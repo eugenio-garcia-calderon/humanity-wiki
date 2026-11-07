@@ -35,7 +35,8 @@ import { slugDe } from '../components/sitio/sitioWeb';
 import fs from 'fs';
 import path from 'path';
 import { bloquesNoticia, noticiaDeBloque, dominioDelMedio } from '../utils/noticias';
-import { uploadsDir } from './uploads';
+import { uploadsDir, rutaLocalDeUpload } from './uploads';
+import { videosJsonLd, videosDeBloques, datosVideo } from './videosEscaparate';
 
 // LOS LOGOS DE LOS MEDIOS (2026-11-06, Eugenio: «destacando el medio con los logos de esos
 // periódicos»). Uno por dominio en /uploads/2026/11/logos/<dominio>.png (los baja y revisa
@@ -153,6 +154,11 @@ type Modelo = {
   porPagina: Map<string, Proyecto>;
   personaDe: Map<string, Persona>;
   secciones: Array<{ titulo: string; entradas: Array<{ titulo: string; url: string }> }>;
+  /** La imagen al compartir de la portada: la de cualquier página del sitio que no tenga ninguna. */
+  imagenRaiz: string | null;
+  /** El lema de la portada (su `subtitulo`: «Laboratorio de Innovación Ecosocial»), para el texto
+   *  alternativo de esa imagen cuando la lleva otra página. */
+  lemaRaiz: string | null;
 };
 
 const memoria = new Map<string, { t: number; m: Promise<Modelo> }>();
@@ -170,6 +176,33 @@ export const imagenDeVerdad = (u: string | null | undefined): string | null => {
   if (yt) return `https://i.ytimg.com/vi/${yt[1]}/hqdefault.jpg`;
   return /^https?:\/\//.test(u) && !/\.(jpe?g|png|webp|gif|avif|svg)(\?|$)/i.test(u) ? null : u;
 };
+/** «a, b y c». */
+const enumerar = (xs: string[]) => xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} y ${xs[xs.length - 1]}`;
+/** Los proyectos de una persona en una frase que no engaña: hasta tres, todos; con más, cuántos y
+ *  dos de ellos (como su tarjeta al compartir, `scripts/imagenes-compartir/`). */
+const proyectosEnFrase = (xs: string[]) => xs.length > 3 ? `${xs.length} proyectos, entre ellos ${enumerar(xs.slice(0, 2))}` : enumerar(xs);
+/** La descripción propia de una página, por el orden de `descripcionDe` en `sitios.ts`: la escrita,
+ *  la de debajo del título o el primer texto de sus bloques. */
+function descripcionPropia(config: any): string {
+  for (const t of [config?.descripcion, config?.subtitulo]) if (typeof t === 'string' && t.trim()) return t.trim();
+  for (const b of Array.isArray(config?.bloques) ? config.bloques : []) {
+    const t = typeof b?.texto === 'string' ? b.texto.replace(/[*`#>\[\]]|\(http[^)]*\)/g, '').trim() : '';
+    if (t) return t;
+  }
+  return '';
+}
+/** La frase de la presentación de la portada, la que pinta su tarjeta al compartir: la misma regla
+ *  que `lemaDe` en `PresentacionSitio.tsx` (el lema propio o la descripción del sitio tras los dos
+ *  puntos). `cfg` es la config del sitio. */
+function fraseDePortada(cfg: any): string {
+  const propio = cfg?.portada?.lema;
+  if (typeof propio === 'string' && propio.trim()) return propio.trim();
+  const d = String(cfg?.seo?.descripcion || '').trim();
+  const resto = d.includes(':') ? d.slice(d.indexOf(':') + 1).trim() : d;
+  return resto ? resto.charAt(0).toUpperCase() + resto.slice(1) : '';
+}
+/** La cuenta de X de la organización (`twitter:site`), si está entre sus perfiles. */
+const cuentaX = (perfiles: string[]) => perfiles.map(u => /^https:\/\/(?:www\.)?(?:x|twitter)\.com\/([A-Za-z0-9_]{1,15})\/?$/.exec(u)?.[1]).find(Boolean) || null;
 const recorta = (t: string, n: number) => {
   const s = t.replace(/\s+/g, ' ').trim();
   if (s.length <= n) return s;
@@ -177,8 +210,10 @@ const recorta = (t: string, n: number) => {
   return corte.slice(0, Math.max(corte.lastIndexOf(' '), n - 20)).replace(/[\s,.;:–-]+$/, '') + '…';
 };
 
-async function construir(db: any, cfg: any): Promise<Modelo> {
+async function construir(db: any, cfg: any, raizId: string): Promise<Modelo> {
   const tProy = String(cfg.proyectos || ''), tPers = String(cfg.personas || ''), tSist = String(cfg.sistemas || '');
+  const filaRaiz = (await db.execute(sql`SELECT config->>'imagenCompartir' AS img, config->>'subtitulo' AS lema FROM knowledge_windows WHERE id = ${raizId}`)).rows[0] as any;
+  const imagenRaiz = filaRaiz?.img || null;
   const cols = (await db.execute(sql`
     SELECT id, nombre, tipo, opciones, config FROM bd_columnas
     WHERE tabla_id = ${tProy} AND archived_at IS NULL ORDER BY orden
@@ -295,6 +330,8 @@ async function construir(db: any, cfg: any): Promise<Modelo> {
     noticias, proyectos, personas, ocultas, secciones,
     porPagina: new Map(proyectos.map(p => [p.pagina, p])),
     personaDe: new Map(personas.map(p => [p.pagina, p])),
+    imagenRaiz: typeof imagenRaiz === 'string' && imagenRaiz ? imagenRaiz : null,
+    lemaRaiz: typeof filaRaiz?.lema === 'string' && filaRaiz.lema.trim() ? filaRaiz.lema.trim() : null,
   };
 }
 
@@ -302,7 +339,7 @@ async function construir(db: any, cfg: any): Promise<Modelo> {
 export function modeloEscaparate(db: any, raizId: string, cfg: any): Promise<Modelo> {
   const m = memoria.get(raizId);
   if (m && Date.now() - m.t < VIDA_MS) return m.m;
-  const nuevo = construir(db, cfg);
+  const nuevo = construir(db, cfg, raizId);
   memoria.set(raizId, { t: Date.now(), m: nuevo });
   nuevo.catch(() => memoria.delete(raizId));
   return nuevo;
@@ -382,6 +419,60 @@ export function datosPortada(m: Pick<Modelo, 'proyectos' | 'noticias'>, cfg: any
   };
 }
 
+// ── LA IMAGEN AL COMPARTIR (2026-11-07, WhatsApp, LinkedIn, X, Facebook y Telegram) ──────────
+// Cada página pública del escaparate lleva su tarjeta de 1200 × 630 (`scripts/imagenes-compartir/`,
+// en `config.imagenCompartir`). Aquí se dice de la imagen lo que las redes necesitan para pintarla a
+// la primera: su medida (`og:image:width` y `height`; sin ella, Facebook no la enseña la primera vez
+// que alguien comparte el enlace, la baja por detrás y sale a la segunda), su tipo y un texto
+// alternativo que cuenta lo que se ve.
+/** La carpeta de las tarjetas: todas son JPEG de 1200 × 630 (las hace y las comprueba el generador). */
+const TARJETAS = '/uploads/2026/11/compartir/';
+export const esTarjeta = (u: unknown): boolean => typeof u === 'string' && u.startsWith(TARJETAS) && /\.jpe?g$/i.test(u);
+const TIPOS_IMAGEN: Record<string, string> = { jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif', avif: 'image/avif', heif: 'image/avif' };
+export type Medida = { ancho: number; alto: number; tipo: string };
+const medidas = new Map<string, { t: number; m: Medida | null }>();
+let sharpCargado: any = null;
+/** La medida y el tipo de una imagen subida al sitio, leídos de su cabecera una sola vez; `null`
+ *  si no está en el disco o no se puede leer (y entonces se vuelve a mirar a los cinco minutos). */
+export async function medidaDeSubida(url: string): Promise<Medida | null> {
+  const limpia = url.split(/[?#]/)[0];
+  const ya = medidas.get(limpia);
+  if (ya && (ya.m || Date.now() - ya.t < 5 * 60_000)) return ya.m;
+  let m: Medida | null = null;
+  const ruta = /^\/uploads\/(?!privado\/)/.test(limpia) ? rutaLocalDeUpload(limpia) : null;
+  if (ruta && fs.existsSync(ruta)) {
+    if (esTarjeta(limpia)) m = { ancho: 1200, alto: 630, tipo: 'image/jpeg' };
+    else try {
+      if (!sharpCargado) sharpCargado = (await import('sharp')).default;
+      const x = await sharpCargado(ruta, { failOn: 'none' }).metadata();
+      const girada = (x.orientation || 1) >= 5;
+      const tipo = TIPOS_IMAGEN[String(x.format || '')];
+      if (x.width && x.height && tipo) m = { ancho: girada ? x.height : x.width, alto: girada ? x.width : x.height, tipo };
+    } catch { /* no es una imagen que se pueda leer */ }
+  }
+  if (medidas.size >= 2000) medidas.clear();
+  medidas.set(limpia, { t: Date.now(), m });
+  return m;
+}
+/** La miniatura grande de YouTube mide siempre 480 × 360. */
+const MINIATURA_YT = /^https:\/\/i\.ytimg\.com\/vi\/[\w-]+\/hqdefault\.jpg$/;
+/** La imagen al compartir de una página, por el mismo orden que `imagenDe` en `sitios.ts` (la
+ *  elegida, la portada, la primera imagen), saltándose la que no está en el disco: un `og:image`
+ *  roto deja la tarjeta sin foto. Sin ninguna, la de la portada del sitio. */
+export async function imagenAlCompartir(config: any, raiz: string | null): Promise<{ url: string; medida: Medida | null } | null> {
+  const bloques = Array.isArray(config?.bloques) ? config.bloques : [];
+  const candidatas = [config?.imagenCompartir, imagenDeVerdad(config?.portada), bloques.find((b: any) => b?.tipo === 'imagen' && b.url)?.url, raiz];
+  for (const c of candidatas) {
+    if (typeof c !== 'string' || !c.trim()) continue;
+    if (MINIATURA_YT.test(c)) return { url: c, medida: { ancho: 480, alto: 360, tipo: 'image/jpeg' } };
+    if (/^https:\/\//.test(c)) return { url: c, medida: null };
+    if (!c.startsWith('/uploads/')) continue;
+    const medida = await medidaDeSubida(c);
+    if (medida) return { url: c, medida };
+  }
+  return null;
+}
+
 export function registrarSeoEscaparate(app?: Express, db?: any) {
   // Las noticias de un escaparate, para la sección de la portada (pública: son enlaces que ya
   // salen en las páginas de los proyectos).
@@ -413,9 +504,17 @@ export function registrarSeoEscaparate(app?: Express, db?: any) {
     if (!cfg?.escaparate || !sitio.raizId) return;
     const m = await modeloEscaparate(db, sitio.raizId, cfg);
 
+    // LOS DATOS DE LOS VÍDEOS (`config.sitio.videos`, ver `videosEscaparate.ts`) son del servidor:
+    // no viajan al navegador con cada página (unos 15 KB que nadie pinta), ni en la config del
+    // sitio ni en la de la portada, que es donde se guardan (2026-11-07).
+    const { videos: datosVideos, ...cfgPublica } = cfg;
+    if (pagina.id === sitio.raizId && pagina.config?.sitio?.videos) {
+      const { videos: _soloServidor, ...sitioPublico } = pagina.config.sitio;
+      pagina.config = { ...pagina.config, sitio: sitioPublico };
+    }
     // El mapa del pie va con la página (también la que pide el navegador):
     // así sale ya escrito en el HTML y no espera a ninguna consulta.
-    if (cfg.pie?.sencillo) sitio.config = { ...cfg, pie: { ...cfg.pie, mapaProyectos: m.secciones } };
+    sitio.config = cfg.pie?.sencillo ? { ...cfgPublica, pie: { ...cfg.pie, mapaProyectos: m.secciones } } : cfgPublica;
     rellenarAlts(pagina.config?.bloques, String(pagina.titulo || '').trim());
     // Cada noticia de «En los medios», con el logo de su medio.
     for (const b of bloquesNoticia(pagina.config?.bloques || [], true)) {
@@ -439,19 +538,45 @@ export function registrarSeoEscaparate(app?: Express, db?: any) {
     meta.manda = true;
     // Las verificaciones de Search Console y Bing (`seoSitio.ts`) se quedan.
     const verificaciones = (meta.metas || []).filter((x: any) => x?.name === 'google-site-verification' || x?.name === 'msvalidate.01');
-    const comunes = (alt: string | null) => [
+    // La imagen al compartir, medida (`imagenAlCompartir`): `sitios.ts` escribe en `og:image` la que
+    // quede en `config.imagenCompartir`, y aquí van su medida, su tipo y su texto alternativo.
+    const imagen = pagina.config ? await imagenAlCompartir(pagina.config, m.imagenRaiz) : null;
+    if (imagen) pagina.config.imagenCompartir = imagen.url;
+    // La de la portada prestada a una página sin imagen propia habla del sitio, no de la página: su
+    // texto alternativo es el de la portada. Lo que se sabe de ella: si es la tarjeta del generador,
+    // la marca, el lema y la frase de la presentación sobre un mosaico de fotos de los proyectos; si
+    // la puso alguien a mano, la marca y el lema (2026-11-07, revisión: decía solo «Luz & Humanidad»).
+    const prestada = !!imagen && imagen.url === m.imagenRaiz && pagina.id !== sitio.raizId;
+    const tarjeta = esTarjeta(imagen?.url) && !prestada;
+    const frase = fraseDePortada(cfg).replace(/[.\s]+$/, '');
+    const conLema = m.lemaRaiz ? `${marca} · ${m.lemaRaiz}` : marca;
+    const altRaiz = esTarjeta(m.imagenRaiz) && frase ? `${conLema}: «${frase}», sobre un mosaico de fotos de sus proyectos` : conLema;
+    const cuentaDeX = cuentaX(lista(seo.perfiles));
+    const comunes = (texto: string | null, alt = prestada ? altRaiz : texto) => [
       ...verificaciones,
       { property: 'og:locale', content: 'es_ES' },
       { property: 'og:site_name', content: marca },
-      ...(alt ? [{ property: 'og:image:alt', content: alt }, { name: 'twitter:image:alt', content: alt }] : []),
+      ...(cuentaDeX ? [{ name: 'twitter:site', content: `@${cuentaDeX}` }] : []),
+      ...(imagen?.medida ? [
+        { property: 'og:image:width', content: String(imagen.medida.ancho) },
+        { property: 'og:image:height', content: String(imagen.medida.alto) },
+        { property: 'og:image:type', content: imagen.medida.tipo },
+      ] : []),
+      ...(imagen && alt ? [{ property: 'og:image:alt', content: alt }, { name: 'twitter:image:alt', content: alt }] : []),
     ];
     const org = { '@id': '/#organizacion' };
     const titular = cfg.titular || {};
+    // LOS VÍDEOS DE LA PÁGINA, PARA GOOGLE (2026-11-07, `videosEscaparate.ts`): un `VideoObject` por
+    // cada vídeo de YouTube que tenga datos; si lo publicó el canal de la organización, firmado por
+    // ella. Y su título, para el enlace con miniatura que escribe el HTML del servidor (`htmlBloques.ts`).
+    const nombreOrg = String(seo.organizacion || titular.nombre || marca).trim();
+    const videos = videosJsonLd(pagina.config?.bloques, datosVideos, { '@type': 'NGO', '@id': '/#organizacion', name: nombreOrg, url: '/' });
+    pagina.videos = Object.fromEntries(videosDeBloques(pagina.config?.bloques)
+      .map(id => [id, datosVideo(datosVideos?.[id])?.titulo]).filter(([, t]) => t));
 
     // ── LA PORTADA ──────────────────────────────────────────────────────
     if (pagina.id === sitio.raizId) {
       const lema = String(pagina.config?.subtitulo || '').trim();
-      const nombreOrg = String(seo.organizacion || titular.nombre || marca).trim();
       meta.titulo = recorta(lema ? `${marca} · ${lema}` : marca, 60);
       meta.descripcion = recorta(String(seo.descripcion || `${lema || marca}: ${m.proyectos.slice(0, 6).map(p => p.titulo).join(', ')} y más proyectos.`), 160);
       meta.ogType = 'website';
@@ -480,8 +605,10 @@ export function registrarSeoEscaparate(app?: Express, db?: any) {
           numberOfItems: m.proyectos.length,
           itemListElement: m.proyectos.map((p, i) => ({ '@type': 'ListItem', position: i + 1, name: p.titulo, url: p.url })),
         },
+        ...videos,
       ];
-      meta.metas = comunes(lema ? `${marca} · ${lema}` : marca);
+      // La tarjeta de la portada lleva la frase de la presentación sobre un mosaico de proyectos.
+      meta.metas = comunes(imagen?.url === m.imagenRaiz ? altRaiz : lema ? `${marca} · ${lema}` : marca);
       return;
     }
 
@@ -528,8 +655,14 @@ export function registrarSeoEscaparate(app?: Express, db?: any) {
             { '@type': 'ListItem', position: 2, name: p.titulo, item: '{{canonica}}' },
           ],
         },
+        ...videos,
       ];
-      meta.metas = comunes(p.portada ? (p.descripcion ? `${p.titulo}: ${p.descripcion}` : p.titulo) : null);
+      // La tarjeta: lo que se lee en ella (el nombre, «año · área · estado» y de quién es) y de qué va
+      // la foto, como el texto alternativo de la portada en la página.
+      const linea = [p.ano && (p.estado === 'Desarrollo principal actual' || p.estado === 'Foco principal' ? `desde ${p.ano}` : p.ano), area, p.estado].filter(Boolean).join(' · ');
+      meta.metas = comunes(tarjeta
+        ? `${p.titulo}${p.descripcion ? `: ${p.descripcion.replace(/[.\s]+$/, '')}` : ''}${linea ? ` (${linea})` : ''} · ${marca}`
+        : p.descripcion ? `${p.titulo}: ${p.descripcion}` : p.titulo);
       return;
     }
 
@@ -538,9 +671,15 @@ export function registrarSeoEscaparate(app?: Express, db?: any) {
     if (persona) {
       const suyos = persona.proyectos.map(id => m.porPagina.get(id)).filter(Boolean) as Proyecto[];
       const quien = String(seo.organizacion || marca);
+      // Quien funda la organización (`seo.fundador`, 2026-11-07): lo dicen su descripción y su tarjeta.
+      const fundador = typeof seo.fundador === 'string' && seo.fundador.trim() === persona.titulo;
       meta.titulo = recorta(`${persona.titulo} | ${marca}`, 60);
-      meta.descripcion = recorta(suyos.length
-        ? `${persona.titulo} forma parte del equipo de ${quien} en ${suyos.slice(0, 4).map(x => x.titulo).join(', ')}${suyos.length > 4 ? ' y otros proyectos' : ''}.`
+      // Sus proyectos en una frase que no engaña (con más de tres, cuántos y dos de ellos): «en A,
+      // B, C, D y otros proyectos» se cortaba a los 160 caracteres (2026-11-07, revisión).
+      const nombres = suyos.map(x => x.titulo);
+      meta.descripcion = recorta(fundador
+        ? `${persona.titulo}, fundador de ${quien}${nombres.length ? `, forma parte del equipo de ${proyectosEnFrase(nombres)}` : ''}.`
+        : nombres.length ? `${persona.titulo} forma parte del equipo de ${quien} en ${proyectosEnFrase(nombres)}.`
         : `${persona.titulo}, del equipo de ${quien}.`, 160);
       meta.ogType = 'profile';
       meta.indexable = true;
@@ -561,8 +700,36 @@ export function registrarSeoEscaparate(app?: Express, db?: any) {
             { '@type': 'ListItem', position: 2, name: persona.titulo, item: '{{canonica}}' },
           ],
         },
+        ...videos,
       ];
-      meta.metas = comunes(persona.foto ? persona.titulo : null);
+      // Su tarjeta: su foto, su nombre y sus proyectos (con más de tres, cuántos y dos de ellos; y
+      // «Fundador» en quien funda la organización). Sin tarjeta, su foto.
+      meta.metas = comunes(tarjeta
+        ? `Foto de ${persona.titulo}${fundador ? ', fundador' : ''}${nombres.length ? `, del equipo de ${proyectosEnFrase(nombres)}` : ''} · ${marca}`
+        : `Foto de ${persona.titulo}`);
+      return;
     }
+
+    // ── CUALQUIER OTRA PÁGINA DEL SITIO (2026-11-07: visión, colabora, prensa, quiénes somos…) ──
+    // Sin esto se quedaban sin idioma, sin nombre del sitio y sin la medida de su imagen. Y las filas
+    // de la tabla del menú se compartían como fichas de producto (la plantilla de ficha, W1):
+    // «Visión: datos, precio y opiniones», «datos técnicos con fuente, precio y opiniones»,
+    // `og:type` product y un `Product` en los datos estructurados. Aquí son lo que son: una página
+    // del sitio, con su título, su descripción (la suya o la del sitio) y sus vídeos. Su `noindex`
+    // no se toca: no es cosa de cómo se comparten.
+    const titulo = String(pagina.titulo || '').trim();
+    meta.titulo = recorta(titulo ? `${titulo} | ${marca}` : marca, 60);
+    meta.descripcion = recorta(descripcionPropia(pagina.config) || String(seo.descripcion || ''), 160);
+    meta.ogType = 'website';
+    const DE_FICHA = new Set(['Product', 'Article', 'AggregateRating']);
+    const previos: any[] = Array.isArray(meta.jsonLd) ? meta.jsonLd : meta.jsonLd ? [meta.jsonLd] : [];
+    meta.jsonLd = [...previos.filter(j => !DE_FICHA.has(j?.['@type'])), ...videos];
+    // Su tarjeta lleva el título y la frase que se lee en ella (la de debajo del título o su
+    // descripción, como la pinta el generador).
+    const texto = String(pagina.config?.subtitulo || pagina.config?.descripcion || '').trim().replace(/[.\s]+$/, '');
+    meta.metas = [
+      ...(meta.metas || []).filter((x: any) => !verificaciones.includes(x) && !/^product:/.test(String(x?.property || ''))),
+      ...comunes(tarjeta ? `${titulo}${texto ? `: ${texto}` : ''} · ${marca}` : titulo),
+    ];
   });
 }

@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { sitioConAnfitrion } from '../components/sitio/ContextoSitio';
 import { MarcoLectura, CabeceraLectura, type DatosPagina } from '../components/sitio/CabeceraLectura';
+import { fotoDePortada, portadaEsVideo } from '../utils/portadaPropia';
 
 // ============================================================================
 // EL TÍTULO Y LA IMAGEN, YA ESCRITOS EN EL HTML (2026-10-01)
@@ -23,6 +24,7 @@ import { MarcoLectura, CabeceraLectura, type DatosPagina } from '../components/s
 
 export function cabeceraEnHtml(pagina: DatosPagina, userAgent: string, raizDominio?: string | null): string {
   const esMovil = /Mobi|Android|iPhone|iPad/i.test(userAgent || '');
+  pagina = sinReproductorDePortada(pagina);
   return renderToStaticMarkup(
     // El menú y el pie también (2026-10-02): salen con el título, sin salto.
     <MarcoLectura pagina={pagina} rutas={pagina.sitio ? { ...sitioConAnfitrion(raizDominio), raizId: pagina.sitio.raizId } : undefined}>
@@ -31,4 +33,20 @@ export function cabeceraEnHtml(pagina: DatosPagina, userAgent: string, raizDomin
       </article>
     </MarcoLectura>,
   );
+}
+
+/** UN PROYECTO DEL ESCAPARATE CON UN VÍDEO DE PORTADA (2026-11-07, revisión del carril «compartir»).
+ *  En el navegador su cabecera (`CabeceraProyectoEscaparate`) enseña la primera foto propia de la
+ *  página; aquí se pintaba el reproductor de YouTube con `autoplay` (`MediaPortada`), y al abrir
+ *  Luz del Amazonas se pedían YouTube, Google y sus letras antes de que nadie pidiera ver nada.
+ *  Ahora el HTML lleva la misma foto que el navegador, sin `<iframe>`. Es un proyecto con la
+ *  misma regla que `proyectoEscaparate` en `VistaPagina.tsx`. */
+function sinReproductorDePortada(pagina: DatosPagina): DatosPagina {
+  const cfg = pagina.config || {};
+  const sitio = pagina.sitio;
+  const proyecto = sitio?.config?.escaparate === true && sitio.raizId !== pagina.id && !pagina.virtual
+    && !!pagina.fila && pagina.fila.tabla_id === sitio.config?.proyectos;
+  if (!proyecto || !portadaEsVideo(cfg.portada)) return pagina;
+  // Su encuadre era el del vídeo: la foto de recambio va centrada, como en el navegador.
+  return { ...pagina, config: { ...cfg, portada: fotoDePortada(cfg)?.url ?? null, encuadre: null } };
 }

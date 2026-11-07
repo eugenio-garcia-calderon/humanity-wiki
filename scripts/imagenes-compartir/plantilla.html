@@ -1,0 +1,230 @@
+<!doctype html>
+<!--
+  LA IMAGEN AL COMPARTIR DE UNA PÁGINA DEL ESCAPARATE (2026-11-07, luzhumanidad.com)
+  1200 × 630, la medida que piden WhatsApp, LinkedIn, X, Facebook y Telegram para la tarjeta grande.
+  La rellena `generar.mjs` con `window.DATOS` y la fotografía Chromium. Cuatro formas:
+    · proyecto: su portada a sangre con un velo oscuro, el título, «año · área · estado», la marca y el dominio.
+    · portada:  un mosaico de fotos de proyectos con la frase de la presentación (el lema).
+    · persona:  su foto en un círculo, su nombre y los proyectos en que está (con más de tres, dos y
+                cuántos más; la etiqueta de encima dice «Fundador» en quien funda la organización).
+    · pagina:   cualquier otra página (colabora, prensa, quiénes somos…): su portada si la tiene, si
+                no el sol de la marca, con el título y su descripción.
+  La letra es la del sitio (la del sistema: SF Pro en el Mac en que se generan), el negro de los
+  títulos es el `font-black` de las tarjetas y el amarillo es el del logotipo.
+-->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1200px; height: 630px; overflow: hidden; background: #0f172a; }
+  body {
+    font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    -webkit-font-smoothing: antialiased; color: #fff; font-kerning: normal;
+  }
+  .lienzo { position: relative; width: 1200px; height: 630px; overflow: hidden; background: #0f172a; }
+  .foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+
+  /* El velo: oscuro abajo (el título), un poco arriba (la marca) y algo a la izquierda (donde se lee).
+     Una foto ya oscura (`oscura`) lleva menos velo y un poco más de luz: si no, se queda en negro. */
+  .foto { filter: saturate(1.06) contrast(1.03); }
+  .velo { position: absolute; inset: 0; background:
+    linear-gradient(to top, rgba(2, 6, 23, .95) 0%, rgba(2, 6, 23, .88) 22%, rgba(2, 6, 23, .66) 44%, rgba(2, 6, 23, .26) 64%, rgba(2, 6, 23, 0) 80%),
+    linear-gradient(to bottom, rgba(2, 6, 23, .56) 0%, rgba(2, 6, 23, .22) 15%, rgba(2, 6, 23, 0) 28%),
+    linear-gradient(to right, rgba(2, 6, 23, .34) 0%, rgba(2, 6, 23, 0) 58%); }
+  .clara .velo { background:
+    radial-gradient(60% 50% at 0% 0%, rgba(2, 6, 23, .6) 0%, rgba(2, 6, 23, .3) 50%, rgba(2, 6, 23, 0) 100%),
+    linear-gradient(to top, rgba(2, 6, 23, .95) 0%, rgba(2, 6, 23, .88) 22%, rgba(2, 6, 23, .7) 44%, rgba(2, 6, 23, .34) 64%, rgba(2, 6, 23, .12) 80%),
+    linear-gradient(to bottom, rgba(2, 6, 23, .72) 0%, rgba(2, 6, 23, .34) 16%, rgba(2, 6, 23, 0) 30%),
+    linear-gradient(to right, rgba(2, 6, 23, .4) 0%, rgba(2, 6, 23, 0) 58%); }
+  .oscura .foto { filter: brightness(1.3) saturate(1.08); }
+  .oscura .velo { background:
+    linear-gradient(to top, rgba(2, 6, 23, .9) 0%, rgba(2, 6, 23, .7) 24%, rgba(2, 6, 23, .3) 48%, rgba(2, 6, 23, 0) 70%),
+    linear-gradient(to bottom, rgba(2, 6, 23, .4) 0%, rgba(2, 6, 23, 0) 26%); }
+
+  /* La marca, como en la cabecera del sitio: el logotipo, el nombre en negro grueso y el eslogan
+     repartido al ancho del nombre. */
+  .marca { position: absolute; left: 64px; top: 50px; display: flex; align-items: center; gap: 16px; }
+  /* Sobre una foto, la marca va en una placa de cristal oscuro: se lee igual sobre un cielo, una
+     captura de pantalla llena de letra pequeña o un plano (en la de una persona el fondo ya es liso). */
+  .lienzo:not(.persona) .marca { left: 48px; top: 36px; padding: 14px 22px 14px 14px; border-radius: 20px;
+    background: rgba(2, 6, 23, .55); -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .08) inset; }
+  .marca img { width: 62px; height: 62px; border-radius: 14px; display: block; }
+  .marca .textos { display: inline-grid; line-height: 1; }
+  .marca .nombre { font-weight: 900; font-size: 35px; letter-spacing: -0.02em; white-space: nowrap; text-shadow: 0 1px 10px rgba(0, 0, 0, .35); }
+  .marca .eslogan { margin-top: 7px; width: 0; min-width: 100%; white-space: nowrap; font-weight: 600; font-size: 12.5px; color: rgba(255, 255, 255, .86); text-shadow: 0 1px 8px rgba(0, 0, 0, .4); }
+
+  .abajo { position: absolute; left: 64px; right: 64px; bottom: 50px; }
+  .raya { width: 64px; height: 7px; border-radius: 4px; background: #facc15; margin-bottom: 24px; }
+  h1 { font-weight: 900; line-height: 1.0; letter-spacing: -0.028em; text-wrap: balance; overflow-wrap: normal; word-break: normal; hyphens: manual;
+       text-shadow: 0 2px 18px rgba(0, 0, 0, .35); }
+  .linea { margin-top: 24px; display: flex; align-items: center; justify-content: space-between; gap: 32px; }
+  .datos { display: flex; align-items: center; flex-wrap: nowrap; gap: 14px; min-width: 0; font-size: 27px; font-weight: 600; color: rgba(255, 255, 255, .94); white-space: nowrap; text-shadow: 0 1px 10px rgba(0, 0, 0, .45); }
+  .datos .sep { color: rgba(255, 255, 255, .55); }
+  .datos .punto { width: 15px; height: 15px; border-radius: 50%; display: inline-block; margin-right: 10px; box-shadow: 0 0 0 3px rgba(255, 255, 255, .85); }
+  .datos .estado { display: inline-flex; align-items: center; }
+  .dominio { flex: none; font-size: 24px; font-weight: 700; letter-spacing: .01em; color: rgba(255, 255, 255, .9); text-shadow: 0 1px 10px rgba(0, 0, 0, .45); }
+  .texto { margin-top: 20px; font-size: 28px; line-height: 1.3; font-weight: 500; color: rgba(255, 255, 255, .9); max-width: 960px; text-wrap: pretty; }
+
+  /* LA PORTADA: un mosaico de proyectos. */
+  .mosaico { position: absolute; inset: 0; display: grid; gap: 4px; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(2, 1fr); background: #020617; }
+  .mosaico div { background-size: cover; background-position: center; }
+  .portada .velo { background:
+    radial-gradient(70% 55% at 0% 0%, rgba(2, 6, 23, .72) 0%, rgba(2, 6, 23, .4) 45%, rgba(2, 6, 23, 0) 100%),
+    linear-gradient(to top, rgba(2, 6, 23, .96) 0%, rgba(2, 6, 23, .88) 30%, rgba(2, 6, 23, .55) 58%, rgba(2, 6, 23, .3) 80%, rgba(2, 6, 23, .45) 100%),
+    linear-gradient(to right, rgba(2, 6, 23, .35) 0%, rgba(2, 6, 23, 0) 60%); }
+
+  /* Sin foto: el sol de la marca, como en la presentación de la portada. */
+  .sol { position: absolute; right: -170px; top: -190px; width: 760px; height: 760px; color: #facc15; }
+  .fondo-marca { position: absolute; inset: 0; background: radial-gradient(120% 90% at 85% 10%, #1e293b 0%, #0f172a 45%, #020617 100%); }
+
+  /* LA PERSONA: su foto en un círculo a la derecha. */
+  .retrato { position: absolute; right: 88px; top: 50%; width: 400px; height: 400px; margin-top: -200px; border-radius: 50%; overflow: hidden;
+             box-shadow: 0 0 0 10px rgba(250, 204, 21, .95), 0 24px 60px rgba(0, 0, 0, .45); background: #1e293b; }
+  .retrato img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .persona .abajo { right: 560px; }
+  .persona .linea { justify-content: flex-start; }
+  .persona .dominio-suelto { position: absolute; right: 64px; bottom: 50px; }
+  .proyectos { margin-top: 22px; font-size: 25px; line-height: 1.35; font-weight: 600; color: rgba(255, 255, 255, .9); }
+  .proyectos b { display: block; margin-bottom: 6px; font-size: 15px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #facc15; }
+  .proyectos .entero { white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="lienzo" id="lienzo"></div>
+<script>
+// Lo que se pinta llega en `window.DATOS` (ver `generar.mjs`). Al acabar, `document.body.dataset.listo`
+// dice si todo cupo («si») o qué no cupo; el generador no guarda una imagen con el título cortado.
+(async () => {
+  const D = window.DATOS;
+  const $ = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+  const L = document.getElementById('lienzo');
+  L.classList.add(D.tipo);
+  if (D.oscura) L.classList.add('oscura');
+  if (D.clara) L.classList.add('clara');
+  const problemas = [];
+
+  // El fondo.
+  if (D.tipo === 'portada' && D.mosaico?.length) {
+    const m = $('div', 'mosaico');
+    for (const src of D.mosaico.slice(0, 8)) { const c = $('div'); c.style.backgroundImage = `url("${src}")`; m.append(c); }
+    L.append(m);
+  } else if (D.tipo !== 'persona' && D.foto) {
+    const img = $('img', 'foto'); img.src = D.foto; img.alt = '';
+    if (D.encuadre) img.style.objectPosition = `${D.encuadre.x ?? 50}% ${D.encuadre.y ?? 50}%`;
+    L.append(img);
+  } else {
+    L.append($('div', 'fondo-marca'));
+    const ns = 'http://www.w3.org/2000/svg';
+    const sol = document.createElementNS(ns, 'svg');
+    sol.setAttribute('viewBox', '0 0 400 400'); sol.setAttribute('class', 'sol');
+    const c = (r, extra) => { const e = document.createElementNS(ns, 'circle'); e.setAttribute('cx', 200); e.setAttribute('cy', 200); e.setAttribute('r', r); for (const [k, v] of Object.entries(extra)) e.setAttribute(k, v); sol.append(e); };
+    c(70, { fill: 'currentColor', opacity: .16 });
+    [110, 150, 190].forEach((r, i) => c(r, { fill: 'none', stroke: 'currentColor', 'stroke-width': 22 - i * 6, opacity: .2 - i * .05 }));
+    L.append(sol);
+  }
+  if (D.tipo !== 'persona' && (D.foto || D.mosaico?.length)) L.append($('div', 'velo'));
+  if (D.tipo === 'persona') {
+    const r = $('div', 'retrato');
+    if (D.foto) { const img = $('img'); img.src = D.foto; img.alt = ''; if (D.encuadre) img.style.objectPosition = `${D.encuadre.x ?? 50}% ${D.encuadre.y ?? 50}%`; r.append(img); }
+    L.append(r);
+  }
+
+  // La marca.
+  const marca = $('div', 'marca');
+  if (D.marca.logo) { const i = $('img'); i.src = D.marca.logo; i.alt = ''; marca.append(i); }
+  const textos = $('span', 'textos');
+  const nombre = $('span', 'nombre', D.marca.nombre);
+  textos.append(nombre);
+  let eslogan = null;
+  if (D.marca.eslogan) { eslogan = $('span', 'eslogan', D.marca.eslogan); textos.append(eslogan); }
+  marca.append(textos);
+  L.append(marca);
+
+  // Abajo: la raya amarilla, el título y la línea pequeña.
+  const abajo = $('div', 'abajo');
+  abajo.append($('div', 'raya'));
+  const h1 = $('h1');
+  D.titulo.split(/(\s+)/).forEach(p => {
+    if (/-/.test(p)) { const s = $('span', null, p); s.style.whiteSpace = 'nowrap'; h1.append(s); }
+    else h1.append(document.createTextNode(p));
+  });
+  abajo.append(h1);
+  if (D.texto) abajo.append($('p', 'texto', D.texto));
+  // Sus proyectos: cada nombre entero en su línea (nunca «Diseño Urbanístico / Orgánico»), el punto
+  // pegado al nombre de antes (una línea no empieza por «·») y, si hay más, cuántos.
+  if (D.proyectos?.length || D.etiqueta) {
+    const p = $('p', 'proyectos');
+    p.append($('b', null, D.etiqueta || (D.proyectos.length === 1 ? 'Proyecto' : 'Proyectos')));
+    (D.proyectos || []).forEach((nombre, i) => {
+      if (i) p.append(document.createTextNode(' '));
+      p.append($('span', 'entero', nombre + (i < D.proyectos.length - 1 ? ' ·' : '')));
+    });
+    if (D.mas) { p.append(document.createTextNode(' ')); p.append($('span', 'entero', `y ${D.mas} más`)); }
+    abajo.append(p);
+  }
+  const linea = $('div', 'linea');
+  const datos = $('div', 'datos');
+  (D.linea || []).forEach((x, i) => {
+    if (i) datos.append($('span', 'sep', '·'));
+    if (x.color) { const s = $('span', 'estado'); const p = $('span', 'punto'); p.style.background = x.color; s.append(p, document.createTextNode(x.texto)); datos.append(s); }
+    else datos.append($('span', null, x.texto));
+  });
+  linea.append(datos);
+  const dominio = $('span', 'dominio', D.dominio);
+  if (D.tipo === 'persona') { dominio.classList.add('dominio-suelto'); L.append(dominio); } else linea.append(dominio);
+  if ((D.linea || []).length || D.tipo !== 'persona') abajo.append(linea);
+  L.append(abajo);
+
+  // Que se carguen las imágenes y la letra antes de medir.
+  await Promise.all([...document.images].map(i => i.complete ? null : new Promise(r => { i.onload = i.onerror = r; })));
+  await document.fonts.ready;
+
+  // El eslogan, del ancho del nombre y con las letras a la misma distancia (como `Eslogan` en
+  // `CabeceraSitio.tsx`).
+  if (eslogan) {
+    const total = nombre.getBoundingClientRect().width;
+    const prueba = $('span', null, D.marca.eslogan);
+    prueba.style.cssText = `position:absolute;visibility:hidden;white-space:nowrap;letter-spacing:0;font-weight:600;font-size:12.5px`;
+    document.body.append(prueba);
+    let tam = 12.5;
+    for (let i = 0; i < 3; i++) { prueba.style.fontSize = tam + 'px'; tam = Math.min(15, tam * (total * 0.9) / prueba.getBoundingClientRect().width); }
+    prueba.style.fontSize = tam + 'px';
+    const huecos = Math.max(1, [...D.marca.eslogan].length - 1);
+    eslogan.style.fontSize = tam + 'px';
+    eslogan.style.letterSpacing = Math.max(0, (total - prueba.getBoundingClientRect().width) / huecos) + 'px';
+    prueba.remove();
+  }
+
+  // EL TÍTULO: lo más grande que quepa en sus líneas, y nunca una palabra partida ni que se
+  // salga de la caja (si la palabra más larga no cabe, se baja la letra).
+  const ancho = h1.getBoundingClientRect().width;
+  const palabraMasAncha = (t) => {
+    const s = $('span'); s.style.cssText = `position:absolute;visibility:hidden;white-space:nowrap;font-weight:900;letter-spacing:-0.028em;font-size:${t}px`;
+    document.body.append(s);
+    let w = 0;
+    for (const p of D.titulo.split(/\s+/)) { s.textContent = p; w = Math.max(w, s.getBoundingClientRect().width); }
+    s.remove();
+    return w;
+  };
+  const [max, min, lineas] = D.ajuste || [86, 54, 2];
+  let cabe = false;
+  for (let t = max; t >= min; t -= 2) {
+    h1.style.fontSize = t + 'px';
+    const alto = parseFloat(getComputedStyle(h1).lineHeight);
+    const n = Math.round(h1.getBoundingClientRect().height / alto);
+    if (n <= lineas && palabraMasAncha(t) <= ancho) { cabe = true; break; }
+  }
+  if (!cabe) problemas.push(`el título no cabe en ${lineas} líneas`);
+  // La línea pequeña tampoco se corta: si no cabe, se dice.
+  if (datos.scrollWidth > datos.clientWidth + 1) problemas.push('la línea «año · área · estado» no cabe');
+  // Nada se sale del lienzo ni se pisa con la marca (ni un nombre de proyecto por la derecha).
+  const caja = abajo.getBoundingClientRect(), m = marca.getBoundingClientRect();
+  if (caja.top < m.bottom + 16) problemas.push('el texto pisa la marca');
+  if ([...abajo.querySelectorAll('.entero')].some(e => e.getBoundingClientRect().right > caja.right + 1)) problemas.push('un nombre de proyecto no cabe');
+  document.body.dataset.listo = problemas.length ? problemas.join('; ') : 'si';
+})().catch(e => { document.body.dataset.listo = 'error: ' + e.message; });
+</script>
+</body>
+</html>

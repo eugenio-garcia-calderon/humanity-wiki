@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useSitio } from './ContextoSitio';
 import { miniatura } from '../../utils/miniatura';
 import { cn } from '../../utils/cn';
+import { fotoDePortada } from '../../utils/portadaPropia';
 import type { DatosPagina } from './CabeceraLectura';
 import type { Grupo } from './RedRelaciones';
 
@@ -52,7 +53,11 @@ export default function CabeceraProyectoEscaparate({ pagina }: { pagina: DatosPa
   const enlace = (id: string | null) => (id ? (sitio ? sitio.enlacePagina(id) : `/p/${id}`) : '#');
   const equipo = grupos?.find(g => EQUIPO.test(g.nombre)) || null;
   const resto = (grupos || []).filter(g => g !== equipo);
-  const enc = cfg.encuadre;
+  // UNA PORTADA QUE ES UN VÍDEO (2026-11-07): en su lugar, la primera foto propia de la página
+  // (`fotoDePortada`, la misma que pone el servidor en el HTML, `cabeceraSitio.tsx`). El encuadre
+  // se eligió para su portada: con la foto de recambio, centrada.
+  const portada = fotoDePortada(cfg);
+  const enc = portada && portada.url === String(cfg.portada || '').trim() ? cfg.encuadre : null;
   const principal = estado?.label === 'Desarrollo principal actual' || estado?.label === 'Foco principal';
 
   return (
@@ -63,8 +68,8 @@ export default function CabeceraProyectoEscaparate({ pagina }: { pagina: DatosPa
             pinchas, más pequeñito»): 16:9 en el móvil, 3:1 en tableta y 4:1 en pantalla ancha
             (unos 220 px de alto), para que la nota de prensa empiece en la primera pantalla. */}
         <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-slate-100 sm:aspect-[3/1] lg:aspect-[4/1]">
-          {cfg.portada && (
-            <img src={miniatura(cfg.portada, 800)} alt={typeof cfg.subtitulo === 'string' && cfg.subtitulo.trim() ? `${pagina.titulo}: ${cfg.subtitulo.trim()}` : pagina.titulo} fetchPriority="high" decoding="async"
+          {portada && (
+            <img src={miniatura(portada.url, 800)} alt={portada.alt || (typeof cfg.subtitulo === 'string' && cfg.subtitulo.trim() ? `${pagina.titulo}: ${cfg.subtitulo.trim()}` : pagina.titulo)} fetchPriority="high" decoding="async"
               className="absolute inset-0 h-full w-full object-cover"
               style={enc ? { objectPosition: `${enc.x ?? 50}% ${enc.y ?? 50}%` } : undefined} />
           )}
