@@ -169,6 +169,46 @@ function estacionEn(m: Est[], x: number): Est {
   return { x, yb: L(a.yb, b.yb), yt: L(a.yt, b.yt), wb: L(a.wb, b.wb), wm: L(a.wm, b.wm), wt: L(a.wt, b.wt), n: L(a.n ?? 2.6, b.n ?? 2.6) };
 }
 
+/** Media anchura de la piel en (x, y): dónde está la superficie del lado z > 0 a esa altura (0 fuera del cuerpo). */
+export function semiAnchoEn(es: Est[], x: number, y: number): number {
+  return semiAncho(estacionEn(muestrear(es, 24), x), y);
+}
+
+/**
+ * Una cinta pegada a la piel del lado z > 0 que sigue una curva vista de lado
+ * (puntos [x, y]): juntas de puertas, tiras de luz que bajan por un borde.
+ * Cada punto se lleva a la piel a su altura y la cinta tiene `ancho` medido en
+ * la vista lateral, perpendicular a la curva. Para el otro lado, escalar z por −1.
+ */
+export function cinta(es: Est[], curva: [number, number][], ancho: number, opciones: { delta?: number; pasos?: number } = {}): THREE.BufferGeometry {
+  const { delta = 0.003, pasos = 48 } = opciones;
+  const m = muestrear(es, 24), pos: number[] = [], idx: number[] = [];
+  // la curva, suavizada (Catmull-Rom) y muestreada en `pasos` tramos
+  const P = (i: number) => curva[Math.max(0, Math.min(curva.length - 1, i))];
+  const pts: [number, number][] = [];
+  for (let k = 0; k <= pasos; k++) {
+    const u = (k / pasos) * (curva.length - 1), i = Math.min(curva.length - 2, Math.floor(u)), t = u - i;
+    const a = P(i - 1), b = P(i), c = P(i + 1), d = P(i + 2);
+    pts.push([cr(a[0], b[0], c[0], d[0], t), cr(a[1], b[1], c[1], d[1], t)]);
+  }
+  const enPiel = (x: number, y: number) => {
+    const e = estacionEn(m, x), th = thetaEnAltura(e, y);
+    const [py, pz] = puntoSeccion(e, th), [y1, z1] = puntoSeccion(e, th - 0.01), [y2, z2] = puntoSeccion(e, th + 0.01);
+    let ny = -(z2 - z1), nz = y2 - y1; const l = Math.hypot(ny, nz) || 1; ny /= l; nz /= l;
+    pos.push(x, py + ny * delta, pz + nz * delta);
+  };
+  pts.forEach(([x, y], k) => {
+    const [xa, ya] = pts[Math.max(0, k - 1)], [xb, yb] = pts[Math.min(pts.length - 1, k + 1)];
+    let tx = xb - xa, ty = yb - ya; const l = Math.hypot(tx, ty) || 1; tx /= l; ty /= l;
+    enPiel(x - ty * ancho / 2, y + tx * ancho / 2);
+    enPiel(x + ty * ancho / 2, y - tx * ancho / 2);
+  });
+  for (let k = 0; k < pts.length - 1; k++) { const a = 2 * k; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
+  return g;
+}
+
 /**
  * Un parche pegado a la piel (cristal, panel solar, tira de luz), separado
  * `delta` hacia fuera. Entre x0 y x1, en cada estación cubre el tramo de
@@ -178,7 +218,7 @@ function estacionEn(m: Est[], x: number): Est {
  */
 export function parche(es: Est[], x0: number, x1: number, rango: (e: Est) => [number, number] | null, opciones: { delta?: number; nx?: number; nth?: number } = {}): THREE.BufferGeometry {
   const { delta = 0.003, nx = 60, nth = 40 } = opciones;
-  const m = muestrear(es, 24), pos: number[] = [], idx: number[] = [];
+  const m = muestrear(es, 24), pos: number[] = [], idx: number[] = [], uv: number[] = [];
   for (let i = 0; i <= nx; i++) {
     const x = x0 + (x1 - x0) * (i / nx), e = estacionEn(m, x), r = rango(e);
     const [a, b] = r ?? [Math.PI / 2, Math.PI / 2];
@@ -187,6 +227,8 @@ export function parche(es: Est[], x0: number, x1: number, rango: (e: Est) => [nu
       const [y, z] = puntoSeccion(e, th), [y1, z1] = puntoSeccion(e, th - 0.01), [y2, z2] = puntoSeccion(e, th + 0.01);
       let ny = -(z2 - z1), nz = y2 - y1; const l = Math.hypot(ny, nz) || 1; ny /= l; nz /= l;
       pos.push(x, y + ny * delta, z + nz * delta);
+      // u a lo largo de x, v a lo ancho del parche: para texturas (las celdas solares)
+      uv.push(i / nx, j / nth);
     }
   }
   for (let i = 0; i < nx; i++) for (let j = 0; j < nth; j++) {
@@ -194,6 +236,7 @@ export function parche(es: Est[], x0: number, x1: number, rango: (e: Est) => [nu
     idx.push(a, b, c, b, d, c);
   }
   const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  g.setIndex(idx); g.computeVertexNormals();
   return g;
 }

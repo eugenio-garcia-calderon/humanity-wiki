@@ -452,11 +452,11 @@ function rectRedondo(w: number, h: number, r: number): THREE.Shape {
 }
 
 // ------------------------------------------------------------- materiales
-function materiales() {
+function materiales(colorChapa = 0xf3f3ef) {
   const fis = (p: THREE.MeshPhysicalMaterialParameters) => new THREE.MeshPhysicalMaterial(p);
   const calcoMat = (p: THREE.MeshPhysicalMaterialParameters) => fis({ polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4, ...p });
   return {
-    chapa: fis({ color: 0xf3f3ef, roughness: 0.32, metalness: 0.0, clearcoat: 1, clearcoatRoughness: 0.06, sheen: 0.35, sheenColor: new THREE.Color(0xe8eefc), sheenRoughness: 0.4, iridescence: 0.12, iridescenceIOR: 1.3 }),
+    chapa: fis({ color: colorChapa, roughness: 0.32, metalness: 0.0, clearcoat: 1, clearcoatRoughness: 0.06, sheen: 0.35, sheenColor: new THREE.Color(0xe8eefc), sheenRoughness: 0.4, iridescence: 0.12, iridescenceIOR: 1.3 }),
     fondo: fis({ color: 0x1d1f22, roughness: 0.75, metalness: 0.1 }),
     cristal: calcoMat({ color: 0x0b0f14, roughness: 0.04, metalness: 0.2, clearcoat: 1, clearcoatRoughness: 0.02, transparent: true, opacity: 0.86 }),
     negro: calcoMat({ color: 0x0c0d0f, roughness: 0.55, metalness: 0.0 }),
@@ -575,8 +575,8 @@ function rueda(ancho: number, rLlanta: number, delantera: boolean, mt: Mats): TH
 }
 
 // ------------------------------------------------------------------ montaje
-function construir(): THREE.Group {
-  const mt = materiales();
+function construir(colorChapa?: number): THREE.Group {
+  const mt = materiales(colorChapa);
   const g = new THREE.Group(); g.name = 'xl1';
   const add = (geo: THREE.BufferGeometry, mat: THREE.Material, sombra = true) => {
     const m = new THREE.Mesh(geo, mat); m.castShadow = sombra; m.receiveShadow = true; g.add(m); return m;
@@ -721,4 +721,19 @@ export const VEHICULO: VehiculoGaraje = {
   envolvente: envolvente(),
   seccion: 2.6,
   construir,
+};
+
+/**
+ * XL1 Concept (Salón de Qatar, 2011). VW lo presentó como el coche de preserie
+ * y la forma es prácticamente la del XL1 de producción, así que se dibuja con
+ * la misma carrocería; cambian el color (gris plata) y los datos declarados:
+ * Cd 0,186 (el de producción subió a 0,189) y alto 1 156 mm. Fuente: Wikipedia,
+ * «Volkswagen 1-litre car».
+ */
+export const VEHICULO_CONCEPTO: VehiculoGaraje = {
+  ...VEHICULO,
+  id: 'xl1concept', nombre: 'VW XL1 Concept 2011', alto: 1.156,
+  fuente: 'XL1 Concept (Qatar, 2011): misma forma que el de producción; Cd 0,186 y alto 1 156 mm (Wikipedia, «Volkswagen 1-litre car»)',
+  aero: { ...VEHICULO.aero!, cd: 0.186, fuente: 'Cd 0,186 del XL1 Concept de 2011 (el de producción subió a 0,189); área frontal 1,5 m², 795 kg y 158 km/h como el de producción: Wikipedia, «Volkswagen 1-litre car»' },
+  construir: () => { const g = construir(0xb9bec5); g.name = 'xl1concept'; return g; },
 };

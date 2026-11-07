@@ -450,7 +450,7 @@ export const EXPLICACIONES: Explicaciones = {
     referencias: [
       'SZEmission: suelo plano a 13,5 cm en las fotos (bot evaluador; su reglamento exige ≥ 10 cm de altura libre: ficha SwRI UrbanConcept).',
       'Velomóvil Quest: fondo redondo de cápsula, 0,765 m de ancho (velomobiel.nl); no lleva batería plana debajo.',
-      'VW XL1 y Aptera: fondo plano carenado hasta la cola (descripciones de prensa; no hay cifra de curvatura publicada).',
+      'VW XL1: fondo plano carenado hasta la cola (descripciones de prensa; no hay cifra de curvatura publicada). Aptera: fondo plano hasta la rueda trasera, que va dentro de una quilla estrecha bajo la cola (fotos de prensa; sin cifra publicada).',
     ],
     relacionados: ['nU', 'clear', 'altBat', 'W', 'viaF', 'viaR'],
     comprobaciones: [C.batPanza, C.batPil, C.batPas, C.motor, C.ruedaF, C.ruedaR],
@@ -489,7 +489,7 @@ export const EXPLICACIONES: Explicaciones = {
     },
     referencias: [
       'SZEmission: la cúpula arranca en 0,19 del largo, medido en las fotos (bot evaluador).',
-      'Aptera 2023: el parabrisas nace casi en la punta del morro, en una curva continua con el capó (fotos; no hay cifra publicada).',
+      'Aptera 2023: el capó solar, oscuro, arranca casi en la punta del morro y sigue sin corte hasta el parabrisas, que empieza hacia el eje delantero; de lejos se leen como una sola curva oscura (fotos; no hay cifra publicada).',
       'VW XL1: capó corto y parabrisas que arranca sobre las ruedas delanteras (fotos; sin cifra).',
     ],
     relacionados: ['parabrisas', 'cupX1', 'posMorro', 'xPil', 'volDist', 'volAlt', 'deck'],
