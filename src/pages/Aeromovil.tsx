@@ -23,7 +23,7 @@
 // misma geometría que el script CadQuery de `public/aeromovil/`.
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Armchair, BatteryCharging, Bike, Box, Car, Camera, ChevronDown, CircleDot, ClipboardList, Factory, Frame, Layers3, Lightbulb, ShieldCheck, Zap, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Ruler, RotateCcw, Package, Wrench } from 'lucide-react';
+import { Armchair, BatteryCharging, Bike, Box, Car, Camera, ChevronDown, CircleDot, ClipboardList, Factory, Frame, Layers3, Lightbulb, ShieldCheck, Zap, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Ruler, RotateCcw, Package, Wrench, Wind } from 'lucide-react';
 import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import { Visor3D, CAPAS, type CapaId, type Vista, type VisorHandle } from '../components/aeromovil/Visor3D';
@@ -38,6 +38,7 @@ import { fichaComparable, type Referencia } from '../components/aeromovil/refere
 import { FormularioMejora, VistaExportar, VistaPlan, VistaPlanos, VistaTareas, cargarDueno, cargarTareas, type Dueno, type Tarea } from '../components/aeromovil/Paneles';
 import { BotonesComponentes, VistaComponentes } from '../components/aeromovil/Componentes';
 import { VEHICULOS_GARAJE } from '../components/aeromovil/garaje';
+import { TarjetaTunel } from '../components/aeromovil/TarjetaTunel';
 import { DEPARTAMENTOS, type IdDepartamento } from '../components/aeromovil/departamentos';
 import { PanelDepartamento, ComparacionChasis } from '../components/aeromovil/Departamentos';
 import { tubosCelosia } from '../components/aeromovil/chasisCelosia';
@@ -547,6 +548,14 @@ export default function Aeromovil() {
   const [abierta, setAbierta] = useState(false);
   const [maleteros, setMaleteros] = useState(false);
   const [sinPasajero, setSinPasajero] = useState(false);
+  const [tunel, setTunel] = useState(false);
+  // Carteles del túnel: el nombre y el CdA (lo que de verdad cuesta empujar el aire), coche por coche.
+  const etiquetasTunel = useMemo(() => {
+    const cda = (v: number) => `CdA ${v.toLocaleString('es-ES', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} m²`;
+    const o: Record<string, string> = { aeromovil: `${esA1 ? 'Aeromóvil 1' : 'Aeromóvil Gota'}\n${cda(res.CdA)}` };
+    for (const v of VEHICULOS_GARAJE) if (v.aero) o[v.id] = `${v.nombre}\n${cda(v.aero.cd * v.aero.area)}`;
+    return o;
+  }, [res.CdA, esA1]);
   // Departamento abierto en el lateral y en el panel de abajo (2026-11-06, Eugenio: «el menú dividido por departamentos como una empresa de fabricación»).
   const [soloDep, setSoloDep] = useState(false);     // «Mostrar solo la carrocería», etc.
   const [capasAbierto, setCapasAbierto] = useState(false);
@@ -638,8 +647,15 @@ export default function Aeromovil() {
       <main className={cn('mx-auto max-w-[1600px] gap-4 px-4 py-4', seccion === 'diseno' ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_380px]' : 'hidden')}>
         <div className="min-w-0">
         <section className={cn('relative h-[62vh] min-h-[380px] overflow-hidden rounded-xl border border-slate-200 bg-slate-50', esA1 ? 'lg:h-[72vh]' : 'lg:sticky lg:top-[68px] lg:h-[calc(100vh-88px)]')} aria-label="Vista 3D">
-          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeVisor} soloGaraje={!!soloGaraje} vista={vista}
+          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeVisor} soloGaraje={!!soloGaraje} tunel={tunel} etiquetasTunel={etiquetasTunel} vista={vista}
             referencia={referencia} modoRef={modoRef} alinear={alinear} alPinchar={esA1 ? c => { navegar(`/aeromovil/componentes/${c}`); window.scrollTo({ top: 0 }); } : undefined} />
+          {tunel && (
+            <TarjetaTunel alCerrar={() => setTunel(false)} className={cn('right-3', referencia && modoRef !== 'no' ? 'top-28' : 'top-3')}
+              filas={[
+                ...(soloGaraje ? [] : [{ id: 'aeromovil', nombre: esA1 ? 'Aeromóvil 1' : 'Aeromóvil Gota', cd: res.Cd, area: res.A, fuente: 'Este diseño: Cd estimado con la fórmula del Aeromóvil (esbeltez, forma de la cola) y área frontal medida sobre la forma 3D' }]),
+                ...garajeVisor.flatMap(v => { const d = VEHICULOS_GARAJE.find(x => x.id === v.id); return d?.aero ? [{ id: d.id, nombre: d.nombre, cd: d.aero.cd, area: d.aero.area, fuente: d.aero.fuente }] : []; }),
+              ]} />
+          )}
           {referencia && modoRef !== 'no' && (
             <div className="absolute right-3 top-3 z-10 flex max-w-[min(92%,560px)] flex-col gap-2 rounded-xl border border-teal-200 bg-white/95 p-2.5 shadow-sm backdrop-blur">
               <div className="flex flex-wrap items-center gap-1.5">
@@ -731,6 +747,15 @@ export default function Aeromovil() {
                 {sinPasajero ? 'Con pasajero' : 'Sin pasajero'}
               </Button>
             )}
+            <Button variant="outline" aria-pressed={tunel} onClick={() => {
+                // Al abrir el túnel, si no hay con quién comparar, se saca el Twizy del garaje.
+                if (!tunel && !garaje.some(g => g.visible && VEHICULOS_GARAJE.find(v => v.id === g.id)?.aero)) setGaraje(g => g.map(x => x.id === 'twizy' ? { ...x, visible: true } : x));
+                setTunel(!tunel);
+              }}
+              title="Líneas de humo alrededor de este diseño y de los coches del garaje, con lo que cuesta empujar el aire a cada uno"
+              className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', tunel && 'border-sky-700 bg-sky-700 text-white hover:bg-sky-800')}>
+              <Wind className="mr-1 h-3 w-3" />Túnel de viento
+            </Button>
             <Button variant="outline" onClick={pedirRender} disabled={render.estado === 'creando'}
               title="Descarga la captura de esta vista y deja la petición en Tareas para la sesión de Claude Code (sin coste)"
               className="ml-auto bg-white px-2 py-1 text-[11px] normal-case tracking-normal">
