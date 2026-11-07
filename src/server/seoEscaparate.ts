@@ -173,6 +173,8 @@ export const imagenDeVerdad = (u: string | null | undefined): string | null => {
   if (yt) return `https://i.ytimg.com/vi/${yt[1]}/hqdefault.jpg`;
   return /^https?:\/\//.test(u) && !/\.(jpe?g|png|webp|gif|avif|svg)(\?|$)/i.test(u) ? null : u;
 };
+/** «a, b y c». */
+const enumerar = (xs: string[]) => xs.length < 2 ? xs.join('') : `${xs.slice(0, -1).join(', ')} y ${xs[xs.length - 1]}`;
 const recorta = (t: string, n: number) => {
   const s = t.replace(/\s+/g, ' ').trim();
   if (s.length <= n) return s;
@@ -620,10 +622,11 @@ export function registrarSeoEscaparate(app?: Express, db?: any) {
         },
         ...videos,
       ];
-      // La tarjeta dice lo mismo que se lee en ella: el nombre, «año · área · estado» y de quién es.
+      // La tarjeta: lo que se lee en ella (el nombre, «año · área · estado» y de quién es) y de qué va
+      // la foto, como el texto alternativo de la portada en la página.
       const linea = [p.ano && (p.estado === 'Desarrollo principal actual' || p.estado === 'Foco principal' ? `desde ${p.ano}` : p.ano), area, p.estado].filter(Boolean).join(' · ');
       meta.metas = comunes(tarjeta
-        ? `${p.titulo}${linea ? ` (${linea})` : ''}, un proyecto de ${marca}${p.descripcion ? `: ${p.descripcion.replace(/[.\s]+$/, '')}` : ''}`
+        ? `${p.titulo}${p.descripcion ? `: ${p.descripcion.replace(/[.\s]+$/, '')}` : ''}${linea ? ` (${linea})` : ''} · ${marca}`
         : p.descripcion ? `${p.titulo}: ${p.descripcion}` : p.titulo);
       return;
     }
@@ -659,7 +662,7 @@ export function registrarSeoEscaparate(app?: Express, db?: any) {
         ...videos,
       ];
       meta.metas = comunes(tarjeta
-        ? `Retrato de ${persona.titulo}${suyos.length ? `, del equipo de ${suyos.slice(0, 4).map(x => x.titulo).join(', ')}` : ''} · ${marca}`
+        ? `Foto de ${persona.titulo}${suyos.length ? `, del equipo de ${enumerar(suyos.slice(0, 4).map(x => x.titulo))}` : ''} · ${marca}`
         : persona.titulo);
       return;
     }

@@ -44,6 +44,11 @@
   /* La marca, como en la cabecera del sitio: el logotipo, el nombre en negro grueso y el eslogan
      repartido al ancho del nombre. */
   .marca { position: absolute; left: 64px; top: 50px; display: flex; align-items: center; gap: 16px; }
+  /* Sobre una foto, la marca va en una placa de cristal oscuro: se lee igual sobre un cielo, una
+     captura de pantalla llena de letra pequeña o un plano (en la de una persona el fondo ya es liso). */
+  .lienzo:not(.persona) .marca { left: 48px; top: 36px; padding: 14px 22px 14px 14px; border-radius: 20px;
+    background: rgba(2, 6, 23, .55); -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, .08) inset; }
   .marca img { width: 62px; height: 62px; border-radius: 14px; display: block; }
   .marca .textos { display: inline-grid; line-height: 1; }
   .marca .nombre { font-weight: 900; font-size: 35px; letter-spacing: -0.02em; white-space: nowrap; text-shadow: 0 1px 10px rgba(0, 0, 0, .35); }

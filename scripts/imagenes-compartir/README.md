@@ -25,6 +25,9 @@ node scripts/imagenes-compartir/generar.mjs
 # Solo unas direcciones (p. ej. páginas nuevas que aún no están en el sitemap)
 node scripts/imagenes-compartir/generar.mjs --solo /colabora,/prensa,/quienes-somos
 
+# Qué haría al publicar (solo lee: ni sube ni escribe)
+node scripts/imagenes-compartir/generar.mjs --solo /colabora --simular
+
 # Y además subirlas y ponerlas en su página
 node scripts/imagenes-compartir/generar.mjs --solo /colabora --publicar
 ```

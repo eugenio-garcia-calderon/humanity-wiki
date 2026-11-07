@@ -13,8 +13,9 @@
 //   node scripts/imagenes-compartir/generar.mjs --publicar           y además las sube y las pone
 //
 // Opciones: --sitio <dominio> (luzhumanidad.com) · --solo <rutas separadas por comas> ·
-// --tipos portada,proyecto,persona,pagina · --salida <carpeta> · --publicar · --forzar
-// (sustituye también una imagen puesta a mano que esté bien) · --crudo (guarda el PNG).
+// --tipos portada,proyecto,persona,pagina · --salida <carpeta> · --publicar · --simular (dice
+// qué haría al publicar, solo leyendo) · --forzar (sustituye también una imagen puesta a mano
+// que esté bien) · --crudo (guarda el PNG).
 import { createRequire } from 'node:module';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -34,7 +35,8 @@ const ORIGEN = `https://${SITIO}`;
 const SOLO = opcion('solo') ? String(opcion('solo')).split(',').map(s => s.trim()).filter(Boolean).map(s => (s.startsWith('/') ? s : `/${s}`)) : null;
 const TIPOS = new Set(String(opcion('tipos', 'portada,proyecto,persona,pagina')).split(','));
 const SALIDA = path.resolve(String(opcion('salida', path.join(AQUI, 'salida'))));
-const PUBLICAR = !!opcion('publicar');
+const SIMULAR = !!opcion('simular');
+const PUBLICAR = !!opcion('publicar') || SIMULAR;
 const FORZAR = !!opcion('forzar');
 const CRUDO = !!opcion('crudo');
 /** Donde viven en el servidor (el nombre lleva la huella del contenido: si cambia, cambia la
@@ -277,6 +279,9 @@ for (const h of hechas) {
   } else informe.push({ ruta: h.ruta, accion: antes ? (nuestra ? 'renovada' : 'cambiada (--forzar)') : 'nueva', antes, url: h.url });
   cambios.push({ id: h.id, valor: h.url });
 }
+fs.writeFileSync(path.join(SALIDA, 'informe.json'), JSON.stringify(informe, null, 1));
+for (const i of informe) console.log(`  ${i.ruta}: ${i.accion}${i.url ? ` → ${i.url}` : ''}${i.propuesta ? ` (propuesta: ${i.propuesta})` : ''}`);
+if (SIMULAR) { console.log(`· --simular: se subirían ${informe.filter(i => i.accion !== 'igual').length} imágenes y cambiarían ${cambios.length} páginas; no se ha escrito nada`); process.exit(0); }
 // Se suben todas (también la propuesta de una que se conserva: así se puede ver y elegir).
 subir(hechas.filter(h => informe.find(i => i.ruta === h.ruta)?.accion !== 'igual').map(h => h.fichero), CARPETA);
 for (const h of hechas) {
@@ -285,6 +290,4 @@ for (const h of hechas) {
 }
 const copia = copiar(cambios.map(c => c.id), 'imagen-compartir');
 const n = escribirClave('{imagenCompartir}', cambios);
-fs.writeFileSync(path.join(SALIDA, 'informe.json'), JSON.stringify(informe, null, 1));
-for (const i of informe) console.log(`  ${i.ruta}: ${i.accion}${i.url ? ` → ${i.url}` : ''}${i.propuesta ? ` (propuesta: ${i.propuesta})` : ''}`);
 console.log(`· ${n} páginas cambiadas${copia ? `; copia de antes en ${copia}` : ''}`);

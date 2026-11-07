@@ -9,7 +9,8 @@
 //       leyendo (por SSH, `imagenes-compartir/produccion.mjs`): las etiquetas de las redes y los
 //       VideoObject de las páginas con vídeos, contra lo que pide Google para los resultados de
 //       vídeo. `--videos` usa ese `config.sitio.videos` en vez del guardado (el que deja
-//       `videos-youtube.ts --salida`), para probar antes de escribir.
+//       `videos-youtube.ts --salida`), y `--tarjetas salida/manifiesto.json` pone las imágenes
+//       recién generadas como si ya estuvieran publicadas: se prueba antes de escribir nada.
 //   npx tsx scripts/probar-compartir-y-videos.ts --vivo [--sitio luzhumanidad.com]
 //       lo mismo contra el HTML publicado (después de desplegar), con los agentes de las redes.
 import assert from 'node:assert/strict';
@@ -177,8 +178,19 @@ if (opcion('produccion')) {
     fs.mkdirSync(path.dirname(f), { recursive: true });
     fs.writeFileSync(f, Buffer.from(await r.arrayBuffer()));
   };
+  // Las tarjetas recién generadas, como si ya estuvieran subidas y puestas en su página.
+  const tarjetas = new Map<string, { url: string; fichero: string }>();
+  if (opcion('tarjetas') && opcion('tarjetas') !== 'si') {
+    for (const h of JSON.parse(fs.readFileSync(opcion('tarjetas')!, 'utf8'))) {
+      const destino = path.join(SUBIDAS, h.url.slice('/uploads/'.length));
+      fs.mkdirSync(path.dirname(destino), { recursive: true });
+      fs.copyFileSync(h.fichero, destino);
+      tarjetas.set(h.id, h);
+    }
+  }
   const armar = async (id: string) => {
     const [w] = leer(`SELECT id, title, config FROM knowledge_windows WHERE id = ${literal(id)}`);
+    if (tarjetas.has(id) && (!w.config?.imagenCompartir || id !== RAIZ)) w.config = { ...w.config, imagenCompartir: tarjetas.get(id)!.url };
     await bajar(w.config?.imagenCompartir); await bajar(w.config?.portada); await bajar(raiz.config?.imagenCompartir);
     const pagina: any = { id: w.id, titulo: w.title, config: w.config, sitio: { config: { ...cfgSitio }, raizId: RAIZ, titulo: raiz.title, icono: raiz.config.icono } };
     await ampliar(db, undefined, pagina);
