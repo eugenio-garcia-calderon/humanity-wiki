@@ -38,6 +38,8 @@ export interface CuerpoTunel {
   n: number;
   /** Cartel flotante encima del coche (nombre y CdA). */
   etiqueta?: string;
+  /** Cd del coche, si se conoce: hace la estela más o menos grande. */
+  cd?: number;
 }
 
 /** La silueta del Aeromóvil a partir de sus superficies (cuerpo y cúpula), cada 3 cm. */
@@ -106,13 +108,16 @@ export function lineasDe(c: CuerpoTunel) {
   const aM = Math.max(0.05, aR[iMax]), bM = Math.max(0.05, bR[iMax]), cM = cR[iMax];
   // La estela: tras la cola, una «sección fantasma» del tamaño de la última que se va cerrando.
   let iCola = 0; for (let i = 0; i < N; i++) if (aR[i] > 0) iCola = i;
-  const kCola = (aR[iCola] * bR[iCola]) / (aM * bM), Lw = 0.5 + 2.4 * kCola;
+  // El tamaño de la estela sale del área de la cola, corregido por el Cd del coche cuando se
+  // conoce: una cola truncada bien hecha (el XL1, Cd 0,19) deja menos estela que una trasera
+  // plana tras una carrocería abierta (el Twizy, Cd 0,64), aunque las dos colas midan parecido.
+  const kCola = (aR[iCola] * bR[iCola]) / (aM * bM) * clamp((c.cd ?? 0.3) / 0.3, 0.3, 2.2), Lw = 0.5 + 2.4 * Math.min(1, kCola);
   const a = new Float64Array(N), b = new Float64Array(N), cc = new Float64Array(N), est = new Float64Array(N);
   for (let i = 0; i < N; i++) {
     if (aR[i] > 0) { a[i] = aR[i]; b[i] = bR[i]; cc[i] = cR[i]; continue; }
     if (i > iCola) {
       const d = (i - iCola) * DX, f = Math.exp(-d / Lw);
-      a[i] = aR[iCola] * f; b[i] = bR[iCola] * f; cc[i] = cR[iCola]; est[i] = kCola * Math.exp(-d / (Lw * 1.3));
+      a[i] = aR[iCola] * f; b[i] = bR[iCola] * f; cc[i] = cR[iCola]; est[i] = Math.min(1, kCola) * Math.exp(-d / (Lw * 1.3));
     } else cc[i] = cM;
   }
   const aS = suavizar(a, 0.2), bS = suavizar(b, 0.2), cS = suavizar(cc, 0.2), eS = suavizar(est, 0.15);
@@ -194,19 +199,28 @@ function puntoRedondo(): THREE.Texture {
   const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t;
 }
 
-/** Cartel de texto que siempre mira a la cámara (dos líneas separadas por «\n»). */
-function cartel(texto: string): THREE.Sprite {
-  const [l1, l2 = ''] = texto.split('\n');
-  const cv = document.createElement('canvas'); cv.width = 640; cv.height = 168;
+/** Cartel de texto que siempre mira a la cámara: nombre arriba y hasta dos líneas de datos (separadas por «\n»). */
+export function cartel(texto: string): THREE.Sprite {
+  const lineas = texto.split('\n').slice(0, 3);
+  const W = 720, H = lineas.length === 1 ? 120 : lineas.length === 2 ? 168 : 214;
+  const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   const g = cv.getContext('2d')!;
-  g.fillStyle = 'rgba(255,255,255,0.93)'; g.strokeStyle = 'rgba(15,23,42,0.18)'; g.lineWidth = 3;
-  g.beginPath(); g.roundRect(4, 4, 632, 160, 28); g.fill(); g.stroke();
-  g.fillStyle = '#0f172a'; g.font = '700 56px Inter, system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.fillText(l1, 320, l2 ? 58 : 84);
-  if (l2) { g.fillStyle = '#0369a1'; g.font = '700 46px Inter, system-ui, sans-serif'; g.fillText(l2, 320, 120); }
+  g.fillStyle = 'rgba(255,255,255,0.94)'; g.strokeStyle = 'rgba(15,23,42,0.18)'; g.lineWidth = 3;
+  g.beginPath(); g.roundRect(4, 4, W - 8, H - 8, 28); g.fill(); g.stroke();
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  lineas.forEach((l, k) => {
+    let px = k === 0 ? 56 : k === 1 ? 44 : 34;
+    const peso = k === 2 ? 500 : 700;
+    // que quepa: se encoge la letra hasta que el texto entra en el cartel
+    do { g.font = `${peso} ${px}px Inter, system-ui, sans-serif`; px -= 2; } while (g.measureText(l).width > W - 48 && px > 18);
+    g.fillStyle = k === 0 ? '#0f172a' : k === 1 ? '#0369a1' : '#475569';
+    g.fillText(l, W / 2, 58 + k * 50 - (lineas.length === 1 ? -2 : 0));
+  });
   const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
-  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, depthTest: false, transparent: true, toneMapped: false }));
-  sp.scale.set(1.9, 0.5, 1); sp.renderOrder = 6; return sp;
+  // Tamaño fijo en pantalla (no crece al acercarse): con la cámara de 32°, 0,042 es ~7 % del alto de la vista.
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, depthTest: false, transparent: true, toneMapped: false, sizeAttenuation: false }));
+  const alto = 0.042 * H / 214;
+  sp.scale.set(alto * W / H, alto, 1); sp.renderOrder = 6; return sp;
 }
 
 export interface Tunel { grupo: THREE.Group; actualizar: (t: number, ancho: number, alto: number) => void; liberar: () => void }

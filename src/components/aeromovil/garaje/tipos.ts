@@ -15,6 +15,8 @@ export interface VehiculoGaraje {
   nombre: string;
   /** Medidas reales de la ficha del fabricante (m): sirven para comprobar el modelo y para la etiqueta. */
   largo: number; ancho: number; alto: number; batalla: number;
+  /** Vías delantera y trasera (m, entre centros de rueda), para las cotas. 0 = una sola rueda en ese eje. */
+  viaDel?: number; viaTras?: number;
   /** De dónde salen las medidas (una URL o el nombre de la ficha). */
   fuente: string;
   /**

@@ -38,7 +38,7 @@ import { fichaComparable, type Referencia } from '../components/aeromovil/refere
 import { FormularioMejora, VistaExportar, VistaPlan, VistaPlanos, VistaTareas, cargarDueno, cargarTareas, type Dueno, type Tarea } from '../components/aeromovil/Paneles';
 import { BotonesComponentes, VistaComponentes } from '../components/aeromovil/Componentes';
 import { VEHICULOS_GARAJE } from '../components/aeromovil/garaje';
-import { TarjetaTunel } from '../components/aeromovil/TarjetaTunel';
+import { TarjetaTunel, gastoEnRuedas, VELOCIDADES, type FilaTunel } from '../components/aeromovil/TarjetaTunel';
 import { TarjetaSuperponer, type Alineacion } from '../components/aeromovil/TarjetaSuperponer';
 import { colorCss } from '../components/aeromovil/garaje/superponer';
 import { DEPARTAMENTOS, type IdDepartamento } from '../components/aeromovil/departamentos';
@@ -553,13 +553,6 @@ export default function Aeromovil() {
   const [tunel, setTunel] = useState(false);
   // «Superponer»: los coches del garaje encima del nuestro, alineados por el eje delantero, el morro o la cola.
   const [superponer, setSuperponer] = useState<Alineacion | null>(null);
-  // Carteles del túnel: el nombre y el CdA (lo que de verdad cuesta empujar el aire), coche por coche.
-  const etiquetasTunel = useMemo(() => {
-    const cda = (v: number) => `CdA ${v.toLocaleString('es-ES', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} m²`;
-    const o: Record<string, string> = { aeromovil: `${esA1 ? 'Aeromóvil 1' : 'Aeromóvil Gota'}\n${cda(res.CdA)}` };
-    for (const v of VEHICULOS_GARAJE) if (v.aero) o[v.id] = `${v.nombre}\n${cda(v.aero.cd * v.aero.area)}`;
-    return o;
-  }, [res.CdA, esA1]);
   // Departamento abierto en el lateral y en el panel de abajo (2026-11-06, Eugenio: «el menú dividido por departamentos como una empresa de fabricación»).
   const [soloDep, setSoloDep] = useState(false);     // «Mostrar solo la carrocería», etc.
   const [capasAbierto, setCapasAbierto] = useState(false);
@@ -579,12 +572,15 @@ export default function Aeromovil() {
     // El Twizy, visible por defecto a 3 m al lado (2026-11-07, Eugenio); la clave v2 hace que también lo vea quien ya tenía el garaje guardado.
     // El Aptera, al otro lado a 3 m (2026-11-07, «ponlo en el garaje junto a los otros dos»). Quien ya tenía el
     // garaje guardado también lo ve: su lista guardada no lo trae y se queda con este valor.
-    const POR_DEFECTO: Record<string, { z: number }> = { twizy: { z: 3 }, aptera: { z: -3 } };
+    const POR_DEFECTO: Record<string, { z: number }> = { twizy: { z: 3 }, aptera: { z: -3 }, xl1: { z: 6 } };
     const base = VEHICULOS_GARAJE.map((v, i) => POR_DEFECTO[v.id] ? { id: v.id, visible: true, x: 0, z: POR_DEFECTO[v.id].z, giro: 0 } : ({ id: v.id, visible: false, x: 0, z: (i % 2 ? 1 : -1) * (2.6 + 2.2 * Math.floor(i / 2)), giro: 0 }));
-    try { const g = JSON.parse(localStorage.getItem('aeromovil_garaje_v2') || 'null'); if (Array.isArray(g)) return base.map(b => ({ ...b, ...(g.find((x: any) => x?.id === b.id) || {}) })); } catch { /* sin memoria */ }
-    return base;
+    // v3 (2026-11-07): el XL1 deja de ser una caja y sale por defecto. En la lista v2 guardada estaba oculto,
+    // así que al pasar de v2 a v3 se olvida solo lo que se guardó del XL1 (el resto se conserva).
+    const leer = (clave: string) => { try { const g = JSON.parse(localStorage.getItem(clave) || 'null'); return Array.isArray(g) ? g : null; } catch { return null; } };
+    const v3 = leer('aeromovil_garaje_v3'), guardado = v3 ?? (leer('aeromovil_garaje_v2') ?? []).filter((x: any) => x?.id !== 'xl1');
+    return base.map(b => ({ ...b, ...(guardado.find((x: any) => x?.id === b.id) || {}) }));
   });
-  useEffect(() => { try { localStorage.setItem('aeromovil_garaje_v2', JSON.stringify(garaje)); } catch { /* sin memoria */ } }, [garaje]);
+  useEffect(() => { try { localStorage.setItem('aeromovil_garaje_v3', JSON.stringify(garaje)); } catch { /* sin memoria */ } }, [garaje]);
   // `?garaje=xl1`: mirar un modelo del garaje a solas, en el origen (para comprobarlo mientras se modela).
   const soloGaraje = useMemo(() => new URLSearchParams(window.location.search).get('garaje'), []);
   const garajeVisor = useMemo(() => {
@@ -598,6 +594,37 @@ export default function Aeromovil() {
       return { id: v.id, x, z: 0, giro: 0 };
     });
   }, [garaje, soloGaraje, superponer, modelo.xn, modelo.xt]);
+  // Comparar gasto (túnel y «Cd y consumo»): las mismas filas y la misma velocidad para la tarjeta y los carteles.
+  const [kmhComparar, setKmhComparar] = useState(80);
+  const [verConsumo, setVerConsumo] = useState(false);
+  const filasComparar = useMemo<FilaTunel[]>(() => [
+    ...(soloGaraje ? [] : [{
+      id: 'aeromovil', nombre: esA1 ? 'Aeromóvil 1' : 'Aeromóvil Gota', cd: res.Cd, area: res.A, masa: res.mTot, crr: res.Crr, estimado: true,
+      fuente: `Este diseño. Cd estimado con la fórmula del editor (tómalo como optimista: el VW XL1 da 0,19 con las ruedas traseras carenadas); área medida sobre la forma 3D; masa y rodadura, las del cálculo del editor, con ${P.plazas} ocupante${P.plazas > 1 ? 's' : ''} de ${P.mOcc} kg.`,
+    }]),
+    ...garajeVisor.flatMap(v => {
+      const d = VEHICULOS_GARAJE.find(x => x.id === v.id); if (!d?.aero) return [];
+      const a = d.aero, plazas = a.plazas ?? 2;
+      return [{
+        id: d.id, nombre: d.nombre, cd: a.cd, area: a.area, vmax: a.vmax,
+        ...(a.masaVacio != null ? { masa: a.masaVacio + plazas * P.mOcc, crr: 0.009 } : {}),
+        fuente: `${a.fuente}. Rodadura 0,009 supuesta (neumáticos de coche, la misma que el Aeromóvil 1) y ${plazas} ocupantes de ${P.mOcc} kg.`,
+      }];
+    }),
+  ], [soloGaraje, esA1, res.Cd, res.A, res.mTot, res.Crr, P.plazas, P.mOcc, garajeVisor]);
+  const cdTunel = useMemo(() => Object.fromEntries(filasComparar.map(f => [f.id, f.cd])), [filasComparar]);
+  // Carteles encima de cada coche (2026-11-07, Eugenio: «que aparezca con un botón el Cd y consumo en kWh a los 100 km de cada uno»).
+  const carteles = useMemo(() => {
+    if (!tunel && !verConsumo) return undefined;
+    const n = (v: number, d: number) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
+    const o: Record<string, string> = {};
+    for (const f of filasComparar) {
+      const c = gastoEnRuedas(f, kmhComparar);
+      // La velocidad y «en las ruedas» los dice la tarjeta o la barra de arriba: el cartel, corto.
+      o[f.id] = `${f.nombre}${c.noLlega ? ' *' : ''}\nCd ${n(f.cd, 2)} · ${c.kWhTotal != null ? `${n(c.kWhTotal, 1)} kWh/100 km` : 'sin masa: solo aire'}`;
+    }
+    return o;
+  }, [tunel, verConsumo, filasComparar, kmhComparar]);
   const [vista, setVista] = useState<Vista>('iso');
   // Render fotorrealista de la vista actual: la captura del visor pasa por la IA y vuelve como foto
   const [render, setRender] = useState<{ estado: 'nada' | 'creando' | 'listo' | 'error'; imagen?: string; error?: string; vista?: Vista }>({ estado: 'nada' });
@@ -664,7 +691,7 @@ export default function Aeromovil() {
       <main className={cn('mx-auto max-w-[1600px] gap-4 px-4 py-4', seccion === 'diseno' ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_380px]' : 'hidden')}>
         <div className="min-w-0">
         <section className={cn('relative h-[62vh] min-h-[380px] overflow-hidden rounded-xl border border-slate-200 bg-slate-50', esA1 ? 'lg:h-[72vh]' : 'lg:sticky lg:top-[68px] lg:h-[calc(100vh-88px)]')} aria-label="Vista 3D">
-          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeVisor} soloGaraje={!!soloGaraje} tunel={tunel} etiquetasTunel={etiquetasTunel} superponer={!!superponer && !soloGaraje} vista={vista}
+          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeVisor} soloGaraje={!!soloGaraje} tunel={tunel} carteles={carteles} cdTunel={cdTunel} superponer={!!superponer && !soloGaraje} vista={vista}
             referencia={referencia} modoRef={modoRef} alinear={alinear} alPinchar={esA1 ? c => { navegar(`/aeromovil/componentes/${c}`); window.scrollTo({ top: 0 }); } : undefined} />
           {superponer && !soloGaraje && (
             <TarjetaSuperponer alineacion={superponer} alCambiar={setSuperponer} alCerrar={() => setSuperponer(null)} className={cn('right-3', referencia && modoRef !== 'no' ? 'top-28' : 'top-3')}
@@ -673,23 +700,14 @@ export default function Aeromovil() {
                 ...garajeVisor.flatMap(v => { const d = VEHICULOS_GARAJE.find(x => x.id === v.id); return d ? [{ id: d.id, nombre: d.nombre, color: colorCss(d.id), largo: d.largo, ancho: d.ancho, alto: d.alto, batalla: d.batalla }] : []; }),
               ]} />
           )}
-          {tunel && (
-            <TarjetaTunel alCerrar={() => setTunel(false)} base="aeromovil" className={cn('right-3', referencia && modoRef !== 'no' ? 'top-28' : 'top-3')}
-              filas={[
-                ...(soloGaraje ? [] : [{
-                  id: 'aeromovil', nombre: esA1 ? 'Aeromóvil 1' : 'Aeromóvil Gota', cd: res.Cd, area: res.A, masa: res.mTot, crr: res.Crr, estimado: true,
-                  fuente: `Este diseño. Cd estimado con la fórmula del editor (tómalo como optimista: el VW XL1 da 0,19 con las ruedas traseras carenadas); área medida sobre la forma 3D; masa y rodadura, las del cálculo del editor, con ${P.plazas} ocupante${P.plazas > 1 ? 's' : ''} de ${P.mOcc} kg.`,
-                }]),
-                ...garajeVisor.flatMap(v => {
-                  const d = VEHICULOS_GARAJE.find(x => x.id === v.id); if (!d?.aero) return [];
-                  const a = d.aero, plazas = a.plazas ?? 2;
-                  return [{
-                    id: d.id, nombre: d.nombre, cd: a.cd, area: a.area, vmax: a.vmax,
-                    ...(a.masaVacio != null ? { masa: a.masaVacio + plazas * P.mOcc, crr: 0.009 } : {}),
-                    fuente: `${a.fuente}. Rodadura 0,009 supuesta (neumáticos de coche, la misma que el Aeromóvil 1) y ${plazas} ocupantes de ${P.mOcc} kg.`,
-                  }];
-                }),
-              ]} />
+          {verConsumo && !tunel && !superponer && (
+            <div className="absolute right-3 top-3 z-10 flex flex-wrap items-center gap-1 rounded-xl border border-slate-200 bg-white/95 px-2.5 py-1.5 text-[11px] text-slate-600 shadow-sm backdrop-blur" role="group" aria-label="Velocidad de los carteles">
+              <Gauge className="h-3.5 w-3.5 text-sky-700" />Consumo en las ruedas (aire + rodadura) a
+              {VELOCIDADES.map(k => (
+                <Button key={k} variant="outline" aria-pressed={kmhComparar === k} onClick={() => setKmhComparar(k)}
+                  className={cn('px-1.5 py-0.5 text-[11px] normal-case tracking-normal', kmhComparar === k && 'border-sky-700 bg-sky-700 text-white hover:bg-sky-800')}>{k} km/h</Button>
+              ))}
+            </div>
           )}
           {referencia && modoRef !== 'no' && (
             <div className="absolute right-3 top-3 z-10 flex max-w-[min(92%,560px)] flex-col gap-2 rounded-xl border border-teal-200 bg-white/95 p-2.5 shadow-sm backdrop-blur">
@@ -802,6 +820,11 @@ export default function Aeromovil() {
               className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', tunel && 'border-sky-700 bg-sky-700 text-white hover:bg-sky-800')}>
               <Wind className="mr-1 h-3 w-3" />Túnel de viento
             </Button>
+            <Button variant="outline" aria-pressed={verConsumo} onClick={() => setVerConsumo(v => !v)}
+              title="Pone encima de cada coche su Cd y lo que gasta cada 100 km a la velocidad elegida"
+              className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', verConsumo && 'border-sky-700 bg-sky-700 text-white hover:bg-sky-800')}>
+              <Gauge className="mr-1 h-3 w-3" />Cd y consumo
+            </Button>
             <Button variant="outline" onClick={pedirRender} disabled={render.estado === 'creando'}
               title="Descarga la captura de esta vista y deja la petición en Tareas para la sesión de Claude Code (sin coste)"
               className="ml-auto bg-white px-2 py-1 text-[11px] normal-case tracking-normal">
@@ -822,6 +845,8 @@ export default function Aeromovil() {
             </div>
           )}
         </section>
+        {/* El túnel abre su tarjeta debajo del visor, no encima (2026-11-07, Eugenio: «que no estorbe»). */}
+        {tunel && <TarjetaTunel alCerrar={() => setTunel(false)} base="aeromovil" kmh={kmhComparar} alCambiarKmh={setKmhComparar} filas={filasComparar} className="mt-3" />}
         {esA1 && <PanelDepartamento d={DEPARTAMENTOS.find(x => x.id === dep)!} P={P} res={res} modelo={modelo} />}
         </div>
 

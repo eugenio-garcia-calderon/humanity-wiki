@@ -9,7 +9,7 @@ import type { VehiculoGaraje } from './tipos';
  * de StreetDrone (github.com/streetdrone-home/SD-TwizyModel, © 2020 StreetDrone
  * Limited, licencia Apache 2.0; copia de la licencia y lista de cambios en
  * public/aeromovil/garaje/LICENSE-SDTwizy.txt). Se ha convertido a un binario
- * compacto (public/aeromovil/garaje/twizy.bin, ~400 KB) con
+ * compacto (public/aeromovil/garaje/twizy.bin, ~395 KB) con
  * scripts/aeromovil/twizy_convertir.py, y se ha ajustado a la ficha de Renault:
  *
  *  - Batalla 1 686 mm, alto 1 454 mm, voladizo trasero 339 mm. El STL original
@@ -218,7 +218,6 @@ function rueda(R: number, ancho: number, M: Mats): THREE.Group {
   // tapacubos y tornillos
   const tapa = new THREE.LatheGeometry([new THREE.Vector2(0, 0.026), new THREE.Vector2(0.02, 0.024), new THREE.Vector2(0.034, 0.016), new THREE.Vector2(0.04, 0.004), new THREE.Vector2(0.041, 0)], 36);
   tapa.rotateX(Math.PI / 2); tapa.translate(0, 0, hw * 0.45 + 0.008); g.add(malla(tapa, M.grafito));
-  const rombo = extruir(romboRenault(0.012), 0.002, 0.0006, 2); rombo.translate(0, 0, hw * 0.45 + 0.036); g.add(malla(rombo, M.cromo));
   for (let k = 0; k < 4; k++) {
     const a = (k / 4) * Math.PI * 2 + Math.PI / 4, t = new THREE.CylinderGeometry(0.008, 0.009, 0.014, 6);
     t.rotateX(Math.PI / 2); t.translate(0.05 * Math.cos(a), 0.05 * Math.sin(a), hw * 0.45 + 0.012); g.add(malla(t, M.cromo));
@@ -226,14 +225,6 @@ function rueda(R: number, ancho: number, M: Mats): THREE.Group {
   return g;
 }
 
-/** El rombo de Renault: contorno con agujero, centrado en el origen, altura 2·s·1.6. */
-function romboRenault(s: number): THREE.Shape {
-  const h = s * 1.6, w = s;
-  const ext = new THREE.Shape(); ext.moveTo(0, h); ext.lineTo(w, 0); ext.lineTo(0, -h); ext.lineTo(-w, 0); ext.closePath();
-  const k = 0.55, hole = new THREE.Path();
-  hole.moveTo(0, h * k); hole.lineTo(-w * k, 0); hole.lineTo(0, -h * k); hole.lineTo(w * k, 0); hole.closePath();
-  ext.holes.push(hole); return ext;
-}
 
 function matricula(M: Mats): THREE.Group {
   const g = new THREE.Group(); g.name = 'matricula';
@@ -295,7 +286,7 @@ function construir(): THREE.Group {
   }
   g.add(faros(M));
   g.add(matricula(M)); // en la parte baja de la trasera, enrasada con la malla (x = −1,965)
-  // La carrocería llega cuando termina la descarga (~400 KB, una vez por página).
+  // La carrocería llega cuando termina la descarga (~395 KB, una vez por página).
   // Si no llega, el coche se queda en ruedas y el error sale en la consola:
   // un Twizy sin cuerpo se ve roto, que es justo lo que tiene que parecer.
   const cuerpo = new THREE.Group(); cuerpo.name = 'carroceria'; g.add(cuerpo);
@@ -323,7 +314,7 @@ const ENVOLVENTE: [number, number, number, number][] = [
 
 export const VEHICULO: VehiculoGaraje = {
   id: 'twizy', nombre: 'Renault Twizy',
-  largo: 2.338, ancho: 1.237, alto: 1.454, batalla: BATALLA,
+  largo: 2.338, ancho: 1.237, alto: 1.454, batalla: BATALLA, viaDel: VIA_DEL, viaTras: VIA_TRAS,
   fuente: 'Renault, ficha técnica Twizy 80 (2012): largo 2 338 mm, ancho 1 237 mm (1 381 con retrovisores), alto 1 454 mm, batalla 1 686 mm, vías 1 094/1 080 mm, voladizos 313/339 mm; malla «SD Twizy» de StreetDrone (Apache 2.0)',
   // Cd 0,64: auto-data.net (ficha Twizy ZE 6.1 kWh). El área frontal no la da
   // Renault: 1,45 m² es la proyección de esta malla con ruedas y retrovisores.
