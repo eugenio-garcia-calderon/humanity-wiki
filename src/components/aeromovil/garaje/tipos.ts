@@ -17,6 +17,14 @@ export interface VehiculoGaraje {
   largo: number; ancho: number; alto: number; batalla: number;
   /** De dónde salen las medidas (una URL o el nombre de la ficha). */
   fuente: string;
+  /**
+   * Aerodinámica, para el túnel de viento: coeficiente de arrastre, área
+   * frontal (m²) y de dónde salen. Sin este dato el túnel no inventa una cifra:
+   * dibuja el humo y dice que no lo sabe.
+   */
+  aero?: { cd: number; area: number; fuente: string };
+  /** Silueta para el túnel: [x, y del suelo de la carrocería, y del techo, media anchura], de delante a atrás. */
+  envolvente?: [number, number, number, number][];
   /** Construye el vehículo: un Group nuevo cada vez (el visor lo destruye al ocultarlo). */
   construir: () => THREE.Group;
 }
