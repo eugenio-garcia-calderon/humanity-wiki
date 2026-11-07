@@ -86,9 +86,9 @@ export default function MapaProyectosSitio({ datos, enlace }: { datos: DatosPort
   );
 
   return (
-    <section ref={caja} data-ancla="mapa" aria-labelledby="titulo-mapa" className="mt-20 scroll-mt-28 sm:scroll-mt-24">
+    <section ref={caja} data-ancla="mapa" aria-labelledby="titulo-mapa" className="mt-20 scroll-mt-36 outline-none sm:scroll-mt-24">
       <div className="text-center">
-        <p className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.2em] text-slate-400"><MapPin className="h-3.5 w-3.5" aria-hidden /> Dónde trabajamos</p>
+        <p className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.2em] text-slate-500"><MapPin className="h-3.5 w-3.5" aria-hidden /> Dónde trabajamos</p>
         <h2 id="titulo-mapa" className="mx-auto mt-2 max-w-2xl text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
           {paises.length === 1 ? `Proyectos en ${paises[0].pais}` : `Proyectos en ${paises.length} países`}
         </h2>
@@ -103,8 +103,8 @@ export default function MapaProyectosSitio({ datos, enlace }: { datos: DatosPort
             style={{ aspectRatio: PROPORCION.espana }}>
             <p className={rotulo}>España · {enDetalle}</p>
             {cerca ? <Suspense fallback={carga}><MapaCapa vista="espana" proyectos={conLugar} enlace={enlace} /></Suspense> : carga}
-            {/* La leyenda, abajo a la izquierda: en el mar, al sur de Portugal. */}
-            {leyenda && <div className="pointer-events-none absolute bottom-3.5 left-4 z-[5] hidden rounded-full bg-white/85 px-3 py-1.5 shadow-sm backdrop-blur-sm sm:block">{leyenda}</div>}
+            {/* La leyenda, abajo a la derecha, sobre el Mediterráneo: abajo a la izquierda están las Canarias. */}
+            {leyenda && <div className="pointer-events-none absolute bottom-3.5 right-4 z-[5] hidden rounded-full bg-white/85 px-3 py-1.5 shadow-sm backdrop-blur-sm sm:block">{leyenda}</div>}
           </div>
         )}
 
@@ -121,7 +121,7 @@ export default function MapaProyectosSitio({ datos, enlace }: { datos: DatosPort
           <div className="px-2 pb-1 sm:px-3">
             {leyenda && enDetalle > 0 && <div className="mb-4 sm:hidden">{leyenda}</div>}
             <p className="text-[11px] font-black uppercase tracking-[0.18em] text-slate-500">Proyectos por país</p>
-            <ul className="mt-2.5 list-none space-y-1 p-0">
+            <ul role="list" className="mt-2.5 list-none space-y-1 p-0">
               {paises.map(p => (
                 <li key={p.pais} className="grid grid-cols-[minmax(6.5rem,8rem)_minmax(0,1fr)_1.75rem] items-center gap-3 text-sm">
                   <span className="truncate font-bold text-slate-700">{p.pais}</span>
@@ -143,11 +143,13 @@ export default function MapaProyectosSitio({ datos, enlace }: { datos: DatosPort
         </p>
       )}
 
-      {/* LA LISTA, PARA QUIEN NO VE EL MAPA: cada proyecto con su lugar y su enlace. */}
-      <ul className="sr-only">
+      {/* LA LISTA, PARA QUIEN NO VE EL MAPA: cada proyecto con su lugar y su enlace. Sus enlaces no
+          son paradas del Tab (2026-11-07, revisión): serían 20 paradas que no se ven. El lector de
+          pantalla los lee y los abre igual, y el teclado llega a todo por las chinchetas. */}
+      <ul role="list" className="sr-only">
         {conLugar.map(p => (
           <li key={p.pagina}>
-            <Link to={enlace(p)} data-interno="">{p.titulo}</Link>: {[p.lugar!.nombre, p.lugar!.region !== p.lugar!.nombre ? p.lugar!.region : null, p.lugar!.pais].filter(Boolean).join(', ')}
+            <Link to={enlace(p)} data-interno="" tabIndex={-1}>{p.titulo}</Link>: {[p.lugar!.nombre, p.lugar!.region !== p.lugar!.nombre ? p.lugar!.region : null, p.lugar!.pais].filter(Boolean).join(', ')}
           </li>
         ))}
       </ul>

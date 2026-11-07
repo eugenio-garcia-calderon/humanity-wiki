@@ -1,4 +1,4 @@
-import type { MouseEvent, ReactNode } from 'react';
+import type { CSSProperties, MouseEvent, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowDown, HeartHandshake } from 'lucide-react';
 import { useSitio, type Sitio } from './ContextoSitio';
@@ -18,7 +18,12 @@ import { anosDe, numero, paisesDe, type DatosPortada } from './portadaEscaparate
 //     visibles, los países con algún proyecto en el mapa, las noticias y vídeos
 //     de «En los medios» y el año del primer proyecto. Ninguna se escribe a mano.
 //   · «Ver proyectos» baja a las tarjetas. «Colaborar» lleva a
-//     `config.sitio.colabora` y no se enseña mientras no exista esa página.
+//     `config.sitio.colabora` y no se enseña mientras no exista esa página;
+//     cuando está, es el botón lleno (lo que más importa a una ONG) y «Ver
+//     proyectos» pasa a ser el de borde.
+//   · Encima de la frase, quién hace el laboratorio (`sitio.seo.organizacion`):
+//     la cabecera ya dice «Laboratorio de Innovación Ecosocial» a todos los
+//     anchos, y repetirlo aquí era leerlo dos veces seguidas.
 
 /** La frase de la presentación: el lema propio o la descripción del sitio tras los dos puntos. */
 export function lemaDe(cfg: any): string {
@@ -35,8 +40,9 @@ export function enlaceColabora(v: unknown, sitio: Sitio | null): { href: string;
   if (typeof v === 'string' && v.trim()) {
     const s = v.trim();
     if (/^https?:\/\//.test(s)) return { href: s, fuera: true };
-    if (s.startsWith('/')) return { href: s, fuera: false };
-    if (/^[A-Z0-9]{8,}$/.test(s)) return pagina(s);
+    // Una ruta del sitio; «//otro-sitio.com» no lo es (el navegador la lleva fuera).
+    if (/^\/(?!\/)/.test(s)) return { href: s, fuera: false };
+    if (/^[A-Z0-9_]{6,40}$/.test(s)) return pagina(s);
     return null;
   }
   if (v && typeof v === 'object') {
@@ -48,25 +54,37 @@ export function enlaceColabora(v: unknown, sitio: Sitio | null): { href: string;
   return null;
 }
 
-/** Baja hasta un ancla de la portada (`data-ancla`) sin recargar, y deja el `#` en la dirección. */
+/** Baja hasta un ancla de la portada (`data-ancla`) sin recargar, deja el `#` en la dirección y
+ *  lleva allí el foco: con el teclado, el siguiente Tab sigue desde esa sección y no desde arriba
+ *  del todo (2026-11-07, revisión). La sección no es un control, solo el punto de partida: sin el
+ *  contorno verde del sitio (`data-sin-contorno`, `index.css`), que la rodeaba entera. */
 export function bajarA(nombre: string) {
   return (e: MouseEvent) => {
-    const el = document.querySelector(`[data-ancla="${CSS.escape(nombre)}"]`);
+    const el = document.querySelector<HTMLElement>(`[data-ancla="${CSS.escape(nombre)}"]`);
     if (!el) return;
     e.preventDefault();
     window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}#${nombre}`);
     const quieto = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     el.scrollIntoView({ behavior: quieto ? 'auto' : 'smooth', block: 'start' });
+    if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '-1');
+    el.setAttribute('data-sin-contorno', '');
+    el.focus({ preventScroll: true });
   };
 }
 
 function Cifra({ valor, texto, ancla }: { valor: ReactNode; texto: string; ancla?: string }) {
   const numeroEl = <dd className="text-[1.4rem] font-black leading-none tracking-tight tabular-nums text-slate-900 sm:text-[2.6rem]">{valor}</dd>;
-  // El número arriba y lo que cuenta debajo; en el HTML, primero lo que cuenta (`dt`) y luego el número (`dd`).
+  // El número arriba y lo que cuenta debajo; en el HTML, primero lo que cuenta (`dt`) y luego el
+  // número (`dd`). Toda la cifra se pulsa, no solo la palabra: el enlace se estira por encima con
+  // su `::after`, y el contorno del foco (el verde de todo el sitio, `index.css`) rodea la cifra
+  // entera en vez de solo la palabra (`data-sin-contorno` quita el de la palabra).
   return (
-    <div className="flex min-w-0 flex-col-reverse justify-end gap-1.5 border-l-2 border-amber-400 pl-2 sm:gap-2 sm:pl-4">
+    <div className="group relative flex min-w-0 flex-col-reverse justify-end gap-1.5 border-l-2 border-amber-400 pl-2 sm:gap-2 sm:pl-4">
       <dt className="text-[10.5px] font-bold leading-tight text-slate-500 sm:text-sm">
-        {ancla ? <a href={`#${ancla}`} onClick={bajarA(ancla)} className="underline-offset-2 hover:text-slate-800 hover:underline">{texto}</a> : texto}
+        {ancla
+          ? <a href={`#${ancla}`} onClick={bajarA(ancla)} data-sin-contorno=""
+              className="underline-offset-2 outline-none after:absolute after:-inset-1 after:rounded-lg group-hover:text-slate-800 group-hover:underline focus-visible:after:outline-3 focus-visible:after:outline-emerald-700">{texto}</a>
+          : texto}
       </dt>
       {numeroEl}
     </div>
@@ -76,10 +94,7 @@ function Cifra({ valor, texto, ancla }: { valor: ReactNode; texto: string; ancla
 export default function PresentacionSitio({ cfg, datos }: { cfg: any; datos: DatosPortada | null | undefined }) {
   const sitio = useSitio();
   const lema = lemaDe(cfg);
-  const seo = cfg?.sitio?.seo || {};
-  const organizacion = String(seo.organizacion || '').trim();
-  const quien = [String(cfg?.subtitulo || '').trim(), organizacion].filter(Boolean);
-  const antetitulo = quien.length === 2 ? `${quien[0]} de ${quien[1]}` : quien[0] || '';
+  const organizacion = String(cfg?.sitio?.seo?.organizacion || '').trim();
   const colabora = enlaceColabora(cfg?.sitio?.colabora, sitio);
   if (!lema && !datos) return null;
 
@@ -95,6 +110,8 @@ export default function PresentacionSitio({ cfg, datos }: { cfg: any; datos: Dat
   ];
 
   const boton = 'inline-flex h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-bold outline-none transition-colors focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2';
+  const lleno = `${boton} bg-slate-900 text-white hover:bg-slate-700`;
+  const borde = `${boton} border border-slate-300 bg-white text-slate-900 hover:border-slate-900`;
   return (
     <section aria-label="Presentación" className="relative isolate mt-1 overflow-hidden rounded-3xl border border-amber-100 bg-gradient-to-br from-amber-50 via-white to-white px-5 py-7 sm:px-10 sm:py-10">
       {/* El sol de la marca, de fondo y muy suave (los anillos del logotipo). */}
@@ -103,11 +120,9 @@ export default function PresentacionSitio({ cfg, datos }: { cfg: any; datos: Dat
         {[110, 150, 190].map((r, i) => <circle key={r} cx="200" cy="200" r={r} fill="none" stroke="currentColor" strokeWidth={22 - i * 6} opacity={0.45 - i * 0.12} />)}
       </svg>
 
-      {/* En el móvil la cabecera ya dice «Laboratorio de Innovación Ecosocial»: aquí basta con quién lo hace. */}
-      {antetitulo && (
-        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-700 sm:text-xs">
-          {organizacion ? <><span className="sm:hidden">{organizacion}</span><span className="hidden sm:inline">{antetitulo}</span></> : antetitulo}
-        </p>
+      {/* La cabecera ya dice «Laboratorio de Innovación Ecosocial»: aquí basta con quién lo hace. */}
+      {organizacion && (
+        <p className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-700 sm:text-xs">{organizacion}</p>
       )}
       {lema && (
         <p className="mt-2.5 max-w-[30ch] text-[1.5rem] font-black leading-[1.1] tracking-tight text-slate-900 [text-wrap:balance] sm:mt-4 sm:max-w-[34ch] sm:text-[2.55rem] sm:leading-[1.08]">
@@ -117,17 +132,19 @@ export default function PresentacionSitio({ cfg, datos }: { cfg: any; datos: Dat
 
       <div className="mt-5 flex flex-col gap-5 sm:mt-8 sm:gap-6 lg:flex-row lg:items-end lg:justify-between lg:gap-10">
         {cifras.length > 0 && (
-          <dl className="grid gap-2 sm:gap-7" style={{ gridTemplateColumns: `repeat(${cifras.length}, minmax(0, 1fr))` }} aria-busy={datos === undefined || undefined}>
+          // Todas en una fila; por debajo de 360 px no caben y van de dos en dos.
+          <dl className="grid grid-cols-2 gap-x-2 gap-y-4 min-[360px]:grid-cols-[repeat(var(--n),minmax(0,1fr))] sm:gap-7"
+            style={{ '--n': cifras.length } as CSSProperties} aria-busy={datos === undefined || undefined}>
             {cifras.map(c => <Cifra key={c.texto} {...c} />)}
           </dl>
         )}
-        <div className="flex shrink-0 gap-2.5">
-          <a href="#proyectos" onClick={bajarA('proyectos')} className={`${boton} bg-slate-900 text-white hover:bg-slate-700`}>
+        <div className="flex shrink-0 flex-wrap gap-2.5">
+          {colabora && (colabora.fuera
+            ? <a href={colabora.href} target="_blank" rel="noopener noreferrer" className={lleno}><HeartHandshake aria-hidden className="h-4 w-4" /> Colaborar</a>
+            : <Link to={colabora.href} data-interno="" className={lleno}><HeartHandshake aria-hidden className="h-4 w-4" /> Colaborar</Link>)}
+          <a href="#proyectos" onClick={bajarA('proyectos')} className={colabora ? borde : lleno}>
             Ver proyectos <ArrowDown aria-hidden className="h-4 w-4" />
           </a>
-          {colabora && (colabora.fuera
-            ? <a href={colabora.href} target="_blank" rel="noopener noreferrer" className={`${boton} border border-slate-300 bg-white text-slate-900 hover:border-slate-900`}><HeartHandshake aria-hidden className="h-4 w-4" /> Colaborar</a>
-            : <Link to={colabora.href} data-interno="" className={`${boton} border border-slate-300 bg-white text-slate-900 hover:border-slate-900`}><HeartHandshake aria-hidden className="h-4 w-4" /> Colaborar</Link>)}
         </div>
       </div>
     </section>

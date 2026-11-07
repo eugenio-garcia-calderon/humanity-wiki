@@ -199,6 +199,9 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
     ? gente.filter(p => p.areas.includes(activa.id) || p.proyectos.some(x => proyectosDelArea!.has(x)))
     : gente;
   const elegir = (slug: string) => { setArea(slug); ponerArea(slug); window.scrollTo({ top: 0 }); };
+  // En el escaparate las tarjetas cuelgan del «Proyectos» oculto (h2), así que su título es h3; en
+  // los demás sitios siguen siendo h2 (2026-11-07, revisión de la portada).
+  const Titulo = escaparate ? 'h3' : 'h2';
   // La dirección de un proyecto en el mapa y en la historia: la misma que la de su tarjeta; si el
   // navegador aún no conoce su nombre corto, el que da el servidor (el del mapa del pie).
   const enlaceProyecto = (p: ProyectoPortada) => {
@@ -256,7 +259,7 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
           blanco; el estado y el año arriba de la imagen y algo más grandes; todas del mismo tamaño,
           dos por fila»). Las primeras cargan ya y con prioridad; el resto, al acercarse. */}
       {escaparate && <h2 className="sr-only">Proyectos</h2>}
-      <ul data-ancla="proyectos" className={cn('grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2', escaparate ? 'mt-6 scroll-mt-32 sm:mt-8 sm:scroll-mt-24' : 'mt-4')}>
+      <ul data-ancla="proyectos" className={cn('grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2', escaparate ? 'mt-6 scroll-mt-36 outline-none sm:mt-8 sm:scroll-mt-24' : 'mt-4')}>
         {visibles.map((f, i) => {
           const nombre = String(f.celdas[modelo.colNombre]?.valor || f.pagina?.titulo || '').trim();
           const img = f.pagina?.imagen || null;
@@ -290,7 +293,7 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
                     </span>
                   )}
                   <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
-                    <h2 className="text-2xl font-black leading-tight tracking-tight text-white [text-shadow:0_2px_8px_rgba(0,0,0,0.45)] sm:text-3xl">{nombre}</h2>
+                    <Titulo className="text-2xl font-black leading-tight tracking-tight text-white [text-shadow:0_2px_8px_rgba(0,0,0,0.45)] sm:text-3xl">{nombre}</Titulo>
                     {(modelo.fecha(f) || sus.length > 0) && (
                       <p className="mt-1 text-sm font-semibold text-white/90 [text-shadow:0_1px_6px_rgba(0,0,0,0.55)]">
                         {[modelo.fecha(f) && (principal ? `Desde ${modelo.fecha(f)}` : modelo.fecha(f)), ...sus.slice(0, 2)].filter(Boolean).join(' · ')}
@@ -326,8 +329,8 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
           personas esté en la página inicial y que te haga un scroll down hasta allí»). El menú
           baja hasta aquí (`sitio.anclas`, en `VistaPagina`) en vez de abrir otra página. */}
       {gente && gente.length > 0 && genteVisible && (
-        <section data-ancla="personas" className="mt-16 scroll-mt-24">
-          <h2 className="text-center text-xs font-black uppercase tracking-[0.2em] text-slate-400">
+        <section data-ancla="personas" className="mt-16 scroll-mt-36 sm:scroll-mt-24">
+          <h2 className="text-center text-xs font-black uppercase tracking-[0.2em] text-slate-500">
             {activa ? <>Personas del área de <span className="text-slate-700">{activa.nombre}</span></> : 'Personas'}
           </h2>
           {genteVisible.length === 0 && <p className="mt-4 text-center text-sm text-slate-400">Todavía no hay personas en esta área.</p>}

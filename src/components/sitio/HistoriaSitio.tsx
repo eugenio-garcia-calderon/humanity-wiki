@@ -27,14 +27,14 @@ export default function HistoriaSitio({ datos, enlace }: { datos: DatosPortada; 
   const conAno = [...porAno.values()].reduce((n, ps) => n + ps.length, 0);
 
   return (
-    <section data-ancla="historia" aria-labelledby="titulo-historia" className="mt-20 scroll-mt-28 sm:scroll-mt-24">
+    <section data-ancla="historia" aria-labelledby="titulo-historia" className="mt-20 scroll-mt-36 outline-none sm:scroll-mt-24">
       <div className="text-center">
-        <p className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.2em] text-slate-400"><History className="h-3.5 w-3.5" aria-hidden /> Nuestra historia</p>
+        <p className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.2em] text-slate-500"><History className="h-3.5 w-3.5" aria-hidden /> Nuestra historia</p>
         <h2 id="titulo-historia" className="mx-auto mt-2 max-w-2xl text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">Cómo ha crecido el laboratorio</h2>
         <p className="mt-3 text-sm font-semibold text-slate-500">{conAno} proyectos · {anos[0]}–{anos[anos.length - 1]}</p>
       </div>
 
-      <ol className="mx-auto mt-10 max-w-5xl list-none py-0 pl-2 pr-0 sm:pl-0">
+      <ol role="list" className="mx-auto mt-10 max-w-5xl list-none py-0 pl-2 pr-0 sm:pl-0">
         {filas.map((ano, i) => {
           const ps = porAno.get(ano) || [];
           const ultimo = i === filas.length - 1;
@@ -44,7 +44,7 @@ export default function HistoriaSitio({ datos, enlace }: { datos: DatosPortada; 
               {/* El año: a la izquierda de la línea en el ordenador; en el móvil, encima de sus proyectos. */}
               <div className="hidden pt-0.5 text-right sm:block">
                 <p className="text-[1.75rem] font-black leading-none tracking-tight tabular-nums text-slate-900">{ano}</p>
-                {cuantos && <p className="mt-1 text-xs font-bold text-slate-400">{cuantos}</p>}
+                {cuantos && <p className="mt-1 text-xs font-bold text-slate-500">{cuantos}</p>}
               </div>
               {/* La línea del tiempo: un punto por año y el hilo que los une, del primero al último. */}
               <div className={`relative pl-6 sm:pl-8 ${ultimo ? '' : 'pb-6 sm:pb-8'}`}>
@@ -54,10 +54,10 @@ export default function HistoriaSitio({ datos, enlace }: { datos: DatosPortada; 
                 <span aria-hidden className="absolute -left-[6px] top-[5px] h-3.5 w-3.5 rounded-full border-2 border-white bg-amber-400 shadow-[0_0_0_1px_rgba(217,119,6,0.4)]" />
                 <p className="mb-2 flex items-baseline gap-2 sm:hidden">
                   <span className="text-xl font-black leading-none tracking-tight tabular-nums text-slate-900">{ano}</span>
-                  {cuantos && <span className="text-xs font-bold text-slate-400">{cuantos}</span>}
+                  {cuantos && <span className="text-xs font-bold text-slate-500">{cuantos}</span>}
                 </p>
                 {ps.length > 0 && (
-                  <ul className="flex list-none flex-wrap gap-1.5 p-0 sm:gap-2">
+                  <ul role="list" className="flex list-none flex-wrap gap-1.5 p-0 sm:gap-2">
                     {ps.map(p => (
                       <li key={p.pagina} className="max-w-full">
                         <Link to={enlace(p)} data-interno="" title={p.descripcion || undefined}

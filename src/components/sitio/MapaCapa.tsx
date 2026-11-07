@@ -6,7 +6,7 @@ import { PUNTOS_PORTADA as P, type PuntosPortada } from './mapaPortadaPuntos';
 import { miniatura } from '../../utils/miniatura';
 import { cn } from '../../utils/cn';
 import useCerrarAlPulsarFuera from '../../hooks/useCerrarAlPulsarFuera';
-import { fotoPropia, type LugarPortada, type ProyectoPortada } from './portadaEscaparate';
+import { enumerar, fotoPropia, type LugarPortada, type ProyectoPortada } from './portadaEscaparate';
 
 // ============================================================================
 // EL MAPA DE «DÓNDE TRABAJAMOS», DIBUJADO (2026-11-07, portada del escaparate)
@@ -43,7 +43,8 @@ export const enDetalle = (l: LugarPortada) => dentro(l, P.espana.caja) || dentro
 export const PROPORCION_MUNDO = 1.6;
 const ANCHO_MINIMO_MUNDO = 600;
 
-// El recuadro de las Canarias, solo si hay algún proyecto allí: abajo a la izquierda, a media escala.
+// El recuadro de las Canarias, abajo a la izquierda y a media escala. Siempre, aunque no haya
+// proyectos allí (2026-11-07, revisión): un mapa de España sin las Canarias se nota enseguida.
 const CANARIAS_ESCALA = 0.55;
 const CANARIAS_EN = { x: 10, y: P.espana.alto - P.canarias.alto * CANARIAS_ESCALA - 10 };
 
@@ -77,8 +78,12 @@ function caminos(t: PuntosPortada['mundo'] | PuntosPortada['canarias'], activos:
 
 type Grupo = { clave: string; x: number; y: number; proyectos: ProyectoPortada[] };
 
+/** El radio en pantalla de lo que se dibuja: el círculo de un grupo (26 px) o el punto de uno solo
+ *  (14 px y su anillo blanco). */
+const radioMarca = (n: number) => (n > 1 ? 13 : 9);
+
 /** Las chinchetas de una vista, juntas cuando se pisarían (a menos de `umbral` px en pantalla). */
-function agrupar(puntos: Array<{ p: ProyectoPortada; x: number; y: number }>, escala: number, umbral: number): Grupo[] {
+export function agrupar(puntos: Array<{ p: ProyectoPortada; x: number; y: number }>, escala: number, umbral: number): Grupo[] {
   const grupos: Array<Grupo & { sx: number; sy: number }> = [];
   for (const pt of [...puntos].sort((a, b) => a.x - b.x || a.y - b.y)) {
     const cerca = grupos.find(g => Math.hypot((g.x - pt.x) * escala, (g.y - pt.y) * escala) < umbral);
@@ -86,6 +91,24 @@ function agrupar(puntos: Array<{ p: ProyectoPortada; x: number; y: number }>, es
       cerca.proyectos.push(pt.p); cerca.sx += pt.x; cerca.sy += pt.y;
       cerca.x = cerca.sx / cerca.proyectos.length; cerca.y = cerca.sy / cerca.proyectos.length;
     } else grupos.push({ clave: pt.p.pagina, x: pt.x, y: pt.y, sx: pt.x, sy: pt.y, proyectos: [pt.p] });
+  }
+  // EL SEGUNDO PASE (2026-11-07, revisión de la portada): el primero junta los puntos al irlos
+  // añadiendo, pero dos grupos ya hechos pueden quedar pegados. A 1440 px Madrid salía partido en
+  // dos círculos, «6» y «2», con el rótulo «Madrid» en los dos. Se funden mientras sus marcas se
+  // toquen en pantalla (la suma de sus radios y 4 px de aire), hasta que no quede ninguna pareja así.
+  for (let otra = true; otra;) {
+    otra = false;
+    busca: for (let i = 0; i < grupos.length; i++) {
+      for (let j = i + 1; j < grupos.length; j++) {
+        const a = grupos[i], b = grupos[j];
+        if (Math.hypot((a.x - b.x) * escala, (a.y - b.y) * escala) >= radioMarca(a.proyectos.length) + radioMarca(b.proyectos.length) + 4) continue;
+        a.proyectos.push(...b.proyectos); a.sx += b.sx; a.sy += b.sy;
+        a.x = a.sx / a.proyectos.length; a.y = a.sy / a.proyectos.length;
+        grupos.splice(j, 1);
+        otra = true;
+        break busca;
+      }
+    }
   }
   return grupos.map(({ sx: _x, sy: _y, ...g }) => ({ ...g, clave: g.proyectos.map(p => p.pagina).sort().join('-') }));
 }
@@ -112,12 +135,13 @@ export function textoLugar(l: LugarPortada, conPais = true): string {
 }
 
 /** El nombre de un grupo: su lugar si es uno solo; si no, su provincia en común; si no, la que más
- *  se repite «y alrededores» (Madrid y Toledo, juntos en el móvil). */
+ *  se repite «y alrededores» (Madrid y Toledo, juntos en el móvil). Si son de países distintos, los
+ *  países («Honduras y Colombia», juntos en un móvil pequeño). */
 function nombreGrupo(g: Grupo): string {
   const ls = g.proyectos.map(p => p.lugar!);
   if (ls.every(l => l.nombre === ls[0].nombre)) return ls[0].nombre;
   if (ls[0].region && ls.every(l => l.region === ls[0].region)) return ls[0].region;
-  if (!ls.every(l => l.pais === ls[0].pais)) return 'Varios lugares';
+  if (!ls.every(l => l.pais === ls[0].pais)) return enumerar([...new Set(ls.map(l => l.pais))]);
   const veces = new Map<string, number>();
   for (const l of ls) { const k = l.region || l.nombre; veces.set(k, (veces.get(k) || 0) + 1); }
   return `${[...veces.entries()].sort((a, b) => b[1] - a[1])[0][0]} y alrededores`;
@@ -171,7 +195,7 @@ export default function MapaCapa({ vista, proyectos, enlace, detalle, alIrDetall
   }, []);
 
   const suyos = useMemo(() => proyectos.filter(p => p.lugar && (vista === 'espana' ? enDetalle(p.lugar) : !enDetalle(p.lugar))), [proyectos, vista]);
-  const conCanarias = vista === 'espana' && suyos.some(p => dentro(p.lugar!, P.canarias.caja));
+  const conCanarias = vista === 'espana';
   const activos = useMemo(() => codigosDe(proyectos.map(p => p.lugar!.pais)), [proyectos]);
   const trama = useMemo(() => caminos(t, activos), [t, activos]);
   const tramaCanarias = useMemo(() => (conCanarias ? caminos(P.canarias, activos) : null), [conCanarias, activos]);
@@ -210,37 +234,51 @@ export default function MapaCapa({ vista, proyectos, enlace, detalle, alIrDetall
     if (!escala || ancho < 280) return [];
     const altoPx = marco.h * escala, H = 14, M = 3;
     const cajaDe = (g: Grupo) => {
-      const x = (g.x - marco.x) * escala, y = (g.y - marco.y) * escala, r = g.proyectos.length > 1 ? 14 : 8;
+      // El radio de la marca y un píxel de aire: el rótulo queda a 4 px del punto, no pegado a él.
+      const x = (g.x - marco.x) * escala, y = (g.y - marco.y) * escala, r = radioMarca(g.proyectos.length) + 1;
       return { x, y, r };
     };
     const ocupado = grupos.map(g => { const { x, y, r } = cajaDe(g); return [x - r, y - r, x + r, y + r]; });
     const pisa = (a: number[]) => ocupado.some(b => a[0] < b[2] && a[2] > b[0] && a[1] < b[3] && a[3] > b[1]);
-    // El recuadro de España en el mundo (y su número) también ocupa sitio.
+    // El recuadro de España en el mundo (y su número) también ocupa sitio, y el de las Canarias.
     if (recuadro) ocupado.push([(recuadro.x - marco.x) * escala - 4, (recuadro.y - marco.y) * escala - 26, (recuadro.x + recuadro.w - marco.x) * escala + 70, (recuadro.y + recuadro.h - marco.y) * escala + 4]);
+    if (conCanarias) ocupado.push([CANARIAS_EN.x * escala, CANARIAS_EN.y * escala, (CANARIAS_EN.x + P.canarias.ancho * CANARIAS_ESCALA) * escala, (CANARIAS_EN.y + P.canarias.alto * CANARIAS_ESCALA) * escala]);
     const out: Array<{ clave: string; texto: string; x: number; y: number }> = [];
+    // Un nombre se escribe una sola vez: dos rótulos «Madrid» seguidos parecen un error.
+    const escritos = new Set<string>();
     for (const g of [...grupos].sort((a, b) => b.proyectos.length - a.proyectos.length)) {
       const texto = rotuloGrupo(g, vista), w = anchoTexto(texto) + 2;
+      if (escritos.has(texto)) continue;
       const { x, y, r } = cajaDe(g);
       const sitios = [[x + r + M, y - H / 2], [x - r - M - w, y - H / 2], [x - w / 2, y - r - M - H], [x - w / 2, y + r + M]];
       for (const [lx, ly] of sitios) {
         const c = [lx, ly, lx + w, ly + H];
         if (lx < 4 || ly < 26 || lx + w > ancho - 4 || ly + H > altoPx - 4 || pisa(c)) continue;
         ocupado.push(c);
+        escritos.add(texto);
         out.push({ clave: g.clave, texto, x: lx, y: ly });
         break;
       }
     }
     return out;
-  }, [grupos, escala, ancho, marco, recuadro, vista]);
+  }, [grupos, escala, ancho, marco, recuadro, vista, conCanarias]);
 
   // La ficha abierta: al pasar (se cierra sola al salir) o fija (al pulsar o tocar).
   const [abierta, setAbierta] = useState<{ clave: string; fija: boolean } | null>(null);
   const salida = useRef<number | undefined>(undefined);
+  const entrada = useRef<number | undefined>(undefined);
   const activa = useRef<HTMLDivElement>(null);
-  const abrir = (clave: string, fija: boolean) => { window.clearTimeout(salida.current); setAbierta({ clave, fija }); };
+  const abrir = (clave: string, fija: boolean) => { window.clearTimeout(salida.current); window.clearTimeout(entrada.current); setAbierta({ clave, fija }); };
   const soltar = () => { window.clearTimeout(salida.current); salida.current = window.setTimeout(() => setAbierta(a => (a?.fija ? a : null)), 220); };
-  useCerrarAlPulsarFuera(activa, !!abierta, () => setAbierta(null));
-  useEffect(() => () => window.clearTimeout(salida.current), []);
+  // Al cerrar con Escape desde dentro de la ficha, el foco vuelve a su chincheta (2026-11-07,
+  // revisión): si no, caía en <body> y quien navega con el teclado o un lector perdía el sitio.
+  useCerrarAlPulsarFuera(activa, !!abierta, () => {
+    const envoltorio = activa.current;
+    const boton = envoltorio?.contains(document.activeElement) ? envoltorio.querySelector<HTMLButtonElement>('button') : null;
+    setAbierta(null);
+    boton?.focus({ preventScroll: true });
+  });
+  useEffect(() => () => { window.clearTimeout(salida.current); window.clearTimeout(entrada.current); }, []);
   // Una ficha abierta a propósito (al pulsar o tocar) se ve entera: si queda bajo la barra fija
   // de arriba o se sale por abajo, la página se mueve lo justo. Al pasar el ratón, no.
   useEffect(() => {
@@ -266,12 +304,19 @@ export default function MapaCapa({ vista, proyectos, enlace, detalle, alIrDetall
         <path d={trama.on} className={vista === 'mundo' ? 'stroke-amber-400' : 'stroke-amber-300/65'} strokeWidth={grosor} strokeLinecap="round" fill="none" />
         {tramaCanarias && (
           <g transform={`translate(${CANARIAS_EN.x} ${CANARIAS_EN.y}) scale(${CANARIAS_ESCALA})`}>
-            <rect x={0} y={0} width={P.canarias.ancho} height={P.canarias.alto} rx={14} className="fill-white stroke-slate-200" strokeWidth={2} />
-            <path d={tramaCanarias.off} className="stroke-slate-200" strokeWidth={grosor / CANARIAS_ESCALA * 0.8} strokeLinecap="round" fill="none" />
-            <path d={tramaCanarias.on} className="stroke-amber-300/65" strokeWidth={grosor / CANARIAS_ESCALA * 0.8} strokeLinecap="round" fill="none" />
+            <rect x={0} y={0} width={P.canarias.ancho} height={P.canarias.alto} rx={14} className="fill-white stroke-slate-300" strokeWidth={3} />
+            <path d={tramaCanarias.off} className="stroke-slate-200" strokeWidth={grosor / CANARIAS_ESCALA * 0.9} strokeLinecap="round" fill="none" />
+            <path d={tramaCanarias.on} className="stroke-amber-300/80" strokeWidth={grosor / CANARIAS_ESCALA * 0.9} strokeLinecap="round" fill="none" />
           </g>
         )}
       </svg>
+      {/* Su nombre, arriba a la izquierda del recuadro (en el mar): sin él, parecía una caja vacía. En
+          un recuadro estrecho (el móvil), más pequeño y menos espaciado, para que no se salga. */}
+      {tramaCanarias && P.canarias.ancho * CANARIAS_ESCALA * escala >= 70 && (
+        <span aria-hidden className={cn('pointer-events-none absolute font-black uppercase leading-none text-slate-500',
+          P.canarias.ancho * CANARIAS_ESCALA * escala < 110 ? 'text-[8px] tracking-[0.08em]' : 'text-[9px] tracking-[0.16em]')}
+          style={{ left: izqPct(CANARIAS_EN.x + 12), top: arribaPct(CANARIAS_EN.y + 12) }}>Canarias</span>
+      )}
 
       {/* El recuadro de España en el mundo: se ve dónde cae el detalle y cuántos proyectos hay dentro. */}
       {recuadro && ancho > 0 && (
@@ -316,8 +361,15 @@ export default function MapaCapa({ vista, proyectos, enlace, detalle, alIrDetall
           <div key={g.clave} ref={abierto ? activa : undefined}
             className={cn('absolute', abierto ? 'z-30' : 'z-10')}
             style={{ left: izqPct(g.x), top: arribaPct(g.y) }}
-            onMouseEnter={() => { if (window.matchMedia('(hover: hover)').matches) abrir(g.clave, abierta?.clave === g.clave && !!abierta?.fija); }}
-            onMouseLeave={() => { if (!abierta?.fija) soltar(); }}
+            onMouseEnter={() => {
+              if (!window.matchMedia('(hover: hover)').matches) return;
+              window.clearTimeout(entrada.current);
+              // Con otra ficha abierta, se cambia a esta solo si el ratón se queda encima 150 ms: de
+              // camino a la ficha de Madrid se roza la chincheta de Toledo, y no debe cambiarla.
+              if (abierta && abierta.clave !== g.clave) entrada.current = window.setTimeout(() => abrir(g.clave, false), 150);
+              else abrir(g.clave, abierta?.clave === g.clave && !!abierta?.fija);
+            }}
+            onMouseLeave={() => { window.clearTimeout(entrada.current); if (!abierta?.fija) soltar(); }}
             onFocus={() => { if (!abierto) abrir(g.clave, false); }}
             onBlur={e => { if (!e.currentTarget.contains(e.relatedTarget as Node | null) && !abierta?.fija) setAbierta(null); }}>
             <button type="button" aria-label={etiqueta} aria-expanded={abierto} aria-controls={abierto ? id : undefined}
@@ -373,14 +425,16 @@ function FichaProyecto({ p, enlace }: { p: ProyectoPortada; enlace: (p: Proyecto
 }
 
 function FichaGrupo({ nombre, proyectos, enlace }: { nombre: string; proyectos: ProyectoPortada[]; enlace: (p: ProyectoPortada) => string }) {
-  // Dentro del grupo «Madrid», cada uno con su pueblo, sin repetir «Madrid».
-  const lugar = (l: LugarPortada) => (l.region && l.region !== nombre && l.region !== l.nombre ? `${l.nombre}, ${l.region}` : l.nombre);
+  // Dentro del grupo «Madrid» (o «Madrid y alrededores», en el móvil), cada uno con su pueblo, sin
+  // repetir «Madrid»: así cabe también el año.
+  const base = nombre.replace(/ y alrededores$/, '');
+  const lugar = (l: LugarPortada) => (l.region && l.region !== base && l.region !== l.nombre ? `${l.nombre}, ${l.region}` : l.nombre);
   return (
     <div className="flex min-h-0 flex-col">
       <p className="shrink-0 border-b border-slate-100 px-3.5 py-2.5 text-xs font-black uppercase tracking-[0.14em] text-slate-500">
         {nombre} · {proyectos.length} proyectos
       </p>
-      <ul className="min-h-0 list-none overflow-y-auto overscroll-contain p-1.5">
+      <ul role="list" className="min-h-0 list-none overflow-y-auto overscroll-contain p-1.5">
         {proyectos.map(p => (
           <li key={p.pagina}>
             <Link to={enlace(p)} data-interno="" className="flex items-center gap-3 rounded-xl p-2 outline-none hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-amber-500">
