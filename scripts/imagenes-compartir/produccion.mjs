@@ -1,5 +1,5 @@
 // ============================================================================
-// PRODUCCIÓN, POR SSH (2026-11-07) — lo comparten `generar.mjs` y `../videos-youtube.mjs`
+// PRODUCCIÓN, POR SSH (2026-11-07) — lo comparten `generar.mjs` y `../videos-youtube.ts`
 // ============================================================================
 // Las dos herramientas del escaparate leen y escriben la base de datos de producción
 // y suben ficheros a `/data/uploads`. Se entra con la llave del despliegue; nada de
