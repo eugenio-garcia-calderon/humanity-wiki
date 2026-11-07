@@ -122,6 +122,7 @@ import { registrarPedidoGestionadoRutas } from './pedidoGestionado.js';
 import { registrarOfertas } from './ofertas.js';
 import { registrarSoporte } from './soporte.js';
 import { registrarExpertos } from './expertos.js';
+import { registrarFormulariosSitio } from './formulariosSitio.js';
 
 /**
  * Un módulo de la API.
@@ -441,6 +442,13 @@ export const MODULOS: Modulo[] = [
   // dependen del orden respecto a `miembros`; el aviso de pago les llega desde `stripe.ts`.
   { nombre: 'soporte', montar: (app, db) => registrarSoporte(app, db) },
   { nombre: 'expertos', montar: (app, db) => registrarExpertos(app, db) },
+  {
+    nombre: 'formularios-sitio',
+    montar: (app, db) => registrarFormulariosSitio(app, db),
+    nota: 'Los formularios de un escaparate: «quiero colaborar» y el boletín, y el panel de quien administra la raíz '
+        + '(2026-11-07, migración 0175). Sólo rutas `/api/sitio/:raiz/{formulario,mensaje,boletin…,formularios…}`, ninguna '
+        + 'de un solo tramo, así que el sitio en la lista da igual; va junto al SEO del escaparate porque lee su modelo.',
+  },
   // EL ÚLTIMO A PROPÓSITO: su ampliación de la página tiene que pasar después de la
   // ficha de producto y de las valoraciones, que en un escaparate no aplican.
   { nombre: 'seoEscaparate', montar: (app, db) => registrarSeoEscaparate(app, db), nota: 'SEO de un sitio escaparate (luzhumanidad.com): títulos, descripciones, datos estructurados, sitemap y mapa del pie (2026-11-06).' },

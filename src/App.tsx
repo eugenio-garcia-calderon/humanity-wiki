@@ -42,6 +42,8 @@ const Challenges = lazy(() => import('./pages/Challenges'));
 const Configuracion = lazy(() => import('./pages/Configuracion'));
 const Documento = lazy(() => import('./pages/Documento'));
 const MiembrosSitio = lazy(() => import('./pages/MiembrosSitio'));
+// Los mensajes y el boletín de un sitio escaparate (2026-11-07, `formulariosSitio.ts`).
+const FormulariosSitio = lazy(() => import('./pages/FormulariosSitio'));
 const Esquemas = lazy(() => import('./pages/Esquemas'));
 const GrafoCanvas = lazy(() => import('./pages/GrafoCanvas'));
 const Grafos = lazy(() => import('./pages/Grafos'));
@@ -486,6 +488,7 @@ export default function App() {
                 <Route path="paginas/:id" element={<Documento />} />
                 {/* Los miembros de una página publicada (carril acceso). */}
                 <Route path="paginas/:id/miembros" element={<MiembrosSitio />} />
+                <Route path="paginas/:id/formularios" element={<FormulariosSitio />} />
                 <Route path="documentos/:id" element={<RedirigirPagina />} />
                 <Route path="presentaciones/:id" element={<Presentacion />} />
                 <Route path="esquemas/:slug" element={<GrafoCanvas />} />
