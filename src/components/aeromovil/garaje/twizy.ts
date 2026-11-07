@@ -327,7 +327,7 @@ export const VEHICULO: VehiculoGaraje = {
   fuente: 'Renault, ficha técnica Twizy 80 (2012): largo 2 338 mm, ancho 1 237 mm (1 381 con retrovisores), alto 1 454 mm, batalla 1 686 mm, vías 1 094/1 080 mm, voladizos 313/339 mm; malla «SD Twizy» de StreetDrone (Apache 2.0)',
   // Cd 0,64: auto-data.net (ficha Twizy ZE 6.1 kWh). El área frontal no la da
   // Renault: 1,45 m² es la proyección de esta malla con ruedas y retrovisores.
-  aero: { cd: 0.64, area: 1.45, fuente: 'Cd 0,64 (auto-data.net, ficha Twizy ZE); área frontal 1,45 m² medida sobre la malla' },
+  aero: { cd: 0.64, area: 1.45, masaVacio: 474, plazas: 2, vmax: 80, fuente: 'Cd 0,64, 474 kg en vacío y 80 km/h de velocidad máxima: auto-data.net (ficha Twizy ZE). Área frontal 1,45 m², medida sobre la malla (con retrovisores)' },
   envolvente: ENVOLVENTE,
   construir,
 };

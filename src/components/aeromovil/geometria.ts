@@ -805,7 +805,7 @@ export function calcularGota(m: ModeloGota, ar: ReturnType<typeof areas>) {
   }
   ch.push({ nombre: 'Manillar dentro del carenado (girado 15°)', holgura: barraCar, minimo: 0.02 });
   return {
-    A, FR, Cd, CdA, vol, Paero, Proll, Pw, WhKm, pedWhKm, autonomia, vmax: vmax * 3.6, masas, mVeh, mTot, rangoMasa,
+    A, FR, Cd, CdA, Crr, vol, Paero, Proll, Pw, WhKm, pedWhKm, autonomia, vmax: vmax * 3.6, masas, mVeh, mTot, rangoMasa,
     Mmax, tension, seguridad, cargaRueda, solarPico, solarDia, kmSol, areas: ar, comprobaciones: ch,
   };
 }

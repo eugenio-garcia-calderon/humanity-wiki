@@ -3,28 +3,35 @@ import { Wind, X } from 'lucide-react';
 import { Button } from '../ui/core';
 import { cn } from '../../utils/cn';
 
-/** Un coche en la comparación del túnel: de dónde sale cada cifra va en `fuente`. */
-export interface FilaTunel { id: string; nombre: string; cd: number; area: number; fuente: string }
+/**
+ * Un coche en la comparación del túnel. `masa` es la total en marcha (vacío +
+ * ocupantes) y `crr` el coeficiente de rodadura: sin ellos no hay total y la
+ * fila lo dice. `vmax` sirve para avisar de una velocidad a la que no llega.
+ */
+export interface FilaTunel { id: string; nombre: string; cd: number; area: number; fuente: string; masa?: number; crr?: number; vmax?: number; estimado?: boolean }
 
-const RHO = 1.2; // kg/m³, la misma densidad que usa el cálculo del Aeromóvil
-const fmt = (v: number, d = 0) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
+const RHO = 1.2, G = 9.81; // kg/m³ y m/s², los mismos que usa el cálculo del Aeromóvil
+const fmt = (v: number, d = 1) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
 
 /**
- * La tarjeta del túnel de viento: lo que cuesta empujar el aire a una
- * velocidad, coche por coche. Las líneas de humo del visor son una
- * ilustración; las cifras son estas, y cada una dice de dónde sale.
+ * La tarjeta del túnel de viento (2026-11-07, Eugenio: «que el comparador sea
+ * de energía a los 100 km y potencia necesaria para mantener la velocidad»).
+ * Todo es en las ruedas: aire (½·ρ·v²·CdA) más rodadura (Crr·m·g), sin las
+ * pérdidas del motor ni los equipos, que no se conocen igual para todos.
  */
-export function TarjetaTunel({ filas, alCerrar, className }: { filas: FilaTunel[]; alCerrar: () => void; className?: string }) {
+export function TarjetaTunel({ filas, base, alCerrar, className }: { filas: FilaTunel[]; base: string; alCerrar: () => void; className?: string }) {
   const [kmh, setKmh] = useState(80);
   const v = kmh / 3.6;
   const calc = filas.map(f => {
-    const cda = f.cd * f.area, fuerza = 0.5 * RHO * v * v * cda;
-    return { ...f, cda, fuerza, kw: (fuerza * v) / 1000, kwh100: (fuerza * 100000) / 3.6e6 };
+    const cda = f.cd * f.area, aire = 0.5 * RHO * v * v * cda;                  // N
+    const rueda = f.masa != null && f.crr != null ? f.crr * f.masa * G : null;  // N
+    const total = rueda != null ? aire + rueda : null;
+    // P = F·v (kW); E = F·100 km (kWh): 1 N durante 100 km son 100 000 J = 0,0278 kWh
+    return { ...f, cda, aire, rueda, total, kWaire: aire * v / 1000, kWtotal: total != null ? total * v / 1000 : null, kWhAire: aire / 36, kWhTotal: total != null ? total / 36 : null, noLlega: f.vmax != null && kmh > f.vmax };
   });
-  const menor = calc.length > 1 ? calc.reduce((a, b) => (a.cda < b.cda ? a : b)) : null;
-  const mayor = calc.length > 1 ? calc.reduce((a, b) => (a.cda > b.cda ? a : b)) : null;
-  return (
-    <div className={cn('absolute z-10 w-[min(94%,440px)] rounded-xl border border-slate-200 bg-white/95 p-3 text-slate-800 shadow-sm backdrop-blur', className)} role="region" aria-label="Túnel de viento">
+  const ref = calc.find(c => c.id === base);
+    return (
+    <div className={cn('absolute z-10 max-h-[calc(100%-5rem)] w-[min(94%,450px)] overflow-y-auto rounded-xl border border-slate-200 bg-white/95 p-3 text-slate-800 shadow-sm backdrop-blur', className)} role="region" aria-label="Túnel de viento">
       <div className="flex items-center gap-2">
         <Wind className="h-4 w-4 text-sky-700" />
         <span className="text-sm font-semibold">Túnel de viento</span>
@@ -37,46 +44,62 @@ export function TarjetaTunel({ filas, alCerrar, className }: { filas: FilaTunel[
         </span>
         <Button variant="ghost" aria-label="Cerrar el túnel de viento" onClick={alCerrar} className="px-1 py-1"><X className="h-4 w-4" /></Button>
       </div>
-      <table className="mt-2 w-full text-[11px]">
+      <table className="mt-2 w-full text-[11px] tabular-nums">
         <thead>
-          <tr className="text-left text-slate-500">
+          <tr className="text-left align-bottom text-slate-500">
             <th className="py-0.5 font-medium">Vehículo</th>
-            <th className="py-0.5 text-right font-medium">Cd</th>
-            <th className="py-0.5 text-right font-medium">Área</th>
-            <th className="py-0.5 text-right font-medium">CdA</th>
-            <th className="py-0.5 text-right font-medium">Fuerza</th>
-            <th className="py-0.5 text-right font-medium">Potencia</th>
-            <th className="py-0.5 text-right font-medium" title="Solo lo que cuesta empujar el aire, sin rodadura ni pérdidas">Aire/100 km</th>
+            <th className="py-0.5 text-right font-medium">Potencia para ir a {kmh} km/h</th>
+            <th className="py-0.5 text-right font-medium">Energía cada 100 km</th>
+            {ref && <th className="py-0.5 text-right font-medium">Frente al {ref.nombre}</th>}
           </tr>
         </thead>
         <tbody>
           {calc.map(f => (
-            <tr key={f.id} className="border-t border-slate-100 tabular-nums" title={f.fuente}>
-              <td className="py-1 pr-1 font-medium text-slate-900">{f.nombre}</td>
-              <td className="py-1 text-right">{fmt(f.cd, 2)}</td>
-              <td className="py-1 text-right">{fmt(f.area, 2)} m²</td>
-              <td className="py-1 text-right font-semibold">{fmt(f.cda, 3)}</td>
-              <td className="py-1 text-right">{fmt(f.fuerza)} N</td>
-              <td className="py-1 text-right">{fmt(f.kw, 1)} kW</td>
-              <td className="py-1 text-right">{fmt(f.kwh100, 1)} kWh</td>
+            <tr key={f.id} className={cn('border-t border-slate-100 align-top', f.noLlega && 'text-slate-400')}>
+              <td className="py-1 pr-1 font-medium text-slate-900">{f.nombre}{f.noLlega && <span className="font-normal text-amber-700"> *</span>}</td>
+              <td className="py-1 text-right">
+                <b className="text-[12px]">{f.kWtotal != null ? `${fmt(f.kWtotal)} kW` : '—'}</b>
+                <div className="text-[10px] text-slate-500">aire {fmt(f.kWaire)}{f.rueda != null && ` · ruedas ${fmt(f.rueda * v / 1000)}`}</div>
+              </td>
+              <td className="py-1 text-right">
+                <b className="text-[12px]">{f.kWhTotal != null ? `${fmt(f.kWhTotal)} kWh` : '—'}</b>
+                <div className="text-[10px] text-slate-500">aire {fmt(f.kWhAire)}{f.rueda != null && ` · ruedas ${fmt(f.rueda / 36)}`}</div>
+              </td>
+              {ref && (
+                <td className="py-1 text-right">
+                  {f.id === base ? <span className="text-slate-400">—</span> : (
+                    <>
+                      <b className="text-[12px]">{f.kWhTotal != null && ref.kWhTotal != null ? `×${fmt(f.kWhTotal / ref.kWhTotal)}` : '—'}</b>
+                      <div className="text-[10px] text-slate-500">solo aire ×{fmt(f.cda / ref.cda)}</div>
+                    </>
+                  )}
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
       </table>
-      {menor && mayor && menor.id !== mayor.id && (
-        <p className="mt-1.5 text-[11px] text-slate-700">
-          A {kmh} km/h el {mayor.nombre} gasta <b>{fmt(mayor.cda / menor.cda, 1)} veces</b> más energía que el {menor.nombre} solo en apartar el aire.
-        </p>
+      {calc.some(c => c.noLlega) && (
+        <p className="mt-1 text-[10.5px] text-amber-800">* {calc.filter(c => c.noLlega).map(c => `el ${c.nombre} no pasa de ${fmt(c.vmax!, 0)} km/h`).join('; ')}: su fila dice lo que costaría, no algo que pueda hacer.</p>
       )}
       {calc.length < 2 && <p className="mt-1.5 text-[11px] text-slate-500">Saca otro vehículo del garaje para compararlo.</p>}
+      <p className="mt-1.5 text-[10.5px] leading-snug text-slate-600">
+        <b>Por qué crece con la velocidad:</b> «solo aire» da siempre el mismo múltiplo, porque el aire frena a todos en la misma proporción. Las ruedas cuestan lo mismo por kilómetro a cualquier velocidad; cuanto más rápido, más pesa el aire en el total y más se separan.
+      </p>
       <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[10.5px] text-slate-600">
         <span className="flex items-center gap-1"><i className="inline-block h-2 w-3 rounded-sm bg-red-600" />el aire choca y frena</span>
         <span className="flex items-center gap-1"><i className="inline-block h-2 w-3 rounded-sm bg-blue-700" />acelera pegado a la carrocería</span>
-        <span className="flex items-center gap-1"><i className="inline-block h-2 w-3 rounded-sm bg-violet-600" />estela: aire revuelto que tira hacia atrás</span>
+        <span className="flex items-center gap-1"><i className="inline-block h-2 w-3 rounded-sm bg-violet-600" />estela: aire revuelto</span>
       </div>
-      <p className="mt-1.5 text-[10.5px] leading-snug text-slate-500">
-        Las líneas son una ilustración, no una simulación: muestran cómo se aparta el aire según la forma de cada coche. Las cifras son las de la tabla; pasa el ratón por cada fila para ver de dónde salen.
-      </p>
+      <details className="mt-1.5 text-[10.5px] leading-snug text-slate-500">
+        <summary className="cursor-pointer text-slate-600">De dónde sale cada cifra</summary>
+        <p className="mt-1">En las ruedas: aire + rodadura, sin las pérdidas del motor ni los equipos. Las líneas de humo son una ilustración, no una simulación.</p>
+        <ul className="mt-1 list-disc space-y-0.5 pl-4">
+          {calc.map(f => (
+            <li key={f.id}><b className="font-medium text-slate-700">{f.nombre}</b>: Cd {fmt(f.cd, 2)} × {fmt(f.area, 2)} m² = CdA {fmt(f.cda, 3)} m²{f.masa != null && `; ${fmt(f.masa, 0)} kg en marcha, rodadura ${fmt(f.crr!, 3)}`}. {f.fuente}</li>
+          ))}
+        </ul>
+      </details>
     </div>
   );
 }

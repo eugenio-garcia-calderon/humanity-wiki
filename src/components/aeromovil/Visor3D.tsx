@@ -27,6 +27,7 @@ import {
 import { GIRO_A1, suspensionA1 } from './geometriaA1';
 import type { Referencia } from './referencias';
 import { vehiculoGaraje } from './garaje';
+import { colorSuperpuesto, hacerFantasma, liberarFantasma, mostrarSiluetas, siluetas } from './garaje/superponer';
 import { crearTunel, envolventeModelo, type CuerpoTunel, type Tunel } from './tunelViento';
 
 /** Las capas. `solo` limita una capa a un vehículo: la dirección y la transmisión son del Aeromóvil 1. */
@@ -72,6 +73,8 @@ interface Props {
   soloGaraje?: boolean;
   /** Túnel de viento: líneas de humo alrededor de nuestro coche y de cada vehículo del garaje que tenga silueta. */
   tunel?: boolean;
+  /** Los coches del garaje, en fantasma de color y con sus siluetas, encima del nuestro (las posiciones las da `garaje`). */
+  superponer?: boolean;
   /** Carteles del túnel por coche ('aeromovil' o el id del garaje): nombre y CdA, dos líneas con «\n». */
   etiquetasTunel?: Record<string, string>;
   vista: Vista;
@@ -1106,7 +1109,7 @@ function construirReferencia(g: THREE.Group, M: Mats, r: Referencia, fantasma: b
   g.traverse((o: any) => { if (o.isMesh && o.material?.isMaterial) (o as any).userData.ref = true; });
 }
 
-export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, etiquetasTunel, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar }, ref) {
+export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, etiquetasTunel, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar }, ref) {
   const pinchar = useRef(alPinchar); pinchar.current = alPinchar;
   const lienzo = useRef<HTMLCanvasElement>(null);
   const estado = useRef<any>(null);
@@ -1204,7 +1207,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       renderer, scene, camera, controls, target, M, G, coche, grupoCotas, grupoRef, grupoGaraje, puertasG, dibujar, tween: null as any,
       curva: false, inclinacion: 0, modelo: null as Modelo | null, plano: new THREE.Plane(new THREE.Vector3(0, 0, 1), 0),
       apertura: 0, aperturaObjetivo: 0, aperturaMal: 0, aperturaMalObjetivo: 0, colocarPuertas: (() => {}) as () => void,
-      tunel: null as Tunel | null,
+      tunel: null as Tunel | null, superponer: false, ultimoFantasma: 0,
     };
     const tamano = new THREE.Vector2();
     estado.current = st;
@@ -1255,6 +1258,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
         M.intermitenteD.emissiveIntensity = st.inclinacion < -2 && enc ? 2.2 : 0.15;
       }
       if (st.tunel) { renderer.getSize(tamano); st.tunel.actualizar(reducir ? 0 : ahora / 1000, tamano.x, tamano.y); }
+      // Lo que llega tarde a un coche superpuesto (la carrocería del Twizy se descarga) también pasa a fantasma.
+      if (st.superponer && ahora - st.ultimoFantasma > 400) { st.ultimoFantasma = ahora; for (const o of grupoGaraje.children) hacerFantasma(o, colorSuperpuesto(o.name)); }
       controls.update(); dibujar(); raf = requestAnimationFrame(bucle);
     };
     raf = requestAnimationFrame(bucle);
@@ -1298,14 +1303,25 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   const claveGaraje = garaje.map(v => v.id).join('|');
   useEffect(() => {
     const st = estado.current; if (!st) return;
-    const g: THREE.Group = st.grupoGaraje; vaciar(g);
+    const g: THREE.Group = st.grupoGaraje;
+    for (const o of g.children) liberarFantasma(o);
+    vaciar(g);
+    st.superponer = superponer;
     for (const v of garaje) {
       const def = vehiculoGaraje(v.id); if (!def) continue;
-      const obj = def.construir(); obj.name = v.id; obj.traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+      // Un modelo del garaje que falla no puede tumbar el visor entero: se queda fuera y lo dice la consola.
+      let obj: THREE.Group;
+      try { obj = def.construir(); } catch (e) { console.error(`[garaje] no se pudo construir «${def.nombre}»:`, e); continue; }
+      obj.name = v.id; obj.traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+      if (superponer) { hacerFantasma(obj, colorSuperpuesto(v.id)); obj.add(siluetas(def, colorSuperpuesto(v.id))); }
       g.add(obj);
     }
+    // Las posiciones se ponen ya (el efecto de abajo solo corre si cambian).
+    for (const v of garaje) { const obj = g.getObjectByName(v.id); if (obj) { obj.position.set(v.x, 0, v.z); obj.rotation.y = v.giro ?? 0; } }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [claveGaraje]);
+  }, [claveGaraje, superponer]);
+  // Con los coches superpuestos, cada vista enseña solo la silueta que se lee en ella.
+  useEffect(() => { const st = estado.current; if (st && superponer) mostrarSiluetas(st.grupoGaraje, vista); }, [vista, superponer, claveGaraje]);
   useEffect(() => {
     const st = estado.current; if (!st) return;
     for (const v of garaje) { const obj = st.grupoGaraje.getObjectByName(v.id); if (obj) { obj.position.set(v.x, 0, v.z); obj.rotation.y = v.giro ?? 0; } }
@@ -1320,7 +1336,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     if (!soloGaraje) cuerpos.push({ id: 'aeromovil', x: 0, z: 0, giro: 0, envolvente: envolventeModelo(modelo), n: 2.3, etiqueta: etiquetasTunel?.aeromovil });
     for (const v of garaje) {
       const def = vehiculoGaraje(v.id);
-      if (def?.envolvente) cuerpos.push({ id: v.id, x: v.x, z: v.z, giro: v.giro ?? 0, envolvente: def.envolvente, n: 3, etiqueta: etiquetasTunel?.[v.id] });
+      if (def?.envolvente) cuerpos.push({ id: v.id, x: v.x, z: v.z, giro: v.giro ?? 0, envolvente: def.envolvente, n: def.seccion ?? 3, etiqueta: etiquetasTunel?.[v.id] });
     }
     st.tunel = crearTunel(cuerpos); st.scene.add(st.tunel.grupo);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1336,9 +1352,9 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       const zc = (Math.min(...zs) + Math.max(...zs)) / 2, xc = (Math.min(...xs) + Math.max(...xs)) / 2, ancho = Math.max(...zs) - Math.min(...zs);
       // El centro de la imagen va un poco a la derecha y arriba de los coches: así
       // quedan abajo a la izquierda, lejos de la tarjeta, con las estelas a la vista.
-      st.target.set(xc - 2.4, 1.0, zc + 1.4);
-      const d = 1 + ancho / 6;
-      st.tween = { from: st.camera.position.clone(), to: new THREE.Vector3(xc - 2.4 - 6.4 * d, 0.55 + 5.2 * d, zc + 1.4 - 6.6 * d), tf: st.controls.target.clone(), t: 0 };
+      const d = 1 + ancho / 6, dz = 1.4 + 0.35 * ancho;
+      st.target.set(xc - 2.4, 1.0, zc + dz);
+      st.tween = { from: st.camera.position.clone(), to: new THREE.Vector3(xc - 2.4 - 6.4 * d, 0.55 + 5.2 * d, zc + dz - 6.6 * d), tf: st.controls.target.clone(), t: 0 };
     } else if (!tunel && (st.target.x !== -1.5 || st.target.z !== 0)) {
       st.target.set(-1.5, 0.55, 0);
       st.tween = { from: st.camera.position.clone(), to: new THREE.Vector3(...VISTAS[vista]), tf: st.controls.target.clone(), t: 0 };
