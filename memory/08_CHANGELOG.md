@@ -10419,3 +10419,19 @@ Eugenio asked for five things on the 3D world; all on branch `nube/arquitectura-
     - `FormularioColabora`, reutilizable, con `?proyecto=` y `?motivo=`.
     - El panel `/paginas/:id/formularios`, con la tarjeta en «Compartir», filtros y CSV protegido contra fórmulas.
   - De paso, `completarSitio` ya no borra `escaparate`, `seo` ni `proyectos` al editar el pie.
+- Portada de luzhumanidad.com: presentación con cifras, mapa «Dónde trabajamos» y «Nuestra historia» (PR #898, 2026-11-07, Eugenio: «haz todas las propuestas… con alta calidad, no quiero nada cutre»).
+  - API nueva `GET /api/sitio/portada/:raiz` en `seoEscaparate.ts`, con la misma caché de 2 minutos.
+  - Las cifras salen de los datos y nunca se escriben a mano: proyectos, países, noticias y año del primer proyecto.
+  - Datos escritos:
+    - `config.lugar` en 19 páginas de proyecto.
+    - `config.sitio.portada` y `config.sitio.historia` en la raíz, con 4 hitos, cada uno con su fuente.
+    - Hay copia en `~/copias-manuales/web-top/`.
+  - El mapa es una trama de puntos de Natural Earth precalculada (`scripts/generar-mapa-portada.mjs`), sin teselas de terceros. `d3-geo` se carga solo al acercarse. Tiene recuadro de España y lista oculta para lectores de pantalla.
+  - `htmlBloques.ts` ya no escribe como `<img>` una portada que es un vídeo de YouTube.
+  - Arreglos de la revisión:
+    - Madrid sale en un solo grupo.
+    - Foco y teclado.
+    - Anclas del móvil.
+    - Canarias.
+    - Las rutas públicas validan los ids.
+    - `addressCountry` va en ISO.
