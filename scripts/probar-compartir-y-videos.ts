@@ -24,17 +24,20 @@ const opcion = (n: string) => { const i = args.indexOf(`--${n}`); return i < 0 ?
 const SUBIDAS = fs.mkdtempSync(path.join(os.tmpdir(), 'prueba-compartir-'));
 process.env.UPLOADS_DIR = SUBIDAS;
 
-const { idYoutube, videosDeBloques, datosVideo, videoObject, videosJsonLd, limpiarDescripcion } = await import('../src/server/videosEscaparate');
+const { idYoutube, videosDeBloques, datosVideo, videoObject, videosJsonLd, limpiarDescripcion, textoDelPie, piesDeVideos } = await import('../src/server/videosEscaparate');
 const { esTarjeta, imagenAlCompartir, medidaDeSubida } = await import('../src/server/seoEscaparate');
 const { bloquesEnHtml } = await import('../src/server/htmlBloques');
+const { fotoDePortada, portadaEsVideo } = await import('../src/utils/portadaPropia');
+const { cabeceraEnHtml } = await import('../src/server/cabeceraSitio');
 
 let n = 0;
 const ok = async (nombre: string, f: () => void | Promise<void>) => { await f(); n++; console.log(`  ✓ ${nombre}`); };
 
 // ── LO QUE GOOGLE PIDE A UN VideoObject ──────────────────────────────────────
 // https://developers.google.com/search/docs/appearance/structured-data/video — obligatorias:
-// name, thumbnailUrl, uploadDate; recomendadas: description, duration, embedUrl, contentUrl.
-// Las direcciones, absolutas; la fecha, ISO 8601 con zona; la duración, ISO 8601.
+// name, thumbnailUrl, uploadDate; recomendadas: description, duration y contentUrl o embedUrl
+// (al menos una). Las direcciones, absolutas; la fecha, ISO 8601 con zona; la duración, ISO 8601.
+// `contentUrl` es el fichero de vídeo, nunca la página donde vive (`youtube.com/watch?v=`).
 export function fallosVideoGoogle(v: any): string[] {
   const f: string[] = [];
   const https = (u: unknown) => typeof u === 'string' && /^https:\/\/[^\s]+$/.test(u);
@@ -47,8 +50,9 @@ export function fallosVideoGoogle(v: any): string[] {
   else if (Date.parse(v.uploadDate) > Date.now() + 86_400_000) f.push('uploadDate en el futuro');
   if (typeof v?.description !== 'string' || !v.description.trim()) f.push('falta description');
   if (v?.duration !== undefined && !/^P(?=\d|T\d)(\d+D)?(T(?=\d)(\d+H)?(\d+M)?(\d+(\.\d+)?S)?)?$/.test(v.duration)) f.push('duration no es ISO 8601');
-  if (!https(v?.embedUrl)) f.push('embedUrl');
-  if (!https(v?.contentUrl)) f.push('contentUrl');
+  if (v?.embedUrl === undefined && v?.contentUrl === undefined) f.push('ni embedUrl ni contentUrl');
+  if (v?.embedUrl !== undefined && !https(v.embedUrl)) f.push('embedUrl no es una dirección https');
+  if (v?.contentUrl !== undefined && (!https(v.contentUrl) || /youtube\.com\/watch|youtu\.be\/|vimeo\.com\/\d/.test(v.contentUrl))) f.push('contentUrl no es un fichero de vídeo');
   for (const k of ['author', 'publisher']) if (v?.[k] !== undefined && (typeof v[k]?.name !== 'string' || !v[k].name)) f.push(`${k} sin nombre`);
   return f;
 }
@@ -91,18 +95,36 @@ await ok('los datos de un vídeo: sin título, fecha o miniatura no hay VideoObj
   assert.equal(datosVideo({ ...bueno, duracion: '3 minutos' })?.duracion, null);
   assert.equal(datosVideo({ ...bueno, propio: 'true' })?.propio, false);
 });
-await ok('el VideoObject cumple lo que pide Google, y solo firma la organización lo de su canal', () => {
+await ok('el VideoObject cumple lo que pide Google (sin contentUrl de página), y solo firma la organización lo de su canal', () => {
   const org = { '@type': 'NGO', '@id': '/#organizacion', name: 'Light Humanity', url: '/' };
   const v = videoObject('Yjb26ysgIbs', datosVideo(bueno)!, org);
   assert.deepEqual(fallosVideoGoogle(v), []);
   assert.equal(v.embedUrl, 'https://www.youtube.com/embed/Yjb26ysgIbs');
-  assert.equal(v.contentUrl, 'https://www.youtube.com/watch?v=Yjb26ysgIbs');
+  assert.equal(v.contentUrl, undefined, 'la página de YouTube no es el fichero del vídeo');
+  assert.deepEqual(fallosVideoGoogle({ ...v, contentUrl: 'https://www.youtube.com/watch?v=Yjb26ysgIbs' }), ['contentUrl no es un fichero de vídeo']);
+  assert.deepEqual(fallosVideoGoogle({ ...v, embedUrl: undefined }), ['ni embedUrl ni contentUrl']);
   assert.deepEqual(v.author, org);
+  assert.equal(v.description, bueno.descripcion, 'sin pie, la descripción de YouTube');
   const ajeno = videoObject('Bib6N9c_FZI', datosVideo({ ...bueno, propio: false, descripcion: '' })!, org);
   assert.equal(ajeno.author, undefined); assert.equal(ajeno.publisher, undefined);
-  assert.equal(ajeno.description, bueno.titulo, 'sin descripción, la del título');
-  const lista = videosJsonLd([{ tipo: 'medio', medio: 'youtube', medioId: 'Yjb26ysgIbs' }, { tipo: 'medio', medio: 'youtube', medioId: 'sinDatos1' }], { Yjb26ysgIbs: bueno }, org);
+  assert.equal(ajeno.description, bueno.titulo, 'sin pie ni descripción, el título');
+  const lista = videosJsonLd([
+    { tipo: 'medio', medio: 'youtube', medioId: 'Yjb26ysgIbs', pie: 'La campaña de **2019** en [Breves](https://ejemplo.org).' },
+    { tipo: 'medio', medio: 'youtube', medioId: 'sinDatos1' },
+  ], { Yjb26ysgIbs: { ...bueno, descripcion: '(NASDAQ: SEV) is a solar mobility company' } }, org);
   assert.equal(lista.length, 1, 'un vídeo sin datos no lleva VideoObject');
+  assert.equal(lista[0].description, 'La campaña de 2019 en Breves.', 'con pie, el pie en texto llano y no lo de YouTube');
+});
+await ok('el pie de un vídeo, en texto llano, de 300 letras como mucho; el primero de cada vídeo', () => {
+  assert.equal(textoDelPie('«La Luz del **Amazonas**», de *Light Humanity*. Vídeo: [Luz & Humanidad](https://youtube.com/@luzhumanidad) (`YouTube`)'),
+    '«La Luz del Amazonas», de Light Humanity. Vídeo: Luz & Humanidad (YouTube)');
+  assert.equal(textoDelPie('Entre 2 * 3 y 4 * 5 hay <b>algo</b>'), 'Entre 2 * 3 y 4 * 5 hay algo');
+  const largo = textoDelPie('palabra '.repeat(60));
+  assert.ok(largo.length <= 300 && largo.endsWith('…') && !/palab…$/.test(largo), largo);
+  assert.equal(textoDelPie(null), '');
+  const v = (id: string, pie?: string) => ({ tipo: 'medio', medio: 'youtube', medioId: id, ...(pie ? { pie } : {}) });
+  const pies = piesDeVideos([v('aaaaaa1'), { tipo: 'columnas', columnas: [[v('aaaaaa1', 'Segundo pie'), v('bbbbbb2', 'Uno')]] }, v('bbbbbb2', 'Otro')]);
+  assert.deepEqual([...pies], [['aaaaaa1', 'Segundo pie'], ['bbbbbb2', 'Uno']]);
 });
 await ok('la descripción de YouTube, limpia y de 300 letras como mucho', () => {
   const t = limpiarDescripcion('Ahora es el momento. 🌞 Ahorra desde el primer día.\nTeléfono: 900 80 28 12\nEmail: info@comunidad.solar\nMás en https://ejemplo.org\n#energia #solar\nPuedes leer la entrevista completa aquí:\nSuscríbete al canal');
@@ -133,6 +155,32 @@ await ok('la imagen al compartir: la tarjeta (1200 × 630), una foto medida, la 
   r = await imagenAlCompartir({ bloques: [] }, '/uploads/2026/11/compartir/aeromovil-0123456789.jpg');
   assert.equal(r?.url, '/uploads/2026/11/compartir/aeromovil-0123456789.jpg', 'sin ninguna, la de la portada del sitio');
   assert.equal(await imagenAlCompartir({}, null), null);
+});
+await ok('una portada que es un vídeo: la primera foto propia de la página, también en el HTML del servidor', () => {
+  const bloques = [{ tipo: 'parrafo', texto: 'hola' }, { tipo: 'columnas', columnas: [{ bloques: [{ tipo: 'imagen', url: '/uploads/2026/10/foto.jpg', alt: 'Lámparas solares en Breves' }] }] }];
+  assert.ok(portadaEsVideo('https://www.youtube.com/watch?v=Yjb26ysgIbs'));
+  assert.ok(portadaEsVideo('http://youtu.be/Yjb26ysgIbs'), 'un enlace de YouTube que el reproductor no reconoce tampoco es una foto');
+  assert.ok(portadaEsVideo('https://vimeo.com/123456789'));
+  assert.ok(portadaEsVideo('/uploads/2026/10/portada.mp4'));
+  assert.ok(!portadaEsVideo('/uploads/2026/10/portada.jpg'));
+  assert.deepEqual(fotoDePortada({ portada: '/uploads/2026/10/portada.jpg', bloques }), { url: '/uploads/2026/10/portada.jpg', alt: null });
+  assert.deepEqual(fotoDePortada({ portada: 'https://www.youtube.com/watch?v=Yjb26ysgIbs', bloques }), { url: '/uploads/2026/10/foto.jpg', alt: 'Lámparas solares en Breves' });
+  assert.deepEqual(fotoDePortada({ portada: '/uploads/2026/10/portada.webm', bloques }), { url: '/uploads/2026/10/foto.jpg', alt: 'Lámparas solares en Breves' });
+  assert.equal(fotoDePortada({ portada: '', bloques }), null, 'sin portada, ninguna (como siempre)');
+  assert.equal(fotoDePortada({ portada: 'https://vimeo.com/123456789', bloques: [] }), null);
+  // La cabecera que escribe el servidor: un proyecto del escaparate con un vídeo de portada.
+  // Como luzhumanidad.com: sin menú (decisión de Eugenio) y sin pie aquí, que no es lo que se prueba.
+  const sitio = { config: { escaparate: true, proyectos: 'BDTPROYECTOS', menu: { activo: false }, pie: { activo: false } }, raizId: 'KWRAIZ', titulo: 'Luz & Humanidad', icono: null };
+  const proyecto: any = { id: 'KWPROYECTO', titulo: 'Luz del Amazonas', config: { portada: 'https://www.youtube.com/watch?v=Yjb26ysgIbs', encuadre: { x: 10, y: 90 }, bloques }, fila: { fila_id: 'F1', tabla_id: 'BDTPROYECTOS' }, sitio };
+  const h = cabeceraEnHtml(proyecto, 'Mozilla/5.0 (iPhone)', 'KWRAIZ');
+  assert.ok(!/<iframe/i.test(h), 'sin reproductor en el HTML del servidor');
+  assert.ok(!/youtube/i.test(h), 'nada de YouTube');
+  assert.match(h, /<img[^>]+src="[^"]*\/uploads\/2026\/10\/foto\.jpg/);
+  assert.equal(proyecto.config.portada, 'https://www.youtube.com/watch?v=Yjb26ysgIbs', 'la página que va al navegador no cambia');
+  // Fuera de un proyecto del escaparate no cambia nada: su cabecera en el navegador es la de
+  // siempre (`CabeceraLectura`, con su reproductor), y el HTML del servidor pinta la misma.
+  const otra = cabeceraEnHtml({ ...proyecto, fila: { fila_id: 'F2', tabla_id: 'BDTOTRA' } }, 'Mozilla/5.0', 'KWRAIZ');
+  assert.match(otra, /<iframe[^>]+youtube-nocookie\.com\/embed\/Yjb26ysgIbs/);
 });
 await ok('el HTML del servidor de un vídeo: enlace con su miniatura y un texto alternativo, sin iframe', () => {
   const ctx: any = { enlacePagina: (id: string) => `/p/${id}`, tablas: new Map(), titulos: new Map(), extra: new Map(), pagina: { videos: { Yjb26ysgIbs: 'LA LUZ DEL AMAZONAS' } } };
@@ -189,10 +237,11 @@ if (opcion('produccion')) {
     }
   }
   const armar = async (id: string) => {
-    const [w] = leer(`SELECT id, title, config FROM knowledge_windows WHERE id = ${literal(id)}`);
+    const [w] = leer(`SELECT k.id, k.title, k.config, (SELECT json_build_object('fila_id', f.id, 'tabla_id', f.tabla_id) FROM bd_filas f
+      WHERE f.pagina_id = k.id AND f.deleted_at IS NULL LIMIT 1) AS fila FROM knowledge_windows k WHERE k.id = ${literal(id)}`);
     if (tarjetas.has(id) && (!w.config?.imagenCompartir || id !== RAIZ)) w.config = { ...w.config, imagenCompartir: tarjetas.get(id)!.url };
     await bajar(w.config?.imagenCompartir); await bajar(w.config?.portada); await bajar(raiz.config?.imagenCompartir);
-    const pagina: any = { id: w.id, titulo: w.title, config: w.config, sitio: { config: { ...cfgSitio }, raizId: RAIZ, titulo: raiz.title, icono: raiz.config.icono } };
+    const pagina: any = { id: w.id, titulo: w.title, config: w.config, fila: w.fila || null, sitio: { config: { ...cfgSitio }, raizId: RAIZ, titulo: raiz.title, icono: raiz.config.icono } };
     await ampliar(db, undefined, pagina);
     return pagina;
   };
@@ -215,18 +264,46 @@ if (opcion('produccion')) {
   await ok(`VideoObject válidos para Google en ${paginasConVideo} páginas (${totalVideos} vídeos)`, () => {
     if (cfgSitio.videos) assert.ok(paginasConVideo >= 3, 'al menos tres páginas con vídeos');
   });
-  await ok('las etiquetas para las redes de la portada, un proyecto, una persona y otra página', async () => {
-    const hijas = leer(`SELECT f.pagina_id AS id FROM bd_filas f WHERE f.tabla_id = ${literal(raiz.config.hijas?.tabla_id || '')} AND f.oculta = false AND f.deleted_at IS NULL LIMIT 1`);
-    for (const id of [RAIZ, 'KWNTX8WIA8DL4N5', 'KWMUVO3ZW55F49', ...hijas.map((h: any) => h.id)]) {
+  await ok('la cabecera que escribe el servidor de un proyecto con vídeo de portada (Luz del Amazonas): su foto, sin reproductor', async () => {
+    const conPortadaDeVideo = leer(`
+      SELECT k.id FROM bd_filas f JOIN knowledge_windows k ON k.id = f.pagina_id
+      WHERE f.tabla_id = ${literal(cfgSitio.proyectos)} AND f.oculta = false AND f.deleted_at IS NULL AND f.archived_at IS NULL
+        AND k.deleted_at IS NULL AND k.config->>'portada' ~* '(youtu|vimeo|[.](mp4|webm|mov|m4v|ogv)([?#]|$))'`);
+    assert.ok(conPortadaDeVideo.length >= 1, 'ningún proyecto con vídeo de portada: la prueba no prueba nada');
+    for (const { id } of conPortadaDeVideo) {
+      const p = await armar(id);
+      const h = cabeceraEnHtml(p, 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)', RAIZ);
+      assert.ok(!/<iframe/i.test(h), `${p.titulo}: un iframe en la cabecera del servidor`);
+      // Nada que se cargue de YouTube o Vimeo (el enlace al canal en los iconos del pie no pide nada).
+      assert.ok(!/\bsrc="[^"]*(youtube|youtu\.be|ytimg|vimeo)/i.test(h), `${p.titulo}: algo de YouTube o Vimeo se carga en la cabecera del servidor`);
+      const img = /<img[^>]+src="([^"]+)"/.exec(h)?.[1];
+      assert.ok(img && /\/uploads\//.test(img), `${p.titulo}: sin su foto`);
+      console.log(`  · ${p.titulo}: ${img}`);
+    }
+  });
+  await ok('las etiquetas para las redes de la portada, un proyecto, dos personas y las demás páginas', async () => {
+    // Las filas visibles de la tabla del menú (Visión, Proyectos, Personas…): eran fichas de producto.
+    const hijas = leer(`SELECT f.pagina_id AS id FROM bd_filas f WHERE f.tabla_id = ${literal(raiz.config.hijas?.tabla_id || '')} AND f.oculta = false AND f.deleted_at IS NULL ORDER BY f.orden`);
+    const fundador = leer(`SELECT k.id FROM bd_filas f JOIN knowledge_windows k ON k.id = f.pagina_id WHERE f.tabla_id = ${literal(cfgSitio.personas)} AND k.title = ${literal(cfgSitio.seo?.fundador || '')} AND f.deleted_at IS NULL LIMIT 1`);
+    for (const id of [RAIZ, 'KWNTX8WIA8DL4N5', 'KWMUVO3ZW55F49', ...fundador.map((h: any) => h.id), ...hijas.map((h: any) => h.id)]) {
       const p = await armar(id);
       const metas = Object.fromEntries((p.meta?.metas || []).map((x: any) => [x.property || x.name, x.content]));
-      console.log(`  · ${p.titulo}: og:image ${p.config.imagenCompartir || '—'} ${metas['og:image:width'] || '?'}×${metas['og:image:height'] || '?'} ${metas['og:image:type'] || ''}\n      alt: ${metas['og:image:alt'] || '—'}`);
+      const ld = (Array.isArray(p.meta?.jsonLd) ? p.meta.jsonLd : [p.meta?.jsonLd]).filter(Boolean);
+      console.log(`  · ${p.titulo}: «${p.meta?.titulo}» (${p.meta?.ogType}) og:image ${p.config.imagenCompartir || '—'} ${metas['og:image:width'] || '?'}×${metas['og:image:height'] || '?'} ${metas['og:image:type'] || ''}\n      descripción: ${p.meta?.descripcion || '—'}\n      alt: ${metas['og:image:alt'] || '—'}`);
       assert.equal(metas['og:locale'], 'es_ES');
       assert.equal(metas['og:site_name'], raiz.title);
+      assert.equal(metas['twitter:site'], '@lighthumanity');
+      assert.ok(!/precio|opiniones/i.test(`${p.meta?.titulo} ${p.meta?.descripcion}`), `${p.titulo}: título o descripción de ficha de producto`);
+      assert.notEqual(p.meta?.ogType, 'product', `${p.titulo}: og:type product`);
+      assert.ok(!ld.some((j: any) => ['Product', 'AggregateRating'].includes(j?.['@type'])), `${p.titulo}: un Product en los datos estructurados`);
+      assert.ok(!(p.meta?.metas || []).some((x: any) => /^product:/.test(String(x?.property || ''))), `${p.titulo}: etiquetas product:*`);
+      assert.ok(p.meta?.descripcion, `${p.titulo}: sin descripción`);
       if (p.config.imagenCompartir) {
         assert.ok(metas['og:image:alt'] && metas['twitter:image:alt'], `${p.titulo}: alt`);
+        assert.ok(metas['og:image:alt'] !== raiz.title, `${p.titulo}: un alt que solo dice la marca`);
         if (String(p.config.imagenCompartir).startsWith('/uploads/')) assert.ok(metas['og:image:width'] && metas['og:image:height'] && metas['og:image:type'], `${p.titulo}: medida`);
       }
+      if (p.titulo === cfgSitio.seo?.fundador && tarjetas.has(id)) assert.match(metas['og:image:alt'], /fundador, del equipo de \d+ proyectos, entre ellos /, 'el alt del fundador no enumera cuatro como si fueran todos');
     }
   });
 }
@@ -237,7 +314,7 @@ if (opcion('vivo')) {
   console.log(`Publicado (${SITIO})`);
   const AGENTES = ['facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)', 'Twitterbot/1.0',
     'LinkedInBot/1.0 (compatible; Mozilla/5.0; Apache-HttpClient +http://www.linkedin.com)', 'WhatsApp/2.23.20.0 A', 'TelegramBot (like TwitterBot)'];
-  const rutas = (opcion('rutas') && opcion('rutas') !== 'si' ? opcion('rutas')! : '/,/canada-solar,/luz-del-amazonas,/pedaleo-solar,/maria-roca').split(',');
+  const rutas = (opcion('rutas') && opcion('rutas') !== 'si' ? opcion('rutas')! : '/,/canada-solar,/luz-del-amazonas,/pedaleo-solar,/maria-roca,/eugenio-garcia-calderon-huerta,/vision').split(',');
   // Páginas con vídeos de YouTube: tienen que llevar sus VideoObject (si no, faltan los datos de
   // `config.sitio.videos` o el despliegue).
   const conVideos = new Set((opcion('con-videos') && opcion('con-videos') !== 'si' ? opcion('con-videos')! : '/canada-solar,/luz-del-amazonas,/pedaleo-solar').split(','));
@@ -249,6 +326,8 @@ if (opcion('vivo')) {
     assert.match(meta('og:image')!, /^https:\/\//);
     assert.equal(meta('og:locale'), 'es_ES');
     assert.equal(meta('twitter:card'), 'summary_large_image');
+    assert.ok(!/precio y opiniones/.test(`${meta('og:title')} ${meta('og:description')}`), `${ruta}: título de ficha de producto`);
+    assert.notEqual(meta('og:type'), 'product', `${ruta}: og:type product`);
     if (ua === AGENTES[0]) {
       const videos = [...h.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m => JSON.parse(m[1])).filter(x => x['@type'] === 'VideoObject');
       for (const v of videos) assert.deepEqual(fallosVideoGoogle(v), [], `${ruta}: ${v.name}`);
