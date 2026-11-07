@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useSitio } from './ContextoSitio';
 import { miniatura } from '../../utils/miniatura';
 import { cn } from '../../utils/cn';
+import { fotoDePortada } from '../../utils/portadaPropia';
 import type { DatosPagina } from './CabeceraLectura';
 import type { Grupo } from './RedRelaciones';
 
@@ -22,27 +23,6 @@ type Columna = { id: string; nombre: string; tipo: string; opciones?: Opcion[] }
 type Tabla = { columnas: Columna[]; filas: Array<{ id: string; celdas: Record<string, { valor?: unknown }> }> };
 
 const EQUIPO = /equipo|personas/i;
-
-/** UNA PORTADA QUE ES UN VÍDEO (2026-11-07). En Luz del Amazonas la portada es un enlace de YouTube
- *  y la cabecera pintaba `<img src="https://www.youtube.com/watch?v=…">`: una imagen rota con su
- *  texto alternativo encima (y una llamada a YouTube al abrir la página). Como en su tarjeta de la
- *  portada y en su imagen al compartir (`imagenPropia` en `seoEscaparate.ts`): entonces va la
- *  primera foto propia de la página. */
-const esFotoPropia = (u: unknown): u is string => typeof u === 'string' && /^\/uploads\/(?!privado\/)/.test(u);
-function fotoDePortada(cfg: any): { url: string; alt: string | null } | null {
-  if (typeof cfg.portada === 'string' && !/youtu\.?be/i.test(cfg.portada)) return { url: cfg.portada, alt: null };
-  const buscar = (bs: unknown, n = 0): { url: string; alt: string | null } | null => {
-    if (!Array.isArray(bs) || n > 4) return null;
-    for (const b of bs) {
-      if (b?.tipo === 'imagen' && esFotoPropia(b.url)) return { url: b.url, alt: typeof b.alt === 'string' && b.alt.trim() ? b.alt.trim() : null };
-      const dentro = buscar(b?.bloques, n + 1)
-        || (Array.isArray(b?.columnas) ? b.columnas.map((c: any) => buscar(Array.isArray(c) ? c : c?.bloques, n + 1)).find(Boolean) || null : null);
-      if (dentro) return dentro;
-    }
-    return null;
-  };
-  return buscar(cfg.bloques);
-}
 
 export default function CabeceraProyectoEscaparate({ pagina }: { pagina: DatosPagina }) {
   const sitio = useSitio();
@@ -73,9 +53,11 @@ export default function CabeceraProyectoEscaparate({ pagina }: { pagina: DatosPa
   const enlace = (id: string | null) => (id ? (sitio ? sitio.enlacePagina(id) : `/p/${id}`) : '#');
   const equipo = grupos?.find(g => EQUIPO.test(g.nombre)) || null;
   const resto = (grupos || []).filter(g => g !== equipo);
+  // UNA PORTADA QUE ES UN VÍDEO (2026-11-07): en su lugar, la primera foto propia de la página
+  // (`fotoDePortada`, la misma que pone el servidor en el HTML, `cabeceraSitio.tsx`). El encuadre
+  // se eligió para su portada: con la foto de recambio, centrada.
   const portada = fotoDePortada(cfg);
-  // El encuadre se eligió para su portada: con la foto de recambio, centrada.
-  const enc = portada?.url === cfg.portada ? cfg.encuadre : null;
+  const enc = portada && portada.url === String(cfg.portada || '').trim() ? cfg.encuadre : null;
   const principal = estado?.label === 'Desarrollo principal actual' || estado?.label === 'Foco principal';
 
   return (
