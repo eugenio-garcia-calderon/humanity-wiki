@@ -198,6 +198,8 @@ export function registerAeromovilRoutes(app: Express, db: any) {
   /** POST /api/aeromovil/disenos — { nombre, parametros, autor? } → el diseño y su clave de edición. */
   app.post('/api/aeromovil/disenos', async (req: Request, res: Response) => {
     try {
+      // Solo el dueño del Aeromóvil (o un admin) guarda diseños (2026-11-07, Eugenio: «que solo Eugenio pueda modificar los parámetros y guardar diseños, iniciando sesión»).
+      if (!puedeDecidir(req, await dueno(db))) return res.status(403).json({ error: 'Solo el dueño del Aeromóvil puede guardar diseños. Inicia sesión con su cuenta.' });
       if (String(req.body?.web ?? '').trim()) return res.json({ diseno: null, clave: null });
       const nombre = nombreValido(req.body?.nombre);
       if (!nombre) return res.status(400).json({ error: 'Ponle un nombre al diseño.' });
@@ -222,11 +224,9 @@ export function registerAeromovilRoutes(app: Express, db: any) {
     const r = await db.execute(sql`SELECT clave_hash, created_by, origen FROM aeromovil_disenos WHERE id = ${id} AND archived_at IS NULL`);
     const f = r.rows[0] as any;
     if (!f) return { existe: false, puede: false };
-    if (puedeDecidir(req, await dueno(db))) return { existe: true, puede: true };
-    if (f.origen === 'equipo') return { existe: true, puede: false };
-    const clave = String(req.body?.clave ?? '');
-    const puede = (!!req.user && f.created_by === req.user.id) || (!!clave && !!f.clave_hash && huella(clave) === f.clave_hash);
-    return { existe: true, puede };
+    // Desde el 2026-11-07 solo decide el dueño (o un admin): la clave de creación y el «lo creé yo» ya no bastan (Eugenio: «una capa de seguridad para que nadie nos joda lo trabajado»).
+    void f;
+    return { existe: true, puede: puedeDecidir(req, await dueno(db)) };
   };
 
   /** PUT /api/aeromovil/disenos/:id — { nombre?, parametros?, clave? } */
@@ -240,7 +240,7 @@ export function registerAeromovilRoutes(app: Express, db: any) {
       if (params != null && !parametrosValidos(params)) return res.status(400).json({ error: 'Los parámetros del diseño no son válidos.' });
       const p = await puedeCambiarDiseno(req, id);
       if (!p.existe) return res.status(404).json({ error: 'Ese diseño no existe.' });
-      if (!p.puede) return res.status(403).json({ error: 'Este diseño es de otra persona: guárdalo como uno nuevo con tus cambios.' });
+      if (!p.puede) return res.status(403).json({ error: 'Solo el dueño del Aeromóvil puede cambiar los diseños. Inicia sesión con su cuenta.' });
       if (!(await conRitmo(db, req, res, FRENO_DISENO))) return;
       const r = await db.execute(sql`
         UPDATE aeromovil_disenos
@@ -283,7 +283,7 @@ export function registerAeromovilRoutes(app: Express, db: any) {
       if (!Number.isInteger(id)) return res.status(400).json({ error: 'Diseño no válido.' });
       const p = await puedeCambiarDiseno(req, id);
       if (!p.existe) return res.status(404).json({ error: 'Ese diseño no existe.' });
-      if (!p.puede) return res.status(403).json({ error: 'Solo quien creó este diseño o el dueño del Aeromóvil puede quitarlo.' });
+      if (!p.puede) return res.status(403).json({ error: 'Solo el dueño del Aeromóvil puede quitar diseños. Inicia sesión con su cuenta.' });
       await db.execute(sql`UPDATE aeromovil_disenos SET archived_at = now() WHERE id = ${id}`);
       res.json({ ok: true });
     } catch (e: any) {

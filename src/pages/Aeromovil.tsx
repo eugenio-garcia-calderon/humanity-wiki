@@ -22,7 +22,7 @@
 // Todo el cálculo vive en `src/components/aeromovil/geometria.ts`, que es la
 // misma geometría que el script CadQuery de `public/aeromovil/`.
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Armchair, BatteryCharging, Bike, Box, Car, Camera, ChevronDown, CircleDot, ClipboardList, Factory, Frame, Layers3, Lightbulb, ShieldCheck, Zap, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Ruler, RotateCcw, Package, Wrench } from 'lucide-react';
 import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
@@ -248,8 +248,8 @@ function LadoA1({ P, Pa, D, set, res, modelo, neumaticos, malas, alNavegar, dep 
         <Deslizador id="a1-H" etiqueta="Alto total (techo de la cúpula)" valor={P.H} centro={D.H} min={1.0} max={1.7} paso={0.01} mostrar={m2(P.H)} alCambiar={v => set('H', v)} />
         <Deslizador id="a1-deck" etiqueta="Altura de la cubierta" valor={P.deck} centro={D.deck} min={0.55} max={0.85} paso={0.005} mostrar={m2(P.deck * P.H)} alCambiar={v => set('deck', v)} />
         <p className="-mt-2 text-xs text-slate-500">La cubierta es el techo de la carrocería baja; de ahí para arriba es cúpula de cristal.</p>
-        <Deslizador id="a1-mo" etiqueta="Redondez del morro" valor={P.morroA1} centro={D.morroA1} min={0.2} max={1} paso={0.05} mostrar={`${fmt((0.04 + 0.10 * P.morroA1 + P.posMorro) * P.L * 100, 0)} cm de punta redonda · ${P.morroA1 > 0.85 ? 'romo' : 'Aptera'}`} alCambiar={v => set('morroA1', v)} />
-        <Deslizador id="a1-pm" etiqueta="Alcance de la pieza del morro" valor={P.posMorro} centro={D.posMorro} min={-0.03} max={0.15} paso={0.01} mostrar={`${P.posMorro >= 0 ? '+' : ''}${(P.posMorro * P.L * 100).toFixed(0)} cm`} alCambiar={v => set('posMorro', v)} />
+        <Deslizador id="a1-mo" etiqueta="Redondez del morro" valor={P.morroA1} centro={D.morroA1} min={0} max={1} paso={0.05} mostrar={P.morroA1 < 0.3 ? 'ojival' : P.morroA1 > 0.85 ? 'roma' : 'gota (elipse)'} alCambiar={v => set('morroA1', v)} />
+        <Deslizador id="a1-pm" etiqueta="Largo del morro (hasta la sección máxima)" valor={P.posMorro} centro={D.posMorro} min={-0.12} max={0.18} paso={0.01} mostrar={m2(Math.min(0.5, Math.max(0.2, 0.32 + P.posMorro)) * P.L)} alCambiar={v => set('posMorro', v)} />
         <Deslizador id="a1-co" etiqueta="Forma de la cola" valor={P.colaA1} centro={D.colaA1} min={0} max={1} paso={0.05} mostrar={P.colaA1 < 0.35 ? 'afilada' : P.colaA1 > 0.65 ? 'llena' : 'como el SZEmission'} alCambiar={v => set('colaA1', v)} />
         <div className="flex items-center justify-between gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-2">
           <div><div className="text-sm font-medium text-slate-800">Opción Jaguar</div><div className="text-xs text-slate-500">la carrocería envuelve las ruedas con un abombamiento redondo, como el D-Type</div></div>
@@ -732,6 +732,13 @@ export default function Aeromovil() {
             <p className="-mt-1 text-xs text-slate-500">Arrastra cada coche en el plano para acercarlo o apartarlo; doble clic lo gira un cuarto de vuelta. Los modelos los va haciendo un bot, uno a uno.</p>
           </Bloque>}
 
+          {dueno && !dueno.puedeDecidir && (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+              Los parámetros solo los cambia el dueño del Aeromóvil con su sesión iniciada; aquí se pueden mirar, girar el 3D y leer los departamentos.
+              {!dueno.sesion && <> <Link to="/login" className="font-semibold underline">Iniciar sesión</Link></>}
+            </div>
+          )}
+          <fieldset disabled={!dueno?.puedeDecidir} className={cn('contents', !dueno?.puedeDecidir && '[&_input]:cursor-not-allowed [&_select]:opacity-70 [&_input]:opacity-70')}>
           {esA1 ? <LadoA1 P={P} Pa={Pa} D={D} set={set} res={res} modelo={modelo} neumaticos={neumaticos} malas={malas} dep={dep} alNavegar={r => { navegar(r); window.scrollTo({ top: 0 }); }} /> : (<>
           <Bloque titulo="Chasis y ruedas">
             <Deslizador id="am-B" etiqueta="Batalla: rueda delantera a trasera" valor={P.B} min={2.6} max={3.8} paso={0.01} mostrar={m2(P.B)} alCambiar={v => set('B', v)} />
@@ -872,6 +879,7 @@ export default function Aeromovil() {
           </Bloque>
 
           </>)}
+          </fieldset>
           <Bloque titulo="¿Algo que mejorar?">
             <FormularioMejora alEnviar={() => { recargar(); }} />
             <p className="text-xs text-slate-500">Se añade a <a className="text-teal-700 underline" href="/aeromovil/tareas" onClick={e => { e.preventDefault(); navegar('/aeromovil/tareas'); }}>Tareas</a> como pendiente.</p>
