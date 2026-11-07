@@ -30,6 +30,7 @@ import { sql } from 'drizzle-orm';
 import { formatear } from '../components/tablas/Celda';
 import { miniatura } from '../utils/miniatura';
 import { noticiaDeBloque } from '../utils/noticias';
+import { idYoutube } from './videosEscaparate';
 
 /** Lo que hace falta saber, ya preguntado a la base de datos, para escribir
  *  los bloques sin ir y volver por cada uno. */
@@ -334,6 +335,18 @@ function bloqueEnHtml(b: any, ctx: ContextoHtml, hijos: (lista: any[]) => string
       return `<figure><img src="${esc(miniatura(h, 1000))}" alt="${esc(b.alt || b.pie || b.texto || '')}" loading="lazy">${pie}</figure>`;
     }
     case 'medio': {
+      // UN VÍDEO DE YOUTUBE, COMO ENLACE CON SU MINIATURA (2026-11-07). Nunca el reproductor: un
+      // `<iframe>` en el HTML del servidor cargaría YouTube antes de que nadie lo pida. El título es
+      // el del vídeo (`pagina.videos`, de `seoEscaparate.ts`) o su pie; la miniatura no manda la
+      // dirección de la página a YouTube y solo se pide si está a la vista.
+      const yt = idYoutube(b);
+      if (yt) {
+        const titulo = String(ctx.pagina?.videos?.[yt] || b.pie || b.texto || '').replace(/\s+/g, ' ').trim();
+        const alt = titulo ? `Vídeo: ${titulo.length > 160 ? `${titulo.slice(0, 159).replace(/\s+\S*$/, '')}…` : titulo}` : 'Vídeo de YouTube';
+        const pie = b.pie ? `<figcaption>${enLinea(b.pie, ctx)}</figcaption>` : '';
+        return `<figure><a href="https://www.youtube.com/watch?v=${esc(yt)}" rel="noopener" target="_blank">`
+          + `<img src="https://i.ytimg.com/vi/${esc(yt)}/hqdefault.jpg" alt="${esc(alt)}" width="480" height="360" loading="lazy" decoding="async" referrerpolicy="no-referrer"></a>${pie}</figure>`;
+      }
       const h = hrefSeguro(b.url || '');
       return h ? `<p>${enlace(h, esc(b.pie || b.texto || b.url))}</p>` : '';
     }
