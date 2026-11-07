@@ -68,9 +68,9 @@ export default function NoticiasSitio({ raizId }: { raizId: string }) {
   const chip = (activo: boolean) => cn('h-9 rounded-full border px-4 text-sm font-bold transition-colors', activo ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-400');
 
   return (
-    <section data-ancla="medios" aria-labelledby="titulo-medios" className="mt-20 scroll-mt-24">
+    <section data-ancla="medios" aria-labelledby="titulo-medios" className="mt-20 scroll-mt-36 outline-none sm:scroll-mt-24">
       <div className="text-center">
-        <p className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.2em] text-slate-400"><Newspaper className="h-3.5 w-3.5" /> En los medios</p>
+        <p className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.2em] text-slate-500"><Newspaper className="h-3.5 w-3.5" aria-hidden /> En los medios</p>
         <h2 id="titulo-medios" className="mx-auto mt-2 max-w-2xl text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">Lo que se ha contado de nuestros proyectos</h2>
         <p className="mt-3 text-sm font-semibold text-slate-500">
           {noticias.length} noticias y vídeos · {medios} medios{anos.length ? ` · ${anos[0]}–${anos[anos.length - 1]}` : ''}

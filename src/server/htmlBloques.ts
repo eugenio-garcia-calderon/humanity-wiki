@@ -267,7 +267,10 @@ function tablaEnHtml(t: TablaHtml, b: any, ctx: ContextoHtml): string {
   const th = ['Nombre', ...t.columnas.map(c => c.nombre)].map(x => `<th scope="col">${esc(x)}</th>`).join('');
   const filas = t.filas.map(f => {
     const nombre = esc(f.nombre || 'Sin título');
-    const img = f.portada && hrefSeguro(f.portada)
+    // Solo si la portada ES una imagen (2026-11-07): una portada que es un vídeo de YouTube
+    // escribía `<img src="https://www.youtube.com/watch?v=…">`, una imagen rota que además
+    // hacía que el navegador llamara a YouTube al abrir la portada de luzhumanidad.com.
+    const img = f.portada && hrefSeguro(f.portada) && (/^\/(?!\/)/.test(f.portada) || /\.(jpe?g|png|webp|gif|avif|svg)(\?|$)/i.test(f.portada))
       ? `<img src="${esc(miniatura(f.portada, 64))}" alt="${nombre}" loading="lazy" width="64" height="64"> ` : '';
     const href = f.ruta && ctx.enlaceRuta ? ctx.enlaceRuta(f.ruta) : f.paginaId ? ctx.enlacePagina(f.paginaId) : null;
     const primera = href ? `<a href="${esc(href)}">${img}${nombre}</a>` : `${img}${nombre}`;

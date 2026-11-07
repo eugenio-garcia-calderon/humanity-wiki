@@ -61,10 +61,84 @@ const PESO_ESTADO: Record<string, number> = {
   'Completado': 3, 'Ideación': 5,
 };
 
+// ── DÓNDE ESTÁ CADA PROYECTO (2026-11-07, el mapa «Dónde trabajamos» de la portada) ──────────
+// Eugenio pidió una portada con «dónde trabajamos»: cada proyecto con un sitio físico, una
+// chincheta. El lugar se guarda en la config de la PÁGINA del proyecto (`config.lugar`), con
+// su nombre, su región, su país y sus coordenadas, y sale de su propia página o de las noticias
+// que la citan. Un proyecto sin lugar (una plataforma, un diseño, una campaña itinerante) no
+// tiene chincheta: es mejor un mapa con huecos que uno con sitios inventados.
+export type Lugar = { nombre: string; region: string | null; pais: string; lat: number; lon: number };
+const textoCorto = (v: unknown, n: number) => (typeof v === 'string' && v.trim() ? v.replace(/\s+/g, ' ').trim().slice(0, n) : null);
+/** El `config.lugar` de una página, si está completo y tiene sentido (si no, `null`). */
+export function lugarValido(v: any): Lugar | null {
+  if (!v || typeof v !== 'object' || Array.isArray(v)) return null;
+  const nombre = textoCorto(v.nombre, 80), pais = textoCorto(v.pais, 60);
+  const { lat, lon } = v;
+  if (!nombre || !pais || typeof lat !== 'number' || typeof lon !== 'number') return null;
+  if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) return null;
+  return { nombre, region: textoCorto(v.region, 80), pais, lat: Math.round(lat * 1e4) / 1e4, lon: Math.round(lon * 1e4) / 1e4 };
+}
+
+/** El código ISO 3166-1 de un país por su nombre en español («España» → «ES»), que es lo que pide
+ *  Google en `addressCountry` (2026-11-07, revisión). Se saca de `Intl.DisplayNames`, como en el
+ *  mapa del cliente; un nombre que no se reconoce devuelve `null` y se escribe tal cual. */
+let paisesIso: Map<string, string> | null = null;
+const planoPais = (t: string) => t.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+export function codigoPais(nombre: string): string | null {
+  if (!paisesIso) {
+    paisesIso = new Map();
+    try {
+      const dn = new Intl.DisplayNames(['es'], { type: 'region', fallback: 'none' });
+      for (let a = 65; a <= 90; a++) for (let b = 65; b <= 90; b++) {
+        const c = String.fromCharCode(a, b), n = dn.of(c);
+        if (n && n !== c && !paisesIso.has(planoPais(n))) paisesIso.set(planoPais(n), c);
+      }
+    } catch { /* sin los nombres de `Intl`: se queda el nombre del país */ }
+  }
+  return paisesIso.get(planoPais(nombre)) || null;
+}
+
+// ── LOS HITOS DE «NUESTRA HISTORIA» (2026-11-07) ────────────────────────────────────────────
+// La línea del tiempo de la portada se pinta sola con el año de inicio de cada proyecto. Encima
+// pueden ir unos pocos hitos escritos a mano en `config.sitio.historia` de la raíz, y cada uno
+// lleva su fuente: un hito sin fuente no se enseña.
+export type Hito = { ano: string; texto: string; fuente: { nombre: string; url: string }; proyecto: string | null };
+export function hitosValidos(v: unknown): Hito[] {
+  if (!Array.isArray(v)) return [];
+  const out: Hito[] = [];
+  for (const h of v.slice(0, 40)) {
+    const ano = /^(19|20)\d\d$/.exec(String(h?.ano ?? '').trim())?.[0];
+    const texto = textoCorto(h?.texto, 240);
+    const url = typeof h?.fuente?.url === 'string' && /^https:\/\/[^\s"<>]+$/.test(h.fuente.url.trim()) ? h.fuente.url.trim() : null;
+    const nombre = textoCorto(h?.fuente?.nombre, 80);
+    if (!ano || !texto || !url || !nombre) continue;
+    out.push({ ano, texto, fuente: { nombre, url }, proyecto: textoCorto(h?.proyecto, 40) });
+  }
+  return out;
+}
+
 type Proyecto = {
   pagina: string; fila: string; titulo: string; url: string; descripcion: string; portada: string | null;
   ano: string | null; estado: string | null; areas: string[]; equipo: string[]; cambio: number; peso: number; orden: number;
+  /** El color de su estado en la tabla (el mismo punto que en su tarjeta). */
+  color: string | null;
+  lugar: Lugar | null;
+  /** Una imagen suya servida desde casa (`/uploads/…`): la portada, o si es de fuera (un vídeo de
+   *  YouTube), la primera foto de su página. La portada del escaparate no pide nada a terceros. */
+  imagenPropia: string | null;
 };
+const esPropia = (u: unknown): u is string => typeof u === 'string' && /^\/uploads\/(?!privado\/)/.test(u);
+function imagenPropia(portada: string | null, bloques: unknown, prof = 0): string | null {
+  if (esPropia(portada)) return portada;
+  if (!Array.isArray(bloques) || prof > 4) return null;
+  for (const b of bloques) {
+    if (b?.tipo === 'imagen' && esPropia(b.url)) return b.url;
+    const dentro = imagenPropia(null, b?.bloques, prof + 1)
+      || (Array.isArray(b?.columnas) ? b.columnas.map((c: any) => imagenPropia(null, Array.isArray(c) ? c : c?.bloques, prof + 1)).find(Boolean) || null : null);
+    if (dentro) return dentro;
+  }
+  return null;
+}
 type Persona = { pagina: string; fila: string; titulo: string; url: string; foto: string | null; cambio: number; proyectos: string[] };
 /** Una noticia que cita un proyecto (un enlace de las listas «En los medios» de su página). */
 export type Noticia = {
@@ -114,10 +188,13 @@ async function construir(db: any, cfg: any): Promise<Modelo> {
   const cArea = cols.find(c => c.tipo === 'relacion' && c.config?.tabla_destino === tSist);
   const cEquipo = cols.find(c => c.tipo === 'relacion' && c.config?.tabla_destino === tPers);
   const etiqueta = new Map<string, string>(((cEstado?.opciones as any[]) || []).map(o => [String(o.id), String(o.label)]));
+  const colorDe = new Map<string, string>(((cEstado?.opciones as any[]) || [])
+    .filter(o => /^#[0-9a-f]{6}$/i.test(String(o.color || ''))).map(o => [String(o.id), String(o.color)]));
 
   const filas = (await db.execute(sql`
     SELECT f.id, f.pagina_id, f.valores, f.oculta, f.orden, k.title, k.slug,
            k.config->>'subtitulo' AS sub, k.config->>'portada' AS portada, k.config->'bloques' AS bloques,
+           k.config->'lugar' AS lugar,
            GREATEST(k.updated_at, f.updated_at) AS cambio
     FROM bd_filas f JOIN knowledge_windows k ON k.id = f.pagina_id
     WHERE f.tabla_id = ${tProy} AND f.deleted_at IS NULL AND f.archived_at IS NULL
@@ -162,6 +239,9 @@ async function construir(db: any, cfg: any): Promise<Modelo> {
       areas: suyos.filter(e => e.columna_id === cArea?.id).map(e => nombreArea.get(String(e.destino_id)) || '').filter(Boolean),
       equipo: suyos.filter(e => e.columna_id === cEquipo?.id).map(e => personaFila.get(String(e.destino_id))).filter(p => p && !p.oculta).map(p => String(p.pagina_id)),
       cambio: new Date(f.cambio).getTime(), peso: estado ? PESO_ESTADO[estado] ?? 4 : 4, orden: Number(f.orden) || 0,
+      color: cEstado ? colorDe.get(String(v[cEstado.id] || '')) || null : null,
+      lugar: lugarValido(f.lugar),
+      imagenPropia: imagenPropia(imagenDeVerdad(f.portada), f.bloques),
     });
   }
   proyectos.sort((a, b) => a.peso - b.peso || a.orden - b.orden);
@@ -229,12 +309,17 @@ export function modeloEscaparate(db: any, raizId: string, cfg: any): Promise<Mod
 }
 
 const escaparates = new Map<string, { t: number; cfg: any | null }>();
+/** La forma de un id de página (`KW…`, mayúsculas, cifras y `_`): lo demás ni se busca. */
+export const idDePagina = (v: unknown): v is string => typeof v === 'string' && /^[A-Z0-9_]{6,40}$/.test(v);
 /** La config del sitio de esa raíz si es un escaparate (`null` si no). */
 export async function configEscaparate(db: any, raizId: string): Promise<any | null> {
   const c = escaparates.get(raizId);
   if (c && Date.now() - c.t < VIDA_MS) return c.cfg;
   const r = (await db.execute(sql`SELECT config->'sitio' AS sitio FROM knowledge_windows WHERE id = ${raizId}`)).rows[0] as any;
   const cfg = r?.sitio?.escaparate === true ? r.sitio : null;
+  // La memoria no crece sin fin (2026-11-07, revisión): cada id que alguien se invente en las rutas
+  // públicas se quedaba guardado para siempre. Pasado un tope, se tiran los caducados y los «no».
+  if (escaparates.size >= 256) for (const [k, v] of escaparates) if (!v.cfg || Date.now() - v.t >= VIDA_MS) escaparates.delete(k);
   escaparates.set(raizId, { t: Date.now(), cfg });
   return cfg;
 }
@@ -281,16 +366,45 @@ function referencias(bloques: any, out: Array<{ nombre: string; url: string }> =
   return out;
 }
 
+/** LO QUE PIDE LA PORTADA DEL ESCAPARATE (2026-11-07): la presentación con sus cifras, el mapa
+ *  «Dónde trabajamos» y «Nuestra historia». Todo sale del mismo modelo que el SEO y «En los
+ *  medios»: los proyectos visibles, su año de inicio, su estado, su lugar y la cuenta de las
+ *  noticias. Ninguna cifra se escribe a mano. */
+export function datosPortada(m: Pick<Modelo, 'proyectos' | 'noticias'>, cfg: any) {
+  return {
+    proyectos: m.proyectos.map(p => ({
+      pagina: p.pagina, titulo: p.titulo, url: p.url, descripcion: p.descripcion, portada: p.imagenPropia,
+      ano: p.ano, estado: p.estado, color: p.color, areas: p.areas, lugar: p.lugar,
+    })),
+    noticias: m.noticias.length,
+    medios: new Set(m.noticias.map(n => n.medio)).size,
+    historia: hitosValidos(cfg?.historia),
+  };
+}
+
 export function registrarSeoEscaparate(app?: Express, db?: any) {
   // Las noticias de un escaparate, para la sección de la portada (pública: son enlaces que ya
   // salen en las páginas de los proyectos).
+  // Las dos rutas son públicas: un id con otra forma no llega a la base de datos, y un fallo se
+  // cuenta en el registro del servidor, no en la respuesta (2026-11-07, revisión).
   if (app && db) app.get('/api/sitio/noticias/:raiz', async (req: Request, res: Response) => {
     try {
-      const cfg = await configEscaparate(db, String(req.params.raiz));
+      const raiz = req.params.raiz;
+      const cfg = idDePagina(raiz) ? await configEscaparate(db, raiz) : null;
       if (!cfg) return res.status(404).json({ error: 'No es un escaparate.' });
-      const m = await modeloEscaparate(db, String(req.params.raiz), cfg);
+      const m = await modeloEscaparate(db, raiz, cfg);
       res.set('Cache-Control', 'public, max-age=300').json({ noticias: m.noticias });
-    } catch (e: any) { console.error('noticias:', e); res.status(500).json({ error: e.message }); }
+    } catch (e: any) { console.error('noticias:', e); res.status(500).json({ error: 'Error interno' }); }
+  });
+  // La portada: cifras, lugares y años (pública: es lo mismo que enseñan las fichas de los proyectos).
+  if (app && db) app.get('/api/sitio/portada/:raiz', async (req: Request, res: Response) => {
+    try {
+      const raiz = req.params.raiz;
+      const cfg = idDePagina(raiz) ? await configEscaparate(db, raiz) : null;
+      if (!cfg) return res.status(404).json({ error: 'No es un escaparate.' });
+      const m = await modeloEscaparate(db, raiz, cfg);
+      res.set('Cache-Control', 'public, max-age=300').json(datosPortada(m, cfg));
+    } catch (e: any) { console.error('portada:', e); res.status(500).json({ error: 'Error interno' }); }
   });
   registrarAmpliacion(async (db, req, pagina) => {
     if (!pagina || pagina.muro) return;
@@ -396,6 +510,12 @@ export function registrarSeoEscaparate(app?: Express, db?: any) {
           ...(p.descripcion ? { description: p.descripcion } : {}),
           ...(fotos.length ? { image: fotos } : {}),
           ...(p.ano ? { foundingDate: p.ano } : {}),
+          // Su lugar, el mismo que su chincheta en el mapa de la portada (2026-11-07).
+          ...(p.lugar ? { location: {
+            '@type': 'Place', name: p.lugar.nombre,
+            address: { '@type': 'PostalAddress', ...(p.lugar.region ? { addressRegion: p.lugar.region } : {}), addressCountry: codigoPais(p.lugar.pais) || p.lugar.pais },
+            geo: { '@type': 'GeoCoordinates', latitude: p.lugar.lat, longitude: p.lugar.lon },
+          } } : {}),
           ...(p.areas.length ? { keywords: p.areas.join(', ') } : {}),
           parentOrganization: org,
           ...(equipo.length ? { member: equipo.map(x => ({ '@type': 'Person', name: x.titulo, url: x.url })) } : {}),
