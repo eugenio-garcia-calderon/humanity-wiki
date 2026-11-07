@@ -5,6 +5,10 @@ import { cn } from '../../utils/cn';
 import { useSitio } from './ContextoSitio';
 import { raizDe } from './CabeceraSitio';
 import { miniatura } from '../../utils/miniatura';
+import PresentacionSitio from './PresentacionSitio';
+import MapaProyectosSitio from './MapaProyectosSitio';
+import HistoriaSitio from './HistoriaSitio';
+import { useDatosPortada, type ProyectoPortada } from './portadaEscaparate';
 const NoticiasSitio = lazy(() => import('./NoticiasSitio'));
 
 // ============================================================================
@@ -88,6 +92,9 @@ function useBajarAlAncla(listo: boolean) {
 export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
   const sitio = useSitio();
   const [raiz, setRaiz] = useState<{ titulo: string; config: any } | null>(null);
+  // LA PORTADA DEL ESCAPARATE (2026-11-07): la presentación, el mapa y la historia leen
+  // `/api/sitio/portada/:raiz`; solo en el escaparate (los demás sitios siguen como estaban).
+  const datos = useDatosPortada(raiz?.config?.sitio?.escaparate === true ? raizId : null);
   const [proyectos, setProyectos] = useState<Tabla | null>(null);
   const [sistemas, setSistemas] = useState<Tabla | null>(null);
   const [personas, setPersonas] = useState<Tabla | null>(null);
@@ -171,7 +178,10 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
         areas: lista(f.celdas[colAreas]?.valor), proyectos: lista(f.celdas[colProy]?.valor) }));
   }, [personas, raiz]);
 
-  useBajarAlAncla(!!modelo);
+  // En el escaparate se espera también a la presentación, el mapa y la historia: si no, un
+  // `#personas` bajaría antes de que se pintaran y la página se movería después.
+  const esEscaparate = raiz?.config?.sitio?.escaparate === true;
+  useBajarAlAncla(!!modelo && (!esEscaparate || datos !== undefined));
 
   if (fallo) return <div className="py-24 text-center text-sm text-slate-500">No se han podido cargar los proyectos. Inténtalo dentro de un momento.</div>;
   if (!modelo || !raiz) return <div className="grid min-h-[50vh] place-items-center py-24 text-sm text-slate-400 animate-pulse">Cargando los proyectos…</div>;
@@ -189,6 +199,12 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
     ? gente.filter(p => p.areas.includes(activa.id) || p.proyectos.some(x => proyectosDelArea!.has(x)))
     : gente;
   const elegir = (slug: string) => { setArea(slug); ponerArea(slug); window.scrollTo({ top: 0 }); };
+  // La dirección de un proyecto en el mapa y en la historia: la misma que la de su tarjeta; si el
+  // navegador aún no conoce su nombre corto, el que da el servidor (el del mapa del pie).
+  const enlaceProyecto = (p: ProyectoPortada) => {
+    const e = sitio ? sitio.enlacePagina(p.pagina) : '';
+    return e && !e.includes('/p/') ? e : p.url;
+  };
 
   const tile = (activo: boolean) => cn(
     'flex h-[72px] w-[84px] shrink-0 flex-col items-center justify-between rounded-xl border px-1 py-1.5 transition-colors',
@@ -230,11 +246,17 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
         </div>
       )}
 
+      {/* LA PRESENTACIÓN (2026-11-07, Eugenio: «haz todas las propuestas… con alta calidad, no
+          quiero nada cutre»): qué es el laboratorio en una frase, sus cifras y dos botones,
+          encima de las tarjetas y sin empujarlas fuera de la primera pantalla. */}
+      {escaparate && <PresentacionSitio cfg={raiz.config} datos={datos} />}
+
       {/* LAS TARJETAS (2026-11-06, Eugenio: «el título en blanco con un poco de sombra y de fondo
           la portada, como en la página del proyecto; debajo la descripción en letra pequeña sobre
           blanco; el estado y el año arriba de la imagen y algo más grandes; todas del mismo tamaño,
           dos por fila»). Las primeras cargan ya y con prioridad; el resto, al acercarse. */}
-      <ul className="mt-4 grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2">
+      {escaparate && <h2 className="sr-only">Proyectos</h2>}
+      <ul data-ancla="proyectos" className={cn('grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2', escaparate ? 'mt-6 scroll-mt-32 sm:mt-8 sm:scroll-mt-24' : 'mt-4')}>
         {visibles.map((f, i) => {
           const nombre = String(f.celdas[modelo.colNombre]?.valor || f.pagina?.titulo || '').trim();
           const img = f.pagina?.imagen || null;
@@ -294,6 +316,11 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
         })}
       </ul>
       {visibles.length === 0 && <p className="py-16 text-center text-sm text-slate-500">No hay proyectos en esta categoría.</p>}
+
+      {/* DÓNDE TRABAJAMOS Y NUESTRA HISTORIA (2026-11-07): el dónde y el cuándo de los proyectos,
+          después de verlos y antes de las personas y los medios. */}
+      {escaparate && datos && <MapaProyectosSitio datos={datos} enlace={enlaceProyecto} />}
+      {escaparate && datos && <HistoriaSitio datos={datos} enlace={enlaceProyecto} />}
 
       {/* LAS PERSONAS, AL FINAL DE LA PORTADA (2026-11-05, Eugenio: «que la base de datos de
           personas esté en la página inicial y que te haga un scroll down hasta allí»). El menú
