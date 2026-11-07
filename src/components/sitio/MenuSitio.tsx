@@ -320,6 +320,8 @@ function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: s
     ? <AltaBoletin raizId={rutas.raizId || null} nombre={nombre || s.titular.nombre || ''} responsable={responsableDe(s, nombre)}
         oscuro={textoSobre(p.fondo) === '#ffffff'} colorLinea={/^#[0-9a-f]{6}$/i.test(p.texto || '') ? `${p.texto}26` : undefined} />
     : null;
+  // La raya de arriba de la línea final: solo si encima va el mapa de los proyectos.
+  const conLinea = Array.isArray(p.mapaProyectos) && p.mapaProyectos.length > 0;
   if (p.sencillo) return (
     <footer id="contacto" style={{ background: p.fondo, color: p.texto }} className="w-full">
       {boletin}
@@ -341,8 +343,29 @@ function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: s
           </div>
         </nav>
       )}
-      <div style={Array.isArray(p.mapaProyectos) && p.mapaProyectos.length ? { borderColor: `${p.texto}26` } : undefined}
-        className={cn('mx-auto max-w-[calc(576px+50vw)] px-5 @2xl:px-8 py-3 flex flex-wrap items-center justify-center gap-x-6 text-sm opacity-80', Array.isArray(p.mapaProyectos) && p.mapaProyectos.length > 0 && 'border-t')}>
+      {/* LAS PÁGINAS DEL SITIO, EN UNA LÍNEA (2026-11-07, luzhumanidad.com: «Colabora · Sala de prensa ·
+          Quiénes somos»): los «Enlaces del pie» del editor del menú (`pie.enlaces`), encima de la línea legal
+          y un punto más destacados. Sin enlaces, el pie sencillo sigue como estaba. */}
+      {p.enlaces.length > 0 && (
+        <nav aria-label="Páginas del sitio" data-enlaces-pie style={conLinea ? { borderColor: `${p.texto}26` } : undefined}
+          className={cn('mx-auto max-w-[calc(576px+50vw)] px-5 @2xl:px-8 pt-4', conLinea && 'border-t')}>
+          <ul className="flex flex-wrap items-center justify-center gap-x-3 gap-y-0.5 @md:gap-x-1">
+            {p.enlaces.map((e, i) => (
+              <li key={e.id} className="flex items-center">
+                {/* El punto entre enlaces, solo cuando caben en una línea: en el móvil, al partirse, empezaba la segunda. */}
+                {i > 0 && <span aria-hidden className="mx-1.5 hidden opacity-40 @md:inline">·</span>}
+                <a href={hrefDe(e.destino, rutas)} data-interno={esInterno(e.destino, e.nuevaPestana) ? '' : undefined}
+                  target={esFuera(e.destino, e.nuevaPestana) ? '_blank' : undefined} rel={esFuera(e.destino, e.nuevaPestana) ? 'noopener noreferrer' : undefined}
+                  className="inline-flex min-h-11 items-center gap-2 px-1 text-sm font-bold opacity-95 hover:underline hover:opacity-100 @md:px-1.5 @md:text-[15px]">
+                  <IconoMenu valor={e.icono} tamano={15} />{e.texto}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+      <div style={conLinea && !p.enlaces.length ? { borderColor: `${p.texto}26` } : undefined}
+        className={cn('mx-auto max-w-[calc(576px+50vw)] px-5 @2xl:px-8 py-3 flex flex-wrap items-center justify-center gap-x-6 text-sm opacity-80', conLinea && !p.enlaces.length && 'border-t', p.enlaces.length > 0 && 'pt-0')}>
         {legales.map(d => <a key={d} href={`#${d}`} className="inline-flex items-center min-h-11 hover:underline">{NOMBRES_LEGALES[d]}</a>)}
         {c.email && <a href={`mailto:${c.email}`} className="inline-flex items-center gap-2 min-h-11 hover:underline break-all"><Mail className="w-4 h-4 shrink-0" /> {c.email}</a>}
         {Array.isArray(p.redes) && p.redes.length > 0 && (

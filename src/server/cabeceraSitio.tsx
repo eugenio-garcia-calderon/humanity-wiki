@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { sitioConAnfitrion } from '../components/sitio/ContextoSitio';
 import { MarcoLectura, CabeceraLectura, type DatosPagina } from '../components/sitio/CabeceraLectura';
 import { fotoDePortada, portadaEsVideo } from '../utils/portadaPropia';
+import CabeceraPaginaEscaparate, { esPaginaEscaparate } from '../components/sitio/CabeceraPaginaEscaparate';
 
 // ============================================================================
 // EL TÍTULO Y LA IMAGEN, YA ESCRITOS EN EL HTML (2026-10-01)
@@ -29,7 +30,11 @@ export function cabeceraEnHtml(pagina: DatosPagina, userAgent: string, raizDomin
     // El menú y el pie también (2026-10-02): salen con el título, sin salto.
     <MarcoLectura pagina={pagina} rutas={pagina.sitio ? { ...sitioConAnfitrion(raizDominio), raizId: pagina.sitio.raizId } : undefined}>
       <article>
-        <CabeceraLectura pagina={pagina} esMovil={esMovil} />
+        {/* Una página propia del escaparate (Colabora, Sala de prensa…, 2026-11-07), con SU cabecera:
+            la misma que pinta el navegador, así no cambia al arrancar. */}
+        {esPaginaEscaparate(pagina)
+          ? <CabeceraPaginaEscaparate pagina={pagina} />
+          : <CabeceraLectura pagina={pagina} esMovil={esMovil} />}
       </article>
     </MarcoLectura>,
   );

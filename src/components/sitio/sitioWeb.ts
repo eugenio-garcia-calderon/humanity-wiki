@@ -107,7 +107,9 @@ export type Pie = {
   /** Enseñar el correo, el teléfono y la dirección (siguen usándose en los textos legales). */
   mostrarContacto: boolean;
   /** Una sola línea: los textos legales y el correo (2026-11-06, Eugenio en luzhumanidad.com:
-   *  «quita el footer; deja solo los avisos legales, la política de privacidad y un correo»). */
+   *  «quita el footer; deja solo los avisos legales, la política de privacidad y un correo»).
+   *  Con `enlaces` (2026-11-07), encima va otra línea con ellos: «Colabora · Sala de prensa ·
+   *  Quiénes somos». Se cambian en «Enlaces del pie» del editor del menú. */
   sencillo?: boolean;
   /** EL MAPA DEL SITIO DE UN ESCAPARATE (2026-11-06, SEO): los proyectos por área. No se
    *  guarda: lo calcula el servidor al servir la página (`seoEscaparate.ts`), así sale ya
@@ -135,6 +137,10 @@ export type Sitio = {
   escaparate?: boolean;
   /** Los datos de la organización para buscadores (`seoEscaparate.ts`). */
   seo?: { organizacion?: string; descripcion?: string; fundador?: string; perfiles?: string[]; otrosNombres?: string[] };
+  /** Adónde lleva «Colaborar» en la portada de un escaparate (`PresentacionSitio`) y «Usar el
+   *  formulario» en la sala de prensa: una dirección del sitio («/colabora») o el id de una página.
+   *  Sin valor, el botón no sale (2026-11-07). */
+  colabora?: string;
 };
 
 export const NOMBRES_LEGALES: Record<DocLegal, string> = {
