@@ -893,7 +893,7 @@ export function calcularA1(m: ModeloA1, ar: { carroceria: number; cristal: numbe
   ch.push({ nombre: 'Carga por neumático (índice 65: 290 kg)', holgura: (290 - cargaRueda) / 100, minimo: 0 });
 
   return {
-    A, FR, Cd, CdA, vol: vol + volCup, Paero, Proll, Pw, WhKm, pedWhKm: 0, autonomia, vmax: vmaxNominal, masas, mVeh, mTot, rangoMasa,
+    A, FR, Cd, CdA, Crr, vol: vol + volCup, Paero, Proll, Pw, WhKm, pedWhKm: 0, autonomia, vmax: vmaxNominal, masas, mVeh, mTot, rangoMasa,
     Mmax, tension, seguridad, cargaRueda, solarPico, solarDia, kmSol, areas: ar, comprobaciones: ch,
     a1: { WhKm100, autonomia100, vmaxNominal, vmaxPico, acel50, acel100, pendiente100, cargaHoras, maleteroF, maleteroT, kmSolDia: kmSol, bateriaL: P.kWh * 1000 / P.whL, bateriaKg: masas['Batería'] },
   };

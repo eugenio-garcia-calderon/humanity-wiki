@@ -22,9 +22,15 @@ export interface VehiculoGaraje {
    * frontal (m²) y de dónde salen. Sin este dato el túnel no inventa una cifra:
    * dibuja el humo y dice que no lo sabe.
    */
-  aero?: { cd: number; area: number; fuente: string };
+  aero?: {
+    cd: number; area: number; fuente: string;
+    /** Masa en vacío (kg) y plazas, para la rodadura del túnel; velocidad máxima (km/h), para avisar si no llega. */
+    masaVacio?: number; plazas?: number; vmax?: number;
+  };
   /** Silueta para el túnel: [x, y del suelo de la carrocería, y del techo, media anchura], de delante a atrás. */
   envolvente?: [number, number, number, number][];
+  /** Forma de la sección para el túnel: 2 elipse, 3 casi cuadrada (por defecto 3). */
+  seccion?: number;
   /** Construye el vehículo: un Group nuevo cada vez (el visor lo destruye al ocultarlo). */
   construir: () => THREE.Group;
 }

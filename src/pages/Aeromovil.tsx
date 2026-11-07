@@ -39,6 +39,8 @@ import { FormularioMejora, VistaExportar, VistaPlan, VistaPlanos, VistaTareas, c
 import { BotonesComponentes, VistaComponentes } from '../components/aeromovil/Componentes';
 import { VEHICULOS_GARAJE } from '../components/aeromovil/garaje';
 import { TarjetaTunel } from '../components/aeromovil/TarjetaTunel';
+import { TarjetaSuperponer, type Alineacion } from '../components/aeromovil/TarjetaSuperponer';
+import { colorCss } from '../components/aeromovil/garaje/superponer';
 import { DEPARTAMENTOS, type IdDepartamento } from '../components/aeromovil/departamentos';
 import { PanelDepartamento, ComparacionChasis } from '../components/aeromovil/Departamentos';
 import { tubosCelosia } from '../components/aeromovil/chasisCelosia';
@@ -549,6 +551,8 @@ export default function Aeromovil() {
   const [maleteros, setMaleteros] = useState(false);
   const [sinPasajero, setSinPasajero] = useState(false);
   const [tunel, setTunel] = useState(false);
+  // «Superponer»: los coches del garaje encima del nuestro, alineados por el eje delantero, el morro o la cola.
+  const [superponer, setSuperponer] = useState<Alineacion | null>(null);
   // Carteles del túnel: el nombre y el CdA (lo que de verdad cuesta empujar el aire), coche por coche.
   const etiquetasTunel = useMemo(() => {
     const cda = (v: number) => `CdA ${v.toLocaleString('es-ES', { minimumFractionDigits: 3, maximumFractionDigits: 3 })} m²`;
@@ -573,14 +577,27 @@ export default function Aeromovil() {
   type PlazaGaraje = { id: string; visible: boolean; x: number; z: number; giro: number };
   const [garaje, setGaraje] = useState<PlazaGaraje[]>(() => {
     // El Twizy, visible por defecto a 3 m al lado (2026-11-07, Eugenio); la clave v2 hace que también lo vea quien ya tenía el garaje guardado.
-    const base = VEHICULOS_GARAJE.map((v, i) => v.id === 'twizy' ? { id: v.id, visible: true, x: 0, z: 3, giro: 0 } : ({ id: v.id, visible: false, x: 0, z: (i % 2 ? 1 : -1) * (2.6 + 2.2 * Math.floor(i / 2)), giro: 0 }));
+    // El Aptera, al otro lado a 3 m (2026-11-07, «ponlo en el garaje junto a los otros dos»). Quien ya tenía el
+    // garaje guardado también lo ve: su lista guardada no lo trae y se queda con este valor.
+    const POR_DEFECTO: Record<string, { z: number }> = { twizy: { z: 3 }, aptera: { z: -3 } };
+    const base = VEHICULOS_GARAJE.map((v, i) => POR_DEFECTO[v.id] ? { id: v.id, visible: true, x: 0, z: POR_DEFECTO[v.id].z, giro: 0 } : ({ id: v.id, visible: false, x: 0, z: (i % 2 ? 1 : -1) * (2.6 + 2.2 * Math.floor(i / 2)), giro: 0 }));
     try { const g = JSON.parse(localStorage.getItem('aeromovil_garaje_v2') || 'null'); if (Array.isArray(g)) return base.map(b => ({ ...b, ...(g.find((x: any) => x?.id === b.id) || {}) })); } catch { /* sin memoria */ }
     return base;
   });
   useEffect(() => { try { localStorage.setItem('aeromovil_garaje_v2', JSON.stringify(garaje)); } catch { /* sin memoria */ } }, [garaje]);
   // `?garaje=xl1`: mirar un modelo del garaje a solas, en el origen (para comprobarlo mientras se modela).
   const soloGaraje = useMemo(() => new URLSearchParams(window.location.search).get('garaje'), []);
-  const garajeVisor = useMemo(() => soloGaraje ? [{ id: soloGaraje, x: 0, z: 0, giro: 0 }] : garaje.filter(v => v.visible).map(v => ({ id: v.id, x: v.x, z: v.z, giro: v.giro })), [garaje, soloGaraje]);
+  const garajeVisor = useMemo(() => {
+    if (soloGaraje) return [{ id: soloGaraje, x: 0, z: 0, giro: 0 }];
+    const visibles = garaje.filter(v => v.visible);
+    if (!superponer) return visibles.map(v => ({ id: v.id, x: v.x, z: v.z, giro: v.giro }));
+    // Superpuestos: todos en el eje del nuestro; el morro y la cola salen de la silueta de cada coche.
+    return visibles.map(v => {
+      const env = VEHICULOS_GARAJE.find(d => d.id === v.id)?.envolvente, xs = env?.map(e => e[0]) ?? [0];
+      const x = superponer === 'morro' ? modelo.xn - Math.max(...xs) : superponer === 'cola' ? modelo.xt - Math.min(...xs) : 0;
+      return { id: v.id, x, z: 0, giro: 0 };
+    });
+  }, [garaje, soloGaraje, superponer, modelo.xn, modelo.xt]);
   const [vista, setVista] = useState<Vista>('iso');
   // Render fotorrealista de la vista actual: la captura del visor pasa por la IA y vuelve como foto
   const [render, setRender] = useState<{ estado: 'nada' | 'creando' | 'listo' | 'error'; imagen?: string; error?: string; vista?: Vista }>({ estado: 'nada' });
@@ -647,13 +664,31 @@ export default function Aeromovil() {
       <main className={cn('mx-auto max-w-[1600px] gap-4 px-4 py-4', seccion === 'diseno' ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_380px]' : 'hidden')}>
         <div className="min-w-0">
         <section className={cn('relative h-[62vh] min-h-[380px] overflow-hidden rounded-xl border border-slate-200 bg-slate-50', esA1 ? 'lg:h-[72vh]' : 'lg:sticky lg:top-[68px] lg:h-[calc(100vh-88px)]')} aria-label="Vista 3D">
-          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeVisor} soloGaraje={!!soloGaraje} tunel={tunel} etiquetasTunel={etiquetasTunel} vista={vista}
+          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeVisor} soloGaraje={!!soloGaraje} tunel={tunel} etiquetasTunel={etiquetasTunel} superponer={!!superponer && !soloGaraje} vista={vista}
             referencia={referencia} modoRef={modoRef} alinear={alinear} alPinchar={esA1 ? c => { navegar(`/aeromovil/componentes/${c}`); window.scrollTo({ top: 0 }); } : undefined} />
-          {tunel && (
-            <TarjetaTunel alCerrar={() => setTunel(false)} className={cn('right-3', referencia && modoRef !== 'no' ? 'top-28' : 'top-3')}
+          {superponer && !soloGaraje && (
+            <TarjetaSuperponer alineacion={superponer} alCambiar={setSuperponer} alCerrar={() => setSuperponer(null)} className={cn('right-3', referencia && modoRef !== 'no' ? 'top-28' : 'top-3')}
               filas={[
-                ...(soloGaraje ? [] : [{ id: 'aeromovil', nombre: esA1 ? 'Aeromóvil 1' : 'Aeromóvil Gota', cd: res.Cd, area: res.A, fuente: 'Este diseño: Cd estimado con la fórmula del Aeromóvil (esbeltez, forma de la cola) y área frontal medida sobre la forma 3D' }]),
-                ...garajeVisor.flatMap(v => { const d = VEHICULOS_GARAJE.find(x => x.id === v.id); return d?.aero ? [{ id: d.id, nombre: d.nombre, cd: d.aero.cd, area: d.aero.area, fuente: d.aero.fuente }] : []; }),
+                { id: 'aeromovil', nombre: esA1 ? 'Aeromóvil 1' : 'Aeromóvil Gota', color: '#1e3a5f', largo: P.L, ancho: P.W, alto: P.H, batalla: P.B },
+                ...garajeVisor.flatMap(v => { const d = VEHICULOS_GARAJE.find(x => x.id === v.id); return d ? [{ id: d.id, nombre: d.nombre, color: colorCss(d.id), largo: d.largo, ancho: d.ancho, alto: d.alto, batalla: d.batalla }] : []; }),
+              ]} />
+          )}
+          {tunel && (
+            <TarjetaTunel alCerrar={() => setTunel(false)} base="aeromovil" className={cn('right-3', referencia && modoRef !== 'no' ? 'top-28' : 'top-3')}
+              filas={[
+                ...(soloGaraje ? [] : [{
+                  id: 'aeromovil', nombre: esA1 ? 'Aeromóvil 1' : 'Aeromóvil Gota', cd: res.Cd, area: res.A, masa: res.mTot, crr: res.Crr, estimado: true,
+                  fuente: `Este diseño. Cd estimado con la fórmula del editor (tómalo como optimista: el VW XL1 da 0,19 con las ruedas traseras carenadas); área medida sobre la forma 3D; masa y rodadura, las del cálculo del editor, con ${P.plazas} ocupante${P.plazas > 1 ? 's' : ''} de ${P.mOcc} kg.`,
+                }]),
+                ...garajeVisor.flatMap(v => {
+                  const d = VEHICULOS_GARAJE.find(x => x.id === v.id); if (!d?.aero) return [];
+                  const a = d.aero, plazas = a.plazas ?? 2;
+                  return [{
+                    id: d.id, nombre: d.nombre, cd: a.cd, area: a.area, vmax: a.vmax,
+                    ...(a.masaVacio != null ? { masa: a.masaVacio + plazas * P.mOcc, crr: 0.009 } : {}),
+                    fuente: `${a.fuente}. Rodadura 0,009 supuesta (neumáticos de coche, la misma que el Aeromóvil 1) y ${plazas} ocupantes de ${P.mOcc} kg.`,
+                  }];
+                }),
               ]} />
           )}
           {referencia && modoRef !== 'no' && (
@@ -747,9 +782,20 @@ export default function Aeromovil() {
                 {sinPasajero ? 'Con pasajero' : 'Sin pasajero'}
               </Button>
             )}
+            <Button variant="outline" aria-pressed={!!superponer} onClick={() => {
+                if (superponer) { setSuperponer(null); return; }
+                // Al superponer: fuera el túnel, vista de lado y, si el garaje está vacío, el Twizy y el Aptera.
+                if (!garaje.some(g => g.visible)) setGaraje(g => g.map(x => x.id === 'twizy' || x.id === 'aptera' ? { ...x, visible: true } : x));
+                setTunel(false); setSuperponer('eje'); setVista('side');
+              }}
+              title="Pone los coches del garaje encima de este diseño, cada uno de un color y con su silueta, para comparar tamaños"
+              className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', superponer && 'border-sky-700 bg-sky-700 text-white hover:bg-sky-800')}>
+              <Layers className="mr-1 h-3 w-3" />Superponer
+            </Button>
             <Button variant="outline" aria-pressed={tunel} onClick={() => {
                 // Al abrir el túnel, si no hay con quién comparar, se saca el Twizy del garaje.
                 if (!tunel && !garaje.some(g => g.visible && VEHICULOS_GARAJE.find(v => v.id === g.id)?.aero)) setGaraje(g => g.map(x => x.id === 'twizy' ? { ...x, visible: true } : x));
+                if (!tunel) setSuperponer(null);
                 setTunel(!tunel);
               }}
               title="Líneas de humo alrededor de este diseño y de los coches del garaje, con lo que cuesta empujar el aire a cada uno"
