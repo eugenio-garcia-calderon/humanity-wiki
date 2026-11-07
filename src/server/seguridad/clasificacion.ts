@@ -87,6 +87,9 @@ export const CLASIFICACION: Clase[] = [
   c('sitio_enlaces', 'ALTA', 'ALTA', 'ALTA', 'ALTA', 'un enlace mágico vivo abre el sitio como esa persona'),
   c('sitio_restricciones', 'ALTA', 'BAJA', 'ALTA', 'ALTA', 'qué ve cada categoría: una fila de menos abre contenido privado'),
   c('sitio_guardados', 'BAJA', 'MEDIA', 'BAJA', 'BAJA', 'lo que cada miembro guarda del sitio'),
+  // Los formularios de un escaparate (2026-11-07, 0175): lo escribe gente sin cuenta.
+  c('sitio_mensajes', 'MEDIA', 'ALTA', 'MEDIA', 'MEDIA', 'el nombre, el correo y el mensaje de quien escribe para colaborar, y el texto que aceptó'),
+  c('sitio_suscriptores', 'MEDIA', 'ALTA', 'MEDIA', 'MEDIA', 'los correos apuntados al boletín y la prueba de su consentimiento: perderlo es escribir a quien no lo pidió'),
   c('comentarios_pagina', 'MEDIA', 'MEDIA', 'MEDIA', 'MEDIA', 'hilos de comentarios de una página: pueden citar trozos de páginas privadas'),
   c('pagina_visitas', 'BAJA', 'MEDIA', 'BAJA', 'BAJA', 'visitas por día con huella sin sal guardada: sin datos personales y recalculable solo hacia delante', true),
 

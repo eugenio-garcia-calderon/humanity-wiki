@@ -14,6 +14,7 @@
 //
 // Este fichero no importa React ni nada del navegador: lo leen la pantalla,
 // el editor y el servidor.
+import { PLAZO_CONFIRMAR_DIAS } from './formularios';
 
 /** Adónde lleva un enlace. Se guarda QUÉ es, no la dirección: «Inicio» es `/`
  *  en un dominio propio y `/@quien/pagina` dentro de humanity.wiki. */
@@ -128,6 +129,12 @@ export type Sitio = {
   verificacion: { google?: string; bing?: string };
   /** Avisar a Bing y compañía de cada cambio (IndexNow, `indexNow.ts`). */
   avisarBuscadores?: boolean;
+  /** UN ESCAPARATE (2026-11-06, `escaparate.ts`): un laboratorio que solo enseña. Desde el
+   *  2026-11-07 con sus dos formularios —colaborar y el boletín, `formularios.ts`—, que su
+   *  política de privacidad explica. Lo pone quien publica; el editor no lo toca. */
+  escaparate?: boolean;
+  /** Los datos de la organización para buscadores (`seoEscaparate.ts`). */
+  seo?: { organizacion?: string; descripcion?: string; fundador?: string; perfiles?: string[]; otrosNombres?: string[] };
 };
 
 export const NOMBRES_LEGALES: Record<DocLegal, string> = {
@@ -156,9 +163,16 @@ export const PIE_POR_DEFECTO: Pie = {
 };
 
 /** El sitio con todo lo que falte puesto por defecto. Una página vieja, o un
- *  `config.sitio` a medias, nunca deja un campo sin valor. */
+ *  `config.sitio` a medias, nunca deja un campo sin valor.
+ *
+ *  LO QUE NO ES DEL MENÚ NI DEL PIE SE CONSERVA (2026-11-07). El editor del menú y
+ *  del pie (`CreadorMenu`) guarda lo que devuelve esta función como `config.sitio`
+ *  entero: sin copiar el resto, editar el pie borraba `escaparate`, `seo`,
+ *  `proyectos`, `personas`, `vistas`… y el escaparate dejaba de serlo (y de tener
+ *  sus formularios) sin que nadie lo hubiera pedido. */
 export function completarSitio(s: any): Sitio {
   return {
+    ...(s && typeof s === 'object' && !Array.isArray(s) ? s : {}),
     menu: { ...MENU_POR_DEFECTO, ...(s?.menu || {}), enlaces: Array.isArray(s?.menu?.enlaces) ? s.menu.enlaces : MENU_POR_DEFECTO.enlaces },
     pie: {
       ...PIE_POR_DEFECTO, ...(s?.pie || {}),
@@ -209,9 +223,64 @@ export function textoLegal(doc: DocLegal, s: Sitio, sitioNombre: string): string
   const propio = s.textos[doc];
   if (propio && propio.trim()) return propio;
   const t = s.titular;
-  const nombre = falta(t.nombre, 'nombre o razón social del titular');
+  const nombre = falta(t.nombre || s.seo?.organizacion, 'nombre o razón social del titular');
   const email = falta(t.email || s.pie.contacto.email, 'correo de contacto');
   const web = sitioNombre || 'esta web';
+
+  // UN ESCAPARATE (2026-11-07): no vende ni tiene cuentas; recoge datos en dos
+  // formularios, el de colaborar y el del boletín (`formularios.ts`). Su política
+  // dice eso y solo eso, con lo que hace de verdad `formulariosSitio.ts`: qué se
+  // guarda, para qué, con qué base, cuánto tiempo, y que la baja borra la dirección.
+  //
+  // CADA FRASE TIENE SU FUENTE (revisión del 2026-11-07), y si la fuente cambia,
+  // cambia la frase:
+  //   · Las visitas: `estadisticas.ts` (una huella de IP y navegador con una sal
+  //     del día que sólo vive en memoria; ni cookie ni IP guardada).
+  //   · La página de origen del alta: columna `origen` de `sitio_suscriptores`.
+  //   · Las altas sin confirmar: `borrarSinConfirmar` (`formulariosSitio.ts`).
+  //   · Quién más los ve: la web, la base de datos y sus copias viven en un
+  //     servidor de Hetzner en Helsinki (Caddyfile, docker-compose.prod.yml).
+  //     humanity.wiki, donde se leen los mensajes, va detrás de Cloudflare
+  //     (Caddyfile; `server: cloudflare` en sus respuestas), una empresa de EE. UU.
+  //     que se acoge al Marco de Privacidad de Datos UE-EE. UU. (su política de
+  //     privacidad, cloudflare.com/privacypolicy, leída el 2026-11-07), con la
+  //     decisión de adecuación (UE) 2023/1795 (EUR-Lex). Las copias FUERA del
+  //     servidor (`copias-remoto`) no salen todavía: el día que salgan, a donde
+  //     sea, esto tiene que decirlo.
+  if (doc === 'privacidad' && s.escaparate) {
+    // El nombre por el que se conoce a la organización, si no es el legal: «Asociación … («Light Humanity»)».
+    const marca = (s.seo?.organizacion || '').trim();
+    const conocida = t.nombre && marca && marca !== t.nombre ? ` («${marca}»)` : '';
+    return [
+      `# Política de privacidad`,
+      `## Responsable del tratamiento`,
+      `${nombre}${conocida}${t.nif ? `, con NIF/CIF ${t.nif}` : ''}${t.domicilio ? `, con domicilio en ${t.domicilio}` : ''}. Contacto: ${email}.`,
+      `## Qué datos tratamos`,
+      `Los que nos das en los dos formularios de esta web: el de colaborar con nosotros y el del boletín. Para contar las visitas no usamos cookies ni guardamos tu IP: solo una huella que cambia cada día y que no permite volver a ella. No elaboramos perfiles ni tomamos decisiones automatizadas.`,
+      `## Si nos escribes para colaborar`,
+      [
+        `- **Qué guardamos:** tu nombre, tu correo, cómo quieres colaborar, el proyecto que elijas, tu mensaje, la página desde la que lo envías, la fecha y el texto que aceptas al enviarlo.`,
+        `- **Para qué:** para leer tu mensaje, responderte y, si sigues adelante, organizar tu colaboración.`,
+        `- **Base jurídica:** tu consentimiento, que das al marcar la casilla (art. 6.1.a del RGPD).`,
+        `- **Cuánto tiempo:** el necesario para atender tu mensaje y tu colaboración. Si nos pides que los borremos, borramos tu nombre, tu correo y tu mensaje.`,
+      ].join('\n'),
+      `## Si te suscribes al boletín`,
+      [
+        `- **Qué guardamos:** tu correo, la página desde la que te suscribes, la fecha y el texto que aceptas al suscribirte y, cuando la confirmas, la fecha de la confirmación.`,
+        `- **Para qué:** para enviarte el boletín con las novedades de ${web}. Antes de enviarte ninguno te pedimos que confirmes la suscripción desde tu correo.`,
+        `- **Base jurídica:** tu consentimiento (art. 6.1.a del RGPD).`,
+        `- **Cuánto tiempo:** mientras sigas suscrito. Cada correo que te enviemos lleva un enlace para darte de baja y, al darte de baja, borramos tu dirección. Si no confirmas la suscripción en los ${PLAZO_CONFIRMAR_DIAS} días siguientes al correo de confirmación, también la borramos.`,
+      ].join('\n'),
+      `## Quién más los ve`,
+      `No cedemos tus datos a nadie, salvo obligación legal. Los tratan por cuenta nuestra, solo para prestarnos su servicio:`,
+      [
+        `- **El alojamiento de la web**, donde se guardan los datos y sus copias de seguridad, en servidores de la Unión Europea.`,
+        `- **Cloudflare, Inc.**, que presta servicios de red y de seguridad a la plataforma desde la que gestionamos los mensajes y el boletín. Es una empresa de Estados Unidos acogida al Marco de Privacidad de Datos UE-EE. UU., que la Comisión Europea reconoce como garantía de un nivel de protección adecuado (Decisión de Ejecución (UE) 2023/1795, de 10 de julio de 2023).`,
+      ].join('\n'),
+      `## Tus derechos`,
+      `Puedes retirar tu consentimiento cuando quieras, sin que eso afecte a lo anterior, y pedir acceso, rectificación, supresión, oposición, limitación y portabilidad de tus datos escribiendo a ${email}. Si crees que no se han respetado, puedes reclamar ante la Agencia Española de Protección de Datos (www.aepd.es).`,
+    ].join('\n\n');
+  }
 
   if (doc === 'aviso-legal') {
     return [

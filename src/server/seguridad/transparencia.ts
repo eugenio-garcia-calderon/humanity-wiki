@@ -67,6 +67,11 @@ export const NO_SE_ASOMAN = new Map<string, string>([
   // necesite un pedido concreto tiene la llave documentada: una fila, por su id,
   // con el motivo escrito y anotado ANTES de leerla.
   ['pedidos', 'la dirección de casa de quien compra, y toda de golpe'],
+  // Los formularios de los escaparates (2026-11-07): quien escribe o se apunta no tiene
+  // cuenta ni ha aceptado más que lo que dice el formulario. Quien administra el sitio
+  // los ve en su panel (`formulariosSitio.ts`); nadie más, ni de golpe.
+  ['sitio_mensajes', 'los mensajes de quien escribe a un sitio desde su formulario'],
+  ['sitio_suscriptores', 'los correos de quien se apunta al boletín de un sitio'],
 ]);
 
 /** Las rutas de lectura que solo puede usar quien manda, y qué enseñan.

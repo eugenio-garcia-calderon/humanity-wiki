@@ -112,6 +112,15 @@ const REVISADAS: Entrada[] = [
   { m: 'PUT', ruta: '/api/incidencias/:id', guardia: { tipo: 'agente' } },
   { m: 'DELETE', ruta: '/api/incidencias/:id', guardia: { tipo: 'agente' }, nota: 'solo la propia, o admin' },
   { m: 'POST', ruta: '/api/sitio/opinion', guardia: { tipo: 'publica', porque: 'los visitantes de un sitio dejan sugerencias sin cuenta; entra como propuesta, con campo trampa y 5 envíos cada 10 minutos por IP' } },
+  // Los formularios de un escaparate (2026-11-07, `formulariosSitio.ts`, migración 0175).
+  { m: 'POST', ruta: '/api/sitio/:raiz/mensaje', guardia: { tipo: 'publica', porque: 'un visitante sin cuenta escribe para colaborar; solo raíces escaparate publicadas, campo trampa, tiempo mínimo, freno por IP en memoria (sin guardarla) y por sitio, y Origin de la propia web' } },
+  { m: 'POST', ruta: '/api/sitio/:raiz/boletin', guardia: { tipo: 'publica', porque: 'alta en el boletín sin cuenta; queda pendiente hasta que se confirma desde el correo; mismas defensas que el mensaje' } },
+  { m: 'POST', ruta: '/api/sitio/:raiz/boletin/confirmar', guardia: { tipo: 'publica', porque: 'abre solo con el testigo de 256 bits que llegó al correo (se guarda su huella)' } },
+  { m: 'POST', ruta: '/api/sitio/:raiz/boletin/baja', guardia: { tipo: 'publica', porque: 'abre solo con el testigo de baja de los correos; también la baja en un clic del programa de correo (RFC 8058)' } },
+  { m: 'PUT', ruta: '/api/sitio/:raiz/formularios/mensajes/:id', guardia: { tipo: 'sesion' }, nota: 'administrar la raíz' },
+  { m: 'DELETE', ruta: '/api/sitio/:raiz/formularios/mensajes/:id', guardia: { tipo: 'sesion' }, nota: 'administrar la raíz; borra los datos personales, no la fila' },
+  { m: 'DELETE', ruta: '/api/sitio/:raiz/formularios/suscriptores/:id', guardia: { tipo: 'sesion' }, nota: 'administrar la raíz; da de baja y borra la dirección' },
+  { m: 'POST', ruta: '/api/sitio/:raiz/formularios/confirmaciones', guardia: { tipo: 'sesion' }, nota: 'administrar la raíz; 200 correos como mucho por vez y solo con proveedor de correo' },
 
   // ── El navegador remoto: cada sesión es un Chromium de verdad ──────────
   { m: 'POST', ruta: '/api/navegador/remoto', guardia: { tipo: 'sesion' } },

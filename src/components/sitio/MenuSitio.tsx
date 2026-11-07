@@ -13,6 +13,8 @@ import {
   type Sitio, type Enlace, type Destino, type DocLegal, type Tamano,
   NOMBRES_LEGALES, textoLegal, textoSobre,
 } from './sitioWeb';
+import AltaBoletin from './AltaBoletin';
+import { responsableDe } from './formularios';
 
 // ============================================================================
 // EL MENÚ Y EL PIE, COMO SE VEN (2026-10-02)
@@ -311,8 +313,16 @@ function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: s
   const hayContacto = p.mostrarContacto && !!(c.email || c.telefono || c.direccion);
   const legales = (Object.keys(NOMBRES_LEGALES) as DocLegal[]).filter(d => p.legales[d]);
   const titulo = 'text-[11px] font-black uppercase tracking-[0.15em] opacity-60 mb-3';
+  // EL BOLETÍN DEL ESCAPARATE (2026-11-07, `AltaBoletin.tsx`): la primera franja del pie. En la
+  // vista previa del editor (sin raíz) se ve igual, pero no envía. Su línea, del color de la
+  // de la barra legal.
+  const boletin = s.escaparate
+    ? <AltaBoletin raizId={rutas.raizId || null} nombre={nombre || s.titular.nombre || ''} responsable={responsableDe(s, nombre)}
+        oscuro={textoSobre(p.fondo) === '#ffffff'} colorLinea={/^#[0-9a-f]{6}$/i.test(p.texto || '') ? `${p.texto}26` : undefined} />
+    : null;
   if (p.sencillo) return (
     <footer id="contacto" style={{ background: p.fondo, color: p.texto }} className="w-full">
+      {boletin}
       {/* El mapa del sitio: los proyectos por área, con su dirección limpia (2026-11-06, SEO). */}
       {Array.isArray(p.mapaProyectos) && p.mapaProyectos.length > 0 && (
         <nav aria-label="Mapa del sitio" data-mapa-proyectos className="mx-auto max-w-[calc(576px+50vw)] px-5 @2xl:px-8 pt-10 pb-8">
@@ -353,6 +363,7 @@ function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: s
   );
   return (
     <footer id="contacto" style={{ background: p.fondo, color: p.texto }} className="w-full">
+      {boletin}
       <div className={cn('mx-auto max-w-[calc(576px+50vw)] px-5 @2xl:px-8 py-12 grid gap-10', p.mapaWeb && rutas.raizId ? '@2xl:grid-cols-[minmax(12rem,16rem)_1fr]' : '@2xl:grid-cols-3')}>
         <div className="space-y-3">
           {(logo || nombre) && (

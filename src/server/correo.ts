@@ -16,7 +16,30 @@
 
 export const hayCorreo = () => !!(process.env.RESEND_API_KEY || '').trim();
 
-export async function enviarCorreo(c: { para: string; asunto: string; texto: string; html?: string; remitente?: string }): Promise<boolean> {
+/** El remitente por defecto, `Nombre <dirección>`. */
+const remitentePorDefecto = () => process.env.CORREO_REMITENTE || 'humanity.wiki <avisos@humanity.wiki>';
+
+/**
+ * EL REMITENTE CON EL NOMBRE DE UN SITIO (2026-11-07, formularios del escaparate).
+ * Un sitio publicado no enseña la plataforma («que no haya ninguna referencia a
+ * la infraestructura», Eugenio, `sitios.ts`): su correo sale con SU nombre
+ * («Luz & Humanidad <avisos@…>») y desde la dirección verificada de siempre, que
+ * es la única que el proveedor deja usar.
+ */
+export function remitenteConNombre(nombre: string): string {
+  const base = remitentePorDefecto();
+  const direccion = /<([^>]+)>/.exec(base)?.[1] || base.trim();
+  const limpio = String(nombre || '').replace(/["<>\r\n]/g, '').replace(/\s+/g, ' ').trim().slice(0, 80);
+  return limpio ? `"${limpio}" <${direccion}>` : base;
+}
+
+export async function enviarCorreo(c: {
+  para: string; asunto: string; texto: string; html?: string; remitente?: string;
+  /** A quién va la respuesta si quien lo recibe pulsa «Responder» (2026-11-07). */
+  responderA?: string;
+  /** Cabeceras extra, p. ej. `List-Unsubscribe` para darse de baja en un clic (2026-11-07). */
+  cabeceras?: Record<string, string>;
+}): Promise<boolean> {
   const clave = (process.env.RESEND_API_KEY || '').trim();
   if (!clave) return false;
   try {
@@ -24,8 +47,10 @@ export async function enviarCorreo(c: { para: string; asunto: string; texto: str
       method: 'POST',
       headers: { Authorization: `Bearer ${clave}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        from: c.remitente || process.env.CORREO_REMITENTE || 'humanity.wiki <avisos@humanity.wiki>',
+        from: c.remitente || remitentePorDefecto(),
         to: [c.para], subject: c.asunto, text: c.texto, ...(c.html ? { html: c.html } : {}),
+        ...(c.responderA ? { reply_to: c.responderA } : {}),
+        ...(c.cabeceras && Object.keys(c.cabeceras).length ? { headers: c.cabeceras } : {}),
       }),
       signal: AbortSignal.timeout(8000),
     });
