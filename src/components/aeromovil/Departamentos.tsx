@@ -300,10 +300,12 @@ export function ComparacionChasis({ modelo }: { modelo: Modelo }) {
   }, [modelo]);
   if (!ev) return null;
   const f = (v: number | null, u: string, d = 0) => (v == null ? '—' : `${v.toLocaleString('es-ES', { maximumFractionDigits: d })} ${u}`);
+  // Rigidez con las soldaduras como uniones rígidas: es la comparable (la v1 no está triangulada y, como barras articuladas, no tiene rigidez).
   const filas: [string, (e: EvaluacionChasis) => string][] = [
-    ['Peso de la estructura', e => f(e.masaKg, 'kg', 1)], ['Tubos', e => f(e.nTubos, '')], ['Metros de tubo', e => f(e.largoM, 'm', 1)],
-    ['Nudos', e => f(e.nNudos, '')], ['Triángulos', e => f(e.triangulos, '')],
-    ['Rigidez a torsión', e => f(e.rigidezTorsion, 'N·m/°')], ['Rigidez a flexión', e => f(e.rigidezFlexion, 'N/mm')],
+    ['Peso de la estructura', e => f(e.masaKg, 'kg', 1)], ['  de acero / aluminio', e => `${f(e.masaAceroKg, '', 1)} / ${f(e.masaAluminioKg, 'kg', 1)}`],
+    ['Tubos', e => f(e.nTubos, '')], ['Metros de tubo', e => f(e.largoM, 'm', 1)],
+    ['Nudos', e => f(e.nNudos, '')], ['Triángulos', e => f(e.triangulos, '')], ['Cuadros sin diagonal', e => f(e.mecanismos, '')],
+    ['Rigidez a torsión', e => f(e.rigidezTorsionSoldada, 'N·m/°')], ['Rigidez a flexión', e => f(e.rigidezFlexionSoldada, 'N/mm')],
   ];
   return (
     <div className="rounded-lg border border-slate-200 bg-slate-50 p-2">
@@ -311,7 +313,10 @@ export function ComparacionChasis({ modelo }: { modelo: Modelo }) {
         <thead><tr className="text-left text-[10px] uppercase tracking-wider text-slate-500"><th className="py-0.5"></th><th className="py-0.5 text-right">v1 largueros</th><th className="py-0.5 text-right">v2 celosía</th></tr></thead>
         <tbody>{filas.map(([n, g]) => <tr key={n}><td className="py-0.5 text-slate-600">{n}</td><td className="py-0.5 text-right font-mono tabular-nums">{g(ev[0])}</td><td className="py-0.5 text-right font-mono tabular-nums">{g(ev[1])}</td></tr>)}</tbody>
       </table>
-      {[...ev[0].notas, ...ev[1].notas].filter(n => n !== 'pendiente').slice(0, 4).map((n, i) => <p key={i} className="mt-1 text-[11px] leading-snug text-slate-500">{n}</p>)}
+      {ev[0].rigidezTorsionSoldada && ev[1].rigidezTorsionSoldada ? <p className="mt-1 text-[11px] font-medium text-teal-800">La v2 es {(ev[1].rigidezTorsionSoldada / ev[0].rigidezTorsionSoldada).toFixed(1).replace('.', ',')} veces más rígida a torsión y {((ev[1].rigidezFlexionSoldada ?? 0) / (ev[0].rigidezFlexionSoldada || 1)).toFixed(0)} veces a flexión, por {(ev[1].masaKg - ev[0].masaKg).toFixed(1).replace('.', ',')} kg {ev[1].masaKg >= ev[0].masaKg ? 'más' : 'menos'}.</p> : null}
+      <details className="mt-1"><summary className="cursor-pointer text-[11px] text-slate-500">Qué dice un ingeniero de cada versión</summary>
+        {[ev[0], ev[1]].map(e => <div key={e.version} className="mt-1"><div className="text-[11px] font-semibold text-slate-600">{e.nombre}</div>{e.notas.map((n, i) => <p key={i} className="text-[11px] leading-snug text-slate-500">· {n}</p>)}</div>)}
+      </details>
       {ev[1].notas.includes('pendiente') && <p className="mt-1 text-[11px] text-slate-500">La versión 2 la está diseñando un bot: cuando termine, aquí saldrán sus números.</p>}
     </div>
   );
