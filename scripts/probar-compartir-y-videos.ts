@@ -238,6 +238,9 @@ if (opcion('vivo')) {
   const AGENTES = ['facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)', 'Twitterbot/1.0',
     'LinkedInBot/1.0 (compatible; Mozilla/5.0; Apache-HttpClient +http://www.linkedin.com)', 'WhatsApp/2.23.20.0 A', 'TelegramBot (like TwitterBot)'];
   const rutas = (opcion('rutas') && opcion('rutas') !== 'si' ? opcion('rutas')! : '/,/canada-solar,/luz-del-amazonas,/pedaleo-solar,/maria-roca').split(',');
+  // Páginas con vídeos de YouTube: tienen que llevar sus VideoObject (si no, faltan los datos de
+  // `config.sitio.videos` o el despliegue).
+  const conVideos = new Set((opcion('con-videos') && opcion('con-videos') !== 'si' ? opcion('con-videos')! : '/canada-solar,/luz-del-amazonas,/pedaleo-solar').split(','));
   for (const ruta of rutas) for (const ua of AGENTES) {
     const h = await (await fetch(`https://${SITIO}${ruta}`, { headers: { 'user-agent': ua }, redirect: 'manual' })).text();
     const meta = (p: string) => new RegExp(`<meta (?:property|name)="${p}" content="([^"]*)"`).exec(h)?.[1];
@@ -249,6 +252,8 @@ if (opcion('vivo')) {
     if (ua === AGENTES[0]) {
       const videos = [...h.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m => JSON.parse(m[1])).filter(x => x['@type'] === 'VideoObject');
       for (const v of videos) assert.deepEqual(fallosVideoGoogle(v), [], `${ruta}: ${v.name}`);
+      if (conVideos.has(ruta)) assert.ok(videos.length > 0, `${ruta}: sin VideoObject`);
+      assert.ok(!/<iframe/i.test(h.slice(h.indexOf('<div id="root"'))), `${ruta}: un iframe en el HTML del servidor`);
       console.log(`  · ${ruta}: ${meta('og:image')} (${meta('og:image:width')}×${meta('og:image:height')}), ${videos.length} VideoObject`);
     }
   }
