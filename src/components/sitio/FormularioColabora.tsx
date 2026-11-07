@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { HandHeart, HandCoins, Building2, Newspaper, MessageCircle, Send, Loader2, Check, AlertCircle, ChevronDown, RotateCw } from 'lucide-react';
 import { cn } from '../../utils/cn';
-import { validarMensaje, capaBasica, CAMPO_TRAMPA, MOTIVOS, LIMITES, type Errores, type Motivo } from './formularios';
+import { validarMensaje, capaBasica, CAMPO_TRAMPA, MOTIVOS, LIMITES, EVENTO_ELEGIR_MOTIVO, type Errores, type Motivo } from './formularios';
 
 // ============================================================================
 // «QUIERO COLABORAR» (2026-11-07)
@@ -23,7 +23,9 @@ import { validarMensaje, capaBasica, CAMPO_TRAMPA, MOTIVOS, LIMITES, type Errore
 //     (cuando la página ya tiene la suya).
 //   · `proyecto`: el proyecto elegido de entrada (su nombre corto, `aeromovil`). Sin
 //     él, se toma de la dirección: `/colabora?proyecto=aeromovil`.
-//   · `motivo`: lo mismo para «¿Cómo quieres colaborar?» (`?motivo=voluntariado`).
+//   · `motivo`: lo mismo para «¿Cómo quieres colaborar?» (`?motivo=voluntariado`). Y ya
+//     abierto, otra parte de la página lo cambia con `EVENTO_ELEGIR_MOTIVO` (`formularios.ts`):
+//     así lo hacen las tarjetas de la página «Colabora» (2026-11-07).
 // Pide al servidor la lista de proyectos y quién responde de los datos
 // (`GET /api/sitio/:raiz/formulario`) al montarse, así que puede ir en cualquier
 // página del sitio sin pasarle nada más.
@@ -99,6 +101,20 @@ export default function FormularioColabora({ raizId, titulo = '¿Quieres colabor
       ...(MOTIVOS.some(x => x.id === m) && !d.motivo ? { motivo: m as Motivo } : {}),
     }));
   }, [proyectoDado, motivoDado]);
+
+  // Lo que elija una tarjeta de la misma página (`EVENTO_ELEGIR_MOTIVO`, la página «Colabora»):
+  // manda sobre lo elegido antes, porque es lo último que ha pedido quien escribe.
+  useEffect(() => {
+    const oir = (e: Event) => {
+      const m = (e as CustomEvent<{ motivo?: string }>).detail?.motivo;
+      if (!MOTIVOS.some(x => x.id === m)) return;
+      setDatos(d => ({ ...d, motivo: m as Motivo }));
+      setErrores(er => { if (!er.motivo) return er; const n = { ...er }; delete n.motivo; return n; });
+      setAviso(null);
+    };
+    window.addEventListener(EVENTO_ELEGIR_MOTIVO, oir);
+    return () => window.removeEventListener(EVENTO_ELEGIR_MOTIVO, oir);
+  }, []);
 
   // El foco nunca se queda en ninguna parte: al dar las gracias, en el título; al
   // volver para «Enviar otro mensaje», en el campo del mensaje (revisión del 2026-11-07).

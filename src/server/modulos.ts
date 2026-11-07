@@ -68,6 +68,7 @@ import { registrarBuscadorSitio } from './buscadorSitio.js';
 import { registrarRutasFila } from './rutasFila.js';
 import { registrarSeoSitio } from './seoSitio.js';
 import { registrarSeoEscaparate } from './seoEscaparate.js';
+import { registrarPaginasEscaparate } from './paginasEscaparate.js';
 import { registrarIndexNow } from './indexNow.js';
 import { registerBuscadorRoutes } from './buscador.js';
 import { registrarRepublicar } from './republicar.js';
@@ -452,6 +453,7 @@ export const MODULOS: Modulo[] = [
   // EL ÚLTIMO A PROPÓSITO: su ampliación de la página tiene que pasar después de la
   // ficha de producto y de las valoraciones, que en un escaparate no aplican.
   { nombre: 'seoEscaparate', montar: (app, db) => registrarSeoEscaparate(app, db), nota: 'SEO de un sitio escaparate (luzhumanidad.com): títulos, descripciones, datos estructurados, sitemap y mapa del pie (2026-11-06).' },
+  { nombre: 'paginasEscaparate', montar: (app, db) => registrarPaginasEscaparate(app, db), nota: 'Las páginas propias de un escaparate (Colabora, Sala de prensa, Quiénes somos, 2026-11-07): los datos de sus secciones y su <head>. DESPUÉS de seoEscaparate: su ampliación escribe encima de la de aquél.' },
 ];
 
 /**

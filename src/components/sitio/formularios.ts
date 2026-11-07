@@ -23,6 +23,11 @@ export const MOTIVOS = [
 export type Motivo = typeof MOTIVOS[number]['id'];
 export const textoMotivo = (id: string | null | undefined) => MOTIVOS.find(m => m.id === id)?.texto || 'Otro';
 
+/** ELEGIR EL MOTIVO DESDE FUERA DEL FORMULARIO (2026-11-07, la página «Colabora»): cada tarjeta
+ *  de «Formas de colaborar» lanza este evento con `{ motivo }` y el formulario de la misma página
+ *  lo marca, aunque ya hubiera otro elegido (`?motivo=` solo vale al abrir la página). */
+export const EVENTO_ELEGIR_MOTIVO = 'colabora:elegir-motivo';
+
 /** Los límites, en caracteres. El mensaje admite saltos de línea; lo demás, una línea. */
 export const LIMITES = { nombreMin: 2, nombreMax: 120, emailMax: 254, mensajeMin: 10, mensajeMax: 4000, enlacesMax: 5 } as const;
 

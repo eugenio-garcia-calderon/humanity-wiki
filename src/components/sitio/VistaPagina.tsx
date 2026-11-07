@@ -25,7 +25,8 @@ const VistaSociedadSitio = lazy(() => import('./VistaSociedadSitio'));
 const VistaFlujoSitio = lazy(() => import('./VistaFlujoSitio'));
 const VistaProyectosSitio = lazy(() => import('./VistaProyectosSitio'));
 import BotonOpinion from './BotonOpinion';
-import { EscaparateContexto } from './escaparate';
+import { EscaparateContexto, RaizEscaparateContexto } from './escaparate';
+import CabeceraPaginaEscaparate, { esPaginaEscaparate } from './CabeceraPaginaEscaparate';
 const CabeceraProyectoEscaparate = lazy(() => import('./CabeceraProyectoEscaparate'));
 
 // ============================================================================
@@ -121,6 +122,11 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
   // grande y todo lo relacionado alrededor, en vez de la cabecera, seguir y las pestañas.
   const proyectoEscaparate = escaparate && !esRaiz && !pagina.virtual && !!pagina.fila
     && pagina.fila.tabla_id === pagina.sitio?.config?.proyectos;
+  // LAS PÁGINAS PROPIAS DEL ESCAPARATE (2026-11-07: Colabora, Sala de prensa, Quiénes somos): ni la
+  // portada, ni un proyecto, ni una persona, ni la de donar (sin cabecera). Su cabecera es la del
+  // escaparate (`CabeceraPaginaEscaparate`) y no llevan seguir, compartir, la red ni comentarios:
+  // en el escaparate no hay cuentas (Eugenio, 2026-11-06).
+  const paginaEscaparate = esPaginaEscaparate(pagina);
 
   // EL MENÚ NAVEGA SIN RECARGAR (2026-10-02). Sus enlaces son `<a>` normales
   // —el servidor también los pinta—, así que aquí se cogen los que van a
@@ -239,6 +245,7 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
       </div>}
       {/* La región principal, para los lectores de pantalla (bot de UX, ronda 1). */}
       <EscaparateContexto.Provider value={escaparate}>
+      <RaizEscaparateContexto.Provider value={escaparate ? pagina.sitio?.raizId || null : null}>
       <main id="contenido" tabIndex={-1} className="outline-none">
       <article>
         {((conBarra && esRaiz) || sinCabecera) && <h1 className="sr-only">{pagina.titulo || 'Sin título'}</h1>}
@@ -246,6 +253,7 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
           ? <LecturaBloqueDatos bloque={{ ...termo, datos: { ...(termo.datos || {}), comoCabecera: true } }} paginaId={pagina.id} />
           : perfil ? <LecturaBloqueDatos bloque={perfil} paginaId={pagina.id} />
           : proyectoEscaparate ? <Suspense fallback={<div className="mb-10 aspect-[16/9] w-full animate-pulse rounded-2xl bg-slate-100" />}><CabeceraProyectoEscaparate pagina={pagina} /></Suspense>
+          : paginaEscaparate ? <CabeceraPaginaEscaparate pagina={pagina} />
           : <CabeceraLectura pagina={pagina} esMovil={esMovil} />}
         {/* Si es la página de una fila: con qué está conectada (solo lo que tiene algo). */}
         {cfg.tiempoLectura === true && (() => {
@@ -261,21 +269,25 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
         {/* Con el termómetro de cabecera, las pestañas de la red van justo debajo,
             en la primera pantalla (2026-10-25: «que se vea que hay muchas opciones
             donde pinchar sin bajar»); seguir y compartir, después. */}
-        {!pagina.virtual && !esRaiz && !termo && !perfil && !sinCabecera && !proyectoEscaparate && <AccionesPagina paginaId={pagina.id} />}
+        {!pagina.virtual && !esRaiz && !termo && !perfil && !sinCabecera && !proyectoEscaparate && !paginaEscaparate && <AccionesPagina paginaId={pagina.id} />}
         {/* Las páginas hijas en galería (2026-10-23, `PaginasHijas.tsx`). */}
         {!pagina.virtual && !termo && <GaleriaHijasLectura config={(pagina as any).config} />}
         {/* También en las fichas: la red es la forma de llegar a lo relacionado. */}
-        {!pagina.virtual && !proyectoEscaparate && <RedRelaciones paginaId={pagina.id} titulo={pagina.titulo || ''} autorHandle={pagina.autor?.handle} esRaiz={esRaiz} />}
+        {!pagina.virtual && !proyectoEscaparate && !paginaEscaparate && <RedRelaciones paginaId={pagina.id} titulo={pagina.titulo || ''} autorHandle={pagina.autor?.handle} esRaiz={esRaiz} />}
         {termo && <GaleriaHijasLectura config={(pagina as any).config} titulo={`Páginas dentro de ${pagina.titulo || 'esta página'}`} />}
         {termo && !esRaiz && <AccionesPagina paginaId={pagina.id} />}
         {/* Los títulos 2 como pestañas (`PestanasTitulos.tsx`), si la página lo pide. */}
         {cfg.pestanasTitulos && !pagina.virtual
           ? <PestanasTitulos bloques={bloques} paginaId={pagina.id} lado={cfg.pestanasTitulos === 'lado'} />
-          : <BloquesLectura bloques={bloques} comentable={pagina.virtual ? undefined : pagina.id} paginaId={pagina.virtual ? undefined : pagina.id} />}
+          : paginaEscaparate
+            // Más aire antes de cada título de sección (el `titulo1` del editor): se lee por partes, como la portada.
+            ? <div className="[&_[data-tipo=titulo1]]:mt-14 sm:[&_[data-tipo=titulo1]]:mt-20 [&>div>div:first-child>[data-tipo=titulo1]]:mt-0 [&>div>div:first-child>[data-tipo=titulo1]>*]:mt-0"><BloquesLectura bloques={bloques} paginaId={pagina.id} /></div>
+            : <BloquesLectura bloques={bloques} comentable={pagina.virtual ? undefined : pagina.id} paginaId={pagina.virtual ? undefined : pagina.id} />}
         {!pagina.virtual && !escaparate && (pagina as any).ficha && <SugerirCorreccion paginaId={pagina.id} />}
-        {!pagina.virtual && <EnlazanAqui paginaId={pagina.id} />}
+        {!pagina.virtual && !paginaEscaparate && <EnlazanAqui paginaId={pagina.id} />}
       </article>
       </main>
+      </RaizEscaparateContexto.Provider>
       </EscaparateContexto.Provider>
       </div>
       {!mapa && pie}

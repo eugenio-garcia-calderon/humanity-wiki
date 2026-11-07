@@ -104,6 +104,7 @@ export const TIPOS_BLOQUE_DATOS = [
   'termometro',    // el termómetro del 0 al 10 de un sistema en un territorio (2026-10-25)
   'donacion',      // donar con tarjeta por Stripe, sin cuenta (2026-10-26)
   'perfil',        // la cabecera del perfil de una persona: nombre, áreas, conectar (2026-10-26)
+  'escaparate',    // una sección calculada de las páginas propias de un escaparate: colabora, prensa, quiénes somos (2026-11-07)
 ] as const;
 export type TipoBloqueDatos = typeof TIPOS_BLOQUE_DATOS[number];
 
