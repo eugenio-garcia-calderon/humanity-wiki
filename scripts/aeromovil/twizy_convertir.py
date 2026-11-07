@@ -44,7 +44,6 @@ for i in (2, 6, 7, 9, 10): CLASE[i] = 'blanco'
 for i in (0, 3, 4, 11, 12, 21): CLASE[i] = 'negroBrillo'
 CLASE[8] = 'salpicadero'
 CLASE[24] = 'tela'
-for i in (44, 45, 54, 56, 57, 63, 64, 43): CLASE[i] = 'cromo'
 for i in (15, 16): CLASE[i] = 'negroBrillo'   # carcasa; el faro (parábola, lámpara y lente) se dibuja en el visor
 for i in (26, 27): CLASE[i] = 'ambar'
 for i in (28, 29, 40): CLASE[i] = 'rojo'
@@ -54,9 +53,10 @@ for i in (19, 20, 22, 23): CLASE[i] = 'muelle'
 for i in (34, 35, 36, 37, 38, 39, 46, 47): CLASE[i] = 'acero'
 for i in (50, 51, 48, 49, 41, 42): CLASE[i] = 'negro'
 for i in (61, 66): CLASE[i] = 'negro'      # limpiaparabrisas
-CLASE[30] = 'negroBrillo'          # tapa de la toma de carga (Z.E.)
-for i in (59, 67): CLASE[i] = 'cromo'   # letras Z.E.
-QUITAR = set()
+CLASE[30] = 'negroBrillo'          # tapa de la toma de carga
+# Fuera los logotipos y rótulos de marca (rombos, «TWIZY», «Z.E.», el del volante):
+# el garaje compara formas, no insignias.
+QUITAR = {43, 44, 45, 54, 56, 57, 59, 63, 64, 67}
 DIEZMAR = {0: 0.6, 1: 0.8, 3: 0.6, 4: 0.6}
 SUSP = {19, 20, 22, 23, 34, 35, 36, 37, 38, 39, 46, 47, 48, 49, 50, 51, 41, 42}
 FRENTE_SUSP = lambda c: c.vertices[:, 1].mean() < 0
@@ -74,10 +74,6 @@ for i, c in enumerate(comps):
         yf = np.interp(ax_, [1.5, 4.5, 7.5, 11.0, 13.0], [-88.23, -88.1, -87.77, -87.44, -87.3])
         yb = yf + 1.4
         V = V.copy(); V[:, 1] = np.where(V[:, 1] < (yf + yb) / 2, yf, yb)
-    if i == 44:
-        V = V.copy(); V[:, 1] -= 1.4          # el rombo de Renault, delante de la placa
-    if i == 57:
-        F = F[V[F].min(1)[:, 2] > 45]          # la «Y» trae un triángulo suelto hasta el paragolpes
     if i in DIEZMAR:
         V2, F2 = fs.simplify(V.astype(np.float32), F.astype(np.int32), DIEZMAR[i])
         V, F = V2.astype(np.float64), F2.astype(np.int64)

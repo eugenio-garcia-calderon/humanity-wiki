@@ -28,7 +28,7 @@ import { GIRO_A1, suspensionA1 } from './geometriaA1';
 import type { Referencia } from './referencias';
 import { vehiculoGaraje } from './garaje';
 import { colorSuperpuesto, hacerFantasma, liberarFantasma, mostrarSiluetas, siluetas } from './garaje/superponer';
-import { crearTunel, envolventeModelo, type CuerpoTunel, type Tunel } from './tunelViento';
+import { cartel, crearTunel, envolventeModelo, type CuerpoTunel, type Tunel } from './tunelViento';
 
 /** Las capas. `solo` limita una capa a un vehículo: la dirección y la transmisión son del Aeromóvil 1. */
 export const CAPAS = [
@@ -75,8 +75,10 @@ interface Props {
   tunel?: boolean;
   /** Los coches del garaje, en fantasma de color y con sus siluetas, encima del nuestro (las posiciones las da `garaje`). */
   superponer?: boolean;
-  /** Carteles del túnel por coche ('aeromovil' o el id del garaje): nombre y CdA, dos líneas con «\n». */
-  etiquetasTunel?: Record<string, string>;
+  /** Carteles encima de cada coche ('aeromovil' o el id del garaje), líneas separadas por «\n». Con el túnel abierto van en el túnel. */
+  carteles?: Record<string, string>;
+  /** Cd de cada coche ('aeromovil' o el id del garaje), para dimensionar la estela del túnel. */
+  cdTunel?: Record<string, number>;
   vista: Vista;
   /** Al pinchar en una pieza: su componente (para ir a su página). */
   alPinchar?: (componente: string) => void;
@@ -707,7 +709,8 @@ function accesoriosA1(g: THREE.Object3D, M: Mats, m: ModeloA1) {
 }
 
 /** Cotas exteriores en el suelo y en vertical, con su número en mm. */
-function cotas(g: THREE.Object3D, M: Mats, m: Modelo, espacio = false) {
+/** Las piezas de una cota (línea, flechas y etiqueta), para el Aeromóvil y para los coches del garaje. */
+function herramientasCota(g: THREE.Object3D, M: Mats) {
   const etiqueta = (texto: string, p: V3) => {
     const c = document.createElement('canvas'); c.width = 512; c.height = 128;
     const x = c.getContext('2d')!;
@@ -733,8 +736,32 @@ function cotas(g: THREE.Object3D, M: Mats, m: Modelo, espacio = false) {
     flecha(b, d.clone()); flecha(a, d.clone().negate());
     etiqueta(texto, [(a[0] + b[0]) / 2 + offEtq[0], (a[1] + b[1]) / 2 + offEtq[1], (a[2] + b[2]) / 2 + offEtq[2]]);
   };
-  const P = m.P, y = 0.004, zL = -(P.W / 2 + 0.38), zB = -(P.W / 2 + 0.16);
   const mm = (v: number) => `${Math.round(v * 1000).toLocaleString('es-ES')} mm`;
+  return { cota, mm, etiqueta };
+}
+
+/**
+ * Cotas de un coche del garaje, en sus propios ejes (van dentro de su grupo):
+ * vías delantera y trasera y alto total (2026-11-07, Eugenio: «que aparezcan
+ * también en los modelos del garaje»).
+ */
+function cotasGaraje(M: Mats, def: { batalla: number; alto: number; ancho: number; viaDel?: number; viaTras?: number; envolvente?: [number, number, number, number][] }): THREE.Group {
+  const g = new THREE.Group(); g.name = 'cotas-garaje';
+  const { cota, mm } = herramientasCota(g, M), y = 0.004;
+  if (def.viaDel) cota([0, y, -def.viaDel / 2], [0, y, def.viaDel / 2], [], `vía del. ${mm(def.viaDel)}`, [0.30, 0.11, 0]);
+  if (def.viaTras) cota([-def.batalla, y, -def.viaTras / 2], [-def.batalla, y, def.viaTras / 2], [], `vía tras. ${mm(def.viaTras)}`, [-0.30, 0.11, 0]);
+  // El alto, de pie junto a la cola, con una línea hasta el punto más alto del techo.
+  const env = def.envolvente;
+  const xTope = env?.length ? env.reduce((a, e) => (e[2] > a[2] ? e : a))[0] : -def.batalla / 2;
+  const xCola = env?.length ? Math.min(...env.map(e => e[0])) : -def.batalla - 0.4;
+  const xH = xCola - 0.30, zL = -(def.ancho / 2 + 0.38);
+  cota([xH, 0, zL], [xH, def.alto, zL], [[[xH - 0.05, def.alto, zL], [xTope, def.alto, zL]]], `alto ${mm(def.alto)}`, [-0.36, 0, 0]);
+  return g;
+}
+
+function cotas(g: THREE.Object3D, M: Mats, m: Modelo, espacio = false) {
+  const { cota, mm, etiqueta } = herramientasCota(g, M);
+  const P = m.P, y = 0.004, zL = -(P.W / 2 + 0.38), zB = -(P.W / 2 + 0.16);
   cota([m.xt, y, zL], [m.xn, y, zL], [[[m.xt, y, 0], [m.xt, y, zL - 0.05]], [[m.xn, y, 0], [m.xn, y, zL - 0.05]]], `largo ${mm(m.Lf)}`, [0.55, 0.11, -0.08]);
   cota([m.xR, y, zB], [0, y, zB], [[[m.xR, y, 0], [m.xR, y, zB - 0.04]], [[0, y, 0], [0, y, zB - 0.04]]], `batalla ${mm(P.B)}`, [-0.35, 0.11, 0.04]);
   const xA = m.xn + 0.40;
@@ -1109,7 +1136,7 @@ function construirReferencia(g: THREE.Group, M: Mats, r: Referencia, fantasma: b
   g.traverse((o: any) => { if (o.isMesh && o.material?.isMaterial) (o as any).userData.ref = true; });
 }
 
-export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, etiquetasTunel, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar }, ref) {
+export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cdTunel, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar }, ref) {
   const pinchar = useRef(alPinchar); pinchar.current = alPinchar;
   const lienzo = useRef<HTMLCanvasElement>(null);
   const estado = useRef<any>(null);
@@ -1313,6 +1340,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       let obj: THREE.Group;
       try { obj = def.construir(); } catch (e) { console.error(`[garaje] no se pudo construir «${def.nombre}»:`, e); continue; }
       obj.name = v.id; obj.traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+      const cg = cotasGaraje(st.M, def); cg.visible = verCotas && !superponer; obj.add(cg);
       if (superponer) { hacerFantasma(obj, colorSuperpuesto(v.id)); obj.add(siluetas(def, colorSuperpuesto(v.id))); }
       g.add(obj);
     }
@@ -1320,6 +1348,11 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     for (const v of garaje) { const obj = g.getObjectByName(v.id); if (obj) { obj.position.set(v.x, 0, v.z); obj.rotation.y = v.giro ?? 0; } }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [claveGaraje, superponer]);
+  // Las cotas de los coches del garaje se ven con las del nuestro (no cuando están superpuestos: se pisarían).
+  useEffect(() => {
+    const st = estado.current; if (!st) return;
+    st.grupoGaraje.traverse((o: THREE.Object3D) => { if (o.name === 'cotas-garaje') o.visible = verCotas && !superponer; });
+  }, [verCotas, superponer, claveGaraje]);
   // Con los coches superpuestos, cada vista enseña solo la silueta que se lee en ella.
   useEffect(() => { const st = estado.current; if (st && superponer) mostrarSiluetas(st.grupoGaraje, vista); }, [vista, superponer, claveGaraje]);
   useEffect(() => {
@@ -1327,40 +1360,58 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     for (const v of garaje) { const obj = st.grupoGaraje.getObjectByName(v.id); if (obj) { obj.position.set(v.x, 0, v.z); obj.rotation.y = v.giro ?? 0; } }
   }, [garaje]);
   // Túnel de viento: se rehace cuando cambia la forma del coche o quién está en el garaje.
-  const claveTunel = tunel ? garaje.map(v => `${v.id}@${v.x},${v.z},${v.giro ?? 0}`).join('|') + (soloGaraje ? '|solo' : '') + JSON.stringify(etiquetasTunel ?? {}) : '';
+  const claveTunel = tunel ? garaje.map(v => `${v.id}@${v.x},${v.z},${v.giro ?? 0}`).join('|') + (soloGaraje ? '|solo' : '') + JSON.stringify(carteles ?? {}) + JSON.stringify(cdTunel ?? {}) : '';
   useEffect(() => {
     const st = estado.current; if (!st) return;
     if (st.tunel) { st.scene.remove(st.tunel.grupo); st.tunel.liberar(); st.tunel = null; }
     if (!tunel) return;
     const cuerpos: CuerpoTunel[] = [];
-    if (!soloGaraje) cuerpos.push({ id: 'aeromovil', x: 0, z: 0, giro: 0, envolvente: envolventeModelo(modelo), n: 2.3, etiqueta: etiquetasTunel?.aeromovil });
+    if (!soloGaraje) cuerpos.push({ id: 'aeromovil', x: 0, z: 0, giro: 0, envolvente: envolventeModelo(modelo), n: 2.3, etiqueta: carteles?.aeromovil, cd: cdTunel?.aeromovil });
     for (const v of garaje) {
       const def = vehiculoGaraje(v.id);
-      if (def?.envolvente) cuerpos.push({ id: v.id, x: v.x, z: v.z, giro: v.giro ?? 0, envolvente: def.envolvente, n: def.seccion ?? 3, etiqueta: etiquetasTunel?.[v.id] });
+      if (def?.envolvente) cuerpos.push({ id: v.id, x: v.x, z: v.z, giro: v.giro ?? 0, envolvente: def.envolvente, n: def.seccion ?? 3, etiqueta: carteles?.[v.id], cd: cdTunel?.[v.id] });
     }
     st.tunel = crearTunel(cuerpos); st.scene.add(st.tunel.grupo);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tunel, modelo, claveTunel]);
+  // «Cd y consumo»: un cartel encima de cada coche (con el túnel abierto los pone el túnel).
+  const claveCarteles = !tunel && carteles ? JSON.stringify(carteles) + garaje.map(v => `${v.id}@${v.x},${v.z},${v.giro ?? 0}`).join('|') + (soloGaraje ? '|solo' : '') : '';
+  useEffect(() => {
+    const st = estado.current; if (!st) return;
+    let g = st.scene.getObjectByName('carteles') as THREE.Group | undefined;
+    if (g) { g.traverse((o: any) => { if (o.isSprite) { o.material.map?.dispose(); o.material.dispose(); } }); st.scene.remove(g); }
+    if (!claveCarteles || !carteles) return;
+    g = new THREE.Group(); g.name = 'carteles'; st.scene.add(g);
+    const poner = (texto: string | undefined, x: number, y: number, z: number) => { if (!texto) return; const c = cartel(texto); c.position.set(x, y, z); g!.add(c); };
+    if (!soloGaraje) poner(carteles.aeromovil, (modelo.xn + modelo.xt) / 2, modelo.P.H + 0.55, 0);
+    for (const v of garaje) {
+      const def = vehiculoGaraje(v.id); if (!def) continue;
+      const xs = def.envolvente?.map(e => e[0]), xm = xs?.length ? (Math.max(...xs) + Math.min(...xs)) / 2 : -def.batalla / 2, gi = v.giro ?? 0;
+      poner(carteles[v.id], v.x + xm * Math.cos(gi), def.alto + 0.55, v.z - xm * Math.sin(gi));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [claveCarteles, modelo]);
   // Al abrir el túnel con más de un coche, la cámara se aleja y se eleva para verlos a la vez
   // (con las estelas delante); al cerrarlo vuelve a la vista que estaba elegida.
-  const claveEncuadre = tunel ? garaje.map(v => `${v.x},${v.z}`).join('|') : '';
+  // Túnel o carteles de consumo: hay que ver todos los coches a la vez.
+  const verTodos = tunel || !!carteles;
+  const claveEncuadre = verTodos ? garaje.map(v => `${v.x},${v.z}`).join('|') : '';
   useEffect(() => {
     const st = estado.current; if (!st) return;
     const zs = [...(soloGaraje ? [] : [0]), ...garaje.filter(v => vehiculoGaraje(v.id)?.envolvente).map(v => v.z)];
     const xs = [...(soloGaraje ? [] : [0]), ...garaje.filter(v => vehiculoGaraje(v.id)?.envolvente).map(v => v.x)];
-    if (tunel && zs.length > 1) {
+    if (verTodos && zs.length > 1) {
       const zc = (Math.min(...zs) + Math.max(...zs)) / 2, xc = (Math.min(...xs) + Math.max(...xs)) / 2, ancho = Math.max(...zs) - Math.min(...zs);
-      // El centro de la imagen va un poco a la derecha y arriba de los coches: así
-      // quedan abajo a la izquierda, lejos de la tarjeta, con las estelas a la vista.
-      const d = 1 + ancho / 6, dz = 1.4 + 0.35 * ancho;
-      st.target.set(xc - 2.4, 1.0, zc + dz);
-      st.tween = { from: st.camera.position.clone(), to: new THREE.Vector3(xc - 2.4 - 6.4 * d, 0.55 + 5.2 * d, zc + dz - 6.6 * d), tf: st.controls.target.clone(), t: 0 };
-    } else if (!tunel && (st.target.x !== -1.5 || st.target.z !== 0)) {
+      // La tarjeta va debajo del visor: los coches, centrados, con las estelas detrás.
+      const d = 1 + ancho / 6;
+      st.target.set(xc - 2.4, 0.5, zc + 0.6);
+      st.tween = { from: st.camera.position.clone(), to: new THREE.Vector3(xc - 2.4 - 6.4 * d, 5.0 * d, zc + 0.6 - 6.6 * d), tf: st.controls.target.clone(), t: 0 };
+    } else if (!verTodos && (st.target.x !== -1.5 || st.target.z !== 0)) {
       st.target.set(-1.5, 0.55, 0);
       st.tween = { from: st.camera.position.clone(), to: new THREE.Vector3(...VISTAS[vista]), tf: st.controls.target.clone(), t: 0 };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tunel, claveEncuadre, soloGaraje]);
+  }, [verTodos, claveEncuadre, soloGaraje]);
   useEffect(() => { const st = estado.current; if (!st) return; st.coche.visible = !soloGaraje && !(referencia && modoRef === 'sola'); st.grupoCotas.visible = !soloGaraje && verCotas && modoRef !== 'sola'; }, [soloGaraje, referencia, modoRef, verCotas]);
   useEffect(() => { const st = estado.current; if (st) st.aperturaObjetivo = abierta ? 1 : 0; }, [abierta]);
   useEffect(() => { const st = estado.current; if (st) st.aperturaMalObjetivo = maleteros ? 1 : 0; }, [maleteros]);

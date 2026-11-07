@@ -149,7 +149,7 @@ const AREA = areaFrontal([
 
 export const VEHICULO: VehiculoGaraje = {
   id: 'aptera', nombre: 'Aptera',
-  largo: 4.496, ancho: 2.225, alto: 1.422, batalla: BATALLA,
+  largo: 4.496, ancho: 2.225, alto: 1.422, batalla: BATALLA, viaDel: VIA, viaTras: 0,
   fuente: 'Wikipedia, ficha del Aptera (Launch Edition): largo 4 496 mm, ancho 2 225 mm, alto 1 422 mm, batalla 2 743 mm, Cd 0,13 declarado; FAQ de Aptera: bajos a 5″, neumáticos de 16″. Vía y voladizos, de fotos de prensa',
   aero: { cd: 0.13, area: Math.round(AREA * 100) / 100, masaVacio: 998, plazas: 2, vmax: 162.5, fuente: `Cd 0,13: lo declara Aptera (enero de 2023, Wikipedia), sin ensayo publicado. 998 kg (Launch Edition de 44 kWh, Wikipedia); 162,5 km/h (FAQ de Aptera). Área frontal ${(Math.round(AREA * 100) / 100).toLocaleString('es-ES')} m², medida sobre este modelo (cuerpo, carenados y brazos)` },
   envolvente: envolventeDe(CUERPO),

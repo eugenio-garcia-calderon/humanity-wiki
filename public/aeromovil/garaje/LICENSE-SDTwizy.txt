@@ -7,7 +7,8 @@ Copyright (c) 2020 StreetDrone Limited. Licensed under the Apache License, Versi
 Modifications made by humanity.wiki (2026-11-07): converted to a compact binary format; re-oriented to the viewer axes;
 scaled to the Renault Twizy 80 data sheet (wheelbase 1686 mm, height 1454 mm, rear overhang 339 mm), which shortens
 the rear pod; the four densest parts simplified; parts grouped by material; the windscreen split from the body frame;
-the wheels are drawn separately by code. Renault and Twizy are trademarks of Renault S.A.S.
+the wheels are drawn separately by code; the embossed StreetDrone logo flattened and the brand badges and lettering
+removed (2026-11-07). Renault and Twizy are trademarks of Renault S.A.S.
 
 =====================================================================
 
