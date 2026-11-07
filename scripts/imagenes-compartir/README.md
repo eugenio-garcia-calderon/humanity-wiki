@@ -8,7 +8,7 @@ página pública: la portada, cada proyecto, cada persona y cualquier otra pági
 |----------|-----------|
 | proyecto | Su portada a sangre con un velo oscuro, el título en negro grueso (dos líneas como mucho, nunca una palabra partida), «año · área · estado» con el color de su estado, la marca y el dominio |
 | portada  | Un mosaico de fotos de proyectos y la frase de la presentación (`sitio.portada.lema`). Sin cifras: la imagen se queda semanas en la caché de las redes y las cifras de la portada cambian cada pocos días |
-| persona  | Su foto en un círculo, su nombre y los proyectos en cuyo equipo está |
+| persona  | Su foto en un círculo (con el encuadre de su página), su nombre y los proyectos en cuyo equipo está: hasta tres, todos; con más, dos y cuántos más. Quien funda la organización (`sitio.seo.fundador`) lleva encima «Fundador · N proyectos» |
 | otra     | Su portada si la tiene (si no, el sol de la marca), su título y su descripción |
 
 Todo sale de lo que el sitio ya enseña: el HTML de cada página (`window.__SITIO__`),
@@ -37,9 +37,16 @@ Opciones: `--sitio <dominio>` (luzhumanidad.com), `--tipos portada,proyecto,pers
 En un Mac compartido por varios bots, `HUECO_CHROMIUM=<ruta a hueco.mjs>` toma un hueco antes
 de abrir Chromium.
 
-**Mira cada imagen antes de publicar** (salida/*.jpg). Si un recorte no acierta, la solución
-buena es el encuadre de la portada de la página (`config.encuadre`, el que usa su cabecera);
-mientras tanto, `ENCUADRES` en `generar.mjs`.
+**Mira cada imagen antes de publicar** (salida/*.jpg): que ninguna cara quede cortada por
+arriba ni bajo la placa de la marca, y que se lean a 300 px. Si un recorte no acierta, la
+solución buena es el encuadre de la portada de la página (`config.encuadre`, el que usa su
+cabecera); mientras tanto, `ENCUADRES` en `generar.mjs` (vale también para la foto de una
+persona). Si la portada no se deja recortar a 1200 × 630 (un collage con un logotipo), `FOTOS`
+pone en su lugar otra foto que la página enseña; si deja de enseñarla, vuelve la portada.
+
+El nombre del fichero es el de la dirección de la página (`/p/<id>`, una página sin nombre
+corto, toma el de su título) y la huella de su contenido: pasar el generador dos veces sin
+cambios da los mismos ficheros, y solo cambia la tarjeta que cambia.
 
 ## Publicar
 

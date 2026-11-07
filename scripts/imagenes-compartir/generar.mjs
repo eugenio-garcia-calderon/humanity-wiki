@@ -54,11 +54,25 @@ const MOSAICO = [
 ];
 /** El encuadre de una portada cuando el automático no acierta y la página no trae el suyo
  *  (`config.encuadre`, el mismo que usa su cabecera: si Eugenio lo pone en el editor, manda ese).
- *  `x`/`y` en %, como `object-position`. */
+ *  `x`/`y` en %, como `object-position`. Vale también para la foto de una persona. */
 const ENCUADRES = {
-  '/barco-solar-electrico': { x: 50, y: 52 },   // la persona de pie en el barco, entera
-  '/comunidad-nuevo-baztan': { x: 50, y: 45 },  // las placas, como en su tarjeta de la portada
-  '/plataforma-de-inversion-solar-crowd': { x: 50, y: 0 },
+  '/barco-solar-electrico': { x: 50, y: 52 },     // la persona de pie en el barco, entera
+  '/comunidad-nuevo-baztan': { x: 50, y: 45 },    // las placas, como en su tarjeta de la portada
+  '/festival-arte-ser-humano': { x: 50, y: 8 },   // las caras enteras y fuera de la placa de la marca
+  '/la-voz-verde': { x: 50, y: 5 },               // el chico entero, con su cabeza, junto a «Tú + Sol»
+  '/humanity-wiki': { x: 50, y: 25 },             // el mapa, sin el pie de la aplicación bajo el dominio
+  '/luz-para-honduras': { x: 50, y: 2 },          // las caras y los cascos enteros, bajo la placa (no cortados arriba)
+  '/casa-nueva-sagunto': { x: 50, y: 0 },         // las tres caras (el automático dejaba dos fuera y una bajo la placa)
+  '/toni-mira': { x: 30, y: 45 },                 // persona: su cara, no su nuca
+};
+/** Una foto de la propia página en vez de su portada, cuando la portada no se deja recortar a
+ *  1200 × 630 (un collage con un logotipo: con cualquier encuadre, la placa de la marca tapa una
+ *  cara o el logo queda debajo del título). Solo una foto que la página enseña: si deja de estar
+ *  en ella, vuelve la portada. */
+const FOTOS = {
+  // Grazziete, en el Amazonas brasileño, con su bombilla y su equipo solar prepago (la historia que
+  // cuenta Solar Crowd); la portada es un collage con el logotipo «SolarCrowd».
+  '/plataforma-de-inversion-solar-crowd': '/uploads/2026/11/notas/12-plataforma-de-inversion-solar-crowd/7d37daf06ea8.jpg',
 };
 
 // ── LEER EL SITIO ───────────────────────────────────────────────────────────
@@ -98,6 +112,13 @@ async function bajar(url) {
   return f;
 }
 const esPropia = (u) => typeof u === 'string' && /^\/uploads\/(?!privado\/)/.test(u);
+/** ¿Enseña la página esa imagen? (en sus bloques, también dentro de otros y de columnas). */
+const enBloques = (bs, url, n = 0) => Array.isArray(bs) && n <= 8 && bs.some(b => b && (
+  (b.tipo === 'imagen' && b.url === url) || enBloques(b.bloques, url, n + 1)
+  || (Array.isArray(b.columnas) && b.columnas.some(c => enBloques(Array.isArray(c) ? c : c?.bloques, url, n + 1)))));
+/** El nombre de una dirección, como `slugDe` en `src/components/sitio/sitioWeb.ts`. */
+const slugDe = (t) => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 60);
 
 // ── PREPARAR LAS FOTOS ──────────────────────────────────────────────────────
 /** La foto recortada a la medida (a sangre), en JPEG dentro de un data-URL, y si es oscura.
@@ -159,7 +180,8 @@ for (const ruta of rutas) {
     : p.fila?.tabla_id && p.fila.tabla_id === cfgSitio.proyectos ? 'proyecto'
     : p.fila?.tabla_id && p.fila.tabla_id === cfgSitio.personas ? 'persona' : 'pagina';
   if (!TIPOS.has(tipo)) continue;
-  const slug = ruta === '/' ? 'portada' : ruta.split('/').filter(Boolean).pop();
+  // El nombre del fichero: el de la dirección (`/p/<id>`, una página sin nombre corto: el de su título).
+  const slug = ruta === '/' ? 'portada' : /^\/p\//.test(ruta) ? slugDe(p.titulo) || id : ruta.split('/').filter(Boolean).pop();
   const d = { ruta, id, slug, tipo, titulo: String(p.titulo || '').trim(), dominio: SITIO, marca: MARCA };
   if (tipo === 'portada') {
     d.titulo = lemaDe(cfg) || d.titulo;
@@ -171,8 +193,10 @@ for (const ruta of rutas) {
     const x = proyectoDe.get(id);
     if (!x) { console.warn(`  ✗ ${ruta}: el proyecto no está en la portada (¿oculto?)`); continue; }
     d.titulo = x.titulo;
-    d.foto = esPropia(x.portada) ? x.portada : null;
-    d.encuadre = (cfg.portada === x.portada && cfg.encuadre) || ENCUADRES[ruta] || null;
+    const otra = FOTOS[ruta] && enBloques(cfg.bloques, FOTOS[ruta]) ? FOTOS[ruta] : null;
+    if (FOTOS[ruta] && !otra) console.warn(`  · ${ruta}: la foto de FOTOS ya no está en la página; va su portada`);
+    d.foto = otra || (esPropia(x.portada) ? x.portada : null);
+    d.encuadre = (!otra && cfg.portada === x.portada && cfg.encuadre) || ENCUADRES[ruta] || null;
     const ano = x.ano ? (PRINCIPAL.has(x.estado) ? `Desde ${x.ano}` : x.ano) : null;
     d.lineas = [
       [ano, x.areas?.[0], x.estado],
@@ -182,9 +206,21 @@ for (const ruta of rutas) {
     d.texto = null;
   } else if (tipo === 'persona') {
     d.foto = esPropia(cfg.portada) ? cfg.portada : null;
+    // Su encuadre: el que tiene su foto en la página (Eugenio lo eligió para varias) o el de ENCUADRES.
+    d.encuadre = cfg.encuadre || ENCUADRES[ruta] || null;
+    // Solo lo que dice su página: los proyectos en cuyo «equipo humano» está. Con más de tres, dos
+    // y cuántos más (nunca cuatro como si fueran todos); y quien funda la organización
+    // (`sitio.seo.fundador`) lo dice, con cuántos proyectos lleva.
     const ld = (Array.isArray(p.meta?.jsonLd) ? p.meta.jsonLd : []).find(j => j?.['@type'] === 'ProfilePage');
-    d.proyectos = (ld?.mainEntity?.subjectOf || []).map(s => s?.name).filter(Boolean).slice(0, 4);
-    // Solo lo que dice su página: los proyectos en cuyo «equipo humano» está.
+    const nombres = (ld?.mainEntity?.subjectOf || []).map(s => s?.name).filter(Boolean);
+    const n = nombres.length;
+    d.proyectos = n > 3 ? nombres.slice(0, 2) : nombres;
+    d.mas = n > 3 ? n - 2 : 0;
+    const fundador = String(cfgSitio.seo?.fundador || '').trim();
+    // Sin proyectos, ni la etiqueta: solo su nombre.
+    d.etiqueta = fundador && fundador === d.titulo
+      ? `Fundador${n ? ` · ${n} ${n === 1 ? 'proyecto' : 'proyectos'}` : ''}`
+      : n ? (n === 1 ? 'Proyecto' : 'Proyectos') : null;
     d.lineas = [[]];
     d.ajuste = [74, 48, 2];
   } else {
@@ -208,7 +244,7 @@ const hoja = await navegador.newPage({ viewport: { width: 1200, height: 630 }, d
 const hechas = [];
 for (const d of paginas) {
   try {
-    const datos = { tipo: d.tipo, titulo: d.titulo, marca: d.marca, dominio: d.dominio, texto: d.texto || null, proyectos: d.proyectos || null, ajuste: d.ajuste || null };
+    const datos = { tipo: d.tipo, titulo: d.titulo, marca: d.marca, dominio: d.dominio, texto: d.texto || null, proyectos: d.proyectos || null, mas: d.mas || 0, etiqueta: d.etiqueta || null, ajuste: d.ajuste || null };
     if (d.foto) {
       const f = await bajar(d.foto);
       if (f) {

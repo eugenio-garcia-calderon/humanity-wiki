@@ -5,7 +5,8 @@
   La rellena `generar.mjs` con `window.DATOS` y la fotografía Chromium. Cuatro formas:
     · proyecto: su portada a sangre con un velo oscuro, el título, «año · área · estado», la marca y el dominio.
     · portada:  un mosaico de fotos de proyectos con la frase de la presentación (el lema).
-    · persona:  su foto en un círculo, su nombre y los proyectos en que está.
+    · persona:  su foto en un círculo, su nombre y los proyectos en que está (con más de tres, dos y
+                cuántos más; la etiqueta de encima dice «Fundador» en quien funda la organización).
     · pagina:   cualquier otra página (colabora, prensa, quiénes somos…): su portada si la tiene, si
                 no el sol de la marca, con el título y su descripción.
   La letra es la del sitio (la del sistema: SF Pro en el Mac en que se generan), el negro de los
@@ -87,6 +88,7 @@
   .persona .dominio-suelto { position: absolute; right: 64px; bottom: 50px; }
   .proyectos { margin-top: 22px; font-size: 25px; line-height: 1.35; font-weight: 600; color: rgba(255, 255, 255, .9); }
   .proyectos b { display: block; margin-bottom: 6px; font-size: 15px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #facc15; }
+  .proyectos .entero { white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -150,10 +152,16 @@
   });
   abajo.append(h1);
   if (D.texto) abajo.append($('p', 'texto', D.texto));
-  if (D.proyectos?.length) {
+  // Sus proyectos: cada nombre entero en su línea (nunca «Diseño Urbanístico / Orgánico»), el punto
+  // pegado al nombre de antes (una línea no empieza por «·») y, si hay más, cuántos.
+  if (D.proyectos?.length || D.etiqueta) {
     const p = $('p', 'proyectos');
-    p.append($('b', null, D.proyectos.length === 1 ? 'Proyecto' : 'Proyectos'));
-    p.append(document.createTextNode(D.proyectos.join(' · ')));
+    p.append($('b', null, D.etiqueta || (D.proyectos.length === 1 ? 'Proyecto' : 'Proyectos')));
+    (D.proyectos || []).forEach((nombre, i) => {
+      if (i) p.append(document.createTextNode(' '));
+      p.append($('span', 'entero', nombre + (i < D.proyectos.length - 1 ? ' ·' : '')));
+    });
+    if (D.mas) { p.append(document.createTextNode(' ')); p.append($('span', 'entero', `y ${D.mas} más`)); }
     abajo.append(p);
   }
   const linea = $('div', 'linea');
@@ -211,9 +219,10 @@
   if (!cabe) problemas.push(`el título no cabe en ${lineas} líneas`);
   // La línea pequeña tampoco se corta: si no cabe, se dice.
   if (datos.scrollWidth > datos.clientWidth + 1) problemas.push('la línea «año · área · estado» no cabe');
-  // Nada se sale del lienzo ni se pisa con la marca.
+  // Nada se sale del lienzo ni se pisa con la marca (ni un nombre de proyecto por la derecha).
   const caja = abajo.getBoundingClientRect(), m = marca.getBoundingClientRect();
   if (caja.top < m.bottom + 16) problemas.push('el texto pisa la marca');
+  if ([...abajo.querySelectorAll('.entero')].some(e => e.getBoundingClientRect().right > caja.right + 1)) problemas.push('un nombre de proyecto no cabe');
   document.body.dataset.listo = problemas.length ? problemas.join('; ') : 'si';
 })().catch(e => { document.body.dataset.listo = 'error: ' + e.message; });
 </script>
