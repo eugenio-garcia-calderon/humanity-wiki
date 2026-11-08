@@ -5,7 +5,7 @@ import type * as THREE from 'three';
  * nuestro y compararlo (2026-11-06, Eugenio: «un garaje lleno de vehículos»).
  *
  * Convenio de ejes, el mismo que el Aeromóvil: X hacia delante (el morro en
- * x > 0), Y hacia arriba, Z lateral (+ es la izquierda del coche). El eje
+ * x > 0), Y hacia arriba, Z lateral (+ es la derecha del coche). El eje
  * delantero está en x = 0 y el suelo en y = 0. Unidades: metros. El modelo se
  * construye con `three` y devuelve un Group con todo dentro; el visor lo
  * coloca, lo gira y lo oculta él solo.
