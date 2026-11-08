@@ -3,12 +3,11 @@ import type { VehiculoGaraje } from './tipos';
 import { E, areaFrontal, envolventeDe, loft, parche, thetaEnAltura, type Est } from './forma';
 
 /**
- * Los dos prototipos de Volkswagen con los asientos en tándem, antecesores del
- * XL1 (2026-11-07, Eugenio: «añade el XL1 concept… los tres»):
- *  - 1-Litro (2002): 3,47 × 1,25 × 1,10 m, 290 kg en vacío, Cd 0,159, cabina
- *    de avión, tapacubos planos y las ruedas traseras muy juntas.
- *  - L1 (Salón de Frankfurt, 2009): 3,813 × 1,20 × 1,143 m, 381 kg, Cd 0,195,
- *    área frontal 1,02 m² (CdA 0,199), 158 km/h.
+ * El 1-Litro de Volkswagen (2002), primer prototipo en tándem, antecesor del
+ * XL1 (2026-11-07, Eugenio: «añade el XL1 concept… los tres»): 3,47 × 1,25 ×
+ * 1,10 m, 290 kg en vacío, Cd 0,159, cabina de avión, tapacubos planos y las
+ * ruedas traseras muy juntas. El L1 de 2009 se quitó el 2026-11-08 («están
+ * repetidos»: su forma era casi la misma).
  * Datos: Wikipedia, «Volkswagen 1-litre car». La batalla, las vías, los
  * voladizos y la forma no están publicados: salen de fotos de prensa y son
  * aproximados (se dice en `fuente`). Sin logotipos ni rótulos de marca.
@@ -89,31 +88,6 @@ function vehiculo(p: Prototipo): VehiculoGaraje {
     construir: () => construirCon(p),
   };
 }
-
-/** L1 de 2009: cuerpo de puro, cúpula larga, 1,20 m de ancho. */
-export const VEHICULO_L1 = vehiculo({
-  id: 'l1', nombre: 'VW L1 2009', largo: 3.813, ancho: 1.2, alto: 1.143, batalla: 2.38, viaDel: 1.0, viaTras: 0.88, r: 0.27,
-  cuerpo: [
-    E(0.72, 0.36, 0.40, 0.02, 0.03, 0.02, 2.2),
-    E(0.66, 0.24, 0.52, 0.20, 0.26, 0.17, 2.3),
-    E(0.52, 0.17, 0.60, 0.38, 0.45, 0.30, 2.4),
-    E(0.30, 0.13, 0.66, 0.52, 0.57, 0.40, 2.5),
-    E(0.00, 0.12, 0.72, 0.57, 0.60, 0.42, 2.5),
-    E(-0.35, 0.12, 0.86, 0.56, 0.59, 0.40, 2.5),
-    E(-0.75, 0.12, 1.04, 0.52, 0.56, 0.36, 2.4),
-    E(-1.15, 0.12, 1.13, 0.50, 0.54, 0.33, 2.4),
-    E(-1.55, 0.12, 1.143, 0.49, 0.53, 0.32, 2.4),
-    E(-1.95, 0.13, 1.10, 0.50, 0.54, 0.31, 2.4),
-    E(-2.38, 0.15, 0.98, 0.50, 0.53, 0.28, 2.4),
-    E(-2.70, 0.22, 0.84, 0.40, 0.43, 0.22, 2.3),
-    E(-2.95, 0.34, 0.70, 0.22, 0.24, 0.13, 2.3),
-    E(-3.093, 0.48, 0.56, 0.02, 0.03, 0.02, 2.2),
-  ],
-  cupula: { x0: -0.22, x1: -2.1, cintura: 0.80 },
-  color: 0xa7b0ba,
-  aero: { cd: 0.195, area: 1.02, masaVacio: 381, plazas: 2, vmax: 158, fuente: 'Cd 0,195, área frontal 1,02 m² (CdA 0,199), 381 kg y 158 km/h: Wikipedia, «Volkswagen 1-litre car»' },
-  fuente: 'Wikipedia, «Volkswagen 1-litre car»: 3 813 × 1 200 × 1 143 mm. Batalla, vías y forma, aproximadas a partir de fotos de prensa',
-});
 
 /** 1-Litro de 2002: más corto y bajo, cabina de avión, ruedas traseras muy juntas. */
 export const VEHICULO_1LITRO = vehiculo({

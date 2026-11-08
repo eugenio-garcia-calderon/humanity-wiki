@@ -10484,3 +10484,9 @@ Eugenio asked for five things on the 3D world; all on branch `nube/arquitectura-
   - Arrastrar: pinchando un coche del garaje en el 3D y moviéndolo se desliza por el suelo; al soltar se guarda su sitio (a 5 cm). La cámara no gira mientras se arrastra. No funciona con los coches superpuestos (ahí la posición la pone la alineación).
   - Superponer: la tarjeta lista todos los coches con silueta; pinchando en el nombre se ponen o se quitan.
   - Sin verificar: el móvil con la app instalada (en táctil, arrastrar un coche y girar la cámara usan el mismo gesto: arrastrar sobre un coche lo mueve, fuera de él gira).
+
+## 2026-11-08 — Aeromóvil: fuera del garaje el XL1 de producción y el L1 2009
+
+- Eugenio: «Elimina estos dos vehículos del garaje, que están repetidos». El XL1 de producción tenía la misma carrocería que el XL1 Concept 2011 (solo cambiaba el color y unos datos) y el L1 2009 se parecía mucho al 1-Litro 2002. Quedan Twizy, Aptera, XL1 Concept 2011 y 1-Litro 2002, alternando a cada lado del Aeromóvil (Twizy y XL1 Concept a un lado, Aptera y 1-Litro al otro).
+- Quien tenía el garaje guardado en su navegador con esos dos coches no los vuelve a ver: la lista guardada solo conserva coches que siguen existiendo.
+- El XL1 Concept pasa a tener en «Superponer» el morado que llevaba el de producción.

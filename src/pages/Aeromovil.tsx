@@ -573,7 +573,7 @@ export default function Aeromovil() {
     // El Aptera, al otro lado a 3 m (2026-11-07, «ponlo en el garaje junto a los otros dos»). Quien ya tenía el
     // garaje guardado también lo ve: su lista guardada no lo trae y se queda con este valor.
     // Los tres prototipos de VW (2026-11-07, «los tres»): el XL1 Concept frente al de producción, y los dos tándem más allá.
-    const POR_DEFECTO: Record<string, { z: number }> = { twizy: { z: 3 }, aptera: { z: -3 }, xl1: { z: 6 }, xl1concept: { z: -6 }, l1: { z: 8.6 }, unlitro: { z: -8.6 } };
+    const POR_DEFECTO: Record<string, { z: number }> = { twizy: { z: 3 }, aptera: { z: -3 }, xl1concept: { z: 6 }, unlitro: { z: -6 } };
     const base = VEHICULOS_GARAJE.map((v, i) => POR_DEFECTO[v.id] ? { id: v.id, visible: true, x: 0, z: POR_DEFECTO[v.id].z, giro: 0 } : ({ id: v.id, visible: false, x: 0, z: (i % 2 ? 1 : -1) * (2.6 + 2.2 * Math.floor(i / 2)), giro: 0 }));
     // v3 (2026-11-07): el XL1 deja de ser una caja y sale por defecto. En la lista v2 guardada estaba oculto,
     // así que al pasar de v2 a v3 se olvida solo lo que se guardó del XL1 (el resto se conserva).
