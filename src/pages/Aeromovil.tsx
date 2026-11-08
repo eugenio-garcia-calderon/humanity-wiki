@@ -18,12 +18,14 @@
 //   /aeromovil/exportar   STEP por capas, STL y parámetros para regenerar el STEP
 //   /aeromovil/componentes[/:id]  (solo Aeromóvil 1) ficha de cada pieza: peso,
 //                         coste, proveedor y alternativas
+//   /aeromovil/aranceles   (solo Aeromóvil 1) derechos de aduana de las piezas
+//                         compradas en China, IVA aparte, y el vehículo entero
 //
 // Todo el cálculo vive en `src/components/aeromovil/geometria.ts`, que es la
 // misma geometría que el script CadQuery de `public/aeromovil/`.
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Armchair, BatteryCharging, Bike, Box, Car, Camera, ChevronDown, CircleDot, ClipboardList, Factory, Frame, Layers3, Lightbulb, ShieldCheck, Zap, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Ruler, RotateCcw, Package, Wrench, Wind } from 'lucide-react';
+import { Armchair, BatteryCharging, Bike, Box, Car, Camera, ChevronDown, CircleDot, ClipboardList, Factory, Frame, Layers3, Lightbulb, ShieldCheck, Zap, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Ruler, RotateCcw, Package, Ship, Wrench, Wind } from 'lucide-react';
 import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import { Visor3D, CAPAS, type CapaId, type Vista, type VisorHandle } from '../components/aeromovil/Visor3D';
@@ -43,6 +45,7 @@ import { TarjetaSuperponer, type Alineacion } from '../components/aeromovil/Tarj
 import { colorCss } from '../components/aeromovil/garaje/superponer';
 import { DEPARTAMENTOS, type IdDepartamento } from '../components/aeromovil/departamentos';
 import { PanelDepartamento, ComparacionChasis } from '../components/aeromovil/Departamentos';
+import { VistaAranceles } from '../components/aeromovil/Aranceles';
 import { tubosCelosia } from '../components/aeromovil/chasisCelosia';
 import { explicacion } from '../components/aeromovil/explicaciones';
 
@@ -51,10 +54,11 @@ const CLAVE = 'aeromovil.parametros.v5';
 const fmt = (v: number, d = 2) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
 const m2 = (v: number) => `${fmt(v)} m`;
 
-type Seccion = 'diseno' | 'componentes' | 'otros' | 'tareas' | 'plan' | 'planos' | 'exportar';
+type Seccion = 'diseno' | 'componentes' | 'aranceles' | 'otros' | 'tareas' | 'plan' | 'planos' | 'exportar';
 const SECCIONES: { k: Seccion; n: string; ruta: string; icono: typeof Box }[] = [
   { k: 'diseno', n: 'Diseño 3D', ruta: '/aeromovil', icono: Box },
   { k: 'componentes', n: 'Componentes', ruta: '/aeromovil/componentes', icono: Wrench },
+  { k: 'aranceles', n: 'Aranceles', ruta: '/aeromovil/aranceles', icono: Ship },
   { k: 'otros', n: 'Otros velomóviles', ruta: '/aeromovil/otros', icono: Bike },
   { k: 'tareas', n: 'Tareas', ruta: '/aeromovil/tareas', icono: ListChecks },
   { k: 'plan', n: 'Plan', ruta: '/aeromovil/plan', icono: MapIcon },
@@ -663,7 +667,7 @@ export default function Aeromovil() {
             alNuevo={() => { setP(PARAMETROS_POR_DEFECTO); setActual(null); cargarDisenoPorDefecto().then(d => { if (d) { setP(deDiseno(d.parametros || {})); setActual(null); } }); }}
             alGuardado={alGuardado} />
           <nav className="flex flex-wrap gap-1" aria-label="Aeromóvil">
-            {SECCIONES.filter(s => s.k !== 'componentes' || esA1).map(s => {
+            {SECCIONES.filter(s => (s.k !== 'componentes' && s.k !== 'aranceles') || esA1).map(s => {
               const Icono = s.icono, activa = seccion === s.k;
               return (
                 <Button key={s.k} variant="ghost" aria-current={activa ? 'page' : undefined} onClick={() => navegar(s.ruta)}
@@ -1040,6 +1044,9 @@ export default function Aeromovil() {
         ? <VistaComponentes P={P} res={res} modelo={modelo} id={ruta.split('/')[3]} alCambiar={setP} alNavegar={r => { navegar(r); window.scrollTo({ top: 0 }); }}
             alVerEn3D={capa => { setVisibles(Object.fromEntries(CAPAS.map(c => [c.k, true])) as Record<CapaId, boolean>); setRayosX(!['carenado', 'cristales', 'solar'].includes(capa)); setVista('iso'); navegar('/aeromovil'); window.scrollTo({ top: 0 }); }} />
         : <p className="mx-auto max-w-[1100px] px-4 py-8 text-sm text-slate-600">Las fichas de componentes son del Aeromóvil 1. Elige ese vehículo en «Diseño 3D» para verlas.</p>)}
+      {seccion === 'aranceles' && (esA1
+        ? <VistaAranceles P={P} res={res} modelo={modelo} />
+        : <p className="mx-auto max-w-[1100px] px-4 py-8 text-sm text-slate-600">Los aranceles se calculan con las piezas del Aeromóvil 1. Elige ese vehículo en «Diseño 3D» para verlos.</p>)}
       {seccion === 'otros' && <VistaOtros modelo={modelo} resultados={res} puedeDecidir={!!dueno?.puedeDecidir} alVer={r => verRef(r, 'sola')} alComparar={r => verRef(r, 'comparar')} />}
       {seccion === 'tareas' && <VistaTareas tareas={tareas} recargar={recargar} error={errorTareas} dueno={dueno} />}
       {seccion === 'plan' && <VistaPlan />}

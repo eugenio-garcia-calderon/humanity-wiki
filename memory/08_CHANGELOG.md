@@ -10490,3 +10490,13 @@ Eugenio asked for five things on the 3D world; all on branch `nube/arquitectura-
 - Eugenio: «Elimina estos dos vehículos del garaje, que están repetidos». El XL1 de producción tenía la misma carrocería que el XL1 Concept 2011 (solo cambiaba el color y unos datos) y el L1 2009 se parecía mucho al 1-Litro 2002. Quedan Twizy, Aptera, XL1 Concept 2011 y 1-Litro 2002, alternando a cada lado del Aeromóvil (Twizy y XL1 Concept a un lado, Aptera y 1-Litro al otro).
 - Quien tenía el garaje guardado en su navegador con esos dos coches no los vuelve a ver: la lista guardada solo conserva coches que siguen existiendo.
 - El XL1 Concept pasa a tener en «Superponer» el morado que llevaba el de producción.
+
+## 2026-11-08 — Aeromóvil: sección «Aranceles» (importar de China)
+
+- Nueva pestaña «Aranceles» en `/aeromovil/aranceles` (solo Aeromóvil 1). Para cada pieza que se compraría en China (todas menos el chasis y la carrocería): precio de catálogo en Europa, precio estimado en China, el código de la Nomenclatura Combinada con lo que se declara, el arancel normal, el derecho especial si lo hay y lo que se paga.
+- Aparte, las piezas que solo pagan IVA (arancel del 0 %: inversor, cargador y convertidor, paneles solares y su regulador).
+- Derechos especiales: antidumping sobre neumáticos chinos (Reglamento 2026/1540, 4,3–45,3 %), sobre llantas de aluminio (22,3 %), sobre tornillería de acero (22,1–86,5 %, solo si se compra suelta), sobre llantas de acero (tipo por confirmar), y el derecho compensatorio sobre coches eléctricos chinos (solo coche entero y no para la categoría L).
+- El IVA aparte, con su base (valor en aduana + derechos + gastos hasta el taller) y la nota de que una empresa lo deduce.
+- Comparación con importar el vehículo entero: como cuadriciclo L7e (10 %) y como turismo M1 (10 % + 35,3 %). Con el diseño por defecto: 468 € de derechos por las piezas, 1.855 € el coche entero como L7e y 8.404 € como M1; IVA aparte.
+- Los precios en China, el flete y el montaje son estimaciones sin presupuesto y la página lo dice. Los tipos se leyeron el 8 de noviembre de 2026 en copias del TARIC; las líneas que no se pudieron leer para su código exacto llevan «confirmar».
+- Sin verificar: el móvil con la app instalada. `vite build` no se ejecutó en local (dos bots usaban la memoria); se comprueba en el despliegue.
