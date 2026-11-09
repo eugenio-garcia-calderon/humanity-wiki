@@ -10721,4 +10721,42 @@ Petición de Eugenio: «permíteme editarlo». Eligió esta opción: «El Bala p
 - **Sin verificar:** un móvil y una gráfica de verdad (no se ha podido notar si arrastrar va fluido; los tiempos medidos son de 30–90 ms por paso) y el guardado contra el servidor real (se probó con el servidor simulado).
 - Calendario Arte: vista «Pantalla completa» (2026-11-09, Eugenio: «una vista que sea solo del calendario, sin el menú ni ningún botón… pulsando un botón arriba a la derecha… y que aparezca el diseño favorito»). Botón «Pantalla completa» arriba a la derecha (`?vista=pantalla`): pide la pantalla completa al navegador y muestra solo la portada y los doce meses seguidos, sin editar, cada mes con su diseño favorito y cada página A4 encajada en el alto de la pantalla. Empieza en el mes donde se estaba. Se sale con Esc o con un aspa que solo asoma al mover el ratón o tocar (en el iPhone no existe Esc ni la pantalla completa del navegador).
 - Calendario Arte: la franja de abajo en tres recuadros iguales (2026-11-09, Eugenio: «un hueco… que sea mi reto personal del mes, donde la gente pueda escribir qué reto se propone… que queden equilibrados… simplificar los cuadraditos… y no sopas de letras»). Herramienta del mes · «Mi reto personal del mes» (una pregunta editable por mes, campo `reto`, y renglones para escribir a mano) · Iniciativa del mes. Las doce herramientas se reescribieron más cortas (un título, una línea y cinco puntos en una columna, sin cambiar los datos); mayo pasa de sopa de letras a «Crea con el cuerpo» y el tipo «sopa» desaparece (se borra `sopaDeLetras.ts`; si quedara guardado en algún mes, se pinta como lista).
+
+## 2026-11-09 — El Cuadriciclo Bala, también en «Diseños»
+
+Eugenio: «no veo el Bala en el selector de diseños».
+
+- **Por qué no salía:** el Bala editable entró en la web a las 19:51, pero solo como tercera opción del apartado «Vehículo». Ese apartado, además, con el Aeromóvil 1 solo se ve en el departamento «Proyecto». La lista de «Diseños» sale de la base de datos, y en ella cada vehículo tiene su diseño base del equipo; el Bala no tenía.
+- **Arreglo:** la migración `0178_aeromovil_bala_base.sql` añade el diseño base «Cuadriciclo Bala (biplaza a horcajadas)», igual que se hizo con el Aeromóvil 1 en la 0170. Abre con las medidas del Bala del garaje (comprobado con un script).
+- **Cómo funciona:** como los otros diseños base, se abre y se mira; cambiarlo o guardarlo como propio sigue siendo cosa del dueño con su sesión.
+- **Sin verificar:** la migración no se ha podido ejecutar contra una base de datos aquí (no hay Postgres en este entorno). Es la misma forma de la 0170, que ya corrió en producción.
+
+### 2026-11-09 — Modo oscuro: las letras sobre fotos y el boletín del pie vuelven a ser claras
+- Eugenio: «las letras me salen negras». El tema oscuro cambia `--color-white` por la superficie oscura; encima de una foto, o de un fondo elegido a mano, el fondo no cambia y el texto quedaba casi negro.
+- Nuevo atributo `data-fondo-oscuro` (`scripts/generar-tema-oscuro.mjs`): dentro, la paleta blanca y pizarra se queda como en el modo claro. Lo llevan los títulos de las tarjetas de proyecto, los de las noticias, la cabecera con foto de cada proyecto y el boletín cuando el pie es oscuro.
+
+### 2026-11-09 — Portada de luzhumanidad.com: una sola línea
+- Eugenio: «con menos texto y menos números, más elegante y simple, y que ocupe menos para que se vean las tarjetas». `PresentacionSitio` pasa de caja con frase, cuatro cifras y dos botones a titular y «Colaborar» en una línea; de 271 a 58 px en escritorio.
+- Nuevo `config.sitio.portada.titular` («Energía, movilidad, vivienda y comunidad.», ya puesto en producción). El lema largo se queda para la tarjeta al compartir.
+
+## 2026-11-09 — Un solo selector de vehículo, en el logo, y la cabecera en una línea
+
+Eugenio: «Unifica los selectores de vehículos… deja solo el de arriba y deja seleccionar los vehículos solo de una manera». Al preguntarle cuál quitar: «deja el de arriba, y de paso unifica el menú de abajo con el de arriba para que ocupe solo una línea. Y que el selector de vehículos esté integrado en el logo de Aeromóvil para que quede elegante como un desplegable/botón».
+
+- **El logo es el selector.** El dibujo del coche con el nombre del vehículo («Aeromóvil 1 ⌄») abre el menú que antes era «Diseños».
+  - Debajo del nombre sale el diseño abierto («sin guardar» si no hay ninguno) y si está guardado.
+  - **La lista va agrupada por vehículo:** Aeromóvil 1, Aeromóvil Gota y Cuadriciclo Bala, cada uno con su descripción y sus diseños. Los diseños sin vehículo (anteriores al 2026-11-06) van con el Gota.
+  - Si un vehículo se queda sin ningún diseño, sale «Medidas de partida» para poder abrirlo igualmente.
+- **Quitado el bloque «Vehículo»** del panel de la derecha: elegir vehículo es abrir uno de sus diseños.
+- **Cabecera en una línea:** logo, secciones y, en el Aeromóvil 1, los departamentos como un desplegable al final («Carrocería ⌄»), con su icono y su lema. Antes eran una segunda fila de once botones.
+  - **Desde 1360 px** de ancho se leen los nombres de todas las secciones.
+  - **Por debajo**, solo los iconos (con su nombre al pasar el ratón), menos la sección abierta, que lleva el nombre.
+  - **En el móvil**, la fila de secciones se desliza de lado.
+- **Textos que mandaban a elegir el vehículo en «Diseño 3D»** (Componentes, Aranceles y Planos) ahora dicen «en el menú del nombre del vehículo, arriba a la izquierda».
+- **Se queda:** «Otros velomóviles» sigue como sección. Es el catálogo para comparar, no un selector del vehículo que se diseña.
+- **Comprobado** en el navegador a 1512, 1366, 1280 y 390 px:
+  - la cabecera ocupa una sola línea y la página no se desborda de lado;
+  - el menú del logo sale agrupado; elegir el Bala lo abre y el bloque «Vehículo» ya no está;
+  - el desplegable de departamentos cambia de departamento.
+- **Sin verificar:** con la cuenta del dueño (los botones de guardar y la estrella) y en un móvil de verdad.
 - Calendario Arte: Diseño 4 (2026-11-09, Eugenio). Ilustraciones centradas en el BIEN, el ideal del tema, sin mitad oscura, en acuarela y lápiz de color sobre papel blanco hueso (RGB 244,239,228), con la ilustradora Sonja Wimmer y una foto de Eugenio como referencia de estilo. Biblioteca de acuarela en `design/calendario-arte/generadores/diseno4/acuarela.py`; encargo en `design/calendario-arte/encargos/DISENO4.md`. Cada mes pasa por un evaluador independiente que puntúa del 1 al 10 y solo se publica con 8 o más: el Diseño 4 de un mes es su favorito y el que se imprime; mientras no lo tenga, sigue el Diseño 2. Primero: febrero (Relaciones, 8/10 en la tercera ronda). Toda la hoja (portada, ilustración y calendario) pasa al mismo papel blanco hueso, con los fines de semana y días vacíos como tinte transparente.

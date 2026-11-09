@@ -250,9 +250,9 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
       )}
 
       {/* LA PRESENTACIÓN (2026-11-07, Eugenio: «haz todas las propuestas… con alta calidad, no
-          quiero nada cutre»): qué es el laboratorio en una frase, sus cifras y dos botones,
+          quiero nada cutre»): qué es el laboratorio en una línea y el botón de colaborar,
           encima de las tarjetas y sin empujarlas fuera de la primera pantalla. */}
-      {escaparate && <PresentacionSitio cfg={raiz.config} datos={datos} />}
+      {escaparate && <PresentacionSitio cfg={raiz.config} />}
 
       {/* LAS TARJETAS (2026-11-06, Eugenio: «el título en blanco con un poco de sombra y de fondo
           la portada, como en la página del proyecto; debajo la descripción en letra pequeña sobre
@@ -292,7 +292,7 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
                       {estado.label}
                     </span>
                   )}
-                  <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
+                  <div data-fondo-oscuro="" className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
                     <Titulo className="text-2xl font-black leading-tight tracking-tight text-white [text-shadow:0_2px_8px_rgba(0,0,0,0.45)] sm:text-3xl">{nombre}</Titulo>
                     {(modelo.fecha(f) || sus.length > 0) && (
                       <p className="mt-1 text-sm font-semibold text-white/90 [text-shadow:0_1px_6px_rgba(0,0,0,0.55)]">
