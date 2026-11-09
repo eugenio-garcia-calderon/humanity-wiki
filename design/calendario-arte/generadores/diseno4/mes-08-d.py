@@ -130,70 +130,82 @@ lz.lapiz([spline([B(110 + k * 1.5, 110 + k * 3.6), B(150, 106 + k * 3.8), B(188,
 lz.contorno(cb, '#8f3a4a', grosor=0.7, presion=0.5, cortes=0.3)
 lz.aguada(cop, '#a0405a', dens=0.22, borde=0.2, desvanece=(BX + 20, BY + 130, BX - 20, BY - 40), gran=0.3)
 
-# the folds: sulci that meander and branch in every direction (skeleton of a random labyrinth),
-# cut by the lateral fissure and the central sulcus that separate the lobes
-from skimage.morphology import skeletonize
+# the folds: GYRI -- thick rounded cords that meander and fold back on themselves like a coiled
+# intestine, separated by thin dark sulci. Painted as volumes: the groove colour first, then each
+# cord lifted lighter on top, with a highlight along its back and a soft pencil edge.
 LATERAL = [B(-170, 74), B(-110, 58), B(-50, 50), B(-10, 30), B(40, 22), B(90, 4), B(130, 10)]
 CENTRAL = [B(14, -170), B(4, -130), B(-12, -96), B(-4, -60), B(-22, -24), B(-26, 14)]
 Mb = (cop.mascara(U1, 0, 0, 1485, 850) > 0.5) & ~(cb.mascara(U1, 0, 0, 1485, 850) > 0.3)
-Mi = cv2.erode(Mb.astype(np.uint8), np.ones((11, 11), np.uint8)) > 0
-campo = np.random.default_rng(812).normal(0, 1, Mb.shape).astype(np.float32)
-campo = cv2.GaussianBlur(campo, (0, 0), 4.6) - 0.7 * cv2.GaussianBlur(campo, (0, 0), 13)
-surcos_m = (campo < 0) & Mi
 for ln in (LATERAL, CENTRAL):
     tmp = np.zeros(Mb.shape, np.uint8)
-    cv2.polylines(tmp, [np.round(spline(ln)).astype(np.int32)], False, 1, thickness=3)
-    surcos_m &= ~(cv2.dilate(tmp, np.ones((9, 9), np.uint8)) > 0)
-esq = skeletonize(surcos_m)
-ys, xs = np.nonzero(esq)
-pix = set(zip(ys.tolist(), xs.tolist()))
-VEC = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
-def vecinos(p):
-    return [(p[0] + a, p[1] + b) for a, b in VEC if (p[0] + a, p[1] + b) in pix]
-grado = {p: len(vecinos(p)) for p in pix}
-usados = set()
-caminos = []
-def anda(p0, p1):
-    cam = [p0, p1]
-    usados.add((p0, p1)); usados.add((p1, p0))
-    while grado.get(cam[-1], 0) == 2:
-        nx = [q for q in vecinos(cam[-1]) if (cam[-1], q) not in usados]
-        if not nx:
-            break
-        usados.add((cam[-1], nx[0])); usados.add((nx[0], cam[-1]))
-        cam.append(nx[0])
-    return cam
-for p in pix:
-    if grado[p] != 2:
-        for q in vecinos(p):
-            if (p, q) not in usados:
-                caminos.append(anda(p, q))
-for p in pix:
-    for q in vecinos(p):
-        if (p, q) not in usados:
-            caminos.append(anda(p, q))
-surcos = []
-for cam in caminos:
-    if len(cam) < 4:
-        continue
-    pp = np.array([(x, y) for y, x in cam], float)
-    k = 5
-    if len(pp) > k:
-        for _ in range(3):
-            pp = np.vstack([pp[:1], np.array([pp[max(0, i - 2):i + 3].mean(0) for i in range(1, len(pp) - 1)]), pp[-1:]])
-    surcos.append(pp)
-# grooves: a deeper rosy glaze in each sulcus, then soft carmine pencil
-for ln in surcos:
-    lz.aguada(Trazo(ln[::3] if len(ln) > 8 else ln, (3.0, 3.0)), '#b84a60', dens=0.28, irreg=0.35, borde=0.6, gran=0.3)
-lz.lapiz(surcos, '#94344a', grosor=0.8, presion=0.55, temblor=0.2, cortes=0.0, puntas=0.01)
-for ln in (LATERAL, CENTRAL):
-    lz.aguada(Trazo(spline(ln)[::3], (5, 4.5, 3)), '#a83e58', dens=0.3, irreg=0.4, borde=0.6)
-    lz.lapiz([spline(ln)], '#7e2a42', grosor=0.95, presion=0.5, temblor=0.4)
-# the temporal lobe a little rosier and in shade, the frontal lit
-lz.aguada(Poligono([B(-200, 60), B(-120, 66), B(-10, 30), B(80, 20), B(60, 110), B(-60, 122), B(-170, 90)]), '#c0566a',
-          dens=0.16, suave=10)
-lz.levanta(Elipse(BX - 100, BY - 95, 90, 45), 0.22, suave=22)
+    cv2.polylines(tmp, [np.round(spline(ln)).astype(np.int32)], False, 1, thickness=6)
+    Mb &= ~(tmp > 0)
+ANCHO_G, HUECO = 15.0, 3.2
+dentro = cv2.erode(Mb.astype(np.uint8), np.ones((int(ANCHO_G) + 3, int(ANCHO_G) + 3), np.uint8)) > 0
+ocupado = np.zeros(Mb.shape, np.uint8)
+rw = np.random.default_rng(4242)
 
+
+def libre(p, propios):
+    x, y = int(round(p[0])), int(round(p[1]))
+    if not (0 <= x < 1485 and 0 <= y < 850) or not dentro[y, x] or ocupado[y, x]:
+        return False
+    if len(propios) > 10:
+        q = np.asarray(propios[:-10])
+        if np.min(np.hypot(q[:, 0] - p[0], q[:, 1] - p[1])) < ANCHO_G + HUECO:
+            return False
+    return True
+
+
+def gusano(p0, ang):
+    """A cord that crawls and folds back on itself, never crossing what is already there."""
+    pts = [np.array(p0, float)]
+    curv = rw.normal(0, 0.12)
+    for _ in range(260):
+        curv = np.clip(curv + rw.normal(0, 0.07), -0.2, 0.2)
+        ok = False
+        for dt in (0.0, 0.35, -0.35, 0.75, -0.75, 1.2, -1.2):
+            a_ = ang + curv + dt * (1 if curv >= 0 else -1)
+            q = pts[-1] + 3.0 * np.array([math.cos(a_), math.sin(a_)])
+            if libre(q, pts):
+                ang = a_
+                pts.append(q)
+                ok = True
+                break
+        if not ok:
+            break
+    return np.array(pts)
+
+
+gyri = []
+ys_, xs_ = np.nonzero(dentro)
+orden = rw.permutation(len(xs_))
+for i in orden[:4000]:
+    p0 = (xs_[i] + 0.5, ys_[i] + 0.5)
+    if ocupado[int(p0[1]), int(p0[0])]:
+        continue
+    g = gusano(p0, rw.uniform(0, 2 * math.pi))
+    if len(g) < 12:
+        continue
+    gyri.append(g)
+    cv2.polylines(ocupado, [np.round(g).astype(np.int32)], False, 1, thickness=int(ANCHO_G * 2 + HUECO))
+# the grooves: one darker glaze over the whole cortex (it stays only in the gaps)
+lz.aguada(Poligono([B(*p) for p in SILUETA]) - cb, '#b4475c', dens=0.42, borde=0.3, gran=0.4, irreg=0.6)
+for g in gyri:
+    tubo = Trazo(g[::2] if len(g) > 6 else g, (ANCHO_G * 1.9,))
+    lz.aguada(tubo, '#f2a69c', dens=0.62, tapa=0.8, borde=0.75, irreg=0.35, gran=0.3,
+              toques=[(*g[len(g) // 2], 20, '#e98e88', 0.4)])
+    tg = np.gradient(g, axis=0)
+    tg /= np.maximum(np.hypot(*tg.T)[:, None], 1e-9)
+    nr = np.stack([-tg[:, 1], tg[:, 0]], 1)
+    lado = np.where((nr[:, 1] < 0)[:, None], nr, -nr)          # the side toward the light (up)
+    lz.levanta(Trazo((g + lado * ANCHO_G * 0.35)[::3], (ANCHO_G * 0.45,)), 0.35, suave=2.0)
+    lz.aguada(Trazo((g - lado * ANCHO_G * 0.5)[::3], (ANCHO_G * 0.55,)), '#c45a68', dens=0.22, suave=2.0)
+    lz.contorno(tubo, '#8a3048', grosor=0.6, presion=0.4, cortes=0.25, desfase=0.2)
+for ln in (LATERAL, CENTRAL):
+    lz.aguada(Trazo(spline(ln)[::3], (6, 5, 4)), '#8a3048', dens=0.4, irreg=0.4, borde=0.6)
+    lz.lapiz([spline(ln)], '#6e2238', grosor=1.0, presion=0.55, temblor=0.3)
+lz.contorno(cop, '#8f3a4a', grosor=1.0, presion=0.55, cortes=0.25)
 # branches climb into the crown and become dendrites; at their tips the neurons light up
 RAMAS = [[B(78, 128), B(40, 96), B(-20, 80), B(-90, 58)],
          [B(80, 126), B(70, 70), B(40, 10), B(20, -60)],
