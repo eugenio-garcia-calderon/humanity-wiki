@@ -171,11 +171,11 @@ export function explicar(cx: Contexto): Explicacion {
       ) : zona === 'costado' ? opciones(
         opcion('nU', -1, 0.3, 'Una sección más redondeada (hacia «elíptica») quita las esquinas que el aire tiene que rodear de golpe.', 'general'),
       ) : opciones(
-        opcion('parabrisas', 1, 0.03, 'Un parabrisas más tumbado hace la curva del techo más suave: el pico de succión baja. Con el diseño por defecto el túnel lo confirma (de Cp −0,85 a −0,73 y Cd algo más bajo).', 'calculo'),
+        opcion('parabrisas', 1, 0.03, 'Un parabrisas más tumbado hace la curva del techo más suave: el pico de succión baja. Con el diseño por defecto el túnel lo confirma, y el Cd también baja algo.', 'calculo'),
         opcion('techo', -1, 0.4, 'Ojo, es un compromiso: con un techo que cae en recta desde el pico, la estela se hace más pequeña y el Cd baja, pero el pico de succión del techo sube. Con el diseño por defecto el túnel da las dos cosas.', 'calculo'),
         (pt.f ?? 1) < 0.2 ? opcion('morroA1', 1, 0.15, 'La succión está en el morro: uno más redondo («gota») suaviza la curva de la punta.', 'general') : null,
       )) : (zona === 'bajos' ? opciones(
-        opcion('clear', 1, 0.04, 'Más altura de bajos: menos carga contra el suelo (con el diseño por defecto, Cl de −0,14 a −0,10 subiendo los bajos a 30 cm). En el Gota el pico de succión de abajo no baja con ello: el túnel no da una tendencia clara, pruébalo.', 'calculo'),
+        opcion('clear', 1, 0.04, 'Más altura de bajos: menos carga contra el suelo; con el diseño por defecto el túnel lo confirma. En el Gota el pico de succión de abajo no baja con ello: el túnel no da una tendencia clara, pruébalo.', 'calculo'),
         opcion('nL', 1, 0.5, 'Un fondo más plano reparte la succión.', 'general'),
       ) : opciones(
         opcion('pmax', -1, 0.08, 'Adelantar el espesor máximo suaviza la curva del techo: con el diseño por defecto el pico de arriba baja un poco.', 'calculo'),
@@ -200,8 +200,8 @@ export function explicar(cx: Contexto): Explicacion {
       void K;
       const mej = a1 || !nuestro ? opciones(
         opcion('posMorro', 1, 0.06, 'Mover hacia atrás la sección más gruesa con un morro más largo. Con el diseño por defecto el túnel da un Cd algo más bajo, aunque deja menos sitio para la bajada.', 'calculo'),
-        opcion('techo', -1, 0.4, 'Un techo que baja antes y en recta hace la subida de presión más larga y más suave: con el diseño por defecto la estela se reduce a la mitad.', 'calculo'),
-        opcion('cupX1', 1, 0.05, 'Llevar la cúpula hasta el final de la cola: si acaba antes, el aire cae de golpe al acabar la cúpula y se despega allí (con el diseño por defecto, acabarla al 85 % sube el Cd un 10 %).', 'calculo'),
+        opcion('techo', -1, 0.4, 'Un techo que baja antes y en recta hace la subida de presión más larga y más suave: con el diseño por defecto el túnel da una estela más pequeña.', 'calculo'),
+        opcion('cupX1', 1, 0.05, 'Llevar la cúpula hasta el final de la cola: si acaba antes, el aire cae de golpe al acabar la cúpula y se despega allí (con el diseño por defecto, acabarla antes de la cola sube el Cd de forma clara).', 'calculo'),
         opcion('colaA1', -1, 0.25, 'Una cola más afilada: el aire tiene más camino para frenarse poco a poco.', 'general'),
       ) : opciones(
         opcion('full', 1, 0.15, 'Una cola más afilada («Plenitud de cola» hacia afilada): la subida de presión se reparte en más longitud. Con el diseño por defecto el túnel da un Cd más bajo.', 'calculo'),
@@ -270,12 +270,12 @@ export function explicar(cx: Contexto): Explicacion {
       { texto: 'Tapar las ruedas traseras y cerrar los huecos de la trasera.', origen: 'general' },
     ];
     return a1 ? opciones(
-      opcion('techo', -1, 0.4, 'Un techo que baja en recta desde el pico deja el hueco final más pequeño: con el diseño por defecto el túnel da la mitad de área de estela y un Cd más bajo.', 'calculo'),
+      opcion('techo', -1, 0.4, 'Un techo que baja en recta desde el pico deja el hueco final más pequeño: con el diseño por defecto el túnel da una estela más pequeña y un Cd más bajo.', 'calculo'),
       opcion('colaA1', -1, 0.25, 'Una cola más afilada termina en un hueco más pequeño. Con el diseño por defecto el túnel apenas lo nota hacia «afilada» y sí lo nota hacia «llena» (peor).', 'calculo'),
       opcion('cupX1', 1, 0.05, 'La cúpula hasta el final de la cola: si acaba antes, el aire se despega en su final.', 'calculo'),
       opcion('parabrisas', 1, 0.03, 'Un parabrisas más tumbado hace todo el perfil de arriba más suave; con el diseño por defecto también encoge la estela.', 'calculo'),
     ) : opciones(
-      opcion('tailRound', -1, 0.3, 'La punta de cola menos roma (hacia «en punta») es lo que más cambia en el Gota: con el diseño por defecto, de 0,75 a 0,30 el túnel da la mitad de área de estela y el Cd baja de 0,122 a 0,108.', 'calculo'),
+      opcion('tailRound', -1, 0.3, 'La punta de cola menos roma (hacia «en punta») es lo que más cambia en el Gota: con el diseño por defecto el túnel da menos estela y un Cd claramente más bajo.', 'calculo'),
       opcion('full', 1, 0.15, 'Una cola más afilada («Plenitud de cola») deja menos hueco: con el diseño por defecto el túnel da un Cd más bajo.', 'calculo'),
       opcion('tipH', -1, 0.15, 'Bajar la punta de cola alinea la cola con el aire que viene de los bajos; con el diseño por defecto, algo menos de estela.', 'calculo'),
     );

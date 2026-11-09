@@ -1158,3 +1158,19 @@ Chose (c).
 **Not adopted by the editor.** The tunnel gives 0.125 for the default A1 against the formula's 0.153 (−19 %). Energy, range and department figures keep `res.Cd`. The decision belongs to Eugenio, and the card puts the two side by side.
 
 **Stored calibration.** `tunel/calibracion.ts` keeps the calibration table so the card does not recompute five cars on every visit. `scripts/tunel-pruebas.ts` fails when it no longer matches the code. It failed at integration, because the XL1 and 1-Litre silhouettes changed the same day. The table was re-run before merging. **Rerun the script after any change to a garage silhouette.**
+
+## 2026-11-09 — Wind tunnel explanations: text generated from the computed result, sliders read from the editor, «Probar» runs on a copy
+
+**Where the text lives.** `tunel/explicaciones.ts` builds each panel from the live `ResultadoTunel`, so the numbers in it are this car's and this speed's. Options considered:
+- (a) static text per point type;
+- (b) text assembled from the result, with a «calculado»/«general» tag on every sentence.
+
+Chose (b): Eugenio asked for an explanation *of this value*, and the tags keep computed claims apart from textbook claims.
+
+**Slider names are not copied.** The improvement options take the label and section from the editor's own slider definitions (`fichas`). A renamed slider renames the option.
+
+**No typed figures for the default design.** The bot's options carried six figures measured on the default designs (e.g. «Cd 0,122 → 0,108»). Removed at integration and replaced by the direction alone. Nothing checked them, and they would go stale silently when the defaults or the calibration change. «Probar» gives the live figure for the visitor's own design.
+
+**«Probar» never writes.** The worker rebuilds the model from a modified copy of the parameters, runs the numbers-only tunnel and returns before → after. It is open to everyone, including visitors who cannot edit, because nothing is saved. Persisting a change stays with the slider and its existing owner check.
+
+**Garage cars.** A short sentence per car on what its maker did, keyed by id in `GARAJE`. A car with no entry falls back to «Es un coche del garaje: su forma la decidió su fabricante». That fallback is wrong for any design of our own added to the garage, so such a car needs its own entry.

@@ -10628,3 +10628,20 @@ Eugenio asked for five things on the 3D world; all on branch `nube/arquitectura-
 - Cambiada la etiqueta «Empieza a frenar» por «El aire empieza a frenarse»: en un coche, «frenar» se lee como pisar el freno. Corregidos también dos comentarios que todavía hablaban de las líneas de humo.
 - Comprobado: `tsc`, `vite build`, el script de pruebas y el editor con el Aeromóvil y los dos XL1 (sin errores nuevos en consola).
 - Sin verificar: un móvil real y una gráfica de verdad (las capturas son con el render por software y las partículas quietas).
+
+## 2026-11-09 — Túnel de viento: cada punto crítico se explica al pincharlo, con opciones de mejora
+
+Petición de Eugenio: «haz que el agente del túnel de viento haga una explicación de cada uno de estos parámetros cuando se hace click y que incluya opciones de mejora de esos parámetros».
+
+- **Las etiquetas del 3D se pueden pinchar** (ratón o dedo). Tienen una «i» y abren un panel dentro de la vista 3D, que también sale en pantalla completa:
+  - remanso, cada pico de succión, «El aire empieza a frenarse», separación prevista, estela y, si la hay, la burbuja;
+  - el panel dice qué es, el valor de este coche, por qué importa, cómo queda frente a los demás coches del túnel y cómo mejorarlo;
+  - cada frase lleva la marca «calculado» (sale de este túnel) o «general» (conocimiento de aerodinámica, no calculado aquí), y el pie explica las dos.
+- **La tarjeta del túnel tiene una fila de botones con los mismos puntos**, para abrirlos aunque las etiquetas queden juntas o con el teclado. Escape cierra el panel.
+- **Opciones de mejora** en nuestro diseño: nombran el deslizador tal y como se lee en pantalla y dónde está. El nombre se lee de la ficha del propio deslizador, no se copia.
+  - **«Probar»** calcula el túnel con ese cambio sobre una copia y enseña antes → después: Cd del túnel, kWh de aire cada 100 km, dónde se despega el aire y la cifra del propio punto. **Nunca toca ni guarda el diseño**, y dice qué deslizador mover para quedarse con el cambio.
+  - En los coches del garaje, las opciones son conocimiento general y una frase sobre qué hizo su fabricante.
+- **Etiquetas sin pisarse:** cada fotograma se proyectan a pantalla y se separan; las que se saldrían por arriba o por los lados vuelven dentro. Los nombres de los coches entran en el mismo reparto.
+- **Al integrarlo** quité seis cifras escritas a mano en las opciones (por ejemplo «el Cd baja de 0,122 a 0,108»). Eran ciertas con el diseño por defecto de hoy, pero nada las comprobaba: se quedarían viejas en cuanto cambie el diseño por defecto o la calibración. «Probar» da la cifra viva del diseño de cada uno.
+- Comprobado: `tsc`, `vite build`, `npx tsx scripts/tunel-pruebas.ts` (todo OK) y, en el navegador, el panel de la estela con el Aeromóvil 1 y el XL1, y «Probar» con «Caída del techo» de 1,90 a 1,50: Cd del túnel 0,125 → 0,122, en 6,7 s, con el diseño intacto.
+- Sin verificar: un móvil real, tocar una etiqueta 3D con el dedo (sí las filas de la tarjeta, en un móvil emulado), las etiquetas mientras gira la cámara, y el texto que ve el dueño con su sesión iniciada.
