@@ -491,3 +491,27 @@ def desvanecer_x(lz, x0, x1, y0, y1, a0, a1, b0, b1, semilla=5):
     T[:] = 1 - (1 - T) * F[..., None]
     O = lz.OP[Y0:Y1, X0:X1]
     O *= F[..., None]
+
+
+def componer(lz, G, k, c, umbral=0.06):
+    """Paste a group painted on its own canvas G = Lienzo(ancho * k) onto lz,
+    scaled by k around the base point c: the people come forward, larger,
+    while the paper, its grain and everything else stay at the series' scale.
+    Wherever the group is painted it covers what is behind it (like tapa);
+    its inner light and gouache come along."""
+    from acuarela import _ss, _blur
+    s = lz.s
+    ox = int(round(c[0] * (k - 1) * s))
+    oy = int(round(c[1] * (k - 1) * s))
+    H, W = lz.H, lz.W
+    Tg = G.T[oy:oy + H, ox:ox + W]
+    h, w = Tg.shape[:2]
+    cov = 1 - Tg.min(axis=2)
+    a = _ss(_blur(cov, 0.6 * s), 0.0, umbral)
+    a = np.maximum(a, G.OP[oy:oy + h, ox:ox + w, 3])
+    T = lz.T[:h, :w]
+    T[:] = T * (1 - a[..., None]) + Tg * a[..., None]
+    lz.LUZ[:h, :w] = lz.LUZ[:h, :w] * (1 - a[..., None]) + G.LUZ[oy:oy + h, ox:ox + w]
+    O = lz.OP[:h, :w]
+    Og = G.OP[oy:oy + h, ox:ox + w]
+    O[:] = O * (1 - a[..., None]) + Og

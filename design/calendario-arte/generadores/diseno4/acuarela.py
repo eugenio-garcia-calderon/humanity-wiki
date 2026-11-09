@@ -86,6 +86,13 @@ BASE_W, BASE_H = 1485, 850
 # Bone-white paper, EXACTLY the colour of the calendar sheet (Eugenio, 2026-11-09):
 # every unpainted area of every illustration must read as RGB (244, 239, 228).
 PAPEL = '#f4efe4'
+# Natural neck (2026-11-09): when True, `busto` and `figura` join neck, nape and
+# neckline to the jaw and shoulders (shadow under the jaw, clavicles in pencil)
+# instead of painting the neck as a separate tube. Off by default so months
+# already published re-render identically; switch it on with
+#     import acuarela; acuarela.CUELLO_NATURAL = True
+# or per call: busto(..., cuello_natural=True) / figura(..., ropa={'cuello_natural': True}).
+CUELLO_NATURAL = False
 
 # ---------------------------------------------------------------- colour helpers
 
@@ -1304,9 +1311,18 @@ def figura(lz, J, ropa, cara=None):
     # neck
     nb = (np.asarray(J['hi']) + np.asarray(J['hd'])) / 2
     cw = ropa.get('cuello', 0.5)
-    extremidad(lz, [(hx, hy + hr * 0.6), nb + (0, -hr * 0.05)], (hr * cw, hr * (cw + 0.05)), piel, dens=0.6,
-               lapiz=PIEL_LAPIZ, contorno=False, toques=[(hx, hy + hr * 0.9, hr * 0.4, mezcla(piel, '#9a5a3a', 0.5), 0.6)])
-    torso(lz, J['hi'], J['hd'], J['ci'], J['cd'], camisa, toques=ropa.get('camisa_toques'))
+    natural = ropa.get('cuello_natural', CUELLO_NATURAL)
+    if natural:
+        c_ = cara or {}
+        hw = float(np.linalg.norm(np.asarray(J['hd']) - np.asarray(J['hi'])))
+        cuello_natural(lz, hx, hy, hr, piel, tuple(nb + (0, -hr * 0.02)), hw * 1.1,
+                       giro=c_.get('giro', 0.0), inclina=c_.get('inclina', 0.0))
+        torso(lz, J['hi'], J['hd'], J['ci'], J['cd'], camisa, toques=ropa.get('camisa_toques'), escote=1.4)
+    else:
+        extremidad(lz, [(hx, hy + hr * 0.6), nb + (0, -hr * 0.05)], (hr * cw, hr * (cw + 0.05)), piel, dens=0.6,
+                   lapiz=PIEL_LAPIZ, contorno=False,
+                   toques=[(hx, hy + hr * 0.9, hr * 0.4, mezcla(piel, '#9a5a3a', 0.5), 0.6)])
+        torso(lz, J['hi'], J['hd'], J['ci'], J['cd'], camisa, toques=ropa.get('camisa_toques'))
     for k in delante:
         if k.startswith('brazo'):
             brazo(k)
@@ -1315,8 +1331,49 @@ def figura(lz, J, ropa, cara=None):
     cabeza(lz, hx, hy, hr, piel=piel, **(cara or {}))
 
 
+def cuello_natural(lz, x, y, r, piel, base, ancho_base, giro=0.0, inclina=0.0, escote=True):
+    """A neck that grows out of the jaw and flows into the shoulders.
+    (x, y, r) = head centre and radius; base = (bx, by) point between the
+    shoulders; ancho_base = shoulder-to-shoulder width. Paint it BEFORE the
+    shirt and the head: the shirt (with tapa) covers its lower part, the face
+    covers its top, and what is left reads as one continuous body: soft shadow
+    under the jaw, the two neck muscles hinted on the shadow side, and the
+    clavicles in pencil inside the neckline."""
+    SEP = '#6b4433'
+    bx, by = base
+    sh = 1 if giro >= 0 else -1                      # shadow side is away from where the face turns
+    a = math.radians(inclina)
+    xt = x - math.sin(a) * r * 0.55 + giro * r * 0.08   # under the chin, following the tilt
+    yt = y + r * 0.45
+    w0 = r * 0.6
+    w1 = min(ancho_base * 0.62, r * 1.35)
+    yb = by + r * 0.05
+    pts = [(xt - w0 / 2, yt), (xt - w0 * 0.52, yt + (yb - yt) * 0.55), (bx - w1 * 0.45, yb - r * 0.08),
+           (bx - w1 * 0.75, yb + r * 0.12), (bx - w1 * 0.7, yb + r * 0.55), (bx, yb + r * 0.7),
+           (bx + w1 * 0.7, yb + r * 0.55), (bx + w1 * 0.75, yb + r * 0.12), (bx + w1 * 0.45, yb - r * 0.08),
+           (xt + w0 * 0.52, yt + (yb - yt) * 0.55), (xt + w0 / 2, yt)]
+    f = Poligono(pts)
+    sombra_col = mezcla(piel, '#8a4a34', 0.5)
+    lz.aguada(f, piel, dens=0.6, tapa=1, irreg=0.3, borde=0.35, gran=0.1, var=0.2,
+              toques=[(xt - sh * w0 * 0.35, (yt + yb) / 2, r * 0.35, sombra_col, 0.55)])
+    # the jaw casts a soft shadow that follows the chin
+    chin_y = y + r * 0.95
+    lz.aguada(Elipse(xt + giro * r * 0.1, chin_y + r * 0.1, r * 0.36, r * 0.16, inclina), sombra_col, dens=0.45,
+              suave=r * 0.07, gran=0.05)
+    # neck muscles (sternocleidomastoid) on the shadow side, and the pit of the throat
+    lz.lapiz([bezier((xt - sh * w0 * 0.42, yt + r * 0.15), (xt - sh * w0 * 0.25, (yt + yb) / 2),
+                     (bx - sh * r * 0.08, yb - r * 0.02), n=12)], SEP, grosor=max(0.5, r * 0.025),
+             presion=0.3, temblor=0.2, cortes=0.3)
+    if escote:
+        lz.lapiz([bezier((bx - r * 0.06, yb + r * 0.02), (bx - r * 0.3, yb - r * 0.04), (bx - r * 0.62, yb + r * 0.04), n=12),
+                  bezier((bx + r * 0.06, yb + r * 0.02), (bx + r * 0.3, yb - r * 0.04), (bx + r * 0.62, yb + r * 0.04), n=12),
+                  arco(bx, yb - r * 0.02, r * 0.05, r * 0.035, 20, 160, 8)], SEP,
+                 grosor=max(0.5, r * 0.025), presion=0.35, temblor=0.15, cortes=0.2)
+    return f
+
+
 def busto(lz, x, y, r, camisa, piel='piel2', ancho=None, bajo=None, cuello=1.0, cara=None,
-          inclina_cuerpo=0.0, toques=None):
+          inclina_cuerpo=0.0, toques=None, cuello_natural=None):
     """Head and shoulders (for people seen through a window or behind a table).
     (x, y) head centre, r head radius, bajo = y where the body is cut."""
     ancho = ancho or r * 2.7
@@ -1329,9 +1386,19 @@ def busto(lz, x, y, r, camisa, piel='piel2', ancho=None, bajo=None, cuello=1.0, 
            (x - ancho * 0.55 + dx, bajo), (x + ancho * 0.55 + dx, bajo),
            (x + ancho * 0.53 + dx * 0.7, ny + r * 0.85), (x + ancho * 0.47 + dx * 0.5, ny + r * 0.38),
            (x + ancho * 0.3 + dx * 0.3, ny + r * 0.12), (x + r * 0.3, ny - r * 0.2), (x, ny + r * 0.2)]
-    extremidad(lz, [(x, y + r * 0.6), (x, ny + r * 0.1)], (r * 0.48, r * 0.56), piel, dens=0.62,
-               contorno=False, sombra=False,
-               toques=[(x, y + r * 0.98, r * 0.42, mezcla(piel, '#9a5a3a', 0.55), 0.7)])
+    natural = CUELLO_NATURAL if cuello_natural is None else cuello_natural
+    if natural:
+        c_ = cara or {}
+        globals()['cuello_natural'](lz, x, y, r, piel, (x + dx * 0.3, ny + r * 0.12), ancho,
+                                    giro=c_.get('giro', 0.0), inclina=c_.get('inclina', 0.0))
+        # a rounder, slightly deeper neckline so the throat and clavicles show
+        pts[-1] = (x + dx * 0.3, ny + r * 0.42)
+        pts[0] = (x - r * 0.38, ny - r * 0.12)
+        pts[-2] = (x + r * 0.38, ny - r * 0.12)
+    else:
+        extremidad(lz, [(x, y + r * 0.6), (x, ny + r * 0.1)], (r * 0.48, r * 0.56), piel, dens=0.62,
+                   contorno=False, sombra=False,
+                   toques=[(x, y + r * 0.98, r * 0.42, mezcla(piel, '#9a5a3a', 0.55), 0.7)])
     f = Poligono(pts)
     lz.aguada(f, camisa, dens=0.8, tapa=1, toques=toques,
               sombra=(-ancho * 0.1, -r * 0.2, mezcla(camisa, '#3a2030', 0.35), 0.4))

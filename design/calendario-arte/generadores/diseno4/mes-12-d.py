@@ -23,12 +23,17 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from acuarela import (Lienzo, Poligono, Elipse, Trazo, Circulos, spline, bezier, arco, mezcla, rgb, extremidad,
                       hojita, flor_simple, estrella, cabeza, remuestrea, _lapiz_de, PIEL_LAPIZ)
 from extra_m1112 import (mano_dedos, brazo, pliegues, sombra, cuello, pieza, cabeza_perfil, cielo_mar,
-                         desvanecer_x)
+                         desvanecer_x, componer)
 
 ANCHO = int(sys.argv[1]) if len(sys.argv) > 1 else 1485
 SALIDA = sys.argv[2] if len(sys.argv) > 2 else 'mes-12-d.png'
 
 lz = Lienzo(ANCHO, semilla=1212)
+HOJA = lz
+# The two at the table are painted on their own sheet, K times larger, and pasted
+# back around (CX, KY): they come forward, while paper grain and pencil of the
+# rest of the page keep the series' scale.
+K, KY = 1.25, 600.0
 
 CORAL = '#e8735e'
 ORO = '#f0c25e'
@@ -73,14 +78,14 @@ def palo(a, b, w=6, col=MADERA, tapa=1.0):
 
 
 # ------------------------------------------------------------------ the river: a ribbon of winter night
-rio_p = spline([(200, 800), (360, 780), (560, 798), (742, 782), (930, 800), (1120, 780), (1290, 796)])
-rio = Trazo(rio_p, (40, 64, 72, 74, 72, 64, 40))
+rio_p = spline([(200, 784), (360, 768), (560, 782), (742, 770), (930, 784), (1120, 768), (1290, 780)])
+rio = Trazo(rio_p, (30, 50, 58, 60, 58, 50, 30))
 cielo_mar(lz, rio, estrellas=1.0, semilla=121)
 lz.contorno(rio, '#22305a', grosor=0.6, presion=0.35, cortes=0.55, desfase=0.4)
 for x in np.linspace(560, 930, 5):                     # the star's light trembles on the water
-    lz.lapiz([[(x - 10, 770 + 5 * math.sin(x)), (x + 10, 770 + 5 * math.sin(x))]], '#f6d27a', grosor=0.9,
+    lz.lapiz([[(x - 10, 760 + 5 * math.sin(x)), (x + 10, 760 + 5 * math.sin(x))]], '#f6d27a', grosor=0.9,
              presion=0.6, temblor=0.6)
-desvanecer_x(lz, 150, 1340, 730, 845, 200, 420, 1060, 1290)
+desvanecer_x(lz, 150, 1340, 720, 830, 200, 420, 1060, 1290)
 
 # ------------------------------------------------------------------ the bridge everybody built
 X0, X1 = 262, 1222
@@ -119,7 +124,7 @@ while xp < X1:
     pl = Poligono([(xp + j0, yf(xp) + 1), (x1 + j1, yf(x1) + 1), (x1 - j1 * 0.5, yn(x1) - 1), (xp, yn(xp) - 1)],
                   suave=False)
     edge = min(1.0, (min(xp - X0, X1 - xp)) / 150)          # the planks fade near the ends of the bridge
-    lz.aguada(pl, COLS[order[k % len(order)]], dens=0.7 * (0.4 + 0.6 * edge), tapa=1, irreg=0.45, borde=0.7,
+    lz.aguada(pl, COLS[order[k % len(order)]], dens=0.95 * (0.35 + 0.65 * edge), tapa=1, irreg=0.45, borde=0.7,
               gran=0.5)
     # wood grain in pencil, running across the plank
     for g in range(2):
@@ -135,12 +140,12 @@ while xp < X1:
 lz.lapiz([np.stack([xs, yf(xs) + 1], 1), np.stack([xs, yn(xs) - 1], 1)], MADERA_LP, grosor=0.8, presion=0.55,
          temblor=0.4)
 
-# ------------------------------------------------------------------ the little table at the top
+# ------------------------------------------------------------------ the little table at the top (on its own sheet)
+lz = Lienzo(int(round(ANCHO * K)), semilla=1213)
 lx = [(CX - 50, 540, CX - 54, ym(CX - 54) + 4), (CX + 50, 540, CX + 54, ym(CX + 54) + 4),
       (CX - 20, 544, CX - 22, yf(CX) + 6)]
 for (a0, a1, b0, b1) in lx:
     palo((a0, a1), (b0, b1), 6, '#8a5a36')
-sombra(lz, CX, ym(CX) + 4, 70, 6, '#8a6a5a', 0.3)
 mantel = Poligono([(CX - 76, 532), (CX + 76, 532), (CX + 72, 560), (CX + 44, 566), (CX + 6, 560), (CX - 36, 568),
                    (CX - 74, 560)])
 lz.aguada(mantel, '#f8f1e2', dens=0.5, tapa=1, irreg=0.4, toques=[(CX + 50, 560, 30, '#d9c8b8', 0.6)],
@@ -170,7 +175,6 @@ for (mx, my) in ((CX + 58, 524), (CX + 68, 523), (CX + 63, 516)):
     hojita(lz, mx, my - 5, 6, -60, '#5f8f63', nervio=False)
 
 # ------------------------------------------------------------------ HE: the grandfather listens (left)
-sombra(lz, 600, ym(600) + 6, 70, 6, '#8a6a5a', 0.3)
 # his chair, seen from the side
 for (a, b) in (((552, 546), (548, ym(548) + 8)), ((626, 548), (630, ym(630) + 8)), ((550, 446), (556, 548))):
     palo(a, b, 6, MADERA)
@@ -212,7 +216,6 @@ brazo(lz, (586, 478), (594, 532), (616, 504), 23, ABRIGO)
 mano_dedos(lz, 616, 506, -55, 36, 'piel3', 'relajada', lado=-1, abre=0.3)
 
 # ------------------------------------------------------------------ SHE: the young woman speaks (right)
-sombra(lz, 880, ym(880) + 6, 80, 6, '#8a6a5a', 0.3)
 WX, WY, WR = 906, 556, 44
 # far wheel and the frame
 lz.aguada(Elipse(WX + 10, WY - 4, WR, WR + 2) - Elipse(WX + 10, WY - 4, WR - 6, WR - 4), '#4a5a6a', dens=0.7,
@@ -247,18 +250,22 @@ cabeza_perfil(lz, 878, 412, 44, piel='piel4', pelo='#2a1a14', peinado='rizado', 
               ojos='abiertos', boca='abierta', ojo=1.35)
 # her headwrap, the size of a real one: curls show at the nape and the temple
 R_ = lambda dx, dy: (878 - dx * 44, 412 + dy * 44)
-envol = Poligono([R_(0.62, -0.62), R_(0.5, -0.98), R_(0.1, -1.32), R_(-0.45, -1.36), R_(-0.9, -1.05),
-                  R_(-1.02, -0.55), R_(-0.86, -0.2), R_(-0.5, -0.32), R_(-0.15, -0.45), R_(0.25, -0.5)])
-lz.aguada(envol, CORAL, dens=0.85, tapa=1, borde=0.8, irreg=0.5, gran=0.3, sombra=(6, -6),
-          toques=[(*R_(-0.6, -0.6), 24, '#c4503e', 0.6), (*R_(0.2, -1.0), 20, '#f39a7a', 0.6)])
-lz.contorno(envol, '#9a3a2e', grosor=0.8, presion=0.55, cortes=0.2)
-pliegues(lz, [[R_(0.5, -0.7), R_(0.0, -0.95), R_(-0.7, -0.85)], [R_(0.35, -0.9), R_(-0.1, -1.2), R_(-0.75, -1.05)],
-              [R_(0.4, -0.55), R_(-0.2, -0.6), R_(-0.8, -0.45)]], '#9a3a2e', presion=0.5)
-nudo = Elipse(*R_(-0.2, -1.36), 12, 9, 10)
-lz.aguada(nudo, '#e2604c', dens=0.85, tapa=1, irreg=0.4)
-lz.contorno(nudo, '#9a3a2e', grosor=0.7, presion=0.5)
-for (dx, dy) in ((0.3, -0.75), (-0.1, -1.05), (-0.5, -0.75), (-0.75, -1.0), (0.1, -0.6), (-0.4, -1.2)):
-    lz.aguada(Elipse(*R_(dx, dy), 2.4, 2.4), '#fff1d0', dens=0.9, irreg=0.1)
+envol = Poligono([R_(0.62, -0.42), R_(0.58, -0.88), R_(0.25, -1.16), R_(-0.4, -1.42), R_(-1.0, -1.38),
+                  R_(-1.24, -1.0), R_(-1.16, -0.5), R_(-0.92, -0.08), R_(-0.62, -0.02), R_(-0.42, -0.3),
+                  R_(-0.08, -0.42), R_(0.3, -0.46)])
+lz.aguada(envol, '#e9a43a', dens=0.85, tapa=1, borde=0.8, irreg=0.5, gran=0.3, sombra=(6, -6),
+          toques=[(*R_(-0.8, -0.6), 26, '#c4782a', 0.6), (*R_(0.1, -1.0), 22, '#f6c86a', 0.6)])
+lz.contorno(envol, '#8a5a1a', grosor=0.8, presion=0.55, cortes=0.2)
+# the fabric is wrapped: diagonal folds from the forehead up to the back, and a coral band
+pliegues(lz, [[R_(0.55, -0.55), R_(0.0, -0.92), R_(-0.7, -1.3)], [R_(0.5, -0.82), R_(-0.1, -1.12), R_(-0.6, -1.36)],
+              [R_(0.2, -0.45), R_(-0.5, -0.8), R_(-1.15, -1.0)], [R_(-0.4, -0.35), R_(-0.85, -0.5), R_(-1.15, -0.7)]],
+         '#8a5a1a', presion=0.5)
+banda = Trazo([R_(0.6, -0.62), R_(0.0, -0.95), R_(-0.6, -1.2), R_(-1.1, -1.22)], (7, 8, 8, 6))
+lz.aguada(banda, CORAL, dens=0.8, tapa=1, irreg=0.4)
+lz.contorno(banda, '#9a3a2e', grosor=0.6, presion=0.5)
+for (dx, dy) in ((0.25, -0.65), (-0.2, -0.75), (-0.65, -0.95), (-0.95, -0.7), (-0.4, -1.1), (0.1, -1.0),
+                 (-0.9, -1.1), (-0.6, -0.4)):
+    lz.aguada(Elipse(*R_(dx, dy), 2.6, 2.6), TEAL, dens=0.9, irreg=0.1)
 lz.aguada(Elipse(*R_(-0.12, 0.42), 3.2, 3.5), ORO, dens=0.95, irreg=0.1)     # a small gold earring
 # near arm: open hand, palm up -- she explains what she feels
 brazo(lz, (884, 470), (860, 520), (818, 500), 22, TEAL)
@@ -271,6 +278,21 @@ lz.lapiz([arco(WX, WY, WR - 10, WR - 8, 0, 360, 40)], '#8a9aaa', grosor=0.7, pre
 lz.lapiz([[(WX, WY), (WX + (WR - 7) * math.cos(a), WY + (WR - 5) * math.sin(a))]
           for a in np.linspace(0, 2 * np.pi, 11)[:-1]], '#5a6a7a', grosor=0.45, presion=0.45, temblor=0.03)
 lz.aguada(Elipse(WX, WY, 5, 5), '#6a7a8a', dens=0.8, tapa=1)
+
+componer(HOJA, lz, K, (CX, KY))
+lz = HOJA
+
+
+def T_(p):
+    """Where a point of the group sheet lands on the page."""
+    p = np.asarray(p, float)
+    return (p - (CX, KY)) * K + (CX, KY)
+
+
+# their shadows on the planks
+for (x, r_) in ((600, 70), (CX, 70), (880, 80)):
+    q = T_((x, ym(x) + 4))
+    sombra(lz, q[0], ym(q[0]) - 2, r_ * K, 7, '#8a6a5a', 0.3)
 
 # ------------------------------------------------------------------ the child brings soup, inside the railing
 NX = 430
@@ -324,12 +346,16 @@ for (x0, y0, sd) in ((330, yn(330) - 60, -1), (1156, yn(1156) - 60, 1)):
 
 # ------------------------------------------------------------------ their words: two threads of light, a heart, a star
 SX, SY = CX, 160                                # the star they light
-TIP, TOP = (CX, 446), (CX, 366)                 # bottom point and cleft of the heart
-voz = np.vstack([bezier((842, 452), (820, 448), (770, 460), TIP, 30),               # from her mouth
-                 bezier(TIP, (800, 410), (812, 344), TOP, 50)[1:]])
-oido = np.vstack([bezier((634, 500), (676, 498), (714, 474), TIP, 30),              # from his hand on his heart
-                  bezier(TIP, (684, 410), (672, 344), TOP, 50)[1:]])
-uno = bezier(TOP, (CX - 14, 300), (CX + 16, 230), (SX, SY + 26), 60)                # together, one thread
+TOP = (CX, 370)                                  # the cleft of the heart: there the two threads become one
+# each thread comes from one of them, runs up beside the other WITHOUT crossing it (gold always on the left,
+# rose always on the right), draws its half of a soft heart and meets the other at the cleft
+oido = spline([(626, 492), (672, 496), (718, 484), (736, 468), (737, 448), (728, 430), (704, 410), (690, 388),
+               (694, 362), (712, 348), (731, 352), (741, 370)])            # from his hand on his heart
+voz = spline([(836, 438), (808, 456), (768, 476), (748, 468), (747, 448), (756, 430), (780, 410), (794, 388),
+              (790, 362), (772, 348), (753, 352), (743, 370)])             # from her mouth
+oido, voz = T_(oido), T_(voz)
+TOP = tuple(T_(TOP))
+uno = bezier(TOP, (CX - 14, 270), (CX + 16, 220), (SX, SY + 26), 60)       # together, one thread
 rng2 = np.random.default_rng(12)
 for path, col, lp_, w in ((oido, '#eba93a', '#b8781a', 3.2), (voz, '#ec7f92', '#b04a60', 3.2),
                           (uno, '#f2b24a', '#b8781a', 3.8)):
@@ -350,7 +376,7 @@ for j in range(10):
     a_ = math.radians(-90 + j * 36 + 4)
     pts.append((SX + math.cos(a_) * rr * (1 + 0.05 * math.sin(j * 2.3)), SY + math.sin(a_) * rr))
 f = Poligono(pts, suave=False)
-lz.aguada(Elipse(SX, SY, 80, 74), '#f6c66a', dens=0.2, suave=26, gran=0.05)
+lz.aguada(Elipse(SX, SY, 60, 56), '#f6c66a', dens=0.14, suave=22, gran=0.05)
 lz.aguada(f, '#f2b632', dens=0.9, tapa=1, irreg=0.35, borde=0.9, toques=[(SX, SY, 12, '#fff3c4', 0.9)])
 lz.contorno(f, '#a0661a', grosor=0.8, presion=0.55, cortes=0.15, desfase=0.3)
 for j in range(0, 10, 2):

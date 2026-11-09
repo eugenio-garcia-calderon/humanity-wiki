@@ -22,12 +22,27 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from acuarela import (Lienzo, Poligono, Elipse, Trazo, Circulos, spline, bezier, arco, mezcla, rgb, extremidad,
                       hoja, hojita, flor_simple, ramita, pajaro, cabeza, puntos_dentro, _lapiz_de, PIEL_LAPIZ)
 from extra_m1112 import (mano_dedos, brazo, cara, pliegues, sombra, casita, cuello, pieza, cabeza_perfil,
-                         cabeza_espalda)
+                         cabeza_espalda, componer)
 
 ANCHO = int(sys.argv[1]) if len(sys.argv) > 1 else 1485
 SALIDA = sys.argv[2] if len(sys.argv) > 2 else 'mes-11-d.png'
 
 lz = Lienzo(ANCHO, semilla=1111)
+HOJA = lz
+KF = 1.18          # each person is painted on its own sheet KF times larger and pasted back round its seat
+
+
+def capa(sem):
+    """Start a person's own sheet."""
+    global lz
+    lz = Lienzo(int(round(ANCHO * KF)), semilla=sem)
+
+
+def pega(c):
+    """Paste the person back on the page, larger, round the seat point c."""
+    global lz
+    componer(HOJA, lz, KF, c)
+    lz = HOJA
 
 CORAL = '#e8735e'
 ORO = '#f0c25e'
@@ -228,6 +243,7 @@ lz.aguada(Elipse(742, 220, 380, 190), '#f6d27a', dens=0.08, suave=60, gran=0.05)
 
 # ------------------------------------------------------------------ G: the girl who has the word (back, right)
 sombra(lz, 900, 540, 40, 6)
+capa(201)
 pierna([(896, 498), (894, 516), (892, 534)], 10, '#e6b48a', zapato=CARMIN, pie_lado=-1)
 pierna([(912, 498), (914, 516), (915, 534)], 10, '#e6b48a', zapato=CARMIN, pie_lado=1)
 pieza(lz, [(890, 436), (904, 432), (920, 436), (928, 470), (938, 504), (904, 510), (872, 504), (882, 470)],
@@ -254,8 +270,11 @@ hojita(lz, 906, 459, 9, -30, '#6fb05e', nervio=False, tapa=1)
 hojita(lz, 905, 460, 8, -150, '#8fc06e', nervio=False, tapa=1)
 lz.luz((905, 472, 9), '#fff2c4', fuerza=0.7)
 lz.chispas(905, 466, 22, 16, n=7, luz=0.25)
+pega((900, 540))
 
 # ------------------------------------------------------------------ W: young woman in a headscarf (back, left)
+sombra(lz, 592, 556, 52, 7)
+capa(202)
 taburete(585, 520, 26, 8, 30)
 pieza(lz, [(556, 492), (600, 488), (626, 500), (640, 524), (640, 546), (604, 552), (566, 548), (552, 520)], ROSA,
       toques=[(632, 536, 26, '#c8607a', 0.55)])                              # skirt over the knees
@@ -272,9 +291,11 @@ cabeza(lz, 584, 416, 25, piel='piel2', pelo='#2f7f86', peinado='pañuelo', giro=
        boca='sonrisa', mira=(1, 0.3))
 brazo(lz, (604, 456), (632, 428), (636, 382), 13, '#f0b44a')              # she votes
 mano_dedos(lz, 636, 384, -90, 26, 'piel2', 'abierta', lado=-1)
+pega((585, 552))
 
 # ------------------------------------------------------------------ A: the grandmother, in profile (left)
 sombra(lz, 404, 724, 80, 9)
+capa(203)
 palo((322, 560), (318, 722), 6)                                          # the chair's back posts
 palo((334, 566), (332, 712), 5)
 lz.aguada(Trazo([(318, 576), (336, 580)], (5, 5)), MADERA, dens=0.7, tapa=1)
@@ -303,9 +324,11 @@ cabeza_perfil(lz, 352, 498, 33, piel='piel1', pelo='#dcd6d0', peinado='mono', la
               gafas=True, ojos='abiertos', boca='sonrisa')
 brazo(lz, (362, 550), (404, 520), (414, 446), 17, CORAL)                 # she votes
 mano_dedos(lz, 414, 448, -88, 32, 'piel1', 'abierta', lado=-1)
+pega((400, 716))
 
 # ------------------------------------------------------------------ R: the young man, in profile (right)
 sombra(lz, 1090, 724, 85, 9)
+capa(204)
 caja = Poligono([(1094, 640), (1176, 636), (1180, 712), (1098, 716)], suave=False)
 lz.aguada(caja, '#c99a5a', dens=0.6, tapa=1, irreg=0.4, toques=[(1170, 690, 30, '#a8703e', 0.5)])
 lz.rayado(caja, '#8a6a3a', angulo=2, sep=12, presion=0.5, grosor=0.8)
@@ -324,6 +347,7 @@ cabeza_perfil(lz, 1124, 500, 33, piel='piel2', pelo='#1e1410', peinado='corto', 
               boca='sonrisa')
 brazo(lz, (1118, 552), (1078, 520), (1070, 450), 17, TEAL)               # he votes
 mano_dedos(lz, 1070, 452, -92, 32, 'piel2', 'abierta', lado=1)
+pega((1110, 716))
 
 # ------------------------------------------------------------------ the empty stool: the viewer's seat
 sombra(lz, 930, 812, 46, 7)
@@ -332,6 +356,7 @@ hoja(lz, 918, 768, 24, -10, '#e0a83a', ancho=0.4)
 
 # ------------------------------------------------------------------ B: the man seen from behind (front, left)
 sombra(lz, 580, 818, 80, 9)
+capa(205)
 taburete(580, 772, 40, 12, 40)
 # the raised arm goes behind his head? no: in front of the sky, drawn after the back
 lomo = pieza(lz, [(532, 664), (556, 650), (580, 646), (606, 650), (630, 666), (634, 700), (628, 760), (580, 772),
@@ -346,6 +371,7 @@ cuello(lz, 580, 612, 35, 'piel5', (580, 652), ancho=0.5)
 cabeza_espalda(lz, 580, 610, 35, piel='piel5', pelo='#1e1410', peinado='rizado', giro=0.6)
 brazo(lz, (622, 672), (664, 612), (668, 494), 19, '#e2a03a')               # he votes too
 mano_dedos(lz, 668, 496, -90, 36, 'piel5', 'abierta', lado=-1)
+pega((580, 814))
 
 # ------------------------------------------------------------------ leaves drift down to the empty stool
 camino = spline([(985, 560), (1000, 620), (968, 680), (975, 720), (948, 762)])

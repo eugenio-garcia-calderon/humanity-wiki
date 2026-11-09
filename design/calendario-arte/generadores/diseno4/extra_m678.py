@@ -361,7 +361,7 @@ def cuello(lz, cabeza_xy, r, base, piel='piel2', ancho=0.48):
 
 def cabeza2(lz, x, y, r, piel='piel2', pelo='#5a3a2a', peinado='corto', giro=0.0, inclina=0.0,
             ojos='abiertos', boca='sonrisa', mira=(0, 0), barba=None, canas=False, gafas=False,
-            adorno=None, mejillas=0.5, semilla=None, pendiente=None):
+            adorno=None, mejillas=0.5, semilla=None, pendiente=None, labios=True):
     """A tender picture-book head worked in sepia pencil.
     giro -1..1 turns the face (3/4 view; + looks to the viewer's right);
     inclina = tilt in degrees; ojos: 'abiertos' | 'cerrados' (happy arcs) |
@@ -528,7 +528,8 @@ def cabeza2(lz, x, y, r, piel='piel2', pelo='#5a3a2a', peinado='corto', giro=0.0
         ww = r * (0.19 if boca == 'sonrisa' else 0.12)
         cur = r * (0.09 if boca == 'sonrisa' else 0.04)
         line = arco(m[0], m[1] - cur, ww, cur, 20, 160, 14, inclina)
-        lz.aguada(Elipse(m[0], m[1] + r * 0.04, ww * 0.55, r * 0.05, inclina), '#e0707a', dens=0.45, irreg=0.2)
+        if labios:
+            lz.aguada(Elipse(m[0], m[1] + r * 0.04, ww * 0.5, r * 0.04, inclina), '#e08a86', dens=0.3, irreg=0.2)
         lz.lapiz([line], '#7a3034', grosor=0.9, presion=0.75, temblor=0.04, puntas=0.3)
         if boca == 'sonrisa':
             lz.lapiz([[line[0] + np.array([-r * 0.02, -r * 0.02]), line[0] + np.array([r * 0.0, r * 0.01])],
