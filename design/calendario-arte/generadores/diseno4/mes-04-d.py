@@ -517,21 +517,29 @@ lz.lapiz([spline([(ARB_X, yA), (ARB_X - 2, yA - 26), (ARB_X + 2, yA - 54)])], '#
 
 
 def hoja_roble(x, y, L, ang, col):
-    """A lobed oak leaf (the young Quercus: deep round lobes)."""
+    """An unmistakable oak leaf: a short stalk, then deep rounded lobes in pairs, largest near the tip."""
     a = math.radians(ang)
     d = np.array([math.cos(a), math.sin(a)])
     n = np.array([-d[1], d[0]])
-    t = np.linspace(0, 1, 41)
-    w = np.sin(np.pi * t) ** 0.5 * L * 0.36 * (0.3 + 0.7 * np.abs(np.cos(t * math.pi * 4.5 + 0.3))) * (0.4 + 0.6 * t ** 0.3)
-    izq = np.array([x, y]) + d * (t * L)[:, None] + n * w[:, None]
-    der = np.array([x, y]) + d * (t * L)[:, None] - n * w[:, None]
-    f = Poligono(np.vstack([izq, der[::-1]]), suave=False)
-    lz.aguada(f, col, dens=0.8, tapa=0.9, irreg=0.2, borde=0.8, toques=[(x + d[0] * L * 0.7, y + d[1] * L * 0.7, L * 0.4, '#b8c85a', 0.6)])
-    lz.contorno(f, _lapiz_de(col, 0.45), grosor=0.5, presion=0.5, cortes=0.1, desfase=0.1)
-    lz.lapiz([[(x, y), (x + d[0] * L * 0.95, y + d[1] * L * 0.95)]], _lapiz_de(col, 0.45), grosor=0.4, presion=0.5)
+    p0 = np.array([x, y], float)
+    cs = [(*(p0 + d * L * 0.98), L * 0.13)]
+    for k, (t, r) in enumerate(((0.28, 0.09), (0.48, 0.12), (0.68, 0.14), (0.85, 0.12))):
+        for sd in (-1, 1):
+            c = p0 + d * L * (t + 0.03 * sd) + n * sd * L * (0.11 + r * 0.9)
+            cs.append((*c, L * r))
+    f = Circulos(cs) | Trazo([tuple(p0 + d * L * 0.15), tuple(p0 + d * L * 0.95)], (L * 0.12, L * 0.16))
+    lz.aguada(f, col, dens=0.8, tapa=0.95, irreg=0.2, borde=0.8,
+              toques=[(*(p0 + d * L * 0.75), L * 0.4, '#b8c85a', 0.6)])
+    lz.contorno(f, _lapiz_de(col, 0.45), grosor=0.6, presion=0.55, cortes=0.05, desfase=0.05)
+    lz.lapiz([[tuple(p0), tuple(p0 + d * L * 0.95)]], _lapiz_de(col, 0.45), grosor=0.5, presion=0.55)
+    for (t, r) in ((0.48, 0.12), (0.68, 0.14)):
+        for sd in (-1, 1):
+            b0 = p0 + d * L * t
+            lz.lapiz([[tuple(b0), tuple(b0 + d * L * 0.06 + n * sd * L * 0.2)]], _lapiz_de(col, 0.45), grosor=0.4,
+                     presion=0.45)
 
 
-for (dy, a, L) in ((-18, -155, 24), (-28, -25, 24), (-40, -135, 22), (-48, -45, 21), (-56, -92, 22)):
+for (dy, a, L) in ((-18, -158, 30), (-30, -22, 30), (-44, -138, 27), (-52, -42, 26), (-58, -92, 28)):
     hoja_roble(ARB_X + (2 if a > -90 else -2), yA + dy, L, a, '#6f9a42')
 # the acorn it came from, half buried by the grandfather's hand
 lz.aguada(Elipse(1146, yA - 1, 5, 7, 70), '#b8843a', dens=0.85, tapa=1, irreg=0.2)
