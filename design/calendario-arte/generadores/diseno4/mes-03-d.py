@@ -225,15 +225,19 @@ lz.lapiz([arco(325, 760, 14, 4, 0, 360, 20), arco(325, 760, 24, 6, 20, 160, 20)]
 # ------------------------------------------------------------------ the girl floating on her back (baño sensorial, day 24)
 F = Marco(520, 732, -8, 1.0)
 # hair fanning out in the water, with tiny fish swimming through it
-for k in range(9):
-    a = math.radians(120 + k * 16)
-    p0 = F(-96, 0)
-    pts = [p0, F(-96 + math.cos(a) * 30, math.sin(a) * 30), F(-96 + math.cos(a + 0.2) * 58, math.sin(a + 0.2) * 52),
-           F(-96 + math.cos(a + 0.1) * 80, math.sin(a + 0.1) * 70)]
-    pts = spline(pts)
-    pts = pts + np.stack([np.sin(np.linspace(0, 6, len(pts)) + k) * np.linspace(0, 6, len(pts)), np.zeros(len(pts))], 1)
-    lz.aguada(Trazo(pts[::3], (16, 13, 9, 4)), '#8a4228', dens=0.55, irreg=0.6, tapa=0.4, borde=0.8)
-    lz.lapiz([pts, pts + 3], '#5a2a1a', grosor=0.6, presion=0.4, temblor=0.4)
+_aa = np.radians(np.linspace(75, 285, 40))
+_rr = 64 + 9 * np.sin(_aa * 7) + 5 * np.sin(_aa * 13 + 1)
+abanico = Poligono([F(-96, 0)] + [F(-96 + math.cos(t) * r_, math.sin(t) * r_ * 0.95) for t, r_ in zip(_aa, _rr)])
+lz.aguada(abanico, '#8a4228', dens=0.6, irreg=0.9, tapa=0.5, borde=0.9, gran=0.4,
+          toques=[(*F(-140, -20), 30, '#b0603a', 0.6), (*F(-130, 30), 25, '#5a2a1a', 0.5)])
+mech = []
+for k in range(16):
+    t0 = math.radians(80 + k * 13)
+    pts = [F(-96 + math.cos(t0) * 14, math.sin(t0) * 14), F(-96 + math.cos(t0 + 0.15) * 36, math.sin(t0 + 0.15) * 36),
+           F(-96 + math.cos(t0 + 0.05) * 56, math.sin(t0 + 0.05) * 54), F(-96 + math.cos(t0 + 0.2) * 70, math.sin(t0 + 0.2) * 66)]
+    mech.append(spline(pts))
+lz.lapiz(mech, '#5a2a1a', grosor=0.6, presion=0.45, temblor=0.4, cortes=0.2)
+lz.lapiz(mech[::3], '#d8905a', grosor=0.6, presion=0.4, temblor=0.4)
 for k in range(4):
     pececillo(lz, *F(-150 + k * 10, -40 + k * 14), 3.4, 80, '#f0c25e', gouache=False)
 # arms open like a star, legs gently apart
