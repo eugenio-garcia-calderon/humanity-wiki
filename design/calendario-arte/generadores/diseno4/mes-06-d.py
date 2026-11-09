@@ -727,6 +727,41 @@ def abeja(x, y, s=1.0, ang=0):
 
 abeja(476, 132, 1.2, -20)
 
+
+# a satellite (2026-11-09, Eugenio: «pon un satélite»): high in the sky, it too lives on sunlight --
+# its two wings are solar panels made of the same blue cells as the sunflower's face.
+def satelite(x, y, s=1.0, ang=-14):
+    a = math.radians(ang)
+    R = lambda u, v: (x + (u * math.cos(a) - v * math.sin(a)) * s, y + (u * math.sin(a) + v * math.cos(a)) * s)
+    # the orbit, a faint pencil arc it rides along
+    orb = [R(u, 0.0016 * u * u - 2) for u in np.linspace(-230, 230, 90)]
+    lz.lapiz([orb[:34], orb[56:68]], '#c9b08a', grosor=0.45, presion=0.25, temblor=0.3, cortes=0.55)
+    # struts and the two panel wings
+    lz.lapiz([[R(-44, 0), R(44, 0)]], '#6a6a7a', grosor=0.7, presion=0.6, temblor=0.05)
+    for sd in (-1, 1):
+        q = [R(sd * 14, -9), R(sd * 50, -9), R(sd * 50, 9), R(sd * 14, 9)]
+        if sd < 0:
+            q = [q[1], q[0], q[3], q[2]]
+        tejado_solar(q, 700 + sd)
+    # the body wrapped in gold foil
+    cuerpo = Poligono([R(-9, -11), R(9, -11), R(9, 11), R(-9, 11)], suave=False)
+    lz.aguada(cuerpo, '#e2b04a', dens=0.95, tapa=1, irreg=0.3, borde=0.7, gran=0.5,
+              toques=[(*R(-3, -4), 7 * s, '#f7dc8a', 0.7), (*R(4, 6), 6 * s, '#b8862a', 0.6)])
+    lz.rayado(cuerpo, '#9a6a2a', angulo=ang + 35, sep=2.2, presion=0.3, grosor=0.4, largo=5)
+    lz.contorno(cuerpo, '#7a5a2a', grosor=0.55, presion=0.55, cortes=0.1, desfase=0.1)
+    # the dish antenna, looking down at us, and a little coral beacon
+    lz.lapiz([[R(0, 11), R(0, 17)]], '#6a6a7a', grosor=0.6, presion=0.6)
+    plato = Elipse(*R(0, 20), 9 * s, 4 * s, ang)
+    lz.aguada(plato, '#fbf6ec', dens=0.95, tapa=1, irreg=0.1)
+    lz.contorno(plato, '#6a6a7a', grosor=0.5, presion=0.5, desfase=0.1)
+    lz.aguada(Elipse(*R(0, 20.5), 1.4 * s), '#6a6a7a', dens=0.9, tapa=1)
+    lz.lapiz([[R(-6, -11), R(-9, -19)]], '#6a6a7a', grosor=0.45, presion=0.55)
+    lz.aguada(Elipse(*R(-9, -19.5), 1.8 * s), '#e8735e', dens=0.95, tapa=1)
+    lz.gouache(Elipse(*R(-3, -6), 1.2 * s, 2.2 * s, ang), '#fff6dc', alfa=0.8, irreg=0)
+
+
+satelite(248, 112, 1.0, ang=-14)
+
 lz.vineta(margen=26)
 lz.guardar(SALIDA)
 print('ok', SALIDA)

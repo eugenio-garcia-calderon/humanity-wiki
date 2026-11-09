@@ -343,7 +343,7 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "Como el abuelo y su lámpara: reparar alarga la vida.",
       "Etiqueta energética UE: de la A (mejor) a la G (peor).",
       "Hoy: ayuda a una persona mayor con su móvil.",
-      "Compartir coche o ir en transporte público: menos CO2.",
+      "Satélites: casi todos viven de placas, como el girasol.",
       "Espejos en espiral de girasol: más sol en menos suelo.",
       "Hoy: aprende a usar algo nuevo: un taladro, una app…",
       "Los móviles tienen metales valiosos: al punto limpio.",
