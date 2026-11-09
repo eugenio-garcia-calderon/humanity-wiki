@@ -23,7 +23,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Check, ChevronDown, CloudOff, FilePlus2, FolderOpen, Link2, Loader2, Save, Star, Trash2 } from 'lucide-react';
 import { Button } from '../ui/core';
 import { cn } from '../../utils/cn';
-import { PARAMETROS_A1, PARAMETROS_GOTA, type Parametros } from './geometria';
+import { PARAMETROS_A1, PARAMETROS_BALA, PARAMETROS_GOTA, type Parametros } from './geometria';
 
 export interface Diseno { id: number; nombre: string; parametros: Partial<Parametros>; autor: string | null; origen: 'equipo' | 'visitante'; por_defecto?: boolean; updated_at: string }
 
@@ -41,10 +41,12 @@ export const aDiseno = (P: Parametros): Partial<Parametros> => { const { comp: _
 /**
  * Un diseño guardado sin `disposicion` es de antes del 2026-11-06: del
  * Aeromóvil Gota, con las medidas por defecto de entonces. Desde entonces el
- * diseño por defecto es el Aeromóvil 1 y cada diseño dice de cuál es.
+ * diseño por defecto es el Aeromóvil 1 y cada diseño dice de cuál es. Desde el
+ * 2026-11-09 hay un tercero, el Cuadriciclo Bala ('bala'), que parte de las
+ * medidas del Bala del garaje. Comprobado con `npx tsx scripts/bala-disenos.ts`.
  */
 export const deDiseno = (d: Partial<Parametros>): Parametros => {
-  const base = d.disposicion === 'cuatro' ? PARAMETROS_A1 : d.disposicion === 'rombo' ? PARAMETROS_GOTA : PARAMETROS_GOTA;
+  const base = d.disposicion === 'cuatro' ? PARAMETROS_A1 : d.disposicion === 'bala' ? PARAMETROS_BALA : PARAMETROS_GOTA;
   // Un valor guardado solo vale si es del mismo tipo que el de por defecto.
   // El 2026-11-06 `parabrisas` pasó de ser un texto ('plano') a un número, y
   // un diseño guardado con el texto dejaba la página en blanco (NaN en toda

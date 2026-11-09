@@ -9,7 +9,8 @@
 //   · CSV con la lista de corte de tubos.
 // Las láminas son dibujo técnico: líneas negras sobre papel blanco, en los
 // dos temas de color, porque se imprimen.
-import { MATERIALES_CHASIS, contornoSeccion, largoTubo, tramosTubo, type Modelo, type Tubo } from './geometria';
+// The Bala has no fabrication drawings (its skin is not built from these sections): the screen says so (Paneles.tsx).
+import { MATERIALES_CHASIS, contornoSeccion, largoTubo, tramosTubo, type ModeloConPiel as Modelo, type Tubo } from './geometria';
 import { contornoCupula } from './geometriaA1';
 
 const A3 = { w: 420, h: 297 };

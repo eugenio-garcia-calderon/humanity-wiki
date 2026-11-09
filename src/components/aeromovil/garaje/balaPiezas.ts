@@ -1,8 +1,10 @@
 import * as THREE from 'three';
-import { E, loft, type Est } from './forma';
+import { E, loft } from './forma';
 import { barrido, curva, parcheM, piel, thetaY, torno } from './apteraPiel';
 import { APLASTADO, geometriasRueda } from './apteraDetalle';
-import { ANCHO_NEU, ANCHO_NEU_LAT, BATALLA, R_DEL, R_LAT, VIA_LAT, X_LAT, ladoZ, punto, sec } from './balaForma';
+import { type FormaBala } from './balaForma';
+import { ALETA, ASIENTO, brazosDe, escalaManillar, podDe, semiAncho, techoEn, type Asientos } from './balaMedidas';
+export { ALETA, ASIENTO, POD, POD_SEMIANCHO, brazosDe, extremoManillar, podDe, techoEn, type Asientos } from './balaMedidas';
 
 /*
  * Materials and the separate parts of the «Cuadriciclo Bala»: wheels, the
@@ -10,6 +12,12 @@ import { ANCHO_NEU, ANCHO_NEU_LAT, BATALLA, R_DEL, R_LAT, VIA_LAT, X_LAT, ladoZ,
  * tank, handlebar, dash, footrests, grab rail, backrest) and the camera pods.
  * The skin, the canopy glass and everything painted on the skin are in
  * `balaModelo.ts`. Everything is drawn by code; no logos or lettering.
+ *
+ * Every part takes the shape (`FormaBala`): the garage model passes the
+ * reference shape, the editor its own (2026-11-09, «permíteme editarlo»).
+ * Parts placed by hand in the reference drawing follow the shape through its
+ * x map (`F.X`), its belly lift (`F.dSuelo`) and, for the lateral wheels, the
+ * ratio of their radius to the reference 20″.
  *
  * Livery: the Aeromóvil family's. The Aeromóvil 1 is pearl white with a dark
  * navy nose piece and red lamps (Visor3D.tsx: 0xf4f5f6, 0x182544,
@@ -88,7 +96,8 @@ function frit(m: THREE.MeshPhysicalMaterial): THREE.MeshPhysicalMaterial {
 }
 
 let MATS: ReturnType<typeof crearMateriales> | null = null;
-function crearMateriales() {
+/** A new set of materials: the editor's Bala has its own, so «Rayos X» and «Corte» never touch the garage's. */
+export function crearMateriales() {
   const F = THREE.FrontSide, D = THREE.DoubleSide;
   const fis = (p: THREE.MeshPhysicalMaterialParameters) => new THREE.MeshPhysicalMaterial({ side: F, ...p });
   // parts laid on the skin: drawn a hair in front of it, so they never flicker
@@ -145,9 +154,6 @@ export const malla = (g: THREE.BufferGeometry, m: THREE.Material | THREE.Materia
   const o = new THREE.Mesh(g, m); o.castShadow = sombra; o.receiveShadow = true; if (nombre) o.name = nombre; return o;
 };
 
-/** Top centre of the skin (y) at x. */
-export const techoEn = (x: number) => punto(sec(x), 1)[1];
-
 // ======================================================================= wheels
 /**
  * A wheel: tyre with a rounded sidewall and grooves, flattened at the contact
@@ -164,95 +170,61 @@ function rueda(R: number, ancho: number, M: Mats, nombre: string): THREE.Group {
   }
   return g;
 }
-/** The four wheels: 24″ front and rear on the centre line (inside the body), 20″ lateral ones in the pods. */
-export function ruedas(M: Mats): THREE.Group {
+/** The four wheels: 24″ front and rear on the centre line (inside the body), 20″ lateral ones in the pods (the reference sizes). */
+export function ruedas(F: FormaBala, M: Mats): THREE.Group {
   const g = new THREE.Group(); g.name = 'ruedas';
-  const del = rueda(R_DEL, ANCHO_NEU, M, 'rueda-delantera'); del.position.set(0, R_DEL - APLASTADO, 0); g.add(del);
-  const tras = del.clone(); tras.name = 'rueda-trasera'; tras.position.set(-BATALLA, R_DEL - APLASTADO, 0); g.add(tras);
-  const lat = rueda(R_LAT, ANCHO_NEU_LAT, M, 'rueda-lateral'); lat.position.set(X_LAT, R_LAT - APLASTADO, VIA_LAT / 2); g.add(lat);
-  const izq = lat.clone(); izq.position.z = -VIA_LAT / 2; g.add(izq);
+  const del = rueda(F.R_DEL, F.ANCHO_NEU, M, 'rueda-delantera'); del.position.set(0, F.R_DEL - APLASTADO, 0); g.add(del);
+  const tras = del.clone(); tras.name = 'rueda-trasera'; tras.position.set(-F.BATALLA, F.R_DEL - APLASTADO, 0); g.add(tras);
+  const lat = rueda(F.R_LAT, F.ANCHO_NEU_LAT, M, 'rueda-lateral'); lat.position.set(F.X_LAT, F.R_LAT - APLASTADO, F.VIA_LAT / 2); g.add(lat);
+  const izq = lat.clone(); izq.position.z = -F.VIA_LAT / 2; g.add(izq);
   return g;
 }
 
 // ======================================================================= pods
-/**
- * Fairing of a lateral wheel, centred on its axle (x relative to the axle,
- * z = 0, +z outwards): Aptera-like, a slim «D» in side view with a rounded
- * front and a tapering tail, an aerofoil in plan; the tyre shows below it.
- */
-export const POD: Est[] = [
-  E(0.385, 0.262, 0.318, 0.006, 0.008, 0.006, 2.2),
-  E(0.370, 0.190, 0.400, 0.030, 0.036, 0.030, 2.4),
-  E(0.340, 0.130, 0.470, 0.050, 0.058, 0.050, 2.7),
-  E(0.280, 0.095, 0.530, 0.064, 0.072, 0.062, 3.0),
-  E(0.180, 0.078, 0.565, 0.071, 0.079, 0.068, 3.2),
-  E(0.050, 0.072, 0.580, 0.073, 0.080, 0.069, 3.3),
-  E(-0.080, 0.072, 0.572, 0.072, 0.079, 0.068, 3.3),
-  E(-0.200, 0.078, 0.545, 0.066, 0.073, 0.062, 3.1),
-  E(-0.300, 0.092, 0.500, 0.054, 0.060, 0.051, 2.9),
-  E(-0.390, 0.120, 0.440, 0.038, 0.043, 0.036, 2.7),
-  E(-0.470, 0.165, 0.375, 0.020, 0.023, 0.019, 2.5),
-  E(-0.530, 0.215, 0.320, 0.007, 0.008, 0.007, 2.3),
-  E(-0.550, 0.245, 0.290, 0.002, 0.002, 0.002, 2.2),
-];
-/** Height of the navy waterline on the pods: the body's at the lateral wheels (balaModelo.ts). */
+/** Height of the navy waterline on the pods: the body's at the lateral wheels (balaModelo.ts), which lifts with the belly. */
 const Y_FLOTACION_POD = 0.39;
-/** The pod's half-width at its widest (for the overall width): 0.08 m. */
-export const POD_SEMIANCHO = 0.080;
-/** Upper arm (main, streamlined) and lower link from the body to each pod: chord, thickness, height. */
-const BRAZOS = [
-  { x: 0.03, cuerda: 0.20, grueso: 0.034, y: 0.43 },
-  { x: -0.01, cuerda: 0.13, grueso: 0.024, y: 0.18 },
-];
-export function carenados(M: Mats): THREE.Group {
+/** Radius of the reference lateral wheel (20″): the pod is drawn for it. */
+const R_LAT_REF = 0.254;
+export function carenados(F: FormaBala, M: Mats): THREE.Group {
   const g = new THREE.Group(); g.name = 'carenados';
+  const POD = podDe(F), k = F.R_LAT / R_LAT_REF, Y_FLOT = Y_FLOTACION_POD + F.dSuelo * 0.6, semiAnchoPod = semiAncho(POD);
   const casco = piel(POD, { N: 56, sub: 6 });
   // navy below the body's waterline (0.39 m at the pods), so the line runs on across them
-  const falda = parcheM(POD, 0.3849, -0.5499, e => {
-    if (e.yb >= Y_FLOTACION_POD) return null;
-    const a = thetaY(e, Math.min(Y_FLOTACION_POD, e.yt - 0.002)); return [Math.PI - a, 2 * Math.PI + a];
+  const falda = parcheM(POD, 0.3849 * k, -0.5499 * k, e => {
+    if (e.yb >= Y_FLOT) return null;
+    const a = thetaY(e, Math.min(Y_FLOT, e.yt - 0.002)); return [Math.PI - a, 2 * Math.PI + a];
   }, { nx: 90, nth: 26, delta: 0.0012, bordes: true });
   // the red pinstripe carries on across the pod, at the body's height (outer and inner faces)
-  const filete = (lado: 0 | 1) => parcheM(POD, 0.3849, -0.5499, e => {
-    const y0 = Y_FLOTACION_POD + 0.011, y1 = Y_FLOTACION_POD + 0.019;
+  const filete = (lado: 0 | 1) => parcheM(POD, 0.3849 * k, -0.5499 * k, e => {
+    const y0 = Y_FLOT + 0.011, y1 = Y_FLOT + 0.019;
     if (e.yb >= y0 || e.yt <= y1) return null;
     const a = thetaY(e, y0), b = thetaY(e, y1); return lado ? [Math.PI - b, Math.PI - a] : [a, b];
   }, { nx: 90, nth: 2, delta: 0.0016, bordes: true });
   const filetes = [filete(0), filete(1)];
   // front indicator: a slim amber lens down the leading edge, outer side
   const luz: THREE.Vector3[] = [];
-  for (let k = 0; k <= 12; k++) {
-    const y = 0.40 - 0.13 * k / 12;
+  for (let j = 0; j <= 12; j++) {
+    const y = (0.40 - 0.13 * j / 12) * k;
     // x of the leading edge at this height, then 1.5 cm back and on the outer side
-    let x = 0.385; for (let xx = 0.385; xx > 0.2; xx -= 0.002) if (semiAnchoPod(xx, y) > 0.02) { x = xx; break; }
+    let x = 0.385 * k; for (let xx = 0.385 * k; xx > 0.2 * k; xx -= 0.002) if (semiAnchoPod(xx, y) > 0.02) { x = xx; break; }
     const w = semiAnchoPod(x - 0.012, y);
     luz.push(new THREE.Vector3(x - 0.012, y, w * 0.72 + 0.003));
   }
   const ambar = barrido(luz, () => [0.007, 0.004], { lados: 8, arriba: new THREE.Vector3(1, 0, 0) });
   for (const s of [1, -1] as const) {
-    const c = new THREE.Group(); c.name = 'carenado'; c.position.set(X_LAT, 0, s * VIA_LAT / 2); c.scale.z = s; g.add(c);
+    const c = new THREE.Group(); c.name = 'carenado'; c.position.set(F.X_LAT, 0, s * F.VIA_LAT / 2); c.scale.z = s; g.add(c);
     c.add(malla(casco, M.chapa, 'carenado'), malla(falda, M.marinoCalco, 'carenado-falda'), malla(ambar, M.ambar, 'intermitente', false));
     for (const f of filetes) c.add(malla(f, M.rojo, 'filete', false));
     // arms: from inside the body skin to inside the pod
-    for (const b of BRAZOS) {
-      const xb = X_LAT + b.x, z0 = ladoZ(xb, b.y) - 0.008, z1 = VIA_LAT / 2 - 0.02;
+    for (const b of brazosDe(F)) {
+      const xb = F.X_LAT + b.x, z0 = F.ladoZ(xb, b.y) - 0.008, z1 = F.VIA_LAT / 2 - 0.02;
+      if (!Number.isFinite(z0)) continue;
       const ruta = [new THREE.Vector3(xb, b.y, s * z0), new THREE.Vector3(xb, b.y + 0.003, s * (z0 + z1) / 2), new THREE.Vector3(xb, b.y, s * z1)];
       g.add(malla(barrido(ruta, () => [b.cuerda / 2, b.grueso / 2], { lados: 16 }), M.marino, 'brazo'));
     }
   }
   return g;
 }
-/** Half-width of the pod at (x relative to the axle, y). */
-function semiAnchoPod(x: number, y: number): number {
-  let k = 0; while (k < POD.length - 2 && POD[k + 1].x > x) k++;
-  const a = POD[k], b = POD[k + 1], t = Math.max(0, Math.min(1, (x - a.x) / (b.x - a.x)));
-  const L = (p: number, q: number) => p + (q - p) * t;
-  const yb = L(a.yb, b.yb), yt = L(a.yt, b.yt), w = L(a.wm, b.wm), n = L(a.n ?? 2.6, b.n ?? 2.6);
-  if (y <= yb || y >= yt) return 0;
-  const u = Math.abs(y - (yb + yt) / 2) / ((yt - yb) / 2);
-  return w * Math.pow(Math.max(0, 1 - Math.pow(u, n)), 1 / n);
-}
-
 // ======================================================================= fin
 /**
  * The tail fin: a small swept stabiliser on the end of the tail cone, as on a
@@ -261,11 +233,13 @@ function semiAnchoPod(x: number, y: number): number {
  * Symmetric aerofoil section (NACA 00xx thickness, 3 cm at the root, 1.2 cm
  * at the tip), navy with a red tip cap (painted).
  */
-export const ALETA = { raiz: [-2.50, -3.05] as [number, number], punta: [[-2.875, 1.0], [-3.015, 0.99]] as [P2, P2], grueso: [0.016, 0.007] as [number, number] }; // half-thickness at root and tip
 type P2 = [number, number];
-export function aleta(M: Mats): THREE.Group {
+/** The fin of this shape: chords follow the tail through its x map; `alto` is the height of the tip's leading edge above the road. */
+export function aleta(F: FormaBala, M: Mats, alto = ALETA.punta[0][1]): THREE.Group {
   const g = new THREE.Group(); g.name = 'aleta';
-  const NU = 40, NV = 24, { raiz, punta, grueso } = ALETA;
+  const NU = 40, NV = 24, { grueso } = ALETA;
+  const raiz = ALETA.raiz.map(F.X) as [number, number];
+  const punta: [P2, P2] = [[F.X(ALETA.punta[0][0]), alto], [F.X(ALETA.punta[1][0]), alto === ALETA.punta[0][1] ? ALETA.punta[1][1] : alto - 0.01]];
   const pos: number[] = [], idxA: number[] = [], idxR: number[] = [];
   // chordwise columns: up the right side from the trailing edge to the leading edge and back down the left
   const cols = 2 * NU + 1;
@@ -278,7 +252,7 @@ export function aleta(M: Mats): THREE.Group {
       const lado = c < NU ? 1 : c > NU ? -1 : 0, k = c <= NU ? NU - c : c - NU;
       const u = 0.5 - 0.5 * Math.cos(Math.PI * k / NU); // 0 at the leading edge (centre column), more columns at both edges
       const uu = 1 - u; // 1 at the leading edge
-      const xr = raiz[0] + (raiz[1] - raiz[0]) * (1 - uu), yr = techoEn(Math.max(-3.09, xr)) - 0.012;
+      const xr = raiz[0] + (raiz[1] - raiz[0]) * (1 - uu), yr = techoEn(F, Math.max(F.X(-3.09), xr)) - 0.012;
       const xt = punta[0][0] + (punta[1][0] - punta[0][0]) * (1 - uu), yt = punta[0][1] + (punta[1][1] - punta[0][1]) * (1 - uu);
       const x = xr + (xt - xr) * v, y = yr + (yt - yr) * v;
       const chord = 1 - uu; // 0 at the leading edge, 1 at the trailing edge
@@ -309,22 +283,36 @@ export function aleta(M: Mats): THREE.Group {
  * on top. Pilot's footboards forward of the knees, passenger's footpegs beside
  * the pilot's hips. Simple volumes: they are seen through tinted glass.
  */
-export const ASIENTO = { xPiloto: -1.06, yPiloto: 0.44, xPasajero: -1.54, yPasajero: 0.47 };
-export function cabina(M: Mats): THREE.Group {
+/**
+ * The cockpit for these seats. The drawing is the reference one; moving a rider
+ * moves what belongs to them: the pilot's end of the saddle, the rear of the
+ * tank and the footboards with the pilot; the passenger's end, the backrest,
+ * the grab rail and the footpegs with the passenger; the saddle in between is
+ * stretched. The steering head, dash and handlebar stay over the front wheel.
+ * Everything that stands on the floor lifts with the belly; parts that reach
+ * out sideways (bars, footrests, rail, saddle) narrow with a narrower body.
+ */
+export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO): THREE.Group {
   const g = new THREE.Group(); g.name = 'cabina';
+  const R0 = ASIENTO, piso = F.dSuelo, kz = Math.min(1, F.kW);
+  const dxPil = A.xPiloto - R0.xPiloto, dyPil = A.yPiloto - R0.yPiloto, dxPas = A.xPasajero - R0.xPasajero, dyPas = A.yPasajero - R0.yPasajero;
+  // along the saddle: 0 at the pilot's hips, 1 at the passenger's (clamped), for the stretch in between
+  const w = (x: number) => Math.min(1, Math.max(0, (R0.xPiloto - x) / (R0.xPiloto - R0.xPasajero)));
+  const sx = (x: number) => x + dxPil + (dxPas - dxPil) * w(x), sy = (x: number) => dyPil + (dyPas - dyPil) * w(x);
+  const Es = (x: number, yb: number, yt: number, wb: number, wm: number, wt: number, n: number) => E(sx(x), yb + sy(x), yt + sy(x), wb * kz, wm * kz, wt * kz, n);
   // stepped saddle (UVs from the loft are not there: the quilting uses a box projection below)
   const sillin = loft([
-    E(-0.835, 0.405, 0.442, 0.03, 0.045, 0.035, 2.4),
-    E(-0.88, 0.37, 0.452, 0.06, 0.085, 0.07, 2.6),
-    E(-0.97, 0.335, 0.448, 0.10, 0.125, 0.11, 3.0),
-    E(-1.07, 0.33, 0.440, 0.135, 0.155, 0.14, 3.2),
-    E(-1.17, 0.33, 0.448, 0.15, 0.162, 0.15, 3.2),
-    E(-1.225, 0.335, 0.484, 0.15, 0.162, 0.15, 3.2),
-    E(-1.30, 0.34, 0.476, 0.152, 0.164, 0.152, 3.2),
-    E(-1.48, 0.35, 0.470, 0.155, 0.166, 0.155, 3.2),
-    E(-1.63, 0.36, 0.474, 0.145, 0.156, 0.145, 3.0),
-    E(-1.71, 0.38, 0.480, 0.11, 0.125, 0.11, 2.6),
-    E(-1.745, 0.42, 0.472, 0.04, 0.055, 0.045, 2.2),
+    Es(-0.835, 0.405, 0.442, 0.03, 0.045, 0.035, 2.4),
+    Es(-0.88, 0.37, 0.452, 0.06, 0.085, 0.07, 2.6),
+    Es(-0.97, 0.335, 0.448, 0.10, 0.125, 0.11, 3.0),
+    Es(-1.07, 0.33, 0.440, 0.135, 0.155, 0.14, 3.2),
+    Es(-1.17, 0.33, 0.448, 0.15, 0.162, 0.15, 3.2),
+    Es(-1.225, 0.335, 0.484, 0.15, 0.162, 0.15, 3.2),
+    Es(-1.30, 0.34, 0.476, 0.152, 0.164, 0.152, 3.2),
+    Es(-1.48, 0.35, 0.470, 0.155, 0.166, 0.155, 3.2),
+    Es(-1.63, 0.36, 0.474, 0.145, 0.156, 0.145, 3.0),
+    Es(-1.71, 0.38, 0.480, 0.11, 0.125, 0.11, 2.6),
+    Es(-1.745, 0.42, 0.472, 0.04, 0.055, 0.045, 2.2),
   ], { N: 48, sub: 6 });
   cajaUV(sillin, 0.5);
   g.add(malla(sillin, M.cuero, 'sillin'));
@@ -336,56 +324,62 @@ export function cabina(M: Mats): THREE.Group {
       E(-0.03, -0.15, 0.15, 0.12, 0.15, 0.12, 3.2),
     ], { N: 40, sub: 4 });
     cajaUV(pad, 0.4);
-    const o = malla(pad, M.cuero, 'respaldo'); o.position.set(-1.80, 0.65, 0); o.rotation.z = 0.21; g.add(o);
-    for (const z of [-0.09, 0.09]) { const p = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.011, 0.2, 10), M.aluminio); p.position.set(-1.76, 0.49, z); p.rotation.z = 0.21; g.add(p); }
+    const o = malla(pad, M.cuero, 'respaldo'); o.position.set(-1.80 + dxPas, 0.65 + dyPas, 0); o.rotation.z = 0.21; o.scale.z = kz; g.add(o);
+    for (const z of [-0.09, 0.09]) { const p = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.011, 0.2, 10), M.aluminio); p.position.set(-1.76 + dxPas, 0.49 + dyPas, z * kz); p.rotation.z = 0.21; g.add(p); }
   }
-  // the saddle's frame below it and the spine forward to the steering head (dark)
+  // the saddle's frame below it and the spine forward to the steering head (dark): on the floor
   {
+    const Ep = (x: number, yb: number, yt: number, wb: number, wm: number, wt: number, n: number) => E(x, yb + piso, yt + piso, wb, wm, wt, n);
     const viga = loft([
-      E(-0.30, 0.50, 0.60, 0.03, 0.04, 0.03, 2.4), E(-0.6, 0.30, 0.42, 0.045, 0.055, 0.045, 2.6),
-      E(-0.9, 0.20, 0.34, 0.07, 0.08, 0.07, 3), E(-1.8, 0.20, 0.36, 0.08, 0.09, 0.08, 3), E(-1.95, 0.24, 0.32, 0.03, 0.04, 0.03, 2.4),
+      Ep(-0.30, 0.50, 0.60, 0.03, 0.04, 0.03, 2.4), Ep(-0.6, 0.30, 0.42, 0.045, 0.055, 0.045, 2.6),
+      Ep(-0.9, 0.20, 0.34, 0.07, 0.08, 0.07, 3), Ep(-1.8, 0.20, 0.36, 0.08, 0.09, 0.08, 3), Ep(-1.95, 0.24, 0.32, 0.03, 0.04, 0.03, 2.4),
     ], { N: 24, sub: 4 });
     g.add(malla(viga, M.carbono, 'chasis'));
   }
-  // the navy tank between the pilot's knees, up to the steering head
+  // the navy tank between the pilot's knees, up to the steering head: its rear follows the pilot, its front stays at the head
+  const wt = (x: number) => Math.min(1, Math.max(0, (-0.27 - x) / 0.59));
+  const Et = (x: number, yb: number, yt: number, wb: number, wm: number, wt0: number, n: number) => {
+    const k = wt(x), dy = piso + (dyPil - piso) * k;
+    return E(x + dxPil * k, yb + dy, yt + dy, wb, wm, wt0, n);
+  };
   const deposito = loft([
-    E(-0.27, 0.70, 0.835, 0.03, 0.05, 0.035, 2.4),
-    E(-0.33, 0.60, 0.865, 0.07, 0.095, 0.075, 2.6),
-    E(-0.45, 0.52, 0.86, 0.095, 0.125, 0.10, 2.8),
-    E(-0.60, 0.47, 0.79, 0.10, 0.13, 0.10, 2.8),
-    E(-0.74, 0.44, 0.63, 0.09, 0.115, 0.085, 2.6),
-    E(-0.83, 0.42, 0.50, 0.05, 0.07, 0.05, 2.4),
-    E(-0.86, 0.43, 0.46, 0.01, 0.02, 0.01, 2.2),
+    Et(-0.27, 0.70, 0.835, 0.03, 0.05, 0.035, 2.4),
+    Et(-0.33, 0.60, 0.865, 0.07, 0.095, 0.075, 2.6),
+    Et(-0.45, 0.52, 0.86, 0.095, 0.125, 0.10, 2.8),
+    Et(-0.60, 0.47, 0.79, 0.10, 0.13, 0.10, 2.8),
+    Et(-0.74, 0.44, 0.63, 0.09, 0.115, 0.085, 2.6),
+    Et(-0.83, 0.42, 0.50, 0.05, 0.07, 0.05, 2.4),
+    Et(-0.86, 0.43, 0.46, 0.01, 0.02, 0.01, 2.2),
   ], { N: 40, sub: 6 });
   g.add(malla(deposito, M.marino, 'deposito'));
-  // dash: a small screen in a carbon hood on top of the tank, facing the pilot
+  // dash: a small screen in a carbon hood on top of the tank, facing the pilot (at the steering head)
   {
-    const capo = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.012, 0.21), M.carbono); capo.position.set(-0.43, 0.868, 0); capo.rotation.z = 0.75; g.add(capo);
-    const pant = new THREE.Mesh(new THREE.PlaneGeometry(0.17, 0.085), M.pantalla); pant.position.set(-0.452, 0.85, 0); pant.rotation.set(0, -Math.PI / 2, 0); pant.rotateX(-0.82); g.add(pant);
+    const capo = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.012, 0.21), M.carbono); capo.position.set(-0.43, 0.868 + piso, 0); capo.rotation.z = 0.75; g.add(capo);
+    const pant = new THREE.Mesh(new THREE.PlaneGeometry(0.17, 0.085), M.pantalla); pant.position.set(-0.452, 0.85 + piso, 0); pant.rotation.set(0, -Math.PI / 2, 0); pant.rotateX(-0.82); g.add(pant);
   }
   // handlebar: clamp on the steering head, bars swept back to the grips, levers ahead of them
   {
-    const p = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
+    const kb = escalaManillar(F), p = (x: number, y: number, z: number) => new THREE.Vector3(x, y + piso, z * kb);
     const barra = (s: number) => curva([p(-0.46, 0.875, 0), p(-0.50, 0.885, s * 0.08), p(-0.55, 0.885, s * 0.17), p(-0.585, 0.872, s * 0.215)], 8);
     for (const s of [1, -1]) {
       g.add(malla(barrido(barra(s), () => [0.011, 0.011], { lados: 10 }), M.aluminio, 'manillar'));
-      const puno = new THREE.Mesh(new THREE.CylinderGeometry(0.017, 0.017, 0.11, 14), M.gomaMate); puno.position.set(-0.592, 0.870, s * 0.265); puno.rotation.x = Math.PI / 2; g.add(puno);
-      const tope = new THREE.Mesh(new THREE.CylinderGeometry(0.019, 0.019, 0.012, 14), M.aluminio); tope.position.set(-0.592, 0.870, s * 0.325); tope.rotation.x = Math.PI / 2; g.add(tope);
+      const puno = new THREE.Mesh(new THREE.CylinderGeometry(0.017, 0.017, 0.11, 14), M.gomaMate); puno.position.set(-0.592, 0.870 + piso, s * 0.265 * kb); puno.rotation.x = Math.PI / 2; g.add(puno);
+      const tope = new THREE.Mesh(new THREE.CylinderGeometry(0.019, 0.019, 0.012, 14), M.aluminio); tope.position.set(-0.592, 0.870 + piso, s * 0.325 * kb); tope.rotation.x = Math.PI / 2; g.add(tope);
       const leva = curva([p(-0.56, 0.882, s * 0.18), p(-0.545, 0.882, s * 0.24), p(-0.555, 0.878, s * 0.295)], 6);
       g.add(malla(barrido(leva, () => [0.006, 0.003], { lados: 6 }), M.plastico, 'maneta'));
     }
-    const abraz = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.03, 0.07), M.carbono); abraz.position.set(-0.46, 0.87, 0); g.add(abraz);
+    const abraz = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.03, 0.07), M.carbono); abraz.position.set(-0.46, 0.87 + piso, 0); g.add(abraz);
   }
   // pilot's footboards forward of the knees (toes up 20°), passenger's footpegs beside the pilot's hips
   for (const s of [1, -1]) {
-    const tabla = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.012, 0.09), M.aluminio); tabla.position.set(-0.55, 0.205, s * 0.15); tabla.rotation.z = 0.35; g.add(tabla);
-    const goma = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.006, 0.07), M.gomaMate); goma.position.set(-0.55, 0.214, s * 0.15); goma.rotation.z = 0.35; g.add(goma);
-    const estribo = new THREE.Mesh(new THREE.CylinderGeometry(0.013, 0.013, 0.09, 12), M.gomaMate); estribo.position.set(-1.30, 0.27, s * 0.20); estribo.rotation.x = Math.PI / 2; g.add(estribo);
-    const soporte = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.05, 0.06), M.aluminio); soporte.position.set(-1.30, 0.255, s * 0.13); g.add(soporte);
+    const tabla = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.012, 0.09), M.aluminio); tabla.position.set(-0.55 + dxPil, 0.205 + piso, s * 0.15 * kz); tabla.rotation.z = 0.35; g.add(tabla);
+    const goma = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.006, 0.07), M.gomaMate); goma.position.set(-0.55 + dxPil, 0.214 + piso, s * 0.15 * kz); goma.rotation.z = 0.35; g.add(goma);
+    const estribo = new THREE.Mesh(new THREE.CylinderGeometry(0.013, 0.013, 0.09, 12), M.gomaMate); estribo.position.set(-1.30 + dxPas, 0.27 + piso, s * 0.20 * kz); estribo.rotation.x = Math.PI / 2; g.add(estribo);
+    const soporte = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.05, 0.06), M.aluminio); soporte.position.set(-1.30 + dxPas, 0.255 + piso, s * 0.13 * kz); g.add(soporte);
   }
   // grab rail round the back of the passenger's seat
   {
-    const p = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
+    const p = (x: number, y: number, z: number) => new THREE.Vector3(x + dxPas, y + dyPas, z * kz);
     const riel = curva([p(-1.42, 0.49, 0.185), p(-1.54, 0.53, 0.20), p(-1.66, 0.555, 0.175), p(-1.73, 0.565, 0.10), p(-1.745, 0.568, 0), p(-1.73, 0.565, -0.10), p(-1.66, 0.555, -0.175), p(-1.54, 0.53, -0.20), p(-1.42, 0.49, -0.185)], 8);
     g.add(malla(barrido(riel, () => [0.012, 0.012], { lados: 10 }), M.aluminio, 'asidero'));
   }
@@ -404,8 +398,8 @@ function cajaUV(geo: THREE.BufferGeometry, escala: number) {
 
 // ======================================================================= cameras
 /** Camera pod instead of a mirror (as on the XL1): a white capsule on the body side with a dark lens looking back. */
-export function camara(M: Mats, x: number, y: number): THREE.Group {
-  const z = ladoZ(x, y);
+export function camara(F: FormaBala, M: Mats, x: number, y: number): THREE.Group {
+  const z = F.ladoZ(x, y);
   const pod = new THREE.Group(); pod.name = 'camara-lateral';
   const casco = torno([[0, 0.06], [0.008, 0.055], [0.016, 0.038], [0.019, 0.012], [0.018, -0.02], [0.015, -0.04], [0.013, -0.048]], 28);
   casco.rotateY(Math.PI / 2); casco.scale(1, 0.62, 1);

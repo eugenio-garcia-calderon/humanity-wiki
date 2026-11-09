@@ -17,7 +17,11 @@ import { ESCALA_CP } from './tunel/colores';
  * ocupantes) y `crr` el coeficiente de rodadura: sin ellos no hay total y la
  * fila lo dice. `vmax` sirve para avisar de una velocidad a la que no llega.
  */
-export interface FilaTunel { id: string; nombre: string; cd: number; area: number; fuente: string; masa?: number; crr?: number; vmax?: number; estimado?: boolean }
+export interface FilaTunel {
+  id: string; nombre: string; cd: number; area: number; fuente: string; masa?: number; crr?: number; vmax?: number; estimado?: boolean;
+  /** Where our design's Cd comes from, when it is not the editor's formula (the Cuadriciclo Bala: the tunnel itself). */
+  origenCd?: string;
+}
 
 const RHO = 1.2, G = 9.81; // kg/m³ y m/s², los mismos que usa el cálculo del Aeromóvil
 const fmt = (v: number, d = 1) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -183,7 +187,7 @@ export function TarjetaTunel({ filas, base, kmh, alCambiarKmh, alCerrar, classNa
                   <td className="py-1 pr-1 font-medium text-slate-900">{f.nombre}{f.noLlega && <span className="font-normal text-amber-700"> *</span>}</td>
                   <td className="py-1 text-right">
                     <b className="text-[12px]">{fmt(f.cd, 3)}</b>
-                    <div className="text-[10px] text-slate-500">{f.id === base ? 'fórmula del editor' : 'publicado'}{t ? ` · túnel ${fmt(t.total, 3)}` : cuerpos.some(c => c.id === f.id) ? ' · túnel…' : ''}</div>
+                    <div className="text-[10px] text-slate-500">{f.id === base ? (f.origenCd ?? 'fórmula del editor') : 'publicado'}{t && !f.origenCd ? ` · túnel ${fmt(t.total, 3)}` : !t && cuerpos.some(c => c.id === f.id) ? ' · túnel…' : ''}</div>
                   </td>
                   <td className="py-1 text-right">
                     <b className="text-[12px]">{f.kWtotal != null ? `${fmt(f.kWtotal)} kW` : '—'}</b>
@@ -215,7 +219,9 @@ export function TarjetaTunel({ filas, base, kmh, alCambiarKmh, alCerrar, classNa
         </div>
         <div>
         <p className="text-[11px] leading-snug text-slate-600">
-          <b>El consumo usa el Cd publicado</b> de cada coche y, para este diseño, el de la fórmula del editor; el que calcula el túnel va al lado y abajo, desglosado. Decidir si el editor adopta el del túnel es cosa tuya.
+          {filas.find(f => f.id === base)?.origenCd
+            ? <><b>El consumo usa el Cd publicado</b> de cada coche y, para este diseño, el que calcula el túnel (no hay otro: la fórmula del editor no vale para su forma), sin masa: solo el aire.</>
+            : <><b>El consumo usa el Cd publicado</b> de cada coche y, para este diseño, el de la fórmula del editor; el que calcula el túnel va al lado y abajo, desglosado. Decidir si el editor adopta el del túnel es cosa tuya.</>}
         </p>
         <p className="mt-1.5 text-[11px] leading-snug text-slate-600">
           <b>Por qué crece con la velocidad:</b> «solo aire» da siempre el mismo múltiplo, porque el aire frena a todos en la misma proporción. Las ruedas cuestan lo mismo por kilómetro a cualquier velocidad; cuanto más rápido, más pesa el aire en el total y más se separan.
@@ -244,7 +250,8 @@ export function TarjetaTunel({ filas, base, kmh, alCambiarKmh, alCerrar, classNa
           <tbody>
             {cuerpos.map(c => {
               const R = resultados[c.id], d = cdTunel(c.id), nuestro = c.id === 'aeromovil';
-              const refCd = nuestro ? filas.find(f => f.id === base)?.cd : c.cdPublicado;
+              // our design is compared with the editor's formula; when its only Cd is the tunel's own (the Bala), there is nothing to compare with
+              const filaNuestra = filas.find(f => f.id === base), refCd = nuestro ? (filaNuestra?.origenCd ? undefined : filaNuestra?.cd) : c.cdPublicado;
               return (
                 <tr key={c.id} className="border-t border-slate-100 align-top">
                   <td className="py-1 pr-2 font-medium text-slate-900">{c.nombre}</td>

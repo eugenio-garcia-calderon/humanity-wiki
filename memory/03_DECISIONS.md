@@ -1205,3 +1205,27 @@ Chose (b): Eugenio asked for an explanation *of this value*, and the tags keep c
 **No `aero`.** There is no published Cd or frontal area. The tunnel estimates Cd 0.198, and the car does not join the calibration.
 
 **Paint.** The bot's 0x1f78d1 at metalness 0.55 rendered royal blue under the park environment. Lightened at integration to 0x3a95e0 at 0.4, closer to the photos' sky blue.
+
+## 2026-11-09 — The Bala in the editor: one shape code, the garage builder parametrised
+
+**Method.** The garage builder (`balaForma`, `balaPiezas`, `balaModelo`) was parametrised instead of rewriting the Bala as editor `Superficie` patches.
+- It keeps the look Eugenio approved.
+- The default is provably identical: `scripts/bala-huella.ts` compared the new code against main's code at integration and printed «IGUAL».
+- The hand-drawn keyframes stay. Other dimensions reach them through:
+  - a piecewise-linear x stretch between nose tip, front axle, canopy start and end, rear axle and tail tip;
+  - a width factor;
+  - a belly lift;
+  - a scale above the widest point.
+
+**Types.**
+- `ModeloBala` is a third member of the `Modelo` union, without the Gota/A1 fields (frame, sec, superficies, tubos…). TypeScript listed every consumer, and each got a deliberate branch.
+- `ModeloConPiel` (Gota | A1) is what `planos.ts` and `cad.ts` take.
+- The Bala's parameters are optional fields of `Parametros`, prefixed `b`. Gota and A1 designs never carry them, so old designs open bit-identical.
+
+**Sliders.** Labels, blocks and ranges live in one table, `DESLIZADORES_BALA`, read by both the page and `tunel/explicaciones.ts`. The ranges are symmetric about the garage values because the existing slider widget recentres on the default.
+
+**No editor Cd for the Bala.** The Gota formula does not apply to this shape, and the screen says so. The tunnel's reference area is the body section, as for the garage car, not the 1.09 m² that includes the pods.
+
+**Head clearance.** The rider is a mannequin scaled to the ANSUR II 2012 sitting heights for men (91.8 cm at the 50th percentile, 97.7 cm at the 95th), trunk leaning 5° forward, no helmet. The 5° lean is an assumption, picked because it reproduces the 7 and 1 cm stated for the pilot.
+
+**Dragging.** Each slider step builds a quick model (half the rows, no small details) on the next frame. The full model follows 0.3 s after the last change.

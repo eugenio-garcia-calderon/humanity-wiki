@@ -9,7 +9,7 @@
 //
 // Unidades: metros, ejes del visor (x delante, y arriba, z izquierda). El
 // script pasa a milímetros y a Z arriba.
-import { contornoSeccion, enZona, type Modelo, type P3, type Piel, type Superficie } from './geometria';
+import { contornoSeccion, enZona, type ModeloConPiel as Modelo, type P3, type Piel, type Superficie } from './geometria';
 import { suspensionA1 } from './geometriaA1';
 
 export interface ParcheCAD { nombre: string; capa: string; piel: Piel; puerta: string; rejilla: P3[][] }

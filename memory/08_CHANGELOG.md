@@ -10693,3 +10693,29 @@ Petición de Eugenio, con un collage de tres fotos de un coche azul de la Shell 
 - **Sitio:** z = +15, a la derecha del AeroRider. Con él, la vista de todos los coches encuadra los diez.
 - **Comprobado:** `tsc`, `vite build`, `tunel-pruebas` (sin cambios en la calibración) y, en el navegador, el coche solo, el garaje entero y «Superponer».
 - **Lo menos seguro:** la foto de carrera no encaja del todo con las proporciones de la presentación (en ella el morro parece unos 20 cm más largo), y no hay foto desde arriba.
+
+## 2026-11-09 — El Cuadriciclo Bala se puede editar
+
+Petición de Eugenio: «permíteme editarlo». Eligió esta opción: «El Bala pasa a ser un diseño más en "Diseños", con sus deslizadores, guardado en tu cuenta y con "Probar" en el túnel».
+
+- **Tercer vehículo en «Vehículo»:** Cuadriciclo Bala.
+  - Por defecto es exactamente el Bala del garaje. Lo comprobó el bot y lo volví a comprobar al integrarlo, contra el código de antes del cambio: la misma envolvente y las mismas 107 mallas, vértice a vértice.
+  - El garaje y el editor usan ahora la misma forma.
+- **Deslizadores:** 16 en cuatro bloques (Medidas; Morro y cola; Cúpula; Ocupantes), más dos selectores de ruedas, cada uno con su explicación. El largo total es morro + batalla + cola y sale en la cabecera.
+- **Comprobaciones:**
+  - la cabeza del piloto y del pasajero, en talla media y alta, sin casco (por defecto, 7,0 / 1,1 y 6,1 / 0,3 cm);
+  - las ruedas dentro de la carrocería, el neumático dentro de su carenado, el carenado separado de la carrocería y el manillar.
+- **Cifras que se calculan:** área frontal (1,09 m² con carenados, brazos y ruedas; 0,90 la carrocería sola), volumen, piel y cristal.
+  - El Cd lo da el túnel (0,138 por defecto, solo la carrocería).
+  - Masa, consumo y autonomía no se calculan: no hay chasis, motor ni batería diseñados, y la pantalla lo dice.
+- **Guardado:** como los demás diseños, en la cuenta, y solo el dueño puede cambiarlo. Los diseños guardados antes abren igual (comprobado con un script).
+- **En el 3D:** «Abrir cúpula» (se abre hacia delante), Rayos X, Corte, Cotas propias y los dos ocupantes a horcajadas.
+- **Lo que no aplica al Bala:** «Simular curva» no sale, porque el Bala no se inclina. Planos, STEP, departamentos, componentes y aranceles no existen para el Bala, y la pantalla lo dice; el STL sí.
+- **Túnel:** «Probar» y las opciones de mejora usan los deslizadores del Bala; por ejemplo, una cola más larga baja el Cd de 0,138 a 0,134. Los nombres de los deslizadores salen de una sola tabla, que leen la página y el túnel.
+- **Arreglado de paso** (venía de antes): con el Aeromóvil 1 a 100 km/h, «Consumo a 100 km/h» y «Autonomía a 100 km/h» salían dos veces.
+- **Comprobado:**
+  - `tsc` y `vite build`;
+  - `tunel-pruebas`: todo OK; el Aeromóvil 1 y el Gota dan las mismas cifras que antes;
+  - los scripts del Bala (huella, diseños guardados y rangos de los deslizadores);
+  - en el navegador: el Aeromóvil 1 y el Gota con su cabecera y sus pestañas de siempre; el Bala elegido en «Vehículo»; mover la batalla a 2,70 m cambia el largo a 3,95 m.
+- **Sin verificar:** un móvil y una gráfica de verdad (no se ha podido notar si arrastrar va fluido; los tiempos medidos son de 30–90 ms por paso) y el guardado contra el servidor real (se probó con el servidor simulado).
