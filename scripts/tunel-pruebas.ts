@@ -14,7 +14,8 @@ import { CONSTANTES, EXPOSICION, RUEDAS_GARAJE } from '../src/components/aeromov
 import { CALIBRACION } from '../src/components/aeromovil/tunel/calibracion';
 import { cuerpoAeromovil, peticionDe } from '../src/components/aeromovil/tunel/cuerpos';
 import { VEHICULOS_GARAJE } from '../src/components/aeromovil/garaje';
-import { PARAMETROS_A1, PARAMETROS_GOTA, ajustarCarenado, areas, calcular, crearModelo } from '../src/components/aeromovil/geometria';
+import { PARAMETROS_A1, PARAMETROS_BALA, PARAMETROS_GOTA, ajustarCarenado, areas, calcular, crearModelo } from '../src/components/aeromovil/geometria';
+import { cuerpoGaraje } from '../src/components/aeromovil/tunel/cuerpos';
 
 let fallos = 0;
 const ok = (cond: boolean, msg: string) => { console.log(`${cond ? 'OK   ' : 'FALLA'} ${msg}`); if (!cond) fallos++; };
@@ -107,14 +108,20 @@ for (const [nI, nJ] of [[24, 12], [40, 16]]) {
     const sinEl = f.cerrado ? (() => { const a2 = ajustar(cerrados.filter(x => x.id !== f.id)); return f.base + a2.kb * f.b + CONSTANTES.K_RUEDA * f.r + a2.dd; })() : f.est;
     ok(!!g && Math.abs(g.estimado - f.est) < 0.002 && Math.abs(g.sinEl - sinEl) < 0.002 && g.publicado === f.pub, `${f.id}: la tabla guardada (${g?.estimado.toFixed(3)}, sin él ${g?.sinEl.toFixed(3)}) coincide con el cálculo (${f.est.toFixed(3)}, ${sinEl.toFixed(3)})`);
   }
-  // our design, both layouts
-  for (const P0 of [PARAMETROS_A1, PARAMETROS_GOTA]) {
+  // our design, the three vehicles (the Bala has no editor formula: its only Cd is the tunnel's)
+  for (const P0 of [PARAMETROS_A1, PARAMETROS_GOTA, PARAMETROS_BALA]) {
     const m = crearModelo(ajustarCarenado(P0)), res = calcular(m, areas(m));
-    const c = cuerpoAeromovil(m as any, res.A);
+    const c = cuerpoAeromovil(m, res.A), nombre = m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala' : 'Aeromóvil Gota';
     for (const resol of ['baja', 'media', 'alta'] as const) {
       const R = calcularTunel({ ...peticionDe(c, resol, 'normal') });
       const q = R.porVelocidad[1];
-      console.log(`  ${m.tipo === 'a1' ? 'Aeromóvil 1' : 'Aeromóvil Gota'} (${resol}, ${R.paneles} paneles, ${R.ms.total.toFixed(0)} ms): Cd túnel ${q.cd.total.toFixed(3)} (${(q.cd.total * (1 - CALIBRACION.banda)).toFixed(3)}–${(q.cd.total * (1 + CALIBRACION.banda)).toFixed(3)}) · fórmula del editor ${res.Cd.toFixed(3)} · Cl ${R.cl.toFixed(2)} (del. ${R.clDel.toFixed(2)}, tras. ${R.clTras.toFixed(2)}) · Cd potencial ${R.cdPotencial.toFixed(3)}`);
+      console.log(`  ${nombre} (${resol}, ${R.paneles} paneles, ${R.ms.total.toFixed(0)} ms): Cd túnel ${q.cd.total.toFixed(3)} (${(q.cd.total * (1 - CALIBRACION.banda)).toFixed(3)}–${(q.cd.total * (1 + CALIBRACION.banda)).toFixed(3)}) · ${Number.isFinite(res.Cd) ? `fórmula del editor ${res.Cd.toFixed(3)}` : 'sin fórmula del editor'} · Cl ${R.cl.toFixed(2)} (del. ${R.clDel.toFixed(2)}, tras. ${R.clTras.toFixed(2)}) · Cd potencial ${R.cdPotencial.toFixed(3)}`);
+    }
+    if (m.tipo === 'bala') {
+      // the editor's default Bala is the garage's Bala: the same body goes through the tunnel
+      const g = cuerpoGaraje({ id: 'bala', x: 0, z: 0 })!;
+      ok(JSON.stringify(g.envolvente) === JSON.stringify(c.envolvente) && g.area === c.area && g.n === c.n && JSON.stringify(g.ruedas) === JSON.stringify(c.ruedas),
+        `el Bala del editor por defecto entra en el túnel igual que el del garaje (silueta, sección ${c.n}, área ${c.area.toFixed(3)} m², ruedas)`);
     }
   }
 }

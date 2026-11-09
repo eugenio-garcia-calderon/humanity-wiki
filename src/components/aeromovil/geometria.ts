@@ -17,7 +17,8 @@
 // junto a los hombros, y para que las laterales no rocen al inclinarse.
 
 import { calcularA1, crearModeloA1, estimarMasasA1, type ModeloA1 } from './geometriaA1';
-export type { ModeloA1 };
+import { areasBala, calcularBala, crearModeloBala, type CamposBala, type ModeloBala, type ResultadosBala } from './geometriaBala';
+export type { ModeloA1, ModeloBala };
 
 export type Pulgadas = '16' | '20' | '24' | '26' | '28';
 export type Puerta = 'cabina' | 'gaviota' | 'aptera';
@@ -31,8 +32,11 @@ export type Puerta = 'cabina' | 'gaviota' | 'aptera';
  *            un 30 % mayor), puertas, maleteros, motor de 15/32 kW y
  *            batería de 27 kWh. Es el diseño por defecto. Su geometría vive
  *            en `geometriaA1.ts`.
+ *   'bala'   el Cuadriciclo Bala (2026-11-09): el modelo del garaje hecho
+ *            editable, biplaza a horcajadas con el rombo del Gota. Su forma
+ *            vive en `garaje/balaForma.ts` y lo del editor en `geometriaBala.ts`.
  */
-export type Disposicion = 'rombo' | 'cuatro';
+export type Disposicion = 'rombo' | 'cuatro' | 'bala';
 /** Neumáticos de coche pequeño: diámetro exterior y anchura (m). Los del Twizy son los dos primeros. */
 export const NEUMATICOS = {
   '125/80R13': { n: '125/80 R13 (Twizy delante)', d: 0.530, w: 0.125 },
@@ -57,7 +61,8 @@ export const MASAS_FIJAS_A1: Record<string, number> = { cargador: 6, cableado: 5
 /** Masa de una de esas piezas: la escrita a mano en su ficha, o la de por defecto. */
 export const masaFija = (P: Parametros, id: string) => P.piezas?.[id]?.masa ?? MASAS_FIJAS_A1[id] ?? 0;
 
-export interface Parametros {
+/** Los campos del Bala (`CamposBala`, prefijo `b`) son opcionales: los diseños del Gota y del Aeromóvil 1 no los llevan. */
+export interface Parametros extends Partial<CamposBala> {
   disposicion: Disposicion;
   /** Alternativa elegida por componente (ver `componentes.ts`); sin entrada = la de serie. */
   variantes?: Record<string, string>;
@@ -218,6 +223,17 @@ export const PARAMETROS_A1: Parametros = {
   matChasis: 'al6061', chasis: 'largueros', extraChasis: 6, mRueda: 8, mSuspension: 26, mMotor: 16, mGenerador: 0, mBateria: 0,
   mAsiento: 7, matCarenado: 'carbono', espCarenado: 1.8, espCristal: 4.0, mSolarM2: 2.2, mVarios: 25,
 };
+/**
+ * El Cuadriciclo Bala (2026-11-09): las medidas del modelo del garaje. Con
+ * ellas el editor construye exactamente el Bala del garaje. Lo que no son
+ * campos `b…` viene del Gota y el Bala no lo usa (salvo el espesor del
+ * cristal, para la holgura sobre la cabeza).
+ */
+export const BALA_DEFECTO: CamposBala = {
+  bBatalla: 2.45, bVia: 1.10, bAncho: 0.85, bSuelo: 0.124, bMorro: 0.60, bPuntaMorro: 0.75, bCola: 0.65, bPuntaCola: 0.47, bAleta: 1.0,
+  bCupIni: 0.15, bCupFin: 2.00, bAlto: 1.452, bPilX: 1.06, bPilY: 0.44, bPasX: 1.54, bPasY: 0.47, bRuedaDT: '24', bRuedaLat: '20',
+};
+export const PARAMETROS_BALA: Parametros = { ...PARAMETROS_GOTA, disposicion: 'bala', ...BALA_DEFECTO };
 export const PARAMETROS_POR_DEFECTO: Parametros = PARAMETROS_A1;
 
 export const DIAMETRO_RUEDA: Record<Pulgadas, number> = { '16': 0.405, '20': 0.508, '24': 0.61, '26': 0.66, '28': 0.70 };
@@ -301,7 +317,7 @@ export interface PuntosOcupante {
   anchoPiernas?: [number, number];
 }
 export interface PiezasAsiento { base: [number, number][]; respaldo: [number, number][]; cabecero: [number, number][]; marco: [number, number][]; anchoCabecero: number }
-/** Lo que los dos vehículos tienen en común: lo que usan el visor, los planos y la comparación. */
+/** Lo que el Gota y el Aeromóvil 1 tienen en común: lo que usan el visor, los planos y la comparación. El Bala no lo lleva (ver `ModeloBala`). */
 export interface ModeloBase {
   tipo: 'gota' | 'a1';
   P: Parametros;
@@ -325,7 +341,7 @@ export interface ModeloBase {
 
 /** Todo lo que sale de los parámetros: medidas derivadas y funciones de forma. */
 export function crearModelo(P: Parametros): Modelo {
-  return P.disposicion === 'cuatro' ? crearModeloA1(P) : crearModeloGota(P);
+  return P.disposicion === 'cuatro' ? crearModeloA1(P) : P.disposicion === 'bala' ? crearModeloBala(P) : crearModeloGota(P);
 }
 
 /** El Aeromóvil Gota (rombo basculante, tándem 1+2, pedaleo asistido). */
@@ -612,7 +628,9 @@ export function crearModeloGota(P: Parametros) {
   };
 }
 export type ModeloGota = ReturnType<typeof crearModeloGota>;
-export type Modelo = ModeloGota | ModeloA1;
+export type Modelo = ModeloGota | ModeloA1 | ModeloBala;
+/** El Gota o el Aeromóvil 1: los dos que comparten la piel por superficies, el chasis de tubos y los ocupantes. */
+export type ModeloConPiel = ModeloGota | ModeloA1;
 
 /** Los tramos rectos de un tubo: uno si es recto; la curva muestreada si está curvado. */
 export function tramosTubo(t: Tubo, n = 24): [P3, P3][] {
@@ -640,7 +658,7 @@ export function muestrearCurva(pts: P3[], n = 24): P3[] {
 export const largoTubo = (t: Tubo) => tramosTubo(t).reduce((L, [a, b]) => L + Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]), 0);
 
 /** Contorno de una sección (cuaderna) en su plano: [z, y] en metros. */
-export function contornoSeccion(m: Modelo, u: number, n = 96): [number, number][] {
+export function contornoSeccion(m: ModeloConPiel, u: number, n = 96): [number, number][] {
   const f = m.frame(u);
   const out: [number, number][] = [];
   for (let j = 0; j < n; j++) { const q = m.sec(f, 2 * Math.PI * j / n); out.push([q[2], q[1]]); }
@@ -662,7 +680,7 @@ function holguras(m: ModeloGota) {
 
 /** Con `auto`, calcula el ancho y el alto que dejan exactamente la holgura pedida. */
 export function ajustarCarenado(P: Parametros): Parametros {
-  if (!P.auto || P.disposicion === 'cuatro') return P;
+  if (!P.auto || P.disposicion !== 'rombo') return P;
   const biseccion = (f: (v: number) => number, lo: number, hi: number) => {
     for (let i = 0; i < 28; i++) { const mid = (lo + hi) / 2; if (f(mid) < 0) lo = mid; else hi = mid; }
     return hi;
@@ -681,7 +699,7 @@ export interface Comprobacion { nombre: string; holgura: number; minimo: number 
 
 /** Áreas, resistencia, energía, estructura y holguras. Todo estimación. */
 export function calcular(m: Modelo, ar: ReturnType<typeof areas>): Resultados {
-  return m.tipo === 'a1' ? calcularA1(m, ar) : calcularGota(m, ar);
+  return m.tipo === 'a1' ? calcularA1(m, ar) : m.tipo === 'bala' ? calcularBala(m, ar) : calcularGota(m, ar);
 }
 export function calcularGota(m: ModeloGota, ar: ReturnType<typeof areas>) {
   const P = m.P;
@@ -810,7 +828,7 @@ export function calcularGota(m: ModeloGota, ar: ReturnType<typeof areas>) {
   };
 }
 /** Lo que vale para los dos vehículos, más lo propio del Aeromóvil 1 en `a1`. */
-export type Resultados = ReturnType<typeof calcularGota> & { a1?: ResultadosA1 };
+export type Resultados = ReturnType<typeof calcularGota> & { a1?: ResultadosA1; bala?: ResultadosBala };
 export interface ResultadosA1 {
   WhKm100: number; autonomia100: number; vmaxNominal: number; vmaxPico: number; acel50: number; acel100: number; pendiente100: number;
   cargaHoras: { kW: number; h: number }[]; maleteroF: number; maleteroT: number; kmSolDia: number; bateriaL: number; bateriaKg: number;
@@ -819,6 +837,7 @@ export interface ResultadosA1 {
 /** Masa de cada parte (kg), a partir de los tubos del modelo y los deslizadores de masa. */
 export function estimarMasas(m: Modelo, ar: { carroceria: number; cristal: number; solar: number }, P: Parametros): Record<string, number> {
   if (m.tipo === 'a1') return estimarMasasA1(m, ar, P);
+  if (m.tipo === 'bala') return {};   // el chasis, el motor y la batería del Bala no están diseñados
   const mat = MATERIALES_CHASIS[P.matChasis];
   let tubos = 0, tubosSusp = 0;
   for (const t of m.tubosChasis()) {
@@ -864,6 +883,7 @@ export function enZona(z: Zona, u: number, th: number) {
 
 /** Área de piel (m²) de carrocería, cristal y paneles, integrando la malla de cada superficie. */
 export function areas(m: Modelo) {
+  if (m.tipo === 'bala') return areasBala(m);
   const nu = 120, nv = 96, out = { carroceria: 0, cristal: 0, solar: 0 };
   const tri = (p: P3, q: P3, r: P3) => {
     const ux = q[0] - p[0], uy = q[1] - p[1], uz = q[2] - p[2], vx = r[0] - p[0], vy = r[1] - p[1], vz = r[2] - p[2];

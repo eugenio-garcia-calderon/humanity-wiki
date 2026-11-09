@@ -16,9 +16,12 @@ const leerClaves = (): Record<string, string> => { try { return JSON.parse(local
 /** Nuestra ficha, en los mismos términos que la de un velomóvil de referencia. */
 export function fichaPropia(m: Modelo, r: Resultados) {
   const ejes = new Set(m.ruedas.map(w => Math.round(w.x * 100))).size;
-  return { L: m.Lf, W: m.P.W, H: m.P.H, batalla: m.P.B, ruedas: m.ruedas.length, ejes, via: Math.max(m.via.del, m.via.tras), plazas: m.asientos.length, masa: r.mVeh, cd: r.Cd as number | null, huella: m.Lf * m.P.W };
+  // The Bala has no mass estimate and the editor's Cd formula does not apply to it: '—' rather than a number that means nothing.
+  const via = m.tipo === 'bala' ? m.P.track : Math.max(m.via.del, m.via.tras);
+  return { L: m.Lf, W: m.P.W, H: m.P.H, batalla: m.P.B, ruedas: m.ruedas.length, ejes, via, plazas: m.tipo === 'bala' ? 2 : m.asientos.length,
+    masa: Number.isFinite(r.mVeh) ? r.mVeh : null, cd: Number.isFinite(r.Cd) ? r.Cd as number | null : null, huella: m.Lf * m.P.W };
 }
-export const nombreDe = (m: Modelo) => (m.tipo === 'a1' ? 'Aeromóvil 1' : 'Aeromóvil Gota');
+export const nombreDe = (m: Modelo) => (m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala' : 'Aeromóvil Gota');
 
 export function TablaComparacion({ propia, otra, nombre, nuestro = 'Aeromóvil 1' }: { propia: ReturnType<typeof fichaPropia>; otra: ReturnType<typeof fichaComparable>; nombre: string; nuestro?: string }) {
   const filas: [string, number | null, number | null, (v: number) => string][] = [
@@ -230,9 +233,10 @@ export function VistaOtros({ modelo, resultados, alVer, alComparar, puedeDecidir
       </div>
       {aviso && <p className="text-sm text-slate-600">{aviso}</p>}
       <section className="rounded-xl border border-slate-200 bg-white p-4">
-        <h3 className="mb-2 font-semibold text-slate-900">Aeromóvil Gota frente a {sel.nombre}</h3>
+        <h3 className="mb-2 font-semibold text-slate-900">{nombreDe(modelo)} frente a {sel.nombre}</h3>
         <TablaComparacion propia={fichaPropia(modelo, resultados)} otra={fichaComparable(sel)} nombre={sel.nombre} nuestro={nombreDe(modelo)} />
-        <p className="mt-2 text-xs text-slate-500">El Aeromóvil lleva tres plazas; los de referencia, una. Compara la huella por plaza: {fmt(modelo.Lf * modelo.P.W / 3)} m² frente a {fmt(fichaComparable(sel).huella / sel.plazas)} m².</p>
+        {(() => { const n = fichaPropia(modelo, resultados).plazas; return (
+          <p className="mt-2 text-xs text-slate-500">Este diseño lleva {n === 1 ? 'una plaza' : n === 2 ? 'dos plazas' : 'tres plazas'}; {sel.plazas === 1 ? 'el de referencia, una' : `el de referencia, ${sel.plazas}`}. Compara la huella por plaza: {fmt(modelo.Lf * modelo.P.W / n)} m² frente a {fmt(fichaComparable(sel).huella / sel.plazas)} m².{modelo.tipo === 'bala' ? ' Del Bala no hay masa estimada ni Cd de la fórmula del editor (no vale para su forma): esas filas quedan en blanco.' : ''}</p>); })()}
       </section>
       <CrearDesdeFotos alVer={alVer} alGuardado={cargar} />
     </div>

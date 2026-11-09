@@ -1,7 +1,15 @@
 import type { VehiculoGaraje } from './tipos';
-import { BATALLA, LARGO, VIA_LAT, envolvente } from './balaForma';
-import { POD_SEMIANCHO } from './balaPiezas';
+import { PARAMETROS_BALA } from '../geometria';
+import { camposBala, medidasBala } from '../geometriaBala';
+import { POD_SEMIANCHO } from './balaMedidas';
 import { construir } from './balaModelo';
+
+/**
+ * Built from the editor's default Bala (PARAMETROS_BALA, 2026-11-09): one shape
+ * code for the garage and the editor. scripts/bala-huella.ts checks that this
+ * is still, vertex for vertex, the model first drawn for the garage.
+ */
+const { F, asientos, aleta } = medidasBala(camposBala(PARAMETROS_BALA));
 
 /*
  * The «Cuadriciclo Bala» (2026-11-09): Eugenio's own design, not a real
@@ -37,11 +45,11 @@ import { construir } from './balaModelo';
 export const VEHICULO: VehiculoGaraje = {
   id: 'bala',
   nombre: 'Cuadriciclo Bala',
-  largo: LARGO, ancho: Math.round((VIA_LAT + 2 * POD_SEMIANCHO) * 1000) / 1000, alto: 1.452, batalla: BATALLA,
+  largo: F.LARGO, ancho: Math.round((F.VIA_LAT + 2 * POD_SEMIANCHO) * 1000) / 1000, alto: F.D.alto, batalla: F.BATALLA,
   fuente: 'Diseño propio (2026-11-09) a partir del Aeromóvil Gota; medidas propuestas, no de una ficha. Del Gota conserva el rombo de ruedas y sus tamaños (24″ delante y detrás, 20″ a los lados, a mitad de batalla); la batalla baja a 2,45 m (2,60 en el Gota) y la vía de las laterales sube a 1,10 m (1,05) para que los carenados queden fuera de la carrocería estrecha. Dos plazas a horcajadas, piloto delante y pasajero detrás. No hay Cd publicado: el del túnel es una estimación a partir de la silueta',
   // the body only: the lateral wheel pods, their arms and the tail fin stand outside it
-  envolvente: envolvente(),
+  envolvente: F.envolvente(),
   // the largest section is an egg 0.85 × 1.34 m whose area (0.90 m²) is that of the ellipse with the same width and height
   seccion: 2,
-  construir,
+  construir: () => construir(F, { asientos, aleta }),
 };

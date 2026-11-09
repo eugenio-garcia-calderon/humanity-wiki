@@ -1,4 +1,5 @@
 import type { Parametros } from '../geometria';
+import { DESLIZADORES_BALA, camposBala, rangoBala } from '../geometriaBala';
 import type { ResultadoTunel, Zona } from './calculo';
 import type { CuerpoTunel } from './nuestro';
 import { porVelocidad, type PuntoTunel, type TipoPunto } from './puntos';
@@ -16,6 +17,10 @@ import { porVelocidad, type PuntoTunel, type TipoPunto } from './puntos';
  * screen (src/pages/Aeromovil.tsx). Their direction was checked with this tunnel
  * on the default designs on 2026-11-09 where `origen` is 'calculo'; «Probar»
  * recomputes it on the visitor's own design.
+ *
+ * The Cuadriciclo Bala's sliders are not copied here: `fichasBala` reads the
+ * same table the page draws them from (geometriaBala.ts, DESLIZADORES_BALA),
+ * with the ranges for this design. The A1 and Gota tables are still copies.
  */
 
 export type Origen = 'calculo' | 'general';
@@ -70,6 +75,13 @@ const GOTA: Partial<Record<keyof Parametros, Ficha>> = {
   clear: { n: 'Altura de los bajos', donde: 'Chasis y ruedas', min: 0.08, max: 0.40 },
 };
 
+/** The Bala's sliders as the page shows them, with their range for these parameters (never a copy). */
+function fichasBala(P: Parametros): Partial<Record<keyof Parametros, Ficha>> {
+  const B = camposBala(P), o: Partial<Record<keyof Parametros, Ficha>> = {};
+  for (const f of DESLIZADORES_BALA) { const [min, max] = rangoBala(f.clave, B); o[f.clave] = { n: f.n, donde: f.bloque, min, max }; }
+  return o;
+}
+
 /** What the garage cars' designers did, or could do (qualitative). */
 const GARAJE: Record<string, string> = {
   xl1: 'VW le dio una cola larga que se estrecha hacia atrás y tapó las ruedas traseras, así que el corte final de la cola es pequeño. Lo que le queda son las ruedas delanteras y sus pasos de rueda.',
@@ -103,8 +115,10 @@ function cpEn(p: { x: number[]; cp: number[] }, x: number): number {
 export function explicar(cx: Contexto): Explicacion {
   const { punto: pt, cuerpo, R, kmh, otros, P } = cx;
   const q = porVelocidad(R, kmh), G = R.geometria, v = kmh / 3.6, qd = 0.5 * RHO * v * v;
-  const nuestro = cuerpo.id === 'aeromovil' && !!P, a1 = P?.disposicion === 'cuatro';
-  const fichas = a1 ? A1 : GOTA;
+  const nuestro = cuerpo.id === 'aeromovil' && !!P, a1 = P?.disposicion === 'cuatro', bala = nuestro && P?.disposicion === 'bala';
+  const fichas = a1 ? A1 : bala ? fichasBala(P!) : GOTA;
+  /** On our Bala the tunnel sees the body only: its pods, arms and fin are not in these numbers. */
+  const notaBala = bala ? 'El túnel solo ve la carrocería del Bala: los carenados de las ruedas laterales, sus brazos y la aleta no entran en el cálculo, así que su Cd real será algo más alto. Las tendencias de «con el diseño por defecto» se comprobaron con este túnel el 2026-11-09.' : undefined;
   const desdeMorro = (x: number) => G.xMorro - x;
   const escala = g(`El Cp (coeficiente de presión) dice cuánto empuja el aire en cada punto, comparado con lo que empujaría si se parase del todo contra el coche. Cp 1: el aire parado del todo (a ${kmh} km/h son ${fmt(qd, 0)} Pa, como ${fmt(qd / 9.81, 0)} kg apoyados en cada metro cuadrado). Cp 0: la misma presión que el aire libre, lejos del coche. Cp negativo: el aire pasa más rápido que el coche y tira de la carrocería hacia fuera (succión).`);
   const kWh = (cdParte: number) => qd * cdParte * cuerpo.area / 36; // kWh/100 km: 1 N for 100 km = 1/36 kWh
@@ -123,7 +137,7 @@ export function explicar(cx: Contexto): Explicacion {
     return m;
   };
   const opciones = (...m: (Mejora | null)[]) => m.filter((x): x is Mejora => !!x);
-  const notaGaraje = !nuestro ? `${GARAJE[cuerpo.id] ?? 'Es un coche del garaje: su forma la decidió su fabricante.'} Las opciones de abajo son conocimiento general; el «Probar» solo funciona con el diseño del editor, porque es el único cuyos parámetros conoce.` : undefined;
+  const notaGaraje = !nuestro ? `${GARAJE[cuerpo.id] ?? 'Es un coche del garaje: su forma la decidió su fabricante.'} Las opciones de abajo son conocimiento general; el «Probar» solo funciona con el diseño del editor, porque es el único cuyos parámetros conoce.` : notaBala;
   const nombreOtros = (f: (o: { cuerpo: CuerpoTunel; R: ResultadoTunel }) => string | null) => otros.map(o => { const t = f(o); return t ? `${o.cuerpo.nombre}: ${t}` : null; }).filter((x): x is string => !!x);
   const sinOtros = otros.length ? [] : [c('No hay otros coches en el túnel con los que compararlo: saca alguno del garaje.')];
 
@@ -141,7 +155,11 @@ export function explicar(cx: Contexto): Explicacion {
           g('Su altura reparte el aire: lo que llega por encima del remanso pasa por el techo y lo de debajo, entre el suelo y los bajos. Cuanto más bajo está, menos aire se cuela por debajo del coche.'),
           g('Es el mejor sitio para una toma de aire (refrigeración, ventilación de la cabina): la presión mete el aire sin ayuda. También es donde más se pegan los insectos y la suciedad.')],
         comparacion: comp.length ? comp.map(t => c(`Remanso del ${t}.`)) : sinOtros,
-        mejoras: a1 || !nuestro ? opciones(
+        mejoras: bala ? opciones(
+          opcion('bSuelo', 1, 0.02, 'Subir un poco la carrocería: con el diseño por defecto el túnel da un Cd algo más bajo y menos estela, porque el aire de debajo pasa con menos apuro.', 'calculo'),
+          opcion('bMorro', 1, 0.10, 'Un morro más largo aparta el aire más despacio. Con el diseño por defecto el túnel apenas lo nota en el Cd: la mayor parte está en el rozamiento y en la cola.', 'calculo'),
+          opcion('bPuntaMorro', 1, 0.15, 'Una punta más fina deja una zona de alta presión más pequeña; en el Bala el túnel no ve diferencia en el Cd.', 'calculo'),
+        ) : a1 || !nuestro ? opciones(
           opcion('morroA1', -1, 0.15, 'Un morro más afilado (hacia «ojival») deja una zona de alta presión más pequeña. Con el diseño por defecto el túnel lo confirma, pero el efecto es pequeño: la mayor parte del Cd está en el rozamiento y en la cola.', 'calculo'),
           opcion('fMorro', 1, 0.04, 'Un voladizo de morro más largo da al aire más distancia para apartarse poco a poco. Con el diseño por defecto el túnel da un Cd algo más bajo.', 'calculo'),
           opcion('clear', 1, 0.03, 'Subir o bajar el coche mueve el remanso: más alto, el remanso sube, pero queda más hueco bajo el coche y pasa más aire entre el suelo y los bajos. Cambia también el área frontal.', 'general'),
@@ -167,7 +185,15 @@ export function explicar(cx: Contexto): Explicacion {
       if (zona === 'bajos') porQue.push(g('Debajo, la succión aprieta el coche contra el suelo (carga aerodinámica): estabiliza, pero si el fondo es rugoso y las ruedas y suspensiones van al aire, ese aire rápido se convierte en rozamiento.'), c(`El cálculo usa la carretera como un espejo y no ve las ruedas ni las piezas de los bajos. Sustentación total Cl ${fmt(R.cl)} (delante ${fmt(R.clDel)}, detrás ${fmt(R.clTras)}).`));
       if (zona === 'costado') porQue.push(g('En los costados tira hacia fuera igual en los dos lados y se anula; con viento de costado deja de ser igual y empuja el coche de lado.'));
       if (zona === 'punta') porQue.push(g('En la punta, el aire acelera al rodear el morro; si la curva es muy cerrada, el pico es alto y corto.'));
-      const mej = a1 || !nuestro ? (zona === 'bajos' ? opciones(
+      const mej = bala ? (zona === 'bajos' ? opciones(
+        opcion('bSuelo', 1, 0.02, 'Más altura libre: el aire pasa menos estrecho entre el suelo y la panza. Con el diseño por defecto el túnel da algo menos de Cd.', 'calculo'),
+      ) : zona === 'costado' ? opciones(
+        opcion('bAncho', -1, 0.03, 'Una carrocería más estrecha curva menos el aire por los lados. Ojo: el manillar y los codos necesitan sitio.', 'general'),
+      ) : opciones(
+        opcion('bCupIni', -1, 0.05, 'Que la cúpula empiece a subir antes: la subida es más larga y suave. Con el diseño por defecto el túnel da un pico de succión arriba más bajo, con el mismo Cd.', 'calculo'),
+        opcion('bAlto', -1, 0.03, 'Una cúpula más baja curva menos el aire por arriba: con el diseño por defecto el pico baja y la estela también. El Cd, que es por metro cuadrado de frente, sube algo porque el frente encoge.', 'calculo'),
+        opcion('bCupFin', 1, 0.10, 'Que la cúpula acabe más atrás también baja el pico de arriba, pero es un compromiso: con el diseño por defecto el túnel da más estela y un Cd algo más alto.', 'calculo'),
+      )) : a1 || !nuestro ? (zona === 'bajos' ? opciones(
         opcion('clear', 1, 0.03, 'Más altura de bajos: el aire pasa menos estrecho entre el suelo y el coche, la succión de abajo baja y también la carga contra el suelo. En el editor también baja el área frontal.', 'calculo'),
         opcion('nL', 1, 0.5, 'Un fondo más plano reparte la succión por todo el fondo en vez de concentrarla.', 'general'),
       ) : zona === 'costado' ? opciones(
@@ -200,7 +226,10 @@ export function explicar(cx: Contexto): Explicacion {
       const largoRec = xa - xs;
       const comp = nombreOtros(o => { const oq = porVelocidad(o.R, kmh), og = o.R.geometria; return `empieza al ${pct((og.xMorro - oq.advTecho) / og.largo)} del largo y tiene ${fmt(oq.advTecho - oq.sepTecho)} m hasta despegarse`; });
       void K;
-      const mej = a1 || !nuestro ? opciones(
+      const mej = bala ? opciones(
+        opcion('bCola', 1, 0.10, 'Una cola más larga: la presión tiene más camino para subir poco a poco. Con el diseño por defecto el túnel da claramente menos estela y un Cd más bajo.', 'calculo'),
+        opcion('bSuelo', 1, 0.02, 'Un poco más de altura libre: con el diseño por defecto, algo menos de estela.', 'calculo'),
+      ) : a1 || !nuestro ? opciones(
         opcion('posMorro', 1, 0.06, 'Mover hacia atrás la sección más gruesa con un morro más largo. Con el diseño por defecto el túnel da un Cd algo más bajo, aunque deja menos sitio para la bajada.', 'calculo'),
         opcion('techo', -1, 0.4, 'Un techo que baja antes y en recta hace la subida de presión más larga y más suave: con el diseño por defecto el túnel da una estela más pequeña.', 'calculo'),
         opcion('cupX1', 1, 0.05, 'Llevar la cúpula hasta el final de la cola: si acaba antes, el aire cae de golpe al acabar la cúpula y se despega allí (con el diseño por defecto, acabarla antes de la cola sube el Cd de forma clara).', 'calculo'),
@@ -271,6 +300,11 @@ export function explicar(cx: Contexto): Explicacion {
       { texto: 'Si no hay sitio para una cola larga, cortarla en seco con un borde vivo (cola Kamm): deja menos estela que una trasera redondeada y corta.', origen: 'general' },
       { texto: 'Tapar las ruedas traseras y cerrar los huecos de la trasera.', origen: 'general' },
     ];
+    if (bala) return opciones(
+      opcion('bCola', 1, 0.10, 'Alargar la cola es lo que más cambia en el Bala: con el diseño por defecto el túnel da una estela claramente más pequeña y un Cd más bajo.', 'calculo'),
+      opcion('bSuelo', 1, 0.02, 'Un poco más de altura libre: con el diseño por defecto, algo menos de estela.', 'calculo'),
+      opcion('bPuntaCola', -1, 0.04, 'Bajar la punta de la cola la alinea con el aire de debajo; en el Bala el túnel apenas lo nota.', 'calculo'),
+    );
     return a1 ? opciones(
       opcion('techo', -1, 0.4, 'Un techo que baja en recta desde el pico deja el hueco final más pequeño: con el diseño por defecto el túnel da una estela más pequeña y un Cd más bajo.', 'calculo'),
       opcion('colaA1', -1, 0.25, 'Una cola más afilada termina en un hueco más pequeño. Con el diseño por defecto el túnel apenas lo nota hacia «afilada» y sí lo nota hacia «llena» (peor).', 'calculo'),

@@ -8,7 +8,7 @@ import { Check, CircleDashed, Download, FileCode2, FileText, Loader2, MessageSqu
 import { Button } from '../ui/core';
 import { cn } from '../../utils/cn';
 import { PLAN, OBJETIVO_PRESUPUESTO, type EstadoEtapa } from '../../data/aeromovilPlan';
-import { parametrosCAD, type Modelo, type Resultados } from './geometria';
+import { parametrosCAD, type Modelo, type ModeloConPiel, type Resultados } from './geometria';
 import { jsonCAD } from './cad';
 import { laminas, dxfCuadernas, dxfPerfiles, dxfChasis, csvCorte, estaciones } from './planos';
 import { CAPAS, type CapaId, type VisorHandle } from './Visor3D';
@@ -235,6 +235,16 @@ export function VistaPlan() {
 
 // ── PLANOS ────────────────────────────────────────────────────────────────
 export function VistaPlanos({ modelo }: { modelo: Modelo }) {
+  // The Bala's skin is not made of the editor's sections, so there are no frames to cut or tubes to list yet.
+  if (modelo.tipo === 'bala') return (
+    <div className="mx-auto max-w-3xl px-4 py-8">
+      <h2 className="text-xl font-semibold text-slate-900">Planos de fabricación</h2>
+      <p className="mt-2 text-sm text-slate-600">Los planos (cuadernas, perfiles, chasis y lista de corte) son del Aeromóvil 1 y del Aeromóvil Gota. El Cuadriciclo Bala todavía no los tiene: su piel se dibuja de otra manera y su chasis no está diseñado. Elige uno de los otros dos en «Diseño 3D» para verlos, o descarga el STL del Bala en «Exportar a CAD».</p>
+    </div>
+  );
+  return <PlanosPiel modelo={modelo} />;
+}
+function PlanosPiel({ modelo }: { modelo: ModeloConPiel }) {
   const [paso, setPaso] = useState(0.25);
   const lams = useMemo(() => laminas(modelo, paso, hoy()), [modelo, paso]);
   const [sel, setSel] = useState(0);
@@ -295,25 +305,27 @@ export function VistaPlanos({ modelo }: { modelo: Modelo }) {
 export function VistaExportar({ modelo, visor, porDefecto, resultados }: { modelo: Modelo; visor: React.RefObject<VisorHandle | null>; porDefecto: boolean; resultados: Resultados }) {
   const [capas, setCapas] = useState<Record<CapaId, boolean>>(() => Object.fromEntries(CAPAS.map(c => [c.k, c.k !== 'ocupantes'])) as Record<CapaId, boolean>);
   const [aviso, setAviso] = useState<string | null>(null);
-  const esA1 = modelo.tipo === 'a1';
-  const json = esA1 ? '' : JSON.stringify(parametrosCAD(modelo.P), null, 1);
+  const esA1 = modelo.tipo === 'a1', esBala = modelo.tipo === 'bala';
+  const json = esA1 || esBala ? '' : JSON.stringify(parametrosCAD(modelo.P), null, 1);
   const capasVisor = CAPAS.filter(c => !('solo' in c) || c.solo === modelo.tipo);
   const stl = () => {
     const elegidas = capasVisor.filter(c => capas[c.k]).map(c => c.k);
     if (!elegidas.length) { setAviso('Marca al menos una capa.'); return; }
     if (!visor.current) { setAviso('Abre «Diseño 3D» una vez para preparar el modelo y vuelve aquí.'); return; }
     setAviso(null);
-    descargar(`${esA1 ? 'aeromovil-1' : 'aeromovil-gota'}-${elegidas.join('-')}.stl`, visor.current.exportarSTL(elegidas));
+    descargar(`${esA1 ? 'aeromovil-1' : esBala ? 'cuadriciclo-bala' : 'aeromovil-gota'}-${elegidas.join('-')}.stl`, visor.current.exportarSTL(elegidas));
   };
   return (
     <div className="mx-auto grid max-w-6xl gap-5 px-4 py-6 md:grid-cols-2">
       <div className="md:col-span-2">
         <h2 className="text-xl font-semibold text-slate-900">Exportar a CAD</h2>
-        <p className="max-w-3xl text-sm text-slate-600">{esA1
+        <p className="max-w-3xl text-sm text-slate-600">{esBala
+          ? 'Del Cuadriciclo Bala hay STL de lo que ves en el visor, capa a capa. STEP no hay todavía: el script de CadQuery dibuja el Aeromóvil 1 y el Gota, y la piel del Bala se construye de otra manera.'
+          : esA1
           ? 'El STEP abre en FreeCAD, Fusion 360, SolidWorks u Onshape con doce capas (Carrocería, Cristales, Paneles solares, Chasis, Suspensión, Dirección, Transmisión, Ruedas, Motor, Baterías, Asientos y Ocupantes) que se ocultan una a una desde el árbol. Las puertas y las tapas de los maleteros son piezas aparte, cerradas; se abren en el visor.'
           : 'El STEP abre en FreeCAD, Fusion 360, SolidWorks u Onshape con diez capas (Carenado, Cristales, Paneles solares, Chasis, Suspensión, Ruedas, Asientos, Ocupantes, Motor y Baterías) que se ocultan una a una desde el árbol. Las puertas se eligen y se abren en el visor; en el STEP la piel va cerrada.'}</p>
       </div>
-      <section className="rounded-xl border border-slate-200 bg-white p-4">
+      {!esBala && <section className="rounded-xl border border-slate-200 bg-white p-4">
         <h3 className="flex items-center gap-2 font-semibold text-slate-900"><FileCode2 className="h-4 w-4" />STEP por capas</h3>
         <p className="mt-1 text-sm text-slate-600">Modelo sólido de la versión publicada (medidas por defecto). {porDefecto ? 'Coincide con lo que ves ahora.' : esA1 ? 'Has cambiado medidas: para un STEP con las tuyas, descarga la geometría y el script de abajo.' : 'Has cambiado medidas: para un STEP con las tuyas, descarga los parámetros y el script de abajo.'}</p>
         <div className="mt-3 flex flex-wrap gap-2">
@@ -325,7 +337,7 @@ export function VistaExportar({ modelo, visor, porDefecto, resultados }: { model
             <a href="/aeromovil/Aeromovil_Gota_STL_por_capas.zip" download className="inline-flex items-center rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"><Download className="mr-1.5 h-4 w-4" />STL por capas (2,2 MB)</a>
           </>}
         </div>
-      </section>
+      </section>}
       <section className="rounded-xl border border-slate-200 bg-white p-4">
         <h3 className="flex items-center gap-2 font-semibold text-slate-900"><FileCode2 className="h-4 w-4" />STL de tu configuración</h3>
         <p className="mt-1 text-sm text-slate-600">Malla de lo que ves en el visor, en mm y con Z arriba, para imprimir en 3D o importar como referencia.</p>
@@ -340,7 +352,12 @@ export function VistaExportar({ modelo, visor, porDefecto, resultados }: { model
         {aviso && <p className="mt-2 text-sm text-amber-800">{aviso}</p>}
         <Button className="mt-3 text-xs normal-case tracking-normal bg-teal-700 hover:bg-teal-800" onClick={stl}><Download className="mr-1.5 h-4 w-4" />Descargar STL</Button>
       </section>
-      <section className="rounded-xl border border-slate-200 bg-white p-4 md:col-span-2">
+      {esBala ? (
+        <section className="rounded-xl border border-slate-200 bg-white p-4">
+          <h3 className="flex items-center gap-2 font-semibold text-slate-900"><FileCode2 className="h-4 w-4" />Medidas de este diseño</h3>
+          <p className="mt-1 text-sm text-slate-600">Largo {fmt(modelo.Lf, 2)} m · ancho {fmt(modelo.P.W, 2)} m con los carenados laterales ({fmt(modelo.anchoCuerpo, 2)} m la carrocería) · alto {fmt(modelo.P.H, 2)} m · batalla {fmt(modelo.P.B, 2)} m. Masa sin estimar: el chasis, el motor y la batería del Bala no están diseñados.</p>
+        </section>
+      ) : <section className="rounded-xl border border-slate-200 bg-white p-4 md:col-span-2">
         <h3 className="flex items-center gap-2 font-semibold text-slate-900"><FileCode2 className="h-4 w-4" />Regenerar el STEP con tus medidas</h3>
         {esA1 ? (
           <>
@@ -370,7 +387,7 @@ export function VistaExportar({ modelo, visor, porDefecto, resultados }: { model
           </>
         )}
         <p className="mt-2 text-xs text-slate-500">Medidas actuales: largo {fmt(modelo.Lf, 2)} m · ancho {fmt(modelo.P.W, 2)} m · alto {fmt(modelo.P.H, 2)} m · masa estimada {fmt(resultados.mVeh)} kg.</p>
-      </section>
+      </section>}
     </div>
   );
 }
