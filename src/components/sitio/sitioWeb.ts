@@ -135,6 +135,9 @@ export type Sitio = {
    *  2026-11-07 con sus dos formularios —colaborar y el boletín, `formularios.ts`—, que su
    *  política de privacidad explica. Lo pone quien publica; el editor no lo toca. */
   escaparate?: boolean;
+  /** Quién presta el correo con el que el escaparate envía y recibe sus avisos, tal como se dice
+   *  en su política de privacidad. Sin valor no se nombra a nadie (2026-11-09). */
+  proveedorCorreo?: string;
   /** Los datos de la organización para buscadores (`seoEscaparate.ts`). */
   seo?: { organizacion?: string; descripcion?: string; fundador?: string; perfiles?: string[]; otrosNombres?: string[] };
   /** Adónde lleva «Colaborar» en la portada de un escaparate (`PresentacionSitio`) y «Usar el
@@ -282,6 +285,7 @@ export function textoLegal(doc: DocLegal, s: Sitio, sitioNombre: string): string
       [
         `- **El alojamiento de la web**, donde se guardan los datos y sus copias de seguridad, en servidores de la Unión Europea.`,
         `- **Cloudflare, Inc.**, que presta servicios de red y de seguridad a la plataforma desde la que gestionamos los mensajes y el boletín. Es una empresa de Estados Unidos acogida al Marco de Privacidad de Datos UE-EE. UU., que la Comisión Europea reconoce como garantía de un nivel de protección adecuado (Decisión de Ejecución (UE) 2023/1795, de 10 de julio de 2023).`,
+        ...(s.proveedorCorreo?.trim() ? [`- ${s.proveedorCorreo.trim()}`] : []),
       ].join('\n'),
       `## Tus derechos`,
       `Puedes retirar tu consentimiento cuando quieras, sin que eso afecte a lo anterior, y pedir acceso, rectificación, supresión, oposición, limitación y portabilidad de tus datos escribiendo a ${email}. Si crees que no se han respetado, puedes reclamar ante la Agencia Española de Protección de Datos (www.aepd.es).`,

@@ -49,7 +49,7 @@ import {
 // venga de la propia web (`Origin`). El boletín, además, pide confirmar por
 // correo: sin eso cualquiera podría apuntar la dirección de otro.
 //
-// CORREO. Hoy no hay proveedor (`RESEND_API_KEY` vacía en producción): los
+// CORREO. Sin proveedor (`hayCorreo()`, en `correo.ts`): los
 // mensajes se guardan y las altas quedan «pendientes de confirmar», y la
 // pantalla nunca dice que se ha mandado un correo que no ha salido. Con
 // proveedor: aviso a la dirección de contacto del sitio por cada mensaje (con
