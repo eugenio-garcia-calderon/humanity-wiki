@@ -30,6 +30,8 @@ export interface Cuerpo {
   /** Section function (with the caps), for the inside test, the base area and the wake. */
   seccion: (x: number) => Seccion;
   xMorro: number; xCola: number;
+  /** The silhouette's last section: behind it is only the cap this mesh adds to close the tail. */
+  xUltima: number;
   n: number;
   /** Largest section: x, area (m²) and the section itself. */
   xMax: number; areaMax: number; secMax: Seccion;
@@ -91,13 +93,13 @@ export function funcionSeccion(envolvente: Envolvente) {
     const A = S[lo], B = S[hi], t = A.x > B.x ? (A.x - x) / (A.x - B.x) : 0;
     return { x, yc: A.yc + (B.yc - A.yc) * t, a: A.a + (B.a - A.a) * t, b: A.b + (B.b - A.b) * t };
   };
-  return { seccion, xMorro, xCola };
+  return { seccion, xMorro, xCola, xUltima: sN.x };
 }
 
 /** The panel mesh of a silhouette. */
 export function cuerpoDeEnvolvente(envolvente: Envolvente, n: number, res: Resolucion): Cuerpo {
   const { nI, nJ } = RESOLUCION[res];
-  const { seccion, xMorro, xCola } = funcionSeccion(envolvente);
+  const { seccion, xMorro, xCola, xUltima } = funcionSeccion(envolvente);
   // Stations: equal steps of a length that also counts how fast the section changes
   // (so the caps and the steep nose get more stations), blended with cosine spacing at the tips.
   const F = 600, xs: number[] = [], acum: number[] = [0];
@@ -133,7 +135,7 @@ export function cuerpoDeEnvolvente(envolvente: Envolvente, n: number, res: Resol
     return nn[1] * (c[1] - s.yc) + nn[2] * c[2] > 0;
   });
   let mojada = 0; for (let p = 0; p < malla.n; p++) mojada += 2 * malla.area[p];
-  return { malla, seccion, xMorro, xCola, n, xMax, areaMax, secMax, mojada, largo: xMorro - xCola };
+  return { malla, seccion, xMorro, xCola, xUltima, n, xMax, areaMax, secMax, mojada, largo: xMorro - xCola };
 }
 
 /** Is (x, y, z) inside the body? (superellipse test on the section at x, with a margin factor). */

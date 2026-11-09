@@ -52,7 +52,7 @@ export interface ResultadoTunel {
   ms: { malla: number; matriz: number; resolver: number; velocidades: number; capa: number; lineas: number; total: number };
   /** Skin: nodes of the half mesh (nI+1)·(nJ+1)·3 and Cp at each node. */
   piel: { nI: number; nJ: number; nodos: Float32Array; cp: Float32Array };
-  geometria: { xMorro: number; xCola: number; xMax: number; areaMax: number; mojada: number; largo: number; alto: number; ancho: number; yMin: number };
+  geometria: { xMorro: number; xCola: number; xUltima: number; xMax: number; areaMax: number; mojada: number; largo: number; alto: number; ancho: number; yMin: number };
   criticos: PuntoCritico[];
   porVelocidad: PorVelocidad[];
   /** Lift coefficient (positive up) on the reference area, total and per axle. Potential flow with the ground image. */
@@ -120,7 +120,8 @@ export function calcularTunel(P: PeticionTunel): ResultadoTunel {
   const minimos: number[] = [];
   for (let i = 1; i < nI - 1; i++) for (let j = 0; j < nJ; j++) {
     const p = i * nJ + j, v = S.cp[p];
-    if (v > -0.12) continue;
+    // not on the cap that closes the tail: it stands for a cut edge, where the real air has already left
+    if (v > -0.12 || M.c[3 * p] < C.xUltima + 0.01) continue;
     let es = true;
     for (let di = -2; di <= 2 && es; di++) for (let dj = -2; dj <= 2; dj++) {
       if (!di && !dj) continue;
@@ -235,7 +236,7 @@ export function calcularTunel(P: PeticionTunel): ResultadoTunel {
     id: P.id, clave: claveTunel(P), resolucion: P.resolucion, paneles: M.n * 2,
     ms: { malla: t1 - t0, matriz: S.ms.matriz, resolver: S.ms.resolver, velocidades: S.ms.velocidades, capa: t4 - t3, lineas: t5 - t4, total: t5 - t0 },
     piel: { nI, nJ, nodos: Float32Array.from(M.nodos), cp: cpN },
-    geometria: { xMorro: C.xMorro, xCola: C.xCola, xMax: C.xMax, areaMax: C.areaMax, mojada: C.mojada, largo: C.largo, alto, ancho, yMin },
+    geometria: { xMorro: C.xMorro, xCola: C.xCola, xUltima: C.xUltima, xMax: C.xMax, areaMax: C.areaMax, mojada: C.mojada, largo: C.largo, alto, ancho, yMin },
     criticos, porVelocidad, cl, clDel, clTras, cdPotencial, perfiles,
     lineas: { p: Float32Array.from(ps), v: Float32Array.from(vs), inicio: Int32Array.from(inicio), centro: Uint8Array.from(centro) },
   };

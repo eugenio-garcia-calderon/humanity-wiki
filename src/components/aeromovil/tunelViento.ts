@@ -130,7 +130,7 @@ function modeloEstela(q: PorVelocidad) {
 
 /** Builds everything for one body once its result is there. */
 function construirCuerpo(c: CuerpoTunel, R: ResultadoTunel, mats: Materiales, o: OpcionesTunel) {
-  const grupo = new THREE.Group(), geos: (THREE.BufferGeometry | LineSegmentsGeometry)[] = [], etiquetas: THREE.Sprite[] = [];
+  const grupo = new THREE.Group(), geos: (THREE.BufferGeometry | LineSegmentsGeometry)[] = [], etiquetas: THREE.Sprite[] = [], guias: THREE.Line[] = [];
   const partes = { piel: new THREE.Group(), lineas: new THREE.Group(), criticos: new THREE.Group(), estela: new THREE.Group() };
   Object.values(partes).forEach(p => grupo.add(p));
   const nuestro = c.id === 'aeromovil';
@@ -188,6 +188,7 @@ function construirCuerpo(c: CuerpoTunel, R: ResultadoTunel, mats: Materiales, o:
     if (kmh === kmhHecho) return; kmhHecho = kmh;
     vaciar(partes.lineas); vaciar(partes.criticos); vaciar(partes.estela); particulas.length = 0;
     for (let k = etiquetas.length - 1; k >= 0; k--) if (!etiquetas[k].parent) etiquetas.splice(k, 1);
+    guias.length = 0;
     const q = porVelocidad(kmh), E = modeloEstela(q);
 
     // streamlines: computed through the potential flow up to the wake, then straight back (the wake's model)
@@ -251,13 +252,14 @@ function construirCuerpo(c: CuerpoTunel, R: ResultadoTunel, mats: Materiales, o:
     const rotular = (grupoR: THREE.Group, p: number[], texto: string, color: string, d: [number, number, number]) => {
       const q2 = [p[0] + d[0], p[1] + d[1], p[2] + d[2]];
       const lg = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(p[0], p[1], p[2]), new THREE.Vector3(q2[0], q2[1], q2[2])]);
-      const l = new THREE.Line(lg, mats.guia); l.renderOrder = 6; grupoR.add(l);
+      const l = new THREE.Line(lg, mats.guia); l.renderOrder = 6; grupoR.add(l); guias.push(l);
       const e = etiqueta(texto, color); e.position.set(q2[0], q2[1], q2[2]); grupoR.add(e); etiquetas.push(e);
     };
     const lado = (p: number[]) => [p[0], p[1], -Math.abs(p[2])];
     let rango = 0;
     for (const k of R.criticos) {
       if (k.tipo === 'remanso') { marcar(k.p, CSS.remanso, 0.035); rotular(partes.criticos, lado(k.p), `Remanso · Cp ${fmt(k.cp)}`, CSS.remanso, [0.3, 0.3, -0.15]); continue; }
+      if (k.p[0] < q.xSeparacion - 0.02) continue; // behind the separation the real air has left: no ideal-flow peak there
       marcar(k.p, CSS.succion); if (k.p[2] > 0.05) marcar([k.p[0], k.p[1], -k.p[2]], CSS.succion);
       // the three strongest get a label; the rest stay as dots
       if (rango < 3) rotular(partes.criticos, lado(k.p), `${k.nombre} · Cp ${fmt(k.cp)}`, CSS.succion, [0, 0.32 + 0.15 * rango, -0.3]);
@@ -325,7 +327,7 @@ function construirCuerpo(c: CuerpoTunel, R: ResultadoTunel, mats: Materiales, o:
     vaciar(partes.lineas); vaciar(partes.criticos); vaciar(partes.estela);
     for (const g of geos) g.dispose();
   };
-  return { grupo, particulas, etiquetas, ajustar, liberar, nuestro, porVelocidad };
+  return { grupo, particulas, etiquetas, guias, ajustar, liberar, nuestro, porVelocidad };
 }
 
 interface Materiales {
@@ -399,11 +401,13 @@ export function crearTunel(cuerpos: CuerpoTunel[], opciones: OpcionesTunel): Tun
     mats.linea.resolution.set(ancho, alto); mats.bordeEstela.resolution.set(ancho, alto);
     for (const m of mats.extra) m.resolution.set(ancho, alto);
     for (const b of hechos) {
-      // garage cars' labels fade in when the camera comes close (with six cars at once they would cover the view)
-      if (camara && !b.nuestro) {
+      // Critical-point labels fade in as the camera comes close (with several cars in view they would cover
+      // everything): within ~9 m for a garage car, ~13 m for our design. Markers and lines stay.
+      if (camara) {
         b.grupo.getWorldPosition(tmp); tmp.x += -1.5;
-        const d = camara.position.distanceTo(tmp), a = Math.max(0, Math.min(1, (9 - d) / 2.5));
+        const lejos = b.nuestro ? 13 : 9, d = camara.position.distanceTo(tmp), a = Math.max(0, Math.min(1, (lejos - d) / 2.5));
         for (const e of b.etiquetas) { e.material.opacity = a; e.visible = a > 0.02; }
+        for (const g of b.guias) g.visible = a > 0.02;
       }
       for (const { geo, lineas } of b.particulas) {
         const P = geo.attributes.position as THREE.BufferAttribute, POR = P.count / Math.max(1, lineas.length);

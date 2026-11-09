@@ -83,10 +83,13 @@ function GraficaSeccion({ R, kmh }: { R: ResultadoTunel; kmh: number }) {
   const ticksCp: number[] = []; for (let c = Math.ceil(cpMin * 2) / 2; c <= cpMax + 1e-9; c += 0.5) ticksCp.push(Math.round(c * 10) / 10);
   const ticksX: number[] = []; for (let d = 0; d <= L + 1e-9; d += L > 3 ? 1 : 0.5) ticksX.push(d);
   const rem = R.criticos.find(c => c.tipo === 'remanso');
-  const minimo = (p: { x: number[]; cp: number[] }, sep: number) => { let i = 0; p.cp.forEach((c, k) => { if (c < p.cp[i] && !(p.x[k] < sep)) i = k; }); return { x: p.x[i], cp: p.cp[i] }; };
+  // strongest suction before the separation and ahead of the cap that closes the tail
+  const minimo = (p: { x: number[]; cp: number[] }, sep: number) => { let i = 0; p.cp.forEach((c, k) => { if (c < p.cp[i] && !(p.x[k] < sep) && p.x[k] > R.geometria.xUltima + 0.01) i = k; }); return { x: p.x[i], cp: p.cp[i] }; };
   return (
     <div>
-      <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full" role="img" aria-label="Cp a lo largo del coche: arriba, en el costado y abajo">
+      {/* On a phone the chart keeps a readable size and scrolls sideways. */}
+      <div className="overflow-x-auto">
+      <svg viewBox={`0 0 ${W} ${H}`} className="h-auto w-full min-w-[600px]" role="img" aria-label="Cp a lo largo del coche: arriba, en el costado y abajo">
         {ticksCp.map(c => (
           <g key={c}>
             <line x1={m.l} x2={W - m.r} y1={Y(c)} y2={Y(c)} className={c === 0 ? 'stroke-slate-400' : 'stroke-slate-200'} strokeWidth={1} />
@@ -108,6 +111,7 @@ function GraficaSeccion({ R, kmh }: { R: ResultadoTunel; kmh: number }) {
         ))}
         {rem && <circle cx={X(rem.p[0])} cy={Y(rem.cp)} r={4} className="fill-red-600" />}
       </svg>
+      </div>
       <div className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[10.5px] text-slate-600">
         <span className="flex items-center gap-1"><i className="inline-block h-0.5 w-4 bg-sky-700" />arriba, por el eje</span>
         <span className="flex items-center gap-1"><i className="inline-block h-0.5 w-4 border-t-2 border-dashed border-emerald-700" />costado</span>

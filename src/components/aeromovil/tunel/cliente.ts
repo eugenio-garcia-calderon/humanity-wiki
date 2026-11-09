@@ -77,8 +77,8 @@ export function pedirTunel(peticion: PeticionTunel, prioridad: number): Promise<
   const clave = claveTunel(peticion);
   const hecho = cache.get(clave); if (hecho) return Promise.resolve(hecho);
   const ya = esperando.get(clave); if (ya) return ya;
-  // the same body with another shape still waiting in the queue: it is stale
-  for (let i = cola.length - 1; i >= 0; i--) if (cola[i].peticion.id === peticion.id && cola[i].peticion.resolucion === peticion.resolucion) {
+  // the same body with another shape or other options still waiting in the queue: it is stale
+  for (let i = cola.length - 1; i >= 0; i--) if (cola[i].peticion.id === peticion.id) {
     const [viejo] = cola.splice(i, 1); esperando.delete(viejo.clave); viejo.resolver(null);
   }
   const p = new Promise<ResultadoTunel | null>(resolver => { cola.push({ clave, peticion, prioridad, resolver }); });
