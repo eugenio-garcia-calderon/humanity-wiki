@@ -204,6 +204,11 @@ def soportal(x0, x1, ytop, ybase, arcos=2, muro='#ecd2b0'):
     return huecos
 
 
+for (x0, x1, y_) in ((40, 420, 404), (1310, 1480, 404)):
+    lz.aguada(Poligono([(x0, y_ - 4), (x1, y_ - 4), (x1 - 20, y_ + 26), (x0 + 30, y_ + 30)]), '#e8d4b4', dens=0.35, irreg=1.6,
+              borde=0.3, gran=0.6, desvanece=(0, y_, 0, y_ + 34))
+    lz.lapiz([[(x0 + 20 + k * 22, y_ + 6 + (k % 2) * 6), (x0 + 34 + k * 22, y_ + 6 + (k % 2) * 6)] for k in range(int((x1 - x0) / 24))],
+             PAL, grosor=0.5, presion=0.3)
 # left: a potter and a flower seller under the arcades, people trading
 huecos = soportal(70, 372, 236, 404, arcos=2)
 (c1, r1), (c2, r2) = huecos
@@ -504,15 +509,15 @@ for k, (ang, L) in enumerate(((-205, 56), (-218, 62), (-196, 50), (-228, 48))):
     lz.aguada(Elipse(tip[0], tip[1], 2.8, 2.2), '#7a5a3a', dens=0.7, irreg=0.5)
 mano_dedos(lz, FX - 186, FY + 106, 172, 38, '#c98a5e', curl=0.7, abre=0.4, lado=-1, pulgar=0.3)
 # right arm (image right): reaches over the table and holds out an apple to the boy, on her open palm
-manga(lz, [(FX + 58, FY + 88), (FX + 96, FY + 122), (FX + 128, FY + 132)], (28, 25, 22), '#e9b04a', pliegues=2,
-      toques=[(FX + 96, FY + 126, 20, '#c4802e', 0.5)])
-fa2 = Trazo([(FX + 124, FY + 132), (FX + 160, FY + 128), (FX + 186, FY + 118)], (19, 17, 14))
+manga(lz, [(FX + 58, FY + 88), (FX + 84, FY + 140), (FX + 114, FY + 160)], (28, 25, 22), '#e9b04a', pliegues=2,
+      toques=[(FX + 84, FY + 140, 20, '#c4802e', 0.5)])
+fa2 = Trazo([(FX + 110, FY + 158), (FX + 148, FY + 142), (FX + 180, FY + 120)], (19, 17, 14))
 lz.aguada(fa2, '#c98a5e', dens=0.6, tapa=1, irreg=0.3, sombra=(-4, -3))
 lz.contorno(fa2, '#6a3a26', grosor=0.7, presion=0.5)
-lz.aguada(Elipse(FX + 126, FY + 132, 9, 14, -20), '#f0c870', dens=0.78, tapa=1, irreg=0.2)
-lz.contorno(Elipse(FX + 126, FY + 132, 9, 14, -20), '#8a5a22', grosor=0.6, presion=0.5)
-mano_dedos(lz, FX + 186, FY + 118, -18, 38, '#c98a5e', curl=0.35, abre=0.5, lado=-1, pulgar=0.7)
-manzana(FX + 212, FY + 98, 15, '#e2553e')
+lz.aguada(Elipse(FX + 112, FY + 158, 9, 14, 30), '#f0c870', dens=0.78, tapa=1, irreg=0.2)
+lz.contorno(Elipse(FX + 112, FY + 158, 9, 14, 30), '#8a5a22', grosor=0.6, presion=0.5)
+mano_dedos(lz, FX + 180, FY + 120, -30, 38, '#c98a5e', curl=0.35, abre=0.5, lado=-1, pulgar=0.7)
+manzana(FX + 206, FY + 96, 15, '#e2553e')
 
 # ------------------------------------------------------------------ the boy on a crate, offering the drawing he made
 cajon = Poligono([(1296, 724), (1380, 720), (1384, 790), (1300, 794)], suave=False)
@@ -560,18 +565,6 @@ mano_dedos(lz, 1266, 522, -128, 24, PIEL_N, curl=0.6, abre=0.4, lado=-1, pulgar=
 PIEL_B = '#9b6141'
 sombra(lz, 494, 792, 100, 14, dens=0.32)
 HX, HY, BR = 476, 300, 48
-# her bag of cloth (reused) on the back arm, carrot tops and bread peeking out
-manga(lz, [(430, 398), (414, 466), (430, 512)], (34, 29, 25), TEAL, pliegues=2, toques=[(414, 466, 28, TEAL_OSC, 0.5)])
-for k in range(5):
-    a = math.radians(-100 + k * 12)
-    ramita(lz, [(436, 520), (436 + math.cos(a) * 20, 520 + math.sin(a) * 26)], '#6f9e4a', hojas=4, largo=6)
-pan(452, 510, 26, 7, -60)
-bolsa = Poligono([(404, 518), (466, 516), (474, 590), (400, 594)])
-lz.aguada(bolsa, '#efe2c4', dens=0.65, tapa=1, irreg=0.4, borde=0.7, gran=0.5, sombra=(-5, -4))
-for k in range(5):
-    lz.lapiz([[(406 + k * 15, 520), (402 + k * 17, 592)]], CORAL, grosor=1.6, presion=0.6)
-lz.contorno(bolsa, '#8a7a5a', grosor=0.8, presion=0.55)
-mano_dedos(lz, 430, 512, 95, 36, PIEL_B, curl=0.7, abre=0.35, lado=-1, pulgar=0.3)
 for (pts, w) in (([(460, 690), (454, 744), (450, 780)], (22, 18, 13)), ([(500, 690), (516, 734), (530, 768)], (22, 18, 13))):
     f = Trazo(pts, w)
     lz.aguada(f, PIEL_B, dens=0.6, tapa=1, irreg=0.3, toques=[(pts[1][0], pts[1][1], 14, '#7a4a32', 0.4)], sombra=(-3, -2))
@@ -608,6 +601,18 @@ for f, n in ((falda, 110), (cuerpo_v, 22)):
 cinta = Trazo([(444, 492), (478, 498), (514, 492)], (10, 11, 10))
 lz.aguada(cinta, ORO, dens=0.88, tapa=1, irreg=0.2)
 lz.contorno(cinta, '#9a6a1a', grosor=0.6, presion=0.5)
+# her bag of cloth (reused) on the back arm, carrot tops and bread peeking out
+manga(lz, [(430, 398), (414, 466), (430, 512)], (34, 29, 25), TEAL, pliegues=2, toques=[(414, 466, 28, TEAL_OSC, 0.5)])
+for k in range(5):
+    a = math.radians(-100 + k * 12)
+    ramita(lz, [(436, 520), (436 + math.cos(a) * 20, 520 + math.sin(a) * 26)], '#6f9e4a', hojas=4, largo=6)
+pan(452, 510, 26, 7, -60)
+bolsa = Poligono([(404, 518), (466, 516), (474, 590), (400, 594)])
+lz.aguada(bolsa, '#efe2c4', dens=0.65, tapa=1, irreg=0.4, borde=0.7, gran=0.5, sombra=(-5, -4))
+for k in range(5):
+    lz.lapiz([[(406 + k * 15, 520), (402 + k * 17, 592)]], CORAL, grosor=1.6, presion=0.6)
+lz.contorno(bolsa, '#8a7a5a', grosor=0.8, presion=0.55)
+mano_dedos(lz, 430, 512, 95, 36, PIEL_B, curl=0.7, abre=0.35, lado=-1, pulgar=0.3)
 manga(lz, [(516, 398), (566, 444), (604, 446)], (32, 27, 23), TEAL, pliegues=2, toques=[(566, 444, 22, TEAL_OSC, 0.5)])
 fore2 = Trazo([(598, 446), (630, 432), (654, 414)], (19, 17, 14))
 lz.aguada(fore2, PIEL_B, dens=0.6, tapa=1, irreg=0.3, toques=[(630, 440, 10, '#7a4a32', 0.4)], sombra=(-3, -3))
@@ -667,7 +672,7 @@ def moneda(x, y, r):
 lz.aguada(Elipse(MX - 20, MY - 20, 90), '#f6d27a', dens=0.22, suave=34, gran=0.05)
 f_moneda = moneda(MX, MY, MR)
 # the bird: its tail and the back of its body are still gold relief on the coin, its head and its wings already alive
-cuerpo_pj, T = pajaro_perfil(MX - 26, MY - 16, 32, 32, '#2f8a88', flip=True)
+cuerpo_pj, T = pajaro_perfil(MX - 26, MY - 20, 41, 38, '#2f8a88', flip=True)
 oro = cuerpo_pj & Elipse(MX, MY, MR * 0.9, MR * 0.9)
 lz.aguada(oro, '#dca238', dens=0.95, tapa=1, irreg=0.1, borde=0.95, gran=0.3,
           toques=[(MX - 6, MY - 8, 12, '#ffe28a', 0.8), (MX + 10, MY + 10, 12, '#a8701e', 0.6)])
@@ -679,13 +684,14 @@ for k in range(16):
     a = math.radians(160 + k * 8)
     px, py = MX + math.cos(a) * MR * 0.88, MY + math.sin(a) * MR * 0.88
     lz.gouache(Elipse(px + rng.normal(0, 2), py + rng.normal(0, 2), rng.uniform(0.6, 1.4)), '#fff3c0', alfa=0.9, irreg=0)
-lz.luz((MX - 18, MY - 18, 40), '#ffe08a', fuerza=0.5)
+lz.luz((MX - 22, MY - 26, 50), '#ffe08a', fuerza=0.5)
 lz.gouache(Elipse(MX + MR * 0.45, MY + MR * 0.5, MR * 0.12, MR * 0.05, -45), '#fffbe8', alfa=0.85, irreg=0)
 mano_dedos(lz, 652, 414, -50, 46, PIEL_B, curl=0.55, abre=0.3, lado=1, pulgar=0.95)
 
 # the flock already in flight, smaller and smaller toward the open paper (behind it, in the distance)
-for k, (x, y, s_, c) in enumerate(((574, 252, 15, CORAL), (516, 196, 13, ORO), (458, 162, 12, TEAL), (398, 132, 10, '#ec9fa0'),
-                                   (338, 114, 9, SALVIA), (282, 96, 8, CORAL), (232, 86, 7, TEAL))):
+for k, (x, y, s_, c) in enumerate(((566, 262, 15, CORAL), (532, 214, 12, ORO), (488, 236, 11, '#ec9fa0'), (452, 170, 12, TEAL),
+                                   (404, 196, 9, SALVIA), (380, 128, 10, CORAL), (318, 150, 8, ORO), (300, 96, 7, TEAL),
+                                   (246, 118, 6, '#ec9fa0'))):
     pajaro(lz, x, y, s_, c, ang=-28 + (k % 3) * 8, alas='arriba' if k % 2 == 0 else 'abajo')
 
 # ------------------------------------------------------------------ the daughter, on tiptoe, reaching for the bird with open hands
