@@ -69,10 +69,12 @@ def volumen(lz, forma, color, dens=0.7, sombra=None, luz=(-0.7, -0.7), tapa=1, b
             contorno=True, sdens=0.38, toques=None, flor=0, gran=0.3, irreg=1.0, borde=0.6, var=0.35):
     """A wash with form: base colour, a transparent shadow glaze from the side
     away from the light, a lifted highlight on the lit side, pencil outline."""
-    lz.aguada(forma, color, dens=dens, tapa=tapa, toques=toques, flor=flor, gran=gran, irreg=irreg, borde=borde,
-              var=var)
     sc = sombra or mezcla(color, '#5a2a4a', 0.55)
-    lz.aguada(forma, sc, dens=sdens, borde=0.25, irreg=irreg * 0.6, gran=gran + 0.1, desvanece=_desv(forma, luz))
+    bb = forma.bbox()
+    w = min(bb[2] - bb[0], bb[3] - bb[1])
+    lz.aguada(forma, color, dens=dens, tapa=tapa, toques=toques, flor=flor, gran=gran, irreg=irreg, borde=borde,
+              var=var, sombra=(luz[0] * w * 0.22, luz[1] * w * 0.22, mezcla(color, '#3a2030', 0.4), 0.42))
+    lz.aguada(forma, sc, dens=sdens * 0.6, borde=0.25, irreg=irreg * 0.6, gran=gran + 0.1, desvanece=_desv(forma, luz))
     if brillo:
         bb = forma.bbox()
         cx, cy = (bb[0] + bb[2]) / 2, (bb[1] + bb[3]) / 2
@@ -100,15 +102,15 @@ def miembro(lz, pts, anchos, color, lado=1, dens=0.7, lapiz=None, pliegues=0, ta
     point. lado=+1/-1 chooses which side is in shadow. pliegues: number of
     small fold strokes at the middle joint (sleeves, trousers)."""
     f = Trazo(pts, anchos)
-    lz.aguada(f, color, dens=dens, tapa=tapa, irreg=0.7, gran=0.3)
     p = np.asarray(f.p)
     tg = np.gradient(p, axis=0)
     tg /= np.maximum(np.hypot(*tg.T)[:, None], 1e-9)
     nr = np.stack([-tg[:, 1], tg[:, 0]], 1)
-    sh = p + nr * (f.w[:, None] * 0.28 * lado)
-    w = f.w[::4] * 0.5
-    lz.aguada(Trazo(sh[::4], w if len(w) > 1 else (w[0], w[0]), suave=False) & f,
-              mezcla(color, '#5a2a4a', 0.5), dens=sdens, suave=f.w.mean() * 0.15, gran=0.35)
+    # light comes from the side opposite `lado` (normal at the middle of the limb)
+    nm = nr[len(nr) // 2] * -lado
+    wm = float(np.max(anchos))
+    lz.aguada(f, color, dens=dens, tapa=tapa, irreg=0.7, gran=0.3,
+              sombra=(nm[0] * wm * 0.32, nm[1] * wm * 0.32, mezcla(color, '#3a2030', 0.4), 0.45))
     hl = p - nr * (f.w[:, None] * 0.25 * lado)
     lz.levanta(Trazo(hl[::6], (f.w.mean() * 0.16, f.w.mean() * 0.1)) & f, 0.25, suave=2)
     lp = lapiz or _lapiz_de(color, 0.5)

@@ -93,7 +93,7 @@ _rin = PR - 64 + 5 * np.sin(_ang * 31) + 3 * np.sin(_ang * 77 + 1.0)
 ORILLA = Poligono(np.stack([PC[0] + np.cos(_ang) * _rin, PC[1] + 8 + np.sin(_ang) * _rin], 1), suave=False)
 TIERRA = Elipse(PC[0], PC[1], PR, PR) - ORILLA
 jardin(lz, TIERRA, paleta=('#f0c25e', '#e8735e', '#c33c4e', '#f6a5b5', '#8d73b0', '#ffb36b'),
-       verdes=('#5f8f63', '#7aa25a', '#3f7a6a', '#86a86c'), base='#6f9a52', base_dens=0.8, escala=0.8, densidad=1.0,
+       verdes=('#5f8f63', '#7aa25a', '#3f7a6a', '#86a86c'), base='#6f9a52', base_dens=0.8, escala=1.1, densidad=0.75,
        semilla=12)
 lz.aguada(TIERRA, '#2f5a4a', dens=0.3, borde=0.2, desvanece=(PC[0], PC[1] - PR + 70, PC[0], PC[1] - PR + 5))
 lz.contorno(TIERRA, '#3f5a3a', grosor=1.0, presion=0.5, cortes=0.35, desfase=0.6)

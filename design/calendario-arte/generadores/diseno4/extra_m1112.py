@@ -126,14 +126,16 @@ def brazo(lz, S, E, Wr, ancho, color, piel=None, manga='larga', dens=0.74, tapa=
 
     if manga == 'larga':
         f = brazo_forma(1.05)
-        lz.aguada(f, color, dens=dens, tapa=tapa, toques=toques, borde=0.6, irreg=0.6)
+        lz.aguada(f, color, dens=dens, tapa=tapa, toques=toques, borde=0.6, irreg=0.6,
+                  sombra=(-w * 0.35, -w * 0.3, mezcla(color, '#3a2030', 0.35), 0.45))
         lz.contorno(f, lapiz or _lapiz_de(color), grosor=0.85, presion=0.55, cortes=0.25)
         out = f
     else:
         pk = piel or 'piel2'
         f = brazo_forma(0.86)
         lz.aguada(f, pk, dens=0.58, tapa=tapa, borde=0.45, irreg=0.4,
-                  toques=[(*E, w * 1.2, mezcla(pk, '#a8573c', 0.3), 0.4)])
+                  toques=[(*E, w * 1.2, mezcla(pk, '#a8573c', 0.3), 0.4)],
+                  sombra=(-w * 0.3, -w * 0.3, mezcla(pk, '#8a4a32', 0.4), 0.4))
         lz.contorno(f, PIEL_LAPIZ, grosor=0.8, presion=0.5, cortes=0.25)
         fin = 0.7 if manga == 'corta' else 1.25
         if fin <= 1:
@@ -141,7 +143,8 @@ def brazo(lz, S, E, Wr, ancho, color, piel=None, manga='larga', dens=0.74, tapa=
         else:
             m = (seg(S, E, w * 1.12, w * 1.05, w * 0.9) | Elipse(E[0], E[1], w * 0.48)
                  | Trazo([E, E + (Wr - E) * (fin - 1)], (w * 0.92, w * 0.9)))
-        lz.aguada(m, color, dens=dens, tapa=tapa, toques=toques, borde=0.6, irreg=0.6)
+        lz.aguada(m, color, dens=dens, tapa=tapa, toques=toques, borde=0.6, irreg=0.6,
+                  sombra=(-w * 0.35, -w * 0.3, mezcla(color, '#3a2030', 0.35), 0.45))
         lz.contorno(m, lapiz or _lapiz_de(color), grosor=0.85, presion=0.55, cortes=0.25)
         out = f
     if pliegue:
@@ -178,20 +181,6 @@ def cara(lz, x, y, r, piel='piel2', lado_sombra=None, **kw):
         xx = sd * rx * (0.93 - 0.35 * t * t)
         tr.append([R(xx, r * yy), R(xx - sd * r * 0.18, r * (yy + 0.12))])
     lz.lapiz(tr, lp, grosor=0.6, presion=0.25, temblor=0.15)
-    # nose: a little shadow plane on the far side
-    nx = giro * r * 0.42
-    lz.lapiz([[R(nx - sd * r * 0.03, r * 0.05), R(nx - sd * r * 0.06, r * 0.3)]], lp, grosor=0.6, presion=0.3,
-             temblor=0.05)
-    lz.aguada(Elipse(*R(nx + sd * r * 0.06, r * 0.32), r * 0.07, r * 0.05), mezcla(piel, '#9a4a35', 0.5),
-              dens=0.35, suave=r * 0.03)
-    # upper eyelids (a warm crease above each eye) when the eyes are open
-    if kw.get('ojos', 'abiertos') == 'abiertos':
-        ex = r * 0.3
-        for s_ in (-1, 1):
-            k = 1 - 0.35 * max(0, giro * s_)
-            cx_, cy_ = R(giro * r * 0.32 + s_ * ex * k, r * 0.12)
-            lz.lapiz([arco(cx_, cy_ + r * 0.02, r * 0.14 * k, r * 0.16, 205, 335, 10, inclina)], lp,
-                     grosor=0.55, presion=0.35, temblor=0.05)
     # lower lip
     mx, my = R(giro * r * 0.36, r * 0.6)
     if kw.get('boca', 'sonrisa') in ('sonrisa', 'suave'):
@@ -262,6 +251,43 @@ def cuello(lz, x, y, r, piel, base, ancho=0.46):
 def pieza(lz, pts, color, dens=0.74, toques=None, tapa=1.0, lapiz=None, suave_pol=True, flor=0, **kw):
     """A garment / object outline: one wash plus a loose pencil contour."""
     f = Poligono(pts, suave=suave_pol)
+    kw.setdefault('sombra', (-9, -8, mezcla(color, '#3a2030', 0.35), 0.45))   # light from top-left
     lz.aguada(f, color, dens=dens, tapa=tapa, toques=toques, flor=flor, **kw)
     lz.contorno(f, lapiz or _lapiz_de(color), grosor=0.9, presion=0.55, cortes=0.3)
     return f
+
+
+def guardar_zoom(lz, ancho, cx, cy, ruta, margen=30, calidad=90):
+    """Save a CLOSE-UP of a canvas that was painted bigger than the sheet.
+
+    Paint on Lienzo(ancho * Z) with ordinary base-unit coordinates, then this
+    crops the final ancho x (850/1485 * ancho) sheet so that the base point
+    (cx, cy) lands at the centre of the sheet: a zoom of Z with no change to
+    any drawing call. The ragged fade to bare paper (like Lienzo.vineta) is
+    applied to the cropped sheet, so the paper stays exactly PAPEL."""
+    from PIL import Image
+    from acuarela import BASE_W, BASE_H, _ss
+    W = int(ancho)
+    H = int(round(BASE_H * W / BASE_W))
+    s = lz.s
+    x0 = int(round(cx * s - W / 2))
+    y0 = int(round(cy * s - H / 2))
+    x0 = max(0, min(lz.W - W, x0))
+    y0 = max(0, min(lz.H - H, y0))
+    img = lz.imagen()[y0:y0 + H, x0:x0 + W].astype(np.float32) / 255.0
+    lz.T = lz.LUZ = lz.OP = None
+    # ragged vignette in sheet units (k = sheet px per base unit)
+    k = W / BASE_W
+    X = (np.arange(W, dtype=np.float32) + 0.5)[None, :] / k
+    Y = (np.arange(H, dtype=np.float32) + 0.5)[:, None] / k
+    dd = np.minimum(np.minimum(X, BASE_W - X), np.minimum(Y, BASE_H - Y))
+    n = lz.fbm(x0, y0, x0 + W, y0 + H, 120, 99, 2)
+    F = _ss(dd + margen * 0.9 * (n - 0.5) * 2, margen * 0.1, margen * 1.6)
+    pap = lz.papel[None, None, :]
+    out = pap + (img - pap) * F[..., None]
+    im = Image.fromarray((np.clip(out, 0, 1) * 255 + 0.5).astype(np.uint8))
+    if ruta.lower().endswith(('.jpg', '.jpeg')):
+        im.save(ruta, quality=calidad, subsampling=0, keep_rgb=True)
+    else:
+        im.save(ruta)
+    return im

@@ -505,6 +505,7 @@ def mano_dedos(lz, x, y, ang, tam, piel='#e6ae88', curl=0.25, abre=1.0, lado=1, 
 def manga(lz, pts, anchos, color, toques=None, pliegues=2, tapa=1.0, dens=0.72, lapiz=None, semilla=None, **kw):
     """Sleeve or trouser leg along a bent path, with pencil folds at the bend."""
     f = Trazo(pts, anchos)
+    kw.setdefault('sombra', (-5, -4))
     lz.aguada(f, color, dens=dens, tapa=tapa, toques=toques, borde=0.6, gran=0.35, **kw)
     lp = lapiz or _lapiz_de(color, 0.5)
     lz.contorno(f, lp, grosor=0.85, presion=0.55, cortes=0.25)

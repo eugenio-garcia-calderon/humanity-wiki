@@ -21,12 +21,15 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from acuarela import (Lienzo, Poligono, Elipse, Trazo, Circulos, spline, bezier, arco, mezcla, rgb, cosmos,
                       hojita, flor_simple, estrella, remuestrea, puntos_dentro, _lapiz_de, PIEL_LAPIZ)
-from extra_m1112 import mano_dedos, brazo, cara, pliegues, sombra, cuello, pieza
+from extra_m1112 import mano_dedos, brazo, cara, pliegues, sombra, cuello, pieza, guardar_zoom
 
 ANCHO = int(sys.argv[1]) if len(sys.argv) > 1 else 1485
 SALIDA = sys.argv[2] if len(sys.argv) > 2 else 'mes-12-d.png'
 
-lz = Lienzo(ANCHO, semilla=1212)
+# The scene is painted bigger than the sheet and framed close (zoom Z around
+# (ZX, ZY)): the people are the protagonists, the bridge runs out of the frame.
+Z, ZX, ZY = 1.35, 744, 492
+lz = Lienzo(int(round(ANCHO * Z)), semilla=1212)
 
 CORAL = '#e8735e'
 ORO = '#f0c25e'
@@ -41,24 +44,24 @@ LP = '#5e3f30'
 
 def yd(x):
     """Height of the bridge deck at x (a gentle arch, accessible)."""
-    return 522 + 0.00042 * (x - 740) ** 2
+    return 522 + 0.0006 * (x - 740) ** 2
 
 
 # ------------------------------------------------------------------ the river: a ribbon of night
-rio_p = spline([(70, 742), (260, 712), (480, 736), (740, 712), (1000, 738), (1220, 714), (1420, 734)])
-rio = Trazo(rio_p, (30, 80, 96, 100, 96, 80, 30))
+rio_p = spline([(250, 690), (380, 672), (560, 690), (744, 676), (930, 692), (1110, 674), (1240, 688)])
+rio = Trazo(rio_p, (16, 52, 66, 70, 66, 52, 16))
 cosmos(lz, rio, base='#24335f', toques_col=('#1f6f7a', '#4b3f8f', '#2a7f86'), estrellas=1.3, semilla=121,
        tapa=1, dens=1.15)
 lz.contorno(rio, '#22305a', grosor=0.7, presion=0.4, cortes=0.5, desfase=0.5)
 # the garland's lights shimmer in the water
-for x in np.linspace(360, 1120, 9):
-    lz.lapiz([[(x - 12, 718 + 6 * math.sin(x)), (x + 12, 718 + 6 * math.sin(x))],
-              [(x - 7, 728 + 4 * math.cos(x)), (x + 7, 728 + 4 * math.cos(x))]], '#f6d27a', grosor=0.9, presion=0.6,
+for x in np.linspace(470, 1020, 7):
+    lz.lapiz([[(x - 10, 672 + 5 * math.sin(x)), (x + 10, 672 + 5 * math.sin(x))],
+              [(x - 6, 680 + 4 * math.cos(x)), (x + 6, 680 + 4 * math.cos(x))]], '#f6d27a', grosor=0.9, presion=0.6,
              temblor=0.6)
 
 # ------------------------------------------------------------------ banks with a little snow
-for pts in ([(80, 690), (120, 650), (200, 628), (300, 640), (360, 672), (330, 700), (200, 708)],
-            [(1110, 676), (1170, 640), (1280, 628), (1380, 650), (1410, 690), (1300, 708), (1160, 704)]):
+for pts in ([(220, 660), (250, 632), (300, 616), (360, 626), (410, 650), (380, 672), (280, 676)],
+            [(1080, 652), (1120, 626), (1190, 614), (1250, 630), (1270, 660), (1200, 676), (1110, 674)]):
     f = Poligono(pts)
     lz.aguada(f, '#e9eef0', dens=0.5, tapa=1, borde=0.9, irreg=1.3, gran=0.4,
               toques=[(pts[-2][0], pts[-2][1] - 10, 70, '#b9c9da', 0.6)])
@@ -67,7 +70,7 @@ for pts in ([(80, 690), (120, 650), (200, 628), (300, 640), (360, 672), (330, 70
     tr = []
     for _ in range(14):
         x = rng.uniform(pts[0][0] + 20, pts[3][0])
-        y = 690 + rng.uniform(-6, 10)
+        y = 660 + rng.uniform(-6, 8)
         for d in (-1, 0, 1):
             tr.append([(x, y), (x + d * 4 + rng.normal(0, 1), y - rng.uniform(8, 14))])
     lz.lapiz(tr, '#6f8f5a', grosor=0.7, presion=0.45, temblor=0.2)
@@ -107,17 +110,17 @@ def arbol(x0, y0, lado, sem):
     return ramas
 
 
-rama_i = arbol(232, 662, 1, 5)
-rama_d = arbol(1258, 662, -1, 9)
+rama_i = arbol(300, 640, 1, 5)
+rama_d = arbol(1190, 636, -1, 9)
 
 # ------------------------------------------------------------------ the bridge everybody built
-xs = np.linspace(168, 1312, 120)
+xs = np.linspace(318, 1166, 120)
 deck = np.stack([xs, yd(xs)], 1)
 # under-arch and struts
-arco_p = np.stack([np.linspace(300, 1180, 80), np.zeros(80)], 1)
-arco_p[:, 1] = 660 - 105 * np.sin(np.linspace(0, np.pi, 80))
-for x in np.linspace(360, 1120, 12):
-    yb = 660 - 105 * math.sin((x - 300) / 880 * math.pi)
+arco_p = np.stack([np.linspace(380, 1108, 80), np.zeros(80)], 1)
+arco_p[:, 1] = 652 - 92 * np.sin(np.linspace(0, np.pi, 80))
+for x in np.linspace(420, 1070, 12):
+    yb = 652 - 92 * math.sin((x - 380) / 728 * math.pi)
     f = Trazo([(x, yd(x) + 8), (x, yb)], (6, 6))
     lz.aguada(f, '#8a5a36', dens=0.6, tapa=1, irreg=0.3)
     lz.contorno(f, '#5a3a24', grosor=0.6, presion=0.45)
@@ -126,10 +129,10 @@ lz.aguada(f, '#8a5a36', dens=0.7, tapa=1, irreg=0.3, gran=0.5, toques=[(740, 556
 lz.contorno(f, '#5a3a24', grosor=0.8, presion=0.5)
 # the deck: a beam of planks, each painted a different colour by a different hand
 COLS = [CORAL, ORO, TEAL, ROSA, OCRE, '#8d73b0', '#7fa86a', '#e0884a', '#6fb1ad', '#f2b93a']
-xs_t = np.arange(168, 1312, 22)
+xs_t = np.arange(318, 1166, 20)
 rng = np.random.default_rng(4)
 for i, x in enumerate(xs_t):
-    x1 = min(x + 22, 1312)
+    x1 = min(x + 20, 1166)
     p = [(x, yd(x) - 1), (x1, yd(x1) - 1), (x1, yd(x1) + 17), (x, yd(x) + 17)]
     lz.aguada(Poligono(p, suave=False), COLS[(i * 7) % len(COLS)], dens=0.62, tapa=1, irreg=0.35, borde=0.6,
               gran=0.4)
@@ -138,7 +141,7 @@ for x in xs_t:
 lz.lapiz([deck + (0, -1), deck + (0, 17)], '#5a3a24', grosor=0.9, presion=0.6, temblor=0.4)
 # railing: posts and a hand rail (a little higher than the deck, same arch)
 rail = np.stack([xs, yd(xs) - 58], 1)
-for x in np.arange(190, 1300, 74):
+for x in np.arange(336, 1160, 66):
     f = Trazo([(x, yd(x) - 58), (x, yd(x))], (5, 5))
     lz.aguada(f, MADERA, dens=0.65, tapa=0.6, irreg=0.3)
     lz.contorno(f, '#5a3a24', grosor=0.5, presion=0.4)
@@ -148,10 +151,10 @@ lz.contorno(f, '#5a3a24', grosor=0.6, presion=0.45)
 
 # ------------------------------------------------------------------ the garland of paper stars (lit by their words)
 g0, g1 = np.array(rama_i[3][2]), np.array(rama_d[3][2])
-cuerda = bezier(g0, (g0[0] + 250, 330), (g1[0] - 250, 330), g1, 160)
+cuerda = bezier(g0, (g0[0] + 200, 330), (g1[0] - 200, 330), g1, 160)
 lz.lapiz([cuerda], '#7c5a48', grosor=0.8, presion=0.5, temblor=0.5)
 SCOLS = [ORO, CORAL, ROSA, ORO, TEAL, ORO, CORAL, ROSA, ORO, TEAL, ORO]
-for k, t in enumerate(np.linspace(0.07, 0.93, 11)):
+for k, t in enumerate(np.linspace(0.08, 0.92, 9)):
     x, y = cuerda[int(t * 159)]
     y += 20
     lz.lapiz([[(x, y - 20), (x, y - 12)]], '#7c5a48', grosor=0.6, presion=0.5)
@@ -354,15 +357,19 @@ mano_dedos(lz, CX + 28, 448, -10, 20, 'piel2', 'sujeta', lado=1)
 brazo(lz, (CX - 8, 416), (CX + 6, 452), (CX + 62, 452), 13, CORAL)
 mano_dedos(lz, CX + 62, 452, -5, 20, 'piel2', 'sujeta', lado=-1)
 
-# ------------------------------------------------------------------ the first stars of the night, and snow
-rng = np.random.default_rng(77)
-for (x, y, r, c) in ((560, 110, 7, ORO), (930, 86, 6, ROSA), (1060, 150, 5, TEAL), (420, 180, 5, ORO),
-                     (760, 60, 8, ORO), (1180, 96, 4, CORAL)):
+# ------------------------------------------------------------------ the first stars of the night, a few snowflakes
+for (x, y, r, c) in ((560, 258, 6, ORO), (930, 240, 5.5, ROSA), (1010, 286, 4.5, TEAL), (470, 290, 4.5, ORO),
+                     (812, 226, 7, ORO)):
     estrella(lz, x, y, r, c, gouache=False)
-for _ in range(26):
-    x, y = rng.uniform(330, 1160), rng.uniform(90, 300)
-    lz.aguada(Elipse(x, y, rng.uniform(1.4, 2.4)), '#9fb4cc', dens=0.6, irreg=0.2)
+rng = np.random.default_rng(77)
+copos = []
+for (x, y) in ((520, 330), (604, 252), (690, 236), (874, 258), (972, 330), (1050, 250), (430, 248), (980, 400),
+               (520, 410)):
+    r = rng.uniform(2.6, 3.8)
+    for a in (0, 60, 120):
+        d = np.array([math.cos(math.radians(a + 15)), math.sin(math.radians(a + 15))]) * r
+        copos.append([(x - d[0], y - d[1]), (x + d[0], y + d[1])])
+lz.lapiz(copos, '#7f9cc0', grosor=0.6, presion=0.6, temblor=0.05)
 
-lz.vineta(margen=30)
-lz.guardar(SALIDA)
+guardar_zoom(lz, ANCHO, ZX, ZY, SALIDA)
 print('ok', SALIDA)

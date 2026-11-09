@@ -41,6 +41,7 @@ LP = '#5e3f30'
 
 def pieza(pts, color, dens=0.74, toques=None, tapa=1.0, lapiz=None, suave_pol=True, flor=0, **kw):
     f = Poligono(pts, suave=suave_pol)
+    kw.setdefault('sombra', (-9, -8, mezcla(color, '#3a2030', 0.35), 0.45))   # light from top-left
     lz.aguada(f, color, dens=dens, tapa=tapa, toques=toques, flor=flor, **kw)
     lz.contorno(f, lapiz or _lapiz_de(color), grosor=0.9, presion=0.55, cortes=0.3)
     return f
