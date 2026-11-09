@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0178_aeromovil_bala_base.sql",
+      "motivo": "Cuadriciclo Bala como diseño base en el selector de diseños",
+      "desde": "2026-11-09T19:01:44.263Z"
+    }
+  ]
 }
