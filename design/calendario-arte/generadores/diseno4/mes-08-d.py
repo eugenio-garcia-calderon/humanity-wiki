@@ -285,14 +285,14 @@ brazo2(lz, (676, 612), (694, 646), (690, 690), 16, '#4f9c9a', P1, 'corta', sombr
 pie(lz, (872, 600), -30, 28, descalzo=True, piel=P1)
 pie(lz, (868, 590), -50, 28, descalzo=True, piel=P1)
 # a clay pitcher and a glass of water in the grass beside him (drink before you're thirsty)
-jar = Poligono([(744, 742), (740, 714), (750, 700), (748, 690), (764, 690), (762, 700), (772, 714), (768, 742)])
+jar = Poligono([(744, 778), (740, 750), (750, 736), (748, 726), (764, 726), (762, 736), (772, 750), (768, 778)])
 lz.aguada(jar, '#c0703f', dens=0.85, tapa=1, borde=0.7, irreg=0.3, toques=[(766, 720, 10, '#8a4a2a', 0.6)])
 lz.contorno(jar, '#7a3a22', grosor=0.7, presion=0.55)
-lz.lapiz([arco(772, 712, 6, 9, -90, 90, 10)], '#7a3a22', grosor=0.9, presion=0.6)
-vaso = Poligono([(784, 744), (782, 722), (796, 722), (794, 744)], suave=False)
+lz.lapiz([arco(772, 748, 6, 9, -90, 90, 10)], '#7a3a22', grosor=0.9, presion=0.6)
+vaso = Poligono([(784, 780), (782, 758), (796, 758), (794, 780)], suave=False)
 lz.aguada(vaso, '#bfe0e6', dens=0.5, tapa=1, irreg=0.2, toques=[(789, 736, 6, '#7fb5d3', 0.8)])
 lz.contorno(vaso, '#6a9aa0', grosor=0.5, presion=0.5)
-lz.gouache(Trazo([(785, 726), (785, 740)], (0.9, 0.9)), '#ffffff', alfa=0.8, irreg=0)
+lz.gouache(Trazo([(785, 762), (785, 776)], (0.9, 0.9)), '#ffffff', alfa=0.8, irreg=0)
 
 # ------------------------------------------------------------------ the dream: little lights rise into the crown
 sueno = bezier((640, 560), (600, 480), (690, 440), (620, 330), 60)
