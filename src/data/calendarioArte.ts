@@ -709,11 +709,12 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "Elige un valor para el año nuevo. Que haya paz."
     ],
     "reto": "¿Qué valor vas a practicar a diario este mes?",
-    "imagen": "/calendario-arte/ilustraciones/mes-12.jpg",
+    "imagen": "/calendario-arte/ilustraciones/mes-12-d.jpg",
     "disenos": [
       "/calendario-arte/ilustraciones/mes-12.jpg",
       "/calendario-arte/ilustraciones/mes-12-b.jpg",
-      "/calendario-arte/ilustraciones/mes-12-c.jpg"
+      "/calendario-arte/ilustraciones/mes-12-c.jpg",
+      "/calendario-arte/ilustraciones/mes-12-d.jpg"
     ]
   }
 ];
