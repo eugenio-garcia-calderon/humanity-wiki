@@ -1097,3 +1097,16 @@ Chose (b): two hand-made silhouettes of the same car had already disagreed by 60
 **AeroRider.** Modelled as a non-tilting trike. No source says it tilts, and the full AQUA equipment list would have said so. No photo was found, so the surface is a reconstruction on the published sizes.
 
 **Storage.** Bumped to `aeromovil_garaje_v4`, forgetting only the stored `jaguarD` entry (hidden while it was a placeholder), as was done for the XL1 between v2 and v3.
+
+## 2026-11-09 — Garage: production XL1 back, 2011 Concept out; layout reset once; overlap guard on load; 3D fullscreen
+
+**XL1.** On 2026-11-08 «estos dos… están repetidos» was read as the production XL1 and the L1 2009. On 2026-11-09 Eugenio's photos made clear that the two XL1s he wants are the production car (white, 2013) and the 2002 concept (the 1-Litre). The production car (`xl1`, already in `xl1.ts`) comes back. The 2011 Qatar Concept (`xl1concept`), which drew the same body, leaves, and its export is deleted. The 1-Litre keeps id `unlitro` and is renamed «VW 1-Litro Concept 2002». VW never called the 2002 car "XL1"; the name keeps "1-Litro" so it stays true.
+
+**Why the 1-Litre "disappeared".** Saved garages keep each car's `z`, and the defaults have changed three times. Eugenio's saved list (layout of 2026-11-07) had the 1-Litre at −9 m, and the new Jaguar default was −9 m. Options considered:
+- (a) bump the key and drop only the affected entries, as done for v3 and v4;
+- (b) reset the layout once;
+- (c) resolve overlaps on load.
+
+Chose (b) + (c). With (b) everyone lands on the clean default layout now. With (c) the next new car cannot hide an old one even if someone moved cars around. (c) uses footprints from `largo`/`ancho`/`batalla`, swaps them when the car is turned 90°, adds a 0.3 m margin, and keeps a fixed footprint for the Aeromóvil at the centre. It runs only on load, not while dragging.
+
+**Fullscreen.** Uses the Fullscreen API on the viewer `<section>` when `document.fullscreenEnabled` is true. Otherwise (iPhone Safari) it falls back to `fixed inset-0 z-[100] h-[100dvh]` with body scroll locked and Esc to close. The canvas already follows its box through a `ResizeObserver`, so both modes resize the renderer. Cards in the top-right corner move to `right-[52px]` from `sm` up, and below the button on phones. The wind-tunnel card stays outside the section (2026-11-07 decision), so it is not visible in fullscreen.

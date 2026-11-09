@@ -37,7 +37,7 @@ import { construir } from './unLitroModelo';
  * No logos, badges or lettering: the garage compares shapes, not brands.
  */
 export const VEHICULO_1LITRO: VehiculoGaraje = {
-  id: 'unlitro', nombre: 'VW 1-Litro 2002',
+  id: 'unlitro', nombre: 'VW 1-Litro Concept 2002',
   largo: LARGO, ancho: ANCHO, alto: ALTO, batalla: BATALLA, viaDel: VIA_DEL, viaTras: VIA_TRAS,
   fuente: 'Ficha de prensa de VW (2002) recogida por ultimatecarpage.com y supercars.net: 3 646 × 1 248 × 1 110 mm, batalla 2 205 mm, vías 1 000 / 810 mm, neumáticos 95/80 R16 y 115/70 R16. La forma (voladizos, perfil, planta, cúpula, luces, aberturas) está estimada: no se ha podido medir ninguna foto ni plano',
   aero: {
