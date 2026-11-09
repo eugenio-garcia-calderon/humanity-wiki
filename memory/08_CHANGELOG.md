@@ -10573,10 +10573,19 @@ Eugenio asked for five things on the 3D world; all on branch `nube/arquitectura-
   - **Carrocería:** ventanillas en gota, juntas de las puertas de ala de gaviota y de los carenados traseros, y cola con la luz roja alrededor.
   - **Ruedas:** delante, tapacubos blancos con cinco aspas negras.
   - **Vías:** las medidas en las fotos dan 1,46 / 1,24 m (antes 1,41 / 1,29; no se encontró la cifra publicada).
-  - **Pendiente:** los bordes del cristal salen escalonados de cerca; lo está arreglando el mismo bot.
+  - Los bordes de los cristales salían escalonados de cerca: arreglado el mismo día (ver la entrada siguiente).
 - **VW 1-Litro Concept 2002** (la foto de Eugenio):
   - **Forma:** carrocería más alta y cúpula más baja, que empieza delante del eje.
   - **Detalles:** discos negros en las ruedas delanteras, cúpula de cristal claro con sus dos arcos, y dos faros redondos bajo un mismo cristal en cada esquina.
   - **Pintura:** sigue siendo carbono sin pintar con barniz. supercars.net: «not painted». En la foto se ve gris antracita, que es como se ve el carbono barnizado a la luz del día.
 - **Lo que queda estimado:** solo había fotos de 3/4 de delante. El perfil de lado, la cola y la vista de arriba de los dos están reconstruidos y pueden variar unos centímetros. El área frontal medida en el modelo sale un 4 % (XL1) y un 9 % (1-Litro) por encima de la publicada. Las medidas, el Cd y el área publicados no cambian.
 - Comprobado: `tsc`, `vite build`, el editor (cada coche solo, el garaje y «Superponer») y la superposición con cada foto. Sin verificar: el móvil con la app instalada.
+
+## 2026-11-09 — Aeromóvil: XL1 de serie, bordes de los cristales lisos
+
+- Los bordes del parabrisas y de las ventanillas del XL1 de serie salían escalonados de cerca, y las matrículas en blanco tenían motas.
+  - **Bordes:** el hueco del cristal se cortaba por triángulos enteros de la chapa. Ahora la chapa y el cristal comparten el contorno, así que el borde es una curva sin escalones.
+  - **Franja negra del cristal:** queda nítida a cualquier distancia.
+  - **Matrículas:** la punta del morro y la de la cola se calculan cada milímetro y ya no se hunden bajo la chapa.
+- 239 000 triángulos (el límite es 250 000). Comprobado de cerca, antes y después con la misma cámara, más `tsc` y `vite build`.
+- Queda sin arreglar un pequeño corte en la junta de la puerta, donde cruza la arista del costado.
