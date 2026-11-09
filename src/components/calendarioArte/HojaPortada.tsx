@@ -13,7 +13,7 @@
 import { cn } from '../../utils/cn';
 import type { ContenidoMes, PortadaCalendario } from '../../data/calendarioArteTipos';
 import { Editable } from './Editable';
-import { ACENTOS, NOMBRES_MES, ANCHO_MM } from './HojaMes';
+import { ACENTOS, NOMBRES_MES, ANCHO_MM, PAPEL } from './HojaMes';
 import { CodigoQR } from './CodigoQR';
 
 /** La ilustración final pesa ~1,5 MB: en la portada se usa su miniatura
@@ -44,7 +44,7 @@ export const ALTO_PORTADA_MM = 210;
 
 export function HojaPortada({ anio, meses, portada: p, editando, alCambiar, alAbrirMes, imagenes }: Props) {
   return (
-    <div className="ca-hoja relative overflow-hidden bg-white text-stone-800" style={{ width: `${ANCHO_MM}mm`, height: `${ALTO_PORTADA_MM}mm` }}>
+    <div className="ca-hoja relative overflow-hidden text-stone-800" style={{ width: `${ANCHO_MM}mm`, height: `${ALTO_PORTADA_MM}mm`, backgroundColor: PAPEL }}>
       <div className="ca-mitad flex flex-col overflow-hidden" style={{ height: `${ALTO_PORTADA_MM}mm`, padding: '11mm 11mm 7mm' }}>
         {/* ── EL TÍTULO ─────────────────────────────────────────────────── */}
         <div className="flex flex-col items-center text-center">
@@ -88,7 +88,7 @@ export function HojaPortada({ anio, meses, portada: p, editando, alCambiar, alAb
               <Caja
                 key={m.mes}
                 {...(Caja === 'button' ? { type: 'button', onClick: () => alAbrirMes!(m.mes), title: `Ir a ${NOMBRES_MES[m.mes - 1]}` } : {})}
-                className={cn('flex min-h-0 flex-col overflow-hidden rounded-[2mm] border bg-white text-left', a.borde, Caja === 'button' && 'transition hover:shadow-lg')}
+                className={cn('flex min-h-0 flex-col overflow-hidden rounded-[2mm] border bg-white/40 text-left', a.borde, Caja === 'button' && 'transition hover:shadow-lg')}
               >
                 <div className={cn('relative min-h-0 w-full flex-1 overflow-hidden', a.suave)}>
                   {img && (

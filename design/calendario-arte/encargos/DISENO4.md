@@ -136,3 +136,29 @@ su manera de pintar y lo que hay que traer al Diseño 4, junto a la acuarela y e
 
 Mantén además todo lo anterior: acuarela creíble y lápiz de color, mucho aire, simplicidad,
 una idea central clara y ninguna letra.
+
+## 7. Fondo blanco hueso, contraste alto, detallitos y silencio (2026-11-09, Eugenio)
+
+Imagen de referencia que envió Eugenio (una doble página de un álbum ilustrado; mírala con
+Read): `/tmp/claude-0/-home-claude/8eedf981-a923-582a-a454-bf675a620bf7/scratchpad/referencia/referencia-eugenio.jpg`.
+Es REFERENCIA de recursos y de calidad, no un modelo para copiar: ninguna ilustración puede
+reproducir su composición (la mano-bosque, el bebé en la burbuja, la mano-cosmos).
+
+Lo que pide Eugenio, con sus palabras resumidas:
+- **Fondo blanco hueso / blanco roto** en TODAS las ilustraciones, exactamente
+  **RGB (244, 239, 228)** (#F4EFE4), el mismo que tendrá la hoja del calendario, para que la
+  ilustración y la parte de texto no desentonen. Nada de cielos o fondos pintados de borde a
+  borde: los elementos flotan sobre el papel hueso.
+- **Contraste muy alto** entre ese fondo claro y los elementos, que tienen que ser mucho más
+  **vivos y coloridos**, con **muchos detallitos y texturas en su interior** (flores, hojas,
+  puntitos, estrellas, peces diminutos, rayitas de lápiz), todo muy artesanal.
+- **Pero con silencio**: grandes espacios donde solo se ve el fondo, para que la mirada
+  abarque el conjunto. Uno se puede perder en un detalle (una libélula que flota, unos
+  planetas y estrellitas sueltas), pero la imagen respira.
+- **Recursos mágicos que integran naturaleza, ser humano y cosmos**: una parte del cuerpo que
+  ES un bosque o un jardín, una forma que es a la vez cosmos y océano, algo muy familiar y
+  humano (un rostro dormido, unas manos, un abrazo) junto a lo mágico. Así se consiguen
+  imágenes de 10.
+- La referencia sirve en especial para **Cosmos y Vida** (origen de la vida y del universo):
+  haz una composición PROPIA con esos recursos (p. ej. otra figura y otros elementos), no la
+  de la foto.

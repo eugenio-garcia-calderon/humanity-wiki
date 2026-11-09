@@ -19,19 +19,25 @@ export const NOMBRES_MES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio
 const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
 
 /** Un acento por mes, en clases de Tailwind (nada de colores a mano). */
+/** El papel de todo el calendario: blanco hueso (2026-11-09, Eugenio: «un
+ *  blanco hueso tirando a blanco roto… úsalo también en la sección del
+ *  calendario para que no desentone la ilustración con la parte de texto»).
+ *  Es el mismo RGB que el fondo de las ilustraciones del Diseño 4. */
+export const PAPEL = 'rgb(244 239 228)';
+
 export const ACENTOS: { texto: string; borde: string; fondo: string; suave: string }[] = [
-  { texto: 'text-indigo-700', borde: 'border-indigo-300', fondo: 'bg-indigo-600', suave: 'bg-indigo-50' },   // Cosmos y Vida
-  { texto: 'text-rose-700', borde: 'border-rose-300', fondo: 'bg-rose-600', suave: 'bg-rose-50' },           // Relaciones
-  { texto: 'text-sky-700', borde: 'border-sky-300', fondo: 'bg-sky-600', suave: 'bg-sky-50' },               // Agua
-  { texto: 'text-emerald-700', borde: 'border-emerald-300', fondo: 'bg-emerald-700', suave: 'bg-emerald-50' }, // Bosque
-  { texto: 'text-fuchsia-700', borde: 'border-fuchsia-300', fondo: 'bg-fuchsia-600', suave: 'bg-fuchsia-50' }, // Arte
-  { texto: 'text-amber-700', borde: 'border-amber-300', fondo: 'bg-amber-600', suave: 'bg-amber-50' },       // Tecnología y Energía
-  { texto: 'text-orange-700', borde: 'border-orange-300', fondo: 'bg-orange-600', suave: 'bg-orange-50' },   // Hogar
-  { texto: 'text-teal-700', borde: 'border-teal-300', fondo: 'bg-teal-600', suave: 'bg-teal-50' },           // Salud
-  { texto: 'text-yellow-800', borde: 'border-yellow-300', fondo: 'bg-yellow-700', suave: 'bg-yellow-50' },   // Economía
-  { texto: 'text-lime-800', borde: 'border-lime-300', fondo: 'bg-lime-700', suave: 'bg-lime-50' },           // Alimentación
-  { texto: 'text-violet-700', borde: 'border-violet-300', fondo: 'bg-violet-600', suave: 'bg-violet-50' },   // Política
-  { texto: 'text-pink-700', borde: 'border-pink-300', fondo: 'bg-pink-600', suave: 'bg-pink-50' },           // Valores
+  { texto: 'text-indigo-700', borde: 'border-indigo-300', fondo: 'bg-indigo-600', suave: 'bg-indigo-500/[0.07]' },   // Cosmos y Vida
+  { texto: 'text-rose-700', borde: 'border-rose-300', fondo: 'bg-rose-600', suave: 'bg-rose-500/[0.07]' },           // Relaciones
+  { texto: 'text-sky-700', borde: 'border-sky-300', fondo: 'bg-sky-600', suave: 'bg-sky-500/[0.07]' },               // Agua
+  { texto: 'text-emerald-700', borde: 'border-emerald-300', fondo: 'bg-emerald-700', suave: 'bg-emerald-500/[0.07]' }, // Bosque
+  { texto: 'text-fuchsia-700', borde: 'border-fuchsia-300', fondo: 'bg-fuchsia-600', suave: 'bg-fuchsia-500/[0.07]' }, // Arte
+  { texto: 'text-amber-700', borde: 'border-amber-300', fondo: 'bg-amber-600', suave: 'bg-amber-500/[0.07]' },       // Tecnología y Energía
+  { texto: 'text-orange-700', borde: 'border-orange-300', fondo: 'bg-orange-600', suave: 'bg-orange-500/[0.07]' },   // Hogar
+  { texto: 'text-teal-700', borde: 'border-teal-300', fondo: 'bg-teal-600', suave: 'bg-teal-500/[0.07]' },           // Salud
+  { texto: 'text-yellow-800', borde: 'border-yellow-300', fondo: 'bg-yellow-700', suave: 'bg-yellow-500/[0.07]' },   // Economía
+  { texto: 'text-lime-800', borde: 'border-lime-300', fondo: 'bg-lime-700', suave: 'bg-lime-500/[0.07]' },           // Alimentación
+  { texto: 'text-violet-700', borde: 'border-violet-300', fondo: 'bg-violet-600', suave: 'bg-violet-500/[0.07]' },   // Política
+  { texto: 'text-pink-700', borde: 'border-pink-300', fondo: 'bg-pink-600', suave: 'bg-pink-500/[0.07]' },           // Valores
 ];
 
 export const ANCHO_MM = 297;
@@ -114,8 +120,8 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
 
   return (
     <div
-      className="ca-hoja relative bg-white text-stone-800 overflow-hidden"
-      style={{ width: `${ANCHO_MM}mm`, height: `${ALTO_MM}mm` }}
+      className="ca-hoja relative text-stone-800 overflow-hidden"
+      style={{ width: `${ANCHO_MM}mm`, height: `${ALTO_MM}mm`, backgroundColor: PAPEL }}
     >
       {/* ── HOJA 1 (A4 apaisado): TEMA, FRASE E ILUSTRACIÓN ───────────────── */}
       {/* La ilustración no lleva letras: el tema y la frase van encima, fuera
@@ -298,7 +304,7 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
           {celdas.map((d, i) => (
             <div
               key={i}
-              className={cn('border-r border-b overflow-hidden', acento.borde, !d && 'bg-stone-50', i % 7 >= 5 && d && acento.suave)}
+              className={cn('border-r border-b overflow-hidden', acento.borde, !d && 'bg-stone-900/[0.03]', i % 7 >= 5 && d && acento.suave)}
               style={{ padding: '1.2mm 1.6mm' }}
             >
               {d && (
