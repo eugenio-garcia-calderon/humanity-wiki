@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import {
   BATALLA, NEU_DEL, NEU_TRAS, RC_DEL, RC_TRAS, R_LLANTA, TL, VIA_DEL, VIA_TRAS, XC0, XC1, X_COLA, X_MORRO,
-  arribaY, detrasX, frenteX, ladoZ, punto, sec, tCristal, zCristal, type Sec,
+  arribaY, detrasX, frenteX, ladoZ, punto, rayoPiel, sec, tCristal, type Sec,
 } from './unLitroForma';
 
 /*
@@ -13,8 +13,12 @@ import {
  *   centre, so glass and carbon meet without a step; normals come from the
  *   grid's neighbours on both sides of every seam, so there are no shading seams.
  * - Shut lines, lamp housings and similar are "decals": a 2D drawing in one
- *   view (side, top, front or rear) projected onto the skin and lifted a
- *   fraction of a millimetre.
+ *   view (side, top, front, rear, or an oblique view for the headlamps on the
+ *   nose corners) projected onto the skin and lifted a fraction of a millimetre.
+ * - What the 2026-11-09 photo showed is noted where it is used: clear glass
+ *   with the door's two dark hoops, black wheel discs, the larger front wheel
+ *   opening with its rolled lip, twin round headlamps, the LED strip below
+ *   them, the left-side door outline, the sill crease and the side inlet.
  * - Materials (and the procedural carbon weave) are created once per page and
  *   shared by every build. The car itself is built once into a template;
  *   `construir()` hands out copies of its geometries (the viewer disposes
@@ -28,16 +32,19 @@ function tejidoCarbono(): THREE.CanvasTexture | null {
   // 2/2 twill: each 32 px tow passes over two and under two; every cell gets a
   // shading gradient along its fibres, which is what makes bare carbon shimmer.
   if (typeof document === 'undefined') return null;
+  // Tones (2026-11-09): the photo shows the bare carbon as a glossy dark
+  // charcoal (its shaded side reads ~ RGB 50-60 next to tyres at 15 and the
+  // black wheel covers at 42), not as black: the weave is lifted accordingly.
   const N = 256, k = 32, cv = document.createElement('canvas'); cv.width = cv.height = N;
   const c = cv.getContext('2d'); if (!c) return null;
   for (let i = 0; i < N / k; i++) for (let j = 0; j < N / k; j++) {
     const trama = ((i + j) >> 1) % 2 === 0; // weft or warp on top
     const x = i * k, y = j * k;
     const g = trama ? c.createLinearGradient(x, y, x + k, y) : c.createLinearGradient(x, y, x, y + k);
-    g.addColorStop(0, trama ? '#0d0e10' : '#0a0b0c'); g.addColorStop(0.5, trama ? '#141518' : '#0d0e10'); g.addColorStop(1, trama ? '#0d0e10' : '#090a0b');
+    g.addColorStop(0, trama ? '#29292a' : '#262627'); g.addColorStop(0.5, trama ? '#2f2f30' : '#2a2a2b'); g.addColorStop(1, trama ? '#29292a' : '#252526');
     c.fillStyle = g; c.fillRect(x, y, k, k);
     // the fibres of the tow
-    c.strokeStyle = trama ? 'rgba(0,0,0,0.18)' : 'rgba(255,255,255,0.015)'; c.lineWidth = 1;
+    c.strokeStyle = trama ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.012)'; c.lineWidth = 1;
     for (let f = 3; f < k; f += 4) { c.beginPath(); if (trama) { c.moveTo(x, y + f); c.lineTo(x + k, y + f); } else { c.moveTo(x + f, y); c.lineTo(x + f, y + k); } c.stroke(); }
   }
   const t = new THREE.CanvasTexture(cv);
@@ -59,31 +66,40 @@ function crearMateriales() {
   const decal = (p: THREE.MeshPhysicalMaterialParameters) => fis({ polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4, ...p });
   const tejido = tejidoCarbono();
   return {
-    // unpainted carbon-fibre skin under a clear coat (VW: "unlackiert")
-    carbono: fis({ color: tejido ? 0xffffff : 0x0c0d0f, map: tejido, roughness: 0.32, metalness: 0.05, clearcoat: 1, clearcoatRoughness: 0.02, side: THREE.DoubleSide }),
-    carbonoCalco: decal({ color: tejido ? 0xffffff : 0x0c0d0f, map: tejido, roughness: 0.32, metalness: 0.05, clearcoat: 1, clearcoatRoughness: 0.02 }),
+    // unpainted carbon-fibre skin under a clear coat (VW: "unlackiert"; supercars.net:
+    // "to save weight, it is of course not painted"): dark charcoal with a high gloss
+    carbono: fis({ color: tejido ? 0xffffff : 0x242527, map: tejido, roughness: 0.34, metalness: 0.1, clearcoat: 1, clearcoatRoughness: 0.03, side: THREE.DoubleSide }),
+    carbonoCalco: decal({ color: tejido ? 0xffffff : 0x242527, map: tejido, roughness: 0.34, metalness: 0.1, clearcoat: 1, clearcoatRoughness: 0.03 }),
     pozo: fis({ color: 0x070708, roughness: 0.9, side: THREE.DoubleSide }),
     junta: decal({ color: 0x010101, roughness: 0.95 }),
-    // the canopy: a light tint (vertex alpha also draws the black frit at the edge) ...
+    // a shallow body crease: only a little darker than the carbon
+    pliegue: decal({ color: 0x0d0e0f, roughness: 0.6, transparent: true, opacity: 0.55 }),
+    // canopy frames (the door's front and rear hoops): satin black
+    marco: decal({ color: 0x0b0c0d, roughness: 0.4, metalness: 0.2, clearcoat: 0.6, clearcoatRoughness: 0.2, side: THREE.DoubleSide }),
+    // the canopy: clear glass (vertex alpha also draws the black frit at the edge and the smoked rear part) ...
     tinte: fis({ color: 0xffffff, vertexColors: true, transparent: true, depthWrite: false, alphaTest: 0.01, roughness: 0.15, metalness: 0, side: THREE.DoubleSide }),
     // ... plus its reflections, added on top so they do not fade with the tint's opacity
-    reflejo: fis({ color: 0x000000, roughness: 0.03, metalness: 0, clearcoat: 0, transparent: true, depthWrite: false, alphaTest: 0.01, blending: THREE.AdditiveBlending, envMapIntensity: 1.6 }),
+    reflejo: fis({ color: 0x000000, roughness: 0.03, metalness: 0, clearcoat: 0, transparent: true, depthWrite: false, alphaTest: 0.01, blending: THREE.AdditiveBlending, envMapIntensity: 1.25 }),
     lente: decal({ color: 0x000000, roughness: 0.02, transparent: true, depthWrite: false, alphaTest: 0.01, blending: THREE.AdditiveBlending, envMapIntensity: 1.8 }),
     lenteRoja: decal({ color: 0x3a0306, roughness: 0.06, clearcoat: 1, clearcoatRoughness: 0.02, emissive: 0x7a080d, emissiveIntensity: 0.3, transparent: true, opacity: 0.9, alphaTest: 0.01 }),
     negroBrillo: decal({ color: 0x050607, roughness: 0.18, metalness: 0.3, clearcoat: 1, clearcoatRoughness: 0.05 }),
-    reflector: decal({ color: 0xa4a9af, roughness: 0.22, metalness: 0.95 }),
+    reflector: decal({ color: 0x8c9096, roughness: 0.32, metalness: 0.7 }),
     blanco: decal({ color: 0xe6e8ea, roughness: 0.25, clearcoat: 1 }),
     cromo: decal({ color: 0xe1e4e8, roughness: 0.08, metalness: 1 }),
     led: decal({ color: 0xffffff, emissive: 0xf2f6ff, emissiveIntensity: 1.1, roughness: 0.3 }),
     ambar: decal({ color: 0xb8742a, roughness: 0.25, clearcoat: 1, emissive: 0x3a1800, emissiveIntensity: 0.3 }),
     rojoLed: decal({ color: 0xc81a1a, emissive: 0xff1010, emissiveIntensity: 0.9, roughness: 0.3 }),
     proyector: fis({ color: 0x0c0f14, roughness: 0.02, metalness: 0.1, clearcoat: 1, clearcoatRoughness: 0.01 }),
+    // the dipped beam, lit in the photo
+    proyectorLuz: fis({ color: 0xdfe6ee, emissive: 0xeef3ff, emissiveIntensity: 0.55, roughness: 0.05, clearcoat: 1, clearcoatRoughness: 0.01 }),
     goma: fis({ color: 0x151516, roughness: 0.93, metalness: 0 }),
-    tapa: fis({ color: 0xa7abb1, roughness: 0.34, metalness: 0.45, clearcoat: 0.6, clearcoatRoughness: 0.1 }),
+    // full black wheel discs (photo: they read darker than the carbon, with a soft sheen)
+    tapa: fis({ color: 0x0e0f10, roughness: 0.42, metalness: 0.15, clearcoat: 0.5, clearcoatRoughness: 0.25 }),
+    tapon: fis({ color: 0xc9cdd2, roughness: 0.2, metalness: 1 }),
     llantaOscura: fis({ color: 0x1b1c1e, roughness: 0.6, metalness: 0.4, side: THREE.DoubleSide }),
-    tela: fis({ color: 0x1d1e21, roughness: 0.95, side: THREE.DoubleSide }),
+    tela: fis({ color: 0x4a4c50, roughness: 0.95, side: THREE.DoubleSide }),
     magnesio: fis({ color: 0x6c6f74, roughness: 0.45, metalness: 0.8, side: THREE.DoubleSide }),
-    plastico: fis({ color: 0x17181a, roughness: 0.55, metalness: 0.1, side: THREE.DoubleSide }),
+    plastico: fis({ color: 0x3c3f43, roughness: 0.6, metalness: 0.1, side: THREE.DoubleSide }),
     pantalla: fis({ color: 0x05080c, emissive: 0x16324a, emissiveIntensity: 0.6, roughness: 0.1, clearcoat: 1 }),
   };
 }
@@ -190,15 +206,21 @@ function geometria(R: Rejilla, idx: number[], grupos?: number[][], color?: Float
 }
 
 // ------------------------------------------------------------ wheel openings
-/** Front wheel opening, seen from the side: an ellipse around the wheel, cut from the skin where |z| > Z_ARCO. */
-const ARCO = { x: 0, y: 0.115, a: 0.355, b: 0.36, z: 0.43 };
+/**
+ * Front wheel opening, seen from the side: an ellipse around the wheel, cut
+ * from the skin where |z| > Z_ARCO. Photo (2026-11-09): the arch lip peaks at
+ * y = 0.64 just ahead of the axle, its front edge is at x = +0.36 and its rear
+ * edge at -0.29, and it runs down to the body's lower edge, so the whole wheel
+ * shows (the previous opening topped out at 0.475 and hid the upper wheel).
+ */
+const ARCO = { x: 0.02, y: 0.27, a: 0.31, b: 0.345, z: 0.43 };
 const qArco = (x: number, y: number) => Math.hypot((x - ARCO.x) / ARCO.a, (y - ARCO.y) / ARCO.b);
 /**
- * Rear tyres come out through the flat floor only (the sides are closed spats;
- * the floor stays flat out to |z| = 0.47 there, so the cut never reaches the
- * rounded lower edge that shows from the side).
+ * Rear tyres come out through the floor only (the sides stay closed); the
+ * floor is raised at the rear axle, so the lower ~0.19 m of each rear tyre
+ * shows under the body, as in the photo.
  */
-const enPozoTrasero = (x: number, y: number, z: number) => Math.abs(x + BATALLA) < 0.31 && Math.abs(z) > 0.335 && Math.abs(z) < 0.468 && y < 0.15;
+const enPozoTrasero = (x: number, y: number, z: number) => Math.abs(x + BATALLA) < 0.31 && Math.abs(z) > 0.335 && Math.abs(z) < 0.468 && y < 0.215;
 
 function carroceria(xs: number[], M: Mats): THREE.Mesh {
   const R = rejilla(xs, s => {
@@ -222,23 +244,37 @@ function carroceria(xs: number[], M: Mats): THREE.Mesh {
   return m;
 }
 
+/**
+ * The door's two hoops over the canopy (photo): each lies in a plane that
+ * leans, from x = `base` on the glass edge along the sides to x = `cima` at
+ * the top centre. The front one is the dark frame behind the windscreen; the
+ * rear one closes the side window, and behind it the glass is smoked.
+ */
+const ARO_DEL = { base: -0.35, cima: -0.66 }, ARO_TRAS = { base: -1.52, cima: -1.38 };
+const Y_BASE_ARO = 0.788, Y_CIMA_ARO = 1.11;
+const xAro = (a: { base: number; cima: number }, y: number) => a.base + (a.cima - a.base) * (y - Y_BASE_ARO) / (Y_CIMA_ARO - Y_BASE_ARO);
+
 /** The canopy: the skin between the glass edge and the top centre, with a black frit along the edge. */
 function cupula(xs: number[], M: Mats): THREE.Group {
   const filas = xs.filter(x => x <= XC0 + 1e-9 && x >= XC1 - 1e-9);
   const R = rejilla(filas, s => { const tb = tCristal(s); const out: number[] = []; for (let k = 0; k <= NG; k++) out.push(tb + (1 - tb) * k / NG); return out; }, 'arriba');
   const { idx } = caras(R);
-  // frit: opaque black within 26 mm of the edge, fading over 12 mm. The edge is
+  // frit: opaque black within 30 mm of the edge, fading over 12 mm. The edge is
   // the first and last column of every row; only rows within 5 cm are searched.
+  // Clear glass over the cabin (photo: the driver is plainly visible); behind
+  // the rear hoop the glass is smoked (it reads lighter and opaque in the photo).
   const col = new Float32Array((R.pos.length / 3) * 4), P = R.pos, C = R.cols;
   for (let v = 0; v < P.length / 3; v++) {
     const i = Math.floor(v / C), x = P[v * 3], y = P[v * 3 + 1], z = P[v * 3 + 2]; let d = Infinity;
     for (let j = i; j >= 0 && filas[j] - x < 0.05; j--) for (const b of [j * C, j * C + C - 1]) { const dd = (P[b * 3] - x) ** 2 + (P[b * 3 + 1] - y) ** 2 + (P[b * 3 + 2] - z) ** 2; if (dd < d) d = dd; }
     for (let j = i + 1; j < R.filas && x - filas[j] < 0.05; j++) for (const b of [j * C, j * C + C - 1]) { const dd = (P[b * 3] - x) ** 2 + (P[b * 3 + 1] - y) ** 2 + (P[b * 3 + 2] - z) ** 2; if (dd < d) d = dd; }
     d = Math.sqrt(d);
-    const f = Math.min(1, Math.max(0, (d - 0.026) / 0.012)); // 0 = frit, 1 = clear
-    const tinte = [0.03, 0.04, 0.045], frit = [0.012, 0.012, 0.014];
-    for (let c = 0; c < 3; c++) col[v * 4 + c] = frit[c] + (tinte[c] - frit[c]) * f;
-    col[v * 4 + 3] = 1 + (0.42 - 1) * f; // smoked: 42 % over the cabin
+    const f = Math.min(1, Math.max(0, (d - 0.030) / 0.012)); // 0 = frit, 1 = glass
+    const humo = Math.min(1, Math.max(0, (xAro(ARO_TRAS, y) - x) / 0.02)); // 1 behind the rear hoop
+    const claro = [0.06, 0.075, 0.08], ahumado = [0.035, 0.04, 0.045], frit = [0.012, 0.012, 0.014];
+    const aCristal = 0.12 + (0.48 - 0.12) * humo;
+    for (let c = 0; c < 3; c++) { const t = claro[c] + (ahumado[c] - claro[c]) * humo; col[v * 4 + c] = frit[c] + (t - frit[c]) * f; }
+    col[v * 4 + 3] = 1 + (aCristal - 1) * f;
   }
   const g = new THREE.Group(); g.name = 'cupula';
   const geo = geometria(R, idx, undefined, col);
@@ -248,10 +284,45 @@ function cupula(xs: number[], M: Mats): THREE.Group {
   return g;
 }
 
+/**
+ * A hoop over the canopy as a ribbon `ancho` wide, lifted 2.5 mm off the glass:
+ * for each column t of the section (glass edge to top centre, both sides) the
+ * station x is found where the skin point sits on the hoop's leaning plane.
+ */
+function aroGeo(aro: { base: number; cima: number }, ancho: number): THREE.BufferGeometry {
+  const N = 36, filas: THREE.Vector3[][] = [];
+  const enPiel = (x: number, t: number) => { const p = punto(sec(x), t); return new THREE.Vector3(x, p[1], p[0]); };
+  // the half from the top centre (k = 0) down to the glass edge (k = N); t of the edge depends on x
+  const mitad: { x: number; t: number }[] = [];
+  for (let k = 0; k <= N; k++) {
+    let x = aro.cima, t = 1;
+    for (let it = 0; it < 8; it++) {
+      const tb = tCristal(sec(x)); t = 1 - (1 - tb) * k / N;
+      x = xAro(aro, punto(sec(x), t)[1]);
+    }
+    mitad.push({ x, t });
+  }
+  const pos: number[] = [], idx: number[] = [];
+  const lados: [number, number][] = [];
+  for (let k = N; k >= 0; k--) lados.push([k, -1]);
+  for (let k = 1; k <= N; k++) lados.push([k, 1]);
+  lados.forEach(([k, s], i) => {
+    const { x, t } = mitad[k];
+    const a = enPiel(x + ancho / 2, t), b = enPiel(x - ancho / 2, t), c = enPiel(x, Math.min(1, t + 0.01)), d = enPiel(x, Math.max(0, t - 0.01));
+    const n = new THREE.Vector3().crossVectors(a.clone().sub(b), c.clone().sub(d)).normalize();
+    if (n.y < 0 || (Math.abs(n.y) < 0.2 && n.z < 0)) n.negate();
+    for (const p of [a, b]) { p.addScaledVector(n, 0.0025); pos.push(p.x, p.y, s * p.z); }
+    if (i > 0) { const q = 2 * i; idx.push(q - 2, q - 1, q, q - 1, q + 1, q); }
+  });
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
+  return g;
+}
+
 /** Dark wheel wells behind the front openings: the arch lining and an inner wall. */
 function pozosDelanteros(M: Mats): THREE.Group {
   const g = new THREE.Group(); g.name = 'pasos-de-rueda';
-  const th0 = Math.asin(Math.max(-1, Math.min(1, (0.128 - ARCO.y) / ARCO.b)));
+  const th0 = Math.asin(Math.max(-1, Math.min(1, (0.14 - ARCO.y) / ARCO.b)));
   const N = 48;
   for (const s of [1, -1]) {
     const pos: number[] = [], idx: number[] = [];
@@ -352,21 +423,35 @@ function rectRedondo(cx: number, cy: number, hx: number, hy: number, r: number, 
 }
 const cerrar = (c: P2[]): P2[] => [...c, c[0]];
 
-type Vista = 'lado' | 'arriba' | 'frente' | 'detras';
-const FUERA: Record<Vista, THREE.Vector3> = { lado: new THREE.Vector3(0, 0, 1), arriba: new THREE.Vector3(0, 1, 0), frente: new THREE.Vector3(1, 0, 0), detras: new THREE.Vector3(-1, 0, 0) };
-/** The skin point a 2D view coordinate lands on: side (x, y), top (x, z), front and rear (z, y). */
+/**
+ * An oblique view: 2D coordinates (a, b) are the point o + a u + b v, and the
+ * decal lands where a ray along -fuera from there meets the skin.
+ */
+interface Oblicua { o: THREE.Vector3; u: THREE.Vector3; v: THREE.Vector3; fuera: THREE.Vector3 }
+type Vista = 'lado' | 'arriba' | 'frente' | 'detras' | Oblicua;
+const FUERAS = { lado: new THREE.Vector3(0, 0, 1), arriba: new THREE.Vector3(0, 1, 0), frente: new THREE.Vector3(1, 0, 0), detras: new THREE.Vector3(-1, 0, 0) };
+const fuera = (v: Vista) => (typeof v === 'string' ? FUERAS[v] : v.fuera);
+/** An oblique view looking at the skin along -n (horizontal), with b = height. */
+function oblicua(o: [number, number, number], n: [number, number]): Oblicua {
+  const f = new THREE.Vector3(n[0], 0, n[1]).normalize();
+  return { o: new THREE.Vector3(...o), u: new THREE.Vector3(-f.z, 0, f.x), v: new THREE.Vector3(0, 1, 0), fuera: f };
+}
+/** The skin point a 2D view coordinate lands on: side (x, y), top (x, z), front and rear (z, y), oblique (a, b). */
 function proyectar(v: Vista, a: number, b: number): THREE.Vector3 {
   if (v === 'lado') return new THREE.Vector3(a, b, ladoZ(a, b));
   if (v === 'arriba') return new THREE.Vector3(a, arribaY(a, b), b);
   if (v === 'frente') return new THREE.Vector3(frenteX(a, b), b, a);
-  return new THREE.Vector3(detrasX(a, b), b, a);
+  if (v === 'detras') return new THREE.Vector3(detrasX(a, b), b, a);
+  const p = v.o.clone().addScaledVector(v.u, a); p.y = b; p.addScaledVector(v.fuera, 0.8);
+  const d = v.fuera.clone().negate();
+  const h = rayoPiel([p.x, p.y, p.z], [d.x, d.y, d.z], 1.6);
+  return h ? new THREE.Vector3(...h) : new THREE.Vector3(NaN, NaN, NaN);
 }
 /** Outward skin normal at a projected point. */
 function normalEn(v: Vista, a: number, b: number): THREE.Vector3 {
   const e = 0.004, p0 = proyectar(v, a, b), pa = proyectar(v, a + e, b), pb = proyectar(v, a, b + e);
   const n = new THREE.Vector3().crossVectors(pa.sub(p0), pb.sub(p0)).normalize();
-  if (n.dot(FUERA[v]) < 0) n.negate();
-  if (v !== 'lado' && v !== 'arriba') { /* front and rear normals point the right way already */ }
+  if (n.dot(fuera(v)) < 0) n.negate();
   return n;
 }
 
@@ -376,7 +461,7 @@ function normalEn(v: Vista, a: number, b: number): THREE.Vector3 {
  * `espejo` mirrors it to the other side (z -> -z).
  */
 function calco(m: Malla2D, vista: Vista, sep: number | ((a: number, b: number) => number), maxLado = 0.02, espejo = false): THREE.BufferGeometry {
-  const s = subdividir(m, maxLado), f = FUERA[vista];
+  const s = subdividir(m, maxLado), f = fuera(vista);
   const pos: number[] = [], ok: boolean[] = [];
   for (const [a, b] of s.p) {
     const v = proyectar(vista, a, b), bueno = Number.isFinite(v.x) && Number.isFinite(v.y) && Number.isFinite(v.z); ok.push(bueno);
@@ -467,15 +552,17 @@ function rueda(neu: { ancho: number; R: number }, rc: number, segs: number, M: M
   for (let k = 0; k < p.count; k++) if (p.getY(k) < -rc) { const y = p.getY(k); p.setY(k, -rc); p.setZ(k, p.getZ(k) * (1 + (-rc - y) * 1.5)); }
   neum.computeVertexNormals();
   g.add(malla(neum, M.goma, 'neumatico'));
-  // rim flange (dark), flat cover slightly dished, small plain centre cap
+  // rim flange (dark), then a full black disc over the rim and the inner half
+  // of the sidewall (photo: the disc reaches ~88 % of the tyre's radius), gently
+  // domed with a rolled edge, and a small plain chrome centre cap
   g.add(malla(torno([[rl - 0.004, w - 0.020], [rl + 0.002, w - 0.012], [rl + 0.008, w - 0.014], [rl + 0.009, w - 0.024]], 72), M.llantaOscura, 'pestana'));
-  const hD = (r: number) => w - 0.016 - 0.006 * (1 - (r / rl) ** 2);
-  const disco: P2[] = [];
-  for (let k = 0; k <= 12; k++) { const r = (rl - 0.003) * (1 - k / 12); disco.push([r, hD(r)]); }
+  const rDisco = R * 0.88;
+  const hD = (r: number) => w + 0.006 + 0.009 * (1 - (r / rDisco) ** 2);
+  const disco: P2[] = [[rDisco + 0.002, w - 0.004], [rDisco + 0.001, w + 0.003], [rDisco - 0.004, w + 0.0058]];
+  for (let k = 1; k <= 14; k++) { const r = (rDisco - 0.004) * (1 - k / 14); disco.push([r, hD(r)]); }
   g.add(malla(torno(disco, 72), M.tapa, 'tapacubos'));
-  g.add(malla(torno([[0.042, hD(0.042) + 0.0005], [0.040, hD(0.04) + 0.0035], [0.03, hD(0.03) + 0.005], [0, hD(0) + 0.0055]], 40), M.tapa, 'tapon'));
-  g.add(malla(torno([[0.048, hD(0.048) + 0.0006], [0.044, hD(0.044) + 0.0006]], 40), M.llantaOscura, 'ranura'));
-  g.add(malla(torno([[0.152, hD(0.152) + 0.0004], [0.149, hD(0.149) + 0.0004]], 64), M.llantaOscura, 'ranura'));
+  g.add(malla(torno([[0.024, hD(0.024) + 0.0004], [0.023, hD(0.023) + 0.004], [0.017, hD(0.017) + 0.0058], [0, hD(0) + 0.0062]], 32), M.tapon, 'tapon'));
+  g.add(malla(torno([[0.030, hD(0.030) + 0.0005], [0.025, hD(0.025) + 0.0005]], 32), M.llantaOscura, 'ranura'));
   // inner face: a dark disc so the wheel is not hollow from inside
   const interior = new THREE.Mesh(new THREE.CircleGeometry(rl + 0.01, 40), M.llantaOscura); interior.position.z = -w + 0.012; interior.rotation.y = Math.PI; g.add(interior);
   return g;
@@ -518,104 +605,147 @@ function construirPlantilla(): THREE.Group {
   add(carroceria(xs, M));
   add(cupula(xs, M));
   add(pozosDelanteros(M));
-  // the arch edge: a carbon lip on the cut (it also hides the steps of the grid)
+  // the arch edge: a carbon lip on the cut (it also hides the steps of the grid);
+  // the opening reaches the body's lower edge, so the lip runs below the axle
   const labio: P2[] = [];
-  for (let k = 0; k <= 40; k++) { const th = 0.04 + (Math.PI - 0.08) * k / 40; labio.push([ARCO.x + ARCO.a * Math.cos(th), ARCO.y + ARCO.b * Math.sin(th)]); }
-  par(cinta2(labio, 0.010, 0.01), 'lado', 0.0008, M.carbonoCalco, 0.016, 'labio');
-  par(cinta2(labio.map(([x, y]) => [ARCO.x + (x - ARCO.x) * 1.035, ARCO.y + (y - ARCO.y) * 1.03] as P2), 0.003, 0.01), 'lado', 0.0012, M.junta, 0.016);
+  const thL = Math.asin((0.16 - ARCO.y) / ARCO.b);
+  for (let k = 0; k <= 48; k++) { const th = thL + (Math.PI - 2 * thL) * k / 48; labio.push([ARCO.x + ARCO.a * Math.cos(th), ARCO.y + ARCO.b * Math.sin(th)]); }
+  par(cinta2(labio, 0.012, 0.01), 'lado', 0.0008, M.carbonoCalco, 0.016, 'labio');
+  par(cinta2(labio.map(([x, y]) => [ARCO.x + (x - ARCO.x) * 1.04, ARCO.y + (y - ARCO.y) * 1.035] as P2), 0.003, 0.01), 'lado', 0.0012, M.junta, 0.016);
+  {
+    // photo: the opening has a rolled lip that catches the light; a tube along the cut edge
+    const pts: THREE.Vector3[] = [];
+    for (const [x, y] of labio) { const z = ladoZ(x, y); if (Number.isFinite(z)) pts.push(new THREE.Vector3(x, y, z - 0.004)); }
+    if (pts.length > 3) {
+      const o = add(malla(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 96, 0.011, 10, false), M.carbono, 'labio'));
+      espejo(o);
+    }
+  }
+
+  // ---------------------------------------------------------------- canopy frames
+  // The door's two hoops (photo): a dark frame behind the windscreen, leaning
+  // back from x = -0.42 at the sides to -0.87 at the top, and a slimmer one
+  // closing the side window at x = -1.50 / -1.40. Each is a ribbon laid on the
+  // glass, 2.5 mm proud of it.
+  for (const [aro, ancho, nombre] of [[ARO_DEL, 0.032, 'marco-parabrisas'], [ARO_TRAS, 0.018, 'marco-ventanilla']] as [{ base: number; cima: number }, number, string][]) {
+    add(malla(aroGeo(aro, ancho), M.marco, nombre));
+  }
 
   // ---------------------------------------------------------------- shut lines
-  // The canopy door: on the right it is hinged just outside the glass; on the
-  // left it is "drawn down" (press kit) to make the step-in opening.
-  const MAS = 0.03;
-  const zPuerta = (x: number) => zCristal(x, MAS);
-  const xJF = -0.52, xJR = -1.62; // where the left-side drop leaves the outline
-  const arriba: P2[] = [];
-  const x0 = XC0 + MAS, x1 = XC1 - MAS;
-  // right side, front to rear, then round the rear end and the front end on the left (plan view, (x, z))
-  const NPU = 140;
-  for (let k = 0; k <= NPU; k++) { const u = k / NPU, x = x0 + (x1 - x0) * (0.5 - 0.5 * Math.cos(Math.PI * u)); arriba.push([x, zPuerta(x)]); }
-  const derecha = arriba, izqDel = arriba.filter(([x]) => x >= xJF).map(([x, z]) => [x, -z] as P2), izqTras = arriba.filter(([x]) => x <= xJR).map(([x, z]) => [x, -z] as P2);
-  add(malla(calco(cinta2(derecha, JUNTA, 0.006), 'arriba', 0.0008, 0.012), M.junta, 'junta-puerta'));
-  add(malla(calco(cinta2(izqDel, JUNTA, 0.006), 'arriba', 0.0008, 0.012), M.junta, 'junta-puerta'));
-  add(malla(calco(cinta2(izqTras, JUNTA, 0.006), 'arriba', 0.0008, 0.012), M.junta, 'junta-puerta'));
+  // The door (photo): the canopy between the two hoops, and on the left side
+  // the panel below it, "drawn down" (press kit) to the sill crease: front edge
+  // from the front hoop's foot down to (-0.59, 0.45), along y = 0.415, and up
+  // the rear edge to the rear hoop's foot. On the right the door is hinged at
+  // the glass edge, so the body side there is plain.
   {
-    // left-side drop, in side view, from the outline down to the sill and back up
-    const yF = arribaY(xJF, zPuerta(xJF)), yR = arribaY(xJR, zPuerta(xJR));
-    const baja: P2[] = suave([[xJF, yF], [xJF - 0.03, 0.60], [-0.57, 0.47], [-0.64, 0.425], [-0.80, 0.415], [-1.40, 0.415], [-1.54, 0.425], [-1.59, 0.47], [xJR + 0.02, 0.60], [xJR, yR]], 3, false);
+    const yF = Y_BASE_ARO, xF = ARO_DEL.base, xR = ARO_TRAS.base;
+    const baja: P2[] = suave([[xF, yF], [xF - 0.03, 0.72], [-0.475, 0.68], [-0.505, 0.575], [-0.55, 0.49], [-0.60, 0.435], [-0.70, 0.416], [-1.45, 0.416], [-1.56, 0.43], [-1.60, 0.50], [-1.585, 0.60], [-1.55, 0.69], [xR - 0.01, 0.75], [xR, yF]], 3, false);
     add(malla(calco(cinta2(baja, JUNTA, 0.006), 'lado', 0.0008, 0.012, true), M.junta, 'junta-puerta'));
   }
-  // rear wheel spats (removable covers over the fully enclosed rear wheels)
-  const spat: P2[] = suave([[-1.885, 0.16], [-1.885, 0.40], [-1.95, 0.505], [-2.08, 0.548], [-2.205, 0.556], [-2.33, 0.548], [-2.44, 0.505], [-2.515, 0.40], [-2.53, 0.20]], 3, false);
-  par(cinta2(spat, JUNTA, 0.006), 'lado', 0.0008, M.junta, 0.012);
-  // luggage flap on the tail (80 l "under a separate flap in the rear")
-  add(malla(calco(cinta2(cerrar(suave(rectRedondo(-2.62, 0, 0.25, 0.215, 0.09, 6), 1)), JUNTA, 0.006), 'arriba', 0.0008, 0.012), M.junta, 'junta-maletero'));
-  // engine cover, ahead of it
-  add(malla(calco(cinta2(cerrar(suave(rectRedondo(-2.07, 0, 0.17, 0.20, 0.07, 6), 1)), JUNTA, 0.006), 'arriba', 0.0008, 0.012), M.junta, 'junta-motor'));
-  // side cooling-air flaps (they open only when the engine needs it): closed, three louvres
+  // the sill crease, both sides: from behind the front arch to the tail (photo: y 0.42 rising to 0.455)
+  par(cinta2(suave([[-0.31, 0.43], [-0.70, 0.418], [-1.40, 0.418], [-1.90, 0.432], [-2.32, 0.455], [-2.55, 0.47]], 2, false), 0.0035, 0.01), 'lado', 0.0007, M.pliegue, 0.014, 'pliegue');
+  // luggage flap on the tail deck (80 l "under a separate flap in the rear"), behind the glass
+  add(malla(calco(cinta2(cerrar(suave(rectRedondo(0, 0.625, 0.17, 0.055, 0.035, 5), 1)), JUNTA, 0.006), 'detras', 0.0008, 0.012), M.junta, 'junta-maletero'));
+  // side cooling-air inlet, both sides (photo: a forward-pointing recess ahead
+  // of the rear wheel, apex at (-1.34, 0.29), rear edge from (-1.68, 0.43) to (-1.70, 0.19))
   {
-    const marco = cerrar(suave(rectRedondo(-1.75, 0.505, 0.095, 0.042, 0.02, 4), 1));
-    par(cinta2(marco, JUNTA, 0.006), 'lado', 0.0008, M.junta, 0.012);
-    for (const y of [0.488, 0.505, 0.522]) par(cinta2([[-1.83, y], [-1.67, y]], 0.0035, 0.01), 'lado', 0.0008, M.junta, 0.012);
+    const toma: P2[] = suave([[-1.34, 0.292], [-1.50, 0.36], [-1.67, 0.425], [-1.685, 0.32], [-1.70, 0.20], [-1.52, 0.245]], 1);
+    par(cinta2(cerrar(toma), JUNTA, 0.006), 'lado', 0.0009, M.junta, 0.012);
+    for (const f of [0.3, 0.55, 0.8]) {
+      // three closed flaps inside it
+      const xa = -1.34 + (-1.685 + 1.34) * f, ya = 0.292 + (0.425 - 0.292) * f, yb = 0.292 + (0.20 - 0.292) * f;
+      par(cinta2([[xa, ya - 0.008], [xa - 0.004, yb + 0.008]], 0.003, 0.01), 'lado', 0.0011, M.junta, 0.012);
+    }
   }
 
   // ---------------------------------------------------------------- headlamps
-  // Bi-xenon projector, LED daytime strip and LED indicator under a clear
-  // blister lens, at the upper corners of the nose (front view, (z, y)).
+  // Photo: a large almond-shaped cluster on each upper corner of the nose,
+  // from the front face round to the side (x 0.42..0.66, y 0.52..0.65), with
+  // two round lamps under one clear cover: the larger one forward and inboard,
+  // the smaller one behind it. Built on the right (+z), seen along the corner's
+  // normal (an oblique view), and mirrored to the left.
+  const ESQUINA = oblicua([0.55, 0, 0.50], [0.6, 0.8]);
   {
-    // built on the right (+z) and mirrored to the left
     const lado = new THREE.Group(); lado.name = 'faro';
-    const s = 1;
     const add = (o: THREE.Object3D) => { lado.add(o); return o; };
-    // a slim teardrop that follows the nose's upper corner, rounder outboard
-    const faro: P2[] = suave([[0.215, 0.478], [0.30, 0.494], [0.39, 0.503], [0.47, 0.50], [0.515, 0.487], [0.527, 0.468], [0.505, 0.451], [0.435, 0.447], [0.34, 0.455], [0.255, 0.467]], 2)
-      .map(([z, y]) => [s * z, y] as P2);
-    // housing: silver reflector inside, a black gasket round the edge
-    add(malla(calco(poligono(faro), 'frente', 0.0008, 0.02), M.reflector, 'faro'));
-    add(malla(calco(cinta2(cerrar(faro), 0.005, 0.01), 'frente', 0.0011, 0.02), M.negroBrillo, 'faro'));
-    // the projector sits in a black bowl with a chrome ring
-    const zp = s * 0.44, yp = 0.475;
-    const elipse = (rz: number, ry: number, n = 28): P2[] => { const o: P2[] = []; for (let k = 0; k < n; k++) { const a = k / n * Math.PI * 2; o.push([zp + rz * Math.cos(a), yp + ry * Math.sin(a)]); } return o; };
-    add(malla(calco(poligono(elipse(0.034, 0.021)), 'frente', 0.0012, 0.012), M.negroBrillo, 'faro'));
-    add(malla(calco(cinta2(cerrar(elipse(0.0215, 0.0178)), 0.0025, 0.005), 'frente', 0.0016, 0.01), M.cromo, 'bisel'));
-    const pp = proyectar('frente', zp, yp), nn = normalEn('frente', zp, yp);
-    const lente = new THREE.Mesh(new THREE.SphereGeometry(0.019, 24, 10, 0, Math.PI * 2, 0, Math.PI * 0.3), M.proyector);
-    lente.rotation.x = Math.PI / 2;
-    const soporte = new THREE.Group(); soporte.add(lente); lente.position.z = -0.0135;
-    colocar(soporte, pp.clone().addScaledVector(nn, 0.0012), nn); add(soporte);
-    // LED daytime light: a thin line just inside the upper edge
-    add(malla(calco(cinta2(suave([[s * 0.245, 0.48], [s * 0.31, 0.4905], [s * 0.37, 0.4955], [s * 0.40, 0.4955]], 2, false), 0.003, 0.006), 'frente', 0.0022, 0.012), M.led, 'luz-diurna'));
-    // indicator: amber segment at the outer end, under the same lens
-    add(malla(calco(poligono(suave([[s * 0.49, 0.458], [s * 0.512, 0.462], [s * 0.522, 0.472], [s * 0.512, 0.486], [s * 0.49, 0.49], [s * 0.484, 0.474]], 1)), 'frente', 0.0016, 0.006), M.ambar, 'intermitente'));
-    // clear blister lens: meets the skin at its edge, 8 mm proud in the middle
-    add(malla(calco(poligono(faro), 'frente', (a, b) => 0.0012 + 0.008 * Math.min(1, distBorde(faro, a, b) / 0.018), 0.016), M.lente, 'lente-faro'));
+    const V = ESQUINA;
+    const faro: P2[] = suave([[-0.190, 0.522], [-0.13, 0.562], [-0.06, 0.590], [0.02, 0.607], [0.09, 0.610], [0.135, 0.597], [0.158, 0.570], [0.160, 0.540], [0.148, 0.513], [0.11, 0.493], [0.05, 0.485], [-0.03, 0.487], [-0.10, 0.495], [-0.16, 0.507]], 2);
+    // housing: a dark chrome reflector inside, a black gasket round the edge
+    add(malla(calco(poligono(faro), V, 0.0008, 0.016), M.reflector, 'faro'));
+    add(malla(calco(cinta2(cerrar(faro), 0.006, 0.01), V, 0.0011, 0.016), M.negroBrillo, 'faro'));
+    // the two lamps: black bowl, chrome bezel, projector lens
+    for (const [a0, b0, r] of [[-0.012, 0.553, 0.040], [0.098, 0.545, 0.035]] as [number, number, number][]) {
+      const circ = (rr: number, n = 32): P2[] => { const o: P2[] = []; for (let k = 0; k < n; k++) { const t = k / n * Math.PI * 2; o.push([a0 + rr * Math.cos(t), b0 + rr * Math.sin(t)]); } return o; };
+      const grande = r > 0.038;
+      add(malla(calco(poligono(circ(r)), V, 0.0013, 0.01), M.reflector, 'faro'));
+      add(malla(calco(cinta2(cerrar(circ(r * 0.95)), 0.005, 0.005), V, 0.0017, 0.008), M.cromo, 'bisel'));
+      add(malla(calco(cinta2(cerrar(circ(r * 0.62)), 0.004, 0.005), V, 0.0019, 0.008), M.negroBrillo, 'bisel'));
+      const pp = proyectar(V, a0, b0), nn = normalEn(V, a0, b0);
+      const rl = r * 0.55, lente = new THREE.Mesh(new THREE.SphereGeometry(rl, 24, 10, 0, Math.PI * 2, 0, Math.PI * 0.32), grande ? M.proyectorLuz : M.proyector);
+      lente.rotation.x = Math.PI / 2;
+      const soporte = new THREE.Group(); soporte.add(lente); lente.position.z = -rl * 0.72;
+      colocar(soporte, pp.clone().addScaledVector(nn, 0.0015), nn); add(soporte);
+    }
+    // LED daytime strip along the top of the cluster, indicator at its tail
+    add(malla(calco(cinta2(suave([[-0.15, 0.534], [-0.09, 0.565], [-0.03, 0.586], [0.03, 0.597]], 2, false), 0.003, 0.006), V, 0.0024, 0.01), M.led, 'luz-diurna'));
+    add(malla(calco(poligono(suave([[0.142, 0.517], [0.155, 0.530], [0.157, 0.557], [0.148, 0.577], [0.138, 0.565], [0.137, 0.530]], 1)), V, 0.0016, 0.006), M.ambar, 'intermitente'));
+    // clear blister cover: meets the skin at its edge, 10 mm proud in the middle
+    add(malla(calco(poligono(faro), V, (a, b) => 0.0012 + 0.010 * Math.min(1, distBorde(faro, a, b) / 0.022), 0.014), M.lente, 'lente-faro'));
     g.add(lado); espejo(lado);
+  }
+  // LED strip under each headlamp (photo: a chrome-framed strip of five
+  // segments, ~0.12 x 0.02 m, sloping down towards the arch)
+  {
+    const lado = new THREE.Group(); lado.name = 'luz-baja';
+    const tira: P2[] = cerrar(suave([[-0.165, 0.448], [-0.045, 0.420], [-0.043, 0.402], [-0.163, 0.428]], 1));
+    lado.add(malla(calco(poligono(tira), ESQUINA, 0.0012, 0.01), M.cromo, 'luz-tira'));
+    for (let k = 0; k < 5; k++) {
+      const u = (k + 0.5) / 5, a = -0.160 + 0.112 * u, b = 0.437 - 0.026 * u;
+      lado.add(malla(calco(poligono(rectRedondo(a, b, 0.0085, 0.0055, 0.002, 2)), ESQUINA, 0.0018, 0.008), M.negroBrillo, 'luz-tira'));
+    }
+    g.add(lado); espejo(lado);
+  }
+  // the corner crease below the headlamp, back to the front of the arch
+  {
+    const o = add(malla(calco(cinta2(suave([[-0.20, 0.462], [-0.10, 0.462], [0.02, 0.457], [0.12, 0.452], [0.20, 0.450]], 2, false), 0.003, 0.01), ESQUINA, 0.0007, 0.014), M.pliegue, 'pliegue'));
+    espejo(o);
+  }
+  // a black housing at the right-hand foot of the windscreen (photo; probably
+  // the fresh-air intake or the wiper's pivot cover: not identified)
+  {
+    const x = 0.135, z = 0.255, y = arribaY(x, z);
+    const tapa = torno([[0, 0.055], [0.010, 0.050], [0.016, 0.035], [0.018, 0.0], [0.017, -0.04], [0.014, -0.055]], 24);
+    tapa.rotateY(Math.PI / 2); tapa.scale(1, 0.75, 1.15);
+    const toma = malla(tapa, M.negroBrillo, 'toma-parabrisas');
+    const boca = new THREE.Mesh(new THREE.CircleGeometry(0.0125, 20).rotateY(Math.PI / 2), M.pozo); boca.scale.set(1, 0.65, 1.1); boca.position.set(0.0505, 0.002, 0);
+    const pieza = new THREE.Group(); pieza.add(toma, boca); pieza.name = 'toma-parabrisas';
+    pieza.position.set(x, y + 0.004, z); pieza.rotation.z = -0.12; add(pieza);
   }
 
   // ---------------------------------------------------------------- tail lamps
-  // LED clusters at the tail (rear view, (z, y)): red lens with a row of LEDs,
-  // an amber indicator outboard, the reversing lamp inboard.
+  // No photo of the tail was found: the LED clusters stay as the press kit
+  // describes them (LED tail lamps), placed on the tail at the height where the
+  // body is widest there. Red lens with a row of LEDs, amber indicator outboard,
+  // reversing lamp inboard.
   {
     const lado = new THREE.Group(); lado.name = 'piloto';
-    const s = 1;
     const add = (o: THREE.Object3D) => { lado.add(o); return o; };
-    const piloto: P2[] = suave([[0.035, 0.552], [0.12, 0.562], [0.20, 0.556], [0.245, 0.538], [0.25, 0.515], [0.21, 0.505], [0.12, 0.507], [0.035, 0.515]], 2)
-      .map(([z, y]) => [s * z, y] as P2);
+    const piloto: P2[] = suave([[0.035, 0.548], [0.11, 0.558], [0.19, 0.553], [0.235, 0.536], [0.24, 0.512], [0.20, 0.502], [0.11, 0.504], [0.035, 0.512]], 2);
     add(malla(calco(poligono(piloto), 'detras', 0.0008, 0.02), M.reflector, 'piloto'));
     add(malla(calco(cinta2(cerrar(piloto), 0.005, 0.01), 'detras', 0.0011, 0.02), M.negroBrillo, 'piloto'));
     for (let k = 0; k < 6; k++) {
-      const z = s * (0.075 + k * 0.026), y = 0.533 + 0.004 * Math.sin(k / 5 * Math.PI);
+      const z = 0.072 + k * 0.025, y = 0.530 + 0.004 * Math.sin(k / 5 * Math.PI);
       const led: P2[] = []; for (let j = 0; j < 10; j++) { const a = j / 10 * Math.PI * 2; led.push([z + 0.006 * Math.cos(a), y + 0.006 * Math.sin(a)]); }
       add(malla(calco(poligono(led), 'detras', 0.0018, 0.012), M.rojoLed, 'led'));
     }
-    add(malla(calco(poligono(suave([[s * 0.222, 0.52], [s * 0.245, 0.522], [s * 0.247, 0.536], [s * 0.226, 0.546]], 1)), 'detras', 0.0018, 0.006), M.ambar, 'intermitente'));
-    add(malla(calco(poligono(rectRedondo(s * 0.05, 0.533, 0.012, 0.011, 0.005, 3)), 'detras', 0.0018, 0.012), M.blanco, 'marcha-atras'));
+    add(malla(calco(poligono(suave([[0.212, 0.516], [0.235, 0.518], [0.237, 0.532], [0.216, 0.542]], 1)), 'detras', 0.0018, 0.006), M.ambar, 'intermitente'));
+    add(malla(calco(poligono(rectRedondo(0.05, 0.530, 0.012, 0.011, 0.005, 3)), 'detras', 0.0018, 0.012), M.blanco, 'marcha-atras'));
     add(malla(calco(poligono(piloto), 'detras', (a, b) => 0.0012 + 0.007 * Math.min(1, distBorde(piloto, a, b) / 0.015), 0.014), M.lenteRoja, 'lente-piloto'));
     g.add(lado); espejo(lado);
   }
   // reversing camera, centred under the lamps
   {
-    const pp = proyectar('detras', 0, 0.475), nn = normalEn('detras', 0, 0.475);
+    const pp = proyectar('detras', 0, 0.455), nn = normalEn('detras', 0, 0.455);
     const cam = new THREE.Group();
     const cuerpo = new THREE.Mesh(new THREE.CylinderGeometry(0.014, 0.016, 0.012, 24).rotateX(Math.PI / 2), M.negroBrillo); cuerpo.position.z = 0.002; cam.add(cuerpo);
     const ojo = new THREE.Mesh(new THREE.CircleGeometry(0.007, 20), M.proyector); ojo.position.z = 0.0085; cam.add(ojo);
@@ -623,19 +753,19 @@ function construirPlantilla(): THREE.Group {
   }
 
   // ------------------------------------------------- side indicators with cameras
-  // "rear visibility via cameras in the side turn signals": a small pod on each
-  // flank behind the front wheel, amber lens outboard, camera looking back.
+  // "rear visibility via cameras in the side turn signals": a small dark pod on
+  // each flank behind the front wheel (photo: at x -0.36, y 0.57), amber lens
+  // outboard, camera looking back.
   {
-    const x = -0.40, y = 0.582, z = ladoZ(x, y);
+    const x = -0.36, y = 0.572, z = ladoZ(x, y);
     const pod = new THREE.Group(); pod.name = 'camara-lateral';
     const casco = torno([[0, 0.05], [0.007, 0.047], [0.013, 0.036], [0.016, 0.018], [0.016, -0.02], [0.014, -0.036], [0.0125, -0.042]], 28);
-    casco.rotateY(Math.PI / 2); casco.scale(1, 0.75, 1); // axis along X, nose forward
-    pod.add(malla(casco, M.carbono, 'capsula'));
-    const tapa = new THREE.Mesh(new THREE.CircleGeometry(0.012, 24).rotateY(-Math.PI / 2), M.negroBrillo); tapa.scale.set(1, 0.75, 1); tapa.position.x = -0.0421; pod.add(tapa);
+    casco.rotateY(Math.PI / 2); casco.scale(1, 0.62, 1); // axis along X, nose forward
+    pod.add(malla(casco, M.negroBrillo, 'capsula'));
+    const tapa = new THREE.Mesh(new THREE.CircleGeometry(0.012, 24).rotateY(-Math.PI / 2), M.negroBrillo); tapa.scale.set(1, 0.62, 1); tapa.position.x = -0.0421; pod.add(tapa);
     const ojo = new THREE.Mesh(new THREE.CircleGeometry(0.0055, 20).rotateY(-Math.PI / 2), M.proyector); ojo.position.set(-0.0425, 0, 0); pod.add(ojo);
-    const intermitente = new THREE.Mesh(new THREE.CapsuleGeometry(0.004, 0.03, 4, 10).rotateZ(Math.PI / 2), M.ambar); intermitente.position.set(0.004, 0, 0.0135); pod.add(intermitente);
-    const pie = new THREE.Mesh(new THREE.BoxGeometry(0.036, 0.008, 0.02), M.carbono); pie.position.set(-0.002, -0.004, -0.012); pod.add(pie);
-    pod.position.set(x, y, z + 0.012);
+    const intermitente = new THREE.Mesh(new THREE.CapsuleGeometry(0.0035, 0.03, 4, 10).rotateZ(Math.PI / 2), M.ambar); intermitente.position.set(0.004, 0, 0.0135); pod.add(intermitente);
+    pod.position.set(x, y, z + 0.009);
     add(pod); espejo(pod);
   }
 
@@ -686,31 +816,41 @@ function asiento(perfil: P2[], ancho: number, M: Mats): THREE.Mesh {
 
 function cabina(M: Mats): THREE.Group {
   const g = new THREE.Group(); g.name = 'cabina';
-  // driver in front, passenger behind (legs either side of the driver's seat)
-  g.add(asiento([[-0.40, 0.30], [-0.56, 0.255], [-0.70, 0.215], [-0.76, 0.24], [-0.86, 0.43], [-0.95, 0.62], [-0.985, 0.74]], 0.42, M));
-  g.add(asiento([[-1.10, 0.33], [-1.26, 0.29], [-1.40, 0.255], [-1.46, 0.28], [-1.56, 0.46], [-1.64, 0.64], [-1.67, 0.75]], 0.46, M));
+  // Driver in front, passenger behind (legs either side of the driver's seat).
+  // Photo (2026-11-09): the driver's head shows through the side window at
+  // about x = -1.3, well behind the windscreen frame, so both seats sit ~0.25 m
+  // further back than before and recline more.
+  g.add(asiento([[-0.62, 0.30], [-0.78, 0.255], [-0.92, 0.215], [-0.98, 0.24], [-1.07, 0.42], [-1.17, 0.62], [-1.22, 0.76]], 0.42, M));
+  g.add(asiento([[-1.40, 0.33], [-1.55, 0.29], [-1.68, 0.255], [-1.74, 0.28], [-1.84, 0.46], [-1.93, 0.64], [-1.97, 0.75]], 0.46, M));
   // dashboard: a slim binnacle with the instrument screen and the two camera screens
   const tablero = new THREE.Mesh(new THREE.CylinderGeometry(0.30, 0.30, 0.22, 32, 1, true, -Math.PI * 0.42, Math.PI * 0.84), M.plastico);
-  tablero.rotation.set(0, 0, Math.PI / 2); tablero.scale.set(0.35, 1, 1); tablero.position.set(-0.20, 0.555, 0); g.add(tablero);
+  tablero.rotation.set(0, 0, Math.PI / 2); tablero.scale.set(0.35, 1, 1); tablero.position.set(-0.40, 0.60, 0); g.add(tablero);
   for (const [z, w] of [[0, 0.15], [0.21, 0.07], [-0.21, 0.07]] as [number, number][]) {
     const p = new THREE.Mesh(new THREE.PlaneGeometry(w, 0.05), M.pantalla);
-    p.position.set(-0.27, 0.615, z); p.rotation.set(0, -Math.PI / 2, 0); p.rotateX(-0.5); g.add(p);
+    p.position.set(-0.47, 0.66, z); p.rotation.set(0, -Math.PI / 2, 0); p.rotateX(-0.5); g.add(p);
   }
-  // steering wheel (magnesium) on its column
+  // the dark cowl under the windscreen, so the glass does not show the inside of the bonnet
+  // (from x 0.12, y 0.74 at the glass foot down to the binnacle at -0.40, 0.60)
+  const cubierta = new THREE.Mesh(new THREE.PlaneGeometry(0.54, 0.78).rotateX(-Math.PI / 2).rotateZ(0.263), M.plastico);
+  cubierta.position.set(-0.14, 0.67, 0); g.add(cubierta);
+  // steering wheel on its column
   const volante = new THREE.Group(); volante.name = 'volante';
   volante.add(malla(new THREE.TorusGeometry(0.125, 0.012, 10, 48), M.plastico, 'aro'));
   volante.add(malla(new THREE.CylinderGeometry(0.035, 0.04, 0.03, 24).rotateX(Math.PI / 2), M.plastico, 'cubo'));
   for (const a of [0, Math.PI * 0.85, -Math.PI * 0.85]) { const r = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.016, 0.008), M.magnesio); r.position.set(0.075 * Math.cos(a + Math.PI / 2), 0.075 * Math.sin(a + Math.PI / 2), 0); r.rotation.z = a + Math.PI / 2; volante.add(r); }
-  volante.position.set(-0.36, 0.585, 0); volante.rotation.set(0, Math.PI / 2, 0); volante.rotateX(-0.45); g.add(volante);
+  volante.position.set(-0.64, 0.63, 0); volante.rotation.set(0, Math.PI / 2, 0); volante.rotateX(-0.45); g.add(volante);
   const columna = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.022, 0.20, 12), M.plastico);
-  columna.position.set(-0.27, 0.543, 0); columna.rotation.z = 1.13; g.add(columna); // from the hub forward and down to the bulkhead
+  columna.position.set(-0.55, 0.588, 0); columna.rotation.z = 1.13; g.add(columna); // from the hub forward and down to the bulkhead
   // rotary gear selector on the right-hand side panel
-  const mando = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.022, 0.025, 20), M.magnesio); mando.rotation.x = Math.PI / 2; mando.position.set(-0.62, 0.50, 0.30); g.add(mando);
-  // cabin floor and side trims, dark, so the glass does not show the inside of the skin
-  const suelo = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 0.78), M.plastico); suelo.rotation.x = -Math.PI / 2; suelo.position.set(-1.0, 0.17, 0); g.add(suelo);
+  const mando = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.022, 0.025, 20), M.magnesio); mando.rotation.x = Math.PI / 2; mando.position.set(-0.88, 0.50, 0.30); g.add(mando);
+  // cabin floor, side trims up to the belt and the bulkhead behind the passenger, all dark
+  const suelo = new THREE.Mesh(new THREE.PlaneGeometry(1.80, 0.80), M.plastico); suelo.rotation.x = -Math.PI / 2; suelo.position.set(-0.95, 0.19, 0); g.add(suelo);
   for (const s of [1, -1]) {
-    const lat = new THREE.Mesh(new THREE.PlaneGeometry(1.55, 0.36), M.plastico); lat.position.set(-1.0, 0.45, s * 0.43); lat.rotation.y = s > 0 ? Math.PI : 0; g.add(lat);
+    const lat = new THREE.Mesh(new THREE.PlaneGeometry(1.60, 0.56), M.plastico); lat.position.set(-1.05, 0.48, s * 0.425); lat.rotation.y = s > 0 ? Math.PI : 0; g.add(lat);
   }
+  const mampara = new THREE.Mesh(new THREE.PlaneGeometry(0.70, 0.60), M.plastico); mampara.rotation.y = Math.PI / 2; mampara.position.set(-2.10, 0.50, 0); g.add(mampara);
+  // the engine cover under the smoked rear glass
+  const motor = new THREE.Mesh(new THREE.PlaneGeometry(0.46, 0.56), M.plastico); motor.rotation.x = -Math.PI / 2; motor.position.set(-2.33, 0.68, 0); g.add(motor);
   return g;
 }
 

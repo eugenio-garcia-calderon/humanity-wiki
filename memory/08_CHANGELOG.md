@@ -10564,3 +10564,19 @@ Eugenio asked for five things on the 3D world; all on branch `nube/arquitectura-
 - Comprobado en el editor con el navegador de pruebas (sin errores en consola), con `tsc` y con `vite build`.
 - Sin verificar: el móvil con la app instalada, y el rendimiento en un portátil con gráfica integrada. El coste por fotograma es el de antes: misma sombra de 2048, sin pases nuevos.
 - Boletín sin doble confirmación (2026-11-09, Eugenio: «quita la confirmación»): el alta vale desde el formulario y avisa a la dirección de contacto una sola vez. La política de privacidad, la pantalla y el panel ya no hablan de confirmar; los enlaces ya enviados siguen valiendo.
+
+## 2026-11-09 — Aeromóvil: los dos XL1, medidos sobre fotos
+
+- Eugenio: «mejora el Xl1 concept 2002 y el Xl1 de serie 2013. Para que sean mucho más reales y parecidos al producto real». Lo hicieron dos bots con el método del Aptera: se calcula la cámara de cada foto con puntos conocidos (matrícula, ruedas, altura publicada) y se corrige la forma hasta que el contorno coincide.
+- **XL1 de serie 2013** (4 fotos de Eugenio):
+  - **Forma:** el modelo se rehízo entero. El morro es más bajo, con la franja negra, los faros LED que envuelven la esquina y la toma de aire con lamas. El parabrisas está 25–30 cm más adelante.
+  - **Carrocería:** ventanillas en gota, juntas de las puertas de ala de gaviota y de los carenados traseros, y cola con la luz roja alrededor.
+  - **Ruedas:** delante, tapacubos blancos con cinco aspas negras.
+  - **Vías:** las medidas en las fotos dan 1,46 / 1,24 m (antes 1,41 / 1,29; no se encontró la cifra publicada).
+  - **Pendiente:** los bordes del cristal salen escalonados de cerca; lo está arreglando el mismo bot.
+- **VW 1-Litro Concept 2002** (la foto de Eugenio):
+  - **Forma:** carrocería más alta y cúpula más baja, que empieza delante del eje.
+  - **Detalles:** discos negros en las ruedas delanteras, cúpula de cristal claro con sus dos arcos, y dos faros redondos bajo un mismo cristal en cada esquina.
+  - **Pintura:** sigue siendo carbono sin pintar con barniz. supercars.net: «not painted». En la foto se ve gris antracita, que es como se ve el carbono barnizado a la luz del día.
+- **Lo que queda estimado:** solo había fotos de 3/4 de delante. El perfil de lado, la cola y la vista de arriba de los dos están reconstruidos y pueden variar unos centímetros. El área frontal medida en el modelo sale un 4 % (XL1) y un 9 % (1-Litro) por encima de la publicada. Las medidas, el Cd y el área publicados no cambian.
+- Comprobado: `tsc`, `vite build`, el editor (cada coche solo, el garaje y «Superponer») y la superposición con cada foto. Sin verificar: el móvil con la app instalada.

@@ -30,18 +30,31 @@ export const NEU_DEL = { ancho: 0.095, R: (406.4 + 2 * 76) / 2000 };   // 0.2792
 export const NEU_TRAS = { ancho: 0.115, R: (406.4 + 2 * 80.5) / 2000 }; // 0.2837
 export const R_LLANTA = 0.2032; // 16-inch rim
 
-// ---------------------------------------------------------------- estimated
+// ------------------------------------------- measured on the reference photo
+// (2026-11-09) One press photo of the car on the test track, front-left 3/4,
+// 799 x 533. Its camera was solved from the left wheels, the EU number plate
+// (520 x 110 mm) and the published height; residuals 2-7 px. Every height and
+// x below that cites "photo" comes from photo rays meeting a known plane, so
+// it carries a few centimetres of error (more towards the tail, further away).
 /** Loaded radius (narrow, high-pressure tyres flatten ~6 mm under 290 kg). */
 export const RC_DEL = 0.273, RC_TRAS = 0.278;
-/** Front overhang: NOT published (only the sum, 3.646 - 2.205 = 1.441 m). */
-export const X_MORRO = 0.60;
-export const X_COLA = X_MORRO - LARGO; // -3.046
-/** Nose cap: from XN0 to the tip, scaled towards (0, CYN). Tail cap likewise. */
-const XN0 = 0.22, CYN = 0.345, PN = 2.2;
-const XT0 = -2.80, CYT = 0.44, PT = 2.0;
-/** The canopy glass, 1.6 m long (the press kit's "1.5 m gullwing door"). */
-export const XC0 = -0.27, XC1 = -1.86;
-const RF = 0.24, RR = 0.34; // plan-view rounding of the glass ends
+/**
+ * Front overhang: not published (only the sum, 3.646 - 2.205 = 1.441 m). The
+ * photo puts the number plate's face at x = 0.63-0.66 and the nose corners at
+ * 0.62-0.64: the tip is taken at 0.67 (the previous 0.60 left the nose short).
+ */
+export const X_MORRO = 0.67;
+export const X_COLA = X_MORRO - LARGO; // -2.976 (photo: tail silhouette at -2.89..-3.03)
+/** Nose cap: from XN0 to the tip, scaled towards (0, CYN). Tail cap likewise. A high power keeps the nose blunt (photo). */
+const XN0 = 0.47, CYN = 0.36, PN = 4.5;
+const XT0 = -2.70, CYT = 0.47, PT = 2.3;
+/**
+ * The canopy glass (photo): the windscreen starts ahead of the front axle,
+ * at x = 0.11 on the centre line, sweeping back to x = -0.2 at the sides; the
+ * bubble runs almost to the tail and meets the tail deck at x = -2.5..-2.6.
+ */
+export const XC0 = 0.11, XC1 = -2.62;
+const RF = 0.34, RR = 0.33; // plan-view rounding of the glass ends
 
 type P2 = [number, number]; // [z, y]
 
@@ -67,36 +80,68 @@ function monotona(xs: number[], ys: number[]): (x: number) => number {
 
 // ------------------------------------------------------------ section table
 // Per station (front to rear): floor yb, widest half-width hw at height ys,
-// lower-corner radius rb, shoulder (zs, ysh), canopy base P5 (z5, y5), bubble
-// P6 (z6, y6) and P7 (z7, y7), top centre yt. Ahead of and behind the glass,
-// P5..P8 are simply the crown of the bonnet and of the engine cover.
-//        x       yb     hw     ys     rb     zs     ysh    z5     y5     z6     y6     z7     y7     yt
+// lower-corner radius rb, shoulder (zs, ysh), canopy base P5 (z5, y5) and the
+// top centre yt. The bubble points P6 and P7 follow from P5 and yt (a rounded
+// section, `burbuja`). Ahead of and behind the glass, P5..P8 are simply the
+// crown of the bonnet and of the tail deck.
+// From the photo (2026-11-09): the glass base along the sides at y = 0.78-0.79
+// (the previous model had it at 0.67), the shoulder highlight at 0.72-0.74, the
+// body bottom 0.12-0.15, the canopy's top line flat at about 1.11 from
+// x = -0.9 to -1.7 (it used to peak at -1.25 and fall away), the bubble's end
+// on the tail at y 0.71, x -2.5; the floor rising to ~0.19 at the rear axle,
+// where the bottom of the rear tyre shows under the body.
+//        x       yb     hw     ys     rb     zs     ysh    z5     y5     yt
 const TABLA: number[][] = [
-  [0.22,   0.130, 0.618, 0.330, 0.120, 0.574, 0.540, 0.440, 0.612, 0.300, 0.632, 0.150, 0.640, 0.642],
-  [0.00,   0.128, 0.624, 0.340, 0.120, 0.584, 0.562, 0.448, 0.630, 0.300, 0.650, 0.150, 0.658, 0.660],
-  [-0.20,  0.128, 0.623, 0.350, 0.120, 0.584, 0.576, 0.432, 0.648, 0.300, 0.672, 0.150, 0.686, 0.690],
-  [-0.40,  0.128, 0.617, 0.360, 0.120, 0.577, 0.590, 0.418, 0.660, 0.345, 0.735, 0.205, 0.785, 0.803],
-  [-0.65,  0.128, 0.605, 0.370, 0.120, 0.566, 0.600, 0.408, 0.667, 0.368, 0.815, 0.250, 0.905, 0.936],
-  [-0.95,  0.128, 0.591, 0.378, 0.118, 0.553, 0.606, 0.402, 0.672, 0.372, 0.865, 0.260, 1.012, 1.062],
-  [-1.25,  0.128, 0.575, 0.384, 0.115, 0.538, 0.610, 0.396, 0.676, 0.367, 0.882, 0.255, 1.055, 1.110],
-  [-1.55,  0.130, 0.557, 0.386, 0.110, 0.521, 0.612, 0.386, 0.680, 0.352, 0.866, 0.240, 1.026, 1.080],
-  [-1.80,  0.132, 0.541, 0.382, 0.100, 0.506, 0.612, 0.370, 0.684, 0.322, 0.826, 0.210, 0.948, 0.996],
-  [-2.05,  0.135, 0.523, 0.376, 0.050, 0.489, 0.608, 0.350, 0.684, 0.285, 0.768, 0.170, 0.862, 0.896],
-  [-2.205, 0.138, 0.509, 0.372, 0.036, 0.475, 0.604, 0.335, 0.680, 0.268, 0.742, 0.155, 0.815, 0.840],
-  [-2.45,  0.150, 0.479, 0.385, 0.045, 0.447, 0.596, 0.305, 0.660, 0.240, 0.695, 0.130, 0.740, 0.755],
-  [-2.65,  0.185, 0.415, 0.405, 0.065, 0.390, 0.580, 0.265, 0.630, 0.205, 0.655, 0.110, 0.677, 0.685],
-  [-2.80,  0.235, 0.345, 0.425, 0.060, 0.325, 0.565, 0.225, 0.605, 0.170, 0.625, 0.090, 0.640, 0.645],
+  [0.47,   0.160, 0.552, 0.440, 0.110, 0.510, 0.580, 0.405, 0.630, 0.665],
+  [0.35,   0.148, 0.590, 0.470, 0.150, 0.540, 0.640, 0.440, 0.695, 0.718],
+  [0.17,   0.135, 0.610, 0.500, 0.150, 0.557, 0.685, 0.450, 0.750, 0.762],
+  [0.00,   0.130, 0.620, 0.520, 0.150, 0.564, 0.712, 0.452, 0.778, 0.850],
+  [-0.20,  0.130, 0.621, 0.520, 0.150, 0.568, 0.725, 0.455, 0.785, 0.935],
+  [-0.42,  0.130, 0.621, 0.520, 0.150, 0.568, 0.730, 0.455, 0.787, 1.030],
+  [-0.65,  0.130, 0.620, 0.520, 0.150, 0.565, 0.732, 0.455, 0.788, 1.075],
+  [-0.90,  0.130, 0.614, 0.520, 0.150, 0.559, 0.733, 0.453, 0.790, 1.100],
+  [-1.15,  0.130, 0.606, 0.520, 0.150, 0.551, 0.733, 0.450, 0.790, 1.110],
+  [-1.45,  0.130, 0.594, 0.520, 0.150, 0.539, 0.732, 0.443, 0.790, 1.108],
+  [-1.70,  0.135, 0.578, 0.520, 0.150, 0.524, 0.728, 0.432, 0.787, 1.092],
+  [-1.95,  0.165, 0.556, 0.520, 0.080, 0.512, 0.720, 0.412, 0.780, 1.045],
+  [-2.205, 0.185, 0.525, 0.520, 0.060, 0.484, 0.705, 0.385, 0.768, 0.955],
+  [-2.40,  0.200, 0.495, 0.520, 0.060, 0.456, 0.690, 0.355, 0.752, 0.865],
+  [-2.58,  0.230, 0.455, 0.510, 0.070, 0.420, 0.665, 0.320, 0.730, 0.770],
+  [-2.70,  0.265, 0.410, 0.500, 0.070, 0.380, 0.640, 0.285, 0.700, 0.720],
 ];
 const CURVAS = (() => {
   const filas = [...TABLA].reverse();
   const xs = filas.map(f => f[0]);
-  return Array.from({ length: 13 }, (_, k) => monotona(xs, filas.map(f => f[k + 1])));
+  return Array.from({ length: 9 }, (_, k) => monotona(xs, filas.map(f => f[k + 1])));
 })();
+/**
+ * P6 and P7 of a rounded bubble between its base (z5, y5) and its top centre
+ * yt. Where the windscreen begins the bubble is narrower than the deck: it
+ * sits on the bonnet with half-width zc, and the deck between zc and z5 stays
+ * flat (photo: the bonnet runs level to the foot of the glass, the scoop sits
+ * on it at z = 0.25, and the glass rises from there).
+ */
+function burbuja(z5: number, y5: number, yt: number, zc = z5): [number, number, number, number] {
+  const h = yt - y5, w = 1 - zc / z5;
+  return [zc * (0.84 + 0.14 * w), y5 + h * (0.64 - 0.40 * w), zc * (0.52 + 0.12 * w), y5 + h * (0.93 - 0.06 * w)];
+}
+const suaveEscalon = (a: number, b: number, x: number) => { const u = Math.min(1, Math.max(0, (x - a) / (b - a))); return u * u * (3 - 2 * u); };
+/** Half-width of the bubble at x as a fraction of the deck's: 1 except around the windscreen's start. */
+function anchoBurbuja(x: number, z5: number): number {
+  if (x > XC0 + 0.16 || x < XC0 - RF - 0.12) return 1;
+  // ahead of the glass the crown narrows into the windscreen's tip ...
+  const minimo = 0.30 + 0.70 * suaveEscalon(XC0, XC0 + 0.16, x);
+  // ... and behind it the bubble follows the glass outline, a little wider
+  const dc = XC0 - x;
+  const vidrio = dc <= 0 ? 0 : dc >= RF ? 1 : Math.sqrt(1 - (1 - dc / RF) ** 2);
+  return Math.min(1, Math.max(minimo, vidrio + 0.10 + 0.25 * suaveEscalon(XC0 - RF + 0.05, XC0 - RF - 0.12, x)));
+}
 
 /** The nine control points of the half-section, before the end caps. */
 function controlesBase(x: number): P2[] {
   const v = CURVAS.map(c => c(x));
-  const [yb, hw, ys, rb, zs, ysh, z5, y5, z6, y6, z7, y7, yt] = v;
+  const [yb, hw, ys, rb, zs, ysh, z5, y5, yt] = v;
+  const [z6, y6, z7, y7] = burbuja(z5, y5, yt, z5 * anchoBurbuja(x, z5));
   return [[0, yb], [hw - rb, yb], [hw - rb * 0.293, yb + rb * 0.293], [hw, ys], [zs, ysh], [z5, y5], [z6, y6], [z7, y7], [0, yt]];
 }
 /**
@@ -105,22 +150,26 @@ function controlesBase(x: number): P2[] {
  * * (1 - g s) starts with the slope the body has where the cap begins (so no
  * notch at the joint) and closes in a round tip at s = 1.
  */
-interface Tapa { x0: number; largo: number; cy: number; p: number; base: P2[]; g: [number, number, number] }
-function tapa(x0: number, xPunta: number, cy: number, p: number): Tapa {
+interface Tapa { x0: number; largo: number; cy: number; p: number; base: P2[]; g: [number, number, number]; pe: number; pDn: number }
+function tapa(x0: number, xPunta: number, cy: number, p: number, pe = 2, pDn = p): Tapa {
   const dir = Math.sign(xPunta - x0), largo = Math.abs(xPunta - x0), e = 0.01;
   const b = controlesBase(x0), a = controlesBase(x0 - dir * e);
   // how fast the body shrinks towards the tip at x0, as a fraction of the base per unit of s
   const rel = (v0: number, vIn: number, ref: number) => Math.min(0.85, Math.max(0, ((vIn - v0) / e) * largo / Math.max(1e-3, ref)));
   const hw0 = b[3][0], yt0 = b[8][1], yb0 = b[0][1];
-  return { x0, largo, cy, p, base: b, g: [rel(hw0, a[3][0], hw0), rel(yt0, a[8][1], yt0 - cy), rel(cy - yb0, cy - a[0][1], cy - yb0)] };
+  return { x0, largo, cy, p, pe, pDn, base: b, g: [rel(hw0, a[3][0], hw0), rel(yt0, a[8][1], yt0 - cy), rel(cy - yb0, cy - a[0][1], cy - yb0)] };
 }
-const TAPA_MORRO = tapa(XN0, X_MORRO, CYN, PN), TAPA_COLA = tapa(XT0, X_COLA, CYT, PT);
+// the nose turns elliptical only at the very tip (pe 5) and its lower edge is
+// tighter than the upper one (pDn 8): the front face stays an upright panel
+// down to y ~ 0.16 (photo: the plate's face, the bottom edge below it)
+const TAPA_MORRO = tapa(XN0, X_MORRO, CYN, PN, 5, 8), TAPA_COLA = tapa(XT0, X_COLA, CYT, PT);
 function enTapa(T: Tapa, x: number): P2[] {
   const s = Math.min(1, Math.abs(x - T.x0) / T.largo), r = Math.pow(Math.max(0, 1 - Math.pow(s, T.p)), 1 / T.p);
-  const [kz, kUp, kDn] = T.g.map(g => r * (1 - g * s));
+  const rDn = Math.pow(Math.max(0, 1 - Math.pow(s, T.pDn)), 1 / T.pDn);
+  const [kz, kUp, kDn] = T.g.map((g, i) => (i === 2 ? rDn : r) * (1 - g * s));
   // towards the tip the section turns into an ellipse, so its corners do not
   // run into the point as creases (an X seen from behind, a V under the chin)
-  const a = T.base[3][0], bUp = T.base[8][1] - T.cy, bDn = T.cy - T.base[0][1], beta = s * s;
+  const a = T.base[3][0], bUp = T.base[8][1] - T.cy, bDn = T.cy - T.base[0][1], beta = Math.pow(s, T.pe);
   return T.base.map(([z, y]) => {
     const dy = y - T.cy, b = dy > 0 ? bUp : bDn, q = Math.hypot(z / a, dy / b);
     const f = q > 1e-6 ? 1 + beta * (1 / q - 1) : 1;
@@ -283,6 +332,30 @@ const iDe = (x: number) => Math.round((x - X_COLA) / PASO_CACHE);
 export function frenteX(z: number, y: number): number { return bordeX(z, y, iDe(-0.2), N_CACHE); }
 /** x of the skin seen from behind at (z, y), or NaN. */
 export function detrasX(z: number, y: number): number { return bordeX(z, y, iDe(-2.3), 0); }
+
+/** Is the point inside the skin? */
+export function interior(x: number, y: number, z: number): boolean {
+  if (x >= X_MORRO || x <= X_COLA) return false;
+  const [a, b, w] = vecinos(x);
+  return dentro(a, b, w, z, y);
+}
+/**
+ * Where a ray from `o` along the unit direction `d` first meets the skin
+ * (steps of 4 mm, then bisection), or null. For decals seen from an oblique
+ * direction (the headlamps sit on the nose's corners).
+ */
+export function rayoPiel(o: [number, number, number], d: [number, number, number], largo = 2): [number, number, number] | null {
+  const paso = 0.004; let prev = 0;
+  for (let s = 0; s <= largo; s += paso) {
+    if (interior(o[0] + d[0] * s, o[1] + d[1] * s, o[2] + d[2] * s)) {
+      let lo = prev, hi = s;
+      for (let k = 0; k < 14; k++) { const m = (lo + hi) / 2; if (interior(o[0] + d[0] * m, o[1] + d[1] * m, o[2] + d[2] * m)) hi = m; else lo = m; }
+      const t = (lo + hi) / 2; return [o[0] + d[0] * t, o[1] + d[1] * t, o[2] + d[2] * t];
+    }
+    prev = s;
+  }
+  return null;
+}
 
 // --------------------------------------------------------- envelope and area
 /** [x, floor, top, max half-width] every `paso` m, from the same sections as the mesh. */

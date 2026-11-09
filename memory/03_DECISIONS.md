@@ -1131,3 +1131,12 @@ Chose (b) + (c). With (b) everyone lands on the clean default layout now. With (
 **Tone mapping.** Moved from ACES Filmic to Neutral. ACES desaturates and greys whites; most garage cars are white, and Neutral is meant for product renders. AgX was also compared.
 
 **Bloom.** UnrealBloomPass was tried at threshold 1.6 and at 6. At 1.6 it veiled white bodywork. At 6 it turned the sun glint on the canopy into a large blob. Removed; it can come back for emissive lamps alone with a selective (layer-masked) bloom, ~1 h.
+
+## 2026-11-09 — The two XL1s rebuilt against Eugenio's photos
+
+**Production XL1.** Rebuilt as `xl1Forma.ts` + `xl1Modelo.ts`, adapted from the 1-Litre's section pipeline. Cameras were solved on 4 photos; headlamp and windscreen points were triangulated across two of them. Tracks measured on photos are 1.46 / 1.24 m (was 1.41 / 1.29). No published tracks were found. `vmax` stays 158 (Wikipedia); the VW press kit says 160, as the header notes. Known defect at merge: glass and frit edges are cell-stepped at close range. The same bot is fixing it as a follow-up.
+
+**1-Litre 2002.** Measured on one photo; the same frame was found on public GitHub (`mono/SkiaSharp.Extended`) at 799×533.
+- **Paint.** Kept "unpainted carbon under clear coat" against the photo's charcoal look: the sources say unpainted, and the photo's luminance (body 50–60 vs tyres 15) fits clear-coated carbon in daylight. The weave was lightened instead of repainting.
+- **Removed.** The rear spats and engine-cover lines were invented in the 2026-11-08 version; the photo shows no evidence of them, so they are gone.
+- **Frontal area.** On the model it is 1.09 m² against the published 1.0. The tunnel and the consumption figures keep using the published value.
