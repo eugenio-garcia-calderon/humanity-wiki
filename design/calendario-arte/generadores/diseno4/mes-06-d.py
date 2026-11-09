@@ -654,9 +654,9 @@ def posa(x):
 
 
 # a row along the lower road, heading up to the village behind a bicycle
-velomovil(*posa(958), 54, '#e8735e', '#8a5a3a', '#2f8f92', ropa='#f2d36b')
-velomovil(*posa(1022), 46, '#2f8f92', '#f0c8a0', '#f2b630', ropa='#c33c4e')
-velomovil(*posa(1080), 42, '#f2b630', '#5a3a2a', '#c33c4e', ropa='#4f9c9a', banderin='#c33c4e')
+velomovil(*posa(962), 48, '#e8735e', '#8a5a3a', '#2f8f92', ropa='#f2d36b')
+velomovil(*posa(1022), 41, '#2f8f92', '#f0c8a0', '#f2b630', ropa='#c33c4e')
+velomovil(*posa(1076), 37, '#f2b630', '#5a3a2a', '#c33c4e', ropa='#4f9c9a', banderin='#c33c4e')
 # and someone still cycles the ordinary way
 cx_, cy_ = posa(1136)
 cy_ -= 2

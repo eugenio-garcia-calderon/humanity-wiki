@@ -329,7 +329,7 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
     "dias": [
       "Girasol solar: el Sol da más energía de la que usamos.",
       "Hoy: cuenta tus aparatos en espera. ¿Hace falta?",
-      "Día de la Bicicleta: hoy pedalea, como en el pueblo.",
+      "Día de la Bicicleta: pedalea, en bici o en velomóvil.",
       "La IA puede errar con aplomo: contrasta lo que dice.",
       "Día del Medio Ambiente: ¿qué energía mueve tu día?",
       "La energía más limpia y barata es la que no se consume.",
@@ -354,7 +354,7 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "Autoconsumo: con placas, tu tejado da parte de tu luz.",
       "Hoy: pasa una tarde sin pantallas. ¿Qué descubres?",
       "La IA puede heredar los sesgos de los datos humanos.",
-      "Un buen aislamiento ahorra mucha energía en casa.",
+      "Planeador: sube sin motor, en aire que el sol calienta.",
       "¿Qué tecnología te mejora la vida y cuál la complica?",
       "Hoy: elige un gesto de ahorro para todo el verano."
     ],
