@@ -10638,7 +10638,7 @@ Petición de Eugenio: «haz que el agente del túnel de viento haga una explicac
   - el panel dice qué es, el valor de este coche, por qué importa, cómo queda frente a los demás coches del túnel y cómo mejorarlo;
   - cada frase lleva la marca «calculado» (sale de este túnel) o «general» (conocimiento de aerodinámica, no calculado aquí), y el pie explica las dos.
 - **La tarjeta del túnel tiene una fila de botones con los mismos puntos**, para abrirlos aunque las etiquetas queden juntas o con el teclado. Escape cierra el panel.
-- **Opciones de mejora** en nuestro diseño: nombran el deslizador tal y como se lee en pantalla y dónde está. El nombre se lee de la ficha del propio deslizador, no se copia.
+- **Opciones de mejora** en nuestro diseño: nombran el deslizador tal y como se lee en pantalla y dónde está. El nombre está copiado de la página del editor en una tabla del túnel: si se renombra un deslizador, hay que cambiarlo en los dos sitios (corregido el mismo día; primero escribí que se leía del propio deslizador, y no es así).
   - **«Probar»** calcula el túnel con ese cambio sobre una copia y enseña antes → después: Cd del túnel, kWh de aire cada 100 km, dónde se despega el aire y la cifra del propio punto. **Nunca toca ni guarda el diseño**, y dice qué deslizador mover para quedarse con el cambio.
   - En los coches del garaje, las opciones son conocimiento general y una frase sobre qué hizo su fabricante.
 - **Etiquetas sin pisarse:** cada fotograma se proyectan a pantalla y se separan; las que se saldrían por arriba o por los lados vuelven dentro. Los nombres de los coches entran en el mismo reparto.
