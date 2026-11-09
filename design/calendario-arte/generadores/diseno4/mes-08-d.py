@@ -133,12 +133,12 @@ lz.aguada(cop, '#a0405a', dens=0.22, borde=0.2, desvanece=(BX + 20, BY + 130, BX
 # the folds: sulci that meander and branch in every direction (skeleton of a random labyrinth),
 # cut by the lateral fissure and the central sulcus that separate the lobes
 from skimage.morphology import skeletonize
-LATERAL = [B(-170, 70), B(-90, 46), B(-10, 22), B(60, 2), B(130, 6)]
-CENTRAL = [B(14, -170), B(-2, -110), B(-20, -50), B(-30, 14)]
+LATERAL = [B(-170, 74), B(-110, 58), B(-50, 50), B(-10, 30), B(40, 22), B(90, 4), B(130, 10)]
+CENTRAL = [B(14, -170), B(4, -130), B(-12, -96), B(-4, -60), B(-22, -24), B(-26, 14)]
 Mb = (cop.mascara(U1, 0, 0, 1485, 850) > 0.5) & ~(cb.mascara(U1, 0, 0, 1485, 850) > 0.3)
-Mi = cv2.erode(Mb.astype(np.uint8), np.ones((9, 9), np.uint8)) > 0
+Mi = cv2.erode(Mb.astype(np.uint8), np.ones((11, 11), np.uint8)) > 0
 campo = np.random.default_rng(812).normal(0, 1, Mb.shape).astype(np.float32)
-campo = cv2.GaussianBlur(campo, (0, 0), 6.0) - 0.7 * cv2.GaussianBlur(campo, (0, 0), 16)
+campo = cv2.GaussianBlur(campo, (0, 0), 4.6) - 0.7 * cv2.GaussianBlur(campo, (0, 0), 13)
 surcos_m = (campo < 0) & Mi
 for ln in (LATERAL, CENTRAL):
     tmp = np.zeros(Mb.shape, np.uint8)
@@ -179,15 +179,16 @@ for cam in caminos:
     pp = np.array([(x, y) for y, x in cam], float)
     k = 5
     if len(pp) > k:
-        pp = np.vstack([pp[:1], np.array([pp[max(0, i - 2):i + 3].mean(0) for i in range(1, len(pp) - 1)]), pp[-1:]])
+        for _ in range(3):
+            pp = np.vstack([pp[:1], np.array([pp[max(0, i - 2):i + 3].mean(0) for i in range(1, len(pp) - 1)]), pp[-1:]])
     surcos.append(pp)
 # grooves: a deeper rosy glaze in each sulcus, then soft carmine pencil
 for ln in surcos:
-    lz.aguada(Trazo(ln[::3] if len(ln) > 8 else ln, (3.6, 3.6)), '#b84a60', dens=0.3, irreg=0.35, borde=0.6, gran=0.3)
-lz.lapiz(surcos, '#94344a', grosor=0.85, presion=0.5, temblor=0.2, cortes=0.08)
+    lz.aguada(Trazo(ln[::3] if len(ln) > 8 else ln, (3.0, 3.0)), '#b84a60', dens=0.28, irreg=0.35, borde=0.6, gran=0.3)
+lz.lapiz(surcos, '#94344a', grosor=0.75, presion=0.5, temblor=0.25, cortes=0.08)
 for ln in (LATERAL, CENTRAL):
-    lz.aguada(Trazo(spline(ln)[::3], (7, 6, 4)), '#a83e58', dens=0.35, irreg=0.3, borde=0.6)
-    lz.lapiz([spline(ln)], '#7e2a42', grosor=1.1, presion=0.55, temblor=0.3)
+    lz.aguada(Trazo(spline(ln)[::3], (5, 4.5, 3)), '#a83e58', dens=0.3, irreg=0.4, borde=0.6)
+    lz.lapiz([spline(ln)], '#7e2a42', grosor=0.95, presion=0.5, temblor=0.4)
 # the temporal lobe a little rosier and in shade, the frontal lit
 lz.aguada(Poligono([B(-200, 60), B(-120, 66), B(-10, 30), B(80, 20), B(60, 110), B(-60, 122), B(-170, 90)]), '#c0566a',
           dens=0.16, suave=10)
