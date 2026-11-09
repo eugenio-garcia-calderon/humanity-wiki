@@ -1174,3 +1174,23 @@ Chose (b): Eugenio asked for an explanation *of this value*, and the tags keep c
 **«Probar» never writes.** The worker rebuilds the model from a modified copy of the parameters, runs the numbers-only tunnel and returns before → after. It is open to everyone, including visitors who cannot edit, because nothing is saved. Persisting a change stays with the slider and its existing owner check.
 
 **Garage cars.** A short sentence per car on what its maker did, keyed by id in `GARAJE`. A car with no entry falls back to «Es un coche del garaje: su forma la decidió su fabricante». That fallback is wrong for any design of our own added to the garage, so such a car needs its own entry.
+
+## 2026-11-09 — Cuadriciclo Bala: our own design in the garage, and the all-cars camera that never moved
+
+**What it is.** A fixed garage model (`garaje/bala*.ts`), not a parametric design in the editor.
+- It keeps the Gota's rhombus and wheel sizes. Wheelbase 2.45 m, lateral track 1.10 m.
+- No `aero`; `fuente` says it is a proposal.
+- The envelope is the body only. The pods, arms and fin are outside it.
+- Making it a third editor design (a `PARAMETROS_BALA` family) would give it sliders and «Probar». That is days of work in `geometria*.ts`, and it is Eugenio's call.
+
+**Tunnel seams owned at integration.**
+- `RUEDAS_GARAJE` had no `bala` entry, so its wheels counted 0. Added: front and rear `dentro` (0.61 × 0.08 m), laterals `carenado` (0.508 × 0.07 m). The estimate went from 0.113 to 0.138.
+- `explicaciones.ts` fell back to «su forma la decidió su fabricante». It got its own sentence, which says that the pods and arms are not in the calculation.
+- The shared footer now says «Probar» works with «el diseño del editor», no longer «nuestro diseño», since the Bala is also ours.
+
+**All-cars framing.**
+- The effect behind «Cd y consumo» and the tunnel computed a camera distance (`d = 1 + ancho/6`). OrbitControls then clamped it to `maxDistance = 25`, so with cars from z = −12 to +12 the nearest ones were always cut off.
+- Now `distanciaParaVer()` fits every car's box, its label and (with the tunnel) 2 m of wake into the real field of view.
+- The camera keeps the distance it effectively had (`min(old, 25)`) and backs off only when something does not fit.
+- While that view lasts, `maxDistance` is lifted to match, and it is restored when the camera gets home.
+- Fog near/far and the ground disc scale with the distance beyond 25 m. Options considered: a wider FOV (distorts) or a broadside camera (needs the same distance), so the fog and the ground move instead.

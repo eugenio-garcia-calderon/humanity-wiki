@@ -113,6 +113,30 @@ const rot = (p: [number, number], c: [number, number], a: number): [number, numb
 };
 
 /** Una célula monocristalina de 125 mm: azul muy oscuro, junta fina y poco más clara, esquinas achaflanadas, dos barras colectoras tenues. */
+/**
+ * How far back a camera must sit, looking at `centro` from the direction `haciaCamara`, for
+ * every point to land inside the view. `margenH`/`margenV` keep clear of the toolbar and the
+ * cards drawn over the viewer. Closed form per point: depth = D + r·fwd must satisfy
+ * |r·right| ≤ tan(fovH/2)·depth and |r·up| ≤ tan(fovV/2)·depth.
+ */
+/** How far the visitor can zoom out by hand. Framing every car at once may go further (see `verTodos`). */
+const MAX_ORBITA = 25;
+
+function distanciaParaVer(puntos: THREE.Vector3[], centro: THREE.Vector3, haciaCamara: THREE.Vector3, cam: THREE.PerspectiveCamera, margenH = 0.9, margenV = 0.76) {
+  const fwd = haciaCamara.clone().normalize().negate();
+  const right = new THREE.Vector3().crossVectors(fwd, cam.up).normalize();
+  const up = new THREE.Vector3().crossVectors(right, fwd);
+  const tv = Math.tan(THREE.MathUtils.degToRad(cam.fov) / 2), th = tv * cam.aspect;
+  const r = new THREE.Vector3();
+  let D = 0;
+  for (const p of puntos) {
+    r.subVectors(p, centro);
+    const f = r.dot(fwd);
+    D = Math.max(D, Math.abs(r.dot(right)) / (th * margenH) - f, Math.abs(r.dot(up)) / (tv * margenV) - f);
+  }
+  return D;
+}
+
 function texturaSolar() {
   const c = document.createElement('canvas'); c.width = c.height = 128;
   const g = c.getContext('2d')!;
@@ -1170,7 +1194,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(32, 1, 0.05, 100);
     const controls = new OrbitControls(camera, cv);
-    controls.enableDamping = true; controls.maxPolarAngle = Math.PI / 2 - 0.02; controls.minDistance = 1.5; controls.maxDistance = 25;
+    controls.enableDamping = true; controls.maxPolarAngle = Math.PI / 2 - 0.02; controls.minDistance = 1.5; controls.maxDistance = MAX_ORBITA;
     const target = new THREE.Vector3(-1.5, 0.55, 0);
     camera.position.set(...VISTAS.iso); controls.target.copy(target);
 
@@ -1222,7 +1246,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     // A 1,5: sin su sol, el cielo de la foto es más oscuro que el dibujado; a 1 las pinturas quedaban apagadas.
     cargarEntorno(entornoUrl, ENTORNO_ESCALA, 1.5);
     const fondo = cielo(false); fondo.position.set(-1.5, 0, 0); scene.add(fondo);
-    scene.fog = new THREE.Fog(0xf3dcc3, 16, 60);
+    const niebla = new THREE.Fog(0xf3dcc3, 16, 60); scene.fog = niebla;
 
     // Luz de exterior: cielo + sol cálido con sombra suave, y un contraluz frío que dibuja el canto de la cúpula.
     scene.add(new THREE.HemisphereLight(0xcfe0f5, 0x5a5751, 0.8));
@@ -1304,6 +1328,10 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       apertura: 0, aperturaObjetivo: 0, aperturaMal: 0, aperturaMalObjetivo: 0, colocarPuertas: (() => {}) as () => void,
       tunel: null as Tunel | null, superponer: false, ultimoFantasma: 0,
       sombraSucia: true,
+      /** Orbit limit to restore when the camera gets home from the all-cars view (0: nothing pending). */
+      maxOrbitaAlVolver: 0,
+      /** How far beyond MAX_ORBITA the camera is (the all-cars view); fog and ground follow it. */
+      lejos: 0,
     };
     const tamano = new THREE.Vector2();
     estado.current = st;
@@ -1379,8 +1407,16 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
         st.tween.t = Math.min(1, st.tween.t + dt / (reducir ? 0.01 : 0.7));
         const e = 1 - Math.pow(1 - st.tween.t, 3);
         camera.position.lerpVectors(st.tween.from, st.tween.to, e); controls.target.lerpVectors(st.tween.tf, target, e);
-        if (st.tween.t >= 1) st.tween = null;
+        if (st.tween.t >= 1) {
+          st.tween = null;
+          // back from the all-cars view: the orbit limit returns once the camera is home, not before (it would jump)
+          if (st.maxOrbitaAlVolver) { controls.maxDistance = st.maxOrbitaAlVolver; st.maxOrbitaAlVolver = 0; }
+        }
       }
+      // Beyond the hand-zoom limit (only the all-cars view goes there) the fog and the ground move
+      // out with the camera; otherwise the far cars sink into the haze and the ground's edge shows.
+      const lejos = Math.round(Math.max(0, camera.position.distanceTo(controls.target) - MAX_ORBITA) * 10) / 10;
+      if (lejos !== st.lejos) { st.lejos = lejos; niebla.near = 16 + lejos; niebla.far = 60 + 1.5 * lejos; suelo.scale.setScalar(1 + lejos / 30); }
       if (st.apertura !== st.aperturaObjetivo || st.aperturaMal !== st.aperturaMalObjetivo) {
         const paso = reducir ? 1 : dt / 1.1;
         const avanzar = (v: number, o: number) => (o > v ? Math.min(o, v + paso) : Math.max(o, v - paso));
@@ -1517,20 +1553,45 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   const claveEncuadre = verTodos ? garaje.map(v => `${v.x},${v.z}`).join('|') : '';
   useEffect(() => {
     const st = estado.current; if (!st) return;
-    const zs = [...(soloGaraje ? [] : [0]), ...garaje.filter(v => vehiculoGaraje(v.id)?.envolvente).map(v => v.z)];
-    const xs = [...(soloGaraje ? [] : [0]), ...garaje.filter(v => vehiculoGaraje(v.id)?.envolvente).map(v => v.x)];
+    const enGaraje = garaje.filter(v => vehiculoGaraje(v.id)?.envolvente);
+    const zs = [...(soloGaraje ? [] : [0]), ...enGaraje.map(v => v.z)];
+    const xs = [...(soloGaraje ? [] : [0]), ...enGaraje.map(v => v.x)];
     if (verTodos && zs.length > 1) {
       const zc = (Math.min(...zs) + Math.max(...zs)) / 2, xc = (Math.min(...xs) + Math.max(...xs)) / 2, ancho = Math.max(...zs) - Math.min(...zs);
       // La tarjeta va debajo del visor: los coches, centrados, con las estelas detrás.
       const d = 1 + ancho / 6;
       st.target.set(xc - 2.4, 0.5, zc + 0.6);
-      st.tween = { from: st.camera.position.clone(), to: new THREE.Vector3(xc - 2.4 - 6.4 * d, 5.0 * d, zc + 0.6 - 6.6 * d), tf: st.controls.target.clone(), t: 0 };
+      let destino = new THREE.Vector3(xc - 2.4 - 6.4 * d, 5.0 * d, zc + 0.6 - 6.6 * d);
+      // That distance never reached the camera: OrbitControls clamps it to MAX_ORBITA (25 m), so
+      // with the garage full (2026-11-09: cars from z = −12 to +12) the nearest cars fell out of
+      // the frame, the Cuadriciclo Bala at −12 among them. Now every car, its label and (with the
+      // tunnel on) the start of its wake are checked against the actual field of view. The camera
+      // keeps the distance it really had until now, and backs off along the same line only when
+      // something would not fit; the orbit limit is lifted to match while this view lasts.
+      const puntos: THREE.Vector3[] = [];
+      const caja = (x0: number, x1: number, z: number, medioAncho: number, alto: number, giro = 0) => {
+        for (const x of [x0, x1]) for (const dz of [-medioAncho, medioAncho]) for (const y of [0, alto])
+          puntos.push(new THREE.Vector3(x * Math.cos(giro) + dz * Math.sin(giro), y, z - x * Math.sin(giro) + dz * Math.cos(giro)));
+      };
+      const estela = tunel ? 2 : 0;
+      if (!soloGaraje) caja(Math.max(modelo.xn, modelo.xt), Math.min(modelo.xn, modelo.xt) - estela, 0, modelo.P.W / 2, modelo.P.H + 0.9);
+      for (const v of enGaraje) {
+        const def = vehiculoGaraje(v.id)!, ex = def.envolvente!.map(e => e[0]), gi = v.giro ?? 0;
+        caja(Math.max(...ex), Math.min(...ex) - estela, 0, def.ancho / 2, def.alto + 0.9, gi);
+        for (const p of puntos.slice(-8)) { p.x += v.x; p.z += v.z; }
+      }
+      const haciaCamara = destino.clone().sub(st.target);
+      const hastaAhora = Math.min(haciaCamara.length(), MAX_ORBITA);
+      const distancia = Math.max(hastaAhora, Math.min(75, distanciaParaVer(puntos, st.target, haciaCamara, st.camera)));
+      destino = st.target.clone().addScaledVector(haciaCamara.normalize(), distancia);
+      st.controls.maxDistance = Math.max(MAX_ORBITA, distancia + 1); st.maxOrbitaAlVolver = 0;
+      st.tween = { from: st.camera.position.clone(), to: destino, tf: st.controls.target.clone(), t: 0 };
     } else if (!verTodos && (st.target.x !== -1.5 || st.target.z !== 0)) {
-      st.target.set(-1.5, 0.55, 0);
+      st.target.set(-1.5, 0.55, 0); st.maxOrbitaAlVolver = MAX_ORBITA;
       st.tween = { from: st.camera.position.clone(), to: new THREE.Vector3(...VISTAS[vista]), tf: st.controls.target.clone(), t: 0 };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [verTodos, claveEncuadre, soloGaraje]);
+  }, [verTodos, claveEncuadre, soloGaraje, tunel]);
   useEffect(() => { const st = estado.current; if (!st) return; st.coche.visible = !soloGaraje && !(referencia && modoRef === 'sola'); st.grupoCotas.visible = !soloGaraje && verCotas && modoRef !== 'sola'; }, [soloGaraje, referencia, modoRef, verCotas]);
   useEffect(() => { const st = estado.current; if (st) st.aperturaObjetivo = abierta ? 1 : 0; }, [abierta]);
   useEffect(() => { const st = estado.current; if (st) st.aperturaMalObjetivo = maleteros ? 1 : 0; }, [maleteros]);

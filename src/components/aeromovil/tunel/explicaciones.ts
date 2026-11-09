@@ -79,6 +79,7 @@ const GARAJE: Record<string, string> = {
   twizy: 'Es un coche urbano abierto por los lados, con la trasera casi vertical y las ruedas al aire. Lo que más le bajaría el consumo: cerrar los costados, carenar las ruedas y alargar la cola.',
   jaguarD: 'Coche de carreras de 1955: morro largo y bajo, aleta detrás del piloto para ir recto a mucha velocidad y pasos de rueda abiertos. La cola cortada y las ruedas son lo que más le cuesta.',
   aerorider: 'Velomóvil: un carenado largo y estrecho con las ruedas dentro y la cola casi en punta.',
+  bala: 'Es un diseño propio, hecho a partir del Aeromóvil Gota como modelo fijo del garaje: morro en punta, cola en cono con aleta y las ruedas delantera y trasera dentro de la carrocería. El túnel solo calcula el cuerpo: los carenados de las ruedas laterales y sus brazos dejan estelas propias que no ve, así que su Cd real será algo más alto.',
 };
 
 export interface Contexto {
@@ -121,7 +122,7 @@ export function explicar(cx: Contexto): Explicacion {
     return m;
   };
   const opciones = (...m: (Mejora | null)[]) => m.filter((x): x is Mejora => !!x);
-  const notaGaraje = !nuestro ? `${GARAJE[cuerpo.id] ?? 'Es un coche del garaje: su forma la decidió su fabricante.'} Las opciones de abajo son conocimiento general; el «Probar» solo funciona con nuestro diseño, porque es el único cuyos parámetros conoce el editor.` : undefined;
+  const notaGaraje = !nuestro ? `${GARAJE[cuerpo.id] ?? 'Es un coche del garaje: su forma la decidió su fabricante.'} Las opciones de abajo son conocimiento general; el «Probar» solo funciona con el diseño del editor, porque es el único cuyos parámetros conoce.` : undefined;
   const nombreOtros = (f: (o: { cuerpo: CuerpoTunel; R: ResultadoTunel }) => string | null) => otros.map(o => { const t = f(o); return t ? `${o.cuerpo.nombre}: ${t}` : null; }).filter((x): x is string => !!x);
   const sinOtros = otros.length ? [] : [c('No hay otros coches en el túnel con los que compararlo: saca alguno del garaje.')];
 
