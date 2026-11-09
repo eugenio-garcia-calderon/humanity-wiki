@@ -27,11 +27,16 @@
   {
     "dia": 23,
     "frase": "Comunidad energética: vecinos que comparten placas.",
-    "como_aparece": "Del girasol salen hilos de luz hacia los tejados del pueblo, cubiertos de las mismas células solares que la cara de la flor: la energía se comparte entre vecinos."
+    "como_aparece": "Del girasol salen hilos de luz hacia los tejados solares de un pueblo en colina de casas muy distintas (fachadas blancas, ocres, rosas y azul pálido; tejados de teja, pizarra, morados y solares; un campanario arriba, cipreses y campos en mosaico): la energía se comparte entre vecinos."
   },
   {
     "dia": 3,
-    "frase": "Día de la Bicicleta: hoy, un trayecto a pie o en bici.",
-    "como_aparece": "Por el camino del pueblo pasa una persona en bicicleta."
+    "frase": "Día de la Bicicleta: pedalea, en bici o en velomóvil.",
+    "como_aparece": "Por el camino del pueblo ruedan tres velomóviles (bicicletas carenadas: rojo, turquesa y amarillo, con la cabeza de quien pedalea asomando) y pasa una persona en bicicleta."
+  },
+  {
+    "dia": 28,
+    "frase": "Planeador: sube sin motor, en aire que el sol calienta.",
+    "como_aparece": "Dos planeadores blancos con las puntas de las alas de color suben en el cielo, cerca del sol de junio."
   }
 ]

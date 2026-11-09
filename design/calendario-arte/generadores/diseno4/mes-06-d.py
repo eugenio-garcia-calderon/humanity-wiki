@@ -6,7 +6,8 @@ and drinks it; from its heart a thread of light comes down to the lamp that a
 grandfather and a girl are mending together, sitting on one of its leaves: she
 screws in a new LED bulb and it lights. A boy on the leaf above lets the
 sunflower's seeds go: each seed is a tiny wind turbine, and the flight of them
-lands on a little hill village whose roofs share the sunflower's light.
+lands on a hill town of many different houses, whose solar roofs share the sunflower's light;
+velomobiles roll along its road and gliders ride the air the sun warms.
 
     python3 mes-06-d.py [ancho_px] [salida.png|.jpg]
 """
@@ -353,26 +354,54 @@ for k, (x, y) in enumerate(vuelo[1:]):
     if k % 2 == 0:
         molinillo(x, y, s, ang=rng.uniform(-35, 35), color=['#f6e3c4', '#f4c9b4', '#f9e9b8'][k % 3])
 
-# ------------------------------------------------------------------ the village, far off on a hill that dissolves into the paper
-colina = Poligono([(980, 720), (1060, 676), (1150, 650), (1250, 644), (1340, 656), (1440, 690), (1470, 740), (1300, 770),
-                   (1100, 770)])
+# ------------------------------------------------------------------ the village (2026-11-09, Eugenio: «un pueblo con más diversidad,
+# y varios velomóviles y algún planeador»): a whole hill town, every house different -- whitewash, ochre, rose, pale blue;
+# terracotta, slate, plum and solar roofs; a bell tower on top; round trees and cypresses between the houses; a patchwork
+# of fields below; velomobiles along the road, and gliders riding the air the sun warms.
+colina = Poligono([(912, 800), (960, 752), (1030, 712), (1110, 670), (1186, 626), (1250, 596), (1310, 588), (1370, 604),
+                   (1420, 640), (1444, 690), (1446, 770), (1400, 812), (1190, 818), (1010, 816)])
 lz.aguada(colina, '#a9c27a', dens=0.6, borde=0.25, irreg=1.6, gran=0.5, var=0.6,
-          toques=[(1300, 670, 70, '#c9c46a', 0.6), (1100, 720, 70, '#7aa456', 0.6), (1400, 720, 60, '#86a86c', 0.5)],
-          desvanece=(1220, 690, 1220, 776))
-lz.lapiz([spline([(1000, 712), (1080, 676), (1170, 652), (1260, 646), (1350, 658), (1440, 690)])], '#6f8f4a', grosor=0.7,
-         presion=0.4, temblor=0.6, cortes=0.4)
-for k, c in enumerate(('#e9c46a', '#d9b46a', '#c9c47a')):
-    f = Poligono([(1290 + k * 18, 690 + k * 10), (1420 - k * 8, 700 + k * 8), (1414 - k * 8, 712 + k * 8), (1286 + k * 18, 702 + k * 10)])
-    lz.aguada(f, c, dens=0.45, irreg=0.8, gran=0.4, desvanece=(1350, 690, 1350, 740))
-    lz.rayado(f, mezcla(c, '#8a6a3a', 0.5), angulo=6, sep=3.5, presion=0.25, grosor=0.55, largo=40)
-camino_v = Trazo([(1010, 740), (1090, 708), (1170, 694), (1250, 686), (1330, 690)], (9, 9, 8, 7, 5))
-lz.aguada(camino_v, '#efe0b8', dens=0.55, tapa=0.8, irreg=0.6, desvanece=(1100, 700, 1010, 744))
+          toques=[(1280, 620, 80, '#c9c46a', 0.55), (1070, 730, 80, '#7aa456', 0.6), (1370, 700, 70, '#86a86c', 0.5)],
+          desvanece=(1170, 700, 1170, 822))
+lz.lapiz([spline([(940, 770), (1010, 724), (1100, 676), (1186, 630), (1250, 600), (1310, 592), (1370, 606), (1412, 636)])],
+         '#6f8f4a', grosor=0.7, presion=0.4, temblor=0.6, cortes=0.4)
+
+# patchwork of fields on the lower slope (ochre, wheat, lavender, a strip of little sunflowers, a ploughed one)
+CAMPOS = (
+    ([(954, 786), (1020, 760), (1036, 776), (972, 800)], '#e9c46a', 8),
+    ([(1024, 758), (1100, 736), (1114, 752), (1040, 774)], '#9fbf6a', -4),
+    ([(1104, 734), (1186, 718), (1196, 736), (1118, 750)], '#a98ac9', 0),
+    ([(1190, 716), (1272, 708), (1278, 726), (1200, 734)], '#ec9a4e', 4),
+    ([(1276, 706), (1360, 708), (1362, 726), (1282, 724)], '#c9c47a', -2),
+    ([(978, 802), (1042, 778), (1062, 796), (1000, 816)], '#d98a5e', 10),
+    ([(1046, 776), (1120, 754), (1136, 772), (1066, 794)], '#e9d28a', 6),
+    ([(1124, 752), (1200, 738), (1212, 758), (1140, 772)], '#7fa85a', -6),
+    ([(1206, 736), (1282, 728), (1290, 748), (1216, 756)], '#d9b46a', 2),
+    ([(1286, 726), (1364, 728), (1368, 748), (1294, 746)], '#a3b98a', -3),
+)
+for k, (q, c, an) in enumerate(CAMPOS):
+    f = Poligono(q, suave=False)
+    lz.aguada(f, c, dens=0.5, irreg=0.7, gran=0.45, borde=0.6, desvanece=(1170, 740, 1170, 822))
+    lz.rayado(f, mezcla(c, '#7a5a3a', 0.5), angulo=an, sep=3.2, presion=0.24, grosor=0.5, largo=26)
+# the lavender rows and the little sunflower strip
+lz.lapiz([[(1112 + i * 9, 748 - i * 1.4), (1120 + i * 9, 734 - i * 1.6)] for i in range(9)], '#7a5a9a', grosor=0.6, presion=0.4)
+for i in range(16):
+    x = 1194 + i * 5.2 + rng.normal(0, 0.8)
+    y = 731 - i * 0.6 + rng.normal(0, 0.8)
+    lz.aguada(Elipse(x, y, 1.7), '#f2b630', dens=0.95, irreg=0.1, tapa=1)
+    lz.aguada(Elipse(x, y, 0.6), '#6a3a1a', dens=0.9, irreg=0, tapa=1)
+
+# the road at the foot of the houses
+CAMINO = [(925, 772), (1000, 754), (1080, 736), (1160, 716), (1240, 700), (1330, 694), (1410, 700)]
+camino_v = Trazo(CAMINO, (8, 8, 7.5, 7, 6.5, 6, 5.5))
+lz.aguada(camino_v, '#ead7a8', dens=0.7, tapa=0.85, irreg=0.6, desvanece=(1030, 730, 940, 788))
+lz.lapiz([spline([(p[0], p[1] + 6) for p in CAMINO])], '#b89a6a', grosor=0.5, presion=0.3, temblor=0.4, cortes=0.5)
 
 
 def tejado_solar(q, sem):
     """A roof plane (4 corners) covered with the same irregular blue cells as the sunflower's face."""
     r_ = np.random.default_rng(sem)
-    lz.aguada(Poligono(q, suave=False), '#26346a', dens=0.95, tapa=1, irreg=0.3, borde=0.6, gran=0.4,
+    lz.aguada(Poligono(q, suave=False), '#34477e', dens=0.9, tapa=1, irreg=0.3, borde=0.6, gran=0.4,
               toques=[(*np.mean(q, 0), 14, '#2f6f9a', 0.6)])
     q = np.asarray(q, float)
     nu, nv = 6, 3
@@ -385,65 +414,301 @@ def tejado_solar(q, sem):
                       irreg=0.3, borde=0.9, gran=0.2)
             if r_.random() < 0.3:
                 lz.gouache(Elipse(*P((u0 + u1) / 2, v0 + 0.1), 0.9), '#cfe8f0', alfa=0.7, irreg=0)
-    lz.contorno(Poligono(q, suave=False), '#1f2f5a', grosor=0.6, presion=0.5, cortes=0.2)
+    lz.contorno(Poligono(q, suave=False), '#2a3a66', grosor=0.6, presion=0.5, cortes=0.2)
 
 
-def casa34(x, y, w, d, h, pared, sem):
-    """A little whitewashed house in 3/4 view; its single-pitch roof faces the sun and is a solar panel.
-    (x, y) = front-left foot of the house."""
+def tejado_tejas(q, color, sem, ang=8):
+    """A tiled roof plane: a warm wash and rows of tiles in pencil."""
+    f = Poligono(q, suave=False)
+    lz.aguada(f, color, dens=0.85, tapa=1, irreg=0.35, borde=0.65, gran=0.45,
+              toques=[(*np.mean(q, 0), 16, mezcla(color, '#f4c08a', 0.45), 0.55)], semilla=sem)
+    lz.rayado(f, mezcla(color, '#3e2a24', 0.45), angulo=ang, sep=2.6, presion=0.32, grosor=0.5, semilla=sem)
+    lz.contorno(f, mezcla(color, '#3e2a24', 0.6), grosor=0.6, presion=0.5, cortes=0.2, semilla=sem)
+
+
+def ventanas(x, y, w, h, pisos, cols, pared, sem, encendida=None):
+    """Small windows in a front wall: some with shutters, one maybe lit."""
+    r_ = np.random.default_rng(sem)
+    cont = mezcla(pared, '#5e3f30', 0.6)
+    for p in range(pisos):
+        for c in range(cols):
+            cx = x + w * (c + 0.5) / cols
+            cy = y - h * (p + 0.55) / pisos
+            vw, vh = min(w / cols * 0.34, 6.5), min(h / pisos * 0.42, 8.5)
+            v = Poligono([(cx - vw / 2, cy - vh / 2), (cx + vw / 2, cy - vh / 2), (cx + vw / 2, cy + vh / 2), (cx - vw / 2, cy + vh / 2)],
+                         suave=False)
+            luz_ = encendida == (p, c)
+            lz.aguada(v, '#f7d36a' if luz_ else r_.choice(['#4a5a7a', '#5a6a8a', '#3e4a6a']), dens=0.85, tapa=1, irreg=0.1)
+            if luz_:
+                lz.luz((cx, cy, vw), '#fff0b0', fuerza=0.35)
+            if r_.random() < 0.45:   # shutters
+                col = r_.choice(['#4f9c9a', '#2f6f45', '#8a3a3a', '#5a6f9a'])
+                for sx in (-1, 1):
+                    lz.aguada(Poligono([(cx + sx * vw / 2, cy - vh / 2), (cx + sx * (vw / 2 + 2.2), cy - vh / 2),
+                                        (cx + sx * (vw / 2 + 2.2), cy + vh / 2), (cx + sx * vw / 2, cy + vh / 2)], suave=False),
+                              col, dens=0.8, tapa=1, irreg=0.1)
+            lz.contorno(v, cont, grosor=0.4, presion=0.4, cortes=0.1, desfase=0.2)
+
+
+def muros(x, y, w, d, h, pared, sem):
     front = [(x, y), (x + w, y), (x + w, y - h), (x, y - h)]
-    side = [(x + w, y), (x + w + d, y - d * 0.45), (x + w + d, y - d * 0.45 - h - 6), (x + w, y - h)]
-    lz.aguada(Poligono(front, suave=False), pared, dens=0.55, tapa=1, irreg=0.5, borde=0.7, gran=0.4,
-              toques=[(x + w * 0.2, y - h * 0.5, w * 0.4, '#fff3e0', 0.5)])
-    lz.aguada(Poligono(side, suave=False), mezcla(pared, '#8a6a7a', 0.35), dens=0.6, tapa=1, irreg=0.5, borde=0.7, gran=0.4)
-    lz.contorno(Poligono(front, suave=False), '#8a5a3a', grosor=0.6, presion=0.45, cortes=0.3)
-    lz.contorno(Poligono(side, suave=False), '#8a5a3a', grosor=0.6, presion=0.45, cortes=0.3)
+    side = [(x + w, y), (x + w + d, y - d * 0.45), (x + w + d, y - d * 0.45 - h), (x + w, y - h)]
+    lz.aguada(Poligono(front, suave=False), pared, dens=0.6, tapa=1, irreg=0.5, borde=0.7, gran=0.4,
+              toques=[(x + w * 0.25, y - h * 0.5, w * 0.4, mezcla(pared, '#fff6e6', 0.6), 0.5)], semilla=sem)
+    lz.aguada(Poligono(side, suave=False), mezcla(pared, '#8a6a7a', 0.38), dens=0.65, tapa=1, irreg=0.5, borde=0.7, gran=0.4,
+              semilla=sem + 1)
+    cont = mezcla(pared, '#5e3f30', 0.65)
+    lz.contorno(Poligono(front, suave=False), cont, grosor=0.6, presion=0.45, cortes=0.3, semilla=sem)
+    lz.contorno(Poligono(side, suave=False), cont, grosor=0.6, presion=0.45, cortes=0.3, semilla=sem + 1)
+    return side
+
+
+def puerta(x, y, w, h, color):
+    pw = min(w * 0.22, 9)
+    px = x + w * 0.62
+    p = Poligono([(px, y), (px + pw, y), (px + pw, y - min(h * 0.4, 15)), (px, y - min(h * 0.4, 15))], suave=False)
+    lz.aguada(p, color, dens=0.85, tapa=1, irreg=0.2)
+    lz.contorno(p, '#5e3f30', grosor=0.4, presion=0.4, cortes=0.1, desfase=0.2)
+
+
+def casa_solar(x, y, w, d, h, pared, sem, pisos=1, cols=1):
+    """Single-pitch roof that faces the sun and IS a solar panel."""
+    muros(x, y, w, d, h, pared, sem)
     roof = [(x - 4, y - h + 2), (x + w + 3, y - h + 2), (x + w + d + 2, y - h - d * 0.45 - 12), (x + d - 4, y - h - d * 0.45 - 12)]
-    tejado_solar(roof, sem)
-    vw = w * 0.2
-    v = Poligono([(x + w * 0.3, y - h * 0.65), (x + w * 0.3 + vw, y - h * 0.65), (x + w * 0.3 + vw, y - h * 0.3), (x + w * 0.3, y - h * 0.3)],
-                 suave=False)
-    lz.aguada(v, '#f7d36a', dens=0.8, tapa=1, irreg=0.2)
-    lz.luz((x + w * 0.3 + vw / 2, y - h * 0.48, w * 0.2), '#fff0b0', fuerza=0.4)
-    puerta = Poligono([(x + w * 0.66, y), (x + w * 0.84, y), (x + w * 0.84, y - h * 0.62), (x + w * 0.66, y - h * 0.62)], suave=False)
-    lz.aguada(puerta, '#4f9c9a', dens=0.8, tapa=1, irreg=0.2)
+    tejado_tejas(roof, '#b8643f', sem, ang=-62)
+    q = np.asarray(roof, float)
+    B = lambda u, v: tuple(q[0] * (1 - u) * (1 - v) + q[1] * u * (1 - v) + q[2] * u * v + q[3] * (1 - u) * v)
+    tejado_solar([B(0.08, 0.16), B(0.92, 0.16), B(0.92, 0.84), B(0.08, 0.84)], sem)
+    ventanas(x, y - 2, w * 0.55, h - 4, pisos, cols, pared, sem, encendida=(0, 0))
+    puerta(x, y, w, h, '#4f9c9a')
     return (x + w / 2 + d / 2, y - h - d * 0.25)
 
 
+def casa_hastial(x, y, w, d, h, pared, teja, sem, pisos=2, cols=2, chimenea=False):
+    """Gable end facing us; the long roof runs back up the hill."""
+    side = muros(x, y, w, d, h, pared, sem)
+    g = w * 0.42
+    apex = (x + w / 2, y - h - g)
+    tri = Poligono([(x - 1, y - h), (x + w + 1, y - h), apex], suave=False)
+    lz.aguada(tri, pared, dens=0.6, tapa=1, irreg=0.4, borde=0.7, semilla=sem + 2)
+    lz.contorno(tri, mezcla(pared, '#5e3f30', 0.65), grosor=0.5, presion=0.4, cortes=0.3, semilla=sem + 2)
+    roof = [apex, (x + w + 3, y - h + 2), (x + w + d + 3, y - h - d * 0.45 + 2), (apex[0] + d, apex[1] - d * 0.45)]
+    tejado_tejas(roof, teja, sem, ang=-28)
+    if chimenea:
+        cx, cy = x + w * 0.5 + d * 0.6, apex[1] - d * 0.27 + 6
+        ch = Poligono([(cx, cy), (cx + 5, cy), (cx + 5, cy - 11), (cx, cy - 11)], suave=False)
+        lz.aguada(ch, mezcla(pared, '#b07a5a', 0.4), dens=0.8, tapa=1, irreg=0.2)
+        lz.contorno(ch, '#5e3f30', grosor=0.4, presion=0.4)
+    ventanas(x, y - 4, w, h - 4, pisos, cols, pared, sem)
+    lz.aguada(Elipse(apex[0], apex[1] + g * 0.45, 1.8), '#5a6a8a', dens=0.8, tapa=1)   # little attic hole
+    puerta(x, y, w, h, ['#8a3a3a', '#4f9c9a', '#2f6f45', '#c98a3a'][sem % 4])
+
+
+def casa_alero(x, y, w, d, h, pared, teja, sem, pisos=1, cols=3, balcon=False):
+    """Ridge parallel to us: we see the roof slope over the front wall and the gable on the side."""
+    side = muros(x, y, w, d, h, pared, sem)
+    r = 9 + w * 0.08
+    top_l = (x + d * 0.5 - 3, y - h - d * 0.225 - r)
+    top_r = (x + w + d * 0.5 + 1, y - h - d * 0.225 - r)
+    gab = Poligono([(x + w, y - h), (x + w + d, y - h - d * 0.45), top_r], suave=False)
+    lz.aguada(gab, mezcla(pared, '#8a6a7a', 0.38), dens=0.65, tapa=1, irreg=0.4, semilla=sem + 3)
+    lz.contorno(gab, mezcla(pared, '#5e3f30', 0.65), grosor=0.5, presion=0.4, cortes=0.3, semilla=sem + 3)
+    roof = [(x - 4, y - h + 2), (x + w + 3, y - h + 2), top_r, top_l]
+    tejado_tejas(roof, teja, sem, ang=-62)
+    ventanas(x, y - 3, w, h - 3, pisos, cols, pared, sem, encendida=(0, 1) if sem % 3 == 0 else None)
+    if balcon:
+        by = y - h * 0.48
+        lz.lapiz([[(x + w * 0.15, by), (x + w * 0.55, by)]], '#3e2a24', grosor=0.8, presion=0.6)
+        lz.lapiz([[(x + w * 0.15 + i * 3, by), (x + w * 0.15 + i * 3, by - 5)] for i in range(int(w * 0.4 / 3) + 1)], '#3e2a24',
+                 grosor=0.4, presion=0.45)
+        for i in range(3):
+            lz.aguada(Elipse(x + w * (0.2 + i * 0.13), by - 1.5, 1.8), [CORAL, '#c33c4e', '#f2d36b'][i], dens=0.9, tapa=1)
+    puerta(x, y, w, h, ['#4f9c9a', '#8a3a3a', '#c98a3a'][sem % 3])
+
+
+def campanario(x, y, w, d, h):
+    """The bell tower that crowns the hill, its little bell in the arch."""
+    pared = '#f2dcb4'
+    muros(x, y, w, d, h, pared, 77)
+    # belfry arch with the bell
+    ax, ay = x + w / 2, y - h + 14
+    arco_ = Poligono(list(arco(ax, ay, w * 0.26, 7, 180, 360, 16)) + [(ax + w * 0.26, ay + 9), (ax - w * 0.26, ay + 9)])
+    lz.aguada(arco_, '#3e3a5a', dens=0.85, tapa=1, irreg=0.1)
+    lz.aguada(Poligono([(ax - 3.2, ay + 7), (ax + 3.2, ay + 7), (ax + 2.2, ay + 1), (ax - 2.2, ay + 1)]), '#d9a43a', dens=0.95, tapa=1)
+    lz.gouache(Elipse(ax - 1, ay + 3, 0.7), '#fff3c8', alfa=0.8, irreg=0)
+    # a little clock
+    lz.aguada(Elipse(ax, y - h * 0.48, 4.2), '#fbf4e8', dens=0.9, tapa=1)
+    lz.contorno(Elipse(ax, y - h * 0.48, 4.2), '#5e3f30', grosor=0.45, presion=0.5, desfase=0.1)
+    lz.lapiz([[(ax, y - h * 0.48), (ax, y - h * 0.48 - 3)], [(ax, y - h * 0.48), (ax + 2.2, y - h * 0.48)]], '#3e2a24', grosor=0.45,
+             presion=0.6)
+    # pyramid roof
+    pico = (x + w / 2 + d / 2, y - h - d * 0.22 - 26)
+    caras = ([(x - 2, y - h + 1), (x + w + 2, y - h + 1), pico], [(x + w + 2, y - h + 1), (x + w + d + 2, y - h - d * 0.45 + 1), pico])
+    for k, q in enumerate(caras):
+        tejado_tejas(q, '#b8553a' if k == 0 else '#8f4030', 78 + k, ang=-70 + 40 * k)
+    vx_, vy_ = pico[0], pico[1] - 7
+    lz.lapiz([[pico, (vx_, vy_)], [(vx_ - 8, vy_), (vx_ + 7, vy_)]], '#5e3f30', grosor=0.6, presion=0.65)
+    lz.aguada(Poligono([(vx_ + 10, vy_), (vx_ + 5.5, vy_ - 3), (vx_ + 5.5, vy_ + 3)], suave=False), '#5e3f30', dens=0.95, tapa=1)
+    lz.aguada(Poligono([(vx_ - 6, vy_), (vx_ - 10, vy_ - 5), (vx_ - 11, vy_), (vx_ - 9.5, vy_ + 1)], suave=False), '#e8735e', dens=0.95,
+              tapa=1)
+    lz.contorno(Poligono([(x, y), (x + w, y), (x + w, y - h), (x, y - h)], suave=False), '#7a5a3a', grosor=0.6, presion=0.5,
+                cortes=0.2)
+
+
+def arbol(x, y, r, color, semilla):
+    mata(lz, x, y, r, color, semilla=semilla)
+    lz.aguada(Trazo([(x, y + r * 0.55), (x, y + r * 1.45)], (2.6, 2.2)), '#7a5a3a', dens=0.85, tapa=0.6)
+
+
+def cipres(x, y, h, semilla):
+    f = Poligono(list(spline([(x, y - h), (x + h * 0.13, y - h * 0.55), (x + h * 0.11, y - h * 0.08), (x, y),
+                              (x - h * 0.11, y - h * 0.08), (x - h * 0.13, y - h * 0.55)], cerrada=True)))
+    lz.aguada(f, '#3f6f45', dens=0.8, tapa=1, irreg=0.4, borde=0.8, gran=0.3,
+              toques=[(x - h * 0.04, y - h * 0.6, h * 0.12, '#6f9f5a', 0.6)], semilla=semilla)
+    lz.rayado(f, '#2f4f35', angulo=75, sep=2.6, presion=0.35, grosor=0.5, largo=7, semilla=semilla)
+
+
+# back row, near the top: the tower and its neighbours
 tejados = []
-for (x, y, w, d, h, c, sm) in ((1110, 690, 40, 20, 26, '#f6ead6', 1), (1172, 676, 46, 22, 30, '#f4dcc0', 2),
-                               (1240, 668, 40, 20, 26, '#f6ead6', 3), (1300, 680, 44, 22, 28, '#f2d4b8', 4),
-                               (1196, 714, 48, 24, 32, '#f6e2c8', 5)):
-    tejados.append(casa34(x, y, w, d, h, c, sm))
-# the seeds that landed already turn as wind turbines on the hill
-for (x, y, h) in ((1370, 668, 78), (1410, 690, 60), (1060, 700, 56)):
+arbol(1212, 616, 12, '#6f9f5a', 401)
+cipres(1358, 622, 40, 402)
+campanario(1272, 618, 26, 12, 74)
+casa_alero(1220, 640, 46, 18, 26, '#f6ead6', '#c4553a', 11, cols=3)
+casa_hastial(1310, 640, 34, 20, 34, '#eda38a', '#6f5a8a', 12, pisos=2, cols=2, chimenea=True)
+casa_alero(1354, 650, 36, 18, 26, '#f4e2a8', '#b8553a', 13, cols=2)
+cipres(1302, 652, 46, 408)
+cipres(1212, 644, 40, 411)
+# middle row
+arbol(1136, 650, 13, '#5f8f4a', 403)
+cipres(1186, 676, 34, 404)
+casa_alero(1146, 680, 40, 20, 28, '#f6ead6', '#a8603a', 14, cols=2)
+casa_hastial(1198, 682, 32, 18, 40, '#e2b25e', '#b8643f', 15, pisos=2, cols=2)
+casa_alero(1246, 680, 52, 20, 30, '#a9c3d9', '#5a6f9a', 16, cols=3, balcon=True)
+tejados.append(casa_solar(1312, 684, 40, 20, 28, '#f2d4b8', 17))
+arbol(1380, 676, 12, '#6f9f5a', 405)
+cipres(1240, 690, 52, 409)
+cipres(1138, 702, 46, 410)
+# front row, along the road
+casa_hastial(1066, 714, 32, 18, 32, '#f6ead6', '#9a3a3a', 18, pisos=2, cols=1, chimenea=True)
+tejados.append(casa_solar(1110, 708, 44, 22, 30, '#dfe3d6', 19, pisos=1, cols=2))
+casa_alero(1172, 700, 40, 18, 24, '#e8c06a', '#c4553a', 20, cols=2)
+casa_hastial(1222, 700, 30, 16, 30, '#f6ead6', '#8a5a3a', 21, pisos=2, cols=1)
+tejados.append(casa_solar(1260, 698, 44, 20, 28, '#f0b8a8', 22, pisos=1, cols=2))
+casa_alero(1316, 698, 38, 18, 26, '#f6ead6', '#6f5a8a', 23, cols=2)
+arbol(1040, 722, 11, '#5f8f4a', 406)
+cipres(1368, 704, 30, 407)
+
+# the seeds that landed already turn as wind turbines on the edges of the hill
+for (x, y, h) in ((1398, 640, 74), (1170, 616, 50)):
     lz.aguada(Trazo([(x, y), (x, y - h)], (3.8, 2.2)), '#f4f0e6', dens=0.6, tapa=1, irreg=0.1)
     lz.lapiz([[(x - 1.8, y), (x - 1, y - h)], [(x + 1.8, y), (x + 1, y - h)]], '#8a7a6a', grosor=0.5, presion=0.5)
     molinillo(x, y - h, h * 0.42, ang=rng.uniform(-20, 20), semilla_=False)
-for (x, y, r) in ((1350, 650, 14), (1148, 664, 11), (1272, 650, 10)):
-    mata(lz, x, y, r, '#5f8f4a')
-    lz.aguada(Trazo([(x, y + r * 0.6), (x, y + r * 1.5)], (3, 3)), '#7a5a3a', dens=0.8, tapa=0.5)
-for k in range(22):
-    x = rng.uniform(1040, 1420)
-    y = rng.uniform(700, 740)
-    lz.aguada(Elipse(x, y, rng.uniform(1.5, 2.4)), rng.choice([CORAL, '#f2d36b', '#fff1e0', '#c33c4e']), dens=0.85, irreg=0.2,
+for k in range(26):
+    t = rng.uniform(0.05, 0.95)
+    x = 950 + 450 * t
+    y = np.interp(x, [p[0] for p in CAMINO], [p[1] for p in CAMINO]) + rng.uniform(8, 14)
+    lz.aguada(Elipse(x, y, rng.uniform(1.4, 2.2)), rng.choice([CORAL, '#f2d36b', '#fff1e0', '#c33c4e']), dens=0.85, irreg=0.2,
               tapa=0.7)
-# someone cycles along the road
-cx_, cy_ = 1270, 684
-for dx in (-8, 8):
-    lz.lapiz([arco(cx_ + dx, cy_, 6, 6, 0, 360, 24)], '#3e2a24', grosor=0.7, presion=0.7, temblor=0.05)
-lz.lapiz([[(cx_ - 8, cy_), (cx_ - 1, cy_ - 7), (cx_ + 8, cy_), (cx_ - 1, cy_ - 7), (cx_ + 4, cy_ - 9)]], '#c33c4e', grosor=0.8,
-         presion=0.7, temblor=0.05)
-lz.aguada(Trazo([(cx_ - 3, cy_ - 11), (cx_ + 1, cy_ - 22)], (5.5, 4.5)), '#4f9c9a', dens=0.85, tapa=1)
-lz.aguada(Elipse(cx_ + 2, cy_ - 27, 3.8), '#c98a5e', dens=0.75, tapa=1)
-lz.lapiz([[(cx_ - 1, cy_ - 12), (cx_ + 4, cy_ - 4)], [(cx_ + 1, cy_ - 20), (cx_ + 5, cy_ - 11)]], '#4a5a8a', grosor=1.0, presion=0.7)
 
-# threads of light: the sunflower shares its energy with every roof (community energy)
+
+# velomobiles on the road: little pedal-powered shells, a head peeping out of each
+def velomovil(x, y, L, color, cabeza='#c98a5e', casco=None, ropa='#4f9c9a', banderin='#ec8a2e'):
+    """A velomobile going right along the road, tilted with it. (x, y): where it touches the road."""
+    t = math.atan2(np.interp(x + 4, [p[0] for p in CAMINO], [p[1] for p in CAMINO]) -
+                   np.interp(x - 4, [p[0] for p in CAMINO], [p[1] for p in CAMINO]), 8)
+    c_, s_ = math.cos(t), math.sin(t)
+    P = lambda u, v: (x + (u * c_ + v * s_) * L, y + (u * s_ - v * c_) * L)
+    lz.aguada(Poligono([P(-0.5, -0.01), P(0.55, -0.01), P(0.55, -0.05), P(-0.5, -0.05)], suave=False), '#8a7a5a', dens=0.3,
+              irreg=0.3, suave=1.5)   # its shadow on the road
+    # the wheels peep out under the shell: two in front, one behind, thin and spoked like a bicycle's
+    for u in (0.27, 0.33, -0.34):
+        cx, cy = P(u, 0.085)
+        rr = 0.085 * L
+        lz.lapiz([arco(cx, cy, rr, rr, 0, 360, 28)], '#3e2a24', grosor=0.55, presion=0.7, temblor=0.03)
+        lz.lapiz([[(cx + rr * math.cos(k * math.pi / 4), cy + rr * math.sin(k * math.pi / 4)),
+                   (cx - rr * math.cos(k * math.pi / 4), cy - rr * math.sin(k * math.pi / 4))] for k in range(4)], '#6a5a4a',
+                 grosor=0.3, presion=0.45, temblor=0.0)
+    # mast and pennant, the sign everybody recognises
+    m0, m1 = P(-0.42, 0.2), P(-0.47, 1.0)
+    lz.lapiz([[m0, m1]], '#5e3f30', grosor=0.45, presion=0.6, temblor=0.05)
+    lz.aguada(Poligono([m1, P(-0.47, 0.85), P(-0.70, 0.94)], suave=False), banderin, dens=0.95, tapa=1, irreg=0.1)
+    # the rider: shoulders and head out of the cockpit, in the back third
+    lz.aguada(Elipse(*P(-0.17, 0.36), 0.11 * L, 0.065 * L, math.degrees(t)), ropa, dens=0.9, tapa=1, irreg=0.1)
+    hx, hy = P(-0.16, 0.47)
+    lz.aguada(Elipse(hx, hy, 0.075 * L), cabeza, dens=0.85, tapa=1, irreg=0.1)
+    if casco:
+        lz.aguada(Poligono(list(arco(hx, hy - 0.4, 0.085 * L, 0.07 * L, 180, 360, 12))), casco, dens=0.9, tapa=1, irreg=0.1)
+    # the shell: pointed nose low in front, highest by the rider, tail tapering
+    cuerpo = Poligono(list(spline([P(0.58, 0.08), P(0.44, 0.19), P(0.20, 0.30), P(-0.04, 0.35), P(-0.27, 0.345), P(-0.45, 0.28),
+                                   P(-0.56, 0.18), P(-0.50, 0.10), P(0.0, 0.09), P(0.45, 0.09)], cerrada=True)))
+    lz.aguada(cuerpo, color, dens=0.9, tapa=1, irreg=0.3, borde=0.7, gran=0.3,
+              toques=[(*P(0.15, 0.2), L * 0.2, mezcla(color, '#fff3dc', 0.5), 0.6)])
+    lz.contorno(cuerpo, mezcla(color, '#3e2a24', 0.6), grosor=0.55, presion=0.55, cortes=0.1, desfase=0.2)
+    # the cockpit opening around the rider
+    lz.lapiz([[P(-0.02, 0.348), P(-0.31, 0.343)]], mezcla(color, '#3e2a24', 0.7), grosor=0.6, presion=0.6)
+    lz.gouache(Trazo([P(0.42, 0.17), P(0.18, 0.27), P(0.0, 0.31)], (0.7, 0.9, 0.5)), '#fff6e6', alfa=0.75, irreg=0.1)
+
+
+def posa(x):
+    return x, float(np.interp(x, [p[0] for p in CAMINO], [p[1] for p in CAMINO])) + 2
+
+
+# a row along the lower road, heading up to the village behind a bicycle
+velomovil(*posa(962), 48, '#e8735e', '#8a5a3a', '#2f8f92', ropa='#f2d36b')
+velomovil(*posa(1022), 41, '#2f8f92', '#f0c8a0', '#f2b630', ropa='#c33c4e')
+velomovil(*posa(1076), 37, '#f2b630', '#5a3a2a', '#c33c4e', ropa='#4f9c9a', banderin='#c33c4e')
+# and someone still cycles the ordinary way
+cx_, cy_ = posa(1136)
+cy_ -= 2
+for dx in (-7, 7):
+    lz.lapiz([arco(cx_ + dx, cy_, 5.5, 5.5, 0, 360, 24)], '#3e2a24', grosor=0.7, presion=0.7, temblor=0.05)
+lz.lapiz([[(cx_ - 7, cy_), (cx_ - 1, cy_ - 6), (cx_ + 7, cy_), (cx_ - 1, cy_ - 6), (cx_ + 4, cy_ - 8)]], '#c33c4e', grosor=0.8,
+         presion=0.7, temblor=0.05)
+lz.aguada(Trazo([(cx_ - 3, cy_ - 10), (cx_ + 1, cy_ - 20)], (5, 4)), '#8d73b0', dens=0.85, tapa=1)
+lz.aguada(Elipse(cx_ + 2, cy_ - 24.5, 3.5), '#5a3a2a', dens=0.8, tapa=1)
+lz.lapiz([[(cx_ - 1, cy_ - 11), (cx_ + 4, cy_ - 4)], [(cx_ + 1, cy_ - 18), (cx_ + 5, cy_ - 10)]], '#4a5a8a', grosor=1.0, presion=0.7)
+
+# threads of light: the sunflower shares its energy with every solar roof (community energy)
 for k, (tx, ty) in enumerate(tejados):
-    p = bezier(H(92, 120), (850 + k * 14, 570 + k * 6), (1000 + k * 12, 640), (tx, ty + 2), 60)
+    p = bezier(H(92, 120), (850 + k * 14, 560 + k * 8), (950 + k * 12, 610), (tx, ty + 2), 60)
     lz.lapiz([p], '#e9b44a', grosor=0.6, presion=0.5, temblor=0.3, cortes=0.35)
     for j in (18, 34, 50):
         lz.aguada(Elipse(*p[j], 1.7), '#f2b630', dens=0.9, irreg=0.1)
+
+
+# gliders: no engine, they climb on the air the June sun warms. Seen from below and behind as they climb away:
+# long slender wings across the sky, a short foreshortened fuselage, coloured wing tips.
+def planeador(x, y, env, inclina=-8, franja='#e8735e', fu=0.42):
+    t = math.radians(inclina)
+    vx, vy = math.cos(t), math.sin(t)          # along the wings
+    ux, uy = math.sin(t), -math.cos(t)         # along the fuselage, nose away from us (up the sheet)
+    R = lambda u, v: (x + (u * fu * ux + v * vx) * env, y + (u * fu * uy + v * vy) * env)
+    def ala(sd):
+        return Poligono([R(0.05, 0.02 * sd), R(0.06, 0.30 * sd), R(0.04, 0.50 * sd), R(0.0, 0.505 * sd),
+                         R(-0.02, 0.30 * sd), R(-0.05, 0.02 * sd)], suave=False)
+    estab = Poligono([R(-0.30, -0.085), R(-0.27, -0.085), R(-0.265, 0.085), R(-0.295, 0.085)], suave=False)
+    fus = Trazo([R(0.20, 0), R(0.12, 0), R(0.0, 0), R(-0.16, 0), R(-0.30, 0)],
+                (0.012 * env, 0.02 * env, 0.019 * env, 0.011 * env, 0.006 * env))
+    for f in (estab, fus, ala(-1), ala(1)):
+        lz.aguada(f, '#fbf6ec', dens=0.95, tapa=1, irreg=0.1, borde=0.8)
+        lz.contorno(f, '#6a6a7a', grosor=0.5, presion=0.5, cortes=0.05, desfase=0.1)
+    # the fin, standing up from the tail
+    bx, by = R(-0.29, 0)
+    fin = Poligono([(bx - 0.006 * env * vx, by), (bx + 0.006 * env * vx, by), (bx + 0.004 * env, by - 0.07 * env),
+                    (bx - 0.005 * env, by - 0.07 * env)], suave=False)
+    lz.aguada(fin, '#fbf6ec', dens=0.95, tapa=1, irreg=0.1)
+    lz.contorno(fin, '#6a6a7a', grosor=0.5, presion=0.5, cortes=0.05, desfase=0.1)
+    for sd in (-1, 1):   # coloured wing tips
+        lz.aguada(Poligono([R(0.045, 0.42 * sd), R(0.04, 0.50 * sd), R(0.0, 0.505 * sd), R(-0.008, 0.42 * sd)], suave=False),
+                  franja, dens=0.9, tapa=1, irreg=0.1)
+    lz.aguada(Elipse(*R(0.12, 0), 0.012 * env, 0.02 * env, inclina), '#7fb0c9', dens=0.85, tapa=1, irreg=0.1)   # canopy
+    lz.aguada(Elipse(*R(0.0, 0), 0.5 * env, 0.01 * env, inclina), '#c9b9a0', dens=0.1, suave=5)
+
+
+planeador(1060, 104, 150, inclina=24, franja='#e8735e')
+planeador(1338, 404, 78, inclina=-24, franja='#e8735e')
+lz.lapiz([[(1338 + 62 * math.cos(a_), 446 + 16 * math.sin(a_)) for a_ in np.linspace(a0, a0 + 0.5, 6)]
+          for a0 in np.linspace(0.3, 2.9, 4)], '#c9b08a', grosor=0.45, presion=0.28, temblor=0.2)
 
 # a bee comes to the sunflower, its looping flight in pencil
 def abeja(x, y, s=1.0, ang=0):
