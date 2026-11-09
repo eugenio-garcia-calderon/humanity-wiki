@@ -10551,3 +10551,14 @@ Eugenio asked for five things on the 3D world; all on branch `nube/arquitectura-
   - la pantalla completa funciona con la API en escritorio, con el sustituto CSS (escritorio y móvil de 390 px) y con Esc;
   - `tsc` y `vite build` pasan.
 - Sin verificar: el móvil con la app instalada.
+
+## 2026-11-09 — Aeromóvil: capas de render más fotorrealistas para todos los vehículos
+
+- Eugenio: «agrega capas a todos los vehículos para que sean un render más foto realista». Se hizo en el visor, así que vale a la vez para el Aeromóvil, el otro velomóvil y todos los coches del garaje.
+- **Reflejos de un sitio real:** la pintura, el cristal y el cromo reflejan una foto de 360° de un parque con cielo azul y árboles en el horizonte («Rooitou Park», Poly Haven, CC0), en lugar de un degradado dibujado. Se le quitó el sol (pone el suyo el visor, alineado con la sombra) y el césped se cambió por gris asfalto como el suelo. Pesa 35 kB; mientras llega, se ve el cielo de antes.
+  - Probada también una plaza con edificios y cielo cubierto: agrisaba las pinturas y teñía de rojo las llantas.
+- **Sombras para todos:** la sombra del sol cubría solo los 10 m del centro, así que los coches del garaje a 9 y 12 m flotaban sin sombra. Ahora la caja de la sombra se ajusta a lo que hay en escena (al cambiar el garaje o el diseño, y cada segundo por si algo carga tarde).
+- **Color neutro:** mapeo tonal Khronos PBR Neutral en lugar de ACES. Los blancos ya no se agrisan y el azul marino y el verde inglés salen de su color.
+- **Probado y descartado:** un halo de luz (bloom). El reflejo del sol en la cúpula se abría en una mancha que velaba el coche.
+- Comprobado en el editor con el navegador de pruebas (sin errores en consola), con `tsc` y con `vite build`.
+- Sin verificar: el móvil con la app instalada, y el rendimiento en un portátil con gráfica integrada. El coste por fotograma es el de antes: misma sombra de 2048, sin pases nuevos.

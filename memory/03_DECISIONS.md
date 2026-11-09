@@ -1110,3 +1110,24 @@ Chose (b): two hand-made silhouettes of the same car had already disagreed by 60
 Chose (b) + (c). With (b) everyone lands on the clean default layout now. With (c) the next new car cannot hide an old one even if someone moved cars around. (c) uses footprints from `largo`/`ancho`/`batalla`, swaps them when the car is turned 90°, adds a 0.3 m margin, and keeps a fixed footprint for the Aeromóvil at the centre. It runs only on load, not while dragging.
 
 **Fullscreen.** Uses the Fullscreen API on the viewer `<section>` when `document.fullscreenEnabled` is true. Otherwise (iPhone Safari) it falls back to `fixed inset-0 z-[100] h-[100dvh]` with body scroll locked and Esc to close. The canvas already follows its box through a `ResizeObserver`, so both modes resize the renderer. Cards in the top-right corner move to `right-[52px]` from `sm` up, and below the button on phones. The wind-tunnel card stays outside the section (2026-11-07 decision), so it is not visible in fullscreen.
+
+## 2026-11-09 — Viewer render layers: photographed environment, fitted sun shadow, Neutral tone mapping; no bloom
+
+**Environment.** Candidates were three Poly Haven HDRIs (CC0, fetched from `pmndrs/drei-assets` with a blobless sparse clone): Rooitou Park, Potsdamer Platz and Kiara dawn.
+- Potsdamer Platz (overcast city) gave the most "photographic" reflection lines. But it greyed dark paint against our sunny background and tinted rims red from the paving.
+- Chose Rooitou Park and edited it:
+  - Its sun is painted out by interpolating the clean sky across ±230 px and keeping only darker pixels (trees). Our own sun sphere is added to the PMREM scene, so glints stay aligned with the shadow.
+  - Below the horizon, grass becomes an asphalt-grey gradient.
+- Shipped as an sRGB JPG of radiance/1.2 (35 kB) instead of the 1.6 MB `.hdr`. The sky's peak radiance after removing the sun is ~1.15, so 8-bit loses only ~2 % median (measured).
+- The HDR file would have been ~1.5 MB per visit after each deploy, because only the entry bundle is precached and code caches are purged on activate.
+- Settings: `environmentIntensity` 1.5. Measured alternatives: 0.55–1.0 left paint dull; the procedural sky stays until the JPG loads.
+
+**Shadow.** The sun's ortho shadow box was fixed at ±5 m around the origin, so garage cars at 9–12 m had no shadow. It is now fitted to the box of `coche ∪ grupoRef ∪ grupoGaraje`, projected into light space, whenever those change and once per second (for models that finish loading late). `mapSize` stays 2048:
+- the A1 alone gets ~2.4 mm/texel (was ~5);
+- the full garage, ~13 mm.
+
+4096 was tried and made every frame several times slower on the software renderer used for checks. The cost on real GPUs was not measured, so it was not shipped.
+
+**Tone mapping.** Moved from ACES Filmic to Neutral. ACES desaturates and greys whites; most garage cars are white, and Neutral is meant for product renders. AgX was also compared.
+
+**Bloom.** UnrealBloomPass was tried at threshold 1.6 and at 6. At 1.6 it veiled white bodywork. At 6 it turned the sun glint on the canopy into a large blob. Removed; it can come back for emissive lamps alone with a selective (layer-masked) bloom, ~1 h.

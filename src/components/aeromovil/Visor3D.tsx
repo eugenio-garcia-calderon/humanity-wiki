@@ -20,10 +20,11 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/examples/jsm/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
-// Reflections of a real place (2026-11-09): Potsdamer Platz, Berlin, by Poly Haven (CC0, via pmndrs/drei-assets),
-// stored as an sRGB JPG of radiance / ENTORNO_ESCALA (1024×512, 62 kB instead of the 1.5 MB .hdr).
-import entornoUrl from './entorno/potsdamer_platz.jpg';
+// Reflections of a real place (2026-11-09): «Rooitou Park» by Poly Haven (CC0, via pmndrs/drei-assets), a sunny
+// sky with a tree line. Its sun is painted out (the viewer adds its own, aligned with the shadow) and the grass
+// below the horizon is replaced by asphalt grey like the viewer's floor. Stored as an sRGB JPG of
+// radiance / ENTORNO_ESCALA (1024×512, 35 kB instead of the 1.6 MB .hdr).
+import entornoUrl from './entorno/parque.jpg';
 import {
   ARM_UP, CELULA, TIRE_W, TRAVEL_F, TRAVEL_R, enZona, tramosTubo,
   type Modelo, type ModeloGota, type ModeloA1, type Piel, type Superficie,
@@ -273,8 +274,8 @@ function texturaAsfalto() {
  * rincones, bajo el coche, entre piezas), el cristal con transmisión y el
  * antialias por multimuestreo; en móvil se queda lo de antes, que ya va justo.
  */
-/** The environment JPG stores radiance divided by this (the brightest point of the photo is ~11). */
-const ENTORNO_ESCALA = 12;
+/** The environment JPG stores radiance divided by this (with the sun painted out, the brightest sky is ~1.15). */
+const ENTORNO_ESCALA = 1.2;
 const CALIDAD_ALTA = typeof window !== 'undefined' && window.matchMedia?.('(pointer: fine)').matches && !/Mobi|Android/i.test(navigator.userAgent);
 
 function materiales() {
@@ -1194,9 +1195,10 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     let entornoRT = pm.fromScene(es, 0.02), vivo = true;
     scene.environment = entornoRT.texture;
     // Capa de reflejos (2026-11-09, Eugenio: «agrega capas a todos los vehículos para que sean un render más
-    // fotorrealista»): la pintura, el cristal y el cromo de todos los coches reflejan un sitio real, una plaza con
-    // edificios y cielo cubierto, en lugar de un degradado. El sol se añade encima para que siga dibujando el
-    // brillo alargado. Mientras llega la imagen (62 kB), se queda el cielo dibujado.
+    // fotorrealista»): la pintura, el cristal y el cromo de todos los coches reflejan un sitio real, un cielo azul
+    // con una fila de árboles en el horizonte, en lugar de un degradado. El sol se añade encima para que siga
+    // dibujando el brillo alargado. Mientras llega la imagen (35 kB), se queda el cielo dibujado.
+    // Probado contra una plaza con edificios y cielo cubierto: agrisaba las pinturas y teñía de rojo las llantas.
     const cargarEntorno = (url: string, escala: number, intensidad: number) => new THREE.TextureLoader().load(url, tex => {
       if (!vivo) { tex.dispose(); return; }
       tex.colorSpace = THREE.SRGBColorSpace;
@@ -1209,7 +1211,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       entornoRT.dispose(); entornoRT = nuevo; scene.environment = nuevo.texture; scene.environmentIntensity = intensidad;
       ee.traverse((o: any) => { o.geometry?.dispose(); o.material?.dispose(); }); tex.dispose();
     });
-    cargarEntorno(entornoUrl, ENTORNO_ESCALA, 0.6);
+    // A 1,5: sin su sol, el cielo de la foto es más oscuro que el dibujado; a 1 las pinturas quedaban apagadas.
+    cargarEntorno(entornoUrl, ENTORNO_ESCALA, 1.5);
     const fondo = cielo(false); fondo.position.set(-1.5, 0, 0); scene.add(fondo);
     scene.fog = new THREE.Fog(0xf3dcc3, 16, 60);
 
@@ -1218,7 +1221,9 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     const sol = new THREE.DirectionalLight(0xffe9cf, 4.6); sol.position.set(3.5, 7, 4.5); sol.castShadow = true;
     // Capa de sombras: la sombra del sol cubre todo lo que hay en escena, no solo los 10 m del centro (los coches
     // del garaje a 9 y 12 m flotaban sin sombra). La caja se ajusta en `ajustarSombra`, más abajo.
-    sol.shadow.mapSize.set(CALIDAD_ALTA ? 4096 : 2048, CALIDAD_ALTA ? 4096 : 2048);
+    // 2048 como antes: ajustada a lo que se ve, la sombra del Aeromóvil solo sale más fina (5 m en 2048 en vez de 10)
+    // y con el garaje entero (unos 26 m) queda en ~13 mm por punto, que con el borde suave no se nota.
+    sol.shadow.mapSize.set(2048, 2048);
     Object.assign(sol.shadow.camera, { left: -5, right: 5, top: 4, bottom: -4, near: 1, far: 20 });
     sol.shadow.bias = -0.0003; sol.shadow.normalBias = 0.01; scene.add(sol); scene.add(sol.target);
     const contraluz = new THREE.DirectionalLight(0xc9dcff, 1.2); contraluz.position.set(-6, 3, -5); scene.add(contraluz);
@@ -1272,17 +1277,14 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       aoPass.blendIntensity = 0.9;
       composer.addPass(aoPass);
     }
-    // Capa de brillo: solo lo muchísimo más claro que el cielo (el reflejo del sol en la pintura y el cromo) se abre
-    // en un halo leve, como en una foto. Con el umbral más bajo velaba todo el coche. Solo en ordenador.
-    let brillo: UnrealBloomPass | null = null;
-    if (CALIDAD_ALTA) { brillo = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.1, 0.15, 6); composer.addPass(brillo); }
+    // Sin halo (bloom): probado el 2026-11-09, el reflejo del sol en la cúpula se abría en una mancha que velaba el
+    // coche, y con el umbral alto no aportaba nada que se viera.
     composer.addPass(new OutputPass());
     const dibujar = () => composer.render();
-    if (import.meta.env.DEV) (window as any).__visorPrueba = { scene, renderer, brillo, M, cargarEntorno, cielo, pm, THREE, usarCielo: (i: number) => { const e2 = new THREE.Scene(); e2.add(cielo(true)); const r = pm.fromScene(e2, 0.02); entornoRT.dispose(); entornoRT = r; scene.environment = r.texture; scene.environmentIntensity = i; } };  // TEMP-PRUEBA
     const resize = () => {
       const r = cv.getBoundingClientRect();
       renderer.setSize(r.width, r.height, false); camera.aspect = r.width / Math.max(1, r.height); camera.updateProjectionMatrix();
-      const pr = renderer.getPixelRatio(); composer.setSize(r.width, r.height); composer.setPixelRatio(pr); aoPass?.setSize(r.width * pr, r.height * pr); brillo?.setSize(r.width * pr, r.height * pr);
+      const pr = renderer.getPixelRatio(); composer.setSize(r.width, r.height); composer.setPixelRatio(pr); aoPass?.setSize(r.width * pr, r.height * pr);
     };
     const ro = new ResizeObserver(resize); ro.observe(cv); resize();
 
@@ -1389,7 +1391,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       cv.removeEventListener('pointermove', moverArrastre); cv.removeEventListener('pointerup', soltarArrastre); cv.removeEventListener('pointercancel', soltarArrastre);
       scene.traverse((o: any) => { o.geometry?.dispose?.(); });
       M.solar.map?.dispose();
-      vivo = false; entornoRT.dispose(); brillo?.dispose();
+      vivo = false; entornoRT.dispose();
       Object.values(M).forEach(m => m.dispose()); pm.dispose(); composer.dispose(); renderer.dispose();
     };
   }, []);
