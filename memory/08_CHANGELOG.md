@@ -10734,3 +10734,7 @@ Eugenio: «no veo el Bala en el selector de diseños».
 ### 2026-11-09 — Modo oscuro: las letras sobre fotos y el boletín del pie vuelven a ser claras
 - Eugenio: «las letras me salen negras». El tema oscuro cambia `--color-white` por la superficie oscura; encima de una foto, o de un fondo elegido a mano, el fondo no cambia y el texto quedaba casi negro.
 - Nuevo atributo `data-fondo-oscuro` (`scripts/generar-tema-oscuro.mjs`): dentro, la paleta blanca y pizarra se queda como en el modo claro. Lo llevan los títulos de las tarjetas de proyecto, los de las noticias, la cabecera con foto de cada proyecto y el boletín cuando el pie es oscuro.
+
+### 2026-11-09 — Portada de luzhumanidad.com: una sola línea
+- Eugenio: «con menos texto y menos números, más elegante y simple, y que ocupe menos para que se vean las tarjetas». `PresentacionSitio` pasa de caja con frase, cuatro cifras y dos botones a titular y «Colaborar» en una línea; de 271 a 58 px en escritorio.
+- Nuevo `config.sitio.portada.titular` («Energía, movilidad, vivienda y comunidad.», ya puesto en producción). El lema largo se queda para la tarjeta al compartir.
