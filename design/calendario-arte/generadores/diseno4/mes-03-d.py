@@ -485,7 +485,7 @@ mano(lz, 1312, 482, -105, 19, 'piel5', 'agarra', lado=-1)
 
 # ------------------------------------------------------------------ small things with intention
 # a pair of dragon... no: a kingfisher darting along the river, a flash of turquoise and orange
-pajaro(lz, 360, 560, 19, '#2f9cb0', ang=170, alas='arriba', vientre='#f0a050')
+pajaro(lz, 470, 590, 19, '#2f9cb0', ang=172, alas='arriba', vientre='#f0a050')
 # blue wildflowers and mint at the bank by the spring
 for (x, y) in ((1180, 660), (1215, 668), (1250, 662), (980, 492), (950, 500)):
     lz.lapiz([[(x, y), (x + rng.normal(0, 3), y - 18)]], '#4f6f45', grosor=0.8, presion=0.6)
