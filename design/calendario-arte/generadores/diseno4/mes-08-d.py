@@ -39,7 +39,7 @@ VERDE_O = '#3f6f45'
 LP = '#5e3f30'
 
 # ------------------------------------------------------------------ the rising sun on the water (right)
-SOL = (1300, 556)
+SOL = (1342, 556)
 lz.aguada(Elipse(SOL[0], SOL[1] - 20, 210, 150), '#f7c98a', dens=0.18, suave=60, gran=0.05)
 sol = Poligono(np.vstack([arco(SOL[0], SOL[1], 58, 58, 180, 360, 40), [(SOL[0] + 58, SOL[1]), (SOL[0] - 58, SOL[1])]]),
                suave=False)
@@ -54,7 +54,7 @@ for k in range(13):
                  (SOL[0] + math.cos(a) * (88 + 14 * (k % 2)), SOL[1] + math.sin(a) * (88 + 14 * (k % 2)))])
 lz.lapiz(rays, '#e0902e', grosor=0.9, presion=0.55, temblor=0.3)
 # the water: a band of sea that fades out at both ends, the sun's road on it
-agua = Poligono([(1040, 560), (1200, 554), (1440, 556), (1450, 600), (1300, 618), (1120, 614), (1030, 596)])
+agua = Poligono([(990, 562), (1200, 554), (1450, 556), (1455, 600), (1300, 618), (1080, 616), (980, 598)])
 lz.aguada(agua, '#5fa8b0', dens=0.72, borde=0.7, gran=0.45, flor=1,
           toques=[(SOL[0], 580, 60, '#f6c27a', 0.85), (1100, 590, 60, '#2f7f8a', 0.6), (1420, 590, 40, '#2f7f8a', 0.6)],
           desvanece=None)
@@ -66,13 +66,13 @@ for k in range(9):
 lz.lapiz([[(1060 + k * 40 + rng.normal(0, 8), 590 + rng.normal(0, 8)), (1080 + k * 40, 590 + rng.normal(0, 8))]
           for k in range(9)], '#2f6f7a', grosor=0.6, presion=0.4, temblor=0.3)
 # a swimmer far off: head and one arm out of the water
-lz.aguada(Elipse(1130, 578, 5.5, 5), '#9b6141', dens=0.8, tapa=1, irreg=0.2)
-lz.aguada(Elipse(1130, 575, 5.6, 3.2), '#e8735e', dens=0.85, tapa=1, irreg=0.2)   # swim cap
-lz.aguada(Trazo([(1138, 580), (1146, 566), (1156, 562)], (3, 2.6, 2.2)), '#9b6141', dens=0.8, tapa=1)
-lz.lapiz([arco(1130, 584, 12, 3, 0, 360, 20), arco(1130, 586, 18, 4, 200, 340, 20)], '#e9f4f0', grosor=0.7, presion=0.7)
+lz.aguada(Elipse(1250, 578, 5.5, 5), '#9b6141', dens=0.8, tapa=1, irreg=0.2)
+lz.aguada(Elipse(1250, 575, 5.6, 3.2), '#e8735e', dens=0.85, tapa=1, irreg=0.2)   # swim cap
+lz.aguada(Trazo([(1258, 580), (1266, 566), (1276, 562)], (3, 2.6, 2.2)), '#9b6141', dens=0.8, tapa=1)
+lz.lapiz([arco(1250, 584, 12, 3, 0, 360, 20), arco(1250, 586, 18, 4, 200, 340, 20)], '#e9f4f0', grosor=0.7, presion=0.7)
 # the shore under the stretching woman
-orilla = Poligono([(1080, 612), (1180, 606), (1290, 616), (1350, 640), (1240, 656), (1120, 650), (1060, 634)])
-lz.aguada(orilla, '#e8cc90', dens=0.5, gran=0.6, irreg=1.2, toques=[(1260, 630, 40, '#d9a86a', 0.6)])
+orilla = Poligono([(1030, 612), (1130, 606), (1240, 616), (1300, 640), (1190, 656), (1070, 650), (1010, 634)])
+lz.aguada(orilla, '#e8cc90', dens=0.5, gran=0.6, irreg=1.2, toques=[(1210, 630, 40, '#d9a86a', 0.6)])
 
 # ------------------------------------------------------------------ meadow under the tree and the walkers
 prado = Poligono([(90, 790), (200, 740), (380, 716), (560, 704), (760, 708), (930, 730), (1000, 770), (900, 806),
@@ -142,38 +142,62 @@ def pliegue(p0, p1, amp, ondas, sem):
     return p0[None] + d[None] * t[:, None] + n[None] * w[:, None]
 
 
-cop_m = puntos_dentro(cop, 1, 1)
 lineas = []
-# the big fissures first
-lineas.append(np.array(spline([B(-150, 70), B(-80, 40), B(0, 16), B(70, -6), B(130, -2)])))          # lateral sulcus
-lineas.append(np.array(spline([B(10, -168), B(-6, -100), B(-26, -40), B(-40, 20)])))                 # central sulcus
-# then many short winding folds following the shape
-for k in range(22):
-    a0 = rng.uniform(0, 2 * math.pi)
-    cx_, cy_ = rng.uniform(-190, 200), rng.uniform(-140, 90)
-    L = rng.uniform(40, 90)
-    p0 = B(cx_ - math.cos(a0) * L / 2, cy_ - math.sin(a0) * L / 2)
-    p1 = B(cx_ + math.cos(a0) * L / 2, cy_ + math.sin(a0) * L / 2)
-    lineas.append(pliegue(p0, p1, rng.uniform(6, 11), rng.uniform(1.2, 2.2), 100 + k))
-M = cop.mascara(type('U', (), {'s': 1.0}), 0, 0, 1485, 850)
+lineas.append(np.array(spline([B(-160, 74), B(-80, 44), B(0, 18), B(70, -4), B(140, 0)])))          # lateral sulcus
+lineas.append(np.array(spline([B(14, -170), B(-4, -100), B(-24, -40), B(-36, 16)])))                # central sulcus
+# the folds as a labyrinth: iso-lines of a band-passed random field (looks like real gyri)
+import cv2
+from skimage import measure
+x0b, y0b = BX - 260, BY - 190
+fw, fh = 520, 360
+campo = np.random.default_rng(88).normal(0, 1, (fh, fw)).astype(np.float32)
+campo = cv2.GaussianBlur(campo, (0, 0), 7.5) - 0.6 * cv2.GaussianBlur(campo, (0, 0), 22)
+campo = cv2.resize(cv2.resize(campo, (fw // 2, fh)), (fw, fh))
+for cc in measure.find_contours(campo, 0.0):
+    p = np.stack([cc[:, 1] + x0b, cc[:, 0] + y0b], 1)
+    if len(p) > 12:
+        lineas.append(p)
+interior = cop - cb
+Mi = interior.mascara(type('U', (), {'s': 1.0}), 0, 0, 1485, 850)
+Mi = cv2.erode((Mi > 0.5).astype(np.uint8), np.ones((13, 13), np.uint8))
 recorte = []
 for ln in lineas:
-    ok = np.array([M[int(min(849, max(0, y))), int(min(1484, max(0, x)))] > 0.5 for x, y in ln])
+    ln = remuestrea(ln, 1.5)
+    ok = np.array([Mi[int(min(849, max(0, y))), int(min(1484, max(0, x)))] > 0 for x, y in ln])
     idx = np.flatnonzero(np.diff(np.r_[0, ok.astype(int), 0]))
     for i0, i1 in zip(idx[::2], idx[1::2]):
-        if i1 - i0 > 6:
-            recorte.append(ln[i0:i1])
-lz.lapiz(recorte[:2], '#7a3040', grosor=1.5, presion=0.75, temblor=0.4)
-lz.lapiz(recorte[2:], '#8a4a3a', grosor=1.05, presion=0.65, temblor=0.4)
-# leaves along the folds
-for j, ln in enumerate(recorte):
-    for i in range(6, len(ln) - 4, 14):
-        dv = ln[i + 1] - ln[i - 1]
-        base = math.degrees(math.atan2(dv[1], dv[0]))
-        hojita(lz, ln[i][0], ln[i][1], rng.uniform(8, 12), base + rng.choice([-60, 60]),
-               rng.choice(['#5f8f4a', '#7aa456', '#3f7a6a']), tapa=0.7, dens=0.8)
+        if i1 - i0 > 8:
+            seg = ln[i0:i1]
+            n = len(seg)
+            j = 0
+            while j < n:                      # small gaps: a hand that lifts the pencil
+                L = int(rng.uniform(40, 110))
+                if min(n, j + L) - j > 6:
+                    recorte.append(seg[j:min(n, j + L)])
+                j += L + int(rng.uniform(3, 7))
+# the sulci: a darker glaze in each groove, then the pencil
+for ln in recorte:
+    if len(ln) > 4:
+        lz.aguada(Trazo(ln[::3] if len(ln) > 9 else ln, (3.2, 3.2)), '#b84a5e', dens=0.32, irreg=0.3, borde=0.5, gran=0.3)
+lz.lapiz(recorte[:2], '#7a2a3e', grosor=1.6, presion=0.75, temblor=0.4)
+lz.lapiz(recorte[2:], '#9a3a4a', grosor=0.95, presion=0.6, temblor=0.3)
+# light on the top of each fold (gouache-like lifted line just above the groove)
+lz.levanta(Elipse(BX - 90, BY - 90, 90, 50), 0.25, suave=20)
+# the crown is foliage: a rim of leaves all round the brain, and a few blossoms
+pts_s = remuestrea(np.array(spline([B(*p) for p in SILUETA], cerrada=True)), 9)
+for i, (x, y) in enumerate(pts_s):
+    a = math.degrees(math.atan2(y - BY, x - BX))
+    if y > BY + 95 and BX - 20 < x < BX + 220:
+        continue
+    if math.sin(i * 0.45) + rng.normal(0, 0.5) < 0.2:      # leaves come in clusters, with bare stretches
+        continue
+    hojita(lz, x + rng.normal(0, 3), y + rng.normal(0, 3), rng.uniform(12, 20), a + rng.normal(0, 35), rng.choice(['#5f8f4a', '#7aa456', '#3f7a6a', '#9fbf6a']),
+           tapa=0.8, dens=0.8)
+    if i % 7 == 3:
+        flor_simple(lz, x + rng.normal(0, 4), y + rng.normal(0, 4), 5, rng.choice(['#fff1e0', ORO, '#f6c0c8']), centro='#e7a33e')
 # neurons: golden nodes joined by fine threads, lit from inside
-nodos = [ln[len(ln) // 2] for ln in recorte[2:]] + [ln[-1] for ln in recorte[2:] if len(ln) > 30]
+sel = [recorte[i] for i in rng.choice(np.arange(2, len(recorte)), size=min(30, len(recorte) - 2), replace=False)]
+nodos = [ln[len(ln) // 2] for ln in sel]
 nodos = [tuple(p) for p in nodos]
 sinapsis = []
 for i, p in enumerate(nodos):
@@ -193,58 +217,73 @@ for (x, y) in nodos:
     lz.luz((x, y, r_ * 2.2), '#fff0b0', fuerza=0.55)
 lz.chispas(BX, BY - 20, 200, 120, n=26, semilla=81, luz=0.25)
 
-# ------------------------------------------------------------------ hammock posts (the trunk and a slim olive on the right)
+# ------------------------------------------------------------------ hammock posts (the trunk and a young olive on the right)
 POST = (930, 500)
-olivo = Trazo([(920, 760), (926, 640), (930, 540), (940, 470), (956, 420)], (22, 20, 18, 15, 10))
-lz.aguada(olivo, '#9a8a6a', dens=0.75, tapa=1, gran=0.6, toques=[(925, 650, 20, '#6e5a4a', 0.6)])
-sombra_lado(lz, olivo, 1, '#4a3a2e', dens=0.3)
+olivo = Trazo([(918, 766), (924, 660), (932, 560), (926, 480), (940, 420)], (26, 22, 20, 17, 12))
+lz.aguada(olivo, '#9a8a6a', dens=0.78, tapa=1, gran=0.6, toques=[(925, 650, 20, '#6e5a4a', 0.6), (930, 520, 20, '#b8a888', 0.5)])
+sombra_lado(lz, olivo, 1, '#4a3a2e', dens=0.32)
 lz.contorno(olivo, '#4a3a2e', grosor=0.8, presion=0.55, cortes=0.3)
-for (a, b) in (((940, 470), (900, 400)), ((956, 420), (1000, 380)), ((948, 440), (980, 450))):
-    lz.aguada(Trazo([a, b], (7, 3)), '#9a8a6a', dens=0.75, tapa=1)
-for k in range(30):
-    x, y = rng.uniform(880, 1030), rng.uniform(360, 460)
-    hojita(lz, x, y, rng.uniform(10, 15), rng.uniform(120, 240) if x < 950 else rng.uniform(-60, 60),
-           rng.choice(['#8a9a6a', '#a9b38a', '#6f8a5a']), tapa=0.8, dens=0.75)
+lz.lapiz([bezier((918 + k * 5, 760), (926 + k * 4, 620), (928 + k * 3, 470), n=24) for k in (-1, 1)], '#6e5a4a', grosor=0.5,
+         presion=0.35, temblor=0.7, cortes=0.4)
+for (p, q) in (((930, 470), (884, 400)), ((940, 424), (990, 372)), ((934, 448), (976, 430))):
+    f = Trazo([p, q], (8, 3))
+    lz.aguada(f, '#9a8a6a', dens=0.78, tapa=1)
+    lz.contorno(f, '#4a3a2e', grosor=0.6, presion=0.5)
+copa_o = Poligono([(850, 400), (868, 352), (920, 326), (980, 330), (1020, 360), (1024, 404), (990, 432), (940, 428),
+                   (900, 436), (860, 426)])
+lz.aguada(copa_o, '#a9b38a', dens=0.62, tapa=0.7, borde=0.8, irreg=1.8, gran=0.5, flor=1,
+          toques=[(900, 350, 40, '#c9cfa8', 0.6), (990, 410, 40, '#6f8a5a', 0.6)])
+for k in range(60):
+    x, y = rng.uniform(850, 1025), rng.uniform(330, 434)
+    hojita(lz, x, y, rng.uniform(10, 14), rng.uniform(0, 360), rng.choice(['#7a8a5a', '#a9b38a', '#5f7a4a', '#c0c8a0']),
+           tapa=0.7, dens=0.75, nervio=False)
+for (x, y) in ((880, 380), (960, 352), (1004, 398), (930, 410)):
+    lz.aguada(Elipse(x, y, 3.2, 4.2, 20), '#4a3a5a', dens=0.9, tapa=1, irreg=0.2)      # olives
 # ropes
-TA = (BX + 72, 548)      # on the trunk
-TB = (POST[0] + 4, 540)
-lz.lapiz([[TA, (TA[0] + 30, 586)], [TA, (TA[0] + 30, 600)], [TB, (TB[0] - 30, 586)], [TB, (TB[0] - 30, 600)]],
-         '#a08a6a', grosor=0.8, presion=0.7, temblor=0.2)
+TA = (BX + 74, 548)      # on the trunk
+TB = (POST[0] - 4, 540)
+HX0, HX1 = TA[0] + 30, TB[0] - 30
+lz.lapiz([[TA, (HX0, 588)], [TA, (HX0 + 4, 600)], [TA, (HX0 - 2, 578)], [TB, (HX1, 588)], [TB, (HX1 - 4, 600)],
+          [TB, (HX1 + 2, 578)]], '#a08a6a', grosor=0.8, presion=0.7, temblor=0.2)
 
 # ------------------------------------------------------------------ the sleeper in the hammock
 P1 = 'piel2'
-HX0, HX1 = TA[0] + 30, TB[0] - 30
-# back of the hammock fabric (seen inside)
-red_atras = Poligono([(HX0, 584), (HX0 + 80, 606), (HX1 - 80, 608), (HX1, 584), (HX1 - 10, 600), (HX1 - 80, 640),
-                      (HX0 + 80, 640), (HX0 + 10, 602)])
-lz.aguada(red_atras, '#e9b46a', dens=0.6, tapa=1, borde=0.7, gran=0.3, toques=[(700, 620, 80, '#c98a4a', 0.6)])
-# him: head on the left, one arm behind his head
-cabeza2(lz, 640, 586, 26, P1, '#7a4a2a', 'ondas', giro=0.15, inclina=-72, ojos='dormidos', boca='suave', mejillas=0.6)
-brazo2(lz, (666, 610), (640, 560), (622, 586), 17, '#4f9c9a', P1, 'corta', sombra=1, mano=None)
-torso2(lz, (664, 598), (676, 628), (770, 600), (772, 628), '#4f9c9a', cintura=1.0, sombra=1)
-# the front edge of the hammock: striped cloth that wraps him
-red = Poligono([(HX0, 586), (HX0 + 30, 616), (HX0 + 100, 640), (HX1 - 90, 642), (HX1 - 20, 616), (HX1, 586),
-                (HX1 - 6, 610), (HX1 - 50, 660), (HX1 - 120, 676), (HX0 + 110, 676), (HX0 + 40, 660), (HX0 + 4, 610)])
-lz.aguada(red, '#f2c04a', dens=0.78, tapa=1, borde=0.7, gran=0.35,
-          toques=[(720, 670, 90, '#e8952a', 0.6), (HX0 + 60, 640, 40, '#f8d880', 0.6)])
-bandas = []
-for k in range(5):
-    t = 0.18 + k * 0.16
-    bandas.append(spline([(HX0 + 6 + (HX1 - HX0) * 0.02, 600 + k * 3), (HX0 + 110, 640 + t * 40 - 6),
-                          (HX1 - 110, 642 + t * 40 - 6), (HX1 - 6, 600 + k * 3)]))
-for k, bd in enumerate(bandas):
-    if k % 2 == 0:
-        lz.aguada(Trazo(bd[::3], (2, 6, 6, 2)), [CORAL, TEAL, CORAL][k // 2], dens=0.7, irreg=0.3)
-lz.contorno(red, '#9a6a2a', grosor=0.8, presion=0.55, cortes=0.2)
-lz.lapiz([[(HX0 + 110 + k * 22, 676), (HX0 + 106 + k * 22, 690)] for k in range(int((HX1 - HX0 - 220) / 22) + 1)],
-         '#c98a4a', grosor=0.7, presion=0.6, temblor=0.2)          # fringe
-# his arm draped over the edge, fingers relaxed; his bare feet crossed out of the far end
-brazo2(lz, (690, 616), (704, 650), (700, 690), 16, '#4f9c9a', P1, 'corta', sombra=1,
-       mano=dict(ang=95, gesto='relajada', lado=1, tam=25))
-pie(lz, (842, 612), -20, 30, descalzo=True, piel=P1)
-pie(lz, (852, 604), -35, 30, descalzo=True, piel=P1)
-lz.aguada(Trazo([(800, 622), (842, 614)], (14, 11)), '#5a6a9a', dens=0.75, tapa=1)
-lz.contorno(Trazo([(800, 622), (842, 614)], (14, 11)), '#3a4a7a', grosor=0.7, presion=0.5)
+# far rim of the fabric, seen behind him
+atras = Poligono(np.vstack([spline([(HX0, 586), (HX0 + 100, 606), (HX1 - 100, 606), (HX1, 586)]),
+                            spline([(HX1, 586), (HX1 - 100, 640), (HX0 + 100, 640), (HX0, 586)])]), suave=False)
+lz.aguada(atras, '#d99a4a', dens=0.6, tapa=1, borde=0.7, gran=0.3, toques=[(760, 630, 80, '#b8763a', 0.6)])
+lz.contorno(atras, '#8a5a2a', grosor=0.7, presion=0.45, cortes=0.3)
+# the arm folded behind his head (drawn first: the head lies on it)
+brazo2(lz, (664, 606), (630, 562), (628, 594), 16, '#4f9c9a', P1, 'corta', sombra=-1, mano=None)
+# torso and legs inside the hammock (only the upper edge will show)
+torso2(lz, (662, 598), (672, 628), (772, 606), (776, 632), '#4f9c9a', cintura=1.0, sombra=1)
+lz.aguada(Trazo([(770, 612), (830, 606), (870, 600)], (26, 22, 16)), '#5a6a9a', dens=0.75, tapa=1)
+lz.contorno(Trazo([(770, 612), (830, 606), (870, 600)], (26, 22, 16)), '#3a4a7a', grosor=0.7, presion=0.5)
+# a small cushion and his head, tilted back, asleep
+cojin = Elipse(626, 600, 26, 14, -20)
+lz.aguada(cojin, '#ec9fa0', dens=0.7, tapa=1, irreg=0.3, toques=[(630, 606, 12, '#c9707a', 0.6)])
+lz.contorno(cojin, '#9a4a5a', grosor=0.6, presion=0.45)
+cabeza2(lz, 640, 588, 26, P1, '#7a4a2a', 'corto', giro=0.25, inclina=-62, ojos='dormidos', boca='suave', mejillas=0.6)
+# the near rim of the hammock wraps him; a striped cloth with a fringe
+frente = Poligono(np.vstack([spline([(HX0 + 2, 590), (HX0 + 40, 622), (HX0 + 120, 646), (HX1 - 120, 646),
+                                     (HX1 - 30, 620), (HX1 - 2, 590)]),
+                             spline([(HX1 - 2, 590), (HX1 - 30, 650), (HX1 - 120, 684), (HX0 + 120, 684), (HX0 + 30, 650),
+                                     (HX0 + 2, 590)])]), suave=False)
+lz.aguada(frente, '#f2c04a', dens=0.8, tapa=1, borde=0.7, gran=0.35,
+          toques=[(760, 676, 90, '#e8952a', 0.6), (HX0 + 60, 640, 40, '#f8d880', 0.6)])
+for k, col in enumerate((CORAL, TEAL, CORAL)):
+    y0 = 640 + k * 12
+    bd = spline([(HX0 + 14 + k * 6, 604 + k * 10), (HX0 + 110, y0 + 8), (HX1 - 110, y0 + 8), (HX1 - 14 - k * 6, 604 + k * 10)])
+    lz.aguada(Trazo(bd[::3], (2, 5, 5, 2)), col, dens=0.72, irreg=0.3)
+lz.contorno(frente, '#9a6a2a', grosor=0.8, presion=0.55, cortes=0.2)
+bajo_ = spline([(HX0 + 30, 650), (HX0 + 120, 684), (HX1 - 120, 684), (HX1 - 30, 650)])
+lz.lapiz([[(x, y), (x - 1, y + 13)] for (x, y) in remuestrea(bajo_, 9)[1:-1]], '#c98a4a', grosor=0.7, presion=0.6,
+         temblor=0.2)
+# his arm draped over the rim, fingers relaxed; bare feet crossed out of the far end
+brazo2(lz, (676, 612), (694, 646), (690, 690), 16, '#4f9c9a', P1, 'corta', sombra=1,
+       mano=dict(ang=96, gesto='relajada', lado=1, tam=25))
+pie(lz, (872, 600), -30, 28, descalzo=True, piel=P1)
+pie(lz, (868, 590), -50, 28, descalzo=True, piel=P1)
 # a clay pitcher and a glass of water in the grass beside him (drink before you're thirsty)
 jar = Poligono([(744, 742), (740, 714), (750, 700), (748, 690), (764, 690), (762, 700), (772, 714), (768, 742)])
 lz.aguada(jar, '#c0703f', dens=0.85, tapa=1, borde=0.7, irreg=0.3, toques=[(766, 720, 10, '#8a4a2a', 0.6)])
@@ -256,7 +295,7 @@ lz.contorno(vaso, '#6a9aa0', grosor=0.5, presion=0.5)
 lz.gouache(Trazo([(785, 726), (785, 740)], (0.9, 0.9)), '#ffffff', alfa=0.8, irreg=0)
 
 # ------------------------------------------------------------------ the dream: little lights rise into the crown
-sueno = bezier((640, 556), (600, 480), (690, 440), (620, 330), 60)
+sueno = bezier((640, 560), (600, 480), (690, 440), (620, 330), 60)
 for k in range(0, 60, 3):
     x, y = sueno[k]
     x += rng.normal(0, 5)
@@ -275,10 +314,10 @@ for (x, y) in ((608, 452), (632, 392), (612, 476)):      # 'z' as tiny curls, no
 PG, PN = 'piel4', 'piel1'
 YG = 806
 # grandfather (walking right, mid-step, turned to the boy)
-pierna2(lz, (196, 586), (178, 690), (150, YG - 20), 30, '#e9dcc0', PG, pie_ang=-30, descalzo=True, sombra=-1, bajo='corto')
+pierna2(lz, (196, 586), (184, 690), (164, YG - 14), 30, '#e9dcc0', PG, pie_ang=-30, descalzo=True, sombra=-1, bajo='corto')
 brazo2(lz, (236, 470), (262, 518), (276, 566), 22, '#7aa0c8', PG, 'larga', sombra=1,
        mano=dict(ang=90, gesto='relajada', lado=1, tam=33))
-pierna2(lz, (222, 588), (262, 688), (276, YG - 4), 30, '#e9dcc0', PG, pie_ang=5, descalzo=True, sombra=1, bajo='corto')
+pierna2(lz, (222, 588), (252, 690), (262, YG - 2), 30, '#e9dcc0', PG, pie_ang=5, descalzo=True, sombra=1, bajo='corto')
 cuello(lz, (214, 426), 30, (212, 466), PG)
 torso2(lz, (180, 466), (240, 470), (192, 592), (230, 594), '#7aa0c8', cintura=0.95, sombra=1, escote='v',
        toques=[(230, 560, 40, '#4a6f9a', 0.6)], pliegues=[[(200, 500), (206, 550), (204, 588)]])
@@ -303,15 +342,15 @@ mano2(lz, 282, 642, -110, 22, PN, 'agarra', lado=1)
 # ------------------------------------------------------------------ the woman who stretches toward the sun
 PM = 'piel3'
 YM = 628
-pierna2(lz, (1180, 520), (1172, 574), (1166, YM - 6), 20, '#c33c4e', PM, pie_ang=180, descalzo=True, sombra=-1)
-pierna2(lz, (1196, 520), (1210, 572), (1222, YM - 2), 20, '#c33c4e', PM, pie_ang=0, descalzo=True, sombra=1)
-torso2(lz, (1172, 428), (1206, 424), (1176, 524), (1202, 522), '#6fb1ad', cintura=0.86, sombra=1,
-       toques=[(1200, 500, 20, '#3f8f8a', 0.6)])
-cuello(lz, (1196, 396), 19, (1190, 426), PM)
-cabeza2(lz, 1196, 394, 19, PM, '#1e1410', 'mono', giro=0.5, inclina=-24, ojos='cerrados', boca='sonrisa')
-brazo2(lz, (1176, 432), (1166, 380), (1180, 330), 14, '#6fb1ad', PM, 'sin', sombra=-1,
+pierna2(lz, (1130, 520), (1122, 574), (1116, YM - 6), 20, '#c33c4e', PM, pie_ang=180, descalzo=True, sombra=-1)
+pierna2(lz, (1146, 520), (1160, 572), (1172, YM - 2), 20, '#c33c4e', PM, pie_ang=0, descalzo=True, sombra=1)
+torso2(lz, (1122, 428), (1156, 424), (1126, 524), (1152, 522), '#6fb1ad', cintura=0.86, sombra=1,
+       toques=[(1150, 500, 20, '#3f8f8a', 0.6)])
+cuello(lz, (1146, 396), 19, (1140, 426), PM)
+cabeza2(lz, 1146, 394, 19, PM, '#1e1410', 'mono', giro=0.5, inclina=-24, ojos='cerrados', boca='sonrisa')
+brazo2(lz, (1126, 432), (1116, 380), (1130, 330), 14, '#6fb1ad', PM, 'sin', sombra=-1,
        mano=dict(ang=-70, gesto='abierta', lado=1, tam=21))
-brazo2(lz, (1204, 430), (1226, 382), (1250, 336), 14, '#6fb1ad', PM, 'sin', sombra=1,
+brazo2(lz, (1154, 430), (1176, 382), (1200, 336), 14, '#6fb1ad', PM, 'sin', sombra=1,
        mano=dict(ang=-60, gesto='abierta', lado=-1, tam=21))
 # morning swallows: they leave the crown and fly to the sun
 for (x, y, s, c, a) in ((820, 170, 13, TEAL, -10), (930, 150, 11, CORAL, -18), (1040, 190, 10, '#4f6fa0', 6)):

@@ -131,10 +131,32 @@ lz.aguada(NUBE, '#cfe0ec', dens=0.7, tapa=1, borde=0.8, irreg=1.3, gran=0.25, va
 # the heavy, rain-filled belly
 lz.aguada(BALLENA, '#4f6f9f', dens=0.5, borde=0.3, desvanece=(900, 300, 900, 165), gran=0.45)
 # the sea still lives inside the cloud: seaweed, a jellyfish, a shoal, bubbles
-for k in range(9):
-    x, y = 660 + k * 22 + rng.normal(0, 6), 160 + rng.normal(0, 10)
-    pececillo(lz, x, y, rng.uniform(3.2, 4.2), 2 + rng.normal(0, 8), rng.choice(['#4f8fc0', '#3f8f94', '#e8735e']),
-              gouache=False)
+for k in range(11):
+    t = k / 10
+    x, y = 730 + t * 200 + rng.normal(0, 5), 128 + 22 * math.sin(t * 3.2) + rng.normal(0, 5)
+    pececillo(lz, x, y, rng.uniform(5.0, 6.5), 12 * math.cos(t * 3.2) + rng.normal(0, 6),
+              rng.choice(['#4f8fc0', '#3f8f94', '#e8735e', '#f0c25e']), gouache=False)
+
+
+def tortuga(x, y, s=1.0, ang=-10):
+    """A small sea turtle swimming inside the cloud."""
+    M_ = Marco(x, y, ang, s)
+    for (u, v, a) in ((14, -14, -40), (14, 14, 40), (-14, -11, -140), (-14, 11, 140)):
+        al = Elipse(*M_(u, v), 11 * s if u > 0 else 7 * s, 4 * s, ang + a)
+        lz.aguada(al, '#7aa28a', dens=0.7, tapa=1, irreg=0.3)
+        lz.contorno(al, '#3f5a4a', grosor=0.6, presion=0.5)
+    cab = Elipse(*M_(24, 0), 6 * s, 5 * s, ang)
+    lz.aguada(cab, '#8ab29a', dens=0.7, tapa=1, irreg=0.3)
+    lz.contorno(cab, '#3f5a4a', grosor=0.6, presion=0.5)
+    lz.aguada(Elipse(*M_(26, -2), 1.1 * s), '#1a1a1a', dens=1.0)
+    capa = Elipse(*M_(0, 0), 20 * s, 15 * s, ang)
+    lz.aguada(capa, '#b08a4a', dens=0.8, tapa=1, irreg=0.3, toques=[(*M_(-4, -4), 10 * s, '#d8b06a', 0.6)])
+    lz.contorno(capa, '#5a4a2a', grosor=0.7, presion=0.55)
+    lz.lapiz([[M_(-12, -8), M_(-4, -2), M_(6, -6)], [M_(-4, -2), M_(-2, 8)], [M_(6, -6), M_(10, 6)]], '#5a4a2a',
+             grosor=0.6, presion=0.5)
+
+
+tortuga(930, 210, 1.3, -6)
 alga = [spline([(760 + k * 22, 252), (766 + k * 22, 232), (756 + k * 22, 214), (764 + k * 22, 198)]) for k in range(3)]
 lz.lapiz(alga, '#4f8f6a', grosor=1.2, presion=0.6, temblor=0.4)
 med = Elipse(990, 160, 15, 11)
@@ -153,7 +175,7 @@ aleta = Trazo([W(0.2, -0.1), W(0.3, -0.16), W(0.43, -0.2)], (30, 24, 7))
 lz.aguada(aleta, '#c8d6e6', dens=0.6, tapa=1, irreg=0.6, toques=[(*W(0.4, -0.19), 20, '#8fa6c0', 0.6)])
 lz.contorno(aleta, '#5f7898', grosor=0.8, presion=0.5, cortes=0.3)
 ex, ey = W(0.12, 0.0)
-lz.lapiz([arco(ex, ey, 7, 4, 200, 340, 12)], '#3b3a4a', grosor=1.4, presion=0.85, temblor=0.05)
+lz.lapiz([arco(ex, ey, 10, 6, 200, 340, 12)], '#3b3a4a', grosor=1.8, presion=0.85, temblor=0.05)
 lz.lapiz([[(ex - 6, ey + 1), (ex - 9, ey + 4)], [(ex, ey + 2), (ex, ey + 6)], [(ex + 6, ey + 1), (ex + 9, ey + 4)]],
          '#3b3a4a', grosor=0.6, presion=0.6)
 lz.aguada(Elipse(ex - 4, ey + 12, 9, 5), '#e98a8a', dens=0.35, suave=3)
@@ -188,8 +210,8 @@ for k, v in enumerate(VAP):
 
 # ------------------------------------------------------------------ the wetland: reeds and a heron (day 15)
 for k in range(26):
-    x = rng.uniform(200, 290) if k < 16 else rng.uniform(560, 640)
-    y = 760 + rng.uniform(-30, 40) if k < 16 else 790 + rng.uniform(-10, 30)
+    x = rng.uniform(200, 290) if k < 16 else rng.uniform(700, 760)
+    y = 760 + rng.uniform(-30, 40) if k < 16 else 770 + rng.uniform(-10, 30)
     h = rng.uniform(40, 90)
     lz.lapiz([bezier((x, y), (x + rng.normal(0, 4), y - h * 0.5), (x + rng.normal(0, 10), y - h), n=14)], '#5f7f45',
              grosor=1.0, presion=0.65, temblor=0.2)
@@ -219,7 +241,7 @@ def garza(x, y, s=1.0):
     lz.aguada(Elipse(*P([(29, -65)])[0], 1.3 * s), '#2a1a14', dens=1.0)
 
 
-garza(250, 700, 1.25)
+garza(245, 690, 1.5)
 lz.lapiz([arco(325, 760, 14, 4, 0, 360, 20), arco(325, 760, 24, 6, 20, 160, 20)], '#2f5f80', grosor=0.6, presion=0.45)
 
 # ------------------------------------------------------------------ the girl floating on her back (baño sensorial, day 24)
@@ -268,14 +290,11 @@ lz.lapiz([arco(*F(10, 0), 160 + k * 16, 100 + k * 10, 0, 360, 80, -8) for k in r
 
 # ------------------------------------------------------------------ the boy, leaping into the river
 # he has just pushed off a rock on the bank: arms up, one knee high, the other leg trailing
-RB = (545, 592)
-roca_b = Elipse(*RB, 46, 22, -6)
-volumen(lz, roca_b, '#b8aa98', dens=0.65, luz=(-0.6, -0.8), brillo=0.25, lapiz='#6e5e50',
-        toques=[(RB[0] - 14, RB[1] - 12, 22, '#8fae6a', 0.6)])
-lz.lapiz([arco(612, 520, 70, 60, 160, 230, 16), arco(618, 528, 52, 44, 160, 225, 14)], '#a89a8a', grosor=0.7,
-         presion=0.45, temblor=0.1)                                   # his arc through the air
-B = Marco(660, 455, -28, 1.0)          # torso frame: v along the body (head at -v), tilted forward
-lz.aguada(Elipse(705, 655, 40, 9), '#2f6f94', dens=0.3, suave=6)                 # his shadow on the water
+# his arc through the air, from the high bank on the left
+lz.lapiz([bezier((470, 470), (500, 380), (540, 350), n=20), bezier((482, 478), (510, 396), (546, 368), n=20)], '#a89a8a',
+         grosor=0.7, presion=0.45, temblor=0.1)
+B = Marco(600, 420, -28, 1.0)          # torso frame: v along the body (head at -v), tilted forward
+lz.aguada(Elipse(655, 650, 40, 9), '#2f6f94', dens=0.3, suave=6)                 # his shadow on the water
 # trailing leg (behind)
 miembro(lz, [B(6, 40), B(-14, 82), B(-44, 112)], (24, 18, 13), 'piel2', lado=1, lapiz=PIEL_LP)
 pie = Elipse(*B(-52, 118), 13, 6.5, -28 + 200)
@@ -306,9 +325,9 @@ mano(lz, *B(-20, -114), -28 - 85, 23, 'piel2', 'abierta', lado=-1)
 for k in range(14):
     a = math.radians(rng.uniform(200, 340))
     r = rng.uniform(20, 55)
-    x, y = 705 + math.cos(a) * r * 1.4, 655 + math.sin(a) * r * 0.7
+    x, y = 655 + math.cos(a) * r * 1.4, 650 + math.sin(a) * r * 0.7
     lz.aguada(Elipse(x, y, rng.uniform(2, 4)), '#8fcfe0', dens=0.8, irreg=0.3, borde=0.8)
-lz.lapiz([arco(705, 657, 40, 9, 0, 360, 30), arco(705, 659, 58, 13, 0, 360, 30)], '#e8f6fb', grosor=1.0, presion=0.6)
+lz.lapiz([arco(655, 652, 40, 9, 0, 360, 30), arco(655, 654, 58, 13, 0, 360, 30)], '#e8f6fb', grosor=1.0, presion=0.6)
 
 # ------------------------------------------------------------------ the grandmother refilling a canteen at the spring (day 13)
 # and the child drinking a glass of clean water (a human right, day 22)
@@ -320,7 +339,12 @@ prenda(lz, falda, '#8d73b0', luz=(-0.5, -1),
        pliegues=[[(1120, 540), (1110, 590), (1100, 625)], [(1160, 545), (1175, 595), (1180, 628)],
                  [(1200, 560), (1222, 610)]])
 for (x, y) in puntos_dentro(Poligono(falda), 16, 2, margen=6):    # a sprig pattern on the skirt
-    flor_simple(lz, x, y, 3.2, rng.choice(['#f6c8d8', '#fff3e0', ORO]), centro=CARMIN)
+    flor_simple(lz, x, y, 4.6, rng.choice(['#f6c8d8', '#fff3e0', ORO]), centro=CARMIN)
+# the soles of her bare feet, peeking out behind: she kneels, sitting on her heels
+for (x, y, a) in ((1236, 622, -20), (1248, 610, -35)):
+    pl_ = Elipse(x, y, 15, 8, a)
+    lz.aguada(pl_, 'piel1', dens=0.6, tapa=1, irreg=0.3, toques=[(x + 4, y, 8, '#e8a08a', 0.6)])
+    lz.contorno(pl_, PIEL_LP, grosor=0.7, presion=0.5)
 # far arm (supports the canteen from below)
 miembro(lz, [(1120, 440), (1078, 492), (1030, 470)], (20, 16, 13), TEAL, lado=1, pliegues=2)
 mano(lz, 1030, 470, -150, 30, 'piel1', 'cuenco', lado=1)
@@ -355,19 +379,19 @@ cuello(lz, (1300, 432), 32, (1308, 472), piel='piel5', ancho=0.42)
 cara(lz, 1300, 432, 32, piel='piel5', pelo='#1e1410', peinado='rizos', giro=-0.3, ang=-26, ojos='cerrados',
      boca='suave', semilla=61)
 # the glass at her lips, with both hands
-vaso = Poligono([(1270, 438), (1290, 430), (1296, 462), (1280, 468)], suave=False)
+vaso = Poligono([(1294, 438), (1316, 444), (1310, 476), (1292, 472)], suave=False)
 lz.aguada(vaso, '#cfe8f0', dens=0.4, tapa=1, irreg=0.2)
-lz.aguada(Poligono([(1280, 448), (1294, 446), (1296, 462), (1280, 468)], suave=False), '#6fb8d8', dens=0.6, irreg=0.2)
+lz.aguada(Poligono([(1293, 450), (1314, 455), (1310, 476), (1292, 472)], suave=False), '#6fb8d8', dens=0.6, irreg=0.2)
 lz.contorno(vaso, '#4a6a7a', grosor=0.7, presion=0.55)
-lz.gouache(Trazo([(1274, 440), (1280, 462)], (1.4, 1.2)), '#ffffff', alfa=0.8, irreg=0)
-miembro(lz, [(1292, 478), (1274, 506), (1282, 470)], (13, 11, 9), 'piel5', lado=1, lapiz=PIEL_LP)
-mano(lz, 1283, 468, -80, 20, 'piel5', 'agarra', lado=1)
-miembro(lz, [(1330, 478), (1316, 510), (1296, 474)], (13, 11, 9), 'piel5', lado=-1, lapiz=PIEL_LP)
-mano(lz, 1296, 474, -110, 20, 'piel5', 'agarra', lado=-1)
+lz.gouache(Trazo([(1298, 444), (1296, 466)], (1.4, 1.2)), '#ffffff', alfa=0.8, irreg=0)
+miembro(lz, [(1292, 480), (1280, 510), (1294, 482)], (13, 11, 9), 'piel5', lado=1, lapiz=PIEL_LP)
+mano(lz, 1294, 482, -70, 19, 'piel5', 'agarra', lado=1)
+miembro(lz, [(1330, 480), (1328, 512), (1312, 482)], (13, 11, 9), 'piel5', lado=-1, lapiz=PIEL_LP)
+mano(lz, 1312, 482, -105, 19, 'piel5', 'agarra', lado=-1)
 
 # ------------------------------------------------------------------ small things with intention
 # a pair of dragon... no: a kingfisher darting along the river, a flash of turquoise and orange
-pajaro(lz, 470, 610, 15, '#2f9cb0', ang=175, alas='arriba', vientre='#f0a050')
+pajaro(lz, 360, 560, 19, '#2f9cb0', ang=170, alas='arriba', vientre='#f0a050')
 # blue wildflowers and mint at the bank by the spring
 for (x, y) in ((1180, 660), (1215, 668), (1250, 662), (980, 492), (950, 500)):
     lz.lapiz([[(x, y), (x + rng.normal(0, 3), y - 18)]], '#4f6f45', grosor=0.8, presion=0.6)

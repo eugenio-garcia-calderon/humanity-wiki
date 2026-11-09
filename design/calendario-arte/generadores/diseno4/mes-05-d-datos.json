@@ -1,9 +1,32 @@
 [
-  {"dia": 4, "frase": "Bailar une ejercicio, coordinación, música y compañía.", "como_aparece": "En el centro una mujer baila riendo, con un brazo en arco sobre la cabeza y la falda alzada en vuelo, al son de la guitarra."},
-  {"dia": 19, "frase": "El flamenco es Patrimonio Inmaterial de la Humanidad.", "como_aparece": "La bailarina levanta el borde de la falda con la mano, con fajín carmesí y flor en el moño, como en el flamenco."},
-  {"dia": 24, "frase": "Crear en grupo, como un mural, fortalece la comunidad.", "como_aparece": "La falda-jardín es una sola obra hecha entre todos: la abuela teje su borde, la niña pinta sus flores y la música la hace girar."},
-  {"dia": 20, "frase": "Hoy: crea algo con las manos, del barro a la cocina.", "como_aparece": "El borde de la falda sale directamente de las agujas de la abuela; la pintura de la niña está en una olla de barro de la que brotan semillas."},
-  {"dia": 1, "frase": "Hoy: dibuja diez minutos lo que ves, sin borrar.", "como_aparece": "Una niña arrodillada pinta con el pincel una flor nueva, aún húmeda, en la falda."},
-  {"dia": 15, "frase": "Tocar música entrena memoria, atención y coordinación.", "como_aparece": "De la guitarra sale la música como una aguada transparente que se abre y envuelve la falda; las notas se vuelven estrellas."},
-  {"dia": 30, "frase": "Regala algo hecho por ti: su valor no se compra.", "como_aparece": "Lo que cada uno hace con sus manos acaba en la falda que lleva otra persona; de ella, flores que se vuelven pájaros salen volando."}
+  {
+    "dia": 4,
+    "frase": "Bailar une ejercicio, coordinación, música y compañía.",
+    "como_aparece": "En el centro una mujer baila de puntillas, riendo, con un brazo en arco sobre la cabeza y la falda girando en espiral, al son de la guitarra."
+  },
+  {
+    "dia": 19,
+    "frase": "El flamenco es Patrimonio Inmaterial de la Humanidad.",
+    "como_aparece": "La bailarina levanta con la mano el borde de la falda, con fajín carmesí y flor en el moño, como en el flamenco."
+  },
+  {
+    "dia": 24,
+    "frase": "Crear en grupo, como un mural, fortalece la comunidad.",
+    "como_aparece": "La falda-jardín es una sola obra hecha entre todos: la abuela teje su borde, la niña modela una de sus flores y la música la hace girar."
+  },
+  {
+    "dia": 20,
+    "frase": "Hoy: crea algo con las manos, del barro a la cocina.",
+    "como_aparece": "Una niña modela en barro un capullo; de él sale un tallo que se abre en una flor de la falda."
+  },
+  {
+    "dia": 15,
+    "frase": "Tocar música entrena memoria, atención y coordinación.",
+    "como_aparece": "De la guitarra sale la música como una aguada transparente que cruza la página y se vuelve una corona de estrellas alrededor de la mano alzada de la bailarina."
+  },
+  {
+    "dia": 30,
+    "frase": "Regala algo hecho por ti: su valor no se compra.",
+    "como_aparece": "El borde tejido sale directamente de las agujas de la abuela, todavía a medio tejer y deshilachándose en lana: lo que cada uno hace con sus manos acaba en la falda que lleva otra persona."
+  }
 ]

@@ -123,13 +123,14 @@ lz.aguada(Trazo(enagua, (12, 22, 26, 22, 14)), '#f7ead8', dens=0.6, tapa=1, irre
 lz.lapiz([enagua + (0, 9), *[arco(*p, 7, 5, 20, 160, 8) for p in remuestrea(enagua, 13)[1:-1] + (0, 6)]],
          '#b08a7a', grosor=0.6, presion=0.45, temblor=0.4, cortes=0.2)
 # one foot, on tiptoe, carrying her weight -- touching the ground
-sombra_suelo(646, 764, 70)
-pie = Trazo([(648, 744), (646, 756), (644, 764)], (12, 10, 8), suave=False)
-lz.aguada(pie, 'piel3', dens=0.62, tapa=1, irreg=0.2)
-zap = Poligono([(637, 750), (656, 748), (654, 766), (646, 770), (638, 764)])
-lz.aguada(zap, CARMIN, dens=0.92, tapa=1, irreg=0.2)
+sombra_suelo(648, 782, 72)
+pie = Trazo([(649, 742), (648, 756), (647, 768)], (13, 10, 8), suave=False)
+lz.aguada(pie, 'piel3', dens=0.62, tapa=1, irreg=0.2, sombra=(-4, 0))
+lz.contorno(pie, SEP, grosor=0.6, presion=0.5, cortes=0.2)
+zap = Poligono([(640, 762), (655, 762), (653, 776), (648, 782), (642, 776)])     # en pointe
+lz.aguada(zap, CARMIN, dens=0.92, tapa=1, irreg=0.15, sombra=(-3, 0))
 lz.contorno(zap, '#6a1f30', grosor=0.8, presion=0.6, cortes=0.05)
-lz.lapiz([[(640, 754), (656, 752)]], '#6a1f30', grosor=0.6, presion=0.6)
+lz.lapiz([[(640, 760), (656, 752)], [(656, 760), (640, 752)]], '#6a1f30', grosor=0.6, presion=0.6)  # ribbons
 
 jardin(lz, FALDA, paleta=(CORAL, ORO, CARMIN, '#f39ab0', '#ff9a5a', '#8d73b0'),
        verdes=('#5f8f63', '#86a86c', '#3f7a6a'), base='#f07a5a', base_dens=0.74, escala=1.6, densidad=1.0,
