@@ -237,8 +237,16 @@ def casita(lz, x, y, w, h, pared='#f1d9b0', tejado='#c0503f', ventanas=1, luz=Tr
         lz.aguada(pu, '#8a5a3e', dens=0.75, tapa=1, irreg=0.2)
 
 
-def cuello(lz, x, y, r, piel, base, ancho=0.46):
-    """A slender neck from under the head (x, y, r) down to the collar point."""
+def cuello(lz, x, y, r, piel, base, ancho=0.46, natural=True, giro=0.0, inclina=0.0, escote=True, hombros=None):
+    """A neck under the head (x, y, r) down to the collar point `base`.
+    natural=True (default) uses acuarela.cuello_natural: it grows out of the
+    jaw and flows into the shoulders, so it must be painted BEFORE the shirt
+    and the head. natural=False: the old slender tube (for a nape seen from
+    behind)."""
+    if natural:
+        import acuarela
+        return acuarela.cuello_natural(lz, x, y, r, piel, base, hombros or r * 1.7, giro=giro, inclina=inclina,
+                                       escote=escote)
     f = Trazo([(x, y + r * 0.55), base], (r * ancho, r * ancho * 1.12))
     lz.aguada(f, piel, dens=0.58, tapa=1, irreg=0.4, borde=0.4,
               toques=[(x, y + r * 0.95, r * 0.45, mezcla(piel, '#8a4a32', 0.55), 0.7)])
@@ -491,3 +499,27 @@ def desvanecer_x(lz, x0, x1, y0, y1, a0, a1, b0, b1, semilla=5):
     T[:] = 1 - (1 - T) * F[..., None]
     O = lz.OP[Y0:Y1, X0:X1]
     O *= F[..., None]
+
+
+def componer(lz, G, k, c, umbral=0.06):
+    """Paste a group painted on its own canvas G = Lienzo(ancho * k) onto lz,
+    scaled by k around the base point c: the people come forward, larger,
+    while the paper, its grain and everything else stay at the series' scale.
+    Wherever the group is painted it covers what is behind it (like tapa);
+    its inner light and gouache come along."""
+    from acuarela import _ss, _blur
+    s = lz.s
+    ox = int(round(c[0] * (k - 1) * s))
+    oy = int(round(c[1] * (k - 1) * s))
+    H, W = lz.H, lz.W
+    Tg = G.T[oy:oy + H, ox:ox + W]
+    h, w = Tg.shape[:2]
+    cov = 1 - Tg.min(axis=2)
+    a = _ss(_blur(cov, 0.6 * s), 0.0, umbral)
+    a = np.maximum(a, G.OP[oy:oy + h, ox:ox + w, 3])
+    T = lz.T[:h, :w]
+    T[:] = T * (1 - a[..., None]) + Tg * a[..., None]
+    lz.LUZ[:h, :w] = lz.LUZ[:h, :w] * (1 - a[..., None]) + G.LUZ[oy:oy + h, ox:ox + w]
+    O = lz.OP[:h, :w]
+    Og = G.OP[oy:oy + h, ox:ox + w]
+    O[:] = O * (1 - a[..., None]) + Og

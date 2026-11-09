@@ -190,7 +190,7 @@ def _rot(x, y, ang):
 
 def cabeza_album(lz, x, y, r, piel='#e6ae88', pelo='#4a2e22', peinado='corto', giro=0.0, inclina=0.0,
                  ojos='abiertos', boca='sonrisa', mira=(0, 0), canas=False, barba=None, adorno=None,
-                 cuello=True, pelo2=None, lapiz=None, semilla=None, pendiente=None, gafas=False):
+                 cuello=True, pelo2=None, lapiz=None, semilla=None, pendiente=None, gafas=False, base=None, ancho_base=None):
     """A picture-book head. (x, y) = centre of the face, r = half face height.
     giro -1..1: 3/4 turn (+ = looks to the image's right). inclina: tilt (deg).
     ojos: 'abiertos' | 'cerrados' (content, lashes down) | 'feliz' (laughing arcs)
@@ -253,8 +253,12 @@ def cabeza_album(lz, x, y, r, piel='#e6ae88', pelo='#4a2e22', peinado='corto', g
         lz.aguada(back, pelo_c if peinado != 'pañuelo' else (pelo2 or pelo_c), dens=0.85 if not canas else 0.45,
                   tapa=1, irreg=0.6, borde=0.65, gran=0.4, toques=tq, flor=1 if peinado == 'pañuelo' else 0)
         lz.contorno(back, pelo_lp, grosor=0.85, presion=0.5, cortes=0.35)
-    # --- neck (behind the face)
-    if cuello:
+    # --- neck (behind the face). With base=(x, y) between the shoulders and ancho_base, the library's
+    # natural neck (narrow under the jaw, opening into the trapezius, clavicles): paint the clothes AFTER the head.
+    if cuello and base is not None:
+        import acuarela as _ac
+        _ac.cuello_natural(lz, x, y, r, piel, base, ancho_base or r * 2.6, giro=giro, inclina=inclina)
+    elif cuello:
         nk = Trazo([R(fx * 0.2, r * 0.55), R(fx * 0.1, r * 1.25), R(0, r * 1.75)], (r * 0.62, r * 0.6, r * 0.7))
         lz.aguada(nk, piel, dens=0.6, tapa=1, irreg=0.4, borde=0.4, gran=0.2,
                   toques=[(*R(0, r * 0.95), r * 0.55, mezcla(piel, '#8a4a30', 0.45), 0.75)])
