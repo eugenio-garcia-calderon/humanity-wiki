@@ -24,12 +24,13 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { createPortal } from 'react-dom';
 import { useSearchParams } from 'react-router-dom';
 import {
-  Pencil, Eye, FolderOpen, ListChecks, Download, Compass, Info, History, Loader2, ChevronLeft, ChevronRight, Check, AlertTriangle, RotateCcw, Type, Menu, X, Star,
+  Pencil, Eye, FolderOpen, ListChecks, Download, Compass, Info, History, Loader2, ChevronLeft, ChevronRight, Check, AlertTriangle, RotateCcw, Type, Menu, X, Star, Maximize,
 } from 'lucide-react';
 import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import { subirImagenCalendario } from '../components/calendarioArte/subirImagen';
 import { HojaMes, NOMBRES_MES, ANCHO_MM, ALTO_MM, ACENTOS, type DisenoVista, type EncargoDiseno } from '../components/calendarioArte/HojaMes';
+import { VistaPantalla } from '../components/calendarioArte/VistaPantalla';
 import { NuevoDiseno, AvisoDisenoListo, type EstadoRobot } from '../components/calendarioArte/NuevoDiseno';
 import { PanelIdeas, PanelPrincipios, PanelConocer, PanelHistorial } from '../components/calendarioArte/Paneles';
 import { VistaCarpetas } from '../components/calendarioArte/VistaCarpetas';
@@ -119,6 +120,20 @@ export default function CalendarioArte() {
   const irAMes = (m: number) => setParams(p => {
     p.set('mes', String(((m % 13) + 13) % 13)); p.delete('vista'); p.delete('carpeta'); return p;
   }, { replace: true });
+  // La vista de PANTALLA COMPLETA (`?vista=pantalla`, 2026-11-09): solo las
+  // hojas, sin menú ni botones, cada mes con su diseño favorito.
+  const enPantalla = params.get('vista') === 'pantalla';
+  const verPantallaCompleta = () => {
+    // Hay que pedirla dentro del clic: el navegador no la da fuera de un gesto.
+    // Donde no existe (Safari del iPhone) la vista se abre igual, sin ocultar
+    // las barras del navegador.
+    document.documentElement.requestFullscreen?.().catch(() => {});
+    setParams(p => { p.set('vista', 'pantalla'); p.delete('carpeta'); return p; }, { replace: true });
+  };
+  const salirDePantalla = useCallback(
+    () => setParams(p => { if (p.get('vista') === 'pantalla') p.delete('vista'); return p; }, { replace: true }),
+    [setParams],
+  );
   const irACarpeta = (c: number | null) => setParams(p => {
     p.set('vista', 'carpetas'); if (c === null) p.delete('carpeta'); else p.set('carpeta', String(c)); return p;
   }, { replace: true });
@@ -458,6 +473,24 @@ export default function CalendarioArte() {
     );
   };
 
+  if (enPantalla) {
+    const conFavorito = meses.map(m => ({ ...m, imagen: favoritoDe(m, disenosDe(m)) ?? m.imagen }));
+    return (
+      <>
+        <style>{CSS_PANTALLA}</style>
+        <VistaPantalla
+          anio={anio}
+          portada={portada}
+          meses={conFavorito}
+          imagenes={Object.fromEntries(conFavorito.map(m => [m.mes, m.imagen]))}
+          estilo={vistaLetra}
+          mesInicial={mes}
+          alSalir={salirDePantalla}
+        />
+      </>
+    );
+  }
+
   /** Un botón del menú del proyecto. */
   const itemMenu = (activo: boolean, onClick: () => void, icono: React.ReactNode, texto: string) => (
     <Button variant={activo ? 'primary' : 'ghost'} onClick={() => { onClick(); setMenuMovil(false); }}
@@ -501,6 +534,9 @@ export default function CalendarioArte() {
               </div>
             )}
           </div>
+          <Button variant="outline" className="gap-1.5 px-3" onClick={verPantallaCompleta} title="Ver solo el calendario, en pantalla completa">
+            <Maximize className="h-4 w-4" /><span className="hidden sm:inline">Pantalla completa</span>
+          </Button>
           <Button variant="ghost" className="px-2 lg:hidden" onClick={() => setMenuMovil(v => !v)} aria-label="Menú">
             {menuMovil ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
