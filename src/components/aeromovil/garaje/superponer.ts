@@ -11,7 +11,7 @@ export const COLOR_SUPERPUESTO: Record<string, number> = {
   twizy: 0xf59e0b, aptera: 0x0ea5e9, xl1: 0xa855f7, unlitro: 0xf97316,
   aerorider: 0xec4899, bala: 0x84cc16,
   tesla3: 0xef4444, caterham7: 0x22c55e, jaguarD: 0x14b8a6,
-  szemission: 0x6366f1,
+  szemission: 0x6366f1, nusKruce: 0xe11d48,
 };
 export const colorSuperpuesto = (id: string) => COLOR_SUPERPUESTO[id] ?? 0x64748b;
 export const colorCss = (id: string) => `#${colorSuperpuesto(id).toString(16).padStart(6, '0')}`;
