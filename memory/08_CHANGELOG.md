@@ -10730,3 +10730,7 @@ Eugenio: «no veo el Bala en el selector de diseños».
 - **Arreglo:** la migración `0178_aeromovil_bala_base.sql` añade el diseño base «Cuadriciclo Bala (biplaza a horcajadas)», igual que se hizo con el Aeromóvil 1 en la 0170. Abre con las medidas del Bala del garaje (comprobado con un script).
 - **Cómo funciona:** como los otros diseños base, se abre y se mira; cambiarlo o guardarlo como propio sigue siendo cosa del dueño con su sesión.
 - **Sin verificar:** la migración no se ha podido ejecutar contra una base de datos aquí (no hay Postgres en este entorno). Es la misma forma de la 0170, que ya corrió en producción.
+
+### 2026-11-09 — Modo oscuro: las letras sobre fotos y el boletín del pie vuelven a ser claras
+- Eugenio: «las letras me salen negras». El tema oscuro cambia `--color-white` por la superficie oscura; encima de una foto, o de un fondo elegido a mano, el fondo no cambia y el texto quedaba casi negro.
+- Nuevo atributo `data-fondo-oscuro` (`scripts/generar-tema-oscuro.mjs`): dentro, la paleta blanca y pizarra se queda como en el modo claro. Lo llevan los títulos de las tarjetas de proyecto, los de las noticias, la cabecera con foto de cada proyecto y el boletín cuando el pie es oscuro.

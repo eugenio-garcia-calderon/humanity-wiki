@@ -75,7 +75,7 @@ export default function CabeceraProyectoEscaparate({ pagina }: { pagina: DatosPa
           )}
           <div aria-hidden className="absolute inset-x-0 bottom-0 h-full bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-2 p-4 sm:p-5">
-            <div className="min-w-0 max-w-3xl">
+            <div data-fondo-oscuro="" className="min-w-0 max-w-3xl">
               <h1 className="text-2xl font-black leading-tight tracking-tight text-white [text-shadow:0_2px_10px_rgba(0,0,0,0.45)] sm:text-3xl">{pagina.titulo}</h1>
               {typeof cfg.subtitulo === 'string' && cfg.subtitulo.trim() && <p className="mt-1 max-w-2xl text-sm font-medium leading-snug text-white/90 [text-shadow:0_1px_6px_rgba(0,0,0,0.5)]">{cfg.subtitulo.trim()}</p>}
             </div>

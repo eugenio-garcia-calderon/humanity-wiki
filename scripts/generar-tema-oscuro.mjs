@@ -59,6 +59,12 @@ const fondosDeColor = [
 ];
 css += `/* 1. Blanco sobre fondos de color: el blanco es aquí tinta, no superficie. */\nhtml.dark :is(\n  ${fondosDeColor.join(',\n  ')}\n) {\n  --color-white: #fff;\n}\n\n`;
 
+// 1 bis. Lo que va encima de una foto, o de un fondo oscuro que no se puede leer en las clases (un
+// color elegido a mano, como el del pie): ahí la paleta se queda como en el modo claro, porque el
+// fondo no cambia con el tema (2026-11-09, Eugenio: «las letras me salen negras»).
+const PIZARRA = { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 400: '#94a3b8', 500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a', 950: '#020617' };
+css += `/* 1 bis. Encima de una foto o de un fondo oscuro fijo: la paleta no se invierte (data-fondo-oscuro). */\nhtml.dark [data-fondo-oscuro] {\n  --color-white: #fff;\n${Object.entries(PIZARRA).map(([n, v]) => `  --color-slate-${n}: ${v};`).join('\n')}\n}\n\n`;
+
 // 2. Telones y degradados oscuros sobre imágenes.
 css += `/* 2. Telones de modales y degradados sobre fotos: siempre negros, con su opacidad. */\n`;
 for (const n of OVERLAYS) {
