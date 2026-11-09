@@ -176,7 +176,7 @@ export default function AltaBoletin({ raizId, nombre, responsable, oscuro = true
   const info = TEXTOS[resultado?.r || 'suscrito'];
 
   return (
-    <section ref={refSeccion} aria-labelledby="boletin-titulo" data-boletin>
+    <section ref={refSeccion} aria-labelledby="boletin-titulo" data-boletin data-fondo-oscuro={oscuro ? '' : undefined}>
       {/* La línea de abajo va DENTRO del contenedor, como la de la barra legal del pie: las dos miden lo mismo. */}
       <div style={colorLinea ? { borderColor: colorLinea } : undefined}
         className={cn('mx-auto grid max-w-[calc(576px+50vw)] gap-6 border-b px-5 py-9 @2xl:px-8 @2xl:py-12 @4xl:grid-cols-[minmax(0,1fr)_minmax(0,29rem)] @4xl:items-center @4xl:gap-14', !colorLinea && t.borde)}>

@@ -292,7 +292,7 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
                       {estado.label}
                     </span>
                   )}
-                  <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
+                  <div data-fondo-oscuro="" className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
                     <Titulo className="text-2xl font-black leading-tight tracking-tight text-white [text-shadow:0_2px_8px_rgba(0,0,0,0.45)] sm:text-3xl">{nombre}</Titulo>
                     {(modelo.fecha(f) || sus.length > 0) && (
                       <p className="mt-1 text-sm font-semibold text-white/90 [text-shadow:0_1px_6px_rgba(0,0,0,0.55)]">
