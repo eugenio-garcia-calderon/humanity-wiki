@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "src/pages/Aeromovil.tsx",
+      "motivo": "Un solo selector de vehículo en el logo y la cabecera en una línea",
+      "desde": "2026-11-09T19:22:12.042Z"
+    }
+  ]
 }
