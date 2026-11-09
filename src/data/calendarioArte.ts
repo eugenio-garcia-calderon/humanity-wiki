@@ -181,11 +181,12 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "¿Qué gesto de ahorro mantendrás? Pégalo junto al grifo."
     ],
     "reto": "¿Qué gesto harás para cuidar el agua este mes?",
-    "imagen": "/calendario-arte/ilustraciones/mes-03.jpg",
+    "imagen": "/calendario-arte/ilustraciones/mes-03-d.jpg",
     "disenos": [
       "/calendario-arte/ilustraciones/mes-03.jpg",
       "/calendario-arte/ilustraciones/mes-03-b.jpg",
-      "/calendario-arte/ilustraciones/mes-03-c.jpg"
+      "/calendario-arte/ilustraciones/mes-03-c.jpg",
+      "/calendario-arte/ilustraciones/mes-03-d.jpg"
     ]
   },
   {
@@ -239,11 +240,12 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "¿Qué gesto por la naturaleza harás hábito desde mañana?"
     ],
     "reto": "¿Qué harás este mes por la naturaleza cercana?",
-    "imagen": "/calendario-arte/ilustraciones/mes-04.jpg",
+    "imagen": "/calendario-arte/ilustraciones/mes-04-d.jpg",
     "disenos": [
       "/calendario-arte/ilustraciones/mes-04.jpg",
       "/calendario-arte/ilustraciones/mes-04-b.jpg",
-      "/calendario-arte/ilustraciones/mes-04-c.jpg"
+      "/calendario-arte/ilustraciones/mes-04-c.jpg",
+      "/calendario-arte/ilustraciones/mes-04-d.jpg"
     ]
   },
   {
