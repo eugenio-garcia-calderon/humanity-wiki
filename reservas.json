@@ -5,6 +5,12 @@
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "Un solo selector de vehículo en el logo y la cabecera en una línea",
       "desde": "2026-11-09T19:22:12.042Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/Disenos.tsx",
+      "motivo": "Un solo selector de vehículo en el logo",
+      "desde": "2026-11-09T19:22:14.561Z"
     }
   ]
 }
