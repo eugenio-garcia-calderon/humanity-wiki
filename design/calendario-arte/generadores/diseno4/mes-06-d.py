@@ -760,7 +760,7 @@ def satelite(x, y, s=1.0, ang=-14):
     lz.gouache(Elipse(*R(-3, -6), 1.2 * s, 2.2 * s, ang), '#fff6dc', alfa=0.8, irreg=0)
 
 
-satelite(248, 112, 1.0, ang=-14)
+satelite(214, 262, 1.0, ang=-14)   # below the web page's design buttons, which cover the top-left corner on screen
 
 lz.vineta(margen=26)
 lz.guardar(SALIDA)
