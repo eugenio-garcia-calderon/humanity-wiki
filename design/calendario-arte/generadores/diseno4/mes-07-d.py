@@ -79,8 +79,7 @@ masas = [((1200, 220, 110), '#4f7f45', 0.82, [(1260, 260, 70, '#2f5a3a', 0.6)]),
 for i, ((cx, cy, r), col, dd, tq) in enumerate(masas):
     f = Circulos([(cx + rng.normal(0, r * 0.18), cy + rng.normal(0, r * 0.14), r * rng.uniform(0.5, 0.66)) for _ in range(6)])
     lz.aguada(f, col, dens=dd, tapa=0.9 if i else 1, borde=0.75, gran=0.45, irreg=1.1, toques=tq)
-    lz.contorno(f, VERDE_O, grosor=0.6, presion=0.35, cortes=0.55)
-    for (x, y) in puntos_dentro(f, 9, 90 + i):
+    for (x, y) in puntos_dentro(f, 12, 90 + i):
         hojita(lz, x, y, rng.uniform(11, 16), rng.uniform(0, 360), rng.choice(['#3f6f45', '#9fbf6a', '#5f8f4a']),
                tapa=0.5, dens=0.75)
 for k in range(40):
@@ -258,9 +257,9 @@ def colgante(x0, y0, largo, seed, deriva=0.0):
     for j in range(2, len(p) - 1, 3):
         d_ = p[j + 1] - p[j - 1]
         base = math.degrees(math.atan2(d_[1], d_[0]))
-        hojita(lz, p[j][0], p[j][1], r_.uniform(8, 12), base + r_.choice([-65, 65]), r_.choice(['#5f8f4a', '#7aa456', '#3f7a6a']),
+        hojita(lz, p[j][0], p[j][1], r_.uniform(10, 15), base + r_.choice([-65, 65]), r_.choice(['#5f8f4a', '#7aa456', '#3f7a6a']),
                tapa=0.9)
-        if j % 6 == 2:
+        if j % 5 == 2:
             flor_simple(lz, p[j][0] + r_.normal(0, 3), p[j][1] + r_.normal(0, 3), r_.uniform(4, 5.5),
                         r_.choice([CORAL, '#f39ab0', CARMIN, '#fff1e0']), centro=ORO)
 
@@ -353,16 +352,18 @@ lz.aguada(MESA, '#f6ead6', dens=0.5, tapa=1, irreg=0.35, borde=0.6, toques=[(118
 FAL = Poligono([(1018, 646), (1344, 642), (1348, 690), (1330, 700), (1300, 694), (1270, 702), (1240, 696), (1210, 704),
                 (1180, 697), (1150, 705), (1120, 698), (1090, 705), (1060, 698), (1030, 704), (1014, 694)])
 lz.aguada(FAL, '#f2e2c8', dens=0.55, tapa=1, irreg=0.4, borde=0.6, toques=[(1180, 680, 80, '#dcc4a0', 0.6)])
-# the print: little coral flowers and teal sprigs, in rows that follow the folds
-for k in range(60):
-    x = rng.uniform(1030, 1336)
-    y = rng.uniform(652, 692) if k % 2 else rng.uniform(610, 640)
-    if k % 3 == 0:
-        lz.aguada(Elipse(x, y, 2.2), '#3f8f8f', dens=0.7, irreg=0.2)
-    else:
-        for a in range(5):
-            aa = math.radians(a * 72)
-            lz.aguada(Elipse(x + math.cos(aa) * 1.8, y + math.sin(aa) * 1.8 * 0.6, 1.5, 1.0), CORAL, dens=0.75, irreg=0.1)
+# the print: a coral gingham (glazes that cross and deepen where they meet)
+for y in np.arange(652, 696, 11):
+    lz.aguada(Trazo([(1018, y), (1346, y - 3)], (4.5, 4.5)) & FAL, CORAL, dens=0.28, irreg=0.4, borde=0.4, gran=0.3)
+for x in np.arange(1026, 1344, 15):
+    lz.aguada(Trazo([(x, 648), (x + 1, 700)], (4.5, 4.5)) & FAL, CORAL, dens=0.28, irreg=0.4, borde=0.4, gran=0.3)
+for t in np.linspace(0.12, 0.88, 4):
+    y = 606 + t * 40
+    lz.aguada(Trazo([(1036 - 18 * t, y), (1318 + 26 * t, y - 4 * t)], (3.4, 3.4)) & MESA, CORAL, dens=0.25, irreg=0.4, borde=0.4)
+for k in range(17):
+    t = k / 16
+    xa, xb = 1036 + t * (1318 - 1036), 1018 + t * (1344 - 1018)
+    lz.aguada(Trazo([(xa, 606), (xb, 646)], (3, 3.6)) & MESA, CORAL, dens=0.25, irreg=0.4, borde=0.4)
 lz.aguada(Trazo([(1016, 694), (1180, 700), (1348, 690)], (7, 7, 7)), CORAL, dens=0.75, irreg=0.4)
 # folds: soft shadowed hollows and pencil
 for x in (1060, 1110, 1162, 1218, 1272, 1320):
@@ -398,11 +399,11 @@ for (x, y) in ((1150, 618), (1092, 616)):
     lz.contorno(v, '#6a9aa0', grosor=0.5, presion=0.5)
 
 # --- the girl's arm and glass (over the table corner)
-brazo2(lz, (1304, 558), (1326, 590), (1340, 574), 14, CORAL, PN, 'corta', sombra=1, mano=None)
-VASO = (1350, 566)
+brazo2(lz, (1304, 558), (1316, 596), (1318, 606), 14, CORAL, PN, 'corta', sombra=1, mano=None)
+VASO = (1328, 598)
 vaso = Poligono([(VASO[0] - 7, VASO[1] - 20), (VASO[0] + 7, VASO[1] - 20), (VASO[0] + 6, VASO[1] + 2), (VASO[0] - 6, VASO[1] + 2)],
                 suave=False)
-mano2(lz, 1336, 574, -40, 21, PN, 'agarra', lado=1)
+mano2(lz, 1316, 606, -10, 21, PN, 'agarra', lado=1)
 lz.aguada(vaso, '#cfe8ec', dens=0.45, tapa=1, irreg=0.2, toques=[(VASO[0], VASO[1] - 4, 6, '#7fb5d3', 0.8)])
 lz.contorno(vaso, '#5a9aa0', grosor=0.7, presion=0.6, cortes=0.05)
 lz.gouache(Trazo([(VASO[0] - 4, VASO[1] - 17), (VASO[0] - 4, VASO[1] - 3)], (1.0, 0.8)), '#ffffff', alfa=0.8, irreg=0)
@@ -416,15 +417,17 @@ for f in silla:
     lz.contorno(f, '#4a3428', grosor=0.6, presion=0.5)
 pierna2(lz, (1388, 650), (1340, 664), (1338, 728), 26, '#6a5a4a', PG, pie_ang=180, zapato='#5e3f30', sombra=-1)
 pierna2(lz, (1404, 652), (1356, 670), (1360, 734), 26, '#6a5a4a', PG, pie_ang=185, zapato='#5e3f30', sombra=1)
-brazo2(lz, (1414, 566), (1410, 610), (1394, 566), 20, '#3f8f8f', PG, 'larga', sombra=1, mano=None)
+brazo2(lz, (1414, 566), (1398, 616), (1376, 640), 20, '#3f8f8f', PG, 'larga', sombra=1,
+       mano=dict(ang=160, gesto='relajada', lado=1, tam=27))
 cuello(lz, (1392, 522), 27, (1390, 560), PG, giro=-0.5, inclina=-8)
 torso2(lz, (1364, 560), (1418, 562), (1372, 654), (1412, 656), '#3f8f8f', cintura=1.0, sombra=1,
        toques=[(1410, 620, 36, '#2f6f72', 0.6)], pliegues=[[(1384, 584), (1390, 630)]])
 cabeza2(lz, 1392, 522, 27, PG, '#e6e0d8', 'calvo', giro=-0.5, inclina=-8, ojos='abajo', boca='sonrisa', canas=True,
         barba='#ece6de', labios=False)
+brazo2(lz, (1368, 568), (1376, 616), (1384, 576), 20, '#3f8f8f', PG, 'larga', sombra=-1, mano=None)
 # the jug, tilted to pour: belly, neck, a pinched spout over her glass, handle in his hand
-ca_, sa_ = math.cos(math.radians(32)), math.sin(math.radians(32))
-JX, JY = 1378, 548
+ca_, sa_ = math.cos(math.radians(-35)), math.sin(math.radians(-35))
+JX, JY = 1362, 586
 J = lambda u, v: (JX + u * ca_ - v * sa_, JY + u * sa_ + v * ca_)
 jarra = Poligono([J(-5, -24), J(5, -24), J(8, -15), J(17, -4), J(17, 10), J(9, 19), J(-9, 19), J(-17, 10), J(-17, -4), J(-8, -15)])
 lz.aguada(jarra, '#c0603a', dens=0.85, tapa=1, borde=0.7, irreg=0.3, toques=[(*J(-7, 2), 10, '#e8a060', 0.6), (*J(10, 12), 10, '#8a3a22', 0.6)])
@@ -441,9 +444,7 @@ lz.aguada(chorro, '#8fc8e0', dens=0.75, irreg=0.2, borde=0.8)
 lz.gouache(Trazo([(sx_ - 1, sy_ + 3), (sx_ - 4, sy_ + 10)], (0.9, 0.7)), '#fffdf6', alfa=0.8, irreg=0)
 for k in range(4):
     lz.gouache(Elipse(VASO[0] + rng.normal(0, 4), VASO[1] - 19 + rng.normal(0, 2), 0.8), '#e8f6ff', alfa=0.9, irreg=0)
-mano2(lz, 1394, 566, -95, 30, PG, 'agarra', lado=-1)
-brazo2(lz, (1368, 568), (1350, 616), (1332, 646), 20, '#3f8f8f', PG, 'larga', sombra=-1,
-       mano=dict(ang=150, gesto='relajada', lado=1, tam=29))
+mano2(lz, 1386, 580, -150, 28, PG, 'agarra', lado=-1)
 
 lz.vineta(margen=26)
 lz.guardar(SALIDA)

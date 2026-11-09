@@ -198,7 +198,7 @@ def lince(x, y, s=1.0, ang=0.0):
 
 
 sl = math.degrees(math.atan2(-(sy(312) - sy(290)) * -1, 22))
-lince(300, sy(300) - 14, 1.1, ang=-33)
+lince(262, sy(262) - 12, 1.1, ang=-36)
 
 # ------------------------------------------------------------------ the girl, kneeling, blowing the dandelion
 HEAD = (500, 380)
@@ -411,10 +411,10 @@ lz.luz((MX - 20, MY, 40), '#fff0c0', fuerza=0.3)
 # ------------------------------------------------------------------ meadow life
 rng = np.random.default_rng(31)
 for x in range(240, 1170, 22):
-    if abs(x - 540) < 50 or 700 < x < 870:
+    if 330 < x < 960:
         continue
     hierba(x + rng.normal(0, 6), alto=rng.uniform(14, 26), col=rng.choice(['#4f6f45', '#5f8f63', '#6f8a4a']))
-for x in list(range(170, 400, 23)) + list(range(560, 640, 26)) + list(range(1000, 1290, 21)):
+for x in list(range(150, 200, 23)) + list(range(1000, 1290, 30)):
     if rng.random() < 0.3:
         continue
     c = rng.choice([CORAL, '#fff3e0', CARMIN, ORO, '#f6a5b5', '#fff3e0', '#8d73b0'])
