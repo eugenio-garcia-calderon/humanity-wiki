@@ -946,7 +946,12 @@ export default function Aeromovil() {
         {/* El túnel abre su tarjeta debajo del visor, no encima (2026-11-07, Eugenio: «que no estorbe»). */}
         {tunel && <TarjetaTunel alCerrar={() => setTunel(false)} base="aeromovil" kmh={kmhComparar} alCambiarKmh={setKmhComparar} filas={filasComparar} className="mt-3"
           cuerpos={cuerposTunel} resultados={resultadosTunel} opciones={opcionesTunel} alCambiarOpciones={setOpcionesTunel}
-          punto={puntoTunel} alElegirPunto={s => { setPuntoTunel(s); ventana3d.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }} />}
+          punto={puntoTunel} alElegirPunto={s => {
+            setPuntoTunel(s);
+            // the explanation opens in the 3D view: bring it into sight below the sticky header (tall on a phone)
+            const v = ventana3d.current, cab = document.querySelector('header')?.getBoundingClientRect().bottom ?? 0;
+            if (v) window.scrollTo({ top: window.scrollY + v.getBoundingClientRect().top - cab - 8, behavior: 'smooth' });
+          }} />}
         {esA1 && <PanelDepartamento d={DEPARTAMENTOS.find(x => x.id === dep)!} P={P} res={res} modelo={modelo} />}
         </div>
 

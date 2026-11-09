@@ -142,7 +142,7 @@ export function explicar(cx: Contexto): Explicacion {
         mejoras: a1 || !nuestro ? opciones(
           opcion('morroA1', -1, 0.15, 'Un morro más afilado (hacia «ojival») deja una zona de alta presión más pequeña. Con el diseño por defecto el túnel lo confirma, pero el efecto es pequeño: la mayor parte del Cd está en el rozamiento y en la cola.', 'calculo'),
           opcion('fMorro', 1, 0.04, 'Un voladizo de morro más largo da al aire más distancia para apartarse poco a poco. Con el diseño por defecto el túnel da un Cd algo más bajo.', 'calculo'),
-          opcion('clear', 1, 0.03, 'Subir o bajar el coche mueve el remanso: más alto, el remanso sube y pasa menos aire por debajo. Cambia también el área frontal.', 'general'),
+          opcion('clear', 1, 0.03, 'Subir o bajar el coche mueve el remanso: más alto, el remanso sube, pero queda más hueco bajo el coche y pasa más aire entre el suelo y los bajos. Cambia también el área frontal.', 'general'),
           ...(!nuestro ? [{ texto: 'Redondear el morro y llevar las tomas de aire a la zona de alta presión, en vez de abrir rejillas por todo el frontal.', origen: 'general' as Origen }] : []),
         ) : opciones(
           opcion('morro', -1, 0.2, 'Un morro más afilado deja una zona de alta presión más pequeña; con el diseño por defecto el túnel da un Cd algo más bajo con el morro afilado que con el romo, pero la diferencia es pequeña.', 'calculo'),

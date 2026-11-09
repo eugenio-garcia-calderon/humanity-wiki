@@ -368,7 +368,7 @@ export function crearTunel(cuerpos: CuerpoTunel[], opciones: OpcionesTunel): Tun
         const cd = (R.porVelocidad.find(v => v.kmh === op.kmh) ?? R.porVelocidad[1]).cd.total;
         linea = c.id === 'aeromovil' ? `túnel: Cd ${fmt(cd, 3)} ± ${Math.round(CALIBRACION.banda * 100)} %` : c.cdPublicado != null ? `túnel: Cd ${fmt(cd, 3)} (publicado ${fmt(c.cdPublicado, 3)})` : `túnel: Cd ${fmt(cd, 3)}, sin dato publicado`;
       }
-      rotulo = cartel([...base, linea].join('\n')); rotulo.position.set(xm, techo + 0.8, 0); g.add(rotulo); rotulos.set(c.id, rotulo);
+      rotulo = cartel([...base, linea].join('\n')); rotulo.position.set(xm, techo + 0.8, 0); rotulo.userData.base = rotulo.position.clone(); g.add(rotulo); rotulos.set(c.id, rotulo);
     };
     ponerCartel(); carteles.push(ponerCartel);
     pedirTunel(peticionDe(c, opciones.resolucion, opciones.lineas), i).then(r => {
@@ -378,7 +378,7 @@ export function crearTunel(cuerpos: CuerpoTunel[], opciones: OpcionesTunel): Tun
     });
   });
 
-  const tmp = new THREE.Vector3(), mundo = new THREE.Vector3(), arribaCam = new THREE.Vector3(), haciaCam = new THREE.Vector3();
+  const tmp = new THREE.Vector3(), mundo = new THREE.Vector3(), arribaCam = new THREE.Vector3(), derechaCam = new THREE.Vector3(), haciaCam = new THREE.Vector3();
   /** Screen rectangles (px) of what is already placed this frame. */
   type Caja = { x0: number; x1: number; y0: number; y1: number };
   const cajaDe = (e: THREE.Sprite, cam: THREE.PerspectiveCamera, ancho: number, alto: number, pos: THREE.Vector3): Caja | null => {
@@ -391,16 +391,18 @@ export function crearTunel(cuerpos: CuerpoTunel[], opciones: OpcionesTunel): Tun
   const pisa = (a: Caja, b: Caja) => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
   /**
    * Point labels that would cover one another (or a car's own label) are pushed up on the
-   * screen, in order: our design's first, then each car's in its own order. The leader
-   * follows the label. Recomputed every frame from each label's resting place, so it
-   * settles again as the camera turns.
+   * screen, in order: our design's first, then each car's in its own order; a label that
+   * would run off the side of the view is pulled back in. The leader follows the label.
+   * Recomputed every frame from each label's resting place, so it settles again as the
+   * camera turns.
    */
   const repartir = (cam: THREE.PerspectiveCamera, ancho: number, alto: number) => {
     const puestas: Caja[] = [];
-    for (const r of rotulos.values()) { if (!r.visible || !r.parent) continue; r.getWorldPosition(mundo); const k = cajaDe(r, cam, ancho, alto, mundo); if (k) puestas.push(k); }
-    arribaCam.set(0, 1, 0).applyQuaternion(cam.quaternion);
+    arribaCam.set(0, 1, 0).applyQuaternion(cam.quaternion); derechaCam.set(1, 0, 0).applyQuaternion(cam.quaternion);
+    // the cars' own labels first (two cars side by side can cover each other's name), then the points
     const orden = [...hechos].sort((a, b) => Number(b.nuestro) - Number(a.nuestro));
-    for (const b of orden) for (const e of b.etiquetas) {
+    const lista: THREE.Sprite[] = [...rotulos.values(), ...orden.flatMap(b => b.etiquetas)];
+    for (const e of lista) {
       const base = e.userData.base as THREE.Vector3 | undefined, padre = e.parent;
       if (!base || !padre) continue;
       let vis = e.visible; for (let o: THREE.Object3D | null = padre; o && vis; o = o.parent) vis = o.visible;
@@ -408,17 +410,21 @@ export function crearTunel(cuerpos: CuerpoTunel[], opciones: OpcionesTunel): Tun
       mundo.copy(base); padre.localToWorld(mundo);
       const k = cajaDe(e, cam, ancho, alto, mundo);
       if (!k) continue;
+      // inside the view sideways (a label runs to the right of its point and would be cut at the edge)
+      let dx = 0;
+      if (k.x1 > ancho - 6) dx = ancho - 6 - k.x1;
+      if (k.x0 + dx < 6) dx = 6 - k.x0;
       let dy = 0;
       for (let vuelta = 0; vuelta < 12; vuelta++) {
-        const choca = puestas.find(p => pisa({ ...k, y0: k.y0 + dy, y1: k.y1 + dy }, p));
+        const choca = puestas.find(p => pisa({ x0: k.x0 + dx, x1: k.x1 + dx, y0: k.y0 + dy, y1: k.y1 + dy }, p));
         if (!choca) break;
         dy = choca.y0 - k.y1 - 3; // just above what it hit
       }
-      puestas.push({ ...k, y0: k.y0 + dy, y1: k.y1 + dy });
-      // pixels → metres at this label's depth, along the camera's up direction
+      puestas.push({ x0: k.x0 + dx, x1: k.x1 + dx, y0: k.y0 + dy, y1: k.y1 + dy });
+      // pixels → metres at this label's depth, along the camera's up and right directions
       const prof = haciaCam.copy(mundo).sub(cam.position).dot(tmp.set(0, 0, -1).applyQuaternion(cam.quaternion));
       const mPorPx = 2 * prof * Math.tan(THREE.MathUtils.degToRad(cam.fov) / 2) / alto;
-      mundo.addScaledVector(arribaCam, -dy * mPorPx);
+      mundo.addScaledVector(arribaCam, -dy * mPorPx).addScaledVector(derechaCam, dx * mPorPx);
       e.position.copy(padre.worldToLocal(mundo));
       const guia = e.userData.guia as THREE.Line | undefined;
       if (guia) { const at = guia.geometry.attributes.position as THREE.BufferAttribute; at.setXYZ(1, e.position.x, e.position.y, e.position.z); at.needsUpdate = true; }
