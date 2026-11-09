@@ -414,9 +414,9 @@ torso2(lz, (1194, 564), (1246, 566), (1202, 658), (1240, 660), '#3f8f8f', cintur
        toques=[(1238, 624, 36, '#2f6f72', 0.6)], pliegues=[[(1212, 588), (1218, 634)], [(1230, 590), (1234, 650)]])
 cabeza2(lz, 1222, 526, 27, PG, '#e6e0d8', 'calvo', giro=-0.5, inclina=-8, ojos='abajo', boca='sonrisa', canas=True,
         barba='#ece6de', labios=False)
-brazo2(lz, (1198, 572), (1204, 618), (1212, 584), 20, '#3f8f8f', PG, 'larga', sombra=-1, mano=None)
-ca_, sa_ = math.cos(math.radians(-38)), math.sin(math.radians(-38))
-JX, JY = 1196, 580
+brazo2(lz, (1198, 572), (1208, 616), (1220, 574), 20, '#3f8f8f', PG, 'larga', sombra=-1, mano=None)
+ca_, sa_ = math.cos(math.radians(-52)), math.sin(math.radians(-52))
+JX, JY = 1206, 566
 J = lambda u, v: (JX + u * ca_ - v * sa_, JY + u * sa_ + v * ca_)
 asa = Trazo([J(15, -10), J(26, -4), J(24, 10), J(15, 12)], (4.5, 4.5, 4.5, 4))
 lz.aguada(asa, '#b0502e', dens=0.85, tapa=1, irreg=0.2)
@@ -451,7 +451,7 @@ lz.contorno(vaso, '#5a9aa0', grosor=0.7, presion=0.6, cortes=0.05)
 lz.gouache(Trazo([(VASO[0] - 5, VASO[1] - 19), (VASO[0] - 5, VASO[1] - 3)], (1.0, 0.8)), '#ffffff', alfa=0.8, irreg=0)
 mano2(lz, 1152, 612, -50, 21, PN, 'agarra', lado=1)
 sx_, sy_ = J(-12, -29)
-chorro = Trazo([(sx_, sy_), (sx_ - 4, sy_ + 6), (VASO[0] + 2, VASO[1] - 20)], (3.6, 3.2, 2.8))
+chorro = Trazo([(sx_, sy_), (sx_ - 3, sy_ + 4), (VASO[0] + 2, VASO[1] - 19)], (4.2, 3.8, 3.4))
 lz.aguada(chorro, '#6fb0d0', dens=0.8, irreg=0.2, borde=0.8)
 lz.gouache(Trazo([(sx_ - 1, sy_ + 3), (sx_ - 4, sy_ + 12)], (1.1, 0.8)), '#ffffff', alfa=0.85, irreg=0)
 for k in range(5):
