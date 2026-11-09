@@ -1167,7 +1167,7 @@ Chose (c).
 
 Chose (b): Eugenio asked for an explanation *of this value*, and the tags keep computed claims apart from textbook claims.
 
-**Slider names are not copied.** The improvement options take the label and section from the editor's own slider definitions (`fichas`). A renamed slider renames the option.
+**Slider names are copied, not shared.** Corrected the same day: this entry first said the options read the label from the editor's own slider definitions. They do not. `tunel/explicaciones.ts` keeps its own `A1` and `GOTA` tables (label, section, range) copied from `src/pages/Aeromovil.tsx`; I had read `fichas[clave]` without looking at where `fichas` came from. All 19 labels matched the page on 2026-11-09, but a slider renamed in the page will keep its old name in the tunnel until someone edits both (see tech debt).
 
 **No typed figures for the default design.** The bot's options carried six figures measured on the default designs (e.g. «Cd 0,122 → 0,108»). Removed at integration and replaced by the direction alone. Nothing checked them, and they would go stale silently when the defaults or the calibration change. «Probar» gives the live figure for the visitor's own design.
 
