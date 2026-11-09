@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { FORMA_REF, monotona, punto, tAbajo, tArriba, type FormaBala, type Sec } from './balaForma';
-import { ASIENTO, aleta, cabina, camara, carenados, crearMateriales, malla, mats, ruedas, sinSombra, techoEn, type Asientos, type Mats } from './balaPiezas';
+import { aleta, cabina, camara, carenados, crearMateriales, malla, mats, ruedas, sinSombra, type Mats } from './balaPiezas';
+import { ASIENTO, contornoCupula, techoEn, type Asientos } from './balaMedidas';
 
 /*
  * The «Cuadriciclo Bala» built in three.js: skin, canopy, livery, lamps and
@@ -30,10 +31,6 @@ type P2 = [number, number];
 // ======================================================================= layout
 // Drawn for the reference shape (balaForma.ts, DIM_REF); a built shape reaches
 // these through its x map and its height changes (`disponer`).
-/** Lower edge of the canopy glass in side view. Where it meets the top line, the glass ends (rounded in plan). */
-const Y_VIDRIO_REF = monotona([[-0.10, 0.80], [-0.25, 0.815], [-0.45, 0.815], [-0.8, 0.815], [-1.2, 0.83], [-1.5, 0.855], [-1.65, 0.90], [-1.78, 0.99], [-1.9, 1.10], [-2.0, 1.20], [-2.1, 1.30]]);
-/** The navy canopy frame: this much below the glass, all round it. Its outer edge is the canopy's shut line. */
-const MARCO = 0.035;
 /** The waterline: navy below it, from the nose ring to the tail ring. */
 const Y_FLOTACION_REF = monotona([[0.30, 0.355], [0.1, 0.36], [-0.4, 0.375], [-1.2, 0.39], [-1.9, 0.41], [-2.4, 0.44], [-2.86, 0.47]]);
 
@@ -46,27 +43,15 @@ let F: FormaBala = FORMA_REF;
 let L = disponer(FORMA_REF);
 /** The canopy's outline and the livery lines for a shape. */
 function disponer(F: FormaBala) {
-  const Y_VIDRIO = (x: number) => F.alturaArriba(Y_VIDRIO_REF(F.R(x)));
-  const yMarco = (x: number) => Y_VIDRIO(x) - MARCO;
-  /** Where a side-view line meets the top line, by bisection between xa (line below the top) and xb (line above it). */
-  const cruce = (linea: (x: number) => number, xa: number, xb: number): number => {
-    let a = xa, b = xb;
-    for (let i = 0; i < 50; i++) { const m = (a + b) / 2; if (techoEn(F, m) - linea(m) > 0) a = m; else b = m; }
-    return (a + b) / 2;
-  };
+  const C = contornoCupula(F);
   /** Navy nose cone ahead of X_ARO_MORRO and navy tail cone behind X_ARO_COLA (with the lamp rings on the joints). */
   const X_ARO_MORRO = F.X(0.30), X_ARO_COLA = F.X(-2.86);
   const Y_FLOTACION = (x: number) => Y_FLOTACION_REF(F.R(x)) + F.dSuelo * 0.6;
   return {
-    Y_VIDRIO, yMarco, Y_FLOTACION, X_ARO_MORRO, X_ARO_COLA,
-    /** Glass from XC1 to XC0, frame from XF1 to XF0. */
-    XC0: cruce(Y_VIDRIO, F.X(-0.30), F.X(-0.08)), XC1: cruce(Y_VIDRIO, F.X(-1.75), F.X(-2.3)),
-    XF0: cruce(yMarco, F.X(-0.30), F.X(0.0)), XF1: cruce(yMarco, F.X(-1.75), F.X(-2.4)),
+    ...C, Y_FLOTACION, X_ARO_MORRO, X_ARO_COLA,
     T_D_MORRO: tAbajo(F.sec(X_ARO_MORRO), Y_FLOTACION(X_ARO_MORRO)), T_D_COLA: tAbajo(F.sec(X_ARO_COLA), Y_FLOTACION(X_ARO_COLA)),
   };
 }
-/** The canopy's glass and frame ends of a shape (for the editor's checks and labels). */
-export function cupulaDe(F: FormaBala) { const l = disponer(F); return { XC0: l.XC0, XC1: l.XC1, XF0: l.XF0, XF1: l.XF1 }; }
 
 // ======================================================================= the skin
 /** Row spacing: fine at the tips, round the canopy's ends (where its outline turns fast in plan) and on the rings. `q` > 1 spaces them out (a quick preview). */
@@ -499,11 +484,15 @@ export const PIVOTES_CUPULA = ['cupula-marco', 'cupula-cristal'] as const;
 /** The canopy opens this much about its front hinge (negative: the rear rises). */
 export const ANGULO_CUPULA = -48;
 
-let PLANTILLA: THREE.Group | null = null;
+let PLANTILLA: { forma: FormaBala; g: THREE.Group } | null = null;
 const L_REF = L;
-export function construir(): THREE.Group {
-  if (!PLANTILLA) PLANTILLA = construirCon(FORMA_REF);
-  const M = mats(), g = PLANTILLA.clone(true), copias = new Map<THREE.BufferGeometry, THREE.BufferGeometry>();
+/**
+ * The garage's Bala: built once per page (from `forma` and its seats and fin) into a template, and every call
+ * hands out a copy of its geometries (the viewer disposes those). Shared materials.
+ */
+export function construir(forma: FormaBala = FORMA_REF, o: Pick<OpcionesBala, 'asientos' | 'aleta'> = {}): THREE.Group {
+  if (PLANTILLA?.forma !== forma) PLANTILLA = { forma, g: construirCon(forma, o) };
+  const M = mats(), g = PLANTILLA.g.clone(true), copias = new Map<THREE.BufferGeometry, THREE.BufferGeometry>();
   g.traverse(o => {
     const m = o as THREE.Mesh; if (!m.isMesh) return;
     let c = copias.get(m.geometry); if (!c) { c = m.geometry.clone(); copias.set(m.geometry, c); }

@@ -418,6 +418,8 @@ export function crearForma(D: DimBala) {
     /** Heights of the reference drawing in this shape: above the widest point (canopy, scaled) and the belly lift. */
     alturaArriba, dSuelo, kW,
     controles, sec, alturaHombro, seccionRapida, ladoZ, arribaY, dentroPiel, frenteX, detrasX, envolvente, seccionMayor, areaSeccion,
+    /** x where the skin is crossed going from xIn (inside) towards xOut, at (z, y); NaN if xIn is outside. */
+    bordeX,
   };
 }
 

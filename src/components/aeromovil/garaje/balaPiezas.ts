@@ -1,8 +1,10 @@
 import * as THREE from 'three';
-import { E, loft, type Est } from './forma';
+import { E, loft } from './forma';
 import { barrido, curva, parcheM, piel, thetaY, torno } from './apteraPiel';
 import { APLASTADO, geometriasRueda } from './apteraDetalle';
-import { punto, type FormaBala } from './balaForma';
+import { type FormaBala } from './balaForma';
+import { ALETA, ASIENTO, brazosDe, podDe, semiAncho, techoEn, type Asientos } from './balaMedidas';
+export { ALETA, ASIENTO, POD, POD_SEMIANCHO, brazosDe, extremoManillar, podDe, techoEn, type Asientos } from './balaMedidas';
 
 /*
  * Materials and the separate parts of the «Cuadriciclo Bala»: wheels, the
@@ -152,9 +154,6 @@ export const malla = (g: THREE.BufferGeometry, m: THREE.Material | THREE.Materia
   const o = new THREE.Mesh(g, m); o.castShadow = sombra; o.receiveShadow = true; if (nombre) o.name = nombre; return o;
 };
 
-/** Top centre of the skin (y) at x. */
-export const techoEn = (F: FormaBala, x: number) => punto(F.sec(x), 1)[1];
-
 // ======================================================================= wheels
 /**
  * A wheel: tyre with a rounded sidewall and grooves, flattened at the contact
@@ -182,47 +181,10 @@ export function ruedas(F: FormaBala, M: Mats): THREE.Group {
 }
 
 // ======================================================================= pods
-/**
- * Fairing of a lateral wheel, centred on its axle (x relative to the axle,
- * z = 0, +z outwards): Aptera-like, a slim «D» in side view with a rounded
- * front and a tapering tail, an aerofoil in plan; the tyre shows below it.
- */
-export const POD: Est[] = [
-  E(0.385, 0.262, 0.318, 0.006, 0.008, 0.006, 2.2),
-  E(0.370, 0.190, 0.400, 0.030, 0.036, 0.030, 2.4),
-  E(0.340, 0.130, 0.470, 0.050, 0.058, 0.050, 2.7),
-  E(0.280, 0.095, 0.530, 0.064, 0.072, 0.062, 3.0),
-  E(0.180, 0.078, 0.565, 0.071, 0.079, 0.068, 3.2),
-  E(0.050, 0.072, 0.580, 0.073, 0.080, 0.069, 3.3),
-  E(-0.080, 0.072, 0.572, 0.072, 0.079, 0.068, 3.3),
-  E(-0.200, 0.078, 0.545, 0.066, 0.073, 0.062, 3.1),
-  E(-0.300, 0.092, 0.500, 0.054, 0.060, 0.051, 2.9),
-  E(-0.390, 0.120, 0.440, 0.038, 0.043, 0.036, 2.7),
-  E(-0.470, 0.165, 0.375, 0.020, 0.023, 0.019, 2.5),
-  E(-0.530, 0.215, 0.320, 0.007, 0.008, 0.007, 2.3),
-  E(-0.550, 0.245, 0.290, 0.002, 0.002, 0.002, 2.2),
-];
 /** Height of the navy waterline on the pods: the body's at the lateral wheels (balaModelo.ts), which lifts with the belly. */
 const Y_FLOTACION_POD = 0.39;
-/** Radius of the reference lateral wheel (20″): the pod is drawn for it and scales with the wheel. */
+/** Radius of the reference lateral wheel (20″): the pod is drawn for it. */
 const R_LAT_REF = 0.254;
-/** The pod for this shape's lateral wheel: x and heights scale with the wheel's radius (exactly the drawing at 20″). */
-export function podDe(F: FormaBala): Est[] {
-  const k = F.R_LAT / R_LAT_REF;
-  return POD.map(e => ({ ...e, x: e.x * k, yb: e.yb * k, yt: e.yt * k }));
-}
-/** The pod's half-width at its widest (for the overall width): 0.08 m. */
-export const POD_SEMIANCHO = 0.080;
-/** Upper arm (main, streamlined) and lower link from the body to each pod: chord, thickness, height. */
-const BRAZOS = [
-  { x: 0.03, cuerda: 0.20, grueso: 0.034, y: 0.43 },
-  { x: -0.01, cuerda: 0.13, grueso: 0.024, y: 0.18 },
-];
-/** The arms of this shape: they scale with the pod, and the lower link stays 5.6 cm above a raised belly (it must meet the skin). */
-export function brazosDe(F: FormaBala) {
-  const k = F.R_LAT / R_LAT_REF;
-  return BRAZOS.map((b, i) => ({ ...b, x: b.x * k, y: i === 1 && F.dSuelo > 0 ? Math.max(b.y * k, F.D.suelo + 0.056) : b.y * k }));
-}
 export function carenados(F: FormaBala, M: Mats): THREE.Group {
   const g = new THREE.Group(); g.name = 'carenados';
   const POD = podDe(F), k = F.R_LAT / R_LAT_REF, Y_FLOT = Y_FLOTACION_POD + F.dSuelo * 0.6, semiAnchoPod = semiAncho(POD);
@@ -263,17 +225,6 @@ export function carenados(F: FormaBala, M: Mats): THREE.Group {
   }
   return g;
 }
-/** Half-width of the pod at (x relative to the axle, y). */
-const semiAncho = (POD: Est[]) => (x: number, y: number): number => {
-  let k = 0; while (k < POD.length - 2 && POD[k + 1].x > x) k++;
-  const a = POD[k], b = POD[k + 1], t = Math.max(0, Math.min(1, (x - a.x) / (b.x - a.x)));
-  const L = (p: number, q: number) => p + (q - p) * t;
-  const yb = L(a.yb, b.yb), yt = L(a.yt, b.yt), w = L(a.wm, b.wm), n = L(a.n ?? 2.6, b.n ?? 2.6);
-  if (y <= yb || y >= yt) return 0;
-  const u = Math.abs(y - (yb + yt) / 2) / ((yt - yb) / 2);
-  return w * Math.pow(Math.max(0, 1 - Math.pow(u, n)), 1 / n);
-}
-
 // ======================================================================= fin
 /**
  * The tail fin: a small swept stabiliser on the end of the tail cone, as on a
@@ -282,7 +233,6 @@ const semiAncho = (POD: Est[]) => (x: number, y: number): number => {
  * Symmetric aerofoil section (NACA 00xx thickness, 3 cm at the root, 1.2 cm
  * at the tip), navy with a red tip cap (painted).
  */
-export const ALETA = { raiz: [-2.50, -3.05] as [number, number], punta: [[-2.875, 1.0], [-3.015, 0.99]] as [P2, P2], grueso: [0.016, 0.007] as [number, number] }; // half-thickness at root and tip
 type P2 = [number, number];
 /** The fin of this shape: chords follow the tail through its x map; `alto` is the height of the tip's leading edge above the road. */
 export function aleta(F: FormaBala, M: Mats, alto = ALETA.punta[0][1]): THREE.Group {
@@ -333,9 +283,6 @@ export function aleta(F: FormaBala, M: Mats, alto = ALETA.punta[0][1]): THREE.Gr
  * on top. Pilot's footboards forward of the knees, passenger's footpegs beside
  * the pilot's hips. Simple volumes: they are seen through tinted glass.
  */
-/** Where the riders sit: hip x (negative: behind the front axle) and the saddle's height under each, above the road. */
-export interface Asientos { xPiloto: number; yPiloto: number; xPasajero: number; yPasajero: number }
-export const ASIENTO: Asientos = { xPiloto: -1.06, yPiloto: 0.44, xPasajero: -1.54, yPasajero: 0.47 };
 /**
  * The cockpit for these seats. The drawing is the reference one; moving a rider
  * moves what belongs to them: the pilot's end of the saddle, the rear of the
@@ -438,8 +385,6 @@ export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO): THREE.Grou
   }
   return g;
 }
-/** The outer end of the handlebar (the bar-end weight's outer face), for the check that it stays inside the body: [x, y, z]. */
-export const extremoManillar = (F: FormaBala): [number, number, number] => [-0.592, 0.870 + F.dSuelo, (0.325 + 0.006) * Math.min(1, F.kW)];
 /** Box-projected UVs (metres / scale) so the quilting has a constant size. */
 function cajaUV(geo: THREE.BufferGeometry, escala: number) {
   const p = geo.attributes.position as THREE.BufferAttribute, n = geo.attributes.normal as THREE.BufferAttribute, uv = new Float32Array(p.count * 2);
