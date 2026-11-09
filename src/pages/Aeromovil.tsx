@@ -41,6 +41,8 @@ import { FormularioMejora, VistaExportar, VistaPlan, VistaPlanos, VistaTareas, c
 import { BotonesComponentes, VistaComponentes } from '../components/aeromovil/Componentes';
 import { VEHICULOS_GARAJE } from '../components/aeromovil/garaje';
 import { TarjetaTunel, gastoEnRuedas, VELOCIDADES, type FilaTunel } from '../components/aeromovil/TarjetaTunel';
+import { cuerpoAeromovil, cuerpoGaraje, type CuerpoTunel } from '../components/aeromovil/tunel/cuerpos';
+import { opcionesPorDefecto, useResultadosTunel, type OpcionesTunel } from '../components/aeromovil/tunel/cliente';
 import { TarjetaSuperponer, type Alineacion } from '../components/aeromovil/TarjetaSuperponer';
 import { colorCss } from '../components/aeromovil/garaje/superponer';
 import { DEPARTAMENTOS, type IdDepartamento } from '../components/aeromovil/departamentos';
@@ -649,7 +651,15 @@ export default function Aeromovil() {
       }];
     }),
   ], [soloGaraje, esA1, res.Cd, res.A, res.mTot, res.Crr, P.plazas, P.mOcc, garajeVisor]);
-  const cdTunel = useMemo(() => Object.fromEntries(filasComparar.map(f => [f.id, f.cd])), [filasComparar]);
+  // Túnel de viento calculado (2026-11-09): los cuerpos que pasan por él, lo que se elige en la tarjeta y los resultados.
+  // El Cd que usan el consumo y el resto del editor no cambia: el del túnel se pone al lado.
+  const [opcionesTunel, setOpcionesTunel] = useState<OpcionesTunel>(opcionesPorDefecto);
+  const opcionesTunelVisor = useMemo(() => ({ ...opcionesTunel, kmh: kmhComparar }), [opcionesTunel, kmhComparar]);
+  const cuerposTunel = useMemo<CuerpoTunel[]>(() => !tunel ? [] : [
+    ...(soloGaraje ? [] : [cuerpoAeromovil(modelo, res.A, esA1 ? 'Aeromóvil 1' : 'Aeromóvil Gota')]),
+    ...garajeVisor.flatMap(v => { const c = cuerpoGaraje(v); return c ? [c] : []; }),
+  ], [tunel, soloGaraje, modelo, res.A, esA1, garajeVisor]);
+  const resultadosTunel = useResultadosTunel(cuerposTunel, opcionesTunel.resolucion, opcionesTunel.lineas);
   // Carteles encima de cada coche (2026-11-07, Eugenio: «que aparezca con un botón el Cd y consumo en kWh a los 100 km de cada uno»).
   const carteles = useMemo(() => {
     if (!tunel && !verConsumo) return undefined;
@@ -760,7 +770,7 @@ export default function Aeromovil() {
         <section ref={ventana3d} aria-label="Vista 3D" className={cn('overflow-hidden bg-slate-50',
           completa === 'no' ? cn('relative h-[62vh] min-h-[380px] rounded-xl border border-slate-200', esA1 ? 'lg:h-[72vh]' : 'lg:sticky lg:top-[68px] lg:h-[calc(100vh-88px)]')
             : completa === 'css' ? 'fixed inset-0 z-[100] h-[100dvh] w-screen' : 'relative h-full w-full')}>
-          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeVisor} soloGaraje={!!soloGaraje} tunel={tunel} carteles={carteles} cdTunel={cdTunel} alMoverGaraje={superponer || soloGaraje ? undefined : (id, x, z) => setGaraje(g => g.map(v => v.id === id ? { ...v, x, z } : v))} superponer={!!superponer && !soloGaraje} vista={vista}
+          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeVisor} soloGaraje={!!soloGaraje} tunel={tunel} carteles={carteles} cuerposTunel={cuerposTunel} opcionesTunel={opcionesTunelVisor} alMoverGaraje={superponer || soloGaraje ? undefined : (id, x, z) => setGaraje(g => g.map(v => v.id === id ? { ...v, x, z } : v))} superponer={!!superponer && !soloGaraje} vista={vista}
             referencia={referencia} modoRef={modoRef} alinear={alinear} alPinchar={esA1 ? c => { navegar(`/aeromovil/componentes/${c}`); window.scrollTo({ top: 0 }); } : undefined} />
           {/* La esquina de arriba a la derecha es del botón de pantalla completa: las tarjetas se apartan a su izquierda
               (en el móvil, debajo, que de ancho no caben). */}
@@ -894,7 +904,7 @@ export default function Aeromovil() {
                 if (!tunel) setSuperponer(null);
                 setTunel(!tunel);
               }}
-              title="Líneas de humo alrededor de este diseño y de los coches del garaje, con lo que cuesta empujar el aire a cada uno"
+              title="Calcula el aire alrededor de este diseño y de los coches del garaje (presiones, líneas de corriente, puntos críticos y un Cd estimado) y lo que cuesta empujarlo"
               className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', tunel && 'border-sky-700 bg-sky-700 text-white hover:bg-sky-800')}>
               <Wind className="mr-1 h-3 w-3" />Túnel de viento
             </Button>
@@ -924,7 +934,8 @@ export default function Aeromovil() {
           )}
         </section>
         {/* El túnel abre su tarjeta debajo del visor, no encima (2026-11-07, Eugenio: «que no estorbe»). */}
-        {tunel && <TarjetaTunel alCerrar={() => setTunel(false)} base="aeromovil" kmh={kmhComparar} alCambiarKmh={setKmhComparar} filas={filasComparar} className="mt-3" />}
+        {tunel && <TarjetaTunel alCerrar={() => setTunel(false)} base="aeromovil" kmh={kmhComparar} alCambiarKmh={setKmhComparar} filas={filasComparar} className="mt-3"
+          cuerpos={cuerposTunel} resultados={resultadosTunel} opciones={opcionesTunel} alCambiarOpciones={setOpcionesTunel} />}
         {esA1 && <PanelDepartamento d={DEPARTAMENTOS.find(x => x.id === dep)!} P={P} res={res} modelo={modelo} />}
         </div>
 

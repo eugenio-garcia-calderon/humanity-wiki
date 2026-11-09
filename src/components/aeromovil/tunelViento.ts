@@ -1,205 +1,45 @@
 import * as THREE from 'three';
-import { Line2 } from 'three/examples/jsm/lines/Line2.js';
+import { LineSegments2 } from 'three/examples/jsm/lines/LineSegments2.js';
+import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeometry.js';
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
-import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
-import type { ModeloBase } from './geometria';
+import { pedirTunel, type OpcionesTunel } from './tunel/cliente';
+import { envolventeModelo, peticionDe, type CuerpoTunel } from './tunel/cuerpos';
+import type { PorVelocidad, ResultadoTunel } from './tunel/calculo';
+import { COLOR_ESTELA, colorDeCp } from './tunel/colores';
+import { CALIBRACION } from './tunel/calibracion';
 
 /**
- * Túnel de viento de mentira, para ver dos coches a la vez (2026-11-07,
- * Eugenio: «un efecto túnel de viento para comparar ambos vehículos»).
+ * Wind tunnel in the 3D view (2026-11-07, Eugenio: «un efecto túnel de viento
+ * para comparar ambos vehículos»; 2026-11-09: «un mejor túnel de viento, con
+ * mayor precisión, datos y visualizaciones de los puntos críticos con una mayor
+ * granularidad»).
  *
- * NO es una simulación de fluidos. Es una ilustración que respeta tres cosas
- * que sí son ciertas y se ven:
- *  1. El aire tiene que apartarse lo que ocupa el coche: cada línea de humo se
- *     separa del eje lo justo para que el área entre ella y el coche se
- *     conserve (r² = r0² + R(x)²), con el coche «reflejado» bajo el suelo para
- *     que el aire de abajo se estreche entre el suelo y los bajos.
- *  2. Un morro romo para el aire de golpe (rojo, presión alta) y uno afilado
- *     lo aparta poco a poco; por los lados el aire acelera (azul).
- *  3. Una cola cortada deja detrás un hueco que el aire tarda en cerrar: la
- *     estela. Su tamaño sale del área de la última sección del coche, así que
- *     el Twizy (trasera plana) arrastra una estela grande y la gota casi nada.
- * Las cifras que importan (Cd, área, fuerza, potencia) no salen de aquí: las
- * pone la tarjeta de la página, cada una con su fuente.
+ * Since 2026-11-09 the flow is computed, not drawn by hand: a potential-flow
+ * panel method with the road as a mirror image (tunel/paneles.ts), a boundary
+ * layer along surface streamlines to predict separation (tunel/capaLimite.ts)
+ * and a drag estimate calibrated on the garage cars (tunel/arrastre.ts), all in
+ * a Web Worker (tunel/cliente.ts). What this file draws, per body:
+ *  · the skin: the body's silhouette painted with the computed Cp, panel by
+ *    panel and smoothed between them, translucent so the real car shows through;
+ *  · streamlines integrated through the computed velocity field, coloured by
+ *    the local Cp, with smoke particles running at the local speed;
+ *  · critical points: the stagnation point, the suction peaks, where the
+ *    pressure starts to rise (adverse gradient) and the predicted separation line;
+ *  · the wake behind the separation line. The wake's SHAPE is a model (a
+ *    recirculation bubble about 1.2 × √(base area) long, then a slowly widening
+ *    wake): potential flow has no wake, so inside it the smoke goes straight back.
  *
- * Ejes del visor: X hacia delante (el coche avanza hacia +X, así que el aire
- * corre hacia −X), Y arriba, Z lateral. Metros.
+ * Viewer axes: X forward (the car drives to +X, so the air goes to −X), Y up, Z to the side. Metres.
  */
 
-/** [x, y del suelo de la carrocería, y del techo, media anchura]. */
+export { envolventeModelo };
+export type { CuerpoTunel };
+/** [x, y of the body's bottom, y of the roof, half width]. */
 export type Envolvente = [number, number, number, number][];
 
-export interface CuerpoTunel {
-  id: string;
-  /** Dónde está el coche en la escena (eje delantero) y su giro. */
-  x: number; z: number; giro: number;
-  envolvente: Envolvente;
-  /** Exponente de la sección (2 = elipse, 3 = más cuadrada, como el Twizy). */
-  n: number;
-  /** Cartel flotante encima del coche (nombre y CdA). */
-  etiqueta?: string;
-  /** Cd del coche, si se conoce: hace la estela más o menos grande. */
-  cd?: number;
-}
+const fmt = (v: number, d = 2) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
 
-/** La silueta del Aeromóvil a partir de sus superficies (cuerpo y cúpula), cada 3 cm. */
-export function envolventeModelo(m: ModeloBase): Envolvente {
-  const paso = 0.03, mapa = new Map<number, [number, number, number]>();
-  for (const s of m.superficies) {
-    for (let k = 0; k <= 400; k++) {
-      const f = s.frame(s.u0 + (s.u1 - s.u0) * (k / 400));
-      if (!(f.hw > 0.002) || !(f.top > f.bot)) continue;
-      const i = Math.round(f.x / paso), e = mapa.get(i);
-      if (!e) mapa.set(i, [f.bot, f.top, f.hw]);
-      else mapa.set(i, [Math.min(e[0], f.bot), Math.max(e[1], f.top), Math.max(e[2], f.hw)]);
-    }
-  }
-  return [...mapa.entries()].sort((a, b) => b[0] - a[0]).map(([i, e]) => [i * paso, e[0], e[1], e[2]]);
-}
-
-// ---------------------------------------------------------------- utilidades
-const DX = 0.03;
-const clamp = (v: number, a: number, b: number) => Math.max(a, Math.min(b, v));
-
-/** Colores del humo según la presión estimada: azul (aire rápido) · gris (libre) · rojo (aire frenado). */
-const C_BAJA = new THREE.Color(0x1d4ed8), C_MEDIA_B = new THREE.Color(0x60a5fa), C_LIBRE = new THREE.Color(0x94a3b8);
-const C_MEDIA_A = new THREE.Color(0xf59e0b), C_ALTA = new THREE.Color(0xdc2626), C_ESTELA = new THREE.Color(0x7c3aed);
-function colorCp(cp: number, estela: number, out: THREE.Color) {
-  if (cp < 0) { const t = clamp(-cp, 0, 1); if (t < 0.5) out.copy(C_LIBRE).lerp(C_MEDIA_B, t / 0.5); else out.copy(C_MEDIA_B).lerp(C_BAJA, (t - 0.5) / 0.5); }
-  else { const t = clamp(cp, 0, 1); if (t < 0.5) out.copy(C_LIBRE).lerp(C_MEDIA_A, t / 0.5); else out.copy(C_MEDIA_A).lerp(C_ALTA, (t - 0.5) / 0.5); }
-  if (estela > 0.02) out.lerp(C_ESTELA, clamp(estela * 1.6, 0, 0.75));
-  return out;
-}
-
-/** Desenfoque gaussiano de un perfil (la influencia del coche empieza antes del morro). */
-function suavizar(v: Float64Array, sigma: number): Float64Array {
-  const r = Math.ceil((3 * sigma) / DX), w: number[] = [];
-  for (let k = -r; k <= r; k++) w.push(Math.exp(-0.5 * ((k * DX) / sigma) ** 2));
-  const o = new Float64Array(v.length);
-  for (let i = 0; i < v.length; i++) {
-    let s = 0, ws = 0;
-    for (let k = -r; k <= r; k++) { const j = i + k; if (j < 0 || j >= v.length) continue; s += v[j] * w[k + r]; ws += w[k + r]; }
-    o[i] = s / ws;
-  }
-  return o;
-}
-
-interface Linea { px: Float32Array; py: Float32Array; pz: Float32Array; t: Float32Array; estela: Float32Array; col: Float32Array; T: number }
-
-/** Las líneas de un coche, en coordenadas del propio coche. */
-export function lineasDe(c: CuerpoTunel) {
-  const env = [...c.envolvente].sort((a, b) => a[0] - b[0]);
-  const xMin = env[0][0], xMax = env[env.length - 1][0];
-  const x0 = xMax + 1.6, x1 = xMin - 3.2, N = Math.ceil((x0 - x1) / DX) + 1;
-  const xs = new Float64Array(N);
-  const aR = new Float64Array(N), bR = new Float64Array(N), cR = new Float64Array(N);
-  for (let i = 0; i < N; i++) {
-    const x = x0 - i * DX; xs[i] = x;
-    if (x > xMax || x < xMin) continue;
-    // tramo [j, j+1] de la envolvente (ordenada de atrás a delante) que contiene x
-    let lo = 0, hi = env.length - 1;
-    while (hi - lo > 1) { const m = (lo + hi) >> 1; if (env[m][0] <= x) lo = m; else hi = m; }
-    const e0 = env[lo], e1 = env[hi], t = e1[0] > e0[0] ? clamp((x - e0[0]) / (e1[0] - e0[0]), 0, 1) : 0;
-    const yb = e0[1] + (e1[1] - e0[1]) * t, yt = e0[2] + (e1[2] - e0[2]) * t, hw = e0[3] + (e1[3] - e0[3]) * t;
-    aR[i] = Math.max(0, (yt - yb) / 2); bR[i] = Math.max(0, hw); cR[i] = (yb + yt) / 2;
-  }
-  // Sección máxima: da la escala de todo.
-  let iMax = 0; for (let i = 0; i < N; i++) if (aR[i] * bR[i] > aR[iMax] * bR[iMax]) iMax = i;
-  const aM = Math.max(0.05, aR[iMax]), bM = Math.max(0.05, bR[iMax]), cM = cR[iMax];
-  // La estela: tras la cola, una «sección fantasma» del tamaño de la última que se va cerrando.
-  let iCola = 0; for (let i = 0; i < N; i++) if (aR[i] > 0) iCola = i;
-  // El tamaño de la estela sale del área de la cola, corregido por el Cd del coche cuando se
-  // conoce: una cola truncada bien hecha (el XL1, Cd 0,19) deja menos estela que una trasera
-  // plana tras una carrocería abierta (el Twizy, Cd 0,64), aunque las dos colas midan parecido.
-  const kCola = (aR[iCola] * bR[iCola]) / (aM * bM) * clamp((c.cd ?? 0.3) / 0.3, 0.3, 2.2), Lw = 0.5 + 2.4 * Math.min(1, kCola);
-  const a = new Float64Array(N), b = new Float64Array(N), cc = new Float64Array(N), est = new Float64Array(N);
-  for (let i = 0; i < N; i++) {
-    if (aR[i] > 0) { a[i] = aR[i]; b[i] = bR[i]; cc[i] = cR[i]; continue; }
-    if (i > iCola) {
-      const d = (i - iCola) * DX, f = Math.exp(-d / Lw);
-      a[i] = aR[iCola] * f; b[i] = bR[iCola] * f; cc[i] = cR[iCola]; est[i] = Math.min(1, kCola) * Math.exp(-d / (Lw * 1.3));
-    } else cc[i] = cM;
-  }
-  const aS = suavizar(a, 0.2), bS = suavizar(b, 0.2), cS = suavizar(cc, 0.2), eS = suavizar(est, 0.15);
-  const n = c.n;
-
-  // Desplazamiento de un punto que llega de lejos a (y0, z0), en la estación i.
-  const desplazar = (y0: number, z0: number, i: number, centro: number, salida: number[]) => {
-    const al = aS[i] / aM, be = bS[i] / bM;
-    const u = (y0 - centro) / aM, v = z0 / bM, r0 = Math.hypot(u, v), th = Math.atan2(u, v);
-    const rb = al > 1e-4 && be > 1e-4 ? Math.pow(Math.pow(Math.abs(Math.cos(th)) / be, n) + Math.pow(Math.abs(Math.sin(th)) / al, n), -1 / n) : 0;
-    const r = Math.sqrt(r0 * r0 + rb * rb);
-    salida[0] = centro + aM * r * Math.sin(th) - y0; salida[1] = bM * r * Math.cos(th) - z0; salida[2] = rb; salida[3] = r;
-  };
-
-  const lineas: Linea[] = [];
-  const hacer = (y0: number, z0: number) => {
-    const px = new Float32Array(N), py = new Float32Array(N), pz = new Float32Array(N), col = new Float32Array(N * 3), es = new Float32Array(N), tt = new Float32Array(N);
-    const d1 = [0, 0, 0, 0], d2 = [0, 0, 0, 0], color = new THREE.Color();
-    let rPrev = -1, T = 0;
-    const fase = y0 * 13.7 + z0 * 7.3;
-    for (let i = 0; i < N; i++) {
-      // El eje es fijo (el centro de la sección mayor): así cada línea decide una
-      // vez por dónde pasa (por encima, por debajo o por un lado) y no salta de
-      // un lado a otro cuando el morro está más bajo que el techo.
-      desplazar(y0, z0, i, cM, d1);
-      desplazar(y0, z0, i, -cM, d2); // el coche reflejado bajo el suelo
-      let y = Math.max(0.015, y0 + d1[0] + d2[0]), z = z0 + d1[1] + d2[1];
-      // Nunca dentro de la carrocería real (sin suavizar): se lleva al borde,
-      // siguiendo el rayo que sale del eje, que es el lado que ya había elegido.
-      if (aR[i] > 0 && bR[i] > 0) {
-        const fuera = (yy: number, zz: number) => Math.pow(Math.pow(Math.abs(zz) / bR[i], n) + Math.pow(Math.abs(yy - cR[i]) / aR[i], n), 1 / n) >= 1.05;
-        if (!fuera(y, z)) {
-          let dy = y - cM, dz = z;
-          if (Math.hypot(dy, dz) < 1e-4) { dy = z0 === 0 ? (y0 >= cM ? 1e-3 : -1e-3) : 0; dz = z0 === 0 ? 0 : Math.sign(z0) * 1e-3; }
-          let lo = 1, hi = 2;
-          while (!fuera(cM + dy * hi, dz * hi) && hi < 4096) { lo = hi; hi *= 2; }
-          for (let it = 0; it < 22; it++) { const m = (lo + hi) / 2; if (fuera(cM + dy * m, dz * m)) hi = m; else lo = m; }
-          y = cM + dy * hi; z = dz * hi;
-          if (y < 0.015) y = 0.015;
-        }
-      }
-      // Presión estimada: se aparta deprisa (frena, rojo) o va pegada sin apartarse (acelera, azul).
-      const r = d1[3], g = rPrev < 0 ? 0 : (r - rPrev) / DX; rPrev = r;
-      const cerca = r > 0 ? clamp((d1[2] * d1[2]) / (r * r), 0, 1) : 0;
-      const aparta = clamp(g * 2.2, 0, 1), cierra = clamp(-g * 2.2, 0, 1);
-      const cp = clamp(cerca * aparta * 1.1 - cerca * 0.85 * (1 - Math.max(aparta, cierra)) + cerca * cierra * 0.2, -1, 1);
-      // Estela: fuerte en las líneas que pasan rozando la cola, nada en las lejanas.
-      es[i] = clamp(eS[i] * 3 * Math.sqrt(cerca), 0, 1);
-      // ... y revuelta: el humo de la estela no va recto (remolinos congelados en la línea).
-      if (es[i] > 0.02) {
-        const amp = es[i] * 0.12 * aM, f = fase + xs[i];
-        y = Math.max(0.015, y + amp * (Math.sin(f * 9.1) + 0.5 * Math.sin(f * 17.3 + 1.1)));
-        z += amp * (Math.cos(f * 7.7 + 0.4) + 0.5 * Math.sin(f * 13.9));
-      }
-      px[i] = xs[i]; py[i] = y; pz[i] = z;
-      colorCp(cp - es[i] * 0.3, es[i], color); color.toArray(col, i * 3);
-      // Velocidad aparente para las partículas (Bernoulli, frenada en la estela).
-      const vel = Math.sqrt(clamp(1 - cp, 0.06, 2)) * (1 - 0.65 * es[i]);
-      if (i > 0) T += DX / Math.max(0.08, vel);
-      tt[i] = T;
-    }
-    lineas.push({ px, py, pz, t: tt, estela: es, col, T });
-  };
-  const techo = cM + aM;
-  // Peine vertical en el eje del coche, horizontal a media altura y otro bajo (ruedas y bajos).
-  for (let k = 0; k < 13; k++) hacer(0.06 + (techo + 0.55 - 0.06) * (k / 12), 0);
-  for (let k = 0; k < 12; k++) { const z = -(bM + 0.75) + (2 * (bM + 0.75)) * (k / 11); if (Math.abs(z) > 0.04) hacer(cM, z); }
-  for (let k = 0; k < 8; k++) { const z = -(bM + 0.45) + (2 * (bM + 0.45)) * (k / 7); hacer(0.22, z); }
-  return { lineas, x0, techo, bM, cM, aM, xMedio: (xMin + xMax) / 2 };
-}
-
-/** Textura redonda para las partículas de humo. */
-function puntoRedondo(): THREE.Texture {
-  const cv = document.createElement('canvas'); cv.width = cv.height = 64;
-  const g = cv.getContext('2d')!;
-  const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.45, 'rgba(255,255,255,0.85)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
-  g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
-  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t;
-}
-
-/** Cartel de texto que siempre mira a la cámara: nombre arriba y hasta dos líneas de datos (separadas por «\n»). */
+/** Text label that always faces the camera: name on top and up to two lines of data (separated by «\n»). */
 export function cartel(texto: string): THREE.Sprite {
   const lineas = texto.split('\n').slice(0, 3);
   const W = 720, H = lineas.length === 1 ? 120 : lineas.length === 2 ? 168 : 214;
@@ -223,80 +63,374 @@ export function cartel(texto: string): THREE.Sprite {
   sp.scale.set(alto * W / H, alto, 1); sp.renderOrder = 6; return sp;
 }
 
-export interface Tunel { grupo: THREE.Group; actualizar: (t: number, ancho: number, alto: number) => void; liberar: () => void }
+/** A short label for a critical point: one line, a coloured dot, small and fixed on screen. */
+function etiqueta(texto: string, color: string): THREE.Sprite {
+  const cv = document.createElement('canvas'), g = cv.getContext('2d')!, px = 30;
+  g.font = `600 ${px}px Inter, system-ui, sans-serif`;
+  const W = Math.ceil(g.measureText(texto).width) + 66, H = 52;
+  cv.width = W; cv.height = H;
+  g.fillStyle = 'rgba(255,255,255,0.92)'; g.strokeStyle = 'rgba(15,23,42,0.22)'; g.lineWidth = 2;
+  g.beginPath(); g.roundRect(2, 2, W - 4, H - 4, 14); g.fill(); g.stroke();
+  g.fillStyle = color; g.beginPath(); g.arc(26, H / 2, 9, 0, Math.PI * 2); g.fill();
+  g.font = `600 ${px}px Inter, system-ui, sans-serif`; g.fillStyle = '#0f172a'; g.textBaseline = 'middle'; g.fillText(texto, 44, H / 2 + 1);
+  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, depthTest: false, transparent: true, toneMapped: false, sizeAttenuation: false }));
+  const alto = 0.021; sp.scale.set(alto * W / H, alto, 1); sp.renderOrder = 7;
+  sp.center.set(0, 0.5); // the label starts at the point and runs to the right
+  return sp;
+}
 
-/** Construye el túnel para todos los coches: líneas de humo fijas y partículas que corren por ellas. */
-export function crearTunel(cuerpos: CuerpoTunel[]): Tunel {
-  const grupo = new THREE.Group(); grupo.name = 'tunel-de-viento';
-  const matLinea = new LineMaterial({ linewidth: 2.2, vertexColors: true, transparent: true, opacity: 0.9, worldUnits: false, depthWrite: false });
-  const textura = puntoRedondo();
-  const matPunto = new THREE.PointsMaterial({ size: 0.24, sizeAttenuation: true, map: textura, vertexColors: true, transparent: true, depthWrite: false, opacity: 0.95 });
-  const matPeine = new THREE.MeshStandardMaterial({ color: 0x2b2f36, roughness: 0.4, metalness: 0.7 });
-  const PUNTOS = 9;
-  const todas: { L: Linea; geo: THREE.BufferGeometry; base: number }[] = [];
-  const carteles: THREE.Sprite[] = [];
-  const geos: THREE.BufferGeometry[] = [];
+export interface Tunel {
+  grupo: THREE.Group;
+  actualizar: (t: number, ancho: number, alto: number, camara?: THREE.Camera) => void;
+  /** Visibility toggles and speed (no recalculation). */
+  ajustar: (o: OpcionesTunel) => void;
+  liberar: () => void;
+}
 
-  for (const c of cuerpos) {
-    if (c.envolvente.length < 3) continue;
-    const g = new THREE.Group(); g.position.set(c.x, 0, c.z); g.rotation.y = c.giro; grupo.add(g);
-    const { lineas, x0, techo, bM, cM, xMedio } = lineasDe(c);
-    if (c.etiqueta) { const e = cartel(c.etiqueta); e.position.set(xMedio, techo + 0.55, 0); g.add(e); carteles.push(e); }
-    for (const L of lineas) {
-      const pos: number[] = [];
-      for (let i = 0; i < L.px.length; i++) pos.push(L.px[i], L.py[i], L.pz[i]);
-      const lg = new LineGeometry(); lg.setPositions(pos); lg.setColors(Array.from(L.col));
-      const ln = new Line2(lg, matLinea); ln.computeLineDistances(); ln.renderOrder = 2; g.add(ln); geos.push(lg);
+const lin = (c: number) => Math.pow(c, 2.2); // sRGB → linear, for vertex colours
+
+/**
+ * Keeps an overlay out of the viewer's ambient-occlusion pass. GTAOPass draws every
+ * mesh into its own depth/normal buffer and only skips objects flagged as points or
+ * lines (`isPoints`, `isLine`, `isLine2`): a translucent wake tube counted as solid
+ * and came out as a black band. The flag is read nowhere else in three.js.
+ */
+function sinAO<T extends THREE.Object3D>(o: T): T { (o as unknown as { isLine2: boolean }).isLine2 = true; return o; }
+const CSS = { remanso: '#dc2626', succion: '#1d4ed8', adverso: '#d97706', separacion: '#be185d', estela: '#7c3aed', burbuja: '#0f766e' };
+
+/** The wake model behind the separation line, at one speed. */
+function modeloEstela(q: PorVelocidad) {
+  const K = q.separacion.length / 3, sep: { x: number; y: number; z: number }[] = [];
+  for (let k = 0; k < K; k++) sep.push({ x: q.separacion[3 * k], y: q.separacion[3 * k + 1], z: q.separacion[3 * k + 2] });
+  const anillo = [...sep, ...[...sep].reverse().map(p => ({ ...p, z: -p.z }))];
+  let yc = 0; for (const p of anillo) yc += p.y; yc /= anillo.length;
+  const polar = anillo.map(p => ({ fi: Math.atan2(p.y - yc, p.z), r: Math.hypot(p.y - yc, p.z), x: p.x })).sort((a, b) => a.fi - b.fi);
+  const Lb = 1.2 * Math.sqrt(Math.max(0.01, q.areaBase)), Lmax = Lb + 2.5;
+  /** Size of the wake section relative to the separation loop, Δ metres behind it. */
+  const f = (d: number) => d < Lb ? 1 - 0.2 * Math.sin(Math.PI / 2 * d / Lb) : 0.8 + 0.08 * (d - Lb);
+  const en = (fi: number) => {
+    // linear interpolation on the sorted ring, wrapping round
+    const n = polar.length; let k = 0;
+    while (k < n && polar[k].fi < fi) k++;
+    const a = polar[(k - 1 + n) % n], b = polar[k % n];
+    let da = b.fi - a.fi; if (da <= 0) da += 2 * Math.PI;
+    let t = fi - a.fi; if (t < 0) t += 2 * Math.PI;
+    const u = Math.min(1, Math.max(0, t / da));
+    return { r: a.r + (b.r - a.r) * u, x: a.x + (b.x - a.x) * u };
+  };
+  /** How deep in the wake (0 outside, else 1 at the base fading to 0 at Lmax). */
+  const dentro = (x: number, y: number, z: number) => {
+    const fi = Math.atan2(y - yc, z), r = Math.hypot(y - yc, z), e = en(fi), d = e.x - x;
+    if (d < 0.02 || d > Lmax || e.r < 0.015) return 0;
+    return r < e.r * f(d) ? 1 - d / Lmax : 0;
+  };
+  return { anillo, yc, Lb, Lmax, f, dentro, en };
+}
+
+/** Builds everything for one body once its result is there. */
+function construirCuerpo(c: CuerpoTunel, R: ResultadoTunel, mats: Materiales, o: OpcionesTunel) {
+  const grupo = new THREE.Group(), geos: (THREE.BufferGeometry | LineSegmentsGeometry)[] = [], etiquetas: THREE.Sprite[] = [];
+  const partes = { piel: new THREE.Group(), lineas: new THREE.Group(), criticos: new THREE.Group(), estela: new THREE.Group() };
+  Object.values(partes).forEach(p => grupo.add(p));
+  const nuestro = c.id === 'aeromovil';
+
+  // ---------- skin: both halves, pushed 8 mm out so it does not fight the car's own paint
+  {
+    const { nI, nJ, nodos, cp } = R.piel, W = nJ + 1, nv = (nI + 1) * W;
+    const pos = new Float32Array(nv * 2 * 3), col = new Float32Array(nv * 2 * 3), idx: number[] = [], rgb = [0, 0, 0];
+    for (let q = 0; q < nv; q++) {
+      for (let h = 0; h < 2; h++) { const o3 = (q + h * nv) * 3; pos[o3] = nodos[3 * q]; pos[o3 + 1] = nodos[3 * q + 1]; pos[o3 + 2] = (h ? -1 : 1) * nodos[3 * q + 2]; }
+      colorDeCp(cp[q], rgb); for (let h = 0; h < 2; h++) for (let k = 0; k < 3; k++) col[(q + h * nv) * 3 + k] = lin(rgb[k]);
     }
-    // Partículas: PUNTOS por línea, con el color de la línea un poco aclarado.
-    const nP = lineas.length * PUNTOS, pg = new THREE.BufferGeometry();
-    pg.setAttribute('position', new THREE.BufferAttribute(new Float32Array(nP * 3), 3));
-    const colP = new Float32Array(nP * 3); pg.setAttribute('color', new THREE.BufferAttribute(colP, 3));
-    const pts = new THREE.Points(pg, matPunto); pts.frustumCulled = false; pts.renderOrder = 3; g.add(pts); geos.push(pg);
-    lineas.forEach((L, k) => todas.push({ L, geo: pg, base: k * PUNTOS }));
-    // Los peines de humo, delante del coche: uno vertical y dos horizontales.
-    const barra = (a: THREE.Vector3, b: THREE.Vector3) => {
-      const d = b.clone().sub(a), cg = new THREE.CylinderGeometry(0.012, 0.012, d.length(), 10);
-      const o = new THREE.Mesh(cg, matPeine); o.position.copy(a).add(b).multiplyScalar(0.5); o.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()); g.add(o); geos.push(cg);
-    };
-    const xp = x0 + 0.02;
-    barra(new THREE.Vector3(xp, 0, 0), new THREE.Vector3(xp, techo + 0.6, 0));
-    barra(new THREE.Vector3(xp, cM, -(bM + 0.8)), new THREE.Vector3(xp, cM, bM + 0.8));
-    barra(new THREE.Vector3(xp, 0.22, -(bM + 0.5)), new THREE.Vector3(xp, 0.22, bM + 0.5));
+    // winding: outward on the + half, decided on a quad in the middle
+    const i0 = nI >> 1, j0 = nJ >> 1, P = (i: number, j: number) => new THREE.Vector3(nodos[3 * (i * W + j)], nodos[3 * (i * W + j) + 1], nodos[3 * (i * W + j) + 2]);
+    const a = P(i0, j0), b = P(i0 + 1, j0), d = P(i0, j0 + 1), n = b.clone().sub(a).cross(d.clone().sub(a));
+    let yc = 0; for (let j = 0; j <= nJ; j++) yc += nodos[3 * (i0 * W + j) + 1]; yc /= W;
+    const directo = n.y * (a.y - yc) + n.z * a.z > 0;
+    for (let h = 0; h < 2; h++) for (let i = 0; i < nI; i++) for (let j = 0; j < nJ; j++) {
+      const q00 = h * nv + i * W + j, q10 = q00 + W, q01 = q00 + 1, q11 = q10 + 1;
+      if (directo !== (h === 1)) idx.push(q00, q10, q01, q01, q10, q11); else idx.push(q00, q01, q10, q01, q11, q10);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.BufferAttribute(col, 3)); g.setIndex(idx);
+    g.computeVertexNormals();
+    const nrm = g.attributes.normal as THREE.BufferAttribute;
+    for (let v = 0; v < pos.length / 3; v++) { pos[3 * v] += nrm.getX(v) * 0.008; pos[3 * v + 1] += nrm.getY(v) * 0.008; pos[3 * v + 2] += nrm.getZ(v) * 0.008; }
+    const piel = sinAO(new THREE.Mesh(g, mats.piel)); piel.renderOrder = 1; partes.piel.add(piel); geos.push(g);
+    // the panel grid, faint: it shows the granularity the flow was solved at
+    const ej: number[] = [];
+    for (let h = 0; h < 2; h++) for (let i = 0; i <= nI; i++) for (let j = 0; j <= nJ; j++) {
+      const q = h * nv + i * W + j;
+      if (i < nI) ej.push(q, q + W);
+      if (j < nJ) ej.push(q, q + 1);
+    }
+    const gr = new THREE.BufferGeometry(); gr.setAttribute('position', new THREE.BufferAttribute(pos, 3)); gr.setIndex(ej);
+    const rejilla = new THREE.LineSegments(gr, mats.rejilla); rejilla.renderOrder = 1; partes.piel.add(rejilla); geos.push(gr);
   }
 
-  const VEL = 1.6; // m/s de «cámara lenta»: lo justo para seguir una partícula con la vista
-  const actualizar = (t: number, ancho: number, alto: number) => {
-    matLinea.resolution.set(ancho, alto);
-    const tocadas = new Set<THREE.BufferGeometry>();
-    for (const { L, geo, base } of todas) {
-      const P = geo.attributes.position as THREE.BufferAttribute, C = geo.attributes.color as THREE.BufferAttribute;
-      const n = L.px.length;
-      for (let k = 0; k < PUNTOS; k++) {
-        const tau = ((t * VEL / 1.0) + (k / PUNTOS) * L.T + base * 0.137) % L.T;
-        // búsqueda binaria del tramo
-        let lo = 0, hi = n - 1;
-        while (hi - lo > 1) { const m = (lo + hi) >> 1; if (L.t[m] < tau) lo = m; else hi = m; }
-        const f = L.t[hi] > L.t[lo] ? (tau - L.t[lo]) / (L.t[hi] - L.t[lo]) : 0;
-        let x = L.px[lo] + (L.px[hi] - L.px[lo]) * f, y = L.py[lo] + (L.py[hi] - L.py[lo]) * f, z = L.pz[lo] + (L.pz[hi] - L.pz[lo]) * f;
-        // En la estela el humo se revuelve.
-        const e = L.estela[lo];
-        if (e > 0.01) {
-          const ph = base * 1.37 + k * 2.1;
-          y += e * 0.16 * Math.sin(t * 6.3 + ph + x * 3.1); z += e * 0.16 * Math.cos(t * 5.1 + ph * 1.3 + x * 2.3); x += e * 0.06 * Math.sin(t * 4.2 + ph);
-          y = Math.max(0.02, y);
-        }
-        const q = base + k;
-        P.setXYZ(q, x, y, z);
-        C.setXYZ(q, L.col[lo * 3] * 0.3 + 0.7, L.col[lo * 3 + 1] * 0.3 + 0.7, L.col[lo * 3 + 2] * 0.3 + 0.7);
-      }
-      tocadas.add(geo);
+  // ---------- speed-dependent parts: streamlines (their wake), critical lines, wake
+  const particulas: { geo: THREE.BufferGeometry; lineas: { p: Float32Array; t: Float32Array; T: number; estela: Float32Array }[] }[] = [];
+  const porVelocidad = (kmh: number) => R.porVelocidad.find(q => q.kmh === kmh) ?? R.porVelocidad[1];
+  const compartidos = new Set<unknown>([mats.piel, mats.rejilla, mats.linea, mats.punto, mats.estela, mats.bordeEstela, mats.guia]);
+  const vaciar = (g: THREE.Group) => {
+    for (const ch of [...g.children]) {
+      g.remove(ch);
+      ch.traverse((x: any) => {
+        if (x.geometry && x.geometry !== mats.esfera) x.geometry.dispose();
+        const m = x.material;
+        if (m && !compartidos.has(m)) { m.map?.dispose(); m.dispose(); const i = mats.extra.indexOf(m); if (i >= 0) mats.extra.splice(i, 1); }
+      });
     }
-    for (const g of tocadas) { g.attributes.position.needsUpdate = true; g.attributes.color.needsUpdate = true; }
   };
+  let kmhHecho = -1;
+  const construirVelocidad = (kmh: number) => {
+    if (kmh === kmhHecho) return; kmhHecho = kmh;
+    vaciar(partes.lineas); vaciar(partes.criticos); vaciar(partes.estela); particulas.length = 0;
+    for (let k = etiquetas.length - 1; k >= 0; k--) if (!etiquetas[k].parent) etiquetas.splice(k, 1);
+    const q = porVelocidad(kmh), E = modeloEstela(q);
+
+    // streamlines: computed through the potential flow up to the wake, then straight back (the wake's model)
+    const seg: number[] = [], segCol: number[] = [], lineasP: { p: Float32Array; t: Float32Array; T: number; estela: Float32Array }[] = [];
+    const L = R.lineas, nL = L.inicio.length, rgb = [0, 0, 0], viol = new THREE.Color(COLOR_ESTELA), gris = new THREE.Color(0xcbd5e1);
+    for (let l = 0; l < nL; l++) {
+      const a = L.inicio[l], b = l + 1 < nL ? L.inicio[l + 1] : L.v.length;
+      if (b - a < 2) continue;
+      const pts: number[] = [], vel: number[] = [], est: number[] = [];
+      let enEstela = -1;
+      for (let i = a; i < b; i++) {
+        const x = L.p[3 * i], y = L.p[3 * i + 1], z = L.p[3 * i + 2];
+        if (E.dentro(x, y, z) > 0) { enEstela = i; break; }
+        pts.push(x, y, z); vel.push(L.v[i]); est.push(0);
+      }
+      if (enEstela >= 0) {
+        const x0 = L.p[3 * enEstela], y0 = L.p[3 * enEstela + 1], z0 = L.p[3 * enEstela + 2], xFin = L.p[3 * (b - 1)];
+        const fase = l * 1.37;
+        for (let x = x0; x > xFin; x -= 0.06) {
+          const d = (x0 - x) / E.Lmax, w = Math.max(0, 1 - d);
+          const amp = 0.035 * w;
+          pts.push(x, Math.max(0.01, y0 + amp * Math.sin(x * 7.3 + fase)), z0 + amp * Math.cos(x * 6.1 + fase * 1.7));
+          vel.push(0.35 + 0.55 * Math.min(1, d)); est.push(w);
+        }
+      }
+      for (const espejo of L.centro[l] ? [1] : [1, -1]) {
+        const n = vel.length, p = new Float32Array(n * 3), t = new Float32Array(n), e = new Float32Array(est);
+        let T = 0;
+        for (let i = 0; i < n; i++) {
+          p[3 * i] = pts[3 * i]; p[3 * i + 1] = pts[3 * i + 1]; p[3 * i + 2] = espejo * pts[3 * i + 2];
+          if (i > 0) T += Math.hypot(p[3 * i] - p[3 * i - 3], p[3 * i + 1] - p[3 * i - 2], p[3 * i + 2] - p[3 * i - 1]) / Math.max(0.15, vel[i]);
+          t[i] = T;
+        }
+        lineasP.push({ p, t, T, estela: e });
+        for (let i = 0; i + 1 < n; i++) {
+          seg.push(p[3 * i], p[3 * i + 1], p[3 * i + 2], p[3 * i + 3], p[3 * i + 4], p[3 * i + 5]);
+          for (const k of [i, i + 1]) {
+            if (est[k] > 0) { const cc = gris.clone().lerp(viol, Math.min(1, 0.35 + est[k])); segCol.push(cc.r, cc.g, cc.b); }
+            else { colorDeCp(1 - vel[k] * vel[k], rgb); segCol.push(lin(rgb[0]), lin(rgb[1]), lin(rgb[2])); }
+          }
+        }
+      }
+    }
+    if (seg.length) {
+      const lg = new LineSegmentsGeometry(); lg.setPositions(seg); lg.setColors(segCol);
+      const ls = sinAO(new LineSegments2(lg, mats.linea)); ls.renderOrder = 2; partes.lineas.add(ls);
+      // smoke particles: 5 per line, running at the local speed
+      const POR = 5, nP = lineasP.length * POR, pg = new THREE.BufferGeometry();
+      pg.setAttribute('position', new THREE.BufferAttribute(new Float32Array(nP * 3), 3));
+      pg.setAttribute('color', new THREE.BufferAttribute(new Float32Array(nP * 3).fill(0.95), 3));
+      const pts = new THREE.Points(pg, mats.punto); pts.frustumCulled = false; pts.renderOrder = 3; partes.lineas.add(pts);
+      particulas.push({ geo: pg, lineas: lineasP });
+    }
+
+    // Critical points. The flow is symmetric, so each label goes on the −z side, the one the
+    // default views look at, a little away from its point and tied to it by a thin leader.
+    const marcar = (p: number[], color: string, radio = 0.028) => {
+      const m = sinAO(new THREE.Mesh(mats.esfera, new THREE.MeshBasicMaterial({ color: new THREE.Color(color), toneMapped: false, depthTest: false, transparent: true, opacity: 0.95 })));
+      m.position.set(p[0], p[1], p[2]); m.scale.setScalar(radio); m.renderOrder = 6; partes.criticos.add(m);
+    };
+    const rotular = (grupoR: THREE.Group, p: number[], texto: string, color: string, d: [number, number, number]) => {
+      const q2 = [p[0] + d[0], p[1] + d[1], p[2] + d[2]];
+      const lg = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(p[0], p[1], p[2]), new THREE.Vector3(q2[0], q2[1], q2[2])]);
+      const l = new THREE.Line(lg, mats.guia); l.renderOrder = 6; grupoR.add(l);
+      const e = etiqueta(texto, color); e.position.set(q2[0], q2[1], q2[2]); grupoR.add(e); etiquetas.push(e);
+    };
+    const lado = (p: number[]) => [p[0], p[1], -Math.abs(p[2])];
+    let rango = 0;
+    for (const k of R.criticos) {
+      if (k.tipo === 'remanso') { marcar(k.p, CSS.remanso, 0.035); rotular(partes.criticos, lado(k.p), `Remanso · Cp ${fmt(k.cp)}`, CSS.remanso, [0.3, 0.3, -0.15]); continue; }
+      marcar(k.p, CSS.succion); if (k.p[2] > 0.05) marcar([k.p[0], k.p[1], -k.p[2]], CSS.succion);
+      // the three strongest get a label; the rest stay as dots
+      if (rango < 3) rotular(partes.criticos, lado(k.p), `${k.nombre} · Cp ${fmt(k.cp)}`, CSS.succion, [0, 0.32 + 0.15 * rango, -0.3]);
+      rango++;
+    }
+    const polilinea = (pts3: number[], color: string, ancho: number, discontinua: boolean) => {
+      const K = pts3.length / 3, P: number[] = [];
+      for (let k = 0; k < K; k++) P.push(pts3[3 * k], pts3[3 * k + 1], pts3[3 * k + 2]);
+      for (let k = K - 1; k >= 0; k--) P.push(pts3[3 * k], pts3[3 * k + 1], -pts3[3 * k + 2]);
+      const s: number[] = [];
+      for (let k = 0; k + 1 < P.length / 3; k++) s.push(P[3 * k], P[3 * k + 1], P[3 * k + 2], P[3 * k + 3], P[3 * k + 4], P[3 * k + 5]);
+      const g = new LineSegmentsGeometry(); g.setPositions(s);
+      const m = new LineMaterial({ color: new THREE.Color(color).getHex(), linewidth: ancho, worldUnits: false, dashed: discontinua, dashSize: 0.05, gapSize: 0.035, depthTest: true, transparent: true, toneMapped: false });
+      mats.extra.push(m);
+      const l = sinAO(new LineSegments2(g, m)); if (discontinua) l.computeLineDistances(); l.renderOrder = 5; partes.criticos.add(l);
+    };
+    polilinea(q.separacion, CSS.separacion, 4, false);
+    polilinea(q.adverso, CSS.adverso, 3, true);
+    // separation: labelled at the side; the adverse-gradient line: at the top
+    const K = q.separacion.length / 3, en = (a: number[], k: number) => [a[3 * k], a[3 * k + 1], a[3 * k + 2]];
+    rotular(partes.criticos, lado(en(q.separacion, K >> 1)), q.pegadas === K ? 'Pegado hasta la cola' : 'Separación prevista', CSS.separacion, [0.15, -0.38, -0.35]);
+    rotular(partes.criticos, en(q.adverso, K - 1), 'Empieza a frenar (gradiente adverso)', CSS.adverso, [-0.55, 0.22, -0.15]);
+    for (let k = 0; k < q.burbujas.length / 3; k++) {
+      const p = [q.burbujas[3 * k], q.burbujas[3 * k + 1], q.burbujas[3 * k + 2]];
+      marcar(p, CSS.burbuja, 0.02);
+      if (k === 0) rotular(partes.criticos, lado(p), 'Burbuja: se despega y vuelve', CSS.burbuja, [0.1, 0.25, -0.25]);
+    }
+
+    // wake: a translucent tube from the separation loop
+    {
+      const ring = E.anillo, nR = ring.length, pasos = 18, pos: number[] = [], idx: number[] = [];
+      for (let s = 0; s <= pasos; s++) {
+        const d = E.Lmax * s / pasos, f = E.f(d);
+        for (const p of ring) pos.push(p.x - d, Math.max(0.005, E.yc + (p.y - E.yc) * f), p.z * f);
+      }
+      for (let s = 0; s < pasos; s++) for (let k = 0; k < nR; k++) {
+        const a = s * nR + k, b = s * nR + (k + 1) % nR, cc = a + nR, dd = b + nR;
+        idx.push(a, b, cc, b, dd, cc);
+      }
+      const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx);
+      const al = new Float32Array(pos.length / 3); for (let s = 0; s <= pasos; s++) for (let k = 0; k < nR; k++) al[s * nR + k] = 1 - s / pasos;
+      g.setAttribute('alfa', new THREE.BufferAttribute(al, 1));
+      const m = sinAO(new THREE.Mesh(g, mats.estela)); m.renderOrder = 1; partes.estela.add(m);
+      // outline: the loop where the bubble closes, and the top and both side edges
+      // (ring order: this half bottom → top, then the mirror half top → bottom)
+      const borde = (sel: (s: number) => [number, number, number]) => { const s: number[] = []; for (let i = 0; i < pasos; i++) s.push(...sel(i), ...sel(i + 1)); return s; };
+      const Kh = nR / 2, kArriba = Kh - 1, kLado = Kh >> 1, kLado2 = nR - 1 - (Kh >> 1);
+      const punto = (s: number, k: number): [number, number, number] => [pos[3 * (s * nR + k)], pos[3 * (s * nR + k) + 1], pos[3 * (s * nR + k) + 2]];
+      const sBurb = Math.max(1, Math.round(E.Lb / E.Lmax * pasos));
+      const contorno: number[] = [...borde(s => punto(s, kArriba)), ...borde(s => punto(s, kLado)), ...borde(s => punto(s, kLado2))];
+      for (let k = 0; k < nR; k++) contorno.push(...punto(sBurb, k), ...punto(sBurb, (k + 1) % nR));
+      const lg = new LineSegmentsGeometry(); lg.setPositions(contorno);
+      const ls = sinAO(new LineSegments2(lg, mats.bordeEstela)); ls.computeLineDistances(); ls.renderOrder = 4; partes.estela.add(ls);
+      rotular(partes.estela, punto(Math.min(pasos, sBurb + 3), kLado2), q.areaBase < 0.02 ? 'Estela muy pequeña (forma estimada)' : 'Estela (forma estimada)', CSS.estela, [-0.3, 0.45, -0.2]);
+    }
+  };
+  construirVelocidad(o.kmh);
+
+  const ajustar = (op: OpcionesTunel) => {
+    construirVelocidad(op.kmh);
+    partes.piel.visible = op.piel; partes.lineas.visible = op.verLineas; partes.criticos.visible = op.criticos; partes.estela.visible = op.estela;
+  };
+  ajustar(o);
   const liberar = () => {
-    for (const g of geos) g.dispose(); matLinea.dispose(); matPunto.dispose(); matPeine.dispose(); textura.dispose();
-    for (const e of carteles) { e.material.map?.dispose(); e.material.dispose(); }
+    vaciar(partes.lineas); vaciar(partes.criticos); vaciar(partes.estela);
+    for (const g of geos) g.dispose();
   };
-  return { grupo, actualizar, liberar };
+  return { grupo, particulas, etiquetas, ajustar, liberar, nuestro, porVelocidad };
+}
+
+interface Materiales {
+  piel: THREE.MeshBasicMaterial; rejilla: THREE.LineBasicMaterial; linea: LineMaterial; punto: THREE.PointsMaterial; esfera: THREE.SphereGeometry;
+  estela: THREE.ShaderMaterial; bordeEstela: LineMaterial; guia: THREE.LineBasicMaterial; extra: LineMaterial[]; textura: THREE.Texture;
+}
+
+/** Round texture for the smoke particles. */
+function puntoRedondo(): THREE.Texture {
+  const cv = document.createElement('canvas'); cv.width = cv.height = 64;
+  const g = cv.getContext('2d')!;
+  const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.45, 'rgba(255,255,255,0.85)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+
+/** Builds the tunnel for all bodies. Each body appears as soon as its flow is computed (ours first). */
+export function crearTunel(cuerpos: CuerpoTunel[], opciones: OpcionesTunel): Tunel {
+  const grupo = new THREE.Group(); grupo.name = 'tunel-de-viento';
+  const textura = puntoRedondo();
+  const mats: Materiales = {
+    // translucent and unlit: the colours are exactly the legend's, and the real car shows through
+    piel: new THREE.MeshBasicMaterial({ vertexColors: true, transparent: true, opacity: 0.62, depthWrite: false, toneMapped: false, side: THREE.FrontSide }),
+    rejilla: new THREE.LineBasicMaterial({ color: 0x0f172a, transparent: true, opacity: 0.13, depthWrite: false }),
+    linea: new LineMaterial({ linewidth: 1.6, vertexColors: true, transparent: true, opacity: 0.9, worldUnits: false, depthWrite: false, toneMapped: false }),
+    punto: new THREE.PointsMaterial({ size: 0.16, sizeAttenuation: true, map: textura, vertexColors: true, transparent: true, depthWrite: false, opacity: 0.95 }),
+    esfera: new THREE.SphereGeometry(1, 16, 10),
+    estela: new THREE.ShaderMaterial({
+      transparent: true, depthWrite: false, side: THREE.DoubleSide,
+      uniforms: { color: { value: new THREE.Color(COLOR_ESTELA) } },
+      vertexShader: 'attribute float alfa; varying float vA; void main(){ vA = alfa; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+      fragmentShader: 'uniform vec3 color; varying float vA; void main(){ gl_FragColor = vec4(color, 0.16 * vA); }',
+    }),
+    bordeEstela: new LineMaterial({ color: COLOR_ESTELA, linewidth: 1.5, worldUnits: false, dashed: true, dashSize: 0.08, gapSize: 0.06, transparent: true, opacity: 0.8, toneMapped: false }),
+    guia: new THREE.LineBasicMaterial({ color: 0x334155, transparent: true, opacity: 0.7, depthTest: false, toneMapped: false }),
+    extra: [], textura,
+  };
+  const hechos: ReturnType<typeof construirCuerpo>[] = [];
+  let op = opciones, vivo = true;
+  const carteles: (() => void)[] = [];
+
+  cuerpos.forEach((c, i) => {
+    if (c.envolvente.length < 3) return;
+    const g = new THREE.Group(); g.position.set(c.x, 0, c.z); g.rotation.y = c.giro; grupo.add(g);
+    const xs = c.envolvente.map(e => e[0]), techo = Math.max(...c.envolvente.map(e => e[2])), xm = (Math.max(...xs) + Math.min(...xs)) / 2;
+    // The car's label (name and the figures the page gives) with a third line: what the tunnel says.
+    let rotulo: THREE.Sprite | null = null, R: ResultadoTunel | null = null, kmhRotulo = -1;
+    const ponerCartel = () => {
+      if (R && kmhRotulo === op.kmh && rotulo) return;
+      if (rotulo) { g.remove(rotulo); rotulo.material.map?.dispose(); rotulo.material.dispose(); }
+      const base = (c.etiqueta ?? c.nombre).split('\n').slice(0, 2);
+      let linea = 'túnel: calculando el flujo…';
+      if (R) {
+        kmhRotulo = op.kmh;
+        const cd = (R.porVelocidad.find(v => v.kmh === op.kmh) ?? R.porVelocidad[1]).cd.total;
+        linea = c.id === 'aeromovil' ? `túnel: Cd ${fmt(cd, 3)} ± ${Math.round(CALIBRACION.banda * 100)} %` : c.cdPublicado != null ? `túnel: Cd ${fmt(cd, 3)} (publicado ${fmt(c.cdPublicado, 3)})` : `túnel: Cd ${fmt(cd, 3)}, sin dato publicado`;
+      }
+      rotulo = cartel([...base, linea].join('\n')); rotulo.position.set(xm, techo + 0.8, 0); g.add(rotulo);
+    };
+    ponerCartel(); carteles.push(ponerCartel);
+    pedirTunel(peticionDe(c, opciones.resolucion, opciones.lineas), i).then(r => {
+      if (!vivo || !r) return;
+      R = r; ponerCartel();
+      const b = construirCuerpo(c, r, mats, op); g.add(b.grupo); hechos.push(b);
+    });
+  });
+
+  const tmp = new THREE.Vector3();
+  const actualizar = (t: number, ancho: number, alto: number, camara?: THREE.Camera) => {
+    mats.linea.resolution.set(ancho, alto); mats.bordeEstela.resolution.set(ancho, alto);
+    for (const m of mats.extra) m.resolution.set(ancho, alto);
+    for (const b of hechos) {
+      // garage cars' labels fade in when the camera comes close (with six cars at once they would cover the view)
+      if (camara && !b.nuestro) {
+        b.grupo.getWorldPosition(tmp); tmp.x += -1.5;
+        const d = camara.position.distanceTo(tmp), a = Math.max(0, Math.min(1, (9 - d) / 2.5));
+        for (const e of b.etiquetas) { e.material.opacity = a; e.visible = a > 0.02; }
+      }
+      for (const { geo, lineas } of b.particulas) {
+        const P = geo.attributes.position as THREE.BufferAttribute, POR = P.count / Math.max(1, lineas.length);
+        lineas.forEach((L, l) => {
+          const n = L.t.length;
+          for (let k = 0; k < POR; k++) {
+            const tau = ((t * 1.4) + (k / POR) * L.T + l * 0.37) % L.T;
+            let lo = 0, hi = n - 1;
+            while (hi - lo > 1) { const m = (lo + hi) >> 1; if (L.t[m] < tau) lo = m; else hi = m; }
+            const f = L.t[hi] > L.t[lo] ? (tau - L.t[lo]) / (L.t[hi] - L.t[lo]) : 0;
+            let x = L.p[3 * lo] + (L.p[3 * hi] - L.p[3 * lo]) * f, y = L.p[3 * lo + 1] + (L.p[3 * hi + 1] - L.p[3 * lo + 1]) * f, z = L.p[3 * lo + 2] + (L.p[3 * hi + 2] - L.p[3 * lo + 2]) * f;
+            const e = L.estela[lo];
+            if (e > 0.01) { const ph = l * 1.37 + k * 2.1; y = Math.max(0.02, y + e * 0.1 * Math.sin(t * 6.3 + ph + x * 3.1)); z += e * 0.1 * Math.cos(t * 5.1 + ph * 1.3 + x * 2.3); }
+            P.setXYZ(l * POR + k, x, y, z);
+          }
+        });
+        P.needsUpdate = true;
+      }
+    }
+  };
+  const ajustar = (o: OpcionesTunel) => { op = o; for (const b of hechos) b.ajustar(o); for (const f of carteles) f(); };
+  const liberar = () => {
+    vivo = false;
+    for (const b of hechos) b.liberar();
+    grupo.traverse((x: any) => { if (x.isSprite) { x.material.map?.dispose(); x.material.dispose(); } });
+    for (const m of [mats.piel, mats.rejilla, mats.linea, mats.punto, mats.estela, mats.bordeEstela, mats.guia, ...mats.extra]) m.dispose();
+    mats.esfera.dispose(); textura.dispose();
+  };
+  return { grupo, actualizar, ajustar, liberar };
 }
