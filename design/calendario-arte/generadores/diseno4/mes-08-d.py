@@ -174,7 +174,7 @@ for p in pix:
             caminos.append(anda(p, q))
 surcos = []
 for cam in caminos:
-    if len(cam) < 9:
+    if len(cam) < 4:
         continue
     pp = np.array([(x, y) for y, x in cam], float)
     k = 5
@@ -185,7 +185,7 @@ for cam in caminos:
 # grooves: a deeper rosy glaze in each sulcus, then soft carmine pencil
 for ln in surcos:
     lz.aguada(Trazo(ln[::3] if len(ln) > 8 else ln, (3.0, 3.0)), '#b84a60', dens=0.28, irreg=0.35, borde=0.6, gran=0.3)
-lz.lapiz(surcos, '#94344a', grosor=0.75, presion=0.5, temblor=0.25, cortes=0.08)
+lz.lapiz(surcos, '#94344a', grosor=0.8, presion=0.55, temblor=0.2, cortes=0.0, puntas=0.01)
 for ln in (LATERAL, CENTRAL):
     lz.aguada(Trazo(spline(ln)[::3], (5, 4.5, 3)), '#a83e58', dens=0.3, irreg=0.4, borde=0.6)
     lz.lapiz([spline(ln)], '#7e2a42', grosor=0.95, presion=0.5, temblor=0.4)
@@ -290,8 +290,18 @@ lz.contorno(frente, '#9a6a2a', grosor=0.8, presion=0.55, cortes=0.2)
 bajo_ = spline([(HX0 + 30, 650), (HX0 + 120, 684), (HX1 - 120, 684), (HX1 - 30, 650)])
 lz.lapiz([[(x, y), (x - 1, y + 13)] for (x, y) in remuestrea(bajo_, 9)[1:-1]], '#c98a4a', grosor=0.7, presion=0.6,
          temblor=0.2)
-brazo2(lz, (676, 612), (694, 646), (690, 690), 16, '#4f9c9a', P1, 'corta', sombra=1,
-       mano=dict(ang=96, gesto='relajada', lado=1, tam=25))
+# an open book rests on his belly (he fell asleep reading); one hand lies on his chest
+libro_i = Poligono([(728, 620), (756, 608), (762, 626), (734, 640)], suave=False)
+libro_d = Poligono([(756, 608), (786, 602), (790, 620), (762, 626)], suave=False)
+lz.aguada(Poligono([(724, 624), (756, 610), (792, 604), (794, 624), (762, 630), (732, 644)], suave=False), '#3f8f8f', dens=0.85, tapa=1,
+          irreg=0.3)
+for f in (libro_i, libro_d):
+    lz.aguada(f, '#fbf3e3', dens=0.35, tapa=1, irreg=0.2)
+    lz.contorno(f, '#7c5a4a', grosor=0.6, presion=0.5, cortes=0.1)
+lz.lapiz([[(736 + k * 5, 624 - k * 2.2), (752 + k * 5, 617 - k * 2.2)] for k in range(3)] +
+         [[(764 + k * 5, 612 - k * 1.2), (782 + k * 5, 608 - k * 1.2)] for k in range(2)], '#a08a7a', grosor=0.45, presion=0.4)
+brazo2(lz, (676, 612), (708, 636), (694, 616), 16, '#4f9c9a', P1, 'corta', sombra=1,
+       mano=dict(ang=200, gesto='relajada', lado=1, tam=24))
 pie(lz, (872, 600), -30, 28, descalzo=True, piel=P1)
 pie(lz, (868, 590), -50, 28, descalzo=True, piel=P1)
 # a clay pitcher and a glass of water in the grass beside him
@@ -316,9 +326,17 @@ for k in range(0, 60, 3):
     else:
         lz.aguada(Elipse(x, y, r_), rng.choice([ORO, '#f2d36b']), dens=0.85, irreg=0.2)
         lz.luz((x, y, r_ * 3), '#fff0b0', fuerza=0.35)
-for k in range(16):
-    x, y = rng.uniform(600, 720), rng.uniform(400, 560)
-    lz.gouache(Elipse(x, y, rng.uniform(0.7, 1.4)), '#fff1b0', alfa=0.85, irreg=0)
+# the golden dust: a gentle fall from the underside of the crown that reaches his forehead
+for k in range(70):
+    t = rng.uniform(0, 1) ** 0.8
+    x = 600 + (630 - 600) * t + rng.normal(0, 40 * (1 - t) + 6)
+    y = 360 + (566 - 360) * t
+    if rng.random() < 0.3:
+        lz.aguada(Elipse(x, y, rng.uniform(1.2, 2.2)), rng.choice([ORO, '#f2d36b']), dens=0.85, irreg=0.2)
+        lz.luz((x, y, 5), '#fff0b0', fuerza=0.3)
+    else:
+        lz.gouache(Elipse(x, y, rng.uniform(0.6, 1.3)), '#fff1b0', alfa=0.85, irreg=0)
+lz.luz((628, 570, 18), '#fff0b0', fuerza=0.35)
 
 # ------------------------------------------------------------------ the walkers on the path: grandfather and grandson
 PG, PN = 'piel3', 'piel1'
@@ -326,12 +344,15 @@ PG, PN = 'piel3', 'piel1'
 GX, GY = 1000, 470
 pierna2(lz, (994, 622), (982, 694), (966, 770), 29, '#c9a86a', PG, pie_ang=-14, descalzo=True, sombra=-1,
         pie_tam=36)
-brazo2(lz, (1022, 522), (1046, 566), (1060, 606), 20, '#8fb0d0', PG, 'tres', sombra=1,
+brazo2(lz, (1014, 532), (1044, 570), (1060, 606), 20, '#8fb0d0', PG, 'tres', sombra=1,
        mano=dict(ang=95, gesto='agarra', lado=1, tam=30))
 # the stick
 lz.aguada(Trazo([(1058, 600), (1070, 774)], (5, 4)), '#8a5a3a', dens=0.85, tapa=1, irreg=0.2)
 lz.lapiz([arco(1052, 600, 8, 6, 180, 360, 10)], '#6a4a2a', grosor=1.6, presion=0.8)
 pierna2(lz, (1014, 624), (1030, 698), (1036, 776), 29, '#c9a86a', PG, pie_ang=6, descalzo=True, sombra=1, pie_tam=36)
+lz.lapiz([bezier((1000, 640), (996, 670), (990, 690)), bezier((988, 704), (980, 730), (972, 752)), bezier((1020, 650), (1026, 676), (1028, 690)),
+          bezier((1030, 708), (1034, 736), (1036, 756)), bezier((976, 756), (968, 760), (962, 764)), bezier((1026, 762), (1036, 764), (1046, 766))],
+         '#8a6a3a', grosor=0.6, presion=0.4, temblor=0.3)
 cuello(lz, (GX + 14, GY + 12), 27, (GX + 4, GY + 50), PG)
 torso2(lz, (976, 518), (1028, 520), (984, 626), (1022, 628), '#8fb0d0', cintura=1.0, sombra=1, escote='v',
        toques=[(1018, 596, 40, '#6a8ab0', 0.6)], pliegues=[[(990, 540), (996, 580), (994, 614)], [(1012, 548), (1016, 600)]])
@@ -363,11 +384,11 @@ pelo = Poligono([(1232, 426), (1262, 418), (1300, 432), (1340, 426), (1372, 444)
 lz.aguada(pelo, '#3a2418', dens=0.8, tapa=1, borde=0.6, gran=0.4, irreg=0.6)
 lz.lapiz([bezier((1250, 434), (1300, 426), (1366, 442)), bezier((1252, 444), (1310, 442), (1350, 450)),
           bezier((1260, 428), (1310, 418), (1338, 428))], '#1e120c', grosor=0.6, presion=0.45, temblor=0.4)
-lz.aguada(Elipse(1266, 700, 30, 5), '#a08a7a', dens=0.5, suave=3)
+lz.aguada(Elipse(1266, 700, 30, 5), '#9a8070', dens=0.6, suave=2)
 lz.aguada(Elipse(1050, 778, 110, 10), '#a0a07a', dens=0.3, suave=8)
 # legs together, heels up
-pierna2(lz, (1262, 562), (1258, 626), (1256, WY - 10), 19, None, PM, pie_ang=96, descalzo=True, sombra=-1, pie_tam=15)
-pierna2(lz, (1276, 562), (1276, 628), (1272, WY - 12), 19, None, PM, pie_ang=84, descalzo=True, sombra=1, pie_tam=15)
+pierna2(lz, (1262, 562), (1258, 626), (1256, WY - 10), 19, None, PM, pie_ang=118, descalzo=True, sombra=-1, pie_tam=18)
+pierna2(lz, (1276, 562), (1276, 628), (1272, WY - 12), 19, None, PM, pie_ang=62, descalzo=True, sombra=1, pie_tam=18)
 # arms overhead, bending the whole body into a curve toward the left
 brazo2(lz, (1270, 466), (1252, 410), (1218, 364), 13, '#6fb1ad', PM, 'sin', sombra=1,
        mano=dict(ang=-135, gesto='abierta', lado=-1, tam=20, abre=0.4))

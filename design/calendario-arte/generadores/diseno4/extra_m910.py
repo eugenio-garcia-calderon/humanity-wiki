@@ -586,8 +586,8 @@ def pimiento(lz, x, y, r):
 def arroz(lz, x, y, r, ang=-10):
     """A grain of rice (r = half its length): slender, pearly, one end pointed."""
     ca, sa = math.cos(math.radians(ang + 90)), math.sin(math.radians(ang + 90))
-    pts = [(0, -1.0), (0.3, -0.8), (0.4, -0.2), (0.38, 0.5), (0.22, 0.92), (0, 1.0), (-0.24, 0.9), (-0.4, 0.45), (-0.4, -0.25),
-           (-0.28, -0.82)]
+    pts = [(0, -1.0), (0.16, -0.82), (0.3, -0.35), (0.32, 0.4), (0.22, 0.86), (0.04, 1.0), (-0.2, 0.9), (-0.32, 0.45), (-0.32, -0.3),
+           (-0.18, -0.78)]
     f = Poligono([(x + (py * ca - px * sa) * r, y + (py * sa + px * ca) * r) for px, py in pts])
     _wash(lz, f, '#f8f2e2', toques=[(x + r * 0.15, y + r * 0.45, r * 0.4, '#dccfb0', 0.7)], dens=0.65, lapiz='#9a8a6a')
     lz.gouache(Elipse(x - r * 0.15, y - r * 0.3, r * 0.08, r * 0.35, ang), '#ffffff', alfa=0.7, irreg=0)
