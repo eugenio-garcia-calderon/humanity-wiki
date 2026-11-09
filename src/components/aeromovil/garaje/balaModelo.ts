@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { X_COLA, X_MORRO, arribaY, detrasX, frenteX, ladoZ, monotona, punto, sec, tAbajo, tArriba, type Sec } from './balaForma';
-import { aleta, cabina, camara, carenados, malla, mats, ruedas, sinSombra, techoEn, type Mats } from './balaPiezas';
+import { FORMA_REF, monotona, punto, tAbajo, tArriba, type FormaBala, type Sec } from './balaForma';
+import { ASIENTO, aleta, cabina, camara, carenados, crearMateriales, malla, mats, ruedas, sinSombra, techoEn, type Asientos, type Mats } from './balaPiezas';
 
 /*
  * The «Cuadriciclo Bala» built in three.js: skin, canopy, livery, lamps and
@@ -28,38 +28,59 @@ import { aleta, cabina, camara, carenados, malla, mats, ruedas, sinSombra, techo
 type P2 = [number, number];
 
 // ======================================================================= layout
+// Drawn for the reference shape (balaForma.ts, DIM_REF); a built shape reaches
+// these through its x map and its height changes (`disponer`).
 /** Lower edge of the canopy glass in side view. Where it meets the top line, the glass ends (rounded in plan). */
-const Y_VIDRIO = monotona([[-0.10, 0.80], [-0.25, 0.815], [-0.45, 0.815], [-0.8, 0.815], [-1.2, 0.83], [-1.5, 0.855], [-1.65, 0.90], [-1.78, 0.99], [-1.9, 1.10], [-2.0, 1.20], [-2.1, 1.30]]);
+const Y_VIDRIO_REF = monotona([[-0.10, 0.80], [-0.25, 0.815], [-0.45, 0.815], [-0.8, 0.815], [-1.2, 0.83], [-1.5, 0.855], [-1.65, 0.90], [-1.78, 0.99], [-1.9, 1.10], [-2.0, 1.20], [-2.1, 1.30]]);
 /** The navy canopy frame: this much below the glass, all round it. Its outer edge is the canopy's shut line. */
 const MARCO = 0.035;
-const yMarco = (x: number) => Y_VIDRIO(x) - MARCO;
-/** Where a side-view line meets the top line, by bisection between xa (line below the top) and xb (line above it). */
-function cruce(linea: (x: number) => number, xa: number, xb: number): number {
-  let a = xa, b = xb;
-  for (let i = 0; i < 50; i++) { const m = (a + b) / 2; if (techoEn(m) - linea(m) > 0) a = m; else b = m; }
-  return (a + b) / 2;
-}
-/** Glass from XC1 to XC0, frame from XF1 to XF0. */
-export const XC0 = cruce(Y_VIDRIO, -0.30, -0.08), XC1 = cruce(Y_VIDRIO, -1.75, -2.3);
-export const XF0 = cruce(yMarco, -0.30, 0.0), XF1 = cruce(yMarco, -1.75, -2.4);
-/** Navy nose cone ahead of this x and navy tail cone behind it (with the lamp rings on the joints). */
-export const X_ARO_MORRO = 0.30, X_ARO_COLA = -2.86;
 /** The waterline: navy below it, from the nose ring to the tail ring. */
-const Y_FLOTACION = monotona([[X_ARO_MORRO, 0.355], [0.1, 0.36], [-0.4, 0.375], [-1.2, 0.39], [-1.9, 0.41], [-2.4, 0.44], [X_ARO_COLA, 0.47]]);
+const Y_FLOTACION_REF = monotona([[0.30, 0.355], [0.1, 0.36], [-0.4, 0.375], [-1.2, 0.39], [-1.9, 0.41], [-2.4, 0.44], [-2.86, 0.47]]);
+
+/**
+ * The shape being built and its layout. One build at a time (everything here is
+ * synchronous), so the functions below read these instead of carrying them in
+ * every signature: `construirCon` sets them before it builds anything.
+ */
+let F: FormaBala = FORMA_REF;
+let L = disponer(FORMA_REF);
+/** The canopy's outline and the livery lines for a shape. */
+function disponer(F: FormaBala) {
+  const Y_VIDRIO = (x: number) => F.alturaArriba(Y_VIDRIO_REF(F.R(x)));
+  const yMarco = (x: number) => Y_VIDRIO(x) - MARCO;
+  /** Where a side-view line meets the top line, by bisection between xa (line below the top) and xb (line above it). */
+  const cruce = (linea: (x: number) => number, xa: number, xb: number): number => {
+    let a = xa, b = xb;
+    for (let i = 0; i < 50; i++) { const m = (a + b) / 2; if (techoEn(F, m) - linea(m) > 0) a = m; else b = m; }
+    return (a + b) / 2;
+  };
+  /** Navy nose cone ahead of X_ARO_MORRO and navy tail cone behind X_ARO_COLA (with the lamp rings on the joints). */
+  const X_ARO_MORRO = F.X(0.30), X_ARO_COLA = F.X(-2.86);
+  const Y_FLOTACION = (x: number) => Y_FLOTACION_REF(F.R(x)) + F.dSuelo * 0.6;
+  return {
+    Y_VIDRIO, yMarco, Y_FLOTACION, X_ARO_MORRO, X_ARO_COLA,
+    /** Glass from XC1 to XC0, frame from XF1 to XF0. */
+    XC0: cruce(Y_VIDRIO, F.X(-0.30), F.X(-0.08)), XC1: cruce(Y_VIDRIO, F.X(-1.75), F.X(-2.3)),
+    XF0: cruce(yMarco, F.X(-0.30), F.X(0.0)), XF1: cruce(yMarco, F.X(-1.75), F.X(-2.4)),
+    T_D_MORRO: tAbajo(F.sec(X_ARO_MORRO), Y_FLOTACION(X_ARO_MORRO)), T_D_COLA: tAbajo(F.sec(X_ARO_COLA), Y_FLOTACION(X_ARO_COLA)),
+  };
+}
+/** The canopy's glass and frame ends of a shape (for the editor's checks and labels). */
+export function cupulaDe(F: FormaBala) { const l = disponer(F); return { XC0: l.XC0, XC1: l.XC1, XF0: l.XF0, XF1: l.XF1 }; }
 
 // ======================================================================= the skin
-/** Row spacing: fine at the tips, round the canopy's ends (where its outline turns fast in plan) and on the rings. */
-function filasX(): number[] {
+/** Row spacing: fine at the tips, round the canopy's ends (where its outline turns fast in plan) and on the rings. `q` > 1 spaces them out (a quick preview). */
+function filasX(q = 1): number[] {
   const paso = (x: number) => {
     let p = 0.02;
-    if (x < XF0 + 0.03 && x > XF1 - 0.03) p = 0.015;
-    for (const xc of [XC0, XC1, XF0, XF1]) { const d = Math.abs(x - xc); if (d < 0.08) p = Math.min(p, 0.0012 + d * 0.08); }
-    const dt = Math.min(X_MORRO - x, x - X_COLA);
-    return Math.min(p, Math.max(0.0015, 0.08 * dt));
+    if (x < L.XF0 + 0.03 && x > L.XF1 - 0.03) p = 0.015;
+    for (const xc of [L.XC0, L.XC1, L.XF0, L.XF1]) { const d = Math.abs(x - xc); if (d < 0.08) p = Math.min(p, 0.0012 + d * 0.08); }
+    const dt = Math.min(F.X_MORRO - x, x - F.X_COLA);
+    return Math.min(p, Math.max(0.0015, 0.08 * dt)) * q;
   };
   const xs: number[] = [];
-  for (let x = X_MORRO; x > X_COLA; x -= paso(x)) xs.push(x);
-  xs.push(X_COLA, XC0, XC1, XF0, XF1, X_ARO_MORRO, X_ARO_COLA);
+  for (let x = F.X_MORRO; x > F.X_COLA; x -= paso(x)) xs.push(x);
+  xs.push(F.X_COLA, L.XC0, L.XC1, L.XF0, L.XF1, L.X_ARO_MORRO, L.X_ARO_COLA);
   xs.sort((a, b) => b - a);
   return xs.filter((x, i) => i === 0 || xs[i - 1] - x > 4e-4);
 }
@@ -75,17 +96,16 @@ const K_D = N_TRAMO[0], K_F = K_D + N_TRAMO[1], K_C = K_F + N_TRAMO[2];
 const T_F_FIJO = 0.62, T_C_FIJO = 0.80;
 const suaveP = (u: number) => { const v = Math.min(1, Math.max(0, u)); return v * v * (3 - 2 * v); };
 const fuera = (x: number, a: number, b: number) => (x > b ? x - b : x < a ? a - x : 0);
-const enVidrio = (x: number) => x <= XC0 + 1e-9 && x >= XC1 - 1e-9;
-const enMarco = (x: number) => x <= XF0 + 1e-9 && x >= XF1 - 1e-9;
-const T_D_MORRO = tAbajo(sec(X_ARO_MORRO), Y_FLOTACION(X_ARO_MORRO)), T_D_COLA = tAbajo(sec(X_ARO_COLA), Y_FLOTACION(X_ARO_COLA));
+const enVidrio = (x: number) => x <= L.XC0 + 1e-9 && x >= L.XC1 - 1e-9;
+const enMarco = (x: number) => x <= L.XF0 + 1e-9 && x >= L.XF1 - 1e-9;
 
 /** Band edges (tD, tF, tC) at a station. */
 function bandas(s: Sec): [number, number, number] {
   const x = s.x;
-  const tD = x > X_ARO_MORRO ? T_D_MORRO : x < X_ARO_COLA ? T_D_COLA : tAbajo(s, Y_FLOTACION(x));
-  const dF = fuera(x, XF1, XF0);
-  const tF = dF > 0 ? 1 - (1 - T_F_FIJO) * suaveP(dF / 0.15) : tArriba(s, yMarco(x));
-  const tC = dF > 0 ? 1 - (1 - T_C_FIJO) * suaveP(dF / 0.15) : enVidrio(x) ? tArriba(s, Y_VIDRIO(x)) : 1;
+  const tD = x > L.X_ARO_MORRO ? L.T_D_MORRO : x < L.X_ARO_COLA ? L.T_D_COLA : tAbajo(s, L.Y_FLOTACION(x));
+  const dF = fuera(x, L.XF1, L.XF0);
+  const tF = dF > 0 ? 1 - (1 - T_F_FIJO) * suaveP(dF / 0.15) : tArriba(s, L.yMarco(x));
+  const tC = dF > 0 ? 1 - (1 - T_C_FIJO) * suaveP(dF / 0.15) : enVidrio(x) ? tArriba(s, L.Y_VIDRIO(x)) : 1;
   return [tD, Math.max(tD, tF), Math.max(tF, tC)];
 }
 function columnasSkin(s: Sec): number[] {
@@ -107,10 +127,10 @@ interface Rejilla { pos: Float32Array; nor: Float32Array; uv: Float32Array; fila
  * sections at the same t, so two grids that share an edge shade alike.
  */
 function rejilla(xs: number[], ts: (s: Sec) => number[], orden: 'abajo' | 'arriba' | 'lado'): Rejilla {
-  const secs = xs.map(x => sec(x)), tsAll = secs.map(s => ts(s));
+  const secs = xs.map(x => F.sec(x)), tsAll = secs.map(s => ts(s));
   const n = tsAll[0].length, cols = orden === 'lado' ? n : 2 * n - 1, filas = xs.length;
   const pos = new Float32Array(filas * cols * 3), nor = new Float32Array(filas * cols * 3), uv = new Float32Array(filas * cols * 2);
-  const mitadX = (X_MORRO + X_COLA) / 2, e = 0.002;
+  const mitadX = (F.X_MORRO + F.X_COLA) / 2, e = 0.002;
   for (let i = 0; i < filas; i++) {
     const s = secs[i], tv = tsAll[i], sa = secs[Math.max(0, i - 1)], sb = secs[Math.min(filas - 1, i + 1)];
     const dx = xs[Math.max(0, i - 1)] - xs[Math.min(filas - 1, i + 1)];
@@ -188,13 +208,13 @@ function geometria(R: Rejilla, grupos: number[][]): THREE.BufferGeometry {
  * repeats every triangle with a dark back-face material: the inside of the
  * skin, as seen through the canopy (one mesh, so «Superponer» paints it once).
  */
-function carroceria(xs: number[], M: Mats): THREE.Mesh {
+function carroceria(xs: number[], M: Mats, marcoAparte = false): [THREE.Mesh, THREE.Mesh | null] {
   const R = rejilla(xs, columnasSkin, 'abajo');
-  const grupos = caras(R, 2, (i, k) => {
+  const grupos = caras(R, marcoAparte ? 3 : 2, (i, k) => {
     const xm = (xs[i] + xs[i + 1]) / 2;
     if (k >= K_C && enVidrio(xs[i]) && enVidrio(xs[i + 1])) return -1;
-    if (xm > X_ARO_MORRO || xm < X_ARO_COLA || k < K_D) return 1;
-    if (k >= K_F && k < K_C && enMarco(xm)) return 1;
+    if (xm > L.X_ARO_MORRO || xm < L.X_ARO_COLA || k < K_D) return 1;
+    if (k >= K_F && k < K_C && enMarco(xm)) return marcoAparte ? 2 : 1;
     return 0;
   });
   // Right at the canopy's ends the rows are millimetres apart while the outline's columns move by
@@ -211,7 +231,13 @@ function carroceria(xs: number[], M: Mats): THREE.Mesh {
   geo.addGroup(inicio[2], orden[2].length, 3); geo.addGroup(inicio[3], orden[3].length, 4);
   const m = new THREE.Mesh(geo, [M.chapa, M.marino, M.forro, M.chapaDoble, M.marinoDoble]);
   m.name = 'carroceria';
-  return m;
+  if (!marcoAparte) return [m, null];
+  // the canopy's navy frame, on its own (it opens with the glass): surface, inner pass, walls
+  const [sup, par] = separarParedes(R, grupos[2]);
+  const gm = geometria(R, [sup, par]);
+  gm.clearGroups(); gm.addGroup(0, sup.length, 0); gm.addGroup(0, sup.length + par.length, 1); gm.addGroup(sup.length, par.length, 2);
+  const marco = new THREE.Mesh(gm, [M.marino, M.forro, M.marinoDoble]); marco.name = 'marco-cupula';
+  return [m, marco];
 }
 /** Splits a triangle list into [surface, walls]: a wall's face is more than 40° off the skin's normal there. */
 function separarParedes(R: Rejilla, l: number[]): [number[], number[]] {
@@ -264,7 +290,7 @@ function cupula(xsPiel: number[], M: Mats): THREE.Group {
 // ------------------------------------------------------------ patches on (x, t)
 /** Outward normal of the skin at (x, t) on the right side. */
 function normalXT(x: number, t: number): THREE.Vector3 {
-  const e = 0.002, s = sec(x), sa = sec(x + e), sb = sec(x - e);
+  const e = 0.002, s = F.sec(x), sa = F.sec(x + e), sb = F.sec(x - e);
   const pa = punto(sa, t), pb = punto(sb, t), q1 = punto(s, Math.min(1, t + e)), q0 = punto(s, Math.max(0, t - e));
   const X = new THREE.Vector3(2 * e, pa[1] - pb[1], pa[0] - pb[0]), T = new THREE.Vector3(0, q1[1] - q0[1], q1[0] - q0[0]);
   const n = new THREE.Vector3().crossVectors(X, T).normalize();
@@ -399,10 +425,10 @@ type Vista = 'lado' | 'arriba' | 'frente' | 'detras';
 const FUERA: Record<Vista, THREE.Vector3> = { lado: new THREE.Vector3(0, 0, 1), arriba: new THREE.Vector3(0, 1, 0), frente: new THREE.Vector3(1, 0, 0), detras: new THREE.Vector3(-1, 0, 0) };
 /** The skin point a 2D view coordinate lands on: side (x, y), top (x, z), front and rear (z, y). */
 function proyectar(v: Vista, a: number, b: number): THREE.Vector3 {
-  if (v === 'lado') return new THREE.Vector3(a, b, ladoZ(a, b));
-  if (v === 'arriba') return new THREE.Vector3(a, arribaY(a, b), b);
-  if (v === 'frente') return new THREE.Vector3(frenteX(a, b), b, a);
-  return new THREE.Vector3(detrasX(a, b), b, a);
+  if (v === 'lado') return new THREE.Vector3(a, b, F.ladoZ(a, b));
+  if (v === 'arriba') return new THREE.Vector3(a, F.arribaY(a, b), b);
+  if (v === 'frente') return new THREE.Vector3(F.frenteX(a, b), b, a);
+  return new THREE.Vector3(F.detrasX(a, b), b, a);
 }
 function normalEn(v: Vista, a: number, b: number): THREE.Vector3 {
   const e = 0.004, p0 = proyectar(v, a, b), pa = proyectar(v, a + e, b), pb = proyectar(v, a, b + e);
@@ -451,9 +477,32 @@ function distBorde(c: P2[], a: number, b: number): number {
 }
 
 // ===================================================================== assembly
+/** How to build one Bala (the garage's needs none of these: it is the reference shape, shared materials, everything). */
+export interface OpcionesBala {
+  /** Where the riders sit (balaPiezas.ts `ASIENTO` by default). */
+  asientos?: Asientos;
+  /** Height of the fin's tip above the road (1.00 m by default). */
+  aleta?: number;
+  /** Materials: the editor passes its own set (`crearMateriales()`), so «Rayos X» and «Corte» never reach the garage's. */
+  M?: Mats;
+  /**
+   * 'rapida' while a slider is being dragged: half the rows along the body and
+   * no small details (lamps, ducts, stripe, cameras, interior trim). The
+   * shape, the canopy, the wheels and the pods are all there.
+   */
+  calidad?: 'completa' | 'rapida';
+  /** The canopy (its navy frame and its glass) in groups of its own, hinged at its front end, so the editor can open it. */
+  cupulaAparte?: boolean;
+}
+/** The pivots of the opening canopy: one for its frame (body layer) and one for its glass (glass layer). */
+export const PIVOTES_CUPULA = ['cupula-marco', 'cupula-cristal'] as const;
+/** The canopy opens this much about its front hinge (negative: the rear rises). */
+export const ANGULO_CUPULA = -48;
+
 let PLANTILLA: THREE.Group | null = null;
+const L_REF = L;
 export function construir(): THREE.Group {
-  if (!PLANTILLA) PLANTILLA = construirPlantilla();
+  if (!PLANTILLA) PLANTILLA = construirCon(FORMA_REF);
   const M = mats(), g = PLANTILLA.clone(true), copias = new Map<THREE.BufferGeometry, THREE.BufferGeometry>();
   g.traverse(o => {
     const m = o as THREE.Mesh; if (!m.isMesh) return;
@@ -464,18 +513,36 @@ export function construir(): THREE.Group {
   return g;
 }
 
-function construirPlantilla(): THREE.Group {
-  const M = mats();
+/** A Bala of any shape. The garage clones one built from the reference shape; the editor builds its own on every change. */
+export function construirCon(forma: FormaBala, o: OpcionesBala = {}): THREE.Group {
+  F = forma; L = forma === FORMA_REF ? L_REF : disponer(forma);
+  try { return armar(o); } finally { F = FORMA_REF; L = L_REF; }
+}
+
+function armar(o: OpcionesBala): THREE.Group {
+  const M = o.M ?? mats(), rapida = o.calidad === 'rapida';
   const g = new THREE.Group(); g.name = 'bala';
   const add = <T extends THREE.Object3D>(o: T) => { g.add(o); return o; };
   /** The object and its mirror on the left side (the mirror is in the object's scale, so its faces still look out). */
   const par = (o: THREE.Object3D) => { add(o); const c = o.clone(); c.scale.z = -o.scale.z; c.position.z = -o.position.z; add(c); return o; };
   const SEP = 0.0012;
+  // details drawn on the reference shape: x through the shape's map, heights with the belly (half of it on the nose)
+  const nx = F.X, yN = (y: number) => y + F.dSuelo * 0.5, yC = (y: number) => y + F.dSuelo * 0.6;
+  const mapa = (pts: P2[], y: (v: number) => number): P2[] => pts.map(([a, b]) => [nx(a), y(b)]);
 
   // ---------------------------------------------------------------- skin and canopy
-  const xs = filasX();
-  add(carroceria(xs, M));
-  add(cupula(xs, M));
+  const xs = filasX(rapida ? 2 : 1);
+  const [cuerpo, marco] = carroceria(xs, M, !!o.cupulaAparte);
+  add(cuerpo);
+  const vidrio = cupula(xs, M);
+  if (o.cupulaAparte && marco) {
+    // hinged at the front end of the frame, on the top line; the shut line stays with the body
+    const bisagra = new THREE.Vector3(L.XF0, techoEn(F, L.XF0), 0);
+    for (const [nombre, pieza] of [[PIVOTES_CUPULA[0], marco], [PIVOTES_CUPULA[1], vidrio]] as const) {
+      const piv = new THREE.Group(); piv.name = nombre; piv.position.copy(bisagra);
+      pieza.position.sub(bisagra); piv.add(pieza); add(piv);
+    }
+  } else add(vidrio);
 
   // canopy shut line: round the outer edge of the navy frame (the canopy and its
   // frame lift as one piece, hinged at the front)
@@ -483,7 +550,7 @@ function construirPlantilla(): THREE.Group {
     const der: THREE.Vector3[] = [], nd: THREE.Vector3[] = [];
     for (const x of xs) {
       if (!enMarco(x)) continue;
-      const s = sec(x), t = bandas(s)[1], [z, y] = punto(s, t);
+      const s = F.sec(x), t = bandas(s)[1], [z, y] = punto(s, t);
       der.push(new THREE.Vector3(x, y, z)); nd.push(normalXT(x, Math.min(t, 0.995)));
     }
     const izq = der.slice(1, -1).reverse().map(p => new THREE.Vector3(p.x, p.y, -p.z)), ni = nd.slice(1, -1).reverse().map(n => new THREE.Vector3(n.x, n.y, -n.z));
@@ -492,71 +559,73 @@ function construirPlantilla(): THREE.Group {
     add(malla(cinta3D([...der, ...izq], [...nd, ...ni], 0.0042, 0.0012, true), M.junta, 'junta-cupula', false));
   }
 
-  // ---------------------------------------------------------------- livery
-  // red pinstripe, 8 mm wide and 1 cm above the navy waterline, nose ring to tail ring (it carries on across the pods)
-  {
-    const geo = parcheXT(X_ARO_MORRO - 0.012, X_ARO_COLA + 0.012, 320, s => [tAbajo(s, Y_FLOTACION(s.x) + 0.011), tAbajo(s, Y_FLOTACION(s.x) + 0.019)], 2, 0.0006, 'lado');
-    par(malla(geo, M.rojo, 'filete', false));
-  }
-
-  // ---------------------------------------------------------------- nose
-  // LED light band across the nose on the joint of the navy cone: black housing, LED strip
-  {
-    const tBase = (s: Sec): [number, number] => [tAbajo(s, Y_FLOTACION(X_ARO_MORRO) - 0.005), 1];
-    add(malla(parcheXT(X_ARO_MORRO + 0.012, X_ARO_MORRO - 0.012, 6, tBase, 26, 0.0008, 'arriba'), M.negroBrillo, 'faro', false));
-    add(malla(parcheXT(X_ARO_MORRO + 0.0065, X_ARO_MORRO - 0.0065, 4, s => [tAbajo(s, Y_FLOTACION(X_ARO_MORRO) + 0.004), 1], 26, 0.0016, 'arriba'), M.ledTira, 'faro-led', false));
-  }
-  // two slim headlamps on the flanks of the nose cone: dark lens, LED line and cells, clear cover
-  {
-    const lado = new THREE.Group(); lado.name = 'faro';
-    const lente: P2[] = suave([[0.535, 0.345], [0.50, 0.358], [0.44, 0.371], [0.38, 0.379], [0.345, 0.378], [0.335, 0.368], [0.36, 0.358], [0.43, 0.350], [0.50, 0.342]], 2);
-    lado.add(malla(calco(poligono(lente), 'lado', 0.0008, 0.012), M.negroBrillo, 'faro', false));
-    lado.add(malla(calco(cinta(suave([[0.515, 0.351], [0.46, 0.362], [0.40, 0.370], [0.355, 0.371]], 2, false), 0.005, 0.005), 'lado', 0.0016, 0.006), M.ledTira, 'faro-led', false));
-    for (let k = 0; k < 3; k++) {
-      const x = 0.385 + k * 0.035, y = 0.3635 - k * 0.0045;
-      lado.add(malla(calco(poligono(rectRedondo(x, y, 0.012, 0.0045, 0.003, 2)), 'lado', 0.0018, 0.005), M.led, 'faro-led', false));
+  if (!rapida) {
+    // ---------------------------------------------------------------- livery
+    // red pinstripe, 8 mm wide and 1 cm above the navy waterline, nose ring to tail ring (it carries on across the pods)
+    {
+      const geo = parcheXT(L.X_ARO_MORRO - 0.012, L.X_ARO_COLA + 0.012, 320, s => [tAbajo(s, L.Y_FLOTACION(s.x) + 0.011), tAbajo(s, L.Y_FLOTACION(s.x) + 0.019)], 2, 0.0006, 'lado');
+      par(malla(geo, M.rojo, 'filete', false));
     }
-    lado.add(malla(calco(poligono(lente), 'lado', (a, b) => 0.0012 + 0.003 * Math.min(1, distBorde(lente, a, b) / 0.008), 0.01), M.lente, 'lente-faro', false));
-    par(lado);
-  }
-  // chin intake under the nose tip, and two small NACA ducts on the nose flanks (brakes and cabin air)
-  add(malla(calco(poligono(suave(rectRedondo(0, 0.262, 0.07, 0.012, 0.01, 3), 1)), 'frente', 0.001, 0.01), M.negroMate, 'toma'));
-  // NACA submerged inlet: a ramp whose walls flare out towards the back (ogee planform), ending in a rounded lip
-  const naca = (x0: number, x1: number, y: number, h: number): P2[] => {
-    const arriba: P2[] = [], abajo: P2[] = [];
-    for (let k = 0; k <= 16; k++) { const u = k / 16, x = x0 + (x1 - x0) * u, w = h * (0.10 + 0.90 * u * u * (3 - 2 * u) * (0.6 + 0.4 * u)) / 2; arriba.push([x, y + w]); abajo.push([x, y - w]); }
-    // the back: a shallow arc between the two walls
-    const fin: P2[] = []; for (let k = 1; k < 8; k++) { const a = Math.PI * k / 8; fin.push([x1 - (x1 - x0) * 0.04 * Math.sin(a) * Math.sign(x0 - x1), y + (h / 2) * Math.cos(a)]); }
-    return [...arriba, ...fin, ...abajo.reverse()];
-  };
-  {
-    const n = naca(0.17, 0.07, 0.29, 0.034);
-    par(malla(calco(poligono(n), 'lado', 0.0008, 0.016), M.negroMate, 'naca', false));
-    // battery cooling, on the rear flanks: the duct and its lip, a fine dark grey arc at the back
-    const nr = naca(-1.93, -2.12, 0.585, 0.06);
-    par(malla(calco(poligono(nr), 'lado', 0.0008, 0.02), M.negroMate, 'naca', false));
-    const labio: P2[] = []; for (let k = 0; k <= 12; k++) { const a = Math.PI * k / 12; labio.push([-2.12 - 0.008 * Math.sin(a) - 0.004, 0.585 + 0.031 * Math.cos(a)]); }
-    par(malla(calco(cinta(labio, 0.005, 0.004), 'lado', 0.0016, 0.006), M.grisOscuro, 'naca-labio', false));
-  }
 
-  // ---------------------------------------------------------------- tail
-  // rear light ring round the tail cone, on the joint of the navy cone (not across the belly)
-  {
-    const rango = (s: Sec): [number, number] => [0.12, 1];
-    add(malla(parcheXT(X_ARO_COLA + 0.003, X_ARO_COLA - 0.03, 6, rango, 40, 0.0008, 'arriba'), M.negroBrillo, 'piloto', false));
-    add(malla(parcheXT(X_ARO_COLA - 0.004, X_ARO_COLA - 0.023, 4, rango, 40, 0.0016, 'arriba'), M.rojoLed, 'piloto-led', false));
-  }
-  // charging flap on the right rear flank (+z is the right)
-  add(malla(calco(cinta(cerrar(suave(rectRedondo(-2.30, 0.66, 0.045, 0.034, 0.014, 3), 1)), 0.0035, 0.005), 'lado', SEP, 0.01), M.junta, 'junta-tapa', false));
+    // ---------------------------------------------------------------- nose
+    // LED light band across the nose on the joint of the navy cone: black housing, LED strip
+    {
+      const tBase = (s: Sec): [number, number] => [tAbajo(s, L.Y_FLOTACION(L.X_ARO_MORRO) - 0.005), 1];
+      add(malla(parcheXT(L.X_ARO_MORRO + 0.012, L.X_ARO_MORRO - 0.012, 6, tBase, 26, 0.0008, 'arriba'), M.negroBrillo, 'faro', false));
+      add(malla(parcheXT(L.X_ARO_MORRO + 0.0065, L.X_ARO_MORRO - 0.0065, 4, s => [tAbajo(s, L.Y_FLOTACION(L.X_ARO_MORRO) + 0.004), 1], 26, 0.0016, 'arriba'), M.ledTira, 'faro-led', false));
+    }
+    // two slim headlamps on the flanks of the nose cone: dark lens, LED line and cells, clear cover
+    {
+      const lado = new THREE.Group(); lado.name = 'faro';
+      const lente: P2[] = suave(mapa([[0.535, 0.345], [0.50, 0.358], [0.44, 0.371], [0.38, 0.379], [0.345, 0.378], [0.335, 0.368], [0.36, 0.358], [0.43, 0.350], [0.50, 0.342]], yN), 2);
+      lado.add(malla(calco(poligono(lente), 'lado', 0.0008, 0.012), M.negroBrillo, 'faro', false));
+      lado.add(malla(calco(cinta(suave(mapa([[0.515, 0.351], [0.46, 0.362], [0.40, 0.370], [0.355, 0.371]], yN), 2, false), 0.005, 0.005), 'lado', 0.0016, 0.006), M.ledTira, 'faro-led', false));
+      for (let k = 0; k < 3; k++) {
+        const x = nx(0.385 + k * 0.035), y = yN(0.3635 - k * 0.0045);
+        lado.add(malla(calco(poligono(rectRedondo(x, y, 0.012, 0.0045, 0.003, 2)), 'lado', 0.0018, 0.005), M.led, 'faro-led', false));
+      }
+      lado.add(malla(calco(poligono(lente), 'lado', (a, b) => 0.0012 + 0.003 * Math.min(1, distBorde(lente, a, b) / 0.008), 0.01), M.lente, 'lente-faro', false));
+      par(lado);
+    }
+    // chin intake under the nose tip, and two small NACA ducts on the nose flanks (brakes and cabin air)
+    add(malla(calco(poligono(suave(rectRedondo(0, yN(0.262), 0.07, 0.012, 0.01, 3), 1)), 'frente', 0.001, 0.01), M.negroMate, 'toma'));
+    // NACA submerged inlet: a ramp whose walls flare out towards the back (ogee planform), ending in a rounded lip
+    const naca = (x0: number, x1: number, y: number, h: number): P2[] => {
+      const arriba: P2[] = [], abajo: P2[] = [];
+      for (let k = 0; k <= 16; k++) { const u = k / 16, x = x0 + (x1 - x0) * u, w = h * (0.10 + 0.90 * u * u * (3 - 2 * u) * (0.6 + 0.4 * u)) / 2; arriba.push([x, y + w]); abajo.push([x, y - w]); }
+      // the back: a shallow arc between the two walls
+      const fin: P2[] = []; for (let k = 1; k < 8; k++) { const a = Math.PI * k / 8; fin.push([x1 - (x1 - x0) * 0.04 * Math.sin(a) * Math.sign(x0 - x1), y + (h / 2) * Math.cos(a)]); }
+      return [...arriba, ...fin, ...abajo.reverse()];
+    };
+    {
+      const n = naca(nx(0.17), nx(0.07), yN(0.29), 0.034);
+      par(malla(calco(poligono(n), 'lado', 0.0008, 0.016), M.negroMate, 'naca', false));
+      // battery cooling, on the rear flanks: the duct and its lip, a fine dark grey arc at the back
+      const nr = naca(nx(-1.93), nx(-2.12), yC(0.585), 0.06);
+      par(malla(calco(poligono(nr), 'lado', 0.0008, 0.02), M.negroMate, 'naca', false));
+      const labio: P2[] = []; for (let k = 0; k <= 12; k++) { const a = Math.PI * k / 12; labio.push([nx(-2.12) - 0.008 * Math.sin(a) - 0.004, yC(0.585) + 0.031 * Math.cos(a)]); }
+      par(malla(calco(cinta(labio, 0.005, 0.004), 'lado', 0.0016, 0.006), M.grisOscuro, 'naca-labio', false));
+    }
 
-  // ---------------------------------------------------------------- cameras instead of mirrors
-  par(camara(M, -0.40, 0.762));
+    // ---------------------------------------------------------------- tail
+    // rear light ring round the tail cone, on the joint of the navy cone (not across the belly)
+    {
+      const rango = (s: Sec): [number, number] => [0.12, 1];
+      add(malla(parcheXT(L.X_ARO_COLA + 0.003, L.X_ARO_COLA - 0.03, 6, rango, 40, 0.0008, 'arriba'), M.negroBrillo, 'piloto', false));
+      add(malla(parcheXT(L.X_ARO_COLA - 0.004, L.X_ARO_COLA - 0.023, 4, rango, 40, 0.0016, 'arriba'), M.rojoLed, 'piloto-led', false));
+    }
+    // charging flap on the right rear flank (+z is the right)
+    add(malla(calco(cinta(cerrar(suave(rectRedondo(nx(-2.30), yC(0.66), 0.045, 0.034, 0.014, 3), 1)), 0.0035, 0.005), 'lado', SEP, 0.01), M.junta, 'junta-tapa', false));
+
+    // ---------------------------------------------------------------- cameras instead of mirrors
+    par(camara(F, M, nx(-0.40), yC(0.762)));
+  }
 
   // ---------------------------------------------------------------- parts
-  add(carenados(M));
-  add(ruedas(M));
-  add(aleta(M));
-  add(cabina(M));
+  add(carenados(F, M));
+  add(ruedas(F, M));
+  add(aleta(F, M, o.aleta));
+  add(cabina(F, M, o.asientos ?? ASIENTO));
 
   g.traverse(o => {
     const m = o as THREE.Mesh; if (!m.isMesh) return;
@@ -565,3 +634,5 @@ function construirPlantilla(): THREE.Group {
   });
   return g;
 }
+/** A new set of the Bala's materials (re-exported for the editor). */
+export { crearMateriales };
