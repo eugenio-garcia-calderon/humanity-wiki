@@ -14,7 +14,6 @@
 //
 // Este fichero no importa React ni nada del navegador: lo leen la pantalla,
 // el editor y el servidor.
-import { PLAZO_CONFIRMAR_DIAS } from './formularios';
 
 /** Adónde lleva un enlace. Se guarda QUÉ es, no la dirección: «Inicio» es `/`
  *  en un dominio propio y `/@quien/pagina` dentro de humanity.wiki. */
@@ -246,7 +245,6 @@ export function textoLegal(doc: DocLegal, s: Sitio, sitioNombre: string): string
   //   · Las visitas: `estadisticas.ts` (una huella de IP y navegador con una sal
   //     del día que sólo vive en memoria; ni cookie ni IP guardada).
   //   · La página de origen del alta: columna `origen` de `sitio_suscriptores`.
-  //   · Las altas sin confirmar: `borrarSinConfirmar` (`formulariosSitio.ts`).
   //   · Quién más los ve: la web, la base de datos y sus copias viven en un
   //     servidor de Hetzner en Helsinki (Caddyfile, docker-compose.prod.yml).
   //     humanity.wiki, donde se leen los mensajes, va detrás de Cloudflare
@@ -275,10 +273,10 @@ export function textoLegal(doc: DocLegal, s: Sitio, sitioNombre: string): string
       ].join('\n'),
       `## Si te suscribes al boletín`,
       [
-        `- **Qué guardamos:** tu correo, la página desde la que te suscribes, la fecha y el texto que aceptas al suscribirte y, cuando la confirmas, la fecha de la confirmación.`,
-        `- **Para qué:** para enviarte el boletín con las novedades de ${web}. Antes de enviarte ninguno te pedimos que confirmes la suscripción desde tu correo.`,
+        `- **Qué guardamos:** tu correo, la página desde la que te suscribes, la fecha y el texto que aceptas al suscribirte.`,
+        `- **Para qué:** para enviarte el boletín con las novedades de ${web}.`,
         `- **Base jurídica:** tu consentimiento (art. 6.1.a del RGPD).`,
-        `- **Cuánto tiempo:** mientras sigas suscrito. Cada correo que te enviemos lleva un enlace para darte de baja y, al darte de baja, borramos tu dirección. Si no confirmas la suscripción en los ${PLAZO_CONFIRMAR_DIAS} días siguientes al correo de confirmación, también la borramos.`,
+        `- **Cuánto tiempo:** mientras sigas suscrito. Cada correo que te enviemos lleva un enlace para darte de baja y, al darte de baja, borramos tu dirección.`,
       ].join('\n'),
       `## Quién más los ve`,
       `No cedemos tus datos a nadie, salvo obligación legal. Los tratan por cuenta nuestra, solo para prestarnos su servicio:`,

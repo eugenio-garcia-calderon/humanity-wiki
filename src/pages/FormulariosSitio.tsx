@@ -5,7 +5,7 @@ import {
   CircleDot, Reply, Clock, Info, UserMinus, ChevronDown,
 } from 'lucide-react';
 import { cn } from '../utils/cn';
-import { MOTIVOS, textoMotivo, enlaceCorreo, PLAZO_CONFIRMAR_DIAS } from '../components/sitio/formularios';
+import { MOTIVOS, textoMotivo, enlaceCorreo } from '../components/sitio/formularios';
 
 // ============================================================================
 // LOS MENSAJES Y EL BOLETÍN DE UN SITIO (2026-11-07)
@@ -104,8 +104,8 @@ export default function FormulariosSitio() {
       <div className={cn('mt-4 flex items-start gap-2.5 rounded-2xl px-4 py-3 text-sm leading-relaxed', p.correo_activo ? 'bg-emerald-50 text-emerald-900' : 'bg-amber-50 text-amber-900')}>
         <Info className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
         {p.correo_activo
-          ? <p>Cada mensaje nuevo avisa por correo a <strong>{p.contacto || 'la dirección de contacto del pie (no hay ninguna puesta)'}</strong>, con «Responder» hacia quien escribió. Las altas del boletín se confirman desde el correo.</p>
-          : <p>El correo de la plataforma todavía no está configurado. Los mensajes se guardan aquí, pero no llega ningún aviso: <strong>pásate por esta pantalla de vez en cuando</strong>. Las altas del boletín quedan pendientes de confirmar hasta que se pueda mandar el correo de confirmación.</p>}
+          ? <p>Cada mensaje nuevo avisa por correo a <strong>{p.contacto || 'la dirección de contacto del pie (no hay ninguna puesta)'}</strong>, con «Responder» hacia quien escribió. Cada alta nueva del boletín también avisa.</p>
+          : <p>El correo de la plataforma todavía no está configurado. Los mensajes se guardan aquí, pero no llega ningún aviso: <strong>pásate por esta pantalla de vez en cuando</strong>.</p>}
       </div>
 
       {!p.pagina.escaparate && <p className="mt-3 rounded-2xl bg-slate-50 px-4 py-3 text-sm text-slate-600">Esta web ya no es un escaparate: sus formularios no aceptan envíos nuevos. Lo que llegó sigue aquí.</p>}
@@ -113,7 +113,7 @@ export default function FormulariosSitio() {
       <dl className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Cifra icono={<CircleDot className="h-4 w-4" />} valor={c.mensajes_nuevos} texto="Mensajes nuevos" tono={c.mensajes_nuevos ? 'ambar' : undefined} />
         <Cifra icono={<Inbox className="h-4 w-4" />} valor={c.mensajes} texto="Mensajes en total" />
-        <Cifra icono={<MailCheck className="h-4 w-4" />} valor={c.confirmados} texto="Suscriptores confirmados" />
+        <Cifra icono={<MailCheck className="h-4 w-4" />} valor={c.confirmados} texto="Suscriptores" />
         <Cifra icono={<Clock className="h-4 w-4" />} valor={c.pendientes} texto="Pendientes de confirmar" />
       </dl>
 
@@ -280,7 +280,7 @@ function PestanaBoletin({ panel, base, accion }: { panel: Panel; base: string; a
   return (
     <div>
       <div className="flex flex-wrap items-center gap-1.5">
-        {([['todos', 'Todos', c.confirmados + c.pendientes], ['confirmado', 'Confirmados', c.confirmados], ['pendiente', 'Pendientes', c.pendientes]] as const).map(([k, t, n]) => (
+        {([['todos', 'Todos', c.confirmados + c.pendientes], ['confirmado', 'Suscritos', c.confirmados], ['pendiente', 'Pendientes', c.pendientes]] as const).map(([k, t, n]) => (
           <button key={k} onClick={() => setFiltro(k)} aria-pressed={filtro === k}
             className={cn('h-9 rounded-full border px-3.5 text-sm font-bold transition-colors', filtro === k ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-600 hover:border-slate-400')}>
             {t} <span className={filtro === k ? 'text-white/70' : 'text-slate-400'}>{n}</span>
@@ -301,10 +301,10 @@ function PestanaBoletin({ panel, base, accion }: { panel: Panel; base: string; a
         )}
         {/* Sólo los confirmados (el servidor los filtra): es el fichero que se lleva a una herramienta de envío. */}
         <a href={`${base}/suscriptores.csv`} className="flex h-11 items-center gap-1.5 rounded-xl border border-slate-200 px-3 text-sm font-bold text-slate-600 hover:bg-slate-50">
-          <Download className="h-4 w-4" aria-hidden /> Confirmados (CSV)
+          <Download className="h-4 w-4" aria-hidden /> Suscriptores (CSV)
         </a>
       </div>
-      <p className="mt-2 text-xs leading-relaxed text-slate-500">Cuando mandes un boletín, envíalo solo a los <strong>confirmados</strong> y con un enlace para darse de baja: es lo que promete la política de privacidad de la web. Las altas sin confirmar se borran solas {PLAZO_CONFIRMAR_DIAS} días después del correo de confirmación.</p>
+      <p className="mt-2 text-xs leading-relaxed text-slate-500">Cuando mandes un boletín, envíalo con un enlace para darse de baja: es lo que promete la política de privacidad de la web.</p>
 
       <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white">
         {lista.length === 0
@@ -318,13 +318,13 @@ function PestanaBoletin({ panel, base, accion }: { panel: Panel; base: string; a
                 <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
                   <span className="min-w-0 max-w-full truncate text-sm font-bold text-slate-800">{s.email}</span>
                   <span className={cn('shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold', s.estado === 'confirmado' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-800')}>
-                    {s.estado === 'confirmado' ? 'Confirmado' : 'Pendiente'}
+                    {s.estado === 'confirmado' ? 'Suscrito' : 'Pendiente'}
                   </span>
                 </p>
                 <p className="mt-0.5 text-xs leading-relaxed text-slate-500">
                   Alta: {fecha(s.created_at)}
                   {s.origen ? ` desde ${s.origen === '/' ? 'la portada' : s.origen}` : ''}
-                  {s.estado === 'confirmado' ? ` · Confirmó: ${fecha(s.confirmado_at)}` : s.correo_enviado_at ? ` · Enlace enviado: ${fecha(s.correo_enviado_at)}` : ' · Sin correo de confirmación todavía'}
+                  {s.estado === 'confirmado' ? ` · Desde: ${fecha(s.confirmado_at)}` : s.correo_enviado_at ? ` · Enlace enviado: ${fecha(s.correo_enviado_at)}` : ' · Sin correo de confirmación todavía'}
                 </p>
               </div>
               <button onClick={() => {

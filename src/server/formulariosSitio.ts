@@ -46,14 +46,15 @@ import {
 // un tiempo mínimo de rellenado, un freno por IP EN MEMORIA y sin guardar la IP
 // (la clave es una huella con una sal que cambia en cada arranque; la IP sale de
 // `ipVisitante`, que no se fía de lo que escriba quien llama), y que el envío
-// venga de la propia web (`Origin`). El boletín, además, pide confirmar por
-// correo: sin eso cualquiera podría apuntar la dirección de otro.
+// venga de la propia web (`Origin`). El boletín NO pide confirmar por correo
+// desde el 2026-11-09 (Eugenio: «quita la confirmación»): el alta vale desde que
+// se envía el formulario. Las rutas de confirmar siguen para los enlaces ya mandados.
 //
 // CORREO. Sin proveedor (`hayCorreo()`, en `correo.ts`): los
-// mensajes se guardan y las altas quedan «pendientes de confirmar», y la
-// pantalla nunca dice que se ha mandado un correo que no ha salido. Con
-// proveedor: aviso a la dirección de contacto del sitio por cada mensaje (con
-// «Responder» hacia quien escribió), doble confirmación del boletín y, en TODO
+// mensajes y las altas se guardan, y la pantalla nunca dice que se ha mandado
+// un correo que no ha salido. Con proveedor: aviso a la dirección de contacto
+// del sitio por cada mensaje (con «Responder» hacia quien escribió) y por cada
+// alta nueva del boletín y, en TODO
 // correo que salga hacia un suscriptor —también los boletines que se manden
 // mañana—, el enlace para darse de baja (`enlacesDe(...).baja` y las cabeceras
 // `List-Unsubscribe`). Antes de mandar un boletín, sólo a los `confirmado`.
@@ -340,18 +341,18 @@ export function correoAviso(s: SitioForm, m: { nombre: string; email: string; mo
   return { asunto, texto, html };
 }
 
-/** El aviso a quien administra cada vez que una persona se confirma en el boletín (2026-11-09:
- *  «cada vez que alguien se suscribe»). Solo la primera confirmación: repetir el enlace no avisa. */
+/** El aviso a quien administra cada vez que alguien se suscribe al boletín (2026-11-09:
+ *  «cada vez que alguien se suscribe»). Una vez por alta: repetirla no avisa. */
 export function correoAltaBoletin(s: SitioForm, email: string, panel: string) {
   const asunto = `Nueva suscripción al boletín de ${s.nombre}: ${email}`;
   const texto = [
-    `Se ha confirmado una nueva suscripción al boletín de ${s.nombre}.`,
+    `Hay una nueva suscripción al boletín de ${s.nombre}.`,
     `Correo: ${email}`,
     `Para ver todas las suscripciones y exportarlas: ${panel}`,
   ].join('\n\n');
   const html = correoHtml({
     marca: s.nombre, titulo: 'Nueva suscripción al boletín',
-    parrafos: [`Se ha confirmado una nueva suscripción al boletín de <strong>${esc(s.nombre)}</strong>.`,
+    parrafos: [`Hay una nueva suscripción al boletín de <strong>${esc(s.nombre)}</strong>.`,
       `<strong>Correo:</strong> ${esc(email)}`],
     boton: { texto: 'Ver las suscripciones', url: panel },
     pie: [`${esc(s.responsable)} · ${esc(s.nombre)}`],
@@ -559,36 +560,38 @@ export function registrarFormulariosSitio(app: Express, db: any, cambios: Partia
         SELECT id, estado, token_baja, correo_enviado_at FROM sitio_suscriptores WHERE raiz_id = ${s.raiz} AND email = ${v.email}
       `)).rows[0] as any;
       let fila = await leer();
+      // ¿Es un alta nueva de verdad? Solo entonces se avisa; repetirla no llena el buzón de administración.
+      let nueva = false;
       if (!fila) {
         try {
           await db.execute(sql`
-            INSERT INTO sitio_suscriptores (id, raiz_id, email, estado, token_baja, consentimiento_texto, consentimiento_at, origen)
-            VALUES (${nuevoId('SS')}, ${s.raiz}, ${v.email}, 'pendiente', ${nuevoTestigo()}, ${consentimiento}, now(), ${origen})
+            INSERT INTO sitio_suscriptores (id, raiz_id, email, estado, token_baja, consentimiento_texto, consentimiento_at, origen, confirmado_at)
+            VALUES (${nuevoId('SS')}, ${s.raiz}, ${v.email}, 'confirmado', ${nuevoTestigo()}, ${consentimiento}, now(), ${origen}, now())
           `);
+          nueva = true;
         } catch (er: any) {
           // Dos altas a la vez con el mismo correo: gana una y la otra la lee.
           if (er?.code !== '23505' && er?.cause?.code !== '23505') throw er;
         }
         fila = await leer();
       } else if (fila.estado === 'pendiente') {
-        // Lo vuelve a pedir: vale el consentimiento de ahora.
+        // Quien quedó pendiente con la doble confirmación de antes y lo vuelve a pedir: vale el consentimiento de ahora.
         await db.execute(sql`
-          UPDATE sitio_suscriptores SET consentimiento_texto = ${consentimiento}, consentimiento_at = now(), origen = COALESCE(${origen}, origen), updated_at = now()
+          UPDATE sitio_suscriptores SET estado = 'confirmado', confirmado_at = now(), consentimiento_texto = ${consentimiento}, consentimiento_at = now(), origen = COALESCE(${origen}, origen), updated_at = now()
           WHERE id = ${fila.id}
         `);
+        nueva = true;
       }
       if (!fila) throw new Error('el alta no se ha guardado');
 
-      // SIN CORREO: guardado y pendiente de confirmar, y la pantalla no dice que haya salido nada.
-      if (!d.hayCorreo()) return contestar(req, res, 200, { ok: true, resultado: 'guardado' }, 'guardado');
-      // Un correo cada diez minutos como mucho a la misma dirección: nadie puede usar este formulario para llenarle el buzón a otro.
-      if (fila.correo_enviado_at && Date.now() - new Date(fila.correo_enviado_at).getTime() < ENTRE_CORREOS_MS) {
-        return contestar(req, res, 200, { ok: true, resultado: 'reciente' }, 'reciente');
+      // El aviso a administración, sin hacer esperar a quien se suscribe.
+      if (nueva && d.hayCorreo() && s.contacto) {
+        const c = correoAltaBoletin(s, v.email, `https://humanity.wiki/paginas/${encodeURIComponent(s.raiz)}/formularios`);
+        void d.enviar({ para: s.contacto, asunto: c.asunto, texto: c.texto, html: c.html, remitente: remitenteConNombre(s.nombre) })
+          .catch((er: any) => console.error('formularios: aviso de alta', er?.message || er));
       }
-      const base = await d.direccion(req, s.raiz);
-      if (!base) return contestar(req, res, 200, { ok: true, resultado: 'guardado' }, 'guardado');
-      const enviado = await mandarConfirmacion(s, fila, v.email, base);
-      return contestar(req, res, 200, { ok: true, resultado: enviado ? 'enviado' : 'fallo' }, enviado ? 'enviado' : 'fallo');
+      // La misma respuesta si ya estaba: el formulario no dice si una dirección está apuntada.
+      return contestar(req, res, 200, { ok: true, resultado: 'suscrito' }, 'suscrito');
     } catch (e: any) {
       console.error('formularios: boletín', e);
       contestar(req, res, 500, { error: 'No hemos podido guardar tu suscripción. Inténtalo de nuevo dentro de un momento.' });
