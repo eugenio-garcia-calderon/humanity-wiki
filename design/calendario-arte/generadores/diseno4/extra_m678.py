@@ -613,3 +613,95 @@ def cabeza2(lz, x, y, r, piel='piel2', pelo='#5a3a2a', peinado='corto', giro=0.0
     lz.contorno(face, lp, grosor=0.75, presion=0.45, cortes=0.4, desfase=0.3,
                 solo=(x - r * 2, y + r * 0.1, x + r * 2, y + r * 2))
     return R(fx, ey)
+
+
+# ---------------------------------------------------------------- moving a whole group
+
+class _FormaDesplazada:
+    """A shape moved by (dx, dy) base units (wraps any acuarela Forma)."""
+
+    def __init__(self, forma, dx, dy):
+        self.f, self.dx, self.dy = forma, dx, dy
+
+    def bbox(self):
+        b = self.f.bbox()
+        return b[0] + self.dx, b[1] + self.dy, b[2] + self.dx, b[3] + self.dy
+
+    def mascara(self, lz, x0, y0, x1, y1):
+        ox, oy = int(round(self.dx * lz.s)), int(round(self.dy * lz.s))
+        return self.f.mascara(lz, x0 - ox, y0 - oy, x1 - ox, y1 - oy)
+
+    def __or__(self, o):
+        from acuarela import _Op
+        return _Op(self, o, 'u')
+
+    def __sub__(self, o):
+        from acuarela import _Op
+        return _Op(self, o, 'r')
+
+    def __and__(self, o):
+        from acuarela import _Op
+        return _Op(self, o, 'i')
+
+
+class Desplazado:
+    """A view of a Lienzo that paints everything moved by (dx, dy) base units,
+    so a whole group (a table with its people, a tree) can be recomposed
+    without rewriting its coordinates. Pass it wherever `lz` is expected."""
+
+    def __init__(self, lz, dx=0.0, dy=0.0):
+        self._lz, self._dx, self._dy = lz, dx, dy
+
+    def __getattr__(self, k):
+        return getattr(self._lz, k)
+
+    def _f(self, forma):
+        return _FormaDesplazada(forma, self._dx, self._dy)
+
+    def _p(self, x, y):
+        return x + self._dx, y + self._dy
+
+    def aguada(self, forma, color, *a, **kw):
+        if kw.get('toques'):
+            kw['toques'] = [(t[0] + self._dx, t[1] + self._dy) + tuple(t[2:]) for t in kw['toques']]
+        if kw.get('desvanece') is not None:
+            x0, y0, x1, y1 = kw['desvanece']
+            kw['desvanece'] = (x0 + self._dx, y0 + self._dy, x1 + self._dx, y1 + self._dy)
+        return self._lz.aguada(self._f(forma), color, *a, **kw)
+
+    def lapiz(self, trazos, *a, **kw):
+        d = np.array([self._dx, self._dy])
+        return self._lz.lapiz([np.asarray(t, np.float64) + d for t in trazos], *a, **kw)
+
+    def contorno(self, forma, *a, **kw):
+        if kw.get('solo') is not None:
+            x0, y0, x1, y1 = kw['solo']
+            kw['solo'] = (x0 + self._dx, y0 + self._dy, x1 + self._dx, y1 + self._dy)
+        return self._lz.contorno(self._f(forma), *a, **kw)
+
+    def rayado(self, forma, *a, **kw):
+        if kw.get('desvanece') is not None:
+            x0, y0, x1, y1 = kw['desvanece']
+            kw['desvanece'] = (x0 + self._dx, y0 + self._dy, x1 + self._dx, y1 + self._dy)
+        return self._lz.rayado(self._f(forma), *a, **kw)
+
+    def luz(self, forma_o_xyr, *a, **kw):
+        if isinstance(forma_o_xyr, tuple):
+            x, y, r = forma_o_xyr
+            return self._lz.luz((*self._p(x, y), r), *a, **kw)
+        return self._lz.luz(self._f(forma_o_xyr), *a, **kw)
+
+    def gouache(self, forma, *a, **kw):
+        return self._lz.gouache(self._f(forma), *a, **kw)
+
+    def levanta(self, forma, *a, **kw):
+        return self._lz.levanta(self._f(forma), *a, **kw)
+
+    def collage(self, forma, *a, **kw):
+        return self._lz.collage(self._f(forma), *a, **kw)
+
+    def brillo(self, cx, cy, *a, **kw):
+        return self._lz.brillo(*self._p(cx, cy), *a, **kw)
+
+    def chispas(self, cx, cy, *a, **kw):
+        return self._lz.chispas(*self._p(cx, cy), *a, **kw)

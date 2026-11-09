@@ -396,11 +396,11 @@ pelo = Poligono([(1232, 426), (1262, 418), (1300, 432), (1340, 426), (1372, 444)
 lz.aguada(pelo, '#3a2418', dens=0.8, tapa=1, borde=0.6, gran=0.4, irreg=0.6)
 lz.lapiz([bezier((1250, 434), (1300, 426), (1366, 442)), bezier((1252, 444), (1310, 442), (1350, 450)),
           bezier((1260, 428), (1310, 418), (1338, 428))], '#1e120c', grosor=0.6, presion=0.45, temblor=0.4)
-lz.aguada(Elipse(1266, 700, 30, 5), '#9a8070', dens=0.6, suave=2)
+lz.aguada(Elipse(1264, 693, 32, 4.5), '#9a8070', dens=0.55, suave=2)
 lz.aguada(Elipse(1050, 778, 110, 10), '#a0a07a', dens=0.3, suave=8)
 # legs together, heels up
-pierna2(lz, (1262, 562), (1258, 626), (1256, WY - 10), 19, None, PM, pie_ang=118, descalzo=True, sombra=-1, pie_tam=18)
-pierna2(lz, (1276, 562), (1276, 628), (1272, WY - 12), 19, None, PM, pie_ang=62, descalzo=True, sombra=1, pie_tam=18)
+pierna2(lz, (1262, 562), (1258, 626), (1254, WY - 16), 19, None, PM, pie_ang=158, descalzo=True, sombra=-1, pie_tam=24)
+pierna2(lz, (1276, 562), (1276, 628), (1274, WY - 16), 19, None, PM, pie_ang=22, descalzo=True, sombra=1, pie_tam=24)
 # arms overhead, bending the whole body into a curve toward the left
 brazo2(lz, (1270, 466), (1252, 410), (1218, 364), 13, '#6fb1ad', PM, 'sin', sombra=1,
        mano=dict(ang=-135, gesto='abierta', lado=-1, tam=20, abre=0.4))
