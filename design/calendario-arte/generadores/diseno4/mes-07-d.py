@@ -425,7 +425,10 @@ jarra = Poligono([J(-5, -24), J(5, -24), J(8, -15), J(17, -4), J(17, 10), J(9, 1
 lz.aguada(jarra, '#c0603a', dens=0.85, tapa=1, borde=0.7, irreg=0.3, toques=[(*J(-7, 2), 10, '#e8a060', 0.6), (*J(10, 12), 10, '#8a3a22', 0.6)])
 lz.aguada(Trazo([J(-12, 2), J(0, 5), J(12, 2)], (3.5, 3.5, 3.5)), '#f6efe0', dens=0.7, irreg=0.2)
 lz.contorno(jarra, '#7a3a22', grosor=0.8, presion=0.55, cortes=0.1)
-lz.aguada(Poligono([J(-5, -24), J(-12, -29), J(-3, -27), J(5, -24)], suave=False), '#c0603a', dens=0.85, tapa=1)
+pico = Poligono([J(-7, -21), J(-17, -33), J(-3, -29), J(7, -23)], suave=False)
+lz.aguada(pico, '#c0603a', dens=0.88, tapa=1, irreg=0.2)
+lz.contorno(pico, '#7a3a22', grosor=0.7, presion=0.55)
+lz.lapiz([[J(-8, -24), J(8, -24)]], '#7a3a22', grosor=0.8, presion=0.6)
 mano2(lz, *J(24, 2), -160, 27, PG, 'agarra', lado=-1)
 
 # --- the girl, sitting on the near side with her back to us, turns to him and holds out her glass
@@ -450,7 +453,7 @@ lz.aguada(vaso, '#cfe8ec', dens=0.45, tapa=1, irreg=0.2, toques=[(VASO[0], VASO[
 lz.contorno(vaso, '#5a9aa0', grosor=0.7, presion=0.6, cortes=0.05)
 lz.gouache(Trazo([(VASO[0] - 5, VASO[1] - 19), (VASO[0] - 5, VASO[1] - 3)], (1.0, 0.8)), '#ffffff', alfa=0.8, irreg=0)
 mano2(lz, 1150, 646, -40, 21, PN, 'agarra', lado=1)
-sx_, sy_ = J(-12, -29)
+sx_, sy_ = J(-17, -33)
 chorro = Trazo([(sx_, sy_), (sx_ - 1, sy_ + 8), (VASO[0] + 1, VASO[1] - 19)], (4.2, 3.8, 3.4))
 lz.aguada(chorro, '#6fb0d0', dens=0.8, irreg=0.2, borde=0.8)
 lz.gouache(Trazo([(sx_ - 1, sy_ + 3), (sx_ - 4, sy_ + 12)], (1.1, 0.8)), '#ffffff', alfa=0.85, irreg=0)
