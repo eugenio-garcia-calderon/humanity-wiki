@@ -43,6 +43,7 @@ import { VEHICULOS_GARAJE } from '../components/aeromovil/garaje';
 import { TarjetaTunel, gastoEnRuedas, VELOCIDADES, type FilaTunel } from '../components/aeromovil/TarjetaTunel';
 import { cuerpoAeromovil, cuerpoGaraje, type CuerpoTunel } from '../components/aeromovil/tunel/cuerpos';
 import { opcionesPorDefecto, useResultadosTunel, type OpcionesTunel } from '../components/aeromovil/tunel/cliente';
+import { PanelPunto, type SeleccionPunto } from '../components/aeromovil/tunel/PanelPunto';
 import { TarjetaSuperponer, type Alineacion } from '../components/aeromovil/TarjetaSuperponer';
 import { colorCss } from '../components/aeromovil/garaje/superponer';
 import { DEPARTAMENTOS, type IdDepartamento } from '../components/aeromovil/departamentos';
@@ -660,6 +661,9 @@ export default function Aeromovil() {
     ...garajeVisor.flatMap(v => { const c = cuerpoGaraje(v); return c ? [c] : []; }),
   ], [tunel, soloGaraje, modelo, res.A, esA1, garajeVisor]);
   const resultadosTunel = useResultadosTunel(cuerposTunel, opcionesTunel.resolucion, opcionesTunel.lineas);
+  // El punto crítico cuya explicación está abierta (2026-11-09, Eugenio: «una explicación de cada uno de estos parámetros cuando se hace click»).
+  const [puntoTunel, setPuntoTunel] = useState<SeleccionPunto | null>(null);
+  useEffect(() => { if (!tunel) setPuntoTunel(null); }, [tunel]);
   // Carteles encima de cada coche (2026-11-07, Eugenio: «que aparezca con un botón el Cd y consumo en kWh a los 100 km de cada uno»).
   const carteles = useMemo(() => {
     if (!tunel && !verConsumo) return undefined;
@@ -770,7 +774,7 @@ export default function Aeromovil() {
         <section ref={ventana3d} aria-label="Vista 3D" className={cn('overflow-hidden bg-slate-50',
           completa === 'no' ? cn('relative h-[62vh] min-h-[380px] rounded-xl border border-slate-200', esA1 ? 'lg:h-[72vh]' : 'lg:sticky lg:top-[68px] lg:h-[calc(100vh-88px)]')
             : completa === 'css' ? 'fixed inset-0 z-[100] h-[100dvh] w-screen' : 'relative h-full w-full')}>
-          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeVisor} soloGaraje={!!soloGaraje} tunel={tunel} carteles={carteles} cuerposTunel={cuerposTunel} opcionesTunel={opcionesTunelVisor} alMoverGaraje={superponer || soloGaraje ? undefined : (id, x, z) => setGaraje(g => g.map(v => v.id === id ? { ...v, x, z } : v))} superponer={!!superponer && !soloGaraje} vista={vista}
+          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeVisor} soloGaraje={!!soloGaraje} tunel={tunel} carteles={carteles} cuerposTunel={cuerposTunel} opcionesTunel={opcionesTunelVisor} alElegirPuntoTunel={setPuntoTunel} puntoTunel={puntoTunel} alMoverGaraje={superponer || soloGaraje ? undefined : (id, x, z) => setGaraje(g => g.map(v => v.id === id ? { ...v, x, z } : v))} superponer={!!superponer && !soloGaraje} vista={vista}
             referencia={referencia} modoRef={modoRef} alinear={alinear} alPinchar={esA1 ? c => { navegar(`/aeromovil/componentes/${c}`); window.scrollTo({ top: 0 }); } : undefined} />
           {/* La esquina de arriba a la derecha es del botón de pantalla completa: las tarjetas se apartan a su izquierda
               (en el móvil, debajo, que de ancho no caben). */}
@@ -780,6 +784,12 @@ export default function Aeromovil() {
             className="absolute right-3 top-3 z-[15] bg-white px-1.5 py-1.5 shadow-sm">
             {completa !== 'no' ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </Button>
+          {/* La explicación de un punto del túnel va dentro de la ventana 3D: así también se ve en pantalla completa. */}
+          {tunel && puntoTunel && (
+            <PanelPunto sel={puntoTunel} cuerpos={cuerposTunel} resultados={resultadosTunel} kmh={kmhComparar} resolucion={opcionesTunel.resolucion}
+              P={P} puedeDecidir={!!dueno?.puedeDecidir} alCerrar={() => setPuntoTunel(null)} alElegir={setPuntoTunel}
+              className="absolute inset-x-2 bottom-2 top-12 sm:inset-x-auto sm:bottom-24 sm:right-3 sm:w-[400px]" />
+          )}
           {superponer && !soloGaraje && (
             <TarjetaSuperponer alineacion={superponer} alCambiar={setSuperponer} alAlternar={id => setGaraje(g => g.map(x => x.id === id ? { ...x, visible: !x.visible } : x))} alCerrar={() => setSuperponer(null)} className={referencia && modoRef !== 'no' ? 'right-3 top-40 sm:right-[52px] sm:top-28' : 'right-3 top-12 sm:right-[52px] sm:top-3'}
               filas={[
@@ -935,7 +945,13 @@ export default function Aeromovil() {
         </section>
         {/* El túnel abre su tarjeta debajo del visor, no encima (2026-11-07, Eugenio: «que no estorbe»). */}
         {tunel && <TarjetaTunel alCerrar={() => setTunel(false)} base="aeromovil" kmh={kmhComparar} alCambiarKmh={setKmhComparar} filas={filasComparar} className="mt-3"
-          cuerpos={cuerposTunel} resultados={resultadosTunel} opciones={opcionesTunel} alCambiarOpciones={setOpcionesTunel} />}
+          cuerpos={cuerposTunel} resultados={resultadosTunel} opciones={opcionesTunel} alCambiarOpciones={setOpcionesTunel}
+          punto={puntoTunel} alElegirPunto={s => {
+            setPuntoTunel(s);
+            // the explanation opens in the 3D view: bring it into sight below the sticky header (tall on a phone)
+            const v = ventana3d.current, cab = document.querySelector('header')?.getBoundingClientRect().bottom ?? 0;
+            if (v) window.scrollTo({ top: window.scrollY + v.getBoundingClientRect().top - cab - 8, behavior: 'smooth' });
+          }} />}
         {esA1 && <PanelDepartamento d={DEPARTAMENTOS.find(x => x.id === dep)!} P={P} res={res} modelo={modelo} />}
         </div>
 

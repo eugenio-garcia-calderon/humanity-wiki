@@ -33,7 +33,7 @@ import { GIRO_A1, suspensionA1 } from './geometriaA1';
 import type { Referencia } from './referencias';
 import { vehiculoGaraje } from './garaje';
 import { colorSuperpuesto, hacerFantasma, liberarFantasma, mostrarSiluetas, siluetas } from './garaje/superponer';
-import { cartel, crearTunel, type CuerpoTunel, type Tunel } from './tunelViento';
+import { cartel, crearTunel, type CuerpoTunel, type SeleccionTunel, type Tunel } from './tunelViento';
 import type { OpcionesTunel } from './tunel/cliente';
 
 /** Las capas. `solo` limita una capa a un vehículo: la dirección y la transmisión son del Aeromóvil 1. */
@@ -87,6 +87,10 @@ interface Props {
   cuerposTunel?: CuerpoTunel[];
   /** Resolución, líneas, qué se ve y a qué velocidad (la separación y la estela dependen de ella). */
   opcionesTunel?: OpcionesTunel;
+  /** Al pinchar (o tocar) el cartel de un punto crítico del túnel: qué cuerpo y qué punto. */
+  alElegirPuntoTunel?: (s: SeleccionTunel) => void;
+  /** El punto del túnel cuya explicación está abierta (su cartel se ve más grande). */
+  puntoTunel?: SeleccionTunel | null;
   vista: Vista;
   /** Al pinchar en una pieza: su componente (para ir a su página). */
   alPinchar?: (componente: string) => void;
@@ -1148,8 +1152,9 @@ function construirReferencia(g: THREE.Group, M: Mats, r: Referencia, fantasma: b
   g.traverse((o: any) => { if (o.isMesh && o.material?.isMaterial) (o as any).userData.ref = true; });
 }
 
-export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cuerposTunel, opcionesTunel, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje }, ref) {
+export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cuerposTunel, opcionesTunel, alElegirPuntoTunel, puntoTunel = null, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje }, ref) {
   const pinchar = useRef(alPinchar); pinchar.current = alPinchar;
+  const elegirPunto = useRef(alElegirPuntoTunel); elegirPunto.current = alElegirPuntoTunel;
   const moverGaraje = useRef(alMoverGaraje); moverGaraje.current = alMoverGaraje;
   const lienzo = useRef<HTMLCanvasElement>(null);
   const estado = useRef<any>(null);
@@ -1313,11 +1318,15 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     let bajada: [number, number] | null = null;
     const alBajar = (e: PointerEvent) => { bajada = [e.clientX, e.clientY]; };
     const alSoltar = (e: PointerEvent) => {
-      if (!bajada || Math.hypot(e.clientX - bajada[0], e.clientY - bajada[1]) > 6 || !pinchar.current) { bajada = null; return; }
+      if (!bajada || Math.hypot(e.clientX - bajada[0], e.clientY - bajada[1]) > 6 || !(pinchar.current || (st.tunel && elegirPunto.current))) { bajada = null; return; }
       bajada = null;
       const r = cv.getBoundingClientRect();
       ptr.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
       ray.setFromCamera(ptr, camera);
+      // Túnel (2026-11-09): el cartel de un punto crítico abre su explicación, y gana a la pieza que tenga detrás.
+      const punto = st.tunel && elegirPunto.current ? st.tunel.elegir(ray) : null;
+      if (punto) { elegirPunto.current!(punto); return; }
+      if (!pinchar.current) return;
       const vis: THREE.Object3D[] = [];
       coche.traverse((o: any) => { if (o.isMesh && o.visible && o.userData.componente) { let p = o.parent, ok = true; while (p && p !== coche) { if (!p.visible) { ok = false; break; } p = p.parent; } if (ok) vis.push(o); } });
       const hit = ray.intersectObjects(vis, false).find(h => !(h.object as any).material?.transparent || ((h.object as any).material.opacity ?? 1) > 0.3) ?? ray.intersectObjects(vis, false)[0];
@@ -1332,6 +1341,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     const empezarArrastre = (e: PointerEvent) => {
       if (!moverGaraje.current || e.button !== 0 || !grupoGaraje.children.length) return;
       rayoDesde(e);
+      if (st.tunel?.elegir(ray)) return; // a tunnel label in front of the car: it is a click on the label, not a drag
       // Primero la caja de cada coche (barato) y solo después sus triángulos.
       const candidatos = grupoGaraje.children.filter(c => ray.ray.intersectsBox(cajaTmp.setFromObject(c)));
       const hit = candidatos.length ? ray.intersectObjects(candidatos, true).find(h => (h.object as any).isMesh && h.object.visible) : undefined;
@@ -1356,6 +1366,13 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     };
     cv.addEventListener('pointerdown', empezarArrastre, { capture: true });
     cv.addEventListener('pointermove', moverArrastre); cv.addEventListener('pointerup', soltarArrastre); cv.addEventListener('pointercancel', soltarArrastre);
+    // Túnel: la mano sobre un cartel que se puede pinchar.
+    const sobreCartel = (e: PointerEvent) => {
+      if (arrastre || e.buttons || e.pointerType !== 'mouse' || !st.tunel) return;
+      rayoDesde(e); const encima = !!st.tunel.elegir(ray);
+      if (encima) cv.style.cursor = 'pointer'; else if (cv.style.cursor === 'pointer') cv.style.cursor = '';
+    };
+    cv.addEventListener('pointermove', sobreCartel);
     const bucle = (ahora: number) => {
       const dt = Math.min(0.05, (ahora - ultimo) / 1000); ultimo = ahora;
       if (st.tween) {
@@ -1392,6 +1409,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       cv.removeEventListener('pointerdown', alBajar); cv.removeEventListener('pointerup', alSoltar);
       cv.removeEventListener('pointerdown', empezarArrastre, { capture: true });
       cv.removeEventListener('pointermove', moverArrastre); cv.removeEventListener('pointerup', soltarArrastre); cv.removeEventListener('pointercancel', soltarArrastre);
+      cv.removeEventListener('pointermove', sobreCartel);
       scene.traverse((o: any) => { o.geometry?.dispose?.(); });
       M.solar.map?.dispose();
       vivo = false; entornoRT.dispose();
@@ -1474,6 +1492,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tunel, claveTunel]);
   useEffect(() => { if (opcionesTunel) estado.current?.tunel?.ajustar(opcionesTunel); }, [opcionesTunel, claveTunel]);
+  useEffect(() => { estado.current?.tunel?.resaltar(puntoTunel); }, [puntoTunel?.cuerpo, puntoTunel?.punto, claveTunel]);
   // «Cd y consumo»: un cartel encima de cada coche (con el túnel abierto los pone el túnel).
   const claveCarteles = !tunel && carteles ? JSON.stringify(carteles) + garaje.map(v => `${v.id}@${v.x},${v.z},${v.giro ?? 0}`).join('|') + (soloGaraje ? '|solo' : '') : '';
   useEffect(() => {

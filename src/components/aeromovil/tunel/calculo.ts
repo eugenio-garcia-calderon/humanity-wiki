@@ -26,9 +26,18 @@ export interface PeticionTunel {
   ruedas: RuedaTunel[];
   /** Front and rear axle x (m), to split the lift. */
   ejes: [number, number];
+  /** Numbers only: no streamlines (for «Probar», which only shows figures). */
+  soloNumeros?: boolean;
 }
 
-export interface PuntoCritico { p: [number, number, number]; cp: number; tipo: 'remanso' | 'succion'; nombre: string }
+/** Where on the body a point sits: on top, underneath, on the side, or at the nose/tail tip. */
+export type Zona = 'arriba' | 'bajos' | 'costado' | 'punta';
+export interface PuntoCritico {
+  p: [number, number, number]; cp: number; tipo: 'remanso' | 'succion'; nombre: string;
+  zona: Zona;
+  /** Fraction of the length from the nose (0) to the tail (1). */
+  f: number;
+}
 export interface Perfil { x: number[]; cp: number[] }
 
 export interface PorVelocidad {
@@ -66,10 +75,14 @@ export interface ResultadoTunel {
 
 /** A short, stable key for the cache: same silhouette + options → same result. */
 export function claveTunel(p: PeticionTunel): string {
-  const s = JSON.stringify([p.envolvente.map(e => e.map(v => Math.round(v * 1000))), p.n, p.resolucion, p.lineas, Math.round(p.area * 1000), p.ruedas, p.ejes]);
+  const s = JSON.stringify([p.envolvente.map(e => e.map(v => Math.round(v * 1000))), p.n, p.resolucion, p.lineas, Math.round(p.area * 1000), p.ruedas, p.ejes, !!p.soloNumeros]);
   let h1 = 0x811c9dc5, h2 = 0x1234567;
   for (let i = 0; i < s.length; i++) { const c = s.charCodeAt(i); h1 = Math.imul(h1 ^ c, 16777619); h2 = Math.imul(h2 ^ c, 2246822519); }
   return `${p.id}:${(h1 >>> 0).toString(36)}${(h2 >>> 0).toString(36)}:${p.resolucion}:${p.lineas}`;
+}
+
+function zonaDe(ny: number, nz: number): Zona {
+  return ny < -0.55 ? 'bajos' : ny > 0.55 ? 'arriba' : Math.abs(nz) > 0.5 ? 'costado' : 'punta';
 }
 
 /** Names a suction peak by where it sits on the body. */
@@ -116,7 +129,8 @@ export function calcularTunel(P: PeticionTunel): ResultadoTunel {
   // ---- critical points: stagnation and suction peaks (local minima of panel Cp)
   const criticos: PuntoCritico[] = [];
   const rem = remansoDelantero(C, S);
-  criticos.push({ p: [M.c[3 * rem], M.c[3 * rem + 1], M.c[3 * rem + 2]], cp: S.cp[rem], tipo: 'remanso', nombre: 'Punto de remanso' });
+  const fDe = (x: number) => (C.xMorro - x) / C.largo;
+  criticos.push({ p: [M.c[3 * rem], M.c[3 * rem + 1], M.c[3 * rem + 2]], cp: S.cp[rem], tipo: 'remanso', nombre: 'Punto de remanso', zona: 'punta', f: fDe(M.c[3 * rem]) });
   const minimos: number[] = [];
   for (let i = 1; i < nI - 1; i++) for (let j = 0; j < nJ; j++) {
     const p = i * nJ + j, v = S.cp[p];
@@ -139,7 +153,7 @@ export function calcularTunel(P: PeticionTunel): ResultadoTunel {
     if (elegidos.some(q => Math.hypot(M.c[3 * p] - M.c[3 * q], M.c[3 * p + 1] - M.c[3 * q + 1], M.c[3 * p + 2] - M.c[3 * q + 2]) < 0.35)) continue;
     elegidos.push(p);
   }
-  for (const p of elegidos) criticos.push({ p: [M.c[3 * p], M.c[3 * p + 1], M.c[3 * p + 2]], cp: S.cp[p], tipo: 'succion', nombre: nombreSuccion(C, M.c[3 * p], M.nor[3 * p + 1], M.nor[3 * p + 2]) });
+  for (const p of elegidos) criticos.push({ p: [M.c[3 * p], M.c[3 * p + 1], M.c[3 * p + 2]], cp: S.cp[p], tipo: 'succion', nombre: nombreSuccion(C, M.c[3 * p], M.nor[3 * p + 1], M.nor[3 * p + 2]), zona: zonaDe(M.nor[3 * p + 1], M.nor[3 * p + 2]), f: fDe(M.c[3 * p]) });
 
   // ---- centreline profiles: top (last column), bottom (first) and the most sideways column at the largest section
   const perfil = (j: number): Perfil => { const x: number[] = [], cp: number[] = []; for (let i = 0; i < nI; i++) { x.push(M.c[3 * (i * nJ + j)]); cp.push(S.cp[i * nJ + j]); } return { x, cp }; };
@@ -205,7 +219,7 @@ export function calcularTunel(P: PeticionTunel): ResultadoTunel {
     const r = Math.pow(Math.pow(Math.abs(z) / s.b, C.n) + Math.pow(Math.abs(y - s.yc) / s.a, C.n), 1 / C.n);
     return Math.max(0, (r - 1) * Math.min(s.a, s.b));
   };
-  for (let iy = 0; iy < lin.ny; iy++) for (let iz = 0; iz < lin.nz; iz++) {
+  if (!P.soloNumeros) for (let iy = 0; iy < lin.ny; iy++) for (let iz = 0; iz < lin.nz; iz++) {
     let x = xIni, y = 0.05 + (techo + 0.3 - 0.05) * (iy / (lin.ny - 1)), z = iz === 0 ? 0 : (bM + 0.3) * (iz / (lin.nz - 1));
     inicio.push(ps.length / 3); centro.push(iz === 0 ? 1 : 0);
     for (let it = 0; it < 700 && x > xFin; it++) {

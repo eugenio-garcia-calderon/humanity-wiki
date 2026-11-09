@@ -34,7 +34,9 @@ export const EXPOSICION: Record<TipoRueda, number> = {
  * ONE set of constants for every car.
  *  · K_BASE 0.2: base-pressure coefficient (−Cpb) typical of rounded and cut-off
  *    car tails (Hucho, «Aerodynamics of Road Vehicles», 1998). Not fitted: fitting
- *    it together with DCD_DETALLES gives 0.165, close, on four cars only.
+ *    it together with DCD_DETALLES is unstable on four cars: 0.165 in the first run,
+ *    0.080 after the XL1 and 1-Litre silhouettes were rebuilt the same day
+ *    (scripts/tunel-pruebas.ts prints it each time).
  *  · K_RUEDA 0.58: isolated rotating wheel (Fackrell & Harvey, 1975). Not fitted.
  *  · DCD_DETALLES: fitted on 2026-11-09 by scripts/tunel-pruebas.ts on the four
  *    closed garage cars with a published Cd (XL1, 1-Litro, SZEmission, Aptera),

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { calcularTunel, claveTunel, type CantidadLineas, type PeticionTunel, type ResultadoTunel } from './calculo';
-import { peticionDe, type CuerpoTunel } from './cuerpos';
+import { peticionDe, type CuerpoTunel } from './nuestro';
 import type { Resolucion } from './malla';
+import type { Parametros } from '../geometria';
 
 /**
  * Main-thread side of the tunnel: one Web Worker, a queue (our design first,
@@ -29,7 +30,11 @@ export function opcionesPorDefecto(): OpcionesTunel {
 
 const cache = new Map<string, ResultadoTunel>();
 const esperando = new Map<string, Promise<ResultadoTunel | null>>();
-type Trabajo = { clave: string; peticion: PeticionTunel; prioridad: number; resolver: (r: ResultadoTunel | null) => void };
+/** What «Probar» gets back: the tunnel on the modified copy, its frontal area and the editor's Cd for it. */
+export interface ResultadoPrueba { R: ResultadoTunel; A: number; cdEditor: number; msModelo: number; msTotal: number }
+const pruebas = new Map<string, ResultadoPrueba>();
+const esperandoPrueba = new Map<string, Promise<ResultadoPrueba | null>>();
+type Trabajo = { clave: string; prioridad: number; peticion?: PeticionTunel; prueba?: { P: Parametros; resolucion: Resolucion }; resolver: (r: any) => void; t0?: number };
 const cola: Trabajo[] = [];
 let trabajador: Worker | null | undefined;
 let ocupado: Trabajo | null = null, numero = 0;
@@ -39,7 +44,7 @@ function obtenerTrabajador(): Worker | null {
   if (trabajador !== undefined) return trabajador;
   try {
     trabajador = new Worker(new URL('./tunel.worker.ts', import.meta.url), { type: 'module' });
-    trabajador.onmessage = (e: MessageEvent<{ n: number; resultado?: ResultadoTunel; error?: string }>) => terminar(e.data.resultado ?? null, e.data.error);
+    trabajador.onmessage = (e: MessageEvent<{ n: number; resultado?: ResultadoTunel; prueba?: Omit<ResultadoPrueba, 'msTotal'>; error?: string }>) => terminar(e.data.resultado ?? e.data.prueba ?? null, e.data.error);
     trabajador.onerror = e => { console.error('[túnel] el trabajador falló:', e.message); trabajador?.terminate(); trabajador = null; terminar(null, e.message); };
   } catch (e) {
     console.warn('[túnel] sin Web Worker; se calcula en el hilo principal', e);
@@ -48,12 +53,18 @@ function obtenerTrabajador(): Worker | null {
   return trabajador;
 }
 
-function terminar(r: ResultadoTunel | null, error?: string) {
+function terminar(r: ResultadoTunel | Omit<ResultadoPrueba, 'msTotal'> | null, error?: string) {
   const t = ocupado; ocupado = null;
   if (t) {
-    if (r) { cache.set(t.clave, r); if (cache.size > 40) cache.delete(cache.keys().next().value!); }
-    else console.error(`[túnel] no se pudo calcular «${t.peticion.id}»:`, error);
-    esperando.delete(t.clave); t.resolver(r);
+    if (!r) console.error(`[túnel] no se pudo calcular «${t.peticion?.id ?? 'prueba'}»:`, error);
+    if (t.prueba) {
+      const out = r ? { ...(r as Omit<ResultadoPrueba, 'msTotal'>), msTotal: performance.now() - (t.t0 ?? 0) } : null;
+      if (out) { pruebas.set(t.clave, out); if (pruebas.size > 60) pruebas.delete(pruebas.keys().next().value!); }
+      esperandoPrueba.delete(t.clave); t.resolver(out);
+    } else {
+      if (r) { cache.set(t.clave, r as ResultadoTunel); if (cache.size > 40) cache.delete(cache.keys().next().value!); }
+      esperando.delete(t.clave); t.resolver(r);
+    }
   }
   avisos.forEach(f => f());
   siguiente();
@@ -63,13 +74,37 @@ function siguiente() {
   if (ocupado || !cola.length) return;
   cola.sort((a, b) => a.prioridad - b.prioridad);
   ocupado = cola.shift()!;
+  ocupado.t0 = performance.now();
   const w = obtenerTrabajador();
-  if (w) w.postMessage({ n: ++numero, peticion: ocupado.peticion });
+  if (w) w.postMessage({ n: ++numero, peticion: ocupado.peticion, prueba: ocupado.prueba });
   else {
     // Without a worker the calculation blocks the page for a moment: one body per tick.
     const t = ocupado;
-    setTimeout(() => { try { terminar(calcularTunel(t.peticion)); } catch (e) { terminar(null, String(e)); } }, 30);
+    setTimeout(async () => {
+      try {
+        if (t.prueba) {
+          const g = await import('../geometria'), nu = await import('./nuestro');
+          const m = g.crearModelo(g.ajustarCarenado(t.prueba.P)), res = g.calcular(m, g.areas(m));
+          terminar({ R: calcularTunel({ ...nu.peticionDe(nu.cuerpoAeromovil(m, res.A), t.prueba.resolucion, 'pocas'), soloNumeros: true }), A: res.A, cdEditor: res.Cd, msModelo: 0 });
+        } else terminar(calcularTunel(t.peticion!));
+      } catch (e) { terminar(null, String(e)); }
+    }, 30);
   }
+}
+
+/**
+ * «Probar»: the tunnel on a modified COPY of the design's parameters (numbers only).
+ * It never writes the parameters: the visitor's design, and what is saved, stay as they are.
+ */
+export function probarParametros(P: Parametros, resolucion: Resolucion): Promise<ResultadoPrueba | null> {
+  const clave = `prueba:${resolucion}:${JSON.stringify(P)}`;
+  const hecho = pruebas.get(clave); if (hecho) return Promise.resolve(hecho);
+  const ya = esperandoPrueba.get(clave); if (ya) return ya;
+  // the visitor asked for it: before the garage cars still waiting
+  const p = new Promise<ResultadoPrueba | null>(resolver => { cola.push({ clave, prueba: { P, resolucion }, prioridad: -1, resolver }); });
+  esperandoPrueba.set(clave, p);
+  siguiente();
+  return p;
 }
 
 /** The result for a body, from the cache or computed. A queued request for the same body with an older shape is dropped. */
@@ -78,7 +113,7 @@ export function pedirTunel(peticion: PeticionTunel, prioridad: number): Promise<
   const hecho = cache.get(clave); if (hecho) return Promise.resolve(hecho);
   const ya = esperando.get(clave); if (ya) return ya;
   // the same body with another shape or other options still waiting in the queue: it is stale
-  for (let i = cola.length - 1; i >= 0; i--) if (cola[i].peticion.id === peticion.id) {
+  for (let i = cola.length - 1; i >= 0; i--) if (cola[i].peticion?.id === peticion.id) {
     const [viejo] = cola.splice(i, 1); esperando.delete(viejo.clave); viejo.resolver(null);
   }
   const p = new Promise<ResultadoTunel | null>(resolver => { cola.push({ clave, peticion, prioridad, resolver }); });
