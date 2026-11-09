@@ -1229,3 +1229,11 @@ Chose (b): Eugenio asked for an explanation *of this value*, and the tags keep c
 **Head clearance.** The rider is a mannequin scaled to the ANSUR II 2012 sitting heights for men (91.8 cm at the 50th percentile, 97.7 cm at the 95th), trunk leaning 5° forward, no helmet. The 5° lean is an assumption, picked because it reproduces the 7 and 1 cm stated for the pilot.
 
 **Dragging.** Each slider step builds a quick model (half the rows, no small details) on the next frame. The full model follows 0.3 s after the last change.
+
+## 2026-11-09 — A team base design for the Bala in «Diseños»
+
+The editable Bala shipped with an entry in the «Vehículo» picker only. Eugenio looked for it in «Diseños», which lists rows of `aeromovil_disenos`. I had worded his choice as «un diseño más en "Diseños"», so the delivery did not match the promise, and the seam was mine.
+
+Migration 0178 adds a team base design, `{"disposicion": "bala"}`, following 0170 (Aeromóvil 1). `deDiseno` fills the rest from `PARAMETROS_BALA`. The insert is idempotent and checks only non-archived team rows.
+
+**Alternative not taken:** listing the three families as built-in entries in the menu, outside the database. It would duplicate what the base rows already do for the A1 and the Gota.
