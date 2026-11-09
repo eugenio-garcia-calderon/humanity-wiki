@@ -20,6 +20,11 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/examples/jsm/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+// Reflections of a real place (2026-11-09): «Rooitou Park» by Poly Haven (CC0, via pmndrs/drei-assets), a sunny
+// sky with a tree line. Its sun is painted out (the viewer adds its own, aligned with the shadow) and the grass
+// below the horizon is replaced by asphalt grey like the viewer's floor. Stored as an sRGB JPG of
+// radiance / ENTORNO_ESCALA (1024×512, 35 kB instead of the 1.6 MB .hdr).
+import entornoUrl from './entorno/parque.jpg';
 import {
   ARM_UP, CELULA, TIRE_W, TRAVEL_F, TRAVEL_R, enZona, tramosTubo,
   type Modelo, type ModeloGota, type ModeloA1, type Piel, type Superficie,
@@ -269,6 +274,8 @@ function texturaAsfalto() {
  * rincones, bajo el coche, entre piezas), el cristal con transmisión y el
  * antialias por multimuestreo; en móvil se queda lo de antes, que ya va justo.
  */
+/** The environment JPG stores radiance divided by this (with the sun painted out, the brightest sky is ~1.15). */
+const ENTORNO_ESCALA = 1.2;
 const CALIDAD_ALTA = typeof window !== 'undefined' && window.matchMedia?.('(pointer: fine)').matches && !/Mobi|Android/i.test(navigator.userAgent);
 
 function materiales() {
@@ -1148,7 +1155,9 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     const cv = lienzo.current!;
     const renderer = new THREE.WebGLRenderer({ canvas: cv, antialias: true, alpha: true, preserveDrawingBuffer: true });
     renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
-    renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
+    // Mapeo tonal neutro (Khronos PBR Neutral, 2026-11-09): el ACES de antes agrisaba los blancos y apagaba el azul
+    // marino y el verde inglés; este deja cada pintura de su color, como en una foto de producto.
+    renderer.toneMapping = THREE.NeutralToneMapping; renderer.toneMappingExposure = 1.0;
     renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.localClippingEnabled = true;
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(32, 1, 0.05, 100);
@@ -1183,16 +1192,40 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       return g;
     };
     const pm = new THREE.PMREMGenerator(renderer), es = new THREE.Scene(); es.add(cielo(true));
-    scene.environment = pm.fromScene(es, 0.02).texture;
+    let entornoRT = pm.fromScene(es, 0.02), vivo = true;
+    scene.environment = entornoRT.texture;
+    // Capa de reflejos (2026-11-09, Eugenio: «agrega capas a todos los vehículos para que sean un render más
+    // fotorrealista»): la pintura, el cristal y el cromo de todos los coches reflejan un sitio real, un cielo azul
+    // con una fila de árboles en el horizonte, en lugar de un degradado. El sol se añade encima para que siga
+    // dibujando el brillo alargado. Mientras llega la imagen (35 kB), se queda el cielo dibujado.
+    // Probado contra una plaza con edificios y cielo cubierto: agrisaba las pinturas y teñía de rojo las llantas.
+    const cargarEntorno = (url: string, escala: number, intensidad: number) => new THREE.TextureLoader().load(url, tex => {
+      if (!vivo) { tex.dispose(); return; }
+      tex.colorSpace = THREE.SRGBColorSpace;
+      const ee = new THREE.Scene();
+      ee.add(new THREE.Mesh(new THREE.SphereGeometry(60, 64, 32), new THREE.MeshBasicMaterial({ map: tex, side: THREE.BackSide, color: new THREE.Color(escala, escala, escala), fog: false })));
+      // Del cielo dibujado solo se quedan el sol y su halo (la bóveda la pone la foto).
+      const [boveda, ...soles] = cielo(true).children as THREE.Mesh[];
+      boveda.geometry.dispose(); (boveda.material as THREE.Material).dispose(); ee.add(...soles);
+      const nuevo = pm.fromScene(ee, 0.02);
+      entornoRT.dispose(); entornoRT = nuevo; scene.environment = nuevo.texture; scene.environmentIntensity = intensidad;
+      ee.traverse((o: any) => { o.geometry?.dispose(); o.material?.dispose(); }); tex.dispose();
+    });
+    // A 1,5: sin su sol, el cielo de la foto es más oscuro que el dibujado; a 1 las pinturas quedaban apagadas.
+    cargarEntorno(entornoUrl, ENTORNO_ESCALA, 1.5);
     const fondo = cielo(false); fondo.position.set(-1.5, 0, 0); scene.add(fondo);
     scene.fog = new THREE.Fog(0xf3dcc3, 16, 60);
 
     // Luz de exterior: cielo + sol cálido con sombra suave, y un contraluz frío que dibuja el canto de la cúpula.
     scene.add(new THREE.HemisphereLight(0xcfe0f5, 0x5a5751, 0.8));
     const sol = new THREE.DirectionalLight(0xffe9cf, 4.6); sol.position.set(3.5, 7, 4.5); sol.castShadow = true;
+    // Capa de sombras: la sombra del sol cubre todo lo que hay en escena, no solo los 10 m del centro (los coches
+    // del garaje a 9 y 12 m flotaban sin sombra). La caja se ajusta en `ajustarSombra`, más abajo.
+    // 2048 como antes: ajustada a lo que se ve, la sombra del Aeromóvil solo sale más fina (5 m en 2048 en vez de 10)
+    // y con el garaje entero (unos 26 m) queda en ~13 mm por punto, que con el borde suave no se nota.
     sol.shadow.mapSize.set(2048, 2048);
     Object.assign(sol.shadow.camera, { left: -5, right: 5, top: 4, bottom: -4, near: 1, far: 20 });
-    sol.shadow.bias = -0.0003; sol.shadow.normalBias = 0.01; scene.add(sol);
+    sol.shadow.bias = -0.0003; sol.shadow.normalBias = 0.01; scene.add(sol); scene.add(sol.target);
     const contraluz = new THREE.DirectionalLight(0xc9dcff, 1.2); contraluz.position.set(-6, 3, -5); scene.add(contraluz);
     // Suelo: asfalto claro con grano, que se funde con el fondo a lo lejos, y la sombra encima.
     // (el suelo recibe la sombra del coche; se desvanece hacia el borde con un alfa radial)
@@ -1207,6 +1240,28 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     const grupoRef = new THREE.Group(); grupoRef.visible = false; scene.add(grupoRef);
     const grupoGaraje = new THREE.Group(); scene.add(grupoGaraje);
     const puertasG = new Map<string, THREE.Group[]>();
+    // La caja de la sombra, ajustada a lo que se ve: el Aeromóvil, el otro velomóvil y los coches del garaje.
+    const DIR_SOL = new THREE.Vector3(3.5, 7, 4.5).normalize(), caja = new THREE.Box3(), cajaUna = new THREE.Box3();
+    const camLuz = new THREE.OrthographicCamera(), esquina = new THREE.Vector3(), centro = new THREE.Vector3(), medida = new THREE.Vector3();
+    const ajustarSombra = () => {
+      caja.makeEmpty();
+      for (const o of [coche, grupoRef, grupoGaraje]) if (o.visible) { cajaUna.setFromObject(o); if (!cajaUna.isEmpty()) caja.union(cajaUna); }
+      if (caja.isEmpty()) return;
+      caja.min.y = 0;
+      caja.getCenter(centro); const radio = caja.getSize(medida).length() / 2;
+      sol.target.position.copy(centro); sol.position.copy(centro).addScaledVector(DIR_SOL, radio + 10);
+      sol.target.updateMatrixWorld(); sol.updateMatrixWorld();
+      camLuz.position.copy(sol.position); camLuz.lookAt(centro); camLuz.updateMatrixWorld();
+      let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity, z0 = Infinity, z1 = -Infinity;
+      for (let i = 0; i < 8; i++) {
+        esquina.set(i & 1 ? caja.max.x : caja.min.x, i & 2 ? caja.max.y : caja.min.y, i & 4 ? caja.max.z : caja.min.z).applyMatrix4(camLuz.matrixWorldInverse);
+        x0 = Math.min(x0, esquina.x); x1 = Math.max(x1, esquina.x); y0 = Math.min(y0, esquina.y); y1 = Math.max(y1, esquina.y); z0 = Math.min(z0, esquina.z); z1 = Math.max(z1, esquina.z);
+      }
+      const c = sol.shadow.camera;
+      c.left = x0 - 0.4; c.right = x1 + 0.4; c.bottom = y0 - 0.4; c.top = y1 + 0.4; c.near = Math.max(0.1, -z1 - 1); c.far = -z0 + 1;
+      c.updateProjectionMatrix();
+    };
+    let ultimaSombra = -1e9;
 
     // Posproceso: color lineal en coma flotante con 4 muestras de antialias,
     // oclusión ambiental y, al final, el mapeo tonal y el paso a sRGB.
@@ -1222,6 +1277,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       aoPass.blendIntensity = 0.9;
       composer.addPass(aoPass);
     }
+    // Sin halo (bloom): probado el 2026-11-09, el reflejo del sol en la cúpula se abría en una mancha que velaba el
+    // coche, y con el umbral alto no aportaba nada que se viera.
     composer.addPass(new OutputPass());
     const dibujar = () => composer.render();
     const resize = () => {
@@ -1238,6 +1295,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       curva: false, inclinacion: 0, modelo: null as Modelo | null, plano: new THREE.Plane(new THREE.Vector3(0, 0, 1), 0),
       apertura: 0, aperturaObjetivo: 0, aperturaMal: 0, aperturaMalObjetivo: 0, colocarPuertas: (() => {}) as () => void,
       tunel: null as Tunel | null, superponer: false, ultimoFantasma: 0,
+      sombraSucia: true,
     };
     const tamano = new THREE.Vector2();
     estado.current = st;
@@ -1322,6 +1380,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       if (st.tunel) { renderer.getSize(tamano); st.tunel.actualizar(reducir ? 0 : ahora / 1000, tamano.x, tamano.y); }
       // Lo que llega tarde a un coche superpuesto (la carrocería del Twizy se descarga) también pasa a fantasma.
       if (st.superponer && ahora - st.ultimoFantasma > 400) { st.ultimoFantasma = ahora; for (const o of grupoGaraje.children) hacerFantasma(o, colorSuperpuesto(o.name)); }
+      if (st.sombraSucia || ahora - ultimaSombra > 1000) { st.sombraSucia = false; ultimaSombra = ahora; ajustarSombra(); }
       controls.update(); dibujar(); raf = requestAnimationFrame(bucle);
     };
     raf = requestAnimationFrame(bucle);
@@ -1332,6 +1391,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       cv.removeEventListener('pointermove', moverArrastre); cv.removeEventListener('pointerup', soltarArrastre); cv.removeEventListener('pointercancel', soltarArrastre);
       scene.traverse((o: any) => { o.geometry?.dispose?.(); });
       M.solar.map?.dispose();
+      vivo = false; entornoRT.dispose();
       Object.values(M).forEach(m => m.dispose()); pm.dispose(); composer.dispose(); renderer.dispose();
     };
   }, []);
@@ -1342,7 +1402,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     construirFijo(st.G, st.puertasG, st.M, modelo, sinPasajero);
     construirMovil(st.G, st.M, modelo, st.coche, st.curva ? st.inclinacion : 0);
     vaciar(st.grupoCotas); cotas(st.grupoCotas, st.M, modelo, sinPasajero);
-    st.colocarPuertas();
+    st.colocarPuertas(); st.sombraSucia = true;
   }, [modelo, sinPasajero]);
 
   useEffect(() => { const st = estado.current; if (!st) return; for (const c of CAPAS) st.G[c.k].visible = visibles[c.k]; }, [visibles]);
@@ -1360,7 +1420,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     if (modoRef === 'comparar' && alinear === 'morro') g.position.x = modelo.xn - morroRef;
     if (modoRef === 'comparar' && alinear === 'lado') g.position.z = -(modelo.P.W / 2 + referencia.W / 2 + 0.35);
     g.visible = true;
-    st.coche.visible = modoRef !== 'sola';
+    st.coche.visible = modoRef !== 'sola'; st.sombraSucia = true;
   }, [referencia, modoRef, alinear, modelo]);
   // El garaje: cada vehículo se construye una vez por cambio de lista (los
   // modelos son pesados) y se coloca con su eje delantero en (x, z).
@@ -1383,6 +1443,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     }
     // Las posiciones se ponen ya (el efecto de abajo solo corre si cambian).
     for (const v of garaje) { const obj = g.getObjectByName(v.id); if (obj) { obj.position.set(v.x, 0, v.z); obj.rotation.y = v.giro ?? 0; } }
+    st.sombraSucia = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [claveGaraje, superponer]);
   // Las cotas de los coches del garaje se ven con las del nuestro (no cuando están superpuestos: se pisarían).
@@ -1395,6 +1456,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   useEffect(() => {
     const st = estado.current; if (!st) return;
     for (const v of garaje) { const obj = st.grupoGaraje.getObjectByName(v.id); if (obj) { obj.position.set(v.x, 0, v.z); obj.rotation.y = v.giro ?? 0; } }
+    st.sombraSucia = true;
   }, [garaje]);
   // Túnel de viento: se rehace cuando cambia la forma del coche o quién está en el garaje.
   const claveTunel = tunel ? garaje.map(v => `${v.id}@${v.x},${v.z},${v.giro ?? 0}`).join('|') + (soloGaraje ? '|solo' : '') + JSON.stringify(carteles ?? {}) + JSON.stringify(cdTunel ?? {}) : '';
