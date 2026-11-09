@@ -4,7 +4,8 @@ import { LineSegmentsGeometry } from 'three/examples/jsm/lines/LineSegmentsGeome
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 import { pedirTunel, type OpcionesTunel } from './tunel/cliente';
 import { envolventeModelo, peticionDe, type CuerpoTunel } from './tunel/cuerpos';
-import type { PorVelocidad, ResultadoTunel } from './tunel/calculo';
+import type { ResultadoTunel } from './tunel/calculo';
+import { modeloEstela, puntosDe, type TipoPunto } from './tunel/puntos';
 import { COLOR_ESTELA, colorDeCp } from './tunel/colores';
 import { CALIBRACION } from './tunel/calibracion';
 
@@ -63,16 +64,24 @@ export function cartel(texto: string): THREE.Sprite {
   sp.scale.set(alto * W / H, alto, 1); sp.renderOrder = 6; return sp;
 }
 
-/** A short label for a critical point: one line, a coloured dot, small and fixed on screen. */
-function etiqueta(texto: string, color: string): THREE.Sprite {
+/**
+ * A short label for a critical point: one line, a coloured dot, small and fixed on screen.
+ * `pulsable`: it opens its explanation, so it carries an «i» at the end (2026-11-09).
+ */
+function etiqueta(texto: string, color: string, pulsable = false): THREE.Sprite {
   const cv = document.createElement('canvas'), g = cv.getContext('2d')!, px = 30;
   g.font = `600 ${px}px Inter, system-ui, sans-serif`;
-  const W = Math.ceil(g.measureText(texto).width) + 66, H = 52;
+  const W = Math.ceil(g.measureText(texto).width) + 66 + (pulsable ? 44 : 0), H = 52;
   cv.width = W; cv.height = H;
-  g.fillStyle = 'rgba(255,255,255,0.92)'; g.strokeStyle = 'rgba(15,23,42,0.22)'; g.lineWidth = 2;
+  g.fillStyle = 'rgba(255,255,255,0.92)'; g.strokeStyle = pulsable ? 'rgba(3,105,161,0.55)' : 'rgba(15,23,42,0.22)'; g.lineWidth = pulsable ? 3 : 2;
   g.beginPath(); g.roundRect(2, 2, W - 4, H - 4, 14); g.fill(); g.stroke();
   g.fillStyle = color; g.beginPath(); g.arc(26, H / 2, 9, 0, Math.PI * 2); g.fill();
   g.font = `600 ${px}px Inter, system-ui, sans-serif`; g.fillStyle = '#0f172a'; g.textBaseline = 'middle'; g.fillText(texto, 44, H / 2 + 1);
+  if (pulsable) {
+    const cx = W - 30;
+    g.fillStyle = '#0369a1'; g.beginPath(); g.arc(cx, H / 2, 14, 0, Math.PI * 2); g.fill();
+    g.fillStyle = '#ffffff'; g.font = `700 22px Georgia, serif`; g.textAlign = 'center'; g.fillText('i', cx, H / 2 + 1);
+  }
   const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace;
   const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, depthTest: false, transparent: true, toneMapped: false, sizeAttenuation: false }));
   const alto = 0.021; sp.scale.set(alto * W / H, alto, 1); sp.renderOrder = 7;
@@ -80,11 +89,18 @@ function etiqueta(texto: string, color: string): THREE.Sprite {
   return sp;
 }
 
+/** A critical point of one body: what a click on its label (or a row of the card) selects. */
+export interface SeleccionTunel { cuerpo: string; punto: string }
+
 export interface Tunel {
   grupo: THREE.Group;
   actualizar: (t: number, ancho: number, alto: number, camara?: THREE.Camera) => void;
   /** Visibility toggles and speed (no recalculation). */
   ajustar: (o: OpcionesTunel) => void;
+  /** The point label under a click or a tap, if any. */
+  elegir: (ray: THREE.Raycaster) => SeleccionTunel | null;
+  /** Marks the label whose explanation is open. */
+  resaltar: (sel: SeleccionTunel | null) => void;
   liberar: () => void;
 }
 
@@ -97,36 +113,7 @@ const lin = (c: number) => Math.pow(c, 2.2); // sRGB → linear, for vertex colo
  * and came out as a black band. The flag is read nowhere else in three.js.
  */
 function sinAO<T extends THREE.Object3D>(o: T): T { (o as unknown as { isLine2: boolean }).isLine2 = true; return o; }
-const CSS = { remanso: '#dc2626', succion: '#1d4ed8', adverso: '#d97706', separacion: '#be185d', estela: '#7c3aed', burbuja: '#0f766e' };
-
-/** The wake model behind the separation line, at one speed. */
-function modeloEstela(q: PorVelocidad) {
-  const K = q.separacion.length / 3, sep: { x: number; y: number; z: number }[] = [];
-  for (let k = 0; k < K; k++) sep.push({ x: q.separacion[3 * k], y: q.separacion[3 * k + 1], z: q.separacion[3 * k + 2] });
-  const anillo = [...sep, ...[...sep].reverse().map(p => ({ ...p, z: -p.z }))];
-  let yc = 0; for (const p of anillo) yc += p.y; yc /= anillo.length;
-  const polar = anillo.map(p => ({ fi: Math.atan2(p.y - yc, p.z), r: Math.hypot(p.y - yc, p.z), x: p.x })).sort((a, b) => a.fi - b.fi);
-  const Lb = 1.2 * Math.sqrt(Math.max(0.01, q.areaBase)), Lmax = Lb + 2.5;
-  /** Size of the wake section relative to the separation loop, Δ metres behind it. */
-  const f = (d: number) => d < Lb ? 1 - 0.2 * Math.sin(Math.PI / 2 * d / Lb) : 0.8 + 0.08 * (d - Lb);
-  const en = (fi: number) => {
-    // linear interpolation on the sorted ring, wrapping round
-    const n = polar.length; let k = 0;
-    while (k < n && polar[k].fi < fi) k++;
-    const a = polar[(k - 1 + n) % n], b = polar[k % n];
-    let da = b.fi - a.fi; if (da <= 0) da += 2 * Math.PI;
-    let t = fi - a.fi; if (t < 0) t += 2 * Math.PI;
-    const u = Math.min(1, Math.max(0, t / da));
-    return { r: a.r + (b.r - a.r) * u, x: a.x + (b.x - a.x) * u };
-  };
-  /** How deep in the wake (0 outside, else 1 at the base fading to 0 at Lmax). */
-  const dentro = (x: number, y: number, z: number) => {
-    const fi = Math.atan2(y - yc, z), r = Math.hypot(y - yc, z), e = en(fi), d = e.x - x;
-    if (d < 0.02 || d > Lmax || e.r < 0.015) return 0;
-    return r < e.r * f(d) ? 1 - d / Lmax : 0;
-  };
-  return { anillo, yc, Lb, Lmax, f, dentro, en };
-}
+const CSS: Record<TipoPunto, string> = { remanso: '#dc2626', succion: '#1d4ed8', adverso: '#d97706', separacion: '#be185d', estela: '#7c3aed', burbuja: '#0f766e' };
 
 /** Builds everything for one body once its result is there. */
 function construirCuerpo(c: CuerpoTunel, R: ResultadoTunel, mats: Materiales, o: OpcionesTunel) {
@@ -245,26 +232,28 @@ function construirCuerpo(c: CuerpoTunel, R: ResultadoTunel, mats: Materiales, o:
 
     // Critical points. The flow is symmetric, so each label goes on the −z side, the one the
     // default views look at, a little away from its point and tied to it by a thin leader.
+    // Every label opens its explanation (2026-11-09, Eugenio): it carries which body and which point.
     const marcar = (p: number[], color: string, radio = 0.028) => {
       const m = sinAO(new THREE.Mesh(mats.esfera, new THREE.MeshBasicMaterial({ color: new THREE.Color(color), toneMapped: false, depthTest: false, transparent: true, opacity: 0.95 })));
       m.position.set(p[0], p[1], p[2]); m.scale.setScalar(radio); m.renderOrder = 6; partes.criticos.add(m);
+      return m;
     };
-    const rotular = (grupoR: THREE.Group, p: number[], texto: string, color: string, d: [number, number, number]) => {
-      const q2 = [p[0] + d[0], p[1] + d[1], p[2] + d[2]];
-      const lg = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(p[0], p[1], p[2]), new THREE.Vector3(q2[0], q2[1], q2[2])]);
+    const puntos = puntosDe(R, kmh);
+    const rotular = (grupoR: THREE.Group, punto: (typeof puntos)[number]) => {
+      const p = punto.ancla, d = punto.desplaza, q2 = new THREE.Vector3(p[0] + d[0], p[1] + d[1], p[2] + d[2]);
+      const lg = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(p[0], p[1], p[2]), q2.clone()]);
       const l = new THREE.Line(lg, mats.guia); l.renderOrder = 6; grupoR.add(l); guias.push(l);
-      const e = etiqueta(texto, color); e.position.set(q2[0], q2[1], q2[2]); grupoR.add(e); etiquetas.push(e);
+      const e = etiqueta(punto.etiqueta, CSS[punto.tipo], true); e.position.copy(q2); grupoR.add(e); etiquetas.push(e);
+      e.userData.tunel = { cuerpo: c.id, punto: punto.id };
+      e.userData.base = q2.clone(); e.userData.guia = l;
     };
-    const lado = (p: number[]) => [p[0], p[1], -Math.abs(p[2])];
-    let rango = 0;
     for (const k of R.criticos) {
-      if (k.tipo === 'remanso') { marcar(k.p, CSS.remanso, 0.035); rotular(partes.criticos, lado(k.p), `Remanso · Cp ${fmt(k.cp)}`, CSS.remanso, [0.3, 0.3, -0.15]); continue; }
+      if (k.tipo === 'remanso') { marcar(k.p, CSS.remanso, 0.035); continue; }
       if (k.p[0] < q.xSeparacion - 0.02) continue; // behind the separation the real air has left: no ideal-flow peak there
       marcar(k.p, CSS.succion); if (k.p[2] > 0.05) marcar([k.p[0], k.p[1], -k.p[2]], CSS.succion);
-      // the three strongest get a label; the rest stay as dots
-      if (rango < 3) rotular(partes.criticos, lado(k.p), `${k.nombre} · Cp ${fmt(k.cp)}`, CSS.succion, [0, 0.32 + 0.15 * rango, -0.3]);
-      rango++;
     }
+    for (let k = 0; k < q.burbujas.length / 3; k++) marcar([q.burbujas[3 * k], q.burbujas[3 * k + 1], q.burbujas[3 * k + 2]], CSS.burbuja, 0.02);
+    for (const pt of puntos) if (pt.tipo !== 'estela') rotular(partes.criticos, pt);
     const polilinea = (pts3: number[], color: string, ancho: number, discontinua: boolean) => {
       const K = pts3.length / 3, P: number[] = [];
       for (let k = 0; k < K; k++) P.push(pts3[3 * k], pts3[3 * k + 1], pts3[3 * k + 2]);
@@ -278,15 +267,6 @@ function construirCuerpo(c: CuerpoTunel, R: ResultadoTunel, mats: Materiales, o:
     };
     polilinea(q.separacion, CSS.separacion, 4, false);
     polilinea(q.adverso, CSS.adverso, 3, true);
-    // separation: labelled at the side; the adverse-gradient line: at the top
-    const K = q.separacion.length / 3, en = (a: number[], k: number) => [a[3 * k], a[3 * k + 1], a[3 * k + 2]];
-    rotular(partes.criticos, lado(en(q.separacion, K >> 1)), q.pegadas === K ? 'Pegado hasta la cola' : 'Separación prevista', CSS.separacion, [0.15, -0.38, -0.35]);
-    rotular(partes.criticos, en(q.adverso, K - 1), 'El aire empieza a frenarse (gradiente adverso)', CSS.adverso, [-0.55, 0.22, -0.15]);
-    for (let k = 0; k < q.burbujas.length / 3; k++) {
-      const p = [q.burbujas[3 * k], q.burbujas[3 * k + 1], q.burbujas[3 * k + 2]];
-      marcar(p, CSS.burbuja, 0.02);
-      if (k === 0) rotular(partes.criticos, lado(p), 'Burbuja: se despega y vuelve', CSS.burbuja, [0.1, 0.25, -0.25]);
-    }
 
     // wake: a translucent tube from the separation loop
     {
@@ -313,7 +293,7 @@ function construirCuerpo(c: CuerpoTunel, R: ResultadoTunel, mats: Materiales, o:
       for (let k = 0; k < nR; k++) contorno.push(...punto(sBurb, k), ...punto(sBurb, (k + 1) % nR));
       const lg = new LineSegmentsGeometry(); lg.setPositions(contorno);
       const ls = sinAO(new LineSegments2(lg, mats.bordeEstela)); ls.computeLineDistances(); ls.renderOrder = 4; partes.estela.add(ls);
-      rotular(partes.estela, punto(Math.min(pasos, sBurb + 3), kLado2), q.areaBase < 0.02 ? 'Estela muy pequeña (forma estimada)' : 'Estela (forma estimada)', CSS.estela, [-0.3, 0.45, -0.2]);
+      const pe = puntos.find(pt => pt.tipo === 'estela'); if (pe) rotular(partes.estela, pe);
     }
   };
   construirVelocidad(o.kmh);
@@ -369,6 +349,8 @@ export function crearTunel(cuerpos: CuerpoTunel[], opciones: OpcionesTunel): Tun
   const hechos: ReturnType<typeof construirCuerpo>[] = [];
   let op = opciones, vivo = true;
   const carteles: (() => void)[] = [];
+  /** Each car's own label (name and figures), an obstacle the point labels must not cover. */
+  const rotulos = new Map<string, THREE.Sprite>();
 
   cuerpos.forEach((c, i) => {
     if (c.envolvente.length < 3) return;
@@ -386,17 +368,62 @@ export function crearTunel(cuerpos: CuerpoTunel[], opciones: OpcionesTunel): Tun
         const cd = (R.porVelocidad.find(v => v.kmh === op.kmh) ?? R.porVelocidad[1]).cd.total;
         linea = c.id === 'aeromovil' ? `túnel: Cd ${fmt(cd, 3)} ± ${Math.round(CALIBRACION.banda * 100)} %` : c.cdPublicado != null ? `túnel: Cd ${fmt(cd, 3)} (publicado ${fmt(c.cdPublicado, 3)})` : `túnel: Cd ${fmt(cd, 3)}, sin dato publicado`;
       }
-      rotulo = cartel([...base, linea].join('\n')); rotulo.position.set(xm, techo + 0.8, 0); g.add(rotulo);
+      rotulo = cartel([...base, linea].join('\n')); rotulo.position.set(xm, techo + 0.8, 0); g.add(rotulo); rotulos.set(c.id, rotulo);
     };
     ponerCartel(); carteles.push(ponerCartel);
     pedirTunel(peticionDe(c, opciones.resolucion, opciones.lineas), i).then(r => {
       if (!vivo || !r) return;
       R = r; ponerCartel();
-      const b = construirCuerpo(c, r, mats, op); g.add(b.grupo); hechos.push(b);
+      const b = construirCuerpo(c, r, mats, op); g.add(b.grupo); hechos.push(b); resaltar(seleccion);
     });
   });
 
-  const tmp = new THREE.Vector3();
+  const tmp = new THREE.Vector3(), mundo = new THREE.Vector3(), arribaCam = new THREE.Vector3(), haciaCam = new THREE.Vector3();
+  /** Screen rectangles (px) of what is already placed this frame. */
+  type Caja = { x0: number; x1: number; y0: number; y1: number };
+  const cajaDe = (e: THREE.Sprite, cam: THREE.PerspectiveCamera, ancho: number, alto: number, pos: THREE.Vector3): Caja | null => {
+    tmp.copy(pos).project(cam);
+    if (tmp.z > 1 || tmp.z < -1) return null;
+    const w = e.scale.x * cam.projectionMatrix.elements[0] * ancho / 2, h = e.scale.y * cam.projectionMatrix.elements[5] * alto / 2;
+    const sx = (tmp.x + 1) / 2 * ancho, sy = (1 - tmp.y) / 2 * alto;
+    return { x0: sx - e.center.x * w, x1: sx + (1 - e.center.x) * w, y0: sy - (1 - e.center.y) * h, y1: sy + e.center.y * h };
+  };
+  const pisa = (a: Caja, b: Caja) => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
+  /**
+   * Point labels that would cover one another (or a car's own label) are pushed up on the
+   * screen, in order: our design's first, then each car's in its own order. The leader
+   * follows the label. Recomputed every frame from each label's resting place, so it
+   * settles again as the camera turns.
+   */
+  const repartir = (cam: THREE.PerspectiveCamera, ancho: number, alto: number) => {
+    const puestas: Caja[] = [];
+    for (const r of rotulos.values()) { if (!r.visible || !r.parent) continue; r.getWorldPosition(mundo); const k = cajaDe(r, cam, ancho, alto, mundo); if (k) puestas.push(k); }
+    arribaCam.set(0, 1, 0).applyQuaternion(cam.quaternion);
+    const orden = [...hechos].sort((a, b) => Number(b.nuestro) - Number(a.nuestro));
+    for (const b of orden) for (const e of b.etiquetas) {
+      const base = e.userData.base as THREE.Vector3 | undefined, padre = e.parent;
+      if (!base || !padre) continue;
+      let vis = e.visible; for (let o: THREE.Object3D | null = padre; o && vis; o = o.parent) vis = o.visible;
+      if (!vis) continue;
+      mundo.copy(base); padre.localToWorld(mundo);
+      const k = cajaDe(e, cam, ancho, alto, mundo);
+      if (!k) continue;
+      let dy = 0;
+      for (let vuelta = 0; vuelta < 12; vuelta++) {
+        const choca = puestas.find(p => pisa({ ...k, y0: k.y0 + dy, y1: k.y1 + dy }, p));
+        if (!choca) break;
+        dy = choca.y0 - k.y1 - 3; // just above what it hit
+      }
+      puestas.push({ ...k, y0: k.y0 + dy, y1: k.y1 + dy });
+      // pixels → metres at this label's depth, along the camera's up direction
+      const prof = haciaCam.copy(mundo).sub(cam.position).dot(tmp.set(0, 0, -1).applyQuaternion(cam.quaternion));
+      const mPorPx = 2 * prof * Math.tan(THREE.MathUtils.degToRad(cam.fov) / 2) / alto;
+      mundo.addScaledVector(arribaCam, -dy * mPorPx);
+      e.position.copy(padre.worldToLocal(mundo));
+      const guia = e.userData.guia as THREE.Line | undefined;
+      if (guia) { const at = guia.geometry.attributes.position as THREE.BufferAttribute; at.setXYZ(1, e.position.x, e.position.y, e.position.z); at.needsUpdate = true; }
+    }
+  };
   const actualizar = (t: number, ancho: number, alto: number, camara?: THREE.Camera) => {
     mats.linea.resolution.set(ancho, alto); mats.bordeEstela.resolution.set(ancho, alto);
     for (const m of mats.extra) m.resolution.set(ancho, alto);
@@ -427,8 +454,29 @@ export function crearTunel(cuerpos: CuerpoTunel[], opciones: OpcionesTunel): Tun
         P.needsUpdate = true;
       }
     }
+    if (camara && (camara as THREE.PerspectiveCamera).isPerspectiveCamera) repartir(camara as THREE.PerspectiveCamera, ancho, alto);
   };
-  const ajustar = (o: OpcionesTunel) => { op = o; for (const b of hechos) b.ajustar(o); for (const f of carteles) f(); };
+  const ajustar = (o: OpcionesTunel) => { op = o; for (const b of hechos) b.ajustar(o); for (const f of carteles) f(); resaltar(seleccion); };
+  /** The point label under a ray (a click or a tap), if any. */
+  const elegir = (ray: THREE.Raycaster): SeleccionTunel | null => {
+    const candidatas: THREE.Sprite[] = [];
+    for (const b of hechos) for (const e of b.etiquetas) {
+      let vis = e.visible && e.material.opacity > 0.3; for (let o: THREE.Object3D | null = e.parent; o && vis; o = o.parent) vis = o.visible;
+      if (vis && e.userData.tunel) candidatas.push(e);
+    }
+    const hit = ray.intersectObjects(candidatas, false)[0];
+    return hit ? { ...(hit.object.userData.tunel as SeleccionTunel) } : null;
+  };
+  /** The open point's label a little bigger, so it is clear which one the panel talks about. */
+  let seleccion: SeleccionTunel | null = null;
+  const resaltar = (sel: SeleccionTunel | null) => {
+    seleccion = sel;
+    for (const b of hechos) for (const e of b.etiquetas) {
+      if (!e.userData.escala) e.userData.escala = e.scale.clone();
+      const s = e.userData.tunel && sel && e.userData.tunel.cuerpo === sel.cuerpo && e.userData.tunel.punto === sel.punto ? 1.25 : 1;
+      e.scale.copy(e.userData.escala).multiplyScalar(s);
+    }
+  };
   const liberar = () => {
     vivo = false;
     for (const b of hechos) b.liberar();
@@ -436,5 +484,5 @@ export function crearTunel(cuerpos: CuerpoTunel[], opciones: OpcionesTunel): Tun
     for (const m of [mats.piel, mats.rejilla, mats.linea, mats.punto, mats.estela, mats.bordeEstela, mats.guia, ...mats.extra]) m.dispose();
     mats.esfera.dispose(); textura.dispose();
   };
-  return { grupo, actualizar, ajustar, liberar };
+  return { grupo, actualizar, ajustar, liberar, elegir, resaltar: (sel: SeleccionTunel | null) => resaltar(sel) };
 }

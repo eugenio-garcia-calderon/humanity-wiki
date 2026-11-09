@@ -3,6 +3,8 @@ import { Wind, X } from 'lucide-react';
 import { Button } from '../ui/core';
 import { cn } from '../../utils/cn';
 import type { CuerpoTunel } from './tunel/cuerpos';
+import { puntosDe, type TipoPunto } from './tunel/puntos';
+import type { SeleccionPunto } from './tunel/PanelPunto';
 import type { OpcionesTunel } from './tunel/cliente';
 import type { ResultadoTunel } from './tunel/calculo';
 import { RESOLUCION } from './tunel/malla';
@@ -126,9 +128,13 @@ function GraficaSeccion({ R, kmh }: { R: ResultadoTunel; kmh: number }) {
   );
 }
 
-export function TarjetaTunel({ filas, base, kmh, alCambiarKmh, alCerrar, className, cuerpos = [], resultados = {}, opciones, alCambiarOpciones }: {
+const PUNTO: Record<TipoPunto, string> = { remanso: 'bg-red-600', succion: 'bg-blue-700', adverso: 'bg-amber-600', separacion: 'bg-pink-700', estela: 'bg-violet-600', burbuja: 'bg-teal-700' };
+
+export function TarjetaTunel({ filas, base, kmh, alCambiarKmh, alCerrar, className, cuerpos = [], resultados = {}, opciones, alCambiarOpciones, punto, alElegirPunto }: {
   filas: FilaTunel[]; base: string; kmh: number; alCambiarKmh: (k: number) => void; alCerrar: () => void; className?: string;
   cuerpos?: CuerpoTunel[]; resultados?: Record<string, ResultadoTunel | undefined>; opciones?: OpcionesTunel; alCambiarOpciones?: (o: OpcionesTunel) => void;
+  /** The point whose explanation is open, and what a row of «Puntos críticos» does (open it in the 3D view). */
+  punto?: SeleccionPunto | null; alElegirPunto?: (s: SeleccionPunto) => void;
 }) {
   const v = kmh / 3.6, setKmh = alCambiarKmh;
   const calc = filas.map(f => gastoEnRuedas(f, kmh));
@@ -286,6 +292,29 @@ export function TarjetaTunel({ filas, base, kmh, alCambiarKmh, alCerrar, classNa
           <span className="flex items-center gap-1"><i className="inline-block h-2 w-3 rounded-sm bg-slate-400" />detalles que no ve</span>
         </div>
       </div>
+
+      {/* ---------------- critical points: the same as the 3D labels, reachable when labels overlap and from the keyboard */}
+      {alElegirPunto && cuerpos.some(c => resultados[c.id]) && (
+        <div className="mt-3 border-t border-slate-100 pt-2">
+          <p className="text-[12px] font-semibold text-slate-900">Puntos críticos <span className="font-normal text-slate-500">· pincha uno (o su cartel en el 3D) para ver qué es y cómo mejorarlo</span></p>
+          <div className="mt-1 space-y-1">
+            {cuerpos.filter(c => resultados[c.id]).map(c => (
+              <div key={c.id} className="flex flex-wrap items-center gap-1">
+                <span className="mr-1 w-full text-[11px] font-medium text-slate-700 sm:w-36 sm:shrink-0">{c.nombre}</span>
+                {puntosDe(resultados[c.id]!, kmh).map(pt => {
+                  const activo = punto?.cuerpo === c.id && punto?.punto === pt.id;
+                  return (
+                    <Button key={pt.id} variant="outline" aria-pressed={activo} onClick={() => alElegirPunto({ cuerpo: c.id, punto: pt.id })}
+                      className={cn('gap-1 px-1.5 py-0.5 text-[11px] font-normal normal-case tracking-normal', activo && 'border-sky-700 bg-sky-50')}>
+                      <i className={cn('inline-block h-2 w-2 shrink-0 rounded-full', PUNTO[pt.tipo])} />{pt.etiqueta}
+                    </Button>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ---------------- mandos y leyenda */}
       {opciones && (
