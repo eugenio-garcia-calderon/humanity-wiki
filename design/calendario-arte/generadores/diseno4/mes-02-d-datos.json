@@ -1,8 +1,7 @@
 [
-  {"dia": 22, "frase": "Hoy: pregunta a tus mayores por sus amigos de siempre.", "como_aparece": "Ventana de arriba a la izquierda: una abuela enseña a su nieto un álbum abierto con fotos de sus amigos; con el dedo señala una."},
-  {"dia": 25, "frase": "Un abrazo deseado dice lo que no dicen las palabras.", "como_aparece": "Ventana de arriba a la derecha: una pareja abrazada, mejilla con mejilla y con los ojos cerrados."},
-  {"dia": 8, "frase": "Hoy: comed juntos sin móviles en la mesa.", "como_aparece": "Ventana grande de abajo: una familia (padre, hija y madre con pañuelo) cena junta, con cuencos humeantes y pan que se pasa de mano en mano; no hay ninguna pantalla en la mesa."},
-  {"dia": 3, "frase": "Escuchar no es esperar turno: escucha hasta el final.", "como_aparece": "Ventana redonda: un amigo habla gesticulando y su amiga lo escucha mirándole, con su taza en la mano."},
-  {"dia": 2, "frase": "Hoy: escribe a alguien con quien hace tiempo no hablas.", "como_aparece": "El hilo rojo que une a todos sale del corazón y lleva atada una carta con alas que vuela."},
-  {"dia": 18, "frase": "La amistad se cuida con tiempo, presencia y esfuerzo.", "como_aparece": "El hilo rojo pasa por todas las ventanas y está anudado al dedo de una persona de cada una: los vínculos se cuidan y se sostienen."}
+  {"dia": 7, "frase": "¿Hace cuánto no dices «te quiero» sin motivo?", "como_aparece": "Ventana de arriba a la izquierda: una abuela acuna a un bebé dormido envuelto en una manta rosa y le acaricia la cabecita."},
+  {"dia": 18, "frase": "La amistad se cuida con tiempo, presencia y esfuerzo.", "como_aparece": "Ventana de arriba a la derecha: dos niños juegan a hacerse cosquillas y se mueren de risa; uno levanta el brazo."},
+  {"dia": 25, "frase": "Un abrazo deseado dice lo que no dicen las palabras.", "como_aparece": "Ventana de abajo: una pareja frente con frente, con los ojos cerrados y las manos cogidas."},
+  {"dia": 23, "frase": "¿Hay alguien solo cerca? La soledad no tiene edad.", "como_aparece": "Un hilo rojo fino, anudado al meñique de alguien en cada ventana, une al bebé, a los niños y a la pareja: todas las edades enlazadas."},
+  {"dia": 1, "frase": "Las buenas relaciones protegen salud y felicidad.", "como_aparece": "El corazón es un músculo real (orejuelas, coronarias, fibras) y a la vez una casa iluminada: la luz de las ventanas lo calienta por dentro."}
 ]

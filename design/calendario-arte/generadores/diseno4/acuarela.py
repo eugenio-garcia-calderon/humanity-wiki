@@ -366,7 +366,7 @@ class Lienzo:
         self.semilla = semilla
         self._n = semilla * 7919
         self.papel = rgb(papel)
-        self.relieve = 0.045  # strength of the embossed paper grain
+        self.relieve = 0.03  # strength of the embossed paper grain
         self.T = np.ones((self.H, self.W, 3), np.float32)
         self.grano = self._hacer_papel()
         # inner light (screen-blended at the end) and opaque gouache touches
@@ -443,11 +443,19 @@ class Lienzo:
     # -- the wash ----------------------------------------------------------
     def aguada(self, forma, color, dens=0.55, borde=0.55, irreg=1.0, gran=0.3, var=0.35,
                suave=0.0, flor=0, toques=None, desvanece=None, tapa=0.0, semilla=None,
-               devuelve=False):
-        """Paint one transparent watercolour wash. See module docstring."""
+               devuelve=False, sombra=None):
+        """Paint one transparent watercolour wash. See module docstring.
+
+        sombra (optional): a second, hard-edged glaze painted on the shadow
+        side of the same shape, the way a watercolourist models volume:
+        (dx, dy) = direction of the LIGHT in units (e.g. (-6, -5) = light from
+        top-left; the crescent opposite gets the glaze), or
+        (dx, dy, colour, dens_factor)."""
         sem = self._sem(semilla)
         s = self.s
         pad = 6 + 4 * irreg + 3 * suave + (20 if flor else 0)
+        if sombra is not None:
+            pad += abs(sombra[0]) + abs(sombra[1])
         c = self._crop(forma.bbox(), pad)
         if c is None:
             return None
@@ -464,16 +472,29 @@ class Lienzo:
             n = 0.6 * self.ruido(x0, y0, x1, y1, 9, sem) + 0.4 * self.ruido(x0, y0, x1, y1, 3.2, sem + 1)
             t = 0.5 + 0.55 * irreg * (n - 0.5)
             Mw = _ss(Mb, t - 0.07, t + 0.07)
-            Mw *= _ss(M, 0.0, 0.02) * 0 + 1  # keep
-            Eb = _blur(Mw, 2.2 * s)
-            E = np.clip(Mw - Eb, 0, 1) * 2.4
-            E = np.minimum(E, 1.0)
-        lo = self.ruido(x0, y0, x1, y1, 55, sem + 2) * 0.6 + self.ruido(x0, y0, x1, y1, 18, sem + 3) * 0.4
-        D = dens * Mw * (1 + var * 2 * (lo - 0.5)) + dens * borde * E * 1.25
+            # wet edge: a thin, dark rim where pigment dried (the signature of
+            # watercolour) plus a wider, gentle migration toward the edge
+            E1 = np.clip(Mw - _blur(Mw, 0.9 * s), 0, 1) * 3.2
+            E2 = np.clip(Mw - _blur(Mw, 4.0 * s), 0, 1) * 1.6
+            E = np.minimum(E1, 1.0) * 1.1 + np.minimum(E2, 1.0) * 0.35
+        # unevenness: big soft puddles + pigment pooled toward one side
+        lo = self.ruido(x0, y0, x1, y1, 60, sem + 2) * 0.65 + self.ruido(x0, y0, x1, y1, 20, sem + 3) * 0.35
+        lo = np.clip((lo - 0.5) * 1.6 + 0.5, 0, 1)
+        X, Y = self._malla(x0, y0, x1, y1)
+        bb = forma.bbox()
+        rr_ = np.random.default_rng(sem + 9)
+        aa = rr_.uniform(0, 2 * np.pi)
+        span = max(bb[2] - bb[0], bb[3] - bb[1], 1)
+        pool = ((X - (bb[0] + bb[2]) / 2) * math.cos(aa) + (Y - (bb[1] + bb[3]) / 2) * math.sin(aa)) / span
+        D = dens * Mw * (1 + var * 2 * (lo - 0.5) + var * 0.9 * pool) + dens * borde * E * 1.25
         if gran > 0:
+            # granulation settles in patches (not a uniform noise filter):
+            # pigment sinks into the paper valleys where the wash was wettest
             g = self.grano[y0:y1, x0:x1]
-            fine = self.ruido(x0, y0, x1, y1, 0.9, sem + 4)
-            D = D * np.clip(1 + gran * (1.6 * (0.5 - g) + 0.8 * (fine - 0.5)), 0.2, 2.0)
+            clump = _ss(self.ruido(x0, y0, x1, y1, 26, sem + 4), 0.35, 0.8)
+            fine = self.ruido(x0, y0, x1, y1, 1.4, sem + 8)
+            D = D * np.clip(1 + gran * clump * (1.1 * (0.5 - g) + 0.35 * (fine - 0.5))
+                            + gran * 0.25 * (0.5 - g), 0.3, 2.0)
         if flor:
             rng = np.random.default_rng(sem + 5)
             ys, xs = np.nonzero(Mw > 0.85)
@@ -499,6 +520,21 @@ class Lienzo:
             tt = ((X - ax) * vx + (Y - ay) * vy) / L2
             tt = tt + 0.18 * (self.ruido(x0, y0, x1, y1, 14, sem + 6) - 0.5)
             D = D * _ss(tt, 1.0, 0.0)
+        if sombra is not None:
+            dx, dy = sombra[0], sombra[1]
+            sc = sombra[2] if len(sombra) > 2 else None
+            sf = sombra[3] if len(sombra) > 3 else 0.7
+            Sh = np.roll(np.roll(M, int(round(dx * s)), 1), int(round(dy * s)), 0)
+            C = M * (1 - Sh)
+            Cb = _blur(C, 3.0 * s)
+            nn = 0.6 * self.ruido(x0, y0, x1, y1, 12, sem + 11) + 0.4 * self.ruido(x0, y0, x1, y1, 4, sem + 12)
+            Cw = _ss(Cb, 0.3 + 0.45 * (nn - 0.5), 0.5 + 0.45 * (nn - 0.5)) * Mw
+            Ce = np.minimum(np.clip(Cw - _blur(Cw, 0.9 * s), 0, 1) * 3.0, 1)
+            Dsh = dens * sf * (Cw + 0.6 * Ce)
+            if sc is None:
+                D = D + Dsh
+            else:
+                self._sombra_pend = (Dsh, sc)
         # colour field (wet-in-wet drops blend in log space)
         lc = np.log(np.clip(rgb(color), 0.02, 1))
         if toques:
@@ -517,6 +553,10 @@ class Lienzo:
             T += (1 - T) * (lift * tapa)[..., None]
             self.OP[y0:y1, x0:x1] *= (1 - lift * tapa)[..., None]   # also hides gouache behind it
         T *= np.exp(D[..., None] * L)
+        if getattr(self, '_sombra_pend', None) is not None:
+            Dsh, sc = self._sombra_pend
+            self._sombra_pend = None
+            T *= np.exp(Dsh[..., None] * np.log(np.clip(rgb(sc), 0.02, 1)))
         if devuelve:
             return (x0, y0, x1, y1), Mw
         return None
@@ -852,7 +892,8 @@ def cabeza(lz, x, y, r, piel='piel2', pelo='#5a3a2a', peinado='corto', giro=0.0,
     """Draw a tender head centred (x, y) with radius r.
     giro: -1..1 turns the face left/right (3/4 view); inclina: degrees of tilt.
     ojos: 'abiertos' | 'cerrados' (happy arcs) | 'abajo'. boca: 'sonrisa' |
-    'abierta' | 'suave' | 'canta'. peinado: 'corto', 'rizado', 'mono' (bun),
+    'abierta' | 'ríe' (open laugh with laugh lines) | 'suave' | 'canta'. Eyes have
+    sepia lids, crease and lashes; nose and mouth are drawn in sepia pencil. peinado: 'corto', 'rizado', 'mono' (bun),
     'largo', 'coleta', 'calvo', 'ondas', 'pañuelo'. barba: colour or None.
     adorno: optional colour for a flower in the hair."""
     sem = lz._sem(semilla)
@@ -892,71 +933,119 @@ def cabeza(lz, x, y, r, piel='piel2', pelo='#5a3a2a', peinado='corto', giro=0.0,
         f = Elipse(bx, by, r * 0.48, r * 0.42)
         lz.aguada(f, pelo, dens=0.8, tapa=1)
         lz.contorno(f, pelo_lp, grosor=0.8, presion=0.5, cortes=0.4)
-    # ears
+    SEP = '#6b4433'                      # sepia pencil for the features
+    gw = max(0.7, r * 0.035)             # pencil weight grows with the head
+    # ears, with the inner curl drawn in pencil
     for sd in (-1, 1):
         if giro * sd > 0.55:
             continue
-        ex, ey = R(sd * rx * (0.98 - 0.25 * max(0, giro * sd)) - giro * r * 0.1, r * 0.08)
-        f = Elipse(ex, ey, r * 0.16, r * 0.22)
-        lz.aguada(f, piel, dens=0.6, tapa=1, irreg=0.4, gran=0.2)
-    # face
+        ex, ey = R(sd * rx * (0.98 - 0.25 * max(0, giro * sd)) - giro * r * 0.1, r * 0.1)
+        f = Elipse(ex, ey, r * 0.15, r * 0.22)
+        lz.aguada(f, piel, dens=0.62, tapa=1, irreg=0.3, gran=0.15,
+                  toques=[(ex, ey, r * 0.1, mezcla(piel, '#c0604a', 0.5), 0.6)])
+        lz.lapiz([arco(ex, ey, r * 0.08, r * 0.13, 90 - sd * 90 - 70, 90 - sd * 90 + 110, 10)], SEP,
+                 grosor=gw * 0.7, presion=0.4, temblor=0.05)
+    # face, modelled with a second glaze on the side away from the light
     sh = giro * r * 0.08
-    face = Poligono([R(-rx + sh, -r * 0.1), R(-rx * 0.9 + sh, r * 0.5), R(-rx * 0.45 + sh * 2, r * 0.92),
-                     R(sh * 3, r * 1.0), R(rx * 0.45 + sh * 2, r * 0.92), R(rx * 0.9 + sh, r * 0.5),
+    face = Poligono([R(-rx + sh, -r * 0.1), R(-rx * 0.92 + sh, r * 0.48), R(-rx * 0.5 + sh * 2, r * 0.9),
+                     R(sh * 3, r * 1.02), R(rx * 0.5 + sh * 2, r * 0.9), R(rx * 0.92 + sh, r * 0.48),
                      R(rx + sh, -r * 0.1), R(rx * 0.8, -r * 0.75), R(0, -r * 0.98), R(-rx * 0.8, -r * 0.75)])
     fx, fy = R(giro * r * 0.32, r * 0.05)  # face centre (features)
     shade_side = -1 if giro >= 0 else 1
-    tq = [(*R(shade_side * rx * 0.9, r * 0.2), r * 0.6, mezcla(piel, '#b0603e', 0.4), 0.45)]
-    lz.aguada(face, piel, dens=0.55, borde=0.45, irreg=0.6, gran=0.25, var=0.25, tapa=1, toques=tq)
+    tq = [(*R(shade_side * rx * 0.9, r * 0.25), r * 0.55, mezcla(piel, '#b0603e', 0.35), 0.4),
+          (*R(giro * r * 0.3, -r * 0.5), r * 0.5, mezcla(piel, '#fff0e0', 0.3), 0.5)]
+    lz.aguada(face, piel, dens=0.6, borde=0.5, irreg=0.5, gran=0.15, var=0.25, tapa=1, toques=tq,
+              sombra=(-shade_side * r * 0.5, -r * 0.25, mezcla(piel, '#a0503a', 0.45), 0.35))
+    cx0 = giro * r * 0.32                      # horizontal centre of the features (local)
+    eye_y = r * 0.14
+    ex = r * 0.31
     if mejillas:
         for sd in (-1, 1):
-            cxx, cyy = R(giro * r * 0.32 + sd * r * (0.42 - 0.18 * giro * sd), r * 0.38)
             if giro * sd > 0.7:
                 continue
-            lz.aguada(Elipse(cxx, cyy, r * 0.2, r * 0.14), '#e9727a', dens=0.45, suave=r * 0.09, gran=0.1)
-    # features (pencil)
-    eye_y = r * 0.12
-    ex = r * 0.3
-    trazos_osc = []
+            cxx, cyy = R(cx0 + sd * r * (0.45 - 0.18 * giro * sd), r * 0.42)
+            lz.aguada(Elipse(cxx, cyy, r * 0.22, r * 0.15), '#ec6a72', dens=0.5, suave=r * 0.08, gran=0.05)
+    # eyes: lids, iris, catch-light, lashes -- in sepia pencil
+    rie = boca in ('abierta', 'ríe')
     for sd in (-1, 1):
         k = 1 - 0.35 * max(0, giro * sd)
-        cx_, cy_ = R(giro * r * 0.32 + sd * ex * k, eye_y)
-        if ojos == 'cerrados':
-            trazos_osc.append(arco(cx_, cy_ + r * 0.03, r * 0.11 * k, r * 0.08, 200, 340, 12, ang))
-        elif ojos == 'abajo':
-            trazos_osc.append(arco(cx_, cy_ - r * 0.02, r * 0.1 * k, r * 0.06, 20, 160, 12, ang))
+        cx_, cy_ = R(cx0 + sd * ex * k, eye_y)
+        ew, eh = r * 0.13 * k, r * 0.085
+        outer = sd  # outer corner side
+        if ojos == 'cerrados':           # laughing: arcs pushed up by the cheeks
+            lid = arco(cx_, cy_ + r * 0.04, ew, eh, 195, 345, 14, ang)
+            lz.lapiz([lid], SEP, grosor=gw * 1.15, presion=0.9, temblor=0.05, puntas=0.3)
+            tip = lid[-1] if outer > 0 else lid[0]
+            lz.lapiz([[tip, (tip[0] + outer * r * 0.06, tip[1] - r * 0.03)],
+                      [tip, (tip[0] + outer * r * 0.07, tip[1] + r * 0.01)]], SEP, grosor=gw * 0.7, presion=0.7)
+            if rie:   # the cheek lifts under the eye
+                lz.lapiz([arco(cx_, cy_ + r * 0.16, ew * 0.9, r * 0.05, 30, 150, 10, ang)], SEP, grosor=gw * 0.6,
+                         presion=0.3)
+        elif ojos == 'abajo':            # tender, eyes lowered: lid with lashes
+            lid = arco(cx_, cy_, ew, eh * 0.8, 15, 165, 14, ang)
+            lz.lapiz([lid], SEP, grosor=gw * 1.15, presion=0.9, temblor=0.05, puntas=0.3)
+            for t in (0.25, 0.5, 0.75) if k > 0.8 else (0.5,):
+                p = lid[int(t * (len(lid) - 1))]
+                lz.lapiz([[p, (p[0] + (t - 0.5) * r * 0.08, p[1] + r * 0.05)]], SEP, grosor=gw * 0.55, presion=0.6)
+            lz.lapiz([arco(cx_, cy_ - r * 0.03, ew * 1.05, eh * 1.4, 200, 340, 12, ang)], SEP, grosor=gw * 0.5,
+                     presion=0.3)          # the upper crease of the lid
         else:
             mx, my = mira
-            ex_, ey_ = cx_ + mx * r * 0.05, cy_ + my * r * 0.04
-            lz.aguada(Elipse(ex_, ey_, r * 0.085 * k, r * 0.11), '#3b2a24',
-                      dens=1.35, borde=0.2, irreg=0.15, gran=0.1)
-            # expressive, warm eyes: a tiny gouache catch-light and an upper lash
-            lz.gouache(Elipse(ex_ + r * 0.025, ey_ - r * 0.035, max(0.5, r * 0.028)), '#fffdf6', alfa=0.95, irreg=0)
-            lz.lapiz([arco(ex_, ey_ + r * 0.01, r * 0.11 * k, r * 0.12, 200, 330, 10, ang)], '#3b2a24',
-                     grosor=0.9, presion=0.7, temblor=0.05, puntas=0.3)
-        # eyebrow
-        bx_, by_ = R(giro * r * 0.32 + sd * ex * k * 1.05, eye_y - r * 0.24)
-        lz.lapiz([arco(bx_, by_ + r * 0.06, r * 0.13 * k, r * 0.06, 205, 335, 10, ang)], pelo_lp,
-                 grosor=0.8, presion=0.45, temblor=0.15)
-    if trazos_osc:
-        lz.lapiz(trazos_osc, '#4a2e24', grosor=1.0, presion=0.85, temblor=0.12, puntas=0.3)
-    # nose
-    nx_, ny_ = R(giro * r * 0.42, r * 0.33)
-    lz.lapiz([arco(nx_, ny_, r * 0.06, r * 0.07, -60 + 60 * giro, 100 + 60 * giro, 10, ang)], lp,
-             grosor=0.8, presion=0.5, temblor=0.1)
+            ix, iy = cx_ + mx * r * 0.04, cy_ + my * r * 0.03
+            # white of the eye left as paper; iris; upper lid over it
+            lz.aguada(Elipse(ix, iy + r * 0.01, r * 0.075 * k, r * 0.085), '#4a2c22', dens=1.3, borde=0.3,
+                      irreg=0.1, gran=0.05, toques=[(ix, iy + r * 0.05, r * 0.05, '#8a5a3a', 0.5)])
+            lz.gouache(Elipse(ix + r * 0.025, iy - r * 0.025, max(0.45, r * 0.026)), '#fffdf6', alfa=0.95, irreg=0)
+            lid = arco(cx_, cy_ + r * 0.01, ew, eh, 192, 348, 14, ang)
+            lz.lapiz([lid], SEP, grosor=gw * 1.25, presion=0.95, temblor=0.04, puntas=0.25)
+            tip = lid[-1] if outer > 0 else lid[0]
+            lz.lapiz([[tip, (tip[0] + outer * r * 0.06, tip[1] - r * 0.04)]], SEP, grosor=gw * 0.7, presion=0.8)
+            lz.lapiz([arco(cx_, cy_ + r * 0.02, ew * 0.8, eh * 0.9, 30, 150, 10, ang)], SEP, grosor=gw * 0.5,
+                     presion=0.3)          # lower lid
+            lz.lapiz([arco(cx_, cy_ - r * 0.03, ew * 1.05, eh * 1.5, 205, 335, 12, ang)], SEP, grosor=gw * 0.5,
+                     presion=0.25)         # crease
+        # eyebrow: raised a little (joy)
+        bx_, by_ = R(cx0 + sd * ex * k * 1.05, eye_y - r * 0.27 - (r * 0.03 if rie else 0))
+        lz.lapiz([arco(bx_, by_ + r * 0.07, r * 0.14 * k, r * 0.07, 200, 335, 10, ang)], pelo_lp,
+                 grosor=gw * 1.1, presion=0.6, temblor=0.1)
+    # nose: a soft shadow and a sepia line with the nostril
+    nx_, ny_ = R(cx0 + r * 0.06 * (1 if giro >= 0 else -1), r * 0.36)
+    lz.aguada(Elipse(nx_ + shade_side * r * 0.04, ny_ + r * 0.03, r * 0.07, r * 0.045), mezcla(piel, '#a0503a', 0.5),
+              dens=0.45, suave=r * 0.03, gran=0.05)
+    sgn = 1 if giro >= 0 else -1
+    lz.lapiz([bezier(R(cx0 + sgn * r * 0.02, r * 0.16), R(cx0 + sgn * r * 0.09, r * 0.3),
+                     R(cx0 + sgn * r * 0.07, r * 0.4), n=12),
+              arco(nx_ - sgn * r * 0.03, ny_ + r * 0.02, r * 0.05, r * 0.035, 20, 200, 10, ang)], SEP,
+             grosor=gw * 0.75, presion=0.55, temblor=0.05)
     # mouth
-    mx_, my_ = R(giro * r * 0.36, r * 0.6)
-    if boca in ('abierta', 'canta'):
-        hh = r * (0.12 if boca == 'abierta' else 0.14)
-        ww = r * (0.17 if boca == 'abierta' else 0.1)
-        m = Poligono(np.vstack([arco(mx_, my_ - hh * 0.2, ww, hh * 0.15, 180, 360, 8, ang),
-                                arco(mx_, my_ - hh * 0.2, ww, hh, 0, 180, 12, ang)]), suave=False)
-        lz.aguada(m, '#b8424a', dens=0.8, irreg=0.2, borde=0.3, gran=0.1)
-        lz.contorno(m, '#7a3030', grosor=0.7, presion=0.5, cortes=0.1, desfase=0.1)
+    mx_, my_ = R(cx0, r * 0.62)
+    if boca in ('abierta', 'ríe', 'canta'):
+        if boca == 'canta':
+            m = Elipse(mx_, my_, r * 0.08, r * 0.11, ang)
+        else:
+            ww, hh = r * 0.2, r * 0.16
+            top = bezier(R(cx0 - ww, r * 0.56), R(cx0, r * 0.6), R(cx0 + ww, r * 0.56), n=12)
+            bot = bezier(R(cx0 + ww, r * 0.56), R(cx0, r * 0.62 + hh * 1.6), R(cx0 - ww, r * 0.56), n=16)
+            m = Poligono(np.vstack([top, bot[1:]]), suave=False)
+        lz.aguada(m, '#8f2a36', dens=0.95, irreg=0.15, borde=0.4, gran=0.05, tapa=1,
+                  toques=[(mx_, my_ + r * 0.1, r * 0.08, '#e8707a', 0.85)])
+        if boca != 'canta':
+            lz.gouache(Poligono([R(cx0 - r * 0.15, r * 0.58), R(cx0 + r * 0.15, r * 0.58), R(cx0 + r * 0.12, r * 0.63),
+                                 R(cx0 - r * 0.12, r * 0.63)]), '#fff8ee', alfa=0.85, irreg=0.1)
+        lz.contorno(m, '#6a2a2a', grosor=gw * 0.8, presion=0.6, cortes=0.05, desfase=0.05)
+        if rie:   # laugh lines
+            for sd in (-1, 1):
+                a0_, a1_ = (-60, 60) if sd > 0 else (120, 240)
+                lz.lapiz([arco(*R(cx0 + sd * r * 0.25, r * 0.6), r * 0.04, r * 0.08, a0_, a1_, 8, ang)],
+                         SEP, grosor=gw * 0.5, presion=0.3)
     else:
-        w = r * (0.18 if boca == 'sonrisa' else 0.12)
-        lz.lapiz([arco(mx_, my_ - r * 0.08, w, r * 0.1, 25, 155, 14, ang)], '#8f3c3c', grosor=0.9,
-                 presion=0.75, temblor=0.1, puntas=0.3)
+        w = r * (0.19 if boca == 'sonrisa' else 0.12)
+        sm = bezier(R(cx0 - w, r * 0.56), R(cx0, r * 0.7 if boca == 'sonrisa' else r * 0.64), R(cx0 + w, r * 0.56), n=16)
+        lz.lapiz([sm], '#7a2e30', grosor=gw * 1.0, presion=0.8, temblor=0.05, puntas=0.25)
+        for sd in (-1, 1):   # little upturned corners
+            p = sm[-1] if sd > 0 else sm[0]
+            lz.lapiz([[p, (p[0] + sd * r * 0.03, p[1] - r * 0.025)]], '#7a2e30', grosor=gw * 0.6, presion=0.5)
+        lz.aguada(Elipse(*R(cx0, r * 0.72), r * 0.09, r * 0.035, ang), '#e0707a', dens=0.4, suave=r * 0.02)
     # hair on top / front
     hp = None
     if peinado in ('corto', 'largo', 'mono', 'coleta', 'ondas'):
@@ -986,15 +1075,18 @@ def cabeza(lz, x, y, r, piel='piel2', pelo='#5a3a2a', peinado='corto', giro=0.0,
                        R(rx * 0.9, r * 0.6), R(rx * 0.85, -r * 0.3), R(0, -r * 0.55), R(-rx * 0.85, -r * 0.3),
                        R(-rx * 0.9, r * 0.6)])
     if hp is not None:
-        lz.aguada(hp, pelo, dens=0.75 if not canas else 0.4, borde=0.6, gran=0.4, tapa=1, irreg=0.8)
-        lz.contorno(hp, pelo_lp, grosor=0.8, presion=0.55, cortes=0.35)
-        # a few strands
+        lz.aguada(hp, pelo, dens=0.78 if not canas else 0.4, borde=0.6, gran=0.3, tapa=1, irreg=0.8,
+                  sombra=(-shade_side * r * 0.3, -r * 0.3, mezcla(pelo, '#1a1010', 0.4), 0.45))
+        lz.contorno(hp, pelo_lp, grosor=gw * 0.9, presion=0.55, cortes=0.35)
+        # strands and a lifted shine
         if peinado not in ('calvo', 'pañuelo'):
             st = []
-            for k in range(5):
-                a0 = rng.uniform(-0.8, 0.6)
-                st.append(bezier(R(rx * a0, -r * 0.95), R(rx * (a0 - 0.3), -r * 0.7), R(rx * (a0 - 0.5), -r * 0.4)))
-            lz.lapiz(st, pelo_lp, grosor=0.7, presion=0.35, temblor=0.2, cortes=0.3)
+            for k in range(9):
+                a0 = rng.uniform(-0.9, 0.7)
+                st.append(bezier(R(rx * a0, -r * 0.97), R(rx * (a0 - 0.25), -r * 0.72), R(rx * (a0 - 0.45), -r * 0.42)))
+            lz.lapiz(st, pelo_lp, grosor=gw * 0.6, presion=0.4, temblor=0.15, cortes=0.25)
+            lz.levanta(Trazo([R(-rx * 0.5, -r * 0.82), R(0, -r * 0.95), R(rx * 0.3, -r * 0.92)],
+                             (r * 0.08, r * 0.1, r * 0.05)), 0.25, suave=r * 0.05)
     if barba:
         b = Poligono([R(-rx * 0.85, r * 0.35), R(-rx * 0.5, r * 1.0), R(0, r * 1.2), R(rx * 0.5, r * 1.0),
                       R(rx * 0.85, r * 0.35), R(rx * 0.4, r * 0.72), R(giro * r * 0.36, r * 0.5),
@@ -1004,7 +1096,7 @@ def cabeza(lz, x, y, r, piel='piel2', pelo='#5a3a2a', peinado='corto', giro=0.0,
     if adorno:
         ax_, ay_ = R(-rx * 0.75, -r * 0.65)
         flor_simple(lz, ax_, ay_, r * 0.28, adorno)
-    lz.contorno(face, lp, grosor=0.8, presion=0.45, cortes=0.45, desfase=0.5,
+    lz.contorno(face, SEP, grosor=gw * 0.8, presion=0.45, cortes=0.4, desfase=r * 0.015,
                 solo=(x - r * 2, y - r * 0.2, x + r * 2, y + r * 2))
     return fx, fy
 
@@ -1020,51 +1112,101 @@ def flor_simple(lz, x, y, r, color='#e8735e', centro='#e8b53e', petalos=5, semil
     lz.aguada(Elipse(x, y, r * 0.25), centro, dens=0.8, irreg=0.3)
 
 
-def extremidad(lz, pts, anchos, color, tapa=1, dens=0.6, lapiz=None, toques=None, contorno=True, **kw):
-    """Arm/leg/sleeve: a tapered wash along a path plus a loose pencil outline."""
-    f = Trazo(pts, anchos)
-    lz.aguada(f, color, dens=dens, tapa=tapa, toques=toques, **kw)
+def extremidad(lz, pts, anchos, color, tapa=1, dens=0.6, lapiz=None, toques=None, contorno=True, sombra=None,
+               **kw):
+    """Arm/leg/sleeve: a tapered wash along a path plus a loose pencil outline.
+    With exactly three points (shoulder, elbow, wrist) the limb is built as two
+    straight segments with a rounded joint, so elbows and knees really bend.
+    sombra: optional light direction (dx, dy) for a modelling glaze."""
+    pts = [tuple(map(float, p)) for p in pts]
+    if len(pts) == 3:
+        an = list(anchos) if len(anchos) == 3 else [anchos[0], (anchos[0] + anchos[-1]) / 2, anchos[-1]]
+        f = Trazo(pts[:2], (an[0], an[1]), suave=False) | Trazo(pts[1:], (an[1] * 1.02, an[2]), suave=False)
+    else:
+        f = Trazo(pts, anchos)
+    if sombra is None:
+        w = max(anchos)
+        sombra = (-w * 0.35, -w * 0.3, mezcla(color, '#3a2030', 0.35), 0.4)
+    lz.aguada(f, color, dens=dens, tapa=tapa, toques=toques, sombra=sombra if sombra else None, **kw)
     if contorno:
         lz.contorno(f, lapiz or _lapiz_de(color), grosor=0.85, presion=0.55, cortes=0.3)
     return f
 
 
-def mano(lz, x, y, ang, tam, piel='piel2', tipo='abierta', semilla=None):
-    """A small mitten-like hand. ang: direction the fingers point (degrees,
-    0 = right, 90 = down). tipo: 'abierta' | 'puño' | 'sujeta'."""
+def mano(lz, x, y, ang, tam, piel='piel2', tipo='abierta', semilla=None, pulgar=1):
+    """A hand with fingers. (x, y) = wrist; ang = direction the fingers point
+    (degrees, 0 = right, 90 = down); tam = wrist-to-fingertip length (units).
+    tipo: 'abierta' (fingers spread), 'junta' (flat, fingers together, for a
+    caress), 'sujeta' / 'puño' (fingers curled round something), 'señala'.
+    pulgar: +1 / -1, which side the thumb is on."""
     a = math.radians(ang)
     d = np.array([math.cos(a), math.sin(a)])
-    n = np.array([-d[1], d[0]])
-    c = np.array([x, y])
-    if tipo == 'puño':
-        palm = Elipse(*(c + d * tam * 0.15), tam * 0.42, tam * 0.36, ang)
+    n = np.array([-d[1], d[0]]) * pulgar
+    c = np.array([x, y], float)
+    P = lambda u, v: c + d * u * tam + n * v * tam
+    palma = Poligono([P(-0.04, -0.15), P(0.25, -0.19), P(0.5, -0.18), P(0.54, 0.0), P(0.5, 0.19), P(0.25, 0.21),
+                      P(-0.04, 0.16)])
+    dedos = []
+    if tipo in ('abierta', 'junta', 'señala'):
+        spread = 15 if tipo == 'abierta' else 4
+        for i, (v, L) in enumerate(((-0.15, 0.34), (-0.05, 0.43), (0.05, 0.41), (0.15, 0.32))):
+            aa = math.radians(ang + (-1.5 + i) * spread * pulgar)
+            dd = np.array([math.cos(aa), math.sin(aa)])
+            root = P(0.44, v)
+            if tipo == 'señala' and i != 1:
+                dedos.append(Elipse(*P(0.55, v), tam * 0.1, tam * 0.06, ang + 90))
+                continue
+            dedos.append(Trazo([root, root + dd * L * tam], (tam * 0.105, tam * 0.085), suave=False))
+        pul = Trazo([P(0.1, 0.17), P(0.24, 0.32), P(0.36, 0.4)], (tam * 0.13, tam * 0.11, tam * 0.09), suave=False)
     else:
-        palm = Elipse(*(c + d * tam * 0.3), tam * 0.55, tam * 0.36, ang)
-    thumb = Elipse(*(c + d * tam * 0.18 + n * tam * 0.36), tam * 0.26, tam * 0.13, ang - 40)
-    f = palm | thumb
-    lz.aguada(f, piel, dens=0.6, tapa=1, irreg=0.4, borde=0.4, gran=0.2)
-    lz.contorno(f, PIEL_LAPIZ, grosor=0.7, presion=0.5, cortes=0.3, desfase=0.3)
-    if tipo == 'abierta':
-        tr = []
-        for k in (-0.12, 0.08):
-            p0 = c + d * tam * 0.5 + n * tam * k
-            tr.append(np.array([p0, p0 + d * tam * 0.3]))
-        lz.lapiz(tr, PIEL_LAPIZ, grosor=0.6, presion=0.35, temblor=0.05)
+        # curled fingers: a row of knuckles wrapping forward, thumb across them
+        for i, v in enumerate((-0.15, -0.05, 0.05, 0.15)):
+            dedos.append(Elipse(*P(0.56, v), tam * 0.1, tam * 0.06, ang + 90))
+        pul = Trazo([P(0.12, 0.18), P(0.3, 0.2), P(0.46, 0.12)], (tam * 0.13, tam * 0.11, tam * 0.09), suave=False)
+    tono_sombra = mezcla(piel, '#a0503a', 0.4)
+    SEP = '#6b4433'
+    gw = max(0.5, tam * 0.028)
+    f = palma
+    for g in dedos + [pul]:
+        f = f | g
+    lz.aguada(f, piel, dens=0.62, tapa=1, irreg=0.15, borde=0.5, gran=0.1,
+              sombra=(-d[0] * tam * 0.12 - n[0] * tam * 0.08, -d[1] * tam * 0.12 - n[1] * tam * 0.08, tono_sombra, 0.3))
+    # each finger outlined on its own so they read as fingers
+    for g in dedos + [pul]:
+        lz.contorno(g, SEP, grosor=gw, presion=0.5, cortes=0.1, desfase=0.0)
+    lz.contorno(palma, SEP, grosor=gw, presion=0.45, cortes=0.3, desfase=0.0)
+    # separations between fingers and the knuckle line
+    tr = []
+    if tipo in ('sujeta', 'puño'):
+        for v in (-0.1, 0.0, 0.1):
+            tr.append([P(0.5, v), P(0.62, v)])
+    else:
+        tr.append([P(0.3, -0.1), P(0.42, -0.12)])
+    lz.lapiz(tr, SEP, grosor=gw * 0.7, presion=0.4, temblor=0.03)
     return f
 
 
-def torso(lz, hi, hd, ci, cd, color, cuello=None, escote=0.3, tapa=1, toques=None, lapiz=None, **kw):
-    """Shirt/torso from two shoulders (hi, hd) and two hips (ci, cd)."""
+def torso(lz, hi, hd, ci, cd, color, cuello=None, escote=0.3, tapa=1, toques=None, lapiz=None, pliegues=True,
+          luz=(-1, -1), **kw):
+    """Shirt/torso from two shoulders (hi, hd) and two hips (ci, cd), with a
+    modelling glaze away from the light and a few pencil folds."""
     hi, hd, ci, cd = map(np.asarray, (hi, hd, ci, cd))
     m = (hi + hd) / 2
     w = np.linalg.norm(hd - hi)
-    pts = [hi + (0, w * 0.06), hi + (-w * 0.05, w * 0.25), (hi * 0.5 + ci * 0.5) + (-w * 0.02, 0),
-           ci, (ci + cd) / 2 + (0, w * 0.04), cd, (hd * 0.5 + cd * 0.5) + (w * 0.02, 0),
-           hd + (w * 0.05, w * 0.25), hd + (0, w * 0.06), m + (w * 0.22, -w * 0.02),
-           m + (0, w * escote * 0.3), m + (-w * 0.22, -w * 0.02)]
+    pts = [hi + (0, w * 0.06), hi + (-w * 0.06, w * 0.25), (hi * 0.5 + ci * 0.5) + (-w * 0.01, 0),
+           ci, (ci + cd) / 2 + (0, w * 0.04), cd, (hd * 0.5 + cd * 0.5) + (w * 0.01, 0),
+           hd + (w * 0.06, w * 0.25), hd + (0, w * 0.06), m + (w * 0.2, -w * 0.06),
+           m + (0, w * escote * 0.3), m + (-w * 0.2, -w * 0.06)]
     f = Poligono(pts)
-    lz.aguada(f, color, dens=0.76, tapa=tapa, toques=toques, **kw)
-    lz.contorno(f, lapiz or _lapiz_de(color), grosor=0.9, presion=0.55, cortes=0.35)
+    sh = kw.pop('sombra', (luz[0] * w * 0.3, luz[1] * w * 0.15, mezcla(color, '#3a2030', 0.35), 0.45))
+    lz.aguada(f, color, dens=0.8, tapa=tapa, toques=toques, sombra=sh, **kw)
+    lp = lapiz or _lapiz_de(color)
+    lz.contorno(f, lp, grosor=0.9, presion=0.55, cortes=0.35)
+    if pliegues:
+        tr = [bezier(hi + (w * 0.08, w * 0.3), hi + (w * 0.2, w * 0.5), ci + (w * 0.15, -w * 0.25)),
+              bezier(hd + (-w * 0.1, w * 0.35), hd + (-w * 0.2, w * 0.55), cd + (-w * 0.2, -w * 0.3)),
+              bezier(ci + (w * 0.2, -w * 0.08), (ci + cd) / 2 + (0, -w * 0.12), cd + (-w * 0.25, -w * 0.06))]
+        lz.lapiz(tr, lp, grosor=0.7, presion=0.3, temblor=0.4, cortes=0.4)
     return f
 
 
@@ -1159,17 +1301,23 @@ def busto(lz, x, y, r, camisa, piel='piel2', ancho=None, bajo=None, cuello=1.0, 
     bajo = bajo or y + r * 4
     ny = y + r * (0.75 + 0.45 * cuello)
     dx = inclina_cuerpo
-    pts = [(x - r * 0.28, ny - r * 0.15), (x - ancho * 0.42 + dx * 0.4, ny + r * 0.25),
-           (x - ancho * 0.52 + dx * 0.6, ny + r * 0.9), (x - ancho * 0.55 + dx, bajo),
-           (x + ancho * 0.55 + dx, bajo), (x + ancho * 0.52 + dx * 0.6, ny + r * 0.9),
-           (x + ancho * 0.42 + dx * 0.4, ny + r * 0.25), (x + r * 0.28, ny - r * 0.15),
-           (x, ny + r * 0.25)]
-    extremidad(lz, [(x, y + r * 0.6), (x, ny + r * 0.1)], (r * 0.5, r * 0.56), piel, dens=0.6,
-               contorno=False, toques=[(x, y + r * 0.95, r * 0.45, mezcla(piel, '#9a5a3a', 0.5), 0.6)])
+    # natural shoulders: the trapezius slopes from the neck to round shoulder caps
+    pts = [(x - r * 0.3, ny - r * 0.2), (x - ancho * 0.3 + dx * 0.3, ny + r * 0.12),
+           (x - ancho * 0.47 + dx * 0.5, ny + r * 0.38), (x - ancho * 0.53 + dx * 0.7, ny + r * 0.85),
+           (x - ancho * 0.55 + dx, bajo), (x + ancho * 0.55 + dx, bajo),
+           (x + ancho * 0.53 + dx * 0.7, ny + r * 0.85), (x + ancho * 0.47 + dx * 0.5, ny + r * 0.38),
+           (x + ancho * 0.3 + dx * 0.3, ny + r * 0.12), (x + r * 0.3, ny - r * 0.2), (x, ny + r * 0.2)]
+    extremidad(lz, [(x, y + r * 0.6), (x, ny + r * 0.1)], (r * 0.48, r * 0.56), piel, dens=0.62,
+               contorno=False, sombra=False,
+               toques=[(x, y + r * 0.98, r * 0.42, mezcla(piel, '#9a5a3a', 0.55), 0.7)])
     f = Poligono(pts)
-    lz.aguada(f, camisa, dens=0.74, tapa=1, toques=toques)
-    lz.contorno(f, _lapiz_de(camisa), grosor=0.9, presion=0.55, cortes=0.35,
-                solo=(x - ancho, y, x + ancho, bajo - 2))
+    lz.aguada(f, camisa, dens=0.8, tapa=1, toques=toques,
+              sombra=(-ancho * 0.1, -r * 0.2, mezcla(camisa, '#3a2030', 0.35), 0.4))
+    lp = _lapiz_de(camisa)
+    lz.contorno(f, lp, grosor=0.9, presion=0.55, cortes=0.35, solo=(x - ancho, y, x + ancho, bajo - 2))
+    lz.lapiz([bezier((x - ancho * 0.3, ny + r * 0.6), (x - ancho * 0.25, ny + r * 1.2), (x - ancho * 0.32, bajo - 2)),
+              bezier((x + ancho * 0.28, ny + r * 0.7), (x + ancho * 0.2, ny + r * 1.3), (x + ancho * 0.26, bajo - 2))],
+             lp, grosor=0.7, presion=0.3, temblor=0.4, cortes=0.3)
     cabeza(lz, x, y, r, piel=piel, **(cara or {}))
     return f
 
@@ -1349,8 +1497,8 @@ def mata(lz, x, y, r, color='#5f8f63', semilla=None):
     rng = np.random.default_rng(sem)
     f = Circulos([(x + rng.normal(0, r * 0.25), y + rng.normal(0, r * 0.2), r * rng.uniform(0.5, 0.75))
                   for _ in range(5)])
-    lz.aguada(f, color, dens=0.8, irreg=0.6, borde=0.7, tapa=0.85, gran=0.4,
-              toques=[(x - r * 0.3, y - r * 0.3, r * 0.6, mezcla(color, '#f0e090', 0.5), 0.6)])
+    lz.aguada(f, color, dens=0.62, irreg=0.6, borde=0.8, tapa=0.85, gran=0.3,
+              toques=[(x - r * 0.3, y - r * 0.3, r * 0.7, mezcla(color, '#f0e090', 0.6), 0.7)])
     lz.rayado(f, _lapiz_de(color, 0.45), angulo=rng.uniform(40, 70), sep=3.5, presion=0.35, largo=8)
 
 
@@ -1374,10 +1522,10 @@ def jardin(lz, forma, paleta=('#e8735e', '#f0c25e', '#c33c4e', '#ec9fa0', '#8d73
     nb = int(area / (1500 * e * e) * densidad)
     for i, (x, y) in enumerate(puntos_dentro(forma, nb, sem + 2, margen=3)):
         k = rng.random()
-        if k < 0.4:
+        if k < 0.45:
             hoja(lz, x, y, rng.uniform(22, 40) * e, rng.uniform(0, 360), verdes[rng.integers(len(verdes))],
                  toque=rng.choice([None, '#e0c060', '#2f5a4a']))
-        elif k < 0.8:
+        elif k < 0.92:
             flor_grande(lz, x, y, rng.uniform(10, 20) * e, paleta[rng.integers(len(paleta))],
                         centro=rng.choice(['#f0c25e', '#5a1a2a', '#fff3cf']), petalos=int(rng.choice([5, 6, 7, 9])))
         else:
