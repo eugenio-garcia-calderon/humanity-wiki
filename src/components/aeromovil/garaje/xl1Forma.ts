@@ -183,7 +183,10 @@ export function punto(s: Sec, t: number): P2 {
 
 // ------------------------------------------------------- fast lookups (cache)
 // Projections query thousands of points: the half-section is cached as a
-// polyline every 8 mm in x and blended between neighbours.
+// polyline every 8 mm in x and blended between neighbours; within 6 cm of the
+// nose and tail tips, where the section shrinks to a point over a few
+// millimetres, every 1 mm (an 8 mm blend there is a cone inside the true
+// rounded face, and decals placed on it sank under the skin in rings).
 const NT = 120;
 const PASO_CACHE = 0.008;
 const cache = new Map<number, Float64Array>();
@@ -198,7 +201,23 @@ function polilinea(i: number): Float64Array {
   return p;
 }
 const N_CACHE = Math.ceil(LARGO / PASO_CACHE);
+const PASO_FINO = 0.001, LARGO_FINO = 0.06, N_FINO = Math.round(LARGO / PASO_FINO);
+const cacheFino = new Map<number, Float64Array>();
+function polilineaFina(i: number): Float64Array {
+  let p = cacheFino.get(i);
+  if (!p) {
+    const s = sec(Math.min(X_MORRO, X_COLA + i * PASO_FINO));
+    p = new Float64Array(NT * 2 + 2);
+    for (let k = 0; k <= NT; k++) { const [z, y] = punto(s, k / NT); p[2 * k] = z; p[2 * k + 1] = y; }
+    cacheFino.set(i, p);
+  }
+  return p;
+}
 function vecinos(x: number): [Float64Array, Float64Array, number] {
+  if (X_MORRO - x < LARGO_FINO || x - X_COLA < LARGO_FINO) {
+    const f = Math.min(N_FINO - 1e-9, Math.max(0, (x - X_COLA) / PASO_FINO)), i = Math.floor(f);
+    return [polilineaFina(i), polilineaFina(i + 1), f - i];
+  }
   const f = Math.min(N_CACHE - 1e-9, Math.max(0, (x - X_COLA) / PASO_CACHE));
   const i = Math.floor(f);
   return [polilinea(i), polilinea(i + 1), f - i];
@@ -242,15 +261,14 @@ function dentro(a: Float64Array, b: Float64Array, w: number, z: number, y: numbe
   // the half-section ends on the centre line: close it there
   return c;
 }
-function bordeX(z: number, y: number, iIn: number, iOut: number): number {
-  const P = polilinea;
-  if (!dentro(P(iIn), P(iIn), 0, z, y)) return NaN;
-  let lo = iIn, hi = iOut;
-  if (dentro(P(hi), P(hi), 0, z, y)) return X_COLA + hi * PASO_CACHE;
-  while (Math.abs(hi - lo) > 1) { const m = Math.round((lo + hi) / 2); if (dentro(P(m), P(m), 0, z, y)) lo = m; else hi = m; }
-  const a = P(lo), b = P(hi); let wl = 0, wh = 1;
-  for (let k = 0; k < 6; k++) { const wm = (wl + wh) / 2; if (dentro(a, b, wm, z, y)) wl = wm; else wh = wm; }
-  return X_COLA + (lo + (hi - lo) * (wl + wh) / 2) * PASO_CACHE;
+/** Is (|z|, y) inside the skin's section at x (blended from the caches)? */
+function dentroEn(x: number, z: number, y: number): boolean { const [a, b, w] = vecinos(x); return dentro(a, b, w, z, y); }
+/** x where the skin is crossed going from xIn (inside) towards xOut: bisection in x. NaN if xIn is outside. */
+function bordeX(z: number, y: number, xIn: number, xOut: number): number {
+  if (!dentroEn(xIn, z, y)) return NaN;
+  let lo = xIn, hi = xOut;
+  for (let k = 0; k < 24; k++) { const m = (lo + hi) / 2; if (dentroEn(m, z, y)) lo = m; else hi = m; }
+  return (lo + hi) / 2;
 }
 /** Is the point (x, y, z) inside the skin? */
 export function dentroPiel(x: number, y: number, z: number): boolean {
@@ -276,11 +294,10 @@ export function rayoPiel(o: [number, number, number], d: [number, number, number
   }
   return null;
 }
-const iDe = (x: number) => Math.round((x - X_COLA) / PASO_CACHE);
 /** x of the skin seen from the front at (z, y), or NaN. */
-export function frenteX(z: number, y: number): number { return bordeX(z, y, iDe(-0.1), N_CACHE); }
+export function frenteX(z: number, y: number): number { return bordeX(z, y, -0.1, X_MORRO); }
 /** x of the skin seen from behind at (z, y), or NaN. */
-export function detrasX(z: number, y: number): number { return bordeX(z, y, iDe(-2.5), 0); }
+export function detrasX(z: number, y: number): number { return bordeX(z, y, -2.5, X_COLA); }
 
 // --------------------------------------------------------- envelope and area
 /** [x, floor, top, max half-width] every `paso` m, from the same sections as the mesh. */
