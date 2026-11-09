@@ -118,7 +118,7 @@ function GraficaSeccion({ R, kmh }: { R: ResultadoTunel; kmh: number }) {
         <span className="flex items-center gap-1"><i className="inline-block h-0.5 w-4 border-t-2 border-dotted border-slate-500" />abajo, por el eje</span>
         <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-full bg-red-600" />remanso</span>
         <span className="flex items-center gap-1"><i className="inline-block h-2 w-2 rounded-full bg-blue-700" />succión máxima</span>
-        <span className="flex items-center gap-1"><i className="inline-block h-3 w-0 border-l border-dashed border-amber-500" />empieza a frenar</span>
+        <span className="flex items-center gap-1"><i className="inline-block h-3 w-0 border-l border-dashed border-amber-500" />el aire empieza a frenarse</span>
         <span className="flex items-center gap-1"><i className="inline-block h-3 w-0 border-l-2 border-rose-700" />separación prevista</span>
         <span>Tras la separación la línea se aclara: el aire real ya se ha despegado y esa parte del cálculo ideal no ocurre.</span>
       </div>

@@ -281,7 +281,7 @@ function construirCuerpo(c: CuerpoTunel, R: ResultadoTunel, mats: Materiales, o:
     // separation: labelled at the side; the adverse-gradient line: at the top
     const K = q.separacion.length / 3, en = (a: number[], k: number) => [a[3 * k], a[3 * k + 1], a[3 * k + 2]];
     rotular(partes.criticos, lado(en(q.separacion, K >> 1)), q.pegadas === K ? 'Pegado hasta la cola' : 'Separación prevista', CSS.separacion, [0.15, -0.38, -0.35]);
-    rotular(partes.criticos, en(q.adverso, K - 1), 'Empieza a frenar (gradiente adverso)', CSS.adverso, [-0.55, 0.22, -0.15]);
+    rotular(partes.criticos, en(q.adverso, K - 1), 'El aire empieza a frenarse (gradiente adverso)', CSS.adverso, [-0.55, 0.22, -0.15]);
     for (let k = 0; k < q.burbujas.length / 3; k++) {
       const p = [q.burbujas[3 * k], q.burbujas[3 * k + 1], q.burbujas[3 * k + 2]];
       marcar(p, CSS.burbuja, 0.02);

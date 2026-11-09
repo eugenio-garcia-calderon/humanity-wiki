@@ -299,7 +299,7 @@ function construir(): THREE.Group {
 /**
  * Silueta del coche para el túnel de viento: [x, suelo de la carrocería,
  * techo, media anchura] cada 5 cm, sacada de la malla proyectada (sin
- * retrovisores ni ruedas). Es la que usa el túnel para desviar las líneas de humo.
+ * retrovisores ni ruedas). Es la que usa el túnel para calcular el aire alrededor del coche.
  */
 const ENVOLVENTE: [number, number, number, number][] = [
   [0.3, 0.23, 0.36, 0.18], [0.25, 0.12, 0.6, 0.28], [0.2, 0.12, 0.63, 0.46], [0.15, 0.12, 0.63, 0.46], [0.1, 0.13, 0.65, 0.46], [0.05, 0.13, 0.84, 0.47],

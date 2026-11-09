@@ -21,8 +21,9 @@ export interface VehiculoGaraje {
   fuente: string;
   /**
    * Aerodinámica, para el túnel de viento: coeficiente de arrastre, área
-   * frontal (m²) y de dónde salen. Sin este dato el túnel no inventa una cifra:
-   * dibuja el humo y dice que no lo sabe.
+   * frontal (m²) y de dónde salen. Sin este dato el consumo no inventa una cifra
+   * (el coche queda fuera de la comparación); el túnel sí calcula su propio Cd a
+   * partir de la silueta y lo enseña como «estimado por el túnel» (2026-11-09).
    */
   aero?: {
     cd: number; area: number; fuente: string;

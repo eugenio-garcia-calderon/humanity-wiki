@@ -10589,3 +10589,42 @@ Eugenio asked for five things on the 3D world; all on branch `nube/arquitectura-
   - **Matrículas:** la punta del morro y la de la cola se calculan cada milímetro y ya no se hunden bajo la chapa.
 - 239 000 triángulos (el límite es 250 000). Comprobado de cerca, antes y después con la misma cámara, más `tsc` y `vite build`.
 - Queda sin arreglar un pequeño corte en la junta de la puerta, donde cruza la arista del costado.
+
+## 2026-11-09 — Aeromóvil: túnel de viento con cálculo del aire, puntos críticos y Cd desglosado
+
+- Eugenio: «haz un mejor tunel de viento, con mayor precisión datos y visualizaciones de los puntos criticos con una mayor granularidad». Lo hizo un bot; revisado e integrado.
+- **Antes era un dibujo** (líneas de humo apartadas por la forma). **Ahora es un cálculo aproximado del aire**:
+  - un método de paneles en 3D con la carretera como espejo, calculado en segundo plano para no congelar la página;
+  - luego una estimación de la capa de aire pegada a la carrocería, para prever dónde se despega.
+  - No es un CFD ni un túnel de verdad, y la tarjeta lo dice.
+- **En el 3D:**
+  - la presión pintada sobre la piel de cada coche, con su leyenda;
+  - líneas de corriente que siguen el aire calculado, con partículas;
+  - marcados y con nombre: el punto donde choca el aire (remanso), los picos de succión, dónde el aire empieza a frenarse, la línea de separación prevista y la estela.
+- **En la tarjeta:**
+  - una gráfica de la presión a lo largo del coche (arriba, costado y bajos);
+  - el Cd de cada coche desglosado en rozamiento, forma y estela, ruedas y detalles;
+  - la sustentación delante y detrás;
+  - controles de detalle (malla baja, media o alta; número de líneas; qué capas se ven);
+  - la velocidad de 50, 80 o 120 km/h, que cambia el rozamiento y dónde se despega el aire.
+- **Calibración** con los coches que publican su Cd (malla media, 80 km/h):
+
+  | Coche | Error |
+  |---|---|
+  | Aptera | +13 % |
+  | XL1 de serie | −19 % |
+  | 1-Litro | +1 % |
+  | SZEmission | −2 % |
+  | Twizy | −52 % |
+
+  - El Twizy va abierto por los lados y el método no lo ve; se enseña, pero queda fuera del ajuste.
+  - La banda de nuestro diseño es ±15 %: el error medio dejando cada coche fuera del ajuste.
+  - Solo hay una constante ajustada (0,051, por retrovisores, juntas, bajos y refrigeración). Las otras dos salen de la literatura.
+  - El bot calibró con las siluetas de antes de los XL1 de hoy (salía ±13 %); al integrarlo se recalculó con las nuevas.
+- **Aeromóvil 1 por defecto:** el túnel da Cd 0,125 (0,106–0,143); la fórmula del editor da 0,153.
+  - **El consumo, la autonomía y los departamentos siguen usando la fórmula del editor**, y el Cd publicado para los demás coches. El túnel pone su cifra al lado.
+  - Si el editor adopta la del túnel lo decide Eugenio.
+- **Comprobaciones del método** (`npx tsx scripts/tunel-pruebas.ts`): la esfera da un error de Cp ≤ 0,012 frente a la solución exacta; el elipsoide 4:1 ≤ 0,021; el espejo del suelo es simétrico.
+- Cambiada la etiqueta «Empieza a frenar» por «El aire empieza a frenarse»: en un coche, «frenar» se lee como pisar el freno. Corregidos también dos comentarios que todavía hablaban de las líneas de humo.
+- Comprobado: `tsc`, `vite build`, el script de pruebas y el editor con el Aeromóvil y los dos XL1 (sin errores nuevos en consola).
+- Sin verificar: un móvil real y una gráfica de verdad (las capturas son con el render por software y las partículas quietas).
