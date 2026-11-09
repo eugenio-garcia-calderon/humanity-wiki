@@ -17,7 +17,7 @@
 import type { Comprobacion, Modelo, Parametros, PuntosOcupante, Pulgadas, Resultados, Rueda } from './geometria';
 import { BALA_DEFECTO, DIAMETRO_RUEDA, PARAMETROS_BALA } from './geometria';
 import { crearForma, punto, type DimBala, type FormaBala } from './garaje/balaForma';
-import { ALETA, APLASTADO_BALA, ASIENTO, POD_SEMIANCHO, alturasPod, brazosDe, contornoCupula, extremoManillar, podDe, semiAncho, techoEn, type Asientos } from './garaje/balaMedidas';
+import { ALETA, APLASTADO_BALA, ASIENTO, POD_SEMIANCHO, alturasPod, brazosDe, contornoCupula, escalaManillar, extremoManillar, podDe, semiAncho, techoEn, type Asientos } from './garaje/balaMedidas';
 
 /** Los parámetros propios del Bala. Van en `Parametros` como opcionales: los diseños del Gota y del Aeromóvil 1 no los llevan. */
 export interface CamposBala {
@@ -67,7 +67,7 @@ export const DESLIZADORES_BALA: FichaBala[] = [
   { clave: 'bCola', n: 'Cola: del eje trasero a la punta', bloque: 'Morro y cola', min: 0.50, max: 1.00, paso: 0.01 },
   { clave: 'bPuntaCola', n: 'Cola: altura de la punta', bloque: 'Morro y cola', min: 0.36, max: 0.62, paso: 0.005 },
   { clave: 'bAleta', n: 'Aleta: altura de la punta', bloque: 'Morro y cola', min: 0.88, max: 1.25, paso: 0.005 },
-  { clave: 'bCupIni', n: 'Cúpula: dónde empieza a subir', bloque: 'Cúpula', min: 0.05, max: 0.40, paso: 0.01 },
+  { clave: 'bCupIni', n: 'Cúpula: dónde empieza a subir', bloque: 'Cúpula', min: 0.05, max: 0.30, paso: 0.01 },
   { clave: 'bCupFin', n: 'Cúpula: dónde acaba de bajar', bloque: 'Cúpula', min: 1.70, max: 2.55, paso: 0.01 },
   { clave: 'bAlto', n: 'Alto total (techo de la cúpula)', bloque: 'Cúpula', min: 1.32, max: 1.60, paso: 0.002 },
   { clave: 'bPilX', n: 'Piloto: cadera al eje delantero', bloque: 'Ocupantes', min: 0.96, max: 1.20, paso: 0.01 },
@@ -170,7 +170,8 @@ function puntosOcupante(F: FormaBala, S: Asientos, piloto: boolean, escala = 1):
   const Fp: [number, number] = piloto ? [-0.52 + dxPil, 0.235 + F.dSuelo] : [-1.30 + dxPas, 0.29 + F.dSuelo];
   const K = rodilla(H, Fp, 0.45 * escala, 0.47 * escala);
   const mano: [number, number] = piloto ? [-0.592, 0.870 + F.dSuelo] : [-1.45 + dxPas, 0.505 + (S.yPasajero - ASIENTO.yPasajero)];
-  return { H, S: en(0.5), C: en(CABEZA_EN_TRONCO), K, F: Fp, d, hx: xH, mano, anchoMano: piloto ? 0.265 * kz : 0.19 * kz, anchoPiernas: piloto ? [0.13, 0.15 * kz] : [0.17, 0.20 * kz] };
+  const kb = escalaManillar(F);
+  return { H, S: en(0.5), C: en(CABEZA_EN_TRONCO), K, F: Fp, d, hx: xH, mano, anchoMano: piloto ? 0.265 * kb : 0.19 * kz, anchoPiernas: piloto ? [0.13, 0.15 * kz] : [0.17, 0.20 * kz] };
 }
 
 export function crearModeloBala(P: Parametros) {

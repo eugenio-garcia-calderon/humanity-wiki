@@ -21,8 +21,9 @@ self.onmessage = (e: MessageEvent<{ n: number; peticion?: PeticionTunel; prueba?
       const t0 = performance.now();
       const m = crearModelo(ajustarCarenado(prueba.P)), res = calcular(m, areas(m));
       const t1 = performance.now();
-      const R = calcularTunel({ ...peticionDe(cuerpoAeromovil(m, res.A), prueba.resolucion, 'pocas'), soloNumeros: true });
-      yo.postMessage({ n, prueba: { R, A: res.A, cdEditor: res.Cd, msModelo: t1 - t0 } });
+      // A: the tunnel body's reference area (the editor's frontal area, except on the Bala, whose tunnel sees its body only)
+      const c = cuerpoAeromovil(m, res.A), R = calcularTunel({ ...peticionDe(c, prueba.resolucion, 'pocas'), soloNumeros: true });
+      yo.postMessage({ n, prueba: { R, A: c.area, cdEditor: res.Cd, msModelo: t1 - t0 } });
       return;
     }
     const r = calcularTunel(peticion!);

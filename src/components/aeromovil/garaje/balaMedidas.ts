@@ -93,8 +93,19 @@ export const ALETA = { raiz: [-2.50, -3.05] as [number, number], punta: [[-2.875
 /** Where the riders sit: hip x (negative: behind the front axle) and the saddle's height under each, above the road. */
 export interface Asientos { xPiloto: number; yPiloto: number; xPasajero: number; yPasajero: number }
 export const ASIENTO: Asientos = { xPiloto: -1.06, yPiloto: 0.44, xPasajero: -1.54, yPasajero: 0.47 };
+/** Half-width of the reference handlebar at the bar-end weight's outer face (m). */
+const MANILLAR = 0.325 + 0.006;
+/**
+ * How wide the handlebar is, as a fraction of the reference one: it narrows with a narrower
+ * body, and further if the canopy is tight where the grips are (1.2 cm from the skin), but
+ * never below 70 % (narrower is not rideable: then it pokes out, and the check says so).
+ */
+export function escalaManillar(F: FormaBala): number {
+  const kz = Math.min(1, F.kW), cabe = (F.ladoZ(-0.592, 0.870 + F.dSuelo) - 0.012) / MANILLAR;
+  return Number.isFinite(cabe) ? Math.max(0.7, Math.min(kz, cabe)) : 0.7;
+}
 /** The outer end of the handlebar (the bar-end weight's outer face), for the check that it stays inside the body: [x, y, z]. */
-export const extremoManillar = (F: FormaBala): [number, number, number] => [-0.592, 0.870 + F.dSuelo, (0.325 + 0.006) * Math.min(1, F.kW)];
+export const extremoManillar = (F: FormaBala): [number, number, number] => [-0.592, 0.870 + F.dSuelo, MANILLAR * escalaManillar(F)];
 
 // ======================================================================= canopy
 /** Lower edge of the canopy glass in side view (reference drawing). Where it meets the top line, the glass ends (rounded in plan). */

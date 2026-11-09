@@ -3,7 +3,7 @@ import { E, loft } from './forma';
 import { barrido, curva, parcheM, piel, thetaY, torno } from './apteraPiel';
 import { APLASTADO, geometriasRueda } from './apteraDetalle';
 import { type FormaBala } from './balaForma';
-import { ALETA, ASIENTO, brazosDe, podDe, semiAncho, techoEn, type Asientos } from './balaMedidas';
+import { ALETA, ASIENTO, brazosDe, escalaManillar, podDe, semiAncho, techoEn, type Asientos } from './balaMedidas';
 export { ALETA, ASIENTO, POD, POD_SEMIANCHO, brazosDe, extremoManillar, podDe, techoEn, type Asientos } from './balaMedidas';
 
 /*
@@ -359,12 +359,12 @@ export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO): THREE.Grou
   }
   // handlebar: clamp on the steering head, bars swept back to the grips, levers ahead of them
   {
-    const p = (x: number, y: number, z: number) => new THREE.Vector3(x, y + piso, z * kz);
+    const kb = escalaManillar(F), p = (x: number, y: number, z: number) => new THREE.Vector3(x, y + piso, z * kb);
     const barra = (s: number) => curva([p(-0.46, 0.875, 0), p(-0.50, 0.885, s * 0.08), p(-0.55, 0.885, s * 0.17), p(-0.585, 0.872, s * 0.215)], 8);
     for (const s of [1, -1]) {
       g.add(malla(barrido(barra(s), () => [0.011, 0.011], { lados: 10 }), M.aluminio, 'manillar'));
-      const puno = new THREE.Mesh(new THREE.CylinderGeometry(0.017, 0.017, 0.11, 14), M.gomaMate); puno.position.set(-0.592, 0.870 + piso, s * 0.265 * kz); puno.rotation.x = Math.PI / 2; g.add(puno);
-      const tope = new THREE.Mesh(new THREE.CylinderGeometry(0.019, 0.019, 0.012, 14), M.aluminio); tope.position.set(-0.592, 0.870 + piso, s * 0.325 * kz); tope.rotation.x = Math.PI / 2; g.add(tope);
+      const puno = new THREE.Mesh(new THREE.CylinderGeometry(0.017, 0.017, 0.11, 14), M.gomaMate); puno.position.set(-0.592, 0.870 + piso, s * 0.265 * kb); puno.rotation.x = Math.PI / 2; g.add(puno);
+      const tope = new THREE.Mesh(new THREE.CylinderGeometry(0.019, 0.019, 0.012, 14), M.aluminio); tope.position.set(-0.592, 0.870 + piso, s * 0.325 * kb); tope.rotation.x = Math.PI / 2; g.add(tope);
       const leva = curva([p(-0.56, 0.882, s * 0.18), p(-0.545, 0.882, s * 0.24), p(-0.555, 0.878, s * 0.295)], 6);
       g.add(malla(barrido(leva, () => [0.006, 0.003], { lados: 6 }), M.plastico, 'maneta'));
     }

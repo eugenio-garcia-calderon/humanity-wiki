@@ -30,7 +30,7 @@ export function opcionesPorDefecto(): OpcionesTunel {
 
 const cache = new Map<string, ResultadoTunel>();
 const esperando = new Map<string, Promise<ResultadoTunel | null>>();
-/** What «Probar» gets back: the tunnel on the modified copy, its frontal area and the editor's Cd for it. */
+/** What «Probar» gets back: the tunnel on the modified copy, its reference area (the editor's frontal area; the Bala's body section) and the editor's Cd for it (none for the Bala). */
 export interface ResultadoPrueba { R: ResultadoTunel; A: number; cdEditor: number; msModelo: number; msTotal: number }
 const pruebas = new Map<string, ResultadoPrueba>();
 const esperandoPrueba = new Map<string, Promise<ResultadoPrueba | null>>();
@@ -85,7 +85,8 @@ function siguiente() {
         if (t.prueba) {
           const g = await import('../geometria'), nu = await import('./nuestro');
           const m = g.crearModelo(g.ajustarCarenado(t.prueba.P)), res = g.calcular(m, g.areas(m));
-          terminar({ R: calcularTunel({ ...nu.peticionDe(nu.cuerpoAeromovil(m, res.A), t.prueba.resolucion, 'pocas'), soloNumeros: true }), A: res.A, cdEditor: res.Cd, msModelo: 0 });
+          const c = nu.cuerpoAeromovil(m, res.A);
+          terminar({ R: calcularTunel({ ...nu.peticionDe(c, t.prueba.resolucion, 'pocas'), soloNumeros: true }), A: c.area, cdEditor: res.Cd, msModelo: 0 });
         } else terminar(calcularTunel(t.peticion!));
       } catch (e) { terminar(null, String(e)); }
     }, 30);
