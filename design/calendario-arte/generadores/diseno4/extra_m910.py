@@ -214,13 +214,6 @@ def cabeza_album(lz, x, y, r, piel='#e6ae88', pelo='#4a2e22', peinado='corto', g
     def side(sd):
         return kL if sd < 0 else kR
 
-    # --- neck (behind the face)
-    if cuello:
-        nk = Trazo([R(fx * 0.2, r * 0.55), R(fx * 0.1, r * 1.25), R(0, r * 1.75)], (r * 0.62, r * 0.6, r * 0.7))
-        lz.aguada(nk, piel, dens=0.6, tapa=1, irreg=0.4, borde=0.4, gran=0.2,
-                  toques=[(*R(0, r * 0.95), r * 0.55, mezcla(piel, '#8a4a30', 0.45), 0.75)])
-        lz.contorno(nk, lp, grosor=0.8, presion=0.45, cortes=0.4, desfase=0.3,
-                    solo=(x - 2 * r, y + r * 0.85, x + 2 * r, y + r * 1.65))
     # --- hair behind
     back = None
     if peinado == 'largo':
@@ -260,6 +253,13 @@ def cabeza_album(lz, x, y, r, piel='#e6ae88', pelo='#4a2e22', peinado='corto', g
         lz.aguada(back, pelo_c if peinado != 'pañuelo' else (pelo2 or pelo_c), dens=0.85 if not canas else 0.45,
                   tapa=1, irreg=0.6, borde=0.65, gran=0.4, toques=tq, flor=1 if peinado == 'pañuelo' else 0)
         lz.contorno(back, pelo_lp, grosor=0.85, presion=0.5, cortes=0.35)
+    # --- neck (behind the face)
+    if cuello:
+        nk = Trazo([R(fx * 0.2, r * 0.55), R(fx * 0.1, r * 1.25), R(0, r * 1.75)], (r * 0.62, r * 0.6, r * 0.7))
+        lz.aguada(nk, piel, dens=0.6, tapa=1, irreg=0.4, borde=0.4, gran=0.2,
+                  toques=[(*R(0, r * 0.95), r * 0.55, mezcla(piel, '#8a4a30', 0.45), 0.75)])
+        lz.contorno(nk, lp, grosor=0.8, presion=0.45, cortes=0.4, desfase=0.3,
+                    solo=(x - 2 * r, y + r * 0.85, x + 2 * r, y + r * 1.65))
     # --- ears
     for sd in (-1, 1):
         if sd * g > 0.45:
@@ -522,3 +522,72 @@ def manga(lz, pts, anchos, color, toques=None, pliegues=2, tapa=1.0, dens=0.72, 
             tr.append(bezier(c - nr * w * 0.35, c + d * w * 0.2 + nr * rng.normal(0, 0.05) * w, c + nr * w * 0.3))
         lz.lapiz(tr, lp, grosor=0.7, presion=0.45, temblor=0.1)
     return f
+
+
+# ======================================================================
+#  Food with personality (month 10). Each returns the face anchor so the
+#  script can add arms that hug, hold hands or wave.
+# ======================================================================
+
+def _wash(lz, f, col, toques=None, dens=0.85, sombra=(-5, -4), tapa=1, lapiz=None, borde=0.75):
+    lz.aguada(f, col, dens=dens, tapa=tapa, irreg=0.3, borde=borde, gran=0.25, toques=toques, sombra=sombra)
+    lz.contorno(f, lapiz or _lapiz_de(col, 0.45), grosor=0.75, presion=0.55, cortes=0.15, desfase=0.15)
+
+
+def lenteja(lz, x, y, r, ang=0, col='#a07a3a'):
+    """A lentil: a lens-shaped disc with a darker rim."""
+    f = Elipse(x, y, r, r * 0.78, ang)
+    _wash(lz, f, col, toques=[(x - r * 0.3, y - r * 0.3, r * 0.6, '#c8a45a', 0.7), (x + r * 0.5, y + r * 0.4, r * 0.5, '#6a4a22', 0.5)],
+          lapiz='#5a3a1a')
+    lz.lapiz([arco(x, y, r * 0.82, r * 0.62, 200, 330, 14, ang)], '#e0c890', grosor=0.8, presion=0.5)
+    return f
+
+
+def limon(lz, x, y, r, ang=0):
+    pts = [(-1.05, 0), (-0.82, -0.42), (-0.3, -0.7), (0.3, -0.7), (0.82, -0.42), (1.05, 0), (0.82, 0.42), (0.3, 0.7),
+           (-0.3, 0.7), (-0.82, 0.42)]
+    ca, sa = math.cos(math.radians(ang)), math.sin(math.radians(ang))
+    f = Poligono([(x + (px * ca - py * sa) * r, y + (px * sa + py * ca) * r) for px, py in pts])
+    _wash(lz, f, '#f2cf3a', toques=[(x - r * 0.3, y - r * 0.3, r * 0.6, '#fbe88a', 0.7), (x + r * 0.5, y + r * 0.4, r * 0.6, '#d9a020', 0.5)],
+          lapiz='#a07a12')
+    rg = np.random.default_rng(int(x * 7 + y * 13))
+    for _ in range(14):  # pores
+        a, d = rg.uniform(0, 6.28), rg.uniform(0.2, 0.8)
+        lz.aguada(Elipse(x + math.cos(a) * r * d, y + math.sin(a) * r * d * 0.6, 0.7), '#c89a1a', dens=0.6, irreg=0.1)
+    lz.gouache(Elipse(x - r * 0.45, y - r * 0.35, r * 0.18, r * 0.07, -25), '#fffbe0', alfa=0.7, irreg=0)
+    return f
+
+
+def pimiento(lz, x, y, r):
+    """A red pepper standing up: three lobes, green stalk."""
+    f = Poligono([(x - r * 0.8, y - r * 0.85), (x - r * 0.3, y - r * 1.0), (x, y - r * 0.85), (x + r * 0.3, y - r * 1.0),
+                  (x + r * 0.8, y - r * 0.85), (x + r * 0.95, y - r * 0.1), (x + r * 0.7, y + r * 0.85), (x + r * 0.25, y + r * 1.05),
+                  (x, y + r * 0.85), (x - r * 0.25, y + r * 1.05), (x - r * 0.7, y + r * 0.85), (x - r * 0.95, y - r * 0.1)])
+    _wash(lz, f, '#d8322a', toques=[(x - r * 0.4, y - r * 0.3, r * 0.5, '#f0705a', 0.7), (x + r * 0.6, y + r * 0.5, r * 0.6, '#8f1a1a', 0.55)],
+          lapiz='#7a1a1a')
+    lz.lapiz([bezier((x - r * 0.3, y - r * 0.9), (x - r * 0.4, y), (x - r * 0.25, y + r * 0.95)),
+              bezier((x + r * 0.3, y - r * 0.9), (x + r * 0.4, y), (x + r * 0.25, y + r * 0.95))], '#a0201e', grosor=0.7, presion=0.45)
+    tallo = Trazo([(x, y - r * 0.9), (x + r * 0.05, y - r * 1.25), (x + r * 0.3, y - r * 1.4)], (r * 0.3, r * 0.16, r * 0.12))
+    _wash(lz, tallo, '#5f8f3a', lapiz='#3f5f2a')
+    lz.gouache(Trazo([(x - r * 0.6, y - r * 0.5), (x - r * 0.62, y + r * 0.2)], (r * 0.12, r * 0.06)), '#fff0e6', alfa=0.6, irreg=0)
+    return f
+
+
+def arroz(lz, x, y, r, ang=-10):
+    """A grain of rice (r = half its length)."""
+    f = Elipse(x, y, r * 0.48, r, ang)
+    _wash(lz, f, '#f6efdc', toques=[(x + r * 0.2, y + r * 0.4, r * 0.4, '#d9ccae', 0.7)], dens=0.6, lapiz='#9a8a6a')
+    lz.lapiz([arco(x, y, r * 0.3, r * 0.8, 200, 300, 10, ang)], '#c8b890', grosor=0.6, presion=0.4)
+    return f
+
+
+def huevo(lz, x, y, r, ang=0, col='#f3e2c8'):
+    f = Poligono([(x + px * r, y + py * r) for px, py in ((0, -1.25), (0.62, -0.85), (0.88, 0.05), (0.7, 0.75), (0, 1.0),
+                                                          (-0.7, 0.75), (-0.88, 0.05), (-0.62, -0.85))])
+    _wash(lz, f, col, toques=[(x + r * 0.4, y + r * 0.5, r * 0.6, '#c8a07a', 0.5)], dens=0.65, lapiz='#9a7a5a')
+    return f
+
+
+def caras_de(lz, x, y, r, **kw):
+    """Shorthand for carita()."""
+    carita(lz, x, y, r, **kw)

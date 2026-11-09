@@ -23,7 +23,7 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from acuarela import (Lienzo, Poligono, Elipse, Trazo, Circulos, spline, bezier, arco, mezcla, rgb, _lapiz_de,
                       pajaro, hojita, hoja, flor_simple, flor_grande, ramita, motas, remuestrea, mata)
-from acuarela import puntos_dentro
+from acuarela import puntos_dentro, pececillo
 from extra_m910 import cabeza_album, mano_dedos, manga, sombra, toldo, banderines, carita
 
 
@@ -171,7 +171,7 @@ for (x0, y0, x1, y1) in ((744, 516, 740, 176), (1236, 480, 1240, 146)):
     lz.aguada(p, '#9a6a4a', dens=0.7, tapa=1, irreg=0.3, gran=0.3)
     lz.contorno(p, LP, grosor=0.7, presion=0.5)
 AW = [(730, 172), (1252, 142), (1318, 196), (694, 232)]
-toldo(lz, *AW, cols=(CORAL, '#f6ead6', TEAL, '#f6ead6'), n=12, fleco=9, lapiz='#7a4030', dens=0.85)
+toldo(lz, *AW, cols=(CORAL, '#f6ead6', TEAL, '#f6ead6'), n=12, fleco=9, lapiz='#7a4030', dens=1.0)
 lz.luz(Poligono(AW), '#ffd9a0', fuerza=0.12, suave=8)
 # the underside of the awning in shade, warm
 lz.aguada(Poligono([(694, 236), (1318, 200), (1300, 214), (712, 246)], suave=False), '#c9a07a', dens=0.25, suave=3)
@@ -180,9 +180,17 @@ lz.aguada(Poligono([(694, 236), (1318, 200), (1300, 214), (712, 246)], suave=Fal
 FX, FY, FR = 968, 322, 44
 blusa = Poligono([(FX - 20, FY + 62), (FX - 58, FY + 78), (FX - 74, FY + 130), (FX - 70, FY + 220), (FX + 74, FY + 224),
                   (FX + 76, FY + 132), (FX + 60, FY + 82), (FX + 20, FY + 64), (FX + 2, FY + 80)])
+# the scarf's knot and its two tails at the nape (she looks left, the knot shows on the right)
+for pts, w in (([(FX + 44, FY + 20), (FX + 62, FY + 48), (FX + 66, FY + 84)], (13, 10, 5)),
+               ([(FX + 46, FY + 22), (FX + 76, FY + 36), (FX + 90, FY + 66)], (12, 9, 4))):
+    t_ = Trazo(pts, w)
+    lz.aguada(t_, CARMIN, dens=0.85, tapa=1, irreg=0.3, borde=0.7, sombra=(-3, -3))
+    lz.contorno(t_, '#7a1f30', grosor=0.6, presion=0.5)
+lz.aguada(Elipse(FX + 46, FY + 20, 10, 9), '#b0304a', dens=0.9, tapa=1, irreg=0.2)
+lz.contorno(Elipse(FX + 46, FY + 20, 10, 9), '#7a1f30', grosor=0.6, presion=0.5)
 cabeza_album(lz, FX, FY, FR, piel='#c98a5e', peinado='pañuelo', pelo='#3a2418', pelo2=CARMIN, giro=-0.45, inclina=-6,
              ojos='abiertos', boca='risa', mira=(-1, 0.4), pendiente=ORO, cuello=True)
-lz.aguada(blusa, '#e9b04a', dens=0.8, tapa=1, borde=0.6, gran=0.35, sombra=(-14, -8, '#b8701e', 0.6),
+lz.aguada(blusa, '#e9a83a', dens=0.95, tapa=1, borde=0.6, gran=0.35, sombra=(-14, -8, '#b8701e', 0.6),
           toques=[(FX + 56, FY + 160, 46, '#c4802e', 0.6), (FX - 30, FY + 100, 34, '#f6d27a', 0.6)])
 lz.contorno(blusa, '#8a5a22', grosor=0.9, presion=0.55, cortes=0.25)
 lz.aguada(Poligono([(FX - 20, FY + 62), (FX + 2, FY + 92), (FX + 20, FY + 64), (FX + 9, FY + 56), (FX - 9, FY + 56)]),
@@ -196,12 +204,11 @@ lz.lapiz([[(FX - 46, FY + 142), (FX - 30, FY + 104), (FX - 22, FY + 66)], [(FX +
 for k in range(12):
     flor_simple(lz, FX - 36 + (k % 6) * 15, FY + 164 + (k // 6) * 26, 4.6, [CORAL, '#f6ead6', ORO][k % 3], centro=CARMIN)
 # her right arm (image right) goes down to the basket on the table
-manga(lz, [(FX + 58, FY + 88), (FX + 84, FY + 156), (FX + 70, FY + 198)], (26, 23, 20), '#e9b04a', pliegues=2,
-      toques=[(FX + 84, FY + 156, 20, '#c4802e', 0.5)])
+
 
 # ------------------------------------------------------------------ the table
 mesa = Poligono(TA, suave=False)
-lz.aguada(mesa, '#c99a6a', dens=0.62, tapa=1, irreg=0.3, borde=0.6, gran=0.45,
+lz.aguada(mesa, '#c99a6a', dens=0.75, sombra=(-10, -6), tapa=1, irreg=0.3, borde=0.6, gran=0.45,
           toques=[(1150, 500, 140, '#b07a4a', 0.5), (720, 580, 100, '#e0b888', 0.5)])
 lz.lapiz([[(700 - k * 6, 530 + k * 12), (1252 + k * 4, 488 + k * 9)] for k in range(1, 7)], '#9a6a3a', grosor=0.6,
          presion=0.25, temblor=0.9)
@@ -213,19 +220,23 @@ hem = [(x + 4 * (k % 2), tela_y(x, 1.0) + (7 if k % 2 else -3)) for k, x in enum
 mantel = Poligono([tuple(D), tuple(C)] + hem[::-1], suave=False)
 lz.aguada(mantel, '#efe0b0', dens=0.5, tapa=1, borde=0.5, gran=0.4,
           toques=[(760, 660, 90, '#f2c36a', 0.5), (1150, 620, 80, '#a8c47a', 0.5)])
-lz.aguada(banda(0.0, 0.3, ola1=5), '#d9a83a', dens=0.6, irreg=0.6, borde=0.7, gran=0.5,
+lz.aguada(banda(0.0, 0.3, ola1=5), '#d9a83a', dens=0.85, irreg=0.6, borde=0.7, gran=0.5,
           toques=[(900, 600, 90, '#e8c25a', 0.6)])
-lz.aguada(banda(0.3, 0.58, x1=950, ola0=5, ola1=8), '#7fae5e', dens=0.62, irreg=0.6, borde=0.7, gran=0.5,
+lz.aguada(banda(0.3, 0.58, x1=950, ola0=5, ola1=8), '#6fa452', dens=0.88, irreg=0.6, borde=0.7, gran=0.5,
           toques=[(760, 670, 60, '#5f8f63', 0.6)])
-lz.aguada(banda(0.3, 0.58, x0=950, ola0=5, ola1=8), '#c9773a', dens=0.6, irreg=0.6, borde=0.7, gran=0.6)
-lz.aguada(banda(0.58, 0.86, ola0=8, ola1=4), '#a9c48a', dens=0.55, irreg=0.6, borde=0.7, gran=0.5,
+lz.aguada(banda(0.3, 0.58, x0=950, ola0=5, ola1=8), '#c9773a', dens=0.85, irreg=0.6, borde=0.7, gran=0.6)
+lz.aguada(banda(0.58, 0.86, ola0=8, ola1=4), '#9cc27e', dens=0.8, irreg=0.6, borde=0.7, gran=0.5,
           toques=[(1100, 690, 70, '#86b6a0', 0.5)])
-# wheat ears on the gold field
-for x in np.arange(684, 1262, 17):
-    y = tela_y(x, 0.17)
-    lz.lapiz([[(x, y + 9), (x + 1.5, y - 6)]], '#9a6a1a', grosor=0.7, presion=0.6)
-    for j in range(3):
-        lz.aguada(Elipse(x + 1.5 + (j - 1) * 2.2, y - 6 - j * 2.5, 1.3, 2.6, 15 * (j - 1)), '#b07a1e', dens=0.85, irreg=0.1)
+# wheat ears on the gold field, leaning in the wind
+for x in np.arange(684, 1262, 19) + rng.uniform(-4, 4, 31):
+    y = tela_y(x, 0.12 + rng.uniform(0, 0.12))
+    lean = 4 + rng.normal(0, 1.5)
+    lz.lapiz([[(x, y + 12), (x + lean, y - 4)]], '#a8782a', grosor=0.6, presion=0.45)
+    for j in range(4):
+        cx_, cy_ = x + lean * (1 + j * 0.25), y - 4 - j * 3.4
+        for sd in (-1, 1):
+            lz.aguada(Elipse(cx_ + sd * 1.6, cy_, 1.3, 2.6, 25 * sd + 15), '#c08a2a', dens=0.7, irreg=0.1)
+    lz.lapiz([[(x + lean * 2, y - 16), (x + lean * 2.6, y - 24)]], '#b07a1e', grosor=0.4, presion=0.5)
 # crop rows in the green field, furrows in the ploughed one
 lz.lapiz([[(x, tela_y(x, 0.54)), (x + 22, tela_y(x + 22, 0.36))] for x in np.arange(680, 930, 18)], '#3f6a3a', grosor=0.8,
          presion=0.5, temblor=0.4)
@@ -266,6 +277,24 @@ for (x, t) in ((800, 0.72), (820, 0.75), (1050, 0.66)):
     lz.lapiz([arco(x, y, 6, 4, 0, 360, 18)], LP, grosor=0.5, presion=0.5)
     lz.aguada(Elipse(x + 6, y - 1, 2), '#3a2a24', dens=0.9, irreg=0.1)
 lz.contorno(mantel, '#8a6a3a', grosor=0.9, presion=0.55, cortes=0.25)
+# the river does not stop at the hem: it pours out of the cloth into a pool on the ground
+wx = 1150
+wy0 = tela_y(wx, 0.72)
+cascada = Trazo([(wx - 4, wy0), (wx + 4, tela_y(wx, 1.0) + 2), (wx + 22, 742), (wx + 34, 768)], (13, 15, 12, 16))
+charca = Elipse(wx + 40, 776, 72, 12)
+lz.aguada(charca, '#4f9ea6', dens=0.85, tapa=1, irreg=0.6, borde=0.8, gran=0.4, toques=[(wx + 60, 776, 30, '#2f7f8a', 0.6)])
+lz.contorno(charca, '#2f6a72', grosor=0.7, presion=0.5, cortes=0.4)
+lz.aguada(cascada, '#4f9ea6', dens=0.85, tapa=1, irreg=0.4, borde=0.8, toques=[(wx + 6, 740, 12, '#2f7f8a', 0.5)])
+for k in range(4):
+    lz.gouache(Trazo([(wx - 6 + k * 3.5, wy0 + 12), (wx + 2 + k * 3, tela_y(wx, 1.0)), (wx + 16 + k * 3, 736 + k * 4)], (1.2, 1.0, 0.7)),
+               '#eef8f6', alfa=0.8, irreg=0)
+for k in range(9):
+    a = math.radians(180 + k * 20)
+    lz.gouache(Elipse(wx + 34 + math.cos(a) * 16, 768 + math.sin(a) * 7, 1.4), '#eef8f6', alfa=0.85, irreg=0)
+lz.lapiz([arco(wx + 34, 774, 40, 6, 200, 340, 20), arco(wx + 50, 776, 22, 3, 190, 350, 14)], '#e8f6f4', grosor=0.9, presion=0.7)
+pececillo(lz, wx + 70, 748, 7, -40, CORAL, gouache=False)
+pececillo(lz, wx + 92, 760, 5.5, 30, ORO, gouache=False)
+lz.lapiz([arco(wx + 80, 760, 16, 14, 200, 330, 12)], '#7fb8b8', grosor=0.6, presion=0.4, cortes=0.4)
 for (x, y) in hem[1:-1]:
     lz.aguada(Elipse(x, y - 6, 3.4), [CORAL, TEAL, ORO][int(x) % 3], dens=0.85, irreg=0.2)
 lado = Poligono([(1278, 548), (1250, 478), (1254, 560), (1272, 694)], suave=False)
@@ -274,13 +303,6 @@ lz.contorno(lado, '#8a6a3a', grosor=0.7, presion=0.45)
 sombra(lz, 980, 760, 340, 20, dens=0.28)
 
 # ------------------------------------------------------------------ goods on the table (back to front)
-# a jug of flowers at the back, behind the bread
-for (x, y, c) in ((884, 436, CORAL), (904, 424, ORO), (868, 420, '#ec9fa0'), (916, 446, CARMIN)):
-    lz.lapiz([[(892, 496), (x, y)]], '#4f6f45', grosor=0.9, presion=0.7)
-    flor_grande(lz, x, y, 10, c, petalos=7)
-jarra = Poligono([(876, 466), (908, 466), (914, 484), (910, 506), (874, 506), (870, 484)])
-lz.aguada(jarra, TEAL, dens=0.8, tapa=1, irreg=0.3, borde=0.7, sombra=(-5, -4))
-lz.contorno(jarra, TEAL_OSC, grosor=0.8, presion=0.55)
 pan(868, 506, 32, 14, -4)
 calabaza(1112, 476, 28)
 calabaza(1156, 490, 19, '#f0a23e')
@@ -346,8 +368,14 @@ for (x, y, f) in ((1032, 542, 'm'), (1058, 536, 'p'), (1084, 542, 'm'), (1046, 5
 cesta(1060, 566, 44, 26, '#b8864a', asa=False)
 for (x, y) in ((1040, 546), (1080, 546)):
     manzana(x, y - 4, 11, '#e2553e')
-mano_dedos(lz, FX + 70, FY + 196, 70, 36, '#c98a5e', curl=0.45, abre=0.7, lado=1, pulgar=0.4)
-lz.aguada(Elipse(FX + 70, FY + 194, 10, 13, 70), '#f0c870', dens=0.75, tapa=1, irreg=0.2)   # rolled cuff
+fa2 = Trazo([(FX + 84, FY + 150), (FX + 82, FY + 196), (FX + 70, FY + 226)], (19, 16, 14))
+lz.aguada(fa2, '#c98a5e', dens=0.6, tapa=1, irreg=0.3, sombra=(-4, -3))
+lz.contorno(fa2, '#6a3a26', grosor=0.7, presion=0.5)
+manga(lz, [(FX + 58, FY + 88), (FX + 80, FY + 122), (FX + 86, FY + 148)], (27, 24, 22), '#e9b04a', pliegues=1,
+      toques=[(FX + 84, FY + 130, 20, '#c4802e', 0.5)])
+lz.aguada(Elipse(FX + 86, FY + 148, 14, 8, 10), '#f0c870', dens=0.78, tapa=1, irreg=0.2)   # rolled cuff
+lz.contorno(Elipse(FX + 86, FY + 148, 14, 8, 10), '#8a5a22', grosor=0.6, presion=0.5)
+mano_dedos(lz, FX + 70, FY + 224, 115, 36, '#c98a5e', curl=0.45, abre=0.6, lado=-1, pulgar=0.4)
 
 # ------------------------------------------------------------------ the farmer's arm reaching to the buyer, carrots
 manga(lz, [(FX - 56, FY + 88), (FX - 92, FY + 140), (FX - 124, FY + 132)], (28, 24, 21), '#e9b04a', pliegues=2,
@@ -381,16 +409,16 @@ mano_dedos(lz, FX - 186, FY + 106, 172, 38, '#c98a5e', curl=0.7, abre=0.4, lado=
 
 # ------------------------------------------------------------------ the buyer: a young woman stepping in
 PIEL_B = '#9b6141'
-sombra(lz, 486, 792, 120, 15, dens=0.32)
+sombra(lz, 494, 792, 100, 14, dens=0.32)
 HX, HY, BR = 476, 300, 48
 # back arm (image left): down, holding her daughter's hand
 manga(lz, [(430, 398), (404, 472), (408, 532)], (34, 29, 25), TEAL, pliegues=2, toques=[(404, 472, 28, TEAL_OSC, 0.5)])
 # legs (one steps forward) and shoes
-for (pts, w) in (([(462, 690), (452, 744), (446, 778)], (20, 16, 13)), ([(500, 690), (530, 738), (556, 766)], (20, 16, 13))):
+for (pts, w) in (([(460, 690), (454, 744), (450, 780)], (22, 18, 13)), ([(500, 690), (516, 734), (530, 768)], (22, 18, 13))):
     f = Trazo(pts, w)
     lz.aguada(f, PIEL_B, dens=0.6, tapa=1, irreg=0.3, toques=[(pts[1][0], pts[1][1], 14, '#7a4a32', 0.4)])
     lz.contorno(f, '#5a3020', grosor=0.6, presion=0.45)
-for (x, y, a) in ((440, 786, 178), (568, 772, 20)):
+for (x, y, a) in ((444, 788, 178), (542, 776, 20)):
     z = Poligono([(x - 20, y), (x - 10, y - 9), (x + 14, y - 8), (x + 22, y + 2), (x + 8, y + 7), (x - 16, y + 6)])
     if a > 90:
         z = Poligono([(2 * x - px, py) for (px, py) in z.p[::3]])
@@ -400,13 +428,13 @@ for (x, y, a) in ((440, 786, 178), (568, 772, 20)):
 cuerpo_v = Poligono([(446, 372), (430, 394), (434, 440), (446, 494), (512, 496), (530, 442), (526, 396), (508, 374), (476, 384)])
 falda = Poligono([(446, 488), (512, 488), (540, 540), (586, 624), (604, 690), (580, 708), (530, 714), (480, 718), (430, 712),
                   (392, 700), (396, 640), (420, 560)])
-lz.aguada(falda, TEAL, dens=0.84, tapa=1, borde=0.75, gran=0.45, sombra=(-16, -10, TEAL_OSC, 0.6),
+lz.aguada(falda, TEAL, dens=1.0, tapa=1, borde=0.75, gran=0.45, sombra=(-16, -10, TEAL_OSC, 0.6),
           toques=[(420, 680, 60, TEAL_OSC, 0.65), (520, 560, 40, '#6fb1ad', 0.6), (580, 680, 40, '#2f6467', 0.5)])
 lz.contorno(falda, '#24504e', grosor=0.95, presion=0.6, cortes=0.15)
 lz.lapiz([bezier((470, 520), (462, 600), (450, 660), (446, 714)), bezier((492, 520), (514, 600), (548, 660), (566, 706)),
           bezier((458, 524), (430, 600), (414, 650), (404, 698)), bezier((500, 512), (540, 570), (574, 630), (594, 690))],
          '#24504e', grosor=0.85, presion=0.45, temblor=0.4)
-lz.aguada(cuerpo_v, TEAL, dens=0.86, tapa=1, borde=0.7, gran=0.4, sombra=(-10, -6, TEAL_OSC, 0.6), toques=[(510, 470, 24, TEAL_OSC, 0.5), (450, 400, 20, '#6fb1ad', 0.5)])
+lz.aguada(cuerpo_v, TEAL, dens=1.0, tapa=1, borde=0.7, gran=0.4, sombra=(-10, -6, TEAL_OSC, 0.6), toques=[(510, 470, 24, TEAL_OSC, 0.5), (450, 400, 20, '#6fb1ad', 0.5)])
 lz.contorno(cuerpo_v, '#24504e', grosor=0.9, presion=0.55)
 for f, n in ((falda, 110), (cuerpo_v, 22)):
     for (x, y) in puntos_dentro(f, n, 77 + n, margen=4):
@@ -429,7 +457,7 @@ lz.aguada(Elipse(600, 446, 10, 16, 30), '#6fb1ad', dens=0.78, tapa=1, irreg=0.2)
 lz.contorno(Elipse(600, 446, 10, 16, 30), '#24504e', grosor=0.6, presion=0.5)
 
 # ------------------------------------------------------------------ the coin, and the bird that leaves it
-MX, MY, MR = 696, 378, 30
+MX, MY, MR = 686, 384, 30
 
 
 def moneda(x, y, r):
@@ -445,14 +473,16 @@ def moneda(x, y, r):
     # the bird embossed on the coin: wings raised, in flight
     s = r / 1.05
     P = lambda pts: [(x + px * s, y + py * s) for px, py in pts]
-    cuerpo_p = Poligono(P([(-0.62, 0.22), (-0.3, 0.08), (0.1, 0.02), (0.42, -0.06), (0.56, -0.02), (0.46, 0.1),
-                           (0.1, 0.24), (-0.3, 0.3)]))
-    ala_p = Poligono(P([(-0.2, 0.08), (-0.32, -0.3), (-0.2, -0.62), (0.0, -0.4), (0.06, -0.66), (0.22, -0.4), (0.18, 0.04)]))
-    cola_p = Poligono(P([(-0.5, 0.2), (-0.8, 0.05), (-0.75, 0.25), (-0.82, 0.42), (-0.5, 0.3)]), suave=False)
-    rel = cuerpo_p | ala_p | cola_p
-    lz.aguada(rel, '#c8922e', dens=0.7, irreg=0.1, borde=0.9)
-    lz.contorno(rel, '#7a4a12', grosor=0.6, presion=0.65, cortes=0.05, desfase=0.05)
-    lz.lapiz([P([(-0.32, -0.3), (-0.2, -0.62), (0.0, -0.4), (0.06, -0.66)]), P([(-0.3, 0.08), (0.42, -0.06)])], '#fff0b8',
+    # a swallow in flight, wings raised in a wide V, forked tail
+    cuerpo_p = Elipse(x + 0.02 * s, y + 0.14 * s, 0.34 * s, 0.1 * s, -8)
+    cabeza_p = Elipse(x + 0.36 * s, y + 0.08 * s, 0.1 * s, 0.09 * s)
+    ala_i = Poligono(P([(-0.06, 0.1), (-0.3, -0.16), (-0.72, -0.5), (-0.5, -0.14), (-0.2, 0.14)]))
+    ala_d = Poligono(P([(0.06, 0.08), (0.26, -0.24), (0.62, -0.6), (0.46, -0.16), (0.2, 0.12)]))
+    cola_p = Poligono(P([(-0.26, 0.14), (-0.66, 0.38), (-0.44, 0.2), (-0.6, 0.5), (-0.24, 0.22)]), suave=False)
+    rel = cuerpo_p | cabeza_p | ala_i | ala_d | cola_p
+    lz.aguada(rel, '#c8922e', dens=0.75, irreg=0.1, borde=0.9)
+    lz.contorno(rel, '#7a4a12', grosor=0.65, presion=0.7, cortes=0.03, desfase=0.05)
+    lz.lapiz([P([(-0.3, -0.16), (-0.72, -0.5)]), P([(0.26, -0.24), (0.62, -0.6)]), P([(-0.3, 0.08), (0.3, 0.02)])], '#fff0b8',
              grosor=0.8, presion=0.8)
     lz.luz((x, y, r * 1.5), '#ffe08a', fuerza=0.55)
     lz.gouache(Elipse(x - r * 0.5, y - r * 0.55, r * 0.12, r * 0.06, -45), '#fffbe8', alfa=0.85, irreg=0)
@@ -460,7 +490,7 @@ def moneda(x, y, r):
 
 lz.aguada(Elipse(MX, MY, 80), '#f6d27a', dens=0.22, suave=30, gran=0.05)
 moneda(MX, MY, MR)
-mano_dedos(lz, 652, 416, -42, 46, PIEL_B, curl=0.5, abre=0.35, lado=1, pulgar=0.8)
+mano_dedos(lz, 652, 414, -50, 46, PIEL_B, curl=0.55, abre=0.3, lado=1, pulgar=0.95)
 
 # the bird lifts off the coin, alive, toward the open paper (freedom)
 camino = bezier((MX - 4, MY - 22), (700, 250), (620, 190), (540, 150), 80)
@@ -469,21 +499,25 @@ for k, (x, y) in enumerate(camino[6:-10:3]):
     lz.gouache(Elipse(x + rng.normal(0, 5), y + rng.normal(0, 5), rng.uniform(0.9, 2.0)), '#fff3c8', alfa=0.9, irreg=0)
     lz.aguada(Elipse(x + rng.normal(0, 7), y + rng.normal(0, 7), rng.uniform(1.0, 2.2)), '#e8b440', dens=0.8, irreg=0.1)
 lz.luz(Trazo(camino[::6], (16,)), '#ffe2a0', fuerza=0.16, suave=10)
-pajaro(lz, 520, 146, 42, '#3f8f8c', ang=-24, alas='arriba', vientre='#f6d27a')
+pajaro(lz, 522, 142, 50, '#2f8a88', ang=-24, alas='arriba', vientre='#f6d27a')
 lz.luz((520, 146, 70), '#ffe2a0', fuerza=0.18)
 
-# the flock that follows: little coins that become leaves, then small birds, off into the silence
-traza2 = bezier((MX - 20, MY - 34), (650, 190), (430, 110), (220, 150), 80)
-for k, (x, y) in enumerate(traza2[8::7]):
-    t = k / 10
-    if t < 0.25:
-        lz.aguada(Elipse(x, y, 6, 6), '#e8b440', dens=0.88, tapa=1, irreg=0.15, borde=0.8, toques=[(x - 2, y - 2, 3, '#ffe28a', 0.7)])
-        lz.contorno(Elipse(x, y, 6, 6), '#7a4a12', grosor=0.5, presion=0.5)
-    elif t < 0.55:
-        hojita(lz, x, y, 15, -150 + k * 30, [SALVIA, ORO, VERDE][k % 3], tapa=1)
+# the flock that follows: little coins that become leaves, then small birds that fly off,
+# smaller and smaller, into the silence (a group escaping from the coin)
+traza2 = bezier((MX - 26, MY - 30), (640, 170), (430, 250), (210, 110), 120)
+for k, idx in enumerate((10, 20, 29, 38, 47, 57, 68, 80, 92, 106, 119)):
+    x, y = traza2[idx]
+    if k < 3:
+        r_ = 7 - k
+        lz.aguada(Elipse(x, y, r_, r_ * (0.55 + 0.45 * (k % 2))), '#e8b440', dens=0.9, tapa=1, irreg=0.15, borde=0.8,
+                  toques=[(x - 2, y - 2, 3, '#ffe28a', 0.7)])
+        lz.contorno(Elipse(x, y, r_, r_ * (0.55 + 0.45 * (k % 2))), '#7a4a12', grosor=0.5, presion=0.55)
+    elif k < 5:
+        hojita(lz, x, y, 17, -150 + k * 40, [ORO, SALVIA][k % 2], tapa=1)
     else:
-        pajaro(lz, x, y - 10, 10 + k * 0.8, [CORAL, ORO, TEAL, '#ec9fa0'][k % 4], ang=-30 + k * 3,
-               alas='arriba' if k % 2 else 'abajo')
+        sz = 17 - (k - 5) * 1.6
+        pajaro(lz, x + (8 if k % 2 else -6), y + (10 if k % 3 == 0 else -6), sz, [CORAL, ORO, TEAL, '#ec9fa0', SALVIA, CORAL][k - 5],
+               ang=-10 - (k % 3) * 12, alas='arriba' if k % 2 else 'abajo')
 
 # ------------------------------------------------------------------ the daughter: holds mum's hand, points at the bird
 GX, GY, GR = 336, 626, 31
@@ -497,7 +531,7 @@ for (x, y, sd) in ((312, 814, -1), (366, 814, 1)):
     lz.aguada(z, '#3f6f8c', dens=0.88, tapa=1, irreg=0.2)
     lz.contorno(z, '#24405a', grosor=0.6, presion=0.5)
 vest = Poligono([(314, 676), (358, 676), (366, 704), (390, 752), (338, 764), (286, 752), (306, 704)])
-lz.aguada(vest, '#f0b030', dens=0.84, tapa=1, borde=0.75, gran=0.4, sombra=(-8, -6, '#c4702a', 0.6), toques=[(370, 740, 26, '#d9862a', 0.6)])
+lz.aguada(vest, '#f0a828', dens=0.98, tapa=1, borde=0.75, gran=0.4, sombra=(-8, -6, '#c4702a', 0.6), toques=[(370, 740, 26, '#d9862a', 0.6)])
 lz.contorno(vest, '#8a5a12', grosor=0.85, presion=0.55)
 lz.lapiz([bezier((330, 712), (322, 732), (312, 758)), bezier((346, 712), (356, 734), (366, 756))], '#9a6a1a', grosor=0.7, presion=0.4)
 for k in range(9):  # embroidered hem
@@ -509,14 +543,14 @@ lz.aguada(Poligono([(316, 674), (336, 688), (356, 674), (346, 668), (326, 668)])
 lz.contorno(Poligono([(316, 674), (336, 688), (356, 674), (346, 668), (326, 668)]), '#9a7a5a', grosor=0.6, presion=0.5)
 # her right arm (image right) up to mum's hand; her left arm points at the bird
 manga(lz, [(356, 684), (382, 626), (402, 566)], (14, 12, 11), '#e6ae88', pliegues=0, lapiz='#8a5440', dens=0.55)
-manga(lz, [(314, 684), (284, 632), (268, 574)], (14, 12, 11), '#e6ae88', pliegues=0, lapiz='#8a5440', dens=0.55)
+manga(lz, [(314, 684), (292, 640), (262, 590)], (14, 12, 11), '#e6ae88', pliegues=0, lapiz='#8a5440', dens=0.55)
 for pts in ([(356, 680), (366, 662)], [(314, 680), (304, 664)]):
     f = Trazo(pts, (17, 15))
     lz.aguada(f, '#f0b030', dens=0.84, tapa=1, irreg=0.2)
     lz.contorno(f, '#8a5a12', grosor=0.6, presion=0.5)
-mano_dedos(lz, 268, 574, -110, 28, '#e6ae88', curl=0.05, abre=0.15, lado=-1, pulgar=0.4, dedos=1)
-lz.aguada(Elipse(266, 562, 7, 9, -20), '#e6ae88', dens=0.6, tapa=1, irreg=0.3)   # curled fingers under the index
-lz.contorno(Elipse(266, 562, 7, 9, -20), '#8a5440', grosor=0.6, presion=0.5)
+mano_dedos(lz, 262, 590, -115, 28, '#e6ae88', curl=0.05, abre=0.15, lado=-1, pulgar=0.4, dedos=1)
+lz.aguada(Elipse(259, 579, 7, 9, -25), '#e6ae88', dens=0.6, tapa=1, irreg=0.3)   # curled fingers under the index
+lz.contorno(Elipse(259, 579, 7, 9, -25), '#8a5440', grosor=0.6, presion=0.5)
 # mum's hand clasps hers
 mano_dedos(lz, 402, 566, -80, 26, '#e6ae88', curl=0.6, abre=0.4, lado=1, pulgar=0.5)
 mano_dedos(lz, 408, 532, 100, 38, PIEL_B, curl=0.65, abre=0.4, lado=-1, pulgar=0.4)

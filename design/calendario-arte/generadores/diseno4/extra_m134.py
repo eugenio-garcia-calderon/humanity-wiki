@@ -294,7 +294,7 @@ def cara(lz, x, y, r, piel='piel2', pelo='#4a2e22', peinado='melena', giro=0.0, 
               toques=[(*M(sd_sh * 0.75, 0.3), r * 0.6, mezcla(piel, '#b0603e', 0.45), 0.5),
                       (*M(fc, -0.5), r * 0.5, mezcla(piel, '#fff0dc', 0.3), 0.4)])
     # shadow glaze on the side away from light + under the hairline
-    lz.aguada(face, mezcla(piel, '#8a3a3a', 0.6), dens=0.28, borde=0.2, irreg=0.4,
+    lz.aguada(face, mezcla(piel, '#8a3a3a', 0.6), dens=0.18, borde=0.2, irreg=0.4,
               desvanece=(*M(sd_sh * 1.0, 0.6), *M(fc - sd_sh * 0.1, 0.0)))
     # cheeks
     puff = 1.35 if boca == 'sopla' else 1.0

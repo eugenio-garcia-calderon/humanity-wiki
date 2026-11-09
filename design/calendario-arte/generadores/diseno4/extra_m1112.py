@@ -180,7 +180,7 @@ def cara(lz, x, y, r, piel='piel2', lado_sombra=None, **kw):
         yy = -0.15 + 0.85 * t
         xx = sd * rx * (0.93 - 0.35 * t * t)
         tr.append([R(xx, r * yy), R(xx - sd * r * 0.18, r * (yy + 0.12))])
-    lz.lapiz(tr, lp, grosor=0.6, presion=0.25, temblor=0.15)
+    lz.lapiz(tr, lp, grosor=0.6, presion=0.18, temblor=0.15)
     # lower lip
     mx, my = R(giro * r * 0.36, r * 0.6)
     if kw.get('boca', 'sonrisa') in ('sonrisa', 'suave'):

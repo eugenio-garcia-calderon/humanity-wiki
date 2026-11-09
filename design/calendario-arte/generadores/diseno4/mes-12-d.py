@@ -151,10 +151,12 @@ lz.contorno(f, '#5a3a24', grosor=0.6, presion=0.45)
 
 # ------------------------------------------------------------------ the garland of paper stars (lit by their words)
 g0, g1 = np.array(rama_i[3][2]), np.array(rama_d[3][2])
-cuerda = bezier(g0, (g0[0] + 200, 330), (g1[0] - 200, 330), g1, 160)
+cuerda = bezier(g0, (g0[0] + 200, 262), (g1[0] - 200, 262), g1, 160)
 lz.lapiz([cuerda], '#7c5a48', grosor=0.8, presion=0.5, temblor=0.5)
 SCOLS = [ORO, CORAL, ROSA, ORO, TEAL, ORO, CORAL, ROSA, ORO, TEAL, ORO]
 for k, t in enumerate(np.linspace(0.08, 0.92, 9)):
+    if k == 4:
+        continue                      # the middle star is lit by their words (painted later)
     x, y = cuerda[int(t * 159)]
     y += 20
     lz.lapiz([[(x, y - 20), (x, y - 12)]], '#7c5a48', grosor=0.6, presion=0.5)
@@ -246,7 +248,7 @@ lz.contorno(f, '#7a1f30', grosor=0.6, presion=0.5)
 lz.lapiz([[(636 + k * 3, 436), (636 + k * 3, 446)] for k in range(4)], CARMIN, grosor=0.7, presion=0.6)
 lz.rayado(f, '#f6d27a', angulo=0, sep=7, presion=0.6, grosor=0.8)
 cuello(lz, 630, 336, 40, 'piel3', (626, 378))
-cara(lz, 630, 336, 40, piel='piel3', pelo='#e2ded8', peinado='calvo', canas=True, barba='#e8e4de',
+cara(lz, 630, 336, 40, piel='piel3', pelo='#e2ded8', peinado='calvo', canas=True,
      giro=0.45, inclina=10, ojos='abiertos', boca='suave', mira=(1, 0.2))
 # a knitted cap
 gorro = Poligono([(596, 318), (604, 298), (628, 290), (654, 298), (664, 316), (650, 312), (628, 308), (608, 312)])
@@ -285,11 +287,20 @@ pieza(lz, [(866, 376), (892, 368), (918, 374), (930, 410), (928, 476), (900, 484
 pliegues(lz, [[(880, 384), (876, 430), (880, 480)], [(912, 400), (918, 440), (912, 478)]], '#1f4f4f', presion=0.5)
 for (x, y) in ((900, 420), (872, 452), (914, 462), (890, 398)):
     flor_simple(lz, x, y, 4.0, ROSA, centro='#fff3cf')
-cuello(lz, 862, 336, 40, 'piel5', (884, 374))
-cara(lz, 862, 336, 40, piel='piel5', pelo=CORAL, peinado='pañuelo', giro=-0.45, inclina=-8, ojos='abiertos',
-     boca='abierta', mira=(-1, 0.1))
-# a pattern of dots on her headwrap
-for (x, y) in ((842, 308), (862, 300), (884, 306), (900, 322), (830, 326), (872, 314)):
+cuello(lz, 862, 336, 40, 'piel4', (884, 374))
+cara(lz, 862, 336, 40, piel='piel4', pelo='#2a1a14', peinado='corto', giro=-0.45, inclina=-8, ojos='abiertos',
+     boca='sonrisa', mira=(-1, 0.1))
+# her headwrap: a tall coral wrap with a knot and a pattern of dots
+envol = Poligono([(822, 348), (813, 312), (818, 276), (840, 252), (874, 244), (904, 256), (916, 288), (912, 324),
+                  (904, 348), (896, 332), (882, 320), (860, 316), (840, 322), (830, 336)])
+lz.aguada(envol, CORAL, dens=0.85, tapa=1, borde=0.8, irreg=0.5, gran=0.3, sombra=(-6, -6),
+          toques=[(900, 300, 24, '#c4503e', 0.6), (850, 262, 20, '#f39a7a', 0.6)])
+lz.contorno(envol, '#9a3a2e', grosor=0.8, presion=0.55, cortes=0.2)
+pliegues(lz, [[(824, 306), (860, 282), (908, 290)], [(826, 284), (856, 260), (900, 266)]], '#9a3a2e', presion=0.5)
+nudo = Elipse(880, 250, 13, 10, -20)
+lz.aguada(nudo, '#e2604c', dens=0.85, tapa=1, irreg=0.4, sombra=(-3, -3))
+lz.contorno(nudo, '#9a3a2e', grosor=0.7, presion=0.5)
+for (x, y) in ((836, 296), (858, 272), (884, 274), (902, 302), (848, 306), (874, 294), (900, 324), (864, 256)):
     lz.aguada(Elipse(x, y, 2.4, 2.4), '#fff1d0', dens=0.9, irreg=0.1)
 # near wheel over her: a ring with spokes
 rueda = Elipse(898, 486, 40, 42) - Elipse(898, 486, 34, 36)
@@ -301,27 +312,48 @@ lz.aguada(Elipse(898, 486, 5, 5), '#6a7a8a', dens=0.8, tapa=1)
 lz.aguada(Elipse(824, 518, 7, 7), '#3a4a5a', dens=0.85, tapa=1)
 # far hand on her lap
 brazo(lz, (914, 386), (916, 444), (882, 462), 22, TEAL)
-mano_dedos(lz, 882, 462, 170, 32, 'piel5', 'relajada', lado=1)
+mano_dedos(lz, 882, 462, 170, 32, 'piel4', 'relajada', lado=1)
 # near hand: open, palm up, she explains what she feels
 brazo(lz, (868, 392), (842, 444), (806, 426), 22, TEAL)
-mano_dedos(lz, 806, 426, 205, 36, 'piel5', 'abierta', lado=-1, abre=0.6, curl=12)
+mano_dedos(lz, 806, 426, 205, 36, 'piel4', 'abierta', lado=-1, abre=0.6, curl=12)
 
 # ------------------------------------------------------------------ their words: two threads of light that braid
-t = np.linspace(0, 1, 120)[:, None]
-base_c = bezier((744, 420), (744, 380), (744, 340), (744, 316), 120)
-dore = bezier((662, 368), (700, 330), (700, 300), (744, 316), 120)                 # from his heart
-rosa = bezier((796, 410), (790, 350), (780, 320), (744, 316), 120)                 # from her open hand
-lz.lapiz([dore], '#e8a83a', grosor=1.6, presion=0.75, temblor=0.4)
-lz.lapiz([rosa], '#e47a8a', grosor=1.6, presion=0.75, temblor=0.4)
-# braided above the table, rising to the garland
-h = np.linspace(316, 270, 60)
-for ph, col in ((0, '#e8a83a'), (np.pi, '#e47a8a')):
-    xx = 744 + 9 * np.sin(np.linspace(0, 4 * np.pi, 60) + ph)
-    lz.lapiz([np.stack([xx, h], 1)], col, grosor=1.6, presion=0.75, temblor=0.2)
-for p in np.vstack([dore[::10], rosa[::10]]):
-    lz.gouache(Elipse(*p, 1.4), '#fff6dc', alfa=0.9, irreg=0)
-    lz.luz((p[0], p[1], 7), '#ffe2a0', fuerza=0.3)
-lz.luz((744, 300, 26), '#ffe7a8', fuerza=0.5)
+SX, SY = cuerda[80][0], cuerda[80][1] + 24          # the middle star of the garland
+MY = 392                                             # where the two threads meet, over the teapot
+CY_ = 348                                            # the cleft of the heart they draw together
+# each thread comes from one of them, they meet, and each draws one half of a heart
+dore = np.vstack([bezier((642, 404), (680, 404), (712, 396), (744, MY), 40),
+                  bezier((744, MY), (700, 356), (696, 312), (744, CY_), 50)[1:]])
+rosa = np.vstack([bezier((802, 416), (790, 396), (772, 388), (744, MY), 40),
+                  bezier((744, MY), (788, 356), (792, 312), (744, CY_), 50)[1:]])
+hh = np.linspace(CY_, SY + 16, 60)
+tw = np.linspace(0, 2.5 * 2 * np.pi, 60)
+amp = 7 * np.sin(np.linspace(0, np.pi, 60)) + 1.5
+br_o = np.stack([744 + amp * np.sin(tw), hh], 1)
+br_r = np.stack([744 + amp * np.sin(tw + np.pi), hh], 1)
+for path, col, lp in ((np.vstack([dore, br_o]), '#eba93a', '#b8781a'), (np.vstack([rosa, br_r]), '#ec7f92', '#b04a60')):
+    f = Trazo(path, (2.0, 3.6, 3.6, 3.0), suave=False)
+    lz.aguada(f, col, dens=0.9, tapa=0.8, irreg=0.15, borde=0.5, gran=0.1)
+    lz.lapiz([path], lp, grosor=0.5, presion=0.4, temblor=0.15, cortes=0.4)
+    lz.luz(Trazo(path[::3], (8,)), '#ffe2a0', fuerza=0.35, suave=5)
+    for p in path[6::12]:
+        lz.gouache(Elipse(*p, 1.3), '#fffaf0', alfa=0.9, irreg=0)
+# the star they light up together
+pts = []
+for j in range(10):
+    rr = 22 if j % 2 == 0 else 9.5
+    a_ = math.radians(-90 + j * 36)
+    pts.append((SX + math.cos(a_) * rr, SY + math.sin(a_) * rr))
+f = Poligono(pts, suave=False)
+lz.lapiz([[(SX, SY - 38), (SX, SY - 20)]], '#7c5a48', grosor=0.6, presion=0.5)
+lz.aguada(Elipse(SX, SY, 60, 56), '#f6c66a', dens=0.22, suave=20, gran=0.05)
+lz.aguada(f, '#f2b632', dens=0.9, tapa=1, irreg=0.2, borde=0.9, toques=[(SX, SY, 10, '#fff3c4', 0.9)])
+lz.contorno(f, '#a0661a', grosor=0.7, presion=0.55, cortes=0.1, desfase=0.2)
+for j in range(0, 10, 2):
+    a_ = math.radians(-90 + j * 36)
+    lz.lapiz([[(SX, SY), (SX + math.cos(a_) * 19, SY + math.sin(a_) * 19)]], '#b8781a', grosor=0.5, presion=0.35)
+lz.luz((SX, SY, 22), '#fff2c4', fuerza=0.7)
+lz.chispas(SX, SY, 52, 40, n=14)
 
 # ------------------------------------------------------------------ the child brings soup up the bridge
 CX = 452
@@ -343,23 +375,23 @@ cuello(lz, CX, 376, 28, 'piel2', (CX + 2, 406))
 cara(lz, CX, 376, 28, piel='piel2', pelo='#c9783a', peinado='rizado', giro=0.4, inclina=6, ojos='abiertos',
      boca='sonrisa', mira=(1, 0.3))
 # the bowl, carried with both hands, steaming
-sopa = Poligono(np.vstack([arco(CX + 46, 442, 20, 5, 180, 360, 12), arco(CX + 46, 442, 20, 14, 0, 180, 14)]),
-                suave=False)
-lz.aguada(sopa, '#f3e6cf', dens=0.6, tapa=1)
-lz.aguada(Elipse(CX + 46, 442, 17, 3.5), '#e0a040', dens=0.8, irreg=0.2)
-lz.lapiz([arco(CX + 46, 450, 16, 4, 20, 160, 10)], CORAL, grosor=0.7, presion=0.5)
+BX, BY = CX + 40, 450
+brazo(lz, (CX - 8, 416), (CX - 2, 452), (BX + 16, 454), 13, CORAL)          # far arm, behind the bowl
+mano_dedos(lz, BX + 16, 454, -20, 20, 'piel2', 'sujeta', lado=-1)
+sopa = Poligono(np.vstack([arco(BX, BY, 21, 5, 180, 360, 12), arco(BX, BY, 21, 15, 0, 180, 14)]), suave=False)
+lz.aguada(sopa, '#f3e6cf', dens=0.6, tapa=1, sombra=(-5, -4))
+lz.aguada(Elipse(BX, BY, 18, 3.5), '#e0a040', dens=0.8, irreg=0.2)
+lz.lapiz([arco(BX, BY + 8, 17, 4, 20, 160, 10)], CORAL, grosor=0.7, presion=0.5)
 lz.contorno(sopa, '#9a7a6a', grosor=0.7, presion=0.5)
 for k in range(3):
-    x = CX + 36 + k * 10
-    lz.lapiz([spline([(x, 436), (x - 4, 424), (x + 3, 412), (x - 2, 400)])], '#c9b8a8', grosor=0.7, presion=0.35)
-brazo(lz, (CX + 12, 414), (CX + 20, 446), (CX + 28, 448), 13, CORAL)
-mano_dedos(lz, CX + 28, 448, -10, 20, 'piel2', 'sujeta', lado=1)
-brazo(lz, (CX - 8, 416), (CX + 6, 452), (CX + 62, 452), 13, CORAL)
-mano_dedos(lz, CX + 62, 452, -5, 20, 'piel2', 'sujeta', lado=-1)
+    x = BX - 10 + k * 10
+    lz.lapiz([spline([(x, BY - 6), (x - 4, BY - 18), (x + 3, BY - 30), (x - 2, BY - 42)])], '#c9b8a8', grosor=0.7,
+             presion=0.35)
+brazo(lz, (CX + 10, 414), (CX + 8, 450), (BX - 18, 458), 13, CORAL)          # near arm
+mano_dedos(lz, BX - 18, 458, -15, 20, 'piel2', 'sujeta', lado=1)
 
 # ------------------------------------------------------------------ the first stars of the night, a few snowflakes
-for (x, y, r, c) in ((560, 258, 6, ORO), (930, 240, 5.5, ROSA), (1010, 286, 4.5, TEAL), (470, 290, 4.5, ORO),
-                     (812, 226, 7, ORO)):
+for (x, y, r, c) in ((548, 246, 10, ORO), (956, 238, 9, ROSA), (1040, 300, 7, TEAL)):
     estrella(lz, x, y, r, c, gouache=False)
 rng = np.random.default_rng(77)
 copos = []

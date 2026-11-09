@@ -224,7 +224,7 @@ lz.aguada(Trazo([(MUN[0] - 1, MUN[1] + 14), (MUN[0], MUN[1] + 2)], (13 * K, 13 *
 mano(lz, MUN[0] + 1, MUN[1] - 2, -84, 30 * K, 'piel2', 'senala', lado=-1)
 
 # a sparrow on the raised knee (birds are dinosaurs, day 20)
-pajaro(lz, rodilla[0] + 6, rodilla[1] - 30, 19, '#a8744a', ang=-8, alas='abajo', vientre='#efe0c8')
+pajaro(lz, rodilla[0] + 4, rodilla[1] - 34, 24, '#9a5a32', ang=-6, alas='arriba', vientre='#f3e6d0')
 
 # ------------------------------------------------------------------ the girl, sitting, blowing the dandelion
 Kg = 1.45
@@ -313,6 +313,10 @@ def semilla_vilano(x, y, s, ang):
 GAL = (1180, 250)
 camino = np.vstack([bezier((cx + 34, cy - 8), (820, 160), (900, 330), (990, 300), 60),
                     bezier((990, 300), (1050, 280), (1020, 190), (1060, 150), 40)[1:]])
+# the breath itself: a faint golden ribbon from her lips, through the dandelion, up to the galaxy
+soplo = np.vstack([bezier(N(46, -152), N(80, -200), (cx - 20, cy + 6), (cx, cy), 20), camino[::3]])
+lz.aguada(Trazo(soplo, (6, 30, 46, 54, 60, 64, 70, 60, 40)), '#f6d690', dens=0.22, suave=14, gran=0.05)
+lz.luz(Trazo(soplo, (10, 40, 50, 40, 20)), '#ffe6a8', fuerza=0.18, suave=12)
 rng = np.random.default_rng(23)
 cols_e = [ORO, CORAL, '#f6a5b5', TEAL, '#8d73b0']
 for i, t in enumerate(np.linspace(0.02, 0.98, 40)):

@@ -98,17 +98,17 @@ rng = np.random.default_rng(31)
 cs = []
 for k in range(26):
     t = k / 26 * 2 * np.pi
-    cs.append((770 + math.cos(t) * 262 * rng.uniform(0.92, 1.05), 196 + math.sin(t) * 100 * rng.uniform(0.9, 1.05),
+    cs.append((770 + math.cos(t) * 262 * rng.uniform(0.92, 1.05), 206 + math.sin(t) * 94 * rng.uniform(0.9, 1.05),
                rng.uniform(40, 56)))
-cs.append((770, 196, 190))
-cs += [(620, 196, 105), (920, 196, 105), (770, 160, 110), (770, 240, 100)]
+cs.append((770, 206, 185))
+cs += [(620, 206, 100), (920, 206, 100), (770, 172, 104), (770, 246, 98)]
 copa = Circulos(cs)
 lz.aguada(copa, '#b5cf7a', dens=0.62, tapa=1, borde=0.7, irreg=1.2, gran=0.5, var=0.6, flor=2,
           toques=[(560, 220, 90, '#5f9a5e', 0.75), (980, 230, 90, '#3f8a6a', 0.75), (770, 120, 110, '#d8d27a', 0.6),
                   (700, 260, 80, '#7fb06a', 0.6), (880, 100, 70, '#4f8f5f', 0.7), (640, 90, 60, '#93b56e', 0.6),
                   (1010, 150, 60, '#e0c060', 0.5), (560, 140, 50, '#e8b04a', 0.55), (920, 290, 50, '#d98a4a', 0.4)])
 # second glaze: darker green in the shady lower half
-lz.aguada(Elipse(770, 280, 280, 60), '#3e7a5a', dens=0.32, suave=30, gran=0.4)
+lz.aguada(copa, '#3e7a5a', dens=0.34, irreg=1.2, borde=0.2, gran=0.4, desvanece=(770, 330, 770, 190))
 lz.contorno(copa, '#3e6a48', grosor=0.9, presion=0.45, cortes=0.5, desfase=0.8)
 # branches inside the crown, each one reaching a house (they are the network that joins the town)
 CASAS = [(560, 224, 36, 26, '#f6e2bd', CORAL, 1, {}), (676, 156, 46, 30, '#f3dcb0', '#b8503e', 2, {'campana': True}),
@@ -142,7 +142,7 @@ for i, (x, y) in enumerate(P):
                       irreg=0.3, tapa=0.6)
 # leaves breaking out of the silhouette, pointing outward
 for t in np.linspace(0, 2 * np.pi, 40, endpoint=False):
-    x, y = 770 + math.cos(t) * 276, 196 + math.sin(t) * 116
+    x, y = 770 + math.cos(t) * 276, 206 + math.sin(t) * 108
     if y > 280 and abs(x - 770) < 120:
         continue
     hoja(lz, x - math.cos(t) * 10, y - math.sin(t) * 10, rng.uniform(22, 32), math.degrees(t) + rng.normal(0, 25),
@@ -307,23 +307,25 @@ brazo(lz, (1134, 504), (1058, 598), (1112, 500), 25, TEAL)
 mano_dedos(lz, 1112, 502, -78, 42, 'piel4', 'apoyada', lado=-1)
 
 # ------------------------------------------------------------------ the votes become leaves of the tree
-for (p0, p1, p2, p3, sm) in (((452, 300), (440, 250), (470, 300), (500, 320), 1),
-                             ((672, 350), (690, 320), (700, 330), (720, 318), 2)):
-    pass
-hojas_voto = [
-    # from the grandmother's hand up to the left clump
-    [(452, 296, 15, -60, ORO), (444, 270, 16, -110, '#e0a83a'), (462, 248, 17, -30, '#7fa86a'),
-     (456, 222, 17, -130, ORO), (482, 204, 19, -70, '#5f9f63')],
-    # from the young woman's hand up into the middle
-    [(676, 352, 14, -70, '#7fa86a'), (664, 330, 15, -120, ORO), (684, 318, 16, -50, '#e0a83a')],
+CAMINOS = [
+    # from the grandmother's hand, a curl of leaves up into the left of the crown
+    [(442, 302), (426, 274), (428, 244), (446, 218), (474, 198), (506, 188)],
+    # from the young woman's hand, straight up into the middle
+    [(670, 356), (656, 334), (664, 310)],
 ]
-for grupo in hojas_voto:
-    for (x, y, L, a, c) in grupo:
-        hojita(lz, x, y, L, a, c, tapa=0.9, dens=0.8)
-    pts = [(x, y) for (x, y, *_r) in grupo]
-    lz.lapiz([spline(pts)], '#d9a441', grosor=0.6, presion=0.25, temblor=0.6, cortes=0.6)
-    for (x, y, *_r) in grupo[::2]:
-        lz.luz((x, y, 10), '#ffe7a8', fuerza=0.35)
+HCOL = [ORO, '#e8b040', '#c9b84a', '#9fb85a', '#6f9f5a']
+for cam in CAMINOS:
+    p = spline(cam)
+    lz.lapiz([p], '#e0a83a', grosor=0.7, presion=0.3, temblor=0.5, cortes=0.5)
+    n = len(cam)
+    for k, (x, y) in enumerate(cam):
+        t = k / max(1, n - 1)
+        d = np.array(cam[min(k + 1, n - 1)]) - np.array(cam[max(k - 1, 0)])
+        ang = math.degrees(math.atan2(d[1], d[0])) + (35 if k % 2 else -35)
+        hoja(lz, x, y, 25 + 12 * t, ang, HCOL[int(t * 4)], ancho=0.42, tapa=0.95)
+        lz.luz((x, y, 12), '#ffe7a8', fuerza=0.35)
+    for q in p[::7]:
+        lz.gouache(Elipse(q[0] + 4, q[1] + 3, 1.2), '#fff4c8', alfa=0.9, irreg=0)
 
 # clean air: birds leave the crown
 pajaro(lz, 1120, 120, 15, TEAL, ang=-14)

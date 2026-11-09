@@ -1282,7 +1282,8 @@ def figura(lz, J, ropa, cara=None):
         lz.contorno(f, _lapiz_de(ropa['falda']), grosor=0.9, presion=0.55, cortes=0.35)
     # neck
     nb = (np.asarray(J['hi']) + np.asarray(J['hd'])) / 2
-    extremidad(lz, [(hx, hy + hr * 0.6), nb + (0, -hr * 0.05)], (hr * 0.5, hr * 0.55), piel, dens=0.6,
+    cw = ropa.get('cuello', 0.5)
+    extremidad(lz, [(hx, hy + hr * 0.6), nb + (0, -hr * 0.05)], (hr * cw, hr * (cw + 0.05)), piel, dens=0.6,
                lapiz=PIEL_LAPIZ, contorno=False, toques=[(hx, hy + hr * 0.9, hr * 0.4, mezcla(piel, '#9a5a3a', 0.5), 0.6)])
     torso(lz, J['hi'], J['hd'], J['ci'], J['cd'], camisa, toques=ropa.get('camisa_toques'))
     for k in delante:
@@ -1315,9 +1316,13 @@ def busto(lz, x, y, r, camisa, piel='piel2', ancho=None, bajo=None, cuello=1.0, 
               sombra=(-ancho * 0.1, -r * 0.2, mezcla(camisa, '#3a2030', 0.35), 0.4))
     lp = _lapiz_de(camisa)
     lz.contorno(f, lp, grosor=0.9, presion=0.55, cortes=0.35, solo=(x - ancho, y, x + ancho, bajo - 2))
-    lz.lapiz([bezier((x - ancho * 0.3, ny + r * 0.6), (x - ancho * 0.25, ny + r * 1.2), (x - ancho * 0.32, bajo - 2)),
-              bezier((x + ancho * 0.28, ny + r * 0.7), (x + ancho * 0.2, ny + r * 1.3), (x + ancho * 0.26, bajo - 2))],
-             lp, grosor=0.7, presion=0.3, temblor=0.4, cortes=0.3)
+    # folds in sepia pencil: from the armpits, and the collar line
+    sp = tuple(mezcla(lp, '#5a3a2a', 0.5).tolist())
+    lz.lapiz([bezier((x - ancho * 0.36, ny + r * 0.55), (x - ancho * 0.28, ny + r * 1.1), (x - ancho * 0.34, bajo - 2)),
+              bezier((x + ancho * 0.34, ny + r * 0.6), (x + ancho * 0.24, ny + r * 1.2), (x + ancho * 0.3, bajo - 2)),
+              bezier((x - ancho * 0.2, ny + r * 0.9), (x - ancho * 0.1, ny + r * 1.05), (x - ancho * 0.02, ny + r * 1.3)),
+              arco(x, ny - r * 0.05, r * 0.32, r * 0.25, 20, 160, 12)],
+             sp, grosor=0.75, presion=0.45, temblor=0.35, cortes=0.25)
     cabeza(lz, x, y, r, piel=piel, **(cara or {}))
     return f
 
@@ -1394,7 +1399,9 @@ def estrella(lz, x, y, r, color='#fff6dc', puntas=5, gouache=True, ang=None, sem
     if gouache:
         lz.gouache(f, color, alfa=0.95, irreg=0.1)
     else:
-        lz.aguada(f, color, dens=0.85, irreg=0.25, borde=0.5, gran=0.1)
+        lz.aguada(f, color, dens=0.8, irreg=0.25, borde=0.8, gran=0.1)
+        lz.contorno(f, _lapiz_de(color, 0.5), grosor=max(0.45, r * 0.06), presion=0.55, cortes=0.15,
+                    desfase=r * 0.04)
 
 
 def pececillo(lz, x, y, s, ang=0, color='#9fd0e0', gouache=True):
@@ -1485,10 +1492,15 @@ def flor_grande(lz, x, y, r, color='#e8735e', centro='#f0c25e', petalos=7, semil
                            (x + math.cos(a) * r * 0.85, y + math.sin(a) * r * 0.85)]], _lapiz_de(color, 0.4),
                          grosor=0.5, presion=0.35, temblor=0.1)
     lz.aguada(Elipse(x, y, r * 0.22), centro, dens=0.9, irreg=0.3, tapa=0.8)
-    for k in range(8):
+    # stamens in pencil (dots and short strokes), not digital sparkles
+    est = []
+    for k in range(9):
         a = rng.uniform(0, 2 * np.pi)
-        lz.gouache(Elipse(x + math.cos(a) * r * 0.3, y + math.sin(a) * r * 0.3, max(0.5, r * 0.05)), '#fff3cf',
-                   alfa=0.9, irreg=0)
+        p0 = (x + math.cos(a) * r * 0.12, y + math.sin(a) * r * 0.12)
+        p1 = (x + math.cos(a) * r * 0.34, y + math.sin(a) * r * 0.34)
+        est.append([p0, p1])
+        est.append(arco(*p1, max(0.4, r * 0.03), max(0.4, r * 0.03), 0, 360, 6))
+    lz.lapiz(est, _lapiz_de(osc, 0.5), grosor=0.5, presion=0.6, temblor=0.05)
 
 
 def mata(lz, x, y, r, color='#5f8f63', semilla=None):
@@ -1502,39 +1514,125 @@ def mata(lz, x, y, r, color='#5f8f63', semilla=None):
     lz.rayado(f, _lapiz_de(color, 0.45), angulo=rng.uniform(40, 70), sep=3.5, presion=0.35, largo=8)
 
 
+def margarita(lz, x, y, r, color='#fbf4e8', centro='#f0b030', petalos=13, semilla=None):
+    """A daisy: many thin petals, each touched with pencil; a dotted heart."""
+    sem = lz._sem(semilla)
+    rng = np.random.default_rng(sem)
+    a0 = rng.uniform(0, 360)
+    lp = _lapiz_de(color if color != '#fbf4e8' else '#c8a090', 0.5)
+    for k in range(petalos):
+        a = math.radians(a0 + k * 360 / petalos + rng.normal(0, 4))
+        L = r * rng.uniform(0.85, 1.05)
+        f = Elipse(x + math.cos(a) * L * 0.55, y + math.sin(a) * L * 0.55, L * 0.48, r * 0.13, math.degrees(a))
+        lz.aguada(f, color, dens=0.7, irreg=0.25, borde=0.9, tapa=0.9, gran=0.1)
+        lz.contorno(f, lp, grosor=0.45, presion=0.45, cortes=0.35, desfase=0.1)
+    c = Elipse(x, y, r * 0.26)
+    lz.aguada(c, centro, dens=0.95, irreg=0.3, tapa=1, toques=[(x + r * 0.08, y + r * 0.08, r * 0.15, '#b06a20', 0.7)])
+    lz.lapiz([arco(x + rng.normal(0, r * 0.08), y + rng.normal(0, r * 0.08), r * 0.03, r * 0.03, 0, 360, 6)
+              for _ in range(7)], '#7a4a20', grosor=0.5, presion=0.6)
+
+
+def campanilla(lz, x, y, r, color='#8d73b0', ang=90, tallo='#4f6f45', semilla=None):
+    """A bell flower hanging from a curved pencil stem. (x, y) = the bell;
+    ang = direction the mouth opens (90 = down)."""
+    a = math.radians(ang)
+    d = np.array([math.cos(a), math.sin(a)])
+    n = np.array([-d[1], d[0]])
+    c = np.array([x, y], float)
+    P = lambda u, v: c + d * u * r + n * v * r
+    pts = [P(-0.7, 0), P(-0.55, -0.35), P(0.1, -0.5), P(0.55, -0.62), P(0.7, -0.4), P(0.62, -0.2), P(0.75, 0),
+           P(0.62, 0.2), P(0.7, 0.4), P(0.55, 0.62), P(0.1, 0.5), P(-0.55, 0.35)]
+    f = Poligono(pts)
+    lz.aguada(f, color, dens=0.8, irreg=0.3, borde=0.9, tapa=0.9, toques=[(*P(-0.4, 0), r * 0.5, mezcla(color, '#2a1a3a', 0.4), 0.6)])
+    lz.contorno(f, _lapiz_de(color, 0.45), grosor=0.55, presion=0.55, cortes=0.2)
+    lz.lapiz([[P(-0.4, 0), P(0.6, 0)], [P(-0.4, -0.15), P(0.55, -0.4)], [P(-0.4, 0.15), P(0.55, 0.4)]],
+             _lapiz_de(color, 0.45), grosor=0.4, presion=0.35)
+    st = P(-0.7, 0)
+    lz.lapiz([bezier(st, st - d * r * 0.8 + n * r * 0.5, st - d * r * 1.6 + n * r * 0.2)], tallo, grosor=0.8, presion=0.7)
+
+
+def tulipan(lz, x, y, r, color='#e8506a', ang=-90, semilla=None):
+    """A tulip cup of three petals on a stem with one long leaf."""
+    a = math.radians(ang)
+    d = np.array([math.cos(a), math.sin(a)])
+    n = np.array([-d[1], d[0]])
+    c = np.array([x, y], float)
+    P = lambda u, v: tuple(c + d * u * r + n * v * r)
+    lz.lapiz([[P(-0.4, 0), P(-2.2, 0.15)]], '#4f6f45', grosor=1.0, presion=0.75, temblor=0.3)
+    hoja(lz, *P(-2.0, 0.1), r * 1.6, math.degrees(a) + 150, '#5f8f63', ancho=0.28)
+    for v0, tint in ((-0.35, 0.0), (0.35, 0.0), (0.0, 0.35)):
+        f = Poligono([P(-0.5, v0 * 0.6), P(0.1, v0 * 1.5), P(0.75, v0 * 0.9), P(0.6, v0 * 0.2), P(0.0, v0 * 0.1)])
+        lz.aguada(f, mezcla(color, '#5a1a2a', tint), dens=0.8, irreg=0.3, borde=0.9, tapa=0.9,
+                  toques=[(*P(-0.4, 0), r * 0.4, mezcla(color, '#5a1a2a', 0.4), 0.6)])
+        lz.contorno(f, _lapiz_de(color, 0.45), grosor=0.5, presion=0.5, cortes=0.2)
+
+
+def capullo(lz, x, y, r, color='#e8735e', ang=-90, semilla=None):
+    """A closed bud with green sepals and a pencil stem."""
+    a = math.radians(ang)
+    d = np.array([math.cos(a), math.sin(a)])
+    n = np.array([-d[1], d[0]])
+    c = np.array([x, y], float)
+    P = lambda u, v: tuple(c + d * u * r + n * v * r)
+    lz.lapiz([[P(-0.3, 0), P(-1.8, 0.2)]], '#4f6f45', grosor=0.9, presion=0.7, temblor=0.3)
+    f = Poligono([P(-0.4, 0), P(-0.1, -0.42), P(0.5, -0.3), P(0.9, 0), P(0.5, 0.3), P(-0.1, 0.42)])
+    lz.aguada(f, color, dens=0.85, irreg=0.3, borde=0.9, tapa=0.9)
+    lz.contorno(f, _lapiz_de(color, 0.45), grosor=0.5, presion=0.55, cortes=0.15)
+    for sd in (-1, 1):
+        s_ = Poligono([P(-0.45, 0), P(-0.1, sd * 0.45), P(0.3, sd * 0.32), P(-0.1, sd * 0.1)])
+        lz.aguada(s_, '#5f8f63', dens=0.85, irreg=0.3, tapa=0.9)
+
+
 def jardin(lz, forma, paleta=('#e8735e', '#f0c25e', '#c33c4e', '#ec9fa0', '#8d73b0'),
            verdes=('#5f8f63', '#86a86c', '#3f7a6a'), base=None, densidad=1.0, semilla=None, base_dens=0.6,
-           tapa=1.0, escala=1.0):
+           tapa=1.0, escala=1.0, destellos=0.15, especies=None):
     """Turn a shape into a garden (a heart, a skirt, an arm...): a wet-in-wet
-    multicolour base, then BIG layered leaves, flowers and bushes packed
-    together, and on top small sprigs, berries and dots. escala scales the
-    motif size (1.0 = big flowers of radius ~12-22 units)."""
+    multicolour base, then BIG layered leaves and flowers of several species
+    (layered flowers, daisies, bells, tulips, buds) drawn over with pencil,
+    and on top small sprigs and berries. escala scales the motif size
+    (1.0 = big flowers of radius ~12-22 units). destellos (0..1): how many
+    light gouache sparkles to scatter (Eugenio's evaluator found them
+    digital: keep low). especies: tuple of names among 'grande', 'margarita',
+    'campanilla', 'tulipan', 'capullo' to restrict the species."""
     sem = lz._sem(semilla)
     rng = np.random.default_rng(sem)
     bb = forma.bbox()
     area = (bb[2] - bb[0]) * (bb[3] - bb[1])
     pts = puntos_dentro(forma, 60, sem + 1)
-    toq = [(x, y, rng.uniform(25, 60) * escala, paleta[i % len(paleta)] if i % 3 else verdes[i % len(verdes)], 0.75)
+    toq = [(x, y, rng.uniform(25, 60) * escala, paleta[i % len(paleta)] if i % 4 else verdes[i % len(verdes)], 0.75)
            for i, (x, y) in enumerate(pts[:16])]
     lz.aguada(forma, base or paleta[0], dens=base_dens, borde=0.6, flor=1, toques=toq, tapa=tapa, var=0.5)
     e = escala
+    esp = especies or ('grande', 'grande', 'margarita', 'campanilla', 'tulipan', 'capullo')
     # big layer
     nb = int(area / (1500 * e * e) * densidad)
     for i, (x, y) in enumerate(puntos_dentro(forma, nb, sem + 2, margen=3)):
         k = rng.random()
-        if k < 0.45:
+        col = paleta[rng.integers(len(paleta))]
+        if k < 0.4:
             hoja(lz, x, y, rng.uniform(22, 40) * e, rng.uniform(0, 360), verdes[rng.integers(len(verdes))],
                  toque=rng.choice([None, '#e0c060', '#2f5a4a']))
-        elif k < 0.92:
-            flor_grande(lz, x, y, rng.uniform(10, 20) * e, paleta[rng.integers(len(paleta))],
-                        centro=rng.choice(['#f0c25e', '#5a1a2a', '#fff3cf']), petalos=int(rng.choice([5, 6, 7, 9])))
+        elif k < 0.94:
+            sp = esp[rng.integers(len(esp))]
+            rr = rng.uniform(10, 20) * e
+            if sp == 'grande':
+                flor_grande(lz, x, y, rr, col, centro=rng.choice(['#f0c25e', '#5a1a2a', '#fff3cf']),
+                            petalos=int(rng.choice([5, 6, 7, 9])))
+            elif sp == 'margarita':
+                margarita(lz, x, y, rr * 0.9, rng.choice(['#fbf4e8', '#f6d6e0', '#fde9b0']))
+            elif sp == 'campanilla':
+                campanilla(lz, x, y, rr * 0.7, rng.choice(['#8d73b0', '#5f86c0', '#c33c4e']), ang=rng.uniform(60, 120))
+            elif sp == 'tulipan':
+                tulipan(lz, x, y, rr * 0.75, col, ang=rng.uniform(-120, -60))
+            else:
+                capullo(lz, x, y, rr * 0.6, col, ang=rng.uniform(-130, -50))
         else:
             mata(lz, x, y, rng.uniform(10, 18) * e, verdes[rng.integers(len(verdes))])
     # small layer
     ns = int(area / (700 * e * e) * densidad)
     for i, (x, y) in enumerate(puntos_dentro(forma, ns, sem + 3, margen=2)):
         k = rng.random()
-        if k < 0.3:
+        if k < 0.35:
             ang = rng.uniform(0, 360)
             L = rng.uniform(16, 30) * e
             p0 = np.array([x, y])
@@ -1542,23 +1640,23 @@ def jardin(lz, forma, paleta=('#e8735e', '#f0c25e', '#c33c4e', '#ec9fa0', '#8d73
             nrm = np.array([-d[1], d[0]])
             ramita(lz, [p0, p0 + d * L * 0.5 + nrm * L * 0.12, p0 + d * L], verdes[rng.integers(len(verdes))],
                    hojas=6, largo=6 * e)
-        elif k < 0.55:
+        elif k < 0.62:
             flor_simple(lz, x, y, rng.uniform(4, 7) * e, paleta[rng.integers(len(paleta))],
                         centro=rng.choice(['#f0c25e', '#fff3cf', '#c33c4e']))
-        elif k < 0.75:
+        elif k < 0.9:
             c = paleta[rng.integers(len(paleta))]
             for _ in range(3):
                 bx, by = x + rng.normal(0, 4), y + rng.normal(0, 4)
                 lz.aguada(Elipse(bx, by, rng.uniform(1.8, 3.2) * e), c, dens=0.9, irreg=0.3, borde=0.6, tapa=0.6)
                 lz.lapiz([[(bx, by), (x, y + 6)]], '#4f6f45', grosor=0.5, presion=0.4)
-        else:
-            for _ in range(6):
-                lz.gouache(Elipse(x + rng.normal(0, 6), y + rng.normal(0, 6), rng.uniform(0.6, 1.3)),
-                           rng.choice(['#fff6dc', '#fde7e2', '#fff1b0']), alfa=0.9, irreg=0)
+        elif rng.random() < destellos:
+            for _ in range(4):
+                lz.gouache(Elipse(x + rng.normal(0, 6), y + rng.normal(0, 6), rng.uniform(0.6, 1.1)),
+                           rng.choice(['#fff6dc', '#fde7e2', '#fff1b0']), alfa=0.85, irreg=0)
 
 
 def cosmos(lz, forma, base='#262a5c', toques_col=('#4b3f8f', '#1f5f72', '#5a2e6e'), estrellas=1.0,
-           peces=True, semilla=None, tapa=1.0, dens=1.25):
+           peces=True, semilla=None, tapa=1.0, dens=1.25, desvanece=None):
     """Turn a shape into night sky and ocean at once: deep indigo with
     teal/violet blooms, star dust, little stars and a shoal of tiny fish."""
     sem = lz._sem(semilla)
@@ -1567,7 +1665,8 @@ def cosmos(lz, forma, base='#262a5c', toques_col=('#4b3f8f', '#1f5f72', '#5a2e6e
     area = (bb[2] - bb[0]) * (bb[3] - bb[1])
     pts = puntos_dentro(forma, 20, sem + 1)
     toq = [(x, y, rng.uniform(20, 45), toques_col[i % len(toques_col)], 0.7) for i, (x, y) in enumerate(pts[:8])]
-    lz.aguada(forma, base, dens=dens, borde=0.5, flor=2, toques=toq, tapa=tapa, gran=0.5, var=0.4)
+    lz.aguada(forma, base, dens=dens, borde=0.5, flor=2, toques=toq, tapa=tapa, gran=0.5, var=0.4,
+              desvanece=desvanece)
     motas(lz, forma, '#fff6dc', n=int(area / 400 * estrellas), tam=(0.4, 1.0), semilla=sem + 3)
     for (x, y) in puntos_dentro(forma, int(area / 5000 * estrellas) + 2, sem + 4, margen=3):
         estrella(lz, x, y, rng.uniform(3.5, 7.0), rng.choice(['#fff6dc', '#fff6dc', '#f6a5b5', '#a8e0e0']),
@@ -1585,7 +1684,7 @@ def cosmos(lz, forma, base='#262a5c', toques_col=('#4b3f8f', '#1f5f72', '#5a2e6e
 
 def pajaro(lz, x, y, s, color='#4f9c9a', ang=0.0, alas='arriba', vientre='#f6e6c8', collage=False):
     """A small bird in flight, facing right (ang rotates it, degrees).
-    s = body half-length in units (12-25). alas: 'arriba' | 'abajo'.
+    s = body half-length in units (12-25). alas: 'arriba' | 'abajo' | 'plegada' (perched).
     collage=True paints it as a cut-paper piece with a tiny shadow."""
     a = math.radians(ang)
     R = lambda pts: [(x + (px * math.cos(a) - py * math.sin(a)) * s, y + (px * math.sin(a) + py * math.cos(a)) * s)
@@ -1593,7 +1692,12 @@ def pajaro(lz, x, y, s, color='#4f9c9a', ang=0.0, alas='arriba', vientre='#f6e6c
     cuerpo = Poligono(R([(-1.05, 0.05), (-0.55, -0.3), (0.25, -0.36), (0.62, -0.42), (0.92, -0.3), (1.02, -0.08),
                          (0.86, 0.12), (0.45, 0.3), (-0.35, 0.3)]))
     cola = Poligono(R([(-0.85, -0.02), (-1.6, -0.42), (-1.45, 0.02), (-1.62, 0.36), (-0.85, 0.16)]), suave=False)
-    if alas == 'arriba':
+    if alas == 'plegada':      # perched: wing folded along the body, little legs
+        ala = Poligono(R([(-0.7, -0.05), (-0.2, -0.3), (0.35, -0.22), (0.45, 0.02), (0.0, 0.18), (-0.6, 0.12)]))
+        lz.lapiz([[R([(0.1, 0.28)])[0], R([(0.05, 0.62)])[0]], [R([(0.3, 0.26)])[0], R([(0.32, 0.62)])[0]],
+                  [R([(-0.05, 0.62)])[0], R([(0.15, 0.62)])[0]], [R([(0.22, 0.62)])[0], R([(0.42, 0.62)])[0]]],
+                 '#6a4a3a', grosor=max(0.5, s * 0.05), presion=0.8, temblor=0.05)
+    elif alas == 'arriba':
         ala = Poligono(R([(-0.45, -0.2), (-0.35, -0.8), (-0.05, -1.35), (0.12, -1.12), (0.3, -1.2), (0.32, -0.85),
                           (0.45, -0.75), (0.38, -0.25)]))
     else:
@@ -1606,10 +1710,17 @@ def pajaro(lz, x, y, s, color='#4f9c9a', ang=0.0, alas='arriba', vientre='#f6e6c
     pinta(cola, mezcla(color, '#2a2a3a', 0.25))
     lz.aguada(cuerpo, color, dens=0.8, tapa=1, irreg=0.35, borde=0.7, gran=0.3,
               toques=[(*R([(0.2, 0.25)])[0], s * 0.45, vientre, 0.85)])
-    pinta(ala, mezcla(color, '#2a2a3a', 0.15) if alas == 'arriba' else mezcla(color, '#ffffff', 0.25))
+    pinta(ala, mezcla(color, '#2a2a3a', 0.15) if alas in ('arriba', 'plegada') else mezcla(color, '#ffffff', 0.25))
     lz.aguada(pico, '#e7a33e', dens=0.9, tapa=1, irreg=0.2)
     lz.contorno(cuerpo | cola, lp, grosor=0.7, presion=0.5, cortes=0.25, desfase=0.3)
     lz.contorno(ala, lp, grosor=0.6, presion=0.45, cortes=0.2, desfase=0.3)
     ex, ey = R([(0.68, -0.16)])[0]
     lz.aguada(Elipse(ex, ey, max(0.9, s * 0.07)), '#2a1a14', dens=1.2, irreg=0.1)
     lz.gouache(Elipse(ex + s * 0.02, ey - s * 0.02, max(0.35, s * 0.025)), '#fffdf6', alfa=0.9, irreg=0)
+
+
+def sombra_bajo(lz, pts, anchos, color='#6a3a4a', dens=0.3, desplaza=(2.5, 5.0)):
+    """Soft cast shadow of an arm/limb on the body under it (paint BEFORE the
+    limb): a wet-edged glaze offset down-right from the limb's path."""
+    q = [(p[0] + desplaza[0], p[1] + desplaza[1]) for p in pts]
+    lz.aguada(Trazo(q, [a * 1.15 for a in anchos]), color, dens=dens, suave=2.5, gran=0.1)

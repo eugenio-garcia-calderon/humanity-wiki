@@ -446,8 +446,7 @@ def abeja(x, y, s=1.0, ang=0):
 
 
 abeja(476, 132, 1.2, -20)
-lz.lapiz([spline([(372, 196), (392, 170), (414, 182), (404, 202), (388, 190), (420, 156), (462, 138)])],
-         '#a08a6a', grosor=0.5, presion=0.4, temblor=0.2, cortes=0.6)
+lz.lapiz([bezier((404, 176), (420, 150), (444, 160), (466, 138))], '#a08a6a', grosor=0.5, presion=0.4, temblor=0.2, cortes=0.6)
 
 # a pair of swallows over the hill
 pajaro(lz, 1040, 420, 11, TEAL, ang=-12)
