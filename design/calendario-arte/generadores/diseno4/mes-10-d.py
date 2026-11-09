@@ -340,12 +340,12 @@ lz.gouache(Trazo([(600, 472), (642, 468)], (1.8, 1.0)), '#ffffff', alfa=0.7, irr
 for (x, y) in ((668, 518), (662, 513), (674, 520)):
     lenteja(lz, x, y, 5, 10)
 # the pepper peeks over the lemon's shoulder and kisses its cheek; the lemon sits on the bowl
-pimiento(lz, 872, 372, 27)
-carita(lz, 866, 368, 12, expr='beso', mira=(-1, 0))
+pimiento(lz, 874, 392, 24)
+carita(lz, 868, 388, 11, expr='beso', mira=(-1, 0))
 limon(lz, 844, 422, 46, -14)
 carita(lz, 854, 410, 22, expr='feliz')
-brazito(lz, [(852, 388), (840, 378), (832, 386)], BRAZO, grosor=1.6, mano_r=3.4)
-cor = Poligono([(830, 346), (825, 339), (830, 334), (835, 339), (840, 334), (845, 339), (840, 346), (835, 352)])
+brazito(lz, [(856, 396), (846, 388), (840, 394)], BRAZO, grosor=1.6, mano_r=3.2)
+cor = Poligono([(822, 384), (817, 377), (822, 372), (827, 377), (832, 372), (837, 377), (832, 384), (827, 390)])
 lz.aguada(cor, CARMIN, dens=0.95, tapa=1, irreg=0.1)
 lz.contorno(cor, '#7a1f30', grosor=0.6, presion=0.5)
 # the chain up the spoon: lentil, rice, lentil, rice
