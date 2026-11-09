@@ -9,11 +9,14 @@ import {
  * and a simple cabin. The shape itself lives in `xl1Forma.ts`.
  *
  * - The skin is one grid over (x, t) per side: rows at fixed x, columns at
- *   fixed t, with normals from the grid's neighbours (no shading seams).
- * - The glass (windscreen and the two door windows) are patches of the same
- *   (x, t) surface lifted 3 mm, with a black frit along their edge; the skin
- *   under them is cut away a little inside the frit, so the cabin shows
- *   through and the cut's steps stay hidden under the opaque border.
+ *   given t, with the surface's own normals (no shading seams). Above the
+ *   shoulder the columns are laid out so that the glass outlines are column
+ *   lines (see `columnasSkin`).
+ * - The glass (windscreen and the two door windows) is the same (x, t)
+ *   surface on the same rows, filling holes cut along exactly those column
+ *   lines: skin and glass share every edge vertex, so the outline is a smooth
+ *   curve with no steps. The black frit is drawn by the glass shader from each
+ *   vertex's distance to the outline (`frit`).
  * - Shut lines, lamps, the black front band and the like are "decals": a 2D
  *   drawing in one view (side, top, front or rear) projected onto the skin
  *   and lifted a fraction of a millimetre.
@@ -76,6 +79,31 @@ function texturaLed(rojo: boolean): THREE.CanvasTexture | null {
   return t;
 }
 
+/**
+ * The glass tint with its black frit: each glass vertex carries `borde`, its
+ * distance to the glass outline minus the frit width. The shader thresholds
+ * the interpolated distance over one pixel (fwidth), so the frit's inner edge
+ * is a crisp, antialiased curve however close the camera gets; vertex colours
+ * would smear it across whole cells.
+ */
+function frit(m: THREE.MeshPhysicalMaterial): THREE.MeshPhysicalMaterial {
+  m.onBeforeCompile = sh => {
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nattribute float borde;\nvarying float vBorde;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvBorde = borde;');
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', '#include <common>\nvarying float vBorde;')
+      .replace('#include <color_fragment>', [
+        '#include <color_fragment>',
+        '{ float w = max(fwidth(vBorde), 1e-5); float f = smoothstep(-w, w, vBorde);',
+        '  diffuseColor.rgb = mix(vec3(0.008, 0.008, 0.010), vec3(0.018, 0.022, 0.027), f);',
+        '  diffuseColor.a = mix(1.0, 0.72, f); }', // tinted: 72 % over the cabin
+      ].join('\n'));
+  };
+  m.customProgramCacheKey = () => 'xl1-frit';
+  return m;
+}
+
 let MATS: ReturnType<typeof crearMateriales> | null = null;
 function crearMateriales() {
   const fis = (p: THREE.MeshPhysicalMaterialParameters) => new THREE.MeshPhysicalMaterial(p);
@@ -90,8 +118,8 @@ function crearMateriales() {
     pozo: fis({ color: 0x070708, roughness: 0.92, side: THREE.DoubleSide }),
     junta: decal({ color: 0x0a0a0b, roughness: 0.95 }),
     sombraJunta: decal({ color: 0xb9bcc0, roughness: 0.5, transparent: true, opacity: 0.55 }),
-    // glass: tint drawn with vertex colour + alpha (frit at the edge) ...
-    tinte: fis({ color: 0xffffff, vertexColors: true, transparent: true, depthWrite: false, alphaTest: 0.01, roughness: 0.12, metalness: 0, side: THREE.DoubleSide }),
+    // glass: tint and black frit at the edge, both drawn by the `frit` shader ...
+    tinte: frit(fis({ color: 0xffffff, transparent: true, depthWrite: false, alphaTest: 0.01, roughness: 0.12, metalness: 0, side: THREE.DoubleSide })),
     // ... plus its reflections, added on top so they do not fade with the tint
     reflejo: fis({ color: 0x000000, roughness: 0.03, metalness: 0, transparent: true, depthWrite: false, alphaTest: 0.01, blending: THREE.AdditiveBlending, envMapIntensity: 1.7 }),
     lente: decal({ color: 0x000000, roughness: 0.02, transparent: true, depthWrite: false, alphaTest: 0.01, blending: THREE.AdditiveBlending, envMapIntensity: 1.9 }),
@@ -125,74 +153,116 @@ function mats() { return MATS ?? (MATS = crearMateriales()); }
 type Mats = ReturnType<typeof crearMateriales>;
 
 // ===================================================================== the skin
-const NC = 64; // columns per half
-
-/** Row spacing: fine at the tips, round the front arches and at the glass ends. */
+/**
+ * Row spacing: fine at the tips and round the front arches, and fine over the
+ * glass, because the glass is built on these same rows: every row has one
+ * vertex on each glass edge in both meshes, so skin and glass meet exactly.
+ */
 function filasX(): number[] {
+  const { xBase, xEsquina, xTop } = PARABRISAS;
   const paso = (x: number) => {
     let p = 0.02;
     if (Math.abs(x - ARCO.x) < ARCO.a + 0.06) p = 0.009;
-    for (const xc of [PARABRISAS.xBase, PARABRISAS.xEsquina, VENTANA.x0, VENTANA.x1]) { const d = Math.abs(x - xc); if (d < 0.12) p = Math.min(p, Math.max(0.004, 0.08 * d + 0.004)); }
+    if (x < xBase + 0.01 && x > VENTANA.x1 - 0.01) p = 0.008;
+    // the windscreen base turns fast in plan: 2.5 mm rows there; 4 mm at the window tips and the windscreen top
+    if (x < xBase + 0.004 && x > xEsquina - 0.03) p = 0.0025;
+    for (const xc of [VENTANA.x0, VENTANA.x1, xTop]) if (Math.abs(x - xc) < 0.04) p = Math.min(p, 0.004);
     const dt = Math.min(X_MORRO - x, x - X_COLA);
-    p = Math.min(p, Math.max(0.0015, 0.1 * dt));
-    return p;
+    return Math.min(p, Math.max(0.0015, 0.1 * dt));
   };
   const xs: number[] = [];
   for (let x = X_MORRO; x > X_COLA; x -= paso(x)) xs.push(x);
-  xs.push(X_COLA);
+  // rows exactly on the glass ends, where each outline closes
+  xs.push(X_COLA, xBase, xTop, VENTANA.x0, VENTANA.x1);
+  xs.sort((a, b) => b - a);
   return xs.filter((x, i) => i === 0 || xs[i - 1] - x > 2e-4);
 }
 
-/** Columns along the half-section: denser round the shoulder crease and the lower corner. */
-function columnasT(): number[] {
+/**
+ * Columns along the half-section. Fixed t up to the shoulder; above it four
+ * bands whose edges are the glass outlines where there is glass: [0.48, tA]
+ * up to the beltline, [tA, tB] the side window, [tB, tW] the A-pillar and
+ * roof side, [tW, 1] the windscreen. Away from the glass the band edges ease
+ * to fixed values over 15 cm, so the columns never jump from row to row.
+ */
+const T_FIJAS: number[] = (() => {
   const out: number[] = [];
-  const tramos: [number, number, number][] = [[0, 0.11, 6], [0.11, 0.2, 6], [0.2, 0.38, 8], [0.38, 0.48, 12], [0.48, 0.6, 10], [0.6, 1, 22]];
-  for (const [a, b, n] of tramos) for (let k = 0; k < n; k++) out.push(a + (b - a) * k / n);
+  for (const [a, b, n] of [[0, 0.11, 5], [0.11, 0.2, 5], [0.2, 0.38, 7], [0.38, 0.48, 10]] as [number, number, number][]) for (let k = 0; k < n; k++) out.push(a + (b - a) * k / n);
+  return out;
+})();
+const N_TRAMO = [3, 8, 10, 14]; // columns in [0.48, tA], [tA, tB], [tB, tW], [tW, 1]
+const K_A = T_FIJAS.length + N_TRAMO[0], K_B = K_A + N_TRAMO[1], K_W = K_B + N_TRAMO[2], N_MEDIA = K_W + N_TRAMO[3] + 1;
+const suaveP = (u: number) => { const v = Math.min(1, Math.max(0, u)); return v * v * (3 - 2 * v); };
+/** Distance from x to the interval [a, b] (0 inside). */
+const fuera = (x: number, a: number, b: number) => (x > b ? x - b : x < a ? a - x : 0);
+
+/** Band edges (tA, tB, tW) at a station: exactly the glass outlines where there is glass. */
+function bandas(s: Sec): [number, number, number] {
+  const tA = T5;
+  let tB: number;
+  const dV = fuera(s.x, VENTANA.x1, VENTANA.x0);
+  if (dV > 0) tB = tA + (0.64 - tA) * suaveP(dV / 0.15);
+  else { const v = yVentana(s.x); tB = v ? Math.max(tA, tDeY(s, v[1])) : tA; }
+  let tW: number;
+  const dW = fuera(s.x, PARABRISAS.xTop, PARABRISAS.xBase);
+  if (dW > 0) tW = Math.max(1 - 0.2 * suaveP(dW / 0.15), Math.min(1, tB + 0.04 * suaveP(dW / 0.15)));
+  else { const r = rangoParabrisas(s); tW = r ? Math.max(r[0], tB) : 1; }
+  return [tA, tB, tW];
+}
+function columnasSkin(s: Sec): number[] {
+  const [tA, tB, tW] = bandas(s), out = T_FIJAS.slice();
+  const tramo = (a: number, b: number, n: number) => { for (let k = 0; k < n; k++) out.push(a + (b - a) * k / n); };
+  tramo(0.48, tA, N_TRAMO[0]); tramo(tA, tB, N_TRAMO[1]); tramo(tB, tW, N_TRAMO[2]); tramo(tW, 1, N_TRAMO[3]);
   out.push(1);
   return out;
 }
 
-interface Rejilla { pos: Float32Array; nor: Float32Array; uv: Float32Array; filas: number; cols: number; xs: number[]; ts: number[][] }
+interface Rejilla { pos: Float32Array; nor: Float32Array; uv: Float32Array; filas: number; cols: number; n: number; xs: number[] }
 
 /**
  * A grid over the skin: for each row x, the columns run over the t-values
  * `ts(s)` of one half, mirrored to the other side ('abajo' puts the bottom
  * centre in the middle of the row, 'arriba' the top centre; 'lado' keeps a
- * single side, z > 0). Normals come from the neighbouring rows and columns.
+ * single side, z > 0). Normals are the surface's own: the tangent along the
+ * section from the curve itself, the one along x from the neighbouring rows'
+ * sections at the same t, so two grids that share an edge shade alike.
  */
-function rejilla(xs: number[], ts: (s: Sec) => number[], orden: 'abajo' | 'arriba' | 'lado', lift = 0): Rejilla {
-  const n = ts(sec(xs[0])).length, cols = orden === 'lado' ? n : 2 * n - 1, filas = xs.length;
+function rejilla(xs: number[], ts: (s: Sec) => number[], orden: 'abajo' | 'arriba' | 'lado'): Rejilla {
+  const secs = xs.map(x => sec(x)), tsAll = secs.map(s => ts(s));
+  const n = tsAll[0].length, cols = orden === 'lado' ? n : 2 * n - 1, filas = xs.length;
   const pos = new Float32Array(filas * cols * 3), nor = new Float32Array(filas * cols * 3), uv = new Float32Array(filas * cols * 2);
-  const tsAll: number[][] = [];
+  const mitadX = (X_MORRO + X_COLA) / 2, e = 0.002;
   for (let i = 0; i < filas; i++) {
-    const x = xs[i], s = sec(x), tv = ts(s); tsAll.push(tv);
-    const mitad = tv.map(t => punto(s, t));
+    const s = secs[i], tv = tsAll[i], sa = secs[Math.max(0, i - 1)], sb = secs[Math.min(filas - 1, i + 1)];
+    const dx = xs[Math.max(0, i - 1)] - xs[Math.min(filas - 1, i + 1)];
+    const half = tv.map(t => {
+      const p = punto(s, t), q1 = punto(s, Math.min(1, t + e)), q0 = punto(s, Math.max(0, t - e)), pa = punto(sa, t), pb = punto(sb, t);
+      // right-side normal = dX x dT, with dX = (dx, ya - yb, za - zb) and dT = (0, y1 - y0, z1 - z0)
+      const Xy = pa[1] - pb[1], Xz = pa[0] - pb[0], Ty = q1[1] - q0[1], Tz = q1[0] - q0[0];
+      let nx = Xy * Tz - Xz * Ty, ny = -dx * Tz, nz = dx * Ty;
+      const l = Math.hypot(nx, ny, nz);
+      if (l < 1e-12) { nx = xs[i] > mitadX ? 1 : -1; ny = 0; nz = 0; } else { nx /= l; ny /= l; nz /= l; }
+      return { p, n: [nx, ny, nz] };
+    });
     for (let c = 0; c < cols; c++) {
       const k = orden === 'lado' ? c : orden === 'abajo' ? Math.abs(c - (n - 1)) : (c < n ? c : 2 * (n - 1) - c);
-      const lado = orden === 'lado' ? 1 : c < n - 1 ? -1 : 1, p = mitad[k], o = (i * cols + c) * 3;
-      pos[o] = x; pos[o + 1] = p[1]; pos[o + 2] = lado * p[0];
+      const lado = orden === 'lado' ? 1 : orden === 'abajo' ? (c < n - 1 ? -1 : 1) : (c < n - 1 ? -1 : 1);
+      const { p, n: nn } = half[k], o = (i * cols + c) * 3;
+      pos[o] = xs[i]; pos[o + 1] = p[1]; pos[o + 2] = lado * p[0];
+      nor[o] = nn[0]; nor[o + 1] = nn[1]; nor[o + 2] = lado * nn[2];
+      if (Math.abs(p[0]) < 1e-7) nor[o + 2] = 0;
       uv[(i * cols + c) * 2] = i / Math.max(1, filas - 1); uv[(i * cols + c) * 2 + 1] = c / Math.max(1, cols - 1);
     }
   }
-  const signo = orden === 'arriba' ? -1 : 1, mitadX = (X_MORRO + X_COLA) / 2;
-  const v = (i: number, c: number, e: number) => pos[(i * cols + c) * 3 + e];
-  for (let i = 0; i < filas; i++) for (let c = 0; c < cols; c++) {
-    const i0 = Math.max(0, i - 1), i1 = Math.min(filas - 1, i + 1), c0 = Math.max(0, c - 1), c1 = Math.min(cols - 1, c + 1);
-    const ax = v(i0, c, 0) - v(i1, c, 0), ay = v(i0, c, 1) - v(i1, c, 1), az = v(i0, c, 2) - v(i1, c, 2);
-    const bx = v(i, c1, 0) - v(i, c0, 0), by = v(i, c1, 1) - v(i, c0, 1), bz = v(i, c1, 2) - v(i, c0, 2);
-    let nx = signo * (ay * bz - az * by), ny = signo * (az * bx - ax * bz), nz = signo * (ax * by - ay * bx);
-    const o = (i * cols + c) * 3;
-    if (orden !== 'lado' && Math.abs(pos[o + 2]) < 1e-6) nz = 0;
-    const l = Math.hypot(nx, ny, nz);
-    if (l < 1e-12) { nx = xs[i] > mitadX ? 1 : -1; ny = 0; nz = 0; } else { nx /= l; ny /= l; nz /= l; }
-    nor[o] = nx; nor[o + 1] = ny; nor[o + 2] = nz;
-  }
-  if (lift) for (let k = 0; k < pos.length; k++) pos[k] += nor[k] * lift;
-  return { pos, nor, uv, filas, cols, xs, ts: tsAll };
+  return { pos, nor, uv, filas, cols, n, xs };
 }
 
-/** Triangles of a grid, skipping those `quitar` rejects (by centroid); `grupo` picks the material group; faces outward. */
-function caras(R: Rejilla, quitar?: (x: number, y: number, z: number) => boolean, grupo?: (x: number, y: number, z: number) => number, nGrupos = 1): number[][] {
+/**
+ * Triangles of a grid, skipping the cells `celda(i, k)` rejects (row i, lower
+ * half-column k) and those `quitar` rejects (by centroid); `grupo` picks the
+ * material group; faces outward.
+ */
+function caras(R: Rejilla, quitar?: (x: number, y: number, z: number) => boolean, grupo?: (x: number, y: number, z: number) => number, nGrupos = 1, celda?: (i: number, k: number) => boolean): number[][] {
   const grupos: number[][] = Array.from({ length: nGrupos }, () => []);
   const P = R.pos;
   const tri = (u: number, v: number, w: number) => {
@@ -201,6 +271,7 @@ function caras(R: Rejilla, quitar?: (x: number, y: number, z: number) => boolean
     grupos[grupo ? grupo(x, y, z) : 0].push(u, v, w);
   };
   for (let i = 0; i < R.filas - 1; i++) for (let c = 0; c < R.cols - 1; c++) {
+    if (celda) { const k = Math.min(Math.abs(c - (R.n - 1)), Math.abs(c + 1 - (R.n - 1))); if (celda(i, k)) continue; }
     const a = i * R.cols + c, cc = a + R.cols;
     tri(a, a + 1, cc); tri(a + 1, cc + 1, cc);
   }
@@ -215,12 +286,11 @@ function caras(R: Rejilla, quitar?: (x: number, y: number, z: number) => boolean
   return grupos;
 }
 
-function geometria(R: Rejilla, grupos: number[][], color?: Float32Array): THREE.BufferGeometry {
+function geometria(R: Rejilla, grupos: number[][]): THREE.BufferGeometry {
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.BufferAttribute(R.pos, 3));
   g.setAttribute('normal', new THREE.BufferAttribute(R.nor, 3));
   g.setAttribute('uv', new THREE.BufferAttribute(R.uv, 2));
-  if (color) g.setAttribute('color', new THREE.BufferAttribute(color, 4));
   const idx: number[] = []; let k = 0;
   grupos.forEach((l, m) => { for (const v of l) idx.push(v); if (grupos.length > 1) g.addGroup(k, l.length, m); k += l.length; });
   g.setIndex(idx);
@@ -276,7 +346,7 @@ function yVentana(x: number, mas = 0): [number, number] | null {
 function yVentanaCalc(x: number, mas: number): [number, number] | null {
   const { x0, x1 } = VENTANA;
   if (x > x0 + mas || x < x1 - mas) return null;
-  const yb = sec(x).c[5][1] + 0.012 - mas;
+  const yb = sec(x).c[5][1] - mas; // the glass starts on the beltline itself (P5)
   // A-pillar: the windscreen's side edge seen from the side, a pillar's width (5 cm) behind it
   const xw = x + 0.05 - mas, zw = zParabrisas(xw);
   const yPilar = zw > 0 ? arribaY(xw, zw) - 0.012 + mas : x < PARABRISAS.xTop ? Infinity : yb;
@@ -294,8 +364,7 @@ const qArco = (x: number, y: number) => Math.hypot((x - ARCO.x) / ARCO.a, (y - A
 const enPozoTrasero = (x: number, y: number, z: number) => Math.abs(x + BATALLA) < 0.33 && Math.abs(Math.abs(z) - VIA_TRAS / 2) < 0.1 && y < 0.16;
 
 function carroceria(xs: number[], M: Mats): THREE.Mesh {
-  const tc = columnasT();
-  const R = rejilla(xs, () => tc, 'abajo');
+  const R = rejilla(xs, columnasSkin, 'abajo');
   // pull the vertices next to the arch onto the ellipse, so the opening has a clean edge
   for (let v = 0; v < R.pos.length / 3; v++) {
     const x = R.pos[v * 3], y = R.pos[v * 3 + 1], z = R.pos[v * 3 + 2];
@@ -303,41 +372,51 @@ function carroceria(xs: number[], M: Mats): THREE.Mesh {
     const q = qArco(x, y);
     if (Math.abs(q - 1) < 0.035 && y > 0.1) { R.pos[v * 3] = ARCO.x + (x - ARCO.x) / q; R.pos[v * 3 + 1] = ARCO.y + (y - ARCO.y) / q; }
   }
-  // the glass holes: well inside the frit, so their steps stay hidden
-  const enVidrio = (x: number, y: number, z: number) => {
-    const zp = zParabrisas(x, -0.045);
-    if (zp > 0 && Math.abs(z) < zp && y > 0.7) return true;
-    const v = yVentana(x, -0.03);
-    return !!v && y > v[0] && y < v[1] && Math.abs(z) > 0.3;
+  // the glass holes are whole bands of cells, whose edges are the glass outlines themselves
+  const enVentana = (x: number) => x <= VENTANA.x0 + 1e-6 && x >= VENTANA.x1 - 1e-6;
+  const enParabrisas = (x: number) => x <= PARABRISAS.xBase + 1e-6 && x >= PARABRISAS.xTop - 1e-6;
+  const hueco = (i: number, k: number) => {
+    const a = xs[i], b = xs[i + 1];
+    if (k >= K_A && k < K_B) return enVentana(a) && enVentana(b);
+    if (k >= K_W) return enParabrisas(a) && enParabrisas(b);
+    return false;
   };
   const grupos = caras(R,
-    (x, y, z) => (Math.abs(z) > ARCO.z && qArco(x, y) < 0.999) || enPozoTrasero(x, y, z) || enVidrio(x, y, z),
-    (_x, y) => (y < 0.135 ? 1 : 0), 2);
+    (x, y, z) => (Math.abs(z) > ARCO.z && qArco(x, y) < 0.999) || enPozoTrasero(x, y, z),
+    (_x, y) => (y < 0.135 ? 1 : 0), 2, hueco);
   const m = new THREE.Mesh(geometria(R, grupos), [M.chapa, M.bajos]);
   m.name = 'carroceria';
   return m;
 }
 
-/** A glass patch over (x, t) with a black frit fading into a smoked tint. */
-function vidrio(filas: number[], rango: (s: Sec) => [number, number] | null, n: number, frit: number, M: Mats, orden: 'arriba' | 'lado', nombre: string): THREE.Group {
-  const xs = filas.filter(x => rango(sec(x)) !== null);
-  const R = rejilla(xs, s => { const r = rango(s) ?? [1, 1]; const o: number[] = []; for (let k = 0; k <= n; k++) o.push(r[0] + (r[1] - r[0]) * k / n); return o; }, orden, 0.003);
+/**
+ * A glass patch on the skin's own rows, filling a hole cut along the same
+ * outline (no lift, no overlap, so the edge is the outline's curve). The black
+ * frit is drawn by the glass shader from each vertex's distance to the
+ * outline, so its inner edge is a crisp curve at any zoom.
+ */
+function vidrio(xsPiel: number[], x0: number, x1: number, rango: (s: Sec) => [number, number], n: number, frit: number, M: Mats, orden: 'arriba' | 'lado', nombre: string): THREE.Group {
+  const xs = xsPiel.filter(x => x <= x0 + 1e-6 && x >= x1 - 1e-6);
+  const R = rejilla(xs, s => { const [a, b] = rango(s); const o: number[] = []; for (let k = 0; k <= n; k++) o.push(a + (b - a) * k / n); return o; }, orden);
   const grupos = caras(R);
-  // distance of every vertex to the patch outline (brute force over the border vertices)
-  const P = R.pos, C = R.cols, F = R.filas, borde: number[] = [];
-  for (let i = 0; i < F; i++) for (let c = 0; c < C; c++) if (i === 0 || i === F - 1 || c === 0 || c === C - 1) borde.push(i * C + c);
-  const col = new Float32Array((P.length / 3) * 4);
+  // distance of every vertex to the outline (the grid's border, as segments, so
+  // it stays exact where the outline's vertices are far apart), minus the frit width
+  const P = R.pos, C = R.cols, F = R.filas, seg: [number, number][] = [];
+  for (let i = 0; i < F - 1; i++) seg.push([i * C, (i + 1) * C], [i * C + C - 1, (i + 1) * C + C - 1]);
+  for (let c = 0; c < C - 1; c++) seg.push([c, c + 1], [(F - 1) * C + c, (F - 1) * C + c + 1]);
+  const dist = new Float32Array(P.length / 3);
   for (let v = 0; v < P.length / 3; v++) {
-    let d = Infinity;
-    for (const b of borde) { const dd = (P[b * 3] - P[v * 3]) ** 2 + (P[b * 3 + 1] - P[v * 3 + 1]) ** 2 + (P[b * 3 + 2] - P[v * 3 + 2]) ** 2; if (dd < d) d = dd; }
-    d = Math.sqrt(d);
-    const f = Math.min(1, Math.max(0, (d - frit) / 0.012));
-    const tinte = [0.018, 0.022, 0.027], negro = [0.008, 0.008, 0.01];
-    for (let c = 0; c < 3; c++) col[v * 4 + c] = negro[c] + (tinte[c] - negro[c]) * f;
-    col[v * 4 + 3] = 1 + (0.72 - 1) * f; // tinted: 72 % over the cabin
+    const px = P[v * 3], py = P[v * 3 + 1], pz = P[v * 3 + 2]; let d = Infinity;
+    for (const [a, b] of seg) {
+      const ax = P[a * 3], ay = P[a * 3 + 1], az = P[a * 3 + 2], ux = P[b * 3] - ax, uy = P[b * 3 + 1] - ay, uz = P[b * 3 + 2] - az;
+      const l2 = ux * ux + uy * uy + uz * uz, u = l2 > 1e-14 ? Math.max(0, Math.min(1, ((px - ax) * ux + (py - ay) * uy + (pz - az) * uz) / l2)) : 0;
+      const dd = (px - ax - u * ux) ** 2 + (py - ay - u * uy) ** 2 + (pz - az - u * uz) ** 2; if (dd < d) d = dd;
+    }
+    dist[v] = Math.sqrt(d) - frit;
   }
   const g = new THREE.Group(); g.name = nombre;
-  const geo = geometria(R, grupos, col);
+  const geo = geometria(R, grupos);
+  geo.setAttribute('borde', new THREE.BufferAttribute(dist, 1));
   const tinte = new THREE.Mesh(geo, M.tinte); tinte.renderOrder = 2; tinte.customDepthMaterial = sinSombra; tinte.name = 'cristal';
   const reflejo = new THREE.Mesh(geo, M.reflejo); reflejo.renderOrder = 3; reflejo.customDepthMaterial = sinSombra; reflejo.name = 'cristal-reflejo';
   g.add(tinte, reflejo);
@@ -631,19 +710,15 @@ function construirPlantilla(): THREE.Group {
     if (vista === 'lado') espejo(o);
     return o;
   };
-  const JUNTA = 0.0042;
+  const JUNTA = 0.0042, SEP_JUNTA = 0.0014;
 
   // ---------------------------------------------------------------- skin and glass
   const xs = filasX();
   add(carroceria(xs, M));
   add(pozosDelanteros(M));
-  const filasVidrio: number[] = [];
-  for (let x = PARABRISAS.xBase + 0.012; x >= PARABRISAS.xTop - 0.012; x -= 0.009) filasVidrio.push(x);
-  add(vidrio(filasVidrio, s => rangoParabrisas(s, 0.012), 30, 0.034, M, 'arriba', 'parabrisas'));
+  add(vidrio(xs, PARABRISAS.xBase, PARABRISAS.xTop, s => [bandas(s)[2], 1], 15, 0.034, M, 'arriba', 'parabrisas'));
   {
-    const filas: number[] = [];
-    for (let x = VENTANA.x0 + 0.012; x >= VENTANA.x1 - 0.012; x -= 0.009) filas.push(x);
-    const v = vidrio(filas, s => { const r = yVentana(s.x, 0.012); return r ? [tDeY(s, r[0]), tDeY(s, r[1])] : null; }, 12, 0.026, M, 'lado', 'ventanilla');
+    const v = vidrio(xs, VENTANA.x0, VENTANA.x1, s => { const [a, b] = bandas(s); return [a, b]; }, 8, 0.026, M, 'lado', 'ventanilla');
     add(v); espejo(v);
   }
   // the arch edge: a body-colour lip on the cut and a thin dark line just outside
@@ -658,23 +733,23 @@ function construirPlantilla(): THREE.Group {
   // rear edge to the sill.
   {
     const puerta: P2[] = suave([[-0.17, 0.74], [-0.25, 0.66], [-0.305, 0.60], [-0.315, 0.45], [-0.32, 0.36], [-0.37, 0.31], [-0.5, 0.30], [-1.40, 0.30], [-1.52, 0.33], [-1.62, 0.43], [-1.67, 0.58], [-1.66, 0.72], [-1.62, 0.835]], 3, false);
-    par(cinta(puerta, JUNTA, 0.006), 'lado', 0.0008, M.junta, 0.012, 'junta-puerta');
+    par(cinta(puerta, JUNTA, 0.006), 'lado', SEP_JUNTA, M.junta, 0.012, 'junta-puerta');
     const techo: P2[] = suave([[-0.76, 0.30], [-0.85, 0.18], [-1.0, 0.165], [-1.3, 0.17], [-1.48, 0.25], [-1.58, 0.42], [-1.62, 0.56]], 3, false);
-    add(malla(calco(cinta(techo, JUNTA, 0.006), 'arriba', 0.0008, 0.012), M.junta, 'junta-puerta'));
-    add(malla(calco(cinta(techo.map(([x, z]) => [x, -z] as P2), JUNTA, 0.006), 'arriba', 0.0008, 0.012), M.junta, 'junta-puerta'));
+    add(malla(calco(cinta(techo, JUNTA, 0.006), 'arriba', SEP_JUNTA, 0.012), M.junta, 'junta-puerta'));
+    add(malla(calco(cinta(techo.map(([x, z]) => [x, -z] as P2), JUNTA, 0.006), 'arriba', SEP_JUNTA, 0.012), M.junta, 'junta-puerta'));
   }
   // rear wheel spats: removable covers over the enclosed rear wheels
   {
     const spat: P2[] = suave([[-1.90, 0.17], [-1.91, 0.36], [-1.97, 0.50], [-2.08, 0.585], [-2.22, 0.615], [-2.36, 0.59], [-2.47, 0.52], [-2.55, 0.40], [-2.58, 0.17]], 3, false);
-    par(cinta(spat, JUNTA, 0.006), 'lado', 0.0008, M.junta, 0.012, 'junta-carenado');
+    par(cinta(spat, JUNTA, 0.006), 'lado', SEP_JUNTA, M.junta, 0.012, 'junta-carenado');
   }
   // engine/luggage lid: from the light-bar corners up the deck to the roof
   {
     const tapa: P2[] = suave([[-3.11, 0.56], [-2.9, 0.53], [-2.55, 0.43], [-2.2, 0.33], [-1.95, 0.26], [-1.82, 0.18], [-1.78, 0], [-1.82, -0.18], [-1.95, -0.26], [-2.2, -0.33], [-2.55, -0.43], [-2.9, -0.53], [-3.11, -0.56]], 3, false);
-    add(malla(calco(cinta(tapa, JUNTA, 0.006), 'arriba', 0.0008, 0.012), M.junta, 'junta-portón'));
+    add(malla(calco(cinta(tapa, JUNTA, 0.006), 'arriba', SEP_JUNTA, 0.012), M.junta, 'junta-portón'));
   }
   // fuel flap on the right rear quarter (+z is the car's right)
-  add(malla(calco(cinta(cerrar(suave(rectRedondo(-1.86, 0.60, 0.05, 0.045, 0.02, 3), 1)), 0.003, 0.005), 'lado', 0.0008, 0.01), M.junta, 'junta-tapa'));
+  add(malla(calco(cinta(cerrar(suave(rectRedondo(-1.86, 0.60, 0.05, 0.045, 0.02, 3), 1)), 0.003, 0.005), 'lado', SEP_JUNTA, 0.01), M.junta, 'junta-tapa'));
 
   // ---------------------------------------------------------------- front
   // the black band across the nose that joins the two headlamps, chrome-edged on top
