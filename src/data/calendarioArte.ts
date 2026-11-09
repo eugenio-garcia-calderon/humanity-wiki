@@ -357,11 +357,12 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "Hoy: elige un gesto de ahorro para todo el verano."
     ],
     "reto": "¿Qué consumo vas a reducir este mes?",
-    "imagen": "/calendario-arte/ilustraciones/mes-06.jpg",
+    "imagen": "/calendario-arte/ilustraciones/mes-06-d.jpg",
     "disenos": [
       "/calendario-arte/ilustraciones/mes-06.jpg",
       "/calendario-arte/ilustraciones/mes-06-b.jpg",
-      "/calendario-arte/ilustraciones/mes-06-c.jpg"
+      "/calendario-arte/ilustraciones/mes-06-c.jpg",
+      "/calendario-arte/ilustraciones/mes-06-d.jpg"
     ]
   },
   {
@@ -533,11 +534,12 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "Una economía sana cuida a personas y planeta. ¿Y tú?"
     ],
     "reto": "¿Qué compra vas a evitar o cambiar este mes?",
-    "imagen": "/calendario-arte/ilustraciones/mes-09.jpg",
+    "imagen": "/calendario-arte/ilustraciones/mes-09-d.jpg",
     "disenos": [
       "/calendario-arte/ilustraciones/mes-09.jpg",
       "/calendario-arte/ilustraciones/mes-09-b.jpg",
-      "/calendario-arte/ilustraciones/mes-09-c.jpg"
+      "/calendario-arte/ilustraciones/mes-09-c.jpg",
+      "/calendario-arte/ilustraciones/mes-09-d.jpg"
     ]
   },
   {
@@ -592,11 +594,12 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "¿Qué hábito de alimentación quieres conservar?"
     ],
     "reto": "¿Qué vas a cambiar en tu plato este mes?",
-    "imagen": "/calendario-arte/ilustraciones/mes-10.jpg",
+    "imagen": "/calendario-arte/ilustraciones/mes-10-d.jpg",
     "disenos": [
       "/calendario-arte/ilustraciones/mes-10.jpg",
       "/calendario-arte/ilustraciones/mes-10-b.jpg",
-      "/calendario-arte/ilustraciones/mes-10-c.jpg"
+      "/calendario-arte/ilustraciones/mes-10-c.jpg",
+      "/calendario-arte/ilustraciones/mes-10-d.jpg"
     ]
   },
   {
