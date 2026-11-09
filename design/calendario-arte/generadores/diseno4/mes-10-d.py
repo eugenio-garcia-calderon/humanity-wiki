@@ -110,33 +110,37 @@ for k in range(14):
         pts.append(pts[-1] + (rng.normal(0, 26), rng.uniform(6, 16)))
     hilos.append(spline(pts))
 lz.lapiz(hilos, '#fbf3e4', grosor=0.6, presion=0.75, temblor=0.6)
-# what we do not throw away goes back to the earth: right under the fridge, peels, dry leaves and an
-# apple core are crumbling into dark, rich soil (compost, days 28-29)
-bolsa_c = Poligono([(600, 712), (900, 712), (912, 742), (880, 790), (760, 800), (640, 792), (590, 750)])
-lz.aguada(bolsa_c, '#2e1c12', dens=0.75, irreg=1.4, borde=0.4, gran=0.9, var=0.6,
-          toques=[(700, 760, 80, '#4a2e1c', 0.6), (840, 740, 50, '#3a2414', 0.5)])
-restos = [
-    (Trazo(spline([(640, 730), (656, 722), (676, 728), (690, 720)]), (6, 7, 6, 3)), '#e8a040'),      # orange peel
-    (Trazo(spline([(700, 750), (720, 742), (742, 748)]), (7, 8, 4)), '#d8c050'),                      # banana peel
-    (Elipse(812, 734, 14, 7, -20), '#a8703a'),                                                          # dry leaf
-    (Elipse(860, 756, 12, 6, 30), '#c08a3a'),                                                           # dry leaf
-    (Poligono([(762, 774), (772, 766), (782, 772), (778, 782), (766, 784)], suave=False), '#f3e8d8'),  # eggshell
-]
-for (f, col) in restos:
-    lz.aguada(f, col, dens=0.8, tapa=0.8, irreg=0.5, borde=0.8, gran=0.5, desvanece=None)
-    lz.contorno(f, _lapiz_de(col, 0.45), grosor=0.6, presion=0.5, cortes=0.4)
-lz.lapiz([[(800, 738), (826, 730)], [(850, 760), (872, 752)]], '#6a4a2a', grosor=0.6, presion=0.6)          # leaf midribs
-corazon = Poligono([(726, 728), (732, 718), (730, 708), (738, 704), (746, 708), (744, 718), (750, 728), (738, 736)])
-lz.aguada(corazon, '#f0d8a0', dens=0.7, tapa=0.85, irreg=0.4, borde=0.8, toques=[(738, 718, 6, '#c87a4a', 0.6)])
-lz.contorno(corazon, '#9a6a3a', grosor=0.6, presion=0.5, cortes=0.2)
-lz.lapiz([[(738, 704), (740, 696)]], LP, grosor=0.8, presion=0.7)
-# the scraps lose their colour and become crumbs of earth toward the bottom
-for _ in range(60):
-    x, y = rng.uniform(610, 890), rng.uniform(748, 794)
-    lz.aguada(Elipse(x, y, rng.uniform(1.2, 3.2), rng.uniform(1, 2.4)), rng.choice(['#5a3a22', '#7a5032', '#a8703a', '#3a2414']),
-              dens=0.8, irreg=0.3)
-for _ in range(30):
-    lz.gouache(Elipse(rng.uniform(610, 890), rng.uniform(720, 795), rng.uniform(0.5, 1.0)), '#f6e6c8', alfa=0.7, irreg=0)
+# what we do not throw away goes back to the earth: right under the fridge, an apple core, eggshells,
+# carrot peelings and dry leaves crumble, little by little, into dark soil (compost, days 28-29)
+bolsa_c = Poligono([(596, 712), (904, 712), (914, 744), (880, 792), (760, 802), (640, 794), (588, 752)])
+lz.aguada(bolsa_c, '#4a2e1c', dens=0.6, suave=10, gran=0.8, var=0.6, toques=[(740, 790, 90, '#2e1c12', 0.6)],
+          desvanece=(0, 820, 0, 708))
+lz.aguada(bolsa_c, '#3a2414', dens=0.35, suave=14, desvanece=(0, 712, 0, 800))
+for (cx, cy, a) in ((640, 732, 0), (868, 730, 30)):   # carrot peelings, curling
+    pel = Trazo(spline([(cx - 18, cy), (cx - 8, cy - 8), (cx + 4, cy - 2), (cx + 2, cy + 8), (cx + 14, cy + 6), (cx + 20, cy - 4)]),
+                (5, 6, 6, 5, 4, 2))
+    lz.aguada(pel, '#ec7a2a', dens=0.9, tapa=0.9, irreg=0.4, borde=0.8, desvanece=(0, cy - 10, 0, cy + 22))
+    lz.contorno(pel, '#9a3a12', grosor=0.6, presion=0.55, cortes=0.3)
+for (cx, cy, L, ang, c) in ((760, 756, 30, -20, '#c08a3a'), (820, 770, 26, 200, '#a8703a'), (680, 768, 24, 10, '#d0a040')):  # dry leaves
+    hoja(lz, cx, cy, L, ang, c, ancho=0.45, tapa=0.85, dens=0.8)
+corazon = Poligono([(720, 740), (728, 726), (726, 712), (736, 706), (746, 712), (744, 726), (752, 740), (736, 750)])
+lz.aguada(corazon, '#f3e0b0', dens=0.8, tapa=1, irreg=0.3, borde=0.8, toques=[(736, 726, 7, '#c87a4a', 0.6)], sombra=(-2, -2))
+lz.aguada(Poligono([(720, 740), (726, 732), (746, 732), (752, 740), (736, 750)]), '#d94a3a', dens=0.6, irreg=0.3)
+lz.contorno(corazon, '#8a5a2a', grosor=0.7, presion=0.55, cortes=0.15)
+lz.lapiz([[(736, 706), (738, 696)]], LP, grosor=0.9, presion=0.8)
+for (x, y) in ((733, 724), (740, 726)):
+    lz.aguada(Elipse(x, y, 1.6, 2.6), '#3a2a20', dens=0.9, irreg=0.1)
+for (cx, cy) in ((800, 738), (814, 748)):   # eggshell halves, white with a jagged rim
+    cas = Poligono([(cx - 10, cy - 2), (cx - 6, cy - 7), (cx - 2, cy - 3), (cx + 2, cy - 8), (cx + 6, cy - 3), (cx + 10, cy - 6),
+                    (cx + 10, cy + 2), (cx + 4, cy + 8), (cx - 4, cy + 8), (cx - 10, cy + 3)], suave=False)
+    lz.aguada(cas, '#f8f0e2', dens=0.5, tapa=1, irreg=0.2, toques=[(cx + 3, cy + 3, 5, '#d8c8b0', 0.6)])
+    lz.contorno(cas, '#8a7a6a', grosor=0.6, presion=0.5)
+# toward the bottom the scraps are only crumbs, then earth
+for _ in range(70):
+    x, y = rng.uniform(612, 888), rng.uniform(756, 798)
+    lz.aguada(Elipse(x, y, rng.uniform(1.2, 3.0), rng.uniform(1, 2.2)), rng.choice(['#5a3a22', '#7a5032', '#c07a3a', '#e8a050', '#f3e8d8']),
+              dens=0.75, irreg=0.3)
+lz.lapiz([bezier((x, 720), (x + 6, 750), (x - 4, 790)) for x in (660, 700, 790, 850)], '#a8784a', grosor=0.5, presion=0.35, cortes=0.4)
 
 # plants on the soil surface: sprouts, chard, a carrot top, grass
 for x in np.arange(345, 1270, 9) + rng.uniform(-3, 3, 103):
@@ -177,33 +181,37 @@ for xh in (FX0 + 8, FX1 - 10):     # enamel shine on the rounded edges
 # the cavity, glowing warm from inside
 CX0, CX1, CY0, CY1 = 590, 892, 168, 668
 cav = Poligono([(CX0, CY1), (CX0, CY0 + 30), (CX0 + 14, CY0), (CX1 - 14, CY0), (CX1, CY0 + 30), (CX1, CY1)], suave=False)
-lz.aguada(cav, '#e8b878', dens=0.75, tapa=1, borde=0.5, irreg=0.4,
-          toques=[(740, 430, 120, '#f8e2b0', 0.75), (CX0 + 10, CY1 - 20, 90, '#c8884a', 0.65), (CX1 - 10, CY0 + 20, 80, '#d09858', 0.6)])
+lz.aguada(cav, '#d8954e', dens=0.85, tapa=1, borde=0.55, irreg=0.4,
+          toques=[(740, 300, 120, '#f6d8a0', 0.75), (CX0 + 10, CY1 - 20, 110, '#a8682e', 0.7), (CX1 - 10, CY1 - 40, 110, '#b0703a', 0.65)])
 # inner side walls give depth: the left wall seen at an angle, darker
 lz.aguada(Poligono([(CX0, CY0 + 30), (CX0 + 22, CY0 + 40), (CX0 + 22, CY1 - 14), (CX0, CY1)], suave=False), '#e0b07a', dens=0.45,
           irreg=0.3)
 lz.aguada(Poligono([(CX0 + 14, CY0), (CX1 - 14, CY0), (CX1 - 26, CY0 + 14), (CX0 + 26, CY0 + 14)], suave=False), '#e8c08a',
           dens=0.4, irreg=0.3)
-lz.luz(Elipse(740, 430, 150, 240), '#ffe7a8', fuerza=0.45, suave=40)
+lz.luz(Poligono([(728, 182), (752, 182), (880, 560), (600, 560)], suave=False), '#ffe2a0', fuerza=0.32, suave=40)   # the cone of light
+bombilla = Elipse(740, 182, 10, 8)
+lz.aguada(Poligono([(728, 170), (752, 170), (748, 176), (732, 176)], suave=False), '#b8a890', dens=0.7, tapa=1)
+lz.aguada(bombilla, '#ffe9a0', dens=0.5, tapa=1, irreg=0.1)
+lz.luz((740, 184, 30), '#fff2c0', fuerza=0.9)
 lz.luz(Elipse(740, 716, 200, 26), '#ffd890', fuerza=0.35, suave=24)   # the warm light spills onto the soil
 lz.contorno(cav, '#8a3022', grosor=0.9, presion=0.55, cortes=0.15)
-# folk painting on the fridge: a garland across the top with a bird, big flowers down the side and the frame
-pajaro(lz, 740, 136, 15, TEAL, ang=-6, alas='arriba', vientre='#f6d27a')
-for (x, y, r_, c, cc) in ((664, 134, 15, '#f6e6c8', CARMIN), (816, 134, 15, '#f6e6c8', CARMIN), (612, 132, 10, ORO, TEAL),
-                          (868, 132, 10, ORO, TEAL)):
-    flor_popular(lz, x, y, r_, c, cc)
-for (x, y, a) in ((690, 140, 20), (790, 140, 160), (636, 142, 160), (842, 142, 20), (590, 140, 200), (890, 140, -20)):
-    hojita(lz, x, y, 14, a, '#3f7a6a', tapa=1)
-lz.lapiz([spline([(590, 150), (640, 146), (700, 152), (780, 152), (840, 146), (892, 150)])], '#2f5a4a', grosor=0.8, presion=0.55)
-for k, y in enumerate(range(196, 680, 54)):          # down the painted side
-    flor_popular(lz, FX0 - 19, y, 11 if k % 2 == 0 else 8, ['#f6e6c8', ORO, '#f6b6b0'][k % 3], [TEAL, CARMIN, TEAL][k % 3])
-    hojita(lz, FX0 - 19, y + 16, 12, 70 + (k % 2) * 40, '#3f7a6a', tapa=1)
-for k, y in enumerate(range(200, 660, 46)):          # small flowers on the frame beside the cavity
-    flor_popular(lz, FX0 + 15, y, 7, [ORO, '#f6e6c8'][k % 2], CARMIN, petalos=5)
-for k, x in enumerate(range(616, 880, 40)):          # and along the bottom
-    flor_popular(lz, x, FY1 - 16, 8, ['#f6e6c8', ORO][k % 2], TEAL, petalos=5)
-for k, y in enumerate(range(176, 660, 28)):          # dots on the door hinge side
-    lz.gouache(Elipse(FX1 - 8, y, 1.8), '#fbe8c8', alfa=0.85, irreg=0)
+# folk painting on the fridge, done by brush: few motifs, big and varied, some leaves running past the edges
+lz.aguada(Trazo(spline([(592, 150), (640, 140), (700, 152), (780, 150), (840, 140), (896, 146)])[::3], (4, 4, 3)), '#2f6a5a', dens=0.85,
+          tapa=1, irreg=0.3)
+for (x, y, L, a, c) in ((612, 146, 26, 200, '#2f7a6a'), (700, 150, 30, -14, '#3f8a6a'), (786, 152, 28, 196, '#2f7a6a'),
+                        (900, 128, 34, -40, '#3f8a6a'), (580, 132, 30, 220, '#2f7a6a')):
+    hoja(lz, x, y, L, a, c, ancho=0.42, tapa=1)
+flor_popular(lz, 652, 132, 19, '#f6e6c8', CARMIN, petalos=8)
+flor_grande(lz, 840, 134, 16, ORO, centro=CARMIN, petalos=6)
+pajaro(lz, 748, 128, 22, TEAL, ang=-10, alas='arriba', vientre='#f6d27a')
+# the bottom band: two big leaves and a flower
+hoja(lz, 712, 686, 30, 182, '#2f7a6a', ancho=0.45, tapa=1)
+hoja(lz, 770, 686, 30, -2, '#3f8a6a', ancho=0.45, tapa=1)
+flor_popular(lz, 742, 684, 12, ORO, CARMIN, petalos=6)
+# on the side panel, behind the vine: big painted leaves that run past its edge
+for (x, y, L, a) in ((524, 300, 36, 196), (522, 470, 34, 160), (526, 620, 32, 200)):
+    hoja(lz, x, y, L, a, '#2f7a6a', ancho=0.5, tapa=1)
+flor_grande(lz, 541, 246, 13, '#f6b6b0', centro=CARMIN, petalos=7)
 
 # a pumpkin vine grows out of the living soil and climbs the fridge (the garden it comes from)
 tallo_v = spline([(540, 706), (528, 650), (540, 590), (526, 530), (538, 466), (526, 404), (538, 340), (528, 280), (544, 214),
@@ -243,8 +251,6 @@ def balda(y):
 # --- freezer (top): the bread sleeps with a scarf on, berries and broth keep (day 27)
 lz.aguada(Poligono([(CX0 + 4, CY0 + 4), (CX1 - 4, CY0 + 4), (CX1 - 4, 262), (CX0 + 4, 262)], suave=False), '#cfe6ec', dens=0.45,
           irreg=0.5, toques=[(700, 200, 60, '#e8f4f6', 0.6)])
-for _ in range(16):
-    estrella(lz, rng.uniform(CX0 + 20, CX1 - 20), rng.uniform(CY0 + 14, 250), rng.uniform(2, 4.5), '#ffffff', puntas=6)
 pan_ = Poligono(np.vstack([arco(672, 258, 50, 50, 180, 360, 24)[:, :] * (1, 1) + (0, 0)]) * (1, 1), suave=False)
 pan_ = Poligono([(622, 258), (624, 236), (640, 216), (672, 208), (704, 216), (720, 236), (722, 258)])
 _wash(lz, pan_, '#d9963e', toques=[(672, 214, 36, '#9a5a22', 0.6), (636, 250, 20, '#f0c27a', 0.5)], lapiz='#7a4a22')
@@ -265,106 +271,119 @@ lz.rayado(Poligono([(818, 222), (868, 222), (866, 212), (820, 212)], suave=False
 lz.gouache(Trazo([(826, 230), (826, 254)], (2, 1)), '#ffffff', alfa=0.6, irreg=0)
 balda(262)
 
-# --- dairy and fish shelf
-# milk bottle, waving to the boy
-lz.aguada(Poligono([(606, 378), (604, 316), (614, 296), (614, 280), (640, 280), (640, 296), (650, 316), (648, 378)]), '#fbfaf4',
-          dens=0.3, tapa=1, irreg=0.2)
-leche = Poligono([(606, 378), (604, 316), (614, 296), (614, 280), (640, 280), (640, 296), (650, 316), (648, 378)])
-lz.aguada(Poligono([(607, 376), (606, 322), (648, 322), (647, 376)]), '#f3eee6', dens=0.4, irreg=0.2,
-          toques=[(640, 360, 12, '#d8d0c8', 0.6)])
-lz.contorno(leche, '#8a9aa8', grosor=0.8, presion=0.55)
-lz.aguada(Poligono([(612, 284), (642, 284), (642, 272), (612, 272)], suave=False), '#3f6f8c', dens=0.85, tapa=1)
-lz.gouache(Trazo([(610, 330), (610, 368)], (2.4, 1.6)), '#ffffff', alfa=0.7, irreg=0)
-carita(lz, 627, 346, 15, expr='o', mira=(-1, 0))
-# a cheese wheel with a wedge cut, smiling
-queso = Poligono([(668, 378), (664, 330), (690, 316), (734, 318), (744, 336), (742, 378)])
-_wash(lz, queso, '#f2c24e', toques=[(720, 360, 24, '#d99a2a', 0.5)], lapiz='#9a6a1a')
-lz.aguada(Poligono([(664, 330), (690, 316), (734, 318), (744, 336), (712, 346), (680, 340)]), '#f8dc7a', dens=0.5, irreg=0.2)
-for (x, y, r_) in ((684, 362, 4), (726, 366, 3), (712, 356, 2.5), (694, 372, 2)):
-    lz.aguada(Elipse(x, y, r_, r_ * 0.8), '#c88a1a', dens=0.7, irreg=0.2, borde=0.8)
-carita(lz, 706, 352, 15, expr='sonrisa', mira=(-0.5, 0))
-# two little yogurt jars (glass, reused)
-for (x, c) in ((760, '#f6b6b0'), (782, '#c8a0d0')):
-    y_ = Poligono([(x - 10, 378), (x - 12, 346), (x + 12, 346), (x + 10, 378)], suave=False)
-    lz.aguada(y_, '#fbf6ee', dens=0.4, tapa=1, irreg=0.2, toques=[(x, 372, 8, c, 0.8)])
-    lz.contorno(y_, '#9a8a8a', grosor=0.6, presion=0.5)
-    lz.aguada(Poligono([(x - 13, 346), (x + 13, 346), (x + 12, 340), (x - 12, 340)], suave=False), c, dens=0.85, tapa=1)
-carita(lz, 760, 360, 7, expr='feliz')
-# the fish on its plate winks at the slice of lemon (fish and lemon go together)
-plato = Elipse(842, 372, 40, 8)
-_wash(lz, plato, '#e8eef2', dens=0.5, lapiz='#7a8a9a', toques=[(842, 374, 20, '#9ab8d0', 0.5)])
+# --- dairy and fish shelf (lower and a little smaller, so the lentils can have the stage)
+leche = Poligono([(606, 350), (604, 302), (612, 288), (612, 276), (636, 276), (636, 288), (646, 302), (644, 350)])
+lz.aguada(leche, '#d6e8f0', dens=0.55, tapa=1, irreg=0.2, borde=0.8)
+lz.aguada(Poligono([(607, 348), (606, 306), (644, 306), (643, 348)]), '#fdfcf8', dens=0.4, tapa=0.9, irreg=0.2,
+          toques=[(638, 336, 12, '#b8c8d8', 0.7)])
+lz.aguada(Trazo([(606, 330), (644, 330)], (7, 7), suave=False) & leche, '#3f6f8c', dens=0.85, irreg=0.2)
+lz.contorno(leche, '#4a6a88', grosor=0.9, presion=0.6)
+lz.aguada(Poligono([(610, 280), (638, 280), (638, 268), (610, 268)], suave=False), '#3f6f8c', dens=0.9, tapa=1)
+lz.gouache(Trazo([(610, 308), (610, 344)], (2.4, 1.6)), '#ffffff', alfa=0.75, irreg=0)
+carita(lz, 625, 316, 13, expr='o', mira=(-1, 0))
+queso = Poligono([(664, 350), (660, 312), (686, 300), (728, 302), (738, 318), (736, 350)])
+_wash(lz, queso, '#f0b030', toques=[(720, 336, 24, '#d98a1a', 0.6)], lapiz='#9a6a1a', dens=1.0)
+lz.aguada(Poligono([(660, 312), (686, 300), (728, 302), (738, 318), (708, 326), (676, 322)]), '#f8d870', dens=0.7, tapa=1, irreg=0.2)
+for (x, y, r_) in ((680, 338, 4), (722, 342, 3), (708, 334, 2.5), (690, 346, 2)):
+    lz.aguada(Elipse(x, y, r_, r_ * 0.8), '#b8761a', dens=0.8, irreg=0.2, borde=0.8)
+carita(lz, 702, 330, 14, expr='sonrisa', mira=(-0.5, 0))
+for (x, c) in ((758, '#e86a8a'), (780, '#9a6ac0')):
+    y_ = Poligono([(x - 10, 350), (x - 12, 322), (x + 12, 322), (x + 10, 350)], suave=False)
+    lz.aguada(y_, '#fbf6ee', dens=0.45, tapa=1, irreg=0.2, toques=[(x, 344, 8, c, 0.9)])
+    lz.contorno(y_, '#8a7a8a', grosor=0.6, presion=0.5)
+    lz.aguada(Poligono([(x - 13, 322), (x + 13, 322), (x + 12, 316), (x - 12, 316)], suave=False), c, dens=0.95, tapa=1)
+carita(lz, 758, 336, 7, expr='feliz')
+plato = Elipse(842, 344, 40, 8)
+_wash(lz, plato, '#e8eef2', dens=0.55, lapiz='#5a7a8a', toques=[(842, 346, 20, '#8ab0d0', 0.6)])
 for k in range(10):
     a = math.radians(k * 36)
-    lz.aguada(Elipse(842 + math.cos(a) * 34, 372 + math.sin(a) * 6.5, 1.8), TEAL, dens=0.8, irreg=0.1)
-pez = Poligono([(806, 362), (820, 346), (848, 340), (870, 348), (878, 360), (868, 368), (840, 372), (816, 370)])
-cola = Poligono([(806, 362), (794, 346), (798, 362), (792, 378)], suave=False)
-_wash(lz, pez | cola, '#8fb0c0', toques=[(850, 346, 18, '#4a6a8a', 0.6), (840, 368, 18, '#e8eef0', 0.6)], lapiz='#3a5a6a')
-for k in range(6):   # scales
-    lz.lapiz([arco(824 + k * 8, 356, 4, 5, 300, 420, 8)], '#4a6a7a', grosor=0.5, presion=0.45)
-lz.lapiz([arco(866, 356, 6, 9, 290, 430, 10)], '#3a5a6a', grosor=0.6, presion=0.5)   # gill
-lz.lapiz([arco(864, 354, 4, 3, 200, 340, 10)], '#2e211c', grosor=1.0, presion=0.9)          # a wink
-lz.aguada(Elipse(866, 360, 4, 2.4), '#e9727a', dens=0.5, suave=1.5)
-lz.lapiz([arco(876, 360, 3, 2.5, 20, 120, 8)], '#5a2a2a', grosor=0.7, presion=0.7)
-rodaja = Elipse(884, 372, 10, 6)
-_wash(lz, rodaja, '#f2cf3a', dens=0.8, lapiz='#a07a12')
-lz.lapiz([[(884, 372), (884 + math.cos(math.radians(a)) * 8, 372 + math.sin(math.radians(a)) * 4.6)] for a in range(0, 360, 60)],
+    lz.aguada(Elipse(842 + math.cos(a) * 34, 344 + math.sin(a) * 6.5, 1.8), TEAL, dens=0.85, irreg=0.1)
+pez = Poligono([(806, 334), (820, 318), (848, 312), (870, 320), (878, 332), (868, 340), (840, 344), (816, 342)])
+cola = Poligono([(806, 334), (794, 318), (798, 334), (792, 350)], suave=False)
+_wash(lz, pez | cola, '#5f8fb8', toques=[(850, 318, 18, '#2f5a8a', 0.7), (840, 340, 16, '#dfe8ec', 0.7), (820, 326, 12, '#6fb1ad', 0.6)],
+      lapiz='#2a4a6a', dens=0.95)
+for k in range(6):
+    lz.lapiz([arco(824 + k * 8, 328, 4, 5, 300, 420, 8)], '#2a4a6a', grosor=0.5, presion=0.5)
+lz.lapiz([arco(866, 328, 6, 9, 290, 430, 10)], '#2a4a6a', grosor=0.6, presion=0.55)
+lz.lapiz([arco(864, 326, 4, 3, 200, 340, 10)], '#1e140f', grosor=1.0, presion=0.9)          # a wink
+lz.aguada(Elipse(866, 332, 4, 2.4), '#e9727a', dens=0.55, suave=1.5)
+lz.lapiz([arco(876, 332, 3, 2.5, 20, 120, 8)], '#5a2a2a', grosor=0.7, presion=0.7)
+rodaja = Elipse(884, 346, 10, 6)
+_wash(lz, rodaja, '#f2cf3a', dens=0.9, lapiz='#a07a12')
+lz.lapiz([[(884, 346), (884 + math.cos(math.radians(a)) * 8, 346 + math.sin(math.radians(a)) * 4.6)] for a in range(0, 360, 60)],
          '#fbe88a', grosor=0.6, presion=0.6)
-balda(380)
+balda(350)
 
-# --- the heroes' shelf: rice, lentil, lemon and pepper (days 3 and 4, and the iron + vitamin C friendship)
-# a glass jar lies on its side; lentils and grains of rice walk out of it hand in hand (day 4)
-tarro_l = Poligono([(600, 474), (640, 472), (648, 480), (660, 482), (660, 512), (648, 514), (640, 520), (600, 520), (592, 510), (592, 484)])
-lz.aguada(tarro_l, '#e6eef0', dens=0.3, tapa=1, irreg=0.2, borde=0.8)
-for _ in range(26):
-    lenteja(lz, rng.uniform(598, 650), rng.uniform(496, 516), 4.5, rng.uniform(-30, 30))
-for _ in range(10):
-    arroz(lz, rng.uniform(600, 650), rng.uniform(490, 512), 5, rng.uniform(0, 180))
-lz.contorno(tarro_l, '#7a9aa8', grosor=0.8, presion=0.55)
-lz.gouache(Trazo([(600, 480), (646, 476)], (1.6, 1.0)), '#ffffff', alfa=0.7, irreg=0)
-lz.aguada(Poligono([(660, 470), (668, 470), (668, 522), (660, 522)], suave=False), '#d9c49a', dens=0.6, tapa=1)   # the cork, out
-for (x, y) in ((664, 518), (672, 520), (668, 514)):
-    lenteja(lz, x, y, 4.5, 10)
-# the little chain: lentil, rice, lentil, rice, lentil...
-lentil_pos = [(684, 500), (734, 500)]
-rice_pos = [(708, 494), (756, 494)]
-for (x, y) in rice_pos:
-    arroz(lz, x, y, 17, -4)
-    carita(lz, x, y - 5, 7.5, expr='feliz')
-for k, (x, y) in enumerate(lentil_pos):
-    lenteja(lz, x, y, 13, -4)
-    carita(lz, x, y - 2, 8.5, expr=['sonrisa', 'risa'][k], mira=(1, 0))
-for (x, y) in lentil_pos + rice_pos:     # little legs
-    for sd in (-1, 1):
-        brazito(lz, [(x + sd * 4, y + 12), (x + sd * 5, y + 18), (x + sd * 8, y + 21)], BRAZO, grosor=1.1, mano_r=1.6)
-# hands joined along the chain
-for (xa, xb) in ((684, 708), (708, 734), (734, 756)):
-    m = ((xa + xb) / 2, 498)
-    brazito(lz, [(xa + 9, 496), (m[0] - 2, 500), m], BRAZO, grosor=1.3, mano=False)
-    brazito(lz, [(xb - 7, 494), (m[0] + 2, 500), m], BRAZO, grosor=1.3, mano_r=2.6)
-# the lemon and the pepper
-limon(lz, 806, 466, 42, -12)
-carita(lz, 816, 458, 20, expr='feliz')
-pimiento(lz, 872, 458, 32)
-carita(lz, 866, 452, 16, expr='beso', mira=(-1, 0))
-brazito(lz, [(846, 444), (834, 434), (822, 440)], BRAZO, grosor=1.5, mano_r=3.4)
-# the last lentil climbs up and hugs the lemon (vitamin C helps it take in the iron)
-lenteja(lz, 774, 486, 15, -20)
-carita(lz, 776, 482, 9, expr='feliz')
-brazito(lz, [(786, 482), (798, 482), (810, 486)], BRAZO, grosor=1.5, mano_r=2.6)
-brazito(lz, [(786, 494), (800, 498), (814, 494)], BRAZO, grosor=1.5, mano_r=2.6)
-brazito(lz, [(766, 498), (760, 504), (756, 498)], BRAZO, grosor=1.3, mano_r=2.4)     # and still holds the rice's hand
-brazito(lz, [(770, 498), (772, 512), (776, 518)], BRAZO, grosor=1.1, mano_r=1.6)
-# a tiny heart floats between the pepper and the lemon
-cor = Poligono([(842, 410), (837, 403), (842, 398), (847, 403), (852, 398), (857, 403), (852, 410), (847, 416)])
+# --- the heroes' shelf, the biggest one: out of a jar, lentils and grains of rice walk hand in hand up a
+# wooden spoon to the lemon, and the first lentil to arrive hugs it (days 3 and 4, and iron + vitamin C)
+lz.luz(Elipse(760, 440, 160, 90), '#ffe2a0', fuerza=0.3, suave=30)
+ramp = lambda x: 518 - (x - 668) * 0.36
+cuchara = Trazo([(660, 520), (790, ramp(790))], (9, 10))
+lz.aguada(cuchara, '#c8925a', dens=0.85, tapa=1, irreg=0.3, borde=0.7, sombra=(-2, -2))
+lz.contorno(cuchara, '#7a4a22', grosor=0.7, presion=0.55)
+lz.lapiz([[(670, 517), (786, ramp(786) - 1)]], '#e8c08a', grosor=0.8, presion=0.5)
+cuenco_b = Poligono(np.vstack([arco(846, 520, 48, 6, 0, 180, 12)[::-1], arco(846, 470, 40, 12, 180, 360, 16)]), suave=False)
+cuenco_b = Poligono([(798, 520), (806, 478), (822, 466), (846, 462), (870, 466), (886, 478), (892, 520)])
+lz.aguada(cuenco_b, '#c0703f', dens=0.9, tapa=1, irreg=0.3, borde=0.75, gran=0.4, sombra=(-6, -4),
+          toques=[(830, 480, 16, '#e0905a', 0.6)])
+lz.contorno(cuenco_b, '#7a3a1a', grosor=0.8, presion=0.55)
+for k in range(6):
+    lz.aguada(Elipse(812 + k * 14, 500, 3), '#f6e6c8', dens=0.6, tapa=0.8, irreg=0.1)
+tarro_l = Poligono([(598, 466), (636, 462), (646, 472), (660, 474), (660, 514), (646, 516), (636, 522), (598, 522), (590, 510), (590, 478)])
+lz.aguada(tarro_l, '#dcecf0', dens=0.35, tapa=1, irreg=0.2, borde=0.8)
+for _ in range(30):
+    lenteja(lz, rng.uniform(598, 652), rng.uniform(490, 516), 5, rng.uniform(-30, 30))
+for _ in range(12):
+    arroz(lz, rng.uniform(600, 652), rng.uniform(484, 512), 6, rng.uniform(0, 180))
+lz.contorno(tarro_l, '#5a8a9a', grosor=0.85, presion=0.6)
+lz.gouache(Trazo([(600, 472), (642, 468)], (1.8, 1.0)), '#ffffff', alfa=0.7, irreg=0)
+for (x, y) in ((668, 518), (662, 513), (674, 520)):
+    lenteja(lz, x, y, 5, 10)
+# the pepper peeks over the lemon's shoulder and kisses its cheek; the lemon sits on the bowl
+pimiento(lz, 872, 372, 27)
+carita(lz, 866, 368, 12, expr='beso', mira=(-1, 0))
+limon(lz, 844, 422, 46, -14)
+carita(lz, 854, 410, 22, expr='feliz')
+brazito(lz, [(852, 388), (840, 378), (832, 386)], BRAZO, grosor=1.6, mano_r=3.4)
+cor = Poligono([(830, 346), (825, 339), (830, 334), (835, 339), (840, 334), (845, 339), (840, 346), (835, 352)])
 lz.aguada(cor, CARMIN, dens=0.95, tapa=1, irreg=0.1)
 lz.contorno(cor, '#7a1f30', grosor=0.6, presion=0.5)
-# sparks of vitamin light from the lemon and the pepper to the lentil (iron taken in)
-for k in range(11):
-    t = k / 10
-    x = 830 - t * 60 + 6 * math.sin(t * 6)
-    y = 428 - 18 * math.sin(t * 3)
+# the chain up the spoon: lentil, rice, lentil, rice
+cadena = [('l', 692), ('r', 722), ('l', 752), ('r', 780)]
+pos = []
+for (kind, x) in cadena:
+    if kind == 'l':
+        y = ramp(x) - 21
+        lenteja(lz, x, y, 19, -10)
+        carita(lz, x, y - 3, 11.5, expr='sonrisa' if x < 720 else 'risa', mira=(1, -0.3))
+        foot = 12
+    else:
+        y = ramp(x) - 32
+        arroz(lz, x, y, 26, -6)
+        carita(lz, x, y - 7, 10, expr='feliz')
+        foot = 23
+    pos.append((x, y, foot))
+    for sd in (-1, 1):
+        brazito(lz, [(x + sd * 5, y + foot), (x + sd * 6, ramp(x + sd * 6) - 6), (x + sd * 10, ramp(x + sd * 10) - 1)], BRAZO,
+                grosor=1.3, mano_r=2)
+for (a, b) in zip(pos[:-1], pos[1:]):
+    m = ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2 + 6)
+    brazito(lz, [(a[0] + 11, a[1] + 2), (m[0] - 3, m[1] + 3), m], BRAZO, grosor=1.5, mano=False)
+    brazito(lz, [(b[0] - 9, b[1] + 2), (m[0] + 3, m[1] + 3), m], BRAZO, grosor=1.5, mano_r=3)
+# the first lentil to arrive hugs the lemon (vitamin C helps it take in the iron)
+lx, ly = 808, 446
+lenteja(lz, lx, ly, 19, -24)
+carita(lz, lx, ly - 5, 11.5, expr='feliz')
+brazito(lz, [(lx + 14, ly - 8), (lx + 28, ly - 8), (lx + 40, ly - 2)], BRAZO, grosor=1.6, mano_r=3)
+brazito(lz, [(lx + 14, ly + 6), (lx + 30, ly + 10), (lx + 44, ly + 6)], BRAZO, grosor=1.6, mano_r=3)
+brazito(lz, [(lx - 14, ly + 4), (lx - 18, ly + 10), (pos[-1][0] + 8, pos[-1][1] + 4)], BRAZO, grosor=1.4, mano_r=2.6)   # still holds the rice
+for sd in (-1, 1):
+    brazito(lz, [(lx + sd * 5, ly + 12), (lx + sd * 7, ly + 18), (lx + sd * 10, 466)], BRAZO, grosor=1.3, mano_r=2)
+for k in range(12):   # sparks of vitamin light from the lemon and pepper down the chain
+    t = k / 11
+    x = 836 - t * 140 + 6 * math.sin(t * 6)
+    y = 396 - 30 * math.sin(t * 3) + t * 40
     lz.gouache(Elipse(x, y, 1.5 + (k % 3) * 0.5), '#fff3b0', alfa=0.9, irreg=0)
-lz.luz((730, 450, 50), '#ffe7a0', fuerza=0.25)
 balda(522)
 
 # --- the crisper drawer: vegetables peeking out over its edge
@@ -418,17 +437,18 @@ lz.aguada(forro, '#fbe8c0', dens=0.55, tapa=1, borde=0.4, irreg=0.4, toques=[(10
 lz.contorno(forro, '#8a3022', grosor=0.8, presion=0.5)
 lz.luz(forro, '#ffe7a8', fuerza=0.18, suave=20)
 lz.rayado(Poligono(DP, suave=False) - forro, '#c8483a', angulo=80, sep=5, presion=0.2, grosor=1.3)
-# the door is painted too: a bird with two flowers on its top band, flowers down its edge, dots by the hinges
-pajaro(lz, 1004, 150, 13, TEAL, ang=-18, alas='arriba', vientre='#f6d27a')
-for (x, y, r_, c, cc) in ((962, 168, 9, '#f6e6c8', CARMIN), (1050, 140, 9, ORO, TEAL)):
-    flor_popular(lz, x, y, r_, c, cc)
-for k, y in enumerate(range(210, 690, 52)):
-    flor_popular(lz, 1070, y - 8, 7, ['#f6e6c8', ORO][k % 2], [TEAL, CARMIN][k % 2], petalos=5)
-for y in range(170, 690, 18):
-    lz.gouache(Elipse(933, y, 1.6), '#fbe8c8', alfa=0.85, irreg=0)
-flor_popular(lz, 1000, 712, 10, '#f6e6c8', TEAL)
-hojita(lz, 1016, 714, 12, 10, '#3f7a6a', tapa=1)
-hojita(lz, 984, 716, 12, 170, '#3f7a6a', tapa=1)
+# the door is painted too: a big bird on its top band and a flowering branch down its outer edge,
+# its leaves running out past the door
+pajaro(lz, 1000, 150, 17, CORAL, ang=-16, alas='arriba', vientre='#f6d27a')
+rama = spline([(1068, 716), (1074, 640), (1066, 560), (1074, 470), (1066, 380), (1074, 290), (1068, 200)], False, 10)
+lz.aguada(Trazo(rama[::3], (4, 3.5, 3)), '#2f6a5a', dens=0.85, tapa=1, irreg=0.3)
+qq = remuestrea(rama, 46)
+for k, p in enumerate(qq[1:-1]):
+    sd = 1 if k % 2 else -1
+    hoja(lz, p[0], p[1], 26 + 4 * (k % 2), -90 + sd * 62, ['#2f7a6a', '#3f8a6a'][k % 2], ancho=0.45, tapa=1)
+flor_popular(lz, 1072, 610, 13, '#f6e6c8', CARMIN, petalos=7)
+flor_grande(lz, 1070, 430, 12, CORAL, centro=ORO, petalos=6)
+flor_popular(lz, 1072, 262, 11, ORO, TEAL, petalos=5)
 
 
 def ybin(x, y0, y1):
@@ -556,15 +576,18 @@ for (x, y) in ((414, 706), (504, 704)):
 cabeza_album(lz, NX, NY, NR, piel=PIEL, peinado='rizado', pelo='#1e140f', giro=0.55, inclina=10, ojos='abiertos', boca='risa',
              mira=(1, 0.4), base=(468, 536), ancho_base=72)
 # jumper, leaning toward the fridge, with folds where the body bends
-jersey = Poligono([(434, 524), (494, 518), (514, 548), (512, 630), (422, 634), (414, 556)])
+jersey = Poligono([(450, 524), (430, 536), (422, 562), (428, 600), (420, 634), (504, 628), (496, 598), (510, 560), (502, 528), (486, 520)])
 lz.aguada(jersey, '#f0a828', dens=0.98, tapa=1, borde=0.7, gran=0.4, sombra=(-10, -6, '#c4702a', 0.6))
 lz.contorno(jersey, '#8a5a12', grosor=0.9, presion=0.55)
 for y in (570, 578):
     lz.aguada(Trazo([(414, y), (514, y - 4)], (5, 5), suave=False) & jersey, TEAL, dens=0.9, irreg=0.2)
 for k in range(8):
     lz.aguada(Elipse(424 + k * 11, 592 - k * 0.4, 2.2), CARMIN, dens=0.9, irreg=0.1)
-lz.lapiz([bezier((440, 604), (452, 614), (450, 630)), bezier((490, 600), (500, 614), (502, 630)), bezier((470, 540), (484, 548), (500, 546))],
-         '#a0661a', grosor=0.7, presion=0.45)
+lz.lapiz([bezier((432, 600), (452, 594), (470, 604)), bezier((476, 598), (488, 592), (498, 600)),       # bends at the waist
+          bezier((486, 540), (496, 552), (504, 548)), bezier((440, 610), (446, 620), (442, 630)), bezier((492, 610), (496, 620), (498, 628)),
+          bezier((428, 548), (436, 556), (432, 570))], '#a0661a', grosor=0.75, presion=0.5)
+lz.aguada(Trazo([(422, 626), (504, 620)], (9, 9), suave=False) & jersey, '#d9902a', dens=0.6, irreg=0.2)          # ribbed hem
+lz.lapiz([[(426 + k * 6, 620 - k * 0.05), (426 + k * 6, 630)] for k in range(14)], '#a0661a', grosor=0.5, presion=0.4)
 lz.lapiz([spline([(440, 526), (466, 540), (492, 522)])], TEAL, grosor=2.2, presion=0.75)     # ribbed collar
 # back arm (image left) hangs down and grips the basket's handle; the basket rests by his foot
 manga(lz, [(436, 538), (422, 590), (422, 632)], (26, 23, 20), '#f0a828', pliegues=2)
@@ -604,7 +627,6 @@ for (a, b) in ((TOMATE_MANOS[0], (610, 554)), (TOMATE_MANOS[1], (610, 566))):
 for k, (x, y, a, c) in enumerate(((880, 86, -20, ORO), (930, 64, 40, '#e8892e'), (986, 54, -50, CARMIN), (1046, 40, 20, '#c0703f'))):
     hoja(lz, x, y, 30 - k * 3, a, c, ancho=0.5)
 lz.lapiz([bezier((852, 94), (900, 84), (960, 50), (1060, 26))], '#c8b8a0', grosor=0.5, presion=0.3, cortes=0.6)
-lz.chispas(740, 160, 140, 20, n=8, tam=(0.7, 1.6), luz=0.2)
 
 lz.vineta(margen=30)
 lz.guardar(SALIDA)

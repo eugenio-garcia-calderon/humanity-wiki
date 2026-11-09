@@ -101,12 +101,20 @@ for (x, y, rx, ry) in ROCAS:
         hx, hy = x + rng.uniform(-rx, rx) * 0.7, y - ry * rng.uniform(0.5, 0.95)
         hojita(lz, hx, hy, rng.uniform(5, 9), rng.uniform(-160, -20), rng.choice(['#5f8f63', '#7aa24a']), tapa=0.6)
 # the crack between the rocks, wet and dark, and the clear water that is born there
-grieta = Poligono([(984, 400), (992, 392), (1000, 398), (996, 410), (988, 412)])
-lz.aguada(grieta, '#2e3a40', dens=0.9, tapa=1, irreg=0.5)
-CHORRO = bezier((996, 404), (1008, 404), (1014, 418), (1014, 436), 20)
-lz.aguada(Trazo(CHORRO, (6, 5.5, 5)), '#8fcfe0', dens=0.7, tapa=0.7, irreg=0.3, borde=0.8)
-lz.gouache(Trazo(CHORRO[2:-3] + (0.8, 0), (1.5, 1.0)), '#ffffff', alfa=0.85, irreg=0)
-lz.luz(Trazo(CHORRO, (10, 8)), '#e8fbff', fuerza=0.35, suave=3)
+# the crack: a thin, wet, irregular seam where two rocks meet (no tube, no hole)
+GRIETA = [(966, 360), (972, 372), (970, 384), (978, 394), (984, 404), (996, 410)]
+lz.aguada(Trazo(GRIETA, (1.5, 3, 4, 3.5, 3, 2)), '#3a4a48', dens=0.75, irreg=0.6, borde=0.6)
+lz.lapiz([spline(GRIETA)], '#2e3a38', grosor=0.9, presion=0.7, temblor=0.4)
+lz.aguada(Trazo([(958, 386), (976, 396), (992, 408), (1002, 418)], (10, 12, 10, 6)), '#4f7a6a', dens=0.35, suave=3)  # wet stain
+# the water seeps out along the seam and spills over the lip of the lower rock as a thin clear sheet
+lamina = Poligono([(980, 398), (998, 404), (1010, 412), (1018, 432), (1012, 440), (1004, 424), (990, 412)])
+lz.aguada(lamina, '#8fd0e4', dens=0.65, tapa=0.7, irreg=0.6, borde=0.9)
+for k in range(3):
+    lz.gouache(Trazo([(986 + k * 6, 404 + k * 2), (1000 + k * 5, 414 + k * 3), (1008 + k * 3, 434)], (1.2, 1.0, 0.6)),
+               '#ffffff', alfa=0.8, irreg=0)
+lz.luz(lamina, '#e8fbff', fuerza=0.35, suave=4)
+for k in range(5):     # moss hanging wet over the seam
+    hojita(lz, 960 + k * 9, 384 + k * 5, 7, -150 + k * 12, '#6f9a4a', tapa=0.7)
 lz.aguada(Trazo([(1000, 412), (996, 426), (990, 440)], (4, 6, 8)), '#7fc0d8', dens=0.6, tapa=0.5)   # overflow to the river
 
 # ------------------------------------------------------------------ the whale made of cloud (the sea inside)
@@ -248,8 +256,11 @@ def garza(x, y, s=1.0):
     """A grey heron standing in the shallows, neck folded, looking down at the water."""
     P = lambda pts: [(x + px * s, y + py * s) for px, py in pts]
     for lx in (-4, 6):
-        lz.lapiz([[P([(lx, 0)])[0], P([(lx + 2, 26)])[0], P([(lx + 3, 46)])[0]]], '#8a6a4a', grosor=1.5, presion=0.85,
-                 temblor=0.1)
+        pata = Trazo(P([(lx, 2), (lx + 1, 24), (lx + 2, 34), (lx + 3, 46)]), (3.2, 2.6, 3.0, 2.4))
+        lz.aguada(pata, '#a88a5a', dens=0.85, tapa=1, irreg=0.1)
+        lz.lapiz([spline(P([(lx - 1.4, 2), (lx - 0.4, 24), (lx + 0.6, 34), (lx + 1.6, 46)]))], '#5a4a3a', grosor=0.6,
+                 presion=0.7)
+        lz.lapiz([arco(*P([(lx + 1, 34)])[0], 2, 1.2, 0, 360, 10)], '#5a4a3a', grosor=0.5, presion=0.6)   # the joint
     cuerpo = Poligono(P([(-30, -8), (-8, -22), (18, -20), (30, -8), (20, 4), (-6, 6), (-34, 12)]))
     volumen(lz, cuerpo, '#b8c0c8', dens=0.6, luz=(-0.5, -1), brillo=0.25, lapiz='#5a6070')
     ala = Poligono(P([(-28, -6), (0, -16), (22, -12), (0, 0), (-36, 14)]))
@@ -267,12 +278,14 @@ def garza(x, y, s=1.0):
     lz.aguada(pico, '#e8b03a', dens=0.9, tapa=1, irreg=0.1)
     lz.aguada(Elipse(*P([(29, -65)])[0], 1.3 * s), '#2a1a14', dens=1.0)
     # its legs stand in the water: a glaze over the lower legs and rings where they enter
-    lz.aguada(Elipse(*P([(1, 42)])[0], 22 * s, 8 * s), '#5fa8c8', dens=0.4, suave=3)
-    lz.lapiz([arco(*P([(0, 46)])[0], 8 * s, 2.5 * s, 0, 360, 18), arco(*P([(8, 46)])[0], 14 * s, 4 * s, 10, 170, 18)],
-             '#e8f6fb', grosor=0.7, presion=0.6)
+    lz.aguada(Elipse(*P([(2, 42)])[0], 20 * s, 7 * s), '#4f98c0', dens=0.3, suave=4)
+    for lx in (-4, 6):
+        lz.lapiz([arco(*P([(lx + 3, 36)])[0], 6 * s, 1.8 * s, 0, 360, 18), arco(*P([(lx + 3, 37)])[0], 11 * s, 3 * s, 20, 160, 18)],
+                 '#e8f6fb', grosor=0.8, presion=0.7)
+        lz.lapiz([[P([(lx + 2.5, 38)])[0], P([(lx + 3.5, 46)])[0]]], '#7a6a5a', grosor=0.5, presion=0.35)   # legs seen through water
 
 
-garza(272, 690, 1.5)
+garza(304, 676, 1.5)
 
 # ------------------------------------------------------------------ the girl floating on her back (baño sensorial, day 24)
 F = Marco(520, 732, -8, 1.0)
@@ -293,20 +306,27 @@ lz.lapiz(mech[::3], '#d8905a', grosor=0.6, presion=0.4, temblor=0.4)
 for k in range(4):
     pececillo(lz, *F(-150 + k * 10, -40 + k * 14), 3.4, 80, '#f0c25e', gouache=False)
 # arms open like a star, legs gently apart
-for (pts, w) in (([F(-58, -18), F(-30, -62), F(-4, -96)], (16, 13, 10)), ([F(-58, 18), F(-26, 58), F(4, 90)], (16, 13, 10))):
-    miembro(lz, pts, w, 'piel4', lado=1, lapiz=PIEL_LP)
-mano(lz, *F(-4, -96), -62, 24, 'piel4', 'abierta', lado=1)
-mano(lz, *F(4, 90), 58, 24, 'piel4', 'abierta', lado=-1)
-for (pts, w) in (([F(30, -12), F(84, -22), F(136, -30)], (24, 18, 13)), ([F(30, 12), F(84, 22), F(136, 34)], (24, 18, 13))):
-    miembro(lz, pts, w, 'piel4', lado=-1, lapiz=PIEL_LP)
-for (x, y, a) in (F(146, -32) + (-10,), F(146, 36) + (12,)):
+BRAZOS = [[F(-60, -18), F(-50, -42), F(-32, -64), F(-22, -80), F(-6, -94)],
+          [F(-60, 18), F(-46, 40), F(-30, 60), F(-16, 76), F(2, 88)]]
+for pts in BRAZOS:
+    miembro(lz, pts, (17, 15, 11, 12, 9.5), 'piel4', lado=1, lapiz=PIEL_LP)
+mano(lz, *F(-6, -94), -60, 24, 'piel4', 'abierta', lado=1)
+mano(lz, *F(2, 88), 56, 24, 'piel4', 'abierta', lado=-1)
+PIERNAS = [[F(30, -12), F(60, -20), F(88, -20), F(114, -28), F(138, -30)],
+           [F(30, 12), F(60, 20), F(86, 30), F(112, 30), F(138, 38)]]
+for pts in PIERNAS:
+    miembro(lz, pts, (25, 22, 16, 17, 12), 'piel4', lado=-1, lapiz=PIEL_LP)
+    lz.lapiz([arco(*pts[2], 5, 3, 200, 340, 8)], PIEL_LP, grosor=0.6, presion=0.45)            # knee
+for (x, y, a) in (F(146, -32) + (-10,), F(146, 40) + (12,)):
     pie = Elipse(x, y, 11, 6, a)
     lz.aguada(pie, 'piel4', dens=0.6, tapa=1, irreg=0.3)
     lz.contorno(pie, PIEL_LP, grosor=0.7, presion=0.5)
 # swimsuit: coral with white dots
-traje = [F(-66, -24), F(-30, -30), F(10, -26), F(36, -18), F(40, 0), F(36, 18), F(10, 26), F(-30, 30), F(-66, 24),
-         F(-72, 0)]
-prenda(lz, traje, CORAL, luz=(-0.3, -1), pliegues=[[F(-40, -10), F(-10, -6), F(20, -8)]])
+traje = [F(-66, -22), F(-44, -27), F(-20, -22), F(2, -20), F(26, -22), F(40, -12), F(42, 4), F(36, 18), F(14, 22),
+         F(-6, 20), F(-28, 26), F(-50, 28), F(-68, 20), F(-74, 0)]
+prenda(lz, traje, CORAL, luz=(-0.3, -1), pliegues=[[F(-40, -14), F(-20, -8), F(4, -12)], [F(-50, 12), F(-30, 16), F(-10, 10)],
+                                                   [F(20, 6), F(34, 10)], [F(-62, -6), F(-56, 6)]])
+lz.aguada(Trazo([F(36, -14), F(30, 0), F(36, 14)], (6, 6, 6)) & Poligono(traje), '#c34a3e', dens=0.5, suave=2)
 for (u, v) in ((-50, -12), (-36, 8), (-16, -18), (0, 6), (18, -6), (24, 14), (-56, 10)):
     lz.gouache(Elipse(*F(u, v), 2.0), '#fff3e0', alfa=0.9, irreg=0)
 cuello(lz, F(-102, 0), 30, F(-68, 0), piel='piel4', ancho=0.42)
@@ -315,8 +335,19 @@ cara(lz, *F(-102, 0), 30, piel='piel4', pelo='#7a3a2a', peinado='corto', giro=0.
 # the water laps over her: a glaze across the edges of her body, a ring of ripples
 borde_agua = Elipse(*F(10, 0), 180, 115, -8) - Elipse(*F(10, 0), 150, 90, -8)
 lz.aguada(borde_agua & rio, '#5fa8c8', dens=0.25, suave=6, gran=0.1)
-lz.lapiz([arco(*F(10, 0), 160 + k * 16, 100 + k * 10, 0, 360, 80, -8) for k in range(2)], '#e8f6fb', grosor=0.8,
-         presion=0.5, cortes=0.5)
+rr3 = np.random.default_rng(33)
+ondas = []
+for k in range(3):
+    a0 = rr3.uniform(0, 60)
+    ondas.append(arco(*F(14, 0), 175 + k * 16, 112 + k * 11, a0, a0 + 300, 80, -8))
+lz.lapiz(ondas, '#2f6f94', grosor=0.7, presion=0.45, cortes=0.35, temblor=0.4)
+lz.lapiz(ondas[:2], '#e8f6fb', grosor=0.9, presion=0.6, cortes=0.5, temblor=0.4)
+for pts in BRAZOS + PIERNAS:            # light glancing off wet skin
+    q = np.asarray(pts)
+    lz.gouache(Trazo([tuple(q[1] + (0, -3)), tuple(q[3] + (0, -3))], (1.4, 0.8)), '#fff8ee', alfa=0.7, irreg=0.3)
+for pts in (BRAZOS[0][1:4], PIERNAS[1][1:4]):     # the surface laps across her limbs
+    q = np.asarray(pts)
+    lz.lapiz([q + (0, 6)], '#e8f6fb', grosor=0.8, presion=0.6, temblor=0.3, cortes=0.3)
 
 # ------------------------------------------------------------------ the boy, leaping from a stone into the pool
 PIEDRA = (690, 592)
@@ -356,11 +387,18 @@ cara(lz, *B(-2, -68), 30, piel='piel2', pelo='#2a1a14', peinado='rizos', giro=-0
 miembro(lz, [B(-16, -30), B(-30, -72), B(-20, -114)], (15, 12.5, 10), 'piel2', lado=-1, lapiz=PIEL_LP)
 mano(lz, *B(-20, -114), 180 - (30 - 85), 23, 'piel2', 'abierta', lado=1)
 # the pool already jumps up to meet him: a crown of splash, drops and rings
-for k in range(9):
-    a = math.radians(200 + k * 17)
-    tip = (SPL[0] + math.cos(a) * 34, SPL[1] + math.sin(a) * 34)
-    lz.aguada(Trazo([(SPL[0] + math.cos(a) * 18, SPL[1] + 4), tip], (5, 2)), '#8fcfe0', dens=0.6, tapa=0.5, irreg=0.3)
-    lz.gouache(Elipse(*tip, 1.6), '#ffffff', alfa=0.85, irreg=0)
+lz.aguada(Elipse(SPL[0], SPL[1] + 4, 52, 13), '#e8f6fb', dens=0.4, tapa=0.6, irreg=0.8, borde=0.9)   # foam
+corona = Poligono([(SPL[0] - 44, SPL[1] + 6)] + [(SPL[0] + math.cos(math.radians(a)) * 42,
+                   SPL[1] + 2 + math.sin(math.radians(a)) * (26 if k % 2 == 0 else 12)) for k, a in enumerate(range(190, 351, 16))]
+                  + [(SPL[0] + 44, SPL[1] + 6), (SPL[0], SPL[1] + 10)])
+lz.aguada(corona, '#9fd8ea', dens=0.55, tapa=0.7, irreg=0.8, borde=0.9, toques=[(SPL[0], SPL[1] - 6, 24, '#e8f8ff', 0.7)])
+lz.contorno(corona, '#3f8fb0', grosor=0.7, presion=0.5, cortes=0.3)
+for k, a in enumerate(range(195, 346, 15)):
+    r = 40 + (k % 3) * 10
+    tip = (SPL[0] + math.cos(math.radians(a)) * r, SPL[1] + math.sin(math.radians(a)) * r * 0.9)
+    lz.aguada(Trazo([(SPL[0] + math.cos(math.radians(a)) * 24, SPL[1] - 2), tip], (5, 1.8)), '#8fcfe0', dens=0.7, tapa=0.6,
+              irreg=0.3)
+    lz.gouache(Elipse(*tip, 2.0), '#ffffff', alfa=0.9, irreg=0)
 for k in range(14):
     a = math.radians(rng.uniform(200, 340))
     r = rng.uniform(30, 60)
