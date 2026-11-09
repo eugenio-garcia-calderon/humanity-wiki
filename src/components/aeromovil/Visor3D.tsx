@@ -1384,6 +1384,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       renderer, scene, camera, controls, target, M, Mb, G, coche, grupoCotas, grupoRef, grupoGaraje, puertasG, dibujar, tween: null as any,
       /** The Bala's rebuilds: the last one's time, the pending quick one (next frame) and the full one after a pause. */
       bala: { ultima: 0, cuadro: 0, pausa: 0 as ReturnType<typeof setTimeout> | 0 },
+      /** The Bala is already on screen (so a change is an edit, rebuilt quick first), not being opened. */
+      balaVisto: false,
       curva: false, inclinacion: 0, modelo: null as Modelo | null, plano: new THREE.Plane(new THREE.Vector3(0, 0, 1), 0),
       apertura: 0, aperturaObjetivo: 0, aperturaMal: 0, aperturaMalObjetivo: 0, colocarPuertas: (() => {}) as () => void,
       tunel: null as Tunel | null, superponer: false, ultimoFantasma: 0,
@@ -1521,14 +1523,18 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     const cotasYPuertas = () => { vaciar(st.grupoCotas); cotas(st.grupoCotas, st.M, st.modelo, sinPasajero); st.colocarPuertas(); st.sombraSucia = true; };
     cancelAnimationFrame(st.bala.cuadro); if (st.bala.pausa) { clearTimeout(st.bala.pausa); st.bala.pausa = 0; }
     if (modelo.tipo !== 'bala') {
+      st.balaVisto = false;
       construirFijo(st.G, st.puertasG, st.M, modelo, sinPasajero);
       construirMovil(st.G, st.M, modelo, st.coche, st.curva ? st.inclinacion : 0);
       cotasYPuertas();
       return;
     }
-    // The Bala takes 150–450 ms to build in full. While a slider is dragged (changes less than
-    // 0.6 s apart) it is rebuilt quick (half the rows, no small details: ~50 ms) once per frame
-    // at most, and in full 0.3 s after the last change. A single change builds in full at once.
+    // The Bala takes 150–450 ms to build in full. When it changes (a slider, a select), it is
+    // rebuilt quick (half the rows, no small details: ~50 ms) on the next frame, at most once per
+    // frame however fast the slider moves, and in full 0.3 s after the last change. Only the first
+    // build (on opening, or on switching from another vehicle) is full at once.
+    const yaEraBala = st.balaVisto === true;
+    st.balaVisto = true;
     const construir = (calidad: 'completa' | 'rapida') => {
       const m = st.modelo as ModeloBala, t0 = performance.now();
       construirBala(st.G, st.puertasG, st.M, st.Mb, m, calidad, sinPasajero);
@@ -1539,8 +1545,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       try { performance.measure(`bala:${calidad}`, { start: t0, end: t1 }); } catch { /* old browsers */ }
       st.bala.ultima = t1;
     };
-    const arrastrando = performance.now() - st.bala.ultima < 600;
-    if (!arrastrando) { construir('completa'); return; }
+    if (!yaEraBala) { construir('completa'); return; }
     st.bala.cuadro = requestAnimationFrame(() => construir('rapida'));
     st.bala.pausa = setTimeout(() => { st.bala.pausa = 0; construir('completa'); }, 300);
   }, [modelo, sinPasajero]);

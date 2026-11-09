@@ -512,6 +512,7 @@ function LadoBala({ P, set, res, modelo, cdTunel }: {
       case 'bCupIni': case 'bCupFin': return `${m2(v)} tras el eje delantero`;
       case 'bVia': return rb?.viaSubida ? `${m2(v)} → ${m2(rb.viaSubida)}` : m2(v);
       case 'bAleta': return `${m2(v)} sobre el suelo`;
+      case 'bAlto': return `${fmt(v, 3)} m`;
       default: return m2(v);
     }
   };
