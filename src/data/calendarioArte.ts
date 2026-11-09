@@ -120,11 +120,12 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "¿Qué aprendiste este mes sobre querer y ser querido?"
     ],
     "reto": "¿A quién vas a cuidar mejor este mes, y cómo?",
-    "imagen": "/calendario-arte/ilustraciones/mes-02.jpg",
+    "imagen": "/calendario-arte/ilustraciones/mes-02-d.jpg",
     "disenos": [
       "/calendario-arte/ilustraciones/mes-02.jpg",
       "/calendario-arte/ilustraciones/mes-02-b.jpg",
-      "/calendario-arte/ilustraciones/mes-02-c.jpg"
+      "/calendario-arte/ilustraciones/mes-02-c.jpg",
+      "/calendario-arte/ilustraciones/mes-02-d.jpg"
     ]
   },
   {
