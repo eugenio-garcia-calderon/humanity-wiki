@@ -178,9 +178,9 @@ for ln in lineas:
 # the sulci: a darker glaze in each groove, then the pencil
 for ln in recorte:
     if len(ln) > 4:
-        lz.aguada(Trazo(ln[::3] if len(ln) > 9 else ln, (3.2, 3.2)), '#b84a5e', dens=0.32, irreg=0.3, borde=0.5, gran=0.3)
+        lz.aguada(Trazo(ln[::3] if len(ln) > 9 else ln, (3.2, 3.2)), '#b84a5e', dens=0.22, irreg=0.3, borde=0.5, gran=0.3)
 lz.lapiz(recorte[:2], '#7a2a3e', grosor=1.6, presion=0.75, temblor=0.4)
-lz.lapiz(recorte[2:], '#9a3a4a', grosor=0.95, presion=0.6, temblor=0.3)
+lz.lapiz(recorte[2:], '#9a3a4a', grosor=0.9, presion=0.5, temblor=0.3)
 # light on the top of each fold (gouache-like lifted line just above the groove)
 lz.levanta(Elipse(BX - 90, BY - 90, 90, 50), 0.25, suave=20)
 # the crown is foliage: a rim of leaves all round the brain, and a few blossoms
