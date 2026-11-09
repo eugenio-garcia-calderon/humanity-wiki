@@ -15,13 +15,16 @@
 /** «¿Cómo quieres colaborar?» Se guarda el `id`; el texto es lo que se ve. */
 export const MOTIVOS = [
   { id: 'voluntariado', texto: 'Voluntariado' },
-  { id: 'donacion', texto: 'Donación' },
   { id: 'empresa', texto: 'Empresa o alianza' },
   { id: 'prensa', texto: 'Prensa' },
+  { id: 'trabajo', texto: 'Trabaja con nosotros' },
   { id: 'otro', texto: 'Otro' },
 ] as const;
 export type Motivo = typeof MOTIVOS[number]['id'];
-export const textoMotivo = (id: string | null | undefined) => MOTIVOS.find(m => m.id === id)?.texto || 'Otro';
+/** La etiqueta de cada motivo, también los que ya no se eligen (2026-11-09: sale la donación del
+ *  formulario de Colabora, pero los mensajes que la eligieron antes conservan su nombre). */
+const ETIQUETAS: Record<string, string> = { ...Object.fromEntries(MOTIVOS.map(m => [m.id, m.texto])), donacion: 'Donación' };
+export const textoMotivo = (id: string | null | undefined) => (id && ETIQUETAS[id]) || 'Otro';
 
 /** ELEGIR EL MOTIVO DESDE FUERA DEL FORMULARIO (2026-11-07, la página «Colabora»): cada tarjeta
  *  de «Formas de colaborar» lanza este evento con `{ motivo }` y el formulario de la misma página

@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import { HandHeart, HandCoins, Building2, Newspaper, MessageCircle, Send, Loader2, Check, AlertCircle, ChevronDown, RotateCw } from 'lucide-react';
+import { HandHeart, Building2, Newspaper, Briefcase, MessageCircle, Send, Loader2, Check, AlertCircle, ChevronDown, RotateCw } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { validarMensaje, capaBasica, CAMPO_TRAMPA, MOTIVOS, LIMITES, EVENTO_ELEGIR_MOTIVO, type Errores, type Motivo } from './formularios';
 
@@ -43,7 +43,7 @@ import { validarMensaje, capaBasica, CAMPO_TRAMPA, MOTIVOS, LIMITES, EVENTO_ELEG
 type Seccion = { area: string; proyectos: Array<{ slug: string; titulo: string }> };
 
 const ICONO: Record<Motivo, typeof HandHeart> = {
-  voluntariado: HandHeart, donacion: HandCoins, empresa: Building2, prensa: Newspaper, otro: MessageCircle,
+  voluntariado: HandHeart, empresa: Building2, prensa: Newspaper, trabajo: Briefcase, otro: MessageCircle,
 };
 
 const INICIAL = { motivo: '' as Motivo | '', nombre: '', email: '', proyecto: '', mensaje: '', consentimiento: false };

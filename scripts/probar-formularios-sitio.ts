@@ -13,10 +13,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {
   validarMensaje, validarAlta, capaBasica, textoConsentimiento, responsableDe, enlaceCorreo, TEXTO_CASILLA, CAMPO_TRAMPA,
+  MOTIVOS, textoMotivo,
 } from '../src/components/sitio/formularios';
+import { FORMAS_COLABORAR } from '../src/components/sitio/reglasPaginasEscaparate';
 import { completarSitio, textoLegal } from '../src/components/sitio/sitioWeb';
 import {
-  Freno, huellaIp, enlacesDe, correoConfirmacion, correoAviso, sitioForm, registrarFormulariosSitio, huellaTestigo,
+  Freno, huellaIp, enlacesDe, correoConfirmacion, correoAviso, correoAltaBoletin, sitioForm, registrarFormulariosSitio, huellaTestigo,
   ipVisitante, esDeCloudflare, borrarSinConfirmar,
 } from '../src/server/formulariosSitio';
 import { remitenteConNombre, enviarCorreo } from '../src/server/correo';
@@ -138,6 +140,22 @@ await ok('el aviso a quien administra escapa el mensaje de quien escribe', () =>
   const c = correoAviso(s, { nombre: 'Eve', email: 'eve@x.org', motivo: 'prensa', proyecto: null, mensaje: '<img src=x onerror=alert(1)>', origen: '/x' }, 'https://humanity.wiki/paginas/KWR/formularios');
   assert.ok(!c.html.includes('<img src=x') && c.html.includes('&lt;img src=x'));
   assert.match(c.asunto, /Prensa · Eve/);
+});
+
+await ok('cada alta confirmada avisa a administración con el correo de quien se suscribe', () => {
+  const s = sitioForm('KWR', 'Portada', CFG);
+  const c = correoAltaBoletin(s, 'nueva@x.org', 'https://humanity.wiki/paginas/KWR/formularios');
+  assert.equal(c.asunto, 'Nueva suscripción al boletín de Sitio de Prueba: nueva@x.org');
+  assert.ok(c.texto.includes('Correo: nueva@x.org') && c.html.includes('nueva@x.org'));
+});
+await ok('«Trabaja con nosotros» sustituye a la donación en la página Colabora; el formulario la conoce', () => {
+  const ids = FORMAS_COLABORAR.map(f => f.motivo);
+  assert.ok(!ids.includes('donacion' as any), 'la tarjeta de donación ya no está en Colabora');
+  assert.ok(ids.includes('trabajo'), 'la tarjeta de trabajo sí');
+  assert.equal(textoMotivo('trabajo'), 'Trabaja con nosotros');
+  assert.equal(textoMotivo('donacion'), 'Donación', 'los mensajes viejos conservan su etiqueta');
+  assert.ok(MOTIVOS.some(m => m.id === 'trabajo'));
+  assert.ok(!MOTIVOS.some(m => (m.id as string) === 'donacion'), 'el formulario ya no ofrece donar');
 });
 
 console.log('Política de privacidad');
@@ -373,8 +391,16 @@ try {
     assert.deepEqual(await r1.json(), { ok: true, ya: false });
     const [s] = await q(`SELECT estado, confirmado_at FROM sitio_suscriptores WHERE email = 'marta@ejemplo.org'`);
     assert.equal(s.estado, 'confirmado');
+    // El aviso a administración: una vez, a la dirección de contacto, con el correo de quien se suscribe.
+    await new Promise(r => setTimeout(r, 300));
+    const avisos = correos.filter(c => /Nueva suscripción al boletín/.test(c.subject));
+    assert.equal(avisos.length, 1, 'una confirmación, un aviso');
+    assert.deepEqual(avisos[0].to, ['contacto@ejemplo.org']);
+    assert.match(avisos[0].subject, /marta@ejemplo\.org$/);
     const r2 = await post('/api/sitio/KWR/boletin/confirmar', { token: tokenConfirmar });
     assert.deepEqual(await r2.json(), { ok: true, ya: true });
+    await new Promise(r => setTimeout(r, 300));
+    assert.equal(correos.filter(c => /Nueva suscripción al boletín/.test(c.subject)).length, 1, 'repetir el enlace no avisa otra vez');
     assert.equal((await post('/api/sitio/KWR/boletin/confirmar', { token: 'x'.repeat(43) })).status, 404);
     assert.equal((await post('/api/sitio/KWR/boletin/confirmar', { token: 'corto' })).status, 400);
   });
@@ -382,8 +408,9 @@ try {
     await q(`UPDATE sitio_suscriptores SET correo_enviado_at = now() - interval '11 minutes' WHERE email = 'marta@ejemplo.org'`);
     const r = await post('/api/sitio/KWR/boletin', ALTA('marta@ejemplo.org'), { ip: otraIp() });
     assert.deepEqual(await r.json(), { ok: true, resultado: 'enviado' });
-    assert.match(correos[1].subject, /Ya estás suscrito/);
-    assert.ok(!/boletin-confirmar/.test(correos[1].text));
+    const ultimo = correos[correos.length - 1];
+    assert.match(ultimo.subject, /Ya estás suscrito/);
+    assert.ok(!/boletin-confirmar/.test(ultimo.text));
     const [s] = await q(`SELECT estado FROM sitio_suscriptores WHERE email = 'marta@ejemplo.org'`);
     assert.equal(s.estado, 'confirmado');
   });

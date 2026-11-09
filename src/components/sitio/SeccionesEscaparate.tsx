@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react';
 import {
-  HandHeart, HandCoins, Building2, Newspaper, ArrowRight, Mail, Download, History, MapPin, FileText,
+  HandHeart, Building2, Newspaper, Briefcase, ArrowRight, Mail, Download, History, MapPin, FileText,
   Instagram, Youtube, Linkedin, Facebook, Twitter, Globe, Scale, ChevronDown, Landmark, Play,
 } from 'lucide-react';
 import { cn } from '../../utils/cn';
@@ -83,7 +83,7 @@ function Correo({ email }: { email: string }) {
 
 // ── COLABORA ─────────────────────────────────────────────────────────────────
 
-const ICONO_FORMA = { voluntariado: HandHeart, donacion: HandCoins, empresa: Building2, prensa: Newspaper };
+const ICONO_FORMA = { voluntariado: HandHeart, empresa: Building2, prensa: Newspaper, trabajo: Briefcase };
 
 /** Una tarjeta elige su motivo en el formulario de la misma página, baja hasta él y deja allí el
  *  foco. Sin formulario en la página (o con la tecla de abrir en otra pestaña), el enlace hace lo
