@@ -340,6 +340,25 @@ export function correoAviso(s: SitioForm, m: { nombre: string; email: string; mo
   return { asunto, texto, html };
 }
 
+/** El aviso a quien administra cada vez que una persona se confirma en el boletín (2026-11-09:
+ *  «cada vez que alguien se suscribe»). Solo la primera confirmación: repetir el enlace no avisa. */
+export function correoAltaBoletin(s: SitioForm, email: string, panel: string) {
+  const asunto = `Nueva suscripción al boletín de ${s.nombre}: ${email}`;
+  const texto = [
+    `Se ha confirmado una nueva suscripción al boletín de ${s.nombre}.`,
+    `Correo: ${email}`,
+    `Para ver todas las suscripciones y exportarlas: ${panel}`,
+  ].join('\n\n');
+  const html = correoHtml({
+    marca: s.nombre, titulo: 'Nueva suscripción al boletín',
+    parrafos: [`Se ha confirmado una nueva suscripción al boletín de <strong>${esc(s.nombre)}</strong>.`,
+      `<strong>Correo:</strong> ${esc(email)}`],
+    boton: { texto: 'Ver las suscripciones', url: panel },
+    pie: [`${esc(s.responsable)} · ${esc(s.nombre)}`],
+  });
+  return { asunto, texto, html };
+}
+
 // ── Las rutas ───────────────────────────────────────────────────────────────
 
 /** ¿Viene el envío de la propia web? Un navegador pone `Origin` en todo POST de
@@ -609,10 +628,19 @@ export function registrarFormulariosSitio(app: Express, db: any, cambios: Partia
       const r = (await db.execute(sql`
         UPDATE sitio_suscriptores SET estado = 'confirmado', confirmado_at = COALESCE(confirmado_at, now()), updated_at = now()
         WHERE raiz_id = ${String(req.params.raiz)} AND token_confirmar = ${huellaTestigo(token)} AND email IS NOT NULL AND estado <> 'baja'
-        RETURNING (confirmado_at < now()) AS ya
+        RETURNING (confirmado_at < now()) AS ya, email
       `)).rows[0] as any;
       if (!r) return res.status(404).json({ error: 'Este enlace ya no sirve: puede que hayas pedido otro después o que te dieras de baja. Si quieres, vuelve a suscribirte desde el pie de la web.' });
       res.json({ ok: true, ya: !!r.ya });
+      // El aviso a administración: solo en la primera confirmación, y sin hacer esperar a quien confirma.
+      if (!r.ya && d.hayCorreo()) {
+        const s = await d.sitio(String(req.params.raiz)).catch(() => null);
+        if (s?.contacto && r.email) {
+          const c = correoAltaBoletin(s, String(r.email), `https://humanity.wiki/paginas/${encodeURIComponent(s.raiz)}/formularios`);
+          void d.enviar({ para: s.contacto, asunto: c.asunto, texto: c.texto, html: c.html, remitente: remitenteConNombre(s.nombre) })
+            .catch((er: any) => console.error('formularios: aviso de alta', er?.message || er));
+        }
+      }
     } catch (e: any) { console.error('formularios: confirmar', e); res.status(500).json({ error: 'No hemos podido confirmar tu suscripción. Inténtalo de nuevo dentro de un momento.' }); }
   });
 

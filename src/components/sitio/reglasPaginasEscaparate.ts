@@ -72,19 +72,18 @@ export function tipoDePagina(s: Set<SeccionEscaparate>): 'ContactPage' | 'AboutP
 
 // ── LAS FORMAS DE COLABORAR (las tarjetas de «Colabora») ─────────────────────
 // Una por motivo del formulario (`formularios.ts`). Cada una elige su motivo en el
-// formulario de la misma página; la donación y la prensa llevan además a su página
-// (`datos.enlaces.donacion` y `datos.enlaces.prensa` del bloque: una dirección del
-// sitio, «/donar»). Los textos se pueden cambiar por bloque (`datos.textos`).
+// formulario de la misma página; la prensa lleva además a su página (`datos.enlaces.prensa`
+// del bloque). La donación ya no tiene tarjeta aquí (2026-11-09: va en su página «Donar»). Los textos se pueden cambiar por bloque (`datos.textos`).
 // Lo que dicen sale de lo que ya cuenta la web: la página de donar (una vez o cada
 // mes, con tarjeta; empresas, fundaciones y administraciones) y el formulario.
 export type FormaColaborar = {
-  motivo: 'voluntariado' | 'donacion' | 'empresa' | 'prensa';
+  motivo: 'voluntariado' | 'empresa' | 'prensa' | 'trabajo';
   titulo: string;
   texto: string;
   /** El botón que elige el motivo en el formulario. */
   accion: string;
   /** Si lleva además a otra página: la clave de `datos.enlaces` y el texto de su botón. */
-  enlace?: { clave: 'donacion' | 'prensa'; texto: string };
+  enlace?: { clave: 'prensa'; texto: string };
 };
 
 export const FORMAS_COLABORAR: FormaColaborar[] = [
@@ -94,9 +93,9 @@ export const FORMAS_COLABORAR: FormaColaborar[] = [
     accion: 'Quiero participar',
   },
   {
-    motivo: 'donacion', titulo: 'Donación',
-    texto: 'Las donaciones sostienen los proyectos del laboratorio. Puedes donar una sola vez o cada mes, con tarjeta.',
-    accion: 'Escríbenos sobre tu donación', enlace: { clave: 'donacion', texto: 'Donar' },
+    motivo: 'trabajo', titulo: 'Trabaja con nosotros',
+    texto: 'Si quieres trabajar en el laboratorio, cuéntanos tu perfil y qué te gustaría aportar. Te contestamos cuando haya un proyecto que encaje contigo.',
+    accion: 'Cuéntanos tu perfil',
   },
   {
     motivo: 'empresa', titulo: 'Empresas y alianzas',
