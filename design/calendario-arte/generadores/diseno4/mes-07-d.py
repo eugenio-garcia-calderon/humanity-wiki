@@ -45,8 +45,8 @@ lz.aguada(Elipse(650, 330, 360, 240), '#f7d08a', dens=0.14, suave=70, gran=0.05)
 
 # ------------------------------------------------------------------ ground: soft patches only where things stand
 lz.aguada(Elipse(650, 628, 290, 22), '#c9b58a', dens=0.38, suave=16, gran=0.45, toques=[(530, 628, 100, '#b9c58a', 0.6)])
-lz.aguada(Elipse(1090, 724, 250, 30), '#d6b88a', dens=0.36, suave=18, gran=0.45, toques=[(990, 724, 80, '#b9c58a', 0.5)])
-lz.aguada(Elipse(1070, 716, 170, 13), '#b8866a', dens=0.3, suave=9, gran=0.3)     # one warm shadow under the table
+lz.aguada(Elipse(1040, 724, 230, 30), '#d6b88a', dens=0.36, suave=18, gran=0.45, toques=[(940, 724, 80, '#b9c58a', 0.5)])
+lz.aguada(Elipse(1036, 716, 170, 13), '#b8866a', dens=0.3, suave=9, gran=0.3)     # one warm shadow under the table
 for k in range(40):
     x = rng.uniform(370, 1320)
     y = rng.uniform(616, 646) if x < 880 else rng.uniform(704, 752)
@@ -54,28 +54,28 @@ for k in range(40):
              rng.choice(['#4f6f45', '#7f9f5a']), grosor=0.6, presion=0.5, temblor=0.2)
 
 # ------------------------------------------------------------------ the apricot tree (behind the table)
-tronco = Trazo([(1128, 640), (1130, 600), (1122, 520), (1108, 430), (1096, 350), (1086, 290)], (58, 46, 40, 38, 32, 24))
+tronco = Trazo([(1078, 640), (1080, 600), (1072, 520), (1058, 430), (1046, 350), (1036, 290)], (58, 46, 40, 38, 32, 24))
 lz.aguada(tronco, '#8a6a52', dens=0.8, tapa=1, borde=0.6, gran=0.6,
-          toques=[(1140, 600, 40, '#5e4a3a', 0.6), (1110, 420, 30, '#a08060', 0.5), (1122, 680, 40, '#6e5440', 0.6)])
+          toques=[(1090, 600, 40, '#5e4a3a', 0.6), (1060, 420, 30, '#a08060', 0.5), (1072, 680, 40, '#6e5440', 0.6)])
 sombra_lado(lz, tronco, 1, '#4a3428', dens=0.38)
 lz.contorno(tronco, '#4a3428', grosor=0.9, presion=0.55, cortes=0.3)
-lz.lapiz([bezier((1122 + k * 7, 690), (1126 + k * 6, 540), (1100 + k * 4, 330), n=30) for k in (-2, 0, 2)],
+lz.lapiz([bezier((1072 + k * 7, 690), (1076 + k * 6, 540), (1050 + k * 4, 330), n=30) for k in (-2, 0, 2)],
          '#5e4a3a', grosor=0.6, presion=0.35, temblor=0.9, cortes=0.4)
-for (x, y, r) in ((1118, 560, 8), (1104, 452, 6), (1134, 640, 7)):          # knots
+for (x, y, r) in ((1068, 560, 8), (1054, 452, 6), (1084, 640, 7)):          # knots
     lz.aguada(Elipse(x, y, r, r * 0.7), '#5e4a3a', dens=0.6, irreg=0.4)
     lz.lapiz([arco(x, y, r * 1.3, r, 0, 330, 14)], '#4a3428', grosor=0.6, presion=0.5)
-for (a, m, b, w) in (((1100, 380), (1040, 320), (980, 280), 16), ((1096, 340), (1150, 280), (1200, 240), 14),
-                     ((1090, 300), (1080, 240), (1066, 190), 12)):
+for (a, m, b, w) in (((1050, 380), (990, 320), (930, 280), 16), ((1046, 340), (1100, 280), (1150, 240), 14),
+                     ((1040, 300), (1030, 240), (1016, 190), 12)):
     f = Trazo([a, m, b], (w, w * 0.65, w * 0.35))
     lz.aguada(f, '#8a6a52', dens=0.78, tapa=1, gran=0.5)
     lz.contorno(f, '#4a3428', grosor=0.7, presion=0.5, cortes=0.3)
 # the crown: soft rounded watercolour masses (dark behind, light in front), with leaves
-masas = [((1090, 220, 110), '#4f7f45', 0.82, [(1150, 260, 70, '#2f5a3a', 0.6)]),
-         ((990, 250, 85), '#6f9a4a', 0.78, [(950, 230, 50, '#a9c46a', 0.6)]),
-         ((1190, 230, 85), '#6f9a4a', 0.76, [(1210, 270, 50, '#3f6f45', 0.6)]),
-         ((1060, 150, 80), '#88b05a', 0.74, [(1040, 130, 50, '#d9dd8a', 0.6)]),
-         ((1160, 150, 70), '#7aa456', 0.74, [(1150, 120, 40, '#c9d27a', 0.6)]),
-         ((930, 300, 55), '#7aa456', 0.74, []), ((1240, 300, 50), '#6f9a4a', 0.74, [])]
+masas = [((1040, 220, 110), '#4f7f45', 0.82, [(1100, 260, 70, '#2f5a3a', 0.6)]),
+         ((940, 250, 85), '#6f9a4a', 0.78, [(900, 230, 50, '#a9c46a', 0.6)]),
+         ((1140, 230, 85), '#6f9a4a', 0.76, [(1160, 270, 50, '#3f6f45', 0.6)]),
+         ((1010, 150, 80), '#88b05a', 0.74, [(990, 130, 50, '#d9dd8a', 0.6)]),
+         ((1110, 150, 70), '#7aa456', 0.74, [(1100, 120, 40, '#c9d27a', 0.6)]),
+         ((880, 300, 55), '#7aa456', 0.74, []), ((1190, 300, 50), '#6f9a4a', 0.74, [])]
 for i, ((cx, cy, r), col, dd, tq) in enumerate(masas):
     f = Circulos([(cx + rng.normal(0, r * 0.18), cy + rng.normal(0, r * 0.14), r * rng.uniform(0.5, 0.66)) for _ in range(6)])
     lz.aguada(f, col, dens=dd, tapa=0.9 if i else 1, borde=0.75, gran=0.45, irreg=1.1, toques=tq)
@@ -84,7 +84,7 @@ for i, ((cx, cy, r), col, dd, tq) in enumerate(masas):
                tapa=0.5, dens=0.75)
 for k in range(40):
     a = rng.uniform(0, 2 * math.pi)
-    x = 1090 + math.cos(a) * 190 * rng.uniform(0.92, 1.04)
+    x = 1040 + math.cos(a) * 190 * rng.uniform(0.92, 1.04)
     y = 220 + math.sin(a) * 130 * rng.uniform(0.92, 1.04)
     if y > 330:
         continue
@@ -105,7 +105,7 @@ def albaricoque(x, y, r=7.5):
     lz.gouache(Elipse(x - r * 0.35, y - r * 0.35, r * 0.15), '#fff3d8', alfa=0.8, irreg=0)
 
 
-for (x, y) in ((1000, 270), (1070, 240), (1152, 288), (1206, 236), (1050, 168), (1124, 150), (950, 300), (1240, 300)):
+for (x, y) in ((950, 270), (1020, 240), (1102, 288), (1156, 236), (1000, 168), (1074, 150), (900, 300), (1190, 300)):
     albaricoque(x, y)
 
 # ------------------------------------------------------------------ the earthen house
@@ -269,7 +269,7 @@ for (x0, L, dv, sd) in ((FL - 6, 150, -10, 1), (FL + 22, 90, 4, 2), (FL + 60, 50
     yy = TOP - 2 if x0 <= FR + 14 else STOP - 2 + (TOP - STOP) * (SR - x0) / (SR - FR)
     colgante(x0, yy, L, 700 + sd, dv)
 # a flowering vine climbs from the roof garden across into the apricot crown
-puente = bezier((SR - 10, STOP - 40), (890, 240), (920, 250), (970, 270), 60)
+puente = bezier((SR - 10, STOP - 40), (872, 250), (890, 254), (912, 266), 60)
 lz.lapiz([puente, puente + np.array([2, 4])], '#4f6f45', grosor=1.0, presion=0.65, temblor=0.4)
 for j in range(3, len(puente) - 2, 4):
     d_ = puente[j + 1] - puente[j - 1]
@@ -308,143 +308,154 @@ for (x, y) in ((600, 296), (620, 300), (660, 302), (684, 298)):     # plants in 
 flor_simple(lz, 672, 290, 7, CORAL, centro=ORO)
 
 
-# ------------------------------------------------------------------ three generations set the table together
-# --- the grandmother (behind the table, left): passes the dish
-PA = 'piel3'
-cuello(lz, (970, 482), 25, (970, 516), PA, giro=0.45, inclina=8)
-torso2(lz, (944, 516), (994, 518), (948, 616), (992, 616), '#8d73b0', cintura=0.96, sombra=1,
-       toques=[(986, 580, 30, '#6a5290', 0.6)], pliegues=[[(960, 540), (964, 580), (962, 612)]])
-cabeza2(lz, 970, 482, 25, PA, '#4f9c9a', 'panuelo', giro=0.45, inclina=8, ojos='abajo', boca='sonrisa')
-# --- the young man (behind the table, right of her): takes the dish
-PH = 'piel5'
-cuello(lz, (1096, 470), 27, (1098, 506), PH, giro=-0.45, inclina=-6)
-torso2(lz, (1070, 506), (1126, 508), (1078, 616), (1120, 616), '#5f86c0', cintura=0.97, sombra=1,
-       toques=[(1118, 580, 36, '#3f5f9a', 0.6)], pliegues=[[(1090, 530), (1096, 580), (1094, 612)]])
-cabeza2(lz, 1096, 470, 27, PH, '#1e1410', 'corto', giro=-0.45, inclina=-6, ojos='abiertos', boca='risa', mira=(-1, 1))
-# --- the girl (behind the table, right end): holds out her glass
-PN = 'piel1'
-cuello(lz, (1180, 522), 21, (1180, 552), PN, giro=0.5, inclina=6)
-torso2(lz, (1162, 552), (1198, 552), (1166, 616), (1196, 616), CORAL, cintura=1.0, sombra=1)
-cabeza2(lz, 1180, 522, 21, PN, '#c0602e', 'coleta', giro=0.5, inclina=6, ojos='abiertos', boca='risa', mira=(1, 0))
-
-# the dish, passing from her hands to his
-brazo2(lz, (990, 524), (1008, 566), (1014, 550), 17, '#8d73b0', PA, 'larga', sombra=1, mano=None)
-brazo2(lz, (1122, 516), (1116, 574), (1076, 562), 19, '#5f86c0', PH, 'larga', sombra=1, mano=None)
-fuente = Poligono(np.vstack([arco(1044, 548, 36, 9, 180, 360, 20), arco(1044, 548, 30, 17, 0, 180, 20)]), suave=False)
-lz.aguada(fuente, '#c0603a', dens=0.85, tapa=1, irreg=0.3, borde=0.7, toques=[(1058, 558, 20, '#8a3a22', 0.6)])
-lz.aguada(Elipse(1044, 548, 32, 7), '#e8b04a', dens=0.85, irreg=0.3, tapa=1,
-          toques=[(1032, 547, 8, CARMIN, 0.7), (1056, 549, 8, '#7aa456', 0.7), (1044, 546, 5, '#f2d36b', 0.7)])
+# ------------------------------------------------------------------ one shared home: the table under the crown that touches the roof
+# --- behind the table: the grandmother passes the steaming dish to the young man, hand to hand
+PA, PH, PN, PG = 'piel3', 'piel5', 'piel1', 'piel2'
+cuello(lz, (950, 488), 25, (950, 522), PA, giro=0.45, inclina=8)
+torso2(lz, (924, 522), (974, 524), (928, 620), (972, 620), '#8d73b0', cintura=0.96, sombra=1,
+       toques=[(966, 584, 30, '#6a5290', 0.6)],
+       pliegues=[[(938, 546), (944, 586), (940, 616)], [(958, 552), (962, 600)], [(930, 560), (936, 600)]])
+cabeza2(lz, 950, 488, 25, PA, '#4f9c9a', 'panuelo', giro=0.45, inclina=8, ojos='abajo', boca='sonrisa')
+cuello(lz, (1082, 476), 27, (1082, 512), PH, giro=-0.45, inclina=-6)
+torso2(lz, (1056, 512), (1112, 514), (1064, 620), (1106, 620), '#5f86c0', cintura=0.97, sombra=1,
+       toques=[(1104, 584, 36, '#3f5f9a', 0.6)],
+       pliegues=[[(1074, 536), (1080, 586), (1078, 616)], [(1094, 540), (1098, 600)], [(1064, 556), (1070, 600)]])
+cabeza2(lz, 1082, 476, 27, PH, '#1e1410', 'corto', giro=-0.45, inclina=-6, ojos='abiertos', boca='risa', mira=(-1, 1))
+# far arms first, then the dish, then the near arms and the hands round its rim
+brazo2(lz, (970, 530), (990, 572), (1000, 560), 17, '#8d73b0', PA, 'larga', sombra=1, mano=None)
+brazo2(lz, (1108, 520), (1100, 576), (1062, 564), 19, '#5f86c0', PH, 'larga', sombra=1, mano=None)
+fuente = Poligono(np.vstack([arco(1030, 552, 40, 10, 180, 360, 20), arco(1030, 552, 34, 19, 0, 180, 20)]), suave=False)
+lz.aguada(fuente, '#c0603a', dens=0.85, tapa=1, irreg=0.3, borde=0.7, toques=[(1046, 562, 20, '#8a3a22', 0.6)])
+lz.aguada(Elipse(1030, 552, 36, 8), '#e8b04a', dens=0.85, irreg=0.3, tapa=1,
+          toques=[(1016, 551, 9, CARMIN, 0.7), (1042, 553, 9, '#7aa456', 0.7), (1030, 549, 6, '#f2d36b', 0.7)])
+for (x, y) in ((1018, 549), (1036, 551), (1046, 548)):          # peppers and potatoes in the stew
+    lz.aguada(Elipse(x, y, 4, 2.5), rng.choice([CARMIN, '#e8952a', '#7aa456']), dens=0.85, irreg=0.2)
 lz.contorno(fuente, '#7a3a22', grosor=0.7, presion=0.55)
-lz.lapiz([arco(1044, 548, 36, 9, 0, 360, 30)], '#7a3a22', grosor=0.6, presion=0.5)
+lz.lapiz([arco(1030, 552, 40, 10, 0, 360, 30)], '#7a3a22', grosor=0.6, presion=0.5)
 for k in range(3):
-    x = 1032 + k * 12
-    lz.lapiz([bezier((x, 540), (x - 8, 522), (x + 6, 506), (x - 2, 486))], '#c8b8a8', grosor=0.7, presion=0.45, temblor=0.5)
-mano2(lz, 998, 560, -8, 27, PA, 'agarra', lado=1)
-mano2(lz, 1018, 552, -20, 25, PA, 'agarra', lado=-1)
-mano2(lz, 1094, 562, 190, 28, PH, 'agarra', lado=-1)
-brazo2(lz, (948, 524), (962, 580), (990, 566), 17, '#8d73b0', PA, 'larga', sombra=-1, mano=None)
-brazo2(lz, (1074, 514), (1060, 570), (1076, 552), 19, '#5f86c0', PH, 'larga', sombra=-1, mano=None)
-mano2(lz, 1074, 552, 175, 28, PH, 'agarra', lado=1)
+    x = 1018 + k * 13
+    lz.lapiz([bezier((x, 544), (x - 8, 526), (x + 6, 510), (x - 2, 490))], '#c8b8a8', grosor=0.7, presion=0.45, temblor=0.5)
+brazo2(lz, (928, 530), (946, 584), (980, 568), 17, '#8d73b0', PA, 'larga', sombra=-1, mano=None)
+brazo2(lz, (1060, 520), (1052, 578), (1076, 562), 19, '#5f86c0', PH, 'larga', sombra=-1, mano=None)
+mano2(lz, 980, 568, -12, 26, PA, 'relajada', lado=1)        # her fingers under the rim
+mano2(lz, 1000, 560, -30, 24, PA, 'relajada', lado=-1)
+mano2(lz, 1076, 562, 190, 27, PH, 'relajada', lado=-1)      # his fingers take the other side
+mano2(lz, 1062, 566, 170, 27, PH, 'relajada', lado=1)
 
-# --- the table: shorter, a printed cloth with folds, full of things
-MESA = Poligono([(926, 606), (1208, 602), (1234, 644), (908, 648)], suave=False)
-lz.aguada(MESA, '#f6ead6', dens=0.5, tapa=1, irreg=0.35, borde=0.6, toques=[(1070, 630, 80, '#ecd6b4', 0.6)])
-FAL = Poligono([(908, 646), (1234, 642), (1238, 690), (1220, 700), (1190, 694), (1160, 702), (1130, 696), (1100, 704),
-                (1070, 697), (1040, 705), (1010, 698), (980, 705), (950, 698), (920, 704), (904, 694)])
-lz.aguada(FAL, '#f2e2c8', dens=0.55, tapa=1, irreg=0.4, borde=0.6, toques=[(1070, 680, 80, '#dcc4a0', 0.6)])
-# the print: a coral gingham (glazes that cross and deepen where they meet)
-for y in np.arange(652, 696, 11):
-    lz.aguada(Trazo([(908, y), (1236, y - 3)], (4.5, 4.5)) & FAL, CORAL, dens=0.28, irreg=0.4, borde=0.4, gran=0.3)
-for x in np.arange(916, 1234, 15):
-    lz.aguada(Trazo([(x, 648), (x + 1, 700)], (4.5, 4.5)) & FAL, CORAL, dens=0.28, irreg=0.4, borde=0.4, gran=0.3)
+# --- the table
+MESA = Poligono([(904, 612), (1162, 608), (1186, 652), (886, 656)], suave=False)
+lz.aguada(MESA, '#f6ead6', dens=0.5, tapa=1, irreg=0.35, borde=0.6, toques=[(1040, 636, 80, '#ecd6b4', 0.6)])
+FAL = Poligono([(886, 654), (1186, 650), (1190, 698), (1170, 708), (1140, 700), (1110, 710), (1080, 702), (1050, 712),
+                (1020, 704), (990, 712), (960, 704), (930, 712), (900, 704), (882, 700)])
+lz.aguada(FAL, '#f2e2c8', dens=0.55, tapa=1, irreg=0.4, borde=0.6, toques=[(1040, 688, 80, '#dcc4a0', 0.6)])
+for y in np.arange(660, 704, 11):
+    lz.aguada(Trazo([(886, y), (1188, y - 3)], (4.5, 4.5)) & FAL, CORAL, dens=0.28, irreg=0.4, borde=0.4, gran=0.3)
+for x in np.arange(894, 1186, 15):
+    lz.aguada(Trazo([(x, 656), (x + 1, 708)], (4.5, 4.5)) & FAL, CORAL, dens=0.28, irreg=0.4, borde=0.4, gran=0.3)
 for t in np.linspace(0.12, 0.88, 4):
-    y = 606 + t * 40
-    lz.aguada(Trazo([(926 - 18 * t, y), (1208 + 26 * t, y - 4 * t)], (3.4, 3.4)) & MESA, CORAL, dens=0.25, irreg=0.4, borde=0.4)
+    y = 612 + t * 40
+    lz.aguada(Trazo([(904 - 18 * t, y), (1162 + 24 * t, y - 4 * t)], (3.4, 3.4)) & MESA, CORAL, dens=0.25, irreg=0.4, borde=0.4)
 for k in range(17):
     t = k / 16
-    xa, xb = 926 + t * (1208 - 926), 908 + t * (1234 - 908)
-    lz.aguada(Trazo([(xa, 606), (xb, 646)], (3, 3.6)) & MESA, CORAL, dens=0.25, irreg=0.4, borde=0.4)
-lz.aguada(Trazo([(906, 694), (1070, 700), (1238, 690)], (7, 7, 7)), CORAL, dens=0.75, irreg=0.4)
-# folds: soft shadowed hollows and pencil
-for x in (950, 1110, 1162, 1218, 1272, 1320):
-    lz.aguada(Trazo([(x, 650), (x + 2, 698)], (3, 7)), '#c8a888', dens=0.3, suave=2)
-    lz.lapiz([[(x, 650), (x + 2, 696)]], '#b08a6a', grosor=0.6, presion=0.35, temblor=0.3)
+    lz.aguada(Trazo([(904 + t * 258, 612), (886 + t * 300, 652)], (3, 3.6)) & MESA, CORAL, dens=0.25, irreg=0.4, borde=0.4)
+for x in (930, 985, 1040, 1095, 1150):
+    lz.aguada(Trazo([(x, 658), (x + 2, 706)], (3, 7)), '#c8a888', dens=0.3, suave=2)
+    lz.lapiz([[(x, 658), (x + 2, 704)]], '#b08a6a', grosor=0.6, presion=0.35, temblor=0.3)
 for f in (MESA, FAL):
     lz.contorno(f, '#a07a60', grosor=0.8, presion=0.5, cortes=0.25)
-# what is on it
-for (x, y) in ((956, 628), (1126, 624), (1188, 630)):
-    pl = Elipse(x, y, 17, 5.5)
-    lz.aguada(pl, '#fbf6ec', dens=0.5, tapa=1, irreg=0.2)
-    lz.lapiz([arco(x, y, 17, 5.5, 0, 360, 24), arco(x, y, 12, 3.6, 0, 360, 20)], '#3f8f8f', grosor=0.6, presion=0.5)
-    lz.aguada(Elipse(x, y - 1, 7, 2.4), rng.choice(['#e8b04a', '#7aa456', CARMIN]), dens=0.8, irreg=0.3)
-cuenco = Poligono(np.vstack([arco(1080, 616, 22, 6, 180, 360, 16), arco(1080, 616, 19, 13, 0, 180, 16)]), suave=False)
-for (x, y) in ((1070, 610), (1084, 608), (1094, 612), (1078, 602), (1066, 616)):
-    lz.aguada(Elipse(x, y, 5.6), '#f2a03a', dens=0.9, tapa=1, irreg=0.2, toques=[(x + 2, y - 1, 3, '#e0604a', 0.7)])
-lz.aguada(cuenco, '#4f9c9a', dens=0.8, tapa=1, irreg=0.3, toques=[(1090, 622, 10, '#2f6f72', 0.6)])
+# fewer, bigger things you can name: a salad, a big bowl of apricots, a loaf, a jug of flowers
+plato = Elipse(948, 636, 30, 9)
+lz.aguada(plato, '#fbf6ec', dens=0.5, tapa=1, irreg=0.2)
+lz.lapiz([arco(948, 636, 30, 9, 0, 360, 30), arco(948, 636, 22, 6.5, 0, 360, 26)], '#3f8f8f', grosor=0.7, presion=0.55)
+for k in range(9):
+    hojita(lz, 948 + rng.normal(0, 9), 634 + rng.normal(0, 2), rng.uniform(9, 13), rng.uniform(0, 360), rng.choice(['#7aa456', '#5f8f4a', '#9fbf6a']), tapa=1)
+for (x, y) in ((938, 632), (954, 630), (960, 637), (944, 638)):
+    lz.aguada(Elipse(x, y, 4.2, 3), CARMIN, dens=0.9, tapa=1, irreg=0.2)
+    lz.gouache(Elipse(x - 1, y - 1, 1.2, 0.8), '#ffd8c8', alfa=0.8, irreg=0)
+cuenco = Poligono(np.vstack([arco(1062, 626, 30, 8, 180, 360, 18), arco(1062, 626, 26, 17, 0, 180, 18)]), suave=False)
+for (x, y) in ((1048, 620), (1062, 616), (1076, 620), (1055, 610), (1069, 609), (1062, 624)):
+    lz.aguada(Elipse(x, y, 7.5), '#f2a03a', dens=0.9, tapa=1, irreg=0.2, toques=[(x + 3, y - 2, 4, '#e0604a', 0.7)])
+    lz.contorno(Elipse(x, y, 7.5), '#b0602a', grosor=0.45, presion=0.4)
+hojita(lz, 1066, 606, 12, -60, '#5f8f4a', tapa=1)
+lz.aguada(cuenco, '#4f9c9a', dens=0.8, tapa=1, irreg=0.3, toques=[(1076, 634, 12, '#2f6f72', 0.6)])
+lz.lapiz([arco(1062, 632, 22, 5, 20, 160, 16)], '#f6efe0', grosor=0.8, presion=0.6)
 lz.contorno(cuenco, '#2f5f5a', grosor=0.6, presion=0.5)
-pan = Elipse(1000, 634, 20, 8, 10)
-lz.aguada(pan, '#d9a441', dens=0.85, tapa=1, irreg=0.3, toques=[(1000, 630, 10, '#f2d36b', 0.6)])
-lz.lapiz([[(990 + k * 8, 629 + k * 1.5), (993 + k * 8, 637 + k * 1.5)] for k in range(3)], '#8a5a22', grosor=0.6,
-         presion=0.5)
+pan = Elipse(1128, 640, 28, 10, 8)
+lz.aguada(pan, '#d9a441', dens=0.88, tapa=1, irreg=0.3, toques=[(1124, 634, 14, '#f2d36b', 0.6), (1144, 646, 10, '#a0662a', 0.6)])
+lz.lapiz([[(1112 + k * 10, 633 + k * 1.4), (1116 + k * 10, 644 + k * 1.4)] for k in range(4)], '#8a5a22', grosor=0.7, presion=0.55)
 lz.contorno(pan, '#8a5a22', grosor=0.6, presion=0.5)
-jarron = Poligono([(1146, 612), (1142, 596), (1148, 586), (1158, 586), (1164, 596), (1160, 612)])
-lz.aguada(jarron, '#f2c04a', dens=0.85, tapa=1, irreg=0.2)
-lz.contorno(jarron, '#9a6a2a', grosor=0.6, presion=0.5)
-for (dx, dy, c) in ((-10, -26, CORAL), (0, -34, '#fff1e0'), (10, -26, '#f39ab0'), (-4, -18, CARMIN), (8, -16, ORO)):
-    lz.lapiz([[(1153, 588), (1153 + dx, 588 + dy + 6)]], '#4f6f45', grosor=0.6, presion=0.6)
-    flor_simple(lz, 1153 + dx, 588 + dy, 5, c, centro=ORO)
-for (x, y) in ((1040, 618), (982, 616)):
-    v = Poligono([(x - 5, y - 15), (x + 5, y - 15), (x + 4, y), (x - 4, y)], suave=False)
-    lz.aguada(v, '#bfe0e0', dens=0.4, tapa=1, irreg=0.2, toques=[(x, y - 4, 4, '#7fb5d3', 0.7)])
-    lz.contorno(v, '#6a9aa0', grosor=0.5, presion=0.5)
+# --- the magic that makes it one home: the roof garden climbs down the wall, crosses the ground
+#     and flowers along the hem of the tablecloth
+ruta = np.vstack([bezier((SR + 2, STOP + 10), (SR + 6, 450), (SR - 4, 540), (SR + 4, SBOT), 40),
+                  bezier((SR + 4, SBOT), (SR + 6, 640), (870, 690), (886, 704), 30)[1:],
+                  bezier((886, 704), (980, 718), (1090, 718), (1188, 704), 50)[1:]])
+lz.lapiz([ruta, ruta + np.array([1.5, 2])], '#4f6f45', grosor=0.9, presion=0.65, temblor=0.4)
+for j in range(2, len(ruta) - 1, 3):
+    d_ = ruta[j + 1] - ruta[j - 1]
+    base = math.degrees(math.atan2(d_[1], d_[0]))
+    hojita(lz, ruta[j][0], ruta[j][1], rng.uniform(10, 14), base + rng.choice([-62, 62]), rng.choice(['#5f8f4a', '#7aa456', '#3f7a6a']),
+           tapa=0.95)
+    if j % 4 == 2 or (j > 70 and j % 2 == 0):
+        flor_simple(lz, ruta[j][0] + rng.normal(0, 3), ruta[j][1] + rng.normal(0, 3), rng.uniform(5, 7),
+                    rng.choice([CORAL, '#f39ab0', CARMIN, '#fff1e0', ORO]), centro=ORO)
 
-# --- the girl's arm and glass (over the table corner)
-brazo2(lz, (1194, 558), (1206, 596), (1208, 606), 14, CORAL, PN, 'corta', sombra=1, mano=None)
-VASO = (1218, 598)
-vaso = Poligono([(VASO[0] - 7, VASO[1] - 20), (VASO[0] + 7, VASO[1] - 20), (VASO[0] + 6, VASO[1] + 2), (VASO[0] - 6, VASO[1] + 2)],
-                suave=False)
-mano2(lz, 1206, 606, -10, 21, PN, 'agarra', lado=1)
-lz.aguada(vaso, '#cfe8ec', dens=0.45, tapa=1, irreg=0.2, toques=[(VASO[0], VASO[1] - 4, 6, '#7fb5d3', 0.8)])
-lz.contorno(vaso, '#5a9aa0', grosor=0.7, presion=0.6, cortes=0.05)
-lz.gouache(Trazo([(VASO[0] - 4, VASO[1] - 17), (VASO[0] - 4, VASO[1] - 3)], (1.0, 0.8)), '#ffffff', alfa=0.8, irreg=0)
-
-# --- the grandfather, seated at the end of the table, pours the water for her
-PG = 'piel2'
-silla = [Trazo([(1320, 520), (1318, 732)], (7, 6)), Trazo([(1270, 664), (1274, 736)], (6, 5)),
-         Trazo([(1262, 652), (1322, 650)], (9, 9)), Trazo([(1318, 540), (1318, 600)], (14, 14))]
+# --- the grandfather, at the end of the table, pours water for the girl
+silla = [Trazo([(1250, 528), (1248, 738)], (7, 6)), Trazo([(1206, 670), (1208, 740)], (6, 5)),
+         Trazo([(1198, 658), (1252, 656)], (9, 9)), Trazo([(1248, 548), (1248, 606)], (14, 14))]
 for f in silla:
     lz.aguada(f, '#9a6a4a', dens=0.78, tapa=1, irreg=0.3)
     lz.contorno(f, '#4a3428', grosor=0.6, presion=0.5)
-pierna2(lz, (1278, 650), (1230, 664), (1228, 728), 26, '#6a5a4a', PG, pie_ang=180, zapato='#5e3f30', sombra=-1)
-pierna2(lz, (1294, 652), (1246, 670), (1250, 734), 26, '#6a5a4a', PG, pie_ang=185, zapato='#5e3f30', sombra=1)
-brazo2(lz, (1304, 566), (1288, 616), (1266, 640), 20, '#3f8f8f', PG, 'larga', sombra=1,
+pierna2(lz, (1212, 656), (1170, 668), (1168, 734), 26, '#6a5a4a', PG, pie_ang=180, zapato='#5e3f30', sombra=-1)
+pierna2(lz, (1228, 658), (1184, 676), (1188, 738), 26, '#6a5a4a', PG, pie_ang=185, zapato='#5e3f30', sombra=1)
+brazo2(lz, (1240, 570), (1232, 616), (1206, 642), 20, '#3f8f8f', PG, 'larga', sombra=1,
        mano=dict(ang=160, gesto='relajada', lado=1, tam=27))
-cuello(lz, (1282, 522), 27, (1280, 560), PG, giro=-0.5, inclina=-8)
-torso2(lz, (1254, 560), (1308, 562), (1262, 654), (1302, 656), '#3f8f8f', cintura=1.0, sombra=1,
-       toques=[(1300, 620, 36, '#2f6f72', 0.6)], pliegues=[[(1274, 584), (1280, 630)]])
-cabeza2(lz, 1282, 522, 27, PG, '#e6e0d8', 'calvo', giro=-0.5, inclina=-8, ojos='abajo', boca='sonrisa', canas=True,
+cuello(lz, (1222, 526), 27, (1220, 564), PG, giro=-0.5, inclina=-8)
+torso2(lz, (1194, 564), (1246, 566), (1202, 658), (1240, 660), '#3f8f8f', cintura=1.0, sombra=1,
+       toques=[(1238, 624, 36, '#2f6f72', 0.6)], pliegues=[[(1212, 588), (1218, 634)], [(1230, 590), (1234, 650)]])
+cabeza2(lz, 1222, 526, 27, PG, '#e6e0d8', 'calvo', giro=-0.5, inclina=-8, ojos='abajo', boca='sonrisa', canas=True,
         barba='#ece6de', labios=False)
-brazo2(lz, (1258, 568), (1266, 616), (1274, 576), 20, '#3f8f8f', PG, 'larga', sombra=-1, mano=None)
-# the jug, tilted to pour: belly, neck, a pinched spout over her glass, handle in his hand
-ca_, sa_ = math.cos(math.radians(-35)), math.sin(math.radians(-35))
-JX, JY = 1252, 586
+brazo2(lz, (1198, 572), (1214, 620), (1212, 584), 20, '#3f8f8f', PG, 'larga', sombra=-1, mano=None)
+ca_, sa_ = math.cos(math.radians(-60)), math.sin(math.radians(-60))
+JX, JY = 1194, 598
 J = lambda u, v: (JX + u * ca_ - v * sa_, JY + u * sa_ + v * ca_)
+asa = Trazo([J(15, -10), J(26, -4), J(24, 10), J(15, 12)], (4.5, 4.5, 4.5, 4))
+lz.aguada(asa, '#b0502e', dens=0.85, tapa=1, irreg=0.2)
+lz.contorno(asa, '#7a3a22', grosor=0.6, presion=0.5)
 jarra = Poligono([J(-5, -24), J(5, -24), J(8, -15), J(17, -4), J(17, 10), J(9, 19), J(-9, 19), J(-17, 10), J(-17, -4), J(-8, -15)])
 lz.aguada(jarra, '#c0603a', dens=0.85, tapa=1, borde=0.7, irreg=0.3, toques=[(*J(-7, 2), 10, '#e8a060', 0.6), (*J(10, 12), 10, '#8a3a22', 0.6)])
 lz.aguada(Trazo([J(-12, 2), J(0, 5), J(12, 2)], (3.5, 3.5, 3.5)), '#f6efe0', dens=0.7, irreg=0.2)
 lz.contorno(jarra, '#7a3a22', grosor=0.8, presion=0.55, cortes=0.1)
-pico = Poligono([J(-5, -24), J(-12, -28), J(-3, -27), J(5, -24)], suave=False)
-lz.aguada(pico, '#c0603a', dens=0.85, tapa=1)
-asa = Trazo([J(15, -10), J(26, -4), J(24, 10), J(15, 12)], (4.5, 4.5, 4.5, 4))
-lz.aguada(asa, '#b0502e', dens=0.85, tapa=1, irreg=0.2)
-lz.contorno(asa, '#7a3a22', grosor=0.6, presion=0.5)
-sx_, sy_ = J(-12, -28)
-chorro = Trazo([(sx_, sy_), (sx_ - 5, sy_ + 6), (VASO[0] + 1, VASO[1] - 18)], (3.0, 2.6, 2.2))
-lz.aguada(chorro, '#8fc8e0', dens=0.75, irreg=0.2, borde=0.8)
-lz.gouache(Trazo([(sx_ - 1, sy_ + 3), (sx_ - 4, sy_ + 10)], (0.9, 0.7)), '#fffdf6', alfa=0.8, irreg=0)
-for k in range(4):
-    lz.gouache(Elipse(VASO[0] + rng.normal(0, 4), VASO[1] - 19 + rng.normal(0, 2), 0.8), '#e8f6ff', alfa=0.9, irreg=0)
-mano2(lz, 1276, 580, -150, 28, PG, 'agarra', lado=-1)
+lz.aguada(Poligono([J(-5, -24), J(-12, -29), J(-3, -27), J(5, -24)], suave=False), '#c0603a', dens=0.85, tapa=1)
+mano2(lz, *J(24, 2), -160, 27, PG, 'agarra', lado=-1)
+
+# --- the girl, sitting on the near side with her back to us, turns to him and holds out her glass
+banco = Trazo([(990, 712), (1160, 708)], (10, 10))
+lz.aguada(banco, '#9a6a4a', dens=0.8, tapa=1, irreg=0.3)
+lz.contorno(banco, '#4a3428', grosor=0.6, presion=0.5)
+for x in (1000, 1150):
+    lz.aguada(Trazo([(x, 716), (x, 748)], (6, 5)), '#8a5a3a', dens=0.8, tapa=1)
+cuello(lz, (1112, 606), 22, (1108, 640), PN, giro=0.8, inclina=-6, escote=False)
+falda_n = Poligono([(1088, 682), (1132, 682), (1140, 716), (1084, 718)])
+lz.aguada(falda_n, CORAL, dens=0.8, tapa=1, irreg=0.3, borde=0.7)
+torso2(lz, (1088, 640), (1128, 640), (1092, 692), (1126, 692), CORAL, cintura=0.94, sombra=-1, escote='redondo',
+       pliegues=[[(1100, 652), (1104, 686)], [(1116, 650), (1118, 684)]])
+lz.aguada(Trazo([(1092, 690), (1110, 692), (1128, 690)], (6, 6, 6)), '#f6efe0', dens=0.6, tapa=1, irreg=0.3)   # her apron bow
+cabeza2(lz, 1112, 606, 22, PN, '#c0602e', 'coleta', giro=0.82, inclina=-6, ojos='abiertos', boca='risa', mira=(1, -1))
+# her arm and the glass, held up under the jug's spout
+VASO = (1160, 634)
+brazo2(lz, (1126, 646), (1146, 660), (1152, 644), 14, CORAL, PN, 'corta', sombra=1, mano=None)
+vaso = Poligono([(VASO[0] - 8, VASO[1] - 22), (VASO[0] + 8, VASO[1] - 22), (VASO[0] + 7, VASO[1] + 2), (VASO[0] - 7, VASO[1] + 2)],
+                suave=False)
+lz.aguada(vaso, '#cfe8ec', dens=0.45, tapa=1, irreg=0.2, toques=[(VASO[0], VASO[1] - 4, 7, '#7fb5d3', 0.8)])
+lz.contorno(vaso, '#5a9aa0', grosor=0.7, presion=0.6, cortes=0.05)
+lz.gouache(Trazo([(VASO[0] - 5, VASO[1] - 19), (VASO[0] - 5, VASO[1] - 3)], (1.0, 0.8)), '#ffffff', alfa=0.8, irreg=0)
+mano2(lz, 1150, 646, -40, 21, PN, 'agarra', lado=1)
+sx_, sy_ = J(-12, -29)
+chorro = Trazo([(sx_, sy_), (sx_ - 1, sy_ + 8), (VASO[0] + 1, VASO[1] - 19)], (4.2, 3.8, 3.4))
+lz.aguada(chorro, '#6fb0d0', dens=0.8, irreg=0.2, borde=0.8)
+lz.gouache(Trazo([(sx_ - 1, sy_ + 3), (sx_ - 4, sy_ + 12)], (1.1, 0.8)), '#ffffff', alfa=0.85, irreg=0)
+for k in range(5):
+    lz.gouache(Elipse(VASO[0] + rng.normal(0, 4), VASO[1] - 21 + rng.normal(0, 2), 0.9), '#e8f6ff', alfa=0.9, irreg=0)
 
 lz.vineta(margen=26)
 lz.guardar(SALIDA)

@@ -166,6 +166,7 @@ cer.sort(key=lambda q: q[0])
 for k in range(4):
     hifa(cer[-1 - (k % 2)], TIPS_A[k], jit=14)
 # a fine fuzz of hyphae everywhere along the threads
+N_PRIM = len(hilos)
 for h in list(hilos):
     for j in range(6, len(h) - 6, 9):
         a = rngm.uniform(0, 2 * math.pi)
@@ -173,12 +174,17 @@ for h in list(hilos):
         q = (h[j][0] + math.cos(a) * L, h[j][1] + math.sin(a) * L)
         if dentro(*q):
             hilos.append(np.array([h[j], ((h[j][0] + q[0]) / 2 + rngm.normal(0, 2), (h[j][1] + q[1]) / 2), q]))
-largos = [h for h in hilos if len(h) > 8]
-lz.lapiz(hilos, '#6a3a1e', grosor=1.3, presion=0.35, temblor=0.12)
-lz.lapiz(hilos, '#e8a830', grosor=0.85, presion=0.9, temblor=0.12)
-lz.lapiz(largos, '#fff2b8', grosor=0.45, presion=0.85, temblor=0.12)
-for h in largos[::2]:
-    lz.luz(Trazo(h[::5], (3, 2)), '#ffd870', fuerza=0.12, suave=2)
+prim, fino = hilos[:N_PRIM], hilos[N_PRIM:]
+for h in prim:
+    lz.aguada(Trazo(h[::4], (5, 4)), '#f6d070', dens=0.35, suave=2.5)
+    lz.luz(Trazo(h[::4], (8, 6)), '#ffd870', fuerza=0.2, suave=3)
+lz.lapiz(prim, '#5a3018', grosor=2.6, presion=0.35, temblor=0.12)
+for h in prim:                       # gold that shines: opaque body colour, not a glaze
+    q = h[::2] if len(h) > 6 else h
+    lz.gouache(Trazo(q, (2.4, 1.6)), '#f6c444', alfa=0.95, irreg=0)
+    lz.gouache(Trazo(q, (0.9, 0.6)), '#fff6d0', alfa=0.9, irreg=0)
+for h in fino:
+    lz.gouache(Trazo(h, (1.0, 0.5)), '#f2c050', alfa=0.85, irreg=0)
 for q in P + TIPS_A:
     lz.gouache(Elipse(*q, 1.6), '#fff4c0', alfa=0.9, irreg=0)
     lz.luz((q[0], q[1], 5), '#ffe2a0', fuerza=0.3)
@@ -366,10 +372,10 @@ _m = np.zeros((900, 1500), np.uint8)
 for (cx_, cy_, r_, col) in MASAS:
     _cv.ellipse(_m, (int(cx_), int(cy_)), (int(r_ * 0.98), int(r_ * 0.78)), 0, 0, 360, 255, -1)
 _c = max(_ms.find_contours(_m.astype(float), 128), key=len)
-for (yy, xx) in _c[::9]:
+for (yy, xx) in _c[::15]:
     a = math.degrees(math.atan2(yy - 200, xx - 560)) + rng.normal(0, 30)
     luzc = (xx - 560) * -0.6 + (yy - 200) * -0.8
-    hoja_encina(xx, yy, rng.uniform(11, 15), a, rng.choice(['#8a9a6a', '#6a8460']) if luzc > 40 else
+    hoja_encina(xx, yy, rng.uniform(16, 21), a, rng.choice(['#8a9a6a', '#6a8460']) if luzc > 40 else
                 rng.choice(['#3e5a48', '#2e4a3c', '#4e6852']))
 for (x, y) in puntos_dentro(COPA, 60, 9, margen=12):
     luzc = (x - 560) * -0.6 + (y - 200) * -0.8
