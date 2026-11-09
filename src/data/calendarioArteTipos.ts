@@ -40,6 +40,9 @@ export interface ContenidoMes {
   dias: string[];
   /** La iniciativa que recibe parte de lo recaudado este mes. Vacía = por elegir. */
   iniciativa?: { nombre: string; texto: string; web?: string };
+  /** «Mi reto personal del mes» (2026-11-09): la pregunta que invita a escribir
+   *  un reto propio sobre el tema. Debajo van líneas en blanco para apuntarlo. */
+  reto?: string;
   /** A dónde lleva el QR. Por defecto, la ficha «Conocer más» del mes en humanity.wiki. */
   qr_url?: string;
   /** Evaluación del mes contra los principios de diseño. No se imprime. */
