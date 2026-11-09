@@ -10731,6 +10731,14 @@ Eugenio: «no veo el Bala en el selector de diseños».
 - **Cómo funciona:** como los otros diseños base, se abre y se mira; cambiarlo o guardarlo como propio sigue siendo cosa del dueño con su sesión.
 - **Sin verificar:** la migración no se ha podido ejecutar contra una base de datos aquí (no hay Postgres en este entorno). Es la misma forma de la 0170, que ya corrió en producción.
 
+### 2026-11-09 — Modo oscuro: las letras sobre fotos y el boletín del pie vuelven a ser claras
+- Eugenio: «las letras me salen negras». El tema oscuro cambia `--color-white` por la superficie oscura; encima de una foto, o de un fondo elegido a mano, el fondo no cambia y el texto quedaba casi negro.
+- Nuevo atributo `data-fondo-oscuro` (`scripts/generar-tema-oscuro.mjs`): dentro, la paleta blanca y pizarra se queda como en el modo claro. Lo llevan los títulos de las tarjetas de proyecto, los de las noticias, la cabecera con foto de cada proyecto y el boletín cuando el pie es oscuro.
+
+### 2026-11-09 — Portada de luzhumanidad.com: una sola línea
+- Eugenio: «con menos texto y menos números, más elegante y simple, y que ocupe menos para que se vean las tarjetas». `PresentacionSitio` pasa de caja con frase, cuatro cifras y dos botones a titular y «Colaborar» en una línea; de 271 a 58 px en escritorio.
+- Nuevo `config.sitio.portada.titular` («Energía, movilidad, vivienda y comunidad.», ya puesto en producción). El lema largo se queda para la tarjeta al compartir.
+
 ## 2026-11-09 — Un solo selector de vehículo, en el logo, y la cabecera en una línea
 
 Eugenio: «Unifica los selectores de vehículos… deja solo el de arriba y deja seleccionar los vehículos solo de una manera». Al preguntarle cuál quitar: «deja el de arriba, y de paso unifica el menú de abajo con el de arriba para que ocupe solo una línea. Y que el selector de vehículos esté integrado en el logo de Aeromóvil para que quede elegante como un desplegable/botón».
