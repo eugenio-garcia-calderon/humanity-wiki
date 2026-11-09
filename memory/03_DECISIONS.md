@@ -1140,3 +1140,21 @@ Chose (b) + (c). With (b) everyone lands on the clean default layout now. With (
 - **Paint.** Kept "unpainted carbon under clear coat" against the photo's charcoal look: the sources say unpainted, and the photo's luminance (body 50–60 vs tyres 15) fits clear-coated carbon in daylight. The weave was lightened instead of repainting.
 - **Removed.** The rear spats and engine-cover lines were invented in the 2026-11-08 version; the photo shows no evidence of them, so they are gone.
 - **Frontal area.** On the model it is 1.09 m² against the published 1.0. The tunnel and the consumption figures keep using the published value.
+
+## 2026-11-09 — Wind tunnel: source-panel method + integral boundary layer, one fitted constant, shown next to (not instead of) the editor's Cd
+
+**Method.** Options:
+- (a) keep the illustration;
+- (b) a 2D/axisymmetric estimate;
+- (c) a 3D constant-strength source-panel method on each silhouette (`envolvente` + section exponent), half-model with symmetry and a mirror image under the road, dense LU in a Web Worker, cached by shape;
+- (d) real CFD.
+
+Chose (c).
+- **Separation:** Thwaites, then Michel transition or a laminar bubble, then Head turbulent with separation at H = 2.4, along traced surface streamlines.
+- **Cd:** flat-plate friction × Hoerner form factor; plus the base area behind separation × 0.2 (Hucho); plus rotating wheels 0.58 × exposed frontal area (Fackrell & Harvey); plus a fixed details increment.
+- **Fit:** only the details increment (0.051) is fitted, on the four closed cars with a published Cd. The Twizy (open sides) is excluded.
+- **Uncertainty band:** the leave-one-out RMS, ±15 % with today's XL1 and 1-Litre silhouettes.
+
+**Not adopted by the editor.** The tunnel gives 0.125 for the default A1 against the formula's 0.153 (−19 %). Energy, range and department figures keep `res.Cd`. The decision belongs to Eugenio, and the card puts the two side by side.
+
+**Stored calibration.** `tunel/calibracion.ts` keeps the calibration table so the card does not recompute five cars on every visit. `scripts/tunel-pruebas.ts` fails when it no longer matches the code. It failed at integration, because the XL1 and 1-Litre silhouettes changed the same day. The table was re-run before merging. **Rerun the script after any change to a garage silhouette.**

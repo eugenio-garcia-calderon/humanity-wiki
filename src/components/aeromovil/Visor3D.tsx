@@ -33,7 +33,8 @@ import { GIRO_A1, suspensionA1 } from './geometriaA1';
 import type { Referencia } from './referencias';
 import { vehiculoGaraje } from './garaje';
 import { colorSuperpuesto, hacerFantasma, liberarFantasma, mostrarSiluetas, siluetas } from './garaje/superponer';
-import { cartel, crearTunel, envolventeModelo, type CuerpoTunel, type Tunel } from './tunelViento';
+import { cartel, crearTunel, type CuerpoTunel, type Tunel } from './tunelViento';
+import type { OpcionesTunel } from './tunel/cliente';
 
 /** Las capas. `solo` limita una capa a un vehículo: la dirección y la transmisión son del Aeromóvil 1. */
 export const CAPAS = [
@@ -76,14 +77,16 @@ interface Props {
   garaje?: { id: string; x: number; z: number; giro?: number }[];
   /** Solo el garaje, sin nuestro coche (para mirar un modelo del garaje a solas). */
   soloGaraje?: boolean;
-  /** Túnel de viento: líneas de humo alrededor de nuestro coche y de cada vehículo del garaje que tenga silueta. */
+  /** Túnel de viento: flujo calculado (presión en la piel, líneas de corriente, puntos críticos, estela) alrededor de cada cuerpo de `cuerposTunel`. */
   tunel?: boolean;
   /** Los coches del garaje, en fantasma de color y con sus siluetas, encima del nuestro (las posiciones las da `garaje`). */
   superponer?: boolean;
   /** Carteles encima de cada coche ('aeromovil' o el id del garaje), líneas separadas por «\n». Con el túnel abierto van en el túnel. */
   carteles?: Record<string, string>;
-  /** Cd de cada coche ('aeromovil' o el id del garaje), para dimensionar la estela del túnel. */
-  cdTunel?: Record<string, number>;
+  /** Los cuerpos que pasan por el túnel (nuestro diseño y los coches del garaje con silueta), con su posición. */
+  cuerposTunel?: CuerpoTunel[];
+  /** Resolución, líneas, qué se ve y a qué velocidad (la separación y la estela dependen de ella). */
+  opcionesTunel?: OpcionesTunel;
   vista: Vista;
   /** Al pinchar en una pieza: su componente (para ir a su página). */
   alPinchar?: (componente: string) => void;
@@ -1145,7 +1148,7 @@ function construirReferencia(g: THREE.Group, M: Mats, r: Referencia, fantasma: b
   g.traverse((o: any) => { if (o.isMesh && o.material?.isMaterial) (o as any).userData.ref = true; });
 }
 
-export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cdTunel, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje }, ref) {
+export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cuerposTunel, opcionesTunel, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje }, ref) {
   const pinchar = useRef(alPinchar); pinchar.current = alPinchar;
   const moverGaraje = useRef(alMoverGaraje); moverGaraje.current = alMoverGaraje;
   const lienzo = useRef<HTMLCanvasElement>(null);
@@ -1377,7 +1380,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
         M.intermitenteI.emissiveIntensity = st.inclinacion > 2 && enc ? 2.2 : 0.15;
         M.intermitenteD.emissiveIntensity = st.inclinacion < -2 && enc ? 2.2 : 0.15;
       }
-      if (st.tunel) { renderer.getSize(tamano); st.tunel.actualizar(reducir ? 0 : ahora / 1000, tamano.x, tamano.y); }
+      if (st.tunel) { renderer.getSize(tamano); st.tunel.actualizar(reducir ? 0 : ahora / 1000, tamano.x, tamano.y, camera); }
       // Lo que llega tarde a un coche superpuesto (la carrocería del Twizy se descarga) también pasa a fantasma.
       if (st.superponer && ahora - st.ultimoFantasma > 400) { st.ultimoFantasma = ahora; for (const o of grupoGaraje.children) hacerFantasma(o, colorSuperpuesto(o.name)); }
       if (st.sombraSucia || ahora - ultimaSombra > 1000) { st.sombraSucia = false; ultimaSombra = ahora; ajustarSombra(); }
@@ -1458,21 +1461,19 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     for (const v of garaje) { const obj = st.grupoGaraje.getObjectByName(v.id); if (obj) { obj.position.set(v.x, 0, v.z); obj.rotation.y = v.giro ?? 0; } }
     st.sombraSucia = true;
   }, [garaje]);
-  // Túnel de viento: se rehace cuando cambia la forma del coche o quién está en el garaje.
-  const claveTunel = tunel ? garaje.map(v => `${v.id}@${v.x},${v.z},${v.giro ?? 0}`).join('|') + (soloGaraje ? '|solo' : '') + JSON.stringify(carteles ?? {}) + JSON.stringify(cdTunel ?? {}) : '';
+  // Túnel de viento (2026-11-09: flujo calculado, ver tunelViento.ts): se rehace cuando cambia un cuerpo, su sitio,
+  // los carteles, la resolución o el número de líneas. Lo que solo se enciende o se apaga, y la velocidad, no lo rehacen.
+  const claveTunel = tunel && cuerposTunel && opcionesTunel
+    ? cuerposTunel.map(c => `${c.id}@${c.x},${c.z},${c.giro}:${c.envolvente.length}:${c.envolvente.reduce((s, e) => s + e[0] * 3.1 + e[1] * 5.7 + e[2] * 7.3 + e[3] * 11.9, 0).toFixed(4)}:${c.area.toFixed(4)}`).join('|')
+      + JSON.stringify(carteles ?? {}) + `|${opcionesTunel.resolucion}|${opcionesTunel.lineas}` : '';
   useEffect(() => {
     const st = estado.current; if (!st) return;
     if (st.tunel) { st.scene.remove(st.tunel.grupo); st.tunel.liberar(); st.tunel = null; }
-    if (!tunel) return;
-    const cuerpos: CuerpoTunel[] = [];
-    if (!soloGaraje) cuerpos.push({ id: 'aeromovil', x: 0, z: 0, giro: 0, envolvente: envolventeModelo(modelo), n: 2.3, etiqueta: carteles?.aeromovil, cd: cdTunel?.aeromovil });
-    for (const v of garaje) {
-      const def = vehiculoGaraje(v.id);
-      if (def?.envolvente) cuerpos.push({ id: v.id, x: v.x, z: v.z, giro: v.giro ?? 0, envolvente: def.envolvente, n: def.seccion ?? 3, etiqueta: carteles?.[v.id], cd: cdTunel?.[v.id] });
-    }
-    st.tunel = crearTunel(cuerpos); st.scene.add(st.tunel.grupo);
+    if (!tunel || !cuerposTunel || !opcionesTunel) return;
+    st.tunel = crearTunel(cuerposTunel.map(c => ({ ...c, etiqueta: carteles?.[c.id] })), opcionesTunel); st.scene.add(st.tunel.grupo);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tunel, modelo, claveTunel]);
+  }, [tunel, claveTunel]);
+  useEffect(() => { if (opcionesTunel) estado.current?.tunel?.ajustar(opcionesTunel); }, [opcionesTunel, claveTunel]);
   // «Cd y consumo»: un cartel encima de cada coche (con el túnel abierto los pone el túnel).
   const claveCarteles = !tunel && carteles ? JSON.stringify(carteles) + garaje.map(v => `${v.id}@${v.x},${v.z},${v.giro ?? 0}`).join('|') + (soloGaraje ? '|solo' : '') : '';
   useEffect(() => {
