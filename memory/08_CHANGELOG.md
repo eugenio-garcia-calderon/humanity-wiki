@@ -10730,3 +10730,24 @@ Eugenio: «no veo el Bala en el selector de diseños».
 - **Arreglo:** la migración `0178_aeromovil_bala_base.sql` añade el diseño base «Cuadriciclo Bala (biplaza a horcajadas)», igual que se hizo con el Aeromóvil 1 en la 0170. Abre con las medidas del Bala del garaje (comprobado con un script).
 - **Cómo funciona:** como los otros diseños base, se abre y se mira; cambiarlo o guardarlo como propio sigue siendo cosa del dueño con su sesión.
 - **Sin verificar:** la migración no se ha podido ejecutar contra una base de datos aquí (no hay Postgres en este entorno). Es la misma forma de la 0170, que ya corrió en producción.
+
+## 2026-11-09 — Un solo selector de vehículo, en el logo, y la cabecera en una línea
+
+Eugenio: «Unifica los selectores de vehículos… deja solo el de arriba y deja seleccionar los vehículos solo de una manera». Al preguntarle cuál quitar: «deja el de arriba, y de paso unifica el menú de abajo con el de arriba para que ocupe solo una línea. Y que el selector de vehículos esté integrado en el logo de Aeromóvil para que quede elegante como un desplegable/botón».
+
+- **El logo es el selector.** El dibujo del coche con el nombre del vehículo («Aeromóvil 1 ⌄») abre el menú que antes era «Diseños».
+  - Debajo del nombre sale el diseño abierto («sin guardar» si no hay ninguno) y si está guardado.
+  - **La lista va agrupada por vehículo:** Aeromóvil 1, Aeromóvil Gota y Cuadriciclo Bala, cada uno con su descripción y sus diseños. Los diseños sin vehículo (anteriores al 2026-11-06) van con el Gota.
+  - Si un vehículo se queda sin ningún diseño, sale «Medidas de partida» para poder abrirlo igualmente.
+- **Quitado el bloque «Vehículo»** del panel de la derecha: elegir vehículo es abrir uno de sus diseños.
+- **Cabecera en una línea:** logo, secciones y, en el Aeromóvil 1, los departamentos como un desplegable al final («Carrocería ⌄»), con su icono y su lema. Antes eran una segunda fila de once botones.
+  - **Desde 1360 px** de ancho se leen los nombres de todas las secciones.
+  - **Por debajo**, solo los iconos (con su nombre al pasar el ratón), menos la sección abierta, que lleva el nombre.
+  - **En el móvil**, la fila de secciones se desliza de lado.
+- **Textos que mandaban a elegir el vehículo en «Diseño 3D»** (Componentes, Aranceles y Planos) ahora dicen «en el menú del nombre del vehículo, arriba a la izquierda».
+- **Se queda:** «Otros velomóviles» sigue como sección. Es el catálogo para comparar, no un selector del vehículo que se diseña.
+- **Comprobado** en el navegador a 1512, 1366, 1280 y 390 px:
+  - la cabecera ocupa una sola línea y la página no se desborda de lado;
+  - el menú del logo sale agrupado; elegir el Bala lo abre y el bloque «Vehículo» ya no está;
+  - el desplegable de departamentos cambia de departamento.
+- **Sin verificar:** con la cuenta del dueño (los botones de guardar y la estrella) y en un móvil de verdad.

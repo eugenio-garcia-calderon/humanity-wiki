@@ -1237,3 +1237,17 @@ The editable Bala shipped with an entry in the «Vehículo» picker only. Eugeni
 Migration 0178 adds a team base design, `{"disposicion": "bala"}`, following 0170 (Aeromóvil 1). `deDiseno` fills the rest from `PARAMETROS_BALA`. The insert is idempotent and checks only non-archived team rows.
 
 **Alternative not taken:** listing the three families as built-in entries in the menu, outside the database. It would duplicate what the base rows already do for the A1 and the Gota.
+
+## 2026-11-09 — The vehicle is chosen in one place: the logo menu; header in one line
+
+**One selector.** Eugenio asked for one selector, at the top. The «Vehículo» radio block duplicated the designs menu, which already held a team base design per family (0170, 0178), so it was removed. The designs menu's button became the page logo: the car mark, the vehicle name and a chevron, with the open design and its save state underneath.
+
+**List grouped by family.** The menu lists its designs grouped by family (`VEHICULOS`, moved to `Disenos.tsx`). A family with no design left shows «Medidas de partida», which calls `cambiarVehiculo`. Without it, archiving a base design would leave that vehicle unreachable.
+
+**One line.** The A1's eleven departments went from a second row to a dropdown at the end of the header line. Section labels show from 1360 px; below that the inactive sections are icons with `title`/`aria-label`. On phones the section strip scrolls sideways. Options considered:
+- shortening the labels;
+- a two-level menu.
+
+Eugenio asked for one line and an elegant look; the dropdown keeps every name readable.
+
+**Kept.** «Otros velomóviles» is a reference catalogue for comparison, not a selector of the vehicle being designed. It stays.

@@ -80,25 +80,9 @@ const PUERTAS_A1: { k: Puerta; n: string; d: string }[] = [
   { k: 'cabina', n: 'Cúpula basculante', d: 'La cúpula entera bascula hacia delante; se entra por encima del estribo, como en un ultraligero.' },
   { k: 'aptera', n: 'Laterales tipo Aptera', d: 'Panel lateral y media cúpula con bisagra delante, inclinada: la puerta sube al abrirse y ocupa poco al lado.' },
 ];
-const VEHICULOS: { k: Disposicion; n: string; d: string }[] = [
-  { k: 'cuatro', n: 'Aeromóvil 1', d: 'Eléctrico de cuatro ruedas, carrocería baja con cúpula (SZEmission ×1,3), clase Twizy.' },
-  { k: 'rombo', n: 'Aeromóvil Gota', d: 'Velomóvil tándem 1+2 de pedaleo asistido, rombo basculante, carenado en gota.' },
-  { k: 'bala', n: 'Cuadriciclo Bala', d: 'Biplaza a horcajadas, tipo moto carenada: el rombo de ruedas del Gota con carenados laterales fijos, morro en punta y cúpula.' },
-];
 /** Las capas que tienen algo en el Bala (no lleva paneles solares, motor ni baterías dibujados). */
 const CAPAS_BALA: CapaId[] = ['carenado', 'cristales', 'chasis', 'suspension', 'ruedas', 'asientos', 'ocupantes'];
 
-function Logo({ nombre }: { nombre: string }) {
-  return (
-    <span className="flex items-center gap-2.5">
-      <svg viewBox="0 0 40 20" className="h-6 w-12 text-teal-700" aria-hidden>
-        <path d="M2 12 C 6 3, 24 1, 38 9 C 30 15, 12 17, 2 12 Z" fill="currentColor" opacity=".18" stroke="currentColor" strokeWidth="1.4" />
-        <circle cx="9" cy="16" r="2.4" fill="currentColor" /><circle cx="31" cy="15" r="2.4" fill="currentColor" />
-      </svg>
-      <span className="text-lg font-semibold tracking-tight text-slate-900">{nombre}</span>
-    </span>
-  );
-}
 
 /**
  * Deslizador compacto (2026-11-07, Eugenio: «más compacto para que quepan más
@@ -597,6 +581,45 @@ const VISTAS_NOMBRE: Record<Vista, string> = { iso: '3/4', side: 'Lateral', top:
 const SOLO_DEP: Partial<Record<IdDepartamento, string>> = { carroceria: 'la carrocería', chasis: 'el chasis', rodaje: 'el rodaje', propulsion: 'el motor', energia: 'la energía', interior: 'el interior', accesos: 'los accesos', luces: 'la carrocería' };
 const NOMBRE_CORTO: Record<IdDepartamento, string> = { proyecto: 'Proyecto', carroceria: 'Carrocería', chasis: 'Chasis', rodaje: 'Rodaje', propulsion: 'Motor', energia: 'Energía', interior: 'Interior', accesos: 'Accesos', luces: 'Luces', fabricacion: 'Fabricación', homologacion: 'Homologación' };
 
+/**
+ * The A1's departments as a menu at the end of the single header line (2026-11-09; they were a
+ * second row of eleven buttons). Same choice and same `title` texts as before.
+ */
+function MenuDepartamento({ dep, alElegir }: { dep: IdDepartamento; alElegir: (d: IdDepartamento) => void }) {
+  const [abierto, setAbierto] = useState(false);
+  const caja = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!abierto) return;
+    const fuera = (e: MouseEvent) => { if (caja.current && !caja.current.contains(e.target as Node)) setAbierto(false); };
+    const esc = (e: KeyboardEvent) => { if (e.key === 'Escape') setAbierto(false); };
+    document.addEventListener('mousedown', fuera); document.addEventListener('keydown', esc);
+    return () => { document.removeEventListener('mousedown', fuera); document.removeEventListener('keydown', esc); };
+  }, [abierto]);
+  const Icono = ICONO_DEP[dep];
+  return (
+    <div ref={caja} className="relative shrink-0">
+      <Button variant="outline" aria-expanded={abierto} aria-haspopup="menu" aria-label={`Departamento: ${NOMBRE_CORTO[dep]}`} onClick={() => setAbierto(a => !a)}
+        className={cn('gap-1.5 px-2.5 py-1.5 text-sm normal-case tracking-normal text-teal-800', abierto && 'bg-teal-50')}>
+        <Icono className="h-4 w-4 shrink-0" /><span className="hidden whitespace-nowrap sm:inline">{NOMBRE_CORTO[dep]}</span>
+        <ChevronDown className={cn('h-3.5 w-3.5 shrink-0 transition-transform', abierto && 'rotate-180')} />
+      </Button>
+      {abierto && (
+        <div role="menu" aria-label="Departamentos" className="absolute right-0 top-full z-40 mt-1 max-h-[75vh] w-[min(92vw,320px)] overflow-y-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl">
+          {DEPARTAMENTOS.map(d => { const I = ICONO_DEP[d.id], activo = dep === d.id; return (
+            <Button key={d.id} variant="ghost" role="menuitemradio" aria-checked={activo} onClick={() => { alElegir(d.id); setAbierto(false); }}
+              className={cn('w-full items-start justify-start gap-2.5 px-2 py-1.5 text-left normal-case tracking-normal', activo ? 'bg-teal-50 text-teal-900' : 'text-slate-800')}>
+              <I className={cn('mt-0.5 h-4 w-4 shrink-0', activo ? 'text-teal-700' : 'text-slate-500')} />
+              <span className="flex min-w-0 flex-col">
+                <span className="text-sm font-medium">{NOMBRE_CORTO[d.id]}</span>
+                <span className="text-[11px] font-normal text-slate-500">{d.lema}</span>
+              </span>
+            </Button>); })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function Aeromovil() {
   const loc = useLocation(), navegar = useNavigate();
   const ruta = loc.pathname.replace(/\/+$/, '');
@@ -846,35 +869,28 @@ export default function Aeromovil() {
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900">
       <header className="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-x-6 gap-y-2 px-4 py-2.5">
-          <Logo nombre={nombreVehiculo} />
+        {/* One line (2026-11-09, Eugenio: «unifica el menú de abajo con el de arriba para que ocupe solo una línea»):
+            the logo is the vehicle and design menu, the sections follow (icons only, the open one with its
+            name, until there is room for all the names), and the A1's departments are a menu at the end. */}
+        <div className="mx-auto flex max-w-[1600px] items-center gap-2 px-2 py-1.5 sm:gap-3 sm:px-4">
           <MenuDisenos P={P} actual={actual} puedeDecidir={!!dueno?.puedeDecidir} alCargar={abrirDiseno} estado={guardadoWeb}
+            nombreVehiculo={nombreVehiculo} alVehiculo={cambiarVehiculo}
             alNuevo={() => { setP(PARAMETROS_POR_DEFECTO); setActual(null); cargarDisenoPorDefecto().then(d => { if (d) { setP(deDiseno(d.parametros || {})); setActual(null); } }); }}
             alGuardado={alGuardado} />
-          <nav className="flex flex-wrap gap-1" aria-label="Aeromóvil">
+          <nav className="flex min-w-0 flex-1 gap-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" aria-label="Aeromóvil">
             {SECCIONES.filter(s => (s.k !== 'componentes' && s.k !== 'aranceles') || esA1).map(s => {
               const Icono = s.icono, activa = seccion === s.k;
               return (
-                <Button key={s.k} variant="ghost" aria-current={activa ? 'page' : undefined} onClick={() => navegar(s.ruta)}
-                  className={cn('gap-1.5 px-3 py-1.5 text-sm normal-case tracking-normal', activa ? 'bg-slate-900 text-white hover:bg-slate-800' : 'text-slate-700')}>
-                  <Icono className="h-4 w-4" />{s.n}
+                <Button key={s.k} variant="ghost" aria-current={activa ? 'page' : undefined} aria-label={s.n} title={s.n} onClick={() => navegar(s.ruta)}
+                  className={cn('shrink-0 gap-1.5 px-2.5 py-1.5 text-sm normal-case tracking-normal', activa ? 'bg-slate-900 text-white hover:bg-slate-800' : 'text-slate-700')}>
+                  <Icono className="h-4 w-4 shrink-0" /><span className={cn('whitespace-nowrap', !activa && 'hidden min-[1360px]:inline')}>{s.n}</span>
                   {s.k === 'tareas' && abiertas ? <span className={cn('ml-0.5 rounded-full px-1.5 text-[11px] font-bold tabular-nums', activa ? 'bg-white text-slate-900' : 'bg-amber-500 text-white')}>{abiertas}</span> : null}
                 </Button>
               );
             })}
           </nav>
+          {seccion === 'diseno' && esA1 && <MenuDepartamento dep={dep} alElegir={d => { setDep(d); setSoloDep(false); }} />}
         </div>
-        {seccion === 'diseno' && esA1 && (
-          <nav className="border-t border-slate-100 bg-white" aria-label="Departamentos">
-            <div className="mx-auto flex max-w-[1600px] gap-0.5 overflow-x-auto px-2 py-1">
-              {DEPARTAMENTOS.map(d => { const Icono = ICONO_DEP[d.id], activo = dep === d.id; return (
-                <Button key={d.id} variant="ghost" aria-pressed={activo} onClick={() => { setDep(d.id); setSoloDep(false); }} title={d.lema}
-                  className={cn('shrink-0 flex-col gap-0.5 px-2.5 py-1 text-[11px] normal-case tracking-normal', activo ? 'bg-teal-700 text-white hover:bg-teal-800' : 'text-slate-600')}>
-                  <Icono className="h-4 w-4" />{NOMBRE_CORTO[d.id]}
-                </Button>); })}
-            </div>
-          </nav>
-        )}
       </header>
 
       {/* El diseño se queda montado aunque se mire otra vista: así «Exportar» puede sacar el STL de lo que se ve. */}
@@ -1066,18 +1082,6 @@ export default function Aeromovil() {
         </div>
 
         <aside className="mt-4 flex flex-col gap-3 lg:mt-0">
-          {(!esA1 || dep === 'proyecto') && <Bloque titulo="Vehículo">
-            <div className="flex flex-col gap-1.5" role="radiogroup" aria-label="Tipo de vehículo">
-              {VEHICULOS.map(o => (
-                <Button key={o.k} variant="outline" role="radio" aria-checked={P.disposicion === o.k} onClick={() => cambiarVehiculo(o.k)}
-                  className={cn('flex-col items-start gap-0.5 px-3 py-2 text-left normal-case tracking-normal', P.disposicion === o.k && 'border-teal-700 bg-teal-50 ring-1 ring-teal-700')}>
-                  <span className="text-sm font-semibold text-slate-900">{o.n}</span>
-                  <span className="text-xs font-normal text-slate-600">{o.d}</span>
-                </Button>
-              ))}
-            </div>
-          </Bloque>}
-
           {(!esA1 || dep === 'proyecto') && <Bloque titulo="Garaje" nota="otros vehículos al lado">
             <div className="flex flex-col gap-1.5">
               {VEHICULOS_GARAJE.map(v => { const pl = garaje.find(g => g.id === v.id)!; return (
@@ -1253,10 +1257,10 @@ export default function Aeromovil() {
       {seccion === 'componentes' && (esA1
         ? <VistaComponentes P={P} res={res} modelo={modelo} id={ruta.split('/')[3]} alCambiar={setP} alNavegar={r => { navegar(r); window.scrollTo({ top: 0 }); }}
             alVerEn3D={capa => { setVisibles(Object.fromEntries(CAPAS.map(c => [c.k, true])) as Record<CapaId, boolean>); setRayosX(!['carenado', 'cristales', 'solar'].includes(capa)); setVista('iso'); navegar('/aeromovil'); window.scrollTo({ top: 0 }); }} />
-        : <p className="mx-auto max-w-[1100px] px-4 py-8 text-sm text-slate-600">Las fichas de componentes son del Aeromóvil 1. Elige ese vehículo en «Diseño 3D» para verlas.</p>)}
+        : <p className="mx-auto max-w-[1100px] px-4 py-8 text-sm text-slate-600">Las fichas de componentes son del Aeromóvil 1. Elígelo en el menú del nombre del vehículo, arriba a la izquierda, para verlas.</p>)}
       {seccion === 'aranceles' && (esA1
         ? <VistaAranceles P={P} res={res} modelo={modelo} />
-        : <p className="mx-auto max-w-[1100px] px-4 py-8 text-sm text-slate-600">Los aranceles se calculan con las piezas del Aeromóvil 1. Elige ese vehículo en «Diseño 3D» para verlos.</p>)}
+        : <p className="mx-auto max-w-[1100px] px-4 py-8 text-sm text-slate-600">Los aranceles se calculan con las piezas del Aeromóvil 1. Elígelo en el menú del nombre del vehículo, arriba a la izquierda, para verlos.</p>)}
       {seccion === 'otros' && <VistaOtros modelo={modelo} resultados={res} puedeDecidir={!!dueno?.puedeDecidir} alVer={r => verRef(r, 'sola')} alComparar={r => verRef(r, 'comparar')} />}
       {seccion === 'tareas' && <VistaTareas tareas={tareas} recargar={recargar} error={errorTareas} dueno={dueno} />}
       {seccion === 'plan' && <VistaPlan />}
