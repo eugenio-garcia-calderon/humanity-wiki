@@ -58,7 +58,7 @@ interface Props {
 
 export function VistaPantalla({ anio, portada, meses, imagenes, estilo, mesInicial, alSalir }: Props) {
   const [aspa, setAspa] = useState(false);
-  const temporizador = useRef<number>();
+  const temporizador = useRef<number | undefined>(undefined);
 
   // Asoma el aspa un momento al mover el ratón o tocar.
   useEffect(() => {
