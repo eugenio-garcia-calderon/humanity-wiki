@@ -429,10 +429,14 @@ export default function CalendarioArte() {
     if (m.imagen && !urls.includes(m.imagen)) urls.push(m.imagen);
     return urls.map((url, i) => ({ url, n: i + 1, generado: !casa.includes(url), nota: disenosIA.find(d => d.url === url)?.prompt ?? null }));
   };
-  /** Sin elegir, el favorito es el Diseño 2 (Eugenio, 2026-11-05: «marca como
-   *  favoritos todos los diseños número 2, son los mejores hasta ahora»). */
-  const favoritoDe = (m: ContenidoMes, lista: DisenoVista[]) =>
-    m.favorito && lista.some(d => d.url === m.favorito) ? m.favorito : (lista[1]?.url ?? lista[0]?.url);
+  /** Sin elegir, el favorito es el Diseño 4 (Eugenio, 2026-11-09: «marca como
+   *  favorito el diseño número 4 en todas»); antes era el 2. Si un mes aún no
+   *  tiene el 4, el último de la casa. */
+  const favoritoDe = (m: ContenidoMes, lista: DisenoVista[]) => {
+    if (m.favorito && lista.some(d => d.url === m.favorito)) return m.favorito;
+    const casa = m.disenos ?? [];
+    return casa[3] ?? casa[casa.length - 1] ?? lista[0]?.url;
+  };
   const vistoDe = (m: ContenidoMes, lista = disenosDe(m)) => {
     const elegido = vistoPorMes[m.mes];
     if (elegido && lista.some(d => d.url === elegido)) return elegido;
