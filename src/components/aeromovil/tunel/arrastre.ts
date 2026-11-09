@@ -72,7 +72,7 @@ export function desgloseCd(o: {
 }
 
 /**
- * The wheels of the garage cars that have a published Cd (and of the two without
+ * The wheels of the garage cars that have a published Cd (and of those without
  * one), from the tyre sizes and fairings described in each model's file
  * (src/components/aeromovil/garaje/). Tyre diameter = rim + 2 × sidewall.
  */
@@ -92,4 +92,7 @@ export const RUEDAS_GARAJE: Record<string, { ruedas: RuedaTunel[]; nota: string 
   jaguarD: { ruedas: [...Array(4)].map(() => ({ d: 0.71, w: 0.165, tipo: 'paso' as const })), nota: 'cuatro ruedas en pasos de rueda' },
   // three 20″ bicycle wheels (≈0.50 × 0.05 m) inside the shell
   aerorider: { ruedas: [...Array(3)].map(() => ({ d: 0.5, w: 0.05, tipo: 'dentro' as const })), nota: 'tres ruedas de bicicleta dentro del casco' },
+  // 24″ front and rear inside the body (R_DEL 0.305 m, 80 mm tyres), two 20″ laterals in pods on arms
+  // (R_LAT 0.254 m, 70 mm tyres): balaForma.ts. The pods and arms themselves are outside the silhouette.
+  bala: { ruedas: [{ d: 0.61, w: 0.08, tipo: 'dentro' }, { d: 0.61, w: 0.08, tipo: 'dentro' }, { d: 0.508, w: 0.07, tipo: 'carenado' }, { d: 0.508, w: 0.07, tipo: 'carenado' }], nota: 'delantera y trasera dentro de la carrocería, las laterales en carenados sobre brazos' },
 };

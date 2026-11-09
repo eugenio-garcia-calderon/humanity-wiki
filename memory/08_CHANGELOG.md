@@ -10645,3 +10645,33 @@ Petición de Eugenio: «haz que el agente del túnel de viento haga una explicac
 - **Al integrarlo** quité seis cifras escritas a mano en las opciones (por ejemplo «el Cd baja de 0,122 a 0,108»). Eran ciertas con el diseño por defecto de hoy, pero nada las comprobaba: se quedarían viejas en cuanto cambie el diseño por defecto o la calibración. «Probar» da la cifra viva del diseño de cada uno.
 - Comprobado: `tsc`, `vite build`, `npx tsx scripts/tunel-pruebas.ts` (todo OK) y, en el navegador, el panel de la estela con el Aeromóvil 1 y el XL1, y «Probar» con «Caída del techo» de 1,90 a 1,50: Cd del túnel 0,125 → 0,122, en 6,7 s, con el diseño intacto.
 - Sin verificar: un móvil real, tocar una etiqueta 3D con el dedo (sí las filas de la tarjeta, en un móvil emulado), las etiquetas mientras gira la cámara, y el texto que ve el dueño con su sesión iniciada.
+
+## 2026-11-09 — Cuadriciclo Bala en el garaje
+
+Petición de Eugenio: «Coge el vehículo aerogota tándem 1+2 … duplícalo, haz una versión distinta. Llámalo cuadriciclo bala … que se parezca más a una moto ultra carenada, que sea todavía más con forma de cohete o avión y que sea parecido también a la Aptera, pero como más estrechito … Y luego ponlo en el garaje», y «que tenga solo dos ocupantes, el piloto y detrás un pasajero a horcajadas, para que sea no muy grande».
+
+- **Qué es:** un diseño propio, no un vehículo real. Las medidas son una propuesta, y `fuente` lo dice.
+- **Medidas:**
+  - 3,70 m de largo; cuerpo de 0,85 m de ancho, 1,26 m con los carenados laterales; 1,45 m de alto.
+  - Batalla 2,45 m (el Gota tiene 2,60) y vía de las ruedas laterales 1,10 m (1,05).
+- **Del Gota conserva** el rombo de ruedas: una delante y otra detrás en el eje, y dos laterales a mitad de batalla, con los mismos tamaños (24″ y 20″).
+  - Las ruedas delantera y trasera van dentro de la carrocería; solo asoma la parte de abajo.
+  - Las laterales van fuera, en carenados tipo Aptera sobre dos brazos.
+- **Aspecto:** morro en punta (cono azul marino), cúpula de caza sobre los dos ocupantes que se abre hacia delante, cola en cono con aleta, y la paleta del Aeromóvil 1: blanco, azul marino y detalles rojos. Sin logos ni letras.
+- **Dentro:** piloto y pasajero a horcajadas en un sillín escalonado, manillar, pantalla, estriberas, asidero y respaldo. Sin pedales: es tipo moto.
+- **Altura para la cabeza** (sin casco, con alturas sentado supuestas por el bot): unos 7 cm para un hombre de talla media y 1 cm para uno alto (percentil 95). Con casco habría que subir la cúpula a unos 1,50 m o bajar los sillines.
+- **Sitio:** z = −12 m, a la izquierda del Jaguar. Sale para todo el mundo sin borrar su garaje guardado.
+- **Túnel:**
+  - Cd estimado 0,138, «sin dato publicado».
+  - Al integrarlo añadí sus cuatro ruedas a la tabla del túnel; sin ellas daba 0,113, demasiado optimista.
+  - Los carenados laterales y sus brazos siguen fuera del cálculo, y su explicación lo dice: el Cd real será algo más alto.
+- **Su explicación en el túnel** dice que es un diseño propio hecho a partir del Gota. Antes habría dicho «su forma la decidió su fabricante», que es falso.
+- **Vista de todos los coches («Cd y consumo» y túnel):** con el garaje lleno, el Bala y el Jaguar se salían del encuadre.
+  - La causa: la cámara no podía alejarse más de 25 m, aunque el encuadre lo pidiera.
+  - Ahora se calcula la distancia para que quepan todos los coches con sus etiquetas, y la niebla y el suelo se alejan con la cámara para que los coches del fondo no se pierdan.
+  - Al volver a la vista normal, el límite de 25 m vuelve.
+- **Comprobado:**
+  - `tsc`, `vite build` y `tunel-pruebas` (todo OK, la calibración no cambia).
+  - En el navegador: los nueve coches en la vista de consumo; el túnel con el Bala, el Aeromóvil 1 y el XL1; el panel «Estela» del Bala.
+- **Sin verificar:** un móvil real y una gráfica de verdad.
+- **No modelado:** las ruedas laterales del Gota se inclinan en las curvas; los carenados del Bala son fijos.
