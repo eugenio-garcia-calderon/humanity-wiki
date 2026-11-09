@@ -250,9 +250,9 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
       )}
 
       {/* LA PRESENTACIÓN (2026-11-07, Eugenio: «haz todas las propuestas… con alta calidad, no
-          quiero nada cutre»): qué es el laboratorio en una frase, sus cifras y dos botones,
+          quiero nada cutre»): qué es el laboratorio en una línea y el botón de colaborar,
           encima de las tarjetas y sin empujarlas fuera de la primera pantalla. */}
-      {escaparate && <PresentacionSitio cfg={raiz.config} datos={datos} />}
+      {escaparate && <PresentacionSitio cfg={raiz.config} />}
 
       {/* LAS TARJETAS (2026-11-06, Eugenio: «el título en blanco con un poco de sombra y de fondo
           la portada, como en la página del proyecto; debajo la descripción en letra pequeña sobre
