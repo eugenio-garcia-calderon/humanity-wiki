@@ -11,6 +11,12 @@
       "ruta": "src/components/aeromovil/Disenos.tsx",
       "motivo": "Un solo selector de vehículo en el logo",
       "desde": "2026-11-09T19:22:14.561Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/Paneles.tsx",
+      "motivo": "Texto que apuntaba al bloque Vehículo",
+      "desde": "2026-11-09T19:24:29.863Z"
     }
   ]
 }
