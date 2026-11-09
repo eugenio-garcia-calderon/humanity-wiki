@@ -23,9 +23,10 @@ import {
 // `#boletin-baja=…`): al abrirlos, aquí se pregunta antes de hacer nada. Un
 // programa que revisa los enlaces de un correo los abre, pero no pulsa botones.
 
-type Resultado = 'guardado' | 'enviado' | 'reciente' | 'fallo' | 'error' | 'rapido' | 'espera';
+type Resultado = 'suscrito' | 'guardado' | 'enviado' | 'reciente' | 'fallo' | 'error' | 'rapido' | 'espera';
 
 const TEXTOS: Record<Resultado, { titulo: string; texto: (email: string | null, nombre: string) => string; bien: boolean }> = {
+  suscrito: { bien: true, titulo: '¡Ya estás suscrito!', texto: e => `Hemos apuntado ${e || 'tu correo'} al boletín. Te puedes dar de baja cuando quieras desde cualquiera de sus correos.` },
   guardado: { bien: true, titulo: '¡Apuntado!', texto: e => `Hemos guardado ${e || 'tu correo'}. Antes de enviarte nada te pediremos que confirmes la suscripción.` },
   enviado: { bien: true, titulo: 'Revisa tu correo', texto: e => `Te hemos enviado un enlace a ${e || 'tu correo'} para confirmar la suscripción. Si no lo ves en unos minutos, mira en la carpeta de correo no deseado.` },
   reciente: { bien: true, titulo: 'Revisa tu correo', texto: () => 'Te enviamos el enlace para confirmar hace un momento. Si no lo ves, mira en la carpeta de correo no deseado.' },
@@ -142,7 +143,7 @@ export default function AltaBoletin({ raizId, nombre, responsable, oscuro = true
         body: JSON.stringify({ email: v.email, consentimiento: true, tiempo: Date.now() - montado.current, origen: window.location.pathname, [CAMPO_TRAMPA]: trampa?.value || '' }),
       });
       const j = await r.json().catch(() => ({}));
-      if (r.ok) setResultado({ r: (j.resultado in TEXTOS ? j.resultado : 'guardado') as Resultado, email: v.email });
+      if (r.ok) setResultado({ r: (j.resultado in TEXTOS ? j.resultado : 'suscrito') as Resultado, email: v.email });
       else if (j.campos) { setErrores(j.campos); refEmail.current?.focus(); }
       else setResultado({ r: r.status === 429 ? 'espera' : j.codigo === 'rapido' ? 'rapido' : 'error', email: v.email, mensaje: j.error });
     } catch {
@@ -172,7 +173,7 @@ export default function AltaBoletin({ raizId, nombre, responsable, oscuro = true
   // sobre el azul marino del pie, el esmeralda se queda en 3,2:1. Cada control con este anillo
   // lleva `data-sin-contorno` para que no salgan los dos.
   const anillo = cn('outline-none focus-visible:ring-2 focus-visible:ring-amber-300 focus-visible:ring-offset-2', t.foco);
-  const info = TEXTOS[resultado?.r || 'guardado'];
+  const info = TEXTOS[resultado?.r || 'suscrito'];
 
   return (
     <section ref={refSeccion} aria-labelledby="boletin-titulo" data-boletin>
