@@ -1,15 +1,15 @@
 """
 Mes 11 -- Politica -- Diseño 4.
 
-Idea: an assembly under the great tree of what we share. Four neighbours of
-every age sit in a ring open towards us (the empty stool in front is the
-viewer's seat). A girl has the word: she offers the circle a seed that is
-already sprouting, her proposal for the neighbourhood. A grandmother and a
-young woman raise their hands to vote, and the leaves that leave their hands
-fly up to become part of the tree. A young man listens with his chin on his
-hand. The crown of the tree holds the whole town -- houses with lit windows,
-a school with its bell, a health centre -- joined by its branches: the polis
-is a living thing everybody keeps growing.
+Idea: an assembly in a ring around the great tree of what we share, seen a
+little from above (a balcony view). Everybody turns toward the girl who has
+the word: she holds out, in the cup of her two hands, a glowing seed that is
+sprouting -- her proposal for the neighbourhood. Four hands go up together to
+vote. The roots of the tree come up through the ground and reach every seat,
+the empty stool in front too: that one is the viewer's. The crown of the tree
+holds the whole town -- houses with lit windows, the common house, a school,
+a little road -- joined by its branches. A few leaves drift down toward the
+empty stool, as an invitation.
 
     python3 mes-11-d.py [ancho_px] [salida.png|.jpg]
 """
@@ -19,9 +19,10 @@ import math
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from acuarela import (Lienzo, Poligono, Elipse, Trazo, Circulos, spline, bezier, arco, mezcla, rgb, jardin,
-                      hoja, hojita, flor_simple, pajaro, estrella, remuestrea, _lapiz_de, PIEL_LAPIZ)
-from extra_m1112 import mano_dedos, brazo, cara, pliegues, sombra, casita
+from acuarela import (Lienzo, Poligono, Elipse, Trazo, Circulos, spline, bezier, arco, mezcla, rgb, extremidad,
+                      hoja, hojita, flor_simple, ramita, pajaro, cabeza, puntos_dentro, _lapiz_de, PIEL_LAPIZ)
+from extra_m1112 import (mano_dedos, brazo, cara, pliegues, sombra, casita, cuello, pieza, cabeza_perfil,
+                         cabeza_espalda)
 
 ANCHO = int(sys.argv[1]) if len(sys.argv) > 1 else 1485
 SALIDA = sys.argv[2] if len(sys.argv) > 2 else 'mes-11-d.png'
@@ -36,301 +37,307 @@ ROSA = '#e58fa0'
 INDIGO = '#3f4f86'
 CARMIN = '#c33c4e'
 CORTEZA = '#8a5a3c'
-LP = '#5e3f30'
+CORTEZA_LP = '#4e3022'
+MADERA = '#a8703e'
+
+C = np.array([742.0, 640.0])          # centre of the ring (the foot of the tree)
 
 
-def pieza(pts, color, dens=0.74, toques=None, tapa=1.0, lapiz=None, suave_pol=True, flor=0, **kw):
-    f = Poligono(pts, suave=suave_pol)
-    kw.setdefault('sombra', (-9, -8, mezcla(color, '#3a2030', 0.35), 0.45))   # light from top-left
-    lz.aguada(f, color, dens=dens, tapa=tapa, toques=toques, flor=flor, **kw)
-    lz.contorno(f, lapiz or _lapiz_de(color), grosor=0.9, presion=0.55, cortes=0.3)
+def pierna(pts, ancho, color, zapato='#5e3f30', pie_ang=0, pie_lado=1):
+    """A leg that bends at the knee (hip, knee, ankle) plus a shoe."""
+    f = extremidad(lz, pts, (ancho, ancho * 0.86, ancho * 0.66), color, dens=0.74, sombra=False,
+                   toques=[(pts[1][0], pts[1][1], ancho, mezcla(color, '#1a1a2a', 0.3), 0.4)])
+    a = np.asarray(pts[2], float)
+    z = Poligono([a + (-ancho * 0.35 * pie_lado, -ancho * 0.2), a + (ancho * 0.9 * pie_lado, -ancho * 0.1),
+                  a + (ancho * 1.05 * pie_lado, ancho * 0.28), a + (-ancho * 0.4 * pie_lado, ancho * 0.3)])
+    lz.aguada(z, zapato, dens=0.85, tapa=1, irreg=0.3)
+    lz.contorno(z, _lapiz_de(zapato, 0.45), grosor=0.6, presion=0.5)
     return f
 
 
-def cuello(x, y, r, piel, base, ancho=0.46):
-    """A slender neck from under the head (x, y, r) down to the collar point."""
-    f = Trazo([(x, y + r * 0.55), base], (r * ancho, r * ancho * 1.12))
-    lz.aguada(f, piel, dens=0.58, tapa=1, irreg=0.4, borde=0.4,
-              toques=[(x, y + r * 0.95, r * 0.45, mezcla(piel, '#8a4a32', 0.55), 0.7)])
-    lz.contorno(f, PIEL_LAPIZ, grosor=0.7, presion=0.4, cortes=0.4)
+def palo(a, b, w=6, col=MADERA):
+    f = Trazo([a, b], (w, w * 0.9))
+    lz.aguada(f, col, dens=0.7, tapa=1, irreg=0.3)
+    lz.contorno(f, '#5a3a24', grosor=0.6, presion=0.5)
 
 
-# ------------------------------------------------------------------ the ground of the square
-# only a warm disc of trodden earth under the ring; the rest of the sheet stays bare
-suelo = Elipse(745, 700, 500, 112)
-lz.aguada(suelo, '#e9c99a', dens=0.32, borde=0.3, irreg=1.8, gran=0.6, var=0.6, suave=0,
-          toques=[(745, 690, 260, '#f2dcb4', 0.6), (420, 730, 140, '#e2b98c', 0.5)])
-# roots: the tree reaches every seat
+def taburete(x, y, rx=34, ry=11, alto=40):
+    """A three-legged stool seen from a little above; (x, y) = centre of the seat."""
+    for (a, b) in (((x - rx * 0.7, y + 2), (x - rx * 0.95, y + alto)), ((x + rx * 0.7, y + 2), (x + rx * 0.95, y + alto)),
+                   ((x, y + ry * 0.6), (x, y + alto + 6))):
+        palo(a, b, 6)
+    s_ = Elipse(x, y, rx, ry)
+    lz.aguada(s_, '#c98a4a', dens=0.75, tapa=1, irreg=0.3, toques=[(x - rx * 0.3, y - 2, rx * 0.5, '#e6b070', 0.6)])
+    lz.contorno(s_, '#6a4428', grosor=0.8, presion=0.55)
+    lz.lapiz([arco(x, y, rx * 0.75, ry * 0.7, 200, 340, 16), arco(x, y, rx * 0.45, ry * 0.4, 20, 160, 12)],
+             '#8a5a30', grosor=0.5, presion=0.35)
+
+
+# ------------------------------------------------------------------ the ground: almost only paper
+lz.aguada(Elipse(C[0], C[1] + 10, 470, 150), '#efd9b4', dens=0.13, suave=50, gran=0.3)
+
+# ------------------------------------------------------------------ roots that reach every seat
+SEATS = [(392, 708), (585, 548), (898, 538), (1112, 708), (590, 806), (928, 806)]
+rng = np.random.default_rng(7)
 raices = []
-rr_ = np.random.default_rng(7)
-for (tx, ty) in ((380, 760), (600, 650), (900, 680), (1120, 762), (745, 790)):
-    b = bezier((745 + (tx - 745) * 0.06, 614), (745 + (tx - 745) * 0.35, 628 + (ty - 628) * 0.15),
-               (745 + (tx - 745) * 0.7, ty - 25), (tx, ty), 40)
-    b = b + rr_.normal(0, 1.2, b.shape)
-    raices.append(b)
-lz.lapiz(raices, '#a8784e', grosor=1.0, presion=0.28, temblor=1.4, cortes=0.55)
-for r_ in raices:
-    lz.aguada(Trazo(r_[:14], (18, 3)), '#9a6a48', dens=0.45, irreg=1.2, gran=0.6)
+for (tx, ty) in SEATS:
+    v = np.array([tx, ty]) - C
+    nrm = np.array([-v[1], v[0]]) / np.hypot(*v)
+    bend = rng.uniform(-0.18, 0.18) * np.hypot(*v)
+    pts = [C + v * 0.02, C + v * 0.35 + nrm * bend, C + v * 0.7 - nrm * bend * 0.6, C + v * 0.97]
+    p = spline(pts)
+    raices.append(p)
+    w0 = 15 if abs(v[1]) > 60 else 12
+    f = Trazo(p[::3], (w0, w0 * 0.55, w0 * 0.32, 2.6))
+    lz.aguada(f, CORTEZA, dens=0.72, tapa=1, borde=0.7, irreg=0.6, gran=0.6,
+              toques=[(*(C + v * 0.1), 30, '#5e3a28', 0.5)])
+    lz.contorno(f, CORTEZA_LP, grosor=0.7, presion=0.45, cortes=0.3)
+    # a thread of golden light runs inside every root
+    q = p[2:-2]
+    lz.lapiz([q], '#f2c45a', grosor=0.8, presion=0.7, temblor=0.2)
+    lz.luz(Trazo(q[::4], (7,)), '#ffe2a0', fuerza=0.3, suave=4)
+    # the tip curls round the foot of the seat
+    end = p[-1]
+    d = (p[-1] - p[-4]) / max(np.hypot(*(p[-1] - p[-4])), 1e-6)
+    curl = [end, end + d * 8 + nrm * 4, end + d * 6 + nrm * 10, end + nrm * 10]
+    lz.lapiz([spline(curl)], CORTEZA_LP, grosor=1.2, presion=0.6, temblor=0.1)
+    # little root hairs
+    for k in range(4):
+        i = int(len(p) * rng.uniform(0.3, 0.85))
+        b = p[i]
+        lz.lapiz([[b, b + nrm * rng.choice([-1, 1]) * rng.uniform(5, 10) + d * rng.uniform(2, 6)]], CORTEZA_LP,
+                 grosor=0.5, presion=0.4)
 
-# ------------------------------------------------------------------ the tree: trunk and branches
-tronco = Poligono([(668, 620), (700, 596), (716, 540), (718, 460), (712, 390), (706, 340), (736, 322),
-                   (772, 322), (796, 340), (790, 400), (786, 470), (790, 548), (806, 598), (840, 622),
-                   (790, 616), (752, 624), (712, 616)])
+# ------------------------------------------------------------------ the trunk
+tronco = Poligono([(700, 650), (714, 620), (722, 560), (724, 480), (720, 410), (716, 360), (742, 344), (768, 360),
+                   (764, 420), (762, 490), (766, 560), (774, 620), (790, 652), (742, 660)])
 lz.aguada(tronco, CORTEZA, dens=0.75, tapa=1, borde=0.7, gran=0.7, var=0.5,
-          toques=[(770, 450, 40, '#5e3a28', 0.6), (724, 520, 40, '#b07a4a', 0.6), (760, 340, 30, '#6e4a34', 0.5)])
-lz.contorno(tronco, '#4e3022', grosor=1.0, presion=0.6, cortes=0.3)
-# bark: pencil furrows
-rng = np.random.default_rng(11)
-corteza = []
-for k in range(9):
-    x0 = 720 + k * 8 + rng.normal(0, 2)
-    corteza.append(spline([(x0, 610), (x0 + rng.normal(0, 3), 520), (x0 + rng.normal(0, 4), 430),
-                           (x0 * 0.8 + 752 * 0.2, 340)]))
-lz.lapiz(corteza, '#4e3022', grosor=0.8, presion=0.3, temblor=0.8, cortes=0.5)
-lz.aguada(Poligono([(770, 330), (792, 340), (788, 470), (792, 560), (812, 608), (780, 612), (772, 470)]), '#4a3a6a',
-          dens=0.35, suave=6, gran=0.5)                                   # cool violet shadow side
-lz.levanta(Trazo([(726, 600), (730, 480), (726, 360)], (8, 6)), 0.35, suave=4)   # warm light side
+          toques=[(758, 470, 40, '#5e3a28', 0.6), (728, 540, 40, '#b07a4a', 0.6)])
+lz.aguada(Poligono([(752, 360), (766, 370), (762, 470), (770, 600), (786, 648), (760, 650), (754, 470)]),
+          '#4a3a6a', dens=0.3, suave=5, gran=0.5)                       # cool shadow side
+lz.contorno(tronco, CORTEZA_LP, grosor=1.0, presion=0.6, cortes=0.25)
+bark = []
+for k in range(8):
+    x0 = 722 + k * 5.5 + rng.normal(0, 1.5)
+    bark.append(spline([(x0, 648), (x0 + rng.normal(0, 2), 560), (x0 + rng.normal(0, 2.5), 470),
+                        (x0 * 0.85 + 742 * 0.15, 370)]))
+lz.lapiz(bark, CORTEZA_LP, grosor=0.7, presion=0.3, temblor=0.9, cortes=0.55)
+for (x, y) in ((732, 520), (750, 440)):                                  # knots
+    lz.lapiz([arco(x, y, 5, 3.5, 0, 360, 14)], CORTEZA_LP, grosor=0.7, presion=0.5)
 
-# ------------------------------------------------------------------ the crown: one glowing garden
-VERDES = ('#4f8f5f', '#7fa86a', '#2f7a6a', '#93b56e', '#5f9a4e')
-FLORES = (CORAL, ORO, '#f39ab0', CARMIN)
-rng = np.random.default_rng(31)
-cs = []
-for k in range(26):
-    t = k / 26 * 2 * np.pi
-    cs.append((770 + math.cos(t) * 262 * rng.uniform(0.92, 1.05), 206 + math.sin(t) * 94 * rng.uniform(0.9, 1.05),
-               rng.uniform(40, 56)))
-cs.append((770, 206, 185))
-cs += [(620, 206, 100), (920, 206, 100), (770, 172, 104), (770, 246, 98)]
-copa = Circulos(cs)
-lz.aguada(copa, '#b5cf7a', dens=0.62, tapa=1, borde=0.7, irreg=1.2, gran=0.5, var=0.6, flor=2,
-          toques=[(560, 220, 90, '#5f9a5e', 0.75), (980, 230, 90, '#3f8a6a', 0.75), (770, 120, 110, '#d8d27a', 0.6),
-                  (700, 260, 80, '#7fb06a', 0.6), (880, 100, 70, '#4f8f5f', 0.7), (640, 90, 60, '#93b56e', 0.6),
-                  (1010, 150, 60, '#e0c060', 0.5), (560, 140, 50, '#e8b04a', 0.55), (920, 290, 50, '#d98a4a', 0.4)])
-# second glaze: darker green in the shady lower half
-lz.aguada(copa, '#3e7a5a', dens=0.34, irreg=1.2, borde=0.2, gran=0.4, desvanece=(770, 330, 770, 190))
-lz.contorno(copa, '#3e6a48', grosor=0.9, presion=0.45, cortes=0.5, desfase=0.8)
-# branches inside the crown, each one reaching a house (they are the network that joins the town)
-CASAS = [(560, 224, 36, 26, '#f6e2bd', CORAL, 1, {}), (676, 156, 46, 30, '#f3dcb0', '#b8503e', 2, {'campana': True}),
-         (840, 132, 34, 26, '#f6e6c6', TEAL, 1, {}), (912, 210, 30, 22, '#f1d6ae', OCRE, 1, {}),
-         (1000, 232, 44, 28, '#fbf1e0', '#d06a52', 2, {'cruz': True}), (756, 262, 32, 24, '#f6e2bd', '#8d73b0', 1, {})]
-ramas = []
-for (hx, hy, *_r) in CASAS:
-    a_ = (752, 335)
-    m = ((752 + hx) / 2 + (hx - 752) * 0.08, (335 + hy) / 2 + 26)
-    ramas.append(Trazo([a_, m, (hx, hy + 4)], (30, 14, 5)))
-for f in ramas:
-    lz.aguada(f, CORTEZA, dens=0.72, tapa=1, borde=0.6, gran=0.6, toques=[(752, 335, 40, '#5e3a28', 0.5)])
-    lz.contorno(f, '#4e3022', grosor=0.8, presion=0.5, cortes=0.3)
-# leaves everywhere except over the houses and the branches
-evita = Circulos([(hx, hy - h * 0.6, w * 0.9) for (hx, hy, w, h, *_r) in CASAS])
-for f in ramas:
-    evita = evita | f
-zona = copa - evita
-P = __import__('acuarela').puntos_dentro(zona, 230, 41, margen=2)
+# ------------------------------------------------------------------ the crown: branches that fork and thin out
+VERDES = ('#4f8f5f', '#7fa86a', '#2f7a6a', '#93b56e', '#5f9a4e', '#a9c46a')
+segs, puntas = [], []
+
+
+def rama(p, ang, L, w, depth, sem):
+    r_ = np.random.default_rng(sem)
+    d = np.array([math.cos(math.radians(ang)), math.sin(math.radians(ang))])
+    n = np.array([-d[1], d[0]])
+    end = p + d * L
+    mid = p + d * L * 0.5 + n * L * r_.uniform(-0.12, 0.12)
+    segs.append(([p, mid, end], (w, w * 0.82, w * 0.66)))
+    if depth == 0:
+        puntas.append(end)
+        return
+    da = r_.uniform(18, 30)
+    rama(end, ang - da + r_.normal(0, 4), L * r_.uniform(0.66, 0.78), w * 0.64, depth - 1, sem * 3 + 1)
+    rama(end, ang + da + r_.normal(0, 4), L * r_.uniform(0.66, 0.78), w * 0.64, depth - 1, sem * 3 + 2)
+
+
+TOP = np.array([742.0, 352.0])
+for k, (a, L, w) in enumerate(((-160, 118, 20), (-128, 128, 23), (-96, 120, 24), (-62, 128, 23), (-22, 118, 20))):
+    rama(TOP, a, L, w, 2, 11 + k)
+
+# foliage: soft wet-in-wet clouds round the branch tips (painted first: the branches show through)
+P = np.array(puntas)
+nubes = Circulos([(x, y, rng.uniform(42, 58)) for (x, y) in P] +
+                 [(742, 230, 120), (620, 250, 80), (870, 250, 80), (742, 150, 90)])
+lz.aguada(nubes, '#b9d07e', dens=0.5, tapa=1, borde=0.6, irreg=1.4, gran=0.5, var=0.6,
+          toques=[(560, 260, 90, '#6f9f5e', 0.7), (930, 270, 90, '#4f8f6a', 0.7), (742, 110, 100, '#d8d27a', 0.6),
+                  (660, 180, 70, '#93b56e', 0.6), (840, 160, 70, '#7fa86a', 0.6), (742, 300, 70, '#5f8f5a', 0.6),
+                  (500, 190, 50, '#e0b85a', 0.45), (1000, 200, 50, '#d99a4a', 0.4)])
+lz.contorno(nubes, '#4f7a4a', grosor=0.8, presion=0.35, cortes=0.55, desfase=0.8)
+# branches: tapered, forking, bark in pencil
+for pts, ws in segs:
+    f = Trazo(pts, ws)
+    lz.aguada(f, CORTEZA, dens=0.75, tapa=0.75, borde=0.6, gran=0.6, irreg=0.4)
+    lz.contorno(f, CORTEZA_LP, grosor=0.7, presion=0.5, cortes=0.3)
+    if ws[0] > 9:
+        lz.lapiz([spline(pts)], CORTEZA_LP, grosor=0.5, presion=0.3, temblor=0.6, cortes=0.5)
+# second, darker foliage glazes round the outer branches
 for i, (x, y) in enumerate(P):
+    if i % 2:
+        continue
+    cl = Circulos([(x + rng.normal(0, 14), y + rng.normal(0, 10), rng.uniform(16, 26)) for _ in range(4)])
+    lz.aguada(cl, VERDES[i % len(VERDES)], dens=0.5, irreg=1.0, borde=0.7, gran=0.5)
+
+# the town that lives in the crown (day 1: polis; day 28: schools, roads)
+CASAS_IDX = [1, 5, 9, 13, 17]
+pos = [P[i] for i in CASAS_IDX]
+estilos = [dict(w=34, h=24, pared='#f6e2bd', tejado=CORAL, ventanas=1),
+           dict(w=34, h=26, pared='#f6e6c6', tejado=TEAL, ventanas=1),
+           dict(w=58, h=30, pared='#f8ead0', tejado='#b8503e', ventanas=3),      # the common house, long and low
+           dict(w=40, h=26, pared='#fbf1e0', tejado='#d06a52', ventanas=2),      # the school
+           dict(w=32, h=24, pared='#f1d6ae', tejado='#8d73b0', ventanas=1)]
+# a little road from house to house
+rd = spline([p + (0, 4) for p in pos])
+lz.aguada(Trazo(rd[::4], (5, 5)), '#e6c48a', dens=0.75, tapa=1, irreg=0.3)
+lz.lapiz([rd + (0, 2.4), rd - (0, 2.4)], '#8a6040', grosor=0.5, presion=0.4, temblor=0.2, cortes=0.3)
+for p_, e in zip(pos, estilos):
+    casita(lz, p_[0], p_[1] + 6, e['w'], e['h'], pared=e['pared'], tejado=e['tejado'], ventanas=e['ventanas'])
+# the common house has a round window lit like a moon
+cx_, cy_ = pos[2][0], pos[2][1] + 6
+lz.aguada(Elipse(cx_, cy_ - 30 - 8, 5, 5), '#f6c65a', dens=0.9, tapa=1, toques=[(cx_, cy_ - 38, 3, '#fff0b0', 0.8)])
+lz.luz((cx_, cy_ - 38, 8), '#ffe6a0', fuerza=0.5)
+# leaves: fewer, varied (leaves, sprigs, little flowers, berries, a few autumn ones)
+pts_h = puntos_dentro(nubes - Circulos([(x, y + 4, 34) for (x, y) in pos]), 70, 41, margen=4)
+for (x, y) in pts_h:
     k = rng.random()
-    if k < 0.74:
-        col = VERDES[rng.integers(len(VERDES))] if rng.random() < 0.8 else rng.choice([OCRE, '#e0884a', '#c9a23a'])
-        hoja(lz, x, y, rng.uniform(20, 34), rng.uniform(0, 360), col,
-             toque=rng.choice([None, '#e0c060', '#2f5a4a']), tapa=0.7)
-    elif k < 0.86:
-        flor_simple(lz, x, y, rng.uniform(4, 7), FLORES[rng.integers(len(FLORES))], centro='#fff3cf')
+    if k < 0.45:
+        col = VERDES[rng.integers(len(VERDES))] if rng.random() < 0.75 else rng.choice([OCRE, '#e0884a', '#c9a23a'])
+        hoja(lz, x, y, rng.uniform(16, 32), rng.uniform(0, 360), col, ancho=rng.uniform(0.28, 0.45), tapa=0.7)
+    elif k < 0.62:
+        a = rng.uniform(0, 360)
+        d = np.array([math.cos(math.radians(a)), math.sin(math.radians(a))]) * rng.uniform(18, 28)
+        ramita(lz, [(x, y), (x + d[0] * 0.5 + d[1] * 0.15, y + d[1] * 0.5 - d[0] * 0.15), (x + d[0], y + d[1])],
+               VERDES[rng.integers(len(VERDES))], hojas=5, largo=7)
+    elif k < 0.8:
+        flor_simple(lz, x, y, rng.uniform(4, 6.5), rng.choice([CORAL, ORO, '#f39ab0', '#fff0d0']), centro='#f0a83a')
     else:
         for _ in range(3):
-            lz.aguada(Elipse(x + rng.normal(0, 4), y + rng.normal(0, 4), rng.uniform(2, 3.2)), CARMIN, dens=0.9,
+            lz.aguada(Elipse(x + rng.normal(0, 3.5), y + rng.normal(0, 3.5), rng.uniform(2.2, 3.2)), CARMIN, dens=0.9,
                       irreg=0.3, tapa=0.6)
-# leaves breaking out of the silhouette, pointing outward
-for t in np.linspace(0, 2 * np.pi, 40, endpoint=False):
-    x, y = 770 + math.cos(t) * 276, 206 + math.sin(t) * 108
-    if y > 280 and abs(x - 770) < 120:
-        continue
-    hoja(lz, x - math.cos(t) * 10, y - math.sin(t) * 10, rng.uniform(22, 32), math.degrees(t) + rng.normal(0, 25),
-         VERDES[rng.integers(len(VERDES))], tapa=0.8)
-for k in range(60):
-    x, y = P[rng.integers(len(P))]
-    lz.gouache(Elipse(x + rng.normal(0, 6), y + rng.normal(0, 6), rng.uniform(0.6, 1.3)), '#fff4c8', alfa=0.85, irreg=0)
+for k in range(40):
+    x, y = pts_h[rng.integers(len(pts_h))]
+    lz.gouache(Elipse(x + rng.normal(0, 8), y + rng.normal(0, 8), rng.uniform(0.6, 1.3)), '#fff4c8', alfa=0.85,
+               irreg=0)
+lz.aguada(Elipse(742, 220, 380, 190), '#f6d27a', dens=0.08, suave=60, gran=0.05)
 
-# the town that lives in the crown (day 1: polis; day 28: schools, hospitals, roads)
-for (hx, hy, w, h, pared, tejado, nv, kw) in CASAS:      # the school has a bell, the health centre a cross
-    casita(lz, hx, hy, w, h, pared=pared, tejado=tejado, ventanas=nv, **kw)
-# a little road winds from house to house
-camino = [(578, 222), (620, 200), (652, 156)], [(700, 156), (770, 150), (822, 132)], \
-         [(858, 132), (890, 166), (904, 208)], [(927, 210), (960, 218), (978, 232)]
-for c in camino:
-    p = spline(c) if len(c) > 2 else np.asarray(c, float)
-    lz.aguada(Trazo(p, (5, 5)), '#e6c48a', dens=0.8, tapa=1, irreg=0.3)
-    lz.lapiz([p + (0, 2.4), p - (0, 2.4)], '#8a6040', grosor=0.5, presion=0.4, temblor=0.2)
-# the windows glow: a golden breath around the crown
-lz.aguada(Elipse(770, 190, 360, 175), '#f6d27a', dens=0.12, suave=50, gran=0.05)
+# ------------------------------------------------------------------ G: the girl who has the word (back, right)
+sombra(lz, 900, 540, 40, 6)
+pierna([(896, 498), (894, 516), (892, 534)], 10, '#e6b48a', zapato=CARMIN, pie_lado=-1)
+pierna([(912, 498), (914, 516), (915, 534)], 10, '#e6b48a', zapato=CARMIN, pie_lado=1)
+pieza(lz, [(890, 436), (904, 432), (920, 436), (928, 470), (938, 504), (904, 510), (872, 504), (882, 470)],
+      '#f2b93a', toques=[(930, 490, 26, '#d98a2c', 0.6), (896, 450, 20, '#f8d77a', 0.5)])
+pliegues(lz, [[(898, 470), (892, 490), (886, 506)], [(912, 470), (918, 490), (924, 506)]], '#a86a20')
+for (x, y) in ((888, 490), (906, 482), (922, 496), (898, 502), (914, 466)):
+    flor_simple(lz, x, y, 3.2, CORAL, centro='#fff3cf')
+cuello(lz, 904, 404, 25, 'piel3', (905, 434))
+cabeza(lz, 904, 404, 25, piel='piel3', pelo='#2a1a14', peinado='coleta', giro=-0.2, inclina=-6, ojos='abiertos',
+       boca='abierta', mira=(-0.6, 0.4))
+# arms bend in, the two hands make a cup in front of her chest
+brazo(lz, (890, 444), (880, 470), (894, 482), 11, '#f2b93a', pliegue=False)
+brazo(lz, (918, 444), (930, 470), (916, 482), 11, '#f2b93a', pliegue=False)
+mano_dedos(lz, 892, 484, -8, 19, 'piel3', 'relajada', lado=1, curl=-18, abre=0.3)
+mano_dedos(lz, 918, 484, 188, 19, 'piel3', 'relajada', lado=-1, curl=-18, abre=0.3)
+# the seed: a small acorn-like seed that glows from inside, with a two-leaf sprout
+lz.luz((905, 474, 30), '#ffd27a', fuerza=0.75)
+lz.aguada(Elipse(905, 474, 40, 34), '#f6c65a', dens=0.2, suave=14, gran=0.05)
+semilla = Elipse(905, 477, 5.5, 4.5)
+lz.aguada(semilla, '#d99a3a', dens=0.8, tapa=1, irreg=0.2, toques=[(904, 476, 3, '#fff0b0', 0.9)])
+lz.contorno(semilla, '#8a5a22', grosor=0.5, presion=0.5)
+lz.lapiz([spline([(905, 473), (904, 465), (906, 458)])], '#3e6a48', grosor=0.9, presion=0.7, temblor=0.1)
+hojita(lz, 906, 459, 9, -30, '#6fb05e', nervio=False, tapa=1)
+hojita(lz, 905, 460, 8, -150, '#8fc06e', nervio=False, tapa=1)
+lz.luz((905, 472, 9), '#fff2c4', fuerza=0.7)
+lz.chispas(905, 466, 22, 16, n=7, luz=0.25)
 
-# ------------------------------------------------------------------ C: the young woman in a headscarf (back left)
-sombra(lz, 595, 650, 85, 12)
-pieza([(545, 600), (565, 572), (600, 566), (636, 574), (660, 600), (672, 640), (600, 652), (528, 642)],
-      ROSA, toques=[(640, 630, 40, '#c8607a', 0.5)])                          # her skirt, sitting on the ground
-pieza([(562, 496), (596, 488), (628, 496), (638, 540), (640, 592), (600, 602), (558, 594), (554, 540)],
-      '#f0b44a', toques=[(570, 560, 30, '#d9902c', 0.5)])                     # blouse
-cuello(600, 452, 32, 'piel2', (598, 494))
-pliegues(lz, [[(600, 580), (590, 610), (575, 640)], [(620, 585), (628, 615), (640, 640)]], '#a8506a')
-# the hand that rests on her knee
-brazo(lz, (568, 506), (560, 560), (596, 598), 18, '#f0b44a')
-mano_dedos(lz, 596, 598, 15, 30, 'piel2', 'relajada', lado=-1)
-cara(lz, 600, 452, 32, piel='piel2', pelo='#2f7f86', peinado='pañuelo', giro=0.35, inclina=6, ojos='abiertos',
-     boca='sonrisa', mira=(1, 0))
-# her raised hand: she votes yes
-brazo(lz, (624, 506), (664, 462), (668, 398), 18, '#f0b44a')
-mano_dedos(lz, 668, 400, -94, 36, 'piel2', 'abierta', lado=-1)
-
-# ------------------------------------------------------------------ D: the girl who has the word (back right)
-sombra(lz, 908, 680, 55, 9)
-for (p0, p1, sh) in (((896, 590), (892, 668), 180), ((918, 590), (924, 670), 0)):
-    lz.aguada(Trazo([p0, p1], (13, 10)), 'piel3', dens=0.55, tapa=1, irreg=0.4)
-    lz.contorno(Trazo([p0, p1], (13, 10)), PIEL_LAPIZ, grosor=0.7, presion=0.45, cortes=0.3)
-    z = Elipse(p1[0] + (8 if sh == 0 else -8), p1[1] + 5, 13, 6)
-    lz.aguada(z, CARMIN, dens=0.85, tapa=1, irreg=0.3)
-    lz.contorno(z, '#7a1f30', grosor=0.6, presion=0.5)
-vestido = pieza([(882, 478), (906, 472), (930, 478), (938, 520), (952, 570), (966, 604), (930, 612), (900, 614),
-                 (858, 606), (868, 568), (876, 520)], '#f2b93a',
-                toques=[(950, 590, 40, '#d98a2c', 0.6), (880, 500, 30, '#f8d77a', 0.5)])
-pliegues(lz, [[(900, 530), (890, 570), (878, 604)], [(918, 532), (926, 575), (944, 606)]], '#a86a20')
-for (x, y) in ((884, 556), (912, 548), (930, 584), (898, 590), (942, 560), (874, 588), (918, 600)):
-    flor_simple(lz, x, y, 4.2, CORAL, centro='#fff3cf')
-cuello(905, 440, 30, 'piel3', (906, 478))
-cara(lz, 905, 440, 30, piel='piel3', pelo='#2a1a14', peinado='coleta', giro=-0.4, inclina=-6,
-     ojos='abiertos', boca='abierta', mira=(-1, 0))
-# both hands offer the sprouting seed to the circle (her proposal)
-brazo(lz, (916, 488), (910, 540), (872, 536), 15, '#f2b93a', piel='piel3', manga='corta')
-mano_dedos(lz, 874, 538, 186, 32, 'piel3', 'relajada', lado=1, curl=-10, abre=0.4)   # palm up, the seed on it
-semilla = Elipse(850, 522, 13, 10, -10)
-lz.aguada(semilla, '#b97a3a', dens=0.85, tapa=1, irreg=0.3, toques=[(846, 518, 7, '#f6d27a', 0.8)])
-lz.contorno(semilla, '#6a3a1a', grosor=0.7, presion=0.55)
-brote = spline([(852, 512), (848, 494), (856, 476), (852, 456)])
-lz.lapiz([brote], '#3e6a48', grosor=1.3, presion=0.75, temblor=0.2)
-hojita(lz, 854, 474, 20, -40, '#5f9f63')
-hojita(lz, 850, 490, 16, -150, '#7fb56e')
-lz.luz((850, 496, 36), '#ffe7a8', fuerza=0.6)
-lz.aguada(Elipse(850, 496, 44, 40), '#f6d27a', dens=0.18, suave=14, gran=0.05)
-
-# ------------------------------------------------------------------ the empty stool: the seat that waits for you
-sombra(lz, 745, 790, 48, 8)
-for (a, b) in (((716, 744), (706, 790)), ((774, 744), (786, 788)), ((748, 750), (748, 798))):
-    lz.aguada(Trazo([a, b], (7, 6)), '#a8703e', dens=0.7, tapa=1, irreg=0.3)
-    lz.contorno(Trazo([a, b], (7, 6)), '#6a4428', grosor=0.6, presion=0.5)
-asiento = Elipse(745, 742, 40, 13)
-lz.aguada(asiento, '#c98a4a', dens=0.75, tapa=1, irreg=0.3, toques=[(735, 738, 20, '#e6b070', 0.6)])
-lz.contorno(asiento, '#6a4428', grosor=0.8, presion=0.55)
-lz.lapiz([arco(745, 742, 30, 9, 200, 340, 16), arco(745, 742, 18, 5, 20, 160, 12)], '#8a5a30', grosor=0.5,
-         presion=0.35)
-hoja(lz, 734, 738, 26, -12, '#e0a83a', ancho=0.38)
-
-# ------------------------------------------------------------------ A: the grandmother votes (front left)
-sombra(lz, 395, 778, 120, 14)
-# her chair
-for (a, b, w) in (((288, 640), (282, 772), 8), ((312, 646), (316, 760), 7), ((392, 640), (396, 766), 7)):
-    lz.aguada(Trazo([a, b], (w, w * 0.9)), '#a8703e', dens=0.7, tapa=1, irreg=0.3)
-    lz.contorno(Trazo([a, b], (w, w * 0.9)), '#6a4428', grosor=0.6, presion=0.5)
-lz.aguada(Poligono([(282, 628), (400, 626), (402, 642), (284, 646)], suave=False), '#b88048', dens=0.7, tapa=1)
-# skirt over her lap, hem to the ankles
-falda = pieza([(292, 572), (384, 566), (432, 576), (468, 594), (482, 630), (480, 690), (492, 756), (446, 768),
-               (398, 762), (388, 708), (372, 662), (330, 650), (292, 640)], INDIGO,
-              toques=[(470, 700, 50, '#2c3a6a', 0.6), (360, 600, 50, '#5a6aa8', 0.5)])
-rng = np.random.default_rng(5)
-for _ in range(16):
-    x, y = rng.uniform(330, 470), rng.uniform(590, 750)
-    if y > 660 and x < 400:
-        continue
-    flor_simple(lz, x, y, rng.uniform(3.2, 4.6), rng.choice([ORO, '#f6c0c8', CORAL]), centro='#fff3cf')
-pliegues(lz, [[(440, 640), (452, 700), (462, 758)], [(410, 650), (418, 708), (420, 760)],
-              [(380, 600), (420, 610), (466, 606)]], '#28305a')
-for (x, ang) in ((432, 0), (470, 0)):                                              # shoes
-    z = Elipse(x + 6, 768, 16, 7, ang)
+# ------------------------------------------------------------------ W: young woman in a headscarf (back, left)
+taburete(585, 520, 26, 8, 30)
+pieza(lz, [(556, 492), (600, 488), (626, 500), (640, 524), (640, 546), (604, 552), (566, 548), (552, 520)], ROSA,
+      toques=[(632, 536, 26, '#c8607a', 0.55)])                              # skirt over the knees
+pliegues(lz, [[(600, 500), (620, 520), (634, 546)], [(580, 504), (590, 528), (588, 550)]], '#a8506a')
+for x in (604, 624):
+    z = Elipse(x, 554, 9, 4.5)
     lz.aguada(z, '#7a3f3a', dens=0.8, tapa=1, irreg=0.3)
-    lz.contorno(z, '#4a2420', grosor=0.6, presion=0.5)
-# cardigan
-pieza([(300, 462), (336, 456), (372, 462), (388, 480), (394, 522), (390, 572), (340, 584), (292, 578),
-       (282, 530), (286, 488)], CORAL, toques=[(296, 540, 40, '#c4503e', 0.6), (360, 480, 30, '#f39a7a', 0.5)])
-pliegues(lz, [[(338, 470), (340, 520), (338, 578)]], '#9a3a2e', presion=0.55)
-for y in (492, 516, 540, 564):
-    lz.aguada(Elipse(344, y, 3, 3), '#f6e2bd', dens=0.9, irreg=0.1)
-# the hand on her lap
-brazo(lz, (300, 482), (310, 556), (372, 590), 25, CORAL)
-mano_dedos(lz, 372, 590, 12, 40, 'piel1', 'relajada', lado=-1)
-cuello(334, 402, 40, 'piel1', (338, 460))
-cara(lz, 334, 402, 40, piel='piel1', pelo='#dcd6d0', peinado='mono', canas=True, giro=0.42, inclina=-4,
-     ojos='cerrados', boca='sonrisa')
-lz.lapiz([arco(346, 404, 9, 7.5, 0, 360, 22), arco(368, 403, 8, 7, 0, 360, 20), [(355, 404), (360, 404)]],
-         '#8a6a4a', grosor=0.7, presion=0.6, temblor=0.05)                         # her round glasses
-# her raised hand
-brazo(lz, (378, 478), (436, 436), (446, 352), 25, CORAL)
-mano_dedos(lz, 446, 354, -96, 48, 'piel1', 'abierta', lado=-1)
+pieza(lz, [(560, 448), (582, 442), (604, 448), (610, 472), (608, 500), (580, 504), (556, 500), (554, 472)],
+      '#f0b44a', toques=[(560, 480, 20, '#d9902c', 0.5)])                     # blouse
+mano_dedos(lz, 606, 520, 20, 22, 'piel2', 'relajada', lado=-1)               # hand on her knee
+brazo(lz, (562, 456), (566, 492), (604, 518), 13, '#f0b44a', pliegue=False)
+cuello(lz, 584, 416, 25, 'piel2', (584, 444))
+cabeza(lz, 584, 416, 25, piel='piel2', pelo='#2f7f86', peinado='pañuelo', giro=0.6, inclina=8, ojos='abiertos',
+       boca='sonrisa', mira=(1, 0.3))
 
-# ------------------------------------------------------------------ B: the young man listens (front right)
-sombra(lz, 1140, 778, 125, 14)
-# a wooden crate as his seat
-caja = Poligono([(1150, 610), (1246, 604), (1250, 762), (1154, 768)], suave=False)
-lz.aguada(caja, '#c99a5a', dens=0.6, tapa=1, irreg=0.4, toques=[(1230, 700, 40, '#a8703e', 0.5)])
-lz.rayado(caja, '#8a6a3a', angulo=2, sep=13, presion=0.5, grosor=0.9)
+# ------------------------------------------------------------------ A: the grandmother, in profile (left)
+sombra(lz, 404, 724, 80, 9)
+palo((322, 560), (318, 722), 6)                                          # the chair's back posts
+palo((334, 566), (332, 712), 5)
+lz.aguada(Trazo([(318, 576), (336, 580)], (5, 5)), MADERA, dens=0.7, tapa=1)
+lz.aguada(Trazo([(318, 606), (336, 610)], (5, 5)), MADERA, dens=0.7, tapa=1)
+for (a, b) in (((392, 654), (396, 722)), ((372, 660), (374, 716))):
+    palo(a, b, 6)
+pierna([(436, 650), (452, 676), (452, 704)], 12, '#d8b49a', zapato='#7a3f3a', pie_lado=1)   # shins under the skirt
+pieza(lz, [(328, 612), (384, 610), (430, 612), (456, 626), (462, 650), (464, 686), (430, 690), (420, 664),
+           (380, 660), (330, 654)], INDIGO, toques=[(450, 670, 30, '#2c3a6a', 0.6), (380, 626, 40, '#5a6aa8', 0.5)])
+pliegues(lz, [[(342, 640), (392, 636), (440, 630), (454, 640)], [(440, 640), (446, 664), (440, 688)],
+              [(400, 650), (412, 668), (424, 684)]], '#28305a')               # the knee shows under the skirt
+for (x, y) in ((360, 630), (404, 624), (446, 660), (424, 640), (380, 646), (438, 680)):
+    flor_simple(lz, x, y, 3.3, rng.choice([ORO, '#f6c0c8']), centro='#fff3cf')
+pieza(lz, [(332, 540), (356, 534), (376, 544), (386, 572), (386, 610), (360, 622), (330, 616), (322, 590),
+           (324, 560)], CORAL, toques=[(330, 590, 30, '#c4503e', 0.55), (372, 556, 24, '#f39a7a', 0.5)])
+pliegues(lz, [[(364, 552), (372, 584), (376, 612)]], '#9a3a2e', presion=0.5)
+mano_dedos(lz, 404, 618, 8, 26, 'piel1', 'relajada', lado=-1)            # far hand rests on her knee
+cuello(lz, 350, 500, 33, 'piel1', (354, 540), ancho=0.4)
+cabeza_perfil(lz, 352, 498, 33, piel='piel1', pelo='#dcd6d0', peinado='mono', lado=1, inclina=-6, canas=True,
+              gafas=True, ojos='abiertos', boca='sonrisa')
+brazo(lz, (362, 550), (404, 520), (414, 446), 17, CORAL)                 # she votes
+mano_dedos(lz, 414, 448, -88, 32, 'piel1', 'abierta', lado=-1)
+
+# ------------------------------------------------------------------ R: the young man, in profile (right)
+sombra(lz, 1090, 724, 85, 9)
+caja = Poligono([(1094, 640), (1176, 636), (1180, 712), (1098, 716)], suave=False)
+lz.aguada(caja, '#c99a5a', dens=0.6, tapa=1, irreg=0.4, toques=[(1170, 690, 30, '#a8703e', 0.5)])
+lz.rayado(caja, '#8a6a3a', angulo=2, sep=12, presion=0.5, grosor=0.8)
 lz.contorno(caja, '#6a4428', grosor=0.8, presion=0.55)
-# far leg, then near leg (jeans)
 JEAN = '#4a6a9a'
-for (k0, a0, w) in (((1100, 626), (1112, 752), 26), ((1062, 628), (1066, 756), 29)):
-    f = Trazo([k0, ((k0[0] + a0[0]) / 2 + 3, (k0[1] + a0[1]) / 2), a0], (w, w * 0.88, w * 0.72))
-    lz.aguada(f, JEAN, dens=0.74, tapa=1, toques=[(a0[0], a0[1] - 30, 30, '#344e7a', 0.5)])
-    lz.contorno(f, '#2a3a5a', grosor=0.8, presion=0.5, cortes=0.3)
-    z = Poligono([(a0[0] + 12, a0[1] - 4), (a0[0] - 26, a0[1] + 2), (a0[0] - 30, a0[1] + 12),
-                  (a0[0] + 14, a0[1] + 12)])
-    lz.aguada(z, '#6e4c3c', dens=0.8, tapa=1, irreg=0.3)
-    lz.contorno(z, '#3a2418', grosor=0.6, presion=0.5)
-muslos = pieza([(1150, 588), (1226, 594), (1226, 632), (1150, 642), (1076, 644), (1046, 628), (1052, 600),
-                (1100, 590)], JEAN, toques=[(1080, 630, 40, '#344e7a', 0.5)])
-pliegues(lz, [[(1110, 600), (1100, 620), (1110, 640)], [(1180, 600), (1170, 615)]], '#2a3a5a')
-# sweater, leaning forward toward the girl
-pieza([(1122, 478), (1160, 470), (1196, 478), (1216, 520), (1228, 598), (1172, 612), (1144, 604), (1116, 548),
-       (1104, 504)], TEAL, toques=[(1210, 560, 40, '#2a6a6a', 0.6), (1130, 500, 30, '#6fb1ad', 0.5)])
-lz.rayado(Poligono([(1124, 590), (1226, 586), (1228, 604), (1124, 610)], suave=False), '#2a6a6a', angulo=90,
-          sep=3, presion=0.5)                                                     # ribbed hem
-# the arm resting on his far thigh
-brazo(lz, (1190, 492), (1206, 570), (1140, 606), 25, TEAL)
-mano_dedos(lz, 1140, 606, 176, 40, 'piel4', 'relajada', lado=1)
-cuello(1124, 440, 40, 'piel4', (1146, 482))
-cara(lz, 1124, 440, 40, piel='piel4', pelo='#1e1410', peinado='corto', giro=-0.5, inclina=-14,
-     ojos='abiertos', boca='suave', mira=(-1, 0.4))
-# elbow on the knee, chin on the hand: he listens
-# a short beard along the jaw, in pencil
-_c, _s = math.cos(math.radians(-14)), math.sin(math.radians(-14))
-_R = lambda dx, dy: (1124 + dx * _c - dy * _s, 440 + dx * _s + dy * _c)
-barba = Poligono([_R(-34, 6), _R(-30, 26), _R(-20, 38), _R(-6, 41), _R(8, 37), _R(20, 26), _R(30, 8),
-                  _R(18, 22), _R(4, 31), _R(-12, 30), _R(-24, 22)])
-lz.aguada(barba, '#4a3428', dens=0.35, irreg=0.8, gran=0.6, borde=0.2)
-lz.rayado(barba, '#2a1a14', angulo=75, sep=1.7, presion=0.45, grosor=0.6, largo=6)
-brazo(lz, (1134, 504), (1058, 598), (1112, 500), 25, TEAL)
-mano_dedos(lz, 1112, 502, -78, 42, 'piel4', 'apoyada', lado=-1)
+pierna([(1130, 628), (1058, 622), (1056, 698)], 22, mezcla(JEAN, '#202a40', 0.25), zapato='#6e4c3c', pie_lado=-1)
+pierna([(1140, 636), (1068, 634), (1066, 708)], 23, JEAN, zapato='#6e4c3c', pie_lado=-1)
+pliegues(lz, [[(1090, 626), (1080, 640)], [(1072, 640), (1062, 650), (1066, 664)]], '#2a3a5a')
+pieza(lz, [(1106, 546), (1130, 538), (1154, 548), (1160, 590), (1158, 636), (1126, 644), (1100, 636), (1098, 590)],
+      TEAL, toques=[(1156, 600, 26, '#2a6a6a', 0.55), (1110, 556, 20, '#6fb1ad', 0.5)])
+lz.rayado(Poligono([(1100, 622), (1158, 620), (1158, 636), (1100, 638)], suave=False), '#2a6a6a', angulo=90, sep=3,
+          presion=0.45)
+mano_dedos(lz, 1086, 628, 188, 26, 'piel2', 'relajada', lado=1)          # far hand on his thigh
+cuello(lz, 1124, 502, 33, 'piel2', (1128, 542), ancho=0.42)
+cabeza_perfil(lz, 1124, 500, 33, piel='piel2', pelo='#1e1410', peinado='corto', lado=-1, inclina=6, ojos='abiertos',
+              boca='sonrisa')
+brazo(lz, (1118, 552), (1078, 520), (1070, 450), 17, TEAL)               # he votes
+mano_dedos(lz, 1070, 452, -92, 32, 'piel2', 'abierta', lado=1)
 
-# ------------------------------------------------------------------ the votes become leaves of the tree
-CAMINOS = [
-    # from the grandmother's hand, a curl of leaves up into the left of the crown
-    [(442, 302), (426, 274), (428, 244), (446, 218), (474, 198), (506, 188)],
-    # from the young woman's hand, straight up into the middle
-    [(670, 356), (656, 334), (664, 310)],
-]
-HCOL = [ORO, '#e8b040', '#c9b84a', '#9fb85a', '#6f9f5a']
-for cam in CAMINOS:
-    p = spline(cam)
-    lz.lapiz([p], '#e0a83a', grosor=0.7, presion=0.3, temblor=0.5, cortes=0.5)
-    n = len(cam)
-    for k, (x, y) in enumerate(cam):
-        t = k / max(1, n - 1)
-        d = np.array(cam[min(k + 1, n - 1)]) - np.array(cam[max(k - 1, 0)])
-        ang = math.degrees(math.atan2(d[1], d[0])) + (35 if k % 2 else -35)
-        hoja(lz, x, y, 25 + 12 * t, ang, HCOL[int(t * 4)], ancho=0.42, tapa=0.95)
-        lz.luz((x, y, 12), '#ffe7a8', fuerza=0.35)
-    for q in p[::7]:
-        lz.gouache(Elipse(q[0] + 4, q[1] + 3, 1.2), '#fff4c8', alfa=0.9, irreg=0)
+# ------------------------------------------------------------------ the empty stool: the viewer's seat
+sombra(lz, 930, 812, 46, 7)
+taburete(930, 772, 38, 12, 40)
+hoja(lz, 918, 768, 24, -10, '#e0a83a', ancho=0.4)
+
+# ------------------------------------------------------------------ B: the man seen from behind (front, left)
+sombra(lz, 580, 818, 80, 9)
+taburete(580, 772, 40, 12, 40)
+# the raised arm goes behind his head? no: in front of the sky, drawn after the back
+lomo = pieza(lz, [(532, 664), (556, 650), (580, 646), (606, 650), (630, 666), (634, 700), (628, 760), (580, 772),
+                  (534, 764), (526, 712)], '#e2a03a',
+             toques=[(540, 720, 40, '#c07a2a', 0.55), (612, 680, 30, '#f2c46a', 0.5)])
+pliegues(lz, [[(580, 660), (578, 710), (580, 768)], [(546, 700), (560, 730), (552, 762)],
+              [(612, 712), (604, 740), (610, 764)]], '#9a6a1a', presion=0.5)
+lz.rayado(Poligono([(534, 744), (628, 744), (628, 764), (580, 772), (534, 764)], suave=False), '#b07a2a', angulo=90,
+          sep=3, presion=0.45)                                              # ribbed hem of the jumper
+brazo(lz, (538, 672), (524, 718), (540, 752), 19, '#e2a03a', pliegue=False)   # far arm resting
+cuello(lz, 580, 612, 35, 'piel5', (580, 652), ancho=0.5)
+cabeza_espalda(lz, 580, 610, 35, piel='piel5', pelo='#1e1410', peinado='rizado', giro=0.6)
+brazo(lz, (622, 672), (660, 620), (664, 528), 19, '#e2a03a')               # he votes too
+mano_dedos(lz, 664, 530, -90, 36, 'piel5', 'abierta', lado=-1)
+
+# ------------------------------------------------------------------ leaves drift down to the empty stool
+camino = spline([(990, 330), (1010, 430), (985, 540), (1000, 640), (950, 730)])
+for k, t in enumerate((0.0, 0.22, 0.45, 0.68, 0.88)):
+    x, y = camino[int(t * (len(camino) - 1))]
+    hoja(lz, x, y, 18 + 4 * k, 40 + 70 * k, rng.choice(['#e0a83a', '#7fa86a', '#c9a23a', '#e0884a', '#93b56e']),
+         ancho=0.42, tapa=0.9)
+lz.lapiz([camino], '#d9a441', grosor=0.5, presion=0.18, temblor=0.8, cortes=0.65)
 
 # clean air: birds leave the crown
-pajaro(lz, 1120, 120, 15, TEAL, ang=-14)
-pajaro(lz, 1176, 84, 12, CORAL, ang=-6, alas='abajo')
-pajaro(lz, 1226, 110, 10, OCRE, ang=-20)
+pajaro(lz, 1140, 150, 14, TEAL, ang=-14)
+pajaro(lz, 1196, 116, 11, CORAL, ang=-6, alas='abajo')
 
 lz.vineta(margen=30)
 lz.guardar(SALIDA)

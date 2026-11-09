@@ -48,14 +48,14 @@ top = [(x, yg(x)) for x in np.linspace(X0, X1, 60)]
 bottom = [(X1 - 20, 610), (1260, 690), (1120, 760), (920, 805), (720, 815), (520, 795), (340, 740), (210, 660),
           (X0 + 10, 590)]
 SUELO = Poligono(top + bottom, suave=True)
-lz.aguada(SUELO, '#c89058', dens=0.78, tapa=1, borde=0.8, flor=3, gran=0.7, var=0.5,
-          toques=[(400, 700, 120, '#9a5a32', 0.6), (900, 760, 140, '#8a4a2e', 0.6), (1150, 640, 90, '#d8a868', 0.6),
-                  (650, 620, 100, '#b8784a', 0.5)])
+lz.aguada(SUELO, '#a8683a', dens=0.9, tapa=1, borde=0.8, flor=0, gran=0.7, var=0.5,
+          toques=[(400, 700, 120, '#6a3a22', 0.7), (900, 760, 140, '#5a3020', 0.7), (1150, 640, 90, '#b87a48', 0.6),
+                  (650, 620, 100, '#8a4a2e', 0.6), (760, 780, 120, '#4a2a1e', 0.6)])
 # dark humus at the top, paler subsoil below
 HUMUS = Poligono(top + [(X1, yg(X1) + 26)] + [(x, yg(x) + 30 + 6 * math.sin(x / 31.0)) for x in np.linspace(X1, X0, 50)]
                  + [(X0, yg(X0) + 20)], suave=False)
 lz.aguada(HUMUS & SUELO, '#5a3424', dens=0.6, borde=0.5, gran=0.6, irreg=1.2)
-lz.aguada(SUELO, '#e8c890', dens=0.3, desvanece=(740, 820, 740, 640), gran=0.4)
+lz.aguada(SUELO, '#4a2a1e', dens=0.3, desvanece=(740, 820, 740, 640), gran=0.4)
 lz.rayado(SUELO, '#7a4a2e', angulo=8, sep=7, presion=0.22, largo=26)
 lz.contorno(SUELO, '#6e4630', grosor=1.0, presion=0.55, cortes=0.35, desfase=0.8)
 # stones and seeds in the soil
@@ -90,7 +90,7 @@ def raiz(p0, ang, L, w, prof=0, sem=0, col='#7a4a2e'):
         y += math.sin(a) * L / 5
         pts.append((x, y))
     f = Trazo(pts, (w, w * 0.75, w * 0.5, w * 0.3, w * 0.18, w * 0.08))
-    lz.aguada(f, col, dens=0.75, tapa=0.6, irreg=0.4, borde=0.6, gran=0.4)
+    lz.aguada(f, col, dens=0.75, tapa=0.8, irreg=0.4, borde=0.6, gran=0.4, toques=[(*pts[0], w * 2, '#c8905a', 0.5)])
     lz.contorno(f, '#4a2e1e', grosor=0.6, presion=0.45, cortes=0.3, desfase=0.2)
     tips = [pts[-1]]
     if prof < 2:
@@ -123,8 +123,8 @@ dentro = lambda x, y: y > yg(x) + 18 and y < 790 and X0 + 30 < x < X1 - 30
 def hifa(a, b, n=1):
     """A wandering fungal thread from a to b."""
     for _ in range(n):
-        m1 = ((a[0] * 2 + b[0]) / 3 + rngm.normal(0, 22), (a[1] * 2 + b[1]) / 3 + rngm.normal(0, 18))
-        m2 = ((a[0] + b[0] * 2) / 3 + rngm.normal(0, 22), (a[1] + b[1] * 2) / 3 + rngm.normal(0, 18))
+        m1 = ((a[0] * 2 + b[0]) / 3 + rngm.normal(0, 10), (a[1] * 2 + b[1]) / 3 + rngm.normal(0, 14) + 12)
+        m2 = ((a[0] + b[0] * 2) / 3 + rngm.normal(0, 10), (a[1] + b[1] * 2) / 3 + rngm.normal(0, 14) + 12)
         p = bezier(a, m1, m2, b, 50)
         p = np.array([q for q in p if dentro(*q)])
         if len(p) > 4:
@@ -133,31 +133,44 @@ def hifa(a, b, n=1):
 
 P = [q for q in puntas if dentro(*q)]
 P.sort(key=lambda q: q[0])
-for i in range(len(P) - 1):
-    hifa(P[i], P[i + 1], 1 + (i % 2))
-    if i + 3 < len(P) and rngm.random() < 0.5:
-        hifa(P[i], P[i + 3])
+# keep only well separated tips: the net reads as a few long threads, not a tangle
+Q = []
+for q in P:
+    if all((q[0] - r_[0]) ** 2 + (q[1] - r_[1]) ** 2 > 38 ** 2 for r_ in Q):
+        Q.append(q)
+P = Q
+hechos = set()
+for i, q in enumerate(P):
+    d = sorted(range(len(P)), key=lambda j: (P[j][0] - q[0]) ** 2 + (P[j][1] - q[1]) ** 2)
+    for j in d[1:3]:
+        if (min(i, j), max(i, j)) in hechos or (P[j][0] - q[0]) ** 2 + (P[j][1] - q[1]) ** 2 > 160 ** 2:
+            continue
+        hechos.add((min(i, j), max(i, j)))
+        hifa(q, P[j])
+# long threads joining the oak to the cherry
+oak_r = max([q for q in P if q[0] < 820], key=lambda q: q[0])
+cer_l = min([q for q in P if q[0] > 820], key=lambda q: q[0])
+hifa(oak_r, cer_l, 2)
 # the new oak's first root has just touched the network
-ult = min(P, key=lambda q: (q[0] - P_ARB[0]) ** 2 + (q[1] - P_ARB[1]) ** 2)
+ult = max(P, key=lambda q: q[0])
 hifa(P_ARB, ult, 2)
 hifa(P_ARB, (P_ARB[0] + 70, P_ARB[1] + 40), 1)
 # fine branching hairs
 for h in list(hilos):
-    for j in range(5, len(h) - 5, 12):
+    for j in range(10, len(h) - 10, 22):
         a = rngm.uniform(0, 2 * math.pi)
         L = rngm.uniform(8, 20)
         q = (h[j][0] + math.cos(a) * L, h[j][1] + math.sin(a) * L)
         if dentro(*q):
             hilos.append(np.array([h[j], ((h[j][0] + q[0]) / 2 + rngm.normal(0, 3), (h[j][1] + q[1]) / 2), q]))
 for h in hilos:
-    lz.aguada(Trazo(h[::4] if len(h) > 8 else h, (3.5, 2.5)), '#f6d690', dens=0.35, suave=1.5)
-lz.lapiz(hilos, '#f8e2a0', grosor=0.9, presion=0.85, temblor=0.15)
-lz.lapiz(hilos[::2], '#e8b84a', grosor=0.5, presion=0.6, temblor=0.15)
-for h in hilos[::3]:
-    lz.luz((h[len(h) // 2][0], h[len(h) // 2][1], 12), '#ffe2a0', fuerza=0.35)
-for q in P[::2]:
-    lz.gouache(Elipse(*q, 1.6), '#fff4c0', alfa=0.9, irreg=0)
-lz.luz((P_ARB[0], P_ARB[1], 20), '#ffe6a8', fuerza=0.7)
+    lz.luz(Trazo(h[::3] if len(h) > 8 else h, (6, 4)), '#ffd870', fuerza=0.16, suave=3)
+    lz.gouache(Trazo(h[::2] if len(h) > 6 else h, (1.5, 0.8)), '#f6cf62', alfa=0.85, irreg=0.2)
+lz.lapiz(hilos[::2], '#fff2c0', grosor=0.5, presion=0.7, temblor=0.15)
+for q in P:
+    lz.gouache(Elipse(*q, 2.0), '#fff4c0', alfa=0.9, irreg=0)
+    lz.luz((q[0], q[1], 7), '#ffe2a0', fuerza=0.4)
+lz.luz((P_ARB[0], P_ARB[1], 16), '#ffe6a8', fuerza=0.7)
 lz.gouache(Elipse(*P_ARB, 2.4), '#fff4c0', alfa=0.95, irreg=0)
 
 # ------------------------------------------------------------------ life in the soil
@@ -176,16 +189,30 @@ def lombriz(pts, w=5.5):
 lombriz([(300, 640), (330, 628), (356, 646), (384, 634)])
 lombriz([(820, 720), (846, 708), (870, 724), (900, 716), (920, 730)])
 lombriz([(1040, 610), (1062, 626), (1090, 618)], 4.5)
-# a dormouse asleep in a chamber among the roots
-cam = Elipse(700, 715, 40, 26)
-lz.aguada(cam, '#4a2a1e', dens=0.6, tapa=1, irreg=0.6, toques=[(700, 725, 26, '#6a3a24', 0.6)])
-lz.aguada(Elipse(700, 728, 36, 10), '#c9a868', dens=0.7, irreg=0.6)            # a bed of dry leaves
-lir = Poligono([(676, 722), (680, 704), (698, 696), (716, 700), (726, 712), (720, 726), (696, 730)])
-volumen(lz, lir, '#b8a090', dens=0.7, brillo=0.3, lapiz='#5a4a3a')
-lz.aguada(Trazo([(720, 724), (734, 716), (730, 700), (716, 696)], (8, 7, 6, 3)), '#9a8070', dens=0.75, tapa=1)
-lz.lapiz([arco(684, 712, 3.5, 2, 20, 160, 8)], '#2a1a14', grosor=0.9, presion=0.85)
-lz.aguada(Elipse(688, 702, 5, 4), '#d8b8a8', dens=0.7, tapa=1)
-lz.lapiz([arco(700, 712, 40, 26, 0, 360, 40)], '#2e1a12', grosor=0.8, presion=0.5, cortes=0.3)
+# a garden dormouse (black mask) asleep in a chamber among the roots
+cam = Elipse(700, 712, 58, 36)
+lz.aguada(cam, '#3a2018', dens=0.8, tapa=1, irreg=0.6, toques=[(700, 725, 36, '#5a3020', 0.6)])
+lz.aguada(Elipse(700, 732, 52, 14), '#c9a868', dens=0.75, irreg=0.6)            # a bed of dry leaves
+for k in range(7):
+    hojita(lz, 660 + k * 13, 735 + rng.normal(0, 3), 10, rng.uniform(-170, -10), rng.choice(['#c9984a', '#a8743a']), tapa=0.8)
+cuerpo_l = Elipse(712, 712, 34, 23)
+volumen(lz, cuerpo_l, '#a89080', dens=0.75, brillo=0.35, lapiz='#4a3a2e', toques=[(712, 728, 16, '#f0e6d8', 0.7)])
+cola = Trazo([(742, 724), (754, 704), (742, 688), (718, 686), (700, 692)], (11, 12, 11, 9, 5))
+lz.aguada(cola, '#8a7a6a', dens=0.8, tapa=1, irreg=0.4)
+lz.aguada(Elipse(698, 692, 9, 7), '#f2ece0', dens=0.6, tapa=1, irreg=0.4)          # white tuft at the tail tip
+lz.contorno(cola, '#3e2e24', grosor=0.6, presion=0.5)
+cab_l = Elipse(676, 716, 19, 16, -10)
+volumen(lz, cab_l, '#b8a090', dens=0.75, brillo=0.35, lapiz='#4a3a2e', toques=[(670, 726, 10, '#f6eee2', 0.7)])
+oreja = Elipse(688, 698, 9, 10, 20)
+lz.aguada(oreja, '#c8a8a0', dens=0.75, tapa=1, toques=[(688, 700, 5, '#e8a0a0', 0.6)])
+lz.contorno(oreja, '#4a3a2e', grosor=0.6, presion=0.5)
+lz.aguada(Trazo([(660, 712), (672, 709), (688, 711)], (5, 7, 4)), '#2a1a14', dens=0.85, irreg=0.2)  # the black mask
+lz.lapiz([arco(673, 709, 4.5, 2.6, 20, 160, 8)], '#f6eee2', grosor=0.9, presion=0.85)              # closed eye
+lz.aguada(Elipse(658, 718, 2.6, 2.2), '#d87a7a', dens=0.9)
+for sd in (-1, 1):
+    lz.lapiz([[(660, 720), (646, 718 + sd * 4)]], '#6e5e50', grosor=0.4, presion=0.5)
+mano(lz, 664, 728, 200, 10, 'piel1', 'relajada', lado=1)
+lz.lapiz([arco(700, 712, 58, 36, 0, 360, 50)], '#2e1a12', grosor=0.8, presion=0.5, cortes=0.3)
 # an acorn the jay buried and forgot (that is how oaks walk)
 bel = Elipse(470, 610, 6, 9, 20)
 lz.aguada(bel, '#a8743a', dens=0.85, tapa=1, irreg=0.2)
@@ -415,37 +442,46 @@ for k in range(12):
     x, y = 1180 + rng.normal(0, 4) - k * 0.6, 446 + k * 7 + rng.normal(0, 2)
     lz.aguada(Elipse(x, y, 2.2, 3.2), '#6fb8d8', dens=0.8, irreg=0.2, borde=0.8)
 
-# the grandfather, kneeling, pressing the soil around the sapling with both hands
-lz.aguada(Elipse(1265, yg(1265) + 4, 90, 10), '#8a6a4a', dens=0.25, suave=6)
-pant = [(1230, 460), (1286, 456), (1300, 500), (1306, yg(1300) - 4), (1258, yg(1258) - 2), (1214, yg(1214) - 2),
-        (1222, 500)]
-prenda(lz, pant, '#6a7aa8', luz=(-0.6, -1), pliegues=[[(1240, 500), (1226, 530)], [(1270, 490), (1290, 530)]])
-bota = Elipse(1318, yg(1318) - 8, 18, 9, -10)
+# the grandfather, on one knee, pressing the soil around the sapling with both hands
+yb = yg(1290)
+lz.aguada(Elipse(1270, yb + 4, 95, 10), '#8a6a4a', dens=0.25, suave=6)
+# back leg: knee on the ground, shin lying back, boot sole up
+miembro(lz, [(1292, 462), (1300, yb - 10), (1352, yb - 8)], (32, 26, 20), '#5a6a98', lado=-1, pliegues=2)
+bota = Poligono([(1346, yb - 16), (1372, yb - 22), (1378, yb - 6), (1350, yb - 2)])
 lz.aguada(bota, '#6e4a2a', dens=0.85, tapa=1, irreg=0.3)
 lz.contorno(bota, '#3e2a1e', grosor=0.7, presion=0.55)
-cam = [(1222, 362), (1264, 354), (1292, 388), (1296, 440), (1290, 470), (1228, 474), (1214, 430)]
-prenda(lz, cam, '#d8a03a', luz=(-0.6, -1), pliegues=[[(1240, 400), (1236, 460)], [(1270, 400), (1276, 460)]])
-lz.rayado(Poligono(cam), '#a8702a', angulo=0, sep=9, presion=0.3, grosor=0.7)      # a checked shirt
-lz.rayado(Poligono(cam), '#a8702a', angulo=90, sep=9, presion=0.3, grosor=0.7)
-cuello(lz, (1222, 330), 38, (1236, 362), piel='piel4', ancho=0.48)
-cara(lz, 1222, 330, 38, piel='piel4', pelo='#3a2a24', peinado='corto', canas=True, barba='#c8c0b8', giro=-0.55,
-     ang=24, ojos='cerrados', boca='sonrisa', semilla=13)
+# front leg: knee up toward the sapling, foot flat
+miembro(lz, [(1278, 458), (1232, 448), (1240, yb - 10)], (34, 27, 21), '#6a7aa8', lado=1, pliegues=3)
+bota2 = Poligono([(1222, yb - 14), (1250, yb - 16), (1256, yb), (1214, yb)])
+lz.aguada(bota2, '#6e4a2a', dens=0.85, tapa=1, irreg=0.3)
+lz.contorno(bota2, '#3e2a1e', grosor=0.7, presion=0.55)
+# far arm
+miembro(lz, [(1262, 390), (1232, 446), (1196, yg(1196) - 10)], (22, 18, 15), '#c8902a', lado=-1, pliegues=2)
+mano(lz, 1196, yg(1196) - 10, 140, 30, 'piel4', 'abierta', lado=1)
+# torso leaning forward over the knee
+cam = [(1226, 372), (1262, 360), (1296, 384), (1306, 430), (1300, 470), (1262, 474), (1240, 440), (1222, 404)]
+prenda(lz, cam, '#d8a03a', luz=(-0.6, -1), pliegues=[[(1250, 400), (1262, 450)], [(1280, 398), (1290, 456)]])
+lz.rayado(Poligono(cam), '#a8702a', angulo=10, sep=9, presion=0.3, grosor=0.7)      # a checked shirt
+lz.rayado(Poligono(cam), '#a8702a', angulo=100, sep=9, presion=0.3, grosor=0.7)
+cuello(lz, (1214, 352), 38, (1232, 382), piel='piel4', ancho=0.48)
+cara(lz, 1214, 352, 38, piel='piel4', pelo='#3a2a24', peinado='corto', canas=True, barba='#c8c0b8', giro=-0.55,
+     ang=28, ojos='abiertos', mira=(-1, 1), boca='sonrisa', semilla=13)
 # a straw hat
-som = Poligono([(1176, 300), (1200, 288), (1240, 284), (1268, 296), (1252, 304), (1196, 312)])
-copa_h = Poligono([(1198, 292), (1204, 268), (1232, 262), (1244, 286)])
+HX, HY = 1218, 318
+som = Poligono([(HX - 46, HY + 4), (HX - 20, HY - 10), (HX + 20, HY - 12), (HX + 50, HY + 2), (HX + 32, HY + 10),
+                (HX - 24, HY + 14)])
+copa_h = Poligono([(HX - 22, HY - 6), (HX - 14, HY - 32), (HX + 14, HY - 36), (HX + 24, HY - 8)])
 for f_ in (som, copa_h):
     volumen(lz, f_, '#e8c878', dens=0.75, brillo=0.3, lapiz='#8a6a2a')
-lz.aguada(Trazo([(1200, 287), (1242, 283)], (5, 5)), CARMIN, dens=0.85, tapa=1)
+lz.aguada(Trazo([(HX - 20, HY - 9), (HX + 22, HY - 11)], (6, 6)), CARMIN, dens=0.85, tapa=1)
 lz.rayado(som | copa_h, '#b8984a', angulo=20, sep=3, presion=0.3, grosor=0.6)
-# arms reaching down to the soil
-miembro(lz, [(1236, 372), (1200, 430), (1184, yg(1184) - 14)], (22, 18, 15), '#d8a03a', lado=1, pliegues=2)
-mano(lz, 1184, yg(1184) - 14, 130, 30, 'piel4', 'abierta', lado=-1)
-miembro(lz, [(1262, 378), (1222, 440), (1196, yg(1196) - 8)], (22, 18, 15), '#d8a03a', lado=-1, pliegues=2)
-mano(lz, 1196, yg(1196) - 8, 110, 30, 'piel4', 'abierta', lado=-1)
+# near arm, hand pressing the soil
+miembro(lz, [(1240, 392), (1206, 452), (1180, yg(1180) - 6)], (23, 19, 15), '#d8a03a', lado=1, pliegues=2)
+mano(lz, 1180, yg(1180) - 6, 120, 31, 'piel4', 'abierta', lado=-1)
 
 # ------------------------------------------------------------------ small lives with intention
-abeja(250, 470, 1.4, 10)
-abeja(1290, 470, 1.3, -10)
+abeja(250, 470, 2.0, 10)
+abeja(1150, 300, 1.8, -10)
 mariposa(300, 430, 1.4, '#e8735e', '#f0c25e', 15)
 mariposa(845, 470, 1.2, '#5f86c0', '#bcd9e0', -20)
 pajaro(lz, 880, 150, 16, TEAL, ang=-15)
