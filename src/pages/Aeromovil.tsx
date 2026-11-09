@@ -577,15 +577,19 @@ export default function Aeromovil() {
     // El Aptera, al otro lado a 3 m (2026-11-07, «ponlo en el garaje junto a los otros dos»). Quien ya tenía el
     // garaje guardado también lo ve: su lista guardada no lo trae y se queda con este valor.
     // Los tres prototipos de VW (2026-11-07, «los tres»): el XL1 Concept frente al de producción, y los dos tándem más allá.
-    const POR_DEFECTO: Record<string, { z: number }> = { twizy: { z: 3 }, aptera: { z: -3 }, xl1concept: { z: 6 }, unlitro: { z: -6 } };
+    // 2026-11-09, «añade el jaguar… y el velomovil aerorider» y «también este de Shell Eco Marathon»: el SZEmission,
+    // el Jaguar D-Type y el AeroRider salen también por defecto, más allá de los cuatro anteriores.
+    const POR_DEFECTO: Record<string, { z: number }> = { twizy: { z: 3 }, aptera: { z: -3 }, xl1concept: { z: 6 }, unlitro: { z: -6 }, szemission: { z: 9 }, jaguarD: { z: -9 }, aerorider: { z: 12 } };
     const base = VEHICULOS_GARAJE.map((v, i) => POR_DEFECTO[v.id] ? { id: v.id, visible: true, x: 0, z: POR_DEFECTO[v.id].z, giro: 0 } : ({ id: v.id, visible: false, x: 0, z: (i % 2 ? 1 : -1) * (2.6 + 2.2 * Math.floor(i / 2)), giro: 0 }));
     // v3 (2026-11-07): el XL1 deja de ser una caja y sale por defecto. En la lista v2 guardada estaba oculto,
     // así que al pasar de v2 a v3 se olvida solo lo que se guardó del XL1 (el resto se conserva).
+    // v4 (2026-11-09): lo mismo con el Jaguar, que hasta hoy era una caja oculta: se olvida solo su plaza guardada.
     const leer = (clave: string) => { try { const g = JSON.parse(localStorage.getItem(clave) || 'null'); return Array.isArray(g) ? g : null; } catch { return null; } };
-    const v3 = leer('aeromovil_garaje_v3'), guardado = v3 ?? (leer('aeromovil_garaje_v2') ?? []).filter((x: any) => x?.id !== 'xl1');
+    const v4 = leer('aeromovil_garaje_v4');
+    const guardado = v4 ?? (leer('aeromovil_garaje_v3') ?? (leer('aeromovil_garaje_v2') ?? []).filter((x: any) => x?.id !== 'xl1')).filter((x: any) => x?.id !== 'jaguarD');
     return base.map(b => ({ ...b, ...(guardado.find((x: any) => x?.id === b.id) || {}) }));
   });
-  useEffect(() => { try { localStorage.setItem('aeromovil_garaje_v3', JSON.stringify(garaje)); } catch { /* sin memoria */ } }, [garaje]);
+  useEffect(() => { try { localStorage.setItem('aeromovil_garaje_v4', JSON.stringify(garaje)); } catch { /* sin memoria */ } }, [garaje]);
   // `?garaje=xl1`: mirar un modelo del garaje a solas, en el origen (para comprobarlo mientras se modela).
   const soloGaraje = useMemo(() => new URLSearchParams(window.location.search).get('garaje'), []);
   const garajeVisor = useMemo(() => {

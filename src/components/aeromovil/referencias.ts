@@ -16,6 +16,13 @@
 // son una aproximación y la página lo dice. Los que se crean desde fotos salen
 // de la silueta que se recorta en el navegador (`fotoAModelo.ts`).
 
+import type { Est } from './garaje/forma';
+import { estacion } from './garaje/apteraPiel';
+import {
+  ALTO as SZ_ALTO, ANCHO as SZ_ANCHO, BATALLA as SZ_BATALLA, CUERPO as SZ_CUERPO, CUPULA as SZ_CUPULA,
+  LARGO as SZ_LARGO, R_RUEDA as SZ_R_RUEDA, VIA_DEL as SZ_VIA_DEL, VIA_TRAS as SZ_VIA_TRAS, X_MORRO as SZ_X_MORRO,
+} from './garaje/szemissionForma';
+
 export type Cabina = 'cupula' | 'abierta' | 'cerrada';
 export interface RuedaRef { x: number; z: number; d: number }
 export interface PerfilRef { x: number[]; top: number[]; bot: number[]; hw: number[] }
@@ -105,50 +112,26 @@ function perfilCapsula(o: {
   return { x, top, bot, hw };
 }
 
-/** Interpola suave (Hermite) una lista de puntos [u, valor] con u creciente. */
-function suave(pts: [number, number][]) {
-  return (u: number) => {
-    if (u <= pts[0][0]) return pts[0][1];
-    if (u >= pts[pts.length - 1][0]) return pts[pts.length - 1][1];
-    let i = 0; while (pts[i + 1][0] < u) i++;
-    const [u0, v0] = pts[i], [u1, v1] = pts[i + 1], h = u1 - u0, t = (u - u0) / h;
-    const m = (k: number) => {
-      const a = pts[Math.max(0, k - 1)], b = pts[Math.min(pts.length - 1, k + 1)];
-      return (b[1] - a[1]) / (b[0] - a[0] || 1);
-    };
-    const m0 = m(i) * h, m1 = m(i + 1) * h, t2 = t * t, t3 = t2 * t;
-    return (2 * t3 - 3 * t2 + 1) * v0 + (t3 - 2 * t2 + t) * m0 + (-2 * t3 + 3 * t2) * v1 + (t3 - t2) * m1;
-  };
-}
-
-/** Perfil a partir de puntos leídos de fotos: u = 0 en el morro, 1 en la cola. */
-function perfilDePuntos(xn: number, L: number, top: [number, number][], bot: [number, number][], hw: [number, number][], N = 120): PerfilRef {
-  const fT = suave(top), fB = suave(bot), fW = suave(hw), o: PerfilRef = { x: [], top: [], bot: [], hw: [] };
-  for (let i = 0; i <= N; i++) {
-    const u = (1 - Math.cos(Math.PI * i / N)) / 2;
-    o.x.push(xn - u * L); o.top.push(fT(u)); o.bot.push(Math.min(fB(u), fT(u))); o.hw.push(Math.max(0.004, fW(u)));
-  }
+/**
+ * The SZEmission (the car the Aeromóvil 1 was shaped from). Since 2026-11-09 this
+ * card reads the garage model's stations (`garaje/szemissionForma.ts`), measured on
+ * Eugenio's photos with solved cameras, so the card and the garage can never give
+ * two sizes for the same car. The first reading (2026-11-06, 2.80 m) took the side
+ * photo as if it had no perspective.
+ */
+const SZ = { L: SZ_LARGO, xn: SZ_X_MORRO };
+const muestrearEst = (es: Est[], n: number) => {
+  const x0 = es[0].x, x1 = es[es.length - 1].x;
+  return Array.from({ length: n + 1 }, (_, i) => estacion(es, x0 + (x1 - x0) * (1 - Math.cos(Math.PI * i / n)) / 2));
+};
+const SZ_PERFIL: PerfilRef = (() => {
+  const o: PerfilRef = { x: [], top: [], bot: [], hw: [] };
+  for (const e of muestrearEst(SZ_CUERPO, 120)) { o.x.push(e.x); o.top.push(e.yt); o.bot.push(Math.min(e.yb, e.yt)); o.hw.push(Math.max(0.004, e.wm)); }
   return o;
-}
-
-/** El Aeromóvil 1 (SZEmission), medido sobre las fotos de Eugenio. */
-const A1 = { L: 2.80, xn: 0.66 };
-const A1_PERFIL = perfilDePuntos(A1.xn, A1.L,
-  // Techo del cuerpo en el centro (m): morro redondo, capó que sube al parabrisas, cola en punta a media altura.
-  [[0, 0.42], [0.02, 0.50], [0.05, 0.555], [0.10, 0.61], [0.18, 0.675], [0.30, 0.71], [0.55, 0.71], [0.70, 0.68], [0.80, 0.62], [0.90, 0.535], [0.97, 0.475], [1, 0.44]],
-  // Fondo (m): barbilla, suelo plano a 13,5 cm y la cola que sube detrás de las ruedas traseras.
-  [[0, 0.42], [0.02, 0.33], [0.05, 0.24], [0.10, 0.17], [0.18, 0.14], [0.30, 0.135], [0.62, 0.135], [0.70, 0.155], [0.80, 0.225], [0.90, 0.32], [0.97, 0.39], [1, 0.44]],
-  // Media anchura en planta (m): frente ancho y redondo, máximo hasta la mitad, cola afilada.
-  [[0, 0.10], [0.02, 0.33], [0.05, 0.47], [0.10, 0.555], [0.18, 0.605], [0.27, 0.625], [0.45, 0.625], [0.55, 0.60], [0.65, 0.55], [0.75, 0.45], [0.85, 0.315], [0.93, 0.17], [1, 0.012]]);
-const A1_CUPULA = (() => {
-  const top = suave([[0.17, 0.66], [0.22, 0.85], [0.27, 0.955], [0.33, 1.015], [0.42, 1.03], [0.47, 1.03], [0.55, 1.01], [0.65, 0.95], [0.75, 0.86], [0.85, 0.74], [0.93, 0.58]]);
-  const hw = suave([[0.17, 0.06], [0.22, 0.20], [0.30, 0.28], [0.45, 0.30], [0.60, 0.28], [0.75, 0.21], [0.85, 0.14], [0.93, 0.03]]);
-  const deck = suave([[0.17, 0.69], [0.30, 0.71], [0.55, 0.71], [0.70, 0.68], [0.80, 0.62], [0.90, 0.535], [0.93, 0.515]]);
+})();
+const SZ_CUPULA_REF = (() => {
   const c = { x: [] as number[], base: [] as number[], top: [] as number[], hw: [] as number[] };
-  for (let i = 0; i <= 60; i++) {
-    const u = 0.17 + (0.93 - 0.17) * (1 - Math.cos(Math.PI * i / 60)) / 2;
-    c.x.push(A1.xn - u * A1.L); c.base.push(deck(u) - 0.06); c.top.push(Math.max(deck(u) + 0.005, top(u))); c.hw.push(hw(u));
-  }
+  for (const e of muestrearEst(SZ_CUPULA, 60)) { c.x.push(e.x); c.base.push(e.yb); c.top.push(e.yt); c.hw.push(e.wm); }
   return c;
 })();
 
@@ -162,7 +145,9 @@ export const CATALOGO: Referencia[] = [
       { t: 'Ficha técnica (AQUA)', url: 'https://aeromenredace.blogspot.com/2008/08/aerorider.html' },
     ],
     L: 2.78, W: 0.85, H: 1.20, clear: 0.10, batalla: 1.27, plazas: 1, masa: 72, cabina: 'cupula', cabinaX: [-0.05, -1.15],
-    // Triciclo basculante con dos ruedas delante y una detrás.
+    // Triciclo con dos ruedas delante y una detrás. No bascula: ninguna fuente lo dice (ni la ficha AQUA,
+    // que lo detalla hasta el limpiaparabrisas, ni la prueba de OliNo); radio de giro 7 m. La vía de
+    // 0,64 m no está publicada: estimada (2026-11-09, al modelarlo para el garaje).
     ruedas: [{ x: 0, z: 0.32, d: d20 }, { x: 0, z: -0.32, d: d20 }, { x: -1.27, z: 0, d: d20 }],
     perfil: perfilGota({ xn: 0.50, L: 2.78, H: 1.20, W: 0.85, clear: 0.10, pmax: 0.40, nariz: 0.30, cola: 0.45, romo: 0.3 }),
     notas: 'Diseño de Gjalt Wijma (Países Bajos), con asistencia eléctrica de 600 W y 45 km/h. Las curvas son una aproximación a partir de las medidas y las fotos.',
@@ -207,31 +192,34 @@ export const CATALOGO: Referencia[] = [
     //   correa dentada, batería LiPo de 350-530 Wh, 332 km/kWh en 2026.
     //   No publican medidas. El reglamento UrbanConcept fija: alto 1,00-1,30 m,
     //   ancho 1,20-1,30 m, largo 2,20-3,50 m, batalla ≥ 1,20 m, vía ≥ 1,00 m
-    //   delante y ≥ 0,80 m detrás, altura libre ≥ 10 cm. Un coche de
-    //   eficiencia apura los mínimos, y las fotos lo confirman: el techo de la
-    //   cúpula queda a la altura de la cadera de la gente. Alto, ancho, batalla,
-    //   vías y altura libre se toman en el mínimo del reglamento; el largo, de
-    //   la proporción largo/alto en las fotos de perfil (≈ 2,8).
+    //   delante y ≥ 0,80 m detrás, altura libre ≥ 10 cm.
+    //   2026-11-09: forma y medidas salen ahora del modelo del garaje
+    //   (`garaje/szemissionForma.ts`), con cámaras resueltas sobre tres fotos a la
+    //   vez y la escala de la vía delantera mínima: 3,42 × 1,28 × 1,045 m,
+    //   batalla 1,21 m. La primera lectura (2,80 m de largo, batalla 1,15 m) leía
+    //   la foto de perfil sin corregir la perspectiva, y esa batalla no pasaría
+    //   el reglamento.
     id: 'cat-szemission', nombre: 'SZEmission (SZEnergy Team)', origen: 'catalogo',
-    fuente: 'SZEmission del SZEnergy Team (Universidad Széchenyi, Győr). Publicado: 95 kg, Cd 0,1365, monocasco de carbono, una plaza. Forma y medidas leídas de las fotos de perfil, de frente y de 3/4, a escala con un alto de 1,03 m (el reglamento UrbanConcept pide entre 1,00 y 1,30).',
+    fuente: 'SZEmission del SZEnergy Team (Universidad Széchenyi, Győr). Publicado: 95 kg, Cd 0,1365, monocasco de carbono, una plaza. Las medidas no se publican: la forma y las medidas son las del modelo del garaje, leídas con cámaras resueltas sobre tres fotos y a escala con la vía delantera mínima del reglamento UrbanConcept (1,00 m); margen de unos ±10 cm en el largo.',
     enlaces: [
       { t: 'SZEmission, ficha del equipo', url: 'https://szenergy.hu/en/our-racing-cars/' },
       { t: 'Presentación del coche 2026', url: 'https://alumni.sze.hu/en/?p=10203' },
       { t: 'Reglas UrbanConcept (resumen)', url: 'https://areeweb.polito.it/didattica/h2polito/en/competitions/shell-eco-marathon.html' },
     ],
-    // Medido sobre la foto de perfil: largo/alto 2,7; eje delantero al 24 % del
-    // largo desde el morro, trasero al 65 %; fondo a 13 % del alto; vía
-    // delantera 0,76 del ancho y trasera más estrecha (foto de frente).
-    L: A1.L, W: 1.25, H: 1.03, clear: 0.135, batalla: 1.15, plazas: 1, masa: 95, cd: 0.1365, cabina: 'cupula',
-    ruedas: [{ x: 0, z: 0.48, d: 0.50 }, { x: 0, z: -0.48, d: 0.50 }, { x: -1.15, z: 0.40, d: 0.50 }, { x: -1.15, z: -0.40, d: 0.50 }],
-    perfil: A1_PERFIL,
+    L: SZ.L, W: SZ_ANCHO, H: SZ_ALTO, clear: 0.14, batalla: SZ_BATALLA, plazas: 1, masa: 95, cd: 0.1365, cabina: 'cupula',
+    ruedas: [
+      { x: 0, z: SZ_VIA_DEL / 2, d: 2 * SZ_R_RUEDA }, { x: 0, z: -SZ_VIA_DEL / 2, d: 2 * SZ_R_RUEDA },
+      { x: -SZ_BATALLA, z: SZ_VIA_TRAS / 2, d: 2 * SZ_R_RUEDA }, { x: -SZ_BATALLA, z: -SZ_VIA_TRAS / 2, d: 2 * SZ_R_RUEDA },
+    ],
+    perfil: SZ_PERFIL,
     seccion: { arriba: 2.4, abajo: 4.5 },
-    cupula: A1_CUPULA,
+    cupula: SZ_CUPULA_REF,
     // Amarillo delante, plata detrás con rayas negras en la cola, y todo el bajo negro.
     color: 0xf5c400,
-    librea: { delante: 0xf5c400, detras: 0xc9ccd1, abajo: 0x16181b, corteX: A1.xn - 0.56 * A1.L, alturaAbajo: 0.32, rayas: [[A1.xn - 0.865 * A1.L, A1.xn - 0.85 * A1.L], [A1.xn - 0.895 * A1.L, A1.xn - 0.88 * A1.L], [A1.xn - 0.925 * A1.L, A1.xn - 0.91 * A1.L]], colorRayas: 0x16181b },
-    faros: [{ x: A1.xn - 0.07 * A1.L, y: 0.55, z: 0.47, largo: 0.20 }, { x: A1.xn - 0.07 * A1.L, y: 0.55, z: -0.47, largo: 0.20 }],
-    notas: 'Ruedas de unos 50 cm, con la mitad de abajo asomando bajo el cuerpo, como en las fotos. La cúpula es de cristal tintado y se prolonga sobre la cola. Las medidas salen de proporciones en fotos con perspectiva: pueden variar unos centímetros.',
+    librea: { delante: 0xf5c400, detras: 0xc9ccd1, abajo: 0x16181b, corteX: SZ.xn - 0.56 * SZ.L, alturaAbajo: 0.32, rayas: [[SZ.xn - 0.865 * SZ.L, SZ.xn - 0.85 * SZ.L], [SZ.xn - 0.895 * SZ.L, SZ.xn - 0.88 * SZ.L], [SZ.xn - 0.925 * SZ.L, SZ.xn - 0.91 * SZ.L]], colorRayas: 0x16181b },
+    // Las rendijas de los faros del modelo del garaje van de x 0,80 a 0,42, en los hombros del morro.
+    faros: [{ x: 0.61, y: 0.51, z: 0.45, largo: 0.30 }, { x: 0.61, y: 0.51, z: -0.45, largo: 0.30 }],
+    notas: 'Ruedas de unos 56 cm (95/80 R16, las del coche anterior del equipo), con la mitad de abajo asomando bajo el cuerpo, como en las fotos. La cúpula es de cristal tintado y se prolonga sobre la cola. Las medidas salen de fotos con perspectiva corregida, no de una ficha: pueden variar unos centímetros. El modelo detallado, con su librea, está en el garaje.',
   },
 ];
 
