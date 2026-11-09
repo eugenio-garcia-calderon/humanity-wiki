@@ -21,7 +21,7 @@ import {
   Freno, huellaIp, enlacesDe, correoConfirmacion, correoAviso, correoAltaBoletin, sitioForm, registrarFormulariosSitio, huellaTestigo,
   ipVisitante, esDeCloudflare, borrarSinConfirmar,
 } from '../src/server/formulariosSitio';
-import { remitenteConNombre, enviarCorreo } from '../src/server/correo';
+import { remitenteConNombre, enviarCorreo, hayCorreo } from '../src/server/correo';
 
 let n = 0;
 const ok = async (nombre: string, f: () => void | Promise<void>) => { await f(); n++; console.log(`  ✓ ${nombre}`); };
@@ -156,6 +156,44 @@ await ok('«Trabaja con nosotros» sustituye a la donación en la página Colabo
   assert.equal(textoMotivo('donacion'), 'Donación', 'los mensajes viejos conservan su etiqueta');
   assert.ok(MOTIVOS.some(m => m.id === 'trabajo'));
   assert.ok(!MOTIVOS.some(m => (m.id as string) === 'donacion'), 'el formulario ya no ofrece donar');
+});
+
+await ok('por SMTP: entrega de verdad, con remitente, respuesta y cabeceras, y tiene preferencia', async () => {
+  const net = await import('node:net');
+  let recibido = '', auth = '';
+  const srv = net.createServer(c => {
+    let enDatos = false;
+    c.write('220 prueba\r\n');
+    c.on('data', b => {
+      const t = b.toString();
+      if (enDatos) { recibido += t; if (recibido.endsWith('\r\n.\r\n')) { enDatos = false; c.write('250 ok\r\n'); } return; }
+      if (/^EHLO/i.test(t)) c.write('250-prueba\r\n250 AUTH PLAIN\r\n');
+      else if (/^AUTH/i.test(t)) { auth = Buffer.from(t.trim().split(' ')[2], 'base64').toString(); c.write('235 ok\r\n'); }
+      else if (/^DATA/i.test(t)) { enDatos = true; c.write('354 sigue\r\n'); }
+      else if (/^QUIT/i.test(t)) { c.write('221 adios\r\n'); c.end(); }
+      else c.write('250 ok\r\n');
+    });
+  });
+  await new Promise<void>(r => srv.listen(0, '127.0.0.1', () => r()));
+  Object.assign(process.env, { SMTP_USUARIO: 'avisos@ejemplo.org', SMTP_CLAVE: 'abcd efgh ijkl mnop', SMTP_SERVIDOR: '127.0.0.1', SMTP_PUERTO: String((srv.address() as any).port) });
+  try {
+    assert.equal(hayCorreo(), true);
+    assert.equal(await enviarCorreo({ para: 'x@ejemplo.org', asunto: 'Hola', texto: 'Cuerpo', responderA: 'r@ejemplo.org', cabeceras: { 'List-Unsubscribe': '<https://e/b>' }, remitente: remitenteConNombre('Mi Sitio') }), true);
+    assert.ok(auth.endsWith('avisos@ejemplo.org\0abcdefghijklmnop'), 'los espacios de la clave de Google no cuentan');
+    assert.match(recibido, /From: Mi Sitio <avisos@ejemplo\.org>/);
+    assert.match(recibido, /Reply-To: r@ejemplo\.org/);
+    assert.match(recibido, /List-Unsubscribe: <https:\/\/e\/b>/);
+    srv.close();
+    process.env.SMTP_PUERTO = '1';
+    assert.equal(await enviarCorreo({ para: 'x@ejemplo.org', asunto: 'Hola', texto: 'Cuerpo' }), false, 'si el servidor no contesta, false y nada revienta');
+  } finally {
+    for (const k of ['SMTP_USUARIO', 'SMTP_CLAVE', 'SMTP_SERVIDOR', 'SMTP_PUERTO']) delete process.env[k];
+    srv.close();
+  }
+});
+await ok('el proveedor de correo sale en la política solo si el sitio lo dice', () => {
+  assert.ok(textoLegal('privacidad', completarSitio({ ...CFG, proveedorCorreo: '**Google**, correo.' }), 'S').includes('- **Google**, correo.'));
+  assert.ok(!textoLegal('privacidad', completarSitio(CFG), 'S').includes('**Google**'));
 });
 
 console.log('Política de privacidad');

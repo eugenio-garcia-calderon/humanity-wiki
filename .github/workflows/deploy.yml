@@ -134,6 +134,13 @@ jobs:
               sed -i '/^CLAVE_MAESTRA=/d' .env.production
               echo "CLAVE_MAESTRA=${{ secrets.CLAVE_MAESTRA }}" >> .env.production
             fi
+            # EL CORREO (2026-11-09): la cuenta de Google Workspace con la que salen los
+            # avisos y las confirmaciones (`src/server/correo.ts`). Secretos de GitHub.
+            if [ -n "${{ secrets.SMTP_USUARIO }}" ] && [ -n "${{ secrets.SMTP_CLAVE }}" ]; then
+              sed -i '/^SMTP_USUARIO=/d;/^SMTP_CLAVE=/d' .env.production
+              echo "SMTP_USUARIO=${{ secrets.SMTP_USUARIO }}" >> .env.production
+              echo "SMTP_CLAVE=$(echo '${{ secrets.SMTP_CLAVE }}' | tr -d ' ')" >> .env.production
+            fi
             # ══ LAS LLAVES QUE HOY SOLO VIVEN EN EL SERVIDOR ═══════════════════
             # De las 27 variables del `.env.production`, este fichero solo sabía
             # reponer 7. Las otras 20 existen ÚNICAMENTE en ese fichero, en esa

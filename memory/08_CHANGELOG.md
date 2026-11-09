@@ -10551,3 +10551,4 @@ Eugenio asked for five things on the 3D world; all on branch `nube/arquitectura-
   - la pantalla completa funciona con la API en escritorio, con el sustituto CSS (escritorio y móvil de 390 px) y con Esc;
   - `tsc` y `vite build` pasan.
 - Sin verificar: el móvil con la app instalada.
+- Correo por SMTP con Google Workspace (2026-11-09, Eugenio eligió su Workspace frente a Cloudflare y Resend): `correo.ts` envía con nodemailer si hay `SMTP_USUARIO` y `SMTP_CLAVE` (secretos de GitHub, los escribe `deploy.yml`), con preferencia sobre Resend. `config.sitio.proveedorCorreo` nombra al proveedor en la política de privacidad del escaparate.
