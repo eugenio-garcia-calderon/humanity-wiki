@@ -246,12 +246,12 @@ sombra(lz, 900, 540, 40, 6)
 capa(201)
 pierna([(896, 498), (894, 516), (892, 534)], 10, '#e6b48a', zapato=CARMIN, pie_lado=-1)
 pierna([(912, 498), (914, 516), (915, 534)], 10, '#e6b48a', zapato=CARMIN, pie_lado=1)
+cuello(lz, 904, 404, 25, 'piel3', (905, 434), giro=-0.2, inclina=-6)
 pieza(lz, [(890, 436), (904, 432), (920, 436), (928, 470), (938, 504), (904, 510), (872, 504), (882, 470)],
       '#f2b93a', toques=[(930, 490, 26, '#d98a2c', 0.6), (896, 450, 20, '#f8d77a', 0.5)])
 pliegues(lz, [[(898, 470), (892, 490), (886, 506)], [(912, 470), (918, 490), (924, 506)]], '#a86a20')
 for (x, y) in ((888, 490), (906, 482), (922, 496), (898, 502), (914, 466)):
     flor_simple(lz, x, y, 3.2, CORAL, centro='#fff3cf')
-cuello(lz, 904, 404, 25, 'piel3', (905, 434))
 cabeza(lz, 904, 404, 25, piel='piel3', pelo='#2a1a14', peinado='coleta', giro=-0.2, inclina=-6, ojos='abiertos',
        boca='abierta', mira=(-0.6, 0.4))
 # arms bend in, the two hands make a cup in front of her chest
@@ -282,11 +282,11 @@ pliegues(lz, [[(600, 500), (620, 520), (634, 546)], [(580, 504), (590, 528), (58
 for x in (604, 624):
     z = Elipse(x, 554, 9, 4.5)
     lz.aguada(z, '#7a3f3a', dens=0.8, tapa=1, irreg=0.3)
+cuello(lz, 584, 416, 25, 'piel2', (584, 444), giro=0.6, inclina=8)
 pieza(lz, [(560, 448), (582, 442), (604, 448), (610, 472), (608, 500), (580, 504), (556, 500), (554, 472)],
       '#f0b44a', toques=[(560, 480, 20, '#d9902c', 0.5)])                     # blouse
 mano_dedos(lz, 606, 520, 20, 22, 'piel2', 'relajada', lado=-1)               # hand on her knee
 brazo(lz, (562, 456), (566, 492), (604, 518), 13, '#f0b44a', pliegue=False)
-cuello(lz, 584, 416, 25, 'piel2', (584, 444))
 cabeza(lz, 584, 416, 25, piel='piel2', pelo='#2f7f86', peinado='pañuelo', giro=0.6, inclina=8, ojos='abiertos',
        boca='sonrisa', mira=(1, 0.3))
 brazo(lz, (604, 456), (632, 428), (636, 382), 13, '#f0b44a')              # she votes
@@ -315,11 +315,11 @@ for (x0, y0) in ((446, 698), (462, 698)):                                    # a
     lz.contorno(z, '#4a2420', grosor=0.5, presion=0.5)
 for (x, y) in ((360, 630), (404, 624), (446, 660), (424, 640), (380, 646), (438, 680)):
     flor_simple(lz, x, y, 3.3, rng.choice([ORO, '#f6c0c8']), centro='#fff3cf')
+cuello(lz, 350, 500, 33, 'piel1', (354, 540), escote=False, giro=0.6)
 pieza(lz, [(332, 540), (356, 534), (376, 544), (386, 572), (386, 610), (360, 622), (330, 616), (322, 590),
            (324, 560)], CORAL, toques=[(330, 590, 30, '#c4503e', 0.55), (372, 556, 24, '#f39a7a', 0.5)])
 pliegues(lz, [[(364, 552), (372, 584), (376, 612)]], '#9a3a2e', presion=0.5)
 mano_dedos(lz, 428, 616, 12, 26, 'piel1', 'relajada', lado=-1)            # far hand rests on her knee
-cuello(lz, 350, 500, 33, 'piel1', (354, 540), ancho=0.4)
 cabeza_perfil(lz, 352, 498, 33, piel='piel1', pelo='#dcd6d0', peinado='mono', lado=1, inclina=-6, canas=True,
               gafas=True, ojos='abiertos', boca='sonrisa')
 brazo(lz, (362, 550), (404, 520), (414, 446), 17, CORAL)                 # she votes
@@ -337,12 +337,12 @@ JEAN = '#4a6a9a'
 pierna([(1130, 628), (1058, 622), (1056, 698)], 22, mezcla(JEAN, '#202a40', 0.25), zapato='#6e4c3c', pie_lado=-1)
 pierna([(1140, 636), (1068, 634), (1066, 708)], 23, JEAN, zapato='#6e4c3c', pie_lado=-1)
 pliegues(lz, [[(1090, 626), (1080, 640)], [(1072, 640), (1062, 650), (1066, 664)]], '#2a3a5a')
+cuello(lz, 1124, 502, 33, 'piel2', (1128, 542), escote=False, giro=-0.6)
 pieza(lz, [(1106, 546), (1130, 538), (1154, 548), (1160, 590), (1158, 636), (1126, 644), (1100, 636), (1098, 590)],
       TEAL, toques=[(1156, 600, 26, '#2a6a6a', 0.55), (1110, 556, 20, '#6fb1ad', 0.5)])
 lz.rayado(Poligono([(1100, 622), (1158, 620), (1158, 636), (1100, 638)], suave=False), '#2a6a6a', angulo=90, sep=3,
           presion=0.45)
 mano_dedos(lz, 1086, 628, 188, 26, 'piel2', 'relajada', lado=1)          # far hand on his thigh
-cuello(lz, 1124, 502, 33, 'piel2', (1128, 542), ancho=0.42)
 cabeza_perfil(lz, 1124, 500, 33, piel='piel2', pelo='#1e1410', peinado='corto', lado=-1, inclina=6, ojos='abiertos',
               boca='sonrisa')
 brazo(lz, (1118, 552), (1078, 520), (1070, 450), 17, TEAL)               # he votes
@@ -359,6 +359,7 @@ sombra(lz, 580, 818, 80, 9)
 capa(205)
 taburete(580, 772, 40, 12, 40)
 # the raised arm goes behind his head? no: in front of the sky, drawn after the back
+cuello(lz, 580, 612, 35, 'piel5', (580, 652), ancho=0.5, natural=False)
 lomo = pieza(lz, [(532, 664), (556, 650), (580, 646), (606, 650), (630, 666), (634, 700), (628, 760), (580, 772),
                   (534, 764), (526, 712)], '#e2a03a',
              toques=[(540, 720, 40, '#c07a2a', 0.55), (612, 680, 30, '#f2c46a', 0.5)])
@@ -367,7 +368,6 @@ pliegues(lz, [[(580, 660), (578, 710), (580, 768)], [(546, 700), (560, 730), (55
 lz.rayado(Poligono([(534, 744), (628, 744), (628, 764), (580, 772), (534, 764)], suave=False), '#b07a2a', angulo=90,
           sep=3, presion=0.45)                                              # ribbed hem of the jumper
 brazo(lz, (538, 672), (524, 718), (540, 752), 19, '#e2a03a', pliegue=False)   # far arm resting
-cuello(lz, 580, 612, 35, 'piel5', (580, 652), ancho=0.5)
 cabeza_espalda(lz, 580, 610, 35, piel='piel5', pelo='#1e1410', peinado='rizado', giro=0.6)
 brazo(lz, (622, 672), (664, 612), (668, 494), 19, '#e2a03a')               # he votes too
 mano_dedos(lz, 668, 496, -90, 36, 'piel5', 'abierta', lado=-1)

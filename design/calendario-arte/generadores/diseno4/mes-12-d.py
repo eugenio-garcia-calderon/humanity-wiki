@@ -184,12 +184,12 @@ pierna([(586, 540), (662, 540), (666, 594)], 28, mezcla(PANT, '#1a1a2a', 0.3), z
 pierna([(600, 546), (676, 548), (680, 600)], 29, PANT, zapato='#4a2e22')
 pliegues(lz, [[(640, 536), (656, 546), (668, 540)], [(672, 556), (676, 574)]], '#2a2f44')
 ABRIGO = '#d9a441'
+cuello(lz, 616, 412, 46, 'piel3', (604, 462), escote=False, giro=0.6, inclina=12)
 pieza(lz, [(566, 466), (596, 456), (624, 462), (646, 486), (652, 520), (650, 548), (612, 556), (572, 552),
            (560, 520), (560, 488)], ABRIGO, toques=[(566, 520, 40, '#b07a2a', 0.6), (632, 478, 26, '#f0c870', 0.5)])
 pliegues(lz, [[(612, 476), (622, 512), (626, 550)], [(580, 500), (590, 530), (582, 552)]], '#8a5a20', presion=0.5)
 for y in (500, 522, 542):
     lz.aguada(Elipse(628, y, 3, 3), '#6a4428', dens=0.9, irreg=0.1)
-cuello(lz, 616, 412, 46, 'piel3', (604, 462), ancho=0.42)
 # red scarf with fringes
 bufanda = Trazo([(586, 462), (608, 472), (630, 462)], (16, 18, 15))
 lz.aguada(bufanda, CARMIN, dens=0.85, tapa=1, irreg=0.3)
@@ -238,6 +238,7 @@ pieza(lz, [(930, 506), (906, 512), (868, 520), (838, 528), (832, 548), (850, 560
       toques=[(840, 540, 26, '#5a2a52', 0.5)])                          # her skirt over the knees
 pliegues(lz, [[(900, 524), (868, 534), (840, 538)], [(886, 540), (858, 552)]], '#4a2240')
 # coat
+cuello(lz, 878, 414, 44, 'piel4', (890, 458), escote=False, giro=-0.6)
 pieza(lz, [(868, 462), (892, 454), (916, 460), (932, 490), (934, 524), (930, 552), (898, 556), (870, 548),
            (860, 516), (860, 486)], TEAL, toques=[(928, 520, 40, '#2a6a6a', 0.6), (874, 474, 26, '#6fb1ad', 0.5)])
 pliegues(lz, [[(886, 470), (884, 510), (888, 552)], [(916, 486), (920, 520), (914, 552)]], '#1f4f4f', presion=0.5)
@@ -245,7 +246,6 @@ for (x, y) in ((902, 496), (876, 528), (918, 534), (894, 474)):
     flor_simple(lz, x, y, 4.0, ROSA, centro='#fff3cf')
 # far hand on the wheel's rim
 mano_dedos(lz, 930, 536, 120, 28, 'piel4', 'sujeta', lado=1)
-cuello(lz, 878, 414, 44, 'piel4', (890, 458), ancho=0.4)
 cabeza_perfil(lz, 878, 412, 44, piel='piel4', pelo='#2a1a14', peinado='rizado', lado=-1, inclina=-4,
               ojos='abiertos', boca='abierta', ojo=1.35)
 # her headwrap, the size of a real one: curls show at the nape and the temple
@@ -299,6 +299,7 @@ NX = 430
 sombra(lz, NX, ym(NX) + 4, 40, 5, '#8a6a5a', 0.3)
 pierna([(NX - 6, 586), (NX - 16, 618), (NX - 26, ym(NX - 26) - 6)], 13, '#4a6a9a', zapato=ORO, pie_lado=1)
 pierna([(NX + 8, 586), (NX + 24, 610), (NX + 26, ym(NX + 26) - 10)], 13, '#5a7aaa', zapato=ORO, pie_lado=1)
+cuello(lz, NX, 472, 32, 'piel2', (NX + 2, 504), giro=0.55, inclina=6)
 pieza(lz, [(NX - 16, 506), (NX + 2, 500), (NX + 20, 506), (NX + 28, 548), (NX + 34, 592), (NX, 598),
            (NX - 30, 592), (NX - 22, 548)], CORAL, toques=[(NX - 22, 570, 28, '#c4503e', 0.6)])
 pliegues(lz, [[(NX, 528), (NX - 4, 566), (NX - 8, 594)]], '#9a3a2e')
@@ -318,7 +319,6 @@ for k in range(3):
              presion=0.35)
 brazo(lz, (NX + 12, 512), (NX + 10, 548), (BX - 20, 558), 14, CORAL)                      # near arm
 mano_dedos(lz, BX - 20, 558, -15, 22, 'piel2', 'sujeta', lado=1)
-cuello(lz, NX, 472, 32, 'piel2', (NX + 2, 504))
 cabeza(lz, NX, 470, 32, piel='piel2', pelo='#c9783a', peinado='rizado', giro=0.55, inclina=6, ojos='abiertos',
        boca='sonrisa', mira=(1, 0.3))
 

@@ -325,7 +325,7 @@ def torso2(lz, hi, hd, ci, cd, color, cintura=0.86, escote='redondo', sombra=1, 
     up = (m - (ci + cd) / 2)
     up /= max(np.linalg.norm(up), 1e-6)
     side = (hd - hi) / max(w, 1e-6)
-    esc = 0.3 if escote == 'v' else 0.1
+    esc = 0.34 if escote == 'v' else 0.2
     pts = [m - side * w * 0.2 + up * w * 0.07, hi + up * w * 0.01, hi - side * w * 0.05 - up * w * 0.12,
            hi - side * w * 0.03 - up * w * 0.32, wi, ci, (ci + cd) / 2 - up * w * 0.02, cd, wd,
            hd + side * w * 0.03 - up * w * 0.32, hd + side * w * 0.05 - up * w * 0.12, hd + up * w * 0.01,
@@ -346,15 +346,14 @@ def torso2(lz, hi, hd, ci, cd, color, cintura=0.86, escote='redondo', sombra=1, 
     return f
 
 
-def cuello(lz, cabeza_xy, r, base, piel='piel2', ancho=0.48):
-    """Neck from under the head to the collar, shadowed under the chin."""
+def cuello(lz, cabeza_xy, r, base, piel='piel2', ancho=0.48, giro=0.0, inclina=0.0, ancho_base=None, escote=True):
+    """A natural neck (acuarela.cuello_natural): narrow under the jaw, opening
+    into the trapezius, a soft shadow under the chin and the clavicles in
+    pencil. Paint it before the shirt and the head."""
+    import acuarela
     hx, hy = cabeza_xy
-    b = _v(base)
-    f = Trazo([(hx, hy + r * 0.55), ((hx + b[0]) / 2, (hy + r * 0.55 + b[1]) / 2), b],
-              (r * ancho, r * ancho * 1.02, r * ancho * 1.12))
-    lz.aguada(f, piel, dens=0.6, tapa=1, irreg=0.4, borde=0.3,
-              toques=[(hx, hy + r * 0.9, r * 0.45, piel_sombra(piel), 0.7)])
-    return f
+    return acuarela.cuello_natural(lz, hx, hy, r, piel, tuple(base), ancho_base or r * 2.3, giro=giro, inclina=inclina,
+                                   escote=escote)
 
 
 # ---------------------------------------------------------------- the head
@@ -561,8 +560,8 @@ def cabeza2(lz, x, y, r, piel='piel2', pelo='#5a3a2a', peinado='corto', giro=0.0
             cs.append((q[0], q[1], r * rng.uniform(0.3, 0.38)))
         hp = Circulos(cs)
     elif peinado == 'calvo':
-        hp = (Poligono([R(-rx * 1.04, r * 0.22), R(-rx * 1.0, -r * 0.35), R(-rx * 0.72, -r * 0.52), R(-rx * 0.8, r * 0.05)]) |
-              Poligono([R(rx * 1.04, r * 0.22), R(rx * 1.0, -r * 0.35), R(rx * 0.72, -r * 0.52), R(rx * 0.8, r * 0.05)]))
+        hp = (Poligono([R(-rx * 1.03, r * 0.12), R(-rx * 1.0, -r * 0.3), R(-rx * 0.86, -r * 0.4), R(-rx * 0.88, r * 0.0)]) |
+              Poligono([R(rx * 1.03, r * 0.12), R(rx * 1.0, -r * 0.3), R(rx * 0.86, -r * 0.4), R(rx * 0.88, r * 0.0)]))
     elif peinado == 'panuelo':
         hp = Poligono([R(-rx * 1.15, r * 0.7), R(-rx * 1.12, -r * 0.5), R(-rx * 0.4, -r * 1.14), R(rx * 0.5, -r * 1.14),
                        R(rx * 1.12, -r * 0.5), R(rx * 1.15, r * 0.7), R(rx * 0.92, r * 0.62), R(rx * 0.86, -r * 0.3),

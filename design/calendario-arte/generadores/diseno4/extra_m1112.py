@@ -237,8 +237,16 @@ def casita(lz, x, y, w, h, pared='#f1d9b0', tejado='#c0503f', ventanas=1, luz=Tr
         lz.aguada(pu, '#8a5a3e', dens=0.75, tapa=1, irreg=0.2)
 
 
-def cuello(lz, x, y, r, piel, base, ancho=0.46):
-    """A slender neck from under the head (x, y, r) down to the collar point."""
+def cuello(lz, x, y, r, piel, base, ancho=0.46, natural=True, giro=0.0, inclina=0.0, escote=True, hombros=None):
+    """A neck under the head (x, y, r) down to the collar point `base`.
+    natural=True (default) uses acuarela.cuello_natural: it grows out of the
+    jaw and flows into the shoulders, so it must be painted BEFORE the shirt
+    and the head. natural=False: the old slender tube (for a nape seen from
+    behind)."""
+    if natural:
+        import acuarela
+        return acuarela.cuello_natural(lz, x, y, r, piel, base, hombros or r * 1.7, giro=giro, inclina=inclina,
+                                       escote=escote)
     f = Trazo([(x, y + r * 0.55), base], (r * ancho, r * ancho * 1.12))
     lz.aguada(f, piel, dens=0.58, tapa=1, irreg=0.4, borde=0.4,
               toques=[(x, y + r * 0.95, r * 0.45, mezcla(piel, '#8a4a32', 0.55), 0.7)])
