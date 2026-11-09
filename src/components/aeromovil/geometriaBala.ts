@@ -58,22 +58,23 @@ export interface FichaBala { clave: Exclude<ClaveBala, 'bRuedaDT' | 'bRuedaLat'>
 export type BloqueBala = 'Medidas' | 'Morro y cola' | 'Cúpula' | 'Ocupantes';
 export const BLOQUES_BALA: BloqueBala[] = ['Medidas', 'Morro y cola', 'Cúpula', 'Ocupantes'];
 export const DESLIZADORES_BALA: FichaBala[] = [
-  { clave: 'bBatalla', n: 'Batalla: eje delantero a trasero', bloque: 'Medidas', min: 2.20, max: 2.80, paso: 0.01 },
-  { clave: 'bVia', n: 'Vía de las ruedas laterales', bloque: 'Medidas', min: 1.00, max: 1.40, paso: 0.01 },
-  { clave: 'bAncho', n: 'Ancho de la carrocería', bloque: 'Medidas', min: 0.78, max: 1.00, paso: 0.01 },
-  { clave: 'bSuelo', n: 'Altura libre al suelo', bloque: 'Medidas', min: 0.10, max: 0.18, paso: 0.002 },
-  { clave: 'bMorro', n: 'Morro: del eje delantero a la punta', bloque: 'Morro y cola', min: 0.50, max: 0.90, paso: 0.01 },
-  { clave: 'bPuntaMorro', n: 'Morro: afilado de la punta', bloque: 'Morro y cola', min: 0.55, max: 1.10, paso: 0.01 },
-  { clave: 'bCola', n: 'Cola: del eje trasero a la punta', bloque: 'Morro y cola', min: 0.50, max: 1.00, paso: 0.01 },
-  { clave: 'bPuntaCola', n: 'Cola: altura de la punta', bloque: 'Morro y cola', min: 0.36, max: 0.62, paso: 0.005 },
-  { clave: 'bAleta', n: 'Aleta: altura de la punta', bloque: 'Morro y cola', min: 0.88, max: 1.25, paso: 0.005 },
-  { clave: 'bCupIni', n: 'Cúpula: dónde empieza a subir', bloque: 'Cúpula', min: 0.05, max: 0.30, paso: 0.01 },
-  { clave: 'bCupFin', n: 'Cúpula: dónde acaba de bajar', bloque: 'Cúpula', min: 1.70, max: 2.55, paso: 0.01 },
-  { clave: 'bAlto', n: 'Alto total (techo de la cúpula)', bloque: 'Cúpula', min: 1.32, max: 1.60, paso: 0.002 },
-  { clave: 'bPilX', n: 'Piloto: cadera al eje delantero', bloque: 'Ocupantes', min: 0.96, max: 1.20, paso: 0.01 },
+  // symmetric about the garage's value: the page's slider recentres on it and would cut a longer side off
+  { clave: 'bBatalla', n: 'Batalla: eje delantero a trasero', bloque: 'Medidas', min: 2.20, max: 2.70, paso: 0.01 },
+  { clave: 'bVia', n: 'Vía de las ruedas laterales', bloque: 'Medidas', min: 0.95, max: 1.25, paso: 0.01 },
+  { clave: 'bAncho', n: 'Ancho de la carrocería', bloque: 'Medidas', min: 0.77, max: 0.93, paso: 0.01 },
+  { clave: 'bSuelo', n: 'Altura libre al suelo', bloque: 'Medidas', min: 0.09, max: 0.158, paso: 0.002 },
+  { clave: 'bMorro', n: 'Morro: del eje delantero a la punta', bloque: 'Morro y cola', min: 0.45, max: 0.75, paso: 0.01 },
+  { clave: 'bPuntaMorro', n: 'Morro: afilado de la punta', bloque: 'Morro y cola', min: 0.50, max: 1.00, paso: 0.01 },
+  { clave: 'bCola', n: 'Cola: del eje trasero a la punta', bloque: 'Morro y cola', min: 0.45, max: 0.85, paso: 0.01 },
+  { clave: 'bPuntaCola', n: 'Cola: altura de la punta', bloque: 'Morro y cola', min: 0.36, max: 0.58, paso: 0.005 },
+  { clave: 'bAleta', n: 'Aleta: altura de la punta', bloque: 'Morro y cola', min: 0.85, max: 1.15, paso: 0.005 },
+  { clave: 'bCupIni', n: 'Cúpula: dónde empieza a subir', bloque: 'Cúpula', min: 0.05, max: 0.25, paso: 0.01 },
+  { clave: 'bCupFin', n: 'Cúpula: dónde acaba de bajar', bloque: 'Cúpula', min: 1.80, max: 2.20, paso: 0.01 },
+  { clave: 'bAlto', n: 'Alto total (techo de la cúpula)', bloque: 'Cúpula', min: 1.32, max: 1.584, paso: 0.002 },
+  { clave: 'bPilX', n: 'Piloto: cadera al eje delantero', bloque: 'Ocupantes', min: 0.94, max: 1.18, paso: 0.01 },
   { clave: 'bPilY', n: 'Piloto: altura del sillín', bloque: 'Ocupantes', min: 0.38, max: 0.50, paso: 0.005 },
   { clave: 'bPasX', n: 'Pasajero: cadera al eje delantero', bloque: 'Ocupantes', min: 1.36, max: 1.80, paso: 0.01 },
-  { clave: 'bPasY', n: 'Pasajero: altura del sillín', bloque: 'Ocupantes', min: 0.42, max: 0.54, paso: 0.005 },
+  { clave: 'bPasY', n: 'Pasajero: altura del sillín', bloque: 'Ocupantes', min: 0.42, max: 0.52, paso: 0.005 },
 ];
 export const fichaBala = (k: ClaveBala) => DESLIZADORES_BALA.find(f => f.clave === k);
 /** Ruedas que se pueden elegir: delante y detrás van dentro de la carrocería; a los lados, en carenados que crecen con la rueda. */
@@ -98,7 +99,7 @@ export function camposBala(P: Partial<Parametros>): CamposBala {
  */
 export function rangoBala(k: FichaBala['clave'], B: CamposBala): [number, number] {
   const f = fichaBala(k)!;
-  if (k === 'bCupFin') return [f.min, Math.min(f.max, B.bBatalla - 0.25)];
+  if (k === 'bCupFin') return [Math.min(f.min, B.bBatalla - 0.45), Math.min(f.max, B.bBatalla - 0.25)];
   if (k === 'bPasX') return [Math.max(f.min, B.bPilX + 0.40), Math.min(f.max, B.bPilX + 0.62)];
   return [f.min, f.max];
 }

@@ -12,7 +12,7 @@
  */
 import { aDiseno, deDiseno } from '../src/components/aeromovil/Disenos';
 import { PARAMETROS_A1, PARAMETROS_BALA, PARAMETROS_GOTA, areas, calcular, crearModelo, type Parametros } from '../src/components/aeromovil/geometria';
-import { DESLIZADORES_BALA } from '../src/components/aeromovil/geometriaBala';
+import { DESLIZADORES_BALA, fichaBala } from '../src/components/aeromovil/geometriaBala';
 import { cuerpoAeromovil } from '../src/components/aeromovil/tunel/nuestro';
 import { cuerpoGaraje } from '../src/components/aeromovil/tunel/cuerpos';
 
@@ -52,14 +52,14 @@ const claves = (o: object) => Object.keys(o).filter(k => /^b[A-Z]/.test(k));
 }
 // 4. broken or out-of-range values
 {
-  const Q = deDiseno(JSON.parse(JSON.stringify({ disposicion: 'bala', bBatalla: 'larga', bAncho: 9, bRuedaDT: '99', bPasX: 0.2 })));
+  const Q = deDiseno(JSON.parse(JSON.stringify({ disposicion: 'bala', bBatalla: 'larga', bAncho: 9, bVia: 0.5, bRuedaDT: '99', bPasX: 0.2 })));
   const m = crearModelo(Q);
   ok(Q.bBatalla === 2.45, 'un número guardado como texto se ignora: batalla de serie (2,45)');
-  ok(m.tipo === 'bala' && m.D.ancho === 1.0, `un ancho de 9 m se queda en el máximo del deslizador (${m.tipo === 'bala' ? m.D.ancho : '?'} m)`);
+  ok(m.tipo === 'bala' && m.D.ancho === fichaBala('bAncho')!.max, `un ancho de 9 m se queda en el máximo del deslizador (${m.tipo === 'bala' ? m.D.ancho : '?'} m)`);
   ok(m.tipo === 'bala' && m.rF === 0.305, 'una rueda que no existe vuelve a la de serie (24″)');
   ok(m.tipo === 'bala' && Math.abs(-m.sillines.xPasajero - (1.06 + 0.40)) < 1e-9, 'un pasajero imposible (delante del piloto) se coloca a 40 cm detrás de él');
   const hueco = calcular(m, areas(m)).comprobaciones.find(c => c.nombre.startsWith('Carenado lateral'))!.holgura;
-  ok(m.tipo === 'bala' && m.F.VIA_LAT > 1.10 && hueco >= 0.028, `con 1 m de carrocería, la vía sube a ${m.tipo === 'bala' ? m.F.VIA_LAT.toFixed(2) : '?'} m y deja ${(hueco * 100).toFixed(1)} cm entre carenado y carrocería`);
+  ok(m.tipo === 'bala' && m.F.VIA_LAT > fichaBala('bVia')!.min && hueco >= 0.028, `con la carrocería más ancha y la vía más estrecha, la vía sube a ${m.tipo === 'bala' ? m.F.VIA_LAT.toFixed(2) : '?'} m y deja ${(hueco * 100).toFixed(1)} cm entre carenado y carrocería`);
 }
 // 5. the editor's default Bala and the garage's, in the tunnel
 {
