@@ -1,10 +1,10 @@
 [
-  {"dia": 4, "frase": "Micorrizas: la mayoría de plantas se asocia con hongos.", "como_aparece": "Bajo tierra, hilos de micelio dorados y luminosos unen las raíces de la encina, del cerezo y del roble recién plantado: la primera raíz del arbolito acaba de tocar la red."},
-  {"dia": 15, "frase": "Una seta es solo el fruto: el hongo vive bajo tierra.", "como_aparece": "Sobre la tierra asoman tres setas; justo debajo, un hilo dorado las conecta con la red de micelio que es el verdadero hongo."},
-  {"dia": 11, "frase": "Las lombrices airean y abonan la tierra del huerto.", "como_aparece": "Tres lombrices, con sus anillos, abren galerías en el corte del suelo."},
-  {"dia": 27, "frase": "Planta especies autóctonas: alimentan a la fauna local.", "como_aparece": "Un abuelo, con una rodilla en tierra, aprieta el suelo alrededor de un roble pequeño recién plantado mientras su nieta lo riega con una regadera."},
-  {"dia": 1, "frase": "Un árbol viejo puede albergar cientos de especies.", "como_aparece": "La vieja encina es un mundo: nido con huevos azules y un petirrojo, una abubilla cantando, un agujero en el tronco, bellotas, y un lirón careto dormido entre sus raíces."},
-  {"dia": 12, "frase": "Hoy: escucha a los pájaros. ¿Cuántos cantos oyes?", "como_aparece": "La abubilla con la cresta abierta y el petirrojo cantan en la copa (rizos de canto a lápiz, sin letras)."},
+  {"dia": 4, "frase": "Micorrizas: la mayoría de plantas se asocia con hongos.", "como_aparece": "Bajo tierra, una red de micelio dorada y luminosa une las raíces de la encina con las del cerezo y estas con las raicillas del roble recién plantado, que se encienden al recibir el oro."},
+  {"dia": 15, "frase": "Una seta es solo el fruto: el hongo vive bajo tierra.", "como_aparece": "Junto a la encina asoman dos setas; un hilo dorado baja de su pie hasta la red de micelio, que es el verdadero hongo."},
+  {"dia": 11, "frase": "Las lombrices airean y abonan la tierra del huerto.", "como_aparece": "Una lombriz, con sus anillos, abre su galería en el corte del suelo."},
+  {"dia": 27, "frase": "Planta especies autóctonas: alimentan a la fauna local.", "como_aparece": "Un abuelo, con una rodilla en tierra, aprieta el suelo alrededor de un roble pequeño de hojas lobuladas (con la bellota medio enterrada junto a su mano), mientras su nieta lo riega con un chorrito de la regadera."},
+  {"dia": 1, "frase": "Un árbol viejo puede albergar cientos de especies.", "como_aparece": "La vieja encina es un mundo: una abubilla da de comer a sus crías en un agujero del tronco, bellotas en la copa, una mariposa y una abeja en las flores de su pie."},
+  {"dia": 12, "frase": "Hoy: escucha a los pájaros. ¿Cuántos cantos oyes?", "como_aparece": "La abubilla, con la cresta abierta, canta junto al nido del tronco (rizos de canto a lápiz, sin letras)."},
   {"dia": 19, "frase": "Hoy: deja un rincón con flores para los insectos.", "como_aparece": "A los dos lados del corte, rincones de flores silvestres con abejas y mariposas."},
-  {"dia": null, "frase": "El arrendajo entierra bellotas: así viajan los robles.", "como_aparece": "Una bellota enterrada y olvidada ya echa su primera raíz en el suelo, junto a las raíces de la encina."}
+  {"dia": null, "frase": "El arrendajo entierra bellotas: así viajan los robles.", "como_aparece": "La bellota de la que nace el arbolito asoma medio enterrada junto a la mano del abuelo."}
 ]

@@ -265,8 +265,6 @@ pieza(lz, [(868, 462), (892, 454), (916, 460), (932, 490), (934, 524), (930, 552
 pliegues(lz, [[(886, 470), (884, 510), (888, 552)], [(916, 486), (920, 520), (914, 552)]], '#1f4f4f', presion=0.5)
 for (x, y) in ((902, 496), (876, 528), (918, 534), (894, 474)):
     flor_simple(lz, x, y, 4.0, ROSA, centro='#fff3cf')
-# far hand resting on her lap
-mano_dedos(lz, 896, 532, 186, 28, 'piel4', 'relajada', lado=1)
 cabeza_perfil(lz, 878, 412, 44, piel='piel4', pelo='#2a1a14', peinado='rizado', lado=-1, inclina=-4,
               ojos='abiertos', boca='abierta', ojo=1.35)
 # a soft wool beanie that slouches to the back; curls show at the nape and the temple
@@ -299,6 +297,36 @@ lz.lapiz([arco(WX, WY, WR - 10, WR - 8, 0, 360, 40)], '#8a9aaa', grosor=0.7, pre
 lz.lapiz([[(WX, WY), (WX + (WR - 7) * math.cos(a), WY + (WR - 5) * math.sin(a))]
           for a in np.linspace(0, 2 * np.pi, 11)[:-1]], '#5a6a7a', grosor=0.45, presion=0.45, temblor=0.03)
 lz.aguada(Elipse(WX, WY, 5, 5), '#6a7a8a', dens=0.8, tapa=1)
+# her far hand grips the hand rim at the top of the wheel: palm and thumb outside, four fingers
+# curling over the rim toward the hub
+RR = WR - 10                                     # radius of the hand rim
+ga = math.radians(-62)                           # where she holds it (top, a little to the back)
+gp = np.array([WX + RR * math.cos(ga), WY + (RR + 2) * math.sin(ga)])
+rad = np.array([math.cos(ga), math.sin(ga)])     # outward from the hub
+tan = np.array([-rad[1], rad[0]])                # along the rim
+manga_ = Trazo([gp + rad * 30 + tan * 4, gp + rad * 14], (17, 15))
+lz.aguada(manga_, TEAL, dens=0.76, tapa=1, irreg=0.5, toques=[(*(gp + rad * 20), 10, '#2a6a6a', 0.5)])
+lz.contorno(manga_, '#1f4f4f', grosor=0.7, presion=0.5, cortes=0.2)
+SEPM = '#6b4433'
+palma = Poligono([gp + rad * 15 + tan * 8, gp + rad * 15 - tan * 8, gp + rad * 3 - tan * 9, gp + rad * 2 + tan * 9])
+dedos_ = []
+for k in range(4):
+    o = tan * (-6 + k * 4)
+    a0 = gp + rad * 3 + o
+    dedos_.append(Trazo([a0, gp - rad * 2.5 + o - tan * 0.6, gp - rad * 8.5 + o - tan * 1.4], (3.8, 3.4, 2.8)))
+pulgar_ = Trazo([gp + rad * 9 + tan * 8, gp + rad * 4.5 + tan * 12.5, gp + rad * 1.5 + tan * 15], (4.4, 3.8, 3.2))
+mano_f = palma
+for g_ in dedos_ + [pulgar_]:
+    mano_f = mano_f | g_
+lz.aguada(mano_f, 'piel4', dens=0.62, tapa=1, irreg=0.25, borde=0.5, gran=0.1,
+          toques=[(*(gp + rad * 9), 8, mezcla('piel4', '#a0503a', 0.35), 0.4)])
+lz.contorno(palma | pulgar_, SEPM, grosor=0.6, presion=0.5, cortes=0.15, desfase=0.05)
+for g_ in dedos_:
+    lz.contorno(g_, SEPM, grosor=0.5, presion=0.5, cortes=0.05, desfase=0.0)
+lz.lapiz([[gp + rad * 4 + tan * -7, gp + rad * 4 + tan * 7]], SEPM, grosor=0.5, presion=0.4)     # knuckles
+# the rim passes over the fingertips, under the palm: redraw the rim between the fingers
+lz.lapiz([[gp - rad * 0.5 + tan * (-6 + k * 4) - tan * 1.6, gp - rad * 0.5 + tan * (-6 + k * 4) - tan * 2.4]
+          for k in range(4)], '#8a9aaa', grosor=0.5, presion=0.4)
 
 componer(HOJA, lz, K, (CX, KY))
 lz = HOJA
@@ -367,24 +395,31 @@ for (x0, y0, sd) in ((330, yn(330) - 60, -1), (1156, yn(1156) - 60, 1)):
 
 # ------------------------------------------------------------------ their words: two threads of light, a heart, a star
 SX, SY = CX, 160                                # the star they light
-TOP = (CX, 348)                                  # the cleft of the heart: there the two threads become one
-# each thread comes from one of them, runs up beside the other WITHOUT crossing it (gold always on the left,
-# rose always on the right), draws its half of a soft heart and meets the other at the cleft
-# below the point they run side by side, straight up (a short stem), so neither tail lines up with the
-# other's side of the heart: nothing crosses, nothing reads as a ribbon or an 8
-oido = spline([(630, 484), (690, 472), (726, 458), (738, 446), (739.5, 428), (740, 410), (722, 392), (700, 370),
-               (693, 348), (702, 330), (722, 325), (736, 334), (741, 348)])  # from his hand on his heart
-voz = spline([(836, 436), (796, 446), (760, 450), (746, 444), (744.5, 428), (744, 410), (762, 392), (784, 370),
-              (791, 348), (782, 330), (762, 325), (748, 334), (743, 348)])  # from her mouth
-oido, voz = T_(oido), T_(voz)
-TOP = tuple(T_(TOP))
+# Page coordinates. Each thread stays on its OWN side and never passes to the other: the gold one (from
+# the grandfather's hand on his heart, on the left) joins the left side of the heart like a branch and draws
+# only the left half; the rose one (from her mouth, on the right) only the right half. The two halves touch
+# only at the point (just above the teapot) and at the cleft; from the cleft one thread goes up to the star.
+TIP, TOP = (CX, 440), (CX, 348)
+izq = spline([(741.6, 443), (718, 420), (696, 396), (682, 370), (682, 346), (694, 328), (714, 322), (732, 330),
+              (741, 348)])
+der = 2 * CX - izq[:, 0]
+der = np.stack([der, izq[:, 1]], 1)
+cola_oro = spline([(606, 452), (634, 434), (660, 408), (676, 386), (682, 368)])      # from his hand
+cola_rosa = spline([(856, 398), (832, 392), (812, 384), (802, 368)])                # from her mouth
+assert izq[:, 0].max() <= CX and der[:, 0].min() >= CX and cola_oro[:, 0].max() < CX and cola_rosa[:, 0].min() > CX
 uno = bezier(TOP, (CX - 14, 270), (CX + 16, 220), (SX, SY + 26), 60)       # together, one thread
 rng2 = np.random.default_rng(12)
-for path, col, lp_, w in ((oido, '#eba93a', '#b8781a', 3.2), (voz, '#ec7f92', '#b04a60', 3.2),
+for path, col, lp_, w in ((cola_oro, '#eba93a', '#b8781a', 3.4), (izq, '#eba93a', '#b8781a', 3.6),
+                          (cola_rosa, '#ec7f92', '#b04a60', 3.4), (der, '#ec7f92', '#b04a60', 3.6),
                           (uno, '#f2b24a', '#b8781a', 3.8)):
-    jit = path + rng2.normal(0, 0.6, path.shape)
+    jit = path + rng2.normal(0, 0.35, path.shape) * np.array([1, 1])
+    if path is izq:
+        jit[:, 0] = np.minimum(jit[:, 0], CX - 0.4)          # the gold half never steps over the middle
+    if path is der:
+        jit[:, 0] = np.maximum(jit[:, 0], CX + 0.4)
     n_ = len(jit)
-    ws = tuple(np.interp(np.linspace(0, 1, 8), [0, 0.15, 0.85, 1], [1.2, w, w, w * 0.8]))
+    w0 = w * 0.85 if (path is izq or path is der) else 1.2     # the two halves keep their width to the point
+    ws = tuple(np.interp(np.linspace(0, 1, 8), [0, 0.15, 0.85, 1], [w0, w, w, w * 0.8]))
     f = Trazo(jit, ws, suave=False)
     lz.aguada(f, col, dens=0.85, tapa=0.7, irreg=0.6, borde=0.8, gran=0.2)
     lz.lapiz([jit], lp_, grosor=0.55, presion=0.45, temblor=0.4, cortes=0.45)
