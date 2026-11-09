@@ -1,0 +1,37 @@
+[
+  {
+    "dia": 1,
+    "frase": "El Sol nos da mucha más energía de la que consumimos.",
+    "como_aparece": "Un girasol gigante cuya cara es una placa solar se vuelve hacia el sol de junio y bebe su luz por finos hilos dorados."
+  },
+  {
+    "dia": 14,
+    "frase": "Reparar alarga la vida del aparato y ahorra recursos.",
+    "como_aparece": "Un abuelo y una niña, sentados en una hoja del girasol, arreglan juntos una lámpara vieja en vez de tirarla."
+  },
+  {
+    "dia": 7,
+    "frase": "Las bombillas LED gastan mucho menos y duran más.",
+    "como_aparece": "La niña enrosca una bombilla LED nueva (filamento amarillo en tira) y se enciende con el hilo de luz que baja del girasol."
+  },
+  {
+    "dia": 12,
+    "frase": "Eólica y solar no emiten CO2 al generar electricidad.",
+    "como_aparece": "Las semillas del girasol son molinillos de viento que un niño suelta al aire; las que han caído ya giran como aerogeneradores en la colina."
+  },
+  {
+    "dia": 23,
+    "frase": "Comunidad energética: vecinos que comparten placas.",
+    "como_aparece": "Del girasol salen hilos de luz hacia los tejados solares de todas las casas del pueblecito: la energía se comparte entre vecinos."
+  },
+  {
+    "dia": 3,
+    "frase": "Día de la Bicicleta: hoy, un trayecto a pie o en bici.",
+    "como_aparece": "Por el camino de la colina pasa una persona en bicicleta."
+  },
+  {
+    "dia": 21,
+    "frase": "Solsticio de verano: el día con más luz del año.",
+    "como_aparece": "El sol del solsticio arriba a la derecha, el más luminoso de la escena, es el que alimenta al girasol."
+  }
+]

@@ -295,7 +295,7 @@ lz.contorno(vaso, '#6a9aa0', grosor=0.5, presion=0.5)
 lz.gouache(Trazo([(785, 762), (785, 776)], (0.9, 0.9)), '#ffffff', alfa=0.8, irreg=0)
 
 # ------------------------------------------------------------------ the dream: little lights rise into the crown
-sueno = bezier((640, 560), (600, 480), (690, 440), (620, 330), 60)
+sueno = bezier((640, 560), (600, 480), (650, 420), (560, 320), 60)
 for k in range(0, 60, 3):
     x, y = sueno[k]
     x += rng.normal(0, 5)
@@ -314,30 +314,30 @@ for (x, y) in ((608, 452), (632, 392), (612, 476)):      # 'z' as tiny curls, no
 PG, PN = 'piel4', 'piel1'
 YG = 806
 # grandfather (walking right, mid-step, turned to the boy)
-pierna2(lz, (196, 586), (184, 690), (164, YG - 14), 30, '#e9dcc0', PG, pie_ang=-30, descalzo=True, sombra=-1, bajo='corto')
-brazo2(lz, (236, 470), (262, 518), (276, 566), 22, '#7aa0c8', PG, 'larga', sombra=1,
+pierna2(lz, (296, 586), (284, 690), (264, YG - 14), 30, '#e9dcc0', PG, pie_ang=-30, descalzo=True, sombra=-1, bajo='corto')
+brazo2(lz, (336, 470), (362, 518), (376, 566), 22, '#7aa0c8', PG, 'larga', sombra=1,
        mano=dict(ang=90, gesto='relajada', lado=1, tam=33))
-pierna2(lz, (222, 588), (252, 690), (262, YG - 2), 30, '#e9dcc0', PG, pie_ang=5, descalzo=True, sombra=1, bajo='corto')
-cuello(lz, (214, 426), 30, (212, 466), PG)
-torso2(lz, (180, 466), (240, 470), (192, 592), (230, 594), '#7aa0c8', cintura=0.95, sombra=1, escote='v',
-       toques=[(230, 560, 40, '#4a6f9a', 0.6)], pliegues=[[(200, 500), (206, 550), (204, 588)]])
-cabeza2(lz, 214, 426, 30, PG, '#e8e2da', 'corto', giro=0.6, inclina=12, ojos='cerrados', boca='abierta', canas=True,
+pierna2(lz, (322, 588), (352, 690), (362, YG - 2), 30, '#e9dcc0', PG, pie_ang=5, descalzo=True, sombra=1, bajo='corto')
+cuello(lz, (314, 426), 30, (312, 466), PG)
+torso2(lz, (280, 466), (340, 470), (292, 592), (330, 594), '#7aa0c8', cintura=0.95, sombra=1, escote='v',
+       toques=[(330, 560, 40, '#4a6f9a', 0.6)], pliegues=[[(300, 500), (306, 550), (304, 588)]])
+cabeza2(lz, 314, 426, 30, PG, '#e8e2da', 'rizado', giro=0.6, inclina=12, ojos='cerrados', boca='abierta', canas=True,
         barba='#e4ddd4')
 # the boy (looking up at his grandfather, laughing)
-pierna2(lz, (306, 708), (300, 752), (280, YG - 6), 22, None, PN, pie_ang=-15, descalzo=True, sombra=-1)
-pierna2(lz, (320, 708), (338, 750), (346, YG), 22, None, PN, pie_ang=10, descalzo=True, sombra=1)
-brazo2(lz, (330, 640), (346, 670), (352, 698), 15, '#f2b33a', PN, 'corta', sombra=1,
+pierna2(lz, (406, 708), (400, 752), (380, YG - 6), 22, None, PN, pie_ang=-15, descalzo=True, sombra=-1)
+pierna2(lz, (420, 708), (438, 750), (446, YG), 22, None, PN, pie_ang=10, descalzo=True, sombra=1)
+brazo2(lz, (430, 640), (446, 670), (452, 698), 15, '#f2b33a', PN, 'corta', sombra=1,
        mano=dict(ang=80, gesto='relajada', lado=1, tam=22))
-lz.aguada(Poligono([(296, 690), (334, 690), (338, 718), (296, 720)]), '#e8735e', dens=0.8, tapa=1, irreg=0.3)   # shorts
-lz.contorno(Poligono([(296, 690), (334, 690), (338, 718), (296, 720)]), '#9a3a2e', grosor=0.7, presion=0.5)
-cuello(lz, (314, 592), 22, (314, 626), PN)
-torso2(lz, (296, 626), (332, 628), (298, 694), (332, 694), '#f2b33a', cintura=1.0, sombra=1)
-cabeza2(lz, 314, 592, 22, PN, '#e0a040', 'rizado', giro=-0.5, inclina=-14, ojos='abiertos', boca='risa', mira=(-1, -1))
+lz.aguada(Poligono([(396, 690), (434, 690), (438, 718), (396, 720)]), '#e8735e', dens=0.8, tapa=1, irreg=0.3)   # shorts
+lz.contorno(Poligono([(396, 690), (434, 690), (438, 718), (396, 720)]), '#9a3a2e', grosor=0.7, presion=0.5)
+cuello(lz, (414, 592), 22, (414, 626), PN)
+torso2(lz, (396, 626), (432, 628), (398, 694), (432, 694), '#f2b33a', cintura=1.0, sombra=1)
+cabeza2(lz, 414, 592, 22, PN, '#e0a040', 'rizado', giro=-0.5, inclina=-14, ojos='abiertos', boca='risa', mira=(-1, -1))
 # their hands meet: the grandfather's near arm comes down, the boy's reaches up
-brazo2(lz, (186, 476), (220, 560), (270, 626), 22, '#7aa0c8', PG, 'larga', sombra=-1, mano=None)
-brazo2(lz, (300, 634), (286, 660), (282, 640), 15, '#f2b33a', PN, 'corta', sombra=-1, mano=None)
-mano2(lz, 270, 626, 40, 32, PG, 'agarra', lado=-1)
-mano2(lz, 282, 642, -110, 22, PN, 'agarra', lado=1)
+brazo2(lz, (286, 476), (320, 560), (370, 626), 22, '#7aa0c8', PG, 'larga', sombra=-1, mano=None)
+brazo2(lz, (400, 634), (386, 660), (382, 640), 15, '#f2b33a', PN, 'corta', sombra=-1, mano=None)
+mano2(lz, 370, 626, 40, 32, PG, 'agarra', lado=-1)
+mano2(lz, 382, 642, -110, 22, PN, 'agarra', lado=1)
 
 # ------------------------------------------------------------------ the woman who stretches toward the sun
 PM = 'piel3'

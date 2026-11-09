@@ -83,7 +83,7 @@ capas = [((1100, 220, 190, 120), '#4f7f45', 0.8, [(1190, 280, 80, '#2f5a3a', 0.6
          ((1240, 280, 80, 50), '#6f9a4a', 0.75, []), ((940, 300, 70, 45), '#7aa456', 0.72, [])]
 for i, ((cx, cy, rx, ry), col, dd, tq) in enumerate(capas):
     f = masa(cx, cy, rx, ry, 16, 70 + i)
-    lz.aguada(f, col, dens=dd, tapa=0.9 if i else 1, borde=0.8, gran=0.45, irreg=1.8, flor=1, toques=tq)
+    lz.aguada(f, col, dens=dd, tapa=0.9 if i else 1, borde=0.8, gran=0.45, irreg=1.8, flor=0 if i else 1, toques=tq)
     lz.contorno(f, VERDE_O, grosor=0.6, presion=0.35, cortes=0.55)
     for (x, y) in puntos_dentro(f, 10, 90 + i):
         hojita(lz, x, y, rng.uniform(10, 15), rng.uniform(0, 360), rng.choice(['#3f6f45', '#9fbf6a', '#5f8f4a']),

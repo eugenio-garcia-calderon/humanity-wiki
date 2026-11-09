@@ -50,37 +50,46 @@ asiento = Poligono([(142, 420), (226, 416), (238, 432), (152, 438)], suave=False
 lz.aguada(asiento, '#d9b06a', dens=0.7, tapa=1, irreg=0.3)
 lz.rayado(asiento, '#9a7238', angulo=80, sep=3, presion=0.4)
 lz.contorno(asiento, SEP, grosor=0.8, presion=0.5)
-# shoulders tilt with the rhythm; one foot flat, the other tapping (toe raised)
-J = dict(cabeza=(188, 282, 24), hi=(162, 326), hd=(214, 320), ci=(168, 412), cd=(208, 414),
-         pierna_i=[(176, 416), (236, 424), (232, 500)], pierna_d=[(198, 418), (262, 412), (272, 488)],
-         pie_i=8, pie_d=-28)
-figura(lz, J, dict(camisa='#f3e6cf', pantalon='#3e4f86', piel='piel2', zapato='#5e3f30', cuello=0.55),
-       cara=dict(peinado='corto', pelo='#cfc6bc', canas=True, barba='#e3dcd2', giro=0.45, inclina=14,
-                 ojos='cerrados', boca='canta'))
-lz.aguada(Poligono([(164, 330), (182, 336), (186, 400), (172, 412), (166, 410)]), '#7a3f6e', dens=0.85, tapa=0.9)
+# shoulders tilt with the rhythm; one foot flat, the other tapping (toe raised); head bent to the guitar
+J = dict(cabeza=(196, 290, 25), hi=(164, 326), hd=(216, 322), ci=(170, 412), cd=(210, 414),
+         pierna_i=[(178, 416), (238, 424), (234, 500)], pierna_d=[(200, 418), (262, 412), (272, 486)],
+         pie_i=8, pie_d=-30)
+figura(lz, J, dict(camisa='#f3e6cf', pantalon='#3e4f86', piel='piel2', zapato='#5e3f30', cuello=0.6,
+                   pliegues=True),
+       cara=dict(peinado='corto', pelo='#cfc6bc', canas=True, barba='#e3dcd2', giro=0.5, inclina=24,
+                 ojos='abajo', boca='canta'))
+lz.aguada(Poligono([(166, 330), (184, 336), (188, 400), (174, 412), (168, 410)]), '#7a3f6e', dens=0.85, tapa=0.9)
+for k in range(3):   # the tapping foot keeps time
+    lz.lapiz([arco(292, 470 - k * 2, 8 + k * 6, 6 + k * 4, 250, 330, 8)], SEP, grosor=0.6, presion=0.45 - k * 0.1)
 # the guitar: body on his thigh, neck rising toward the dancer
-G0 = np.array([190.0, 396.0])
+G0 = np.array([192.0, 396.0])
 a = math.radians(-22)
 dG = np.array([math.cos(a), math.sin(a)])
 nG = np.array([-dG[1], dG[0]])
 Rg = lambda u, v: tuple(G0 + dG * u + nG * v)
-mastil = Trazo([Rg(26, 0), Rg(146, 0)], (9, 7.5), suave=False)
+mastil = Trazo([Rg(26, 0), Rg(124, 0)], (9, 7.5), suave=False)
 lz.aguada(mastil, '#7a4a2c', dens=0.8, tapa=1, irreg=0.15)
 lz.contorno(mastil, SEP, grosor=0.7, presion=0.55)
-clav = Poligono([Rg(146, -6), Rg(170, -8), Rg(172, 8), Rg(146, 6)], suave=False)
+lz.lapiz([[Rg(40 + 14 * k, -4), Rg(40 + 14 * k, 4)] for k in range(6)], '#d9c09a', grosor=0.5, presion=0.6)  # frets
+clav = Poligono([Rg(124, -6), Rg(146, -8), Rg(148, 8), Rg(124, 6)], suave=False)
 lz.aguada(clav, '#5e3f30', dens=0.85, tapa=1, irreg=0.1)
-lz.lapiz([[Rg(152 + 6 * k, -9), Rg(152 + 6 * k, -13)] for k in range(3)], SEP, grosor=1.0, presion=0.7)
+lz.lapiz([[Rg(130 + 6 * k, -9), Rg(130 + 6 * k, -13)] for k in range(3)], SEP, grosor=1.0, presion=0.7)
 cuerpo_g = Circulos([(*Rg(-12, 0), 31), (*Rg(22, 0), 24)])
 lz.aguada(cuerpo_g, '#e0a24e', dens=0.75, tapa=1, borde=0.7, gran=0.2, irreg=0.3,
           toques=[(*Rg(-20, 14), 24, '#b8692e', 0.6)], sombra=(-10, -10, '#a8582a', 0.5))
 lz.contorno(cuerpo_g, '#6a3a22', grosor=1.0, presion=0.65, cortes=0.1)
 lz.aguada(Elipse(*Rg(12, 0), 8.5), '#3e2a24', dens=1.0, irreg=0.1, tapa=1)
-lz.aguada(Trazo([Rg(-32, -8), Rg(-32, 8)], (4, 4), suave=False), '#5e3f30', dens=0.9, tapa=1)
-lz.lapiz([[Rg(-32, k), Rg(146, k)] for k in (-3, -1, 1, 3)], '#fbf1dc', grosor=0.45, presion=0.7, temblor=0.03)
-extremidad(lz, [(166, 334), (142, 384), Rg(-12, -5)], (15, 13, 12), '#f3e6cf', dens=0.8)
-mano(lz, *Rg(-12, -5), 40, 20, 'piel2', 'abierta')
-extremidad(lz, [(212, 330), (250, 366), Rg(116, 6)], (15, 13, 12), '#f3e6cf', dens=0.8)
-mano(lz, *Rg(116, 6), -110, 20, 'piel2', 'sujeta')
+lz.lapiz([arco(*Rg(12, 0), 11, 11, 0, 360, 24)], '#8a5a2a', grosor=0.6, presion=0.5)        # rosette
+lz.lapiz([[Rg(-30, -7), Rg(-30, 7)]], '#8a5a2a', grosor=1.2, presion=0.6)                   # bridge: a thin line
+lz.lapiz([[Rg(-30, k), Rg(124, k)] for k in (-3, -1, 1, 3)], '#fbf1dc', grosor=0.45, presion=0.7, temblor=0.03)
+# arms of real length: strumming over the strings, the other hand on the neck near the body
+brazo1 = [(168, 334), (150, 380), Rg(-8, -6)]
+brazo2 = [(214, 330), (230, 378), Rg(78, 5)]
+for br in (brazo1, brazo2):
+    sombra_bajo(lz, br, (15, 13, 12), '#6a5a4a', dens=0.22)
+    extremidad(lz, br, (15, 13, 12), '#f3e6cf', dens=0.8, pliegues=True)
+mano(lz, *Rg(-8, -6), 50, 20, 'piel2', 'abierta')
+mano(lz, *Rg(78, 5), -100, 20, 'piel2', 'sujeta')
 
 # ------------------------------------------------------------------ the music crosses the page
 MANO_ALTA = np.array([604.0, 104.0])
@@ -101,7 +110,7 @@ for k in range(9):                                       # ...a little crown of 
 
 # ------------------------------------------------------------------ the skirt-garden (protagonist)
 MANO_FALDA = np.array([772.0, 284.0])
-BORDE = spline([(596, 350), (560, 430), (512, 516), (470, 588), (500, 640), (560, 690), (640, 720), (730, 724),
+BORDE = spline([(596, 336), (560, 430), (512, 516), (470, 588), (500, 640), (560, 690), (640, 720), (730, 724),
                 (820, 705), (900, 664), (960, 605), (1000, 530), (1012, 452), (980, 388), (900, 330),
                 tuple(MANO_FALDA)], False, 14)
 BORDE = remuestrea(BORDE, 2.0)
@@ -114,7 +123,7 @@ BORDE = BORDE + _n * (_amp * np.sin(_d / 58 * 2 * np.pi))[:, None]
 i_a = int(np.argmin(np.hypot(*(BORDE - (470, 588)).T)))
 i_b = int(np.argmin(np.hypot(*(BORDE - (1012, 452)).T)))
 HEM = BORDE[i_a:i_b + 1]
-FALDA = Poligono(np.vstack([(622, 296), BORDE, (720, 298), (658, 298)]))
+FALDA = Poligono(np.vstack([(624, 278), BORDE, (720, 282), (660, 274)]))
 
 # opaque petticoat ruffle under the hem: it hides the legs
 enagua = spline([(520, 668), (580, 712), (650, 738), (730, 740), (820, 722), (890, 690)])
@@ -146,9 +155,9 @@ for k in range(5):
     p = tramo[int((k + 0.5) / 5 * (len(tramo) - 1))]
     flor_simple(lz, p[0] - 3, p[1] + 9, 4, '#f6c6b0', centro=ORO)
 # one spiral of folds: every fold sweeps from the waist the same way the skirt turns
-plis = [bezier((632, 304), (600, 380), (540, 470), (486, 590)), bezier((636, 306), (620, 430), (590, 570), (566, 694)),
-        bezier((642, 306), (660, 450), (680, 600), (700, 722)), bezier((648, 306), (720, 430), (800, 580), (840, 698)),
-        bezier((654, 304), (760, 390), (880, 500), (958, 604)), bezier((660, 300), (790, 330), (930, 400), (1004, 488))]
+plis = [bezier((632, 282), (600, 380), (540, 470), (486, 590)), bezier((636, 284), (620, 430), (590, 570), (566, 694)),
+        bezier((642, 284), (660, 450), (680, 600), (700, 722)), bezier((648, 284), (720, 430), (800, 580), (840, 698)),
+        bezier((654, 282), (760, 390), (880, 500), (958, 604)), bezier((660, 278), (790, 330), (930, 400), (1004, 488))]
 for k, pl in enumerate(plis):
     if k % 2 == 0:
         sombra_pl = Trazo(pl + (6, 0), (3, 16, 26))
@@ -162,7 +171,7 @@ borde_pts = remuestrea(HEM, 3.0)
 tg = np.gradient(borde_pts, axis=0)
 tg /= np.maximum(np.hypot(*tg.T)[:, None], 1e-9)
 nr = np.stack([-tg[:, 1], tg[:, 0]], 1)
-WB = 9.0
+WB = 7.0
 bandas = [TEAL, ORO, '#f39ab0', '#5f86c0']
 nb = 26
 for j in range(nb):
@@ -170,36 +179,49 @@ for j in range(nb):
     i1 = int((j + 1) / nb * (len(borde_pts) - 1))
     seg = borde_pts[i0:i1 + 1]
     pts = np.vstack([seg + nr[i0:i1 + 1] * WB / 2, (seg - nr[i0:i1 + 1] * WB / 2)[::-1]])
-    lz.aguada(Poligono(pts, suave=False), bandas[j % 4], dens=0.82, irreg=0.2, borde=0.6, tapa=1, gran=0.25)
-st = []
-for k in range(1, len(borde_pts) - 1):        # two rows of knit V's, the real texture of stocking stitch
-    p, nn_, tt_ = borde_pts[k], nr[k], tg[k]
-    for row in (-0.22, 0.22):
-        c = p + nn_ * WB * row
-        st.append([c + nn_ * WB * 0.18 - tt_ * 1.3, c - nn_ * WB * 0.12, c + nn_ * WB * 0.18 + tt_ * 1.3])
-lz.lapiz(st, '#4a3a3a', grosor=0.45, presion=0.35, temblor=0.03)
-lz.lapiz([borde_pts + nr * WB / 2, borde_pts - nr * WB / 2], SEP, grosor=0.7, presion=0.5, cortes=0.15)
-# ...and beside the grandmother it is still being knitted: it narrows and frays into loose wool
+    col = bandas[j % 4]
+    lz.aguada(Poligono(pts, suave=False), col, dens=0.78, irreg=0.25, borde=0.6, tapa=1, gran=0.3)
+    # knitted texture tone on tone: little interlaced loops, two columns, slanting against each other
+    tono = tuple(mezcla(col, '#2a1a20', 0.35).tolist())
+    lazos = []
+    for k in range(i0, i1, 1):
+        p, nn_, tt_ = borde_pts[k], nr[k], tg[k]
+        ang_t = math.degrees(math.atan2(nn_[1], nn_[0]))
+        for row, sl in ((-0.23, 28), (0.23, -28)):
+            c = p + nn_ * WB * row
+            lazos.append(arco(c[0], c[1], WB * 0.26, 1.15, 200, 520, 10, ang_t + sl))
+    lz.lapiz(lazos, tono, grosor=0.4, presion=0.3, temblor=0.05)
+    lz.lapiz([seg + nr[i0:i1 + 1] * WB / 2, seg - nr[i0:i1 + 1] * WB / 2], tono, grosor=0.55, presion=0.45,
+             cortes=0.1)
+# ...and beside the grandmother it is still being knitted: a single yarn, sagging, goes through her
+# needles and reaches the hem, where the last stitches fray into loose wool
 inicio = borde_pts[0]
-for k, (c, off) in enumerate(((TEAL, -3), ('#5f86c0', 0), (ORO, 3))):
-    hebra = bezier(inicio + (0, off), inicio + (-20, 40 + off * 3), AGUJAS + (40, -30 + off * 4), AGUJAS + (4, off), 30)
-    lz.lapiz([hebra], c, grosor=1.1, presion=0.85, temblor=0.6)
+hebra = bezier(AGUJAS + (16, -4), AGUJAS + (44, 52), inicio + (-34, 70), inicio + (-2, 6), 40)
+lz.lapiz([hebra], '#4f7fb0', grosor=1.2, presion=0.85, temblor=0.5)
+rngf = np.random.default_rng(8)
+for k in range(5):       # frayed fibres
+    a_ = math.radians(rngf.uniform(110, 250))
+    L = rngf.uniform(6, 13)
+    lz.lapiz([bezier(inicio, inicio + (math.cos(a_) * L * 0.5, math.sin(a_) * L * 0.5 + 3),
+                     inicio + (math.cos(a_) * L, math.sin(a_) * L))], rngf.choice([TEAL, '#5f86c0', ORO]),
+             grosor=0.6, presion=0.6, temblor=0.4)
 punto = Poligono([AGUJAS + (-6, -10), AGUJAS + (20, -14), AGUJAS + (24, 6), AGUJAS + (-2, 10)])
-lz.aguada(punto, TEAL, dens=0.8, tapa=1, irreg=0.2)
-lz.lapiz([[AGUJAS + (k * 5 - 4, -8), AGUJAS + (k * 5 - 2, -2), AGUJAS + (k * 5, -8)] for k in range(5)],
-         '#2a4a4a', grosor=0.45, presion=0.45)
+lz.aguada(punto, '#5f86c0', dens=0.8, tapa=1, irreg=0.2)
+lz.lapiz([arco(*(AGUJAS + (k * 5 - 2, -2)), 1.6, 3.5, 200, 520, 10, 90 + (20 if k % 2 else -20)) for k in range(5)],
+         '#2a3a6a', grosor=0.4, presion=0.4)
 
 # ------------------------------------------------------------------ the dancer
-J = dict(cabeza=(640, 166, 30), hi=(612, 208), hd=(668, 212), ci=(624, 290), cd=(656, 292),
-         brazo_i=[(614, 216), (568, 160), MANO_ALTA], brazo_d=[(666, 220), (722, 258), MANO_FALDA - (6, 0)],
-         mano_i=(-15, 'abierta'), mano_d=(15, 'sujeta'), delante=['brazo_i', 'brazo_d'])
-figura(lz, J, dict(camisa=TEAL, piel='piel3', grosor=0.52, cuello=0.62),
-       cara=dict(peinado='mono', pelo='#1e1410', giro=0.3, inclina=-12, ojos='cerrados', boca='ríe',
-                 adorno=CARMIN))
-faja = Trazo([(620, 294), (640, 300), (662, 294)], (15, 16, 15))
+J = dict(cabeza=(644, 156, 33), hi=(614, 198), hd=(670, 208), ci=(628, 272), cd=(662, 268),
+         brazo_i=[(616, 204), (574, 150), MANO_ALTA], brazo_d=[(668, 214), (724, 250), MANO_FALDA - (6, 0)],
+         mano_i=(-60, 'junta'), mano_d=(15, 'sujeta'), delante=['brazo_i', 'brazo_d'])
+figura(lz, J, dict(camisa=TEAL, piel='piel3', grosor=0.5, cuello=0.64, pliegues=True),
+       cara=dict(peinado='mono', pelo='#1e1410', giro=0.3, inclina=-12, ojos='cerrados', boca='abierta',
+                 dientes=False, adorno=CARMIN))
+mano(lz, *MANO_ALTA, -70, 26, 'piel3', 'junta', pulgar=-1)     # an open, flamenco hand -- not a fist
+faja = Trazo([(624, 274), (644, 280), (664, 272)], (15, 16, 15))
 lz.aguada(faja, CARMIN, dens=0.92, tapa=1, irreg=0.3, sombra=(0, -6))
 lz.contorno(faja, '#7a1f30', grosor=0.8, presion=0.55)
-for pts in ([(662, 296), (686, 312), (706, 306)], [(662, 298), (680, 324), (694, 332)]):
+for pts in ([(664, 274), (688, 290), (708, 284)], [(664, 276), (682, 302), (696, 310)]):
     f = Trazo(pts, (8, 6, 2))
     lz.aguada(f, CARMIN, dens=0.9, tapa=1, irreg=0.3)
     lz.contorno(f, '#7a1f30', grosor=0.6, presion=0.5)
@@ -216,12 +238,14 @@ lz.contorno(taburete, SEP, grosor=0.8, presion=0.5)
 J = dict(cabeza=(298, 614, 29), hi=(268, 660), hd=(326, 664), ci=(272, 746), cd=(320, 748),
          pierna_i=[(282, 748), (350, 758), (350, 818)], pierna_d=[(308, 752), (372, 766), (376, 822)],
          pie_i=0, pie_d=0)
-figura(lz, J, dict(camisa='#8d73b0', falda='#5f8f8a', piel='piel1', zapato='#6e4c3c', cuello=0.55,
+figura(lz, J, dict(camisa='#8d73b0', falda='#5f8f8a', piel='piel1', zapato='#6e4c3c', cuello=0.55, pliegues=True,
                    falda_bajo=[(344, 812), (392, 812), (396, 776)]),
        cara=dict(peinado='mono', pelo='#d8d2cc', canas=True, giro=0.45, inclina=8, ojos='abajo', boca='sonrisa'))
 for brazo, col in (([(272, 668), (300, 720), (370, 714)], '#8d73b0'), ([(324, 672), (352, 724), (398, 720)], '#8d73b0')):
     sombra_bajo(lz, brazo, (18, 15, 13), '#3a2a5a', dens=0.25)
-    extremidad(lz, brazo, (18, 15, 13), col, dens=0.84)
+    extremidad(lz, brazo, (18, 15, 13), col, dens=0.84, pliegues=True)
+lz.lapiz([bezier((290, 752), (320, 770), (360, 768)), bezier((300, 766), (340, 790), (380, 800)),
+          arco(352, 760, 12, 7, 190, 330, 10)], '#3a4a48', grosor=0.7, presion=0.45, temblor=0.3)   # lap folds, knee
 lz.lapiz([[(356, 694), (420, 734)], [(420, 690), (370, 740)]], '#8a6a52', grosor=1.2, presion=0.85, temblor=0.03)
 mano(lz, 370, 714, -10, 24, 'piel1', 'sujeta')
 mano(lz, 398, 720, 200, 24, 'piel1', 'sujeta', pulgar=-1)
@@ -236,27 +260,38 @@ for (bx, by, c) in ((212, 778, TEAL), (236, 776, ORO), (224, 768, '#5f86c0')):
 lz.lapiz([bezier((224, 768), (280, 760), (330, 770), (372, 716))], '#5f86c0', grosor=1.0, presion=0.75)
 
 # ------------------------------------------------------------------ the girl models in clay a bud that becomes a flower
-sombra_suelo(972, 812, 70)
-vestido = Poligono([(946, 742), (994, 742), (1016, 770), (1040, 806), (974, 816), (914, 806), (930, 770)])
-J = dict(cabeza=(972, 690, 23), hi=(952, 728), hd=(994, 730), ci=(956, 790), cd=(992, 792))
-figura(lz, J, dict(camisa=ORO, piel='piel4', cuello=0.55, grosor=0.5),
-       cara=dict(peinado='rizado', pelo='#1e1410', giro=-0.5, inclina=-12, ojos='abajo', boca='sonrisa'))
-lz.aguada(vestido, ORO, dens=0.84, tapa=1, irreg=0.4, sombra=(-10, -8, '#b07a20', 0.4))
+sombra_suelo(976, 816, 78)
+# kneeling for real: feet behind, knees under the dress, back leaning toward the clay
+for (x, y, ang_) in ((1030, 806, -10), (1046, 798, -20)):
+    zap = Elipse(x, y, 11, 5, ang_)
+    lz.aguada(zap, '#c33c4e', dens=0.85, tapa=1, irreg=0.2)
+    lz.contorno(zap, '#6a1f30', grosor=0.7, presion=0.55)
+lz.aguada(Trazo([(992, 810), (1020, 806)], (9, 7), suave=False), 'piel4', dens=0.62, tapa=1, irreg=0.2)
+vestido = Poligono([(950, 714), (976, 720), (996, 742), (1012, 772), (1016, 800), (1000, 812), (968, 814),
+                    (942, 812), (920, 806), (916, 794), (930, 784), (950, 780), (944, 752), (942, 728)])
+lz.aguada(vestido, ORO, dens=0.84, tapa=1, irreg=0.35, toques=[(1000, 790, 30, '#d08a20', 0.5)],
+          sombra=(-10, -10, '#b07a20', 0.45))
 lz.contorno(vestido, '#8a5a1a', grosor=0.9, presion=0.55, cortes=0.25)
-lz.lapiz([bezier((944, 780), (964, 790), (984, 808)), bezier((1004, 776), (1014, 792), (1024, 806))], '#8a5a1a',
-         grosor=0.7, presion=0.4)
-for brazo in ([(954, 736), (936, 770), (912, 754)], [(992, 738), (970, 774), (936, 760)]):
+SP = '#6a4a2a'
+lz.lapiz([arco(928, 800, 12, 8, 190, 330, 10), arco(950, 806, 12, 7, 190, 330, 10),          # two knees
+          bezier((954, 786), (972, 790), (998, 804)), bezier((962, 760), (980, 776), (1004, 790)),  # lap folds
+          bezier((976, 724), (992, 742), (1006, 770))], SP, grosor=0.7, presion=0.45, temblor=0.3)
+cuello_n = Trazo([(942, 700), (952, 716)], (11, 12))
+lz.aguada(cuello_n, 'piel4', dens=0.62, tapa=1, irreg=0.2, toques=[(944, 704, 8, '#6a3a22', 0.5)])
+cabeza(lz, 934, 686, 23, piel='piel4', pelo='#1e1410', peinado='rizado', giro=-0.5, inclina=-18, ojos='abajo',
+       boca='sonrisa')
+for brazo in ([(952, 724), (946, 764), (914, 760)], [(974, 730), (972, 772), (938, 766)]):
     sombra_bajo(lz, brazo, (12, 11, 10), '#8a5a1a', dens=0.25)
-    extremidad(lz, brazo, (12, 11, 10), ORO, dens=0.85)
+    extremidad(lz, brazo, (12, 11, 10), ORO, dens=0.85, pliegues=True)
 # the clay bud held out in her hands: terracotta below, already turning coral at the tip
-yema = Poligono([(906, 752), (910, 734), (916, 724), (923, 732), (928, 752), (917, 758)])
-lz.aguada(yema, BARRO, dens=0.85, tapa=1, irreg=0.3, borde=0.8, toques=[(916, 728, 8, CORAL, 0.9)])
+yema = Poligono([(902, 756), (906, 738), (912, 728), (919, 736), (924, 756), (913, 762)])
+lz.aguada(yema, BARRO, dens=0.85, tapa=1, irreg=0.3, borde=0.8, toques=[(912, 732, 8, CORAL, 0.9)])
 lz.contorno(yema, '#6a3a22', grosor=0.7, presion=0.55, cortes=0.1)
-lz.lapiz([[(911, 744), (921, 740)], [(912, 750), (922, 747)]], '#8a4a2a', grosor=0.5, presion=0.4)  # finger marks
-mano(lz, 900, 762, -50, 18, 'piel4', 'junta')
-mano(lz, 934, 762, 230, 18, 'piel4', 'junta', pulgar=-1)
+lz.lapiz([[(907, 748), (917, 744)], [(908, 754), (918, 751)]], '#8a4a2a', grosor=0.5, presion=0.4)  # finger marks
+mano(lz, 914, 760, 200, 18, 'piel4', 'junta')
+mano(lz, 938, 766, 210, 18, 'piel4', 'junta', pulgar=-1)
 # from the bud a stem rises into the skirt, where it opens as one of its flowers
-tallo = bezier((916, 724), (910, 704), (896, 690), (884, 672), 30)
+tallo = bezier((912, 728), (906, 708), (894, 690), (884, 672), 30)
 lz.lapiz([tallo], '#4f6f45', grosor=1.1, presion=0.8, temblor=0.3)
 hojita(lz, 903, 698, 12, -170, '#5f8f63', tapa=1)
 flor_grande(lz, 882, 662, 17, '#e8506a', centro=ORO)

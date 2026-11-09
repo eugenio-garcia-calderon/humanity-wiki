@@ -888,7 +888,7 @@ def _lapiz_de(color, osc=0.55):
 
 def cabeza(lz, x, y, r, piel='piel2', pelo='#5a3a2a', peinado='corto', giro=0.0, inclina=0.0,
            ojos='abiertos', boca='sonrisa', mejillas=True, barba=None, canas=False, mira=(0, 0),
-           semilla=None, lapiz=None, adorno=None):
+           semilla=None, lapiz=None, adorno=None, dientes=True):
     """Draw a tender head centred (x, y) with radius r.
     giro: -1..1 turns the face left/right (3/4 view); inclina: degrees of tilt.
     ojos: 'abiertos' | 'cerrados' (happy arcs) | 'abajo'. boca: 'sonrisa' |
@@ -1029,7 +1029,7 @@ def cabeza(lz, x, y, r, piel='piel2', pelo='#5a3a2a', peinado='corto', giro=0.0,
             m = Poligono(np.vstack([top, bot[1:]]), suave=False)
         lz.aguada(m, '#8f2a36', dens=0.95, irreg=0.15, borde=0.4, gran=0.05, tapa=1,
                   toques=[(mx_, my_ + r * 0.1, r * 0.08, '#e8707a', 0.85)])
-        if boca != 'canta':
+        if boca != 'canta' and dientes:
             lz.gouache(Poligono([R(cx0 - r * 0.15, r * 0.58), R(cx0 + r * 0.15, r * 0.58), R(cx0 + r * 0.12, r * 0.63),
                                  R(cx0 - r * 0.12, r * 0.63)]), '#fff8ee', alfa=0.85, irreg=0.1)
         lz.contorno(m, '#6a2a2a', grosor=gw * 0.8, presion=0.6, cortes=0.05, desfase=0.05)
@@ -1113,7 +1113,7 @@ def flor_simple(lz, x, y, r, color='#e8735e', centro='#e8b53e', petalos=5, semil
 
 
 def extremidad(lz, pts, anchos, color, tapa=1, dens=0.6, lapiz=None, toques=None, contorno=True, sombra=None,
-               **kw):
+               pliegues=False, **kw):
     """Arm/leg/sleeve: a tapered wash along a path plus a loose pencil outline.
     With exactly three points (shoulder, elbow, wrist) the limb is built as two
     straight segments with a rounded joint, so elbows and knees really bend.
@@ -1130,6 +1130,25 @@ def extremidad(lz, pts, anchos, color, tapa=1, dens=0.6, lapiz=None, toques=None
     lz.aguada(f, color, dens=dens, tapa=tapa, toques=toques, sombra=sombra if sombra else None, **kw)
     if contorno:
         lz.contorno(f, lapiz or _lapiz_de(color), grosor=0.85, presion=0.55, cortes=0.3)
+    if pliegues and len(pts) == 3:
+        # sepia creases on the inside of the elbow / behind the knee
+        p0, p1, p2 = (np.array(p) for p in pts)
+        u = p0 - p1
+        v = p2 - p1
+        u /= max(np.linalg.norm(u), 1e-6)
+        v /= max(np.linalg.norm(v), 1e-6)
+        b = u + v
+        if np.linalg.norm(b) > 0.2:
+            b /= np.linalg.norm(b)
+            w = an[1]
+            perp = np.array([-b[1], b[0]])
+            tr = []
+            for k, off in enumerate((0.15, 0.32)):
+                c = p1 + b * w * off
+                tr.append(bezier(c - perp * w * 0.28, c + b * w * 0.08, c + perp * w * 0.28, n=10))
+            tr.append([p1 + u * w * 0.9 + b * w * 0.2, p1 + u * w * 0.4 + b * w * 0.3])
+            sp = tuple(mezcla(lapiz or _lapiz_de(color), '#5a3a2a', 0.5).tolist())
+            lz.lapiz(tr, sp, grosor=0.65, presion=0.5, temblor=0.15)
     return f
 
 
@@ -1234,7 +1253,8 @@ def figura(lz, J, ropa, cara=None):
         sh, el, wr = map(np.asarray, J[key])
         larga = ropa.get('manga', 'larga') == 'larga'
         if larga:
-            extremidad(lz, [sh, el, wr], (grosor * 1.05, grosor * 0.9, grosor * 0.8), camisa, dens=0.76)
+            extremidad(lz, [sh, el, wr], (grosor * 1.05, grosor * 0.9, grosor * 0.8), camisa, dens=0.76,
+                       pliegues=ropa.get('pliegues', False))
         else:
             mid = sh + (el - sh) * 0.75
             extremidad(lz, [sh, el, wr], (grosor * 0.75, grosor * 0.66, grosor * 0.55), piel, dens=0.55,
@@ -1252,7 +1272,8 @@ def figura(lz, J, ropa, cara=None):
         hp, kn, an = map(np.asarray, J[key])
         col = ropa.get('pantalon', None)
         if col:
-            extremidad(lz, [hp, kn, an], (grosor * 1.35, grosor * 1.15, grosor * 0.95), col, dens=0.74)
+            extremidad(lz, [hp, kn, an], (grosor * 1.35, grosor * 1.15, grosor * 0.95), col, dens=0.74,
+                       pliegues=ropa.get('pliegues', False))
         else:
             extremidad(lz, [hp, kn, an], (grosor * 1.0, grosor * 0.85, grosor * 0.65), piel, dens=0.5,
                        lapiz=PIEL_LAPIZ)

@@ -534,12 +534,18 @@ def _wash(lz, f, col, toques=None, dens=0.85, sombra=(-5, -4), tapa=1, lapiz=Non
     lz.contorno(f, lapiz or _lapiz_de(col, 0.45), grosor=0.75, presion=0.55, cortes=0.15, desfase=0.15)
 
 
-def lenteja(lz, x, y, r, ang=0, col='#a07a3a'):
-    """A lentil: a lens-shaped disc with a darker rim."""
-    f = Elipse(x, y, r, r * 0.78, ang)
-    _wash(lz, f, col, toques=[(x - r * 0.3, y - r * 0.3, r * 0.6, '#c8a45a', 0.7), (x + r * 0.5, y + r * 0.4, r * 0.5, '#6a4a22', 0.5)],
-          lapiz='#5a3a1a')
-    lz.lapiz([arco(x, y, r * 0.82, r * 0.62, 200, 330, 14, ang)], '#e0c890', grosor=0.8, presion=0.5)
+def lenteja(lz, x, y, r, ang=0, col='#9a8a46'):
+    """A lentil (pardina): a flat lens with a lighter rim and dark speckles."""
+    f = Elipse(x, y, r, r * 0.66, ang)
+    _wash(lz, f, col, toques=[(x - r * 0.3, y - r * 0.25, r * 0.6, '#c8b46a', 0.7), (x + r * 0.5, y + r * 0.3, r * 0.5, '#5a4a22', 0.5)],
+          lapiz='#4a3a1a')
+    lz.lapiz([arco(x, y, r * 0.86, r * 0.54, 190, 350, 16, ang)], '#e6d79a', grosor=0.9 if r > 10 else 0.5, presion=0.6)
+    if r > 10:
+        rg = np.random.default_rng(int(x * 3 + y * 5))
+        for _ in range(int(r * 1.2)):
+            a_, d = rg.uniform(0, 6.28), rg.uniform(0.1, 0.85)
+            lz.aguada(Elipse(x + math.cos(a_) * r * d, y + math.sin(a_) * r * d * 0.62, rg.uniform(0.5, 1.1)), '#4a3a1e',
+                      dens=0.7, irreg=0.1)
     return f
 
 
@@ -574,10 +580,14 @@ def pimiento(lz, x, y, r):
 
 
 def arroz(lz, x, y, r, ang=-10):
-    """A grain of rice (r = half its length)."""
-    f = Elipse(x, y, r * 0.48, r, ang)
-    _wash(lz, f, '#f6efdc', toques=[(x + r * 0.2, y + r * 0.4, r * 0.4, '#d9ccae', 0.7)], dens=0.6, lapiz='#9a8a6a')
-    lz.lapiz([arco(x, y, r * 0.3, r * 0.8, 200, 300, 10, ang)], '#c8b890', grosor=0.6, presion=0.4)
+    """A grain of rice (r = half its length): slender, pearly, one end pointed."""
+    ca, sa = math.cos(math.radians(ang + 90)), math.sin(math.radians(ang + 90))
+    pts = [(0, -1.0), (0.3, -0.8), (0.4, -0.2), (0.38, 0.5), (0.22, 0.92), (0, 1.0), (-0.24, 0.9), (-0.4, 0.45), (-0.4, -0.25),
+           (-0.28, -0.82)]
+    f = Poligono([(x + (py * ca - px * sa) * r, y + (py * sa + px * ca) * r) for px, py in pts])
+    _wash(lz, f, '#f8f2e2', toques=[(x + r * 0.15, y + r * 0.45, r * 0.4, '#dccfb0', 0.7)], dens=0.65, lapiz='#9a8a6a')
+    lz.gouache(Elipse(x - r * 0.15, y - r * 0.3, r * 0.08, r * 0.35, ang), '#ffffff', alfa=0.7, irreg=0)
+    lz.aguada(Elipse(x + r * 0.04, y + r * 0.8, r * 0.1, r * 0.08), '#e0c890', dens=0.6, irreg=0.1)
     return f
 
 

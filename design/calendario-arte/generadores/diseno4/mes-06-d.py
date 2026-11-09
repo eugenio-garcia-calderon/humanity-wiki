@@ -335,7 +335,7 @@ def molinillo(x, y, s, ang=0, color='#f6e3c4', gouache=False, semilla_=True):
         if gouache:
             lz.gouache(f, color, alfa=0.9, irreg=0.1)
         else:
-            lz.aguada(f, color, dens=0.75, tapa=1, irreg=0.2, borde=0.9)
+            lz.aguada(f, color, dens=0.9, tapa=1, irreg=0.2, borde=0.9)
         lz.contorno(f, '#8a7a6a', grosor=0.45, presion=0.45, cortes=0.1, desfase=0.1)
     lz.aguada(Elipse(x, y, s * 0.12), '#c0703f', dens=0.9, irreg=0.1, tapa=1)
 
@@ -345,7 +345,7 @@ for k, (x, y) in enumerate(vuelo[1:]):
     t = k / 29
     x += rng.normal(0, 14) * (0.4 + t)
     y += rng.normal(0, 12)
-    s = 17 - 7 * t + rng.normal(0, 1.2)
+    s = 20 - 8 * t + rng.normal(0, 1.2)
     if k % 2 == 0:
         molinillo(x, y, s, ang=rng.uniform(-35, 35), color=['#f6e3c4', '#f4c9b4', '#f9e9b8'][k % 3])
 

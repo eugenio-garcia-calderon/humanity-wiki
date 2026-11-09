@@ -126,16 +126,14 @@ def brazo(lz, S, E, Wr, ancho, color, piel=None, manga='larga', dens=0.74, tapa=
 
     if manga == 'larga':
         f = brazo_forma(1.05)
-        lz.aguada(f, color, dens=dens, tapa=tapa, toques=toques, borde=0.6, irreg=0.6,
-                  sombra=(-w * 0.35, -w * 0.3, mezcla(color, '#3a2030', 0.35), 0.45))
+        lz.aguada(f, color, dens=dens, tapa=tapa, toques=toques, borde=0.6, irreg=0.6)
         lz.contorno(f, lapiz or _lapiz_de(color), grosor=0.85, presion=0.55, cortes=0.25)
         out = f
     else:
         pk = piel or 'piel2'
         f = brazo_forma(0.86)
         lz.aguada(f, pk, dens=0.58, tapa=tapa, borde=0.45, irreg=0.4,
-                  toques=[(*E, w * 1.2, mezcla(pk, '#a8573c', 0.3), 0.4)],
-                  sombra=(-w * 0.3, -w * 0.3, mezcla(pk, '#8a4a32', 0.4), 0.4))
+                  toques=[(*E, w * 1.2, mezcla(pk, '#a8573c', 0.3), 0.4)])
         lz.contorno(f, PIEL_LAPIZ, grosor=0.8, presion=0.5, cortes=0.25)
         fin = 0.7 if manga == 'corta' else 1.25
         if fin <= 1:
@@ -143,8 +141,7 @@ def brazo(lz, S, E, Wr, ancho, color, piel=None, manga='larga', dens=0.74, tapa=
         else:
             m = (seg(S, E, w * 1.12, w * 1.05, w * 0.9) | Elipse(E[0], E[1], w * 0.48)
                  | Trazo([E, E + (Wr - E) * (fin - 1)], (w * 0.92, w * 0.9)))
-        lz.aguada(m, color, dens=dens, tapa=tapa, toques=toques, borde=0.6, irreg=0.6,
-                  sombra=(-w * 0.35, -w * 0.3, mezcla(color, '#3a2030', 0.35), 0.45))
+        lz.aguada(m, color, dens=dens, tapa=tapa, toques=toques, borde=0.6, irreg=0.6)
         lz.contorno(m, lapiz or _lapiz_de(color), grosor=0.85, presion=0.55, cortes=0.25)
         out = f
     if pliegue:
@@ -291,3 +288,163 @@ def guardar_zoom(lz, ancho, cx, cy, ruta, margen=30, calidad=90):
     else:
         im.save(ruta)
     return im
+
+
+# ======================================================================
+#  Heads seen in profile and from behind (cabeza() only draws front / 3/4)
+# ======================================================================
+
+def _loc(x, y, r, lado, inclina):
+    ca, sa = math.cos(math.radians(inclina)), math.sin(math.radians(inclina))
+
+    def R(dx, dy):
+        dx = dx * lado
+        return (x + (dx * ca - dy * sa) * r, y + (dx * sa + dy * ca) * r)
+    return R
+
+
+def _pelo_perfil(lz, R, r, pelo, peinado, canas):
+    lp = _lapiz_de(pelo, 0.6)
+    if peinado == 'pañuelo':
+        f = Poligono([R(0.62, -0.62), R(0.25, -1.1), R(-0.45, -1.08), R(-0.95, -0.55), R(-1.05, 0.2), R(-0.95, 0.95),
+                      R(-0.55, 1.25), R(-0.2, 1.05), R(0.05, 0.75), R(-0.05, 0.3), R(0.2, 0.0), R(0.55, -0.25),
+                      R(0.7, -0.45)])
+        lz.aguada(f, pelo, dens=0.8, tapa=1, borde=0.7, irreg=0.6, gran=0.3,
+                  toques=[(*R(-0.6, 0.6), r * 0.6, mezcla(pelo, '#1a1a2a', 0.35), 0.6)])
+        lz.contorno(f, lp, grosor=0.8, presion=0.55, cortes=0.25)
+        pliegues(lz, [[R(-0.2, -0.95), R(-0.55, -0.4), R(-0.7, 0.4)], [R(0.2, -0.7), R(-0.2, -0.2), R(-0.35, 0.6)]],
+                 lp, presion=0.45)
+        return
+    if peinado == 'rizado':
+        rng = np.random.default_rng(int(abs(R(0, 0)[0])))
+        cs = []
+        for a in np.linspace(150, 330, 12):
+            t = math.radians(a)
+            px, py = R(-0.1 + math.cos(t) * 0.82, -0.12 + math.sin(t) * 0.88)
+            cs.append((px, py, r * rng.uniform(0.24, 0.32)))
+        cs.append((*R(-0.3, -0.25), r * 0.55))
+        f = Circulos(cs)
+    else:
+        f = Poligono([R(0.66, -0.55), R(0.45, -0.98), R(-0.15, -1.1), R(-0.75, -0.8), R(-0.98, -0.2), R(-0.92, 0.35),
+                      R(-0.68, 0.62), R(-0.5, 0.3), R(-0.32, 0.02), R(-0.05, -0.12), R(0.3, -0.38)])
+    lz.aguada(f, pelo, dens=0.48 if canas else 0.8, tapa=1, borde=0.7, irreg=0.7, gran=0.4,
+              toques=[(*R(-0.5, -0.5), r * 0.5, mezcla(pelo, '#ffffff', 0.3), 0.5)])
+    lz.contorno(f, lp, grosor=0.8, presion=0.55, cortes=0.3)
+    st = [bezier(R(0.45, -0.85), R(-0.1, -0.85), R(-0.6, -0.45), n=14),
+          bezier(R(0.3, -0.6), R(-0.2, -0.55), R(-0.7, -0.1), n=14),
+          bezier(R(0.0, -0.95), R(-0.5, -0.7), R(-0.85, 0.1), n=14)]
+    lz.lapiz(st, lp, grosor=0.7, presion=0.4, temblor=0.2, cortes=0.3)
+    if peinado == 'mono':
+        b = Elipse(*R(-0.62, -0.78), r * 0.42, r * 0.36)
+        lz.aguada(b, pelo, dens=0.55 if canas else 0.85, tapa=1, borde=0.7, irreg=0.5)
+        lz.contorno(b, lp, grosor=0.8, presion=0.55, cortes=0.2)
+        lz.lapiz([arco(*R(-0.62, -0.78), r * 0.25, r * 0.2, 0, 300, 20)], lp, grosor=0.6, presion=0.4)
+
+
+def cabeza_perfil(lz, x, y, r, piel='piel2', pelo='#3a2418', peinado='corto', lado=1, inclina=0.0,
+                  ojos='abiertos', boca='sonrisa', canas=False, gafas=False, barba=None):
+    """A tender head in true profile, looking toward lado (+1 right, -1 left).
+    Small round nose, one eye with lid and lashes, ear, rosy cheek."""
+    R = _loc(x, y, r, lado, inclina)
+    SEP = '#6b4433'
+    gw = max(0.7, r * 0.035)
+    cara_ = Poligono([R(-0.86, 0.05), R(-0.82, -0.52), R(-0.45, -0.93), R(0.1, -1.0), R(0.55, -0.82), R(0.78, -0.48),
+                      R(0.82, -0.18), R(0.79, 0.0), R(0.9, 0.17), R(0.97, 0.27), R(0.86, 0.34), R(0.84, 0.42),
+                      R(0.88, 0.48), R(0.81, 0.55), R(0.85, 0.62), R(0.74, 0.74), R(0.72, 0.86), R(0.48, 0.94),
+                      R(0.12, 0.8), R(-0.12, 0.62), R(-0.5, 0.55)])
+    lz.aguada(cara_, piel, dens=0.6, tapa=1, borde=0.5, irreg=0.45, gran=0.15,
+              toques=[(*R(-0.3, 0.3), r * 0.55, mezcla(piel, '#b0603e', 0.35), 0.45),
+                      (*R(0.4, -0.5), r * 0.45, mezcla(piel, '#fff0e0', 0.3), 0.5)],
+              sombra=(-lado * r * 0.3, -r * 0.3, mezcla(piel, '#a0503a', 0.45), 0.3))
+    # the profile line in sepia (forehead, nose, lips, chin), the back of the skull lighter
+    lz.lapiz([spline([R(0.55, -0.82), R(0.78, -0.48), R(0.82, -0.18), R(0.79, 0.0), R(0.9, 0.17), R(0.97, 0.27),
+                      R(0.86, 0.34)]),
+              spline([R(0.84, 0.42), R(0.88, 0.48), R(0.81, 0.55), R(0.85, 0.62), R(0.74, 0.74), R(0.72, 0.86),
+                      R(0.48, 0.94), R(0.12, 0.8)])], SEP, grosor=gw * 0.85, presion=0.6, temblor=0.08)
+    lz.contorno(cara_, PIEL_LAPIZ, grosor=0.7, presion=0.35, cortes=0.5, desfase=0.2)
+    # cheek
+    lz.aguada(Elipse(*R(0.4, 0.38), r * 0.22, r * 0.15), '#ec6a72', dens=0.5, suave=r * 0.08, gran=0.05)
+    # ear
+    ex, ey = R(-0.12, 0.12)
+    oreja = Elipse(ex, ey, r * 0.15, r * 0.22)
+    lz.aguada(oreja, piel, dens=0.62, tapa=1, irreg=0.3, toques=[(ex, ey, r * 0.1, mezcla(piel, '#c0604a', 0.5), 0.6)])
+    lz.contorno(oreja, PIEL_LAPIZ, grosor=0.6, presion=0.45, cortes=0.1, desfase=0.05)
+    lz.lapiz([arco(ex, ey, r * 0.08, r * 0.13, -60 if lado > 0 else 60, 160 if lado > 0 else 340, 10)], SEP,
+             grosor=gw * 0.6, presion=0.4)
+    # eye
+    ecx, ecy = R(0.56, 0.02)
+    if ojos == 'cerrados':
+        lz.lapiz([[R(0.46, 0.04), R(0.56, 0.08), R(0.66, 0.04)]], SEP, grosor=gw * 1.1, presion=0.9, temblor=0.03)
+        lz.lapiz([[R(0.48, 0.06), R(0.42, 0.12)]], SEP, grosor=gw * 0.6, presion=0.6)
+    else:
+        iris = Elipse(*R(0.62, 0.03), r * 0.065, r * 0.09)
+        lz.aguada(iris, '#4a2c22', dens=1.3, irreg=0.1, borde=0.3, gran=0.05)
+        lz.gouache(Elipse(*R(0.65, 0.0), max(0.45, r * 0.024)), '#fffdf6', alfa=0.95, irreg=0)
+        lid = spline([R(0.47, 0.0), R(0.58, -0.06), R(0.7, -0.02)])
+        lz.lapiz([lid], SEP, grosor=gw * 1.2, presion=0.95, temblor=0.03, puntas=0.25)
+        lz.lapiz([[R(0.7, -0.02), R(0.76, -0.07)], [R(0.66, -0.04), R(0.7, -0.1)]], SEP, grosor=gw * 0.6,
+                 presion=0.7)                               # lashes
+        lz.lapiz([spline([R(0.5, -0.1), R(0.6, -0.14), R(0.68, -0.1)])], SEP, grosor=gw * 0.5, presion=0.3)  # crease
+        lz.lapiz([[R(0.55, 0.1), R(0.66, 0.09)]], SEP, grosor=gw * 0.5, presion=0.3)
+    # eyebrow
+    lz.lapiz([spline([R(0.46, -0.22), R(0.6, -0.27), R(0.74, -0.22)])], _lapiz_de(pelo, 0.6), grosor=gw * 1.1,
+             presion=0.6)
+    # nostril and mouth
+    lz.lapiz([arco(*R(0.82, 0.27), r * 0.05, r * 0.035, 100 if lado > 0 else -100, 260 if lado > 0 else 80, 8)],
+             SEP, grosor=gw * 0.6, presion=0.5)
+    if boca == 'abierta':
+        m = Poligono([R(0.83, 0.48), R(0.68, 0.5), R(0.8, 0.6)])
+        lz.aguada(m, '#8f2a36', dens=0.9, tapa=1, irreg=0.1)
+    else:
+        lz.lapiz([spline([R(0.86, 0.5), R(0.76, 0.52), R(0.68, 0.47)])], '#8f3c3c', grosor=gw * 0.9, presion=0.75)
+    if barba:
+        b = Poligono([R(-0.02, 0.5), R(0.3, 0.66), R(0.62, 0.66), R(0.74, 0.76), R(0.6, 0.93), R(0.2, 0.86),
+                      R(0.0, 0.66)])
+        lz.aguada(b, barba, dens=0.22, gran=0.5, irreg=0.8, borde=0.1)
+        lz.rayado(b, _lapiz_de(barba, 0.5), angulo=80, sep=1.6, presion=0.3, grosor=0.5, largo=4)
+    _pelo_perfil(lz, R, r, pelo, peinado, canas)
+    if gafas:
+        lz.lapiz([arco(*R(0.6, 0.03), r * 0.13, r * 0.12, 0, 360, 20), [R(0.47, 0.0), R(-0.08, -0.02)]], '#8a6a4a',
+                 grosor=0.7, presion=0.6, temblor=0.05)
+
+
+def cabeza_espalda(lz, x, y, r, piel='piel2', pelo='#3a2418', peinado='corto', giro=0.4, canas=False):
+    """A head seen from behind, turned toward one side (sign of giro) so the
+    curve of the cheek and the eyelashes peep out: the 'lost profile' of
+    picture books."""
+    sd = 1 if giro >= 0 else -1
+    R = lambda dx, dy: (x + dx * sd * r, y + dy * r)
+    SEP = '#6b4433'
+    gw = max(0.7, r * 0.035)
+    # far ear first (mostly hidden)
+    oreja = Elipse(*R(-0.9, 0.14), r * 0.13, r * 0.2)
+    lz.aguada(oreja, piel, dens=0.62, tapa=1, irreg=0.3)
+    lz.contorno(oreja, PIEL_LAPIZ, grosor=0.6, presion=0.45, cortes=0.1, desfase=0.05)
+    cab = Poligono([R(-0.88, -0.1), R(-0.84, -0.6), R(-0.45, -0.98), R(0.2, -1.0), R(0.75, -0.7), R(0.95, -0.15),
+                    R(1.0, 0.25), R(0.88, 0.62), R(0.58, 0.88), R(0.15, 0.95), R(-0.35, 0.82), R(-0.74, 0.48)])
+    lz.aguada(cab, piel, dens=0.6, tapa=1, borde=0.5, irreg=0.4,
+              toques=[(*R(-0.3, 0.5), r * 0.6, mezcla(piel, '#b0603e', 0.35), 0.5)])
+    lz.contorno(cab, PIEL_LAPIZ, grosor=0.7, presion=0.4, cortes=0.4, desfase=0.2)
+    lz.aguada(Elipse(*R(0.8, 0.45), r * 0.16, r * 0.12), '#ec6a72', dens=0.5, suave=r * 0.06)
+    lz.lapiz([[R(0.97, 0.02), R(1.08, -0.05)], [R(0.98, 0.07), R(1.09, 0.06)]], SEP, grosor=gw * 0.75, presion=0.85)
+    lp = _lapiz_de(pelo, 0.6)
+    if peinado == 'rizado':
+        rng = np.random.default_rng(int(x))
+        cs = [(*R(math.cos(t) * 0.72, -0.12 + math.sin(t) * 0.78), r * rng.uniform(0.25, 0.33))
+              for t in np.linspace(math.pi * 0.8, math.pi * 2.05, 12)]
+        cs.append((*R(-0.1, -0.2), r * 0.72))
+        f = Circulos(cs)
+    else:
+        f = Poligono([R(-0.94, 0.1), R(-0.9, -0.6), R(-0.45, -1.05), R(0.2, -1.07), R(0.78, -0.74), R(0.92, -0.3),
+                      R(0.66, -0.08), R(0.46, 0.25), R(0.3, 0.56), R(-0.1, 0.64), R(-0.55, 0.56), R(-0.85, 0.36)])
+    lz.aguada(f, pelo, dens=0.5 if canas else 0.82, tapa=1, borde=0.7, irreg=0.7, gran=0.4,
+              toques=[(*R(-0.2, -0.55), r * 0.5, mezcla(pelo, '#ffffff', 0.3), 0.5)])
+    lz.contorno(f, lp, grosor=0.8, presion=0.55, cortes=0.3)
+    st = [bezier(R(k, -0.98), R(k * 1.15, -0.35), R(k * 1.05, 0.45), n=14) for k in (-0.55, -0.2, 0.15, 0.45)]
+    lz.lapiz(st, lp, grosor=0.7, presion=0.4, temblor=0.3, cortes=0.4)
+    # the ear on the side we see, in front of the hair
+    oreja = Elipse(*R(0.6, 0.14), r * 0.14, r * 0.21)
+    lz.aguada(oreja, piel, dens=0.62, tapa=1, irreg=0.3,
+              toques=[(*R(0.6, 0.14), r * 0.09, mezcla(piel, '#c0604a', 0.5), 0.6)])
+    lz.contorno(oreja, PIEL_LAPIZ, grosor=0.6, presion=0.45, cortes=0.1, desfase=0.05)
+    lz.lapiz([arco(*R(0.6, 0.14), r * 0.07, r * 0.12, 0, 200, 10)], SEP, grosor=gw * 0.6, presion=0.4)
