@@ -142,7 +142,7 @@ await ok('el aviso a quien administra escapa el mensaje de quien escribe', () =>
   assert.match(c.asunto, /Prensa · Eve/);
 });
 
-await ok('cada alta confirmada avisa a administración con el correo de quien se suscribe', () => {
+await ok('cada alta avisa a administración con el correo de quien se suscribe', () => {
   const s = sitioForm('KWR', 'Portada', CFG);
   const c = correoAltaBoletin(s, 'nueva@x.org', 'https://humanity.wiki/paginas/KWR/formularios');
   assert.equal(c.asunto, 'Nueva suscripción al boletín de Sitio de Prueba: nueva@x.org');
@@ -200,8 +200,8 @@ console.log('Política de privacidad');
 await ok('el escaparate explica sus dos formularios, con base, plazo, baja y quién más los ve', () => {
   const t = textoLegal('privacidad', completarSitio(CFG), 'Sitio de Prueba');
   for (const x of ['Asociación de Prueba («Prueba»), con NIF/CIF G00000000', '## Si nos escribes para colaborar', '## Si te suscribes al boletín',
-    'art. 6.1.a del RGPD', 'al darte de baja, borramos tu dirección', 'Antes de enviarte ninguno te pedimos que confirmes', 'www.aepd.es',
-    'tu correo, la página desde la que te suscribes,', 'Si no confirmas la suscripción en los 30 días siguientes al correo de confirmación',
+    'art. 6.1.a del RGPD', 'al darte de baja, borramos tu dirección', 'www.aepd.es',
+    'tu correo, la página desde la que te suscribes,',
     'Para contar las visitas no usamos cookies ni guardamos tu IP', '**Cloudflare, Inc.**', 'Marco de Privacidad de Datos UE-EE. UU.',
     'Decisión de Ejecución (UE) 2023/1795', 'en servidores de la Unión Europea']) {
     assert.ok(t.includes(x), `falta: ${x}`);
@@ -360,11 +360,12 @@ try {
   });
 
   console.log('Boletín sin proveedor de correo');
-  await ok('el alta queda pendiente, sin correo y sin decir que se ha mandado nada', async () => {
+  await ok('el alta vale desde el formulario, sin correo y sin decir que se ha mandado nada', async () => {
     const r = await post('/api/sitio/KWR/boletin', ALTA(' Luis@Ejemplo.org '), { ip: otraIp() });
-    assert.deepEqual(await r.json(), { ok: true, resultado: 'guardado' });
+    assert.deepEqual(await r.json(), { ok: true, resultado: 'suscrito' });
     const [s] = await q(`SELECT * FROM sitio_suscriptores WHERE email = 'luis@ejemplo.org'`);
-    assert.equal(s.estado, 'pendiente');
+    assert.equal(s.estado, 'confirmado');
+    assert.ok(s.confirmado_at);
     assert.equal(s.correo_enviado_at, null);
     assert.equal(s.token_confirmar, null);
     assert.match(s.token_baja, /^[A-Za-z0-9_-]{43}$/);
@@ -382,7 +383,7 @@ try {
       body: new URLSearchParams({ email: 'sinjs@ejemplo.org', consentimiento: 'on', inicio: String(Date.now() - 5000) }).toString(),
     });
     assert.equal(r.status, 303);
-    assert.equal(r.headers.get('location'), '/luz-para-kenia#boletin-resultado=guardado');
+    assert.equal(r.headers.get('location'), '/luz-para-kenia#boletin-resultado=suscrito');
     assert.equal((await q(`SELECT count(*)::int AS n FROM sitio_suscriptores WHERE email = 'sinjs@ejemplo.org'`))[0].n, 1);
     const otra = await fetchReal(`${B}/api/sitio/KWR/boletin`, {
       method: 'POST', redirect: 'manual',
@@ -396,70 +397,50 @@ try {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'x-forwarded-for': otraIp(), Referer: `${B}//luz-para-kenia` },
       body: new URLSearchParams({ email: 'sinjs@ejemplo.org', consentimiento: 'on', inicio: String(Date.now() - 5000) }).toString(),
     });
-    assert.equal(dobles.headers.get('location'), '/luz-para-kenia#boletin-resultado=guardado');
+    assert.equal(dobles.headers.get('location'), '/luz-para-kenia#boletin-resultado=suscrito');
   });
 
   console.log('Boletín con proveedor de correo (de mentira)');
   conCorreo(true);
-  let tokenConfirmar = '', tokenBaja = '';
-  await ok('el alta manda el correo de confirmar, con el nombre del sitio, la baja y List-Unsubscribe', async () => {
-    const r = await post('/api/sitio/KWR/boletin', ALTA('marta@ejemplo.org'), { ip: otraIp(), 'x-forwarded-host': 'evil.example' });
-    assert.deepEqual(await r.json(), { ok: true, resultado: 'enviado' });
-    assert.equal(correos.length, 1);
-    const c = correos[0];
-    assert.equal(c.from, '"Sitio de Prueba" <avisos@humanity.wiki>');
-    assert.deepEqual(c.to, ['marta@ejemplo.org']);
-    assert.match(c.subject, /Confirma tu suscripción al boletín de Sitio de Prueba/);
-    tokenConfirmar = /prueba\.ejemplo\.org\/#boletin-confirmar=([A-Za-z0-9_-]+)/.exec(c.text)![1];
-    tokenBaja = /prueba\.ejemplo\.org\/#boletin-baja=([A-Za-z0-9_-]+)/.exec(c.text)![1];
-    assert.ok(!c.text.includes('evil.example'), 'la cabecera Host no decide adónde llevan los enlaces');
-    assert.equal(c.headers['List-Unsubscribe'], `<https://prueba.ejemplo.org/api/sitio/KWR/boletin/baja?t=${tokenBaja}>`);
-    assert.equal(c.headers['List-Unsubscribe-Post'], 'List-Unsubscribe=One-Click');
-    const [s] = await q(`SELECT * FROM sitio_suscriptores WHERE email = 'marta@ejemplo.org'`);
-    assert.equal(s.token_confirmar, huellaTestigo(tokenConfirmar), 'se guarda la huella, no el testigo');
-    assert.ok(s.correo_enviado_at);
-  });
-  await ok('pedirlo otra vez enseguida no manda otro correo', async () => {
+  let tokenBaja = '';
+  await ok('un alta nueva avisa a administración una sola vez y no escribe a quien se suscribe', async () => {
     const r = await post('/api/sitio/KWR/boletin', ALTA('marta@ejemplo.org'), { ip: otraIp() });
-    assert.deepEqual(await r.json(), { ok: true, resultado: 'reciente' });
+    assert.deepEqual(await r.json(), { ok: true, resultado: 'suscrito' });
+    await espera(300);
+    assert.equal(correos.length, 1);
+    assert.deepEqual(correos[0].to, ['contacto@ejemplo.org']);
+    assert.match(correos[0].subject, /Nueva suscripción al boletín de Sitio de Prueba: marta@ejemplo\.org$/);
+    assert.equal(correos[0].from, '"Sitio de Prueba" <avisos@humanity.wiki>');
+    const [s] = await q(`SELECT * FROM sitio_suscriptores WHERE email = 'marta@ejemplo.org'`);
+    assert.equal(s.estado, 'confirmado');
+    tokenBaja = s.token_baja;
+  });
+  await ok('repetir el alta da la misma respuesta y no avisa otra vez', async () => {
+    const r = await post('/api/sitio/KWR/boletin', ALTA('marta@ejemplo.org'), { ip: otraIp() });
+    assert.deepEqual(await r.json(), { ok: true, resultado: 'suscrito' });
+    await espera(300);
     assert.equal(correos.length, 1);
   });
-  await ok('confirmar con el enlace del correo; la segunda vez dice que ya estaba', async () => {
-    const r1 = await post('/api/sitio/KWR/boletin/confirmar', { token: tokenConfirmar });
+  await ok('quien quedó pendiente con la confirmación de antes pasa a suscrito al volver a apuntarse', async () => {
+    await q(`INSERT INTO sitio_suscriptores (id, raiz_id, email, estado, token_baja, consentimiento_texto, consentimiento_at) VALUES ('SSPEND', 'KWR', 'vuelve@ejemplo.org', 'pendiente', '${'P'.repeat(43)}', 'x', now())`);
+    const r = await post('/api/sitio/KWR/boletin', ALTA('vuelve@ejemplo.org'), { ip: otraIp() });
+    assert.deepEqual(await r.json(), { ok: true, resultado: 'suscrito' });
+    await espera(300);
+    assert.equal((await q(`SELECT estado FROM sitio_suscriptores WHERE id = 'SSPEND'`))[0].estado, 'confirmado');
+    assert.equal(correos.filter(c => /vuelve@ejemplo\.org$/.test(c.subject)).length, 1);
+  });
+  await ok('los enlaces de confirmar ya enviados siguen valiendo y avisan una vez', async () => {
+    const t = 'C'.repeat(43);
+    await q(`INSERT INTO sitio_suscriptores (id, raiz_id, email, estado, token_baja, token_confirmar, consentimiento_texto, consentimiento_at) VALUES ('SSENLACE', 'KWR', 'enlace@ejemplo.org', 'pendiente', '${'E'.repeat(43)}', '${huellaTestigo(t)}', 'x', now())`);
+    const r1 = await post('/api/sitio/KWR/boletin/confirmar', { token: t });
     assert.deepEqual(await r1.json(), { ok: true, ya: false });
-    const [s] = await q(`SELECT estado, confirmado_at FROM sitio_suscriptores WHERE email = 'marta@ejemplo.org'`);
-    assert.equal(s.estado, 'confirmado');
-    // El aviso a administración: una vez, a la dirección de contacto, con el correo de quien se suscribe.
-    await new Promise(r => setTimeout(r, 300));
-    const avisos = correos.filter(c => /Nueva suscripción al boletín/.test(c.subject));
-    assert.equal(avisos.length, 1, 'una confirmación, un aviso');
-    assert.deepEqual(avisos[0].to, ['contacto@ejemplo.org']);
-    assert.match(avisos[0].subject, /marta@ejemplo\.org$/);
-    const r2 = await post('/api/sitio/KWR/boletin/confirmar', { token: tokenConfirmar });
+    await espera(300);
+    const r2 = await post('/api/sitio/KWR/boletin/confirmar', { token: t });
     assert.deepEqual(await r2.json(), { ok: true, ya: true });
-    await new Promise(r => setTimeout(r, 300));
-    assert.equal(correos.filter(c => /Nueva suscripción al boletín/.test(c.subject)).length, 1, 'repetir el enlace no avisa otra vez');
+    await espera(300);
+    assert.equal(correos.filter(c => /enlace@ejemplo\.org$/.test(c.subject)).length, 1);
     assert.equal((await post('/api/sitio/KWR/boletin/confirmar', { token: 'x'.repeat(43) })).status, 404);
     assert.equal((await post('/api/sitio/KWR/boletin/confirmar', { token: 'corto' })).status, 400);
-  });
-  await ok('a quien ya está confirmado y lo pide otra vez se le avisa, sin cambiarle nada', async () => {
-    await q(`UPDATE sitio_suscriptores SET correo_enviado_at = now() - interval '11 minutes' WHERE email = 'marta@ejemplo.org'`);
-    const r = await post('/api/sitio/KWR/boletin', ALTA('marta@ejemplo.org'), { ip: otraIp() });
-    assert.deepEqual(await r.json(), { ok: true, resultado: 'enviado' });
-    const ultimo = correos[correos.length - 1];
-    assert.match(ultimo.subject, /Ya estás suscrito/);
-    assert.ok(!/boletin-confirmar/.test(ultimo.text));
-    const [s] = await q(`SELECT estado FROM sitio_suscriptores WHERE email = 'marta@ejemplo.org'`);
-    assert.equal(s.estado, 'confirmado');
-  });
-  await ok('si el proveedor falla, se dice y no se apunta como enviado', async () => {
-    estadoProveedor = 500;
-    const r = await post('/api/sitio/KWR/boletin', ALTA('fallo@ejemplo.org'), { ip: otraIp() });
-    assert.deepEqual(await r.json(), { ok: true, resultado: 'fallo' });
-    const [s] = await q(`SELECT correo_enviado_at, estado FROM sitio_suscriptores WHERE email = 'fallo@ejemplo.org'`);
-    assert.equal(s.correo_enviado_at, null);
-    assert.equal(s.estado, 'pendiente');
-    estadoProveedor = 200;
   });
   await ok('un mensaje avisa a la dirección de contacto, con «Responder» hacia quien escribe', async () => {
     const antes = correos.length;
@@ -487,7 +468,7 @@ try {
     const abrir = await fetchReal(`${B}/api/sitio/KWR/boletin/baja?t=${s.token_baja}`, { redirect: 'manual' });
     assert.equal(abrir.status, 303, 'abrirla no da de baja: lleva a la web, que pregunta');
     assert.equal(abrir.headers.get('location'), `https://prueba.ejemplo.org/#boletin-baja=${s.token_baja}`);
-    assert.equal((await q(`SELECT estado FROM sitio_suscriptores WHERE email = 'luis@ejemplo.org'`))[0].estado, 'pendiente');
+    assert.equal((await q(`SELECT estado FROM sitio_suscriptores WHERE email = 'luis@ejemplo.org'`))[0].estado, 'confirmado');
     const r = await fetchReal(`${B}/api/sitio/KWR/boletin/baja?t=${s.token_baja}`, {
       method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'x-forwarded-for': otraIp() }, body: 'List-Unsubscribe=One-Click',
     });
@@ -554,7 +535,7 @@ try {
     assert.ok(t.startsWith('﻿fecha,nombre,correo'));
     assert.ok(t.includes(`"'=HYPERLINK(""x"")"`), 'la fórmula sale como texto');
     assert.equal((await fetchReal(`${B}/api/sitio/KWR/formularios/suscriptores.csv`)).status, 401);
-    await q(`UPDATE sitio_suscriptores SET estado = 'confirmado', confirmado_at = now() WHERE email = 'sinjs@ejemplo.org'`);
+    await q(`INSERT INTO sitio_suscriptores (id, raiz_id, email, estado, token_baja, consentimiento_texto, consentimiento_at) VALUES ('SSFALLO', 'KWR', 'fallo@ejemplo.org', 'pendiente', '${'F'.repeat(43)}', 'x', now())`);
     const csvS = await fetchReal(`${B}/api/sitio/KWR/formularios/suscriptores.csv`, { headers: { 'x-usuario': 'U_DUENO' } });
     assert.match(csvS.headers.get('content-disposition') || '', /boletin-confirmados-KWR\.csv/);
     const s = await conBom(csvS);

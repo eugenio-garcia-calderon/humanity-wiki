@@ -10563,3 +10563,4 @@ Eugenio asked for five things on the 3D world; all on branch `nube/arquitectura-
 - **Probado y descartado:** un halo de luz (bloom). El reflejo del sol en la cúpula se abría en una mancha que velaba el coche.
 - Comprobado en el editor con el navegador de pruebas (sin errores en consola), con `tsc` y con `vite build`.
 - Sin verificar: el móvil con la app instalada, y el rendimiento en un portátil con gráfica integrada. El coste por fotograma es el de antes: misma sombra de 2048, sin pases nuevos.
+- Boletín sin doble confirmación (2026-11-09, Eugenio: «quita la confirmación»): el alta vale desde el formulario y avisa a la dirección de contacto una sola vez. La política de privacidad, la pantalla y el panel ya no hablan de confirmar; los enlaces ya enviados siguen valiendo.
