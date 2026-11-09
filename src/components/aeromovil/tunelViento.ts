@@ -414,12 +414,18 @@ export function crearTunel(cuerpos: CuerpoTunel[], opciones: OpcionesTunel): Tun
       let dx = 0;
       if (k.x1 > ancho - 6) dx = ancho - 6 - k.x1;
       if (k.x0 + dx < 6) dx = 6 - k.x0;
-      let dy = 0;
-      for (let vuelta = 0; vuelta < 12; vuelta++) {
-        const choca = puestas.find(p => pisa({ x0: k.x0 + dx, x1: k.x1 + dx, y0: k.y0 + dy, y1: k.y1 + dy }, p));
-        if (!choca) break;
-        dy = choca.y0 - k.y1 - 3; // just above what it hit
-      }
+      // up past whatever it covers; if that leaves the view, down instead
+      const buscar = (sube: boolean) => {
+        let d = 0;
+        for (let vuelta = 0; vuelta < 12; vuelta++) {
+          const choca = puestas.find(p => pisa({ x0: k.x0 + dx, x1: k.x1 + dx, y0: k.y0 + d, y1: k.y1 + d }, p));
+          if (!choca) break;
+          d = sube ? choca.y0 - k.y1 - 3 : choca.y1 - k.y0 + 3;
+        }
+        return d;
+      };
+      let dy = buscar(true);
+      if (k.y0 + dy < 4) dy = buscar(false);
       puestas.push({ x0: k.x0 + dx, x1: k.x1 + dx, y0: k.y0 + dy, y1: k.y1 + dy });
       // pixels → metres at this label's depth, along the camera's up and right directions
       const prof = haciaCam.copy(mundo).sub(cam.position).dot(tmp.set(0, 0, -1).applyQuaternion(cam.quaternion));
