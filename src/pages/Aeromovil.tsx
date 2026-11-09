@@ -304,7 +304,10 @@ function LadoA1({ P, Pa, D, set, res, modelo, neumaticos, malas, alNavegar, dep 
             ['Carga 0-100 %', a1.cargaHoras.map(c => `${c.kW} kW: ${h(c.h)}`).join(' · ')],
             ['Paneles solares', `${fmt(res.areas.solar)} m² · ${Math.round(res.solarPico)} W pico`],
             ['Energía solar al día', `${fmt(res.solarDia / 1000)} kWh · ${Math.round(res.kmSol)} km`],
-          ] as [string, string][]).map(([a, b]) => (<Fragment key={a}><dt className="text-slate-600">{a}</dt><dd className="text-right font-mono text-xs tabular-nums">{b}</dd></Fragment>))}
+          ] as [string, string][])
+            // at the default 100 km/h the fixed «a 100 km/h» rows and the «a ${P.speed} km/h» rows are the same row twice
+            .filter(([a], i, l) => l.findIndex(([x]) => x === a) === i)
+            .map(([a, b]) => (<Fragment key={a}><dt className="text-slate-600">{a}</dt><dd className="text-right font-mono text-xs tabular-nums">{b}</dd></Fragment>))}
         </dl>
         <p className="text-xs text-slate-500">Rodadura 0,009, rendimiento eléctrico 88 %, 250 W de equipos, batería usable al 92 %. El Cd es orientativo: valídalo con CFD antes del molde.</p>
       </Bloque>
