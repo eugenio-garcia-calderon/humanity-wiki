@@ -116,20 +116,25 @@ bolsa_c = Poligono([(596, 712), (904, 712), (914, 744), (880, 792), (760, 802), 
 lz.aguada(bolsa_c, '#4a2e1c', dens=0.6, suave=10, gran=0.8, var=0.6, toques=[(740, 790, 90, '#2e1c12', 0.6)],
           desvanece=(0, 820, 0, 708))
 lz.aguada(bolsa_c, '#3a2414', dens=0.35, suave=14, desvanece=(0, 712, 0, 800))
-for (cx, cy, a) in ((640, 732, 0), (868, 730, 30)):   # carrot peelings, curling
-    pel = Trazo(spline([(cx - 18, cy), (cx - 8, cy - 8), (cx + 4, cy - 2), (cx + 2, cy + 8), (cx + 14, cy + 6), (cx + 20, cy - 4)]),
-                (5, 6, 6, 5, 4, 2))
-    lz.aguada(pel, '#ec7a2a', dens=0.9, tapa=0.9, irreg=0.4, borde=0.8, desvanece=(0, cy - 10, 0, cy + 22))
-    lz.contorno(pel, '#9a3a12', grosor=0.6, presion=0.55, cortes=0.3)
+for (cx, cy, a) in ((646, 730, -8), (866, 728, 14)):   # carrot peelings: flat ribbons, breaking into bits
+    ca_, sa_ = math.cos(math.radians(a)), math.sin(math.radians(a))
+    for j, (dx, L, w) in enumerate(((-16, 18, 5), (4, 14, 4.5), (20, 9, 4))):
+        p0 = (cx + dx * ca_, cy + dx * sa_ + j * 3)
+        cinta_ = Trazo([p0, (p0[0] + L * ca_ * 0.5, p0[1] - 3), (p0[0] + L * ca_, p0[1] + L * sa_)], (w, w * 1.1, w * 0.6))
+        lz.aguada(cinta_, '#f08a3a', dens=0.85, tapa=0.9, irreg=0.4, borde=0.8)
+        lz.contorno(cinta_, '#a8501a', grosor=0.5, presion=0.5, cortes=0.3)
+        lz.lapiz([[(p0[0] + k * 4, p0[1] - 1), (p0[0] + k * 4 + 1, p0[1] + 2)] for k in range(int(L / 4))], '#c8641e', grosor=0.4,
+                 presion=0.45)
 for (cx, cy, L, ang, c) in ((760, 756, 30, -20, '#c08a3a'), (820, 770, 26, 200, '#a8703a'), (680, 768, 24, 10, '#d0a040')):  # dry leaves
     hoja(lz, cx, cy, L, ang, c, ancho=0.45, tapa=0.85, dens=0.8)
-corazon = Poligono([(720, 740), (728, 726), (726, 712), (736, 706), (746, 712), (744, 726), (752, 740), (736, 750)])
-lz.aguada(corazon, '#f3e0b0', dens=0.8, tapa=1, irreg=0.3, borde=0.8, toques=[(736, 726, 7, '#c87a4a', 0.6)], sombra=(-2, -2))
-lz.aguada(Poligono([(720, 740), (726, 732), (746, 732), (752, 740), (736, 750)]), '#d94a3a', dens=0.6, irreg=0.3)
+# an apple core standing up: red skin left only at the top and the bottom, a narrow bitten waist, its stalk
+corazon = Poligono([(724, 712), (748, 712), (744, 722), (740, 730), (742, 738), (750, 746), (722, 746), (730, 738), (732, 730), (728, 722)])
+lz.aguada(corazon, '#f6e6b8', dens=0.8, tapa=1, irreg=0.3, borde=0.8, toques=[(736, 728, 6, '#d8a868', 0.6)], sombra=(-2, -2))
+for (y0, y1) in ((706, 714), (744, 752)):
+    lz.aguada(Elipse(736, (y0 + y1) / 2, 14, (y1 - y0) / 2), '#d94a3a', dens=0.85, tapa=1, irreg=0.3)
 lz.contorno(corazon, '#8a5a2a', grosor=0.7, presion=0.55, cortes=0.15)
 lz.lapiz([[(736, 706), (738, 696)]], LP, grosor=0.9, presion=0.8)
-for (x, y) in ((733, 724), (740, 726)):
-    lz.aguada(Elipse(x, y, 1.6, 2.6), '#3a2a20', dens=0.9, irreg=0.1)
+lz.aguada(Elipse(736, 729, 1.4, 2.4), '#3a2a20', dens=0.9, irreg=0.1)
 for (cx, cy) in ((800, 738), (814, 748)):   # eggshell halves, white with a jagged rim
     cas = Poligono([(cx - 10, cy - 2), (cx - 6, cy - 7), (cx - 2, cy - 3), (cx + 2, cy - 8), (cx + 6, cy - 3), (cx + 10, cy - 6),
                     (cx + 10, cy + 2), (cx + 4, cy + 8), (cx - 4, cy + 8), (cx - 10, cy + 3)], suave=False)
@@ -619,8 +624,8 @@ lz.lapiz([arco(598, 560, 5, 11, -80, 80, 10), arco(598, 560, 5, 11, 100, 260, 10
 lz.aguada(Trazo([(598, 548), (601, 540), (606, 537)], (4, 2.5, 2)), '#6a7a3a', dens=0.9, tapa=1)
 manga(lz, [(496, 532), (534, 568), (568, 574)], (26, 23, 20), '#f0a828', pliegues=2)
 mano_dedos(lz, 566, 576, -8, 30, PIEL, curl=0.55, abre=0.35, lado=1, pulgar=0.7)
-for (a, b) in ((TOMATE_MANOS[0], (610, 554)), (TOMATE_MANOS[1], (610, 566))):
-    brazito(lz, [a, ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2 + 2), b], BRAZO, grosor=1.5, mano_r=3)
+for (a, b) in ((TOMATE_MANOS[0], (606, 552)), (TOMATE_MANOS[1], (607, 565))):
+    brazito(lz, [a, ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2 + 2), b], BRAZO, grosor=1.4, mano=False)
 
 # ------------------------------------------------------------------ magic: autumn leaves drift out of the fridge's light
 # the vine's last leaves have turned autumn colours and drift off, light, toward the open paper

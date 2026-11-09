@@ -1,9 +1,37 @@
 [
-  {"dia": 24, "frase": "Hoy: compra en tu barrio y pregunta de dónde viene.", "como_aparece": "El mantel del puesto ES el campo de donde viene la comida: un patchwork de retales cosidos a mano (trigal, huerta, tierra arada, prados), frutales, la casa de la agricultora y un río que se sale del mantel y cae a una charca con peces; la agricultora entrega zanahorias aún con tierra."},
-  {"dia": 19, "frase": "Hoy: arregla algo en lugar de sustituirlo.", "como_aparece": "Sobre la mesa, un cuenco azul roto y reparado con oro (kintsugi): sus grietas brillan."},
-  {"dia": 23, "frase": "Comercio justo: precios dignos para quien produce.", "como_aparece": "Una balanza dorada pequeña en equilibrio en la esquina de la mesa (uvas en un platillo, una manzana en el otro)."},
-  {"dia": 25, "frase": "Mira el precio por kilo o litro: ¿es de verdad oferta?", "como_aparece": "La misma balanza: lo que se compra se pesa."},
-  {"dia": 7, "frase": "Reducir, reutilizar, reparar y reciclar, en ese orden.", "como_aparece": "La madre lleva su bolsa de tela de siempre (con pan y zanahorias); tarros de miel con tapa de tela; el cuenco reparado."},
-  {"dia": null, "frase": "No todo se paga con dinero: también se intercambia.", "como_aparece": "Un niño subido a un cajón ofrece a la agricultora un dibujo hecho por él (sol, colinas, una casa, dos personas de la mano) y ella le regala una manzana."},
-  {"dia": null, "frase": "El dinero es una herramienta: tú decides a qué sirve.", "como_aparece": "La madre paga con una moneda de oro: el pájaro grabado en ella se está despegando, con la cola aún en relieve de oro y la cabeza y las alas ya vivas; una bandada vuela delante hacia el papel en blanco (libertad). Es el lema del mes."}
+ {
+  "dia": 24,
+  "frase": "Hoy: compra en tu barrio y pregunta de dónde viene.",
+  "como_aparece": "El mantel del puesto ES el campo de donde viene la comida: retales cosidos a mano que caen en pliegues (trigal, huerta con brotes, tierra arada, prados), frutales, la casa de la agricultora y un río que se sale del mantel y cae a una charca con peces; la agricultora entrega zanahorias aún con tierra."
+ },
+ {
+  "dia": 19,
+  "frase": "Hoy: arregla algo en lugar de sustituirlo.",
+  "como_aparece": "Sobre la mesa, un cuenco azul roto y reparado con oro (kintsugi): sus grietas brillan."
+ },
+ {
+  "dia": 23,
+  "frase": "Comercio justo: precios dignos para quien produce.",
+  "como_aparece": "Una balanza dorada pequeña en equilibrio en la esquina de la mesa (uvas en un platillo, una manzana en el otro)."
+ },
+ {
+  "dia": 25,
+  "frase": "Mira el precio por kilo o litro: ¿es de verdad oferta?",
+  "como_aparece": "La misma balanza: lo que se compra se pesa."
+ },
+ {
+  "dia": 7,
+  "frase": "Reducir, reutilizar, reparar y reciclar, en ese orden.",
+  "como_aparece": "La madre lleva su bolsa de tela de siempre (con pan y zanahorias); tarros de miel con tapa de tela; el cuenco reparado."
+ },
+ {
+  "dia": null,
+  "frase": "No todo se paga con dinero: también se intercambia.",
+  "como_aparece": "Un niño subido a un cajón ofrece a la agricultora un dibujo hecho por él (una flor, un pájaro y la hierba) y ella le regala una manzana. Al fondo, bajo los soportales de la plaza, otras personas intercambian: una tiende un cántaro, otra se prueba un chal que le sostiene la tejedora."
+ },
+ {
+  "dia": null,
+  "frase": "El dinero es una herramienta: tú decides a qué sirve.",
+  "como_aparece": "La madre paga con una moneda de oro que resplandece: el pájaro grabado en ella se está despegando; la cola sigue en relieve de oro, el ala ya rompe el borde de la moneda y la cabeza está viva; tres pajarillos lo siguen como si los guiara (libertad). Es el lema del mes."
+ }
 ]

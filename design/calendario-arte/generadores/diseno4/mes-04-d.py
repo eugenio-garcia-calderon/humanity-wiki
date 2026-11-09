@@ -151,45 +151,64 @@ def hifa(a, b, jit=12):
     return p
 
 
-P = [q for q in puntas if dentro(*q)]
+P = []
+for q in [q for q in puntas if dentro(*q)]:
+    if all((q[0] - r_[0]) ** 2 + (q[1] - r_[1]) ** 2 > 30 ** 2 for r_ in P):
+        P.append(q)
+hechos = set()
 for i, q in enumerate(P):
     d = sorted(range(len(P)), key=lambda j: (P[j][0] - q[0]) ** 2 + (P[j][1] - q[1]) ** 2)
-    for j in d[1:4]:
-        if (P[j][0] - q[0]) ** 2 + (P[j][1] - q[1]) ** 2 < 130 ** 2:
+    for j in d[1:3]:
+        if (min(i, j), max(i, j)) not in hechos and (P[j][0] - q[0]) ** 2 + (P[j][1] - q[1]) ** 2 < 110 ** 2:
+            hechos.add((min(i, j), max(i, j)))
             hifa(q, P[j])
-oak = [q for q in P if q[0] < 800]
-cer = [q for q in P if q[0] >= 800]
-# three long threads from the oak to the cherry, three from the cherry to the little oak's rootlets
+oak = sorted([q for q in P if q[0] < 800], key=lambda q: q[0])
+cer = sorted([q for q in P if q[0] >= 800], key=lambda q: q[0])
+# long threads: oak -> cherry, cherry -> the little oak's rootlets
 for k in range(3):
-    hifa(oak[-1 - k * 2] if len(oak) > k * 2 else oak[-1], cer[k] if len(cer) > k else cer[0], jit=18)
-cer.sort(key=lambda q: q[0])
+    hifa(oak[-1 - k], cer[min(k, len(cer) - 1)], jit=18)
 for k in range(4):
     hifa(cer[-1 - (k % 2)], TIPS_A[k], jit=14)
-# a fine fuzz of hyphae everywhere along the threads
 N_PRIM = len(hilos)
-for h in list(hilos):
-    for j in range(6, len(h) - 6, 9):
-        a = rngm.uniform(0, 2 * math.pi)
-        L = rngm.uniform(6, 16)
-        q = (h[j][0] + math.cos(a) * L, h[j][1] + math.sin(a) * L)
-        if dentro(*q):
-            hilos.append(np.array([h[j], ((h[j][0] + q[0]) / 2 + rngm.normal(0, 2), (h[j][1] + q[1]) / 2), q]))
+
+
+def rama_hifa(p0, ang, L, nivel):
+    """A fine hypha that forks once or twice (the net is a fuzz of these)."""
+    a = math.radians(ang)
+    p1 = (p0[0] + math.cos(a) * L, p0[1] + math.sin(a) * L)
+    if not dentro(*p1):
+        return
+    m = ((p0[0] + p1[0]) / 2 + rngm.normal(0, 2), (p0[1] + p1[1]) / 2 + rngm.normal(0, 2))
+    hilos.append(np.array([p0, m, p1]))
+    if nivel < 2:
+        for sd in (-1, 1):
+            if rngm.random() < 0.7:
+                rama_hifa(p1, ang + sd * rngm.uniform(25, 50), L * 0.6, nivel + 1)
+
+
+for h in list(hilos[:N_PRIM]):
+    for j in range(6, len(h) - 6, 12):
+        d = h[min(j + 1, len(h) - 1)] - h[j - 1]
+        base = math.degrees(math.atan2(d[1], d[0]))
+        rama_hifa(tuple(h[j]), base + rngm.choice([-1, 1]) * rngm.uniform(35, 80), rngm.uniform(8, 16), 0)
+for q in P + TIPS_A:                # denser around the roots
+    for k in range(2):
+        rama_hifa(q, rngm.uniform(0, 360), rngm.uniform(8, 14), 0)
 prim, fino = hilos[:N_PRIM], hilos[N_PRIM:]
 for h in prim:
-    lz.aguada(Trazo(h[::4], (5, 4)), '#f6d070', dens=0.35, suave=2.5)
-    lz.luz(Trazo(h[::4], (8, 6)), '#ffd870', fuerza=0.2, suave=3)
-lz.lapiz(prim, '#5a3018', grosor=2.6, presion=0.35, temblor=0.12)
+    lz.luz(Trazo(h[::5], (5, 4)), '#ffd870', fuerza=0.12, suave=2.5)
+lz.lapiz(prim, '#5a3018', grosor=1.9, presion=0.3, temblor=0.12)
 for h in prim:                       # gold that shines: opaque body colour, not a glaze
     q = h[::2] if len(h) > 6 else h
-    lz.gouache(Trazo(q, (2.4, 1.6)), '#f6c444', alfa=0.95, irreg=0)
-    lz.gouache(Trazo(q, (0.9, 0.6)), '#fff6d0', alfa=0.9, irreg=0)
+    lz.gouache(Trazo(q, (1.5, 1.0)), '#f6c444', alfa=0.95, irreg=0)
+    lz.gouache(Trazo(q, (0.55, 0.4)), '#fff6d0', alfa=0.9, irreg=0)
 for h in fino:
-    lz.gouache(Trazo(h, (1.0, 0.5)), '#f2c050', alfa=0.85, irreg=0)
-for q in P + TIPS_A:
-    lz.gouache(Elipse(*q, 1.6), '#fff4c0', alfa=0.9, irreg=0)
-    lz.luz((q[0], q[1], 5), '#ffe2a0', fuerza=0.3)
+    lz.gouache(Trazo(h, (0.6, 0.3)), '#f2c050', alfa=0.7, irreg=0)
+for q in P + TIPS_A:                 # small knots of light where threads meet the roots
+    lz.gouache(Elipse(*q, 1.3), '#fff8d8', alfa=0.95, irreg=0)
+    lz.luz((q[0], q[1], 4), '#ffe2a0', fuerza=0.35)
 for q in TIPS_A:                 # the little oak lights up where the gold reaches it
-    lz.luz((q[0], q[1], 12), '#ffe6a8', fuerza=0.55)
+    lz.luz((q[0], q[1], 9), '#ffe6a8', fuerza=0.4)
 
 # ------------------------------------------------------------------ one worm (day 11)
 def lombriz(pts, w=5.5):
@@ -223,8 +242,7 @@ for (x, s_) in ((420, 1.0), (436, 0.7)):
                     (x + 13 * s_, y - 22 * s_), (x + 15 * s_, y - 13 * s_)])
     volumen(lz, som, '#9a5a2e', dens=0.8, brillo=0.35, lapiz='#5a3420')
 hifa((428, yg(428) + 4), P[0] if P else (420, 620), jit=6)
-lz.lapiz([hilos[-1]], '#e8a830', grosor=0.85, presion=0.9)
-lz.lapiz([hilos[-1]], '#fff0b8', grosor=0.4, presion=0.8)
+lz.gouache(Trazo(hilos[-1], (1.3, 0.9)), '#f6c444', alfa=0.95, irreg=0)
 
 
 def amapola(x, h):
@@ -293,11 +311,12 @@ def mariposa(x, y, s=1.0, c1='#e8735e', c2='#f0c25e', ang=0):
 
 
 # ------------------------------------------------------------------ the girl's shins hang BEHIND the branch (drawn before the tree)
-KN = (436, 316)                       # her knees, hooked over the top of the branch
+KN = (436, 306)                       # her knees, bent over the top of the branch
 for (dx, col) in ((-4, '#d8604e'), (6, '#e8735e')):
-    miembro(lz, [(KN[0] + dx, KN[1] + 2), (KN[0] + dx - 10, KN[1] + 34), (KN[0] + dx - 18, KN[1] + 62)], (20, 16, 12),
+    # calves hang straight down on the far side of the branch, feet dangling
+    miembro(lz, [(KN[0] + dx - 8, KN[1] + 2), (KN[0] + dx - 14, KN[1] + 30), (KN[0] + dx - 16, KN[1] + 56)], (19, 17, 11),
             'piel3', lado=1, lapiz=PIEL_LP)
-    z = Elipse(KN[0] + dx - 22, KN[1] + 72, 7, 12, 10)
+    z = Elipse(KN[0] + dx - 17, KN[1] + 66, 7, 12, 4)
     lz.aguada(z, '#5f86c0', dens=0.8, tapa=1, irreg=0.3)
     lz.contorno(z, '#2f4a7a', grosor=0.7, presion=0.55)
 
@@ -335,9 +354,9 @@ def masa(cx, cy, r, sem):
     return Poligono(np.stack([cx + np.cos(ang_) * rad_, cy + np.sin(ang_) * rad_ * 0.8], 1))
 
 
-MASAS = [(560, 160, 118, '#4e6852'), (430, 220, 86, '#3e5a48'), (690, 210, 94, '#455e4c'), (360, 278, 56, '#3a5444'),
+MASAS = [(560, 160, 118, '#4e6852'), (430, 220, 86, '#3e5a48'), (690, 210, 94, '#455e4c'), (340, 256, 48, '#3a5444'),
          (770, 268, 64, '#3a5444'), (500, 102, 78, '#5e765a'), (640, 98, 76, '#5a7258'), (560, 262, 84, '#344c40'),
-         (440, 300, 46, '#344c40')]
+         ]
 COPA = None
 for k, (cx_, cy_, r_, col) in enumerate(sorted(MASAS, key=lambda m: m[1])):
     f_ = masa(cx_, cy_, r_, 70 + k)
@@ -372,10 +391,17 @@ _m = np.zeros((900, 1500), np.uint8)
 for (cx_, cy_, r_, col) in MASAS:
     _cv.ellipse(_m, (int(cx_), int(cy_)), (int(r_ * 0.98), int(r_ * 0.78)), 0, 0, 360, 255, -1)
 _c = max(_ms.find_contours(_m.astype(float), 128), key=len)
-for (yy, xx) in _c[::15]:
+_rng_b = np.random.default_rng(55)
+_pts_b = [p_ for k, p_ in enumerate(_c[::11]) if math.sin(k * 0.9 + 1.3) + _rng_b.normal(0, 0.5) > 0.1]
+for (yy, xx) in _pts_b:
     a = math.degrees(math.atan2(yy - 200, xx - 560)) + rng.normal(0, 30)
     luzc = (xx - 560) * -0.6 + (yy - 200) * -0.8
-    hoja_encina(xx, yy, rng.uniform(16, 21), a, rng.choice(['#8a9a6a', '#6a8460']) if luzc > 40 else
+    tip = (xx + math.cos(math.radians(a)) * rng.uniform(4, 14), yy + math.sin(math.radians(a)) * rng.uniform(4, 14))
+    lz.lapiz([[(xx, yy), tip]], '#4a3a2a', grosor=0.6, presion=0.5)        # a twig sticking out
+    for da in (-35, 0, 35):
+        if rng.random() < 0.3:
+            continue
+        hoja_encina(*tip, rng.uniform(9, 15), a + da + rng.normal(0, 10), rng.choice(['#8a9a6a', '#6a8460']) if luzc > 40 else
                 rng.choice(['#3e5a48', '#2e4a3c', '#4e6852']))
 for (x, y) in puntos_dentro(COPA, 60, 9, margen=12):
     luzc = (x - 560) * -0.6 + (y - 200) * -0.8
@@ -389,9 +415,16 @@ lz.luz((500, 100, 80), '#ffe6a0', fuerza=0.3)
 def abubilla(x, y, s=1.0):
     """A hoopoe perched, crest open (singing)."""
     pajaro(lz, x, y, 16 * s, '#d89a5a', ang=-5, alas='abajo', vientre='#f0d0a8')
-    ala = Poligono([(x - 14 * s, y - 2 * s), (x + 4 * s, y - 4 * s), (x + 6 * s, y + 4 * s), (x - 20 * s, y + 6 * s)])
-    lz.aguada(ala, '#2a2420', dens=0.85, tapa=1, irreg=0.2)
-    lz.lapiz([[(x - 16 + 5 * k, y - 3), (x - 16 + 5 * k, y + 5)] for k in range(5)], '#f6f0e0', grosor=1.0, presion=0.8)
+    ala = Poligono([(x - 16 * s, y - 2 * s), (x + 6 * s, y - 5 * s), (x + 8 * s, y + 4 * s), (x - 22 * s, y + 7 * s)])
+    lz.aguada(ala, '#f4ecdc', dens=0.6, tapa=1, irreg=0.2)
+    for k in range(5):                 # the hoopoe's zebra wing: broad black bars on cream
+        u = x + (-18 + k * 6) * s
+        lz.aguada(Poligono([(u, y - 5 * s), (u + 3.2 * s, y - 5 * s), (u + 2.2 * s, y + 8 * s), (u - 1 * s, y + 8 * s)],
+                           suave=False) & ala, '#1e1814', dens=1.0, irreg=0.1)
+    lz.contorno(ala, '#1e1814', grosor=0.7, presion=0.6)
+    cola = Poligono([(x - 20 * s, y + 1 * s), (x - 34 * s, y - 1 * s), (x - 34 * s, y + 7 * s), (x - 20 * s, y + 6 * s)])
+    lz.aguada(cola, '#1e1814', dens=1.0, tapa=1, irreg=0.1)
+    lz.aguada(Trazo([(x - 28 * s, y - 1 * s), (x - 28 * s, y + 7 * s)], (2.4 * s, 2.4 * s)), '#f4ecdc', dens=0.8, tapa=1)
     for k in range(5):
         a = math.radians(-150 + k * 22)
         p0 = (x + 8 * s, y - 6 * s)
@@ -411,13 +444,19 @@ for (x, y) in ((TRONCO_X + 80, 390),):
 
 # ------------------------------------------------------------------ the girl hanging upside down by her knees
 # thighs rise from her hips to the knees hooked over the branch (in front of it)
-HIP = (448, 382)
+HIP = (450, 384)
+# thighs rise in front of the branch to knees that fold OVER its top
 for (dx, col) in ((-5, '#d8604e'), (5, '#e8735e')):
-    miembro(lz, [(HIP[0] + dx, HIP[1]), (KN[0] + dx + 4, (HIP[1] + KN[1]) / 2), (KN[0] + dx, KN[1] - 2)], (24, 21, 17),
-            col, lado=-1, pliegues=1)
-lz.aguada(Elipse(KN[0], KN[1] - 2, 16, 9), '#e8735e', dens=0.8, tapa=1)                  # knees over the top
-lz.contorno(Elipse(KN[0], KN[1] - 2, 16, 9), '#8a3a30', grosor=0.7, presion=0.5)
-peto = [(426, 376), (470, 376), (468, 410), (462, 440), (432, 440), (426, 410)]
+    miembro(lz, [(HIP[0] + dx, HIP[1]), (KN[0] + dx + 8, (HIP[1] + KN[1]) / 2 + 6), (KN[0] + dx + 4, KN[1] + 4)],
+            (24, 21, 18), col, lado=-1, pliegues=1)
+for (dx, col) in ((-5, '#d8604e'), (5, '#e8735e')):
+    rodilla = Poligono([(KN[0] + dx + 14, KN[1] + 14), (KN[0] + dx + 12, KN[1] - 4), (KN[0] + dx + 2, KN[1] - 10),
+                        (KN[0] + dx - 10, KN[1] - 6), (KN[0] + dx - 16, KN[1] + 6), (KN[0] + dx - 10, KN[1] + 12)])
+    lz.aguada(rodilla, col, dens=0.8, tapa=1, irreg=0.3)
+    lz.contorno(rodilla, '#8a3a30', grosor=0.8, presion=0.55, cortes=0.2)
+    lz.lapiz([arco(KN[0] + dx, KN[1] + 6, 10, 8, 200, 340, 12)], '#8a3a30', grosor=0.7, presion=0.5)   # the bend of the knee
+lz.aguada(Trazo([(KN[0] - 40, KN[1] + 26), (KN[0] + 40, KN[1] + 24)], (12, 12)) & RAMA_I, '#5a3e2e', dens=0.3, suave=3)
+peto = [(428, 378), (472, 378), (468, 410), (462, 440), (432, 440), (426, 410)]
 prenda(lz, peto, '#e8735e', luz=(-0.6, -1), pliegues=[[(438, 386), (436, 434)], [(458, 386), (460, 434)]])
 lz.gouache(Elipse(436, 428, 3), '#fff3e0', alfa=0.9, irreg=0)
 lz.gouache(Elipse(458, 428, 3), '#fff3e0', alfa=0.9, irreg=0)
@@ -438,28 +477,34 @@ miembro(lz, [(468, 478), (494, 504), (504, 536)], (14, 12, 10), 'piel3', lado=-1
 mano(lz, 504, 536, 72, 20, 'piel3', 'abierta', lado=-1)
 
 # ------------------------------------------------------------------ the young cherry in blossom
-CT = Trazo([(CER_X, yg(CER_X) + 2), (CER_X - 4, 480), (CER_X + 4, 420), (CER_X + 2, 380)], (17, 14, 11, 9))
+# a young cherry: a leader that wanders upward, side branches of different thickness at different heights
+TRONCO_C = [(CER_X, yg(CER_X) + 2), (CER_X - 5, 490), (CER_X + 3, 446), (CER_X - 6, 404), (CER_X - 1, 352),
+            (CER_X + 8, 300), (CER_X + 4, 262)]
+CT = Trazo(TRONCO_C, (18, 15, 13, 11, 8, 5, 2))
 volumen(lz, CT, '#8a5a4a', dens=0.8, brillo=0.25, lapiz='#4a2e22')
-lz.lapiz([[(CER_X - 6, 520 - k * 30), (CER_X + 2, 520 - k * 30)] for k in range(5)], '#c8a090', grosor=0.7, presion=0.5)
-RAMAS_C = [[(CER_X + 2, 392), (CER_X - 26, 352), (CER_X - 58, 330), (CER_X - 80, 322)],
-           [(CER_X - 26, 352), (CER_X - 34, 316), (CER_X - 30, 282)],
-           [(CER_X + 3, 384), (CER_X + 30, 344), (CER_X + 62, 318), (CER_X + 82, 312)],
-           [(CER_X + 30, 344), (CER_X + 40, 300), (CER_X + 34, 268)],
-           [(CER_X + 2, 382), (CER_X + 6, 330), (CER_X - 2, 270), (CER_X + 6, 246)]]
-for k, pts in enumerate(RAMAS_C):
-    lz.aguada(Trazo(pts, (9 if k in (0, 2, 4) else 6, 5, 3, 1.5)[:len(pts)]), '#7a4a3a', dens=0.85, tapa=1, irreg=0.3)
-    lz.contorno(Trazo(pts, (9 if k in (0, 2, 4) else 6, 5, 3, 1.5)[:len(pts)]), '#4a2e22', grosor=0.5, presion=0.5)
-NUBES_C = [(CER_X - 56, 318, 40), (CER_X + 58, 304, 42), (CER_X - 4, 260, 46), (CER_X - 36, 270, 30), (CER_X + 34, 262, 34),
-           (CER_X + 4, 312, 30)]
+lz.lapiz([[(CER_X - 7, 520 - k * 34), (CER_X + 3, 520 - k * 34)] for k in range(4)], '#c8a090', grosor=0.7, presion=0.5)
+RAMAS_C = [([(CER_X + 2, 446), (CER_X - 24, 420), (CER_X - 52, 380), (CER_X - 78, 352)], (9, 7, 4, 1.5)),
+           ([(CER_X - 52, 380), (CER_X - 60, 346), (CER_X - 56, 318)], (4, 2.5, 1.2)),
+           ([(CER_X - 5, 404), (CER_X + 22, 388), (CER_X + 50, 352), (CER_X + 86, 328)], (7, 5, 3, 1.2)),
+           ([(CER_X + 50, 352), (CER_X + 58, 320), (CER_X + 52, 292)], (3, 2, 1)),
+           ([(CER_X - 1, 352), (CER_X - 24, 318), (CER_X - 30, 286)], (5, 3, 1.2)),
+           ([(CER_X + 8, 300), (CER_X + 30, 282), (CER_X + 40, 262)], (3.5, 2, 1))]
+for pts, w in RAMAS_C:
+    f_ = Trazo(pts, w)
+    lz.aguada(f_, '#7a4a3a', dens=0.85, tapa=1, irreg=0.3)
+    lz.contorno(f_, '#4a2e22', grosor=0.5, presion=0.5)
+NUBES_C = [(CER_X - 66, 340, 38), (CER_X + 70, 322, 40), (CER_X + 4, 262, 46), (CER_X - 34, 290, 32), (CER_X + 44, 276, 34),
+           (CER_X - 6, 318, 24)]
 for k, (x, y, r) in enumerate(NUBES_C):
     f_ = masa(x, y, r, 300 + k)
-    lz.aguada(f_, '#f4b8c4', dens=0.5, tapa=0.55, borde=0.8, irreg=1.4,
+    lz.aguada(f_, '#f4b8c4', dens=0.5, tapa=0.5, borde=0.8, irreg=1.6,
               toques=[(x - r * 0.4, y - r * 0.4, r * 0.6, '#fde4ea', 0.7), (x + r * 0.3, y + r * 0.4, r * 0.5, '#e88aa0', 0.6)])
     for (fx, fy) in puntos_dentro(f_, int(r * 0.5), 31 + k, margen=3):
         flor_simple(lz, fx, fy, rng.uniform(3.8, 6), rng.choice(['#f8c8d4', '#fde8ec', '#f0a0b4']), centro='#c33c4e')
-# a few twigs show between the blossom
-for pts in ([(CER_X - 30, 300), (CER_X - 44, 286)], [(CER_X + 40, 296), (CER_X + 56, 286)], [(CER_X + 2, 290), (CER_X - 6, 276)]):
-    lz.lapiz([pts], '#5a3428', grosor=1.6, presion=0.75)
+# here and there a piece of branch shows through the blossom
+for pts in ([(CER_X - 40, 404), (CER_X - 52, 380)], [(CER_X + 30, 380), (CER_X + 46, 358)], [(CER_X - 2, 340), (CER_X + 4, 312)],
+            [(CER_X - 18, 312), (CER_X - 26, 296)]):
+    lz.lapiz([pts], '#5a3428', grosor=1.8, presion=0.8)
 # petals drifting toward the girl
 for k in range(9):
     t = k / 8
@@ -477,7 +522,7 @@ def hoja_roble(x, y, L, ang, col):
     d = np.array([math.cos(a), math.sin(a)])
     n = np.array([-d[1], d[0]])
     t = np.linspace(0, 1, 41)
-    w = np.sin(np.pi * t) ** 0.6 * L * 0.3 * (0.72 + 0.28 * np.abs(np.cos(t * math.pi * 4.5)))
+    w = np.sin(np.pi * t) ** 0.5 * L * 0.36 * (0.3 + 0.7 * np.abs(np.cos(t * math.pi * 4.5 + 0.3))) * (0.4 + 0.6 * t ** 0.3)
     izq = np.array([x, y]) + d * (t * L)[:, None] + n * w[:, None]
     der = np.array([x, y]) + d * (t * L)[:, None] - n * w[:, None]
     f = Poligono(np.vstack([izq, der[::-1]]), suave=False)
@@ -486,8 +531,8 @@ def hoja_roble(x, y, L, ang, col):
     lz.lapiz([[(x, y), (x + d[0] * L * 0.95, y + d[1] * L * 0.95)]], _lapiz_de(col, 0.45), grosor=0.4, presion=0.5)
 
 
-for (dy, a) in ((-20, -150), (-30, -30), (-40, -140), (-50, -40), (-56, -95)):
-    hoja_roble(ARB_X + (2 if a > -90 else -2), yA + dy, 17, a, '#7aa24a')
+for (dy, a, L) in ((-18, -155, 24), (-28, -25, 24), (-40, -135, 22), (-48, -45, 21), (-56, -92, 22)):
+    hoja_roble(ARB_X + (2 if a > -90 else -2), yA + dy, L, a, '#6f9a42')
 # the acorn it came from, half buried by the grandfather's hand
 lz.aguada(Elipse(1146, yA - 1, 5, 7, 70), '#b8843a', dens=0.85, tapa=1, irreg=0.2)
 lz.aguada(Elipse(1140, yA - 3, 4, 5, 70), '#6e4a2a', dens=0.9, tapa=1, irreg=0.2)
