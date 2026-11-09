@@ -131,24 +131,26 @@ function normales(R: Rejilla, xs: number[]) {
 
 function carroceria(xs: number[], M: Mats): THREE.Mesh {
   const R = rejilla(xs), P = R.pos, nv = P.length / 3;
+  // normals from the smooth grid, before any vertex is moved: the pulled vertices
+  // slide a centimetre or two along the surface and keep the normal they had
+  normales(R, xs);
   // arches: pull the vertices next to the opening onto its ellipse
   for (let v = 0; v < nv; v++) {
     const x = P[v * 3], y = P[v * 3 + 1], z = P[v * 3 + 2];
     for (const A of ARCOS) {
       if (Math.abs(z) < A.z - 0.004 || y < 0.15) continue;
       const q = qArco(A, x, y);
-      if (Math.abs(q - 1) < 0.028) { P[v * 3] = A.x + (x - A.x) / q; P[v * 3 + 1] = A.y + (y - A.y) / q; }
+      if (Math.abs(q - 1) < 0.055) { P[v * 3] = A.x + (x - A.x) / q; P[v * 3 + 1] = A.y + (y - A.y) / q; }
     }
     // cockpit: pull the top-surface vertices next to the outline onto it (and back onto the skin)
     if (y > 0.6) {
       const d = dRect(CABINA, x, z);
-      if (Math.abs(d) < 0.011) {
+      if (Math.abs(d) < 0.015) {
         const [px, pz] = sobreRect(CABINA, x, z), py = arribaY(px, pz);
         if (Number.isFinite(py)) { P[v * 3] = px; P[v * 3 + 1] = py; P[v * 3 + 2] = pz; }
       }
     }
   }
-  normales(R, xs);
   const idx: number[] = [], { cols, filas } = R;
   const quitar = (x: number, y: number, z: number) =>
     ARCOS.some(A => Math.abs(z) > A.z && qArco(A, x, y) < 0.999) ||
