@@ -18,7 +18,7 @@ import math
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from acuarela import (Lienzo, Poligono, Elipse, Trazo, Circulos, spline, bezier, arco, mezcla,
+from acuarela import (cosmos, jardin, estrella, libelula, hojita, pececillo, pajaro, remuestrea, Lienzo, Poligono, Elipse, Trazo, Circulos, spline, bezier, arco, mezcla,
                       mano, flor_simple, cabeza, extremidad, figura, rgb, _lapiz_de)
 
 ANCHO = int(sys.argv[1]) if len(sys.argv) > 1 else 1485
@@ -35,29 +35,22 @@ SIENA = '#c0703f'
 BARRO = '#c47a52'
 LP = '#5e3f30'
 
-# ------------------------------------------------------------------ ground and air
-lz.fondo(('#f6dca0', '#f3c3a0'), dens=0.13, centro=(740, 380), radio=640)
-lz.aguada(Elipse(740, 250, 460, 220), '#f8d68a', dens=0.18, suave=80, gran=0.05)   # evening glow
-lz.luz((740, 250, 300), '#fff0c8', fuerza=0.18)
-# plaza floor: pale terracotta, lost toward the edges
-suelo = Poligono([(40, 606), (400, 596), (740, 592), (1100, 596), (1450, 606), (1460, 860), (20, 860)])
-lz.aguada(suelo, '#ecc29a', dens=0.34, borde=0.3, irreg=1.4, var=0.5,
-          toques=[(740, 660, 280, '#f4d8a4', 0.6), (180, 800, 200, '#dda283', 0.4)],
-          desvanece=(740, 640, 740, 880))
+# ------------------------------------------------------------------ the bone paper stays bare
+# no sky, no floor: the people and what they make float on the paper, with
+# only their shadows and one fragment of painted wall behind them.
 
-# ------------------------------------------------------------------ the whitewashed wall and its mural
-muro = Poligono([(120, 602), (112, 410), (200, 402), (420, 398), (640, 402), (860, 396), (1100, 400),
-                 (1300, 404), (1376, 412), (1372, 602)])
-lz.aguada(muro, '#f1e2cb', dens=0.32, borde=0.35, irreg=1.2, gran=0.35, var=0.5, tapa=0.7,
-          toques=[(1300, 540, 150, '#e6c9ad', 0.5), (160, 540, 120, '#e6c9ad', 0.5)])
-lz.aguada(muro, '#caa588', dens=0.16, desvanece=(740, 600, 740, 500), gran=0.4)
-lz.contorno(muro, '#a07a60', grosor=0.9, presion=0.35, cortes=0.45, desfase=1.0, solo=(130, 380, 1360, 430))
-# whitewash shows its brush: a few broad dry strokes
+# a fragment of whitewashed wall, like a piece torn from a cave or a village street
+muro = Poligono([(152, 556), (146, 500), (128, 462), (160, 430), (176, 398), (230, 404), (268, 380),
+                 (330, 392), (384, 376), (430, 402), (474, 410), (468, 452), (492, 490), (470, 530),
+                 (480, 566), (420, 560), (360, 580), (290, 566), (220, 576)], suave=False)
+lz.aguada(muro, '#ead6b4', dens=0.6, borde=0.7, irreg=1.6, gran=0.6, var=0.6, tapa=0.7,
+          toques=[(420, 520, 80, '#e2c3a0', 0.6), (200, 430, 70, '#f6ead6', 0.6)])
+lz.contorno(muro, '#a07a60', grosor=0.9, presion=0.4, cortes=0.45, desfase=1.2)
 rng = np.random.default_rng(3)
-for k in range(10):
-    x0 = rng.uniform(150, 1250)
-    y0 = rng.uniform(420, 580)
-    lz.aguada(Trazo([(x0, y0), (x0 + 60, y0 - 6), (x0 + 120, y0 + 2)], (14, 10, 4)), '#e2c8ac', dens=0.12,
+for k in range(5):
+    x0 = rng.uniform(180, 400)
+    y0 = rng.uniform(420, 540)
+    lz.aguada(Trazo([(x0, y0), (x0 + 40, y0 - 4), (x0 + 80, y0 + 2)], (12, 9, 4)), '#d9bc9c', dens=0.15,
               irreg=1.6, gran=0.8, borde=0.6)
 
 
@@ -73,10 +66,10 @@ def bisonte(x, y, s=1.0):
     melena = Poligono(P([(-58, -6), (-54, -30), (-34, -50), (-10, -58), (4, -50), (-8, -36), (-26, -24),
                          (-40, -8), (-48, 8)]))
     lz.aguada(melena, '#4a3028', dens=0.6, gran=0.8, irreg=1.2, borde=0.5)
-    legs = [Trazo(P([(-38, 16), (-40, 34), (-42, 48)]), (12 * s, 8 * s, 6 * s)),
-            Trazo(P([(-18, 18), (-16, 34), (-18, 48)]), (11 * s, 8 * s, 6 * s)),
-            Trazo(P([(34, 18), (38, 34), (36, 48)]), (12 * s, 8 * s, 6 * s)),
-            Trazo(P([(52, 14), (58, 30), (60, 44)]), (11 * s, 8 * s, 6 * s))]
+    legs = [Trazo(P([(-40, 12), (-44, 28), (-46, 42)]), (14 * s, 8 * s, 5 * s)),
+            Trazo(P([(-22, 14), (-21, 30), (-23, 42)]), (12 * s, 7 * s, 5 * s)),
+            Trazo(P([(36, 14), (40, 28), (39, 42)]), (14 * s, 8 * s, 5 * s)),
+            Trazo(P([(52, 10), (57, 24), (60, 38)]), (11 * s, 7 * s, 5 * s))]
     for f in legs:
         lz.aguada(f, '#a84a28', dens=0.7, gran=0.8, irreg=1.0)
     tr = [spline(P([(-64, 0), (-58, -26), (-40, -46), (-14, -58), (6, -50), (24, -40), (48, -32), (64, -18),
@@ -86,12 +79,11 @@ def bisonte(x, y, s=1.0):
           spline(P([(66, -18), (76, -6), (74, 10)])),                      # tail
           spline(P([(-44, 18), (-10, 24), (30, 22)]))]
     lz.lapiz(tr, '#3e2a24', grosor=1.7, presion=0.7, temblor=1.0, textura=0.9, cortes=0.2)
-    for f in legs:
-        lz.contorno(f, '#3e2a24', grosor=1.2, presion=0.5, cortes=0.4, desfase=0.6)
+    lz.lapiz([f.p[::3] for f in legs], '#3e2a24', grosor=1.1, presion=0.45, temblor=0.6, cortes=0.3)
     lz.aguada(Elipse(x - 50 * s, y - 14 * s, 2.5 * s, 2 * s), '#2a1a14', dens=1.0, irreg=0.2)
 
 
-bisonte(330, 478, 1.3)
+bisonte(310, 478, 1.15)
 
 
 def huella(x, y, s, col, ang=0):
@@ -105,48 +97,32 @@ def huella(x, y, s, col, ang=0):
     lz.aguada(f, col, dens=0.72, borde=0.8, gran=0.5, irreg=0.6)
 
 
-for (hx, hy, c, an) in ((220, 440, TEAL, -14), (430, 432, CORAL, 10), (456, 462, OCRE, -4),
-                        (250, 548, '#a99bcb', 6), (410, 540, CORAL, -12), (1146, 436, TEAL, 8),
-                        (1186, 462, CORAL, -10), (1300, 446, OCRE, 6)):
-    huella(hx, hy, 1.25, c, an)
-# a painted sun, children's work on the wall
-lz.aguada(Elipse(1230, 470, 15, 15), ORO, dens=0.7, irreg=0.8, gran=0.4)
-lz.lapiz([[(1230 + math.cos(t) * 20, 470 + math.sin(t) * 20), (1230 + math.cos(t) * 29, 470 + math.sin(t) * 29)]
-          for t in np.linspace(0, 2 * np.pi, 10, endpoint=False)], '#d38a2a', grosor=1.6, presion=0.6)
-
-# bougainvillea spilling over the right end of the wall
-rng = np.random.default_rng(21)
-hojas = [(rng.uniform(1290, 1400), rng.uniform(388, 470 - 60 * max(0, (1340 - x) / 80)), rng.uniform(7, 12))
-         for x in rng.uniform(1290, 1400, 30)]
-lz.aguada(Circulos([(x, y, r * 1.3) for x, y, r in hojas]), '#7f9a5d', dens=0.45, irreg=1.2, gran=0.5)
-for x, y, r in hojas[::2]:
-    lz.aguada(Circulos([(x + rng.normal(0, 4), y + rng.normal(0, 4), r * 0.7) for _ in range(3)]),
-              rng.choice(['#d9487a', '#e8688c', '#c93a6a']), dens=0.6, irreg=0.8, borde=0.6)
-
+for (hx, hy, c, an) in ((200, 440, TEAL, -14), (420, 428, CORAL, 10), (446, 462, OCRE, -4),
+                        (150, 452, '#8d73b0', 6), (420, 524, CORAL, -12), (250, 410, OCRE, 4)):
+    huella(hx, hy, 1.15, c, an)
 # ------------------------------------------------------------------ paper lanterns (light from inside)
-cuerda1 = bezier((-20, 64), (420, 190), (900, 176), (1510, 50), 200)
+cuerda1 = bezier((330, 70), (560, 190), (960, 186), (1180, 64), 200)
 lz.lapiz([cuerda1], '#7c5a48', grosor=0.8, presion=0.5, temblor=0.6)
-cols = [ORO, CORAL, TEAL, ORO, '#ec9fa0', ORO, CORAL, TEAL, ORO, '#ec9fa0']
-for k, t in enumerate(np.linspace(0.06, 0.94, 10)):
+cols = [ORO, CORAL, TEAL, ORO, '#ec9fa0', ORO, CORAL]
+for k, t in enumerate(np.linspace(0.1, 0.9, 7)):
     i = int(t * 199)
     x, y = cuerda1[i]
     y += 24
     c = cols[k]
     lz.lapiz([[(x, y - 24), (x, y - 15)]], '#7c5a48', grosor=0.6, presion=0.5)
     f = Elipse(x, y, 15, 17)
-    lz.aguada(f, c, dens=0.55, tapa=1, irreg=0.4, toques=[(x, y - 2, 9, '#fff0b8', 0.85)])
+    lz.aguada(f, c, dens=0.9, tapa=1, irreg=0.4, borde=0.8, toques=[(x, y - 2, 8, '#fff3c4', 0.8)])
     lz.contorno(f, _lapiz_de(c), grosor=0.7, presion=0.45, cortes=0.2)
     lz.lapiz([arco(x, y, 15, 6, 0, 180, 12), arco(x, y - 2, 7, 17, 270, 450, 12)], _lapiz_de(c), grosor=0.5,
              presion=0.3)
     for dy in (-17, 17):
         lz.aguada(Elipse(x, y + dy, 6, 2.2), '#7c5a48', dens=0.6, irreg=0.2)
-    lz.aguada(Elipse(x, y, 46, 40), '#f6c66a', dens=0.14, suave=18, gran=0.05)
-    lz.luz((x, y, 36), '#ffd98a', fuerza=0.45)
-    lz.luz((x, y, 10), '#fff2c4', fuerza=0.7)
+    lz.aguada(Elipse(x, y, 34, 30), '#f6c66a', dens=0.16, suave=12, gran=0.05)
+    lz.luz((x, y, 8), '#fff2c4', fuerza=0.35)
 
 # ------------------------------------------------------------------ shadows on the floor
 for (cx, cy, rx) in ((250, 784, 130), (510, 718, 95), (780, 752, 150), (1030, 724, 90), (1252, 796, 55)):
-    lz.aguada(Elipse(cx, cy, rx, 12), '#b98a9a', dens=0.3, suave=9, gran=0.2)
+    lz.aguada(Elipse(cx, cy, rx, 12), '#c9a08a', dens=0.35, suave=9, gran=0.3)
 
 
 def silla(x, y, col=SIENA, h=98):
@@ -167,11 +143,11 @@ J = dict(cabeza=(474, 474, 26), hi=(446, 518), hd=(500, 518), ci=(454, 602), cd=
          brazo_i=[(448, 526), (424, 590), (414, 558)], brazo_d=[(498, 526), (534, 562), (528, 598)],
          pierna_i=[(462, 606), (538, 612), (546, 704)], pierna_d=[(484, 608), (556, 622), (568, 708)],
          pie_i=0, pie_d=0, delante=['brazo_d', 'brazo_i'])
-figura(lz, J, dict(camisa='#f3ead9', pantalon='#6b6f8f', piel='piel3', zapato='#5e3f30',
+figura(lz, J, dict(camisa='#f3ead9', pantalon='#3e4f86', piel='piel3', zapato='#5e3f30',
                    camisa_toques=[(446, 590, 50, '#d9c3a8', 0.6)]),
-       cara=dict(peinado='calvo', pelo='#e8e2da', barba='#efe9e0', giro=0.5, inclina=12, ojos='cerrados',
+       cara=dict(peinado='corto', pelo='#cfc6bc', canas=True, barba='#d8d0c6', giro=0.5, inclina=12, ojos='cerrados',
                  boca='canta'))
-lz.aguada(Poligono([(448, 524), (466, 532), (470, 586), (458, 604), (452, 602)]), '#8a5a7a', dens=0.6, tapa=0.9)
+lz.aguada(Poligono([(448, 524), (466, 532), (470, 586), (458, 604), (452, 602)]), '#7a3f6e', dens=0.8, tapa=0.9)
 # the guitar across his lap, neck rising to the left
 cx, cy, ang = 522, 598, 24
 a = math.radians(ang)
@@ -197,7 +173,7 @@ J = dict(cabeza=(1062, 484, 26), hi=(1034, 528), hd=(1090, 528), ci=(1040, 610),
          brazo_i=[(1038, 536), (1026, 592), (1050, 576)], brazo_d=[(1088, 536), (1102, 594), (1076, 580)],
          pierna_i=[(1046, 614), (990, 622), (994, 716)], pierna_d=[(1070, 616), (1008, 632), (1014, 720)],
          mano_i=(-20, 'sujeta'), mano_d=(200, 'sujeta'), pie_i=180, pie_d=180, delante=['brazo_i', 'brazo_d'])
-figura(lz, J, dict(camisa='#9bb48a', falda='#a99bcb', piel='piel1', zapato='#6e4c3c',
+figura(lz, J, dict(camisa='#6f9e6a', falda='#8d73b0', piel='piel1', zapato='#6e4c3c',
                    falda_bajo=[(982, 712), (1010, 718), (1050, 714), (1094, 708)],
                    falda_toques=[(1000, 680, 40, '#7d6aa8', 0.5)]),
        cara=dict(peinado='mono', pelo='#d8d2cc', canas=True, giro=-0.45, inclina=-8, ojos='abajo',
@@ -217,7 +193,7 @@ for (bx, by, c) in ((1124, 684, CORAL), (1148, 682, TEAL), (1137, 675, ORO)):
 lz.lapiz([bezier((1137, 675), (1120, 630), (1090, 610), (1064, 584))], CORAL, grosor=0.9, presion=0.7)
 
 # ------------------------------------------------------------------ the dancer (day 4)
-J = dict(cabeza=(742, 256, 31), hi=(708, 306), hd=(774, 302), ci=(722, 404), cd=(764, 402),
+J = dict(cabeza=(742, 256, 31), hi=(708, 306), hd=(774, 302), ci=(724, 394), cd=(762, 392),
          brazo_i=[(710, 312), (664, 258), (652, 192)], brazo_d=[(772, 310), (830, 330), (884, 306)],
          mano_i=(-100, 'abierta'), mano_d=(-25, 'sujeta'),
          pierna_i=[(730, 600), (722, 690), (712, 752)], pie_i=180, delante=['brazo_i', 'brazo_d'])
@@ -226,18 +202,31 @@ figura(lz, J, dict(camisa=TEAL, piel='piel2', zapato='#8f2a3c', grosor=0.5,
                                             (880, 700), (956, 640), (1000, 572), (950, 540), (880, 480)],
                    falda_toques=[(860, 600, 90, CARMIN, 0.7), (700, 540, 70, '#f39a6a', 0.6),
                                  (960, 600, 50, '#b5304a', 0.7)],
-                   camisa_toques=[(760, 390, 40, '#2f6467', 0.6)]),
+                   camisa_toques=[(760, 390, 40, '#2f6467', 0.6)],
+                   falda_jardin=dict(paleta=(CORAL, ORO, CARMIN, '#f39ab0', '#ff9a5a', '#8d73b0'),
+                                     verdes=('#5f8f63', '#86a86c', '#3f7a6a'), base='#ec7a64', base_dens=0.8,
+                                     escala=1.25, densidad=1.15, semilla=55)),
        cara=dict(peinado='mono', pelo='#2e1e18', giro=0.15, inclina=-14, ojos='cerrados', boca='abierta',
                  adorno=CARMIN))
+# a carmine sash at the waist, its ends flying with the turn
+faja = Trazo([(720, 398), (744, 402), (768, 396)], (14, 15, 14))
+lz.aguada(faja, CARMIN, dens=0.9, tapa=1, irreg=0.3)
+for pts in ([(770, 398), (800, 412), (826, 404)], [(770, 400), (794, 428), (818, 432)]):
+    f = Trazo(pts, (8, 6, 2))
+    lz.aguada(f, CARMIN, dens=0.85, tapa=1, irreg=0.3)
+    lz.contorno(f, '#7a1f30', grosor=0.6, presion=0.5)
+lz.contorno(faja, '#7a1f30', grosor=0.7, presion=0.5)
 # folds of the spinning skirt: pencil sweeps from the waist
 plis = [bezier((734, 414), (700, 500), (660, 580), (648, 680)), bezier((740, 414), (736, 520), (716, 640), (720, 724)),
         bezier((746, 414), (790, 530), (800, 640), (806, 722)), bezier((752, 412), (830, 500), (890, 590), (900, 690)),
         bezier((756, 410), (860, 470), (940, 530), (990, 568))]
-lz.lapiz(plis, '#a02c40', grosor=0.9, presion=0.4, temblor=0.6, cortes=0.2)
+lz.lapiz(plis, '#8f2a3c', grosor=0.9, presion=0.35, temblor=0.6, cortes=0.35)
 # ruffled hem (flamenco, day 19): a second, lighter flounce
 volante = Trazo([(632, 640), (660, 700), (720, 734), (800, 732), (880, 704), (956, 644), (998, 578)],
                 (16, 18, 20, 20, 18, 16, 12))
-lz.aguada(volante, '#f39a7a', dens=0.45, borde=0.9, tapa=0.3)
+lz.aguada(volante, CARMIN, dens=0.7, borde=0.9, tapa=0.5, toques=[(800, 732, 120, '#e8735e', 0.6)])
+for (x, y) in remuestrea(volante.p, 14)[1:-1]:
+    lz.gouache(Elipse(x, y, 2.0), '#fff3cf', alfa=0.9, irreg=0)
 lz.lapiz([spline([(626, 650), (648, 690), (684, 718), (720, 742), (760, 738), (800, 742), (840, 728),
                   (880, 716), (918, 690), (956, 660), (984, 620), (1006, 584)])], '#a02c40', grosor=0.9,
          presion=0.5, temblor=1.4)
@@ -249,11 +238,12 @@ for lx in (106, 160):
 J = dict(cabeza=(178, 506, 29), hi=(142, 556), hd=(204, 560), ci=(146, 670), cd=(198, 672),
          pierna_i=[(158, 674), (238, 682), (246, 774)], pierna_d=[(186, 678), (262, 694), (272, 782)],
          pie_i=0, pie_d=0)
-figura(lz, J, dict(camisa='#e2a34a', pantalon='#5f86c0', piel='piel5', zapato='#7a5544',
+figura(lz, J, dict(camisa='#e8952a', pantalon='#3f6fb0', piel='piel5', zapato='#7a5544',
                    camisa_toques=[(170, 640, 40, '#c97b2c', 0.5)]),
        cara=dict(peinado='rizado', pelo='#241814', giro=0.5, inclina=14, ojos='abajo', boca='sonrisa'))
 # apron
-lz.aguada(Poligono([(160, 590), (204, 594), (214, 676), (152, 672)]), '#c9b79a', dens=0.45, tapa=0.8)
+for (x, y, r) in ((176, 640, 7), (192, 612, 5), (164, 660, 5)):   # clay smudges on his shirt
+    lz.aguada(Elipse(x, y, r, r * 0.7, 20), BARRO, dens=0.6, irreg=1.0, gran=0.6)
 # wheel and the rising pot
 base = Poligono([(262, 690), (338, 690), (350, 772), (250, 772)], suave=False)
 lz.aguada(base, '#a35a32', dens=0.6, tapa=1, irreg=0.4, toques=[(340, 740, 30, '#7a3a22', 0.6)])
@@ -271,9 +261,9 @@ lz.contorno(jarro, '#7a3a22', grosor=0.9, presion=0.6, cortes=0.1)
 lz.lapiz([arco(300, 650, 26, 4, 10, 170, 16), arco(300, 664, 27, 4, 10, 170, 16)], '#8f4a2c', grosor=0.6,
          presion=0.4)
 # arms reach around the pot
-extremidad(lz, [(146, 566), (210, 640), (272, 640)], (17, 15, 13), '#e2a34a', dens=0.62)
+extremidad(lz, [(146, 566), (210, 640), (272, 640)], (17, 15, 13), '#e8952a', dens=0.76)
 mano(lz, 274, 640, 10, 16, 'piel5', 'sujeta')
-extremidad(lz, [(202, 568), (262, 606), (326, 628)], (17, 15, 13), '#e2a34a', dens=0.62)
+extremidad(lz, [(202, 568), (262, 606), (326, 628)], (17, 15, 13), '#e8952a', dens=0.76)
 mano(lz, 328, 630, 160, 16, 'piel5', 'sujeta')
 
 # ------------------------------------------------------------------ the girl and the bowl she made, foreground right
@@ -281,7 +271,7 @@ J = dict(cabeza=(1252, 552, 24), hi=(1228, 592), hd=(1274, 592), ci=(1234, 668),
          brazo_i=[(1230, 598), (1206, 634), (1178, 632)], brazo_d=[(1272, 598), (1240, 642), (1200, 640)],
          pierna_i=[(1242, 700), (1242, 744), (1238, 790)], pierna_d=[(1262, 700), (1264, 744), (1268, 792)],
          mano_i=(180, 'sujeta'), mano_d=(180, 'sujeta'), pie_i=180, pie_d=0, delante=['brazo_i', 'brazo_d'])
-figura(lz, J, dict(camisa=ORO, falda=ORO, piel='piel4', zapato='#c33c4e', manga='corta', grosor=0.5,
+figura(lz, J, dict(camisa='#f0b030', falda='#f0b030', piel='piel4', zapato='#c33c4e', manga='corta', grosor=0.5,
                    falda_bajo=[(1214, 714), (1250, 722), (1286, 712)]),
        cara=dict(peinado='rizado', pelo='#2a1a14', giro=-0.5, ojos='abiertos', boca='abierta', mira=(-1, 0)))
 cuenco = Poligono(np.vstack([arco(1186, 624, 24, 6, 180, 360, 14), arco(1186, 624, 24, 19, 0, 180, 16)]),
@@ -296,11 +286,12 @@ lz.lapiz([[(1186, 614), (1188, 624)]], '#4f6f45', grosor=0.8, presion=0.6)
 
 # ------------------------------------------------------------------ magic: the scarf that flies
 # the striped scarf leaves the grandmother's needles and floats up into the dancer's hand
-camino = np.vstack([bezier((1062, 582), (1150, 420), (1080, 200), (960, 210), 90),
-                    bezier((960, 210), (880, 216), (900, 300), (888, 306), 40)[1:]])
+camino = np.vstack([bezier((1062, 582), (1140, 470), (1120, 330), (1030, 300), 70),
+                    bezier((1030, 300), (950, 272), (960, 220), (912, 230), 40)[1:],
+                    bezier((912, 230), (880, 236), (870, 280), (886, 304), 30)[1:]])
 d = np.r_[0, np.cumsum(np.hypot(*np.diff(camino, axis=0).T))]
 tt = d / d[-1]
-ancho = 7 + 13 * np.abs(np.cos(tt * np.pi * 2.6))          # the ribbon twists as it flies
+ancho = 4 + 11 * np.abs(np.cos(tt * np.pi * 3.2))          # the ribbon twists as it flies
 tg = np.gradient(camino, axis=0)
 tg /= np.maximum(np.hypot(*tg.T)[:, None], 1e-9)
 nr = np.stack([-tg[:, 1], tg[:, 0]], 1)
@@ -311,6 +302,11 @@ for j, k in enumerate(range(0, len(camino) - 1, paso)):
     pts = [camino[k] + nr[k] * ancho[k] / 2, camino[k1] + nr[k1] * ancho[k1] / 2,
            camino[k1] - nr[k1] * ancho[k1] / 2, camino[k] - nr[k] * ancho[k] / 2]
     lz.aguada(Poligono(pts, suave=False), bandas[j % 4], dens=0.62, irreg=0.35, borde=0.5, tapa=0.85, gran=0.3)
+for k in range(4, len(camino) - 4, 5):   # knit stitches and dots
+    lz.lapiz([[camino[k] - nr[k] * ancho[k] * 0.35, camino[k] + nr[k] * ancho[k] * 0.35]], '#7a4a3a', grosor=0.5,
+             presion=0.3, temblor=0.05)
+    if k % 15 == 4:
+        lz.gouache(Elipse(*camino[k], 1.6), '#fff6dc', alfa=0.9, irreg=0)
 lz.lapiz([camino + nr * ancho[:, None] / 2, camino - nr * ancho[:, None] / 2], '#7a4a3a', grosor=0.7,
          presion=0.45, temblor=0.4, cortes=0.2)
 lz.luz(Trazo(camino[::4], (30,)), '#ffe7b0', fuerza=0.2, suave=10)
@@ -322,35 +318,26 @@ mano(lz, 884, 306, -25, 15, 'piel2', 'sujeta')
 rng = np.random.default_rng(12)
 for k in range(14):
     t = k / 13
-    x = 1000 + t * 200 + rng.normal(0, 10)
-    y = 560 - t * 250 + rng.normal(0, 12) - 40 * math.sin(t * 3)
+    x = 975 + t * 230 + rng.normal(0, 8) - 60 * math.sin(t * 3)
+    y = 520 - t * 260 + rng.normal(0, 8)
     if t < 0.7:
         lz.aguada(Elipse(x, y, 7.5 - 2 * t, 4.4, rng.uniform(0, 180)), rng.choice([CORAL, '#f39a6a', CARMIN]),
                   dens=0.65, irreg=0.4, borde=0.6)
 
 
-def pajaro(x, y, s, col, alas_arriba=True):
-    cuerpo = Poligono([(x - s, y), (x - s * 0.2, y - s * 0.35), (x + s * 0.9, y - s * 0.15),
-                       (x + s * 1.25, y - s * 0.3), (x + s * 0.85, y + s * 0.12), (x - s * 0.1, y + s * 0.3)])
-    if alas_arriba:
-        ala = Poligono([(x - s * 0.2, y - s * 0.2), (x - s * 0.7, y - s * 1.2), (x + s * 0.35, y - s * 0.95),
-                        (x + s * 0.35, y - s * 0.15)])
-    else:
-        ala = Poligono([(x - s * 0.2, y), (x - s * 0.5, y + s * 0.9), (x + s * 0.35, y + s * 0.7),
-                        (x + s * 0.35, y + s * 0.05)])
-    lz.collage(cuerpo, col, sombra=1.2)
-    lz.collage(ala, mezcla(col, '#ffffff', 0.3), sombra=1.2)
-    lz.lapiz([[(x + s * 0.9, y - s * 0.1), (x + s * 0.95, y - s * 0.08)]], '#3a2a24', grosor=1.3, presion=0.9)
-    lz.contorno(cuerpo | ala, tuple((rgb(col) * 0.5).tolist()), grosor=0.6, presion=0.4, cortes=0.4, desfase=0.3)
+pajaro(lz, 1206, 262, 18, CORAL, ang=-18)
+pajaro(lz, 1272, 206, 16, TEAL, ang=-8)
+pajaro(lz, 1330, 252, 13, ORO, ang=-25)
+libelula(lz, 1330, 520, 1.1, ang=200, cuerpo='#4f9c9a', alas='#bcd9e0')
 
+# the music leaves the guitar as a ribbon of night sea: stars and a shoal of tiny fish
+musica = Trazo(bezier(R(-6, 0), (580, 480), (540, 330), (650, 300), 60), (4, 18, 26, 14, 3))
+cosmos(lz, musica, base='#24335f', toques_col=('#1f6f7a', '#4b3f8f', '#2a7f86'), estrellas=1.6, semilla=58,
+       tapa=0.9)
+lz.contorno(musica, '#22305a', grosor=0.7, presion=0.45, cortes=0.4, desfase=0.4)
+for k, (x, y) in enumerate(((664, 284), (686, 262), (700, 234))):
+    estrella(lz, x, y, 7 - k, [ORO, TEAL, CORAL][k], gouache=False)
 
-pajaro(1200, 300, 22, CORAL)
-pajaro(1268, 246, 19, TEAL, False)
-pajaro(1330, 284, 16, ORO)
-
-# music rising from the guitar toward the dancer: sparks of light
-lz.chispas(560, 440, 70, 90, n=12, semilla=4)
-lz.chispas(742, 230, 240, 120, n=20, semilla=5)
 
 lz.vineta(margen=30)
 lz.guardar(SALIDA)

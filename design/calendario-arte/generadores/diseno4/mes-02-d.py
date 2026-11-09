@@ -17,7 +17,7 @@ import math
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from acuarela import (Lienzo, Poligono, Elipse, Trazo, Circulos, spline, bezier, arco, mezcla,
+from acuarela import (pajaro, _lapiz_de, cosmos, jardin, estrella, libelula, hojita, flor_grande, pececillo, Lienzo, Poligono, Elipse, Trazo, Circulos, spline, bezier, arco, mezcla,
                       busto, mano, flor_simple, cabeza, extremidad, rgb)
 
 ANCHO = int(sys.argv[1]) if len(sys.argv) > 1 else 1485
@@ -33,27 +33,33 @@ CARMIN = '#c33c4e'
 ORO = '#f0c25e'
 HILO = '#d61f3a'
 
-# ------------------------------------------------------------------ ground
-lz.fondo(('#f6dca0', '#f3bf98'), dens=0.22, centro=(745, 440), radio=560)
-# the heartbeat: concentric warm halos
-for k, (rr, d) in enumerate(((420, 0.20), (350, 0.18))):
-    ring = Elipse(752, 470, rr, rr * 0.98) - Elipse(752, 470, rr - 22, rr * 0.98 - 22)
-    lz.aguada(ring, '#f2c06a', dens=d, suave=10, gran=0.1)
-lz.luz((752, 470, 380), '#ffd889', fuerza=0.30)
+# ------------------------------------------------------------------ the bone paper stays bare
+# only a close golden aura: the heart glows, everything else is silence
+lz.aguada(Poligono([(600, 250), (760, 180), (960, 250), (1060, 480), (960, 760), (860, 860), (620, 740),
+                    (450, 520), (470, 330)]), '#f4cf7a', dens=0.16, suave=45, gran=0.05)
 
 # ------------------------------------------------------------------ great vessels (behind)
-def vaso(pts, anchos, color, sombra, borde_lp, luzlado=1, flor=0, toques=None):
+def vaso(pts, anchos, color, sombra, borde_lp, luzlado=1, flor=0, toques=None, mundo=None, semilla=None):
     """A great vessel with volume: wash, shadow glaze on one side, lifted
-    highlight on the other, loose pencil outline."""
+    highlight on the other, loose pencil outline. mundo='cosmos' fills it with
+    night sea (stars, tiny fish); mundo='jardin' with flowers and leaves."""
     f = Trazo(pts, anchos)
-    lz.aguada(f, color, dens=0.58, tapa=1, flor=flor, toques=toques)
+    if mundo == 'cosmos':
+        cosmos(lz, f, base='#24335f', toques_col=('#1f6f7a', '#4b3f8f', '#2a7f86'), estrellas=1.4, semilla=semilla)
+    elif mundo == 'jardin':
+        jardin(lz, f, paleta=('#e8735e', '#f0c25e', '#c33c4e', '#f39ab0', '#ffb36b'),
+               verdes=('#5f8f63', '#86a86c', '#3f7a6a'), base='#ef8a74', base_dens=0.75, escala=0.85,
+               densidad=1.3, semilla=semilla)
+    else:
+        lz.aguada(f, color, dens=0.7, tapa=1, flor=flor, toques=toques)
     # highlight stripe along one side
     p = np.asarray(f.p)
     tg = np.gradient(p, axis=0)
     tg /= np.maximum(np.hypot(*tg.T)[:, None], 1e-9)
     nr = np.stack([-tg[:, 1], tg[:, 0]], 1)
     off = p + nr * (f.w[:, None] * 0.22 * luzlado)
-    lz.levanta(Trazo(off[::6], (anchos[0] * 0.18, anchos[-1] * 0.15), suave=True), 0.55, suave=3)
+    lz.levanta(Trazo(off[::6], (anchos[0] * 0.18, anchos[-1] * 0.15), suave=True), 0.3 if mundo else 0.55,
+               suave=4)
     sh = p - nr * (f.w[:, None] * 0.3 * luzlado)
     lz.aguada(Trazo(sh[::6], (anchos[0] * 0.4, anchos[-1] * 0.35)), sombra, dens=0.35, suave=5, gran=0.3)
     lz.contorno(f, borde_lp, grosor=1.0, presion=0.55, cortes=0.3)
@@ -72,14 +78,15 @@ AORTA = [(718, 318), (712, 236), (735, 168), (795, 132), (858, 140), (898, 186),
 ram = [((742, 158), (730, 72), 32), ((790, 136), (794, 58), 27), ((838, 138), (858, 66), 29)]
 for a, b_, w in ram:
     vaso([a, ((a[0] + b_[0]) / 2 + 2, (a[1] + b_[1]) / 2), b_], (w, w * 0.92), CORAL, CARMIN, '#9c3a32')
-    boca_luz(b_[0], b_[1], w * 0.47, w * 0.17, -6 if b_[0] < 800 else 8)
-vaso(AORTA, (78, 76, 72, 70, 68), CORAL, CARMIN, '#9c3a32', luzlado=-1, flor=1,
-     toques=[(905, 230, 60, CARMIN, 0.7), (725, 180, 50, '#f2a07a', 0.6)])
-vaso([(606, 318), (602, 230), (598, 150)], (58, 56, 54), TEAL_V, TEAL, '#3d6f73', luzlado=-1,
-     toques=[(585, 250, 40, TEAL, 0.5)])
+    lz.aguada(Elipse(b_[0], b_[1], w * 0.47, w * 0.17, -6 if b_[0] < 800 else 8), '#7a2a30', dens=0.6, tapa=1,
+              irreg=0.3)
+# the aorta is a garden; the veins carry a night sea full of stars and little fish
+vaso(AORTA, (78, 76, 72, 70, 68), CORAL, CARMIN, '#9c3a32', luzlado=-1, mundo='jardin', semilla=71)
+vaso([(606, 318), (602, 230), (598, 150)], (58, 56, 54), TEAL_V, '#14203f', '#22305a', luzlado=-1,
+     mundo='cosmos', semilla=72)
 boca_luz(598, 150, 26, 9, -3)
-vaso([(782, 350), (792, 282), (838, 238), (900, 222), (960, 232)], (72, 68, 60, 52, 46), TEAL_V, TEAL,
-     '#3d6f73', luzlado=1, flor=1, toques=[(800, 310, 50, TEAL, 0.6)])
+vaso([(782, 350), (792, 282), (838, 238), (900, 222), (960, 232)], (72, 68, 60, 52, 46), TEAL_V, '#14203f',
+     '#22305a', luzlado=1, mundo='cosmos', semilla=73)
 boca_luz(962, 233, 10, 22, 8)
 
 # ------------------------------------------------------------------ heart body
@@ -88,11 +95,11 @@ CUERPO = Poligono([(608, 300), (552, 306), (510, 350), (490, 420), (498, 492), (
                    (672, 700), (760, 762), (838, 800), (884, 806), (918, 780), (958, 704), (992, 606),
                    (1006, 506), (998, 412), (972, 346), (930, 308), (872, 306), (812, 322), (752, 318),
                    (682, 302)])
-lz.aguada(CUERPO, '#ea8f86', dens=0.62, borde=0.6, tapa=1, flor=2, var=0.45,
+lz.aguada(CUERPO, '#ea8078', dens=0.78, borde=0.6, tapa=1, flor=2, var=0.45,
           toques=[(975, 560, 170, CARMIN, 0.75), (880, 780, 120, '#b5304a', 0.8),
                   (560, 400, 130, '#f4b08f', 0.75), (640, 660, 110, '#d9586a', 0.45)])
 # second glaze: the shadow side of the muscle
-lz.aguada(CUERPO, CARMIN, dens=0.3, borde=0.3, desvanece=(1010, 680, 660, 430), gran=0.4)
+lz.aguada(CUERPO, '#b0283f', dens=0.45, borde=0.3, desvanece=(1010, 680, 660, 430), gran=0.4)
 # light inside: lifted highlights (left, top)
 lz.levanta(Elipse(560, 410, 44, 85, 15), 0.45, suave=18)
 lz.levanta(Elipse(700, 350, 70, 20, -6), 0.35, suave=12)
@@ -130,23 +137,41 @@ lz.lapiz([spline([(p[0] + 3, p[1]) for p in SURCO])], '#8f2a3c', grosor=0.6, pre
 VEN = Trazo([(p[0] - 5, p[1] + 4) for p in SURCO[:-1]], (3.5, 3, 3, 2, 1.5))
 lz.aguada(VEN, TEAL, dens=0.35, tapa=0.2, irreg=0.4)
 # the coronary branches are a climbing vine that blossoms (light gouache flowers)
-ramas = [[(810, 480), (842, 500), (866, 528)], [(842, 660), (878, 676), (900, 712)],
-         [(826, 600), (790, 625), (772, 660)], [(990, 380), (980, 440), (990, 488)],
-         [(556, 344), (534, 392), (540, 440)]]
+ramas = [[(803, 450), (842, 470), (866, 520)], [(842, 660), (880, 676), (905, 724)],
+         [(826, 600), (790, 625), (760, 650)], [(990, 380), (980, 440), (990, 488)],
+         [(556, 344), (534, 392), (540, 440)], [(788, 340), (800, 430), (818, 540), (838, 650), (860, 770)],
+         [(820, 560), (858, 590), (868, 640)], [(850, 720), (820, 750), (800, 760)],
+         [(560, 560), (600, 600), (640, 660), (700, 720)]]
 for i, rp in enumerate(ramas):
-    lz.lapiz([spline(rp)], '#8f2a3c', grosor=0.9, presion=0.5, temblor=0.3)
+    lz.lapiz([spline(rp)], '#5a2a2a', grosor=0.9, presion=0.55, temblor=0.3)
     pts = spline(rp)
-    for j in (len(pts) // 3, 2 * len(pts) // 3):
+    for jj, j in enumerate(range(3, len(pts) - 2, 4)):
         ex, ey = pts[j]
-        sd = 1 if j % 2 else -1
-        lz.aguada(Elipse(ex + sd * 6, ey - 2, 6, 2.8, sd * 35), '#8fae74', dens=0.75, irreg=0.3, tapa=0.8)
+        d_ = pts[j + 1] - pts[j - 1]
+        base = math.degrees(math.atan2(d_[1], d_[0]))
+        hojita(lz, ex, ey, 10, base + (55 if jj % 2 else -55), '#6f9a5e', tapa=0.9)
     ex, ey = rp[-1]
-    for k in range(5):
-        a_ = math.radians(k * 72 + i * 20)
-        lz.gouache(Elipse(ex + math.cos(a_) * 4, ey + math.sin(a_) * 4, 3.6, 2.4, math.degrees(a_)),
-                   '#fde7e2' if i % 2 else '#fff3cf', alfa=0.9, irreg=0.2)
-    lz.gouache(Elipse(ex, ey, 1.8), '#e7a33e', alfa=0.95, irreg=0)
+    for (fx_, fy_, fr) in ((ex, ey, 1.0), tuple(pts[len(pts) // 2]) + (0.75,)):
+        for k in range(5):
+            a_ = math.radians(k * 72 + i * 20)
+            lz.gouache(Elipse(fx_ + math.cos(a_) * 4.5 * fr, fy_ + math.sin(a_) * 4.5 * fr, 4 * fr, 2.6 * fr,
+                              math.degrees(a_)), ['#fde7e2', '#fff3cf', '#ffd0d8'][i % 3], alfa=0.92, irreg=0.2)
+        lz.gouache(Elipse(fx_, fy_, 1.9 * fr), '#e7a33e', alfa=0.95, irreg=0)
 
+# ivy climbs the heart's left wall, as on an old house
+hiedra = [(700, 742), (640, 690), (588, 630), (540, 566), (512, 500), (504, 440), (516, 380), (540, 340)]
+lz.lapiz([spline(hiedra)], '#4f6f45', grosor=1.0, presion=0.6, temblor=0.4)
+hp_ = spline(hiedra)
+rngh = np.random.default_rng(23)
+for k in range(4, len(hp_) - 2, 5):
+    x, y = hp_[k]
+    d_ = hp_[k + 1] - hp_[k - 1]
+    base = math.degrees(math.atan2(d_[1], d_[0]))
+    hojita(lz, x, y, rngh.uniform(13, 19), base + rngh.choice([-60, 60]) + rngh.normal(0, 15),
+           rngh.choice(['#5f8f63', '#7fa86a', '#3f7a6a']), tapa=0.9)
+    if k % 15 == 4:
+        flor_simple(lz, x + rngh.normal(0, 4), y + rngh.normal(0, 4), 5, rngh.choice(['#f39ab0', '#f0c25e', '#ffffff']),
+                    centro='#e7a33e')
 # soft modelling of the muscle: carmine hatching on the shadow side, shade under the auricles
 lz.rayado(CUERPO, '#a02c40', angulo=62, sep=4.0, presion=0.26, grosor=0.8, desvanece=(1000, 700, 760, 480),
           largo=22)
@@ -311,36 +336,36 @@ for dx in (-26, 26):   # two flower pots
 lz.contorno(CUERPO, '#8f2a3c', grosor=1.2, presion=0.6, cortes=0.25, desfase=1.2)
 lz.contorno(CUERPO, '#b04a3a', grosor=0.8, presion=0.35, cortes=0.5, desfase=2.5)
 
-# ------------------------------------------------------------------ light that becomes birds
-# golden light pours out of the great vessels and turns into birds
-PLUMAS = [((730, 72), (700, 50)), ((794, 58), (790, 20)), ((858, 66), (935, 62)), ((598, 150), (530, 96))]
-for (bx, by), (tx, ty) in PLUMAS:
-    pl = Trazo(bezier((bx, by - 4), (bx, by - 40), (tx * 0.6 + bx * 0.4, ty + 30), (tx, ty), 30), (20, 30, 8))
-    lz.aguada(pl, '#f2c25e', dens=0.4, suave=7, gran=0.05)
-    lz.luz(pl, '#fff0c0', fuerza=0.35, suave=8)
-    lz.chispas((bx + tx) / 2, (by + ty) / 2, 22, 30, n=6, tam=(0.7, 1.6))
-def pajaro(x, y, s, col, alas_arriba=True):
-    cuerpo = Poligono([(x - s, y), (x - s * 0.2, y - s * 0.35), (x + s * 0.9, y - s * 0.15),
-                       (x + s * 1.25, y - s * 0.3), (x + s * 0.85, y + s * 0.12), (x - s * 0.1, y + s * 0.3)])
-    if alas_arriba:
-        ala = Poligono([(x - s * 0.2, y - s * 0.2), (x - s * 0.7, y - s * 1.2), (x + s * 0.35, y - s * 0.95),
-                        (x + s * 0.35, y - s * 0.15)])
-    else:
-        ala = Poligono([(x - s * 0.2, y), (x - s * 0.5, y + s * 0.9), (x + s * 0.35, y + s * 0.7),
-                        (x + s * 0.35, y + s * 0.05)])
-    lz.collage(cuerpo, col, sombra=1.2)
-    lz.collage(ala, mezcla(col, '#ffffff', 0.3), sombra=1.2)
-    lz.lapiz([[(x + s * 0.9, y - s * 0.1), (x + s * 0.95, y - s * 0.08)]], '#3a2a24', grosor=1.3, presion=0.9)
-    lz.contorno(cuerpo | ala, _lp(col), grosor=0.6, presion=0.4, cortes=0.4, desfase=0.3)
-
-
-def _lp(c):
-    return tuple((rgb(c) * 0.5).tolist())
-
-
-pajaro(684, 44, 22, TEAL)
-pajaro(950, 60, 20, CORAL, False)
-pajaro(512, 98, 19, '#e7a33e')
+# ------------------------------------------------------------------ what pours out of the heart
+# the aorta's garden overflows from its branches as bouquets; stars and tiny fish spill out of the veins
+rngb = np.random.default_rng(17)
+for (bx, by), sd in (((730, 72), -1), ((794, 58), 0), ((858, 66), 1)):
+    for k in range(4):
+        ang = -90 + sd * 25 + rngb.uniform(-40, 40)
+        L = rngb.uniform(18, 34)
+        a_ = math.radians(ang)
+        tip = (bx + math.cos(a_) * L, by + math.sin(a_) * L)
+        lz.lapiz([bezier((bx, by), (bx + math.cos(a_) * L * 0.4, by - 8), tip)], '#4f6f45', grosor=0.8, presion=0.6)
+        if k % 2:
+            hojita(lz, *tip, rngb.uniform(9, 14), ang + rngb.uniform(-30, 30), rngb.choice(['#5f8f63', '#86a86c']))
+        else:
+            flor_simple(lz, *tip, rngb.uniform(5, 7.5), rngb.choice(['#e8735e', '#f0c25e', '#f39ab0', '#c33c4e']),
+                        centro='#fff3cf')
+rng = np.random.default_rng(41)
+for (x0, y0), (dx, dy) in (((598, 140), (-1.0, -0.9)), ((972, 233), (1.0, -0.2))):
+    for k in range(9):
+        t = (k + 1) / 9
+        x = x0 + dx * t * 120 + rng.normal(0, 7)
+        y = y0 + dy * t * 120 + rng.normal(0, 7) - 12 * math.sin(t * 3)
+        if k % 3 == 2:
+            pececillo(lz, x, y, 7.5 - 2 * t, math.degrees(math.atan2(dy, dx)) + rng.normal(0, 15),
+                      rng.choice(['#3f8f9a', '#5a6fb0']), gouache=False)
+        else:
+            estrella(lz, x, y, 11 - 4 * t, rng.choice(['#e8735e', '#f0c25e', '#4f9c9a', '#8d73b0']),
+                     gouache=False)
+pajaro(lz, 690, 44, 17, TEAL, ang=-12)
+pajaro(lz, 946, 64, 15, CORAL, ang=10)
+pajaro(lz, 508, 98, 15, '#e7a33e', ang=-20)
 
 # ------------------------------------------------------------------ the red thread
 A, Fm, N, P = ATADOS['amigos'], ATADOS['familia'], ATADOS['nieto'], ATADOS['pareja']
@@ -371,20 +396,17 @@ lz.contorno(sobre, '#7c4632', grosor=0.8, presion=0.55, cortes=0.1, desfase=0.3)
 lz.aguada(Elipse(1140, 111, 4.5, 4), HILO, dens=0.9, irreg=0.2)   # wax seal
 lz.luz((1140, 105, 50), '#ffe2a0', fuerza=0.3)
 
-# ------------------------------------------------------------------ magic in the air
-lz.chispas(752, 450, 400, 360, n=36, semilla=77)
+# ------------------------------------------------------------------ one detail to get lost in
+libelula(lz, 330, 330, 1.25, ang=-25, cuerpo='#c33c4e', alas='#9cc7d6')
 rng = np.random.default_rng(9)
-for k in range(9):
-    a = rng.uniform(0, 2 * np.pi)
-    x, y = 752 + math.cos(a) * rng.uniform(330, 470), 460 + math.sin(a) * rng.uniform(260, 360)
-    lz.aguada(Elipse(x, y, 7, 4.2, rng.uniform(0, 180)), '#f2a0a0', dens=0.55, irreg=0.4)
-# pulse lines either side
-for sd in (-1, 1):
-    for k in range(3):
-        r = 300 + k * 18
-        a0, a1 = (160, 200) if sd < 0 else (-20, 20)
-        lz.lapiz([arco(752, 470, r + 140, r, a0, a1, 20)], '#c0703f', grosor=0.9, presion=0.4 - 0.08 * k,
-                 temblor=0.6)
+for k in range(7):   # a few petals drifting off the heart's garden
+    a = rng.uniform(-0.9, 2.2)
+    x, y = 752 + math.cos(a) * rng.uniform(320, 430), 470 + math.sin(a) * rng.uniform(300, 360)
+    lz.aguada(Elipse(x, y, 7, 4.2, rng.uniform(0, 180)), rng.choice(['#ef7f88', '#f0a35e', '#e8735e']),
+              dens=0.75, irreg=0.4, borde=0.7)
+for (x, y, r, c) in ((1250, 300, 5, '#f0c25e'), (1290, 360, 3.5, '#e8735e'), (1215, 400, 3, '#4f9c9a'),
+                     (250, 560, 4, '#f0c25e'), (210, 610, 3, '#e8735e')):
+    estrella(lz, x, y, r, c, gouache=False)
 
 lz.vineta(margen=30)
 lz.guardar(SALIDA)
