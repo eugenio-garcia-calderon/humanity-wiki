@@ -57,9 +57,10 @@ export async function enviarCorreo(c: {
 }): Promise<boolean> {
   const cuenta = smtp();
   if (cuenta) {
-    const puerto = Number(process.env.SMTP_PUERTO) || 465;
+    // El 587 con STARTTLS, no el 465: Hetzner corta las salidas por el 25 y el 465 (2026-11-09).
+    const puerto = Number(process.env.SMTP_PUERTO) || 587;
     const envio = nodemailer.createTransport({
-      host: (process.env.SMTP_SERVIDOR || 'smtp.gmail.com').trim(), port: puerto, secure: puerto === 465,
+      host: (process.env.SMTP_SERVIDOR || 'smtp.gmail.com').trim(), port: puerto, secure: puerto === 465, requireTLS: puerto === 587,
       auth: { user: cuenta.usuario, pass: cuenta.clave },
       connectionTimeout: 8000, greetingTimeout: 8000, socketTimeout: 15000,
     });
