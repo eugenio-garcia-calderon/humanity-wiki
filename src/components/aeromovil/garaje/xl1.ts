@@ -714,26 +714,11 @@ function envolvente(): [number, number, number, number][] {
 
 export const VEHICULO: VehiculoGaraje = {
   id: 'xl1',
-  nombre: 'Volkswagen XL1',
+  nombre: 'VW XL1 2013 (serie)',
   largo: LARGO, ancho: ANCHO, alto: ALTO, batalla: BATALLA, viaDel: VIA_DEL, viaTras: VIA_TRAS,
   fuente: 'Ficha técnica VW XL1 (2013): auto-data.net/en/volkswagen-xl1-0.8-tdi-69hp-plug-in-hybrid-dsg-42793 y cars-data.com (3888 × 1665 × 1153 mm, batalla 2224 mm)',
   aero: { cd: 0.189, area: 1.5, masaVacio: 795, plazas: 2, vmax: 158, fuente: 'Cd 0,189, área frontal 1,5 m² (CdA 0,28 m²), 795 kg en vacío y 158 km/h limitada: Wikipedia, «Volkswagen 1-litre car» (datos de VW)' },
   envolvente: envolvente(),
   seccion: 2.6,
   construir,
-};
-
-/**
- * XL1 Concept (Salón de Qatar, 2011). VW lo presentó como el coche de preserie
- * y la forma es prácticamente la del XL1 de producción, así que se dibuja con
- * la misma carrocería; cambian el color (gris plata) y los datos declarados:
- * Cd 0,186 (el de producción subió a 0,189) y alto 1 156 mm. Fuente: Wikipedia,
- * «Volkswagen 1-litre car».
- */
-export const VEHICULO_CONCEPTO: VehiculoGaraje = {
-  ...VEHICULO,
-  id: 'xl1concept', nombre: 'VW XL1 Concept 2011', alto: 1.156,
-  fuente: 'XL1 Concept (Qatar, 2011): misma forma que el de producción; Cd 0,186 y alto 1 156 mm (Wikipedia, «Volkswagen 1-litre car»)',
-  aero: { ...VEHICULO.aero!, cd: 0.186, fuente: 'Cd 0,186 del XL1 Concept de 2011 (el de producción subió a 0,189); área frontal 1,5 m², 795 kg y 158 km/h como el de producción: Wikipedia, «Volkswagen 1-litre car»' },
-  construir: () => { const g = construir(0xb9bec5); g.name = 'xl1concept'; return g; },
 };

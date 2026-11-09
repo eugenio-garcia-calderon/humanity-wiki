@@ -10529,3 +10529,25 @@ Eugenio asked for five things on the 3D world; all on branch `nube/arquitectura-
   - Corregido un comentario de su ficha de «Otros velomóviles» que lo llamaba basculante sin fuente.
 - Comprobado: `tsc`; `vite build`; el editor con los siete coches a la vez, «Superponer» con cada uno de los tres nuevos y su tabla de medidas; la migración del garaje guardado (de v3 con el Jaguar oculto a v4 con el Jaguar visible, conservando lo demás); y la ficha del SZEmission en «Otros velomóviles» y en «Comparar». Sin errores en consola.
 - Sin verificar: el móvil con la app instalada.
+
+## 2026-11-09 — Aeromóvil: pantalla completa en el 3D, los dos XL1 y el garaje sin coches encima de otros
+
+- Eugenio: «que la ventana de los diseños 3D… se pueda expandir a pantalla completa con un selector de expansión arriba a la derecha». Nuevo botón en la esquina de arriba a la derecha de la vista 3D.
+  - Usa la pantalla completa del navegador. En el iPhone, que solo la permite para vídeos, la ventana ocupa toda la pantalla.
+  - Se sale con el mismo botón o con Esc, y también al pinchar una pieza (que abre su ficha).
+  - Las tarjetas que vivían en esa esquina (otro velomóvil, «Superponer», la barra de velocidades) se apartan a su izquierda; en el móvil, debajo.
+  - La tarjeta del túnel de viento sigue debajo del visor, así que en pantalla completa no se ve: se ven el humo y los carteles.
+- Eugenio, con fotos: los dos XL1 que quiere en el garaje son el de serie (blanco, 2013, 250 unidades) y el concept de 2002 (el 1-Litro, negro).
+  - Vuelve el XL1 de serie («VW XL1 2013 (serie)», blanco, Cd 0,189), que se había quitado el 2026-11-08 por repetido.
+  - Sale el «XL1 Concept 2011», que es el que repetía la misma carrocería.
+  - El 1-Litro pasa a llamarse «VW 1-Litro Concept 2002».
+- «Falta el XL1 concept» y «tienes mal puesto las etiquetas»: no faltaba. Su garaje guardado traía la colocación del 2026-11-07, con el 1-Litro a −9 m, y el Jaguar nuevo llegó a esa misma plaza. El 1-Litro quedaba dentro del Jaguar, con solo la cúpula asomando y su cartel encima del Jaguar.
+  - El garaje vuelve una vez a la colocación por defecto (clave `aeromovil_garaje_v5`): Jaguar −9, 1-Litro −6, Aptera −3, Aeromóvil, Twizy 3, XL1 6, SZEmission 9, AeroRider 12.
+  - Al cargar, si dos coches visibles se solapan, el segundo se aparta de 3 en 3 m hacia fuera: un coche nuevo ya no puede esconder a uno viejo.
+- Los carteles de «Cd y consumo» salen también en el Jaguar y el AeroRider, con su nombre y «Cd sin publicar».
+- Comprobado en el editor, con un garaje guardado como el de Eugenio:
+  - queda cada coche en su plaza, con su cartel;
+  - un garaje con el 1-Litro y el Jaguar en el mismo sitio se separa solo;
+  - la pantalla completa funciona con la API en escritorio, con el sustituto CSS (escritorio y móvil de 390 px) y con Esc;
+  - `tsc` y `vite build` pasan.
+- Sin verificar: el móvil con la app instalada.
