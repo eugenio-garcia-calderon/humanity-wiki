@@ -21,17 +21,13 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
     "franja": {
       "tipo": "lista",
       "titulo": "El sistema solar a escala",
-      "texto": "Si el Sol fuera una pelota de 1 metro, así de pequeños y lejanos estarían los planetas. Haz el paseo: coloca la pelota y camina las distancias marcando cada planeta.",
+      "texto": "Si el Sol fuera una pelota de 1 m, camina estas distancias.",
       "items": [
-        "Sol: pelota de 1 m de diámetro (punto de partida)",
-        "Mercurio: 3,5 mm (grano de pimienta) a 42 m",
-        "Venus: 9 mm (garbanzo pequeño) a 78 m",
-        "Tierra: 9 mm (garbanzo) a 107 m",
-        "Marte: 5 mm (lenteja) a 164 m",
-        "Júpiter: 10 cm (naranja) a 560 m",
-        "Saturno: 8,4 cm (naranja pequeña) a 1 km",
-        "Urano: 3,6 cm (nuez) a 2 km",
-        "Neptuno: 3,5 cm (nuez) a 3,2 km"
+        "Mercurio: grano de pimienta a 42 m",
+        "Tierra: garbanzo a 107 m",
+        "Marte: lenteja a 164 m",
+        "Júpiter: naranja a 560 m",
+        "Neptuno: nuez a 3,2 km"
       ]
     },
     "dias": [
@@ -67,6 +63,7 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "Hoy, paseo de la franja: ¿cuántos pasos hasta Neptuno?",
       "Busca «Un punto azul pálido», foto de la Voyager 1."
     ],
+    "reto": "¿Qué harás este mes para mirar más el cielo?",
     "imagen": "/calendario-arte/ilustraciones/mes-01.jpg",
     "disenos": [
       "/calendario-arte/ilustraciones/mes-01.jpg",
@@ -82,16 +79,14 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
     "ilustracion_idea": "Dos aves (dos tórtolas) entrelazadas cuyas colas forman un único corazón-nudo de cintas. Luz: un nido con huevos luminosos entre ambas. Sombra: del otro lado, las cintas se convierten en alambre de espino que les aprieta las alas (relaciones que hieren, posesión).",
     "franja": {
       "tipo": "pasos",
-      "titulo": "Cinco minutos de escucha (en pareja, familia o amistad)",
-      "texto": "Un juego sencillo para sentirse escuchado de verdad. Hacedlo una vez por semana y observad cómo cambian vuestras conversaciones.",
+      "titulo": "Cinco minutos de escucha",
+      "texto": "En pareja, familia o amistad, una vez por semana.",
       "items": [
-        "Elegid un momento sin pantallas y sentaos frente a frente",
-        "Una persona habla 5 minutos sobre cómo está de verdad",
-        "La otra solo escucha: sin interrumpir, aconsejar ni juzgar",
-        "Quien escucha resume: «Lo que te he entendido es…»",
-        "Pregunta: «¿Hay algo más?» y vuelve a escuchar",
-        "Cambiad los papeles y repetid",
-        "Cerrad diciendo algo que agradecéis de la otra persona"
+        "Sin pantallas, frente a frente",
+        "Uno habla 5 minutos; el otro solo escucha",
+        "Quien escucha resume lo que entendió",
+        "Cambiad los papeles",
+        "Cerrad con un «gracias por…»"
       ]
     },
     "dias": [
@@ -124,6 +119,7 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "Hoy: haz los «Cinco minutos de escucha» de la franja.",
       "¿Qué aprendiste este mes sobre querer y ser querido?"
     ],
+    "reto": "¿A quién vas a cuidar mejor este mes, y cómo?",
     "imagen": "/calendario-arte/ilustraciones/mes-02.jpg",
     "disenos": [
       "/calendario-arte/ilustraciones/mes-02.jpg",
@@ -139,16 +135,14 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
     "ilustracion_idea": "Una ballena cuyo cuerpo es un río que baja de una montaña y desemboca en el mar. Luz: aguas turquesas transparentes con peces, algas y un niño flotando en calma. Sombra: la parte final de la cola está hecha de botellas, redes y una mancha oscura de petróleo.",
     "franja": {
       "tipo": "pasos",
-      "titulo": "Baño sensorial: conecta con el agua",
-      "texto": "Una pequeña práctica de atención plena para sentir el agua y valorarla. Basta con la ducha o una palangana; no hace falta gastar más agua.",
+      "titulo": "Baño sensorial con el agua",
+      "texto": "Basta la ducha o una palangana, sin gastar más.",
       "items": [
-        "Abre la ducha o llena una palangana para manos o pies",
-        "Antes de tocar el agua, respira hondo tres veces",
-        "Siente su temperatura en la piel, sin prisa",
-        "Escucha su sonido y observa cómo se mueve",
-        "Imagina su viaje: nube, río, embalse, tubería, grifo",
-        "Agradece en silencio tenerla limpia y a mano",
-        "Cierra el grifo en cuanto termines: cada gota cuenta"
+        "Respira hondo tres veces",
+        "Siente su temperatura, sin prisa",
+        "Escucha su sonido",
+        "Imagina su viaje: nube, río, grifo",
+        "Cierra el grifo y da las gracias"
       ]
     },
     "dias": [
@@ -184,6 +178,7 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "¿Qué río, lago o mar te marcó? Hoy, recuérdalo.",
       "¿Qué gesto de ahorro mantendrás? Pégalo junto al grifo."
     ],
+    "reto": "¿Qué gesto harás para cuidar el agua este mes?",
     "imagen": "/calendario-arte/ilustraciones/mes-03.jpg",
     "disenos": [
       "/calendario-arte/ilustraciones/mes-03.jpg",
@@ -199,16 +194,14 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
     "ilustracion_idea": "Un ciervo cuya cornamenta es un bosque entero con raíces y micelio (red de hongos) bajo sus patas. Luz: lado verde con pájaros, setas, flores. Sombra: el otro lado de la cornamenta está calcinado, ramas negras y brasas (incendios, tala).",
     "franja": {
       "tipo": "pasos",
-      "titulo": "Baño de bosque en 7 pasos",
-      "texto": "Inspirado en el shinrin-yoku japonés: pasar tiempo en un entorno natural con los cinco sentidos. Practícalo al menos una vez este mes, sin prisa.",
+      "titulo": "Baño de bosque",
+      "texto": "Inspirado en el shinrin-yoku japonés. Una vez este mes.",
       "items": [
-        "Elige un parque o bosque cercano y silencia el móvil",
-        "Camina despacio, sin meta ni prisa",
-        "Respira hondo y nota el olor de la tierra y las hojas",
-        "Toca cortezas, hojas y piedras con atención",
-        "Escucha: viento, pájaros, agua, tus propios pasos",
-        "Siéntate diez minutos y solo observa",
-        "Al salir, da las gracias y anota cómo te sientes"
+        "Busca un parque o bosque; silencia el móvil",
+        "Camina despacio, sin meta",
+        "Huele, toca y escucha",
+        "Siéntate diez minutos a observar",
+        "Anota cómo te sientes"
       ]
     },
     "dias": [
@@ -243,6 +236,7 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "El compost devuelve al suelo tus restos de cocina.",
       "¿Qué gesto por la naturaleza harás hábito desde mañana?"
     ],
+    "reto": "¿Qué harás este mes por la naturaleza cercana?",
     "imagen": "/calendario-arte/ilustraciones/mes-04.jpg",
     "disenos": [
       "/calendario-arte/ilustraciones/mes-04.jpg",
@@ -257,21 +251,15 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
     "lema": "La belleza no sirve para nada. Por eso es lo único que nos salva.",
     "ilustracion_idea": "Un pavo real cuyas plumas son pinceles, instrumentos y telas de colores; bailarinas diminutas giran en los ojos de las plumas. Luz: explosión de color y movimiento. Sombra: las últimas plumas se vuelven pantallas negras idénticas que miran al vacío (consumo pasivo, creatividad apagada).",
     "franja": {
-      "tipo": "sopa",
-      "titulo": "Sopa de letras del arte",
-      "texto": "Encuentra las 11 palabras escondidas en horizontal, vertical y diagonal. Después elige una y practícala esta semana.",
+      "tipo": "lista",
+      "titulo": "Crea con el cuerpo",
+      "texto": "Una por semana: sin pantallas y sin hacerlo «bien».",
       "items": [
-        "BAILE",
-        "PINTURA",
-        "MUSICA",
-        "TEATRO",
-        "POESIA",
-        "DIBUJO",
-        "CANTO",
-        "BELLEZA",
-        "JUEGO",
-        "ESCULTURA",
-        "COLOR"
+        "Baila una canción entera",
+        "Dibuja lo que ves por la ventana",
+        "Canta en voz alta",
+        "Modela algo con barro o masa",
+        "Escribe un poema de cuatro versos"
       ]
     },
     "dias": [
@@ -307,6 +295,7 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "Regala algo hecho por ti: su valor no se compra.",
       "¿Qué afición creativa cuidarás el resto del año?"
     ],
+    "reto": "¿Qué vas a crear tú este mes con tus manos?",
     "imagen": "/calendario-arte/ilustraciones/mes-05.jpg",
     "disenos": [
       "/calendario-arte/ilustraciones/mes-05.jpg",
@@ -322,17 +311,14 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
     "ilustracion_idea": "Un búho mecánico de latón con engranajes y circuitos, con un sol en el pecho. Luz: un ala de placas solares que dan energía a un pequeño huerto. Sombra: la otra ala es de chimeneas y cables enredados que soltan humo oscuro.",
     "franja": {
       "tipo": "lista",
-      "titulo": "Reto de ahorro energético en casa",
-      "texto": "Marca cada hábito cuando lo hayas incorporado. Al final del mes, compara tu factura de la luz con la del mismo mes del año anterior.",
+      "titulo": "Ahorra energía en casa",
+      "texto": "Marca cada hábito al incorporarlo y compara tu factura.",
       "items": [
-        "Apaga del todo los aparatos en vez de dejarlos en espera",
-        "Cambia las bombillas que te queden por LED",
-        "Lava la ropa en frío siempre que sea posible",
-        "Pon lavadora y lavavajillas solo con carga completa",
-        "Cierra persianas en las horas de sol y ventila de noche",
+        "Apaga del todo, no en espera",
+        "Bombillas LED en toda la casa",
+        "Lava en frío y con carga completa",
         "Tapa las ollas al cocinar",
-        "Desenchufa los cargadores que no estés usando",
-        "Mira la etiqueta energética antes de comprar"
+        "Persianas: cerradas al sol, abiertas de noche"
       ]
     },
     "dias": [
@@ -367,6 +353,7 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "¿Qué tecnología te mejora la vida y cuál la complica?",
       "Hoy: elige un gesto de ahorro para todo el verano."
     ],
+    "reto": "¿Qué consumo vas a reducir este mes?",
     "imagen": "/calendario-arte/ilustraciones/mes-06.jpg",
     "disenos": [
       "/calendario-arte/ilustraciones/mes-06.jpg",
@@ -382,19 +369,14 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
     "ilustracion_idea": "Una tortuga enorme que lleva en el caparazón un pueblo de casitas encaladas con ventanas redondas, árboles y nidos. Luz: casas abiertas, ropa tendida, gente compartiendo. Sombra: en el borde del caparazón, una casa cerrada con candado y una persona dormida a la intemperie.",
     "franja": {
       "tipo": "lista",
-      "titulo": "Kit de emergencia para casa",
-      "texto": "Prepara una mochila o caja accesible para pasar 72 horas sin luz ni agua corriente. Marca lo que ya tienes y revísala una vez al año.",
+      "titulo": "Kit de emergencia",
+      "texto": "Para 72 horas sin luz ni agua. Revísalo una vez al año.",
       "items": [
-        "Agua potable para varios días",
-        "Comida no perecedera y abrelatas",
-        "Linterna y pilas de repuesto",
-        "Radio a pilas o de dinamo",
+        "Agua y comida no perecedera",
+        "Linterna, pilas y radio",
         "Botiquín y medicación habitual",
-        "Copia de documentos importantes",
-        "Batería externa y cargadores",
-        "Algo de dinero en efectivo",
-        "Mantas o ropa de abrigo",
-        "Silbato y lista de teléfonos útiles"
+        "Copia de documentos y efectivo",
+        "Teléfonos útiles en papel"
       ]
     },
     "dias": [
@@ -430,6 +412,7 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "Día de la Amistad: invita a alguien a tu casa.",
       "Hogar es seguridad, cuidado y pertenencia."
     ],
+    "reto": "¿Qué mejorarás en tu casa o tu barrio este mes?",
     "imagen": "/calendario-arte/ilustraciones/mes-07.jpg",
     "disenos": [
       "/calendario-arte/ilustraciones/mes-07.jpg",
@@ -445,16 +428,14 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
     "ilustracion_idea": "Una figura humana serena hecha de raíces, cuyo cerebro es una copa de árbol con neuronas como ramas luminosas y un corazón que es un nido. Luz: plantas medicinales, agua, sueño (luna amable). Sombra: un brazo de cables, pastillas y un reloj que la ata (estrés, prisa, insomnio).",
     "franja": {
       "tipo": "pasos",
-      "titulo": "Reto de 7 días de bienestar",
-      "texto": "Un pequeño hábito cada día durante una semana. No hace falta hacerlo perfecto: se trata de notar cómo te sientes.",
+      "titulo": "Una semana de bienestar",
+      "texto": "Un hábito al día, sin buscar la perfección.",
       "items": [
-        "Día 1: fija una hora para acostarte y respétala",
-        "Día 2: camina 30 minutos a paso ligero",
-        "Día 3: sal a la luz natural nada más levantarte",
-        "Día 4: una hora sin pantallas antes de dormir",
-        "Día 5: llama a alguien solo para saber cómo está",
-        "Día 6: respira lento 5 minutos (inspira 4, espira 6)",
-        "Día 7: escribe tres cosas que hayas disfrutado"
+        "Acuéstate a la misma hora",
+        "Camina 30 minutos",
+        "Luz natural al levantarte",
+        "Una hora sin pantallas antes de dormir",
+        "Llama a alguien solo para saber cómo está"
       ]
     },
     "dias": [
@@ -490,6 +471,7 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "Hoy: pasea con alguien y hablad sin móvil.",
       "El bienestar son hábitos pequeños. ¿Cuál mantendrás?"
     ],
+    "reto": "¿Qué hábito sano vas a sostener todo el mes?",
     "imagen": "/calendario-arte/ilustraciones/mes-08.jpg",
     "disenos": [
       "/calendario-arte/ilustraciones/mes-08.jpg",
@@ -506,16 +488,13 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
     "franja": {
       "tipo": "lista",
       "titulo": "Antes de comprar, pregúntate",
-      "texto": "Repasa esta lista antes de cualquier compra que no sea de primera necesidad. Si dudas en tres o más, espera unos días.",
+      "texto": "Si dudas en tres, espera unos días.",
       "items": [
-        "¿Lo necesito o solo me apetece ahora?",
-        "¿Puedo pedirlo prestado o alquilarlo?",
-        "¿Puedo reparar el que ya tengo?",
+        "¿Lo necesito o solo me apetece?",
+        "¿Puedo pedirlo prestado o repararlo?",
         "¿Existe de segunda mano?",
-        "¿Cuánto durará y cuánto me costará por uso?",
-        "¿Quién lo ha fabricado y en qué condiciones?",
-        "¿Qué pasará con él cuando ya no me sirva?",
-        "¿Lo seguiré queriendo dentro de 48 horas?"
+        "¿Quién lo fabricó y cómo?",
+        "¿Lo querré dentro de 48 horas?"
       ]
     },
     "dias": [
@@ -550,6 +529,7 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "Día contra la Pérdida y el Desperdicio de Alimentos.",
       "Una economía sana cuida a personas y planeta. ¿Y tú?"
     ],
+    "reto": "¿Qué compra vas a evitar o cambiar este mes?",
     "imagen": "/calendario-arte/ilustraciones/mes-09.jpg",
     "disenos": [
       "/calendario-arte/ilustraciones/mes-09.jpg",
@@ -565,21 +545,14 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
     "ilustracion_idea": "Un gallo/gallina-huerto: plumaje hecho de frutas y verduras de temporada (granadas, calabazas, uvas, setas), patas como raíces en tierra fértil. Luz: cesta compartida, tierra viva con lombrices. Sombra: bajo una pata, un montón de comida desperdiciada y envases de plástico.",
     "franja": {
       "tipo": "lista",
-      "titulo": "Productos de temporada en otoño (España)",
-      "texto": "Frutas y verduras que están en su mejor momento en octubre. Marca cada una cuando la pruebes este mes y, si puedes, cómprala a productores cercanos.",
+      "titulo": "De temporada en otoño",
+      "texto": "Márcalos al probarlos y, si puedes, compra cerca.",
       "items": [
-        "Calabaza",
-        "Boniato",
-        "Caqui",
-        "Granada",
-        "Castaña",
-        "Uva",
-        "Manzana",
-        "Pera",
-        "Membrillo",
-        "Setas",
-        "Coliflor",
-        "Acelga"
+        "Calabaza y boniato",
+        "Caqui y granada",
+        "Castaña y uva",
+        "Manzana, pera y membrillo",
+        "Setas, coliflor y acelga"
       ]
     },
     "dias": [
@@ -615,6 +588,7 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "Agradece la comida a la tierra, el agua y las manos.",
       "¿Qué hábito de alimentación quieres conservar?"
     ],
+    "reto": "¿Qué vas a cambiar en tu plato este mes?",
     "imagen": "/calendario-arte/ilustraciones/mes-10.jpg",
     "disenos": [
       "/calendario-arte/ilustraciones/mes-10.jpg",
@@ -630,16 +604,14 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
     "ilustracion_idea": "Un círculo de aves distintas (garza, jilguero, cuervo, golondrina) sosteniendo juntas con el pico un mismo hilo que forma una gran esfera-mundo. Luz: el hilo bien tejido, voces que se cruzan. Sombra: un ave más grande con corona de papel tira del hilo hacia sí y lo deshilacha (abuso de poder, polarización).",
     "franja": {
       "tipo": "pasos",
-      "titulo": "Reto de 7 días de ciudadanía activa",
-      "texto": "Un paso cada día durante una semana para conocer mejor cómo funciona lo común y participar en ello, sin importar lo que pienses.",
+      "titulo": "Una semana de ciudadanía",
+      "texto": "Un paso al día para participar en lo común.",
       "items": [
-        "Día 1: lee un artículo de la Constitución",
-        "Día 2: busca cuándo es el próximo pleno de tu ayuntamiento",
-        "Día 3: comprueba tus datos en el censo electoral",
-        "Día 4: lee una misma noticia en dos medios distintos",
-        "Día 5: escucha una opinión contraria sin interrumpir",
-        "Día 6: conoce una asociación o consulta pública de tu zona",
-        "Día 7: habla de un problema común y propón una solución"
+        "Lee un artículo de la Constitución",
+        "Busca el próximo pleno de tu ayuntamiento",
+        "Lee una noticia en dos medios distintos",
+        "Escucha una opinión contraria sin interrumpir",
+        "Propón una solución a un problema común"
       ]
     },
     "dias": [
@@ -674,6 +646,7 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "Hoy: agradece a alguien que cuida lo común.",
       "¿Qué paso darás para participar en tu comunidad?"
     ],
+    "reto": "¿En qué vas a participar este mes?",
     "imagen": "/calendario-arte/ilustraciones/mes-11.jpg",
     "disenos": [
       "/calendario-arte/ilustraciones/mes-11.jpg",
@@ -689,16 +662,14 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
     "ilustracion_idea": "Un lobo y un cordero dormidos juntos, enroscados formando un yin-yang ornamental, rodeados de manos que se ofrecen. Luz: calidez, paloma, olivo. Sombra: en un rincón, una sombra de lobo con dientes y una flecha clavada (violencia, miedo al otro).",
     "franja": {
       "tipo": "pasos",
-      "titulo": "Comunicación no violenta en la práctica",
-      "texto": "Usa estos pasos, basados en la CNV de Marshall Rosenberg, la próxima vez que algo te moleste o tengas una conversación difícil.",
+      "titulo": "Comunicación no violenta",
+      "texto": "Para la próxima conversación difícil (CNV, M. Rosenberg).",
       "items": [
-        "Para y respira antes de responder",
-        "Observa: describe los hechos sin juzgar",
-        "Siente: nombra la emoción que te provoca",
-        "Necesita: descubre qué necesidad hay detrás",
-        "Pide: haz una petición concreta y realizable",
-        "Escucha: repite con tus palabras lo que entiendes del otro",
-        "Agradece el esfuerzo de entenderos"
+        "Observa los hechos sin juzgar",
+        "Nombra lo que sientes",
+        "Descubre qué necesitas",
+        "Pide algo concreto",
+        "Escucha y repite lo que entiendes"
       ]
     },
     "dias": [
@@ -734,6 +705,7 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "Repasa el año: ¿qué aprendiste de cada mes?",
       "Elige un valor para el año nuevo. Que haya paz."
     ],
+    "reto": "¿Qué valor vas a practicar a diario este mes?",
     "imagen": "/calendario-arte/ilustraciones/mes-12.jpg",
     "disenos": [
       "/calendario-arte/ilustraciones/mes-12.jpg",

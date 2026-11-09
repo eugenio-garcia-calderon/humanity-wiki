@@ -13,7 +13,6 @@ import { cn } from '../../utils/cn';
 import type { ContenidoMes, FranjaMes, TipoFranja } from '../../data/calendarioArteTipos';
 import { Editable } from './Editable';
 import { Button } from '../ui/core';
-import { generarSopa, normalizarPalabra } from './sopaDeLetras';
 import { CodigoQR, urlConocerMas } from './CodigoQR';
 
 export const NOMBRES_MES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -321,9 +320,12 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
           ))}
         </div>
 
-        {/* El 25 % de abajo: la herramienta del mes y la iniciativa que apoya. */}
-        <div className="flex shrink-0" style={{ height: '41mm', marginTop: '2.5mm', gap: '3mm' }}>
+        {/* El 25 % de abajo, en tres recuadros iguales (2026-11-09, Eugenio):
+            la herramienta del mes, «Mi reto personal del mes» para escribir a
+            mano, y la iniciativa que apoya lo recaudado. */}
+        <div className="grid shrink-0 grid-cols-3" style={{ height: '41mm', marginTop: '2.5mm', gap: '3mm' }}>
           <Franja franja={c.franja} editando={editando} acento={acento} alCambiar={franja => alCambiar({ franja })} />
+          <Reto c={c} editando={editando} acento={acento} alCambiar={reto => alCambiar({ reto })} />
           <Iniciativa c={c} editando={editando} acento={acento} alCambiar={iniciativa => alCambiar({ iniciativa })} />
         </div>
       </div>
@@ -337,7 +339,7 @@ function Iniciativa({ c, editando, acento, alCambiar }: {
   const i = c.iniciativa ?? { nombre: '', texto: '' };
   const vacia = !i.nombre;
   return (
-    <div className={cn('flex flex-col rounded-[4mm] overflow-hidden', acento.suave)} style={{ width: '74mm', padding: '3mm 4mm' }}>
+    <div className={cn('flex min-w-0 flex-col rounded-[4mm] overflow-hidden', acento.suave)} style={{ padding: '2.6mm 4mm' }}>
       <span className={cn('font-sans font-bold uppercase tracking-[0.18em]', acento.texto)} style={{ fontSize: '7pt' }}>Iniciativa del mes</span>
       <Editable as="p" valor={i.nombre} editando={editando} multilinea={false} alCambiar={v => alCambiar({ ...i, nombre: v })}
         vacio="Iniciativa por elegir" className="ca-titulo font-bold leading-tight text-stone-800" style={{ fontSize: '10pt', marginTop: '1mm' }} />
@@ -351,12 +353,33 @@ function Iniciativa({ c, editando, acento, alCambiar }: {
   );
 }
 
+/** «Mi reto personal del mes»: una pregunta y renglones para escribir a mano. */
+function Reto({ c, editando, acento, alCambiar }: {
+  c: ContenidoMes; editando: boolean; acento: typeof ACENTOS[number]; alCambiar: (r: string) => void;
+}) {
+  return (
+    <div className={cn('flex min-w-0 flex-col overflow-hidden rounded-[4mm] border-2 border-dashed', acento.borde)} style={{ padding: '2.6mm 4mm' }}>
+      <span className={cn('font-sans font-bold uppercase tracking-[0.18em]', acento.texto)} style={{ fontSize: '7pt' }}>Mi reto personal del mes</span>
+      <Editable as="p" valor={c.reto ?? ''} editando={editando} alCambiar={alCambiar}
+        vacio="Una pregunta que invite a proponerse un reto…" className="italic leading-snug text-stone-600" style={{ fontSize: '8pt', marginTop: '1mm' }} />
+      {/* Renglones para escribir a mano: líneas finas cada 6 mm. */}
+      <div className="min-h-0 flex-1" aria-hidden style={{
+        marginTop: '1.5mm',
+        backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0, transparent calc(6mm - 0.25mm), rgb(168 162 158 / 0.7) calc(6mm - 0.25mm), rgb(168 162 158 / 0.7) 6mm)',
+      }} />
+    </div>
+  );
+}
+
 // ── LA FRANJA: herramienta, juego o dinámica del mes ─────────────────────
+// 2026-11-09: un tercio del ancho y en una sola columna. Eugenio pidió
+// «simplificar los cuadraditos… en cosas más sencillas y no sopas de letras»:
+// el tipo «sopa» ya no se ofrece; si quedó guardado en algún mes, se pinta
+// como lista.
 
 const TIPOS: { id: TipoFranja; nombre: string }[] = [
   { id: 'lista', nombre: 'Lista con casillas' },
   { id: 'pasos', nombre: 'Pasos numerados' },
-  { id: 'sopa', nombre: 'Sopa de letras' },
   { id: 'texto', nombre: 'Solo texto' },
 ];
 
@@ -364,14 +387,13 @@ function Franja({ franja: f, editando, acento, alCambiar }: {
   franja: FranjaMes; editando: boolean; acento: typeof ACENTOS[number]; alCambiar: (f: FranjaMes) => void;
 }) {
   const cambiar = (c: Partial<FranjaMes>) => alCambiar({ ...f, ...c });
-  const sopa = f.tipo === 'sopa' ? generarSopa(f.items) : null;
   const cambiarItem = (i: number, v: string) => {
     const items = [...f.items];
-    if (v) items[i] = f.tipo === 'sopa' ? normalizarPalabra(v) : v; else items.splice(i, 1);
+    if (v) items[i] = v; else items.splice(i, 1);
     cambiar({ items });
   };
   const quitar = (i: number) => cambiar({ items: f.items.filter((_, k) => k !== i) });
-  const anadir = () => cambiar({ items: [...f.items, f.tipo === 'sopa' ? 'PALABRA' : 'Nuevo elemento'] });
+  const anadir = () => cambiar({ items: [...f.items, 'Nuevo elemento'] });
 
   /** Cada elemento se edita en su sitio, como cualquier otro texto de la hoja.
    *  Funciones que devuelven JSX y NO componentes: un componente declarado aquí
@@ -396,11 +418,12 @@ function Franja({ franja: f, editando, acento, alCambiar }: {
     </button>
   ) : null;
 
+  const esPasos = f.tipo === 'pasos';
   return (
-    <div className={cn('group relative flex-1 min-w-0 rounded-[4mm] border-2 flex overflow-hidden', acento.borde)} style={{ padding: '2.4mm 4.5mm', gap: '4mm' }}>
+    <div className={cn('group relative flex min-w-0 flex-col overflow-hidden rounded-[4mm] border-2', acento.borde)} style={{ padding: '2.6mm 4mm' }}>
       {editando && (
         <select
-          value={f.tipo}
+          value={f.tipo === 'sopa' ? 'lista' : f.tipo}
           onChange={e => cambiar({ tipo: e.target.value as TipoFranja })}
           title="Tipo de herramienta"
           className="ca-no-imprimir absolute right-2 top-2 z-10 rounded border border-stone-300 bg-white px-1 py-0.5 font-sans text-xs opacity-0 transition-opacity focus:opacity-100 group-hover:opacity-100"
@@ -408,61 +431,25 @@ function Franja({ franja: f, editando, acento, alCambiar }: {
           {TIPOS.map(t => <option key={t.id} value={t.id}>{t.nombre}</option>)}
         </select>
       )}
-      <div className="flex flex-col" style={{ width: f.tipo === 'texto' ? '100%' : '58mm', flexShrink: 0 }}>
-        <Editable as="h3" valor={f.titulo} editando={editando} multilinea={false} alCambiar={v => cambiar({ titulo: v })}
-          vacio="Título de la herramienta" className={cn('ca-titulo font-bold uppercase tracking-[0.18em] leading-tight', acento.texto)} style={{ fontSize: '9pt' }} />
-        <Editable as="p" valor={f.texto} editando={editando} alCambiar={v => cambiar({ texto: v })}
-          vacio="Cómo se usa…" className="leading-snug text-stone-600" style={{ fontSize: '7.6pt', marginTop: '1.2mm' }} />
-      </div>
-
-      {f.tipo === 'sopa' && sopa ? (
-        <div className="flex flex-1 min-w-0" style={{ gap: '4mm' }}>
-          <div className="grid font-sans font-semibold text-stone-700" style={{ gridTemplateColumns: `repeat(${sopa.filas[0].length}, 3.8mm)`, gridAutoRows: '3.8mm', fontSize: '7.6pt' }}>
-            {sopa.filas.flat().map((l, i) => <div key={i} className="flex items-center justify-center">{l}</div>)}
-          </div>
-          <div className="flex-1 min-w-0">
-            <ul className="grid font-sans text-stone-600" style={{
-              fontSize: '7.5pt', columnGap: '3mm', gridAutoFlow: 'column', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-              gridTemplateRows: `repeat(${Math.max(1, Math.ceil(f.items.length / 2))}, auto)`,
-            }}>
-              {f.items.map((p, i) => (
-                <li key={i} className={cn('flex break-inside-avoid', !sopa.colocadas.includes(normalizarPalabra(p)) && 'text-rose-500 line-through')}>
-                  {item(normalizarPalabra(p), i)}
-                </li>
-              ))}
-            </ul>
-            {botonAnadir('Añadir palabra')}
-            {sopa.noCaben.length > 0 && (
-              <p className="ca-no-imprimir font-sans text-rose-600" style={{ fontSize: '7pt' }}>
-                No caben en la sopa: {sopa.noCaben.join(', ')}. Acórtalas o quita alguna.
-              </p>
-            )}
-          </div>
-        </div>
-      ) : f.tipo !== 'texto' ? (
-        <div className="flex-1 min-w-0">
-          {/* Rejilla que se llena por columnas (como un texto a dos o tres
-              columnas) y no `columns-*`: el móvil agranda el texto de las
-              cajas multicolumna y la hoja dejaba de parecerse a la impresa. */}
-          <ul className="grid font-sans text-stone-700" style={{
-            fontSize: '7.6pt', columnGap: '5mm', gridAutoFlow: 'column',
-            gridTemplateColumns: `repeat(${f.tipo === 'pasos' ? 2 : 3}, minmax(0, 1fr))`,
-            gridTemplateRows: `repeat(${Math.max(1, Math.ceil(f.items.length / (f.tipo === 'pasos' ? 2 : 3)))}, auto)`,
-          }}>
-            {f.items.map((it, i) => (
-              <li key={i} className="flex items-start" style={{ gap: '1.6mm', marginBottom: '0.9mm' }}>
-                {f.tipo === 'pasos' ? (
-                  <span className={cn('shrink-0 rounded-full text-white text-center font-bold leading-[3.6mm]', acento.fondo)} style={{ width: '3.6mm', height: '3.6mm', fontSize: '6pt' }}>{i + 1}</span>
-                ) : (
-                  <span className={cn('shrink-0 rounded-full border', acento.borde)} style={{ width: '3.2mm', height: '3.2mm', marginTop: '0.3mm' }} />
-                )}
-                {item(it, i)}
-              </li>
-            ))}
-          </ul>
-          {botonAnadir('Añadir')}
-        </div>
-      ) : null}
+      <Editable as="h3" valor={f.titulo} editando={editando} multilinea={false} alCambiar={v => cambiar({ titulo: v })}
+        vacio="Título de la herramienta" className={cn('font-sans font-bold uppercase tracking-[0.18em] leading-tight', acento.texto)} style={{ fontSize: '7pt' }} />
+      <Editable as="p" valor={f.texto} editando={editando} alCambiar={v => cambiar({ texto: v })}
+        vacio="Cómo se usa…" className="italic leading-snug text-stone-600" style={{ fontSize: '7.4pt', marginTop: '0.8mm' }} />
+      {f.tipo !== 'texto' && (
+        <ul className="font-sans text-stone-700" style={{ fontSize: '7.6pt', marginTop: '1.4mm' }}>
+          {f.items.map((it, i) => (
+            <li key={i} className="flex items-start" style={{ gap: '1.6mm', marginBottom: '0.8mm' }}>
+              {esPasos ? (
+                <span className={cn('shrink-0 rounded-full text-white text-center font-bold leading-[3.6mm]', acento.fondo)} style={{ width: '3.6mm', height: '3.6mm', fontSize: '6pt' }}>{i + 1}</span>
+              ) : (
+                <span className={cn('shrink-0 rounded-full border', acento.borde)} style={{ width: '3.2mm', height: '3.2mm', marginTop: '0.3mm' }} />
+              )}
+              {item(it, i)}
+            </li>
+          ))}
+          {editando && <li>{botonAnadir('Añadir')}</li>}
+        </ul>
+      )}
     </div>
   );
 }
