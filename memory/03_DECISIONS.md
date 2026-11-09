@@ -1072,3 +1072,28 @@ Options: (a) special blocks rendered by `BloquesLectura` and by `htmlBloques`; (
 **Aptera.** Options: (a) keep tuning stations by eye against photos; (b) solve each press photo's camera from known points (three tyre contacts, nose centre, roof top), draw the model over it with that camera and ray-cast the photo's features (pillars, glass corners, shut lines) onto the model. Chose (b): it turns «looks a bit off» into centimetres. The two best photos still disagree by 10–15 cm along the car around the doors; the model sits in the middle, and the header says so. The tail stays a 1.26 m wing (Launch Edition photos) although the 2020–21 prototypes were ~1.5 m wide. Detail lives in two new files (`apteraPiel.ts` skin patches, `apteraDetalle.ts` materials, procedural canvas textures, wheels, cabin); textures are drawn in code, nothing is downloaded. 229k triangles; `construir()` ~60 ms warm.
 **1-Litre.** English Wikipedia gives 3.47 m; the VW press-release spec tables (ultimatecarpage, supercars.net, traumautoarchiv, the German press release) give 3.646 m with wheelbase 2.205 m and tracks 1.000/0.810 m. Chose the press tables: they agree with each other and with the 1.0 m² frontal area on German Wikipedia. Body changed from silver to black unpainted carbon (press release: «unlackiert»; period press: «schwarze Zigarre»). No photo could be loaded in the sandbox, so the surface is a reconstruction checked only against the published dimensions; the header says it. The model is built once per page and cloned (first build ~300 ms, later ~10 ms); 129k triangles.
 **Cost.** Neither model's canvas textures or materials are disposed when the garage is emptied (same as the other garage cars): a few hundred kB per page visit, not per rebuild for the 1-Litre (cached), per rebuild for the Aptera. Disposing them in the viewer's garage cleanup is ~15 minutes if it ever shows up in memory.
+
+## 2026-11-09 — Garage: SZEmission re-measured at 3.42 m; the catalogue card reads the garage stations; the A1 is left alone
+
+**SZEmission size.** The 2026-11-06 reading (2.80 × 1.25 × 1.03 m, wheelbase 1.15 m) scaled the side photo by height as if it had no perspective. Solving the cameras of three photos together (side with the team, low 3/4, head-on 706) gives 3.42 × 1.28 × 1.045 m, wheelbase 1.21 m, ±3 %.
+- **Scale.** Front track measured at 0.77 of body width, set to the rules' 1.00 m minimum.
+- **Independent checks.**
+  - The tyre is 0.556 m, the team's earlier car per its public ROS config.
+  - People about 1 m behind the car come out about 1.78 m tall.
+  - 1.15 m would fail the rules' wheelbase minimum of ≥ 1.20 m.
+- **Mechanism, rechecked by hand.** With a camera about 4 m from the centreline, the near-side ground contact is about 0.5 m closer than the canopy top and the nose and tail tips. That inflates apparent height by about 13 % against length, which matches the gap between 2.8 and 3.4.
+- **Still an estimate.** The team publishes no dimensions; searched again in English and Hungarian, nothing found.
+
+**One source for one car.** Options:
+- (a) keep the «Otros velomóviles» card's own hand-traced curves and only change its numbers;
+- (b) have the card sample the garage model's stations (`szemissionForma.ts` via `estacion`).
+
+Chose (b): two hand-made silhouettes of the same car had already disagreed by 60 cm. The cost is that `referencias.ts` now imports from `garaje/` (and `three`, through `apteraPiel.ts`). The removed helpers `suave` and `perfilDePuntos` had no other user.
+
+**The Aeromóvil 1 is not rescaled.** It was born as «SZEmission × 1.3» from the old reading. Against the new one it is +15 % long, +21 % wide and +6 % high. Whether that changes the design is Eugenio's call. Only sentences stating the SZEmission's size, or the 30 % to its builders, were corrected. Dated code comments recording how the A1 was born keep the history.
+
+**Jaguar D-Type.** Modelled the 1955 short-nose customer car, not the 1955 works long-nose car (190 mm longer): its published dimensions agree across sources, and it is the car in the only photo that loaded. `alto` is the published 0.80 m without the fin, so the fin is not in the tunnel envelope.
+
+**AeroRider.** Modelled as a non-tilting trike. No source says it tilts, and the full AQUA equipment list would have said so. No photo was found, so the surface is a reconstruction on the published sizes.
+
+**Storage.** Bumped to `aeromovil_garaje_v4`, forgetting only the stored `jaguarD` entry (hidden while it was a placeholder), as was done for the XL1 between v2 and v3.

@@ -10512,3 +10512,20 @@ Eugenio asked for five things on the 3D world; all on branch `nube/arquitectura-
   - Toda la superficie es estimada: no se pudo cargar aquí ninguna foto ni plano del coche, así que no está comparado con una foto real (lo dice la cabecera).
 - Corregido un comentario en `garaje/tipos.ts`: con X hacia delante e Y arriba, +Z es la derecha del coche, no la izquierda (lo vieron los dos bots).
 - Comprobado: `tsc`, `vite build`, y el editor con los coches al lado del Aeromóvil y en «Superponer» (la tabla ya da 3,65 m para el 1-Litro), sin errores en consola. Sin verificar: el móvil con la app instalada.
+
+## 2026-11-09 — Aeromóvil: Jaguar D-Type, AeroRider y SZEmission en el garaje
+
+- Eugenio: «añade el jaguar que te dije antes, y el velomovil aerorider, hazlo a un nivel de calidad muy alta y alto detalle» y «también este de Shell Eco Marathon», con fotos del SZEmission. Lo hicieron tres bots; revisado e integrado.
+- Los tres salen por defecto en el garaje: el SZEmission a 9 m a la derecha del Aeromóvil, el Jaguar a 9 m a la izquierda y el AeroRider a 12 m a la derecha. El garaje se guarda ahora en `aeromovil_garaje_v4`: quien ya lo tenía guardado conserva su colocación, salvo la del Jaguar, que hasta hoy era una caja oculta, para que también le aparezca.
+- SZEmission (SZEnergy Team, coche 701, librea 2025-2026): forma medida sobre tres fotos de Eugenio con la cámara de cada una resuelta. Mide 3,42 × 1,28 × 1,045 m, con batalla de 1,21 m y vías de 1,00 y 0,80 m. Son estimaciones a escala con la vía delantera mínima del reglamento UrbanConcept, con un margen de unos ±10 cm en el largo; el equipo no publica medidas. El Cd 0,1365 y los 95 kg sí son publicados, así que el túnel de viento tiene dato. La librea va en sus colores, sin logos, nombres ni números.
+  - **Corrige la medida anterior.** El 2026-11-06 se leyeron 2,80 m de largo y 1,15 m de batalla, a partir de la foto de perfil sin corregir la perspectiva; esa batalla, además, no pasa el reglamento (≥ 1,20 m). El Aeromóvil 1 (3,94 m) resulta un 15 % más largo que el SZEmission, no un 30 %. El diseño del Aeromóvil 1 no se toca.
+  - Se corrigen los textos que daban la medida vieja: la ficha de «Otros velomóviles» (ahora lee la forma del modelo del garaje), tres explicaciones de la geometría (largo y alto) y los dos borradores de correo al SZEnergy Team, que decían «scaled up 30 %».
+- Jaguar D-Type 1955 de morro corto (el de cliente, volante a la derecha, con aleta). Medidas publicadas (supercars.net, uniquecarsandparts, ultimatecarpage): 3,912 × 1,66 × 0,80 m sin la aleta, batalla 2,30 m, vías 1,27 y 1,22 m.
+  - Verde inglés; ruedas de disco con agujeros y tuerca central; faros carenados; cabina con asiento de piel, cinco relojes y volante de madera; tubo de escape lateral.
+  - No hay Cd publicado: el túnel dice que no lo sabe. La superficie es una reconstrucción, cotejada con una sola foto de 3/4.
+- AeroRider: 2,78 × 0,85 × 1,20 m y batalla de 1,27 m, según la ficha AQUA.
+  - Lleva cúpula que bascula hacia delante, dos palancas laterales en lugar de manillar, tomas NACA y dos ventiladores bajo el morro, y ruedas de 20″ con freno de disco delante.
+  - No se encontró ninguna foto utilizable del AeroRider, así que la forma es una reconstrucción y lo dice. La foto que mandó Eugenio (blanca, con la cúpula oscura) no es un AeroRider: tiene ruedas de moto con disco y la rueda delantera fuera del cuerpo.
+  - Corregido un comentario de su ficha de «Otros velomóviles» que lo llamaba basculante sin fuente.
+- Comprobado: `tsc`; `vite build`; el editor con los siete coches a la vez, «Superponer» con cada uno de los tres nuevos y su tabla de medidas; la migración del garaje guardado (de v3 con el Jaguar oculto a v4 con el Jaguar visible, conservando lo demás); y la ficha del SZEmission en «Otros velomóviles» y en «Comparar». Sin errores en consola.
+- Sin verificar: el móvil con la app instalada.

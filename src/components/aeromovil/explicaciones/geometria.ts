@@ -80,7 +80,7 @@ export const EXPLICACIONES: Explicaciones = {
       ventajas: [
         'Ligereza y coste: −2,2 kg y menos carbono con 3,74 m (modelo).',
         'Entra en la clase L7e-C (≤ 3,70 m): la del Twizy, con homologación más sencilla y conocida.',
-        'Más fácil de aparcar; el SZEmission original, del que sale la forma, mide unos 2,8 m.',
+        'Más fácil de aparcar; el SZEmission original, del que sale la forma, mide unos 3,4 m (estimado en sus fotos).',
       ],
       desventajas: [
         'Con 3,74 m el motor, la reductora y el inversor ya no caben en la cola: la comprobación pasa de −0,7 a −3,6 cm (modelo).',
@@ -93,7 +93,7 @@ export const EXPLICACIONES: Explicaciones = {
       'Renault Twizy: 2,338 m (ficha técnica, auto-data.net).',
       'VW XL1: 3,888 m (Wikipedia, «Volkswagen 1-litre car»).',
       'Aptera 2023: 4,496 m (Wikipedia); Aptera 2e de 2009: 173 pulgadas = 4,39 m (Green Car Reports).',
-      'SZEmission: ≈ 2,8 m, estimado por proporción en las fotos (no publicado por el equipo).',
+      'SZEmission: ≈ 3,42 m, medido en las fotos con cámaras resueltas y a escala con el reglamento (no publicado por el equipo; margen ±10 cm). Una primera lectura, sin corregir la perspectiva, daba 2,8 m.',
       'Velomóvil Quest: 2,85 m (velomobiel.nl).',
       'Límite L7e: 4,00 m en general, 3,70 m para L7e-C (Reglamento (UE) 168/2013, anexo I). Shell Eco-marathon UrbanConcept: entre 2,20 y 3,50 m (H2polito).',
     ],
@@ -219,7 +219,7 @@ export const EXPLICACIONES: Explicaciones = {
       'Renault Twizy: 1,454 m (ficha técnica, auto-data.net).',
       'VW XL1: 1,153 m (Wikipedia).',
       'Aptera 2023: 1,422 m (Wikipedia); Aptera 2e: 53 pulgadas = 1,35 m (Green Car Reports).',
-      'SZEmission: ≈ 1,03 m, a escala de las fotos (no publicado); el Aeromóvil 1 nació como «un 30 % mayor» = 1,34 m, y Eugenio lo bajó después a 1,11 m.',
+      'SZEmission: ≈ 1,05 m, medido en las fotos (no publicado); el Aeromóvil 1 nació como «un 30 % mayor» que la primera lectura de 1,03 m = 1,34 m, y Eugenio lo bajó después a 1,11 m.',
       'Velomóvil Quest: 0,87 m (velomobiel.nl).',
       'Shell Eco-marathon UrbanConcept: entre 1,00 y 1,30 m (H2polito). L7e: ≤ 2,50 m (Reglamento 168/2013).',
     ],
