@@ -131,9 +131,9 @@ lz.aguada(NUBE, '#cfe0ec', dens=0.7, tapa=1, borde=0.8, irreg=1.3, gran=0.25, va
 # the heavy, rain-filled belly
 lz.aguada(BALLENA, '#4f6f9f', dens=0.5, borde=0.3, desvanece=(900, 300, 900, 165), gran=0.45)
 # the sea still lives inside the cloud: seaweed, a jellyfish, a shoal, bubbles
-for k in range(11):
-    t = k / 10
-    x, y = 730 + t * 200 + rng.normal(0, 5), 128 + 22 * math.sin(t * 3.2) + rng.normal(0, 5)
+for k in range(16):
+    t = rng.uniform(0, 1)
+    x, y = 740 + t * 170 + rng.normal(0, 6), 140 + 18 * math.sin(t * 3.2) + rng.normal(0, 13)
     pececillo(lz, x, y, rng.uniform(5.0, 6.5), 12 * math.cos(t * 3.2) + rng.normal(0, 6),
               rng.choice(['#4f8fc0', '#3f8f94', '#e8735e', '#f0c25e']), gouache=False)
 

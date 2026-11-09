@@ -297,11 +297,12 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "¿Qué afición creativa cuidarás el resto del año?"
     ],
     "reto": "¿Qué vas a crear tú este mes con tus manos?",
-    "imagen": "/calendario-arte/ilustraciones/mes-05.jpg",
+    "imagen": "/calendario-arte/ilustraciones/mes-05-d.jpg",
     "disenos": [
       "/calendario-arte/ilustraciones/mes-05.jpg",
       "/calendario-arte/ilustraciones/mes-05-b.jpg",
-      "/calendario-arte/ilustraciones/mes-05-c.jpg"
+      "/calendario-arte/ilustraciones/mes-05-c.jpg",
+      "/calendario-arte/ilustraciones/mes-05-d.jpg"
     ]
   },
   {

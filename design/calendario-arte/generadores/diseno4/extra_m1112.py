@@ -342,7 +342,7 @@ def _pelo_perfil(lz, R, r, pelo, peinado, canas):
 
 
 def cabeza_perfil(lz, x, y, r, piel='piel2', pelo='#3a2418', peinado='corto', lado=1, inclina=0.0,
-                  ojos='abiertos', boca='sonrisa', canas=False, gafas=False, barba=None):
+                  ojos='abiertos', boca='sonrisa', canas=False, gafas=False, barba=None, ojo=1.0, sin_pelo=False):
     """A tender head in true profile, looking toward lado (+1 right, -1 left).
     Small round nose, one eye with lid and lashes, ear, rosy cheek."""
     R = _loc(x, y, r, lado, inclina)
@@ -377,10 +377,10 @@ def cabeza_perfil(lz, x, y, r, piel='piel2', pelo='#3a2418', peinado='corto', la
         lz.lapiz([[R(0.46, 0.04), R(0.56, 0.08), R(0.66, 0.04)]], SEP, grosor=gw * 1.1, presion=0.9, temblor=0.03)
         lz.lapiz([[R(0.48, 0.06), R(0.42, 0.12)]], SEP, grosor=gw * 0.6, presion=0.6)
     else:
-        iris = Elipse(*R(0.62, 0.03), r * 0.065, r * 0.09)
+        iris = Elipse(*R(0.62, 0.03), r * 0.065 * ojo, r * 0.09 * ojo)
         lz.aguada(iris, '#4a2c22', dens=1.3, irreg=0.1, borde=0.3, gran=0.05)
         lz.gouache(Elipse(*R(0.65, 0.0), max(0.45, r * 0.024)), '#fffdf6', alfa=0.95, irreg=0)
-        lid = spline([R(0.47, 0.0), R(0.58, -0.06), R(0.7, -0.02)])
+        lid = spline([R(0.47, 0.0), R(0.58, -0.04 - 0.03 * ojo), R(0.7, -0.02)])
         lz.lapiz([lid], SEP, grosor=gw * 1.2, presion=0.95, temblor=0.03, puntas=0.25)
         lz.lapiz([[R(0.7, -0.02), R(0.76, -0.07)], [R(0.66, -0.04), R(0.7, -0.1)]], SEP, grosor=gw * 0.6,
                  presion=0.7)                               # lashes
@@ -402,7 +402,8 @@ def cabeza_perfil(lz, x, y, r, piel='piel2', pelo='#3a2418', peinado='corto', la
                       R(0.0, 0.66)])
         lz.aguada(b, barba, dens=0.22, gran=0.5, irreg=0.8, borde=0.1)
         lz.rayado(b, _lapiz_de(barba, 0.5), angulo=80, sep=1.6, presion=0.3, grosor=0.5, largo=4)
-    _pelo_perfil(lz, R, r, pelo, peinado, canas)
+    if not sin_pelo:
+        _pelo_perfil(lz, R, r, pelo, peinado, canas)
     if gafas:
         lz.lapiz([arco(*R(0.6, 0.03), r * 0.13, r * 0.12, 0, 360, 20), [R(0.47, 0.0), R(-0.08, -0.02)]], '#8a6a4a',
                  grosor=0.7, presion=0.6, temblor=0.05)
@@ -448,3 +449,45 @@ def cabeza_espalda(lz, x, y, r, piel='piel2', pelo='#3a2418', peinado='corto', g
               toques=[(*R(0.6, 0.14), r * 0.09, mezcla(piel, '#c0604a', 0.5), 0.6)])
     lz.contorno(oreja, PIEL_LAPIZ, grosor=0.6, presion=0.45, cortes=0.1, desfase=0.05)
     lz.lapiz([arco(*R(0.6, 0.14), r * 0.07, r * 0.12, 0, 200, 10)], SEP, grosor=gw * 0.6, presion=0.4)
+
+
+def cielo_mar(lz, forma, base='#24335f', toques_col=('#1f6f7a', '#4b3f8f', '#2a7f86'), estrellas=1.0, semilla=None,
+              tapa=1.0, dens=1.1):
+    """Like acuarela.cosmos but without blooms (no pale stains): night sky and
+    sea at once, star dust, little stars and a shoal of tiny fish."""
+    from acuarela import motas, estrella, pececillo, puntos_dentro
+    sem = lz._sem(semilla)
+    rng = np.random.default_rng(sem)
+    bb = forma.bbox()
+    area = (bb[2] - bb[0]) * (bb[3] - bb[1])
+    pts = puntos_dentro(forma, 20, sem + 1)
+    toq = [(x, y, rng.uniform(30, 60), toques_col[i % len(toques_col)], 0.6) for i, (x, y) in enumerate(pts[:10])]
+    lz.aguada(forma, base, dens=dens, borde=0.6, flor=0, toques=toq, tapa=tapa, gran=0.6, var=0.3)
+    motas(lz, forma, '#fff6dc', n=int(area / 500 * estrellas), tam=(0.4, 1.0), semilla=sem + 3)
+    for (x, y) in puntos_dentro(forma, int(area / 6000 * estrellas) + 2, sem + 4, margen=3):
+        estrella(lz, x, y, rng.uniform(3.5, 6.5), rng.choice(['#fff6dc', '#fff6dc', '#f6a5b5', '#a8e0e0']),
+                 puntas=int(rng.choice([4, 5])))
+    P = puntos_dentro(forma, 2, sem + 5, margen=10)
+    for (x, y) in P:
+        ang = rng.uniform(-20, 20)
+        for k in range(6):
+            pececillo(lz, x + k * 7 * math.cos(math.radians(ang)) + rng.normal(0, 2),
+                      y + k * 7 * math.sin(math.radians(ang)) + rng.normal(0, 3), rng.uniform(2.4, 3.2),
+                      ang + rng.normal(0, 10), '#9fd0e0')
+
+
+def desvanecer_x(lz, x0, x1, y0, y1, a0, a1, b0, b1, semilla=5):
+    """Lose everything painted inside the box (x0..x1, y0..y1) toward paper:
+    transparent before a0, full from a1 to b0, gone again after b1 (units),
+    with a ragged, noisy edge like a wash that runs out of water."""
+    from acuarela import _ss
+    s = lz.s
+    X0, Y0, X1, Y1 = int(x0 * s), int(y0 * s), int(x1 * s), int(y1 * s)
+    X = (np.arange(X0, X1, dtype=np.float32) + 0.5)[None, :] / s
+    n = lz.ruido(X0, Y0, X1, Y1, 14, semilla) - 0.5
+    Xn = X + n * 60
+    F = _ss(Xn, a0, a1) * _ss(Xn, b1, b0)
+    T = lz.T[Y0:Y1, X0:X1]
+    T[:] = 1 - (1 - T) * F[..., None]
+    O = lz.OP[Y0:Y1, X0:X1]
+    O *= F[..., None]
