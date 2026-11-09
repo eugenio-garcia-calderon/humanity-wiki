@@ -5,6 +5,12 @@
 // diseños… para no perderlas cuando se recarga la página o cuando se quiere
 // empezar un nuevo diseño. Que esos diseños estén en el menú».
 //
+// 2026-11-09 (Eugenio: «unifica los selectores de vehículos… deja solo el de
+// arriba… que el selector de vehículos esté integrado en el logo de Aeromóvil,
+// como un desplegable»): el botón del menú ES el logo con el nombre del
+// vehículo, y la lista va agrupada por vehículo. El bloque «Vehículo» del panel
+// lateral desapareció: elegir vehículo es abrir uno de sus diseños.
+//
 // Un menú desplegable en la barra superior: la lista de diseños (de todos), y
 // guardar, guardar como nuevo, empezar uno nuevo y quitar. Quien crea un diseño
 // sin cuenta recibe una clave que se queda en SU navegador
@@ -20,10 +26,19 @@
 // no tienen historial). Y un diseño sin guardar nunca se crea solo: cada
 // visitante que juega con los deslizadores llenaría la lista de todos.
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Check, ChevronDown, CloudOff, FilePlus2, FolderOpen, Link2, Loader2, Save, Star, Trash2 } from 'lucide-react';
+import { Check, ChevronDown, CloudOff, FilePlus2, Link2, Loader2, Save, Star, Trash2 } from 'lucide-react';
 import { Button } from '../ui/core';
 import { cn } from '../../utils/cn';
-import { PARAMETROS_A1, PARAMETROS_BALA, PARAMETROS_GOTA, type Parametros } from './geometria';
+import { PARAMETROS_A1, PARAMETROS_BALA, PARAMETROS_GOTA, type Disposicion, type Parametros } from './geometria';
+
+/** The three vehicle families, in the order the menu lists them. */
+export const VEHICULOS: { k: Disposicion; n: string; d: string }[] = [
+  { k: 'cuatro', n: 'Aeromóvil 1', d: 'Eléctrico de cuatro ruedas, carrocería baja con cúpula (SZEmission ×1,3), clase Twizy.' },
+  { k: 'rombo', n: 'Aeromóvil Gota', d: 'Velomóvil tándem 1+2 de pedaleo asistido, rombo basculante, carenado en gota.' },
+  { k: 'bala', n: 'Cuadriciclo Bala', d: 'Biplaza a horcajadas, tipo moto carenada: el rombo de ruedas del Gota con carenados laterales fijos, morro en punta y cúpula.' },
+];
+/** A saved design's family: designs from before 2026-11-06 carry none and are the Gota's. */
+const familiaDe = (d: Diseno): Disposicion => { const k = d.parametros?.disposicion; return VEHICULOS.some(v => v.k === k) ? k! : 'rombo'; };
 
 export interface Diseno { id: number; nombre: string; parametros: Partial<Parametros>; autor: string | null; origen: 'equipo' | 'visitante'; por_defecto?: boolean; updated_at: string }
 
@@ -131,8 +146,12 @@ export function useAutoguardado(P: Parametros, actual: DisenoAbierto | null, alG
   return { tipo: cambiado ? 'pendiente' : 'al-dia' };
 }
 
-export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, puedeDecidir, estado }: {
+export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, alVehiculo, nombreVehiculo, puedeDecidir, estado }: {
   P: Parametros;
+  /** The open vehicle's name: the button is the page's logo. */
+  nombreVehiculo: string;
+  /** Opens a vehicle at its starting measures; only used when that vehicle has no design in the list. */
+  alVehiculo: (k: Disposicion) => void;
   actual: DisenoAbierto | null;
   estado: EstadoGuardado;
   alCargar: (d: Diseno) => void;
@@ -205,20 +224,52 @@ export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, puedeDec
     try { await navigator.clipboard.writeText(url); setAviso('Enlace copiado.'); } catch { setAviso(url); }
   };
 
+  const fila = (d: Diseno) => {
+    const esActual = actual?.id === d.id;
+    return (
+                <li key={d.id} className={cn('group flex items-center gap-1 rounded-lg px-1', esActual && 'bg-teal-50')}>
+                  <Button variant="ghost" role="menuitem" onClick={() => { alCargar(d); setAbierto(false); }}
+                    className="min-w-0 flex-1 justify-start gap-2 px-2 py-1.5 text-left text-sm font-medium normal-case tracking-normal text-slate-800">
+                    {esActual ? <Check className="h-3.5 w-3.5 shrink-0 text-teal-700" /> : <span className="w-3.5 shrink-0" />}
+                    <span className="min-w-0 flex-1 truncate">{d.nombre}</span>
+                    <span className="shrink-0 text-[11px] font-normal text-slate-400">{d.por_defecto ? 'por defecto · ' : ''}{d.origen === 'equipo' ? 'base' : (d.autor || 'anónimo')} · {new Date(d.updated_at).toLocaleDateString('es-ES')}</span>
+                  </Button>
+                  {puedeDecidir && (
+                    <Button variant="ghost" aria-label={d.por_defecto ? `${d.nombre} es el diseño por defecto` : `Poner ${d.nombre} por defecto`} aria-pressed={!!d.por_defecto} disabled={!!d.por_defecto || ocupado} onClick={() => ponerPorDefecto(d)}
+                      className={cn('px-1.5 py-1.5', d.por_defecto ? 'text-amber-500' : 'text-slate-400 hover:text-amber-500')}><Star className={cn('h-3.5 w-3.5', d.por_defecto && 'fill-current')} /></Button>
+                  )}
+                  <Button variant="ghost" aria-label={`Copiar enlace de ${d.nombre}`} onClick={() => copiarEnlace(d)} className="px-1.5 py-1.5 text-slate-500"><Link2 className="h-3.5 w-3.5" /></Button>
+                  {puedeDecidir && (
+                    <Button variant="ghost" aria-label={`Quitar ${d.nombre}`} onClick={() => quitar(d)} className="px-1.5 py-1.5 text-slate-500 hover:text-red-700"><Trash2 className="h-3.5 w-3.5" /></Button>
+                  )}
+                </li>
+    );
+  };
+
   return (
     <div ref={caja} className="relative">
       <Button variant="ghost" aria-expanded={abierto} aria-haspopup="menu" onClick={() => setAbierto(a => !a)}
-        className={cn('gap-1.5 px-3 py-1.5 text-sm normal-case tracking-normal text-slate-700', abierto && 'bg-slate-100')}>
-        <FolderOpen className="h-4 w-4" />
-        <span className="max-w-[14rem] truncate">{actual ? actual.nombre : 'Diseños'}</span>
-        {estado.tipo === 'guardando' && <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-400" aria-label="Guardando en la web" />}
-        {estado.tipo === 'al-dia' && actual && <Check className="h-3.5 w-3.5 text-teal-700" aria-label="Guardado en la web" />}
-        {estado.tipo === 'error' && <CloudOff className="h-3.5 w-3.5 text-amber-600" aria-label="Sin guardar en la web" />}
-        {(estado.tipo === 'manual' || estado.tipo === 'pendiente') && cambiado && <span className="h-2 w-2 rounded-full bg-amber-500" title={estado.tipo === 'pendiente' ? 'Se guardará en unos segundos' : 'Cambios sin guardar'} />}
-        <ChevronDown className="h-3.5 w-3.5" />
+        title="Elegir vehículo o diseño"
+        className={cn('h-auto gap-2 rounded-xl px-1.5 py-1 normal-case tracking-normal sm:px-2', abierto && 'bg-slate-100')}>
+        <svg viewBox="0 0 40 20" className="h-5 w-10 shrink-0 text-teal-700 sm:h-6 sm:w-12" aria-hidden>
+          <path d="M2 12 C 6 3, 24 1, 38 9 C 30 15, 12 17, 2 12 Z" fill="currentColor" opacity=".18" stroke="currentColor" strokeWidth="1.4" />
+          <circle cx="9" cy="16" r="2.4" fill="currentColor" /><circle cx="31" cy="15" r="2.4" fill="currentColor" />
+        </svg>
+        <span className="flex min-w-0 flex-col items-start text-left leading-tight">
+          <span className="flex items-center gap-1 whitespace-nowrap text-base font-semibold tracking-tight text-slate-900 sm:text-lg">
+            {nombreVehiculo}<ChevronDown className={cn('h-4 w-4 shrink-0 text-slate-500 transition-transform', abierto && 'rotate-180')} />
+          </span>
+          <span className="hidden max-w-[13rem] items-center gap-1 text-[11px] font-normal text-slate-500 sm:flex">
+            <span className="truncate">{actual ? actual.nombre : 'sin guardar'}</span>
+            {estado.tipo === 'guardando' && <Loader2 className="h-3 w-3 shrink-0 animate-spin text-slate-400" aria-label="Guardando en la web" />}
+            {estado.tipo === 'al-dia' && actual && <Check className="h-3 w-3 shrink-0 text-teal-700" aria-label="Guardado en la web" />}
+            {estado.tipo === 'error' && <CloudOff className="h-3 w-3 shrink-0 text-amber-600" aria-label="Sin guardar en la web" />}
+            {(estado.tipo === 'manual' || estado.tipo === 'pendiente') && cambiado && <span className="h-2 w-2 shrink-0 rounded-full bg-amber-500" title={estado.tipo === 'pendiente' ? 'Se guardará en unos segundos' : 'Cambios sin guardar'} />}
+          </span>
+        </span>
       </Button>
       {abierto && (
-        <div role="menu" className="absolute left-0 top-full z-40 mt-1 w-[min(92vw,380px)] rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
+        <div role="menu" className="absolute left-0 top-full z-40 mt-1 w-[min(92vw,420px)] rounded-xl border border-slate-200 bg-white p-2 shadow-xl">
           {!puedeDecidir && <p className="border-b border-slate-100 px-2 py-1.5 text-[11px] text-amber-800">Solo el dueño del Aeromóvil, con su sesión iniciada, guarda o cambia diseños (desde el 2026-11-07). Aquí se pueden abrir y mirar.</p>}
           {puedeDecidir && <div className="flex flex-wrap gap-1.5 border-b border-slate-100 p-1 pb-2">
             <Button variant="outline" disabled={ocupado} onClick={guardarCambios} className="px-2.5 py-1.5 text-xs normal-case tracking-normal">
@@ -251,25 +302,26 @@ export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, puedeDec
           {aviso && <p className="px-2 py-1.5 text-xs text-slate-600">{aviso}</p>}
           {error && <p className="px-2 py-1.5 text-xs text-red-700">{error}</p>}
           {!lista && !error && <p className="flex items-center gap-2 px-2 py-2 text-xs text-slate-500"><Loader2 className="h-3.5 w-3.5 animate-spin" />Cargando…</p>}
-          <ul className="max-h-[50vh] overflow-y-auto py-1">
-            {lista?.map(d => {
-              const esActual = actual?.id === d.id;
+          <ul className="max-h-[60vh] overflow-y-auto py-1">
+            {lista && VEHICULOS.map(v => {
+              const suyos = lista.filter(d => familiaDe(d) === v.k), abiertoAhora = P.disposicion === v.k;
               return (
-                <li key={d.id} className={cn('group flex items-center gap-1 rounded-lg px-1', esActual && 'bg-teal-50')}>
-                  <Button variant="ghost" role="menuitem" onClick={() => { alCargar(d); setAbierto(false); }}
-                    className="min-w-0 flex-1 justify-start gap-2 px-2 py-1.5 text-left text-sm font-medium normal-case tracking-normal text-slate-800">
-                    {esActual ? <Check className="h-3.5 w-3.5 shrink-0 text-teal-700" /> : <span className="w-3.5 shrink-0" />}
-                    <span className="min-w-0 flex-1 truncate">{d.nombre}</span>
-                    <span className="shrink-0 text-[11px] font-normal text-slate-400">{d.por_defecto ? 'por defecto · ' : ''}{d.origen === 'equipo' ? 'base' : (d.autor || 'anónimo')} · {new Date(d.updated_at).toLocaleDateString('es-ES')}</span>
-                  </Button>
-                  {puedeDecidir && (
-                    <Button variant="ghost" aria-label={d.por_defecto ? `${d.nombre} es el diseño por defecto` : `Poner ${d.nombre} por defecto`} aria-pressed={!!d.por_defecto} disabled={!!d.por_defecto || ocupado} onClick={() => ponerPorDefecto(d)}
-                      className={cn('px-1.5 py-1.5', d.por_defecto ? 'text-amber-500' : 'text-slate-400 hover:text-amber-500')}><Star className={cn('h-3.5 w-3.5', d.por_defecto && 'fill-current')} /></Button>
-                  )}
-                  <Button variant="ghost" aria-label={`Copiar enlace de ${d.nombre}`} onClick={() => copiarEnlace(d)} className="px-1.5 py-1.5 text-slate-500"><Link2 className="h-3.5 w-3.5" /></Button>
-                  {puedeDecidir && (
-                    <Button variant="ghost" aria-label={`Quitar ${d.nombre}`} onClick={() => quitar(d)} className="px-1.5 py-1.5 text-slate-500 hover:text-red-700"><Trash2 className="h-3.5 w-3.5" /></Button>
-                  )}
+                <li key={v.k} className="py-1">
+                  <p className={cn('flex items-baseline gap-2 px-2 pb-0.5 pt-1 text-[11px] font-semibold uppercase tracking-wide', abiertoAhora ? 'text-teal-800' : 'text-slate-500')}>
+                    {v.n}{abiertoAhora && <span className="font-normal normal-case tracking-normal text-teal-700">· el que ves</span>}
+                  </p>
+                  <p className="px-2 pb-1 text-[11px] text-slate-400">{v.d}</p>
+                  <ul>
+                    {suyos.map(fila)}
+                    {!suyos.length && (
+                      <li>
+                        <Button variant="ghost" role="menuitem" onClick={() => { alVehiculo(v.k); setAbierto(false); }}
+                          className="w-full justify-start gap-2 px-2 py-1.5 text-left text-sm font-medium normal-case tracking-normal text-slate-800">
+                          <span className="w-3.5 shrink-0" />Medidas de partida
+                        </Button>
+                      </li>
+                    )}
+                  </ul>
                 </li>
               );
             })}

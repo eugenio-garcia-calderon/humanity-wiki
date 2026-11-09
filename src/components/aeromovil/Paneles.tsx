@@ -239,7 +239,7 @@ export function VistaPlanos({ modelo }: { modelo: Modelo }) {
   if (modelo.tipo === 'bala') return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <h2 className="text-xl font-semibold text-slate-900">Planos de fabricación</h2>
-      <p className="mt-2 text-sm text-slate-600">Los planos (cuadernas, perfiles, chasis y lista de corte) son del Aeromóvil 1 y del Aeromóvil Gota. El Cuadriciclo Bala todavía no los tiene: su piel se dibuja de otra manera y su chasis no está diseñado. Elige uno de los otros dos en «Diseño 3D» para verlos, o descarga el STL del Bala en «Exportar a CAD».</p>
+      <p className="mt-2 text-sm text-slate-600">Los planos (cuadernas, perfiles, chasis y lista de corte) son del Aeromóvil 1 y del Aeromóvil Gota. El Cuadriciclo Bala todavía no los tiene: su piel se dibuja de otra manera y su chasis no está diseñado. Elige uno de los otros dos en el menú del nombre del vehículo, arriba a la izquierda, para verlos, o descarga el STL del Bala en «Exportar a CAD».</p>
     </div>
   );
   return <PlanosPiel modelo={modelo} />;
