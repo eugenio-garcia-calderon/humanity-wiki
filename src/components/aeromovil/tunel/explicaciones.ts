@@ -79,6 +79,7 @@ const GARAJE: Record<string, string> = {
   twizy: 'Es un coche urbano abierto por los lados, con la trasera casi vertical y las ruedas al aire. Lo que más le bajaría el consumo: cerrar los costados, carenar las ruedas y alargar la cola.',
   jaguarD: 'Coche de carreras de 1955: morro largo y bajo, aleta detrás del piloto para ir recto a mucha velocidad y pasos de rueda abiertos. La cola cortada y las ruedas son lo que más le cuesta.',
   aerorider: 'Velomóvil: un carenado largo y estrecho con las ruedas dentro y la cola casi en punta.',
+  nusKruce: 'Coche de estudiantes para la Shell Eco-marathon con forma de coche de ciudad: morro redondo, techo de cristal en arco y ruedas tapadas con discos lisos para que no remuevan el aire. Lo que más le cuesta es la trasera, alta y cortada, y las cuatro ruedas en sus pasos: el reglamento de su categoría le obliga a parecerse a un coche de calle.',
   bala: 'Es un diseño propio, hecho a partir del Aeromóvil Gota como modelo fijo del garaje: morro en punta, cola en cono con aleta y las ruedas delantera y trasera dentro de la carrocería. El túnel solo calcula el cuerpo: los carenados de las ruedas laterales y sus brazos dejan estelas propias que no ve, así que su Cd real será algo más alto.',
 };
 

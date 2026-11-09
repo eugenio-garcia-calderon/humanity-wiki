@@ -607,7 +607,7 @@ export default function Aeromovil() {
     // Los dos XL1 (2026-11-09, Eugenio, con fotos): el de serie de 2013 enfrente del Twizy y el concept 1-Litro de 2002 al otro lado.
     // 2026-11-09, «añade el jaguar… y el velomovil aerorider» y «también este de Shell Eco Marathon»: el SZEmission,
     // el Jaguar D-Type y el AeroRider salen también por defecto, más allá de los cuatro anteriores.
-    const POR_DEFECTO: Record<string, { z: number }> = { twizy: { z: 3 }, aptera: { z: -3 }, xl1: { z: 6 }, unlitro: { z: -6 }, szemission: { z: 9 }, jaguarD: { z: -9 }, aerorider: { z: 12 }, bala: { z: -12 } };
+    const POR_DEFECTO: Record<string, { z: number }> = { twizy: { z: 3 }, aptera: { z: -3 }, xl1: { z: 6 }, unlitro: { z: -6 }, szemission: { z: 9 }, jaguarD: { z: -9 }, aerorider: { z: 12 }, bala: { z: -12 }, nusKruce: { z: 15 } };
     const base = VEHICULOS_GARAJE.map((v, i) => POR_DEFECTO[v.id] ? { id: v.id, visible: true, x: 0, z: POR_DEFECTO[v.id].z, giro: 0 } : ({ id: v.id, visible: false, x: 0, z: (i % 2 ? 1 : -1) * (2.6 + 2.2 * Math.floor(i / 2)), giro: 0 }));
     // v3 (2026-11-07): el XL1 deja de ser una caja y sale por defecto. En la lista v2 guardada estaba oculto,
     // así que al pasar de v2 a v3 se olvida solo lo que se guardó del XL1 (el resto se conserva).

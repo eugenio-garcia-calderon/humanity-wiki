@@ -94,5 +94,8 @@ export const RUEDAS_GARAJE: Record<string, { ruedas: RuedaTunel[]; nota: string 
   aerorider: { ruedas: [...Array(3)].map(() => ({ d: 0.5, w: 0.05, tipo: 'dentro' as const })), nota: 'tres ruedas de bicicleta dentro del casco' },
   // 24″ front and rear inside the body (R_DEL 0.305 m, 80 mm tyres), two 20″ laterals in pods on arms
   // (R_LAT 0.254 m, 70 mm tyres): balaForma.ts. The pods and arms themselves are outside the silhouette.
+  // 16″ rims with narrow eco tyres (0.55 m × 0.09 m, nusKruceForma.ts) behind black disc covers, in open
+  // arches: the front ones flush with the body side, the rear ones under flared fenders
+  nusKruce: { ruedas: [...Array(4)].map(() => ({ d: 0.55, w: 0.09, tipo: 'paso' as const })), nota: 'cuatro ruedas en pasos de rueda, con tapacubos lisos' },
   bala: { ruedas: [{ d: 0.61, w: 0.08, tipo: 'dentro' }, { d: 0.61, w: 0.08, tipo: 'dentro' }, { d: 0.508, w: 0.07, tipo: 'carenado' }, { d: 0.508, w: 0.07, tipo: 'carenado' }], nota: 'delantera y trasera dentro de la carrocería, las laterales en carenados sobre brazos' },
 };

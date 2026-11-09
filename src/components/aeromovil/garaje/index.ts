@@ -4,6 +4,7 @@ import { VEHICULO_1LITRO as unlitro } from './vwL1';
 import { VEHICULO as szemission } from './szemission';
 import { VEHICULO as aerorider } from './aerorider';
 import { VEHICULO as bala } from './bala';
+import { VEHICULO as nusKruce } from './nusKruce';
 import { VEHICULO as twizy } from './twizy';
 import { VEHICULO as aptera } from './aptera';
 import { VEHICULO as tesla3 } from './tesla3';
@@ -16,5 +17,5 @@ export type { VehiculoGaraje } from './tipos';
 // 2026-11-08, Eugenio: fuera dos coches «que están repetidos»; se quitaron el XL1 de producción y el L1 2009.
 // 2026-11-09, Eugenio, con fotos: los dos XL1 que quiere son el de serie (blanco, 250 unidades) y el concept de
 // 2002 (el 1-Litro, negro). Vuelve el de serie y sale el XL1 Concept 2011, que es el repetido: misma carrocería.
-export const VEHICULOS_GARAJE: VehiculoGaraje[] = [twizy, aptera, xl1, unlitro, szemission, jaguarD, aerorider, bala, tesla3, caterham7, suspensionTwizy];
+export const VEHICULOS_GARAJE: VehiculoGaraje[] = [twizy, aptera, xl1, unlitro, szemission, jaguarD, aerorider, bala, nusKruce, tesla3, caterham7, suspensionTwizy];
 export const vehiculoGaraje = (id: string) => VEHICULOS_GARAJE.find(v => v.id === id);

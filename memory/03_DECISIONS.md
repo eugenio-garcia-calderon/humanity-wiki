@@ -1194,3 +1194,14 @@ Chose (b): Eugenio asked for an explanation *of this value*, and the tags keep c
 - The camera keeps the distance it effectively had (`min(old, 25)`) and backs off only when something does not fit.
 - While that view lasts, `maxDistance` is lifted to match, and it is restored when the camera gets home.
 - Fog near/far and the ground disc scale with the distance beyond 25 m. Options considered: a wider FOV (distorts) or a broadside camera (needs the same distance), so the fog and the ground move instead.
+
+## 2026-11-09 — NUS KRUCE: identified from a photo collage; only the length is published
+
+**Identification.** The car in the photo collage is the NUS KRUCE (Kent Ridge Urban Concept Ecocar), launched 2009-04-20. The race photo (number 413) may show KRUCE 2 (Shell Eco-marathon Asia 2010). No source says whether the body changed, so the model follows the launch photo's proportions and the race photo's details.
+- Sources: the NUS press release, TODAY and Channel NewsAsia, the NUS «ECO Car» page, and The Star of 2010-07-15.
+
+**Dimensions.** Only the length (2.70 m) is published. The wheelbase, height, width and tracks were solved from the launch photo (camera solved from the rims) and the rear photo, and checked against the UrbanConcept rule bounds of 2008–2012. The race photo does not fit one pinhole camera with those proportions: its nose looks ~20 cm longer. It is used for details only, and `fuente` says so.
+
+**No `aero`.** There is no published Cd or frontal area. The tunnel estimates Cd 0.198, and the car does not join the calibration.
+
+**Paint.** The bot's 0x1f78d1 at metalness 0.55 rendered royal blue under the park environment. Lightened at integration to 0x3a95e0 at 0.4, closer to the photos' sky blue.
