@@ -303,11 +303,22 @@ lz.aguada(COPA, VERDE_E, dens=0.85, tapa=0.9, borde=0.8, flor=3, gran=0.5, var=0
           toques=[(500, 100, 90, '#7a9a4a', 0.7), (640, 120, 70, '#9ab05a', 0.6), (700, 280, 90, '#2a4a3a', 0.7),
                   (380, 280, 70, '#2f5a4a', 0.6), (560, 200, 60, '#5f8a5a', 0.5)])
 lz.aguada(COPA, '#1f3a30', dens=0.35, desvanece=(740, 330, 520, 120), gran=0.4)
-# leaves: many small holm-oak leaves in three greens, light on the upper left
-for (x, y) in puntos_dentro(COPA, 170, 5, margen=4):
+# leaf clusters: rounded clumps, sunlit on the upper left, in shadow below right
+for (x, y) in puntos_dentro(COPA, 26, 5, margen=30):
     luzc = (x - 560) * -0.6 + (y - 170) * -0.8
-    col = rng.choice(['#9ab05a', '#7a9a4a']) if luzc > 40 else rng.choice(['#3f6a4a', '#2f5a42', '#5f8a5a'])
-    hojita(lz, x, y, rng.uniform(9, 14), rng.uniform(0, 360), col, tapa=0.7, nervio=rng.random() < 0.4)
+    col = rng.choice(['#8aa850', '#7a9a4a']) if luzc > 30 else rng.choice(['#3f6a4a', '#2f5a42', '#4f7a52'])
+    mata(lz, x, y, rng.uniform(26, 40), col)
+# leaves standing out along the edge of the crown (no smooth outline)
+from skimage import measure as _ms
+_m = np.zeros((900, 1500), np.uint8)
+import cv2 as _cv
+for (cx_, cy_, r_) in COPA_C:
+    _cv.circle(_m, (int(cx_), int(cy_)), int(r_), 255, -1)
+_c = max(_ms.find_contours(_m.astype(float), 128), key=len)
+for (yy, xx) in _c[::14]:
+    a = math.degrees(math.atan2(yy - 190, xx - 560)) + rng.normal(0, 25)
+    hojita(lz, xx, yy, rng.uniform(11, 16), a, rng.choice(['#3f6a4a', '#5f8a5a', '#7a9a4a']), tapa=0.8,
+           nervio=True)
 lz.contorno(COPA, '#2a4030', grosor=0.9, presion=0.45, cortes=0.4, desfase=1.0)
 # acorns
 for (x, y) in puntos_dentro(COPA, 14, 21, margen=12):
@@ -345,7 +356,7 @@ def abubilla(x, y, s=1.0):
              grosor=1.0, presion=0.8)
 
 
-abubilla(732, 236, 1.1)
+abubilla(738, 232, 1.45)
 # musical breath of the birds: tiny pencil notes would be letters -- instead, little curls of song
 for (x, y) in ((760, 205), (590, 214)):
     lz.lapiz([arco(x + k * 10, y - k * 8, 4 + k, 3 + k, 200, 340, 10) for k in range(3)], '#c8603a', grosor=0.6,
@@ -364,11 +375,11 @@ for (x, y, a) in ((CR[0] + 30, CR[1] - 40, -60), (CR[0] - 12, CR[1] - 46, -100))
 lz.aguada(RAMA_I & Elipse(430, 330, 30, 20), '#7a5a44', dens=0.8, tapa=1)        # branch passes in front
 lz.contorno(RAMA_I & Elipse(430, 330, 30, 20), '#3e2a1e', grosor=0.9, presion=0.5)
 # body hanging: dungarees then T-shirt, upside down
-peto = [(426, 344), (466, 346), (470, 380), (464, 410), (424, 410), (420, 378)]
+peto = [(424, 344), (468, 346), (466, 376), (460, 410), (430, 410), (426, 376)]
 prenda(lz, peto, '#e8735e', luz=(-0.6, -1), pliegues=[[(438, 360), (436, 400)], [(456, 356), (458, 404)]])
 lz.gouache(Elipse(434, 396, 3), '#fff3e0', alfa=0.9, irreg=0)
 lz.gouache(Elipse(458, 396, 3), '#fff3e0', alfa=0.9, irreg=0)
-camis = [(424, 408), (466, 408), (472, 446), (462, 462), (426, 462), (418, 446)]
+camis = [(428, 406), (462, 406), (472, 438), (468, 460), (424, 462), (418, 438)]
 prenda(lz, camis, ORO, luz=(-0.6, -1), pliegues=[[(436, 420), (444, 450)]])
 for (u, v) in ((432, 420), (452, 430), (440, 448), (460, 450)):
     lz.gouache(Elipse(u, v, 2.2), '#fff3e0', alfa=0.9, irreg=0)
@@ -381,10 +392,10 @@ cuello(lz, (446, 492), 28, (446, 462), piel='piel3', ancho=0.45)
 cara(lz, 446, 492, 28, piel='piel3', pelo='#6a3a22', peinado='calvo', orejas=True, giro=-0.2, ang=180,
      ojos='abiertos', mira=(0, 1), boca='risa', semilla=41)
 # arms dangling, one reaching for a flower in the grass
-miembro(lz, [(428, 452), (410, 490), (402, 528)], (14, 12, 10), 'piel3', lado=1, lapiz=PIEL_LP)
-mano(lz, 402, 528, 96, 20, 'piel3', 'abierta', lado=1)
-miembro(lz, [(464, 452), (482, 492), (486, 530)], (14, 12, 10), 'piel3', lado=-1, lapiz=PIEL_LP)
-mano(lz, 486, 530, 80, 20, 'piel3', 'relajada', lado=-1)
+miembro(lz, [(426, 452), (396, 486), (380, 526)], (14, 12, 10), 'piel3', lado=1, lapiz=PIEL_LP)
+mano(lz, 380, 526, 112, 20, 'piel3', 'abierta', lado=1)
+miembro(lz, [(466, 452), (494, 484), (506, 522)], (14, 12, 10), 'piel3', lado=-1, lapiz=PIEL_LP)
+mano(lz, 506, 522, 70, 20, 'piel3', 'abierta', lado=-1)
 
 # ------------------------------------------------------------------ the young cherry in blossom
 CT = Trazo([(CER_X, yg(CER_X) + 2), (CER_X - 4, 470), (CER_X + 6, 400), (CER_X + 2, 360)], (16, 13, 10, 8))
@@ -415,9 +426,9 @@ for (dy, a) in ((-20, -150), (-30, -30), (-40, -140), (-50, -40), (-56, -95)):
 
 # the granddaughter, standing, tilting a watering can over it
 GN = (1085, yg(1085))
-for (hip, kn, an) in (((1080, 438), (1074, 490), (1070, GN[1] - 6)), ((1098, 438), (1104, 490), (1108, GN[1] - 6))):
+for (hip, kn, an) in (((1080, 438), (1068, 490), (1058, GN[1] - 6)), ((1098, 438), (1106, 492), (1104, GN[1] - 6))):
     miembro(lz, [hip, kn, an], (18, 15, 12), 'piel2', lado=1, lapiz=PIEL_LP)
-for x in (1066, 1112):
+for x in (1052, 1106):
     z = Elipse(x + 4, GN[1] - 2, 13, 6.5)
     lz.aguada(z, '#3f8f94', dens=0.8, tapa=1, irreg=0.3)
     lz.contorno(z, '#2a5a5e', grosor=0.7, presion=0.55)
@@ -425,7 +436,7 @@ vest = [(1068, 344), (1110, 342), (1122, 380), (1134, 430), (1138, 452), (1052, 
 prenda(lz, vest, '#8d73b0', luz=(-0.6, -1), pliegues=[[(1076, 390), (1070, 446)], [(1100, 392), (1110, 446)]])
 for (x, y) in puntos_dentro(Poligono(vest), 12, 3, margen=5):
     flor_simple(lz, x, y, 3.6, rng.choice(['#fff3e0', ORO, '#f6a5b5']), centro=CARMIN)
-miembro(lz, [(1070, 352), (1060, 392), (1076, 420)], (14, 12, 10), 'piel2', lado=1, lapiz=PIEL_LP)
+miembro(lz, [(1070, 352), (1066, 396), (1110, 420)], (14, 12, 10), 'piel2', lado=1, lapiz=PIEL_LP)
 cuello(lz, (1090, 306), 34, (1090, 346), piel='piel2', ancho=0.42)
 cara(lz, 1090, 306, 34, piel='piel2', pelo='#b0582e', peinado='trenza', giro=0.5, ang=12, ojos='abiertos',
      mira=(1, 1), boca='sonrisa', pecas=True, adorno=ORO, semilla=27)
@@ -435,7 +446,7 @@ volumen(lz, reg, '#5f9c6a', dens=0.8, brillo=0.4, lapiz='#2f5a3a')
 lz.aguada(Trazo([(1152, 410), (1172, 418), (1180, 436)], (6, 5, 4)), '#5f9c6a', dens=0.8, tapa=1, irreg=0.2)
 lz.contorno(Trazo([(1152, 410), (1172, 418), (1180, 436)], (6, 5, 4)), '#2f5a3a', grosor=0.6, presion=0.5)
 lz.lapiz([arco(1130, 386, 16, 14, 180, 360, 14)], '#2f5a3a', grosor=1.6, presion=0.8)
-mano(lz, 1084, 420, -10, 22, 'piel2', 'agarra', lado=1)
+mano(lz, 1108, 420, -20, 21, 'piel2', 'agarra', lado=1)
 miembro(lz, [(1106, 352), (1118, 368), (1124, 382)], (14, 12, 10), 'piel2', lado=-1, lapiz=PIEL_LP)
 mano(lz, 1124, 382, -30, 21, 'piel2', 'agarra', lado=-1)
 for k in range(12):
@@ -456,16 +467,16 @@ bota2 = Poligono([(1222, yb - 14), (1250, yb - 16), (1256, yb), (1214, yb)])
 lz.aguada(bota2, '#6e4a2a', dens=0.85, tapa=1, irreg=0.3)
 lz.contorno(bota2, '#3e2a1e', grosor=0.7, presion=0.55)
 # far arm
-miembro(lz, [(1262, 390), (1232, 446), (1196, yg(1196) - 10)], (22, 18, 15), '#c8902a', lado=-1, pliegues=2)
-mano(lz, 1196, yg(1196) - 10, 140, 30, 'piel4', 'abierta', lado=1)
+miembro(lz, [(1262, 390), (1252, 452), (1214, yg(1214) - 22)], (22, 17, 13), '#c8902a', lado=-1, pliegues=2)
+mano(lz, 1214, yg(1214) - 22, 150, 30, 'piel4', 'abierta', lado=1)
 # torso leaning forward over the knee
 cam = [(1226, 372), (1262, 360), (1296, 384), (1306, 430), (1300, 470), (1262, 474), (1240, 440), (1222, 404)]
 prenda(lz, cam, '#d8a03a', luz=(-0.6, -1), pliegues=[[(1250, 400), (1262, 450)], [(1280, 398), (1290, 456)]])
 lz.rayado(Poligono(cam), '#a8702a', angulo=10, sep=9, presion=0.3, grosor=0.7)      # a checked shirt
 lz.rayado(Poligono(cam), '#a8702a', angulo=100, sep=9, presion=0.3, grosor=0.7)
 cuello(lz, (1214, 352), 38, (1232, 382), piel='piel4', ancho=0.48)
-cara(lz, 1214, 352, 38, piel='piel4', pelo='#3a2a24', peinado='corto', canas=True, barba='#c8c0b8', giro=-0.55,
-     ang=28, ojos='abiertos', mira=(-1, 1), boca='sonrisa', semilla=13)
+cara(lz, 1214, 352, 38, piel='piel4', pelo='#3a2a24', peinado='corto', canas=True, barba='#c8c0b8', giro=-0.6,
+     ang=30, ojos='cerrados', boca='sonrisa', semilla=13)
 # a straw hat
 HX, HY = 1218, 318
 som = Poligono([(HX - 46, HY + 4), (HX - 20, HY - 10), (HX + 20, HY - 12), (HX + 50, HY + 2), (HX + 32, HY + 10),
@@ -476,8 +487,9 @@ for f_ in (som, copa_h):
 lz.aguada(Trazo([(HX - 20, HY - 9), (HX + 22, HY - 11)], (6, 6)), CARMIN, dens=0.85, tapa=1)
 lz.rayado(som | copa_h, '#b8984a', angulo=20, sep=3, presion=0.3, grosor=0.6)
 # near arm, hand pressing the soil
-miembro(lz, [(1240, 392), (1206, 452), (1180, yg(1180) - 6)], (23, 19, 15), '#d8a03a', lado=1, pliegues=2)
-mano(lz, 1180, yg(1180) - 6, 120, 31, 'piel4', 'abierta', lado=-1)
+miembro(lz, [(1240, 392), (1232, 462), (1188, yg(1188) - 18)], (23, 18, 13), '#d8a03a', lado=1, pliegues=2)
+lz.aguada(Trazo([(1200, yg(1200) - 26), (1192, yg(1192) - 20)], (15, 15)), '#b8802a', dens=0.8, tapa=1)
+mano(lz, 1190, yg(1190) - 18, 125, 31, 'piel4', 'abierta', lado=-1)
 
 # ------------------------------------------------------------------ small lives with intention
 abeja(250, 470, 2.0, 10)
