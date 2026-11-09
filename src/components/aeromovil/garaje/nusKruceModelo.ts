@@ -128,8 +128,9 @@ function crearMateriales() {
   const fis = (p: THREE.MeshPhysicalMaterialParameters) => new THREE.MeshPhysicalMaterial({ side: F, ...p });
   const decal = (p: THREE.MeshPhysicalMaterialParameters) => fis({ polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4, ...p });
   const grano = texturaGrano(), tela = texturaTela();
-  // metallic light blue, as in the photos (sRGB about 40, 135, 215 in daylight)
-  const pintura = { color: 0x1f78d1, metalness: 0.55, roughness: 0.34, roughnessMap: grano, clearcoat: 1, clearcoatRoughness: 0.06, envMapIntensity: 1.15 };
+  // metallic light blue, as in the photos (sRGB about 40, 135, 215 in daylight). Lighter and less
+  // metallic than the bot's first 0x1f78d1 / 0.55, which rendered royal blue against the park sky.
+  const pintura = { color: 0x3a95e0, metalness: 0.4, roughness: 0.34, roughnessMap: grano, clearcoat: 1, clearcoatRoughness: 0.06, envMapIntensity: 1.15 };
   return {
     chapa: fis(pintura),
     chapaCalco: decal(pintura),

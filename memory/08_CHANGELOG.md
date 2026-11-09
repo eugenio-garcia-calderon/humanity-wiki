@@ -10675,3 +10675,21 @@ Petición de Eugenio: «Coge el vehículo aerogota tándem 1+2 … duplícalo, h
   - En el navegador: los nueve coches en la vista de consumo; el túnel con el Bala, el Aeromóvil 1 y el XL1; el panel «Estela» del Bala.
 - **Sin verificar:** un móvil real y una gráfica de verdad.
 - **No modelado:** las ruedas laterales del Gota se inclinan en las curvas; los carenados del Bala son fijos.
+
+## 2026-11-09 — NUS KRUCE en el garaje
+
+Petición de Eugenio, con un collage de tres fotos de un coche azul de la Shell Eco-marathon: «Hazlo con un bot y ponlo en el garaje».
+
+- **Qué coche es:** el KRUCE (Kent Ridge Urban Concept Ecocar) de la Universidad Nacional de Singapur, de hidrógeno, presentado el 20 de abril de 2009, de la categoría UrbanConcept. Su sucesor, el KRUCE 2, ganó su categoría en la Shell Eco-marathon Asia 2010 (Sepang).
+  - Ninguna fuente dice si el KRUCE 2 conservó la carrocería, ni cuál de los dos es el de la foto de carrera (número 413).
+- **Datos:**
+  - Publicado: solo el largo (2,70 m), 130 kg, una plaza.
+  - Medido en la foto de la presentación (cámara calculada a partir de las llantas) y en la trasera, dentro de los límites del reglamento UrbanConcept de esos años: batalla 1,65 m, alto 1,19, ancho 1,26 y vías 1,10/1,04.
+  - Sin Cd publicado: el túnel estima 0,198.
+- **Modelo:**
+  - **Versión:** la de carrera, con tapacubos negros lisos y los paneles del número en blanco. Azul metalizado claro, sin pegatinas ni logos.
+  - **Detalles:** cúpula de cristal entre dos largueros azules, puertas, banda negra delantera con faros finos, barra de luz trasera, y el interior de una plaza.
+- **Al integrarlo:** aclaré la pintura, porque se veía azul real y la foto es azul celeste.
+- **Sitio:** z = +15, a la derecha del AeroRider. Con él, la vista de todos los coches encuadra los diez.
+- **Comprobado:** `tsc`, `vite build`, `tunel-pruebas` (sin cambios en la calibración) y, en el navegador, el coche solo, el garaje entero y «Superponer».
+- **Lo menos seguro:** la foto de carrera no encaja del todo con las proporciones de la presentación (en ella el morro parece unos 20 cm más largo), y no hay foto desde arriba.
