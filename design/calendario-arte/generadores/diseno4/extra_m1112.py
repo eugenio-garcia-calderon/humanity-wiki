@@ -202,13 +202,13 @@ def casita(lz, x, y, w, h, pared='#f1d9b0', tejado='#c0503f', ventanas=1, luz=Tr
     a = math.radians(ang)
     R = lambda dx, dy: (x + dx * math.cos(a) - dy * math.sin(a), y + dx * math.sin(a) + dy * math.cos(a))
     cuerpo = Poligono([R(-w / 2, 0), R(-w / 2, -h), R(w / 2, -h), R(w / 2, 0)], suave=False)
-    lz.aguada(cuerpo, pared, dens=0.7, tapa=1, irreg=0.3, borde=0.6, gran=0.3,
+    lz.aguada(cuerpo, pared, dens=0.7, tapa=1, irreg=0.7, borde=0.7, gran=0.4,
               toques=[(*R(w * 0.3, -h * 0.3), w * 0.5, mezcla(pared, '#c08a60', 0.5), 0.5)])
-    lz.contorno(cuerpo, '#7a5040', grosor=0.6, presion=0.5, cortes=0.1, desfase=0.2)
+    lz.contorno(cuerpo, '#7a5040', grosor=0.55, presion=0.4, cortes=0.3, desfase=0.5)
     tj = Poligono([R(-w / 2 - w * 0.12, -h + 1), R(0, -h - w * 0.55), R(w / 2 + w * 0.12, -h + 1)], suave=False)
-    lz.aguada(tj, tejado, dens=0.85, tapa=1, irreg=0.3, borde=0.7, gran=0.3)
-    lz.contorno(tj, _lapiz_de(tejado, 0.45), grosor=0.6, presion=0.5, cortes=0.1, desfase=0.2)
-    lz.rayado(tj, _lapiz_de(tejado, 0.5), angulo=ang + 60, sep=2.2, presion=0.3, grosor=0.5)
+    lz.aguada(tj, tejado, dens=0.8, tapa=1, irreg=0.7, borde=0.8, gran=0.4)
+    lz.contorno(tj, _lapiz_de(tejado, 0.45), grosor=0.55, presion=0.4, cortes=0.3, desfase=0.5)
+    lz.rayado(tj, _lapiz_de(tejado, 0.5), angulo=ang + 60, sep=2.4, presion=0.25, grosor=0.45)
     if campana:
         g = Poligono([R(-w * 0.12, -h - w * 0.5), R(-w * 0.12, -h - w * 0.85), R(0, -h - w * 1.0),
                       R(w * 0.12, -h - w * 0.85), R(w * 0.12, -h - w * 0.5)], suave=False)
@@ -501,25 +501,33 @@ def desvanecer_x(lz, x0, x1, y0, y1, a0, a1, b0, b1, semilla=5):
     O *= F[..., None]
 
 
-def componer(lz, G, k, c, umbral=0.06):
+def componer(lz, G, k, c, umbral=0.06, mover=(0.0, 0.0)):
     """Paste a group painted on its own canvas G = Lienzo(ancho * k) onto lz,
-    scaled by k around the base point c: the people come forward, larger,
-    while the paper, its grain and everything else stay at the series' scale.
-    Wherever the group is painted it covers what is behind it (like tapa);
-    its inner light and gouache come along."""
+    scaled by k around the base point c and then moved by `mover` (units):
+    the person comes forward, larger, while the paper, its grain and
+    everything else stay at the series' scale. Wherever the group is painted
+    it covers what is behind it (like tapa); its inner light and gouache come
+    along."""
     from acuarela import _ss, _blur
     s = lz.s
-    ox = int(round(c[0] * (k - 1) * s))
-    oy = int(round(c[1] * (k - 1) * s))
+    ox = int(round((c[0] * (k - 1) - mover[0]) * s))      # page pixel = group pixel - (ox, oy)
+    oy = int(round((c[1] * (k - 1) - mover[1]) * s))
     H, W = lz.H, lz.W
-    Tg = G.T[oy:oy + H, ox:ox + W]
-    h, w = Tg.shape[:2]
+    # page window [py0:py1, px0:px1] <- group window [py0+oy : ..., px0+ox : ...]
+    px0, py0 = max(0, -ox), max(0, -oy)
+    px1, py1 = min(W, G.W - ox), min(H, G.H - oy)
+    if px1 <= px0 or py1 <= py0:
+        return
+    gs = (slice(py0 + oy, py1 + oy), slice(px0 + ox, px1 + ox))
+    ps = (slice(py0, py1), slice(px0, px1))
+    Tg = G.T[gs]
     cov = 1 - Tg.min(axis=2)
-    a = _ss(_blur(cov, 0.6 * s), 0.0, umbral)
-    a = np.maximum(a, G.OP[oy:oy + h, ox:ox + w, 3])
-    T = lz.T[:h, :w]
-    T[:] = T * (1 - a[..., None]) + Tg * a[..., None]
-    lz.LUZ[:h, :w] = lz.LUZ[:h, :w] * (1 - a[..., None]) + G.LUZ[oy:oy + h, ox:ox + w]
-    O = lz.OP[:h, :w]
-    Og = G.OP[oy:oy + h, ox:ox + w]
-    O[:] = O * (1 - a[..., None]) + Og
+    # opaque where the group is really painted; at its thin edges it glazes over the page
+    # (multiplies) instead of replacing it, so no pale halo appears round the figures
+    a = _ss(cov, 0.03, 0.25)
+    a = np.maximum(a, G.OP[gs][..., 3])
+    T = lz.T[ps]
+    T[:] = Tg * (a[..., None] + (1 - a[..., None]) * T)
+    lz.LUZ[ps] = lz.LUZ[ps] * (1 - a[..., None]) + G.LUZ[gs]
+    O = lz.OP[ps]
+    O[:] = O * (1 - a[..., None]) + G.OP[gs]

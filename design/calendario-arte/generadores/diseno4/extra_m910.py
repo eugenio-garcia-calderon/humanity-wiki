@@ -542,7 +542,7 @@ def lenteja(lz, x, y, r, ang=0, col='#9a8a46'):
     """A lentil (pardina): a flat lens with a lighter rim and dark speckles."""
     f = Elipse(x, y, r, r * 0.66, ang)
     _wash(lz, f, col, toques=[(x - r * 0.3, y - r * 0.25, r * 0.6, '#c8b46a', 0.7), (x + r * 0.5, y + r * 0.3, r * 0.5, '#5a4a22', 0.5)],
-          lapiz='#4a3a1a')
+          lapiz='#4a3a1a' if r > 8 else '#8a7a4a')
     lz.lapiz([arco(x, y, r * 0.86, r * 0.54, 190, 350, 16, ang)], '#e6d79a', grosor=0.9 if r > 10 else 0.5, presion=0.6)
     if r > 10:
         rg = np.random.default_rng(int(x * 3 + y * 5))
@@ -605,3 +605,21 @@ def huevo(lz, x, y, r, ang=0, col='#f3e2c8'):
 def caras_de(lz, x, y, r, **kw):
     """Shorthand for carita()."""
     carita(lz, x, y, r, **kw)
+
+
+def flor_popular(lz, x, y, r, col='#f6e6c8', centro='#e8735e', petalos=6, ang=0.0, lapiz=None, puntos='#fff6dc'):
+    """A folk-painted flower (like on a painted cupboard): round petals that cover what is under them
+    (reserve + glaze), a contrasting heart ringed with gouache dots, pencil petal lines."""
+    lp = lapiz or _lapiz_de(col, 0.45)
+    for k in range(petalos):
+        a = math.radians(ang + k * 360 / petalos)
+        cx, cy = x + math.cos(a) * r * 0.58, y + math.sin(a) * r * 0.58
+        f = Elipse(cx, cy, r * 0.5, r * 0.36, math.degrees(a))
+        lz.aguada(f, col, dens=0.85, tapa=1, irreg=0.25, borde=0.75, gran=0.2)
+        lz.contorno(f, lp, grosor=0.6, presion=0.5, cortes=0.15, desfase=0.1)
+        lz.lapiz([[(x + math.cos(a) * r * 0.3, y + math.sin(a) * r * 0.3), (x + math.cos(a) * r * 0.8, y + math.sin(a) * r * 0.8)]],
+                 lp, grosor=0.5, presion=0.35)
+    lz.aguada(Elipse(x, y, r * 0.3), centro, dens=0.95, tapa=1, irreg=0.2, borde=0.7)
+    for k in range(8):
+        a = math.radians(k * 45 + 10)
+        lz.gouache(Elipse(x + math.cos(a) * r * 0.42, y + math.sin(a) * r * 0.42, max(0.5, r * 0.05)), puntos, alfa=0.9, irreg=0)

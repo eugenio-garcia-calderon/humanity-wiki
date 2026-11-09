@@ -649,11 +649,12 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "¿Qué paso darás para participar en tu comunidad?"
     ],
     "reto": "¿En qué vas a participar este mes?",
-    "imagen": "/calendario-arte/ilustraciones/mes-11.jpg",
+    "imagen": "/calendario-arte/ilustraciones/mes-11-d.jpg",
     "disenos": [
       "/calendario-arte/ilustraciones/mes-11.jpg",
       "/calendario-arte/ilustraciones/mes-11-b.jpg",
-      "/calendario-arte/ilustraciones/mes-11-c.jpg"
+      "/calendario-arte/ilustraciones/mes-11-c.jpg",
+      "/calendario-arte/ilustraciones/mes-11-d.jpg"
     ]
   },
   {

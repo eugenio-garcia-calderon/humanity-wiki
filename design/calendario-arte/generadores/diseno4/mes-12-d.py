@@ -71,10 +71,23 @@ def pierna(pts, ancho, color, zapato='#5e3f30', pie_lado=1):
     lz.contorno(z, _lapiz_de(zapato, 0.45), grosor=0.6, presion=0.5)
 
 
+_rp = np.random.default_rng(99)
+
+
 def palo(a, b, w=6, col=MADERA, tapa=1.0):
-    f = Trazo([a, b], (w, w * 0.9))
-    lz.aguada(f, col, dens=0.72, tapa=tapa, irreg=0.3, gran=0.4)
-    lz.contorno(f, MADERA_LP, grosor=0.6, presion=0.5)
+    """A hand-made wooden post: never ruler-straight, wet edges, grain in pencil."""
+    a = np.asarray(a, float) + _rp.normal(0, 0.8, 2)
+    b = np.asarray(b, float) + _rp.normal(0, 0.8, 2)
+    d = b - a
+    n = np.array([-d[1], d[0]]) / max(np.hypot(*d), 1e-6)
+    m = (a + b) / 2 + n * _rp.normal(0, 1.2)
+    f = Trazo([a, m, b], (w * 1.05, w * 0.92, w * 0.85))
+    lz.aguada(f, col, dens=0.72, tapa=tapa, irreg=0.9, borde=0.8, gran=0.6,
+              toques=[(*b, w * 2, mezcla(col, '#3a2418', 0.3), 0.4)])
+    lz.contorno(f, MADERA_LP, grosor=0.6, presion=0.5, temblor=0.9, cortes=0.3)
+    if np.hypot(*d) > 25:
+        lz.lapiz([spline([a + n * w * 0.15, m + n * w * 0.1, b + n * w * 0.2])], MADERA_LP, grosor=0.4,
+                 presion=0.25, temblor=0.6, cortes=0.5)
 
 
 # ------------------------------------------------------------------ the river: a ribbon of winter night
@@ -86,6 +99,9 @@ for x in np.linspace(560, 930, 5):                     # the star's light trembl
     lz.lapiz([[(x - 10, 760 + 5 * math.sin(x)), (x + 10, 760 + 5 * math.sin(x))]], '#f6d27a', grosor=0.9,
              presion=0.6, temblor=0.6)
 desvanecer_x(lz, 150, 1340, 720, 830, 200, 420, 1060, 1290)
+for (dx, dy, L) in ((0, 0, 16), (-6, 8, 10), (8, 15, 7), (-2, 22, 5)):        # the star shines back from the water
+    lz.lapiz([[(CX + dx - L, 758 + dy), (CX + dx + L, 758 + dy)]], '#ffd36a', grosor=1.3, presion=0.9, temblor=0.4)
+    lz.luz((CX + dx, 758 + dy, L * 0.9), '#ffe2a0', fuerza=0.55)
 
 # ------------------------------------------------------------------ the bridge everybody built
 X0, X1 = 262, 1222
@@ -95,21 +111,26 @@ arc_y = 772 - 112 * np.sin((arc_x - 330) / (1154 - 330) * np.pi)
 for x in np.linspace(380, 1104, 11):
     yb = 772 - 112 * math.sin((x - 330) / (1154 - 330) * math.pi)
     palo((x, yn(x) + 12), (x, yb), 6, '#8a5a36')
-f = Trazo(np.stack([arc_x, arc_y], 1), (14, 14))
-lz.aguada(f, '#8a5a36', dens=0.7, tapa=1, irreg=0.35, gran=0.5, toques=[(CX, 660, 120, '#6a4428', 0.5)])
-lz.contorno(f, MADERA_LP, grosor=0.8, presion=0.5)
+f = Trazo(np.stack([arc_x, arc_y + 1.5 * np.sin(arc_x / 23.0)], 1), (14, 14))
+lz.aguada(f, '#8a5a36', dens=0.7, tapa=1, irreg=0.9, borde=0.8, gran=0.6, toques=[(CX, 660, 120, '#6a4428', 0.5)])
+lz.contorno(f, MADERA_LP, grosor=0.8, presion=0.5, temblor=1.0, cortes=0.25)
+lz.lapiz([np.stack([arc_x, arc_y + 2 * np.sin(arc_x / 17.0)], 1)], '#4a2e1e', grosor=0.45, presion=0.3, temblor=0.8,
+         cortes=0.5)
 # the far railing (behind everybody)
 xs_post = np.arange(X0 + 14, X1, 64)
 for x in xs_post:
     palo((x, yf(x) - 52), (x, yf(x) + 2), 5, MADERA, tapa=0.7)
 xs = np.linspace(X0, X1, 120)
-f = Trazo(np.stack([xs, yf(xs) - 52], 1), (5, 5))
-lz.aguada(f, MADERA, dens=0.72, tapa=0.7, irreg=0.3, gran=0.4)
-lz.contorno(f, MADERA_LP, grosor=0.6, presion=0.45)
+ond = 1.2 * np.sin(xs / 37.0) + 0.8 * np.sin(xs / 13.0)
+f = Trazo(np.stack([xs, yf(xs) - 52 + ond], 1), (5, 5))
+lz.aguada(f, MADERA, dens=0.72, tapa=0.7, irreg=0.9, borde=0.8, gran=0.6)
+lz.contorno(f, MADERA_LP, grosor=0.6, presion=0.45, temblor=1.0, cortes=0.3)
 # the side beam of the deck
 beam = Poligono(np.vstack([np.stack([xs, yn(xs)], 1), np.stack([xs[::-1], yn(xs[::-1]) + 14], 1)]), suave=False)
-lz.aguada(beam, '#7a4e30', dens=0.75, tapa=1, irreg=0.3, gran=0.5)
-lz.contorno(beam, MADERA_LP, grosor=0.8, presion=0.5)
+lz.aguada(beam, '#7a4e30', dens=0.75, tapa=1, irreg=0.9, borde=0.8, gran=0.6)
+lz.contorno(beam, MADERA_LP, grosor=0.8, presion=0.5, temblor=1.0, cortes=0.25)
+lz.lapiz([np.stack([xs, yn(xs) + 5 + 0.8 * np.sin(xs / 9.0)], 1), np.stack([xs, yn(xs) + 10 + 0.8 * np.cos(xs / 11.0)], 1)],
+         '#4a2e1e', grosor=0.45, presion=0.3, temblor=0.8, cortes=0.55)                 # grain of the beam
 # the walking surface: planks across it, each painted by a different hand (no flag, no rainbow order)
 COLS = ['#e8a07a', '#cfae6a', '#8fb5a8', '#e7b8b0', '#c99a5a', '#a9b88a', '#d98a6a', '#b8a8c8', '#e9c27a',
         '#9cc0c4', '#d7a080', '#c4b07a']
@@ -138,7 +159,7 @@ while xp < X1:
     xp = x1
     k += 1
 lz.lapiz([np.stack([xs, yf(xs) + 1], 1), np.stack([xs, yn(xs) - 1], 1)], MADERA_LP, grosor=0.8, presion=0.55,
-         temblor=0.4)
+         temblor=1.2, cortes=0.2)
 
 # ------------------------------------------------------------------ the little table at the top (on its own sheet)
 lz = Lienzo(int(round(ANCHO * K)), semilla=1213)
@@ -244,28 +265,28 @@ pieza(lz, [(868, 462), (892, 454), (916, 460), (932, 490), (934, 524), (930, 552
 pliegues(lz, [[(886, 470), (884, 510), (888, 552)], [(916, 486), (920, 520), (914, 552)]], '#1f4f4f', presion=0.5)
 for (x, y) in ((902, 496), (876, 528), (918, 534), (894, 474)):
     flor_simple(lz, x, y, 4.0, ROSA, centro='#fff3cf')
-# far hand on the wheel's rim
-mano_dedos(lz, 930, 536, 120, 28, 'piel4', 'sujeta', lado=1)
+# far hand resting on her lap
+mano_dedos(lz, 896, 532, 186, 28, 'piel4', 'relajada', lado=1)
 cabeza_perfil(lz, 878, 412, 44, piel='piel4', pelo='#2a1a14', peinado='rizado', lado=-1, inclina=-4,
               ojos='abiertos', boca='abierta', ojo=1.35)
-# her headwrap, the size of a real one: curls show at the nape and the temple
+# a soft wool beanie that slouches to the back; curls show at the nape and the temple
 R_ = lambda dx, dy: (878 - dx * 44, 412 + dy * 44)
-envol = Poligono([R_(0.62, -0.42), R_(0.58, -0.88), R_(0.25, -1.16), R_(-0.4, -1.42), R_(-1.0, -1.38),
-                  R_(-1.24, -1.0), R_(-1.16, -0.5), R_(-0.92, -0.08), R_(-0.62, -0.02), R_(-0.42, -0.3),
-                  R_(-0.08, -0.42), R_(0.3, -0.46)])
-lz.aguada(envol, '#e9a43a', dens=0.85, tapa=1, borde=0.8, irreg=0.5, gran=0.3, sombra=(6, -6),
-          toques=[(*R_(-0.8, -0.6), 26, '#c4782a', 0.6), (*R_(0.1, -1.0), 22, '#f6c86a', 0.6)])
-lz.contorno(envol, '#8a5a1a', grosor=0.8, presion=0.55, cortes=0.2)
-# the fabric is wrapped: diagonal folds from the forehead up to the back, and a coral band
-pliegues(lz, [[R_(0.55, -0.55), R_(0.0, -0.92), R_(-0.7, -1.3)], [R_(0.5, -0.82), R_(-0.1, -1.12), R_(-0.6, -1.36)],
-              [R_(0.2, -0.45), R_(-0.5, -0.8), R_(-1.15, -1.0)], [R_(-0.4, -0.35), R_(-0.85, -0.5), R_(-1.15, -0.7)]],
-         '#8a5a1a', presion=0.5)
-banda = Trazo([R_(0.6, -0.62), R_(0.0, -0.95), R_(-0.6, -1.2), R_(-1.1, -1.22)], (7, 8, 8, 6))
-lz.aguada(banda, CORAL, dens=0.8, tapa=1, irreg=0.4)
-lz.contorno(banda, '#9a3a2e', grosor=0.6, presion=0.5)
-for (dx, dy) in ((0.25, -0.65), (-0.2, -0.75), (-0.65, -0.95), (-0.95, -0.7), (-0.4, -1.1), (0.1, -1.0),
-                 (-0.9, -1.1), (-0.6, -0.4)):
-    lz.aguada(Elipse(*R_(dx, dy), 2.6, 2.6), TEAL, dens=0.9, irreg=0.1)
+LANA = '#d9606a'
+gorro_ = Poligono([R_(0.64, -0.4), R_(0.6, -0.85), R_(0.3, -1.15), R_(-0.2, -1.25), R_(-0.7, -1.16),
+                   R_(-1.12, -0.92), R_(-1.36, -0.58), R_(-1.3, -0.22), R_(-1.1, -0.08), R_(-0.85, -0.12),
+                   R_(-0.4, -0.3), R_(0.1, -0.4)])
+lz.aguada(gorro_, LANA, dens=0.78, tapa=1, borde=0.7, irreg=0.8, gran=0.5, sombra=(7, -6),
+          toques=[(*R_(-0.9, -0.6), 26, '#a8404e', 0.6), (*R_(0.15, -0.95), 22, '#f08a8a', 0.6)])
+lz.contorno(gorro_, '#8a2a3a', grosor=0.8, presion=0.5, cortes=0.3, desfase=0.4)
+# soft knit: curved rows following the slouch, and a ribbed brim
+filas = [spline([R_(0.55, -0.55 - 0.13 * k), R_(0.0, -0.75 - 0.12 * k), R_(-0.6, -0.72 - 0.1 * k),
+                 R_(-1.1, -0.45 - 0.06 * k)]) for k in range(4)]
+lz.lapiz(filas, '#a8404e', grosor=0.6, presion=0.3, temblor=0.6, cortes=0.4)
+borde_ = Trazo([R_(0.64, -0.44), R_(0.2, -0.46), R_(-0.4, -0.32), R_(-0.88, -0.14)], (10, 10, 10, 9))
+lz.aguada(borde_, '#c4505c', dens=0.85, tapa=1, irreg=0.6, borde=0.7)
+lz.contorno(borde_, '#8a2a3a', grosor=0.6, presion=0.5, cortes=0.3)
+q_ = remuestrea(spline([R_(0.6, -0.44), R_(0.2, -0.46), R_(-0.4, -0.32), R_(-0.86, -0.14)]), 3.2)
+lz.lapiz([[p_ + (0, -4), p_ + (0, 4)] for p_ in q_], '#8a2a3a', grosor=0.5, presion=0.4, temblor=0.1)
 lz.aguada(Elipse(*R_(-0.12, 0.42), 3.2, 3.5), ORO, dens=0.95, irreg=0.1)     # a small gold earring
 # near arm: open hand, palm up -- she explains what she feels
 brazo(lz, (884, 470), (860, 520), (818, 500), 22, TEAL)
@@ -307,7 +328,6 @@ for y in (520, 540, 560):
     lz.aguada(Elipse(NX + 6, y, 2.6, 2.6), '#f6e2bd', dens=0.9, irreg=0.1)
 BX, BY = NX + 46, 548
 brazo(lz, (NX - 10, 514), (NX - 4, 548), (BX + 18, 552), 14, CORAL, pliegue=False)        # far arm
-mano_dedos(lz, BX + 18, 552, -20, 22, 'piel2', 'sujeta', lado=-1)
 sopa = Poligono(np.vstack([arco(BX, BY, 23, 5.5, 180, 360, 12), arco(BX, BY, 23, 16, 0, 180, 14)]), suave=False)
 lz.aguada(sopa, '#f3e6cf', dens=0.6, tapa=1, sombra=(-5, -4))
 lz.aguada(Elipse(BX, BY, 20, 4), '#e0a040', dens=0.8, irreg=0.2)
@@ -317,10 +337,11 @@ for k in range(3):
     x = BX - 10 + k * 10
     lz.lapiz([spline([(x, BY - 6), (x - 4, BY - 18), (x + 3, BY - 30), (x - 2, BY - 42)])], '#c9b8a8', grosor=0.7,
              presion=0.35)
+mano_dedos(lz, BX + 28, 560, 200, 22, 'piel2', 'sujeta', lado=1)      # far hand round the bowl's rim
 brazo(lz, (NX + 12, 512), (NX + 10, 548), (BX - 20, 558), 14, CORAL)                      # near arm
 mano_dedos(lz, BX - 20, 558, -15, 22, 'piel2', 'sujeta', lado=1)
-cabeza(lz, NX, 470, 32, piel='piel2', pelo='#c9783a', peinado='rizado', giro=0.55, inclina=6, ojos='abiertos',
-       boca='sonrisa', mira=(1, 0.3))
+cabeza(lz, NX, 470, 32, piel='piel2', pelo='#c9783a', peinado='rizado', giro=0.7, inclina=8, ojos='abiertos',
+       boca='ríe', mira=(1, -0.3))
 
 # ------------------------------------------------------------------ the near railing, only on the slopes
 for x in xs_post:
@@ -329,9 +350,9 @@ for x in xs_post:
     palo((x, yn(x) - 54), (x, yn(x) + 2), 5.5, MADERA)
 for (a, b) in ((X0, CX - 230), (CX + 230, X1)):
     xx = np.linspace(a, b, 50)
-    f = Trazo(np.stack([xx, yn(xx) - 54], 1), (5.5, 5.5, 5.5, 4))
-    lz.aguada(f, MADERA, dens=0.75, tapa=1, irreg=0.3, gran=0.4)
-    lz.contorno(f, MADERA_LP, grosor=0.6, presion=0.45)
+    f = Trazo(np.stack([xx, yn(xx) - 54 + 1.2 * np.sin(xx / 29.0)], 1), (5.5, 5.5, 5.5, 4))
+    lz.aguada(f, MADERA, dens=0.75, tapa=1, irreg=0.9, borde=0.8, gran=0.6)
+    lz.contorno(f, MADERA_LP, grosor=0.6, presion=0.45, temblor=1.0, cortes=0.3)
 # the planks and railing fade at both ends of the bridge, into the paper
 desvanecer_x(lz, 150, 1340, 560, 790, 180, 330, 1150, 1300, semilla=9)
 # a sprig of holly with berries at each end
@@ -346,13 +367,15 @@ for (x0, y0, sd) in ((330, yn(330) - 60, -1), (1156, yn(1156) - 60, 1)):
 
 # ------------------------------------------------------------------ their words: two threads of light, a heart, a star
 SX, SY = CX, 160                                # the star they light
-TOP = (CX, 370)                                  # the cleft of the heart: there the two threads become one
+TOP = (CX, 348)                                  # the cleft of the heart: there the two threads become one
 # each thread comes from one of them, runs up beside the other WITHOUT crossing it (gold always on the left,
 # rose always on the right), draws its half of a soft heart and meets the other at the cleft
-oido = spline([(626, 492), (672, 496), (718, 484), (736, 468), (737, 448), (728, 430), (704, 410), (690, 388),
-               (694, 362), (712, 348), (731, 352), (741, 370)])            # from his hand on his heart
-voz = spline([(836, 438), (808, 456), (768, 476), (748, 468), (747, 448), (756, 430), (780, 410), (794, 388),
-              (790, 362), (772, 348), (753, 352), (743, 370)])             # from her mouth
+# below the point they run side by side, straight up (a short stem), so neither tail lines up with the
+# other's side of the heart: nothing crosses, nothing reads as a ribbon or an 8
+oido = spline([(630, 484), (690, 472), (726, 458), (738, 446), (739.5, 428), (740, 410), (722, 392), (700, 370),
+               (693, 348), (702, 330), (722, 325), (736, 334), (741, 348)])  # from his hand on his heart
+voz = spline([(836, 436), (796, 446), (760, 450), (746, 444), (744.5, 428), (744, 410), (762, 392), (784, 370),
+              (791, 348), (782, 330), (762, 325), (748, 334), (743, 348)])  # from her mouth
 oido, voz = T_(oido), T_(voz)
 TOP = tuple(T_(TOP))
 uno = bezier(TOP, (CX - 14, 270), (CX + 16, 220), (SX, SY + 26), 60)       # together, one thread

@@ -1,8 +1,32 @@
 [
-  {"dia": 8, "frase": "CNV, paso 2: di lo que sientes: «Me siento preocupado».", "como_aparece": "La joven habla mirando al abuelo, con la mano abierta y la palma hacia arriba; de su boca sale un hilo de luz rosa."},
-  {"dia": 14, "frase": "Hoy: escucha a alguien sin dar consejos.", "como_aparece": "El abuelo, de perfil frente a ella, se inclina, la mira a los ojos y se pone la mano en el pecho; de esa mano sale un hilo de luz dorado."},
-  {"dia": 31, "frase": "Elige un valor para el año nuevo. Que haya paz.", "como_aparece": "Los dos hilos se juntan sin cruzarse en un corazón suave y siguen subiendo como un solo hilo hasta encender una estrella."},
-  {"dia": 3, "frase": "Día de la Discapacidad: ¿es accesible tu entorno?", "como_aparece": "Ella va en silla de ruedas y está en lo alto del puente: el arco es suave, hecho para que todo el mundo pueda subir."},
-  {"dia": 29, "frase": "Ubuntu: «soy porque somos». ¿Qué te une a los demás?", "como_aparece": "Cada tabla del suelo del puente está pintada a mano de un color distinto, con su veta: el puente lo han construido entre todos."},
-  {"dia": 20, "frase": "Día de la Solidaridad: ¿a quién puedes tender la mano?", "como_aparece": "Un niño sube por el puente, por dentro de la barandilla, llevando con las dos manos un cuenco de sopa caliente para los dos."}
+ {
+  "dia": 8,
+  "frase": "CNV, paso 2: di lo que sientes: «Me siento preocupado».",
+  "como_aparece": "La joven habla mirando al abuelo, con la mano abierta y la palma hacia arriba; de su boca sale un hilo de luz rosa."
+ },
+ {
+  "dia": 14,
+  "frase": "Hoy: escucha a alguien sin dar consejos.",
+  "como_aparece": "El abuelo, de perfil frente a ella, se inclina, la mira a los ojos y se pone la mano en el pecho; de esa mano sale un hilo de luz dorado."
+ },
+ {
+  "dia": 31,
+  "frase": "Elige un valor para el año nuevo. Que haya paz.",
+  "como_aparece": "Los dos hilos, el dorado siempre a la izquierda y el rosa a la derecha, se tocan sin cruzarse en la punta y en la hendidura de un corazón suave, y siguen subiendo como un solo hilo hasta encender una estrella que se refleja en el río."
+ },
+ {
+  "dia": 3,
+  "frase": "Día de la Discapacidad: ¿es accesible tu entorno?",
+  "como_aparece": "Ella va en silla de ruedas y está en lo alto del puente: el arco es suave, hecho para que todo el mundo pueda subir."
+ },
+ {
+  "dia": 29,
+  "frase": "Ubuntu: «soy porque somos». ¿Qué te une a los demás?",
+  "como_aparece": "Cada tabla del suelo del puente está pintada a mano de un color distinto, con su veta: el puente lo han construido entre todos."
+ },
+ {
+  "dia": 20,
+  "frase": "Día de la Solidaridad: ¿a quién puedes tender la mano?",
+  "como_aparece": "Un niño sube por el puente, por dentro de la barandilla, llevando con las dos manos un cuenco de sopa caliente para los dos."
+ }
 ]

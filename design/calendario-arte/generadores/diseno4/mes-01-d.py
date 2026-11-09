@@ -71,15 +71,15 @@ lz.luz(ball, '#d8f6ff', fuerza=0.55, suave=10)
 lz.lapiz([spline([(bx_ - 64, by_ + 4), (bx_ - 30, by_ - 14), (bx_ + 20, by_ - 16), (bx_ + 60, by_ - 8)])], '#e8fbff',
          grosor=0.7, presion=0.6, cortes=0.3)
 # the first life: a tiny luminous spiral shell and a glowing cell
-for (cx_, cy_) in ((470, 660),):
+for (cx_, cy_) in ((452, 712),):
     esp = np.array([(cx_ + math.cos(t) * (1.2 + t * 1.25), cy_ + math.sin(t) * (1.2 + t * 1.25)) for t in np.linspace(0, 12, 80)])
     lz.aguada(Elipse(cx_, cy_, 15), '#f4d8a8', dens=0.5, irreg=0.3, borde=0.8)
     lz.lapiz([esp], '#fff2d0', grosor=0.9, presion=0.8, temblor=0.05)
     lz.luz((cx_, cy_, 22), '#ffe6b0', fuerza=0.5)
-cel = Elipse(905, 662, 11, 9, 20)
+cel = Elipse(905, 702, 11, 9, 20)
 lz.aguada(cel, '#b8f0c8', dens=0.5, irreg=0.3, borde=0.9)
-lz.aguada(Elipse(908, 660, 3.5), '#4f9c7a', dens=0.8, irreg=0.2)
-lz.luz((905, 662, 18), '#c8ffd8', fuerza=0.5)
+lz.aguada(Elipse(908, 700, 3.5), '#4f9c7a', dens=0.8, irreg=0.2)
+lz.luz((905, 702, 18), '#c8ffd8', fuerza=0.5)
 lz.lapiz([spline([(bx_ - 62, by_ + 8), (bx_ - 10, by_ + 14), (bx_ + 40, by_ + 8)])], '#d8f0f4', grosor=0.6, presion=0.5)
 lz.gouache(Elipse(bx_ - 46, by_ - 2, 1.6), '#24335f', alfa=0.9, irreg=0)
 for (x0, y0, ang) in ((420, 720, -12), (900, 700, 10), (1040, 760, -5)):
@@ -198,7 +198,7 @@ def lince(x, y, s=1.0, ang=0.0):
 
 
 sl = math.degrees(math.atan2(-(sy(312) - sy(290)) * -1, 22))
-lince(300, sy(300) - 14, 1.1, ang=-33)
+lince(262, sy(262) - 12, 1.1, ang=-36)
 
 # ------------------------------------------------------------------ the girl, kneeling, blowing the dandelion
 HEAD = (500, 380)
@@ -265,13 +265,13 @@ mano(lz, MUN[0] + 2, MUN[1] - 2, ANG_J, 40, 'piel2', 'senala', lado=-1)
 pajaro(lz, RODILLA[0] + 4, RODILLA[1] - 30, 23, '#9a5a32', ang=-6, alas='abajo', vientre='#f3e6d0')
 
 # ------------------------------------------------------------------ the girl's hands: one strokes his head, one holds the flower
-miembro(lz, [(468, 452), (488, 508), (560, 498)], (20, 17, 14), PIEL_N, lado=1, lapiz=PIEL_LP)
-lz.aguada(Trazo([(466, 448), (476, 476)], (26, 22)), OCRE, dens=0.78, tapa=1)
-mano(lz, 562, 496, 12, 34, PIEL_N, 'cuenco', lado=1)
+miembro(lz, [(468, 452), (500, 516), (568, 512)], (20, 17, 14), PIEL_N, lado=1, lapiz=PIEL_LP)
+miembro(lz, [(466, 446), (478, 474)], (27, 23), OCRE, lado=1, pliegues=1)
+mano(lz, 566, 512, -8, 34, PIEL_N, 'cuenco', lado=1)
 CAB = (574, 384)
 TALLO0 = (566, 470)
 miembro(lz, [(494, 452), (522, 504), (552, 462)], (19, 16, 13), PIEL_N, lado=-1, lapiz=PIEL_LP)
-lz.aguada(Trazo([(490, 448), (502, 474)], (26, 22)), OCRE, dens=0.78, tapa=1)
+miembro(lz, [(490, 446), (500, 472)], (26, 22), OCRE, lado=-1, pliegues=1)
 lz.lapiz([bezier(TALLO0, (568, 430), CAB, n=30)], '#6f8a4a', grosor=2.4, presion=0.8, temblor=0.15)
 mano(lz, 551, 462, -78, 31, PIEL_N, 'agarra', lado=-1)
 lz.lapiz([bezier((560, 440), (566, 420), (570, 408), n=10)], '#6f8a4a', grosor=2.4, presion=0.8, temblor=0.1)
@@ -334,7 +334,7 @@ lz.aguada(Trazo(soplo, (6, 22, 34, 44, 54, 60, 64, 58, 40)), '#f6d690', dens=0.2
 lz.luz(Trazo(soplo, (10, 30, 40, 40, 20)), '#ffe6a8', fuerza=0.16, suave=12)
 rng = np.random.default_rng(23)
 cols_e = [ORO, CORAL, '#f6a5b5', '#f0c25e', '#8d73b0']
-for i, t in enumerate(np.linspace(0.02, 0.98, 42)):
+for i, t in enumerate(np.linspace(0.02, 0.98, 56)):
     j = int(t * (len(camino) - 1))
     x, y = camino[j] + rng.normal(0, 12, 2) * (0.5 + t)
     d = camino[min(j + 1, len(camino) - 1)] - camino[max(j - 1, 0)]
@@ -344,7 +344,7 @@ for i, t in enumerate(np.linspace(0.02, 0.98, 42)):
     elif t < 0.55:
         vilano(x, y, 1.4 - 0.6 * t, ang, brasa=(t - 0.3) / 0.25)
     else:
-        estrellita(x, y, (3.6 - 1.6 * t) * rng.uniform(0.8, 1.2), cols_e[i % 5])
+        estrellita(x, y, (4.6 - 2.2 * t) * rng.uniform(0.8, 1.25), cols_e[i % 5])
 
 # ------------------------------------------------------------------ the galaxy
 gx, gy = GAL
@@ -411,10 +411,10 @@ lz.luz((MX - 20, MY, 40), '#fff0c0', fuerza=0.3)
 # ------------------------------------------------------------------ meadow life
 rng = np.random.default_rng(31)
 for x in range(240, 1170, 22):
-    if abs(x - 540) < 50 or 700 < x < 870:
+    if 330 < x < 960:
         continue
     hierba(x + rng.normal(0, 6), alto=rng.uniform(14, 26), col=rng.choice(['#4f6f45', '#5f8f63', '#6f8a4a']))
-for x in list(range(170, 400, 23)) + list(range(560, 640, 26)) + list(range(1000, 1290, 21)):
+for x in list(range(150, 200, 23)) + list(range(1000, 1290, 30)):
     if rng.random() < 0.3:
         continue
     c = rng.choice([CORAL, '#fff3e0', CARMIN, ORO, '#f6a5b5', '#fff3e0', '#8d73b0'])

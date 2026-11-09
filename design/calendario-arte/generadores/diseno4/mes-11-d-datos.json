@@ -1,8 +1,32 @@
 [
-  {"dia": 24, "frase": "Participar no es solo votar: asociaciones, vecindario…", "como_aparece": "Cinco vecinos de todas las edades se sientan en corro alrededor del gran árbol de la plaza, vistos un poco desde arriba; cuatro levantan la mano a la vez para votar."},
-  {"dia": 20, "frase": "Día del Niño: aniversario de la Convención de Derechos.", "como_aparece": "Quien tiene la palabra es una niña, de pie junto al tronco, y todos los adultos giran la cabeza hacia ella para escucharla."},
-  {"dia": 8, "frase": "¿Qué problema de tu barrio te gustaría resolver?", "como_aparece": "En el cuenco de sus dos manos la niña ofrece una semilla pequeña que brilla por dentro y ya brota con dos hojas: su propuesta para el barrio (y el paso de la franja «Propón una solución a un problema común»)."},
-  {"dia": 1, "frase": "Política viene de «polis», ciudad: la vida en común.", "como_aparece": "La copa del árbol contiene el pueblo: casitas con las ventanas encendidas y una casa común alargada, unidas por las ramas y por un caminito."},
-  {"dia": 30, "frase": "¿Qué paso darás para participar en tu comunidad?", "como_aparece": "Las raíces del árbol salen por el suelo con un hilo de luz dorada y llegan al asiento de cada persona, también a un taburete vacío en primer plano, el sitio de quien mira, hacia el que caen unas hojas."},
-  {"dia": 19, "frase": "Hoy, en 1933: primeras generales con voto femenino.", "como_aparece": "Enlace suave: entre las manos que votan están las de una abuela y una joven con pañuelo."}
+ {
+  "dia": 24,
+  "frase": "Participar no es solo votar: asociaciones, vecindario…",
+  "como_aparece": "Cinco vecinos de todas las edades se sientan en corro alrededor del gran árbol de la plaza (silla, cojín sobre una estera, caja, taburete), vistos un poco desde arriba; cuatro levantan la mano a la vez para votar."
+ },
+ {
+  "dia": 20,
+  "frase": "Día del Niño: aniversario de la Convención de Derechos.",
+  "como_aparece": "Quien tiene la palabra es una niña, de pie en el centro del corro, delante del tronco; todos los adultos se giran hacia ella para escucharla."
+ },
+ {
+  "dia": 8,
+  "frase": "¿Qué problema de tu barrio te gustaría resolver?",
+  "como_aparece": "En el cuenco de sus dos manos la niña ofrece una semilla pequeña que brilla por dentro y ya brota con dos hojas: su propuesta para el barrio (y el paso de la franja «Propón una solución a un problema común»)."
+ },
+ {
+  "dia": 1,
+  "frase": "Política viene de «polis», ciudad: la vida en común.",
+  "como_aparece": "En la copa del árbol, medio escondidas entre las hojas, hay casitas con las ventanas encendidas y una casa común alargada, cada una al final de una rama: el pueblo vive en el árbol."
+ },
+ {
+  "dia": 30,
+  "frase": "¿Qué paso darás para participar en tu comunidad?",
+  "como_aparece": "Las raíces del árbol, gruesas junto al tronco y medio enterradas, salen por el suelo con un hilo de luz dorada viva y llegan al asiento de cada persona, también a un taburete vacío en primer plano, el sitio de quien mira, hacia el que caen unas hojas."
+ },
+ {
+  "dia": 19,
+  "frase": "Hoy, en 1933: primeras generales con voto femenino.",
+  "como_aparece": "Enlace suave: entre las manos que votan están las de una abuela y una joven con pañuelo."
+ }
 ]

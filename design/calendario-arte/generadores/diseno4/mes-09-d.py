@@ -602,17 +602,17 @@ cinta = Trazo([(444, 492), (478, 498), (514, 492)], (10, 11, 10))
 lz.aguada(cinta, ORO, dens=0.88, tapa=1, irreg=0.2)
 lz.contorno(cinta, '#9a6a1a', grosor=0.6, presion=0.5)
 # her bag of cloth (reused) on the back arm, carrot tops and bread peeking out
-manga(lz, [(430, 398), (414, 466), (430, 512)], (34, 29, 25), TEAL, pliegues=2, toques=[(414, 466, 28, TEAL_OSC, 0.5)])
+manga(lz, [(432, 398), (410, 462), (402, 514)], (34, 29, 25), TEAL, pliegues=2, toques=[(414, 466, 28, TEAL_OSC, 0.5)])
 for k in range(5):
     a = math.radians(-100 + k * 12)
-    ramita(lz, [(436, 520), (436 + math.cos(a) * 20, 520 + math.sin(a) * 26)], '#6f9e4a', hojas=4, largo=6)
-pan(452, 510, 26, 7, -60)
-bolsa = Poligono([(404, 518), (466, 516), (474, 590), (400, 594)])
+    ramita(lz, [(396, 524), (396 + math.cos(a) * 20, 524 + math.sin(a) * 26)], '#6f9e4a', hojas=4, largo=6)
+pan(414, 514, 26, 7, -60)
+bolsa = Poligono([(368, 522), (428, 520), (436, 594), (362, 598)])
 lz.aguada(bolsa, '#efe2c4', dens=0.65, tapa=1, irreg=0.4, borde=0.7, gran=0.5, sombra=(-5, -4))
 for k in range(5):
-    lz.lapiz([[(406 + k * 15, 520), (402 + k * 17, 592)]], CORAL, grosor=1.6, presion=0.6)
+    lz.lapiz([[(370 + k * 14, 524), (366 + k * 16, 596)]], CORAL, grosor=1.6, presion=0.6)
 lz.contorno(bolsa, '#8a7a5a', grosor=0.8, presion=0.55)
-mano_dedos(lz, 430, 512, 95, 36, PIEL_B, curl=0.7, abre=0.35, lado=-1, pulgar=0.3)
+mano_dedos(lz, 402, 512, 95, 36, PIEL_B, curl=0.7, abre=0.35, lado=-1, pulgar=0.3)
 manga(lz, [(516, 398), (566, 444), (604, 446)], (32, 27, 23), TEAL, pliegues=2, toques=[(566, 444, 22, TEAL_OSC, 0.5)])
 fore2 = Trazo([(598, 446), (630, 432), (654, 414)], (19, 17, 14))
 lz.aguada(fore2, PIEL_B, dens=0.6, tapa=1, irreg=0.3, toques=[(630, 440, 10, '#7a4a32', 0.4)], sombra=(-3, -3))
@@ -689,7 +689,7 @@ lz.gouache(Elipse(MX + MR * 0.45, MY + MR * 0.5, MR * 0.12, MR * 0.05, -45), '#f
 mano_dedos(lz, 652, 414, -50, 46, PIEL_B, curl=0.55, abre=0.3, lado=1, pulgar=0.95)
 
 # the flock already in flight, smaller and smaller toward the open paper (behind it, in the distance)
-for k, (x, y, s_, c) in enumerate(((566, 262, 15, CORAL), (532, 214, 12, ORO), (488, 236, 11, '#ec9fa0'), (452, 170, 12, TEAL),
+for k, (x, y, s_, c) in enumerate(((566, 262, 15, CORAL), (544, 204, 12, ORO), (494, 198, 11, '#ec9fa0'), (452, 170, 12, TEAL),
                                    (404, 196, 9, SALVIA), (380, 128, 10, CORAL), (318, 150, 8, ORO), (300, 96, 7, TEAL),
                                    (246, 118, 6, '#ec9fa0'))):
     pajaro(lz, x, y, s_, c, ang=-28 + (k % 3) * 8, alas='arriba' if k % 2 == 0 else 'abajo')
