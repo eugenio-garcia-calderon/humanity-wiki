@@ -48,9 +48,29 @@ Wash parameters (`aguada`)
     desvanece (x0,y0,x1,y1): lose the wash from full at p0 to nothing at p1
     tapa    0..1 reserve (lift to paper) before painting
 
-Figures (bottom of the file): `cabeza`, `extremidad`, `mano`, `torso`,
-`figura` (a whole person from a joint dictionary). Faces are deliberately
-simple and tender: dot eyes or happy closed arcs, rosy cheeks, small smile.
+Figures: `cabeza`, `extremidad`, `mano`, `torso`, `busto` (head and shoulders,
+e.g. people seen through a window), `figura` (a whole person from a joint
+dictionary; `ropa['falda_jardin']` makes a skirt that is a garden). Faces are
+simple and tender: dark eyes with a gouache catch-light or happy closed arcs,
+rosy cheeks, small smile. Limbs are slender (Sonja-Wimmer-like stylisation).
+
+Series rules (Eugenio, 2026-11-09) the library already enforces or helps with
+----------------------------------------------------------------------------
+* PAPER: unpainted areas are EXACTLY RGB (244, 239, 228) = PAPEL, the colour of
+  the calendar sheet. The paper grain only shows under paint. Do NOT paint
+  skies or floors edge to edge; `fondo()` exists but is NOT for Diseño 4.
+  Save JPGs with `keep_rgb=True` (see the month scripts' notes): ordinary
+  YCbCr JPEG cannot reproduce 244,239,228 exactly (it comes back 243,239,228).
+* HIGH CONTRAST, MANY LITTLE DETAILS INSIDE THINGS, SILENCE AROUND THEM:
+  `jardin(lz, forma)` turns any shape into a garden (big layered flowers and
+  leaves, then sprigs, berries, dots); `cosmos(lz, forma)` turns it into night
+  sky and sea at once (indigo blooms, star dust, stars, a shoal of tiny fish).
+  Small loose motifs to float on the paper: `pajaro`, `libelula`, `estrella`
+  (gouache=False on paper), `pececillo`, `hojita`, `hoja`, `flor_simple`,
+  `flor_grande`, `mata`, `ramita`, `motas`.
+* MAGIC LIGHT: `luz()` glows from inside painted things (screen blend, never
+  bleaches bare paper); `gouache()` opaque highlights; `chispas()` sparks for
+  dark grounds; `collage()` a piece of painted paper glued on.
 
 Memory: work happens in crops around each shape; arrays are float32.
 """
@@ -803,7 +823,8 @@ class Lienzo:
     def guardar(self, ruta, calidad=90):
         im = Image.fromarray(self.imagen())
         if ruta.lower().endswith(('.jpg', '.jpeg')):
-            im.save(ruta, quality=calidad, subsampling=0)
+            # keep_rgb: store RGB (no YCbCr) so the bone paper stays exactly 244,239,228
+            im.save(ruta, quality=calidad, subsampling=0, keep_rgb=True)
         else:
             im.save(ruta)
         return im
