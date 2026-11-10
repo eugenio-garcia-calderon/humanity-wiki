@@ -36,7 +36,7 @@ import { cabeceraEnHtml } from './cabeceraSitio';
 import { cuerpoEnHtml, esc as escHtml, enLinea } from './htmlBloques';
 import { ampliar, type MetaPagina } from './ampliarPagina';
 import { configEscaparate, urlsEscaparate, modeloEscaparate } from './seoEscaparate';
-import { idiomaListo, localeDe, datosDeIdioma, dominiosTraducidos, estaTraducido, hreflangDe, idiomaDeHost, traducirHtml, traducirProfundo, tramosOriginales } from './traducciones';
+import { direccionTraducida, idiomaListo, localeDe, datosDeIdioma, dominiosTraducidos, estaTraducido, hreflangDe, idiomaDeHost, traducirHtml, traducirProfundo, tramosOriginales } from './traducciones';
 import { asegurarRutas, asegurarRutaDePagina, patronDeTitulo, TRAMOS_RESERVADOS } from './rutasFila';
 import { sitioConAnfitrion, sitioEnCasa } from '../components/sitio/ContextoSitio';
 import { bloquesDe } from './bloquesSql';
@@ -918,7 +918,7 @@ export function registrarSitios(app: Express, db: any) {
       if (urls && idiomaDeHost(sitioDe(req).host)) {
         const h = sitioDe(req).host;
         urls = urls.map(u => ({ ...u, loc: traducirProfundo(u.loc.replace(`https://${h}`, 'https://luzhumanidad.com'), h) }))
-          .filter(u => { const t = new URL(u.loc).pathname.split('/').filter(Boolean); return t.length !== 1 || tramosOriginales(h, t)[0] !== t[0]; });
+          .filter(u => { const t = new URL(u.loc).pathname.split('/').filter(Boolean); return t.length !== 1 || direccionTraducida(h, t[0]); });
       }
       if (!urls) return res.status(404).type('txt').send('No existe ese fichero.');
       const trozos = Math.max(1, Math.ceil(urls.length / POR_TROZO));
