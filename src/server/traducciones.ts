@@ -65,7 +65,7 @@ const diccionarios = new Map<string, Diccionario>();
 let dominiosActivos = new Set<string>();
 let paginasConocidas: Array<{ title: string; slug: string | null }> = [];
 
-const dominioDe = (host: string) => SITIOS_TRADUCIDOS.flatMap(s => Object.entries(s.traducciones).map(([idioma, dominio]) => ({ s, idioma, dominio }))).find(x => x.dominio === host) || null;
+const dominioDe = (host: string) => SITIOS_TRADUCIDOS.flatMap(s => Object.entries(s.traducciones).map(([idioma, dominio]) => ({ s, idioma, dominio }))).find(x => x.dominio === host.replace(/^www\./, '')) || null;
 const hostDe = (req: Request) => String(req.headers['x-forwarded-host'] || req.headers.host || '').split(',')[0].trim().toLowerCase().replace(/:\d+$/, '');
 
 /** El idioma traducido de este anfitrión, o `null` si es un sitio en su idioma original. */
@@ -73,13 +73,15 @@ export const idiomaDeHost = (host: string): string | null => dominioDe(host)?.id
 const dic = (idioma: string) => diccionarios.get(idioma) || vacio();
 
 /** ¿Está traducido este texto? Lo usa quien decide si un proyecto nuevo ya se enseña. */
-export const estaTraducido = (texto: string, idioma: string) => dic(idioma).textos.has(String(texto || '').trim());
+export const estaTraducido = (texto: string, idioma: string) => !diccionarios.has(idioma) || dic(idioma).textos.has(String(texto || '').trim());
 
 const MESES: Record<string, string> = { enero: 'January', febrero: 'February', marzo: 'March', abril: 'April', mayo: 'May', junio: 'June', julio: 'July', agosto: 'August', septiembre: 'September', octubre: 'October', noviembre: 'November', diciembre: 'December' };
 
 function traducirCadena(s: string, idioma: string, d: Diccionario, origen: string, destino: string): string {
   if (s === 'es-ES') return IDIOMAS_LARGOS[idioma] || idioma;
   const t = s.trim();
+  // Lo que ya está traducido no se vuelve a traducir (un «en» es el idioma, no la preposición).
+  if (t === idioma || d.valores.has(t)) return s;
   const v = d.textos.get(t);
   if (v !== undefined) return s.replace(t, () => v);
   if (d.slugs.has(t)) return d.slugs.get(t)!;
@@ -95,6 +97,9 @@ function traducirCadena(s: string, idioma: string, d: Diccionario, origen: strin
   return s;
 }
 
+/** Valores que el programa compara: un nombre corto como «conciencia» aquí no es una dirección. */
+const NO_SE_TOCAN = new Set(['id', 'tipo', 'aplicacion', 'vistaInicial', 'vistas', 'forma', 'modo', 'variante']);
+
 /** Cambia cada texto conocido de un objeto. Los nombres de columna no: la aplicación los busca por su nombre. */
 function profundo(x: any, idioma: string, d: Diccionario, origen: string, destino: string): any {
   if (typeof x === 'string') return traducirCadena(x, idioma, d, origen, destino);
@@ -103,7 +108,7 @@ function profundo(x: any, idioma: string, d: Diccionario, origen: string, destin
   const o: any = {};
   for (const [k, v] of Object.entries(x)) {
     if (k === 'columnas' && Array.isArray(v)) o[k] = v.map((c: any) => (c && typeof c === 'object' ? { ...c, opciones: profundo(c.opciones, idioma, d, origen, destino) } : c));
-    else o[k] = k === 'id' || k === 'tipo' ? v : profundo(v, idioma, d, origen, destino);
+    else o[k] = NO_SE_TOCAN.has(k) ? v : profundo(v, idioma, d, origen, destino);
   }
   return o;
 }
@@ -131,7 +136,8 @@ export function traducirHtml(html: string, host: string): string {
   if (!q) return html;
   const d = dic(q.idioma);
   const cambiar = (s: string) => traducirCadena(s, q.idioma, d, q.s.origen, q.dominio);
-  return html.split(/(<script\b[\s\S]*?<\/script>|<style\b[\s\S]*?<\/style>)/i).map((trozo, i) => {
+  // Las líneas `hreflang` se quedan como están: cada una apunta a su propio dominio.
+  return html.split(/(<script\b[\s\S]*?<\/script>|<style\b[\s\S]*?<\/style>|<link rel="alternate" hreflang[^>]*>)/i).map((trozo, i) => {
     if (i % 2) {
       const m = /^(<script\b[^>]*>)([\s\S]*)(<\/script>)$/i.exec(trozo);
       if (!m) return trozo;
@@ -217,6 +223,7 @@ async function recogerPublicado(db: any, s: SitioTraducido) {
     if (!tabla) continue;
     const cols = (await db.execute(sql`SELECT nombre, opciones FROM bd_columnas WHERE tabla_id = ${tabla} AND archived_at IS NULL`)).rows as any[];
     anadir(cols.flatMap(c => (Array.isArray(c.opciones) ? c.opciones.map((o: any) => String(o?.label || '')) : [])).filter(esTexto), 'Etiquetas de las tablas');
+    anadir(cols.map(c => String(c.nombre || '')).filter(esTexto), 'Nombres de las columnas');
     const filas = (await db.execute(sql`
       SELECT f.pagina_id, w.title, w.slug, w.config->>'subtitulo' AS subtitulo FROM bd_filas f JOIN knowledge_windows w ON w.id = f.pagina_id
       WHERE f.tabla_id = ${tabla} AND f.deleted_at IS NULL AND f.archived_at IS NULL AND COALESCE(f.oculta, false) = false AND w.deleted_at IS NULL AND w.archived_at IS NULL
@@ -271,7 +278,8 @@ export async function recargarDiccionarios(db: any) {
     nuevos.set(f.idioma, d);
     d.textos.set(f.original, f.traduccion);
     d.valores.add(f.traduccion);
-    if (f.tipo === 'interfaz') d.interfaz[f.original] = f.traduccion;
+    // Al navegador va lo escrito en el programa y todo lo corto (etiquetas, filtros): pinta con ello lo que no viene del servidor.
+    if (f.tipo === 'interfaz' || String(f.original).length <= 120) d.interfaz[f.original] = f.traduccion;
   }
   for (const d of nuevos.values()) {
     const usados = new Set<string>();
@@ -313,7 +321,8 @@ function conToken(req: Request, res: Response): boolean {
 export function registrarTraducciones(app: Express, db: any) {
   const repasar = () => recargarDiccionarios(db).catch(e => console.error('[traducciones] diccionario:', e.message));
   const barrer = () => barrerTraducciones(db).catch(e => console.error('[traducciones] barrido:', e.message));
-  setTimeout(barrer, 20_000).unref?.();
+  repasar();
+  setTimeout(barrer, 3_000).unref?.();
   setInterval(barrer, 15 * 60_000).unref?.();
   setInterval(repasar, 60_000).unref?.();
 
