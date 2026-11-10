@@ -86,7 +86,7 @@ async function conRitmo(db: any, req: Request, res: Response, regla: Regla = FRE
 
 // ── What a map may contain ─────────────────────────────────────────────────
 
-const FORMAS = new Set(['matriz', 'campo', 'estado', 'nivel', 'capacidad', 'canal', 'nota', 'titulo', 'estudio', 'franja']);
+const FORMAS = new Set(['matriz', 'campo', 'estado', 'nivel', 'capacidad', 'canal', 'nota', 'titulo', 'estudio', 'franja', 'consejos']);
 const ESTILOS = new Set(['continua', 'discontinua', 'puntos', 'onda', 'energia']);
 const DIRECCIONES = new Set(['ida', 'vuelta', 'doble', 'ninguna']);
 const POSICIONES = new Set(['abajo', 'arriba', 'izquierda', 'derecha']);
@@ -113,7 +113,7 @@ export function limpiarMapa(d: any): { mapa?: any; error?: string } {
     const sub = texto(n.subtitulo, 300); if (sub) limpio.subtitulo = sub;
     const exp = texto(n.explicacion, 4000); if (exp) limpio.explicacion = exp;
     if (Array.isArray(n.etiquetas)) {
-      const et = n.etiquetas.map((e: unknown) => texto(e, 60)).filter(Boolean).slice(0, 12);
+      const et = n.etiquetas.map((e: unknown) => texto(typeof e === 'string' ? e.trim() : e, 60)).filter(Boolean).slice(0, 12);
       if (et.length) limpio.etiquetas = et;
     }
     if (typeof n.icono === 'string' && ICONO.test(n.icono)) limpio.icono = n.icono;
@@ -123,6 +123,10 @@ export function limpiarMapa(d: any): { mapa?: any; error?: string } {
     if (typeof n.estudio === 'string' && ID.test(n.estudio)) limpio.estudio = n.estudio;
     const ancho = num(n.ancho, 20, 6000); if (ancho !== undefined) limpio.ancho = ancho;
     const alto = num(n.alto, 20, 6000); if (alto !== undefined) limpio.alto = alto;
+    if (Array.isArray(n.consejos)) {
+      const cs = n.consejos.map((e: unknown) => texto(typeof e === 'string' ? e.trim() : e, 400)).filter(Boolean).slice(0, 12);
+      if (cs.length) limpio.consejos = cs;
+    }
     nodos.push(limpio);
   }
   const fids = new Set<string>();

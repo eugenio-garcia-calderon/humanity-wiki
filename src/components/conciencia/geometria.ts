@@ -52,8 +52,9 @@ export function partir(texto: string | undefined, fuente: number, ancho: number,
   return lineas;
 }
 
-function filasDeEtiquetas(etiquetas: string[] | undefined, fuente: number, ancho: number): string[][] {
-  if (!etiquetas?.length) return [];
+function filasDeEtiquetas(crudas: string[] | undefined, fuente: number, ancho: number): string[][] {
+  const etiquetas = (crudas ?? []).map(e => e.trim()).filter(Boolean);
+  if (!etiquetas.length) return [];
   const filas: string[][] = [];
   let fila: string[] = [];
   let usado = 0;
@@ -149,6 +150,14 @@ export function medir(n: Nodo): Medida {
       m.titulo = partir(n.titulo, m.fT, m.w - 62 * k, 2);
       m.sub = [n.estudio ? 'Ver el estudio ↓' : 'Estudio'];
       m.h = Math.max(56 * k, 24 * k + m.titulo.length * m.fT * 1.25 + m.fS * 1.4);
+      return m;
+    }
+    case 'consejos': {
+      // A folded chip: one line, the icon, a «+». It opens in a window.
+      m.fT = 14.5 * k;
+      m.titulo = partir(n.titulo, m.fT, 300 * k, 1);
+      m.w = Math.max(200 * k, (m.titulo[0]?.length ?? 10) * m.fT * EM + 92 * k);
+      m.h = 38 * k;
       return m;
     }
     case 'titulo':
