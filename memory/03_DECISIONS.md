@@ -1252,6 +1252,16 @@ Eugenio asked for one line and an elegant look; the dropdown keeps every name re
 
 **Kept.** «Otros velomóviles» is a reference catalogue for comparison, not a selector of the vehicle being designed. It stays.
 
+## 2026-11-10 — solarcrowd.com is an ordinary site made of pages, not a second escaparate
+
+Eugenio asked to rescue solarcrowd.com (it lived on Softr) «con la arquitectura de Humanity Wiki, como Luz y Humanidad», and to turn it into a «portal» that publishes entities needing a loan.
+
+**Chosen.** A normal published site: a root page («SolarCrowd», `KWMWAFZMATPX`) with its own menu and footer in `config.sitio`, a gallery of the database «Préstamos SolarCrowd» (`BDTMWAFL7L4XKCM`, route `prestamos/{Nombre}`), one page per loan, and three subpages (contracts, risks, for entities). All of it is content: built through the same calls the editor uses, editable by Eugenio in the editor, no code of its own.
+
+**Rejected: a second escaparate** (`sitio.escaparate`, the luzhumanidad.com machinery). It would have brought the map, the history and the forms for free, but it speaks of «el laboratorio» in several fixed strings, hides category filters and assumes the Sistemas/Personas tables. Bending it to a lending portal meant several code changes inside a component that luzhumanidad.com depends on. Switching later costs one afternoon: point `sitio.proyectos` at the loans table and set `escaparate: true`.
+
+**The only code change:** `menu.logoHorizontal` / `pie.logoHorizontal`, opt-in, so a wordmark logo is shown whole instead of cropped to a square. Off for every existing site.
+
 ## 2026-11-10 — Consciousness map: saving for everyone needs an account
 
 `/conciencia` is a map people refine by editing it. Two ways to store edits were possible:
