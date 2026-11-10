@@ -1313,3 +1313,7 @@ Marking items done or discarded is admin-only (level 4). Saving the map itself s
 **Sliders.** One table, `deslizadoresTriciclo()`, read by the page and by the tunnel's improvement options; shape rows reuse `DESLIZADORES_BALA`. A slider recentres on the default (`centrar`) only when the default is the midpoint of its range, so asymmetric ranges (recline −10…20°, handlebar −6…+10 cm) show whole in the existing widget.
 
 **Recline.** Trunk reclines about the hip, head a third (A1 model). Pilot 0° → 20°: tall rider +4.8 cm under the canopy but ~15 cm less reach. Passenger: reclining costs headroom, because the canopy falls behind him.
+
+## 2026-11-10 — Triciclo Bala as the default design, and reaching browsers that already had one
+
+The default is data (`por_defecto`, migration 0185), not code, so the owner's star keeps working. The first-visit rule only opened the default when the browser had nothing stored, so Eugenio himself would never have seen the change. A one-shot localStorage flag (`aeromovil.inicio.triciclo`) opens the default once in every browser. Rejected: bumping `aeromovil.parametros.v5` to v6, which would also throw away every stored local state for good. Cost accepted: an unsaved local edit by a non-owner is replaced on that one load (the owner's designs autosave).

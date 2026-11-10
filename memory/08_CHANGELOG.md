@@ -10845,3 +10845,8 @@ Petición de Eugenio: una rama del Cuadriciclo Bala con tres ruedas, dos delante
 - Eugenio: la categoría, con su icono (`iconoCategoria.tsx`), va en la píldora blanca de arriba; las tarjetas se juntan por categoría, y el estado y el año solo se ven dentro del proyecto.
 - El título y la descripción van juntos sobre la imagen, en blanco y con sombra; la descripción, a dos líneas con puntos suspensivos; degradado casi negro abajo que se aclara hacia el centro.
 - Tres por fila, a casi todo el ancho del escritorio; lo de debajo de las tarjetas sigue en su columna. En el editor, la píldora cambia la categoría.
+
+### 2026-11-10 — El Triciclo Bala, diseño por defecto del Aeromóvil
+Petición de Eugenio: que al cargar /aeromovil aparezca el Triciclo Bala con su editor.
+- Migración 0185: el diseño base del equipo del Triciclo (0182) pasa a ser el diseño por defecto (la estrella); el que lo era deja de serlo. Se puede volver a mover la estrella desde el menú del logo.
+- Quien ya tenía un diseño abierto en su navegador lo seguía viendo al volver; ahora cada navegador abre una vez más el diseño por defecto (marca `aeromovil.inicio.triciclo`) y desde ahí abre lo último que tuvo. Un cambio sin guardar de quien no es el dueño se pierde esa vez.

@@ -837,8 +837,12 @@ export default function Aeromovil() {
   // Quien llega por primera vez (sin nada guardado en este navegador) abre el
   // diseño por defecto de la web, si hay uno (2026-11-06, Eugenio).
   useEffect(() => {
-    let hayAlgo = false; try { hayAlgo = !!localStorage.getItem(CLAVE) || !!localStorage.getItem('aeromovil.diseno'); } catch { /* sin almacenamiento */ }
-    if (hayAlgo || new URLSearchParams(loc.search).get('diseno')) return;
+    // 2026-11-10 (Eugenio): the Triciclo Bala became the default design and he wanted it to open on load.
+    // A browser that already had a design open would keep it, so each browser opens the default once more.
+    const UNA_VEZ = 'aeromovil.inicio.triciclo';
+    let hayAlgo = false, yaAbierto = true;
+    try { hayAlgo = !!localStorage.getItem(CLAVE) || !!localStorage.getItem('aeromovil.diseno'); yaAbierto = !!localStorage.getItem(UNA_VEZ); localStorage.setItem(UNA_VEZ, '1'); } catch { /* sin almacenamiento */ }
+    if ((hayAlgo && yaAbierto) || new URLSearchParams(loc.search).get('diseno')) return;
     cargarDisenoPorDefecto().then(d => { if (d) abrirDiseno(d); });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
