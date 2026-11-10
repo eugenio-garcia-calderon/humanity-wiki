@@ -10858,3 +10858,6 @@ Petición de Eugenio: que al cargar /aeromovil aparezca el Triciclo Bala con su 
 - Lo escrito en el código (botones, esquemas) lo cambia `src/i18n/traductorDom.ts` y lo que falte lo avisa el navegador.
 - Sin IA de pago: traduce la sesión de trabajo una vez al día por la API con `TRADUCCIONES_TOKEN`.
 - lighthumanity.org sigue redirigiendo hasta que esté traducido: la migración que lo activa va en otro despliegue.
+
+### 2026-11-10 — Proyectos que nos inspiran
+- Eugenio: una sección antes del pie con una base de datos de proyectos de otras personas y organizaciones, en una sola línea con slider. Tabla «Proyectos que nos inspiran» (`sitio.inspiran`) con Our World in Data, Robodienst, World Solar Challenge y Shell Eco-marathon; `InspiranSitio.tsx`. Entra también en la lista de traducción de lighthumanity.org.

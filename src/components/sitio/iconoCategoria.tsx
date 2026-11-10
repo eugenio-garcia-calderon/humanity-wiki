@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import {
-  Banknote, Briefcase, Building2, Car, CloudSun, Coins, Construction, Cpu, Droplet, Factory, FlaskConical, GraduationCap, HandHeart, Handshake,
+  BarChart3, Bot, Gauge, Banknote, Briefcase, Building2, Car, CloudSun, Coins, Construction, Cpu, Droplet, Factory, FlaskConical, GraduationCap, HandHeart, Handshake,
   HeartPulse, Home, Landmark, Layers, Leaf, Music, Palette, PersonStanding, RadioTower, Recycle, Scale, Shirt, ShoppingCart, Sparkles, Store, Sun,
   Tag, Tent, Users, Wheat, Wind, Zap, type LucideIcon,
 } from 'lucide-react';
@@ -15,7 +15,9 @@ const ICONOS: Record<string, LucideIcon> = {
   residuos: Recycle, justicia: Scale, comercio: Store, ciencia: FlaskConical, conciencia: Sparkles, demografia: PersonStanding,
   infraestructuras: Construction, consumo: ShoppingCart, 'vehiculo solar': Sun, 'vehiculo aerodinamico': Wind, 'mini casas': Tent,
   'contact improvisacion': HandHeart, biodanza: Music,
+  'datos abiertos': BarChart3, robotica: Bot, 'competicion solar': Sun, 'eficiencia energetica': Gauge,
   // En el dominio traducido la categoría llega en inglés.
+  'open data': BarChart3, robotics: Bot, 'solar competition': Sun, 'solar racing': Sun, 'energy efficiency': Gauge,
   mobility: Car, economy: Coins, health: HeartPulse, ecology: Leaf, relationships: Users, energy: Zap, food: Wheat, coexistence: Handshake, work: Briefcase,
   climatology: CloudSun, education: GraduationCap, 'computer science': Cpu, computing: Cpu, culture: Palette, water: Droplet, companies: Building2, housing: Home,
   politics: Landmark, telecommunications: RadioTower, materials: Layers, finance: Banknote, clothing: Shirt, manufacturing: Factory, waste: Recycle, justice: Scale,
@@ -24,7 +26,7 @@ const ICONOS: Record<string, LucideIcon> = {
 
 const clave = (n: string) => n.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
 
-export function iconoCategoria(nombre: string): ReactNode {
+export function iconoCategoria(nombre: string, clase = 'h-4 w-4 shrink-0 text-slate-700'): ReactNode {
   const Icono = ICONOS[clave(nombre)] || Tag;
-  return <Icono aria-hidden className="h-4 w-4 shrink-0 text-slate-700" strokeWidth={2.25} />;
+  return <Icono aria-hidden className={clase} strokeWidth={2.25} />;
 }
