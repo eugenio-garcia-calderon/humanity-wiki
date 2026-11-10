@@ -204,9 +204,29 @@ function EditarNodo({ nodo, onCambiarNodo, onBorrar, onDuplicar, onConectarDesde
         </div>
       )}
 
+      {(nodo.forma === 'franja' || nodo.forma === 'matriz') && (
+        <div className="grid grid-cols-2 gap-2">
+          <Fila etiqueta={`Ancho · ${Math.round(nodo.ancho ?? (nodo.forma === 'franja' ? 1000 : 560))}`}>
+            <input type="range" min={60} max={2400} step={10} value={nodo.ancho ?? (nodo.forma === 'franja' ? 1000 : 560)} onChange={e => c({ ancho: Number(e.target.value) }, `an-${nodo.id}`)} className="mt-2 w-full accent-violet-300" />
+          </Fila>
+          <Fila etiqueta={`Alto · ${Math.round(nodo.alto ?? (nodo.forma === 'franja' ? 220 : 118))}`}>
+            <input type="range" min={40} max={1600} step={10} value={nodo.alto ?? (nodo.forma === 'franja' ? 220 : 118)} onChange={e => c({ alto: Number(e.target.value) }, `al-${nodo.id}`)} className="mt-2 w-full accent-violet-300" />
+          </Fila>
+        </div>
+      )}
+      {nodo.forma === 'matriz' && (
+        <Fila etiqueta="Nombre de la matriz">
+          <select className={campo} value={nodo.etiquetaPos ?? ''} onChange={e => c({ etiquetaPos: (e.target.value || undefined) as PosEtiqueta | undefined })}>
+            <option value="" className="bg-slate-900">Dentro, en el centro</option>
+            <option value="abajo" className="bg-slate-900">Debajo</option>
+            <option value="arriba" className="bg-slate-900">Encima</option>
+          </select>
+        </Fila>
+      )}
+
       <Fila etiqueta="Color"><Paleta valor={nodo.color} onCambio={color => c({ color })} /></Fila>
 
-      {nodo.forma !== 'titulo' && nodo.forma !== 'nota' && nodo.forma !== 'campo' && nodo.forma !== 'matriz' && (
+      {nodo.forma !== 'titulo' && nodo.forma !== 'nota' && nodo.forma !== 'campo' && nodo.forma !== 'matriz' && nodo.forma !== 'franja' && (
         <div>
           <span className={rotulo}>Icono</span>
           <div className="grid grid-cols-8 gap-1">
