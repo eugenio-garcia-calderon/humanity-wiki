@@ -247,6 +247,7 @@ export const PARAMETROS_BALA: Parametros = { ...PARAMETROS_GOTA, disposicion: 'b
  */
 export const TRICICLO_DEFECTO: CamposTriciclo = {
   tAncho: 0.85, tSuelo: 0.124, tMorro: 0.60, tPuntaMorro: 0.75, tCola: 0.65, tPuntaCola: 0.47, tAleta: 1.0, tCupIni: 0.15, tCupFin: 2.00, tAlto: 1.452,
+  tSolar: 1.10, tVentAlto: 0.42, tVentanas: 'marco', tPilar: 0.62, tPilarBarrido: 0.48, tPilarAncho: 0.055,
   tPodEsc: 1, tPodAncho: 1, tPodCola: 1, tBrazo: 0.20, tFaldon: 0,
   tMatCarenado: 'carbonoLino', tEspCarenado: 1.5, tEspCristal: 3,
   tPilX: 1.06, tPilY: 0.40, tPasX: 1.54, tPasY: 0.43, tRecPil: 5, tRecPas: 0, tManX: 0, tManY: 0, tPiesX: 0, tPiesY: 0, tMOcc: 80, tMAsiento: 3.5,
@@ -254,7 +255,7 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   tBatalla: 2.45, tEjeDel: 0.30, tVia: 1.80, tRuedaDel: '20', tRuedaTras: '24', tGiro: 28, tRecDel: 80, tRecTras: 80, tBasculante: 0.50,
   tMRueda: 4.5, tMFreno: 1.2, tMSuspDel: 9, tMSuspTras: 6, tMDir: 4.5,
   tKWNom: 5, tKWPico: 10, tMMotor: 13, tMInversor: 2.5, tVel: 80,
-  tKWh: 9, tWhKg: 160, tWhL: 230, tMVarios: 12,
+  tKWh: 9, tWhKg: 160, tWhL: 230, tMVarios: 12, tSolarM2: 2.2,
 };
 export const PARAMETROS_TRICICLO: Parametros = { ...PARAMETROS_GOTA, disposicion: 'triciclo', ...TRICICLO_DEFECTO };
 export const PARAMETROS_POR_DEFECTO: Parametros = PARAMETROS_A1;
