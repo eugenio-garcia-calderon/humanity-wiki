@@ -10850,3 +10850,11 @@ Petición de Eugenio: una rama del Cuadriciclo Bala con tres ruedas, dos delante
 Petición de Eugenio: que al cargar /aeromovil aparezca el Triciclo Bala con su editor.
 - Migración 0185: el diseño base del equipo del Triciclo (0182) pasa a ser el diseño por defecto (la estrella); el que lo era deja de serlo. Se puede volver a mover la estrella desde el menú del logo.
 - Quien ya tenía un diseño abierto en su navegador lo seguía viendo al volver; ahora cada navegador abre una vez más el diseño por defecto (marca `aeromovil.inicio.triciclo`) y desde ahí abre lo último que tuvo. Un cambio sin guardar de quien no es el dueño se pierde esa vez.
+
+### 2026-11-10 — Una sola fuente, todos los idiomas: la base de lighthumanity.org
+- Eugenio: luzhumanidad.com es la fuente en español y lighthumanity.org su réplica en inglés, y Google debe saber que son la misma página. Regla 11 de la Constitución (v1.2).
+- `src/server/traducciones.ts`: el dominio traducido sirve las mismas páginas y cambia cada texto por el suyo. Diccionario y lista de tareas en `traducciones_textos`; `barrerTraducciones` apunta lo publicado cada 15 minutos.
+- Direcciones en inglés, `hreflang` recíproco en las dos webs, canónica propia, sitemap propio y selector de idioma en el pie, sin redirigir por idioma.
+- Lo escrito en el código (botones, esquemas) lo cambia `src/i18n/traductorDom.ts` y lo que falte lo avisa el navegador.
+- Sin IA de pago: traduce la sesión de trabajo una vez al día por la API con `TRADUCCIONES_TOKEN`.
+- lighthumanity.org sigue redirigiendo hasta que esté traducido: la migración que lo activa va en otro despliegue.

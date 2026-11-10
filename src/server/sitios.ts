@@ -36,6 +36,7 @@ import { cabeceraEnHtml } from './cabeceraSitio';
 import { cuerpoEnHtml, esc as escHtml, enLinea } from './htmlBloques';
 import { ampliar, type MetaPagina } from './ampliarPagina';
 import { configEscaparate, urlsEscaparate, modeloEscaparate } from './seoEscaparate';
+import { datosDeIdioma, estaTraducido, hreflangDe, idiomaDeHost, traducirHtml, traducirProfundo, tramosOriginales } from './traducciones';
 import { asegurarRutas, asegurarRutaDePagina, patronDeTitulo, TRAMOS_RESERVADOS } from './rutasFila';
 import { sitioConAnfitrion, sitioEnCasa } from '../components/sitio/ContextoSitio';
 import { bloquesDe } from './bloquesSql';
@@ -902,7 +903,13 @@ export function registrarSitios(app: Express, db: any) {
   app.get(/^\/sitemap(?:-(\d+))?\.xml$/, async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (sitioDe(req).forma === 'casa') return next();
-      const urls = await urlsDelSitio(sitioDe(req));
+      let urls = await urlsDelSitio(sitioDe(req));
+      // En el dominio traducido, solo lo traducido y con su dirección en ese idioma.
+      if (urls && idiomaDeHost(sitioDe(req).host)) {
+        const h = sitioDe(req).host;
+        urls = urls.map(u => ({ ...u, loc: traducirProfundo(u.loc.replace(`https://${h}`, 'https://luzhumanidad.com'), h) }))
+          .filter(u => { const t = new URL(u.loc).pathname.split('/').filter(Boolean); return t.length !== 1 || tramosOriginales(h, t)[0] !== t[0]; });
+      }
       if (!urls) return res.status(404).type('txt').send('No existe ese fichero.');
       const trozos = Math.max(1, Math.ceil(urls.length / POR_TROZO));
       const n = req.params[0] ? Number(req.params[0]) : 0;
@@ -1026,7 +1033,7 @@ export function registrarSitios(app: Express, db: any) {
         // aplicación vacía, y un buscador la guardaba como página (fina). El
         // HTML es el mismo —la aplicación pinta su «no está»—; cambia el
         // código y se le dice al buscador que no la guarde.
-        const html = await rapido(plantilla, req, s, null);
+        const html = datosDeIdioma(traducirHtml(await rapido(plantilla, req, s, null), s.host), s.host);
         if (!esDeSitio(req)) return res.type('html').set('Cache-Control', 'no-cache').send(html);
         return res.status(404).type('html').set('Cache-Control', 'no-cache')
           .send(html.replace('</head>', '    <meta name="robots" content="noindex">\n  </head>'));
@@ -1037,7 +1044,18 @@ export function registrarSitios(app: Express, db: any) {
       w.config = (await filtrarBloques(db, w.id, w.config, null)).config;
       // La página tal como se pinta, ampliada por los módulos que se apuntan
       // (`ampliarPagina.ts`): la ficha de producto cambia título, tipo y robots.
-      const publica = w.virtual ? w : await paginaPublica(db, w.id);
+      let publica = w.virtual ? w : await paginaPublica(db, w.id);
+      // EL DOMINIO TRADUCIDO (regla 11 de la Constitución): la misma página, con sus textos. Una
+      // página aún sin traducir no se deja indexar. Su título y su descripción compuestos, fuera:
+      // se arman con los textos ya traducidos.
+      const idioma = idiomaDeHost(s.host);
+      const tituloOriginal = String(w.title || '');
+      if (idioma) {
+        if (!w.virtual && !estaTraducido(tituloOriginal, idioma)) w.indexable = false;
+        w = traducirProfundo(w, s.host);
+        publica = traducirProfundo(publica, s.host);
+        if (publica?.meta) { delete publica.meta.titulo; delete publica.meta.descripcion; }
+      }
       const m: MetaPagina = (publica && !publica.muro && publica.meta) || {};
       const cfg = (publica && !publica.muro ? publica.config : null) || w.config;
       const tituloBase = String(m.titulo || w.title || '').trim() || 'Sin título';
@@ -1115,6 +1133,8 @@ export function registrarSitios(app: Express, db: any) {
         img && `<meta property="og:image" content="${esc(abs(img))}">`,
         `<meta name="twitter:card" content="${img ? 'summary_large_image' : 'summary'}">`,
         `<link rel="canonical" href="${esc(canonica)}">`,
+        ...hreflangDe(s.host, req.path, tituloOriginal),
+        idioma && `<meta property="og:locale" content="en_US">`,
         `<meta name="robots" content="${!indexable ? 'noindex,nofollow' : conFiltros ? 'noindex,follow' : 'index,follow'}">`,
         ...(m.metas || []).filter(x => x && (x.property || x.name)).map(x => x.property
           ? `<meta property="${esc(String(x.property))}" content="${esc(String(x.content ?? ''))}">`
@@ -1124,7 +1144,7 @@ export function registrarSitios(app: Express, db: any) {
 
       let html = plantilla
         // El idioma de las páginas publicadas: español (2026-11-06, SEO; decía «en»).
-        .replace(/<html lang="[^"]*"/, '<html lang="es"')
+        .replace(/<html lang="[^"]*"/, `<html lang="${idioma || 'es'}"`)
         .replace(/<title>[\s\S]*?<\/title>/, () => `<title>${esc(propio ? titulo : `${titulo} · humanity.wiki`)}</title>`)
         .replace('</head>', () => `    ${meta}\n  </head>`);
       // En un sitio propio, el icono de la pestaña es el de la página. Un emoji
@@ -1135,7 +1155,7 @@ export function registrarSitios(app: Express, db: any) {
           : `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">${icono}</text></svg>`)}`;
         html = html.replace(/<link[^>]+rel="icon"[^>]*>/g, '').replace('</head>', () => `    <link rel="icon" href="${esc(href)}">\n  </head>`);
       }
-      html = await rapido(html, req, s, w, publica);
+      html = datosDeIdioma(traducirHtml(await rapido(html, req, s, w, publica), s.host), s.host);
       res.status(w.perdida ? 404 : 200).type('html').set('Cache-Control', 'no-cache').send(html);
     } catch (e) {
       console.error('sitios: vista previa', e);
@@ -1350,6 +1370,8 @@ export function registrarSitios(app: Express, db: any) {
     const s = sitioDe(req);
     let tramos: string[];
     try { tramos = camino.split('/').filter(Boolean).map(decodeURIComponent); } catch { return null; }
+    // En el dominio traducido, las direcciones van en su idioma (`traducciones.ts`).
+    tramos = tramosOriginales(s.host, tramos);
 
     // `/bd/:tabla[/:nombre]`, en todas las formas (y `/@quien/bd/…` en casa).
     const sinArroba = s.forma === 'casa' && tramos[0]?.startsWith('@') ? tramos.slice(1) : tramos;
