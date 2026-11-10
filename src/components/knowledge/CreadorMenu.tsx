@@ -193,6 +193,8 @@ function MandosMenu({ s, menu, poner, titulo, opciones }: {
           <Grupo titulo="Logotipo y nombre">
             <Interruptor etiqueta="Mostrar el logotipo" valor={m.mostrarLogo} onCambio={v => menu({ mostrarLogo: v })} />
             {m.mostrarLogo && <ElegirLogo valor={m.logo} onCambio={v => menu({ logo: v })} />}
+            {/* 2026-11-10: un logotipo con el nombre dentro se ve entero en vez de recortado en un cuadrado. */}
+            {m.mostrarLogo && m.logo && <Interruptor etiqueta="Logotipo horizontal (con el nombre dentro, sin recortar)" valor={!!m.logoHorizontal} onCambio={v => menu({ logoHorizontal: v })} />}
             <Interruptor etiqueta="Mostrar el nombre" valor={m.mostrarNombre} onCambio={v => menu({ mostrarNombre: v })} />
             {m.mostrarNombre && <Campo valor={m.nombre || ''} placeholder={titulo || 'El nombre de tu web'} onCambio={v => menu({ nombre: v || undefined })} />}
           </Grupo>
@@ -231,6 +233,7 @@ function MandosPie({ s, pie, poner, titulo, opciones }: {
           <Grupo titulo="Logotipo y nombre">
             <Interruptor etiqueta="Mostrar el logotipo" valor={p.mostrarLogo} onCambio={v => pie({ mostrarLogo: v })} />
             {p.mostrarLogo && <ElegirLogo valor={p.logo} onCambio={v => pie({ logo: v })} ayuda="Vacío: el mismo del menú." />}
+            {p.mostrarLogo && p.logo && <Interruptor etiqueta="Logotipo horizontal (con el nombre dentro, sin recortar)" valor={!!p.logoHorizontal} onCambio={v => pie({ logoHorizontal: v })} />}
             <Campo valor={p.nombre || ''} placeholder={s.menu.nombre || titulo || 'El nombre de tu web'} onCambio={v => pie({ nombre: v || undefined })} />
             <Campo valor={p.descripcion || ''} placeholder="Una frase sobre quién eres o qué haces" multilinea
               onCambio={v => pie({ descripcion: v || undefined })} />
