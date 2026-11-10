@@ -10840,3 +10840,8 @@ Petición de Eugenio: una rama del Cuadriciclo Bala con tres ruedas, dos delante
 - **Túnel**: «Probar» y sus opciones con los deslizadores del Triciclo (alargar la cola 10 cm: Cd 0,134 → 0,130).
 - El pie de la página ya no dice «STEP generado con CadQuery» con el Cuadriciclo ni con el Triciclo, que no tienen STEP.
 - **Comprobado**: tsc; build; bala-huella IGUAL contra main (garaje y editor); bala-disenos; triciclo-disenos contra main (26 OK); triciclo-rangos (138 casos); tunel-pruebas sin fallos; navegador con gráficos por software y la API simulada. **Sin verificar**: un móvil o una gráfica de verdad con la app instalada, y el guardado contra el servidor real.
+
+### 2026-11-10 — El Triciclo Bala, diseño por defecto del Aeromóvil
+Petición de Eugenio: que al cargar /aeromovil aparezca el Triciclo Bala con su editor.
+- Migración 0185: el diseño base del equipo del Triciclo (0182) pasa a ser el diseño por defecto (la estrella); el que lo era deja de serlo. Se puede volver a mover la estrella desde el menú del logo.
+- Quien ya tenía un diseño abierto en su navegador lo seguía viendo al volver; ahora cada navegador abre una vez más el diseño por defecto (marca `aeromovil.inicio.triciclo`) y desde ahí abre lo último que tuvo. Un cambio sin guardar de quien no es el dueño se pierde esa vez.
