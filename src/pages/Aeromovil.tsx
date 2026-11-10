@@ -34,7 +34,7 @@ import {
   type Comprobacion, type Disposicion, type MaterialCarenado, type MaterialChasis, type Modelo, type ModeloBala, type ModeloTriciclo, type Neumatico, type Parametros, type Puerta, type Pulgadas, type Resultados,
 } from '../components/aeromovil/geometria';
 import {
-  AGARRE, AUXILIARES, CRR, DEPS_TRICICLO, LEMAS_TRICICLO, RENDIMIENTO, SELECTORES_TRICICLO, USABLE, VUELCO_OBJETIVO, camposTriciclo, deslizadoresTriciclo, energiaTriciclo, guardarTriciclo, vistaTriciclo,
+  AGARRE, AUXILIARES, CRR, DEPS_TRICICLO, LEMAS_TRICICLO, RENDIMIENTO, RUEDAS_TRICICLO, SELECTORES_TRICICLO, USABLE, VUELCO_OBJETIVO, camposTriciclo, deslizadoresTriciclo, energiaTriciclo, estirarTriciclo, guardarTriciclo, largoTriciclo, vistaTriciclo,
   type DepTriciclo, type FichaTriciclo,
 } from '../components/aeromovil/geometriaTriciclo';
 import { cuerpoTriciclo, peticionDe as peticionTunel } from '../components/aeromovil/tunel/nuestro';
@@ -705,6 +705,14 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
       </Bloque>
       {bloques.map(bloque => (
         <Bloque key={bloque} titulo={bloque}>
+          {bloque === 'Forma' && (() => {
+            // round two (2026-11-10): one lever for «hazlo un poco más grande»; it moves the nose, wheelbase and tail (see estirarTriciclo)
+            const lg = largoTriciclo(T);
+            return <>
+              <Deslizador id="t-largo" etiqueta="Largo total (estira morro, batalla y cola)" valor={lg.valor} min={lg.min} max={lg.max} paso={0.01} mostrar={`${m2(lg.valor)} de carrocería`} alCambiar={x => { const o = estirarTriciclo(T, x); for (const [k, v] of Object.entries(o)) set(k as keyof Parametros, v as never); }} />
+              <p className="-mt-1 text-xs text-slate-500">Estira la carrocería sin agrandar a las personas: reparte el cambio entre el morro, la batalla y la cola (cada uno según lo que le queda), y la cúpula acaba igual de lejos del eje trasero. No es una escala de todo: los ocupantes, el manillar y los asientos no crecen.</p>
+            </>;
+          })()}
           {fichas.filter(f => f.bloque === bloque).map(f => {
             const v = vistaTriciclo(f, T);
             return <Deslizador key={f.clave} id={`t-${f.clave}`} etiqueta={f.n} valor={v.valor} clave={f.clave} centro={f.centrar ? v.defecto : undefined} min={v.min} max={v.max} paso={f.paso} mostrar={mostrar(f, v.valor)} alCambiar={x => set(f.clave, guardarTriciclo(f, x, T))} />;
@@ -717,8 +725,8 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
             <p className="-mt-1 text-xs text-slate-500">El eje delantero va detrás de donde el Cuadriciclo lleva su rueda delantera: así el peso queda más cerca de las dos ruedas de delante y el triciclo vuelca menos (abajo, «Vuelco»). Batalla {m2(modelo.batalla)}.</p>
           </>}
           {bloque === 'Bastidor' && <p className="-mt-1 text-xs text-slate-500">Dos largueros sobre la panza con cuatro travesaños, la cuna de la batería (donde se apoya la suspensión delantera), los soportes de los sillines, la torreta del amortiguador y el soporte de la columna de dirección: {fmt(rt.bastidor.metros, 1)} m de tubo. Se ve con «Rayos X» o la capa «Chasis».</p>}
-          {bloque === 'Motor' && <p className="-mt-1 text-xs text-slate-500">Motor de buje en la rueda trasera, sin cadena ni correa, con su controlador bajo el sillín del pasajero.</p>}
-          {bloque === 'Batería' && <p className="-mt-1 text-xs text-slate-500">En el morro, donde el Cuadriciclo lleva la rueda delantera ({Math.round(rt.bateria.litrosMorro)} L caben ahí); lo que no cabe va en un módulo estrecho entre los pies del piloto. Ahora: {Math.round(rt.bateria.litros)} L y {Math.round(rt.bateria.kg)} kg.</p>}
+          {bloque === 'Motor' && <p className="-mt-1 text-xs text-slate-500">Motor de buje en la rueda trasera, sin cadena ni correa, con su controlador bajo el sillín del pasajero. Su masa y la del controlador siguen a la potencia máxima (su rango se mueve con ella). En una rueda de ciclomotor caben unos {RUEDAS_TRICICLO['24'].kWBuje} kW de pico; en una llanta de coche de 15″, unos {RUEDAS_TRICICLO.c15.kWBuje} (como los motores en rueda del Aptera). Por encima, lo honrado sería un motor en el basculante con correa, como en las motos eléctricas, y eso aquí no se dibuja: la comprobación «Motor de buje» lo avisa.</p>}
+          {bloque === 'Batería' && <p className="-mt-1 text-xs text-slate-500">Primero en el morro, donde el Cuadriciclo lleva la rueda delantera ({Math.round(rt.bateria.litrosMorro)} L), luego en un módulo estrecho entre los pies del piloto; si hace falta más, el módulo del morro sube, crece hacia la punta y queda un módulo plano bajo los sillines. Ahora: {Math.round(rt.bateria.litros)} L y {Math.round(rt.bateria.kg)} kg{rt.bateria.litros - rt.bateria.cabe > 0.05 ? `: caben ${Math.round(rt.bateria.cabe)} L, faltan ${Math.round(rt.bateria.litros - rt.bateria.cabe)} (un morro más largo, una carrocería más ancha o celdas más densas)` : ''}.</p>}
         </Bloque>
       ))}
 

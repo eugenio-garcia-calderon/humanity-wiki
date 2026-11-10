@@ -29,11 +29,11 @@
 // for the Cd the results use.
 
 import type { Comprobacion, MaterialCarenado, MaterialChasis, Parametros, PuntosOcupante, Pulgadas, Resultados, Rueda, Tubo, P3 } from './geometria';
-import { DIAMETRO_RUEDA, MATERIALES_CARENADO, MATERIALES_CHASIS, TRICICLO_DEFECTO, largoTubo } from './geometria';
+import { MATERIALES_CARENADO, MATERIALES_CHASIS, TRICICLO_DEFECTO, largoTubo } from './geometria';
 import { crearForma, type DimBala, type FormaBala } from './garaje/balaForma';
 import { APLASTADO_BALA, ASIENTO, alturasPod, anchoMaxPod, brazosDe, contornoCupula, escalaManillar, extremoManillar, podDe, semiAncho, techoEn, type Asientos } from './garaje/balaMedidas';
 import {
-  ANCHO_NEU, ANCHO_NEU_LAT, CADERA_SOBRE_ASIENTO, DESLIZADORES_BALA, HUECO_CARENADO, MEDIA_CABEZA, TALLA_SENTADO,
+  CADERA_SOBRE_ASIENTO, DESLIZADORES_BALA, HUECO_CARENADO, MEDIA_CABEZA, TALLA_SENTADO,
   areaFrontalBala, carenadoCuerpo, neumaticoCarenado, pielBala, rodilla, ruedaDentro, type ClaveBala, type ResultadosBala,
 } from './geometriaBala';
 
@@ -61,7 +61,7 @@ export interface CamposTriciclo {
   // Rodaje
   tBatalla: number;    // la batalla de la carrocería (del Cuadriciclo): de donde iba su rueda delantera al eje trasero (m)
   tEjeDel: number;     // eje delantero: cuánto va detrás de donde iba la rueda delantera del Cuadriciclo (m)
-  tVia: number; tRuedaDel: Pulgadas; tRuedaTras: Pulgadas;
+  tVia: number; tRuedaDel: RuedaTriciclo; tRuedaTras: RuedaTriciclo;
   tGiro: number;       // giro máximo de la rueda delantera de dentro (°)
   tRecDel: number; tRecTras: number;   // recorrido de la suspensión (mm)
   tBasculante: number; // largo del basculante trasero (m)
@@ -72,6 +72,26 @@ export interface CamposTriciclo {
   tKWh: number; tWhKg: number; tWhL: number; tMVarios: number;
 }
 export type ClaveTriciclo = keyof CamposTriciclo;
+/**
+ * The Triciclo's wheels (2026-11-10, round two: Eugenio, «ponle unas ruedas más grandes»). The bicycle/moped
+ * sizes of the first version (moped tyres: 70 mm in front, 80 mm behind) and three car rims with low-profile
+ * tyres. `kg`: a wheel's mass as a multiple of the «Una rueda con neumático» slider (which is a moped wheel's):
+ * a 13–15″ car wheel with its tyre weighs 10–13 kg against a moped wheel's 4–5. `kWBuje`: the peak power a
+ * motor in that hub can credibly give (the «Motor de buje» check): a rough rule from motors on sale (QS 273 in
+ * motorcycle rims, ≈ 20 kW peak; Elaphe M700 in car rims, ≈ 75 kW peak), not a measurement.
+ */
+export type RuedaTriciclo = Pulgadas | 'c13' | 'c14' | 'c15';
+export const RUEDAS_TRICICLO: Record<RuedaTriciclo, { d: number; neuDel: number; neuTras: number; n: string; kg: number; kWBuje: number }> = {
+  '16': { d: 0.405, neuDel: 0.07, neuTras: 0.08, n: '16″ de ciclomotor (405 mm)', kg: 1, kWBuje: 6 },
+  '20': { d: 0.508, neuDel: 0.07, neuTras: 0.08, n: '20″ de ciclomotor (508 mm)', kg: 1, kWBuje: 10 },
+  '24': { d: 0.61, neuDel: 0.07, neuTras: 0.08, n: '24″ de ciclomotor (610 mm)', kg: 1, kWBuje: 12 },
+  '26': { d: 0.66, neuDel: 0.07, neuTras: 0.08, n: '26″ de ciclomotor (660 mm)', kg: 1, kWBuje: 12 },
+  '28': { d: 0.70, neuDel: 0.07, neuTras: 0.08, n: '28″ de ciclomotor (700 mm)', kg: 1, kWBuje: 12 },
+  // tyre diameter = rim + 2 × width × profile: 330 + 2·145·0.70, 356 + 2·165·0.60, 381 + 2·175·0.55 (mm)
+  c13: { d: 0.533, neuDel: 0.145, neuTras: 0.145, n: '13″ de coche, 145/70 R13 (533 mm)', kg: 2.3, kWBuje: 35 },
+  c14: { d: 0.554, neuDel: 0.165, neuTras: 0.165, n: '14″ de coche, 165/60 R14 (554 mm)', kg: 2.5, kWBuje: 45 },
+  c15: { d: 0.574, neuDel: 0.175, neuTras: 0.175, n: '15″ de coche, 175/55 R15 (574 mm)', kg: 2.7, kWBuje: 60 },
+};
 type ClaveTexto = 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras';
 export type ClaveNumTriciclo = Exclude<ClaveTriciclo, ClaveTexto>;
 
@@ -102,17 +122,19 @@ export interface SelectorTriciclo { clave: ClaveTexto; n: string; dep: DepTricic
 
 type Fila = [ClaveNumTriciclo, DepTriciclo, string, ClaveBala | null, string, number, number, number, Unidad];
 // [clave, departamento, bloque, del Cuadriciclo, etiqueta, mín, máx, paso, unidad]
+// A row «del Cuadriciclo» takes its label from that table, and its range too when mín = máx = 0; since round two
+// (2026-11-10, «lo has diseñado para algo muy pequeñito») most of them carry a wider range of their own.
 const FILAS: Fila[] = [
-  ['tAncho', 'carroceria', 'Forma', 'bAncho', '', 0, 0, 0, 'm'],
-  ['tSuelo', 'carroceria', 'Forma', 'bSuelo', '', 0, 0, 0, 'cm'],
-  ['tMorro', 'carroceria', 'Morro y cola', 'bMorro', '', 0, 0, 0, 'm'],
+  ['tAncho', 'carroceria', 'Forma', 'bAncho', '', 0.77, 1.30, 0.01, 'm'],
+  ['tSuelo', 'carroceria', 'Forma', 'bSuelo', '', 0.04, 0.158, 0.002, 'cm'],
+  ['tMorro', 'carroceria', 'Morro y cola', 'bMorro', '', 0.45, 1.00, 0.01, 'm'],
   ['tPuntaMorro', 'carroceria', 'Morro y cola', 'bPuntaMorro', '', 0, 0, 0, 'x'],
-  ['tCola', 'carroceria', 'Morro y cola', 'bCola', '', 0, 0, 0, 'm'],
+  ['tCola', 'carroceria', 'Morro y cola', 'bCola', '', 0.45, 1.20, 0.01, 'm'],
   ['tPuntaCola', 'carroceria', 'Morro y cola', 'bPuntaCola', '', 0, 0, 0, 'm'],
   ['tAleta', 'carroceria', 'Morro y cola', 'bAleta', '', 0, 0, 0, 'm'],
   ['tCupIni', 'carroceria', 'Cúpula', 'bCupIni', '', 0, 0, 0, 'm'],
-  ['tCupFin', 'carroceria', 'Cúpula', 'bCupFin', '', 0, 0, 0, 'm'],
-  ['tAlto', 'carroceria', 'Cúpula', 'bAlto', '', 0, 0, 0, 'm'],
+  ['tCupFin', 'carroceria', 'Cúpula', 'bCupFin', '', 1.80, 2.90, 0.01, 'm'],
+  ['tAlto', 'carroceria', 'Cúpula', 'bAlto', '', 1.15, 1.584, 0.002, 'm'],
   ['tPodEsc', 'carroceria', 'Carenados', null, 'Carenado delantero: tamaño', 0.90, 1.10, 0.01, 'x'],
   ['tPodAncho', 'carroceria', 'Carenados', null, 'Carenado delantero: anchura', 0.80, 1.20, 0.01, 'x'],
   ['tPodCola', 'carroceria', 'Carenados', null, 'Carenado delantero: largo de la cola', 0.70, 1.30, 0.01, 'x'],
@@ -121,12 +143,12 @@ const FILAS: Fila[] = [
   ['tEspCarenado', 'carroceria', 'Material y espesores', null, 'Espesor de la carrocería', 0.6, 2.4, 0.1, 'mm'],
   ['tEspCristal', 'carroceria', 'Material y espesores', null, 'Espesor de la cúpula (policarbonato)', 1.5, 4.5, 0.5, 'mm'],
   ['tPilX', 'interior', 'Asientos', 'bPilX', '', 0, 0, 0, 'm'],
-  ['tPilY', 'interior', 'Asientos', 'bPilY', '', 0, 0, 0, 'm'],
-  ['tRecPil', 'interior', 'Asientos', null, 'Reclinado del piloto', -10, 20, 1, '°'],
+  ['tPilY', 'interior', 'Asientos', 'bPilY', '', 0.30, 0.50, 0.005, 'm'],
+  ['tRecPil', 'interior', 'Asientos', null, 'Reclinado del piloto', -10, 35, 1, '°'],
   ['tPasX', 'interior', 'Asientos', 'bPasX', '', 0, 0, 0, 'm'],
-  ['tPasY', 'interior', 'Asientos', 'bPasY', '', 0, 0, 0, 'm'],
-  ['tRecPas', 'interior', 'Asientos', null, 'Reclinado del pasajero', -10, 20, 1, '°'],
-  ['tManX', 'interior', 'Mandos', null, 'Manillar: hacia el piloto', -0.06, 0.10, 0.01, 'cm'],
+  ['tPasY', 'interior', 'Asientos', 'bPasY', '', 0.34, 0.52, 0.005, 'm'],
+  ['tRecPas', 'interior', 'Asientos', null, 'Reclinado del pasajero', -10, 35, 1, '°'],
+  ['tManX', 'interior', 'Mandos', null, 'Manillar: hacia el piloto', -0.06, 0.25, 0.01, 'cm'],
   ['tManY', 'interior', 'Mandos', null, 'Manillar: altura', -0.02, 0.10, 0.01, 'cm'],
   ['tPiesX', 'interior', 'Mandos', null, 'Plataformas: hacia delante', -0.08, 0.08, 0.01, 'cm'],
   ['tPiesY', 'interior', 'Mandos', null, 'Plataformas: altura', -0.04, 0.04, 0.01, 'cm'],
@@ -135,9 +157,9 @@ const FILAS: Fila[] = [
   ['tChD', 'chasis', 'Bastidor', null, 'Tubos: diámetro', 30, 60, 1, 'mm'],
   ['tChT', 'chasis', 'Bastidor', null, 'Tubos: pared', 1.2, 3.6, 0.1, 'mm'],
   ['tChUniones', 'chasis', 'Bastidor', null, 'Uniones, chapas y tornillería', 1, 6, 0.5, 'kg'],
-  ['tBatalla', 'rodaje', 'Ejes y ruedas', 'bBatalla', '', 0, 0, 0, 'm'],
+  ['tBatalla', 'rodaje', 'Ejes y ruedas', 'bBatalla', '', 2.20, 3.20, 0.01, 'm'],
   ['tEjeDel', 'rodaje', 'Ejes y ruedas', null, 'Eje delantero: atrasado', 0, 0.45, 0.01, 'cm'],
-  ['tVia', 'rodaje', 'Ejes y ruedas', null, 'Vía delantera', 1.40, 2.20, 0.01, 'm'],
+  ['tVia', 'rodaje', 'Ejes y ruedas', null, 'Vía delantera', 1.40, 2.40, 0.01, 'm'],
   ['tGiro', 'rodaje', 'Suspensión y dirección', null, 'Giro máximo de la dirección', 18, 38, 1, '°'],
   ['tRecDel', 'rodaje', 'Suspensión y dirección', null, 'Recorrido de la suspensión delantera', 50, 110, 5, 'mm'],
   ['tRecTras', 'rodaje', 'Suspensión y dirección', null, 'Recorrido de la suspensión trasera', 50, 110, 5, 'mm'],
@@ -147,12 +169,12 @@ const FILAS: Fila[] = [
   ['tMSuspDel', 'rodaje', 'Masas', null, 'Suspensión delantera (las dos)', 5, 13, 0.5, 'kg'],
   ['tMSuspTras', 'rodaje', 'Masas', null, 'Basculante y amortiguador trasero', 4, 8, 0.5, 'kg'],
   ['tMDir', 'rodaje', 'Masas', null, 'Dirección: columna, cremallera y bieletas', 3, 6, 0.5, 'kg'],
-  ['tKWNom', 'propulsion', 'Motor', null, 'Potencia nominal', 2, 8, 0.5, 'kW'],
-  ['tKWPico', 'propulsion', 'Motor', null, 'Potencia máxima', 5, 15, 0.5, 'kW'],
-  ['tMMotor', 'propulsion', 'Motor', null, 'Motor de buje', 8, 18, 0.5, 'kg'],
-  ['tMInversor', 'propulsion', 'Motor', null, 'Controlador (inversor)', 1.5, 3.5, 0.1, 'kg'],
+  ['tKWNom', 'propulsion', 'Motor', null, 'Potencia nominal', 2, 30, 0.5, 'kW'],
+  ['tKWPico', 'propulsion', 'Motor', null, 'Potencia máxima', 5, 60, 0.5, 'kW'],
+  ['tMMotor', 'propulsion', 'Motor', null, 'Motor de buje', 5, 62, 0.5, 'kg'],
+  ['tMInversor', 'propulsion', 'Motor', null, 'Controlador (inversor)', 1.4, 14, 0.1, 'kg'],
   ['tVel', 'propulsion', 'Motor', null, 'Velocidad de cálculo', 40, 120, 5, 'km/h'],
-  ['tKWh', 'energia', 'Batería', null, 'Batería', 5, 13, 0.5, 'kWh'],
+  ['tKWh', 'energia', 'Batería', null, 'Batería', 5, 30, 0.5, 'kWh'],
   ['tWhKg', 'energia', 'Batería', null, 'Densidad del paquete (masa)', 120, 200, 5, 'Wh/kg'],
   ['tWhL', 'energia', 'Batería', null, 'Densidad del paquete (volumen)', 160, 300, 5, 'Wh/L'],
   ['tMVarios', 'energia', 'Varios', null, 'Varios: cargador, cables, luces, 12 V', 6, 18, 1, 'kg'],
@@ -166,7 +188,8 @@ let FICHAS: FichaTriciclo[] | null = null;
  */
 export function deslizadoresTriciclo(): FichaTriciclo[] {
   return FICHAS ?? (FICHAS = FILAS.map(([clave, dep, bloque, bala, n, min, max, paso, unidad]) => {
-    const b = bala ? DESLIZADORES_BALA.find(f => f.clave === bala)! : null, f = b ? { n: b.n, min: b.min, max: b.max, paso: b.paso } : { n, min, max, paso };
+    const b = bala ? DESLIZADORES_BALA.find(f => f.clave === bala)! : null, propio = min !== 0 || max !== 0;
+    const f = b ? (propio ? { n: b.n, min, max, paso } : { n: b.n, min: b.min, max: b.max, paso: b.paso }) : { n, min, max, paso };
     // the editor's sliders put the default in the middle; where this vehicle's default is not the middle of the range, the whole range shows instead
     return { clave, dep, bloque, ...f, unidad, centrar: Math.abs(TRICICLO_DEFECTO[clave] - (f.min + f.max) / 2) < 1e-6 * (f.max - f.min), ...(DESDE_EJE[clave] ? { desde: DESDE_EJE[clave] } : {}) };
   }));
@@ -187,12 +210,12 @@ export function vistaTriciclo(f: FichaTriciclo, T: CamposTriciclo): { valor: num
 /** The stored value for what a slider shows. */
 export const guardarTriciclo = (f: FichaTriciclo, v: number, T: CamposTriciclo) => v - (f.desde ?? 0) * limitarTriciclo('tEjeDel', T);
 export const fichaTriciclo = (k: ClaveNumTriciclo) => deslizadoresTriciclo().find(f => f.clave === k);
-const ruedas = (l: Pulgadas[]) => l.map(k => ({ k, n: `${k}″ (${Math.round({ '16': 405, '20': 508, '24': 610, '26': 660, '28': 700 }[k])} mm)` }));
+const ruedas = (l: RuedaTriciclo[]) => l.map(k => ({ k, n: RUEDAS_TRICICLO[k].n }));
 export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
   { clave: 'tMatCarenado', n: 'Material de la carrocería', dep: 'carroceria', bloque: 'Material y espesores', opciones: [{ k: 'carbonoLino', n: 'Carbono-lino' }, { k: 'vidrio', n: 'Fibra de vidrio' }, { k: 'carbono', n: 'Fibra de carbono' }] },
   { clave: 'tChMat', n: 'Material de los tubos', dep: 'chasis', bloque: 'Bastidor', opciones: [{ k: 'al6061', n: 'Aluminio 6061-T6' }, { k: 'cromoly', n: 'Acero cromoly 4130' }, { k: 'carbono', n: 'Tubo de carbono' }] },
-  { clave: 'tRuedaDel', n: 'Ruedas delanteras (en los carenados)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['16', '20', '24']) },
-  { clave: 'tRuedaTras', n: 'Rueda trasera (dentro de la cola)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['20', '24', '26']) },
+  { clave: 'tRuedaDel', n: 'Ruedas delanteras (en los carenados)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['16', '20', '24', '26', '28', 'c13', 'c14', 'c15']) },
+  { clave: 'tRuedaTras', n: 'Rueda trasera (dentro de la cola)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['20', '24', '26', '28', 'c13', 'c14', 'c15']) },
 ];
 
 /** Los parámetros del Triciclo de un diseño: lo guardado (si es del tipo correcto y, en los selectores, una opción que existe) y lo que falte, el de por defecto. */
@@ -219,12 +242,47 @@ export function rangoTriciclo(k: ClaveNumTriciclo, T: CamposTriciclo): [number, 
   if (k === 'tCupFin') return [Math.min(f.min, T.tBatalla - 0.45), Math.min(f.max, T.tBatalla - 0.25)];
   if (k === 'tPasX') return [Math.max(f.min, T.tPilX + 0.40), Math.min(f.max, T.tPilX + 0.62)];
   if (k === 'tKWPico') return [Math.max(f.min, T.tKWNom), f.max];
+  // round two (2026-11-10): the motor and its controller weigh what their power asks for, so a 60 kW motor
+  // cannot weigh 8 kg. Hub motors on sale run from about 0.45 kg/kW of peak power (car in-wheel motors:
+  // Elaphe M700, 34 kg for 75 kW) to 0.9 (moped hubs); controllers 0.08–0.2 kg/kW. Estimates, not measured.
+  if (k === 'tMMotor' || k === 'tMInversor') {
+    const p = limitarTriciclo('tKWPico', T);
+    return k === 'tMMotor' ? [Math.max(f.min, 3 + 0.45 * p), Math.min(f.max, 8 + 0.9 * p)] : [Math.max(f.min, 1 + 0.08 * p), Math.min(f.max, 2 + 0.2 * p)];
+  }
+  // a lower belly lets the saddles come down with it (never closer than today's to the rails)
+  if (k === 'tPilY' || k === 'tPasY') {
+    const baja = Math.min(0, limitarTriciclo('tSuelo', T) - TRICICLO_DEFECTO.tSuelo);
+    return [Math.max(f.min, (k === 'tPilY' ? 0.38 : 0.42) + baja), f.max];
+  }
   // a smaller pod is also a narrower one: below 82 % of the drawn width in all, the tyre no longer fits inside
   const esc = Math.min(fichaTriciclo('tPodEsc')!.max, Math.max(fichaTriciclo('tPodEsc')!.min, T.tPodEsc));
   if (k === 'tPodAncho') return [Math.max(f.min, 0.82 / esc), f.max];
   // and a shorter one: its tail must still reach past the back of the tyre
   if (k === 'tPodCola') return [Math.max(f.min, 0.70 / esc), f.max];
   return [f.min, f.max];
+}
+/**
+ * «Largo total» (round two, 2026-11-10: «hazlo un poco más grande»): one slider that stretches the body
+ * without scaling the people. The length is nose + wheelbase + tail; moving it shares the change among the
+ * three in proportion to the room each still has towards that end, so it is continuous and reaches both ends.
+ * The canopy's end goes back with the rear axle (the tail keeps its line) and the riders stay where they are.
+ * It writes those four fields: there is no stored «largo» of its own, so a saved design is unaffected.
+ */
+export const PARTES_LARGO = ['tMorro', 'tBatalla', 'tCola'] as const;
+export function largoTriciclo(T: CamposTriciclo): { valor: number; min: number; max: number } {
+  let valor = 0, min = 0, max = 0;
+  for (const k of PARTES_LARGO) { const [a, b] = rangoTriciclo(k, T); valor += limitarTriciclo(k, T); min += a; max += b; }
+  return { valor, min, max };
+}
+export function estirarTriciclo(T: CamposTriciclo, largo: number): Partial<CamposTriciclo> {
+  const ahora = largoTriciclo(T), d = Math.min(ahora.max, Math.max(ahora.min, largo)) - ahora.valor;
+  if (Math.abs(d) < 1e-9) return {};
+  const sitio = PARTES_LARGO.map(k => { const [a, b] = rangoTriciclo(k, T), v = limitarTriciclo(k, T); return d > 0 ? b - v : v - a; });
+  const total = sitio.reduce((s, v) => s + v, 0); if (total <= 0) return {};
+  const o: Partial<CamposTriciclo> = {};
+  PARTES_LARGO.forEach((k, i) => { o[k] = Math.round((limitarTriciclo(k, T) + d * sitio[i] / total) * 1e4) / 1e4; });
+  o.tCupFin = Math.round((limitarTriciclo('tCupFin', T) + (o.tBatalla! - limitarTriciclo('tBatalla', T))) * 1e4) / 1e4;
+  return o;
 }
 /** Un valor dentro de su rango (un diseño escrito a mano o de otra versión no puede construir un triciclo imposible). */
 export const limitarTriciclo = (k: ClaveNumTriciclo, T: CamposTriciclo) => { const [a, b] = rangoTriciclo(k, T); return Math.min(b, Math.max(a, T[k])); };
@@ -238,12 +296,12 @@ export const anguloFuera = (di: number, L: number, t: number) => Math.atan(L / (
 /** La forma, con los valores ya en su rango y la vía subida si el carenado girado no cabe. */
 export function medidasTriciclo(T: CamposTriciclo) {
   const L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T);
-  const rDel = DIAMETRO_RUEDA[T.tRuedaDel] / 2, rTras = DIAMETRO_RUEDA[T.tRuedaTras] / 2;
+  const wDel = RUEDAS_TRICICLO[T.tRuedaDel], wTras = RUEDAS_TRICICLO[T.tRuedaTras], rDel = wDel.d / 2, rTras = wTras.d / 2;
   const D: DimBala = {
     batalla: L('tBatalla'), morro: L('tMorro'), cola: L('tCola'), ancho: L('tAncho'), alto: L('tAlto'), suelo: L('tSuelo'),
     cupIni: L('tCupIni'), cupFin: L('tCupFin'), puntaMorro: L('tPuntaMorro'), puntaCola: L('tPuntaCola'),
     // the Cuadriciclo's «front and rear» wheel is our rear one; its «lateral» wheels, our front ones
-    rDel: rTras, rLat: rDel, anchoNeu: ANCHO_NEU, anchoNeuLat: ANCHO_NEU_LAT, via: L('tVia'),
+    rDel: rTras, rLat: rDel, anchoNeu: wTras.neuTras, anchoNeuLat: wDel.neuDel, via: L('tVia'),
     xLat: -L('tEjeDel'), pod: { esc: L('tPodEsc'), ancho: L('tPodAncho'), cola: L('tPodCola') }, cuerdaBrazo: L('tBrazo'),
   };
   let F = crearForma(D);
@@ -321,19 +379,58 @@ function cgOcupante(o: PuntosOcupante): [number, number] {
 export interface Caja { nombre: string; x0: number; x1: number; y0: number; y1: number; hz: number }
 /** Medio ancho de los dos largueros del bastidor (eje a eje), m. */
 export const Z_LARGUERO = 0.11;
-/** El paquete de batería: un módulo ancho en el morro, donde iba la rueda delantera del Cuadriciclo, y si no cabe, el resto en un módulo estrecho entre los pies del piloto, bajo el depósito. Sobre los largueros. */
-function bateriaEn(F: FormaBala, T: CamposTriciclo, yBase: number): Caja[] {
+/**
+ * El paquete de batería, sobre los largueros. Se llena por orden:
+ *   1. un módulo ancho en el morro, donde iba la rueda delantera del Cuadriciclo (20 cm de alto);
+ *   2. un módulo estrecho entre los pies del piloto, hasta 2 cm del morro de su sillín;
+ * y desde la segunda versión (2026-11-10, «una batería más potente», hasta 30 kWh):
+ *   3. el módulo del morro sube hasta 26 cm (por encima van la cremallera de la dirección y el salpicadero);
+ *   4. el módulo del morro crece hacia la punta mientras quepa, a 1 cm de la piel;
+ *   5. un módulo plano bajo los dos sillines, entre sus soportes, hasta el controlador.
+ * Lo que no cabe en los cinco no se dibuja: se cuenta su masa (en el centro de lo dibujado) y la
+ * comprobación «Batería: cabe en su sitio» dice cuántos litros faltan. Con un morro más largo o una
+ * carrocería más ancha (el módulo del morro se ensancha con ella) cabe más; con celdas más densas, ocupa menos.
+ */
+function bateriaEn(F: FormaBala, T: CamposTriciclo, yBase: number, lim: { xSillin: number; ySillin: number; xFin: number }): { cajas: Caja[]; litros: number; capacidad: number } {
   const litros = limitarTriciclo('tKWh', T) * 1000 / limitarTriciclo('tWhL', T), V = litros / 1000;
-  const alto = 0.20, delante = 0.12, partido = -0.30;
-  const aF = 0.30, aR = 0.18, Vmax = (delante - partido) * aF * alto;
+  const alto = 0.20, alto2 = 0.26, partido = -0.30;
+  // the nose module widens with a wider body (never narrower than today's 30 cm)
+  const aF = 0.30 * Math.max(1, F.kW), aR = 0.18, aU = 0.10;
+  // its front face at 12 cm ahead of the Cuadriciclo's front wheel, or further back where a low, short nose has no room there
+  const cabeFrente = (x: number, h: number) => [yBase, yBase + h].every(y => [-aF / 2, aF / 2].every(z => dentroDe(F, x, y, z) > 0));
+  let delante = 0.12; while (delante > partido + 0.1 && !cabeFrente(delante, alto)) delante -= 0.005;
+  const Vmax = (delante - partido) * aF * alto;
   const cajas: Caja[] = [];
-  if (V <= Vmax) cajas.push({ nombre: 'Módulo del morro', x0: delante - V / (aF * alto), x1: delante, y0: yBase, y1: yBase + alto, hz: aF / 2 });
-  else {
+  if (V <= Vmax) {
+    cajas.push({ nombre: 'Módulo del morro', x0: delante - V / (aF * alto), x1: delante, y0: yBase, y1: yBase + alto, hz: aF / 2 });
+    return { cajas, litros, capacidad: litros };
+  }
+  const largoPies = Math.max(0, partido - lim.xSillin), Vpies = largoPies * aR * alto;
+  if (V <= Vmax + Vpies) {
     cajas.push({ nombre: 'Módulo del morro', x0: partido, x1: delante, y0: yBase, y1: yBase + alto, hz: aF / 2 });
     cajas.push({ nombre: 'Módulo entre los pies', x0: partido - (V - Vmax) / (aR * alto), x1: partido, y0: yBase, y1: yBase + alto, hz: aR / 2 });
+    return { cajas, litros, capacidad: litros };
   }
-  void F;
-  return cajas;
+  let resto = V - Vmax - Vpies;
+  // 3. the nose module taller
+  const Valto = (delante - partido) * aF * (alto2 - alto), dAlto = Math.min(resto, Valto);
+  const hN = alto + dAlto / ((delante - partido) * aF); resto -= dAlto;
+  // 4. forward, while its front face stays 1 cm inside the skin
+  let xFr = delante;
+  if (resto > 0) for (let x = delante + 0.01; x < F.X_MORRO; x += 0.01) {
+    let ok = true;
+    for (const y of [yBase, yBase + hN]) for (const z of [-aF / 2, aF / 2]) if (dentroDe(F, x, y, z) < 0.01) ok = false;
+    if (!ok) break;
+    xFr = x;
+  }
+  const dFr = Math.min(resto, (xFr - delante) * aF * hN); resto -= dFr;
+  cajas.push({ nombre: 'Módulo del morro', x0: partido, x1: delante + dFr / (aF * hN), y0: yBase, y1: yBase + hN, hz: aF / 2 });
+  if (largoPies > 0) cajas.push({ nombre: 'Módulo entre los pies', x0: lim.xSillin, x1: partido, y0: yBase, y1: yBase + alto, hz: aR / 2 });
+  // 5. under the saddles: from the pilot's saddle nose back to the controller, up to the saddles' frame
+  const xU1 = Math.min(lim.xSillin, partido), hU = lim.ySillin - yBase, Vu = hU > 0.03 ? Math.max(0, xU1 - lim.xFin) * aU * hU : 0;
+  const dU = Math.min(resto, Vu); resto -= dU;
+  if (dU > 1e-6) cajas.push({ nombre: 'Módulo bajo los sillines', x0: xU1 - dU / (aU * hU), x1: xU1, y0: yBase, y1: yBase + hU, hz: aU / 2 });
+  return { cajas, litros, capacidad: litros - resto * 1000 };
 }
 
 /** El modelo del Triciclo: la forma, los ocupantes, el bastidor, la batería, el motor y lo que lee el visor. */
@@ -358,10 +455,13 @@ export function crearModeloTriciclo(P: Parametros) {
   const yL = D.suelo + 0.035 + dT / 2, zL = Z_LARGUERO * Math.min(1, F.kW);
   const xPiv = xR + L('tBasculante'), yPiv = yL + 0.03;
   const yBat = yL + dT / 2 + 0.005;
-  const baterias = bateriaEn(F, T, yBat);
+  const dyPil = asientos.yPiloto - ASIENTO.yPiloto, dyPas = asientos.yPasajero - ASIENTO.yPasajero, dxPil = asientos.xPiloto - ASIENTO.xPiloto, dxPas = asientos.xPasajero - ASIENTO.xPasajero;
+  const inversor: Caja = { nombre: 'Controlador', x0: -1.86 + dxPas * 0, x1: -1.66, y0: yL + dT / 2 + 0.01, y1: yL + dT / 2 + 0.09, hz: 0.07 };
+  // the battery's room: the pilot's saddle nose (2 cm), under the saddles' frame (3 cm) and ahead of the controller (2 cm)
+  const bat = bateriaEn(F, T, yBat, { xSillin: -0.835 + dxPil + 0.02, ySillin: Math.min(0.335 + dyPil, 0.35 + dyPas) - 0.03, xFin: inversor.x1 + 0.02 });
+  const baterias = bat.cajas;
   const yTopBat = Math.max(...baterias.map(b => b.y1));
   const yCuna = yTopBat + 0.03, xCuna = xF, zCuna = 0.18;
-  const dyPil = asientos.yPiloto - ASIENTO.yPiloto, dyPas = asientos.yPasajero - ASIENTO.yPasajero, dxPil = asientos.xPiloto - ASIENTO.xPiloto, dxPas = asientos.xPasajero - ASIENTO.xPasajero;
   const T_ = (nombre: string, a: P3, b: P3, d = dT, curva?: P3[]): Tubo => ({ nombre, grupo: 'Chasis', a, b, d, pared, material: mat, ...(curva ? { curva } : {}) });
   const tubos: Tubo[] = [];
   for (const s of [1, -1]) {
@@ -386,12 +486,12 @@ export function crearModeloTriciclo(P: Parametros) {
 
   // ── suspensión, dirección y motor (posiciones; el visor los dibuja y la masa los cuenta por deslizador)
   const recTras = L('tRecTras') / 1000, recDel = L('tRecDel') / 1000;
-  const basculante = { pivote: [xPiv, yPiv] as [number, number], eje: [xR, rR - APLASTADO_BALA] as [number, number], z: 0.075 };
+  // the swing arm's legs clear the tyre by 3.5 cm (7.5 cm from the centre with the 80 mm moped tyre, as before)
+  const basculante = { pivote: [xPiv, yPiv] as [number, number], eje: [xR, rR - APLASTADO_BALA] as [number, number], z: Math.max(0.075, F.ANCHO_NEU / 2 + 0.035) };
   const amortiguador = { abajo: [xR + 0.4 * (xPiv - xR), (rR + yPiv) / 2 + 0.03] as [number, number], arriba: [xPiv - 0.06, yPiv + 0.26] as [number, number] };
   const brazos = brazosDe(F);
   const cremallera = { x: -0.03, y: Math.max(0.47, yTopBat + 0.05), z: 0.15 };
   const motor = { tipo: 'buje' as const, c: [xR, rR - APLASTADO_BALA] as [number, number], r: 0.115 * rR / 0.305, ancho: 0.10 };
-  const inversor: Caja = { nombre: 'Controlador', x0: -1.86 + dxPas * 0, x1: -1.66, y0: yL + dT / 2 + 0.01, y1: yL + dT / 2 + 0.09, hz: 0.07 };
 
   const Lf = F.LARGO;
   const Pm: Parametros = { ...P, ...T, L: Lf, B: xF - xR, W: anchoTotal, H: D.alto, clear: D.suelo, track: via };
@@ -399,7 +499,7 @@ export function crearModeloTriciclo(P: Parametros) {
     tipo: 'triciclo' as const, P: Pm, campos: T, F, D, sillines: asientos, aleta, cup, viaPedida, giro, rec, man, pies,
     xn: F.X_MORRO, xt: F.X_COLA, Lf, rF, rR, rL: rF, xR, xL: xF, xF, batalla: xF - xR, anchoTotal, anchoCuerpo: D.ancho, alto: D.alto, semiPod,
     ruedas, via: { del: via, tras: 0 },
-    tubos, baterias, inversor, motor, basculante, amortiguador, brazos, cremallera, cabezaDireccion: cabeza, recTras, recDel, yLarguero: yL,
+    tubos, baterias, bateriaCabe: bat.capacidad, inversor, motor, basculante, amortiguador, brazos, cremallera, cabezaDireccion: cabeza, recTras, recDel, yLarguero: yL,
     faldon: faldonDe(F, L('tFaldon'), xR, rR),
     /** Los maniquíes de talla media (el visor los dibuja con la función de los otros vehículos). */
     occPts: (piloto: boolean) => occ(piloto),
@@ -427,7 +527,8 @@ export interface ResultadosTriciclo extends ResultadosBala {
   giro: { radio: number; dentro: number; fuera: number };
   /** El bastidor: momento, tensión y coeficiente de seguridad de los largueros. */
   bastidor: { M: number; tension: number; seguridad: number; metros: number };
-  bateria: { litros: number; kg: number; litrosMorro: number };
+  /** Litros y kilos del paquete; `litrosMorro`: lo que cabe en el módulo del morro a su tamaño de partida; `cabe`: los litros que caben en los cinco sitios (menos que `litros`: no cabe). */
+  bateria: { litros: number; kg: number; litrosMorro: number; cabe: number };
   /** Lo que depende del Cd del túnel (null mientras calcula). */
   energia: null | { cd: number; areaRef: number; CdA: number; WhKm: number; autonomia: number; vmaxNominal: number; vmaxPico: number; acel50: number; potencia: number; WhKm50: number; WhKm100: number };
 }
@@ -479,7 +580,7 @@ export function piezasTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cris
   let vb = 0, xb = 0, yb = 0;
   for (const c of m.baterias) { const v = (c.x1 - c.x0) * (c.y1 - c.y0) * c.hz * 2; vb += v; xb += v * (c.x0 + c.x1) / 2; yb += v * (c.y0 + c.y1) / 2; }
   const ySillin = (piloto: boolean) => (piloto ? m.sillines.yPiloto : m.sillines.yPasajero) - 0.03;
-  const yRF = m.rF - APLASTADO_BALA, yRR = m.rR - APLASTADO_BALA;
+  const yRF = m.rF - APLASTADO_BALA, yRR = m.rR - APLASTADO_BALA, kDel = RUEDAS_TRICICLO[T.tRuedaDel].kg, kTras = RUEDAS_TRICICLO[T.tRuedaTras].kg;
   return [
     { nombre: 'Carrocería', kg: ar.carroceria * kgm2, x: centros.xPiel, y: centros.yPiel },
     { nombre: 'Carenados y brazos delanteros', kg: pods.area * kgm2, x: m.xF, y: yRF + 0.05 },
@@ -487,7 +588,8 @@ export function piezasTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cris
     { nombre: 'Bastidor', kg: kgTubos + L('tChUniones'), x: kgTubos ? xt / kgTubos : -1, y: kgTubos ? yt / kgTubos : 0.3 },
     { nombre: 'Suspensión delantera', kg: L('tMSuspDel'), x: m.xF, y: yRF + 0.08 },
     { nombre: 'Basculante y amortiguador', kg: L('tMSuspTras'), x: (m.basculante.pivote[0] + m.xR) / 2, y: (m.basculante.pivote[1] + yRR) / 2 },
-    { nombre: 'Ruedas', kg: 3 * L('tMRueda'), x: (2 * m.xF + m.xR) / 3, y: (2 * yRF + yRR) / 3 },
+    // a car wheel weighs a multiple of the slider's moped wheel (RUEDAS_TRICICLO `kg`)
+    { nombre: 'Ruedas', kg: L('tMRueda') * (2 * kDel + kTras), x: (2 * kDel * m.xF + kTras * m.xR) / (2 * kDel + kTras), y: (2 * kDel * yRF + kTras * yRR) / (2 * kDel + kTras) },
     { nombre: 'Frenos', kg: 3 * L('tMFreno'), x: (2 * m.xF + m.xR) / 3, y: (2 * yRF + yRR) / 3 },
     { nombre: 'Dirección', kg: L('tMDir'), x: (m.cremallera.x + m.cabezaDireccion[0]) / 2, y: (m.cremallera.y + m.cabezaDireccion[1]) / 2 },
     { nombre: 'Motor de buje', kg: L('tMMotor'), x: m.motor.c[0], y: m.motor.c[1] },
@@ -604,10 +706,17 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   c('chasis', 'Bastidor: coeficiente de seguridad de los largueros', seguridad - 1.3, 0.5, `×${fmt(seguridad, 1)}`);
   for (const b of m.baterias) c('energia', `Batería, ${b.nombre.toLowerCase()}: dentro de la carrocería`, cajaDentro(F, b), 0.01);
   // the pilot's toes (17 cm ahead of the ankle) and the saddle's nose behind the battery
-  const pie = m.occPts(true).F[0] + 0.17, ultima = m.baterias[m.baterias.length - 1];
-  if (m.baterias.length > 1) c('energia', 'Batería: el módulo de entre los pies, delante del sillín', ultima.x0 - (-0.835 + (m.sillines.xPiloto - ASIENTO.xPiloto) + 0.02), 0.0);
+  const pie = m.occPts(true).F[0] + 0.17, pies = m.baterias.find(b => b.nombre === 'Módulo entre los pies');
+  if (pies) c('energia', 'Batería: el módulo de entre los pies, delante del sillín', pies.x0 - (-0.835 + (m.sillines.xPiloto - ASIENTO.xPiloto) + 0.02), 0.0);
   else c('energia', 'Batería delante de los pies del piloto', m.baterias[0].x0 - pie, 0.02);
+  // round two: what does not fit in the five places is not drawn; this says so (in litres)
+  const litrosBat = L('tKWh') * 1000 / L('tWhL');
+  c('energia', 'Batería: cabe en su sitio (morro, entre los pies y bajo los sillines)', m.bateriaCabe - litrosBat + 1e-9, 0, litrosBat - m.bateriaCabe > 0.05 ? `${Math.round(litrosBat)} L · caben ${Math.round(m.bateriaCabe)}` : `${Math.round(litrosBat)} L`);
   c('propulsion', 'Controlador dentro de la carrocería', cajaDentro(F, m.inversor), 0.01);
+  // a hub motor has the room its rim gives it: above that power, a motor on the swing arm with a belt (as on
+  // electric motorcycles) would be the honest drive, and that is not drawn here
+  const kWBuje = RUEDAS_TRICICLO[T.tRuedaTras].kWBuje, kWp = L('tKWPico');
+  c('propulsion', 'Motor de buje: potencia que cabe en la rueda trasera (regla aproximada)', kWBuje - kWp, 0, `${fmt(kWp, 1)} de ${kWBuje} kW`);
 
   const bala: ResultadosTriciclo = {
     area, vol, piel: ar.carroceria + ar.cristal, cristal: ar.cristal, cupula: [-m.cup.XC0, -m.cup.XC1],
@@ -615,7 +724,7 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     piezas, cg: { x: cg.x, y: cg.y, masa: cg.masa, vacio: { x: vacio.x, y: vacio.y } }, vuelco: { ssf, ssfSolo, repartoDel },
     giro: { radio, dentro: di * 180 / Math.PI, fuera: dout * 180 / Math.PI },
     bastidor: { M: Mmax, tension, seguridad, metros },
-    bateria: { litros: L('tKWh') * 1000 / L('tWhL'), kg: L('tKWh') * 1000 / L('tWhKg'), litrosMorro: 0.42 * 0.30 * 0.20 * 1000 },
+    bateria: { litros: L('tKWh') * 1000 / L('tWhL'), kg: L('tKWh') * 1000 / L('tWhKg'), litrosMorro: 0.42 * 0.30 * Math.max(1, F.kW) * 0.20 * 1000, cabe: m.bateriaCabe },
     energia: cd ? energiaTriciclo(m, mVeh + 2 * mOcc, cd) : null,
   };
   const e = bala.energia, nada = NaN;

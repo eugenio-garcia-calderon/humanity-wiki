@@ -1,5 +1,5 @@
 import type { Est } from './forma';
-import { monotona, punto, type FormaBala } from './balaForma';
+import { monotona, punto, tArriba, type FormaBala } from './balaForma';
 
 /*
  * The «Cuadriciclo Bala»'s hand-placed measurements, apart from the skin:
@@ -51,11 +51,15 @@ export function podDe(F: FormaBala): Est[] {
   if (!o) return POD.map(e => ({ ...e, x: e.x * k, yb: e.yb * k, yt: e.yt * k }));
   // The Triciclo's pods (2026-11-10): `esc` scales the whole pod about the wheel's
   // centre, `ancho` its width and `cola` the length of its tail (behind the axle).
-  const yc = R_LAT_REF * k, Y = (y: number) => yc + (y * k - yc) * o.esc, W = o.esc * o.ancho;
+  // A tyre wider than the drawn 70 mm (round two: car tyres up to 175 mm) widens the pod by 1.8 times what it adds
+  // (the pod narrows towards its top, a car tyre does not).
+  const yc = R_LAT_REF * k, Y = (y: number) => yc + (y * k - yc) * o.esc, W = o.esc * o.ancho + masNeu(F);
   return POD.map(e => ({ ...e, x: e.x * k * o.esc * (e.x < 0 ? o.cola : 1), yb: Y(e.yb), yt: Y(e.yt), wb: e.wb * W, wm: e.wm * W, wt: e.wt * W }));
 }
+/** The Triciclo's pods: what a tyre wider than the drawn 70 mm adds to their width factor (0 with it). */
+const masNeu = (F: FormaBala) => Math.max(0, F.ANCHO_NEU_LAT - 0.07) / 2 * 1.8 / POD_SEMIANCHO;
 /** A pod's half-width at its widest (m): the Cuadriciclo's is `POD_SEMIANCHO`. */
-export const anchoMaxPod = (F: FormaBala) => (F.D.pod ? POD_SEMIANCHO * F.D.pod.esc * F.D.pod.ancho : POD_SEMIANCHO);
+export const anchoMaxPod = (F: FormaBala) => (F.D.pod ? POD_SEMIANCHO * (F.D.pod.esc * F.D.pod.ancho + masNeu(F)) : POD_SEMIANCHO);
 /** Half-width of a pod at (x relative to its axle, y); 0 outside it. */
 export const semiAncho = (POD: Est[]) => (x: number, y: number): number => {
   let k = 0; while (k < POD.length - 2 && POD[k + 1].x > x) k++;
@@ -137,4 +141,90 @@ export function contornoCupula(F: FormaBala) {
     XC0: cruce(Y_VIDRIO, F.X(-0.30), F.X(-0.08)), XC1: cruce(Y_VIDRIO, F.X(-1.75), F.X(-2.3)),
     XF0: cruce(yMarco, F.X(-0.30), F.X(0.0)), XF1: cruce(yMarco, F.X(-1.75), F.X(-2.4)),
   };
+}
+
+// ======================================================= the Triciclo's solar roof and side windows
+/*
+ * Round two of the Triciclo Bala (2026-11-10, Eugenio): «como está ahora la cúpula, en verano sería mucho
+ * calor… un techo solar que llegaba hasta la altura de la cabeza del piloto», and «como el Aptera original…
+ * ventanas laterales con un frame que separa el cristal frontal parabrisas con las ventanas laterales. De una
+ * forma elegante y curva». The canopy's SHAPE does not change: everything here lies on the canopy glass's own
+ * surface, addressed by (x, t) like the skin (balaForma.ts). The Cuadriciclo never reads any of this.
+ *
+ *  - tC(x): the glass's lower edge (where the canopy glass begins on the side).
+ *  - tR(x) = tC + alto · (1 − tC): the roof rail, a fixed fraction of the way from that edge to the top centre.
+ *    Below it on each side, the side window; above it, the roof. Near the canopy's two ends the glass edge
+ *    rises to the top line, and the rail with it: the side window closes in a long teardrop, as on the Aptera.
+ *  - The solar panel: the roof above the rail, from the canopy's rear end forward to `solar`, with a rounded
+ *    leading edge (it reaches `BOMBEO` further forward on the centre line than at the rail). Opaque.
+ *  - The A-pillar (`pilar`): a band from the glass's lower edge at `x` that rises and sweeps back to meet the
+ *    rail `barrido` metres further back. Its centre line is a quarter ellipse in (x, height between the two
+ *    edges): it leaves the lower edge going straight up the side and meets the rail tangentially, so the
+ *    windscreen's edge is one curve that flows into the roof line. Ahead of it, the windscreen (which runs
+ *    over the top up to the panel); behind it, the side window. The rail behind the pillar carries the same
+ *    dark band, narrower: the frame between the side window and the roof.
+ */
+export interface OpcionesVentanas {
+  /** x where the solar panel starts at the rail (shape coordinates), or null: no panel. */
+  solar: number | null;
+  /** Height of the side window (and of the panel's side edge): fraction of the glass from its lower edge to the top. */
+  alto: number;
+  /** The A-pillar and the rail frame, or null (a single bubble, as the Cuadriciclo's). */
+  pilar: { x: number; barrido: number; ancho: number } | null;
+}
+/** How much further forward the panel reaches on the centre line than at the rail (m): its rounded leading edge. */
+export const BOMBEO_SOLAR = 0.14;
+type Contorno = Pick<ReturnType<typeof contornoCupula>, 'Y_VIDRIO' | 'XC0' | 'XC1'>;
+/** The windows and the panel of a shape, as curves on the glass in (x, t). */
+export function ventanasDe(F: FormaBala, C: Contorno, o: OpcionesVentanas) {
+  const tC = (x: number) => tArriba(F.sec(x), C.Y_VIDRIO(x));
+  const tR = (x: number) => { const c = tC(x); return c + o.alto * (1 - c); };
+  // ── the panel
+  let panel: null | { x0: number; x1: number; xS: number; tLow: (x: number) => number } = null;
+  if (o.solar != null && o.solar > C.XC1 + 0.03) {
+    const xS = Math.min(C.XC0 - 0.05, o.solar), x1 = Math.min(C.XC0 - 0.01, xS + BOMBEO_SOLAR);
+    const tLow = (x: number) => {
+      const r = tR(x); if (x <= xS) return r;
+      const u = (2 / Math.PI) * Math.asin(Math.min(1, (x - xS) / BOMBEO_SOLAR));
+      return r + u * (1 - r);
+    };
+    panel = { x0: C.XC1 + 1e-4, x1, xS, tLow };
+  }
+  // ── the pillar and the rail
+  let pilar: null | { xP: number; xT: number; punto: (s: number) => [number, number]; ancho: number } = null;
+  if (o.pilar) {
+    const xP = Math.min(C.XC0 - 0.06, Math.max(C.XC1 + 0.3, o.pilar.x)), xT = Math.max(C.XC1 + 0.1, xP - o.pilar.barrido);
+    pilar = {
+      xP, xT, ancho: o.pilar.ancho,
+      punto: (s: number) => {
+        const a = Math.PI / 2 * Math.min(1, Math.max(0, s)), x = xP + (xT - xP) * (1 - Math.cos(a)), c = tC(x);
+        // from just below the glass edge (into the navy canopy frame) up to the rail
+        return [x, c - 0.01 + (o.alto * (1 - c) + 0.01) * Math.sin(a)];
+      },
+    };
+  }
+  return { tC, tR, panel, pilar };
+}
+export type Ventanas = ReturnType<typeof ventanasDe>;
+
+/**
+ * Area (m², both sides) of a region of the skin given by rows x0..x1 and, on each row, t from `rango(x)[0]`
+ * to `rango(x)[1]`; with its centroid (x, y). Triangles on the skin's own sections, as `pielBala`.
+ */
+export function areaXT(F: FormaBala, x0: number, x1: number, rango: (x: number) => [number, number], nx = 90, nt = 16): { area: number; x: number; y: number } {
+  let A = 0, ax = 0, ay = 0, prev: [number, number, number][] | null = null;
+  const tri = (p: number[], q: number[], r: number[]) => {
+    const ux = q[0] - p[0], uy = q[1] - p[1], uz = q[2] - p[2], vx = r[0] - p[0], vy = r[1] - p[1], vz = r[2] - p[2];
+    return Math.hypot(uy * vz - uz * vy, uz * vx - ux * vz, ux * vy - uy * vx) / 2;
+  };
+  for (let i = 0; i <= nx; i++) {
+    const x = x0 + (x1 - x0) * i / nx, s = F.sec(x), [a, b] = rango(x), fila: [number, number, number][] = [];
+    for (let j = 0; j <= nt; j++) { const [z, y] = punto(s, a + (b - a) * j / nt); fila.push([x, y, z]); }
+    if (prev) for (let j = 0; j < nt; j++) {
+      const k = 2 * (tri(prev[j], prev[j + 1], fila[j]) + tri(prev[j + 1], fila[j + 1], fila[j]));
+      A += k; ax += k * (prev[j][0] + fila[j + 1][0]) / 2; ay += k * (prev[j][1] + fila[j + 1][1]) / 2;
+    }
+    prev = fila;
+  }
+  return { area: A, x: A ? ax / A : (x0 + x1) / 2, y: A ? ay / A : 1 };
 }
