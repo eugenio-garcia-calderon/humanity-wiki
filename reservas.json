@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "memory/03_DECISIONS.md",
-      "motivo": "Triciclo 2: notas",
-      "desde": "2026-11-10T15:03:06.110Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md",
       "motivo": "Triciclo 2: notas",
       "desde": "2026-11-10T15:03:09.076Z"
