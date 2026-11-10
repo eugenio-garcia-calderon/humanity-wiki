@@ -43,9 +43,9 @@ export interface CamposBala {
 export type ClaveBala = keyof CamposBala;
 
 /** Anchos de neumático (no se eligen): de ciclomotor, 80 mm delante y detrás y 70 mm a los lados. */
-const ANCHO_NEU = 0.08, ANCHO_NEU_LAT = 0.07;
+export const ANCHO_NEU = 0.08, ANCHO_NEU_LAT = 0.07;
 /** Holgura mínima entre el carenado lateral y la carrocería, que la vía nunca baja de ahí (m). */
-const HUECO_CARENADO = 0.03;
+export const HUECO_CARENADO = 0.03;
 
 // ------------------------------------------------------------------ deslizadores
 /**
@@ -148,9 +148,9 @@ export const INCLINACION = { piloto: 5, pasajero: 5 };
  * más allá por el tronco y 11 cm de media cabeza. Con la talla media suma 91,8 cm
  * erguido, la talla sentado del percentil 50; para otra talla se escala entero.
  */
-const CADERA_SOBRE_ASIENTO = 0.108, CABEZA_EN_TRONCO = 0.70, MEDIA_CABEZA = 0.11;
+export const CADERA_SOBRE_ASIENTO = 0.108, CABEZA_EN_TRONCO = 0.70, MEDIA_CABEZA = 0.11;
 /** Rodilla por cinemática inversa: muslo l1 y pierna l2 de la cadera h al pie f, la rodilla hacia delante y arriba. */
-function rodilla(h: [number, number], f: [number, number], l1: number, l2: number): [number, number] {
+export function rodilla(h: [number, number], f: [number, number], l1: number, l2: number): [number, number] {
   const dx = f[0] - h[0], dy = f[1] - h[1], d = Math.min(Math.hypot(dx, dy), l1 + l2 - 1e-3);
   const a = Math.acos((l1 * l1 + d * d - l2 * l2) / (2 * l1 * d)), b = Math.atan2(dy, dx);
   return [h[0] + l1 * Math.cos(b + a), h[1] + l1 * Math.sin(b + a)];
@@ -212,8 +212,9 @@ export interface ResultadosBala {
 }
 
 /** La superficie de la piel (m²) en total y en la zona del cristal, integrando la malla de secciones. */
-function pielBala(F: FormaBala, cup: ReturnType<typeof contornoCupula>) {
-  const NX = 150, NT = 40, out = { piel: 0, cristal: 0 };
+export function pielBala(F: FormaBala, cup: ReturnType<typeof contornoCupula>) {
+  // the x and y moments (m³) of the body and of the glass go along too, for the Triciclo's centre of gravity
+  const NX = 150, NT = 40, out = { piel: 0, cristal: 0, xPiel: 0, yPiel: 0, xCristal: 0, yCristal: 0 };
   const filas: [number, number][][] = [];
   for (let i = 0; i <= NX; i++) {
     const x = F.X_MORRO - 1e-4 - (F.LARGO - 2e-4) * i / NX, s = F.sec(x), fila: [number, number][] = [];
@@ -231,7 +232,8 @@ function pielBala(F: FormaBala, cup: ReturnType<typeof contornoCupula>) {
     const s = 2 * (tri(A, Bv, C) + tri(Bv, Dv, C)); // the two halves
     out.piel += s;
     const xm = (x0 + x1) / 2, ym = (a[1] + b[1] + c[1] + d[1]) / 4;
-    if (xm <= cup.XC0 && xm >= cup.XC1 && ym > cup.Y_VIDRIO(xm)) out.cristal += s;
+    out.xPiel += s * xm; out.yPiel += s * ym;
+    if (xm <= cup.XC0 && xm >= cup.XC1 && ym > cup.Y_VIDRIO(xm)) { out.cristal += s; out.xCristal += s * xm; out.yCristal += s * ym; }
   }
   return out;
 }
@@ -242,7 +244,7 @@ function pielBala(F: FormaBala, cup: ReturnType<typeof contornoCupula>) {
  * ruedas que asoman, aleta) y se mide su unión: lo que una parte tapa detrás de
  * otra no cuenta dos veces. Cada parte suma lo que añade a las anteriores.
  */
-function areaFrontalBala(m: ModeloBala) {
+export function areaFrontalBala(m: Pick<ModeloBala, 'F' | 'alto' | 'ruedas' | 'aleta'>, extras: { y0: number; y1: number; z: number }[] = []) {
   const F = m.F, DY = 0.005, NY = Math.ceil((m.alto + 0.4) / DY);
   // Media anchura del cuerpo por franja: el máximo de todas las secciones a esa altura.
   const zc = new Float64Array(NY), tramos: [number, number][][] = Array.from({ length: NY }, () => []);
@@ -282,6 +284,8 @@ function areaFrontalBala(m: ModeloBala) {
     const cy = r.r - APLASTADO_BALA;
     for (let i = 0; i < NY; i++) { const y = (i + 0.5) * DY; if (y < cy + r.r) poner(i, Math.abs(r.z) - r.w / 2, Math.abs(r.z) + r.w / 2); }
   }
+  // the Triciclo's rear wheel spat (2026-11-10): half-width z from y0 to y1, counted with the wheels
+  for (const e of extras) for (let i = Math.floor(e.y0 / DY); i <= Math.floor(e.y1 / DY); i++) poner(i, 0, e.z);
   const conRuedas = medir();
   // the fin: its root thickness from the tail's top to the tip
   const yRaiz = techoEn(F, F.X(ALETA.punta[0][0]));
@@ -298,8 +302,9 @@ function cabeza(m: ModeloBala, piloto: boolean, talla: number, espCristal: numbe
 }
 
 /** Holgura (m) de una rueda a la piel, para la parte que va por encima de la panza: de lado, por arriba y por delante o por detrás. */
-function ruedaDentro(F: FormaBala, x0: number, r: number, w: number): number {
-  const cy = r - APLASTADO_BALA; let h = 9;
+export function ruedaDentro(F: FormaBala, x0: number, r: number, w: number, sube = 0): number {
+  // `sube`: the wheel lifted that much into the body (the Triciclo's rear suspension compressed)
+  const cy = r - APLASTADO_BALA + sube; let h = 9;
   for (let k = 0; k < 72; k++) {
     const a = 2 * Math.PI * k / 72, x = x0 + r * Math.cos(a), y = cy + r * Math.sin(a);
     const s = F.seccionRapida(x); let yb = Infinity; for (let j = 0; j < s.length; j += 2) yb = Math.min(yb, s[j + 1]);
@@ -314,7 +319,7 @@ function ruedaDentro(F: FormaBala, x0: number, r: number, w: number): number {
 }
 
 /** Holgura (m) del neumático lateral a la cara de dentro del carenado (de lado y por arriba). */
-function neumaticoCarenado(F: FormaBala): number {
+export function neumaticoCarenado(F: FormaBala): number {
   const POD = podDe(F), ancho = semiAncho(POD), r = F.R_LAT, w = F.ANCHO_NEU_LAT, cy = r - APLASTADO_BALA, ESP = 0.003;
   let h = 9;
   for (let k = 0; k < 96; k++) {
@@ -327,7 +332,7 @@ function neumaticoCarenado(F: FormaBala): number {
 }
 
 /** El hueco (m) entre la cara de dentro de cada carenado lateral (y sus brazos no cuentan) y la carrocería. */
-function carenadoCuerpo(F: FormaBala): number {
+export function carenadoCuerpo(F: FormaBala): number {
   const POD = podDe(F), ancho = semiAncho(POD); let h = 9;
   for (let i = 0; i <= 24; i++) {
     const xr = POD[0].x + (POD[POD.length - 1].x - POD[0].x) * i / 24, alt = alturasPod(POD, xr); if (!alt) continue;
@@ -374,7 +379,7 @@ export function calcularBala(m: ModeloBala, ar: { carroceria: number; cristal: n
 }
 
 /** Superficies de piel (m²): la carrocería y el cristal de la cúpula; el Bala no lleva paneles solares. */
-export function areasBala(m: ModeloBala) {
+export function areasBala(m: Pick<ModeloBala, 'F' | 'cup'>) {
   const s = pielBala(m.F, m.cup);
   return { carroceria: s.piel - s.cristal, cristal: s.cristal, solar: 0 };
 }

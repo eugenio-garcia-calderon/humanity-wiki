@@ -1,0 +1,101 @@
+/**
+ * Saved designs and the Triciclo Bala (2026-11-10). Run with: npx tsx scripts/triciclo-disenos.ts [carpeta-de-main]
+ *
+ *  - Round trip: the default Triciclo, and one with every field moved, survive save → open unchanged; a saved
+ *    `{"disposicion": "triciclo"}` (what the team base design will be) opens with the defaults.
+ *  - Clamping: out-of-range numbers build a model with the values at the ends of their sliders; wrong types and
+ *    unknown options fall back to the defaults (a design written by hand cannot build an impossible triciclo).
+ *  - The body at the defaults is the Cuadriciclo Bala's default body: the same envelope, and every body mesh
+ *    (skin, canopy, livery, lamps, fin) the same vertex for vertex.
+ *  - Old designs untouched: with `carpeta-de-main` (a copy of main's src/, e.g. from `git archive`), the Gota,
+ *    the Aeromóvil 1 and the Cuadriciclo designs open to the same parameters and the same results as on main.
+ */
+import * as THREE from 'three';
+import { PARAMETROS_A1, PARAMETROS_BALA, PARAMETROS_GOTA, PARAMETROS_TRICICLO, TRICICLO_DEFECTO, areas, calcular, crearModelo, type Parametros } from '../src/components/aeromovil/geometria';
+import { aDiseno, deDiseno } from '../src/components/aeromovil/Disenos';
+import { camposTriciclo, deslizadoresTriciclo, rangoTriciclo, type ModeloTriciclo } from '../src/components/aeromovil/geometriaTriciclo';
+import type { ModeloBala } from '../src/components/aeromovil/geometriaBala';
+import { construirCon, crearMateriales } from '../src/components/aeromovil/garaje/balaModelo';
+
+let fallos = 0;
+const ok = (c: boolean, m: string) => { console.log(`${c ? 'OK   ' : 'FALLA'} ${m}`); if (!c) fallos++; };
+const igual = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
+
+// ── round trip
+ok(igual(deDiseno(aDiseno(PARAMETROS_TRICICLO)), { ...PARAMETROS_TRICICLO, comp: 0 }), 'el Triciclo por defecto se guarda y se abre igual');
+ok(igual(camposTriciclo(deDiseno({ disposicion: 'triciclo' })), TRICICLO_DEFECTO), 'un diseño guardado solo con {"disposicion": "triciclo"} abre con las medidas por defecto');
+{
+  const P: Parametros = { ...PARAMETROS_TRICICLO };
+  const T = camposTriciclo(P);
+  for (const f of deslizadoresTriciclo()) { const [a, b] = rangoTriciclo(f.clave, T); (P as unknown as Record<string, unknown>)[f.clave] = +(a + (b - a) * 0.3).toFixed(4); }
+  Object.assign(P, { tMatCarenado: 'vidrio', tChMat: 'al6061', tRuedaDel: '24', tRuedaTras: '26' });
+  const Q = deDiseno(JSON.parse(JSON.stringify(aDiseno(P))));
+  ok(igual(camposTriciclo(Q), camposTriciclo(P)), 'un Triciclo con todos los campos cambiados se guarda y se abre igual');
+  const m = crearModelo(Q) as ModeloTriciclo;
+  ok(m.tipo === 'triciclo' && m.ruedas.length === 3, 'y abre como triciclo, con tres ruedas');
+}
+
+// ── clamping
+{
+  const P = deDiseno({ disposicion: 'triciclo', tVia: 9, tPilY: -1, tKWh: 999, tRecPil: 90, tGiro: 80, tPodEsc: 0.1, tBatalla: 5 } as Partial<Parametros>);
+  const m = crearModelo(P) as ModeloTriciclo, T = m.campos, f = (k: string) => deslizadoresTriciclo().find(x => x.clave === k)!;
+  ok(Math.abs(m.F.VIA_LAT - f('tVia').max) < 1e-9, `vía 9 m → ${m.F.VIA_LAT} m (el máximo del deslizador)`);
+  ok(Math.abs(m.sillines.yPiloto - f('tPilY').min) < 1e-9, `sillín del piloto a −1 m → ${m.sillines.yPiloto} m (el mínimo)`);
+  ok(Math.abs(m.rec.piloto - f('tRecPil').max) < 1e-9 && Math.abs(m.giro * 180 / Math.PI - f('tGiro').max) < 1e-9, `reclinado 90° → ${m.rec.piloto}°; giro 80° → ${Math.round(m.giro * 180 / Math.PI)}°`);
+  ok(Math.abs(m.F.BATALLA - f('tBatalla').max) < 1e-9 && m.F.D.pod!.esc === f('tPodEsc').min, `batalla de la carrocería 5 m → ${m.F.BATALLA} m; carenado ×0,1 → ×${m.F.D.pod!.esc}`);
+  const res = calcular(m, areas(m));
+  ok(Math.abs(res.triciclo!.bateria.kg - f('tKWh').max * 1000 / T.tWhKg) < 1e-9, `batería de 999 kWh → ${f('tKWh').max} kWh (${Math.round(res.triciclo!.bateria.kg)} kg, ${Math.round(res.triciclo!.bateria.litros)} L)`);
+  void T;
+  const Q = deDiseno({ disposicion: 'triciclo', tVia: 'ancha', tRuedaDel: '99', tChMat: 'madera', tSuelo: Number.NaN } as unknown as Partial<Parametros>);
+  const U = camposTriciclo(Q);
+  ok(U.tVia === TRICICLO_DEFECTO.tVia && U.tRuedaDel === TRICICLO_DEFECTO.tRuedaDel && U.tChMat === TRICICLO_DEFECTO.tChMat && U.tSuelo === TRICICLO_DEFECTO.tSuelo, 'un texto donde va un número, una rueda o un material que no existen y un NaN: los de por defecto');
+}
+
+// ── the body at the defaults is the Cuadriciclo's
+{
+  const mb = crearModelo(PARAMETROS_BALA) as ModeloBala, mt = crearModelo(PARAMETROS_TRICICLO) as ModeloTriciclo;
+  ok(igual(mb.F.envolvente(), mt.F.envolvente()), `la silueta del Triciclo por defecto es la del Cuadriciclo (${mt.F.envolvente().length} estaciones)`);
+  const M = crearMateriales();
+  const cuerpo = (g: THREE.Group) => {
+    // the body: everything but the wheels, the pods and their arms, the cockpit and the Triciclo's spat
+    const o: Record<string, Float32Array[]> = {};
+    for (const c of g.children) {
+      if (['carenados', 'ruedas', 'cabina', 'faldon'].includes(c.name)) continue;
+      c.updateMatrixWorld(true);
+      c.traverse(x => { const m = x as THREE.Mesh; if (!m.isMesh) return; (o[m.name] ??= []).push(m.geometry.getAttribute('position').array as Float32Array); });
+    }
+    return o;
+  };
+  const a = cuerpo(construirCon(mb.F, { M, cupulaAparte: true, asientos: mb.sillines, aleta: mb.aleta }));
+  const b = cuerpo(construirCon(mt.F, { M, cupulaAparte: true, asientos: mt.sillines, aleta: mt.aleta, triciclo: { recPil: mt.rec.piloto, recPas: mt.rec.pasajero, man: mt.man, pies: mt.pies, faldon: mt.faldon } }));
+  const ka = Object.keys(a).sort(), kb = Object.keys(b).sort();
+  let n = 0, distintas: string[] = [];
+  for (const k of ka) for (let i = 0; i < a[k].length; i++) { n++; const p = a[k][i], q = b[k]?.[i]; if (!q || p.length !== q.length || p.some((v, j) => v !== q[j])) distintas.push(k); }
+  ok(igual(ka, kb) && !distintas.length, `la carrocería por defecto es la del Cuadriciclo, vértice a vértice: ${n} mallas (${ka.join(', ')})${distintas.length ? ` · distintas: ${distintas.join(', ')}` : ''}`);
+}
+
+// ── old designs, against main
+const main = process.argv[2];
+if (!main) console.log('(sin la carpeta de main: no se comparan los diseños antiguos)');
+else {
+  const g = await import(`${main}/src/components/aeromovil/geometria.ts`);
+  const d = await import(`${main}/src/components/aeromovil/Disenos.tsx`);
+  const viejos: [string, Partial<Parametros>][] = [
+    ['Gota de antes del 2026-11-06 (sin disposicion)', { B: 2.7, xLm: 1.3, W: 1.2, H: 1.3, puerta: 'gaviota' } as Partial<Parametros>],
+    ['Aeromóvil Gota por defecto', PARAMETROS_GOTA], ['Aeromóvil 1 por defecto', PARAMETROS_A1],
+    ['Aeromóvil 1 cambiado', { ...PARAMETROS_A1, L: 4.1, viaF: 1.3, kWh: 30, recPil: 45, chasis: 'celosia' }],
+    ['Cuadriciclo Bala por defecto', PARAMETROS_BALA], ['Cuadriciclo Bala cambiado', { ...PARAMETROS_BALA, bBatalla: 2.6, bAncho: 0.8, bRuedaLat: '24', bPilY: 0.48 }],
+    ['Bala de base del equipo', { disposicion: 'bala' }],
+  ];
+  const limpio = (r: unknown) => JSON.parse(JSON.stringify(r, (_k, v) => (typeof v === 'number' && !Number.isFinite(v) ? String(v) : v)));
+  for (const [nombre, P] of viejos) {
+    const a = d.deDiseno(P), b = deDiseno(P);
+    ok(igual(a, b), `${nombre}: abre con los mismos parámetros que en main`);
+    const ma = g.crearModelo(g.ajustarCarenado(a)), mb2 = crearModelo(b);
+    const ra = limpio(g.calcular(ma, g.areas(ma))), rb = limpio(calcular(mb2, areas(mb2)));
+    ok(igual(ra, rb), `${nombre}: mismos resultados que en main (área, Cd, masas, comprobaciones${b.disposicion === 'bala' ? ', cabezas' : ''})`);
+  }
+}
+
+console.log(fallos ? `\n${fallos} fallos` : '\nTodo OK');
+if (fallos) process.exitCode = 1;
