@@ -1274,3 +1274,23 @@ Without an account the page still lets anyone move and change things. Their chan
 Opening it later is one constant, `NIVEL_GUARDAR`, plus `puedeGuardar` in `src/server/conciencia.ts`. History (a copy every 10 minutes at most, always before restoring or resetting; 300 kept) and the per-IP brake are already there, so the open variant would be safe too.
 
 **Storage shape:** one row per map with the whole map as JSONB (`conciencia_mapas`, key `principal`), `datos` NULL meaning «the map in the code», and `version` for 409 on concurrent saves. Same pattern as `calendario_arte_meses`. Node and edge rows were rejected: one drag would be dozens of writes, and the map is always read and drawn whole.
+
+## 2026-11-10 — Triciclo Bala: the Cuadriciclo's body on a tadpole layout
+
+**Family and types.** Fourth family, `disposicion: 'triciclo'`, with `ModeloTriciclo` (tipo `'triciclo'`) in the `Modelo` union, so TypeScript listed every family branch; each got an explicit answer (viewer, tunnel body, planos «not yet», exportar STL only, comparison card, components). Parameters are optional `t…` fields; old designs never carry them (`scripts/triciclo-disenos.ts <copy of main>` checks Gota, A1 and Cuadriciclo designs open with the same parameters and the same `calcular` output as main). Team base design: migration 0182, same pattern as 0178.
+
+**Shape reuse, not copy.** `crearForma` and the Bala builder take three optional `DimBala` fields read only by the Triciclo: `xLat` (axle of the wheels in pods), `pod {esc, ancho, cola}` and `cuerdaBrazo`. With them absent every number is the Cuadriciclo's: `bala-huella` prints IGUAL for the garage Bala and (new `--editor` mode) for the editor's default Cuadriciclo, against main. At its defaults the Triciclo's body meshes equal the Cuadriciclo's vertex for vertex.
+
+**Coordinates.** The Triciclo is computed in the Cuadriciclo's frame: x = 0 is where the Cuadriciclo has its front wheel; the Triciclo's front axle is `tEjeDel` behind it (default 0.30 m). Sliders measured «al eje delantero» display and take values from the Triciclo's own axle (`vistaTriciclo`/`guardarTriciclo`), so the labels are true. Rejected for now: translating the whole model (debt entry).
+
+**Pods turn with the wheels** (as on the Aptera). A fixed pod with room for a 28° lock would need about twice the half-width. Check: the turned pod's inner face to the skin, both directions, at full lock.
+
+**Nose = battery.** The Cuadriciclo's front-wheel space holds a 25 L battery module, the rest a narrow module between the pilot's feet: weight low and close to the front axle, which is what a tadpole needs against rollover. Hub motor in the rear wheel.
+
+**Rollover.** Static stability for a tadpole = t·b / (2·h·L) (t front track, b CG to rear axle, h CG height, L wheelbase), rigid body; exact for lateral acceleration perpendicular to the centreline (the axis tilt cancels). Thresholds are the bot's engineering choice, stated on screen: red below 0.9 g (a moped tyre's dry grip: it would tip before sliding), green from 1.05 g (grip + ~15 % for roll compliance). With two adults astride a 1.20 m track gives ~0.73 g; reaching ≥ 1.05 needed four levers together: track 1.80 m, front axle 0.30 m back, saddles 4 cm lower, 9 kWh battery in the nose. Default 1.09 g with two, 1.34 g with the pilot alone. Chosen over a narrower, Aptera-unlike track with a red check by default.
+
+**Cd.** No editor formula: the tunnel's numbers-only run in the worker, in the background, keyed by the silhouette, interpolated between 50/80/120 km/h; «calculando…» while it runs, never a placeholder number.
+
+**Sliders.** One table, `deslizadoresTriciclo()`, read by the page and by the tunnel's improvement options; shape rows reuse `DESLIZADORES_BALA`. A slider recentres on the default (`centrar`) only when the default is the midpoint of its range, so asymmetric ranges (recline −10…20°, handlebar −6…+10 cm) show whole in the existing widget.
+
+**Recline.** Trunk reclines about the hip, head a third (A1 model). Pilot 0° → 20°: tall rider +4.8 cm under the canopy but ~15 cm less reach. Passenger: reclining costs headroom, because the canopy falls behind him.

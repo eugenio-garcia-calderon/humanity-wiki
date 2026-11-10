@@ -1472,7 +1472,7 @@ export default function Aeromovil() {
       {seccion === 'exportar' && <VistaExportar modelo={modelo} visor={visor} porDefecto={porDefecto} resultados={res} />}
 
       <footer className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-x-4 gap-y-1 px-4 pb-6 pt-2 text-xs text-slate-500">
-        <span className="flex items-center gap-1"><Layers className="h-3.5 w-3.5" />Modelo paramétrico · STEP generado con CadQuery</span>
+        <span className="flex items-center gap-1"><Layers className="h-3.5 w-3.5" />Modelo paramétrico{!esBala && !esTri && ' · STEP generado con CadQuery'}</span>
         <span className="flex items-center gap-1"><Gauge className="h-3.5 w-3.5" />Cifras de rendimiento estimadas</span>
         <span className="flex items-center gap-1"><ClipboardList className="h-3.5 w-3.5" />{abiertas ?? '…'} tareas abiertas</span>
       </footer>
