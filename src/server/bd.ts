@@ -2219,6 +2219,28 @@ export function registerBdRoutes(app: Express, db: any) {
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
+  /** La descripción que se ve en la tarjeta (`config.subtitulo` de su página), desde la propia
+   *  tarjeta (2026-11-10). Sin texto, se quita. */
+  app.put('/api/bd/filas/:id/subtitulo', async (req: Request, res: Response) => {
+    try {
+      if (!exigeSesion(req, res)) return;
+      const f = await db.execute(sql`SELECT tabla_id, pagina_id FROM bd_filas WHERE id = ${req.params.id} AND deleted_at IS NULL`);
+      const fila = f.rows[0] as any;
+      if (!fila?.pagina_id) return res.status(404).json({ error: 'Esa fila no tiene página.' });
+      const permiso = await puedeConTabla(req, fila.tabla_id, true);
+      if ('error' in permiso) return res.status(permiso.codigo).json({ error: permiso.error });
+      const texto = String(req.body?.subtitulo ?? '').trim().slice(0, 300);
+      await db.execute(sql`
+        UPDATE knowledge_windows
+        SET config = CASE WHEN ${texto} = '' THEN COALESCE(config, '{}'::jsonb) - 'subtitulo'
+                          ELSE jsonb_set(COALESCE(config, '{}'::jsonb), '{subtitulo}', to_jsonb(${texto}::text)) END,
+            updated_at = now(), updated_by = ${req.user!.id}
+        WHERE id = ${fila.pagina_id}
+      `);
+      res.json({ subtitulo: texto });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   /**
    * Escribir celdas de una fila. El cuerpo es `{ celdas: { "<id_columna>": valor } }`.
    *

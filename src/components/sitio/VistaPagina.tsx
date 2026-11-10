@@ -253,7 +253,7 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
         {(conBarra && esRaiz) || sinCabecera ? null : termo
           ? <LecturaBloqueDatos bloque={{ ...termo, datos: { ...(termo.datos || {}), comoCabecera: true } }} paginaId={pagina.id} />
           : perfil ? <LecturaBloqueDatos bloque={perfil} paginaId={pagina.id} />
-          : proyectoEscaparate ? <Suspense fallback={<div className="mb-10 aspect-[16/9] w-full animate-pulse rounded-2xl bg-slate-100" />}><CabeceraProyectoEscaparate pagina={pagina} /></Suspense>
+          : proyectoEscaparate || cfg.cabecera?.estilo === 'portada' ? <Suspense fallback={<div className="mb-10 aspect-[16/9] w-full animate-pulse rounded-2xl bg-slate-100" />}><CabeceraProyectoEscaparate pagina={pagina} /></Suspense>
           : paginaEscaparate ? <CabeceraPaginaEscaparate pagina={pagina} />
           : <CabeceraLectura pagina={pagina} esMovil={esMovil} />}
         {/* Si es la página de una fila: con qué está conectada (solo lo que tiene algo). */}
