@@ -36,7 +36,7 @@ import { cabeceraEnHtml } from './cabeceraSitio';
 import { cuerpoEnHtml, esc as escHtml, enLinea } from './htmlBloques';
 import { ampliar, type MetaPagina } from './ampliarPagina';
 import { configEscaparate, urlsEscaparate, modeloEscaparate } from './seoEscaparate';
-import { datosDeIdioma, dominiosTraducidos, estaTraducido, hreflangDe, idiomaDeHost, traducirHtml, traducirProfundo, tramosOriginales } from './traducciones';
+import { direccionTraducida, idiomaListo, localeDe, datosDeIdioma, dominiosTraducidos, estaTraducido, hreflangDe, idiomaDeHost, traducirHtml, traducirProfundo, tramosOriginales } from './traducciones';
 import { asegurarRutas, asegurarRutaDePagina, patronDeTitulo, TRAMOS_RESERVADOS } from './rutasFila';
 import { sitioConAnfitrion, sitioEnCasa } from '../components/sitio/ContextoSitio';
 import { bloquesDe } from './bloquesSql';
@@ -223,7 +223,15 @@ export function sitioDe(req: Request): Sitio {
     if (esSubdominioDeSitio(comoSitio)) return { forma: 'dominio', host: comoSitio };
     return { forma: 'subdominio', host, handle: primero };
   }
-  return { forma: 'dominio', host };
+  // EL «www» DE UN DOMINIO PROPIO ES EL MISMO SITIO (2026-11-10, Eugenio en
+  // solarcrowd.com: «algo está fallando en las páginas de cada proyecto»). El
+  // dominio se guarda sin `www.` (`normalizarDominio`) y Caddy sirve las dos
+  // formas, pero aquí se buscaba tal cual llegaba: en `www.solarcrowd.com` la
+  // portada salía y cada subpágina daba «Esta página no existe», porque
+  // `dominioApunta` buscaba `www.solarcrowd.com` y no lo encontraba. Quien
+  // escribe `www.` quiere su sitio, y las direcciones canónicas salen así sin
+  // `www.`: una sola por página.
+  return { forma: 'dominio', host: host.replace(/^www\./, '') };
 }
 
 /** La página a la que apunta un dominio propio, o su dueño si apunta al
@@ -910,7 +918,7 @@ export function registrarSitios(app: Express, db: any) {
       if (urls && idiomaDeHost(sitioDe(req).host)) {
         const h = sitioDe(req).host;
         urls = urls.map(u => ({ ...u, loc: traducirProfundo(u.loc.replace(`https://${h}`, 'https://luzhumanidad.com'), h) }))
-          .filter(u => { const t = new URL(u.loc).pathname.split('/').filter(Boolean); return t.length !== 1 || tramosOriginales(h, t)[0] !== t[0]; });
+          .filter(u => { const t = new URL(u.loc).pathname.split('/').filter(Boolean); return t.length !== 1 || direccionTraducida(h, t[0]); });
       }
       if (!urls) return res.status(404).type('txt').send('No existe ese fichero.');
       const trozos = Math.max(1, Math.ceil(urls.length / POR_TROZO));
@@ -1053,7 +1061,7 @@ export function registrarSitios(app: Express, db: any) {
       const idioma = idiomaDeHost(s.host);
       const tituloOriginal = String(w.title || '');
       if (idioma) {
-        if (!w.virtual && !estaTraducido(tituloOriginal, idioma)) w.indexable = false;
+        if ((!w.virtual && !estaTraducido(tituloOriginal, idioma)) || !idiomaListo(idioma)) w.indexable = false;
         w = traducirProfundo(w, s.host);
         publica = traducirProfundo(publica, s.host);
         if (publica?.meta) { delete publica.meta.titulo; delete publica.meta.descripcion; }
@@ -1138,7 +1146,7 @@ export function registrarSitios(app: Express, db: any) {
         `<meta name="twitter:card" content="${img ? 'summary_large_image' : 'summary'}">`,
         `<link rel="canonical" href="${esc(canonica)}">`,
         ...hreflangDe(s.host, req.path, tituloOriginal),
-        idioma && `<meta property="og:locale" content="en_US">`,
+        idioma && `<meta property="og:locale" content="${localeDe(idioma)}">`,
         `<meta name="robots" content="${!indexable ? 'noindex,nofollow' : conFiltros ? 'noindex,follow' : 'index,follow'}">`,
         ...(m.metas || []).filter(x => x && (x.property || x.name)).map(x => x.property
           ? `<meta property="${esc(String(x.property))}" content="${esc(String(x.content ?? ''))}">`

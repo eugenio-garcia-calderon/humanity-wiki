@@ -4,6 +4,7 @@ import { miniatura } from '../../utils/miniatura';
 import BuscarBarra from './BuscarBarra';
 import BotonCalificaciones from './BotonCalificaciones';
 import { VistasMenu, vistasDe, type Vista } from './VistaMapaSitio';
+import SelectorIdioma from './SelectorIdioma';
 
 const BotonesLectura = lazy(() => import('./BotonesLectura'));
 
@@ -65,7 +66,7 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
           </span>
         )}
       </Link>
-      <div className="flex min-w-0 justify-end"><BuscarBarra raizId={raizId} enLinea /></div>
+      <div className="flex min-w-0 items-center justify-end gap-2"><BuscarBarra raizId={raizId} enLinea /><SelectorIdioma /></div>
     </header>
   );
   return (

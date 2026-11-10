@@ -127,6 +127,7 @@ import { registrarOfertas } from './ofertas.js';
 import { registrarSoporte } from './soporte.js';
 import { registrarExpertos } from './expertos.js';
 import { registrarFormulariosSitio } from './formulariosSitio.js';
+import { registrarPrestamos } from './prestamos.js';
 
 /**
  * Un módulo de la API.
@@ -466,6 +467,13 @@ export const MODULOS: Modulo[] = [
     nota: 'Los formularios de un escaparate: «quiero colaborar» y el boletín, y el panel de quien administra la raíz '
         + '(2026-11-07, migración 0175). Sólo rutas `/api/sitio/:raiz/{formulario,mensaje,boletin…,formularios…}`, ninguna '
         + 'de un solo tramo, así que el sitio en la lista da igual; va junto al SEO del escaparate porque lee su modelo.',
+  },
+  {
+    nombre: 'prestamos',
+    montar: (app, db) => registrarPrestamos(app, db),
+    nota: 'Formalizar un préstamo desde el bloque «Formalizar préstamo» (2026-11-10, SolarCrowd, migración 0180): firma, '
+        + 'justificante, contrato en PDF y copia por correo. Solo rutas `/api/prestamo/…`; el envío trae su propio tipo '
+        + '(`application/x-prestamo-json`) porque el JSON global de server.ts corta en 100 kB.',
   },
   // EL ÚLTIMO A PROPÓSITO: su ampliación de la página tiene que pasar después de la
   // ficha de producto y de las valoraciones, que en un escaparate no aplican.

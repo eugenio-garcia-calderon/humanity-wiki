@@ -26,11 +26,12 @@ import { AMBITOS, APOYOS, EMPLEADORES, ESCALAS, FUENTES, FUNCIONES, GRUPOS_GASTO
 
 export type SitioTraducido = { raiz: string; origen: string; traducciones: Record<string, string> };
 export const SITIOS_TRADUCIDOS: SitioTraducido[] = [
-  { raiz: 'KWMUO4S4V663', origen: 'luzhumanidad.com', traducciones: { en: 'lighthumanity.org' } },
+  { raiz: 'KWMUO4S4V663', origen: 'luzhumanidad.com', traducciones: { en: 'lighthumanity.org', pt: 'pt.lighthumanity.org' } },
 ];
 export const dominiosTraducidos = () => SITIOS_TRADUCIDOS.flatMap(s => Object.values(s.traducciones));
-const ETIQUETAS: Record<string, string> = { es: 'Español', en: 'English' };
-const IDIOMAS_LARGOS: Record<string, string> = { es: 'es-ES', en: 'en' };
+const ETIQUETAS: Record<string, string> = { es: 'Español', en: 'English', pt: 'Português' };
+const IDIOMAS_LARGOS: Record<string, string> = { es: 'es-ES', en: 'en', pt: 'pt-BR' };
+export const localeDe = (idioma: string) => ({ en: 'en_US', pt: 'pt_BR' } as Record<string, string>)[idioma] || 'es_ES';
 
 const CLAVES_FUERA = new Set(['id', 'tipo', 'tabla_id', 'entityId', 'url', 'src', 'href', 'imagen', 'portada', 'icono', 'color', 'slug', 'ruta', 'aplicacion',
   'encuadre', 'jsonLd', 'dominio', 'email', 'correo', 'telefono', 'handle', 'proveedorCorreo', 'organizacion', 'fundador', 'imagenCompartir', 'colabora', 'proyectos',
@@ -53,15 +54,16 @@ export function esTexto(s: string): boolean {
 export function textosDe(x: unknown, salida: Set<string> = new Set(), clave = ''): Set<string> {
   if (typeof x === 'string') { if (!CLAVES_FUERA.has(clave) && esTexto(x)) salida.add(x.trim()); }
   else if (Array.isArray(x)) x.forEach(v => textosDe(v, salida, clave));
-  else if (x && typeof x === 'object') for (const [k, v] of Object.entries(x)) if (!CLAVES_FUERA.has(k)) textosDe(v, salida, k);
+  // Una clave de la lista con un objeto dentro sí se recorre: `portada` es una imagen en una página y el titular en el sitio.
+  else if (x && typeof x === 'object') for (const [k, v] of Object.entries(x)) if (!CLAVES_FUERA.has(k) || (v && typeof v === 'object')) textosDe(v, salida, k);
   return salida;
 }
 
 type Diccionario = {
   textos: Map<string, string>; interfaz: Record<string, string>; valores: Set<string>;
-  slugs: Map<string, string>; inversos: Map<string, string>;
+  slugs: Map<string, string>; inversos: Map<string, string>; iguales: Set<string>;
 };
-const vacio = (): Diccionario => ({ textos: new Map(), interfaz: {}, valores: new Set(), slugs: new Map(), inversos: new Map() });
+const vacio = (): Diccionario => ({ textos: new Map(), interfaz: {}, valores: new Set(), slugs: new Map(), inversos: new Map(), iguales: new Set() });
 const diccionarios = new Map<string, Diccionario>();
 let dominiosActivos = new Set<string>();
 let paginasConocidas: Array<{ title: string; slug: string | null }> = [];
@@ -76,13 +78,14 @@ const dic = (idioma: string) => diccionarios.get(idioma) || vacio();
 /** ¿Está traducido este texto? Lo usa quien decide si un proyecto nuevo ya se enseña. */
 export const estaTraducido = (texto: string, idioma: string) => !diccionarios.has(idioma) || dic(idioma).textos.has(String(texto || '').trim());
 
+const MESES_PT: Record<string, string> = { enero: 'janeiro', febrero: 'fevereiro', marzo: 'março', abril: 'abril', mayo: 'maio', junio: 'junho', julio: 'julho', agosto: 'agosto', septiembre: 'setembro', octubre: 'outubro', noviembre: 'novembro', diciembre: 'dezembro' };
 const MESES: Record<string, string> = { enero: 'January', febrero: 'February', marzo: 'March', abril: 'April', mayo: 'May', junio: 'June', julio: 'July', agosto: 'August', septiembre: 'September', octubre: 'October', noviembre: 'November', diciembre: 'December' };
 
 function traducirCadena(s: string, idioma: string, d: Diccionario, origen: string, destino: string): string {
   if (s === 'es-ES') return IDIOMAS_LARGOS[idioma] || idioma;
   const t = s.trim();
   // Lo que ya está traducido no se vuelve a traducir (un «en» es el idioma, no la preposición).
-  if (t === idioma || d.valores.has(t)) return s;
+  if (t === idioma || t === IDIOMAS_LARGOS[idioma] || d.valores.has(t)) return s;
   const v = d.textos.get(t);
   if (v !== undefined) return s.replace(t, () => v);
   if (d.slugs.has(t)) return d.slugs.get(t)!;
@@ -91,9 +94,10 @@ function traducirCadena(s: string, idioma: string, d: Diccionario, origen: strin
     const resto = t.slice(`https://${origen}`.length);
     return `https://${destino}${d.slugs.has(resto.slice(1)) ? `/${d.slugs.get(resto.slice(1))}` : resto}`;
   }
-  if (idioma === 'en') {
-    const f = /^(\d{1,2}) de (\p{L}+) de (\d{4})$/u.exec(t);
-    if (f && MESES[f[2].toLowerCase()]) return `${MESES[f[2].toLowerCase()]} ${Number(f[1])}, ${f[3]}`;
+  const f = /^(\d{1,2}) de (\p{L}+) de (\d{4})$/u.exec(t);
+  if (f && MESES[f[2].toLowerCase()]) {
+    if (idioma === 'en') return `${MESES[f[2].toLowerCase()]} ${Number(f[1])}, ${f[3]}`;
+    if (idioma === 'pt') return `${Number(f[1])} de ${MESES_PT[f[2].toLowerCase()]} de ${f[3]}`;
   }
   return s;
 }
@@ -117,6 +121,14 @@ function profundo(x: any, idioma: string, d: Diccionario, origen: string, destin
 export function traducirProfundo<T>(x: T, host: string): T {
   const q = dominioDe(host);
   return q ? profundo(x, q.idioma, dic(q.idioma), q.s.origen, q.dominio) : x;
+}
+
+/** ¿Esta dirección de un solo tramo es de una página ya traducida? Para el mapa del sitio. */
+export function direccionTraducida(host: string, tramo: string): boolean {
+  const idioma = idiomaDeHost(host);
+  if (!idioma) return true;
+  const d = dic(idioma);
+  return d.inversos.has(tramo) || d.iguales.has(tramo);
 }
 
 /** Los tramos de una dirección traducida, tal como se llaman en el original. */
@@ -150,27 +162,37 @@ export function traducirHtml(html: string, host: string): string {
       return trozo;
     }
     return trozo
+      // El «es_ES» que traen los datos de la página: cada dominio traducido ya declara el suyo.
+      .replace(/<meta property="og:locale" content="es_ES">\s*/g, '')
       .replace(/>([^<>]*\p{L}[^<>]*)</gu, (t, texto: string) => { const n = sinEntidades(texto); const c = cambiar(n); return c === n ? t : `>${conEntidades(c)}<`; })
       .replace(/\b(alt|title|aria-label|placeholder|content)="([^"]*\p{L}[^"]*)"/gu, (t, a: string, v: string) => { const n = sinEntidades(v); const c = cambiar(n); return c === n ? t : `${a}="${conEntidades(c)}"`; })
       .replace(/\bhref="(\/[^"?#]*|https:\/\/[^"]*)"/g, (t, v: string) => { const c = cambiar(v); return c === v ? t : `href="${conEntidades(c)}"`; });
   }).join('');
 }
 
+/** ¿Se puede enseñar este idioma? Traducido casi entero respecto al que más lleva. */
+export function idiomaListo(idioma: string): boolean {
+  if (!diccionarios.size) return true;
+  const mayor = Math.max(...[...diccionarios.values()].map(d => d.textos.size));
+  return mayor > 0 && dic(idioma).textos.size >= mayor * 0.8;
+}
+const activo = (dominio: string, idioma: string) => dominiosActivos.has(dominio) && diccionarios.has(idioma) && idiomaListo(idioma);
+
 /** La misma página en cada idioma, para decírselo a Google. Nada si no hay traducción publicada. */
 export function versionesDe(host: string, camino: string, titulo: string): Array<{ idioma: string; url: string }> {
   const q = dominioDe(host);
   const s = q?.s || SITIOS_TRADUCIDOS.find(x => x.origen === host);
   if (!s) return [];
+  const tramos = camino.split('/').filter(Boolean);
+  const originales = q ? tramosOriginales(host, tramos) : tramos;
   const salida: Array<{ idioma: string; url: string }> = [];
   for (const [idioma, dominio] of Object.entries(s.traducciones)) {
-    if (!dominiosActivos.has(dominio)) continue;
+    if (!activo(dominio, idioma)) continue;
     const d = dic(idioma);
-    const tramos = camino.split('/').filter(Boolean);
-    if (tramos.length && !d.textos.has(String(titulo || '').trim()) && !q) continue;
-    const originales = q ? tramosOriginales(host, tramos) : tramos;
+    if (tramos.length && !d.textos.has(String(titulo || '').trim())) continue;
     salida.push({ idioma, url: `https://${dominio}/${originales.map(t => d.slugs.get(t) || t).join('/')}` });
-    if (salida.length === 1) salida.push({ idioma: 'es', url: `https://${s.origen}/${originales.join('/')}` });
   }
+  if (salida.length) salida.push({ idioma: 'es', url: `https://${s.origen}/${originales.join('/')}` });
   return salida;
 }
 
@@ -182,18 +204,20 @@ export function hreflangDe(host: string, camino: string, titulo: string): string
   return [...v, { idioma: 'x-default', url: general.url }].map(x => `<link rel="alternate" hreflang="${x.idioma}" href="${conEntidades(x.url)}">`);
 }
 
-/** Lo que el navegador necesita saber del idioma: cuál es, el otro y, en la réplica, la interfaz. */
+/** Lo que el navegador necesita saber del idioma: cuál es, los que hay y, si es traducido, la interfaz. */
 export function datosDeIdioma(html: string, host: string): string {
   const q = dominioDe(host);
   const s = q?.s || SITIOS_TRADUCIDOS.find(x => x.origen === host);
   if (!s) return html;
-  const [idioma, dominio] = Object.entries(s.traducciones)[0];
-  if (!dominiosActivos.has(dominio)) return html;
-  const d = dic(idioma);
-  const datos = q
-    ? { actual: idioma, otro: { idioma: 'es', host: s.origen, etiqueta: ETIQUETAS.es }, rutas: Object.fromEntries(d.inversos) }
-    : { actual: 'es', otro: { idioma, host: dominio, etiqueta: ETIQUETAS[idioma] || idioma }, rutas: Object.fromEntries(d.slugs) };
-  const extra = q ? `window.__TRADUCCIONES__=${jsonSeguro(d.interfaz)};` : '';
+  const listos = Object.entries(s.traducciones).filter(([idioma, dominio]) => activo(dominio, idioma));
+  if (!listos.length && !q) return html;
+  const datos = {
+    actual: q?.idioma || 'es',
+    idiomas: [{ id: 'es', host: s.origen, etiqueta: 'ES', nombre: ETIQUETAS.es },
+      ...listos.map(([id, dominio]) => ({ id, host: dominio, etiqueta: id.toUpperCase(), nombre: ETIQUETAS[id] || id }))],
+    rutas: Object.fromEntries(Object.keys(s.traducciones).map(id => [id, Object.fromEntries(dic(id).slugs)])),
+  };
+  const extra = q ? `window.__TRADUCCIONES__=${jsonSeguro(dic(q.idioma).interfaz)};` : '';
   return html.replace('</head>', () => `    <script>window.__IDIOMA_SITIO__=${jsonSeguro(datos)};${extra}</script>\n  </head>`);
 }
 
@@ -312,6 +336,8 @@ export async function recargarDiccionarios(db: any) {
       const en = d.textos.get(String(p.title || '').trim());
       if (!en || (p.slug && String(p.slug).includes('/'))) continue;
       const es = p.slug || slugDe(p.title), nuevo = slugDe(en);
+      // «Aeromóvil» se llama igual en todos los idiomas: está traducida aunque su dirección no cambie.
+      if (es && es === nuevo) d.iguales.add(es);
       if (!es || !nuevo || es === nuevo || usados.has(nuevo) || TRAMOS_RESERVADOS.has(nuevo)) continue;
       usados.add(nuevo); d.slugs.set(es, nuevo); d.inversos.set(nuevo, es);
     }

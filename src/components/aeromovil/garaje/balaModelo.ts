@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { FORMA_REF, monotona, punto, tAbajo, tArriba, type FormaBala, type Sec } from './balaForma';
 import { aleta, cabina, camara, carenados, crearMateriales, malla, mats, ruedas, sinSombra, type CabinaTriciclo, type Mats } from './balaPiezas';
 import { E, loft } from './forma';
-import { ASIENTO, contornoCupula, techoEn, type Asientos } from './balaMedidas';
+import { ASIENTO, bandaMarco, contornoCupula, techoEn, ventanasDe, type Asientos, type OpcionesVentanas, type Ventanas } from './balaMedidas';
 
 /*
  * The «Cuadriciclo Bala» built in three.js: skin, canopy, livery, lamps and
@@ -483,7 +483,72 @@ export interface OpcionesBala {
    * The Triciclo Bala (2026-11-10): the same body, three wheels (`ruedas`), its own
    * cockpit (`cabina`) and, if asked, a spat round the bottom of the rear wheel.
    */
-  triciclo?: CabinaTriciclo & { faldon: { x0: number; x1: number; y0: number; hz: number } | null };
+  triciclo?: CabinaTriciclo & { faldon: { x0: number; x1: number; y0: number; hz: number } | null; ventanas?: OpcionesVentanas };
+}
+
+// ============================================== the Triciclo's solar roof and window frames (round two)
+/** Rows from x0 (front) back to x1, denser where `fino` says (m between rows). */
+function filasEntre(x0: number, x1: number, paso: (x: number) => number): number[] {
+  const xs: number[] = []; for (let x = x0; x > x1; x -= paso(x)) xs.push(x);
+  xs.push(x1); return xs;
+}
+/**
+ * The solar panel: a grid on the canopy glass's own surface from the rail (or its rounded leading edge) over
+ * the top to the other rail, lifted 1.5 mm. uv in cells: u across (arc length), v along x, so the 125 mm cells
+ * stay square however the panel curves.
+ */
+function techoSolar(V: Ventanas, M: Mats): THREE.Mesh | null {
+  const p = V.panel; if (!p) return null;
+  const CEL = 0.125, n = 22;
+  // fine rows round the rounded leading edge (where the edge runs across the rows), 1.5 cm elsewhere
+  const xs = filasEntre(p.x1, p.x0, x => (x > p.xS - 0.02 ? 0.004 : 0.015));
+  const R = rejilla(xs, s => { const a = p.tLow(s.x), o: number[] = []; for (let k = 0; k <= n; k++) o.push(a + (1 - a) * k / n); return o; }, 'arriba');
+  for (let v = 0; v < R.pos.length / 3; v++) for (let j = 0; j < 3; j++) R.pos[v * 3 + j] += R.nor[v * 3 + j] * 0.0015;
+  for (let i = 0; i < R.filas; i++) {
+    // u from the centre line, so the cells line up across the top
+    const c0 = R.n - 1, o0 = (i * R.cols + c0) * 3; let s = 0;
+    R.uv[(i * R.cols + c0) * 2] = 0;
+    for (const dir of [1, -1]) {
+      s = 0;
+      for (let c = c0 + dir; c >= 0 && c < R.cols; c += dir) {
+        const o = (i * R.cols + c) * 3, q = o - dir * 3; s += Math.hypot(R.pos[o] - R.pos[q], R.pos[o + 1] - R.pos[q + 1], R.pos[o + 2] - R.pos[q + 2]);
+        R.uv[(i * R.cols + c) * 2] = dir * s / CEL;
+      }
+    }
+    void o0;
+    for (let c = 0; c < R.cols; c++) R.uv[(i * R.cols + c) * 2 + 1] = R.pos[(i * R.cols + c) * 3] / CEL;
+  }
+  const m = malla(geometria(R, caras(R)), M.solar, 'panel-solar');
+  return m;
+}
+/** A ribbon on the skin through (x, t) points (right side), with its width at each point, lifted `sep`. */
+function cintaXT(pts: [number, number][], ancho: (i: number) => number, sep: number): THREE.BufferGeometry {
+  const P = pts.map(([x, t]) => { const [z, y] = punto(F.sec(x), t); return new THREE.Vector3(x, y, z); });
+  const N = pts.map(([x, t]) => normalXT(x, Math.min(t, 0.995)));
+  const pos: number[] = [], idx: number[] = [], T = new THREE.Vector3(), B = new THREE.Vector3();
+  for (let i = 0; i < P.length; i++) {
+    T.subVectors(P[Math.min(P.length - 1, i + 1)], P[Math.max(0, i - 1)]).normalize(); B.crossVectors(N[i], T).normalize().multiplyScalar(ancho(i) / 2);
+    const q = P[i].clone().addScaledVector(N[i], sep);
+    pos.push(q.x + B.x, q.y + B.y, q.z + B.z, q.x - B.x, q.y - B.y, q.z - B.z);
+    if (i > 0) { const a = 2 * (i - 1), b = 2 * i; idx.push(a, a + 1, b, a + 1, b + 1, b); }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
+  // face outwards (the skin's normal side)
+  const n0 = new THREE.Vector3().fromBufferAttribute(g.getAttribute('normal') as THREE.BufferAttribute, 0);
+  if (n0.dot(N[0]) < 0) { for (let k = 0; k < idx.length; k += 3) { const a = idx[k + 1]; idx[k + 1] = idx[k + 2]; idx[k + 2] = a; } g.setIndex(idx); g.computeVertexNormals(); }
+  return g;
+}
+/**
+ * The A-pillar and the rail frame, one navy band per side (the canopy frame's own navy, so it reads as part of
+ * it): up from the glass edge along the pillar's quarter-ellipse, then back along the rail, narrowing from the
+ * pillar's width to 60 % of it, and closing on the glass edge at the canopy's rear end.
+ */
+function marcosVentanas(V: Ventanas, M: Mats): THREE.Object3D[] {
+  const b = bandaMarco(V, L.XC1 + 0.004); if (!b) return [];
+  const der = malla(cintaXT(b.pts, i => b.ancho[i], 0.0016), M.marinoDoble, 'pilar');
+  const izq = der.clone(); izq.scale.z = -1;
+  return [der, izq];
 }
 /** The pivots of the opening canopy: one for its frame (body layer) and one for its glass (glass layer). */
 export const PIVOTES_CUPULA = ['cupula-marco', 'cupula-cristal'] as const;
@@ -530,6 +595,13 @@ function armar(o: OpcionesBala): THREE.Group {
   const [cuerpo, marco] = carroceria(xs, M, !!o.cupulaAparte);
   add(cuerpo);
   const vidrio = cupula(xs, M);
+  // the Triciclo's solar roof and window frames ride on the canopy glass (they open with it)
+  const ov = o.triciclo?.ventanas;
+  if (ov) {
+    const V = ventanasDe(F, L, ov), panel = techoSolar(V, M);
+    if (panel) vidrio.add(panel);
+    for (const m of marcosVentanas(V, M)) vidrio.add(m);
+  }
   if (o.cupulaAparte && marco) {
     // hinged at the front end of the frame, on the top line; the shut line stays with the body
     const bisagra = new THREE.Vector3(L.XF0, techoEn(F, L.XF0), 0);

@@ -54,6 +54,8 @@ export async function enviarCorreo(c: {
   responderA?: string;
   /** Cabeceras extra, p. ej. `List-Unsubscribe` para darse de baja en un clic (2026-11-07). */
   cabeceras?: Record<string, string>;
+  /** Ficheros adjuntos (2026-11-10, la copia del préstamo firmado en PDF). Bytes ya en memoria. */
+  adjuntos?: Array<{ nombre: string; tipo: string; contenido: Buffer }>;
 }): Promise<boolean> {
   const cuenta = smtp();
   if (cuenta) {
@@ -70,6 +72,7 @@ export async function enviarCorreo(c: {
         ...(c.html ? { html: c.html } : {}),
         ...(c.responderA ? { replyTo: c.responderA } : {}),
         ...(c.cabeceras && Object.keys(c.cabeceras).length ? { headers: c.cabeceras } : {}),
+        ...(c.adjuntos?.length ? { attachments: c.adjuntos.map(x => ({ filename: x.nombre, contentType: x.tipo, content: x.contenido })) } : {}),
       });
       return true;
     } catch (e: any) {
@@ -91,8 +94,9 @@ export async function enviarCorreo(c: {
         to: [c.para], subject: c.asunto, text: c.texto, ...(c.html ? { html: c.html } : {}),
         ...(c.responderA ? { reply_to: c.responderA } : {}),
         ...(c.cabeceras && Object.keys(c.cabeceras).length ? { headers: c.cabeceras } : {}),
+        ...(c.adjuntos?.length ? { attachments: c.adjuntos.map(x => ({ filename: x.nombre, content: x.contenido.toString('base64') })) } : {}),
       }),
-      signal: AbortSignal.timeout(8000),
+      signal: AbortSignal.timeout(c.adjuntos?.length ? 20000 : 8000),
     });
     if (!r.ok) console.error('correo: el proveedor dijo', r.status, (await r.text()).slice(0, 200));
     return r.ok;

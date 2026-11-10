@@ -255,6 +255,11 @@ function MandosPie({ s, pie, poner, titulo, opciones }: {
             <Interruptor etiqueta="Enseñar el contacto" valor={p.mostrarContacto} onCambio={v => pie({ mostrarContacto: v })} />
           </Grupo>
 
+          <Grupo titulo="Aviso al final" ayuda="Una advertencia que sale abajo del todo, debajo de los textos legales. Vacío: no sale.">
+            <Campo valor={p.aviso || ''} placeholder="Por ejemplo: no prestes dinero que necesites a corto plazo…" multilinea
+              onCambio={v => pie({ aviso: v || undefined })} />
+          </Grupo>
+
           <Grupo titulo="Colores">
             <div className="grid grid-cols-2 gap-2">
               <Color etiqueta="Fondo" valor={p.fondo} onCambio={v => pie({ fondo: v })} />
