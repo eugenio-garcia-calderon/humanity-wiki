@@ -47,12 +47,6 @@
       "ruta": "src/pages/SubpaginaSitio.tsx",
       "motivo": "Conciencia: esquema nuevo, buzón de mejoras y proyecto en luzhumanidad.com",
       "desde": "2026-11-10T10:07:14.521Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/server/modulos.ts",
-      "motivo": "Conciencia: esquema nuevo, buzón de mejoras y proyecto en luzhumanidad.com",
-      "desde": "2026-11-10T10:07:20.231Z"
     }
   ]
 }
