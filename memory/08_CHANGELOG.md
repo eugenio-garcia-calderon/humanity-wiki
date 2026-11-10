@@ -10851,6 +10851,73 @@ Petición de Eugenio: que al cargar /aeromovil aparezca el Triciclo Bala con su 
 - Migración 0185: el diseño base del equipo del Triciclo (0182) pasa a ser el diseño por defecto (la estrella); el que lo era deja de serlo. Se puede volver a mover la estrella desde el menú del logo.
 - Quien ya tenía un diseño abierto en su navegador lo seguía viendo al volver; ahora cada navegador abre una vez más el diseño por defecto (marca `aeromovil.inicio.triciclo`) y desde ahí abre lo último que tuvo. Un cambio sin guardar de quien no es el dueño se pierde esa vez.
 
+### 2026-11-10 — Una sola fuente, todos los idiomas: la base de lighthumanity.org
+- Eugenio: luzhumanidad.com es la fuente en español y lighthumanity.org su réplica en inglés, y Google debe saber que son la misma página. Regla 11 de la Constitución (v1.2).
+- `src/server/traducciones.ts`: el dominio traducido sirve las mismas páginas y cambia cada texto por el suyo. Diccionario y lista de tareas en `traducciones_textos`; `barrerTraducciones` apunta lo publicado cada 15 minutos.
+- Direcciones en inglés, `hreflang` recíproco en las dos webs, canónica propia, sitemap propio y selector de idioma en el pie, sin redirigir por idioma.
+- Lo escrito en el código (botones, esquemas) lo cambia `src/i18n/traductorDom.ts` y lo que falte lo avisa el navegador.
+- Sin IA de pago: traduce la sesión de trabajo una vez al día por la API con `TRADUCCIONES_TOKEN`.
+- lighthumanity.org sigue redirigiendo hasta que esté traducido: la migración que lo activa va en otro despliegue.
+
+### 2026-11-10 — Proyectos que nos inspiran
+- Eugenio: una sección antes del pie con una base de datos de proyectos de otras personas y organizaciones, en una sola línea con slider. Tabla «Proyectos que nos inspiran» (`sitio.inspiran`) con Our World in Data, Robodienst, World Solar Challenge y Shell Eco-marathon; `InspiranSitio.tsx`. Entra también en la lista de traducción de lighthumanity.org.
+
+### 2026-11-10 — Selector de idioma, portugués y la misión en la portada
+- Selector ES · EN · PT arriba a la derecha en todas las webs del laboratorio (`SelectorIdioma.tsx`); lleva a la misma página en cada idioma.
+- Portugués en `pt.lighthumanity.org`, con el mismo sistema que el inglés; un idioma no sale en el selector ni se indexa hasta tener casi todo traducido.
+- Titular de la portada: «Impulsamos proyectos que resuelven los grandes retos del ser humano.»
+
+## 2026-11-10 — Las subpáginas de un dominio propio abren también con «www.»
+
+- Eugenio, con una captura de `www.solarcrowd.com/prestamos/hogar-de-asnuci-en-lepe`: «algo está fallando en las páginas de cada proyecto».
+- Causa: el dominio se guarda sin `www.` (`normalizarDominio`) y Caddy sirve las dos formas, pero `sitioDe` buscaba el anfitrión tal cual llegaba. Con `www.`, `dominioApunta` no encontraba el dominio: la portada abría y cada subpágina daba «Esta página no existe». Afectaba a todos los dominios propios, también a luzhumanidad.com.
+- Arreglo: para un dominio propio, `sitioDe` quita el `www.` del anfitrión. Las direcciones canónicas y el mapa web salen también sin `www.`, una por página. Los dominios traducidos ya redirigían su `www.` (`traducciones.ts`) y no cambian.
+- Comprobado en local con un dominio de prueba: sin el arreglo, `www.` da 404 en una subpágina y sin `www.` da 200; con el arreglo, las dos dan 200, y una dirección que no existe sigue dando 404. `tsc` y `build` limpios.
+
+### 2026-11-10 — Triciclo Bala, segunda versión: más grande, techo solar y ventanas como el Aptera
+
+Eugenio: «permite que el triciclo bala se le pueda modificar más los parámetros… lo has diseñado para algo muy pequeñito… un techo solar… ventanas laterales con un frame… de una forma elegante y curva».
+
+- **Rangos más amplios.** Motor hasta 30 kW nominales y 60 de pico; la masa del motor y la del controlador siguen a la potencia de pico (su rango se mueve con ella). Batería hasta 30 kWh. Panza hasta 4 cm del suelo (los sillines pueden bajar con ella), cúpula hasta 1,15 m, reclinado hasta 35°, manillar hasta 25 cm más cerca. Carrocería hasta 1,30 m de ancho, vía hasta 2,40 m, batalla hasta 3,20 m, morro hasta 1,00 m, cola hasta 1,20 m, final de la cúpula hasta 2,90 m.
+- **«Largo total»**: un deslizador que estira la carrocería (morro, batalla y cola, cada uno según lo que le queda; la cúpula acaba igual de lejos del eje trasero) sin agrandar a los ocupantes. No se guarda aparte: escribe esos cuatro campos.
+- **Ruedas**: además de 16″–24″, de ciclomotor de 26″ y 28″, y de coche 13″ (145/70 R13), 14″ (165/60 R14) y 15″ (175/55 R15). Los carenados delanteros se ensanchan con un neumático de coche; una rueda de coche pesa 2,3–2,7 veces la de ciclomotor.
+- **Motor de buje**: nueva comprobación «potencia que cabe en la rueda trasera» (regla aproximada: ~10–12 kW de pico en una rueda de ciclomotor, 35–60 kW en llantas de coche de 13″–15″). Por encima, lo honrado sería un motor en el basculante con correa; no se dibuja.
+- **Batería**: se llena por orden: morro (como antes), entre los pies (como antes), el módulo del morro más alto, más largo hacia la punta, y un módulo plano bajo los sillines. Lo que no cabe no se dibuja; la comprobación «Batería: cabe en su sitio» dice cuántos litros faltan. En la carrocería de serie caben ~60 L (~14 kWh a 230 Wh/L).
+- **Techo solar** (como el del Aeromóvil 1): lo alto de la cúpula es un panel opaco desde donde dice «Techo solar: dónde empieza» (por defecto, sobre la cabeza del piloto) hasta atrás, con el borde delantero redondeado. Área, W de pico y kWh al día (estimados) en Motor, Energía y Proyecto; masa del panel (2,2 kg/m²) sobre laminado en lugar del cristal.
+- **Ventanas laterales con montante (Aptera)**: un montante azul marino curvo separa el parabrisas de la ventana lateral y sigue como marco entre la ventana y el techo. Deslizadores: dónde nace, cuánto se tumba hacia atrás, ancho, alto de la ventana; selector «Cúpula: con montante / de una pieza». La forma de la cúpula no cambia (ni el Cd ni el área frontal).
+- **Por defecto**: las medidas de antes; techo solar y montantes activados. Cambia: masa en vacío 177,7 → 177,9 kg; cristal 2,36 → 1,59 m²; panel 0,63 m², 132 W de pico, ~0,35 kWh/día (~14 km/día a 80 km/h). Cd, consumo, autonomía y vuelco, iguales.
+- Los diseños del Triciclo guardados antes abren igual salvo el techo solar y los montantes, que llegan activados (campos nuevos opcionales).
+
+## 2026-11-10 — «Realizar préstamo»: formalizar un préstamo con firma, justificante y copia por correo
+
+- Eugenio: «un botón que sea realizar préstamo… que se rellenen los datos del prestamista, se le expliquen las condiciones, que las acepte y que haga una firma… que adjunte el justificante… dividido en 3 secciones dentro de la misma página… que se envíe una copia de lo firmado y lo aceptado al correo de esta persona». Y después: «añadir el IBAN de la entidad… y también el correo electrónico para que aparezcan ambos públicos… la entidad recibe una copia a ese correo».
+- **Bloque de datos nuevo «Formalizar préstamo»** (`src/components/bloquesDatos/prestamo/`). Lo ve quien visita: las condiciones, el IBAN y el correo de la entidad, y el botón «Realizar préstamo», que abre tres pasos en la misma página:
+  1. Tus datos y tu préstamo.
+  2. Condiciones y firma: un resumen, desplegables con el contrato completo, los riesgos y los datos personales, tres casillas y la firma con el dedo.
+  3. Transferencia y justificante.
+- **Al enviarlo**, el servidor (`src/server/prestamos.ts`) hace esto:
+  - Rehace el contrato a partir del bloque guardado en la página, nunca de lo que manda el navegador, y calcula su huella SHA-256.
+  - Genera el PDF firmado.
+  - Guarda la firma, el justificante y el PDF en `/uploads/privado/` (no se sirven en público) y añade una fila en `prestamos_firmados` (migración 0183).
+  - Manda los correos por la cuenta SMTP de Google que ya existe:
+    - a la persona, el PDF;
+    - a administración (`avisar`) y a la entidad (`correoEntidad`), el PDF y el justificante.
+  - La pantalla solo dice que salió el correo si salió de verdad; si no, ofrece descargar el PDF.
+- **El editor** permite cambiar todos los datos del préstamo: entidad, NIF, IBAN, correo, destino, subvención, intereses, plazos, importes y quién supervisa. Tiene un interruptor «Abierto» y avisa de lo que falta para abrirlo.
+  - El correo de la entidad es obligatorio para abrir.
+  - El IBAN solo se enseña con el préstamo abierto.
+  - Quien administra la página ve aquí los préstamos firmados: estado, contrato, justificante y «Borrar sus datos» (derecho de supresión).
+- **Comprobado en local** (Postgres con todas las migraciones, servidor real, SMTP de prueba, Chrome sin cabeza a 390 px táctil):
+  - El recorrido completo, incluida la descarga del PDF. Los 3 correos con sus adjuntos y sus «Responder a».
+  - Los rechazos:
+    - demasiado rápido, campo trampa, sin casillas, sin firma, firma falsa;
+    - justificante falso, letra del DNI, importe, interés inventado, plazo, IBAN;
+    - préstamo cerrado, otra web, bloque inexistente, JSON normal.
+  - Lista, archivo, estado y borrado solo para quien administra la página (401 sin sesión, 403 para otra persona).
+  - El borrado quita los tres archivos del disco.
+  - La huella del PDF coincide con el texto guardado.
+- **Sin verificar:** en producción, con el Gmail real (límite de adjuntos y de envíos), y con la app instalada en un móvil. Pendiente de datos: el IBAN, el NIF y el correo de ASNUCI para abrir su préstamo.
+
 ## 2026-11-10 — Un aviso al final del pie de un sitio
 
 - Eugenio en solarcrowd.com: «la advertencia de no prestes aquí tu dinero que necesites a corto plazo, ponla abajo del todo en el footer».

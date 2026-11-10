@@ -24,7 +24,7 @@ type Opcion = { id: string; label: string; color?: string | null };
 type Columna = { id: string; nombre: string; tipo: string; opciones?: Opcion[] };
 type Tabla = { columnas: Columna[]; filas: Array<{ id: string; celdas: Record<string, { valor?: unknown }> }> };
 
-const EQUIPO = /equipo|personas/i;
+const EQUIPO = /equipo|equipe|personas|pessoas|team|people/i;
 
 /** Lo que el editor le da para escribir encima (2026-11-10): se ve como al publicar y se edita ahí. */
 export type EdicionCabecera = { titulo: string; onTitulo: (v: string) => void; subtitulo: string; onSubtitulo: (v: string) => void; onPortada: () => void };

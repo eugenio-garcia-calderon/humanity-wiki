@@ -1317,3 +1317,47 @@ Marking items done or discarded is admin-only (level 4). Saving the map itself s
 ## 2026-11-10 — Triciclo Bala as the default design, and reaching browsers that already had one
 
 The default is data (`por_defecto`, migration 0185), not code, so the owner's star keeps working. The first-visit rule only opened the default when the browser had nothing stored, so Eugenio himself would never have seen the change. A one-shot localStorage flag (`aeromovil.inicio.triciclo`) opens the default once in every browser. Rejected: bumping `aeromovil.parametros.v5` to v6, which would also throw away every stored local state for good. Cost accepted: an unsaved local edit by a non-owner is replaced on that one load (the owner's designs autosave).
+
+## 2026-11-10 — Triciclo base-design migration renumbered 0182 → 0186
+
+Another session had claimed 0182 (`prestamos_firmados`) and Eugenio asked to move ours. Ours was already applied in production as `0182_aeromovil_triciclo_base.sql`; renamed to 0186 it runs once more on the next deploy and inserts nothing (WHERE NOT EXISTS). 0185 depends on the row, which already exists. Exception to drizzle/CLAUDE.md «renaming an applied migration is worse than the duplicate», safe only because the file is idempotent.
+
+### 2026-11-10 — Triciclo Bala round two: solar roof and window frames as overlays on the canopy glass
+
+Context: Eugenio asked for a solar roof up to the pilot's head and Aptera-style side windows with a curved A-pillar, "keeping the curvature".
+Decision: the canopy's shape and its glass mesh are untouched. The panel and the frames are separate meshes laid 1.5 mm over the glass surface, addressed in the skin's own (x, t) coordinates (`ventanasDe`, `bandaMarco` in `garaje/balaMedidas.ts`; meshes in `garaje/balaModelo.ts`). The roof rail is a fixed fraction of the glass side band, tR = tC + alto·(1 − tC), so the side window closes in a teardrop at both canopy ends without extra rules. The pillar centre line is a quarter ellipse in (x, height between the glass edge and the rail): vertical at the glass edge, tangent to the rail at the top.
+Alternatives: (a) splitting the glass grid into material groups by cell — exact areas but a jagged curved pillar unless the grid is re-laid around it, and it would change the glass mesh the Cuadriciclo shares; (b) new glass outline curves in the band layout of the skin — the right long-term pattern if windows are to open separately, ~1 day.
+Mass accounting: the panel area counts as panel and as body laminate (the A1's convention); the frame area as laminate; both leave the glass.
+
+### 2026-11-10 — Triciclo Bala: hub motor limit is a check, not a different drive
+
+A hub motor is credible up to roughly 10–12 kW peak in a moped wheel and 35–60 kW in 13–15″ car rims (QS 273, Elaphe M700 as references). Above that, the honest drive is a motor on the swing arm with a belt; that is not modelled. The page and a check ("Motor de buje: potencia que cabe en la rueda trasera") say so instead of silently drawing an impossible hub. Motor and controller mass ranges depend on peak power.
+
+### 2026-11-10 — Triciclo Bala: «Largo total» stretches the body, it does not scale the vehicle
+
+An overall scale would also scale the riders, handlebar and seats, which is not what "make it bigger" means for people. «Largo total» shares a length change among nose, wheelbase and tail in proportion to each one's remaining room and moves the canopy's end with the rear axle; it has no stored field of its own.
+
+## 2026-11-10 — Formalizing a loan: one contract function, the block as the source of truth, files kept private
+
+Eugenio asked for a «Realizar préstamo» flow on solarcrowd.com: lender's details, conditions with a signature, transfer receipt, and a copy of what was signed mailed to the lender.
+
+**Chosen.**
+- A **data block** (`prestamo`) holds the loan's terms in `bloque.datos`. Each funding page carries its own block, editable in the page editor.
+- The server reads the terms **from the stored page**, never from the request, so a visitor can only choose among the options the publisher offered.
+- **One function writes the contract** (`contrato.ts`), imported by the screen, the server and the PDF. What the person reads in the fold is word for word what is signed, hashed and mailed. Every signed row keeps its own text and SHA-256, so editing the terms changes only future signatures.
+- **The body arrives as `application/x-prestamo-json`, parsed with its own 12 MB limit.** `server.ts` is frozen and parses JSON globally with a 100 kB cap, which a receipt does not fit in.
+- **Signature, receipt and PDF are private** (`/uploads/privado/`). They leave only through the managers' route or as e-mail attachments. Managers are whoever has `gestionar` on the page.
+
+**Rejected.**
+- **A site form** (`formulariosSitio.ts`). It stores fields, not contracts: no signature, no attachments, no per-page terms.
+- **A database form** (`bd_formularios`). It writes rows that the editor can change later, which is wrong for a signed record.
+- **An e-signature provider** (DocuSign and the like). Money and an account Eugenio did not ask for. What is collected is a simple electronic signature (eIDAS «simple»): a drawn signature, the time, the text's hash and the e-mail copy.
+
+**The public write route has no role check, on purpose.** The lender has no account; the portal is account-free by Eugenio's design. In its place, the route has:
+- a check that the request comes from the site itself (origin);
+- the page must be visible and the block open;
+- a trap field and a minimum of 15 s;
+- per-IP and per-loan brakes;
+- the files' own first bytes must match their type.
+
+This is the same shape as the site forms.

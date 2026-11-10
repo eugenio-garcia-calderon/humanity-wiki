@@ -34,7 +34,7 @@ import {
   type Comprobacion, type Disposicion, type MaterialCarenado, type MaterialChasis, type Modelo, type ModeloBala, type ModeloTriciclo, type Neumatico, type Parametros, type Puerta, type Pulgadas, type Resultados,
 } from '../components/aeromovil/geometria';
 import {
-  AGARRE, AUXILIARES, CRR, DEPS_TRICICLO, LEMAS_TRICICLO, RENDIMIENTO, SELECTORES_TRICICLO, USABLE, VUELCO_OBJETIVO, camposTriciclo, deslizadoresTriciclo, energiaTriciclo, guardarTriciclo, vistaTriciclo,
+  AGARRE, AUXILIARES, CRR, DEPS_TRICICLO, LEMAS_TRICICLO, RENDIMIENTO, RUEDAS_TRICICLO, SELECTORES_TRICICLO, USABLE, VUELCO_OBJETIVO, camposTriciclo, deslizadoresTriciclo, energiaTriciclo, estirarTriciclo, guardarTriciclo, largoTriciclo, vistaTriciclo,
   type DepTriciclo, type FichaTriciclo,
 } from '../components/aeromovil/geometriaTriciclo';
 import { cuerpoTriciclo, peticionDe as peticionTunel } from '../components/aeromovil/tunel/nuestro';
@@ -90,7 +90,7 @@ const PUERTAS_A1: { k: Puerta; n: string; d: string }[] = [
 ];
 /** Las capas que tienen algo en el Bala (no lleva paneles solares, motor ni baterías dibujados). */
 const CAPAS_BALA: CapaId[] = ['carenado', 'cristales', 'chasis', 'suspension', 'ruedas', 'asientos', 'ocupantes'];
-/** Las del Triciclo: las del Bala más la dirección, el motor y la batería (sin paneles solares ni transmisión: el motor va en el buje). */
+/** Las del Triciclo: las del Bala más la dirección, el motor y la batería (sin transmisión: el motor va en el buje; el techo solar va con la cúpula, en «Cristales»). */
 const CAPAS_TRICICLO: CapaId[] = ['carenado', 'cristales', 'chasis', 'suspension', 'direccion', 'ruedas', 'asientos', 'ocupantes', 'motor', 'baterias'];
 
 
@@ -649,6 +649,10 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
       case 'tAlto': return `${fmt(v, 3)} m`;
       case 'tFaldon': return v < 0.01 ? 'sin faldón' : `asoman ${cm(modelo.faldon?.y0 ?? 0)}`;
       case 'tEjeDel': return v < 0.005 ? 'donde el Cuadriciclo' : `${cm(v, 0)} más atrás`;
+      case 'tSolar': return res.areas.solar < 0.005 ? 'sin techo solar' : `${m2(v)} tras el eje · ${fmt(res.areas.solar)} m²`;
+      case 'tVentAlto': return `${Math.round(v * 100)} % del costado`;
+      case 'tPilar': return `${m2(v)} tras el eje delantero`;
+      case 'tPilarBarrido': return `${cm(v, 0)} hacia atrás`;
       case 'tManX': case 'tManY': case 'tPiesX': case 'tPiesY': return `${v >= 0 ? '+' : '−'}${cm(Math.abs(v), 0)}`;
       case 'tRecPil': case 'tRecPas': return v === 0 ? '0° (erguido)' : v < 0 ? `${-v}° hacia delante` : `${v}° hacia atrás`;
     }
@@ -687,6 +691,8 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
         [`Velocidad sostenida (${fmt(T.tKWNom, 1)} kW)`, e ? `${Math.round(e.vmaxNominal)} km/h` : sinCd],
         [`Velocidad punta (${fmt(T.tKWPico, 1)} kW)`, e ? `${Math.round(e.vmaxPico)} km/h` : sinCd],
         ['0 → 50 km/h', e ? (e.acel50 > 60 ? 'no llega' : `${fmt(e.acel50, 1)} s`) : sinCd],
+        ['Techo solar', res.areas.solar > 0.005 ? `${fmt(res.areas.solar)} m² · ${Math.round(res.solarPico)} W pico` : 'sin techo solar'],
+        ['  energía solar al día (estimada)', res.areas.solar > 0.005 ? `${fmt(res.solarDia / 1000)} kWh · ${e ? `${Math.round(e.kmSol)} km` : sinCd}` : '—'],
       ])}
       {cd.calculando && <p className="flex items-center gap-1.5 text-xs text-sky-800"><Wind className="h-3.5 w-3.5 animate-pulse" />El túnel de viento está calculando el Cd de esta forma (unos segundos). Hasta que acabe, no hay cifra.</p>}
       <p className="text-xs text-slate-500">El Cd lo calcula el túnel con la silueta de la carrocería y sus tres ruedas (no hay fórmula del editor para esta forma); los carenados y los brazos solo entran como ruedas carenadas, así que el real será algo más alto. Con dos ocupantes de {T.tMOcc} kg ({Math.round(res.mTot)} kg en total), rodadura {fmt(CRR, 3)} (neumático de ciclomotor), motor y controlador al {Math.round(RENDIMIENTO * 100)} %, {AUXILIARES} W de equipos y la batería usable al {Math.round(USABLE * 100)} %. Todo supuesto, no medido.</p>
@@ -705,9 +711,19 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
       </Bloque>
       {bloques.map(bloque => (
         <Bloque key={bloque} titulo={bloque}>
+          {bloque === 'Forma' && (() => {
+            // round two (2026-11-10): one lever for «hazlo un poco más grande»; it moves the nose, wheelbase and tail (see estirarTriciclo)
+            const lg = largoTriciclo(T);
+            return <>
+              <Deslizador id="t-largo" etiqueta="Largo total (estira morro, batalla y cola)" valor={lg.valor} min={lg.min} max={lg.max} paso={0.01} mostrar={`${m2(lg.valor)} de carrocería`} alCambiar={x => { const o = estirarTriciclo(T, x); for (const [k, v] of Object.entries(o)) set(k as keyof Parametros, v as never); }} />
+              <p className="-mt-1 text-xs text-slate-500">Estira la carrocería sin agrandar a las personas: reparte el cambio entre el morro, la batalla y la cola (cada uno según lo que le queda), y la cúpula acaba igual de lejos del eje trasero. No es una escala de todo: los ocupantes, el manillar y los asientos no crecen.</p>
+            </>;
+          })()}
           {fichas.filter(f => f.bloque === bloque).map(f => {
             const v = vistaTriciclo(f, T);
-            return <Deslizador key={f.clave} id={`t-${f.clave}`} etiqueta={f.n} valor={v.valor} clave={f.clave} centro={f.centrar ? v.defecto : undefined} min={v.min} max={v.max} paso={f.paso} mostrar={mostrar(f, v.valor)} alCambiar={x => set(f.clave, guardarTriciclo(f, x, T))} />;
+            // the A-pillar's sliders do nothing on a one-piece canopy
+            const apagado = T.tVentanas === 'burbuja' && f.clave.startsWith('tPilar');
+            return <Deslizador key={f.clave} id={`t-${f.clave}`} etiqueta={f.n} valor={v.valor} clave={f.clave} centro={f.centrar ? v.defecto : undefined} min={v.min} max={v.max} paso={f.paso} mostrar={mostrar(f, v.valor)} desactivado={apagado} alCambiar={x => set(f.clave, guardarTriciclo(f, x, T))} />;
           })}
           {sels.filter(s => s.bloque === bloque).map(s => <Selector key={s.clave} id={`t-${s.clave}`} etiqueta={s.n} valor={T[s.clave] as string} clave={s.clave} opciones={s.opciones} alCambiar={v => set(s.clave, v as never)} />)}
           {bloque === 'Carenados' && <p className="-mt-1 text-xs text-slate-500">Los carenados delanteros giran con sus ruedas (como en el Aptera): el neumático siempre queda igual de centrado; lo que se comprueba es que, girados a tope, no toquen la carrocería. El faldón tapa la parte de abajo de la rueda trasera.</p>}
@@ -717,8 +733,10 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
             <p className="-mt-1 text-xs text-slate-500">El eje delantero va detrás de donde el Cuadriciclo lleva su rueda delantera: así el peso queda más cerca de las dos ruedas de delante y el triciclo vuelca menos (abajo, «Vuelco»). Batalla {m2(modelo.batalla)}.</p>
           </>}
           {bloque === 'Bastidor' && <p className="-mt-1 text-xs text-slate-500">Dos largueros sobre la panza con cuatro travesaños, la cuna de la batería (donde se apoya la suspensión delantera), los soportes de los sillines, la torreta del amortiguador y el soporte de la columna de dirección: {fmt(rt.bastidor.metros, 1)} m de tubo. Se ve con «Rayos X» o la capa «Chasis».</p>}
-          {bloque === 'Motor' && <p className="-mt-1 text-xs text-slate-500">Motor de buje en la rueda trasera, sin cadena ni correa, con su controlador bajo el sillín del pasajero.</p>}
-          {bloque === 'Batería' && <p className="-mt-1 text-xs text-slate-500">En el morro, donde el Cuadriciclo lleva la rueda delantera ({Math.round(rt.bateria.litrosMorro)} L caben ahí); lo que no cabe va en un módulo estrecho entre los pies del piloto. Ahora: {Math.round(rt.bateria.litros)} L y {Math.round(rt.bateria.kg)} kg.</p>}
+          {bloque === 'Techo solar y ventanas' && <p className="-mt-1 text-xs text-slate-500">La forma de la cúpula no cambia: el techo solar y las ventanas se dibujan sobre ella. Detrás de donde empieza, lo alto de la cúpula es un panel solar opaco (da sombra a las cabezas: menos calor dentro en verano); por los lados, encima de la ventana. Delante, el parabrisas pasa por encima hasta el panel. El montante sale del borde del cristal, sube y se tumba hacia atrás en una sola curva hasta el techo, como en el Aptera, y sigue como marco entre la ventana y el techo. Panel: {res.areas.solar > 0.005 ? `${fmt(res.areas.solar)} m², ${Math.round(res.solarPico)} W a pleno sol, unos ${fmt(res.solarDia / 1000)} kWh al día (estimado)` : 'ninguno'}; cristal: {fmt(res.areas.cristal)} m².</p>}
+          {bloque === 'Techo solar' && <p className="-mt-1 text-xs text-slate-500">{res.areas.solar > 0.005 ? `${fmt(res.areas.solar)} m² de panel: ${Math.round(res.solarPico)} W a 1000 W/m², y de media unos ${fmt(res.solarDia / 1000)} kWh al día (${fmt(P.sol, 1)} kWh/m² al día sobre plano, el panel curvo recoge un 70 % de eso, células al ${Math.round(0.21 * 100)} % y un 15 % de pérdidas). ${Math.round(res.masas['Paneles solares'] ?? 0)} kg de panel, sobre laminado de carrocería en lugar del cristal.` : 'Sin techo solar: la cúpula es toda de cristal (se mueve en Carrocería › Techo solar y ventanas).'}</p>}
+          {bloque === 'Motor' && <p className="-mt-1 text-xs text-slate-500">Motor de buje en la rueda trasera, sin cadena ni correa, con su controlador bajo el sillín del pasajero. Su masa y la del controlador siguen a la potencia máxima (su rango se mueve con ella). En una rueda de ciclomotor caben unos {RUEDAS_TRICICLO['24'].kWBuje} kW de pico; en una llanta de coche de 15″, unos {RUEDAS_TRICICLO.c15.kWBuje} (como los motores en rueda del Aptera). Por encima, lo honrado sería un motor en el basculante con correa, como en las motos eléctricas, y eso aquí no se dibuja: la comprobación «Motor de buje» lo avisa.</p>}
+          {bloque === 'Batería' && <p className="-mt-1 text-xs text-slate-500">Primero en el morro, donde el Cuadriciclo lleva la rueda delantera ({Math.round(rt.bateria.litrosMorro)} L), luego en un módulo estrecho entre los pies del piloto; si hace falta más, el módulo del morro sube, crece hacia la punta y queda un módulo plano bajo los sillines. Ahora: {Math.round(rt.bateria.litros)} L y {Math.round(rt.bateria.kg)} kg{rt.bateria.litros - rt.bateria.cabe > 0.05 ? `: caben ${Math.round(rt.bateria.cabe)} L, faltan ${Math.round(rt.bateria.litros - rt.bateria.cabe)} (un morro más largo, una carrocería más ancha o celdas más densas)` : ''}.</p>}
         </Bloque>
       ))}
 

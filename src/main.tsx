@@ -4,6 +4,7 @@ import './index.css';
 import './tema-oscuro.css';
 import {iniciarTema} from './utils/tema.ts';
 import {iniciarIdioma, ConIdioma} from './i18n/index.ts';
+import {iniciarTraductorDom} from './i18n/traductorDom.ts';
 import {registrarPWA} from './pwa.ts';
 import {instalarAutoscrollArrastre} from './utils/autoscrollArrastre.ts';
 import {instalarRespuestasAmables} from './utils/respuestasAmables.ts';
@@ -37,6 +38,7 @@ instalarAutoscrollArrastre();
 // la misma, ya viva.
 iniciarTema();
 iniciarIdioma();
+iniciarTraductorDom();
 const DOMINIO_PROPIO = dominioPropio();
 const raiz = createRoot(document.getElementById('root')!);
 // The data blocks of the page the server sent come down WITH the app, not
