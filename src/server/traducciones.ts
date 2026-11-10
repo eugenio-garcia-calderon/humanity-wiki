@@ -27,6 +27,7 @@ export type SitioTraducido = { raiz: string; origen: string; traducciones: Recor
 export const SITIOS_TRADUCIDOS: SitioTraducido[] = [
   { raiz: 'KWMUO4S4V663', origen: 'luzhumanidad.com', traducciones: { en: 'lighthumanity.org' } },
 ];
+export const dominiosTraducidos = () => SITIOS_TRADUCIDOS.flatMap(s => Object.values(s.traducciones));
 const ETIQUETAS: Record<string, string> = { es: 'Español', en: 'English' };
 const IDIOMAS_LARGOS: Record<string, string> = { es: 'es-ES', en: 'en' };
 
