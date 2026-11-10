@@ -10821,3 +10821,9 @@ Eugenio: «Unifica los selectores de vehículos… deja solo el de arriba y deja
 - **Proyecto de luzhumanidad.com** (migración 0181): fila «Conciencia del ser humano» en la base de datos de proyectos del sitio, área Conciencia, equipo Eugenio, en curso. Su página tiene la dirección `luzhumanidad.com/conciencia-del-ser-humano/teoria-sintergica` y `config.aplicacion = 'conciencia'`, así que enseña el mapa (`APLICACIONES` en `SubpaginaSitio.tsx`). Imagen de la tarjeta: `public/estudio-conciencia/mapa-teoria-sintergica.jpg`.
 - Un mapa guardado con el esquema viejo (`version` < 2) no se enseña: se ve el nuevo y el viejo queda en el historial. En producción no había ninguno guardado (comprobado: versión 0).
 - **Comprobado** en Chrome sin cabeza, con Postgres local y las migraciones 0179 y 0180: las tres animaciones paso a paso, el buzón (enviar y listar), arrastrar y guardar, y la vista a 1400 y 390 px. La 0181, en una réplica mínima de las tablas: crea la página, la fila y los dos enlaces, y es idempotente (dos pasadas, un solo proyecto); en una base sin esas tablas no hace nada.
+
+## 2026-11-10 — El menú de un sitio se pliega también cuando el logotipo horizontal llega tarde
+
+- Visto en solarcrowd.com nada más activar el logotipo horizontal: a unos 1.030 px de ancho, «Próximo préstamo» quedaba cortado por la derecha en vez de pasar a las tres rayas.
+- Por qué: el menú medía si cabía cuando cambiaba el ancho de la fila; un logotipo horizontal no tiene ancho fijo y lo toma cuando llega la imagen, y entonces cambia el ancho de los enlaces, no el de la fila. Ahora se vigilan los dos.
+- Comprobado: `tsc` y `vite build`. Sin verificar: en un móvil con la app instalada (en el teléfono el menú ya va plegado por CSS).
