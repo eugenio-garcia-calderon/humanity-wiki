@@ -110,12 +110,12 @@ export const DEPS_TRICICLO: DepTriciclo[] = ['carroceria', 'interior', 'chasis',
 /** Lo que es cada departamento en el Triciclo (los lemas del Aeromóvil 1 hablan de sus piezas, no de estas). */
 export const LEMAS_TRICICLO: Record<DepTriciclo | 'proyecto', string> = {
   proyecto: 'el resumen: comprobaciones, peso, consumo y vuelco',
-  carroceria: 'la piel del Cuadriciclo, los carenados delanteros y el material',
+  carroceria: 'la piel del Cuadriciclo, techo solar y ventanas, carenados y material',
   interior: 'los dos a horcajadas: sillines, respaldos, manillar y plataformas',
   chasis: 'el bastidor de tubos dentro de la carrocería',
   rodaje: 'ejes, vía, ruedas, suspensión y dirección',
   propulsion: 'el motor en el buje de la rueda trasera',
-  energia: 'la batería en el morro y entre los pies',
+  energia: 'la batería (morro, pies y bajo los sillines) y el techo solar',
 };
 export type Unidad = 'm' | 'cm' | 'mm' | '°' | 'kg' | 'kW' | 'kWh' | 'Wh/kg' | 'Wh/L' | 'km/h' | 'x' | 'kg/m²';
 /**
