@@ -52,19 +52,20 @@ export function TextoEnLinea({ valor, onGuardar, className, ayuda, etiqueta, obl
   );
 }
 
-/** El estado se ve igual que al publicar; al pulsarlo se abre la lista de la columna. */
-export function PildoraEstado({ estado, opciones, onCambiar, className }: {
-  estado: EstadoTarjeta | null; opciones?: EstadoTarjeta[]; onCambiar?: (id: string | null) => void; className?: string;
+/** La píldora blanca de arriba (la categoría, o el estado en la página de un proyecto): se ve igual
+ *  que al publicar y, al editar, al pulsarla se abre su lista. Blanca también en modo oscuro. */
+export function PildoraEstado({ estado, opciones, onCambiar, className, icono, nombre = 'Estado' }: {
+  estado: EstadoTarjeta | null; opciones?: EstadoTarjeta[]; onCambiar?: (id: string | null) => void; className?: string; icono?: ReactNode; nombre?: string;
 }) {
   if (!estado && !onCambiar) return null;
   return (
-    <span className={cn('inline-flex items-center gap-2 rounded-full bg-white/90 font-bold text-slate-800 shadow-sm backdrop-blur', onCambiar && 'relative hover:bg-white', className)}>
-      {estado && <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ background: estado.color || '#94a3b8' }} />}
-      {estado?.label || 'Añadir estado'}
+    <span data-fondo-oscuro="" className={cn('inline-flex items-center gap-2 rounded-full bg-white/90 font-bold text-slate-800 shadow-sm backdrop-blur', onCambiar && 'relative hover:bg-white', className)}>
+      {estado && (icono || <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ background: estado.color || '#94a3b8' }} />)}
+      {estado?.label || `Añadir ${nombre.toLowerCase()}`}
       {onCambiar && (
-        <select aria-label="Estado" value={estado?.id || ''} onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}
+        <select aria-label={nombre} value={estado?.id || ''} onClick={e => e.stopPropagation()} onKeyDown={e => e.stopPropagation()}
           onChange={e => onCambiar(e.target.value || null)} className="absolute inset-0 h-full w-full cursor-pointer opacity-0">
-          <option value="">Sin estado</option>
+          <option value="">{`Sin ${nombre.toLowerCase()}`}</option>
           {(opciones || []).map(o => <option key={o.id} value={o.id}>{o.label}</option>)}
         </select>
       )}
@@ -72,54 +73,55 @@ export function PildoraEstado({ estado, opciones, onCambiar, className }: {
   );
 }
 
-export default function TarjetaPortada({ nombre, imagen, alt, encuadre, descripcion, estado, datos, Titulo = 'h3', prioridad = 9, conDescripcion = true, edicion, esquina }: {
+export default function TarjetaPortada({ nombre, imagen, alt, encuadre, descripcion, pildora, iconoPildora, nombrePildora, Titulo = 'h3', prioridad = 9, conDescripcion = true, edicion, esquina }: {
   nombre: string;
   imagen: string | null | undefined;
   alt?: string;
   encuadre?: { x?: number; y?: number } | null;
   descripcion?: string | null;
-  estado: EstadoTarjeta | null;
-  /** La línea bajo el título: «2024 · Movilidad». */
-  datos?: string;
+  /** La etiqueta blanca de arriba a la izquierda. */
+  pildora: EstadoTarjeta | null;
+  iconoPildora?: ReactNode;
+  /** Qué es esa etiqueta («Categoría», «Estado»): para quien edita. */
+  nombrePildora?: string;
   Titulo?: 'h2' | 'h3' | 'p';
   /** Su lugar en la lista: las primeras cargan ya. */
   prioridad?: number;
   conDescripcion?: boolean;
-  edicion?: { onNombre: (v: string) => void; onDescripcion: (v: string) => void; opciones?: EstadoTarjeta[]; onEstado?: (id: string | null) => void };
+  edicion?: { onNombre: (v: string) => void; onDescripcion: (v: string) => void; opciones?: EstadoTarjeta[]; onPildora?: (id: string | null) => void };
   /** Lo que va arriba a la derecha (abrir, más opciones). */
   esquina?: ReactNode;
 }) {
-  const claseNombre = 'text-2xl font-black leading-tight tracking-tight text-white [text-shadow:0_2px_8px_rgba(0,0,0,0.45)] sm:text-3xl';
-  const claseDescripcion = 'text-sm leading-snug text-slate-500';
+  // EL TÍTULO Y LA DESCRIPCIÓN, JUNTOS SOBRE LA IMAGEN (2026-11-10, Eugenio): letra blanca con sombra,
+  // la descripción algo mayor y en dos líneas como mucho, y abajo casi negro, aclarándose hacia el centro.
+  const claseNombre = 'text-xl font-black leading-tight tracking-tight text-white [text-shadow:0_2px_8px_rgba(0,0,0,0.6)] sm:text-2xl 2xl:text-3xl';
+  const claseDescripcion = 'text-base font-medium leading-snug text-white [text-shadow:0_1px_6px_rgba(0,0,0,0.85)]';
   return (
-    <>
-      <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
-        {imagen ? (
-          <img src={miniatura(imagen, 400)} alt={alt ?? (descripcion ? `${nombre}: ${descripcion}` : nombre)} loading={prioridad < 4 ? 'eager' : 'lazy'} decoding="async"
-            {...(prioridad < 2 ? { fetchPriority: 'high' as const } : {})}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-            style={encuadre ? { objectPosition: `${encuadre.x ?? 50}% ${encuadre.y ?? 50}%` } : undefined} />
-        ) : (
-          <div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-400" />
-        )}
-        <div aria-hidden className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
-        <PildoraEstado estado={estado} opciones={edicion?.opciones} onCambiar={edicion?.onEstado}
-          className="absolute left-3 top-3 px-3.5 py-1.5 text-sm" />
-        {esquina && <div className="absolute right-3 top-3 z-10 flex items-center gap-1.5">{esquina}</div>}
-        <div data-fondo-oscuro="" className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
-          {edicion
-            ? <TextoEnLinea valor={nombre} onGuardar={edicion.onNombre} etiqueta="Título" obligatorio className={claseNombre} />
-            : <Titulo className={claseNombre}>{nombre}</Titulo>}
-          {datos && <p className="mt-1 text-sm font-semibold text-white/90 [text-shadow:0_1px_6px_rgba(0,0,0,0.55)]">{datos}</p>}
-        </div>
-      </div>
-      {conDescripcion && (edicion || descripcion) && (
-        <div className="px-4 py-3 sm:px-5">
-          {edicion
-            ? <TextoEnLinea valor={descripcion || ''} onGuardar={edicion.onDescripcion} etiqueta="Descripción" ayuda="Añadir una descripción" maximo={300} className={claseDescripcion} />
-            : <p className={cn('line-clamp-2', claseDescripcion)}>{descripcion}</p>}
-        </div>
+    <div className="relative aspect-[3/2] w-full overflow-hidden bg-slate-100">
+      {imagen ? (
+        <img src={miniatura(imagen, 400)} srcSet={`${miniatura(imagen, 400)} 800w, ${miniatura(imagen, 800)} 1600w`} sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" alt={alt ?? (descripcion ? `${nombre}: ${descripcion}` : nombre)} loading={prioridad < 6 ? 'eager' : 'lazy'} decoding="async"
+          {...(prioridad < 3 ? { fetchPriority: 'high' as const } : {})}
+          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          style={encuadre ? { objectPosition: `${encuadre.x ?? 50}% ${encuadre.y ?? 50}%` } : undefined} />
+      ) : (
+        <div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-400" />
       )}
-    </>
+      <div aria-hidden className="absolute inset-x-0 bottom-0 h-[85%] bg-gradient-to-t from-black via-black/75 via-40% to-transparent" />
+      <PildoraEstado estado={pildora} opciones={edicion?.opciones} onCambiar={edicion?.onPildora} icono={iconoPildora} nombre={nombrePildora}
+        className="absolute left-3 top-3 px-3.5 py-1.5 text-sm" />
+      {esquina && <div className="absolute right-3 top-3 z-10 flex items-center gap-1.5">{esquina}</div>}
+      <div data-fondo-oscuro="" className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
+        {edicion
+          ? <TextoEnLinea valor={nombre} onGuardar={edicion.onNombre} etiqueta="Título" obligatorio className={claseNombre} />
+          : <Titulo className={cn('line-clamp-2', claseNombre)}>{nombre}</Titulo>}
+        {conDescripcion && (edicion || descripcion) && (
+          <div className="mt-1.5">
+            {edicion
+              ? <TextoEnLinea valor={descripcion || ''} onGuardar={edicion.onDescripcion} etiqueta="Descripción" ayuda="Añadir una descripción" maximo={300} className={cn('placeholder:text-white/70', claseDescripcion)} />
+              : <p className={cn('line-clamp-2', claseDescripcion)}>{descripcion}</p>}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

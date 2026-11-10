@@ -10,6 +10,7 @@ import TarjetaPortada, { CLASE_TARJETA_PORTADA, type EstadoTarjeta } from '../ta
 import MapaProyectosSitio from './MapaProyectosSitio';
 import HistoriaSitio from './HistoriaSitio';
 import { useDatosPortada, type ProyectoPortada } from './portadaEscaparate';
+import { iconoCategoria } from './iconoCategoria';
 const NoticiasSitio = lazy(() => import('./NoticiasSitio'));
 
 // ============================================================================
@@ -50,15 +51,7 @@ type Tabla = {
   conexiones?: Array<{ tabla_id: string; columna_id: string }>;
 };
 
-// El orden de los estados (2026-11-06, Eugenio: «el proyecto futuro súbelo arriba, cerca del
-// desarrollo principal actual»). Los nombres viejos siguen valiendo por si vuelven.
-const PESO_ESTADO: Record<string, number> = {
-  'Estado inicial': 0, 'Desarrollo principal actual': 0, 'Foco principal': 0,
-  'Proyecto futuro': 1, 'Desarrollo futuro': 1,
-  'En curso': 2, 'En desarrollo': 2, 'En seguimiento': 2, 'Activo': 2,
-  'Completado': 3, 'Ideación': 5,
-};
-const FOCO = new Set(['Desarrollo principal actual', 'Foco principal']);
+const ANCHO_TARJETAS = 'min(100vw - 2.5rem, 1840px)';
 
 const lista = (v: unknown): string[] => (Array.isArray(v) ? v.map(String) : []);
 const pide = (t: string) => fetch(`/api/bd/tablas/${encodeURIComponent(t)}?lectura=1`, { credentials: 'include' })
@@ -156,7 +149,6 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
     // La columna de categorías: la relación que apunta a la tabla de Sistemas.
     const tSistemas = raiz?.config?.sitio?.sistemas;
     const colArea = (proyectos.conexiones || []).find(c => c.tabla_id === tSistemas)?.columna_id || '';
-    const colEstado = cols.find(c => c.tipo === 'seleccion' && c.nombre === 'Estado') || cols.find(c => c.tipo === 'seleccion');
 
     // Las categorías: nombre e ilustración (la portada de su fila de Sistemas), solo las que tienen proyectos.
     const sistemaDe = new Map<string, { nombre: string; imagen: string | null; orden: number }>();
@@ -173,23 +165,17 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
       // está lo más a la izquierda posible»); a igualdad, el orden de la tabla de Sistemas.
       .sort((a, b) => b.n - a.n || a.orden - b.orden);
 
-    // Los proyectos, por su estado (`PESO_ESTADO`): el desarrollo principal actual (a toda la
-    // fila), los proyectos futuros, los que están en desarrollo, los completados, los que no
-    // tienen estado y al final la ideación. Dentro de cada grupo, el orden de la tabla. Las
-    // entradas ocultas no salen (quien edita las recibe del servidor; aquí es la cara pública).
-    const opciones = new Map((colEstado?.opciones || []).map(o => [o.id, o]));
-    const peso = (f: Fila) => PESO_ESTADO[opciones.get(String(f.celdas[colEstado?.id || '']?.valor || ''))?.label || ''] ?? 4;
+    // LOS PROYECTOS, JUNTOS POR CATEGORÍA (2026-11-10, Eugenio: «el orden ya no es el estado»): las
+    // categorías en el orden de arriba y, dentro de cada una, el de la tabla. Los que no tienen
+    // categoría, al final. Las entradas ocultas solo salen en el editor.
+    const lugar = new Map(areas.map((a, i) => [a.id, i]));
+    const categoriaDe = (f: Fila) => lista(f.celdas[colArea]?.valor).find(id => lugar.has(id)) || null;
+    const posicion = (f: Fila) => { const c = categoriaDe(f); return c ? lugar.get(c)! : areas.length; };
     const filas = [...proyectos.filas]
       .filter(f => (edicion ? true : !f.oculta && f.pagina_id) && String(f.celdas[colNombre]?.valor || f.pagina?.titulo || '').trim())
-      .sort((a, b) => peso(a) - peso(b) || a.orden - b.orden);
-    // LA FECHA (2026-11-06, Eugenio: «añade la fecha de los proyectos; abajo a la izquierda
-    // sobre la imagen»): el año de su «Fecha Inicio» (o de la primera columna de fecha).
-    const colFecha = cols.find(c => c.tipo === 'fecha' && c.nombre === 'Fecha Inicio') || cols.find(c => c.tipo === 'fecha');
-    const fecha = (f: Fila): string | null => {
-      const m = /\b(\d{4})\b/.exec(String(colFecha ? f.celdas[colFecha.id]?.valor ?? '' : ''));
-      return m ? m[1] : null;
-    };
-    return { colNombre, colArea, colEstado, opciones, areas, filas, fecha };
+      .sort((a, b) => posicion(a) - posicion(b) || a.orden - b.orden);
+    const opcionesArea: EstadoTarjeta[] = [...sistemaDe.entries()].map(([id, x]) => ({ id, label: x.nombre })).sort((a, b) => a.label.localeCompare(b.label, 'es'));
+    return { colNombre, colArea, areas, filas, categoriaDe, opcionesArea, nombreArea: (id: string) => sistemaDe.get(id)?.nombre || '' };
   }, [proyectos, sistemas, raiz]);
 
   // Las personas: su foto (la portada de su página) y su nombre.
@@ -276,6 +262,10 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
         </div>
       )}
 
+      {/* A TODO EL ANCHO DEL ESCRITORIO (2026-11-10, Eugenio: «tres por fila, pero aprovecha el ancho total»):
+          la portada y las tarjetas se salen de la columna de lectura; lo de debajo sigue en ella. En el
+          editor, no: allí el ancho lo marcan sus paneles. */}
+      <div style={escaparate && !edicion ? { width: ANCHO_TARJETAS, marginLeft: `calc((100% - ${ANCHO_TARJETAS}) / 2)` } : undefined}>
       {/* LA PRESENTACIÓN (2026-11-07, Eugenio: «haz todas las propuestas… con alta calidad, no
           quiero nada cutre»): qué es el laboratorio en una línea y el botón de colaborar,
           encima de las tarjetas y sin empujarlas fuera de la primera pantalla. */}
@@ -286,28 +276,25 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
           blanco; el estado y el año arriba de la imagen y algo más grandes; todas del mismo tamaño,
           dos por fila»). Las primeras cargan ya y con prioridad; el resto, al acercarse. */}
       {escaparate && <h2 className="sr-only">Proyectos</h2>}
-      <ul data-ancla="proyectos" className={cn('grid list-none grid-cols-1 gap-6 p-0 sm:grid-cols-2', escaparate ? 'mt-6 scroll-mt-36 outline-none sm:mt-8 sm:scroll-mt-24' : 'mt-4')}>
+      <ul data-ancla="proyectos" className={cn('grid list-none grid-cols-1 gap-5 p-0 sm:grid-cols-2', escaparate ? 'lg:grid-cols-3 ' + 'mt-6 scroll-mt-36 outline-none sm:mt-8 sm:scroll-mt-24' : 'mt-4')}>
         {visibles.map((f, i) => {
           const nombre = String(f.celdas[modelo.colNombre]?.valor || f.pagina?.titulo || '').trim();
           const img = f.pagina?.imagen || null;
           const enc = f.pagina?.encuadre;
-          const estadoId = String(f.celdas[modelo.colEstado?.id || '']?.valor || '');
-          const estado = modelo.opciones.get(estadoId) || null;
-          const sus = lista(f.celdas[modelo.colArea]?.valor).map(id => modelo.areas.find(a => a.id === id)?.nombre).filter(Boolean) as string[];
+          const categoria = modelo.categoriaDe(f);
+          const nombreCategoria = categoria ? modelo.nombreArea(categoria) : '';
           const descripcion = (f.pagina?.descripcion || '').trim();
-          const principal = FOCO.has(estado?.label || '');
           return (
             <li key={f.id} className="relative">
               {(() => {
-                const datosEl = [modelo.fecha(f) && (principal ? `Desde ${modelo.fecha(f)}` : modelo.fecha(f)), ...sus.slice(0, 2)].filter(Boolean).join(' · ');
-                const opciones = (modelo.colEstado?.opciones || []) as EstadoTarjeta[];
                 const tarjeta = (
-                  <TarjetaPortada nombre={nombre} imagen={img} encuadre={enc} descripcion={descripcion} estado={estado} datos={datosEl} Titulo={Titulo} prioridad={i}
+                  <TarjetaPortada nombre={nombre} imagen={img} encuadre={enc} descripcion={descripcion} Titulo={Titulo} prioridad={i}
+                    pildora={categoria ? { id: categoria, label: nombreCategoria } : null} iconoPildora={nombreCategoria ? iconoCategoria(nombreCategoria) : undefined} nombrePildora="Categoría"
                     edicion={edicion ? {
                       onNombre: v => guardarCelda(f.id, modelo.colNombre, v),
                       onDescripcion: v => guardarDescripcion(f.id, v),
-                      opciones,
-                      onEstado: modelo.colEstado ? id => guardarCelda(f.id, modelo.colEstado!.id, id) : undefined,
+                      opciones: modelo.opcionesArea,
+                      onPildora: modelo.colArea ? id => guardarCelda(f.id, modelo.colArea, id ? [id] : []) : undefined,
                     } : undefined}
                     esquina={edicion ? <>
                       {f.oculta && <span className="rounded-full bg-slate-900/80 px-2.5 py-1 text-xs font-bold text-white">Oculta</span>}
@@ -333,13 +320,14 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
         {edicion && (
           <li>
             <button type="button" onClick={anadirProyecto}
-              className="grid aspect-[16/9] h-full w-full place-items-center rounded-2xl border-2 border-dashed border-slate-300 text-sm font-bold text-slate-500 transition-colors hover:border-slate-500 hover:text-slate-800">
+              className="grid aspect-[3/2] h-full w-full place-items-center rounded-2xl border-2 border-dashed border-slate-300 text-sm font-bold text-slate-500 transition-colors hover:border-slate-500 hover:text-slate-800">
               <span className="inline-flex items-center gap-2"><Plus className="h-4 w-4" /> Añadir proyecto</span>
             </button>
           </li>
         )}
       </ul>
       {edicion && aviso && <p role="alert" className="mt-3 text-sm font-bold text-rose-600">{aviso}</p>}
+      </div>
       {visibles.length === 0 && <p className="py-16 text-center text-sm text-slate-500">No hay proyectos en esta categoría.</p>}
 
       {/* DÓNDE TRABAJAMOS Y NUESTRA HISTORIA (2026-11-07): el dónde y el cuándo de los proyectos,

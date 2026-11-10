@@ -10840,3 +10840,8 @@ Petición de Eugenio: una rama del Cuadriciclo Bala con tres ruedas, dos delante
 - **Túnel**: «Probar» y sus opciones con los deslizadores del Triciclo (alargar la cola 10 cm: Cd 0,134 → 0,130).
 - El pie de la página ya no dice «STEP generado con CadQuery» con el Cuadriciclo ni con el Triciclo, que no tienen STEP.
 - **Comprobado**: tsc; build; bala-huella IGUAL contra main (garaje y editor); bala-disenos; triciclo-disenos contra main (26 OK); triciclo-rangos (138 casos); tunel-pruebas sin fallos; navegador con gráficos por software y la API simulada. **Sin verificar**: un móvil o una gráfica de verdad con la app instalada, y el guardado contra el servidor real.
+
+### 2026-11-10 — Tarjetas de Luz & Humanidad: por categoría y con el texto sobre la imagen
+- Eugenio: la categoría, con su icono (`iconoCategoria.tsx`), va en la píldora blanca de arriba; las tarjetas se juntan por categoría, y el estado y el año solo se ven dentro del proyecto.
+- El título y la descripción van juntos sobre la imagen, en blanco y con sombra; la descripción, a dos líneas con puntos suspensivos; degradado casi negro abajo que se aclara hacia el centro.
+- Tres por fila, a casi todo el ancho del escritorio; lo de debajo de las tarjetas sigue en su columna. En el editor, la píldora cambia la categoría.

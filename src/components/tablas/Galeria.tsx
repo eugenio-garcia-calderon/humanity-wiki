@@ -16,6 +16,7 @@ import { duplicarFila, eliminarFila, restaurarFila } from './accionesFila';
 import { tonosDeNota, textoNota, textoSobre } from '../../utils/nota';
 import NotaCirculo from '../sitio/NotaCirculo';
 import { miniatura } from '../../utils/miniatura';
+import { iconoCategoria } from '../sitio/iconoCategoria';
 import TarjetaPortada, { CLASE_TARJETA_PORTADA, type EstadoTarjeta } from './TarjetaPortada';
 
 // ============================================================================
@@ -74,7 +75,7 @@ const LETRA_NOMBRE: Record<TamanoGaleria, string> = {
   xxxs: 'text-[9px] leading-tight', xxs: 'text-[10px] leading-tight', xs: 'text-xs', pequeno: 'text-sm', mediano: 'text-base', grande: 'text-lg', 'muy-grande': 'text-xl',
 };
 
-export default function Galeria({ tarjetaPortada = false, tarjetasPorFila = 2, onNuevaPagina, celdasNueva, alCrearNueva, onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, enCaja = false, conDescripcion = true, conImagen = true, filasMax = null, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla, listaEnMovil = false }: {
+export default function Galeria({ tarjetaPortada = false, tarjetasPorFila = 3, onNuevaPagina, celdasNueva, alCrearNueva, onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, enCaja = false, conDescripcion = true, conImagen = true, filasMax = null, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla, listaEnMovil = false }: {
   /** Título en blanco sobre la imagen, con el estado encima (`TarjetaPortada.tsx`). */
   tarjetaPortada?: boolean;
   /** Con `tarjetaPortada`: cuántas por fila en pantalla ancha. */
@@ -431,17 +432,17 @@ export default function Galeria({ tarjetaPortada = false, tarjetasPorFila = 2, o
           // (o la primera), y debajo del título van el año y lo enlazado, de lo que la vista enseña.
           const portadaEl = (() => {
             if (!conPortada) return null;
-            const cEstado = otras.find(c => c.tipo === 'seleccion' && c.nombre === 'Estado') || otras.find(c => c.tipo === 'seleccion');
-            const opciones = (cEstado?.opciones || []) as EstadoTarjeta[];
-            const cFecha = otras.find(c => c.tipo === 'fecha');
+            // Arriba, lo primero enlazado (la categoría); si no hay nada enlazado, el estado, y se puede cambiar ahí.
             const cRel = otras.find(c => c.tipo === 'relacion');
+            const enlazado = cRel ? (f.apuntados?.[cRel.id] || [])[0] : null;
+            const cEstado = enlazado ? undefined : otras.find(c => c.tipo === 'seleccion' && c.nombre === 'Estado') || otras.find(c => c.tipo === 'seleccion');
+            const opciones = (cEstado?.opciones || []) as EstadoTarjeta[];
             const estado = cEstado ? opciones.find(o => o.id === String((f.celdas[cEstado.id] as any)?.valor ?? '')) || null : null;
-            const ano = cFecha ? /\b(\d{4})\b/.exec(String((f.celdas[cFecha.id] as any)?.valor ?? ''))?.[1] : null;
-            const datos = [ano, ...(cRel ? (f.apuntados?.[cRel.id] || []).slice(0, 2).map((a: any) => a.etiqueta) : [])].filter(Boolean).join(' · ');
+            const pildora: EstadoTarjeta | null = enlazado ? { id: String(enlazado.id), label: String(enlazado.etiqueta || '') } : estado;
             return (
               <div className={CLASE_TARJETA_PORTADA}>
                 <TarjetaPortada nombre={nombre || 'Sin título'} imagen={f.pagina?.imagen} encuadre={f.pagina?.encuadre} descripcion={f.pagina?.descripcion}
-                  estado={estado} datos={datos} conDescripcion={conDescripcion} Titulo="p"
+                  pildora={pildora} iconoPildora={enlazado ? iconoCategoria(String(enlazado.etiqueta || '')) : undefined} nombrePildora="Estado" conDescripcion={conDescripcion} Titulo="p"
                   edicion={onGuardarCelda && colTitulo ? {
                     onNombre: v => onGuardarCelda(f.id, colTitulo.id, v),
                     onDescripcion: async v => {
@@ -450,7 +451,7 @@ export default function Galeria({ tarjetaPortada = false, tarjetasPorFila = 2, o
                       onCambio();
                     },
                     opciones,
-                    onEstado: cEstado ? id => onGuardarCelda(f.id, cEstado.id, id) : undefined,
+                    onPildora: cEstado ? id => onGuardarCelda(f.id, cEstado.id, id) : undefined,
                   } : undefined}
                   esquina={conMenu ? (
                     <button type="button" aria-label="Más opciones" title="Más opciones" aria-haspopup="menu" aria-expanded={menu?.fila.id === f.id}
