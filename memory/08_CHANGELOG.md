@@ -10808,3 +10808,16 @@ Eugenio: «Unifica los selectores de vehículos… deja solo el de arriba y deja
 - En el editor, título, descripción y estado se escriben en la propia tarjeta. Nuevo `PUT /api/bd/filas/:id/subtitulo` para la descripción.
 - La portada de un escaparate se edita tal como se ve (`VistaProyectosSitio` con `edicion`), con titular y «Añadir proyecto»; «Ver los bloques de la página» enseña lo de debajo.
 - Los proyectos del escaparate llevan en el editor su cabecera pública; cualquier otra página puede pedirla con «Título sobre la imagen» (`cabecera.estilo = 'portada'`). Propiedades y relaciones quedan plegadas debajo.
+
+## 2026-11-10 — Conciencia: esquema nuevo, animaciones, buzón de mejoras y proyecto en luzhumanidad.com
+
+- Eugenio: el mapa se redibuja. El ser humano 1 (magenta) a la izquierda, la matriz fundamental del universo en el centro (una columna de malla) y el ser humano 2 (naranja) a la derecha. Entre ellos, tres franjas con las tres maneras en que interactúan dos seres conscientes a través de la matriz:
+  - **Vigilia**: codifica, el aire vibra, decodifica.
+  - **Estado onírico**: el hipercampo y los sentidos energéticos aún desconocidos.
+  - **Meditación**: un campo coherente que lleva a la telepatía (hacia el otro ser), la visión extraocular (un objeto cercano) y la visión remota (un lugar o ser lejano).
+- El campo neuronal de cada persona se dibuja con la misma malla que la matriz (`cz-malla-*`).
+- **Animaciones** («Ver cómo funciona: Vigilia · Sueño · Meditación»): cuatro pasos por canal, con texto y controles (pausa, anterior, siguiente, repetir); el resto del mapa se atenúa. Vigilia enseña la idea en palabras, las ondas de sonido que viajan, el aire que se comprime, el oído que recibe y el campo del otro que le da sentido. Textos en `RECORRIDOS` (`src/data/concienciaMapa.ts`), dibujo en `src/components/conciencia/Animacion.tsx` (SMIL, se pausa con «reducir movimiento»).
+- **Cabecera de una franja** con lo poco que hay que explicar, «Creado por Luz & Humanidad» y el botón **«Añadir mejora o comentario»**: buzón sin cuenta (tabla `conciencia_comentarios`, migración 0180; pendientes en texto en `/api/conciencia/comentarios.txt`). Desaparece la presentación grande: el mapa ocupa la pantalla nada más entrar.
+- **Proyecto de luzhumanidad.com** (migración 0181): fila «Conciencia del ser humano» en la base de datos de proyectos del sitio, área Conciencia, equipo Eugenio, en curso. Su página tiene la dirección `luzhumanidad.com/conciencia-del-ser-humano/teoria-sintergica` y `config.aplicacion = 'conciencia'`, así que enseña el mapa (`APLICACIONES` en `SubpaginaSitio.tsx`). Imagen de la tarjeta: `public/estudio-conciencia/mapa-teoria-sintergica.jpg`.
+- Un mapa guardado con el esquema viejo (`version` < 2) no se enseña: se ve el nuevo y el viejo queda en el historial. En producción no había ninguno guardado (comprobado: versión 0).
+- **Comprobado** en Chrome sin cabeza, con Postgres local y las migraciones 0179 y 0180: las tres animaciones paso a paso, el buzón (enviar y listar), arrastrar y guardar, y la vista a 1400 y 390 px. La 0181, en una réplica mínima de las tablas: crea la página, la fila y los dos enlaces, y es idempotente (dos pasadas, un solo proyecto); en una base sin esas tablas no hace nada.
