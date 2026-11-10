@@ -41,6 +41,8 @@ export function esTexto(s: string): boolean {
   const t = s.trim();
   if (t.length < 2 || t.length > 12000 || !/\p{L}/u.test(t)) return false;
   if (/^(https?:|mailto:|tel:|\/|#|\{\{)/.test(t) || /^[A-Z0-9_]{6,}$/.test(t)) return false;
+  // Fechas ISO e identificadores externos (los canales de YouTube, por ejemplo).
+  if (/^\d{4}-\d{2}-\d{2}/.test(t) || /^[A-Za-z0-9_-]{16,}$/.test(t)) return false;
   if (/^[a-záéíóúñü_-]+$/.test(t) || /^[a-z]+([A-Z][a-z0-9]*)+$/.test(t)) return false;
   return true;
 }
@@ -204,7 +206,10 @@ async function recogerPublicado(db: any, s: SitioTraducido) {
     if (!p) return;
     paginas.push({ title: p.title, slug: p.slug });
     anadir([p.title], p.title);
-    anadir(textosDe(p.config), p.title);
+    // Tal como se sirve: la Sala de prensa, por ejemplo, arma sus resúmenes al leerla.
+    const { paginaPublica } = await import('./sitios');
+    const servida = await paginaPublica(db, id).catch(() => null);
+    anadir(textosDe(servida?.config || p.config), p.title);
   };
   for (const p of await paginasDelPie(db, raiz)) await conCuerpo(p.id);
   for (const [tabla, cuerpos] of [[cfg.proyectos, true], [cfg.personas, true], [cfg.sistemas, false]] as Array<[string, boolean]>) {
@@ -336,9 +341,9 @@ export function registrarTraducciones(app: Express, db: any) {
       await barrerTraducciones(db);
       const filas = (await db.execute(sql`
         SELECT hash, original, tipo, contexto FROM traducciones_textos
-        WHERE idioma = ${idioma} AND traduccion IS NULL ORDER BY contexto, creada_at LIMIT ${limite}
+        WHERE idioma = ${idioma} AND traduccion IS NULL AND visto_at > now() - interval '3 days' ORDER BY contexto, creada_at LIMIT ${limite}
       `)).rows;
-      const total = Number(((await db.execute(sql`SELECT count(*) AS n FROM traducciones_textos WHERE idioma = ${idioma} AND traduccion IS NULL`)).rows[0] as any).n);
+      const total = Number(((await db.execute(sql`SELECT count(*) AS n FROM traducciones_textos WHERE idioma = ${idioma} AND traduccion IS NULL AND visto_at > now() - interval '3 days'`)).rows[0] as any).n);
       res.set('Cache-Control', 'no-store').json({ idioma, total, tareas: filas });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
@@ -367,7 +372,8 @@ export function registrarTraducciones(app: Express, db: any) {
     if (!conToken(req, res)) return;
     try {
       const idioma = String(req.body?.idioma || 'en');
-      const textos = (Array.isArray(req.body?.textos) ? req.body.textos : []).map(String).filter(esTexto).slice(0, 2000);
+      // Lo que se ve en pantalla, aunque sea una palabra en minúscula («proyectos»).
+      const textos = (Array.isArray(req.body?.textos) ? req.body.textos : []).map((t: unknown) => String(t).trim()).filter((t: string) => t.length >= 2 && t.length <= 4000 && /\p{L}/u.test(t)).slice(0, 2000);
       await guardarTextos(db, idioma, textos.map((texto: string) => ({ texto, tipo: 'interfaz', contexto: String(req.body?.contexto || 'Interfaz') })));
       res.json({ apuntados: textos.length });
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
