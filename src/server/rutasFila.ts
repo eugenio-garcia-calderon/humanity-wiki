@@ -39,6 +39,14 @@ const MAX_TRAMOS = 3;
  *  `sitios.ts`): una plantilla no puede empezar por ellos. */
 export const TRAMOS_RESERVADOS = new Set(['p', 'bd', 'buscar', 'pedido', 'producto', 'carpetas', 'proyectos', 'api', 'assets', 'uploads']);
 
+/** El LIKE que encuentra, por su dirección, las páginas cuyo título da esa dirección. Solo acota: la
+ *  comparación exacta con `slugDe` la hace quien lo usa. Va abierto por los dos lados porque `slugDe`
+ *  recorta a 60 letras y quita los signos de los extremos: un título largo o con «¿?» daba 404
+ *  (2026-11-10, «Competición para el desarrollo de un Vehículo Eficiente y Solar de código abierto»). */
+export function patronDeTitulo(slug: string): string {
+  return `%${slug.replace(/[%_\\]/g, '').replace(/-/g, '%').replace(/[aceinosuyz]/g, '_')}%`;
+}
+
 /** Lo que se puede escribir en una plantilla: letras, números, guiones,
  *  barras y `{Columna}`. */
 export function plantillaValida(p: unknown): string | null {

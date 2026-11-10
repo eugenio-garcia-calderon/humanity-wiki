@@ -1261,3 +1261,16 @@ Eugenio asked to rescue solarcrowd.com (it lived on Softr) «con la arquitectura
 **Rejected: a second escaparate** (`sitio.escaparate`, the luzhumanidad.com machinery). It would have brought the map, the history and the forms for free, but it speaks of «el laboratorio» in several fixed strings, hides category filters and assumes the Sistemas/Personas tables. Bending it to a lending portal meant several code changes inside a component that luzhumanidad.com depends on. Switching later costs one afternoon: point `sitio.proyectos` at the loans table and set `escaparate: true`.
 
 **The only code change:** `menu.logoHorizontal` / `pie.logoHorizontal`, opt-in, so a wordmark logo is shown whole instead of cropped to a square. Off for every existing site.
+
+## 2026-11-10 — Consciousness map: saving for everyone needs an account
+
+`/conciencia` is a map people refine by editing it. Two ways to store edits were possible:
+
+- **Open to anyone without an account**, like the Calendario Arte and the Aeromóvil. Eugenio asked for that explicitly on 2026-11-05 for those two pages. He did not ask for it here.
+- **A signed-in account, level 1** (the catalogue level of `CREATE_KNOWLEDGE_GRAPH`, which is what a concept map is). Chosen, because `src/server/CLAUDE.md` says every write route checks the role and the open exception was granted page by page.
+
+Without an account the page still lets anyone move and change things. Their changes stay in `localStorage` (`conciencia.mapa.borrador`) and can be downloaded as JSON. The page says so and links to the login.
+
+Opening it later is one constant, `NIVEL_GUARDAR`, plus `puedeGuardar` in `src/server/conciencia.ts`. History (a copy every 10 minutes at most, always before restoring or resetting; 300 kept) and the per-IP brake are already there, so the open variant would be safe too.
+
+**Storage shape:** one row per map with the whole map as JSONB (`conciencia_mapas`, key `principal`), `datos` NULL meaning «the map in the code», and `version` for 409 on concurrent saves. Same pattern as `calendario_arte_meses`. Node and edge rows were rejected: one drag would be dozens of writes, and the map is always read and drawn whole.
