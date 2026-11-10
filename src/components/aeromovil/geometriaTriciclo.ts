@@ -211,14 +211,19 @@ export function camposTriciclo(P: Partial<Parametros>): CamposTriciclo {
  * El rango de un deslizador para estos parámetros. Cuatro dependen de otro: la
  * cúpula acaba al menos 25 cm por delante del eje trasero y el pasajero va entre
  * 40 y 62 cm detrás del piloto (los dos, como en el Cuadriciclo); la potencia
- * máxima no baja de la nominal; el basculante no llega más allá de 70 cm del eje
- * trasero ni deja el pivote detrás de los estribos del pasajero.
+ * máxima no baja de la nominal; y el carenado pequeño no puede ser además
+ * estrecho ni corto (el neumático dejaría de caber).
  */
 export function rangoTriciclo(k: ClaveNumTriciclo, T: CamposTriciclo): [number, number] {
   const f = fichaTriciclo(k)!;
   if (k === 'tCupFin') return [Math.min(f.min, T.tBatalla - 0.45), Math.min(f.max, T.tBatalla - 0.25)];
   if (k === 'tPasX') return [Math.max(f.min, T.tPilX + 0.40), Math.min(f.max, T.tPilX + 0.62)];
   if (k === 'tKWPico') return [Math.max(f.min, T.tKWNom), f.max];
+  // a smaller pod is also a narrower one: below 82 % of the drawn width in all, the tyre no longer fits inside
+  const esc = Math.min(fichaTriciclo('tPodEsc')!.max, Math.max(fichaTriciclo('tPodEsc')!.min, T.tPodEsc));
+  if (k === 'tPodAncho') return [Math.max(f.min, 0.82 / esc), f.max];
+  // and a shorter one: its tail must still reach past the back of the tyre
+  if (k === 'tPodCola') return [Math.max(f.min, 0.70 / esc), f.max];
   return [f.min, f.max];
 }
 /** Un valor dentro de su rango (un diseño escrito a mano o de otra versión no puede construir un triciclo imposible). */
@@ -318,7 +323,7 @@ export interface Caja { nombre: string; x0: number; x1: number; y0: number; y1: 
 export const Z_LARGUERO = 0.11;
 /** El paquete de batería: un módulo ancho en el morro, donde iba la rueda delantera del Cuadriciclo, y si no cabe, el resto en un módulo estrecho entre los pies del piloto, bajo el depósito. Sobre los largueros. */
 function bateriaEn(F: FormaBala, T: CamposTriciclo, yBase: number): Caja[] {
-  const litros = T.tKWh * 1000 / T.tWhL, V = litros / 1000;
+  const litros = limitarTriciclo('tKWh', T) * 1000 / limitarTriciclo('tWhL', T), V = litros / 1000;
   const alto = 0.20, delante = 0.12, partido = -0.30;
   const aF = 0.30, aR = 0.18, Vmax = (delante - partido) * aF * alto;
   const cajas: Caja[] = [];
@@ -349,7 +354,8 @@ export function crearModeloTriciclo(P: Parametros) {
 
   // ── bastidor: dos largueros sobre la panza, travesaños, la cuna de la batería y la suspensión delantera, los soportes de los sillines y la torreta del amortiguador
   const dT = L('tChD') / 1000, pared = L('tChT') / 1000, mat = MATERIALES_CHASIS[T.tChMat].n;
-  const yL = D.suelo + 0.035 + dT / 2, zL = Z_LARGUERO;
+  // the rails narrow with a narrower body (they run along the flat of the belly)
+  const yL = D.suelo + 0.035 + dT / 2, zL = Z_LARGUERO * Math.min(1, F.kW);
   const xPiv = xR + L('tBasculante'), yPiv = yL + 0.03;
   const yBat = yL + dT / 2 + 0.005;
   const baterias = bateriaEn(F, T, yBat);
@@ -360,7 +366,7 @@ export function crearModeloTriciclo(P: Parametros) {
   const tubos: Tubo[] = [];
   for (const s of [1, -1]) {
     const lado = s > 0 ? 'der.' : 'izq.';
-    tubos.push(T_(`Larguero ${lado}`, [0.10, yL, s * zL], [xPiv, yL, s * zL]));
+    tubos.push(T_(`Larguero ${lado}`, [0.06, yL, s * zL], [xPiv, yL, s * zL]));
     // the cradle round the nose module: a post each side up to the top bar, on which the front suspension pivots
     tubos.push(T_(`Cuna de la batería: poste ${lado}`, [xCuna, yL, s * zL], [xCuna, yCuna, s * zCuna]));
     // the pilot's saddle and the passenger's: a post each side from the rail up to the saddle's underside
@@ -369,7 +375,7 @@ export function crearModeloTriciclo(P: Parametros) {
     // the shock tower: from the rail at the swing-arm pivot up and back to the shock's top mount
     tubos.push(T_(`Torreta del amortiguador ${lado}`, [xPiv + 0.04, yL, s * zL], [xPiv - 0.06, yPiv + 0.26, s * 0.05]));
   }
-  tubos.push(T_('Travesaño delantero', [0.10, yL, -zL], [0.10, yL, zL]));
+  tubos.push(T_('Travesaño delantero', [0.06, yL, -zL], [0.06, yL, zL]));
   tubos.push(T_('Cuna de la batería: barra de arriba', [xCuna, yCuna, -zCuna], [xCuna, yCuna, zCuna]));
   tubos.push(T_('Travesaño de las plataformas', [-0.55 + dxPil + pies[0], yL, -zL], [-0.55 + dxPil + pies[0], yL, zL]));
   tubos.push(T_('Travesaño bajo los sillines', [-1.25, yL, -zL], [-1.25, yL, zL]));
@@ -469,7 +475,7 @@ export function piezasTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cris
     const kg = Math.PI * ((t.d / 2) ** 2 - (t.d / 2 - t.pared) ** 2) * largoTubo(t) * densidad;
     kgTubos += kg; xt += kg * (t.a[0] + t.b[0]) / 2; yt += kg * (t.a[1] + t.b[1]) / 2;
   }
-  const bat = T.tKWh * 1000 / L('tWhKg');
+  const bat = L('tKWh') * 1000 / L('tWhKg');
   let vb = 0, xb = 0, yb = 0;
   for (const c of m.baterias) { const v = (c.x1 - c.x0) * (c.y1 - c.y0) * c.hz * 2; vb += v; xb += v * (c.x0 + c.x1) / 2; yb += v * (c.y0 + c.y1) / 2; }
   const ySillin = (piloto: boolean) => (piloto ? m.sillines.yPiloto : m.sillines.yPasajero) - 0.03;
@@ -609,7 +615,7 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     piezas, cg: { x: cg.x, y: cg.y, masa: cg.masa, vacio: { x: vacio.x, y: vacio.y } }, vuelco: { ssf, ssfSolo, repartoDel },
     giro: { radio, dentro: di * 180 / Math.PI, fuera: dout * 180 / Math.PI },
     bastidor: { M: Mmax, tension, seguridad, metros },
-    bateria: { litros: T.tKWh * 1000 / L('tWhL'), kg: T.tKWh * 1000 / L('tWhKg'), litrosMorro: 0.42 * 0.30 * 0.20 * 1000 },
+    bateria: { litros: L('tKWh') * 1000 / L('tWhL'), kg: L('tKWh') * 1000 / L('tWhKg'), litrosMorro: 0.42 * 0.30 * 0.20 * 1000 },
     energia: cd ? energiaTriciclo(m, mVeh + 2 * mOcc, cd) : null,
   };
   const e = bala.energia, nada = NaN;
@@ -628,7 +634,7 @@ export function energiaTriciclo(m: ModeloTriciclo, mTot: number, cd: { cd: numbe
   const T = m.campos, L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), g = 9.81, CdA = cd.cd * cd.areaRef;
   const potencia = (v: number) => (0.5 * 1.2 * CdA * v ** 3 + CRR * mTot * g * v) / RENDIMIENTO + AUXILIARES;
   const consumo = (kmh: number) => { const v = kmh / 3.6; return potencia(v) / v / 3.6; };
-  const vel = L('tVel'), WhKm = consumo(vel), util = T.tKWh * 1000 * USABLE;
+  const vel = L('tVel'), WhKm = consumo(vel), util = L('tKWh') * 1000 * USABLE;
   const vmaxCon = (kW: number) => { let v = 10; for (let i = 0; i < 80; i++) v *= Math.pow(kW * 1000 / potencia(v), 0.34); return v * 3.6; };
   // 0 → 50 km/h: peak power, limited by the grip of the one driven wheel (≈ 40 % of the weight on it, μ 0.9)
   const reparto = 0.4, Fmax = AGARRE * reparto * mTot * g;
