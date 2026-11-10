@@ -10812,7 +10812,7 @@ Eugenio: «Unifica los selectores de vehículos… deja solo el de arriba y deja
 - **Al enviarlo**, el servidor (`src/server/prestamos.ts`) hace esto:
   - Rehace el contrato a partir del bloque guardado en la página, nunca de lo que manda el navegador, y calcula su huella SHA-256.
   - Genera el PDF firmado.
-  - Guarda la firma, el justificante y el PDF en `/uploads/privado/` (no se sirven en público) y añade una fila en `prestamos_firmados` (migración 0180).
+  - Guarda la firma, el justificante y el PDF en `/uploads/privado/` (no se sirven en público) y añade una fila en `prestamos_firmados` (migración 0182).
   - Manda los correos por la cuenta SMTP de Google que ya existe:
     - a la persona, el PDF;
     - a administración (`avisar`) y a la entidad (`correoEntidad`), el PDF y el justificante.

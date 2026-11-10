@@ -1,4 +1,4 @@
--- 0180 — LOS PRÉSTAMOS FIRMADOS EN UN SITIO (2026-11-10, Eugenio en solarcrowd.com:
+-- 0182 — LOS PRÉSTAMOS FIRMADOS EN UN SITIO (2026-11-10, Eugenio en solarcrowd.com:
 -- «un botón que sea realizar préstamo… que rellene sus datos, acepte las condiciones,
 -- firme, adjunte el justificante de la transferencia y le dé a formalizar préstamo»).
 -- El código está en `src/server/prestamos.ts`; el bloque, en `bloquesDatos/prestamo`.
