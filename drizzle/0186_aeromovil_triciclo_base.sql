@@ -1,3 +1,6 @@
+-- Renumbered from 0182 on 2026-11-10 (Eugenio: «cambia tú la tuya»): another
+-- migration had claimed 0182. Already applied in production as 0182; it is
+-- idempotent, so running again under this name inserts nothing.
 -- 2026-11-10 (Eugenio): «Desarrolla una ramificación del cuadriciclo bala […]
 -- vamos a llamarlo triciclo bala». The Triciclo Bala is the editor's fourth
 -- family (`disposicion = 'triciclo'`). The «Diseños» list is built from this
