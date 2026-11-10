@@ -60,9 +60,9 @@ export function textosDe(x: unknown, salida: Set<string> = new Set(), clave = ''
 
 type Diccionario = {
   textos: Map<string, string>; interfaz: Record<string, string>; valores: Set<string>;
-  slugs: Map<string, string>; inversos: Map<string, string>;
+  slugs: Map<string, string>; inversos: Map<string, string>; iguales: Set<string>;
 };
-const vacio = (): Diccionario => ({ textos: new Map(), interfaz: {}, valores: new Set(), slugs: new Map(), inversos: new Map() });
+const vacio = (): Diccionario => ({ textos: new Map(), interfaz: {}, valores: new Set(), slugs: new Map(), inversos: new Map(), iguales: new Set() });
 const diccionarios = new Map<string, Diccionario>();
 let dominiosActivos = new Set<string>();
 let paginasConocidas: Array<{ title: string; slug: string | null }> = [];
@@ -120,6 +120,14 @@ function profundo(x: any, idioma: string, d: Diccionario, origen: string, destin
 export function traducirProfundo<T>(x: T, host: string): T {
   const q = dominioDe(host);
   return q ? profundo(x, q.idioma, dic(q.idioma), q.s.origen, q.dominio) : x;
+}
+
+/** ¿Esta dirección de un solo tramo es de una página ya traducida? Para el mapa del sitio. */
+export function direccionTraducida(host: string, tramo: string): boolean {
+  const idioma = idiomaDeHost(host);
+  if (!idioma) return true;
+  const d = dic(idioma);
+  return d.inversos.has(tramo) || d.iguales.has(tramo);
 }
 
 /** Los tramos de una dirección traducida, tal como se llaman en el original. */
@@ -324,6 +332,8 @@ export async function recargarDiccionarios(db: any) {
       const en = d.textos.get(String(p.title || '').trim());
       if (!en || (p.slug && String(p.slug).includes('/'))) continue;
       const es = p.slug || slugDe(p.title), nuevo = slugDe(en);
+      // «Aeromóvil» se llama igual en todos los idiomas: está traducida aunque su dirección no cambie.
+      if (es && es === nuevo) d.iguales.add(es);
       if (!es || !nuevo || es === nuevo || usados.has(nuevo) || TRAMOS_RESERVADOS.has(nuevo)) continue;
       usados.add(nuevo); d.slugs.set(es, nuevo); d.inversos.set(nuevo, es);
     }
