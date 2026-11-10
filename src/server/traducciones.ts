@@ -53,7 +53,8 @@ export function esTexto(s: string): boolean {
 export function textosDe(x: unknown, salida: Set<string> = new Set(), clave = ''): Set<string> {
   if (typeof x === 'string') { if (!CLAVES_FUERA.has(clave) && esTexto(x)) salida.add(x.trim()); }
   else if (Array.isArray(x)) x.forEach(v => textosDe(v, salida, clave));
-  else if (x && typeof x === 'object') for (const [k, v] of Object.entries(x)) if (!CLAVES_FUERA.has(k)) textosDe(v, salida, k);
+  // Una clave de la lista con un objeto dentro sí se recorre: `portada` es una imagen en una página y el titular en el sitio.
+  else if (x && typeof x === 'object') for (const [k, v] of Object.entries(x)) if (!CLAVES_FUERA.has(k) || (v && typeof v === 'object')) textosDe(v, salida, k);
   return salida;
 }
 
