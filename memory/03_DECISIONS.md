@@ -1392,3 +1392,11 @@ Where he did not say, the page decides and says so (all in `src/data/modeloSocio
 - In the literal reading, business-to-business purchases pay the general 20 %.
 
 Result (default reading): ≈ 275.600 M€, **16,3 % of GDP** (flat 20 % was 23 %), 701 € per person and scale. Shown openly with health/education cuts, the pension transition, size thresholds, the necessity/luxury line and hospitality at 40 % as open problems. A sandbox lets the reader reclassify the 14 spending groups.
+
+## 2026-11-10 — Calendario Arte: adding to a month's folder appends on the server
+
+Eugenio asked that anyone with the link can add reference pictures to each month, with a «+» under the month that opens the paste / drag / file dialog (`SoltarImagen`). The folder already existed (`calendario_arte_meses.referencias`), written with `PUT …/:mes/referencias`, which **replaces the whole list with what the browser holds**. With open editing that loses work: a tab opened an hour ago that adds one picture erases every picture added since (a copy survives in the history, but nobody would know to look).
+
+- **Keep using the PUT for adding.** Rejected for the reason above.
+- **Version check on the PUT (409 and reload).** Safe, but makes someone adding a photo fight a conflict they did not cause.
+- **Chosen: `POST …/:mes/referencias` appends one picture in a single SQL statement** (`referencias || nueva`, skipped if the same URL is already there, refused with 409 at 200 pictures) and returns the whole folder, so the tab also sees what others added. The folder view's «Añadir …» buttons use it too. The PUT stays for removing and for notes. Those still rewrite the list, but they are rarer and happen inside the folder view, where the list on screen is what the person is acting on.
