@@ -20,7 +20,7 @@ export function TuCaso({ modo, ejemplo, onEjemplo }: { modo: Modo; ejemplo: Ejem
   const filas: { t: ReactNode; v: number; fuerte?: boolean; signo?: string }[] = [
     { t: 'Lo que paga la empresa por su trabajo', v: r.costeTrabajo },
     { t: `Le llega a su cuenta (el ${porcentaje((1 - TIPO) * 100, 0)})`, v: r.netoModelo },
-    { t: ejemplo.enComunidad ? 'Recibe del fondo común (su dividendo)' : 'Recibe del fondo común (su dividendo y la parte de su hogar)', v: r.recibe, signo: '+' },
+    { t: ejemplo.enComunidad ? `Recibe su dividendo del fondo común` : `Recibe del fondo común: su dividendo (${euros(r.dividendo)}) y su parte del hogar (${euros(r.parteFamilia)})`, v: r.recibe, signo: '+' },
     { t: 'Gasta (la misma cesta que hoy)', v: r.gastoModelo, signo: '−' },
     { t: 'Le queda para ahorrar', v: r.sobraModelo, fuerte: true },
     { t: 'Aporta al fondo común', v: r.aporta, fuerte: true },
@@ -70,7 +70,7 @@ export function TuCaso({ modo, ejemplo, onEjemplo }: { modo: Modo; ejemplo: Ejem
                       <span className="font-semibold text-slate-900">{lugar}</span>
                       <span className="tabular-nums text-slate-700">
                         {recibe == null
-                          ? (e.id === 'vecindad' ? 'según cuántos vecinos sean' : '—')
+                          ? (e.id === 'vecindad' ? `${euros(r.pais.porPersonaEscala)} por vecino` : '—')
                           : e.id === 'continente' || e.id === 'planeta'
                             ? `España aporta ${millonesCortos(recibe)} al año`
                             : `recibe ${recibe >= 1e6 ? millonesCortos(recibe) : euros(recibe)} al año`}
@@ -125,12 +125,12 @@ export function TuCaso({ modo, ejemplo, onEjemplo }: { modo: Modo; ejemplo: Ejem
 
         <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
           <h3 className="text-lg font-bold text-slate-900">La misma persona, hoy y con el modelo</h3>
-          <p className="mt-1 text-sm text-slate-600">Lo que va a las administraciones en un año, con la misma empresa pagando lo mismo y la misma cesta de la compra.</p>
+          <p className="mt-1 text-sm text-slate-600">Lo que paga en un año en impuestos, cotizaciones y cuotas obligatorias, con la misma empresa pagando lo mismo por su trabajo y la misma cesta de la compra.</p>
           <div className="mt-5 grid gap-6 sm:grid-cols-2">
             <Columna titulo="Hoy" total={r.totalHoy} max={maxBarra} items={r.hoy} tono="hoy"
-              pie={`${r.hoy.length} conceptos distintos, cada uno con sus reglas y sus plazos`} />
+              pie={`El ${porcentaje(r.pctHoy * 100, 0)} de lo que vale su trabajo, en ${r.hoy.length} conceptos distintos, cada uno con sus reglas y sus plazos.`} />
             <Columna titulo="Con el modelo" total={r.aporta} max={maxBarra} items={r.modelo} tono="modelo"
-              pie={`Y recibe ${euros(r.recibe)} del fondo: aportación neta ${euros(r.aportaNeto)}`} />
+              pie={`Y recibe ${euros(r.recibe)} del fondo. Aportación neta: ${euros(r.aportaNeto)}, el ${porcentaje(r.pctModelo * 100, 0)} de lo que vale su trabajo.`} />
           </div>
           <dl className="mt-6 grid grid-cols-2 gap-4 border-t border-slate-100 pt-4 text-sm">
             <div>
@@ -145,7 +145,12 @@ export function TuCaso({ modo, ejemplo, onEjemplo }: { modo: Modo; ejemplo: Ejem
           <p className="mt-3 text-xs leading-relaxed text-slate-500">
             Hoy: cotizaciones de 2026, IRPF con las escalas estatal y de Madrid<Fuente id="irpf-madrid" /> y sus mínimos<Fuente id="minimo-madrid" />,
             IBI, basuras y vehículo medios de un hogar<Fuente id="roams" />. Es un cálculo orientativo: no incluye deducciones personales.
-            Que con el modelo le quede más dinero no es magia: el modelo, en esta lectura, recauda menos que el sistema actual (lo explican «Las cuentas del país» y «Lo que falta por resolver»).
+            «Le queda» descuenta en los dos casos sus impuestos locales y la cesta de la compra.
+          </p>
+          <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm leading-relaxed text-amber-950">
+            <b>Lo que deja de tener.</b> Con el modelo no hay cotizaciones, así que deja de acumular derechos de pensión contributiva y de paro.
+            Su protección pasa a ser el dividendo y lo que decidan las escalas. Que le quede más dinero no es magia: en esta lectura el modelo recauda
+            menos que el sistema actual y hay menos servicios públicos (lo cuentan «Hoy y con el modelo» y «Lo que falta por resolver»).
           </p>
         </div>
       </div>

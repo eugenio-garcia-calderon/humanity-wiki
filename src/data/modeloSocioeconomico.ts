@@ -52,16 +52,16 @@ export interface Escala {
 export const ESCALAS: Escala[] = [
   {
     id: 'persona', nombre: 'Persona', corto: 'Persona', color: '#D49838', tinta: '#1B2433',
-    recibe: 'Cada persona, por igual: un dividendo mensual en su cuenta',
+    recibe: 'Lo recibe cada persona por igual, como un dividendo que llega cada mes a su cuenta',
     devuelve: 'Un ingreso para todas las personas, desde que nacen',
     ejemplo: 'Ella misma', habitantesEjemplo: 1,
     participacion: 'Decide ella: el dividendo es suyo y lo usa como quiera.',
     comite: 'No hace falta. Si quiere, puede pedir consejo financiero gratuito al municipio.',
-    ritmo: 'Cada mes',
+    ritmo: 'Cuando quiera: el dividendo llega cada mes',
   },
   {
     id: 'vecindad', nombre: 'Comunidad vecinal o familia', corto: 'Vecindad', color: '#A1991F', tinta: '#1B2433',
-    recibe: 'La comunidad vecinal registrada de cada edificio o urbanización; si la persona no vive en una, su hogar',
+    recibe: 'Lo recibe la comunidad vecinal registrada de cada edificio o urbanización; si la persona vive en una casa independiente, lo recibe su hogar',
     devuelve: 'El edificio o la casa cuidados, sin cuotas de comunidad',
     ejemplo: 'Su hogar (vive en una casa)', habitantesEjemplo: 2,
     participacion: 'Junta vecinal: votan todas las personas que viven allí (no solo las propietarias), una persona un voto, en persona o desde el móvil.',
@@ -70,7 +70,7 @@ export const ESCALAS: Escala[] = [
   },
   {
     id: 'municipio', nombre: 'Municipio', corto: 'Municipio', color: '#60973D', tinta: '#1B2433',
-    recibe: 'El ayuntamiento, para dar servicios y suministros a sus comunidades vecinales',
+    recibe: 'Lo recibe el ayuntamiento, que da servicios y suministros a sus comunidades vecinales',
     devuelve: 'Agua, calles, residuos, escuela infantil, consultorio y vida en el pueblo',
     ejemplo: 'Su pueblo (400 habitantes)', habitantesEjemplo: 400,
     participacion: 'Asamblea abierta a todo vecino desde los 16 años y presupuestos participativos en la web del municipio.',
@@ -79,7 +79,7 @@ export const ESCALAS: Escala[] = [
   },
   {
     id: 'provincia', nombre: 'Provincia o comarca', corto: 'Provincia', color: '#008F61', tinta: '#FFFFFF',
-    recibe: 'La provincia, para dar a los municipios los servicios que solos no pueden sostener',
+    recibe: 'Lo recibe la provincia, que da a los municipios los servicios que solos no pueden sostener',
     devuelve: 'Carreteras entre pueblos, bomberos, institutos y urgencias comarcales',
     ejemplo: 'Provincia de Madrid, organizada por comarcas como la Sierra Norte', habitantesEjemplo: 7_229_000,
     participacion: 'Consejo de delegados elegidos por la asamblea de cada municipio, más una consulta digital de prioridades.',
@@ -88,7 +88,7 @@ export const ESCALAS: Escala[] = [
   },
   {
     id: 'region', nombre: 'Región', corto: 'Región', color: '#007E80', tinta: '#FFFFFF',
-    recibe: 'La región, que agrupa provincias, para construir infraestructuras y apoyar a las que más lo necesitan',
+    recibe: 'Lo recibe la región, que agrupa varias provincias, construye infraestructuras y apoya a las que más lo necesitan',
     devuelve: 'Hospitales, universidades, transporte regional y vivienda pública',
     ejemplo: 'Comunidad de Madrid', habitantesEjemplo: 7_229_000,
     participacion: 'Asamblea ciudadana de 150 personas elegidas por sorteo que se renueva cada año y fija prioridades; la ciudadanía las ratifica en votación digital.',
@@ -97,7 +97,7 @@ export const ESCALAS: Escala[] = [
   },
   {
     id: 'nacion', nombre: 'Nación', corto: 'Nación', color: '#006591', tinta: '#FFFFFF',
-    recibe: 'El Estado, que agrupa las regiones, para cubrir lo que necesitan todas a la vez',
+    recibe: 'Lo recibe el Estado, que agrupa las regiones y cubre lo que necesitan todas a la vez',
     devuelve: 'Pensiones básicas, grandes redes, defensa, justicia y sanidad común',
     ejemplo: 'España (49,1 millones de habitantes)', habitantesEjemplo: 49_128_297,
     participacion: 'Asamblea ciudadana por sorteo junto al parlamento; las prioridades se votan cada dos años.',
@@ -106,7 +106,7 @@ export const ESCALAS: Escala[] = [
   },
   {
     id: 'continente', nombre: 'Continente', corto: 'Continente', color: '#034990', tinta: '#FFFFFF',
-    recibe: 'Las instituciones europeas, para dar servicios y conexiones entre naciones',
+    recibe: 'Lo reciben las instituciones europeas, que dan servicios y conexiones entre naciones',
     devuelve: 'Trenes y redes entre países, cohesión, defensa común, Erasmus',
     ejemplo: 'Europa', habitantesEjemplo: null,
     participacion: 'Parlamento continental y asambleas ciudadanas europeas por sorteo.',
@@ -115,7 +115,7 @@ export const ESCALAS: Escala[] = [
   },
   {
     id: 'planeta', nombre: 'Planeta', corto: 'Planeta', color: '#392D7D', tinta: '#FFFFFF',
-    recibe: 'Instituciones que cuidan del planeta y de la humanidad entera',
+    recibe: 'Lo reciben instituciones que cuidan del planeta y de la humanidad entera',
     devuelve: 'Clima, océanos, paz, catástrofes, ciencia abierta y exploración espacial',
     ejemplo: 'La Tierra', habitantesEjemplo: null,
     participacion: 'Asamblea de delegados de cada continente y consultas globales abiertas a todas las personas.',
@@ -142,20 +142,20 @@ export interface Ambito { id: AmbitoId; nombre: string; corto: string }
 
 export const AMBITOS: Ambito[] = [
   { id: 'salud', nombre: 'Salud', corto: 'Salud' },
-  { id: 'economia', nombre: 'Economía y protección', corto: 'Economía' },
+  { id: 'economia', nombre: 'Economía, pensiones y protección', corto: 'Economía y pensiones' },
   { id: 'educacion', nombre: 'Educación', corto: 'Educación' },
   { id: 'movilidad', nombre: 'Movilidad', corto: 'Movilidad' },
   { id: 'vivienda', nombre: 'Vivienda', corto: 'Vivienda' },
   { id: 'energia', nombre: 'Energía', corto: 'Energía' },
   { id: 'agricultura', nombre: 'Agricultura', corto: 'Agricultura' },
-  { id: 'alimentacion', nombre: 'Alimentación', corto: 'Alimento' },
+  { id: 'alimentacion', nombre: 'Alimentación', corto: 'Alimentación' },
   { id: 'cultura', nombre: 'Cultura', corto: 'Cultura' },
   { id: 'deporte', nombre: 'Deporte', corto: 'Deporte' },
   { id: 'defensa', nombre: 'Defensa', corto: 'Defensa' },
   { id: 'seguridad', nombre: 'Seguridad', corto: 'Seguridad' },
-  { id: 'clima', nombre: 'Clima y naturaleza', corto: 'Clima' },
+  { id: 'clima', nombre: 'Agua, clima y naturaleza', corto: 'Agua y clima' },
   { id: 'ciencia', nombre: 'Ciencia y conocimiento', corto: 'Ciencia' },
-  { id: 'gestion', nombre: 'Participación y gestión', corto: 'Gestión' },
+  { id: 'gestion', nombre: 'Participación y gestión', corto: 'Participación' },
 ];
 
 export const AMBITO = Object.fromEntries(AMBITOS.map(a => [a.id, a])) as Record<AmbitoId, Ambito>;
@@ -252,7 +252,7 @@ export const MATRIZ: Record<EscalaId, Fila> = {
     alimentacion: c(2, 'Seguridad alimentaria', 'Control de calidad', 'Alimentación escolar'),
     cultura: c(4, 'Cultura regional', 'Teatros y archivos', 'Lengua y patrimonio'),
     deporte: c(2, 'Deporte regional', 'Deporte base', 'Centros de alto rendimiento'),
-    defensa: c(1, 'Coordinación de emergencias', 'Planes territoriales de emergencia'),
+    defensa: c(1, 'Defensa civil y emergencias', 'Planes territoriales de emergencia'),
     seguridad: c(5, 'Emergencias y justicia cercana', 'Teléfono 112', 'Juzgados de proximidad'),
     clima: c(5, 'Naturaleza regional', 'Espacios protegidos', 'Calidad del aire y del agua'),
     ciencia: c(3, 'Investigación regional', 'Centros de investigación', 'Transferencia a empresas'),
@@ -329,23 +329,26 @@ export const FUENTES: Fuente[] = [
   { id: 'ine-hogares', titulo: 'INE · Cuentas de los hogares 2025: consumo e inversión', url: 'https://www.infobae.com/america/agencias/2026/04/01/la-tasa-de-ahorro-de-los-hogares-baja-al-12-en-2025-tras-disparar-su-gasto-en-consumo-un-62/' },
   { id: 'ine-viviendas', titulo: 'INE · Transmisiones de derechos de la propiedad: compraventas de 2025', url: 'https://ine.es/dyngs/Prensa/ETDP1225.htm?print=1' },
   { id: 'fbbva-inversion', titulo: 'Fundación BBVA e Ivie · Inversión total y pública en 2025', url: 'https://www.fbbva.es/wp-content/uploads/2026/03/NP_InversionyStockCapital_2026_FundacionBBVA_Ivie.pdf' },
+  { id: 'aeat-iva', titulo: 'Agencia Tributaria · IVA en 2025 (99.532 M€)', url: 'https://sede.agenciatributaria.gob.es/Sede/eu_es/estadisticas/recaudacion-tributaria/informe-anual/ejercicio-2025/4-impuesto-sobre-valor-anadido.html' },
+  { id: 'aeat-especiales', titulo: 'Agencia Tributaria vía Europa Press · Impuestos especiales en 2025 (23.083 M€)', url: 'https://www.bolsamania.com/noticias_print/economia/economia--los-ingresos-del-impuesto-a-la-cerveza-bajan-en-2025-por-primera-vez-desde-el-covid-por-la-caida-de-consumo--22353697.html' },
+  { id: 'intereses', titulo: 'Ministerio de Hacienda vía Vozpópuli · Intereses de la deuda pública en 2025', url: 'https://www.vozpopuli.com/economia/macroeconomia/el-gasto-en-intereses-de-la-deuda-rompe-en-espana-la-barrera-de-los-40000-millones-por-primera-vez.html' },
   { id: 'aeat-2025', titulo: 'Agencia Tributaria · Informe anual de recaudación 2025', url: 'https://sede.agenciatributaria.gob.es/Sede/estadisticas/recaudacion-tributaria/informe-anual/ejercicio-2025/resumen.html' },
   { id: 'reaf-2026', titulo: 'Consejo General de Economistas (REAF) · Panorama de la fiscalidad autonómica y foral 2026', url: 'https://multimedia2.coev.com/pdfs/panorama-fiscalidad2026.pdf' },
   { id: 'reaf-propios', titulo: 'REAF vía Ara · 66 impuestos autonómicos propios en 2025', url: 'https://es.ara.cat/economia/cataluna-comunidad-lidera-creacion-impuestos-propios_1_5306827.html' },
   { id: 'ss-2025', titulo: 'Seguridad Social · Cotizaciones de 2025 (176.918 M€)', url: 'https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/inclusion/Paginas/2026/310326-seguridad-social-deficit-pib.aspx' },
   { id: 'ijm-2026', titulo: 'Instituto Juan de Mariana · Impuestómetro 2026 (datos de Eurostat)', url: 'https://juandemariana.org/wp-content/uploads/2026/03/IMP-2026-report.pdf' },
-  { id: 'bde-ingresos', titulo: 'Banco de España vía El Debate de hoy · Ingresos y gastos públicos de 2025', url: 'https://www.esdiario.com/economia/260618/190881/cara-gobierno-recaudado-17-000-millones-euros-deflactar-irpf.html' },
+  { id: 'bde-ingresos', titulo: 'Banco de España vía ESdiario · Ingresos y gastos públicos de 2025', url: 'https://www.esdiario.com/economia/260618/190881/cara-gobierno-recaudado-17-000-millones-euros-deflactar-irpf.html' },
   { id: 'igae-cofog', titulo: 'IGAE · Gasto de las Administraciones públicas por funciones y subsectores 2020-2024', url: 'https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/AAPP_A/Funcional%202020-2024.pdf' },
   { id: 'complejidad', titulo: 'Emprendedores · Índice de complejidad fiscal y horas de cumplimiento', url: 'https://emprendedores.es/gestion/espana-suspenso-competitividad-fiscal/' },
   { id: 'aeat-coste', titulo: 'Agencia Tributaria · Coste de la organización sobre lo que recauda (2025)', url: 'https://www3.agenciatributaria.gob.es/static_files/AEAT_Intranet/Auditoria_Interna/INFORMES/INFORME_PGCT_11_2026.pdf' },
   { id: 'cafmadrid', titulo: 'Colegio de Administradores de Fincas de Madrid · Comunidades y obligaciones fiscales', url: 'https://cafmadrid.es/wp-content/uploads/2024/03/Ndp-Impuestos.pdf' },
-  { id: 'comunidades-cuotas', titulo: 'Las comunidades de propietarios mueven unos 40.000 M€ al año en cuotas', url: 'https://www.franquiciasaldia.es/noticias/2025-01-01/14-millones-de-comunidades-de-propietarios-en-espana/' },
+  { id: 'comunidades-cuotas', titulo: 'Franquicias al Día · Las comunidades de propietarios mueven unos 40.000 M€ al año en cuotas', url: 'https://www.franquiciasaldia.es/noticias/2025-01-01/14-millones-de-comunidades-de-propietarios-en-espana/' },
   { id: 'roams', titulo: 'Forbes / Roams · Gasto medio de los hogares: impuestos locales y comunidad', url: 'https://forbes.es/?p=869267' },
   { id: 'ine-salarios', titulo: 'INE · Encuesta anual de estructura salarial 2024', url: 'https://ine.es/dyngs/Prensa/EAES2024.htm' },
   { id: 'irpf-madrid', titulo: 'Raisin · Tramos del IRPF 2025-2026 en la Comunidad de Madrid', url: 'https://www.raisin.com/es-es/tributacion/declaracion-de-la-renta/tramos-irpf/' },
   { id: 'minimo-madrid', titulo: 'Guía Fiscal · IRPF en Madrid 2026: mínimos estatal y autonómico', url: 'https://guiafiscal.es/cuanto-pago/irpf/40000-euros-madrid/' },
   { id: 'ue-presupuesto', titulo: 'Consejo de la UE · Presupuesto de la Unión para 2026', url: 'https://informat.ro/es/internacional/el-consejo-adopta-el-presupuesto-de-la-ue-para-2026-92944' },
-  { id: 'ue-espana', titulo: 'Aportación media de España al presupuesto de la UE 2021-2027', url: 'https://www.merca2.es/2019/11/05/espana-ue-214211/' },
+  { id: 'ue-espana', titulo: 'Merca2 (estimación de la Comisión Europea) · Aportación media de España a la UE 2021-2027', url: 'https://www.merca2.es/2019/11/05/espana-ue-214211/' },
   { id: 'aod-2025', titulo: 'Ministerio de Asuntos Exteriores · Ayuda Oficial al Desarrollo de 2025', url: 'https://www.exteriores.gob.es/es/Comunicacion/NotasPrensa/Paginas/2026_NOTAS_P/La-Ayuda-Oficial-al-Desarrollo-espa%C3%B1ola-alcanza-su-mayor-cifra-de-los-ultimos-15-a%C3%B1os.aspx' },
   { id: 'cam-pueblos', titulo: 'Comunidad de Madrid · Población de los municipios pequeños y la Sierra Norte', url: 'https://www.comunidad.madrid/node/109832' },
   { id: 'madrid-poblacion', titulo: 'Ayuntamiento de Madrid · Madrid Economía 2025 (la ciudad es el 48,8 % de la región)', url: 'https://www.madrid.es/UnidadesDescentralizadas/UDCObservEconomico/006%20Madrid%20Economia/Ficheros/006%20Ficheros%20Madrid%20Econom%C3%ADa%202025/Madrid_Econom%C3%ADa_2025.pdf' },
@@ -396,7 +399,7 @@ export const BASE: ComponenteBase[] = [
   },
   {
     id: 'viviendaUsada', nombre: 'Compraventa de vivienda usada', millones: Math.round(558_327 * 0.2), modos: ['eslabon', 'literal'], fuente: 'ine-viviendas',
-    explicacion: 'Las 558.327 viviendas usadas vendidas en 2025.',
+    explicacion: 'Las 558.327 viviendas usadas vendidas en 2025. Pagan el 20 % en cada venta, aunque la casa ya lo pagó al ser nueva; hoy pagan el impuesto de transmisiones, entre el 6 % y el 10 % en la mayoría de regiones.',
     estimacion: 'Con un precio medio supuesto de 200.000 € por vivienda.',
   },
   {
@@ -446,6 +449,9 @@ export const HOY = {
   costeAEATpct: 0.57, // aeat-coste
   impuestosPropiosCCAA: 66, // reaf-propios
   presupuestoMadrid2026: 30_663.6, // cam-presupuesto
+  iva2025: 99_532, // aeat-iva
+  especiales2025: 23_083, // aeat-especiales
+  intereses2025: 40_314, // intereses
 };
 
 // ── THE COUNTRY'S ACCOUNTS UNDER THE MODEL ──────────────────────────────────
@@ -475,8 +481,9 @@ export function cuentasPais(modo: Modo) {
 //   · employee: 4,70 + 1,55 + 0,10 + MEI 0,15 = 6,50 %;
 //   · IRPF: state scale + Madrid scale, general allowance, 2.000 € expenses,
 //     the art. 20 reduction for low wages, state minimum 5.550 € and Madrid's 5.956,65 €;
-//   · VAT and excise taxes ≈ 12 % of what a household spends (estimate: VAT plus excise
-//     duties over household consumption is ≈ 13 %, but part of it is paid by others);
+//   · VAT and excise taxes ≈ 12 % of what a household spends: VAT (99.532 M€) plus excise
+//     duties (23.083 M€) over household consumption (937.447 M€) is 13,1 %, and part of it
+//     is paid by administrations and VAT-exempt businesses, not by households;
 //   · local taxes per household: IBI 320 €, waste 107 €, vehicle 58 € (roams);
 //     community fees, if any, 1.260 € a year per home (roams).
 export const SUPUESTOS = {
@@ -575,9 +582,11 @@ export function calcularEjemplo(e: Ejemplo, modo: Modo) {
     hoy, totalHoy, netoHoy,
     modelo, aporta, netoModelo, dividendo, parteFamilia, recibe,
     aportaNeto: aporta - recibe,
+    pctModelo: (aporta - recibe) / costeTrabajo,
     porEscala: aporta / ESCALAS.length,
     // What is left at the end of the year after spending the same basket.
-    sobraHoy: netoHoy - gastoHoy,
+    sobraHoy: netoHoy - gastoHoy - locales - comunidad,
+    pctHoy: totalHoy / costeTrabajo,
     sobraModelo: netoModelo + recibe - gastoModelo,
     // Money that passes through her hands: her work and her purchases.
     maneja: costeTrabajo + gastoModelo,
@@ -598,7 +607,7 @@ export interface GrupoImpuestos { id: string; nombre: string; quien: string; fig
 
 export const IMPUESTOS_HOY: GrupoImpuestos[] = [
   {
-    id: 'estatales', nombre: 'Impuestos del Estado', quien: 'Agencia Tributaria y aduanas',
+    id: 'estatales', nombre: 'Impuestos del Estado', quien: 'la Agencia Tributaria y las aduanas',
     figuras: [
       'IRPF', 'IVA', 'Impuesto sobre Sociedades', 'Renta de no residentes', 'Temporal de solidaridad de las grandes fortunas',
       'Hidrocarburos', 'Labores del tabaco', 'Alcohol y bebidas derivadas', 'Cerveza', 'Productos intermedios', 'Vino y bebidas fermentadas',
@@ -610,21 +619,21 @@ export const IMPUESTOS_HOY: GrupoImpuestos[] = [
     nota: 'Más las tasas estatales: DNI y pasaporte, tráfico, justicia, puertos…',
   },
   {
-    id: 'cotizaciones', nombre: 'Cotizaciones sociales', quien: 'Seguridad Social',
+    id: 'cotizaciones', nombre: 'Cotizaciones sociales', quien: 'la Seguridad Social',
     figuras: ['Contingencias comunes', 'Desempleo', 'Fondo de Garantía Salarial', 'Formación profesional', 'Mecanismo de Equidad Intergeneracional', 'Accidentes de trabajo y enfermedades profesionales', 'Cotización de solidaridad'],
   },
   {
-    id: 'cedidos', nombre: 'Impuestos cedidos a las regiones', quien: 'Agencias tributarias autonómicas',
+    id: 'cedidos', nombre: 'Impuestos cedidos a las regiones', quien: 'la agencia tributaria de cada región',
     figuras: ['Patrimonio', 'Sucesiones y Donaciones', 'Transmisiones Patrimoniales y Actos Jurídicos Documentados', 'Tributos sobre el juego'],
     nota: 'Además, las regiones reciben una parte del IRPF, del IVA y de los especiales.',
   },
   {
-    id: 'propios', nombre: 'Impuestos propios de las regiones', quien: 'Cada comunidad autónoma',
+    id: 'propios', nombre: 'Impuestos propios de las regiones', quien: 'cada comunidad autónoma',
     figuras: ['Estancias turísticas', 'Viviendas vacías', 'Bebidas azucaradas', 'Cánones del agua', 'Residuos', 'Emisiones contaminantes', 'Grandes establecimientos comerciales', '…'],
     numero: HOY.impuestosPropiosCCAA, fuente: 'reaf-propios',
   },
   {
-    id: 'locales', nombre: 'Impuestos municipales', quien: 'Ayuntamientos y diputaciones',
+    id: 'locales', nombre: 'Impuestos municipales', quien: 'el ayuntamiento o la diputación',
     figuras: ['IBI', 'Vehículos (IVTM)', 'Actividades Económicas (IAE)', 'Construcciones (ICIO)', 'Plusvalía municipal'],
     nota: 'Más cientos de tasas: basuras, vados, terrazas, licencias, agua, alcantarillado… y contribuciones especiales.',
   },
@@ -652,3 +661,31 @@ export function millones(m: number) {
   return `${numero(m)}\u00A0M€`;
 }
 export function porcentaje(p: number, dec = 1) { return `${numero(p, dec)}\u00A0%`; }
+
+// ── WHAT EACH AREA HAS TODAY AND WITH THE MODEL ─────────────────────────────
+// Today: spending of all administrations in 2024 by COFOG division (igae-cofog).
+// Model: what the five scales that serve people inside Spain (neighbourhood to
+// nation) put into the matching areas of the matrix. The match is approximate:
+// COFOG 04 «asuntos económicos» is transport, energy and farming here, and
+// COFOG 01 «servicios públicos generales» includes the interest on the public debt.
+export const ESCALAS_INTERIORES: EscalaId[] = ['vecindad', 'municipio', 'provincia', 'region', 'nacion'];
+export const FUNCIONES: { id: string; nombre: string; hoy: number; ambitos: AmbitoId[]; nota?: string }[] = [
+  { id: 'proteccion', nombre: 'Pensiones y protección social', hoy: 297_532, ambitos: ['economia'], nota: 'hoy incluye 206.130 M€ de pensiones' },
+  { id: 'salud', nombre: 'Salud', hoy: 102_942, ambitos: ['salud'] },
+  { id: 'generales', nombre: 'Administración, ciencia e intereses de la deuda', hoy: 92_551, ambitos: ['gestion', 'ciencia'] },
+  { id: 'economicos', nombre: 'Transporte, energía y campo', hoy: 80_908, ambitos: ['movilidad', 'energia', 'agricultura', 'alimentacion'] },
+  { id: 'educacion', nombre: 'Educación', hoy: 65_862, ambitos: ['educacion'] },
+  { id: 'seguridad', nombre: 'Seguridad y justicia', hoy: 28_628, ambitos: ['seguridad'] },
+  { id: 'cultura', nombre: 'Cultura y deporte', hoy: 19_193, ambitos: ['cultura', 'deporte'] },
+  { id: 'clima', nombre: 'Medio ambiente', hoy: 15_539, ambitos: ['clima'] },
+  { id: 'defensa', nombre: 'Defensa', hoy: 14_233, ambitos: ['defensa'] },
+  { id: 'vivienda', nombre: 'Vivienda y servicios comunitarios', hoy: 7_613, ambitos: ['vivienda'] },
+];
+
+export function modeloPorFuncion(modo: Modo) {
+  const pais = cuentasPais(modo);
+  return FUNCIONES.map(f => ({
+    ...f,
+    modelo: ESCALAS_INTERIORES.reduce((s, e) => s + f.ambitos.reduce((t, a) => t + ((MATRIZ[e][a].peso ?? 0) / 100) * pais.porEscala, 0), 0),
+  }));
+}

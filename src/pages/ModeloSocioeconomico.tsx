@@ -28,10 +28,11 @@ import {
   cuentasPais, principales, euros, millones, porcentaje, MATRIZ,
 } from '../data/modeloSocioeconomico';
 import { AnillosEscalas } from '../components/modeloSocioeconomico/AnillosEscalas';
-import { EsquemaFlujos } from '../components/modeloSocioeconomico/EsquemaFlujos';
+import { EsquemaFlujos, EsquemaVertical } from '../components/modeloSocioeconomico/EsquemaFlujos';
 import { MatrizAmbitos } from '../components/modeloSocioeconomico/MatrizAmbitos';
 import { TuCaso } from '../components/modeloSocioeconomico/TuCaso';
-import { Piezas, Costes, Tabla, DondeEstaElDinero } from '../components/modeloSocioeconomico/Comparativa';
+import { Piezas, Costes, Tabla, DondeEstaElDinero, GanaYPierde } from '../components/modeloSocioeconomico/Comparativa';
+import { PreguntasCobro } from '../components/modeloSocioeconomico/PreguntasCobro';
 import { QuienDecide } from '../components/modeloSocioeconomico/QuienDecide';
 import { LasCuentas, Retos, ListaFuentes } from '../components/modeloSocioeconomico/Cuentas';
 import { BuzonProyecto } from '../components/modeloSocioeconomico/BuzonProyecto';
@@ -41,14 +42,15 @@ const SECCIONES = [
   { id: 'como-funciona', t: 'Cómo funciona' },
   { id: 'esquema', t: 'Esquema' },
   { id: 'matriz', t: 'Quién hace qué' },
-  { id: 'ejemplo', t: 'Un caso real' },
-  { id: 'hoy', t: 'Hoy y con el modelo' },
+  { id: 'ejemplo', t: 'Un caso' },
+  { id: 'hoy', t: 'Frente a hoy' },
   { id: 'decide', t: 'Quién decide' },
-  { id: 'cuentas', t: 'Las cuentas' },
+  { id: 'cuentas', t: 'Cuentas' },
   { id: 'retos', t: 'Lo que falta' },
+  { id: 'fuentes', t: 'Fuentes' },
 ];
 
-const LECTURA_CORTA: Record<Modo, string> = { eslabon: 'Una vez en cada producto', literal: 'Al pie de la letra' };
+const LECTURA_CORTA: Record<Modo, string> = { eslabon: 'Sin cascada entre empresas', literal: 'Al pie de la letra' };
 
 export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: string } } = {}) {
   const [modo, setModo] = useState<Modo>('eslabon');
@@ -86,20 +88,24 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
             <span className="block text-[15px] font-bold tracking-tight">Modelo socioeconómico optimizado</span>
             <span className="block text-xs text-slate-500">Un proyecto de {marca}</span>
           </a>
-          <nav aria-label="Secciones" className="ml-auto hidden min-w-0 gap-1 overflow-x-auto text-[13px] xl:flex">
+          <nav aria-label="Secciones" className="ml-auto hidden min-w-0 gap-0.5 text-[13px] min-[1400px]:flex">
             {SECCIONES.map(s => (
-              <a key={s.id} href={`#${s.id}`} className="whitespace-nowrap rounded-full px-2.5 py-1.5 text-slate-600 hover:bg-slate-100 hover:text-slate-900">{s.t}</a>
+              <a key={s.id} href={`#${s.id}`} className="whitespace-nowrap rounded-full px-2 py-1.5 text-slate-600 hover:bg-slate-100 hover:text-slate-900">{s.t}</a>
             ))}
           </nav>
-          <Boton onClick={() => setVerBuzon(true)} className="ml-auto shrink-0 xl:ml-0">
-            <MessageSquarePlus className="h-4 w-4" /><span className="hidden sm:inline">Proponer una mejora</span>
+          <Boton onClick={() => setVerBuzon(true)} className="ml-auto shrink-0 min-[1400px]:ml-0">
+            <MessageSquarePlus className="h-4 w-4" /><span className="sm:hidden">Proponer</span><span className="hidden sm:inline">Proponer una mejora</span>
           </Boton>
         </div>
-        <nav aria-label="Secciones" className="flex gap-1 overflow-x-auto border-t border-slate-100 px-3 py-1.5 text-[13px] [scrollbar-width:none] xl:hidden">
-          {SECCIONES.map(s => (
-            <a key={s.id} href={`#${s.id}`} className="whitespace-nowrap rounded-full px-2.5 py-1 text-slate-600 hover:bg-slate-100">{s.t}</a>
-          ))}
-        </nav>
+        {/* Phones: the list scrolls sideways; the fade on the right says there is more. */}
+        <div className="relative border-t border-slate-100 min-[1400px]:hidden">
+          <nav aria-label="Secciones" className="flex gap-1 overflow-x-auto px-3 py-1.5 pr-10 text-[13px] [scrollbar-width:none]">
+            {SECCIONES.map(s => (
+              <a key={s.id} href={`#${s.id}`} className="whitespace-nowrap rounded-full px-2.5 py-1 text-slate-600 hover:bg-slate-100">{s.t}</a>
+            ))}
+          </nav>
+          <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-white to-transparent" />
+        </div>
       </header>
 
       <main>
@@ -139,17 +145,12 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
                 <>
                   <p className="font-bold text-slate-900">Ocho escalas, una dentro de otra</p>
                   <p className="mt-1 text-slate-700">Toca un anillo para ver quién recibe su parte y qué devuelve.</p>
-                  <p className="mt-3 text-sm text-slate-500">Cada escala recibe lo mismo: {euros(pais.porPersonaEscala)} por habitante y año.</p>
+                  <p className="mt-3 text-sm text-slate-500">
+                    Los anillos muestran qué escala está dentro de cuál, no cuánto recibe: todas reciben lo mismo, {euros(pais.porPersonaEscala)} por habitante y año.
+                  </p>
                 </>
               )}
             </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm lg:col-span-2">
-            <span className="text-slate-600">«Todas las transacciones» se puede entender de dos maneras, y las cifras cambian:</span>
-            <Segmentado<Modo> etiqueta="Lectura del modelo" valor={modo} onChange={setModo}
-              opciones={[{ id: 'eslabon', texto: LECTURA_CORTA.eslabon }, { id: 'literal', texto: LECTURA_CORTA.literal }]} />
-            <a href="#cuentas" className="text-slate-600 underline decoration-slate-300 underline-offset-2 hover:text-slate-900">qué cambia</a>
           </div>
         </section>
 
@@ -161,9 +162,9 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
             </Encabezado>
             <ol className="grid gap-8 md:grid-cols-4">
               {[
-                { t: 'Pagas', d: 'Compras un pan de 2,00 € con tarjeta, Bizum o el móvil. El precio ya lleva el impuesto dentro, como hoy el IVA.' },
-                { t: 'Se aparta el 20 %', d: `En el mismo instante, el sistema de pago separa 0,40 €. La panadería recibe 1,60 €.` },
-                { t: 'Se reparte', d: `Los 0,40 € se dividen en ocho partes de 0,05 €: una para ti, otra para tu comunidad vecinal, tu municipio, tu provincia, tu región, España, Europa y el planeta.` },
+                { t: 'Pagas', d: 'Compras un pan de 2,00\u00A0€ con tarjeta, Bizum o el móvil. El precio ya lleva el impuesto dentro, como hoy el IVA.' },
+                { t: 'Se aparta el 20\u00A0%', d: `En el mismo instante, el sistema de pago separa 0,40\u00A0€. La panadería recibe 1,60\u00A0€.` },
+                { t: 'Se reparte', d: `Los 0,40\u00A0€ se dividen en ocho partes de 0,05\u00A0€: una para ti, otra para tu comunidad vecinal, tu municipio, tu provincia, tu región, España, Europa y el planeta.` },
                 { t: 'Cada escala decide', d: 'Su asamblea ciudadana elige las prioridades y su comité técnico las cumple al menor coste, de la forma más eficaz y ecológica.' },
               ].map((p, i) => (
                 <li key={p.t}>
@@ -183,23 +184,55 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
                 </span>
               ))}
             </div>
+
+            <PreguntasCobro modo={modo} />
+
+            {/* The one decision that changes every figure below. */}
+            <div className="mt-12 rounded-2xl border border-slate-300 bg-slate-50 p-5 sm:p-6">
+              <h3 className="text-lg font-bold">Una decisión antes de seguir: ¿pagan también las compras entre empresas?</h3>
+              <p className="mt-1 max-w-3xl text-[15px] leading-relaxed text-slate-600">
+                La panadería compra harina al molino. Si esa compra también deja su {porcentaje(TIPO * 100, 0)}, el impuesto se suma en cada eslabón de la cadena.
+                «Todas las transacciones» admite dos lecturas, y todas las cifras de la página cambian con la que elijas.
+              </p>
+              <dl className="mt-4 grid gap-4 text-sm md:grid-cols-2">
+                <div>
+                  <dt className="font-semibold text-slate-900">{LECTURA_CORTA.eslabon}</dt>
+                  <dd className="mt-0.5 leading-relaxed text-slate-600">
+                    La empresa paga el {porcentaje(TIPO * 100, 0)} al comprar y lo recupera al vender, como hoy el IVA. Cada producto lleva un {porcentaje(TIPO * 100, 0)} exacto.
+                    Recauda ≈ {porcentaje(cuentasPais('eslabon').pctPIB, 0)} del PIB. Es la lectura por defecto.
+                  </dd>
+                </div>
+                <div>
+                  <dt className="font-semibold text-slate-900">{LECTURA_CORTA.literal}</dt>
+                  <dd className="mt-0.5 leading-relaxed text-slate-600">
+                    Cada pago entre empresas deja también su {porcentaje(TIPO * 100, 0)}, sin devolución. Recauda ≈ {porcentaje(cuentasPais('literal').pctPIB, 0)} del PIB,
+                    pero los productos con más intermediarios salen más caros.
+                  </dd>
+                </div>
+              </dl>
+              <div className="mt-5 flex flex-wrap items-center gap-3 text-sm">
+                <Segmentado<Modo> etiqueta="Lectura del modelo" valor={modo} onChange={setModo}
+                  opciones={[{ id: 'eslabon', texto: LECTURA_CORTA.eslabon }, { id: 'literal', texto: LECTURA_CORTA.literal }]} />
+                <a href="#cuentas" className="text-slate-600 underline decoration-slate-300 underline-offset-2 hover:text-slate-900">Ver las cuentas de las dos</a>
+              </div>
+            </div>
           </div>
         </section>
 
         {/* ── The 2D scheme ── */}
         <section id="esquema" aria-labelledby="esquema-titulo" className="mx-auto max-w-7xl scroll-mt-28 px-4 py-16 sm:px-6">
           <Encabezado id="esquema" titulo="El esquema completo: adónde va el dinero">
-            De izquierda a derecha, el camino de cada euro; abajo, lo que vuelve a las personas y cómo ellas deciden. Pasa o toca una escala para seguir su parte.
+            El camino de cada euro, desde el pago hasta lo que vuelve a las personas, y cómo ellas deciden. Pasa o toca una escala para seguir su parte.
           </Encabezado>
-          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm text-slate-500 xl:hidden">En pantallas pequeñas, desliza el esquema hacia los lados.</p>
-            <Boton onClick={() => setMover(v => !v)} className="ml-auto" aria-pressed={!mover}>
+          <div className="mb-3 hidden justify-end md:flex">
+            <Boton onClick={() => setMover(v => !v)} aria-pressed={!mover}>
               {mover ? <><Pause className="h-4 w-4" /> Detener el movimiento</> : <><Play className="h-4 w-4" /> Ver el dinero moverse</>}
             </Boton>
           </div>
-          <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white p-3 sm:p-5">
+          <div className="hidden overflow-x-auto rounded-2xl border border-slate-200 bg-white p-3 sm:p-5 md:block">
             <EsquemaFlujos modo={modo} activa={nivel} onActiva={setNivel} mover={mover} />
           </div>
+          <div className="md:hidden"><EsquemaVertical modo={modo} activa={nivel} onActiva={setNivel} /></div>
           <div aria-live="polite" className="mt-4 min-h-[88px] rounded-2xl border border-slate-200 bg-white p-5 text-[15px]">
             {selNivel ? (
               <div className="grid gap-4 md:grid-cols-[1fr_1fr]">
@@ -210,7 +243,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
                 <div className="text-slate-700">
                   {selNivel.id === 'persona'
                     ? <>Recibe {euros(pais.porPersonaEscala)} al año, unos {euros(pais.porPersonaEscala / 12)} al mes, y decide libremente en qué gastarlo.</>
-                    : <>Sus mayores partidas: {principales(selNivel.id).map(a => `${a.nombre.toLowerCase()} (${MATRIZ[selNivel.id][a.id].peso} %)`).join(', ')}.</>}
+                    : <>Sus mayores partidas: {principales(selNivel.id).map(a => `${a.nombre.toLowerCase()} (${MATRIZ[selNivel.id][a.id].peso}\u00A0%)`).join(', ')}.</>}
                 </div>
               </div>
             ) : (
@@ -256,6 +289,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
             </div>
             <Tabla modo={modo} />
             <DondeEstaElDinero modo={modo} />
+            <GanaYPierde modo={modo} />
           </div>
         </section>
 

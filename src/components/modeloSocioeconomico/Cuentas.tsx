@@ -4,16 +4,17 @@
 import { cn } from '../../utils/cn';
 import {
   BASE, ESPANA, FUENTE, HOY, type Modo, cuentasPais, calcularEjemplo, irpfMadrid, euros, millones, numero, porcentaje, PARTE_ESCALA, TIPO, SUPUESTOS,
+  EJEMPLO_INICIAL, modeloPorFuncion,
 } from '../../data/modeloSocioeconomico';
 import { Fuente, Libre } from './piezas';
 
 const LECTURAS: { id: Modo; titulo: string; texto: string }[] = [
   {
-    id: 'eslabon', titulo: 'Una vez en cada producto',
+    id: 'eslabon', titulo: 'Sin cascada entre empresas',
     texto: 'Todas las transacciones pagan el 20 %. Cuando una empresa vende, recupera al instante el 20 % que pagó por sus materiales: así cada producto lleva un 20 % exacto, nunca un 20 % sobre otro 20 %. Es la lectura que usa esta página por defecto.',
   },
   {
-    id: 'literal', titulo: 'Todas las transacciones, al pie de la letra',
+    id: 'literal', titulo: 'Al pie de la letra, también entre empresas',
     texto: 'También las compras entre empresas dejan su 20 % en el fondo. Recauda casi el doble, pero el impuesto se acumula en cada eslabón de la cadena y los productos con más intermediarios pagan más.',
   },
 ];
@@ -114,7 +115,7 @@ export function LasCuentas({ modo, onModo }: { modo: Modo; onModo: (m: Modo) => 
             <h3 className="text-lg font-bold text-slate-900">Un pan de {euros(pan.precioEslabon, 2)}</h3>
             <p className="mt-1 text-sm text-slate-600">El agricultor aporta 0,50 € de valor, el molino 0,30 € y la panadería 0,80 €.</p>
             <dl className="mt-3 space-y-3 text-sm">
-              <div><dt className="font-semibold text-slate-900">Una vez en cada producto</dt><dd className="tabular-nums text-slate-700">Cuesta {euros(pan.precioEslabon, 2)}, de los que {euros(pan.impuestoEslabon, 2)} van al fondo: el {porcentaje((pan.impuestoEslabon / pan.precioEslabon) * 100, 0)}.</dd></div>
+              <div><dt className="font-semibold text-slate-900">Sin cascada entre empresas</dt><dd className="tabular-nums text-slate-700">Cuesta {euros(pan.precioEslabon, 2)}, de los que {euros(pan.impuestoEslabon, 2)} van al fondo: el {porcentaje((pan.impuestoEslabon / pan.precioEslabon) * 100, 0)}.</dd></div>
               <div><dt className="font-semibold text-slate-900">Al pie de la letra</dt><dd className="tabular-nums text-slate-700">Cuesta {euros(pan.precioLiteral, 2)}, de los que {euros(pan.impuestoLiteral, 2)} van al fondo: el {porcentaje((pan.impuestoLiteral / pan.precioLiteral) * 100, 0)}.</dd></div>
             </dl>
             <p className="mt-3 text-xs leading-relaxed text-slate-500">Con tres eslabones, la lectura literal ya cobra más de un tercio del precio. Por eso empuja a las empresas a fusionarse para saltarse intermediarios. España tuvo un impuesto así, el IGTE, hasta que en 1986 llegó el IVA.</p>
@@ -130,22 +131,25 @@ export function Retos({ modo }: { modo: Modo }) {
   const pais = cuentasPais(modo);
   const lit = cuentasPais('literal');
   const esl = cuentasPais('eslabon');
-  // Who pays more, net: three wages, spending three quarters of today's net pay.
+  const proteccion = modeloPorFuncion(modo).find(f => f.id === 'proteccion')!;
+  // Who pays more, net: three wages, same household as the worked example
+  // (living with a partner, in a house), spending three quarters of today's net pay.
   const casos = [16_000, 26_000, 50_000].map(bruto => {
     const netoHoy = bruto - Math.min(bruto, SUPUESTOS.baseMaximaAnual) * SUPUESTOS.cotTrabajador - irpfMadrid(bruto);
-    const r = calcularEjemplo({ bruto, gastoMes: (netoHoy * 0.75) / 12, pareja: false, enComunidad: true }, modo);
+    const r = calcularEjemplo({ ...EJEMPLO_INICIAL, bruto, gastoMes: (netoHoy * 0.75) / 12 }, modo);
     return { bruto, hoy: r.totalHoy / r.costeTrabajo, modelo: r.aportaNeto / r.costeTrabajo };
   });
   const difHoy = Math.round((casos[2].hoy - casos[0].hoy) * 100);
   const difModelo = Math.round((casos[2].modelo - casos[0].modelo) * 100);
   const retos: { t: string; d: React.ReactNode }[] = [
     {
-      t: 'Las pensiones no caben en una sola escala',
-      d: <>Hoy las pensiones cuestan {millones(HOY.pensiones2024)} al año<Fuente id="igae-cofog" />; la escala nacional recibiría {millones(pais.porEscala)}. Caminos posibles: una transición en la que las pensiones ya reconocidas se siguen pagando con un fondo propio mientras se reduce; el dividendo individual como pensión básica para todas las personas; o que las asambleas cambien los pesos para dar más a la escala nacional. Es la primera decisión que el modelo tiene que tomar.</>,
+      t: 'Las pensiones no caben en el reparto inicial',
+      d: <>Hoy las pensiones cuestan {millones(HOY.pensiones2024)} al año<Fuente id="igae-cofog" />, y toda la protección social, {millones(proteccion.hoy)}.
+        Con el reparto inicial de la matriz, las cinco escalas de España dedicarían a «economía y pensiones» {millones(proteccion.modelo)}; la escala nacional entera recibe {millones(pais.porEscala)}. Caminos posibles: una transición en la que las pensiones ya reconocidas se siguen pagando con un fondo propio mientras se reduce; el dividendo individual como pensión básica para todas las personas; o que las asambleas cambien los pesos para dar más a la escala nacional. Es la primera decisión que el modelo tiene que tomar.</>,
     },
     {
       t: 'Recauda distinto que hoy',
-      d: <>Una vez en cada producto, el modelo recauda ≈ {porcentaje(esl.pctPIB, 0)} del PIB, frente al ≈ 38 % de hoy en impuestos y cotizaciones: habría menos servicios públicos o tendrían que ser mucho más eficientes. Al pie de la letra recauda ≈ {porcentaje(lit.pctPIB, 0)}, más que hoy, a costa de la cascada. Entre las dos hay lecturas intermedias, como cobrar también la inversión de las empresas.</>,
+      d: <>Sin cascada entre empresas, el modelo recauda ≈ {porcentaje(esl.pctPIB, 0)} del PIB, frente al ≈ 38 % de hoy en impuestos y cotizaciones: habría menos servicios públicos o tendrían que ser mucho más eficientes. Al pie de la letra recauda ≈ {porcentaje(lit.pctPIB, 0)}, más que hoy, a costa de la cascada. Entre las dos hay lecturas intermedias, como cobrar también la inversión de las empresas.</>,
     },
     {
       t: '¿Es justo un tipo igual para todos?',
@@ -155,7 +159,7 @@ export function Retos({ modo }: { modo: Modo }) {
           Con un dividendo de {euros(pais.porPersonaEscala)} al año, el efecto es {difModelo < 3 ? 'pequeño: el modelo queda casi proporcional' : 'claro'}. Entre un sueldo de {euros(casos[0].bruto)} y uno de {euros(casos[2].bruto)},
           hoy la diferencia es de {numero(difHoy)} puntos y con el modelo, de {numero(difModelo)}. Quien no tiene ingresos recibe el dividendo entero.
           Para acercarse a la progresividad de hoy, el dividendo tendría que crecer, y eso lo deciden las asambleas.
-          Aportación neta sobre lo que la empresa paga por cada trabajo (persona sola que gasta tres cuartas partes de su sueldo neto):
+          Aportación neta sobre lo que la empresa paga por cada trabajo, para el mismo hogar del caso de arriba (vive en pareja, en una casa) y gastando tres cuartas partes del sueldo neto de hoy:
           <span className="mt-2 block overflow-x-auto">
             <table className="w-full min-w-[360px] text-sm tabular-nums">
               <thead><tr className="text-left text-slate-500"><th scope="col" className="py-1 pr-3 font-medium">Sueldo bruto</th><th scope="col" className="py-1 pr-3 text-right font-medium">Hoy</th><th scope="col" className="py-1 text-right font-medium">Con el modelo</th></tr></thead>
@@ -166,6 +170,14 @@ export function Retos({ modo }: { modo: Modo }) {
           </span>
         </>
       ),
+    },
+    {
+      t: 'La deuda que ya existe',
+      d: <>En 2025 las administraciones pagaron {millones(HOY.intereses2025)} en intereses de la deuda pública<Fuente id="intereses" />, más de lo que se gasta en defensa, cultura y vivienda juntas. El modelo no reserva nada para eso. Caminos posibles: que la escala nacional la pague durante una transición, o un tramo temporal por encima del {porcentaje(TIPO * 100, 0)} hasta reducirla. Mientras no se decida, las cifras de esta página son un punto de llegada, no el primer año.</>,
+    },
+    {
+      t: 'Los precios y los sueldos se moverían',
+      d: <>Todas las cifras usan los precios y los sueldos de hoy. Al desaparecer las cotizaciones, que hoy pagan las empresas sobre cada nómina, los sueldos y los precios cambiarían, y la gente compraría y trabajaría de otra manera. Esta página es una foto fija para comparar, no una previsión de lo que pasaría.</>,
     },
     {
       t: 'El efectivo y la economía sumergida',

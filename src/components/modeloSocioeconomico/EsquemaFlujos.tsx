@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import {
   ESCALAS, type EscalaId, type Modo, cuentasPais, euros, millones, porcentaje, PARTE_ESCALA, TIPO,
 } from '../../data/modeloSocioeconomico';
+import { Libre } from './piezas';
 
 const W = 1120, H = 784;
 const PAGO_X = 24, PAGO_W = 232, PAGO_H = 66;
@@ -193,5 +194,52 @@ export function EsquemaFlujos({ modo, activa, onActiva, mover }: {
         Prioridades: cada persona vota en la asamblea de sus escalas y un comité técnico las ejecuta
       </text>
     </svg>
+  );
+}
+
+/** The same scheme, top to bottom, for phones: the SVG needs 820 px to be read. */
+export function EsquemaVertical({ modo, activa, onActiva }: { modo: Modo; activa: EscalaId | null; onActiva: (e: EscalaId | null) => void }) {
+  const pais = cuentasPais(modo);
+  const Flecha = ({ t }: { t?: string }) => (
+    <div className="flex items-center gap-2 py-1.5 pl-5 text-xs font-semibold text-slate-700">
+      <span aria-hidden className="text-lg leading-none text-slate-400">↓</span>{t}
+    </div>
+  );
+  return (
+    <ol className="text-[15px]">
+      <li className="rounded-xl border border-slate-300 bg-white p-4">
+        <p className="font-bold text-slate-900">1. Cada pago</p>
+        <p className="mt-1 text-sm text-slate-600">Un sueldo, una compra, la venta de una vivienda{modo === 'literal' ? ' y también las compras entre empresas' : ' (entre empresas, el 20 % se paga y se recupera al vender)'}.</p>
+      </li>
+      <Flecha />
+      <li className="rounded-xl bg-slate-900 p-4 text-white">
+        <p className="font-bold">2. El sistema de pago aparta el {porcentaje(TIPO * 100, 0)}</p>
+        <p className="mt-1 text-sm text-slate-300">En el mismo instante. El {porcentaje((1 - TIPO) * 100, 0)} llega a quien cobra. Nadie declara nada.</p>
+      </li>
+      <Flecha t={`${porcentaje(TIPO * 100, 0)} al fondo común abierto`} />
+      <li className="rounded-xl border border-slate-300 bg-slate-100 p-4">
+        <p className="font-bold text-slate-900">3 y 4. El reparto: {porcentaje(PARTE_ESCALA * 100)} a cada una de las ocho escalas</p>
+        <p className="mt-1 text-sm text-slate-600">{millones(pais.porEscala)} al año para cada una en España, {euros(pais.porPersonaEscala)} por habitante.</p>
+        <ul className="mt-3 space-y-1.5">
+          {ESCALAS.map(e => (
+            <li key={e.id}>
+              <Libre aria-pressed={activa === e.id} onClick={() => onActiva(activa === e.id ? null : e.id)}
+                className={`flex w-full items-start gap-3 rounded-lg bg-white p-2.5 text-left ${activa === e.id ? 'ring-2 ring-slate-900' : ''}`}>
+                <span aria-hidden className="mt-0.5 h-9 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: e.color }} />
+                <span className="min-w-0">
+                  <span className="block font-semibold text-slate-900">{e.nombre}</span>
+                  <span className="block text-sm text-slate-600">{e.devuelve}</span>
+                </span>
+              </Libre>
+            </li>
+          ))}
+        </ul>
+      </li>
+      <Flecha t="Servicios, infraestructuras y derechos" />
+      <li className="rounded-xl border-2 border-slate-900 bg-white p-4">
+        <p className="font-bold text-slate-900">5. Todas las personas</p>
+        <p className="mt-1 text-sm text-slate-600">Reciben los servicios de las ocho escalas y votan en la asamblea de cada una las prioridades; un comité técnico las ejecuta. Y vuelta a empezar.</p>
+      </li>
+    </ol>
   );
 }

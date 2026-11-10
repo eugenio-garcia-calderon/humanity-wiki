@@ -1300,7 +1300,7 @@ Eugenio's model taxes every transaction at 20 %. Read literally, purchases betwe
 
 - **Literal only.** Faithful to the words, but it hides a known flaw and collects ≈ 45 % of GDP, more than today.
 - **Silently switch to a VAT-like credit.** Rejected: it would change his model without telling him.
-- **Chosen: both readings on the page, with a switch.** Default «una vez en cada producto»: every payment pays 20 % and a business recovers what it paid on its purchases when it sells, so each final product carries exactly 20 % (≈ 23 % of GDP). Every figure on the page follows the switch.
+- **Chosen: both readings on the page, with a switch.** Default «sin cascada entre empresas» (first called «una vez en cada producto»; renamed after the blind evaluation because the name did not say what it decides): every payment pays 20 % and a business recovers what it paid on its purchases when it sells, so each final product carries exactly 20 % (≈ 23 % of GDP). Every figure on the page follows the switch.
 
 The base is built from INE and Fundación BBVA-Ivie 2025 aggregates (`BASE` in `src/data/modeloSocioeconomico.ts`). Business-to-business purchases (≈ 0,95 × GDP) and the used-housing price (200.000 €) are labelled estimates. The money is split per inhabitant within Spain at every scale, and Spain's continental and planetary shares are what Spain sends.
 

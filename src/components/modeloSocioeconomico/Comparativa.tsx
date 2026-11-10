@@ -3,7 +3,7 @@
 // sits today and with the model.
 import { cn } from '../../utils/cn';
 import {
-  ESCALA, HOY, IMPUESTOS_HOY, TOTAL_FIGURAS, type Modo, cuentasPais, millones, numero, numeroFiguras, porcentaje, PARTE_ESCALA, TIPO,
+  ESCALA, ESCALAS, HOY, modeloPorFuncion, IMPUESTOS_HOY, TOTAL_FIGURAS, type Modo, cuentasPais, millones, numero, numeroFiguras, porcentaje, PARTE_ESCALA, TIPO,
 } from '../../data/modeloSocioeconomico';
 import { Fuente, Muestra } from './piezas';
 
@@ -12,7 +12,10 @@ export function Piezas() {
     <div className="grid gap-8 lg:grid-cols-[minmax(0,8fr)_minmax(0,4fr)]">
       <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
         <h3 className="text-lg font-bold text-slate-900">Hoy: {TOTAL_FIGURAS} figuras distintas, y cientos de tasas</h3>
-        <p className="mt-1 text-sm text-slate-600">Cada cuadrado es un impuesto o una cotización con sus propias reglas, plazos y formularios.</p>
+        <p className="mt-1 text-sm text-slate-600">
+          Cada cuadrado es un impuesto o una cotización con sus propias reglas, plazos y formularios. Son los de toda España: a cada persona le tocan los del Estado,
+          las cotizaciones, los de su región y los de su municipio.
+        </p>
         <div className="mt-5 space-y-4">
           {IMPUESTOS_HOY.map(g => (
             <div key={g.id}>
@@ -20,7 +23,7 @@ export function Piezas() {
                 <span className="text-sm font-semibold text-slate-900">{g.nombre}</span>
                 <span className="text-sm font-semibold tabular-nums text-slate-900">{numeroFiguras(g)}</span>
               </div>
-              <span className="block text-xs text-slate-500">Los cobra: {g.quien.charAt(0).toLowerCase() + g.quien.slice(1)}</span>
+              <span className="block text-xs text-slate-500">Los cobra {g.quien}</span>
               <div aria-hidden className="mt-2 flex flex-wrap gap-[3px]">
                 {Array.from({ length: numeroFiguras(g) }, (_, i) => <span key={i} className="h-3 w-3 rounded-[2px] bg-slate-400" />)}
               </div>
@@ -34,13 +37,23 @@ export function Piezas() {
           ))}
         </div>
       </div>
-      <div className="flex flex-col justify-between rounded-2xl bg-slate-900 p-6 text-white">
-        <div>
-          <h3 className="text-lg font-bold">Con el modelo: 1</h3>
-          <p className="mt-1 text-sm text-slate-300">Un único {porcentaje(TIPO * 100, 0)} sobre cada pago, que el sistema de pago aparta y reparte solo: {porcentaje(PARTE_ESCALA * 100)} a cada escala.</p>
+      <div className="flex flex-col rounded-2xl bg-slate-900 p-6 text-white">
+        <h3 className="text-lg font-bold">Con el modelo: 1</h3>
+        <p className="mt-1 text-sm text-slate-300">Un único {porcentaje(TIPO * 100, 0)} sobre cada pago. Lo aparta el sistema de pago y llega ya repartido:</p>
+        <div className="mt-5 flex items-stretch gap-3">
+          <span aria-hidden className="grid h-24 w-24 shrink-0 place-items-center rounded-lg bg-white text-2xl font-[800] tracking-tight text-slate-900">{porcentaje(TIPO * 100, 0)}</span>
+          <ul className="grid flex-1 grid-cols-2 gap-x-3 gap-y-1 text-xs text-slate-200">
+            {ESCALAS.map(e => <li key={e.id} className="flex items-center gap-1.5"><Muestra color={e.color} />{e.corto}</li>)}
+          </ul>
         </div>
-        <span aria-hidden className="mt-6 grid h-24 w-24 place-items-center rounded-lg bg-white text-2xl font-[800] tracking-tight text-slate-900">{porcentaje(TIPO * 100, 0)}</span>
-        <p className="mt-6 text-sm text-slate-300">Sin declaración de la renta, sin modelos trimestrales, sin recibos del IBI ni cuotas de comunidad.</p>
+        <ul className="mt-5 list-disc space-y-1 pl-5 text-sm text-slate-300">
+          <li>Sin declaración de la renta ni modelos trimestrales.</li>
+          <li>Sin recibos del IBI, de basuras ni del vehículo.</li>
+          <li>Sin cuotas de comunidad.</li>
+        </ul>
+        <p className="mt-auto pt-5 text-xs leading-relaxed text-slate-400">
+          Dentro de la Unión Europea, la parte de las compras sería legalmente el IVA, que la UE obliga a mantener; para quien paga sigue siendo un único {porcentaje(TIPO * 100, 0)}.
+        </p>
       </div>
     </div>
   );
@@ -143,8 +156,57 @@ export function DondeEstaElDinero({ modo }: { modo: Modo }) {
         ))}
       </div>
       <p className="mt-5 text-sm leading-relaxed text-slate-600">
+        Las escalas que prestan servicios dentro de España, de la comunidad vecinal a la nación, tendrían {millones(pais.porEscala * 5)} al año, frente a los {millones(HOY.gastoTotal2024)} que gastaron todas las administraciones en 2024.
+        España aportaría a Europa y al planeta {millones(pais.porEscala * 2)}, frente a unos {millones(HOY.aportacionUE + HOY.aod2025)} hoy. Y cada persona recibiría su dividendo.
+      </p>
+      <p className="mt-3 text-sm leading-relaxed text-slate-600">
         El cambio de fondo no es solo cuánto se recauda, sino dónde: hoy el {porcentaje(((HOY.gastoCentral2024 + HOY.gastoSeguridadSocial2024) / HOY.gastoTotal2024) * 100, 0)} del gasto
         público lo hacen el Estado y la Seguridad Social; con el modelo cada escala recibe lo mismo, y el dinero se acerca a las personas y a lo que compartimos con el resto del mundo.
+      </p>
+    </figure>
+  );
+}
+
+/** What each area has today and with the model: the gains and losses, area by area. */
+export function GanaYPierde({ modo }: { modo: Modo }) {
+  const pais = cuentasPais(modo);
+  const filas = modeloPorFuncion(modo);
+  const max = Math.max(...filas.flatMap(f => [f.hoy, f.modelo]));
+  const totalHoy = filas.reduce((s, f) => s + f.hoy, 0);
+  const totalModelo = filas.reduce((s, f) => s + f.modelo, 0);
+  const pension = filas.find(f => f.id === 'proteccion')!;
+  return (
+    <figure className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
+      <figcaption>
+        <h3 className="text-lg font-bold text-slate-900">Lo que se gana y lo que se pierde, ámbito por ámbito</h3>
+        <p className="mt-1 max-w-3xl text-sm text-slate-600">
+          Millones de euros al año. Hoy: gasto de todas las administraciones en 2024 por funciones<Fuente id="igae-cofog" />.
+          Con el modelo: lo que dedican a cada ámbito las cinco escalas que sirven dentro de España (de la comunidad vecinal a la nación), con el reparto inicial de la matriz.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-4 text-sm text-slate-700">
+          <span className="flex items-center gap-2"><span className="h-3 w-5 rounded-sm bg-slate-400" />Hoy</span>
+          <span className="flex items-center gap-2"><span className="h-3 w-5 rounded-sm bg-slate-900" />Con el modelo</span>
+        </div>
+      </figcaption>
+      <div className="mt-5 space-y-3.5">
+        {filas.map(f => (
+          <div key={f.id} className="grid gap-x-4 gap-y-1 sm:grid-cols-[230px_1fr]">
+            <div className="text-sm font-semibold leading-snug text-slate-900">{f.nombre}</div>
+            <div className="space-y-1">
+              {[{ v: f.hoy, t: 'Hoy', c: 'bg-slate-400', nota: f.nota }, { v: f.modelo, t: 'Con el modelo', c: 'bg-slate-900', nota: undefined }].map(b => (
+                <div key={b.t} className="flex items-center gap-2" title={`${f.nombre}, ${b.t.toLowerCase()}: ${millones(b.v)} al año`}>
+                  <span className={cn('h-3.5 rounded-r-[4px]', b.c)} style={{ width: `${Math.max(0.4, (b.v / max) * 74)}%` }} />
+                  <span className="whitespace-nowrap text-xs tabular-nums text-slate-700">{millones(b.v)}{b.nota && <span className="text-slate-500"> ({b.nota})</span>}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="mt-5 text-sm leading-relaxed text-slate-700">
+        En total, {millones(totalModelo)} frente a {millones(totalHoy)}. La mayor diferencia está en las pensiones y la protección social:
+        {' '}{millones(pension.modelo)} frente a {millones(pension.hoy)}. Hay que sumar el dividendo, {millones(pais.porEscala)} al año que reciben directamente todas las personas,
+        y saber que hoy «administración» incluye {millones(HOY.intereses2025)} de intereses de la deuda en 2025<Fuente id="intereses" />, que el modelo todavía no resuelve.
       </p>
     </figure>
   );

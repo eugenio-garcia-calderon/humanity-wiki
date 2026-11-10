@@ -39,7 +39,7 @@ export function AnillosEscalas({ activa, onActiva, className }: {
             tabIndex={0}
             aria-label={`${e.nombre}: ${porcentaje(PARTE_ESCALA * 100)} de cada pago`}
             aria-pressed={activa === e.id}
-            className={`${uid}-a cursor-pointer outline-none [&:focus-visible>path]:stroke-slate-900 [&:focus-visible>path]:stroke-[3]`}
+            className={`${uid}-a cursor-pointer outline-none [&:focus-visible>path.anillo]:stroke-slate-900 [&:focus-visible>path.anillo]:stroke-[3]`}
             style={{ animationDelay: `${120 + i * 70}ms`, transformOrigin: '0 0', transformBox: 'view-box' }}
             onMouseEnter={() => onActiva(e.id)}
             onMouseLeave={() => onActiva(null)}
@@ -48,7 +48,7 @@ export function AnillosEscalas({ activa, onActiva, className }: {
             onClick={() => onActiva(activa === e.id ? null : e.id)}
             onKeyDown={ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); onActiva(activa === e.id ? null : e.id); } }}
           >
-            <path d={anillo(r1, r2)} fillRule="evenodd" fill={e.color} stroke="white" strokeWidth={0}
+            <path className="anillo" d={anillo(r1, r2)} fillRule="evenodd" fill={e.color} stroke="white" strokeWidth={0}
               style={{ opacity: apagado ? 0.28 : 1, transition: 'opacity .2s' }} />
             <path id={idTexto} d={`M ${-rm} 0 A ${rm} ${rm} 0 1 1 ${rm} 0`} fill="none" />
             <text fontSize={15} fontWeight={650} letterSpacing=".02em" fill={e.tinta} style={{ opacity: apagado ? 0.4 : 1, pointerEvents: 'none' }}>

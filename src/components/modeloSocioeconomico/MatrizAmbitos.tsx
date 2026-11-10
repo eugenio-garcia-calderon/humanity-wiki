@@ -30,6 +30,10 @@ export function MatrizAmbitos({ modo }: { modo: Modo }) {
 
   return (
     <div>
+      <p className="mb-4 max-w-3xl rounded-xl bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-950">
+        Los porcentajes son una <b>propuesta inicial de reparto</b>, hecha para esta página a partir de lo que hace hoy cada nivel de la administración,
+        para que cada asamblea tenga un punto de partida. Cada escala los cambiará según sus prioridades.
+      </p>
       <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2">
         <span className="text-sm text-slate-600">Mostrar cada celda como</span>
         <Segmentado<Unidad> etiqueta="Unidad de la matriz" valor={unidad} onChange={setUnidad} opciones={[
@@ -39,7 +43,20 @@ export function MatrizAmbitos({ modo }: { modo: Modo }) {
         ]} />
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white [scrollbar-width:thin]">
+      {/* Phones: one scale at a time (the 15-column table needs a wide screen). */}
+      <div className="md:hidden">
+        <p className="mb-2 text-sm text-slate-600">Elige una escala:</p>
+        <div className="mb-2 flex flex-wrap gap-1.5">
+          {ESCALAS.map(e => (
+            <Libre key={e.id} onClick={() => setFoco({ escala: e.id })} aria-pressed={foco.escala === e.id}
+              className={cn('flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[13px]',
+                foco.escala === e.id ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-300 bg-white text-slate-800')}>
+              <Muestra color={e.color} />{e.corto}
+            </Libre>
+          ))}
+        </div>
+      </div>
+      <div className="hidden overflow-x-auto rounded-2xl border border-slate-200 bg-white [scrollbar-width:thin] md:block">
         <table className="w-full min-w-[1080px] border-separate border-spacing-0 text-[13px]">
           <caption className="sr-only">Responsabilidades e inversión de cada escala en cada ámbito</caption>
           <thead>
@@ -50,7 +67,7 @@ export function MatrizAmbitos({ modo }: { modo: Modo }) {
                   <Libre
                     onClick={() => setFoco({ ambito: a.id })}
                     aria-pressed={!foco.escala && foco.ambito === a.id}
-                    className={cn('w-full rounded-md px-1 py-1 text-center text-[12px] font-semibold leading-tight text-slate-700 hover:bg-slate-100',
+                    className={cn('w-full rounded-md px-1 py-1 text-center text-[11.5px] font-semibold leading-tight text-slate-700 hover:bg-slate-100 [text-wrap:balance]',
                       foco.ambito === a.id && !foco.escala && 'bg-slate-900 text-white hover:bg-slate-900')}
                     title={`Ver ${a.nombre} en las ocho escalas`}
                   >{a.corto}</Libre>
@@ -102,7 +119,7 @@ export function MatrizAmbitos({ modo }: { modo: Modo }) {
           </tbody>
         </table>
       </div>
-      <p className="mt-2 text-xs text-slate-500">
+      <p className="mt-2 hidden text-xs text-slate-500 md:block">
         Pulsa una celda, el nombre de una escala o el de un ámbito. Cuanto más intenso el color, mayor la parte del presupuesto de esa escala.
         En la fila de la persona pone «libre»: su dividendo es suyo y decide ella.
       </p>
@@ -129,7 +146,7 @@ function Detalle({ foco, modo, onFoco }: { foco: Foco; modo: Modo; onFoco: (f: F
               <Libre onClick={() => onFoco({ escala: e.id, ambito: a.id })} className="group block w-full rounded-lg px-2 py-1.5 text-left hover:bg-slate-50">
                 <span className="flex items-baseline justify-between gap-3 text-sm">
                   <span className="font-semibold text-slate-900">{a.nombre}</span>
-                  <span className="tabular-nums text-slate-600">{c.peso == null ? 'libre' : `${c.peso} % · ${euros((pais.porPersonaEscala * c.peso) / 100)}/persona`}</span>
+                  <span className="tabular-nums text-slate-600">{c.peso == null ? 'libre' : `${c.peso}\u00A0%, ${euros((pais.porPersonaEscala * c.peso) / 100)} por persona`}</span>
                 </span>
                 {c.peso != null && (
                   <span className="mt-1 block h-1.5 rounded-full bg-slate-100">
