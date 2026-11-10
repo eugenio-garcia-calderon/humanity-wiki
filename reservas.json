@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/avisoInstalar.ts",
-      "motivo": "Estudio sobre la conciencia: nueva página /conciencia",
-      "desde": "2026-11-10T08:43:30.253Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "drizzle/0179_conciencia_mapa.sql",
       "motivo": "Estudio sobre la conciencia: nueva página /conciencia",
       "desde": "2026-11-10T08:43:33.700Z"
