@@ -44,12 +44,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/components/sitio/MenuSitio.tsx",
-      "motivo": "Aviso al final del pie (SolarCrowd)",
-      "desde": "2026-11-10T11:13:33.626Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/sitio/sitioWeb.ts",
       "motivo": "Aviso al final del pie",
       "desde": "2026-11-10T11:13:36.900Z"
