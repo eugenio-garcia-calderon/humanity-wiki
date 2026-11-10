@@ -10801,3 +10801,33 @@ Eugenio: «Unifica los selectores de vehículos… deja solo el de arriba y deja
 ### 2026-11-10 — Las páginas con título largo o con signos ya no dan 404 en el dominio propio
 - Un proyecto nuevo sin nombre corto se abre por su título (`porContexto`, `sitios.ts`). `slugDe` recorta a 60 letras y quita los signos de los extremos, pero el LIKE que busca el título exigía coincidir entero: «Competición para el desarrollo de un Vehículo Eficiente y Solar de código abierto» daba 404.
 - `patronDeTitulo` (`rutasFila.ts`) lo busca abierto por los dos lados; la comparación exacta sigue siendo con `slugDe`, y primero van los títulos más cortos para que no se quede fuera del límite de candidatas.
+
+## 2026-11-10 — «Realizar préstamo»: formalizar un préstamo con firma, justificante y copia por correo
+
+- Eugenio: «un botón que sea realizar préstamo… que se rellenen los datos del prestamista, se le expliquen las condiciones, que las acepte y que haga una firma… que adjunte el justificante… dividido en 3 secciones dentro de la misma página… que se envíe una copia de lo firmado y lo aceptado al correo de esta persona». Y después: «añadir el IBAN de la entidad… y también el correo electrónico para que aparezcan ambos públicos… la entidad recibe una copia a ese correo».
+- **Bloque de datos nuevo «Formalizar préstamo»** (`src/components/bloquesDatos/prestamo/`). Lo ve quien visita: las condiciones, el IBAN y el correo de la entidad, y el botón «Realizar préstamo», que abre tres pasos en la misma página:
+  1. Tus datos y tu préstamo.
+  2. Condiciones y firma: un resumen, desplegables con el contrato completo, los riesgos y los datos personales, tres casillas y la firma con el dedo.
+  3. Transferencia y justificante.
+- **Al enviarlo**, el servidor (`src/server/prestamos.ts`) hace esto:
+  - Rehace el contrato a partir del bloque guardado en la página, nunca de lo que manda el navegador, y calcula su huella SHA-256.
+  - Genera el PDF firmado.
+  - Guarda la firma, el justificante y el PDF en `/uploads/privado/` (no se sirven en público) y añade una fila en `prestamos_firmados` (migración 0180).
+  - Manda los correos por la cuenta SMTP de Google que ya existe:
+    - a la persona, el PDF;
+    - a administración (`avisar`) y a la entidad (`correoEntidad`), el PDF y el justificante.
+  - La pantalla solo dice que salió el correo si salió de verdad; si no, ofrece descargar el PDF.
+- **El editor** permite cambiar todos los datos del préstamo: entidad, NIF, IBAN, correo, destino, subvención, intereses, plazos, importes y quién supervisa. Tiene un interruptor «Abierto» y avisa de lo que falta para abrirlo.
+  - El correo de la entidad es obligatorio para abrir.
+  - El IBAN solo se enseña con el préstamo abierto.
+  - Quien administra la página ve aquí los préstamos firmados: estado, contrato, justificante y «Borrar sus datos» (derecho de supresión).
+- **Comprobado en local** (Postgres con todas las migraciones, servidor real, SMTP de prueba, Chrome sin cabeza a 390 px táctil):
+  - El recorrido completo, incluida la descarga del PDF. Los 3 correos con sus adjuntos y sus «Responder a».
+  - Los rechazos:
+    - demasiado rápido, campo trampa, sin casillas, sin firma, firma falsa;
+    - justificante falso, letra del DNI, importe, interés inventado, plazo, IBAN;
+    - préstamo cerrado, otra web, bloque inexistente, JSON normal.
+  - Lista, archivo, estado y borrado solo para quien administra la página (401 sin sesión, 403 para otra persona).
+  - El borrado quita los tres archivos del disco.
+  - La huella del PDF coincide con el texto guardado.
+- **Sin verificar:** en producción, con el Gmail real (límite de adjuntos y de envíos), y con la app instalada en un móvil. Pendiente de datos: el IBAN, el NIF y el correo de ASNUCI para abrir su préstamo.

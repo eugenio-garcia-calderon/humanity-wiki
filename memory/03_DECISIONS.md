@@ -1274,3 +1274,28 @@ Without an account the page still lets anyone move and change things. Their chan
 Opening it later is one constant, `NIVEL_GUARDAR`, plus `puedeGuardar` in `src/server/conciencia.ts`. History (a copy every 10 minutes at most, always before restoring or resetting; 300 kept) and the per-IP brake are already there, so the open variant would be safe too.
 
 **Storage shape:** one row per map with the whole map as JSONB (`conciencia_mapas`, key `principal`), `datos` NULL meaning «the map in the code», and `version` for 409 on concurrent saves. Same pattern as `calendario_arte_meses`. Node and edge rows were rejected: one drag would be dozens of writes, and the map is always read and drawn whole.
+
+## 2026-11-10 — Formalizing a loan: one contract function, the block as the source of truth, files kept private
+
+Eugenio asked for a «Realizar préstamo» flow on solarcrowd.com: lender's details, conditions with a signature, transfer receipt, and a copy of what was signed mailed to the lender.
+
+**Chosen.**
+- A **data block** (`prestamo`) holds the loan's terms in `bloque.datos`. Each funding page carries its own block, editable in the page editor.
+- The server reads the terms **from the stored page**, never from the request, so a visitor can only choose among the options the publisher offered.
+- **One function writes the contract** (`contrato.ts`), imported by the screen, the server and the PDF. What the person reads in the fold is word for word what is signed, hashed and mailed. Every signed row keeps its own text and SHA-256, so editing the terms changes only future signatures.
+- **The body arrives as `application/x-prestamo-json`, parsed with its own 12 MB limit.** `server.ts` is frozen and parses JSON globally with a 100 kB cap, which a receipt does not fit in.
+- **Signature, receipt and PDF are private** (`/uploads/privado/`). They leave only through the managers' route or as e-mail attachments. Managers are whoever has `gestionar` on the page.
+
+**Rejected.**
+- **A site form** (`formulariosSitio.ts`). It stores fields, not contracts: no signature, no attachments, no per-page terms.
+- **A database form** (`bd_formularios`). It writes rows that the editor can change later, which is wrong for a signed record.
+- **An e-signature provider** (DocuSign and the like). Money and an account Eugenio did not ask for. What is collected is a simple electronic signature (eIDAS «simple»): a drawn signature, the time, the text's hash and the e-mail copy.
+
+**The public write route has no role check, on purpose.** The lender has no account; the portal is account-free by Eugenio's design. In its place, the route has:
+- a check that the request comes from the site itself (origin);
+- the page must be visible and the block open;
+- a trap field and a minimum of 15 s;
+- per-IP and per-loan brakes;
+- the files' own first bytes must match their type.
+
+This is the same shape as the site forms.
