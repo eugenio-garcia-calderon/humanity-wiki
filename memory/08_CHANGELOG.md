@@ -10859,6 +10859,9 @@ Petición de Eugenio: que al cargar /aeromovil aparezca el Triciclo Bala con su 
 - Sin IA de pago: traduce la sesión de trabajo una vez al día por la API con `TRADUCCIONES_TOKEN`.
 - lighthumanity.org sigue redirigiendo hasta que esté traducido: la migración que lo activa va en otro despliegue.
 
+### 2026-11-10 — Proyectos que nos inspiran
+- Eugenio: una sección antes del pie con una base de datos de proyectos de otras personas y organizaciones, en una sola línea con slider. Tabla «Proyectos que nos inspiran» (`sitio.inspiran`) con Our World in Data, Robodienst, World Solar Challenge y Shell Eco-marathon; `InspiranSitio.tsx`. Entra también en la lista de traducción de lighthumanity.org.
+
 ## 2026-11-10 — Modelo socioeconómico optimizado: nuevo proyecto en humanity.wiki y luzhumanidad.com
 
 - Eugenio: un modelo con **un solo impuesto del 20 % sobre cada transacción** (compra o sueldo), sin ningún otro, que el sistema de pago aparta al instante y reparte **2,5 % a cada una de ocho escalas**: persona, comunidad vecinal (o el hogar si no hay comunidad), municipio, provincia, región, nación, continente y planeta. En cada escala, una asamblea ciudadana elige prioridades y un comité técnico las ejecuta. Comparado con el sistema fiscal español.

@@ -11,6 +11,7 @@ import MapaProyectosSitio from './MapaProyectosSitio';
 import HistoriaSitio from './HistoriaSitio';
 import { useDatosPortada, type ProyectoPortada } from './portadaEscaparate';
 import { iconoCategoria } from './iconoCategoria';
+import InspiranSitio, { type TablaInspiran } from './InspiranSitio';
 const NoticiasSitio = lazy(() => import('./NoticiasSitio'));
 
 // ============================================================================
@@ -92,6 +93,7 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
   const [proyectos, setProyectos] = useState<Tabla | null>(null);
   const [sistemas, setSistemas] = useState<Tabla | null>(null);
   const [personas, setPersonas] = useState<Tabla | null>(null);
+  const [inspiran, setInspiran] = useState<TablaInspiran | null>(null);
   const [equipo, setEquipo] = useState(false);
   const [fallo, setFallo] = useState(false);
   const [area, setArea] = useState(() => areaDeLaDireccion());
@@ -135,6 +137,7 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
       setProyectos(p); setSistemas(s);
       // Las personas, después de los proyectos: la página carga de arriba abajo.
       if (tPersonas) pide(tPersonas).then(x => { if (vivo) setPersonas(x); });
+      if (r?.config?.sitio?.inspiran) pide(r.config.sitio.inspiran).then(x => { if (vivo) setInspiran(x); });
     });
     // El lápiz y «Añadir», solo para quien gestiona la web.
     fetch(`/api/sitio-miembros/${encodeURIComponent(raizId)}/estado`, { credentials: 'include' })
@@ -361,6 +364,13 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
 
       {/* EN LOS MEDIOS (2026-11-06): todas las noticias de los proyectos, debajo de las personas. */}
       <Suspense fallback={null}><NoticiasSitio raizId={raizId} /></Suspense>
+
+      {/* PROYECTOS QUE NOS INSPIRAN (2026-11-10): lo último antes del pie, al ancho de las tarjetas. */}
+      {inspiran && (
+        <div style={escaparate && !edicion ? { width: ANCHO_TARJETAS, marginLeft: `calc((100% - ${ANCHO_TARJETAS}) / 2)` } : undefined}>
+          <InspiranSitio tabla={inspiran} />
+        </div>
+      )}
     </div>
   );
 }
