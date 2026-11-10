@@ -31,8 +31,8 @@ export function MatrizAmbitos({ modo }: { modo: Modo }) {
   return (
     <div>
       <p className="mb-4 max-w-3xl rounded-xl bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-950">
-        Los porcentajes son una <b>propuesta inicial de reparto</b>, hecha para esta página a partir de lo que hace hoy cada nivel de la administración,
-        para que cada asamblea tenga un punto de partida. Cada escala los cambiará según sus prioridades.
+        Los porcentajes son una <b>propuesta inicial de reparto</b>, hecha para esta página según lo que le toca a cada escala, para que cada asamblea tenga un punto de partida.
+        No copian el gasto de hoy: por ejemplo, hoy las pensiones se llevan cerca de la mitad de lo que gastan el Estado y la Seguridad Social. Cada escala los cambiará según sus prioridades.
       </p>
       <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2">
         <span className="text-sm text-slate-600">Mostrar cada celda como</span>

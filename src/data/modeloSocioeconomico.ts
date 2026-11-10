@@ -66,7 +66,7 @@ export const ESCALAS: Escala[] = [
     ejemplo: 'Su hogar (vive en una casa)', habitantesEjemplo: 2,
     participacion: 'Junta vecinal: votan todas las personas que viven allí (no solo las propietarias), una persona un voto, en persona o desde el móvil.',
     comite: 'Dos o tres vecinos que rotan cada año, con un administrador profesional si la junta lo elige.',
-    ritmo: 'Cuatro juntas al año',
+    ritmo: 'Cuatro juntas al año; en una casa, lo decide el hogar',
   },
   {
     id: 'municipio', nombre: 'Municipio', corto: 'Municipio', color: '#60973D', tinta: '#1B2433',
@@ -686,6 +686,8 @@ export function modeloPorFuncion(modo: Modo) {
   const pais = cuentasPais(modo);
   return FUNCIONES.map(f => ({
     ...f,
+    // Same perimeter on both sides: the model's neighbourhood scale replaces today's community fees.
+    ...(f.id === 'vivienda' ? { hoy: f.hoy + HOY.cuotasComunidades, nota: `${numero(f.hoy)} M€ de gasto público y ${numero(HOY.cuotasComunidades)} M€ de cuotas de comunidad` } : {}),
     modelo: ESCALAS_INTERIORES.reduce((s, e) => s + f.ambitos.reduce((t, a) => t + ((MATRIZ[e][a].peso ?? 0) / 100) * pais.porEscala, 0), 0),
   }));
 }

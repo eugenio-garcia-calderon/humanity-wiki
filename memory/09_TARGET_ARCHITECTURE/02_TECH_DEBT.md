@@ -527,4 +527,4 @@ threshold, checked only on that null path here).
 - The Aeromóvil and consciousness mailboxes still have their own tables. Moving them into `buzon_proyectos` (data copy plus pointing two components at `/api/buzon/:proyecto`): ~1 h.
 - Migration 0184 repeats 0181's hard-coded luzhumanidad.com project ids. A third project should get the admin endpoint noted above instead of a third migration.
 - `/modelo-socioeconomico` computes today's tax burden with fixed 2026 rules (contribution rates, Madrid and state IRPF scales, ≈ 12 % indirect taxes) in `src/data/modeloSocioeconomico.ts`. When the rules change, the comparison goes stale silently. Pointing to an official calculator or a yearly check: ~20 min a year.
-- The scheme (`EsquemaFlujos.tsx`) wraps SVG text by character count, and on phones it is a horizontal scroll at min 820 px. A vertical phone layout: ~2 h.
+- The scheme exists twice: `EsquemaFlujos` (SVG, wraps text by character count) for tablets and desktops, `EsquemaVertical` (HTML list) for phones. A change to the flows has to be made in both; deriving both from one description of the flows: ~2 h.

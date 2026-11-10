@@ -3,7 +3,7 @@
 // sits today and with the model.
 import { cn } from '../../utils/cn';
 import {
-  ESCALA, ESCALAS, HOY, modeloPorFuncion, IMPUESTOS_HOY, TOTAL_FIGURAS, type Modo, cuentasPais, millones, numero, numeroFiguras, porcentaje, PARTE_ESCALA, TIPO,
+  AMBITO, ESCALA, ESCALAS, ESPANA, HOY, modeloPorFuncion, euros, IMPUESTOS_HOY, TOTAL_FIGURAS, type Modo, cuentasPais, millones, numero, numeroFiguras, porcentaje, PARTE_ESCALA, TIPO,
 } from '../../data/modeloSocioeconomico';
 import { Fuente, Muestra } from './piezas';
 
@@ -37,7 +37,7 @@ export function Piezas() {
           ))}
         </div>
       </div>
-      <div className="flex flex-col rounded-2xl bg-slate-900 p-6 text-white">
+      <div className="flex flex-col self-start rounded-2xl bg-slate-900 p-6 text-white">
         <h3 className="text-lg font-bold">Con el modelo: 1</h3>
         <p className="mt-1 text-sm text-slate-300">Un único {porcentaje(TIPO * 100, 0)} sobre cada pago. Lo aparta el sistema de pago y llega ya repartido:</p>
         <div className="mt-5 flex items-stretch gap-3">
@@ -51,7 +51,7 @@ export function Piezas() {
           <li>Sin recibos del IBI, de basuras ni del vehículo.</li>
           <li>Sin cuotas de comunidad.</li>
         </ul>
-        <p className="mt-auto pt-5 text-xs leading-relaxed text-slate-400">
+        <p className="mt-5 text-xs leading-relaxed text-slate-400">
           Dentro de la Unión Europea, la parte de las compras sería legalmente el IVA, que la UE obliga a mantener; para quien paga sigue siendo un único {porcentaje(TIPO * 100, 0)}.
         </p>
       </div>
@@ -147,8 +147,8 @@ export function DondeEstaElDinero({ modo }: { modo: Modo }) {
             <div className="space-y-1">
               {[{ v: g.hoy, t: 'Hoy', c: 'bg-slate-400', nota: g.notaHoy }, { v: g.modelo, t: 'Con el modelo', c: 'bg-slate-900' }].map(b => (
                 <div key={b.t} className="flex items-center gap-2" title={`${g.nombre}, ${b.t.toLowerCase()}: ${millones(b.v)} al año`}>
-                  <span className={cn('h-4 rounded-r-[4px]', b.c)} style={{ width: `${Math.max(0.4, (b.v / max) * 78)}%` }} />
-                  <span className="whitespace-nowrap text-xs tabular-nums text-slate-700">{millones(b.v)}{b.nota && <span className="text-slate-500"> ({b.nota})</span>}</span>
+                  <span className={cn('h-4 shrink-0 rounded-r-[4px]', b.c)} style={{ width: `${Math.max(0.4, (b.v / max) * 78)}%` }} />
+                  <span className="min-w-0 text-xs tabular-nums text-slate-700"><span className="whitespace-nowrap">{millones(b.v)}</span>{b.nota && <span className="text-slate-500"> ({b.nota})</span>}</span>
                 </div>
               ))}
             </div>
@@ -161,7 +161,8 @@ export function DondeEstaElDinero({ modo }: { modo: Modo }) {
       </p>
       <p className="mt-3 text-sm leading-relaxed text-slate-600">
         El cambio de fondo no es solo cuánto se recauda, sino dónde: hoy el {porcentaje(((HOY.gastoCentral2024 + HOY.gastoSeguridadSocial2024) / HOY.gastoTotal2024) * 100, 0)} del gasto
-        público lo hacen el Estado y la Seguridad Social; con el modelo cada escala recibe lo mismo, y el dinero se acerca a las personas y a lo que compartimos con el resto del mundo.
+        público lo hacen el Estado y la Seguridad Social. Con el modelo cada escala recibe lo mismo: el Estado y las regiones pasan a tener mucho menos,
+        los municipios, las provincias y las comunidades vecinales algo más, y Europa y el planeta bastante más.
       </p>
     </figure>
   );
@@ -195,15 +196,22 @@ export function GanaYPierde({ modo }: { modo: Modo }) {
             <div className="space-y-1">
               {[{ v: f.hoy, t: 'Hoy', c: 'bg-slate-400', nota: f.nota }, { v: f.modelo, t: 'Con el modelo', c: 'bg-slate-900', nota: undefined }].map(b => (
                 <div key={b.t} className="flex items-center gap-2" title={`${f.nombre}, ${b.t.toLowerCase()}: ${millones(b.v)} al año`}>
-                  <span className={cn('h-3.5 rounded-r-[4px]', b.c)} style={{ width: `${Math.max(0.4, (b.v / max) * 74)}%` }} />
-                  <span className="whitespace-nowrap text-xs tabular-nums text-slate-700">{millones(b.v)}{b.nota && <span className="text-slate-500"> ({b.nota})</span>}</span>
+                  <span className={cn('h-3.5 shrink-0 rounded-r-[4px]', b.c)} style={{ width: `${Math.max(0.4, (b.v / max) * 74)}%` }} />
+                  <span className="min-w-0 text-xs tabular-nums text-slate-700"><span className="whitespace-nowrap">{millones(b.v)}</span>{b.nota && <span className="text-slate-500"> ({b.nota})</span>}</span>
                 </div>
               ))}
             </div>
           </div>
         ))}
       </div>
-      <p className="mt-5 text-sm leading-relaxed text-slate-700">
+      <p className="mt-5 text-xs leading-relaxed text-slate-500">
+        Cómo se agrupan los quince ámbitos de la matriz:{' '}
+        {filas.map(f => `${f.nombre}: ${f.ambitos.map(a => AMBITO[a].corto).join(', ')}`).join('. ')}.
+        La parte de la comunidad vecinal se cuenta aquí como gasto en sus ámbitos; quien vive en una casa sin comunidad la recibe en dinero, como en el caso de la persona del pueblo.
+      </p>
+      <p className="mt-4 text-sm leading-relaxed text-slate-700">
+        Por habitante: hoy, unos {euros((totalHoy * 1e6) / ESPANA.poblacion)} al año entre gasto público y cuotas de comunidad;
+        con el modelo, {euros((totalModelo * 1e6) / ESPANA.poblacion)} en servicios más {euros(pais.porPersonaEscala)} de dividendo.
         En total, {millones(totalModelo)} frente a {millones(totalHoy)}. La mayor diferencia está en las pensiones y la protección social:
         {' '}{millones(pension.modelo)} frente a {millones(pension.hoy)}. Hay que sumar el dividendo, {millones(pais.porEscala)} al año que reciben directamente todas las personas,
         y saber que hoy «administración» incluye {millones(HOY.intereses2025)} de intereses de la deuda en 2025<Fuente id="intereses" />, que el modelo todavía no resuelve.

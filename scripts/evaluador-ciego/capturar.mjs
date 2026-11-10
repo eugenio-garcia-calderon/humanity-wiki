@@ -35,11 +35,16 @@ for (const [nombre, vp] of [['escritorio', { width: 1440, height: 900 }], ['movi
   // The sticky header would cover each section's capture: hide it there.
   await page.screenshot({ path: f(`${nombre}-01-portada.png`) });
   if (nombre === 'movil') {
-    // Three more phone screens, scrolling.
-    for (let i = 1; i <= 3; i++) {
-      await page.evaluate(h => window.scrollTo(0, h), vp.height * 0.9 * i);
+    // A page wider than the phone scrolls sideways: the evaluator cannot see that, so say it.
+    const ancho = await page.evaluate(() => document.documentElement.scrollWidth);
+    if (ancho > vp.width) errores.push(`movil: la página mide ${ancho} px de ancho en una pantalla de ${vp.width} px`);
+    // One phone screen at the start of every section, so the evaluator sees all of them.
+    const ids = await page.evaluate(() => [...document.querySelectorAll('main > section[id]')].map(s => s.id));
+    let k = 2;
+    for (const id of ids) {
+      await page.evaluate(i => document.getElementById(i)?.scrollIntoView({ block: 'start' }), id);
       await page.waitForTimeout(300);
-      await page.screenshot({ path: f(`movil-0${i + 1}-pantalla.png`) });
+      await page.screenshot({ path: f(`movil-${String(k++).padStart(2, '0')}-${id}.png`) });
     }
   } else {
     fs.writeFileSync(f('texto.txt'), await page.evaluate(() => (document.querySelector('main') || document.body).innerText));

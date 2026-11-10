@@ -5,7 +5,7 @@
 import type { ReactNode } from 'react';
 import { cn } from '../../utils/cn';
 import {
-  ESCALAS, type Modo, type Ejemplo, calcularEjemplo, recibeLugar, euros, millones, porcentaje, SUPUESTOS, TIPO,
+  ESCALAS, ESPANA, type Modo, type Ejemplo, calcularEjemplo, modeloPorFuncion, recibeLugar, euros, millones, porcentaje, SUPUESTOS, TIPO,
 } from '../../data/modeloSocioeconomico';
 import { Fuente, Muestra, Regulador, Segmentado } from './piezas';
 
@@ -13,6 +13,10 @@ const dia = (n: number) => n / 365;
 const mes = (n: number) => n / 12;
 
 export function TuCaso({ modo, ejemplo, onEjemplo }: { modo: Modo; ejemplo: Ejemplo; onEjemplo: (e: Ejemplo) => void }) {
+  // Services per inhabitant, same perimeter as «Lo que se gana y lo que se pierde».
+  const porFuncion = modeloPorFuncion(modo);
+  const serviciosHoy = (porFuncion.reduce((s, f) => s + f.hoy, 0) * 1e6) / ESPANA.poblacion;
+  const serviciosModelo = (porFuncion.reduce((s, f) => s + f.modelo, 0) * 1e6) / ESPANA.poblacion;
   const r = calcularEjemplo(ejemplo, modo);
   const set = (p: Partial<Ejemplo>) => onEjemplo({ ...ejemplo, ...p });
   const maxBarra = Math.max(r.totalHoy, r.aporta);
@@ -27,7 +31,7 @@ export function TuCaso({ modo, ejemplo, onEjemplo }: { modo: Modo; ejemplo: Ejem
   ];
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
       {/* ── The controls and the chain of places ── */}
       <div className="space-y-6">
         <div className="space-y-5 rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
@@ -150,7 +154,8 @@ export function TuCaso({ modo, ejemplo, onEjemplo }: { modo: Modo; ejemplo: Ejem
           <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm leading-relaxed text-amber-950">
             <b>Lo que deja de tener.</b> Con el modelo no hay cotizaciones, así que deja de acumular derechos de pensión contributiva y de paro.
             Su protección pasa a ser el dividendo y lo que decidan las escalas. Que le quede más dinero no es magia: en esta lectura el modelo recauda
-            menos que el sistema actual y hay menos servicios públicos (lo cuentan «Hoy y con el modelo» y «Lo que falta por resolver»).
+            menos que el sistema actual y hay menos servicios públicos: por habitante, unos {euros(serviciosModelo)} al año en lugar de {euros(serviciosHoy)}{' '}
+            (lo cuentan «Frente a hoy» y «Lo que falta por resolver»).
           </p>
         </div>
       </div>

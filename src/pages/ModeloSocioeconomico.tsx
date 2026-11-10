@@ -84,7 +84,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
       {/* ── Top band: what this is, who makes it, where to go, the mailbox ── */}
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-2.5 sm:px-6">
-          <a href="#inicio" className="shrink-0 leading-tight">
+          <a href="#inicio" className="min-w-0 leading-tight">
             <span className="block text-[15px] font-bold tracking-tight">Modelo socioeconómico optimizado</span>
             <span className="block text-xs text-slate-500">Un proyecto de {marca}</span>
           </a>
@@ -146,7 +146,8 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
                   <p className="font-bold text-slate-900">Ocho escalas, una dentro de otra</p>
                   <p className="mt-1 text-slate-700">Toca un anillo para ver quién recibe su parte y qué devuelve.</p>
                   <p className="mt-3 text-sm text-slate-500">
-                    Los anillos muestran qué escala está dentro de cuál, no cuánto recibe: todas reciben lo mismo, {euros(pais.porPersonaEscala)} por habitante y año.
+                    Los anillos muestran qué escala está dentro de cuál, no cuánto recibe: cada una recibe {euros(pais.porPersonaEscala)} por habitante y año.
+                    En Europa y el planeta, es lo que aporta España por cada habitante.
                   </p>
                 </>
               )}
@@ -164,7 +165,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
               {[
                 { t: 'Pagas', d: 'Compras un pan de 2,00\u00A0€ con tarjeta, Bizum o el móvil. El precio ya lleva el impuesto dentro, como hoy el IVA.' },
                 { t: 'Se aparta el 20\u00A0%', d: `En el mismo instante, el sistema de pago separa 0,40\u00A0€. La panadería recibe 1,60\u00A0€.` },
-                { t: 'Se reparte', d: `Los 0,40\u00A0€ se dividen en ocho partes de 0,05\u00A0€: una para ti, otra para tu comunidad vecinal, tu municipio, tu provincia, tu región, España, Europa y el planeta.` },
+                { t: 'Se reparte', d: `Los 0,40\u00A0€ se dividen en ocho partes de 0,05\u00A0€, una por escala. Se juntan con las de todos los pagos y cada escala recibe lo mismo por habitante: tu parte personal es un dividendo igual para todo el mundo.` },
                 { t: 'Cada escala decide', d: 'Su asamblea ciudadana elige las prioridades y su comité técnico las cumple al menor coste, de la forma más eficaz y ecológica.' },
               ].map((p, i) => (
                 <li key={p.t}>
@@ -248,7 +249,8 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
               </div>
             ) : (
               <p className="text-slate-600">
-                En España, cada pago suma al año {millones(pais.base)}; su {porcentaje(TIPO * 100, 0)} son {millones(pais.recaudacion)}, y cada escala recibe {millones(pais.porEscala)}.
+                En España, los pagos que llevan el impuesto (la base: sueldos, compras de las familias y vivienda{modo === 'literal' ? ', compras entre empresas e inversión' : ''}) suman al año {millones(pais.base)};
+                su {porcentaje(TIPO * 100, 0)} son {millones(pais.recaudacion)}, y cada escala recibe {millones(pais.porEscala)}.
                 Lectura usada: «{LECTURA_CORTA[modo].toLowerCase()}».
               </p>
             )}
@@ -335,6 +337,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
             <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600">
               Las cifras de España salen de las fuentes oficiales enlazadas. Donde no hay un dato oficial exacto, la página dice que es una estimación y cómo se ha hecho.
               Los cálculos del sistema actual son orientativos y no incluyen deducciones personales.
+              Los años no son todos el mismo: el gasto por administraciones y por funciones es de 2024 (el último cerrado), la recaudación y la base de 2025, y las reglas del IRPF y las cotizaciones del caso, de 2026.
             </p>
             <div className="mt-5"><ListaFuentes /></div>
           </div>

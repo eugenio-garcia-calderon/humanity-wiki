@@ -11,7 +11,7 @@ import { Fuente, Libre } from './piezas';
 const LECTURAS: { id: Modo; titulo: string; texto: string }[] = [
   {
     id: 'eslabon', titulo: 'Sin cascada entre empresas',
-    texto: 'Todas las transacciones pagan el 20 %. Cuando una empresa vende, recupera al instante el 20 % que pagó por sus materiales: así cada producto lleva un 20 % exacto, nunca un 20 % sobre otro 20 %. Es la lectura que usa esta página por defecto.',
+    texto: 'Los sueldos y todas las compras pagan el 20 %, también las de las empresas. Cuando una empresa vende, recupera al instante el 20 % que pagó por sus materiales: así cada producto lleva un 20 % exacto, nunca un 20 % sobre otro 20 %. Es la lectura que usa esta página por defecto.',
   },
   {
     id: 'literal', titulo: 'Al pie de la letra, también entre empresas',
@@ -131,7 +131,8 @@ export function Retos({ modo }: { modo: Modo }) {
   const pais = cuentasPais(modo);
   const lit = cuentasPais('literal');
   const esl = cuentasPais('eslabon');
-  const proteccion = modeloPorFuncion(modo).find(f => f.id === 'proteccion')!;
+  const porFuncion = modeloPorFuncion(modo);
+  const [proteccion, salud, educacion] = (['proteccion', 'salud', 'educacion'] as const).map(id => porFuncion.find(f => f.id === id)!);
   // Who pays more, net: three wages, same household as the worked example
   // (living with a partner, in a house), spending three quarters of today's net pay.
   const casos = [16_000, 26_000, 50_000].map(bruto => {
@@ -139,6 +140,7 @@ export function Retos({ modo }: { modo: Modo }) {
     const r = calcularEjemplo({ ...EJEMPLO_INICIAL, bruto, gastoMes: (netoHoy * 0.75) / 12 }, modo);
     return { bruto, hoy: r.totalHoy / r.costeTrabajo, modelo: r.aportaNeto / r.costeTrabajo };
   });
+  const inicial = calcularEjemplo(EJEMPLO_INICIAL, modo);
   const difHoy = Math.round((casos[2].hoy - casos[0].hoy) * 100);
   const difModelo = Math.round((casos[2].modelo - casos[0].modelo) * 100);
   const retos: { t: string; d: React.ReactNode }[] = [
@@ -149,17 +151,21 @@ export function Retos({ modo }: { modo: Modo }) {
     },
     {
       t: 'Recauda distinto que hoy',
-      d: <>Sin cascada entre empresas, el modelo recauda ≈ {porcentaje(esl.pctPIB, 0)} del PIB, frente al ≈ 38 % de hoy en impuestos y cotizaciones: habría menos servicios públicos o tendrían que ser mucho más eficientes. Al pie de la letra recauda ≈ {porcentaje(lit.pctPIB, 0)}, más que hoy, a costa de la cascada. Entre las dos hay lecturas intermedias, como cobrar también la inversión de las empresas.</>,
+      d: <>Sin cascada entre empresas, el modelo recauda ≈ {porcentaje(esl.pctPIB, 0)} del PIB, frente al ≈ 38 % de hoy en impuestos y cotizaciones.
+        Con el reparto inicial, la salud pasaría de {millones(salud.hoy)} a {millones(salud.modelo)} y la educación de {millones(educacion.hoy)} a {millones(educacion.modelo)}:
+        para dar lo mismo, los servicios tendrían que costar unas {numero(salud.hoy / salud.modelo, 0)} veces menos. Caminos: un tipo mayor, que las asambleas den más peso a esos ámbitos, o que una parte deje de ser pública. Al pie de la letra recauda ≈ {porcentaje(lit.pctPIB, 0)}, más que hoy, a costa de la cascada. Entre las dos hay lecturas intermedias, como cobrar también la inversión de las empresas.</>,
     },
     {
       t: '¿Es justo un tipo igual para todos?',
       d: (
         <>
           La Constitución pide un sistema inspirado en la igualdad y la progresividad (artículo 31). En el modelo todos aportan el mismo porcentaje y todos reciben el mismo dividendo, que es lo que lo hace progresivo.
-          Con un dividendo de {euros(pais.porPersonaEscala)} al año, el efecto es {difModelo < 3 ? 'pequeño: el modelo queda casi proporcional' : 'claro'}. Entre un sueldo de {euros(casos[0].bruto)} y uno de {euros(casos[2].bruto)},
-          hoy la diferencia es de {numero(difHoy)} puntos y con el modelo, de {numero(difModelo)}. Quien no tiene ingresos recibe el dividendo entero.
+          Con un dividendo de {euros(pais.porPersonaEscala)} al año, el modelo es bastante menos progresivo que hoy: entre un sueldo de {euros(casos[0].bruto)} y uno de {euros(casos[2].bruto)},
+          la diferencia de aportación baja de {numero(difHoy)} puntos a {numero(difModelo)}. Quien no tiene ingresos recibe el dividendo entero.
           Para acercarse a la progresividad de hoy, el dividendo tendría que crecer, y eso lo deciden las asambleas.
-          Aportación neta sobre lo que la empresa paga por cada trabajo, para el mismo hogar del caso de arriba (vive en pareja, en una casa) y gastando tres cuartas partes del sueldo neto de hoy:
+          Aportación neta sobre lo que la empresa paga por cada trabajo, para el mismo hogar del caso de arriba (vive en pareja, en una casa) y gastando tres cuartas partes del sueldo neto de hoy.
+          Con ese gasto, para {euros(casos[1].bruto)} sale {porcentaje(casos[1].hoy * 100, 0)} hoy y {porcentaje(casos[1].modelo * 100, 0)} con el modelo; en el caso de arriba, que con sus valores de partida
+          gasta {euros(EJEMPLO_INICIAL.gastoMes)} al mes, {porcentaje(inicial.totalHoy / inicial.costeTrabajo * 100, 0)} y {porcentaje(inicial.aportaNeto / inicial.costeTrabajo * 100, 0)}:
           <span className="mt-2 block overflow-x-auto">
             <table className="w-full min-w-[360px] text-sm tabular-nums">
               <thead><tr className="text-left text-slate-500"><th scope="col" className="py-1 pr-3 font-medium">Sueldo bruto</th><th scope="col" className="py-1 pr-3 text-right font-medium">Hoy</th><th scope="col" className="py-1 text-right font-medium">Con el modelo</th></tr></thead>
@@ -174,6 +180,16 @@ export function Retos({ modo }: { modo: Modo }) {
     {
       t: 'La deuda que ya existe',
       d: <>En 2025 las administraciones pagaron {millones(HOY.intereses2025)} en intereses de la deuda pública<Fuente id="intereses" />, más de lo que se gasta en defensa, cultura y vivienda juntas. El modelo no reserva nada para eso. Caminos posibles: que la escala nacional la pague durante una transición, o un tramo temporal por encima del {porcentaje(TIPO * 100, 0)} hasta reducirla. Mientras no se decida, las cifras de esta página son un punto de llegada, no el primer año.</>,
+    },
+    {
+      t: 'Comprar o alquilar una casa',
+      d: <>Una vivienda usada paga el {porcentaje(TIPO * 100, 0)} cada vez que se vende: {euros(200_000 * TIPO)} por un piso de {euros(200_000)}, frente a los {euros(200_000 * 0.06)}–{euros(200_000 * 0.10)} del impuesto de transmisiones de hoy en la mayoría de regiones.
+        Y el alquiler, hoy sin IVA, pagaría también el {porcentaje(TIPO * 100, 0)}. Una salida es tratar la casa usada como el resto de la cadena: que solo pague la diferencia entre lo que costó y lo que se vende.</>,
+    },
+    {
+      t: 'Europa, el planeta y los gobiernos de hoy',
+      d: <>Mientras los demás países no adopten el modelo, las escalas europea y planetaria no tienen quien las gestione: España podría guardar sus {millones(pais.porEscala * 2)} en un fondo para proyectos europeos y mundiales, o empezar con menos.
+        Tampoco está decidido si las asambleas sustituyen a los plenos municipales, los parlamentos y los gobiernos elegidos de hoy o trabajan con ellos.</>,
     },
     {
       t: 'Los precios y los sueldos se moverían',
@@ -193,7 +209,7 @@ export function Retos({ modo }: { modo: Modo }) {
     },
   ];
   return (
-    <ol className="grid gap-x-10 gap-y-8 md:grid-cols-2">
+    <ol className="grid grid-cols-[minmax(0,1fr)] gap-x-10 gap-y-8 md:grid-cols-2">
       {retos.map(r => (
         <li key={r.t} className="border-l-2 border-slate-300 pl-5">
           <div>
