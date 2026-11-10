@@ -113,6 +113,11 @@ export type Pie = {
   mapaWeb: boolean;
   /** Enseñar el correo, el teléfono y la dirección (siguen usándose en los textos legales). */
   mostrarContacto: boolean;
+  /** EL AVISO DEL FINAL (2026-11-10, Eugenio en solarcrowd.com: «la advertencia de no prestes aquí
+   *  tu dinero que necesites a corto plazo, ponla abajo del todo en el footer»): un texto que va
+   *  en la última línea del pie, debajo del © y de los textos legales, en el pie completo y en el
+   *  sencillo. Vacío: no sale nada. */
+  aviso?: string;
   /** Una sola línea: los textos legales y el correo (2026-11-06, Eugenio en luzhumanidad.com:
    *  «quita el footer; deja solo los avisos legales, la política de privacidad y un correo»).
    *  Con `enlaces` (2026-11-07), encima va otra línea con ellos: «Colabora · Sala de prensa ·

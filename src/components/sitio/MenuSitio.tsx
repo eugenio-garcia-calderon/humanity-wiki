@@ -327,6 +327,13 @@ function MapaWeb({ raizId, rutas }: { raizId: string; rutas: Rutas }) {
 function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: string; nombre?: string }) {
   const p = s.pie;
   const c = p.contacto;
+  // El aviso del final (`pie.aviso`): lo último de la página, con su raya encima.
+  const textoAviso = typeof p.aviso === 'string' ? p.aviso.trim() : '';
+  const aviso = textoAviso ? (
+    <div data-aviso-pie style={{ borderColor: `${p.texto}26` }} className="border-t">
+      <p className="mx-auto max-w-[calc(576px+50vw)] px-5 @2xl:px-8 py-4 text-sm leading-relaxed opacity-75 whitespace-pre-line">{textoAviso}</p>
+    </div>
+  ) : null;
   // Sin logotipo propio, el pie usa el del menú (`MarcoSitio`), y con él su forma.
   const logoHorizontal = p.logo ? !!p.logoHorizontal : !!s.menu.logoHorizontal;
   const hayContacto = p.mostrarContacto && !!(c.email || c.telefono || c.direccion);
@@ -401,6 +408,7 @@ function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: s
           </span>
         )}
       </div>
+      {aviso}
     </footer>
   );
   return (
@@ -453,6 +461,7 @@ function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: s
           </div>
         </div>
       )}
+      {aviso}
     </footer>
   );
 }
