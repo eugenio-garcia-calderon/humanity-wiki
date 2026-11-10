@@ -10862,6 +10862,11 @@ Petición de Eugenio: que al cargar /aeromovil aparezca el Triciclo Bala con su 
 ### 2026-11-10 — Proyectos que nos inspiran
 - Eugenio: una sección antes del pie con una base de datos de proyectos de otras personas y organizaciones, en una sola línea con slider. Tabla «Proyectos que nos inspiran» (`sitio.inspiran`) con Our World in Data, Robodienst, World Solar Challenge y Shell Eco-marathon; `InspiranSitio.tsx`. Entra también en la lista de traducción de lighthumanity.org.
 
+### 2026-11-10 — Selector de idioma, portugués y la misión en la portada
+- Selector ES · EN · PT arriba a la derecha en todas las webs del laboratorio (`SelectorIdioma.tsx`); lleva a la misma página en cada idioma.
+- Portugués en `pt.lighthumanity.org`, con el mismo sistema que el inglés; un idioma no sale en el selector ni se indexa hasta tener casi todo traducido.
+- Titular de la portada: «Impulsamos proyectos que resuelven los grandes retos del ser humano.»
+
 ## 2026-11-10 — Las subpáginas de un dominio propio abren también con «www.»
 
 - Eugenio, con una captura de `www.solarcrowd.com/prestamos/hogar-de-asnuci-en-lepe`: «algo está fallando en las páginas de cada proyecto».

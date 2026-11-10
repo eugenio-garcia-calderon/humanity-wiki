@@ -16,7 +16,8 @@ const ICONOS: Record<string, LucideIcon> = {
   infraestructuras: Construction, consumo: ShoppingCart, 'vehiculo solar': Sun, 'vehiculo aerodinamico': Wind, 'mini casas': Tent,
   'contact improvisacion': HandHeart, biodanza: Music,
   'datos abiertos': BarChart3, robotica: Bot, 'competicion solar': Sun, 'eficiencia energetica': Gauge,
-  // En el dominio traducido la categoría llega en inglés.
+  // En los dominios traducidos la categoría llega en su idioma.
+  mobilidade: Car, saude: HeartPulse, habitacao: Home, alimentacao: Wheat, 'dados abertos': BarChart3, 'competicao solar': Sun, consciencia: Sparkles, educacao: GraduationCap,
   'open data': BarChart3, robotics: Bot, 'solar competition': Sun, 'solar racing': Sun, 'energy efficiency': Gauge,
   mobility: Car, economy: Coins, health: HeartPulse, ecology: Leaf, relationships: Users, energy: Zap, food: Wheat, coexistence: Handshake, work: Briefcase,
   climatology: CloudSun, education: GraduationCap, 'computer science': Cpu, computing: Cpu, culture: Palette, water: Droplet, companies: Building2, housing: Home,

@@ -36,7 +36,7 @@ import { cabeceraEnHtml } from './cabeceraSitio';
 import { cuerpoEnHtml, esc as escHtml, enLinea } from './htmlBloques';
 import { ampliar, type MetaPagina } from './ampliarPagina';
 import { configEscaparate, urlsEscaparate, modeloEscaparate } from './seoEscaparate';
-import { datosDeIdioma, dominiosTraducidos, estaTraducido, hreflangDe, idiomaDeHost, traducirHtml, traducirProfundo, tramosOriginales } from './traducciones';
+import { idiomaListo, localeDe, datosDeIdioma, dominiosTraducidos, estaTraducido, hreflangDe, idiomaDeHost, traducirHtml, traducirProfundo, tramosOriginales } from './traducciones';
 import { asegurarRutas, asegurarRutaDePagina, patronDeTitulo, TRAMOS_RESERVADOS } from './rutasFila';
 import { sitioConAnfitrion, sitioEnCasa } from '../components/sitio/ContextoSitio';
 import { bloquesDe } from './bloquesSql';
@@ -1061,7 +1061,7 @@ export function registrarSitios(app: Express, db: any) {
       const idioma = idiomaDeHost(s.host);
       const tituloOriginal = String(w.title || '');
       if (idioma) {
-        if (!w.virtual && !estaTraducido(tituloOriginal, idioma)) w.indexable = false;
+        if ((!w.virtual && !estaTraducido(tituloOriginal, idioma)) || !idiomaListo(idioma)) w.indexable = false;
         w = traducirProfundo(w, s.host);
         publica = traducirProfundo(publica, s.host);
         if (publica?.meta) { delete publica.meta.titulo; delete publica.meta.descripcion; }
@@ -1146,7 +1146,7 @@ export function registrarSitios(app: Express, db: any) {
         `<meta name="twitter:card" content="${img ? 'summary_large_image' : 'summary'}">`,
         `<link rel="canonical" href="${esc(canonica)}">`,
         ...hreflangDe(s.host, req.path, tituloOriginal),
-        idioma && `<meta property="og:locale" content="en_US">`,
+        idioma && `<meta property="og:locale" content="${localeDe(idioma)}">`,
         `<meta name="robots" content="${!indexable ? 'noindex,nofollow' : conFiltros ? 'noindex,follow' : 'index,follow'}">`,
         ...(m.metas || []).filter(x => x && (x.property || x.name)).map(x => x.property
           ? `<meta property="${esc(String(x.property))}" content="${esc(String(x.content ?? ''))}">`
