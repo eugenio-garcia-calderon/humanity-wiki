@@ -1008,7 +1008,7 @@ export default function Rejilla({ vinculo, alCrearEnVinculo, vistaPropia, onCamb
           onCambiar={v => cambiarVista({ config: { ...activa.config, tarjeta: v === 'portada' ? 'portada' : undefined } })}
           opciones={[['clasica', 'Clásica'], ['portada', 'Título sobre la imagen']]} />
         {activa.config.tarjeta === 'portada' && (
-          <Chips etiqueta="Tarjetas por fila" valor={String(activa.config.por_fila || 2)}
+          <Chips etiqueta="Tarjetas por fila" valor={String(activa.config.por_fila || 3)}
             onCambiar={v => cambiarVista({ config: { ...activa.config, por_fila: Number(v) } })}
             opciones={[['1', '1'], ['2', '2'], ['3', '3'], ['4', '4']]} />
         )}

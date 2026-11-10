@@ -1314,6 +1314,10 @@ Marking items done or discarded is admin-only (level 4). Saving the map itself s
 
 **Recline.** Trunk reclines about the hip, head a third (A1 model). Pilot 0° → 20°: tall rider +4.8 cm under the canopy but ~15 cm less reach. Passenger: reclining costs headroom, because the canopy falls behind him.
 
+## 2026-11-10 — Triciclo Bala as the default design, and reaching browsers that already had one
+
+The default is data (`por_defecto`, migration 0185), not code, so the owner's star keeps working. The first-visit rule only opened the default when the browser had nothing stored, so Eugenio himself would never have seen the change. A one-shot localStorage flag (`aeromovil.inicio.triciclo`) opens the default once in every browser. Rejected: bumping `aeromovil.parametros.v5` to v6, which would also throw away every stored local state for good. Cost accepted: an unsaved local edit by a non-owner is replaced on that one load (the owner's designs autosave).
+
 ## 2026-11-10 — Formalizing a loan: one contract function, the block as the source of truth, files kept private
 
 Eugenio asked for a «Realizar préstamo» flow on solarcrowd.com: lender's details, conditions with a signature, transfer receipt, and a copy of what was signed mailed to the lender.
