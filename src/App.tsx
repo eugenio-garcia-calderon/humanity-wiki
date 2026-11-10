@@ -36,6 +36,7 @@ const Calendario = lazy(() => import('./pages/Calendario'));
 const CalendarioArte = lazy(() => import('./pages/CalendarioArte'));
 const Aeromovil = lazy(() => import('./pages/Aeromovil'));
 const Conciencia = lazy(() => import('./pages/Conciencia'));
+const ModeloSocioeconomico = lazy(() => import('./pages/ModeloSocioeconomico'));
 const Arquitectura = lazy(() => import('./pages/Arquitectura'));
 const MisVideos = lazy(() => import('./pages/MisVideos'));
 const ChallengeProfile = lazy(() => import('./pages/ChallengeProfile'));
@@ -336,6 +337,10 @@ export default function App() {
                   Layout (2026-11-10, Eugenio). El mapa editable de la teoría
                   sintérgica de Jacobo Grinberg y sus estudios científicos. */}
               <Route path="conciencia" element={<Conciencia />} />
+              {/* Modelo socioeconómico optimizado: página PROPIA, fuera del Layout
+                  (2026-11-10, Eugenio). Un solo impuesto del 20 % repartido en
+                  ocho escalas, comparado con el sistema fiscal español. */}
+              <Route path="modelo-socioeconomico" element={<ModeloSocioeconomico />} />
               {/* Arquitectura: el mundo 3D editable de la Comunidad Circular Humana
                   (2026-11-05, Eugenio). Herramienta a pantalla completa, sin
                   cuenta y fuera del Layout, como el calendario. */}

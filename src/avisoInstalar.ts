@@ -70,6 +70,8 @@ export function ofrecerInstalacion() {
   if (location.pathname.startsWith("/arquitectura")) return;
   // Y para el Estudio sobre la conciencia (2026-11-10): página propia.
   if (location.pathname.startsWith("/conciencia")) return;
+  // Y para el Modelo socioeconómico (2026-11-10): página propia.
+  if (location.pathname.startsWith("/modelo-socioeconomico")) return;
 
   const caja = document.createElement("div");
   caja.setAttribute("role", "dialog");

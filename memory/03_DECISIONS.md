@@ -1361,3 +1361,34 @@ Eugenio asked for a «Realizar préstamo» flow on solarcrowd.com: lender's deta
 - the files' own first bytes must match their type.
 
 This is the same shape as the site forms.
+
+## 2026-11-10 — Modelo socioeconómico: two readings of «20 % of every transaction»
+
+Eugenio's model taxes every transaction at 20 %. Read literally, purchases between businesses pay too, and the tax stacks along supply chains (three links already take 35 % of a loaf of bread; Spain had that with the IGTE until VAT in 1986). Options:
+
+- **Literal only.** Faithful to the words, but it hides a known flaw and collects ≈ 45 % of GDP, more than today.
+- **Silently switch to a VAT-like credit.** Rejected: it would change his model without telling him.
+- **Chosen: both readings on the page, with a switch.** Default «sin cascada entre empresas» (first called «una vez en cada producto»; renamed after the blind evaluation because the name did not say what it decides): every payment pays 20 % and a business recovers what it paid on its purchases when it sells, so each final product carries exactly 20 % (≈ 23 % of GDP). Every figure on the page follows the switch.
+
+The base is built from INE and Fundación BBVA-Ivie 2025 aggregates (`BASE` in `src/data/modeloSocioeconomico.ts`). Business-to-business purchases (≈ 0,95 × GDP) and the used-housing price (200.000 €) are labelled estimates. The money is split per inhabitant within Spain at every scale, and Spain's continental and planetary shares are what Spain sends.
+
+## 2026-11-10 — One mailbox table for every project
+
+The third project mailbox would have been a third copy of the same table (`aeromovil_tareas`, `conciencia_comentarios`). Instead: `buzon_proyectos` with a `proyecto` key, accepted only if listed in `PROYECTOS` (`src/server/buzonProyectos.ts`). A new project's mailbox is one line there plus `<BuzonProyecto proyecto="…" />`. Same safeguards as the others: anyone writes, 20 an hour per IP, honeypot, 500 pending, level 4 to decide.
+
+## 2026-11-10 — Modelo socioeconómico: three tiers, thirds and support between scales (second round)
+
+Eugenio replaced the flat 20 % with **three tiers**: purchases 0 % (first necessity: water, energy, the home you live in, mobility), 20 % (second home, second vehicle…), 40 % (leisure, luxury); wages 0 % when a small company pays them, 20 % a medium one, 40 % a large one. He added: **every scale splits its eighth in thirds** (means of production, care, free); **help goes down and across** as loans at the CPI and one-off donations; **no constant pensions** except for people with a disability, in kind where possible.
+
+Where he did not say, the page decides and says so (all in `src/data/modeloSocioeconomico.ts`):
+- **Food, health and education are tier 1.** Asked; he gave no preference. Recommended option taken.
+- **Administrations pay 0 % on their own wages.** Taxing them would only move public money between scales. Alternative: treat them by size like any employer.
+- **Company size counted per group, EU thresholds (<50, 50–249, ≥250).** The page lists a marginal, IRPF-like version as an open path, because flat thresholds punish the 50th hire.
+- **The rate stays a share of the payment**, as the 20 % always was here: 40 % of a 40 € dinner goes to the fund. In VAT terms that is ≈ 67 % on top of the net price. Alternative: read the tiers as VAT-style rates on top. Not asked yet.
+- **Household spending by tier from EPF 2024 shares**, imputed rent (≈ 19 %, estimate) taken out; tourists' spending in Spain now counted (80 % of Egatur's 134.712 M€, mostly tier 3), since imputed rent no longer offsets it.
+- **Second home share 18 %** (Fotocasa: second residence 10 % + investment 8 %); **second vehicle ≈ 1,2 points** of household spending (estimate from census vehicle counts).
+- **Private wages by size 38/16/46 %** (Cifras PYME employment shares with higher pay in large firms; estimate). Public wages 181.494 M€ (IGAE via press).
+- **Elderly dependency counts as disability** for the only constant support.
+- In the literal reading, business-to-business purchases pay the general 20 %.
+
+Result (default reading): ≈ 275.600 M€, **16,3 % of GDP** (flat 20 % was 23 %), 701 € per person and scale. Shown openly with health/education cuts, the pension transition, size thresholds, the necessity/luxury line and hospitality at 40 % as open problems. A sandbox lets the reader reclassify the 14 spending groups.

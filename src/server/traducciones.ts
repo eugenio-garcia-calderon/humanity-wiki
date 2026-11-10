@@ -6,6 +6,7 @@ import { paginasDelPie } from './seoEscaparate';
 import { TRAMOS_RESERVADOS } from './rutasFila';
 import { MAPA_POR_DEFECTO, RECORRIDOS } from '../data/concienciaMapa';
 import { ESTUDIOS, LIBROS } from '../data/concienciaEstudios';
+import { AMBITOS, APOYOS, EMPLEADORES, ESCALAS, FUENTES, FUNCIONES, GRUPOS_GASTO, IMPUESTOS_HOY, MATRIZ, TERCIOS, TERCIOS_ESCALA, TRAMOS } from '../data/modeloSocioeconomico';
 
 // ============================================================================
 // UNA SOLA FUENTE, TODOS LOS IDIOMAS (2026-11-10, regla 11 de la Constitución)
@@ -264,6 +265,9 @@ async function recogerPublicado(db: any, s: SitioTraducido) {
   anadir(textosDe(RECORRIDOS), 'Esquema de la teoría sintérgica: recorridos', 'interfaz');
   anadir(textosDe(ESTUDIOS), 'Estudios sobre la conciencia', 'interfaz');
   anadir(textosDe(LIBROS), 'Libros de Grinberg', 'interfaz');
+  // The socioeconomic model page writes its scales, areas, matrix and sources in code; the rest of
+  // its text (sentences built with figures) reaches the list through the browser (`/api/traducciones/faltan`).
+  anadir(textosDe({ ESCALAS, AMBITOS, MATRIZ, IMPUESTOS_HOY, FUNCIONES, FUENTES, TRAMOS, EMPLEADORES, GRUPOS_GASTO, TERCIOS, TERCIOS_ESCALA, APOYOS }), 'Modelo socioeconómico optimizado', 'interfaz');
   return { textos, paginas };
 }
 

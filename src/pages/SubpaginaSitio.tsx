@@ -29,8 +29,10 @@ import type { ContextoRuta } from '../utils/precargado';
 // site pays for the map. Add an entry here, never a route in
 // AplicacionDeDominio (that would appear on every customer's domain).
 const Conciencia = lazy(() => import('./Conciencia'));
+const ModeloSocioeconomico = lazy(() => import('./ModeloSocioeconomico'));
 const APLICACIONES: Record<string, (p: { inicio: string }) => ReactNode> = {
   conciencia: ({ inicio }) => <Conciencia enSitio={{ inicio }} />,
+  'modelo-socioeconomico': ({ inicio }) => <ModeloSocioeconomico enSitio={{ inicio }} />,
 };
 
 export default function SubpaginaSitio({ propio, idFijo, contexto }: { propio: boolean; idFijo?: string; contexto?: ContextoRuta['contexto'] }) {
