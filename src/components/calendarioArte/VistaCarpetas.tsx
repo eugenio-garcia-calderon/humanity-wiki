@@ -38,6 +38,8 @@ interface Props {
   editando: boolean;
   alAbrir: (mes: number | null) => void;
   alGuardar: (mes: number, refs: Referencia[]) => Promise<boolean>;
+  /** Añade UNA imagen sin reescribir la lista (no pisa lo que otra persona añadió mientras tanto). */
+  alAnadir: (mes: number, ref: Referencia) => Promise<boolean>;
   alUsarIlustracion: (mes: number, url: string) => void;
   alCambiarMes: (mes: number, cambio: Partial<ContenidoMes>) => void;
   alVerMes: (mes: number) => void;
@@ -49,13 +51,19 @@ export function VistaCarpetas(p: Props) {
   return (
     <>
       {p.abierta === null ? <Rejilla {...p} /> : <Carpeta {...p} mes={p.abierta} verGrande={setGrande} />}
-      {grande && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/85 p-4" onClick={() => setGrande(null)}>
-          <img src={grande} alt="" className="max-h-full max-w-full object-contain" />
-          <Button variant="ghost" className="absolute right-4 top-4 bg-white/10 px-2 text-white hover:bg-white/20" aria-label="Cerrar"><X className="h-5 w-5" /></Button>
-        </div>
-      )}
+      {grande && <ImagenGrande url={grande} alCerrar={() => setGrande(null)} />}
     </>
+  );
+}
+
+/** Una imagen a pantalla completa; se cierra pinchando en cualquier sitio.
+ *  También la usa la carpetita de referencias bajo cada mes (`ReferenciasMes`). */
+export function ImagenGrande({ url, alCerrar }: { url: string; alCerrar: () => void }) {
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/85 p-4" onClick={alCerrar}>
+      <img src={url} alt="" className="max-h-full max-w-full object-contain" />
+      <Button variant="ghost" className="absolute right-4 top-4 bg-white/10 px-2 text-white hover:bg-white/20" aria-label="Cerrar"><X className="h-5 w-5" /></Button>
+    </div>
   );
 }
 
@@ -106,7 +114,7 @@ function Rejilla({ meses, carpetas, alAbrir }: Props) {
   );
 }
 
-function Carpeta({ meses, originales, carpetas, mes, editando, alAbrir, alGuardar, alUsarIlustracion, alCambiarMes, alVerMes, alPedirIA, verGrande }: Props & { mes: number; verGrande: (u: string) => void }) {
+function Carpeta({ meses, originales, carpetas, mes, editando, alAbrir, alGuardar, alAnadir, alUsarIlustracion, alCambiarMes, alVerMes, alPedirIA, verGrande }: Props & { mes: number; verGrande: (u: string) => void }) {
   const refs = carpetas[mes] ?? [];
   const m = mes > 0 ? meses[mes - 1] : null;
   const original = mes > 0 ? originales[mes - 1]?.imagen : undefined;
@@ -114,6 +122,7 @@ function Carpeta({ meses, originales, carpetas, mes, editando, alAbrir, alGuarda
   const [pedida, setPedida] = useState<'no' | 'enviando' | 'si'>('no');
 
   const guardar = (nuevas: Referencia[]) => alGuardar(mes, nuevas);
+  const anadir = (r: Referencia) => alAnadir(mes, r);
   const quitar = (url: string) => { if (confirm('¿Quitar esta imagen de la carpeta?')) guardar(refs.filter(r => r.url !== url)); };
   const anotar = (url: string, nota: string) => guardar(refs.map(r => r.url === url ? { ...r, nota: nota || undefined } : r));
 
@@ -170,22 +179,22 @@ function Carpeta({ meses, originales, carpetas, mes, editando, alAbrir, alGuarda
 
       {mes > 0 && (
         <Cajon titulo="Ilustraciones" ayuda="La que está en el calendario y otras versiones. Sube las ilustraciones a máxima calidad: es lo que va a imprenta."
-          items={ilustraciones} tipo="ilustracion" mes={mes} refs={refs} editando={editando} guardar={guardar} quitar={quitar} anotar={anotar} verGrande={verGrande}
+          items={ilustraciones} tipo="ilustracion" mes={mes} refs={refs} editando={editando} anadir={anadir} quitar={quitar} anotar={anotar} verGrande={verGrande}
           actual={m?.imagen} alUsar={url => alUsarIlustracion(mes, url)} />
       )}
       {mes > 0 && (
         <Cajon titulo="Bocetos" ayuda="Ideas de composición, a mano o digitales. Una foto de un dibujo en papel vale."
-          items={bocetos} tipo="boceto" mes={mes} refs={refs} editando={editando} guardar={guardar} quitar={quitar} anotar={anotar} verGrande={verGrande} />
+          items={bocetos} tipo="boceto" mes={mes} refs={refs} editando={editando} anadir={anadir} quitar={quitar} anotar={anotar} verGrande={verGrande} />
       )}
       <Cajon titulo="Referencias" ayuda={mes > 0 ? 'Imágenes de inspiración para este tema: estilo, colores, detalles.' : 'El estilo que comparten las doce ilustraciones: murales, paletas, artistas que nos inspiran.'}
-        items={referencias} tipo="referencia" mes={mes} refs={refs} editando={editando} guardar={guardar} quitar={quitar} anotar={anotar} verGrande={verGrande} />
+        items={referencias} tipo="referencia" mes={mes} refs={refs} editando={editando} anadir={anadir} quitar={quitar} anotar={anotar} verGrande={verGrande} />
     </div>
   );
 }
 
-function Cajon({ titulo, ayuda, items, tipo, refs, editando, guardar, quitar, anotar, verGrande, actual, alUsar }: {
+function Cajon({ titulo, ayuda, items, tipo, editando, anadir, quitar, anotar, verGrande, actual, alUsar }: {
   titulo: string; ayuda: string; items: { url: string; nota?: string; fija?: string }[]; tipo: TipoCarpeta; mes: number;
-  refs: Referencia[]; editando: boolean; guardar: (r: Referencia[]) => Promise<boolean>;
+  refs: Referencia[]; editando: boolean; anadir: (r: Referencia) => Promise<boolean>;
   quitar: (url: string) => void; anotar: (url: string, nota: string) => void; verGrande: (u: string) => void;
   actual?: string; alUsar?: (url: string) => void;
 }) {
@@ -196,17 +205,17 @@ function Cajon({ titulo, ayuda, items, tipo, refs, editando, guardar, quitar, an
   const subir = async (archivos: FileList | null) => {
     if (!archivos?.length) return;
     setError(null);
-    const nuevas: Referencia[] = [];
     let i = 0;
     for (const f of Array.from(archivos)) {
       i++;
       setSubiendo(`Subiendo ${i} de ${archivos.length}…`);
       const r = await subirImagenCalendario(f, { original: tipo === 'ilustracion' });
       if ('error' in r) { setError(`${f.name}: ${r.error}`); continue; }
-      nuevas.push({ url: r.url, tipo });
+      // One by one, appended on the server: rewriting the whole list from this
+      // tab would erase what someone else added since the page was opened.
+      await anadir({ url: r.url, tipo });
     }
     setSubiendo(null);
-    if (nuevas.length) await guardar([...refs, ...nuevas]);
   };
 
   return (

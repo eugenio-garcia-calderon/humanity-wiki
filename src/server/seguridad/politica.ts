@@ -169,6 +169,7 @@ const REVISADAS: Entrada[] = [
   // antes de cada cambio, freno por IP y hora, e imágenes solo subidas aquí.
   // Ver `src/server/calendarioArte.ts`.
   { m: 'PUT', ruta: '/api/calendario-arte/:anio/:mes', guardia: { tipo: 'publica', porque: 'Edición abierta del calendario (Eugenio, 2026-11-05). Copia en el historial antes de cada cambio y freno por IP.' } },
+  { m: 'POST', ruta: '/api/calendario-arte/:anio/:mes/referencias', guardia: { tipo: 'publica', porque: 'Añadir una imagen a la carpeta del mes (Eugenio, 2026-11-10: cualquiera con el enlace). Solo imágenes subidas aquí, se añade sin pisar las de otros, copia en el historial y freno por IP.' } },
   { m: 'PUT', ruta: '/api/calendario-arte/:anio/:mes/referencias', guardia: { tipo: 'publica', porque: 'Edición abierta del calendario. Solo imágenes subidas aquí; copia en el historial.' } },
   { m: 'DELETE', ruta: '/api/calendario-arte/:anio/:mes', guardia: { tipo: 'publica', porque: 'Volver al original; antes se guarda copia, así que se deshace con Restaurar.' } },
   { m: 'POST', ruta: '/api/calendario-arte/historial/:id/restaurar', guardia: { tipo: 'publica', porque: 'Deshacer lo que estropee alguien, también sin cuenta. Guarda copia de lo actual antes.' } },

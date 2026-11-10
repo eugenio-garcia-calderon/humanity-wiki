@@ -34,6 +34,7 @@ import { VistaPantalla } from '../components/calendarioArte/VistaPantalla';
 import { NuevoDiseno, AvisoDisenoListo, type EstadoRobot } from '../components/calendarioArte/NuevoDiseno';
 import { PanelIdeas, PanelPrincipios, PanelConocer, PanelHistorial } from '../components/calendarioArte/Paneles';
 import { VistaCarpetas } from '../components/calendarioArte/VistaCarpetas';
+import { ReferenciasMes } from '../components/calendarioArte/ReferenciasMes';
 import { BotonPropuesta } from '../components/calendarioArte/BotonPropuesta';
 import { TIPOGRAFIAS, TIPOGRAFIA_POR_DEFECTO, cargarTipografias, estiloTipografia, type EleccionTipografia } from '../components/calendarioArte/tipografias';
 import { HojaPortada, ALTO_PORTADA_MM } from '../components/calendarioArte/HojaPortada';
@@ -325,6 +326,35 @@ export default function CalendarioArte() {
     }
   };
 
+  /** Añade UNA imagen a la carpeta de un mes. El servidor la pone al final de
+   *  lo que haya en ese momento (no de lo que esta pestaña cree que hay), y
+   *  devuelve la carpeta entera: así se ve también lo que otros añadieron. */
+  const anadirReferencia = async (hoja: number, ref: Referencia): Promise<string | null> => {
+    try {
+      const r = await fetch(`/api/calendario-arte/${anio}/${hoja}/referencias`, {
+        method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(ref),
+      });
+      let j: any = {};
+      try { j = await r.json(); } catch { /* respuesta no JSON (proxy) */ }
+      if (!r.ok) return j?.error || 'No se ha podido guardar en la carpeta.';
+      setGuardados(prev => ({
+        ...prev,
+        [hoja]: { contenido: prev[hoja]?.contenido ?? {}, referencias: j.referencias ?? [...(prev[hoja]?.referencias ?? []), ref], version: prev[hoja]?.version ?? j.version ?? 0 },
+      }));
+      return null;
+    } catch {
+      return 'No hay conexión. Vuelve a probar en un momento.';
+    }
+  };
+  /** El «+» de la carpetita de referencias: sube la foto (comprimida, es para
+   *  inspirarse) y la añade. Si algo falla, el diálogo se queda abierto y lo dice. */
+  const subirReferencia = (hoja: number) => async (f: File): Promise<string | void> => {
+    const r = await subirImagenCalendario(f);
+    if ('error' in r) return r.error;
+    return (await anadirReferencia(hoja, { url: r.url, tipo: 'referencia' })) ?? undefined;
+  };
+
   const restaurarMes = async () => {
     if (!confirm(`¿Volver ${NOMBRES_MES[mes - 1]} al contenido original? Lo de ahora queda guardado en el Historial (la carpeta de referencias se conserva).`)) return;
     const r = await fetch(`/api/calendario-arte/${anio}/${mes}`, { method: 'DELETE', credentials: 'include' });
@@ -495,6 +525,16 @@ export default function CalendarioArte() {
     );
   }
 
+  /** La carpetita «Referencias» bajo la hoja de un mes (no se imprime: está fuera de la hoja). */
+  const referenciasDeMes = (m: number) => editando && (
+    <ReferenciasMes
+      nombreMes={NOMBRES_MES[m - 1].toLowerCase()}
+      referencias={(guardados[m]?.referencias ?? []).filter(r => (r.tipo ?? 'referencia') === 'referencia')}
+      alAnadir={subirReferencia(m)}
+      alAbrirCarpeta={() => irACarpeta(m)}
+    />
+  );
+
   /** Un botón del menú del proyecto. */
   const itemMenu = (activo: boolean, onClick: () => void, icono: React.ReactNode, texto: string) => (
     <Button variant={activo ? 'primary' : 'ghost'} onClick={() => { onClick(); setMenuMovil(false); }}
@@ -640,6 +680,11 @@ export default function CalendarioArte() {
             editando={puedeEditar}
             alAbrir={irACarpeta}
             alGuardar={(m, refs) => guardarReferencias(m)(refs)}
+            alAnadir={async (m, ref) => {
+              const fallo = await anadirReferencia(m, ref);
+              if (fallo) { setMensaje(fallo); setEstado('error'); }
+              return !fallo;
+            }}
             alUsarIlustracion={usarIlustracion}
             alCambiarMes={(m, c) => cambiar(m, c)}
             alVerMes={irAMes}
@@ -682,11 +727,15 @@ export default function CalendarioArte() {
                     </span>
                   </div>
                   <HojaEscalada>{hojaDeMes(m, true)}</HojaEscalada>
+                  {referenciasDeMes(m.mes)}
                 </section>
               ))}
             </div>
           ) : (
-            <HojaEscalada>{hojaDeMes(actual, false)}</HojaEscalada>
+            <>
+              <HojaEscalada>{hojaDeMes(actual, false)}</HojaEscalada>
+              {referenciasDeMes(actual.mes)}
+            </>
           )}
           <input ref={entradaImagen} type="file" accept="image/*" className="hidden" onChange={e => { subirIlustracion(e.target.files?.[0]); e.target.value = ''; }} />
         </div>

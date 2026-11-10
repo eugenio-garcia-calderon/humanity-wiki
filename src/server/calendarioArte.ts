@@ -253,6 +253,47 @@ export function registerCalendarioArteRoutes(app: Express, db: any) {
   });
 
   /**
+   * POST /api/calendario-arte/:anio/:mes/referencias — AÑADIR una imagen a la
+   * carpeta del mes (2026-11-10, Eugenio: «que cualquier persona con el link
+   * pueda agregar referencias en cada mes… con un más»).
+   *
+   * Why not the PUT below: the PUT replaces the whole list with what the
+   * browser believes the folder holds. With anyone able to add from any open
+   * tab, someone who opened the page an hour ago and adds one picture would
+   * silently erase every picture added since. Appending happens in the
+   * database, in one statement, so two people adding at once both keep theirs.
+   * Body: `{ url, tipo?, nota? }`, the same shape as one entry of the list.
+   */
+  app.post('/api/calendario-arte/:anio/:mes/referencias', async (req: Request, res: Response) => {
+    try {
+      const anio = anioValido(req.params.anio);
+      const mes = hojaValida(req.params.mes);
+      if (!anio || mes === null) return res.status(400).json({ error: 'Año o mes no válido.' });
+      const nueva = limpiarReferencias([req.body ?? {}])?.[0];
+      if (!nueva) return res.status(400).json({ error: 'Imagen no válida: tiene que estar subida desde el calendario.' });
+      if (!(await conRitmo(db, FRENO_ESCRITURA, req, res))) return;
+      await copiar(anio, mes, 'carpeta');
+      const r = await db.execute(sql`
+        INSERT INTO calendario_arte_meses (anio, mes, referencias, version, updated_by, updated_at)
+        VALUES (${anio}, ${mes}, ${JSON.stringify([nueva])}::jsonb, 0, ${req.user?.id ?? null}, now())
+        ON CONFLICT (anio, mes) DO UPDATE
+          SET referencias = CASE
+                WHEN calendario_arte_meses.referencias @> ${JSON.stringify([{ url: nueva.url }])}::jsonb
+                  THEN calendario_arte_meses.referencias
+                ELSE calendario_arte_meses.referencias || EXCLUDED.referencias END,
+              updated_by = EXCLUDED.updated_by, updated_at = now()
+          WHERE jsonb_array_length(calendario_arte_meses.referencias) < ${MAX_REFERENCIAS}
+        RETURNING mes, contenido, referencias, version, updated_at
+      `);
+      if (!r.rows[0]) return res.status(409).json({ error: `La carpeta de este mes está llena (máximo ${MAX_REFERENCIAS} imágenes). Quita alguna antes de añadir otra.` });
+      res.json(r.rows[0]);
+    } catch (e: any) {
+      console.error('calendario-arte añadir referencia:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /**
    * PUT /api/calendario-arte/:anio/:mes/referencias — la carpeta del mes.
    * Va aparte del contenido para que añadir una foto de referencia no choque
    * con alguien que está corrigiendo frases al mismo tiempo.
