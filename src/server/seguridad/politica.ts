@@ -114,6 +114,9 @@ const REVISADAS: Entrada[] = [
   { m: 'POST', ruta: '/api/sitio/opinion', guardia: { tipo: 'publica', porque: 'los visitantes de un sitio dejan sugerencias sin cuenta; entra como propuesta, con campo trampa y 5 envíos cada 10 minutos por IP' } },
   // Los formularios de un escaparate (2026-11-07, `formulariosSitio.ts`, migración 0175).
   { m: 'POST', ruta: '/api/sitio/:raiz/mensaje', guardia: { tipo: 'publica', porque: 'un visitante sin cuenta escribe para colaborar; solo raíces escaparate publicadas, campo trampa, tiempo mínimo, freno por IP en memoria (sin guardarla) y por sitio, y Origin de la propia web' } },
+  { m: 'POST', ruta: '/api/traducciones', guardia: { tipo: 'publica', porque: 'abre solo con la llave TRADUCCIONES_TOKEN; solo escribe traducciones de textos que ya están en la lista' } },
+  { m: 'POST', ruta: '/api/traducciones/interfaz', guardia: { tipo: 'publica', porque: 'abre solo con la llave TRADUCCIONES_TOKEN; solo apunta tareas de traducción' } },
+  { m: 'POST', ruta: '/api/traducciones/faltan', guardia: { tipo: 'publica', porque: 'el navegador avisa de textos sin traducir; acotado por dirección y con tope de tareas abiertas, y nada se publica sin traducir' } },
   { m: 'POST', ruta: '/api/sitio/:raiz/boletin', guardia: { tipo: 'publica', porque: 'alta en el boletín sin cuenta; queda pendiente hasta que se confirma desde el correo; mismas defensas que el mensaje' } },
   { m: 'POST', ruta: '/api/sitio/:raiz/boletin/confirmar', guardia: { tipo: 'publica', porque: 'abre solo con el testigo de 256 bits que llegó al correo (se guarda su huella)' } },
   { m: 'POST', ruta: '/api/sitio/:raiz/boletin/baja', guardia: { tipo: 'publica', porque: 'abre solo con el testigo de baja de los correos; también la baja en un clic del programa de correo (RFC 8058)' } },

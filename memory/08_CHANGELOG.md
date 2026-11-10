@@ -10822,6 +10822,43 @@ Eugenio: «Unifica los selectores de vehículos… deja solo el de arriba y deja
 - Un mapa guardado con el esquema viejo (`version` < 2) no se enseña: se ve el nuevo y el viejo queda en el historial. En producción no había ninguno guardado (comprobado: versión 0).
 - **Comprobado** en Chrome sin cabeza, con Postgres local y las migraciones 0179 y 0180: las tres animaciones paso a paso, el buzón (enviar y listar), arrastrar y guardar, y la vista a 1400 y 390 px. La 0181, en una réplica mínima de las tablas: crea la página, la fila y los dos enlaces, y es idempotente (dos pasadas, un solo proyecto); en una base sin esas tablas no hace nada.
 
+## 2026-11-10 — El menú de un sitio se pliega también cuando el logotipo horizontal llega tarde
+
+- Visto en solarcrowd.com nada más activar el logotipo horizontal: a unos 1.030 px de ancho, «Próximo préstamo» quedaba cortado por la derecha en vez de pasar a las tres rayas.
+- Por qué: el menú medía si cabía cuando cambiaba el ancho de la fila; un logotipo horizontal no tiene ancho fijo y lo toma cuando llega la imagen, y entonces cambia el ancho de los enlaces, no el de la fila. Ahora se vigilan los dos.
+- Comprobado: `tsc` y `vite build`. Sin verificar: en un móvil con la app instalada (en el teléfono el menú ya va plegado por CSS).
+
+### 2026-11-10 — Triciclo Bala, cuarto vehículo del editor
+Petición de Eugenio: una rama del Cuadriciclo Bala con tres ruedas, dos delante «como el Aptera» y una detrás en el eje, la misma forma, dos ocupantes con respaldos que se reclinan, y editable «como el Apterike» (carenado, chasis, asientos…).
+- **En el menú del logo** y en «Diseños», con su diseño base del equipo (migración 0182, como la 0178 del Cuadriciclo).
+- **La carrocería es la del Cuadriciclo**: por defecto, la misma vértice a vértice (40 mallas). Cambian las ruedas: dos delante en carenados que giran con ellas, sobre brazos carenados; una detrás dentro de la cola, con el motor en el buje. Donde iba la rueda delantera va la batería.
+- **Por departamentos**, como el Aeromóvil 1: Proyecto (resumen), Carrocería, Interior, Chasis, Rodaje, Motor y Energía; 55 deslizadores y 4 selectores, cada uno con su explicación. Fabricación, Accesos y Luces no salen (aquí no tienen nada que mover).
+- **Vuelco**: con dos a horcajadas y sentados altos, un triciclo con las dos ruedas delante vuelca en curva si la vía es estrecha. Por defecto pasa con 1,09 g (objetivo 1,05 g, umbrales elegidos por el bot y explicados en pantalla); para llegar hizo falta vía delantera de 1,80 m (1,96 m de ancho con los carenados), el eje delantero 30 cm más atrás que la rueda del Cuadriciclo, sillines 4 cm más bajos y la batería en el morro. Con vía de 1,40 m sale en rojo.
+- **Comprobaciones** nuevas: vuelco con dos y con el piloto solo, carenados girados a tope (28°), cabezas con el respaldo reclinado, alcance al manillar, bastidor dentro y su coeficiente de seguridad (×2,4), batería dentro, rueda trasera hundida. Reclinar al pasajero le quita techo (la cúpula baja detrás de él) y la pantalla lo dice.
+- **Cifras** por defecto: 178 kg sin ocupantes, Cd del túnel 0,134 (estimado, se calcula en segundo plano), 2,5 kWh/100 km a 80 km/h y 330 km con 9 kWh. Optimistas: el túnel ve los carenados delanteros solo como ruedas carenadas.
+- **En el 3D**: bastidor de tubos, batería, motor, suspensión y dirección en sus capas; «Girar ruedas» gira ruedas y carenados; «Rayos X», «Cotas», «Abrir cúpula». Planos y STEP no existen todavía (la pantalla lo dice); el STL sí.
+- **Túnel**: «Probar» y sus opciones con los deslizadores del Triciclo (alargar la cola 10 cm: Cd 0,134 → 0,130).
+- El pie de la página ya no dice «STEP generado con CadQuery» con el Cuadriciclo ni con el Triciclo, que no tienen STEP.
+- **Comprobado**: tsc; build; bala-huella IGUAL contra main (garaje y editor); bala-disenos; triciclo-disenos contra main (26 OK); triciclo-rangos (138 casos); tunel-pruebas sin fallos; navegador con gráficos por software y la API simulada. **Sin verificar**: un móvil o una gráfica de verdad con la app instalada, y el guardado contra el servidor real.
+
+### 2026-11-10 — Tarjetas de Luz & Humanidad: por categoría y con el texto sobre la imagen
+- Eugenio: la categoría, con su icono (`iconoCategoria.tsx`), va en la píldora blanca de arriba; las tarjetas se juntan por categoría, y el estado y el año solo se ven dentro del proyecto.
+- El título y la descripción van juntos sobre la imagen, en blanco y con sombra; la descripción, a dos líneas con puntos suspensivos; degradado casi negro abajo que se aclara hacia el centro.
+- Tres por fila, a casi todo el ancho del escritorio; lo de debajo de las tarjetas sigue en su columna. En el editor, la píldora cambia la categoría.
+
+### 2026-11-10 — El Triciclo Bala, diseño por defecto del Aeromóvil
+Petición de Eugenio: que al cargar /aeromovil aparezca el Triciclo Bala con su editor.
+- Migración 0185: el diseño base del equipo del Triciclo (0182) pasa a ser el diseño por defecto (la estrella); el que lo era deja de serlo. Se puede volver a mover la estrella desde el menú del logo.
+- Quien ya tenía un diseño abierto en su navegador lo seguía viendo al volver; ahora cada navegador abre una vez más el diseño por defecto (marca `aeromovil.inicio.triciclo`) y desde ahí abre lo último que tuvo. Un cambio sin guardar de quien no es el dueño se pierde esa vez.
+
+### 2026-11-10 — Una sola fuente, todos los idiomas: la base de lighthumanity.org
+- Eugenio: luzhumanidad.com es la fuente en español y lighthumanity.org su réplica en inglés, y Google debe saber que son la misma página. Regla 11 de la Constitución (v1.2).
+- `src/server/traducciones.ts`: el dominio traducido sirve las mismas páginas y cambia cada texto por el suyo. Diccionario y lista de tareas en `traducciones_textos`; `barrerTraducciones` apunta lo publicado cada 15 minutos.
+- Direcciones en inglés, `hreflang` recíproco en las dos webs, canónica propia, sitemap propio y selector de idioma en el pie, sin redirigir por idioma.
+- Lo escrito en el código (botones, esquemas) lo cambia `src/i18n/traductorDom.ts` y lo que falte lo avisa el navegador.
+- Sin IA de pago: traduce la sesión de trabajo una vez al día por la API con `TRADUCCIONES_TOKEN`.
+- lighthumanity.org sigue redirigiendo hasta que esté traducido: la migración que lo activa va en otro despliegue.
+
 ## 2026-11-10 — Modelo socioeconómico optimizado: nuevo proyecto en humanity.wiki y luzhumanidad.com
 
 - Eugenio: un modelo con **un solo impuesto del 20 % sobre cada transacción** (compra o sueldo), sin ningún otro, que el sistema de pago aparta al instante y reparte **2,5 % a cada una de ocho escalas**: persona, comunidad vecinal (o el hogar si no hay comunidad), municipio, provincia, región, nación, continente y planeta. En cada escala, una asamblea ciudadana elige prioridades y un comité técnico las ejecuta. Comparado con el sistema fiscal español.

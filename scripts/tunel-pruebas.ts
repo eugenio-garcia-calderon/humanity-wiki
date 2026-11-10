@@ -14,7 +14,7 @@ import { CONSTANTES, EXPOSICION, RUEDAS_GARAJE } from '../src/components/aeromov
 import { CALIBRACION } from '../src/components/aeromovil/tunel/calibracion';
 import { cuerpoAeromovil, peticionDe } from '../src/components/aeromovil/tunel/cuerpos';
 import { VEHICULOS_GARAJE } from '../src/components/aeromovil/garaje';
-import { PARAMETROS_A1, PARAMETROS_BALA, PARAMETROS_GOTA, ajustarCarenado, areas, calcular, crearModelo } from '../src/components/aeromovil/geometria';
+import { PARAMETROS_A1, PARAMETROS_BALA, PARAMETROS_GOTA, PARAMETROS_TRICICLO, ajustarCarenado, areas, calcular, crearModelo } from '../src/components/aeromovil/geometria';
 import { cuerpoGaraje } from '../src/components/aeromovil/tunel/cuerpos';
 
 let fallos = 0;
@@ -108,10 +108,10 @@ for (const [nI, nJ] of [[24, 12], [40, 16]]) {
     const sinEl = f.cerrado ? (() => { const a2 = ajustar(cerrados.filter(x => x.id !== f.id)); return f.base + a2.kb * f.b + CONSTANTES.K_RUEDA * f.r + a2.dd; })() : f.est;
     ok(!!g && Math.abs(g.estimado - f.est) < 0.002 && Math.abs(g.sinEl - sinEl) < 0.002 && g.publicado === f.pub, `${f.id}: la tabla guardada (${g?.estimado.toFixed(3)}, sin él ${g?.sinEl.toFixed(3)}) coincide con el cálculo (${f.est.toFixed(3)}, ${sinEl.toFixed(3)})`);
   }
-  // our design, the three vehicles (the Bala has no editor formula: its only Cd is the tunnel's)
-  for (const P0 of [PARAMETROS_A1, PARAMETROS_GOTA, PARAMETROS_BALA]) {
+  // our design, the four vehicles (the Bala and the Triciclo have no editor formula: their only Cd is the tunnel's)
+  for (const P0 of [PARAMETROS_A1, PARAMETROS_GOTA, PARAMETROS_BALA, PARAMETROS_TRICICLO]) {
     const m = crearModelo(ajustarCarenado(P0)), res = calcular(m, areas(m));
-    const c = cuerpoAeromovil(m, res.A), nombre = m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala' : 'Aeromóvil Gota';
+    const c = cuerpoAeromovil(m, res.A), nombre = m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala' : m.tipo === 'triciclo' ? 'Triciclo Bala' : 'Aeromóvil Gota';
     for (const resol of ['baja', 'media', 'alta'] as const) {
       const R = calcularTunel({ ...peticionDe(c, resol, 'normal') });
       const q = R.porVelocidad[1];
@@ -122,6 +122,20 @@ for (const [nI, nJ] of [[24, 12], [40, 16]]) {
       const g = cuerpoGaraje({ id: 'bala', x: 0, z: 0 })!;
       ok(JSON.stringify(g.envolvente) === JSON.stringify(c.envolvente) && g.area === c.area && g.n === c.n && JSON.stringify(g.ruedas) === JSON.stringify(c.ruedas),
         `el Bala del editor por defecto entra en el túnel igual que el del garaje (silueta, sección ${c.n}, área ${c.area.toFixed(3)} m², ruedas)`);
+    }
+    if (m.tipo === 'triciclo') {
+      // the Triciclo's body is the Cuadriciclo's: the same silhouette and area; its own three wheels, front axle and rear axle
+      const g = cuerpoGaraje({ id: 'bala', x: 0, z: 0 })!;
+      ok(JSON.stringify(g.envolvente) === JSON.stringify(c.envolvente) && g.area === c.area && g.n === c.n,
+        `el Triciclo por defecto entra en el túnel con la silueta y el área del Cuadriciclo (${c.area.toFixed(3)} m²)`);
+      ok(c.ruedas.length === 3 && c.ruedas.filter(r => r.tipo === 'carenado').length === 2 && Math.abs(c.ejes[0] - m.xF) < 1e-9 && Math.abs(c.ejes[1] - m.xR) < 1e-9,
+        `el Triciclo lleva tres ruedas (dos carenadas delante, eje en x = ${m.xF.toFixed(2)}; una dentro detrás, en x = ${m.xR.toFixed(2)})`);
+      // its results use the numbers-only run (in the background): it must give the Cd of the full run
+      for (const resol of ['baja', 'media'] as const) {
+        const a = calcularTunel({ ...peticionDe(c, resol, 'pocas'), soloNumeros: true }), b = calcularTunel({ ...peticionDe(c, resol, 'normal') });
+        ok(a.porVelocidad.every((q, i) => Math.abs(q.cd.total - b.porVelocidad[i].cd.total) < 1e-9),
+          `Triciclo (${resol}): el cálculo solo de cifras da el mismo Cd que el completo (${a.porVelocidad.map(q => q.cd.total.toFixed(3)).join(' / ')} a 50/80/120 km/h)`);
+      }
     }
   }
 }

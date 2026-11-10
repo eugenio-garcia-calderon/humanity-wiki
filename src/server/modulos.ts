@@ -63,6 +63,7 @@ import { registrarPlantillaFicha } from './bd/plantillaFicha.js';
 import { registerPublicarRoutes } from './publicar.js';
 import { registerHerramientasRoutes } from './herramientas.js';
 import { registerDominiosRoutes } from './dominios.js';
+import { registrarTraducciones } from './traducciones.js';
 import { registrarSitios } from './sitios.js';
 import { registrarBuscadorSitio } from './buscadorSitio.js';
 import { registrarRutasFila } from './rutasFila.js';
@@ -150,6 +151,8 @@ export const MODULOS: Modulo[] = [
         + 'y arranca en modo avisar: anota lo que habría rechazado y no rechaza nada. '
         + 'Se enciende con SEGURIDAD_MODO=exigir, sin desplegar. Ver src/server/seguridad/CLAUDE.md.',
   },
+  // Delante de las demás rutas: traduce lo que sale de las rutas de las tablas y los sitios hacia el dominio en otro idioma.
+  { nombre: 'traducciones', montar: (app, db) => registrarTraducciones(app, db) },
 
   {
     nombre: 'seguridad/transparencia',

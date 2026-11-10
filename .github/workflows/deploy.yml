@@ -141,6 +141,11 @@ jobs:
               echo "SMTP_USUARIO=${{ secrets.SMTP_USUARIO }}" >> .env.production
               echo "SMTP_CLAVE=$(echo '${{ secrets.SMTP_CLAVE }}' | tr -d ' ')" >> .env.production
             fi
+            # La llave de la lista de traducciones (`src/server/traducciones.ts`). Secreto de GitHub.
+            if [ -n "${{ secrets.TRADUCCIONES_TOKEN }}" ]; then
+              sed -i '/^TRADUCCIONES_TOKEN=/d' .env.production
+              echo "TRADUCCIONES_TOKEN=${{ secrets.TRADUCCIONES_TOKEN }}" >> .env.production
+            fi
             # ══ LAS LLAVES QUE HOY SOLO VIVEN EN EL SERVIDOR ═══════════════════
             # De las 27 variables del `.env.production`, este fichero solo sabía
             # reponer 7. Las otras 20 existen ÚNICAMENTE en ese fichero, en esa
