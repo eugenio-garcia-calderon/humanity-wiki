@@ -16,6 +16,7 @@ import { duplicarFila, eliminarFila, restaurarFila } from './accionesFila';
 import { tonosDeNota, textoNota, textoSobre } from '../../utils/nota';
 import NotaCirculo from '../sitio/NotaCirculo';
 import { miniatura } from '../../utils/miniatura';
+import TarjetaPortada, { CLASE_TARJETA_PORTADA, type EstadoTarjeta } from './TarjetaPortada';
 
 // ============================================================================
 // TABLAS · LA GALERÍA (2026-09-30)
@@ -73,7 +74,11 @@ const LETRA_NOMBRE: Record<TamanoGaleria, string> = {
   xxxs: 'text-[9px] leading-tight', xxs: 'text-[10px] leading-tight', xs: 'text-xs', pequeno: 'text-sm', mediano: 'text-base', grande: 'text-lg', 'muy-grande': 'text-xl',
 };
 
-export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, enCaja = false, conDescripcion = true, conImagen = true, filasMax = null, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla, listaEnMovil = false }: {
+export default function Galeria({ tarjetaPortada = false, tarjetasPorFila = 2, onNuevaPagina, celdasNueva, alCrearNueva, onGuardarCelda, recolocar, arrastrable, alSoltarEnGrupo, celdasAlRecibir, enCaja = false, conDescripcion = true, conImagen = true, filasMax = null, tablaId, columnas, filas, columnaTitulo, editable, onCambio, claseTitulo = '', tamano = 'mediano', tamanoNombre, nombreArriba = false, pesoNombre = 'negrita', visibles, sinMargen = false, centrada = false, carrusel = false, velocidad, ordenable = false, motivoSinOrden, tituloTabla, listaEnMovil = false }: {
+  /** Título en blanco sobre la imagen, con el estado encima (`TarjetaPortada.tsx`). */
+  tarjetaPortada?: boolean;
+  /** Con `tarjetaPortada`: cuántas por fila en pantalla ancha. */
+  tarjetasPorFila?: number;
   /** En vez de crear y abrir: lo que diga quien la usa (la vista enlazada abre su diálogo). */
   onNuevaPagina?: () => void;
   /** Lo que lleva una página nueva para nacer conectada (la vista enlazada, 2026-10-23). */
@@ -409,7 +414,8 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
   const chica = tamano === 'xs' || tamano === 'xxs' || tamano === 'xxxs';
   const minima = tamano === 'xxxs';
   // La lista del teléfono sólo para tarjetas que se leen (no miniaturas ni carrusel).
-  const enLista = listaEnMovil && !chica && !carrusel && !nombreArriba;
+  const conPortada = tarjetaPortada && !carrusel;
+  const enLista = listaEnMovil && !chica && !carrusel && !nombreArriba && !conPortada;
   // On a published site, cards from size S up are read, not managed: names at
   // 16 px and properties at 14 px (W2's 16 px audit, 2026-10-18; they were 12).
   // The editor keeps the compact sizes its users already lay pages out with.
@@ -421,6 +427,42 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
           const conMenu = (arrastrable ?? editable) && !sitio && !copia;
           const nombre = (colTitulo && formatear(f.celdas[colTitulo.id] ?? { estado: 'vacia' }, colTitulo))
             || f.pagina?.titulo || '';
+          // LA TARJETA CON EL TÍTULO SOBRE LA IMAGEN (2026-11-10): el estado es la selección «Estado»
+          // (o la primera), y debajo del título van el año y lo enlazado, de lo que la vista enseña.
+          const portadaEl = (() => {
+            if (!conPortada) return null;
+            const cEstado = otras.find(c => c.tipo === 'seleccion' && c.nombre === 'Estado') || otras.find(c => c.tipo === 'seleccion');
+            const opciones = (cEstado?.opciones || []) as EstadoTarjeta[];
+            const cFecha = otras.find(c => c.tipo === 'fecha');
+            const cRel = otras.find(c => c.tipo === 'relacion');
+            const estado = cEstado ? opciones.find(o => o.id === String((f.celdas[cEstado.id] as any)?.valor ?? '')) || null : null;
+            const ano = cFecha ? /\b(\d{4})\b/.exec(String((f.celdas[cFecha.id] as any)?.valor ?? ''))?.[1] : null;
+            const datos = [ano, ...(cRel ? (f.apuntados?.[cRel.id] || []).slice(0, 2).map((a: any) => a.etiqueta) : [])].filter(Boolean).join(' · ');
+            return (
+              <div className={CLASE_TARJETA_PORTADA}>
+                <TarjetaPortada nombre={nombre || 'Sin título'} imagen={f.pagina?.imagen} encuadre={f.pagina?.encuadre} descripcion={f.pagina?.descripcion}
+                  estado={estado} datos={datos} conDescripcion={conDescripcion} Titulo="p"
+                  edicion={onGuardarCelda && colTitulo ? {
+                    onNombre: v => onGuardarCelda(f.id, colTitulo.id, v),
+                    onDescripcion: async v => {
+                      const r = await fetch(`/api/bd/filas/${f.id}/subtitulo`, { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subtitulo: v }) });
+                      if (!r.ok) { setFallo('No se pudo guardar la descripción.'); return; }
+                      onCambio();
+                    },
+                    opciones,
+                    onEstado: cEstado ? id => onGuardarCelda(f.id, cEstado.id, id) : undefined,
+                  } : undefined}
+                  esquina={conMenu ? (
+                    <button type="button" aria-label="Más opciones" title="Más opciones" aria-haspopup="menu" aria-expanded={menu?.fila.id === f.id}
+                      onClick={e => { e.stopPropagation(); const r = e.currentTarget.getBoundingClientRect(); setMenu({ fila: f, x: r.right - 240, y: r.bottom + 4 }); }}
+                      onKeyDown={e => e.stopPropagation()}
+                      className="grid h-8 w-8 place-items-center rounded-lg border border-slate-200 bg-white/90 text-slate-600 shadow-sm hover:bg-white hover:text-slate-900">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </button>
+                  ) : undefined} />
+              </div>
+            );
+          })();
           const icono = f.pagina?.icono;
           // LA NOTA, GRANDE (2026-10-25, Eugenio): si la tarjeta enseña una
           // propiedad «Nota», la tarjeta se tiñe con su color (el del mapa) y la
@@ -549,6 +591,7 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
                     : cn('inset-x-0 h-1', destino.lado === 'antes' ? '-top-3' : '-bottom-3')
                 )} />
               )}
+              {portadaEl ? portadaEl : <>
               {nombreArriba && <div className="mb-2">{cabeceraEl}</div>}
               {/* CUADRADA Y SIN RECORTAR (2026-10-21, Eugenio): la imagen entera dentro de un cuadrado, con blanco arriba y abajo (o a los lados) si no es cuadrada. */}
               <div className={cn('relative bg-white border border-slate-100 rounded-xl overflow-hidden grid place-items-center transition-shadow group-hover:shadow-md', tonos ? 'aspect-[16/10] border-0' /* más bajas: tres filas en la pantalla */ : 'aspect-square', enLista && 'max-sm:w-28 max-sm:shrink-0 max-sm:aspect-square', !conImagen && 'hidden')}>
@@ -682,6 +725,7 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
                     onCambio={() => comparar.alternar(f.id, f.pagina_id!, nombreDe(f))} />
                 ) : null}
               </div>
+              </>}
             </div>
           );
   };
@@ -704,13 +748,16 @@ export default function Galeria({ onNuevaPagina, celdasNueva, alCrearNueva, onGu
           // grande, las columnas llenan el ancho y empiezan donde los filtros
           // (ronda 4: «la rejilla está más metida que la fila de filtros»).
           // `!` porque las columnas van en `style`.
+          conPortada && 'gap-6 max-sm:!grid-cols-1',
           enLista && 'max-sm:!grid-cols-1 max-sm:gap-y-4 sm:![grid-template-columns:repeat(auto-fill,minmax(220px,1fr))]')}
         onDragOver={(arrastrable ?? editable) && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; setEntrando(true); } } : undefined}
         onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setEntrando(false); }}
         onDrop={(arrastrable ?? editable) && !sitio ? e => { if (!arrastrada && esFilaAjena(e)) recibir(e, null); } : undefined}
         // En el recuadro de un grupo, las tarjetas llenan todo el ancho (2026-10-18,
         // Eugenio: «hay mucho espacio lateral no aprovechado»).
-        style={enCaja || centrada
+        style={conPortada
+        ? { gridTemplateColumns: `repeat(${Math.min(4, Math.max(1, tarjetasPorFila))}, minmax(0, 1fr))` }
+        : enCaja || centrada
         ? { gridTemplateColumns: `repeat(auto-fit, min(${anchoTarjeta(tamano)}px, 100%))`, justifyContent: 'center' }
         : { gridTemplateColumns: `repeat(auto-fill, minmax(min(${ANCHO_TARJETA[tamano] ?? 220}px, 100%), 1fr))` }}>
         {filasVis.slice(0, cuantas).map(f => tarjeta(f, false, (arrastrable ?? editable) && !sitio, ordenable && (arrastrable ?? editable) && !sitio))}

@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useSitio, type Sitio } from './ContextoSitio';
+import { TextoEnLinea } from '../tablas/TarjetaPortada';
 
 // ============================================================================
 // LA PRESENTACIÓN DE LA PORTADA (2026-11-07, luzhumanidad.com)
@@ -49,21 +50,24 @@ export function enlaceColabora(v: unknown, sitio: Sitio | null): { href: string;
   return null;
 }
 
-export default function PresentacionSitio({ cfg }: { cfg: any }) {
+export default function PresentacionSitio({ cfg, edicion }: { cfg: any; edicion?: { titular: string; onTitular: (v: string) => void } }) {
   const sitio = useSitio();
-  const titular = titularDe(cfg);
+  const titular = edicion ? edicion.titular || titularDe(cfg) : titularDe(cfg);
   const colabora = enlaceColabora(cfg?.sitio?.colabora, sitio);
   if (!titular && !colabora) return null;
 
   const boton = 'inline-flex h-11 shrink-0 items-center self-start rounded-full bg-slate-900 px-6 text-sm font-bold text-white outline-none transition-colors hover:bg-slate-700 focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 sm:self-auto';
   return (
     <section aria-label="Presentación" className="flex flex-col gap-4 pt-3 sm:flex-row sm:items-center sm:justify-between sm:gap-8 sm:pt-5">
-      {titular && (
+      {edicion ? (
+        <TextoEnLinea valor={titular} onGuardar={edicion.onTitular} etiqueta="Titular de la portada"
+          className="flex-1 text-[1.75rem] font-semibold leading-[1.15] tracking-tight text-slate-900 sm:text-[2.25rem]" />
+      ) : titular && (
         <p className="max-w-[34ch] text-[1.75rem] font-semibold leading-[1.15] tracking-tight text-slate-900 [text-wrap:balance] sm:max-w-none sm:text-[2.25rem]">
           {titular}
         </p>
       )}
-      {colabora && (colabora.fuera
+      {colabora && edicion ? <span className={boton}>Colaborar</span> : colabora && (colabora.fuera
         ? <a href={colabora.href} target="_blank" rel="noopener noreferrer" className={boton}>Colaborar</a>
         : <Link to={colabora.href} data-interno="" className={boton}>Colaborar</Link>)}
     </section>

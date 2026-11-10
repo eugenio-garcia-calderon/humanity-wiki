@@ -6,6 +6,8 @@ import { cn } from '../../utils/cn';
 import { fotoDePortada } from '../../utils/portadaPropia';
 import type { DatosPagina } from './CabeceraLectura';
 import type { Grupo } from './RedRelaciones';
+import { PildoraEstado, TextoEnLinea } from '../tablas/TarjetaPortada';
+import { ImageIcon } from 'lucide-react';
 
 // ============================================================================
 // LA CABECERA DE UN PROYECTO EN EL ESCAPARATE (2026-11-06, Eugenio en luzhumanidad.com)
@@ -24,23 +26,28 @@ type Tabla = { columnas: Columna[]; filas: Array<{ id: string; celdas: Record<st
 
 const EQUIPO = /equipo|personas/i;
 
-export default function CabeceraProyectoEscaparate({ pagina }: { pagina: DatosPagina }) {
+/** Lo que el editor le da para escribir encima (2026-11-10): se ve como al publicar y se edita ahí. */
+export type EdicionCabecera = { titulo: string; onTitulo: (v: string) => void; subtitulo: string; onSubtitulo: (v: string) => void; onPortada: () => void };
+
+export default function CabeceraProyectoEscaparate({ pagina, edicion }: { pagina: DatosPagina; edicion?: EdicionCabecera }) {
   const sitio = useSitio();
   const cfg: any = (pagina as any).config || {};
-  const fila = pagina.fila!;
+  const fila = pagina.fila || null;
+  const [colEstado, setColEstado] = useState<Columna | null>(null);
   const [estado, setEstado] = useState<Opcion | null>(null);
   const [ano, setAno] = useState<string | null>(null);
   const [grupos, setGrupos] = useState<Grupo[] | null>(null);
 
   useEffect(() => {
     let vivo = true;
-    fetch(`/api/bd/tablas/${encodeURIComponent(fila.tabla_id)}?lectura=1`, { credentials: 'include' })
+    if (fila) fetch(`/api/bd/tablas/${encodeURIComponent(fila.tabla_id)}?lectura=1`, { credentials: 'include' })
       .then(r => (r.ok ? r.json() : null)).then((t: Tabla | null) => {
         if (!vivo || !t) return;
         const f = t.filas.find(x => x.id === fila.fila_id);
         if (!f) return;
         const cEstado = t.columnas.find(c => c.tipo === 'seleccion' && c.nombre === 'Estado') || t.columnas.find(c => c.tipo === 'seleccion');
         const cFecha = t.columnas.find(c => c.tipo === 'fecha' && c.nombre === 'Fecha Inicio') || t.columnas.find(c => c.tipo === 'fecha');
+        if (cEstado) setColEstado(cEstado);
         if (cEstado) setEstado(cEstado.opciones?.find(o => o.id === String(f.celdas[cEstado.id]?.valor || '')) || null);
         const m = cFecha ? /\b(\d{4})\b/.exec(String(f.celdas[cFecha.id]?.valor ?? '')) : null;
         setAno(m ? m[1] : null);
@@ -48,9 +55,14 @@ export default function CabeceraProyectoEscaparate({ pagina }: { pagina: DatosPa
     fetch(`/api/bd/paginas/${encodeURIComponent(pagina.id)}/red`, { credentials: 'include' })
       .then(r => (r.ok ? r.json() : null)).then(j => { if (vivo) setGrupos((j?.grupos || []).filter((g: Grupo) => g.entradas.length)); }).catch(() => {});
     return () => { vivo = false; };
-  }, [pagina.id, fila.tabla_id, fila.fila_id]);
+  }, [pagina.id, fila?.tabla_id, fila?.fila_id]);
 
-  const enlace = (id: string | null) => (id ? (sitio ? sitio.enlacePagina(id) : `/p/${id}`) : '#');
+  const cambiarEstado = async (id: string | null) => {
+    if (!fila || !colEstado) return;
+    setEstado(colEstado.opciones?.find(o => o.id === id) || null);
+    await fetch(`/api/bd/filas/${encodeURIComponent(fila.fila_id)}`, { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ celdas: { [colEstado.id]: id } }) }).catch(() => null);
+  };
+  const enlace = (id: string | null) => (id ? (edicion ? `/paginas/${id}` : sitio ? sitio.enlacePagina(id) : `/p/${id}`) : '#');
   const equipo = grupos?.find(g => EQUIPO.test(g.nombre)) || null;
   const resto = (grupos || []).filter(g => g !== equipo);
   // UNA PORTADA QUE ES UN VÍDEO (2026-11-07): en su lugar, la primera foto propia de la página
@@ -67,26 +79,31 @@ export default function CabeceraProyectoEscaparate({ pagina }: { pagina: DatosPa
         {/* Una franja baja (2026-11-06, Eugenio: «las portadas siguen siendo muy grandes; en cuanto
             pinchas, más pequeñito»): 16:9 en el móvil, 3:1 en tableta y 4:1 en pantalla ancha
             (unos 220 px de alto), para que la nota de prensa empiece en la primera pantalla. */}
-        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-slate-100 sm:aspect-[3/1] lg:aspect-[4/1]">
+        <div className={cn('relative w-full overflow-hidden rounded-2xl bg-slate-100', edicion ? 'flex min-h-[220px] flex-col justify-end' : 'aspect-[16/9] sm:aspect-[3/1] lg:aspect-[4/1]')}>
           {portada && (
             <img src={miniatura(portada.url, 800)} alt={portada.alt || (typeof cfg.subtitulo === 'string' && cfg.subtitulo.trim() ? `${pagina.titulo}: ${cfg.subtitulo.trim()}` : pagina.titulo)} fetchPriority="high" decoding="async"
               className="absolute inset-0 h-full w-full object-cover"
               style={enc ? { objectPosition: `${enc.x ?? 50}% ${enc.y ?? 50}%` } : undefined} />
           )}
           <div aria-hidden className="absolute inset-x-0 bottom-0 h-full bg-gradient-to-t from-black/75 via-black/30 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-end justify-between gap-2 p-4 sm:p-5">
-            <div data-fondo-oscuro="" className="min-w-0 max-w-3xl">
-              <h1 className="text-2xl font-black leading-tight tracking-tight text-white [text-shadow:0_2px_10px_rgba(0,0,0,0.45)] sm:text-3xl">{pagina.titulo}</h1>
-              {typeof cfg.subtitulo === 'string' && cfg.subtitulo.trim() && <p className="mt-1 max-w-2xl text-sm font-medium leading-snug text-white/90 [text-shadow:0_1px_6px_rgba(0,0,0,0.5)]">{cfg.subtitulo.trim()}</p>}
+          {edicion && (
+            <button type="button" onClick={edicion.onPortada} className="absolute right-3 top-3 z-10 inline-flex h-8 items-center gap-1.5 rounded-full bg-white/90 px-3 text-xs font-bold text-slate-700 shadow-sm backdrop-blur hover:bg-white">
+              <ImageIcon className="h-3.5 w-3.5" aria-hidden /> {portada ? 'Cambiar portada' : 'Añadir portada'}
+            </button>
+          )}
+          {/* Al editar, la franja crece con lo que se escribe: un texto largo no se sale por arriba. */}
+          <div className={cn('flex flex-wrap items-end justify-between gap-2 p-4 sm:p-5', edicion ? 'relative pt-14 sm:pt-14' : 'absolute inset-x-0 bottom-0')}>
+            <div data-fondo-oscuro="" className={cn('min-w-0 max-w-3xl', edicion && 'w-full')}>
+              {edicion
+                ? <TextoEnLinea valor={edicion.titulo} onGuardar={edicion.onTitulo} etiqueta="Título" obligatorio className="text-2xl font-black leading-tight tracking-tight text-white [text-shadow:0_2px_10px_rgba(0,0,0,0.45)] sm:text-3xl" />
+                : <h1 className="text-2xl font-black leading-tight tracking-tight text-white [text-shadow:0_2px_10px_rgba(0,0,0,0.45)] sm:text-3xl">{pagina.titulo}</h1>}
+              {edicion
+                ? <TextoEnLinea valor={edicion.subtitulo} onGuardar={edicion.onSubtitulo} etiqueta="Descripción" ayuda="Añadir una descripción" maximo={300} className="mt-1 text-sm font-medium leading-snug text-white/90 placeholder:text-white/70 [text-shadow:0_1px_6px_rgba(0,0,0,0.5)]" />
+                : typeof cfg.subtitulo === 'string' && cfg.subtitulo.trim() && <p className="mt-1 max-w-2xl text-sm font-medium leading-snug text-white/90 [text-shadow:0_1px_6px_rgba(0,0,0,0.5)]">{cfg.subtitulo.trim()}</p>}
             </div>
             <div className="flex shrink-0 items-center gap-2">
               {ano && <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-slate-700 shadow-sm backdrop-blur">{principal ? `Desde ${ano}` : ano}</span>}
-              {estado && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-slate-700 shadow-sm backdrop-blur">
-                  <span aria-hidden className="h-2 w-2 rounded-full" style={{ background: estado.color || '#94a3b8' }} />
-                  {estado.label}
-                </span>
-              )}
+              <PildoraEstado estado={estado} opciones={colEstado?.opciones} onCambiar={edicion && colEstado ? cambiarEstado : undefined} className="px-3 py-1 text-xs" />
             </div>
           </div>
         </div>

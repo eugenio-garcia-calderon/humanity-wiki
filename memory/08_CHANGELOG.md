@@ -10801,3 +10801,10 @@ Eugenio: «Unifica los selectores de vehículos… deja solo el de arriba y deja
 ### 2026-11-10 — Las páginas con título largo o con signos ya no dan 404 en el dominio propio
 - Un proyecto nuevo sin nombre corto se abre por su título (`porContexto`, `sitios.ts`). `slugDe` recorta a 60 letras y quita los signos de los extremos, pero el LIKE que busca el título exigía coincidir entero: «Competición para el desarrollo de un Vehículo Eficiente y Solar de código abierto» daba 404.
 - `patronDeTitulo` (`rutasFila.ts`) lo busca abierto por los dos lados; la comparación exacta sigue siendo con `slugDe`, y primero van los títulos más cortos para que no se quede fuera del límite de candidatas.
+
+### 2026-11-10 — El editor enseña lo que se publica, y la tarjeta de Luz sirve para cualquier galería
+- Eugenio: «que el cómo se ve la página publicada sea igual a cómo se gestiona desde el editor» y «que sea configurable para replicarlo».
+- `TarjetaPortada.tsx`: la misma tarjeta (título blanco sobre la imagen, estado encima, año y área debajo, descripción) en la portada del escaparate y en cualquier galería. En la vista: «Diseño de tarjeta» y «Tarjetas por fila» (`config.tarjeta`, `config.por_fila`).
+- En el editor, título, descripción y estado se escriben en la propia tarjeta. Nuevo `PUT /api/bd/filas/:id/subtitulo` para la descripción.
+- La portada de un escaparate se edita tal como se ve (`VistaProyectosSitio` con `edicion`), con titular y «Añadir proyecto»; «Ver los bloques de la página» enseña lo de debajo.
+- Los proyectos del escaparate llevan en el editor su cabecera pública; cualquier otra página puede pedirla con «Título sobre la imagen» (`cabecera.estilo = 'portada'`). Propiedades y relaciones quedan plegadas debajo.
