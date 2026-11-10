@@ -13,7 +13,7 @@
  *    checks warn about on screen.
  */
 import { PARAMETROS_TRICICLO, areas, calcular, crearModelo, type Parametros } from '../src/components/aeromovil/geometria';
-import { SELECTORES_TRICICLO, camposTriciclo, deslizadoresTriciclo, rangoTriciclo, type ModeloTriciclo } from '../src/components/aeromovil/geometriaTriciclo';
+import { SELECTORES_TRICICLO, camposTriciclo, deslizadoresTriciclo, estirarTriciclo, largoTriciclo, rangoTriciclo, type ModeloTriciclo } from '../src/components/aeromovil/geometriaTriciclo';
 import { construirCon, crearMateriales } from '../src/components/aeromovil/garaje/balaModelo';
 import * as THREE from 'three';
 
@@ -34,7 +34,8 @@ function pielSana(m: ModeloTriciclo): string | null {
     for (let k = p.length / 2 - 2; k > 0; k--) pts.push([-p[2 * k], p[2 * k + 1]]);
     if (pts.some(q => !Number.isFinite(q[0]) || !Number.isFinite(q[1]))) return `NaN en x = ${x.toFixed(2)}`;
     const yb = Math.min(...pts.map(q => q[1])), yt = Math.max(...pts.map(q => q[1]));
-    if (!(yt > yb + 0.01)) return `sección sin altura en x = ${x.toFixed(2)}`;
+    // (round two: a 1 m needle nose is under 1 cm tall 1 cm from its tip, so only a flat section fails)
+    if (!(yt > yb + 0.002)) return `sección sin altura en x = ${x.toFixed(2)}`;
     const n = pts.length;
     for (let i = 0; i < n; i++) for (let j = i + 2; j < n; j++) {
       if (i === 0 && j === n - 1) continue;
@@ -45,7 +46,7 @@ function pielSana(m: ModeloTriciclo): string | null {
 }
 /** Each front pod's group and its wheel's group stand on the same vertical axis (x, z), so they turn together. */
 function mismoEje(m: ModeloTriciclo): string | null {
-  const g = construirCon(m.F, { M, calidad: 'rapida', cupulaAparte: true, asientos: m.sillines, aleta: m.aleta, triciclo: { recPil: m.rec.piloto, recPas: m.rec.pasajero, man: m.man, pies: m.pies, faldon: m.faldon } });
+  const g = construirCon(m.F, { M, calidad: 'rapida', cupulaAparte: true, asientos: m.sillines, aleta: m.aleta, triciclo: { recPil: m.rec.piloto, recPas: m.rec.pasajero, man: m.man, pies: m.pies, faldon: m.faldon, ventanas: m.opcVentanas } });
   const pods: THREE.Object3D[] = [], ruedas: THREE.Object3D[] = [];
   g.traverse(o => { if (o.name === 'carenado' && o.userData.lado) pods.push(o); if (o.name === 'rueda-direccion') ruedas.push(o); });
   if (pods.length !== 2 || ruedas.length !== 2) return `${pods.length} carenados y ${ruedas.length} ruedas que giran (deberían ser 2 y 2)`;
@@ -108,6 +109,30 @@ probar('manillar y plataformas en los extremos (2)', { ...PARAMETROS_TRICICLO, t
 probar('tubos gruesos, carrocería estrecha y baja', { ...PARAMETROS_TRICICLO, tChD: 60, tAncho: 0.77, tSuelo: 0.09 });
 probar('basculante corto y largo con la rueda grande', { ...PARAMETROS_TRICICLO, tBasculante: 0.40, tRuedaTras: '26', tRecTras: 110 });
 probar('pasajero lo más atrás, cola corta', { ...PARAMETROS_TRICICLO, tPasX: 1.80, tCola: 0.45, tBatalla: 2.20 });
+
+// round two (2026-11-10): the wider ranges at their extremes, together
+const GRANDE = { tAncho: 1.30, tBatalla: 3.20, tMorro: 1.00, tCola: 1.20, tCupFin: 2.90, tVia: 2.40, tKWNom: 30, tKWPico: 60, tKWh: 30, tRuedaDel: 'c15', tRuedaTras: 'c15' };
+const BAJO = { tSuelo: 0.04, tAlto: 1.15, tPilY: 0.30, tPasY: 0.34, tRecPil: 35, tRecPas: 35, tManX: 0.25 };
+probar('grande: lo más ancho, largo, potente, ruedas de 15″', { ...PARAMETROS_TRICICLO, ...GRANDE } as Parametros);
+probar('grande y además bajo', { ...PARAMETROS_TRICICLO, ...GRANDE, ...BAJO } as Parametros);
+probar('bajo: panza y cúpula al mínimo, reclinados', { ...PARAMETROS_TRICICLO, ...BAJO });
+probar('bajo y estrecho, con ruedas de 28″', { ...PARAMETROS_TRICICLO, ...BAJO, tAncho: 0.77, tRuedaDel: '28', tRuedaTras: '28' });
+probar('ancho y bajo, ruedas de coche, vía mínima, giro máximo', { ...PARAMETROS_TRICICLO, tAncho: 1.30, tSuelo: 0.04, tRuedaDel: 'c15', tRuedaTras: 'c13', tVia: 1.40, tGiro: 38, tPodEsc: 1.1, tPodCola: 1.3 });
+probar('ruedas de coche, carenados al mínimo', { ...PARAMETROS_TRICICLO, ...extremo(0, CARENADOS), tRuedaDel: 'c14', tRuedaTras: 'c14' });
+probar('largo al máximo, corto al mínimo de batalla', { ...PARAMETROS_TRICICLO, tMorro: 1.00, tCola: 1.20, tBatalla: 2.20 });
+probar('batería de 30 kWh, carrocería de serie', { ...PARAMETROS_TRICICLO, tKWh: 30, tWhL: 160 });
+probar('batería de 30 kWh, estrecha y con la panza alta', { ...PARAMETROS_TRICICLO, tKWh: 30, tWhL: 160, tAncho: 0.77, tSuelo: 0.158, tMorro: 0.45 });
+probar('batería de 30 kWh, ancha y de morro largo', { ...PARAMETROS_TRICICLO, tKWh: 30, tWhL: 300, tAncho: 1.30, tMorro: 1.00 });
+probar('60 kW en una rueda de 16″ con la batería al máximo', { ...PARAMETROS_TRICICLO, tKWNom: 30, tKWPico: 60, tRuedaTras: '20', tKWh: 30 });
+{
+  // «Largo total»: both ends of its slider, and it moves only nose, wheelbase, tail and the canopy's end
+  const lg = largoTriciclo(T0);
+  for (const [n, v] of [['mín.', lg.min], ['máx.', lg.max]] as const) {
+    const o = estirarTriciclo(T0, v), claves = Object.keys(o).sort().join(',');
+    if (claves !== 'tBatalla,tCola,tCupFin,tMorro') { console.log(`FALLA largo total ${n}: cambia ${claves}`); fallos++; }
+    probar(`largo total ${n} (${v.toFixed(2)} m)`, { ...PARAMETROS_TRICICLO, ...o });
+  }
+}
 
 console.log(`\n${casos} casos, ${fallos ? `${fallos} con fallos` : 'todos OK'}`);
 if (fallos) process.exitCode = 1;

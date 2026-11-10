@@ -153,6 +153,8 @@ export function traducirHtml(html: string, host: string): string {
       return trozo;
     }
     return trozo
+      // El «es_ES» que traen los datos de la página: cada dominio traducido ya declara el suyo.
+      .replace(/<meta property="og:locale" content="es_ES">\s*/g, '')
       .replace(/>([^<>]*\p{L}[^<>]*)</gu, (t, texto: string) => { const n = sinEntidades(texto); const c = cambiar(n); return c === n ? t : `>${conEntidades(c)}<`; })
       .replace(/\b(alt|title|aria-label|placeholder|content)="([^"]*\p{L}[^"]*)"/gu, (t, a: string, v: string) => { const n = sinEntidades(v); const c = cambiar(n); return c === n ? t : `${a}="${conEntidades(c)}"`; })
       .replace(/\bhref="(\/[^"?#]*|https:\/\/[^"]*)"/g, (t, v: string) => { const c = cambiar(v); return c === v ? t : `href="${conEntidades(c)}"`; });

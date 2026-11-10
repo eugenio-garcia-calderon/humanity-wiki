@@ -1104,7 +1104,7 @@ function repartirBala(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THRE
 function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THREE.Group[]>, M: Mats, Mb: ReturnType<typeof materialesBala>, m: ModeloTriciclo, calidad: 'completa' | 'rapida', sinPasajero: boolean) {
   for (const c of CAPAS) vaciar(G[c.k]);
   puertasG.clear();
-  const b = construirBalaCon(m.F, { M: Mb, calidad, cupulaAparte: true, asientos: m.sillines, aleta: m.aleta, triciclo: { recPil: m.rec.piloto, recPas: m.rec.pasajero, man: m.man, pies: m.pies, faldon: m.faldon } });
+  const b = construirBalaCon(m.F, { M: Mb, calidad, cupulaAparte: true, asientos: m.sillines, aleta: m.aleta, triciclo: { recPil: m.rec.piloto, recPas: m.rec.pasajero, man: m.man, pies: m.pies, faldon: m.faldon, ventanas: m.opcVentanas } });
   repartirBala(G, puertasG, b);
   for (const t of m.tubos) { if (t.curva) tuboCurvo(G.chasis, t.curva, t.d, M.alu); else tube(G.chasis, t.a, t.b, t.d, M.alu); }
   for (const c of m.baterias) cajaRedonda(G.baterias, [(c.x0 + c.x1) / 2, (c.y0 + c.y1) / 2, 0], [c.x1 - c.x0, c.y1 - c.y0, 2 * c.hz], M.batt, 0.015);
@@ -1773,7 +1773,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     // The editor's Bala: its paint (and everything painted on it) goes see-through, the inner skin disappears;
     // «Corte» cuts every one of its materials at the centre plane, so the cockpit shows.
     const Mb = st.Mb as ReturnType<typeof materialesBala>;
-    for (const mt of [Mb.chapa, Mb.marino, Mb.chapaDoble, Mb.marinoDoble, Mb.chapaCalco, Mb.marinoCalco, Mb.rojo, Mb.rojoDoble, Mb.rojoPieza, Mb.junta, Mb.negroBrillo, Mb.negroMate, Mb.grisOscuro]) {
+    for (const mt of [Mb.chapa, Mb.marino, Mb.chapaDoble, Mb.marinoDoble, Mb.chapaCalco, Mb.marinoCalco, Mb.rojo, Mb.rojoDoble, Mb.rojoPieza, Mb.junta, Mb.negroBrillo, Mb.negroMate, Mb.grisOscuro, Mb.solar]) {
       mt.transparent = rayosX; mt.opacity = rayosX ? 0.16 : 1; mt.depthWrite = !rayosX;
     }
     Mb.forro.visible = !rayosX;

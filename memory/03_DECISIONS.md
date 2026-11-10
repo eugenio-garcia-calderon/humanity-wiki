@@ -1322,6 +1322,21 @@ The default is data (`por_defecto`, migration 0185), not code, so the owner's st
 
 Another session had claimed 0182 (`prestamos_firmados`) and Eugenio asked to move ours. Ours was already applied in production as `0182_aeromovil_triciclo_base.sql`; renamed to 0186 it runs once more on the next deploy and inserts nothing (WHERE NOT EXISTS). 0185 depends on the row, which already exists. Exception to drizzle/CLAUDE.md «renaming an applied migration is worse than the duplicate», safe only because the file is idempotent.
 
+### 2026-11-10 — Triciclo Bala round two: solar roof and window frames as overlays on the canopy glass
+
+Context: Eugenio asked for a solar roof up to the pilot's head and Aptera-style side windows with a curved A-pillar, "keeping the curvature".
+Decision: the canopy's shape and its glass mesh are untouched. The panel and the frames are separate meshes laid 1.5 mm over the glass surface, addressed in the skin's own (x, t) coordinates (`ventanasDe`, `bandaMarco` in `garaje/balaMedidas.ts`; meshes in `garaje/balaModelo.ts`). The roof rail is a fixed fraction of the glass side band, tR = tC + alto·(1 − tC), so the side window closes in a teardrop at both canopy ends without extra rules. The pillar centre line is a quarter ellipse in (x, height between the glass edge and the rail): vertical at the glass edge, tangent to the rail at the top.
+Alternatives: (a) splitting the glass grid into material groups by cell — exact areas but a jagged curved pillar unless the grid is re-laid around it, and it would change the glass mesh the Cuadriciclo shares; (b) new glass outline curves in the band layout of the skin — the right long-term pattern if windows are to open separately, ~1 day.
+Mass accounting: the panel area counts as panel and as body laminate (the A1's convention); the frame area as laminate; both leave the glass.
+
+### 2026-11-10 — Triciclo Bala: hub motor limit is a check, not a different drive
+
+A hub motor is credible up to roughly 10–12 kW peak in a moped wheel and 35–60 kW in 13–15″ car rims (QS 273, Elaphe M700 as references). Above that, the honest drive is a motor on the swing arm with a belt; that is not modelled. The page and a check ("Motor de buje: potencia que cabe en la rueda trasera") say so instead of silently drawing an impossible hub. Motor and controller mass ranges depend on peak power.
+
+### 2026-11-10 — Triciclo Bala: «Largo total» stretches the body, it does not scale the vehicle
+
+An overall scale would also scale the riders, handlebar and seats, which is not what "make it bigger" means for people. «Largo total» shares a length change among nose, wheelbase and tail in proportion to each one's remaining room and moves the canopy's end with the rear axle; it has no stored field of its own.
+
 ## 2026-11-10 — Formalizing a loan: one contract function, the block as the source of truth, files kept private
 
 Eugenio asked for a «Realizar préstamo» flow on solarcrowd.com: lender's details, conditions with a signature, transfer receipt, and a copy of what was signed mailed to the lender.
