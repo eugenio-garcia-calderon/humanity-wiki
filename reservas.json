@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "src/server/traducciones.ts",
+      "motivo": "Modelo socioeconómico: register the new tier, thirds and support texts in the translation sweep",
+      "desde": "2026-11-10T12:56:54.165Z"
+    }
+  ]
 }
