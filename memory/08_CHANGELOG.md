@@ -10788,3 +10788,9 @@ Eugenio: «Unifica los selectores de vehículos… deja solo el de arriba y deja
 - **Código (este PR):** nuevo interruptor «Logotipo horizontal (con el nombre dentro, sin recortar)» en el creador del menú y del pie (`menu.logoHorizontal`, `pie.logoHorizontal`). Con él, el logotipo se ve entero a la altura del menú (hasta 6:1) en vez de recortado en un cuadrado de 36 px, lleva el nombre de la web como texto alternativo y el pie no repite el nombre al lado. Apagado por defecto: ningún sitio que ya existía cambia.
 - **Datos (producción, hechos con la sesión de Eugenio, sin código):** el sitio SolarCrowd. Página raíz `KWMWAFZMATPX` (publicada, `solarcrowd.humanity.wiki` activo, `solarcrowd.com` pendiente de DNS); base de datos «Préstamos SolarCrowd» `BDTMWAFL7L4XKCM` con 18 préstamos (17 financiados y «Hogar de ASNUCI en Lepe», próximamente), cada uno con su página; subpáginas «Modelos de contrato» (`KWMWAFZMFGD5`), «Riesgos y garantías» (`KWMWAFZMJ7BH`) y «Solicita un préstamo» (`KWMWAFZMMUHY`). Los contratos (Word y PDF) están en `/uploads/2026/11/`. Las fotos son las que ya estaban en las páginas de luzhumanidad.com.
 - **Comprobado:** `tsc`, `vite build` y el marcado del menú y del pie con y sin el interruptor (`renderToStaticMarkup`). **Sin verificar:** el móvil con la app instalada.
+
+## 2026-11-10 — El menú de un sitio se pliega también cuando el logotipo horizontal llega tarde
+
+- Visto en solarcrowd.com nada más activar el logotipo horizontal: a unos 1.030 px de ancho, «Próximo préstamo» quedaba cortado por la derecha en vez de pasar a las tres rayas.
+- Por qué: el menú medía si cabía cuando cambiaba el ancho de la fila; un logotipo horizontal no tiene ancho fijo y lo toma cuando llega la imagen, y entonces cambia el ancho de los enlaces, no el de la fila. Ahora se vigilan los dos.
+- Comprobado: `tsc` y `vite build`. Sin verificar: en un móvil con la app instalada (en el teléfono el menú ya va plegado por CSS).
