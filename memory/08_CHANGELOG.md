@@ -10861,3 +10861,10 @@ Petición de Eugenio: que al cargar /aeromovil aparezca el Triciclo Bala con su 
 
 ### 2026-11-10 — Proyectos que nos inspiran
 - Eugenio: una sección antes del pie con una base de datos de proyectos de otras personas y organizaciones, en una sola línea con slider. Tabla «Proyectos que nos inspiran» (`sitio.inspiran`) con Our World in Data, Robodienst, World Solar Challenge y Shell Eco-marathon; `InspiranSitio.tsx`. Entra también en la lista de traducción de lighthumanity.org.
+
+## 2026-11-10 — Las subpáginas de un dominio propio abren también con «www.»
+
+- Eugenio, con una captura de `www.solarcrowd.com/prestamos/hogar-de-asnuci-en-lepe`: «algo está fallando en las páginas de cada proyecto».
+- Causa: el dominio se guarda sin `www.` (`normalizarDominio`) y Caddy sirve las dos formas, pero `sitioDe` buscaba el anfitrión tal cual llegaba. Con `www.`, `dominioApunta` no encontraba el dominio: la portada abría y cada subpágina daba «Esta página no existe». Afectaba a todos los dominios propios, también a luzhumanidad.com.
+- Arreglo: para un dominio propio, `sitioDe` quita el `www.` del anfitrión. Las direcciones canónicas y el mapa web salen también sin `www.`, una por página. Los dominios traducidos ya redirigían su `www.` (`traducciones.ts`) y no cambian.
+- Comprobado en local con un dominio de prueba: sin el arreglo, `www.` da 404 en una subpágina y sin `www.` da 200; con el arreglo, las dos dan 200, y una dirección que no existe sigue dando 404. `tsc` y `build` limpios.
