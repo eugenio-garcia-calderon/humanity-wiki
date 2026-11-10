@@ -664,7 +664,7 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
   };
   const fichas = deslizadoresTriciclo().filter(f => f.dep === dep), sels = SELECTORES_TRICICLO.filter(s => s.dep === dep);
   const bloques = [...new Set([...fichas.map(f => f.bloque), ...sels.map(s => s.bloque)])];
-  const checks = res.comprobaciones.filter(c => dep === 'proyecto' || c.dep === dep);
+  const checks = res.comprobaciones.filter(c => dep === 'proyecto' || (c.dep ?? '').split(',').includes(dep));
   const malas = checks.filter(c => c.holgura < c.minimo).length;
   const dl = (filas: [string, string][]) => (
     <dl className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 text-[13px]">

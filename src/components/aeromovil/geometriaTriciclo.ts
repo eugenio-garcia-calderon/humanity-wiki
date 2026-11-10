@@ -565,8 +565,8 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   const metros = m.tubos.reduce((a, tb) => a + largoTubo(tb), 0);
 
   // ── checks
-  const ch: (Comprobacion & { dep: DepTriciclo })[] = [];
-  const c = (dep: DepTriciclo, nombre: string, holgura: number, minimo: number, mostrar?: string) => ch.push({ nombre, holgura, minimo, dep, ...(mostrar ? { mostrar } : {}) });
+  const ch: Comprobacion[] = [];
+  const c = (dep: DepTriciclo | `${DepTriciclo},${DepTriciclo}`, nombre: string, holgura: number, minimo: number, mostrar?: string) => ch.push({ nombre, holgura, minimo, dep, ...(mostrar ? { mostrar } : {}) });
   const fmt = (v: number, d = 2) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
   c('rodaje', `Vuelco: aceleración lateral que lo tumba, con dos (objetivo ${fmt(VUELCO_OBJETIVO)} g)`, ssf - AGARRE, VUELCO_OBJETIVO - AGARRE, `${fmt(ssf)} g`);
   c('rodaje', 'Vuelco: con el piloto solo', ssfSolo - AGARRE, VUELCO_OBJETIVO - AGARRE, `${fmt(ssfSolo)} g`);
@@ -576,8 +576,8 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   });
   for (const k of cabezas) {
     const quien = k.quien === 'piloto' ? 'del piloto' : 'del pasajero';
-    c('interior', `Cabeza ${quien} a la cúpula (talla media, sin casco)`, k.p50, 0.03);
-    c('interior', `Cabeza ${quien} a la cúpula (talla alta, sin casco)`, k.p95, 0.03);
+    c('interior,carroceria', `Cabeza ${quien} a la cúpula (talla media, sin casco)`, k.p50, 0.03);
+    c('interior,carroceria', `Cabeza ${quien} a la cúpula (talla alta, sin casco)`, k.p95, 0.03);
   }
   // the pilot's backrest against the passenger: its back face (pad 3 cm, 14 cm behind the trunk's axis) to the passenger's belly (12 cm ahead of the hips)
   {
@@ -592,9 +592,9 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   }
   const [xb, yb, zb] = extremoManillar(F, m.man);
   c('interior', 'Manillar dentro de la carrocería', F.ladoZ(xb, yb) - zb, 0.01);
-  c('rodaje', 'Neumático delantero dentro de su carenado (gira con él)', neumaticoCarenado(F), 0.015);
-  c('rodaje', 'Carenado delantero a la carrocería, recto', carenadoCuerpo(F), HUECO_CARENADO - 0.002);
-  c('rodaje', `Carenado delantero a la carrocería, girado ${Math.round(m.giro * 180 / Math.PI)}°`, huecoGiro(F, m.giro), HUECO_GIRO - 0.002);
+  c('rodaje,carroceria', 'Neumático delantero dentro de su carenado (gira con él)', neumaticoCarenado(F), 0.015);
+  c('rodaje,carroceria', 'Carenado delantero a la carrocería, recto', carenadoCuerpo(F), HUECO_CARENADO - 0.002);
+  c('rodaje,carroceria', `Carenado delantero a la carrocería, girado ${Math.round(m.giro * 180 / Math.PI)}°`, huecoGiro(F, m.giro), HUECO_GIRO - 0.002);
   c('rodaje', `Rueda trasera dentro de la cola, hundida ${Math.round(m.recTras * 1000)} mm`, ruedaDentro(F, m.xR, m.rR, F.ANCHO_NEU, m.recTras), 0.02);
   c('rodaje', `Bajos al suelo con la suspensión hundida`, F.D.suelo - Math.max(m.recDel, m.recTras) * 0.6, 0.03);
   // the swing arm's pivot ahead of the rear wheel and behind the passenger's footpegs

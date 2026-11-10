@@ -315,7 +315,8 @@ export function VistaExportar({ modelo, visor, porDefecto, resultados }: { model
   // the Triciclo is a Bala here: STL only, its skin is the Cuadriciclo's
   const esA1 = modelo.tipo === 'a1', esBala = modelo.tipo === 'bala' || modelo.tipo === 'triciclo', esTri = modelo.tipo === 'triciclo';
   const json = esA1 || esBala ? '' : JSON.stringify(parametrosCAD(modelo.P), null, 1);
-  const capasVisor = CAPAS.filter(c => !('solo' in c) || c.solo === modelo.tipo);
+  // the Triciclo draws a steering (rack, column, tie rods) but no solar panels or transmission
+  const capasVisor = esTri ? CAPAS.filter(c => c.k !== 'solar' && c.k !== 'transmision') : CAPAS.filter(c => !('solo' in c) || c.solo === modelo.tipo);
   const stl = () => {
     const elegidas = capasVisor.filter(c => capas[c.k]).map(c => c.k);
     if (!elegidas.length) { setAviso('Marca al menos una capa.'); return; }

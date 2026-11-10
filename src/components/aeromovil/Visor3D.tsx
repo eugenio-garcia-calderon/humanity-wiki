@@ -1118,14 +1118,15 @@ function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<string,
   tube(G.suspension, [ax, ay, 0], [bx, by, 0], 0.03, M.stanch);
   muelle(G.suspension, [ax + (bx - ax) * 0.2, ay + (by - ay) * 0.2, 0], [ax + (bx - ax) * 0.85, ay + (by - ay) * 0.85, 0], 0.035, 6, M.muelle);
   tube(G.suspension, [ax, ay, -zb], [ax, ay, zb], 0.02, M.susp);
-  // front: in each pod, the upright on the wheel's inner side, and a coil-over from the lower link up to the body
+  // front: in each pod, the upright on the wheel's inner side; the coil-over lies along the upper arm, inside its
+  // fairing (pushed by the upright, held at the body), so nothing but the faired arms stands in the air
   const zIn = m.via.del / 2 - m.F.ANCHO_NEU_LAT / 2 - 0.025, [arriba, abajo] = m.brazos;
   for (const s of [1, -1]) {
     tube(G.suspension, [m.xF, abajo.y - 0.02, s * zIn], [m.xF, arriba.y + 0.03, s * zIn], 0.03, M.alu);
     const z0 = m.F.ladoZ(m.xF + arriba.x, arriba.y);
     if (Number.isFinite(z0)) {
-      const a: V3 = [m.xF + abajo.x - 0.02, abajo.y + 0.01, s * (zIn - 0.10)], c: V3 = [m.xF + arriba.x - 0.02, arriba.y - 0.01, s * (z0 + 0.02)];
-      tube(G.suspension, a, c, 0.026, M.stanch); muelle(G.suspension, a, c, 0.03, 7, M.muelle);
+      const a: V3 = [m.xF + arriba.x - 0.02, arriba.y - 0.002, s * (zIn - 0.04)], c: V3 = [m.xF + arriba.x - 0.02, arriba.y - 0.002, s * (z0 + 0.03)];
+      tube(G.suspension, a, c, 0.012, M.stanch); muelle(G.suspension, [a[0], a[1], s * (zIn - 0.06)], [c[0], c[1], s * (z0 + 0.12)], 0.013, 9, M.muelle);
     }
   }
   // steering: the rack across, the column up to the steering head, the tie rods out to the uprights' arms
