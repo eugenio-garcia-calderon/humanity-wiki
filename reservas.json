@@ -11,6 +11,12 @@
       "ruta": "src/App.tsx",
       "motivo": "Modelo socioeconómico optimizado (nube)",
       "desde": "2026-11-10T10:51:38.186Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/pages/SubpaginaSitio.tsx",
+      "motivo": "Modelo socioeconómico optimizado (nube)",
+      "desde": "2026-11-10T10:51:41.420Z"
     }
   ]
 }
