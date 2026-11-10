@@ -65,6 +65,15 @@ export interface DimBala {
   rDel: number; rLat: number; anchoNeu: number; anchoNeuLat: number;
   /** Lateral track: centre to centre of the lateral wheels. */
   via: number;
+  /**
+   * The «Triciclo Bala» (2026-11-10) only: where the wheels in pods stand (x of
+   * their axle; the Cuadriciclo has them at mid-wheelbase), and the pods' and
+   * arms' own shape (balaMedidas.ts `podDe`, `brazosDe`). The body never reads
+   * these: with them absent every number is the Cuadriciclo's.
+   */
+  xLat?: number;
+  pod?: { esc: number; ancho: number; cola: number };
+  cuerdaBrazo?: number;
 }
 
 // --------------------------------------------------- from the Aeromóvil Gota
@@ -223,8 +232,8 @@ export function crearForma(D: DimBala) {
   // ---------------------------------------------------------------- layout
   const BATALLA = D.batalla, X_MORRO = D.morro, X_COLA = -D.batalla - D.cola;
   const LARGO = X_MORRO - X_COLA;
-  /** Lateral wheels at mid-wheelbase, as on the Gota (xLm 1.22 of 2.60 there; 1.225 of 2.45 here). */
-  const X_LAT = -BATALLA / 2;
+  /** Lateral wheels at mid-wheelbase, as on the Gota (xLm 1.22 of 2.60 there; 1.225 of 2.45 here); the Triciclo's at its front axle. */
+  const X_LAT = D.xLat ?? -BATALLA / 2;
   const anclas = [X_MORRO, 0, -D.cupIni, -D.cupFin, -BATALLA, X_COLA];
   /** New x → x of the reference drawing, and back. */
   const R = tramos(anclas, ANCLAS_REF), X = tramos(ANCLAS_REF, anclas);

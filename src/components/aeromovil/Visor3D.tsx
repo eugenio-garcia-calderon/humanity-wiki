@@ -27,8 +27,9 @@ import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import entornoUrl from './entorno/parque.jpg';
 import {
   ARM_UP, CELULA, TIRE_W, TRAVEL_F, TRAVEL_R, enZona, tramosTubo,
-  type Modelo, type ModeloGota, type ModeloA1, type ModeloBala, type ModeloConPiel, type Piel, type PuntosOcupante, type Superficie,
+  type Modelo, type ModeloGota, type ModeloA1, type ModeloBala, type ModeloConPiel, type ModeloTriciclo, type Piel, type PuntosOcupante, type Superficie,
 } from './geometria';
+import { anguloFuera } from './geometriaTriciclo';
 import { ANGULO_CUPULA, PIVOTES_CUPULA, construirCon as construirBalaCon, crearMateriales as materialesBala } from './garaje/balaModelo';
 import { GIRO_A1, suspensionA1 } from './geometriaA1';
 import type { Referencia } from './referencias';
@@ -802,6 +803,7 @@ function cotasGaraje(M: Mats, def: { batalla: number; alto: number; ancho: numbe
 
 function cotas(g: THREE.Object3D, M: Mats, m: Modelo, espacio = false) {
   if (m.tipo === 'bala') { cotasBala(g, M, m); return; }
+  if (m.tipo === 'triciclo') { cotasTriciclo(g, M, m); return; }
   const { cota, mm, etiqueta } = herramientasCota(g, M);
   const P = m.P, y = 0.004, zL = -(P.W / 2 + 0.38), zB = -(P.W / 2 + 0.16);
   cota([m.xt, y, zL], [m.xn, y, zL], [[[m.xt, y, 0], [m.xt, y, zL - 0.05]], [[m.xn, y, 0], [m.xn, y, zL - 0.05]]], `largo ${mm(m.Lf)}`, [0.55, 0.11, -0.08]);
@@ -840,6 +842,21 @@ function cotasBala(g: THREE.Object3D, M: Mats, m: ModeloBala) {
   const xH = m.xt - 0.30, xTope = (m.sillines.xPiloto + m.sillines.xPasajero) / 2;
   cota([xH, 0, zL], [xH, m.alto, zL], [[[xH - 0.05, m.alto, zL], [xTope, m.alto, zL]]], `alto ${mm(m.alto)}`, [-0.36, 0, 0]);
   cota([m.xL, y, -P.track / 2], [m.xL, y, P.track / 2], [], `vía ${mm(P.track)}`, [0, 0.11, 0]);
+}
+
+/** Cotas del Triciclo Bala: largo, batalla (de su eje delantero al trasero), ancho con los carenados y de la carrocería, alto y vía delantera. */
+function cotasTriciclo(g: THREE.Object3D, M: Mats, m: ModeloTriciclo) {
+  const { cota, mm } = herramientasCota(g, M);
+  const y = 0.004, W = m.anchoTotal, zL = -(W / 2 + 0.38), zB = -(W / 2 + 0.16);
+  cota([m.xt, y, zL], [m.xn, y, zL], [[[m.xt, y, 0], [m.xt, y, zL - 0.05]], [[m.xn, y, 0], [m.xn, y, zL - 0.05]]], `largo ${mm(m.Lf)}`, [0.55, 0.11, -0.08]);
+  cota([m.xR, y, zB], [m.xF, y, zB], [[[m.xR, y, 0], [m.xR, y, zB - 0.04]], [[m.xF, y, -W / 2 + 0.1], [m.xF, y, zB - 0.04]]], `batalla ${mm(m.batalla)}`, [-0.35, 0.11, 0.04]);
+  const xA = m.xn + 0.40;
+  cota([xA, y, -W / 2], [xA, y, W / 2], [[[m.xF, y, -W / 2], [xA + 0.05, y, -W / 2]], [[m.xF, y, W / 2], [xA + 0.05, y, W / 2]]], `ancho ${mm(W)}`, [0.12, 0.1, 0]);
+  const xC = m.xn + 0.15, hw = m.anchoCuerpo / 2;
+  cota([xC, 0.62, -hw], [xC, 0.62, hw], [], `carrocería ${mm(m.anchoCuerpo)}`, [0.10, 0.12, 0]);
+  const xH = m.xt - 0.30, xTope = (m.sillines.xPiloto + m.sillines.xPasajero) / 2;
+  cota([xH, 0, zL], [xH, m.alto, zL], [[[xH - 0.05, m.alto, zL], [xTope, m.alto, zL]]], `alto ${mm(m.alto)}`, [-0.36, 0, 0]);
+  cota([m.xF, y, -m.via.del / 2], [m.xF, y, m.via.del / 2], [], `vía ${mm(m.via.del)}`, [0, 0.11, 0]);
 }
 
 /** Una caja con cantos redondeados (batería, reductora, inversor…). */
@@ -1023,7 +1040,19 @@ function construirFijoA1(G: Record<CapaId, THREE.Group>, M: Mats, m: ModeloA1) {
 function construirMovil(G: Record<CapaId, THREE.Group>, M: Mats, m: Modelo, coche: THREE.Group, angulo: number) {
   // the Bala does not lean and has no moving suspension drawn: its wheels are built with the rest (construirBala)
   if (m.tipo === 'bala') { coche.rotation.x = 0; return; }
+  // the Triciclo does not lean either; «Girar ruedas» turns its two front wheels and their pods (Ackermann: the inner one more)
+  if (m.tipo === 'triciclo') { coche.rotation.x = 0; girarTriciclo(G, m, angulo); return; }
   if (m.tipo === 'a1') construirMovilA1(G, M, m, coche, angulo); else construirMovilGota(G, M, m, coche, angulo);
+}
+
+/** The Triciclo's front wheels and pods turned `angulo` degrees (+ to the left: the left wheel is then the inner one). */
+function girarTriciclo(G: Record<CapaId, THREE.Group>, m: ModeloTriciclo, angulo: number) {
+  const di = Math.abs(angulo) * Math.PI / 180, dout = di > 1e-6 ? anguloFuera(di, m.batalla, m.via.del) : 0, s = Math.sign(angulo);
+  for (const capa of [G.carenado, G.ruedas]) capa.traverse(o => {
+    if ((o.name !== 'carenado' && o.name !== 'rueda-direccion') || !o.userData.lado) return;
+    // +y turns the nose to −z, the vehicle's left
+    o.rotation.y = s * (o.userData.lado * s < 0 ? di : dout);
+  });
 }
 
 /** The layer each part of the Bala goes to (the 3D model's own names, balaModelo.ts / balaPiezas.ts). */
@@ -1042,6 +1071,13 @@ function construirBala(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THR
   for (const c of CAPAS) vaciar(G[c.k]);
   puertasG.clear();
   const b = construirBalaCon(m.F, { M: Mb, calidad, cupulaAparte: true, asientos: m.sillines, aleta: m.aleta });
+  repartirBala(G, puertasG, b);
+  if (calidad === 'completa') for (const piloto of [true, false]) { if (sinPasajero && !piloto) continue; ocupante(G.ocupantes, M, m, 0, piloto); }
+  // as the garage does with its cars (glass and lenses keep their no-shadow depth material)
+  for (const c of CAPAS) G[c.k].traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+}
+/** The Bala builder's parts into the viewer's layers (the Cuadriciclo's and the Triciclo's). */
+function repartirBala(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THREE.Group[]>, b: THREE.Group) {
   for (const o of [...b.children]) {
     let capa: CapaId = CAPA_BALA[o.name] ?? 'carenado';
     if (o.name === 'carenados') {
@@ -1057,8 +1093,48 @@ function construirBala(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THR
     }
     G[capa].add(o);
   }
+}
+
+/**
+ * The Triciclo Bala (2026-11-10): the Cuadriciclo's builder with three wheels and the reclining
+ * cockpit, split into layers as the Bala; and what only the Triciclo has, from its model: the tube
+ * frame («Chasis»), the battery modules, the hub motor and its controller, the swing arm and the
+ * front uprights («Suspensión»), the rack, column and tie rods («Dirección»).
+ */
+function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THREE.Group[]>, M: Mats, Mb: ReturnType<typeof materialesBala>, m: ModeloTriciclo, calidad: 'completa' | 'rapida', sinPasajero: boolean) {
+  for (const c of CAPAS) vaciar(G[c.k]);
+  puertasG.clear();
+  const b = construirBalaCon(m.F, { M: Mb, calidad, cupulaAparte: true, asientos: m.sillines, aleta: m.aleta, triciclo: { recPil: m.rec.piloto, recPas: m.rec.pasajero, man: m.man, pies: m.pies, faldon: m.faldon } });
+  repartirBala(G, puertasG, b);
+  for (const t of m.tubos) { if (t.curva) tuboCurvo(G.chasis, t.curva, t.d, M.alu); else tube(G.chasis, t.a, t.b, t.d, M.alu); }
+  for (const c of m.baterias) cajaRedonda(G.baterias, [(c.x0 + c.x1) / 2, (c.y0 + c.y1) / 2, 0], [c.x1 - c.x0, c.y1 - c.y0, 2 * c.hz], M.batt, 0.015);
+  const iv = m.inversor; cajaRedonda(G.motor, [(iv.x0 + iv.x1) / 2, (iv.y0 + iv.y1) / 2, 0], [iv.x1 - iv.x0, iv.y1 - iv.y0, 2 * iv.hz], M.black, 0.01);
+  disk(G.motor, [m.motor.c[0], m.motor.c[1], 0], m.motor.r, m.motor.ancho, M.motor);
+  // rear: the swing arm's two legs round the tyre, its pivot tube and the mono-shock
+  const [px, py] = m.basculante.pivote, [ex, ey] = m.basculante.eje, zb = m.basculante.z;
+  for (const s of [1, -1]) tube(G.suspension, [px, py, s * zb], [ex, ey, s * zb], 0.032, M.susp);
+  tube(G.suspension, [px, py, -zb - 0.02], [px, py, zb + 0.02], 0.036, M.black);
+  const [ax, ay] = m.amortiguador.abajo, [bx, by] = m.amortiguador.arriba;
+  tube(G.suspension, [ax, ay, 0], [bx, by, 0], 0.03, M.stanch);
+  muelle(G.suspension, [ax + (bx - ax) * 0.2, ay + (by - ay) * 0.2, 0], [ax + (bx - ax) * 0.85, ay + (by - ay) * 0.85, 0], 0.035, 6, M.muelle);
+  tube(G.suspension, [ax, ay, -zb], [ax, ay, zb], 0.02, M.susp);
+  // front: in each pod, the upright on the wheel's inner side; the coil-over lies along the upper arm, inside its
+  // fairing (pushed by the upright, held at the body), so nothing but the faired arms stands in the air
+  const zIn = m.via.del / 2 - m.F.ANCHO_NEU_LAT / 2 - 0.025, [arriba, abajo] = m.brazos;
+  for (const s of [1, -1]) {
+    tube(G.suspension, [m.xF, abajo.y - 0.02, s * zIn], [m.xF, arriba.y + 0.03, s * zIn], 0.03, M.alu);
+    const z0 = m.F.ladoZ(m.xF + arriba.x, arriba.y);
+    if (Number.isFinite(z0)) {
+      const a: V3 = [m.xF + arriba.x - 0.02, arriba.y - 0.002, s * (zIn - 0.04)], c: V3 = [m.xF + arriba.x - 0.02, arriba.y - 0.002, s * (z0 + 0.03)];
+      tube(G.suspension, a, c, 0.012, M.stanch); muelle(G.suspension, [a[0], a[1], s * (zIn - 0.06)], [c[0], c[1], s * (z0 + 0.12)], 0.013, 9, M.muelle);
+    }
+  }
+  // steering: the rack across, the column up to the steering head, the tie rods out to the uprights' arms
+  const k = m.cremallera;
+  tube(G.direccion, [k.x, k.y, -k.z], [k.x, k.y, k.z], 0.035, M.black);
+  tube(G.direccion, [k.x, k.y, 0], m.cabezaDireccion, 0.026, M.alu);
+  for (const s of [1, -1]) tube(G.direccion, [k.x, k.y, s * k.z], [m.xF - 0.07, arriba.y + 0.02, s * zIn], 0.016, M.alu);
   if (calidad === 'completa') for (const piloto of [true, false]) { if (sinPasajero && !piloto) continue; ocupante(G.ocupantes, M, m, 0, piloto); }
-  // as the garage does with its cars (glass and lenses keep their no-shadow depth material)
   for (const c of CAPAS) G[c.k].traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
 }
 
@@ -1385,7 +1461,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       /** The Bala's rebuilds: the last one's time, the pending quick one (next frame) and the full one after a pause. */
       bala: { ultima: 0, cuadro: 0, pausa: 0 as ReturnType<typeof setTimeout> | 0 },
       /** The Bala is already on screen (so a change is an edit, rebuilt quick first), not being opened. */
-      balaVisto: false,
+      balaVisto: false as false | 'bala' | 'triciclo',
       curva: false, inclinacion: 0, modelo: null as Modelo | null, plano: new THREE.Plane(new THREE.Vector3(0, 0, 1), 0),
       apertura: 0, aperturaObjetivo: 0, aperturaMal: 0, aperturaMalObjetivo: 0, colocarPuertas: (() => {}) as () => void,
       tunel: null as Tunel | null, superponer: false, ultimoFantasma: 0,
@@ -1488,7 +1564,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       if (st.curva && st.modelo) {
         tc += dt; acc += dt;
         // El Gota se inclina; el Aeromóvil 1 gira las ruedas delanteras.
-        const maximo = st.modelo.tipo === 'a1' ? GIRO_A1 : st.modelo.P.tiltMax;
+        const maximo = st.modelo.tipo === 'a1' ? GIRO_A1 : st.modelo.tipo === 'triciclo' ? st.modelo.giro * 180 / Math.PI : st.modelo.P.tiltMax;
         if (acc > 0.045) { acc = 0; st.inclinacion = maximo * Math.sin(tc * 1.1); construirMovil(G, M, st.modelo, coche, st.inclinacion); }
         // Intermitente del lado hacia el que se inclina o gira, a 1,5 parpadeos por segundo
         const enc = Math.floor(ahora / 333) % 2 === 0;
@@ -1522,7 +1598,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     st.modelo = modelo;
     const cotasYPuertas = () => { vaciar(st.grupoCotas); cotas(st.grupoCotas, st.M, st.modelo, sinPasajero); st.colocarPuertas(); st.sombraSucia = true; };
     cancelAnimationFrame(st.bala.cuadro); if (st.bala.pausa) { clearTimeout(st.bala.pausa); st.bala.pausa = 0; }
-    if (modelo.tipo !== 'bala') {
+    if (modelo.tipo !== 'bala' && modelo.tipo !== 'triciclo') {
       st.balaVisto = false;
       construirFijo(st.G, st.puertasG, st.M, modelo, sinPasajero);
       construirMovil(st.G, st.M, modelo, st.coche, st.curva ? st.inclinacion : 0);
@@ -1533,16 +1609,18 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     // rebuilt quick (half the rows, no small details: ~50 ms) on the next frame, at most once per
     // frame however fast the slider moves, and in full 0.3 s after the last change. Only the first
     // build (on opening, or on switching from another vehicle) is full at once.
-    const yaEraBala = st.balaVisto === true;
-    st.balaVisto = true;
+    // The Triciclo (2026-11-10) comes from the same builder and is rebuilt the same way; switching between the two builds in full.
+    const yaEraBala = st.balaVisto === modelo.tipo;
+    st.balaVisto = modelo.tipo;
     const construir = (calidad: 'completa' | 'rapida') => {
-      const m = st.modelo as ModeloBala, t0 = performance.now();
-      construirBala(st.G, st.puertasG, st.M, st.Mb, m, calidad, sinPasajero);
-      construirMovil(st.G, st.M, m, st.coche, 0);
+      const m = st.modelo as ModeloBala | ModeloTriciclo, t0 = performance.now();
+      if (m.tipo === 'triciclo') construirTriciclo(st.G, st.puertasG, st.M, st.Mb, m, calidad, sinPasajero);
+      else construirBala(st.G, st.puertasG, st.M, st.Mb, m, calidad, sinPasajero);
+      construirMovil(st.G, st.M, m, st.coche, st.curva && m.tipo === 'triciclo' ? st.inclinacion : 0);
       cotasYPuertas();
       const t1 = performance.now();
       // measured where the visitor's browser can be asked (performance.getEntriesByName)
-      try { performance.measure(`bala:${calidad}`, { start: t0, end: t1 }); } catch { /* old browsers */ }
+      try { performance.measure(`${m.tipo}:${calidad}`, { start: t0, end: t1 }); } catch { /* old browsers */ }
       st.bala.ultima = t1;
     };
     if (!yaEraBala) { construir('completa'); return; }
@@ -1755,5 +1833,5 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     }),
   }), []);
 
-  return <canvas ref={lienzo} className="absolute inset-0 h-full w-full touch-none" aria-label={modelo.tipo === 'a1' ? 'Modelo 3D del Aeromóvil 1' : modelo.tipo === 'bala' ? 'Modelo 3D del Cuadriciclo Bala' : 'Modelo 3D del Aeromóvil Gota'} />;
+  return <canvas ref={lienzo} className="absolute inset-0 h-full w-full touch-none" aria-label={modelo.tipo === 'a1' ? 'Modelo 3D del Aeromóvil 1' : modelo.tipo === 'bala' ? 'Modelo 3D del Cuadriciclo Bala' : modelo.tipo === 'triciclo' ? 'Modelo 3D del Triciclo Bala' : 'Modelo 3D del Aeromóvil Gota'} />;
 });

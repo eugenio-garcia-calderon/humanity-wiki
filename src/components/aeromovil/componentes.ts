@@ -60,7 +60,7 @@ export interface Componente {
 }
 
 /** Metros de tubo del chasis (sin lo comprado), para el coste del material. */
-const metrosTubo = (m: Modelo) => m.tipo === 'bala' ? 0 : m.tubosChasis().filter(t => !t.comprado).reduce((s, t) => s + largoTubo(t), 0);
+const metrosTubo = (m: Modelo) => m.tipo === 'bala' || m.tipo === 'triciclo' ? 0 : m.tubosChasis().filter(t => !t.comprado).reduce((s, t) => s + largoTubo(t), 0);
 const EUR_M_TUBO: Record<Parametros['matChasis'], number> = { al6061: 9, cromoly: 16, carbono: 62 };
 const EUR_M2_CARENADO: Record<Parametros['matCarenado'], number> = { carbono: 230, carbonoLino: 190, vidrio: 70 };
 const MOLDE_CARENADO: Record<Parametros['matCarenado'], number> = { carbono: 3500, carbonoLino: 3500, vidrio: 2200 };

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { FORMA_REF, monotona, punto, tAbajo, tArriba, type FormaBala, type Sec } from './balaForma';
-import { aleta, cabina, camara, carenados, crearMateriales, malla, mats, ruedas, sinSombra, type Mats } from './balaPiezas';
+import { aleta, cabina, camara, carenados, crearMateriales, malla, mats, ruedas, sinSombra, type CabinaTriciclo, type Mats } from './balaPiezas';
+import { E, loft } from './forma';
 import { ASIENTO, contornoCupula, techoEn, type Asientos } from './balaMedidas';
 
 /*
@@ -478,6 +479,11 @@ export interface OpcionesBala {
   calidad?: 'completa' | 'rapida';
   /** The canopy (its navy frame and its glass) in groups of its own, hinged at its front end, so the editor can open it. */
   cupulaAparte?: boolean;
+  /**
+   * The Triciclo Bala (2026-11-10): the same body, three wheels (`ruedas`), its own
+   * cockpit (`cabina`) and, if asked, a spat round the bottom of the rear wheel.
+   */
+  triciclo?: CabinaTriciclo & { faldon: { x0: number; x1: number; y0: number; hz: number } | null };
 }
 /** The pivots of the opening canopy: one for its frame (body layer) and one for its glass (glass layer). */
 export const PIVOTES_CUPULA = ['cupula-marco', 'cupula-cristal'] as const;
@@ -612,9 +618,19 @@ function armar(o: OpcionesBala): THREE.Group {
 
   // ---------------------------------------------------------------- parts
   add(carenados(F, M));
-  add(ruedas(F, M));
+  add(ruedas(F, M, !!o.triciclo));
   add(aleta(F, M, o.aleta));
-  add(cabina(F, M, o.asientos ?? ASIENTO));
+  add(cabina(F, M, o.asientos ?? ASIENTO, o.triciclo));
+  // the Triciclo's rear-wheel spat: a narrow navy keel under the tail, from inside the belly down to `y0`, round the wheel
+  const fd = o.triciclo?.faldon;
+  if (fd) {
+    const yt = F.D.suelo + 0.03, n = 9, est = [];
+    for (let i = 0; i <= n; i++) {
+      const u = i / n, x = fd.x0 + (fd.x1 - fd.x0) * u, cierre = Math.sin(Math.PI * Math.min(1, Math.max(0.02, u)));
+      est.push(E(x, fd.y0 + (yt - fd.y0) * (1 - Math.pow(cierre, 0.35)), yt, fd.hz * Math.pow(cierre, 0.5), fd.hz * Math.pow(cierre, 0.5), fd.hz * Math.pow(cierre, 0.5), 3.5));
+    }
+    const geo = loft(est, { N: 24, sub: 3 }); add(malla(geo, M.marino, 'faldon'));
+  }
 
   g.traverse(o => {
     const m = o as THREE.Mesh; if (!m.isMesh) return;

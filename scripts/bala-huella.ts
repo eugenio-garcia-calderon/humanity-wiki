@@ -3,13 +3,21 @@
  * positions and index list, plus the tunnel envelope. Run before and after a change to the Bala's shape code:
  * identical output means the garage model did not move by a single vertex.
  * Run with: npx tsx scripts/bala-huella.ts [salida.json] [comparar-con.json]
+ *
+ * `--editor` (2026-11-10, with the Triciclo Bala): fingerprints the editor's default Cuadriciclo instead, built
+ * the way the viewer builds it (PARAMETROS_BALA, its own materials, the canopy hinged apart). The Triciclo
+ * reuses this shape code, so both must stay the same.
  */
 import * as THREE from 'three';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { VEHICULO } from '../src/components/aeromovil/garaje/bala';
+import { PARAMETROS_BALA, crearModelo, type ModeloBala } from '../src/components/aeromovil/geometria';
+import { construirCon, crearMateriales } from '../src/components/aeromovil/garaje/balaModelo';
 
+const editor = process.argv.includes('--editor');
 const t0 = performance.now();
-const g = VEHICULO.construir();
+const me = editor ? crearModelo(PARAMETROS_BALA) as ModeloBala : null;
+const g = me ? construirCon(me.F, { M: crearMateriales(), cupulaAparte: true, asientos: me.sillines, aleta: me.aleta }) : VEHICULO.construir();
 const t1 = performance.now();
 const mallas: Record<string, number[]> = {};
 let n = 0;
@@ -24,8 +32,10 @@ g.traverse(o => {
   const k = `${String(n++).padStart(3, '0')} ${m.name}`;
   mallas[k] = [p.count, idx?.count ?? 0, Math.round(s * 1e3) / 1e3, Math.round(s2 * 1e3) / 1e3, si];
 });
-const salida = { largo: VEHICULO.largo, ancho: VEHICULO.ancho, alto: VEHICULO.alto, batalla: VEHICULO.batalla, envolvente: VEHICULO.envolvente, mallas };
-const [f, otro] = process.argv.slice(2);
+const salida = me
+  ? { largo: me.Lf, ancho: me.anchoTotal, alto: me.alto, batalla: me.P.B, envolvente: me.F.envolvente(), mallas }
+  : { largo: VEHICULO.largo, ancho: VEHICULO.ancho, alto: VEHICULO.alto, batalla: VEHICULO.batalla, envolvente: VEHICULO.envolvente, mallas };
+const [f, otro] = process.argv.slice(2).filter(a => a !== '--editor');
 if (f) writeFileSync(f, JSON.stringify(salida));
 console.log(`construir(): ${Math.round(t1 - t0)} ms, ${Object.keys(mallas).length} mallas, ${Object.values(mallas).reduce((a, b) => a + b[1] / 3, 0)} triángulos`);
 if (otro) {
