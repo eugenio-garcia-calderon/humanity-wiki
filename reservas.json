@@ -59,6 +59,12 @@
       "ruta": "src/components/knowledge/CreadorMenu.tsx",
       "motivo": "Aviso al final del pie",
       "desde": "2026-11-10T11:13:40.699Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "Aviso al final del pie",
+      "desde": "2026-11-10T11:16:14.779Z"
     }
   ]
 }
