@@ -35,6 +35,12 @@
       "ruta": "memory/03_DECISIONS.md",
       "motivo": "Formalizar préstamo (SolarCrowd)",
       "desde": "2026-11-10T10:04:12.402Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md",
+      "motivo": "Formalizar préstamo (SolarCrowd)",
+      "desde": "2026-11-10T10:04:15.243Z"
     }
   ]
 }
