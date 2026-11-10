@@ -5,6 +5,12 @@
       "ruta": "drizzle/0182_aeromovil_triciclo_base.sql",
       "motivo": "Triciclo Bala: diseño base del equipo",
       "desde": "2026-11-10T10:08:54.004Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/App.tsx",
+      "motivo": "Modelo socioeconómico optimizado (nube)",
+      "desde": "2026-11-10T10:51:38.186Z"
     }
   ]
 }
