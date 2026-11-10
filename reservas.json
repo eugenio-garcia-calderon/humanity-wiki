@@ -35,6 +35,12 @@
       "ruta": "drizzle/0184_modelo_socioeconomico_proyecto_luz.sql",
       "motivo": "Modelo socioeconómico optimizado (nube)",
       "desde": "2026-11-10T10:51:54.273Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/traducciones.ts",
+      "motivo": "Modelo socioeconómico: register its code-written texts in the translation sweep (rule 11)",
+      "desde": "2026-11-10T11:45:33.463Z"
     }
   ]
 }
