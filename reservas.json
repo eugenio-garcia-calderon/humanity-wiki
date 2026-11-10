@@ -5,6 +5,12 @@
       "ruta": "src/server/sitios.ts",
       "motivo": "www de un dominio propio: 404 en subpáginas",
       "desde": "2026-11-10T13:41:30.407Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "www de dominio propio",
+      "desde": "2026-11-10T13:44:47.439Z"
     }
   ]
 }
