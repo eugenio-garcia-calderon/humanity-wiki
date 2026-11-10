@@ -329,6 +329,8 @@ export function registrarTraducciones(app: Express, db: any) {
   // Delante de las rutas: lo que sale hacia el dominio traducido, ya traducido.
   app.use((req: Request, res: Response, next: NextFunction) => {
     const host = hostDe(req);
+    // Una sola dirección por página: `www.` lleva al dominio sin `www.`.
+    if (host.startsWith('www.') && idiomaDeHost(host) && !req.path.startsWith('/.well-known/')) return res.redirect(301, `https://${host.slice(4)}${req.originalUrl}`);
     const idioma = req.method === 'GET' && /^\/api\/(sitio|bd\/tablas|bd\/paginas|conciencia\/mapa)/.test(req.path) ? idiomaDeHost(host) : null;
     if (!idioma) return next();
     const json = res.json.bind(res);
