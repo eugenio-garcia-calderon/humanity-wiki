@@ -46,6 +46,7 @@ import { descargarJSON, descargarPNG, descargarSVG } from '../components/concien
 import { medir } from '../components/conciencia/geometria';
 import { dibujarPaso } from '../components/conciencia/Animacion';
 import { BuzonMejoras } from '../components/conciencia/BuzonMejoras';
+import { VentanaClaves } from '../components/conciencia/VentanaClaves';
 import {
   MAPA_POR_DEFECTO, PALETA, RECORRIDOS, ESQUEMA_ACTUAL, esMapaValido,
   type MapaConciencia, type Nodo, type Flecha, type Canal,
@@ -138,6 +139,8 @@ export default function Conciencia({ enSitio }: { enSitio?: { inicio: string } }
   const [destello, setDestello] = useState<string | null>(null);
   const [recorrido, setRecorrido] = useState<{ canal: Canal; paso: number; reproduciendo: boolean } | null>(null);
   const [verBuzon, setVerBuzon] = useState(false);
+  /** The «5 claves» window open, by the id of its chip. */
+  const [claves, setClaves] = useState<string | null>(null);
   const mapaUI = useRef<MapaHandle>(null);
   const zonaMapa = useRef<HTMLDivElement>(null);
   const importar = useRef<HTMLInputElement>(null);
@@ -418,6 +421,7 @@ export default function Conciencia({ enSitio }: { enSitio?: { inicio: string } }
   // ── Keyboard ──────────────────────────────────────────────────────────────
   useEffect(() => {
     const tecla = (e: KeyboardEvent) => {
+      if (claves || verBuzon) return; // a window is open: it handles its own keys
       const t = e.target as HTMLElement;
       const escribiendo = t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.tagName === 'SELECT' || t.isContentEditable);
       if (recorrido && !escribiendo) {
@@ -440,7 +444,7 @@ export default function Conciencia({ enSitio }: { enSitio?: { inicio: string } }
     };
     window.addEventListener('keydown', tecla);
     return () => window.removeEventListener('keydown', tecla);
-  }, [conectarDesde, seleccion, completa, editando, deshacer, rehacer, borrar, recorrido]);
+  }, [conectarDesde, seleccion, completa, editando, deshacer, rehacer, borrar, recorrido, claves, verBuzon]);
 
   // Full screen locks the page scroll behind it.
   useEffect(() => {
@@ -644,7 +648,13 @@ export default function Conciencia({ enSitio }: { enSitio?: { inicio: string } }
             mapa={mapa}
             editando={editando}
             seleccion={seleccion}
-            onSeleccion={s => { setSeleccion(s); setMenuDescarga(false); }}
+            onSeleccion={s => {
+              setMenuDescarga(false);
+              // Exploring, a folded «5 claves» chip opens its window instead of the side panel.
+              const n = s?.tipo === 'nodo' ? mapaRef.current.nodos.find(x => x.id === s.id) : undefined;
+              if (n?.forma === 'consejos' && !editando) { setClaves(n.id); setSeleccion(null); return; }
+              setSeleccion(s);
+            }}
             onMover={moverNodo}
             onFinMover={finMover}
             onConectar={conectar}
@@ -758,6 +768,11 @@ export default function Conciencia({ enSitio }: { enSitio?: { inicio: string } }
                     Ver la animación ▶
                   </BotonTexto>
                 )}
+                {p.canal && mapa.nodos.some(n => n.id === `claves-${p.canal}`) && (
+                  <BotonTexto onClick={() => setClaves(`claves-${p.canal}`)} className="text-sm text-violet-200 underline-offset-4">
+                    5 claves para comunicar mejor
+                  </BotonTexto>
+                )}
                 <BotonTexto onClick={() => verEnElMapa(p.nodo)} className="text-sm text-teal-200 underline-offset-4">
                   Verlo en el mapa ↑
                 </BotonTexto>
@@ -788,6 +803,7 @@ export default function Conciencia({ enSitio }: { enSitio?: { inicio: string } }
       )}
 
       {verBuzon && <BuzonMejoras onCerrar={() => setVerBuzon(false)} />}
+      {claves && <VentanaClaves mapa={mapa} id={claves} onCerrar={() => setClaves(null)} onAnimar={c => verRecorrido(c, true)} />}
 
       {verHistorial && (
         <Historial

@@ -100,7 +100,7 @@ function VerNodo({ mapa, nodo, onSeleccion, onIrAEstudio }: Props & { nodo: Nodo
       {nodo.explicacion && <p className="text-slate-200">{nodo.explicacion}</p>}
       {!!nodo.etiquetas?.length && (
         <div className="flex flex-wrap gap-1.5">
-          {nodo.etiquetas.map(e => <span key={e} className="rounded-full border border-white/15 bg-white/5 px-2.5 py-0.5 text-xs">{e}</span>)}
+          {nodo.etiquetas.map(e => e.trim()).filter(Boolean).map(e => <span key={e} className="rounded-full border border-white/15 bg-white/5 px-2.5 py-0.5 text-xs">{e}</span>)}
         </div>
       )}
       {estudio && (
@@ -158,18 +158,32 @@ function EditarNodo({ nodo, onCambiarNodo, onBorrar, onDuplicar, onConectarDesde
   return (
     <div className="space-y-3">
       <Fila etiqueta="Nombre"><Texto valor={nodo.titulo} onCambio={v => c({ titulo: v }, `t-${nodo.id}`)} /></Fila>
-      {nodo.forma !== 'titulo' && nodo.forma !== 'nota' && (
+      {nodo.forma !== 'titulo' && nodo.forma !== 'nota' && nodo.forma !== 'consejos' && (
         <Fila etiqueta="Debajo del nombre"><Texto valor={nodo.subtitulo ?? ''} placeholder="(opcional)" onCambio={v => c({ subtitulo: v || undefined }, `s-${nodo.id}`)} /></Fila>
       )}
-      <Fila etiqueta={nodo.forma === 'nota' ? 'Texto de la nota' : 'Explicación (se lee al pinchar)'}>
-        <Texto multilinea valor={nodo.explicacion ?? ''} onCambio={v => c({ explicacion: v || undefined }, `e-${nodo.id}`)} />
-      </Fila>
+      {nodo.forma !== 'consejos' && (
+        <Fila etiqueta={nodo.forma === 'nota' ? 'Texto de la nota' : 'Explicación (se lee al pinchar)'}>
+          <Texto multilinea valor={nodo.explicacion ?? ''} onCambio={v => c({ explicacion: v || undefined }, `e-${nodo.id}`)} />
+        </Fila>
+      )}
+      {(nodo.forma === 'consejos' || nodo.consejos?.length) && (
+        <Fila etiqueta="Claves (una por línea; se abren en una ventana)">
+          <Texto
+            multilinea
+            valor={(nodo.consejos ?? []).join('\n')}
+            placeholder="Una clave por línea"
+            // Raw lines while typing (trimming here would eat the Enter and the
+            // space just typed); empty lines are dropped where they are shown and saved.
+            onCambio={v => c({ consejos: v.split('\n').slice(0, 12) }, `k-${nodo.id}`)}
+          />
+        </Fila>
+      )}
       {(nodo.forma === 'canal' || nodo.etiquetas?.length) && (
         <Fila etiqueta="Píldoras (separadas por comas)">
           <Texto
-            valor={(nodo.etiquetas ?? []).join(', ')}
+            valor={(nodo.etiquetas ?? []).join(',')}
             placeholder="voz, oído, vista…"
-            onCambio={v => c({ etiquetas: v.split(',').map(s => s.trim()).filter(Boolean).slice(0, 12) }, `p-${nodo.id}`)}
+            onCambio={v => c({ etiquetas: v.split(',').slice(0, 12) }, `p-${nodo.id}`)}
           />
         </Fila>
       )}

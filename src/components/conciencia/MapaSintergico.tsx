@@ -10,7 +10,7 @@ import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRe
 import type { LucideIcon } from 'lucide-react';
 import {
   Sun, Moon, Flower2, Eye, EyeOff, Brain, Network, Waves, Sparkles, Hand, Ear, Mic, Wind, User, BookOpen,
-  Orbit, Radar, Telescope, Infinity as Infinito, Heart, Star, Atom, Zap,
+  Orbit, Radar, Telescope, Infinity as Infinito, Heart, Star, Atom, Zap, Lightbulb,
 } from 'lucide-react';
 import { LIENZO, type Icono, type MapaConciencia, type Nodo } from '../../data/concienciaMapa';
 import {
@@ -22,6 +22,7 @@ export const ICONOS_LUCIDE: Record<Icono, LucideIcon | null> = {
   ninguno: null, sol: Sun, luna: Moon, loto: Flower2, ojo: Eye, ojoCerrado: EyeOff, cerebro: Brain, red: Network,
   ondas: Waves, chispas: Sparkles, mano: Hand, oido: Ear, voz: Mic, olfato: Wind, persona: User, libro: BookOpen,
   orbita: Orbit, radar: Radar, telescopio: Telescope, infinito: Infinito, corazon: Heart, estrella: Star, atomo: Atom, rayo: Zap,
+  bombilla: Lightbulb,
 };
 
 export type Seleccion = { tipo: 'nodo' | 'flecha'; id: string } | null;
@@ -251,6 +252,21 @@ function Concepto({ n, m }: { n: Nodo; m: Medida }) {
           <IconoEn icono={n.icono && n.icono !== 'ninguno' ? n.icono : 'libro'} x={-w / 2 + 26 * k} y={0} tam={22 * k} color={color} />
           <Lineas lineas={m.titulo} x={-w / 2 + 50 * k} y={-bloque / 2 + m.fT * 0.85} tam={m.fT} alto={1.25} fill={claro} fontFamily={FUENTE} fontWeight={600} />
           <Lineas lineas={m.sub} x={-w / 2 + 50 * k} y={-bloque / 2 + m.titulo.length * m.fT * 1.25 + m.fS * 0.8} tam={m.fS} fill={color} fontFamily={FUENTE} />
+        </g>
+      );
+    }
+    case 'consejos': {
+      // Folded: a pill with a bulb, the title and a «+». Tapping it opens the window.
+      const { w, h } = m;
+      return (
+        <g>
+          <rect x={-w / 2 - 5} y={-h / 2 - 5} width={w + 10} height={h + 10} rx={(h + 10) / 2} fill={`url(#cz-rg-${c})`} opacity={0.35} className="cz-latido" />
+          <rect x={-w / 2} y={-h / 2} width={w} height={h} rx={h / 2} fill={TINTA} opacity={0.95} stroke={color} strokeOpacity={0.9} strokeWidth={1.4} className="cz-cuerpo" />
+          <circle cx={-w / 2 + h / 2} cy={0} r={h / 2 - 5} fill={color} />
+          <IconoEn icono={n.icono && n.icono !== 'ninguno' ? n.icono : 'bombilla'} x={-w / 2 + h / 2} y={0} tam={h * 0.5} color={TINTA} />
+          <text x={-w / 2 + h + 8 * k} y={m.fT * 0.36} fontSize={m.fT} fill={claro} fontFamily={FUENTE} fontWeight={600}>{m.titulo[0] || ''}</text>
+          <circle cx={w / 2 - h / 2} cy={0} r={h / 2 - 8} fill="none" stroke={color} strokeWidth={1.4} />
+          <path d={`M${w / 2 - h / 2 - 5},0 H${w / 2 - h / 2 + 5} M${w / 2 - h / 2},-5 V5`} stroke={color} strokeWidth={1.8} strokeLinecap="round" />
         </g>
       );
     }
