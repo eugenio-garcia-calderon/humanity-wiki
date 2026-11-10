@@ -1003,6 +1003,15 @@ export default function Rejilla({ vinculo, alCrearEnVinculo, vistaPropia, onCamb
         {onCambiarTamano && <Segmentos etiqueta="Tamaño" valor={tamano} onCambiar={onCambiarTamano} />}
         {onCambiarTamanoNombre && <Segmentos etiqueta="Tamaño del nombre" valor={tamanoNombre} onCambiar={onCambiarTamanoNombre} desde={2} />}
         {onCambiarPesoNombre && <Chips etiqueta="Grosor del nombre" valor={pesoNombre} onCambiar={onCambiarPesoNombre} opciones={PESOS} />}
+        {/* LA TARJETA DE LUZ & HUMANIDAD, PARA CUALQUIER GALERÍA (2026-11-10, `TarjetaPortada.tsx`). */}
+        <Chips etiqueta="Diseño de tarjeta" valor={activa.config.tarjeta === 'portada' ? 'portada' : 'clasica'}
+          onCambiar={v => cambiarVista({ config: { ...activa.config, tarjeta: v === 'portada' ? 'portada' : undefined } })}
+          opciones={[['clasica', 'Clásica'], ['portada', 'Título sobre la imagen']]} />
+        {activa.config.tarjeta === 'portada' && (
+          <Chips etiqueta="Tarjetas por fila" valor={String(activa.config.por_fila || 2)}
+            onCambiar={v => cambiarVista({ config: { ...activa.config, por_fila: Number(v) } })}
+            opciones={[['1', '1'], ['2', '2'], ['3', '3'], ['4', '4']]} />
+        )}
         {/* GALERÍA SIN IMÁGENES (2026-10-20): las mismas tarjetas, sólo con nombre y propiedades. */}
         <Chips etiqueta="Imágenes" valor={activa.config.imagenes === false ? 'no' : 'si'}
           onCambiar={v => cambiarVista({ config: { ...activa.config, imagenes: v === 'si' } })}
@@ -1342,7 +1351,7 @@ export default function Rejilla({ vinculo, alCrearEnVinculo, vistaPropia, onCamb
         // página, no con una barra de desplazamiento dentro de otra.
         <div className={cn(colAgr && !colSub && 'flex flex-wrap items-stretch gap-4', colAgr && !colSub && (activa.config.grupo_alineacion || 'centro') === 'centro' && 'justify-center')}>
           {porGrupos(filas, (fs, grupo, celdasGrupo) => (
-            <Galeria onGuardarCelda={editable ? guardar : undefined} recolocar={editable} arrastrable={editable}
+            <Galeria tarjetaPortada={activa.config.tarjeta === 'portada'} tarjetasPorFila={activa.config.por_fila} onGuardarCelda={editable ? guardar : undefined} recolocar={editable} arrastrable={editable}
               onNuevaPagina={vinculo ? anadirFila : undefined} celdasNueva={vinculo ? celdasVinculo() : undefined} alCrearNueva={vinculo ? async id => { await alCrearEnVinculo?.(id); avisarCambio(); } : undefined}
               // Lo que llega de otra base de datos cae en ESTE grupo (2026-10-18).
               celdasAlRecibir={colAgr && editable ? celdasGrupo : undefined}

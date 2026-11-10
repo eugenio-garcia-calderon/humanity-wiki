@@ -29,6 +29,10 @@ import CreadorMenu from '../components/knowledge/CreadorMenu';
 import ConsolaCadena from '../components/knowledge/ConsolaCadena';
 import MenuBloque, { type OpcionExtra } from '../components/knowledge/MenuBloque';
 import PropiedadesFila from '../components/tablas/PropiedadesFila';
+import VistaProyectosSitio from '../components/sitio/VistaProyectosSitio';
+import CabeceraProyectoEscaparate from '../components/sitio/CabeceraProyectoEscaparate';
+import { raizDe } from '../components/sitio/CabeceraSitio';
+import { vistaInicialDe } from '../components/sitio/VistaMapaSitio';
 import RedEnEditor from '../components/tablas/RedEnEditor';
 import MenuEntradaPagina from '../components/tablas/MenuEntradaPagina';
 import TextoEnriquecido from '../components/knowledge/TextoEnriquecido';
@@ -237,7 +241,19 @@ function EditorPagina() {
   /** Dónde se ve publicada: su dominio propio, o su dirección en Humanity.Wiki. */
   const [urlPublicada, setUrlPublicada] = useState<string | null>(null);
   /** Si esta página es una fila de una base de datos: de cuál y dónde vive. */
+  // COMO SE PUBLICA (2026-11-10, Eugenio: «que el cómo se ve la página publicada sea igual a cómo se
+  // gestiona desde el editor»): un proyecto del escaparate lleva aquí su cabecera pública, y la
+  // portada de tarjetas se edita tal como se ve. «Bloques» enseña lo que hay debajo.
+  const [proyectoEscaparate, setProyectoEscaparate] = useState(false);
+  const [verBloques, setVerBloques] = useState(false);
   const [filaDe, setFilaDe] = useState<{ fila_id?: string; tabla_id?: string; tabla_titulo: string | null; padre: { id: string; titulo: string } | null } | null>(null);
+  useEffect(() => {
+    const padre = filaDe?.padre?.id, tabla = filaDe?.tabla_id;
+    if (!padre || !tabla) { setProyectoEscaparate(false); return; }
+    let vivo = true;
+    raizDe(padre).then(r => { if (vivo) setProyectoEscaparate(r?.config?.sitio?.escaparate === true && r.config.sitio.proyectos === tabla); });
+    return () => { vivo = false; };
+  }, [filaDe?.padre?.id, filaDe?.tabla_id]);
   const [publico, setPublico] = useState(false);
   const [puedoEditar, setPuedoEditar] = useState(false);
   const [puedoGestionar, setPuedoGestionar] = useState(false);
@@ -4305,6 +4321,10 @@ function EditorPagina() {
     return () => window.removeEventListener('click', cerrar);
   }, [menuAbierto, menuDescargar]);
 
+  const cabeceraSobreImagen = proyectoEscaparate || ajustes.cabecera?.estilo === 'portada';
+  const esPortadaTarjetas = (ajustes.sitio as any)?.escaparate === true && !!(ajustes.sitio as any)?.proyectos && vistaInicialDe(ajustes.sitio) === 'proyectos' && !!id;
+  const portadaComoWeb = esPortadaTarjetas && editable && !verBloques;
+
   if (cargando) return <p className="text-sm text-slate-400 text-center py-24">{tr('Abriendo el documento…')}</p>;
 
   if (error) {
@@ -4568,7 +4588,23 @@ function EditorPagina() {
             página pública, igual en la modificable»). Si la página empieza por un termómetro: el título
             y la descripción en una línea con el territorio a la derecha; debajo, el termómetro; luego la
             red y las páginas hijas; los bloques, después. Lo de editar (portada, ajustes, propiedades) sigue a mano. */}
-        <div data-cabecera-editor>
+        {esPortadaTarjetas && editable && (
+          <div className="mb-3 flex justify-end">
+            <button type="button" onClick={() => setVerBloques(v => !v)} className="inline-flex h-8 items-center rounded-full border border-slate-200 px-3 text-xs font-bold text-slate-600 hover:border-slate-400">
+              {verBloques ? 'Ver como la web' : 'Ver los bloques de la página'}
+            </button>
+          </div>
+        )}
+        {portadaComoWeb && (
+          <VistaProyectosSitio raizId={id!} edicion={{
+            titular: String((ajustes.sitio as any)?.portada?.titular || ''),
+            onTitular: v => {
+              setAjustes(a => ({ ...a, sitio: { ...(a.sitio as any), portada: { ...((a.sitio as any)?.portada || {}), titular: v || undefined } } }));
+              programarGuardado();
+            },
+          }} />
+        )}
+        <div data-cabecera-editor hidden={portadaComoWeb || undefined}>
         {(() => {
           const v2 = usaDisenoNuevo(ajustes.cabecera, !!filaDe?.fila_id);
           const alLado = v2 && portadaAlLado(elementosDe(ajustes.cabecera));
@@ -4686,7 +4722,14 @@ function EditorPagina() {
                     <ImageIcon className="w-3.5 h-3.5" /> {tr('Añadir portada')}
                   </button>
                 )}
-                {ajustes.subtitulo === undefined && !eligiendoIcono && (
+                {!proyectoEscaparate && !eligiendoIcono && (
+                  <button onClick={() => { setAjustes(a => ({ ...a, cabecera: { ...(a.cabecera || {}), estilo: a.cabecera?.estilo === 'portada' ? undefined : 'portada' } })); programarGuardado(); }}
+                    aria-pressed={ajustes.cabecera?.estilo === 'portada'}
+                    className={cn('inline-flex items-center gap-1 text-[11px] font-bold transition-colors', ajustes.cabecera?.estilo === 'portada' ? 'text-emerald-600' : 'text-slate-300 hover:text-slate-500')}>
+                    <ImageIcon className="w-3.5 h-3.5" /> Título sobre la imagen
+                  </button>
+                )}
+                {ajustes.subtitulo === undefined && !cabeceraSobreImagen && !eligiendoIcono && (
                   <button onClick={() => { setAjustes(a => ({ ...a, subtitulo: '' })); setFocoDescripcion(true); }}
                     className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-300 hover:text-slate-500 transition-colors">
                     <AlignLeft className="w-3.5 h-3.5" /> {tr('Añadir descripción')}
@@ -4789,6 +4832,28 @@ function EditorPagina() {
           <p className="text-xs text-slate-400 mb-6">de {autor}</p>
         ) : <div className="mb-6" />)}
           </>);
+          // EL TÍTULO SOBRE LA IMAGEN: la cabecera pública, escrita en su sitio. Las propiedades y las
+          // relaciones siguen a mano, plegadas: al publicar no salen así.
+          if (cabeceraSobreImagen) return (
+            <>
+              {filaAnadir}
+              <CabeceraProyectoEscaparate pagina={{ id: docId.current, titulo, config: { portada, subtitulo: ajustes.subtitulo }, fila: filaDe?.fila_id && filaDe.tabla_id ? { fila_id: filaDe.fila_id, tabla_id: filaDe.tabla_id } : undefined } as any}
+                edicion={editable ? {
+                  titulo, onTitulo: v => { setTitulo(v); colabRef.current?.titulo(v); programarGuardado(); },
+                  subtitulo: ajustes.subtitulo || '', onSubtitulo: v => { setAjustes(a => ({ ...a, subtitulo: v || undefined })); programarGuardado(); },
+                  onPortada: () => setEligiendoPortada(true),
+                } : undefined} />
+              {filaDe?.fila_id && filaDe.tabla_id && (
+                <details className="mb-6 rounded-xl border border-slate-200 px-4 py-2">
+                  <summary className="cursor-pointer text-sm font-bold text-slate-600">Propiedades y relaciones</summary>
+                  <div className="mt-3">
+                    <PropiedadesFila tablaId={filaDe.tabla_id} filaId={filaDe.fila_id} editable={editable} sinRelaciones />
+                    <RedEnEditor paginaId={docId.current} titulo={titulo} tablaId={filaDe.tabla_id} filaId={filaDe.fila_id} editable={editable} />
+                  </div>
+                </details>
+              )}
+            </>
+          );
           // Con el termómetro de cabecera, el título, la descripción y la imagen se editan en su tarjeta (abajo).
           if (termoBloque) return (<>{filaAnadir && eligiendoPortada ? filaAnadir : null}</>);
           if (v2) return (
@@ -4853,7 +4918,7 @@ function EditorPagina() {
             extra={editable ? <ElegirVistaHijas vista={vistaHijas} onCambiar={cambiarVistaHijas} /> : undefined} />
         )}
         {/* LA RED DE LA ENTRADA (2026-10-23): la misma que en la página publicada. */}
-        {!termoBloque && filaDe?.fila_id && filaDe.tabla_id && (
+        {!termoBloque && !cabeceraSobreImagen && filaDe?.fila_id && filaDe.tabla_id && (
           <RedEnEditor paginaId={docId.current} titulo={titulo} tablaId={filaDe.tabla_id} filaId={filaDe.fila_id} editable={editable} />
         )}
         {nombreBotonNuevo !== null && createPortal(
@@ -4972,7 +5037,7 @@ function EditorPagina() {
         )}
 
         {/* Los bloques */}
-        <div className={cn('space-y-2', editable && 'pl-0')}>
+        <div hidden={portadaComoWeb || undefined} className={cn('space-y-2', editable && 'pl-0')}>
           {/* Una fila es un bloque suelto o varios en columnas. En un
               teléfono las columnas se apilan: 390 px no caben dos. */}
           {enFilas(termoBloque ? visibles.filter(b => b !== termoBloque) : visibles).map(fila => fila.length === 1

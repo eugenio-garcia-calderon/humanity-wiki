@@ -6,6 +6,7 @@ import { useSitio } from './ContextoSitio';
 import { raizDe } from './CabeceraSitio';
 import { miniatura } from '../../utils/miniatura';
 import PresentacionSitio from './PresentacionSitio';
+import TarjetaPortada, { CLASE_TARJETA_PORTADA, type EstadoTarjeta } from '../tablas/TarjetaPortada';
 import MapaProyectosSitio from './MapaProyectosSitio';
 import HistoriaSitio from './HistoriaSitio';
 import { useDatosPortada, type ProyectoPortada } from './portadaEscaparate';
@@ -89,7 +90,7 @@ function useBajarAlAncla(listo: boolean) {
   }, [listo]);
 }
 
-export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
+export default function VistaProyectosSitio({ raizId, edicion }: { raizId: string; edicion?: { titular: string; onTitular: (v: string) => void } }) {
   const sitio = useSitio();
   const [raiz, setRaiz] = useState<{ titulo: string; config: any } | null>(null);
   // LA PORTADA DEL ESCAPARATE (2026-11-07): la presentación, el mapa y la historia leen
@@ -101,6 +102,32 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
   const [equipo, setEquipo] = useState(false);
   const [fallo, setFallo] = useState(false);
   const [area, setArea] = useState(() => areaDeLaDireccion());
+  const [aviso, setAviso] = useState<string | null>(null);
+
+  // EDITAR EN EL MISMO SITIO (2026-11-10, `TarjetaPortada.tsx`): en el editor esta vista es la de la
+  // web, y cada texto se guarda en su celda o en su página nada más salir de él.
+  const cambiarFila = (id: string, cambio: (f: Fila) => Fila) => setProyectos(t => (t ? { ...t, filas: t.filas.map(f => (f.id === id ? cambio(f) : f)) } : t));
+  const guardarCelda = async (filaId: string, columna: string, valor: unknown) => {
+    setAviso(null);
+    cambiarFila(filaId, f => ({ ...f, celdas: { ...f.celdas, [columna]: { estado: valor === null ? 'vacia' : 'ok', valor } } }));
+    const r = await fetch(`/api/bd/filas/${encodeURIComponent(filaId)}`, { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ celdas: { [columna]: valor } }) }).catch(() => null);
+    if (!r?.ok) setAviso('No se ha podido guardar el cambio. Inténtalo otra vez.');
+  };
+  const guardarDescripcion = async (filaId: string, subtitulo: string) => {
+    setAviso(null);
+    cambiarFila(filaId, f => ({ ...f, pagina: { ...(f.pagina || {}), descripcion: subtitulo || null } }));
+    const r = await fetch(`/api/bd/filas/${encodeURIComponent(filaId)}/subtitulo`, { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ subtitulo }) }).catch(() => null);
+    if (!r?.ok) setAviso('No se ha podido guardar la descripción. Inténtalo otra vez.');
+  };
+  const anadirProyecto = async () => {
+    const t = raiz?.config?.sitio?.proyectos;
+    if (!t) return;
+    setAviso(null);
+    const r = await fetch(`/api/bd/tablas/${encodeURIComponent(t)}/filas`, { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ titulo: 'Nuevo proyecto' }) }).catch(() => null);
+    if (!r?.ok) { setAviso('No se ha podido crear el proyecto.'); return; }
+    const p = await pide(t);
+    if (p) setProyectos(p);
+  };
 
   useEffect(() => {
     let vivo = true;
@@ -153,7 +180,7 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
     const opciones = new Map((colEstado?.opciones || []).map(o => [o.id, o]));
     const peso = (f: Fila) => PESO_ESTADO[opciones.get(String(f.celdas[colEstado?.id || '']?.valor || ''))?.label || ''] ?? 4;
     const filas = [...proyectos.filas]
-      .filter(f => !f.oculta && f.pagina_id && String(f.celdas[colNombre]?.valor || f.pagina?.titulo || '').trim())
+      .filter(f => (edicion ? true : !f.oculta && f.pagina_id) && String(f.celdas[colNombre]?.valor || f.pagina?.titulo || '').trim())
       .sort((a, b) => peso(a) - peso(b) || a.orden - b.orden);
     // LA FECHA (2026-11-06, Eugenio: «añade la fecha de los proyectos; abajo a la izquierda
     // sobre la imagen»): el año de su «Fecha Inicio» (o de la primera columna de fecha).
@@ -252,7 +279,7 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
       {/* LA PRESENTACIÓN (2026-11-07, Eugenio: «haz todas las propuestas… con alta calidad, no
           quiero nada cutre»): qué es el laboratorio en una línea y el botón de colaborar,
           encima de las tarjetas y sin empujarlas fuera de la primera pantalla. */}
-      {escaparate && <PresentacionSitio cfg={raiz.config} />}
+      {escaparate && <PresentacionSitio cfg={raiz.config} edicion={edicion} />}
 
       {/* LAS TARJETAS (2026-11-06, Eugenio: «el título en blanco con un poco de sombra y de fondo
           la portada, como en la página del proyecto; debajo la descripción en letra pequeña sobre
@@ -271,43 +298,29 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
           const principal = FOCO.has(estado?.label || '');
           return (
             <li key={f.id} className="relative">
-              <Link to={sitio ? sitio.enlacePagina(f.pagina_id!) : `/p/${f.pagina_id}`}
-                className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
-                <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
-                  {img ? (
-                    <img src={miniatura(img, 400)} alt={descripcion ? `${nombre}: ${descripcion}` : nombre} loading={i < 4 ? 'eager' : 'lazy'} decoding="async"
-                      {...(i < 2 ? { fetchPriority: 'high' as const } : {})}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                      style={enc ? { objectPosition: `${enc.x ?? 50}% ${enc.y ?? 50}%` } : undefined} />
-                  ) : (
-                    <div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-400" />
-                  )}
-                  <div aria-hidden className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-black/70 via-black/25 to-transparent" />
-                  {/* EL ESTADO, ARRIBA A LA IZQUIERDA Y MÁS GRANDE; EL AÑO Y EL ÁREA, DEBAJO DEL TÍTULO
-                      (2026-11-06, Eugenio: «las propiedades debajo de los títulos, en letra blanca con
-                      esa sombra, sin fondo, más pequeñas que el título»). */}
-                  {estado && (
-                    <span className="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full bg-white/90 px-3.5 py-1.5 text-sm font-bold text-slate-800 shadow-sm backdrop-blur">
-                      <span aria-hidden className="h-2.5 w-2.5 rounded-full" style={{ background: estado.color || '#94a3b8' }} />
-                      {estado.label}
-                    </span>
-                  )}
-                  <div data-fondo-oscuro="" className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
-                    <Titulo className="text-2xl font-black leading-tight tracking-tight text-white [text-shadow:0_2px_8px_rgba(0,0,0,0.45)] sm:text-3xl">{nombre}</Titulo>
-                    {(modelo.fecha(f) || sus.length > 0) && (
-                      <p className="mt-1 text-sm font-semibold text-white/90 [text-shadow:0_1px_6px_rgba(0,0,0,0.55)]">
-                        {[modelo.fecha(f) && (principal ? `Desde ${modelo.fecha(f)}` : modelo.fecha(f)), ...sus.slice(0, 2)].filter(Boolean).join(' · ')}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                {descripcion && (
-                  <div className="px-4 py-3 sm:px-5">
-                    <p className="line-clamp-2 text-sm leading-snug text-slate-500">{descripcion}</p>
-                  </div>
-                )}
-              </Link>
-              {equipo && f.pagina_id && (
+              {(() => {
+                const datosEl = [modelo.fecha(f) && (principal ? `Desde ${modelo.fecha(f)}` : modelo.fecha(f)), ...sus.slice(0, 2)].filter(Boolean).join(' · ');
+                const opciones = (modelo.colEstado?.opciones || []) as EstadoTarjeta[];
+                const tarjeta = (
+                  <TarjetaPortada nombre={nombre} imagen={img} encuadre={enc} descripcion={descripcion} estado={estado} datos={datosEl} Titulo={Titulo} prioridad={i}
+                    edicion={edicion ? {
+                      onNombre: v => guardarCelda(f.id, modelo.colNombre, v),
+                      onDescripcion: v => guardarDescripcion(f.id, v),
+                      opciones,
+                      onEstado: modelo.colEstado ? id => guardarCelda(f.id, modelo.colEstado!.id, id) : undefined,
+                    } : undefined}
+                    esquina={edicion ? <>
+                      {f.oculta && <span className="rounded-full bg-slate-900/80 px-2.5 py-1 text-xs font-bold text-white">Oculta</span>}
+                      {f.pagina_id && <Link to={`/paginas/${f.pagina_id}`} className="inline-flex h-8 items-center gap-1.5 rounded-full bg-white/90 px-3 text-xs font-bold text-slate-700 shadow-sm backdrop-blur hover:bg-white">
+                        <Pencil className="h-3.5 w-3.5" /> Abrir
+                      </Link>}
+                    </> : undefined} />
+                );
+                return edicion
+                  ? <div className={cn(CLASE_TARJETA_PORTADA, f.oculta && 'opacity-60')}>{tarjeta}</div>
+                  : <Link to={sitio ? sitio.enlacePagina(f.pagina_id!) : `/p/${f.pagina_id}`} className={CLASE_TARJETA_PORTADA}>{tarjeta}</Link>;
+              })()}
+              {equipo && !edicion && f.pagina_id && (
                 <a href={`https://humanity.wiki/paginas/${encodeURIComponent(f.pagina_id)}`} target="_blank" rel="noopener noreferrer"
                   title={`Editar «${nombre}»`} aria-label={`Editar «${nombre}»`}
                   className="absolute right-3 top-12 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-slate-600 shadow-sm backdrop-blur hover:text-slate-900">
@@ -317,7 +330,16 @@ export default function VistaProyectosSitio({ raizId }: { raizId: string }) {
             </li>
           );
         })}
+        {edicion && (
+          <li>
+            <button type="button" onClick={anadirProyecto}
+              className="grid aspect-[16/9] h-full w-full place-items-center rounded-2xl border-2 border-dashed border-slate-300 text-sm font-bold text-slate-500 transition-colors hover:border-slate-500 hover:text-slate-800">
+              <span className="inline-flex items-center gap-2"><Plus className="h-4 w-4" /> Añadir proyecto</span>
+            </button>
+          </li>
+        )}
       </ul>
+      {edicion && aviso && <p role="alert" className="mt-3 text-sm font-bold text-rose-600">{aviso}</p>}
       {visibles.length === 0 && <p className="py-16 text-center text-sm text-slate-500">No hay proyectos en esta categoría.</p>}
 
       {/* DÓNDE TRABAJAMOS Y NUESTRA HISTORIA (2026-11-07): el dónde y el cuándo de los proyectos,
