@@ -105,6 +105,7 @@ export const TIPOS_BLOQUE_DATOS = [
   'donacion',      // donar con tarjeta por Stripe, sin cuenta (2026-10-26)
   'perfil',        // la cabecera del perfil de una persona: nombre, áreas, conectar (2026-10-26)
   'escaparate',    // una sección calculada de las páginas propias de un escaparate: colabora, prensa, quiénes somos (2026-11-07)
+  'prestamo',      // formalizar un préstamo a una entidad: datos, condiciones y firma, transferencia (2026-11-10, SolarCrowd)
 ] as const;
 export type TipoBloqueDatos = typeof TIPOS_BLOQUE_DATOS[number];
 

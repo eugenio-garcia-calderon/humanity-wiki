@@ -10887,3 +10887,33 @@ Eugenio: «permite que el triciclo bala se le pueda modificar más los parámetr
 - **Ventanas laterales con montante (Aptera)**: un montante azul marino curvo separa el parabrisas de la ventana lateral y sigue como marco entre la ventana y el techo. Deslizadores: dónde nace, cuánto se tumba hacia atrás, ancho, alto de la ventana; selector «Cúpula: con montante / de una pieza». La forma de la cúpula no cambia (ni el Cd ni el área frontal).
 - **Por defecto**: las medidas de antes; techo solar y montantes activados. Cambia: masa en vacío 177,7 → 177,9 kg; cristal 2,36 → 1,59 m²; panel 0,63 m², 132 W de pico, ~0,35 kWh/día (~14 km/día a 80 km/h). Cd, consumo, autonomía y vuelco, iguales.
 - Los diseños del Triciclo guardados antes abren igual salvo el techo solar y los montantes, que llegan activados (campos nuevos opcionales).
+
+## 2026-11-10 — «Realizar préstamo»: formalizar un préstamo con firma, justificante y copia por correo
+
+- Eugenio: «un botón que sea realizar préstamo… que se rellenen los datos del prestamista, se le expliquen las condiciones, que las acepte y que haga una firma… que adjunte el justificante… dividido en 3 secciones dentro de la misma página… que se envíe una copia de lo firmado y lo aceptado al correo de esta persona». Y después: «añadir el IBAN de la entidad… y también el correo electrónico para que aparezcan ambos públicos… la entidad recibe una copia a ese correo».
+- **Bloque de datos nuevo «Formalizar préstamo»** (`src/components/bloquesDatos/prestamo/`). Lo ve quien visita: las condiciones, el IBAN y el correo de la entidad, y el botón «Realizar préstamo», que abre tres pasos en la misma página:
+  1. Tus datos y tu préstamo.
+  2. Condiciones y firma: un resumen, desplegables con el contrato completo, los riesgos y los datos personales, tres casillas y la firma con el dedo.
+  3. Transferencia y justificante.
+- **Al enviarlo**, el servidor (`src/server/prestamos.ts`) hace esto:
+  - Rehace el contrato a partir del bloque guardado en la página, nunca de lo que manda el navegador, y calcula su huella SHA-256.
+  - Genera el PDF firmado.
+  - Guarda la firma, el justificante y el PDF en `/uploads/privado/` (no se sirven en público) y añade una fila en `prestamos_firmados` (migración 0183).
+  - Manda los correos por la cuenta SMTP de Google que ya existe:
+    - a la persona, el PDF;
+    - a administración (`avisar`) y a la entidad (`correoEntidad`), el PDF y el justificante.
+  - La pantalla solo dice que salió el correo si salió de verdad; si no, ofrece descargar el PDF.
+- **El editor** permite cambiar todos los datos del préstamo: entidad, NIF, IBAN, correo, destino, subvención, intereses, plazos, importes y quién supervisa. Tiene un interruptor «Abierto» y avisa de lo que falta para abrirlo.
+  - El correo de la entidad es obligatorio para abrir.
+  - El IBAN solo se enseña con el préstamo abierto.
+  - Quien administra la página ve aquí los préstamos firmados: estado, contrato, justificante y «Borrar sus datos» (derecho de supresión).
+- **Comprobado en local** (Postgres con todas las migraciones, servidor real, SMTP de prueba, Chrome sin cabeza a 390 px táctil):
+  - El recorrido completo, incluida la descarga del PDF. Los 3 correos con sus adjuntos y sus «Responder a».
+  - Los rechazos:
+    - demasiado rápido, campo trampa, sin casillas, sin firma, firma falsa;
+    - justificante falso, letra del DNI, importe, interés inventado, plazo, IBAN;
+    - préstamo cerrado, otra web, bloque inexistente, JSON normal.
+  - Lista, archivo, estado y borrado solo para quien administra la página (401 sin sesión, 403 para otra persona).
+  - El borrado quita los tres archivos del disco.
+  - La huella del PDF coincide con el texto guardado.
+- **Sin verificar:** en producción, con el Gmail real (límite de adjuntos y de envíos), y con la app instalada en un móvil. Pendiente de datos: el IBAN, el NIF y el correo de ASNUCI para abrir su préstamo.
