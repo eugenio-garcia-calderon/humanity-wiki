@@ -65,6 +65,12 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "Aviso al final del pie",
       "desde": "2026-11-10T11:16:14.779Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0186_aeromovil_triciclo_base.sql",
+      "motivo": "Triciclo: libera el 0182 para préstamos",
+      "desde": "2026-11-10T11:19:37.739Z"
     }
   ]
 }
