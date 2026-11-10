@@ -10866,3 +10866,10 @@ Petición de Eugenio: que al cargar /aeromovil aparezca el Triciclo Bala con su 
 - Selector ES · EN · PT arriba a la derecha en todas las webs del laboratorio (`SelectorIdioma.tsx`); lleva a la misma página en cada idioma.
 - Portugués en `pt.lighthumanity.org`, con el mismo sistema que el inglés; un idioma no sale en el selector ni se indexa hasta tener casi todo traducido.
 - Titular de la portada: «Impulsamos proyectos que resuelven los grandes retos del ser humano.»
+
+## 2026-11-10 — Las subpáginas de un dominio propio abren también con «www.»
+
+- Eugenio, con una captura de `www.solarcrowd.com/prestamos/hogar-de-asnuci-en-lepe`: «algo está fallando en las páginas de cada proyecto».
+- Causa: el dominio se guarda sin `www.` (`normalizarDominio`) y Caddy sirve las dos formas, pero `sitioDe` buscaba el anfitrión tal cual llegaba. Con `www.`, `dominioApunta` no encontraba el dominio: la portada abría y cada subpágina daba «Esta página no existe». Afectaba a todos los dominios propios, también a luzhumanidad.com.
+- Arreglo: para un dominio propio, `sitioDe` quita el `www.` del anfitrión. Las direcciones canónicas y el mapa web salen también sin `www.`, una por página. Los dominios traducidos ya redirigían su `www.` (`traducciones.ts`) y no cambian.
+- Comprobado en local con un dominio de prueba: sin el arreglo, `www.` da 404 en una subpágina y sin `www.` da 200; con el arreglo, las dos dan 200, y una dirección que no existe sigue dando 404. `tsc` y `build` limpios.

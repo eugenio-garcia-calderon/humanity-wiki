@@ -223,7 +223,15 @@ export function sitioDe(req: Request): Sitio {
     if (esSubdominioDeSitio(comoSitio)) return { forma: 'dominio', host: comoSitio };
     return { forma: 'subdominio', host, handle: primero };
   }
-  return { forma: 'dominio', host };
+  // EL «www» DE UN DOMINIO PROPIO ES EL MISMO SITIO (2026-11-10, Eugenio en
+  // solarcrowd.com: «algo está fallando en las páginas de cada proyecto»). El
+  // dominio se guarda sin `www.` (`normalizarDominio`) y Caddy sirve las dos
+  // formas, pero aquí se buscaba tal cual llegaba: en `www.solarcrowd.com` la
+  // portada salía y cada subpágina daba «Esta página no existe», porque
+  // `dominioApunta` buscaba `www.solarcrowd.com` y no lo encontraba. Quien
+  // escribe `www.` quiere su sitio, y las direcciones canónicas salen así sin
+  // `www.`: una sola por página.
+  return { forma: 'dominio', host: host.replace(/^www\./, '') };
 }
 
 /** La página a la que apunta un dominio propio, o su dueño si apunta al
