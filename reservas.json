@@ -41,6 +41,12 @@
       "ruta": "drizzle/0182_prestamos_firmados.sql",
       "motivo": "Formalizar préstamo (renumerada: 0180 y 0181 ya están en main)",
       "desde": "2026-11-10T10:53:13.238Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0183_aeromovil_triciclo_por_defecto.sql",
+      "motivo": "Triciclo Bala por defecto",
+      "desde": "2026-11-10T10:57:43.844Z"
     }
   ]
 }
