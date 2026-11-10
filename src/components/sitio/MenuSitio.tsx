@@ -42,11 +42,22 @@ export const ICONOS_MENU: Record<string, typeof Home> = {
   Download, ExternalLink, Instagram, Facebook, Linkedin, Youtube, Twitter, Github,
 };
 
-export function IconoMenu({ valor, tamano }: { valor?: string; tamano: number }) {
+export function IconoMenu({ valor, tamano, horizontal, alt }: {
+  valor?: string; tamano: number;
+  /** Un logotipo ancho (`menu.logoHorizontal`): a la altura de siempre, entero y sin recortar. */
+  horizontal?: boolean;
+  /** Con el nombre dentro del logotipo y sin texto al lado, el logotipo es el nombre del enlace. */
+  alt?: string;
+}) {
   if (!valor) return null;
   if (valor.startsWith('lucide:')) {
     const I = ICONOS_MENU[valor.slice(7)];
     return I ? <I style={{ width: tamano, height: tamano }} strokeWidth={1.9} className="shrink-0" /> : null;
+  }
+  if (/^(https?:|\/)/.test(valor) && horizontal) {
+    // Hasta seis veces más ancho que alto: «SolarCrowd» mide unas 6:1. La miniatura se pide
+    // por ese ancho, no por el alto, o saldría borrosa.
+    return <img src={miniatura(valor, tamano * 6)} alt={alt || ''} style={{ height: tamano, width: 'auto', maxWidth: tamano * 6 }} className="shrink-0 object-contain" />;
   }
   if (/^(https?:|\/)/.test(valor)) return <img src={miniatura(valor, tamano)} alt="" style={{ width: tamano, height: tamano }} className="shrink-0 rounded object-cover" />;
   return <span style={{ fontSize: Math.round(tamano * 0.9), lineHeight: 1 }} className="shrink-0">{valor}</span>;
@@ -112,15 +123,17 @@ function EnlaceMenu({ e, rutas, tamano, acento, lleno }: {
   );
 }
 
-function Marca({ logo, nombre, tamano, rutas, columna }: {
+function Marca({ logo, nombre, tamano, rutas, columna, horizontal, etiqueta }: {
   logo?: string; nombre?: string; tamano: Tamano; rutas: Rutas; columna?: boolean;
+  /** `menu.logoHorizontal`, y el nombre de la web para quien no ve el logotipo. */
+  horizontal?: boolean; etiqueta?: string;
 }) {
   if (!logo && !nombre) return null;
   const m = MEDIDAS[tamano];
   return (
     <a href={hrefDe({ tipo: 'inicio' }, rutas)} data-interno=""
       className={cn('flex min-w-0 min-h-11 shrink-0 font-black tracking-tight', columna ? 'flex-col items-start gap-3' : 'items-center gap-2.5')}>
-      {logo && <IconoMenu valor={logo} tamano={m.logo} />}
+      {logo && <IconoMenu valor={logo} tamano={m.logo} horizontal={horizontal} alt={horizontal && !nombre ? etiqueta : undefined} />}
       {nombre && <span className={cn('truncate', tamano === 'grande' ? 'text-xl' : tamano === 'pequeno' ? 'text-sm' : 'text-base')}>{nombre}</span>}
     </a>
   );
@@ -192,8 +205,8 @@ function useApretado(medir: boolean) {
   return { fila, nav, apretado };
 }
 
-function Barra({ s, rutas, logo, nombre, soloMovil, cuenta }: {
-  s: Sitio; rutas: Rutas; logo?: string; nombre?: string; soloMovil?: boolean; cuenta?: string | null;
+function Barra({ s, rutas, logo, nombre, etiqueta, soloMovil, cuenta }: {
+  s: Sitio; rutas: Rutas; logo?: string; nombre?: string; etiqueta?: string; soloMovil?: boolean; cuenta?: string | null;
 }) {
   const mn = s.menu;
   const m = MEDIDAS[mn.tamano];
@@ -209,7 +222,7 @@ function Barra({ s, rutas, logo, nombre, soloMovil, cuenta }: {
           entera, no a esta fila: así cae debajo de la caja de buscar y no la
           tapa (comprobación en producción tras la ronda 2). */}
       <div ref={fila} className="mx-auto max-w-[calc(576px+50vw)] px-5 @2xl:px-8 flex items-center gap-4" style={{ height: m.alto }}>
-        <Marca logo={logo} nombre={nombre} tamano={mn.tamano} rutas={rutas} />
+        <Marca logo={logo} nombre={nombre} tamano={mn.tamano} rutas={rutas} horizontal={!!mn.logoHorizontal} etiqueta={etiqueta} />
         <nav ref={nav} aria-label="Menú"
           className={cn('flex-1 items-center gap-1 min-w-0',
             mn.alineacion === 'centro' ? 'justify-center-safe' : mn.alineacion === 'izquierda' ? 'justify-start' : 'justify-end-safe',
@@ -251,13 +264,13 @@ function Barra({ s, rutas, logo, nombre, soloMovil, cuenta }: {
   );
 }
 
-function Lateral({ s, rutas, logo, nombre, cuenta }: { s: Sitio; rutas: Rutas; logo?: string; nombre?: string; cuenta?: string | null }) {
+function Lateral({ s, rutas, logo, nombre, etiqueta, cuenta }: { s: Sitio; rutas: Rutas; logo?: string; nombre?: string; etiqueta?: string; cuenta?: string | null }) {
   const mn = s.menu;
   return (
     <aside style={{ background: mn.fondo, color: mn.texto, borderColor: `${mn.texto}1f` }}
       className={cn('hidden @2xl:flex flex-col gap-8 w-64 shrink-0 p-6 self-start sticky top-0 h-screen overflow-y-auto', mn.borde && 'border-r')}>
       {cuenta && <div className="absolute right-3 top-3"><CuentaMenu raiz={cuenta} /></div>}
-      <Marca logo={logo} nombre={nombre} tamano={mn.tamano} rutas={rutas} columna />
+      <Marca logo={logo} nombre={nombre} tamano={mn.tamano} rutas={rutas} columna horizontal={!!mn.logoHorizontal} etiqueta={etiqueta} />
       {mn.buscador && <CajaBuscar rutas={rutas} s={s} lleno />}
       <nav aria-label="Menú" className="flex flex-col gap-1">
         {mn.enlaces.map(e => <EnlaceMenu key={e.id} e={e} rutas={rutas} tamano={mn.tamano} acento={mn.acento} lleno />)}
@@ -310,6 +323,8 @@ function MapaWeb({ raizId, rutas }: { raizId: string; rutas: Rutas }) {
 function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: string; nombre?: string }) {
   const p = s.pie;
   const c = p.contacto;
+  // Sin logotipo propio, el pie usa el del menú (`MarcoSitio`), y con él su forma.
+  const logoHorizontal = p.logo ? !!p.logoHorizontal : !!s.menu.logoHorizontal;
   const hayContacto = p.mostrarContacto && !!(c.email || c.telefono || c.direccion);
   const legales = (Object.keys(NOMBRES_LEGALES) as DocLegal[]).filter(d => p.legales[d]);
   const titulo = 'text-[11px] font-black uppercase tracking-[0.15em] opacity-60 mb-3';
@@ -391,8 +406,9 @@ function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: s
         <div className="space-y-3">
           {(logo || nombre) && (
             <div className="flex items-center gap-2.5 font-black text-lg">
-              {logo && <IconoMenu valor={logo} tamano={36} />}
-              {nombre && <span>{nombre}</span>}
+              {logo && <IconoMenu valor={logo} tamano={36} horizontal={logoHorizontal} alt={logoHorizontal ? nombre : undefined} />}
+              {/* Un logotipo horizontal ya lleva el nombre dentro: no se repite al lado. */}
+              {nombre && !(logo && logoHorizontal) && <span>{nombre}</span>}
             </div>
           )}
           {p.descripcion && <p className="text-base opacity-75 leading-relaxed whitespace-pre-line max-w-xs">{p.descripcion}</p>}
@@ -497,12 +513,14 @@ export function MarcoSitio({ sitio, rutas, logo, nombre, cuenta, children }: {
   const nombreMenu = mn.mostrarNombre ? (mn.nombre || nombre || undefined) : undefined;
   const logoPie = sitio.pie.mostrarLogo ? (sitio.pie.logo || mn.logo || logo || undefined) : undefined;
   const nombrePie = sitio.pie.nombre || mn.nombre || nombre || undefined;
+  // El nombre de la web aunque no se enseñe al lado del logotipo: con uno horizontal, es su texto alternativo.
+  const etiqueta = mn.nombre || nombre || undefined;
   const lateral = mn.activo && mn.posicion === 'lateral' && mn.plegado !== 'siempre';
   return (
     <div data-marco-sitio className="sitio-foco @container min-h-screen bg-white flex flex-col">
-      {mn.activo && <Barra s={sitio} rutas={rutas} logo={logoMenu} nombre={nombreMenu} soloMovil={lateral} cuenta={cuenta} />}
+      {mn.activo && <Barra s={sitio} rutas={rutas} logo={logoMenu} nombre={nombreMenu} etiqueta={etiqueta} soloMovil={lateral} cuenta={cuenta} />}
       <div className={cn('flex-1', lateral && '@2xl:flex')}>
-        {lateral && <Lateral s={sitio} rutas={rutas} logo={logoMenu} nombre={nombreMenu} cuenta={cuenta} />}
+        {lateral && <Lateral s={sitio} rutas={rutas} logo={logoMenu} nombre={nombreMenu} etiqueta={etiqueta} cuenta={cuenta} />}
         <div className="flex-1 min-w-0">{children}</div>
       </div>
       {sitio.pie.activo && <PieSitio s={sitio} rutas={rutas} logo={logoPie} nombre={nombrePie} />}

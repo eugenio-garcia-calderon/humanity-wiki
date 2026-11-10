@@ -67,6 +67,11 @@ export type Menu = {
   nombre?: string;
   mostrarLogo: boolean;
   mostrarNombre: boolean;
+  /** UN LOGOTIPO HORIZONTAL (2026-11-10, Eugenio en solarcrowd.com: «reutiliza el logo»). Un
+   *  logotipo con el nombre dentro («SolarCrowd») es ancho; en el cuadrado de siempre se recortaba
+   *  y solo se leía una letra. Encendido, se ve entero a la altura del menú, sin recortar. Apagado
+   *  (y en todos los sitios que ya existían), el cuadrado de siempre. */
+  logoHorizontal?: boolean;
   /** Una raya fina debajo (arriba) o al lado (lateral). */
   borde: boolean;
   /** Una caja para buscar dentro del sitio (2026-10-18). Apagada en los
@@ -92,6 +97,9 @@ export type Pie = {
   fondo: string;
   texto: string;
   logo?: string;
+  /** Como en el menú: el logotipo con el nombre dentro, entero. Sin logotipo propio del pie se
+   *  usa el del menú, y con él su forma. Con logotipo horizontal no se repite el nombre al lado. */
+  logoHorizontal?: boolean;
   nombre?: string;
   mostrarLogo: boolean;
   descripcion?: string;
