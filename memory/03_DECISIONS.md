@@ -1318,6 +1318,10 @@ Marking items done or discarded is admin-only (level 4). Saving the map itself s
 
 The default is data (`por_defecto`, migration 0185), not code, so the owner's star keeps working. The first-visit rule only opened the default when the browser had nothing stored, so Eugenio himself would never have seen the change. A one-shot localStorage flag (`aeromovil.inicio.triciclo`) opens the default once in every browser. Rejected: bumping `aeromovil.parametros.v5` to v6, which would also throw away every stored local state for good. Cost accepted: an unsaved local edit by a non-owner is replaced on that one load (the owner's designs autosave).
 
+## 2026-11-10 — Triciclo base-design migration renumbered 0182 → 0186
+
+Another session had claimed 0182 (`prestamos_firmados`) and Eugenio asked to move ours. Ours was already applied in production as `0182_aeromovil_triciclo_base.sql`; renamed to 0186 it runs once more on the next deploy and inserts nothing (WHERE NOT EXISTS). 0185 depends on the row, which already exists. Exception to drizzle/CLAUDE.md «renaming an applied migration is worse than the duplicate», safe only because the file is idempotent.
+
 ## 2026-11-10 — Formalizing a loan: one contract function, the block as the source of truth, files kept private
 
 Eugenio asked for a «Realizar préstamo» flow on solarcrowd.com: lender's details, conditions with a signature, transfer receipt, and a copy of what was signed mailed to the lender.

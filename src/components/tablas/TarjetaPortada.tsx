@@ -73,7 +73,7 @@ export function PildoraEstado({ estado, opciones, onCambiar, className, icono, n
   );
 }
 
-export default function TarjetaPortada({ nombre, imagen, alt, encuadre, descripcion, pildora, iconoPildora, nombrePildora, Titulo = 'h3', prioridad = 9, conDescripcion = true, edicion, esquina }: {
+export default function TarjetaPortada({ nombre, imagen, alt, encuadre, descripcion, pildora, iconoPildora, nombrePildora, Titulo = 'h3', prioridad = 9, conDescripcion = true, edicion, esquina, fondo }: {
   nombre: string;
   imagen: string | null | undefined;
   alt?: string;
@@ -91,6 +91,8 @@ export default function TarjetaPortada({ nombre, imagen, alt, encuadre, descripc
   edicion?: { onNombre: (v: string) => void; onDescripcion: (v: string) => void; opciones?: EstadoTarjeta[]; onPildora?: (id: string | null) => void };
   /** Lo que va arriba a la derecha (abrir, más opciones). */
   esquina?: ReactNode;
+  /** Lo que se pinta si no hay imagen, en vez del degradado gris. */
+  fondo?: ReactNode;
 }) {
   // EL TÍTULO Y LA DESCRIPCIÓN, JUNTOS SOBRE LA IMAGEN (2026-11-10, Eugenio): letra blanca con sombra,
   // la descripción algo mayor y en dos líneas como mucho, y abajo casi negro, aclarándose hacia el centro.
@@ -103,7 +105,7 @@ export default function TarjetaPortada({ nombre, imagen, alt, encuadre, descripc
           {...(prioridad < 3 ? { fetchPriority: 'high' as const } : {})}
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           style={encuadre ? { objectPosition: `${encuadre.x ?? 50}% ${encuadre.y ?? 50}%` } : undefined} />
-      ) : (
+      ) : fondo || (
         <div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-400" />
       )}
       <div aria-hidden className="absolute inset-x-0 bottom-0 h-[85%] bg-gradient-to-t from-black via-black/75 via-40% to-transparent" />

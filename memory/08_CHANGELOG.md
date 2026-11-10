@@ -10851,6 +10851,29 @@ Petición de Eugenio: que al cargar /aeromovil aparezca el Triciclo Bala con su 
 - Migración 0185: el diseño base del equipo del Triciclo (0182) pasa a ser el diseño por defecto (la estrella); el que lo era deja de serlo. Se puede volver a mover la estrella desde el menú del logo.
 - Quien ya tenía un diseño abierto en su navegador lo seguía viendo al volver; ahora cada navegador abre una vez más el diseño por defecto (marca `aeromovil.inicio.triciclo`) y desde ahí abre lo último que tuvo. Un cambio sin guardar de quien no es el dueño se pierde esa vez.
 
+### 2026-11-10 — Una sola fuente, todos los idiomas: la base de lighthumanity.org
+- Eugenio: luzhumanidad.com es la fuente en español y lighthumanity.org su réplica en inglés, y Google debe saber que son la misma página. Regla 11 de la Constitución (v1.2).
+- `src/server/traducciones.ts`: el dominio traducido sirve las mismas páginas y cambia cada texto por el suyo. Diccionario y lista de tareas en `traducciones_textos`; `barrerTraducciones` apunta lo publicado cada 15 minutos.
+- Direcciones en inglés, `hreflang` recíproco en las dos webs, canónica propia, sitemap propio y selector de idioma en el pie, sin redirigir por idioma.
+- Lo escrito en el código (botones, esquemas) lo cambia `src/i18n/traductorDom.ts` y lo que falte lo avisa el navegador.
+- Sin IA de pago: traduce la sesión de trabajo una vez al día por la API con `TRADUCCIONES_TOKEN`.
+- lighthumanity.org sigue redirigiendo hasta que esté traducido: la migración que lo activa va en otro despliegue.
+
+### 2026-11-10 — Proyectos que nos inspiran
+- Eugenio: una sección antes del pie con una base de datos de proyectos de otras personas y organizaciones, en una sola línea con slider. Tabla «Proyectos que nos inspiran» (`sitio.inspiran`) con Our World in Data, Robodienst, World Solar Challenge y Shell Eco-marathon; `InspiranSitio.tsx`. Entra también en la lista de traducción de lighthumanity.org.
+
+### 2026-11-10 — Selector de idioma, portugués y la misión en la portada
+- Selector ES · EN · PT arriba a la derecha en todas las webs del laboratorio (`SelectorIdioma.tsx`); lleva a la misma página en cada idioma.
+- Portugués en `pt.lighthumanity.org`, con el mismo sistema que el inglés; un idioma no sale en el selector ni se indexa hasta tener casi todo traducido.
+- Titular de la portada: «Impulsamos proyectos que resuelven los grandes retos del ser humano.»
+
+## 2026-11-10 — Las subpáginas de un dominio propio abren también con «www.»
+
+- Eugenio, con una captura de `www.solarcrowd.com/prestamos/hogar-de-asnuci-en-lepe`: «algo está fallando en las páginas de cada proyecto».
+- Causa: el dominio se guarda sin `www.` (`normalizarDominio`) y Caddy sirve las dos formas, pero `sitioDe` buscaba el anfitrión tal cual llegaba. Con `www.`, `dominioApunta` no encontraba el dominio: la portada abría y cada subpágina daba «Esta página no existe». Afectaba a todos los dominios propios, también a luzhumanidad.com.
+- Arreglo: para un dominio propio, `sitioDe` quita el `www.` del anfitrión. Las direcciones canónicas y el mapa web salen también sin `www.`, una por página. Los dominios traducidos ya redirigían su `www.` (`traducciones.ts`) y no cambian.
+- Comprobado en local con un dominio de prueba: sin el arreglo, `www.` da 404 en una subpágina y sin `www.` da 200; con el arreglo, las dos dan 200, y una dirección que no existe sigue dando 404. `tsc` y `build` limpios.
+
 ## 2026-11-10 — «Realizar préstamo»: formalizar un préstamo con firma, justificante y copia por correo
 
 - Eugenio: «un botón que sea realizar préstamo… que se rellenen los datos del prestamista, se le expliquen las condiciones, que las acepte y que haga una firma… que adjunte el justificante… dividido en 3 secciones dentro de la misma página… que se envíe una copia de lo firmado y lo aceptado al correo de esta persona». Y después: «añadir el IBAN de la entidad… y también el correo electrónico para que aparezcan ambos públicos… la entidad recibe una copia a ese correo».

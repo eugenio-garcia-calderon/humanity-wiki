@@ -2,7 +2,7 @@
 
 # Constitución de Wiki Creator
 
-Versión 1.1
+Versión 1.2
 
 ## Propósito
 Define las reglas fundamentales de Humanity.wiki.
@@ -18,6 +18,7 @@ Define las reglas fundamentales de Humanity.wiki.
 8. Relaciones explícitas.
 9. Flujo: Problema → Conocimiento → Soluciones → Necesidades → Productos → Transacción → Iniciativa → Resultados → Caso de éxito.
 10. Diseñar siempre para escalar.
+11. **Una sola fuente, todos los idiomas.** luzhumanidad.com es la fuente original en español y lighthumanity.org su réplica en inglés. Todo cambio publicado en la fuente, sea de contenido, de interfaz o de un esquema, se publica también en lighthumanity.org: entra en la lista de tareas de traducción (`traducciones_textos`) y se traduce como máximo en un día. Nunca se escribe directamente en la réplica ni se crea un texto público que quede fuera de esa lista. Ver `src/server/traducciones.ts`.
 
 ## Prioridad
 Constitución > Visión > Arquitectura > Base de datos > Requisitos > UI > Implementación.

@@ -109,7 +109,9 @@ export async function ponerIdioma(i: Idioma) {
 
 /** Al arrancar: carga el diccionario del idioma elegido o del navegador. */
 export function iniciarIdioma() {
-  const i = leerIdioma();
+  // Un sitio con versión en otro idioma manda el suyo (`traducciones.ts`), sea cual sea el navegador.
+  const delSitio = typeof window !== 'undefined' ? (window as any).__IDIOMA_SITIO__?.actual : null;
+  const i = esIdioma(delSitio) ? delSitio : delSitio ? 'es' : leerIdioma();
   if (i === 'es') { aplicar('es'); return; }
   // Hasta que llega el diccionario se ve español; al llegar se repinta.
   void cargar(i).then(() => aplicar(i));
