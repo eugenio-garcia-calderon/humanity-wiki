@@ -274,6 +274,27 @@ export async function barrerTraducciones(db: any): Promise<number> {
   return n;
 }
 
+/** Títulos y nombres cortos de lo publicado, sin leer los cuerpos: al arrancar las direcciones en
+ *  inglés tienen que estar listas enseguida, no cuando acabe el primer barrido. */
+async function cargarPaginasConocidas(db: any) {
+  const todas: any[] = [];
+  for (const s of SITIOS_TRADUCIDOS) {
+    const raiz = (await db.execute(sql`SELECT id, title, config FROM knowledge_windows WHERE id = ${s.raiz}`)).rows[0] as any;
+    if (!raiz) continue;
+    const cfg = raiz.config?.sitio || {};
+    const tablas = [cfg.proyectos, cfg.personas, cfg.sistemas].filter(Boolean).map(String);
+    const pie = (await paginasDelPie(db, raiz)).map(p => p.id);
+    todas.push({ title: raiz.title, slug: null });
+    const r = await db.execute(sql`
+      SELECT w.title, w.slug FROM knowledge_windows w
+      WHERE w.deleted_at IS NULL AND w.archived_at IS NULL AND (w.id = ANY(string_to_array(${pie.join(',')}, ','))
+        OR w.id IN (SELECT pagina_id FROM bd_filas WHERE tabla_id = ANY(string_to_array(${tablas.join(',')}, ',')) AND deleted_at IS NULL))
+    `);
+    todas.push(...(r.rows as any[]));
+  }
+  paginasConocidas = todas;
+}
+
 export async function recargarDiccionarios(db: any) {
   const filas = (await db.execute(sql`SELECT idioma, original, traduccion, tipo FROM traducciones_textos WHERE traduccion IS NOT NULL`)).rows as any[];
   const nuevos = new Map<string, Diccionario>();
@@ -325,8 +346,8 @@ function conToken(req: Request, res: Response): boolean {
 export function registrarTraducciones(app: Express, db: any) {
   const repasar = () => recargarDiccionarios(db).catch(e => console.error('[traducciones] diccionario:', e.message));
   const barrer = () => barrerTraducciones(db).catch(e => console.error('[traducciones] barrido:', e.message));
-  repasar();
-  setTimeout(barrer, 3_000).unref?.();
+  cargarPaginasConocidas(db).catch(e => console.error('[traducciones] páginas:', e.message)).finally(repasar);
+  setTimeout(barrer, 30_000).unref?.();
   setInterval(barrer, 15 * 60_000).unref?.();
   setInterval(repasar, 60_000).unref?.();
 
