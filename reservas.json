@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/components/aeromovil/garaje/balaMedidas.ts",
-      "motivo": "Triciclo: techo solar, ventanas, rangos",
-      "desde": "2026-11-10T14:39:23.435Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/aeromovil/garaje/balaModelo.ts",
       "motivo": "Triciclo: techo solar, ventanas, rangos",
       "desde": "2026-11-10T14:39:26.416Z"
