@@ -53,6 +53,12 @@
       "ruta": "src/components/aeromovil/geometriaTriciclo.ts",
       "motivo": "Triciclo: techo solar, ventanas, rangos",
       "desde": "2026-11-10T14:39:36.982Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/pages/Aeromovil.tsx",
+      "motivo": "Triciclo: techo solar, ventanas, rangos",
+      "desde": "2026-11-10T14:39:40.017Z"
     }
   ]
 }
