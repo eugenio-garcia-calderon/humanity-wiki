@@ -1,24 +1,39 @@
 // ============================================================================
 // MODELO SOCIOECONÓMICO OPTIMIZADO — data and arithmetic (2026-11-10, Eugenio)
 // ============================================================================
-// Eugenio's proposal: ONE tax of 20 % on every transaction (a purchase or a
-// wage), nothing else, collected automatically by the payment system and split
-// in equal parts (2.5 %) among eight scales: person, neighbourhood (or family),
-// municipality, province, region, nation, continent and planet. Each scale has
-// a citizens' assembly that chooses priorities and a technical committee that
-// carries them out at the lowest cost, most effectively and most ecologically.
+// Eugenio's proposal: ONE tax, collected automatically by the payment system on
+// every payment and split in eight equal parts among eight scales: person,
+// neighbourhood (or family), municipality, province, region, nation, continent
+// and planet. Each scale has a citizens' assembly that chooses priorities and a
+// technical committee that carries them out at the lowest cost, most
+// effectively and most ecologically.
+//
+// Second round, same day (Eugenio):
+//   · THREE TIERS instead of a flat 20 %. Purchases: 0 % for first necessities
+//     (water, energy, the home you live in, mobility…), 20 % for second ones
+//     (second home, second vehicle…), 40 % for leisure and luxury. Wages: 0 %
+//     when a small company pays them, 20 % a medium one, 40 % a large one.
+//   · EVERY SCALE SPLITS ITS SHARE IN THIRDS: one to buy or improve means of
+//     production, one for care, one free.
+//   · SUPPORT GOES DOWN AND ACROSS, NOT AS PENSIONS: loans at the CPI and one-off
+//     donations from a larger scale to a smaller one (or between equals), work
+//     before allowances, and a constant support only for people with a
+//     disability, in kind whenever possible.
+// Decisions this page takes where Eugenio did not say (memory/03_DECISIONS.md):
+// food, health and education are tier 1; administrations pay 0 % on their own
+// wages; the rate is a share of the payment, as the 20 % always was here.
 //
 // Everything the page says with a number comes from here: the texts of the
 // page read these values instead of repeating them, so a figure can only be
 // changed in one place (root CLAUDE.md, «the sentence and the number it
 // promises»). Real figures carry a source id (`FUENTES`); estimates say so.
 //
-// TWO READINGS OF «EVERY TRANSACTION» (decision logged in memory/03_DECISIONS.md):
-//   · 'eslabon' (default): every payment carries 20 %, but a business recovers
-//     the 20 % it paid on its own purchases when it sells (the way VAT works).
-//     Each final product then carries exactly 20 %, never 20 % on top of 20 %.
-//   · 'literal': business-to-business purchases also keep their 20 %. It
-//     collects about twice as much and stacks the tax along supply chains (the
+// TWO READINGS OF «EVERY TRANSACTION»:
+//   · 'eslabon' (default): a business pays the tax on what it buys and recovers
+//     it when it sells (the way VAT works). Each final product carries exactly
+//     its tier, never a tax on top of a tax.
+//   · 'literal': business-to-business purchases also keep the general 20 %.
+//     It collects much more and stacks the tax along supply chains (the
 //     «cascade» Spain had with the IGTE until 1985).
 
 export type Modo = 'eslabon' | 'literal';
@@ -55,7 +70,7 @@ export const ESCALAS: Escala[] = [
     recibe: 'Lo recibe cada persona por igual, como un dividendo que llega cada mes a su cuenta',
     devuelve: 'Un ingreso para todas las personas, desde que nacen',
     ejemplo: 'Ella misma', habitantesEjemplo: 1,
-    participacion: 'Decide ella: el dividendo es suyo y lo usa como quiera.',
+    participacion: 'Decide ella, con la regla de los tercios: uno para producir, uno para cuidar y uno libre.',
     comite: 'No hace falta. Si quiere, puede pedir consejo financiero gratuito al municipio.',
     ritmo: 'Cuando quiera: el dividendo llega cada mes',
   },
@@ -98,7 +113,7 @@ export const ESCALAS: Escala[] = [
   {
     id: 'nacion', nombre: 'Nación', corto: 'Nación', color: '#006591', tinta: '#FFFFFF',
     recibe: 'Lo recibe el Estado, que agrupa las regiones y cubre lo que necesitan todas a la vez',
-    devuelve: 'Pensiones básicas, grandes redes, defensa, justicia y sanidad común',
+    devuelve: 'Apoyo a personas con discapacidad, grandes redes, defensa, justicia y sanidad común',
     ejemplo: 'España (49,1 millones de habitantes)', habitantesEjemplo: 49_128_297,
     participacion: 'Asamblea ciudadana por sorteo junto al parlamento; las prioridades se votan cada dos años.',
     comite: 'Agencias técnicas independientes, con objetivos públicos y evaluación externa.',
@@ -126,9 +141,64 @@ export const ESCALAS: Escala[] = [
 
 export const ESCALA = Object.fromEntries(ESCALAS.map(e => [e.id, e])) as Record<EscalaId, Escala>;
 
-/** The single rate and its split. */
-export const TIPO = 0.20;
-export const PARTE_ESCALA = TIPO / ESCALAS.length; // 0.025
+/** The general rate: tier 2, and what business-to-business payments carry in the literal reading. */
+export const TIPO_GENERAL = 0.20;
+/** What each scale receives of whatever is collected. */
+export const OCTAVO = 1 / ESCALAS.length;
+
+// ── THE THREE TIERS ─────────────────────────────────────────────────────────
+// The rate is a share of the payment (as the 20 % always was on this page): of a
+// 40 € dinner in tier 3, 16 € go to the common fund and the restaurant keeps 24 €.
+export type Tramo = 1 | 2 | 3;
+export interface TramoInfo { id: Tramo; tipo: number; nombre: string; compras: string; sueldos: string }
+export const TRAMOS: TramoInfo[] = [
+  { id: 1, tipo: 0, nombre: 'Primera necesidad', compras: 'Agua, energía, la vivienda en la que se vive, movilidad, comida, salud y educación', sueldos: 'Empresas pequeñas, de menos de 50 personas' },
+  { id: 2, tipo: 0.2, nombre: 'Segunda necesidad', compras: 'Segunda vivienda, segundo vehículo, ropa, muebles, móvil e internet, seguros, cuidado personal', sueldos: 'Empresas medianas, de 50 a 249 personas' },
+  { id: 3, tipo: 0.4, nombre: 'Ocio y lujo', compras: 'Restaurantes, bares, hoteles, viajes, ocio, alcohol, tabaco y lujo', sueldos: 'Empresas grandes, de 250 personas o más' },
+];
+export const TRAMO = Object.fromEntries(TRAMOS.map(t => [t.id, t])) as Record<Tramo, TramoInfo>;
+
+/** Who pays a wage decides its tier. Sizes as in the EU definition (by people employed, counted per group of companies). */
+export type Empleador = 'pequena' | 'mediana' | 'grande' | 'publica';
+export interface EmpleadorInfo { id: Empleador; nombre: string; corto: string; tipo: number; tramo: Tramo | null; nota?: string }
+export const EMPLEADORES: EmpleadorInfo[] = [
+  { id: 'pequena', nombre: 'Empresa pequeña (menos de 50 personas)', corto: 'Pequeña', tipo: 0, tramo: 1 },
+  { id: 'mediana', nombre: 'Empresa mediana (de 50 a 249)', corto: 'Mediana', tipo: 0.2, tramo: 2 },
+  { id: 'grande', nombre: 'Empresa grande (250 o más)', corto: 'Grande', tipo: 0.4, tramo: 3 },
+  { id: 'publica', nombre: 'Una administración o una escala', corto: 'Administración', tipo: 0, tramo: null, nota: 'No paga: sería cobrarse a sí misma y mover dinero público de una escala a otra' },
+];
+export const EMPLEADOR = Object.fromEntries(EMPLEADORES.map(e => [e.id, e])) as Record<Empleador, EmpleadorInfo>;
+
+// ── THE THIRDS: HOW EVERY SCALE SPLITS WHAT IT RECEIVES ─────────────────────
+export type TercioId = 'produccion' | 'cuidados' | 'libre';
+export interface TercioInfo { id: TercioId; nombre: string; corto: string; texto: string }
+export const TERCIOS: TercioInfo[] = [
+  { id: 'produccion', nombre: 'Medios de producción', corto: 'Producir', texto: 'Comprar o mejorar lo que produce lo básico (energía, movilidad, salud, alimentos, vivienda, tecnología) para que haya abundancia. Este tercio no se gasta en consumo.' },
+  { id: 'cuidados', nombre: 'Cuidados', corto: 'Cuidar', texto: 'Cuidar de las personas: el apoyo en especie a quien tiene una discapacidad, la crianza, las personas mayores, los préstamos al IPC y las donaciones puntuales.' },
+  { id: 'libre', nombre: 'Libre disposición', corto: 'Libre', texto: 'Lo que decida su asamblea: el funcionamiento de los servicios, la cultura, el deporte, la seguridad…' },
+];
+export const TERCIOS_ESCALA: Record<EscalaId, Record<TercioId, string>> = {
+  persona: { produccion: 'Participaciones en la placa solar de su comunidad, herramientas de su oficio, su parte de una cooperativa', cuidados: 'Su salud y la de los suyos, o apoyar a quien lo necesite', libre: 'Lo que quiera' },
+  vecindad: { produccion: 'Placas solares, huerto, aislamiento del edificio', cuidados: 'Vecinos mayores o con discapacidad, préstamos al IPC a una familia del edificio', libre: 'Limpieza, fiestas, lo que vote la junta' },
+  municipio: { produccion: 'Comunidad energética, vivienda municipal, obrador o tierras de cultivo', cuidados: 'Ayuda en casa, escuela infantil, trabajo para quien lo necesite', libre: 'Calles, agua, cultura y fiestas' },
+  provincia: { produccion: 'Redes de calor, mataderos y obradores comarcales, fibra', cuidados: 'Centros de día y residencias, transporte a consulta', libre: 'Carreteras, bomberos, ligas entre pueblos' },
+  region: { produccion: 'Renovables, trenes, equipos de hospital, vivienda pública', cuidados: 'Hospitales, dependencia, préstamos al IPC a municipios', libre: 'Universidades, cultura, emergencias' },
+  nacion: { produccion: 'Red eléctrica, ferrocarril, investigación y fábricas de lo esencial', cuidados: 'Apoyo en especie a personas con discapacidad, préstamos a regiones', libre: 'Defensa, justicia, grandes redes' },
+  continente: { produccion: 'Redes entre países, almacenamiento de energía, grandes programas científicos', cuidados: 'Cohesión entre regiones, vacunas, refugio', libre: 'Defensa común, Erasmus' },
+  planeta: { produccion: 'Energía limpia y semillas donde faltan, satélites, ciencia abierta', cuidados: 'Hambre cero, salud global, catástrofes', libre: 'Paz, océanos, exploración espacial' },
+};
+
+// ── SUPPORT BETWEEN SCALES ──────────────────────────────────────────────────
+// Instead of constant, recurring pensions: each person's stability comes from
+// work, family, community and municipality. Help goes from a larger scale to a
+// smaller one, or between equals.
+export interface Apoyo { id: string; nombre: string; texto: string }
+export const APOYOS: Apoyo[] = [
+  { id: 'prestamo', nombre: 'Préstamos al IPC', texto: 'Una escala presta a otra más pequeña (la comunidad a una familia, la región a un municipio) o a una igual, con un interés igual al IPC: el dinero vuelve con el mismo valor y nadie gana con él.' },
+  { id: 'donacion', nombre: 'Donaciones puntuales', texto: 'Para lo que un préstamo no resuelve: una avería que no se puede devolver, una urgencia. Una vez, no cada mes.' },
+  { id: 'ocupacion', nombre: 'Trabajo antes que paga', texto: 'Quien se queda sin ingresos recibe primero una ocupación: el municipio o la comunidad le ofrece trabajo en lo que necesita.' },
+  { id: 'discapacidad', nombre: 'Apoyo constante solo con discapacidad', texto: 'Solo las personas con discapacidad reciben una ayuda constante, y en lo posible no en dinero: acceso directo a vivienda, alimentación y cuidados, pagado con el tercio de cuidados de cada escala.' },
+];
 
 // ── THE FIFTEEN AREAS OF THE MATRIX ─────────────────────────────────────────
 // The twelve Eugenio named, plus three the planet scale needs (climate and
@@ -142,7 +212,7 @@ export interface Ambito { id: AmbitoId; nombre: string; corto: string }
 
 export const AMBITOS: Ambito[] = [
   { id: 'salud', nombre: 'Salud', corto: 'Salud' },
-  { id: 'economia', nombre: 'Economía, pensiones y protección', corto: 'Economía y pensiones' },
+  { id: 'economia', nombre: 'Apoyo mutuo y empleo', corto: 'Apoyo y empleo' },
   { id: 'educacion', nombre: 'Educación', corto: 'Educación' },
   { id: 'movilidad', nombre: 'Movilidad', corto: 'Movilidad' },
   { id: 'vivienda', nombre: 'Vivienda', corto: 'Vivienda' },
@@ -175,7 +245,7 @@ const c = (peso: number | null, responsabilidad: string, ...inversiones: string[
 export const MATRIZ: Record<EscalaId, Fila> = {
   persona: {
     salud: c(null, 'Cuidar de su propia salud', 'Comer bien, moverse, dormir', 'Gafas, dentista o terapias que elija'),
-    economia: c(null, 'Tener un colchón propio', 'Ahorro para imprevistos', 'Formación para su trabajo'),
+    economia: c(null, 'Tener un colchón propio y ayudar a los suyos', 'Ahorro para imprevistos', 'Préstamos al IPC a su familia'),
     educacion: c(null, 'Seguir aprendiendo toda la vida', 'Cursos, libros, idiomas'),
     movilidad: c(null, 'Elegir cómo moverse', 'Bicicleta, abono de transporte, coche compartido'),
     vivienda: c(null, 'Pagar su parte del hogar', 'Alquiler o hipoteca, muebles, reparaciones propias'),
@@ -192,7 +262,7 @@ export const MATRIZ: Record<EscalaId, Fila> = {
   },
   vecindad: {
     salud: c(6, 'Cuidados entre vecinos y espacios sin barreras', 'Desfibrilador y botiquín', 'Red de apoyo a mayores que viven solos'),
-    economia: c(6, 'Economía cercana entre vecinos', 'Banco de tiempo', 'Compras compartidas'),
+    economia: c(6, 'Apoyo entre vecinos', 'Préstamos al IPC a una familia del edificio', 'Banco de tiempo'),
     educacion: c(5, 'Aprender juntos', 'Sala de estudio', 'Apoyo escolar entre vecinos'),
     movilidad: c(6, 'Moverse sin depender del coche propio', 'Aparcabicis seguro', 'Coche compartido y punto de recarga'),
     vivienda: c(30, 'Mantener el edificio o la casa', 'Limpieza y ascensor', 'Tejado, fachada y accesibilidad'),
@@ -209,7 +279,7 @@ export const MATRIZ: Record<EscalaId, Fila> = {
   },
   municipio: {
     salud: c(8, 'Salud de cercanía', 'Consultorio local', 'Prevención y atención a mayores en casa'),
-    economia: c(7, 'Empleo y comercio local', 'Mercado y vivero de empresas', 'Ayudas de emergencia a vecinos'),
+    economia: c(7, 'Trabajo y ayuda cercana', 'Ocupación para quien se queda sin ingresos', 'Préstamos al IPC y donaciones puntuales a hogares'),
     educacion: c(9, 'Escuela cercana', 'Escuela infantil de 0 a 3 años', 'Mantenimiento del colegio y escuela de adultos'),
     movilidad: c(10, 'Calles y transporte local', 'Calles y aceras', 'Transporte a demanda para ir a la cabecera de comarca'),
     vivienda: c(10, 'Urbanismo y vivienda', 'Vivienda municipal en alquiler', 'Rehabilitar casas vacías para nuevos vecinos'),
@@ -226,7 +296,7 @@ export const MATRIZ: Record<EscalaId, Fila> = {
   },
   provincia: {
     salud: c(14, 'Salud comarcal', 'Centros de salud y urgencias', 'Ambulancias y residencias'),
-    economia: c(8, 'Servicios a los municipios', 'Asistencia técnica y jurídica', 'Desarrollo local y turismo'),
+    economia: c(8, 'Servicios a los municipios', 'Asistencia técnica y jurídica', 'Préstamos al IPC a municipios'),
     educacion: c(10, 'Institutos y formación', 'Institutos y formación profesional', 'Transporte escolar'),
     movilidad: c(14, 'Carreteras y transporte entre pueblos', 'Carreteras provinciales', 'Autobuses interurbanos'),
     vivienda: c(6, 'Vivienda rural', 'Rehabilitación en pueblos pequeños', 'Vivienda para nuevos pobladores'),
@@ -243,7 +313,7 @@ export const MATRIZ: Record<EscalaId, Fila> = {
   },
   region: {
     salud: c(24, 'Hospitales y especialistas', 'Hospitales y especialidades', 'Salud mental y dependencia'),
-    economia: c(7, 'Empleo regional', 'Formación para el empleo', 'Apoyo a quien emprende'),
+    economia: c(7, 'Empleo y préstamos', 'Formación para el empleo', 'Préstamos al IPC a comarcas y municipios'),
     educacion: c(16, 'Educación y universidades', 'Profesorado', 'Universidades públicas y becas'),
     movilidad: c(12, 'Transporte regional', 'Cercanías y metro ligero', 'Carriles bici entre municipios'),
     vivienda: c(8, 'Vivienda pública', 'Parque público de alquiler', 'Ayudas a la rehabilitación'),
@@ -260,7 +330,7 @@ export const MATRIZ: Record<EscalaId, Fila> = {
   },
   nacion: {
     salud: c(18, 'Sanidad común', 'Medicamentos y vacunas', 'Alta especialización y trasplantes'),
-    economia: c(28, 'Pensiones y protección', 'Garantía de pensiones básicas', 'Desempleo y estabilidad económica'),
+    economia: c(28, 'Discapacidad y transición', 'Apoyo en especie a personas con discapacidad', 'Pagar durante la transición las pensiones ya reconocidas'),
     educacion: c(6, 'Igualdad educativa', 'Becas', 'Títulos y evaluación'),
     movilidad: c(9, 'Grandes redes', 'Ferrocarril y carreteras estatales', 'Puertos y aeropuertos'),
     vivienda: c(3, 'Derecho a la vivienda', 'Fondo de garantía de vivienda', 'Suelo público estatal'),
@@ -351,10 +421,20 @@ export const FUENTES: Fuente[] = [
   { id: 'ue-espana', titulo: 'Merca2 (estimación de la Comisión Europea) · Aportación media de España a la UE 2021-2027', url: 'https://www.merca2.es/2019/11/05/espana-ue-214211/' },
   { id: 'aod-2025', titulo: 'Ministerio de Asuntos Exteriores · Ayuda Oficial al Desarrollo de 2025', url: 'https://www.exteriores.gob.es/es/Comunicacion/NotasPrensa/Paginas/2026_NOTAS_P/La-Ayuda-Oficial-al-Desarrollo-espa%C3%B1ola-alcanza-su-mayor-cifra-de-los-ultimos-15-a%C3%B1os.aspx' },
   { id: 'cam-pueblos', titulo: 'Comunidad de Madrid · Población de los municipios pequeños y la Sierra Norte', url: 'https://www.comunidad.madrid/node/109832' },
-  { id: 'madrid-poblacion', titulo: 'Ayuntamiento de Madrid · Madrid Economía 2025 (la ciudad es el 48,8 % de la región)', url: 'https://www.madrid.es/UnidadesDescentralizadas/UDCObservEconomico/006%20Madrid%20Economia/Ficheros/006%20Ficheros%20Madrid%20Econom%C3%ADa%202025/Madrid_Econom%C3%ADa_2025.pdf' },
+  { id: 'madrid-poblacion', titulo: 'Ayuntamiento de Madrid · Madrid Economía 2025 (la ciudad es el 48,8 % de la región)', url: 'https://www.madrid.es/UnidadesDescentralizadas/UDCObservEconomico/006%20Madrid%20Economia/Ficheros/006%20Ficheros%20Madrid%20Econom%C3%ADa%202025/Madrid_Econom%C3%ADa_2025.pdf' },
   { id: 'cam-presupuesto', titulo: 'Comunidad de Madrid · Presupuestos 2026', url: 'https://www.comunidad.madrid/file/497589/download' },
   { id: 'apt', titulo: 'Wikipedia · Automated Payment Transaction tax (Edgar Feige)', url: 'https://en.wikipedia.org/wiki/Automated_Payment_Transaction_tax' },
   { id: 'seg-social', titulo: 'Seguridad Social · Bases y tipos de cotización', url: 'https://www.seg-social.es' },
+  { id: 'ine-epf', titulo: 'INE · Encuesta de Presupuestos Familiares 2024: gasto por grupos', url: 'https://www.ine.es/dyngs/Prensa/EPF2024.htm' },
+  { id: 'alquiler-imputado', titulo: 'Modaes (datos de Eurostat) · El alquiler imputado, ≈ 19,8 % del presupuesto de los hogares en España', url: 'https://www.modaes.com/entorno/casi-alemanes-el-juego-de-las-siete-diferencias-entre-el-consumidor-espanol-y-el-europeo' },
+  { id: 'egatur-2025', titulo: 'INE · Egatur: gasto de los turistas internacionales en 2025 (134.712 M€)', url: 'https://www.ine.es/dyngs/Prensa/EGATUR1225.htm' },
+  { id: 'fotocasa-vivienda', titulo: 'Fotocasa vía Europa Press · Compradores de segunda residencia (10 %) y de inversión (8 %), 2025', url: 'https://www.bolsamania.com/noticias/empresas/economia--menos-del-1-del-parque-de-vivienda-en-espana-se-destina-al-alquiler-vacacional-segun-fotocasa--19977040.html' },
+  { id: 'censo-vehiculos', titulo: 'INE vía Valencia Plaza · Hogares con uno, dos o más vehículos (2021)', url: 'https://valenciaplaza.com/vivienda-propiedad-se-redujo-diez-aos' },
+  { id: 'cifras-pyme', titulo: 'Ministerio de Industria · Cifras PYME, marzo de 2025: empleo por tamaño de empresa', url: 'https://ipyme.org/Publicaciones/Cifras%20PYME/CifrasPyme-marzo2025.pdf' },
+  { id: 'remuneracion-publica', titulo: 'IGAE vía Vozpópuli · Gasto en personal de las administraciones en 2025 (181.494 M€)', url: 'https://www.vozpopuli.com/economia/pagar-las-nominas-de-politicos-y-funcionarios-cuesta-ya-4000-euros-a-cada-espanol.html' },
+  { id: 'pensiones-2026', titulo: 'Seguridad Social vía Junta de Extremadura · Pensiones contributivas, julio de 2026', url: 'https://www.juntaex.es/documents/77055/46718143/PC_ND_2026_07.pdf/814916c2-5e3d-040a-b8c5-96c2a5b6c986' },
+  { id: 'imserso-discapacidad', titulo: 'Imserso vía Servimedia · Personas con discapacidad reconocida (≥ 33 %), 2022', url: 'https://sid-inico.usal.es/noticias/numero-de-personas-con-discapacidad-en-espana-las-mujeres-con-grados-mas-altos/' },
+  { id: 'ipc-2026', titulo: 'INE · Indicador adelantado del IPC, octubre de 2026 (4,9 %)', url: 'https://www.ine.es/dyngs/Prensa/adIPC1026.htm' },
 ];
 
 export const FUENTE = Object.fromEntries(FUENTES.map(f => [f.id, f])) as Record<string, Fuente>;
@@ -365,63 +445,160 @@ export const ESPANA = {
   poblacion: 49_128_297, // 1-1-2025, INE (ine-poblacion)
   municipios: 8_132,
   municipiosMenos1000: 4_975,
-  madridRegion: 7_229_000, // the city (3.527.924) is 48,8 % of the region (madrid-poblacion)
+  madridRegion: 7_229_000, // the city (3.527.924) is 48,8 % of the region (madrid-poblacion)
   sierraNorte: { pueblos: 44 },
 };
 
+// ── FORMATTING ──────────────────────────────────────────────────────────────
+const nf = (dec = 0) => new Intl.NumberFormat('es-ES', { minimumFractionDigits: dec, maximumFractionDigits: dec, useGrouping: true });
+/** «1.234 €», always with the thousands point (es-ES leaves it out under 10.000). */
+export function euros(n: number, dec = 0) {
+  const s = nf(dec).format(n);
+  return `${agrupar(s)}\u00A0€`;
+}
+export function numero(n: number, dec = 0) { return agrupar(nf(dec).format(n)); }
+// es-ES does not group four-digit numbers («1234»); Spanish style guides
+// accept both, but a table that mixes «1234» and «12.345» reads as an error.
+function agrupar(s: string) {
+  return s.replace(/^(-?)(\d)(\d{3})(?=,|$)/, '$1$2.$3');
+}
+/** Millions of euros, readable: «48.686 M€» or «1,9 billones €». */
+export function millones(m: number) {
+  if (Math.abs(m) >= 1_000_000) return `${numero(m / 1_000_000, 2)}\u00A0billones\u00A0€`;
+  return `${numero(m)}\u00A0M€`;
+}
+export function porcentaje(p: number, dec = 1) { return `${numero(p, dec)}\u00A0%`; }
+
+// ── WHAT HOUSEHOLDS BUY, BY TIER ────────────────────────────────────────────
+// Structure of household spending: INE's EPF 2024 (13 groups, % of all spending,
+// they add up to 99,8). The imputed rent of people who own their home is part of
+// that spending but is not a payment, so it pays nothing and is taken out.
+// `hoy` is today's VAT and excise duties inside the price of each group,
+// estimated from the rates (4, 10 or 21 % VAT; fuel, tobacco and alcohol duties).
+export interface GrupoGasto { id: string; nombre: string; pct: number; tramo: Tramo; hoy: number; nota?: string }
+export const EPF_TOTAL = 99.8;
+export const ALQUILER_IMPUTADO = 19.0; // estimate (alquiler-imputado: 19,8 %)
+export const GRUPOS_GASTO: GrupoGasto[] = [
+  { id: 'alimentos', nombre: 'Comida y bebidas sin alcohol', pct: 15.8, tramo: 1, hoy: 0.07 },
+  { id: 'vivienda', nombre: 'Alquiler, agua, luz y gas de la vivienda habitual', pct: 32.4 - ALQUILER_IMPUTADO, tramo: 1, hoy: 0.11, nota: 'sin el alquiler imputado' },
+  { id: 'sanidad', nombre: 'Salud: medicinas, consultas, gafas', pct: 4.0, tramo: 1, hoy: 0.04 },
+  { id: 'transporte', nombre: 'Transporte: combustible, billetes y un vehículo', pct: 11.4 - 1.2, tramo: 1, hoy: 0.18 },
+  { id: 'educacion', nombre: 'Educación', pct: 1.6, tramo: 1, hoy: 0.01 },
+  { id: 'vestido', nombre: 'Ropa y calzado', pct: 4.2, tramo: 2, hoy: 0.174 },
+  { id: 'hogar', nombre: 'Muebles, electrodomésticos y cuidado del hogar', pct: 3.7, tramo: 2, hoy: 0.17 },
+  { id: 'segundoVehiculo', nombre: 'Compra de un segundo vehículo del hogar', pct: 1.2, tramo: 2, hoy: 0.2, nota: 'estimación: un tercio de los vehículos de los hogares son el segundo o el tercero' },
+  { id: 'comunicaciones', nombre: 'Móvil, internet y aparatos', pct: 3.2, tramo: 2, hoy: 0.17 },
+  { id: 'seguros', nombre: 'Seguros y servicios financieros', pct: 3.7, tramo: 2, hoy: 0.06 },
+  { id: 'personal', nombre: 'Cuidado personal y otros gastos', pct: 3.6, tramo: 2, hoy: 0.14 },
+  { id: 'alcohol', nombre: 'Alcohol y tabaco', pct: 1.3, tramo: 3, hoy: 0.55 },
+  { id: 'ocio', nombre: 'Ocio, deporte, cultura y viajes organizados', pct: 5.0, tramo: 3, hoy: 0.15 },
+  { id: 'restaurantes', nombre: 'Restaurantes, bares y alojamiento', pct: 9.9, tramo: 3, hoy: 0.09 },
+];
+export type Clasificacion = Record<string, Tramo>;
+export const CLASIFICACION_INICIAL: Clasificacion = Object.fromEntries(GRUPOS_GASTO.map(g => [g.id, g.tramo]));
+
+/** Share of household payments (imputed rent out) that falls in each tier. */
+export function cuotasTramo(clasif: Clasificacion = CLASIFICACION_INICIAL): Record<Tramo, number> {
+  const pagos = EPF_TOTAL - ALQUILER_IMPUTADO;
+  const r: Record<Tramo, number> = { 1: 0, 2: 0, 3: 0 };
+  for (const g of GRUPOS_GASTO) r[clasif[g.id] ?? g.tramo] += g.pct / pagos;
+  return r;
+}
+/** Today's VAT and excise duties inside the price, on average for each tier (default classification). */
+export const INDIRECTOS_HOY: Record<Tramo, number> = (() => {
+  const r: Record<Tramo, number> = { 1: 0, 2: 0, 3: 0 };
+  for (const t of [1, 2, 3] as Tramo[]) {
+    const gs = GRUPOS_GASTO.filter(g => g.tramo === t);
+    r[t] = gs.reduce((s, g) => s + g.pct * g.hoy, 0) / gs.reduce((s, g) => s + g.pct, 0);
+  }
+  return r;
+})();
+
+// ── THE BASE: EVERY PAYMENT THE TAX APPLIES TO IN A YEAR IN SPAIN ───────────
+export interface ParteBase { nombre: string; millones: number; tipo: number; tramo: Tramo | null }
 export interface ComponenteBase {
   id: string;
   nombre: string;
   explicacion: string;
-  millones: number;
   /** Which reading counts it. */
   modos: Modo[];
   fuente: string | null;
   estimacion?: string;
+  /** How the amount splits by tier. */
+  partes: (clasif: Clasificacion) => ParteBase[];
 }
 
-// The «base»: every payment the 20 % applies to in a year in Spain.
-const SUELDOS_2024 = 763_677; // ine-remuneracion
+const SUELDOS_2025 = Math.round(763_677 * 1.072); // ine-remuneracion, 2024 plus 2025's growth
+const SUELDOS_PUBLICOS = 181_494; // remuneracion-publica, 2025
+const SUELDOS_PRIVADOS = SUELDOS_2025 - SUELDOS_PUBLICOS;
+const CONSUMO_2025 = 937_447; // ine-hogares
+const TURISTAS_EN_ESPANA = Math.round(134_712 * 0.8); // egatur-2025, without the trip to Spain (estimate)
+const NO_HABITUAL = 0.18; // fotocasa-vivienda: second homes 10 % + investment 8 %
+const tramoP = (nombre: string, millones: number, tramo: Tramo): ParteBase => ({ nombre, millones, tipo: TRAMO[tramo].tipo, tramo });
+
 export const BASE: ComponenteBase[] = [
   {
-    id: 'sueldos', nombre: 'Sueldos', millones: Math.round(SUELDOS_2024 * 1.072), modos: ['eslabon', 'literal'], fuente: 'ine-remuneracion',
-    explicacion: 'Todo lo que las empresas y administraciones pagan por el trabajo (hoy, salario bruto más cotizaciones de la empresa).',
-    estimacion: '763.677 M€ en 2024, más el 7,2 % que creció en 2025 según el INE.',
+    id: 'sueldos', nombre: 'Sueldos', modos: ['eslabon', 'literal'], fuente: 'ine-remuneracion',
+    explicacion: 'Todo lo que se paga por el trabajo (hoy, salario bruto más cotizaciones de la empresa). El tramo lo pone el tamaño de quien contrata.',
+    estimacion: `${numero(763_677)} M€ en 2024 más el 7,2 % que creció en 2025. Las administraciones pagaron ${numero(SUELDOS_PUBLICOS)} M€. El resto se reparte por tamaño con el empleo de Cifras PYME (43 %, 16 % y 40 %) y sueldos algo más altos en las grandes: 38 %, 16 % y 46 %.`,
+    partes: () => [
+      tramoP('Empresas pequeñas', SUELDOS_PRIVADOS * 0.38, 1),
+      tramoP('Empresas medianas', SUELDOS_PRIVADOS * 0.16, 2),
+      tramoP('Empresas grandes', SUELDOS_PRIVADOS * 0.46, 3),
+      { nombre: 'Administraciones (no pagan)', millones: SUELDOS_PUBLICOS, tipo: 0, tramo: null },
+    ],
   },
   {
-    id: 'compras', nombre: 'Compras de las familias', millones: 937_447, modos: ['eslabon', 'literal'], fuente: 'ine-hogares',
-    explicacion: 'Lo que los hogares gastan en un año: comida, luz, ropa, alquiler, restaurantes, transporte…',
-    estimacion: 'Incluye el alquiler «imputado» de quien vive en casa propia, que no es un pago, y deja fuera lo que gastan los turistas en España; los dos efectos se compensan aproximadamente.',
+    id: 'compras', nombre: 'Compras de las familias', modos: ['eslabon', 'literal'], fuente: 'ine-hogares',
+    explicacion: 'Lo que los hogares gastan en un año, repartido por tramos con la estructura de gasto de la Encuesta de Presupuestos Familiares.',
+    estimacion: `${numero(CONSUMO_2025)} M€ en 2025, sin el alquiler imputado de quien vive en casa propia (≈ ${numero(ALQUILER_IMPUTADO, 0)} % del gasto), que no es un pago.`,
+    partes: clasif => {
+      const cuotas = cuotasTramo(clasif);
+      const pagos = CONSUMO_2025 * ((EPF_TOTAL - ALQUILER_IMPUTADO) / EPF_TOTAL);
+      return ([1, 2, 3] as Tramo[]).map(t => tramoP(TRAMO[t].nombre, pagos * cuotas[t], t));
+    },
   },
   {
-    id: 'viviendaNueva', nombre: 'Compra de vivienda nueva y reformas', millones: 79_685, modos: ['eslabon', 'literal'], fuente: 'ine-hogares',
-    explicacion: 'La inversión de los hogares en vivienda.',
+    id: 'turistas', nombre: 'Compras de los turistas en España', modos: ['eslabon', 'literal'], fuente: 'egatur-2025',
+    explicacion: 'Los visitantes de otros países pagan el tramo de lo que compran aquí, como cualquiera.',
+    estimacion: `${numero(134_712)} M€ en 2025; el 80 % se gasta en España (el resto es el viaje). De eso, ≈ 70 % hoteles, restaurantes y ocio, 15 % compras y 15 % comida y transporte.`,
+    partes: () => [tramoP('Comida y transporte', TURISTAS_EN_ESPANA * 0.15, 1), tramoP('Compras', TURISTAS_EN_ESPANA * 0.15, 2), tramoP('Hoteles, restaurantes y ocio', TURISTAS_EN_ESPANA * 0.7, 3)],
   },
   {
-    id: 'viviendaUsada', nombre: 'Compraventa de vivienda usada', millones: Math.round(558_327 * 0.2), modos: ['eslabon', 'literal'], fuente: 'ine-viviendas',
-    explicacion: 'Las 558.327 viviendas usadas vendidas en 2025. Pagan el 20 % en cada venta, aunque la casa ya lo pagó al ser nueva; hoy pagan el impuesto de transmisiones, entre el 6 % y el 10 % en la mayoría de regiones.',
-    estimacion: 'Con un precio medio supuesto de 200.000 € por vivienda.',
+    id: 'viviendaNueva', nombre: 'Compra de vivienda nueva y reformas', modos: ['eslabon', 'literal'], fuente: 'ine-hogares',
+    explicacion: 'La inversión de los hogares en vivienda. La vivienda en la que se vive va en el tramo 1; una segunda o una para invertir, en el 2.',
+    estimacion: `${numero(79_685)} M€; el ${numero(NO_HABITUAL * 100, 0)} % de quien compra lo hace para segunda residencia o para invertir.`,
+    partes: () => [tramoP('Vivienda habitual', 79_685 * (1 - NO_HABITUAL), 1), tramoP('Segunda vivienda o inversión', 79_685 * NO_HABITUAL, 2)],
   },
   {
-    id: 'entreEmpresas', nombre: 'Compras entre empresas', millones: 1_600_000, modos: ['literal'], fuente: null,
-    explicacion: 'Materias primas, piezas, servicios y suministros que unas empresas compran a otras para producir.',
+    id: 'viviendaUsada', nombre: 'Compraventa de vivienda usada', modos: ['eslabon', 'literal'], fuente: 'ine-viviendas',
+    explicacion: 'Las 558.327 viviendas usadas vendidas en 2025. Hoy pagan el impuesto de transmisiones, entre el 6 % y el 10 % en la mayoría de regiones.',
+    estimacion: `Con un precio medio supuesto de 200.000 €; el ${numero(NO_HABITUAL * 100, 0)} % no es para vivir en ella.`,
+    partes: () => [tramoP('Vivienda habitual', 558_327 * 0.2 * (1 - NO_HABITUAL), 1), tramoP('Segunda vivienda o inversión', 558_327 * 0.2 * NO_HABITUAL, 2)],
+  },
+  {
+    id: 'entreEmpresas', nombre: 'Compras entre empresas', modos: ['literal'], fuente: null,
+    explicacion: 'Materias primas, piezas, servicios y suministros que unas empresas compran a otras para producir. Al pie de la letra pagan el tipo general, sin devolución.',
     estimacion: 'Orden de magnitud: en una economía como la española los consumos intermedios son de un tamaño parecido al PIB (≈ 0,95 veces).',
+    partes: () => [tramoP('Tipo general', 1_600_000, 2)],
   },
   {
-    id: 'inversionEmpresas', nombre: 'Inversión de empresas', millones: 347_000 - 37_177 - 79_685, modos: ['literal'], fuente: 'fbbva-inversion',
+    id: 'inversionEmpresas', nombre: 'Inversión de empresas', modos: ['literal'], fuente: 'fbbva-inversion',
     explicacion: 'Máquinas, naves, programas informáticos.',
     estimacion: 'Inversión total de 2025 (347.000 M€) menos la pública (37.177 M€) y la de los hogares.',
+    partes: () => [tramoP('Tipo general', 347_000 - 37_177 - 79_685, 2)],
   },
   {
-    id: 'inversionPublica', nombre: 'Inversión pública', millones: 37_177, modos: ['literal'], fuente: 'fbbva-inversion',
+    id: 'inversionPublica', nombre: 'Inversión pública', modos: ['literal'], fuente: 'fbbva-inversion',
     explicacion: 'Carreteras, hospitales, escuelas que construyen las administraciones.',
+    partes: () => [tramoP('Tipo general', 37_177, 2)],
   },
 ];
 
 /** Today's system, for the comparison. */
 export const HOY = {
-  impuestosYCotizaciones2024: 591_679, // 37,1 % del PIB (ijm-2026, Eurostat)
-  impuestosYCotizaciones2025: 638_300, // ≈ 38 % del PIB, estimación (ijm-2026)
+  impuestosYCotizaciones2024: 591_679, // 37,1 % del PIB (ijm-2026, Eurostat)
+  impuestosYCotizaciones2025: 638_300, // ≈ 38 % del PIB, estimación (ijm-2026)
   ingresosPublicosPct2025: 42.9, // bde-ingresos
   gastoPublicoPct2025: 45.3, // bde-ingresos
   aeat2025: 325_356, // aeat-2025
@@ -452,24 +629,38 @@ export const HOY = {
   iva2025: 99_532, // aeat-iva
   especiales2025: 23_083, // aeat-especiales
   intereses2025: 40_314, // intereses
+  sueldosPublicos2025: SUELDOS_PUBLICOS, // remuneracion-publica
+  turistas2025: 134_712, // egatur-2025
+  pensionesContributivas: 10_517_634, // julio de 2026 (pensiones-2026)
+  pensionistas: 9_400_000, // ≈ 9,4 millones de personas (pensiones-2026)
+  nominaPensionesMes: 14_431.9, // M€, julio de 2026 (pensiones-2026)
+  pensionesIncapacidad: 1_060_553, // (pensiones-2026)
+  nominaIncapacidadMes: 1_330.6, // M€ (pensiones-2026)
+  discapacidadReconocida: 3_391_955, // ≥ 33 %, 31-12-2022 (imserso-discapacidad)
+  ipc: 4.9, // % anual, octubre de 2026 (ipc-2026)
 };
 
 // ── THE COUNTRY'S ACCOUNTS UNDER THE MODEL ──────────────────────────────────
 /** Final demand ≈ GDP plus imports (≈ 1,33 × GDP): what the business-to-business 20 % ends up inside of. Estimate. */
 const DEMANDA_FINAL = ESPANA.pib * 1.33;
 
-export function cuentasPais(modo: Modo) {
-  const componentes = BASE.filter(b => b.modos.includes(modo));
+export function cuentasPais(modo: Modo, clasif: Clasificacion = CLASIFICACION_INICIAL) {
+  const componentes = BASE.filter(b => b.modos.includes(modo)).map(b => {
+    const partes = b.partes(clasif);
+    return { ...b, partes, millones: partes.reduce((s, p) => s + p.millones, 0), recaudacion: partes.reduce((s, p) => s + p.millones * p.tipo, 0) };
+  });
   const base = componentes.reduce((s, b) => s + b.millones, 0);
-  const recaudacion = base * TIPO;
-  const porEscala = recaudacion / ESCALAS.length;
+  const recaudacion = componentes.reduce((s, b) => s + b.recaudacion, 0);
+  const porTramo: Record<Tramo, { base: number; recaudacion: number }> = { 1: { base: 0, recaudacion: 0 }, 2: { base: 0, recaudacion: 0 }, 3: { base: 0, recaudacion: 0 } };
+  for (const c of componentes) for (const p of c.partes) if (p.tramo) { porTramo[p.tramo].base += p.millones; porTramo[p.tramo].recaudacion += p.millones * p.tipo; }
+  const porEscala = recaudacion * OCTAVO;
   const porPersonaEscala = (porEscala * 1e6) / ESPANA.poblacion;
-  const entreEmpresas = BASE.find(b => b.id === 'entreEmpresas')!.millones;
-  // In the literal reading, the 20 % paid between businesses ends up inside final prices.
-  const cascada = modo === 'literal' ? 1 + (entreEmpresas * TIPO) / DEMANDA_FINAL : 1;
+  // In the literal reading, the general rate paid between businesses ends up inside final prices.
+  const cascada = modo === 'literal' ? 1 + (1_600_000 * TIPO_GENERAL) / DEMANDA_FINAL : 1;
   return {
-    componentes, base, recaudacion, porEscala, porPersonaEscala, cascada,
+    componentes, base, recaudacion, porTramo, porEscala, porPersonaEscala, cascada,
     pctPIB: (recaudacion / ESPANA.pib) * 100,
+    tipoMedio: recaudacion / base,
     basePorPersona: (base * 1e6) / ESPANA.poblacion,
   };
 }
@@ -481,16 +672,14 @@ export function cuentasPais(modo: Modo) {
 //   · employee: 4,70 + 1,55 + 0,10 + MEI 0,15 = 6,50 %;
 //   · IRPF: state scale + Madrid scale, general allowance, 2.000 € expenses,
 //     the art. 20 reduction for low wages, state minimum 5.550 € and Madrid's 5.956,65 €;
-//   · VAT and excise taxes ≈ 12 % of what a household spends: VAT (99.532 M€) plus excise
-//     duties (23.083 M€) over household consumption (937.447 M€) is 13,1 %, and part of it
-//     is paid by administrations and VAT-exempt businesses, not by households;
+//   · VAT and excise duties inside prices: `INDIRECTOS_HOY` by tier (≈ 12 % on average,
+//     close to VAT 99.532 M€ plus excise 23.083 M€ over household consumption 937.447 M€);
 //   · local taxes per household: IBI 320 €, waste 107 €, vehicle 58 € (roams);
 //     community fees, if any, 1.260 € a year per home (roams).
 export const SUPUESTOS = {
   cotEmpresa: 0.3215,
   cotTrabajador: 0.065,
   baseMaximaAnual: 5_101.2 * 12, // ≈ base máxima de cotización 2026
-  indirectosHoy: 0.12,
   ibi: 320, basuras: 107, vehiculo: 58, cuotaComunidad: 1_260,
 };
 
@@ -524,28 +713,35 @@ export function irpfMadrid(bruto: number) {
 export interface Ejemplo {
   /** Gross annual salary today. */
   bruto: number;
-  /** What she spends a month today (without the mortgage or rent principal). */
-  gastoMes: number;
+  /** Who pays it. */
+  empleador: Empleador;
+  /** What she spends a month today in each tier (without the mortgage or rent principal). */
+  gasto: Record<Tramo, number>;
   /** Lives with a partner (two people in the household). */
   pareja: boolean;
   /** Lives in a building with a registered neighbourhood community instead of a house. */
   enComunidad: boolean;
 }
 
-export const EJEMPLO_INICIAL: Ejemplo = { bruto: 26_000, gastoMes: 1_100, pareja: true, enComunidad: false };
+// 1.100 € a month, split like the average household's payments (`cuotasTramo`).
+export const EJEMPLO_INICIAL: Ejemplo = { bruto: 26_000, empleador: 'pequena', gasto: { 1: 610, 2: 270, 3: 220 }, pareja: true, enComunidad: false };
+
+export const sumaGasto = (g: Record<Tramo, number>) => g[1] + g[2] + g[3];
 
 export function calcularEjemplo(e: Ejemplo, modo: Modo) {
   const pais = cuentasPais(modo);
   const miembros = e.pareja ? 2 : 1;
   const costeTrabajo = e.bruto + Math.min(e.bruto, SUPUESTOS.baseMaximaAnual) * SUPUESTOS.cotEmpresa;
-  const gastoHoy = e.gastoMes * 12;
+  const tramos = [1, 2, 3] as Tramo[];
+  const gastoHoyTramo = Object.fromEntries(tramos.map(t => [t, e.gasto[t] * 12])) as Record<Tramo, number>;
+  const gastoHoy = sumaGasto(gastoHoyTramo);
 
   // Today
   const cotEmpresa = costeTrabajo - e.bruto;
   const cotTrabajador = Math.min(e.bruto, SUPUESTOS.baseMaximaAnual) * SUPUESTOS.cotTrabajador;
   const irpf = irpfMadrid(e.bruto);
   const netoHoy = e.bruto - cotTrabajador - irpf;
-  const indirectos = gastoHoy * SUPUESTOS.indirectosHoy;
+  const indirectos = tramos.reduce((s, t) => s + gastoHoyTramo[t] * INDIRECTOS_HOY[t], 0);
   const locales = (SUPUESTOS.ibi + SUPUESTOS.basuras + SUPUESTOS.vehiculo) / miembros;
   const comunidad = e.enComunidad ? SUPUESTOS.cuotaComunidad / miembros : 0;
   const hoy = [
@@ -558,36 +754,38 @@ export function calcularEjemplo(e: Ejemplo, modo: Modo) {
   ];
   const totalHoy = hoy.reduce((s, x) => s + x.euros, 0);
 
-  // Model: the same employer cost and the same basket of goods.
-  // Prices carry 20 % instead of today's ≈ 12 % (and, in the literal reading, the business cascade).
-  const precio = ((1 - SUPUESTOS.indirectosHoy) / (1 - TIPO)) * pais.cascada;
-  const gastoModelo = gastoHoy * precio;
-  const sobreSueldo = costeTrabajo * TIPO;
+  // Model: the same employer cost and the same basket of goods. Each tier's price
+  // carries its rate instead of today's taxes (and, in the literal reading, the cascade).
+  const precioTramo = Object.fromEntries(tramos.map(t => [t, ((1 - INDIRECTOS_HOY[t]) / (1 - TRAMO[t].tipo)) * pais.cascada])) as Record<Tramo, number>;
+  const gastoModeloTramo = Object.fromEntries(tramos.map(t => [t, gastoHoyTramo[t] * precioTramo[t]])) as Record<Tramo, number>;
+  const gastoModelo = sumaGasto(gastoModeloTramo);
+  const tipoSueldo = EMPLEADOR[e.empleador].tipo;
+  const sobreSueldo = costeTrabajo * tipoSueldo;
   const netoModelo = costeTrabajo - sobreSueldo;
-  const sobreCompras = gastoModelo * TIPO;
-  const oculto = pais.cascada > 1 ? gastoModelo * (1 - TIPO) * (1 - 1 / pais.cascada) : 0;
+  const sobreCompras = tramos.reduce((s, t) => s + gastoModeloTramo[t] * TRAMO[t].tipo, 0);
+  const oculto = pais.cascada > 1 ? tramos.reduce((s, t) => s + gastoModeloTramo[t] * (1 - TRAMO[t].tipo) * (1 - 1 / pais.cascada), 0) : 0;
   const aporta = sobreSueldo + sobreCompras + oculto;
   const dividendo = pais.porPersonaEscala;
   // The neighbourhood share goes to the household when there is no community.
   const parteFamilia = e.enComunidad ? 0 : pais.porPersonaEscala;
   const recibe = dividendo + parteFamilia;
   const modelo = [
-    { id: 'sueldo', nombre: '20 % de lo que paga la empresa por su trabajo', euros: sobreSueldo },
-    { id: 'compras', nombre: '20 % de lo que compra', euros: sobreCompras },
+    { id: 'sueldo', nombre: `${porcentaje(tipoSueldo * 100, 0)} de lo que paga la empresa por su trabajo (${EMPLEADOR[e.empleador].corto.toLowerCase()})`, euros: sobreSueldo },
+    ...tramos.map(t => ({ id: `compras${t}`, nombre: `${porcentaje(TRAMO[t].tipo * 100, 0)} de sus compras del tramo ${t}`, euros: gastoModeloTramo[t] * TRAMO[t].tipo })),
     ...(oculto > 0 ? [{ id: 'cascada', nombre: 'Lo que llega escondido en los precios (compras entre empresas)', euros: oculto }] : []),
   ];
 
   return {
-    pais, miembros, costeTrabajo, gastoHoy, gastoModelo, precio,
-    hoy, totalHoy, netoHoy,
+    pais, miembros, costeTrabajo, gastoHoy, gastoHoyTramo, gastoModelo, gastoModeloTramo, precioTramo,
+    hoy, totalHoy, netoHoy, tipoSueldo,
     modelo, aporta, netoModelo, dividendo, parteFamilia, recibe,
     aportaNeto: aporta - recibe,
     pctModelo: (aporta - recibe) / costeTrabajo,
-    porEscala: aporta / ESCALAS.length,
-    // What is left at the end of the year after spending the same basket.
+    porEscala: aporta * OCTAVO,
+    // What is left at the end of the year after spending the same basket (before the dividend).
     sobraHoy: netoHoy - gastoHoy - locales - comunidad,
     pctHoy: totalHoy / costeTrabajo,
-    sobraModelo: netoModelo + recibe - gastoModelo,
+    sobraModelo: netoModelo - gastoModelo,
     // Money that passes through her hands: her work and her purchases.
     maneja: costeTrabajo + gastoModelo,
   };
@@ -642,26 +840,6 @@ export const IMPUESTOS_HOY: GrupoImpuestos[] = [
 export const numeroFiguras = (g: GrupoImpuestos) => g.numero ?? g.figuras.length;
 export const TOTAL_FIGURAS = IMPUESTOS_HOY.reduce((s, g) => s + numeroFiguras(g), 0);
 
-// ── FORMATTING ──────────────────────────────────────────────────────────────
-const nf = (dec = 0) => new Intl.NumberFormat('es-ES', { minimumFractionDigits: dec, maximumFractionDigits: dec, useGrouping: true });
-/** «1.234 €», always with the thousands point (es-ES leaves it out under 10.000). */
-export function euros(n: number, dec = 0) {
-  const s = nf(dec).format(n);
-  return `${agrupar(s)}\u00A0€`;
-}
-export function numero(n: number, dec = 0) { return agrupar(nf(dec).format(n)); }
-// es-ES does not group four-digit numbers («1234»); Spanish style guides
-// accept both, but a table that mixes «1234» and «12.345» reads as an error.
-function agrupar(s: string) {
-  return s.replace(/^(-?)(\d)(\d{3})(?=,|$)/, '$1$2.$3');
-}
-/** Millions of euros, readable: «48.686 M€» or «1,9 billones €». */
-export function millones(m: number) {
-  if (Math.abs(m) >= 1_000_000) return `${numero(m / 1_000_000, 2)}\u00A0billones\u00A0€`;
-  return `${numero(m)}\u00A0M€`;
-}
-export function porcentaje(p: number, dec = 1) { return `${numero(p, dec)}\u00A0%`; }
-
 // ── WHAT EACH AREA HAS TODAY AND WITH THE MODEL ─────────────────────────────
 // Today: spending of all administrations in 2024 by COFOG division (igae-cofog).
 // Model: what the five scales that serve people inside Spain (neighbourhood to
@@ -670,7 +848,7 @@ export function porcentaje(p: number, dec = 1) { return `${numero(p, dec)}\u00A0
 // COFOG 01 «servicios públicos generales» includes the interest on the public debt.
 export const ESCALAS_INTERIORES: EscalaId[] = ['vecindad', 'municipio', 'provincia', 'region', 'nacion'];
 export const FUNCIONES: { id: string; nombre: string; hoy: number; ambitos: AmbitoId[]; nota?: string }[] = [
-  { id: 'proteccion', nombre: 'Pensiones y protección social', hoy: 297_532, ambitos: ['economia'], nota: 'hoy incluye 206.130 M€ de pensiones' },
+  { id: 'proteccion', nombre: 'Protección social y apoyo mutuo', hoy: 297_532, ambitos: ['economia'], nota: 'hoy incluye 206.130 M€ de pensiones' },
   { id: 'salud', nombre: 'Salud', hoy: 102_942, ambitos: ['salud'] },
   { id: 'generales', nombre: 'Administración, ciencia e intereses de la deuda', hoy: 92_551, ambitos: ['gestion', 'ciencia'] },
   { id: 'economicos', nombre: 'Transporte, energía y campo', hoy: 80_908, ambitos: ['movilidad', 'energia', 'agricultura', 'alimentacion'] },

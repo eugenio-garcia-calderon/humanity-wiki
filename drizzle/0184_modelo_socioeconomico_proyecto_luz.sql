@@ -67,16 +67,16 @@ BEGIN
     pagina, 'Modelo socioeconómico optimizado', 'pagina',
     jsonb_build_object(
       'aplicacion', 'modelo-socioeconomico',
-      'subtitulo', 'Un único impuesto del 20 % sobre cada pago, repartido al instante entre ocho escalas: de la persona al planeta',
+      'subtitulo', 'Un solo impuesto sobre cada pago, en tres tramos (0, 20 y 40 %), repartido al instante entre ocho escalas: de la persona al planeta',
       'portada', imagen,
       'imagenCompartir', imagen,
       'bloques', jsonb_build_array(
         jsonb_build_object('id', 'Bmodelosocio01', 'tipo', 'parrafo', 'texto',
-          'Un modelo socioeconómico con un solo impuesto: el 20 % de cada transacción, sea una compra o el pago de un sueldo, sin ningún otro impuesto ni tasa. El propio sistema de pago lo aparta al instante y lo reparte a partes iguales, un 2,5 % para cada una de las ocho escalas en las que vivimos: la persona, la comunidad vecinal o la familia, el municipio, la provincia, la región, la nación, el continente y el planeta.'),
+          'Un modelo socioeconómico con un solo impuesto sobre cada transacción, sin ningún otro impuesto ni tasa, en tres tramos: 0 % en lo de primera necesidad (agua, energía, vivienda, movilidad, comida), 20 % en lo de segunda necesidad y 40 % en el ocio y el lujo; en los sueldos, 0 % si los paga una empresa pequeña, 20 % una mediana y 40 % una grande. El propio sistema de pago lo aparta al instante y lo reparte en ocho partes iguales entre las escalas en las que vivimos: la persona, la comunidad vecinal o la familia, el municipio, la provincia, la región, la nación, el continente y el planeta.'),
         jsonb_build_object('id', 'Bmodelosocio02', 'tipo', 'parrafo', 'texto',
-          'En cada escala, una asamblea ciudadana elige las prioridades y un comité técnico las cumple al menor coste, de la forma más eficaz y ecológica. La página lo compara con el sistema fiscal español actual, con más de cien impuestos y cotizaciones y cientos de tasas, e incluye una matriz interactiva de responsabilidades por escala y ámbito, un esquema del recorrido del dinero y el cálculo para una persona de un pueblo de 400 habitantes de Madrid.'),
+          'Cada escala dedica un tercio a medios de producción, uno a cuidados y uno libre; la ayuda pasa de las escalas mayores a las menores con préstamos al IPC y donaciones puntuales, y solo las personas con discapacidad reciben un apoyo constante, en especie. En cada escala, una asamblea ciudadana elige las prioridades y un comité técnico las cumple al menor coste, de la forma más eficaz y ecológica. La página lo compara con el sistema fiscal español actual, con más de cien impuestos y cotizaciones y cientos de tasas, e incluye una matriz interactiva de responsabilidades por escala y ámbito, un esquema del recorrido del dinero y el cálculo para una persona de un pueblo de 400 habitantes de Madrid.'),
         jsonb_build_object('id', 'Bmodelosocio03', 'tipo', 'imagen', 'url', imagen,
-          'alt', 'Esquema del modelo: cada pago aporta el 20 % al sistema de pago, que lo pasa a un fondo común abierto; el fondo da un 2,5 % a cada una de las ocho escalas, que devuelven servicios a las personas, y las personas votan las prioridades de cada escala.')
+          'alt', 'Esquema del modelo: cada pago aporta su tramo (0, 20 o 40 %) al sistema de pago, que lo pasa a un fondo común abierto; el fondo da un octavo a cada una de las ocho escalas, que lo reparten en tercios y devuelven servicios a las personas, y las personas votan las prioridades de cada escala.')
       )
     ),
     CASE WHEN t.proyecto_id IS NOT NULL THEN COALESCE(t.proyecto_publico, false) ELSE false END,

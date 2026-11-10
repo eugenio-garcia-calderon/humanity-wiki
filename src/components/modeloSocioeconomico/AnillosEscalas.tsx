@@ -1,8 +1,8 @@
 // The eight scales as nested rings, from the person (centre) to the planet
-// (outside). The memorable thing of the page: the 20 % in the middle, and the
-// same 2,5 % going to each ring. Tap or hover a ring to read it.
+// (outside). The memorable thing of the page: the three tiers in the middle,
+// and the same eighth going to each ring. Tap or hover a ring to read it.
 import { useId } from 'react';
-import { ESCALAS, type EscalaId, PARTE_ESCALA, porcentaje } from '../../data/modeloSocioeconomico';
+import { ESCALAS, type EscalaId } from '../../data/modeloSocioeconomico';
 
 const R0 = 82; // radius of the centre disc
 const ANCHO = 34; // width of each ring
@@ -37,7 +37,7 @@ export function AnillosEscalas({ activa, onActiva, className }: {
             key={e.id}
             role="button"
             tabIndex={0}
-            aria-label={`${e.nombre}: ${porcentaje(PARTE_ESCALA * 100)} de cada pago`}
+            aria-label={`${e.nombre}: un octavo de lo recaudado`}
             aria-pressed={activa === e.id}
             className={`${uid}-a cursor-pointer outline-none [&:focus-visible>path.anillo]:stroke-slate-900 [&:focus-visible>path.anillo]:stroke-[3]`}
             style={{ animationDelay: `${120 + i * 70}ms`, transformOrigin: '0 0', transformBox: 'view-box' }}
@@ -59,8 +59,8 @@ export function AnillosEscalas({ activa, onActiva, className }: {
       })}
       <g className={`${uid}-a`} style={{ transformOrigin: '0 0', transformBox: 'view-box', pointerEvents: 'none' }}>
         <circle r={R0 - HUECO} fill="white" />
-        <text y={10} textAnchor="middle" fontSize={50} fontWeight={800} letterSpacing="-0.03em" className="fill-slate-900">20 %</text>
-        <text y={34} textAnchor="middle" fontSize={13.5} className="fill-slate-600">de cada pago</text>
+        <text y={2} textAnchor="middle" fontSize={29} fontWeight={800} letterSpacing="-0.03em" className="fill-slate-900">0 · 20 · 40</text>
+        <text y={26} textAnchor="middle" fontSize={13.5} className="fill-slate-600">% según el tramo</text>
       </g>
     </svg>
   );

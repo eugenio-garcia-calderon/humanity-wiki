@@ -2,15 +2,15 @@
 // technical committee carries them out at the lowest cost, most effectively and
 // most ecologically, and the accounts are open so the next round of priorities
 // starts from what actually happened.
-import { ESCALAS, PARTE_ESCALA, porcentaje } from '../../data/modeloSocioeconomico';
+import { ESCALAS } from '../../data/modeloSocioeconomico';
 import { Muestra } from './piezas';
 
 const CICLO = [
-  { t: 'Se recauda', d: 'Cada pago aparta el 20 % al instante.' },
-  { t: 'Se reparte', d: `${porcentaje(PARTE_ESCALA * 100)} a cada escala, por habitante.` },
-  { t: 'La asamblea elige', d: 'Las personas votan las prioridades: qué importa más este año.' },
+  { t: 'Se recauda', d: 'Cada pago aparta su tramo (0, 20 o 40 %) al instante.' },
+  { t: 'Se reparte', d: 'Un octavo a cada escala, lo mismo por habitante, y en cada escala en tres tercios: producir, cuidar y libre.' },
+  { t: 'La asamblea elige', d: 'Las personas votan las prioridades: qué importa más este año, dentro de cada tercio.' },
   { t: 'El comité diseña', d: 'Busca la manera más barata, eficaz y ecológica de cumplirlas.' },
-  { t: 'Se ejecuta', d: 'Obras, servicios y ayudas, con contratos públicos y abiertos.' },
+  { t: 'Se ejecuta', d: 'Obras, servicios, préstamos al IPC y donaciones puntuales, con contratos públicos y abiertos.' },
   { t: 'Se rinde cuentas', d: 'Cada euro y cada resultado, a la vista. Y vuelta a empezar.' },
 ];
 

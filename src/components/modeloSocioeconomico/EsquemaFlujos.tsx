@@ -1,11 +1,12 @@
 // The 2D scheme Eugenio asked for: every element, with arrows showing where
 // the money goes, how it is split and what comes back. Read left to right:
-// 1 every payment → 2 the payment system sets 20 % aside → 3 the open common
-// fund splits it, 2,5 % per scale → 4 each scale gives back services; and the
-// loop at the bottom: services go back to people, people vote the priorities.
+// 1 every payment → 2 the payment system sets its tier aside (0, 20 or 40 %) →
+// 3 the open common fund splits it in eighths → 4 each scale, in thirds, gives
+// back services; and the loop at the bottom: services go back to people,
+// people vote the priorities.
 import { useEffect, useState } from 'react';
 import {
-  ESCALAS, type EscalaId, type Modo, cuentasPais, euros, millones, porcentaje, PARTE_ESCALA, TIPO,
+  ESCALAS, type EscalaId, type Modo, cuentasPais, euros, millones,
 } from '../../data/modeloSocioeconomico';
 import { Libre } from './piezas';
 
@@ -50,12 +51,12 @@ export function EsquemaFlujos({ modo, activa, onActiva, mover }: {
   const animar = mover && !poco;
 
   const pagos = [
-    { id: 'sueldo', t: 'Una empresa paga un sueldo', s: `${porcentaje(TIPO * 100, 0)} al fondo y ${porcentaje((1 - TIPO) * 100, 0)} al trabajador` },
-    { id: 'compra', t: 'Alguien compra algo', s: `el ${porcentaje(TIPO * 100, 0)} ya va dentro del precio` },
-    { id: 'vivienda', t: 'Se vende una vivienda', s: 'igual que cualquier otra compra' },
+    { id: 'sueldo', t: 'Una empresa paga un sueldo', s: 'pequeña 0, mediana 20, grande 40 %' },
+    { id: 'compra', t: 'Alguien compra algo', s: 'tramo 1: 0 %, 2: 20 %, 3: 40 %' },
+    { id: 'vivienda', t: 'Se vende una vivienda', s: 'la habitual 0 %, otra 20 %' },
     {
       id: 'empresas', t: 'Una empresa compra a otra',
-      s: modo === 'eslabon' ? 'paga el 20 % y lo recupera al vender' : 'su 20 % también se queda en el fondo',
+      s: modo === 'eslabon' ? 'paga y lo recupera al vender' : 'el 20 % general se queda',
       tenue: modo === 'eslabon',
     },
   ];
@@ -66,7 +67,7 @@ export function EsquemaFlujos({ modo, activa, onActiva, mover }: {
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="block h-auto w-full min-w-[820px] font-[inherit]" role="img"
-      aria-label={`Esquema: cada pago aporta el ${porcentaje(TIPO * 100, 0)} al sistema de pago, que lo pasa al fondo común; el fondo da ${porcentaje(PARTE_ESCALA * 100)} a cada una de las ocho escalas, que devuelven servicios a las personas; las personas votan las prioridades de cada escala.`}>
+      aria-label="Esquema: cada pago aporta su tramo (0, 20 o 40 %) al sistema de pago, que lo pasa al fondo común; el fondo da un octavo a cada una de las ocho escalas; cada escala reparte lo suyo en tres tercios (producir, cuidar y libre) y devuelve servicios a las personas; las personas votan las prioridades de cada escala.">
       <defs>
         <marker id="ms-flecha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M0 0 L10 5 L0 10 z" className="fill-slate-500" />
@@ -85,6 +86,7 @@ export function EsquemaFlujos({ modo, activa, onActiva, mover }: {
         { x: VUELVE_X, n: 5, t: 'Lo que devuelven' },
       ].map(h => (
         <g key={h.n} transform={`translate(${h.x} 34)`}>
+          {h.n === 4 && <text x={27} y={19} fontSize={11.5} className="fill-slate-600">cada una en tercios: producir, cuidar, libre</text>}
           <circle cx={10} cy={-5} r={10} className="fill-slate-900" />
           <text x={10} y={-1} textAnchor="middle" fontSize={12} fontWeight={700} className="fill-white">{h.n}</text>
           <text x={27} y={0} fontSize={14} fontWeight={700} className="fill-slate-900">{h.t}</text>
@@ -112,20 +114,20 @@ export function EsquemaFlujos({ modo, activa, onActiva, mover }: {
 
       {/* 2 · The payment system */}
       <rect x={PAS_X} y={PAS_Y} width={PAS_W} height={PAS_H} rx={16} className="fill-slate-900" />
-      <text x={PAS_X + 18} y={PAS_Y + 34} fontSize={15} fontWeight={700} className="fill-white">Aparta el {porcentaje(TIPO * 100, 0)}</text>
-      {lineas('en el mismo instante del pago, sea con banco, tarjeta, Bizum o euro digital. Nadie tiene que declarar nada.', 24).map((l, k) => (
+      <text x={PAS_X + 18} y={PAS_Y + 34} fontSize={15} fontWeight={700} className="fill-white">Aparta su tramo</text>
+      {lineas('el 0, el 20 o el 40 %, en el mismo instante del pago, con banco, tarjeta, Bizum o euro digital. Nadie declara nada.', 24).map((l, k) => (
         <text key={k} x={PAS_X + 18} y={PAS_Y + 60 + k * 18} fontSize={12.5} className="fill-slate-300">{l}</text>
       ))}
-      {/* 80 % to whoever is paid */}
+      {/* the rest to whoever is paid */}
       <path d={`M ${PAS_X + PAS_W / 2} ${PAS_Y + PAS_H} L ${PAS_X + PAS_W / 2} ${PAS_Y + PAS_H + 52}`} className="stroke-slate-500" strokeWidth={1.6} markerEnd="url(#ms-flecha)" />
-      <text x={PAS_X + PAS_W / 2 + 8} y={PAS_Y + PAS_H + 30} fontSize={12} fontWeight={650} className="fill-slate-700">{porcentaje((1 - TIPO) * 100, 0)}</text>
+      <text x={PAS_X + PAS_W / 2 + 8} y={PAS_Y + PAS_H + 30} fontSize={12} fontWeight={650} className="fill-slate-700">el resto</text>
       <rect x={PAS_X} y={PAS_Y + PAS_H + 56} width={PAS_W} height={58} rx={12} className="fill-white stroke-slate-300" />
       <text x={PAS_X + 16} y={PAS_Y + PAS_H + 80} fontSize={13.5} fontWeight={650} className="fill-slate-900">Quien cobra</text>
       <text x={PAS_X + 16} y={PAS_Y + PAS_H + 98} fontSize={12} className="fill-slate-600">el trabajador o la tienda</text>
 
-      {/* 20 % into the fund */}
+      {/* what was set aside, into the fund */}
       <path id="ms-al-fondo" d={`M ${PAS_X + PAS_W} ${PAS_Y + PAS_H / 2} L ${FON_X - 2} ${PAS_Y + PAS_H / 2}`} className="stroke-slate-900" strokeWidth={2.4} markerEnd="url(#ms-flecha-oscura)" />
-      <text x={(PAS_X + PAS_W + FON_X) / 2} y={PAS_Y + PAS_H / 2 - 9} textAnchor="middle" fontSize={13} fontWeight={700} className="fill-slate-900">{porcentaje(TIPO * 100, 0)}</text>
+      <text x={(PAS_X + PAS_W + FON_X) / 2} y={PAS_Y + PAS_H / 2 - 9} textAnchor="middle" fontSize={11.5} fontWeight={700} className="fill-slate-900">al fondo</text>
       {animar && (
         <circle r={4} className="fill-slate-900">
           <animateMotion dur="1.6s" repeatCount="indefinite"><mpath href="#ms-al-fondo" /></animateMotion>
@@ -155,7 +157,7 @@ export function EsquemaFlujos({ modo, activa, onActiva, mover }: {
             onKeyDown={ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); onActiva(activa === e.id ? null : e.id); } }}
           >
             <path id={`ms-nivel-${i}`} d={d} fill="none" stroke={e.color} strokeWidth={activa === e.id ? 4 : 2.4} markerEnd="url(#ms-flecha)" />
-            <text x={(FON_X + FON_W + NIV_X) / 2} y={yc - 8} textAnchor="middle" fontSize={11.5} fontWeight={650} className="fill-slate-700">{porcentaje(PARTE_ESCALA * 100)}</text>
+            <text x={(FON_X + FON_W + NIV_X) / 2} y={yc - 8} textAnchor="middle" fontSize={11.5} fontWeight={650} className="fill-slate-700">1/8</text>
             {animar && (
               <circle r={3.5} fill={e.color}>
                 <animateMotion dur="1.4s" repeatCount="indefinite" begin={`${0.2 + i * 0.12}s`}><mpath href={`#ms-nivel-${i}`} /></animateMotion>
@@ -166,6 +168,10 @@ export function EsquemaFlujos({ modo, activa, onActiva, mover }: {
             <text x={NIV_X + 20} y={y + 24} fontSize={14} fontWeight={700} className="fill-slate-900">{e.nombre}</text>
             <text x={NIV_X + 20} y={y + 42} fontSize={12} className="fill-slate-700">{millones(pais.porEscala)} al año en España</text>
             <text x={NIV_X + 20} y={y + 58} fontSize={12} className="fill-slate-500">{euros(pais.porPersonaEscala)} por habitante</text>
+            {/* the three thirds: produce, care, free */}
+            {[0, 1, 2].map(k => (
+              <rect key={k} x={NIV_X + NIV_W - 58 + k * 17} y={y + 50} width={15} height={7} rx={2} fill={e.color} style={{ opacity: 1 - k * 0.3 }} />
+            ))}
             {lineas(e.devuelve, 26).slice(0, 4).map((l, k, arr) => (
               <text key={k} x={VUELVE_X} y={yc - (arr.length - 1) * 7.5 + k * 15 + 4} fontSize={12} className="fill-slate-700">{l}</text>
             ))}
@@ -209,17 +215,17 @@ export function EsquemaVertical({ modo, activa, onActiva }: { modo: Modo; activa
     <ol className="text-[15px]">
       <li className="rounded-xl border border-slate-300 bg-white p-4">
         <p className="font-bold text-slate-900">1. Cada pago</p>
-        <p className="mt-1 text-sm text-slate-600">Un sueldo, una compra, la venta de una vivienda{modo === 'literal' ? ' y también las compras entre empresas' : ' (entre empresas, el 20 % se paga y se recupera al vender)'}.</p>
+        <p className="mt-1 text-sm text-slate-600">Un sueldo (empresa pequeña 0 %, mediana 20 %, grande 40 %), una compra (tramo 1: 0 %, 2: 20 %, 3: 40 %), la venta de una vivienda{modo === 'literal' ? '; y también las compras entre empresas, al 20 %' : '. Cuando una empresa compra a otra, paga y lo recupera al vender'}.</p>
       </li>
       <Flecha />
       <li className="rounded-xl bg-slate-900 p-4 text-white">
-        <p className="font-bold">2. El sistema de pago aparta el {porcentaje(TIPO * 100, 0)}</p>
-        <p className="mt-1 text-sm text-slate-300">En el mismo instante. El {porcentaje((1 - TIPO) * 100, 0)} llega a quien cobra. Nadie declara nada.</p>
+        <p className="font-bold">2. El sistema de pago aparta su tramo</p>
+        <p className="mt-1 text-sm text-slate-300">En el mismo instante. El resto llega a quien cobra. Nadie declara nada.</p>
       </li>
-      <Flecha t={`${porcentaje(TIPO * 100, 0)} al fondo común abierto`} />
+      <Flecha t="Lo apartado, al fondo común abierto" />
       <li className="rounded-xl border border-slate-300 bg-slate-100 p-4">
-        <p className="font-bold text-slate-900">3 y 4. El reparto: {porcentaje(PARTE_ESCALA * 100)} a cada una de las ocho escalas</p>
-        <p className="mt-1 text-sm text-slate-600">{millones(pais.porEscala)} al año para cada una en España, {euros(pais.porPersonaEscala)} por habitante.</p>
+        <p className="font-bold text-slate-900">3 y 4. El reparto: un octavo para cada una de las ocho escalas</p>
+        <p className="mt-1 text-sm text-slate-600">{millones(pais.porEscala)} al año para cada una en España, {euros(pais.porPersonaEscala)} por habitante. Cada escala lo divide en tres tercios: producir, cuidar y libre.</p>
         <ul className="mt-3 space-y-1.5">
           {ESCALAS.map(e => (
             <li key={e.id}>

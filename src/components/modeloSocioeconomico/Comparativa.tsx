@@ -3,7 +3,7 @@
 // sits today and with the model.
 import { cn } from '../../utils/cn';
 import {
-  AMBITO, ESCALA, ESCALAS, ESPANA, HOY, modeloPorFuncion, euros, IMPUESTOS_HOY, TOTAL_FIGURAS, type Modo, cuentasPais, millones, numero, numeroFiguras, porcentaje, PARTE_ESCALA, TIPO,
+  AMBITO, ESCALA, ESCALAS, ESPANA, HOY, modeloPorFuncion, euros, IMPUESTOS_HOY, TOTAL_FIGURAS, type Modo, cuentasPais, millones, numero, numeroFiguras, porcentaje,
 } from '../../data/modeloSocioeconomico';
 import { Fuente, Muestra } from './piezas';
 
@@ -39,9 +39,9 @@ export function Piezas() {
       </div>
       <div className="flex flex-col self-start rounded-2xl bg-slate-900 p-6 text-white">
         <h3 className="text-lg font-bold">Con el modelo: 1</h3>
-        <p className="mt-1 text-sm text-slate-300">Un único {porcentaje(TIPO * 100, 0)} sobre cada pago. Lo aparta el sistema de pago y llega ya repartido:</p>
+        <p className="mt-1 text-sm text-slate-300">Un solo impuesto sobre cada pago, con tres tramos. Lo aparta el sistema de pago y llega ya repartido:</p>
         <div className="mt-5 flex items-stretch gap-3">
-          <span aria-hidden className="grid h-24 w-24 shrink-0 place-items-center rounded-lg bg-white text-2xl font-[800] tracking-tight text-slate-900">{porcentaje(TIPO * 100, 0)}</span>
+          <span aria-hidden className="grid h-24 w-24 shrink-0 place-items-center rounded-lg bg-white text-center text-lg font-[800] leading-tight tracking-tight text-slate-900">0 · 20<br />· 40 %</span>
           <ul className="grid flex-1 grid-cols-2 gap-x-3 gap-y-1 text-xs text-slate-200">
             {ESCALAS.map(e => <li key={e.id} className="flex items-center gap-1.5"><Muestra color={e.color} />{e.corto}</li>)}
           </ul>
@@ -52,7 +52,7 @@ export function Piezas() {
           <li>Sin cuotas de comunidad.</li>
         </ul>
         <p className="mt-5 text-xs leading-relaxed text-slate-400">
-          Dentro de la Unión Europea, la parte de las compras sería legalmente el IVA, que la UE obliga a mantener; para quien paga sigue siendo un único {porcentaje(TIPO * 100, 0)}.
+          Hoy el IVA ya tiene tres tipos (4, 10 y 21 %). Dentro de la Unión Europea, la parte de las compras sería legalmente el IVA, que la UE obliga a mantener con un tipo mínimo del 15 % y reducidos para lo básico.
         </p>
       </div>
     </div>
@@ -82,14 +82,15 @@ export function Costes() {
 export function Tabla({ modo }: { modo: Modo }) {
   const pais = cuentasPais(modo);
   const filas: [string, React.ReactNode, React.ReactNode][] = [
-    ['Cuántos impuestos', <>{TOTAL_FIGURAS} figuras y cientos de tasas</>, <>Uno: el {porcentaje(TIPO * 100, 0)}</>],
+    ['Cuántos impuestos', <>{TOTAL_FIGURAS} figuras y cientos de tasas</>, 'Uno, con tres tramos: 0, 20 y 40 %'],
     ['Quién hace papeleo', 'Personas, autónomos, empresas y comunidades de vecinos: declaraciones, modelos trimestrales, liquidaciones y recibos', 'Nadie: lo aparta el sistema de pago en cada operación'],
     ['Cuándo se paga', 'Retenciones cada mes, declaraciones cada trimestre y cada año, recibos en fechas distintas', 'En el instante de cada pago'],
-    ['Cómo llega el dinero a cada administración', 'Impuestos cedidos, participaciones en tributos del Estado y un sistema de financiación autonómica que se negocia políticamente y se liquida años después', `${porcentaje(PARTE_ESCALA * 100)} automático a cada escala, repartido por habitante, cada día`],
+    ['Cómo llega el dinero a cada administración', 'Impuestos cedidos, participaciones en tributos del Estado y un sistema de financiación autonómica que se negocia políticamente y se liquida años después', 'Un octavo automático a cada escala, repartido por habitante, cada día; y en cada escala, tercios para producir, cuidar y libre'],
     ['La comunidad de vecinos', `Cuotas aparte: unos ${millones(HOY.cuotasComunidades)} al año`, 'Es una escala más y la financia el fondo común'],
-    ['Quién paga más', 'Tramos del IRPF, deducciones y exenciones', 'Tipo único y un dividendo igual para todos: en neto paga más quien más mueve'],
+    ['Quién paga más', 'Tramos del IRPF, deducciones y exenciones', 'Quien gasta en ocio y lujo, y quien trabaja para una empresa grande; todos reciben el mismo dividendo'],
+    ['Pensiones', 'Pensiones contributivas de jubilación, viudedad e incapacidad', 'Sin pensiones constantes, salvo por discapacidad y en especie; préstamos al IPC y donaciones puntuales entre escalas'],
     ['Transparencia', 'Presupuestos y liquidaciones anuales', 'Cuentas abiertas: cada euro, en tiempo real'],
-    ['Cuánto se recauda', <>≈ 38 % del PIB en impuestos y cotizaciones (2025)<Fuente id="ijm-2026" /></>, <>≈ {porcentaje(pais.pctPIB, 0)} del PIB en esta lectura del modelo</>],
+    ['Cuánto se recauda', <>≈ 38 % del PIB en impuestos y cotizaciones (2025)<Fuente id="ijm-2026" /></>, <>≈ {porcentaje(pais.pctPIB, 0)} del PIB en esta lectura del modelo</>],
   ];
   return (
     <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
@@ -211,9 +212,9 @@ export function GanaYPierde({ modo }: { modo: Modo }) {
       </p>
       <p className="mt-4 text-sm leading-relaxed text-slate-700">
         Por habitante: hoy, unos {euros((totalHoy * 1e6) / ESPANA.poblacion)} al año entre gasto público y cuotas de comunidad;
-        con el modelo, {euros((totalModelo * 1e6) / ESPANA.poblacion)} en servicios más {euros(pais.porPersonaEscala)} de dividendo.
-        En total, {millones(totalModelo)} frente a {millones(totalHoy)}. La mayor diferencia está en las pensiones y la protección social:
-        {' '}{millones(pension.modelo)} frente a {millones(pension.hoy)}. Hay que sumar el dividendo, {millones(pais.porEscala)} al año que reciben directamente todas las personas,
+        con el modelo, {euros((totalModelo * 1e6) / ESPANA.poblacion)} en lo que hacen las escalas (servicios e inversión) más {euros(pais.porPersonaEscala)} de dividendo.
+        En total, {millones(totalModelo)} frente a {millones(totalHoy)} (los {millones(HOY.gastoTotal2024)} de gasto público más las cuotas de comunidad). La mayor diferencia está en la protección social:
+        {' '}{millones(pension.modelo)} frente a {millones(pension.hoy)}, porque el modelo no paga pensiones constantes, salvo por discapacidad y en especie. Hay que sumar el dividendo, {millones(pais.porEscala)} al año que reciben directamente todas las personas,
         y saber que hoy «administración» incluye {millones(HOY.intereses2025)} de intereses de la deuda en 2025<Fuente id="intereses" />, que el modelo todavía no resuelve.
       </p>
     </figure>

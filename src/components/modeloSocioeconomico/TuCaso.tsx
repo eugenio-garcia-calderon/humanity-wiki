@@ -1,11 +1,14 @@
 // The worked example Eugenio asked for: a person who lives with her partner in
 // a village of 400 people in the Comunidad de Madrid. How much money she
 // handles a day, a month and a year; how much goes to each layer; and the same
-// person under today's system. Every figure is computed from the controls.
+// person under today's system. Every figure is computed from the controls:
+// her wage, who pays it (the tier of wages is the size of the company) and her
+// spending in each tier.
 import type { ReactNode } from 'react';
 import { cn } from '../../utils/cn';
 import {
-  ESCALAS, ESPANA, type Modo, type Ejemplo, calcularEjemplo, modeloPorFuncion, recibeLugar, euros, millones, porcentaje, SUPUESTOS, TIPO,
+  EMPLEADOR, EMPLEADORES, ESCALAS, ESPANA, TRAMO, type Empleador, type Modo, type Ejemplo, type Tramo,
+  calcularEjemplo, modeloPorFuncion, recibeLugar, euros, millones, porcentaje, sumaGasto,
 } from '../../data/modeloSocioeconomico';
 import { Fuente, Muestra, Regulador, Segmentado } from './piezas';
 
@@ -21,13 +24,20 @@ export function TuCaso({ modo, ejemplo, onEjemplo }: { modo: Modo; ejemplo: Ejem
   const set = (p: Partial<Ejemplo>) => onEjemplo({ ...ejemplo, ...p });
   const maxBarra = Math.max(r.totalHoy, r.aporta);
 
+  const emp = EMPLEADOR[ejemplo.empleador];
+  const cambio = (t: Tramo) => (r.precioTramo[t] - 1) * 100;
   const filas: { t: ReactNode; v: number; fuerte?: boolean; signo?: string }[] = [
     { t: 'Lo que paga la empresa por su trabajo', v: r.costeTrabajo },
-    { t: `Le llega a su cuenta (el ${porcentaje((1 - TIPO) * 100, 0)})`, v: r.netoModelo },
-    { t: ejemplo.enComunidad ? `Recibe su dividendo del fondo común` : `Recibe del fondo común: su dividendo (${euros(r.dividendo)}) y su parte del hogar (${euros(r.parteFamilia)})`, v: r.recibe, signo: '+' },
-    { t: 'Gasta (la misma cesta que hoy)', v: r.gastoModelo, signo: '−' },
-    { t: 'Le queda para ahorrar', v: r.sobraModelo, fuerte: true },
+    { t: `Le llega a su cuenta (el ${porcentaje((1 - r.tipoSueldo) * 100, 0)}: ${emp.corto.toLowerCase()})`, v: r.netoModelo },
+    { t: 'Gasta (la misma cesta que hoy, con los precios del modelo)', v: r.gastoModelo, signo: '−' },
+    { t: 'Le queda de su trabajo', v: r.sobraModelo, fuerte: true },
+    { t: ejemplo.enComunidad ? `Recibe del fondo su dividendo` : `Recibe del fondo su dividendo (${euros(r.dividendo)}) y la parte de su hogar (${euros(r.parteFamilia)})`, v: r.recibe, signo: '+' },
     { t: 'Aporta al fondo común', v: r.aporta, fuerte: true },
+  ];
+  const GASTOS: { t: Tramo; etiqueta: string; ayuda: string; max: number }[] = [
+    { t: 1, etiqueta: 'Primera necesidad, al mes', ayuda: 'Comida, alquiler, luz, agua, transporte, salud.', max: 2_000 },
+    { t: 2, etiqueta: 'Segunda necesidad, al mes', ayuda: 'Ropa, muebles, móvil e internet, seguros.', max: 1_500 },
+    { t: 3, etiqueta: 'Ocio y lujo, al mes', ayuda: 'Bares, restaurantes, viajes, ocio, tabaco.', max: 1_500 },
   ];
 
   return (
@@ -40,8 +50,17 @@ export function TuCaso({ modo, ejemplo, onEjemplo }: { modo: Modo; ejemplo: Ejem
           <p className="-mt-3 text-xs leading-relaxed text-slate-500">
             Como referencia, el salario mediano en España fue de 24.497 € en 2024 y el medio de la Comunidad de Madrid, 34.410 €.<Fuente id="ine-salarios">INE</Fuente>
           </p>
-          <Regulador etiqueta="Lo que gasta al mes (su parte)" valor={ejemplo.gastoMes} min={400} max={3_000} paso={50}
-            mostrar={euros(ejemplo.gastoMes)} onChange={v => set({ gastoMes: v })} ayuda="Comida, luz, transporte, ropa, ocio… con los precios de hoy." />
+          <div className="space-y-2">
+            <span className="block text-sm font-medium text-slate-700">Trabaja en</span>
+            <Segmentado<Empleador> etiqueta="Quién le paga el sueldo" valor={ejemplo.empleador} onChange={v => set({ empleador: v })}
+              opciones={EMPLEADORES.map(x => ({ id: x.id, texto: `${x.corto} (${porcentaje(x.tipo * 100, 0)})` }))} />
+            <span className="block text-xs text-slate-500">{emp.nombre}{emp.nota ? `. ${emp.nota}.` : '.'}</span>
+          </div>
+          <p className="text-sm font-medium text-slate-700">Lo que gasta, con los precios de hoy (su parte): {euros(sumaGasto(ejemplo.gasto))} al mes</p>
+          {GASTOS.map(g => (
+            <Regulador key={g.t} etiqueta={`${g.etiqueta} (tramo ${g.t}, ${porcentaje(TRAMO[g.t].tipo * 100, 0)})`} valor={ejemplo.gasto[g.t]} min={0} max={g.max} paso={10}
+              mostrar={euros(ejemplo.gasto[g.t])} onChange={v => set({ gasto: { ...ejemplo.gasto, [g.t]: v } })} ayuda={g.ayuda} />
+          ))}
           <div className="flex flex-wrap items-center gap-3">
             <span className="text-sm font-medium text-slate-700">Vive</span>
             <Segmentado etiqueta="Con quién vive" valor={ejemplo.pareja ? 'si' : 'no'} onChange={v => set({ pareja: v === 'si' })}
@@ -121,9 +140,11 @@ export function TuCaso({ modo, ejemplo, onEjemplo }: { modo: Modo; ejemplo: Ejem
           </div>
           <p className="mt-3 text-xs leading-relaxed text-slate-500">
             Por sus manos pasan {euros(r.maneja)} al año ({euros(dia(r.maneja), 2)} al día): lo que vale su trabajo más lo que compra.
-            La empresa paga lo mismo que hoy; los precios cambian: la misma cesta cuesta {euros(mes(r.gastoModelo))} al mes en vez de {euros(ejemplo.gastoMes)},
-            porque el {porcentaje(TIPO * 100, 0)} sustituye al ≈ {porcentaje(SUPUESTOS.indirectosHoy * 100, 0)} que hoy suman el IVA y los impuestos especiales
-            {modo === 'literal' ? ', y porque el 20 % que se pagan las empresas entre sí acaba dentro de los precios' : ''}.
+            La empresa paga lo mismo que hoy; los precios cambian: la misma cesta cuesta {euros(mes(r.gastoModelo))} al mes en vez de {euros(sumaGasto(ejemplo.gasto))}.
+            Lo de primera necesidad {cambio(1) < 0 ? 'baja' : 'sube'} un {porcentaje(Math.abs(cambio(1)), 0)}, porque pierde el IVA y los impuestos especiales de hoy;
+            lo de segunda necesidad sube un {porcentaje(cambio(2), 0)} y el ocio y el lujo, un {porcentaje(cambio(3), 0)}
+            {modo === 'literal' ? ', contando el 20 % que se pagan las empresas entre sí y acaba dentro de los precios' : ''}.
+            De su dividendo, un tercio ({euros(r.dividendo / 3)}) va a sus participaciones en lo que produce, otro a cuidados y otro es libre.
           </p>
         </div>
 
@@ -142,20 +163,22 @@ export function TuCaso({ modo, ejemplo, onEjemplo }: { modo: Modo; ejemplo: Ejem
               <dd className="text-2xl font-bold tabular-nums text-slate-900">{euros(r.sobraHoy)}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Le queda al año, con el modelo</dt>
+              <dt className="text-slate-500">Le queda al año de su trabajo, con el modelo</dt>
               <dd className="text-2xl font-bold tabular-nums text-slate-900">{euros(r.sobraModelo)}</dd>
+              <dd className="text-xs text-slate-500">{euros(r.sobraModelo + r.recibe)} con lo que recibe del fondo</dd>
             </div>
           </dl>
           <p className="mt-3 text-xs leading-relaxed text-slate-500">
             Hoy: cotizaciones de 2026, IRPF con las escalas estatal y de Madrid<Fuente id="irpf-madrid" /> y sus mínimos<Fuente id="minimo-madrid" />,
             IBI, basuras y vehículo medios de un hogar<Fuente id="roams" />. Es un cálculo orientativo: no incluye deducciones personales.
-            «Le queda» descuenta en los dos casos sus impuestos locales y la cesta de la compra.
+            «Le queda» descuenta en los dos casos sus impuestos locales y la cesta de la compra; con el modelo, además, recibe {euros(r.recibe)} del fondo.
           </p>
           <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm leading-relaxed text-amber-950">
-            <b>Lo que deja de tener.</b> Con el modelo no hay cotizaciones, así que deja de acumular derechos de pensión contributiva y de paro.
-            Su protección pasa a ser el dividendo y lo que decidan las escalas. Que le quede más dinero no es magia: en esta lectura el modelo recauda
-            menos que el sistema actual y hay menos servicios públicos: por habitante, unos {euros(serviciosModelo)} al año en lugar de {euros(serviciosHoy)}{' '}
+            <b>Lo que deja de tener.</b> El modelo no tiene pensiones de jubilación ni paro: su vejez se apoya en lo que ahorre e invierta, en su familia,
+            su comunidad y su municipio, en préstamos al IPC y en un trabajo u ocupación; si llega a tener una discapacidad, en el apoyo en especie.
+            Y hay menos servicios públicos: por habitante, unos {euros(serviciosModelo)} entre servicios e inversión al año en lugar de {euros(serviciosHoy)}{' '}
             (lo cuentan «Frente a hoy» y «Lo que falta por resolver»).
+            {r.tipoSueldo === 0 && ejemplo.empleador !== 'publica' && <> Gran parte de la diferencia viene de que su empresa es pequeña: su sueldo no paga nada.</>}
           </p>
         </div>
       </div>
