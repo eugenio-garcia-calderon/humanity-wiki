@@ -242,6 +242,13 @@ export function VistaPlanos({ modelo }: { modelo: Modelo }) {
       <p className="mt-2 text-sm text-slate-600">Los planos (cuadernas, perfiles, chasis y lista de corte) son del Aeromóvil 1 y del Aeromóvil Gota. El Cuadriciclo Bala todavía no los tiene: su piel se dibuja de otra manera y su chasis no está diseñado. Elige uno de los otros dos en el menú del nombre del vehículo, arriba a la izquierda, para verlos, o descarga el STL del Bala en «Exportar a CAD».</p>
     </div>
   );
+  // The Triciclo has the Bala's skin (no editor sections either) and a tube frame, but no drawings of it yet.
+  if (modelo.tipo === 'triciclo') return (
+    <div className="mx-auto max-w-3xl px-4 py-8">
+      <h2 className="text-xl font-semibold text-slate-900">Planos de fabricación</h2>
+      <p className="mt-2 text-sm text-slate-600">Los planos (cuadernas, perfiles, chasis y lista de corte) son del Aeromóvil 1 y del Aeromóvil Gota. El Triciclo Bala todavía no los tiene: su piel es la del Cuadriciclo, que se dibuja de otra manera, y su bastidor de tubos se ve en el 3D («Rayos X» o la capa «Chasis») pero aún no tiene láminas. Descarga su STL en «Exportar a CAD».</p>
+    </div>
+  );
   return <PlanosPiel modelo={modelo} />;
 }
 function PlanosPiel({ modelo }: { modelo: ModeloConPiel }) {
@@ -305,7 +312,8 @@ function PlanosPiel({ modelo }: { modelo: ModeloConPiel }) {
 export function VistaExportar({ modelo, visor, porDefecto, resultados }: { modelo: Modelo; visor: React.RefObject<VisorHandle | null>; porDefecto: boolean; resultados: Resultados }) {
   const [capas, setCapas] = useState<Record<CapaId, boolean>>(() => Object.fromEntries(CAPAS.map(c => [c.k, c.k !== 'ocupantes'])) as Record<CapaId, boolean>);
   const [aviso, setAviso] = useState<string | null>(null);
-  const esA1 = modelo.tipo === 'a1', esBala = modelo.tipo === 'bala';
+  // the Triciclo is a Bala here: STL only, its skin is the Cuadriciclo's
+  const esA1 = modelo.tipo === 'a1', esBala = modelo.tipo === 'bala' || modelo.tipo === 'triciclo', esTri = modelo.tipo === 'triciclo';
   const json = esA1 || esBala ? '' : JSON.stringify(parametrosCAD(modelo.P), null, 1);
   const capasVisor = CAPAS.filter(c => !('solo' in c) || c.solo === modelo.tipo);
   const stl = () => {
@@ -313,14 +321,14 @@ export function VistaExportar({ modelo, visor, porDefecto, resultados }: { model
     if (!elegidas.length) { setAviso('Marca al menos una capa.'); return; }
     if (!visor.current) { setAviso('Abre «Diseño 3D» una vez para preparar el modelo y vuelve aquí.'); return; }
     setAviso(null);
-    descargar(`${esA1 ? 'aeromovil-1' : esBala ? 'cuadriciclo-bala' : 'aeromovil-gota'}-${elegidas.join('-')}.stl`, visor.current.exportarSTL(elegidas));
+    descargar(`${esA1 ? 'aeromovil-1' : esTri ? 'triciclo-bala' : esBala ? 'cuadriciclo-bala' : 'aeromovil-gota'}-${elegidas.join('-')}.stl`, visor.current.exportarSTL(elegidas));
   };
   return (
     <div className="mx-auto grid max-w-6xl gap-5 px-4 py-6 md:grid-cols-2">
       <div className="md:col-span-2">
         <h2 className="text-xl font-semibold text-slate-900">Exportar a CAD</h2>
         <p className="max-w-3xl text-sm text-slate-600">{esBala
-          ? 'Del Cuadriciclo Bala hay STL de lo que ves en el visor, capa a capa. STEP no hay todavía: el script de CadQuery dibuja el Aeromóvil 1 y el Gota, y la piel del Bala se construye de otra manera.'
+          ? `Del ${esTri ? 'Triciclo' : 'Cuadriciclo'} Bala hay STL de lo que ves en el visor, capa a capa. STEP no hay todavía: el script de CadQuery dibuja el Aeromóvil 1 y el Gota, y la piel del Bala se construye de otra manera.`
           : esA1
           ? 'El STEP abre en FreeCAD, Fusion 360, SolidWorks u Onshape con doce capas (Carrocería, Cristales, Paneles solares, Chasis, Suspensión, Dirección, Transmisión, Ruedas, Motor, Baterías, Asientos y Ocupantes) que se ocultan una a una desde el árbol. Las puertas y las tapas de los maleteros son piezas aparte, cerradas; se abren en el visor.'
           : 'El STEP abre en FreeCAD, Fusion 360, SolidWorks u Onshape con diez capas (Carenado, Cristales, Paneles solares, Chasis, Suspensión, Ruedas, Asientos, Ocupantes, Motor y Baterías) que se ocultan una a una desde el árbol. Las puertas se eligen y se abren en el visor; en el STEP la piel va cerrada.'}</p>
@@ -355,7 +363,7 @@ export function VistaExportar({ modelo, visor, porDefecto, resultados }: { model
       {esBala ? (
         <section className="rounded-xl border border-slate-200 bg-white p-4">
           <h3 className="flex items-center gap-2 font-semibold text-slate-900"><FileCode2 className="h-4 w-4" />Medidas de este diseño</h3>
-          <p className="mt-1 text-sm text-slate-600">Largo {fmt(modelo.Lf, 2)} m · ancho {fmt(modelo.P.W, 2)} m con los carenados laterales ({fmt(modelo.anchoCuerpo, 2)} m la carrocería) · alto {fmt(modelo.P.H, 2)} m · batalla {fmt(modelo.P.B, 2)} m. Masa sin estimar: el chasis, el motor y la batería del Bala no están diseñados.</p>
+          <p className="mt-1 text-sm text-slate-600">Largo {fmt(modelo.Lf, 2)} m · ancho {fmt(modelo.P.W, 2)} m con los carenados {esTri ? 'delanteros' : 'laterales'} ({fmt(modelo.anchoCuerpo, 2)} m la carrocería) · alto {fmt(modelo.P.H, 2)} m · batalla {fmt(modelo.P.B, 2)} m. {esTri ? `Masa estimada: ${fmt(resultados.mVeh, 0)} kg sin ocupantes (el desglose, en «Diseño 3D»).` : 'Masa sin estimar: el chasis, el motor y la batería del Bala no están diseñados.'}</p>
         </section>
       ) : <section className="rounded-xl border border-slate-200 bg-white p-4 md:col-span-2">
         <h3 className="flex items-center gap-2 font-semibold text-slate-900"><FileCode2 className="h-4 w-4" />Regenerar el STEP con tus medidas</h3>

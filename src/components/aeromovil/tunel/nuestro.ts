@@ -1,5 +1,6 @@
 import type { Modelo, ModeloBase } from '../geometria';
 import type { ModeloBala } from '../geometriaBala';
+import type { ModeloTriciclo } from '../geometriaTriciclo';
 import { areaSuperelipse, funcionSeccion } from './malla';
 import type { RuedaTunel } from './arrastre';
 import type { Envolvente, Resolucion } from './malla';
@@ -44,8 +45,9 @@ export function envolventeModelo(m: ModeloBase): Envolvente {
 }
 
 /** Our design. `area` is the editor's frontal area (res.A), the one its Cd refers to (not for the Bala: see `cuerpoBala`). */
-export function cuerpoAeromovil(m: Modelo, area: number, nombre = m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala' : 'Aeromóvil Gota'): CuerpoTunel {
+export function cuerpoAeromovil(m: Modelo, area: number, nombre = m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala' : m.tipo === 'triciclo' ? 'Triciclo Bala' : 'Aeromóvil Gota'): CuerpoTunel {
   if (m.tipo === 'bala') return cuerpoBala(m, nombre);
+  if (m.tipo === 'triciclo') return cuerpoTriciclo(m, nombre);
   const xs = m.ruedas.map(r => r.x);
   return {
     id: 'aeromovil', nombre, x: 0, z: 0, giro: 0, envolvente: envolventeModelo(m), n: 2.3,
@@ -70,10 +72,7 @@ const N_BALA = 2;
  * and dividing it by a larger area would only make the Cd look smaller.
  */
 export function cuerpoBala(m: ModeloBala, nombre = 'Cuadriciclo Bala'): CuerpoTunel {
-  const envolvente = m.F.envolvente();
-  const { seccion, xMorro, xCola } = funcionSeccion(envolvente);
-  let area = 0;
-  for (let k = 0; k <= 200; k++) { const s = seccion(xMorro + (xCola - xMorro) * k / 200); area = Math.max(area, areaSuperelipse(s.a, s.b, N_BALA)); }
+  const { envolvente, area } = silueta(m.F);
   return {
     id: 'aeromovil', nombre, x: 0, z: 0, giro: 0, envolvente, n: N_BALA,
     area, fuenteArea: 'sección mayor del cuerpo (sin los carenados laterales ni sus brazos)',
@@ -82,6 +81,34 @@ export function cuerpoBala(m: ModeloBala, nombre = 'Cuadriciclo Bala'): CuerpoTu
       { d: 2 * m.rL, w: m.F.ANCHO_NEU_LAT, tipo: 'carenado' }, { d: 2 * m.rL, w: m.F.ANCHO_NEU_LAT, tipo: 'carenado' },
     ],
     ejes: [0, m.xR],
+  };
+}
+
+/** The Bala body's silhouette and its reference area (the largest elliptical section of it): the Cuadriciclo's and the Triciclo's. */
+function silueta(F: ModeloBala['F']) {
+  const envolvente = F.envolvente();
+  const { seccion, xMorro, xCola } = funcionSeccion(envolvente);
+  let area = 0;
+  for (let k = 0; k <= 200; k++) { const s = seccion(xMorro + (xCola - xMorro) * k / 200); area = Math.max(area, areaSuperelipse(s.a, s.b, N_BALA)); }
+  return { envolvente, area };
+}
+/**
+ * The Triciclo Bala (2026-11-10): the Cuadriciclo's body, so the same silhouette
+ * and the same reference area (the body's largest section); its three wheels:
+ * the two front ones in pods on arms ('carenado', as the Cuadriciclo's laterals
+ * and the Aptera's front ones), the rear one inside the tail ('dentro'). The pods,
+ * their arms, the fin and the rear wheel's spat are outside the silhouette.
+ */
+export function cuerpoTriciclo(m: ModeloTriciclo, nombre = 'Triciclo Bala'): CuerpoTunel {
+  const { envolvente, area } = silueta(m.F);
+  return {
+    id: 'aeromovil', nombre, x: 0, z: 0, giro: 0, envolvente, n: N_BALA,
+    area, fuenteArea: 'sección mayor del cuerpo (sin los carenados delanteros ni sus brazos)',
+    ruedas: [
+      { d: 2 * m.rF, w: m.F.ANCHO_NEU_LAT, tipo: 'carenado' }, { d: 2 * m.rF, w: m.F.ANCHO_NEU_LAT, tipo: 'carenado' },
+      { d: 2 * m.rR, w: m.F.ANCHO_NEU, tipo: 'dentro' },
+    ],
+    ejes: [m.xF, m.xR],
   };
 }
 

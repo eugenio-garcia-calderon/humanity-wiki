@@ -30,9 +30,17 @@ import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import { Visor3D, CAPAS, type CapaId, type Vista, type VisorHandle } from '../components/aeromovil/Visor3D';
 import {
-  PARAMETROS_POR_DEFECTO, PARAMETROS_A1, PARAMETROS_GOTA, PARAMETROS_BALA, BALA_DEFECTO, DIAMETRO_RUEDA, NEUMATICOS, MATERIALES_CARENADO, MATERIALES_CHASIS, RANGOS_MASA, ajustarCarenado, areas, calcular, crearModelo,
-  type Disposicion, type MaterialCarenado, type MaterialChasis, type Modelo, type ModeloBala, type Neumatico, type Parametros, type Puerta, type Pulgadas, type Resultados,
+  PARAMETROS_POR_DEFECTO, PARAMETROS_A1, PARAMETROS_GOTA, PARAMETROS_BALA, PARAMETROS_TRICICLO, BALA_DEFECTO, DIAMETRO_RUEDA, NEUMATICOS, MATERIALES_CARENADO, MATERIALES_CHASIS, RANGOS_MASA, ajustarCarenado, areas, calcular, crearModelo,
+  type Comprobacion, type Disposicion, type MaterialCarenado, type MaterialChasis, type Modelo, type ModeloBala, type ModeloTriciclo, type Neumatico, type Parametros, type Puerta, type Pulgadas, type Resultados,
 } from '../components/aeromovil/geometria';
+import {
+  AGARRE, AUXILIARES, CRR, DEPS_TRICICLO, LEMAS_TRICICLO, RENDIMIENTO, SELECTORES_TRICICLO, USABLE, VUELCO_OBJETIVO, camposTriciclo, deslizadoresTriciclo, energiaTriciclo, guardarTriciclo, vistaTriciclo,
+  type DepTriciclo, type FichaTriciclo,
+} from '../components/aeromovil/geometriaTriciclo';
+import { cuerpoTriciclo, peticionDe as peticionTunel } from '../components/aeromovil/tunel/nuestro';
+import { claveTunel } from '../components/aeromovil/tunel/calculo';
+import { pedirTunel, resultadoEnCache } from '../components/aeromovil/tunel/cliente';
+import type { Resolucion } from '../components/aeromovil/tunel/malla';
 import { BLOQUES_BALA, DESLIZADORES_BALA, INCLINACION, RUEDAS_DT_BALA, RUEDAS_LAT_BALA, TALLA_SENTADO, camposBala, rangoBala, type BloqueBala, type FichaBala } from '../components/aeromovil/geometriaBala';
 import { RANGOS_MASA_A1 } from '../components/aeromovil/geometriaA1';
 import { MenuDisenos, aDiseno, cargarDisenoPorDefecto, deDiseno, useAutoguardado, type Diseno } from '../components/aeromovil/Disenos';
@@ -82,6 +90,8 @@ const PUERTAS_A1: { k: Puerta; n: string; d: string }[] = [
 ];
 /** Las capas que tienen algo en el Bala (no lleva paneles solares, motor ni baterías dibujados). */
 const CAPAS_BALA: CapaId[] = ['carenado', 'cristales', 'chasis', 'suspension', 'ruedas', 'asientos', 'ocupantes'];
+/** Las del Triciclo: las del Bala más la dirección, el motor y la batería (sin paneles solares ni transmisión: el motor va en el buje). */
+const CAPAS_TRICICLO: CapaId[] = ['carenado', 'cristales', 'chasis', 'suspension', 'direccion', 'ruedas', 'asientos', 'ocupantes', 'motor', 'baterias'];
 
 
 /**
@@ -571,6 +581,184 @@ function LadoBala({ P, set, res, modelo, cdTunel }: {
   );
 }
 
+/** Una lista de comprobaciones: holgura en cm, o la cifra que traiga (`mostrar`: el vuelco en g, el bastidor en ×). */
+function ListaComprobaciones({ lista }: { lista: Comprobacion[] }) {
+  return (
+    <ul className="flex flex-col gap-1.5">
+      {lista.map(c => {
+        const cl = c.holgura < 0 ? 'border-red-300 bg-red-50 text-red-700' : c.holgura < c.minimo ? 'border-amber-300 bg-amber-50 text-amber-800' : 'border-emerald-300 bg-emerald-50 text-emerald-700';
+        const mal = c.mostrar ? (c.nombre.startsWith('Vuelco') ? 'vuelca' : 'no') : 'roza';
+        return (
+          <li key={c.nombre} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 text-[13px]">
+            <span className={cn('rounded-full border px-1.5 text-[10px] font-bold uppercase', cl)}>{c.holgura < 0 ? mal : c.holgura < c.minimo ? 'justo' : 'ok'}</span>
+            <span className="text-slate-700">{c.nombre}</span>
+            <span className="font-mono text-xs tabular-nums">{c.mostrar ?? `${c.holgura < 0 ? '−' : ''}${fmt(Math.abs(c.holgura) * 100, 1)} cm`}</span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/** El Cd del túnel para el Triciclo: lo que da, a qué área se refiere y si aún calcula. */
+interface CdTriciclo { calculando: boolean; cd?: number; areaRef?: number }
+/**
+ * El Cd del Triciclo (2026-11-10): el del túnel de viento, calculado en segundo plano (solo las cifras) con la
+ * silueta de la carrocería y sus tres ruedas, en el trabajador del túnel. Se pide medio segundo después del último
+ * cambio de la silueta; los deslizadores que no la cambian (masas, motor, batería…) no lo vuelven a pedir. El túnel
+ * da el Cd a 50, 80 y 120 km/h; a otra velocidad se interpola entre los dos más cercanos.
+ */
+function useCdTriciclo(modelo: Modelo, resolucion: Resolucion, kmh: number): CdTriciclo {
+  const peticion = useMemo(() => modelo.tipo === 'triciclo' ? { ...peticionTunel({ ...cuerpoTriciclo(modelo), id: 'triciclo-cd' }, resolucion, 'pocas'), soloNumeros: true } : null, [modelo, resolucion]);
+  const clave = peticion ? claveTunel(peticion) : '';
+  const [, setVersion] = useState(0);
+  useEffect(() => {
+    if (!peticion) return;
+    let vivo = true;
+    const t = setTimeout(() => { pedirTunel(peticion, 5).then(() => { if (vivo) setVersion(v => v + 1); }); }, 500);
+    return () => { vivo = false; clearTimeout(t); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clave]);
+  if (!peticion) return { calculando: false };
+  const R = resultadoEnCache(peticion);
+  if (!R) return { calculando: true };
+  const pv = R.porVelocidad, v = Math.min(pv[pv.length - 1].kmh, Math.max(pv[0].kmh, kmh));
+  let i = 0; while (i < pv.length - 2 && v > pv[i + 1].kmh) i++;
+  const u = (v - pv[i].kmh) / (pv[i + 1].kmh - pv[i].kmh);
+  return { calculando: false, cd: pv[i].cd.total + (pv[i + 1].cd.total - pv[i].cd.total) * u, areaRef: peticion.area };
+}
+
+/**
+ * Los deslizadores y las cifras del Triciclo Bala (2026-11-10, Eugenio: «permite modificar todo lo que se permitía
+ * modificar en el Apterike»), por departamentos como el Aeromóvil 1. Etiquetas, departamentos, bloques y rangos salen
+ * de `deslizadoresTriciclo()` (geometriaTriciclo.ts), la misma tabla que leen las opciones del túnel; las de la forma,
+ * de la del Cuadriciclo. «Proyecto» es el resumen: todas las comprobaciones, el rendimiento y el peso.
+ */
+function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
+  P: Parametros; set: <K extends keyof Parametros>(k: K, v: Parametros[K]) => void; res: Resultados; modelo: ModeloTriciclo; dep: DepTriciclo | 'proyecto'; cd: CdTriciclo;
+}) {
+  const T = camposTriciclo(P), rt = res.triciclo!, cm = (v: number, d = 1) => `${fmt(v * 100, d)} cm`;
+  const e = cd.cd != null && cd.areaRef != null ? energiaTriciclo(modelo, res.mTot, { cd: cd.cd, areaRef: cd.areaRef }) : null;
+  const mostrar = (f: FichaTriciclo, v: number): string => {
+    switch (f.clave) {
+      case 'tSuelo': return `${cm(v)} al suelo`;
+      case 'tPuntaMorro': return `${fmt(v, 2)} · ${v < 0.7 ? 'ojiva llena' : v > 0.95 ? 'en aguja' : 'ojiva'}`;
+      case 'tCupIni': case 'tCupFin': return v >= 0 ? `${m2(v)} tras el eje delantero` : `${m2(-v)} delante del eje delantero`;
+      case 'tVia': return rt.viaSubida ? `${m2(v)} → ${m2(rt.viaSubida)}` : m2(v);
+      case 'tAleta': return `${m2(v)} sobre el suelo`;
+      case 'tAlto': return `${fmt(v, 3)} m`;
+      case 'tFaldon': return v < 0.01 ? 'sin faldón' : `asoman ${cm(modelo.faldon?.y0 ?? 0)}`;
+      case 'tEjeDel': return v < 0.005 ? 'donde el Cuadriciclo' : `${cm(v, 0)} más atrás`;
+      case 'tManX': case 'tManY': case 'tPiesX': case 'tPiesY': return `${v >= 0 ? '+' : '−'}${cm(Math.abs(v), 0)}`;
+      case 'tRecPil': case 'tRecPas': return v === 0 ? '0° (erguido)' : v < 0 ? `${-v}° hacia delante` : `${v}° hacia atrás`;
+    }
+    switch (f.unidad) {
+      case 'm': return m2(v);
+      case 'cm': return cm(v);
+      case 'mm': return `${fmt(v, 1)} mm`;
+      case '°': return `${v}°`;
+      case 'x': return `×${fmt(v, 2)}`;
+      case 'Wh/kg': case 'Wh/L': case 'km/h': return `${Math.round(v)} ${f.unidad}`;
+      default: return `${fmt(v, 1)} ${f.unidad}`;
+    }
+  };
+  const fichas = deslizadoresTriciclo().filter(f => f.dep === dep), sels = SELECTORES_TRICICLO.filter(s => s.dep === dep);
+  const bloques = [...new Set([...fichas.map(f => f.bloque), ...sels.map(s => s.bloque)])];
+  const checks = res.comprobaciones.filter(c => dep === 'proyecto' || c.dep === dep);
+  const malas = checks.filter(c => c.holgura < c.minimo).length;
+  const dl = (filas: [string, string][]) => (
+    <dl className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 text-[13px]">
+      {filas.map(([a, b]) => (<Fragment key={a}><dt className="whitespace-pre text-slate-600">{a}</dt><dd className="text-right font-mono text-xs tabular-nums">{b}</dd></Fragment>))}
+    </dl>
+  );
+  const cdTexto = cd.calculando ? 'calculando…' : cd.cd != null ? fmt(cd.cd, 3) : '—';
+  const sinCd = cd.calculando ? 'calculando…' : '—';
+  const kmhVel = Math.round(T.tVel);
+  const rendimiento = (
+    <Bloque titulo="Rendimiento" nota={cd.calculando ? 'el túnel calcula el Cd…' : 'estimación'}>
+      {dl([
+        ['Cd del túnel (estimado)', cdTexto],
+        ['  referido a la sección de la carrocería', cd.areaRef != null ? `${fmt(cd.areaRef)} m²` : sinCd],
+        ['CdA', e ? `${fmt(e.CdA, 3)} m²` : sinCd],
+        [`Consumo a ${kmhVel} km/h`, e ? `${fmt(e.WhKm / 10, 1)} kWh/100 km` : sinCd],
+        ['Consumo a 50 y a 100 km/h', e ? `${fmt(e.WhKm50 / 10, 1)} · ${fmt(e.WhKm100 / 10, 1)} kWh/100 km` : sinCd],
+        [`Potencia a ${kmhVel} km/h`, e ? `${fmt(e.potencia / 1000, 1)} kW` : sinCd],
+        [`Autonomía a ${kmhVel} km/h`, e ? `${Math.round(e.autonomia)} km` : sinCd],
+        [`Velocidad sostenida (${fmt(T.tKWNom, 1)} kW)`, e ? `${Math.round(e.vmaxNominal)} km/h` : sinCd],
+        [`Velocidad punta (${fmt(T.tKWPico, 1)} kW)`, e ? `${Math.round(e.vmaxPico)} km/h` : sinCd],
+        ['0 → 50 km/h', e ? (e.acel50 > 60 ? 'no llega' : `${fmt(e.acel50, 1)} s`) : sinCd],
+      ])}
+      {cd.calculando && <p className="flex items-center gap-1.5 text-xs text-sky-800"><Wind className="h-3.5 w-3.5 animate-pulse" />El túnel de viento está calculando el Cd de esta forma (unos segundos). Hasta que acabe, no hay cifra.</p>}
+      <p className="text-xs text-slate-500">El Cd lo calcula el túnel con la silueta de la carrocería y sus tres ruedas (no hay fórmula del editor para esta forma); los carenados y los brazos solo entran como ruedas carenadas, así que el real será algo más alto. Con dos ocupantes de {T.tMOcc} kg ({Math.round(res.mTot)} kg en total), rodadura {fmt(CRR, 3)} (neumático de ciclomotor), motor y controlador al {Math.round(RENDIMIENTO * 100)} %, {AUXILIARES} W de equipos y la batería usable al {Math.round(USABLE * 100)} %. Todo supuesto, no medido.</p>
+    </Bloque>
+  );
+  const peso = (
+    <Bloque titulo="Peso del vehículo" nota={`${Math.round(res.mVeh)} kg sin ocupantes`}>
+      {dl([...rt.piezas.map(p => [p.nombre, `${fmt(p.kg, 1)} kg`] as [string, string]), [`Con dos ocupantes de ${T.tMOcc} kg`, `${Math.round(res.mTot)} kg`]])}
+      <p className="text-xs text-slate-500">Centro de gravedad con los dos: {cm(rt.cg.y, 0)} sobre el suelo y {m2(modelo.xF - rt.cg.x)} detrás del eje delantero ({Math.round(rt.vuelco.repartoDel * 100)} % del peso delante). Vacío: {cm(rt.cg.vacio.y, 0)} de alto.</p>
+    </Bloque>
+  );
+  return (
+    <>
+      <Bloque titulo={LEMAS_TRICICLO[dep]} nota="Triciclo Bala">
+        <p className="text-xs text-slate-500">Tres ruedas: dos delante en carenados como el Aptera, que giran con ellas, y una detrás dentro de la cola, con el motor en el buje. La carrocería es la del Cuadriciclo Bala; con las medidas por defecto, la misma.</p>
+      </Bloque>
+      {bloques.map(bloque => (
+        <Bloque key={bloque} titulo={bloque}>
+          {fichas.filter(f => f.bloque === bloque).map(f => {
+            const v = vistaTriciclo(f, T);
+            return <Deslizador key={f.clave} id={`t-${f.clave}`} etiqueta={f.n} valor={v.valor} clave={f.clave} centro={f.centrar ? v.defecto : undefined} min={v.min} max={v.max} paso={f.paso} mostrar={mostrar(f, v.valor)} alCambiar={x => set(f.clave, guardarTriciclo(f, x, T))} />;
+          })}
+          {sels.filter(s => s.bloque === bloque).map(s => <Selector key={s.clave} id={`t-${s.clave}`} etiqueta={s.n} valor={T[s.clave] as string} clave={s.clave} opciones={s.opciones} alCambiar={v => set(s.clave, v as never)} />)}
+          {bloque === 'Carenados' && <p className="-mt-1 text-xs text-slate-500">Los carenados delanteros giran con sus ruedas (como en el Aptera): el neumático siempre queda igual de centrado; lo que se comprueba es que, girados a tope, no toquen la carrocería. El faldón tapa la parte de abajo de la rueda trasera.</p>}
+          {bloque === 'Asientos' && <p className="-mt-1 text-xs text-slate-500">A horcajadas, como en el Cuadriciclo, con un respaldo cada uno. Reclinar baja la cabeza y la lleva hacia atrás: al piloto le da techo (la cúpula sube detrás de él), pero aleja sus manos del manillar; al pasajero se lo quita, porque detrás de él la cúpula baja.</p>}
+          {bloque === 'Ejes y ruedas' && <>
+            {rt.viaSubida && <p className="-mt-1 text-xs text-amber-800">La vía sube a {m2(rt.viaSubida)}: es lo mínimo para que los carenados, girados a tope, queden a 3 cm de la carrocería.</p>}
+            <p className="-mt-1 text-xs text-slate-500">El eje delantero va detrás de donde el Cuadriciclo lleva su rueda delantera: así el peso queda más cerca de las dos ruedas de delante y el triciclo vuelca menos (abajo, «Vuelco»). Batalla {m2(modelo.batalla)}.</p>
+          </>}
+          {bloque === 'Bastidor' && <p className="-mt-1 text-xs text-slate-500">Dos largueros sobre la panza con cuatro travesaños, la cuna de la batería (donde se apoya la suspensión delantera), los soportes de los sillines, la torreta del amortiguador y el soporte de la columna de dirección: {fmt(rt.bastidor.metros, 1)} m de tubo. Se ve con «Rayos X» o la capa «Chasis».</p>}
+          {bloque === 'Motor' && <p className="-mt-1 text-xs text-slate-500">Motor de buje en la rueda trasera, sin cadena ni correa, con su controlador bajo el sillín del pasajero.</p>}
+          {bloque === 'Batería' && <p className="-mt-1 text-xs text-slate-500">En el morro, donde el Cuadriciclo lleva la rueda delantera ({Math.round(rt.bateria.litrosMorro)} L caben ahí); lo que no cabe va en un módulo estrecho entre los pies del piloto. Ahora: {Math.round(rt.bateria.litros)} L y {Math.round(rt.bateria.kg)} kg.</p>}
+        </Bloque>
+      ))}
+
+      {dep === 'carroceria' && (
+        <Bloque titulo="Lo que se mide" nota="estimación">
+          {dl([
+            ['Área frontal (todo)', `${fmt(rt.area.total)} m²`], ['  la carrocería', `${fmt(rt.area.cuerpo)} m²`], ['  + carenados delanteros y brazos', `${fmt(rt.area.carenados)} m²`], ['  + ruedas y faldón (lo que asoma)', `${fmt(rt.area.ruedas)} m²`],
+            ['Volumen de la carrocería', `${fmt(rt.vol)} m³`], ['Piel de la carrocería', `${fmt(rt.piel - rt.cristal)} m²`], ['Cristal de la cúpula', `${fmt(rt.cristal)} m²`],
+            ['Masa: carrocería, carenados y cúpula', `${fmt((res.masas['Carrocería'] ?? 0) + (res.masas['Carenados y brazos delanteros'] ?? 0) + (res.masas['Cúpula'] ?? 0), 1)} kg`],
+            ['Cd del túnel (estimado)', cdTexto],
+          ])}
+        </Bloque>
+      )}
+      {dep === 'chasis' && (
+        <Bloque titulo="Estructura" nota="estimación">
+          {dl([['Masa del bastidor (con uniones)', `${fmt(res.masas['Bastidor'] ?? 0, 1)} kg`], ['Momento máx. en los largueros', `${Math.round(rt.bastidor.M)} N·m`], ['Tensión dinámica (×2,5)', `${Math.round(rt.bastidor.tension)} MPa`], ['Coeficiente de seguridad', fmt(rt.bastidor.seguridad, 2)]])}
+          <p className="text-xs text-slate-500">Los dos largueros como una viga entre la cuna de la batería y el pivote del basculante, con los dos ocupantes y sus asientos encima, y 2,5 veces su peso por los baches (como en el Aeromóvil 1). El resto del bastidor no se cuenta: ayuda, así que el real aguanta algo más.</p>
+        </Bloque>
+      )}
+      {(dep === 'rodaje' || dep === 'proyecto') && (
+        <Bloque titulo="Vuelco" nota={`${fmt(rt.vuelco.ssf)} g con dos`}>
+          {dl([
+            ['Lo tumba, con dos ocupantes', `${fmt(rt.vuelco.ssf)} g`], ['Lo tumba, con el piloto solo', `${fmt(rt.vuelco.ssfSolo)} g`],
+            ['Centro de gravedad: altura', cm(rt.cg.y, 0)], ['  detrás del eje delantero', m2(modelo.xF - rt.cg.x)], ['  peso sobre las ruedas delanteras', `${Math.round(rt.vuelco.repartoDel * 100)} %`],
+            ['Radio de giro (rueda de fuera)', m2(rt.giro.radio)], ['Ruedas a tope: dentro · fuera', `${Math.round(rt.giro.dentro)}° · ${fmt(rt.giro.fuera, 1)}°`],
+          ])}
+          <p className="text-xs text-slate-500">Umbral de vuelco = vía × distancia del centro de gravedad al eje trasero ÷ (2 × altura del centro de gravedad × batalla): la aceleración lateral, en g, a la que una curva lo tumbaría sobre una rueda delantera y la trasera. Un neumático de ciclomotor agarra unos {fmt(AGARRE, 1)} g en seco: por debajo de eso vuelca antes de derrapar (rojo). Se pide {fmt(VUELCO_OBJETIVO)} g porque el cálculo es de un sólido rígido: la suspensión y los neumáticos, al ceder, lo bajan un 10-15 %. Más vía, el eje delantero más atrás, la batería más pesada o los sillines más bajos lo suben.</p>
+        </Bloque>
+      )}
+      {(dep === 'propulsion' || dep === 'energia' || dep === 'proyecto') && rendimiento}
+
+      <Bloque titulo={dep === 'proyecto' ? 'Comprobaciones' : 'Comprobaciones de este departamento'} nota={checks.length ? (malas ? `${malas} por revisar` : 'todo cabe') : ''}>
+        {checks.length ? <ListaComprobaciones lista={checks} /> : <p className="text-xs text-slate-500">Este departamento no tiene comprobaciones propias: todas están en «Proyecto».</p>}
+        {(dep === 'interior' || dep === 'proyecto') && <p className="text-xs text-slate-500">Cabezas: un hombre sentado, sin casco, de talla media (91,8 cm sentado erguido) y alta (97,7 cm, percentil 95; ANSUR II, 2012); el tronco reclinado lo que diga su respaldo y la cabeza un tercio de eso. Se mide de la parte de arriba y de atrás del cráneo a la cara de dentro del cristal. El alcance compara del hombro al puño con un brazo de 58 cm, con los codos algo doblados.</p>}
+      </Bloque>
+      {dep === 'proyecto' && peso}
+    </>
+  );
+}
+
 const ICONO_DEP: Record<IdDepartamento, typeof Box> = { proyecto: ClipboardList, carroceria: Car, chasis: Frame, rodaje: CircleDot, propulsion: Zap, energia: BatteryCharging, interior: Armchair, accesos: DoorOpen, luces: Lightbulb, fabricacion: Factory, homologacion: ShieldCheck };
 /** Qué capas del 3D son de cada departamento (para «Mostrar solo …»). Sin entrada = se ve todo. */
 const CAPAS_DEP: Partial<Record<IdDepartamento, CapaId[]>> = {
@@ -585,7 +773,9 @@ const NOMBRE_CORTO: Record<IdDepartamento, string> = { proyecto: 'Proyecto', car
  * The A1's departments as a menu at the end of the single header line (2026-11-09; they were a
  * second row of eleven buttons). Same choice and same `title` texts as before.
  */
-function MenuDepartamento({ dep, alElegir }: { dep: IdDepartamento; alElegir: (d: IdDepartamento) => void }) {
+function MenuDepartamento({ dep, alElegir, triciclo = false }: { dep: IdDepartamento; alElegir: (d: IdDepartamento) => void; triciclo?: boolean }) {
+  // the Triciclo (2026-11-10) has six of the A1's departments plus «Proyecto» as its summary, with its own one-liners
+  const lista = triciclo ? DEPARTAMENTOS.filter(d => d.id === 'proyecto' || (DEPS_TRICICLO as string[]).includes(d.id)).map(d => ({ ...d, lema: LEMAS_TRICICLO[d.id as DepTriciclo | 'proyecto'] })) : DEPARTAMENTOS;
   const [abierto, setAbierto] = useState(false);
   const caja = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -605,7 +795,7 @@ function MenuDepartamento({ dep, alElegir }: { dep: IdDepartamento; alElegir: (d
       </Button>
       {abierto && (
         <div role="menu" aria-label="Departamentos" className="absolute right-0 top-full z-40 mt-1 max-h-[75vh] w-[min(92vw,320px)] overflow-y-auto rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl">
-          {DEPARTAMENTOS.map(d => { const I = ICONO_DEP[d.id], activo = dep === d.id; return (
+          {lista.map(d => { const I = ICONO_DEP[d.id], activo = dep === d.id; return (
             <Button key={d.id} variant="ghost" role="menuitemradio" aria-checked={activo} onClick={() => { alElegir(d.id); setAbierto(false); }}
               className={cn('w-full items-start justify-start gap-2.5 px-2 py-1.5 text-left normal-case tracking-normal', activo ? 'bg-teal-50 text-teal-900' : 'text-slate-800')}>
               <I className={cn('mt-0.5 h-4 w-4 shrink-0', activo ? 'text-teal-700' : 'text-slate-500')} />
@@ -667,10 +857,10 @@ export default function Aeromovil() {
   // The Bala's figures take ~30 ms (frontal area, clearances): while a slider is dragged they may lag a frame behind
   // the 3D, so the slider never waits for them. Only within the same vehicle: switching computes at once.
   const diferido = useDeferredValue(modelo);
-  const paraCalcular = modelo.tipo === 'bala' && diferido.tipo === 'bala' ? diferido : modelo;
+  const paraCalcular = (modelo.tipo === 'bala' || modelo.tipo === 'triciclo') && diferido.tipo === modelo.tipo ? diferido : modelo;
   const res = useMemo(() => calcular(paraCalcular, areas(paraCalcular)), [paraCalcular]);
-  const esA1 = modelo.tipo === 'a1', esBala = modelo.tipo === 'bala';
-  const nombreVehiculo = esA1 ? 'Aeromóvil 1' : esBala ? 'Cuadriciclo Bala' : 'Aeromóvil Gota';
+  const esA1 = modelo.tipo === 'a1', esBala = modelo.tipo === 'bala', esTri = modelo.tipo === 'triciclo';
+  const nombreVehiculo = esA1 ? 'Aeromóvil 1' : esBala ? 'Cuadriciclo Bala' : esTri ? 'Triciclo Bala' : 'Aeromóvil Gota';
   const NOMBRE_VISTA: Record<Vista, string> = { iso: 'tres cuartos delantera', side: 'lateral', top: 'planta (desde arriba)', front: 'frontal', back: 'trasera' };
   // «Pedir render» (2026-11-07, Eugenio: «quita lo de crear render con Gemini,
   // que gasta dinero; mantenlo bajo una petición a Claude Code con nuestra
@@ -695,7 +885,7 @@ export default function Aeromovil() {
   };
   const porDefecto = JSON.stringify(aDiseno(Pa)) === JSON.stringify(aDiseno(PARAMETROS_POR_DEFECTO));
   // Cambiar de vehículo carga su juego de medidas: los dos no comparten deslizadores.
-  const cambiarVehiculo = (k: Disposicion) => { if (k !== P.disposicion) { setP(k === 'cuatro' ? PARAMETROS_A1 : k === 'bala' ? PARAMETROS_BALA : PARAMETROS_GOTA); setActual(null); } };
+  const cambiarVehiculo = (k: Disposicion) => { if (k !== P.disposicion) { setP(k === 'cuatro' ? PARAMETROS_A1 : k === 'bala' ? PARAMETROS_BALA : k === 'triciclo' ? PARAMETROS_TRICICLO : PARAMETROS_GOTA); setActual(null); } };
 
   const [visibles, setVisibles] = useState<Record<CapaId, boolean>>(() => Object.fromEntries(CAPAS.map(c => [c.k, true])) as Record<CapaId, boolean>);
   const [rayosX, setRayosX] = useState(false);
@@ -764,6 +954,12 @@ export default function Aeromovil() {
   // El Cd que usan el consumo y el resto del editor no cambia: el del túnel se pone al lado.
   const [opcionesTunel, setOpcionesTunel] = useState<OpcionesTunel>(opcionesPorDefecto);
   const opcionesTunelVisor = useMemo(() => ({ ...opcionesTunel, kmh: kmhComparar }), [opcionesTunel, kmhComparar]);
+  // The Triciclo's Cd: the tunnel's, numbers only, in the background, at its calculation speed (its results and consumption use it).
+  const cdTri = useCdTriciclo(paraCalcular, opcionesTunel.resolucion, esTri ? camposTriciclo(P).tVel : 80);
+  const cdTriComparar = useCdTriciclo(paraCalcular, opcionesTunel.resolucion, kmhComparar);
+  // The Triciclo's departments: the A1's choice is kept, but one the Triciclo does not have shows «Carrocería».
+  const depTri: DepTriciclo | 'proyecto' = dep === 'proyecto' || (DEPS_TRICICLO as string[]).includes(dep) ? dep as DepTriciclo | 'proyecto' : 'carroceria';
+  useEffect(() => { if (esTri && dep !== depTri) setDep(depTri); }, [esTri, dep, depTri]);
   const cuerposTunel = useMemo<CuerpoTunel[]>(() => !tunel ? [] : [
     ...(soloGaraje ? [] : [cuerpoAeromovil(modelo, res.A, nombreVehiculo)]),
     ...garajeVisor.flatMap(v => { const c = cuerpoGaraje(v); return c ? [c] : []; }),
@@ -773,7 +969,11 @@ export default function Aeromovil() {
   const cdTunelNuestro = (() => { const R = resultadosTunel.aeromovil; return R ? (R.porVelocidad.find(q => q.kmh === kmhComparar) ?? R.porVelocidad[1]).cd.total : undefined; })();
   const areaTunelNuestro = cuerposTunel.find(c => c.id === 'aeromovil')?.area;
   const filasComparar = useMemo<FilaTunel[]>(() => [
-    ...(soloGaraje ? [] : esBala ? (cdTunelNuestro != null && areaTunelNuestro != null ? [{
+    ...(soloGaraje ? [] : esTri ? (cdTriComparar.cd != null && cdTriComparar.areaRef != null ? [{
+      // the Triciclo: the tunnel's Cd (computed in the background), with its own mass and rolling resistance
+      id: 'aeromovil', nombre: nombreVehiculo, cd: cdTriComparar.cd, area: cdTriComparar.areaRef, masa: res.mTot, crr: CRR, estimado: true, origenCd: 'túnel (la carrocería y sus ruedas)',
+      fuente: `Este diseño. Cd estimado por el túnel con la carrocería y sus tres ruedas (los carenados y los brazos, solo como ruedas carenadas: el real será algo más alto); masa estimada con dos ocupantes de ${camposTriciclo(P).tMOcc} kg y rodadura ${CRR} (neumático de ciclomotor).`,
+    }] : []) : esBala ? (cdTunelNuestro != null && areaTunelNuestro != null ? [{
       // the Bala: no editor formula and no mass, so the tunnel's Cd on the body's area, and air only
       id: 'aeromovil', nombre: nombreVehiculo, cd: cdTunelNuestro, area: areaTunelNuestro, estimado: true, origenCd: 'túnel (solo la carrocería)',
       fuente: 'Este diseño. Cd estimado por el túnel con la carrocería sola: los carenados laterales y sus brazos no entran, así que el real será algo más alto. Sin masa (el chasis, el motor y la batería no están diseñados): solo el aire.',
@@ -790,7 +990,7 @@ export default function Aeromovil() {
         fuente: `${a.fuente}. Rodadura 0,009 supuesta (neumáticos de coche, la misma que el Aeromóvil 1) y ${plazas} ocupantes de ${P.mOcc} kg.`,
       }];
     }),
-  ], [soloGaraje, esBala, nombreVehiculo, cdTunelNuestro, areaTunelNuestro, res.Cd, res.A, res.mTot, res.Crr, P.plazas, P.mOcc, garajeVisor]);
+  ], [soloGaraje, esBala, esTri, cdTriComparar.cd, cdTriComparar.areaRef, P, nombreVehiculo, cdTunelNuestro, areaTunelNuestro, res.Cd, res.A, res.mTot, res.Crr, P.plazas, P.mOcc, garajeVisor]);
   // El punto crítico cuya explicación está abierta (2026-11-09, Eugenio: «una explicación de cada uno de estos parámetros cuando se hace click»).
   const [puntoTunel, setPuntoTunel] = useState<SeleccionPunto | null>(null);
   useEffect(() => { if (!tunel) setPuntoTunel(null); }, [tunel]);
@@ -808,8 +1008,9 @@ export default function Aeromovil() {
     for (const v of garajeVisor) { const d = VEHICULOS_GARAJE.find(x => x.id === v.id); if (d && !o[d.id]) o[d.id] = `${d.nombre}\nCd sin publicar`; }
     // El Bala del editor: su Cd solo lo da el túnel.
     if (esBala && !soloGaraje && !o.aeromovil) o.aeromovil = `${nombreVehiculo}\nCd: ábrelo en el túnel`;
+    if (esTri && !soloGaraje && !o.aeromovil) o.aeromovil = `${nombreVehiculo}\nCd: el túnel lo está calculando…`;
     return o;
-  }, [tunel, verConsumo, filasComparar, kmhComparar, garajeVisor, esBala, soloGaraje, nombreVehiculo]);
+  }, [tunel, verConsumo, filasComparar, kmhComparar, garajeVisor, esBala, esTri, soloGaraje, nombreVehiculo]);
   const [vista, setVista] = useState<Vista>('iso');
   // Render fotorrealista de la vista actual: la captura del visor pasa por la IA y vuelve como foto
   const [render, setRender] = useState<{ estado: 'nada' | 'creando' | 'listo' | 'error'; imagen?: string; error?: string; vista?: Vista }>({ estado: 'nada' });
@@ -863,7 +1064,7 @@ export default function Aeromovil() {
   const ruedas = (Object.keys(DIAMETRO_RUEDA) as Pulgadas[]).map(k => ({ k, n: `${k}″ (${Math.round(DIAMETRO_RUEDA[k] * 1000)} mm)` }));
   const neumaticos = (Object.keys(NEUMATICOS) as Neumatico[]).map(k => ({ k, n: NEUMATICOS[k].n }));
   const malas = res.comprobaciones.filter(c => c.holgura < c.minimo).length;
-  const capas = esBala ? CAPAS.filter(c => CAPAS_BALA.includes(c.k)) : CAPAS.filter(c => !('solo' in c) || c.solo === modelo.tipo);
+  const capas = esBala ? CAPAS.filter(c => CAPAS_BALA.includes(c.k)) : esTri ? CAPAS.filter(c => CAPAS_TRICICLO.includes(c.k)) : CAPAS.filter(c => !('solo' in c) || c.solo === modelo.tipo);
   const a1 = res.a1;
 
   return (
@@ -890,6 +1091,7 @@ export default function Aeromovil() {
             })}
           </nav>
           {seccion === 'diseno' && esA1 && <MenuDepartamento dep={dep} alElegir={d => { setDep(d); setSoloDep(false); }} />}
+          {seccion === 'diseno' && esTri && <MenuDepartamento triciclo dep={depTri} alElegir={d => { setDep(d); setSoloDep(false); }} />}
         </div>
       </header>
 
@@ -961,7 +1163,7 @@ export default function Aeromovil() {
             </div>
           )}
           <div className="pointer-events-none absolute left-3 right-14 top-3 font-mono text-[11px] uppercase tracking-wider text-slate-500">
-            {esA1 ? `${P.plazas === 2 ? 'Tándem 1+1' : 'Monoplaza'} · cuatro ruedas · eléctrico ${P.kWNom}/${P.kWPico} kW · ${P.kWh} kWh` : esBala ? 'Biplaza a horcajadas · rombo de ruedas, laterales fijas en carenados' : 'Tándem 1+2 · rombo basculante · pedaleo asistido'}
+            {esA1 ? `${P.plazas === 2 ? 'Tándem 1+1' : 'Monoplaza'} · cuatro ruedas · eléctrico ${P.kWNom}/${P.kWPico} kW · ${P.kWh} kWh` : esBala ? 'Biplaza a horcajadas · rombo de ruedas, laterales fijas en carenados' : esTri ? `Biplaza a horcajadas · tres ruedas, dos delante en carenados · eléctrico ${fmt(camposTriciclo(P).tKWNom, 1)}/${fmt(camposTriciclo(P).tKWPico, 1)} kW · ${fmt(camposTriciclo(P).tKWh, 1)} kWh` : 'Tándem 1+2 · rombo basculante · pedaleo asistido'}
             {esA1 && <span className="block normal-case tracking-normal text-slate-400">Pincha una pieza para abrir su ficha</span>}
           </div>
           <div className="absolute inset-x-2 bottom-2 flex flex-wrap items-center gap-1">
@@ -996,20 +1198,20 @@ export default function Aeromovil() {
                 </div>
               )}
             </div>
-            {esA1 && dep !== 'proyecto' && CAPAS_DEP[dep] && (
+            {(esA1 || esTri) && (esTri ? depTri : dep) !== 'proyecto' && CAPAS_DEP[esTri ? depTri : dep] && (
               <Button variant="outline" aria-pressed={soloDep} onClick={() => setSoloDep(v => !v)}
                 className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', soloDep && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
                 {soloDep ? 'Mostrar todo' : `Mostrar solo ${SOLO_DEP[dep] ?? NOMBRE_CORTO[dep].toLowerCase()}`}
               </Button>
             )}
             {/* El Bala no se inclina ni tiene la dirección dibujada: sin «Simular curva». */}
-            {([['Cotas', verCotas, setVerCotas], ['Rayos X', rayosX, setRayosX], ['Corte', corte, setCorte], ...(esBala ? [] : [[esA1 ? 'Girar ruedas' : 'Simular curva', curva, setCurva]])] as [string, boolean, (v: boolean) => void][]).map(([n, v, f]) => (
+            {([['Cotas', verCotas, setVerCotas], ['Rayos X', rayosX, setRayosX], ['Corte', corte, setCorte], ...(esBala ? [] : [[esA1 || esTri ? 'Girar ruedas' : 'Simular curva', curva, setCurva]])] as [string, boolean, (v: boolean) => void][]).map(([n, v, f]) => (
               <Button key={n} variant="outline" aria-pressed={v} onClick={() => f(!v)}
                 className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', v && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>{n}</Button>
             ))}
             <Button variant="outline" aria-pressed={abierta} onClick={() => setAbierta(!abierta)}
               className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', abierta && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
-              <DoorOpen className="mr-1 h-3 w-3" />{abierta ? 'Cerrar' : 'Abrir'} {esBala || Pa.puerta === 'cabina' ? 'cúpula' : 'puertas'}
+              <DoorOpen className="mr-1 h-3 w-3" />{abierta ? 'Cerrar' : 'Abrir'} {esBala || esTri || Pa.puerta === 'cabina' ? 'cúpula' : 'puertas'}
             </Button>
             {esA1 && (
               <Button variant="outline" aria-pressed={maleteros} onClick={() => setMaleteros(!maleteros)}
@@ -1082,7 +1284,7 @@ export default function Aeromovil() {
         </div>
 
         <aside className="mt-4 flex flex-col gap-3 lg:mt-0">
-          {(!esA1 || dep === 'proyecto') && <Bloque titulo="Garaje" nota="otros vehículos al lado">
+          {(esA1 ? dep === 'proyecto' : esTri ? depTri === 'proyecto' : true) && <Bloque titulo="Garaje" nota="otros vehículos al lado">
             <div className="flex flex-col gap-1.5">
               {VEHICULOS_GARAJE.map(v => { const pl = garaje.find(g => g.id === v.id)!; return (
                 <Button key={v.id} variant="outline" aria-pressed={pl.visible} onClick={() => setGaraje(g => g.map(x => x.id === v.id ? { ...x, visible: !x.visible } : x))}
@@ -1090,7 +1292,7 @@ export default function Aeromovil() {
                   <span>{v.nombre}</span><span className="text-[11px] font-normal text-slate-400">{v.largo.toFixed(2).replace('.', ',')} m</span>
                 </Button>); })}
             </div>
-            {garaje.some(g => g.visible) && <MapaGaraje garaje={garaje} largo={modelo.Lf} ancho={modelo.P.W} morro={modelo.xn} etiqueta={esA1 ? 'A1' : esBala ? 'Bala' : 'Gota'} alMover={(id, x, z) => setGaraje(g => g.map(v => v.id === id ? { ...v, x, z } : v))} alGirar={id => setGaraje(g => g.map(v => v.id === id ? { ...v, giro: (v.giro + Math.PI / 2) % (2 * Math.PI) } : v))} />}
+            {garaje.some(g => g.visible) && <MapaGaraje garaje={garaje} largo={modelo.Lf} ancho={modelo.P.W} morro={modelo.xn} etiqueta={esA1 ? 'A1' : esBala ? 'Bala' : esTri ? 'Triciclo' : 'Gota'} alMover={(id, x, z) => setGaraje(g => g.map(v => v.id === id ? { ...v, x, z } : v))} alGirar={id => setGaraje(g => g.map(v => v.id === id ? { ...v, giro: (v.giro + Math.PI / 2) % (2 * Math.PI) } : v))} />}
             <p className="-mt-1 text-xs text-slate-500">Arrastra cada coche en el 3D (pínchalo y muévelo) o en este plano; doble clic en el plano lo gira un cuarto de vuelta.</p>
           </Bloque>}
 
@@ -1102,7 +1304,9 @@ export default function Aeromovil() {
           )}
           <fieldset disabled={!dueno?.puedeDecidir} className={cn('contents', !dueno?.puedeDecidir && '[&_input]:cursor-not-allowed [&_select]:opacity-70 [&_input]:opacity-70')}>
           {modelo.tipo === 'a1' ? <LadoA1 P={P} Pa={Pa} D={D} set={set} res={res} modelo={modelo} neumaticos={neumaticos} malas={malas} dep={dep} alNavegar={r => { navegar(r); window.scrollTo({ top: 0 }); }} />
-            : modelo.tipo === 'bala' ? <LadoBala P={P} set={set} res={res} modelo={modelo} cdTunel={tunel ? cdTunelNuestro : undefined} /> : (<>
+            : modelo.tipo === 'bala' ? <LadoBala P={P} set={set} res={res} modelo={modelo} cdTunel={tunel ? cdTunelNuestro : undefined} />
+            : modelo.tipo === 'triciclo' && res.triciclo ? <LadoTriciclo P={P} set={set} res={res} modelo={paraCalcular.tipo === 'triciclo' ? paraCalcular : modelo} dep={depTri} cd={cdTri} />
+            : modelo.tipo === 'triciclo' ? null : (<>
           <Bloque titulo="Chasis y ruedas">
             <Deslizador id="am-B" etiqueta="Batalla: rueda delantera a trasera" valor={P.B} min={2.6} max={3.8} paso={0.01} mostrar={m2(P.B)} alCambiar={v => set('B', v)} />
             <Deslizador id="am-xL" etiqueta="Eje lateral desde la rueda delantera" valor={P.xLm} min={1.1} max={Math.min(2.3, P.B - 0.8)} paso={0.01} mostrar={m2(P.xLm)} alCambiar={v => set('xLm', v)} />

@@ -29,13 +29,14 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Check, ChevronDown, CloudOff, FilePlus2, Link2, Loader2, Save, Star, Trash2 } from 'lucide-react';
 import { Button } from '../ui/core';
 import { cn } from '../../utils/cn';
-import { PARAMETROS_A1, PARAMETROS_BALA, PARAMETROS_GOTA, type Disposicion, type Parametros } from './geometria';
+import { PARAMETROS_A1, PARAMETROS_BALA, PARAMETROS_GOTA, PARAMETROS_TRICICLO, type Disposicion, type Parametros } from './geometria';
 
-/** The three vehicle families, in the order the menu lists them. */
+/** The four vehicle families, in the order the menu lists them (the Triciclo Bala since 2026-11-10). */
 export const VEHICULOS: { k: Disposicion; n: string; d: string }[] = [
   { k: 'cuatro', n: 'Aeromóvil 1', d: 'Eléctrico de cuatro ruedas, carrocería baja con cúpula (SZEmission ×1,3), clase Twizy.' },
   { k: 'rombo', n: 'Aeromóvil Gota', d: 'Velomóvil tándem 1+2 de pedaleo asistido, rombo basculante, carenado en gota.' },
   { k: 'bala', n: 'Cuadriciclo Bala', d: 'Biplaza a horcajadas, tipo moto carenada: el rombo de ruedas del Gota con carenados laterales fijos, morro en punta y cúpula.' },
+  { k: 'triciclo', n: 'Triciclo Bala', d: 'La carrocería del Cuadriciclo con tres ruedas: dos delante en carenados que giran, como el Aptera, y una detrás con el motor; respaldos que se reclinan.' },
 ];
 /** A saved design's family: designs from before 2026-11-06 carry none and are the Gota's. */
 const familiaDe = (d: Diseno): Disposicion => { const k = d.parametros?.disposicion; return VEHICULOS.some(v => v.k === k) ? k! : 'rombo'; };
@@ -59,9 +60,11 @@ export const aDiseno = (P: Parametros): Partial<Parametros> => { const { comp: _
  * diseño por defecto es el Aeromóvil 1 y cada diseño dice de cuál es. Desde el
  * 2026-11-09 hay un tercero, el Cuadriciclo Bala ('bala'), que parte de las
  * medidas del Bala del garaje. Comprobado con `npx tsx scripts/bala-disenos.ts`.
+ * Desde el 2026-11-10, el Triciclo Bala ('triciclo'), con sus campos `t…`
+ * (`npx tsx scripts/triciclo-disenos.ts`).
  */
 export const deDiseno = (d: Partial<Parametros>): Parametros => {
-  const base = d.disposicion === 'cuatro' ? PARAMETROS_A1 : d.disposicion === 'bala' ? PARAMETROS_BALA : PARAMETROS_GOTA;
+  const base = d.disposicion === 'cuatro' ? PARAMETROS_A1 : d.disposicion === 'bala' ? PARAMETROS_BALA : d.disposicion === 'triciclo' ? PARAMETROS_TRICICLO : PARAMETROS_GOTA;
   // Un valor guardado solo vale si es del mismo tipo que el de por defecto.
   // El 2026-11-06 `parabrisas` pasó de ser un texto ('plano') a un número, y
   // un diseño guardado con el texto dejaba la página en blanco (NaN en toda
