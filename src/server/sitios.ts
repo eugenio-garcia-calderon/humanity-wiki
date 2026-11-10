@@ -403,7 +403,7 @@ function imagenDe(config: any): string | null {
  * `/api/sitio/pagina/:id`, o `null` si no se puede ver. Suelta (2026-10-01)
  * porque el HTML de la visita la deja escrita dentro (`precargado.ts`).
  */
-async function paginaPublica(db: any, id: string, req?: Request): Promise<any> {
+export async function paginaPublica(db: any, id: string, req?: Request): Promise<any> {
   const w = await datosPagina(db, id);
   if (!w) return null;
   // MIEMBROS (2026-10-05, carril acceso). Sin `req` —el HTML del servidor— se
