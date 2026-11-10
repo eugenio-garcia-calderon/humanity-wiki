@@ -23,6 +23,12 @@
       "ruta": "src/server/modulos.ts",
       "motivo": "Modelo socioeconómico optimizado (nube)",
       "desde": "2026-11-10T10:51:44.286Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/avisoInstalar.ts",
+      "motivo": "Modelo socioeconómico optimizado (nube)",
+      "desde": "2026-11-10T10:51:48.003Z"
     }
   ]
 }
