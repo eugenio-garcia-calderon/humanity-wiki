@@ -1293,3 +1293,17 @@ The project row was created by migration 0181, with ids read from production thr
 - a cap of 500 pending items.
 
 Marking items done or discarded is admin-only (level 4). Saving the map itself still needs an account (level 1), as decided earlier today.
+
+## 2026-11-10 — Modelo socioeconómico: two readings of «20 % of every transaction»
+
+Eugenio's model taxes every transaction at 20 %. Read literally, purchases between businesses pay too, and the tax stacks along supply chains (three links already take 35 % of a loaf of bread; Spain had that with the IGTE until VAT in 1986). Options:
+
+- **Literal only.** Faithful to the words, but it hides a known flaw and collects ≈ 45 % of GDP, more than today.
+- **Silently switch to a VAT-like credit.** Rejected: it would change his model without telling him.
+- **Chosen: both readings on the page, with a switch.** Default «una vez en cada producto»: every payment pays 20 % and a business recovers what it paid on its purchases when it sells, so each final product carries exactly 20 % (≈ 23 % of GDP). Every figure on the page follows the switch.
+
+The base is built from INE and Fundación BBVA-Ivie 2025 aggregates (`BASE` in `src/data/modeloSocioeconomico.ts`). Business-to-business purchases (≈ 0,95 × GDP) and the used-housing price (200.000 €) are labelled estimates. The money is split per inhabitant within Spain at every scale, and Spain's continental and planetary shares are what Spain sends.
+
+## 2026-11-10 — One mailbox table for every project
+
+The third project mailbox would have been a third copy of the same table (`aeromovil_tareas`, `conciencia_comentarios`). Instead: `buzon_proyectos` with a `proyecto` key, accepted only if listed in `PROYECTOS` (`src/server/buzonProyectos.ts`). A new project's mailbox is one line there plus `<BuzonProyecto proyecto="…" />`. Same safeguards as the others: anyone writes, 20 an hour per IP, honeypot, 500 pending, level 4 to decide.

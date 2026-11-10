@@ -106,6 +106,7 @@ import { registerCalendarioRoutes } from './calendario.js';
 import { registerCalendarioArteRoutes } from './calendarioArte.js';
 import { registerAeromovilRoutes } from './aeromovil.js';
 import { registerConcienciaRoutes } from './conciencia.js';
+import { registerBuzonProyectosRoutes } from './buzonProyectos.js';
 import { registerPersonasRoutes } from './personas.js';
 import { registerGuardarRoutes } from './guardar.js';
 import { registerVeracidadRoutes } from './veracidad.js';
@@ -373,6 +374,12 @@ export const MODULOS: Modulo[] = [
     montar: (app, db) => registerConcienciaRoutes(app, db),
     nota: 'Estudio sobre la conciencia: el mapa editable de la teoría sintérgica, con historial. '
         + 'Guardar pide cuenta (lee req.user), así que va después de la autenticación.',
+  },
+  {
+    nombre: 'buzon-proyectos',
+    montar: (app, db) => registerBuzonProyectosRoutes(app, db),
+    nota: 'Buzón de mejoras común a las páginas de proyecto (migración 0183); el primero, el Modelo socioeconómico. '
+        + 'Lee req.user (opcional), así que va después de la autenticación.',
   },
   { nombre: 'personas', montar: (app, db) => registerPersonasRoutes(app, db) },
   { nombre: 'guardar', montar: (app, db) => registerGuardarRoutes(app, db) },
