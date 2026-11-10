@@ -328,9 +328,13 @@ function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: s
   const p = s.pie;
   const c = p.contacto;
   // El aviso del final (`pie.aviso`): lo último de la página, con su raya encima.
+  // Con hueco debajo (`pb-20`): en solarcrowd.com el botón flotante «¿Qué mejorarías?»
+  // tapaba media advertencia al llegar al final de la portada (2026-11-10), porque
+  // allí el pie es lo último y no hay espacio detrás. El hueco va en el propio aviso,
+  // así vale en cualquier página, la tenga o no.
   const textoAviso = typeof p.aviso === 'string' ? p.aviso.trim() : '';
   const aviso = textoAviso ? (
-    <div data-aviso-pie style={{ borderColor: `${p.texto}26` }} className="border-t">
+    <div data-aviso-pie style={{ borderColor: `${p.texto}26` }} className="border-t pb-20">
       <p className="mx-auto max-w-[calc(576px+50vw)] px-5 @2xl:px-8 py-4 text-sm leading-relaxed opacity-75 whitespace-pre-line">{textoAviso}</p>
     </div>
   ) : null;

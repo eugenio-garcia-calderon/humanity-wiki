@@ -10923,3 +10923,9 @@ Eugenio: «permite que el triciclo bala se le pueda modificar más los parámetr
 - Eugenio en solarcrowd.com: «la advertencia de no prestes aquí tu dinero que necesites a corto plazo, ponla abajo del todo en el footer».
 - Nuevo campo `pie.aviso`: un texto que sale en la última línea del pie, debajo del © y de los textos legales, con una raya encima, tanto en el pie completo como en el sencillo. Se escribe en el editor del menú, «Pie de página» → «Aviso al final». Vacío: no sale nada, así que ningún sitio que ya existía cambia.
 - Comprobado en local (servidor real, Chrome sin cabeza) a 1280 y 390 px: el aviso es el último elemento del pie y el botón «¿Qué mejorarías?» no lo tapa, porque su hueco va después del pie. `tsc` y `build` limpios.
+
+## 2026-11-10 — El aviso del pie ya no queda tapado por «¿Qué mejorarías?»
+
+- Al publicar `pie.aviso` en solarcrowd.com, el botón flotante «¿Qué mejorarías?» tapaba media advertencia al llegar al final de la portada. Allí el pie es lo último de la página y no tiene hueco detrás; en la prueba local sí lo tenía, porque era una página de otro tipo.
+- El aviso lleva ahora su propio hueco debajo (`pb-20`), así que funciona en cualquier página.
+- Comprobado en producción, simulando ese hueco en la portada: el texto termina 24 px por encima del botón. Antes, el botón lo tapaba.
