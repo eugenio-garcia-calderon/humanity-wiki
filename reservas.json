@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/components/sitio/MenuSitio.tsx",
-      "motivo": "Hueco bajo el aviso del pie",
-      "desde": "2026-11-10T16:24:45.522Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "Hueco bajo el aviso del pie",
       "desde": "2026-11-10T16:26:33.788Z"
