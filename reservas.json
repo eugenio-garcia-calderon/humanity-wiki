@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "drizzle/0180_prestamos_firmados.sql",
-      "motivo": "Formalizar préstamo (SolarCrowd)",
-      "desde": "2026-11-10T10:03:58.585Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/utils/bloques.ts",
       "motivo": "Formalizar préstamo (SolarCrowd)",
       "desde": "2026-11-10T10:04:04.155Z"
