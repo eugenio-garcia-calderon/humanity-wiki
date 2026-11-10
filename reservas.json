@@ -41,6 +41,12 @@
       "ruta": "drizzle/0183_prestamos_firmados.sql",
       "motivo": "Formalizar préstamo (0182 la tomó el triciclo)",
       "desde": "2026-11-10T10:59:39.688Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/sitio/MenuSitio.tsx",
+      "motivo": "Aviso al final del pie (SolarCrowd)",
+      "desde": "2026-11-10T11:13:33.626Z"
     }
   ]
 }
