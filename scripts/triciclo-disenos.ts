@@ -40,7 +40,8 @@ ok(igual(camposTriciclo(deDiseno({ disposicion: 'triciclo' })), TRICICLO_DEFECTO
   const P = deDiseno({ disposicion: 'triciclo', tVia: 9, tPilY: -1, tKWh: 999, tRecPil: 90, tGiro: 80, tPodEsc: 0.1, tBatalla: 5 } as Partial<Parametros>);
   const m = crearModelo(P) as ModeloTriciclo, T = m.campos, f = (k: string) => deslizadoresTriciclo().find(x => x.clave === k)!;
   ok(Math.abs(m.F.VIA_LAT - f('tVia').max) < 1e-9, `vía 9 m → ${m.F.VIA_LAT} m (el máximo del deslizador)`);
-  ok(Math.abs(m.sillines.yPiloto - f('tPilY').min) < 1e-9, `sillín del piloto a −1 m → ${m.sillines.yPiloto} m (el mínimo)`);
+  // (its minimum depends on the belly since round two: `rangoTriciclo`)
+  ok(Math.abs(m.sillines.yPiloto - rangoTriciclo('tPilY', T)[0]) < 1e-9, `sillín del piloto a −1 m → ${m.sillines.yPiloto} m (el mínimo con esa panza)`);
   ok(Math.abs(m.rec.piloto - f('tRecPil').max) < 1e-9 && Math.abs(m.giro * 180 / Math.PI - f('tGiro').max) < 1e-9, `reclinado 90° → ${m.rec.piloto}°; giro 80° → ${Math.round(m.giro * 180 / Math.PI)}°`);
   ok(Math.abs(m.F.BATALLA - f('tBatalla').max) < 1e-9 && m.F.D.pod!.esc === f('tPodEsc').min, `batalla de la carrocería 5 m → ${m.F.BATALLA} m; carenado ×0,1 → ×${m.F.D.pod!.esc}`);
   const res = calcular(m, areas(m));
@@ -67,11 +68,20 @@ ok(igual(camposTriciclo(deDiseno({ disposicion: 'triciclo' })), TRICICLO_DEFECTO
     return o;
   };
   const a = cuerpo(construirCon(mb.F, { M, cupulaAparte: true, asientos: mb.sillines, aleta: mb.aleta }));
-  const b = cuerpo(construirCon(mt.F, { M, cupulaAparte: true, asientos: mt.sillines, aleta: mt.aleta, triciclo: { recPil: mt.rec.piloto, recPas: mt.rec.pasajero, man: mt.man, pies: mt.pies, faldon: mt.faldon } }));
-  const ka = Object.keys(a).sort(), kb = Object.keys(b).sort();
-  let n = 0, distintas: string[] = [];
-  for (const k of ka) for (let i = 0; i < a[k].length; i++) { n++; const p = a[k][i], q = b[k]?.[i]; if (!q || p.length !== q.length || p.some((v, j) => v !== q[j])) distintas.push(k); }
-  ok(igual(ka, kb) && !distintas.length, `la carrocería por defecto es la del Cuadriciclo, vértice a vértice: ${n} mallas (${ka.join(', ')})${distintas.length ? ` · distintas: ${distintas.join(', ')}` : ''}`);
+  const tri = (m: ModeloTriciclo) => cuerpo(construirCon(m.F, { M, cupulaAparte: true, asientos: m.sillines, aleta: m.aleta, triciclo: { recPil: m.rec.piloto, recPas: m.rec.pasajero, man: m.man, pies: m.pies, faldon: m.faldon, ventanas: m.opcVentanas } }));
+  // round two (2026-11-10): the solar roof and the window frames ride on the canopy glass ('panel-solar', 'pilar');
+  // everything else, glass included, is still the Cuadriciclo's to the last vertex
+  const NUEVAS = ['panel-solar', 'pilar'];
+  const comparar = (b: Record<string, Float32Array[]>, nuevas: string[], texto: string) => {
+    const ka = Object.keys(a).sort(), kb = Object.keys(b).filter(k => !nuevas.includes(k)).sort();
+    let n = 0; const distintas: string[] = [];
+    for (const k of ka) for (let i = 0; i < a[k].length; i++) { n++; const p = a[k][i], q = b[k]?.[i]; if (!q || p.length !== q.length || p.some((v, j) => v !== q[j])) distintas.push(k); }
+    const faltan = nuevas.filter(k => !b[k]);
+    ok(igual(ka, kb) && !distintas.length && !faltan.length, `${texto}: ${n} mallas (${ka.join(', ')})${nuevas.length ? ` + ${nuevas.join(', ')}` : ''}${distintas.length ? ` · distintas: ${distintas.join(', ')}` : ''}${faltan.length ? ` · faltan: ${faltan.join(', ')}` : ''}`);
+  };
+  comparar(tri(mt), NUEVAS, 'la carrocería por defecto es la del Cuadriciclo, vértice a vértice, más el techo solar y los montantes');
+  const sinNada = crearModelo({ ...PARAMETROS_TRICICLO, tVentanas: 'burbuja', tSolar: 99 }) as ModeloTriciclo;
+  comparar(tri(sinNada), [], 'con la cúpula de una pieza y sin techo solar, es la del Cuadriciclo entera, vértice a vértice');
 }
 
 // ── old designs, against main

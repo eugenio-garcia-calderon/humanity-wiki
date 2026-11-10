@@ -70,6 +70,29 @@ function texturaAsiento(): THREE.CanvasTexture | null {
 }
 
 /**
+ * One solar cell of the Triciclo's roof (2026-11-10, round two): monocrystalline, dark blue, with its
+ * clipped corners, a fine silver grid and three busbars. uv (1, 1) is one 125 mm cell (the A1's `CELULA`).
+ */
+function texturaSolar(): THREE.CanvasTexture | null {
+  if (typeof document === 'undefined') return null;
+  const N = 128, cv = document.createElement('canvas'); cv.width = cv.height = N;
+  const c = cv.getContext('2d'); if (!c) return null;
+  c.fillStyle = '#c9ced6'; c.fillRect(0, 0, N, N);   // the backsheet showing between the cells
+  const m = 3, k = 14;
+  c.beginPath(); c.moveTo(m + k, m); c.lineTo(N - m - k, m); c.lineTo(N - m, m + k); c.lineTo(N - m, N - m - k); c.lineTo(N - m - k, N - m); c.lineTo(m + k, N - m); c.lineTo(m, N - m - k); c.lineTo(m, m + k); c.closePath();
+  const g = c.createLinearGradient(0, 0, N, N); g.addColorStop(0, '#13234a'); g.addColorStop(0.5, '#0b1735'); g.addColorStop(1, '#0f1d40');
+  c.fillStyle = g; c.fill();
+  c.save(); c.clip();
+  c.strokeStyle = 'rgba(150,165,190,0.35)'; c.lineWidth = 0.6;
+  for (let y = m + 2; y < N; y += 3.2) { c.beginPath(); c.moveTo(0, y); c.lineTo(N, y); c.stroke(); }
+  c.strokeStyle = 'rgba(205,212,224,0.9)'; c.lineWidth = 1.6;
+  for (const x of [N * 0.25, N * 0.5, N * 0.75]) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, N); c.stroke(); }
+  c.restore();
+  const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4;
+  return t;
+}
+
+/**
  * The glass tint with its black frit: each glass vertex carries `borde`, its
  * distance to the glass outline minus the frit width. The shader thresholds
  * the interpolated distance over one pixel (fwidth), so the frit's inner edge
@@ -102,7 +125,7 @@ export function crearMateriales() {
   const fis = (p: THREE.MeshPhysicalMaterialParameters) => new THREE.MeshPhysicalMaterial({ side: F, ...p });
   // parts laid on the skin: drawn a hair in front of it, so they never flicker
   const decal = (p: THREE.MeshPhysicalMaterialParameters) => fis({ polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4, ...p });
-  const grano = texturaGrano(), asiento = texturaAsiento();
+  const grano = texturaGrano(), asiento = texturaAsiento(), solar = texturaSolar();
   const pintura = { color: 0xf4f5f6, metalness: 0.12, roughness: 0.32, roughnessMap: grano, clearcoat: 1, clearcoatRoughness: 0.04, sheen: 0.15, sheenColor: new THREE.Color(0xffffff), envMapIntensity: 1.1 };
   const azul = { color: 0x182544, metalness: 0.2, roughness: 0.32, roughnessMap: grano, clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 1.1 };
   return {
@@ -134,6 +157,8 @@ export function crearMateriales() {
     rojoLed: decal({ color: 0xffffff, emissive: 0xff2a20, emissiveIntensity: 0.85, emissiveMap: texturaLed(true), map: texturaLed(true), roughness: 0.2, polygonOffsetFactor: -5, polygonOffsetUnits: -6 }),
     ambar: fis({ color: 0xffb321, emissive: 0xff9a00, emissiveIntensity: 0.8, roughness: 0.25, clearcoat: 1 }),
     proyector: fis({ color: 0x0c0f14, roughness: 0.02, metalness: 0.1, clearcoat: 1, clearcoatRoughness: 0.01 }),
+    // the Triciclo's solar roof (round two): cells under a glossy film; both faces (from inside it is the cabin's roof)
+    solar: fis({ color: solar ? 0xffffff : 0x15233f, map: solar, roughness: 0.2, metalness: 0.25, clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 1.2, side: D, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 }),
     // wheels
     goma: fis({ color: 0x18191b, roughness: 0.86, metalness: 0 }),
     tapa: fis({ color: 0xd9dcdf, metalness: 0.6, roughness: 0.25, clearcoat: 0.8, clearcoatRoughness: 0.08 }),

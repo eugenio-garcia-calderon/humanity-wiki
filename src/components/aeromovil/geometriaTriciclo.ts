@@ -29,12 +29,12 @@
 // for the Cd the results use.
 
 import type { Comprobacion, MaterialCarenado, MaterialChasis, Parametros, PuntosOcupante, Pulgadas, Resultados, Rueda, Tubo, P3 } from './geometria';
-import { MATERIALES_CARENADO, MATERIALES_CHASIS, TRICICLO_DEFECTO, largoTubo } from './geometria';
+import { MATERIALES_CARENADO, MATERIALES_CHASIS, RENDIMIENTO_SOLAR, TRICICLO_DEFECTO, largoTubo } from './geometria';
 import { crearForma, type DimBala, type FormaBala } from './garaje/balaForma';
-import { APLASTADO_BALA, ASIENTO, alturasPod, anchoMaxPod, brazosDe, contornoCupula, escalaManillar, extremoManillar, podDe, semiAncho, techoEn, type Asientos } from './garaje/balaMedidas';
+import { APLASTADO_BALA, ASIENTO, alturasPod, anchoMaxPod, areaMarco, areaXT, bandaMarco, brazosDe, contornoCupula, escalaManillar, extremoManillar, podDe, semiAncho, techoEn, ventanasDe, type Asientos, type OpcionesVentanas } from './garaje/balaMedidas';
 import {
   CADERA_SOBRE_ASIENTO, DESLIZADORES_BALA, HUECO_CARENADO, MEDIA_CABEZA, TALLA_SENTADO,
-  areaFrontalBala, carenadoCuerpo, neumaticoCarenado, pielBala, rodilla, ruedaDentro, type ClaveBala, type ResultadosBala,
+  areaFrontalBala, areasBala, carenadoCuerpo, neumaticoCarenado, pielBala, rodilla, ruedaDentro, type ClaveBala, type ResultadosBala,
 } from './geometriaBala';
 
 /** Los parámetros propios del Triciclo (prefijo `t`). Opcionales en `Parametros`: los diseños de los otros tres vehículos no los llevan. */
@@ -42,6 +42,13 @@ export interface CamposTriciclo {
   // Carrocería: la forma del Cuadriciclo
   tAncho: number; tSuelo: number; tMorro: number; tPuntaMorro: number; tCola: number; tPuntaCola: number; tAleta: number;
   tCupIni: number; tCupFin: number; tAlto: number;
+  // Carrocería: techo solar y ventanas (2026-11-10, segunda versión). Opcionales al guardar: un diseño de antes los toma por defecto.
+  tSolar: number;      // dónde empieza el panel solar, detrás de donde iba la rueda delantera del Cuadriciclo (m); al máximo, sin panel
+  tVentAlto: number;   // alto de la ventana lateral: fracción del costado de cristal, de su borde de abajo a lo alto; encima, el techo
+  tVentanas: 'marco' | 'burbuja';   // ventanas laterales con montante (como el Aptera) o una cúpula de una pieza (como el Cuadriciclo)
+  tPilar: number;      // pie del montante delantero, detrás de donde iba la rueda delantera del Cuadriciclo (m)
+  tPilarBarrido: number;   // cuánto más atrás llega el montante arriba, donde se junta con el techo (m)
+  tPilarAncho: number; // ancho del montante (m)
   // Carrocería: carenados de las ruedas delanteras, brazos y faldón trasero
   tPodEsc: number;     // tamaño del carenado delantero alrededor de la rueda (×)
   tPodAncho: number;   // anchura del carenado (×)
@@ -70,6 +77,7 @@ export interface CamposTriciclo {
   tKWNom: number; tKWPico: number; tMMotor: number; tMInversor: number; tVel: number;
   // Energía
   tKWh: number; tWhKg: number; tWhL: number; tMVarios: number;
+  tSolarM2: number;    // paneles solares flexibles laminados (kg/m²), como en el Aeromóvil 1
 }
 export type ClaveTriciclo = keyof CamposTriciclo;
 /**
@@ -92,7 +100,7 @@ export const RUEDAS_TRICICLO: Record<RuedaTriciclo, { d: number; neuDel: number;
   c14: { d: 0.554, neuDel: 0.165, neuTras: 0.165, n: '14″ de coche, 165/60 R14 (554 mm)', kg: 2.5, kWBuje: 45 },
   c15: { d: 0.574, neuDel: 0.175, neuTras: 0.175, n: '15″ de coche, 175/55 R15 (574 mm)', kg: 2.7, kWBuje: 60 },
 };
-type ClaveTexto = 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras';
+type ClaveTexto = 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas';
 export type ClaveNumTriciclo = Exclude<ClaveTriciclo, ClaveTexto>;
 
 // ------------------------------------------------------------------ deslizadores
@@ -109,7 +117,7 @@ export const LEMAS_TRICICLO: Record<DepTriciclo | 'proyecto', string> = {
   propulsion: 'el motor en el buje de la rueda trasera',
   energia: 'la batería en el morro y entre los pies',
 };
-export type Unidad = 'm' | 'cm' | 'mm' | '°' | 'kg' | 'kW' | 'kWh' | 'Wh/kg' | 'Wh/L' | 'km/h' | 'x';
+export type Unidad = 'm' | 'cm' | 'mm' | '°' | 'kg' | 'kW' | 'kWh' | 'Wh/kg' | 'Wh/L' | 'km/h' | 'x' | 'kg/m²';
 /**
  * Un deslizador del Triciclo. `bala`: la forma es la del Cuadriciclo, y su
  * etiqueta, su rango y su paso se leen de su tabla (DESLIZADORES_BALA), no se
@@ -135,6 +143,11 @@ const FILAS: Fila[] = [
   ['tCupIni', 'carroceria', 'Cúpula', 'bCupIni', '', 0, 0, 0, 'm'],
   ['tCupFin', 'carroceria', 'Cúpula', 'bCupFin', '', 1.80, 2.90, 0.01, 'm'],
   ['tAlto', 'carroceria', 'Cúpula', 'bAlto', '', 1.15, 1.584, 0.002, 'm'],
+  ['tSolar', 'carroceria', 'Techo solar y ventanas', null, 'Techo solar: dónde empieza', 0.40, 3.00, 0.01, 'm'],
+  ['tVentAlto', 'carroceria', 'Techo solar y ventanas', null, 'Ventana lateral: alto (encima, el techo)', 0.30, 0.85, 0.01, 'x'],
+  ['tPilar', 'carroceria', 'Techo solar y ventanas', null, 'Montante delantero: dónde nace', 0.40, 1.00, 0.01, 'm'],
+  ['tPilarBarrido', 'carroceria', 'Techo solar y ventanas', null, 'Montante delantero: cuánto se tumba hacia atrás', 0.15, 0.80, 0.01, 'cm'],
+  ['tPilarAncho', 'carroceria', 'Techo solar y ventanas', null, 'Montante delantero: ancho', 0.025, 0.08, 0.005, 'cm'],
   ['tPodEsc', 'carroceria', 'Carenados', null, 'Carenado delantero: tamaño', 0.90, 1.10, 0.01, 'x'],
   ['tPodAncho', 'carroceria', 'Carenados', null, 'Carenado delantero: anchura', 0.80, 1.20, 0.01, 'x'],
   ['tPodCola', 'carroceria', 'Carenados', null, 'Carenado delantero: largo de la cola', 0.70, 1.30, 0.01, 'x'],
@@ -178,6 +191,7 @@ const FILAS: Fila[] = [
   ['tWhKg', 'energia', 'Batería', null, 'Densidad del paquete (masa)', 120, 200, 5, 'Wh/kg'],
   ['tWhL', 'energia', 'Batería', null, 'Densidad del paquete (volumen)', 160, 300, 5, 'Wh/L'],
   ['tMVarios', 'energia', 'Varios', null, 'Varios: cargador, cables, luces, 12 V', 6, 18, 1, 'kg'],
+  ['tSolarM2', 'energia', 'Techo solar', null, 'Paneles solares: masa por m²', 1.2, 3.5, 0.1, 'kg/m²'],
 ];
 let FICHAS: FichaTriciclo[] | null = null;
 /**
@@ -201,7 +215,7 @@ export function deslizadoresTriciclo(): FichaTriciclo[] {
  * and take their value from that axle, so «al eje delantero» is true for this
  * vehicle (+1: ahead of the axle, the nose; −1: behind it).
  */
-const DESDE_EJE: Partial<Record<ClaveNumTriciclo, 1 | -1>> = { tMorro: 1, tCupIni: -1, tCupFin: -1, tPilX: -1, tPasX: -1, tBatalla: -1 };
+const DESDE_EJE: Partial<Record<ClaveNumTriciclo, 1 | -1>> = { tMorro: 1, tCupIni: -1, tCupFin: -1, tPilX: -1, tPasX: -1, tBatalla: -1, tSolar: -1, tPilar: -1 };
 /** What a slider shows: its value and range from the Triciclo's front axle. */
 export function vistaTriciclo(f: FichaTriciclo, T: CamposTriciclo): { valor: number; min: number; max: number; defecto: number } {
   const [a, b] = rangoTriciclo(f.clave, T), d = (f.desde ?? 0) * limitarTriciclo('tEjeDel', T);
@@ -212,6 +226,7 @@ export const guardarTriciclo = (f: FichaTriciclo, v: number, T: CamposTriciclo) 
 export const fichaTriciclo = (k: ClaveNumTriciclo) => deslizadoresTriciclo().find(f => f.clave === k);
 const ruedas = (l: RuedaTriciclo[]) => l.map(k => ({ k, n: RUEDAS_TRICICLO[k].n }));
 export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
+  { clave: 'tVentanas', n: 'Cúpula', dep: 'carroceria', bloque: 'Techo solar y ventanas', opciones: [{ k: 'marco', n: 'Ventanas laterales con montante (Aptera)' }, { k: 'burbuja', n: 'De una pieza (como el Cuadriciclo)' }] },
   { clave: 'tMatCarenado', n: 'Material de la carrocería', dep: 'carroceria', bloque: 'Material y espesores', opciones: [{ k: 'carbonoLino', n: 'Carbono-lino' }, { k: 'vidrio', n: 'Fibra de vidrio' }, { k: 'carbono', n: 'Fibra de carbono' }] },
   { clave: 'tChMat', n: 'Material de los tubos', dep: 'chasis', bloque: 'Bastidor', opciones: [{ k: 'al6061', n: 'Aluminio 6061-T6' }, { k: 'cromoly', n: 'Acero cromoly 4130' }, { k: 'carbono', n: 'Tubo de carbono' }] },
   { clave: 'tRuedaDel', n: 'Ruedas delanteras (en los carenados)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['16', '20', '24', '26', '28', 'c13', 'c14', 'c15']) },
@@ -241,6 +256,8 @@ export function rangoTriciclo(k: ClaveNumTriciclo, T: CamposTriciclo): [number, 
   const f = fichaTriciclo(k)!;
   if (k === 'tCupFin') return [Math.min(f.min, T.tBatalla - 0.45), Math.min(f.max, T.tBatalla - 0.25)];
   if (k === 'tPasX') return [Math.max(f.min, T.tPilX + 0.40), Math.min(f.max, T.tPilX + 0.62)];
+  // the solar roof starts anywhere from over the pilot's knees to 10 cm behind the canopy's end (there: no panel)
+  if (k === 'tSolar') return [f.min, Math.min(f.max, limitarTriciclo('tCupFin', T) + 0.10)];
   if (k === 'tKWPico') return [Math.max(f.min, T.tKWNom), f.max];
   // round two (2026-11-10): the motor and its controller weigh what their power asks for, so a 60 kW motor
   // cannot weigh 8 kg. Hub motors on sale run from about 0.45 kg/kW of peak power (car in-wheel motors:
@@ -493,6 +510,16 @@ export function crearModeloTriciclo(P: Parametros) {
   const cremallera = { x: -0.03, y: Math.max(0.47, yTopBat + 0.05), z: 0.15 };
   const motor = { tipo: 'buje' as const, c: [xR, rR - APLASTADO_BALA] as [number, number], r: 0.115 * rR / 0.305, ancho: 0.10 };
 
+  // ── techo solar y ventanas (balaMedidas.ts `ventanasDe`): on the canopy glass, the shape does not change
+  const opcVentanas: OpcionesVentanas = {
+    solar: L('tSolar') >= rangoTriciclo('tSolar', T)[1] - 1e-6 ? null : -L('tSolar'), alto: L('tVentAlto'),
+    pilar: T.tVentanas === 'marco' ? { x: -L('tPilar'), barrido: L('tPilarBarrido'), ancho: L('tPilarAncho') } : null,
+  };
+  const ventanas = ventanasDe(F, cup, opcVentanas);
+  const p = ventanas.panel, solar = p ? areaXT(F, p.x0, p.x1, x => [p.tLow(x), 1]) : { area: 0, x: -1.5, y: 1.2 };
+  // the A-pillars and the rail frames: laminate (navy) instead of glass
+  const marcoArea = areaMarco(F, bandaMarco(ventanas, cup.XC1 + 0.004));
+
   const Lf = F.LARGO;
   const Pm: Parametros = { ...P, ...T, L: Lf, B: xF - xR, W: anchoTotal, H: D.alto, clear: D.suelo, track: via };
   return {
@@ -501,6 +528,8 @@ export function crearModeloTriciclo(P: Parametros) {
     ruedas, via: { del: via, tras: 0 },
     tubos, baterias, bateriaCabe: bat.capacidad, inversor, motor, basculante, amortiguador, brazos, cremallera, cabezaDireccion: cabeza, recTras, recDel, yLarguero: yL,
     faldon: faldonDe(F, L('tFaldon'), xR, rR),
+    /** The canopy's solar panel and side windows: what the 3D builder draws (`opcVentanas`), the curves, and the panel's area (m², both sides) and centre. */
+    opcVentanas, ventanas, solar, marcoArea,
     /** Los maniquíes de talla media (el visor los dibuja con la función de los otros vehículos). */
     occPts: (piloto: boolean) => occ(piloto),
     occTalla: occ,
@@ -530,7 +559,7 @@ export interface ResultadosTriciclo extends ResultadosBala {
   /** Litros y kilos del paquete; `litrosMorro`: lo que cabe en el módulo del morro a su tamaño de partida; `cabe`: los litros que caben en los cinco sitios (menos que `litros`: no cabe). */
   bateria: { litros: number; kg: number; litrosMorro: number; cabe: number };
   /** Lo que depende del Cd del túnel (null mientras calcula). */
-  energia: null | { cd: number; areaRef: number; CdA: number; WhKm: number; autonomia: number; vmaxNominal: number; vmaxPico: number; acel50: number; potencia: number; WhKm50: number; WhKm100: number };
+  energia: null | { cd: number; areaRef: number; CdA: number; WhKm: number; autonomia: number; kmSol: number; vmaxNominal: number; vmaxPico: number; acel50: number; potencia: number; WhKm50: number; WhKm100: number };
 }
 
 /** Los que no llegan: 9 en una holgura que no tiene sentido (un tubo fuera de la piel, etc.). */
@@ -597,6 +626,8 @@ export function piezasTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cris
     { nombre: 'Batería', kg: bat, x: vb ? xb / vb : 0, y: vb ? yb / vb : 0.3 },
     { nombre: 'Asientos', kg: 2 * L('tMAsiento'), x: (m.sillines.xPiloto + m.sillines.xPasajero) / 2, y: (ySillin(true) + ySillin(false)) / 2 },
     { nombre: 'Varios', kg: L('tMVarios'), x: -1.0, y: 0.40 + F.dSuelo },
+    // the panel replaces the glass there (`areasTriciclo`): laminate under it (in «Carrocería») and the panel itself
+    ...(ar.solar > 0 ? [{ nombre: 'Paneles solares', kg: ar.solar * L('tSolarM2'), x: m.solar.x, y: m.solar.y }] : []),
   ];
 }
 
@@ -725,21 +756,27 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     giro: { radio, dentro: di * 180 / Math.PI, fuera: dout * 180 / Math.PI },
     bastidor: { M: Mmax, tension, seguridad, metros },
     bateria: { litros: L('tKWh') * 1000 / L('tWhL'), kg: L('tKWh') * 1000 / L('tWhKg'), litrosMorro: 0.42 * 0.30 * Math.max(1, F.kW) * 0.20 * 1000, cabe: m.bateriaCabe },
-    energia: cd ? energiaTriciclo(m, mVeh + 2 * mOcc, cd) : null,
+    energia: cd ? energiaTriciclo(m, mVeh + 2 * mOcc, cd, ar.solar) : null,
   };
   const e = bala.energia, nada = NaN;
   return {
     A: area.total, FR: nada, Cd: e?.cd ?? nada, CdA: e?.CdA ?? nada, Crr: CRR, vol, Paero: nada, Proll: nada, Pw: e?.potencia ?? nada, WhKm: e?.WhKm ?? nada, pedWhKm: 0,
     autonomia: e?.autonomia ?? nada, vmax: e?.vmaxNominal ?? nada,
     masas, mVeh, mTot: mVeh + 2 * mOcc, rangoMasa: [nada, nada], Mmax, tension, seguridad, cargaRueda: nada,
-    solarPico: 0, solarDia: 0, kmSol: 0, areas: ar, comprobaciones: ch, triciclo: bala,
+    solarPico: ar.solar * RENDIMIENTO_SOLAR * 1000, solarDia: solarDiaTriciclo(ar.solar, m.P.sol), kmSol: e?.kmSol ?? nada, areas: ar, comprobaciones: ch, triciclo: bala,
   };
 }
 
 /** Rodadura de neumático de ciclomotor (0,011), motor de buje y controlador al 85 %, 80 W de equipos y la batería usable al 90 %. Supuestos, no medidos. */
 export const CRR = 0.011, RENDIMIENTO = 0.85, AUXILIARES = 80, USABLE = 0.9;
 /** Consumo, autonomía y velocidades con el Cd del túnel (referido a su área: la sección mayor de la carrocería). */
-export function energiaTriciclo(m: ModeloTriciclo, mTot: number, cd: { cd: number; areaRef: number }) {
+/**
+ * Lo que da el techo solar en un día (Wh), como en el Aeromóvil 1: el panel, curvo, recoge de media ~70 % de lo
+ * que uno plano; rendimiento de las células `RENDIMIENTO_SOLAR`, `sol` kWh/m² al día sobre plano (4,5: media
+ * anual en España) y 85 % de pérdidas de cableado, temperatura y carga. Estimación.
+ */
+export const solarDiaTriciclo = (area: number, sol = 4.5) => area * 0.7 * RENDIMIENTO_SOLAR * sol * 1000 * 0.85;
+export function energiaTriciclo(m: ModeloTriciclo, mTot: number, cd: { cd: number; areaRef: number }, areaSolar = m.solar.area) {
   const T = m.campos, L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), g = 9.81, CdA = cd.cd * cd.areaRef;
   const potencia = (v: number) => (0.5 * 1.2 * CdA * v ** 3 + CRR * mTot * g * v) / RENDIMIENTO + AUXILIARES;
   const consumo = (kmh: number) => { const v = kmh / 3.6; return potencia(v) / v / 3.6; };
@@ -749,10 +786,17 @@ export function energiaTriciclo(m: ModeloTriciclo, mTot: number, cd: { cd: numbe
   const reparto = 0.4, Fmax = AGARRE * reparto * mTot * g;
   let v = 0.5, t = 0; const dt = 0.02;
   while (v < 50 / 3.6 && t < 60) { const Fz = Math.min(Fmax, L('tKWPico') * 1000 * RENDIMIENTO / v) - 0.5 * 1.2 * CdA * v * v - CRR * mTot * g; if (Fz <= 0) { t = 99; break; } v += Fz / (mTot * 1.03) * dt; t += dt; }
-  return { cd: cd.cd, areaRef: cd.areaRef, CdA, WhKm, autonomia: util / WhKm, vmaxNominal: vmaxCon(L('tKWNom')), vmaxPico: vmaxCon(L('tKWPico')), acel50: t, potencia: potencia(vel / 3.6), WhKm50: consumo(50), WhKm100: consumo(100) };
+  return { cd: cd.cd, areaRef: cd.areaRef, CdA, WhKm, autonomia: util / WhKm, kmSol: solarDiaTriciclo(areaSolar, m.P.sol) / WhKm, vmaxNominal: vmaxCon(L('tKWNom')), vmaxPico: vmaxCon(L('tKWPico')), acel50: t, potencia: potencia(vel / 3.6), WhKm50: consumo(50), WhKm100: consumo(100) };
 }
 
-/** Superficies de piel (m²): la carrocería y el cristal de la cúpula (como el Cuadriciclo: sin paneles solares). */
-export { areasBala as areasTriciclo } from './geometriaBala';
+/**
+ * Superficies de piel (m²): la carrocería, el cristal de la cúpula y, desde la segunda versión, el panel solar.
+ * El panel sustituye al cristal donde está: bajo él va laminado de carrocería (el panel flexible no es
+ * estructural), así que su superficie cuenta como panel y como carrocería, como en el Aeromóvil 1.
+ */
+export function areasTriciclo(m: Pick<ModeloTriciclo, 'F' | 'cup' | 'solar' | 'marcoArea'>) {
+  const b = areasBala(m), s = m.solar.area, k = m.marcoArea;
+  return { carroceria: b.carroceria + s + k, cristal: Math.max(0, b.cristal - s - k), solar: s };
+}
 /** ¿Es este modelo un Triciclo? */
 export const esTriciclo = (m: { tipo: string }): m is ModeloTriciclo => m.tipo === 'triciclo';

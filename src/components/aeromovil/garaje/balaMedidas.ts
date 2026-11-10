@@ -206,6 +206,29 @@ export function ventanasDe(F: FormaBala, C: Contorno, o: OpcionesVentanas) {
   return { tC, tR, panel, pilar };
 }
 export type Ventanas = ReturnType<typeof ventanasDe>;
+/**
+ * The frame's band as (x, t) points (right side): up the pillar, then back along the rail to the canopy's
+ * rear end; and its width at each point (the pillar slims by a quarter towards the roof, the rail is 75 %
+ * of the pillar, tapering out at the end). The 3D builder draws exactly this, and the mass counts its area.
+ */
+export function bandaMarco(V: Ventanas, xFin: number): { pts: [number, number][]; ancho: number[] } | null {
+  const p = V.pilar; if (!p) return null;
+  const pts: [number, number][] = [], ancho: number[] = [], NP = 40;
+  for (let i = 0; i <= NP; i++) { pts.push(p.punto(i / NP)); ancho.push(p.ancho * (1 - 0.25 * Math.sin(Math.PI / 2 * i / NP) ** 2)); }
+  const xs: number[] = []; for (let x = p.xT - 0.01; x > xFin; x -= 0.012) xs.push(x); xs.push(xFin);
+  xs.forEach((x, i) => { const u = i / Math.max(1, xs.length - 1); pts.push([x, V.tR(x)]); ancho.push(p.ancho * 0.75 * (1 - 0.2 * u) * Math.min(1, (1 - u) * 12)); });
+  return { pts, ancho };
+}
+/** Area of that band (m², both sides): its length on the skin times its width. */
+export function areaMarco(F: FormaBala, b: { pts: [number, number][]; ancho: number[] } | null): number {
+  if (!b) return 0;
+  let A = 0;
+  for (let i = 1; i < b.pts.length; i++) {
+    const [x0, t0] = b.pts[i - 1], [x1, t1] = b.pts[i], [z0, y0] = punto(F.sec(x0), t0), [z1, y1] = punto(F.sec(x1), t1);
+    A += Math.hypot(x1 - x0, y1 - y0, z1 - z0) * (b.ancho[i - 1] + b.ancho[i]) / 2;
+  }
+  return 2 * A;
+}
 
 /**
  * Area (m², both sides) of a region of the skin given by rows x0..x1 and, on each row, t from `rango(x)[0]`
