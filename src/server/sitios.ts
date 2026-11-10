@@ -36,7 +36,7 @@ import { cabeceraEnHtml } from './cabeceraSitio';
 import { cuerpoEnHtml, esc as escHtml, enLinea } from './htmlBloques';
 import { ampliar, type MetaPagina } from './ampliarPagina';
 import { configEscaparate, urlsEscaparate, modeloEscaparate } from './seoEscaparate';
-import { datosDeIdioma, estaTraducido, hreflangDe, idiomaDeHost, traducirHtml, traducirProfundo, tramosOriginales } from './traducciones';
+import { datosDeIdioma, dominiosTraducidos, estaTraducido, hreflangDe, idiomaDeHost, traducirHtml, traducirProfundo, tramosOriginales } from './traducciones';
 import { asegurarRutas, asegurarRutaDePagina, patronDeTitulo, TRAMOS_RESERVADOS } from './rutasFila';
 import { sitioConAnfitrion, sitioEnCasa } from '../components/sitio/ContextoSitio';
 import { bloquesDe } from './bloquesSql';
@@ -475,6 +475,8 @@ async function canonicaDe(db: any, w: any, publica: any): Promise<string | null>
     SELECT d.dominio, d.pagina_id FROM dominios_paginas d JOIN users u ON u.id = d.propietario_user_id
     LEFT JOIN sube s ON s.id = d.pagina_id
     WHERE u.handle = ${handle} AND d.estado = 'activo' AND (d.pagina_id IS NULL OR s.id IS NOT NULL)
+      -- Un dominio traducido es la réplica en otro idioma: nunca la canónica de la fuente.
+      AND d.dominio <> ALL(string_to_array(${dominiosTraducidos().join(',')}, ','))
     -- Un dominio comprado gana a un subdominio de humanity.wiki: es el definitivo.
     ORDER BY (d.dominio LIKE ${'%.' + DOMINIO}), (d.pagina_id IS NULL), s.n LIMIT 1
   `)).rows[0] as any;
@@ -1086,6 +1088,8 @@ export function registrarSitios(app: Express, db: any) {
         canonica = r?.id === w.id ? `https://${s.host}${pref}/${slugDe(w.title)}` : url;
       }
       if (!canonica) canonica = (await direccionCanonica(w, publica)) || url;
+      // En el dominio traducido, cada página es canónica de sí misma.
+      if (idioma) canonica = traducirProfundo(canonica, s.host);
       const icono = cfg?.icono;
       const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
       // Las páginas de la red se indexan aunque la ficha de producto diga que está «flaca» (2026-10-21).
