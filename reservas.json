@@ -41,6 +41,12 @@
       "ruta": "src/components/aeromovil/garaje/balaPiezas.ts",
       "motivo": "Triciclo: techo solar, ventanas, rangos",
       "desde": "2026-11-10T14:39:30.726Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/geometria.ts",
+      "motivo": "Triciclo: techo solar, ventanas, rangos",
+      "desde": "2026-11-10T14:39:34.049Z"
     }
   ]
 }
