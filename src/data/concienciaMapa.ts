@@ -16,7 +16,7 @@
 
 export type Forma =
   | 'matriz' | 'campo' | 'estado' | 'nivel' | 'capacidad'
-  | 'canal' | 'nota' | 'titulo' | 'estudio';
+  | 'canal' | 'nota' | 'titulo' | 'estudio' | 'franja';
 
 export type Icono =
   | 'ninguno' | 'sol' | 'luna' | 'loto' | 'ojo' | 'ojoCerrado' | 'cerebro' | 'red'
@@ -42,7 +42,10 @@ export interface Nodo {
   color: string;
   /** Escala del concepto: 1 = tamaño normal. */
   tam?: number;
-  /** Solo para «campo»: dónde va el nombre y hacia dónde mira la cabeza. */
+  /** Solo «franja» y «matriz»: su ancho y alto propios (antes de `tam`). */
+  ancho?: number;
+  alto?: number;
+  /** «campo»: dónde va el nombre y hacia dónde mira la cabeza. «matriz»: nombre dentro (sin valor) o debajo/encima. */
   etiquetaPos?: PosEtiqueta;
   espejo?: boolean;
   /** Id de un estudio de `concienciaEstudios.ts`. Nunca una URL libre. */
@@ -63,12 +66,13 @@ export interface Flecha {
 }
 
 export interface MapaConciencia {
-  version: 1;
+  /** Layout generation, see ESQUEMA_ACTUAL. */
+  version: number;
   nodos: Nodo[];
   flechas: Flecha[];
 }
 
-export const LIENZO = { ancho: 1600, alto: 1560 } as const;
+export const LIENZO = { ancho: 1800, alto: 1120 } as const;
 
 /** La paleta que ofrece el editor. Con nombre, para que se elija sin saber de colores. */
 export const PALETA: { color: string; nombre: string }[] = [
@@ -94,6 +98,7 @@ export const FORMAS: { forma: Forma; nombre: string }[] = [
   { forma: 'nota', nombre: 'Nota con texto' },
   { forma: 'estudio', nombre: 'Estudio científico' },
   { forma: 'titulo', nombre: 'Título de zona' },
+  { forma: 'franja', nombre: 'Franja (fondo de una zona)' },
 ];
 
 export const ICONOS: { icono: Icono; nombre: string }[] = [
@@ -134,126 +139,181 @@ export const ESTILOS: { estilo: EstiloFlecha; nombre: string }[] = [
 const ORO = '#f5c25b', VIOLETA = '#b48cff', AZUL = '#7b93ff', TURQUESA = '#5ee6d0',
   ROSA = '#ff8fd1', CORAL = '#ffb27a', VERDE = '#9be58f', CIAN = '#8ef0ff', LUZ = '#fff1c9', PLATA = '#c9d4e8';
 
+/**
+ * The layout generation of the map. 2 = the three-lane layout of 2026-11-10
+ * (human 1 left, matrix centre, human 2 right). A map saved with an older
+ * generation is ignored in favour of this one — it is still in the history.
+ */
+export const ESQUEMA_ACTUAL = 2;
+
 export const MAPA_POR_DEFECTO: MapaConciencia = {
-  version: 1,
+  version: ESQUEMA_ACTUAL,
   nodos: [
-    // ── I · UN SER HUMANO Y LA MATRIZ ───────────────────────────────────────
-    { id: 'titulo-1', x: 330, y: 52, forma: 'titulo', titulo: 'I · Un ser humano y la matriz', color: PLATA },
+    // ── The three lanes: three ways two conscious beings interact ─────────
     {
-      id: 'campo', x: 800, y: 178, forma: 'campo', icono: 'cerebro', color: ROSA, etiquetaPos: 'derecha',
-      titulo: 'Ser humano', subtitulo: 'su campo mental (Grinberg: «campo neuronal»)',
-      explicacion: 'Según la teoría sintérgica, la actividad de miles de millones de neuronas forma un campo de energía que no se queda dentro del cráneo: se expande e interactúa con la matriz fundamental del universo. Grinberg lo llamó campo neuronal. De esa interacción nace la experiencia: lo que vemos, oímos y sentimos.',
+      id: 'franja-vigilia', x: 900, y: 205, forma: 'franja', color: ORO, ancho: 1060, alto: 230,
+      titulo: 'Vigilia', subtitulo: 'estar despierto · por los sentidos físicos',
+      explicacion: 'Primera forma de interactuar. Despiertos, nos comunicamos por la voz, el oído, la vista, el tacto y el olfato. La información viaja como algo físico —una vibración del aire, la luz, una presión— y cada cerebro la traduce con un código que ha aprendido: su idioma y su cultura.',
     },
     {
-      id: 'sintergia', x: 1345, y: 150, forma: 'nota', color: PLATA,
+      id: 'franja-onirico', x: 900, y: 480, forma: 'franja', color: AZUL, ancho: 1060, alto: 230,
+      titulo: 'Estado onírico', subtitulo: 'el sueño · por el hipercampo',
+      explicacion: 'Segunda forma de interactuar. Al dormir, los sentidos físicos se apagan y los campos neuronales siguen en contacto con la matriz. Según la teoría sintérgica, dos campos que interactúan forman un campo común, el hipercampo. Lo que llega por ahí no entra por los ojos ni por los oídos: actúan sentidos energéticos que todavía no conocemos.',
+    },
+    {
+      id: 'franja-meditacion', x: 900, y: 800, forma: 'franja', color: VIOLETA, ancho: 1060, alto: 330,
+      titulo: 'Meditación', subtitulo: 'entre la vigilia y el sueño · percepción directa',
+      explicacion: 'El tercer estado, a medio camino entre estar despierto y dormir: el cuerpo descansa y la atención sigue despierta. El campo neuronal gana coherencia (alta sintergia) y se puede acceder de forma consciente a la información de la matriz: la de otros seres (telepatía), la de objetos cercanos (visión extraocular) y la de lugares lejanos (visión remota).',
+    },
+    {
+      id: 'matriz', x: 900, y: 528, forma: 'matriz', icono: 'red', color: TURQUESA, ancho: 230, alto: 505, etiquetaPos: 'abajo',
+      titulo: 'Matriz fundamental del universo', subtitulo: '(Grinberg la llama «lattice»)',
+      explicacion: 'La estructura de fondo del espacio-tiempo. Según Grinberg es una red de información en la que cada punto contiene la información de todo lo demás, como un holograma. Toda interacción entre seres conscientes pasa por ella: la vibración del aire de una palabra, el hipercampo del sueño y la percepción directa de la meditación.',
+    },
+
+    // ── The two conscious beings ─────────────────────────────────────────
+    {
+      id: 'persona-a', x: 175, y: 520, forma: 'campo', icono: 'cerebro', color: ROSA, etiquetaPos: 'abajo', tam: 1.3,
+      titulo: 'Ser humano 1', subtitulo: 'su campo neuronal, una malla como la matriz',
+      explicacion: 'Cada cerebro genera un campo de energía —Grinberg lo llamó campo neuronal— con la misma forma de malla que la matriz, porque es una distorsión de ella. Ese campo es lo que interactúa con la matriz y, a través de ella, con otros seres.',
+    },
+    {
+      id: 'persona-b', x: 1625, y: 520, forma: 'campo', icono: 'cerebro', color: CORAL, etiquetaPos: 'abajo', espejo: true, tam: 1.3,
+      titulo: 'Ser humano 2', subtitulo: 'su campo neuronal, una malla como la matriz',
+      explicacion: 'El otro ser consciente. Recibe lo que viene del ser humano 1 de tres maneras: por los sentidos (vigilia), por el hipercampo (sueño) y por la percepción directa (meditación).',
+    },
+    {
+      id: 'sintergia', x: 175, y: 905, forma: 'nota', color: PLATA, tam: 0.92,
       titulo: '¿Qué es la sintergia?',
-      explicacion: 'Palabra inventada por Grinberg: síntesis + energía. Mide cuánta coherencia y unidad tiene un campo. Con poca sintergia vemos el mundo fragmentado, desde el «yo»; con mucha, la percepción se vuelve directa y unitaria.',
+      explicacion: 'Palabra de Grinberg: síntesis + energía. Mide cuánta coherencia y unidad tiene un campo. Con poca sintergia vemos el mundo fragmentado, desde el «yo»; con mucha, la percepción se vuelve directa y unitaria.',
+    },
+
+    // ── Lane 1 · Waking: through the physical senses ────────────────────
+    {
+      id: 'codifica', x: 500, y: 228, forma: 'capacidad', icono: 'voz', color: ORO,
+      titulo: '1 · Codifica', subtitulo: 'la idea se vuelve palabras: código cultural y lingüístico',
+      explicacion: 'El ser humano 1 tiene una idea y la traduce a un código que ha aprendido: las palabras y los gestos de su idioma y de su cultura. Su voz convierte ese código en vibración.',
     },
     {
-      id: 'vigilia', x: 300, y: 392, forma: 'estado', icono: 'sol', color: ORO,
-      titulo: 'Vigilia', subtitulo: '(estar despierto)',
-      explicacion: 'Primera forma de interactuar con la matriz. Despiertos, el campo mental toca la matriz a través de los cinco sentidos: el cerebro decodifica esa información y construye el mundo de objetos, formas, colores y sonidos que llamamos realidad.',
+      id: 'vibra', x: 900, y: 222, forma: 'canal', icono: 'ondas', color: ORO, tam: 0.9,
+      titulo: '2 · El aire vibra', subtitulo: 'una onda mecánica que viaja por la matriz',
+      explicacion: 'La voz empuja el aire y forma una onda de presión que se propaga en todas direcciones. Es una vibración física: no lleva el significado, solo la forma del sonido.',
     },
     {
-      id: 'meditacion', x: 800, y: 392, forma: 'estado', icono: 'loto', color: VIOLETA,
-      titulo: 'Meditación', subtitulo: '(entre la vigilia y el sueño)',
-      explicacion: 'El tercer estado, a medio camino entre estar despierto y dormir. El cuerpo descansa como en el sueño, pero la atención sigue despierta. El campo mental se vuelve más coherente y se puede acceder de forma consciente a información de la matriz. Tiene niveles de profundidad.',
+      id: 'decodifica', x: 1300, y: 228, forma: 'capacidad', icono: 'oido', color: ORO,
+      titulo: '3 · Decodifica', subtitulo: 'el oído recibe la vibración y el campo neuronal le da sentido',
+      explicacion: 'El oído del ser humano 2 convierte la vibración en impulsos nerviosos. Su campo neuronal los decodifica con el mismo código cultural y lingüístico, y aparece el sentido: entiende lo que el otro quiso decir.',
+    },
+
+    // ── Lane 2 · Dreaming: through the hyperfield ───────────────────────
+    {
+      id: 'hipercampo', x: 900, y: 492, forma: 'canal', icono: 'infinito', color: AZUL, estudio: 'subtle-1992',
+      titulo: 'Hipercampo', subtitulo: 'los dos campos neuronales se entrelazan en la matriz',
+      etiquetas: ['sin sentidos físicos', 'sentidos energéticos aún desconocidos', 'imágenes y símbolos'],
+      explicacion: 'Grinberg propuso que los campos neuronales individuales se combinan en un campo colectivo: el hipercampo. En el sueño, sin los sentidos físicos, los campos se expanden e interactúan así, y lo que llega del otro se vive como imágenes, emociones y símbolos.',
+    },
+
+    // ── Lane 3 · Meditation: direct perception ──────────────────────────
+    {
+      id: 'coherencia', x: 520, y: 852, forma: 'nivel', color: VIOLETA,
+      titulo: 'Campo coherente', subtitulo: 'alta sintergia',
+      explicacion: 'Meditando, la mente se aquieta, los dos hemisferios se sincronizan y el campo neuronal se vuelve muy coherente. Según Grinberg, cuanto más sintergia tiene un campo, más directa es su interacción con la matriz.',
     },
     {
-      id: 'onirico', x: 1300, y: 392, forma: 'estado', icono: 'luna', color: AZUL,
-      titulo: 'Estado onírico', subtitulo: '(estado de sueño)',
-      explicacion: 'Segunda forma de interactuar con la matriz. Al dormir, los sentidos se apagan pero el campo mental sigue en contacto con la matriz, sin dirección consciente: la información aparece como imágenes, símbolos y sueños.',
+      id: 'telepatia', x: 900, y: 705, forma: 'capacidad', icono: 'ondas', color: LUZ, estudio: 'epr-1994',
+      titulo: 'Telepatía', subtitulo: 'de un campo neuronal a otro',
+      explicacion: 'Comunicación directa entre dos seres conscientes, sin voz ni contacto. Es lo que Grinberg intentó medir con parejas que meditaban juntas y después se aislaban en cámaras separadas: el «potencial transferido».',
     },
     {
-      id: 'nivel-1', x: 800, y: 518, forma: 'nivel', color: VIOLETA,
-      titulo: 'Nivel 1 · Calma y coherencia',
-      explicacion: 'La atención se aquieta, el ruido mental baja y los dos hemisferios del cerebro empiezan a trabajar sincronizados (Grinberg midió esta coherencia con el electroencefalograma).',
-    },
-    {
-      id: 'nivel-2', x: 800, y: 600, forma: 'nivel', color: VIOLETA,
-      titulo: 'Nivel 2 · Percepción sutil',
-      explicacion: 'Con los ojos cerrados aparecen luces, imágenes y sensaciones que no llegan por los sentidos. Se empieza a percibir la energía y la información de lo que nos rodea.',
-    },
-    {
-      id: 'nivel-3', x: 800, y: 682, forma: 'nivel', color: VIOLETA,
-      titulo: 'Nivel 3 · Alta sintergia',
-      explicacion: 'El campo mental es muy coherente y se parece cada vez más a la estructura de la propia matriz. Según Grinberg, en este nivel la percepción deja de depender de los sentidos y se vuelve directa.',
-    },
-    {
-      id: 'extraocular', x: 530, y: 642, forma: 'capacidad', icono: 'ojo', color: LUZ, estudio: 'extraocular-1983',
-      titulo: 'Visión extraocular',
+      id: 'extraocular', x: 900, y: 805, forma: 'capacidad', icono: 'ojo', color: LUZ, estudio: 'extraocular-1983',
+      titulo: 'Visión extraocular', subtitulo: 'percibir sin los ojos',
       explicacion: 'Percibir imágenes, colores o letras sin usar los ojos. Grinberg trabajó con niños con los ojos vendados que, tras una meditación guiada, intentaban reconocer imágenes impresas pasando los dedos por encima.',
     },
     {
-      id: 'remota', x: 530, y: 740, forma: 'capacidad', icono: 'telescopio', color: LUZ,
-      titulo: 'Visión remota',
-      explicacion: 'Percibir lugares, objetos o escenas lejanas sin estar allí, accediendo a su información a través de la matriz.',
+      id: 'remota', x: 900, y: 905, forma: 'capacidad', icono: 'telescopio', color: LUZ,
+      titulo: 'Visión remota', subtitulo: 'percibir lo que está lejos',
+      explicacion: 'Percibir lugares, objetos o seres lejanos sin estar allí, accediendo a su información a través de la matriz.',
     },
     {
-      id: 'telepatia', x: 1075, y: 692, forma: 'capacidad', icono: 'ondas', color: LUZ, estudio: 'epr-1994',
-      titulo: 'Telepatía',
-      explicacion: 'Comunicación directa entre dos campos mentales, sin pasar por los sentidos. Es lo que Grinberg intentó medir con parejas aisladas en cámaras separadas (ver la parte II del mapa).',
+      id: 'objeto-cercano', x: 1270, y: 805, forma: 'nivel', color: PLATA,
+      titulo: 'Un objeto cercano', subtitulo: 'una imagen, un color, una letra',
+      explicacion: 'Lo que percibe la visión extraocular: algo que está al alcance, pero sin mirarlo con los ojos.',
     },
     {
-      id: 'estudio-1987', x: 1075, y: 560, forma: 'estudio', icono: 'libro', color: PLATA, estudio: 'interhemisferica-1987',
-      titulo: 'Coherencia entre hemisferios (1987)',
-    },
-    {
-      id: 'matriz', x: 800, y: 925, forma: 'matriz', icono: 'red', color: TURQUESA,
-      titulo: 'Matriz fundamental del universo', subtitulo: '(Grinberg la llama «lattice»)',
-      explicacion: 'La estructura de fondo del espacio-tiempo. Según Grinberg es una red de información en la que cada punto contiene la información de todo lo demás, como un holograma. No vemos la matriz tal cual: el cerebro la decodifica y la convierte en el mundo que percibimos.',
-    },
-
-    // ── II · DOS CAMPOS MENTALES QUE SE COMUNICAN ───────────────────────────
-    { id: 'titulo-2', x: 330, y: 1112, forma: 'titulo', titulo: 'II · Dos campos mentales que se comunican', color: PLATA },
-    {
-      id: 'persona-a', x: 300, y: 1268, forma: 'campo', icono: 'cerebro', color: ROSA, etiquetaPos: 'abajo',
-      titulo: 'Persona A', subtitulo: 'su campo mental',
-      explicacion: 'Cada persona es un campo mental individual. Puede comunicarse con otra de dos maneras: por los sentidos o a través de la matriz.',
-    },
-    {
-      id: 'persona-b', x: 1300, y: 1268, forma: 'campo', icono: 'cerebro', color: CORAL, etiquetaPos: 'abajo', espejo: true,
-      titulo: 'Persona B', subtitulo: 'su campo mental',
-      explicacion: 'El otro campo mental. Recibe la información de A por los sentidos y, también, por la matriz.',
-    },
-    {
-      id: 'energetico', x: 800, y: 1238, forma: 'canal', icono: 'chispas', color: CIAN, estudio: 'subtle-1992',
-      titulo: 'Canal energético', subtitulo: 'a través de la matriz',
-      etiquetas: ['visiones con los ojos cerrados', 'sensaciones sin contacto'],
-      explicacion: 'La energía y la información que contiene el campo de una persona llegan a la otra a través de la matriz, sin voz ni contacto. Se perciben como visiones con los ojos cerrados y sensaciones sin contacto físico. Grinberg propuso que, al interactuar, los dos campos forman uno común: el «hipercampo».',
-    },
-    {
-      id: 'sensorial', x: 800, y: 1418, forma: 'canal', icono: 'voz', color: VERDE,
-      titulo: 'Canal de los sentidos', subtitulo: 'comunicación física',
-      etiquetas: ['voz', 'oído', 'vista', 'tacto', 'olfato'],
-      explicacion: 'La forma de comunicarnos que todos conocemos: hablar y escuchar, mirarnos, tocarnos, olernos.',
-    },
-    {
-      id: 'estudio-1994', x: 1330, y: 1508, forma: 'estudio', icono: 'libro', color: PLATA, estudio: 'epr-1994',
-      titulo: 'Potencial transferido (1994)',
+      id: 'lugar-lejano', x: 1270, y: 905, forma: 'nivel', color: PLATA,
+      titulo: 'Un lugar o un ser lejano', subtitulo: 'a cualquier distancia',
+      explicacion: 'Lo que percibe la visión remota: otros lugares, objetos y seres, estén donde estén.',
     },
   ],
   flechas: [
-    { id: 'f-campo-vigilia', de: 'campo', a: 'vigilia', estilo: 'continua', direccion: 'ida', color: ORO },
-    { id: 'f-campo-meditacion', de: 'campo', a: 'meditacion', estilo: 'continua', direccion: 'ida', color: VIOLETA },
-    { id: 'f-campo-onirico', de: 'campo', a: 'onirico', estilo: 'continua', direccion: 'ida', color: AZUL },
-    { id: 'f-vigilia-matriz', de: 'vigilia', a: 'matriz', estilo: 'continua', direccion: 'doble', color: ORO, etiqueta: 'por los 5 sentidos' },
-    { id: 'f-onirico-matriz', de: 'onirico', a: 'matriz', estilo: 'onda', direccion: 'doble', color: AZUL, etiqueta: 'sueños y símbolos' },
-    { id: 'f-med-1', de: 'meditacion', a: 'nivel-1', estilo: 'continua', direccion: 'ida', color: VIOLETA },
-    { id: 'f-1-2', de: 'nivel-1', a: 'nivel-2', estilo: 'continua', direccion: 'ida', color: VIOLETA },
-    { id: 'f-2-3', de: 'nivel-2', a: 'nivel-3', estilo: 'continua', direccion: 'ida', color: VIOLETA },
-    { id: 'f-3-matriz', de: 'nivel-3', a: 'matriz', estilo: 'energia', direccion: 'doble', color: VIOLETA, etiqueta: 'acceso consciente a la información', grosor: 3 },
-    { id: 'f-3-extraocular', de: 'nivel-3', a: 'extraocular', estilo: 'discontinua', direccion: 'ida', color: LUZ },
-    { id: 'f-3-remota', de: 'nivel-3', a: 'remota', estilo: 'discontinua', direccion: 'ida', color: LUZ },
-    { id: 'f-3-telepatia', de: 'nivel-3', a: 'telepatia', estilo: 'discontinua', direccion: 'ida', color: LUZ },
-    { id: 'f-1-estudio', de: 'nivel-1', a: 'estudio-1987', estilo: 'puntos', direccion: 'ninguna', color: PLATA },
-    { id: 'f-a-energia', de: 'persona-a', a: 'energetico', estilo: 'energia', direccion: 'doble', color: CIAN },
-    { id: 'f-energia-b', de: 'energetico', a: 'persona-b', estilo: 'energia', direccion: 'doble', color: CIAN },
-    { id: 'f-energia-matriz', de: 'energetico', a: 'matriz', estilo: 'energia', direccion: 'doble', color: TURQUESA, etiqueta: 'energía e información' },
-    { id: 'f-a-sentidos', de: 'persona-a', a: 'sensorial', estilo: 'continua', direccion: 'doble', color: VERDE },
-    { id: 'f-sentidos-b', de: 'sensorial', a: 'persona-b', estilo: 'continua', direccion: 'doble', color: VERDE },
-    { id: 'f-energia-estudio', de: 'energetico', a: 'estudio-1994', estilo: 'puntos', direccion: 'ida', color: PLATA, etiqueta: 'medido en el laboratorio' },
+    // Waking
+    { id: 'f-a-codifica', de: 'persona-a', a: 'codifica', estilo: 'continua', direccion: 'ida', color: ORO, etiqueta: 'una idea' },
+    { id: 'f-codifica-vibra', de: 'codifica', a: 'vibra', estilo: 'onda', direccion: 'ida', color: ORO, etiqueta: 'la voz' },
+    { id: 'f-vibra-decodifica', de: 'vibra', a: 'decodifica', estilo: 'onda', direccion: 'ida', color: ORO, etiqueta: 'el oído' },
+    { id: 'f-decodifica-b', de: 'decodifica', a: 'persona-b', estilo: 'continua', direccion: 'ida', color: ORO, etiqueta: 'el sentido' },
+    // Dreaming
+    { id: 'f-a-hipercampo', de: 'persona-a', a: 'hipercampo', estilo: 'energia', direccion: 'doble', color: AZUL, etiqueta: 'su campo se expande' },
+    { id: 'f-hipercampo-b', de: 'hipercampo', a: 'persona-b', estilo: 'energia', direccion: 'doble', color: AZUL },
+    // Meditation
+    { id: 'f-a-coherencia', de: 'persona-a', a: 'coherencia', estilo: 'continua', direccion: 'ida', color: VIOLETA, etiqueta: 'medita' },
+    { id: 'f-coherencia-telepatia', de: 'coherencia', a: 'telepatia', estilo: 'continua', direccion: 'ida', color: VIOLETA },
+    { id: 'f-coherencia-extraocular', de: 'coherencia', a: 'extraocular', estilo: 'continua', direccion: 'ida', color: VIOLETA },
+    { id: 'f-coherencia-remota', de: 'coherencia', a: 'remota', estilo: 'continua', direccion: 'ida', color: VIOLETA },
+    { id: 'f-telepatia-b', de: 'telepatia', a: 'persona-b', estilo: 'energia', direccion: 'ida', color: VIOLETA, etiqueta: 'otro ser' },
+    { id: 'f-extraocular-objeto', de: 'extraocular', a: 'objeto-cercano', estilo: 'energia', direccion: 'ida', color: LUZ },
+    { id: 'f-remota-lugar', de: 'remota', a: 'lugar-lejano', estilo: 'energia', direccion: 'ida', color: LUZ },
   ],
+};
+
+// ── The animated walkthroughs («Ver cómo funciona») ──────────────────────────
+// The drawing of each step lives in `components/conciencia/Animacion.tsx` and
+// finds the concepts by these ids. If someone deletes or renames one of them,
+// that step just draws less: the animation never breaks the map.
+
+export type Canal = 'vigilia' | 'onirico' | 'meditacion';
+
+export interface PasoRecorrido { titulo: string; texto: string; resaltar: string[] }
+
+export const RECORRIDOS: Record<Canal, { nombre: string; color: string; pasos: PasoRecorrido[] }> = {
+  vigilia: {
+    nombre: 'Vigilia: por los sentidos', color: ORO,
+    pasos: [
+      { titulo: 'Una idea se codifica', resaltar: ['persona-a', 'codifica'],
+        texto: 'El ser humano 1 quiere decir algo. Su campo neuronal traduce la idea a palabras de su idioma: un código cultural y lingüístico aprendido.' },
+      { titulo: 'La voz hace vibrar el aire', resaltar: ['persona-a', 'codifica', 'vibra'],
+        texto: 'Al hablar, empuja el aire. Se forma una onda mecánica —compresiones y expansiones— que viaja a través de la matriz. La onda no lleva el significado, solo la forma del sonido.' },
+      { titulo: 'El oído recibe la vibración', resaltar: ['vibra', 'decodifica', 'persona-b'],
+        texto: 'La vibración llega al oído del ser humano 2, que la convierte en impulsos nerviosos: de algo físico a algo eléctrico.' },
+      { titulo: 'El campo neuronal le da sentido', resaltar: ['decodifica', 'persona-b'],
+        texto: 'Su campo neuronal decodifica los impulsos con el mismo código cultural y lingüístico, y aparece el sentido. Si los dos no compartieran el código, la vibración llegaría igual, pero no se entendería.' },
+    ],
+  },
+  onirico: {
+    nombre: 'Sueño: por el hipercampo', color: AZUL,
+    pasos: [
+      { titulo: 'Los sentidos físicos se apagan', resaltar: ['persona-a', 'persona-b'],
+        texto: 'Al dormir, los ojos, los oídos y la piel dejan de traer información de fuera. Las dos personas no se ven ni se oyen.' },
+      { titulo: 'Los campos neuronales se expanden', resaltar: ['persona-a', 'persona-b', 'franja-onirico'],
+        texto: 'Sin el ruido de los sentidos, cada campo neuronal sigue interactuando con la matriz y se extiende más allá del cuerpo.' },
+      { titulo: 'Se forma el hipercampo', resaltar: ['persona-a', 'hipercampo', 'persona-b'],
+        texto: 'Según Grinberg, los campos neuronales que interactúan se combinan en un campo colectivo, el hipercampo. Las dos mallas se entrelazan en la matriz.' },
+      { titulo: 'Llega como imágenes y símbolos', resaltar: ['hipercampo', 'persona-b'],
+        texto: 'Lo que llega del otro no entra por los sentidos físicos: actúan sentidos energéticos que todavía no conocemos. Se vive como imágenes, emociones y símbolos del sueño.' },
+    ],
+  },
+  meditacion: {
+    nombre: 'Meditación: percepción directa', color: VIOLETA,
+    pasos: [
+      { titulo: 'El campo se vuelve coherente', resaltar: ['persona-a', 'coherencia'],
+        texto: 'Meditando, entre la vigilia y el sueño, la mente se aquieta y la malla del campo neuronal se ordena: alta sintergia.' },
+      { titulo: 'Telepatía: con otros seres', resaltar: ['coherencia', 'telepatia', 'persona-b'],
+        texto: 'La información pasa de un campo neuronal a otro directamente, a través de la matriz, sin voz ni contacto. El ser humano 2 la recibe como una imagen o una sensación.' },
+      { titulo: 'Visión extraocular: con lo cercano', resaltar: ['coherencia', 'extraocular', 'objeto-cercano'],
+        texto: 'El campo percibe un objeto cercano —una imagen, un color, una letra— sin usar los ojos.' },
+      { titulo: 'Visión remota: con lo lejano', resaltar: ['coherencia', 'remota', 'lugar-lejano'],
+        texto: 'El campo accede a la información de lugares, objetos o seres lejanos, estén donde estén.' },
+    ],
+  },
 };
 
 /** ¿Es esto un mapa con la forma correcta? Lo usa la página al cargar lo guardado. */

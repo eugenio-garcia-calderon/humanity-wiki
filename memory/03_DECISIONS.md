@@ -1275,6 +1275,25 @@ Opening it later is one constant, `NIVEL_GUARDAR`, plus `puedeGuardar` in `src/s
 
 **Storage shape:** one row per map with the whole map as JSONB (`conciencia_mapas`, key `principal`), `datos` NULL meaning «the map in the code», and `version` for 409 on concurrent saves. Same pattern as `calendario_arte_meses`. Node and edge rows were rejected: one drag would be dozens of writes, and the map is always read and drawn whole.
 
+## 2026-11-10 — A site page can be an app (`config.aplicacion`)
+
+The consciousness map had to live on luzhumanidad.com as one of its projects, at `/conciencia-del-ser-humano/teoria-sintergica`. Options:
+
+- **A route in `AplicacionDeDominio`.** Rejected. That file exists so routes do not leak onto every customer's domain.
+- **An iframe block pointing at humanity.wiki/conciencia.** Rejected. Two scroll bars on a phone and a second app download.
+- **Chosen: a project page whose `config.aplicacion` names a screen.** `SubpaginaSitio` renders that screen (lazy) instead of the blocks. The blocks are still written, because the project card, the server HTML and search engines read them. The allowed names are a closed list in code (`APLICACIONES`), so data cannot load arbitrary code.
+
+The project row was created by migration 0181, with ids read from production through the public read API. The alternative was creating it through the editor with Eugenio's session. That was not possible from this session: his Chrome sends every humanity.wiki address to the installed app.
+
+## 2026-11-10 — The consciousness mailbox is open to anyone
+
+«Añadir mejora o comentario» accepts posts without an account, like the Aeromóvil's improvement mailbox. Safeguards:
+- a per-IP brake (20 an hour);
+- a honeypot field;
+- a cap of 500 pending items.
+
+Marking items done or discarded is admin-only (level 4). Saving the map itself still needs an account (level 1), as decided earlier today.
+
 ## 2026-11-10 — Formalizing a loan: one contract function, the block as the source of truth, files kept private
 
 Eugenio asked for a «Realizar préstamo» flow on solarcrowd.com: lender's details, conditions with a signature, transfer receipt, and a copy of what was signed mailed to the lender.

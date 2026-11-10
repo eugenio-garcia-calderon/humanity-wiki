@@ -77,10 +77,22 @@ export function medir(n: Nodo): Medida {
   const m = vacia();
   switch (n.forma) {
     case 'matriz': {
-      m.borde = 'elipse'; m.rx = 560 * k; m.ry = 118 * k; m.w = m.rx * 2; m.h = m.ry * 2;
-      m.fT = 30 * k; m.fS = 16 * k;
-      m.titulo = partir(n.titulo, m.fT, m.rx * 1.3, 2, EM_TITULO);
-      m.sub = partir(n.subtitulo, m.fS, m.rx * 1.2, 2);
+      m.borde = 'elipse';
+      m.rx = (n.ancho ?? 560) * k; m.ry = (n.alto ?? 118) * k; m.w = m.rx * 2; m.h = m.ry * 2;
+      // Name inside (default) or under/over the shape (`etiquetaPos`), where it
+      // has the room of the whole canvas rather than the width of the ellipse.
+      const fuera = n.etiquetaPos === 'abajo' || n.etiquetaPos === 'arriba';
+      m.fT = (fuera ? 26 : 30) * k; m.fS = (fuera ? 15 : 16) * k;
+      const ancho = fuera ? Math.max(m.rx * 2.4, 520 * k) : m.rx * 1.3;
+      m.titulo = partir(n.titulo, m.fT, ancho, 2, EM_TITULO);
+      m.sub = partir(n.subtitulo, m.fS, ancho, 2);
+      return m;
+    }
+    case 'franja': {
+      m.w = (n.ancho ?? 1000) * k; m.h = (n.alto ?? 220) * k;
+      m.fT = 17 * k; m.fS = 12.5 * k;
+      m.titulo = partir((n.titulo || '').toUpperCase(), m.fT, 360 * k, 1, 0.85);
+      m.sub = partir(n.subtitulo, m.fS, 360 * k, 2);
       return m;
     }
     case 'campo': {
@@ -110,7 +122,7 @@ export function medir(n: Nodo): Medida {
       m.w = 236 * k; m.fT = 17 * k; m.fS = 12 * k;
       const ancho = m.w - (n.icono && n.icono !== 'ninguno' ? 66 : 28) * k;
       m.titulo = partir(n.titulo, m.fT, ancho, 2);
-      m.sub = partir(n.subtitulo, m.fS, ancho, 2);
+      m.sub = partir(n.subtitulo, m.fS, ancho, 3);
       m.h = Math.max(60 * k, 26 * k + m.titulo.length * m.fT * 1.2 + m.sub.length * m.fS * 1.3);
       return m;
     }
@@ -177,7 +189,15 @@ export function ancla(n: Nodo, m: Medida, hacia: Punto, margen = 6): Punto {
   }
   if (m.borde === 'elipse') {
     const rx = m.rx + margen, ry = m.ry + margen;
-    if (Math.abs(hacia.y - c.y) > m.ry * 0.9) {
+    if (m.ry > m.rx) {
+      // A tall ellipse (a column): arrows meet it straight to the left or right.
+      if (Math.abs(hacia.x - c.x) > m.rx * 0.9) {
+        const y = Math.min(c.y + m.ry * 0.84, Math.max(c.y - m.ry * 0.84, hacia.y));
+        const t = (y - c.y) / ry;
+        const off = rx * Math.sqrt(Math.max(0, 1 - t * t));
+        return { x: c.x + (hacia.x < c.x ? -off : off), y };
+      }
+    } else if (Math.abs(hacia.y - c.y) > m.ry * 0.9) {
       const x = Math.min(c.x + m.rx * 0.84, Math.max(c.x - m.rx * 0.84, hacia.x));
       const t = (x - c.x) / rx;
       const off = ry * Math.sqrt(Math.max(0, 1 - t * t));
@@ -279,9 +299,15 @@ export function limites(nodos: Nodo[]): { x0: number; y0: number; x1: number; y1
     const m = medir(n);
     let w2: number, h2: number;
     if (m.borde === 'circulo') { w2 = h2 = m.r * 1.5; }
-    else if (m.borde === 'elipse') { w2 = m.rx * 1.12; h2 = m.ry * 1.5; }
+    else if (m.borde === 'elipse') { w2 = m.rx * 1.12; h2 = m.ry * (m.ry > m.rx ? 1.05 : 1.5); }
     else { w2 = m.w / 2 + 10; h2 = m.h / 2 + 10; }
     let izq = n.x - w2, der = n.x + w2, arr = n.y - h2, aba = n.y + h2;
+    if (n.forma === 'matriz' && (n.etiquetaPos === 'abajo' || n.etiquetaPos === 'arriba')) {
+      const texto = 34 + m.titulo.length * m.fT * 1.15 + m.sub.length * m.fS * 1.3;
+      if (n.etiquetaPos === 'abajo') aba = n.y + m.ry + texto; else arr = n.y - m.ry - texto;
+      const mitad = Math.max(...m.titulo.map(l => l.length * m.fT * 0.7), 0) / 2;
+      izq = Math.min(izq, n.x - mitad); der = Math.max(der, n.x + mitad);
+    }
     if (n.forma === 'campo') {
       const pos = n.etiquetaPos ?? 'abajo';
       const texto = m.titulo.length * m.fT * 1.2 + m.sub.length * m.fS * 1.3;

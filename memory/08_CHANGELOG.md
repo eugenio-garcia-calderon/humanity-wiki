@@ -10802,6 +10802,32 @@ Eugenio: «Unifica los selectores de vehículos… deja solo el de arriba y deja
 - Un proyecto nuevo sin nombre corto se abre por su título (`porContexto`, `sitios.ts`). `slugDe` recorta a 60 letras y quita los signos de los extremos, pero el LIKE que busca el título exigía coincidir entero: «Competición para el desarrollo de un Vehículo Eficiente y Solar de código abierto» daba 404.
 - `patronDeTitulo` (`rutasFila.ts`) lo busca abierto por los dos lados; la comparación exacta sigue siendo con `slugDe`, y primero van los títulos más cortos para que no se quede fuera del límite de candidatas.
 
+### 2026-11-10 — El editor enseña lo que se publica, y la tarjeta de Luz sirve para cualquier galería
+- Eugenio: «que el cómo se ve la página publicada sea igual a cómo se gestiona desde el editor» y «que sea configurable para replicarlo».
+- `TarjetaPortada.tsx`: la misma tarjeta (título blanco sobre la imagen, estado encima, año y área debajo, descripción) en la portada del escaparate y en cualquier galería. En la vista: «Diseño de tarjeta» y «Tarjetas por fila» (`config.tarjeta`, `config.por_fila`).
+- En el editor, título, descripción y estado se escriben en la propia tarjeta. Nuevo `PUT /api/bd/filas/:id/subtitulo` para la descripción.
+- La portada de un escaparate se edita tal como se ve (`VistaProyectosSitio` con `edicion`), con titular y «Añadir proyecto»; «Ver los bloques de la página» enseña lo de debajo.
+- Los proyectos del escaparate llevan en el editor su cabecera pública; cualquier otra página puede pedirla con «Título sobre la imagen» (`cabecera.estilo = 'portada'`). Propiedades y relaciones quedan plegadas debajo.
+
+## 2026-11-10 — Conciencia: esquema nuevo, animaciones, buzón de mejoras y proyecto en luzhumanidad.com
+
+- Eugenio: el mapa se redibuja. El ser humano 1 (magenta) a la izquierda, la matriz fundamental del universo en el centro (una columna de malla) y el ser humano 2 (naranja) a la derecha. Entre ellos, tres franjas con las tres maneras en que interactúan dos seres conscientes a través de la matriz:
+  - **Vigilia**: codifica, el aire vibra, decodifica.
+  - **Estado onírico**: el hipercampo y los sentidos energéticos aún desconocidos.
+  - **Meditación**: un campo coherente que lleva a la telepatía (hacia el otro ser), la visión extraocular (un objeto cercano) y la visión remota (un lugar o ser lejano).
+- El campo neuronal de cada persona se dibuja con la misma malla que la matriz (`cz-malla-*`).
+- **Animaciones** («Ver cómo funciona: Vigilia · Sueño · Meditación»): cuatro pasos por canal, con texto y controles (pausa, anterior, siguiente, repetir); el resto del mapa se atenúa. Vigilia enseña la idea en palabras, las ondas de sonido que viajan, el aire que se comprime, el oído que recibe y el campo del otro que le da sentido. Textos en `RECORRIDOS` (`src/data/concienciaMapa.ts`), dibujo en `src/components/conciencia/Animacion.tsx` (SMIL, se pausa con «reducir movimiento»).
+- **Cabecera de una franja** con lo poco que hay que explicar, «Creado por Luz & Humanidad» y el botón **«Añadir mejora o comentario»**: buzón sin cuenta (tabla `conciencia_comentarios`, migración 0180; pendientes en texto en `/api/conciencia/comentarios.txt`). Desaparece la presentación grande: el mapa ocupa la pantalla nada más entrar.
+- **Proyecto de luzhumanidad.com** (migración 0181): fila «Conciencia del ser humano» en la base de datos de proyectos del sitio, área Conciencia, equipo Eugenio, en curso. Su página tiene la dirección `luzhumanidad.com/conciencia-del-ser-humano/teoria-sintergica` y `config.aplicacion = 'conciencia'`, así que enseña el mapa (`APLICACIONES` en `SubpaginaSitio.tsx`). Imagen de la tarjeta: `public/estudio-conciencia/mapa-teoria-sintergica.jpg`.
+- Un mapa guardado con el esquema viejo (`version` < 2) no se enseña: se ve el nuevo y el viejo queda en el historial. En producción no había ninguno guardado (comprobado: versión 0).
+- **Comprobado** en Chrome sin cabeza, con Postgres local y las migraciones 0179 y 0180: las tres animaciones paso a paso, el buzón (enviar y listar), arrastrar y guardar, y la vista a 1400 y 390 px. La 0181, en una réplica mínima de las tablas: crea la página, la fila y los dos enlaces, y es idempotente (dos pasadas, un solo proyecto); en una base sin esas tablas no hace nada.
+
+## 2026-11-10 — El menú de un sitio se pliega también cuando el logotipo horizontal llega tarde
+
+- Visto en solarcrowd.com nada más activar el logotipo horizontal: a unos 1.030 px de ancho, «Próximo préstamo» quedaba cortado por la derecha en vez de pasar a las tres rayas.
+- Por qué: el menú medía si cabía cuando cambiaba el ancho de la fila; un logotipo horizontal no tiene ancho fijo y lo toma cuando llega la imagen, y entonces cambia el ancho de los enlaces, no el de la fila. Ahora se vigilan los dos.
+- Comprobado: `tsc` y `vite build`. Sin verificar: en un móvil con la app instalada (en el teléfono el menú ya va plegado por CSS).
+
 ## 2026-11-10 — «Realizar préstamo»: formalizar un préstamo con firma, justificante y copia por correo
 
 - Eugenio: «un botón que sea realizar préstamo… que se rellenen los datos del prestamista, se le expliquen las condiciones, que las acepte y que haga una firma… que adjunte el justificante… dividido en 3 secciones dentro de la misma página… que se envíe una copia de lo firmado y lo aceptado al correo de esta persona». Y después: «añadir el IBAN de la entidad… y también el correo electrónico para que aparezcan ambos públicos… la entidad recibe una copia a ese correo».

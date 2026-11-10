@@ -35,6 +35,8 @@ export type Cabecera = {
   icono?: number;
   /** Tamaño de letra de la descripción bajo el título, 12–32 px. */
   descripcion?: number;
+  /** `portada`: el título en blanco sobre la imagen, igual en el editor y al publicar (2026-11-10). */
+  estilo?: 'portada';
   /** El icono al lado del título (por defecto) o encima. */
   iconoPos?: 'lado' | 'encima';
   /** Tamaño de letra del título, 16–64 px. */

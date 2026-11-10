@@ -10,7 +10,7 @@
 // and the page shows the map that ships in the code
 // (`src/data/concienciaMapa.ts`); «Volver al original» sets it back to NULL.
 //
-// ── WHO CAN WHAT ───────────────────────────────────────────────────────────
+// ── WHO CAN WHAT (the map) ───────────────────────────────────────────────────────────
 // Reading: anyone. Saving the shared map (and restoring or resetting it):
 // a signed-in account, level 1 — the catalogue level for CREATE_KNOWLEDGE_GRAPH,
 // which is what a concept map is (src/server/CLAUDE.md: reuse the catalogue).
@@ -59,10 +59,17 @@ function exigirCuenta(req: Request, res: Response): boolean {
   return true;
 }
 
-async function conRitmo(db: any, req: Request, res: Response): Promise<boolean> {
+// Comments: 20 an hour per connection is far above a person writing; a bot is not.
+const FRENO_COMENTARIO: Regla = { puerta: 'conciencia-comentarios', gracia: 20, baseSegundos: 60, topeSegundos: 3600, alFallar: 'cerrar' };
+const MAX_COMENTARIO = 4_000;
+const MAX_AUTOR = 80;
+const MAX_PENDIENTES = 500;
+const ESTADOS_COMENTARIO = new Set(['pendiente', 'hecha', 'descartada']);
+
+async function conRitmo(db: any, req: Request, res: Response, regla: Regla = FRENO): Promise<boolean> {
   const quien = `${ipDe(req)}@${horaActual()}`;
   try {
-    const espera = await esperaPendiente(db, FRENO, quien);
+    const espera = await esperaPendiente(db, regla, quien);
     if (espera > 0) {
       res.setHeader('Retry-After', String(espera));
       res.status(429).json({ error: `Demasiados cambios seguidos desde esta conexión. Prueba en ${espera < 60 ? `${espera} segundos` : `${Math.ceil(espera / 60)} minutos`}.` });
@@ -73,13 +80,13 @@ async function conRitmo(db: any, req: Request, res: Response): Promise<boolean> 
     res.status(503).json({ error: 'No se puede comprobar el límite de cambios. Prueba en un momento.' });
     return false;
   }
-  ritmo(db, FRENO, quien);
+  ritmo(db, regla, quien);
   return true;
 }
 
 // ── What a map may contain ─────────────────────────────────────────────────
 
-const FORMAS = new Set(['matriz', 'campo', 'estado', 'nivel', 'capacidad', 'canal', 'nota', 'titulo', 'estudio']);
+const FORMAS = new Set(['matriz', 'campo', 'estado', 'nivel', 'capacidad', 'canal', 'nota', 'titulo', 'estudio', 'franja']);
 const ESTILOS = new Set(['continua', 'discontinua', 'puntos', 'onda', 'energia']);
 const DIRECCIONES = new Set(['ida', 'vuelta', 'doble', 'ninguna']);
 const POSICIONES = new Set(['abajo', 'arriba', 'izquierda', 'derecha']);
@@ -114,6 +121,8 @@ export function limpiarMapa(d: any): { mapa?: any; error?: string } {
     if (POSICIONES.has(n.etiquetaPos)) limpio.etiquetaPos = n.etiquetaPos;
     if (n.espejo === true) limpio.espejo = true;
     if (typeof n.estudio === 'string' && ID.test(n.estudio)) limpio.estudio = n.estudio;
+    const ancho = num(n.ancho, 20, 6000); if (ancho !== undefined) limpio.ancho = ancho;
+    const alto = num(n.alto, 20, 6000); if (alto !== undefined) limpio.alto = alto;
     nodos.push(limpio);
   }
   const fids = new Set<string>();
@@ -133,7 +142,9 @@ export function limpiarMapa(d: any): { mapa?: any; error?: string } {
     const grosor = num(f.grosor, 1, 8); if (grosor !== undefined && grosor !== 2) limpia.grosor = grosor;
     flechas.push(limpia);
   }
-  const mapa = { version: 1, nodos, flechas };
+  // `version` is the layout generation (ESQUEMA_ACTUAL in src/data/concienciaMapa.ts).
+  const version = Number.isInteger(d.version) && d.version >= 1 && d.version <= 99 ? d.version : 1;
+  const mapa = { version, nodos, flechas };
   if (JSON.stringify(mapa).length > MAX_JSON) return { error: 'El mapa es demasiado grande.' };
   return { mapa };
 }
@@ -279,6 +290,95 @@ export function registerConcienciaRoutes(app: Express, db: any) {
       res.json({ datos: fila.datos, version: fila.version, actualizado: fila.updated_at });
     } catch (e: any) {
       console.error('conciencia restaurar:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  // ── THE MAILBOX OF IMPROVEMENTS AND COMMENTS (2026-11-10) ─────────────────
+  // Anyone can write (like the Aeromóvil's mailbox); only an administrator
+  // marks a comment done or discarded.
+
+  /** GET /api/conciencia/comentarios — newest first. */
+  app.get('/api/conciencia/comentarios', async (req: Request, res: Response) => {
+    try {
+      const r = await db.execute(sql`
+        SELECT id, texto, autor, estado, respuesta, created_at, resuelto_at
+        FROM conciencia_comentarios
+        ORDER BY (estado = 'pendiente') DESC, created_at DESC
+        LIMIT 300
+      `);
+      res.set('Cache-Control', 'no-store');
+      res.json({ comentarios: r.rows, puedeDecidir: (req.user?.roleLevel ?? 0) >= 4 });
+    } catch (e: any) {
+      console.error('conciencia comentarios:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /** GET /api/conciencia/comentarios.txt — the pending ones, to paste to the AI. */
+  app.get('/api/conciencia/comentarios.txt', async (_req: Request, res: Response) => {
+    try {
+      const r = await db.execute(sql`
+        SELECT id, texto, autor, created_at FROM conciencia_comentarios
+        WHERE estado = 'pendiente' ORDER BY created_at
+      `);
+      const lineas = (r.rows as any[]).map(c => `#${c.id}${c.autor ? ` (${c.autor})` : ''}: ${String(c.texto).replace(/\s+/g, ' ')}`);
+      res.set('Cache-Control', 'no-store');
+      res.type('text/plain; charset=utf-8').send(
+        `Mejoras y comentarios pendientes del mapa de la teoría sintérgica (humanity.wiki/conciencia): ${lineas.length}\n\n${lineas.join('\n')}\n`,
+      );
+    } catch (e: any) {
+      res.status(500).type('text/plain').send(e.message);
+    }
+  });
+
+  /** POST /api/conciencia/comentarios — leave an improvement or a comment. Body: { texto, autor?, web? } */
+  app.post('/api/conciencia/comentarios', async (req: Request, res: Response) => {
+    try {
+      // `web` is a field people never see: only a robot fills it. It gets a
+      // normal-looking answer and nothing is stored.
+      if (typeof req.body?.web === 'string' && req.body.web.trim()) return res.json({ ok: true });
+      const texto = typeof req.body?.texto === 'string' ? req.body.texto.trim() : '';
+      if (texto.length < 3) return res.status(400).json({ error: 'Escribe tu mejora o comentario.' });
+      if (texto.length > MAX_COMENTARIO) return res.status(400).json({ error: `Como mucho ${MAX_COMENTARIO} caracteres.` });
+      const autor = typeof req.body?.autor === 'string' && req.body.autor.trim() ? req.body.autor.trim().slice(0, MAX_AUTOR) : null;
+      if (!(await conRitmo(db, req, res, FRENO_COMENTARIO))) return;
+      const p = await db.execute(sql`SELECT count(*)::int AS n FROM conciencia_comentarios WHERE estado = 'pendiente'`);
+      if (((p.rows[0] as any)?.n ?? 0) >= MAX_PENDIENTES) {
+        return res.status(503).json({ error: 'El buzón está lleno de propuestas sin revisar. Prueba dentro de unos días.' });
+      }
+      const r = await db.execute(sql`
+        INSERT INTO conciencia_comentarios (texto, autor, autor_user_id)
+        VALUES (${texto}, ${autor}, ${req.user?.id ?? null})
+        RETURNING id, texto, autor, estado, respuesta, created_at, resuelto_at
+      `);
+      res.json(r.rows[0]);
+    } catch (e: any) {
+      console.error('conciencia comentar:', e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  /** PUT /api/conciencia/comentarios/:id — { estado, respuesta? }. Administrators only. */
+  app.put('/api/conciencia/comentarios/:id', async (req: Request, res: Response) => {
+    try {
+      if (!req.user) return res.status(401).json({ error: 'Debes iniciar sesión.' });
+      if ((req.user.roleLevel ?? 0) < 4) return res.status(403).json({ error: 'Requiere nivel 4 o superior.' });
+      const id = Number(req.params.id);
+      const estado = String(req.body?.estado || '');
+      if (!Number.isInteger(id) || !ESTADOS_COMENTARIO.has(estado)) return res.status(400).json({ error: 'Datos no válidos.' });
+      const respuesta = typeof req.body?.respuesta === 'string' && req.body.respuesta.trim() ? req.body.respuesta.trim().slice(0, MAX_COMENTARIO) : null;
+      const r = await db.execute(sql`
+        UPDATE conciencia_comentarios
+        SET estado = ${estado}, respuesta = COALESCE(${respuesta}, respuesta),
+            resuelto_at = CASE WHEN ${estado} = 'pendiente' THEN NULL ELSE now() END
+        WHERE id = ${id}
+        RETURNING id, texto, autor, estado, respuesta, created_at, resuelto_at
+      `);
+      if (!r.rows.length) return res.status(404).json({ error: 'Ese comentario no existe.' });
+      res.json(r.rows[0]);
+    } catch (e: any) {
+      console.error('conciencia decidir:', e);
       res.status(500).json({ error: e.message });
     }
   });

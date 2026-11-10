@@ -198,6 +198,10 @@ function useApretado(medir: boolean) {
     comprobar();
     const ro = new ResizeObserver(comprobar);
     ro.observe(f);
+    // The nav too (2026-11-10): a horizontal logo (`menu.logoHorizontal`) has no fixed width and
+    // only takes its room when the image arrives. The row does not change size then, the nav
+    // does: watching only the row left the last links cut off at ~1030 px on solarcrowd.com.
+    if (nav.current) ro.observe(nav.current);
     // Las letras web llegan después del primer pintado y cambian los anchos.
     document.fonts?.ready.then(comprobar).catch(() => {});
     return () => ro.disconnect();
