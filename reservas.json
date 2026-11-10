@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md",
-      "motivo": "Formalizar préstamo (SolarCrowd)",
-      "desde": "2026-11-10T10:04:15.243Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "drizzle/0180_conciencia_comentarios.sql",
       "motivo": "Conciencia: esquema nuevo, buzón de mejoras y proyecto en luzhumanidad.com",
       "desde": "2026-11-10T10:06:57.682Z"
