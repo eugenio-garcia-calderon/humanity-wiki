@@ -1,5 +1,6 @@
 import type { Parametros } from '../geometria';
 import { DESLIZADORES_BALA, camposBala, rangoBala } from '../geometriaBala';
+import { camposTriciclo, deslizadoresTriciclo, vistaTriciclo } from '../geometriaTriciclo';
 import type { ResultadoTunel, Zona } from './calculo';
 import type { CuerpoTunel } from './nuestro';
 import { porVelocidad, type PuntoTunel, type TipoPunto } from './puntos';
@@ -49,7 +50,8 @@ const c = (texto: string): Frase => ({ texto, origen: 'calculo' });
 const g = (texto: string): Frase => ({ texto, origen: 'general' });
 
 /** The sliders the options use: label on screen, where it is, range (as in Aeromovil.tsx). */
-type Ficha = { n: string; donde: string; min: number; max: number };
+/** `ver`: what the screen shows for a stored value (the Triciclo measures some lengths from its own front axle). */
+type Ficha = { n: string; donde: string; min: number; max: number; ver?: number };
 const A1: Partial<Record<keyof Parametros, Ficha>> = {
   parabrisas: { n: 'Inclinación del parabrisas', donde: 'Carrocería › Carrocería y cúpula', min: 0.12, max: 0.32 },
   techo: { n: 'Caída del techo', donde: 'Carrocería › Carrocería y cúpula', min: 1, max: 3 },
@@ -79,6 +81,18 @@ const GOTA: Partial<Record<keyof Parametros, Ficha>> = {
 function fichasBala(P: Parametros): Partial<Record<keyof Parametros, Ficha>> {
   const B = camposBala(P), o: Partial<Record<keyof Parametros, Ficha>> = {};
   for (const f of DESLIZADORES_BALA) { const [min, max] = rangoBala(f.clave, B); o[f.clave] = { n: f.n, donde: f.bloque, min, max }; }
+  return o;
+}
+
+/**
+ * The Triciclo Bala's sliders (2026-11-10), from the one table the page draws them from (geometriaTriciclo.ts),
+ * under the Cuadriciclo's keys: its body is the Cuadriciclo's, so the improvement options are the same ones, and
+ * `opcion` turns each `b…` key into its `t…` twin. Ranges in stored values; `ver` adds what the screen adds.
+ */
+function fichasTriciclo(P: Parametros): Partial<Record<keyof Parametros, Ficha>> {
+  const T = camposTriciclo(P), o: Partial<Record<keyof Parametros, Ficha>> = {};
+  const DEP: Record<string, string> = { carroceria: 'Carrocería', interior: 'Interior', chasis: 'Chasis', rodaje: 'Rodaje', propulsion: 'Motor', energia: 'Energía' };
+  for (const f of deslizadoresTriciclo()) { const v = vistaTriciclo(f, T), d = v.valor - T[f.clave]; o[f.clave] = { n: f.n, donde: `${DEP[f.dep]} › ${f.bloque}`, min: v.min - d, max: v.max - d, ...(Math.abs(d) > 1e-9 ? { ver: d } : {}) }; }
   return o;
 }
 
@@ -115,24 +129,27 @@ function cpEn(p: { x: number[]; cp: number[] }, x: number): number {
 export function explicar(cx: Contexto): Explicacion {
   const { punto: pt, cuerpo, R, kmh, otros, P } = cx;
   const q = porVelocidad(R, kmh), G = R.geometria, v = kmh / 3.6, qd = 0.5 * RHO * v * v;
-  const nuestro = cuerpo.id === 'aeromovil' && !!P, a1 = P?.disposicion === 'cuatro', bala = nuestro && P?.disposicion === 'bala';
-  const fichas = a1 ? A1 : bala ? fichasBala(P!) : GOTA;
+  // the Triciclo has the Cuadriciclo's body: the same options, on its own sliders (`fichasTriciclo`)
+  const nuestro = cuerpo.id === 'aeromovil' && !!P, a1 = P?.disposicion === 'cuatro', tri = nuestro && P?.disposicion === 'triciclo', bala = nuestro && (P?.disposicion === 'bala' || tri);
+  const fichas = a1 ? A1 : tri ? fichasTriciclo(P!) : bala ? fichasBala(P!) : GOTA;
   /** On our Bala the tunnel sees the body only: its pods, arms and fin are not in these numbers. */
-  const notaBala = bala ? 'El túnel solo ve la carrocería del Bala: los carenados de las ruedas laterales, sus brazos y la aleta no entran en el cálculo, así que su Cd real será algo más alto. Las tendencias de «con el diseño por defecto» se comprobaron con este túnel el 2026-11-09.' : undefined;
+  const notaBala = tri ? 'Este triciclo tiene la carrocería del Cuadriciclo Bala, y el túnel ve esa carrocería y sus tres ruedas: los carenados de las ruedas delanteras, sus brazos, la aleta y el faldón no entran como formas, así que su Cd real será algo más alto. Las tendencias de «con el diseño por defecto» se comprobaron con este túnel en el Cuadriciclo; «Probar» las recalcula en este triciclo.' : bala ? 'El túnel solo ve la carrocería del Bala: los carenados de las ruedas laterales, sus brazos y la aleta no entran en el cálculo, así que su Cd real será algo más alto. Las tendencias de «con el diseño por defecto» se comprobaron con este túnel el 2026-11-09.' : undefined;
   const desdeMorro = (x: number) => G.xMorro - x;
   const escala = g(`El Cp (coeficiente de presión) dice cuánto empuja el aire en cada punto, comparado con lo que empujaría si se parase del todo contra el coche. Cp 1: el aire parado del todo (a ${kmh} km/h son ${fmt(qd, 0)} Pa, como ${fmt(qd / 9.81, 0)} kg apoyados en cada metro cuadrado). Cp 0: la misma presión que el aire libre, lejos del coche. Cp negativo: el aire pasa más rápido que el coche y tira de la carrocería hacia fuera (succión).`);
   const kWh = (cdParte: number) => qd * cdParte * cuerpo.area / 36; // kWh/100 km: 1 N for 100 km = 1/36 kWh
 
   /** An option with a slider; for our design, a concrete value to try with «Probar». */
-  const opcion = (clave: keyof Parametros, sentido: 1 | -1, paso: number, texto: string, origen: Origen): Mejora | null => {
+  const opcion = (claveB: keyof Parametros, sentido: 1 | -1, paso: number, texto: string, origen: Origen): Mejora | null => {
+    const clave = (tri && /^b[A-Z]/.test(claveB) ? 't' + claveB.slice(1) : claveB) as keyof Parametros;
     const f = fichas[clave];
     if (!f || !nuestro) return null; // garage cars have no sliders: they get the general options instead
     const m: Mejora = { texto, origen, deslizador: f.n, donde: f.donde };
     if (nuestro && P) {
       const actual = Number(P[clave]);
       const nuevo = Math.round(Math.min(f.max, Math.max(f.min, actual + sentido * paso)) * 1000) / 1000;
-      if (Math.abs(nuevo - actual) < 1e-6) m.enElExtremo = `«${f.n}» ya está en su extremo (${fmtV(actual)}).`;
-      else m.prueba = { clave, valor: nuevo, desc: `«${f.n}» de ${fmtV(actual)} a ${fmtV(nuevo)}` };
+      const ver = f.ver ?? 0;
+      if (Math.abs(nuevo - actual) < 1e-6) m.enElExtremo = `«${f.n}» ya está en su extremo (${fmtV(actual + ver)}).`;
+      else m.prueba = { clave, valor: nuevo, desc: `«${f.n}» de ${fmtV(actual + ver)} a ${fmtV(nuevo + ver)}` };
     }
     return m;
   };
