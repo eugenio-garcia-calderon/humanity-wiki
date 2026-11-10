@@ -35,6 +35,7 @@ const BaseDeDatos = lazy(() => import('./pages/BaseDeDatos'));
 const Calendario = lazy(() => import('./pages/Calendario'));
 const CalendarioArte = lazy(() => import('./pages/CalendarioArte'));
 const Aeromovil = lazy(() => import('./pages/Aeromovil'));
+const Conciencia = lazy(() => import('./pages/Conciencia'));
 const Arquitectura = lazy(() => import('./pages/Arquitectura'));
 const MisVideos = lazy(() => import('./pages/MisVideos'));
 const ChallengeProfile = lazy(() => import('./pages/ChallengeProfile'));
@@ -331,6 +332,10 @@ export default function App() {
                   `:arroba/:categoria/:ficha` (más abajo) gana a `aeromovil/*`
                   y enseña «Esta página no está aquí» (2026-11-06). */}
               <Route path="aeromovil/componentes/:id" element={<Aeromovil />} />
+              {/* Estudio sobre la conciencia del ser humano: página PROPIA, fuera del
+                  Layout (2026-11-10, Eugenio). El mapa editable de la teoría
+                  sintérgica de Jacobo Grinberg y sus estudios científicos. */}
+              <Route path="conciencia" element={<Conciencia />} />
               {/* Arquitectura: el mundo 3D editable de la Comunidad Circular Humana
                   (2026-11-05, Eugenio). Herramienta a pantalla completa, sin
                   cuenta y fuera del Layout, como el calendario. */}
