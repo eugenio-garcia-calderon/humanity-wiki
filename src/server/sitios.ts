@@ -36,7 +36,7 @@ import { cabeceraEnHtml } from './cabeceraSitio';
 import { cuerpoEnHtml, esc as escHtml, enLinea } from './htmlBloques';
 import { ampliar, type MetaPagina } from './ampliarPagina';
 import { configEscaparate, urlsEscaparate, modeloEscaparate } from './seoEscaparate';
-import { asegurarRutas, asegurarRutaDePagina, TRAMOS_RESERVADOS } from './rutasFila';
+import { asegurarRutas, asegurarRutaDePagina, patronDeTitulo, TRAMOS_RESERVADOS } from './rutasFila';
 import { sitioConAnfitrion, sitioEnCasa } from '../components/sitio/ContextoSitio';
 import { bloquesDe } from './bloquesSql';
 import { slugDe } from '../components/sitio/sitioWeb';
@@ -1430,12 +1430,12 @@ export function registrarSitios(app: Express, db: any) {
     const porContexto = async (handle: string, ruta: string[], raizId: string | null, prefijo: string) => {
       if (!ruta.length || ruta.length > 3 || TRAMOS_RESERVADOS.has(ruta[0])) return null;
       const a = ruta[0].toLowerCase();
-      const patron = a.replace(/[%_]/g, '').replace(/-/g, '%').replace(/[aeioun]/g, '_');
+      const patron = patronDeTitulo(a);
       const candidatas = (await db.execute(sql`
         SELECT w.id, w.title, w.slug FROM knowledge_windows w JOIN users u ON u.id = w.creator_user_id
         WHERE u.handle = ${handle.toLowerCase()} AND w.kind = 'pagina' AND w.deleted_at IS NULL AND w.archived_at IS NULL
           AND (w.slug = ${a} OR lower(w.title) LIKE ${patron})
-        ORDER BY (w.slug = ${a}) DESC, w.created_at LIMIT 40
+        ORDER BY (w.slug = ${a}) DESC, length(w.title), w.created_at LIMIT 40
       `)).rows as any[];
       let pagA: any = null;
       for (const c of candidatas) {

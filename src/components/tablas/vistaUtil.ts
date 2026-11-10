@@ -58,6 +58,10 @@ export type ConfigVista = {
   velocidad?: number;
   /** La galería: `false` esconde la descripción de la página en la tarjeta (2026-10-18). */
   descripcion?: boolean;
+  /** La galería: `portada` pone el título en blanco sobre la imagen, con el estado encima (2026-11-10). */
+  tarjeta?: 'portada';
+  /** La galería con `tarjeta: 'portada'`: cuántas tarjetas por fila en pantalla ancha. Dos, si no se dice. */
+  por_fila?: number;
   /** La galería: `false` quita las imágenes de las tarjetas (2026-10-20). */
   imagenes?: boolean;
   /** Qué propiedades se ven en las tarjetas (tablero, lista, calendario). */
