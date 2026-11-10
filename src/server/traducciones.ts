@@ -33,7 +33,7 @@ const IDIOMAS_LARGOS: Record<string, string> = { es: 'es-ES', en: 'en' };
 
 const CLAVES_FUERA = new Set(['id', 'tipo', 'tabla_id', 'entityId', 'url', 'src', 'href', 'imagen', 'portada', 'icono', 'color', 'slug', 'ruta', 'aplicacion',
   'encuadre', 'jsonLd', 'dominio', 'email', 'correo', 'telefono', 'handle', 'proveedorCorreo', 'organizacion', 'fundador', 'imagenCompartir', 'colabora', 'proyectos',
-  'sistemas', 'personas', 'vistaInicial', 'vistas', 'fuente']);
+  'sistemas', 'personas', 'inspiran', 'vistaInicial', 'vistas', 'fuente']);
 
 const hashDe = (s: string) => crypto.createHash('sha1').update(s.trim()).digest('hex');
 
@@ -219,7 +219,7 @@ async function recogerPublicado(db: any, s: SitioTraducido) {
     anadir(textosDe(servida?.config || p.config), p.title);
   };
   for (const p of await paginasDelPie(db, raiz)) await conCuerpo(p.id);
-  for (const [tabla, cuerpos] of [[cfg.proyectos, true], [cfg.personas, true], [cfg.sistemas, false]] as Array<[string, boolean]>) {
+  for (const [tabla, cuerpos] of [[cfg.proyectos, true], [cfg.personas, true], [cfg.sistemas, false], [cfg.inspiran, false]] as Array<[string, boolean]>) {
     if (!tabla) continue;
     const cols = (await db.execute(sql`SELECT nombre, opciones FROM bd_columnas WHERE tabla_id = ${tabla} AND archived_at IS NULL`)).rows as any[];
     anadir(cols.flatMap(c => (Array.isArray(c.opciones) ? c.opciones.map((o: any) => String(o?.label || '')) : [])).filter(esTexto), 'Etiquetas de las tablas');
