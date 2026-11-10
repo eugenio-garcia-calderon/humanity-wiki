@@ -15,6 +15,11 @@ const ICONOS: Record<string, LucideIcon> = {
   residuos: Recycle, justicia: Scale, comercio: Store, ciencia: FlaskConical, conciencia: Sparkles, demografia: PersonStanding,
   infraestructuras: Construction, consumo: ShoppingCart, 'vehiculo solar': Sun, 'vehiculo aerodinamico': Wind, 'mini casas': Tent,
   'contact improvisacion': HandHeart, biodanza: Music,
+  // En el dominio traducido la categoría llega en inglés.
+  mobility: Car, economy: Coins, health: HeartPulse, ecology: Leaf, relationships: Users, energy: Zap, food: Wheat, coexistence: Handshake, work: Briefcase,
+  climatology: CloudSun, education: GraduationCap, 'computer science': Cpu, computing: Cpu, culture: Palette, water: Droplet, companies: Building2, housing: Home,
+  politics: Landmark, telecommunications: RadioTower, materials: Layers, finance: Banknote, clothing: Shirt, manufacturing: Factory, waste: Recycle, justice: Scale,
+  commerce: Store, science: FlaskConical, consciousness: Sparkles, demographics: PersonStanding, infrastructure: Construction, consumption: ShoppingCart,
 };
 
 const clave = (n: string) => n.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();

@@ -16,6 +16,15 @@ import {
 import AltaBoletin from './AltaBoletin';
 import { responsableDe } from './formularios';
 
+/** La misma página en el otro idioma del sitio (`traducciones.ts`): se elige, nunca se redirige. */
+function EnlaceOtroIdioma() {
+  const datos = typeof window !== 'undefined' ? (window as any).__IDIOMA_SITIO__ : null;
+  if (!datos?.otro) return null;
+  const destino = () => `https://${datos.otro.host}/${window.location.pathname.split('/').filter(Boolean).map((t: string) => datos.rutas?.[t] || t).join('/')}`;
+  return <a href={`https://${datos.otro.host}/`} hrefLang={datos.otro.idioma} onPointerDown={e => { e.currentTarget.href = destino(); }} onClick={e => { e.currentTarget.href = destino(); }}
+    className="inline-flex items-center min-h-11 font-bold hover:underline">{datos.otro.etiqueta}</a>;
+}
+
 // ============================================================================
 // EL MENÚ Y EL PIE, COMO SE VEN (2026-10-02)
 // ============================================================================
@@ -386,6 +395,7 @@ function PieSitio({ s, rutas, logo, nombre }: { s: Sitio; rutas: Rutas; logo?: s
       <div style={conLinea && !p.enlaces.length ? { borderColor: `${p.texto}26` } : undefined}
         className={cn('mx-auto max-w-[calc(576px+50vw)] px-5 @2xl:px-8 py-3 flex flex-wrap items-center justify-center gap-x-6 text-sm opacity-80', conLinea && !p.enlaces.length && 'border-t', p.enlaces.length > 0 && 'pt-0')}>
         {legales.map(d => <a key={d} href={`#${d}`} className="inline-flex items-center min-h-11 hover:underline">{NOMBRES_LEGALES[d]}</a>)}
+        <EnlaceOtroIdioma />
         {c.email && <a href={`mailto:${c.email}`} className="inline-flex items-center gap-2 min-h-11 hover:underline break-all"><Mail className="w-4 h-4 shrink-0" /> {c.email}</a>}
         {Array.isArray(p.redes) && p.redes.length > 0 && (
           <span className="inline-flex items-center gap-1">

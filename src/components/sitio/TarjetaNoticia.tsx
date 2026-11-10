@@ -58,7 +58,7 @@ export function PortadaNoticia({ n, grande, clase }: { n: ConLogo; grande?: bool
       {/* El medio, destacado: su logo y su nombre en grande sobre la imagen. */}
       <div data-fondo-oscuro="" className="absolute inset-x-3 bottom-3 flex items-center gap-2.5">
         <LogoMedio n={n} grande={grande} />
-        <span className={cn('min-w-0 truncate font-black leading-tight tracking-tight text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.65)]', grande ? 'text-2xl' : 'text-lg')}>
+        <span data-no-traducir="" className={cn('min-w-0 truncate font-black leading-tight tracking-tight text-white [text-shadow:0_1px_8px_rgba(0,0,0,0.65)]', grande ? 'text-2xl' : 'text-lg')}>
           {medioCorto(n.medio)}
         </span>
       </div>
