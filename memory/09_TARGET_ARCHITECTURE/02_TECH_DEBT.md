@@ -523,3 +523,12 @@ threshold, checked only on that null path here).
 - **Triciclo Bala rollover and frame checks are static and simplified**: rigid-body static stability factor; only the two rails as a beam (×2.5 dynamic factor, as the A1). The 0.9 / 1.05 g thresholds are an engineering choice, not a norm.
 - **Triciclo Bala steering drawn half-way**: pods and wheels turn; uprights and tie rods stay straight-ahead.
 - **Phone framing** of the 3D view crops the Bala-family vehicles at 390 px wide (the Cuadriciclo did it before the Triciclo).
+
+### 2026-11-10 — Triciclo Bala round two
+
+- **Triciclo battery placement is a fill order of boxes, not a packaging solver.** Five fixed-shape modules filled in order; what does not fit is not drawn but its mass is counted at the drawn modules' centroid. A proper layout (cells as a volume in the body, minus occupants and frame) would be ~1 day; until then the "cabe en su sitio" check is the truth.
+- **Hub-motor power limit per wheel is a rough table** (`RUEDAS_TRICICLO.kWBuje`), and there is no swing-arm/belt drive option. Adding it is a drive selector, a motor box on the swing arm and its mass; ~3 h.
+- **The solar panel and frames are overlays over glass that is still there underneath.** Areas are subtracted analytically, but the glass mesh under them is still built and drawn (hidden). Cutting the glass to the window outlines is alternative (b) in DECISIONS; ~1 day, worth it if windows must open on their own.
+- **Car tyres keep the moped rolling resistance (0.011)** in the consumption estimate; a car tyre is closer to 0.008–0.009.
+- **Pod width for car tyres** is a heuristic (1.8 × the extra half-width), giving 33–35 cm wide pods at 15″; no aerodynamic check of the wider pods (the tunnel sees pods only as faired wheels).
+- **The 3D view does not zoom out for long Triciclos**: at the 5.40 m extreme of «Largo total» the default 3/4 framing crops the car. The camera distance should follow the vehicle's length; ~30 min.
