@@ -1,3 +1,4 @@
+import { lazy, Suspense, type ReactNode } from 'react';
 import { useParams } from 'react-router-dom';
 import VistaPagina, { Cargando, SinPagina, type DatosPagina } from '../components/sitio/VistaPagina';
 import { useSitio, ProveedorSitio, sitioConAnfitrion, sitioEnCasa } from '../components/sitio/ContextoSitio';
@@ -20,6 +21,18 @@ import HerramientasPagina from '../components/acceso/HerramientasPagina';
 
 import type { ContextoRuta } from '../utils/precargado';
 
+// PÁGINAS QUE SON UNA APLICACIÓN (2026-11-10, Eugenio: el mapa de la teoría
+// sintérgica como proyecto de luzhumanidad.com). A page whose
+// `config.aplicacion` names one of these shows that screen instead of its
+// blocks. The blocks still matter: they are what the project card, the
+// server-rendered HTML and search engines read. Lazy, so nobody else on a
+// site pays for the map. Add an entry here, never a route in
+// AplicacionDeDominio (that would appear on every customer's domain).
+const Conciencia = lazy(() => import('./Conciencia'));
+const APLICACIONES: Record<string, (p: { inicio: string }) => ReactNode> = {
+  conciencia: ({ inicio }) => <Conciencia enSitio={{ inicio }} />,
+};
+
 export default function SubpaginaSitio({ propio, idFijo, contexto }: { propio: boolean; idFijo?: string; contexto?: ContextoRuta['contexto'] }) {
   const { id: idDeRuta } = useParams();
   // Por `/p/:id` el id viene en la dirección; por la dirección legible de una
@@ -41,6 +54,12 @@ export default function SubpaginaSitio({ propio, idFijo, contexto }: { propio: b
         volver={sitio && propio ? '/' : null}
       />
     );
+  }
+  const App = APLICACIONES[String(pagina.config?.aplicacion || '')];
+  if (App) {
+    // No HerramientasPagina here: its comment column would sit on top of the
+    // app, which brings its own mailbox.
+    return <Suspense fallback={<Cargando />}><App inicio={sitio && propio ? '/' : 'https://luzhumanidad.com'} /></Suspense>;
   }
   return <>
     <VistaPagina pagina={pagina} propio={propio} contexto={contexto} />

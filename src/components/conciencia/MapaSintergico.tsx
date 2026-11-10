@@ -27,7 +27,8 @@ export const ICONOS_LUCIDE: Record<Icono, LucideIcon | null> = {
 export type Seleccion = { tipo: 'nodo' | 'flecha'; id: string } | null;
 
 export interface MapaHandle {
-  ajustar(): void;
+  /** Frame the whole map. `margenAbajo`: room to keep free at the bottom (a caption over the map). */
+  ajustar(margenAbajo?: number): void;
   zoom(factor: number): void;
   /** The point of the world at the centre of the screen: where a new concept appears. */
   centro(): Punto;
@@ -44,6 +45,10 @@ interface Props {
   onConectar(de: string, a: string): void;
   /** «Conectar con…» from the panel: the next concept tapped becomes the arrow's end. */
   conectarDesde: string | null;
+  /** While a walkthrough plays: the concepts in focus. The rest fade back. */
+  resaltados?: string[] | null;
+  /** Extra drawing on top of the map, in world units (the walkthrough). */
+  capa?: (ctx: { porId: Map<string, Nodo>; medidas: Map<string, Medida> }) => ReactNode;
   className?: string;
 }
 
@@ -86,9 +91,12 @@ function Concepto({ n, m }: { n: Nodo; m: Medida }) {
     case 'matriz': {
       const { rx, ry } = m;
       const total = m.titulo.length * m.fT * 1.1 + m.sub.length * m.fS * 1.3;
+      const fuera = n.etiquetaPos === 'abajo' || n.etiquetaPos === 'arriba';
+      const y0 = n.etiquetaPos === 'abajo' ? ry + 30 * k : n.etiquetaPos === 'arriba' ? -ry - 22 * k - total : -total / 2;
+      const alta = ry > rx;
       return (
         <g>
-          <ellipse rx={rx * 1.16} ry={ry * 1.55} fill={`url(#cz-halo-${c})`} className="cz-latido" />
+          <ellipse rx={rx * (alta ? 1.45 : 1.16)} ry={ry * (alta ? 1.12 : 1.55)} fill={`url(#cz-halo-${c})`} className="cz-latido" />
           <ellipse rx={rx} ry={ry} fill={`url(#cz-rg-${c})`} />
           <g clipPath={`url(#cz-clip-${n.id.replace(/[^\w-]/g, '')})`}>
             <rect x={-rx} y={-ry} width={rx * 2} height={ry * 2} fill={`url(#cz-red-${c})`} opacity={0.75} />
@@ -96,9 +104,9 @@ function Concepto({ n, m }: { n: Nodo; m: Medida }) {
           <ellipse rx={rx} ry={ry} fill="none" stroke={color} strokeOpacity={0.65} strokeWidth={1.6} className="cz-cuerpo" />
           <ellipse rx={rx * 0.72} ry={ry * 0.6} fill="none" stroke={color} strokeOpacity={0.25} strokeDasharray="3 9" />
           <ellipse rx={rx * 0.42} ry={ry * 0.3} fill="none" stroke={color} strokeOpacity={0.18} strokeDasharray="2 7" />
-          <ellipse rx={Math.min(rx * 0.8, 400 * k)} ry={total / 2 + 30 * k} fill="url(#cz-velo)" />
-          <Lineas lineas={m.titulo} x={0} y={-total / 2 + m.fT * 0.8} tam={m.fT} alto={1.1} textAnchor="middle" fill={claro} fontFamily={FUENTE_TITULO} fontWeight={700} letterSpacing={1.5} />
-          <Lineas lineas={m.sub} x={0} y={-total / 2 + m.titulo.length * m.fT * 1.1 + m.fS * 1.1} tam={m.fS} alto={1.3} textAnchor="middle" fill={color} fontFamily={FUENTE} fontStyle="italic" />
+          {fuera ? null : <ellipse rx={Math.min(rx * 0.8, 400 * k)} ry={total / 2 + 30 * k} fill="url(#cz-velo)" />}
+          <Lineas lineas={m.titulo} x={0} y={y0 + m.fT * 0.8} tam={m.fT} alto={1.1} textAnchor="middle" fill={claro} fontFamily={FUENTE_TITULO} fontWeight={700} letterSpacing={1.5} />
+          <Lineas lineas={m.sub} x={0} y={y0 + m.titulo.length * m.fT * 1.1 + m.fS * 1.1} tam={m.fS} alto={1.3} textAnchor="middle" fill={color} fontFamily={FUENTE} fontStyle="italic" />
         </g>
       );
     }
@@ -113,9 +121,12 @@ function Concepto({ n, m }: { n: Nodo; m: Medida }) {
       if (pos === 'arriba') { ty = -r * 1.38 - bloque + m.fT * 0.85; }
       return (
         <g>
-          <circle r={r * 1.45} fill={`url(#cz-rg-${c})`} opacity={0.35} className="cz-respira" />
-          <circle r={r * 1.18} fill={`url(#cz-rg-${c})`} opacity={0.45} className="cz-respira" style={{ animationDelay: '-1.6s' }} />
-          <circle r={r * 1.3} fill="none" stroke={color} strokeOpacity={0.35} strokeDasharray="2 10" className="cz-giro" />
+          <circle r={r * 1.6} fill={`url(#cz-rg-${c})`} opacity={0.3} className="cz-respira" />
+          {/* The neuronal field is a distortion of the lattice, so it is drawn as the same mesh. */}
+          <g className="cz-giro-lento">
+            <circle r={r * 1.45} fill={`url(#cz-malla-${c})`} mask="url(#cz-fundido)" />
+          </g>
+          <circle r={r * 1.45} fill="none" stroke={color} strokeOpacity={0.4} strokeDasharray="2 10" className="cz-giro" />
           <circle r={r} fill={TINTA} opacity={0.55} />
           <circle r={r} fill="none" stroke={color} strokeOpacity={0.7} strokeWidth={1.4} className="cz-cuerpo" />
           <g transform={`scale(${n.espejo ? -s : s},${s})`}>
@@ -243,6 +254,17 @@ function Concepto({ n, m }: { n: Nodo; m: Medida }) {
         </g>
       );
     }
+    case 'franja': {
+      const { w, h } = m;
+      const tx = -w / 2 + 22 * k, ty = -h / 2 + 30 * k;
+      return (
+        <g>
+          <rect x={-w / 2} y={-h / 2} width={w} height={h} rx={30 * k} fill={color} fillOpacity={0.055} stroke={color} strokeOpacity={0.28} strokeDasharray="10 8" className="cz-cuerpo" />
+          <text x={tx} y={ty} fontSize={m.fT} fill={color} fontFamily={FUENTE_TITULO} fontWeight={700} letterSpacing={3}>{m.titulo[0] || ''}</text>
+          <Lineas lineas={m.sub} x={tx} y={ty + m.fT * 0.6 + m.fS * 1.1} tam={m.fS} alto={1.3} fill={tenue} fontFamily={FUENTE} fontStyle="italic" />
+        </g>
+      );
+    }
     case 'titulo':
     default: {
       return (
@@ -282,7 +304,7 @@ type Gesto =
   | { tipo: 'pinza'; d0: number; k0: number; cx: number; cy: number; tx0: number; ty0: number };
 
 export const MapaSintergico = forwardRef<MapaHandle, Props>(function MapaSintergico(
-  { mapa, editando, seleccion, onSeleccion, onMover, onFinMover, onConectar, conectarDesde, className }, ref,
+  { mapa, editando, seleccion, onSeleccion, onMover, onFinMover, onConectar, conectarDesde, resaltados, capa, className }, ref,
 ) {
   const svgRef = useRef<SVGSVGElement>(null);
   const caja = useRef<HTMLDivElement>(null);
@@ -294,6 +316,8 @@ export const MapaSintergico = forwardRef<MapaHandle, Props>(function MapaSinterg
   const punteros = useRef(new Map<number, Punto>());
   const [lineaTemp, setLineaTemp] = useState<{ de: Punto; a: Punto } | null>(null);
   const ajustado = useRef(false);
+  /** The bottom room asked for by the last `ajustar`, kept when the box resizes. */
+  const margenFijo = useRef(0);
 
   const medidas = useMemo(() => {
     const m = new Map<string, Medida>();
@@ -317,10 +341,10 @@ export const MapaSintergico = forwardRef<MapaHandle, Props>(function MapaSinterg
     }));
   }, []);
 
-  const ajustar = useCallback(() => {
+  const ajustar = useCallback((margenAbajo = 0) => {
     const { x0, y0, x1, y1 } = limites(mapa.nodos);
-    // Room for the toolbar on top and the hint line at the bottom.
-    const lado = 16, arriba = 64, abajo = 34;
+    // Room for the toolbar on top and the hint line (or a caption) at the bottom.
+    const lado = 16, arriba = 64, abajo = 34 + Math.max(0, margenAbajo);
     const anchoUtil = tam.w - lado * 2, altoUtil = tam.h - arriba - abajo;
     const k = Math.min(anchoUtil / (x1 - x0), altoUtil / (y1 - y0), 1.4);
     setVista({ k, tx: lado + (anchoUtil - (x1 - x0) * k) / 2 - x0 * k, ty: arriba + (altoUtil - (y1 - y0) * k) / 2 - y0 * k });
@@ -335,7 +359,7 @@ export const MapaSintergico = forwardRef<MapaHandle, Props>(function MapaSinterg
   }, [tam]);
 
   useImperativeHandle(ref, () => ({
-    ajustar,
+    ajustar: (margenAbajo?: number) => { margenFijo.current = margenAbajo ?? 0; ajustar(margenAbajo); },
     zoom: (f: number) => zoomEn(f),
     centro: () => ({ x: (tam.w / 2 - vistaRef.current.tx) / vistaRef.current.k, y: (tam.h / 2 - vistaRef.current.ty) / vistaRef.current.k }),
     svg: () => svgRef.current,
@@ -356,7 +380,7 @@ export const MapaSintergico = forwardRef<MapaHandle, Props>(function MapaSinterg
   useEffect(() => {
     if (tam.w < 50) return;
     const cambio = Math.abs(tam.w - ultimoTam.current.w) > 80 || Math.abs(tam.h - ultimoTam.current.h) > 80;
-    if (!ajustado.current || cambio) { ajustar(); ajustado.current = true; ultimoTam.current = tam; }
+    if (!ajustado.current || cambio) { ajustar(margenFijo.current); ajustado.current = true; ultimoTam.current = tam; }
   }, [tam, ajustar]);
 
   // The side panel (bottom sheet on phones) opens over the map when something is
@@ -380,6 +404,12 @@ export const MapaSintergico = forwardRef<MapaHandle, Props>(function MapaSinterg
     // Only when the selection changes, not on every drag frame.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [seleccion?.tipo, seleccion?.id]);
+
+  // SVG's own animations (the walkthrough) do not obey CSS; pause them by hand
+  // for people who asked their system for less motion.
+  useEffect(() => {
+    try { if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) svgRef.current?.pauseAnimations(); } catch { /* old browser */ }
+  }, [capa]);
 
   // Ctrl/⌘ + wheel (and trackpad pinch, which arrives as ctrl+wheel) zooms; a plain
   // wheel keeps scrolling the page, so the map never traps someone reading below it.
@@ -526,6 +556,15 @@ export const MapaSintergico = forwardRef<MapaHandle, Props>(function MapaSinterg
     setLineaTemp(null);
   };
 
+  const foco = useMemo(() => (resaltados ? new Set(resaltados) : null), [resaltados]);
+  /** Lanes and the matrix never fade: they are the stage the walkthrough happens on. */
+  const enFoco = (id: string) => {
+    if (!foco) return true;
+    if (foco.has(id)) return true;
+    const n = porId.get(id);
+    return n?.forma === 'matriz' || n?.forma === 'franja';
+  };
+
   const sel = seleccion;
   const nodoSel = sel?.tipo === 'nodo' ? porId.get(sel.id) : undefined;
 
@@ -549,12 +588,16 @@ export const MapaSintergico = forwardRef<MapaHandle, Props>(function MapaSinterg
           .cz-respira { transform-box: fill-box; transform-origin: center; animation: cz-respira 6s ease-in-out infinite; }
           .cz-latido { animation: cz-latido 4.5s ease-in-out infinite; }
           .cz-giro { transform-box: fill-box; transform-origin: center; animation: cz-giro 60s linear infinite; }
+          @keyframes cz-aparece { from { opacity: 0; } to { opacity: 1; } }
+          .cz-aparece { animation: cz-aparece .7s ease both; }
+          .cz-giro-lento { transform-box: fill-box; transform-origin: center; animation: cz-giro 180s linear infinite; }
+          [data-nodo], [data-flecha] { transition: opacity .45s ease; }
           [data-nodo] { cursor: ${editando ? 'move' : 'pointer'}; }
           [data-nodo]:hover .cz-cuerpo { filter: brightness(1.35); }
           [data-flecha] { cursor: pointer; }
           [data-flecha]:hover .cz-trazo { stroke-opacity: 1; }
           [data-asa] { cursor: crosshair; }
-          @media (prefers-reduced-motion: reduce) { .cz-flujo, .cz-respira, .cz-latido, .cz-giro { animation: none; } }
+          @media (prefers-reduced-motion: reduce) { .cz-flujo, .cz-respira, .cz-latido, .cz-giro, .cz-giro-lento { animation: none; } }
         `}</style>
         <defs>
           <radialGradient id="cz-cielo" cx="50%" cy="58%" r="75%">
@@ -562,6 +605,14 @@ export const MapaSintergico = forwardRef<MapaHandle, Props>(function MapaSinterg
             <stop offset="55%" stopColor="#0b1033" />
             <stop offset="100%" stopColor={NOCHE} />
           </radialGradient>
+          <radialGradient id="cz-fundido-grad">
+            <stop offset="0%" stopColor="#fff" stopOpacity={1} />
+            <stop offset="55%" stopColor="#fff" stopOpacity={0.75} />
+            <stop offset="100%" stopColor="#fff" stopOpacity={0} />
+          </radialGradient>
+          <mask id="cz-fundido" maskContentUnits="objectBoundingBox">
+            <rect width="1" height="1" fill="url(#cz-fundido-grad)" />
+          </mask>
           <radialGradient id="cz-velo">
             <stop offset="0%" stopColor={HALO} stopOpacity={0.8} />
             <stop offset="60%" stopColor={HALO} stopOpacity={0.55} />
@@ -600,6 +651,11 @@ export const MapaSintergico = forwardRef<MapaHandle, Props>(function MapaSinterg
                   <path d="M0,0 H40 M0,34.64 H40 M0,69.28 H40 M0,0 L20,34.64 L40,0 M0,69.28 L20,34.64 L40,69.28" stroke={col} strokeOpacity={0.45} strokeWidth={0.7} fill="none" />
                   {[[0, 0], [40, 0], [20, 34.64], [0, 69.28], [40, 69.28]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r={1.7} fill={col} opacity={0.9} />)}
                 </pattern>
+                {/* The same net, finer and brighter: the neuronal field of a person. */}
+                <pattern id={`cz-malla-${c}`} width="24" height="41.57" patternUnits="userSpaceOnUse">
+                  <path d="M0,0 H24 M0,20.78 H24 M0,41.57 H24 M0,0 L12,20.78 L24,0 M0,41.57 L12,20.78 L24,41.57" stroke={col} strokeOpacity={0.8} strokeWidth={0.8} fill="none" />
+                  {[[0, 0], [24, 0], [12, 20.78], [0, 41.57], [24, 41.57]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r={1.5} fill={col} />)}
+                </pattern>
               </g>
             );
           })}
@@ -629,7 +685,13 @@ export const MapaSintergico = forwardRef<MapaHandle, Props>(function MapaSinterg
             <circle key={i} cx={s.x} cy={s.y} r={s.r} fill="#ffffff" opacity={s.o} className={s.t ? 'cz-latido' : undefined} style={s.t ? { animationDelay: `-${s.d}s` } : undefined} />
           ))}
 
-          {/* Arrows under the concepts. */}
+          {/* Background concepts first (lanes, the matrix), then arrows, then the rest. */}
+          {mapa.nodos.filter(n => n.forma === 'franja' || n.forma === 'matriz').map(n => (
+            <g key={n.id} data-nodo={n.id} transform={`translate(${n.x},${n.y})`} opacity={enFoco(n.id) ? 1 : 0.4}>
+              <Concepto n={n} m={medidas.get(n.id)!} />
+            </g>
+          ))}
+
           {mapa.flechas.map(f => {
             const a = porId.get(f.de), b = porId.get(f.a);
             if (!a || !b) return null;
@@ -640,7 +702,7 @@ export const MapaSintergico = forwardRef<MapaHandle, Props>(function MapaSinterg
             const elegida = sel?.tipo === 'flecha' && sel.id === f.id;
             const raya = f.estilo === 'discontinua' ? '10 8' : f.estilo === 'puntos' ? '0.5 9' : undefined;
             return (
-              <g key={f.id} data-flecha={f.id}>
+              <g key={f.id} data-flecha={f.id} opacity={enFoco(f.de) && enFoco(f.a) ? 1 : 0.15}>
                 <path d={t.dBase} stroke="transparent" strokeWidth={Math.max(18, g + 14)} fill="none" style={{ pointerEvents: 'stroke' }} />
                 {elegida && <path d={t.d} stroke="#ffffff" strokeOpacity={0.35} strokeWidth={g + 9} fill="none" strokeLinecap="round" data-ui />}
                 {f.estilo === 'energia' ? (
@@ -664,14 +726,16 @@ export const MapaSintergico = forwardRef<MapaHandle, Props>(function MapaSinterg
           })}
 
           {/* The concepts. */}
-          {mapa.nodos.map(n => {
+          {mapa.nodos.filter(n => n.forma !== 'franja' && n.forma !== 'matriz').map(n => {
             const m = medidas.get(n.id)!;
             return (
-              <g key={n.id} data-nodo={n.id} transform={`translate(${n.x},${n.y})`}>
+              <g key={n.id} data-nodo={n.id} transform={`translate(${n.x},${n.y})`} opacity={enFoco(n.id) ? 1 : 0.22}>
                 <Concepto n={n} m={m} />
               </g>
             );
           })}
+
+          {capa && <g pointerEvents="none" data-capa>{capa({ porId, medidas })}</g>}
 
           {/* Selection, the «+» handle and the arrow being drawn: interface, left out of exports. */}
           <g data-ui>
