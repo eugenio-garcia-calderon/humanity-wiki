@@ -220,7 +220,7 @@ export function TarjetaTunel({ filas, base, kmh, alCambiarKmh, alCerrar, classNa
         <div>
         <p className="text-[11px] leading-snug text-slate-600">
           {filas.find(f => f.id === base)?.origenCd
-            ? <><b>El consumo usa el Cd publicado</b> de cada coche y, para este diseño, el que calcula el túnel (no hay otro: la fórmula del editor no vale para su forma), sin masa: solo el aire.</>
+            ? <><b>El consumo usa el Cd publicado</b> de cada coche y, para este diseño, el que calcula el túnel (no hay otro: la fórmula del editor no vale para su forma), {filas.find(f => f.id === base)?.masa != null ? 'con su masa estimada y su rodadura.' : 'sin masa: solo el aire.'}</>
             : <><b>El consumo usa el Cd publicado</b> de cada coche y, para este diseño, el de la fórmula del editor; el que calcula el túnel va al lado y abajo, desglosado. Decidir si el editor adopta el del túnel es cosa tuya.</>}
         </p>
         <p className="mt-1.5 text-[11px] leading-snug text-slate-600">

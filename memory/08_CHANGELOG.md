@@ -10828,6 +10828,19 @@ Eugenio: «Unifica los selectores de vehículos… deja solo el de arriba y deja
 - Por qué: el menú medía si cabía cuando cambiaba el ancho de la fila; un logotipo horizontal no tiene ancho fijo y lo toma cuando llega la imagen, y entonces cambia el ancho de los enlaces, no el de la fila. Ahora se vigilan los dos.
 - Comprobado: `tsc` y `vite build`. Sin verificar: en un móvil con la app instalada (en el teléfono el menú ya va plegado por CSS).
 
+### 2026-11-10 — Triciclo Bala, cuarto vehículo del editor
+Petición de Eugenio: una rama del Cuadriciclo Bala con tres ruedas, dos delante «como el Aptera» y una detrás en el eje, la misma forma, dos ocupantes con respaldos que se reclinan, y editable «como el Apterike» (carenado, chasis, asientos…).
+- **En el menú del logo** y en «Diseños», con su diseño base del equipo (migración 0182, como la 0178 del Cuadriciclo).
+- **La carrocería es la del Cuadriciclo**: por defecto, la misma vértice a vértice (40 mallas). Cambian las ruedas: dos delante en carenados que giran con ellas, sobre brazos carenados; una detrás dentro de la cola, con el motor en el buje. Donde iba la rueda delantera va la batería.
+- **Por departamentos**, como el Aeromóvil 1: Proyecto (resumen), Carrocería, Interior, Chasis, Rodaje, Motor y Energía; 55 deslizadores y 4 selectores, cada uno con su explicación. Fabricación, Accesos y Luces no salen (aquí no tienen nada que mover).
+- **Vuelco**: con dos a horcajadas y sentados altos, un triciclo con las dos ruedas delante vuelca en curva si la vía es estrecha. Por defecto pasa con 1,09 g (objetivo 1,05 g, umbrales elegidos por el bot y explicados en pantalla); para llegar hizo falta vía delantera de 1,80 m (1,96 m de ancho con los carenados), el eje delantero 30 cm más atrás que la rueda del Cuadriciclo, sillines 4 cm más bajos y la batería en el morro. Con vía de 1,40 m sale en rojo.
+- **Comprobaciones** nuevas: vuelco con dos y con el piloto solo, carenados girados a tope (28°), cabezas con el respaldo reclinado, alcance al manillar, bastidor dentro y su coeficiente de seguridad (×2,4), batería dentro, rueda trasera hundida. Reclinar al pasajero le quita techo (la cúpula baja detrás de él) y la pantalla lo dice.
+- **Cifras** por defecto: 178 kg sin ocupantes, Cd del túnel 0,134 (estimado, se calcula en segundo plano), 2,5 kWh/100 km a 80 km/h y 330 km con 9 kWh. Optimistas: el túnel ve los carenados delanteros solo como ruedas carenadas.
+- **En el 3D**: bastidor de tubos, batería, motor, suspensión y dirección en sus capas; «Girar ruedas» gira ruedas y carenados; «Rayos X», «Cotas», «Abrir cúpula». Planos y STEP no existen todavía (la pantalla lo dice); el STL sí.
+- **Túnel**: «Probar» y sus opciones con los deslizadores del Triciclo (alargar la cola 10 cm: Cd 0,134 → 0,130).
+- El pie de la página ya no dice «STEP generado con CadQuery» con el Cuadriciclo ni con el Triciclo, que no tienen STEP.
+- **Comprobado**: tsc; build; bala-huella IGUAL contra main (garaje y editor); bala-disenos; triciclo-disenos contra main (26 OK); triciclo-rangos (138 casos); tunel-pruebas sin fallos; navegador con gráficos por software y la API simulada. **Sin verificar**: un móvil o una gráfica de verdad con la app instalada, y el guardado contra el servidor real.
+
 ## 2026-11-10 — «Realizar préstamo»: formalizar un préstamo con firma, justificante y copia por correo
 
 - Eugenio: «un botón que sea realizar préstamo… que se rellenen los datos del prestamista, se le expliquen las condiciones, que las acepte y que haga una firma… que adjunte el justificante… dividido en 3 secciones dentro de la misma página… que se envíe una copia de lo firmado y lo aceptado al correo de esta persona». Y después: «añadir el IBAN de la entidad… y también el correo electrónico para que aparezcan ambos públicos… la entidad recibe una copia a ese correo».
@@ -10838,7 +10851,7 @@ Eugenio: «Unifica los selectores de vehículos… deja solo el de arriba y deja
 - **Al enviarlo**, el servidor (`src/server/prestamos.ts`) hace esto:
   - Rehace el contrato a partir del bloque guardado en la página, nunca de lo que manda el navegador, y calcula su huella SHA-256.
   - Genera el PDF firmado.
-  - Guarda la firma, el justificante y el PDF en `/uploads/privado/` (no se sirven en público) y añade una fila en `prestamos_firmados` (migración 0182).
+  - Guarda la firma, el justificante y el PDF en `/uploads/privado/` (no se sirven en público) y añade una fila en `prestamos_firmados` (migración 0183).
   - Manda los correos por la cuenta SMTP de Google que ya existe:
     - a la persona, el PDF;
     - a administración (`avisar`) y a la entidad (`correoEntidad`), el PDF y el justificante.

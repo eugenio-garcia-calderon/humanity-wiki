@@ -47,9 +47,15 @@ export const POD_SEMIANCHO = 0.080;
 export const R_LAT_REF = 0.254;
 /** The pod for this shape's lateral wheel: x and heights scale with the wheel's radius (exactly the drawing at 20″). */
 export function podDe(F: FormaBala): Est[] {
-  const k = F.R_LAT / R_LAT_REF;
-  return POD.map(e => ({ ...e, x: e.x * k, yb: e.yb * k, yt: e.yt * k }));
+  const k = F.R_LAT / R_LAT_REF, o = F.D.pod;
+  if (!o) return POD.map(e => ({ ...e, x: e.x * k, yb: e.yb * k, yt: e.yt * k }));
+  // The Triciclo's pods (2026-11-10): `esc` scales the whole pod about the wheel's
+  // centre, `ancho` its width and `cola` the length of its tail (behind the axle).
+  const yc = R_LAT_REF * k, Y = (y: number) => yc + (y * k - yc) * o.esc, W = o.esc * o.ancho;
+  return POD.map(e => ({ ...e, x: e.x * k * o.esc * (e.x < 0 ? o.cola : 1), yb: Y(e.yb), yt: Y(e.yt), wb: e.wb * W, wm: e.wm * W, wt: e.wt * W }));
 }
+/** A pod's half-width at its widest (m): the Cuadriciclo's is `POD_SEMIANCHO`. */
+export const anchoMaxPod = (F: FormaBala) => (F.D.pod ? POD_SEMIANCHO * F.D.pod.esc * F.D.pod.ancho : POD_SEMIANCHO);
 /** Half-width of a pod at (x relative to its axle, y); 0 outside it. */
 export const semiAncho = (POD: Est[]) => (x: number, y: number): number => {
   let k = 0; while (k < POD.length - 2 && POD[k + 1].x > x) k++;
@@ -75,8 +81,8 @@ const BRAZOS = [
 ];
 /** The arms of this shape: they scale with the pod, and the lower link stays 5.6 cm above a raised belly (it must meet the skin). */
 export function brazosDe(F: FormaBala) {
-  const k = F.R_LAT / R_LAT_REF;
-  return BRAZOS.map((b, i) => ({ ...b, x: b.x * k, y: i === 1 && F.dSuelo > 0 ? Math.max(b.y * k, F.D.suelo + 0.056) : b.y * k }));
+  const k = F.R_LAT / R_LAT_REF, cuerda = F.D.cuerdaBrazo;
+  return BRAZOS.map((b, i) => ({ ...b, ...(i === 0 && cuerda != null ? { cuerda } : {}), x: b.x * k, y: i === 1 && F.dSuelo > 0 ? Math.max(b.y * k, F.D.suelo + 0.056) : b.y * k }));
 }
 
 // ======================================================================= fin
@@ -100,12 +106,15 @@ const MANILLAR = 0.325 + 0.006;
  * body, and further if the canopy is tight where the grips are (1.2 cm from the skin), but
  * never below 70 % (narrower is not rideable: then it pokes out, and the check says so).
  */
-export function escalaManillar(F: FormaBala): number {
-  const kz = Math.min(1, F.kW), cabe = (F.ladoZ(-0.592, 0.870 + F.dSuelo) - 0.012) / MANILLAR;
+export function escalaManillar(F: FormaBala, d: [number, number] = [0, 0]): number {
+  const kz = Math.min(1, F.kW), cabe = (F.ladoZ(-0.592 + d[0], 0.870 + F.dSuelo + d[1]) - 0.012) / MANILLAR;
   return Number.isFinite(cabe) ? Math.max(0.7, Math.min(kz, cabe)) : 0.7;
 }
-/** The outer end of the handlebar (the bar-end weight's outer face), for the check that it stays inside the body: [x, y, z]. */
-export const extremoManillar = (F: FormaBala): [number, number, number] => [-0.592, 0.870 + F.dSuelo, MANILLAR * escalaManillar(F)];
+/**
+ * The outer end of the handlebar (the bar-end weight's outer face), for the check that it stays inside the body: [x, y, z].
+ * `d` moves the bars (the Triciclo's handlebar sliders, 2026-11-10: [x, y], m); the Cuadriciclo's never move.
+ */
+export const extremoManillar = (F: FormaBala, d: [number, number] = [0, 0]): [number, number, number] => [-0.592 + d[0], 0.870 + F.dSuelo + d[1], MANILLAR * escalaManillar(F, d)];
 
 // ======================================================================= canopy
 /** Lower edge of the canopy glass in side view (reference drawing). Where it meets the top line, the glass ends (rounded in plan). */
