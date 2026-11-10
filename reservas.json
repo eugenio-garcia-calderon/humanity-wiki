@@ -53,6 +53,12 @@
       "ruta": "drizzle/0181_conciencia_proyecto_luz.sql",
       "motivo": "Conciencia: esquema nuevo, buzón de mejoras y proyecto en luzhumanidad.com",
       "desde": "2026-11-10T10:07:05.920Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/pages/SubpaginaSitio.tsx",
+      "motivo": "Conciencia: esquema nuevo, buzón de mejoras y proyecto en luzhumanidad.com",
+      "desde": "2026-11-10T10:07:14.521Z"
     }
   ]
 }
