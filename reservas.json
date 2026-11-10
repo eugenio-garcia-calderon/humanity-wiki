@@ -35,6 +35,12 @@
       "ruta": "drizzle/0183_buzon_proyectos.sql",
       "motivo": "Modelo socioeconómico optimizado (nube)",
       "desde": "2026-11-10T10:51:51.017Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0184_modelo_socioeconomico_proyecto_luz.sql",
+      "motivo": "Modelo socioeconómico optimizado (nube)",
+      "desde": "2026-11-10T10:51:54.273Z"
     }
   ]
 }
