@@ -11,6 +11,12 @@
       "ruta": "scripts/triciclo-rangos.ts",
       "motivo": "Triciclo: techo solar, ventanas, rangos",
       "desde": "2026-11-10T14:39:15.440Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/Visor3D.tsx",
+      "motivo": "Triciclo: techo solar, ventanas, rangos",
+      "desde": "2026-11-10T14:39:18.191Z"
     }
   ]
 }
