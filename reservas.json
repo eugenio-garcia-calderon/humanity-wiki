@@ -44,12 +44,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "drizzle/0185_aeromovil_triciclo_por_defecto.sql",
-      "motivo": "Triciclo Bala por defecto",
-      "desde": "2026-11-10T10:57:59.711Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "drizzle/0183_prestamos_firmados.sql",
       "motivo": "Formalizar préstamo (0182 la tomó el triciclo)",
       "desde": "2026-11-10T10:59:39.688Z"
