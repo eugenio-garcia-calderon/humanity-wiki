@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "src/server/seguridad/politica.ts",
+      "motivo": "Calendario Arte: POST para añadir una referencia a la carpeta del mes",
+      "desde": "2026-11-10T19:45:42.042Z"
+    }
+  ]
 }
