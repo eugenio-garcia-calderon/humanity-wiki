@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "scripts/triciclo-disenos.ts",
-      "motivo": "Triciclo: tres filas y maletero",
-      "desde": "2026-11-11T21:14:13.139Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "scripts/triciclo-rangos.ts",
       "motivo": "Triciclo: tres filas y maletero",
       "desde": "2026-11-11T21:14:15.856Z"
