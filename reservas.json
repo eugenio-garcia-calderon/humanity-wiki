@@ -23,6 +23,12 @@
       "ruta": "memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md",
       "motivo": "Bala de cuatro ruedas",
       "desde": "2026-11-11T23:56:39.417Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "scripts/triciclo-disenos.ts",
+      "motivo": "Bala de cuatro ruedas",
+      "desde": "2026-11-11T23:56:41.754Z"
     }
   ]
 }
