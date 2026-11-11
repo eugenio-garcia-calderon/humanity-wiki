@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/components/aeromovil/geometriaBala.ts",
-      "motivo": "Triciclo: tres filas y maletero",
-      "desde": "2026-11-11T21:14:39.262Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/aeromovil/geometriaTriciclo.ts",
       "motivo": "Triciclo: tres filas y maletero",
       "desde": "2026-11-11T21:14:41.831Z"
