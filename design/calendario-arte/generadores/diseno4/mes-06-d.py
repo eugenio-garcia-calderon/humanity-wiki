@@ -225,10 +225,10 @@ for k in range(6, 78, 9):
     lz.gouache(Elipse(*hilo[k], 1.5), '#fff6d8', alfa=0.9, irreg=0)
 
 # ------------------------------------------------------------------ the people (redrawn 2026-11-11: personajes_06.py)
-# the grandfather mends the lamp, the girl screws the bulb in, the leaf curls up in front of them, the boy throws the seeds
+# the leaf's curled edge behind their legs; the grandfather mends the lamp, the girl screws the bulb in, the boy throws the seeds
+labio_hoja(lz)
 abuelo_y_lampara(lz, BULBO)
 nina(lz)
-labio_hoja(lz)
 nino(lz)
 
 # ------------------------------------------------------------------ seeds that are wind turbines

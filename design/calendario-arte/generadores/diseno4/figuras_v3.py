@@ -341,6 +341,35 @@ def torso3(lz, hi, hd, ci, cd, color, luz, cintura=0.9, escote='redondo', tapa=1
     return f, g
 
 
+# ---------------------------------------------------------------- the neck
+
+def cuello3(lz, cabeza_xy, r, base, piel, luz, ancho_base=None, giro=0.0, inclina=0.0):
+    """A neck that grows from under the jaw into the shoulders: lit like the rest,
+    a soft shadow under the chin, the clavicles barely there. Paint it before the
+    shirt and the head."""
+    x, y = cabeza_xy
+    bx, by = base
+    piel_c = _piel(piel)
+    a = math.radians(inclina)
+    xt = x - math.sin(a) * r * 0.55 + giro * r * 0.08
+    yt = y + r * 0.45
+    w0 = r * 0.58
+    w1 = min((ancho_base or r * 2.3) * 0.62, r * 1.35)
+    yb = by + r * 0.05
+    f = Poligono([(xt - w0 / 2, yt), (xt - w0 * 0.5, yt + (yb - yt) * 0.6), (bx - w1 * 0.45, yb - r * 0.08),
+                  (bx - w1 * 0.75, yb + r * 0.12), (bx - w1 * 0.7, yb + r * 0.55), (bx, yb + r * 0.7),
+                  (bx + w1 * 0.7, yb + r * 0.55), (bx + w1 * 0.75, yb + r * 0.12), (bx + w1 * 0.45, yb - r * 0.08),
+                  (xt + w0 * 0.5, yt + (yb - yt) * 0.6), (xt + w0 / 2, yt)])
+    modelar(lz, f, piel_c, luz, dens=0.56, prof=0.32, sombra=sombra_piel(piel_c), linea=linea_de(piel_c, 0.55),
+            grosor=0.6, rayar=False, perdida=0.1)
+    lz.aguada(Elipse(xt + giro * r * 0.1, y + r * 1.02, r * 0.36, r * 0.16, inclina), sombra_piel(piel_c), dens=0.42,
+              suave=r * 0.07, gran=0.05)
+    lz.lapiz([bezier((bx - r * 0.08, yb + r * 0.04), (bx - r * 0.3, yb - r * 0.02), (bx - r * 0.56, yb + r * 0.05), n=10),
+              bezier((bx + r * 0.08, yb + r * 0.04), (bx + r * 0.3, yb - r * 0.02), (bx + r * 0.56, yb + r * 0.05), n=10)],
+             linea_de(piel_c, 0.5), grosor=0.45, presion=0.25, temblor=0.15, cortes=0.35)
+    return f
+
+
 # ---------------------------------------------------------------- the head
 
 def cabeza3(lz, x, y, r, piel, pelo, peinado, luz, giro=0.0, inclina=0.0, edad='nino', ojos='abiertos',
@@ -372,22 +401,15 @@ def cabeza3(lz, x, y, r, piel, pelo, peinado, luz, giro=0.0, inclina=0.0, edad='
     # --- hair behind the head
     if peinado == 'afro':
         cs = []
-        for t in np.radians(np.linspace(0, 360, 22, endpoint=False)):
-            rr = rng.uniform(0.3, 0.42)
-            cs.append((*R(-s * 0.12 + math.cos(t) * 1.06, -0.2 + math.sin(t) * 1.0), rr * r))
+        for t in np.radians(np.linspace(0, 360, 26, endpoint=False)):
+            if 0.42 < math.sin(t):          # nothing hangs below the jaw
+                continue
+            rr = rng.uniform(0.3, 0.4)
+            cs.append((*R(-s * 0.1 + math.cos(t) * 1.04, -0.3 + math.sin(t) * 0.9), rr * r))
+        for sd in (-1, 1):                  # full at the sides, level with the ears
+            cs.append((*R(-s * 0.1 + sd * 0.98, 0.2), r * 0.3))
         pelo_f = Circulos(cs)
-        modelar(lz, pelo_f, pelo, luz, dens=0.86, prof=0.5, tapa=1, sep=1.8, rayar=False, grosor=0.7, perdida=0.2,
-                semilla=sem)
-        # coils: little loops in two values, more on the lit side
-        bucles = []
-        for k in range(150):
-            t = rng.uniform(0, 2 * math.pi)
-            rad = math.sqrt(rng.uniform(0.15, 1.0)) * 1.1
-            q = R(-s * 0.12 + math.cos(t) * rad, -0.2 + math.sin(t) * rad * 0.95)
-            rr = r * rng.uniform(0.05, 0.09)
-            bucles.append(arco(q[0], q[1], rr, rr * 0.8, rng.uniform(0, 360), rng.uniform(0, 360) + 260, 9))
-        lz.lapiz(bucles[:90], tono(pelo, '#000000', 0.45), grosor=0.5, presion=0.55, temblor=0.15)
-        lz.lapiz(bucles[90:], tono(pelo, '#c99a6a', 0.45), grosor=0.45, presion=0.45, temblor=0.15)
+        lz.aguada(pelo_f, pelo, dens=0.9, tapa=1, irreg=0.4, gran=0.35, borde=0.5, semilla=sem)
     if peinado == 'calvo' or mayor:
         # white hair round the back of the skull, from ear to ear
         corona = Poligono([R(-s * 0.86, -0.32), R(-s * 0.97, -0.08), R(-s * 0.98, 0.24), R(-s * 0.84, 0.48),
@@ -402,8 +424,26 @@ def cabeza3(lz, x, y, r, piel, pelo, peinado, luz, giro=0.0, inclina=0.0, edad='
         lz.lapiz(mech[::2], '#9a928a', grosor=0.4, presion=0.45, temblor=0.2, puntas=0.5)
         lz.lapiz(mech[1::2], '#c8c2ba', grosor=0.4, presion=0.4, temblor=0.2, puntas=0.5)
 
+    # --- face silhouette: the front side shows brow, cheekbone and jaw
+    ch = 0.0 if nino else 0.05
+    F = [R(s * 0.6, -0.8), R(s * (0.8 + 0.04 * a), -0.32), R(s * (0.76 + 0.03 * a), ey - 0.02),
+         R(s * (0.82 + 0.05 * a + ch), ey + 0.18), R(s * (0.72 + ch * 0.4), 0.52), R(s * (0.46 + 0.08 * a), 0.84),
+         R(s * (0.12 + 0.16 * a), menton)]
+    kb = 0.93 if mayor else 1.0
+    B = [R(-s * (0.3 - 0.1 * a), menton - 0.06), R(-s * (0.64 - 0.06 * a + ch), 0.62), R(-s * 0.84 * kb, 0.18),
+         R(-s * 0.9 * kb, -0.3), R(-s * 0.68 * kb, -0.82), R(-s * 0.05, -1.0)]
+    cara = Poligono(F + B)
+    modelar(lz, cara, piel_c, luz, dens=0.55, prof=0.34, sombra=sp, linea=lp, grosor=0.7, rayar=False, semilla=sem + 3,
+            reflejo=0.12, alcance=1.05, perdida=0.12, toques=[(*R(fx, 0.3), r * 0.6, tono(piel_c, '#f6dccb', 0.3), 0.4)],
+            dibuja=peinado != 'afro')
+    if peinado == 'afro':      # the hair covers the top of the head: no pencil line of the skull under it
+        linea_luz(lz, cara, lp, luz, grosor=0.7, perdida=0.12, limite=(x - 2 * r, y - 0.3 * r, x + 2 * r, y + 2 * r))
+    # planes: under the brow, the far side of the nose, under the cheekbone, under the lip, under the chin
+    lz.aguada(Elipse(*R(fx - s * 0.05, ey - 0.06), r * 0.62, r * 0.14, inclina), sp, dens=0.2, suave=r * 0.08, gran=0.2)
+    lz.aguada(Poligono([R(s * 0.86, 0.22), R(s * 0.62, 0.62), R(s * 0.42, 0.8), R(s * 0.6, 0.4)]) & cara, sp, dens=0.22,
+              suave=r * 0.06)
     # --- the ear (on the back side)
-    ex_, ey_ = -s * (0.8 - 0.12 * a), 0.12
+    ex_, ey_ = -s * (0.86 - 0.06 * a) * (0.93 if mayor else 1.0), 0.13
     oreja = Poligono([R(ex_ - s * 0.02, ey_ - 0.2), R(ex_ - s * 0.14, ey_ - 0.16), R(ex_ - s * 0.17, ey_ + 0.02),
                       R(ex_ - s * 0.1, ey_ + 0.2), R(ex_ + s * 0.01, ey_ + 0.24), R(ex_ + s * 0.04, ey_ + 0.04)])
     modelar(lz, oreja, piel_c, luz, dens=0.58, prof=0.35, sombra=sp, linea=lp, grosor=0.6, rayar=False, semilla=sem + 2)
@@ -414,20 +454,6 @@ def cabeza3(lz, x, y, r, piel, pelo, peinado, luz, giro=0.0, inclina=0.0, edad='
         lz.aguada(Elipse(*R(ex_ - s * 0.04, ey_ + 0.3), r * 0.05), pendiente, dens=0.95, tapa=1, irreg=0.1)
         lz.gouache(Elipse(*R(ex_ - s * 0.05, ey_ + 0.28), r * 0.015), '#fff6d8', alfa=0.9, irreg=0)
 
-    # --- face silhouette: the front side shows brow, cheekbone and jaw
-    ch = 0.0 if nino else 0.05
-    F = [R(s * 0.6, -0.8), R(s * (0.8 + 0.04 * a), -0.32), R(s * (0.76 + 0.03 * a), ey - 0.02),
-         R(s * (0.82 + 0.05 * a + ch), ey + 0.18), R(s * (0.72 + ch * 0.4), 0.52), R(s * (0.46 + 0.08 * a), 0.84),
-         R(s * (0.12 + 0.16 * a), menton)]
-    B = [R(-s * (0.3 - 0.1 * a), menton - 0.06), R(-s * (0.64 - 0.06 * a + ch), 0.62), R(-s * 0.84, 0.18),
-         R(-s * 0.9, -0.3), R(-s * 0.68, -0.82), R(-s * 0.05, -1.0)]
-    cara = Poligono(F + B)
-    modelar(lz, cara, piel_c, luz, dens=0.55, prof=0.34, sombra=sp, linea=lp, grosor=0.7, rayar=False, semilla=sem + 3,
-            reflejo=0.12, alcance=1.05, perdida=0.12, toques=[(*R(fx, 0.3), r * 0.6, tono(piel_c, '#f6dccb', 0.3), 0.4)])
-    # planes: under the brow, the far side of the nose, under the cheekbone, under the lip, under the chin
-    lz.aguada(Elipse(*R(fx - s * 0.05, ey - 0.06), r * 0.62, r * 0.14, inclina), sp, dens=0.2, suave=r * 0.08, gran=0.2)
-    lz.aguada(Poligono([R(s * 0.86, 0.22), R(s * 0.62, 0.62), R(s * 0.42, 0.8), R(s * 0.6, 0.4)]) & cara, sp, dens=0.22,
-              suave=r * 0.06)
     # cheeks
     for k in (-1, 1):
         kk = 1 - 0.4 * max(0, k * s * a)
@@ -451,7 +477,7 @@ def cabeza3(lz, x, y, r, piel, pelo, peinado, luz, giro=0.0, inclina=0.0, edad='
         if ojos == 'abiertos':
             lz.aguada(forma, '#f7efe6', dens=0.55, tapa=1, irreg=0.05, borde=0.2)
             mx, my = mira
-            ci = R(cx + mx * w * 0.35, cy - hgt * 0.05 + my * hgt * 0.2)
+            ci = R(cx + mx * w * 0.5, cy - hgt * 0.05 + my * hgt * 0.35)
             ri = hgt * 0.95
             iri = Elipse(ci[0], ci[1], ri * r, ri * r * 1.02) & forma
             lz.aguada(iri, iris, dens=0.95, tapa=1, irreg=0.05, borde=0.4)
@@ -460,8 +486,10 @@ def cabeza3(lz, x, y, r, piel, pelo, peinado, luz, giro=0.0, inclina=0.0, edad='
             lz.aguada(Elipse(ci[0], ci[1], ri * r * 0.45) & forma, '#140c0a', dens=1.0, tapa=1, irreg=0.02)
             lz.aguada(Poligono(list(bezier(oc, top, ic, n=12)) + list(bezier(ic, R(cx, cy - hgt * 0.45), oc, n=12)),
                                suave=False) & forma, '#5a3a2c', dens=0.3, irreg=0.05)       # lid shadow on the eyeball
-            lz.gouache(Elipse(ci[0] + ri * r * 0.35 * L[0], ci[1] - ri * r * 0.4, max(0.45, ri * r * 0.28)), '#fffdf6',
-                       alfa=0.95, irreg=0)
+            # a small catch light high on the pupil: a big one beside the iris reads as white of the eye
+            # and turns the gaze the wrong way
+            lz.gouache(Elipse(ci[0] + ri * r * 0.18 * L[0], ci[1] - ri * r * 0.3, max(0.3, ri * r * 0.17)), '#fffdf6',
+                       alfa=0.9, irreg=0)
             # upper lid: firm and darkest toward the outer corner, with a few lashes
             lid = list(bezier(ic, R(cx + interior * w * 0.6, cy - hgt * 1.05), top, n=10)) + \
                 list(bezier(top, R(cx - interior * w * 0.8, cy - hgt * 0.9), oc, n=10))[1:]
@@ -495,7 +523,8 @@ def cabeza3(lz, x, y, r, piel, pelo, peinado, luz, giro=0.0, inclina=0.0, edad='
                                   R(cx - interior * w * 0.8, cy + hgt * 1.2), n=10))], lp, grosor=0.4, presion=0.3)
         # eyebrow: short hairs along an arch
         pc = '#b8b0a6' if (mayor or canas) else tono(pelo, '#000000', 0.15)
-        arco_c = [R(cx + interior * w * (1.0 - 2.2 * t), cy - hgt * 2.2 - 0.11 * math.sin(t * math.pi * 0.9) + 0.03 * t)
+        arco_c = [R(cx + interior * w * (1.0 - 2.2 * t),
+                    cy - hgt * 2.2 - (0.0 if mayor else 0.035) * (1 - t) - 0.07 * math.sin(t * math.pi * 0.9) + 0.035 * t)
                   for t in np.linspace(0, 1, 6)]
         anch = r * (0.06 if mayor else 0.045)
         lz.aguada(Trazo(arco_c, (anch * 0.9, anch, anch * 0.85, anch * 0.6, anch * 0.35)), pc,
@@ -549,14 +578,16 @@ def cabeza3(lz, x, y, r, piel, pelo, peinado, luz, giro=0.0, inclina=0.0, edad='
     labio_i = tono(piel_c, '#c85a64', 0.38)
     if boca == 'risa':
         ab = 0.09
-        bocaf = Poligono(list(bezier(mL, R(fx, my_ - 0.05), mR, n=12)) +
-                         list(bezier(mR, R(fx, my_ + ab + 0.04), mL, n=12))[1:-1], suave=False)
+        mL = mL + (R(0, -0.04) - R(0, 0))
+        mR = mR + (R(0, -0.04) - R(0, 0))
+        bocaf = Poligono(list(bezier(mL, R(fx, my_ + 0.02), mR, n=12)) +
+                         list(bezier(mR, R(fx, my_ + ab + 0.06), mL, n=12))[1:-1], suave=False)
         lz.aguada(bocaf, '#7a2a30', dens=0.9, tapa=1, irreg=0.05)
         lz.aguada(Elipse(*R(fx, my_ + ab * 0.7), r * mw * 0.55, r * ab * 0.32, inclina) & bocaf, '#d2626a', dens=0.8, tapa=1)
-        lz.lapiz([list(bezier(mL, R(fx, my_ - 0.05), mR, n=12))], '#5a1e24', grosor=0.6, presion=0.6)
-        lz.lapiz([list(bezier(mR, R(fx, my_ + ab + 0.04), mL, n=12))], '#7a3036', grosor=0.5, presion=0.45)
-        lz.aguada(Poligono(list(bezier(mR, R(fx, my_ + ab + 0.04), mL, n=12)) +
-                           list(bezier(mL, R(fx, my_ + ab + 0.1), mR, n=12))[1:-1], suave=False), labio_i, dens=0.4)
+        lz.lapiz([list(bezier(mL, R(fx, my_ + 0.02), mR, n=12))], '#5a1e24', grosor=0.6, presion=0.6)
+        lz.lapiz([list(bezier(mR, R(fx, my_ + ab + 0.06), mL, n=12))], '#7a3036', grosor=0.5, presion=0.45)
+        lz.aguada(Poligono(list(bezier(mR, R(fx, my_ + ab + 0.06), mL, n=12)) +
+                           list(bezier(mL, R(fx, my_ + ab + 0.12), mR, n=12))[1:-1], suave=False), labio_i, dens=0.4)
         for q in (mL, mR):
             lz.lapiz([[q + (q - mc) * 0.04, q + (q - mc) * 0.2 + (R(0, -0.05) - R(0, 0))]], lp, grosor=0.45, presion=0.45)
     else:
@@ -583,9 +614,9 @@ def cabeza3(lz, x, y, r, piel, pelo, peinado, luz, giro=0.0, inclina=0.0, edad='
 
     # --- hair on top
     if peinado == 'corto':
-        hp = Poligono([R(-s * 0.84, 0.15), R(-s * 0.96, -0.36), R(-s * 0.66, -0.96), R(0, -1.12), R(s * 0.62, -0.96),
+        hp = Poligono([R(-s * 0.88, -0.04), R(-s * 0.96, -0.36), R(-s * 0.66, -0.96), R(0, -1.12), R(s * 0.62, -0.96),
                        R(s * 0.86, -0.48), R(s * 0.78, -0.3), R(s * 0.5, -0.5), R(s * 0.1, -0.56), R(-s * 0.3, -0.44),
-                       R(-s * 0.56, -0.2), R(-s * 0.66, 0.12)])
+                       R(-s * 0.56, -0.2), R(-s * 0.62, -0.06)])
         modelar(lz, hp, pelo, luz, dens=0.86, prof=0.45, rayar=False, grosor=0.7, perdida=0.15, semilla=sem + 5,
                 brillo=0.0)
         st = []
@@ -606,12 +637,35 @@ def cabeza3(lz, x, y, r, piel, pelo, peinado, luz, giro=0.0, inclina=0.0, edad='
         arriba = Poligono(borde_pelo[::-1] + [R(s * 1.2, -0.2), R(s * 1.2, -1.4), R(-s * 1.2, -1.4), R(-s * 1.2, -0.2)][::-1],
                           suave=False)
         cs = [(*q, r * rng.uniform(0.09, 0.13)) for q in borde_pelo]
+        # the fringe over the forehead, in the same flat wash as the mass behind...
         fr = (arriba & cara) | Circulos(cs)
-        lz.aguada(fr, pelo, dens=0.92, tapa=1, irreg=0.3, borde=0.5)
-        lz.lapiz([arco(c_[0], c_[1], c_[2] * 0.7, c_[2] * 0.6, rng.uniform(0, 360), rng.uniform(0, 360) + 250, 8)
-                  for c_ in cs], tono(pelo, '#c99a6a', 0.4), grosor=0.4, presion=0.4)
+        lz.aguada(fr, pelo, dens=0.9, tapa=1, irreg=0.4, gran=0.35, borde=0.5)
+        # ...then the light, the line and the coils over all the hair that shows, as one form
+        visible = (pelo_f - cara) | fr
+        x0, y0, x1, y1 = pelo_f.bbox()
+        cc = np.array([(x0 + x1) / 2, (y0 + y1) / 2])
+        RR = max(x1 - x0, y1 - y0) / 2
+        lz.aguada(visible, sombra_de(pelo), dens=0.45, borde=0.15, irreg=0.3, gran=0.3,
+                  desvanece=(*(cc - L * RR), *(cc + L * RR * 0.3)))
+        lz.levanta(visible & Elipse(*(cc + L * RR * 0.55), RR * 0.5), cantidad=0.28, suave=RR * 0.2)
+        linea_luz(lz, pelo_f - cara, linea_de(pelo, 0.4), luz, grosor=0.65, perdida=0.15)     # not along the hairline
+        from matplotlib.path import Path
+        en_cara = Path(cara.p)
+        en_arriba = Path(arriba.p)
+        bucles = []
+        for k in range(260):
+            t = rng.uniform(0, 2 * math.pi)
+            rad = math.sqrt(rng.uniform(0.1, 1.0)) * 1.12
+            q = R(-s * 0.1 + math.cos(t) * rad, -0.3 + min(math.sin(t) * rad * 0.9, 0.42))
+            if en_cara.contains_point(q) and not en_arriba.contains_point(q):
+                continue        # never on the skin
+            rr = r * rng.uniform(0.045, 0.08)
+            bucles.append(arco(q[0], q[1], rr, rr * 0.8, rng.uniform(0, 360), rng.uniform(0, 360) + 260, 9))
+        mitad = len(bucles) * 3 // 5
+        lz.lapiz(bucles[:mitad], tono(pelo, '#000000', 0.45), grosor=0.45, presion=0.5, temblor=0.15)
+        lz.lapiz(bucles[mitad:], tono(pelo, '#c99a6a', 0.5), grosor=0.42, presion=0.42, temblor=0.15)
         # the shade the hair throws on the top of the forehead
-        lz.aguada(Elipse(*R(-s * 0.05, -0.5), r * 0.62, r * 0.14, inclina) & cara, sp, dens=0.3, suave=r * 0.06)
+        lz.aguada(Elipse(*R(-s * 0.05, -0.48), r * 0.6, r * 0.12, inclina) & cara, sp, dens=0.16, suave=r * 0.08)
     if gafas:
         for (cx, k) in ((near, 1.0), (far, 1 - 0.38 * a)):
             c_ = R(cx, ey + 0.02)
@@ -690,7 +744,9 @@ def telefono(lz, cx, cy, w, h, ang=0.0, luz=(0.6, -0.8), semilla=None):
                 pts.append(P(uc + rr * math.cos(math.radians(t)), vc + rr * w / h * math.sin(math.radians(t))))
         return Poligono(pts, suave=False)
     cuerpo = redondo(-0.5, -0.5, 0.5, 0.5, 0.16)
-    modelar(lz, cuerpo, '#3a4050', luz, dens=0.9, prof=0.35, rayar=False, grosor=0.7, semilla=semilla, brillo=0.25)
+    modelar(lz, cuerpo, '#4a5060', luz, dens=0.9, prof=0.4, rayar=False, grosor=0.6, semilla=semilla, brillo=0.3)
+    lz.gouache(Poligono([P(0.3, -0.5), P(0.42, -0.5), P(-0.2, 0.5), P(-0.32, 0.5)], suave=False) & cuerpo, '#c8d0dc',
+               alfa=0.18, irreg=0.2)
     pant = redondo(-0.42, -0.4, 0.42, 0.4, 0.05)
     S = lambda u, v: P(-0.42 + 0.84 * u, -0.4 + 0.8 * v)
     # sky
@@ -710,13 +766,13 @@ def telefono(lz, cx, cy, w, h, ang=0.0, luz=(0.6, -0.8), semilla=None):
     rng = np.random.default_rng(semilla or 5)
     lz.lapiz([[S(u, v), S(u + 0.02, v - 0.06)] for u, v in zip(rng.uniform(0.05, 0.95, 26), rng.uniform(0.7, 0.98, 26))],
              '#a8742a', grosor=0.35, presion=0.5)
-    # two holm oaks
-    for (u, v, rr) in ((0.3, 0.66, 0.06), (0.62, 0.7, 0.05)):
-        lz.aguada(Elipse(*S(u, v - 0.02), w * 0.84 * rr, h * 0.8 * rr * 0.55, ang), '#4f6f3a', dens=0.9, tapa=1, irreg=0.2)
+    # a few poppies in the wheat
+    for (u, v) in ((0.62, 0.74), (0.78, 0.82), (0.7, 0.9), (0.9, 0.7)):
+        lz.aguada(Elipse(*S(u, v), w * 0.025, w * 0.022), '#d23a2a', dens=0.95, tapa=1, irreg=0.1)
     # the camera speaker slot and the home button
     lz.aguada(Trazo([P(-0.1, -0.45), P(0.1, -0.45)], (h * 0.015, h * 0.015)), '#6a7080', dens=0.8, tapa=1)
     lz.lapiz([arco(*P(0, 0.455), w * 0.07, w * 0.07, 0, 360, 16)], '#8a90a0', grosor=0.5, presion=0.6)
     # glass glare
-    lz.gouache(Poligono([S(0.62, 0.0), S(0.78, 0.0), S(0.3, 0.6), S(0.18, 0.6)], suave=False) & pant, '#ffffff', alfa=0.12,
+    lz.gouache(Poligono([S(0.62, 0.0), S(0.78, 0.0), S(0.3, 0.6), S(0.18, 0.6)], suave=False) & pant, '#ffffff', alfa=0.18,
                irreg=0)
     return pant, S
