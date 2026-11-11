@@ -100,7 +100,9 @@ export function medir(n: Nodo): Medida {
       m.borde = 'circulo'; m.r = 80 * k; m.w = m.h = m.r * 2;
       m.fT = 22 * k; m.fS = 13 * k;
       const ancho = (n.etiquetaPos === 'izquierda' || n.etiquetaPos === 'derecha') ? 250 * k : 230 * k;
-      m.titulo = partir(n.titulo, m.fT, ancho, 2, EM_TITULO);
+      // The being is not titled on the map: its figure already says it is a
+      // person (Eugenio, 2026-11-11). The name still heads its panel.
+      m.titulo = [];
       m.sub = partir(n.subtitulo, m.fS, ancho, 3);
       return m;
     }

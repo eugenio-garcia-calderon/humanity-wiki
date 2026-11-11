@@ -201,7 +201,7 @@ function EditarNodo({ nodo, onCambiarNodo, onBorrar, onDuplicar, onConectarDesde
 
       {nodo.forma === 'campo' && (
         <div className="grid grid-cols-2 gap-2">
-          <Fila etiqueta="Nombre a la">
+          <Fila etiqueta="Texto a la">
             <select className={campo} value={nodo.etiquetaPos ?? 'abajo'} onChange={e => c({ etiquetaPos: e.target.value as PosEtiqueta })}>
               <option value="abajo" className="bg-slate-900">Abajo</option>
               <option value="arriba" className="bg-slate-900">Arriba</option>
