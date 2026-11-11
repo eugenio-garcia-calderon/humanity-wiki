@@ -484,8 +484,8 @@ def cabeza3(lz, x, y, r, piel, pelo, peinado, luz, giro=0.0, inclina=0.0, edad='
             lz.aguada(Elipse(ci[0], ci[1] + ri * r * 0.25, ri * r * 0.9, ri * r * 0.5) & forma, tono(iris, '#d9a46a', 0.35),
                       dens=0.35, irreg=0.05)
             lz.aguada(Elipse(ci[0], ci[1], ri * r * 0.45) & forma, '#140c0a', dens=1.0, tapa=1, irreg=0.02)
-            lz.aguada(Poligono(list(bezier(oc, top, ic, n=12)) + list(bezier(ic, R(cx, cy - hgt * 0.45), oc, n=12)),
-                               suave=False) & forma, '#5a3a2c', dens=0.3, irreg=0.05)       # lid shadow on the eyeball
+            lz.aguada(Poligono(list(bezier(oc, top, ic, n=12)) + list(bezier(ic, R(cx, cy - hgt * 0.72), oc, n=12)),
+                               suave=False) & forma, '#5a3a2c', dens=0.2, irreg=0.05)       # lid shadow on the eyeball
             # a small catch light high on the pupil: a big one beside the iris reads as white of the eye
             # and turns the gaze the wrong way
             lz.gouache(Elipse(ci[0] + ri * r * 0.18 * L[0], ci[1] - ri * r * 0.3, max(0.3, ri * r * 0.17)), '#fffdf6',

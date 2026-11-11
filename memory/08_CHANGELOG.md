@@ -10990,3 +10990,15 @@ Eugenio: «permite que el triciclo bala se le pueda modificar más los parámetr
   - el deslizamiento en el móvil.
 
   No hubo errores en la consola.
+  - Junio, Diseño 4: personajes repintados con más realismo (Eugenio: «más realista, y trazos más profesionales»). Nuevo kit `design/calendario-arte/generadores/diseno4/figuras_v3.py`:
+    - Una sola luz por figura: la bombilla para el abuelo y la niña, el sol para el niño.
+    - Cada forma lleva sombra que se desvanece hacia la luz, rayado de lápiz solo en la sombra de la ropa (nunca en la piel) y una línea firme en el lado oscuro que se pierde en el iluminado.
+    - Brazos y piernas anatómicos: deltoides, codo, antebrazo, muñeca; muslo, rodilla, gemelo, tobillo. Zapatos con suela y cordones.
+    - Cabezas con proporciones reales: ojos almendrados con blanco, iris, pupila y brillo; nariz con su plano de sombra y aleta; labios superior e inferior; orejas; afro como una sola masa con rizos; canas y arrugas en el abuelo.
+    - La niña lleva un peto con tirantes sobre la camiseta amarilla.
+    - El borde de la hoja ahora pasa por detrás de sus piernas, con sombras de contacto.
+  - Junio, Diseño 4: cuarto personaje, del que solo se ven la mano y el móvil, entrando por el borde izquierdo (Eugenio, con la referencia de un mural, sin la frase). En la pantalla hay un campo de trigo con amapolas bajo un cielo de verano; de su nube sale volando una golondrina hacia el cielo de verdad. Día 26 enlazado: «Hoy, como la golondrina: sal de la pantalla una tarde.». Evaluador independiente:
+    - Personajes: de 5 a 7,3.
+    - La mano: 7,5.
+    - Ilustración: de 8,5 a 8,8, tras dos rondas de arreglos (mirada de los niños, pelo de la niña, orejas, cuellos sin raya, dedos, estela que nace en la pantalla).
+    - El resto de meses sigue con las figuras de `extra_m678.py`; `figuras_v3.py` se puede usar en ellos si se pide.

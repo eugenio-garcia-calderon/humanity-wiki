@@ -163,8 +163,8 @@ def nino(lz):
            pliegues=[[(858, 318), (854, 352)], [(874, 314), (866, 346)], [(848, 336), (844, 362)],
                      [(878, 330), (870, 358)]], semilla=34)
     lz.lapiz([bezier((840, 362), (852, 368), (866, 362), n=10)], linea_de(CAM, 0.5), grosor=0.6, presion=0.45)
-    cabeza3(lz, 872, 268, 20, P3, '#3a2620', 'corto', luz, giro=0.5, inclina=10, edad='nino', ojos='abiertos',
-            boca='risa', mira=(1, -1), semilla=35)
+    cabeza3(lz, 872, 268, 20, P3, '#3a2620', 'corto', luz, giro=0.5, inclina=3, edad='nino', ojos='abiertos',
+            boca='risa', mira=(1.0, -1.6), semilla=35)
     brazo3(lz, (888, 302), (914, 276), (940, 246), 13, CAM, P3, luz, 'corta',
            mano=dict(ang=-55, gesto='abierta', lado=-1, tam=21), semilla=36)
 
@@ -193,12 +193,16 @@ def mano_con_telefono(lz):
     antebrazo = Trazo([codo, (codo + muneca) / 2 + (0, 4), muneca], (54, 44, 34), suave=True)
     lz.aguada(antebrazo, piel, dens=0.62, tapa=1, borde=0.7, irreg=0.6, gran=0.45, desvanece=(70, 650, 18, 680))
     lz.aguada(antebrazo, sp, dens=0.4, borde=0.2, irreg=0.4, gran=0.35, desvanece=(110, 700, 120, 640))
-    linea_luz(lz, antebrazo, lp, luz, grosor=0.7, limite=(52, 0, 1485, 850))
+    linea_luz(lz, antebrazo, lp, luz, grosor=0.6, limite=(52, 0, 1485, 850))
     # the palm behind the phone: thenar mound on the left, heel below
-    palma = Poligono([P(-28, 4), P(-42, 20), P(-47, 42), P(-42, 60), P(-30, 74), P(-10, 80), P(10, 76), P(24, 64),
-                      P(30, 30)])
-    modelar(lz, palma, piel, luz, dens=0.62, prof=0.38, sombra=sp, linea=lp, grosor=0.7, rayar=False, semilla=42)
-    lz.lapiz([list(bezier(P(-38, 50), P(-30, 66), P(-14, 76), n=10))], lp, grosor=0.5, presion=0.4, temblor=0.1)
+    palma = Poligono([P(-28, 4), P(-42, 18), P(-48, 38), P(-44, 58), P(-34, 72), P(-22, 82), P(-4, 84), P(14, 78),
+                      P(26, 64), P(30, 30)])
+    modelar(lz, palma, piel, luz, dens=0.62, prof=0.38, sombra=sp, linea=lp, grosor=0.6, rayar=False, semilla=42)
+    # the thumb's mound, set off from the palm by its crease, and the crease where the hand meets the wrist
+    lz.aguada(Elipse(*P(-36, 52), 11, 18, ANG + 20) & palma, tono(piel, '#f2c8a8', 0.25), dens=0.3, suave=4)
+    lz.lapiz([list(bezier(P(-28, 34), P(-24, 56), P(-12, 74), n=12))], lp, grosor=0.5, presion=0.42, temblor=0.1)
+    lz.lapiz([list(bezier(P(-36, 78), P(-20, 86), P(-2, 85), n=10)), list(bezier(P(-32, 82), P(-18, 89), P(-6, 88), n=10))],
+             lp, grosor=0.45, presion=0.35, temblor=0.1, cortes=0.2)
 
     pant, S = telefono(lz, C[0], C[1], W, H, ANG, luz, semilla=43)
     lz.aguada(Poligono([P(-31, 58), P(31, 58), P(30, 67), P(-28, 67)]) & palma, sp, dens=0.4, suave=2)
