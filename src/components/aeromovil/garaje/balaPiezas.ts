@@ -254,9 +254,10 @@ export function carenados(F: FormaBala, M: Mats): THREE.Group {
     for (const f of filetes) c.add(malla(f, M.rojo, 'filete', false));
     // arms: from inside the body skin to inside the pod
     for (const b of brazosDe(F)) {
-      const xb = F.X_LAT + b.x, z0 = F.ladoZ(xb, b.y) - 0.008, z1 = F.VIA_LAT / 2 - 0.02;
+      // (the Triciclo lifted, round three: from the body at `yCuerpo` down to the pod at `y`)
+      const xb = F.X_LAT + b.x, z0 = F.ladoZ(xb, b.yCuerpo) - 0.008, z1 = F.VIA_LAT / 2 - 0.02;
       if (!Number.isFinite(z0)) continue;
-      const ruta = [new THREE.Vector3(xb, b.y, s * z0), new THREE.Vector3(xb, b.y + 0.003, s * (z0 + z1) / 2), new THREE.Vector3(xb, b.y, s * z1)];
+      const ruta = [new THREE.Vector3(xb, b.yCuerpo, s * z0), new THREE.Vector3(xb, (b.yCuerpo + b.y) / 2 + 0.003, s * (z0 + z1) / 2), new THREE.Vector3(xb, b.y, s * z1)];
       g.add(malla(barrido(ruta, () => [b.cuerda / 2, b.grueso / 2], { lados: 16 }), M.marino, 'brazo'));
     }
   }
@@ -335,7 +336,35 @@ export function aleta(F: FormaBala, M: Mats, alto = ALETA.punta[0][1]): THREE.Gr
  * footboards move (`man`, `pies`: [x, y] in m), and the frame is drawn by the
  * viewer from the model's tubes, so the carbon spine is left out.
  */
-export interface CabinaTriciclo { recPil: number; recPas: number; man: [number, number]; pies: [number, number] }
+export interface CabinaTriciclo {
+  recPil: number; recPas: number; man: [number, number]; pies: [number, number];
+  /**
+   * Round three (2026-11-11): «tres filas» instead of the astride saddle. Car-style seats (geometriaTriciclo.ts
+   * `AsientoFila`): hips x, centre z, cushion top y, size, recline and folded. Absent: the astride cockpit.
+   */
+  filas?: AsientoCoche[];
+}
+/** A car-style seat of the Triciclo's three rows (the same fields as geometriaTriciclo.ts `AsientoFila`). */
+export interface AsientoCoche { fila: 1 | 2 | 3; x: number; z: number; y: number; ancho: number; fondo: number; respaldo: number; rec: number; plegado: boolean }
+/**
+ * A car-style seat: a thin pan and cushion (6 cm) from 17 cm behind the hips forward (the backrest's rear face), and a backrest hinged at the
+ * cushion's rear edge, reclined `rec`; the pilot's and row 2's with a headrest. Folded, the backrest lies forward
+ * flat on the cushion (its back up, 7 cm over the cushion: the boot's floor, as `volumenMaletero` counts it).
+ */
+function asientoCoche(g: THREE.Group, M: Mats, a: AsientoCoche) {
+  const x0 = a.x - 0.17, grueso = 0.07, w = a.ancho;
+  const cojin = new THREE.Mesh(new THREE.BoxGeometry(a.fondo, 0.06, w), M.cuero); cojin.position.set(x0 + a.fondo / 2, a.y - 0.03, a.z); cojin.name = 'asiento'; g.add(cojin);
+  // the side bolsters of the cushion
+  for (const s of [1, -1]) { const b = new THREE.Mesh(new THREE.BoxGeometry(a.fondo * 0.85, 0.035, 0.05), M.cuero); b.position.set(x0 + a.fondo * 0.5, a.y + 0.012, a.z + s * (w / 2 - 0.025)); g.add(b); }
+  const respaldo = new THREE.Group(); respaldo.name = a.plegado ? 'respaldo-plegado' : 'respaldo';
+  const placa = new THREE.Mesh(new THREE.BoxGeometry(grueso, a.respaldo, w * 0.96), M.cuero); placa.position.set(-grueso / 2, a.respaldo / 2, 0); respaldo.add(placa);
+  if (a.fila < 3) { const cab = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.13, Math.min(0.24, w * 0.55)), M.cuero); cab.position.set(-0.04, a.respaldo + 0.08, 0); respaldo.add(cab); }
+  // hinged at the cushion's rear top edge
+  respaldo.position.set(x0 + grueso, a.y, a.z);
+  if (a.plegado) { respaldo.rotation.z = -Math.PI / 2; respaldo.position.set(x0, a.y + grueso, a.z); }
+  else respaldo.rotation.z = a.rec * Math.PI / 180;
+  g.add(respaldo);
+}
 /** A thin post between two points (for the backrests' supports). */
 function poste(g: THREE.Object3D, a: THREE.Vector3, b: THREE.Vector3, r: number, mat: THREE.Material) {
   const v = b.clone().sub(a), L = v.length(); if (L < 1e-4) return;
@@ -344,7 +373,7 @@ function poste(g: THREE.Object3D, a: THREE.Vector3, b: THREE.Vector3, r: number,
 }
 export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO, t?: CabinaTriciclo): THREE.Group {
   const g = new THREE.Group(); g.name = 'cabina';
-  const R0 = ASIENTO, piso = F.dSuelo, kz = Math.min(1, F.kW);
+  const R0 = ASIENTO, piso = F.dSuelo + F.elevar, kz = Math.min(1, F.kW);
   const dxPil = A.xPiloto - R0.xPiloto, dyPil = A.yPiloto - R0.yPiloto, dxPas = A.xPasajero - R0.xPasajero, dyPas = A.yPasajero - R0.yPasajero;
   // along the saddle: 0 at the pilot's hips, 1 at the passenger's (clamped), for the stretch in between
   const w = (x: number) => Math.min(1, Math.max(0, (R0.xPiloto - x) / (R0.xPiloto - R0.xPasajero)));
@@ -365,7 +394,8 @@ export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO, t?: CabinaT
     Es(-1.745, 0.42, 0.472, 0.04, 0.055, 0.045, 2.2),
   ], { N: 48, sub: 6 });
   cajaUV(sillin, 0.5);
-  g.add(malla(sillin, M.cuero, 'sillin'));
+  if (!t?.filas) g.add(malla(sillin, M.cuero, 'sillin'));
+  else for (const a of t.filas) asientoCoche(g, M, a);
   // passenger backrest: a pad leaning back 12°, on two short posts
   {
     const pad = loft([
@@ -377,7 +407,7 @@ export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO, t?: CabinaT
     if (!t) {
       const o = malla(pad, M.cuero, 'respaldo'); o.position.set(-1.80 + dxPas, 0.65 + dyPas, 0); o.rotation.z = 0.21; o.scale.z = kz; g.add(o);
       for (const z of [-0.09, 0.09]) { const p = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.011, 0.2, 10), M.aluminio); p.position.set(-1.76 + dxPas, 0.49 + dyPas, z * kz); p.rotation.z = 0.21; g.add(p); }
-    } else {
+    } else if (!t.filas) {
       // the Triciclo: each rider's backrest against their back, reclined about the hips (the pilot's narrower,
       // so the passenger's knees pass beside it), on two posts from the saddle
       const respaldo = (x0: number, y0: number, rec: number, ancho: number, base: [number, number]) => {
@@ -441,11 +471,12 @@ export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO, t?: CabinaT
   for (const s of [1, -1]) {
     const tabla = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.012, 0.09), M.aluminio); tabla.position.set(-0.55 + dxPil + px, 0.205 + piso + py, s * 0.15 * kz); tabla.rotation.z = 0.35; g.add(tabla);
     const goma = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.006, 0.07), M.gomaMate); goma.position.set(-0.55 + dxPil + px, 0.214 + piso + py, s * 0.15 * kz); goma.rotation.z = 0.35; g.add(goma);
+    if (t?.filas) continue;
     const estribo = new THREE.Mesh(new THREE.CylinderGeometry(0.013, 0.013, 0.09, 12), M.gomaMate); estribo.position.set(-1.30 + dxPas, 0.27 + piso, s * 0.20 * kz); estribo.rotation.x = Math.PI / 2; g.add(estribo);
     const soporte = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.05, 0.06), M.aluminio); soporte.position.set(-1.30 + dxPas, 0.255 + piso, s * 0.13 * kz); g.add(soporte);
   }
-  // grab rail round the back of the passenger's seat
-  {
+  // grab rail round the back of the passenger's seat (not with three rows)
+  if (!t?.filas) {
     const p = (x: number, y: number, z: number) => new THREE.Vector3(x + dxPas, y + dyPas, z * kz);
     const riel = curva([p(-1.42, 0.49, 0.185), p(-1.54, 0.53, 0.20), p(-1.66, 0.555, 0.175), p(-1.73, 0.565, 0.10), p(-1.745, 0.568, 0), p(-1.73, 0.565, -0.10), p(-1.66, 0.555, -0.175), p(-1.54, 0.53, -0.20), p(-1.42, 0.49, -0.185)], 8);
     g.add(malla(barrido(riel, () => [0.012, 0.012], { lados: 10 }), M.aluminio, 'asidero'));

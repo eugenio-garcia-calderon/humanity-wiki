@@ -47,7 +47,7 @@ function disponer(F: FormaBala) {
   const C = contornoCupula(F);
   /** Navy nose cone ahead of X_ARO_MORRO and navy tail cone behind X_ARO_COLA (with the lamp rings on the joints). */
   const X_ARO_MORRO = F.X(0.30), X_ARO_COLA = F.X(-2.86);
-  const Y_FLOTACION = (x: number) => Y_FLOTACION_REF(F.R(x)) + F.dSuelo * 0.6;
+  const Y_FLOTACION = (x: number) => Y_FLOTACION_REF(F.R(x)) + F.dSuelo * 0.6 + F.elevar;
   return {
     ...C, Y_FLOTACION, X_ARO_MORRO, X_ARO_COLA,
     T_D_MORRO: tAbajo(F.sec(X_ARO_MORRO), Y_FLOTACION(X_ARO_MORRO)), T_D_COLA: tAbajo(F.sec(X_ARO_COLA), Y_FLOTACION(X_ARO_COLA)),
@@ -194,11 +194,13 @@ function geometria(R: Rejilla, grupos: number[][]): THREE.BufferGeometry {
  * repeats every triangle with a dark back-face material: the inside of the
  * skin, as seen through the canopy (one mesh, so «Superponer» paints it once).
  */
-function carroceria(xs: number[], M: Mats, marcoAparte = false): [THREE.Mesh, THREE.Mesh | null] {
+function carroceria(xs: number[], M: Mats, marcoAparte = false, portonAparte = false): [THREE.Mesh, THREE.Mesh | null, THREE.Mesh | null] {
   const R = rejilla(xs, columnasSkin, 'abajo');
-  const grupos = caras(R, marcoAparte ? 3 : 2, (i, k) => {
+  const grupos = caras(R, portonAparte ? 4 : marcoAparte ? 3 : 2, (i, k) => {
     const xm = (xs[i] + xs[i + 1]) / 2;
     if (k >= K_C && enVidrio(xs[i]) && enVidrio(xs[i + 1])) return -1;
+    // the Triciclo's boot lid (round three): the tail's top behind the canopy, above the frame's column, back to the tail ring
+    if (portonAparte && enPorton(xm) && k >= K_F) return 3;
     if (xm > L.X_ARO_MORRO || xm < L.X_ARO_COLA || k < K_D) return 1;
     if (k >= K_F && k < K_C && enMarco(xm)) return marcoAparte ? 2 : 1;
     return 0;
@@ -217,14 +219,33 @@ function carroceria(xs: number[], M: Mats, marcoAparte = false): [THREE.Mesh, TH
   geo.addGroup(inicio[2], orden[2].length, 3); geo.addGroup(inicio[3], orden[3].length, 4);
   const m = new THREE.Mesh(geo, [M.chapa, M.marino, M.forro, M.chapaDoble, M.marinoDoble]);
   m.name = 'carroceria';
-  if (!marcoAparte) return [m, null];
+  const porton = portonAparte ? pielAparte(R, grupos[3], [M.chapa, M.forro, M.chapaDoble], 'porton') : null;
+  if (!marcoAparte) return [m, null, porton];
   // the canopy's navy frame, on its own (it opens with the glass): surface, inner pass, walls
   const [sup, par] = separarParedes(R, grupos[2]);
   const gm = geometria(R, [sup, par]);
   gm.clearGroups(); gm.addGroup(0, sup.length, 0); gm.addGroup(0, sup.length + par.length, 1); gm.addGroup(sup.length, par.length, 2);
   const marco = new THREE.Mesh(gm, [M.marino, M.forro, M.marinoDoble]); marco.name = 'marco-cupula';
-  return [m, marco];
+  return [m, marco, porton];
 }
+/** A part of the skin on its own (the canopy frame, the boot lid): its surface, the inner pass and its walls. */
+function pielAparte(R: Rejilla, l: number[], mats: THREE.Material[], nombre: string): THREE.Mesh {
+  const [sup, par] = separarParedes(R, l);
+  const g = geometria(R, [sup, par]);
+  g.clearGroups(); g.addGroup(0, sup.length, 0); g.addGroup(0, sup.length + par.length, 1); g.addGroup(sup.length, par.length, 2);
+  const m = new THREE.Mesh(g, mats); m.name = nombre; return m;
+}
+/**
+ * The Triciclo's boot lid (round three, 2026-11-11): the top of the tail from the canopy's rear tip (XF1) back to
+ * the tail ring, above the column where the canopy's navy frame edge runs (`bandas` tF, which eases down from the
+ * canopy's tip to t = 0.62 over 15 cm). The cut line is the canopy's own shut line carried on backwards, and it
+ * stays above the rear wheel, which sits inside the tail lower down: the wheel's arch and the lamp ring stay fixed.
+ * Hinged across the top at the canopy's rear tip, like a hatchback's roof hinge; the fin rides on it.
+ */
+const enPorton = (x: number) => x < L.XF1 - 1e-9 && x > L.X_ARO_COLA + 1e-9;
+/** The boot lid's pivot and how far it opens about its front hinge (negative: the rear rises). */
+export const PIVOTE_PORTON = 'porton-maletero';
+export const ANGULO_PORTON = -55;
 /** Splits a triangle list into [surface, walls]: a wall's face is more than 40° off the skin's normal there. */
 function separarParedes(R: Rejilla, l: number[]): [number[], number[]] {
   const sup: number[] = [], par: number[] = [], P = R.pos, N = R.nor, cos40 = Math.cos(40 * Math.PI / 180);
@@ -483,7 +504,7 @@ export interface OpcionesBala {
    * The Triciclo Bala (2026-11-10): the same body, three wheels (`ruedas`), its own
    * cockpit (`cabina`) and, if asked, a spat round the bottom of the rear wheel.
    */
-  triciclo?: CabinaTriciclo & { faldon: { x0: number; x1: number; y0: number; hz: number } | null; ventanas?: OpcionesVentanas };
+  triciclo?: CabinaTriciclo & { faldon: { x0: number; x1: number; y0: number; hz: number } | null; ventanas?: OpcionesVentanas; /** Round three: the tail's top as an opening boot lid. */ maletero?: boolean };
 }
 
 // ============================================== the Triciclo's solar roof and window frames (round two)
@@ -587,12 +608,13 @@ function armar(o: OpcionesBala): THREE.Group {
   const par = (o: THREE.Object3D) => { add(o); const c = o.clone(); c.scale.z = -o.scale.z; c.position.z = -o.position.z; add(c); return o; };
   const SEP = 0.0012;
   // details drawn on the reference shape: x through the shape's map, heights with the belly (half of it on the nose)
-  const nx = F.X, yN = (y: number) => y + F.dSuelo * 0.5, yC = (y: number) => y + F.dSuelo * 0.6;
+  const nx = F.X, yN = (y: number) => y + F.dSuelo * 0.5 + F.elevar, yC = (y: number) => y + F.dSuelo * 0.6 + F.elevar;
   const mapa = (pts: P2[], y: (v: number) => number): P2[] => pts.map(([a, b]) => [nx(a), y(b)]);
 
   // ---------------------------------------------------------------- skin and canopy
   const xs = filasX(rapida ? 2 : 1);
-  const [cuerpo, marco] = carroceria(xs, M, !!o.cupulaAparte);
+  const conPorton = !!o.triciclo?.maletero;
+  const [cuerpo, marco, porton] = carroceria(xs, M, !!o.cupulaAparte, conPorton);
   add(cuerpo);
   const vidrio = cupula(xs, M);
   // the Triciclo's solar roof and window frames ride on the canopy glass (they open with it)
@@ -691,7 +713,26 @@ function armar(o: OpcionesBala): THREE.Group {
   // ---------------------------------------------------------------- parts
   add(carenados(F, M));
   add(ruedas(F, M, !!o.triciclo));
-  add(aleta(F, M, o.aleta));
+  const laAleta = aleta(F, M, o.aleta);
+  if (porton) {
+    // the boot lid and the fin on it hang from a pivot on its front hinge (the viewer opens it as a boot, `tipo: 'maletero'`)
+    const bisagra = new THREE.Vector3(L.XF1, techoEn(F, L.XF1), 0);
+    const piv = new THREE.Group(); piv.name = PIVOTE_PORTON; piv.position.copy(bisagra);
+    for (const pieza of [porton, laAleta]) { pieza.position.sub(bisagra); piv.add(pieza); }
+    add(piv);
+    // its shut line on the body: along the frame's column on each side, and across the tail at the ring
+    const der: THREE.Vector3[] = [], nd: THREE.Vector3[] = [];
+    for (const x of xs) {
+      if (!enPorton(x) && Math.abs(x - L.X_ARO_COLA) > 1e-9) continue;
+      const s = F.sec(x), t = bandas(s)[1], [z, y] = punto(s, t);
+      der.push(new THREE.Vector3(x, y, z)); nd.push(normalXT(x, Math.min(t, 0.995)));
+    }
+    const atras: THREE.Vector3[] = [], na: THREE.Vector3[] = [];
+    { const s = F.sec(L.X_ARO_COLA), t0 = bandas(s)[1]; for (let k = 1; k < 24; k++) { const t = t0 + (1 - t0) * k / 24, [z, y] = punto(s, t); atras.push(new THREE.Vector3(L.X_ARO_COLA, y, z)); na.push(normalXT(L.X_ARO_COLA, Math.min(t, 0.995))); } }
+    const lado = [...der, ...atras], nl = [...nd, ...na];
+    const izq = lado.slice().reverse().map(p => new THREE.Vector3(p.x, p.y, -p.z)), ni = nl.slice().reverse().map(n => new THREE.Vector3(n.x, n.y, -n.z));
+    add(malla(cinta3D([...lado, new THREE.Vector3(L.X_ARO_COLA, techoEn(F, L.X_ARO_COLA), 0), ...izq], [...nl, normalXT(L.X_ARO_COLA, 1), ...ni], 0.0042, 0.0012, false), M.junta, 'junta-porton', false));
+  } else add(laAleta);
   add(cabina(F, M, o.asientos ?? ASIENTO, o.triciclo));
   // the Triciclo's rear-wheel spat: a narrow navy keel under the tail, from inside the belly down to `y0`, round the wheel
   const fd = o.triciclo?.faldon;
