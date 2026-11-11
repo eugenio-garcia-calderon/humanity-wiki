@@ -74,6 +74,13 @@ export interface DimBala {
   xLat?: number;
   pod?: { esc: number; ancho: number; cola: number };
   cuerdaBrazo?: number;
+  /**
+   * The Triciclo only (2026-11-11, round three: «que la altura libre sobre el suelo sea mucho mayor»): a rigid
+   * lift of the whole body (m). `suelo` is still the real belly height; the shape below it is drawn with the
+   * belly at `suelo − elevar` and then raised `elevar`, so above 15.8 cm the cabin keeps its size and the whole
+   * body (with everything built on its floor) rises. Absent, 0: every number is the Cuadriciclo's, bit for bit.
+   */
+  elevar?: number;
 }
 
 // --------------------------------------------------- from the Aeromóvil Gota
@@ -239,12 +246,14 @@ export function crearForma(D: DimBala) {
   const R = tramos(anclas, ANCLAS_REF), X = tramos(ANCLAS_REF, anclas);
   const XN0 = X(XN0_REF), XT0 = X(XT0_REF);
   /** Width factor, belly lift, and the canopy scale above BASE_ALTO (k − 1, so the reference is an exact 0). */
-  const kW = D.ancho / DIM_REF.ancho, dSuelo = D.suelo - DIM_REF.suelo, kAlto1 = (D.alto - BASE_ALTO) / (DIM_REF.alto - BASE_ALTO) - 1;
-  /** A height of the reference drawing in this shape: the belly and the widest point lift, the canopy scales. */
-  const alturaArriba = (y: number) => y + (y - BASE_ALTO) * kAlto1;
-  const yb = (x: number) => K.yb(R(x)) + dSuelo;
-  const yt = (x: number) => { const v = K.yt(R(x)); return v > BASE_ALTO ? alturaArriba(v) : v; };
-  const ysW = (x: number) => K.ys(R(x)) + dSuelo * 0.6;
+  // `elevar` (the Triciclo's rigid lift) is added last, so with 0 every height is the same number bit for bit (v + 0)
+  const elevar = D.elevar ?? 0;
+  const kW = D.ancho / DIM_REF.ancho, dSuelo = (D.suelo - elevar) - DIM_REF.suelo, kAlto1 = (D.alto - BASE_ALTO) / (DIM_REF.alto - BASE_ALTO) - 1;
+  /** A height of the reference drawing in this shape: the belly and the widest point lift, the canopy scales (and the whole body rises `elevar`). */
+  const alturaArriba = (y: number) => y + (y - BASE_ALTO) * kAlto1 + elevar;
+  const yb = (x: number) => K.yb(R(x)) + dSuelo + elevar;
+  const yt = (x: number) => { const v = K.yt(R(x)); return v > BASE_ALTO ? alturaArriba(v) : v + elevar; };
+  const ysW = (x: number) => K.ys(R(x)) + dSuelo * 0.6 + elevar;
 
   /** The nine control points of the half-section, before the end caps. */
   function controlesBase(x: number): P2[] {
@@ -267,7 +276,7 @@ export function crearForma(D: DimBala) {
     const hw0 = b[3][0], yt0 = b[8][1], yb0 = b[0][1];
     return { x0, largo, cy, m, base: b, g: [rel(hw0, a[3][0], hw0), rel(yt0, a[8][1], yt0 - cy), rel(cy - yb0, cy - a[0][1], cy - yb0)] };
   }
-  const TAPA_MORRO = tapa(XN0, X_MORRO, CYN + dSuelo * 0.5, D.puntaMorro), TAPA_COLA = tapa(XT0, X_COLA, D.puntaCola, PT);
+  const TAPA_MORRO = tapa(XN0, X_MORRO, CYN + dSuelo * 0.5 + elevar, D.puntaMorro), TAPA_COLA = tapa(XT0, X_COLA, D.puntaCola + elevar, PT);
   function enTapa(T: Tapa, x: number): P2[] {
     const s = Math.min(1, Math.abs(x - T.x0) / T.largo);
     const k = (g: number) => { const m = Math.max(T.m, g); return Math.pow(1 - s, m) * (1 + (m - g) * s); };
@@ -424,8 +433,12 @@ export function crearForma(D: DimBala) {
     R_DEL: D.rDel, R_LAT: D.rLat, VIA_LAT: D.via, ANCHO_NEU: D.anchoNeu, ANCHO_NEU_LAT: D.anchoNeuLat,
     /** x of the reference drawing → x in this shape, and back. */
     X, R,
-    /** Heights of the reference drawing in this shape: above the widest point (canopy, scaled) and the belly lift. */
-    alturaArriba, dSuelo, kW,
+    /**
+     * Heights of the reference drawing in this shape: above the widest point (canopy, scaled) and the belly lift.
+     * `dSuelo` is the shape's own belly lift; `elevar` the Triciclo's rigid lift on top of it (0 elsewhere):
+     * what stands on the floor rises `dSuelo + elevar`.
+     */
+    alturaArriba, dSuelo, elevar, kW,
     controles, sec, alturaHombro, seccionRapida, ladoZ, arribaY, dentroPiel, frenteX, detrasX, envolvente, seccionMayor, areaSeccion,
     /** x where the skin is crossed going from xIn (inside) towards xOut, at (z, y); NaN if xIn is outside. */
     bordeX,
