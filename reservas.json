@@ -29,6 +29,12 @@
       "ruta": "scripts/triciclo-rangos.ts",
       "motivo": "Triciclo: tres filas y maletero",
       "desde": "2026-11-11T21:14:15.856Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/Visor3D.tsx",
+      "motivo": "Triciclo: tres filas y maletero",
+      "desde": "2026-11-11T21:14:19.469Z"
     }
   ]
 }
