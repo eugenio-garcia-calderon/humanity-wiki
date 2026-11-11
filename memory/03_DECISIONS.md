@@ -1410,3 +1410,9 @@ Eugenio asked for a much more artistic version without any text, and a menu with
 - **Chosen: a second view on the same page**, `?vista=arte` (the default, so the parameter is omitted) and `?vista=esquema`, switched from a native `<select>` in the top band. The picture is a fixed, hand-drawn SVG (`VistaArtistica.tsx`) that reuses the head outline, the mesh patterns and the palette of the schema (`CABEZA`, `TINTES`). The schema and its saved map, history and editing are untouched.
 - **Cost:** editing the schema does not change the picture. If a concept is renamed or a fourth lane is added, the picture has to be redrawn by hand. Its only link to the map data is the «5 claves» lists, which it reads from the map, so editing them in the schema also changes the bulbs' windows.
 
+
+## 2026-11-11 — Pension tiers are partly estimated; budgets use each source's own items
+
+- No public July 2026 table gives every pension bracket. Chosen: real count for ≥ 3.300 € (July 2026), 2025's split around 1.000/1.500/2.000 € applied to 2026's total, tier averages estimated from bracket limits, and the bottom tier closing against the real payroll. Alternative (the INSS bracket table, by month) is better and should replace this when someone downloads it; the page labels the middle tiers «estimación».
+- Budgets show each scale's own items (Torrelodones by economic chapter, the family by EPF group) rather than forcing everything into six categories; the six categories are a separate comparison table where «—» means the scale does not pay for that.
+- Debt repayments (amortización) are off by default: they are refinanced, not spent, and at Spain's scale (230.693 M€) they would dwarf every real item. One click adds them.

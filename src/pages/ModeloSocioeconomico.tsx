@@ -12,7 +12,8 @@
 //
 // The page: the rings (hero), how it works, the 2D scheme of where the money
 // goes, the matrix scale × area, a worked example (a person in a village of 400
-// in Madrid), today's Spanish system next to the model, who decides, the
+// in Madrid), today's Spanish system next to the model, today's pensions in five tiers,
+// today's budgets at every scale (EU to family) as donuts, who decides, the
 // country's accounts and what is still to be solved. Every number comes from
 // `src/data/modeloSocioeconomico.ts`.
 //
@@ -40,6 +41,8 @@ import { QuienDecide } from '../components/modeloSocioeconomico/QuienDecide';
 import { Tercios, AyudaEntreEscalas } from '../components/modeloSocioeconomico/TerciosApoyo';
 import { TresTramos, CincoPagos } from '../components/modeloSocioeconomico/Tramos';
 import { LasCuentas, Retos, ListaFuentes } from '../components/modeloSocioeconomico/Cuentas';
+import { Pensiones } from '../components/modeloSocioeconomico/Pensiones';
+import { Presupuestos } from '../components/modeloSocioeconomico/Presupuestos';
 import { BuzonProyecto } from '../components/modeloSocioeconomico/BuzonProyecto';
 import { Boton, Encabezado, Muestra, Segmentado } from '../components/modeloSocioeconomico/piezas';
 
@@ -50,6 +53,8 @@ const SECCIONES = [
   { id: 'tercios', t: 'Tercios y ayuda' },
   { id: 'ejemplo', t: 'Un caso' },
   { id: 'hoy', t: 'Frente a hoy' },
+  { id: 'pensiones', t: 'Pensiones' },
+  { id: 'presupuestos', t: 'Presupuestos' },
   { id: 'decide', t: 'Quién decide' },
   { id: 'cuentas', t: 'Cuentas' },
   { id: 'retos', t: 'Lo que falta' },
@@ -89,22 +94,22 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
     <div className="min-h-screen bg-slate-100 text-slate-900 antialiased" style={{ fontFamily: '"Public Sans Variable", ui-sans-serif, system-ui, sans-serif' }}>
       {/* ── Top band: what this is, who makes it, where to go, the mailbox ── */}
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-2.5 sm:px-6">
+        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-2.5 sm:px-6 min-[1700px]:max-w-none">
           <a href="#inicio" className="min-w-0 leading-tight">
             <span className="block text-[15px] font-bold tracking-tight">Modelo socioeconómico optimizado</span>
             <span className="block text-xs text-slate-500">Un proyecto de {marca}</span>
           </a>
-          <nav aria-label="Secciones" className="ml-auto hidden min-w-0 gap-0.5 text-[13px] min-[1600px]:flex">
+          <nav aria-label="Secciones" className="ml-auto hidden min-w-0 gap-0.5 text-[13px] min-[1700px]:flex">
             {SECCIONES.map(s => (
               <a key={s.id} href={`#${s.id}`} className="whitespace-nowrap rounded-full px-2 py-1.5 text-slate-600 hover:bg-slate-100 hover:text-slate-900">{s.t}</a>
             ))}
           </nav>
-          <Boton onClick={() => setVerBuzon(true)} className="ml-auto shrink-0 min-[1600px]:ml-0">
+          <Boton onClick={() => setVerBuzon(true)} className="ml-auto shrink-0 min-[1700px]:ml-0">
             <MessageSquarePlus className="h-4 w-4" /><span className="sm:hidden">Proponer</span><span className="hidden sm:inline">Proponer una mejora</span>
           </Boton>
         </div>
         {/* Phones: the list scrolls sideways; the fade on the right says there is more. */}
-        <div className="relative border-t border-slate-100 min-[1600px]:hidden">
+        <div className="relative border-t border-slate-100 min-[1700px]:hidden">
           <nav aria-label="Secciones" className="flex gap-1 overflow-x-auto px-3 py-1.5 pr-10 text-[13px] [scrollbar-width:none]">
             {SECCIONES.map(s => (
               <a key={s.id} href={`#${s.id}`} className="whitespace-nowrap rounded-full px-2.5 py-1 text-slate-600 hover:bg-slate-100">{s.t}</a>
@@ -316,6 +321,24 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
             <DondeEstaElDinero modo={modo} />
             <GanaYPierde modo={modo} />
           </div>
+        </section>
+
+        {/* ── Pensions by tier (today's system) ── */}
+        <section id="pensiones" aria-labelledby="pensiones-titulo" className="scroll-mt-28 border-t border-slate-200 bg-slate-50">
+          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+            <Encabezado id="pensiones" titulo="Las pensiones de hoy, en cinco tramos">
+              Cuántas pensiones hay en cada tramo, de la máxima a la mínima, y qué parte del dinero se lleva cada uno. Es el gasto más grande del país: sirve para ver qué sustituirían los préstamos, las donaciones y el apoyo a la discapacidad del modelo.
+            </Encabezado>
+            <Pensiones />
+          </div>
+        </section>
+
+        {/* ── Budgets at every order of magnitude ── */}
+        <section id="presupuestos" aria-labelledby="presupuestos-titulo" className="mx-auto max-w-7xl scroll-mt-28 px-4 py-16 sm:px-6">
+          <Encabezado id="presupuestos" titulo="En qué se gasta cada escala">
+            El presupuesto de hoy de Europa, España, la Comunidad de Madrid, un municipio, una comunidad de vecinos y una familia, cada uno en su quesito. Elige una escala; la tabla de abajo las pone todas juntas.
+          </Encabezado>
+          <Presupuestos />
         </section>
 
         {/* ── Who decides ── */}

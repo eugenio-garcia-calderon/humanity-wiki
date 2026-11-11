@@ -439,6 +439,15 @@ export const FUENTES: Fuente[] = [
   { id: 'remuneracion-publica', titulo: 'IGAE vía Vozpópuli · Gasto en personal de las administraciones en 2025 (181.494 M€)', url: 'https://www.vozpopuli.com/economia/pagar-las-nominas-de-politicos-y-funcionarios-cuesta-ya-4000-euros-a-cada-espanol.html' },
   { id: 'pensiones-2026', titulo: 'Seguridad Social vía Junta de Extremadura · Pensiones contributivas, julio de 2026', url: 'https://www.juntaex.es/documents/77055/46718143/PC_ND_2026_07.pdf/814916c2-5e3d-040a-b8c5-96c2a5b6c986' },
   { id: 'imserso-discapacidad', titulo: 'Imserso vía Servimedia · Personas con discapacidad reconocida (≥ 33 %), 2022', url: 'https://sid-inico.usal.es/noticias/numero-de-personas-con-discapacidad-en-espana-las-mujeres-con-grados-mas-altos/' },
+  { id: 'pensiones-cuantias', titulo: 'INSS vía El Español · Pensiones por tramos de cuantía, julio de 2026 (las de 3.300 € o más)', url: 'https://www.elespanol.com/sociedad/20260820/oficial-millones-jubilados-cobran-pension-euros-mes-espana-td/1003744357533_0.html' },
+  { id: 'pensiones-reparto', titulo: 'Ministerio de Inclusión vía Vozpópuli · Reparto de las pensiones por encima y por debajo de 1.000 € (2025)', url: 'https://www.vozpopuli.com/economia/nuevo-hito-en-las-pensiones-mas-de-la-mitad-superan-ya-los-1000-euros-al-mes.html' },
+  { id: 'pensiones-limites', titulo: 'La Moncloa · Pensiones 2026: pensión máxima, mínimas y no contributivas', url: 'https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/inclusion/Paginas/2026/subida-pensiones-2026.aspx' },
+  { id: 'pensiones-minimos', titulo: 'El Debate (datos de la Seguridad Social) · Pensionistas con complemento a mínimos, marzo de 2026', url: 'https://www.eldebate.com/economia/20260417/casi-cada-cuatro-jubilados-recibe-complemento-porque-no-llega-pension-minima_407575.html' },
+  { id: 'tesoro-2026', titulo: 'Ara (Tesoro Público) · Estrategia de financiación 2026: emisión bruta 285.693 M€, neta 55.000 M€', url: 'https://es.ara.cat/economia/cuentas-publicas/tesoro-repetira-2026-emision-neta-55-000-m-deuda-ano_1_5587056.html' },
+  { id: 'torrelodones-2024', titulo: 'BOCM · Presupuesto General del Ayuntamiento de Torrelodones 2024, resumen por capítulos', url: 'https://www.bocm.es/boletin/CM_Orden_BOCM/2024/01/23/BOCM-20240123-96.PDF' },
+  { id: 'housfy-comunidad', titulo: 'Housfy · Ejemplo de presupuesto anual de una comunidad de propietarios', url: 'https://housfy.com/administracion-fincas/guias/post/contabilidad-comunidad-de-propietarios' },
+  { id: 'ine-epf-hogar', titulo: 'INE · EPF 2024: gasto medio por hogar, 34.044 €', url: 'https://www.ine.es/dyngs/Prensa/es/EPF2024.htm' },
+  { id: 'pensiones-mayo', titulo: 'La Moncloa · Nómina de pensiones de mayo de 2026: 10.480.593 pensiones a cerca de 9,5 millones de personas', url: 'https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/inclusion/Paginas/2026/260526-pension-media-datos-mayo.aspx' },
   { id: 'ipc-2026', titulo: 'INE · Indicador adelantado del IPC, octubre de 2026 (4,9 %)', url: 'https://www.ine.es/dyngs/Prensa/adIPC1026.htm' },
 ];
 
