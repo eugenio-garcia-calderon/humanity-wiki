@@ -244,7 +244,7 @@ export function pielBala(F: FormaBala, cup: ReturnType<typeof contornoCupula>) {
  * ruedas que asoman, aleta) y se mide su unión: lo que una parte tapa detrás de
  * otra no cuenta dos veces. Cada parte suma lo que añade a las anteriores.
  */
-export function areaFrontalBala(m: Pick<ModeloBala, 'F' | 'alto' | 'ruedas' | 'aleta'>, extras: { y0: number; y1: number; z: number }[] = []) {
+export function areaFrontalBala(m: Pick<ModeloBala, 'F' | 'alto' | 'ruedas' | 'aleta'>, extras: { y0: number; y1: number; z: number }[] = [], formasPod: FormaBala[] = [m.F]) {
   const F = m.F, DY = 0.005, NY = Math.ceil((m.alto + 0.4) / DY);
   // Media anchura del cuerpo por franja: el máximo de todas las secciones a esa altura.
   const zc = new Float64Array(NY), tramos: [number, number][][] = Array.from({ length: NY }, () => []);
@@ -268,14 +268,16 @@ export function areaFrontalBala(m: Pick<ModeloBala, 'F' | 'alto' | 'ruedas' | 'a
   for (let i = 0; i < NY; i++) if (zc[i] > 0) poner(i, 0, zc[i]);
   const cuerpo = medir();
   // pods: each station's superellipse around z = via/2, and the arms from the skin to the pod
-  const POD = podDe(F), ancho = semiAncho(POD), zp = F.VIA_LAT / 2;
+  // (`formasPod`: since 2026-11-11 the «Bala de cuatro ruedas» also passes its rear pods' view of the shape)
+  for (const Fp of formasPod) {
+  const POD = podDe(Fp), ancho = semiAncho(POD), zp = Fp.VIA_LAT / 2;
   for (let i = 0; i < NY; i++) {
     const y = (i + 0.5) * DY; let w = 0;
     for (let xr = POD[POD.length - 1].x; xr <= POD[0].x; xr += 0.01) w = Math.max(w, ancho(xr, y));
     if (w > 0) poner(i, zp - w, zp + w);
   }
-  for (const b of brazosDe(F)) {
-    const z0 = F.ladoZ(F.X_LAT + b.x, b.yCuerpo); if (!Number.isFinite(z0)) continue;
+  for (const b of brazosDe(Fp)) {
+    const z0 = F.ladoZ(Fp.X_LAT + b.x, b.yCuerpo); if (!Number.isFinite(z0)) continue;
     if (b.yCuerpo === b.y) { for (let i = Math.floor((b.y - b.grueso / 2) / DY); i <= Math.floor((b.y + b.grueso / 2) / DY); i++) poner(i, z0, zp); continue; }
     // the Triciclo lifted (round three): the arm runs down from the body to its pod; each band takes the stretch of it that crosses its height
     const ya = Math.min(b.y, b.yCuerpo) - b.grueso / 2, yb = Math.max(b.y, b.yCuerpo) + b.grueso / 2;
@@ -285,6 +287,7 @@ export function areaFrontalBala(m: Pick<ModeloBala, 'F' | 'alto' | 'ruedas' | 'a
       for (let k = 0; k <= 40; k++) { const u = k / 40; if (Math.abs(yAt(u) - yc) <= b.grueso / 2 + DY / 2) { a = Math.min(a, zAt(u)); c = Math.max(c, zAt(u)); } }
       if (c > a) poner(i, a, c);
     }
+  }
   }
   const conCarenados = medir();
   // wheels: front and rear on the centre line, laterals in the pods (only what shows below the body and the pods counts)

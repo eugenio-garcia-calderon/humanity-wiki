@@ -504,7 +504,9 @@ export interface OpcionesBala {
    * The Triciclo Bala (2026-11-10): the same body, three wheels (`ruedas`), its own
    * cockpit (`cabina`) and, if asked, a spat round the bottom of the rear wheel.
    */
-  triciclo?: CabinaTriciclo & { faldon: { x0: number; x1: number; y0: number; hz: number } | null; ventanas?: OpcionesVentanas; /** Round three: the tail's top as an opening boot lid. */ maletero?: boolean };
+  triciclo?: CabinaTriciclo & { faldon: { x0: number; x1: number; y0: number; hz: number } | null; ventanas?: OpcionesVentanas; /** Round three: the tail's top as an opening boot lid. */ maletero?: boolean;
+    /** The «Bala de cuatro ruedas» (2026-11-11): the rear pods' view of the shape (geometriaTriciclo.ts `formaTrasera`); two rear wheels in pods instead of one in the tail. */
+    traseras?: FormaBala | null };
 }
 
 // ============================================== the Triciclo's solar roof and window frames (round two)
@@ -712,7 +714,9 @@ function armar(o: OpcionesBala): THREE.Group {
 
   // ---------------------------------------------------------------- parts
   add(carenados(F, M));
-  add(ruedas(F, M, !!o.triciclo));
+  const traseras = o.triciclo?.traseras ?? null;
+  if (traseras) add(carenados(traseras, M, true));
+  add(ruedas(F, M, !!o.triciclo, traseras));
   const laAleta = aleta(F, M, o.aleta);
   if (porton) {
     // the boot lid and the fin on it hang from a pivot on its front hinge (the viewer opens it as a boot, `tipo: 'maletero'`)

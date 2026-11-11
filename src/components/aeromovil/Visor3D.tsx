@@ -31,6 +31,7 @@ import {
 } from './geometria';
 import { anguloFuera } from './geometriaTriciclo';
 import { ANGULO_CUPULA, ANGULO_PORTON, PIVOTES_CUPULA, PIVOTE_PORTON, construirCon as construirBalaCon, crearMateriales as materialesBala } from './garaje/balaModelo';
+import { brazosDe } from './garaje/balaMedidas';
 import { GIRO_A1, suspensionA1 } from './geometriaA1';
 import type { Referencia } from './referencias';
 import { vehiculoGaraje } from './garaje';
@@ -857,6 +858,8 @@ function cotasTriciclo(g: THREE.Object3D, M: Mats, m: ModeloTriciclo) {
   const xH = m.xt - 0.30, xTope = (m.sillines.xPiloto + m.sillines.xPasajero) / 2;
   cota([xH, 0, zL], [xH, m.alto, zL], [[[xH - 0.05, m.alto, zL], [xTope, m.alto, zL]]], `alto ${mm(m.alto)}`, [-0.36, 0, 0]);
   cota([m.xF, y, -m.via.del / 2], [m.xF, y, m.via.del / 2], [], `vía ${mm(m.via.del)}`, [0, 0.11, 0]);
+  // four wheels (2026-11-11): the rear track too
+  if (m.traseras) cota([m.xR, y, -m.via.tras / 2], [m.xR, y, m.via.tras / 2], [], `vía trasera ${mm(m.via.tras)}`, [0, 0.11, 0]);
 }
 
 /** Una caja con cantos redondeados (batería, reductora, inversor…). */
@@ -1080,7 +1083,7 @@ function construirBala(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THR
 function repartirBala(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THREE.Group[]>, b: THREE.Group) {
   for (const o of [...b.children]) {
     let capa: CapaId = CAPA_BALA[o.name] ?? 'carenado';
-    if (o.name === 'carenados') {
+    if (o.name === 'carenados' || o.name === 'carenados-traseros') {
       // the arms are suspension, the pods body
       for (const brazo of o.children.filter(c => c.name === 'brazo')) G.suspension.add(brazo);
       capa = 'carenado';
@@ -1110,11 +1113,21 @@ function repartirBala(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THRE
 function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THREE.Group[]>, M: Mats, Mb: ReturnType<typeof materialesBala>, m: ModeloTriciclo, calidad: 'completa' | 'rapida', sinPasajero: boolean) {
   for (const c of CAPAS) vaciar(G[c.k]);
   puertasG.clear();
-  const b = construirBalaCon(m.F, { M: Mb, calidad, cupulaAparte: true, asientos: m.sillines, aleta: m.aleta, triciclo: { recPil: m.rec.piloto, recPas: m.rec.pasajero, man: m.man, pies: m.pies, faldon: m.faldon, ventanas: m.opcVentanas, maletero: true, ...(m.filas ? { filas: m.asientosFilas } : {}) } });
+  const b = construirBalaCon(m.F, { M: Mb, calidad, cupulaAparte: true, asientos: m.sillines, aleta: m.aleta, triciclo: { recPil: m.rec.piloto, recPas: m.rec.pasajero, man: m.man, pies: m.pies, faldon: m.faldon, ventanas: m.opcVentanas, maletero: true, ...(m.filas ? { filas: m.asientosFilas } : {}), traseras: m.traseras } });
   repartirBala(G, puertasG, b);
   for (const t of m.tubos) { if (t.curva) tuboCurvo(G.chasis, t.curva, t.d, M.alu); else tube(G.chasis, t.a, t.b, t.d, M.alu); }
   for (const c of m.baterias) cajaRedonda(G.baterias, [(c.x0 + c.x1) / 2, (c.y0 + c.y1) / 2, 0], [c.x1 - c.x0, c.y1 - c.y0, 2 * c.hz], M.batt, 0.015);
   const iv = m.inversor; cajaRedonda(G.motor, [(iv.x0 + iv.x1) / 2, (iv.y0 + iv.y1) / 2, 0], [iv.x1 - iv.x0, iv.y1 - iv.y0, 2 * iv.hz], M.black, 0.01);
+  const Ft = m.traseras;
+  if (Ft) {
+    // four wheels (2026-11-11): a hub motor in each rear wheel, and in each rear pod an upright on the wheel's inner
+    // side, held by the pod's two faired arms (drawn with the pods): a simple arm, as in front, that does not steer
+    const zInT = Ft.VIA_LAT / 2 - Ft.ANCHO_NEU_LAT / 2 - 0.025, [arT, abT] = brazosDe(Ft);
+    for (const s of [1, -1]) {
+      disk(G.motor, [m.motor.c[0], m.motor.c[1], s * Ft.VIA_LAT / 2], m.motor.r, m.motor.ancho, M.motor);
+      tube(G.suspension, [m.xR, abT.y - 0.02, s * zInT], [m.xR, arT.y + 0.03, s * zInT], 0.03, M.alu);
+    }
+  } else {
   disk(G.motor, [m.motor.c[0], m.motor.c[1], 0], m.motor.r, m.motor.ancho, M.motor);
   // rear: the swing arm's two legs round the tyre, its pivot tube and the mono-shock
   const [px, py] = m.basculante.pivote, [ex, ey] = m.basculante.eje, zb = m.basculante.z;
@@ -1124,6 +1137,7 @@ function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<string,
   tube(G.suspension, [ax, ay, 0], [bx, by, 0], 0.03, M.stanch);
   muelle(G.suspension, [ax + (bx - ax) * 0.2, ay + (by - ay) * 0.2, 0], [ax + (bx - ax) * 0.85, ay + (by - ay) * 0.85, 0], 0.035, 6, M.muelle);
   tube(G.suspension, [ax, ay, -zb], [ax, ay, zb], 0.02, M.susp);
+  }
   // front: in each pod, the upright on the wheel's inner side; the coil-over lies along the upper arm, inside its
   // fairing (pushed by the upright, held at the body), so nothing but the faired arms stands in the air
   const zIn = m.via.del / 2 - m.F.ANCHO_NEU_LAT / 2 - 0.025, [arriba, abajo] = m.brazos;
@@ -1844,5 +1858,5 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     }),
   }), []);
 
-  return <canvas ref={lienzo} className="absolute inset-0 h-full w-full touch-none" aria-label={modelo.tipo === 'a1' ? 'Modelo 3D del Aeromóvil 1' : modelo.tipo === 'bala' ? 'Modelo 3D del Cuadriciclo Bala' : modelo.tipo === 'triciclo' ? 'Modelo 3D del Triciclo Bala' : 'Modelo 3D del Aeromóvil Gota'} />;
+  return <canvas ref={lienzo} className="absolute inset-0 h-full w-full touch-none" aria-label={modelo.tipo === 'a1' ? 'Modelo 3D del Aeromóvil 1' : modelo.tipo === 'bala' ? 'Modelo 3D del Cuadriciclo Bala' : modelo.tipo === 'triciclo' ? (modelo.traseras ? 'Modelo 3D de la Bala de cuatro ruedas' : 'Modelo 3D del Triciclo Bala') : 'Modelo 3D del Aeromóvil Gota'} />;
 });

@@ -200,10 +200,12 @@ function rueda(R: number, ancho: number, M: Mats, nombre: string): THREE.Group {
  * The Triciclo (2026-11-10, `triciclo`): no front centre wheel; the wheels in pods are its front, steering ones
  * ('rueda-direccion', `userData.lado` ±1, turned by the viewer about their vertical axis).
  */
-export function ruedas(F: FormaBala, M: Mats, triciclo = false): THREE.Group {
+export function ruedas(F: FormaBala, M: Mats, triciclo = false, traseras: FormaBala | null = null): THREE.Group {
   const g = new THREE.Group(); g.name = 'ruedas';
   if (triciclo) {
-    const tras = rueda(F.R_DEL, F.ANCHO_NEU, M, 'rueda-trasera'); tras.position.set(-F.BATALLA, F.R_DEL - APLASTADO, 0); g.add(tras);
+    // the «Bala de cuatro ruedas» (2026-11-11): two rear wheels in their pods, at the rear track (`traseras`, the rear pods' view of the shape)
+    if (traseras) for (const s of [1, -1]) { const t = rueda(traseras.R_LAT, traseras.ANCHO_NEU_LAT, M, 'rueda-trasera'); t.position.set(traseras.X_LAT, traseras.R_LAT - APLASTADO, s * traseras.VIA_LAT / 2); g.add(t); }
+    else { const tras = rueda(F.R_DEL, F.ANCHO_NEU, M, 'rueda-trasera'); tras.position.set(-F.BATALLA, F.R_DEL - APLASTADO, 0); g.add(tras); }
     for (const s of [1, -1]) { const d = rueda(F.R_LAT, F.ANCHO_NEU_LAT, M, 'rueda-direccion'); d.position.set(F.X_LAT, F.R_LAT - APLASTADO, s * F.VIA_LAT / 2); d.userData.lado = s; g.add(d); }
     return g;
   }
@@ -219,8 +221,10 @@ export function ruedas(F: FormaBala, M: Mats, triciclo = false): THREE.Group {
 const Y_FLOTACION_POD = 0.39;
 /** Radius of the reference lateral wheel (20″): the pod is drawn for it. */
 const R_LAT_REF = 0.254;
-export function carenados(F: FormaBala, M: Mats): THREE.Group {
-  const g = new THREE.Group(); g.name = 'carenados';
+export function carenados(F: FormaBala, M: Mats, trasero = false): THREE.Group {
+  // `trasero` (2026-11-11, the «Bala de cuatro ruedas»): the rear pods, from the rear pods' view of the shape; named
+  // apart and without `lado`, so the viewer never steers them
+  const g = new THREE.Group(); g.name = trasero ? 'carenados-traseros' : 'carenados';
   const POD = podDe(F), k = F.R_LAT / R_LAT_REF, Y_FLOT = Y_FLOTACION_POD + F.dSuelo * 0.6, semiAnchoPod = semiAncho(POD);
   const casco = piel(POD, { N: 56, sub: 6 });
   // the pod's ends (the Triciclo's pods change length: read from the pod itself; the Cuadriciclo's stay the drawn numbers)
@@ -249,7 +253,7 @@ export function carenados(F: FormaBala, M: Mats): THREE.Group {
   const ambar = barrido(luz, () => [0.007, 0.004], { lados: 8, arriba: new THREE.Vector3(1, 0, 0) });
   for (const s of [1, -1] as const) {
     // `lado`: the Triciclo's viewer turns its (front) pods with the wheels, about this group's vertical axis
-    const c = new THREE.Group(); c.name = 'carenado'; c.userData.lado = s; c.position.set(F.X_LAT, 0, s * F.VIA_LAT / 2); c.scale.z = s; g.add(c);
+    const c = new THREE.Group(); c.name = trasero ? 'carenado-trasero' : 'carenado'; if (!trasero) c.userData.lado = s; c.position.set(F.X_LAT, 0, s * F.VIA_LAT / 2); c.scale.z = s; g.add(c);
     c.add(malla(casco, M.chapa, 'carenado'), malla(falda, M.marinoCalco, 'carenado-falda'), malla(ambar, M.ambar, 'intermitente', false));
     for (const f of filetes) c.add(malla(f, M.rojo, 'filete', false));
     // arms: from inside the body skin to inside the pod

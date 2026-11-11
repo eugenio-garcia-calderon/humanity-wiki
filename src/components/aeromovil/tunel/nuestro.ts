@@ -45,7 +45,7 @@ export function envolventeModelo(m: ModeloBase): Envolvente {
 }
 
 /** Our design. `area` is the editor's frontal area (res.A), the one its Cd refers to (not for the Bala: see `cuerpoBala`). */
-export function cuerpoAeromovil(m: Modelo, area: number, nombre = m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala' : m.tipo === 'triciclo' ? 'Triciclo Bala' : 'Aeromóvil Gota'): CuerpoTunel {
+export function cuerpoAeromovil(m: Modelo, area: number, nombre = m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala' : m.tipo === 'triciclo' ? (m.traseras ? 'Bala de cuatro ruedas' : 'Triciclo Bala') : 'Aeromóvil Gota'): CuerpoTunel {
   if (m.tipo === 'bala') return cuerpoBala(m, nombre);
   if (m.tipo === 'triciclo') return cuerpoTriciclo(m, nombre);
   const xs = m.ruedas.map(r => r.x);
@@ -99,14 +99,17 @@ function silueta(F: ModeloBala['F']) {
  * and the Aptera's front ones), the rear one inside the tail ('dentro'). The pods,
  * their arms, the fin and the rear wheel's spat are outside the silhouette.
  */
-export function cuerpoTriciclo(m: ModeloTriciclo, nombre = 'Triciclo Bala'): CuerpoTunel {
+export function cuerpoTriciclo(m: ModeloTriciclo, nombre = m.traseras ? 'Bala de cuatro ruedas' : 'Triciclo Bala'): CuerpoTunel {
   const { envolvente, area } = silueta(m.F);
   return {
     id: 'aeromovil', nombre, x: 0, z: 0, giro: 0, envolvente, n: N_BALA,
-    area, fuenteArea: 'sección mayor del cuerpo (sin los carenados delanteros ni sus brazos)',
+    area, fuenteArea: m.traseras ? 'sección mayor del cuerpo (sin los carenados ni sus brazos)' : 'sección mayor del cuerpo (sin los carenados delanteros ni sus brazos)',
     ruedas: [
       { d: 2 * m.rF, w: m.F.ANCHO_NEU_LAT, tipo: 'carenado' }, { d: 2 * m.rF, w: m.F.ANCHO_NEU_LAT, tipo: 'carenado' },
-      { d: 2 * m.rR, w: m.F.ANCHO_NEU, tipo: 'dentro' },
+      // the «Bala de cuatro ruedas» (2026-11-11): the two rear wheels in pods, seen as the front ones are
+      ...(m.traseras
+        ? [{ d: 2 * m.rR, w: m.F.ANCHO_NEU, tipo: 'carenado' as const }, { d: 2 * m.rR, w: m.F.ANCHO_NEU, tipo: 'carenado' as const }]
+        : [{ d: 2 * m.rR, w: m.F.ANCHO_NEU, tipo: 'dentro' as const }]),
     ],
     ejes: [m.xF, m.xR],
   };

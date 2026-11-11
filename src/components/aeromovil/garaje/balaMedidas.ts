@@ -95,6 +95,10 @@ export function brazosDe(F: FormaBala) {
   const vientre = F.D.suelo - e;
   return BRAZOS.map((b, i) => {
     const y = i === 1 && F.dSuelo > 0 ? Math.max(b.y * k, vientre + 0.056) : b.y * k;
+    // the rear pods of the «Bala de cuatro ruedas» (2026-11-11): each arm meets the body at least 5.6 cm above the
+    // tail's belly there (`vientreBrazos`), and runs down to its pod if it has to
+    const vb = F.D.vientreBrazos;
+    if (vb != null) { const yc = Math.max(y + e, vb + 0.056 + (i === 0 ? 0.10 : 0)); return { ...b, ...(i === 0 && cuerda != null ? { cuerda } : {}), x: b.x * k, y, yCuerpo: yc }; }
     return { ...b, ...(i === 0 && cuerda != null ? { cuerda } : {}), x: b.x * k, y, yCuerpo: e > 0 ? y + e : y };
   });
 }

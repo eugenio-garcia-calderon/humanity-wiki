@@ -246,7 +246,7 @@ export function VistaPlanos({ modelo }: { modelo: Modelo }) {
   if (modelo.tipo === 'triciclo') return (
     <div className="mx-auto max-w-3xl px-4 py-8">
       <h2 className="text-xl font-semibold text-slate-900">Planos de fabricación</h2>
-      <p className="mt-2 text-sm text-slate-600">Los planos (cuadernas, perfiles, chasis y lista de corte) son del Aeromóvil 1 y del Aeromóvil Gota. El Triciclo Bala todavía no los tiene: su piel es la del Cuadriciclo, que se dibuja de otra manera, y su bastidor de tubos se ve en el 3D («Rayos X» o la capa «Chasis») pero aún no tiene láminas. Descarga su STL en «Exportar a CAD».</p>
+      <p className="mt-2 text-sm text-slate-600">Los planos (cuadernas, perfiles, chasis y lista de corte) son del Aeromóvil 1 y del Aeromóvil Gota. {modelo.traseras ? 'La Bala de cuatro ruedas' : 'El Triciclo Bala'} todavía no los tiene: su piel es la del Cuadriciclo, que se dibuja de otra manera, y su bastidor de tubos se ve en el 3D («Rayos X» o la capa «Chasis») pero aún no tiene láminas. Descarga su STL en «Exportar a CAD».</p>
     </div>
   );
   return <PlanosPiel modelo={modelo} />;
@@ -322,14 +322,14 @@ export function VistaExportar({ modelo, visor, porDefecto, resultados }: { model
     if (!elegidas.length) { setAviso('Marca al menos una capa.'); return; }
     if (!visor.current) { setAviso('Abre «Diseño 3D» una vez para preparar el modelo y vuelve aquí.'); return; }
     setAviso(null);
-    descargar(`${esA1 ? 'aeromovil-1' : esTri ? 'triciclo-bala' : esBala ? 'cuadriciclo-bala' : 'aeromovil-gota'}-${elegidas.join('-')}.stl`, visor.current.exportarSTL(elegidas));
+    descargar(`${esA1 ? 'aeromovil-1' : esTri ? (modelo.tipo === 'triciclo' && modelo.traseras ? 'bala-cuatro-ruedas' : 'triciclo-bala') : esBala ? 'cuadriciclo-bala' : 'aeromovil-gota'}-${elegidas.join('-')}.stl`, visor.current.exportarSTL(elegidas));
   };
   return (
     <div className="mx-auto grid max-w-6xl gap-5 px-4 py-6 md:grid-cols-2">
       <div className="md:col-span-2">
         <h2 className="text-xl font-semibold text-slate-900">Exportar a CAD</h2>
         <p className="max-w-3xl text-sm text-slate-600">{esBala
-          ? `Del ${esTri ? 'Triciclo' : 'Cuadriciclo'} Bala hay STL de lo que ves en el visor, capa a capa. STEP no hay todavía: el script de CadQuery dibuja el Aeromóvil 1 y el Gota, y la piel del Bala se construye de otra manera.`
+          ? `${esTri && modelo.tipo === 'triciclo' && modelo.traseras ? 'De la Bala de cuatro ruedas' : `Del ${esTri ? 'Triciclo' : 'Cuadriciclo'} Bala`} hay STL de lo que ves en el visor, capa a capa. STEP no hay todavía: el script de CadQuery dibuja el Aeromóvil 1 y el Gota, y la piel del Bala se construye de otra manera.`
           : esA1
           ? 'El STEP abre en FreeCAD, Fusion 360, SolidWorks u Onshape con doce capas (Carrocería, Cristales, Paneles solares, Chasis, Suspensión, Dirección, Transmisión, Ruedas, Motor, Baterías, Asientos y Ocupantes) que se ocultan una a una desde el árbol. Las puertas y las tapas de los maleteros son piezas aparte, cerradas; se abren en el visor.'
           : 'El STEP abre en FreeCAD, Fusion 360, SolidWorks u Onshape con diez capas (Carenado, Cristales, Paneles solares, Chasis, Suspensión, Ruedas, Asientos, Ocupantes, Motor y Baterías) que se ocultan una a una desde el árbol. Las puertas se eligen y se abren en el visor; en el STEP la piel va cerrada.'}</p>

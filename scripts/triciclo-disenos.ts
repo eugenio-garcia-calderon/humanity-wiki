@@ -35,6 +35,21 @@ ok(igual(camposTriciclo(deDiseno({ disposicion: 'triciclo' })), TRICICLO_DEFECTO
   ok(m.tipo === 'triciclo' && m.ruedas.length === 3, 'y abre como triciclo, con tres ruedas');
 }
 
+// ── the «Bala de cuatro ruedas» (2026-11-11): a Triciclo design with two rear wheels
+{
+  const base = { ...PARAMETROS_TRICICLO, tVia: 2.1, tBatalla: 2.6 } as Parametros;
+  const viejo = JSON.parse(JSON.stringify(aDiseno(base))); delete viejo.tTraseras; delete viejo.tViaTras;
+  const Q = deDiseno({ ...viejo, tTraseras: 'dos' });
+  ok(Q.tViaTras === 2.1 && camposTriciclo(Q).tTraseras === 'dos', `un diseño guardado sin vía trasera, al pasar a cuatro ruedas: vía trasera = la delantera (${Q.tViaTras} m)`);
+  const m = crearModelo(Q) as ModeloTriciclo, m3 = crearModelo(deDiseno(viejo)) as ModeloTriciclo;
+  ok(m.ruedas.length === 4 && m.cuatro && !m.faldon && m3.ruedas.length === 3 && !m3.cuatro, 'abre con cuatro ruedas (y sin faldón); el mismo diseño sin «dos», con tres');
+  const T4 = camposTriciclo(Q), T3 = camposTriciclo(deDiseno(viejo));
+  const distintos = (Object.keys(T3) as (keyof typeof T3)[]).filter(k => k !== 'tTraseras' && T3[k] !== T4[k]);
+  ok(!distintos.length, `todas las demás medidas son las del triciclo${distintos.length ? ` (distintas: ${distintos.join(', ')})` : ''}`);
+  const sinCuerpo = (mm: ModeloTriciclo) => JSON.stringify(mm.F.envolvente());
+  ok(sinCuerpo(m) === sinCuerpo(m3), 'y la misma carrocería');
+}
+
 // ── clamping
 {
   const P = deDiseno({ disposicion: 'triciclo', tVia: 9, tPilY: -1, tKWh: 999, tRecPil: 90, tGiro: 80, tPodEsc: 0.1, tBatalla: 5 } as Partial<Parametros>);
@@ -108,17 +123,37 @@ else {
     ['Triciclo cambiado', { ...PARAMETROS_TRICICLO, tSuelo: 0.158, tAncho: 1.0, tBatalla: 2.9, tCupFin: 2.5, tKWh: 20, tRecPas: 20, tRuedaDel: 'c14', tVentanas: 'burbuja' } as Partial<Parametros>],
     ['Triciclo bajo y estrecho', { ...PARAMETROS_TRICICLO, tSuelo: 0.05, tAncho: 0.77, tAlto: 1.2, tPilY: 0.30 } as Partial<Parametros>],
   ];
-  const NUEVOS = ['tAsientos', 'tFila2', 'tFila3', 'tFila2X', 'tFila3X', 'tRecFila'];
+  // (2026-11-11: and the «Bala de cuatro ruedas»'s two, which with one rear wheel change nothing)
+  const NUEVOS = ['tAsientos', 'tFila2', 'tFila3', 'tFila2X', 'tFila3X', 'tRecFila', 'tTraseras', 'tViaTras'];
   const sinNuevos = (o: object) => Object.fromEntries(Object.entries(o).filter(([k]) => !NUEVOS.includes(k)));
   for (const [nombre, P] of triciclos) {
     const a = d.deDiseno(P), b = deDiseno(P);
     ok(igual(sinNuevos(a), sinNuevos(b)), `${nombre}: abre con los mismos parámetros que en main (más los campos nuevos, por defecto)`);
     const ma = g.crearModelo(a), mb2 = crearModelo(b);
     const ra = limpio(g.calcular(ma, g.areas(ma))), rb = limpio(calcular(mb2, areas(mb2)));
-    delete rb.triciclo.maletero; delete rb.triciclo.ocupantes;
-    // the boot is a new check at the end of the list
-    rb.comprobaciones = rb.comprobaciones.filter((c: { nombre: string }) => !c.nombre.startsWith('Maletero'));
+    // (only against a main from before round three: since it merged, main has them too and they must match as well;
+    // 2026-11-11, found with the «Bala de cuatro ruedas»: this failed against main itself)
+    if (!ra.triciclo.maletero) {
+      delete rb.triciclo.maletero; delete rb.triciclo.ocupantes;
+      // the boot is a new check at the end of the list
+      rb.comprobaciones = rb.comprobaciones.filter((c: { nombre: string }) => !c.nombre.startsWith('Maletero'));
+    }
     ok(igual(ra, rb), `${nombre}: mismos resultados que en main (área, masas, centro de gravedad, vuelco, cabezas, comprobaciones)`);
+  }
+  // 2026-11-11 (the «Bala de cuatro ruedas»): with one rear wheel, every mesh of the whole vehicle as on main
+  {
+    const bm = await import(`${main}/src/components/aeromovil/garaje/balaModelo.ts`);
+    const todo = (cons: typeof construirCon, mats: unknown, m: ModeloTriciclo, extra: object) => {
+      const gr = cons(m.F, { M: mats as ReturnType<typeof crearMateriales>, cupulaAparte: true, asientos: m.sillines, aleta: m.aleta, triciclo: { recPil: m.rec.piloto, recPas: m.rec.pasajero, man: m.man, pies: m.pies, faldon: m.faldon, ventanas: m.opcVentanas, maletero: true, ...(m.filas ? { filas: m.asientosFilas } : {}), ...extra } });
+      gr.updateMatrixWorld(true); const o: string[] = [];
+      gr.traverse(x => { const q = x as THREE.Mesh; if (!q.isMesh) return; const p = q.geometry.getAttribute('position'), v = new THREE.Vector3(); let h = 0; for (let i = 0; i < p.count; i++) { v.fromBufferAttribute(p as THREE.BufferAttribute, i).applyMatrix4(q.matrixWorld); h += v.x * 1.3 + v.y * 2.7 + v.z * 3.1; } o.push(`${q.name}:${p.count}:${h.toFixed(6)}`); });
+      return o;
+    };
+    for (const [nombre, P] of triciclos) {
+      const ma = g.crearModelo(d.deDiseno(P)), mb2 = crearModelo(deDiseno(P)) as ModeloTriciclo;
+      const a = todo(bm.construirCon, bm.crearMateriales(), ma, {}), b = todo(construirCon, crearMateriales(), mb2, { traseras: mb2.traseras });
+      ok(igual(a, b), `${nombre}: todas las mallas del vehículo (${a.length}: carrocería, carenados, ruedas, cabina) iguales que en main, vértice a vértice`);
+    }
   }
   for (const [nombre, P] of viejos) {
     const a = d.deDiseno(P), b = deDiseno(P);
