@@ -65,6 +65,12 @@
       "ruta": "src/components/aeromovil/garaje/balaPiezas.ts",
       "motivo": "Triciclo: tres filas y maletero",
       "desde": "2026-11-11T21:14:34.127Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/geometria.ts",
+      "motivo": "Triciclo: tres filas y maletero",
+      "desde": "2026-11-11T21:14:36.712Z"
     }
   ]
 }
