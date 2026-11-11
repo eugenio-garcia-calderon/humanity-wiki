@@ -11009,6 +11009,7 @@ Eugenio: «permite que el triciclo bala se le pueda modificar más los parámetr
 - En el camino del medio los dos cerebros están a la misma altura, así que la telepatía va casi en línea recta de una mente a la otra. El objeto (visión extraocular) queda justo debajo del camino y las montañas (visión remota), abajo a la derecha. Los caminos del sueño bajan desde los dos cerebros.
 - Solo cambia el dibujo. El esquema con texto mantiene su orden (vigilia, sueño, meditación).
 - Comprobado en Chrome sin cabeza a 1440 px y a 390 px. No hubo errores en la consola.
+
 ### 2026-11-11 — Observatorio de Polarización en luzhumanidad.com
 
 Eugenio: «publícalo en Luzhumanidad como "Observatorio de Polarización"».
@@ -11031,6 +11032,29 @@ Eugenio pidió simplificarlo y reordenarlo. `public/observatorio-polarizacion/in
 - Migración 0195: actualiza la ficha del proyecto (subtítulo y dos párrafos) solo si nadie la ha editado, y sube `version`. Probada dos veces en un Postgres temporal.
 - Portada regenerada.
 
+## 2026-11-11 — Conciencia: seres humanos de cuerpo entero, con sus niveles de energía
+
+- Eugenio: «que los seres humanos sean una silueta entera del ser humano con todos sus niveles energéticos, más que solamente la cabeza. Y quita "ser humano 1" y "ser humano 2" como título, porque ya se ve que son seres humanos».
+- **`Ser.tsx`**, compartido por las dos vistas. Dibuja a la persona de frente y de cuerpo entero, con:
+  - los siete centros de energía, de la raíz a la coronilla, en sus colores tradicionales, unidos por un canal;
+  - el brillo que rodea el cuerpo;
+  - el cerebro iluminado.
+
+  En el dibujo «Arte» añade además las capas del aura (emocional, la malla del campo neuronal, mental y espiritual), que respiran. En el esquema, el cuerpo va dentro del círculo de su campo, como el hombre de Vitruvio.
+- **Dibujo «Arte»**, conexiones:
+  - la voz sale de la boca y llega al oído del otro;
+  - la meditación sale del tercer ojo, y la telepatía pasa por debajo de la bombilla y sube hasta el tercer ojo del otro;
+  - el sueño baja desde la coronilla;
+  - el lugar lejano (visión remota) se ve ahora como una visión en una ventana redonda, porque los cuerpos ocupan los lados.
+- **Sin títulos**: en el mapa ya no se dibuja el nombre de las personas, aunque se ve el de debajo («campo neuronal»). El nombre se sigue viendo al pinchar en la persona, en el panel. Se quita al medir (`geometria.ts`), así que vale también para un mapa ya guardado. En el editor, «Nombre a la» pasa a llamarse «Texto a la».
+- Los textos que decían «ser humano 1 / 2» hablan ahora del de la izquierda y el de la derecha, porque el número ya no se ve en ningún sitio. Cambian en las explicaciones, los recorridos y las tarjetas de «Cómo funciona». Los títulos del panel pasan a «Ser humano de la izquierda / de la derecha».
+- Las animaciones del esquema (voz, oído, cerebro) toman los puntos del cuerpo nuevo.
+- Imagen de la tarjeta del proyecto en luzhumanidad.com regenerada con el dibujo nuevo.
+- **Comprobado** en Chrome sin cabeza con Postgres local, a 1440 px y a 390 px:
+  - las dos vistas y el recorrido de la vigilia;
+  - el ancho de móvil.
+
+  No hubo errores en la consola.
 ### 2026-11-11 — Modelo socioeconómico: los tramos se suman al precio, como el IVA
 - Eugenio: «como el IVA». El 0, 20 o 40 % se suma al precio sin impuesto (y al sueldo); antes era una parte del pago. Una cena de 40 € cuesta 56 € y deja 16 € en el fondo.
 - `fraccion(t) = t/(1+t)` en `cuentasPais`, el caso y la cadena del pan; tabla de cinco pagos con «se paga en total»; hostelería ≈ +27 %.

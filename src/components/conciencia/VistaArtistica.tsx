@@ -3,7 +3,8 @@
 // pero con símbolos, arte para que la gente lo entienda sin el lenguaje»).
 //
 // It is a fixed picture, not the editable map. Person 1 (magenta) on the left,
-// person 2 (orange) on the right, the lattice in the centre, and three lanes,
+// person 2 (orange) on the right — whole bodies with their energy centres and
+// aura (`Ser.tsx`) — the lattice in the centre, and three lanes,
 // top to bottom (order set by Eugenio on 2026-11-11: sun, lotus, moon —
 // meditation sits between waking and sleep):
 //   sun   — awake: a voice leaves the mouth as a code of shapes, the air of the
@@ -23,7 +24,7 @@ import { Cherry, Ear, Eye, Hand, Lightbulb, MoveHorizontal, Wind } from 'lucide-
 import { cn } from '../../utils/cn';
 import { TINTES, type Canal, type MapaConciencia } from '../../data/concienciaMapa';
 import { aleatorio, type Punto } from './geometria';
-import { CABEZA } from './MapaSintergico';
+import { Ser, parteDelSer, type Parte } from './Ser';
 
 const { ORO, VIOLETA, AZUL, TURQUESA, ROSA, CORAL, LUZ } = TINTES;
 // Night-sky paint, the same as the schema's. Artwork, not interface chrome.
@@ -35,18 +36,23 @@ const idc = (c: string) => c.replace('#', '');
 
 // ── Layout (world units; the drawing is 1800 × 1000) ─────────────────────────
 const W = 1800, H = 1000;
-const S = 1.55;                                   // head scale
+const ALTO_SER = 700;                             // height of each being
 const P1 = { x: 190, y: 500 }, P2 = { x: 1610, y: 500 };
 const MZ = { x: 900, y: 500, rx: 235, ry: 462 };  // the matrix
 const Y: Record<Canal, number> = { vigilia: 215, meditacion: 515, onirico: 815 };
 const SOBRE = 88;                                 // medallion above its lane's flow
 
-/** A point of a head (mouth, ear, brain) in world units; offsets from MapaSintergico's profile. */
-const en = (p: Punto, espejo: boolean, dx: number, dy: number): Punto => ({ x: p.x + (espejo ? -dx : dx) * S, y: p.y + dy * S });
-const BOCA_1 = en(P1, false, 62, 20);
-const CEREBRO_1 = en(P1, false, 6, -28);
-const OIDO_2 = en(P2, true, 2, -2);
-const CEREBRO_2 = en(P2, true, 6, -28);
+/** A point of a being (mouth, ear, brain, crown) in world units. Person 2 faces the other way. */
+const en = (p: Punto, espejo: boolean, parte: Parte): Punto => {
+  const q = parteDelSer(parte, ALTO_SER, espejo);
+  return { x: p.x + q.x, y: p.y + q.y };
+};
+const BOCA_1 = en(P1, false, 'boca');
+const CEREBRO_1 = en(P1, false, 'cerebro');
+const CORONA_1 = en(P1, false, 'corona');
+const OIDO_2 = en(P2, true, 'oido');
+const CEREBRO_2 = en(P2, true, 'cerebro');
+const CORONA_2 = en(P2, true, 'corona');
 
 const f = (n: number) => n.toFixed(1);
 
@@ -157,27 +163,11 @@ function Icono({ I, x, y, tam, color, ancho = 1.8 }: { I: typeof Eye; x: number;
   return <I x={x - tam / 2} y={y - tam / 2} width={tam} height={tam} color={color} strokeWidth={ancho} aria-hidden />;
 }
 
-function Persona({ p, color, espejo }: { p: Punto; color: string; espejo?: boolean }) {
-  const c = idc(color);
+function Persona({ p, color }: { p: Punto; color: string }) {
   return (
     <g transform={`translate(${p.x},${p.y})`} pointerEvents="none">
-      <circle r={255} fill={`url(#va-rg-${c})`} opacity={0.2} className="va-respira" />
-      {/* The neuronal field is a distortion of the lattice, so it is the same mesh. */}
-      <g className="va-giro-lento"><circle r={196} fill={`url(#va-malla-${c})`} mask="url(#va-fundido)" /></g>
-      <circle r={196} fill="none" stroke={color} strokeOpacity={0.35} strokeDasharray="2 10" className="va-giro" />
-      <circle r={134} fill={TINTA} opacity={0.5} />
-      <circle r={134} fill="none" stroke={color} strokeOpacity={0.6} strokeWidth={1.4} />
-      <g transform={`scale(${espejo ? -S : S},${S})`}>
-        <path d={CABEZA} fill={`url(#va-cabeza-${c})`} stroke={color} strokeWidth={1.6 / S} strokeOpacity={0.9} />
-        <circle cx={6} cy={-28} r={32} fill={`url(#va-rg-${c})`} className="va-latido" />
-        <circle cx={6} cy={-28} r={7} fill={LUZ} opacity={0.95} />
-        {[[-14, -38], [24, -44], [-6, -6], [22, -14], [-22, -18]].map(([px, py], i) => (
-          <g key={i}>
-            <line x1={6} y1={-28} x2={px} y2={py} stroke={LUZ} strokeOpacity={0.35} strokeWidth={0.8 / S} />
-            <circle cx={px} cy={py} r={2.4} fill={LUZ} opacity={0.75} />
-          </g>
-        ))}
-      </g>
+      <ellipse cy={-20} rx={250} ry={470} fill={`url(#va-halo-${idc(color)})`} className="va-respira" />
+      <Ser alto={ALTO_SER} color={color} luz={LUZ} pre="va" />
     </g>
   );
 }
@@ -187,8 +177,8 @@ function Persona({ p, color, espejo }: { p: Punto; color: string; espejo?: boole
 /** Awake: voice → a code of shapes → the air vibrates → the ear → the other brain lights up. */
 function Vigilia() {
   const y = Y.vigilia;
-  const dBoca = `M${f(BOCA_1.x)},${f(BOCA_1.y)} C320,440 360,320 432,268`;
-  const dOido = `M1392,266 C1470,300 1550,380 ${f(OIDO_2.x)},${f(OIDO_2.y - 8)}`;
+  const dBoca = `M${f(BOCA_1.x)},${f(BOCA_1.y)} C290,236 360,270 430,268`;
+  const dOido = `M1392,266 C1450,270 1515,${f(OIDO_2.y + 18)} ${f(OIDO_2.x)},${f(OIDO_2.y)}`;
   const sentidos = [Eye, Ear, Hand, Wind, Cherry];
   return (
     <g>
@@ -265,8 +255,9 @@ function Vigilia() {
 /** Asleep: both fields stretch out and merge in the hypercampo; dreams travel both ways. */
 function Onirico() {
   const y = Y.onirico;
-  const d1 = `M${f(CEREBRO_1.x)},${f(CEREBRO_1.y)} C230,640 330,${y} 450,${y}`;
-  const d2 = `M${f(CEREBRO_2.x)},${f(CEREBRO_2.y)} C1570,640 1470,${y} 1350,${y}`;
+  // Dreaming starts at the crown and reaches down to the lane.
+  const d1 = `M${f(CORONA_1.x + 8)},${f(CORONA_1.y)} C360,140 330,${y} 450,${y}`;
+  const d2 = `M${f(CORONA_2.x - 8)},${f(CORONA_2.y)} C1440,140 1470,${y} 1350,${y}`;
   const inf = lemniscata(900, y, 100);
   const suenos: { forma: ReactNode; color: string }[] = [
     { forma: <path d={estrella(7)} fill={LUZ} />, color: LUZ },
@@ -331,12 +322,15 @@ function Onirico() {
 /** Meditating: coherent waves, and three beams of direct perception. */
 function Meditacion() {
   const y = Y.meditacion;
-  const d1 = `M${f(CEREBRO_1.x)},${f(CEREBRO_1.y)} C290,440 360,${y} 440,${y}`;
-  // In the middle lane the two brains are level: telepathy goes straight across.
-  const telepatia = `M930,${y} C1130,${y - 8} 1400,${y - 36} ${f(CEREBRO_2.x - 6)},${f(CEREBRO_2.y + 10)}`;
-  const OBJ = { x: 1250, y: y + 85 }, LEJOS = { x: 1675, y: y + 268 };
-  const extraocular = `M930,${y + 5} C1030,${y + 20} 1120,${y + 72} ${OBJ.x - 42},${OBJ.y}`;
-  const remota = `M930,${y + 10} C1150,${y + 92} 1420,${y + 292} ${LEJOS.x - 78},${LEJOS.y + 4}`;
+  // From the third eye, the centre of direct perception.
+  const d1 = `M${f(CEREBRO_1.x + 12)},${f(CEREBRO_1.y)} C300,190 335,${y} 440,${y}`;
+  // Telepathy reaches the other's third eye.
+  // It runs low, under the bulb, and rises inside the other's aura.
+  const telepatia = `M930,${y} C1250,${y} 1480,${y + 5} 1522,${y - 110} C1550,${y - 200} 1572,${f(CEREBRO_2.y + 40)} ${f(CEREBRO_2.x - 10)},${f(CEREBRO_2.y)}`;
+  // The object is near; the far place is seen as a vision, small, in a round window.
+  const OBJ = { x: 1180, y: y + 82 }, LEJOS = { x: 1350, y: y + 118 };
+  const extraocular = `M930,${y + 5} C1010,${y + 18} 1080,${y + 64} ${OBJ.x - 42},${OBJ.y}`;
+  const remota = `M930,${y + 10} C1060,${y + 70} 1180,${y + 150} ${LEJOS.x - 50},${LEJOS.y + 6}`;
   return (
     <g>
       <Haz d={d1} color={VIOLETA} />
@@ -379,15 +373,21 @@ function Meditacion() {
         <circle cx={1} cy={3} r={1.2} fill={LUZ} />
       </g>
 
-      {/* Remote vision: a landscape far away */}
+      {/* Remote vision: a far landscape, seen as a vision in a round window */}
       <Haz d={remota} color={VIOLETA} punteado />
       <Chispas d={remota} color={VIOLETA} n={3} dur={4.4} r={3} />
       <g transform={`translate(${LEJOS.x},${LEJOS.y})`}>
-        <ellipse rx={110} ry={50} fill={`url(#va-rg-${idc(VIOLETA)})`} opacity={0.45} className="va-latido" style={{ animationDelay: '-1s' }} />
-        <line x1={-100} y1={30} x2={100} y2={30} stroke={VIOLETA} strokeOpacity={0.4} />
-        <path d="M-90,30 L-52,-12 L-34,6 L-2,-36 L28,2 L46,-12 L90,30 Z" fill="url(#va-montana)" stroke={VIOLETA} strokeOpacity={0.7} strokeWidth={1.4} strokeLinejoin="round" />
-        <path d="M-2,-36 L-12,-22 L-4,-25 L3,-20 L9,-27 Z" fill={LUZ} opacity={0.85} />
-        <circle cx={52} cy={-34} r={7} fill={LUZ} opacity={0.9} />
+        <circle r={74} fill={`url(#va-rg-${idc(VIOLETA)})`} opacity={0.4} className="va-latido" style={{ animationDelay: '-1s' }} />
+        <circle r={46} fill={TINTA} />
+        <g clipPath="url(#va-ventana)">
+          <circle cy={-10} r={46} fill={`url(#va-rg-${idc(VIOLETA)})`} opacity={0.5} />
+          <circle cx={20} cy={-20} r={6} fill={LUZ} opacity={0.95} />
+          <path d="M-60,16 L-30,-8 L-19,2 L1,-22 L21,0 L31,-8 L60,16 V60 H-60 Z" fill="url(#va-montana)" stroke={VIOLETA} strokeOpacity={0.8} strokeWidth={1.2} strokeLinejoin="round" />
+          <path d="M1,-22 L-6,-13 L0,-15 L5,-11 L9,-16 Z" fill={LUZ} opacity={0.9} />
+          <path d="M-46,26 H46 M-38,34 H38" stroke={LUZ} strokeOpacity={0.25} strokeWidth={1} />
+        </g>
+        <circle r={46} fill="none" stroke={VIOLETA} strokeOpacity={0.85} strokeWidth={1.6} />
+        <circle r={53} fill="none" stroke={VIOLETA} strokeOpacity={0.35} strokeDasharray="2 6" className="va-giro" />
       </g>
 
       {/* Lotus: meditating */}
@@ -462,7 +462,7 @@ export function VistaArtistica({ mapa, foco, onFoco, onClaves, className }: {
   return (
     <div className={cn('relative', className)}>
       <p className="sr-only">
-        Dibujo sin palabras de la teoría sintérgica. A la izquierda, una persona (magenta); a la derecha, otra (naranja); en el centro,
+        Dibujo sin palabras de la teoría sintérgica. A la izquierda, una persona de cuerpo entero (magenta), con sus siete centros de energía, su aura y la malla de su campo neuronal; a la derecha, otra (naranja); en el centro,
         la matriz del universo. Arriba, con el sol, despiertos: la voz sale de la boca como un código de formas, hace vibrar el aire de
         la matriz, llega al oído y el otro cerebro la descifra. En medio, con el loto, meditando: ondas coherentes y tres rayos de luz: a
         la mente del otro (telepatía), a un objeto cercano (visión extraocular) y a un paisaje lejano (visión remota). Abajo, con la luna,
@@ -521,6 +521,7 @@ export function VistaArtistica({ mapa, foco, onFoco, onClaves, className }: {
               <circle cx={9} cy={-7} r={17} fill="#000" />
             </mask>
             <filter id="va-difuso" x="-20%" y="-50%" width="140%" height="200%"><feGaussianBlur stdDeviation="6" /></filter>
+            <clipPath id="va-ventana"><circle r={46} /></clipPath>
             <clipPath id="va-clip-matriz"><ellipse rx={MZ.rx} ry={MZ.ry} /></clipPath>
             <clipPath id="va-recorte-coherencia"><rect x={440} y={Y.meditacion - 46} width={390} height={92} rx={40} /></clipPath>
             <linearGradient id="va-montana" x1="0" x2="0" y1="0" y2="1">
@@ -608,7 +609,7 @@ export function VistaArtistica({ mapa, foco, onFoco, onClaves, className }: {
           </g>
 
           <Persona p={P1} color={ROSA} />
-          <Persona p={P2} color={CORAL} espejo />
+          <Persona p={P2} color={CORAL} />
 
           {/* The three lanes: tap one to look at it alone */}
           {CARRILES.map(({ canal, color, nombre, Dibujo }) => (

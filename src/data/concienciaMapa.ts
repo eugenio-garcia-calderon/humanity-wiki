@@ -45,7 +45,7 @@ export interface Nodo {
   /** Solo «franja» y «matriz»: su ancho y alto propios (antes de `tam`). */
   ancho?: number;
   alto?: number;
-  /** «campo»: dónde va el nombre y hacia dónde mira la cabeza. «matriz»: nombre dentro (sin valor) o debajo/encima. */
+  /** «campo»: dónde va el texto (el nombre ya no se dibuja) y hacia qué lado mira (de dónde salen la voz y el oído en la animación). «matriz»: nombre dentro (sin valor) o debajo/encima. */
   etiquetaPos?: PosEtiqueta;
   espejo?: boolean;
   /** Id de un estudio de `concienciaEstudios.ts`. Nunca una URL libre. */
@@ -185,13 +185,13 @@ export const MAPA_POR_DEFECTO: MapaConciencia = {
     // ── The two conscious beings ─────────────────────────────────────────
     {
       id: 'persona-a', x: 175, y: 520, forma: 'campo', icono: 'cerebro', color: ROSA, etiquetaPos: 'abajo', tam: 1.3,
-      titulo: 'Ser humano 1', subtitulo: 'campo neuronal',
+      titulo: 'Ser humano de la izquierda', subtitulo: 'campo neuronal',
       explicacion: 'Cada cerebro genera un campo de energía —Grinberg lo llamó campo neuronal— con la misma forma de malla que la matriz, porque es una distorsión de ella. Ese campo es lo que interactúa con la matriz y, a través de ella, con otros seres. Cuanta más coherencia tiene (más «sintergia», de síntesis + energía), más directa es la percepción.',
     },
     {
       id: 'persona-b', x: 1625, y: 520, forma: 'campo', icono: 'cerebro', color: CORAL, etiquetaPos: 'abajo', espejo: true, tam: 1.3,
-      titulo: 'Ser humano 2', subtitulo: 'campo neuronal',
-      explicacion: 'El otro ser consciente. Recibe lo que viene del ser humano 1 de tres maneras: por los sentidos (vigilia), por el hipercampo (sueño) y por la percepción directa (meditación).',
+      titulo: 'Ser humano de la derecha', subtitulo: 'campo neuronal',
+      explicacion: 'El otro ser consciente. Recibe lo que viene del ser humano de la izquierda de tres maneras: por los sentidos (vigilia), por el hipercampo (sueño) y por la percepción directa (meditación).',
     },
 
     // ── The five keys of each lane: folded, they open in a window ───────
@@ -233,7 +233,7 @@ export const MAPA_POR_DEFECTO: MapaConciencia = {
     {
       id: 'codifica', x: 500, y: 228, forma: 'capacidad', icono: 'voz', color: ORO,
       titulo: 'Codifica',
-      explicacion: 'El ser humano 1 tiene una idea y la traduce a un código que ha aprendido: las palabras y los gestos de su idioma y de su cultura. Su voz convierte ese código en vibración.',
+      explicacion: 'El ser humano de la izquierda tiene una idea y la traduce a un código que ha aprendido: las palabras y los gestos de su idioma y de su cultura. Su voz convierte ese código en vibración.',
     },
     {
       id: 'vibra', x: 900, y: 228, forma: 'capacidad', icono: 'ondas', color: ORO,
@@ -243,7 +243,7 @@ export const MAPA_POR_DEFECTO: MapaConciencia = {
     {
       id: 'decodifica', x: 1300, y: 228, forma: 'capacidad', icono: 'oido', color: ORO,
       titulo: 'Decodifica',
-      explicacion: 'El oído del ser humano 2 convierte la vibración en impulsos nerviosos. Su campo neuronal los decodifica con el mismo código cultural y lingüístico, y aparece el sentido: entiende lo que el otro quiso decir.',
+      explicacion: 'El oído del ser humano de la derecha convierte la vibración en impulsos nerviosos. Su campo neuronal los decodifica con el mismo código cultural y lingüístico, y aparece el sentido: entiende lo que el otro quiso decir.',
     },
 
     // ── Lane 2 · Dreaming ───────────────────────────────────────────────
@@ -319,11 +319,11 @@ export const RECORRIDOS: Record<Canal, { nombre: string; color: string; pasos: P
     nombre: 'Vigilia: por los sentidos', color: ORO,
     pasos: [
       { titulo: 'Una idea se codifica', resaltar: ['persona-a', 'codifica'],
-        texto: 'El ser humano 1 quiere decir algo. Su campo neuronal traduce la idea a palabras de su idioma: un código cultural y lingüístico aprendido.' },
+        texto: 'El ser humano de la izquierda quiere decir algo. Su campo neuronal traduce la idea a palabras de su idioma: un código cultural y lingüístico aprendido.' },
       { titulo: 'La voz hace vibrar el aire', resaltar: ['persona-a', 'codifica', 'vibra'],
         texto: 'Al hablar, empuja el aire. Se forma una onda mecánica —compresiones y expansiones— que viaja a través de la matriz. La onda no lleva el significado, solo la forma del sonido.' },
       { titulo: 'El oído recibe la vibración', resaltar: ['vibra', 'decodifica', 'persona-b'],
-        texto: 'La vibración llega al oído del ser humano 2, que la convierte en impulsos nerviosos: de algo físico a algo eléctrico.' },
+        texto: 'La vibración llega al oído del ser humano de la derecha, que la convierte en impulsos nerviosos: de algo físico a algo eléctrico.' },
       { titulo: 'El campo neuronal le da sentido', resaltar: ['decodifica', 'persona-b'],
         texto: 'Su campo neuronal decodifica los impulsos con el mismo código cultural y lingüístico, y aparece el sentido. Si los dos no compartieran el código, la vibración llegaría igual, pero no se entendería.' },
     ],
@@ -347,7 +347,7 @@ export const RECORRIDOS: Record<Canal, { nombre: string; color: string; pasos: P
       { titulo: 'El campo se vuelve coherente', resaltar: ['persona-a', 'coherencia'],
         texto: 'Meditando, entre la vigilia y el sueño, la mente se aquieta y la malla del campo neuronal se ordena: alta sintergia.' },
       { titulo: 'Telepatía: con otros seres', resaltar: ['coherencia', 'telepatia', 'persona-b'],
-        texto: 'La información pasa de un campo neuronal a otro directamente, a través de la matriz, sin voz ni contacto. El ser humano 2 la recibe como una imagen o una sensación.' },
+        texto: 'La información pasa de un campo neuronal a otro directamente, a través de la matriz, sin voz ni contacto. El ser humano de la derecha la recibe como una imagen o una sensación.' },
       { titulo: 'Visión extraocular: con lo cercano', resaltar: ['coherencia', 'extraocular', 'objeto-cercano'],
         texto: 'El campo percibe un objeto cercano —una imagen, un color, una letra— sin usar los ojos.' },
       { titulo: 'Visión remota: con lo lejano', resaltar: ['coherencia', 'remota', 'lugar-lejano'],
