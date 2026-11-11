@@ -11,6 +11,12 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "Triciclo: tres filas y maletero",
       "desde": "2026-11-11T21:14:07.882Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md",
+      "motivo": "Triciclo: tres filas y maletero",
+      "desde": "2026-11-11T21:14:10.516Z"
     }
   ]
 }
