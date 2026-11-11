@@ -11,6 +11,12 @@
       "ruta": "memory/03_DECISIONS.md",
       "motivo": "Bala de cuatro ruedas",
       "desde": "2026-11-11T23:56:34.390Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "Bala de cuatro ruedas",
+      "desde": "2026-11-11T23:56:36.787Z"
     }
   ]
 }
