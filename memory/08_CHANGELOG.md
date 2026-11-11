@@ -11017,3 +11017,27 @@ Eugenio: «publícalo en Luzhumanidad como "Observatorio de Polarización"».
 - Contenido: simulador (ideología × dependencia del grupo, con la distribución real del CIS 3577), cien años de España (1923-2026) en campanas con sus consecuencias, cinco tipos ideales más libertarismo y socialismo patriótico, líderes por dirección, etiquetas, miradas, encuadres, identidades y eje territorial, escalera de Glasl, consecuencias por fase, contradicciones, test de 15 ítems, salida y método con referencias.
 - Revisado por un evaluador ciego en tres rondas (5,7 → 6,85 → 7,2) antes de añadir historia, consecuencias y líderes; esas tres secciones no se han vuelto a evaluar.
 - Migración probada dos veces en un Postgres temporal (crea una sola página y una sola fila; elige Sociología antes que Política).
+
+## 2026-11-11 — Conciencia: seres humanos de cuerpo entero, con sus niveles de energía
+
+- Eugenio: «que los seres humanos sean una silueta entera del ser humano con todos sus niveles energéticos, más que solamente la cabeza. Y quita "ser humano 1" y "ser humano 2" como título, porque ya se ve que son seres humanos».
+- **`Ser.tsx`**, compartido por las dos vistas. Dibuja a la persona de frente y de cuerpo entero, con:
+  - los siete centros de energía, de la raíz a la coronilla, en sus colores tradicionales, unidos por un canal;
+  - el brillo que rodea el cuerpo;
+  - el cerebro iluminado.
+
+  En el dibujo «Arte» añade además las capas del aura (emocional, la malla del campo neuronal, mental y espiritual), que respiran. En el esquema, el cuerpo va dentro del círculo de su campo, como el hombre de Vitruvio.
+- **Dibujo «Arte»**, conexiones:
+  - la voz sale de la boca y llega al oído del otro;
+  - la meditación sale del tercer ojo, y la telepatía pasa por debajo de la bombilla y sube hasta el tercer ojo del otro;
+  - el sueño baja desde la coronilla;
+  - el lugar lejano (visión remota) se ve ahora como una visión en una ventana redonda, porque los cuerpos ocupan los lados.
+- **Sin títulos**: en el mapa ya no se dibuja el nombre de las personas, aunque se ve el de debajo («campo neuronal»). El nombre se sigue viendo al pinchar en la persona, en el panel. Se quita al medir (`geometria.ts`), así que vale también para un mapa ya guardado. En el editor, «Nombre a la» pasa a llamarse «Texto a la».
+- Los textos que decían «ser humano 1 / 2» hablan ahora del de la izquierda y el de la derecha, porque el número ya no se ve en ningún sitio. Cambian en las explicaciones, los recorridos y las tarjetas de «Cómo funciona». Los títulos del panel pasan a «Ser humano de la izquierda / de la derecha».
+- Las animaciones del esquema (voz, oído, cerebro) toman los puntos del cuerpo nuevo.
+- Imagen de la tarjeta del proyecto en luzhumanidad.com regenerada con el dibujo nuevo.
+- **Comprobado** en Chrome sin cabeza con Postgres local, a 1440 px y a 390 px:
+  - las dos vistas y el recorrido de la vigilia;
+  - el ancho de móvil.
+
+  No hubo errores en la consola.

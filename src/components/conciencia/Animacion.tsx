@@ -11,6 +11,7 @@
 import type { ReactNode } from 'react';
 import type { Canal, Nodo } from '../../data/concienciaMapa';
 import { colorSeguro, FUENTE, type Medida, type Punto } from './geometria';
+import { parteDelSer } from './Ser';
 
 interface Ctx { porId: Map<string, Nodo>; medidas: Map<string, Medida> }
 
@@ -20,10 +21,9 @@ const idColor = (c: string) => colorSeguro(c).replace('#', '');
 
 /** Where the mouth, the ear and the brain of a field's head are, in world units. */
 function cabeza(n: Nodo, m: Medida, parte: 'boca' | 'oido' | 'cerebro'): Punto {
-  const s = (m.r / 80) * 0.95;
-  const lado = n.espejo ? -1 : 1;
-  const p = parte === 'boca' ? { x: 62, y: 20 } : parte === 'oido' ? { x: 2, y: -2 } : { x: 6, y: -28 };
-  return { x: n.x + lado * p.x * s, y: n.y + p.y * s };
+  // The being is drawn 1.9 × r tall inside its circle (MapaSintergico, `Ser`).
+  const p = parteDelSer(parte, m.r * 1.9, n.espejo);
+  return { x: n.x + p.x, y: n.y + p.y };
 }
 
 const linea = (pts: Punto[]) => pts.length ? 'M' + pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' L') : '';

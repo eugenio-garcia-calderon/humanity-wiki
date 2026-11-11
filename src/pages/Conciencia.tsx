@@ -110,7 +110,7 @@ const PASOS: { id: string; titulo: string; texto: string; nodo: string; canal?: 
   },
   {
     id: 'vigilia', nodo: 'franja-vigilia', canal: 'vigilia', titulo: 'Vigilia: por los sentidos',
-    texto: 'El ser humano 1 codifica una idea en palabras de su idioma, su voz hace vibrar el aire, el oído del ser humano 2 recibe esa vibración física y su campo neuronal la decodifica con el mismo código cultural y lingüístico para darle sentido.',
+    texto: 'El ser humano de la izquierda codifica una idea en palabras de su idioma, su voz hace vibrar el aire, el oído del de la derecha recibe esa vibración física y su campo neuronal la decodifica con el mismo código cultural y lingüístico para darle sentido.',
   },
   {
     id: 'onirico', nodo: 'franja-onirico', canal: 'onirico', titulo: 'Sueño: por el hipercampo',
