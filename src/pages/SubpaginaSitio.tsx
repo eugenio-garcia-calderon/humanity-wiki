@@ -30,9 +30,11 @@ import type { ContextoRuta } from '../utils/precargado';
 // AplicacionDeDominio (that would appear on every customer's domain).
 const Conciencia = lazy(() => import('./Conciencia'));
 const ModeloSocioeconomico = lazy(() => import('./ModeloSocioeconomico'));
+const ObservatorioPolarizacion = lazy(() => import('./ObservatorioPolarizacion'));
 const APLICACIONES: Record<string, (p: { inicio: string }) => ReactNode> = {
   conciencia: ({ inicio }) => <Conciencia enSitio={{ inicio }} />,
   'modelo-socioeconomico': ({ inicio }) => <ModeloSocioeconomico enSitio={{ inicio }} />,
+  'observatorio-polarizacion': () => <ObservatorioPolarizacion />,
 };
 
 export default function SubpaginaSitio({ propio, idFijo, contexto }: { propio: boolean; idFijo?: string; contexto?: ContextoRuta['contexto'] }) {

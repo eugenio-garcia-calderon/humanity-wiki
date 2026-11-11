@@ -11002,3 +11002,12 @@ Eugenio: «permite que el triciclo bala se le pueda modificar más los parámetr
     - La mano: 7,5.
     - Ilustración: de 8,5 a 8,8, tras dos rondas de arreglos (mirada de los niños, pelo de la niña, orejas, cuellos sin raya, dedos, estela que nace en la pantalla).
     - El resto de meses sigue con las figuras de `extra_m678.py`; `figuras_v3.py` se puede usar en ellos si se pide.
+
+### 2026-11-11 — Observatorio de Polarización en luzhumanidad.com
+
+Eugenio: «publícalo en Luzhumanidad como "Observatorio de Polarización"».
+- Nuevo proyecto en luzhumanidad.com, en `/observatorio-de-polarizacion/espana` (migración 0194, misma receta que 0181 y 0184): página con `config.aplicacion = 'observatorio-polarizacion'`, fila en «Proyectos» (En curso, 2026), equipo Eugenio y área buscada por nombre (Sociología, Política o Sociedad).
+- La aplicación es un documento HTML autónomo en `public/observatorio-polarizacion/index.html`, que `src/pages/ObservatorioPolarizacion.tsx` enmarca a pantalla completa (mismo origen; el marco tiene su propio desplazamiento para que funcione la barra de capítulos). Portada: `public/observatorio-polarizacion/portada.jpg`.
+- Contenido: simulador (ideología × dependencia del grupo, con la distribución real del CIS 3577), cien años de España (1923-2026) en campanas con sus consecuencias, cinco tipos ideales más libertarismo y socialismo patriótico, líderes por dirección, etiquetas, miradas, encuadres, identidades y eje territorial, escalera de Glasl, consecuencias por fase, contradicciones, test de 15 ítems, salida y método con referencias.
+- Revisado por un evaluador ciego en tres rondas (5,7 → 6,85 → 7,2) antes de añadir historia, consecuencias y líderes; esas tres secciones no se han vuelto a evaluar.
+- Migración probada dos veces en un Postgres temporal (crea una sola página y una sola fila; elige Sociología antes que Política).
