@@ -6,7 +6,7 @@ import { ESCALAS } from '../../data/modeloSocioeconomico';
 import { Muestra } from './piezas';
 
 const CICLO = [
-  { t: 'Se recauda', d: 'Cada pago aparta su tramo (0, 20 o 40 %) al instante.' },
+  { t: 'Se recauda', d: 'Cada pago aparta su tramo (10, 25 o 40 %) al instante.' },
   { t: 'Se reparte', d: 'Un octavo a cada escala, lo mismo por habitante, y en cada escala en tres tercios: producir, cuidar y libre.' },
   { t: 'La asamblea elige', d: 'Las personas votan las prioridades: qué importa más este año, dentro de cada tercio.' },
   { t: 'El comité diseña', d: 'Busca la manera más barata, eficaz y ecológica de cumplirlas.' },

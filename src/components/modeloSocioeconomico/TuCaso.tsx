@@ -141,9 +141,9 @@ export function TuCaso({ modo, ejemplo, onEjemplo }: { modo: Modo; ejemplo: Ejem
           <p className="mt-3 text-xs leading-relaxed text-slate-500">
             Por sus manos pasan {euros(r.maneja)} al año ({euros(dia(r.maneja), 2)} al día): lo que vale su trabajo más lo que compra.
             La empresa paga lo mismo que hoy; los precios cambian: la misma cesta cuesta {euros(mes(r.gastoModelo))} al mes en vez de {euros(sumaGasto(ejemplo.gasto))}.
-            Lo de primera necesidad {cambio(1) < 0 ? 'baja' : 'sube'} un {porcentaje(Math.abs(cambio(1)), 0)}, porque pierde el IVA y los impuestos especiales de hoy;
+            Lo de primera necesidad {cambio(1) < 0 ? 'baja' : 'sube'} un {porcentaje(Math.abs(cambio(1)), 0)}, porque su {porcentaje(TRAMO[1].tipo * 100, 0)} sustituye al IVA y los impuestos especiales de hoy;
             lo de segunda necesidad sube un {porcentaje(cambio(2), 0)} y el ocio y el lujo, un {porcentaje(cambio(3), 0)}
-            {modo === 'literal' ? ', contando el 20 % que se pagan las empresas entre sí y acaba dentro de los precios' : ''}.
+            {modo === 'literal' ? ', contando el 25 % que se pagan las empresas entre sí y acaba dentro de los precios' : ''}.
             De su dividendo, un tercio ({euros(r.dividendo / 3)}) va a sus participaciones en lo que produce, otro a cuidados y otro es libre.
           </p>
         </div>
@@ -178,7 +178,7 @@ export function TuCaso({ modo, ejemplo, onEjemplo }: { modo: Modo; ejemplo: Ejem
             su comunidad y su municipio, en préstamos al IPC y en un trabajo u ocupación; si llega a tener una discapacidad, en el apoyo en especie.
             Y hay menos servicios públicos: por habitante, unos {euros(serviciosModelo)} entre servicios e inversión al año en lugar de {euros(serviciosHoy)}{' '}
             (lo cuentan «Frente a hoy» y «Lo que falta por resolver»).
-            {r.tipoSueldo === 0 && ejemplo.empleador !== 'publica' && <> Gran parte de la diferencia viene de que su empresa es pequeña: su sueldo no paga nada.</>}
+            {ejemplo.empleador === 'pequena' && <> Gran parte de la diferencia viene de que su empresa es pequeña: su sueldo paga solo el {porcentaje(r.tipoSueldo * 100, 0)}.</>}
           </p>
         </div>
       </div>

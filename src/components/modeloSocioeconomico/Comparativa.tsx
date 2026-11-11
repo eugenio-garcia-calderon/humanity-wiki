@@ -41,7 +41,7 @@ export function Piezas() {
         <h3 className="text-lg font-bold">Con el modelo: 1</h3>
         <p className="mt-1 text-sm text-slate-300">Un solo impuesto sobre cada pago, con tres tramos. Lo aparta el sistema de pago y llega ya repartido:</p>
         <div className="mt-5 flex items-stretch gap-3">
-          <span aria-hidden className="grid h-24 w-24 shrink-0 place-items-center rounded-lg bg-white text-center text-lg font-[800] leading-tight tracking-tight text-slate-900">0 · 20<br />· 40 %</span>
+          <span aria-hidden className="grid h-24 w-24 shrink-0 place-items-center rounded-lg bg-white text-center text-lg font-[800] leading-tight tracking-tight text-slate-900">10 · 25<br />· 40 %</span>
           <ul className="grid flex-1 grid-cols-2 gap-x-3 gap-y-1 text-xs text-slate-200">
             {ESCALAS.map(e => <li key={e.id} className="flex items-center gap-1.5"><Muestra color={e.color} />{e.corto}</li>)}
           </ul>
@@ -82,7 +82,7 @@ export function Costes() {
 export function Tabla({ modo }: { modo: Modo }) {
   const pais = cuentasPais(modo);
   const filas: [string, React.ReactNode, React.ReactNode][] = [
-    ['Cuántos impuestos', <>{TOTAL_FIGURAS} figuras y cientos de tasas</>, 'Uno, con tres tramos: 0, 20 y 40 %'],
+    ['Cuántos impuestos', <>{TOTAL_FIGURAS} figuras y cientos de tasas</>, 'Uno, con tres tramos: 10, 25 y 40 %'],
     ['Quién hace papeleo', 'Personas, autónomos, empresas y comunidades de vecinos: declaraciones, modelos trimestrales, liquidaciones y recibos', 'Nadie: lo aparta el sistema de pago en cada operación'],
     ['Cuándo se paga', 'Retenciones cada mes, declaraciones cada trimestre y cada año, recibos en fechas distintas', 'En el instante de cada pago'],
     ['Cómo llega el dinero a cada administración', 'Impuestos cedidos, participaciones en tributos del Estado y un sistema de financiación autonómica que se negocia políticamente y se liquida años después', 'Un octavo automático a cada escala, repartido por habitante, cada día; y en cada escala, tercios para producir, cuidar y libre'],

@@ -19,7 +19,7 @@ const LECTURAS: { id: Modo; titulo: string; texto: string }[] = [
   },
   {
     id: 'literal', titulo: 'Al pie de la letra, también entre empresas',
-    texto: `Las compras entre empresas dejan además el tipo general, un ${porcentaje(TIPO_GENERAL * 100, 0)}, sin devolución. Recauda más del doble, pero el impuesto se acumula en cada eslabón de la cadena: hasta el pan del tramo 1 llega con impuesto escondido.`,
+    texto: `Las compras entre empresas dejan además el tipo general, un ${porcentaje(TIPO_GENERAL * 100, 0)}, sin devolución. Recauda más del doble, pero el impuesto se acumula en cada eslabón de la cadena: hasta el pan del tramo 1 llega con mucho más impuesto del que dice su tramo.`,
   },
 ];
 
@@ -140,10 +140,10 @@ export function LasCuentas({ modo, onModo }: { modo: Modo; onModo: (m: Modo) => 
             <h3 className="text-lg font-bold text-slate-900">Un pan del tramo 1</h3>
             <p className="mt-1 text-sm text-slate-600">El agricultor aporta 0,50 € de valor, el molino 0,30 € y la panadería 0,80 €.</p>
             <dl className="mt-3 space-y-3 text-sm">
-              <div><dt className="font-semibold text-slate-900">Sin cascada entre empresas</dt><dd className="tabular-nums text-slate-700">Cuesta {euros(pan.precioEslabon, 2)} y no lleva impuesto: {euros(pan.impuestoEslabon, 2)}.</dd></div>
+              <div><dt className="font-semibold text-slate-900">Sin cascada entre empresas</dt><dd className="tabular-nums text-slate-700">Cuesta {euros(pan.precioEslabon, 2)}, con {euros(pan.impuestoEslabon, 2)} de impuesto: su {porcentaje(TRAMO[1].tipo * 100, 0)} exacto.</dd></div>
               <div><dt className="font-semibold text-slate-900">Al pie de la letra</dt><dd className="tabular-nums text-slate-700">Cuesta {euros(pan.precioLiteral, 2)}, de los que {euros(pan.impuestoLiteral, 2)} se quedaron en el fondo por el camino: el {porcentaje((pan.impuestoLiteral / pan.precioLiteral) * 100, 0)}.</dd></div>
             </dl>
-            <p className="mt-3 text-xs leading-relaxed text-slate-500">Al pie de la letra, el tramo 1 deja de ser cero: lo pagan el molino y la panadería al comprar, y llega dentro del precio. Por eso empuja a las empresas a fusionarse para saltarse intermediarios. España tuvo un impuesto así, el IGTE, hasta que en 1986 llegó el IVA.</p>
+            <p className="mt-3 text-xs leading-relaxed text-slate-500">Al pie de la letra, el pan paga mucho más que su tramo: el molino y la panadería pagan al comprar el tipo general y llega dentro del precio. Por eso empuja a las empresas a fusionarse para saltarse intermediarios. España tuvo un impuesto así, el IGTE, hasta que en 1986 llegó el IVA.</p>
           </div>
         </div>
       </div>
@@ -234,7 +234,7 @@ export function Retos({ modo }: { modo: Modo }) {
       t: '¿Quién paga más?',
       d: (
         <>
-          La progresividad ya no sale del sueldo, sino de lo que se compra y de quién paga: con el mismo trabajo, quien está en una empresa grande aporta el 40 % de lo que vale y quien está en una pequeña, nada.
+          La progresividad ya no sale del sueldo, sino de lo que se compra y de quién paga: con el mismo trabajo, quien está en una empresa grande aporta un 40 % encima de su sueldo y quien está en una pequeña, un 10 %.
           El dividendo, igual para todas las personas, devuelve una parte. Aportación neta sobre lo que la empresa paga por cada trabajo, para el mismo hogar del caso de arriba, gastando tres cuartas partes del sueldo neto de hoy:
           <span className="mt-2 block overflow-x-auto">
             <table className="w-full min-w-[420px] text-sm tabular-nums">
@@ -259,8 +259,8 @@ export function Retos({ modo }: { modo: Modo }) {
     },
     {
       t: 'Crecer de 49 a 50 personas',
-      d: <>Con tramos por tamaño, la empresa número 50 paga de golpe el 20 % de todos sus sueldos, y la 250, el 40 %. Eso empuja a no crecer o a partirse. Contar el grupo de empresas lo frena, pero no del todo.
-        Una salida: que funcione como los tramos del IRPF, por persona contratada (las 49 primeras al 0 %, de la 50 a la 249 al 20 %, el resto al 40 %), para que crecer nunca cueste más de lo que añade.</>,
+      d: <>Con tramos por tamaño, la empresa número 50 pasa de golpe del 10 % al 25 % en todos sus sueldos, y la 250, al 40 %. Eso empuja a no crecer o a partirse. Contar el grupo de empresas lo frena, pero no del todo.
+        Una salida: que funcione como los tramos del IRPF, por persona contratada (las 49 primeras al 10 %, de la 50 a la 249 al 25 %, el resto al 40 %), para que crecer nunca cueste más de lo que añade.</>,
     },
     {
       t: 'Dónde está la línea entre necesidad y lujo',
@@ -274,7 +274,7 @@ export function Retos({ modo }: { modo: Modo }) {
     },
     {
       t: 'Comprar o alquilar una casa',
-      d: <>La vivienda en la que se vive, comprada o alquilada, va en el tramo 1 y no paga. Una segunda vivienda o una de inversión paga el {porcentaje(TRAMO[2].tipo * 100, 0)} en cada venta: {euros(200_000 * TRAMO[2].tipo)} por un piso de {euros(200_000)}, frente a los {euros(200_000 * 0.06)}–{euros(200_000 * 0.10)} del impuesto de transmisiones de hoy.
+      d: <>La vivienda en la que se vive, comprada o alquilada, va en el tramo 1, al {porcentaje(TRAMO[1].tipo * 100, 0)}. Una segunda vivienda o una de inversión paga el {porcentaje(TRAMO[2].tipo * 100, 0)} en cada venta: {euros(200_000 * TRAMO[2].tipo)} por un piso de {euros(200_000)}, frente a los {euros(200_000 * 0.06)}–{euros(200_000 * 0.10)} del impuesto de transmisiones de hoy.
         Una salida es tratar la casa usada como el resto de la cadena: que solo pague la diferencia entre lo que costó y lo que se vende.</>,
     },
     {

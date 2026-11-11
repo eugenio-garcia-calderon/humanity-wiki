@@ -1,7 +1,7 @@
 // ============================================================================
 // MODELO SOCIOECONÓMICO OPTIMIZADO (2026-11-10, Eugenio)
 // ============================================================================
-// One tax on every payment, nothing else, in three tiers (0, 20 or 40 %: by
+// One tax on every payment, nothing else, in three tiers (10, 25 or 40 %: by
 // what is bought, and for wages by the size of the company that pays them),
 // collected by the payment system itself and split in eight equal parts among
 // eight scales: person, neighbourhood or family, municipality, province, region,
@@ -73,7 +73,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
     const anterior = meta?.content;
     if (!meta) { meta = document.createElement('meta'); meta.name = 'description'; document.head.appendChild(meta); }
-    meta.content = 'Un único impuesto en tres tramos (0, 20 y 40 %) sobre cada pago, que el sistema de pago reparte al instante entre ocho escalas (persona, comunidad vecinal, municipio, provincia, región, nación, continente y planeta), con un tercio para producir, uno para cuidar y uno libre, comparado con el sistema fiscal español actual.';
+    meta.content = 'Un único impuesto en tres tramos (10, 25 y 40 %) sobre cada pago, que el sistema de pago reparte al instante entre ocho escalas (persona, comunidad vecinal, municipio, provincia, región, nación, continente y planeta), con un tercio para producir, uno para cuidar y uno libre, comparado con el sistema fiscal español actual.';
     return () => { document.title = titulo; if (meta) meta.content = anterior ?? ''; };
   }, []);
 
@@ -120,7 +120,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
           <div>
             <h1 className="text-[2.35rem] font-[800] leading-[1.02] tracking-[-0.035em] sm:text-[3.4rem]">Modelo socioeconómico optimizado</h1>
             <p className="mt-6 max-w-[34ch] text-[1.45rem] font-medium leading-snug tracking-[-0.01em] text-slate-800 sm:text-[1.65rem]">
-              Un solo impuesto sobre cada pago, en tres tramos: nada en lo básico, un 20 % en lo secundario y un 40 % en el ocio y el lujo.
+              Un solo impuesto sobre cada pago, en tres tramos: un 10 % en lo básico, un 25 % en lo secundario y un 40 % en el ocio y el lujo.
               Llega al instante, en ocho partes iguales, a las escalas en las que vivimos.
             </p>
             <p className="mt-5 max-w-[62ch] text-[17px] leading-relaxed text-slate-600">
@@ -166,12 +166,12 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
         <section id="como-funciona" aria-labelledby="como-funciona-titulo" className="scroll-mt-28 border-t border-slate-200 bg-white">
           <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
             <Encabezado id="como-funciona" titulo="Cómo funciona: tres tramos y ocho partes">
-              De cada pago se aparta su tramo: nada, un 20 % o un 40 %. Lo apartado se junta y se reparte en ocho partes iguales, una por escala.
+              De cada pago se aparta su tramo: un 10 %, un 25 % o un 40 %. Lo apartado se junta y se reparte en ocho partes iguales, una por escala.
             </Encabezado>
             <ol className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
               {[
                 { t: 'Pagas', d: 'Con tarjeta, Bizum o el móvil. El precio ya lleva su tramo dentro, como hoy el IVA.' },
-                { t: 'Se aparta el tramo', d: 'En el mismo instante, el sistema de pago separa el impuesto (0, 20 o 40\u00A0% sobre el precio sin impuesto) y el resto llega a quien cobra.' },
+                { t: 'Se aparta el tramo', d: 'En el mismo instante, el sistema de pago separa el impuesto (10, 25 o 40\u00A0% sobre el precio sin impuesto) y el resto llega a quien cobra.' },
                 { t: 'Se reparte en ocho', d: 'Lo apartado de todos los pagos se junta y cada escala recibe un octavo, lo mismo por habitante. Tu parte personal es un dividendo igual para todo el mundo.' },
                 { t: 'Cada escala, en tercios', d: 'Un tercio para comprar o mejorar medios de producción, uno para cuidados y uno libre.' },
                 { t: 'Cada escala decide', d: 'Su asamblea ciudadana elige las prioridades y su comité técnico las cumple al menor coste, de la forma más eficaz y ecológica.' },
@@ -187,7 +187,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
             <div className="mt-12"><TresTramos /></div>
             <div className="mt-6"><CincoPagos /></div>
             <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600">
-              El tramo se suma al precio sin impuesto, como el IVA de hoy: una cena de 40 € cuesta 56 € y 16 € van al fondo. De todo lo que pagas, el fondo se queda una sexta parte en el tramo 2 y dos séptimas partes en el 3.
+              El tramo se suma al precio sin impuesto, como el IVA de hoy: una cena de 40 € cuesta 56 € y 16 € van al fondo. De todo lo que pagas, el fondo se queda una onceava parte en el tramo 1, una quinta parte en el 2 y dos séptimas partes en el 3.
             </p>
 
             <PreguntasCobro modo={modo} />
@@ -203,7 +203,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
                 <div>
                   <dt className="font-semibold text-slate-900">{LECTURA_CORTA.eslabon}</dt>
                   <dd className="mt-0.5 leading-relaxed text-slate-600">
-                    La empresa paga al comprar y lo recupera al vender, como hoy el IVA. Cada producto lleva exactamente su tramo: el pan, nada; la chaqueta, el 20 %.
+                    La empresa paga al comprar y lo recupera al vender, como hoy el IVA. Cada producto lleva exactamente su tramo: el pan, el 10 %; la chaqueta, el 25 %.
                     Recauda ≈ {porcentaje(cuentasPais('eslabon').pctPIB, 0)} del PIB. Es la lectura por defecto.
                   </dd>
                 </div>

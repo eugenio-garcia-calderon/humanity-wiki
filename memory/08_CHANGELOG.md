@@ -10968,3 +10968,4 @@ Eugenio: «permite que el triciclo bala se le pueda modificar más los parámetr
 - Eugenio: «como el IVA». El 0, 20 o 40 % se suma al precio sin impuesto (y al sueldo); antes era una parte del pago. Una cena de 40 € cuesta 56 € y deja 16 € en el fondo.
 - `fraccion(t) = t/(1+t)` en `cuentasPais`, el caso y la cadena del pan; tabla de cinco pagos con «se paga en total»; hostelería ≈ +27 %.
 - Recauda ≈ 12 % del PIB por defecto (antes 16 %), 521 € por persona y escala; al pie de la letra ≈ 31 %.
+- Mismo día, Eugenio: los tramos pasan a **10 / 25 / 40 %** (lo básico paga un 10 %). Los sueldos siguen los mismos tres tipos por tamaño de empresa (pequeña 10 %, mediana 25 %, grande 40 %); las administraciones, 0 %. El tipo general de las compras entre empresas (lectura al pie de la letra) pasa al 25 %. Recauda ≈ 17 % del PIB por defecto, 744 € por persona y escala.
