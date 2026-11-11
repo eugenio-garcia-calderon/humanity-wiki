@@ -10990,6 +10990,46 @@ Eugenio: «permite que el triciclo bala se le pueda modificar más los parámetr
   - el deslizamiento en el móvil.
 
   No hubo errores en la consola.
+  - Junio, Diseño 4: personajes repintados con más realismo (Eugenio: «más realista, y trazos más profesionales»). Nuevo kit `design/calendario-arte/generadores/diseno4/figuras_v3.py`:
+    - Una sola luz por figura: la bombilla para el abuelo y la niña, el sol para el niño.
+    - Cada forma lleva sombra que se desvanece hacia la luz, rayado de lápiz solo en la sombra de la ropa (nunca en la piel) y una línea firme en el lado oscuro que se pierde en el iluminado.
+    - Brazos y piernas anatómicos: deltoides, codo, antebrazo, muñeca; muslo, rodilla, gemelo, tobillo. Zapatos con suela y cordones.
+    - Cabezas con proporciones reales: ojos almendrados con blanco, iris, pupila y brillo; nariz con su plano de sombra y aleta; labios superior e inferior; orejas; afro como una sola masa con rizos; canas y arrugas en el abuelo.
+    - La niña lleva un peto con tirantes sobre la camiseta amarilla.
+    - El borde de la hoja ahora pasa por detrás de sus piernas, con sombras de contacto.
+  - Junio, Diseño 4: cuarto personaje, del que solo se ven la mano y el móvil, entrando por el borde izquierdo (Eugenio, con la referencia de un mural, sin la frase). En la pantalla hay un campo de trigo con amapolas bajo un cielo de verano; de su nube sale volando una golondrina hacia el cielo de verdad. Día 26 enlazado: «Hoy, como la golondrina: sal de la pantalla una tarde.». Evaluador independiente:
+    - Personajes: de 5 a 7,3.
+    - La mano: 7,5.
+    - Ilustración: de 8,5 a 8,8, tras dos rondas de arreglos (mirada de los niños, pelo de la niña, orejas, cuellos sin raya, dedos, estela que nace en la pantalla).
+    - El resto de meses sigue con las figuras de `extra_m678.py`; `figuras_v3.py` se puede usar en ellos si se pide.
+
+## 2026-11-11 — Conciencia: orden del dibujo, sol · loto · luna
+
+- Eugenio: «pon arriba la parte del Sol, en el medio la de meditación (loto) y abajo la de Luna (dormidos)». La meditación queda entre la vigilia y el sueño, como en la teoría.
+- En el camino del medio los dos cerebros están a la misma altura, así que la telepatía va casi en línea recta de una mente a la otra. El objeto (visión extraocular) queda justo debajo del camino y las montañas (visión remota), abajo a la derecha. Los caminos del sueño bajan desde los dos cerebros.
+- Solo cambia el dibujo. El esquema con texto mantiene su orden (vigilia, sueño, meditación).
+- Comprobado en Chrome sin cabeza a 1440 px y a 390 px. No hubo errores en la consola.
+### 2026-11-11 — Observatorio de Polarización en luzhumanidad.com
+
+Eugenio: «publícalo en Luzhumanidad como "Observatorio de Polarización"».
+- Nuevo proyecto en luzhumanidad.com, en `/observatorio-de-polarizacion/espana` (migración 0194, misma receta que 0181 y 0184): página con `config.aplicacion = 'observatorio-polarizacion'`, fila en «Proyectos» (En curso, 2026), equipo Eugenio y área buscada por nombre (Sociología, Política o Sociedad).
+- La aplicación es un documento HTML autónomo en `public/observatorio-polarizacion/index.html`, que `src/pages/ObservatorioPolarizacion.tsx` enmarca a pantalla completa (mismo origen; el marco tiene su propio desplazamiento para que funcione la barra de capítulos). Portada: `public/observatorio-polarizacion/portada.jpg`.
+- Contenido: simulador (ideología × dependencia del grupo, con la distribución real del CIS 3577), cien años de España (1923-2026) en campanas con sus consecuencias, cinco tipos ideales más libertarismo y socialismo patriótico, líderes por dirección, etiquetas, miradas, encuadres, identidades y eje territorial, escalera de Glasl, consecuencias por fase, contradicciones, test de 15 ítems, salida y método con referencias.
+- Revisado por un evaluador ciego en tres rondas (5,7 → 6,85 → 7,2) antes de añadir historia, consecuencias y líderes; esas tres secciones no se han vuelto a evaluar.
+- Migración probada dos veces en un Postgres temporal (crea una sola página y una sola fila; elige Sociología antes que Política).
+
+### 2026-11-11 — Observatorio de Polarización: seis capítulos
+
+Eugenio pidió simplificarlo y reordenarlo. `public/observatorio-polarizacion/index.html` queda en seis capítulos, con una portada de seis tarjetas ilustradas que llevan a cada uno:
+1. **La España de hoy**: el barómetro del CIS 3577 como estudio real destacado (barras grandes con su porcentaje y cuatro cifras clave), el modelo de presión del grupo marcado como simulación y la tabla de consecuencias, que se enciende con la fase del modelo y lo mueve al pulsarla.
+2. **Cien años**: campanas con el espectro de colores, una línea del tiempo de diez etapas que cambia al pasar el ratón y un control deslizante. Se quita el gráfico de «temperatura» con rayas.
+3. **Miradas**: lentes, prisma del lenguaje y espejo, subidos de posición.
+4. **Doce perfiles** compactos: los cinco de la línea más anarcocomunismo, socialismo patriótico, libertarismo, anarcocapitalismo e independentismos de izquierda radical, de izquierda y de derecha, con relato, lenguaje, contradicción y líderes. Se quita el mapa de autoubicación de dos ejes y el bloque «radical / extremista».
+5. **Del nosotros al enemigo**: círculos de pertenencia de los doce perfiles con colores claros (verde, gris, rojo) que cambian al pasar el ratón, el eje territorial y una escalera de Glasl dibujada como escalera descendente.
+6. **Palabras y fuentes**: cronología, tarjetas, Venn y las 32 fuentes en cuadrícula con lo que se tomó de cada una.
+- Se quitan el test, el capítulo de metapercepciones y el de método (las notas de límites quedan junto a cada pieza).
+- Migración 0195: actualiza la ficha del proyecto (subtítulo y dos párrafos) solo si nadie la ha editado, y sube `version`. Probada dos veces en un Postgres temporal.
+- Portada regenerada.
 
 ### 2026-11-11 — Modelo socioeconómico: los tramos se suman al precio, como el IVA
 - Eugenio: «como el IVA». El 0, 20 o 40 % se suma al precio sin impuesto (y al sueldo); antes era una parte del pago. Una cena de 40 € cuesta 56 € y deja 16 € en el fondo.

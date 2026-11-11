@@ -1,0 +1,2204 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+</head>
+<body>
+<title>Observatorio de Polarización</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Un modelo interactivo de las cinco posiciones políticas de la España actual: cómo piensan, cómo hablan, cómo se ven entre sí y hasta dónde escalan. Incluye un test para saber hacia dónde te escoras.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&display=swap">
+<style>
+/* Concepto: un observatorio nocturno. Un único eje de luz (izquierda → derecha) recorre la página;
+   cada capítulo es un instrumento distinto para mirar la misma sociedad, de lo general a lo concreto.
+   Look deliberadamente oscuro y único. Color: convención rojo-azul de la ciencia política, con los
+   extremos más oscuros y el centro más claro, para que las posiciones se distingan también sin color. */
+:root{
+  --bg:#0C0F14; --bg-2:#131821; --bg-3:#1B2230; --line:#283142; --line-2:#3A4660; --ctl:#5E6B88;
+  --ink:#EDEBE6; --ink-2:#C9CCD3; --muted:#9AA3B3;
+  --xl:#EC5272; --l:#F2955F; --c:#E8E2CF; --r:#6CC4E4; --xr:#5B7CF0;
+  --warn:#F6BE3B;
+  --spectrum:linear-gradient(90deg,var(--xl),var(--l) 25%,var(--c) 50%,var(--r) 75%,var(--xr));
+  --display:"Newsreader","Iowan Old Style",Georgia,serif;
+  --sans:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --gl:max(16px,env(safe-area-inset-left,0px));
+  --gr:max(16px,env(safe-area-inset-right,0px));
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+*,*::before,*::after{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:76px}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 17px/1.6 var(--sans);-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));overflow-x:hidden}
+.page{max-width:1200px;margin:0 auto}
+a{color:var(--ink)}
+p{margin:0 0 12px}
+::selection{background:var(--warn);color:var(--bg)}
+:focus-visible{outline:2px solid var(--warn);outline-offset:3px}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:absolute;left:-999px;top:8px;z-index:100;background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:8px;font-weight:600}
+.skip:focus{left:16px}
+.sprite{position:absolute;width:0;height:0;overflow:hidden}
+h1,h2,h3,h4{text-wrap:balance}
+
+/* ---------- Cabecera ---------- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;margin-left:calc(-1 * var(--gl));margin-right:calc(-1 * var(--gr));
+  padding-left:var(--gl);padding-right:var(--gr);background:rgba(12,15,20,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1200px;margin:0 auto;height:60px;display:flex;align-items:center;gap:20px}
+.top-in > nav{flex:1;min-width:0}
+.brand{flex:none;display:flex;align-items:center;gap:10px;text-decoration:none;font:600 14px/1 var(--sans);font-stretch:115%;white-space:nowrap}
+.brand-mark{flex:none;width:22px;height:22px;border-radius:50%;background:conic-gradient(from 200deg,var(--xl),var(--l),var(--c),var(--r),var(--xr),var(--xl));box-shadow:inset 0 0 0 5px var(--bg)}
+.nav{display:flex;gap:2px;list-style:none;margin:0;padding:0;overflow-x:auto;scrollbar-width:none;min-width:0}
+.nav::-webkit-scrollbar{display:none}
+.nav a{display:block;padding:9px 10px;border-radius:999px;font:500 13px/1 var(--sans);color:var(--muted);text-decoration:none;white-space:nowrap}
+.nav a:hover{color:var(--ink)}
+.nav a[aria-current="true"]{color:var(--bg);background:var(--ink)}
+.prog{position:absolute;left:0;right:0;bottom:-1px;height:2px}
+.prog i{display:block;height:100%;width:0;background:var(--spectrum)}
+@media (min-width:1180px){.nav{justify-content:flex-end}}
+@media (max-width:760px){.brand-txt{display:none}}
+
+/* ---------- Tipografía común ---------- */
+.eyebrow,.ch-num{display:flex;align-items:center;gap:12px;font:500 12px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0}
+.eyebrow::before,.ch-num::before{content:"";flex:none;width:32px;height:2px;background:var(--spectrum)}
+h1{font:400 clamp(2.4rem,5.4vw,4.6rem)/1.02 var(--display);letter-spacing:-.028em;margin:0;max-width:17ch}
+h2{font:400 clamp(2.1rem,4.6vw,3.6rem)/1.04 var(--display);letter-spacing:-.02em;margin:0}
+h1 em,h2 em{font-style:italic}
+h3{font:400 clamp(1.5rem,2.6vw,2rem)/1.15 var(--display);margin:0}
+.chapter{padding-block:clamp(72px,10vw,128px);border-top:1px solid var(--line)}
+.ch-head{display:grid;gap:16px;max-width:800px;margin-bottom:clamp(32px,5vw,56px)}
+.ch-lede{font-size:clamp(1.05rem,1.5vw,1.2rem);color:var(--ink-2);margin:0;max-width:62ch}
+.hint{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted);margin:14px 0 0}
+.note{font-size:13.5px;line-height:1.55;color:var(--muted);margin:16px 0 0;max-width:86ch}
+.lbl{font:500 11px/1.3 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.tiny{font-size:13px;color:var(--muted);margin:12px 0 0}
+.bridge{margin-top:clamp(40px,6vw,64px);display:flex;flex-wrap:wrap;align-items:center;gap:14px 24px;padding-top:24px;border-top:1px dashed var(--line-2)}
+.bridge p{margin:0;font:italic 400 clamp(1.05rem,1.6vw,1.25rem)/1.4 var(--display);color:var(--ink-2);max-width:60ch}
+
+/* ---------- Controles ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:11px 20px;border-radius:999px;border:1px solid var(--ctl);
+  background:transparent;color:var(--ink);font:600 14.5px/1 var(--sans);text-decoration:none;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+.btn:hover{border-color:var(--ink-2);background:var(--bg-3)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.primary:hover{background:#fff}
+.btn.sm{min-height:44px;padding:9px 16px;font-size:13.5px}
+.btn:disabled{opacity:.4;cursor:default}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:999px;border:1px solid var(--line-2);font-size:13px;line-height:1.3;color:var(--ink-2);background:var(--bg)}
+.segs{display:inline-flex;gap:3px;vertical-align:middle;flex:none}
+.segs i{width:14px;height:6px;border-radius:2px;background:var(--line)}
+.segs i.on{background:var(--dc,var(--ink-2))}
+.segs.warn i.on{background:var(--warn)}
+.toggle-row{display:flex;flex-wrap:wrap;gap:8px}
+.tbtn{min-height:44px;padding:9px 16px;border-radius:999px;border:1px solid var(--ctl);background:transparent;color:var(--ink-2);font:500 14px/1.2 var(--sans);cursor:pointer;text-align:left}
+.tbtn:hover{color:var(--ink);border-color:var(--ink-2)}
+.tbtn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+/* ---------- Portada + simulador ---------- */
+.hero{padding-block:clamp(32px,5vw,64px) clamp(64px,9vw,112px);display:grid;gap:clamp(24px,3.4vw,40px)}
+.hero-text{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:18px 48px;align-items:end}
+.hero-text .eyebrow{grid-column:1 / -1}
+.hero-side{display:grid;gap:18px}
+.hero-lede{font-size:clamp(1.05rem,1.6vw,1.22rem);line-height:1.55;color:var(--ink-2);margin:0}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px}
+@media (max-width:900px){.hero-text{grid-template-columns:minmax(0,1fr)}}
+.sim{background:var(--bg-2);border:1px solid var(--line);border-radius:20px;padding:clamp(16px,2.6vw,30px);display:grid;gap:18px}
+.sim-head{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px 40px;align-items:end}
+.phase-name{font:400 clamp(1.7rem,3.2vw,2.6rem)/1.05 var(--display);margin:8px 0 10px;letter-spacing:-.01em}
+.phase-txt{color:var(--ink-2);margin:0;max-width:58ch;min-height:4.8em}
+.meters{display:grid;gap:12px}
+.meter{display:grid;grid-template-columns:minmax(0,10em) minmax(0,1fr) 5.4em;gap:12px;align-items:center;font-size:13.5px;color:var(--ink-2)}
+.meter .bar{height:6px;background:var(--bg-3);border-radius:3px;overflow:hidden}
+.meter .bar i{display:block;height:100%;width:0;background:var(--c);transition:width .35s ease}
+.meter.v .bar i,.meter.t .bar i{background:var(--warn)}
+.meter b{font:500 12.5px var(--mono);text-align:right;color:var(--ink);text-transform:uppercase;letter-spacing:.06em}
+.sim-canvas{position:relative}
+#sim{display:block;width:100%;height:clamp(320px,34vw,430px)}
+.axis5{display:flex;justify-content:space-between;gap:8px;font:500 11px/1.3 var(--mono);letter-spacing:.08em;text-transform:uppercase;margin-top:4px}
+.axis5 span:nth-child(1){color:var(--xl)} .axis5 span:nth-child(2){color:var(--l)} .axis5 span:nth-child(3){color:var(--c)}
+.axis5 span:nth-child(4){color:var(--r)} .axis5 span:nth-child(5){color:var(--xr);text-align:right}
+.sim-ctrl{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 28px;align-items:center}
+.sim-ctrl label{display:block;margin-bottom:6px}
+.range{-webkit-appearance:none;appearance:none;width:100%;height:30px;background:transparent;cursor:pointer;margin:0}
+.range::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(90deg,#5E6B88,#B08A38 60%,var(--warn))}
+.range::-moz-range-track{height:6px;border-radius:3px;background:linear-gradient(90deg,#5E6B88,#B08A38 60%,var(--warn))}
+.range::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-10px;border-radius:50%;background:var(--ink);border:5px solid var(--bg-2);box-shadow:0 0 0 1px var(--ink-2)}
+.range::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--ink);border:5px solid var(--bg-2)}
+.sim-data{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px 20px;align-items:start}
+.cis-key{display:inline-block;width:14px;height:10px;margin-right:8px;border:1px solid var(--ink-2);background:rgba(237,235,230,.18);vertical-align:-1px}
+.sim-note{font-size:13px;color:var(--muted);margin:0}
+@media (max-width:700px){.sim-data{grid-template-columns:minmax(0,1fr)}}
+.sim-note b{color:var(--ink-2);font-weight:600}
+@media (max-width:860px){.sim-head,.sim-ctrl{grid-template-columns:minmax(0,1fr)} .axis5 span:nth-child(2),.axis5 span:nth-child(4){display:none}}
+
+/* ---------- Mapa ---------- */
+.map-stage{position:relative;background:var(--bg-2);border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.map-stage > svg{display:block;width:100%;height:auto}
+.mt{font:500 13px var(--mono);fill:var(--muted)}
+.ml{font:500 14px var(--sans);fill:var(--muted)}
+.mz{font:500 12px var(--mono);letter-spacing:.14em;fill:var(--muted)}
+.mw{font:italic 400 18px var(--display);fill:var(--warn)}
+.node{position:absolute;transform:translate(-50%,-50%);width:clamp(54px,8.6vw,104px);padding:0;border:0;background:none;cursor:pointer;color:var(--ink);font:inherit}
+.node:focus-visible{outline:none}
+.ncirc{display:block;aspect-ratio:1;border-radius:50%;overflow:hidden;border:2px solid var(--nc);
+  background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--nc) 34%,var(--bg-3)),var(--bg-3) 72%);transition:transform .25s ease,box-shadow .25s ease}
+.node:hover .ncirc{transform:scale(1.07);box-shadow:0 0 0 7px color-mix(in srgb,var(--nc) 22%,transparent)}
+.node:focus-visible .ncirc{outline:2px solid var(--warn);outline-offset:4px}
+.node[aria-pressed="true"] .ncirc{box-shadow:0 0 0 4px var(--bg-2),0 0 0 6px var(--nc)}
+.pt{display:block;width:100%;height:100%}
+.nlab{position:absolute;top:calc(100% + 7px);left:50%;transform:translateX(-50%);white-space:nowrap;font:600 13.5px/1.2 var(--sans);text-align:center;text-shadow:0 1px 10px var(--bg-2),0 0 4px var(--bg-2)}
+.nlab small{display:block;font:italic 400 14px/1.3 var(--display);color:var(--ink-2)}
+.nlab .short{display:none}
+.you-html{position:absolute;z-index:6;transform:translate(-50%,-50%);pointer-events:none;transition:left .6s cubic-bezier(.2,.8,.2,1),top .6s cubic-bezier(.2,.8,.2,1)}
+.you-html i{display:block;width:22px;height:22px;border-radius:50%;background:var(--warn);border:3px solid var(--bg);box-shadow:0 0 0 0 rgba(246,190,59,.7);animation:ping 2.2s ease-out 4}
+.you-html b{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);white-space:nowrap;font:700 13px var(--sans);color:var(--bg);background:var(--warn);padding:3px 9px;border-radius:999px}
+@keyframes ping{0%{box-shadow:0 0 0 0 rgba(246,190,59,.7)}100%{box-shadow:0 0 0 18px rgba(246,190,59,0)}}
+.bubble{position:absolute;z-index:5;width:min(310px,72%);background:var(--bg);border:1px solid var(--nc);border-radius:14px;padding:14px 16px;
+  pointer-events:none;opacity:0;transform:translateY(6px);transition:opacity .2s,transform .2s;box-shadow:0 18px 40px rgba(0,0,0,.45)}
+.bubble.on{opacity:1;transform:none}
+.bubble .b-who{display:block;font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--nc);margin-bottom:6px}
+.bubble q{display:block;font:italic 400 17px/1.35 var(--display);quotes:"«" "»"}
+.bubble q + q{margin-top:8px}
+.bubble small{display:block;margin-top:10px;font-size:12px;color:var(--muted)}
+.map-legend{display:flex;flex-wrap:wrap;gap:10px 24px;margin-top:16px;font-size:13.5px;color:var(--muted)}
+.map-legend span{display:inline-flex;align-items:center;gap:8px}
+.lg-line{width:28px;height:3px;border-radius:2px;background:var(--spectrum)}
+.lg-zone{width:14px;height:14px;border-radius:3px;background:#3A3424;border:1px solid var(--line-2)}
+.lg-zone.a{background:#262A30}
+.lg-dash{width:28px;border-top:2px dashed var(--warn)}
+@media (max-width:640px){
+  .mt{display:none} .ml{font-size:24px} .mz{font-size:22px} .mw,.yaxis{display:none}
+  .nlab{font-size:11.5px} .nlab small,.nlab .full{display:none} .nlab .short{display:inline}
+}
+
+/* Radical frente a extremista */
+.rx{margin-top:28px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:20px 40px;align-items:center;padding:clamp(20px,3vw,32px);border-radius:20px;border:1px solid var(--warn);background:rgba(246,190,59,.05)}
+.rx h3{font-size:clamp(1.4rem,2.4vw,1.8rem);margin:8px 0 10px}
+.rx p{font-size:15px;color:var(--ink-2);margin:0}
+.rx-scale{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.rx-scale div{padding:14px 14px 16px;border-radius:12px;background:var(--bg-2);border:1px solid var(--line);font-size:13.5px;color:var(--ink-2);line-height:1.4}
+.rx-scale b{display:block;font:400 1.2rem/1.2 var(--display);color:var(--ink);margin-bottom:4px}
+.rx-two{display:grid;gap:6px}
+.rx-two i{font-style:normal;color:var(--ink);font-weight:600}
+.rx-scale div:last-child{border-color:var(--warn)}
+.rx-scale div:last-child b{color:var(--warn)}
+@media (max-width:860px){.rx{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:520px){.rx-scale{grid-template-columns:minmax(0,1fr)}}
+
+/* ---------- Ficha (dossier) ---------- */
+.dossier{margin-top:28px;background:var(--bg-2);border:1px solid var(--line);border-radius:20px;overflow:hidden}
+.dz-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:clamp(20px,3vw,44px);padding:clamp(20px,3.4vw,44px);align-items:center;
+  background:radial-gradient(120% 90% at 0% 0%,color-mix(in srgb,var(--dc) 13%,transparent),transparent 60%)}
+.dz-fig{margin:0}
+.dz-fig svg{display:block;width:100%;height:auto;max-width:560px;margin:0 auto}
+.dz-por{width:min(240px,60%);margin:0 auto}
+.co{font:500 11.5px var(--sans);fill:var(--ink-2)}
+.dz-eyebrow{font:500 11px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0}
+.dz-id h3{font:400 clamp(2.2rem,4.4vw,3.4rem)/1 var(--display);letter-spacing:-.02em;color:var(--dc);margin:8px 0 6px;outline:none}
+.dz-arq{font:italic 400 1.25rem/1.3 var(--display);color:var(--ink-2);margin:0 0 18px}
+.dz-flag{display:inline-block;margin:0 0 18px;padding:7px 12px;border-radius:10px;border:1px solid var(--warn);color:var(--ink);font-size:13.5px;line-height:1.4;background:rgba(246,190,59,.06)}
+.dz-quote{position:relative;margin:0 0 22px;padding-left:34px;font:400 clamp(1.2rem,1.9vw,1.5rem)/1.32 var(--display)}
+.dz-quote::before{content:"«";position:absolute;left:0;top:-.16em;font-size:2.4em;line-height:1;color:var(--dc)}
+.dz-two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-bottom:20px}
+.dz-two h4,.dz-card h4{font:500 11px/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+.dz-two p{font-size:14.5px;line-height:1.55;color:var(--ink-2);margin:0}
+.dz-nav{display:flex;flex-wrap:wrap;gap:8px}
+.dz-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;background:var(--line);border-top:1px solid var(--line)}
+.dz-card{background:var(--bg-2);padding:26px;min-width:0}
+.dz-card p{font-size:14.5px;line-height:1.55;color:var(--ink-2)}
+.dz-card .big{font:400 1.45rem/1.2 var(--display);color:var(--ink);margin-bottom:10px}
+.dz-card.steel{background:linear-gradient(180deg,color-mix(in srgb,var(--dc) 9%,var(--bg-2)),var(--bg-2))}
+.dz-card.steel .big{font-size:1.2rem;line-height:1.35}
+.dz-links{display:grid;gap:8px}
+.dz-links button{display:flex;justify-content:space-between;align-items:center;gap:10px;min-height:44px;padding:10px 14px;border-radius:12px;border:1px solid var(--ctl);background:var(--bg);color:var(--ink);font:500 14px/1.3 var(--sans);text-align:left;cursor:pointer}
+.dz-links button:hover{border-color:var(--ink-2);background:var(--bg-3)}
+.dz-links button span{color:var(--muted);font-size:13px}
+.trait{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:11px;font-size:14px;color:var(--ink-2)}
+.cloud{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-bottom:14px}
+.cloud .w{font-family:var(--display);line-height:1.2}
+.cloud .w1{font-size:14px;color:var(--muted)} .cloud .w2{font-size:18px;color:var(--ink-2)} .cloud .w3{font-size:24px;font-style:italic;color:var(--dc)}
+.ph{display:block;font:italic 400 15.5px/1.4 var(--display);color:var(--ink);quotes:"«" "»";margin-top:8px}
+.karp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto 88px auto;gap:6px 12px;font-size:13.5px;line-height:1.35;color:var(--ink-2)}
+.karp svg{grid-column:1 / -1;grid-row:2;width:100%;height:88px}
+.kv b{display:block;font:500 10.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--dc);margin-bottom:3px}
+.kv-p{grid-column:1 / -1;grid-row:1;text-align:center;justify-self:center;max-width:85%}
+.kv-v{grid-row:3;grid-column:1}
+.kv-s{grid-row:3;grid-column:2;text-align:right}
+.gmini{display:flex;align-items:flex-end;gap:4px;height:70px;margin-bottom:12px}
+.gmini i{flex:1;border-radius:3px 3px 0 0;background:var(--line)}
+.gmini i.on.lv1{background:#8A92A3} .gmini i.on.lv2{background:#B08A38} .gmini i.on.lv3{background:var(--warn)}
+.gceil{font-size:14px;color:var(--ink);margin-bottom:6px}
+@media (max-width:980px){.dz-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:860px){.dz-top{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:620px){.dz-grid{grid-template-columns:minmax(0,1fr)} .dz-two{grid-template-columns:minmax(0,1fr)} .dz-card{padding:22px 18px}}
+
+/* ---------- Cuerda (incoherencia) ---------- */
+.rope .poles{display:flex;justify-content:space-between;gap:20px;font:400 clamp(1.02rem,1.6vw,1.25rem)/1.25 var(--display);color:var(--ink)}
+.rope .poles span:last-child{text-align:right}
+.rope-line{position:relative;display:flex;align-items:center;height:40px;margin:8px 0 14px}
+.rope-line .pole{flex:none;display:block;width:18px;height:18px;border-radius:50%}
+.rl-line{flex:1 1 0;width:0;min-width:0;height:40px;margin:0 -2px}
+.rl-knot{position:absolute;left:50%;top:0;width:16px;height:40px;transform:translateX(-50%)}
+.strats{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:4px}
+.strats .lbl{margin-right:4px}
+
+/* ---------- Etiquetas: cronología ---------- */
+.timeline-wrap{position:relative;margin-bottom:36px}
+.timeline{position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(122px,1fr);overflow-x:auto;padding:30px 0 6px;scrollbar-width:thin}
+.timeline::before{content:"";position:absolute;left:0;right:0;top:36px;height:2px;background:var(--line-2)}
+@media (max-width:1100px){.timeline-wrap::after{content:"Desliza →";position:absolute;right:0;top:0;font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)} .timeline{-webkit-mask-image:linear-gradient(90deg,#000 85%,transparent);mask-image:linear-gradient(90deg,#000 85%,transparent)}}
+.tl{position:relative;padding:22px 14px 0 0;min-width:0}
+.tl::before{content:"";position:absolute;top:0;left:0;width:14px;height:14px;border-radius:50%;background:var(--bg);border:2px solid var(--ink-2)}
+.tl.hot::before{border-color:var(--warn);background:var(--warn)}
+.tl b{display:block;font:400 1.45rem/1 var(--display);color:var(--ink);margin:8px 0 6px}
+.tl.hot b{color:var(--warn)}
+.tl p{font-size:13.5px;line-height:1.4;color:var(--ink-2);margin:0}
+.tl q{font-family:var(--display);font-style:italic;color:var(--ink);quotes:"«" "»"}
+
+/* ---------- Tarjetas giratorias ---------- */
+.flips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.flip{perspective:1400px;height:270px;padding:0;border:0;background:none;cursor:pointer;text-align:left;color:inherit;font:inherit}
+.flip-in{position:relative;display:block;width:100%;height:100%;transition:transform .7s cubic-bezier(.2,.7,.2,1);transform-style:preserve-3d}
+.flip[aria-pressed="true"] .flip-in{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;display:flex;flex-direction:column;gap:10px;padding:24px;border-radius:18px;border:1px solid var(--line);background:var(--bg-2);backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.face.front{background:radial-gradient(100% 80% at 100% 100%,color-mix(in srgb,var(--fc) 16%,transparent),transparent 65%),var(--bg-2)}
+.face.back{transform:rotateY(180deg);background:var(--bg-3);font-size:13.5px;line-height:1.4;color:var(--ink-2);gap:8px;padding:20px 22px}
+.face .word{margin-top:auto;font:italic 400 clamp(2.5rem,4.2vw,3.5rem)/1 var(--display);color:var(--ink)}
+.face .turn{font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.face.back b{display:block;font:500 10.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--fc);margin-bottom:2px}
+.face.back span{display:block}
+.flip:focus-visible{outline:none} .flip:focus-visible .face{outline:2px solid var(--warn);outline-offset:3px}
+.venn-wrap{margin-top:clamp(48px,7vw,80px)}
+.venn{position:relative;margin-top:24px}
+.venn svg{display:block;width:100%;height:auto}
+.vcol{position:absolute;top:50%;transform:translateY(-50%);display:grid;gap:8px}
+.vcol h4{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;margin:0 0 4px}
+.vcol ul{list-style:none;margin:0;padding:0;display:grid;gap:8px;font-size:14px;line-height:1.35;color:var(--ink-2)}
+.vcol.a{left:18%;width:18%} .vcol.a h4{color:var(--xl)}
+.vcol.b{left:39%;width:22%;text-align:center} .vcol.b h4{color:var(--warn)} .vcol.b ul{color:var(--ink)}
+.vcol.c{left:64%;width:18%;text-align:right} .vcol.c h4{color:var(--xr)}
+.debate{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-top:28px}
+.deb{padding:clamp(22px,3vw,32px);border-radius:18px;background:var(--bg-2);border:1px solid var(--line)}
+.deb.obj{background:transparent;border-style:dashed;border-color:var(--ctl)}
+.deb h4{font:400 1.45rem/1.2 var(--display);margin:8px 0 12px}
+.deb p{font-size:15px;color:var(--ink-2)}
+@media (max-width:980px){.flips{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:900px){
+  .venn svg{display:none}
+  .vcol{position:static;transform:none;width:auto!important;text-align:left!important;padding:18px 20px;border-radius:14px;background:var(--bg-2);border:1px solid var(--line)}
+  .venn{display:grid;gap:12px}
+}
+@media (max-width:760px){.debate{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:640px){.flips{display:grid;grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:84%;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:8px} .flip{height:300px;scroll-snap-align:start}}
+
+/* ---------- Miradas ---------- */
+.lens{background:var(--bg-2);border:1px solid var(--line);border-radius:20px;padding:clamp(18px,3vw,36px)}
+.lens-stage{position:relative;--pc:var(--xl)}
+.lens-row{position:relative;z-index:1;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.lens-col{display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;min-width:0}
+.lchip{min-height:78px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:7px}
+.lchip span{font:italic 400 clamp(13px,1.75vw,21px)/1.15 var(--display);color:var(--ink);overflow-wrap:anywhere;hyphens:auto;max-width:100%}
+.lchip small{font:500 10.5px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.lchip.self span{color:var(--pc)}
+.lfig{width:clamp(56px,9.4vw,112px);padding:0;border:0;background:none;cursor:pointer}
+.lfig .ncirc{border-color:var(--nc)}
+.lfig[aria-pressed="true"] .ncirc{box-shadow:0 0 0 4px var(--bg-2),0 0 0 7px var(--nc),0 0 40px color-mix(in srgb,var(--nc) 45%,transparent)}
+.lfig:hover .ncirc{transform:scale(1.06)}
+.lfig:focus-visible{outline:none} .lfig:focus-visible .ncirc{outline:2px solid var(--warn);outline-offset:4px}
+.lname{font:600 13px/1.2 var(--sans);color:var(--ink-2)}
+.lens-under{height:150px}
+.lens-arcs{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.lens-insight{display:grid;grid-template-columns:minmax(0,14em) minmax(0,1fr);gap:16px;align-items:start;border-top:1px solid var(--line);padding-top:22px;margin-top:4px}
+.lens-insight p{font:400 clamp(1.1rem,1.7vw,1.35rem)/1.4 var(--display);margin:0;max-width:64ch}
+.lens-insight .lbl{padding-top:6px;color:var(--pc)}
+.mirror{margin-top:28px;display:grid;gap:18px;padding:clamp(20px,3vw,36px);border-radius:20px;border:1px solid var(--line);background:var(--bg-2)}
+.mirror-q{margin:0;font:400 clamp(1.25rem,2.2vw,1.75rem)/1.35 var(--display);max-width:44ch}
+.enemy{display:inline-block;min-width:4.5em;padding:0 .3em;border-bottom:2px dashed var(--warn);color:var(--warn);text-align:center}
+.mirror-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.mcard{margin:0;padding:clamp(18px,2.6vw,26px);border-radius:16px;background:var(--bg);border:1px solid var(--mc)}
+.mcard blockquote{margin:0;font:400 clamp(1.05rem,1.6vw,1.25rem)/1.4 var(--display)}
+.mcard blockquote b{font-weight:500;color:var(--mc)}
+.mcard figcaption{margin-top:12px;font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mc)}
+.mirror-v{font:italic 400 clamp(1.1rem,1.7vw,1.3rem)/1.4 var(--display);color:var(--warn);margin:0;max-width:70ch}
+@media (max-width:700px){
+  .mirror-grid{grid-template-columns:minmax(0,1fr)} .lens-under{height:110px} .lchip{min-height:96px}
+  .lens-insight{grid-template-columns:minmax(0,1fr);gap:8px}
+  .segs i{width:9px}
+}
+
+/* ---------- Prisma ---------- */
+.fact-box{display:grid;gap:8px;margin:22px 0 26px;max-width:820px}
+.fact-text{font:400 clamp(1.4rem,2.6vw,2.1rem)/1.2 var(--display);margin:0}
+.prism{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.3fr);align-items:stretch}
+.prism-left{position:relative;min-height:540px}
+.prism-left svg{position:absolute;inset:0;width:100%;height:100%}
+.rays-cards{display:grid;grid-template-rows:repeat(5,100px);gap:10px}
+.rcard{display:grid;align-content:center;gap:4px;padding:10px 20px;border-radius:14px;background:var(--bg-2);border:1px solid var(--line);min-width:0}
+.rcard .who{display:flex;flex-wrap:wrap;gap:4px 10px;font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--rc)}
+.rcard .who span{color:var(--muted)}
+.rcard p{margin:0;font:italic 400 clamp(15.5px,1.55vw,19px)/1.3 var(--display)}
+.anim .ray{animation:rayIn .8s both;animation-delay:calc(var(--j) * 90ms)}
+.anim .rcard{animation:cardIn .6s both;animation-delay:calc(var(--j) * 90ms + 120ms)}
+@keyframes rayIn{from{opacity:0}to{opacity:1}}
+@keyframes cardIn{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
+@media (max-width:760px){.prism{grid-template-columns:minmax(0,1fr)} .prism-left{display:none} .rays-cards{grid-template-rows:none} .rcard{padding:16px 18px}}
+
+/* ---------- Identidades + eje territorial ---------- */
+.id-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4vw,64px);align-items:center}
+.rings svg{display:block;width:100%;max-width:560px;height:auto;margin:0 auto}
+.rl{font:600 15px var(--sans);fill:var(--ink);paint-order:stroke;stroke:var(--bg-2);stroke-width:4px;stroke-linejoin:round}
+.rs{font:500 11.5px var(--mono);letter-spacing:.1em;paint-order:stroke;stroke:var(--bg-2);stroke-width:4px;stroke-linejoin:round}
+.picker{display:flex;flex-wrap:wrap;gap:8px}
+.pick{display:inline-flex;align-items:center;gap:9px;min-height:44px;padding:5px 15px 5px 5px;border-radius:999px;border:1px solid var(--ctl);background:transparent;color:var(--ink);font:500 14px var(--sans);cursor:pointer}
+.pick .pc{display:block;width:32px;height:32px;border-radius:50%;overflow:hidden;border:2px solid var(--nc);background:var(--bg-3)}
+.pick:hover{border-color:var(--ink-2)}
+.pick[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.legend3{display:flex;flex-wrap:wrap;gap:8px 20px;font-size:13.5px;color:var(--ink-2);margin:22px 0}
+.legend3 span{display:inline-flex;align-items:center;gap:8px}
+.legend3 i{display:inline-block;width:16px;height:16px;border-radius:50%}
+.id-insight{font:400 clamp(1.15rem,1.9vw,1.45rem)/1.4 var(--display);margin:0 0 18px}
+.moreno{padding:18px 20px;border-radius:14px;border:1px dashed var(--ctl);font-size:14px;color:var(--ink-2)}
+.moreno q{font-family:var(--display);font-style:italic;color:var(--ink);quotes:"«" "»"}
+.terr{margin-top:clamp(48px,7vw,80px);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:clamp(24px,4vw,56px);align-items:center}
+.terr h3{margin:8px 0 12px}
+.terr p{font-size:15px;color:var(--ink-2)}
+.terr-chart{background:var(--bg-2);border:1px solid var(--line);border-radius:20px;padding:10px}
+.terr-chart svg{display:block;width:100%;height:auto}
+.tt{font:500 14px var(--sans);fill:var(--ink-2)}
+.tt.b{font-weight:600;fill:var(--ink)}
+.terr-list{display:none;list-style:none;margin:0;padding:8px;gap:10px}
+.terr-list li{display:grid;grid-template-columns:16px minmax(0,1fr);gap:10px;align-items:start;font-size:14.5px;color:var(--ink-2)}
+.terr-list li i{width:14px;height:14px;border-radius:50%;margin-top:4px}
+.terr-list li b{color:var(--ink);font-weight:600}
+@media (max-width:640px){#terr{display:none} .terr-list{display:grid} .rl{font-size:19px} .rs{font-size:15px} .mini .mz{font-size:32px} .mini .ml{font-size:34px} .mlab{font-size:34px}}
+@media (max-width:860px){.id-grid,.terr{grid-template-columns:minmax(0,1fr)} .rings{order:2}}
+
+/* ---------- Escalera de Glasl ---------- */
+.levels{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-bottom:6px}
+.levels div{border-top:2px solid var(--lc);padding-top:10px;font-size:13.5px;color:var(--ink-2)}
+.levels b{display:block;font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--lc);margin-bottom:2px}
+.stairs{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:6px;align-items:end;height:420px;padding-top:62px}
+.step{position:relative;height:calc(100% - var(--i) * 8.4%);border:0;border-radius:12px 12px 3px 3px;padding:12px 10px;text-align:left;color:var(--ink);
+  cursor:pointer;display:flex;flex-direction:column;gap:6px;font:inherit;transition:filter .2s}
+.step:hover{filter:brightness(1.18)}
+.step[aria-pressed="true"]{box-shadow:inset 0 0 0 2px var(--ink)}
+.sn{font:400 clamp(1.5rem,2.6vw,2.4rem)/1 var(--display)}
+.sname{font:600 12.5px/1.2 var(--sans)}
+.marks{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);display:flex;gap:3px}
+.mk{display:block;width:clamp(28px,3.4vw,42px);aspect-ratio:1;border-radius:50%;overflow:hidden;border:2px solid var(--nc);background:var(--bg-3)}
+.step-detail{margin-top:24px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 28px;background:var(--bg-2);border:1px solid var(--line);border-radius:20px;padding:clamp(20px,3vw,34px)}
+.sd-num{font:400 clamp(3.4rem,7vw,5.6rem)/.9 var(--display);color:var(--sdc)}
+.step-detail h3{margin:6px 0 10px}
+.step-detail p{color:var(--ink-2);max-width:62ch}
+.step-detail blockquote{margin:6px 0 14px;font:italic 400 clamp(1.15rem,1.8vw,1.4rem)/1.35 var(--display);color:var(--ink)}
+.sd-who{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.vnote{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px}
+.vnote div{padding:20px 22px;border-radius:16px;border:1px solid var(--line)}
+.vnote b{display:block;font:400 1.2rem/1.2 var(--display);margin-bottom:6px}
+.vnote p{font-size:14.5px;color:var(--ink-2);margin:0}
+@media (max-width:900px){.vnote{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:760px){
+  .levels{display:none}
+  .stairs{grid-template-columns:minmax(0,1fr);height:auto;padding-top:0}
+  .step{height:auto;width:calc(100% - var(--i) * 5%);min-height:56px;flex-direction:row;align-items:center;gap:14px;border-radius:3px 12px 12px 3px}
+  .sn{font-size:1.5rem;min-width:1.2em}
+  .marks{position:static;transform:none;margin-left:auto}
+  .mk{width:30px}
+  .step-detail{grid-template-columns:minmax(0,1fr)}
+}
+
+/* ---------- Contradicciones ---------- */
+.contra-stage{margin-top:20px;display:grid;grid-template-columns:minmax(0,1fr);gap:14px;padding:clamp(20px,3vw,34px);border-radius:20px;background:var(--bg-2);border:1px solid var(--line)}
+.cs-head{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.cs-head .ncirc{width:64px;flex:none}
+.cs-head h3{color:var(--dc)}
+.cs-head small{display:block;font:italic 400 15px var(--display);color:var(--muted)}
+.cs-rope{padding-top:16px;border-top:1px solid var(--line)}
+.cs-rope .rope p{font-size:15px;color:var(--ink-2);margin:0 0 10px;max-width:80ch}
+.contra{display:grid;gap:12px}
+.crow{display:grid;grid-template-columns:220px minmax(0,1fr);gap:28px;align-items:center;padding:clamp(16px,2.4vw,24px) clamp(18px,2.6vw,28px);background:var(--bg-2);border:1px solid var(--line);border-radius:18px;--dc:var(--ink-2)}
+.crow .who{display:flex;align-items:center;gap:12px}
+.crow .who .ncirc{width:52px;flex:none}
+.crow .who b{display:block;font:600 15px/1.2 var(--sans)}
+.crow .who small{display:block;font:italic 400 14px/1.3 var(--display);color:var(--muted)}
+.crow .rope p{font-size:14.5px;color:var(--ink-2);margin:0 0 10px;max-width:80ch}
+@media (max-width:760px){.crow{grid-template-columns:minmax(0,1fr);gap:14px}}
+
+/* ---------- Test ---------- */
+.test{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(20px,3vw,32px);align-items:start}
+.q-card{background:var(--bg-2);border:1px solid var(--line);border-radius:20px;padding:clamp(20px,3vw,36px);min-height:420px;display:flex;flex-direction:column;gap:20px}
+.q-progress{display:flex;gap:4px}
+.q-progress i{flex:1;height:4px;border-radius:2px;background:var(--bg-3)}
+.q-progress i.done{background:var(--ink-2)}
+.q-progress i.cur{background:var(--warn)}
+.q-meta{display:flex;justify-content:space-between;gap:12px}
+.q-text{font:400 clamp(1.35rem,2.4vw,1.85rem)/1.25 var(--display);margin:0;outline:none}
+.likert{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.likert button{min-height:66px;border-radius:12px;border:1px solid var(--ctl);background:var(--bg);color:var(--ink);font:500 13px/1.2 var(--sans);padding:8px 6px;cursor:pointer;transition:background .15s,border-color .15s}
+.likert button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+@media (hover:hover){.likert:not(.fresh) button:hover{border-color:var(--ink-2);background:var(--bg-3)}}
+.likert .nb{grid-column:1 / -1;min-height:48px;border-style:dashed;color:var(--ink-2)}
+.share{margin:0}
+.share img{display:block;width:100%;height:auto;border-radius:14px;border:1px solid var(--line)}
+.share figcaption{font-size:13px;color:var(--muted);margin-top:8px}
+.q-nav{display:flex;justify-content:space-between;gap:12px;margin-top:auto}
+.mini-wrap{background:var(--bg-2);border:1px solid var(--line);border-radius:20px;padding:14px;position:sticky;top:84px}
+.mini-wrap svg{display:block;width:100%;height:auto}
+.mini-cap{font-size:14px;color:var(--ink-2);padding:6px 8px 4px;margin:0}
+.mini .mt,.mini .mw{display:none}
+.mini .mz{font-size:22px}
+.mini .ml{font-size:24px}
+.mlab{font:600 24px var(--sans);fill:var(--ink-2)}
+.you{transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+.you-ring{transform-box:fill-box;transform-origin:center;animation:pulse 2.2s ease-out 4 both}
+.you-t{font:700 30px var(--sans);fill:var(--warn);paint-order:stroke;stroke:var(--bg-2);stroke-width:6px}
+@keyframes pulse{0%{transform:scale(.7);opacity:1}100%{transform:scale(1.7);opacity:0}}
+.result{background:var(--bg-2);border:1px solid var(--line);border-radius:20px;padding:clamp(20px,3vw,36px);display:grid;gap:22px}
+.res-head{display:flex;align-items:center;gap:16px}
+.res-head .ncirc{width:76px;flex:none}
+.res-head h3{color:var(--dc);outline:none}
+.gauge{display:grid;gap:8px}
+.gauge .g-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;font-size:14px;color:var(--ink-2)}
+.gauge .g-top b{color:var(--ink);font-weight:600}
+.track{position:relative;height:10px;border-radius:5px}
+.track.dir{background:var(--spectrum)}
+.track.tri{background:linear-gradient(90deg,#5E6B88,#B08A38 60%,var(--warn))}
+.track .mark{position:absolute;top:50%;width:20px;height:20px;border-radius:50%;background:var(--bg);border:3px solid var(--ink);transform:translate(-50%,-50%)}
+.ends{display:flex;justify-content:space-between;font:500 10.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.comps{display:grid;gap:9px}
+.comp{display:grid;grid-template-columns:minmax(0,11em) minmax(0,1fr) 2.6em;gap:12px;align-items:center;font-size:13.5px;color:var(--ink-2)}
+.comp .bar{height:6px;border-radius:3px;background:var(--bg-3);overflow:hidden}
+.comp .bar i{display:block;height:100%;background:var(--warn)}
+.comp b{font:500 12.5px var(--mono);text-align:right;color:var(--ink)}
+.res-txt{font:400 clamp(1.08rem,1.6vw,1.25rem)/1.45 var(--display);margin:0}
+.alert{padding:16px 18px;border-radius:14px;border:1px solid var(--warn);background:rgba(246,190,59,.07);font-size:15px;color:var(--ink)}
+.alert b{color:var(--warn)}
+.flags{margin:0;padding-left:18px;color:var(--ink-2);font-size:14.5px}
+.flags li{margin-bottom:8px}
+.flags em{color:var(--ink);font-style:normal;font-weight:600}
+.eyes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.eyes div{padding:14px 16px;border-radius:12px;border:1px solid var(--line)}
+.eyes span:not(.lbl){display:block;font:italic 400 18px/1.25 var(--display);color:var(--ink);margin-top:4px}
+.res-actions{display:flex;flex-wrap:wrap;gap:10px}
+@media (max-width:900px){.test{grid-template-columns:minmax(0,1fr)} .mini-wrap{position:static;order:-1;padding:10px} .mini-wrap svg{max-height:240px}}
+@media (max-width:540px){.likert{grid-template-columns:minmax(0,1fr)} .likert button{min-height:48px} .eyes{grid-template-columns:minmax(0,1fr)} .comp{grid-template-columns:minmax(0,1fr) 2.6em} .comp .bar{grid-column:1 / -1;grid-row:2}}
+
+/* ---------- Salir de la escalera ---------- */
+.meta{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:clamp(20px,3vw,40px);align-items:center;padding:clamp(22px,3.4vw,40px);border-radius:20px;background:var(--bg-2);border:1px solid var(--line)}
+.meta-q{font:400 clamp(1.3rem,2.3vw,1.8rem)/1.3 var(--display);margin:0 0 18px}
+.meta-val{font:400 clamp(3rem,7vw,5rem)/1 var(--display);color:var(--warn);font-variant-numeric:tabular-nums}
+.meta-out{font:400 clamp(1.05rem,1.6vw,1.2rem)/1.45 var(--display);color:var(--ink);margin:14px 0 0}
+.meta-bars{display:grid;gap:12px}
+.mb{display:grid;grid-template-columns:minmax(0,1fr) 4.2em;gap:6px 12px;align-items:center;font-size:13.5px;color:var(--ink-2)}
+.mb span{grid-column:1 / -1}
+.mb i{display:block;height:14px;border-radius:7px;background:var(--warn);transition:width .5s ease}
+.mb.real i{background:var(--c)}
+.mb b{font:400 1.4rem/1 var(--display);color:var(--ink);text-align:right}
+.antis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:20px}
+.anti{padding:clamp(22px,3vw,30px);border-radius:18px;border:1px solid var(--line);background:var(--bg-2)}
+.anti .n{font:400 2.6rem/1 var(--display);color:var(--c)}
+.anti h3{font-size:1.35rem;margin:10px 0 8px}
+.anti p{font-size:15px;color:var(--ink-2);margin:0}
+.coda{margin-top:clamp(48px,7vw,80px);text-align:center;display:grid;justify-items:center;gap:22px}
+.coda p{font:400 clamp(1.6rem,3.4vw,2.6rem)/1.2 var(--display);margin:0;max-width:24ch;text-wrap:balance}
+.coda p em{font-style:italic;color:var(--c)}
+@media (max-width:900px){.meta,.antis{grid-template-columns:minmax(0,1fr)}}
+
+/* ---------- Corrientes cruzadas y líderes ---------- */
+:root{--lib:#4FC1A6;--sp:#C46A45}
+.node.mini{width:clamp(40px,5.8vw,70px)}
+.node.mini .ncirc{border-style:dashed}
+.cx-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.cx-grid div{min-width:0}
+.looks2{display:grid;gap:6px;margin:0;padding:0;list-style:none;font-size:14px;color:var(--ink-2)}
+.looks2 q{font-family:var(--display);font-style:italic;color:var(--ink);quotes:"«" "»"}
+.leaders{position:relative;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px;padding-top:26px}
+.leaders::before{content:"";position:absolute;left:0;right:0;top:8px;height:4px;border-radius:2px;background:linear-gradient(90deg,var(--xl),var(--sp) 16%,var(--l) 32%,var(--c) 50%,var(--r) 66%,var(--lib) 82%,var(--xr))}
+.lcol{position:relative;display:grid;align-content:start;gap:10px;min-width:0}
+.lcol::before{content:"";position:absolute;top:-24px;left:50%;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--lc);border:3px solid var(--bg)}
+.lcol h3{font:600 13px/1.25 var(--sans);text-align:center;color:var(--lc);margin:0 0 4px;min-height:2.5em}
+.ldr{padding:14px 12px;border-radius:14px;background:var(--bg-2);border:1px solid var(--line);text-align:center}
+.ldr .av{display:grid;place-items:center;width:52px;height:52px;margin:0 auto 8px;border-radius:50%;font:400 1.3rem/1 var(--display);color:var(--bg);background:var(--lc)}
+.ldr b{display:block;font:400 1.08rem/1.2 var(--display);color:var(--ink)}
+.ldr span{display:block;font-size:12.5px;line-height:1.35;color:var(--muted);margin-top:4px}
+.lcol .lnote{font-size:12.5px;color:var(--muted);text-align:center;margin:0}
+.lead-note{margin-top:22px;padding:16px 18px;border-radius:14px;border:1px dashed var(--ctl);font-size:14px;color:var(--ink-2);max-width:none}
+.lead-note b{color:var(--ink)}
+@media (max-width:1000px){.leaders{grid-template-columns:repeat(4,minmax(0,1fr));row-gap:34px} .leaders::before{display:none}}
+@media (max-width:560px){.leaders{grid-template-columns:repeat(2,minmax(0,1fr))} .cx-grid{grid-template-columns:minmax(0,1fr)}}
+
+/* ---------- Cien años ---------- */
+.hist-chart{background:var(--bg-2);border:1px solid var(--line);border-radius:20px;padding:10px;overflow-x:auto}
+.hist-chart svg{display:block;width:100%;min-width:640px;height:auto}
+.hseg{cursor:pointer}
+.hseg:focus-visible{outline:none}
+.hseg:focus-visible rect{stroke:var(--warn);stroke-width:2}
+.hst{font:500 12px var(--mono);letter-spacing:.08em;fill:var(--muted)}
+.hsy{font:500 12px var(--mono);fill:var(--ink-2)}
+.hist-pick{margin-top:16px}
+.hist-pick .tbtn{padding:8px 12px;font-size:13px}
+.hist-detail{margin-top:18px;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.2fr);gap:clamp(18px,3vw,40px);padding:clamp(20px,3vw,34px);border-radius:20px;background:var(--bg-2);border:1px solid var(--line);align-items:start}
+.hist-detail svg{display:block;width:100%;height:auto}
+.hd-years{font:400 clamp(2.4rem,5vw,3.6rem)/1 var(--display);color:var(--hc)}
+.hd-phase{display:inline-block;margin:10px 0 4px;padding:4px 10px;border-radius:999px;border:1px solid var(--hc);font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--hc)}
+.hist-detail h3{margin:6px 0 10px}
+.hist-detail p{color:var(--ink-2)}
+.hd-cons{margin:6px 0 0;padding-left:18px;color:var(--ink-2);font-size:15px}
+.hd-cons li{margin-bottom:6px}
+.hd-cap{font-size:12.5px;color:var(--muted);margin:8px 0 0;text-align:center}
+@media (max-width:820px){.hist-detail{grid-template-columns:minmax(0,1fr)}}
+
+/* ---------- Consecuencias ---------- */
+.cons{margin-top:18px;display:grid;grid-template-columns:minmax(0,11em) repeat(4,minmax(0,1fr));border:1px solid var(--line);border-radius:20px;overflow:hidden;background:var(--line);gap:1px}
+.cons > div{background:var(--bg-2);padding:14px 16px;font-size:14px;line-height:1.45;color:var(--ink-2);min-width:0}
+.cons .ch{font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);background:var(--bg-3)}
+.cons .ch.on{color:var(--bg);background:var(--warn)}
+.cons .rd{font:400 1.05rem/1.25 var(--display);color:var(--ink);background:var(--bg-3)}
+.cons .cell{transition:background .3s,color .3s,opacity .3s;opacity:.55}
+.cons .cell.on{opacity:1;color:var(--ink);background:color-mix(in srgb,var(--warn) var(--heat),var(--bg-2))}
+.cons .cell i{display:block;margin-top:6px;font-style:normal;font-size:12.5px;color:var(--muted)}
+.cons .cell.on i{color:var(--ink-2)}
+.cons .corner{background:var(--bg-3)}
+@media (max-width:860px){
+  .cons{grid-template-columns:minmax(0,8em) minmax(0,1fr)}
+  .cons .ch,.cons .cell:not(.on),.cons .corner{display:none}
+  .cons .rd{font-size:.98rem}
+}
+
+/* ================= Versión de seis capítulos ================= */
+:root{--ancom:#C0507A;--ancap:#2E9C86;--indxl:#8F5FD6;--indl:#B597F2;--indr:#7A86B8;--ok:#5CC28A}
+
+/* Portada: seis tarjetas */
+.hero{padding-block:clamp(28px,4vw,56px) clamp(56px,8vw,96px)}
+.hero-text{display:block}
+.hero-text h1{font-size:clamp(2rem,4.2vw,3.4rem);max-width:22ch;margin-top:14px}
+.cards{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
+.card{grid-column:span 2;display:flex;flex-direction:column;gap:6px;padding:14px 14px 18px;border-radius:18px;background:var(--bg-2);border:1px solid var(--line);
+  color:var(--ink);text-decoration:none;transition:transform .2s,border-color .2s,background .2s;min-width:0}
+.card.big{grid-column:span 2}
+.card:hover,.card:focus-visible{transform:translateY(-3px);border-color:var(--cc);background:var(--bg-3)}
+.card-img{display:block;border-radius:12px;background:radial-gradient(120% 120% at 0% 0%,color-mix(in srgb,var(--cc) 14%,transparent),transparent 60%),var(--bg);overflow:hidden;margin-bottom:6px}
+.card-img svg{display:block;width:100%;height:auto}
+.card.big .card-img svg{aspect-ratio:320/150}
+.card-n{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--cc)}
+.card b{font:400 clamp(1.3rem,2vw,1.6rem)/1.15 var(--display)}
+.card-t{font-size:14px;line-height:1.45;color:var(--ink-2)}
+@media (max-width:900px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))} .card,.card.big{grid-column:auto}}
+@media (max-width:520px){.cards{grid-template-columns:minmax(0,1fr)}}
+
+/* Subsecciones dentro de un capítulo */
+.sub{margin-top:clamp(48px,7vw,80px)}
+.sub > h3,.cons-head h3,.model-head h3{font-size:clamp(1.5rem,2.6vw,2rem);margin:0 0 10px}
+.sub > .ch-lede{margin-bottom:22px}
+
+/* 1 · El estudio real */
+.study{padding:clamp(20px,3.4vw,40px);border-radius:22px;background:var(--bg-2);border:1px solid var(--c);display:grid;gap:18px}
+.study-badge{display:inline-flex;align-items:center;gap:10px;align-self:start;justify-self:start;padding:7px 14px;border-radius:999px;background:var(--c);color:var(--bg);font:600 12px var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.dot-live{width:9px;height:9px;border-radius:50%;background:#2E9C5A;box-shadow:0 0 0 3px rgba(46,156,90,.3)}
+.study h3{font-size:clamp(1.7rem,3.2vw,2.5rem)}
+.study-meta{font-size:14px;color:var(--muted);margin:0;max-width:90ch}
+.study-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:clamp(18px,3vw,40px);align-items:end}
+.cis-bars{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:8px;align-items:end;height:300px}
+.cb{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;height:100%;min-width:0}
+.cb b{font:400 clamp(1.05rem,2vw,1.6rem)/1 var(--display);color:var(--ink);white-space:nowrap}
+.cb b small{font-size:.6em;color:var(--muted);margin-left:1px}
+.cb i{display:block;width:100%;border-radius:8px 8px 3px 3px;min-height:4px}
+.cb span{font:500 14px var(--mono);color:var(--ink-2)}
+.cis-ends{display:flex;justify-content:space-between;margin-top:8px;font:500 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.stat{padding:16px;border-radius:14px;background:var(--bg);border:1px solid var(--line)}
+.stat b{display:block;font:400 clamp(2rem,3.6vw,2.8rem)/1 var(--display);color:var(--ink);margin-bottom:6px}
+.stat span{font-size:13.5px;line-height:1.4;color:var(--ink-2)}
+.study-read{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 28px}
+.study-read p{margin:0;color:var(--ink-2)}
+.study-read b{color:var(--ink)}
+.study-read .tiny{grid-column:1 / -1}
+.model-head{margin-top:clamp(48px,7vw,80px);display:grid;gap:8px;margin-bottom:20px}
+.model-badge{justify-self:start;padding:6px 12px;border-radius:999px;border:1px dashed var(--muted);font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.cons-head{margin-top:clamp(40px,6vw,64px);margin-bottom:14px}
+@media (max-width:900px){.study-grid,.study-read{grid-template-columns:minmax(0,1fr)} .cis-bars{height:220px;gap:4px} .cb b{font-size:.95rem}}
+@media (max-width:520px){.cb b small{display:none} .cb b{font-size:.78rem}}
+
+/* 2 · Cien años */
+.hist{padding:clamp(18px,3vw,34px);border-radius:22px;background:var(--bg-2);border:1px solid var(--line)}
+.hline{position:relative;display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px}
+.hline::before{content:"";position:absolute;left:5%;right:5%;top:17px;height:3px;border-radius:2px;background:linear-gradient(90deg,#9AA3B3,#F6BE3B 14%,#EC5272 16%,#9AA3B3 22%,#9AA3B3 50%,#E8E2CF 60%,#F2955F 85%,#F2955F)}
+.hnode{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;padding:8px 2px 6px;border-radius:12px;border:0;background:none;color:var(--ink-2);cursor:pointer;font:inherit}
+.hnode i{width:18px;height:18px;border-radius:50%;background:var(--bg);border:3px solid var(--hc);transition:transform .2s,background .2s}
+.hnode b{font:400 1.05rem/1 var(--display);color:var(--ink)}
+.hnode span{font-size:12px;line-height:1.2;text-align:center;color:var(--muted)}
+.hnode:hover,.hnode[aria-pressed="true"]{background:var(--bg-3)}
+.hnode:hover i,.hnode[aria-pressed="true"] i{transform:scale(1.35);background:var(--hc)}
+.hnode[aria-pressed="true"] b{color:var(--hc)}
+.hrange{margin:6px 0 14px}
+.hbody{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:clamp(18px,3vw,40px);align-items:start}
+.hchart svg{display:block;width:100%;height:auto}
+.hsy{font:500 12px var(--mono);fill:var(--ink-2)}
+.hst{font:600 12px var(--mono);letter-spacing:.1em}
+.hd-cap{font-size:12.5px;color:var(--muted);margin:8px 0 0;text-align:center}
+.hinfo{--hc:var(--c)}
+.hd-years{display:block;font:400 clamp(2.6rem,5vw,3.8rem)/1 var(--display);color:var(--hc)}
+.hd-phase{display:inline-block;margin:12px 0 4px;padding:4px 10px;border-radius:999px;border:1px solid var(--hc);font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--hc)}
+.hinfo h3{margin:8px 0 10px}
+.hinfo p{color:var(--ink-2)}
+.hd-cons{margin:6px 0 0;padding-left:18px;color:var(--ink-2);font-size:15px}
+.hd-cons li{margin-bottom:6px}
+@media (max-width:900px){.hbody{grid-template-columns:minmax(0,1fr)} .hnode span{display:none} .hline{grid-template-columns:repeat(5,minmax(0,1fr))} .hline::before{display:none}}
+
+/* 4 · Perfiles */
+.pf-grid{margin-top:20px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.pf{display:flex;flex-direction:column;gap:10px;padding:18px;border-radius:18px;background:var(--bg-2);border:1px solid var(--line);border-top:3px solid var(--dc);min-width:0}
+.pf-h{display:flex;align-items:center;gap:12px}
+.pf-h .ncirc{width:58px;flex:none}
+.pf-h h3{font-size:1.25rem;line-height:1.15;color:var(--ink)}
+.pf-arq{font:italic 400 1rem/1.25 var(--display);color:var(--dc);margin:2px 0 0}
+.pf-flag{margin:0;font-size:12.5px;color:var(--warn)}
+.pf-q{font:400 1.08rem/1.35 var(--display);color:var(--ink);quotes:"«" "»"}
+.pf-dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 12px;margin:0;font-size:13.5px;line-height:1.45}
+.pf-dl dt{font:500 10.5px/1.6 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.pf-dl dd{margin:0;color:var(--ink-2);min-width:0}
+.pf-dep{display:flex;align-items:center;gap:8px;margin-top:5px;font-size:12px;color:var(--muted)}
+.pf-dep .segs i.on{background:var(--dc)}
+.kv3{display:block}
+.kv3 i{font-style:normal;color:var(--dc);margin-right:6px}
+.pf-dl .chip{font-size:12px;padding:3px 9px;margin:0 0 4px}
+.pf-ten{display:block;font-weight:600;color:var(--ink)}
+.pf-ten + .pf-ten{margin-top:4px}
+.pf-lid{display:block}
+.pf-lid b{color:var(--ink);font-weight:600}
+.pf-more{margin-top:auto;border-top:1px solid var(--line);padding-top:10px;font-size:13.5px;color:var(--ink-2)}
+.pf-more summary{cursor:pointer;font:600 13px var(--sans);color:var(--ink);min-height:32px;display:flex;align-items:center}
+.pf-more p{margin:8px 0 0}
+.pf-strats .chip{font-size:12px;padding:3px 9px;margin:4px 4px 0 0}
+.lead-note{margin-top:22px;padding:16px 18px;border-radius:14px;border:1px dashed var(--ctl);font-size:14px;color:var(--ink-2)}
+.lead-note b{color:var(--ink)}
+@media (max-width:1000px){.pf-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.pf-grid{grid-template-columns:minmax(0,1fr)}}
+
+/* 5 · Círculos de pertenencia */
+.rings-wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(20px,3vw,48px);align-items:center}
+.rings svg{display:block;width:100%;max-width:520px;height:auto;margin:0 auto}
+.rings .ring{transition:fill-opacity .3s}
+.rl{font:600 15px var(--sans);fill:var(--ink);paint-order:stroke;stroke:#0C0F14;stroke-width:5px;stroke-linejoin:round}
+.rpick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.rp{display:flex;align-items:center;gap:6px;min-height:44px;padding:4px 8px 4px 4px;border-radius:12px;border:1px solid var(--line-2);background:var(--bg);color:var(--ink-2);font:500 12px/1.15 var(--sans);text-align:left;cursor:pointer;min-width:0}
+.rp .ncirc{width:30px;flex:none;border-width:2px}
+.rp span:last-child{overflow:hidden;text-overflow:ellipsis}
+.rp:hover,.rp[aria-pressed="true"]{border-color:var(--nc);color:var(--ink);background:var(--bg-3)}
+.rlist{list-style:none;margin:18px 0;padding:0;display:grid;gap:6px}
+.rlist li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:var(--bg-2);border-left:4px solid var(--ec);font-size:14.5px}
+.rlist i{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--ec);color:#0C0F14;font-style:normal;font-weight:700;font-size:13px}
+.rlist b{font:600 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ec)}
+.id-insight{font:400 clamp(1.05rem,1.7vw,1.3rem)/1.4 var(--display);margin:0}
+@media (max-width:900px){.rings-wrap{grid-template-columns:minmax(0,1fr)} .rpick{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:480px){.rpick{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* 5 · La escalera */
+.glasl{overflow-x:auto;border-radius:22px;background:var(--bg-2);border:1px solid var(--line);padding:10px}
+.glasl svg{display:block;width:100%;min-width:720px;height:auto}
+.gstep{cursor:pointer}
+.gstep:focus-visible{outline:none}
+.gstep > rect:first-child{transition:filter .2s,stroke-width .2s;stroke:#EDEBE6;stroke-width:0}
+.gstep:hover > rect:first-child,.gstep.on > rect:first-child{filter:brightness(1.18);stroke-width:3}
+.gl-n{font:400 40px var(--display);fill:#0C0F14}
+.gl-t{font:600 12.5px var(--sans);fill:#0C0F14}
+.gl-lv{font:600 12px var(--mono);letter-spacing:.1em}
+.gl-ld{font:400 13px var(--sans);fill:var(--ink-2)}
+.gl-ab{font:600 13px var(--mono);letter-spacing:.2em;fill:#EC5272}
+
+/* 6 · Fuentes */
+.refs-grid{margin-top:18px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.ref{display:grid;grid-template-columns:92px minmax(0,1fr);gap:14px;padding:14px;border-radius:16px;background:var(--bg-2);border:1px solid var(--line);min-width:0}
+.ref-img{position:relative;display:flex;flex-direction:column;justify-content:space-between;height:124px;padding:10px;border-radius:10px;overflow:hidden;
+  background:linear-gradient(160deg,color-mix(in srgb,var(--rc) 55%,#0C0F14),#0C0F14);box-shadow:inset 6px 0 0 rgba(0,0,0,.25)}
+.ref-y{font:600 12px var(--mono);color:#0C0F14;background:var(--rc);align-self:flex-start;padding:2px 6px;border-radius:4px}
+.ref-i{font:400 2.2rem/1 var(--display);color:#fff;opacity:.95}
+.ref-cat{font:500 9.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#fff;opacity:.8}
+.ref-b{min-width:0}
+.ref-a{margin:0;font:500 12px var(--mono);color:var(--muted)}
+.ref h4{margin:4px 0 2px;font:400 1.05rem/1.25 var(--display);color:var(--ink)}
+.ref-s{margin:0 0 8px;font-size:12.5px;font-style:italic;color:var(--muted)}
+.ref-u{margin:0;font-size:13.5px;line-height:1.45;color:var(--ink-2)}
+.ref-u .lbl{display:block;margin-bottom:2px;color:var(--rc)}
+.ref-ch{margin:8px 0 0;font:500 11px var(--mono);color:var(--muted)}
+@media (max-width:1000px){.refs-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.refs-grid{grid-template-columns:minmax(0,1fr)}}
+
+/* ---------- Método ---------- */
+.method{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.mcard2{padding:clamp(22px,3vw,30px);border-radius:18px;background:var(--bg-2);border:1px solid var(--line)}
+.mcard2 h3{font-size:1.45rem;margin:8px 0 10px}
+.mcard2 p{font-size:15px;color:var(--ink-2)}
+.limits{margin-top:40px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,4vw,56px)}
+.limits ul{margin:0;padding-left:18px;color:var(--ink-2);font-size:15px}
+.limits li{margin-bottom:10px}
+.limits li b{color:var(--ink)}
+.refs{list-style:none;margin:0;padding:0;font-size:13.5px;line-height:1.5;color:var(--ink-2)}
+.refs li{margin-bottom:9px;padding-left:1.6em;text-indent:-1.6em}
+.refs i{color:var(--ink)}
+@media (max-width:900px){.method,.limits{grid-template-columns:minmax(0,1fr)}}
+
+footer{border-top:1px solid var(--line);padding-block:40px 64px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;font-size:13.5px;color:var(--muted)}
+footer p{margin:0;max-width:70ch}
+
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .flip[aria-pressed="true"] .flip-in{transform:none}
+  .flip .face.back{transform:none;opacity:0}
+  .flip[aria-pressed="true"] .face.back{opacity:1}
+  .flip[aria-pressed="true"] .face.front{opacity:0}
+}
+</style>
+
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <defs>
+    <pattern id="hatch" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="7" height="7" fill="#1B2230"/><rect width="2.4" height="7" fill="#F6BE3B" fill-opacity=".55"/>
+    </pattern>
+    <linearGradient id="spec" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0" stop-color="#EC5272"/><stop offset=".25" stop-color="#F2955F"/><stop offset=".5" stop-color="#E8E2CF"/>
+      <stop offset=".75" stop-color="#6CC4E4"/><stop offset="1" stop-color="#5B7CF0"/>
+    </linearGradient>
+    <!-- Retratos: busto plano, rostro sin rasgos para no caricaturizar. Mismo tono de piel; género alternado a propósito. -->
+    <symbol id="p-xl" viewBox="0 0 120 140">
+      <path d="M30,110 C26,86 40,72 60,72 C80,72 94,86 90,110 Z" fill="#1A1D25"/>
+      <path d="M50,72 L70,72 L71,98 Q60,104 49,98 Z" fill="#B8957A"/>
+      <path d="M12,140 C12,108 32,94 60,94 C88,94 108,108 108,140 Z" fill="#2C313C"/>
+      <path d="M36,99 Q60,114 84,99" stroke="#1A1D25" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <line x1="53" y1="106" x2="52" y2="128" stroke="#9AA3B3" stroke-width="1.6" stroke-linecap="round"/>
+      <line x1="67" y1="106" x2="68" y2="128" stroke="#9AA3B3" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M43,94 L77,94 L60,117 Z" fill="#EC5272"/>
+      <circle cx="87" cy="120" r="6.5" fill="#EC5272"/><circle cx="87" cy="120" r="2.6" fill="#2C313C"/>
+      <ellipse cx="60" cy="54" rx="20" ry="24" fill="#CFAE93"/>
+      <path d="M39,57 C37,36 48,28 60,28 C73,28 83,36 81,57 C78,44 70,38 60,38 C50,38 42,44 39,57 Z" fill="#4A3328"/>
+      <circle cx="60" cy="23" r="9" fill="#4A3328"/>
+      <path d="M40,52 Q38,66 43,75" stroke="#4A3328" stroke-width="3" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="p-l" viewBox="0 0 120 140">
+      <path d="M50,72 L70,72 L71,98 Q60,104 49,98 Z" fill="#B8957A"/>
+      <path d="M12,140 C12,108 32,94 60,94 C88,94 108,108 108,140 Z" fill="#F2955F"/>
+      <path d="M12,140 C12,108 30,95 47,94 L52,140 Z" fill="#46648A"/>
+      <path d="M108,140 C108,108 90,95 73,94 L68,140 Z" fill="#46648A"/>
+      <path d="M47,94 L56,118 L50,122 Z" fill="#37516F"/><path d="M73,94 L64,118 L70,122 Z" fill="#37516F"/>
+      <rect x="54" y="122" width="12" height="2.2" rx="1" fill="#0C0F14" opacity=".55"/>
+      <rect x="55.5" y="127" width="9" height="2.2" rx="1" fill="#0C0F14" opacity=".55"/>
+      <path d="M26,104 L90,140" stroke="#D9CDB4" stroke-width="4.5"/>
+      <ellipse cx="60" cy="54" rx="20" ry="24" fill="#CFAE93"/>
+      <circle cx="43" cy="42" r="7" fill="#3A2C24"/><circle cx="50" cy="34" r="8" fill="#3A2C24"/><circle cx="60" cy="31" r="8.5" fill="#3A2C24"/>
+      <circle cx="70" cy="34" r="8" fill="#3A2C24"/><circle cx="77" cy="42" r="7" fill="#3A2C24"/><circle cx="41" cy="50" r="4.5" fill="#3A2C24"/><circle cx="79" cy="50" r="4.5" fill="#3A2C24"/>
+      <circle cx="52" cy="57" r="5.6" fill="none" stroke="#14171C" stroke-width="2"/><circle cx="68" cy="57" r="5.6" fill="none" stroke="#14171C" stroke-width="2"/>
+      <line x1="57.6" y1="57" x2="62.4" y2="57" stroke="#14171C" stroke-width="2"/>
+    </symbol>
+    <symbol id="p-c" viewBox="0 0 120 140">
+      <path d="M50,72 L70,72 L71,98 Q60,104 49,98 Z" fill="#B8957A"/>
+      <path d="M12,140 C12,108 32,94 60,94 C88,94 108,108 108,140 Z" fill="#8E8A80"/>
+      <path d="M44,96 Q60,105 76,96" stroke="#77736A" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <path d="M47,93 L60,106 L51,111 Z" fill="#EDEBE6"/><path d="M73,93 L60,106 L69,111 Z" fill="#EDEBE6"/>
+      <ellipse cx="60" cy="54" rx="20" ry="24" fill="#CFAE93"/>
+      <path d="M38,62 C34,36 46,28 60,28 C76,28 86,38 82,62 L82,77 L74,77 C78,62 76,47 65,42 C57,47 47,49 45,57 L46,77 L38,77 Z" fill="#7A5638"/>
+    </symbol>
+    <symbol id="p-r" viewBox="0 0 120 140">
+      <path d="M36,58 C34,34 46,26 60,26 C74,26 86,34 84,58 L87,98 C81,102 74,100 72,94 L72,62 L48,62 L48,94 C46,100 39,102 33,98 Z" fill="#8A5A34"/>
+      <path d="M50,72 L70,72 L71,98 Q60,104 49,98 Z" fill="#B8957A"/>
+      <path d="M12,140 C12,108 32,94 60,94 C88,94 108,108 108,140 Z" fill="#A9CBEA"/>
+      <path d="M48,93 L60,104 L52,110 Z" fill="#CFE1F3"/><path d="M72,93 L60,104 L68,110 Z" fill="#CFE1F3"/>
+      <path d="M12,140 C12,108 30,96 46,95 L54,140 Z" fill="#1E3557"/>
+      <path d="M108,140 C108,108 90,96 74,95 L66,140 Z" fill="#1E3557"/>
+      <path d="M20,108 L49,108 M15,118 L51,118 M13,128 L52,128 M100,108 L71,108 M105,118 L69,118 M107,128 L68,128" stroke="#2F4C77" stroke-width="1.6"/>
+      <circle cx="34" cy="113" r="3.8" fill="#D9B44A"/>
+      <ellipse cx="60" cy="54" rx="20" ry="24" fill="#CFAE93"/>
+      <path d="M40,54 C39,35 49,28 60,28 C72,28 81,35 80,54 C74,43 66,40 60,40 C53,40 45,43 40,54 Z" fill="#8A5A34"/>
+      <path d="M41,44 C47,32 73,32 79,44" stroke="#1E3557" stroke-width="4" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="p-xr" viewBox="0 0 120 140">
+      <path d="M50,72 L70,72 L71,98 Q60,104 49,98 Z" fill="#B8957A"/>
+      <path d="M12,140 C12,108 32,94 60,94 C88,94 108,108 108,140 Z" fill="#363A2C"/>
+      <path d="M47,94 L73,94 L68,140 L52,140 Z" fill="#20283A"/>
+      <path d="M47,93 L58,102 L52,107 Z" fill="#2E3A55"/><path d="M73,93 L62,102 L68,107 Z" fill="#2E3A55"/>
+      <path d="M45,95 L54,126 L47,130 Z" fill="#262A1F"/><path d="M75,95 L66,126 L73,130 Z" fill="#262A1F"/>
+      <path d="M80,120 L94,116" stroke="#5B6150" stroke-width="2" stroke-linecap="round"/>
+      <ellipse cx="60" cy="54" rx="20" ry="24" fill="#CFAE93"/>
+      <path d="M40,50 C39,33 50,27 61,27 C73,27 81,33 80,48 C77,40 69,37 60,37 C51,37 44,41 40,50 Z" fill="#4A3F33"/>
+      <path d="M41,60 C42,74 50,80 60,80 C70,80 78,74 79,60 C76,70 70,72 60,72 C50,72 44,70 41,60 Z" fill="#4A3628"/>
+    </symbol>
+    <symbol id="p-lib" viewBox="0 0 120 140">
+      <path d="M50,72 L70,72 L71,98 Q60,104 49,98 Z" fill="#B8957A"/>
+      <path d="M12,140 C12,108 32,94 60,94 C88,94 108,108 108,140 Z" fill="#EDEBE6"/>
+      <path d="M12,140 C12,108 30,96 46,94 L56,140 Z" fill="#2B3A4A"/>
+      <path d="M108,140 C108,108 90,96 74,94 L64,140 Z" fill="#2B3A4A"/>
+      <path d="M46,94 L55,122 L49,126 Z" fill="#22303E"/><path d="M74,94 L65,122 L71,126 Z" fill="#22303E"/>
+      <circle cx="30" cy="112" r="4.2" fill="#4FC1A6"/>
+      <ellipse cx="60" cy="54" rx="20" ry="24" fill="#CFAE93"/>
+      <path d="M40,49 C40,33 50,28 61,28 C73,28 81,34 80,47 C76,40 68,37 59,38 C51,39 45,42 40,49 Z" fill="#5A4030"/>
+      <path d="M43,64 C44,75 51,79 60,79 C69,79 76,75 77,64 C74,70 68,72 60,72 C52,72 46,70 43,64 Z" fill="#5A4030" opacity=".75"/>
+    </symbol>
+    <symbol id="p-sp" viewBox="0 0 120 140">
+      <path d="M50,72 L70,72 L71,98 Q60,104 49,98 Z" fill="#B8957A"/>
+      <path d="M12,140 C12,108 32,94 60,94 C88,94 108,108 108,140 Z" fill="#4A5340"/>
+      <path d="M44,94 L76,94 L70,140 L50,140 Z" fill="#3A4232"/>
+      <path d="M22,112 L44,108 M78,108 L98,112" stroke="#5F6A52" stroke-width="2"/>
+      <rect x="27" y="114" width="12" height="8" rx="1" fill="#C8102E"/><rect x="27" y="116.8" width="12" height="2.6" fill="#F1BF00"/>
+      <circle cx="88" cy="118" r="5.5" fill="#B5653E"/>
+      <ellipse cx="60" cy="54" rx="20" ry="24" fill="#CFAE93"/>
+      <path d="M39,58 C37,36 48,28 60,28 C73,28 83,36 81,58 C78,44 70,38 60,38 C50,38 42,44 39,58 Z" fill="#2E241D"/>
+      <path d="M78,46 C90,50 92,66 86,80" stroke="#2E241D" stroke-width="6" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="p-ancom" viewBox="0 0 120 140">
+      <path d="M50,72 L70,72 L71,98 Q60,104 49,98 Z" fill="#B8957A"/>
+      <path d="M12,140 C12,108 32,94 60,94 C88,94 108,108 108,140 Z" fill="#23262E"/>
+      <path d="M40,95 Q60,108 80,95" stroke="#3A3F4B" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M80,112 L94,112 L94,124 L80,124 Z" fill="#14161B"/><path d="M80,112 L94,112 L80,124 Z" fill="#C8303F"/>
+      <ellipse cx="60" cy="54" rx="20" ry="24" fill="#CFAE93"/>
+      <path d="M40,52 C38,33 50,27 61,27 C73,27 82,34 80,52 C77,40 70,36 60,36 C51,36 44,41 40,52 Z" fill="#2B211B"/>
+      <path d="M38,48 L36,64 M82,48 L84,64" stroke="#2B211B" stroke-width="4" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="p-ancap" viewBox="0 0 120 140">
+      <path d="M78,40 C92,44 94,62 88,78" stroke="#5A3A24" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <path d="M50,72 L70,72 L71,98 Q60,104 49,98 Z" fill="#B8957A"/>
+      <path d="M12,140 C12,108 32,94 60,94 C88,94 108,108 108,140 Z" fill="#E9E6DE"/>
+      <path d="M12,140 C12,108 30,96 46,94 L55,140 Z" fill="#4A4D55"/><path d="M108,140 C108,108 90,96 74,94 L65,140 Z" fill="#4A4D55"/>
+      <path d="M30,108 L42,108 L42,120 L30,120 Z" fill="#14161B"/><path d="M30,108 L42,108 L30,120 Z" fill="#E3B341"/>
+      <ellipse cx="60" cy="54" rx="20" ry="24" fill="#CFAE93"/>
+      <path d="M40,55 C38,34 49,28 60,28 C72,28 82,35 80,52 C75,41 67,38 58,39 C50,40 44,45 40,55 Z" fill="#5A3A24"/>
+    </symbol>
+    <symbol id="p-indxl" viewBox="0 0 120 140">
+      <path d="M50,72 L70,72 L71,98 Q60,104 49,98 Z" fill="#B8957A"/>
+      <path d="M12,140 C12,108 32,94 60,94 C88,94 108,108 108,140 Z" fill="#3E4A3A"/>
+      <path d="M58,94 L62,94 L62,140 L58,140 Z" fill="#2E372B"/>
+      <path d="M38,98 C46,108 74,108 82,98 L80,106 C70,114 50,114 40,106 Z" fill="#8F5FD6"/>
+      <circle cx="86" cy="122" r="6" fill="#8F5FD6"/><path d="M86,117.5 L87.3,120.6 L90.5,120.8 L88,122.9 L88.8,126 L86,124.3 L83.2,126 L84,122.9 L81.5,120.8 L84.7,120.6 Z" fill="#EDEBE6"/>
+      <ellipse cx="60" cy="54" rx="20" ry="24" fill="#CFAE93"/>
+      <path d="M40,50 C39,33 50,27 61,27 C73,27 81,33 80,48 C77,40 69,36 60,36 C51,36 44,41 40,50 Z" fill="#1F1A16"/>
+      <path d="M44,64 C45,74 52,78 60,78 C68,78 75,74 76,64 C72,70 67,71 60,71 C53,71 48,70 44,64 Z" fill="#1F1A16" opacity=".8"/>
+    </symbol>
+    <symbol id="p-indl" viewBox="0 0 120 140">
+      <path d="M50,72 L70,72 L71,98 Q60,104 49,98 Z" fill="#B8957A"/>
+      <path d="M12,140 C12,108 32,94 60,94 C88,94 108,108 108,140 Z" fill="#B597F2"/>
+      <path d="M12,140 C12,108 30,96 46,95 L52,140 Z" fill="#6E5A99"/><path d="M108,140 C108,108 90,96 74,95 L68,140 Z" fill="#6E5A99"/>
+      <ellipse cx="60" cy="54" rx="20" ry="24" fill="#CFAE93"/>
+      <path d="M38,64 C34,38 46,28 60,28 C76,28 86,38 82,64 L80,90 L74,90 L76,62 C74,48 68,42 60,42 C52,42 46,48 44,62 L46,90 L40,90 Z" fill="#3B2B22"/>
+    </symbol>
+    <symbol id="p-indr" viewBox="0 0 120 140">
+      <path d="M50,72 L70,72 L71,98 Q60,104 49,98 Z" fill="#B8957A"/>
+      <path d="M12,140 C12,108 32,94 60,94 C88,94 108,108 108,140 Z" fill="#2A3142"/>
+      <path d="M48,94 L72,94 L64,118 L56,118 Z" fill="#EDEBE6"/>
+      <path d="M57,98 L63,98 L65,128 L60,134 L55,128 Z" fill="#7A86B8"/>
+      <ellipse cx="60" cy="54" rx="20" ry="24" fill="#CFAE93"/>
+      <path d="M40,50 C40,34 50,28 61,28 C72,28 80,33 80,46 C76,40 69,37 61,38 C52,39 45,43 40,50 Z" fill="#8A8F98"/>
+    </symbol>
+  </defs>
+</svg>
+<a class="skip" href="#hoy">Saltar al contenido</a>
+
+<header class="top" lang="es">
+  <div class="top-in">
+    <a class="brand" href="#inicio"><span class="brand-mark" aria-hidden="true"></span><span class="brand-txt">Observatorio de Polarización</span></a>
+    <nav aria-label="Capítulos">
+      <ol class="nav">
+        <li><a href="#hoy">1 · Hoy</a></li>
+        <li><a href="#historia">2 · Cien años</a></li>
+        <li><a href="#miradas">3 · Miradas</a></li>
+        <li><a href="#perfiles">4 · Perfiles</a></li>
+        <li><a href="#escalada">5 · Del nosotros al enemigo</a></li>
+        <li><a href="#fuentes">6 · Palabras y fuentes</a></li>
+      </ol>
+    </nav>
+  </div>
+  <div class="prog" aria-hidden="true"><i id="prog"></i></div>
+</header>
+
+<div class="page" lang="es">
+<main>
+
+<!-- ============ PORTADA: SEIS CAPÍTULOS ============ -->
+<section id="inicio" class="hero" aria-labelledby="h-inicio">
+  <div class="hero-text">
+    <p class="eyebrow">Observatorio de Polarización · España</p>
+    <h1 id="h-inicio">Seis formas de mirar una sociedad dividida.</h1>
+  </div>
+  <div class="cards" id="cards">
+    <a class="card big" href="#hoy" style="--cc:var(--c)">
+      <span class="card-img" aria-hidden="true"><svg viewBox="0 0 320 150" id="ci-hoy"></svg></span>
+      <span class="card-n">Capítulo 1</span><b>La España de hoy</b>
+      <span class="card-t">El estudio real del CIS, qué pasa cuando sube la presión del grupo y lo que cuesta cada fase.</span>
+    </a>
+    <a class="card big" href="#historia" style="--cc:var(--l)">
+      <span class="card-img" aria-hidden="true"><svg viewBox="0 0 320 150" id="ci-historia"></svg></span>
+      <span class="card-n">Capítulo 2</span><b>Cien años de polarización</b>
+      <span class="card-t">De 1923 a 2026: la forma de la sociedad española en cada etapa, y su precio.</span>
+    </a>
+    <a class="card big" href="#miradas" style="--cc:var(--xl)">
+      <span class="card-img" aria-hidden="true"><svg viewBox="0 0 320 150" id="ci-miradas"></svg></span>
+      <span class="card-n">Capítulo 3</span><b>Miradas</b>
+      <span class="card-t">Mira la sociedad con los ojos de cada bando: cómo nombra a los demás y cómo cuenta los hechos.</span>
+    </a>
+    <a class="card" href="#perfiles" style="--cc:var(--r)">
+      <span class="card-img" aria-hidden="true"><svg viewBox="0 0 320 150" id="ci-perfiles"></svg></span>
+      <span class="card-n">Capítulo 4</span><b>Doce perfiles</b>
+      <span class="card-t">Psicología, relato, lenguaje, contradicciones y líderes de cada corriente.</span>
+    </a>
+    <a class="card" href="#escalada" style="--cc:var(--warn)">
+      <span class="card-img" aria-hidden="true"><svg viewBox="0 0 320 150" id="ci-escalada"></svg></span>
+      <span class="card-n">Capítulo 5</span><b>Del nosotros al enemigo</b>
+      <span class="card-t">Los círculos de pertenencia y los nueve peldaños que llevan del desacuerdo al abismo.</span>
+    </a>
+    <a class="card" href="#fuentes" style="--cc:var(--xr)">
+      <span class="card-img" aria-hidden="true"><svg viewBox="0 0 320 150" id="ci-fuentes"></svg></span>
+      <span class="card-n">Capítulo 6</span><b>Palabras y fuentes</b>
+      <span class="card-t">De dónde vienen «facha», «rojo» o «fascista», y los estudios en que se apoya todo.</span>
+    </a>
+  </div>
+</section>
+
+<!-- ============ 1 · LA ESPAÑA DE HOY ============ -->
+<section id="hoy" class="chapter" aria-labelledby="h-hoy">
+  <div class="ch-head">
+    <p class="ch-num">Capítulo 1 · La España de hoy</p>
+    <h2 id="h-hoy">Lo que dicen los datos, <em>y lo que podría pasar</em>.</h2>
+    <p class="ch-lede">Primero, una medición real: cómo se sitúan hoy los españoles entre la izquierda y la derecha. Después, un modelo para ver qué ocurre cuando el grupo empieza a pensar por nosotros, y lo que cuesta cada fase.</p>
+  </div>
+
+  <article class="study" aria-labelledby="h-study">
+    <div class="study-badge"><span class="dot-live" aria-hidden="true"></span>Estudio real · no es una simulación</div>
+    <h3 id="h-study">Barómetro del CIS, septiembre de 2026</h3>
+    <p class="study-meta">Centro de Investigaciones Sociológicas · Estudio n.º 3577 · 4.042 entrevistas · Pregunta: «¿Dónde se colocaría usted en una escala de 1 a 10, donde 1 es izquierda y 10 derecha?»</p>
+    <div class="study-grid">
+      <div class="cis-chart" id="cis-chart" role="img" aria-label="Autoubicación ideológica en España, septiembre de 2026: 1, 17,7 %; 2, 7,0 %; 3, 11,5 %; 4, 8,3 %; 5, 20,5 %; 6, 6,3 %; 7, 7,5 %; 8, 6,5 %; 9, 1,3 %; 10, 8,1 %."></div>
+      <div class="stats">
+        <div class="stat"><b>24,7 %</b><span>se sitúa en el 1 o el 2, la izquierda más marcada</span></div>
+        <div class="stat"><b>20,5 %</b><span>elige el 5, el centro exacto de la escala</span></div>
+        <div class="stat"><b>9,4 %</b><span>se sitúa en el 9 o el 10, la derecha más marcada</span></div>
+        <div class="stat"><b>4,6</b><span>es la media: algo a la izquierda del centro</span></div>
+      </div>
+    </div>
+    <div class="study-read">
+      <p><b>No es una campana.</b> Tiene tres picos: el 1, el 5 y el 10. Los extremos de una escala atraen respuestas por anclaje, así que elegir el 1 o el 10 indica una dirección, no extremismo.</p>
+      <p><b>Lo que más ha crecido es el rechazo al otro.</b> España está entre los países europeos con más polarización afectiva: más que en las ideas, la distancia está en lo que se siente por el otro bando (Reiljan, 2020; Torcal, 2023).</p>
+      <p class="tiny">Porcentajes sobre el total de la muestra; un 2,1 % no sabe y un 3,1 % no contesta. Calculados a partir de las bases de cada columna de la tabulación por ideología publicada por el CIS.</p>
+    </div>
+  </article>
+
+  <div class="model-head">
+    <span class="model-badge">Modelo · simulación ilustrativa</span>
+    <h3>¿Y si sube la presión del grupo?</h3>
+    <p class="ch-lede">520 personas imaginarias. Mueve el control y mira qué se mueve primero: las ideas o la temperatura. Las barras grises son el estudio real de arriba, para comparar.</p>
+  </div>
+  <div class="sim" role="group" aria-labelledby="sim-label">
+    <div class="sim-head">
+      <div>
+        <p class="lbl" id="sim-label">Modelo · 520 personas</p>
+        <p class="phase-name" id="phase-name" aria-live="polite">Sociedad centrada</p>
+        <p class="phase-txt" id="phase-txt"></p>
+      </div>
+      <div class="meters" role="group" aria-label="Niveles del modelo">
+        <div class="meter" id="m-centro"><span>Centro habitable</span><span class="bar"><i></i></span><b>—</b></div>
+        <div class="meter t" id="m-temp"><span>Temperatura afectiva</span><span class="bar"><i></i></span><b>—</b></div>
+        <div class="meter v" id="m-violencia"><span>Riesgo de violencia</span><span class="bar"><i></i></span><b>—</b></div>
+      </div>
+    </div>
+    <div class="sim-canvas">
+      <canvas id="sim" role="img" aria-label="Cada punto es una persona. Su posición horizontal es su ideología; su altura, cuánto depende de su grupo y cuánto rechaza al otro bando. Abajo, la campana de la distribución ideológica del modelo y, en barras grises, la distribución real del CIS de septiembre de 2026."></canvas>
+      <div class="axis5" aria-hidden="true"><span>Extrema izquierda</span><span>Izquierda</span><span>Centro</span><span>Derecha</span><span>Extrema derecha</span></div>
+    </div>
+    <div class="sim-ctrl">
+      <div>
+        <label class="lbl" for="pressure">Presión del grupo</label>
+        <input class="range" type="range" id="pressure" min="0" max="100" value="8">
+      </div>
+      <div class="toggle-row" role="group" aria-label="Saltar a una fase">
+        <button class="tbtn stop" data-ph="0" data-v="8" aria-pressed="true">Centrada</button>
+        <button class="tbtn stop" data-ph="1" data-v="42" aria-pressed="false">Afectiva</button>
+        <button class="tbtn stop" data-ph="2" data-v="68" aria-pressed="false">Ideológica</button>
+        <button class="tbtn stop" data-ph="3" data-v="95" aria-pressed="false">Ruptura</button>
+      </div>
+    </div>
+    <div class="sim-data">
+      <button class="tbtn" id="cis-toggle" aria-pressed="true"><span class="cis-key" aria-hidden="true"></span>Comparar con el CIS</button>
+      <p class="sim-note">Los puntos y sus niveles salen de las reglas del modelo, no de una encuesta. Solo las barras grises son datos. <span class="sr" id="sim-sr" aria-live="polite"></span></p>
+    </div>
+  </div>
+
+  <div class="cons-head">
+    <h3>Lo que cuesta cada fase</h3>
+    <p class="ch-lede">La columna encendida es la fase en que está el modelo. Cambia al mover el control de arriba, o pulsa una fase.</p>
+  </div>
+  <div class="toggle-row" id="cons-pick" role="group" aria-label="Elige una fase"></div>
+  <div class="cons" id="cons" aria-live="polite"></div>
+  <p class="note">Los ejemplos con cita son resultados de investigación, casi todos de EE. UU.; los de España son hechos documentados.</p>
+</section>
+
+<!-- ============ 2 · CIEN AÑOS ============ -->
+<section id="historia" class="chapter" aria-labelledby="h-historia">
+  <div class="ch-head">
+    <p class="ch-num">Capítulo 2 · Cien años de polarización</p>
+    <h2 id="h-historia">La campana de España, <em>1923–2026</em>.</h2>
+    <p class="ch-lede">Diez etapas. Pasa el ratón por la línea del tiempo, o arrastra el control, y mira cómo cambia la forma de la sociedad y lo que costó.</p>
+  </div>
+  <div class="hist">
+    <div class="hline" id="hline" role="group" aria-label="Etapas de la historia de España"></div>
+    <input class="range hrange" type="range" id="hrange" min="0" max="9" value="9" aria-label="Etapa">
+    <div class="hbody">
+      <div class="hchart"><svg id="hchart" viewBox="0 0 640 330" role="img" aria-label="Forma de la sociedad española en la etapa elegida"></svg>
+        <div class="axis5" aria-hidden="true"><span>Extrema izquierda</span><span>Izquierda</span><span>Centro</span><span>Derecha</span><span>Extrema derecha</span></div>
+        <p class="hd-cap" id="hcap"></p>
+      </div>
+      <div class="hinfo" id="hinfo" aria-live="polite"></div>
+    </div>
+  </div>
+  <p class="note">Antes de 1976 no hay encuestas de autoubicación: esas curvas son interpretaciones a partir de la historiografía, no mediciones. En las dictaduras, la curva gris es la sociedad que no podía expresarse. La de 2026 lleva debajo el estudio real del CIS.</p>
+</section>
+
+<!-- ============ 3 · MIRADAS ============ -->
+<section id="miradas" class="chapter" aria-labelledby="h-miradas">
+  <div class="ch-head">
+    <p class="ch-num">Capítulo 3 · Miradas</p>
+    <h2 id="h-miradas">Mira la sociedad <em>con sus ojos</em>.</h2>
+    <p class="ch-lede">Cada posición pone nombre a las demás. Elige unos ojos y el resto cambia de nombre. El grosor de cada línea es la hostilidad; en ámbar, la que ya no ve un adversario sino un enemigo.</p>
+  </div>
+  <div class="lens">
+    <div class="lens-stage" id="lens-stage">
+      <svg class="lens-arcs" id="lens-arcs" aria-hidden="true"></svg>
+      <div class="lens-row" id="lens-row"></div>
+      <div class="lens-under"></div>
+    </div>
+    <div class="lens-insight" id="lens-insight-wrap" aria-live="polite"><span class="lbl" id="lens-who"></span><p id="lens-insight"></p></div>
+  </div>
+
+  <div class="sub">
+    <h3>El mismo hecho, cinco realidades</h3>
+    <p class="ch-lede">Encuadrar es elegir qué parte de un hecho se ilumina y cuál queda a oscuras (Entman, 1993; Lakoff, 2004). Cada posición tiene su encuadre, también el centro.</p>
+    <div class="toggle-row" id="facts" role="group" aria-label="Elige un hecho"></div>
+    <div class="fact-box"><span class="lbl">El hecho</span><p class="fact-text" id="fact-text" aria-live="polite"></p></div>
+    <div class="prism" id="prism">
+      <div class="prism-left">
+        <svg viewBox="0 0 400 540" preserveAspectRatio="none" aria-hidden="true">
+          <line x1="0" y1="300" x2="165" y2="280" stroke="#EDEBE6" stroke-width="3" vector-effect="non-scaling-stroke"/>
+          <polygon points="210,150 130,380 290,380" fill="#1B2230" stroke="#C9CCD3" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+          <polygon points="165,280 240.4,237.4 262.8,301.8" fill="#EDEBE6" fill-opacity=".14"/>
+          <line class="ray" style="--j:0" x1="240.4" y1="237.4" x2="400" y2="50" stroke="#EC5272" stroke-width="3" vector-effect="non-scaling-stroke"/>
+          <line class="ray" style="--j:1" x1="246" y1="253.5" x2="400" y2="160" stroke="#F2955F" stroke-width="3" vector-effect="non-scaling-stroke"/>
+          <line class="ray" style="--j:2" x1="251.6" y1="269.6" x2="400" y2="270" stroke="#E8E2CF" stroke-width="3" vector-effect="non-scaling-stroke"/>
+          <line class="ray" style="--j:3" x1="257.2" y1="285.7" x2="400" y2="380" stroke="#6CC4E4" stroke-width="3" vector-effect="non-scaling-stroke"/>
+          <line class="ray" style="--j:4" x1="262.8" y1="301.8" x2="400" y2="490" stroke="#5B7CF0" stroke-width="3" vector-effect="non-scaling-stroke"/>
+        </svg>
+      </div>
+      <div class="rays-cards" id="rays-cards" aria-live="polite"></div>
+    </div>
+    <p class="note">Frases tipo, redactadas para ilustrar el encuadre de cada posición. No son citas de personas ni de partidos concretos.</p>
+  </div>
+
+  <div class="mirror" id="mirror">
+    <span class="lbl">El espejo · una plantilla</span>
+    <p class="mirror-q">«Somos una minoría que ve lo que la mayoría no quiere ver. Si las instituciones no frenan a <span class="enemy" id="enemy">· · ·</span>, tendremos que hacerlo nosotros.»</p>
+    <p class="ch-lede" style="margin:0">Elige un enemigo para completar la frase:</p>
+    <div class="toggle-row" id="mirror-opts" role="group" aria-label="Elige un enemigo"></div>
+    <p class="mirror-v" id="mirror-v" aria-live="polite"></p>
+  </div>
+</section>
+
+<!-- ============ 4 · PERFILES ============ -->
+<section id="perfiles" class="chapter" aria-labelledby="h-perfiles">
+  <div class="ch-head">
+    <p class="ch-num">Capítulo 4 · Doce perfiles</p>
+    <h2 id="h-perfiles">Quién hay <em>en cada rincón</em>.</h2>
+    <p class="ch-lede">Doce tipos ideales, en el sentido de Weber (1904): exageraciones deliberadas que sirven para medir la realidad, no para describir a nadie. Cada ficha resume su psicología, su relato, su lenguaje y su contradicción. Pulsa «Más» para ver su parte de razón y cómo sostiene su incoherencia.</p>
+  </div>
+  <div class="toggle-row" id="pf-pick" role="group" aria-label="Filtrar perfiles"></div>
+  <div class="pf-grid" id="pf-grid"></div>
+  <p class="lead-note"><b>Sobre los líderes:</b> los nombres ilustran la dirección ideológica que representa cada corriente en la vida pública, no la ficha psicológica. Las fichas de los extremos describen un polo extremista que justifica la violencia; ningún líder citado se presenta aquí como parte de él. Cargos a noviembre de 2026.</p>
+  <p class="note">«Dependencia del grupo» resume cuatro rasgos: necesidad de aprobación, en el sentido de la sociotropía de Beck (1983); fusión con el grupo (Swann et al., 2009, 2012); necesidad de cierre cognitivo (Webster y Kruglanski, 1994); y hostilidad afectiva (Iyengar et al., 2012). La búsqueda de sentido en el grupo sigue a Kruglanski et al. (2014). El relato usa víctima, villano y héroe (Karpman, 1968; Jones y McBeth, 2010). El mapa trata a los dos lados con la misma escala, aunque la literatura está dividida: Altemeyer (1981) y Jost et al. (2003) hallaron más rigidez en la derecha; Costello et al. (2022), un autoritarismo de izquierdas comparable.</p>
+</section>
+
+<!-- ============ 5 · DEL NOSOTROS AL ENEMIGO ============ -->
+<section id="escalada" class="chapter" aria-labelledby="h-escalada">
+  <div class="ch-head">
+    <p class="ch-num">Capítulo 5 · Del nosotros al enemigo</p>
+    <h2 id="h-escalada">A quién sientes tuyo, <em>y hasta dónde llegarías</em>.</h2>
+    <p class="ch-lede">Todo conflicto empieza por trazar una frontera entre «nosotros» y «ellos» (Tajfel y Turner, 1979). Primero, los círculos que cada perfil siente suyos. Después, la escalera que baja del desacuerdo al abismo.</p>
+  </div>
+
+  <div class="sub">
+    <h3>Los círculos de pertenencia</h3>
+    <p class="ch-lede">Del yo a la humanidad. Pasa el ratón por un perfil: en verde, los círculos que abraza; en gris, los que tolera; en rojo, los que combate.</p>
+    <div class="rings-wrap">
+      <div class="rings"><svg id="rings" viewBox="0 0 520 520" role="img" aria-label="Círculos de pertenencia"></svg></div>
+      <div>
+        <div class="rpick" id="ring-picker" role="group" aria-label="Elige un perfil"></div>
+        <ul class="rlist" id="ring-list"></ul>
+        <p class="id-insight" id="ring-insight" aria-live="polite"></p>
+      </div>
+    </div>
+    <p class="moreno">En España, la <q>pregunta Moreno</q> mide desde hace décadas la identidad dual: «¿Se siente usted solo español, más español que de su comunidad, tanto lo uno como lo otro…?». La respuesta más frecuente suele ser la del medio: las dos cosas a la vez (Moreno, 2006).</p>
+  </div>
+
+  <div class="terr">
+    <div>
+      <span class="lbl">El eje territorial</span>
+      <h3>La tribu también puede ser territorial.</h3>
+      <p>El eje centro-periferia atraviesa la línea izquierda-derecha. En el conjunto del país suele ir con la dirección: cuanto más a la derecha, más recentralizador. Pero los independentismos vasco, catalán y gallego tienen su propia izquierda radical, su izquierda y su derecha. Para ellos, el «otro bando» puede ser el Estado.</p>
+      <p>El procés, desde 2017, ha sido uno de los grandes motores de la polarización afectiva española (Torcal, 2023), y la ley de amnistía de 2024 volvió a abrir ese frente.</p>
+    </div>
+    <div class="terr-chart"><svg id="terr" viewBox="0 0 720 440" role="img" aria-label="Eje territorial frente a eje izquierda-derecha"></svg>
+      <ul class="terr-list" id="terr-list"></ul>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>La escalera del conflicto</h3>
+    <p class="ch-lede">Friedrich Glasl (1980) describe nueve peldaños que bajan del desacuerdo al abismo. Cada figura está en el peldaño más bajo que su lógica llega a justificar. Pasa el ratón por un peldaño.</p>
+    <div class="glasl"><svg id="glasl" viewBox="0 0 1000 520" role="img" aria-label="Los nueve peldaños de la escalada de Glasl"></svg></div>
+    <div class="step-detail" id="step-detail" aria-live="polite"></div>
+    <div class="vnote">
+      <div><b>Peldaño 5: violencia verbal</b><p>Izquierda y derecha se quedan aquí: desprecio, ironía y humillación pública del adversario. Se falta al respeto, pero no se toca.</p></div>
+      <div style="border-color:var(--warn)"><b>Peldaño 7: violencia justificada</b><p>El polo extremista de cada lado baja hasta aquí: si el diálogo «no sirve», el daño al enemigo se justifica.</p></div>
+      <div style="border-color:var(--xl)"><b>Peldaños 8 y 9: la ruptura</b><p>En julio de 1936, tras años de polarización y violencia política, un golpe militar contra la República abrió la Guerra Civil. Las democracias caen cuando los moderados toleran la deslealtad de su propio bando (Linz, 1978).</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6 · PALABRAS Y FUENTES ============ -->
+<section id="fuentes" class="chapter" aria-labelledby="h-fuentes">
+  <div class="ch-head">
+    <p class="ch-num">Capítulo 6 · Palabras y fuentes</p>
+    <h2 id="h-fuentes">Palabras del siglo XX <em>para conflictos del XXI</em>.</h2>
+    <p class="ch-lede">«Fascista» y «comunista» nombran regímenes que ya no existen en Europa. En España arrastran además la memoria de la Guerra Civil. Hoy funcionan como insultos, y cada época añade los suyos, venga de donde venga.</p>
+  </div>
+  <div class="timeline-wrap">
+    <div class="timeline" role="list" aria-label="Cronología de las etiquetas políticas en España" tabindex="0">
+      <div class="tl" role="listitem"><b>1919</b><p>Mussolini funda en Italia el movimiento fascista.</p></div>
+      <div class="tl" role="listitem"><b>1921</b><p>Se funda el Partido Comunista de España.</p></div>
+      <div class="tl" role="listitem"><b>1933</b><p>Nace Falange Española, el fascismo español.</p></div>
+      <div class="tl hot" role="listitem"><b>1936–39</b><p>Un golpe militar abre la Guerra Civil: <q>rojos</q> frente a <q>nacionales</q>.</p></div>
+      <div class="tl" role="listitem"><b>1939–75</b><p>Franquismo: <q>rojo</q> pasa a ser un estigma oficial.</p></div>
+      <div class="tl" role="listitem"><b>1977</b><p>Se legaliza el PCE. <q>Facha</q> nombra a los nostálgicos; <q>progre</q>, a la izquierda urbana.</p></div>
+      <div class="tl" role="listitem"><b>2014</b><p><q>Casta</q> entra en el vocabulario político.</p></div>
+      <div class="tl" role="listitem"><b>2019</b><p><q>Derechita cobarde</q> entra en el debate.</p></div>
+      <div class="tl" role="listitem"><b>2024</b><p><q>Fachosfera</q> entra en el debate.</p></div>
+    </div>
+  </div>
+  <p class="lbl" style="margin-bottom:14px">Gira cada tarjeta para ver de dónde viene la palabra y qué describe hoy</p>
+  <div class="flips" id="flips"></div>
+
+  <div class="venn-wrap">
+    <h3>Lo que comparten los dos extremos, y lo que no</h3>
+    <p class="ch-lede" style="margin-top:10px">El contenido los separa. El estilo los une.</p>
+    <div class="venn">
+      <svg viewBox="0 0 1000 470" aria-hidden="true">
+        <circle cx="390" cy="235" r="228" fill="#EC5272" fill-opacity=".09" stroke="#EC5272" stroke-opacity=".6" stroke-width="1.5"/>
+        <circle cx="610" cy="235" r="228" fill="#5B7CF0" fill-opacity=".1" stroke="#5B7CF0" stroke-opacity=".7" stroke-width="1.5"/>
+      </svg>
+      <div class="vcol a"><h4>Solo extrema izquierda</h4><ul><li>Igualdad universal como meta</li><li>La opresión estructural lo explica todo</li><li>Relativiza las diferencias culturales</li></ul></div>
+      <div class="vcol b"><h4>Comparten</h4><ul><li>Minoría lúcida, mayoría engañada</li><li>Lenguaje de batalla</li><li>Enemigo absoluto, no adversario</li><li>Violencia si el diálogo «no sirve»</li><li>Identidad fundida con el grupo</li><li>Pueblo puro frente a élite</li></ul></div>
+      <div class="vcol c"><h4>Solo extrema derecha</h4><ul><li>Jerarquía y orden natural</li><li>Linaje y territorio como identidad</li><li>Esencializa las diferencias culturales</li></ul></div>
+    </div>
+  </div>
+
+  <div class="debate">
+    <div class="deb">
+      <span class="lbl">Tesis del observatorio</span>
+      <h4>Ni fascismo ni comunismo: populismos.</h4>
+      <p>Los dos extremos de hoy se describen mejor como populismos (Mudde, 2004): un pueblo puro frente a una élite corrupta. Lo que los separa no es el estilo, que comparten, sino cómo tratan la diferencia. Uno la esencializa y la convierte en linaje, raza o territorio. El otro la relativiza, sobre todo cuando quien la encarna está del lado del «oprimido».</p>
+    </div>
+    <div class="deb obj">
+      <span class="lbl">Objeción académica</span>
+      <h4>La herradura compara estilos, no programas.</h4>
+      <p>La derecha radical populista acepta las elecciones, y por eso Mudde (2019) la distingue del fascismo histórico; la izquierda radical tampoco equivale al comunismo de partido único (March, 2011). Van Prooijen y Krouwel (2019) y Zmigrod et al. (2020) documentan rasgos psicológicos comunes a los extremos, como la simplicidad cognitiva o la rigidez, sin que eso implique programas iguales.</p>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>Las fuentes</h3>
+    <p class="ch-lede">Los estudios y libros en que se apoya el observatorio, y lo que se ha tomado de cada uno. Filtra por capítulo.</p>
+    <div class="toggle-row" id="ref-pick" role="group" aria-label="Filtrar fuentes por capítulo"></div>
+    <div class="refs-grid" id="refs-grid"></div>
+  </div>
+</section>
+
+</main>
+<footer>
+  <p>Herramienta educativa sin afiliación política. Los perfiles son tipos ideales, no retratos de personas ni de partidos.</p>
+  <p>Ningún dato sale de tu navegador.</p>
+</footer>
+</div>
+
+<script>
+(() => {
+"use strict";
+
+/* ================= Utilidades ================= */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const RM = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const HOVER = window.matchMedia("(hover: hover)").matches;
+const ORD = ["xl", "l", "c", "r", "xr"];
+const CSSV = getComputedStyle(document.documentElement);
+const cssv = (n) => CSSV.getPropertyValue(n).trim();
+const pt = (k, cls = "pt") =>
+  `<svg class="${cls}" viewBox="0 0 120 140" aria-hidden="true" focusable="false"><use href="#p-${k}"></use></svg>`;
+const segs = (n, max = 5, cls = "") =>
+  `<span class="segs ${cls}" role="img" aria-label="${n} de ${max}">${Array.from({ length: max }, (_, i) => `<i class="${i < n ? "on" : ""}"></i>`).join("")}</span>`;
+const sm = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+const r1 = (n) => Math.round(n * 10) / 10;
+const go = (id) => document.getElementById(id).scrollIntoView({ behavior: RM ? "auto" : "smooth", block: "start" });
+/* Cada capítulo registra aquí su selector, para que la ficha pueda llevar a ellos ya filtrados */
+const API = {};
+
+/* ================= Datos: los cinco tipos ideales ================= */
+const A = {
+  xl: {
+    name: "Extrema izquierda", short: "Ext. izq.", arq: "El defensor del más débil", pos: [-0.85, 0.86], extreme: true,
+    quote: "No hay neutralidad posible: o estás con los oprimidos o con los opresores.",
+    psique: "Necesidad alta de aprobación del grupo: la identidad descansa en pertenecer a un bloque moral. La disidencia interna se vive como traición, no como opinión.",
+    social: "Colectivos militantes y espacios de activismo. El estatus se gana con pureza ideológica y cercanía al más vulnerable.",
+    traits: [5, 5, 5, 5, 1, 4],
+    sentido: ["Una causa contra un opresor", "Sin un conflicto que librar, la identidad pierde forma. El grupo da pertenencia y una tarea moral para cada día."],
+    karp: { v: "El pobre, la mujer, el migrante", p: "El rico, el patriarcado, el sistema", s: "El militante consciente" },
+    words: [["frenar", 3], ["opresión", 3], ["fascismo", 3], ["lucha", 3], ["privilegio", 2], ["señalar", 2], ["resistencia", 2], ["patriarcado", 2], ["sistema", 1], ["cómplice", 1]],
+    phrases: ["Con el fascismo no se dialoga.", "El sistema está hecho para que pierdan siempre los mismos."],
+    glasl: 7,
+    steel: "La desigualdad y la discriminación existen y dejan heridas reales. Señalarlas ha ampliado derechos que hoy casi nadie discute.",
+    contra: [
+      { a: "Feminismo universal", b: "Silencio ante el islam político",
+        txt: "Defiende los derechos de las mujeres y a la vez evita criticar las normas religiosas que las sitúan por debajo del hombre: criticarlas la colocaría junto al «opresor» occidental.",
+        strats: ["Separar religión y cultura", "«¿Y Occidente qué?»", "Acusar de islamofobia", "Silencio selectivo"] },
+      { a: "Internacionalismo", b: "Rechazo de la identidad española",
+        txt: "Abraza todas las identidades nacionales menos la propia: acepta el patriotismo periférico o el de los pueblos oprimidos y combate el español como si fuera de la derecha.",
+        strats: ["«Lo español es franquismo»", "Patria buena y patria mala"] }
+    ]
+  },
+  l: {
+    name: "Izquierda", short: "Izquierda", arq: "El reformista indignado", pos: [-0.45, 0.47],
+    quote: "Ni un paso atrás en derechos.",
+    psique: "Necesidad moderada de aprobación: comparte valores de igualdad, pero conserva margen de autonomía y de crítica interna.",
+    social: "Partidos, sindicatos, asociaciones y medios progresistas. Busca el cambio desde las instituciones.",
+    traits: [3, 3, 3, 3, 3, 1],
+    sentido: ["Que el mundo progrese", "El sentido viene de mejorar lo colectivo. El grupo importa, pero hay vida fuera de él."],
+    karp: { v: "Trabajadores y colectivos discriminados", p: "La desigualdad y la derecha", s: "El Estado social" },
+    words: [["derechos", 3], ["igualdad", 3], ["avanzar", 2], ["retroceso", 2], ["ultraderecha", 2], ["justicia social", 2], ["conquistas", 2], ["fachas", 1], ["negacionista", 1]],
+    phrases: ["La derecha solo gobierna para los de arriba.", "Frente a la ultraderecha, más democracia."],
+    glasl: 5,
+    steel: "El Estado social reduce el sufrimiento evitable: la sanidad, la educación y las pensiones públicas son conquistas compartidas.",
+    contra: [
+      { a: "Libertad individual", b: "Regular la vida cotidiana",
+        txt: "Reivindica que cada cual viva a su manera y, a la vez, quiere regular cómo se habla, se consume o se educa.",
+        strats: ["«Es por el bien común»", "Doble rasero según quién gobierne"] }
+    ]
+  },
+  c: {
+    name: "Centro", short: "Centro", arq: "El ciudadano equilibrado", pos: [0, 0.16],
+    quote: "Depende. Veamos los datos y busquemos un acuerdo.",
+    psique: "Autonomía alta: sus valores no dependen de un grupo para tener sentido. Tolera la ambigüedad. Su riesgo es doble: la pasividad y la superioridad moral de la moderación.",
+    social: "Clase media diversa, votantes que cambian de voto, parte de la abstención, profesiones técnicas y de mediación.",
+    traits: [1, 2, 2, 1, 5, 0],
+    sentido: ["Su propio criterio", "El sentido se construye con proyectos, relaciones y trabajo. La política es un medio, no una identidad."],
+    karp: { v: "El ciudadano sensato", p: "La polarización y los extremos", s: "El consenso técnico" },
+    words: [["acuerdo", 3], ["gestionar", 3], ["datos", 2], ["depende", 2], ["matiz", 2], ["consenso", 2], ["coste", 1], ["evaluar", 1]],
+    phrases: ["Ni todo es blanco ni todo es negro.", "¿Qué funciona y cuánto cuesta?"],
+    glasl: 2,
+    steel: "Sin un terreno común no hay acuerdos posibles. Los datos y la negociación evitan errores caros.",
+    contra: [
+      { a: "Equilibrio", b: "Evitar el conflicto",
+        txt: "Busca el punto medio incluso cuando una posición tiene más evidencia que la otra, y su silencio deja el espacio público a los extremos.",
+        strats: ["Falsa equidistancia", "No posicionarse nunca", "«Todos son iguales»"] }
+    ]
+  },
+  r: {
+    name: "Derecha", short: "Derecha", arq: "La conservadora liberal", pos: [0.45, 0.47],
+    quote: "Menos Estado, más libertad y respeto a la ley.",
+    psique: "Autonomía y responsabilidad individual como valores centrales. Necesidad moderada de aprobación, más ligada a la familia y al entorno cercano que al partido.",
+    social: "Partidos de centroderecha, empresariado, profesionales, ámbitos religiosos y medios conservadores.",
+    traits: [3, 3, 3, 3, 3, 1],
+    sentido: ["Orden, familia y esfuerzo", "El sentido viene de lo cercano: familia, trabajo y tradición. La política protege ese mundo."],
+    karp: { v: "El contribuyente, la familia, la clase media", p: "El intervencionismo, el gasto, el sectarismo", s: "El individuo, la empresa y la ley" },
+    words: [["libertad", 3], ["orden", 3], ["mérito", 2], ["impuestos", 2], ["ruina", 2], ["sectarismo", 2], ["Constitución", 2], ["okupas", 1], ["chiringuitos", 1]],
+    phrases: ["Este Gobierno nos lleva a la ruina.", "El que la hace, la paga."],
+    glasl: 5,
+    steel: "El esfuerzo, la seguridad y la estabilidad institucional son condiciones de cualquier proyecto colectivo.",
+    contra: [
+      { a: "Libre mercado y autonomía", b: "Restricciones morales a la vida privada",
+        txt: "Pide que el Estado no se meta en la economía y, a la vez, que regule la vida privada en asuntos morales.",
+        strats: ["«La tradición es la excepción»", "Libertad económica sí, moral no"] }
+    ]
+  },
+  xr: {
+    name: "Extrema derecha", short: "Ext. der.", arq: "El guardián de la patria", pos: [0.85, 0.86], extreme: true,
+    quote: "Nos están invadiendo y nadie hace nada.",
+    psique: "Necesidad alta de aprobación del grupo: la identidad descansa en un linaje y un territorio. El miedo a lo desconocido hace que la diversidad se viva como amenaza.",
+    social: "Grupos militantes, comunidades en línea y camaradería de defensa del territorio.",
+    traits: [5, 5, 5, 5, 1, 4],
+    sentido: ["Una patria que defender", "Sin una amenaza exterior, la identidad pierde forma. El grupo da linaje, territorio y una misión."],
+    karp: { v: "La nación, el trabajador nativo", p: "Élites globalistas, inmigración ilegal, separatistas", s: "El patriota" },
+    words: [["invasión", 3], ["traidores", 3], ["España", 3], ["defender", 3], ["élites", 2], ["globalismo", 2], ["ideología de género", 2], ["reconquista", 2], ["cobardes", 1], ["resistir", 1]],
+    phrases: ["Hay que defender España de sus traidores.", "Los políticos de siempre no se atreven a decirlo."],
+    glasl: 7,
+    steel: "La pérdida de cohesión, el abandono de algunos barrios y la sensación de no ser escuchado son reales para quien los vive.",
+    contra: [
+      { a: "Patriotismo propio", b: "Rechazo de otros patriotismos",
+        txt: "Se declara patriota y combate a otros patriotas: los nacionalismos regionales y las identidades europeas. No concibe que una persona tenga varias pertenencias a la vez.",
+        strats: ["«Solo hay una nación verdadera»", "«Lo regional es separatismo»", "«Europa nos disuelve»"] },
+      { a: "Libertad de expresión", b: "Prohibir la expresión ajena",
+        txt: "Reclama poder decirlo todo contra la «dictadura de lo correcto» y, a la vez, pide prohibir charlas, libros, banderas o contenidos escolares de los otros.",
+        strats: ["«Lo nuestro es opinión, lo suyo es adoctrinamiento»", "«Protegemos a los niños»"] }
+    ]
+  }
+};
+const TRAITS = ["Necesidad de aprobación del grupo", "Fusión con el grupo", "Certeza moral", "Pensamiento binario", "Tolerancia a la ambigüedad", "Justificación de la violencia"];
+
+/* Cómo ve cada posición (fila) a las demás (columna): [etiqueta, hostilidad 0–4] */
+const PERC = {
+  xl: { l: ["reformistas tibios", 2], c: ["cómplices del sistema", 3], r: ["fachas y machistas", 4], xr: ["fascistas, xenófobos", 4] },
+  l:  { xl: ["radicales impacientes", 2], c: ["indecisos", 1], r: ["reaccionarios", 3], xr: ["ultraderecha peligrosa", 4] },
+  c:  { xl: ["dogmáticos", 2], l: ["idealistas", 1], r: ["conservadores", 1], xr: ["dogmáticos", 2] },
+  r:  { xl: ["comunistas", 4], l: ["progres sectarios", 3], c: ["veletas", 1], xr: ["exaltados", 2] },
+  xr: { xl: ["enemigos de España", 4], l: ["decadentes, traidores", 4], c: ["cobardes", 3], r: ["blandos, vendidos", 3] }
+};
+const SELF = { xl: "los conscientes", l: "los progresistas", c: "los sensatos", r: "la gente de orden", xr: "los patriotas despiertos" };
+const LENS_TXT = {
+  xl: "Desde aquí, todo lo que no es lucha es complicidad. El centro desaparece: quien no se posiciona ya ha elegido bando. La hostilidad no baja al alejarse: la derecha moderada y la extrema reciben casi la misma etiqueta.",
+  l: "Ve a la extrema izquierda como aliada incómoda y a la derecha como adversario. La hostilidad crece hacia la derecha, pero sin borrar al centro ni convertirlo en enemigo.",
+  c: "La mirada con menos hostilidad. Distingue grados y ve a los dos extremos con la misma palabra. Su punto ciego: creerse por encima del conflicto, como si no tuviera relato propio.",
+  r: "Simétrica a la izquierda: la hostilidad crece hacia la izquierda, y al extremo de su propio lado lo ve como un competidor ruidoso más que como un enemigo.",
+  xr: "Desde aquí, quien no defiende la patria la traiciona. Incluso la derecha moderada es «blanda»: el enemigo también está dentro."
+};
+
+/* Prisma: un hecho, cinco encuadres (orden ORD) con su marco propio */
+const FACTS = [
+  { k: "Migración", f: "Llega a Canarias una embarcación con sesenta migrantes.", fr: ["colonialismo", "humanitario", "gestión", "control", "invasión"],
+    v: ["Personas que huyen del expolio que Europa sigue practicando.", "Una emergencia humanitaria que exige acogida digna.", "Un flujo migratorio que hay que gestionar con recursos y acuerdos.", "Otra prueba de una inmigración ilegal sin control.", "La invasión continúa y el Gobierno la financia."] },
+  { k: "Okupación", f: "La policía desaloja una vivienda ocupada.", fr: ["lucha de clases", "derecho a la vivienda", "procedimiento", "propiedad", "limpieza"],
+    v: ["Violencia policial al servicio de los rentistas.", "Un drama de vivienda que el desalojo no resuelve.", "Un conflicto entre propiedad y vivienda que exige juicios rápidos y alternativas.", "Por fin se defiende la propiedad privada.", "Hay que limpiar los barrios de okupas."] },
+  { k: "Amnistía", f: "El Congreso aprueba la amnistía para los encausados del procés.", fr: ["autodeterminación", "convivencia", "coste jurídico", "igualdad ante la ley", "traición"],
+    v: ["Un paso hacia el derecho a decidir de los pueblos.", "Una medida para la convivencia y el reencuentro.", "Una decisión con costes jurídicos y políticos que conviene medir.", "Un ataque a la igualdad ante la ley a cambio de votos.", "Traición: se vende la nación para seguir en el poder."] },
+  { k: "Impuestos", f: "El Gobierno sube el impuesto a las rentas más altas.", fr: ["redistribución", "justicia fiscal", "eficiencia", "esfuerzo", "expolio"],
+    v: ["Insuficiente: que paguen los ricos lo que deben.", "Un paso más hacia la justicia fiscal.", "Una medida cuyos efectos conviene medir: recaudación, inversión y fuga.", "Un infierno fiscal que castiga el esfuerzo.", "Las élites exprimen al trabajador para mantener a quien no trabaja."] },
+  { k: "Semana Santa", f: "Una procesión de Semana Santa recorre el centro de la ciudad.", fr: ["poder clerical", "laicidad", "patrimonio", "raíces", "resistencia"],
+    v: ["Exhibición de poder de la Iglesia y nostalgia nacionalcatólica.", "Una tradición respetable, siempre que no la pague el dinero público.", "Una tradición cultural y religiosa con gran impacto turístico.", "Nuestras raíces y nuestra identidad.", "Resistencia cristiana frente a quienes quieren borrarnos."] },
+  { k: "8 de marzo", f: "Miles de personas se manifiestan el 8 de marzo.", fr: ["patriarcado", "igualdad", "movilización", "apropiación partidista", "ideología"],
+    v: ["La lucha contra el patriarcado toma las calles.", "Una reivindicación de igualdad que sigue siendo necesaria.", "Una manifestación masiva por la igualdad entre hombres y mujeres.", "Una causa justa secuestrada por un partido.", "Propaganda de la ideología de género pagada con tus impuestos."] },
+  { k: "Bandera", f: "Un vecino cuelga la bandera de España en su balcón.", fr: ["fascismo", "apropiación", "símbolo común", "orgullo", "anti-España"],
+    v: ["Facherío de balcón.", "Un nacionalismo rancio que se apropia de un símbolo común.", "Un símbolo constitucional que es de todos.", "Orgullo de país, sin complejos.", "Resistencia frente a la anti-España."] }
+];
+
+/* Escalera de Glasl */
+const LEVELS = [
+  { name: "Ganar-ganar", d: "Todavía se puede salir juntos", c: "#8A92A3" },
+  { name: "Ganar-perder", d: "Uno de los dos tiene que perder", c: "#C99A3E" },
+  { name: "Perder-perder", d: "Destruir al otro, aunque cueste", c: "#F6BE3B" }
+];
+const GLASL = [
+  { lv: 1, name: "Endurecimiento", d: "Las posturas se tensan, pero todavía se cree en el diálogo.", ex: "No estoy de acuerdo, pero hablemos." },
+  { lv: 1, name: "Debate y polémica", d: "Se discute para ganar, con trucos retóricos y datos escogidos.", ex: "Tus datos están sesgados." },
+  { lv: 1, name: "Hechos, no palabras", d: "Se deja de hablar y se actúa para presionar.", ex: "Ya no merece la pena explicarse." },
+  { lv: 2, name: "Imágenes y coaliciones", d: "Se fabrica un estereotipo del otro y se buscan aliados contra él.", ex: "Todos los de ese bando son iguales." },
+  { lv: 2, name: "Pérdida de prestigio", d: "Se busca humillar y desenmascarar al otro en público.", ex: "Hay que retratarlos delante de todos." },
+  { lv: 2, name: "Estrategias de amenaza", d: "Ultimátums y amenazas para forzar al otro.", ex: "O cedéis o os vais a enterar." },
+  { lv: 3, name: "Golpes destructivos limitados", d: "El otro deja de ser una persona; dañarlo se justifica.", ex: "Contra ellos, todo vale." },
+  { lv: 3, name: "Fragmentación", d: "Se busca destruir los apoyos y la estructura del enemigo. Es la fase de ruptura del simulador.", ex: "Hay que acabar con todo lo suyo." },
+  { lv: 3, name: "Juntos al abismo", d: "Se acepta la propia destrucción si arrastra al enemigo. En España, el golpe militar de julio de 1936 contra la República abrió esta fase.", ex: "Prefiero perderlo todo antes que dejarles ganar." }
+];
+const GLASL_TXT = {
+  xl: "Justifica la confrontación directa contra el «enemigo» cuando considera que el diálogo no sirve.",
+  l: "Rechaza la violencia física. Su violencia es verbal: desprecio, ironía y humillación pública del adversario.",
+  c: "Discute y polemiza, pero rechaza la violencia política. Su riesgo es la indiferencia, no la agresión.",
+  r: "Rechaza la violencia física. Su violencia es verbal y de desprecio; confronta más a través de tribunales e instituciones.",
+  xr: "Justifica la violencia contra el «enemigo interno» si siente que el Estado o la mayoría no protegen a su comunidad."
+};
+
+/* Anillos de identidad: a = abraza, t = tolera, x = combate */
+const RINGS = ["Yo y los míos", "Mi ciudad", "Mi comunidad", "España", "Europa", "Humanidad"];
+const RR = [48, 88, 128, 170, 212, 254];
+const RSTATE = {
+  xl: ["a", "a", "a", "x", "t", "a"],
+  l:  ["a", "a", "a", "t", "a", "a"],
+  c:  ["a", "a", "a", "a", "a", "a"],
+  r:  ["a", "a", "t", "a", "a", "t"],
+  xr: ["a", "a", "x", "a", "x", "x"]
+};
+const RTXT = {
+  xl: "Abraza la humanidad y simpatiza con las identidades regionales, pero combate la española, que asocia a la derecha. Un internacionalismo con una excepción: su propio país.",
+  l: "Abraza casi todos los anillos. La identidad española le resulta incómoda y la usa poco, sin llegar a combatirla.",
+  c: "Identidades anidadas: se puede ser de tu barrio, de tu comunidad, español, europeo y humano a la vez. Ninguna excluye a las otras.",
+  r: "España y Europa en el centro. El anillo autonómico le genera recelo cuando se vuelve nacionalista, y la humanidad le parece una abstracción.",
+  xr: "Una sola identidad válida. Los anillos de dentro (las regiones) son separatismo; los de fuera (Europa, la humanidad) son globalismo. Un patriotismo que no admite otros patriotismos."
+};
+
+/* Etiquetas */
+const FLIPS = [
+  { w: "Fascista", k: "xr", o: "Italia, 1919: partido único, culto al líder y violencia organizada. En España, Falange (1933) y su integración en el franquismo.", u: "Insultar a cualquier posición de derecha percibida como autoritaria o nacionalista.", d: "Casi siempre, un etnonacionalismo populista que compite en elecciones." },
+  { w: "Comunista", k: "xl", o: "Marx y Engels, 1848; regímenes de partido único desde 1917. En España, el PCE (1921), clave en la Guerra Civil y legalizado en 1977.", u: "Insultar a cualquier propuesta de izquierda que pida más Estado.", d: "Casi siempre, una izquierda radical igualitaria que compite en elecciones." },
+  { w: "Facha", k: "r", o: "Acortamiento coloquial de «fascista», extendido en la Transición para señalar a los nostálgicos del franquismo.", u: "Cualquier persona a la derecha de quien lo dice.", d: "Casi nunca a un fascista: describe una distancia política." },
+  { w: "Rojo", k: "l", o: "Color del movimiento obrero. El franquismo lo usó para nombrar al bando republicano y como estigma durante cuarenta años.", u: "Cualquier persona a la izquierda de quien lo dice.", d: "Una memoria de 1936 aplicada a los conflictos de hoy." },
+  { w: "Progre", k: "l", o: "Abreviatura irónica de «progresista», popular en la España de los años setenta.", u: "Burlarse de la izquierda urbana percibida como moralista o acomodada.", d: "Una crítica de estilo más que de ideas." },
+  { w: "Rojipardo", k: "sp", o: "Rojo y pardo, el color de las camisas nazis. Nace en la Rusia de los noventa para nombrar la alianza de comunistas y nacionalistas.", u: "Señalar a la izquierda que mezcla socialismo y nación, o que critica la inmigración.", d: "Una corriente real, el socialismo patriótico, y a menudo un insulto para cualquier izquierdista heterodoxo." },
+  { w: "Liberalio", k: "lib", o: "Cruce burlón de «liberal» y «libertario», popular en las redes españolas.", u: "Burlarse de quien defiende el mercado libre y bajar impuestos.", d: "Una tradición filosófica real, del liberalismo clásico al libertarismo, con referentes académicos." },
+  { w: "Equidistante", k: "c", o: "Término geométrico: a la misma distancia de dos puntos.", u: "Acusar al centro de no tomar partido: «no elegir también es elegir».", d: "A veces, un falso equilibrio. A veces, la única posición que escucha a los dos lados." }
+];
+
+/* Distribución real de autoubicación: CIS, barómetro de septiembre de 2026 (estudio 3577), % sobre n = 4.042 */
+const CIS = [17.7, 7.0, 11.5, 8.3, 20.5, 6.3, 7.5, 6.5, 1.3, 8.1];
+
+/* Cien años: fases y etapas */
+const FASES = {
+  centrada: { n: "Centrada", c: "#E8E2CF" }, afectiva: { n: "Polarización afectiva", c: "#F2955F" },
+  ideologica: { n: "Polarización ideológica", c: "#EC5272" }, ruptura: { n: "Ruptura", c: "#F6BE3B" },
+  silenciada: { n: "Silenciada por una dictadura", c: "#9AA3B3" }
+};
+const ETAPAS = [
+  { a: 1923, b: 1930, t: "Dictadura de Primo de Rivera", fase: "silenciada", nv: 1.1,
+    f: [[0.62, 0.05, 1]], oculta: [[0.3, 0.12, 1], [0.7, 0.12, 1]],
+    ctx: "Un golpe de Estado, con el apoyo del rey, suspende partidos y Cortes. El conflicto social no desaparece: deja de poder expresarse.",
+    cons: ["Sin libertad de partidos ni de prensa", "La tensión acumulada estalla al caer la monarquía en 1931"] },
+  { a: 1931, b: 1933, t: "Segunda República: el bienio reformista", fase: "ideologica", nv: 2,
+    f: [[0.27, 0.11, 1], [0.5, 0.12, 0.55], [0.74, 0.11, 0.95]],
+    ctx: "Primera democracia plena; las mujeres votan por primera vez en 1933. Las reformas agraria, militar, religiosa y territorial dividen el país en dos proyectos.",
+    cons: ["Quema de conventos en 1931", "Intento de golpe de Sanjurjo en 1932", "Insurrección anarquista y matanza de Casas Viejas en 1933"] },
+  { a: 1934, b: 1936, t: "Revolución de Asturias y Frente Popular", fase: "ruptura", nv: 2.8,
+    f: [[0.17, 0.08, 1], [0.5, 0.1, 0.18], [0.83, 0.08, 1]],
+    ctx: "La revolución de octubre de 1934 en Asturias y su represión dejan más de mil muertos. En las elecciones de febrero de 1936 compiten dos bloques y el centro casi desaparece. La violencia política llena las calles.",
+    cons: ["Revolución de Asturias y represión (1934)", "Asesinatos políticos, como el de Calvo Sotelo en julio de 1936", "El centro se hunde en las urnas de 1936"] },
+  { a: 1936, b: 1939, t: "Guerra Civil", fase: "ruptura", nv: 3,
+    f: [[0.1, 0.05, 1], [0.9, 0.05, 1]],
+    ctx: "En julio de 1936, un golpe militar contra el Gobierno de la República fracasa en parte del país y abre tres años de guerra.",
+    cons: ["En torno a medio millón de muertos, según las estimaciones más citadas (Juliá, 1999)", "Represión en las dos retaguardias", "Cerca de medio millón de personas cruzan la frontera en 1939"] },
+  { a: 1939, b: 1975, t: "Franquismo", fase: "silenciada", nv: 1.3,
+    f: [[0.82, 0.05, 1]], oculta: [[0.32, 0.13, 1], [0.66, 0.13, 0.9]],
+    ctx: "Una dictadura con un solo bando legal. La división de 1936 no se cierra: se reprime durante casi cuarenta años.",
+    cons: ["Decenas de miles de ejecuciones en la posguerra", "Exilio, cárcel y censura durante décadas", "La herida de 1936 pasa a la generación siguiente"] },
+  { a: 1975, b: 1982, t: "Transición", fase: "centrada", nv: 0.9,
+    f: [[0.45, 0.16, 1], [0.08, 0.04, 0.08], [0.92, 0.04, 0.08]],
+    ctx: "Los herederos de los dos bandos pactan: Ley de Amnistía y Pactos de la Moncloa en 1977, y una Constitución aprobada en referéndum por el 87,8 % en 1978.",
+    cons: ["Una democracia nacida del consenso", "Violencia en los márgenes: ETA y grupos armados de extrema derecha y extrema izquierda; 1980 es el año más sangriento", "Intento de golpe del 23-F en 1981"] },
+  { a: 1982, b: 2004, t: "Bipartidismo", fase: "centrada", nv: 0.6,
+    f: [[0.43, 0.13, 1], [0.6, 0.12, 0.8]],
+    ctx: "PSOE y PP se alternan compitiendo por el centro. Es la campana más centrada del siglo.",
+    cons: ["Entrada en la Comunidad Europea (1986)", "ETA sigue matando; la condena es casi unánime", "Crispación y corrupción al final de cada ciclo"] },
+  { a: 2004, b: 2011, t: "Los años de la crispación", fase: "afectiva", nv: 1.3,
+    f: [[0.38, 0.12, 1], [0.66, 0.12, 0.9]],
+    ctx: "Los atentados del 11-M y el giro electoral de 2004 abren años de desconfianza mutua. Se discute la memoria histórica, el Estatut de Cataluña y la negociación con ETA.",
+    cons: ["Ley de Memoria Histórica (2007), aprobada sin consenso", "Estatut (2006) y sentencia del Constitucional (2010)", "ETA anuncia el cese definitivo de la violencia en 2011"] },
+  { a: 2011, b: 2017, t: "Crisis y fin del bipartidismo", fase: "afectiva", nv: 1.7,
+    f: [[0.24, 0.1, 0.8], [0.45, 0.11, 0.9], [0.68, 0.11, 0.9]],
+    ctx: "La Gran Recesión y el 15-M. En 2015 entran Podemos y Ciudadanos: cuatro grandes partidos y ninguna mayoría.",
+    cons: ["Paro por encima del 25 % en 2012 y 2013", "Repetición electoral en 2016", "Desconfianza récord en los partidos"] },
+  { a: 2017, b: 2026, t: "Procés y dos bloques", fase: "afectiva", nv: 2.1, cis: true,
+    f: [[0.06, 0.06, 0.95], [0.3, 0.1, 0.75], [0.47, 0.06, 1.1], [0.72, 0.11, 0.65], [0.96, 0.04, 0.45]],
+    ctx: "El referéndum del 1-O de 2017, suspendido por el Constitucional, la entrada de Vox en 2019 y los gobiernos de coalición consolidan dos bloques. España está entre los países europeos con más polarización afectiva (Reiljan, 2020; Torcal, 2023).",
+    cons: ["Dos elecciones generales en 2019", "El CGPJ pasa más de cinco años sin renovarse (2018–2024)", "Ley de amnistía (2024)"] }
+];
+
+/* ================= 6 bis · Consecuencias por fase ================= */
+(function consecuencias() {
+  const box = $("#cons"), pick = $("#cons-pick");
+  if (!box) return;
+  const FS = ["Centrada", "Afectiva", "Ideológica", "Ruptura"];
+  const DOM = [
+    { d: "Familia y amistades", v: [
+      ["Se puede discrepar en una cena familiar."],
+      ["Se evitan temas y las relaciones se enfrían.", "En EE. UU., las cenas familiares entre votantes distintos se acortaron tras 2016 (Chen y Rohla, 2018)."],
+      ["Se rompen amistades y parejas por política; crece la autocensura."],
+      ["Familias partidas por el frente; denuncias entre vecinos."]] },
+    { d: "Trabajo y economía", v: [
+      ["Se coopera y se contrata sin mirar el voto."],
+      ["Se discrimina por voto.", "En experimentos, el partido pesa más que la raza al elegir a quién dar una beca (Iyengar y Westwood, 2015)."],
+      ["Cada bando tiene sus barrios, sus marcas y sus redes; la incertidumbre frena la inversión."],
+      ["Economía de guerra, hambre y exilio."]] },
+    { d: "Información", v: [
+      ["Medios compartidos y hechos comunes."],
+      ["Cada bando elige sus medios y cree antes los bulos del propio lado."],
+      ["Ya no hay hechos comunes: todo dato se lee como propaganda."],
+      ["Propaganda y censura."]] },
+    { d: "Instituciones", v: [
+      ["Pactos de Estado y árbitros renovados a tiempo."],
+      ["Bloqueos: jueces y órganos de control se leen como de un bando.", "En España, el CGPJ estuvo más de cinco años sin renovarse (2018–2024)."],
+      ["Leyes que cambian con cada gobierno; el adversario no se acepta como gobernante legítimo."],
+      ["Las instituciones dejan de mediar: gana quien tiene la fuerza."]] },
+    { d: "Democracia", v: [
+      ["Contención: nadie usa todo su poder legal contra el rival (Levitsky y Ziblatt, 2018)."],
+      ["Se perdonan abusos del propio bando.", "Muchos votantes toleran violaciones democráticas si las comete su candidato (Graham y Svolik, 2020)."],
+      ["Polarización perniciosa: se acepta erosionar la democracia para que no gane el otro (McCoy y Somer, 2019)."],
+      ["Golpe, guerra o dictadura."]] },
+    { d: "Violencia", v: [
+      ["Excepcional y condenada por todos."],
+      ["Insultos, acoso en redes y escraches."],
+      ["Ataques a sedes y personas; la condena depende de quién sea la víctima."],
+      ["Violencia organizada: la guerra civil."]] }
+  ];
+  let cur = 0;
+  pick.innerHTML = FS.map((f, i) => `<button class="tbtn" data-i="${i}" aria-pressed="false">${f}</button>`).join("");
+  function set(i, desdeSim) {
+    if (i === cur && box.innerHTML) return;
+    cur = i;
+    let h = `<div class="corner"></div>` + FS.map((f, j) => `<div class="ch${j === i ? " on" : ""}">${f}</div>`).join("");
+    DOM.forEach((row) => {
+      h += `<div class="rd">${row.d}</div>` + row.v.map((v, j) => `<div class="cell${j === i ? " on" : ""}" style="--heat:${8 + j * 14}%">${v[0]}${v[1] ? `<i>${v[1]}</i>` : ""}</div>`).join("");
+    });
+    box.innerHTML = h;
+    $$(".tbtn", pick).forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.i === i)));
+  }
+  API.cons = set;
+  $$(".tbtn", pick).forEach((b) => b.addEventListener("click", () => { set(+b.dataset.i); if (API.simPhase) API.simPhase(+b.dataset.i); }));
+  set(cur);
+})();
+
+
+/* ================= 0 · Simulador (ideología × tribu) ================= */
+(function sim() {
+  const cv = $("#sim"); if (!cv) return;
+  const ctx = cv.getContext("2d");
+  const slider = $("#pressure"), cisBtn = $("#cis-toggle");
+  const rgb = (h) => { h = (h || "#888888").replace("#", ""); return [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16)); };
+  const STOPS = ORD.map((k) => rgb(cssv("--" + k)));
+  const colorAt = (u) => {
+    const f = Math.min(0.9999, Math.max(0, u)) * 4, i = Math.floor(f), t = f - i, a = STOPS[i], b = STOPS[i + 1];
+    return `rgb(${(a[0] + (b[0] - a[0]) * t) | 0},${(a[1] + (b[1] - a[1]) * t) | 0},${(a[2] + (b[2] - a[2]) * t) | 0})`;
+  };
+  const N = 520;
+  let seed = 20261018;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const gr = () => { let u = 0; while (u === 0) u = rnd(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rnd()); };
+  const P = [];
+  for (let i = 0; i < N; i++) {
+    const z = gr();
+    // t: umbral de reclutamiento. Quien supera ~0,62 nunca se suma del todo: siempre queda gente autónoma.
+    P.push({ z, side: z < 0 ? -1 : 1, ext: Math.min(1, Math.abs(z) / 2.2), t: 0.05 + 0.7 * rnd(), a0: 0.03 + 0.21 * rnd(), w: gr(), w2: gr(), j: rnd() * 6.283, x: 0.5, y: 0.1, tx: 0.5, ty: 0.1 });
+  }
+  let p = +slider.value / 100, W = 0, H = 0, raf = 0, visible = false, first = true, touched = false, played = false, sparks = [], hScale = 0, showCIS = true;
+
+  const PH = [
+    { max: 0.25, name: "Sociedad centrada", txt: "La mayoría comparte un terreno común y casi nadie necesita al grupo para saber quién es. Las diferencias son de grado y se negocian." },
+    { max: 0.55, name: "Polarización afectiva", txt: "Las ideas apenas se mueven, pero sube la temperatura: crecen el rechazo al otro bando y la lealtad al propio. Torcal (2023) describe así buena parte de la polarización española reciente." },
+    { max: 0.82, name: "Polarización ideológica", txt: "La identidad arrastra a las ideas: el centro se vacía, la campana se parte en dos y cada bando ve al otro como la única alternativa. Aun así, siempre queda gente que no se suma." },
+    { max: 1.01, name: "Ruptura", txt: "El grupo ha convencido a los suyos de que merece la pena combatir. El centro es tierra de nadie y la violencia deja de ser excepción: es el terreno de las guerras civiles." }
+  ];
+  function target(o) {
+    const c = 0.5 + 0.16 * o.z;
+    const mI = sm(o.t + 0.22, o.t + 0.38, p);
+    const pole = 0.5 + o.side * (0.24 + 0.13 * sm(0.55, 1, p)) + (0.075 - 0.03 * sm(0.6, 1, p)) * o.w;
+    o.tx = Math.min(0.985, Math.max(0.015, c + (pole - c) * mI));
+    const mA = sm(o.t * 0.75, o.t * 0.75 + 0.28, p);
+    const top = 0.5 + 0.18 * o.ext + 0.05 * o.w2 + 0.22 * sm(0.78, 1, p) * mI;
+    o.ty = Math.min(0.97, Math.max(0.02, o.a0 + (top - o.a0) * mA));
+  }
+  const level = (v, cuts, names) => names[cuts.findIndex((c) => v < c)];
+  function setM(id, frac, word) { const m = $("#" + id); m.querySelector("i").style.width = Math.round(Math.min(1, frac) * 100) + "%"; m.querySelector("b").textContent = word; }
+  function ui() {
+    const idx = PH.findIndex((x) => p < x.max), ph = PH[idx];
+    $("#phase-name").textContent = ph.name; $("#phase-txt").textContent = ph.txt;
+    let mid = 0, ys = 0, tribal = 0, dist = 0;
+    for (const o of P) {
+      if (o.tx > 0.38 && o.tx < 0.62 && o.ty < 0.5) mid++;
+      ys += o.ty;
+      if (o.ty > 0.66) { tribal++; dist += Math.abs(o.tx - 0.5) * 2; }
+    }
+    const centro = mid / N, temp = ys / N;
+    // Riesgo de violencia = cuánta gente está en la zona tribal × cuán lejos están entre sí los bloques
+    const viol = Math.min(1, (tribal / N) * (0.5 + (tribal ? dist / tribal : 0)));
+    const wc = level(centro, [0.08, 0.25, 0.45, 2], ["vacío", "bajo", "medio", "alto"]);
+    const wt = level(temp, [0.25, 0.45, 0.65, 2], ["baja", "media", "alta", "extrema"]);
+    const wv = level(viol, [0.12, 0.4, 0.75, 9], ["bajo", "medio", "alto", "crítico"]);
+    setM("m-centro", centro / 0.6, wc); setM("m-temp", temp, wt); setM("m-violencia", Math.max(0.04, viol), wv);
+    $$(".stop").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.ph === idx)));
+    if (API.cons) API.cons(idx, true);
+    slider.setAttribute("aria-valuetext", `${Math.round(p * 100)} de 100: ${ph.name}`);
+    $("#sim-sr").textContent = `${ph.name}. Centro habitable ${wc}, temperatura afectiva ${wt}, riesgo de violencia ${wv}.`;
+  }
+  function targets() { P.forEach(target); ui(); }
+  function resize() {
+    const r = cv.getBoundingClientRect(); if (!r.width) return;
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    W = r.width; H = r.height; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (first) { targets(); P.forEach((o) => { o.x = o.tx; o.y = o.ty; }); first = false; }
+    draw(performance.now());
+  }
+  function draw(ts) {
+    const sT = 30, sB = H * 0.58, hT = H * 0.67, hB = H - 24, padX = 6, pw = W - padX * 2;
+    const X = (u) => padX + u * pw, Y = (v) => sB - v * (sB - sT);
+    const small = W < 600;
+    ctx.clearRect(0, 0, W, H);
+    // Zonas del eje vertical
+    ctx.fillStyle = "rgba(246,190,59,0.06)"; ctx.fillRect(padX, Y(1), pw, Y(0.66) - Y(1));
+    ctx.fillStyle = "rgba(232,226,207,0.035)"; ctx.fillRect(padX, Y(0.33), pw, Y(0) - Y(0.33));
+    ctx.strokeStyle = "#3A4660"; ctx.setLineDash([3, 6]); ctx.lineWidth = 1;
+    [0.66, 0.33].forEach((v) => { ctx.beginPath(); ctx.moveTo(padX, Y(v) + 0.5); ctx.lineTo(W - padX, Y(v) + 0.5); ctx.stroke(); });
+    ctx.setLineDash([]);
+    ctx.font = `500 ${small ? 10 : 10.5}px "IBM Plex Mono", ui-monospace, monospace`;
+    // Personas
+    const jit = p > 0.8 && !RM ? (p - 0.8) * 9 : 0;
+    const rad = small ? 2.1 : 2.8;
+    for (const o of P) {
+      let x = X(o.x), y = Y(o.y);
+      if (jit) { x += Math.sin(ts * 0.006 + o.j) * jit * 0.5; y += Math.cos(ts * 0.008 + o.j * 1.7) * jit * 0.4; }
+      ctx.fillStyle = colorAt(o.x); ctx.globalAlpha = 0.88; ctx.beginPath(); ctx.arc(x, y, rad, 0, 6.2832); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    // Rótulos de zona por encima de los puntos, con fondo para que se lean
+    const tag = (txt, x, y, align, col) => {
+      ctx.textAlign = align; const w = ctx.measureText(txt).width;
+      const bx = align === "right" ? x - w - 6 : align === "center" ? x - w / 2 - 6 : x - 6;
+      ctx.fillStyle = "rgba(19,24,33,0.85)"; ctx.fillRect(bx, y - 11, w + 12, 16);
+      ctx.fillStyle = col || "#9AA3B3"; ctx.fillText(txt, x, y);
+    };
+    tag("ZONA TRIBAL", padX + 12, Y(1) + 15, "left"); tag("ZONA PARTIDISTA", padX + 12, Y(0.66) + 15, "left"); tag("ZONA AUTÓNOMA", padX + 12, Y(0.33) + 15, "left");
+    if (!small) tag("↑ DEPENDENCIA DEL GRUPO Y RECHAZO AL OTRO", W - padX - 8, sT - 12, "right");
+    // Chispas de conflicto
+    if (p > 0.82) {
+      if (RM) {
+        const Lb = P.filter((o) => o.tx < 0.36), Rb = P.filter((o) => o.tx > 0.64);
+        sparks = Lb.length && Rb.length ? [0, 1, 2, 3, 4, 5].map((i) => ({ a: Lb[(i * 41) % Lb.length], b: Rb[(i * 59) % Rb.length], l: 0.7 })) : [];
+      } else if (Math.random() < (p - 0.8) * 2) {
+        const a = P[(Math.random() * N) | 0], b = P[(Math.random() * N) | 0];
+        if (a.x < 0.36 && b.x > 0.64) sparks.push({ a, b, l: 1 });
+      }
+      ctx.lineWidth = 1.3;
+      for (const s of sparks) {
+        const ax = X(s.a.x), ay = Y(s.a.y), bx = X(s.b.x), by = Y(s.b.y);
+        ctx.strokeStyle = `rgba(246,190,59,${(s.l * 0.8).toFixed(3)})`;
+        ctx.beginPath(); ctx.moveTo(ax, ay); ctx.quadraticCurveTo((ax + bx) / 2, Math.min(ay, by) - 60, bx, by); ctx.stroke();
+        if (!RM) s.l -= 0.02;
+      }
+      sparks = sparks.filter((s) => s.l > 0);
+      tag("TIERRA DE NADIE", X(0.5), Y(0.5), "center", "#F6BE3B");
+    } else sparks = [];
+    // Datos reales del CIS: diez barras grises, con su propia escala
+    if (showCIS) {
+      const cmax = Math.max(...CIS);
+      CIS.forEach((v, i) => {
+        const x0 = X(i / 10) + 3, x1 = X((i + 1) / 10) - 3, hh = (v / cmax) * (hB - hT) * 0.92;
+        ctx.fillStyle = "rgba(237,235,230,0.12)"; ctx.fillRect(x0, hB - hh, x1 - x0, hh);
+        ctx.strokeStyle = "rgba(237,235,230,0.45)"; ctx.lineWidth = 1; ctx.strokeRect(x0 + 0.5, hB - hh + 0.5, x1 - x0 - 1, hh - 0.5);
+        if (!small || i === 0 || i === 4 || i === 9) { ctx.textAlign = "center"; ctx.fillStyle = "#C9CCD3"; ctx.fillText(v.toFixed(1).replace(".", ","), (x0 + x1) / 2, hB - hh - 4); }
+      });
+    }
+    // Campana del modelo
+    const B = 90, h = new Array(B).fill(0);
+    for (const o of P) h[Math.min(B - 1, Math.max(0, Math.floor(o.x * B)))]++;
+    const hs = h.map((_, i) => { let s = 0, w = 0; for (let k = -3; k <= 3; k++) { const v = h[i + k]; if (v !== undefined) { const ww = 4 - Math.abs(k); s += v * ww; w += ww; } } return s / w; });
+    const mx = Math.max(10, ...hs);
+    hScale = hScale < 2 || RM ? mx : hScale + (mx - hScale) * 0.12;
+    if (mx > hScale) hScale = mx;
+    const grad = ctx.createLinearGradient(padX, 0, W - padX, 0);
+    ORD.forEach((k, i) => grad.addColorStop(i / 4, `rgba(${STOPS[i].join(",")},${showCIS ? 0.42 : 0.55})`));
+    ctx.beginPath(); ctx.moveTo(X(0), hB);
+    hs.forEach((v, i) => ctx.lineTo(X((i + 0.5) / B), hB - (v / hScale) * (hB - hT)));
+    ctx.lineTo(X(1), hB); ctx.closePath(); ctx.fillStyle = grad; ctx.fill();
+    ctx.strokeStyle = "rgba(237,235,230,0.8)"; ctx.lineWidth = 1.4; ctx.beginPath();
+    hs.forEach((v, i) => { const x = X((i + 0.5) / B), y = hB - (v / hScale) * (hB - hT); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke();
+    ctx.textAlign = "left"; ctx.fillStyle = "#9AA3B3";
+    ctx.fillText(showCIS ? (small ? "MODELO (CURVA) · CIS 2026 (BARRAS, %)" : "CAMPANA DEL MODELO (CURVA) · ESPAÑA, CIS SEPT. 2026 (BARRAS, % DE LA MUESTRA)") : "CAMPANA DEL MODELO: DISTRIBUCIÓN IDEOLÓGICA", padX + 6, hT - 8);
+    ctx.strokeStyle = "#3A4660"; ctx.beginPath(); ctx.moveTo(padX, hB + 0.5); ctx.lineTo(W - padX, hB + 0.5); ctx.stroke();
+    ctx.textAlign = "center";
+    for (let n = 1; n <= 10; n++) { const x = X((n - 0.5) / 10); ctx.fillRect(x, hB + 1, 1, 5); ctx.fillText(String(n), x, hB + 17); }
+  }
+  function frame(ts) {
+    if (!visible) { raf = 0; return; }
+    const k = RM ? 1 : 0.07; let moving = false;
+    for (const o of P) {
+      const dx = o.tx - o.x, dy = o.ty - o.y;
+      if (Math.abs(dx) > 0.0005 || Math.abs(dy) > 0.0005) moving = true;
+      o.x += dx * k; o.y += dy * k;
+    }
+    draw(ts);
+    raf = moving || (p > 0.8 && !RM) ? requestAnimationFrame(frame) : 0;
+  }
+  function kick() { if (!raf && visible) raf = requestAnimationFrame(frame); else if (!visible) draw(performance.now()); }
+  function onSlider() { p = +slider.value / 100; targets(); kick(); }
+  function tween(to, dur) {
+    const from = +slider.value, t0 = performance.now();
+    (function step(now) {
+      const q = dur ? Math.min(1, (now - t0) / dur) : 1, e = q < 0.5 ? 2 * q * q : 1 - Math.pow(-2 * q + 2, 2) / 2;
+      slider.value = String(from + (to - from) * e); onSlider();
+      if (q < 1 && !(touched && dur > 1500)) requestAnimationFrame(step);
+    })(t0);
+  }
+  slider.addEventListener("input", () => { touched = true; onSlider(); });
+  $$(".stop").forEach((b) => b.addEventListener("click", () => { touched = true; tween(+b.dataset.v, RM ? 0 : 1100); }));
+  API.simPhase = (i) => { touched = true; tween(+$$(".stop")[i].dataset.v, RM ? 0 : 1100); };
+  cisBtn.addEventListener("click", () => { showCIS = !showCIS; cisBtn.setAttribute("aria-pressed", String(showCIS)); draw(performance.now()); });
+  new IntersectionObserver((es) => {
+    visible = es[0].isIntersecting;
+    if (visible) {
+      kick();
+      if (!played && !touched && !RM) { played = true; setTimeout(() => { if (!touched) tween(42, 2600); }, 900); }
+    }
+  }, { threshold: 0.35 }).observe(cv);
+  let rz = 0;
+  new ResizeObserver(() => { cancelAnimationFrame(rz); rz = requestAnimationFrame(resize); }).observe(cv);
+  resize();
+})();
+
+
+/* ================= Doce perfiles ================= */
+/* Los cinco de la línea izquierda-derecha reutilizan A; los otros siete tienen sus datos aquí.
+   dep: dependencia del grupo, 0–5 (tipo ideal, no medición). */
+const LIDERES = {
+  xl: [["Ione Belarra", "Secretaria general de Podemos"], ["Pablo Iglesias", "Fundador de Podemos, fuera de la política institucional"]],
+  l: [["Pedro Sánchez", "Secretario general del PSOE"], ["Yolanda Díaz", "Impulsora de Sumar"]],
+  c: [["Albert Rivera", "Fundador de Ciudadanos, retirado"], ["Inés Arrimadas", "Expresidenta de Ciudadanos, retirada"]],
+  r: [["Alberto Núñez Feijóo", "Presidente del PP"], ["Isabel Díaz Ayuso", "Presidenta de la Comunidad de Madrid"]],
+  xr: [["Santiago Abascal", "Presidente de Vox"], ["Alvise Pérez", "Fundador de Se Acabó La Fiesta"]]
+};
+const NUEVOS = {
+  ancom: { name: "Anarcocomunismo", short: "Anarcocom.", arq: "El comunero sin Estado", g: "cruzan", dep: 4,
+    quote: "Ni Dios, ni Estado, ni patrón.",
+    psique: "Rechaza toda autoridad, pero vive una lealtad intensa a la asamblea y al colectivo.",
+    karp: { v: "El trabajador y el excluido", p: "El Estado, el capital y la Iglesia", s: "La asamblea y el apoyo mutuo" },
+    words: ["autogestión", "apoyo mutuo", "asamblea", "acción directa"],
+    contra: { a: "Sin jerarquías", b: "Disciplina de asamblea", txt: "Rechaza toda autoridad y a la vez exige al grupo una unanimidad moral que castiga al disidente.", strats: ["«La asamblea no es poder»", "«Es autodefensa»"] },
+    steel: "Recuerda que la cooperación voluntaria y el apoyo mutuo sostienen buena parte de la vida social sin necesidad de mando.",
+    lid: [["Sin líderes, por principio", "Referentes históricos: Buenaventura Durruti y Federica Montseny (CNT-FAI)"]] },
+  sp: { name: "Socialismo patriótico", short: "Soc. patriótico", arq: "El obrero de la nación", g: "cruzan", dep: 4,
+    quote: "Ni la izquierda caviar ni la derecha de los ricos: primero la clase obrera española.",
+    psique: "Identidad doble, de clase y de nación, y disciplina de organización. Rechaza a la izquierda «posmoderna» por haber abandonado al obrero.",
+    karp: { v: "La clase obrera nacional", p: "La oligarquía y el globalismo", s: "Un Estado obrero y soberano" },
+    words: ["clase obrera", "soberanía", "izquierda caviar", "globalismo"],
+    contra: { a: "Internacionalismo marxista", b: "El trabajador nacional primero", txt: "Se reclama marxista, una tradición internacionalista, y pone al trabajador nacional por delante del extranjero, que es de su misma clase.", strats: ["«El inmigrante es ejército de reserva»", "«Primero, los de aquí»"] },
+    steel: "Señala que una parte de la clase trabajadora se siente abandonada a la vez por la izquierda cultural y por la derecha económica.",
+    lid: [["Roberto Vaquero", "Fundador de Frente Obrero"]] },
+  lib: { name: "Libertarismo minarquista", short: "Libertario", arq: "El individuo soberano", g: "cruzan", dep: 2,
+    quote: "El Estado no es la solución: es el problema.",
+    psique: "Autonomía alta y desconfianza de lo colectivo. Su tribu es doctrinal: una comunidad con su propio canon de autores.",
+    karp: { v: "El contribuyente", p: "El Estado intervencionista", s: "El individuo libre y una ley mínima" },
+    words: ["expolio fiscal", "intervencionismo", "libre mercado", "propiedad"],
+    contra: { a: "Estado mínimo", b: "Un Estado firme que proteja la propiedad", txt: "Quiere un Estado mínimo y a la vez necesita uno firme que haga cumplir contratos y propiedad. Mira mucho el abuso del poder público y poco el del privado.", strats: ["«El mercado corrige»", "«Eso no es libre mercado de verdad»"] },
+    steel: "Recuerda que todo gasto público lo paga alguien y que el poder concentrado en el Estado también puede abusar.",
+    lid: [["Juan Ramón Rallo", "Economista y divulgador, defensor de un Estado mínimo"]] },
+  ancap: { name: "Anarcocapitalismo", short: "Anarcocap.", arq: "El soberano del mercado", g: "cruzan", dep: 3,
+    quote: "Los impuestos son un robo; el Estado sobra entero.",
+    psique: "Autonomía individual extrema y desconfianza total del poder público. Su tribu es doctrinal: una lógica que lo explica todo.",
+    karp: { v: "El contribuyente y el emprendedor", p: "El Estado y los políticos", s: "El mercado libre y los contratos voluntarios" },
+    words: ["propiedad privada", "robo", "contratos", "Escuela Austriaca"],
+    contra: { a: "Ningún poder coactivo", b: "Poder privado sin límites", txt: "Elimina el Estado para acabar con la coacción, pero deja la seguridad y la justicia en manos de empresas que podrían ejercer el mismo poder sin control democrático.", strats: ["«La competencia lo resuelve»", "«El mercado se autorregula»"] },
+    steel: "Obliga a justificar cada intervención pública y recuerda que el poder concentrado puede abusar.",
+    lid: [["Jesús Huerta de Soto", "Catedrático de Economía, defensor del anarcocapitalismo"]] },
+  indxl: { name: "Independentismo de izquierda radical", short: "Indep. izq. radical", arq: "Liberación nacional y social", g: "indep", dep: 5,
+    quote: "Independencia y socialismo: dos luchas, una sola.",
+    psique: "Identidad doble, de pueblo y de clase, y pertenencia muy intensa a la comunidad nacional y al movimiento.",
+    karp: { v: "El pueblo vasco o catalán y su clase trabajadora", p: "El Estado español y el capital", s: "La izquierda independentista" },
+    words: ["autodeterminación", "pueblo", "represión", "unidad popular"],
+    contra: { a: "Antinacionalismo", b: "Nacionalismo propio", txt: "Combate el nacionalismo español como opresor y defiende el propio como liberación.", strats: ["«Nación oprimida, no opresora»", "«El nuestro es de izquierdas»"] },
+    steel: "Recuerda que la lengua y la cultura de una minoría necesitan protección y reconocimiento.",
+    lid: [["Arnaldo Otegi", "Coordinador general de EH Bildu"], ["CUP", "Dirección colectiva, sin líder único"]] },
+  indl: { name: "Independentismo de izquierda", short: "Indep. izquierda", arq: "La república por las urnas", g: "indep", dep: 4,
+    quote: "Votar no es delito.",
+    psique: "Identidad nacional intensa compatible con el pragmatismo: negocia en Madrid sin renunciar al objetivo.",
+    karp: { v: "La nación sin Estado", p: "El Estado centralista", s: "La república propia" },
+    words: ["derecho a decidir", "república", "diálogo", "autogobierno"],
+    contra: { a: "Ruptura con España", b: "Negociar en el Congreso", txt: "Defiende la independencia y a la vez sostiene gobiernos españoles a cambio de competencias y medidas.", strats: ["«Ensanchar la base»", "«Hay que acumular fuerzas»"] },
+    steel: "Señala que el reparto del poder territorial es una pregunta democrática legítima.",
+    lid: [["Oriol Junqueras", "Presidente de ERC"], ["Ana Pontón", "Portavoz nacional del BNG"]] },
+  indr: { name: "Nacionalismo e independentismo de derecha", short: "Indep. derecha", arq: "La nación propia, con orden y empresa", g: "indep", dep: 4,
+    quote: "Somos una nación y queremos decidir.",
+    psique: "Identidad nacional fuerte con valores de orden, empresa y tradición: menos ruptura social, más soberanía fiscal.",
+    karp: { v: "La nación propia y sus empresas", p: "El Estado central y el déficit fiscal", s: "Las instituciones propias" },
+    words: ["soberanía", "déficit fiscal", "concierto", "nación"],
+    contra: { a: "Economía abierta", b: "Una frontera con su mayor mercado", txt: "Defiende el libre comercio y a la vez propone una frontera con el mercado español, su principal cliente.", strats: ["«Europa nos acogerá»", "«Los costes serán transitorios»"] },
+    steel: "Recuerda que un gobierno cercano puede ser más eficaz y que el equilibrio fiscal entre territorios importa.",
+    lid: [["Carles Puigdemont", "Presidente de Junts"], ["Aitor Esteban", "Presidente del PNV, nacionalista no independentista"]] }
+};
+const PF_ORD = ["xl", "ancom", "l", "sp", "c", "r", "lib", "ancap", "xr", "indxl", "indl", "indr"];
+const PF = (k) => {
+  if (NUEVOS[k]) return { k, ...NUEVOS[k] };
+  const a = A[k];
+  return { k, name: a.name, short: a.short, arq: a.arq, g: "linea", dep: a.traits[0], quote: a.quote, psique: a.psique, karp: a.karp,
+    words: a.words.filter((w) => w[1] >= 2).slice(0, 5).map((w) => w[0]), contra: a.contra[0], contra2: a.contra[1], steel: a.steel, lid: LIDERES[k], extreme: a.extreme };
+};
+const GRUPOS = [["todos", "Los doce"], ["linea", "La línea izquierda–derecha"], ["cruzan", "Los que cruzan la línea"], ["indep", "Independentismos"]];
+
+(function perfiles() {
+  const grid = $("#pf-grid"), pick = $("#pf-pick");
+  if (!grid) return;
+  grid.innerHTML = PF_ORD.map((k) => {
+    const p = PF(k);
+    const contras = [p.contra, p.contra2].filter(Boolean);
+    return `<article class="pf" data-g="${p.g}" style="--dc:var(--${k})">
+      <header class="pf-h"><span class="ncirc" style="--nc:var(--${k})">${pt(k)}</span><div><h3>${p.name}</h3><p class="pf-arq">${p.arq}</p></div></header>
+      ${p.extreme ? `<p class="pf-flag">Describe al polo extremista, una minoría.</p>` : ""}
+      <q class="pf-q">${p.quote}</q>
+      <dl class="pf-dl">
+        <dt>Psique</dt><dd>${p.psique.split(/(?<=\.)\s/)[0]}<span class="pf-dep">${segs(p.dep, 5)} dependencia del grupo</span></dd>
+        <dt>Relato</dt><dd><span class="kv3"><i>Víctima</i>${p.karp.v}</span><span class="kv3"><i>Villano</i>${p.karp.p}</span><span class="kv3"><i>Héroe</i>${p.karp.s}</span></dd>
+        <dt>Habla</dt><dd>${p.words.map((w) => `<span class="chip">${w}</span>`).join(" ")}</dd>
+        <dt>Contradicción</dt><dd>${contras.slice(0, 1).map((c) => `<b class="pf-ten">${c.a} <span aria-hidden="true">⟷</span><span class="sr">frente a</span> ${c.b}</b>`).join("")}</dd>
+        <dt>Líderes</dt><dd>${(p.lid || []).map(([n, r]) => `<span class="pf-lid"><b>${n}</b> · ${r}</span>`).join("")}</dd>
+      </dl>
+      <details class="pf-more"><summary>Más</summary>
+        ${p.psique.split(/(?<=\.)\s/).length > 1 ? `<p>${p.psique}</p>` : ""}${contras.length > 1 ? `<p><b class="pf-ten">${contras[1].a} ⟷ ${contras[1].b}</b></p>` : ""}
+        ${contras.map((c) => `<p>${c.txt}</p><p class="pf-strats"><span class="lbl">Cómo lo sostiene</span>${c.strats.map((s) => `<span class="chip">${s}</span>`).join(" ")}</p>`).join("")}
+        <p><span class="lbl">Su parte de razón</span><br>${p.steel}</p>
+      </details>
+    </article>`;
+  }).join("");
+  pick.innerHTML = GRUPOS.map(([g, t], i) => `<button class="tbtn" data-g="${g}" aria-pressed="${i === 0}">${t}</button>`).join("");
+  $$(".tbtn", pick).forEach((b) => b.addEventListener("click", () => {
+    $$(".tbtn", pick).forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    $$(".pf", grid).forEach((c) => { c.hidden = b.dataset.g !== "todos" && c.dataset.g !== b.dataset.g; });
+  }));
+})();
+
+/* ================= Portada: imágenes de las tarjetas ================= */
+(function portada() {
+  const STOPC = ORD.map((k) => cssv("--" + k));
+  const col = (u) => STOPC[Math.round(Math.min(1, Math.max(0, u)) * 4)];
+  const g = (x, m, s) => Math.exp(-((x - m) ** 2) / (2 * s * s));
+  const curva = (mix, W, H, top) => {
+    const ys = []; for (let i = 0; i <= 80; i++) ys.push(mix.reduce((a, [m, s, w]) => a + w * g(i / 80, m, s), 0));
+    const mx = Math.max(...ys);
+    return ys.map((y, i) => `${i ? "L" : "M"}${r1(10 + (i / 80) * (W - 20))},${r1(H - 12 - (y / mx) * (H - 12 - top))}`).join(" ");
+  };
+  const set = (id, s) => { const e = document.getElementById(id); if (e) e.innerHTML = s; };
+  const mx = Math.max(...CIS);
+  set("ci-hoy", CIS.map((v, i) => `<rect x="${18 + i * 29}" y="${r1(138 - (v / mx) * 112)}" width="22" height="${r1((v / mx) * 112)}" rx="3" fill="${col(i / 9)}" fill-opacity=".9"/>`).join("") + `<line x1="12" x2="308" y1="139" y2="139" stroke="#3A4660"/>`);
+  set("ci-historia", [[[[0.15, 0.08, 1], [0.85, 0.08, 1]], "#EC5272", 0.5], [[[0.47, 0.13, 1]], "#E8E2CF", 0.75], [[[0.08, 0.06, 0.9], [0.47, 0.07, 1.1], [0.95, 0.04, 0.45]], "#F2955F", 1]]
+    .map(([mix, c, o]) => `<path d="${curva(mix, 320, 150, 18)}" fill="none" stroke="${c}" stroke-opacity="${o}" stroke-width="3" stroke-linecap="round"/>`).join(""));
+  const xs = [40, 100, 160, 220, 280];
+  set("ci-miradas", xs.slice(1).map((x, i) => `<path d="M40,96 Q${(40 + x) / 2},${140 + i * 2} ${x},96" fill="none" stroke="${i > 1 ? "#F6BE3B" : "#EC5272"}" stroke-width="${2 + i * 1.6}" stroke-linecap="round" stroke-opacity=".85"/>`).join("")
+    + xs.map((x, i) => `<circle cx="${x}" cy="80" r="${i ? 15 : 19}" fill="${STOPC[i]}"/>`).join("") + `<path d="M22,40 Q40,22 58,40 Q40,58 22,40 Z" fill="none" stroke="#EDEBE6" stroke-width="2"/><circle cx="40" cy="40" r="5" fill="#EDEBE6"/>`);
+  set("ci-perfiles", ["xl", "l", "c", "r", "xr"].map((k, i) => `<g transform="translate(${14 + i * 60} 20)"><circle cx="30" cy="55" r="29" fill="#1B2230" stroke="${STOPC[i]}" stroke-width="2"/><use href="#p-${k}" x="4" y="22" width="52" height="61"/></g>`).join(""));
+  set("ci-escalada", [56, 44, 32, 20].map((r, i) => `<circle cx="70" cy="76" r="${r}" fill="${["#EC5272", "#5E6B88", "#5CC28A", "#5CC28A"][i]}" fill-opacity="${0.25 + i * 0.15}"/>`).join("")
+    + Array.from({ length: 6 }, (_, i) => `<rect x="${150 + i * 26}" y="${30 + i * 18}" width="24" height="${120 - (30 + i * 18) + 10}" fill="${["#8A92A3", "#8A92A3", "#B08A38", "#B08A38", "#F6BE3B", "#EC5272"][i]}" fill-opacity=".85"/>`).join(""));
+  set("ci-fuentes", `<text x="26" y="112" font-family="Newsreader, Georgia, serif" font-size="110" font-style="italic" fill="#EDEBE6">«»</text>`
+    + [0, 1, 2, 3].map((i) => `<rect x="${170 + i * 30}" y="${34 + (i % 2) * 10}" width="24" height="${100 - (i % 2) * 10}" rx="2" fill="${STOPC[[0, 4, 1, 3][i]]}" fill-opacity=".8"/>`).join(""));
+})();
+
+/* ================= 1 · El estudio del CIS ================= */
+(function estudio() {
+  const box = $("#cis-chart"); if (!box) return;
+  const STOPC = ORD.map((k) => cssv("--" + k));
+  const mx = Math.max(...CIS);
+  box.innerHTML = `<div class="cis-bars">${CIS.map((v, i) => `<div class="cb"><b>${v.toFixed(1).replace(".", ",")}<small>%</small></b><i style="height:${(v / mx) * 100}%;background:${STOPC[Math.min(4, Math.round((i / 9) * 4))]}"></i><span>${i + 1}</span></div>`).join("")}</div>
+    <div class="cis-ends"><span>← Izquierda</span><span>Derecha →</span></div>`;
+})();
+
+/* ================= 2 · Cien años: campanas por etapa ================= */
+(function historia() {
+  const line = $("#hline"), svg = $("#hchart"), info = $("#hinfo"), cap = $("#hcap"), range = $("#hrange");
+  if (!svg) return;
+  const W = 640, H = 300, pad = 16, NP = 120;
+  const g = (x, m, s) => Math.exp(-((x - m) ** 2) / (2 * s * s));
+  const muestra = (mix) => { const ys = []; for (let i = 0; i <= NP; i++) ys.push(mix.reduce((a, [m, s, w]) => a + w * g(i / NP, m, s), 0)); const mx = Math.max(...ys); return ys.map((y) => y / mx); };
+  const camino = (ys, cerrar) => {
+    let d = ys.map((y, i) => `${i ? "L" : "M"}${r1(pad + (i / NP) * (W - 2 * pad))},${r1(H - pad - y * (H - 2 * pad - 16))}`).join(" ");
+    return cerrar ? `${d} L${W - pad},${H - pad} L${pad},${H - pad} Z` : d;
+  };
+  const CORTO = ["Primo de Rivera", "II República", "Asturias y Frente Popular", "Guerra Civil", "Franquismo", "Transición", "Bipartidismo", "Crispación", "Fin del bipartidismo", "Procés y bloques"];
+  line.innerHTML = ETAPAS.map((e, i) => `<button class="hnode" data-i="${i}" style="--hc:${FASES[e.fase].c}" aria-pressed="false" aria-label="${e.a}–${e.b}: ${e.t}"><i></i><b>${e.a}</b><span>${CORTO[i]}</span></button>`).join("");
+  let cur = null, actual = muestra(ETAPAS[ETAPAS.length - 1].f), anim = 0;
+  function pinta(ys, e) {
+    const F = FASES[e.fase];
+    let s = `<defs><linearGradient id="hgrad" x1="0" x2="1" y1="0" y2="0">${ORD.map((k, j) => `<stop offset="${j / 4}" stop-color="${cssv("--" + k)}"/>`).join("")}</linearGradient></defs>`;
+    for (let n = 1; n <= 10; n++) { const x = pad + ((n - 0.5) / 10) * (W - 2 * pad); s += `<line x1="${r1(x)}" x2="${r1(x)}" y1="${pad}" y2="${H - pad}" stroke="#283142"/><text x="${r1(x)}" y="${H + 12}" text-anchor="middle" class="hsy">${n}</text>`; }
+    if (e.cis) {
+      const mx = Math.max(...CIS), bw = (W - 2 * pad) / 10;
+      CIS.forEach((v, j) => { const hh = (v / mx) * (H - 2 * pad - 16); s += `<rect x="${r1(pad + j * bw + 4)}" y="${r1(H - pad - hh)}" width="${r1(bw - 8)}" height="${r1(hh)}" rx="3" fill="#EDEBE6" fill-opacity=".1" stroke="#EDEBE6" stroke-opacity=".45"/><text x="${r1(pad + j * bw + bw / 2)}" y="${r1(H - pad - hh - 5)}" text-anchor="middle" class="hsy">${v.toFixed(1).replace(".", ",")}</text>`; });
+    }
+    if (e.oculta) s += `<path d="${camino(muestra(e.oculta), true)}" fill="#9AA3B3" fill-opacity=".1" stroke="#9AA3B3" stroke-dasharray="5 6" stroke-width="2"/>`;
+    s += `<path d="${camino(ys, true)}" fill="url(#hgrad)" fill-opacity="${e.oculta ? 0.75 : 0.5}"/>`;
+    s += `<path d="${camino(ys, false)}" fill="none" stroke="#EDEBE6" stroke-width="2.4" stroke-linejoin="round"/>`;
+    s += `<line x1="${pad}" x2="${W - pad}" y1="${H - pad}" y2="${H - pad}" stroke="#3A4660"/>`;
+    s += `<text x="${pad + 6}" y="${pad + 14}" class="hst" style="fill:${F.c}">${F.n.toUpperCase()}</text>`;
+    svg.innerHTML = s;
+  }
+  function set(i) {
+    if (i === cur) return;
+    cur = i;
+    const e = ETAPAS[i], F = FASES[e.fase], dest = muestra(e.f), desde = actual.slice(), t0 = performance.now();
+    cancelAnimationFrame(anim);
+    const paso = (now) => {
+      const q = RM ? 1 : Math.min(1, (now - t0) / 450), k = 1 - Math.pow(1 - q, 3);
+      actual = desde.map((y, j) => y + (dest[j] - y) * k);
+      pinta(actual, e);
+      if (q < 1) anim = requestAnimationFrame(paso);
+    };
+    anim = requestAnimationFrame(paso);
+    if (RM) pinta(dest, e);
+    cap.textContent = e.cis ? "Barras: el estudio real del CIS. Curva: lectura del modelo." : e.oculta ? "Color: lo que se podía decir. Gris discontinuo: lo que pensaba la sociedad." : "Forma interpretada a partir de la historiografía.";
+    info.style.setProperty("--hc", F.c);
+    info.innerHTML = `<span class="hd-years">${e.a}–${e.b}</span><span class="hd-phase">${F.n}</span><h3>${e.t}</h3><p>${e.ctx}</p>
+      <span class="lbl">Consecuencias</span><ul class="hd-cons">${e.cons.map((x) => `<li>${x}</li>`).join("")}</ul>`;
+    $$(".hnode", line).forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.i === i)));
+    range.value = String(i);
+  }
+  $$(".hnode", line).forEach((b) => {
+    const i = +b.dataset.i;
+    b.addEventListener("mouseenter", () => set(i)); b.addEventListener("focus", () => set(i)); b.addEventListener("click", () => set(i));
+  });
+  range.addEventListener("input", () => set(+range.value));
+  set(ETAPAS.length - 1);
+})();
+
+/* ================= 5 · Círculos de pertenencia ================= */
+(function circulos() {
+  const svg = $("#rings"), pick = $("#ring-picker"), list = $("#ring-list");
+  if (!svg) return;
+  const ESTADO = { a: ["Abraza", "#5CC28A", "✓"], t: ["Tolera", "#5E6B88", "–"], x: ["Combate", "#EC5272", "✕"] };
+  const RS = { ...RSTATE,
+    ancom: ["a", "a", "t", "x", "x", "a"], sp: ["a", "a", "t", "a", "x", "t"], lib: ["a", "a", "t", "t", "a", "a"], ancap: ["a", "t", "x", "x", "x", "a"],
+    indxl: ["a", "a", "a", "x", "t", "a"], indl: ["a", "a", "a", "x", "a", "a"], indr: ["a", "a", "a", "x", "a", "t"] };
+  const RT = { ...RTXT,
+    ancom: "La comuna y la humanidad, sin Estados en medio: combate la nación española y la Unión Europea como estructuras de poder.",
+    sp: "La patria y el barrio obrero. Europa, la de Bruselas y la OTAN, es un poder ajeno.",
+    lib: "El individuo y el mundo abierto. Tolera la nación, pero desconfía de todo poder que no haya elegido.",
+    ancap: "El individuo y el mercado global. Combate los Estados a cualquier escala; la comunidad es voluntaria o no es.",
+    indxl: "Su nación, su barrio y la humanidad. Combate la identidad española, que vive como imposición del Estado.",
+    indl: "Su nación y Europa, a la que quiere pertenecer como Estado propio. La identidad española queda fuera.",
+    indr: "Su nación y Europa, con orden y empresa. La humanidad le parece una abstracción; España, otro Estado." };
+  const R = [44, 82, 120, 160, 200, 240];
+  pick.innerHTML = PF_ORD.map((k) => `<button class="rp" data-k="${k}" style="--nc:var(--${k})" aria-pressed="false" title="${PF(k).name}"><span class="ncirc">${pt(k)}</span><span>${PF(k).short}</span></button>`).join("");
+  function draw(k) {
+    const st = RS[k];
+    let s = `<defs><pattern id="hatchR" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#3A1A22"/><rect width="3" height="8" fill="#EC5272" fill-opacity=".7"/></pattern></defs>`;
+    for (let i = R.length - 1; i >= 0; i--) {
+      const r = R[i], e = st[i];
+      s += `<circle cx="260" cy="260" r="${r}" fill="#0C0F14"/>`;
+      s += `<circle class="ring" data-i="${i}" cx="260" cy="260" r="${r - 1}" fill="${e === "x" ? "url(#hatchR)" : ESTADO[e][1]}" fill-opacity="${e === "a" ? 0.28 + (5 - i) * 0.06 : e === "t" ? 0.35 : 1}" stroke="${ESTADO[e][1]}" stroke-width="${e === "x" ? 3 : 1.5}"/>`;
+    }
+    RINGS.forEach((name, i) => {
+      const y = i ? 260 - (R[i] + R[i - 1]) / 2 + 5 : 265;
+      s += `<text x="260" y="${y}" text-anchor="middle" class="rl">${name}</text>`;
+    });
+    svg.innerHTML = s;
+    list.innerHTML = RINGS.map((n, i) => { const [t, c, ic] = ESTADO[st[i]]; return `<li style="--ec:${c}"><i aria-hidden="true">${ic}</i><span>${n}</span><b>${t}</b></li>`; }).reverse().join("");
+    $$(".rp", pick).forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.k === k)));
+    $("#ring-insight").innerHTML = `<b style="color:var(--${k})">${PF(k).name}.</b> ${RT[k]}`;
+    svg.setAttribute("aria-label", `Círculos de pertenencia de ${PF(k).name}: ` + RINGS.map((n, i) => `${n}, ${ESTADO[st[i]][0].toLowerCase()}`).join("; "));
+  }
+  $$(".rp", pick).forEach((b) => {
+    const k = b.dataset.k;
+    b.addEventListener("mouseenter", () => draw(k)); b.addEventListener("focus", () => draw(k)); b.addEventListener("click", () => draw(k));
+  });
+  draw("xr");
+
+  // Eje territorial: izquierda-derecha frente a centro-periferia
+  const TX = (d) => 380 + d * 290, TY = (t) => 215 + t * 160;
+  const TP = { xl: [-0.85, 0.62], l: [-0.45, 0.3], c: [0, 0], r: [0.45, -0.4], xr: [0.85, -0.88], indxl: [-0.8, 0.9], indl: [-0.42, 0.88], indr: [0.32, 0.8] };
+  let s = `<rect x="70" y="40" width="620" height="350" rx="12" fill="#0C0F14" fill-opacity=".35"/>`;
+  s += `<line x1="70" x2="690" y1="${TY(0)}" y2="${TY(0)}" stroke="#3A4660" stroke-dasharray="3 7"/><line x1="${TX(0)}" x2="${TX(0)}" y1="40" y2="390" stroke="#3A4660" stroke-dasharray="3 7"/>`;
+  s += `<text x="80" y="62" class="tt">↑ Recentralización: una sola nación</text><text x="80" y="${TY(0) - 8}" class="tt">Estado autonómico</text><text x="690" y="380" text-anchor="end" class="tt">↓ Independencia</text>`;
+  s += `<text x="380" y="420" text-anchor="middle" class="tt">← izquierda · derecha →</text>`;
+  s += `<path d="M${TX(-0.95)},${TY(0.72)} L${TX(0.95)},${TY(-0.98)}" stroke="#9AA3B3" stroke-opacity=".35" stroke-width="1.5" stroke-dasharray="2 5"/>`;
+  Object.entries(TP).forEach(([k, [d, t]]) => {
+    const x = TX(d), y = TY(t), izq = d > 0.6;
+    s += `<circle cx="${x}" cy="${y}" r="12" style="fill:var(--${k})"/><text x="${x + (izq ? -20 : 20)}" y="${y + 5}" text-anchor="${izq ? "end" : "start"}" class="tt b">${PF(k).short}</text>`;
+  });
+  $("#terr").innerHTML = s;
+  const TL = { xl: "plurinacionalidad y derecho a decidir", l: "Estado federal", c: "Estado autonómico tal como es", r: "más Estado central", xr: "recentralización: una sola nación", indxl: "independencia y socialismo", indl: "república propia por las urnas", indr: "soberanía propia con economía abierta" };
+  $("#terr-list").innerHTML = Object.keys(TP).map((k) => `<li><i style="background:var(--${k})"></i><span><b>${PF(k).name}:</b> ${TL[k]}.</span></li>`).join("");
+})();
+
+/* ================= 5 · La escalera de Glasl ================= */
+(function escalera() {
+  const svg = $("#glasl"), det = $("#step-detail");
+  if (!svg) return;
+  const COL = ["#8A92A3", "#9AA0AD", "#AAB0BA", "#B8963F", "#C99A3E", "#DDA53C", "#F6BE3B", "#EE8A4B", "#EC5272"];
+  const X0 = 30, SW = 104, Y0 = 118, DY = 30, BOT = 500;
+  let s = `<defs><linearGradient id="abismo" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#0C0F14" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".85"/></linearGradient></defs>`;
+  LEVELS.forEach((L, i) => {
+    const x = X0 + i * 3 * SW;
+    s += `<rect x="${x}" y="18" width="${3 * SW - 6}" height="${BOT - 18}" rx="12" fill="${L.c}" fill-opacity=".05"/>`;
+    s += `<text x="${x + 12}" y="44" class="gl-lv" style="fill:${L.c}">NIVEL ${i + 1} · ${L.name.toUpperCase()}</text><text x="${x + 12}" y="64" class="gl-ld">${L.d}</text>`;
+  });
+  s += `<path d="M${X0 + 20},${Y0 - 14} ${GLASL.map((_, i) => `L${X0 + i * SW + SW - 6},${Y0 + i * DY - 14} L${X0 + i * SW + SW - 6},${Y0 + (i + 1) * DY - 14}`).join(" ")}" fill="none" stroke="#EDEBE6" stroke-opacity=".25" stroke-width="2" stroke-dasharray="3 6"/>`;
+  GLASL.forEach((gl, i) => {
+    const x = X0 + i * SW, y = Y0 + i * DY, w = SW - 6;
+    const lineas = [[]]; gl.name.split(" ").forEach((w2) => { const ult = lineas[lineas.length - 1]; if (ult.length && (ult.join(" ") + " " + w2).length > 12) lineas.push([w2]); else ult.push(w2); });
+    s += `<g class="gstep" data-i="${i}" tabindex="0" role="button" aria-label="Peldaño ${i + 1}: ${gl.name}">
+      <rect x="${x}" y="${y}" width="${w}" height="${BOT - y}" rx="8" fill="${COL[i]}" fill-opacity=".9"/>
+      <rect x="${x}" y="${y}" width="${w}" height="8" rx="4" fill="#fff" fill-opacity=".35"/>
+      <text x="${x + w / 2}" y="${y + 52}" text-anchor="middle" class="gl-n">${i + 1}</text>
+      ${lineas.map((l, n) => `<text x="${x + w / 2}" y="${y + 76 + n * 16}" text-anchor="middle" class="gl-t">${l.join(" ")}</text>`).join("")}
+      <rect x="${x}" y="${y}" width="${w}" height="${BOT - y}" fill="transparent"/></g>`;
+    const who = ORD.filter((k) => A[k].glasl === i + 1);
+    who.forEach((k, j) => {
+      const cx = x + w / 2 + (j - (who.length - 1) / 2) * 34, cy = y - 22;
+      s += `<g aria-hidden="true"><circle cx="${cx}" cy="${cy}" r="16" fill="#1B2230" stroke="var(--${k})" stroke-width="2"/><use href="#p-${k}" x="${cx - 13}" y="${cy - 15}" width="26" height="30"/></g>`;
+    });
+  });
+  s += `<rect x="${X0}" y="${BOT - 34}" width="${9 * SW - 6}" height="34" fill="url(#abismo)"/><text x="${X0 + 9 * SW - 14}" y="${BOT - 10}" text-anchor="end" class="gl-ab">↓ EL ABISMO</text>`;
+  svg.innerHTML = s;
+  function set(i) {
+    const gl = GLASL[i], L = LEVELS[gl.lv - 1], who = ORD.filter((k) => A[k].glasl === i + 1);
+    $$(".gstep", svg).forEach((g) => g.classList.toggle("on", +g.dataset.i === i));
+    det.style.setProperty("--sdc", COL[i]);
+    det.innerHTML = `<div class="sd-num">${i + 1}</div><div><p class="lbl" style="color:${L.c}">Nivel ${gl.lv} de 3 · ${L.name} · ${L.d}</p><h3>${gl.name}</h3><p>${gl.d}</p><blockquote>«${gl.ex}»</blockquote>
+      ${who.length ? `<p class="sd-who"><span class="lbl">Techo típico de</span>${who.map((k) => `<span class="chip" style="border-color:var(--${k});color:var(--ink)">${A[k].name}</span>`).join("")}</p><p style="margin-top:10px">${[...new Set(who.map((k) => GLASL_TXT[k]))].join(" ")}</p>` : ""}</div>`;
+  }
+  $$(".gstep", svg).forEach((g) => {
+    const i = +g.dataset.i;
+    g.addEventListener("mouseenter", () => set(i)); g.addEventListener("focus", () => set(i)); g.addEventListener("click", () => set(i));
+  });
+  set(6);
+})();
+
+/* ================= 6 · Fuentes ================= */
+const CAT = { datos: ["Datos", "#6CC4E4"], politica: ["Ciencia política", "#5B7CF0"], psico: ["Psicología", "#F2955F"], historia: ["Historia", "#EC5272"], lenguaje: ["Comunicación", "#E8E2CF"], conflicto: ["Conflicto", "#F6BE3B"] };
+const REFS = [
+  { c: "datos", ch: [1, 2], a: "CIS", y: 2026, t: "Barómetro de septiembre 2026", s: "Estudio n.º 3577", u: "La distribución real de la autoubicación ideológica de 1 a 10, con 4.042 entrevistas: el gráfico del capítulo 1 y las barras grises del modelo y de 2026." },
+  { c: "politica", ch: [1, 2], a: "Torcal, M.", y: 2023, t: "De votantes a hooligans", s: "Catarata", u: "La idea central del capítulo 1: en España ha crecido sobre todo la polarización afectiva, el rechazo al otro bando, y el procés fue uno de sus motores." },
+  { c: "politica", ch: [1], a: "Reiljan, A.", y: 2020, t: "«Fear and loathing across party lines» (also) in Europe", s: "European Journal of Political Research, 59(2)", u: "El índice comparado de polarización afectiva que sitúa a España entre los países europeos más polarizados." },
+  { c: "psico", ch: [1, 4], a: "Iyengar, Sood y Lelkes", y: 2012, t: "Affect, not ideology", s: "Public Opinion Quarterly, 76(3)", u: "La distinción entre polarización ideológica y afectiva: el eje vertical del modelo y la fase «afectiva»." },
+  { c: "psico", ch: [1], a: "Chen y Rohla", y: 2018, t: "The effect of partisanship… on close family ties", s: "Science, 360(6392)", u: "Las cenas familiares entre votantes distintos se acortaron tras las elecciones de 2016: la fila «Familia» de las consecuencias." },
+  { c: "psico", ch: [1], a: "Iyengar y Westwood", y: 2015, t: "Fear and loathing across party lines", s: "American Journal of Political Science, 59(3)", u: "En experimentos, el partido pesó más que la raza al decidir a quién dar una beca: la fila «Trabajo» de las consecuencias." },
+  { c: "politica", ch: [1], a: "Graham y Svolik", y: 2020, t: "Democracy in America?", s: "American Political Science Review, 114(2)", u: "Muchos votantes perdonan violaciones democráticas si las comete su candidato: la fase afectiva en la fila «Democracia»." },
+  { c: "politica", ch: [1], a: "McCoy y Somer", y: 2019, t: "Toward a theory of pernicious polarization", s: "The Annals of the AAPSS, 681(1)", u: "La polarización perniciosa, en la que se acepta erosionar la democracia para que no gane el otro." },
+  { c: "politica", ch: [1], a: "Levitsky y Ziblatt", y: 2018, t: "How Democracies Die", s: "Crown", u: "La contención y la tolerancia mutua como normas no escritas que sostienen una democracia sana." },
+  { c: "historia", ch: [2], a: "Juliá, S. (coord.)", y: 1999, t: "Víctimas de la guerra civil", s: "Temas de Hoy", u: "Las estimaciones de víctimas de la guerra y de la represión que resume la etapa 1936–1939." },
+  { c: "politica", ch: [2, 5], a: "Linz, J. J.", y: 1978, t: "The Breakdown of Democratic Regimes", s: "Johns Hopkins University Press", u: "Las democracias caen cuando los moderados toleran la deslealtad de su propio bando: la lectura de 1936 y de los peldaños 8 y 9." },
+  { c: "lenguaje", ch: [3], a: "Entman, R. M.", y: 1993, t: "Framing", s: "Journal of Communication, 43(4)", u: "Qué es encuadrar: seleccionar y destacar una parte de la realidad. La base del prisma del lenguaje." },
+  { c: "lenguaje", ch: [3], a: "Lakoff, G.", y: 2004, t: "Don't Think of an Elephant!", s: "Chelsea Green", u: "Cómo cada bando nombra los hechos con sus propias palabras para activar su marco moral." },
+  { c: "psico", ch: [4], a: "Weber, M.", y: 1904, t: "La «objetividad» del conocimiento", s: "Ensayo", u: "El tipo ideal: los doce perfiles son exageraciones deliberadas para medir la realidad, no retratos de nadie." },
+  { c: "psico", ch: [4], a: "Beck, A. T.", y: 1983, t: "Cognitive therapy of depression: new perspectives", s: "Raven Press", u: "La sociotropía, la necesidad de aprobación de los demás, usada como analogía de la dependencia del grupo." },
+  { c: "psico", ch: [4], a: "Swann, Gómez et al.", y: 2009, t: "Identity fusion", s: "Journal of Personality and Social Psychology, 96(5)", u: "La fusión de la identidad personal con la del grupo, que predice la disposición a luchar por él." },
+  { c: "psico", ch: [4], a: "Swann, Jetten, Gómez et al.", y: 2012, t: "When group membership gets personal", s: "Psychological Review, 119(3)", u: "La teoría completa de la fusión de identidad, en la que se apoya el rasgo «fusión con el grupo»." },
+  { c: "psico", ch: [4], a: "Webster y Kruglanski", y: 1994, t: "Need for cognitive closure", s: "Journal of Personality and Social Psychology, 67(6)", u: "La necesidad de cierre cognitivo: preferir respuestas firmes a la ambigüedad. El rasgo «pensamiento binario»." },
+  { c: "psico", ch: [4], a: "Kruglanski et al.", y: 2014, t: "The psychology of radicalization and deradicalization", s: "Political Psychology, 35(S1)", u: "La búsqueda de significado: por qué el grupo da sentido a la vida y cómo eso puede empujar a la radicalización." },
+  { c: "lenguaje", ch: [4], a: "Karpman, S.", y: 1968, t: "Fairy tales and script drama analysis", s: "Transactional Analysis Bulletin, 7(26)", u: "El triángulo de víctima, villano y salvador que ordena el relato de cada perfil." },
+  { c: "politica", ch: [4], a: "Jones y McBeth", y: 2010, t: "A Narrative Policy Framework", s: "Policy Studies Journal, 38(2)", u: "Cómo las políticas se cuentan con héroes, villanos y víctimas: la versión de ciencia política del relato." },
+  { c: "psico", ch: [4], a: "Altemeyer, B.", y: 1981, t: "Right-Wing Authoritarianism", s: "University of Manitoba Press", u: "La medida clásica del autoritarismo de derechas, uno de los lados del debate sobre la simetría." },
+  { c: "psico", ch: [4], a: "Jost et al.", y: 2003, t: "Political conservatism as motivated social cognition", s: "Psychological Bulletin, 129(3)", u: "La hipótesis de asimetría: más rigidez cognitiva en la derecha. Por eso la simetría del mapa es una decisión discutible." },
+  { c: "psico", ch: [4], a: "Costello et al.", y: 2022, t: "Clarifying… left-wing authoritarianism", s: "Journal of Personality and Social Psychology, 122(1)", u: "Un autoritarismo de izquierdas medible y comparable: el otro lado del debate sobre la simetría." },
+  { c: "psico", ch: [5], a: "Tajfel y Turner", y: 1979, t: "An integrative theory of intergroup conflict", s: "Brooks/Cole", u: "La identidad social: basta trazar un «nosotros» para favorecerlo frente a «ellos». La base de los círculos de pertenencia." },
+  { c: "datos", ch: [5], a: "Moreno, L.", y: 2006, t: "Scotland, Catalonia, Europeanization and the «Moreno question»", s: "Scottish Affairs, 54", u: "La pregunta sobre identidad dual que muestra que la mayoría se siente de su comunidad y española a la vez." },
+  { c: "conflicto", ch: [5], a: "Glasl, F.", y: 1980, t: "Konfliktmanagement", s: "Haupt", u: "Los nueve peldaños de la escalada del conflicto, en tres niveles: ganar-ganar, ganar-perder y perder-perder." },
+  { c: "politica", ch: [6], a: "Mudde, C.", y: 2004, t: "The populist zeitgeist", s: "Government and Opposition, 39(4)", u: "El populismo como «ideología delgada»: un pueblo puro frente a una élite corrupta. La tesis sobre los extremos." },
+  { c: "politica", ch: [6], a: "Mudde, C.", y: 2019, t: "The Far Right Today", s: "Polity", u: "La distinción entre derecha radical, que acepta las urnas, y extrema derecha, que las rechaza." },
+  { c: "politica", ch: [6], a: "March, L.", y: 2011, t: "Radical Left Parties in Europe", s: "Routledge", u: "La izquierda radical europea: rechaza el orden económico capitalista, pero compite en elecciones." },
+  { c: "psico", ch: [6], a: "Van Prooijen y Krouwel", y: 2019, t: "Psychological features of extreme political ideologies", s: "Current Directions in Psychological Science, 28(2)", u: "Los rasgos que comparten los dos extremos: simplicidad cognitiva, exceso de confianza e intolerancia. El centro del diagrama." },
+  { c: "psico", ch: [6], a: "Zmigrod, Rentfrow y Robbins", y: 2020, t: "The partisan mind", s: "Journal of Experimental Psychology: General, 149(3)", u: "La rigidez cognitiva medida en laboratorio se asocia con un partidismo más extremo." }
+];
+(function fuentes() {
+  const grid = $("#refs-grid"), pick = $("#ref-pick");
+  if (!grid) return;
+  const NOMBRES = ["Todas", "1 · Hoy", "2 · Cien años", "3 · Miradas", "4 · Perfiles", "5 · Escalada", "6 · Palabras"];
+  const ini = (a) => a.length <= 4 ? a : a.split(/[\s,()]+/).filter((w) => w.length > 2 && /^[A-ZÁÉÍÓÚ]/.test(w)).slice(0, 2).map((w) => w[0]).join("");
+  grid.innerHTML = REFS.map((r) => {
+    const [cn, cc] = CAT[r.c];
+    return `<article class="ref" data-ch="${r.ch.join(" ")}" style="--rc:${cc}">
+      <div class="ref-img" aria-hidden="true"><span class="ref-y">${r.y}</span><span class="ref-i">${ini(r.a) || r.a.slice(0, 2)}</span><span class="ref-cat">${cn}</span></div>
+      <div class="ref-b"><p class="ref-a">${r.a} (${r.y})</p><h4>${r.t}</h4><p class="ref-s">${r.s}</p><p class="ref-u"><span class="lbl">Qué tomamos</span>${r.u}</p>
+      <p class="ref-ch">${r.ch.map((c) => `Cap. ${c}`).join(" · ")}</p></div></article>`;
+  }).join("");
+  pick.innerHTML = NOMBRES.map((n, i) => `<button class="tbtn" data-i="${i}" aria-pressed="${i === 0}">${n}</button>`).join("");
+  $$(".tbtn", pick).forEach((b) => b.addEventListener("click", () => {
+    const i = +b.dataset.i;
+    $$(".tbtn", pick).forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    $$(".ref", grid).forEach((c) => { c.hidden = i > 0 && !c.dataset.ch.split(" ").includes(String(i)); });
+  }));
+})();
+
+/* ================= 3 · Miradas ================= */
+(function lens() {
+  const stage = $("#lens-stage"), row = $("#lens-row"), svg = $("#lens-arcs");
+  let cur = "xl";
+  row.innerHTML = ORD.map((k) => `<div class="lens-col" data-k="${k}"><div class="lchip" id="lchip-${k}"></div>
+    <button class="lfig" data-k="${k}" style="--nc:var(--${k})" aria-pressed="false" aria-label="Mirar con los ojos de: ${A[k].name}"><span class="ncirc">${pt(k)}</span></button>
+    <span class="lname">${A[k].name}</span></div>`).join("");
+  function arcs() {
+    const R = stage.getBoundingClientRect(); if (!R.width) return;
+    svg.setAttribute("viewBox", `0 0 ${r1(R.width)} ${r1(R.height)}`);
+    const pc = cssv("--" + cur);
+    const fc = $(`.lens-col[data-k="${cur}"]`).getBoundingClientRect();
+    const fx = fc.left + fc.width / 2 - R.left, fy = fc.bottom - R.top + 8;
+    let out = `<defs>${[["w", "#F6BE3B"], ["p", pc]].map(([id, c]) => `<marker id="lah-${id}" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4.5" markerHeight="4.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${c}"/></marker>`).join("")}</defs>`;
+    ORD.forEach((o) => {
+      if (o === cur) return;
+      const tc = $(`.lens-col[data-k="${o}"]`).getBoundingClientRect();
+      const tx = tc.left + tc.width / 2 - R.left, ty = tc.bottom - R.top + 8;
+      const h = PERC[cur][o][1], depth = Math.min(128, 24 + Math.abs(tx - fx) * 0.17);
+      const hot = h >= 3;
+      out += `<path d="M${r1(fx)},${r1(fy)} Q${r1((fx + tx) / 2)},${r1(Math.max(fy, ty) + depth)} ${r1(tx)},${r1(ty + 4)}" fill="none" stroke="${hot ? "#F6BE3B" : pc}" stroke-width="${1 + h * 1.25}" stroke-linecap="round" stroke-opacity="${0.5 + h * 0.12}" marker-end="url(#lah-${hot ? "w" : "p"})"/>`;
+    });
+    svg.innerHTML = out;
+  }
+  function set(k) {
+    cur = k;
+    stage.style.setProperty("--pc", `var(--${k})`);
+    $("#lens-insight-wrap").style.setProperty("--pc", `var(--${k})`);
+    ORD.forEach((o) => {
+      const chip = $("#lchip-" + o);
+      if (o === k) { chip.className = "lchip self"; chip.innerHTML = `<small>Se ven como</small><span>«${SELF[k]}»</span>`; }
+      else { const [lab, h] = PERC[k][o]; chip.className = "lchip"; chip.innerHTML = `<span>«${lab}»</span>${segs(h, 4, "warn")}`; }
+    });
+    $$(".lfig", row).forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.k === k)));
+    $("#lens-who").textContent = `Con los ojos de: ${A[k].name}`;
+    $("#lens-insight").textContent = LENS_TXT[k];
+    arcs();
+  }
+  $$(".lfig", row).forEach((b) => b.addEventListener("click", () => set(b.dataset.k)));
+  new ResizeObserver(() => arcs()).observe(stage);
+  set("xl");
+
+  // El espejo: una plantilla que funciona con cualquier enemigo
+  const ENEMIES = [
+    { e: "los fascistas", who: "la extrema izquierda" },
+    { e: "los invasores", who: "la extrema derecha" },
+    { e: "la casta", who: "el populismo de izquierda de 2014" },
+    { e: "los separatistas", who: "el nacionalismo español más duro" },
+    { e: "los españolistas", who: "el nacionalismo periférico más duro" }
+  ];
+  const opts = $("#mirror-opts"), enemy = $("#enemy"), seen = new Set();
+  opts.innerHTML = ENEMIES.map((x, i) => `<button class="tbtn" data-i="${i}" aria-pressed="false">${x.e}</button>`).join("");
+  $$(".tbtn", opts).forEach((b) => b.addEventListener("click", () => {
+    const x = ENEMIES[+b.dataset.i]; seen.add(b.dataset.i);
+    $$(".tbtn", opts).forEach((o) => o.setAttribute("aria-pressed", String(o === b)));
+    enemy.textContent = x.e;
+    $("#mirror-v").textContent = `Así la diría ${x.who}. ` + (seen.size > 1
+      ? "La frase funciona con cualquier enemigo: esa es la estructura. Una minoría lúcida, una mayoría engañada y el permiso para actuar por su cuenta."
+      : "Prueba con otro enemigo.");
+  }));
+})();
+
+
+/* ================= 4 · Prisma ================= */
+(function prism() {
+  const wrap = $("#facts"), cards = $("#rays-cards"), pr = $("#prism");
+  wrap.innerHTML = FACTS.map((f, i) => `<button class="tbtn" data-i="${i}" aria-pressed="false">${f.k}</button>`).join("");
+  function set(i) {
+    const f = FACTS[i];
+    $$(".tbtn", wrap).forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.i === i)));
+    $("#fact-text").textContent = f.f;
+    cards.innerHTML = ORD.map((k, j) => `<div class="rcard" style="--rc:var(--${k});--j:${j}"><span class="who">${A[k].name}<span>encuadre: ${f.fr[j]}</span></span><p>«${f.v[j]}»</p></div>`).join("");
+    pr.classList.remove("anim"); void pr.offsetWidth; if (!RM) pr.classList.add("anim");
+  }
+  $$(".tbtn", wrap).forEach((b) => b.addEventListener("click", () => set(+b.dataset.i)));
+  set(0);
+})();
+
+
+/* ================= 2 · Etiquetas ================= */
+(function flips() {
+  const box = $("#flips");
+  box.innerHTML = FLIPS.map((f, i) => `<button class="flip" data-i="${i}" aria-pressed="false" style="--fc:var(--${f.k})">
+    <span class="flip-in">
+      <span class="face front"><span class="turn">Gira la tarjeta ↻</span><span class="word">«${f.w}»</span></span>
+      <span class="face back" aria-hidden="true"><span><b>Origen</b>${f.o}</span><span><b>Hoy se usa para</b>${f.u}</span><span><b>Lo que describe mejor</b>${f.d}</span></span>
+    </span></button>`).join("");
+  $$(".flip", box).forEach((b) => b.addEventListener("click", () => {
+    const on = b.getAttribute("aria-pressed") !== "true";
+    b.setAttribute("aria-pressed", String(on));
+    b.querySelector(".back").setAttribute("aria-hidden", String(!on));
+    b.querySelector(".front .turn").setAttribute("aria-hidden", String(on));
+  }));
+})();
+
+
+/* ================= Navegación ================= */
+(function nav() {
+  const links = $$(".nav a"), bar = $("#prog");
+  const io = new IntersectionObserver((es) => {
+    es.forEach((e) => { if (e.isIntersecting) links.forEach((a) => a.setAttribute("aria-current", String(a.getAttribute("href") === "#" + e.target.id))); });
+  }, { rootMargin: "-40% 0px -55% 0px" });
+  links.forEach((a) => { const s = document.getElementById(a.getAttribute("href").slice(1)); if (s) io.observe(s); });
+  let tick = 0;
+  const onScroll = () => { if (tick) return; tick = requestAnimationFrame(() => { const h = document.documentElement; bar.style.width = (100 * h.scrollTop / Math.max(1, h.scrollHeight - h.clientHeight)) + "%"; tick = 0; }); };
+  window.addEventListener("scroll", onScroll, { passive: true }); onScroll();
+})();
+})();
+
+</script>
+</body>
+</html>
