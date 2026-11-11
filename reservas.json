@@ -77,6 +77,12 @@
       "ruta": "src/components/aeromovil/garaje/balaForma.ts",
       "motivo": "Bala de cuatro ruedas",
       "desde": "2026-11-11T23:57:00.586Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/garaje/balaMedidas.ts",
+      "motivo": "Bala de cuatro ruedas",
+      "desde": "2026-11-11T23:57:03.084Z"
     }
   ]
 }
