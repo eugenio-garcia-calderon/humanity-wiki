@@ -171,7 +171,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
             <ol className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
               {[
                 { t: 'Pagas', d: 'Con tarjeta, Bizum o el móvil. El precio ya lleva su tramo dentro, como hoy el IVA.' },
-                { t: 'Se aparta el tramo', d: 'En el mismo instante, el sistema de pago separa el 0, el 20 o el 40\u00A0% del pago, y el resto llega a quien cobra.' },
+                { t: 'Se aparta el tramo', d: 'En el mismo instante, el sistema de pago separa el impuesto (0, 20 o 40\u00A0% sobre el precio sin impuesto) y el resto llega a quien cobra.' },
                 { t: 'Se reparte en ocho', d: 'Lo apartado de todos los pagos se junta y cada escala recibe un octavo, lo mismo por habitante. Tu parte personal es un dividendo igual para todo el mundo.' },
                 { t: 'Cada escala, en tercios', d: 'Un tercio para comprar o mejorar medios de producción, uno para cuidados y uno libre.' },
                 { t: 'Cada escala decide', d: 'Su asamblea ciudadana elige las prioridades y su comité técnico las cumple al menor coste, de la forma más eficaz y ecológica.' },
@@ -187,7 +187,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
             <div className="mt-12"><TresTramos /></div>
             <div className="mt-6"><CincoPagos /></div>
             <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600">
-              El tramo es una parte del precio final, no se suma encima como el IVA de hoy. Medido como el IVA, sobre el precio sin impuesto, el 20 % equivale a un 25 % y el 40 % a un 67 %.
+              El tramo se suma al precio sin impuesto, como el IVA de hoy: una cena de 40 € cuesta 56 € y 16 € van al fondo. De todo lo que pagas, el fondo se queda una sexta parte en el tramo 2 y dos séptimas partes en el 3.
             </p>
 
             <PreguntasCobro modo={modo} />

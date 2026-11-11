@@ -145,10 +145,14 @@ export const ESCALA = Object.fromEntries(ESCALAS.map(e => [e.id, e])) as Record<
 export const TIPO_GENERAL = 0.20;
 /** What each scale receives of whatever is collected. */
 export const OCTAVO = 1 / ESCALAS.length;
+/** Share of a payment (tax included) that goes to the fund when the rate t goes on top of the price. */
+export const fraccion = (t: number) => t / (1 + t);
 
 // ── THE THREE TIERS ─────────────────────────────────────────────────────────
-// The rate is a share of the payment (as the 20 % always was on this page): of a
-// 40 € dinner in tier 3, 16 € go to the common fund and the restaurant keeps 24 €.
+// The rate goes ON TOP of the price without tax, like today's VAT (Eugenio,
+// 2026-11-11): a dinner worth 40 € in tier 3 costs 56 €, and 16 € go to the fund.
+// Of every euro paid, the fund gets `fraccion(t)` = t / (1 + t): 1/6 at 20 %, 2/7 at 40 %.
+// Wages too: the employer pays the wage plus its tier on top.
 export type Tramo = 1 | 2 | 3;
 export interface TramoInfo { id: Tramo; tipo: number; nombre: string; compras: string; sueldos: string }
 export const TRAMOS: TramoInfo[] = [
@@ -647,16 +651,16 @@ const DEMANDA_FINAL = ESPANA.pib * 1.33;
 export function cuentasPais(modo: Modo, clasif: Clasificacion = CLASIFICACION_INICIAL) {
   const componentes = BASE.filter(b => b.modos.includes(modo)).map(b => {
     const partes = b.partes(clasif);
-    return { ...b, partes, millones: partes.reduce((s, p) => s + p.millones, 0), recaudacion: partes.reduce((s, p) => s + p.millones * p.tipo, 0) };
+    return { ...b, partes, millones: partes.reduce((s, p) => s + p.millones, 0), recaudacion: partes.reduce((s, p) => s + p.millones * fraccion(p.tipo), 0) };
   });
   const base = componentes.reduce((s, b) => s + b.millones, 0);
   const recaudacion = componentes.reduce((s, b) => s + b.recaudacion, 0);
   const porTramo: Record<Tramo, { base: number; recaudacion: number }> = { 1: { base: 0, recaudacion: 0 }, 2: { base: 0, recaudacion: 0 }, 3: { base: 0, recaudacion: 0 } };
-  for (const c of componentes) for (const p of c.partes) if (p.tramo) { porTramo[p.tramo].base += p.millones; porTramo[p.tramo].recaudacion += p.millones * p.tipo; }
+  for (const c of componentes) for (const p of c.partes) if (p.tramo) { porTramo[p.tramo].base += p.millones; porTramo[p.tramo].recaudacion += p.millones * fraccion(p.tipo); }
   const porEscala = recaudacion * OCTAVO;
   const porPersonaEscala = (porEscala * 1e6) / ESPANA.poblacion;
   // In the literal reading, the general rate paid between businesses ends up inside final prices.
-  const cascada = modo === 'literal' ? 1 + (1_600_000 * TIPO_GENERAL) / DEMANDA_FINAL : 1;
+  const cascada = modo === 'literal' ? 1 + (1_600_000 * fraccion(TIPO_GENERAL)) / DEMANDA_FINAL : 1;
   return {
     componentes, base, recaudacion, porTramo, porEscala, porPersonaEscala, cascada,
     pctPIB: (recaudacion / ESPANA.pib) * 100,
@@ -756,22 +760,22 @@ export function calcularEjemplo(e: Ejemplo, modo: Modo) {
 
   // Model: the same employer cost and the same basket of goods. Each tier's price
   // carries its rate instead of today's taxes (and, in the literal reading, the cascade).
-  const precioTramo = Object.fromEntries(tramos.map(t => [t, ((1 - INDIRECTOS_HOY[t]) / (1 - TRAMO[t].tipo)) * pais.cascada])) as Record<Tramo, number>;
+  const precioTramo = Object.fromEntries(tramos.map(t => [t, (1 - INDIRECTOS_HOY[t]) * (1 + TRAMO[t].tipo) * pais.cascada])) as Record<Tramo, number>;
   const gastoModeloTramo = Object.fromEntries(tramos.map(t => [t, gastoHoyTramo[t] * precioTramo[t]])) as Record<Tramo, number>;
   const gastoModelo = sumaGasto(gastoModeloTramo);
   const tipoSueldo = EMPLEADOR[e.empleador].tipo;
-  const sobreSueldo = costeTrabajo * tipoSueldo;
+  const sobreSueldo = costeTrabajo * fraccion(tipoSueldo);
   const netoModelo = costeTrabajo - sobreSueldo;
-  const sobreCompras = tramos.reduce((s, t) => s + gastoModeloTramo[t] * TRAMO[t].tipo, 0);
-  const oculto = pais.cascada > 1 ? tramos.reduce((s, t) => s + gastoModeloTramo[t] * (1 - TRAMO[t].tipo) * (1 - 1 / pais.cascada), 0) : 0;
+  const sobreCompras = tramos.reduce((s, t) => s + gastoModeloTramo[t] * fraccion(TRAMO[t].tipo), 0);
+  const oculto = pais.cascada > 1 ? tramos.reduce((s, t) => s + gastoModeloTramo[t] * (1 - fraccion(TRAMO[t].tipo)) * (1 - 1 / pais.cascada), 0) : 0;
   const aporta = sobreSueldo + sobreCompras + oculto;
   const dividendo = pais.porPersonaEscala;
   // The neighbourhood share goes to the household when there is no community.
   const parteFamilia = e.enComunidad ? 0 : pais.porPersonaEscala;
   const recibe = dividendo + parteFamilia;
   const modelo = [
-    { id: 'sueldo', nombre: `${porcentaje(tipoSueldo * 100, 0)} de lo que paga la empresa por su trabajo (${EMPLEADOR[e.empleador].corto.toLowerCase()})`, euros: sobreSueldo },
-    ...tramos.map(t => ({ id: `compras${t}`, nombre: `${porcentaje(TRAMO[t].tipo * 100, 0)} de sus compras del tramo ${t}`, euros: gastoModeloTramo[t] * TRAMO[t].tipo })),
+    { id: 'sueldo', nombre: `${porcentaje(tipoSueldo * 100, 0)} sobre su sueldo (empresa ${EMPLEADOR[e.empleador].corto.toLowerCase()})`, euros: sobreSueldo },
+    ...tramos.map(t => ({ id: `compras${t}`, nombre: `${porcentaje(TRAMO[t].tipo * 100, 0)} sobre sus compras del tramo ${t}`, euros: gastoModeloTramo[t] * fraccion(TRAMO[t].tipo) })),
     ...(oculto > 0 ? [{ id: 'cascada', nombre: 'Lo que llega escondido en los precios (compras entre empresas)', euros: oculto }] : []),
   ];
 

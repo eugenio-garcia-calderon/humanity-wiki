@@ -28,7 +28,7 @@ export function TuCaso({ modo, ejemplo, onEjemplo }: { modo: Modo; ejemplo: Ejem
   const cambio = (t: Tramo) => (r.precioTramo[t] - 1) * 100;
   const filas: { t: ReactNode; v: number; fuerte?: boolean; signo?: string }[] = [
     { t: 'Lo que paga la empresa por su trabajo', v: r.costeTrabajo },
-    { t: `Le llega a su cuenta (el ${porcentaje((1 - r.tipoSueldo) * 100, 0)}: ${emp.corto.toLowerCase()})`, v: r.netoModelo },
+    { t: r.tipoSueldo ? `Le llega a su cuenta (la empresa suma el ${porcentaje(r.tipoSueldo * 100, 0)} de impuesto encima)` : 'Le llega a su cuenta (sin impuesto sobre el sueldo)', v: r.netoModelo },
     { t: 'Gasta (la misma cesta que hoy, con los precios del modelo)', v: r.gastoModelo, signo: '−' },
     { t: 'Le queda de su trabajo', v: r.sobraModelo, fuerte: true },
     { t: ejemplo.enComunidad ? `Recibe del fondo su dividendo` : `Recibe del fondo su dividendo (${euros(r.dividendo)}) y la parte de su hogar (${euros(r.parteFamilia)})`, v: r.recibe, signo: '+' },

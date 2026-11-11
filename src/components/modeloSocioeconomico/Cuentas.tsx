@@ -7,7 +7,7 @@ import { cn } from '../../utils/cn';
 import {
   ALQUILER_IMPUTADO, CLASIFICACION_INICIAL, EJEMPLO_INICIAL, EPF_TOTAL, EMPLEADORES, ESPANA, FUENTE, GRUPOS_GASTO, HOY, OCTAVO, TIPO_GENERAL, TRAMO, TRAMOS,
   type Clasificacion, type Empleador, type Modo, type Tramo,
-  calcularEjemplo, cuentasPais, euros, irpfMadrid, millones, modeloPorFuncion, numero, porcentaje, sumaGasto, SUPUESTOS,
+  calcularEjemplo, cuentasPais, fraccion, euros, irpfMadrid, millones, modeloPorFuncion, numero, porcentaje, sumaGasto, SUPUESTOS,
 } from '../../data/modeloSocioeconomico';
 import { Boton, Fuente, Libre, Segmentado } from './piezas';
 import { TONO_TRAMO } from './Tramos';
@@ -28,15 +28,15 @@ function cadena(tramo: Tramo) {
   const anade = [0.5, 0.3, 0.8]; // farmer, mill, bakery
   const tf = TRAMO[tramo].tipo;
   const neto = anade.reduce((s, x) => s + x, 0);
-  // Without cascade: the final price carries exactly its tier.
-  const precioEslabon = neto / (1 - tf);
-  // Literally: each business sale keeps the general rate; the last sale, the product's tier.
+  // Without cascade: the final price carries exactly its tier, on top.
+  const precioEslabon = neto * (1 + tf);
+  // Literally: each business sale adds the general rate; the last sale, the product's tier.
   let coste = 0, impuesto = 0, precio = 0;
   anade.forEach((a, i) => {
     const t = i === anade.length - 1 ? tf : TIPO_GENERAL;
-    precio = (coste + a) / (1 - t); impuesto += precio * t; coste = precio;
+    impuesto += (coste + a) * t; precio = (coste + a) * (1 + t); coste = precio;
   });
-  return { precioEslabon, impuestoEslabon: precioEslabon * tf, precioLiteral: precio, impuestoLiteral: impuesto };
+  return { precioEslabon, impuestoEslabon: neto * tf, precioLiteral: precio, impuestoLiteral: impuesto };
 }
 
 function Chip({ t }: { t: Tramo }) {
@@ -102,7 +102,7 @@ export function LasCuentas({ modo, onModo }: { modo: Modo; onModo: (m: Modo) => 
                     <th scope="row" className="py-1 pl-8 pr-3 text-left font-normal text-slate-700">{p.nombre}</th>
                     <td className="px-3 py-1 text-right text-slate-700">{numero(p.millones)}</td>
                     <td className="px-3 py-1">{p.tramo ? <Chip t={p.tramo} /> : <span className="text-xs text-slate-500">0 %</span>}</td>
-                    <td className="px-5 py-1 text-right text-slate-900">{numero(p.millones * p.tipo)}</td>
+                    <td className="px-5 py-1 text-right text-slate-900">{numero(p.millones * fraccion(p.tipo))}</td>
                   </tr>
                 ))}
                 <tr><td colSpan={4} className="pb-2" /></tr>
@@ -269,7 +269,7 @@ export function Retos({ modo }: { modo: Modo }) {
     },
     {
       t: 'Turismo y hostelería al 40 %',
-      d: <>Restaurantes, bares y hoteles pasan del 10 % de IVA de hoy, que se suma al precio sin impuesto, al 40 % del precio final: con los mismos costes, sus precios subirían alrededor de un 50 %. Los turistas dejarían {millones(turistas)} al año en el fondo<Fuente id="egatur-2025" />,
+      d: <>Restaurantes, bares y hoteles pasan del 10 % de IVA de hoy al 40 %, los dos sumados al precio sin impuesto: con los mismos costes, sus precios subirían alrededor de un {porcentaje((1.4 / 1.1 - 1) * 100, 0)}. Los turistas dejarían {millones(turistas)} al año en el fondo<Fuente id="egatur-2025" />,
         pero España compite con otros destinos. Las asambleas podrían llevar la hostelería del día a día al tramo 2.</>,
     },
     {

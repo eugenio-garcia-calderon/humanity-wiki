@@ -10963,3 +10963,8 @@ Eugenio: «permite que el triciclo bala se le pueda modificar más los parámetr
 - Arreglado de paso: al escribir las píldoras (separadas por comas) o las claves (una por línea), el panel se comía la coma, el salto de línea o el espacio recién escritos. Ahora se guarda lo escrito tal cual y se limpia al mostrarlo y en el servidor.
 - Imagen de la tarjeta de luzhumanidad.com regenerada con el mapa simplificado.
 - **Comprobado** en Chrome sin cabeza con Postgres local: abrir la ventana desde el mapa y desde las tarjetas, cerrarla con Escape, el botón que lanza la animación, editar una sexta clave conservando saltos y espacios, el guardado (el servidor recorta) y la animación de la vigilia.
+
+### 2026-11-11 — Modelo socioeconómico: los tramos se suman al precio, como el IVA
+- Eugenio: «como el IVA». El 0, 20 o 40 % se suma al precio sin impuesto (y al sueldo); antes era una parte del pago. Una cena de 40 € cuesta 56 € y deja 16 € en el fondo.
+- `fraccion(t) = t/(1+t)` en `cuentasPais`, el caso y la cadena del pan; tabla de cinco pagos con «se paga en total»; hostelería ≈ +27 %.
+- Recauda ≈ 12 % del PIB por defecto (antes 16 %), 521 € por persona y escala; al pie de la letra ≈ 31 %.
