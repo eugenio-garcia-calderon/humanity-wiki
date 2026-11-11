@@ -275,8 +275,16 @@ export function areaFrontalBala(m: Pick<ModeloBala, 'F' | 'alto' | 'ruedas' | 'a
     if (w > 0) poner(i, zp - w, zp + w);
   }
   for (const b of brazosDe(F)) {
-    const z0 = F.ladoZ(F.X_LAT + b.x, b.y); if (!Number.isFinite(z0)) continue;
-    for (let i = Math.floor((b.y - b.grueso / 2) / DY); i <= Math.floor((b.y + b.grueso / 2) / DY); i++) poner(i, z0, zp);
+    const z0 = F.ladoZ(F.X_LAT + b.x, b.yCuerpo); if (!Number.isFinite(z0)) continue;
+    if (b.yCuerpo === b.y) { for (let i = Math.floor((b.y - b.grueso / 2) / DY); i <= Math.floor((b.y + b.grueso / 2) / DY); i++) poner(i, z0, zp); continue; }
+    // the Triciclo lifted (round three): the arm runs down from the body to its pod; each band takes the stretch of it that crosses its height
+    const ya = Math.min(b.y, b.yCuerpo) - b.grueso / 2, yb = Math.max(b.y, b.yCuerpo) + b.grueso / 2;
+    for (let i = Math.floor(ya / DY); i <= Math.floor(yb / DY); i++) {
+      const yc = (i + 0.5) * DY, zAt = (u: number) => z0 + (zp - z0) * u, yAt = (u: number) => b.yCuerpo + (b.y - b.yCuerpo) * u;
+      let a = Infinity, c = -Infinity;
+      for (let k = 0; k <= 40; k++) { const u = k / 40; if (Math.abs(yAt(u) - yc) <= b.grueso / 2 + DY / 2) { a = Math.min(a, zAt(u)); c = Math.max(c, zAt(u)); } }
+      if (c > a) poner(i, a, c);
+    }
   }
   const conCarenados = medir();
   // wheels: front and rear on the centre line, laterals in the pods (only what shows below the body and the pods counts)

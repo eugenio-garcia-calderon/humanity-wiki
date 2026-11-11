@@ -63,6 +63,13 @@ export interface CamposTriciclo {
   tManX: number; tManY: number;       // manillar: + hacia el piloto, + arriba (m)
   tPiesX: number; tPiesY: number;     // plataformas del piloto: + hacia delante, + arriba (m)
   tMOcc: number; tMAsiento: number;   // kg
+  // Interior, round three (2026-11-11): the seating layout and the folding rows. Optional when saved: an older design takes the defaults (astride, as before).
+  tAsientos: 'horcajadas' | 'filas';  // a horcajadas (2 plazas, como hasta ahora) o tres filas 1 + 2 + 1
+  tFila2: 'abierta' | 'plegada';      // fila 2 (dos asientos juntos): con sus dos pasajeros, o plegada como suelo del maletero
+  tFila3: 'abierta' | 'plegada';      // fila 3 (un asiento pequeño en el centro), lo mismo
+  tFila2X: number;     // caderas de la fila 2 detrás de las del piloto (m)
+  tFila3X: number;     // caderas de la fila 3 detrás de las de la fila 2 (m)
+  tRecFila: number;    // reclinado de los respaldos de las filas 2 y 3 (°)
   // Chasis
   tChMat: MaterialChasis; tChD: number; tChT: number; tChUniones: number;   // mm, mm, kg
   // Rodaje
@@ -100,7 +107,7 @@ export const RUEDAS_TRICICLO: Record<RuedaTriciclo, { d: number; neuDel: number;
   c14: { d: 0.554, neuDel: 0.165, neuTras: 0.165, n: '14″ de coche, 165/60 R14 (554 mm)', kg: 2.5, kWBuje: 45 },
   c15: { d: 0.574, neuDel: 0.175, neuTras: 0.175, n: '15″ de coche, 175/55 R15 (574 mm)', kg: 2.7, kWBuje: 60 },
 };
-type ClaveTexto = 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas';
+type ClaveTexto = 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3';
 export type ClaveNumTriciclo = Exclude<ClaveTriciclo, ClaveTexto>;
 
 // ------------------------------------------------------------------ deslizadores
@@ -111,7 +118,7 @@ export const DEPS_TRICICLO: DepTriciclo[] = ['carroceria', 'interior', 'chasis',
 export const LEMAS_TRICICLO: Record<DepTriciclo | 'proyecto', string> = {
   proyecto: 'el resumen: comprobaciones, peso, consumo y vuelco',
   carroceria: 'la piel del Cuadriciclo, techo solar y ventanas, carenados y material',
-  interior: 'los dos a horcajadas: sillines, respaldos, manillar y plataformas',
+  interior: 'los asientos (a horcajadas o en tres filas que se pliegan), manillar, plataformas y maletero',
   chasis: 'el bastidor de tubos dentro de la carrocería',
   rodaje: 'ejes, vía, ruedas, suspensión y dirección',
   propulsion: 'el motor en el buje de la rueda trasera',
@@ -134,7 +141,8 @@ type Fila = [ClaveNumTriciclo, DepTriciclo, string, ClaveBala | null, string, nu
 // (2026-11-10, «lo has diseñado para algo muy pequeñito») most of them carry a wider range of their own.
 const FILAS: Fila[] = [
   ['tAncho', 'carroceria', 'Forma', 'bAncho', '', 0.77, 1.30, 0.01, 'm'],
-  ['tSuelo', 'carroceria', 'Forma', 'bSuelo', '', 0.04, 0.158, 0.002, 'cm'],
+  // round three (2026-11-11, «mucho mayor»): up to 35 cm; above 15.8 cm the whole body rises (see SUELO_RIGIDO)
+  ['tSuelo', 'carroceria', 'Forma', 'bSuelo', '', 0.04, 0.35, 0.002, 'cm'],
   ['tMorro', 'carroceria', 'Morro y cola', 'bMorro', '', 0.45, 1.00, 0.01, 'm'],
   ['tPuntaMorro', 'carroceria', 'Morro y cola', 'bPuntaMorro', '', 0, 0, 0, 'x'],
   ['tCola', 'carroceria', 'Morro y cola', 'bCola', '', 0.45, 1.20, 0.01, 'm'],
@@ -165,6 +173,9 @@ const FILAS: Fila[] = [
   ['tManY', 'interior', 'Mandos', null, 'Manillar: altura', -0.02, 0.10, 0.01, 'cm'],
   ['tPiesX', 'interior', 'Mandos', null, 'Plataformas: hacia delante', -0.08, 0.08, 0.01, 'cm'],
   ['tPiesY', 'interior', 'Mandos', null, 'Plataformas: altura', -0.04, 0.04, 0.01, 'cm'],
+  ['tFila2X', 'interior', 'Tres filas', null, 'Fila 2: caderas detrás de las del piloto', 0.60, 0.85, 0.01, 'cm'],
+  ['tFila3X', 'interior', 'Tres filas', null, 'Fila 3: caderas detrás de las de la fila 2', 0.55, 0.80, 0.01, 'cm'],
+  ['tRecFila', 'interior', 'Tres filas', null, 'Reclinado de las filas 2 y 3', -5, 35, 1, '°'],
   ['tMOcc', 'interior', 'Masas', null, 'Masa por ocupante', 50, 110, 1, 'kg'],
   ['tMAsiento', 'interior', 'Masas', null, 'Un asiento (sillín y respaldo)', 1.5, 5.5, 0.5, 'kg'],
   ['tChD', 'chasis', 'Bastidor', null, 'Tubos: diámetro', 30, 60, 1, 'mm'],
@@ -227,11 +238,65 @@ export const fichaTriciclo = (k: ClaveNumTriciclo) => deslizadoresTriciclo().fin
 const ruedas = (l: RuedaTriciclo[]) => l.map(k => ({ k, n: RUEDAS_TRICICLO[k].n }));
 export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
   { clave: 'tVentanas', n: 'Cúpula', dep: 'carroceria', bloque: 'Techo solar y ventanas', opciones: [{ k: 'marco', n: 'Ventanas laterales con montante (Aptera)' }, { k: 'burbuja', n: 'De una pieza (como el Cuadriciclo)' }] },
+  { clave: 'tAsientos', n: 'Asientos', dep: 'interior', bloque: 'Asientos', opciones: [{ k: 'horcajadas', n: 'A horcajadas (2 plazas)' }, { k: 'filas', n: 'Tres filas: 1 + 2 + 1 (4 plazas)' }] },
+  { clave: 'tFila2', n: 'Fila 2 (dos asientos juntos)', dep: 'interior', bloque: 'Tres filas', opciones: [{ k: 'abierta', n: 'Abierta: dos pasajeros' }, { k: 'plegada', n: 'Plegada: maletero' }] },
+  { clave: 'tFila3', n: 'Fila 3 (un asiento pequeño)', dep: 'interior', bloque: 'Tres filas', opciones: [{ k: 'abierta', n: 'Abierta: un pasajero' }, { k: 'plegada', n: 'Plegada: maletero' }] },
   { clave: 'tMatCarenado', n: 'Material de la carrocería', dep: 'carroceria', bloque: 'Material y espesores', opciones: [{ k: 'carbonoLino', n: 'Carbono-lino' }, { k: 'vidrio', n: 'Fibra de vidrio' }, { k: 'carbono', n: 'Fibra de carbono' }] },
   { clave: 'tChMat', n: 'Material de los tubos', dep: 'chasis', bloque: 'Bastidor', opciones: [{ k: 'al6061', n: 'Aluminio 6061-T6' }, { k: 'cromoly', n: 'Acero cromoly 4130' }, { k: 'carbono', n: 'Tubo de carbono' }] },
   { clave: 'tRuedaDel', n: 'Ruedas delanteras (en los carenados)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['16', '20', '24', '26', '28', 'c13', 'c14', 'c15']) },
   { clave: 'tRuedaTras', n: 'Rueda trasera (dentro de la cola)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['20', '24', '26', '28', 'c13', 'c14', 'c15']) },
 ];
+
+// ------------------------------------------------------------------ tres filas (round three, 2026-11-11)
+/**
+ * Eugenio: «Permite que la altura libre sobre el suelo sea mucho mayor… añade asientos para los pasajeros que sean
+ * dobles… pegaditos… 3 filas, la del piloto, que solo tiene un asiento, la de los pasajeros del centro, que tienen 2
+ * asientos dobles, y luego… un asiento individual un poco más pequeño… que todo eso se pueda plegar para poder luego
+ * tener maletero grande… y que se abra también el maletero».
+ *
+ * Up to SUELO_RIGIDO (15.8 cm, the old maximum) the clearance slider moves only the belly, as before. Above it the
+ * body is drawn at 15.8 cm and lifted rigidly by the rest (`elevar`): skin, canopy, floor, frame, battery, seats and
+ * riders all rise together; the wheels and their pods stay on the road and the arms and the swing arm tilt to
+ * reach them. So every saved design (all ≤ 15.8 cm) is built exactly as before.
+ */
+export const SUELO_RIGIDO = 0.158;
+export const elevarDe = (suelo: number) => Math.max(0, suelo - SUELO_RIGIDO);
+/**
+ * The seats of «tres filas» (car-style: cushion and backrest; m). A design proposal, not a product: sized on
+ * ordinary car seats (a rear bench place is 44–48 cm wide), the third one smaller as asked. Row 2's two seats
+ * sit 4 cm apart, their centres `Z_FILA2` off the centre line: 49 cm between the two passengers' centres is the
+ * shoulder breadth of an average man (bideltoid 49 cm, ANSUR II 2012), so their shoulders just touch.
+ */
+export const ASIENTOS_FILAS = {
+  piloto: { ancho: 0.46, fondo: 0.46, respaldo: 0.60 },
+  fila2: { ancho: 0.45, fondo: 0.44, respaldo: 0.56 },
+  fila3: { ancho: 0.40, fondo: 0.38, respaldo: 0.48 },
+} as const;
+export const Z_FILA2 = 0.245;
+/** How far each foot goes from its passenger's centre line (m): row 2's close together (the belly curves up outside them), row 3's apart, outside the rails. */
+const PIES_FILA2 = 0.04, PIES_FILA3 = 0.18;
+/** A seat's pan: its cushion's underside this far below its top (m; a thin shell and pad, as a sports seat). */
+export const PAN_ASIENTO = 0.06;
+/** Half the shoulder breadth of an average man (m): the outer shoulder of a row-2 passenger is `Z_FILA2` + this. */
+export const MEDIO_HOMBRO = 0.245;
+/**
+ * The body's width with three rows: at least this (m). At shoulder height the canopy is narrower than the body's
+ * widest point (it curves in towards the top); 1.16 m gives the two outer shoulders of row 2 their 2 cm with the
+ * default three-row canopy (`ALTO_FILAS`). A lower or shorter canopy can still pinch them: the check «Hombros de la fila 2» says so.
+ */
+export const ANCHO_FILAS = 1.16;
+/**
+ * The canopy's top with three rows: at least this (m). Measured on this model: with the canopy stretched back over
+ * row 3 the crest moves back, and the default 1.452 m leaves the tall man's head (p95) 4 cm into the glass over the
+ * pilot and row 3; 1.56 m gives every head its 3 cm (row 3, the tightest, 3.7 cm).
+ */
+export const ALTO_FILAS = 1.56;
+/** From row 3's hips back to its backrest's rear face, plus 3 cm of air to the shock tower (m). */
+const RESPALDO_FILA3 = 0.22;
+/** The canopy ends at least this far behind row 3's hips (m), so that its falling line still clears that head. */
+const CUPULA_TRAS_FILA3 = 0.62;
+/** Row 3's hips behind where the Cuadriciclo's front wheel is (m, positive backwards). */
+export const distanciaFila3 = (T: CamposTriciclo) => limitarTriciclo('tPilX', T) + limitarTriciclo('tFila2X', T) + limitarTriciclo('tFila3X', T);
 
 /** Los parámetros del Triciclo de un diseño: lo guardado (si es del tipo correcto y, en los selectores, una opción que existe) y lo que falte, el de por defecto. */
 export function camposTriciclo(P: Partial<Parametros>): CamposTriciclo {
@@ -254,6 +319,29 @@ export function camposTriciclo(P: Partial<Parametros>): CamposTriciclo {
  */
 export function rangoTriciclo(k: ClaveNumTriciclo, T: CamposTriciclo): [number, number] {
   const f = fichaTriciclo(k)!;
+  // round three (2026-11-11): three rows need room. Only with that layout; astride, every range is as before.
+  if (T.tAsientos === 'filas') {
+    // the two seats of row 2 side by side need width at shoulder height, under the canopy's curve (see ANCHO_FILAS)
+    if (k === 'tAncho') return [Math.max(f.min, ANCHO_FILAS), f.max];
+    if (k === 'tAlto') return [Math.max(f.min, ALTO_FILAS), f.max];
+    // row 3's backrest ahead of the rear shock tower, and the canopy long enough to cover row 3's head
+    if (k === 'tBatalla') return [Math.min(f.max, Math.max(f.min, distanciaFila3(T) + RESPALDO_FILA3 + limitarTriciclo('tBasculante', T) - 0.01)), f.max];
+    // and the rows only as far back as the longest wheelbase still leaves row 3 ahead of the shock tower. The order
+    // breaks the circle: row 3 reads the swing arm as stored (in its own range), the swing arm reads row 3 limited.
+    if (k === 'tFila2X' || k === 'tFila3X' || k === 'tBasculante') {
+      const sitio = fichaTriciclo('tBatalla')!.max + 0.01 - RESPALDO_FILA3 - limitarTriciclo('tPilX', T);
+      const bas = (() => { const b = fichaTriciclo('tBasculante')!; return Math.min(b.max, Math.max(b.min, T.tBasculante)); })();
+      const hi = k === 'tFila2X' ? sitio - bas - fichaTriciclo('tFila3X')!.min
+        : k === 'tFila3X' ? sitio - bas - limitarTriciclo('tFila2X', T)
+          : sitio - limitarTriciclo('tFila2X', T) - limitarTriciclo('tFila3X', T);
+      const top = Math.min(f.max, hi);
+      return [Math.min(f.min, top), top];
+    }
+    if (k === 'tCupFin') {
+      const b = limitarTriciclo('tBatalla', T), hi = Math.min(f.max, b - 0.25);
+      return [Math.min(hi, Math.max(Math.min(f.min, b - 0.45), distanciaFila3(T) + CUPULA_TRAS_FILA3)), hi];
+    }
+  }
   if (k === 'tCupFin') return [Math.min(f.min, T.tBatalla - 0.45), Math.min(f.max, T.tBatalla - 0.25)];
   if (k === 'tPasX') return [Math.max(f.min, T.tPilX + 0.40), Math.min(f.max, T.tPilX + 0.62)];
   // the solar roof starts anywhere from over the pilot's knees to 10 cm behind the canopy's end (there: no panel)
@@ -314,8 +402,9 @@ export const anguloFuera = (di: number, L: number, t: number) => Math.atan(L / (
 export function medidasTriciclo(T: CamposTriciclo) {
   const L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T);
   const wDel = RUEDAS_TRICICLO[T.tRuedaDel], wTras = RUEDAS_TRICICLO[T.tRuedaTras], rDel = wDel.d / 2, rTras = wTras.d / 2;
+  const suelo = L('tSuelo'), elevar = elevarDe(suelo);
   const D: DimBala = {
-    batalla: L('tBatalla'), morro: L('tMorro'), cola: L('tCola'), ancho: L('tAncho'), alto: L('tAlto'), suelo: L('tSuelo'),
+    batalla: L('tBatalla'), morro: L('tMorro'), cola: L('tCola'), ancho: L('tAncho'), alto: L('tAlto'), suelo, ...(elevar > 0 ? { elevar } : {}),
     cupIni: L('tCupIni'), cupFin: L('tCupFin'), puntaMorro: L('tPuntaMorro'), puntaCola: L('tPuntaCola'),
     // the Cuadriciclo's «front and rear» wheel is our rear one; its «lateral» wheels, our front ones
     rDel: rTras, rLat: rDel, anchoNeu: wTras.neuTras, anchoNeuLat: wDel.neuDel, via: L('tVia'),
@@ -326,8 +415,9 @@ export function medidasTriciclo(T: CamposTriciclo) {
   // the pods only move sideways with the track: the gap grows by half of what the track grows
   const hueco = huecoGiro(F, giro);
   if (hueco < HUECO_GIRO) F = crearForma({ ...D, via: Math.ceil((D.via + 2 * (HUECO_GIRO - hueco)) * 100) / 100 });
-  const asientos: Asientos = { xPiloto: -L('tPilX'), yPiloto: L('tPilY'), xPasajero: -L('tPasX'), yPasajero: L('tPasY') };
-  return { D: F.D, F, asientos, aleta: L('tAleta'), viaPedida: D.via, giro };
+  // the seats rise with the lifted body (`+ 0` without a lift: the same numbers)
+  const asientos: Asientos = { xPiloto: -L('tPilX'), yPiloto: L('tPilY') + elevar, xPasajero: -L('tPasX'), yPasajero: L('tPasY') + elevar };
+  return { D: F.D, F, asientos, aleta: L('tAleta') + elevar, viaPedida: D.via, giro, elevar };
 }
 
 /**
@@ -373,12 +463,33 @@ export function puntosTriciclo(F: FormaBala, S: Asientos, piloto: boolean, rec: 
   const Sh: [number, number] = [H[0] + d[0] * 0.5 * escala, H[1] + d[1] * 0.5 * escala];
   const C: [number, number] = [Sh[0] + dh[0] * 0.2 * escala, Sh[1] + dh[1] * 0.2 * escala];
   const dxPil = S.xPiloto - ASIENTO.xPiloto, dxPas = S.xPasajero - ASIENTO.xPasajero, kz = Math.min(1, F.kW);
-  const Fp: [number, number] = piloto ? [-0.52 + dxPil + pies[0], 0.235 + F.dSuelo + pies[1]] : [-1.30 + dxPas, 0.29 + F.dSuelo];
+  const Fp: [number, number] = piloto ? [-0.52 + dxPil + pies[0], 0.235 + F.dSuelo + F.elevar + pies[1]] : [-1.30 + dxPas, 0.29 + F.dSuelo + F.elevar];
   const K = rodilla(H, Fp, 0.45 * escala, 0.47 * escala);
-  const mano: [number, number] = piloto ? [-0.592 + man[0], 0.870 + F.dSuelo + man[1]] : [-1.45 + dxPas, 0.505 + (S.yPasajero - ASIENTO.yPasajero)];
+  const mano: [number, number] = piloto ? [-0.592 + man[0], 0.870 + F.dSuelo + F.elevar + man[1]] : [-1.45 + dxPas, 0.505 + (S.yPasajero - ASIENTO.yPasajero)];
   const kb = escalaManillar(F, man);
   return { H, S: Sh, C, K, F: Fp, d, dh, hx: xH, mano, anchoMano: piloto ? 0.265 * kb : 0.19 * kz, anchoPiernas: piloto ? [0.13, 0.15 * kz] : [0.17, 0.20 * kz] };
 }
+/**
+ * A passenger of «tres filas» (round three) on a car-style seat: the trunk and head as the astride riders
+ * (`puntosTriciclo`), the feet forward on the floor (`yPiso`, heel down, ankle 7 cm up), 60 cm ahead of the hips
+ * (under the seat in front, as in a car), the knees where the legs put them, the hands on the thighs.
+ */
+export function puntosFila(xH: number, yS: number, rec: number, yPiso: number, escala = 1, pies = 0.10): PuntosOcupante {
+  const R = rec * Math.PI / 180, RH = R * 0.35;
+  const d: [number, number] = [-Math.sin(R), Math.cos(R)], dh: [number, number] = [-Math.sin(RH), Math.cos(RH)];
+  const H: [number, number] = [xH, yS + CADERA_SOBRE_ASIENTO * escala];
+  const Sh: [number, number] = [H[0] + d[0] * 0.5 * escala, H[1] + d[1] * 0.5 * escala];
+  const C: [number, number] = [Sh[0] + dh[0] * 0.2 * escala, Sh[1] + dh[1] * 0.2 * escala];
+  const Fp: [number, number] = [xH + 0.60 * escala, yPiso + 0.07];
+  const K = rodilla(H, Fp, 0.45 * escala, 0.47 * escala);
+  const mano: [number, number] = [H[0] + (K[0] - H[0]) * 0.6, H[1] + (K[1] - H[1]) * 0.6 + 0.08];
+  return { H, S: Sh, C, K, F: Fp, d, dh, hx: xH, mano, anchoMano: 0.13, anchoPiernas: [0.09, pies] };
+}
+/** A seat of «tres filas»: hips x, centre z, cushion top y, its size, its recline and whether it is folded. */
+export interface AsientoFila { fila: 1 | 2 | 3; x: number; z: number; y: number; ancho: number; fondo: number; respaldo: number; rec: number; plegado: boolean }
+/** Who sits where (the viewer draws them, the mass and the checks count them). */
+export interface Plaza { nombre: string; fila: 1 | 2 | 3; z: number; piloto: boolean; pts: PuntosOcupante; talla: (escala: number) => PuntosOcupante }
+
 /**
  * Centro de gravedad de una persona sentada, de sus puntos: cabeza 8 %, tronco
  * 50 % (a 40 % de la cadera a los hombros), brazos 10 %, muslos 20 %, piernas y
@@ -453,7 +564,7 @@ function bateriaEn(F: FormaBala, T: CamposTriciclo, yBase: number, lim: { xSilli
 /** El modelo del Triciclo: la forma, los ocupantes, el bastidor, la batería, el motor y lo que lee el visor. */
 export function crearModeloTriciclo(P: Parametros) {
   const T = camposTriciclo(P);
-  const { D, F, asientos, aleta, viaPedida, giro } = medidasTriciclo(T);
+  const { D, F, asientos, aleta, viaPedida, giro, elevar } = medidasTriciclo(T);
   const cup = contornoCupula(F);
   const L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T);
   const rF = F.R_LAT, rR = F.R_DEL, xR = -F.BATALLA, via = F.VIA_LAT, xF = F.X_LAT;
@@ -470,6 +581,9 @@ export function crearModeloTriciclo(P: Parametros) {
   const dT = L('tChD') / 1000, pared = L('tChT') / 1000, mat = MATERIALES_CHASIS[T.tChMat].n;
   // the rails narrow with a narrower body (they run along the flat of the belly)
   const yL = D.suelo + 0.035 + dT / 2, zL = Z_LARGUERO * Math.min(1, F.kW);
+  // three rows (round three): where rows 2 and 3 sit (their cushions at the passenger's saddle height), and the floor on the rails
+  const filas = T.tAsientos === 'filas', yPiso = yL + dT / 2 + 0.02;
+  const x2 = asientos.xPiloto - L('tFila2X'), x3 = x2 - L('tFila3X'), yAsiento = asientos.yPasajero;
   const xPiv = xR + L('tBasculante'), yPiv = yL + 0.03;
   const yBat = yL + dT / 2 + 0.005;
   const dyPil = asientos.yPiloto - ASIENTO.yPiloto, dyPas = asientos.yPasajero - ASIENTO.yPasajero, dxPil = asientos.xPiloto - ASIENTO.xPiloto, dxPas = asientos.xPasajero - ASIENTO.xPasajero;
@@ -488,7 +602,12 @@ export function crearModeloTriciclo(P: Parametros) {
     tubos.push(T_(`Cuna de la batería: poste ${lado}`, [xCuna, yL, s * zL], [xCuna, yCuna, s * zCuna]));
     // the pilot's saddle and the passenger's: a post each side from the rail up to the saddle's underside
     tubos.push(T_(`Soporte del sillín del piloto ${lado}`, [-0.95 + dxPil, yL, s * zL], [-1.02 + dxPil, 0.335 + dyPil + F.dSuelo * 0, s * 0.08]));
-    tubos.push(T_(`Soporte del sillín del pasajero ${lado}`, [-1.50 + dxPas, yL, s * zL], [-1.55 + dxPas, 0.35 + dyPas, s * 0.08]));
+    if (!filas) tubos.push(T_(`Soporte del sillín del pasajero ${lado}`, [-1.50 + dxPas, yL, s * zL], [-1.55 + dxPas, 0.35 + dyPas, s * 0.08]));
+    else {
+      // three rows (round three): a post under each seat of row 2 and a pair under row 3, from the rails to the seat's pan
+      tubos.push(T_(`Soporte del asiento de la fila 2 ${lado}`, [x2 + 0.04, yL, s * zL], [x2 - 0.02, yAsiento - 0.09, s * Z_FILA2]));
+      tubos.push(T_(`Soporte del asiento de la fila 3 ${lado}`, [x3 + 0.04, yL, s * zL], [x3 - 0.02, yAsiento - 0.09, s * 0.10]));
+    }
     // the shock tower: from the rail at the swing-arm pivot up and back to the shock's top mount
     tubos.push(T_(`Torreta del amortiguador ${lado}`, [xPiv + 0.04, yL, s * zL], [xPiv - 0.06, yPiv + 0.26, s * 0.05]));
   }
@@ -497,8 +616,9 @@ export function crearModeloTriciclo(P: Parametros) {
   tubos.push(T_('Travesaño de las plataformas', [-0.55 + dxPil + pies[0], yL, -zL], [-0.55 + dxPil + pies[0], yL, zL]));
   tubos.push(T_('Travesaño bajo los sillines', [-1.25, yL, -zL], [-1.25, yL, zL]));
   tubos.push(T_('Travesaño del basculante', [xPiv, yL, -zL], [xPiv, yL, zL]));
+  if (filas) tubos.push(T_('Travesaño de la fila 2', [x2 - 0.02, yAsiento - 0.09, -(Z_FILA2 + 0.10)], [x2 - 0.02, yAsiento - 0.09, Z_FILA2 + 0.10]));
   // the steering-column support: from the cradle's top bar back and up to the steering head under the dash
-  const cabeza: P3 = [-0.44 - man[0] * 0, 0.80 + F.dSuelo, 0];
+  const cabeza: P3 = [-0.44 - man[0] * 0, 0.80 + F.dSuelo + elevar, 0];
   tubos.push(T_('Soporte de la columna de dirección', [xCuna, yCuna, 0], cabeza, dT, [[xCuna, yCuna, 0], [-0.22, yCuna + 0.20, 0], cabeza]));
 
   // ── suspensión, dirección y motor (posiciones; el visor los dibuja y la masa los cuenta por deslizador)
@@ -507,7 +627,7 @@ export function crearModeloTriciclo(P: Parametros) {
   const basculante = { pivote: [xPiv, yPiv] as [number, number], eje: [xR, rR - APLASTADO_BALA] as [number, number], z: Math.max(0.075, F.ANCHO_NEU / 2 + 0.035) };
   const amortiguador = { abajo: [xR + 0.4 * (xPiv - xR), (rR + yPiv) / 2 + 0.03] as [number, number], arriba: [xPiv - 0.06, yPiv + 0.26] as [number, number] };
   const brazos = brazosDe(F);
-  const cremallera = { x: -0.03, y: Math.max(0.47, yTopBat + 0.05), z: 0.15 };
+  const cremallera = { x: -0.03, y: Math.max(0.47 + elevar, yTopBat + 0.05), z: 0.15 };
   const motor = { tipo: 'buje' as const, c: [xR, rR - APLASTADO_BALA] as [number, number], r: 0.115 * rR / 0.305, ancho: 0.10 };
 
   // ── techo solar y ventanas (balaMedidas.ts `ventanasDe`): on the canopy glass, the shape does not change
@@ -520,11 +640,38 @@ export function crearModeloTriciclo(P: Parametros) {
   // the A-pillars and the rail frames: laminate (navy) instead of glass
   const marcoArea = areaMarco(F, bandaMarco(ventanas, cup.XC1 + 0.004));
 
+  // ── the seats and who sits on them (round three): astride, the two riders as before; in three rows, the pilot
+  // on a car-style seat with the same posture, row 2's two side by side and row 3's one, unless their row is folded
+  const asientosFilas: AsientoFila[] = [];
+  const plazas: Plaza[] = [
+    { nombre: 'Piloto', fila: 1, z: 0, piloto: true, pts: occ(true), talla: e => occ(true, e) },
+  ];
+  if (!filas) plazas.push({ nombre: 'Pasajero', fila: 2, z: 0, piloto: false, pts: occ(false), talla: e => occ(false, e) });
+  else {
+    const A = ASIENTOS_FILAS, plegada2 = T.tFila2 === 'plegada', plegada3 = T.tFila3 === 'plegada';
+    asientosFilas.push({ fila: 1, x: asientos.xPiloto, z: 0, y: asientos.yPiloto, ...A.piloto, rec: rec.piloto, plegado: false });
+    const recF = L('tRecFila');
+    for (const z of [Z_FILA2, -Z_FILA2]) asientosFilas.push({ fila: 2, x: x2, z, y: yAsiento, ...A.fila2, rec: recF, plegado: plegada2 });
+    asientosFilas.push({ fila: 3, x: x3, z: 0, y: yAsiento, ...A.fila3, rec: recF, plegado: plegada3 });
+    // the feet: forward on the floor beside the rails (row 2 under the pilot's seat, row 3 under row 2's), as low as the
+    // belly's curve lets them at their outer edge (1.5 cm inside the skin, never below the belly's floor)
+    const piso = (x: number, z: number, ancho: number) => {
+      const zf = Math.abs(z) + ancho + 0.045; let y = D.suelo + 0.03;
+      while (y < yPiso && dentroDe(F, x, y, zf) < 0.015) y += 0.005;
+      return y;
+    };
+    const fila = (x: number, z: number, ancho: number, e = 1) => puntosFila(x, yAsiento, recF, piso(x + 0.60 + 0.09, z, ancho), e, ancho);
+    if (!plegada2) for (const [z, n] of [[Z_FILA2, 'der.'], [-Z_FILA2, 'izq.']] as const) plazas.push({ nombre: `Fila 2 ${n}`, fila: 2, z, piloto: false, pts: fila(x2, z, PIES_FILA2), talla: e => fila(x2, z, PIES_FILA2, e) });
+    if (!plegada3) plazas.push({ nombre: 'Fila 3', fila: 3, z: 0, piloto: false, pts: fila(x3, 0, PIES_FILA3), talla: e => fila(x3, 0, PIES_FILA3, e) });
+  }
+
   const Lf = F.LARGO;
-  const Pm: Parametros = { ...P, ...T, L: Lf, B: xF - xR, W: anchoTotal, H: D.alto, clear: D.suelo, track: via };
+  const Pm: Parametros = { ...P, ...T, L: Lf, B: xF - xR, W: anchoTotal, H: D.alto + elevar, clear: D.suelo, track: via };
   return {
     tipo: 'triciclo' as const, P: Pm, campos: T, F, D, sillines: asientos, aleta, cup, viaPedida, giro, rec, man, pies,
-    xn: F.X_MORRO, xt: F.X_COLA, Lf, rF, rR, rL: rF, xR, xL: xF, xF, batalla: xF - xR, anchoTotal, anchoCuerpo: D.ancho, alto: D.alto, semiPod,
+    xn: F.X_MORRO, xt: F.X_COLA, Lf, rF, rR, rL: rF, xR, xL: xF, xF, batalla: xF - xR, anchoTotal, anchoCuerpo: D.ancho, alto: D.alto + elevar, semiPod,
+    /** Round three: the rigid lift above 15.8 cm (m), the seating layout, its seats, who sits where, and the floor's height. */
+    elevar, filas, asientosFilas, plazas, yPiso,
     ruedas, via: { del: via, tras: 0 },
     tubos, baterias, bateriaCabe: bat.capacidad, inversor, motor, basculante, amortiguador, brazos, cremallera, cabezaDireccion: cabeza, recTras, recDel, yLarguero: yL,
     faldon: faldonDe(F, L('tFaldon'), xR, rR),
@@ -546,7 +693,12 @@ function faldonDe(F: FormaBala, k: number, xR: number, rR: number) {
 
 // ------------------------------------------------------------------ cálculo
 export interface PiezaMasa { nombre: string; kg: number; x: number; y: number }
-export interface ResultadosTriciclo extends ResultadosBala {
+export interface ResultadosTriciclo extends Omit<ResultadosBala, 'cabezas'> {
+  /** Lo que queda sobre la cabeza de cada uno (m), sin casco: talla media y alta ('piloto', 'pasajero', 'fila 2', 'fila 3'). */
+  cabezas: { quien: string; p50: number; p95: number; x: number }[];
+  /** Round three: the boot (litres) now and in every state of the rows, and how many ride. */
+  maletero: Maleteros;
+  ocupantes: number;
   /** Masa por partes con su centro (para el centro de gravedad); los ocupantes van aparte. */
   piezas: PiezaMasa[];
   cg: { x: number; y: number; masa: number; vacio: { x: number; y: number } };
@@ -595,6 +747,80 @@ function cabezaTriciclo(m: ModeloTriciclo, piloto: boolean, talla: number, esp: 
   return { holgura: h, x: o.C[0] };
 }
 
+/**
+ * Round three: what is left over a passenger's head off the centre line (row 2) or on it (row 3), m. The head is an
+ * ellipsoid: 11 cm up and back from its centre (as `cabezaTriciclo`), 7.8 cm to each side; each of its points is
+ * measured straight up to the inner face of the canopy above it, and its side to the canopy's side.
+ */
+function cabezaPlaza(m: ModeloTriciclo, q: Plaza, talla: number, esp: number) {
+  const k = talla / TALLA_SENTADO.p50, o = q.talla(k), F = m.F, ANCHO = 0.078 * k;
+  const a0 = Math.atan2(o.dh![0], o.dh![1]); let h = 9;
+  for (const dz of [-1, -0.5, 0, 0.5, 1]) {
+    const f = Math.sqrt(Math.max(0, 1 - (dz * 0.95) ** 2)), z = Math.abs(q.z + dz * 0.95 * ANCHO);
+    for (let g = -30; g <= 70; g += 10) {
+      const a = a0 - g * Math.PI / 180, x = o.C[0] + Math.sin(a) * MEDIA_CABEZA * k * f, y = o.C[1] + Math.cos(a) * MEDIA_CABEZA * k * f;
+      const techo = F.arribaY(x, z); h = Math.min(h, Number.isFinite(techo) ? techo - esp - y : -0.05);
+    }
+  }
+  const lado = F.ladoZ(o.C[0], o.C[1]); h = Math.min(h, Number.isFinite(lado) ? lado - esp - (Math.abs(q.z) + ANCHO) : -0.05);
+  return { holgura: h, x: o.C[0] };
+}
+
+// ------------------------------------------------------------------ maletero (round three)
+/** The boot in litres: now, and in each state of the rows (astride: one, behind the passenger). */
+export interface Maleteros { ahora: number; estado: string; estados: { nombre: string; litros: number }[] }
+/** Wall, lining and air between the luggage and the skin (m). */
+const PARED_MALETERO = 0.02;
+/**
+ * The boot's volume (L) for rows 2 and 3 open or folded: the room inside the skin (2 cm in from it, up to the canopy's
+ * roof) behind the pilot's backrest (astride: behind the passenger's), above the floor on the rails (on a folded seat,
+ * above its folded backrest), less the space each seated passenger takes (from their toes to their backrest, as wide
+ * as their seat), the rear wheel with its suspension travel, the shock tower, the battery modules and the controller.
+ * A geometric volume, counted in 2 cm slices: it is not the VDA method (1-litre blocks), which gives some 15-25 % less
+ * for the same shape. An estimate on this model, not a measurement.
+ */
+export function volumenMaletero(m: ModeloTriciclo, plegada2: boolean, plegada3: boolean): number {
+  const F = m.F, P = PARED_MALETERO, paso = 0.02;
+  // the front limit: the backrest of the pilot (three rows) or the passenger (astride); it leans back with its recline
+  const delante = m.filas ? m.asientosFilas.find(a => a.fila === 1)! : { x: m.sillines.xPasajero, y: m.sillines.yPasajero, rec: m.rec.pasajero };
+  const inicio = (y: number) => delante.x - 0.19 - Math.max(0, y - delante.y) * Math.tan(Math.max(0, delante.rec) * Math.PI / 180);
+  const sentados = m.filas ? m.asientosFilas.filter(a => a.fila > 1 && !(a.fila === 2 ? plegada2 : plegada3)) : [];
+  const plegados = m.filas ? m.asientosFilas.filter(a => a.fila > 1 && (a.fila === 2 ? plegada2 : plegada3)) : [];
+  const xR = m.xR, rR = m.rR, piv = m.basculante.pivote;
+  const cajas = [...m.baterias, m.inversor].map(c => ({ x0: c.x0, x1: c.x1, y0: c.y0, y1: c.y1, z: c.hz }));
+  // the rear wheel and its travel, 4 cm round; the swing arm and the shock tower above its pivot
+  cajas.push({ x0: xR - rR - 0.04, x1: xR + rR + 0.04, y0: 0, y1: 2 * rR + m.recTras + 0.04, z: F.ANCHO_NEU / 2 + 0.05 });
+  cajas.push({ x0: xR, x1: piv[0] + 0.06, y0: 0, y1: piv[1] + 0.30, z: m.basculante.z + 0.04 });
+  let V = 0;
+  for (let y = m.yPiso + paso / 2; y < m.alto; y += paso) {
+    const x0 = inicio(y);
+    for (let x = x0 - paso / 2; x > F.X_COLA + 0.02; x -= paso) {
+      const w = Math.min(F.ladoZ(x, y), F.ladoZ(x, y + P)) - P; if (!(w > 0.02)) continue;
+      // the z-intervals taken, on the right half (the boot is symmetric)
+      const fuera: [number, number][] = [];
+      for (const c of cajas) if (x > c.x0 && x < c.x1 && y > c.y0 && y < c.y1) fuera.push([0, c.z]);
+      for (const a of sentados) {
+        const atras = a.x - 0.19 - Math.max(0, y - a.y) * Math.tan(Math.max(0, a.rec) * Math.PI / 180);
+        if (x < a.x + 0.60 + 0.20 && x > atras) fuera.push([Math.max(0, Math.abs(a.z) - a.ancho / 2 - 0.02), Math.abs(a.z) + a.ancho / 2 + 0.02]);
+      }
+      for (const a of plegados) if (y < a.y + 0.07 && x > a.x - 0.19 && x < a.x - 0.17 + Math.max(a.fondo, a.respaldo)) fuera.push([Math.max(0, Math.abs(a.z) - a.ancho / 2), Math.abs(a.z) + a.ancho / 2]);
+      fuera.sort((p, q) => p[0] - q[0]);
+      let libre = 0, z = 0;
+      for (const [a, b] of fuera) { if (a > z) libre += Math.min(a, w) - z; z = Math.max(z, b); if (z >= w) break; }
+      if (z < w) libre += w - z;
+      V += 2 * Math.max(0, libre) * paso * paso;
+    }
+  }
+  return V * 1000;
+}
+export function maleterosTriciclo(m: ModeloTriciclo): Maleteros {
+  if (!m.filas) { const v = volumenMaletero(m, false, false); return { ahora: v, estado: 'detrás del pasajero', estados: [{ nombre: 'Detrás del pasajero', litros: v }] }; }
+  const T = m.campos, p2 = T.tFila2 === 'plegada', p3 = T.tFila3 === 'plegada';
+  const nombre = (a: boolean, b: boolean) => a && b ? 'filas 2 y 3 plegadas' : a ? 'fila 2 plegada' : b ? 'fila 3 plegada' : 'las tres filas abiertas';
+  const estados = ([[false, false], [false, true], [true, false], [true, true]] as const).map(([a, b]) => ({ nombre: nombre(a, b), litros: volumenMaletero(m, a, b) }));
+  return { ahora: estados.find(e => e.nombre === nombre(p2, p3))!.litros, estado: nombre(p2, p3), estados };
+}
+
 /** Masa de cada parte (kg) con su centro (x, y). */
 export function piezasTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cristal: number; solar: number }, centros: { xPiel: number; yPiel: number; xCristal: number; yCristal: number }, pods: { area: number }): PiezaMasa[] {
   const T = m.campos, L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), F = m.F;
@@ -624,11 +850,22 @@ export function piezasTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cris
     { nombre: 'Motor de buje', kg: L('tMMotor'), x: m.motor.c[0], y: m.motor.c[1] },
     { nombre: 'Controlador', kg: L('tMInversor'), x: (m.inversor.x0 + m.inversor.x1) / 2, y: (m.inversor.y0 + m.inversor.y1) / 2 },
     { nombre: 'Batería', kg: bat, x: vb ? xb / vb : 0, y: vb ? yb / vb : 0.3 },
-    { nombre: 'Asientos', kg: 2 * L('tMAsiento'), x: (m.sillines.xPiloto + m.sillines.xPasajero) / 2, y: (ySillin(true) + ySillin(false)) / 2 },
-    { nombre: 'Varios', kg: L('tMVarios'), x: -1.0, y: 0.40 + F.dSuelo },
+    m.filas ? asientosFilasMasa(m, L('tMAsiento')) : { nombre: 'Asientos', kg: 2 * L('tMAsiento'), x: (m.sillines.xPiloto + m.sillines.xPasajero) / 2, y: (ySillin(true) + ySillin(false)) / 2 },
+    { nombre: 'Varios', kg: L('tMVarios'), x: -1.0, y: 0.40 + F.dSuelo + m.elevar },
     // the panel replaces the glass there (`areasTriciclo`): laminate under it (in «Carrocería») and the panel itself
     ...(ar.solar > 0 ? [{ nombre: 'Paneles solares', kg: ar.solar * L('tSolarM2'), x: m.solar.x, y: m.solar.y }] : []),
   ];
+}
+
+/**
+ * The seats of «tres filas» (round three): a car-style seat with its folding hinge weighs more than the slider's
+ * saddle and backrest. Estimate, not measured: 1.5 times the slider for the pilot's and row 2's, 1.2 for row 3's
+ * smaller one; folded or not, they are on board.
+ */
+function asientosFilasMasa(m: ModeloTriciclo, kgAsiento: number): PiezaMasa {
+  let kg = 0, x = 0, y = 0;
+  for (const a of m.asientosFilas) { const k = kgAsiento * (a.fila === 3 ? 1.2 : 1.5); kg += k; x += k * (a.x - 0.05); y += k * (a.y + 0.08); }
+  return { nombre: 'Asientos', kg, x: x / kg, y: y / kg };
 }
 
 /** Superficie (m²) de los dos carenados delanteros y sus brazos de arriba, para su masa. */
@@ -638,7 +875,8 @@ function pielCarenados(F: FormaBala): number {
     const a = POD[i], b = POD[i + 1], per = (e: typeof a) => { const h = (e.yt - e.yb) / 2, w = e.wm; return Math.PI * (3 * (h + w) - Math.sqrt((3 * h + w) * (h + 3 * w))); };
     A += (per(a) + per(b)) / 2 * Math.abs(a.x - b.x);
   }
-  const brazos = brazosDe(F).reduce((s, b) => s + 2.05 * b.cuerda * Math.max(0, F.VIA_LAT / 2 - F.ladoZ(F.X_LAT + b.x, b.y)), 0);
+  // (a lifted Triciclo's arms run down from the body to the pod: their length, not their span)
+  const brazos = brazosDe(F).reduce((s, b) => s + 2.05 * b.cuerda * Math.hypot(Math.max(0, F.VIA_LAT / 2 - F.ladoZ(F.X_LAT + b.x, b.yCuerpo)), b.yCuerpo - b.y), 0);
   return 2 * (A + brazos);
 }
 
@@ -657,6 +895,8 @@ function pielCarenados(F: FormaBala): number {
  * neumáticos, que en la realidad lo bajan un 10-15 %, ni ocupantes que se inclinan.
  */
 export const umbralVuelco = (t: number, b: number, h: number, L: number) => t * b / (2 * h * L);
+const NUMERO: Record<number, string> = { 1: 'uno', 2: 'dos', 3: 'tres', 4: 'cuatro' };
+
 /** Lo que agarra en seco un neumático de ciclomotor (μ ≈ 0,9): por debajo, en una curva vuelca antes de derrapar. */
 export const AGARRE = 0.9;
 /** Lo que se pide al umbral de vuelco: el agarre y un 15 % más, por lo que el cálculo rígido no ve. */
@@ -678,7 +918,9 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   const masas: Record<string, number> = {}; for (const p of piezas) masas[p.nombre] = (masas[p.nombre] ?? 0) + p.kg;
   const mVeh = piezas.reduce((a, p) => a + p.kg, 0), mOcc = L('tMOcc');
   const momento = (l: PiezaMasa[]) => { const M = l.reduce((a, p) => a + p.kg, 0); return { masa: M, x: l.reduce((a, p) => a + p.kg * p.x, 0) / M, y: l.reduce((a, p) => a + p.kg * p.y, 0) / M }; };
-  const ocupantes = ([true, false] as const).map(pil => { const [x, y] = cgOcupante(m.occPts(pil)); return { nombre: pil ? 'Piloto' : 'Pasajero', kg: mOcc, x, y }; });
+  // everyone on board (round three: up to four; a folded row carries nobody)
+  const ocupantes = m.plazas.map(q => { const [x, y] = cgOcupante(q.pts); return { nombre: q.nombre, kg: mOcc, x, y }; });
+  const nOcc = ocupantes.length;
   const cg = momento([...piezas, ...ocupantes]), cgSolo = momento([...piezas, ocupantes[0]]), vacio = momento(piezas);
   const Lb = m.batalla, t = F.VIA_LAT;
   const ssf = umbralVuelco(t, cg.x - m.xR, cg.y, Lb), ssfSolo = umbralVuelco(t, cgSolo.x - m.xR, cgSolo.y, Lb);
@@ -689,7 +931,10 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
 
   // the frame: the two rails as one beam on two supports (the battery cradle at x = 0 and the swing-arm pivot), riders and seats on it
   const g = 9.81, apoyo = m.basculante.pivote[0], luz = m.xF - apoyo;
-  const cargas: [number, number][] = [[m.xF - m.sillines.xPiloto, (mOcc + L('tMAsiento')) * g], [m.xF - m.sillines.xPasajero, (mOcc + L('tMAsiento')) * g]];
+  const cargas: [number, number][] = !m.filas
+    ? [[m.xF - m.sillines.xPiloto, (mOcc + L('tMAsiento')) * g], [m.xF - m.sillines.xPasajero, (mOcc + L('tMAsiento')) * g]]
+    // three rows: each seat with its occupant (if its row is open), at its hips
+    : m.asientosFilas.map(a => [m.xF - a.x, ((a.plegado ? 0 : mOcc) + L('tMAsiento') * (a.fila === 3 ? 1.2 : 1.5)) * g] as [number, number]);
   let Mmax = 0; for (const [a, Fz] of cargas) { const aa = Math.min(luz, Math.max(0, a)); Mmax = Math.max(Mmax, Fz * aa * (luz - aa) / luz); }
   // both loads together: the moment at each load point of the sum
   for (const [a0] of cargas) { let M = 0; for (const [a, Fz] of cargas) { const lo = Math.min(a, a0), hi = Math.max(a, a0); M += Fz * lo * (luz - hi) / luz; } Mmax = Math.max(Mmax, M); }
@@ -701,24 +946,70 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   const ch: Comprobacion[] = [];
   const c = (dep: DepTriciclo | `${DepTriciclo},${DepTriciclo}`, nombre: string, holgura: number, minimo: number, mostrar?: string) => ch.push({ nombre, holgura, minimo, dep, ...(mostrar ? { mostrar } : {}) });
   const fmt = (v: number, d = 2) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
-  c('rodaje', `Vuelco: aceleración lateral que lo tumba, con dos (objetivo ${fmt(VUELCO_OBJETIVO)} g)`, ssf - AGARRE, VUELCO_OBJETIVO - AGARRE, `${fmt(ssf)} g`);
+  c('rodaje', `Vuelco: aceleración lateral que lo tumba, con ${NUMERO[nOcc] ?? nOcc} (objetivo ${fmt(VUELCO_OBJETIVO)} g)`, ssf - AGARRE, VUELCO_OBJETIVO - AGARRE, `${fmt(ssf)} g`);
   c('rodaje', 'Vuelco: con el piloto solo', ssfSolo - AGARRE, VUELCO_OBJETIVO - AGARRE, `${fmt(ssfSolo)} g`);
-  const cabezas = ([true, false] as const).map(piloto => {
-    const a = cabezaTriciclo(m, piloto, TALLA_SENTADO.p50, esp), b = cabezaTriciclo(m, piloto, TALLA_SENTADO.p95, esp);
-    return { quien: piloto ? 'piloto' as const : 'pasajero' as const, p50: a.holgura, p95: b.holgura, x: a.x };
-  });
+  let cabezas: { quien: string; p50: number; p95: number; x: number }[];
+  if (!m.filas) {
+    cabezas = ([true, false] as const).map(piloto => {
+      const a = cabezaTriciclo(m, piloto, TALLA_SENTADO.p50, esp), b = cabezaTriciclo(m, piloto, TALLA_SENTADO.p95, esp);
+      return { quien: piloto ? 'piloto' as const : 'pasajero' as const, p50: a.holgura, p95: b.holgura, x: a.x };
+    });
+  } else {
+    // three rows: the pilot as astride (on the centre line); row 2's right seat (the left is its mirror) and row 3, off and on the centre line
+    cabezas = [{ ...(() => { const a = cabezaTriciclo(m, true, TALLA_SENTADO.p50, esp), b = cabezaTriciclo(m, true, TALLA_SENTADO.p95, esp); return { p50: a.holgura, p95: b.holgura, x: a.x }; })(), quien: 'piloto' }];
+    for (const q of m.plazas) if (q.fila > 1 && q.z >= 0) {
+      const a = cabezaPlaza(m, q, TALLA_SENTADO.p50, esp), b = cabezaPlaza(m, q, TALLA_SENTADO.p95, esp);
+      cabezas.push({ quien: q.fila === 2 ? 'fila 2' : 'fila 3', p50: a.holgura, p95: b.holgura, x: a.x });
+    }
+  }
   for (const k of cabezas) {
-    const quien = k.quien === 'piloto' ? 'del piloto' : 'del pasajero';
+    const quien = k.quien === 'piloto' ? 'del piloto' : k.quien === 'pasajero' ? 'del pasajero' : `de la ${k.quien}`;
     c('interior,carroceria', `Cabeza ${quien} a la cúpula (talla media, sin casco)`, k.p50, 0.03);
     c('interior,carroceria', `Cabeza ${quien} a la cúpula (talla alta, sin casco)`, k.p95, 0.03);
   }
+  const op = m.occPts(true);
   // the pilot's backrest against the passenger: its back face (pad 3 cm, 14 cm behind the trunk's axis) to the passenger's belly (12 cm ahead of the hips)
-  {
-    const op = m.occPts(true), oq = m.occPts(false), t0 = 0.30;
+  if (!m.filas) {
+    const oq = m.occPts(false), t0 = 0.30;
     const xRespaldo = op.H[0] + op.d[0] * t0 - op.d[1] * 0.17, yR = op.H[1] + op.d[1] * t0;
     const xVientre = oq.H[0] + oq.d[0] * Math.max(0, (yR - oq.H[1]) / oq.d[1]) + 0.12;
     c('interior', 'Respaldo del piloto al vientre del pasajero', xRespaldo - xVientre, 0.03);
     c('interior', 'Cabeza del piloto a la del pasajero', Math.hypot(op.C[0] - oq.C[0], op.C[1] - oq.C[1]) - 2 * 0.105, 0.05);
+  } else {
+    // three rows (round three): knees to the backrest in front (its rear face, 17 cm behind the trunk's axis; a knee is 6 cm round)
+    const respaldoEn = (o: PuntosOcupante, y: number) => { const t = (y - o.H[1]) / o.d[1]; return o.H[0] + o.d[0] * t - o.d[1] * 0.17; };
+    const fila2 = m.plazas.find(q => q.fila === 2 && q.z > 0), fila3 = m.plazas.find(q => q.fila === 3);
+    if (fila2) c('interior', 'Rodillas de la fila 2 al respaldo del piloto', respaldoEn(op, fila2.pts.K[1]) - (fila2.pts.K[0] + 0.06), 0.02);
+    // row 2's backrests stand (or lie folded, then the knees pass over them) in front of row 3
+    const r2 = m.asientosFilas.find(a => a.fila === 2)!;
+    if (fila3 && !r2.plegado) {
+      const o2 = puntosFila(r2.x, r2.y, r2.rec, m.yPiso);
+      c('interior', 'Rodillas de la fila 3 al respaldo de la fila 2', respaldoEn(o2, fila3.pts.K[1]) - (fila3.pts.K[0] + 0.06), 0.02);
+    }
+    // row 2's outer shoulder (an average man's: Z_FILA2 + MEDIO_HOMBRO from the centre line) to the canopy's inner face
+    if (fila2) {
+      const o = fila2.pts, S = [o.H[0] + o.d[0] * 0.44, o.H[1] + o.d[1] * 0.44];
+      c('interior,carroceria', 'Hombros de la fila 2 a la cúpula (de lado)', Math.min(F.ladoZ(S[0], S[1]), F.ladoZ(o.S[0], o.S[1])) - esp - (Z_FILA2 + MEDIO_HOMBRO), 0.02);
+    }
+    // the feet (instep 4 cm over the ankle): inside the body where they rest, and under the seat in front (its pan's underside)
+    const pies = (q: Plaza, delante: AsientoFila | undefined) => {
+      const o = q.pts, zf = Math.abs(q.z) + (o.anchoPiernas?.[1] ?? 0.1) + 0.045, yPie = o.F[1] - 0.06;
+      let h = 9; for (const x of [o.F[0], o.F[0] + 0.18]) h = Math.min(h, dentroDe(F, x, yPie, zf));
+      c('interior', `Pies de la ${q.fila === 2 ? 'fila 2' : 'fila 3'} dentro de la carrocería`, h, 0.01);
+      if (delante) {
+        const x0 = delante.x - 0.17, x1 = x0 + delante.fondo, punta = o.F[0] + 0.18;
+        // only where the foot (ankle to toes) is under that cushion
+        const bajo = punta > x0 && o.F[0] < x1;
+        c('interior', `Pies de la ${q.fila === 2 ? 'fila 2' : 'fila 3'} bajo el asiento de delante`, bajo ? (delante.y - PAN_ASIENTO) - (o.F[1] + 0.04) : 0.09, 0.01);
+      }
+    };
+    if (fila2) pies(fila2, m.asientosFilas.find(a => a.fila === 1));
+    if (fila3) pies(fila3, r2);
+    // row 3's backrest ahead of the rear shock tower (its tube's front face)
+    const r3 = m.asientosFilas.find(a => a.fila === 3)!;
+    c('interior,rodaje', 'Respaldo de la fila 3 a la torreta del amortiguador', (r3.x - 0.19) - (m.basculante.pivote[0] - 0.06 + L('tChD') / 2000), 0.02);
+  }
+  {
     // reach: shoulder to grip, against a 58 cm arm (the viewer's 30 + 28 cm), elbows a little bent
     const hom: P3 = [op.H[0] + op.d[0] * 0.46, op.H[1] + op.d[1] * 0.46, 0.19], puno: P3 = [op.mano[0], op.mano[1], op.anchoMano];
     c('interior', 'Manos del piloto al manillar (alcance)', 0.55 - Math.hypot(puno[0] - hom[0], puno[1] - hom[1], puno[2] - hom[2]), 0.0);
@@ -731,7 +1022,7 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   c('rodaje', `Rueda trasera dentro de la cola, hundida ${Math.round(m.recTras * 1000)} mm`, ruedaDentro(F, m.xR, m.rR, F.ANCHO_NEU, m.recTras), 0.02);
   c('rodaje', `Bajos al suelo con la suspensión hundida`, F.D.suelo - Math.max(m.recDel, m.recTras) * 0.6, 0.03);
   // the swing arm's pivot ahead of the rear wheel and behind the passenger's footpegs
-  c('rodaje', 'Pivote del basculante detrás de los estribos del pasajero', (-1.30 + (m.sillines.xPasajero - ASIENTO.xPasajero) - 0.06) - m.basculante.pivote[0], 0.02);
+  if (!m.filas) c('rodaje', 'Pivote del basculante detrás de los estribos del pasajero', (-1.30 + (m.sillines.xPasajero - ASIENTO.xPasajero) - 0.06) - m.basculante.pivote[0], 0.02);
   let tub = 9, peor = ''; for (const tb of m.tubos) { const h = tuboDentro(F, tb); if (h < tub) { tub = h; peor = tb.nombre; } }
   c('chasis', `Bastidor dentro de la carrocería${tub < 0.01 ? ` (${peor.toLowerCase()})` : ''}`, tub, 0.01);
   c('chasis', 'Bastidor: coeficiente de seguridad de los largueros', seguridad - 1.3, 0.5, `×${fmt(seguridad, 1)}`);
@@ -748,6 +1039,9 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   // electric motorcycles) would be the honest drive, and that is not drawn here
   const kWBuje = RUEDAS_TRICICLO[T.tRuedaTras].kWBuje, kWp = L('tKWPico');
   c('propulsion', 'Motor de buje: potencia que cabe en la rueda trasera (regla aproximada)', kWBuje - kWp, 0, `${fmt(kWp, 1)} de ${kWBuje} kW`);
+  // round three: the boot, in litres (always passes: it says how much there is)
+  const maletero = maleterosTriciclo(m);
+  c('interior', `Maletero (${m.filas ? (maletero.estado) : 'detrás del pasajero'})`, maletero.ahora / 1000, 0, `${Math.round(maletero.ahora)} L`);
 
   const bala: ResultadosTriciclo = {
     area, vol, piel: ar.carroceria + ar.cristal, cristal: ar.cristal, cupula: [-m.cup.XC0, -m.cup.XC1],
@@ -756,13 +1050,14 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     giro: { radio, dentro: di * 180 / Math.PI, fuera: dout * 180 / Math.PI },
     bastidor: { M: Mmax, tension, seguridad, metros },
     bateria: { litros: L('tKWh') * 1000 / L('tWhL'), kg: L('tKWh') * 1000 / L('tWhKg'), litrosMorro: 0.42 * 0.30 * Math.max(1, F.kW) * 0.20 * 1000, cabe: m.bateriaCabe },
-    energia: cd ? energiaTriciclo(m, mVeh + 2 * mOcc, cd, ar.solar) : null,
+    energia: cd ? energiaTriciclo(m, mVeh + nOcc * mOcc, cd, ar.solar) : null,
+    maletero, ocupantes: nOcc,
   };
   const e = bala.energia, nada = NaN;
   return {
     A: area.total, FR: nada, Cd: e?.cd ?? nada, CdA: e?.CdA ?? nada, Crr: CRR, vol, Paero: nada, Proll: nada, Pw: e?.potencia ?? nada, WhKm: e?.WhKm ?? nada, pedWhKm: 0,
     autonomia: e?.autonomia ?? nada, vmax: e?.vmaxNominal ?? nada,
-    masas, mVeh, mTot: mVeh + 2 * mOcc, rangoMasa: [nada, nada], Mmax, tension, seguridad, cargaRueda: nada,
+    masas, mVeh, mTot: mVeh + nOcc * mOcc, rangoMasa: [nada, nada], Mmax, tension, seguridad, cargaRueda: nada,
     solarPico: ar.solar * RENDIMIENTO_SOLAR * 1000, solarDia: solarDiaTriciclo(ar.solar, m.P.sol), kmSol: e?.kmSol ?? nada, areas: ar, comprobaciones: ch, triciclo: bala,
   };
 }

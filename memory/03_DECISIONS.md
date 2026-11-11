@@ -1416,3 +1416,32 @@ Eugenio asked for a much more artistic version without any text, and a menu with
 - No public July 2026 table gives every pension bracket. Chosen: real count for ≥ 3.300 € (July 2026), 2025's split around 1.000/1.500/2.000 € applied to 2026's total, tier averages estimated from bracket limits, and the bottom tier closing against the real payroll. Alternative (the INSS bracket table, by month) is better and should replace this when someone downloads it; the page labels the middle tiers «estimación».
 - Budgets show each scale's own items (Torrelodones by economic chapter, the family by EPF group) rather than forcing everything into six categories; the six categories are a separate comparison table where «—» means the scale does not pay for that.
 - Debt repayments (amortización) are off by default: they are refinanced, not spent, and at Spain's scale (230.693 M€) they would dwarf every real item. One click adds them.
+
+## 2026-11-11 — Triciclo Bala round three: rigid lift above 15.8 cm, three folding rows as a layout option, boot lid cut above the rear wheel
+
+**Ground clearance.** The old slider moved only the belly (`dSuelo` lifts the belly fully, the widest point by 0.6 and the nose cap by 0.5, while the canopy top stays put), so going from 15.8 cm to 35 cm that way would have squashed the cabin by ~20 cm.
+- Rejected: **reinterpret `tSuelo` everywhere as a rigid lift.** Saved designs between 12.4 and 15.8 cm would have changed.
+- Chosen: **a hybrid.** Up to `SUELO_RIGIDO` (0.158 m, the old maximum) nothing changes. Above it, the shape is built at 0.158 and translated up by `elevar = tSuelo − 0.158`. This is an optional `DimBala.elevar`, added last to every height in `crearForma`, so `+ 0` keeps the Cuadriciclo bit-identical (`bala-huella` IGUAL).
+- What rises with it: everything that used `F.dSuelo` as "on the floor" now adds `F.elevar`. That is the handlebar, the waterline and painted details, the cockpit, the steering head, the rack and «Varios»; the seats and the fin are lifted in `medidasTriciclo`.
+- What stays: the wheels and the front pods stay on the road. `brazosDe` now returns `y` (at the pod) and `yCuerpo` (at the body), and the arms are drawn, measured (frontal area, mass) and fitted with the coil-over as sloped. The pods' waterline is not lifted (they do not rise).
+- The rollover factor is unchanged and simply sees the higher centre of mass: 0.82 g at 35 cm (red).
+
+**Seating.** A new selector `tAsientos: 'horcajadas' | 'filas'`, default astride, so every saved design and the default's numbers are unchanged (`triciclo-disenos.ts` now compares four Triciclos against main as well).
+- Rejected: **a separate vehicle** (`disposicion`). It would duplicate the whole Triciclo for what is an interior choice.
+- Rejected: **reusing `tPasX` / `tRecPas` for the rows.** The astride passenger's ranges are tied to the pilot. The rows get `tFila2X`, `tFila3X` and `tRecFila`; `tPasY` is reused as the rows' seat height.
+- Row 2 seats sit at ±0.245 m: the mean male bideltoid breadth (49 cm, ANSUR II), so the shoulders just touch («pegaditos»).
+- The feet go under the seat in front, as in a car. They are as low as the belly's curve allows at their outer edge, and get a check that they are under the cushion's pan (6 cm).
+
+Dependent ranges, all measured on this model:
+- Width ≥ 1.16 m (row 2's outer shoulders 2 cm from the canopy).
+- Canopy top ≥ 1.56 m (the tall man's head 3 cm under the glass in every row).
+- Wheelbase ≥ row-3 hips + 0.22 + swing arm − 0.01 (row 3's backrest ahead of the shock tower).
+- Canopy end ≥ row-3 hips + 0.62.
+- The rows and the swing arm are limited to what the 3.20 m maximum wheelbase leaves. The circle is broken on purpose: row 3 reads the stored swing-arm length, and the swing arm reads row 3 limited.
+
+**Boot.** A geometric volume, not VDA: 2 cm slices inside the skin less 2 cm, up to the canopy's roof, behind the front backrest. It subtracts each seated passenger's box (toes to backrest), the rear wheel with its travel, the shock tower, the battery and the controller. It is said on screen to read 15–25 % above VDA.
+
+**Boot lid.** The cut runs along the skin column where the canopy frame's edge runs (`tF`, which eases from the canopy's rear tip down to t = 0.62). It goes from the canopy's rear tip back to the tail ring, hinged across the top at the tip, with the fin riding on it.
+- Rejected: **a clamshell of the whole tail.** The rear wheel and its arch live in the lower tail.
+- Rejected: **a lid ending ahead of the fin.** Too short to load anything.
+- The lid takes cells out of the body's index list but not its vertices, so the "body = Cuadriciclo, vertex for vertex" check still holds, with 'porton' and 'junta-porton' as new meshes. The viewer registers it as a `tipo: 'maletero'` door, the same mechanism as the Aeromóvil 1's boots.

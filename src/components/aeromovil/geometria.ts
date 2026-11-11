@@ -251,6 +251,7 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   tPodEsc: 1, tPodAncho: 1, tPodCola: 1, tBrazo: 0.20, tFaldon: 0,
   tMatCarenado: 'carbonoLino', tEspCarenado: 1.5, tEspCristal: 3,
   tPilX: 1.06, tPilY: 0.40, tPasX: 1.54, tPasY: 0.43, tRecPil: 5, tRecPas: 0, tManX: 0, tManY: 0, tPiesX: 0, tPiesY: 0, tMOcc: 80, tMAsiento: 3.5,
+  tAsientos: 'horcajadas', tFila2: 'abierta', tFila3: 'abierta', tFila2X: 0.70, tFila3X: 0.72, tRecFila: 15,
   tChMat: 'cromoly', tChD: 45, tChT: 2.4, tChUniones: 3.5,
   tBatalla: 2.45, tEjeDel: 0.30, tVia: 1.80, tRuedaDel: '20', tRuedaTras: '24', tGiro: 28, tRecDel: 80, tRecTras: 80, tBasculante: 0.50,
   tMRueda: 4.5, tMFreno: 1.2, tMSuspDel: 9, tMSuspTras: 6, tMDir: 4.5,

@@ -30,7 +30,7 @@ import {
   type Modelo, type ModeloGota, type ModeloA1, type ModeloBala, type ModeloConPiel, type ModeloTriciclo, type Piel, type PuntosOcupante, type Superficie,
 } from './geometria';
 import { anguloFuera } from './geometriaTriciclo';
-import { ANGULO_CUPULA, PIVOTES_CUPULA, construirCon as construirBalaCon, crearMateriales as materialesBala } from './garaje/balaModelo';
+import { ANGULO_CUPULA, ANGULO_PORTON, PIVOTES_CUPULA, PIVOTE_PORTON, construirCon as construirBalaCon, crearMateriales as materialesBala } from './garaje/balaModelo';
 import { GIRO_A1, suspensionA1 } from './geometriaA1';
 import type { Referencia } from './referencias';
 import { vehiculoGaraje } from './garaje';
@@ -1091,6 +1091,12 @@ function repartirBala(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THRE
       if (!puertasG.has('cupula')) puertasG.set('cupula', []);
       puertasG.get('cupula')!.push(o as THREE.Group);
     }
+    // the Triciclo's boot lid (round three): a boot, so «Abrir maletero» opens it (as the Aeromóvil 1's boots)
+    if (o.name === PIVOTE_PORTON) {
+      o.userData = { eje: new THREE.Vector3(0, 0, 1), angulo: ANGULO_PORTON * Math.PI / 180, tipo: 'maletero' };
+      if (!puertasG.has('maletero')) puertasG.set('maletero', []);
+      puertasG.get('maletero')!.push(o as THREE.Group);
+    }
     G[capa].add(o);
   }
 }
@@ -1104,7 +1110,7 @@ function repartirBala(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THRE
 function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THREE.Group[]>, M: Mats, Mb: ReturnType<typeof materialesBala>, m: ModeloTriciclo, calidad: 'completa' | 'rapida', sinPasajero: boolean) {
   for (const c of CAPAS) vaciar(G[c.k]);
   puertasG.clear();
-  const b = construirBalaCon(m.F, { M: Mb, calidad, cupulaAparte: true, asientos: m.sillines, aleta: m.aleta, triciclo: { recPil: m.rec.piloto, recPas: m.rec.pasajero, man: m.man, pies: m.pies, faldon: m.faldon, ventanas: m.opcVentanas } });
+  const b = construirBalaCon(m.F, { M: Mb, calidad, cupulaAparte: true, asientos: m.sillines, aleta: m.aleta, triciclo: { recPil: m.rec.piloto, recPas: m.rec.pasajero, man: m.man, pies: m.pies, faldon: m.faldon, ventanas: m.opcVentanas, maletero: true, ...(m.filas ? { filas: m.asientosFilas } : {}) } });
   repartirBala(G, puertasG, b);
   for (const t of m.tubos) { if (t.curva) tuboCurvo(G.chasis, t.curva, t.d, M.alu); else tube(G.chasis, t.a, t.b, t.d, M.alu); }
   for (const c of m.baterias) cajaRedonda(G.baterias, [(c.x0 + c.x1) / 2, (c.y0 + c.y1) / 2, 0], [c.x1 - c.x0, c.y1 - c.y0, 2 * c.hz], M.batt, 0.015);
@@ -1123,10 +1129,12 @@ function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<string,
   const zIn = m.via.del / 2 - m.F.ANCHO_NEU_LAT / 2 - 0.025, [arriba, abajo] = m.brazos;
   for (const s of [1, -1]) {
     tube(G.suspension, [m.xF, abajo.y - 0.02, s * zIn], [m.xF, arriba.y + 0.03, s * zIn], 0.03, M.alu);
-    const z0 = m.F.ladoZ(m.xF + arriba.x, arriba.y);
+    // (a lifted Triciclo's arm runs down from the body, at `yCuerpo`, to the pod: the coil-over follows it)
+    const z0 = m.F.ladoZ(m.xF + arriba.x, arriba.yCuerpo);
     if (Number.isFinite(z0)) {
-      const a: V3 = [m.xF + arriba.x - 0.02, arriba.y - 0.002, s * (zIn - 0.04)], c: V3 = [m.xF + arriba.x - 0.02, arriba.y - 0.002, s * (z0 + 0.03)];
-      tube(G.suspension, a, c, 0.012, M.stanch); muelle(G.suspension, [a[0], a[1], s * (zIn - 0.06)], [c[0], c[1], s * (z0 + 0.12)], 0.013, 9, M.muelle);
+      const yEn = (z: number) => arriba.y + (arriba.yCuerpo - arriba.y) * (zIn - z) / Math.max(1e-6, zIn - z0) - 0.002;
+      const a: V3 = [m.xF + arriba.x - 0.02, yEn(zIn - 0.04), s * (zIn - 0.04)], c: V3 = [m.xF + arriba.x - 0.02, yEn(z0 + 0.03), s * (z0 + 0.03)];
+      tube(G.suspension, a, c, 0.012, M.stanch); muelle(G.suspension, [a[0], yEn(zIn - 0.06), s * (zIn - 0.06)], [c[0], yEn(z0 + 0.12), s * (z0 + 0.12)], 0.013, 9, M.muelle);
     }
   }
   // steering: the rack across, the column up to the steering head, the tie rods out to the uprights' arms
@@ -1134,7 +1142,8 @@ function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<string,
   tube(G.direccion, [k.x, k.y, -k.z], [k.x, k.y, k.z], 0.035, M.black);
   tube(G.direccion, [k.x, k.y, 0], m.cabezaDireccion, 0.026, M.alu);
   for (const s of [1, -1]) tube(G.direccion, [k.x, k.y, s * k.z], [m.xF - 0.07, arriba.y + 0.02, s * zIn], 0.016, M.alu);
-  if (calidad === 'completa') for (const piloto of [true, false]) { if (sinPasajero && !piloto) continue; ocupante(G.ocupantes, M, m, 0, piloto); }
+  // everyone on board (round three: up to four, each at their own z; a folded row carries nobody)
+  if (calidad === 'completa') for (const q of m.plazas) { if (sinPasajero && !q.piloto) continue; ocupante(G.ocupantes, M, { occPts: () => q.pts }, q.z, q.piloto); }
   for (const c of CAPAS) G[c.k].traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
 }
 
@@ -1625,7 +1634,9 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     };
     if (!yaEraBala) { construir('completa'); return; }
     st.bala.cuadro = requestAnimationFrame(() => construir('rapida'));
-    st.bala.pausa = setTimeout(() => { st.bala.pausa = 0; construir('completa'); }, 300);
+    // the full build cancels a quick one still waiting for its frame: on a slow screen (2 frames a second, measured
+    // 2026-11-11 under software WebGL) the frame came after the 0.3 s and the quick build wiped the riders and details
+    st.bala.pausa = setTimeout(() => { st.bala.pausa = 0; cancelAnimationFrame(st.bala.cuadro); construir('completa'); }, 300);
   }, [modelo, sinPasajero]);
 
   useEffect(() => { const st = estado.current; if (!st) return; for (const c of CAPAS) st.G[c.k].visible = visibles[c.k]; }, [visibles]);
