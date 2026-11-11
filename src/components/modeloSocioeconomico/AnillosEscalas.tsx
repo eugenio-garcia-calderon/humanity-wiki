@@ -59,7 +59,7 @@ export function AnillosEscalas({ activa, onActiva, className }: {
       })}
       <g className={`${uid}-a`} style={{ transformOrigin: '0 0', transformBox: 'view-box', pointerEvents: 'none' }}>
         <circle r={R0 - HUECO} fill="white" />
-        <text y={2} textAnchor="middle" fontSize={29} fontWeight={800} letterSpacing="-0.03em" className="fill-slate-900">0 · 20 · 40</text>
+        <text y={2} textAnchor="middle" fontSize={29} fontWeight={800} letterSpacing="-0.03em" className="fill-slate-900">10 · 25 · 40</text>
         <text y={26} textAnchor="middle" fontSize={13.5} className="fill-slate-600">% según el tramo</text>
       </g>
     </svg>

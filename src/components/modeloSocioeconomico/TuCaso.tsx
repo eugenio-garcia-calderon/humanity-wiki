@@ -28,7 +28,7 @@ export function TuCaso({ modo, ejemplo, onEjemplo }: { modo: Modo; ejemplo: Ejem
   const cambio = (t: Tramo) => (r.precioTramo[t] - 1) * 100;
   const filas: { t: ReactNode; v: number; fuerte?: boolean; signo?: string }[] = [
     { t: 'Lo que paga la empresa por su trabajo', v: r.costeTrabajo },
-    { t: `Le llega a su cuenta (el ${porcentaje((1 - r.tipoSueldo) * 100, 0)}: ${emp.corto.toLowerCase()})`, v: r.netoModelo },
+    { t: r.tipoSueldo ? `Le llega a su cuenta (la empresa suma el ${porcentaje(r.tipoSueldo * 100, 0)} de impuesto encima)` : 'Le llega a su cuenta (sin impuesto sobre el sueldo)', v: r.netoModelo },
     { t: 'Gasta (la misma cesta que hoy, con los precios del modelo)', v: r.gastoModelo, signo: '−' },
     { t: 'Le queda de su trabajo', v: r.sobraModelo, fuerte: true },
     { t: ejemplo.enComunidad ? `Recibe del fondo su dividendo` : `Recibe del fondo su dividendo (${euros(r.dividendo)}) y la parte de su hogar (${euros(r.parteFamilia)})`, v: r.recibe, signo: '+' },
@@ -141,9 +141,9 @@ export function TuCaso({ modo, ejemplo, onEjemplo }: { modo: Modo; ejemplo: Ejem
           <p className="mt-3 text-xs leading-relaxed text-slate-500">
             Por sus manos pasan {euros(r.maneja)} al año ({euros(dia(r.maneja), 2)} al día): lo que vale su trabajo más lo que compra.
             La empresa paga lo mismo que hoy; los precios cambian: la misma cesta cuesta {euros(mes(r.gastoModelo))} al mes en vez de {euros(sumaGasto(ejemplo.gasto))}.
-            Lo de primera necesidad {cambio(1) < 0 ? 'baja' : 'sube'} un {porcentaje(Math.abs(cambio(1)), 0)}, porque pierde el IVA y los impuestos especiales de hoy;
+            Lo de primera necesidad {cambio(1) < 0 ? 'baja' : 'sube'} un {porcentaje(Math.abs(cambio(1)), 0)}, porque su {porcentaje(TRAMO[1].tipo * 100, 0)} sustituye al IVA y los impuestos especiales de hoy;
             lo de segunda necesidad sube un {porcentaje(cambio(2), 0)} y el ocio y el lujo, un {porcentaje(cambio(3), 0)}
-            {modo === 'literal' ? ', contando el 20 % que se pagan las empresas entre sí y acaba dentro de los precios' : ''}.
+            {modo === 'literal' ? ', contando el 25 % que se pagan las empresas entre sí y acaba dentro de los precios' : ''}.
             De su dividendo, un tercio ({euros(r.dividendo / 3)}) va a sus participaciones en lo que produce, otro a cuidados y otro es libre.
           </p>
         </div>
@@ -178,7 +178,7 @@ export function TuCaso({ modo, ejemplo, onEjemplo }: { modo: Modo; ejemplo: Ejem
             su comunidad y su municipio, en préstamos al IPC y en un trabajo u ocupación; si llega a tener una discapacidad, en el apoyo en especie.
             Y hay menos servicios públicos: por habitante, unos {euros(serviciosModelo)} entre servicios e inversión al año en lugar de {euros(serviciosHoy)}{' '}
             (lo cuentan «Frente a hoy» y «Lo que falta por resolver»).
-            {r.tipoSueldo === 0 && ejemplo.empleador !== 'publica' && <> Gran parte de la diferencia viene de que su empresa es pequeña: su sueldo no paga nada.</>}
+            {ejemplo.empleador === 'pequena' && <> Gran parte de la diferencia viene de que su empresa es pequeña: su sueldo paga solo el {porcentaje(r.tipoSueldo * 100, 0)}.</>}
           </p>
         </div>
       </div>

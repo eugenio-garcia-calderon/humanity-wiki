@@ -544,7 +544,6 @@ threshold, checked only on that null path here).
 ### 2026-11-11 — Observatorio de Polarización shipped as a framed static HTML document
 The observatory is one self-contained HTML file (`public/observatorio-polarizacion/index.html`, ~190 KB, inline CSS/JS, Google Fonts) framed by `ObservatorioPolarizacion.tsx`, not React components like the socio-economic model. Chosen because it was built and evaluated as a standalone document. Cost: it does not share the platform's UI primitives, tokens or translations, and its text is invisible to the site's search and SEO except for the page blocks. Porting it to components is roughly a day; worth it only if it must be translated or edited from the platform.
 
-
 ### 2026-11-11 — Triciclo Bala round three: shortcuts
 - The rigid lift is threaded by hand: every consumer of `F.dSuelo` that means "on the floor" adds `F.elevar`. There are 10 sites today, in `balaMedidas`, `balaPiezas`, `balaModelo` and `geometriaTriciclo`. A new part placed "on the floor" that forgets it will float 19 cm low at 35 cm clearance, and no script catches that. Folding the lift into one helper (`F.piso(y)`) is about 30 min today and grows with every part.
 - The wind tunnel still treats the rear wheel as `dentro` (inside the tail). Above 15.8 cm more of it shows below the tail, so the Cd there is somewhat optimistic. Modelling the exposed fraction is about 1 h in `tunel/nuestro.ts` plus recalibration.
