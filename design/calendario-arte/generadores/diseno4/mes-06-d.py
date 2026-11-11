@@ -7,7 +7,8 @@ grandfather and a girl are mending together, sitting on one of its leaves: she
 screws in a new LED bulb and it lights. A boy on the leaf above lets the
 sunflower's seeds go: each seed is a tiny wind turbine, and the flight of them
 lands on a hill town of many different houses, whose solar roofs share the sunflower's light;
-velomobiles roll along its road and gliders ride the air the sun warms.
+velomobiles roll along its road and gliders ride the air the sun warms. From the
+left edge a hand reaches in with a phone: a swallow flies out of its screen into the real sky.
 
     python3 mes-06-d.py [ancho_px] [salida.png|.jpg]
 """
@@ -20,6 +21,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from acuarela import (Lienzo, Poligono, Elipse, Trazo, Circulos, spline, bezier, arco, mezcla, rgb, _lapiz_de,
                       hoja, hojita, flor_simple, flor_grande, mata, ramita, pajaro, estrella, motas, remuestrea)
 from extra_m678 import (cabeza2, mano2, brazo2, pierna2, torso2, cuello, sombra_lado, piel_lapiz, pie, manga_poly)
+from personajes_06 import abuelo_y_lampara, nina, labio_hoja, nino, mano_con_telefono
 
 ANCHO = int(sys.argv[1]) if len(sys.argv) > 1 else 1485
 SALIDA = sys.argv[2] if len(sys.argv) > 2 else 'mes-06-d.png'
@@ -222,105 +224,12 @@ lz.luz(Trazo(hilo[::4], (12,)), '#ffe6a0', fuerza=0.25, suave=6)
 for k in range(6, 78, 9):
     lz.gouache(Elipse(*hilo[k], 1.5), '#fff6d8', alfa=0.9, irreg=0)
 
-# ------------------------------------------------------------------ the grandfather (holds the lamp)
-P1 = 'piel2'
-# far leg first, then near leg (seated on the leaf, legs dangling over its front edge)
-pierna2(lz, (446, 566), (500, 576), (494, 660), 30, '#4a5a8a', P1, pie_ang=-10, zapato='#6e4c3c', sombra=1)
-pierna2(lz, (424, 572), (486, 592), (468, 676), 32, '#4a5a8a', P1, pie_ang=-5, zapato='#6e4c3c', sombra=1)
-# back arm (far side): hand round the lamp base
-brazo2(lz, (452, 482), (488, 530), (528, 548), 21, '#d98a4a', P1, 'larga', sombra=1,
-       mano=dict(ang=20, gesto='relajada', lado=-1, tam=30))
-cuello(lz, (424, 438), 30, (428, 476), P1)
-torso2(lz, (396, 478), (458, 484), (408, 572), (452, 574), '#e8a04e', cintura=0.97, escote='v', sombra=-1,
-       toques=[(420, 560, 40, '#c97b2c', 0.5)],
-       pliegues=[[(420, 500), (430, 530), (428, 560)], [(446, 510), (452, 540)], [(406, 520), (412, 556)], [(440, 556), (448, 568)]])
-# cardigan buttons
-for y in (510, 530, 550):
-    lz.aguada(Elipse(437, y, 2.2), '#8a4a2a', dens=0.8, irreg=0.1)
-cabeza2(lz, 424, 438, 30, P1, '#e4ddd4', 'calvo', giro=0.55, inclina=10, ojos='abajo', boca='suave',
-        barba=None, canas=True, gafas=True, labios=False)
-
-# the lamp: an old table lamp, whole. Its round wooden foot rests in his hands, the brass column rises
-# to the socket, and the fringed shade is tipped back on its hinge so the girl can screw in the new bulb.
-pie_lamp = Poligono(np.vstack([arco(512, 562, 30, 9, 180, 360, 20), arco(512, 562, 30, 16, 0, 180, 20)]), suave=False)
-lz.aguada(pie_lamp, '#a8683a', dens=0.85, tapa=1, borde=0.7, gran=0.4, toques=[(526, 570, 16, '#6e3e22', 0.6), (498, 556, 12, '#d9a06a', 0.6)])
-lz.lapiz([arco(512, 562, 30, 9, 0, 360, 30), arco(512, 562, 20, 6, 200, 340, 20)], '#5e3a22', grosor=0.7, presion=0.55)
-col_l = Trazo([(514, 556), (518, 528), (524, 506)], (8, 7, 7))
-lz.aguada(col_l, '#d9a441', dens=0.85, tapa=1, toques=[(520, 530, 6, '#9a6a22', 0.6)])
-lz.contorno(col_l, '#7a4a22', grosor=0.7, presion=0.5)
-lz.lapiz([[(512, 540), (520, 540)], [(514, 548), (521, 548)]], '#9a6a22', grosor=0.6, presion=0.5)
-# the shade, tipped back
-rc, tc = np.array([506.0, 486.0]), np.array([480.0, 456.0])
-ax_ = tc - rc
-nn_ = np.array([ax_[1], -ax_[0]]) / np.linalg.norm(ax_)
-pantalla = Poligono([rc + nn_ * 25, tc + nn_ * 13, tc - nn_ * 13, rc - nn_ * 25], suave=False)
-lz.aguada(pantalla, CORAL, dens=0.82, tapa=1, borde=0.8, gran=0.3, toques=[(*(rc - nn_ * 14), 14, '#b8503a', 0.6), (*(tc + nn_ * 6), 10, '#f39a7a', 0.6)])
-lz.contorno(pantalla, '#8a3a2a', grosor=0.7, presion=0.5)
-borde_p = np.array([rc + nn_ * 25 * c for c in np.linspace(1, -1, 12)])
-lz.lapiz([[q, q + ax_ / np.linalg.norm(ax_) * -6 + np.array([1.5, 3])] for q in borde_p], '#b8503a', grosor=0.7, presion=0.65)
-lz.lapiz([[rc + nn_ * 5, (518, 506)]], '#7a4a22', grosor=1.0, presion=0.7)          # the hinge arm
-casq = Poligono([(518, 506), (532, 500), (536, 512), (524, 518)])
-lz.aguada(casq, '#9a9a8a', dens=0.8, tapa=1)
-lz.lapiz([[(521, 508), (533, 503)], [(523, 512), (534, 507)]], '#5a5a52', grosor=0.5, presion=0.5)
-lz.contorno(casq, '#5a5a52', grosor=0.6, presion=0.5)
-bul = Elipse(BULBO[0] + 2, BULBO[1] - 8, 13, 15, 20)
-lz.aguada(bul, '#fbe7a2', dens=0.35, tapa=1, irreg=0.2, borde=0.7)
-lz.contorno(bul, '#b08a3a', grosor=0.6, presion=0.45, cortes=0.1)
-# the filament: a fine coiled spring, lit
-bx_, by_ = BULBO[0] + 2, BULBO[1] - 8
-lz.lapiz([[(bx_ - 3, by_ + 9), (bx_ - 2, by_ + 2)], [(bx_ + 3, by_ + 9), (bx_ + 2, by_ + 2)]], '#b08a3a', grosor=0.45, presion=0.6)
-espiral = np.array([(bx_ - 5 + 10 * t, by_ + 1.5 * math.sin(t * 6 * math.pi) - 1, ) for t in np.linspace(0, 1, 60)])
-espiral[:, 1] += np.cos(np.linspace(0, 1, 60) * 6 * math.pi) * 0.0
-lz.lapiz([espiral], '#e8901e', grosor=0.7, presion=0.85, temblor=0.0)
-lz.luz((BULBO[0] + 2, BULBO[1] - 8, 30), '#fff0b0', fuerza=0.9)
-lz.aguada(Elipse(BULBO[0] + 2, BULBO[1] - 8, 70), '#f8d57e', dens=0.12, suave=25, gran=0.05)
-# grandfather's near arm: wraps the base
-brazo2(lz, (400, 488), (430, 546), (482, 562), 23, '#e8a04e', P1, 'larga', sombra=-1,
-       mano=dict(ang=-6, gesto='relajada', lado=1, tam=32))
-
-# ------------------------------------------------------------------ the girl (screws the bulb in)
-P2 = 'piel4'
-pierna2(lz, (612, 566), (558, 570), (544, 640), 26, None, P2, pie_ang=150, zapato=CORAL, sombra=-1)
-pierna2(lz, (626, 570), (568, 580), (574, 650), 26, None, P2, pie_ang=195, zapato=CORAL, sombra=-1)
-# her dress: a teal skirt that covers her lap down to the knees
-falda = Poligono([(598, 518), (634, 518), (650, 562), (640, 584), (612, 590), (570, 590), (550, 584), (552, 562),
-                  (578, 552)])
-lz.aguada(falda, TEAL, dens=0.8, tapa=1, borde=0.7, toques=[(582, 580, 30, '#1f6f72', 0.6)])
-lz.contorno(falda, '#1f5a5a', grosor=0.8, presion=0.5, cortes=0.25)
-for (x, y) in ((588, 548), (612, 560), (628, 540), (602, 576), (570, 572), (634, 572)):
-    lz.gouache(Elipse(x, y, 2.0), '#fff3cf', alfa=0.9, irreg=0)
-lz.lapiz([bezier((604, 524), (598, 552), (588, 586)), bezier((622, 526), (626, 556), (630, 584)), bezier((570, 560), (566, 574), (560, 586))],
-         '#1f5a5a', grosor=0.65, presion=0.45, temblor=0.3)
-# back arm resting on the leaf
-brazo2(lz, (634, 480), (650, 526), (646, 562), 17, '#f2c04a', P2, 'corta', sombra=1,
-       mano=dict(ang=95, gesto='relajada', lado=1, tam=26))
-cuello(lz, (618, 434), 25, (616, 474), P2)
-torso2(lz, (592, 476), (638, 478), (596, 526), (634, 528), TEAL, cintura=0.95, sombra=1,
-       toques=[(622, 510, 30, '#1f6f72', 0.5)])
-cabeza2(lz, 618, 434, 25, P2, '#2a1a14', 'afro', giro=-0.5, inclina=-14, ojos='abiertos', boca='abierta',
-        mira=(-1, 1), pendiente=ORO)
-# near arm: up to the bulb, fingers pinching it
-brazo2(lz, (596, 484), (574, 528), (556, 498), 17, '#f2c04a', P2, 'corta', sombra=-1,
-       mano=dict(ang=-155, gesto='pinza', lado=1, tam=26))
-
-# the near edge of the leaf curls up in front of their hips: they sit IN it
-labio = Trazo([(400, 590), (470, 600), (540, 602), (610, 598), (650, 590)], (5, 12, 14, 12, 6))
-lz.aguada(labio, '#7aa456', dens=0.8, tapa=1, borde=0.7, toques=[(520, 600, 40, '#a9c46a', 0.6)])
-lz.contorno(labio, VERDE_O, grosor=0.8, presion=0.5, cortes=0.2)
-lz.lapiz([spline([(420, 594), (500, 602), (600, 600)])], '#d9e3a8', grosor=0.6, presion=0.5)
-# ------------------------------------------------------------------ the boy who flings the seeds into the wind (upper leaf)
-# on tiptoe on the back foot, front knee bent; one arm throws up and forward, the other opens back for balance
-P3 = 'piel3'
-brazo2(lz, (852, 322), (826, 334), (800, 326), 14, '#e8735e', P3, 'corta', sombra=-1,
-       mano=dict(ang=185, gesto='abierta', lado=1, tam=23))
-pierna2(lz, (838, 380), (820, 410), (808, 432), 21, '#3f6fb0', P3, pie_ang=48, zapato='#e8b53e', sombra=-1, pie_tam=26)
-pierna2(lz, (856, 376), (884, 398), (886, 432), 21, '#3f6fb0', P3, pie_ang=5, zapato='#e8b53e', sombra=1, pie_tam=28)
-cuello(lz, (870, 276), 22, (868, 312), P3, giro=0.5, inclina=10)
-torso2(lz, (850, 318), (888, 308), (836, 380), (860, 374), '#e8735e', cintura=0.95, sombra=1,
-       pliegues=[[(856, 330), (852, 362)], [(872, 324), (864, 356)], [(846, 346), (842, 370)]])
-cabeza2(lz, 870, 276, 22, P3, '#3a2620', 'corto', giro=0.5, inclina=10, ojos='abiertos', boca='risa', mira=(1, -1))
-brazo2(lz, (886, 314), (914, 290), (940, 258), 14, '#e8735e', P3, 'corta', sombra=1,
-       mano=dict(ang=-55, gesto='abierta', lado=-1, tam=23))
+# ------------------------------------------------------------------ the people (redrawn 2026-11-11: personajes_06.py)
+# the grandfather mends the lamp, the girl screws the bulb in, the leaf curls up in front of them, the boy throws the seeds
+abuelo_y_lampara(lz, BULBO)
+nina(lz)
+labio_hoja(lz)
+nino(lz)
 
 # ------------------------------------------------------------------ seeds that are wind turbines
 def molinillo(x, y, s, ang=0, color='#f6e3c4', gouache=False, semilla_=True):
@@ -761,6 +670,9 @@ def satelite(x, y, s=1.0, ang=-14):
 
 
 satelite(214, 262, 1.0, ang=-14)   # below the web page's design buttons, which cover the top-left corner on screen
+
+# the fourth character: only a hand and its phone, reaching in from the left; a swallow flies out of the screen
+mano_con_telefono(lz)
 
 lz.vineta(margen=26)
 lz.guardar(SALIDA)
