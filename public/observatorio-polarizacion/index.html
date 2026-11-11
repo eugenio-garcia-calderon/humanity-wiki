@@ -568,6 +568,165 @@ h3{font:400 clamp(1.5rem,2.6vw,2rem)/1.15 var(--display);margin:0}
   .cons .rd{font-size:.98rem}
 }
 
+/* ================= Versión de seis capítulos ================= */
+:root{--ancom:#C0507A;--ancap:#2E9C86;--indxl:#8F5FD6;--indl:#B597F2;--indr:#7A86B8;--ok:#5CC28A}
+
+/* Portada: seis tarjetas */
+.hero{padding-block:clamp(28px,4vw,56px) clamp(56px,8vw,96px)}
+.hero-text{display:block}
+.hero-text h1{font-size:clamp(2rem,4.2vw,3.4rem);max-width:22ch;margin-top:14px}
+.cards{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
+.card{grid-column:span 2;display:flex;flex-direction:column;gap:6px;padding:14px 14px 18px;border-radius:18px;background:var(--bg-2);border:1px solid var(--line);
+  color:var(--ink);text-decoration:none;transition:transform .2s,border-color .2s,background .2s;min-width:0}
+.card.big{grid-column:span 2}
+.card:hover,.card:focus-visible{transform:translateY(-3px);border-color:var(--cc);background:var(--bg-3)}
+.card-img{display:block;border-radius:12px;background:radial-gradient(120% 120% at 0% 0%,color-mix(in srgb,var(--cc) 14%,transparent),transparent 60%),var(--bg);overflow:hidden;margin-bottom:6px}
+.card-img svg{display:block;width:100%;height:auto}
+.card.big .card-img svg{aspect-ratio:320/150}
+.card-n{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--cc)}
+.card b{font:400 clamp(1.3rem,2vw,1.6rem)/1.15 var(--display)}
+.card-t{font-size:14px;line-height:1.45;color:var(--ink-2)}
+@media (max-width:900px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))} .card,.card.big{grid-column:auto}}
+@media (max-width:520px){.cards{grid-template-columns:minmax(0,1fr)}}
+
+/* Subsecciones dentro de un capítulo */
+.sub{margin-top:clamp(48px,7vw,80px)}
+.sub > h3,.cons-head h3,.model-head h3{font-size:clamp(1.5rem,2.6vw,2rem);margin:0 0 10px}
+.sub > .ch-lede{margin-bottom:22px}
+
+/* 1 · El estudio real */
+.study{padding:clamp(20px,3.4vw,40px);border-radius:22px;background:var(--bg-2);border:1px solid var(--c);display:grid;gap:18px}
+.study-badge{display:inline-flex;align-items:center;gap:10px;align-self:start;justify-self:start;padding:7px 14px;border-radius:999px;background:var(--c);color:var(--bg);font:600 12px var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.dot-live{width:9px;height:9px;border-radius:50%;background:#2E9C5A;box-shadow:0 0 0 3px rgba(46,156,90,.3)}
+.study h3{font-size:clamp(1.7rem,3.2vw,2.5rem)}
+.study-meta{font-size:14px;color:var(--muted);margin:0;max-width:90ch}
+.study-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:clamp(18px,3vw,40px);align-items:end}
+.cis-bars{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:8px;align-items:end;height:300px}
+.cb{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:6px;height:100%;min-width:0}
+.cb b{font:400 clamp(1.05rem,2vw,1.6rem)/1 var(--display);color:var(--ink);white-space:nowrap}
+.cb b small{font-size:.6em;color:var(--muted);margin-left:1px}
+.cb i{display:block;width:100%;border-radius:8px 8px 3px 3px;min-height:4px}
+.cb span{font:500 14px var(--mono);color:var(--ink-2)}
+.cis-ends{display:flex;justify-content:space-between;margin-top:8px;font:500 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.stat{padding:16px;border-radius:14px;background:var(--bg);border:1px solid var(--line)}
+.stat b{display:block;font:400 clamp(2rem,3.6vw,2.8rem)/1 var(--display);color:var(--ink);margin-bottom:6px}
+.stat span{font-size:13.5px;line-height:1.4;color:var(--ink-2)}
+.study-read{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 28px}
+.study-read p{margin:0;color:var(--ink-2)}
+.study-read b{color:var(--ink)}
+.study-read .tiny{grid-column:1 / -1}
+.model-head{margin-top:clamp(48px,7vw,80px);display:grid;gap:8px;margin-bottom:20px}
+.model-badge{justify-self:start;padding:6px 12px;border-radius:999px;border:1px dashed var(--muted);font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.cons-head{margin-top:clamp(40px,6vw,64px);margin-bottom:14px}
+@media (max-width:900px){.study-grid,.study-read{grid-template-columns:minmax(0,1fr)} .cis-bars{height:220px;gap:4px} .cb b{font-size:.95rem}}
+@media (max-width:520px){.cb b small{display:none} .cb b{font-size:.78rem}}
+
+/* 2 · Cien años */
+.hist{padding:clamp(18px,3vw,34px);border-radius:22px;background:var(--bg-2);border:1px solid var(--line)}
+.hline{position:relative;display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px}
+.hline::before{content:"";position:absolute;left:5%;right:5%;top:17px;height:3px;border-radius:2px;background:linear-gradient(90deg,#9AA3B3,#F6BE3B 14%,#EC5272 16%,#9AA3B3 22%,#9AA3B3 50%,#E8E2CF 60%,#F2955F 85%,#F2955F)}
+.hnode{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:0;padding:8px 2px 6px;border-radius:12px;border:0;background:none;color:var(--ink-2);cursor:pointer;font:inherit}
+.hnode i{width:18px;height:18px;border-radius:50%;background:var(--bg);border:3px solid var(--hc);transition:transform .2s,background .2s}
+.hnode b{font:400 1.05rem/1 var(--display);color:var(--ink)}
+.hnode span{font-size:12px;line-height:1.2;text-align:center;color:var(--muted)}
+.hnode:hover,.hnode[aria-pressed="true"]{background:var(--bg-3)}
+.hnode:hover i,.hnode[aria-pressed="true"] i{transform:scale(1.35);background:var(--hc)}
+.hnode[aria-pressed="true"] b{color:var(--hc)}
+.hrange{margin:6px 0 14px}
+.hbody{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:clamp(18px,3vw,40px);align-items:start}
+.hchart svg{display:block;width:100%;height:auto}
+.hsy{font:500 12px var(--mono);fill:var(--ink-2)}
+.hst{font:600 12px var(--mono);letter-spacing:.1em}
+.hd-cap{font-size:12.5px;color:var(--muted);margin:8px 0 0;text-align:center}
+.hinfo{--hc:var(--c)}
+.hd-years{display:block;font:400 clamp(2.6rem,5vw,3.8rem)/1 var(--display);color:var(--hc)}
+.hd-phase{display:inline-block;margin:12px 0 4px;padding:4px 10px;border-radius:999px;border:1px solid var(--hc);font:500 11px var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--hc)}
+.hinfo h3{margin:8px 0 10px}
+.hinfo p{color:var(--ink-2)}
+.hd-cons{margin:6px 0 0;padding-left:18px;color:var(--ink-2);font-size:15px}
+.hd-cons li{margin-bottom:6px}
+@media (max-width:900px){.hbody{grid-template-columns:minmax(0,1fr)} .hnode span{display:none} .hline{grid-template-columns:repeat(5,minmax(0,1fr))} .hline::before{display:none}}
+
+/* 4 · Perfiles */
+.pf-grid{margin-top:20px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.pf{display:flex;flex-direction:column;gap:10px;padding:18px;border-radius:18px;background:var(--bg-2);border:1px solid var(--line);border-top:3px solid var(--dc);min-width:0}
+.pf-h{display:flex;align-items:center;gap:12px}
+.pf-h .ncirc{width:58px;flex:none}
+.pf-h h3{font-size:1.25rem;line-height:1.15;color:var(--ink)}
+.pf-arq{font:italic 400 1rem/1.25 var(--display);color:var(--dc);margin:2px 0 0}
+.pf-flag{margin:0;font-size:12.5px;color:var(--warn)}
+.pf-q{font:400 1.08rem/1.35 var(--display);color:var(--ink);quotes:"«" "»"}
+.pf-dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 12px;margin:0;font-size:13.5px;line-height:1.45}
+.pf-dl dt{font:500 10.5px/1.6 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.pf-dl dd{margin:0;color:var(--ink-2);min-width:0}
+.pf-dep{display:flex;align-items:center;gap:8px;margin-top:5px;font-size:12px;color:var(--muted)}
+.pf-dep .segs i.on{background:var(--dc)}
+.kv3{display:block}
+.kv3 i{font-style:normal;color:var(--dc);margin-right:6px}
+.pf-dl .chip{font-size:12px;padding:3px 9px;margin:0 0 4px}
+.pf-ten{display:block;font-weight:600;color:var(--ink)}
+.pf-ten + .pf-ten{margin-top:4px}
+.pf-lid{display:block}
+.pf-lid b{color:var(--ink);font-weight:600}
+.pf-more{margin-top:auto;border-top:1px solid var(--line);padding-top:10px;font-size:13.5px;color:var(--ink-2)}
+.pf-more summary{cursor:pointer;font:600 13px var(--sans);color:var(--ink);min-height:32px;display:flex;align-items:center}
+.pf-more p{margin:8px 0 0}
+.pf-strats .chip{font-size:12px;padding:3px 9px;margin:4px 4px 0 0}
+.lead-note{margin-top:22px;padding:16px 18px;border-radius:14px;border:1px dashed var(--ctl);font-size:14px;color:var(--ink-2)}
+.lead-note b{color:var(--ink)}
+@media (max-width:1000px){.pf-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.pf-grid{grid-template-columns:minmax(0,1fr)}}
+
+/* 5 · Círculos de pertenencia */
+.rings-wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(20px,3vw,48px);align-items:center}
+.rings svg{display:block;width:100%;max-width:520px;height:auto;margin:0 auto}
+.rings .ring{transition:fill-opacity .3s}
+.rl{font:600 15px var(--sans);fill:var(--ink);paint-order:stroke;stroke:#0C0F14;stroke-width:5px;stroke-linejoin:round}
+.rpick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.rp{display:flex;align-items:center;gap:6px;min-height:44px;padding:4px 8px 4px 4px;border-radius:12px;border:1px solid var(--line-2);background:var(--bg);color:var(--ink-2);font:500 12px/1.15 var(--sans);text-align:left;cursor:pointer;min-width:0}
+.rp .ncirc{width:30px;flex:none;border-width:2px}
+.rp span:last-child{overflow:hidden;text-overflow:ellipsis}
+.rp:hover,.rp[aria-pressed="true"]{border-color:var(--nc);color:var(--ink);background:var(--bg-3)}
+.rlist{list-style:none;margin:18px 0;padding:0;display:grid;gap:6px}
+.rlist li{display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;background:var(--bg-2);border-left:4px solid var(--ec);font-size:14.5px}
+.rlist i{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--ec);color:#0C0F14;font-style:normal;font-weight:700;font-size:13px}
+.rlist b{font:600 12px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ec)}
+.id-insight{font:400 clamp(1.05rem,1.7vw,1.3rem)/1.4 var(--display);margin:0}
+@media (max-width:900px){.rings-wrap{grid-template-columns:minmax(0,1fr)} .rpick{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:480px){.rpick{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* 5 · La escalera */
+.glasl{overflow-x:auto;border-radius:22px;background:var(--bg-2);border:1px solid var(--line);padding:10px}
+.glasl svg{display:block;width:100%;min-width:720px;height:auto}
+.gstep{cursor:pointer}
+.gstep:focus-visible{outline:none}
+.gstep > rect:first-child{transition:filter .2s,stroke-width .2s;stroke:#EDEBE6;stroke-width:0}
+.gstep:hover > rect:first-child,.gstep.on > rect:first-child{filter:brightness(1.18);stroke-width:3}
+.gl-n{font:400 40px var(--display);fill:#0C0F14}
+.gl-t{font:600 12.5px var(--sans);fill:#0C0F14}
+.gl-lv{font:600 12px var(--mono);letter-spacing:.1em}
+.gl-ld{font:400 13px var(--sans);fill:var(--ink-2)}
+.gl-ab{font:600 13px var(--mono);letter-spacing:.2em;fill:#EC5272}
+
+/* 6 · Fuentes */
+.refs-grid{margin-top:18px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.ref{display:grid;grid-template-columns:92px minmax(0,1fr);gap:14px;padding:14px;border-radius:16px;background:var(--bg-2);border:1px solid var(--line);min-width:0}
+.ref-img{position:relative;display:flex;flex-direction:column;justify-content:space-between;height:124px;padding:10px;border-radius:10px;overflow:hidden;
+  background:linear-gradient(160deg,color-mix(in srgb,var(--rc) 55%,#0C0F14),#0C0F14);box-shadow:inset 6px 0 0 rgba(0,0,0,.25)}
+.ref-y{font:600 12px var(--mono);color:#0C0F14;background:var(--rc);align-self:flex-start;padding:2px 6px;border-radius:4px}
+.ref-i{font:400 2.2rem/1 var(--display);color:#fff;opacity:.95}
+.ref-cat{font:500 9.5px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:#fff;opacity:.8}
+.ref-b{min-width:0}
+.ref-a{margin:0;font:500 12px var(--mono);color:var(--muted)}
+.ref h4{margin:4px 0 2px;font:400 1.05rem/1.25 var(--display);color:var(--ink)}
+.ref-s{margin:0 0 8px;font-size:12.5px;font-style:italic;color:var(--muted)}
+.ref-u{margin:0;font-size:13.5px;line-height:1.45;color:var(--ink-2)}
+.ref-u .lbl{display:block;margin-bottom:2px;color:var(--rc)}
+.ref-ch{margin:8px 0 0;font:500 11px var(--mono);color:var(--muted)}
+@media (max-width:1000px){.refs-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.refs-grid{grid-template-columns:minmax(0,1fr)}}
+
 /* ---------- Método ---------- */
 .method{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 .mcard2{padding:clamp(22px,3vw,30px);border-radius:18px;background:var(--bg-2);border:1px solid var(--line)}
@@ -688,30 +847,64 @@ footer p{margin:0;max-width:70ch}
       <path d="M39,58 C37,36 48,28 60,28 C73,28 83,36 81,58 C78,44 70,38 60,38 C50,38 42,44 39,58 Z" fill="#2E241D"/>
       <path d="M78,46 C90,50 92,66 86,80" stroke="#2E241D" stroke-width="6" fill="none" stroke-linecap="round"/>
     </symbol>
+    <symbol id="p-ancom" viewBox="0 0 120 140">
+      <path d="M50,72 L70,72 L71,98 Q60,104 49,98 Z" fill="#B8957A"/>
+      <path d="M12,140 C12,108 32,94 60,94 C88,94 108,108 108,140 Z" fill="#23262E"/>
+      <path d="M40,95 Q60,108 80,95" stroke="#3A3F4B" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M80,112 L94,112 L94,124 L80,124 Z" fill="#14161B"/><path d="M80,112 L94,112 L80,124 Z" fill="#C8303F"/>
+      <ellipse cx="60" cy="54" rx="20" ry="24" fill="#CFAE93"/>
+      <path d="M40,52 C38,33 50,27 61,27 C73,27 82,34 80,52 C77,40 70,36 60,36 C51,36 44,41 40,52 Z" fill="#2B211B"/>
+      <path d="M38,48 L36,64 M82,48 L84,64" stroke="#2B211B" stroke-width="4" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="p-ancap" viewBox="0 0 120 140">
+      <path d="M78,40 C92,44 94,62 88,78" stroke="#5A3A24" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <path d="M50,72 L70,72 L71,98 Q60,104 49,98 Z" fill="#B8957A"/>
+      <path d="M12,140 C12,108 32,94 60,94 C88,94 108,108 108,140 Z" fill="#E9E6DE"/>
+      <path d="M12,140 C12,108 30,96 46,94 L55,140 Z" fill="#4A4D55"/><path d="M108,140 C108,108 90,96 74,94 L65,140 Z" fill="#4A4D55"/>
+      <path d="M30,108 L42,108 L42,120 L30,120 Z" fill="#14161B"/><path d="M30,108 L42,108 L30,120 Z" fill="#E3B341"/>
+      <ellipse cx="60" cy="54" rx="20" ry="24" fill="#CFAE93"/>
+      <path d="M40,55 C38,34 49,28 60,28 C72,28 82,35 80,52 C75,41 67,38 58,39 C50,40 44,45 40,55 Z" fill="#5A3A24"/>
+    </symbol>
+    <symbol id="p-indxl" viewBox="0 0 120 140">
+      <path d="M50,72 L70,72 L71,98 Q60,104 49,98 Z" fill="#B8957A"/>
+      <path d="M12,140 C12,108 32,94 60,94 C88,94 108,108 108,140 Z" fill="#3E4A3A"/>
+      <path d="M58,94 L62,94 L62,140 L58,140 Z" fill="#2E372B"/>
+      <path d="M38,98 C46,108 74,108 82,98 L80,106 C70,114 50,114 40,106 Z" fill="#8F5FD6"/>
+      <circle cx="86" cy="122" r="6" fill="#8F5FD6"/><path d="M86,117.5 L87.3,120.6 L90.5,120.8 L88,122.9 L88.8,126 L86,124.3 L83.2,126 L84,122.9 L81.5,120.8 L84.7,120.6 Z" fill="#EDEBE6"/>
+      <ellipse cx="60" cy="54" rx="20" ry="24" fill="#CFAE93"/>
+      <path d="M40,50 C39,33 50,27 61,27 C73,27 81,33 80,48 C77,40 69,36 60,36 C51,36 44,41 40,50 Z" fill="#1F1A16"/>
+      <path d="M44,64 C45,74 52,78 60,78 C68,78 75,74 76,64 C72,70 67,71 60,71 C53,71 48,70 44,64 Z" fill="#1F1A16" opacity=".8"/>
+    </symbol>
+    <symbol id="p-indl" viewBox="0 0 120 140">
+      <path d="M50,72 L70,72 L71,98 Q60,104 49,98 Z" fill="#B8957A"/>
+      <path d="M12,140 C12,108 32,94 60,94 C88,94 108,108 108,140 Z" fill="#B597F2"/>
+      <path d="M12,140 C12,108 30,96 46,95 L52,140 Z" fill="#6E5A99"/><path d="M108,140 C108,108 90,96 74,95 L68,140 Z" fill="#6E5A99"/>
+      <ellipse cx="60" cy="54" rx="20" ry="24" fill="#CFAE93"/>
+      <path d="M38,64 C34,38 46,28 60,28 C76,28 86,38 82,64 L80,90 L74,90 L76,62 C74,48 68,42 60,42 C52,42 46,48 44,62 L46,90 L40,90 Z" fill="#3B2B22"/>
+    </symbol>
+    <symbol id="p-indr" viewBox="0 0 120 140">
+      <path d="M50,72 L70,72 L71,98 Q60,104 49,98 Z" fill="#B8957A"/>
+      <path d="M12,140 C12,108 32,94 60,94 C88,94 108,108 108,140 Z" fill="#2A3142"/>
+      <path d="M48,94 L72,94 L64,118 L56,118 Z" fill="#EDEBE6"/>
+      <path d="M57,98 L63,98 L65,128 L60,134 L55,128 Z" fill="#7A86B8"/>
+      <ellipse cx="60" cy="54" rx="20" ry="24" fill="#CFAE93"/>
+      <path d="M40,50 C40,34 50,28 61,28 C72,28 80,33 80,46 C76,40 69,37 61,38 C52,39 45,43 40,50 Z" fill="#8A8F98"/>
+    </symbol>
   </defs>
 </svg>
-
-<a class="skip" href="#mapa">Saltar al mapa</a>
+<a class="skip" href="#hoy">Saltar al contenido</a>
 
 <header class="top" lang="es">
   <div class="top-in">
-    <a class="brand" href="#inicio"><span class="brand-mark" aria-hidden="true"></span><span class="brand-txt">Observatorio de la polarización</span></a>
+    <a class="brand" href="#inicio"><span class="brand-mark" aria-hidden="true"></span><span class="brand-txt">Observatorio de Polarización</span></a>
     <nav aria-label="Capítulos">
       <ol class="nav">
-        <li><a href="#inicio">Simulador</a></li>
-        <li><a href="#historia">Historia</a></li>
-        <li><a href="#mapa">Mapa</a></li>
-        <li><a href="#lideres">Líderes</a></li>
-        <li><a href="#etiquetas">Etiquetas</a></li>
-        <li><a href="#miradas">Miradas</a></li>
-        <li><a href="#prisma">Lenguaje</a></li>
-        <li><a href="#identidades">Identidades</a></li>
-        <li><a href="#escalada">Escalada</a></li>
-        <li><a href="#consecuencias">Consecuencias</a></li>
-        <li><a href="#contradicciones">Contradicciones</a></li>
-        <li><a href="#test">Test</a></li>
-        <li><a href="#salida">Salida</a></li>
-        <li><a href="#metodo">Método</a></li>
+        <li><a href="#hoy">1 · Hoy</a></li>
+        <li><a href="#historia">2 · Cien años</a></li>
+        <li><a href="#miradas">3 · Miradas</a></li>
+        <li><a href="#perfiles">4 · Perfiles</a></li>
+        <li><a href="#escalada">5 · Del nosotros al enemigo</a></li>
+        <li><a href="#fuentes">6 · Palabras y fuentes</a></li>
       </ol>
     </nav>
   </div>
@@ -721,20 +914,79 @@ footer p{margin:0;max-width:70ch}
 <div class="page" lang="es">
 <main>
 
-<!-- ============ 0 · PORTADA Y SIMULADOR ============ -->
+<!-- ============ PORTADA: SEIS CAPÍTULOS ============ -->
 <section id="inicio" class="hero" aria-labelledby="h-inicio">
   <div class="hero-text">
-    <p class="eyebrow">Modelo interactivo · Sociedad española</p>
-    <h1 id="h-inicio">Una sociedad se mide por la forma de su <em>centro</em>.</h1>
-    <div class="hero-side">
-      <p class="hero-lede">Cinco posiciones políticas, dos ejes y una pregunta: ¿qué ocurre cuando el grupo empieza a pensar por nosotros? Sube la presión del grupo y mira qué se mueve primero: las ideas o la temperatura.</p>
-      <div class="hero-cta">
-        <a class="btn primary" href="#mapa">Explorar el mapa</a>
-        <a class="btn" href="#test">Hacer el test · 3 min</a>
-      </div>
-    </div>
+    <p class="eyebrow">Observatorio de Polarización · España</p>
+    <h1 id="h-inicio">Seis formas de mirar una sociedad dividida.</h1>
+  </div>
+  <div class="cards" id="cards">
+    <a class="card big" href="#hoy" style="--cc:var(--c)">
+      <span class="card-img" aria-hidden="true"><svg viewBox="0 0 320 150" id="ci-hoy"></svg></span>
+      <span class="card-n">Capítulo 1</span><b>La España de hoy</b>
+      <span class="card-t">El estudio real del CIS, qué pasa cuando sube la presión del grupo y lo que cuesta cada fase.</span>
+    </a>
+    <a class="card big" href="#historia" style="--cc:var(--l)">
+      <span class="card-img" aria-hidden="true"><svg viewBox="0 0 320 150" id="ci-historia"></svg></span>
+      <span class="card-n">Capítulo 2</span><b>Cien años de polarización</b>
+      <span class="card-t">De 1923 a 2026: la forma de la sociedad española en cada etapa, y su precio.</span>
+    </a>
+    <a class="card big" href="#miradas" style="--cc:var(--xl)">
+      <span class="card-img" aria-hidden="true"><svg viewBox="0 0 320 150" id="ci-miradas"></svg></span>
+      <span class="card-n">Capítulo 3</span><b>Miradas</b>
+      <span class="card-t">Mira la sociedad con los ojos de cada bando: cómo nombra a los demás y cómo cuenta los hechos.</span>
+    </a>
+    <a class="card" href="#perfiles" style="--cc:var(--r)">
+      <span class="card-img" aria-hidden="true"><svg viewBox="0 0 320 150" id="ci-perfiles"></svg></span>
+      <span class="card-n">Capítulo 4</span><b>Doce perfiles</b>
+      <span class="card-t">Psicología, relato, lenguaje, contradicciones y líderes de cada corriente.</span>
+    </a>
+    <a class="card" href="#escalada" style="--cc:var(--warn)">
+      <span class="card-img" aria-hidden="true"><svg viewBox="0 0 320 150" id="ci-escalada"></svg></span>
+      <span class="card-n">Capítulo 5</span><b>Del nosotros al enemigo</b>
+      <span class="card-t">Los círculos de pertenencia y los nueve peldaños que llevan del desacuerdo al abismo.</span>
+    </a>
+    <a class="card" href="#fuentes" style="--cc:var(--xr)">
+      <span class="card-img" aria-hidden="true"><svg viewBox="0 0 320 150" id="ci-fuentes"></svg></span>
+      <span class="card-n">Capítulo 6</span><b>Palabras y fuentes</b>
+      <span class="card-t">De dónde vienen «facha», «rojo» o «fascista», y los estudios en que se apoya todo.</span>
+    </a>
+  </div>
+</section>
+
+<!-- ============ 1 · LA ESPAÑA DE HOY ============ -->
+<section id="hoy" class="chapter" aria-labelledby="h-hoy">
+  <div class="ch-head">
+    <p class="ch-num">Capítulo 1 · La España de hoy</p>
+    <h2 id="h-hoy">Lo que dicen los datos, <em>y lo que podría pasar</em>.</h2>
+    <p class="ch-lede">Primero, una medición real: cómo se sitúan hoy los españoles entre la izquierda y la derecha. Después, un modelo para ver qué ocurre cuando el grupo empieza a pensar por nosotros, y lo que cuesta cada fase.</p>
   </div>
 
+  <article class="study" aria-labelledby="h-study">
+    <div class="study-badge"><span class="dot-live" aria-hidden="true"></span>Estudio real · no es una simulación</div>
+    <h3 id="h-study">Barómetro del CIS, septiembre de 2026</h3>
+    <p class="study-meta">Centro de Investigaciones Sociológicas · Estudio n.º 3577 · 4.042 entrevistas · Pregunta: «¿Dónde se colocaría usted en una escala de 1 a 10, donde 1 es izquierda y 10 derecha?»</p>
+    <div class="study-grid">
+      <div class="cis-chart" id="cis-chart" role="img" aria-label="Autoubicación ideológica en España, septiembre de 2026: 1, 17,7 %; 2, 7,0 %; 3, 11,5 %; 4, 8,3 %; 5, 20,5 %; 6, 6,3 %; 7, 7,5 %; 8, 6,5 %; 9, 1,3 %; 10, 8,1 %."></div>
+      <div class="stats">
+        <div class="stat"><b>24,7 %</b><span>se sitúa en el 1 o el 2, la izquierda más marcada</span></div>
+        <div class="stat"><b>20,5 %</b><span>elige el 5, el centro exacto de la escala</span></div>
+        <div class="stat"><b>9,4 %</b><span>se sitúa en el 9 o el 10, la derecha más marcada</span></div>
+        <div class="stat"><b>4,6</b><span>es la media: algo a la izquierda del centro</span></div>
+      </div>
+    </div>
+    <div class="study-read">
+      <p><b>No es una campana.</b> Tiene tres picos: el 1, el 5 y el 10. Los extremos de una escala atraen respuestas por anclaje, así que elegir el 1 o el 10 indica una dirección, no extremismo.</p>
+      <p><b>Lo que más ha crecido es el rechazo al otro.</b> España está entre los países europeos con más polarización afectiva: más que en las ideas, la distancia está en lo que se siente por el otro bando (Reiljan, 2020; Torcal, 2023).</p>
+      <p class="tiny">Porcentajes sobre el total de la muestra; un 2,1 % no sabe y un 3,1 % no contesta. Calculados a partir de las bases de cada columna de la tabulación por ideología publicada por el CIS.</p>
+    </div>
+  </article>
+
+  <div class="model-head">
+    <span class="model-badge">Modelo · simulación ilustrativa</span>
+    <h3>¿Y si sube la presión del grupo?</h3>
+    <p class="ch-lede">520 personas imaginarias. Mueve el control y mira qué se mueve primero: las ideas o la temperatura. Las barras grises son el estudio real de arriba, para comparar.</p>
+  </div>
   <div class="sim" role="group" aria-labelledby="sim-label">
     <div class="sim-head">
       <div>
@@ -749,7 +1001,7 @@ footer p{margin:0;max-width:70ch}
       </div>
     </div>
     <div class="sim-canvas">
-      <canvas id="sim" role="img" aria-label="Cada punto es una persona. Su posición horizontal es su ideología; su altura, cuánto depende de su grupo y cuánto rechaza al otro bando. Abajo, la campana de la distribución ideológica del modelo y, en barras grises, la distribución real del barómetro del CIS de septiembre de 2026."></canvas>
+      <canvas id="sim" role="img" aria-label="Cada punto es una persona. Su posición horizontal es su ideología; su altura, cuánto depende de su grupo y cuánto rechaza al otro bando. Abajo, la campana de la distribución ideológica del modelo y, en barras grises, la distribución real del CIS de septiembre de 2026."></canvas>
       <div class="axis5" aria-hidden="true"><span>Extrema izquierda</span><span>Izquierda</span><span>Centro</span><span>Derecha</span><span>Extrema derecha</span></div>
     </div>
     <div class="sim-ctrl">
@@ -765,87 +1017,154 @@ footer p{margin:0;max-width:70ch}
       </div>
     </div>
     <div class="sim-data">
-      <button class="tbtn" id="cis-toggle" aria-pressed="true"><span class="cis-key" aria-hidden="true"></span>Datos reales: CIS</button>
-      <p class="sim-note"><b>España, septiembre de 2026.</b> En el barómetro del CIS (estudio 3577, n = 4.042), el 20,5 % se sitúa en el 5, pero el 24,7 % elige el 1 o el 2 y el 8,1 % el 10; la media es 4,6. Los extremos de una escala atraen respuestas por anclaje: elegir el 1 o el 10 indica dirección, no tribu. La polarización afectiva española figura entre las altas de Europa (Reiljan, 2020; Torcal, 2023). La campana del modelo es ilustrativa y sus niveles salen de sus propias reglas. <span class="sr" id="sim-sr" aria-live="polite"></span></p>
+      <button class="tbtn" id="cis-toggle" aria-pressed="true"><span class="cis-key" aria-hidden="true"></span>Comparar con el CIS</button>
+      <p class="sim-note">Los puntos y sus niveles salen de las reglas del modelo, no de una encuesta. Solo las barras grises son datos. <span class="sr" id="sim-sr" aria-live="polite"></span></p>
     </div>
   </div>
+
+  <div class="cons-head">
+    <h3>Lo que cuesta cada fase</h3>
+    <p class="ch-lede">La columna encendida es la fase en que está el modelo. Cambia al mover el control de arriba, o pulsa una fase.</p>
+  </div>
+  <div class="toggle-row" id="cons-pick" role="group" aria-label="Elige una fase"></div>
+  <div class="cons" id="cons" aria-live="polite"></div>
+  <p class="note">Los ejemplos con cita son resultados de investigación, casi todos de EE. UU.; los de España son hechos documentados.</p>
 </section>
 
-<!-- ============ 0 bis · CIEN AÑOS ============ -->
+<!-- ============ 2 · CIEN AÑOS ============ -->
 <section id="historia" class="chapter" aria-labelledby="h-historia">
   <div class="ch-head">
-    <p class="ch-num">Capítulo 0 · Cien años</p>
+    <p class="ch-num">Capítulo 2 · Cien años de polarización</p>
     <h2 id="h-historia">La campana de España, <em>1923–2026</em>.</h2>
-    <p class="ch-lede">Un siglo en diez etapas, con las mismas cuatro fases del simulador. Cada etapa muestra la forma que la historiografía atribuye a su sociedad y lo que costó. Pulsa una etapa.</p>
+    <p class="ch-lede">Diez etapas. Pasa el ratón por la línea del tiempo, o arrastra el control, y mira cómo cambia la forma de la sociedad y lo que costó.</p>
   </div>
-  <div class="hist-chart"><svg id="hist-svg" viewBox="0 0 1000 270" role="img" aria-label="Temperatura de la polarización en España de 1923 a 2026, según el modelo"></svg></div>
-  <div class="toggle-row hist-pick" id="hist-pick" role="group" aria-label="Elige una etapa"></div>
-  <article class="hist-detail" id="hist-detail" aria-live="polite"></article>
-  <p class="note">Antes de 1976 no hay encuestas de autoubicación: las curvas anteriores son interpretaciones del modelo a partir de la historiografía, no mediciones. En las dictaduras, la curva gris es la sociedad que no podía expresarse. La curva de 2026 se apoya en la distribución real del CIS (estudio 3577).</p>
-  <div class="bridge"><p>Las formas se repiten porque las personas se agrupan de la misma manera. Estos son los cinco tipos que las forman.</p><a class="btn sm" href="#mapa">Capítulo 1 · El mapa</a></div>
+  <div class="hist">
+    <div class="hline" id="hline" role="group" aria-label="Etapas de la historia de España"></div>
+    <input class="range hrange" type="range" id="hrange" min="0" max="9" value="9" aria-label="Etapa">
+    <div class="hbody">
+      <div class="hchart"><svg id="hchart" viewBox="0 0 640 330" role="img" aria-label="Forma de la sociedad española en la etapa elegida"></svg>
+        <div class="axis5" aria-hidden="true"><span>Extrema izquierda</span><span>Izquierda</span><span>Centro</span><span>Derecha</span><span>Extrema derecha</span></div>
+        <p class="hd-cap" id="hcap"></p>
+      </div>
+      <div class="hinfo" id="hinfo" aria-live="polite"></div>
+    </div>
+  </div>
+  <p class="note">Antes de 1976 no hay encuestas de autoubicación: esas curvas son interpretaciones a partir de la historiografía, no mediciones. En las dictaduras, la curva gris es la sociedad que no podía expresarse. La de 2026 lleva debajo el estudio real del CIS.</p>
 </section>
 
-<!-- ============ 1 · MAPA ============ -->
-<section id="mapa" class="chapter" aria-labelledby="h-mapa">
+<!-- ============ 3 · MIRADAS ============ -->
+<section id="miradas" class="chapter" aria-labelledby="h-miradas">
   <div class="ch-head">
-    <p class="ch-num">Capítulo 1 · El mapa</p>
-    <h2 id="h-mapa">La dirección no es el problema. <em>La tribu</em>, sí.</h2>
-    <p class="ch-lede">El eje horizontal dice hacia dónde miras. El vertical, cuánto necesitas al grupo para saber quién eres. Los extremos no solo están lejos del centro: están arriba, donde la identidad depende de la tribu.</p>
+    <p class="ch-num">Capítulo 3 · Miradas</p>
+    <h2 id="h-miradas">Mira la sociedad <em>con sus ojos</em>.</h2>
+    <p class="ch-lede">Cada posición pone nombre a las demás. Elige unos ojos y el resto cambia de nombre. El grosor de cada línea es la hostilidad; en ámbar, la que ya no ve un adversario sino un enemigo.</p>
+  </div>
+  <div class="lens">
+    <div class="lens-stage" id="lens-stage">
+      <svg class="lens-arcs" id="lens-arcs" aria-hidden="true"></svg>
+      <div class="lens-row" id="lens-row"></div>
+      <div class="lens-under"></div>
+    </div>
+    <div class="lens-insight" id="lens-insight-wrap" aria-live="polite"><span class="lbl" id="lens-who"></span><p id="lens-insight"></p></div>
   </div>
 
-  <div class="map-stage" id="map-stage">
-    <svg id="map-svg" viewBox="0 0 1000 640" role="img" aria-labelledby="map-t map-d">
-      <title id="map-t">Mapa de dos ejes de la polarización española</title>
-      <desc id="map-d">Eje horizontal: escala de autoubicación del CIS, de 1 (izquierda) a 10 (derecha). Eje vertical: dependencia del grupo. Las cinco posiciones dibujan una herradura: el centro abajo, en la zona autónoma; izquierda y derecha en la zona partidista; los dos extremos arriba, en la zona tribal.</desc>
-      <g id="map-base"></g>
-    </svg>
-    <div id="map-nodes"></div>
-    <div class="you-html" id="map-you" hidden><i></i><b>Tú</b></div>
-    <div class="bubble" id="bubble" aria-hidden="true"></div>
+  <div class="sub">
+    <h3>El mismo hecho, cinco realidades</h3>
+    <p class="ch-lede">Encuadrar es elegir qué parte de un hecho se ilumina y cuál queda a oscuras (Entman, 1993; Lakoff, 2004). Cada posición tiene su encuadre, también el centro.</p>
+    <div class="toggle-row" id="facts" role="group" aria-label="Elige un hecho"></div>
+    <div class="fact-box"><span class="lbl">El hecho</span><p class="fact-text" id="fact-text" aria-live="polite"></p></div>
+    <div class="prism" id="prism">
+      <div class="prism-left">
+        <svg viewBox="0 0 400 540" preserveAspectRatio="none" aria-hidden="true">
+          <line x1="0" y1="300" x2="165" y2="280" stroke="#EDEBE6" stroke-width="3" vector-effect="non-scaling-stroke"/>
+          <polygon points="210,150 130,380 290,380" fill="#1B2230" stroke="#C9CCD3" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
+          <polygon points="165,280 240.4,237.4 262.8,301.8" fill="#EDEBE6" fill-opacity=".14"/>
+          <line class="ray" style="--j:0" x1="240.4" y1="237.4" x2="400" y2="50" stroke="#EC5272" stroke-width="3" vector-effect="non-scaling-stroke"/>
+          <line class="ray" style="--j:1" x1="246" y1="253.5" x2="400" y2="160" stroke="#F2955F" stroke-width="3" vector-effect="non-scaling-stroke"/>
+          <line class="ray" style="--j:2" x1="251.6" y1="269.6" x2="400" y2="270" stroke="#E8E2CF" stroke-width="3" vector-effect="non-scaling-stroke"/>
+          <line class="ray" style="--j:3" x1="257.2" y1="285.7" x2="400" y2="380" stroke="#6CC4E4" stroke-width="3" vector-effect="non-scaling-stroke"/>
+          <line class="ray" style="--j:4" x1="262.8" y1="301.8" x2="400" y2="490" stroke="#5B7CF0" stroke-width="3" vector-effect="non-scaling-stroke"/>
+        </svg>
+      </div>
+      <div class="rays-cards" id="rays-cards" aria-live="polite"></div>
+    </div>
+    <p class="note">Frases tipo, redactadas para ilustrar el encuadre de cada posición. No son citas de personas ni de partidos concretos.</p>
   </div>
-  <div class="map-legend">
-    <span><i class="lg-line"></i>La herradura: el camino de cada posición</span>
-    <span><i class="lg-zone"></i>Zona tribal: la identidad depende del grupo</span>
-    <span><i class="lg-zone a"></i>Zona autónoma</span>
-    <span><i class="lg-dash"></i>Los extremos se tocan en el estilo</span>
-  </div>
-  <p class="hint" id="map-hint"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 2l9 5-4 1 2 5-2 1-2-5-3 3z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg><span>Pasa el cursor por una figura para leer su discurso. Púlsala para abrir su ficha.</span></p>
 
-  <div class="rx">
+  <div class="mirror" id="mirror">
+    <span class="lbl">El espejo · una plantilla</span>
+    <p class="mirror-q">«Somos una minoría que ve lo que la mayoría no quiere ver. Si las instituciones no frenan a <span class="enemy" id="enemy">· · ·</span>, tendremos que hacerlo nosotros.»</p>
+    <p class="ch-lede" style="margin:0">Elige un enemigo para completar la frase:</p>
+    <div class="toggle-row" id="mirror-opts" role="group" aria-label="Elige un enemigo"></div>
+    <p class="mirror-v" id="mirror-v" aria-live="polite"></p>
+  </div>
+</section>
+
+<!-- ============ 4 · PERFILES ============ -->
+<section id="perfiles" class="chapter" aria-labelledby="h-perfiles">
+  <div class="ch-head">
+    <p class="ch-num">Capítulo 4 · Doce perfiles</p>
+    <h2 id="h-perfiles">Quién hay <em>en cada rincón</em>.</h2>
+    <p class="ch-lede">Doce tipos ideales, en el sentido de Weber (1904): exageraciones deliberadas que sirven para medir la realidad, no para describir a nadie. Cada ficha resume su psicología, su relato, su lenguaje y su contradicción. Pulsa «Más» para ver su parte de razón y cómo sostiene su incoherencia.</p>
+  </div>
+  <div class="toggle-row" id="pf-pick" role="group" aria-label="Filtrar perfiles"></div>
+  <div class="pf-grid" id="pf-grid"></div>
+  <p class="lead-note"><b>Sobre los líderes:</b> los nombres ilustran la dirección ideológica que representa cada corriente en la vida pública, no la ficha psicológica. Las fichas de los extremos describen un polo extremista que justifica la violencia; ningún líder citado se presenta aquí como parte de él. Cargos a noviembre de 2026.</p>
+  <p class="note">«Dependencia del grupo» resume cuatro rasgos: necesidad de aprobación, en el sentido de la sociotropía de Beck (1983); fusión con el grupo (Swann et al., 2009, 2012); necesidad de cierre cognitivo (Webster y Kruglanski, 1994); y hostilidad afectiva (Iyengar et al., 2012). La búsqueda de sentido en el grupo sigue a Kruglanski et al. (2014). El relato usa víctima, villano y héroe (Karpman, 1968; Jones y McBeth, 2010). El mapa trata a los dos lados con la misma escala, aunque la literatura está dividida: Altemeyer (1981) y Jost et al. (2003) hallaron más rigidez en la derecha; Costello et al. (2022), un autoritarismo de izquierdas comparable.</p>
+</section>
+
+<!-- ============ 5 · DEL NOSOTROS AL ENEMIGO ============ -->
+<section id="escalada" class="chapter" aria-labelledby="h-escalada">
+  <div class="ch-head">
+    <p class="ch-num">Capítulo 5 · Del nosotros al enemigo</p>
+    <h2 id="h-escalada">A quién sientes tuyo, <em>y hasta dónde llegarías</em>.</h2>
+    <p class="ch-lede">Todo conflicto empieza por trazar una frontera entre «nosotros» y «ellos» (Tajfel y Turner, 1979). Primero, los círculos que cada perfil siente suyos. Después, la escalera que baja del desacuerdo al abismo.</p>
+  </div>
+
+  <div class="sub">
+    <h3>Los círculos de pertenencia</h3>
+    <p class="ch-lede">Del yo a la humanidad. Pasa el ratón por un perfil: en verde, los círculos que abraza; en gris, los que tolera; en rojo, los que combate.</p>
+    <div class="rings-wrap">
+      <div class="rings"><svg id="rings" viewBox="0 0 520 520" role="img" aria-label="Círculos de pertenencia"></svg></div>
+      <div>
+        <div class="rpick" id="ring-picker" role="group" aria-label="Elige un perfil"></div>
+        <ul class="rlist" id="ring-list"></ul>
+        <p class="id-insight" id="ring-insight" aria-live="polite"></p>
+      </div>
+    </div>
+    <p class="moreno">En España, la <q>pregunta Moreno</q> mide desde hace décadas la identidad dual: «¿Se siente usted solo español, más español que de su comunidad, tanto lo uno como lo otro…?». La respuesta más frecuente suele ser la del medio: las dos cosas a la vez (Moreno, 2006).</p>
+  </div>
+
+  <div class="terr">
     <div>
-      <span class="lbl">Antes de abrir las fichas</span>
-      <h3>Radical no es extremista.</h3>
-      <p>Las fichas de los extremos describen el polo extremista: una minoría dentro de cada lado. No describen a los votantes de los partidos de izquierda o derecha radical, que compiten en las urnas.</p>
+      <span class="lbl">El eje territorial</span>
+      <h3>La tribu también puede ser territorial.</h3>
+      <p>El eje centro-periferia atraviesa la línea izquierda-derecha. En el conjunto del país suele ir con la dirección: cuanto más a la derecha, más recentralizador. Pero los independentismos vasco, catalán y gallego tienen su propia izquierda radical, su izquierda y su derecha. Para ellos, el «otro bando» puede ser el Estado.</p>
+      <p>El procés, desde 2017, ha sido uno de los grandes motores de la polarización afectiva española (Torcal, 2023), y la ley de amnistía de 2024 volvió a abrir ese frente.</p>
     </div>
-    <div class="rx-scale">
-      <div><b>Moderado</b>Acepta la democracia liberal y sus contrapesos.</div>
-      <div><b>Radical</b><span class="rx-two"><span><i>Izquierda:</i> acepta las urnas y rechaza el orden económico capitalista (March, 2011).</span><span><i>Derecha:</i> acepta las urnas y rechaza contrapesos y derechos de minorías (Mudde, 2019).</span></span></div>
-      <div><b>Extremista</b>Rechaza la democracia y acepta la violencia contra el adversario.</div>
+    <div class="terr-chart"><svg id="terr" viewBox="0 0 720 440" role="img" aria-label="Eje territorial frente a eje izquierda-derecha"></svg>
+      <ul class="terr-list" id="terr-list"></ul>
     </div>
   </div>
 
-  <article class="dossier" id="dossier"></article>
-
-  <div class="bridge"><p>Las fichas son tipos ideales. ¿Quién encarna hoy cada dirección en la vida pública española?</p><a class="btn sm" href="#lideres">Líderes</a></div>
-</section>
-
-<!-- ============ 1 bis · LÍDERES ============ -->
-<section id="lideres" class="chapter" aria-labelledby="h-lideres">
-  <div class="ch-head">
-    <p class="ch-num">Capítulo 1 bis · Líderes</p>
-    <h2 id="h-lideres">Quién representa <em>cada dirección</em>.</h2>
-    <p class="ch-lede">La misma línea, de izquierda a derecha, con los líderes y referentes que hoy encarnan cada corriente en España.</p>
+  <div class="sub">
+    <h3>La escalera del conflicto</h3>
+    <p class="ch-lede">Friedrich Glasl (1980) describe nueve peldaños que bajan del desacuerdo al abismo. Cada figura está en el peldaño más bajo que su lógica llega a justificar. Pasa el ratón por un peldaño.</p>
+    <div class="glasl"><svg id="glasl" viewBox="0 0 1000 520" role="img" aria-label="Los nueve peldaños de la escalada de Glasl"></svg></div>
+    <div class="step-detail" id="step-detail" aria-live="polite"></div>
+    <div class="vnote">
+      <div><b>Peldaño 5: violencia verbal</b><p>Izquierda y derecha se quedan aquí: desprecio, ironía y humillación pública del adversario. Se falta al respeto, pero no se toca.</p></div>
+      <div style="border-color:var(--warn)"><b>Peldaño 7: violencia justificada</b><p>El polo extremista de cada lado baja hasta aquí: si el diálogo «no sirve», el daño al enemigo se justifica.</p></div>
+      <div style="border-color:var(--xl)"><b>Peldaños 8 y 9: la ruptura</b><p>En julio de 1936, tras años de polarización y violencia política, un golpe militar contra la República abrió la Guerra Civil. Las democracias caen cuando los moderados toleran la deslealtad de su propio bando (Linz, 1978).</p></div>
+    </div>
   </div>
-  <div class="leaders" id="leaders"></div>
-  <p class="lead-note"><b>Importante:</b> estos nombres ilustran la dirección ideológica, no la ficha psicológica. Las fichas de los extremos describen un polo extremista que justifica la violencia; ninguno de estos líderes se presenta aquí como parte de él. Por eso los extremos aparecen como izquierda y derecha radical, en el sentido de March (2011) y Mudde (2019). Cargos a octubre de 2026.</p>
-  <div class="bridge"><p>Antes de ver cómo se miran entre sí, conviene saber de dónde vienen las palabras con que se insultan.</p><a class="btn sm" href="#etiquetas">Capítulo 2 · Etiquetas</a></div>
 </section>
 
-<!-- ============ 2 · ETIQUETAS ============ -->
-<section id="etiquetas" class="chapter" aria-labelledby="h-etiquetas">
+<!-- ============ 6 · PALABRAS Y FUENTES ============ -->
+<section id="fuentes" class="chapter" aria-labelledby="h-fuentes">
   <div class="ch-head">
-    <p class="ch-num">Capítulo 2 · Etiquetas</p>
-    <h2 id="h-etiquetas">Palabras del siglo XX <em>para conflictos del XXI</em>.</h2>
+    <p class="ch-num">Capítulo 6 · Palabras y fuentes</p>
+    <h2 id="h-fuentes">Palabras del siglo XX <em>para conflictos del XXI</em>.</h2>
     <p class="ch-lede">«Fascista» y «comunista» nombran regímenes que ya no existen en Europa. En España arrastran además la memoria de la Guerra Civil. Hoy funcionan como insultos, y cada época añade los suyos, venga de donde venga.</p>
   </div>
   <div class="timeline-wrap">
@@ -880,287 +1199,22 @@ footer p{margin:0;max-width:70ch}
 
   <div class="debate">
     <div class="deb">
-      <span class="lbl">Tesis del mapa</span>
+      <span class="lbl">Tesis del observatorio</span>
       <h4>Ni fascismo ni comunismo: populismos.</h4>
       <p>Los dos extremos de hoy se describen mejor como populismos (Mudde, 2004): un pueblo puro frente a una élite corrupta. Lo que los separa no es el estilo, que comparten, sino cómo tratan la diferencia. Uno la esencializa y la convierte en linaje, raza o territorio. El otro la relativiza, sobre todo cuando quien la encarna está del lado del «oprimido».</p>
     </div>
     <div class="deb obj">
       <span class="lbl">Objeción académica</span>
       <h4>La herradura compara estilos, no programas.</h4>
-      <p>La derecha radical populista acepta las elecciones, y por eso Mudde (2019) la distingue del fascismo histórico; la izquierda radical tampoco equivale al comunismo de partido único (March, 2011). La «teoría de la herradura» se critica porque iguala lo que difiere en igualdad, jerarquía y trato a las minorías. Van Prooijen y Krouwel (2019) documentan rasgos psicológicos comunes a ambos extremos, como la simplicidad cognitiva o el exceso de confianza, sin que eso implique programas iguales.</p>
-    </div>
-  </div>
-  <div class="bridge"><p>Con esas palabras en la mano, cada posición nombra a las demás.</p><a class="btn sm" href="#miradas">Capítulo 3 · Miradas</a></div>
-</section>
-
-<!-- ============ 3 · MIRADAS ============ -->
-<section id="miradas" class="chapter" aria-labelledby="h-miradas">
-  <div class="ch-head">
-    <p class="ch-num">Capítulo 3 · Miradas</p>
-    <h2 id="h-miradas">Mira la sociedad <em>con sus ojos</em>.</h2>
-    <p class="ch-lede">Cada posición pone nombre a las demás. Elige unos ojos y el resto del mapa cambia de nombre. El grosor de cada línea es la hostilidad; en ámbar, la que ya no ve un adversario sino un enemigo.</p>
-  </div>
-  <div class="lens">
-    <div class="lens-stage" id="lens-stage">
-      <svg class="lens-arcs" id="lens-arcs" aria-hidden="true"></svg>
-      <div class="lens-row" id="lens-row"></div>
-      <div class="lens-under"></div>
-    </div>
-    <div class="lens-insight" id="lens-insight-wrap" aria-live="polite"><span class="lbl" id="lens-who"></span><p id="lens-insight"></p></div>
-  </div>
-
-  <div class="mirror" id="mirror">
-    <span class="lbl">El espejo · una plantilla</span>
-    <p class="mirror-q">«Somos una minoría que ve lo que la mayoría no quiere ver. Si las instituciones no frenan a <span class="enemy" id="enemy">· · ·</span>, tendremos que hacerlo nosotros.»</p>
-    <p class="ch-lede" style="margin:0">Elige un enemigo para completar la frase:</p>
-    <div class="toggle-row" id="mirror-opts" role="group" aria-label="Elige un enemigo"></div>
-    <p class="mirror-v" id="mirror-v" aria-live="polite"></p>
-  </div>
-  <div class="bridge"><p>Los nombres que ponen a los demás son el principio. El lenguaje encuadra también los hechos.</p><a class="btn sm" href="#prisma">Capítulo 4 · Lenguaje</a></div>
-</section>
-
-<!-- ============ 4 · PRISMA DEL LENGUAJE ============ -->
-<section id="prisma" class="chapter" aria-labelledby="h-prisma">
-  <div class="ch-head">
-    <p class="ch-num">Capítulo 4 · El prisma del lenguaje</p>
-    <h2 id="h-prisma">Un mismo hecho, <em>cinco realidades</em>.</h2>
-    <p class="ch-lede">Encuadrar es elegir qué parte de un hecho se ilumina y cuál queda a oscuras (Entman, 1993). Cada posición tiene un encuadre propio, también el centro. Elige un hecho y míralo atravesar el prisma.</p>
-  </div>
-  <div class="toggle-row" id="facts" role="group" aria-label="Elige un hecho"></div>
-  <div class="fact-box"><span class="lbl">El hecho</span><p class="fact-text" id="fact-text" aria-live="polite"></p></div>
-  <div class="prism" id="prism">
-    <div class="prism-left">
-      <svg viewBox="0 0 400 540" preserveAspectRatio="none" aria-hidden="true">
-        <line x1="0" y1="300" x2="165" y2="280" stroke="#EDEBE6" stroke-width="3" vector-effect="non-scaling-stroke"/>
-        <polygon points="210,150 130,380 290,380" fill="#1B2230" stroke="#C9CCD3" stroke-width="1.5" vector-effect="non-scaling-stroke"/>
-        <polygon points="165,280 240.4,237.4 262.8,301.8" fill="#EDEBE6" fill-opacity=".14"/>
-        <line class="ray" style="--j:0" x1="240.4" y1="237.4" x2="400" y2="50" stroke="#EC5272" stroke-width="3" vector-effect="non-scaling-stroke"/>
-        <line class="ray" style="--j:1" x1="246" y1="253.5" x2="400" y2="160" stroke="#F2955F" stroke-width="3" vector-effect="non-scaling-stroke"/>
-        <line class="ray" style="--j:2" x1="251.6" y1="269.6" x2="400" y2="270" stroke="#E8E2CF" stroke-width="3" vector-effect="non-scaling-stroke"/>
-        <line class="ray" style="--j:3" x1="257.2" y1="285.7" x2="400" y2="380" stroke="#6CC4E4" stroke-width="3" vector-effect="non-scaling-stroke"/>
-        <line class="ray" style="--j:4" x1="262.8" y1="301.8" x2="400" y2="490" stroke="#5B7CF0" stroke-width="3" vector-effect="non-scaling-stroke"/>
-      </svg>
-    </div>
-    <div class="rays-cards" id="rays-cards" aria-live="polite"></div>
-  </div>
-  <p class="note">Frases tipo, redactadas para ilustrar el encuadre de cada posición. No son citas de personas ni de partidos concretos.</p>
-  <div class="bridge"><p>Detrás de cada encuadre hay una pertenencia. ¿A qué se siente cada uno que pertenece?</p><a class="btn sm" href="#identidades">Capítulo 5 · Identidades</a></div>
-</section>
-
-<!-- ============ 5 · IDENTIDADES ============ -->
-<section id="identidades" class="chapter" aria-labelledby="h-identidades">
-  <div class="ch-head">
-    <p class="ch-num">Capítulo 5 · Identidades</p>
-    <h2 id="h-identidades">Se puede ser de muchos sitios <em>a la vez</em>.</h2>
-    <p class="ch-lede">Barrio, comunidad, España, Europa, humanidad: las identidades se anidan como anillos. Elige una posición y mira qué anillos abraza, cuáles tolera y cuáles combate.</p>
-  </div>
-  <div class="id-grid">
-    <div class="rings"><svg id="rings" viewBox="0 0 520 520" role="img" aria-label="Anillos de identidad"></svg></div>
-    <div>
-      <div class="picker" id="ring-picker" role="group" aria-label="Elige una posición"></div>
-      <div class="legend3" id="ring-legend">
-        <span><i id="lg-abraza" style="background:var(--xr)"></i>Abraza</span>
-        <span><i style="background:#3A4660"></i>Tolera</span>
-        <span><i style="background:repeating-linear-gradient(45deg,var(--warn) 0 2px,var(--bg-3) 2px 6px);outline:1.5px dashed var(--warn);outline-offset:1px"></i>Combate</span>
-      </div>
-      <p class="id-insight" id="ring-insight" aria-live="polite"></p>
-      <p class="moreno">En España, la <q>pregunta Moreno</q> mide desde hace décadas la identidad dual: «¿Se siente usted solo español, más español que de su comunidad, tanto lo uno como lo otro…?». La respuesta más frecuente suele ser la del medio: las dos cosas a la vez (Moreno, 2006).</p>
+      <p>La derecha radical populista acepta las elecciones, y por eso Mudde (2019) la distingue del fascismo histórico; la izquierda radical tampoco equivale al comunismo de partido único (March, 2011). Van Prooijen y Krouwel (2019) y Zmigrod et al. (2020) documentan rasgos psicológicos comunes a los extremos, como la simplicidad cognitiva o la rigidez, sin que eso implique programas iguales.</p>
     </div>
   </div>
 
-  <div class="terr">
-    <div>
-      <span class="lbl">El tercer eje</span>
-      <h3>En España, la tribu también puede ser territorial.</h3>
-      <p>El eje centro-periferia atraviesa la herradura. En el conjunto del país suele correlacionar con la dirección: cuanto más a la derecha, más recentralizador. Pero los nacionalismos vasco, catalán y gallego tienen su propia izquierda y su propia derecha. Para ellos, el «otro bando» puede ser el Estado, no la derecha ni la izquierda.</p>
-      <p>El procés, desde 2017, ha sido uno de los grandes motores de la polarización afectiva española (Torcal, 2023), y la ley de amnistía de 2024 volvió a abrir ese frente.</p>
-    </div>
-    <div class="terr-chart"><svg id="terr" viewBox="0 0 720 440" role="img" aria-label="Eje territorial frente a eje izquierda-derecha"></svg>
-      <ul class="terr-list" id="terr-list"></ul>
-    </div>
-  </div>
-  <div class="bridge"><p>Cuando la identidad no admite a la del otro, el desacuerdo empieza a bajar escalones.</p><a class="btn sm" href="#escalada">Capítulo 6 · Escalada</a></div>
-</section>
-
-<!-- ============ 6 · ESCALADA ============ -->
-<section id="escalada" class="chapter" aria-labelledby="h-escalada">
-  <div class="ch-head">
-    <p class="ch-num">Capítulo 6 · La escalera</p>
-    <h2 id="h-escalada">Del desacuerdo <em>al abismo</em>, en nueve peldaños.</h2>
-    <p class="ch-lede">El modelo de Friedrich Glasl (1980) describe cómo baja un conflicto: primero se discute, luego se humilla y al final se destruye. Cada figura está en el peldaño más bajo que su lógica llega a justificar. Pulsa un peldaño.</p>
-  </div>
-  <div class="levels" aria-hidden="true">
-    <div style="--lc:#8A92A3"><b>Nivel 1 · Ganar-ganar</b>Todavía se puede salir juntos</div>
-    <div style="--lc:#C99A3E"><b>Nivel 2 · Ganar-perder</b>Uno de los dos tiene que perder</div>
-    <div style="--lc:var(--warn)"><b>Nivel 3 · Perder-perder</b>Destruir al otro, aunque cueste</div>
-  </div>
-  <div class="stairs" id="stairs" role="group" aria-label="Los nueve peldaños de la escalada"></div>
-  <div class="step-detail" id="step-detail" aria-live="polite"></div>
-  <div class="vnote">
-    <div><b>Peldaño 5: violencia verbal</b><p>Izquierda y derecha se quedan aquí: desprecio, ironía y humillación pública del adversario. Se falta al respeto, pero no se toca.</p></div>
-    <div style="border-color:var(--warn)"><b>Peldaño 7: violencia justificada</b><p>El polo extremista de cada lado baja hasta aquí. Se siente una minoría con razón frente a una mayoría equivocada; si el diálogo «no sirve», el daño al enemigo se justifica.</p></div>
-    <div style="border-color:var(--xl)"><b>Peldaños 8 y 9: la ruptura</b><p>En julio de 1936, tras años de polarización y violencia política, un golpe militar contra el Gobierno de la República abrió la Guerra Civil. Linz (1978) mostró que las democracias caen cuando los moderados toleran la deslealtad de su propio bando.</p></div>
-  </div>
-  <div class="bridge"><p>Cada peldaño tiene un precio, y no solo en la política.</p><a class="btn sm" href="#consecuencias">Consecuencias</a></div>
-</section>
-
-<!-- ============ 6 bis · CONSECUENCIAS ============ -->
-<section id="consecuencias" class="chapter" aria-labelledby="h-consecuencias">
-  <div class="ch-head">
-    <p class="ch-num">Capítulo 6 bis · Consecuencias</p>
-    <h2 id="h-consecuencias">Lo que cuesta <em>cada fase</em>.</h2>
-    <p class="ch-lede">La polarización no se queda en la política. Cada fase del simulador tiene un precio en la familia, en la economía, en la información, en las instituciones, en la democracia y en la calle. Elige una fase.</p>
-  </div>
-  <div class="toggle-row" id="cons-pick" role="group" aria-label="Elige una fase"></div>
-  <div class="cons" id="cons" aria-live="polite"></div>
-  <p class="note">Los ejemplos con cita son resultados de investigación, casi todos de EE. UU.; los de España son hechos documentados. El resto describe la lógica de cada fase.</p>
-  <div class="bridge"><p>Para no pagar ese precio, cada posición tendría que mirar primero su propia incoherencia.</p><a class="btn sm" href="#contradicciones">Capítulo 7 · Contradicciones</a></div>
-</section>
-
-<!-- ============ 7 · CONTRADICCIONES ============ -->
-<section id="contradicciones" class="chapter" aria-labelledby="h-contra">
-  <div class="ch-head">
-    <p class="ch-num">Capítulo 7 · Contradicciones</p>
-    <h2 id="h-contra">Cada posición sostiene <em>una cuerda tensa</em>.</h2>
-    <p class="ch-lede">Toda ideología arrastra incoherencias que no resuelve: las sostiene. Elige una posición para ver los dos valores que tiran en sentido contrario y los nudos mentales que impiden que la cuerda se rompa. Cuantos más nudos necesita, más vibra la cuerda.</p>
-  </div>
-  <div class="picker" id="contra-pick" role="group" aria-label="Elige una posición"></div>
-  <div class="contra-stage" id="contra-stage" aria-live="polite"></div>
-  <div class="bridge"><p>Has visto a los cinco por dentro. Ahora te toca a ti.</p><a class="btn sm" href="#test">Capítulo 8 · Tu posición</a></div>
-</section>
-
-<!-- ============ 8 · TEST ============ -->
-<section id="test" class="chapter" aria-labelledby="h-test">
-  <div class="ch-head">
-    <p class="ch-num">Capítulo 8 · Tu posición</p>
-    <h2 id="h-test">¿Hacia dónde <em>te escoras</em>?</h2>
-    <p class="ch-lede">Quince afirmaciones. Seis miden tu dirección política; ocho, cuánto pesa la tribu en tu forma de pensar; una, si justificas la violencia. Si no te sientes de ningún bando, puedes decirlo. Tu punto se mueve en el mapa mientras respondes. Nada sale de este navegador.</p>
-  </div>
-  <div class="test">
-    <div>
-      <div class="q-card" id="q-card">
-        <div class="q-progress" id="q-prog" aria-hidden="true"></div>
-        <div class="q-meta"><span class="lbl" id="q-count"></span><span class="lbl" id="q-axis"></span></div>
-        <p class="q-text" id="q-text" tabindex="-1"></p>
-        <div class="likert" id="likert" role="group" aria-label="Tu grado de acuerdo"></div>
-        <div class="q-nav"><button class="btn sm" id="q-back">← Anterior</button><button class="btn sm" id="q-reset">Empezar de nuevo</button></div>
-      </div>
-      <div class="result" id="result" hidden></div>
-    </div>
-    <div class="mini-wrap">
-      <svg class="mini" id="mini" viewBox="0 0 1000 640" role="img" aria-label="Tu punto en el mapa de dos ejes"><g id="mini-base"></g><g id="mini-you"></g></svg>
-      <p class="mini-cap" id="mini-cap" aria-live="polite">Tu punto aparecerá aquí en cuanto respondas a las dos primeras afirmaciones.</p>
-    </div>
-  </div>
-  <p class="note">Instrumento didáctico, no validado psicométricamente. Los ítems están equilibrados: tres de dirección puntúan hacia la izquierda y tres hacia la derecha, todos sobre temas que dividen. De los ocho de tribu, cuatro están redactados en sentido inverso para neutralizar la tendencia a decir que sí, y cubren cuatro componentes con dos ítems cada uno: necesidad de aprobación, fusión con el grupo, cierre cognitivo y hostilidad afectiva. Zonas: autónoma por debajo de 55 sobre 100, partidista de 55 a 71, tribal desde 72.</p>
-  <div class="bridge"><p>Sea cual sea tu resultado, hay una salida de la escalera.</p><a class="btn sm" href="#salida">Capítulo 9 · Salida</a></div>
-</section>
-
-<!-- ============ 9 · SALIDA ============ -->
-<section id="salida" class="chapter" aria-labelledby="h-salida">
-  <div class="ch-head">
-    <p class="ch-num">Capítulo 9 · Salir de la escalera</p>
-    <h2 id="h-salida">El otro bando te odia <em>menos de lo que crees</em>.</h2>
-    <p class="ch-lede">La polarización se alimenta de una percepción equivocada: creemos que el otro lado nos desprecia más de lo que realmente lo hace. Esa creencia, la metapercepción, alimenta la hostilidad propia.</p>
-  </div>
-  <div class="meta">
-    <div>
-      <p class="meta-q">¿Qué parte del bando contrario crees que te considera mala persona?</p>
-      <label class="lbl" for="meta-range">Tu estimación</label>
-      <input class="range" type="range" id="meta-range" min="0" max="100" value="50" aria-valuetext="50 %">
-      <div class="toggle-row" style="margin-top:14px"><button class="btn sm" id="meta-btn">Comparar con la investigación</button></div>
-    </div>
-    <div>
-      <div class="meta-bars" id="meta-bars" aria-hidden="true">
-        <div class="mb"><span>Tu estimación</span><i id="mb-you" style="width:50%"></i><b id="mb-you-v">50 %</b></div>
-        <div class="mb real" id="mb-real-row" hidden><span>Si te pareces al partidario medio estudiado</span><i id="mb-real" style="width:25%"></i><b id="mb-real-v">≈ 25 %</b></div>
-      </div>
-      <p class="meta-out" id="meta-out" aria-live="polite">Mueve el control y compara tu estimación.</p>
-    </div>
-  </div>
-  <div class="antis">
-    <div class="anti"><span class="n">1</span><h3>Corregir la estimación</h3><p>Corregir la metapercepción redujo el apoyo a la violencia partidista en EE. UU. (Mernyk et al., 2022). Pero bajar la hostilidad no basta para reforzar la democracia (Voelkel et al., 2023).</p></div>
-    <div class="anti"><span class="n">2</span><h3>Contacto con cara y nombre</h3><p>El contacto entre grupos reduce el prejuicio cuando es entre iguales, con metas comunes y respaldo institucional (Allport, 1954). Una cena vale más que mil tuits.</p></div>
-    <div class="anti"><span class="n">3</span><h3>Un anillo que nos incluya</h3><p>Una identidad común más amplia, como el barrio, la profesión o el país, reduce el sesgo sin borrar las otras (Gaertner y Dovidio, 2000). Es la lección de los anillos.</p></div>
-  </div>
-  <div class="coda">
-    <p>La forma de una sociedad no es un destino. Se decide en lo que cada uno hace <em>con el otro</em>.</p>
-    <div class="hero-cta" style="justify-content:center"><a class="btn primary" href="#test">Haz el test</a><a class="btn" href="#inicio">Vuelve al simulador</a></div>
-  </div>
-</section>
-
-<!-- ============ 10 · MÉTODO ============ -->
-<section id="metodo" class="chapter" aria-labelledby="h-metodo">
-  <div class="ch-head">
-    <p class="ch-num">Capítulo 10 · Método</p>
-    <h2 id="h-metodo">Cómo se construyó <em>este mapa</em>.</h2>
-    <p class="ch-lede">Un modelo es una simplificación honesta. Estas son sus piezas, sus fuentes y sus límites.</p>
-  </div>
-  <div class="method">
-    <div class="mcard2"><span class="lbl">Unidad de análisis</span><h3>Tipos ideales</h3><p>Cada figura es un tipo ideal en el sentido de Weber (1904): una exageración deliberada que sirve para medir la realidad, no para describir a nadie. Los dos extremos describen al polo extremista, no al electorado radical (March, 2011; Mudde, 2019).</p></div>
-    <div class="mcard2"><span class="lbl">Operacionalización</span><h3>Dos ejes</h3><p>Horizontal: la escala 1–10 de autoubicación del CIS. Vertical, «dependencia del grupo», con cuatro componentes medidos en el test: necesidad de aprobación; fusión de la identidad con el grupo (Swann et al., 2009, 2012); cierre cognitivo (Webster y Kruglanski, 1994); y hostilidad afectiva (Iyengar et al., 2012). La búsqueda de significado (Kruglanski et al., 2014) explica por qué el grupo da sentido.</p></div>
-    <div class="mcard2"><span class="lbl">Instrumentos</span><h3>Cinco lentes</h3><p>Escalada: Glasl (1980) y Linz (1978). Relato: víctima, villano y héroe (Karpman, 1968; Jones y McBeth, 2010). Lenguaje: encuadre (Entman, 1993; Lakoff, 2004). Identidades: la pregunta Moreno. Salida: metapercepciones, contacto e identidad común.</p></div>
-    <div class="mcard2"><span class="lbl">Valores del modelo</span><h3>Cómo se asignaron</h3><p>Hostilidad de 0 a 4: 0, adversario cordial; 2, rival al que se ridiculiza; 3, enemigo político; 4, enemigo deshumanizado, siguiendo los niveles de Glasl. Rasgos de 0 a 5: la altura de cada tipo en el eje vertical. Techo de escalada: el peldaño cuya lógica cada tipo llega a justificar.</p></div>
-    <div class="mcard2"><span class="lbl">Datos</span><h3>Lo que es medición</h3><p>Solo dos cifras de la página son mediciones: la distribución de autoubicación del CIS (septiembre de 2026, estudio 3577) y la sobrestimación de la hostilidad ajena en torno al doble (Moore-Berg et al., 2020), un sesgo replicado en 26 países (Ruggeri et al., 2021).</p></div>
-    <div class="mcard2"><span class="lbl">Sociotropía</span><h3>Una analogía, no un diagnóstico</h3><p>La sociotropía de Beck (1983) es un rasgo clínico de dependencia interpersonal; no es el «voto sociotrópico» de la ciencia política. El mapa la usa como analogía y mide en su lugar necesidad de aprobación y fusión, que la literatura sí vincula con la disposición a luchar por el grupo.</p></div>
-  </div>
-  <div class="limits">
-    <div>
-      <h3>Límites</h3>
-      <ul style="margin-top:14px">
-        <li><b>Valores del modelo, no datos.</b> Perfiles, hostilidades y niveles del simulador son estimaciones teóricas para ilustrar la lógica de cada posición.</li>
-        <li><b>Simetría por diseño.</b> El mapa aplica la misma escala a ambos lados. La literatura está dividida: Jost et al. (2003) hallaron más rigidez en la derecha y Altemeyer (1981) estudió el autoritarismo de derechas; Costello et al. (2022) han medido un autoritarismo de izquierdas comparable. La simetría es una hipótesis de trabajo, no una conclusión.</li>
-        <li><b>La campana no es la temperatura.</b> Una sociedad puede tener ideas muy dispersas y un afecto templado, y una tribu puede existir sin ideología: el test contempla un centro con lógica de tribu.</li>
-        <li><b>Una sola línea ideológica.</b> Se funden lo económico y lo cultural. Por eso el libertarismo (máximo mercado, libertad moral) y el socialismo patriótico (máximo Estado, nación) se colocan en la línea de forma aproximada. El eje territorial aparece en el capítulo 5.</li>
-        <li><b>Evidencia importada.</b> Los estudios de metapercepción y de intervención son sobre todo estadounidenses; en España no hay una medición equivalente publicada que conozcamos.</li>
-        <li><b>El test no está validado.</b> Quince ítems no bastan para medir una actitud con fiabilidad. Su función es reflexiva.</li>
-        <li><b>Color.</b> Rojo a la izquierda y azul a la derecha siguen la convención de la ciencia política, no los colores de ningún partido. Los extremos son más oscuros y el centro más claro, para que se distingan también sin color.</li>
-      </ul>
-    </div>
-    <div>
-      <h3>Referencias</h3>
-      <ul class="refs" style="margin-top:14px">
-        <li>Allport, G. W. (1954). <i>The Nature of Prejudice</i>. Addison-Wesley.</li>
-        <li>Altemeyer, B. (1981). <i>Right-Wing Authoritarianism</i>. University of Manitoba Press.</li>
-        <li>Beck, A. T. (1983). Cognitive therapy of depression: New perspectives. En P. J. Clayton y J. E. Barrett (eds.), <i>Treatment of Depression</i>. Raven Press.</li>
-        <li>CIS (2026). <i>Barómetro de septiembre 2026</i>. Estudio n.º 3577.</li>
-        <li>Costello, T. H., et al. (2022). Clarifying the structure and nature of left-wing authoritarianism. <i>Journal of Personality and Social Psychology</i>, 122(1), 135–170.</li>
-        <li>Entman, R. M. (1993). Framing: Toward clarification of a fractured paradigm. <i>Journal of Communication</i>, 43(4), 51–58.</li>
-        <li>Gaertner, S. L. y Dovidio, J. F. (2000). <i>Reducing Intergroup Bias: The Common Ingroup Identity Model</i>. Psychology Press.</li>
-        <li>Glasl, F. (1980). <i>Konfliktmanagement</i>. Haupt.</li>
-        <li>Iyengar, S., Sood, G. y Lelkes, Y. (2012). Affect, not ideology. <i>Public Opinion Quarterly</i>, 76(3), 405–431.</li>
-        <li>Jones, M. D. y McBeth, M. K. (2010). A Narrative Policy Framework: Clear enough to be wrong? <i>Policy Studies Journal</i>, 38(2), 329–353.</li>
-        <li>Jost, J. T., Glaser, J., Kruglanski, A. W. y Sulloway, F. J. (2003). Political conservatism as motivated social cognition. <i>Psychological Bulletin</i>, 129(3), 339–375.</li>
-        <li>Karpman, S. (1968). Fairy tales and script drama analysis. <i>Transactional Analysis Bulletin</i>, 7(26), 39–43.</li>
-        <li>Kruglanski, A. W., et al. (2014). The psychology of radicalization and deradicalization: How significance quest impacts violent extremism. <i>Political Psychology</i>, 35(S1), 69–93.</li>
-        <li>Lakoff, G. (2004). <i>Don't Think of an Elephant!</i> Chelsea Green.</li>
-        <li>Lees, J. y Cikara, M. (2020). Inaccurate group meta-perceptions drive negative out-group attributions in competitive contexts. <i>Nature Human Behaviour</i>, 4, 279–286.</li>
-        <li>Linz, J. J. (1978). <i>The Breakdown of Democratic Regimes</i>. Johns Hopkins University Press.</li>
-        <li>March, L. (2011). <i>Radical Left Parties in Europe</i>. Routledge.</li>
-        <li>Mernyk, J. S., Pink, S. L., Druckman, J. N. y Willer, R. (2022). Correcting inaccurate metaperceptions reduces Americans' support for partisan violence. <i>PNAS</i>, 119(16).</li>
-        <li>Moore-Berg, S. L., Ankori-Karlinsky, L.-O., Hameiri, B. y Bruneau, E. (2020). Exaggerated meta-perceptions predict intergroup hostility between American political partisans. <i>PNAS</i>, 117(26), 14864–14872.</li>
-        <li>Moreno, L. (2006). Scotland, Catalonia, Europeanization and the «Moreno question». <i>Scottish Affairs</i>, 54, 1–21.</li>
-        <li>Mudde, C. (2004). The populist zeitgeist. <i>Government and Opposition</i>, 39(4), 541–563.</li>
-        <li>Mudde, C. (2019). <i>The Far Right Today</i>. Polity.</li>
-        <li>Reiljan, A. (2020). «Fear and loathing across party lines» (also) in Europe. <i>European Journal of Political Research</i>, 59(2), 376–396.</li>
-        <li>Ruggeri, K., et al. (2021). The general fault in our fault lines. <i>Nature Human Behaviour</i>, 5, 1369–1380.</li>
-        <li>Swann, W. B., Gómez, Á., Seyle, D. C., Morales, J. F. y Huici, C. (2009). Identity fusion: The interplay of personal and social identities in extreme group behavior. <i>Journal of Personality and Social Psychology</i>, 96(5), 995–1011.</li>
-        <li>Swann, W. B., Jetten, J., Gómez, Á., Whitehouse, H. y Bastian, B. (2012). When group membership gets personal: A theory of identity fusion. <i>Psychological Review</i>, 119(3), 441–456.</li>
-        <li>Tajfel, H. y Turner, J. C. (1979). An integrative theory of intergroup conflict. En W. G. Austin y S. Worchel (eds.), <i>The Social Psychology of Intergroup Relations</i>. Brooks/Cole.</li>
-        <li>Torcal, M. (2023). <i>De votantes a hooligans: la polarización política en España</i>. Catarata.</li>
-        <li>Van Prooijen, J.-W. y Krouwel, A. P. M. (2019). Psychological features of extreme political ideologies. <i>Current Directions in Psychological Science</i>, 28(2), 159–163.</li>
-        <li>Voelkel, J. G., et al. (2023). Interventions reducing affective polarization do not necessarily improve anti-democratic attitudes. <i>Nature Human Behaviour</i>, 7, 55–64.</li>
-        <li>Chen, M. K. y Rohla, R. (2018). The effect of partisanship and political advertising on close family ties. <i>Science</i>, 360(6392), 1020–1024.</li>
-        <li>Graham, M. H. y Svolik, M. W. (2020). Democracy in America? Partisanship, polarization, and the robustness of support for democracy in the United States. <i>American Political Science Review</i>, 114(2), 392–409.</li>
-        <li>Iyengar, S. y Westwood, S. J. (2015). Fear and loathing across party lines: New evidence on group polarization. <i>American Journal of Political Science</i>, 59(3), 690–707.</li>
-        <li>Juliá, S. (coord.) (1999). <i>Víctimas de la guerra civil</i>. Temas de Hoy.</li>
-        <li>Levitsky, S. y Ziblatt, D. (2018). <i>How Democracies Die</i>. Crown.</li>
-        <li>McCoy, J. y Somer, M. (2019). Toward a theory of pernicious polarization and how it harms democracies. <i>The Annals of the American Academy of Political and Social Science</i>, 681(1), 234–271.</li>
-        <li>Weber, M. (1904). La «objetividad» del conocimiento en la ciencia social y en la política social.</li>
-        <li>Webster, D. M. y Kruglanski, A. W. (1994). Individual differences in need for cognitive closure. <i>Journal of Personality and Social Psychology</i>, 67(6), 1049–1062.</li>
-        <li>Zmigrod, L., Rentfrow, P. J. y Robbins, T. W. (2020). The partisan mind. <i>Journal of Experimental Psychology: General</i>, 149(3), 407–418.</li>
-      </ul>
-    </div>
+  <div class="sub">
+    <h3>Las fuentes</h3>
+    <p class="ch-lede">Los estudios y libros en que se apoya el observatorio, y lo que se ha tomado de cada uno. Filtra por capítulo.</p>
+    <div class="toggle-row" id="ref-pick" role="group" aria-label="Filtrar fuentes por capítulo"></div>
+    <div class="refs-grid" id="refs-grid"></div>
   </div>
 </section>
 
@@ -1384,68 +1438,112 @@ const FLIPS = [
   { w: "Equidistante", k: "c", o: "Término geométrico: a la misma distancia de dos puntos.", u: "Acusar al centro de no tomar partido: «no elegir también es elegir».", d: "A veces, un falso equilibrio. A veces, la única posición que escucha a los dos lados." }
 ];
 
-/* Test: ax d = dirección (k −1 = izquierda), t = tribu (k −1 = invertido), v = violencia; b = presupone un bando */
-const COMP = { apr: "Necesidad de aprobación", fus: "Fusión con el grupo", cie: "Cierre cognitivo", hos: "Hostilidad afectiva" };
-const ITEMS = [
-  { ax: "d", k: -1, t: "El Estado debería reducir las diferencias de renta aunque eso suponga subir impuestos." },
-  { ax: "t", k: 1, c: "hos", b: 1, t: "Quien vota al bando contrario suele tener malas intenciones." },
-  { ax: "d", k: 1, t: "La inmigración debería reducirse de forma significativa." },
-  { ax: "t", k: -1, c: "apr", t: "Puedo estar a gusto en un grupo donde casi nadie piensa como yo." },
-  { ax: "d", k: -1, t: "Habría que reducir la enseñanza concertada en favor de la pública." },
-  { ax: "t", k: 1, c: "fus", b: 1, t: "Cuando critican a mi bando político, lo siento como un ataque personal." },
-  { ax: "d", k: 1, t: "Proteger la identidad y las tradiciones nacionales debería ser una prioridad política." },
-  { ax: "t", k: -1, c: "cie", b: 1, t: "Cambio de opinión cuando alguien me da buenos argumentos, aunque venga del otro lado." },
-  { ax: "v", k: 1, t: "En determinadas circunstancias, la violencia contra adversarios políticos está justificada." },
-  { ax: "d", k: 1, t: "La empresa privada gestiona mejor que el Estado la mayoría de servicios." },
-  { ax: "t", k: 1, c: "apr", b: 1, t: "Me cuesta expresar ante los míos una opinión política distinta a la del grupo." },
-  { ax: "t", k: -1, c: "hos", b: 1, t: "Hay ideas del otro bando que me parecen razonables." },
-  { ax: "d", k: -1, t: "El Estado debería poder limitar el precio del alquiler en las zonas más caras." },
-  { ax: "t", k: -1, c: "fus", b: 1, t: "Critico en público a los míos cuando se equivocan." },
-  { ax: "t", k: 1, c: "cie", t: "En política, las cosas son blancas o negras; los matices suelen ser excusas." }
-];
-const LIK = ["Muy en desacuerdo", "En desacuerdo", "Ni sí ni no", "De acuerdo", "Muy de acuerdo"];
-const NB = 5;
-
 /* Distribución real de autoubicación: CIS, barómetro de septiembre de 2026 (estudio 3577), % sobre n = 4.042 */
 const CIS = [17.7, 7.0, 11.5, 8.3, 20.5, 6.3, 7.5, 6.5, 1.3, 8.1];
 
-/* Corrientes que cruzan la línea: su lugar en ella es aproximado */
-const EXTRA = {
-    lib: { name: "Libertario minarquista", short: "Libertario", arq: "El individuo soberano",
-      ref: "Referente en España: el economista Juan Ramón Rallo, defensor de un Estado mínimo.",
-      quote: "El Estado no es la solución: es el problema.",
-      eje: "Mercado al máximo y Estado limitado a justicia, seguridad y defensa. En lo moral, libertad personal amplia: lo que no daña a terceros no es asunto del Estado.",
-      psique: "Autonomía alta y desconfianza de lo colectivo. Su tribu es doctrinal más que identitaria: una comunidad con su propio canon de autores. Su riesgo es una certeza teórica que lo explica todo por el Estado.",
-      habla: ["expolio fiscal", "intervencionismo", "libre mercado", "los impuestos son un robo", "socialismo", "propiedad"],
-      contra: "Quiere un Estado mínimo y a la vez necesita uno firme que proteja la propiedad y haga cumplir los contratos. Mira mucho el abuso del poder público y poco el del poder privado concentrado.",
-      steel: "Recuerda que todo gasto público lo paga alguien y que el poder concentrado en el Estado también puede abusar.",
-      ve: { l: "socialistas", c: "socialdemócratas de todos los partidos", r: "conservadores estatistas", xr: "colectivistas nacionalistas" },
-      llaman: "«liberalio», «anarcocapi», «neoliberal»", tribu: 0.45 },
-    sp: { name: "Socialismo patriótico", short: "Soc. patriótico", arq: "El obrero de la nación",
-      ref: "Referente en España: Roberto Vaquero, fundador de Frente Obrero.",
-      quote: "Ni la izquierda caviar ni la derecha de los ricos: primero la clase obrera española.",
-      eje: "Estado fuerte en la economía, propiedad pública y derechos laborales. En lo cultural, nación, soberanía frente a la UE y la OTAN, y control de la inmigración, a la que ve como presión sobre los salarios.",
-      psique: "Identidad doble, de clase y de nación, y disciplina de organización. Rechaza a la izquierda «posmoderna» por haber abandonado al obrero. El grupo es a la vez partido, clase y patria.",
-      habla: ["clase obrera", "soberanía", "izquierda caviar", "globalismo", "posmodernidad", "oligarquía"],
-      contra: "Se reclama marxista, una tradición internacionalista, y pone al trabajador nacional por delante del extranjero, que pertenece a su misma clase.",
-      steel: "Señala que una parte de la clase trabajadora se siente abandonada a la vez por la izquierda cultural y por la derecha económica.",
-      ve: { xl: "progres posmodernos", l: "izquierda caviar", c: "tecnócratas del capital", r: "oligarquía", xr: "patriotas de los ricos" },
-      llaman: "«rojipardo»", tribu: 0.75 }
+/* Cien años: fases y etapas */
+const FASES = {
+  centrada: { n: "Centrada", c: "#E8E2CF" }, afectiva: { n: "Polarización afectiva", c: "#F2955F" },
+  ideologica: { n: "Polarización ideológica", c: "#EC5272" }, ruptura: { n: "Ruptura", c: "#F6BE3B" },
+  silenciada: { n: "Silenciada por una dictadura", c: "#9AA3B3" }
 };
-EXTRA.lib.pos = [0.66, 0.36]; EXTRA.sp.pos = [-0.62, 0.66];
-EXTRA.lib.sitio = "En una sola línea cae a la derecha por la economía, pero en lo moral está más cerca de la izquierda liberal.";
-EXTRA.sp.sitio = "En una sola línea cae a la izquierda por la economía, pero en lo cultural está más cerca de la derecha nacional.";
-
-/* Líderes y referentes públicos por dirección (cargos a octubre de 2026) */
-const LEADERS = [
-  { k: "xl", t: "Izquierda radical", p: [["Ione Belarra", "Secretaria general de Podemos"], ["Pablo Iglesias", "Fundador de Podemos, hoy fuera de la política institucional"]] },
-  { k: "sp", t: "Socialismo patriótico", p: [["Roberto Vaquero", "Fundador de Frente Obrero"]] },
-  { k: "l", t: "Izquierda", p: [["Pedro Sánchez", "Secretario general del PSOE"], ["Yolanda Díaz", "Impulsora de Sumar"]] },
-  { k: "c", t: "Centro", p: [["Albert Rivera", "Fundador de Ciudadanos, retirado"], ["Inés Arrimadas", "Expresidenta de Ciudadanos, retirada"]], n: "Hoy ningún partido de centro tiene peso en el Congreso." },
-  { k: "r", t: "Derecha", p: [["Alberto Núñez Feijóo", "Presidente del PP"], ["Isabel Díaz Ayuso", "Presidenta de la Comunidad de Madrid (PP)"]] },
-  { k: "lib", t: "Libertarismo", p: [["Juan Ramón Rallo", "Economista y divulgador, defensor de un Estado mínimo"]] },
-  { k: "xr", t: "Derecha radical", p: [["Santiago Abascal", "Presidente de Vox"], ["Alvise Pérez", "Fundador de Se Acabó La Fiesta"]] }
+const ETAPAS = [
+  { a: 1923, b: 1930, t: "Dictadura de Primo de Rivera", fase: "silenciada", nv: 1.1,
+    f: [[0.62, 0.05, 1]], oculta: [[0.3, 0.12, 1], [0.7, 0.12, 1]],
+    ctx: "Un golpe de Estado, con el apoyo del rey, suspende partidos y Cortes. El conflicto social no desaparece: deja de poder expresarse.",
+    cons: ["Sin libertad de partidos ni de prensa", "La tensión acumulada estalla al caer la monarquía en 1931"] },
+  { a: 1931, b: 1933, t: "Segunda República: el bienio reformista", fase: "ideologica", nv: 2,
+    f: [[0.27, 0.11, 1], [0.5, 0.12, 0.55], [0.74, 0.11, 0.95]],
+    ctx: "Primera democracia plena; las mujeres votan por primera vez en 1933. Las reformas agraria, militar, religiosa y territorial dividen el país en dos proyectos.",
+    cons: ["Quema de conventos en 1931", "Intento de golpe de Sanjurjo en 1932", "Insurrección anarquista y matanza de Casas Viejas en 1933"] },
+  { a: 1934, b: 1936, t: "Revolución de Asturias y Frente Popular", fase: "ruptura", nv: 2.8,
+    f: [[0.17, 0.08, 1], [0.5, 0.1, 0.18], [0.83, 0.08, 1]],
+    ctx: "La revolución de octubre de 1934 en Asturias y su represión dejan más de mil muertos. En las elecciones de febrero de 1936 compiten dos bloques y el centro casi desaparece. La violencia política llena las calles.",
+    cons: ["Revolución de Asturias y represión (1934)", "Asesinatos políticos, como el de Calvo Sotelo en julio de 1936", "El centro se hunde en las urnas de 1936"] },
+  { a: 1936, b: 1939, t: "Guerra Civil", fase: "ruptura", nv: 3,
+    f: [[0.1, 0.05, 1], [0.9, 0.05, 1]],
+    ctx: "En julio de 1936, un golpe militar contra el Gobierno de la República fracasa en parte del país y abre tres años de guerra.",
+    cons: ["En torno a medio millón de muertos, según las estimaciones más citadas (Juliá, 1999)", "Represión en las dos retaguardias", "Cerca de medio millón de personas cruzan la frontera en 1939"] },
+  { a: 1939, b: 1975, t: "Franquismo", fase: "silenciada", nv: 1.3,
+    f: [[0.82, 0.05, 1]], oculta: [[0.32, 0.13, 1], [0.66, 0.13, 0.9]],
+    ctx: "Una dictadura con un solo bando legal. La división de 1936 no se cierra: se reprime durante casi cuarenta años.",
+    cons: ["Decenas de miles de ejecuciones en la posguerra", "Exilio, cárcel y censura durante décadas", "La herida de 1936 pasa a la generación siguiente"] },
+  { a: 1975, b: 1982, t: "Transición", fase: "centrada", nv: 0.9,
+    f: [[0.45, 0.16, 1], [0.08, 0.04, 0.08], [0.92, 0.04, 0.08]],
+    ctx: "Los herederos de los dos bandos pactan: Ley de Amnistía y Pactos de la Moncloa en 1977, y una Constitución aprobada en referéndum por el 87,8 % en 1978.",
+    cons: ["Una democracia nacida del consenso", "Violencia en los márgenes: ETA y grupos armados de extrema derecha y extrema izquierda; 1980 es el año más sangriento", "Intento de golpe del 23-F en 1981"] },
+  { a: 1982, b: 2004, t: "Bipartidismo", fase: "centrada", nv: 0.6,
+    f: [[0.43, 0.13, 1], [0.6, 0.12, 0.8]],
+    ctx: "PSOE y PP se alternan compitiendo por el centro. Es la campana más centrada del siglo.",
+    cons: ["Entrada en la Comunidad Europea (1986)", "ETA sigue matando; la condena es casi unánime", "Crispación y corrupción al final de cada ciclo"] },
+  { a: 2004, b: 2011, t: "Los años de la crispación", fase: "afectiva", nv: 1.3,
+    f: [[0.38, 0.12, 1], [0.66, 0.12, 0.9]],
+    ctx: "Los atentados del 11-M y el giro electoral de 2004 abren años de desconfianza mutua. Se discute la memoria histórica, el Estatut de Cataluña y la negociación con ETA.",
+    cons: ["Ley de Memoria Histórica (2007), aprobada sin consenso", "Estatut (2006) y sentencia del Constitucional (2010)", "ETA anuncia el cese definitivo de la violencia en 2011"] },
+  { a: 2011, b: 2017, t: "Crisis y fin del bipartidismo", fase: "afectiva", nv: 1.7,
+    f: [[0.24, 0.1, 0.8], [0.45, 0.11, 0.9], [0.68, 0.11, 0.9]],
+    ctx: "La Gran Recesión y el 15-M. En 2015 entran Podemos y Ciudadanos: cuatro grandes partidos y ninguna mayoría.",
+    cons: ["Paro por encima del 25 % en 2012 y 2013", "Repetición electoral en 2016", "Desconfianza récord en los partidos"] },
+  { a: 2017, b: 2026, t: "Procés y dos bloques", fase: "afectiva", nv: 2.1, cis: true,
+    f: [[0.06, 0.06, 0.95], [0.3, 0.1, 0.75], [0.47, 0.06, 1.1], [0.72, 0.11, 0.65], [0.96, 0.04, 0.45]],
+    ctx: "El referéndum del 1-O de 2017, suspendido por el Constitucional, la entrada de Vox en 2019 y los gobiernos de coalición consolidan dos bloques. España está entre los países europeos con más polarización afectiva (Reiljan, 2020; Torcal, 2023).",
+    cons: ["Dos elecciones generales en 2019", "El CGPJ pasa más de cinco años sin renovarse (2018–2024)", "Ley de amnistía (2024)"] }
 ];
+
+/* ================= 6 bis · Consecuencias por fase ================= */
+(function consecuencias() {
+  const box = $("#cons"), pick = $("#cons-pick");
+  if (!box) return;
+  const FS = ["Centrada", "Afectiva", "Ideológica", "Ruptura"];
+  const DOM = [
+    { d: "Familia y amistades", v: [
+      ["Se puede discrepar en una cena familiar."],
+      ["Se evitan temas y las relaciones se enfrían.", "En EE. UU., las cenas familiares entre votantes distintos se acortaron tras 2016 (Chen y Rohla, 2018)."],
+      ["Se rompen amistades y parejas por política; crece la autocensura."],
+      ["Familias partidas por el frente; denuncias entre vecinos."]] },
+    { d: "Trabajo y economía", v: [
+      ["Se coopera y se contrata sin mirar el voto."],
+      ["Se discrimina por voto.", "En experimentos, el partido pesa más que la raza al elegir a quién dar una beca (Iyengar y Westwood, 2015)."],
+      ["Cada bando tiene sus barrios, sus marcas y sus redes; la incertidumbre frena la inversión."],
+      ["Economía de guerra, hambre y exilio."]] },
+    { d: "Información", v: [
+      ["Medios compartidos y hechos comunes."],
+      ["Cada bando elige sus medios y cree antes los bulos del propio lado."],
+      ["Ya no hay hechos comunes: todo dato se lee como propaganda."],
+      ["Propaganda y censura."]] },
+    { d: "Instituciones", v: [
+      ["Pactos de Estado y árbitros renovados a tiempo."],
+      ["Bloqueos: jueces y órganos de control se leen como de un bando.", "En España, el CGPJ estuvo más de cinco años sin renovarse (2018–2024)."],
+      ["Leyes que cambian con cada gobierno; el adversario no se acepta como gobernante legítimo."],
+      ["Las instituciones dejan de mediar: gana quien tiene la fuerza."]] },
+    { d: "Democracia", v: [
+      ["Contención: nadie usa todo su poder legal contra el rival (Levitsky y Ziblatt, 2018)."],
+      ["Se perdonan abusos del propio bando.", "Muchos votantes toleran violaciones democráticas si las comete su candidato (Graham y Svolik, 2020)."],
+      ["Polarización perniciosa: se acepta erosionar la democracia para que no gane el otro (McCoy y Somer, 2019)."],
+      ["Golpe, guerra o dictadura."]] },
+    { d: "Violencia", v: [
+      ["Excepcional y condenada por todos."],
+      ["Insultos, acoso en redes y escraches."],
+      ["Ataques a sedes y personas; la condena depende de quién sea la víctima."],
+      ["Violencia organizada: la guerra civil."]] }
+  ];
+  let cur = 0;
+  pick.innerHTML = FS.map((f, i) => `<button class="tbtn" data-i="${i}" aria-pressed="false">${f}</button>`).join("");
+  function set(i, desdeSim) {
+    if (i === cur && box.innerHTML) return;
+    cur = i;
+    let h = `<div class="corner"></div>` + FS.map((f, j) => `<div class="ch${j === i ? " on" : ""}">${f}</div>`).join("");
+    DOM.forEach((row) => {
+      h += `<div class="rd">${row.d}</div>` + row.v.map((v, j) => `<div class="cell${j === i ? " on" : ""}" style="--heat:${8 + j * 14}%">${v[0]}${v[1] ? `<i>${v[1]}</i>` : ""}</div>`).join("");
+    });
+    box.innerHTML = h;
+    $$(".tbtn", pick).forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.i === i)));
+  }
+  API.cons = set;
+  $$(".tbtn", pick).forEach((b) => b.addEventListener("click", () => { set(+b.dataset.i); if (API.simPhase) API.simPhase(+b.dataset.i); }));
+  set(cur);
+})();
+
 
 /* ================= 0 · Simulador (ideología × tribu) ================= */
 (function sim() {
@@ -1504,6 +1602,7 @@ const LEADERS = [
     const wv = level(viol, [0.12, 0.4, 0.75, 9], ["bajo", "medio", "alto", "crítico"]);
     setM("m-centro", centro / 0.6, wc); setM("m-temp", temp, wt); setM("m-violencia", Math.max(0.04, viol), wv);
     $$(".stop").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.ph === idx)));
+    if (API.cons) API.cons(idx, true);
     slider.setAttribute("aria-valuetext", `${Math.round(p * 100)} de 100: ${ph.name}`);
     $("#sim-sr").textContent = `${ph.name}. Centro habitable ${wc}, temperatura afectiva ${wt}, riesgo de violencia ${wv}.`;
   }
@@ -1572,7 +1671,7 @@ const LEADERS = [
         const x0 = X(i / 10) + 3, x1 = X((i + 1) / 10) - 3, hh = (v / cmax) * (hB - hT) * 0.92;
         ctx.fillStyle = "rgba(237,235,230,0.12)"; ctx.fillRect(x0, hB - hh, x1 - x0, hh);
         ctx.strokeStyle = "rgba(237,235,230,0.45)"; ctx.lineWidth = 1; ctx.strokeRect(x0 + 0.5, hB - hh + 0.5, x1 - x0 - 1, hh - 0.5);
-        if (!small || i === 0 || i === 4 || i === 9) { ctx.textAlign = "center"; ctx.fillStyle = "#C9CCD3"; ctx.fillText(String(v).replace(".", ","), (x0 + x1) / 2, hB - hh - 4); }
+        if (!small || i === 0 || i === 4 || i === 9) { ctx.textAlign = "center"; ctx.fillStyle = "#C9CCD3"; ctx.fillText(v.toFixed(1).replace(".", ","), (x0 + x1) / 2, hB - hh - 4); }
       });
     }
     // Campana del modelo
@@ -1618,6 +1717,7 @@ const LEADERS = [
   }
   slider.addEventListener("input", () => { touched = true; onSlider(); });
   $$(".stop").forEach((b) => b.addEventListener("click", () => { touched = true; tween(+b.dataset.v, RM ? 0 : 1100); }));
+  API.simPhase = (i) => { touched = true; tween(+$$(".stop")[i].dataset.v, RM ? 0 : 1100); };
   cisBtn.addEventListener("click", () => { showCIS = !showCIS; cisBtn.setAttribute("aria-pressed", String(showCIS)); draw(performance.now()); });
   new IntersectionObserver((es) => {
     visible = es[0].isIntersecting;
@@ -1631,208 +1731,362 @@ const LEADERS = [
   resize();
 })();
 
-/* ================= 1 · Mapa ================= */
-const MX = (d) => 510 + d * 400;
-const MY = (t) => 540 - t * 460;
-function cr(pts) {
-  let d = `M${r1(pts[0][0])},${r1(pts[0][1])}`;
-  for (let i = 0; i < pts.length - 1; i++) {
-    const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
-    d += ` C${r1(p1[0] + (p2[0] - p0[0]) / 6)},${r1(p1[1] + (p2[1] - p0[1]) / 6)} ${r1(p2[0] - (p3[0] - p1[0]) / 6)},${r1(p2[1] - (p3[1] - p1[1]) / 6)} ${r1(p2[0])},${r1(p2[1])}`;
-  }
-  return d;
-}
-function mapBase(mini) {
-  const y0 = MY(1.05), y1 = MY(0.66), y2 = MY(0.33), y3 = 560;
-  let s = "";
-  s += `<rect x="90" y="${y0}" width="840" height="${y1 - y0}" fill="#F6BE3B" fill-opacity=".06"/>`;
-  s += `<rect x="90" y="${y2}" width="840" height="${y3 - y2}" fill="#E8E2CF" fill-opacity=".035"/>`;
-  [y1, y2].forEach((y) => { s += `<line x1="90" x2="930" y1="${y}" y2="${y}" stroke="#3A4660" stroke-dasharray="3 7"/>`; });
-  for (let n = 1; n <= 10; n++) {
-    const x = r1(MX((n - 5.5) / 4.5));
-    s += `<line x1="${x}" x2="${x}" y1="${y0}" y2="${y3}" stroke="#283142" stroke-opacity=".7"/><text x="${x}" y="586" text-anchor="middle" class="mt">${n}</text>`;
-  }
-  s += `<line x1="90" x2="930" y1="${y3}" y2="${y3}" stroke="#3A4660" stroke-width="1.5"/>`;
-  s += `<text x="510" y="622" text-anchor="middle" class="ml"${mini ? "" : ` id="map-axis"`}>${mini ? "← izquierda · derecha →" : "Escala de autoubicación ideológica del CIS · 1 izquierda · 10 derecha"}</text>`;
-  s += `<text x="104" y="${y0 + 24}" class="mz">ZONA TRIBAL</text><text x="104" y="${y1 + 24}" class="mz">ZONA PARTIDISTA</text><text x="104" y="${y2 + 24}" class="mz">ZONA AUTÓNOMA</text>`;
-  if (!mini) s += `<g class="yaxis" transform="translate(56 300) rotate(-90)"><text text-anchor="middle" class="ml">Dependencia del grupo →</text></g>`;
-  const pts = [[-0.98, 1.02], ...ORD.map((k) => A[k].pos), [0.98, 1.02]].map(([d, t]) => [MX(d), MY(t)]);
-  const path = cr(pts);
-  s += `<path d="${path}" fill="none" stroke="url(#spec)" stroke-width="16" stroke-opacity=".1" stroke-linecap="round"/>`;
-  s += `<path d="${path}" fill="none" stroke="url(#spec)" stroke-width="2.5" stroke-opacity=".8" stroke-linecap="round"/>`;
-  if (!mini) {
-    s += `<path d="M${MX(-0.7)},${MY(0.99)} Q510,${MY(1.24)} ${MX(0.7)},${MY(0.99)}" fill="none" stroke="#F6BE3B" stroke-width="1.6" stroke-dasharray="4 7" stroke-opacity=".85"/>`;
-    s += `<text x="510" y="${r1(MY(1.0) + 6)}" text-anchor="middle" class="mw">Se tocan en el estilo, no en el programa</text>`;
-  }
-  return s;
-}
-/* Las zonas del test (55/72) se redibujan sobre las bandas del mapa (33/66) para que el punto caiga en la banda que dice el texto */
-const mapT = (t) => t < 0.55 ? (t / 0.55) * 0.33 : t < 0.72 ? 0.33 + ((t - 0.55) / 0.17) * 0.33 : Math.min(0.97, 0.66 + ((t - 0.72) / 0.28) * 0.34);
-function placeYouSVG(gSel, d, t) {
-  t = mapT(t);
-  const g = $(gSel); if (!g) return;
-  const x = r1(MX(d)), y = r1(MY(t));
-  let you = g.querySelector(".you");
-  if (!you) {
-    g.innerHTML = `<g class="you"><circle class="you-ring" r="30" fill="none" stroke="#F6BE3B" stroke-width="3"/><circle r="13" fill="#F6BE3B" stroke="#0C0F14" stroke-width="3"/><text class="you-t" y="-40" text-anchor="middle">Tú</text></g>`;
-    you = g.querySelector(".you");
-    you.style.transition = "none"; you.style.transform = `translate(${x}px,${y}px)`;
-    void you.getBoundingClientRect(); you.style.transition = "";
-  } else you.style.transform = `translate(${x}px,${y}px)`;
-}
-function placeYouMap(d, t) {
-  t = mapT(t);
-  const el = $("#map-you"); if (!el) return;
-  el.style.left = MX(d) / 10 + "%"; el.style.top = MY(t) / 6.4 + "%"; el.hidden = false;
-  const ax = $("#map-axis"); if (ax) ax.textContent = "Escala del CIS · tu punto «Tú» es tu posición relativa en el test";
-}
 
-/* Cuerdas: la vibración crece con los nudos que necesita; la animación se pausa fuera de pantalla */
-const ropeIO = new IntersectionObserver((es) => es.forEach((e) => $$("svg", e.target).forEach((s) => { if (s.pauseAnimations) e.isIntersecting ? s.unpauseAnimations() : s.pauseAnimations(); })));
-function ropeHTML(k, c) {
-  const amp = 3 + c.strats.length * 2.2, lo = r1(20 - amp), hi = r1(20 + amp), klo = r1(20 - amp / 2), khi = r1(20 + amp / 2);
-  const dur = (2.4 - c.strats.length * 0.25).toFixed(2) + "s";
-  const anim = RM ? "" : `<animate attributeName="d" dur="${dur}" repeatCount="indefinite" values="M0,20 Q300,${lo} 600,20;M0,20 Q300,${hi} 600,20;M0,20 Q300,${lo} 600,20"/>`;
-  const knot = RM ? "" : `<animate attributeName="cy" dur="${dur}" repeatCount="indefinite" values="${klo};${khi};${klo}"/>`;
-  return `<div class="rope"><div class="poles"><span>${c.a}</span><span>${c.b}</span></div>
-    <div class="rope-line" aria-hidden="true"><i class="pole" style="background:var(--${k})"></i>
-    <svg class="rl-line" viewBox="0 0 600 40" preserveAspectRatio="none"><path d="M0,20 Q300,20 600,20" stroke="#C9CCD3" stroke-width="2.2" fill="none" vector-effect="non-scaling-stroke">${anim}</path></svg>
-    <i class="pole" style="background:var(--${k})"></i><svg class="rl-knot" viewBox="0 0 16 40"><circle cx="8" cy="20" r="6" fill="#F6BE3B">${knot}</circle></svg></div>
-    <p>${c.txt}</p><div class="strats"><span class="lbl">${c.strats.length} nudos que la sostienen</span>${c.strats.map((s) => `<span class="chip">${s}</span>`).join("")}</div></div>`;
-}
+/* ================= Doce perfiles ================= */
+/* Los cinco de la línea izquierda-derecha reutilizan A; los otros siete tienen sus datos aquí.
+   dep: dependencia del grupo, 0–5 (tipo ideal, no medición). */
+const LIDERES = {
+  xl: [["Ione Belarra", "Secretaria general de Podemos"], ["Pablo Iglesias", "Fundador de Podemos, fuera de la política institucional"]],
+  l: [["Pedro Sánchez", "Secretario general del PSOE"], ["Yolanda Díaz", "Impulsora de Sumar"]],
+  c: [["Albert Rivera", "Fundador de Ciudadanos, retirado"], ["Inés Arrimadas", "Expresidenta de Ciudadanos, retirada"]],
+  r: [["Alberto Núñez Feijóo", "Presidente del PP"], ["Isabel Díaz Ayuso", "Presidenta de la Comunidad de Madrid"]],
+  xr: [["Santiago Abascal", "Presidente de Vox"], ["Alvise Pérez", "Fundador de Se Acabó La Fiesta"]]
+};
+const NUEVOS = {
+  ancom: { name: "Anarcocomunismo", short: "Anarcocom.", arq: "El comunero sin Estado", g: "cruzan", dep: 4,
+    quote: "Ni Dios, ni Estado, ni patrón.",
+    psique: "Rechaza toda autoridad, pero vive una lealtad intensa a la asamblea y al colectivo.",
+    karp: { v: "El trabajador y el excluido", p: "El Estado, el capital y la Iglesia", s: "La asamblea y el apoyo mutuo" },
+    words: ["autogestión", "apoyo mutuo", "asamblea", "acción directa"],
+    contra: { a: "Sin jerarquías", b: "Disciplina de asamblea", txt: "Rechaza toda autoridad y a la vez exige al grupo una unanimidad moral que castiga al disidente.", strats: ["«La asamblea no es poder»", "«Es autodefensa»"] },
+    steel: "Recuerda que la cooperación voluntaria y el apoyo mutuo sostienen buena parte de la vida social sin necesidad de mando.",
+    lid: [["Sin líderes, por principio", "Referentes históricos: Buenaventura Durruti y Federica Montseny (CNT-FAI)"]] },
+  sp: { name: "Socialismo patriótico", short: "Soc. patriótico", arq: "El obrero de la nación", g: "cruzan", dep: 4,
+    quote: "Ni la izquierda caviar ni la derecha de los ricos: primero la clase obrera española.",
+    psique: "Identidad doble, de clase y de nación, y disciplina de organización. Rechaza a la izquierda «posmoderna» por haber abandonado al obrero.",
+    karp: { v: "La clase obrera nacional", p: "La oligarquía y el globalismo", s: "Un Estado obrero y soberano" },
+    words: ["clase obrera", "soberanía", "izquierda caviar", "globalismo"],
+    contra: { a: "Internacionalismo marxista", b: "El trabajador nacional primero", txt: "Se reclama marxista, una tradición internacionalista, y pone al trabajador nacional por delante del extranjero, que es de su misma clase.", strats: ["«El inmigrante es ejército de reserva»", "«Primero, los de aquí»"] },
+    steel: "Señala que una parte de la clase trabajadora se siente abandonada a la vez por la izquierda cultural y por la derecha económica.",
+    lid: [["Roberto Vaquero", "Fundador de Frente Obrero"]] },
+  lib: { name: "Libertarismo minarquista", short: "Libertario", arq: "El individuo soberano", g: "cruzan", dep: 2,
+    quote: "El Estado no es la solución: es el problema.",
+    psique: "Autonomía alta y desconfianza de lo colectivo. Su tribu es doctrinal: una comunidad con su propio canon de autores.",
+    karp: { v: "El contribuyente", p: "El Estado intervencionista", s: "El individuo libre y una ley mínima" },
+    words: ["expolio fiscal", "intervencionismo", "libre mercado", "propiedad"],
+    contra: { a: "Estado mínimo", b: "Un Estado firme que proteja la propiedad", txt: "Quiere un Estado mínimo y a la vez necesita uno firme que haga cumplir contratos y propiedad. Mira mucho el abuso del poder público y poco el del privado.", strats: ["«El mercado corrige»", "«Eso no es libre mercado de verdad»"] },
+    steel: "Recuerda que todo gasto público lo paga alguien y que el poder concentrado en el Estado también puede abusar.",
+    lid: [["Juan Ramón Rallo", "Economista y divulgador, defensor de un Estado mínimo"]] },
+  ancap: { name: "Anarcocapitalismo", short: "Anarcocap.", arq: "El soberano del mercado", g: "cruzan", dep: 3,
+    quote: "Los impuestos son un robo; el Estado sobra entero.",
+    psique: "Autonomía individual extrema y desconfianza total del poder público. Su tribu es doctrinal: una lógica que lo explica todo.",
+    karp: { v: "El contribuyente y el emprendedor", p: "El Estado y los políticos", s: "El mercado libre y los contratos voluntarios" },
+    words: ["propiedad privada", "robo", "contratos", "Escuela Austriaca"],
+    contra: { a: "Ningún poder coactivo", b: "Poder privado sin límites", txt: "Elimina el Estado para acabar con la coacción, pero deja la seguridad y la justicia en manos de empresas que podrían ejercer el mismo poder sin control democrático.", strats: ["«La competencia lo resuelve»", "«El mercado se autorregula»"] },
+    steel: "Obliga a justificar cada intervención pública y recuerda que el poder concentrado puede abusar.",
+    lid: [["Jesús Huerta de Soto", "Catedrático de Economía, defensor del anarcocapitalismo"]] },
+  indxl: { name: "Independentismo de izquierda radical", short: "Indep. izq. radical", arq: "Liberación nacional y social", g: "indep", dep: 5,
+    quote: "Independencia y socialismo: dos luchas, una sola.",
+    psique: "Identidad doble, de pueblo y de clase, y pertenencia muy intensa a la comunidad nacional y al movimiento.",
+    karp: { v: "El pueblo vasco o catalán y su clase trabajadora", p: "El Estado español y el capital", s: "La izquierda independentista" },
+    words: ["autodeterminación", "pueblo", "represión", "unidad popular"],
+    contra: { a: "Antinacionalismo", b: "Nacionalismo propio", txt: "Combate el nacionalismo español como opresor y defiende el propio como liberación.", strats: ["«Nación oprimida, no opresora»", "«El nuestro es de izquierdas»"] },
+    steel: "Recuerda que la lengua y la cultura de una minoría necesitan protección y reconocimiento.",
+    lid: [["Arnaldo Otegi", "Coordinador general de EH Bildu"], ["CUP", "Dirección colectiva, sin líder único"]] },
+  indl: { name: "Independentismo de izquierda", short: "Indep. izquierda", arq: "La república por las urnas", g: "indep", dep: 4,
+    quote: "Votar no es delito.",
+    psique: "Identidad nacional intensa compatible con el pragmatismo: negocia en Madrid sin renunciar al objetivo.",
+    karp: { v: "La nación sin Estado", p: "El Estado centralista", s: "La república propia" },
+    words: ["derecho a decidir", "república", "diálogo", "autogobierno"],
+    contra: { a: "Ruptura con España", b: "Negociar en el Congreso", txt: "Defiende la independencia y a la vez sostiene gobiernos españoles a cambio de competencias y medidas.", strats: ["«Ensanchar la base»", "«Hay que acumular fuerzas»"] },
+    steel: "Señala que el reparto del poder territorial es una pregunta democrática legítima.",
+    lid: [["Oriol Junqueras", "Presidente de ERC"], ["Ana Pontón", "Portavoz nacional del BNG"]] },
+  indr: { name: "Nacionalismo e independentismo de derecha", short: "Indep. derecha", arq: "La nación propia, con orden y empresa", g: "indep", dep: 4,
+    quote: "Somos una nación y queremos decidir.",
+    psique: "Identidad nacional fuerte con valores de orden, empresa y tradición: menos ruptura social, más soberanía fiscal.",
+    karp: { v: "La nación propia y sus empresas", p: "El Estado central y el déficit fiscal", s: "Las instituciones propias" },
+    words: ["soberanía", "déficit fiscal", "concierto", "nación"],
+    contra: { a: "Economía abierta", b: "Una frontera con su mayor mercado", txt: "Defiende el libre comercio y a la vez propone una frontera con el mercado español, su principal cliente.", strats: ["«Europa nos acogerá»", "«Los costes serán transitorios»"] },
+    steel: "Recuerda que un gobierno cercano puede ser más eficaz y que el equilibrio fiscal entre territorios importa.",
+    lid: [["Carles Puigdemont", "Presidente de Junts"], ["Aitor Esteban", "Presidente del PNV, nacionalista no independentista"]] }
+};
+const PF_ORD = ["xl", "ancom", "l", "sp", "c", "r", "lib", "ancap", "xr", "indxl", "indl", "indr"];
+const PF = (k) => {
+  if (NUEVOS[k]) return { k, ...NUEVOS[k] };
+  const a = A[k];
+  return { k, name: a.name, short: a.short, arq: a.arq, g: "linea", dep: a.traits[0], quote: a.quote, psique: a.psique, karp: a.karp,
+    words: a.words.filter((w) => w[1] >= 2).slice(0, 5).map((w) => w[0]), contra: a.contra[0], contra2: a.contra[1], steel: a.steel, lid: LIDERES[k], extreme: a.extreme };
+};
+const GRUPOS = [["todos", "Los doce"], ["linea", "La línea izquierda–derecha"], ["cruzan", "Los que cruzan la línea"], ["indep", "Independentismos"]];
 
-function karpHTML(k) {
-  const kp = A[k].karp;
-  return `<div class="karp"><svg viewBox="0 0 300 88" aria-hidden="true"><path d="M150,8 L44,80 L256,80 Z" style="fill:color-mix(in srgb,var(--${k}) 10%,transparent);stroke:var(--${k})" stroke-width="1.5"/><circle cx="150" cy="8" r="5" style="fill:var(--${k})"/><circle cx="44" cy="80" r="5" style="fill:var(--${k})"/><circle cx="256" cy="80" r="5" style="fill:var(--${k})"/></svg>
-    <div class="kv kv-p"><b>Villano</b>${kp.p}</div><div class="kv kv-v"><b>Víctima</b>${kp.v}</div><div class="kv kv-s"><b>Héroe</b>${kp.s}</div></div>`;
-}
-function renderDossier(k) {
-  const a = A[k], i = ORD.indexOf(k), prev = ORD[(i + 4) % 5], next = ORD[(i + 1) % 5];
-  const el = $("#dossier");
-  el.style.setProperty("--dc", `var(--${k})`);
-  el.setAttribute("aria-label", `Ficha: ${a.name}`);
-  el.innerHTML = `
-  <div class="dz-top">
-    <figure class="dz-fig"><span class="ncirc dz-por" style="--nc:var(--${k})">${pt(k)}</span></figure>
-    <div class="dz-id">
-      <p class="dz-eyebrow">Tipo ideal ${i + 1} de 5</p>
-      <h3 tabindex="-1">${a.name}</h3>
-      <p class="dz-arq">${a.arq}</p>
-      ${a.extreme ? `<p class="dz-flag">Describe al polo extremista, una minoría. No al votante de los partidos radicales.</p>` : ""}
-      <blockquote class="dz-quote">${a.quote}</blockquote>
-      <div class="dz-two"><div><h4>Psique</h4><p>${a.psique}</p></div><div><h4>Vínculo social</h4><p>${a.social}</p></div></div>
-      <div class="dz-nav"><button class="btn sm" data-go="${prev}">← ${A[prev].name}</button><button class="btn sm" data-go="${next}">${A[next].name} →</button></div>
-    </div>
-  </div>
-  <div class="dz-grid">
-    <section class="dz-card"><h4>Perfil psicológico</h4>${a.traits.map((v, j) => `<div class="trait"><span>${TRAITS[j]}</span>${segs(v, 5, j === 5 ? "warn" : "")}</div>`).join("")}<p class="tiny">Perfil teórico del tipo ideal, de 0 a 5. Simétrico por diseño: ver Método.</p></section>
-    <section class="dz-card"><h4>Qué le da sentido</h4><p class="big">${a.sentido[0]}</p><p>${a.sentido[1]}</p><p class="tiny">La búsqueda de significado explica por qué el grupo da sentido (Kruglanski et al., 2014).</p></section>
-    <section class="dz-card"><h4>Su relato: quién es quién</h4>${karpHTML(k)}</section>
-    <section class="dz-card"><h4>Cómo habla</h4><div class="cloud">${a.words.map(([w, n]) => `<span class="w w${n}">${w}</span>`).join("")}</div>${a.phrases.map((p) => `<q class="ph">${p}</q>`).join("")}</section>
-    <section class="dz-card steel"><h4>Su parte de razón</h4><p class="big">${a.steel}</p><p>Toda posición nace de una preocupación legítima. El problema empieza cuando se convierte en identidad.</p></section>
-    <section class="dz-card"><h4>Recorre su lógica</h4><div class="dz-links">
-      <button data-to="lens">Cómo ve a los demás <span>Miradas →</span></button>
-      <button data-to="ring">Qué identidades abraza <span>Identidades →</span></button>
-      <button data-to="step">Peldaño ${a.glasl} · ${GLASL[a.glasl - 1].name} <span>Escalada →</span></button>
-      <button data-to="contra">Sus contradicciones <span>${a.contra.length} →</span></button>
-    </div></section>
-  </div>`;
-  $$("[data-go]", el).forEach((b) => b.addEventListener("click", () => selectA(b.dataset.go, "focus")));
-  $$("[data-to]", el).forEach((b) => b.addEventListener("click", () => {
-    const t = b.dataset.to;
-    if (t === "lens") { API.lens(k); go("miradas"); }
-    else if (t === "ring") { API.ring(k); go("identidades"); }
-    else if (t === "step") { API.step(a.glasl - 1); go("escalada"); }
-    else { API.contra(k); go("contradicciones"); }
-  }));
-}
-function renderExtra(k) {
-  const n = EXTRA[k], el = $("#dossier");
-  el.style.setProperty("--dc", `var(--${k})`);
-  el.setAttribute("aria-label", `Ficha: ${n.name}`);
-  el.innerHTML = `<div class="dz-top">
-    <figure class="dz-fig"><span class="ncirc dz-por" style="--nc:var(--${k})">${pt(k)}</span></figure>
-    <div class="dz-id"><p class="dz-eyebrow">Corriente que cruza la línea</p><h3 tabindex="-1">${n.name}</h3><p class="dz-arq">${n.arq}</p>
-      <blockquote class="dz-quote">${n.quote}</blockquote><p class="dz-flag">${n.sitio}</p>
-      <div class="dz-nav"><button class="btn sm" data-go="xl">Volver a los cinco tipos</button></div></div></div>
-    <div class="dz-card"><div class="cx-grid">
-      <div><h4>Qué defiende</h4><p>${n.eje}</p></div>
-      <div><h4>Psique y grupo</h4><p>${n.psique}</p></div>
-      <div><h4>Cómo habla</h4><p>${n.habla.map((w) => `<span class="chip" style="margin:0 4px 4px 0">${w}</span>`).join("")}</p></div>
-      <div><h4>Su contradicción</h4><p>${n.contra}</p></div>
-      <div><h4>Cómo ve a los demás</h4><ul class="looks2">${Object.entries(n.ve).map(([o, lab]) => `<li>${A[o].name}: <q>${lab}</q></li>`).join("")}</ul></div>
-      <div><h4>Su parte de razón</h4><p>${n.steel}</p><h4 style="margin-top:12px">Cómo le llaman</h4><p>${n.llaman}</p></div>
-    </div></div>`;
-  $$("[data-go]", el).forEach((b) => b.addEventListener("click", () => selectA(b.dataset.go, "focus")));
-}
-function selectA(k, mode) {
-  if (EXTRA[k]) renderExtra(k); else renderDossier(k);
-  $$(".node").forEach((n) => n.setAttribute("aria-pressed", String(n.dataset.k === k)));
-  const d = $("#dossier"), h = d.querySelector("h3");
-  if (mode === "scroll") {
-    const r = d.getBoundingClientRect();
-    if (r.top > window.innerHeight * 0.55 || r.bottom < 90) d.scrollIntoView({ behavior: RM ? "auto" : "smooth", block: "start" });
-    h.focus({ preventScroll: true });
-  } else if (mode === "focus") {
-    d.scrollIntoView({ behavior: RM ? "auto" : "smooth", block: "start" }); h.focus({ preventScroll: true });
-  }
-}
-(function map() {
-  $("#map-base").innerHTML = mapBase(false);
-  const nodes = $("#map-nodes"), stage = $("#map-stage"), bub = $("#bubble");
-  if (!HOVER) $("#map-hint span").textContent = "Toca una figura para abrir su ficha.";
-  const ALL = [...ORD, "sp", "lib"], INFO = (k) => A[k] || EXTRA[k];
-  nodes.innerHTML = ALL.map((k) => {
-    const [d, t] = INFO(k).pos, mini = !A[k] ? " mini" : "";
-    const a = INFO(k);
-    return `<button class="node${mini}" data-k="${k}" style="left:${MX(d) / 10}%;top:${MY(t) / 6.4}%;--nc:var(--${k})" aria-pressed="false" aria-label="${a.name}, ${a.arq}: abrir ficha">
-      <span class="ncirc">${pt(k)}</span><span class="nlab"><span class="full">${mini ? a.short : a.name}</span><span class="short">${a.short}</span>${mini ? "" : `<small>${a.arq}</small>`}</span></button>`;
+(function perfiles() {
+  const grid = $("#pf-grid"), pick = $("#pf-pick");
+  if (!grid) return;
+  grid.innerHTML = PF_ORD.map((k) => {
+    const p = PF(k);
+    const contras = [p.contra, p.contra2].filter(Boolean);
+    return `<article class="pf" data-g="${p.g}" style="--dc:var(--${k})">
+      <header class="pf-h"><span class="ncirc" style="--nc:var(--${k})">${pt(k)}</span><div><h3>${p.name}</h3><p class="pf-arq">${p.arq}</p></div></header>
+      ${p.extreme ? `<p class="pf-flag">Describe al polo extremista, una minoría.</p>` : ""}
+      <q class="pf-q">${p.quote}</q>
+      <dl class="pf-dl">
+        <dt>Psique</dt><dd>${p.psique.split(/(?<=\.)\s/)[0]}<span class="pf-dep">${segs(p.dep, 5)} dependencia del grupo</span></dd>
+        <dt>Relato</dt><dd><span class="kv3"><i>Víctima</i>${p.karp.v}</span><span class="kv3"><i>Villano</i>${p.karp.p}</span><span class="kv3"><i>Héroe</i>${p.karp.s}</span></dd>
+        <dt>Habla</dt><dd>${p.words.map((w) => `<span class="chip">${w}</span>`).join(" ")}</dd>
+        <dt>Contradicción</dt><dd>${contras.slice(0, 1).map((c) => `<b class="pf-ten">${c.a} <span aria-hidden="true">⟷</span><span class="sr">frente a</span> ${c.b}</b>`).join("")}</dd>
+        <dt>Líderes</dt><dd>${(p.lid || []).map(([n, r]) => `<span class="pf-lid"><b>${n}</b> · ${r}</span>`).join("")}</dd>
+      </dl>
+      <details class="pf-more"><summary>Más</summary>
+        ${p.psique.split(/(?<=\.)\s/).length > 1 ? `<p>${p.psique}</p>` : ""}${contras.length > 1 ? `<p><b class="pf-ten">${contras[1].a} ⟷ ${contras[1].b}</b></p>` : ""}
+        ${contras.map((c) => `<p>${c.txt}</p><p class="pf-strats"><span class="lbl">Cómo lo sostiene</span>${c.strats.map((s) => `<span class="chip">${s}</span>`).join(" ")}</p>`).join("")}
+        <p><span class="lbl">Su parte de razón</span><br>${p.steel}</p>
+      </details>
+    </article>`;
   }).join("");
-  function show(k) {
-    if (!HOVER || stage.clientWidth < 700) return;
-    const a = INFO(k);
-    bub.style.setProperty("--nc", `var(--${k})`);
-    bub.innerHTML = `<span class="b-who">${a.name} · así habla</span>${(a.phrases || [a.quote]).map((x) => `<q>${x}</q>`).join("")}<small>Pulsa para abrir su ficha completa</small>`;
-    const W = stage.clientWidth, H = stage.clientHeight, [d, t] = a.pos;
-    const nx = (MX(d) / 1000) * W, ny = (MY(t) / 640) * H;
-    const nr = nodes.querySelector(`[data-k="${k}"]`).offsetWidth / 2;
-    const bw = bub.offsetWidth, bh = bub.offsetHeight;
-    let left, top;
-    if (k === "xl" || k === "l" || k === "sp") { left = nx + nr + 18; top = ny - bh / 2 + (k === "xl" ? 48 : 0); }
-    else if (k === "xr" || k === "r" || k === "lib") { left = nx - nr - 18 - bw; top = ny - bh / 2 + (k === "xr" ? 48 : 0); }
-    else { left = nx - bw / 2; top = ny - nr - 18 - bh; }
-    bub.style.left = Math.max(10, Math.min(W - bw - 10, left)) + "px";
-    bub.style.top = Math.max(10, Math.min(H - bh - 10, top)) + "px";
-    bub.classList.add("on");
-  }
-  const hide = () => bub.classList.remove("on");
-  $$(".node", nodes).forEach((n) => {
-    const k = n.dataset.k;
-    n.addEventListener("mouseenter", () => show(k)); n.addEventListener("mouseleave", hide);
-    n.addEventListener("focus", () => show(k)); n.addEventListener("blur", hide);
-    n.addEventListener("click", () => { hide(); selectA(k, "scroll"); });
-  });
-  selectA("xl", null);
+  pick.innerHTML = GRUPOS.map(([g, t], i) => `<button class="tbtn" data-g="${g}" aria-pressed="${i === 0}">${t}</button>`).join("");
+  $$(".tbtn", pick).forEach((b) => b.addEventListener("click", () => {
+    $$(".tbtn", pick).forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    $$(".pf", grid).forEach((c) => { c.hidden = b.dataset.g !== "todos" && c.dataset.g !== b.dataset.g; });
+  }));
 })();
 
-/* ================= 1 bis · Líderes ================= */
-$("#leaders").innerHTML = LEADERS.map((g) => `<div class="lcol" style="--lc:var(--${g.k})"><h3>${g.t}</h3>
-  ${g.p.map(([n, r]) => `<div class="ldr"><span class="av" aria-hidden="true">${n.split(" ").filter((w) => w.length > 2 || w === n.split(" ")[0]).slice(0, 2).map((w) => w[0]).join("")}</span><b>${n}</b><span>${r}</span></div>`).join("")}
-  ${g.n ? `<p class="lnote">${g.n}</p>` : ""}</div>`).join("");
+/* ================= Portada: imágenes de las tarjetas ================= */
+(function portada() {
+  const STOPC = ORD.map((k) => cssv("--" + k));
+  const col = (u) => STOPC[Math.round(Math.min(1, Math.max(0, u)) * 4)];
+  const g = (x, m, s) => Math.exp(-((x - m) ** 2) / (2 * s * s));
+  const curva = (mix, W, H, top) => {
+    const ys = []; for (let i = 0; i <= 80; i++) ys.push(mix.reduce((a, [m, s, w]) => a + w * g(i / 80, m, s), 0));
+    const mx = Math.max(...ys);
+    return ys.map((y, i) => `${i ? "L" : "M"}${r1(10 + (i / 80) * (W - 20))},${r1(H - 12 - (y / mx) * (H - 12 - top))}`).join(" ");
+  };
+  const set = (id, s) => { const e = document.getElementById(id); if (e) e.innerHTML = s; };
+  const mx = Math.max(...CIS);
+  set("ci-hoy", CIS.map((v, i) => `<rect x="${18 + i * 29}" y="${r1(138 - (v / mx) * 112)}" width="22" height="${r1((v / mx) * 112)}" rx="3" fill="${col(i / 9)}" fill-opacity=".9"/>`).join("") + `<line x1="12" x2="308" y1="139" y2="139" stroke="#3A4660"/>`);
+  set("ci-historia", [[[[0.15, 0.08, 1], [0.85, 0.08, 1]], "#EC5272", 0.5], [[[0.47, 0.13, 1]], "#E8E2CF", 0.75], [[[0.08, 0.06, 0.9], [0.47, 0.07, 1.1], [0.95, 0.04, 0.45]], "#F2955F", 1]]
+    .map(([mix, c, o]) => `<path d="${curva(mix, 320, 150, 18)}" fill="none" stroke="${c}" stroke-opacity="${o}" stroke-width="3" stroke-linecap="round"/>`).join(""));
+  const xs = [40, 100, 160, 220, 280];
+  set("ci-miradas", xs.slice(1).map((x, i) => `<path d="M40,96 Q${(40 + x) / 2},${140 + i * 2} ${x},96" fill="none" stroke="${i > 1 ? "#F6BE3B" : "#EC5272"}" stroke-width="${2 + i * 1.6}" stroke-linecap="round" stroke-opacity=".85"/>`).join("")
+    + xs.map((x, i) => `<circle cx="${x}" cy="80" r="${i ? 15 : 19}" fill="${STOPC[i]}"/>`).join("") + `<path d="M22,40 Q40,22 58,40 Q40,58 22,40 Z" fill="none" stroke="#EDEBE6" stroke-width="2"/><circle cx="40" cy="40" r="5" fill="#EDEBE6"/>`);
+  set("ci-perfiles", ["xl", "l", "c", "r", "xr"].map((k, i) => `<g transform="translate(${14 + i * 60} 20)"><circle cx="30" cy="55" r="29" fill="#1B2230" stroke="${STOPC[i]}" stroke-width="2"/><use href="#p-${k}" x="4" y="22" width="52" height="61"/></g>`).join(""));
+  set("ci-escalada", [56, 44, 32, 20].map((r, i) => `<circle cx="70" cy="76" r="${r}" fill="${["#EC5272", "#5E6B88", "#5CC28A", "#5CC28A"][i]}" fill-opacity="${0.25 + i * 0.15}"/>`).join("")
+    + Array.from({ length: 6 }, (_, i) => `<rect x="${150 + i * 26}" y="${30 + i * 18}" width="24" height="${120 - (30 + i * 18) + 10}" fill="${["#8A92A3", "#8A92A3", "#B08A38", "#B08A38", "#F6BE3B", "#EC5272"][i]}" fill-opacity=".85"/>`).join(""));
+  set("ci-fuentes", `<text x="26" y="112" font-family="Newsreader, Georgia, serif" font-size="110" font-style="italic" fill="#EDEBE6">«»</text>`
+    + [0, 1, 2, 3].map((i) => `<rect x="${170 + i * 30}" y="${34 + (i % 2) * 10}" width="24" height="${100 - (i % 2) * 10}" rx="2" fill="${STOPC[[0, 4, 1, 3][i]]}" fill-opacity=".8"/>`).join(""));
+})();
 
-/* ================= 2 · Etiquetas ================= */
-(function flips() {
-  const box = $("#flips");
-  box.innerHTML = FLIPS.map((f, i) => `<button class="flip" data-i="${i}" aria-pressed="false" style="--fc:var(--${f.k})">
-    <span class="flip-in">
-      <span class="face front"><span class="turn">Gira la tarjeta ↻</span><span class="word">«${f.w}»</span></span>
-      <span class="face back" aria-hidden="true"><span><b>Origen</b>${f.o}</span><span><b>Hoy se usa para</b>${f.u}</span><span><b>Lo que describe mejor</b>${f.d}</span></span>
-    </span></button>`).join("");
-  $$(".flip", box).forEach((b) => b.addEventListener("click", () => {
-    const on = b.getAttribute("aria-pressed") !== "true";
-    b.setAttribute("aria-pressed", String(on));
-    b.querySelector(".back").setAttribute("aria-hidden", String(!on));
-    b.querySelector(".front .turn").setAttribute("aria-hidden", String(on));
+/* ================= 1 · El estudio del CIS ================= */
+(function estudio() {
+  const box = $("#cis-chart"); if (!box) return;
+  const STOPC = ORD.map((k) => cssv("--" + k));
+  const mx = Math.max(...CIS);
+  box.innerHTML = `<div class="cis-bars">${CIS.map((v, i) => `<div class="cb"><b>${v.toFixed(1).replace(".", ",")}<small>%</small></b><i style="height:${(v / mx) * 100}%;background:${STOPC[Math.min(4, Math.round((i / 9) * 4))]}"></i><span>${i + 1}</span></div>`).join("")}</div>
+    <div class="cis-ends"><span>← Izquierda</span><span>Derecha →</span></div>`;
+})();
+
+/* ================= 2 · Cien años: campanas por etapa ================= */
+(function historia() {
+  const line = $("#hline"), svg = $("#hchart"), info = $("#hinfo"), cap = $("#hcap"), range = $("#hrange");
+  if (!svg) return;
+  const W = 640, H = 300, pad = 16, NP = 120;
+  const g = (x, m, s) => Math.exp(-((x - m) ** 2) / (2 * s * s));
+  const muestra = (mix) => { const ys = []; for (let i = 0; i <= NP; i++) ys.push(mix.reduce((a, [m, s, w]) => a + w * g(i / NP, m, s), 0)); const mx = Math.max(...ys); return ys.map((y) => y / mx); };
+  const camino = (ys, cerrar) => {
+    let d = ys.map((y, i) => `${i ? "L" : "M"}${r1(pad + (i / NP) * (W - 2 * pad))},${r1(H - pad - y * (H - 2 * pad - 16))}`).join(" ");
+    return cerrar ? `${d} L${W - pad},${H - pad} L${pad},${H - pad} Z` : d;
+  };
+  const CORTO = ["Primo de Rivera", "II República", "Asturias y Frente Popular", "Guerra Civil", "Franquismo", "Transición", "Bipartidismo", "Crispación", "Fin del bipartidismo", "Procés y bloques"];
+  line.innerHTML = ETAPAS.map((e, i) => `<button class="hnode" data-i="${i}" style="--hc:${FASES[e.fase].c}" aria-pressed="false" aria-label="${e.a}–${e.b}: ${e.t}"><i></i><b>${e.a}</b><span>${CORTO[i]}</span></button>`).join("");
+  let cur = null, actual = muestra(ETAPAS[ETAPAS.length - 1].f), anim = 0;
+  function pinta(ys, e) {
+    const F = FASES[e.fase];
+    let s = `<defs><linearGradient id="hgrad" x1="0" x2="1" y1="0" y2="0">${ORD.map((k, j) => `<stop offset="${j / 4}" stop-color="${cssv("--" + k)}"/>`).join("")}</linearGradient></defs>`;
+    for (let n = 1; n <= 10; n++) { const x = pad + ((n - 0.5) / 10) * (W - 2 * pad); s += `<line x1="${r1(x)}" x2="${r1(x)}" y1="${pad}" y2="${H - pad}" stroke="#283142"/><text x="${r1(x)}" y="${H + 12}" text-anchor="middle" class="hsy">${n}</text>`; }
+    if (e.cis) {
+      const mx = Math.max(...CIS), bw = (W - 2 * pad) / 10;
+      CIS.forEach((v, j) => { const hh = (v / mx) * (H - 2 * pad - 16); s += `<rect x="${r1(pad + j * bw + 4)}" y="${r1(H - pad - hh)}" width="${r1(bw - 8)}" height="${r1(hh)}" rx="3" fill="#EDEBE6" fill-opacity=".1" stroke="#EDEBE6" stroke-opacity=".45"/><text x="${r1(pad + j * bw + bw / 2)}" y="${r1(H - pad - hh - 5)}" text-anchor="middle" class="hsy">${v.toFixed(1).replace(".", ",")}</text>`; });
+    }
+    if (e.oculta) s += `<path d="${camino(muestra(e.oculta), true)}" fill="#9AA3B3" fill-opacity=".1" stroke="#9AA3B3" stroke-dasharray="5 6" stroke-width="2"/>`;
+    s += `<path d="${camino(ys, true)}" fill="url(#hgrad)" fill-opacity="${e.oculta ? 0.75 : 0.5}"/>`;
+    s += `<path d="${camino(ys, false)}" fill="none" stroke="#EDEBE6" stroke-width="2.4" stroke-linejoin="round"/>`;
+    s += `<line x1="${pad}" x2="${W - pad}" y1="${H - pad}" y2="${H - pad}" stroke="#3A4660"/>`;
+    s += `<text x="${pad + 6}" y="${pad + 14}" class="hst" style="fill:${F.c}">${F.n.toUpperCase()}</text>`;
+    svg.innerHTML = s;
+  }
+  function set(i) {
+    if (i === cur) return;
+    cur = i;
+    const e = ETAPAS[i], F = FASES[e.fase], dest = muestra(e.f), desde = actual.slice(), t0 = performance.now();
+    cancelAnimationFrame(anim);
+    const paso = (now) => {
+      const q = RM ? 1 : Math.min(1, (now - t0) / 450), k = 1 - Math.pow(1 - q, 3);
+      actual = desde.map((y, j) => y + (dest[j] - y) * k);
+      pinta(actual, e);
+      if (q < 1) anim = requestAnimationFrame(paso);
+    };
+    anim = requestAnimationFrame(paso);
+    if (RM) pinta(dest, e);
+    cap.textContent = e.cis ? "Barras: el estudio real del CIS. Curva: lectura del modelo." : e.oculta ? "Color: lo que se podía decir. Gris discontinuo: lo que pensaba la sociedad." : "Forma interpretada a partir de la historiografía.";
+    info.style.setProperty("--hc", F.c);
+    info.innerHTML = `<span class="hd-years">${e.a}–${e.b}</span><span class="hd-phase">${F.n}</span><h3>${e.t}</h3><p>${e.ctx}</p>
+      <span class="lbl">Consecuencias</span><ul class="hd-cons">${e.cons.map((x) => `<li>${x}</li>`).join("")}</ul>`;
+    $$(".hnode", line).forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.i === i)));
+    range.value = String(i);
+  }
+  $$(".hnode", line).forEach((b) => {
+    const i = +b.dataset.i;
+    b.addEventListener("mouseenter", () => set(i)); b.addEventListener("focus", () => set(i)); b.addEventListener("click", () => set(i));
+  });
+  range.addEventListener("input", () => set(+range.value));
+  set(ETAPAS.length - 1);
+})();
+
+/* ================= 5 · Círculos de pertenencia ================= */
+(function circulos() {
+  const svg = $("#rings"), pick = $("#ring-picker"), list = $("#ring-list");
+  if (!svg) return;
+  const ESTADO = { a: ["Abraza", "#5CC28A", "✓"], t: ["Tolera", "#5E6B88", "–"], x: ["Combate", "#EC5272", "✕"] };
+  const RS = { ...RSTATE,
+    ancom: ["a", "a", "t", "x", "x", "a"], sp: ["a", "a", "t", "a", "x", "t"], lib: ["a", "a", "t", "t", "a", "a"], ancap: ["a", "t", "x", "x", "x", "a"],
+    indxl: ["a", "a", "a", "x", "t", "a"], indl: ["a", "a", "a", "x", "a", "a"], indr: ["a", "a", "a", "x", "a", "t"] };
+  const RT = { ...RTXT,
+    ancom: "La comuna y la humanidad, sin Estados en medio: combate la nación española y la Unión Europea como estructuras de poder.",
+    sp: "La patria y el barrio obrero. Europa, la de Bruselas y la OTAN, es un poder ajeno.",
+    lib: "El individuo y el mundo abierto. Tolera la nación, pero desconfía de todo poder que no haya elegido.",
+    ancap: "El individuo y el mercado global. Combate los Estados a cualquier escala; la comunidad es voluntaria o no es.",
+    indxl: "Su nación, su barrio y la humanidad. Combate la identidad española, que vive como imposición del Estado.",
+    indl: "Su nación y Europa, a la que quiere pertenecer como Estado propio. La identidad española queda fuera.",
+    indr: "Su nación y Europa, con orden y empresa. La humanidad le parece una abstracción; España, otro Estado." };
+  const R = [44, 82, 120, 160, 200, 240];
+  pick.innerHTML = PF_ORD.map((k) => `<button class="rp" data-k="${k}" style="--nc:var(--${k})" aria-pressed="false" title="${PF(k).name}"><span class="ncirc">${pt(k)}</span><span>${PF(k).short}</span></button>`).join("");
+  function draw(k) {
+    const st = RS[k];
+    let s = `<defs><pattern id="hatchR" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#3A1A22"/><rect width="3" height="8" fill="#EC5272" fill-opacity=".7"/></pattern></defs>`;
+    for (let i = R.length - 1; i >= 0; i--) {
+      const r = R[i], e = st[i];
+      s += `<circle cx="260" cy="260" r="${r}" fill="#0C0F14"/>`;
+      s += `<circle class="ring" data-i="${i}" cx="260" cy="260" r="${r - 1}" fill="${e === "x" ? "url(#hatchR)" : ESTADO[e][1]}" fill-opacity="${e === "a" ? 0.28 + (5 - i) * 0.06 : e === "t" ? 0.35 : 1}" stroke="${ESTADO[e][1]}" stroke-width="${e === "x" ? 3 : 1.5}"/>`;
+    }
+    RINGS.forEach((name, i) => {
+      const y = i ? 260 - (R[i] + R[i - 1]) / 2 + 5 : 265;
+      s += `<text x="260" y="${y}" text-anchor="middle" class="rl">${name}</text>`;
+    });
+    svg.innerHTML = s;
+    list.innerHTML = RINGS.map((n, i) => { const [t, c, ic] = ESTADO[st[i]]; return `<li style="--ec:${c}"><i aria-hidden="true">${ic}</i><span>${n}</span><b>${t}</b></li>`; }).reverse().join("");
+    $$(".rp", pick).forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.k === k)));
+    $("#ring-insight").innerHTML = `<b style="color:var(--${k})">${PF(k).name}.</b> ${RT[k]}`;
+    svg.setAttribute("aria-label", `Círculos de pertenencia de ${PF(k).name}: ` + RINGS.map((n, i) => `${n}, ${ESTADO[st[i]][0].toLowerCase()}`).join("; "));
+  }
+  $$(".rp", pick).forEach((b) => {
+    const k = b.dataset.k;
+    b.addEventListener("mouseenter", () => draw(k)); b.addEventListener("focus", () => draw(k)); b.addEventListener("click", () => draw(k));
+  });
+  draw("xr");
+
+  // Eje territorial: izquierda-derecha frente a centro-periferia
+  const TX = (d) => 380 + d * 290, TY = (t) => 215 + t * 160;
+  const TP = { xl: [-0.85, 0.62], l: [-0.45, 0.3], c: [0, 0], r: [0.45, -0.4], xr: [0.85, -0.88], indxl: [-0.8, 0.9], indl: [-0.42, 0.88], indr: [0.32, 0.8] };
+  let s = `<rect x="70" y="40" width="620" height="350" rx="12" fill="#0C0F14" fill-opacity=".35"/>`;
+  s += `<line x1="70" x2="690" y1="${TY(0)}" y2="${TY(0)}" stroke="#3A4660" stroke-dasharray="3 7"/><line x1="${TX(0)}" x2="${TX(0)}" y1="40" y2="390" stroke="#3A4660" stroke-dasharray="3 7"/>`;
+  s += `<text x="80" y="62" class="tt">↑ Recentralización: una sola nación</text><text x="80" y="${TY(0) - 8}" class="tt">Estado autonómico</text><text x="690" y="380" text-anchor="end" class="tt">↓ Independencia</text>`;
+  s += `<text x="380" y="420" text-anchor="middle" class="tt">← izquierda · derecha →</text>`;
+  s += `<path d="M${TX(-0.95)},${TY(0.72)} L${TX(0.95)},${TY(-0.98)}" stroke="#9AA3B3" stroke-opacity=".35" stroke-width="1.5" stroke-dasharray="2 5"/>`;
+  Object.entries(TP).forEach(([k, [d, t]]) => {
+    const x = TX(d), y = TY(t), izq = d > 0.6;
+    s += `<circle cx="${x}" cy="${y}" r="12" style="fill:var(--${k})"/><text x="${x + (izq ? -20 : 20)}" y="${y + 5}" text-anchor="${izq ? "end" : "start"}" class="tt b">${PF(k).short}</text>`;
+  });
+  $("#terr").innerHTML = s;
+  const TL = { xl: "plurinacionalidad y derecho a decidir", l: "Estado federal", c: "Estado autonómico tal como es", r: "más Estado central", xr: "recentralización: una sola nación", indxl: "independencia y socialismo", indl: "república propia por las urnas", indr: "soberanía propia con economía abierta" };
+  $("#terr-list").innerHTML = Object.keys(TP).map((k) => `<li><i style="background:var(--${k})"></i><span><b>${PF(k).name}:</b> ${TL[k]}.</span></li>`).join("");
+})();
+
+/* ================= 5 · La escalera de Glasl ================= */
+(function escalera() {
+  const svg = $("#glasl"), det = $("#step-detail");
+  if (!svg) return;
+  const COL = ["#8A92A3", "#9AA0AD", "#AAB0BA", "#B8963F", "#C99A3E", "#DDA53C", "#F6BE3B", "#EE8A4B", "#EC5272"];
+  const X0 = 30, SW = 104, Y0 = 118, DY = 30, BOT = 500;
+  let s = `<defs><linearGradient id="abismo" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#0C0F14" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".85"/></linearGradient></defs>`;
+  LEVELS.forEach((L, i) => {
+    const x = X0 + i * 3 * SW;
+    s += `<rect x="${x}" y="18" width="${3 * SW - 6}" height="${BOT - 18}" rx="12" fill="${L.c}" fill-opacity=".05"/>`;
+    s += `<text x="${x + 12}" y="44" class="gl-lv" style="fill:${L.c}">NIVEL ${i + 1} · ${L.name.toUpperCase()}</text><text x="${x + 12}" y="64" class="gl-ld">${L.d}</text>`;
+  });
+  s += `<path d="M${X0 + 20},${Y0 - 14} ${GLASL.map((_, i) => `L${X0 + i * SW + SW - 6},${Y0 + i * DY - 14} L${X0 + i * SW + SW - 6},${Y0 + (i + 1) * DY - 14}`).join(" ")}" fill="none" stroke="#EDEBE6" stroke-opacity=".25" stroke-width="2" stroke-dasharray="3 6"/>`;
+  GLASL.forEach((gl, i) => {
+    const x = X0 + i * SW, y = Y0 + i * DY, w = SW - 6;
+    const lineas = [[]]; gl.name.split(" ").forEach((w2) => { const ult = lineas[lineas.length - 1]; if (ult.length && (ult.join(" ") + " " + w2).length > 12) lineas.push([w2]); else ult.push(w2); });
+    s += `<g class="gstep" data-i="${i}" tabindex="0" role="button" aria-label="Peldaño ${i + 1}: ${gl.name}">
+      <rect x="${x}" y="${y}" width="${w}" height="${BOT - y}" rx="8" fill="${COL[i]}" fill-opacity=".9"/>
+      <rect x="${x}" y="${y}" width="${w}" height="8" rx="4" fill="#fff" fill-opacity=".35"/>
+      <text x="${x + w / 2}" y="${y + 52}" text-anchor="middle" class="gl-n">${i + 1}</text>
+      ${lineas.map((l, n) => `<text x="${x + w / 2}" y="${y + 76 + n * 16}" text-anchor="middle" class="gl-t">${l.join(" ")}</text>`).join("")}
+      <rect x="${x}" y="${y}" width="${w}" height="${BOT - y}" fill="transparent"/></g>`;
+    const who = ORD.filter((k) => A[k].glasl === i + 1);
+    who.forEach((k, j) => {
+      const cx = x + w / 2 + (j - (who.length - 1) / 2) * 34, cy = y - 22;
+      s += `<g aria-hidden="true"><circle cx="${cx}" cy="${cy}" r="16" fill="#1B2230" stroke="var(--${k})" stroke-width="2"/><use href="#p-${k}" x="${cx - 13}" y="${cy - 15}" width="26" height="30"/></g>`;
+    });
+  });
+  s += `<rect x="${X0}" y="${BOT - 34}" width="${9 * SW - 6}" height="34" fill="url(#abismo)"/><text x="${X0 + 9 * SW - 14}" y="${BOT - 10}" text-anchor="end" class="gl-ab">↓ EL ABISMO</text>`;
+  svg.innerHTML = s;
+  function set(i) {
+    const gl = GLASL[i], L = LEVELS[gl.lv - 1], who = ORD.filter((k) => A[k].glasl === i + 1);
+    $$(".gstep", svg).forEach((g) => g.classList.toggle("on", +g.dataset.i === i));
+    det.style.setProperty("--sdc", COL[i]);
+    det.innerHTML = `<div class="sd-num">${i + 1}</div><div><p class="lbl" style="color:${L.c}">Nivel ${gl.lv} de 3 · ${L.name} · ${L.d}</p><h3>${gl.name}</h3><p>${gl.d}</p><blockquote>«${gl.ex}»</blockquote>
+      ${who.length ? `<p class="sd-who"><span class="lbl">Techo típico de</span>${who.map((k) => `<span class="chip" style="border-color:var(--${k});color:var(--ink)">${A[k].name}</span>`).join("")}</p><p style="margin-top:10px">${[...new Set(who.map((k) => GLASL_TXT[k]))].join(" ")}</p>` : ""}</div>`;
+  }
+  $$(".gstep", svg).forEach((g) => {
+    const i = +g.dataset.i;
+    g.addEventListener("mouseenter", () => set(i)); g.addEventListener("focus", () => set(i)); g.addEventListener("click", () => set(i));
+  });
+  set(6);
+})();
+
+/* ================= 6 · Fuentes ================= */
+const CAT = { datos: ["Datos", "#6CC4E4"], politica: ["Ciencia política", "#5B7CF0"], psico: ["Psicología", "#F2955F"], historia: ["Historia", "#EC5272"], lenguaje: ["Comunicación", "#E8E2CF"], conflicto: ["Conflicto", "#F6BE3B"] };
+const REFS = [
+  { c: "datos", ch: [1, 2], a: "CIS", y: 2026, t: "Barómetro de septiembre 2026", s: "Estudio n.º 3577", u: "La distribución real de la autoubicación ideológica de 1 a 10, con 4.042 entrevistas: el gráfico del capítulo 1 y las barras grises del modelo y de 2026." },
+  { c: "politica", ch: [1, 2], a: "Torcal, M.", y: 2023, t: "De votantes a hooligans", s: "Catarata", u: "La idea central del capítulo 1: en España ha crecido sobre todo la polarización afectiva, el rechazo al otro bando, y el procés fue uno de sus motores." },
+  { c: "politica", ch: [1], a: "Reiljan, A.", y: 2020, t: "«Fear and loathing across party lines» (also) in Europe", s: "European Journal of Political Research, 59(2)", u: "El índice comparado de polarización afectiva que sitúa a España entre los países europeos más polarizados." },
+  { c: "psico", ch: [1, 4], a: "Iyengar, Sood y Lelkes", y: 2012, t: "Affect, not ideology", s: "Public Opinion Quarterly, 76(3)", u: "La distinción entre polarización ideológica y afectiva: el eje vertical del modelo y la fase «afectiva»." },
+  { c: "psico", ch: [1], a: "Chen y Rohla", y: 2018, t: "The effect of partisanship… on close family ties", s: "Science, 360(6392)", u: "Las cenas familiares entre votantes distintos se acortaron tras las elecciones de 2016: la fila «Familia» de las consecuencias." },
+  { c: "psico", ch: [1], a: "Iyengar y Westwood", y: 2015, t: "Fear and loathing across party lines", s: "American Journal of Political Science, 59(3)", u: "En experimentos, el partido pesó más que la raza al decidir a quién dar una beca: la fila «Trabajo» de las consecuencias." },
+  { c: "politica", ch: [1], a: "Graham y Svolik", y: 2020, t: "Democracy in America?", s: "American Political Science Review, 114(2)", u: "Muchos votantes perdonan violaciones democráticas si las comete su candidato: la fase afectiva en la fila «Democracia»." },
+  { c: "politica", ch: [1], a: "McCoy y Somer", y: 2019, t: "Toward a theory of pernicious polarization", s: "The Annals of the AAPSS, 681(1)", u: "La polarización perniciosa, en la que se acepta erosionar la democracia para que no gane el otro." },
+  { c: "politica", ch: [1], a: "Levitsky y Ziblatt", y: 2018, t: "How Democracies Die", s: "Crown", u: "La contención y la tolerancia mutua como normas no escritas que sostienen una democracia sana." },
+  { c: "historia", ch: [2], a: "Juliá, S. (coord.)", y: 1999, t: "Víctimas de la guerra civil", s: "Temas de Hoy", u: "Las estimaciones de víctimas de la guerra y de la represión que resume la etapa 1936–1939." },
+  { c: "politica", ch: [2, 5], a: "Linz, J. J.", y: 1978, t: "The Breakdown of Democratic Regimes", s: "Johns Hopkins University Press", u: "Las democracias caen cuando los moderados toleran la deslealtad de su propio bando: la lectura de 1936 y de los peldaños 8 y 9." },
+  { c: "lenguaje", ch: [3], a: "Entman, R. M.", y: 1993, t: "Framing", s: "Journal of Communication, 43(4)", u: "Qué es encuadrar: seleccionar y destacar una parte de la realidad. La base del prisma del lenguaje." },
+  { c: "lenguaje", ch: [3], a: "Lakoff, G.", y: 2004, t: "Don't Think of an Elephant!", s: "Chelsea Green", u: "Cómo cada bando nombra los hechos con sus propias palabras para activar su marco moral." },
+  { c: "psico", ch: [4], a: "Weber, M.", y: 1904, t: "La «objetividad» del conocimiento", s: "Ensayo", u: "El tipo ideal: los doce perfiles son exageraciones deliberadas para medir la realidad, no retratos de nadie." },
+  { c: "psico", ch: [4], a: "Beck, A. T.", y: 1983, t: "Cognitive therapy of depression: new perspectives", s: "Raven Press", u: "La sociotropía, la necesidad de aprobación de los demás, usada como analogía de la dependencia del grupo." },
+  { c: "psico", ch: [4], a: "Swann, Gómez et al.", y: 2009, t: "Identity fusion", s: "Journal of Personality and Social Psychology, 96(5)", u: "La fusión de la identidad personal con la del grupo, que predice la disposición a luchar por él." },
+  { c: "psico", ch: [4], a: "Swann, Jetten, Gómez et al.", y: 2012, t: "When group membership gets personal", s: "Psychological Review, 119(3)", u: "La teoría completa de la fusión de identidad, en la que se apoya el rasgo «fusión con el grupo»." },
+  { c: "psico", ch: [4], a: "Webster y Kruglanski", y: 1994, t: "Need for cognitive closure", s: "Journal of Personality and Social Psychology, 67(6)", u: "La necesidad de cierre cognitivo: preferir respuestas firmes a la ambigüedad. El rasgo «pensamiento binario»." },
+  { c: "psico", ch: [4], a: "Kruglanski et al.", y: 2014, t: "The psychology of radicalization and deradicalization", s: "Political Psychology, 35(S1)", u: "La búsqueda de significado: por qué el grupo da sentido a la vida y cómo eso puede empujar a la radicalización." },
+  { c: "lenguaje", ch: [4], a: "Karpman, S.", y: 1968, t: "Fairy tales and script drama analysis", s: "Transactional Analysis Bulletin, 7(26)", u: "El triángulo de víctima, villano y salvador que ordena el relato de cada perfil." },
+  { c: "politica", ch: [4], a: "Jones y McBeth", y: 2010, t: "A Narrative Policy Framework", s: "Policy Studies Journal, 38(2)", u: "Cómo las políticas se cuentan con héroes, villanos y víctimas: la versión de ciencia política del relato." },
+  { c: "psico", ch: [4], a: "Altemeyer, B.", y: 1981, t: "Right-Wing Authoritarianism", s: "University of Manitoba Press", u: "La medida clásica del autoritarismo de derechas, uno de los lados del debate sobre la simetría." },
+  { c: "psico", ch: [4], a: "Jost et al.", y: 2003, t: "Political conservatism as motivated social cognition", s: "Psychological Bulletin, 129(3)", u: "La hipótesis de asimetría: más rigidez cognitiva en la derecha. Por eso la simetría del mapa es una decisión discutible." },
+  { c: "psico", ch: [4], a: "Costello et al.", y: 2022, t: "Clarifying… left-wing authoritarianism", s: "Journal of Personality and Social Psychology, 122(1)", u: "Un autoritarismo de izquierdas medible y comparable: el otro lado del debate sobre la simetría." },
+  { c: "psico", ch: [5], a: "Tajfel y Turner", y: 1979, t: "An integrative theory of intergroup conflict", s: "Brooks/Cole", u: "La identidad social: basta trazar un «nosotros» para favorecerlo frente a «ellos». La base de los círculos de pertenencia." },
+  { c: "datos", ch: [5], a: "Moreno, L.", y: 2006, t: "Scotland, Catalonia, Europeanization and the «Moreno question»", s: "Scottish Affairs, 54", u: "La pregunta sobre identidad dual que muestra que la mayoría se siente de su comunidad y española a la vez." },
+  { c: "conflicto", ch: [5], a: "Glasl, F.", y: 1980, t: "Konfliktmanagement", s: "Haupt", u: "Los nueve peldaños de la escalada del conflicto, en tres niveles: ganar-ganar, ganar-perder y perder-perder." },
+  { c: "politica", ch: [6], a: "Mudde, C.", y: 2004, t: "The populist zeitgeist", s: "Government and Opposition, 39(4)", u: "El populismo como «ideología delgada»: un pueblo puro frente a una élite corrupta. La tesis sobre los extremos." },
+  { c: "politica", ch: [6], a: "Mudde, C.", y: 2019, t: "The Far Right Today", s: "Polity", u: "La distinción entre derecha radical, que acepta las urnas, y extrema derecha, que las rechaza." },
+  { c: "politica", ch: [6], a: "March, L.", y: 2011, t: "Radical Left Parties in Europe", s: "Routledge", u: "La izquierda radical europea: rechaza el orden económico capitalista, pero compite en elecciones." },
+  { c: "psico", ch: [6], a: "Van Prooijen y Krouwel", y: 2019, t: "Psychological features of extreme political ideologies", s: "Current Directions in Psychological Science, 28(2)", u: "Los rasgos que comparten los dos extremos: simplicidad cognitiva, exceso de confianza e intolerancia. El centro del diagrama." },
+  { c: "psico", ch: [6], a: "Zmigrod, Rentfrow y Robbins", y: 2020, t: "The partisan mind", s: "Journal of Experimental Psychology: General, 149(3)", u: "La rigidez cognitiva medida en laboratorio se asocia con un partidismo más extremo." }
+];
+(function fuentes() {
+  const grid = $("#refs-grid"), pick = $("#ref-pick");
+  if (!grid) return;
+  const NOMBRES = ["Todas", "1 · Hoy", "2 · Cien años", "3 · Miradas", "4 · Perfiles", "5 · Escalada", "6 · Palabras"];
+  const ini = (a) => a.length <= 4 ? a : a.split(/[\s,()]+/).filter((w) => w.length > 2 && /^[A-ZÁÉÍÓÚ]/.test(w)).slice(0, 2).map((w) => w[0]).join("");
+  grid.innerHTML = REFS.map((r) => {
+    const [cn, cc] = CAT[r.c];
+    return `<article class="ref" data-ch="${r.ch.join(" ")}" style="--rc:${cc}">
+      <div class="ref-img" aria-hidden="true"><span class="ref-y">${r.y}</span><span class="ref-i">${ini(r.a) || r.a.slice(0, 2)}</span><span class="ref-cat">${cn}</span></div>
+      <div class="ref-b"><p class="ref-a">${r.a} (${r.y})</p><h4>${r.t}</h4><p class="ref-s">${r.s}</p><p class="ref-u"><span class="lbl">Qué tomamos</span>${r.u}</p>
+      <p class="ref-ch">${r.ch.map((c) => `Cap. ${c}`).join(" · ")}</p></div></article>`;
+  }).join("");
+  pick.innerHTML = NOMBRES.map((n, i) => `<button class="tbtn" data-i="${i}" aria-pressed="${i === 0}">${n}</button>`).join("");
+  $$(".tbtn", pick).forEach((b) => b.addEventListener("click", () => {
+    const i = +b.dataset.i;
+    $$(".tbtn", pick).forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    $$(".ref", grid).forEach((c) => { c.hidden = i > 0 && !c.dataset.ch.split(" ").includes(String(i)); });
   }));
 })();
 
@@ -1874,7 +2128,6 @@ $("#leaders").innerHTML = LEADERS.map((g) => `<div class="lcol" style="--lc:var(
     $("#lens-insight").textContent = LENS_TXT[k];
     arcs();
   }
-  API.lens = set;
   $$(".lfig", row).forEach((b) => b.addEventListener("click", () => set(b.dataset.k)));
   new ResizeObserver(() => arcs()).observe(stage);
   set("xl");
@@ -1899,6 +2152,7 @@ $("#leaders").innerHTML = LEADERS.map((g) => `<div class="lcol" style="--lc:var(
   }));
 })();
 
+
 /* ================= 4 · Prisma ================= */
 (function prism() {
   const wrap = $("#facts"), cards = $("#rays-cards"), pr = $("#prism");
@@ -1914,420 +2168,23 @@ $("#leaders").innerHTML = LEADERS.map((g) => `<div class="lcol" style="--lc:var(
   set(0);
 })();
 
-/* ================= 5 · Identidades ================= */
-(function rings() {
-  const svg = $("#rings"), pick = $("#ring-picker");
-  const STL = { a: "abraza", t: "tolera", x: "combate" };
-  pick.innerHTML = ORD.map((k) => `<button class="pick" data-k="${k}" style="--nc:var(--${k})" aria-pressed="false"><span class="pc">${pt(k)}</span>${A[k].name}</button>`).join("");
-  function draw(k) {
-    const st = RSTATE[k];
-    let s = "";
-    for (let i = RR.length - 1; i >= 0; i--) {
-      const r = RR[i];
-      s += `<circle cx="260" cy="260" r="${r}" fill="#131821"/>`;
-      if (st[i] === "a") s += `<circle cx="260" cy="260" r="${r}" style="fill:var(--${k});stroke:var(--${k})" fill-opacity=".22" stroke-width="1.5"/>`;
-      else if (st[i] === "t") s += `<circle cx="260" cy="260" r="${r}" fill="#3A4660" fill-opacity=".45" stroke="#3A4660" stroke-width="1.5"/>`;
-      else s += `<circle cx="260" cy="260" r="${r}" fill="url(#hatch)" stroke="#F6BE3B" stroke-width="2" stroke-dasharray="7 6"/>`;
-    }
-    RINGS.forEach((name, i) => {
-      const ro = RR[i], ri = i ? RR[i - 1] : 0, y = i ? 260 - (ro + ri) / 2 - 2 : 255;
-      const col = st[i] === "x" ? "#F6BE3B" : st[i] === "a" ? "#EDEBE6" : "#9AA3B3";
-      s += `<text x="260" y="${y}" text-anchor="middle" class="rl">${name}</text><text x="260" y="${y + 15}" text-anchor="middle" class="rs" style="fill:${col}">${STL[st[i]].toUpperCase()}</text>`;
-    });
-    svg.innerHTML = s;
-    svg.setAttribute("aria-label", `Anillos de identidad de ${A[k].name}: ` + RINGS.map((n, i) => `${n}, ${STL[st[i]]}`).join("; "));
-    $$(".pick", pick).forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.k === k)));
-    $("#lg-abraza").style.background = `var(--${k})`;
-    $("#ring-insight").textContent = RTXT[k];
-  }
-  API.ring = draw;
-  $$(".pick", pick).forEach((b) => b.addEventListener("click", () => draw(b.dataset.k)));
-  draw("xr");
 
-  // Eje territorial: izquierda-derecha frente a centro-periferia (trazo neutro: no es hostilidad)
-  const TX = (d) => 380 + d * 290, TY = (t) => 215 + t * 160;
-  const TPOS = { xl: 0.62, l: 0.3, c: 0, r: -0.4, xr: -0.88 };
-  let s = `<rect x="70" y="40" width="620" height="350" rx="12" fill="#0C0F14" fill-opacity=".35"/>`;
-  s += `<line x1="70" x2="690" y1="${TY(0)}" y2="${TY(0)}" stroke="#3A4660" stroke-dasharray="3 7"/><line x1="${TX(0)}" x2="${TX(0)}" y1="40" y2="390" stroke="#3A4660" stroke-dasharray="3 7"/>`;
-  s += `<text x="80" y="62" class="tt">↑ Recentralización: una sola nación</text><text x="80" y="${TY(0) - 8}" class="tt">Estado autonómico</text><text x="690" y="380" text-anchor="end" class="tt">↓ Plurinacionalidad y soberanismo</text>`;
-  s += `<text x="380" y="420" text-anchor="middle" class="tt">← izquierda · derecha →</text>`;
-  s += `<path d="M${TX(-0.95)},${TY(0.72)} L${TX(0.95)},${TY(-0.98)}" stroke="#9AA3B3" stroke-opacity=".35" stroke-width="1.5" stroke-dasharray="2 5"/>`;
-  ORD.forEach((k) => { const x = TX(A[k].pos[0]), y = TY(TPOS[k]); s += `<circle cx="${x}" cy="${y}" r="13" style="fill:var(--${k})"/><text x="${x + (k === "xr" ? -22 : 22)}" y="${y + 5}" text-anchor="${k === "xr" ? "end" : "start"}" class="tt b">${A[k].short}</text>`; });
-  [{ d: -0.62, t: 0.8, l1: "Nacionalismo periférico", l2: "de izquierda" }, { d: 0.28, t: 0.62, l1: "Nacionalismo periférico", l2: "de centroderecha" }].forEach((q) => {
-    const x = TX(q.d), y = TY(q.t);
-    s += `<circle cx="${x}" cy="${y}" r="13" fill="none" stroke="#C9CCD3" stroke-width="2" stroke-dasharray="4 3"/><text x="${x + 22}" y="${y - 3}" class="tt b">${q.l1}</text><text x="${x + 22}" y="${y + 14}" class="tt">${q.l2}</text>`;
-  });
-  $("#terr").innerHTML = s;
-  const TL = { xl: "plurinacionalidad y derecho a decidir", l: "Estado federal", c: "Estado autonómico tal como es", r: "más Estado central", xr: "recentralización: una sola nación" };
-  $("#terr-list").innerHTML = ORD.map((k) => `<li><i style="background:var(--${k})"></i><span><b>${A[k].name}:</b> ${TL[k]}.</span></li>`).join("")
-    + `<li><i style="border:2px dashed var(--ink-2)"></i><span><b>Nacionalismos periféricos:</b> soberanistas, con su propia izquierda y su propia derecha.</span></li>`;
+/* ================= 2 · Etiquetas ================= */
+(function flips() {
+  const box = $("#flips");
+  box.innerHTML = FLIPS.map((f, i) => `<button class="flip" data-i="${i}" aria-pressed="false" style="--fc:var(--${f.k})">
+    <span class="flip-in">
+      <span class="face front"><span class="turn">Gira la tarjeta ↻</span><span class="word">«${f.w}»</span></span>
+      <span class="face back" aria-hidden="true"><span><b>Origen</b>${f.o}</span><span><b>Hoy se usa para</b>${f.u}</span><span><b>Lo que describe mejor</b>${f.d}</span></span>
+    </span></button>`).join("");
+  $$(".flip", box).forEach((b) => b.addEventListener("click", () => {
+    const on = b.getAttribute("aria-pressed") !== "true";
+    b.setAttribute("aria-pressed", String(on));
+    b.querySelector(".back").setAttribute("aria-hidden", String(!on));
+    b.querySelector(".front .turn").setAttribute("aria-hidden", String(on));
+  }));
 })();
 
-/* ================= 6 · Escalera de Glasl ================= */
-(function stairs() {
-  const box = $("#stairs");
-  box.innerHTML = GLASL.map((g, i) => {
-    const who = ORD.filter((k) => A[k].glasl === i + 1);
-    const bg = `color-mix(in srgb, #F6BE3B ${4 + i * 4.4}%, #1B2230)`;
-    return `<button class="step" data-i="${i}" style="--i:${i};background:${bg}" aria-pressed="false" aria-label="Peldaño ${i + 1}: ${g.name}${who.length ? ". Techo de " + who.map((k) => A[k].name).join(" y ") : ""}">
-      <span class="sn">${i + 1}</span><span class="sname">${g.name}</span>
-      ${who.length ? `<span class="marks">${who.map((k) => `<span class="mk" style="--nc:var(--${k})" title="${A[k].name}">${pt(k)}</span>`).join("")}</span>` : ""}</button>`;
-  }).join("");
-  function set(i) {
-    const g = GLASL[i], L = LEVELS[g.lv - 1], who = ORD.filter((k) => A[k].glasl === i + 1);
-    $$(".step", box).forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.i === i)));
-    const d = $("#step-detail");
-    d.style.setProperty("--sdc", L.c);
-    d.innerHTML = `<div class="sd-num">${i + 1}</div><div><p class="lbl" style="color:${L.c}">Nivel ${g.lv} de 3 · ${L.name} · ${L.d}</p><h3>${g.name}</h3><p>${g.d}</p><blockquote>«${g.ex}»</blockquote>
-      ${who.length ? `<p class="sd-who"><span class="lbl">Techo típico de</span>${who.map((k) => `<span class="chip" style="border-color:var(--${k});color:var(--ink)">${A[k].name}</span>`).join("")}</p><p style="margin-top:10px">${who.map((k) => GLASL_TXT[k]).filter((v, j, arr) => arr.indexOf(v) === j).join(" ")}</p>` : ""}</div>`;
-  }
-  API.step = set;
-  $$(".step", box).forEach((b) => b.addEventListener("click", () => set(+b.dataset.i)));
-  set(6);
-})();
-
-/* ================= 0 bis · Cien años de polarización en España ================= */
-/* Cuatro fases, las del simulador. `nv`: temperatura del modelo de 0 (centrada) a 3 (ruptura).
-   `f`: forma de la curva como mezcla de campanas [centro, anchura, peso] sobre el eje 0–1.
-   `oculta`: en las dictaduras, la sociedad que no podía expresarse (curva gris). */
-const FASES = {
-  centrada: { n: "Centrada", c: "#E8E2CF" }, afectiva: { n: "Polarización afectiva", c: "#F2955F" },
-  ideologica: { n: "Polarización ideológica", c: "#EC5272" }, ruptura: { n: "Ruptura", c: "#F6BE3B" },
-  silenciada: { n: "Silenciada por una dictadura", c: "#9AA3B3" }
-};
-const ETAPAS = [
-  { a: 1923, b: 1930, t: "Dictadura de Primo de Rivera", fase: "silenciada", nv: 1.1,
-    f: [[0.62, 0.05, 1]], oculta: [[0.3, 0.12, 1], [0.7, 0.12, 1]],
-    ctx: "Un golpe de Estado, con el apoyo del rey, suspende partidos y Cortes. El conflicto social no desaparece: deja de poder expresarse.",
-    cons: ["Sin libertad de partidos ni de prensa", "La tensión acumulada estalla al caer la monarquía en 1931"] },
-  { a: 1931, b: 1933, t: "Segunda República: el bienio reformista", fase: "ideologica", nv: 2,
-    f: [[0.27, 0.11, 1], [0.5, 0.12, 0.55], [0.74, 0.11, 0.95]],
-    ctx: "Primera democracia plena; las mujeres votan por primera vez en 1933. Las reformas agraria, militar, religiosa y territorial dividen el país en dos proyectos.",
-    cons: ["Quema de conventos en 1931", "Intento de golpe de Sanjurjo en 1932", "Insurrección anarquista y matanza de Casas Viejas en 1933"] },
-  { a: 1934, b: 1936, t: "Revolución de Asturias y Frente Popular", fase: "ruptura", nv: 2.8,
-    f: [[0.17, 0.08, 1], [0.5, 0.1, 0.18], [0.83, 0.08, 1]],
-    ctx: "La revolución de octubre de 1934 en Asturias y su represión dejan más de mil muertos. En las elecciones de febrero de 1936 compiten dos bloques y el centro casi desaparece. La violencia política llena las calles.",
-    cons: ["Revolución de Asturias y represión (1934)", "Asesinatos políticos, como el de Calvo Sotelo en julio de 1936", "El centro se hunde en las urnas de 1936"] },
-  { a: 1936, b: 1939, t: "Guerra Civil", fase: "ruptura", nv: 3,
-    f: [[0.1, 0.05, 1], [0.9, 0.05, 1]],
-    ctx: "En julio de 1936, un golpe militar contra el Gobierno de la República fracasa en parte del país y abre tres años de guerra.",
-    cons: ["En torno a medio millón de muertos, según las estimaciones más citadas (Juliá, 1999)", "Represión en las dos retaguardias", "Cerca de medio millón de personas cruzan la frontera en 1939"] },
-  { a: 1939, b: 1975, t: "Franquismo", fase: "silenciada", nv: 1.3,
-    f: [[0.82, 0.05, 1]], oculta: [[0.32, 0.13, 1], [0.66, 0.13, 0.9]],
-    ctx: "Una dictadura con un solo bando legal. La división de 1936 no se cierra: se reprime durante casi cuarenta años.",
-    cons: ["Decenas de miles de ejecuciones en la posguerra", "Exilio, cárcel y censura durante décadas", "La herida de 1936 pasa a la generación siguiente"] },
-  { a: 1975, b: 1982, t: "Transición", fase: "centrada", nv: 0.9,
-    f: [[0.45, 0.16, 1], [0.08, 0.04, 0.08], [0.92, 0.04, 0.08]],
-    ctx: "Los herederos de los dos bandos pactan: Ley de Amnistía y Pactos de la Moncloa en 1977, y una Constitución aprobada en referéndum por el 87,8 % en 1978.",
-    cons: ["Una democracia nacida del consenso", "Violencia en los márgenes: ETA y grupos armados de extrema derecha y extrema izquierda; 1980 es el año más sangriento", "Intento de golpe del 23-F en 1981"] },
-  { a: 1982, b: 2004, t: "Bipartidismo", fase: "centrada", nv: 0.6,
-    f: [[0.43, 0.13, 1], [0.6, 0.12, 0.8]],
-    ctx: "PSOE y PP se alternan compitiendo por el centro. Es la campana más centrada del siglo.",
-    cons: ["Entrada en la Comunidad Europea (1986)", "ETA sigue matando; la condena es casi unánime", "Crispación y corrupción al final de cada ciclo"] },
-  { a: 2004, b: 2011, t: "Los años de la crispación", fase: "afectiva", nv: 1.3,
-    f: [[0.38, 0.12, 1], [0.66, 0.12, 0.9]],
-    ctx: "Los atentados del 11-M y el giro electoral de 2004 abren años de desconfianza mutua. Se discute la memoria histórica, el Estatut de Cataluña y la negociación con ETA.",
-    cons: ["Ley de Memoria Histórica (2007), aprobada sin consenso", "Estatut (2006) y sentencia del Constitucional (2010)", "ETA anuncia el cese definitivo de la violencia en 2011"] },
-  { a: 2011, b: 2017, t: "Crisis y fin del bipartidismo", fase: "afectiva", nv: 1.7,
-    f: [[0.24, 0.1, 0.8], [0.45, 0.11, 0.9], [0.68, 0.11, 0.9]],
-    ctx: "La Gran Recesión y el 15-M. En 2015 entran Podemos y Ciudadanos: cuatro grandes partidos y ninguna mayoría.",
-    cons: ["Paro por encima del 25 % en 2012 y 2013", "Repetición electoral en 2016", "Desconfianza récord en los partidos"] },
-  { a: 2017, b: 2026, t: "Procés y dos bloques", fase: "afectiva", nv: 2.1, cis: true,
-    f: [[0.06, 0.06, 0.95], [0.3, 0.1, 0.75], [0.47, 0.06, 1.1], [0.72, 0.11, 0.65], [0.96, 0.04, 0.45]],
-    ctx: "El referéndum del 1-O de 2017, suspendido por el Constitucional, la entrada de Vox en 2019 y los gobiernos de coalición consolidan dos bloques. España está entre los países europeos con más polarización afectiva (Reiljan, 2020; Torcal, 2023).",
-    cons: ["Dos elecciones generales en 2019", "El CGPJ pasa más de cinco años sin renovarse (2018–2024)", "Ley de amnistía (2024)"] }
-];
-function curvaPath(mix, W, H, pad) {
-  const g = (x, m, s) => Math.exp(-((x - m) ** 2) / (2 * s * s));
-  const ys = []; let mx = 0;
-  for (let i = 0; i <= 120; i++) { const x = i / 120; const y = mix.reduce((acc, [m, s, w]) => acc + w * g(x, m, s), 0); ys.push(y); mx = Math.max(mx, y); }
-  let d = `M${pad},${H - pad}`;
-  ys.forEach((y, i) => { d += ` L${r1(pad + (i / 120) * (W - 2 * pad))},${r1(H - pad - (y / mx) * (H - 2 * pad - 10))}`; });
-  return d + ` L${W - pad},${H - pad} Z`;
-}
-(function historia() {
-  const svg = $("#hist-svg"), pick = $("#hist-pick"), det = $("#hist-detail");
-  if (!svg) return;
-  const X = (y) => 60 + ((y - 1923) / (2026 - 1923)) * 910, Y = (n) => 220 - (n / 3) * 180;
-  let s = "";
-  [["CENTRADA", 0.4], ["AFECTIVA", 1.25], ["IDEOLÓGICA", 2.05], ["RUPTURA", 2.8]].forEach(([n, v], i) => {
-    s += `<rect x="60" y="${Y((i + 1) * 0.75)}" width="910" height="${Y(i * 0.75) - Y((i + 1) * 0.75)}" fill="${i === 3 ? "#F6BE3B" : "#E8E2CF"}" fill-opacity="${i === 3 ? 0.07 : 0.02 + i * 0.012}"/>`;
-    s += `<text x="8" y="${Y(v) + 4}" class="hst">${n}</text>`;
-  });
-  s += `<line x1="60" x2="970" y1="220" y2="220" stroke="#3A4660"/>`;
-  ETAPAS.forEach((e, i) => {
-    const x0 = X(e.a), x1 = X(e.b + (e.b === 2026 ? 0 : 1)), y = Y(e.nv), col = FASES[e.fase].c;
-    s += `<g class="hseg" data-i="${i}" tabindex="0" role="button" aria-label="${e.a}–${e.b}: ${e.t}">
-      <rect x="${r1(x0)}" y="${r1(y)}" width="${r1(Math.max(4, x1 - x0 - 2))}" height="${r1(220 - y)}" fill="${e.fase === "silenciada" ? "url(#hatch)" : col}" fill-opacity="${e.fase === "silenciada" ? 0.9 : 0.55}" stroke="${col}" stroke-width="1"/>
-      <rect x="${r1(x0)}" y="40" width="${r1(Math.max(4, x1 - x0 - 2))}" height="180" fill="transparent"/></g>`;
-  });
-  [1923, 1931, 1939, 1975, 1982, 2004, 2011, 2017, 2026].forEach((y) => { s += `<text x="${r1(X(y))}" y="244" text-anchor="middle" class="hsy">${y}</text>`; });
-  s += `<text x="60" y="266" class="hst">TEMPERATURA DE LA POLARIZACIÓN SEGÚN EL MODELO · LAS RAYAS SON DICTADURAS</text>`;
-  svg.innerHTML = s;
-  pick.innerHTML = ETAPAS.map((e, i) => `<button class="tbtn" data-i="${i}" aria-pressed="false">${e.a}–${String(e.b).slice(e.a < 2000 && e.b >= 2000 ? 0 : 2)}</button>`).join("");
-  function set(i) {
-    const e = ETAPAS[i], F = FASES[e.fase], W = 400, H = 210, pad = 14;
-    let c = `<svg viewBox="0 0 ${W} ${H + 24}" role="img" aria-label="Forma de la sociedad en ${e.a}–${e.b}: ${F.n}">`;
-    c += `<rect x="${pad}" y="${pad}" width="${(W - 2 * pad) * 0.24}" height="${H - 2 * pad}" fill="transparent"/>`;
-    if (e.oculta) c += `<path d="${curvaPath(e.oculta, W, H, pad)}" fill="#9AA3B3" fill-opacity=".08" stroke="#9AA3B3" stroke-dasharray="4 5" stroke-width="1.5"/>`;
-    if (e.cis) {
-      const mx = Math.max(...CIS);
-      CIS.forEach((v, j) => { const bw = (W - 2 * pad) / 10, hh = (v / mx) * (H - 2 * pad - 10); c += `<rect x="${r1(pad + j * bw + 3)}" y="${r1(H - pad - hh)}" width="${r1(bw - 6)}" height="${r1(hh)}" fill="#EDEBE6" fill-opacity=".1" stroke="#EDEBE6" stroke-opacity=".4"/>`; });
-    }
-    c += `<path d="${curvaPath(e.f, W, H, pad)}" fill="${F.c}" fill-opacity=".28" stroke="${F.c}" stroke-width="2.2"/>`;
-    c += `<line x1="${pad}" x2="${W - pad}" y1="${H - pad}" y2="${H - pad}" stroke="#3A4660"/>`;
-    c += `<text x="${pad}" y="${H + 14}" class="hsy">izquierda</text><text x="${W / 2}" y="${H + 14}" text-anchor="middle" class="hsy">centro</text><text x="${W - pad}" y="${H + 14}" text-anchor="end" class="hsy">derecha</text></svg>`;
-    det.style.setProperty("--hc", F.c);
-    det.innerHTML = `<div>${c}<p class="hd-cap">${e.cis ? "Barras: autoubicación real, CIS 2026. Curva: lectura del modelo." : e.oculta ? "Curva de color: lo que se podía decir. Curva gris: lo que pensaba la sociedad." : "Forma interpretada por el modelo."}</p></div>
-      <div><span class="hd-years">${e.a}–${e.b}</span><br><span class="hd-phase">${F.n}</span><h3>${e.t}</h3><p>${e.ctx}</p>
-      <span class="lbl">Consecuencias</span><ul class="hd-cons">${e.cons.map((x) => `<li>${x}</li>`).join("")}</ul></div>`;
-    $$(".tbtn", pick).forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.i === i)));
-    $$(".hseg rect:first-child", svg).forEach((r) => r.setAttribute("stroke-width", r.parentNode.dataset.i == i ? 3 : 1));
-  }
-  $$(".tbtn", pick).forEach((b) => b.addEventListener("click", () => set(+b.dataset.i)));
-  $$(".hseg", svg).forEach((g) => {
-    g.addEventListener("click", () => set(+g.dataset.i));
-    g.addEventListener("keydown", (ev) => { if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); set(+g.dataset.i); } });
-  });
-  set(ETAPAS.length - 1);
-})();
-
-/* ================= 6 bis · Consecuencias por fase ================= */
-(function consecuencias() {
-  const box = $("#cons"), pick = $("#cons-pick");
-  if (!box) return;
-  const FS = ["Centrada", "Afectiva", "Ideológica", "Ruptura"];
-  const DOM = [
-    { d: "Familia y amistades", v: [
-      ["Se puede discrepar en una cena familiar."],
-      ["Se evitan temas y las relaciones se enfrían.", "En EE. UU., las cenas familiares entre votantes distintos se acortaron tras 2016 (Chen y Rohla, 2018)."],
-      ["Se rompen amistades y parejas por política; crece la autocensura."],
-      ["Familias partidas por el frente; denuncias entre vecinos."]] },
-    { d: "Trabajo y economía", v: [
-      ["Se coopera y se contrata sin mirar el voto."],
-      ["Se discrimina por voto.", "En experimentos, el partido pesa más que la raza al elegir a quién dar una beca (Iyengar y Westwood, 2015)."],
-      ["Cada bando tiene sus barrios, sus marcas y sus redes; la incertidumbre frena la inversión."],
-      ["Economía de guerra, hambre y exilio."]] },
-    { d: "Información", v: [
-      ["Medios compartidos y hechos comunes."],
-      ["Cada bando elige sus medios y cree antes los bulos del propio lado."],
-      ["Ya no hay hechos comunes: todo dato se lee como propaganda."],
-      ["Propaganda y censura."]] },
-    { d: "Instituciones", v: [
-      ["Pactos de Estado y árbitros renovados a tiempo."],
-      ["Bloqueos: jueces y órganos de control se leen como de un bando.", "En España, el CGPJ estuvo más de cinco años sin renovarse (2018–2024)."],
-      ["Leyes que cambian con cada gobierno; el adversario no se acepta como gobernante legítimo."],
-      ["Las instituciones dejan de mediar: gana quien tiene la fuerza."]] },
-    { d: "Democracia", v: [
-      ["Contención: nadie usa todo su poder legal contra el rival (Levitsky y Ziblatt, 2018)."],
-      ["Se perdonan abusos del propio bando.", "Muchos votantes toleran violaciones democráticas si las comete su candidato (Graham y Svolik, 2020)."],
-      ["Polarización perniciosa: se acepta erosionar la democracia para que no gane el otro (McCoy y Somer, 2019)."],
-      ["Golpe, guerra o dictadura."]] },
-    { d: "Violencia", v: [
-      ["Excepcional y condenada por todos."],
-      ["Insultos, acoso en redes y escraches."],
-      ["Ataques a sedes y personas; la condena depende de quién sea la víctima."],
-      ["Violencia organizada: la guerra civil."]] }
-  ];
-  let cur = 1;
-  pick.innerHTML = FS.map((f, i) => `<button class="tbtn" data-i="${i}" aria-pressed="false">${f}</button>`).join("");
-  function set(i) {
-    cur = i;
-    let h = `<div class="corner"></div>` + FS.map((f, j) => `<div class="ch${j === i ? " on" : ""}">${f}</div>`).join("");
-    DOM.forEach((row) => {
-      h += `<div class="rd">${row.d}</div>` + row.v.map((v, j) => `<div class="cell${j === i ? " on" : ""}" style="--heat:${8 + j * 14}%">${v[0]}${v[1] ? `<i>${v[1]}</i>` : ""}</div>`).join("");
-    });
-    box.innerHTML = h;
-    $$(".tbtn", pick).forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.i === i)));
-  }
-  $$(".tbtn", pick).forEach((b) => b.addEventListener("click", () => set(+b.dataset.i)));
-  set(cur);
-})();
-
-/* ================= 7 · Contradicciones ================= */
-(function contra() {
-  const pick = $("#contra-pick"), stage = $("#contra-stage");
-  pick.innerHTML = ORD.map((k) => `<button class="pick" data-k="${k}" style="--nc:var(--${k})" aria-pressed="false"><span class="pc">${pt(k)}</span>${A[k].name}</button>`).join("");
-  function set(k) {
-    const a = A[k];
-    stage.style.setProperty("--dc", `var(--${k})`);
-    stage.innerHTML = `<div class="cs-head"><span class="ncirc" style="--nc:var(--${k})">${pt(k)}</span><div><h3>${a.name}</h3><small>${a.contra.length === 1 ? "Una cuerda tensa" : a.contra.length + " cuerdas tensas"}</small></div></div>`
-      + a.contra.map((c) => `<div class="cs-rope">${ropeHTML(k, c)}</div>`).join("");
-    $$(".pick", pick).forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.k === k)));
-    $$(".rope", stage).forEach((r) => ropeIO.observe(r));
-  }
-  API.contra = set;
-  $$(".pick", pick).forEach((b) => b.addEventListener("click", () => set(b.dataset.k)));
-  set("xl");
-})();
-
-/* ================= 8 · Test ================= */
-(function test() {
-  const ans = new Array(ITEMS.length).fill(null);
-  const VI = ITEMS.findIndex((it) => it.ax === "v");
-  let qi = 0;
-  $("#mini-base").innerHTML = mapBase(true) + ORD.map((k) => {
-    const [d, t] = A[k].pos, x = r1(MX(d)), y = r1(MY(t));
-    return `<circle cx="${x}" cy="${y}" r="16" style="fill:var(--${k})" fill-opacity=".9"/><text x="${x}" y="${y + 50}" text-anchor="middle" class="mlab">${A[k].short}</text>`;
-  }).join("");
-  function scores() {
-    let d = 0, nd = 0, t = 0, nt = 0, neutral = 0, nb = 0; const cs = {}, cn = {};
-    ITEMS.forEach((it, i) => {
-      const a = ans[i];
-      if (a === null || it.ax === "v") return;
-      if (a === NB) { nb++; return; }
-      const v = (a - 2) * it.k;
-      if (it.ax === "d") { d += v; nd++; }
-      else { t += (v + 2) / 4; nt++; if (a === 2) neutral++; cs[it.c] = (cs[it.c] || 0) + (v + 2) / 4; cn[it.c] = (cn[it.c] || 0) + 1; }
-    });
-    const raw = nt ? t / nt : 0.5, va = ans[VI];
-    const floor = va === 4 ? 0.74 : va === 3 ? 0.56 : 0;
-    const comps = Object.keys(COMP).map((c) => ({ c, v: cn[c] ? cs[c] / cn[c] : null }));
-    return { dir: nd ? d / nd / 2 : 0, raw, trib: Math.max(raw, floor), va, nd, nt, neutral, nb, comps };
-  }
-  function zoneOf(s) {
-    if (s.va !== 3 && s.va !== 4 && (s.nt < 2 || s.neutral >= 6)) return "indefinida";
-    return s.trib >= 0.72 ? "tribal" : s.trib >= 0.55 ? "partidista" : "autónoma";
-  }
-  const dirLabel = (d) => d < -0.55 ? "claramente a la izquierda" : d < -0.15 ? "a la izquierda" : d <= 0.15 ? "en el centro" : d <= 0.55 ? "a la derecha" : "claramente a la derecha";
-  /* Veredicto coherente con las definiciones de la obra: «extremista» exige tribu y violencia */
-  function verdict(s) {
-    const side = s.dir < -0.15 ? "L" : s.dir > 0.15 ? "R" : "C";
-    const base = side === "L" ? "l" : side === "R" ? "r" : "c";
-    const z = zoneOf(s), viol = s.va === 3 || s.va === 4;
-    if (z === "tribal" && viol && side !== "C") {
-      const k = side === "L" ? "xl" : "xr";
-      return { k, title: A[k].name, arq: A[k].arq, z, viol, txt: "Tus respuestas reúnen los dos rasgos que el mapa usa para definir el polo extremista: una relación tribal con el grupo y la justificación de la violencia contra el adversario. No es un diagnóstico: es una alerta que merece una pausa." };
-    }
-    if (viol) return { k: base, title: `${A[base].name} que justifica la violencia`, arq: "Ha justificado la violencia política", z, viol,
-      txt: "Tus ideas no son extremas, pero has aceptado la violencia contra adversarios políticos. Es el rasgo que define el peldaño 7 de la escalera, y la historia muestra que basta con que los moderados lo toleren para que una democracia se rompa (Linz, 1978)." };
-    if (s.nb >= 3 || z === "indefinida") return { k: "c", title: "Sin posición clara", arq: "El test no puede situarte", z,
-      txt: s.nb >= 3 ? "No te sientes de ningún bando, y la mayoría de las afirmaciones de tribu lo presuponen. Con los ítems que no lo hacen, el test no tiene base suficiente para situarte. No tener bando también es una posición." : "Has respondido «Ni sí ni no» a casi todo lo relacionado con el grupo. El test no puede situarte en el eje vertical." };
-    if (z === "tribal") return { k: base, title: `${A[base].name} con lógica de tribu`, arq: base === "c" ? "Ideas moderadas, relación tribal con el grupo" : "Ideas de su lado, relación tribal con el grupo", z,
-      txt: base === "c" ? "Tus ideas son moderadas, pero tu relación con el grupo es la del polo extremista: lealtad por encima del error, rechazo al otro y poca tolerancia al matiz. La tribu no necesita ideología." : "Tu dirección no es extrema, pero tu relación con el grupo es la del polo extremista: necesidad de aprobación, lealtad por encima del error y rechazo al otro bando. No justificas la violencia, y esa es la frontera que te separa del extremismo." };
-    if (z === "partidista") return { k: base, title: A[base].name, arq: base === "c" ? "Ideas de centro con identidad de grupo marcada" : A[base].arq, z,
-      txt: "Tienes una identidad política marcada y algo de recelo hacia el otro lado, pero conservas margen para matizar. Es la zona donde vive la mayoría de votantes comprometidos." };
-    return { k: base, title: A[base].name, arq: base === "c" ? A.c.arq : Math.abs(s.dir) > 0.55 ? "Convicción firme, sin tribu" : A[base].arq, z,
-      txt: "Tus respuestas muestran autonomía: reconoces ideas razonables en el otro lado, toleras la discrepancia y cambias de opinión con argumentos." + (Math.abs(s.dir) > 0.55 ? " Tienes convicciones firmes sin necesitar un enemigo: dirección clara, mente abierta." : "") };
-  }
-  function update() {
-    const s = scores();
-    if (s.nd && s.nt) {
-      placeYouSVG("#mini-you", s.dir, s.trib);
-      const prov = ans.includes(null) ? "Estimación provisional: " : "";
-      $("#mini-cap").textContent = `${prov}${dirLabel(s.dir)} y en la zona ${zoneOf(s)}. Se ajusta con cada respuesta.`;
-    }
-  }
-  function render(focus) {
-    const it = ITEMS[qi], lk = $("#likert");
-    $("#q-prog").innerHTML = ITEMS.map((_, i) => `<i class="${ans[i] !== null ? "done" : ""} ${i === qi ? "cur" : ""}"></i>`).join("");
-    $("#q-count").textContent = `Afirmación ${qi + 1} de ${ITEMS.length}`;
-    $("#q-axis").textContent = it.ax === "d" ? "Dirección" : it.ax === "v" ? "Violencia" : "Relación con el grupo";
-    $("#q-text").textContent = it.t;
-    lk.innerHTML = LIK.map((l, v) => `<button type="button" data-v="${v}" aria-pressed="${ans[qi] === v}">${l}</button>`).join("")
-      + (it.b ? `<button type="button" class="nb" data-v="${NB}" aria-pressed="${ans[qi] === NB}">No me siento de ningún bando</button>` : "");
-    lk.classList.add("fresh");
-    lk.addEventListener("pointermove", () => lk.classList.remove("fresh"), { once: true });
-    $$("button", lk).forEach((b) => b.addEventListener("click", () => {
-      ans[qi] = +b.dataset.v; update();
-      if (qi < ITEMS.length - 1) { qi++; render(true); } else finish();
-    }));
-    $("#q-back").disabled = qi === 0;
-    if (focus) $("#q-text").focus({ preventScroll: true });
-  }
-  function card(v, s) {
-    // Tarjeta para compartir: se dibuja en un lienzo y se muestra como imagen que el lector puede guardar
-    const c = document.createElement("canvas"), W = 1200, H = 630;
-    c.width = W; c.height = H;
-    const g = c.getContext("2d");
-    g.fillStyle = "#0C0F14"; g.fillRect(0, 0, W, H);
-    const sp = g.createLinearGradient(0, 0, W, 0);
-    ORD.forEach((k, i) => sp.addColorStop(i / 4, cssv("--" + k))); g.fillStyle = sp; g.fillRect(0, 0, W, 8);
-    g.fillStyle = "#9AA3B3"; g.font = '500 20px "IBM Plex Mono", monospace'; g.fillText("OBSERVATORIO DE POLARIZACIÓN · MI RESULTADO", 60, 70);
-    g.fillStyle = cssv("--" + v.k); g.font = '400 64px "Newsreader", Georgia, serif';
-    const words = v.title.split(" "); let line = "", y = 160;
-    words.forEach((w) => { if (g.measureText(line + w).width > 560) { g.fillText(line.trim(), 60, y); line = ""; y += 70; } line += w + " "; });
-    g.fillText(line.trim(), 60, y);
-    g.fillStyle = "#C9CCD3"; g.font = 'italic 400 30px "Newsreader", Georgia, serif'; g.fillText(v.arq, 60, y + 50);
-    g.fillStyle = "#EDEBE6"; g.font = '500 24px "Archivo", Arial, sans-serif';
-    g.fillText(`Zona ${v.z} · peso de la tribu ${Math.round(s.trib * 100)} de 100`, 60, y + 110);
-    g.fillStyle = "#9AA3B3"; g.font = '400 22px "Archivo", Arial, sans-serif'; g.fillText("Instrumento didáctico, no validado. ¿Y tú?", 60, H - 50);
-    // Minimapa
-    const mx = 700, my = 110, mw = 440, mh = 400, PX = (d) => mx + (d + 1) / 2 * mw, PY = (t) => my + mh - t * mh;
-    g.fillStyle = "#131821"; g.fillRect(mx, my, mw, mh);
-    g.fillStyle = "rgba(246,190,59,0.08)"; g.fillRect(mx, PY(1), mw, PY(0.72) - PY(1));
-    g.strokeStyle = "#3A4660"; g.setLineDash([4, 6]); [0.72, 0.55].forEach((t) => { g.beginPath(); g.moveTo(mx, PY(t)); g.lineTo(mx + mw, PY(t)); g.stroke(); }); g.setLineDash([]);
-    ORD.forEach((k) => { const [d, t] = A[k].pos; g.fillStyle = cssv("--" + k); g.beginPath(); g.arc(PX(d * 0.9), PY(t), 12, 0, 6.283); g.fill(); });
-    g.fillStyle = "#F6BE3B"; g.beginPath(); g.arc(PX(s.dir * 0.95), PY(mapT(s.trib)), 16, 0, 6.283); g.fill();
-    g.strokeStyle = "#0C0F14"; g.lineWidth = 4; g.stroke();
-    g.fillStyle = "#F6BE3B"; g.font = '700 26px "Archivo", Arial, sans-serif'; g.textAlign = "center"; g.fillText("Tú", PX(s.dir * 0.95), PY(mapT(s.trib)) - 26);
-    g.fillStyle = "#9AA3B3"; g.font = '500 18px "IBM Plex Mono", monospace'; g.fillText("← izquierda · derecha →", mx + mw / 2, my + mh + 34);
-    g.save(); g.translate(mx - 20, my + mh / 2); g.rotate(-Math.PI / 2); g.fillText("tribu →", 0, 0); g.restore();
-    try { return c.toDataURL("image/png"); } catch (e) { return ""; }
-  }
-  function finish() {
-    const s = scores(), v = verdict(s), k = v.k;
-    const flags = ITEMS.map((it, i) => ({ it, i, v: ans[i] === null || ans[i] === NB ? 0 : (ans[i] - 2) * it.k })).filter((x) => x.it.ax === "t" && x.v >= 1);
-    const eyeXL = k === "xl" ? SELF.xl : PERC.xl[k][0], eyeXR = k === "xr" ? SELF.xr : PERC.xr[k][0];
-    const res = $("#result");
-    res.style.setProperty("--dc", `var(--${k})`);
-    res.innerHTML = `
-      <div class="res-head"><span class="ncirc" style="--nc:var(--${k})">${pt(k)}</span><div><span class="lbl">Tu resultado</span><h3 tabindex="-1">${v.title}</h3><p class="dz-arq" style="margin:0">${v.arq}</p></div></div>
-      ${v.viol ? `<div class="alert"><b>Has justificado la violencia política.</b> Respondiste «${LIK[s.va]}» a la afirmación sobre la violencia contra adversarios. Por eso tu resultado no puede quedar en la zona autónoma.</div>` : ""}
-      <div class="gauge"><div class="g-top"><span>Dirección</span><b>${dirLabel(s.dir)} · posición relativa en este test</b></div><div class="track dir"><span class="mark" style="left:${(s.dir + 1) * 50}%"></span></div><div class="ends"><span>Izquierda</span><span>Derecha</span></div></div>
-      <div class="gauge"><div class="g-top"><span>Peso de la tribu</span><b>Zona ${v.z}${v.z === "indefinida" ? "" : ` · ${Math.round(s.trib * 100)} de 100`}</b></div><div class="track tri"><span class="mark" style="left:${s.trib * 100}%"></span></div><div class="ends"><span>Autonomía</span><span>Tribu</span></div></div>
-      <div><span class="lbl">Dónde pesa tu tribu</span><div class="comps" style="margin-top:10px">${s.comps.map((c) => `<div class="comp"><span>${COMP[c.c]}</span><span class="bar"><i style="width:${Math.round((c.v ?? 0) * 100)}%"></i></span><b>${c.v === null ? "–" : Math.round(c.v * 100)}</b></div>`).join("")}</div></div>
-      <p class="res-txt">${v.txt}</p>
-      ${flags.length ? `<div><span class="lbl">Respuestas que te acercan a la tribu</span><ul class="flags" style="margin-top:10px">${flags.map((x) => `<li>Respondiste <em>«${LIK[ans[x.i]]}»</em> a: ${x.it.t}</li>`).join("")}</ul></div>` : ""}
-      ${s.nb ? `<p class="tiny" style="margin:0">Dijiste no sentirte de ningún bando en ${s.nb} afirmaciones; no cuentan en el cálculo.</p>` : ""}
-      <div><span class="lbl">Cómo te verían los extremos</span><div class="eyes" style="margin-top:8px"><div style="border-color:var(--xl)"><span class="lbl">Extrema izquierda</span><span>«${eyeXL}»</span></div><div style="border-color:var(--xr)"><span class="lbl">Extrema derecha</span><span>«${eyeXR}»</span></div></div></div>
-      <figure class="share" id="share" hidden><img id="share-img" alt="Tarjeta con tu resultado: ${v.title}, zona ${v.z}."><figcaption>Mantén pulsada la imagen, o haz clic derecho, para guardarla y compartirla.</figcaption></figure>
-      <div class="res-actions"><a class="btn primary" href="#mapa">Ver tu punto en el mapa</a><button class="btn" id="res-card">Crear tarjeta</button><button class="btn" id="res-copy">Copiar texto</button><button class="btn" id="res-again">Repetir el test</button></div>
-      <p class="tiny" id="res-copied" aria-live="polite">Resultado orientativo de un instrumento no validado. Quince respuestas no definen a nadie.</p>`;
-    $("#q-card").hidden = true; res.hidden = false;
-    placeYouMap(s.dir, s.trib);
-    $("#res-again").addEventListener("click", reset);
-    $("#res-card").addEventListener("click", () => {
-      const url = card(v, s);
-      if (url) { $("#share-img").src = url; $("#share").hidden = false; $("#res-copied").textContent = "Tarjeta creada debajo de tus resultados."; }
-      else $("#res-copied").textContent = "Este navegador no permite crear la imagen. Usa «Copiar texto».";
-    });
-    $("#res-copy").addEventListener("click", () => {
-      const msg = `Mi resultado en el Observatorio de Polarización: ${v.title} (${v.arq}), zona ${v.z}. Desde la extrema izquierda me verían como «${eyeXL}»; desde la extrema derecha, como «${eyeXR}». ¿Y tú?`;
-      const done = () => { $("#res-copied").textContent = "Copiado. Pégalo donde quieras compartirlo."; };
-      const fallback = () => { const out = $("#res-copied"); out.textContent = msg; const r = document.createRange(); r.selectNodeContents(out); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); };
-      try { navigator.clipboard.writeText(msg).then(done, fallback); } catch (e) { fallback(); }
-    });
-    res.scrollIntoView({ behavior: RM ? "auto" : "smooth", block: "start" });
-    res.querySelector("h3").focus({ preventScroll: true });
-  }
-  function reset() {
-    ans.fill(null); qi = 0; $("#mini-you").innerHTML = ""; $("#map-you").hidden = true;
-    const ax = $("#map-axis"); if (ax) ax.textContent = "Escala de autoubicación ideológica del CIS · 1 izquierda · 10 derecha";
-    $("#mini-cap").textContent = "Tu punto aparecerá aquí en cuanto respondas a las dos primeras afirmaciones.";
-    $("#result").hidden = true; $("#q-card").hidden = false; render(true);
-    $("#q-card").scrollIntoView({ behavior: RM ? "auto" : "smooth", block: "center" });
-  }
-  $("#q-back").addEventListener("click", () => { if (qi > 0) { qi--; render(true); } });
-  $("#q-reset").addEventListener("click", reset);
-  render(false);
-})();
-
-/* ================= 9 · Salida: metapercepciones ================= */
-(function meta() {
-  const r = $("#meta-range"), out = $("#meta-out");
-  let shown = false;
-  const paint = () => {
-    const v = +r.value, real = Math.round(v / 2);
-    r.setAttribute("aria-valuetext", v + " %");
-    $("#mb-you").style.width = v + "%"; $("#mb-you-v").textContent = v + " %";
-    $("#mb-real").style.width = real + "%"; $("#mb-real-v").textContent = "≈ " + real + " %";
-    if (shown) out.textContent = `En el estudio de Moore-Berg et al. (2020), cada bando estimó la hostilidad y la deshumanización del otro en torno al doble de lo que el otro declaraba. Si te pareces al partidario medio de ese estudio, la cifra real rondaría el ${real} %. Son datos de EE. UU.; Ruggeri et al. (2021) hallaron el mismo tipo de error en 26 países. Y cuanto más se exagera, más hostilidad propia.`;
-  };
-  r.addEventListener("input", paint);
-  $("#meta-btn").addEventListener("click", () => { shown = true; $("#mb-real-row").hidden = false; paint(); });
-  paint();
-})();
 
 /* ================= Navegación ================= */
 (function nav() {

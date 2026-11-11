@@ -11018,6 +11018,19 @@ Eugenio: «publícalo en Luzhumanidad como "Observatorio de Polarización"».
 - Revisado por un evaluador ciego en tres rondas (5,7 → 6,85 → 7,2) antes de añadir historia, consecuencias y líderes; esas tres secciones no se han vuelto a evaluar.
 - Migración probada dos veces en un Postgres temporal (crea una sola página y una sola fila; elige Sociología antes que Política).
 
+### 2026-11-11 — Observatorio de Polarización: seis capítulos
+
+Eugenio pidió simplificarlo y reordenarlo. `public/observatorio-polarizacion/index.html` queda en seis capítulos, con una portada de seis tarjetas ilustradas que llevan a cada uno:
+1. **La España de hoy**: el barómetro del CIS 3577 como estudio real destacado (barras grandes con su porcentaje y cuatro cifras clave), el modelo de presión del grupo marcado como simulación y la tabla de consecuencias, que se enciende con la fase del modelo y lo mueve al pulsarla.
+2. **Cien años**: campanas con el espectro de colores, una línea del tiempo de diez etapas que cambia al pasar el ratón y un control deslizante. Se quita el gráfico de «temperatura» con rayas.
+3. **Miradas**: lentes, prisma del lenguaje y espejo, subidos de posición.
+4. **Doce perfiles** compactos: los cinco de la línea más anarcocomunismo, socialismo patriótico, libertarismo, anarcocapitalismo e independentismos de izquierda radical, de izquierda y de derecha, con relato, lenguaje, contradicción y líderes. Se quita el mapa de autoubicación de dos ejes y el bloque «radical / extremista».
+5. **Del nosotros al enemigo**: círculos de pertenencia de los doce perfiles con colores claros (verde, gris, rojo) que cambian al pasar el ratón, el eje territorial y una escalera de Glasl dibujada como escalera descendente.
+6. **Palabras y fuentes**: cronología, tarjetas, Venn y las 32 fuentes en cuadrícula con lo que se tomó de cada una.
+- Se quitan el test, el capítulo de metapercepciones y el de método (las notas de límites quedan junto a cada pieza).
+- Migración 0195: actualiza la ficha del proyecto (subtítulo y dos párrafos) solo si nadie la ha editado, y sube `version`. Probada dos veces en un Postgres temporal.
+- Portada regenerada.
+
 ## 2026-11-11 — Conciencia: seres humanos de cuerpo entero, con sus niveles de energía
 
 - Eugenio: «que los seres humanos sean una silueta entera del ser humano con todos sus niveles energéticos, más que solamente la cabeza. Y quita "ser humano 1" y "ser humano 2" como título, porque ya se ve que son seres humanos».
