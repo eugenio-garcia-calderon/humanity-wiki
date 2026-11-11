@@ -59,8 +59,8 @@ const NOCHE = '#070b1f';
 const TINTA = '#0b1030';
 const HALO = '#060a1c';
 
-/** Profile of a head looking right, centred on (0,0), about 140 units tall. */
-const CABEZA = 'M-25,70 C-25,50 -32,38 -38,26 C-58,0 -55,-45 -25,-62 C0,-76 40,-70 50,-40 C55,-28 52,-18 56,-10 L68,8 C70,12 66,14 60,14 C63,19 61,23 57,25 C60,30 57,35 52,37 C49,46 36,48 26,46 C22,54 22,62 24,70 Z';
+/** Profile of a head looking right, centred on (0,0), about 140 units tall. Also drawn by the artistic view. */
+export const CABEZA = 'M-25,70 C-25,50 -32,38 -38,26 C-58,0 -55,-45 -25,-62 C0,-76 40,-70 50,-40 C55,-28 52,-18 56,-10 L68,8 C70,12 66,14 60,14 C63,19 61,23 57,25 C60,30 57,35 52,37 C49,46 36,48 26,46 C22,54 22,62 24,70 Z';
 
 const idColor = (c: string) => c.replace('#', '');
 

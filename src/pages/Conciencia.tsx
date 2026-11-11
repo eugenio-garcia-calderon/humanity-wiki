@@ -26,11 +26,11 @@
 // /aeromovil. The map that ships is in `src/data/concienciaMapa.ts`; what people
 // save lives in `conciencia_mapas` (see `src/server/conciencia.ts`).
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Eye, Pencil, Plus, Undo2, Redo2, ZoomIn, ZoomOut, Scan, Maximize2, Minimize2, History, Download, RotateCcw,
   Check, Loader2, AlertTriangle, CloudOff, X, LogIn, Upload, MousePointer2,
-  Play, Pause, SkipBack, SkipForward, Sun, Moon, Flower2, MessageSquarePlus, RotateCw,
+  Play, Pause, SkipBack, SkipForward, Sun, Moon, Flower2, MessageSquarePlus, RotateCw, Palette, Network, ChevronDown,
 } from 'lucide-react';
 import '@fontsource/cinzel/400.css';
 import '@fontsource/cinzel/700.css';
@@ -47,12 +47,21 @@ import { medir } from '../components/conciencia/geometria';
 import { dibujarPaso } from '../components/conciencia/Animacion';
 import { BuzonMejoras } from '../components/conciencia/BuzonMejoras';
 import { VentanaClaves } from '../components/conciencia/VentanaClaves';
+import { VistaArtistica } from '../components/conciencia/VistaArtistica';
 import {
   MAPA_POR_DEFECTO, PALETA, RECORRIDOS, ESQUEMA_ACTUAL, esMapaValido,
   type MapaConciencia, type Nodo, type Flecha, type Canal,
 } from '../data/concienciaMapa';
 
 type Guardado = 'listo' | 'pendiente' | 'guardando' | 'local' | 'error' | 'conflicto';
+
+/**
+ * The two views of the map (2026-11-11): «arte», a picture without words (the
+ * default), and «esquema», the editable schema with text. Chosen in the menu of
+ * the top band and kept in the address as `?vista=esquema`, so a link opens the
+ * same view.
+ */
+type Vista = 'arte' | 'esquema';
 
 const COPIA_LOCAL = 'conciencia.mapa.borrador';
 const MAX_DESHACER = 80;
@@ -144,6 +153,23 @@ export default function Conciencia({ enSitio }: { enSitio?: { inicio: string } }
   const mapaUI = useRef<MapaHandle>(null);
   const zonaMapa = useRef<HTMLDivElement>(null);
   const importar = useRef<HTMLInputElement>(null);
+
+  // ── The view: picture without words, or the schema with text ─────────────
+  const [params, setParams] = useSearchParams();
+  const vista: Vista = params.get('vista') === 'esquema' ? 'esquema' : 'arte';
+  const vistaRef = useRef(vista);
+  vistaRef.current = vista;
+  /** In the picture, the lane looked at alone (the others fade). */
+  const [foco, setFoco] = useState<Canal | null>(null);
+  const cambiarVista = useCallback((v: Vista) => {
+    if (v === 'arte') { setEditando(false); setSeleccion(null); setConectarDesde(null); setRecorrido(null); setMenuDescarga(false); }
+    setFoco(null);
+    setParams(p => {
+      const n = new URLSearchParams(p);
+      if (v === 'arte') n.delete('vista'); else n.set('vista', v);
+      return n;
+    }, { replace: true });
+  }, [setParams]);
 
   // ── Undo / redo (this device only; the server keeps its own history) ─────
   const pasado = useRef<MapaConciencia[]>([]);
@@ -414,9 +440,11 @@ export default function Conciencia({ enSitio }: { enSitio?: { inicio: string } }
   }, []);
 
   const verEnElMapa = useCallback((idNodo: string) => {
+    // Concepts are only in the schema; the picture has none.
+    if (vistaRef.current !== 'esquema') cambiarVista('esquema');
     setSeleccion({ tipo: 'nodo', id: idNodo });
     zonaMapa.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, []);
+  }, [cambiarVista]);
 
   // ── Keyboard ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -433,6 +461,7 @@ export default function Conciencia({ enSitio }: { enSitio?: { inicio: string } }
       if (e.key === 'Escape') {
         if (conectarDesde) setConectarDesde(null);
         else if (seleccion) setSeleccion(null);
+        else if (foco) setFoco(null);
         else if (completa) setCompleta(false);
         return;
       }
@@ -444,7 +473,7 @@ export default function Conciencia({ enSitio }: { enSitio?: { inicio: string } }
     };
     window.addEventListener('keydown', tecla);
     return () => window.removeEventListener('keydown', tecla);
-  }, [conectarDesde, seleccion, completa, editando, deshacer, rehacer, borrar, recorrido, claves, verBuzon]);
+  }, [conectarDesde, seleccion, completa, editando, deshacer, rehacer, borrar, recorrido, claves, verBuzon, foco]);
 
   // Full screen locks the page scroll behind it.
   useEffect(() => {
@@ -488,15 +517,21 @@ export default function Conciencia({ enSitio }: { enSitio?: { inicio: string } }
   }, [recorrido]);
 
   const verRecorrido = useCallback((canal: Canal, desdeAbajo = false) => {
+    // The step-by-step walkthrough, with its captions, lives in the schema.
+    const cambia = vistaRef.current !== 'esquema';
+    if (cambia) cambiarVista('esquema');
     setEditando(false);
     setSeleccion(null);
     setConectarDesde(null);
     setMenuDescarga(false);
     setRecorrido({ canal, paso: 0, reproduciendo: true });
     // Keep the bottom free for the caption card, so it never hides a lane.
-    mapaUI.current?.ajustar(window.innerWidth < 640 ? 250 : 175);
+    // Coming from the picture, the schema is not mounted yet: fit it once it is.
+    const margen = window.innerWidth < 640 ? 250 : 175;
+    if (cambia) window.setTimeout(() => mapaUI.current?.ajustar(margen), 80);
+    else mapaUI.current?.ajustar(margen);
     if (desdeAbajo) zonaMapa.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, []);
+  }, [cambiarVista]);
 
   const pasoRecorrido = recorrido ? RECORRIDOS[recorrido.canal].pasos[recorrido.paso] : null;
   const capaRecorrido = useMemo(
@@ -529,9 +564,24 @@ export default function Conciencia({ enSitio }: { enSitio?: { inicio: string } }
             <b className="text-slate-100"> matriz fundamental del universo</b> («lattice») e interactúa con ella. Dos seres conscientes se
             relacionan de tres maneras: despiertos por los sentidos, dormidos por el hipercampo y meditando por percepción directa.
           </p>
-          <div className="ml-auto flex shrink-0 items-center gap-2">
+          <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2 sm:shrink-0">
+            <label className="relative flex items-center" title="Cambiar de vista">
+              <span className="sr-only">Vista del mapa</span>
+              {vista === 'arte'
+                ? <Palette className="pointer-events-none absolute left-2.5 h-4 w-4 text-amber-100" aria-hidden />
+                : <Network className="pointer-events-none absolute left-2.5 h-4 w-4 text-teal-100" aria-hidden />}
+              <select
+                value={vista}
+                onChange={e => cambiarVista(e.target.value === 'esquema' ? 'esquema' : 'arte')}
+                className="h-9 cursor-pointer appearance-none rounded-xl border border-white/15 bg-white/5 pl-8 pr-8 text-sm text-slate-100 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-200/60 [&>option]:bg-slate-900 [&>option]:text-slate-100"
+              >
+                <option value="arte">Arte (sin palabras)</option>
+                <option value="esquema">Esquema (con texto)</option>
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-2.5 h-4 w-4 text-slate-400" aria-hidden />
+            </label>
             <BotonOscuro onClick={() => setVerBuzon(true)} className="bg-amber-200/15 text-amber-100 ring-1 ring-amber-200/40 hover:bg-amber-200/25">
-              <MessageSquarePlus className="h-4 w-4" /> Añadir mejora o comentario
+              <MessageSquarePlus className="h-4 w-4" /> Añadir mejora<span className="hidden sm:inline"> o comentario</span>
             </BotonOscuro>
             <a href="#laboratorio" className="hidden text-xs text-slate-400 hover:text-white md:inline">Estudios ↓</a>
           </div>
@@ -547,6 +597,23 @@ export default function Conciencia({ enSitio }: { enSitio?: { inicio: string } }
             completa ? 'fixed inset-0 z-50 max-w-none rounded-none border-0' : 'h-[calc(100svh-7.5rem)] min-h-[480px] max-w-[1600px] rounded-2xl lg:h-[calc(100svh-5.25rem)]',
           )}
         >
+          {vista === 'arte' ? (
+            <>
+              <VistaArtistica
+                className="absolute inset-0"
+                mapa={mapa}
+                foco={foco}
+                onFoco={setFoco}
+                onClaves={setClaves}
+              />
+              <div className="absolute right-2 top-2 z-20 flex gap-1 rounded-2xl border border-white/10 bg-slate-950/70 p-1 backdrop-blur">
+                <BotonOscuro onClick={() => setCompleta(v => !v)} aria-label={completa ? 'Salir de pantalla completa' : 'Pantalla completa'}>
+                  {completa ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                </BotonOscuro>
+              </div>
+            </>
+          ) : (
+          <>
           {/* Barra de herramientas */}
           <div className="absolute inset-x-2 top-2 z-20 flex flex-nowrap items-center gap-1 overflow-x-auto rounded-2xl border border-white/10 bg-slate-950/80 p-1 backdrop-blur [scrollbar-width:none] md:flex-wrap md:overflow-visible" onPointerDown={e => e.stopPropagation()}>
             <div className="flex shrink-0 rounded-xl bg-white/5 p-0.5">
@@ -726,10 +793,12 @@ export default function Conciencia({ enSitio }: { enSitio?: { inicio: string } }
             </p>
           )}
           <input ref={importar} type="file" accept="application/json,.json" className="hidden" onChange={e => { const f = e.target.files?.[0]; if (f) importarArchivo(f); e.target.value = ''; }} />
+          </>
+          )}
         </div>
 
-        {/* Leyenda */}
-        <div className="mx-auto mt-4 grid max-w-7xl gap-2 px-2 text-xs text-slate-300 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Leyenda (the schema's; the picture has no words on purpose) */}
+        <div className={cn('mx-auto mt-4 grid max-w-7xl gap-2 px-2 text-xs text-slate-300 sm:grid-cols-2 lg:grid-cols-4', vista === 'arte' && 'hidden')}>
           {[
             { c: PALETA[0].color, t: 'Vigilia · por los sentidos físicos' },
             { c: PALETA[2].color, t: 'Sueño · por el hipercampo' },
