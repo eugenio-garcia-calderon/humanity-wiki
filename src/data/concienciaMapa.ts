@@ -143,6 +143,9 @@ export const ESTILOS: { estilo: EstiloFlecha; nombre: string }[] = [
 const ORO = '#f5c25b', VIOLETA = '#b48cff', AZUL = '#7b93ff', TURQUESA = '#5ee6d0',
   ROSA = '#ff8fd1', CORAL = '#ffb27a', VERDE = '#9be58f', CIAN = '#8ef0ff', LUZ = '#fff1c9', PLATA = '#c9d4e8';
 
+/** The paint of the picture, shared with the artistic view so both views keep the same colours. */
+export const TINTES = { ORO, VIOLETA, AZUL, TURQUESA, ROSA, CORAL, LUZ } as const;
+
 /**
  * The layout generation of the map. 2 = the three-lane layout of 2026-11-10;
  * 3 = the same, with names only on the map and five folded keys per lane
