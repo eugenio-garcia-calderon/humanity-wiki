@@ -1,7 +1,7 @@
 // ============================================================================
 // MODELO SOCIOECONÓMICO OPTIMIZADO (2026-11-10, Eugenio)
 // ============================================================================
-// One tax on every payment, nothing else, in three tiers (0, 20 or 40 %: by
+// One tax on every payment, nothing else, in three tiers (10, 25 or 40 %: by
 // what is bought, and for wages by the size of the company that pays them),
 // collected by the payment system itself and split in eight equal parts among
 // eight scales: person, neighbourhood or family, municipality, province, region,
@@ -12,7 +12,8 @@
 //
 // The page: the rings (hero), how it works, the 2D scheme of where the money
 // goes, the matrix scale × area, a worked example (a person in a village of 400
-// in Madrid), today's Spanish system next to the model, who decides, the
+// in Madrid), today's Spanish system next to the model, today's pensions in five tiers,
+// today's budgets at every scale (EU to family) as donuts, who decides, the
 // country's accounts and what is still to be solved. Every number comes from
 // `src/data/modeloSocioeconomico.ts`.
 //
@@ -40,6 +41,8 @@ import { QuienDecide } from '../components/modeloSocioeconomico/QuienDecide';
 import { Tercios, AyudaEntreEscalas } from '../components/modeloSocioeconomico/TerciosApoyo';
 import { TresTramos, CincoPagos } from '../components/modeloSocioeconomico/Tramos';
 import { LasCuentas, Retos, ListaFuentes } from '../components/modeloSocioeconomico/Cuentas';
+import { Pensiones } from '../components/modeloSocioeconomico/Pensiones';
+import { Presupuestos } from '../components/modeloSocioeconomico/Presupuestos';
 import { BuzonProyecto } from '../components/modeloSocioeconomico/BuzonProyecto';
 import { Boton, Encabezado, Muestra, Segmentado } from '../components/modeloSocioeconomico/piezas';
 
@@ -50,6 +53,8 @@ const SECCIONES = [
   { id: 'tercios', t: 'Tercios y ayuda' },
   { id: 'ejemplo', t: 'Un caso' },
   { id: 'hoy', t: 'Frente a hoy' },
+  { id: 'pensiones', t: 'Pensiones' },
+  { id: 'presupuestos', t: 'Presupuestos' },
   { id: 'decide', t: 'Quién decide' },
   { id: 'cuentas', t: 'Cuentas' },
   { id: 'retos', t: 'Lo que falta' },
@@ -73,7 +78,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
     const anterior = meta?.content;
     if (!meta) { meta = document.createElement('meta'); meta.name = 'description'; document.head.appendChild(meta); }
-    meta.content = 'Un único impuesto en tres tramos (0, 20 y 40 %) sobre cada pago, que el sistema de pago reparte al instante entre ocho escalas (persona, comunidad vecinal, municipio, provincia, región, nación, continente y planeta), con un tercio para producir, uno para cuidar y uno libre, comparado con el sistema fiscal español actual.';
+    meta.content = 'Un único impuesto en tres tramos (10, 25 y 40 %) sobre cada pago, que el sistema de pago reparte al instante entre ocho escalas (persona, comunidad vecinal, municipio, provincia, región, nación, continente y planeta), con un tercio para producir, uno para cuidar y uno libre, comparado con el sistema fiscal español actual.';
     return () => { document.title = titulo; if (meta) meta.content = anterior ?? ''; };
   }, []);
 
@@ -89,22 +94,22 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
     <div className="min-h-screen bg-slate-100 text-slate-900 antialiased" style={{ fontFamily: '"Public Sans Variable", ui-sans-serif, system-ui, sans-serif' }}>
       {/* ── Top band: what this is, who makes it, where to go, the mailbox ── */}
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-2.5 sm:px-6">
+        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-2.5 sm:px-6 min-[1700px]:max-w-none">
           <a href="#inicio" className="min-w-0 leading-tight">
             <span className="block text-[15px] font-bold tracking-tight">Modelo socioeconómico optimizado</span>
             <span className="block text-xs text-slate-500">Un proyecto de {marca}</span>
           </a>
-          <nav aria-label="Secciones" className="ml-auto hidden min-w-0 gap-0.5 text-[13px] min-[1600px]:flex">
+          <nav aria-label="Secciones" className="ml-auto hidden min-w-0 gap-0.5 text-[13px] min-[1700px]:flex">
             {SECCIONES.map(s => (
               <a key={s.id} href={`#${s.id}`} className="whitespace-nowrap rounded-full px-2 py-1.5 text-slate-600 hover:bg-slate-100 hover:text-slate-900">{s.t}</a>
             ))}
           </nav>
-          <Boton onClick={() => setVerBuzon(true)} className="ml-auto shrink-0 min-[1600px]:ml-0">
+          <Boton onClick={() => setVerBuzon(true)} className="ml-auto shrink-0 min-[1700px]:ml-0">
             <MessageSquarePlus className="h-4 w-4" /><span className="sm:hidden">Proponer</span><span className="hidden sm:inline">Proponer una mejora</span>
           </Boton>
         </div>
         {/* Phones: the list scrolls sideways; the fade on the right says there is more. */}
-        <div className="relative border-t border-slate-100 min-[1600px]:hidden">
+        <div className="relative border-t border-slate-100 min-[1700px]:hidden">
           <nav aria-label="Secciones" className="flex gap-1 overflow-x-auto px-3 py-1.5 pr-10 text-[13px] [scrollbar-width:none]">
             {SECCIONES.map(s => (
               <a key={s.id} href={`#${s.id}`} className="whitespace-nowrap rounded-full px-2.5 py-1 text-slate-600 hover:bg-slate-100">{s.t}</a>
@@ -120,7 +125,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
           <div>
             <h1 className="text-[2.35rem] font-[800] leading-[1.02] tracking-[-0.035em] sm:text-[3.4rem]">Modelo socioeconómico optimizado</h1>
             <p className="mt-6 max-w-[34ch] text-[1.45rem] font-medium leading-snug tracking-[-0.01em] text-slate-800 sm:text-[1.65rem]">
-              Un solo impuesto sobre cada pago, en tres tramos: nada en lo básico, un 20 % en lo secundario y un 40 % en el ocio y el lujo.
+              Un solo impuesto sobre cada pago, en tres tramos: un 10 % en lo básico, un 25 % en lo secundario y un 40 % en el ocio y el lujo.
               Llega al instante, en ocho partes iguales, a las escalas en las que vivimos.
             </p>
             <p className="mt-5 max-w-[62ch] text-[17px] leading-relaxed text-slate-600">
@@ -166,12 +171,12 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
         <section id="como-funciona" aria-labelledby="como-funciona-titulo" className="scroll-mt-28 border-t border-slate-200 bg-white">
           <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
             <Encabezado id="como-funciona" titulo="Cómo funciona: tres tramos y ocho partes">
-              De cada pago se aparta su tramo: nada, un 20 % o un 40 %. Lo apartado se junta y se reparte en ocho partes iguales, una por escala.
+              De cada pago se aparta su tramo: un 10 %, un 25 % o un 40 %. Lo apartado se junta y se reparte en ocho partes iguales, una por escala.
             </Encabezado>
             <ol className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
               {[
                 { t: 'Pagas', d: 'Con tarjeta, Bizum o el móvil. El precio ya lleva su tramo dentro, como hoy el IVA.' },
-                { t: 'Se aparta el tramo', d: 'En el mismo instante, el sistema de pago separa el 0, el 20 o el 40\u00A0% del pago, y el resto llega a quien cobra.' },
+                { t: 'Se aparta el tramo', d: 'En el mismo instante, el sistema de pago separa el impuesto (10, 25 o 40\u00A0% sobre el precio sin impuesto) y el resto llega a quien cobra.' },
                 { t: 'Se reparte en ocho', d: 'Lo apartado de todos los pagos se junta y cada escala recibe un octavo, lo mismo por habitante. Tu parte personal es un dividendo igual para todo el mundo.' },
                 { t: 'Cada escala, en tercios', d: 'Un tercio para comprar o mejorar medios de producción, uno para cuidados y uno libre.' },
                 { t: 'Cada escala decide', d: 'Su asamblea ciudadana elige las prioridades y su comité técnico las cumple al menor coste, de la forma más eficaz y ecológica.' },
@@ -187,7 +192,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
             <div className="mt-12"><TresTramos /></div>
             <div className="mt-6"><CincoPagos /></div>
             <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600">
-              El tramo es una parte del precio final, no se suma encima como el IVA de hoy. Medido como el IVA, sobre el precio sin impuesto, el 20 % equivale a un 25 % y el 40 % a un 67 %.
+              El tramo se suma al precio sin impuesto, como el IVA de hoy: una cena de 40 € cuesta 56 € y 16 € van al fondo. De todo lo que pagas, el fondo se queda una onceava parte en el tramo 1, una quinta parte en el 2 y dos séptimas partes en el 3.
             </p>
 
             <PreguntasCobro modo={modo} />
@@ -203,7 +208,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
                 <div>
                   <dt className="font-semibold text-slate-900">{LECTURA_CORTA.eslabon}</dt>
                   <dd className="mt-0.5 leading-relaxed text-slate-600">
-                    La empresa paga al comprar y lo recupera al vender, como hoy el IVA. Cada producto lleva exactamente su tramo: el pan, nada; la chaqueta, el 20 %.
+                    La empresa paga al comprar y lo recupera al vender, como hoy el IVA. Cada producto lleva exactamente su tramo: el pan, el 10 %; la chaqueta, el 25 %.
                     Recauda ≈ {porcentaje(cuentasPais('eslabon').pctPIB, 0)} del PIB. Es la lectura por defecto.
                   </dd>
                 </div>
@@ -316,6 +321,24 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
             <DondeEstaElDinero modo={modo} />
             <GanaYPierde modo={modo} />
           </div>
+        </section>
+
+        {/* ── Pensions by tier (today's system) ── */}
+        <section id="pensiones" aria-labelledby="pensiones-titulo" className="scroll-mt-28 border-t border-slate-200 bg-slate-50">
+          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
+            <Encabezado id="pensiones" titulo="Las pensiones de hoy, en cinco tramos">
+              Cuántas pensiones hay en cada tramo, de la máxima a la mínima, y qué parte del dinero se lleva cada uno. Es el gasto más grande del país: sirve para ver qué sustituirían los préstamos, las donaciones y el apoyo a la discapacidad del modelo.
+            </Encabezado>
+            <Pensiones />
+          </div>
+        </section>
+
+        {/* ── Budgets at every order of magnitude ── */}
+        <section id="presupuestos" aria-labelledby="presupuestos-titulo" className="mx-auto max-w-7xl scroll-mt-28 px-4 py-16 sm:px-6">
+          <Encabezado id="presupuestos" titulo="En qué se gasta cada escala">
+            El presupuesto de hoy de Europa, España, la Comunidad de Madrid, un municipio, una comunidad de vecinos y una familia, cada uno en su quesito. Elige una escala; la tabla de abajo las pone todas juntas.
+          </Encabezado>
+          <Presupuestos />
         </section>
 
         {/* ── Who decides ── */}

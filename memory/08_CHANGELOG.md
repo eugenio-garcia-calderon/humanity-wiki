@@ -11055,3 +11055,15 @@ Eugenio pidió simplificarlo y reordenarlo. `public/observatorio-polarizacion/in
   - el ancho de móvil.
 
   No hubo errores en la consola.
+### 2026-11-11 — Modelo socioeconómico: los tramos se suman al precio, como el IVA
+- Eugenio: «como el IVA». El 0, 20 o 40 % se suma al precio sin impuesto (y al sueldo); antes era una parte del pago. Una cena de 40 € cuesta 56 € y deja 16 € en el fondo.
+- `fraccion(t) = t/(1+t)` en `cuentasPais`, el caso y la cadena del pan; tabla de cinco pagos con «se paga en total»; hostelería ≈ +27 %.
+- Recauda ≈ 12 % del PIB por defecto (antes 16 %), 521 € por persona y escala; al pie de la letra ≈ 31 %.
+- Mismo día, Eugenio: los tramos pasan a **10 / 25 / 40 %** (lo básico paga un 10 %). Los sueldos siguen los mismos tres tipos por tamaño de empresa (pequeña 10 %, mediana 25 %, grande 40 %); las administraciones, 0 %. El tipo general de las compras entre empresas (lectura al pie de la letra) pasa al 25 %. Recauda ≈ 17 % del PIB por defecto, 744 € por persona y escala.
+
+## 2026-11-11 — Modelo socioeconómico: «Pensiones» and «Presupuestos» sections
+
+- New section `#pensiones`: Spain's contributory pensions (July 2026) in five tiers — maximum (≥ 3.300 €, shows the 3.359,60 € cap), upper middle, middle, lower middle, minimum and below (< 1.000 €, shows the 936,20 € legal minimum). Each tier: number of pensions, % of pensions, monthly and yearly cost, % of the payroll. The top tier is July 2026 data; the middle tiers apply 2025's shares to 2026's total (marked «estimación»); the bottom tier's average is the remainder of the real payroll, so the five add up to 14.431,9 M€.
+- New section `#presupuestos`: a hand-drawn SVG donut per scale — Unión Europea 2026, España (all administrations, COFOG 2024), Comunidad de Madrid 2026, Torrelodones 2024 (by chapter, no debt), a block of flats (Housfy example, marked as example) and a family (EPF 2024, imputed rent out). Toggle to add the debt repaid and refinanced in the year (Spain 230.693 M€, Madrid 2.552 M€). A table lines up pensions, debt interest, education, health, infrastructure and defence across all six scales.
+- Data in the new `src/data/presupuestos.ts`; nine new sources in `FUENTES`; texts registered in the translation sweep.
+- Desktop nav (now 12 entries) shows in one row from 1700 px with a full-width header; below that, the scrolling row.

@@ -142,18 +142,23 @@ export const ESCALAS: Escala[] = [
 export const ESCALA = Object.fromEntries(ESCALAS.map(e => [e.id, e])) as Record<EscalaId, Escala>;
 
 /** The general rate: tier 2, and what business-to-business payments carry in the literal reading. */
-export const TIPO_GENERAL = 0.20;
+export const TIPO_GENERAL = 0.25;
 /** What each scale receives of whatever is collected. */
 export const OCTAVO = 1 / ESCALAS.length;
+/** Share of a payment (tax included) that goes to the fund when the rate t goes on top of the price. */
+export const fraccion = (t: number) => t / (1 + t);
 
 // ── THE THREE TIERS ─────────────────────────────────────────────────────────
-// The rate is a share of the payment (as the 20 % always was on this page): of a
-// 40 € dinner in tier 3, 16 € go to the common fund and the restaurant keeps 24 €.
+// The rate goes ON TOP of the price without tax, like today's VAT (Eugenio,
+// 2026-11-11): a dinner worth 40 € in tier 3 costs 56 €, and 16 € go to the fund.
+// Of every euro paid, the fund gets `fraccion(t)` = t / (1 + t): 1/11 at 10 %, 1/5 at 25 %, 2/7 at 40 %.
+// Rates 10 / 25 / 40 % (Eugenio, 2026-11-11, replacing 0 / 20 / 40); wages follow the same three rates by company size.
+// Wages too: the employer pays the wage plus its tier on top.
 export type Tramo = 1 | 2 | 3;
 export interface TramoInfo { id: Tramo; tipo: number; nombre: string; compras: string; sueldos: string }
 export const TRAMOS: TramoInfo[] = [
-  { id: 1, tipo: 0, nombre: 'Primera necesidad', compras: 'Agua, energía, la vivienda en la que se vive, movilidad, comida, salud y educación', sueldos: 'Empresas pequeñas, de menos de 50 personas' },
-  { id: 2, tipo: 0.2, nombre: 'Segunda necesidad', compras: 'Segunda vivienda, segundo vehículo, ropa, muebles, móvil e internet, seguros, cuidado personal', sueldos: 'Empresas medianas, de 50 a 249 personas' },
+  { id: 1, tipo: 0.1, nombre: 'Primera necesidad', compras: 'Agua, energía, la vivienda en la que se vive, movilidad, comida, salud y educación', sueldos: 'Empresas pequeñas, de menos de 50 personas' },
+  { id: 2, tipo: 0.25, nombre: 'Segunda necesidad', compras: 'Segunda vivienda, segundo vehículo, ropa, muebles, móvil e internet, seguros, cuidado personal', sueldos: 'Empresas medianas, de 50 a 249 personas' },
   { id: 3, tipo: 0.4, nombre: 'Ocio y lujo', compras: 'Restaurantes, bares, hoteles, viajes, ocio, alcohol, tabaco y lujo', sueldos: 'Empresas grandes, de 250 personas o más' },
 ];
 export const TRAMO = Object.fromEntries(TRAMOS.map(t => [t.id, t])) as Record<Tramo, TramoInfo>;
@@ -162,8 +167,8 @@ export const TRAMO = Object.fromEntries(TRAMOS.map(t => [t.id, t])) as Record<Tr
 export type Empleador = 'pequena' | 'mediana' | 'grande' | 'publica';
 export interface EmpleadorInfo { id: Empleador; nombre: string; corto: string; tipo: number; tramo: Tramo | null; nota?: string }
 export const EMPLEADORES: EmpleadorInfo[] = [
-  { id: 'pequena', nombre: 'Empresa pequeña (menos de 50 personas)', corto: 'Pequeña', tipo: 0, tramo: 1 },
-  { id: 'mediana', nombre: 'Empresa mediana (de 50 a 249)', corto: 'Mediana', tipo: 0.2, tramo: 2 },
+  { id: 'pequena', nombre: 'Empresa pequeña (menos de 50 personas)', corto: 'Pequeña', tipo: 0.1, tramo: 1 },
+  { id: 'mediana', nombre: 'Empresa mediana (de 50 a 249)', corto: 'Mediana', tipo: 0.25, tramo: 2 },
   { id: 'grande', nombre: 'Empresa grande (250 o más)', corto: 'Grande', tipo: 0.4, tramo: 3 },
   { id: 'publica', nombre: 'Una administración o una escala', corto: 'Administración', tipo: 0, tramo: null, nota: 'No paga: sería cobrarse a sí misma y mover dinero público de una escala a otra' },
 ];
@@ -434,6 +439,15 @@ export const FUENTES: Fuente[] = [
   { id: 'remuneracion-publica', titulo: 'IGAE vía Vozpópuli · Gasto en personal de las administraciones en 2025 (181.494 M€)', url: 'https://www.vozpopuli.com/economia/pagar-las-nominas-de-politicos-y-funcionarios-cuesta-ya-4000-euros-a-cada-espanol.html' },
   { id: 'pensiones-2026', titulo: 'Seguridad Social vía Junta de Extremadura · Pensiones contributivas, julio de 2026', url: 'https://www.juntaex.es/documents/77055/46718143/PC_ND_2026_07.pdf/814916c2-5e3d-040a-b8c5-96c2a5b6c986' },
   { id: 'imserso-discapacidad', titulo: 'Imserso vía Servimedia · Personas con discapacidad reconocida (≥ 33 %), 2022', url: 'https://sid-inico.usal.es/noticias/numero-de-personas-con-discapacidad-en-espana-las-mujeres-con-grados-mas-altos/' },
+  { id: 'pensiones-cuantias', titulo: 'INSS vía El Español · Pensiones por tramos de cuantía, julio de 2026 (las de 3.300 € o más)', url: 'https://www.elespanol.com/sociedad/20260820/oficial-millones-jubilados-cobran-pension-euros-mes-espana-td/1003744357533_0.html' },
+  { id: 'pensiones-reparto', titulo: 'Ministerio de Inclusión vía Vozpópuli · Reparto de las pensiones por encima y por debajo de 1.000 € (2025)', url: 'https://www.vozpopuli.com/economia/nuevo-hito-en-las-pensiones-mas-de-la-mitad-superan-ya-los-1000-euros-al-mes.html' },
+  { id: 'pensiones-limites', titulo: 'La Moncloa · Pensiones 2026: pensión máxima, mínimas y no contributivas', url: 'https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/inclusion/Paginas/2026/subida-pensiones-2026.aspx' },
+  { id: 'pensiones-minimos', titulo: 'El Debate (datos de la Seguridad Social) · Pensionistas con complemento a mínimos, marzo de 2026', url: 'https://www.eldebate.com/economia/20260417/casi-cada-cuatro-jubilados-recibe-complemento-porque-no-llega-pension-minima_407575.html' },
+  { id: 'tesoro-2026', titulo: 'Ara (Tesoro Público) · Estrategia de financiación 2026: emisión bruta 285.693 M€, neta 55.000 M€', url: 'https://es.ara.cat/economia/cuentas-publicas/tesoro-repetira-2026-emision-neta-55-000-m-deuda-ano_1_5587056.html' },
+  { id: 'torrelodones-2024', titulo: 'BOCM · Presupuesto General del Ayuntamiento de Torrelodones 2024, resumen por capítulos', url: 'https://www.bocm.es/boletin/CM_Orden_BOCM/2024/01/23/BOCM-20240123-96.PDF' },
+  { id: 'housfy-comunidad', titulo: 'Housfy · Ejemplo de presupuesto anual de una comunidad de propietarios', url: 'https://housfy.com/administracion-fincas/guias/post/contabilidad-comunidad-de-propietarios' },
+  { id: 'ine-epf-hogar', titulo: 'INE · EPF 2024: gasto medio por hogar, 34.044 €', url: 'https://www.ine.es/dyngs/Prensa/es/EPF2024.htm' },
+  { id: 'pensiones-mayo', titulo: 'La Moncloa · Nómina de pensiones de mayo de 2026: 10.480.593 pensiones a cerca de 9,5 millones de personas', url: 'https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/inclusion/Paginas/2026/260526-pension-media-datos-mayo.aspx' },
   { id: 'ipc-2026', titulo: 'INE · Indicador adelantado del IPC, octubre de 2026 (4,9 %)', url: 'https://www.ine.es/dyngs/Prensa/adIPC1026.htm' },
 ];
 
@@ -641,22 +655,22 @@ export const HOY = {
 };
 
 // ── THE COUNTRY'S ACCOUNTS UNDER THE MODEL ──────────────────────────────────
-/** Final demand ≈ GDP plus imports (≈ 1,33 × GDP): what the business-to-business 20 % ends up inside of. Estimate. */
+/** Final demand ≈ GDP plus imports (≈ 1,33 × GDP): what the business-to-business general rate ends up inside of. Estimate. */
 const DEMANDA_FINAL = ESPANA.pib * 1.33;
 
 export function cuentasPais(modo: Modo, clasif: Clasificacion = CLASIFICACION_INICIAL) {
   const componentes = BASE.filter(b => b.modos.includes(modo)).map(b => {
     const partes = b.partes(clasif);
-    return { ...b, partes, millones: partes.reduce((s, p) => s + p.millones, 0), recaudacion: partes.reduce((s, p) => s + p.millones * p.tipo, 0) };
+    return { ...b, partes, millones: partes.reduce((s, p) => s + p.millones, 0), recaudacion: partes.reduce((s, p) => s + p.millones * fraccion(p.tipo), 0) };
   });
   const base = componentes.reduce((s, b) => s + b.millones, 0);
   const recaudacion = componentes.reduce((s, b) => s + b.recaudacion, 0);
   const porTramo: Record<Tramo, { base: number; recaudacion: number }> = { 1: { base: 0, recaudacion: 0 }, 2: { base: 0, recaudacion: 0 }, 3: { base: 0, recaudacion: 0 } };
-  for (const c of componentes) for (const p of c.partes) if (p.tramo) { porTramo[p.tramo].base += p.millones; porTramo[p.tramo].recaudacion += p.millones * p.tipo; }
+  for (const c of componentes) for (const p of c.partes) if (p.tramo) { porTramo[p.tramo].base += p.millones; porTramo[p.tramo].recaudacion += p.millones * fraccion(p.tipo); }
   const porEscala = recaudacion * OCTAVO;
   const porPersonaEscala = (porEscala * 1e6) / ESPANA.poblacion;
   // In the literal reading, the general rate paid between businesses ends up inside final prices.
-  const cascada = modo === 'literal' ? 1 + (1_600_000 * TIPO_GENERAL) / DEMANDA_FINAL : 1;
+  const cascada = modo === 'literal' ? 1 + (1_600_000 * fraccion(TIPO_GENERAL)) / DEMANDA_FINAL : 1;
   return {
     componentes, base, recaudacion, porTramo, porEscala, porPersonaEscala, cascada,
     pctPIB: (recaudacion / ESPANA.pib) * 100,
@@ -756,22 +770,22 @@ export function calcularEjemplo(e: Ejemplo, modo: Modo) {
 
   // Model: the same employer cost and the same basket of goods. Each tier's price
   // carries its rate instead of today's taxes (and, in the literal reading, the cascade).
-  const precioTramo = Object.fromEntries(tramos.map(t => [t, ((1 - INDIRECTOS_HOY[t]) / (1 - TRAMO[t].tipo)) * pais.cascada])) as Record<Tramo, number>;
+  const precioTramo = Object.fromEntries(tramos.map(t => [t, (1 - INDIRECTOS_HOY[t]) * (1 + TRAMO[t].tipo) * pais.cascada])) as Record<Tramo, number>;
   const gastoModeloTramo = Object.fromEntries(tramos.map(t => [t, gastoHoyTramo[t] * precioTramo[t]])) as Record<Tramo, number>;
   const gastoModelo = sumaGasto(gastoModeloTramo);
   const tipoSueldo = EMPLEADOR[e.empleador].tipo;
-  const sobreSueldo = costeTrabajo * tipoSueldo;
+  const sobreSueldo = costeTrabajo * fraccion(tipoSueldo);
   const netoModelo = costeTrabajo - sobreSueldo;
-  const sobreCompras = tramos.reduce((s, t) => s + gastoModeloTramo[t] * TRAMO[t].tipo, 0);
-  const oculto = pais.cascada > 1 ? tramos.reduce((s, t) => s + gastoModeloTramo[t] * (1 - TRAMO[t].tipo) * (1 - 1 / pais.cascada), 0) : 0;
+  const sobreCompras = tramos.reduce((s, t) => s + gastoModeloTramo[t] * fraccion(TRAMO[t].tipo), 0);
+  const oculto = pais.cascada > 1 ? tramos.reduce((s, t) => s + gastoModeloTramo[t] * (1 - fraccion(TRAMO[t].tipo)) * (1 - 1 / pais.cascada), 0) : 0;
   const aporta = sobreSueldo + sobreCompras + oculto;
   const dividendo = pais.porPersonaEscala;
   // The neighbourhood share goes to the household when there is no community.
   const parteFamilia = e.enComunidad ? 0 : pais.porPersonaEscala;
   const recibe = dividendo + parteFamilia;
   const modelo = [
-    { id: 'sueldo', nombre: `${porcentaje(tipoSueldo * 100, 0)} de lo que paga la empresa por su trabajo (${EMPLEADOR[e.empleador].corto.toLowerCase()})`, euros: sobreSueldo },
-    ...tramos.map(t => ({ id: `compras${t}`, nombre: `${porcentaje(TRAMO[t].tipo * 100, 0)} de sus compras del tramo ${t}`, euros: gastoModeloTramo[t] * TRAMO[t].tipo })),
+    { id: 'sueldo', nombre: `${porcentaje(tipoSueldo * 100, 0)} sobre su sueldo (empresa ${EMPLEADOR[e.empleador].corto.toLowerCase()})`, euros: sobreSueldo },
+    ...tramos.map(t => ({ id: `compras${t}`, nombre: `${porcentaje(TRAMO[t].tipo * 100, 0)} sobre sus compras del tramo ${t}`, euros: gastoModeloTramo[t] * fraccion(TRAMO[t].tipo) })),
     ...(oculto > 0 ? [{ id: 'cascada', nombre: 'Lo que llega escondido en los precios (compras entre empresas)', euros: oculto }] : []),
   ];
 

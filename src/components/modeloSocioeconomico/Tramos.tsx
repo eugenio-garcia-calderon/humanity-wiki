@@ -33,8 +33,8 @@ const PAGOS: { que: string; importe: number; tramo: Tramo; nota: string }[] = [
   { que: 'Un pan', importe: 2, tramo: 1, nota: 'comida' },
   { que: 'Una chaqueta', importe: 50, tramo: 2, nota: 'ropa' },
   { que: 'Una cena para dos', importe: 40, tramo: 3, nota: 'restaurante' },
-  { que: 'Un mes de trabajo en una empresa pequeña', importe: 2_000, tramo: 1, nota: 'lo que paga la empresa' },
-  { que: 'El mismo mes en una empresa grande', importe: 2_000, tramo: 3, nota: 'lo que paga la empresa' },
+  { que: 'Un sueldo de un mes en una empresa pequeña', importe: 2_000, tramo: 1, nota: 'sueldo' },
+  { que: 'El mismo sueldo en una empresa grande', importe: 2_000, tramo: 3, nota: 'sueldo' },
 ];
 
 export function CincoPagos() {
@@ -42,14 +42,14 @@ export function CincoPagos() {
   return (
     <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
       <table className="w-full min-w-[680px] text-sm tabular-nums">
-        <caption className="px-5 pt-5 text-left text-lg font-bold text-slate-900">Cinco pagos, de principio a fin</caption>
+        <caption className="px-5 pt-5 text-left text-lg font-bold text-slate-900">Cinco pagos, de principio a fin <span className="block text-sm font-normal text-slate-500">Precios y sueldos sin impuesto; el tramo se suma encima, como el IVA.</span></caption>
         <thead>
           <tr className="border-b border-slate-200 text-left text-slate-500">
             <th scope="col" className="px-5 py-2 font-medium">Pago</th>
             <th scope="col" className="px-4 py-2 font-medium">Tramo</th>
-            <th scope="col" className="px-4 py-2 text-right font-medium">Va al fondo</th>
-            <th scope="col" className="px-4 py-2 text-right font-medium">A cada una de las {ESCALAS.length} escalas</th>
-            <th scope="col" className="px-5 py-2 text-right font-medium">Le llega a quien cobra</th>
+            <th scope="col" className="px-4 py-2 text-right font-medium">Impuesto, al fondo</th>
+            <th scope="col" className="px-4 py-2 text-right font-medium">Se paga en total</th>
+            <th scope="col" className="px-5 py-2 text-right font-medium">A cada una de las {ESCALAS.length} escalas</th>
           </tr>
         </thead>
         <tbody>
@@ -62,8 +62,8 @@ export function CincoPagos() {
                 </th>
                 <td className="px-4 py-2.5"><span className={cn('rounded px-1.5 py-0.5 text-xs font-bold', TONO_TRAMO[p.tramo])}>{p.tramo}: {porcentaje(tipo(p.tramo) * 100, 0)}</span></td>
                 <td className="px-4 py-2.5 text-right font-semibold text-slate-900">{euros(fondo, fondo % 1 ? 2 : 0)}</td>
-                <td className="px-4 py-2.5 text-right text-slate-700">{euros(fondo * OCTAVO, 2)}</td>
-                <td className="px-5 py-2.5 text-right text-slate-700">{euros(p.importe - fondo, p.importe < 10 ? 2 : 0)}</td>
+                <td className="px-4 py-2.5 text-right text-slate-700">{euros(p.importe + fondo, p.importe < 10 ? 2 : 0)}</td>
+                <td className="px-5 py-2.5 text-right text-slate-700">{euros(fondo * OCTAVO, 2)}</td>
               </tr>
             );
           })}

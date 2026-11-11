@@ -1384,7 +1384,7 @@ Where he did not say, the page decides and says so (all in `src/data/modeloSocio
 - **Food, health and education are tier 1.** Asked; he gave no preference. Recommended option taken.
 - **Administrations pay 0 % on their own wages.** Taxing them would only move public money between scales. Alternative: treat them by size like any employer.
 - **Company size counted per group, EU thresholds (<50, 50–249, ≥250).** The page lists a marginal, IRPF-like version as an open path, because flat thresholds punish the 50th hire.
-- **The rate stays a share of the payment**, as the 20 % always was here: 40 % of a 40 € dinner goes to the fund. In VAT terms that is ≈ 67 % on top of the net price. Alternative: read the tiers as VAT-style rates on top. Not asked yet.
+- ~~The rate stays a share of the payment~~ → **2026-11-11, Eugenio: «como el IVA».** Every tier goes on top of the price without tax (a 40 € dinner costs 56 €, 16 € to the fund); wages too (employer pays wage + tier). The fund gets t/(1+t) of each payment: `fraccion()`. Same day: rates 10 / 25 / 40 % (wages too, by size; administrations 0 %; general rate 25 %). Default reading ≈ 17 % of GDP, 744 € per person and scale.
 - **Household spending by tier from EPF 2024 shares**, imputed rent (≈ 19 %, estimate) taken out; tourists' spending in Spain now counted (80 % of Egatur's 134.712 M€, mostly tier 3), since imputed rent no longer offsets it.
 - **Second home share 18 %** (Fotocasa: second residence 10 % + investment 8 %); **second vehicle ≈ 1,2 points** of household spending (estimate from census vehicle counts).
 - **Private wages by size 38/16/46 %** (Cifras PYME employment shares with higher pay in large firms; estimate). Public wages 181.494 M€ (IGAE via press).
@@ -1410,3 +1410,9 @@ Eugenio asked for a much more artistic version without any text, and a menu with
 - **Chosen: a second view on the same page**, `?vista=arte` (the default, so the parameter is omitted) and `?vista=esquema`, switched from a native `<select>` in the top band. The picture is a fixed, hand-drawn SVG (`VistaArtistica.tsx`) that reuses the head outline, the mesh patterns and the palette of the schema (`CABEZA`, `TINTES`). The schema and its saved map, history and editing are untouched.
 - **Cost:** editing the schema does not change the picture. If a concept is renamed or a fourth lane is added, the picture has to be redrawn by hand. Its only link to the map data is the «5 claves» lists, which it reads from the map, so editing them in the schema also changes the bulbs' windows.
 
+
+## 2026-11-11 — Pension tiers are partly estimated; budgets use each source's own items
+
+- No public July 2026 table gives every pension bracket. Chosen: real count for ≥ 3.300 € (July 2026), 2025's split around 1.000/1.500/2.000 € applied to 2026's total, tier averages estimated from bracket limits, and the bottom tier closing against the real payroll. Alternative (the INSS bracket table, by month) is better and should replace this when someone downloads it; the page labels the middle tiers «estimación».
+- Budgets show each scale's own items (Torrelodones by economic chapter, the family by EPF group) rather than forcing everything into six categories; the six categories are a separate comparison table where «—» means the scale does not pay for that.
+- Debt repayments (amortización) are off by default: they are refinanced, not spent, and at Spain's scale (230.693 M€) they would dwarf every real item. One click adds them.
