@@ -11068,6 +11068,8 @@ Eugenio pidió simplificarlo y reordenarlo. `public/observatorio-polarizacion/in
 - Data in the new `src/data/presupuestos.ts`; nine new sources in `FUENTES`; texts registered in the translation sweep.
 - Desktop nav (now 12 entries) shows in one row from 1700 px with a full-width header; below that, the scrolling row.
 
+### 2026-11-11 — Titular de luzhumanidad.com: optimizar los sistemas de la humanidad
+- `drizzle/0196_titular_sistemas.sql`: el titular pasa a «Impulsamos proyectos que optimizan los sistemas de la humanidad y resuelven sus grandes retos.» Traducciones en/pt subidas a la cola.
 ## 2026-11-11 — Triciclo Bala: tres filas de asientos que se pliegan, maletero que se abre y mucha más altura libre
 
 - Eugenio: «Permite que la altura libre sobre el suelo sea mucho mayor del triciclo bala. y añade asientos para los pasajeros que sean dobles… 3 filas… que todo eso se pueda plegar para poder luego tener maletero grande. Y luego haz… que se abra también el maletero».
