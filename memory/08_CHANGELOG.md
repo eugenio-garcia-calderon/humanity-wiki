@@ -11055,3 +11055,23 @@ Eugenio pidió simplificarlo y reordenarlo. `public/observatorio-polarizacion/in
   - el ancho de móvil.
 
   No hubo errores en la consola.
+
+
+## 2026-11-11 — Triciclo Bala: tres filas de asientos que se pliegan, maletero que se abre y mucha más altura libre
+
+- Eugenio: «Permite que la altura libre sobre el suelo sea mucho mayor del triciclo bala. y añade asientos para los pasajeros que sean dobles… 3 filas… que todo eso se pueda plegar para poder luego tener maletero grande. Y luego haz… que se abra también el maletero».
+- **Altura libre al suelo**: de 4 a 35 cm (antes, hasta 15,8). Hasta 15,8 cm solo se mueve la panza, como antes. Por encima, sube la carrocería entera con todo lo de dentro (bastidor, batería, asientos, ocupantes, manillar, aleta): la cabina no se encoge. Las ruedas y los carenados delanteros se quedan en el suelo; los brazos delanteros bajan inclinados de la carrocería al carenado y el basculante trasero se inclina. Con 35 cm y dos a bordo, el vuelco pasa de 1,09 g a 0,82 g: sale en rojo, y es verdad.
+- **Interior › Asientos**: nuevo selector «A horcajadas (2 plazas)» / «Tres filas: 1 + 2 + 1 (4 plazas)». A horcajadas sigue siendo el de por defecto y no cambia nada.
+  - Fila 1: el piloto solo, en un asiento de coche en el centro, con el manillar de siempre.
+  - Fila 2: dos asientos juntos (45 cm cada uno, 4 cm entre ellos).
+  - Fila 3: un asiento más pequeño (40 cm) en el centro.
+  - Bloque nuevo «Tres filas»: «Fila 2» y «Fila 3» (abierta o plegada, cada una por su lado), «Fila 2: caderas detrás de las del piloto» (60–85 cm), «Fila 3: caderas detrás de las de la fila 2» (55–80 cm) y «Reclinado de las filas 2 y 3» (−5° a 35°).
+  - Con tres filas, la carrocería tiene unos mínimos: 1,16 m de ancho (hombros de la fila 2), 1,56 m de cúpula (cabezas) y la batalla y la cúpula largas para que la fila 3 quepa delante del amortiguador trasero. Con las medidas de serie sale de 4,44 m de largo.
+- **Plegar**: el respaldo cae sobre el asiento y queda un suelo plano. Sus pasajeros dejan de contar en el peso, el vuelco y el consumo. En el 3D se ven plegados.
+- **Maletero**: litros en Interior y en Proyecto, para cada estado, y una línea en las comprobaciones. Con las medidas de serie: a horcajadas, 424 L detrás del pasajero; con tres filas, 854 L con todo abierto, 1178 con la fila 3 plegada, 1412 con la fila 2 plegada y 1927 con las dos. Es volumen geométrico hasta el techo de la cúpula, no el método oficial (VDA), que da un 15–25 % menos.
+- **«Abrir maletero»** junto a «Abrir cúpula», animado igual. La tapa es lo alto de la cola, detrás de la cúpula, con la bisagra en la punta de la cúpula; la aleta va en la tapa. También a horcajadas.
+- **Comprobaciones nuevas**: cabeza de la fila 2 y de la fila 3, hombros de la fila 2, rodillas contra el respaldo de delante, pies dentro de la carrocería y bajo el asiento de delante, respaldo de la fila 3 a la torreta del amortiguador. El vuelco, el peso, el bastidor y el consumo cuentan a todos los que van sentados.
+- Con tres filas y las medidas de serie quedan dos en rojo, de verdad: el vuelco con cuatro (0,88 g; con 2,20 m de vía sube a 1,08) y los largueros (×0,9; con tubos de 60 × 3,6 mm pasan).
+- **Arreglo de paso en el visor**: en una pantalla lenta, el 3D rápido de después de mover un deslizador llegaba más tarde que el completo y borraba a los ocupantes. Ahora el completo cancela el rápido pendiente.
+- **Sin cambios** en el Triciclo por defecto (mismos números que en main), ni en los diseños guardados, el Cuadriciclo, el Gota o el Aeromóvil 1.
+- **Comprobado** en Chromium sin cabeza a 1280×800, con WebGL por software: tres filas en 3/4, de lado y con «Rayos X»; todo plegado con la cúpula y el maletero abiertos; 35 cm de altura libre; el panel de comprobaciones. **No comprobado** en un móvil ni con la aplicación instalada.
