@@ -41,6 +41,12 @@
       "ruta": "scripts/tunel-pruebas.ts",
       "motivo": "Bala de cuatro ruedas",
       "desde": "2026-11-11T23:56:46.478Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/Disenos.tsx",
+      "motivo": "Bala de cuatro ruedas",
+      "desde": "2026-11-11T23:56:48.867Z"
     }
   ]
 }
