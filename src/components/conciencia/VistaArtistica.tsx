@@ -3,14 +3,16 @@
 // pero con símbolos, arte para que la gente lo entienda sin el lenguaje»).
 //
 // It is a fixed picture, not the editable map. Person 1 (magenta) on the left,
-// person 2 (orange) on the right, the lattice in the centre, and three lanes:
+// person 2 (orange) on the right, the lattice in the centre, and three lanes,
+// top to bottom (order set by Eugenio on 2026-11-11: sun, lotus, moon —
+// meditation sits between waking and sleep):
 //   sun   — awake: a voice leaves the mouth as a code of shapes, the air of the
 //           matrix vibrates, it reaches the ear and the other brain decodes it;
-//   moon  — asleep: both fields stretch out and merge in the hypercampo (∞),
-//           and dream images travel both ways;
 //   lotus — meditating: coherent waves and three beams of light — to the other
-//           mind (telepathy), to a nearby object (extraocular vision) and to a
-//           far landscape (remote vision).
+//           mind (telepathy, straight across), to a nearby object (extraocular
+//           vision) and to a far landscape (remote vision);
+//   moon  — asleep: both fields stretch out and merge in the hypercampo (∞),
+//           and dream images travel both ways.
 // The editable schema with words is one choice away in the «Vista» menu.
 //
 // No visible text on purpose. Screen readers get the description in a
@@ -36,7 +38,7 @@ const W = 1800, H = 1000;
 const S = 1.55;                                   // head scale
 const P1 = { x: 190, y: 500 }, P2 = { x: 1610, y: 500 };
 const MZ = { x: 900, y: 500, rx: 235, ry: 462 };  // the matrix
-const Y: Record<Canal, number> = { vigilia: 215, onirico: 515, meditacion: 815 };
+const Y: Record<Canal, number> = { vigilia: 215, meditacion: 515, onirico: 815 };
 const SOBRE = 88;                                 // medallion above its lane's flow
 
 /** A point of a head (mouth, ear, brain) in world units; offsets from MapaSintergico's profile. */
@@ -263,8 +265,8 @@ function Vigilia() {
 /** Asleep: both fields stretch out and merge in the hypercampo; dreams travel both ways. */
 function Onirico() {
   const y = Y.onirico;
-  const d1 = `M${f(CEREBRO_1.x)},${f(CEREBRO_1.y)} C290,420 370,505 450,${y}`;
-  const d2 = `M${f(CEREBRO_2.x)},${f(CEREBRO_2.y)} C1510,420 1430,505 1350,${y}`;
+  const d1 = `M${f(CEREBRO_1.x)},${f(CEREBRO_1.y)} C230,640 330,${y} 450,${y}`;
+  const d2 = `M${f(CEREBRO_2.x)},${f(CEREBRO_2.y)} C1570,640 1470,${y} 1350,${y}`;
   const inf = lemniscata(900, y, 100);
   const suenos: { forma: ReactNode; color: string }[] = [
     { forma: <path d={estrella(7)} fill={LUZ} />, color: LUZ },
@@ -280,11 +282,11 @@ function Onirico() {
       <Haz d={d2} color={CORAL} />
 
       {/* Each dreamer's field reaches out across the matrix… */}
-      <g className="va-respira-x" style={{ transformOrigin: '440px 515px' }}>
+      <g className="va-respira-x" style={{ transformOrigin: `440px ${y}px` }}>
         <ellipse cx={690} cy={y} rx={250} ry={80} fill={`url(#va-malla-${idc(ROSA)})`} mask="url(#va-fundido)" />
         <ellipse cx={690} cy={y} rx={250} ry={80} fill={`url(#va-rg-${idc(ROSA)})`} opacity={0.2} />
       </g>
-      <g className="va-respira-x" style={{ transformOrigin: '1360px 515px', animationDelay: '-3s' }}>
+      <g className="va-respira-x" style={{ transformOrigin: `1360px ${y}px`, animationDelay: '-3s' }}>
         <ellipse cx={1110} cy={y} rx={250} ry={80} fill={`url(#va-malla-${idc(CORAL)})`} mask="url(#va-fundido)" />
         <ellipse cx={1110} cy={y} rx={250} ry={80} fill={`url(#va-rg-${idc(CORAL)})`} opacity={0.2} />
       </g>
@@ -329,11 +331,12 @@ function Onirico() {
 /** Meditating: coherent waves, and three beams of direct perception. */
 function Meditacion() {
   const y = Y.meditacion;
-  const d1 = `M${f(CEREBRO_1.x)},${f(CEREBRO_1.y)} C230,640 300,${y} 440,${y}`;
-  const telepatia = `M930,${y} C1150,805 1420,640 ${f(CEREBRO_2.x - 6)},${f(CEREBRO_2.y + 10)}`;
-  const extraocular = `M930,${y + 5} C1040,840 1140,898 1248,904`;
-  const remota = `M930,${y + 10} C1150,905 1420,965 1590,905`;
-  const OBJ = { x: 1290, y: 905 }, LEJOS = { x: 1668, y: 902 };
+  const d1 = `M${f(CEREBRO_1.x)},${f(CEREBRO_1.y)} C290,440 360,${y} 440,${y}`;
+  // In the middle lane the two brains are level: telepathy goes straight across.
+  const telepatia = `M930,${y} C1130,${y - 8} 1400,${y - 36} ${f(CEREBRO_2.x - 6)},${f(CEREBRO_2.y + 10)}`;
+  const OBJ = { x: 1250, y: y + 85 }, LEJOS = { x: 1675, y: y + 268 };
+  const extraocular = `M930,${y + 5} C1030,${y + 20} 1120,${y + 72} ${OBJ.x - 42},${OBJ.y}`;
+  const remota = `M930,${y + 10} C1150,${y + 92} 1420,${y + 292} ${LEJOS.x - 78},${LEJOS.y + 4}`;
   return (
     <g>
       <Haz d={d1} color={VIOLETA} />
@@ -350,7 +353,7 @@ function Meditacion() {
       </g>
 
       {/* The point of stillness in the matrix */}
-      <Ondas x={900} y={y} color={VIOLETA} rx={120} ry={120} dur={4.5} />
+      <Ondas x={900} y={y} color={VIOLETA} rx={160} ry={72} dur={4.5} />
       <circle cx={900} cy={y} r={40} fill={`url(#va-rg-${idc(LUZ)})`} className="va-latido" />
       <path d={estrella(13)} transform={`translate(900,${y})`} fill={BLANCO} />
 
@@ -406,8 +409,8 @@ function Meditacion() {
 
 const CARRILES: { canal: Canal; color: string; alto: number; nombre: string; Dibujo: typeof Vigilia }[] = [
   { canal: 'vigilia', color: ORO, alto: 210, nombre: 'Despiertos: por los sentidos', Dibujo: Vigilia },
-  { canal: 'onirico', color: AZUL, alto: 210, nombre: 'Dormidos: por el hipercampo', Dibujo: Onirico },
   { canal: 'meditacion', color: VIOLETA, alto: 240, nombre: 'Meditando: percepción directa', Dibujo: Meditacion },
+  { canal: 'onirico', color: AZUL, alto: 210, nombre: 'Dormidos: por el hipercampo', Dibujo: Onirico },
 ];
 
 export function VistaArtistica({ mapa, foco, onFoco, onClaves, className }: {
@@ -461,9 +464,9 @@ export function VistaArtistica({ mapa, foco, onFoco, onClaves, className }: {
       <p className="sr-only">
         Dibujo sin palabras de la teoría sintérgica. A la izquierda, una persona (magenta); a la derecha, otra (naranja); en el centro,
         la matriz del universo. Arriba, con el sol, despiertos: la voz sale de la boca como un código de formas, hace vibrar el aire de
-        la matriz, llega al oído y el otro cerebro la descifra. En medio, con la luna, dormidos: los dos campos se extienden y se unen en
-        el hipercampo (∞) y las imágenes de los sueños viajan en los dos sentidos. Abajo, con el loto, meditando: ondas coherentes y tres
-        rayos de luz: a la mente del otro (telepatía), a un objeto cercano (visión extraocular) y a un paisaje lejano (visión remota).
+        la matriz, llega al oído y el otro cerebro la descifra. En medio, con el loto, meditando: ondas coherentes y tres rayos de luz: a
+        la mente del otro (telepatía), a un objeto cercano (visión extraocular) y a un paisaje lejano (visión remota). Abajo, con la luna,
+        dormidos: los dos campos se extienden y se unen en el hipercampo (∞) y las imágenes de los sueños viajan en los dos sentidos.
       </p>
       <div
         ref={caja}

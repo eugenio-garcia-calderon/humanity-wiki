@@ -11003,6 +11003,12 @@ Eugenio: «permite que el triciclo bala se le pueda modificar más los parámetr
     - Ilustración: de 8,5 a 8,8, tras dos rondas de arreglos (mirada de los niños, pelo de la niña, orejas, cuellos sin raya, dedos, estela que nace en la pantalla).
     - El resto de meses sigue con las figuras de `extra_m678.py`; `figuras_v3.py` se puede usar en ellos si se pide.
 
+## 2026-11-11 — Conciencia: orden del dibujo, sol · loto · luna
+
+- Eugenio: «pon arriba la parte del Sol, en el medio la de meditación (loto) y abajo la de Luna (dormidos)». La meditación queda entre la vigilia y el sueño, como en la teoría.
+- En el camino del medio los dos cerebros están a la misma altura, así que la telepatía va casi en línea recta de una mente a la otra. El objeto (visión extraocular) queda justo debajo del camino y las montañas (visión remota), abajo a la derecha. Los caminos del sueño bajan desde los dos cerebros.
+- Solo cambia el dibujo. El esquema con texto mantiene su orden (vigilia, sueño, meditación).
+- Comprobado en Chrome sin cabeza a 1440 px y a 390 px. No hubo errores en la consola.
 ### 2026-11-11 — Observatorio de Polarización en luzhumanidad.com
 
 Eugenio: «publícalo en Luzhumanidad como "Observatorio de Polarización"».
