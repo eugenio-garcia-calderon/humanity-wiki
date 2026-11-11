@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "memory/03_DECISIONS.md",
+      "motivo": "Triciclo: tres filas y maletero",
+      "desde": "2026-11-11T21:14:05.234Z"
+    }
+  ]
 }
