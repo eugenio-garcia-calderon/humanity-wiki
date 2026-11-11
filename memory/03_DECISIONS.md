@@ -1445,3 +1445,28 @@ Dependent ranges, all measured on this model:
 - Rejected: **a clamshell of the whole tail.** The rear wheel and its arch live in the lower tail.
 - Rejected: **a lid ending ahead of the fin.** Too short to load anything.
 - The lid takes cells out of the body's index list but not its vertices, so the "body = Cuadriciclo, vertex for vertex" check still holds, with 'porton' and 'junta-porton' as new meshes. The viewer registers it as a `tipo: 'maletero'` door, the same mechanism as the Aeromóvil 1's boots.
+
+## 2026-11-11 — Bala de cuatro ruedas: a Triciclo option, not a fifth vehicle; rear pods through a view of the shape
+
+**Request.** Eugenio: the Triciclo Bala «pero esta vez que tenga 4 ruedas… con las mismas medidas que están ahora guardadas en el triciclo».
+
+**Decision: one optional field, not a new `disposicion`.**
+- `tTraseras: 'una' | 'dos'` (missing = `'una'`) and `tViaTras`.
+- A saved Triciclo without `tViaTras` gets its own `tVia` (in `deDiseno` and in `camposTriciclo`). The page also copies the front track when the selector switches to `'dos'`.
+- Every other `t…` measure carries over, which is exactly «las mismas medidas».
+- Rejected: **a new `disposicion: 'cuatro-bala'`.** It would duplicate ~70 slider rows, the model, the page panel and the scripts, and the two would drift apart.
+- With `'una'`, `scripts/triciclo-disenos.ts` now also checks every mesh of the whole vehicle against main, vertex for vertex.
+
+**Rear pods through a view of the shape (`formaTrasera`).**
+- All the pod code (`podDe`, `brazosDe`, `carenadoCuerpo`, `neumaticoCarenado`, the 3D `carenados`) reads the «wheel in a pod» from `F.X_LAT`, `F.R_LAT`, `F.ANCHO_NEU_LAT`, `F.VIA_LAT` and `F.D`.
+- The rear pods are that same code, handed `{ ...F, X_LAT: −batalla, R_LAT: rTras, … }`. The body's closures are shared, so the view sees the same body.
+- One addition to `DimBala`, `vientreBrazos`: the tail sweeps up at the rear axle, so an arm meets the body at least 5.6 cm above the belly there. The Cuadriciclo never sets it, and `bala-huella` stays IGUAL.
+- Rejected: **a second copy of the pod builder for the rear.** Same numbers, twice the code.
+- Rejected: **stretching the front pods' parameters.** They steer, and the rear ones must not. The rear pods are named `carenado-trasero`, with no `lado`, so the viewer never turns them.
+
+**Numbers.**
+- **Rollover:** `SSF = (tF·b + tR·(1−b)) / 2h`, where `b` is the front axle's load share. This is the track under the centre of gravity on the line from the front outer wheel to the rear outer wheel. With `tR = 0` it reduces to the tadpole formula, so one rear wheel gives the same number.
+- **Rolling resistance:** stays `Crr·m·g`. An extra wheel only adds its mass; rolling drag is proportional to load, not to wheel count. The Cd changes because the tunnel sees two more `carenado` wheels.
+- **Motors:** two hub motors at half power each, by the same kg/kW rule. The `tMMotor` slider is both together, with a range of `[2·(3 + 0.45·p/2), 2·(8 + 0.9·p/2)]`. The stored value is kept: «mismas medidas».
+- **Rear track minimum:** the narrowest track whose rear pods clear the tail by 3 cm (`viaTraseraMinima`, cached per shape). It is a slider range, not a silent raise like the front's `viaSubida`. The rear pods do not steer, so nothing moves into the body.
+- **Frame:** unchanged. The rear arms meet the skin at the rear axle, as the front arms meet it at the cradle. See tech debt.

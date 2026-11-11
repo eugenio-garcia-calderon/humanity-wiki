@@ -14,13 +14,15 @@
  */
 import { PARAMETROS_TRICICLO, areas, calcular, crearModelo, type Parametros } from '../src/components/aeromovil/geometria';
 import { SELECTORES_TRICICLO, camposTriciclo, deslizadoresTriciclo, estirarTriciclo, largoTriciclo, rangoTriciclo, type ModeloTriciclo } from '../src/components/aeromovil/geometriaTriciclo';
+import { carenadoCuerpo } from '../src/components/aeromovil/geometriaBala';
+import { alturasPod, brazosDe, podDe, semiAncho } from '../src/components/aeromovil/garaje/balaMedidas';
 import { construirCon, crearMateriales } from '../src/components/aeromovil/garaje/balaModelo';
 import * as THREE from 'three';
 
 const M = crearMateriales();
 let fallos = 0, casos = 0;
 /** What must never poke through (a clearance below zero is a failure here). */
-const NO_PASAN = ['Neumático delantero', 'Carenado delantero a la carrocería', 'Rueda trasera dentro', 'Manillar dentro', 'Bastidor dentro', 'Batería, ', 'Controlador dentro', 'Pies de la fila 2 dentro', 'Pies de la fila 3 dentro', 'Respaldo de la fila 3 a la torreta'];
+const NO_PASAN = ['Neumático delantero', 'Carenado delantero a la carrocería', 'Neumático trasero', 'Carenado trasero a la carrocería', 'Rueda trasera dentro', 'Manillar dentro', 'Bastidor dentro', 'Batería, ', 'Controlador dentro', 'Pies de la fila 2 dentro', 'Pies de la fila 3 dentro', 'Respaldo de la fila 3 a la torreta'];
 
 function cruzan(a: number[], b: number[], c: number[], d: number[]) {
   const o = (p: number[], q: number[], r: number[]) => (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]);
@@ -47,7 +49,7 @@ function pielSana(m: ModeloTriciclo): string | null {
 /** Each front pod's group and its wheel's group stand on the same vertical axis (x, z), so they turn together. */
 function mismoEje(m: ModeloTriciclo): string | null {
   // (built as the viewer builds it: since round three with the boot lid apart and, with three rows, their seats)
-  const g = construirCon(m.F, { M, calidad: 'rapida', cupulaAparte: true, asientos: m.sillines, aleta: m.aleta, triciclo: { recPil: m.rec.piloto, recPas: m.rec.pasajero, man: m.man, pies: m.pies, faldon: m.faldon, ventanas: m.opcVentanas, maletero: true, ...(m.filas ? { filas: m.asientosFilas } : {}) } });
+  const g = construirCon(m.F, { M, calidad: 'rapida', cupulaAparte: true, asientos: m.sillines, aleta: m.aleta, triciclo: { recPil: m.rec.piloto, recPas: m.rec.pasajero, man: m.man, pies: m.pies, faldon: m.faldon, ventanas: m.opcVentanas, maletero: true, ...(m.filas ? { filas: m.asientosFilas } : {}), traseras: m.traseras } });
   const pods: THREE.Object3D[] = [], ruedas: THREE.Object3D[] = [];
   g.traverse(o => { if (o.name === 'carenado' && o.userData.lado) pods.push(o); if (o.name === 'rueda-direccion') ruedas.push(o); });
   if (pods.length !== 2 || ruedas.length !== 2) return `${pods.length} carenados y ${ruedas.length} ruedas que giran (deberían ser 2 y 2)`;
@@ -57,6 +59,15 @@ function mismoEje(m: ModeloTriciclo): string | null {
   }
   let delantera = 0; g.traverse(o => { if (o.name === 'rueda-delantera') delantera++; });
   if (delantera) return 'hay una rueda delantera central';
+  // four wheels (2026-11-11): two rear wheels, each in a rear pod on its own axis (they do not steer), and no spat
+  let traseras = 0, podsT = 0; const ejesT: string[] = [], ejesP: string[] = [];
+  g.traverse(o => {
+    if (o.name === 'rueda-trasera') { traseras++; ejesT.push(`${o.position.x.toFixed(6)},${o.position.z.toFixed(6)}`); }
+    if (o.name === 'carenado-trasero') { podsT++; ejesP.push(`${o.position.x.toFixed(6)},${o.position.z.toFixed(6)}`); if (o.userData.lado) return; }
+  });
+  if (traseras !== (m.cuatro ? 2 : 1) || podsT !== (m.cuatro ? 2 : 0)) return `${traseras} ruedas traseras y ${podsT} carenados traseros (deberían ser ${m.cuatro ? '2 y 2' : '1 y 0'})`;
+  if (m.cuatro && ejesT.sort().join(' ') !== ejesP.sort().join(' ')) return 'un carenado trasero no está centrado en su rueda';
+  if (m.cuatro && g.getObjectByName('faldon')) return 'hay faldón sin rueda en la cola';
   // round three: the boot lid hangs from its own pivot, with the fin on it
   const porton = g.getObjectByName('porton-maletero');
   if (!porton || !porton.getObjectByName('porton') || !porton.getObjectByName('aleta')) return 'falta la tapa del maletero (o la aleta no va en ella)';
@@ -64,6 +75,31 @@ function mismoEje(m: ModeloTriciclo): string | null {
   let asientos = 0, plegados = 0; g.traverse(o => { if (o.name === 'asiento') asientos++; if (o.name === 'respaldo-plegado') plegados++; });
   const esperados = m.filas ? 4 : 0, plegEsperados = m.asientosFilas.filter(a => a.plegado).length;
   if (asientos !== esperados || plegados !== plegEsperados) return `${asientos} asientos de coche (${plegados} plegados); deberían ser ${esperados} (${plegEsperados})`;
+  return null;
+}
+
+/**
+ * Four wheels (2026-11-11): the rear pods never intersect the body. Apart from the check on screen (3 cm, the pod's
+ * inner face against the tail along its length and up its height), here: its whole outline at 20 heights and 40
+ * stations, inner and outer face, must be outside the body (the body's half-width there below the pod's inner face),
+ * and both arms must meet the skin (an arm whose root falls under the belly or past the tail would hang in the air).
+ */
+function podsTraseros(m: ModeloTriciclo): string | null {
+  const Ft = m.traseras!, POD = podDe(Ft), ancho = semiAncho(POD), zp = Ft.VIA_LAT / 2;
+  let h = 9;
+  for (let i = 0; i <= 40; i++) {
+    const xr = POD[0].x + (POD[POD.length - 1].x - POD[0].x) * i / 40, alt = alturasPod(POD, xr); if (!alt) continue;
+    for (let j = 0; j <= 20; j++) {
+      const y = alt[0] + (alt[1] - alt[0]) * j / 20, w = ancho(xr, y), zb = m.F.ladoZ(Ft.X_LAT + xr, y);
+      if (Number.isFinite(zb)) h = Math.min(h, zp - w - zb);
+    }
+  }
+  if (!(h > 0) || !(carenadoCuerpo(Ft) > 0)) return `un carenado trasero toca la carrocería (${(Math.min(h, carenadoCuerpo(Ft)) * 100).toFixed(1)} cm)`;
+  for (const b of brazosDe(Ft)) {
+    const z0 = m.F.ladoZ(Ft.X_LAT + b.x, b.yCuerpo);
+    if (!Number.isFinite(z0)) return `un brazo trasero no llega a la carrocería (a ${(b.yCuerpo * 100).toFixed(0)} cm de alto)`;
+    if (!(z0 < zp - 0.02)) return 'un brazo trasero nace fuera de su carenado';
+  }
   return null;
 }
 
@@ -75,13 +111,14 @@ function probar(nombre: string, P: Parametros) {
   const piel = pielSana(m); if (piel) mal.push(piel);
   for (const c of res.comprobaciones) if (NO_PASAN.some(n => c.nombre.startsWith(n)) && !(c.holgura >= 0)) mal.push(`${c.nombre}: ${(c.holgura * 100).toFixed(1)} cm`);
   try { const e = mismoEje(m); if (e) mal.push(e); } catch (e) { mal.push(`el 3D falla: ${(e as Error).message}`); }
+  if (m.traseras) { const e = podsTraseros(m); if (e) mal.push(e); }
   const t = res.triciclo!, cab = t.cabezas.map(c => `${c.quien} ${(c.p50 * 100).toFixed(1)}/${(c.p95 * 100).toFixed(1)}`).join(', ');
   // round three: the boot is never negative, and folding a row never shrinks it
   const e = t.maletero.estados.map(x => x.litros);
   if (e.some(v => !(v >= 0))) mal.push(`maletero sin sentido: ${e.map(Math.round).join(' / ')} L`);
   if (m.filas && !(e[1] >= e[0] - 1 && e[2] >= e[0] - 1 && e[3] >= Math.max(e[1], e[2]) - 1)) mal.push(`plegar una fila no agranda el maletero: ${e.map(Math.round).join(' / ')} L`);
   const alc = res.comprobaciones.find(c => c.nombre.startsWith('Manos'))!;
-  console.log(`${mal.length ? 'FALLA' : 'OK   '} ${nombre.padEnd(46)} vuelco ${t.vuelco.ssf.toFixed(2)} g · cabezas ${cab} cm · alcance ${(alc.holgura * 100).toFixed(1)} cm · vía ${m.F.VIA_LAT.toFixed(2)}${t.viaSubida ? ' (subida)' : ''} · maletero ${Math.round(t.maletero.ahora)} L${mal.length ? '\n        ' + mal.join('\n        ') : ''}`);
+  console.log(`${mal.length ? 'FALLA' : 'OK   '} ${nombre.padEnd(46)}${m.traseras ? ` vía tras. ${m.traseras.VIA_LAT.toFixed(2)} · carenado tras. ${(carenadoCuerpo(m.traseras) * 100).toFixed(1)} cm ·` : ''} vuelco ${t.vuelco.ssf.toFixed(2)} g · cabezas ${cab} cm · alcance ${(alc.holgura * 100).toFixed(1)} cm · vía ${m.F.VIA_LAT.toFixed(2)}${t.viaSubida ? ' (subida)' : ''} · maletero ${Math.round(t.maletero.ahora)} L${mal.length ? '\n        ' + mal.join('\n        ') : ''}`);
   if (mal.length) fallos++;
 }
 
@@ -171,6 +208,46 @@ probar('tres filas, 35 cm y grande', { ...FILAS, ...GRANDE, tSuelo: 0.35 } as Pa
 {
   const lg = largoTriciclo(TF);
   for (const [n, v] of [['mín.', lg.min], ['máx.', lg.max]] as const) probar(`tres filas, largo total ${n} (${v.toFixed(2)} m)`, { ...FILAS, ...estirarTriciclo(TF, v) });
+}
+
+// ── four wheels (2026-11-11): «Bala de cuatro ruedas», the same Triciclo with two rear wheels in pods
+const CUATRO = { ...PARAMETROS_TRICICLO, tTraseras: 'dos' } as Parametros;
+const T4 = camposTriciclo(CUATRO);
+const conVia = (P: Parametros, lado: 0 | 1) => ({ ...P, tViaTras: rangoTriciclo('tViaTras', camposTriciclo(P))[lado] } as Parametros);
+probar('cuatro ruedas por defecto', CUATRO);
+for (const f of deslizadoresTriciclo()) {
+  const [a, b] = rangoTriciclo(f.clave, T4);
+  probar(`cuatro · ${f.clave} = ${+a.toFixed(3)} (mín.)`, { ...CUATRO, [f.clave]: a });
+  probar(`cuatro · ${f.clave} = ${+b.toFixed(3)} (máx.)`, { ...CUATRO, [f.clave]: b });
+}
+for (const s of SELECTORES_TRICICLO) for (const o of s.opciones) probar(`cuatro · ${s.clave} = ${o.k}`, { ...CUATRO, [s.clave]: o.k });
+// every rear wheel at both ends of the rear track, with the pods at their smallest and largest, low and at 35 cm
+for (const r of SELECTORES_TRICICLO.find(s => s.clave === 'tRuedaTras')!.opciones.map(o => o.k)) for (const lado of [0, 1] as const) {
+  const n = `rueda trasera ${r}, vía trasera ${lado ? 'máx.' : 'mín.'}`;
+  probar(`cuatro · ${n}`, conVia({ ...CUATRO, tRuedaTras: r } as Parametros, lado));
+  probar(`cuatro · ${n}, carenados grandes`, conVia({ ...CUATRO, ...extremo(1, CARENADOS), tRuedaTras: r, tTraseras: 'dos' } as Parametros, lado));
+  probar(`cuatro · ${n}, carenados pequeños`, conVia({ ...CUATRO, ...extremo(0, CARENADOS), tRuedaTras: r, tTraseras: 'dos' } as Parametros, lado));
+  probar(`cuatro · ${n}, 35 cm`, conVia({ ...CUATRO, tRuedaTras: r, tSuelo: 0.35 } as Parametros, lado));
+  probar(`cuatro · ${n}, panza al mínimo`, conVia({ ...CUATRO, tRuedaTras: r, tSuelo: 0.04 } as Parametros, lado));
+}
+const FILAS4 = { ...CUATRO, tAsientos: 'filas' } as Parametros;
+for (const lado of [0, 1] as const) {
+  const v = lado ? 'máx.' : 'mín.';
+  probar(`cuatro · vía trasera ${v}, tres filas`, conVia(FILAS4, lado));
+  probar(`cuatro · vía trasera ${v}, tres filas plegadas`, conVia({ ...FILAS4, tFila2: 'plegada', tFila3: 'plegada' } as Parametros, lado));
+  probar(`cuatro · vía trasera ${v}, 35 cm, lo más ancho`, conVia({ ...CUATRO, tSuelo: 0.35, tAncho: 1.30 }, lado));
+  probar(`cuatro · vía trasera ${v}, 35 cm, tres filas, lo más ancho`, conVia({ ...FILAS4, tSuelo: 0.35, tAncho: 1.30 }, lado));
+  probar(`cuatro · vía trasera ${v}, grande, ruedas de 15″`, conVia({ ...CUATRO, ...GRANDE } as Parametros, lado));
+  probar(`cuatro · vía trasera ${v}, grande y 35 cm`, conVia({ ...CUATRO, ...GRANDE, tSuelo: 0.35 } as Parametros, lado));
+  probar(`cuatro · vía trasera ${v}, grande y bajo`, conVia({ ...CUATRO, ...GRANDE, ...BAJO } as Parametros, lado));
+  probar(`cuatro · vía trasera ${v}, toda la forma al mínimo`, conVia({ ...extremo(0, FORMA), tTraseras: 'dos' } as Parametros, lado));
+  probar(`cuatro · vía trasera ${v}, toda la forma al máximo`, conVia({ ...extremo(1, FORMA), tTraseras: 'dos' } as Parametros, lado));
+  probar(`cuatro · vía trasera ${v}, cola corta y batalla corta, ruedas de 28″`, conVia({ ...CUATRO, tCola: 0.45, tBatalla: 2.20, tRuedaTras: '28' } as Parametros, lado));
+  probar(`cuatro · vía trasera ${v}, 60 kW`, conVia({ ...CUATRO, tKWNom: 30, tKWPico: 60, tRuedaTras: 'c15' } as Parametros, lado));
+}
+{
+  const lg = largoTriciclo(T4);
+  for (const [n, v] of [['mín.', lg.min], ['máx.', lg.max]] as const) probar(`cuatro · largo total ${n} (${v.toFixed(2)} m)`, { ...CUATRO, ...estirarTriciclo(T4, v) });
 }
 
 console.log(`\n${casos} casos, ${fallos ? `${fallos} con fallos` : 'todos OK'}`);

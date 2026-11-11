@@ -11088,3 +11088,17 @@ Eugenio pidió simplificarlo y reordenarlo. `public/observatorio-polarizacion/in
 - **Arreglo de paso en el visor**: en una pantalla lenta, el 3D rápido de después de mover un deslizador llegaba más tarde que el completo y borraba a los ocupantes. Ahora el completo cancela el rápido pendiente.
 - **Sin cambios** en el Triciclo por defecto (mismos números que en main), ni en los diseños guardados, el Cuadriciclo, el Gota o el Aeromóvil 1.
 - **Comprobado** en Chromium sin cabeza a 1280×800, con WebGL por software: tres filas en 3/4, de lado y con «Rayos X»; todo plegado con la cúpula y el maletero abiertos; 35 cm de altura libre; el panel de comprobaciones. **No comprobado** en un móvil ni con la aplicación instalada.
+
+## 2026-11-11 — Bala de cuatro ruedas: el Triciclo Bala con dos ruedas detrás
+
+Eugenio: «Haz un vehículo igual que el triciclo bala, pero esta vez que tenga 4 ruedas… con las mismas medidas que están ahora guardadas en el triciclo».
+
+- **Un selector nuevo en Rodaje, «Ruedas traseras»**: «Una en la cola (triciclo)» o «Dos en carenados (cuatro ruedas)». Con dos, el vehículo se llama **«Bala de cuatro ruedas»** en todas partes (cabecera, título de la pestaña, rótulo de arriba del 3D, textos de los departamentos, túnel, comparaciones). Con una, todo sigue exactamente igual.
+- No es un vehículo nuevo: es un diseño del Triciclo con `tTraseras: 'dos'`, así que **todas las demás medidas son las del triciclo**. El diseño «Bala de cuatro ruedas» del equipo lo añade la migración de la sesión principal, copiando las medidas guardadas del Triciclo.
+- **Detrás**: la rueda de la cola y su basculante desaparecen. Van dos ruedas fuera, cada una en un carenado igual que los de delante (mismos deslizadores de tamaño, anchura, cola y brazo), sobre dos brazos carenados, en el eje trasero. **No giran**: solo giran las de delante, y el radio de giro no cambia.
+- **«Vía trasera»** (deslizador nuevo, solo con dos ruedas): de lo justo para que los carenados queden a 3 cm de la cola (0,95 m con las medidas de serie) a 2,40 m. De serie, la de delante.
+- **Motor**: uno en el buje de cada rueda trasera, cada uno con la mitad de la potencia. «Motores de buje (los dos)» es la masa de los dos juntos y su rango es el de dos motores de media potencia (10,5–25 kg con 10 kW). La comprobación «Motor de buje» mira la potencia por rueda (5 de 12 kW).
+- **Cifras de serie, tres ruedas → cuatro**: masa 178 → 190 kg; Cd del túnel 0,134 → 0,157; consumo a 80 km/h 2,45 → 2,69 kWh/100 km; autonomía 330 → 301 km; **vuelco con dos 1,09 → 1,68 g** (con el piloto solo 1,34 → 1,88); maletero 424 → 492 L (con tres filas, todas plegadas, 1908 → 1977 L).
+- **El vuelco** se calcula con la fórmula de cuatro ruedas: la vía media bajo el centro de gravedad entre (2 × su altura).
+- **El faldón y el basculante** no existen con dos ruedas: sus deslizadores se quedan apagados.
+- **Comprobado** en Chromium sin cabeza a 1280×800 con WebGL por software: la Bala de cuatro ruedas en 3/4, de lado, desde atrás y en 3/4 trasero; los paneles de Rodaje y Proyecto; el Triciclo sigue con tres ruedas. **No comprobado** en un móvil ni con la aplicación instalada.
