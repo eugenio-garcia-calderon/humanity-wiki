@@ -1400,3 +1400,13 @@ Eugenio asked that anyone with the link can add reference pictures to each month
 - **Keep using the PUT for adding.** Rejected for the reason above.
 - **Version check on the PUT (409 and reload).** Safe, but makes someone adding a photo fight a conflict they did not cause.
 - **Chosen: `POST …/:mes/referencias` appends one picture in a single SQL statement** (`referencias || nueva`, skipped if the same URL is already there, refused with 409 at 200 pictures) and returns the whole folder, so the tab also sees what others added. The folder view's «Añadir …» buttons use it too. The PUT stays for removing and for notes. Those still rewrite the list, but they are rarer and happen inside the folder view, where the list on screen is what the person is acting on.
+
+## 2026-11-11 — Consciousness map: the artistic view is a `?vista=` value, drawn by hand, not generated from the map data
+
+Eugenio asked for a much more artistic version without any text, and a menu with both views so the previous work is not lost.
+
+- **A new page** (`/conciencia-arte`). Rejected: it is the same theory in a different shape, which `src/pages/CLAUDE.md` says is a view, not a place. It would also need a second site page in luzhumanidad.com.
+- **Hide the text of the editable map.** Rejected: the schema is boxes and arrows, and taking the words away leaves boxes, not symbols.
+- **Chosen: a second view on the same page**, `?vista=arte` (the default, so the parameter is omitted) and `?vista=esquema`, switched from a native `<select>` in the top band. The picture is a fixed, hand-drawn SVG (`VistaArtistica.tsx`) that reuses the head outline, the mesh patterns and the palette of the schema (`CABEZA`, `TINTES`). The schema and its saved map, history and editing are untouched.
+- **Cost:** editing the schema does not change the picture. If a concept is renamed or a fourth lane is added, the picture has to be redrawn by hand. Its only link to the map data is the «5 claves» lists, which it reads from the map, so editing them in the schema also changes the bulbs' windows.
+

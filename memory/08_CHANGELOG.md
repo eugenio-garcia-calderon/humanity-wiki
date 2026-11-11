@@ -10964,6 +10964,33 @@ Eugenio: «permite que el triciclo bala se le pueda modificar más los parámetr
 - Imagen de la tarjeta de luzhumanidad.com regenerada con el mapa simplificado.
 - **Comprobado** en Chrome sin cabeza con Postgres local: abrir la ventana desde el mapa y desde las tarjetas, cerrarla con Escape, el botón que lanza la animación, editar una sexta clave conservando saltos y espacios, el guardado (el servidor recorta) y la animación de la vigilia.
 
+## 2026-11-11 — Conciencia: vista «Arte (sin palabras)» y menú de vistas
+
+- Eugenio: «hazlo mucho más artístico sin nada de texto, pero con símbolos, arte para que la gente lo entienda sin el lenguaje. Haz arriba en el menú un desplegable con las dos vistas, la nueva y la anterior, para que no se pierda el trabajo».
+- **Vista nueva, por defecto** (`VistaArtistica.tsx`): un dibujo animado sin una sola palabra. Persona 1 (magenta) a la izquierda, persona 2 (naranja) a la derecha y la matriz en el centro, con un medallón por cada estado:
+  - **Sol**, despiertos, rodeado de los cinco sentidos. La voz sale de la boca como un código de formas (○ △ □), el aire de la matriz vibra en ondas de presión, llega al oído y las formas se convierten en luz cerca del otro cerebro.
+  - **Luna**, dormidos. Los dos campos se estiran y se unen en un ∞ (el hipercampo), y las imágenes de los sueños viajan hacia los dos lados.
+  - **Loto**, meditando. Tres ondas acompasadas (coherencia) y tres rayos de luz: a la mente del otro (telepatía), a un objeto que percibe una mano con un ojo (visión extraocular) y a unas montañas lejanas (visión remota).
+- Al pinchar un camino, los otros dos se apagan; al pinchar el cielo o pulsar Escape, vuelven. La bombilla de cada camino abre sus «5 claves».
+- En el móvil el dibujo mantiene toda la altura y se desliza de lado, de una persona a la otra. Una mano animada lo indica hasta que se desliza por primera vez.
+- Los lectores de pantalla reciben la descripción en un párrafo oculto y el nombre de cada camino. No se usa `<title>`, para que no aparezca texto al pasar el ratón.
+- **Menú «Vista»** en la franja de arriba, con dos opciones:
+  - «Arte (sin palabras)»;
+  - «Esquema (con texto)», que es el mapa editable de antes, sin cambios.
+
+  La elección queda en la dirección (`?vista=esquema`), así que un enlace abre la misma vista. «Ver la animación ▶» y «Verlo en el mapa ↑» pasan solos al esquema, porque los pasos con texto y los conceptos solo están allí. La leyenda de colores solo sale en el esquema.
+- En el móvil, el botón de la franja se acorta a «Añadir mejora» para que quepa al lado del menú.
+- **Comprobado** en Chrome sin cabeza con Postgres local, a 1440 px y a 390 px:
+  - el dibujo no tiene ningún `<text>`;
+  - enfocar un camino con el ratón y con el teclado;
+  - las bombillas en el ordenador y en el móvil;
+  - el cambio de vista y la dirección;
+  - abrir directamente con `?vista=esquema`;
+  - que la animación pase sola al esquema;
+  - el deslizamiento en el móvil.
+
+  No hubo errores en la consola.
+
 ### 2026-11-11 — Modelo socioeconómico: los tramos se suman al precio, como el IVA
 - Eugenio: «como el IVA». El 0, 20 o 40 % se suma al precio sin impuesto (y al sueldo); antes era una parte del pago. Una cena de 40 € cuesta 56 € y deja 16 € en el fondo.
 - `fraccion(t) = t/(1+t)` en `cuentasPais`, el caso y la cadena del pan; tabla de cinco pagos con «se paga en total»; hostelería ≈ +27 %.
