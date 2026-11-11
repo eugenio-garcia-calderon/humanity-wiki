@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "src/server/traducciones.ts",
+      "motivo": "modelo socioeconómico: pensiones y presupuestos",
+      "desde": "2026-11-11T19:11:47.744Z"
+    }
+  ]
 }
