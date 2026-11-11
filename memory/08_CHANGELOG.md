@@ -11067,3 +11067,6 @@ Eugenio pidió simplificarlo y reordenarlo. `public/observatorio-polarizacion/in
 - New section `#presupuestos`: a hand-drawn SVG donut per scale — Unión Europea 2026, España (all administrations, COFOG 2024), Comunidad de Madrid 2026, Torrelodones 2024 (by chapter, no debt), a block of flats (Housfy example, marked as example) and a family (EPF 2024, imputed rent out). Toggle to add the debt repaid and refinanced in the year (Spain 230.693 M€, Madrid 2.552 M€). A table lines up pensions, debt interest, education, health, infrastructure and defence across all six scales.
 - Data in the new `src/data/presupuestos.ts`; nine new sources in `FUENTES`; texts registered in the translation sweep.
 - Desktop nav (now 12 entries) shows in one row from 1700 px with a full-width header; below that, the scrolling row.
+
+### 2026-11-11 — Titular de luzhumanidad.com: optimizar los sistemas de la humanidad
+- `drizzle/0196_titular_sistemas.sql`: el titular pasa a «Impulsamos proyectos que optimizan los sistemas de la humanidad y resuelven sus grandes retos.» Traducciones en/pt subidas a la cola.
