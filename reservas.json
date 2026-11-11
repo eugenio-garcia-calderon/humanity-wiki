@@ -17,6 +17,12 @@
       "ruta": "memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md",
       "motivo": "Triciclo: tres filas y maletero",
       "desde": "2026-11-11T21:14:10.516Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "scripts/triciclo-disenos.ts",
+      "motivo": "Triciclo: tres filas y maletero",
+      "desde": "2026-11-11T21:14:13.139Z"
     }
   ]
 }
