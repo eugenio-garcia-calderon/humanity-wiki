@@ -20,7 +20,7 @@ import * as THREE from 'three';
 const M = crearMateriales();
 let fallos = 0, casos = 0;
 /** What must never poke through (a clearance below zero is a failure here). */
-const NO_PASAN = ['Neumático delantero', 'Carenado delantero a la carrocería', 'Rueda trasera dentro', 'Manillar dentro', 'Bastidor dentro', 'Batería, ', 'Controlador dentro'];
+const NO_PASAN = ['Neumático delantero', 'Carenado delantero a la carrocería', 'Rueda trasera dentro', 'Manillar dentro', 'Bastidor dentro', 'Batería, ', 'Controlador dentro', 'Pies de la fila 2 dentro', 'Pies de la fila 3 dentro', 'Respaldo de la fila 3 a la torreta'];
 
 function cruzan(a: number[], b: number[], c: number[], d: number[]) {
   const o = (p: number[], q: number[], r: number[]) => (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]);
@@ -46,7 +46,8 @@ function pielSana(m: ModeloTriciclo): string | null {
 }
 /** Each front pod's group and its wheel's group stand on the same vertical axis (x, z), so they turn together. */
 function mismoEje(m: ModeloTriciclo): string | null {
-  const g = construirCon(m.F, { M, calidad: 'rapida', cupulaAparte: true, asientos: m.sillines, aleta: m.aleta, triciclo: { recPil: m.rec.piloto, recPas: m.rec.pasajero, man: m.man, pies: m.pies, faldon: m.faldon, ventanas: m.opcVentanas } });
+  // (built as the viewer builds it: since round three with the boot lid apart and, with three rows, their seats)
+  const g = construirCon(m.F, { M, calidad: 'rapida', cupulaAparte: true, asientos: m.sillines, aleta: m.aleta, triciclo: { recPil: m.rec.piloto, recPas: m.rec.pasajero, man: m.man, pies: m.pies, faldon: m.faldon, ventanas: m.opcVentanas, maletero: true, ...(m.filas ? { filas: m.asientosFilas } : {}) } });
   const pods: THREE.Object3D[] = [], ruedas: THREE.Object3D[] = [];
   g.traverse(o => { if (o.name === 'carenado' && o.userData.lado) pods.push(o); if (o.name === 'rueda-direccion') ruedas.push(o); });
   if (pods.length !== 2 || ruedas.length !== 2) return `${pods.length} carenados y ${ruedas.length} ruedas que giran (deberían ser 2 y 2)`;
@@ -56,6 +57,13 @@ function mismoEje(m: ModeloTriciclo): string | null {
   }
   let delantera = 0; g.traverse(o => { if (o.name === 'rueda-delantera') delantera++; });
   if (delantera) return 'hay una rueda delantera central';
+  // round three: the boot lid hangs from its own pivot, with the fin on it
+  const porton = g.getObjectByName('porton-maletero');
+  if (!porton || !porton.getObjectByName('porton') || !porton.getObjectByName('aleta')) return 'falta la tapa del maletero (o la aleta no va en ella)';
+  // and the seats: three rows draw four car seats (folded ones folded), astride none
+  let asientos = 0, plegados = 0; g.traverse(o => { if (o.name === 'asiento') asientos++; if (o.name === 'respaldo-plegado') plegados++; });
+  const esperados = m.filas ? 4 : 0, plegEsperados = m.asientosFilas.filter(a => a.plegado).length;
+  if (asientos !== esperados || plegados !== plegEsperados) return `${asientos} asientos de coche (${plegados} plegados); deberían ser ${esperados} (${plegEsperados})`;
   return null;
 }
 
@@ -68,8 +76,12 @@ function probar(nombre: string, P: Parametros) {
   for (const c of res.comprobaciones) if (NO_PASAN.some(n => c.nombre.startsWith(n)) && !(c.holgura >= 0)) mal.push(`${c.nombre}: ${(c.holgura * 100).toFixed(1)} cm`);
   try { const e = mismoEje(m); if (e) mal.push(e); } catch (e) { mal.push(`el 3D falla: ${(e as Error).message}`); }
   const t = res.triciclo!, cab = t.cabezas.map(c => `${c.quien} ${(c.p50 * 100).toFixed(1)}/${(c.p95 * 100).toFixed(1)}`).join(', ');
+  // round three: the boot is never negative, and folding a row never shrinks it
+  const e = t.maletero.estados.map(x => x.litros);
+  if (e.some(v => !(v >= 0))) mal.push(`maletero sin sentido: ${e.map(Math.round).join(' / ')} L`);
+  if (m.filas && !(e[1] >= e[0] - 1 && e[2] >= e[0] - 1 && e[3] >= Math.max(e[1], e[2]) - 1)) mal.push(`plegar una fila no agranda el maletero: ${e.map(Math.round).join(' / ')} L`);
   const alc = res.comprobaciones.find(c => c.nombre.startsWith('Manos'))!;
-  console.log(`${mal.length ? 'FALLA' : 'OK   '} ${nombre.padEnd(46)} vuelco ${t.vuelco.ssf.toFixed(2)} g · cabezas ${cab} cm · alcance ${(alc.holgura * 100).toFixed(1)} cm · vía ${m.F.VIA_LAT.toFixed(2)}${t.viaSubida ? ' (subida)' : ''}${mal.length ? '\n        ' + mal.join('\n        ') : ''}`);
+  console.log(`${mal.length ? 'FALLA' : 'OK   '} ${nombre.padEnd(46)} vuelco ${t.vuelco.ssf.toFixed(2)} g · cabezas ${cab} cm · alcance ${(alc.holgura * 100).toFixed(1)} cm · vía ${m.F.VIA_LAT.toFixed(2)}${t.viaSubida ? ' (subida)' : ''} · maletero ${Math.round(t.maletero.ahora)} L${mal.length ? '\n        ' + mal.join('\n        ') : ''}`);
   if (mal.length) fallos++;
 }
 
@@ -132,6 +144,33 @@ probar('60 kW en una rueda de 16″ con la batería al máximo', { ...PARAMETROS
     if (claves !== 'tBatalla,tCola,tCupFin,tMorro') { console.log(`FALLA largo total ${n}: cambia ${claves}`); fallos++; }
     probar(`largo total ${n} (${v.toFixed(2)} m)`, { ...PARAMETROS_TRICICLO, ...o });
   }
+}
+
+// ── round three (2026-11-11): three rows (1 + 2 + 1), folding, an opening boot and up to 35 cm of clearance
+const FILAS = { ...PARAMETROS_TRICICLO, tAsientos: 'filas' } as Parametros;
+const TF = camposTriciclo(FILAS);
+probar('tres filas por defecto', FILAS);
+for (const [a, b] of [['abierta', 'plegada'], ['plegada', 'abierta'], ['plegada', 'plegada']]) probar(`tres filas: fila 2 ${a}, fila 3 ${b}`, { ...FILAS, tFila2: a, tFila3: b } as Parametros);
+// every slider at both ends with three rows (their ranges with that layout: width, canopy and wheelbase have their own minimums)
+for (const f of deslizadoresTriciclo()) {
+  const [a, b] = rangoTriciclo(f.clave, TF);
+  probar(`filas · ${f.clave} = ${+a.toFixed(3)} (mín.)`, { ...FILAS, [f.clave]: a });
+  probar(`filas · ${f.clave} = ${+b.toFixed(3)} (máx.)`, { ...FILAS, [f.clave]: b });
+}
+probar('35 cm de altura libre, a horcajadas', { ...PARAMETROS_TRICICLO, tSuelo: 0.35 });
+probar('35 cm con las ruedas más pequeñas (16″ y 20″)', { ...PARAMETROS_TRICICLO, tSuelo: 0.35, tRuedaDel: '16', tRuedaTras: '20' });
+probar('35 cm con ruedas de coche y faldón cerrado', { ...PARAMETROS_TRICICLO, tSuelo: 0.35, tRuedaDel: 'c15', tRuedaTras: 'c15', tFaldon: 1 } as Parametros);
+probar('35 cm, tres filas, lo más ancho', { ...FILAS, tSuelo: 0.35, tAncho: 1.30 });
+probar('35 cm, tres filas, lo más ancho, todo plegado', { ...FILAS, tSuelo: 0.35, tAncho: 1.30, tFila2: 'plegada', tFila3: 'plegada' } as Parametros);
+probar('tres filas, todo plegado, batería máxima', { ...FILAS, tFila2: 'plegada', tFila3: 'plegada', tKWh: 30, tWhL: 160 } as Parametros);
+probar('tres filas, filas lo más separadas, basculante largo', { ...FILAS, tFila2X: 0.85, tFila3X: 0.80, tBasculante: 0.60, tRuedaTras: 'c15' } as Parametros);
+probar('tres filas, filas juntas, reclinadas al máximo', { ...FILAS, tFila2X: 0.60, tFila3X: 0.55, tRecFila: 35 });
+probar('tres filas, bajo y reclinado', { ...FILAS, ...BAJO, tRecFila: 35 });
+probar('tres filas, grande', { ...FILAS, ...GRANDE } as Parametros);
+probar('tres filas, 35 cm y grande', { ...FILAS, ...GRANDE, tSuelo: 0.35 } as Parametros);
+{
+  const lg = largoTriciclo(TF);
+  for (const [n, v] of [['mín.', lg.min], ['máx.', lg.max]] as const) probar(`tres filas, largo total ${n} (${v.toFixed(2)} m)`, { ...FILAS, ...estirarTriciclo(TF, v) });
 }
 
 console.log(`\n${casos} casos, ${fallos ? `${fallos} con fallos` : 'todos OK'}`);

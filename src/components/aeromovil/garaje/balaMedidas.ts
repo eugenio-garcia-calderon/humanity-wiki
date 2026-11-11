@@ -83,10 +83,20 @@ const BRAZOS = [
   { x: 0.03, cuerda: 0.20, grueso: 0.034, y: 0.43 },
   { x: -0.01, cuerda: 0.13, grueso: 0.024, y: 0.18 },
 ];
-/** The arms of this shape: they scale with the pod, and the lower link stays 5.6 cm above a raised belly (it must meet the skin). */
+/**
+ * The arms of this shape: they scale with the pod, and the lower link stays 5.6 cm above a raised belly (it must meet the skin).
+ * `y` is the height at the pod; `yCuerpo` at the body. They differ only on a Triciclo lifted rigidly (`F.elevar`, round three,
+ * 2026-11-11): the pods stay round their wheels on the road and the body rises, so each arm runs down and out from the body to
+ * its pod, as on a car with long suspension. With no lift `yCuerpo` is `y` itself.
+ */
 export function brazosDe(F: FormaBala) {
-  const k = F.R_LAT / R_LAT_REF, cuerda = F.D.cuerdaBrazo;
-  return BRAZOS.map((b, i) => ({ ...b, ...(i === 0 && cuerda != null ? { cuerda } : {}), x: b.x * k, y: i === 1 && F.dSuelo > 0 ? Math.max(b.y * k, F.D.suelo + 0.056) : b.y * k }));
+  const k = F.R_LAT / R_LAT_REF, cuerda = F.D.cuerdaBrazo, e = F.elevar;
+  // the belly of the shape before the lift (the real one, `D.suelo`, is `e` higher)
+  const vientre = F.D.suelo - e;
+  return BRAZOS.map((b, i) => {
+    const y = i === 1 && F.dSuelo > 0 ? Math.max(b.y * k, vientre + 0.056) : b.y * k;
+    return { ...b, ...(i === 0 && cuerda != null ? { cuerda } : {}), x: b.x * k, y, yCuerpo: e > 0 ? y + e : y };
+  });
 }
 
 // ======================================================================= fin
@@ -111,14 +121,14 @@ const MANILLAR = 0.325 + 0.006;
  * never below 70 % (narrower is not rideable: then it pokes out, and the check says so).
  */
 export function escalaManillar(F: FormaBala, d: [number, number] = [0, 0]): number {
-  const kz = Math.min(1, F.kW), cabe = (F.ladoZ(-0.592 + d[0], 0.870 + F.dSuelo + d[1]) - 0.012) / MANILLAR;
+  const kz = Math.min(1, F.kW), cabe = (F.ladoZ(-0.592 + d[0], 0.870 + F.dSuelo + F.elevar + d[1]) - 0.012) / MANILLAR;
   return Number.isFinite(cabe) ? Math.max(0.7, Math.min(kz, cabe)) : 0.7;
 }
 /**
  * The outer end of the handlebar (the bar-end weight's outer face), for the check that it stays inside the body: [x, y, z].
  * `d` moves the bars (the Triciclo's handlebar sliders, 2026-11-10: [x, y], m); the Cuadriciclo's never move.
  */
-export const extremoManillar = (F: FormaBala, d: [number, number] = [0, 0]): [number, number, number] => [-0.592 + d[0], 0.870 + F.dSuelo + d[1], MANILLAR * escalaManillar(F, d)];
+export const extremoManillar = (F: FormaBala, d: [number, number] = [0, 0]): [number, number, number] => [-0.592 + d[0], 0.870 + F.dSuelo + F.elevar + d[1], MANILLAR * escalaManillar(F, d)];
 
 // ======================================================================= canopy
 /** Lower edge of the canopy glass in side view (reference drawing). Where it meets the top line, the glass ends (rounded in plan). */

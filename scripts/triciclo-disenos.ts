@@ -68,10 +68,13 @@ ok(igual(camposTriciclo(deDiseno({ disposicion: 'triciclo' })), TRICICLO_DEFECTO
     return o;
   };
   const a = cuerpo(construirCon(mb.F, { M, cupulaAparte: true, asientos: mb.sillines, aleta: mb.aleta }));
-  const tri = (m: ModeloTriciclo) => cuerpo(construirCon(m.F, { M, cupulaAparte: true, asientos: m.sillines, aleta: m.aleta, triciclo: { recPil: m.rec.piloto, recPas: m.rec.pasajero, man: m.man, pies: m.pies, faldon: m.faldon, ventanas: m.opcVentanas } }));
+  // built as the viewer builds it: since round three (2026-11-11) with the boot lid apart ('porton', its shut line
+  // 'junta-porton'; the skin keeps every vertex, the lid takes its cells, and the fin rides on it unchanged)
+  const tri = (m: ModeloTriciclo) => cuerpo(construirCon(m.F, { M, cupulaAparte: true, asientos: m.sillines, aleta: m.aleta, triciclo: { recPil: m.rec.piloto, recPas: m.rec.pasajero, man: m.man, pies: m.pies, faldon: m.faldon, ventanas: m.opcVentanas, maletero: true } }));
   // round two (2026-11-10): the solar roof and the window frames ride on the canopy glass ('panel-solar', 'pilar');
   // everything else, glass included, is still the Cuadriciclo's to the last vertex
-  const NUEVAS = ['panel-solar', 'pilar'];
+  const PORTON = ['porton', 'junta-porton'];
+  const NUEVAS = ['panel-solar', 'pilar', ...PORTON];
   const comparar = (b: Record<string, Float32Array[]>, nuevas: string[], texto: string) => {
     const ka = Object.keys(a).sort(), kb = Object.keys(b).filter(k => !nuevas.includes(k)).sort();
     let n = 0; const distintas: string[] = [];
@@ -81,7 +84,7 @@ ok(igual(camposTriciclo(deDiseno({ disposicion: 'triciclo' })), TRICICLO_DEFECTO
   };
   comparar(tri(mt), NUEVAS, 'la carrocería por defecto es la del Cuadriciclo, vértice a vértice, más el techo solar y los montantes');
   const sinNada = crearModelo({ ...PARAMETROS_TRICICLO, tVentanas: 'burbuja', tSolar: 99 }) as ModeloTriciclo;
-  comparar(tri(sinNada), [], 'con la cúpula de una pieza y sin techo solar, es la del Cuadriciclo entera, vértice a vértice');
+  comparar(tri(sinNada), PORTON, 'con la cúpula de una pieza y sin techo solar, es la del Cuadriciclo entera, vértice a vértice (más la tapa del maletero)');
 }
 
 // ── old designs, against main
@@ -98,6 +101,25 @@ else {
     ['Bala de base del equipo', { disposicion: 'bala' }],
   ];
   const limpio = (r: unknown) => JSON.parse(JSON.stringify(r, (_k, v) => (typeof v === 'number' && !Number.isFinite(v) ? String(v) : v)));
+  // round three (2026-11-11): the Triciclo too. Results are compared without what round three added to them
+  // (`maletero`, `ocupantes`) and without the new fields in `P`: everything that existed must be the same number.
+  const triciclos: [string, Partial<Parametros>][] = [
+    ['Triciclo Bala por defecto', PARAMETROS_TRICICLO], ['Triciclo de base del equipo', { disposicion: 'triciclo' }],
+    ['Triciclo cambiado', { ...PARAMETROS_TRICICLO, tSuelo: 0.158, tAncho: 1.0, tBatalla: 2.9, tCupFin: 2.5, tKWh: 20, tRecPas: 20, tRuedaDel: 'c14', tVentanas: 'burbuja' } as Partial<Parametros>],
+    ['Triciclo bajo y estrecho', { ...PARAMETROS_TRICICLO, tSuelo: 0.05, tAncho: 0.77, tAlto: 1.2, tPilY: 0.30 } as Partial<Parametros>],
+  ];
+  const NUEVOS = ['tAsientos', 'tFila2', 'tFila3', 'tFila2X', 'tFila3X', 'tRecFila'];
+  const sinNuevos = (o: object) => Object.fromEntries(Object.entries(o).filter(([k]) => !NUEVOS.includes(k)));
+  for (const [nombre, P] of triciclos) {
+    const a = d.deDiseno(P), b = deDiseno(P);
+    ok(igual(sinNuevos(a), sinNuevos(b)), `${nombre}: abre con los mismos parámetros que en main (más los campos nuevos, por defecto)`);
+    const ma = g.crearModelo(a), mb2 = crearModelo(b);
+    const ra = limpio(g.calcular(ma, g.areas(ma))), rb = limpio(calcular(mb2, areas(mb2)));
+    delete rb.triciclo.maletero; delete rb.triciclo.ocupantes;
+    // the boot is a new check at the end of the list
+    rb.comprobaciones = rb.comprobaciones.filter((c: { nombre: string }) => !c.nombre.startsWith('Maletero'));
+    ok(igual(ra, rb), `${nombre}: mismos resultados que en main (área, masas, centro de gravedad, vuelco, cabezas, comprobaciones)`);
+  }
   for (const [nombre, P] of viejos) {
     const a = d.deDiseno(P), b = deDiseno(P);
     ok(igual(a, b), `${nombre}: abre con los mismos parámetros que en main`);
