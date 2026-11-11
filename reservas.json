@@ -119,6 +119,12 @@
       "ruta": "src/components/aeromovil/tunel/explicaciones.ts",
       "motivo": "Bala de cuatro ruedas",
       "desde": "2026-11-11T23:57:16.685Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/tunel/nuestro.ts",
+      "motivo": "Bala de cuatro ruedas",
+      "desde": "2026-11-11T23:57:18.985Z"
     }
   ]
 }
