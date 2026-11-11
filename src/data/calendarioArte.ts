@@ -352,7 +352,7 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "Comunidad energética: hilos de luz entre vecinos.",
       "Antes de compartir una noticia, comprueba la fuente.",
       "Autoconsumo: con placas, tu tejado da parte de tu luz.",
-      "Hoy: pasa una tarde sin pantallas. ¿Qué descubres?",
+      "Hoy, como la golondrina: sal de la pantalla una tarde.",
       "La IA puede heredar los sesgos de los datos humanos.",
       "Planeador: sube sin motor, en aire que el sol calienta.",
       "¿Qué tecnología te mejora la vida y cuál la complica?",
