@@ -27,6 +27,12 @@ export function recordarRuta(paginaId: string | null | undefined, ruta: string |
   else if ((conocidas.get(paginaId) || '').includes('/')) conocidas.delete(paginaId);
 }
 
+/** Apunta la dirección que el servidor confirmó para una página (también de un tramo: `/sol-solidario`),
+ *  la del 301 de `/p/:id` (SubpaginaSitio.tsx, 2026-11-12). */
+export function apuntarRutaConfirmada(paginaId: string, ruta: string) {
+  if (paginaId && ruta) conocidas.set(paginaId, ruta);
+}
+
 /** La dirección legible de esta página, codificada para un enlace, si se sabe. */
 export function rutaLegible(paginaId: string): string | null {
   const r = conocidas.get(paginaId);
