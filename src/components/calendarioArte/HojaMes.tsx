@@ -3,7 +3,9 @@
 // ============================================================================
 // Hoja 1 (297 × 210 mm): el tema, la frase y la ilustración (sin letras).
 // Hoja 2 (297 × 210 mm): el calendario con una enseñanza por día (75 %) y la
-// herramienta, juego o dinámica del mes (25 %). Eugenio, 2026-11-04.
+// herramienta, juego o dinámica del mes (25 %). Eugenio, 2026-11-04. Desde el
+// 2026-11-12 la misma ilustración hace de fondo de esta hoja, y el calendario va
+// encima en un papel casi opaco, con margen para que se vea el dibujo.
 //
 // La hoja se dibuja SIEMPRE en milímetros reales. En pantalla se escala para
 // que quepa; al imprimir se usa tal cual, así lo que ves es lo que sale.
@@ -111,6 +113,14 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
     const d = i - primerDia + 1;
     return d >= 1 && d <= diasMes ? d : null;
   });
+  // La ilustración también hace de fondo de la hoja del calendario (2026-11-12,
+  // Eugenio: «en toda la página, no solo en la parte superior… haz un poco más
+  // estrechito el calendario para que en los bordes también aparezcan partes del
+  // diseño… añade un toque de transparencia… finita para que sean legibles las
+  // letras»). La misma imagen que arriba: la que se mira en pantalla, la que se
+  // imprime al imprimir. Sin ilustración, la hoja sigue siendo papel liso.
+  const fondo = comparar ? visto : (c.imagen && imagenRota !== c.imagen ? c.imagen : undefined);
+
   const cambiarDia = (d: number, v: string) => {
     const dias = [...c.dias];
     while (dias.length < diasMes) dias.push('');
@@ -266,7 +276,27 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
       {/* ── HOJA 2 (A4 apaisado): CALENDARIO 75 % + HERRAMIENTA 25 % ─────── */}
       {/* 2026-11-05, Eugenio: cabecera y franja más bajas para que los
           cuadrados de los días crezcan y quede sitio para anotar. */}
-      <div className="ca-mitad flex flex-col" style={{ height: '210mm', padding: '4.5mm 9mm 6mm' }}>
+      <div className="ca-mitad relative flex flex-col overflow-hidden" style={{ height: '210mm' }}>
+        {fondo && (
+          <img
+            src={fondo}
+            alt=""
+            aria-hidden
+            loading={perezosa ? 'lazy' : undefined}
+            className="absolute inset-0 h-full w-full object-cover"
+            style={{ objectPosition: `${c.imagen_x ?? 50}% ${c.imagen_y ?? 50}%` }}
+          />
+        )}
+        {/* El papel del calendario, algo más estrecho que la hoja y apenas
+            transparente: el dibujo se ve entero en los bordes y se intuye detrás
+            de los días sin quitar legibilidad. */}
+        <div
+          className="relative flex flex-1 flex-col"
+          style={fondo
+            ? { margin: '6mm 12mm', padding: '3.5mm 5mm 4.5mm', backgroundColor: 'rgb(244 239 228 / 0.88)', borderRadius: '4mm',
+                boxShadow: '0 0.6mm 3mm rgb(60 40 20 / 0.18)' }
+            : { padding: '4.5mm 9mm 6mm' }}
+        >
         <div className="flex items-center justify-between" style={{ marginBottom: '1.5mm' }}>
           <div className="flex items-baseline" style={{ gap: '4mm' }}>
             <h3 className={cn('ca-titulo font-bold leading-none', acento.texto)} style={{ fontSize: '22pt' }}>{nombre}</h3>
@@ -333,6 +363,7 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
           <Franja franja={c.franja} editando={editando} acento={acento} alCambiar={franja => alCambiar({ franja })} />
           <Reto c={c} editando={editando} acento={acento} alCambiar={reto => alCambiar({ reto })} />
           <Iniciativa c={c} editando={editando} acento={acento} alCambiar={iniciativa => alCambiar({ iniciativa })} />
+        </div>
         </div>
       </div>
     </div>
