@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/components/aeromovil/Otros.tsx",
-      "motivo": "Bala de cuatro ruedas",
-      "desde": "2026-11-11T23:56:51.217Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/aeromovil/Paneles.tsx",
       "motivo": "Bala de cuatro ruedas",
       "desde": "2026-11-11T23:56:53.528Z"
