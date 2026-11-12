@@ -96,11 +96,16 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
   }, []);
 
   // After the window is drawn, go to the section in the address, or to its top.
+  // A window opens at its top; a section, below both headers — after they
+  // have been measured (on luzhumanidad.com the site bar is measured late).
   useEffect(() => {
     if (!ventana) return;
     const id = ALIAS[ancla] || ancla;
-    const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ block: 'start' });
+    const t = window.setTimeout(() => {
+      if (id === ventana) { window.scrollTo({ top: 0 }); return; }
+      document.getElementById(id)?.scrollIntoView({ block: 'start' });
+    }, 80);
+    return () => window.clearTimeout(t);
   }, [ancla, ventana]);
 
   // Which section of the window is on screen: lit in the submenu.
