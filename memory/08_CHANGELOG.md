@@ -11175,3 +11175,8 @@ Eugenio: «llamado Observatorio de Polarización Política, y permite que si se 
 ### 2026-11-12 — Proyecto «Optimización del sistema de energía» con Suntropy; la cadena de valor solar dentro
 - `drizzle/0205_optimizacion_sistema_energia.sql`: fila nueva en Proyectos (En curso, 2022, Energía; equipo Pablo Sánchez y Eugenio) y su página `KWOPTIMENERGIA1`: arriba la inversión de 2022 en Suntropy (pionera en España en optimización) con la foto de Pablo Sánchez y enlace a su página, qué optimiza Suntropy y enlace a suntropy.ai. «Cadena de valor solar» pasa a ser su subelemento (sale de la rejilla de la portada).
 - `CadenaSolar.tsx`: tarjeta de Suntropy con la foto de Pablo al principio de «Qué hacemos», enlazada al proyecto madre; el reparto ya no fija la distancia en 2 km (la página de Comunidades energéticas dice 5 km).
+
+### 2026-11-12 — Portada de luzhumanidad.com: un sector por línea, vivienda y comunidad, barra nueva
+- `drizzle/0204_sectores_fila_y_barra_luz.sql`: sector «vivienda y comunidad», «socioeconómico y político», eslogan «Optimización de los sistemas de la humanidad», sin titular (`sitio.presentacion: false`), Colaborar en la barra (`sitio.colaborarEnBarra`), La Voz Verde y Wiki Creator App ocultas, Pedaleo Solar → «Activismo energético» (sector energético; /pedaleo-solar da 301 a /activismo-energetico).
+- `FilaSector.tsx`: cada sector en una línea con flechas, deslizable y «Mostrar todos»; tarjetas iguales (1, 2, 3, 4 o 5 por fila según la pantalla) y sin etiqueta de categoría.
+- `CabeceraSitio` (escaparate): buscador grande a la izquierda (`BuscarBarra ancha`), marca más grande en el centro, Colaborar e idiomas a la derecha.
