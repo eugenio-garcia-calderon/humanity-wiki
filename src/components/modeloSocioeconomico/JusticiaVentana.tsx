@@ -5,22 +5,18 @@
 // and courts working as one service, without the judge depending on the police.
 // Data and sources: src/data/justicia.ts.
 import { useState } from 'react';
-import { ArrowDown, CornerUpLeft, Monitor, Timer } from 'lucide-react';
+import { Monitor, Timer } from 'lucide-react';
+import { F, Recorrido } from './JusticiaPiezas';
+import { Ocupacion, Reincidencia } from './JusticiaReincidencia';
 import { ESCALAS, ESPANA, MATRIZ, TERCIOS, modeloPorFuncion, numero, porcentaje } from '../../data/modeloSocioeconomico';
 import {
-  ACTIVIDAD_2025, CAMBIOS_2025, DURACION_APELACION, DURACION_DIAS, DURACION_SOCIAL_MESES, FUENTES_JUSTICIA, FUENTE_JUSTICIA,
+  ACTIVIDAD_2025, CAMBIOS_2025, DURACION_APELACION, DURACION_DIAS, DURACION_SOCIAL_MESES, FUENTES_JUSTICIA,
   JUECES, JURISDICCIONES, JUSTICIA_ESCALAS, NO_CAMBIA_2025, PLAZOS_PROPUESTA, PRESUPUESTO_HAB_2022, RECORRIDO_HOY,
-  RECORRIDO_PROPUESTA, REFORMA, RETOS_JUSTICIA, vaciarCola, type Paso,
+  RECORRIDO_PROPUESTA, REFORMA, RETOS_JUSTICIA, vaciarCola,
 } from '../../data/justicia';
 import { Apartado, Cifra, Mas } from './ventanas';
 import { Fuente, Muestra, Regulador } from './piezas';
 import { cn } from '../../utils/cn';
-
-/** A source link by id, from this window's own list. */
-function F({ id }: { id: string }) {
-  const f = FUENTE_JUSTICIA[id];
-  return f ? <Fuente url={f.url} titulo={f.titulo} /> : null;
-}
 
 const millonesTxt = (n: number) => `${numero(n / 1e6, 2)} millones`;
 const texto = 'max-w-3xl space-y-3 text-[15px] leading-relaxed text-slate-700';
@@ -30,6 +26,8 @@ export function JusticiaVentana() {
     <>
       <Resumen />
       <Propuesta />
+      <Reincidencia />
+      <Ocupacion />
       <Hoy />
       <CivilPenal />
       <Cola />
@@ -161,7 +159,7 @@ function Hoy() {
 
 function CivilPenal() {
   return (
-    <Apartado id="justicia-civil-penal" titulo="Lo penal va primero" fondo="blanco"
+    <Apartado id="justicia-civil-penal" fondo="blanco" titulo="Lo penal va primero"
       entradilla={<><span className="mb-2 block text-sm font-medium text-slate-500">Lo que los juristas llaman «prejudicialidad penal»</span>Hoy hay que elegir entre lo civil y lo penal porque son dos preguntas distintas. Lo penal pregunta: ¿alguien cometió un delito y merece un castigo? Lo civil pregunta: ¿alguien te debe algo y cuánto? Un mismo hecho tiene a menudo las dos caras, y cada una va por su puerta.</>}>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-2xl border border-slate-200 bg-white p-5">
@@ -228,34 +226,6 @@ function Reforma() {
         </div>
       </Mas>
     </Mas>
-  );
-}
-
-function Recorrido({ titulo, pasos, tono }: { titulo: string; pasos: Paso[]; tono: 'mal' | 'bien' }) {
-  return (
-    <div className={cn('rounded-2xl border p-5', tono === 'mal' ? 'border-rose-200 bg-rose-50/50' : 'border-emerald-200 bg-emerald-50/50')}>
-      <p className={cn('text-lg font-bold', tono === 'mal' ? 'text-rose-800' : 'text-emerald-800')}>{titulo}</p>
-      <ol className="mt-4">
-        {pasos.map((p, i) => (
-          <li key={p.t}>
-            {i > 0 && (
-              <span aria-hidden className="flex justify-center py-1 text-slate-400">
-                {p.vuelta ? <CornerUpLeft className="h-4 w-4 text-rose-600" /> : <ArrowDown className="h-4 w-4" />}
-              </span>
-            )}
-            <div className={cn('rounded-xl border bg-white p-3', p.vuelta ? 'border-dashed border-rose-300' : 'border-slate-200')}>
-              <p className="font-semibold text-slate-900"><span className="mr-1.5 tabular-nums text-slate-400">{i + 1}.</span>{p.t}</p>
-              <p className="mt-0.5 text-sm leading-relaxed text-slate-700">{p.d}{p.fuente && !p.tiempo && <F id={p.fuente} />}</p>
-              {p.tiempo && (
-                <p className={cn('mt-1.5 text-sm font-semibold', tono === 'mal' ? 'text-rose-700' : 'text-emerald-700')}>
-                  {p.tiempo}{p.fuente && <F id={p.fuente} />}
-                </p>
-              )}
-            </div>
-          </li>
-        ))}
-      </ol>
-    </div>
   );
 }
 
@@ -343,7 +313,7 @@ function Cola() {
 
 function Escalas() {
   return (
-    <Apartado id="justicia-escalas" titulo="Qué hace cada escala" fondo="blanco"
+    <Apartado id="justicia-escalas" fondo="blanco" titulo="Qué hace cada escala"
       entradilla="La justicia la dicta un juez independiente. Pero llegar a ella, los medios y las reglas se reparten entre las ocho escalas, de la persona al planeta.">
       <TarjetasEscalas escalas={ESCALAS.slice(0, 3)} />
       <Mas titulo={`las otras ${ESCALAS.length - 3} escalas, de la provincia al planeta`}>
