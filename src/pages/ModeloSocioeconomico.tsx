@@ -89,11 +89,11 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
 
   useEffect(() => {
     const titulo = document.title;
-    document.title = 'Modelo socioeconómico optimizado · Escalas, recaudación, pensiones, deuda, servicios y leyes · Luz & Humanidad';
+    document.title = 'Modelo De País Optimizado · Escalas, recaudación, pensiones, deuda, servicios y leyes · Luz & Humanidad';
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
     const anterior = meta?.content;
     if (!meta) { meta = document.createElement('meta'); meta.name = 'description'; document.head.appendChild(meta); }
-    meta.content = 'Un único impuesto en cuatro tramos (10, 20, 40 y 60 %) repartido entre ocho escalas, una pensión única igual al salario mínimo y los presupuestos de cada escala, comparados con el sistema español de hoy.';
+    meta.content = 'Modelo De País Optimizado: ocho escalas de la persona al planeta, un único impuesto en cuatro tramos (10, 20, 40 y 60 %), una pensión única, un país sin deuda, y propuestas para vivienda, seguridad, justicia, sanidad, educación, leyes y firma digital, comparadas con la España de hoy.';
     return () => { document.title = titulo; if (meta) meta.content = anterior ?? ''; };
   }, []);
 
@@ -232,7 +232,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
       </main>
 
       <footer className="border-t border-slate-200 px-4 pb-24 pt-8 text-center text-sm text-slate-500">
-        Modelo socioeconómico optimizado. Un proyecto de {marca}.
+        Modelo De País Optimizado. Un proyecto de {marca}.
       </footer>
 
       {/* The mailbox, floating at the bottom (Eugenio: «lo de proponer una mejora, abajo como un botón flotante»). */}
@@ -258,7 +258,8 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
 function Portada() {
   return (
     <div className="mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6 sm:pt-14">
-      <h1 className="max-w-3xl text-[2.3rem] font-[800] leading-[1.03] tracking-[-0.035em] sm:text-[3.4rem]">Un sistema más simple, más justo y que reparte abundancia</h1>
+      <p className="text-[15px] font-semibold text-slate-500">Modelo De País Optimizado</p>
+      <h1 className="mt-2 max-w-3xl text-[2.3rem] font-[800] leading-[1.03] tracking-[-0.035em] sm:text-[3.4rem]">Un sistema más simple, más justo y que reparte abundancia</h1>
       <p className="mt-5 max-w-[60ch] text-[1.15rem] leading-relaxed text-slate-700">
         Cómo funcionan hoy la recaudación, las pensiones, el gasto público, la deuda, los servicios y las leyes en España, y cómo podrían funcionar. Elige por dónde empezar: cada ventana empieza por lo esencial y se abre en detalle cuando lo pidas.
       </p>

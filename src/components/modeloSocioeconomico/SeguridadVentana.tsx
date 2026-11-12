@@ -8,7 +8,7 @@ import { useState, type ReactNode } from 'react';
 import { ESCALAS, ESPANA, numero, porcentaje } from '../../data/modeloSocioeconomico';
 import {
   AUTONOMICAS_2023, COMPARA, CUERPOS, CUERPOS_CON_MANDO, DUPLICIDADES, FUENTES_SEG, FUENTE_SEG, GASTO, GUARDIA_CIVIL, GUARDIANES,
-  AHORRO_SUPUESTO, ESCALONES, FUERZAS_ARMADAS, LOCALES, MOSSOS_PUESTOS_2026, POLICIAS_TOTAL, POLICIA_NACIONAL, POR_CIEN_MIL, RETOS, SEG_ESCALA, SUELDOS,
+  AHORRO_SUPUESTO, CIUDADANOS, CIUDADANOS_FORMACION, CIUDADANOS_NO_PUEDE, CIUDADANOS_PUEDE, ESCALONES, FUERZAS_ARMADAS, LOCALES, MOSSOS_PUESTOS_2026, POLICIAS_TOTAL, POLICIA_NACIONAL, POR_CIEN_MIL, RETOS, SEG_ESCALA, SUELDOS,
 } from '../../data/seguridad';
 import { Apartado, Cifra, Mas } from './ventanas';
 import { Fuente, Muestra, Regulador } from './piezas';
@@ -25,7 +25,7 @@ export function SeguridadVentana() {
     <>
       {/* ── 1. Summary ── */}
       <Apartado id="seguridad" titulo="Unos 1.700 cuerpos de policía para una sola tarea: cuidarnos"
-        entradilla={<>Hoy hay militares, policías nacionales, guardias civiles, cuatro policías autonómicas y una policía local en cada ayuntamiento que la tiene. Cada cuerpo con su jefe, su sueldo y su academia. La propuesta: un solo cuerpo de <strong className="text-slate-800">guardianes</strong>, con un sueldo igual por el mismo puesto, y el ejército aparte pero coordinado.</>}>
+        entradilla={<>Hoy hay militares, policías nacionales, guardias civiles, cuatro policías autonómicas y una policía local en cada ayuntamiento que la tiene. Cada cuerpo con su jefe, su sueldo y su academia. La propuesta: un solo cuerpo de <strong className="text-slate-800">guardianes</strong>, con un sueldo igual por el mismo puesto, el ejército incluido, y ciudadanos voluntarios formados para ayudar.</>}>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <Cifra tono="mal" valor={`≈ ${numero(redondo(CUERPOS_CON_MANDO, 100))}`} texto="cuerpos de policía, cada uno con su propio jefe"
             nota={<>Cuenta propia: 2 del Estado, 4 autonómicos y unos 1.700 locales<F id="locales" /></>} />
@@ -33,10 +33,10 @@ export function SeguridadVentana() {
             nota={`${numero(POR_CIEN_MIL.espanaTodos)} si se cuentan también las policías locales (estimación nuestra con datos de 2023 a 2026)`} />
           <Cifra tono="mal" valor={`${numero(SUELDOS.brechaMossosPN)} €`} texto={<>al mes más cobra un mosso que un policía nacional, por un trabajo parecido<F id="mossos-subida" /></>}
             nota="Es la cifra de un sindicato policial (Jupol), tras la subida de 2026: no hay una comparación oficial" />
-          <Cifra tono="bien" valor="1" texto="solo cuerpo de guardianes: un sueldo por puesto, un mando, una academia y vigilado desde fuera" nota="La propuesta" />
+          <Cifra tono="bien" valor="1" texto="solo cuerpo de guardianes, ejército incluido: un sueldo por puesto, un mando, una academia y vigilado desde fuera" nota="La propuesta" />
         </div>
         <p className="mt-5 max-w-3xl rounded-2xl border border-emerald-200 bg-emerald-50/60 px-5 py-4 text-[15px] leading-relaxed text-slate-700">
-          <strong className="text-emerald-900">Guardianes, no agresores:</strong> formados para calmar antes que usar la fuerza, con cámara en el uniforme y un control independiente.
+          <strong className="text-emerald-900">Guardianes, no agresores:</strong> formados para calmar antes que usar la fuerza, con cámara en el uniforme y un control independiente. Y <strong className="text-emerald-900">ciudadanos guardianes</strong>: cualquiera puede formarse gratis en seguridad, orden y paz para ayudar si hay violencia.
         </p>
 
       </Apartado>
@@ -86,10 +86,14 @@ export function SeguridadVentana() {
 
       {/* ── 6. The proposal ── */}
       <Apartado id="seguridad-propuesta" fondo="blanco" titulo="Un solo cuerpo de guardianes"
-        entradilla={<>Las fuerzas del orden, unificadas: un cuerpo con una escala salarial, una jerarquía y una formación únicas. Son las garantes del orden y del cumplimiento de la ley, y se organizan por escalas, del municipio al continente. El ejército queda aparte, pero coordinado.</>}>
+        entradilla={<>Las fuerzas del orden, unificadas: un cuerpo con una escala salarial, una jerarquía y una formación únicas. Son las garantes del orden y del cumplimiento de la ley, y se organizan por escalas, del municipio al continente. El ejército entra en el mismo cuerpo, como sección de defensa y emergencias.</>}>
+        <div className="mb-6 grid gap-4 sm:grid-cols-2">
+          <Cifra tono="bien" valor={`≈ ${numero(redondo(FUERZAS_ARMADAS + POLICIAS_TOTAL, 1000))}`} texto={<>personas en el cuerpo único: {numero(FUERZAS_ARMADAS)} de las Fuerzas Armadas<F id="epsap" /> y unos {numero(redondo(POLICIAS_TOTAL, 1000))} policías y guardias</>} nota="Suma nuestra con datos de 2023 a 2026" />
+          <Cifra tono="bien" valor={mill(GASTO.defensa2024 + GASTO.policia2024)} texto={<>al año entre defensa ({mill(GASTO.defensa2024)}) y policía ({mill(GASTO.policia2024)}), lo gastado en 2024<F id="igae" /></>} nota="Misma serie, la contabilidad pública. Sin bomberos, juzgados ni cárceles" />
+        </div>
         <div className="sm:hidden">
           <ul className="space-y-2">{COMPARA.slice(0, 3).map(c => <FilaCompara key={c.t} c={c} />)}</ul>
-          <Mas titulo="teléfono, formación, quién vigila y ejército" className="mt-3">
+          <Mas titulo="formación, teléfono, quién vigila, ejército y ciudadanía" className="mt-3">
             <ul className="space-y-2">{COMPARA.slice(3).map(c => <FilaCompara key={c.t} c={c} />)}</ul>
           </Mas>
         </div>
@@ -120,7 +124,7 @@ export function SeguridadVentana() {
             <li><strong>Policías locales</strong> → la sección municipal. Siguen en su pueblo o ciudad y la asamblea municipal fija sus prioridades, pero cobran según la tabla común y se forman en la academia común.</li>
             <li><strong>Policía Nacional y Guardia Civil</strong> → las secciones provincial, regional y nacional, según su trabajo: tráfico y rescate a la provincia; unidades especiales a la región; fronteras, crimen organizado y terrorismo a la nación. Se acaba el reparto entre ciudad y campo.</li>
             <li><strong>Mossos, Ertzaintza, Policía Foral y Policía Canaria</strong> → la sección regional de su comunidad, con su nombre si así lo deciden, dentro de la misma tabla de sueldos, la misma jerarquía y la misma inspección.</li>
-            <li><strong>Fuerzas Armadas</strong> → no se integran. Siguen con Defensa y para la defensa. La Unidad Militar de Emergencias trabaja con los guardianes en catástrofes con un protocolo único.</li>
+            <li><strong>Fuerzas Armadas</strong> → la sección de defensa y emergencias, en la escala nacional y continental. Tierra, mar, aire y la Unidad Militar de Emergencias, con la misma escala salarial, la misma jerarquía civil y la misma formación en desescalada que el resto. Su tarea sigue siendo defender el país y ayudar en catástrofes.</li>
           </ul>
         </Mas>
         <EscalaSalarial />
@@ -140,6 +144,9 @@ export function SeguridadVentana() {
           </ul>
         </Mas>
       </Apartado>
+
+      {/* ── 7b. Citizen guardians ── */}
+      <Ciudadanos />
 
       {/* ── 8. Each scale ── */}
       <Apartado id="seguridad-escalas" fondo="blanco" titulo="Qué hace cada escala"
@@ -405,5 +412,69 @@ function FilaCompara({ c }: { c: { t: string; hoy: string; propuesta: string } }
 function DefensaTresCifras() {
   return (
     <>Tres cifras de defensa que no se contradicen: {mill(12_825)} es lo presupuestado para el Ministerio de Defensa en 2023<F id="pge-defensa" />; {mill(GASTO.defensa2024)} es lo que se gastó en defensa en 2024 según la contabilidad pública<F id="igae" />; y {mill(GASTO.seguridadDefensa2025)} es lo que el Gobierno cuenta para 2025 sumando otras partidas de seguridad para llegar al 2 % del PIB que pide la OTAN<F id="defensa-2025" />.</>
+  );
+}
+
+/** «Ciudadanos guardianes» (Eugenio, 2026-11-12): voluntary, free training in security, order and peace; observers who may step in against violence. */
+function Ciudadanos() {
+  const [personas, setPersonas] = useState(100_000);
+  const c = CIUDADANOS;
+  const inicial = (personas * c.horasBasico * c.euroHoraAlumno) / 1e6;
+  const anual = (personas * (c.horasAnuales * c.euroHoraAlumno + c.seguroAnual)) / 1e6;
+  return (
+    <Apartado id="seguridad-ciudadanos" fondo="blanco" titulo="Ciudadanos guardianes"
+      entradilla="Cualquier persona puede formarse, gratis y si quiere, en seguridad, orden y paz. La administración paga la formación. Quien la termina ayuda como observador y puede intervenir si hay violencia o una amenaza.">
+      <div className="grid gap-4 sm:grid-cols-3">
+        <Cifra tono="bien" valor={`${c.horasBasico} h`} texto="de curso inicial gratuito, y luego un repaso de 16 horas al año" nota="Propuesta" />
+        <Cifra tono="bien" valor="0 €" texto="paga quien se forma: la formación y el seguro los paga la administración" nota="Propuesta" />
+        <Cifra valor={`${mill(Math.round(inicial))}`} texto={`costaría formar a ${numero(personas)} personas, una vez`} nota="Estimación nuestra: mueve el número abajo" />
+      </div>
+
+      <div className="mt-6 grid gap-4 md:grid-cols-2">
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-5">
+          <p className="font-bold text-emerald-900">Qué puede hacer</p>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-[15px] leading-snug text-slate-700">{CIUDADANOS_PUEDE.map(x => <li key={x}>{x}</li>)}</ul>
+        </div>
+        <div className="rounded-2xl border border-rose-200 bg-rose-50/60 p-5">
+          <p className="font-bold text-rose-900">Qué no puede hacer</p>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-[15px] leading-snug text-slate-700">{CIUDADANOS_NO_PUEDE.map(x => <li key={x}>{x}</li>)}</ul>
+        </div>
+      </div>
+      <p className="mt-4 max-w-3xl text-sm leading-relaxed text-slate-600">
+        Hoy ya cualquier persona puede detener a quien intenta cometer un delito o al que sorprende cometiéndolo, y debe poder justificar que tenía motivos razonables<F id="lecrim" />. La diferencia es que el ciudadano guardián sabe cómo hacerlo sin hacer daño, y avisa siempre a los profesionales.
+      </p>
+
+      <Mas titulo="cómo funcionaría: formación, distintivo, seguro y coordinación">
+        <div className="max-w-3xl space-y-4 text-[15px] leading-relaxed text-slate-700">
+          <div>
+            <p className="font-semibold text-slate-900">La formación, {c.horasBasico} horas</p>
+            <ul className="mt-1 list-disc space-y-1 pl-5">{CIUDADANOS_FORMACION.map(f => <li key={f.t}><strong>{f.t}:</strong> {f.d}</li>)}</ul>
+            <p className="mt-1">La da la academia de los guardianes, en el municipio, por las tardes o los fines de semana. Hay un examen práctico, y cada año un repaso de {c.horasAnuales} horas para seguir en activo.</p>
+          </div>
+          <p><strong>Quién puede:</strong> cualquier persona mayor de edad, sin antecedentes por delitos violentos y tras una entrevista. Se inscribe en un registro público de su municipio.</p>
+          <p><strong>Distintivo:</strong> un brazalete o chaleco y una tarjeta con número, que solo se llevan durante una actividad o una emergencia. Se retira al primer abuso.</p>
+          <p><strong>Seguro:</strong> la administración paga un seguro de accidentes y de responsabilidad civil, como hoy con el voluntariado de Protección Civil.</p>
+          <p><strong>Coordinación:</strong> cada ciudadano guardián depende de la sección municipal de los guardianes. Ante cualquier incidente avisa al 112, y cuando llega un guardián profesional, manda el profesional. Pueden apoyar en fiestas, grandes eventos y catástrofes, siempre convocados.</p>
+          <p><strong>Proporcionalidad:</strong> solo la fuerza necesaria para parar la violencia, y solo mientras dura. Proteger antes que perseguir.</p>
+        </div>
+        <Mas titulo="cuánto costaría (estimación)">
+          <div className="max-w-3xl">
+            <Regulador etiqueta="Personas formadas" valor={personas} min={10_000} max={500_000} paso={10_000} mostrar={numero(personas)} onChange={setPersonas} />
+            <p className="mt-3 text-[15px] text-slate-700">
+              Curso inicial: {numero(personas)} × {c.horasBasico} h × {c.euroHoraAlumno} € = <strong className="tabular-nums">{mill(Math.round(inicial))}</strong>, una vez. Después, repaso y seguro: <strong className="tabular-nums">{mill(Math.round(anual))} al año</strong>.
+            </p>
+            <p className="mt-2 text-xs leading-relaxed text-slate-500">Supuestos nuestros, no datos: {c.euroHoraAlumno} € por hora y alumno (un formador para unos 20 alumnos) y {c.seguroAnual} € de seguro por persona y año. Para comparar, se gastaron {mill(GASTO.policia2024)} en policía en 2024<F id="igae" />.</p>
+          </div>
+        </Mas>
+        <Mas titulo="ejemplos reales en España y fuera">
+          <ul className="max-w-3xl list-disc space-y-2 pl-5 text-[15px] leading-relaxed text-slate-700">
+            <li><strong>España, voluntariado de Protección Civil:</strong> agrupaciones municipales de voluntarios que el plan estatal de emergencias considera un eslabón esencial<F id="plegem" />. Solo el de SAMUR-Protección Civil de Madrid tiene más de 1.200 miembros<F id="samur" />. Ayudan en emergencias, pero no en seguridad ni en orden público.</li>
+            <li><strong>España, reservistas voluntarios:</strong> civiles que se forman unos días con las Fuerzas Armadas y pueden ser llamados. En 2025 se convocaron 400 plazas<F id="reservistas" />.</li>
+            <li><strong>Reino Unido, «special constables»:</strong> voluntarios sin sueldo, con uniforme y los mismos poderes que un policía; la mayoría de cuerpos les pide unas 16 horas al mes<F id="specials-guia" />. En marzo de 2026 había 5.196 en Inglaterra y Gales<F id="specials" />. Tienen más poder del que propone este modelo.</li>
+            <li><strong>Finlandia:</strong> una asociación pública organiza cursos voluntarios de seguridad, preparación ante crisis y defensa para cualquier residente<F id="mpk" />.</li>
+          </ul>
+        </Mas>
+      </Mas>
+    </Apartado>
   );
 }
