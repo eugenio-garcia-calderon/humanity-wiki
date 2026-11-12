@@ -1483,7 +1483,6 @@ Eugenio chose the names after being told «Cuadriciclo Bala» was already taken 
 - Fund simulator: returns are reinvested until they could pay all pensions (the switch-over year); before that pensions keep being paid as today. Chosen after the blind evaluator flagged that counting returns as both paid out and compounding was double counting. Constant real cost and return; risks behind «Más».
 - Open, flagged on the page (Pensiones › «¿y cómo encaja con el impuesto único?», Impuestos › «Lo que falta por resolver»): the single tax split in eighths does not fund a 170.330 M€ pension bill; the nation's eighth is far smaller. The tax-model accounts (`cuentasPais`, `DondeEstaElDinero`) still assume no constant pensions. Eugenio has to choose: a pension tier of the tax, several scales paying, or the fund first.
 
-<<<<<<< HEAD
 ## 2026-11-12 — Debt window: what the model assumes
 
 - No scale may borrow outside the system. Loans at the CPI between scales are still allowed because they move savings that exist; the system as a whole owes nobody.
@@ -1491,7 +1490,7 @@ Eugenio chose the names after being told «Cuadriciclo Bala» was already taken 
 - Contingency box: ≥ 20 % of the free third of each of the 8 scales (≈ 39.700 M€ a year with the default reading). It is not used to pay the inherited debt.
 - Inherited debt: each scale inherits its administration's debt; the payoff simulator uses today's average rate (interest 2025 / debt 2025 ≈ 2,4 %), constant. Where the yearly payment comes from during the transition is left open on the page, like the single pension.
 - Luxury thresholds in «Categorías» (1.000 € a watch, 500 € a garment…) are a stated proposal for an assembly to set, not data.
-=======
+
 ## 2026-11-12 — Consciousness «Fenómenos» tab: the project's position plus the evidence, and two facts corrected
 
 Eugenio asked for a tab that presents phenomena suggesting perception beyond the senses. He wanted it to say that science cannot yet explain them because it reduces consciousness to the traditional physical senses.
@@ -1505,10 +1504,29 @@ Eugenio asked for a tab that presents phenomena suggesting perception beyond the
   - Stargate used remote-viewing protocols (coordinates, relaxation and meditation), not hypnosis.
 - **Detail kept, with its source:** for the age of extraocular vision, «niños de entre 5 y 13 años» is from Grinberg's own study.
 - **The three phenomena added:** dream telepathy at Maimonides, Ganzfeld, and the transferred potential. Each one fits one of the three ways of feeling (asleep, and meditating twice).
->>>>>>> origin/main
 
 ## 2026-11-12 — Thirteen windows: how they were built, and what is proposal
 
 - Built in parallel by eight agents, each restricted to its own files; the registry (`ventanas.tsx`, page) was scaffolded first so nobody touched shared files. Sources live in each window's data file (`<Fuente url titulo />`), not in the shared `FUENTES`, to avoid eight-way merge conflicts. Cost: two source mechanisms; unifying them later is a mechanical move of ~200 entries.
 - Every proposal-specific number (health and justice deadlines, police pay scale, luxury thresholds, mochila extra, licence levels, Legal test) is labelled on the page as a proposal or estimate, not data.
 - Open decisions surfaced on the pages for Eugenio: empty homes (default: municipal pool with guaranteed rent), rent paying 10 % where today it is VAT-exempt, justice and security getting less money in the model than today, the transition payment for inherited debt and pensions.
+
+## 2026-11-12 · Garage cars with parts that open: pivots declared by the model, state in the viewer
+
+Eugenio wants to click the garage Aptera and open its doors and boot. Options:
+- (a) The viewer knows each car's doors (names and hinges hard-coded in `Visor3D.tsx`). Rejected: every new car would touch the frozen-in-practice viewer.
+- (b) The model sets `userData` on its pivot objects and the viewer discovers them by traversal. Works, but the contract is invisible in the type.
+- (c) **Chosen:** `VehiculoGaraje.pivotes?: { nombre, tipo: 'puerta' | 'maletero', eje, angulo }[]`. `construir()` returns objects with those names placed at their hinge; the viewer turns each by `angulo · fraction` about `eje` (in its parent's axes, so a left door built as the right one inside a `scale.z = −1` group mirrors correctly). Per car the viewer keeps `{ p, pObj, m, mObj }` (`st.garajeAbre`), animates it at the same pace as our own car's doors and reapplies it when the garage is rebuilt.
+
+**Click vs drag.** A press on a garage car already starts a drag (capture listener, so the orbit never starts). The car now stays put until the pointer moves more than 6 px (the same threshold as clicking a part of our own car); a release before that is a click and picks the car. When the car cannot be dragged (alone with `?garaje=…`, or overlaid), the press reaches the ordinary click handler, which now picks garage cars too. Touch goes through the same pointer events. A click on anything else closes the card.
+
+**Hover hint.** The pointer cursor over a car with pivots costs a raycast against the whole car (~230k triangles), so it runs at most every 120 ms and only for a mouse.
+
+**Fixed body vs moving panels (Aptera).** The skin is one mesh built on a grid, so a hole for a door has stepped edges. The hole only takes grid cells that are entirely inside the panel (four corners tested), so it never shows outside the door line when closed; what the fixed skin keeps inside the door line is hidden by the closed panel and, when open, by a 4 cm dark frame laid inside the opening. The panels themselves are patches with exact edges. Alternative not taken: rebuilding the fixed skin from exact patches around each opening (clean, but it would duplicate the glass holes, the dark underside and the inner lining logic, about half a day).
+
+**Tunnel calibration not refitted.** The Aptera is one of the four cars the tunnel's detail constant is fitted on. With its new shape the fit gives `DCD_DETALLES` 0.0565 instead of 0.051 and a band of ±11 % instead of ±15 %, which would move every tunnel Cd shown in the app, our own designs included (by about +0.005). That is Eugenio's call, not a side effect of fixing a garage model: `CALIBRACION` and `DCD_DETALLES` are unchanged, and `scripts/tunel-pruebas.ts` reports the mismatch until he decides. (He decided the same day: constants stay, the table is updated; see «Aptera round 2» below.)
+
+## 2026-11-12 · Aptera round 2: panels stand proud instead of exact cuts; tunnel constants frozen by decision
+
+- **Seams.** The moving panels sit 4 mm out of the skin with a polygon offset (`pinturaPieza`, `bandaPieza`), and the fixed skin and band lose only cells fully inside an opening (tested at each mesh's own cell size). Fixed cells that cross the door line stay under the panel and never show. The opening frame is grouped per opening and shown only while that panel is open, through a new optional `PivoteGaraje.conHueco`. Not taken: cutting the fixed skin with exact edges along the door line (clean at any distance, about half a day).
+- **Tunnel.** The evaluator found that the Aptera's new shape moves the fit (DCD_DETALLES 0.051 → 0.0565, band ±15 % → ±11 %). Eugenio decided that no constant and no Cd shown for our designs changes. The calibration table stores today's rows. The fit is recorded as data (`CALIBRACION.ajusteActual`) and the tests check it there, so a silhouette that moves again still fails. The difference from the constants in use is printed as a warning, and the card's text says the band in use is the earlier, wider one.

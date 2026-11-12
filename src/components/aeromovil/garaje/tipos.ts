@@ -36,4 +36,22 @@ export interface VehiculoGaraje {
   seccion?: number;
   /** Construye el vehículo: un Group nuevo cada vez (el visor lo destruye al ocultarlo). */
   construir: () => THREE.Group;
+  /**
+   * Piezas que se abren (2026-11-12, Eugenio: pinchar en el Aptera y abrir sus
+   * puertas y su maletero). Cada una es un objeto del grupo que devuelve
+   * `construir`, con ese `nombre`, colocado en su bisagra; el visor lo gira
+   * `angulo` grados sobre `eje` (en los ejes de su padre). Las de tipo
+   * 'puerta' se abren con «Abrir puertas» y las de tipo 'maletero' con «Abrir
+   * maletero». Un coche sin esto no enseña esos botones.
+   */
+  pivotes?: PivoteGaraje[];
+}
+
+export interface PivoteGaraje {
+  nombre: string;
+  tipo: 'puerta' | 'maletero';
+  eje: [number, number, number];
+  angulo: number;
+  /** An object (by name) that the viewer shows only while this piece is open: the frame of its opening. */
+  conHueco?: string;
 }

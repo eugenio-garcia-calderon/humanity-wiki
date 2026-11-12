@@ -146,7 +146,7 @@ export function PanelPunto({ sel, cuerpos, resultados, kmh, resolucion, P, puede
             })}
           </ul>
           <p className="mt-3 border-t border-slate-100 pt-2 text-[10.5px] leading-snug text-slate-500">
-            <Origen o="calculo" /> sale de este túnel: un cálculo aproximado (método de paneles y capa límite), no un CFD ni un túnel de verdad; su Cd se equivoca de media un ±{fmt(CALIBRACION.banda * 100, 0)} % con los coches cerrados que publican el suyo.
+            <Origen o="calculo" /> sale de este túnel: un cálculo aproximado (método de paneles y capa límite), no un CFD ni un túnel de verdad; con los coches cerrados que publican el suyo se equivoca de media un ±{fmt(CALIBRACION.ajusteActual.banda * 100, 0)} %, y se le da un margen de ±{fmt(CALIBRACION.banda * 100, 0)} %, más ancho a propósito.
             {' '}<Origen o="general" /> es conocimiento general de aerodinámica, no calculado aquí.
           </p>
         </div>
