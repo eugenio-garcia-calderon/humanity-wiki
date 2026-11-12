@@ -527,6 +527,29 @@ const jsonEnScript = (x: unknown) => JSON.stringify(x)
 
 export function registrarSitios(app: Express, db: any) {
   /** La página propia de una base de datos: `/bd/:tabla`. */
+  /**
+   * LAS DIRECCIONES LEGIBLES DE UNAS PÁGINAS, EN ESTA WEB (2026-11-12). El navegador arma los enlaces de las
+   * tarjetas con lo que sabe; si se llegó a la portada desde otra página, no sabe las de sus proyectos y
+   * salían por `/p/:id`. Las pide aquí (`?ids=a,b,c`, hasta 200) y recibe `{ id: ruta }` de las que tienen,
+   * las mismas del 301 y de la canónica (`rutaBonita`). En un dominio traducido no: allí las direcciones van
+   * en su idioma y las pone el HTML.
+   */
+  app.get('/api/sitio/rutas', async (req: Request, res: Response) => {
+    try {
+      const ids = [...new Set(String(req.query.ids || '').split(',').map(x => x.trim()).filter(x => /^[A-Za-z0-9_]{6,40}$/.test(x)))].slice(0, 200);
+      const s = sitioDe(req);
+      if (!ids.length || idiomaDeHost(s.host)) return res.json({ rutas: {} });
+      const filas = (await db.execute(sql`
+        SELECT w.id, w.slug, w.title, w.publico, u.handle FROM knowledge_windows w JOIN users u ON u.id = w.creator_user_id
+        WHERE w.id IN (${sql.join(ids.map(i => sql`${i}`), sql`, `)}) AND w.deleted_at IS NULL AND w.archived_at IS NULL
+      `)).rows as any[];
+      const rutas: Record<string, string> = {};
+      await enParalelo(filas, async (x: any) => { const b = await rutaBonita(req, x); if (b) rutas[x.id] = b; });
+      res.set('Cache-Control', 'public, max-age=300');
+      res.json({ rutas });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   app.get('/api/sitio/bd/:id', async (req: Request, res: Response) => {
     try {
       const p = await baseDatosPublica(db, req.params.id, req);

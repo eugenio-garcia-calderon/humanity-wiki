@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useSitio } from './ContextoSitio';
 import TarjetaPortada, { CLASE_TARJETA_PORTADA } from '../tablas/TarjetaPortada';
 import { iconoCategoria } from './iconoCategoria';
+import { pedirRutas } from '../../utils/rutasLegibles';
 
 // ============================================================================
 // LOS PROYECTOS DENTRO DE UN PROYECTO (2026-11-12, Eugenio en luzhumanidad.com)
@@ -46,7 +47,8 @@ export default function SubproyectosSitio({ filaId, tablaId, sistemasId, titulo,
   const [sistemas, setSistemas] = useState<Tabla | null>(null);
   useEffect(() => {
     let vivo = true;
-    pide(tablaId).then(t => { if (vivo) setTabla(t); });
+    // Con las direcciones legibles de sus filas antes de pintar (2026-11-12): nada de `/p/:id` en las tarjetas.
+    pide(tablaId).then(async t => { if (t) await pedirRutas((t.filas || []).map((f: Fila) => f.pagina_id)); if (vivo) setTabla(t); });
     if (sistemasId) pide(sistemasId).then(t => { if (vivo) setSistemas(t); });
     return () => { vivo = false; };
   }, [tablaId, sistemasId]);
