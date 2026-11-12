@@ -260,7 +260,7 @@ const FILAS: Fila[] = [
   ['tChT', 'chasis', 'Bastidor', null, 'Tubos: pared', 1.2, 3.6, 0.1, 'mm'],
   ['tChUniones', 'chasis', 'Bastidor', null, 'Uniones, chapas y tornillería', 1, 6, 0.5, 'kg'],
   // round 3 interior (2026-11-12, «permite poder hacer un poco más ancho la separación entre los dos tubos»): its maximum, what keeps them on the belly (`rangoTriciclo`)
-  ['tChSep', 'chasis', 'Bastidor', null, 'Largueros: separación (de eje a eje)', 0.18, 0.60, 0.01, 'cm'],
+  ['tChSep', 'chasis', 'Bastidor', null, 'Largueros: separación', 0.18, 0.60, 0.01, 'cm'],
   // (round 2, 2026-11-12: up to 3.40 m, so «Largo total» can still grow the saved clásico, at 3.20)
   ['tBatalla', 'rodaje', 'Ejes y ruedas', 'bBatalla', '', 2.20, 3.40, 0.01, 'm'],
   ['tEjeDel', 'rodaje', 'Ejes y ruedas', null, 'Eje delantero: atrasado', 0, 0.45, 0.01, 'cm'],
@@ -343,7 +343,7 @@ export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
   { clave: 'tMando', n: 'Mando', dep: 'interior', bloque: 'Mandos', opciones: [{ k: 'manillar', n: 'Manillar' }, { k: 'volante', n: 'Volante' }] },
   { clave: 'tSalpicadero', n: 'Salpicadero', dep: 'interior', bloque: 'Salpicadero', opciones: [{ k: 'no', n: 'Pantallita sobre el depósito' }, { k: 'si', n: 'Salpicadero de lado a lado' }, { k: 'blanco', n: 'Salpicadero blanco con detalles (como el Aptera)' }] },
   // round 3 interior (2026-11-12, «el chasis no llega hasta el final»): only with two rear wheels (with one, the wheel is in the tail between them)
-  { clave: 'tChLargo', n: 'Largueros: hasta dónde llegan', dep: 'chasis', bloque: 'Bastidor', opciones: [{ k: 'torreta', n: 'Hasta la torreta del amortiguador' }, { k: 'eje', n: 'Hasta el eje trasero, con una cuna trasera' }] },
+  { clave: 'tChLargo', n: 'Largueros: hasta', dep: 'chasis', bloque: 'Bastidor', opciones: [{ k: 'torreta', n: 'La torreta' }, { k: 'eje', n: 'El eje trasero' }] },
   { clave: 'tBatDisp', n: 'Dónde va la batería', dep: 'energia', bloque: 'Batería', opciones: [{ k: 'reparto', n: 'Morro, pies y bajo los sillines' }, { k: 'chasis', n: 'A lo largo del bastidor' }] },
 ];
 /** 2026-11-12: which of those options are on (the Aptera hatch only with doors: it takes the canopy's rear part, which a one-piece canopy carries away when it opens). */
