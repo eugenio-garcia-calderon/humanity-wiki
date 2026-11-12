@@ -11187,3 +11187,4 @@ Eugenio: «llamado Observatorio de Polarización Política, y permite que si se 
 ### 2026-11-12 — Direcciones legibles siempre (nunca `/p/:id`), también en humanity.wiki
 - `sitios.ts`: `rutaBonita(req, w)` = el nombre corto o el título que esta web abre de verdad en esa página. La usan el 301 de `/p/:id` (ahora también en la casa, `/@luz/p/…` → `/@luz/nombre`), los enlaces del HTML (`__SITIO__.legibles`, también páginas no `publico` creadas por migración) y la canónica (las páginas abiertas por su nombre en humanity.wiki ya no son canónicas de sí mismas: van a su dominio).
 - `SubpaginaSitio`: si el navegador llega a `/p/:id` por un enlace armado sin la dirección legible, pregunta con HEAD y cambia la barra a la legible.
+- `GET /api/sitio/rutas?ids=`: las direcciones legibles (`rutaBonita`) que el navegador no sabía; las piden la portada, los subproyectos y la barra de Sol Solidario antes de pintar enlaces.
