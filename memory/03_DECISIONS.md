@@ -1483,7 +1483,6 @@ Eugenio chose the names after being told «Cuadriciclo Bala» was already taken 
 - Fund simulator: returns are reinvested until they could pay all pensions (the switch-over year); before that pensions keep being paid as today. Chosen after the blind evaluator flagged that counting returns as both paid out and compounding was double counting. Constant real cost and return; risks behind «Más».
 - Open, flagged on the page (Pensiones › «¿y cómo encaja con el impuesto único?», Impuestos › «Lo que falta por resolver»): the single tax split in eighths does not fund a 170.330 M€ pension bill; the nation's eighth is far smaller. The tax-model accounts (`cuentasPais`, `DondeEstaElDinero`) still assume no constant pensions. Eugenio has to choose: a pension tier of the tax, several scales paying, or the fund first.
 
-<<<<<<< HEAD
 ## 2026-11-12 — Debt window: what the model assumes
 
 - No scale may borrow outside the system. Loans at the CPI between scales are still allowed because they move savings that exist; the system as a whole owes nobody.
@@ -1491,7 +1490,7 @@ Eugenio chose the names after being told «Cuadriciclo Bala» was already taken 
 - Contingency box: ≥ 20 % of the free third of each of the 8 scales (≈ 39.700 M€ a year with the default reading). It is not used to pay the inherited debt.
 - Inherited debt: each scale inherits its administration's debt; the payoff simulator uses today's average rate (interest 2025 / debt 2025 ≈ 2,4 %), constant. Where the yearly payment comes from during the transition is left open on the page, like the single pension.
 - Luxury thresholds in «Categorías» (1.000 € a watch, 500 € a garment…) are a stated proposal for an assembly to set, not data.
-=======
+
 ## 2026-11-12 — Consciousness «Fenómenos» tab: the project's position plus the evidence, and two facts corrected
 
 Eugenio asked for a tab that presents phenomena suggesting perception beyond the senses. He wanted it to say that science cannot yet explain them because it reduces consciousness to the traditional physical senses.
@@ -1505,7 +1504,6 @@ Eugenio asked for a tab that presents phenomena suggesting perception beyond the
   - Stargate used remote-viewing protocols (coordinates, relaxation and meditation), not hypnosis.
 - **Detail kept, with its source:** for the age of extraocular vision, «niños de entre 5 y 13 años» is from Grinberg's own study.
 - **The three phenomena added:** dream telepathy at Maimonides, Ganzfeld, and the transferred potential. Each one fits one of the three ways of feeling (asleep, and meditating twice).
->>>>>>> origin/main
 
 ## 2026-11-12 — Thirteen windows: how they were built, and what is proposal
 
