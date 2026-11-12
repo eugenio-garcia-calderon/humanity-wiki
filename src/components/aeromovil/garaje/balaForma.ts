@@ -87,6 +87,23 @@ export interface DimBala {
    * higher than it meets its pod (balaMedidas.ts `brazosDe`). The body never reads it; absent, nothing changes.
    */
   vientreBrazos?: number;
+  // ── Round 3 body (2026-11-12, the «Cuadriciclo Bala clásico»: nose, tail, roof). The Triciclo only; each absent or 0
+  // leaves the shape exactly as it was, bit for bit (every one of them is applied only when it is set).
+  /** The nose tip: 0 the ogive's point, 1 a wide, flat leading «line» like the Aptera's (round in plan, thin in side view). */
+  morroLinea?: number;
+  /** The nose tip's height moved this much (m, + up): the centre the nose cone closes to. */
+  morroAlto?: number;
+  /** The tail tip: 0 the pointed cone, 1 a flat, wide, truncated trailing edge like the Aptera's. */
+  colaPlana?: number;
+  /** The top of every section: 0 the round crown (an ellipse), 1 a flat one (a squarer curve through the same top). */
+  techoPlano?: number;
+  /** How the roof falls from its crest into the tail (−1…1): + it stays high longer and drops late, − it drops early. */
+  caida?: number;
+  /**
+   * The line where the painted body ends and the canopy glass begins, moved this much (m, + up), all round the car
+   * (balaMedidas.ts `contornoCupula`): the glass edge, the frame under it, the door windows and the roof rail follow it.
+   */
+  lineaCupula?: number;
 }
 
 // --------------------------------------------------- from the Aeromóvil Gota
@@ -231,7 +248,7 @@ export function tAbajo(s: Sec, y: number): number {
  * cap begins (so no notch at the joint) and m < 1 the sharpness of the point:
  * it closes in a point with a rounded tip at s = 1 (a rocket's nose cone).
  */
-interface Tapa { x0: number; largo: number; cy: number; m: number; base: P2[]; g: [number, number, number] }
+interface Tapa { x0: number; largo: number; cy: number; m: number; base: P2[]; g: [number, number, number]; linea?: number; pe?: number }
 
 /** Half-section polyline resolution of the lookup cache. */
 const NT = 120;
@@ -258,9 +275,17 @@ export function crearForma(D: DimBala) {
   /** A height of the reference drawing in this shape: the belly and the widest point lift, the canopy scales (and the whole body rises `elevar`). */
   const alturaArriba = (y: number) => y + (y - BASE_ALTO) * kAlto1 + elevar;
   const yb = (x: number) => K.yb(R(x)) + dSuelo + elevar;
-  const yt = (x: number) => { const v = K.yt(R(x)); return v > BASE_ALTO ? alturaArriba(v) : v + elevar; };
+  // round 3 (2026-11-12): the roof's fall from its crest (x_ref −1.40) to the tail cap (XT0_REF), re-timed by `caida`
+  const caida = D.caida ?? 0, XCIMA = -1.40;
+  const ytRef = caida ? (xr: number) => {
+    if (xr >= XCIMA || xr <= XT0_REF) return K.yt(xr);
+    const u = (XCIMA - xr) / (XCIMA - XT0_REF), w = u - caida * u * (1 - u);
+    return K.yt(XCIMA - (XCIMA - XT0_REF) * w);
+  } : K.yt;
+  const yt = (x: number) => { const v = ytRef(R(x)); return v > BASE_ALTO ? alturaArriba(v) : v + elevar; };
   const ysW = (x: number) => K.ys(R(x)) + dSuelo * 0.6 + elevar;
 
+  const plano = D.techoPlano ?? 0, ePlano = 1 - 0.65 * plano;
   /** The nine control points of the half-section, before the end caps. */
   function controlesBase(x: number): P2[] {
     const xr = R(x);
@@ -268,25 +293,36 @@ export function crearForma(D: DimBala) {
     const z2 = zk + (hw - zk) * K.f2(xr), y2 = b + (ys - b) * F2Y;
     const ysh = ys + (t - ys) * K.fsh(xr), zs = hw * K.ksh(xr);
     const out: P2[] = [[0, b], [zk, b], [z2, y2], [hw, ys], [zs, ysh]];
-    for (const a of ANG_CUPULA) out.push([zs * Math.cos(a), ysh + (t - ysh) * Math.sin(a)]);
+    // (round 3: a flatter crown bends the same three points out towards a square through the shoulder and the top)
+    if (plano) for (const a of ANG_CUPULA) out.push([zs * Math.pow(Math.cos(a), ePlano), ysh + (t - ysh) * Math.pow(Math.sin(a), ePlano)]);
+    else for (const a of ANG_CUPULA) out.push([zs * Math.cos(a), ysh + (t - ysh) * Math.sin(a)]);
     out.push([0, t]);
     return out;
   }
   /** Height of the shoulder (P4) at x, between the caps: the canopy's sill line runs just above it. */
   const alturaHombro = (x: number) => { const ys = ysW(x); return ys + (yt(x) - ys) * K.fsh(R(x)); };
 
-  function tapa(x0: number, xPunta: number, cy: number, m: number): Tapa {
+  function tapa(x0: number, xPunta: number, cy: number, m: number, linea = 0, pe = 2): Tapa {
     const dir = Math.sign(xPunta - x0), largo = Math.abs(xPunta - x0), e = 0.01;
     const b = controlesBase(x0), a = controlesBase(x0 - dir * e);
     const rel = (v0: number, vIn: number, ref: number) => Math.min(0.95, Math.max(0, ((vIn - v0) / e) * largo / Math.max(1e-3, ref)));
     const hw0 = b[3][0], yt0 = b[8][1], yb0 = b[0][1];
-    return { x0, largo, cy, m, base: b, g: [rel(hw0, a[3][0], hw0), rel(yt0, a[8][1], yt0 - cy), rel(cy - yb0, cy - a[0][1], cy - yb0)] };
+    return { x0, largo, cy, m, base: b, g: [rel(hw0, a[3][0], hw0), rel(yt0, a[8][1], yt0 - cy), rel(cy - yb0, cy - a[0][1], cy - yb0)], ...(linea ? { linea, pe } : {}) };
   }
-  const TAPA_MORRO = tapa(XN0, X_MORRO, CYN + dSuelo * 0.5 + elevar, D.puntaMorro), TAPA_COLA = tapa(XT0, X_COLA, D.puntaCola + elevar, PT);
+  // (round 3: the nose's tip height `morroAlto`, and the Aptera-like line / flat tail: `linea` with a round (2) or square (4) plan)
+  const cyMorro = D.morroAlto ? CYN + dSuelo * 0.5 + elevar + D.morroAlto : CYN + dSuelo * 0.5 + elevar;
+  const TAPA_MORRO = tapa(XN0, X_MORRO, cyMorro, D.puntaMorro, D.morroLinea ?? 0, 2), TAPA_COLA = tapa(XT0, X_COLA, D.puntaCola + elevar, PT, D.colaPlana ?? 0, 4);
   function enTapa(T: Tapa, x: number): P2[] {
     const s = Math.min(1, Math.abs(x - T.x0) / T.largo);
     const k = (g: number) => { const m = Math.max(T.m, g); return Math.pow(1 - s, m) * (1 + (m - g) * s); };
-    const kz = k(T.g[0]), kUp = k(T.g[1]), kDn = k(T.g[2]);
+    let kz = k(T.g[0]), kUp = k(T.g[1]), kDn = k(T.g[2]);
+    if (T.linea) {
+      // Round 3 (2026-11-12): towards a wide, thin edge. In plan a superellipse of exponent `pe` (2: round, the Aptera's
+      // nose; 4: nearly square, its truncated tail) that leaves the joint with the body's own slope (g) and keeps half of
+      // its width or more until close to the tip; in side view the cone thins into a wedge. Blended by `linea`.
+      const g = T.g[0], ancho = Math.pow(Math.max(0, 1 - Math.pow(s, T.pe!)), 1 / T.pe!) * (1 - g * s + g * s * s / 2), cuna = 1 - 0.5 * T.linea * s;
+      kz += (ancho - kz) * T.linea; kUp *= cuna; kDn *= cuna;
+    }
     // towards the tip the section turns into an ellipse, so its corners do not
     // run into the point as creases
     const a = T.base[3][0], bUp = T.base[8][1] - T.cy, bDn = T.cy - T.base[0][1], beta = s * s * s;
@@ -434,8 +470,16 @@ export function crearForma(D: DimBala) {
     return best;
   }
 
+  /**
+   * The tail's light ring (where the navy tail cone, the lamps, the hatch's and the tail panel's ends are), x_ref −2.86.
+   * Round 3: a flat tail (`colaPlana`) carries it back towards the trailing edge, to 8 cm from it when fully flat, as
+   * the Aptera's light bar is on its trailing edge; the panel and the hatch reach it.
+   */
+  /** And the nose's light ring (x_ref 0.30): a nose that ends in a line carries it forward, to 12 cm from the tip (the Aptera's light bar runs along its leading line). */
+  const X_ARO_MORRO = D.morroLinea ? X(0.30) + (X_MORRO - 0.12 - X(0.30)) * Math.min(1, D.morroLinea) : X(0.30);
+  const X_ARO_COLA = D.colaPlana ? X(-2.86) + (X_COLA + 0.08 - X(-2.86)) * Math.min(1, D.colaPlana) : X(-2.86);
   return {
-    D, BATALLA, X_MORRO, X_COLA, LARGO, X_LAT, XN0, XT0,
+    D, BATALLA, X_MORRO, X_COLA, LARGO, X_LAT, XN0, XT0, X_ARO_MORRO, X_ARO_COLA,
     R_DEL: D.rDel, R_LAT: D.rLat, VIA_LAT: D.via, ANCHO_NEU: D.anchoNeu, ANCHO_NEU_LAT: D.anchoNeuLat,
     /** x of the reference drawing → x in this shape, and back. */
     X, R,

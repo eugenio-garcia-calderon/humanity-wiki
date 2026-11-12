@@ -12,6 +12,7 @@
 // taxes window, where those sections now are.
 import { useState, type ReactNode } from 'react';
 import { ChevronDown, Euro, GraduationCap, HandCoins, Home, Landmark, Layers, PieChart, Scale, ScrollText, ShieldCheck, Smartphone, Stethoscope, Tags, type LucideIcon } from 'lucide-react';
+import { ESPECTROS } from '../../data/espectro';
 import { APARTADOS as A_ESCALAS } from '../../data/escalas';
 import { APARTADOS as A_VIVIENDA } from '../../data/vivienda';
 import { APARTADOS as A_SEGURIDAD } from '../../data/seguridad';
@@ -36,7 +37,7 @@ export interface Ventana {
   apartados: { id: string; t: string }[];
 }
 
-export const VENTANAS: Ventana[] = [
+const BASE: Ventana[] = [
   {
     id: 'escalas', titulo: 'Escalas', icono: Layers, apartados: A_ESCALAS,
     lema: 'De la persona al planeta: qué le toca a cada escala y con qué poder.',
@@ -108,6 +109,11 @@ export const VENTANAS: Ventana[] = [
 ];
 
 /** Which window an anchor belongs to: its own id, or one of its sections. */
+/** Every window with «Otras propuestas» gets it as the first entry of its submenu. */
+export const VENTANAS: Ventana[] = BASE.map(v => ESPECTROS[v.id]
+  ? { ...v, apartados: [{ id: `${v.id}-propuestas`, t: 'Otras propuestas' }, ...v.apartados] }
+  : v);
+
 export function ventanaDeAncla(ancla: string): VentanaId | null {
   for (const v of VENTANAS) {
     if (v.pronto) continue;

@@ -244,7 +244,7 @@ function CajaContingencias() {
         <ul className="max-w-3xl list-disc space-y-2 pl-5 text-[15px] leading-relaxed text-slate-700">
           <li>Cada escala tiene la suya: la comunidad vecinal, el municipio, la región, la nación… También la persona, con su propio ahorro.</li>
           <li>Solo se usa para contingencias extraordinarias: un desastre natural, una pandemia, una crisis social. Lo decide su asamblea.</li>
-          <li>Nunca baja de cero. Si a una escala no le alcanza, la ayuda una escala mayor o una igual con lo que tiene ahorrado, en un préstamo al IPC o una donación. Entre todas pueden moverse ahorros; nadie puede pedir prestado fuera.</li>
+          <li>Nunca baja de cero. Si a una escala no le alcanza, la ayuda una escala mayor o una igual con lo que tiene ahorrado, en un préstamo sin intereses, solo ajustado a la subida de los precios, o una donación. Entre todas pueden moverse ahorros; nadie puede pedir prestado fuera.</li>
           <li>Mientras no se usa, puede invertirse con prudencia, como el fondo de las pensiones, para que no pierda valor.</li>
           <li>Si la caja de una escala crece mucho más de lo que podría necesitar, su asamblea puede bajar su parte hasta el mínimo del 20 %.</li>
         </ul>

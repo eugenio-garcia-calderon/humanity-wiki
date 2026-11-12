@@ -166,13 +166,21 @@ export const Y_VIDRIO_REF = monotona([[-0.10, 0.80], [-0.25, 0.815], [-0.45, 0.8
 export const MARCO_CUPULA = 0.035;
 /** The canopy of a shape: its glass edge and frame edge in side view, and where each meets the top line. */
 export function contornoCupula(F: FormaBala) {
-  const Y_VIDRIO = (x: number) => F.alturaArriba(Y_VIDRIO_REF(F.R(x)));
+  // round 3 (2026-11-12): the body/glass line moved `lineaCupula` (absent: exactly as before, the same brackets too)
+  const dl = F.D.lineaCupula ?? 0;
+  const Y_VIDRIO = dl ? (x: number) => F.alturaArriba(Y_VIDRIO_REF(F.R(x))) + dl : (x: number) => F.alturaArriba(Y_VIDRIO_REF(F.R(x)));
   const yMarco = (x: number) => Y_VIDRIO(x) - MARCO_CUPULA;
   /** Where a side-view line meets the top line, by bisection between xa (line below the top) and xb (line above it). */
   const cruce = (linea: (x: number) => number, xa: number, xb: number): number => {
     let a = xa, b = xb;
     for (let i = 0; i < 50; i++) { const m = (a + b) / 2; if (techoEn(F, m) - linea(m) > 0) a = m; else b = m; }
     return (a + b) / 2;
+  };
+  // (a moved line meets the top line elsewhere: searched from the crest to the nose ring and to the tail ring)
+  if (dl) return {
+    Y_VIDRIO, yMarco,
+    XC0: cruce(Y_VIDRIO, F.X(-1.30), F.X(0.30)), XC1: cruce(Y_VIDRIO, F.X(-1.30), F.X(-2.86)),
+    XF0: cruce(yMarco, F.X(-1.30), F.X(0.30)), XF1: cruce(yMarco, F.X(-1.30), F.X(-2.86)),
   };
   return {
     Y_VIDRIO, yMarco,

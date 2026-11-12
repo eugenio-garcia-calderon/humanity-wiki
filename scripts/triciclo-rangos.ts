@@ -28,7 +28,11 @@ const NO_PASAN = ['Neumático delantero', 'Carenado delantero a la carrocería',
   // 2026-11-12: the pack along the frame, the steering wheel, the dashboard, the doors and the hatch as they swing, the mirrors
   'Batería: paquete', 'Volante dentro', 'Salpicadero dentro', 'Puerta: al abrirse', 'Puerta abierta al', 'Portón: al abrirse', 'Retrovisor al carenado',
   // round 3 interior (2026-11-12): the Aptera buckets' feet inside the body
-  'Pies del piloto (en los pedales) dentro', 'Pies del pasajero dentro'];
+  'Pies del piloto (en los pedales) dentro', 'Pies del pasajero dentro',
+  // round 3 (2026-11-12): the passengers' door as it swings, and the leaves through each other or through the hatch (a
+  // negative clearance there is one piece going under the other; under 3 cm and positive is a warning on screen)
+  'Puerta de atrás: al abrirse', 'Puerta de atrás abierta a', 'Puertas: la de delante', 'Puertas y portón'];
+// (round 3: «Segunda puerta: cabe» is red, not a failure: with no room the model builds one door and says so)
 
 function cruzan(a: number[], b: number[], c: number[], d: number[]) {
   const o = (p: number[], q: number[], r: number[]) => (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]);
@@ -77,7 +81,8 @@ function mismoEje(m: ModeloTriciclo): string | null {
   if (m.cuatro && g.getObjectByName('faldon')) return 'hay faldón sin rueda en la cola';
   // round three: the boot lid hangs from its own pivot, with the fin on it
   const porton = g.getObjectByName('porton-maletero');
-  if (!porton || !porton.getObjectByName('porton') || !porton.getObjectByName('aleta')) return 'falta la tapa del maletero (o la aleta no va en ella)';
+  // (round 3: «Sin aleta» has none, anywhere)
+  if (!porton || !porton.getObjectByName('porton') || (m.aleta !== null) !== !!porton.getObjectByName('aleta')) return m.aleta === null ? 'hay aleta con «Sin aleta»' : 'falta la tapa del maletero (o la aleta no va en ella)';
   // 2026-11-12: the Aptera doors, each on its hinge with its skin and its glass; the canopy then does not open
   if (m.puerta) {
     for (const n of ['puerta-der', 'puerta-izq', 'puerta-der-cristal', 'puerta-izq-cristal']) {
@@ -87,7 +92,18 @@ function mismoEje(m: ModeloTriciclo): string | null {
     }
     if (g.getObjectByName('cupula-marco')) return 'con puertas, la cúpula sigue abriéndose';
     if (m.retrovisor && !g.getObjectByName('puerta-der')!.getObjectByName('retrovisor')) return 'el retrovisor no va en la puerta';
+    // round 3: the passengers' doors on their own hinges, with the B- and C-pillars and the hinge knuckles
+    if (m.puerta.segunda) {
+      for (const n of ['puerta-tras-der', 'puerta-tras-izq', 'puerta-tras-der-cristal', 'puerta-tras-izq-cristal']) {
+        const p = g.getObjectByName(n); if (!p || !p.userData.eje) return `falta ${n} (o su eje)`;
+        let tri = 0; p.traverse(o => { const q = o as THREE.Mesh; if (q.isMesh) tri += (q.geometry.getIndex()?.count ?? 0) / 3; });
+        if (tri < 50) return `${n} casi vacía (${tri} triángulos)`;
+      }
+      for (const n of ['montante-b', 'montante-c', 'bisagra-trasera']) if (!g.getObjectByName(n)) return `falta ${n}`;
+    } else if (g.getObjectByName('puerta-tras-der')) return 'hay puerta de atrás sin pedirla';
   }
+  // round 3: the central headlamp and the nose panel, when asked
+  if (!!m.faro !== !!g.getObjectByName('faro-central')) return 'el faro central no es el que se pide';
   if (m.porton && !g.getObjectByName('porton-maletero-cristal')) return 'el portón largo no se lleva su cristal';
   if (m.volante && !g.getObjectByName('volante')) return 'falta el volante';
   if (m.salpicadero && !g.getObjectByName('salpicadero')) return 'falta el salpicadero';
@@ -334,9 +350,21 @@ probar('triciclo · asientos al mínimo sobre los largueros', { ...PARAMETROS_TR
 const MIGRACION = { tBatDisp: 'chasis', tBatLargo: 1.75, tBatAncho: 150, tBatAlto: 0.10, tBatX: 0.60, tMando: 'volante', tVolX: 0, tVolY: -0.03, tVolInc: 30, tVolD: 0.32,
   tSalpicadero: 'si', tSalpY: 0, tSalpFondo: 0.16, tAcceso: 'puertas', tPuertaDel: 0.80, tPuertaTras: 1.86, tUmbral: 0.34, tCintura: 0, tBisagraY: 0.05, tBisagraInc: 13,
   tBisagraDentro: 20, tPuertaAbre: 110, tRetrovisores: 'espejos', tMaletero: 'aptera', tMalIni: 1.70, tMalAbre: 36, tMalLado: 55, tSolarCola: 'si', tPilY: 0.33, tPasY: 0.33 };
-const REAL = deDiseno(CLASICO_GUARDADO), REAL_MIG = deDiseno({ ...CLASICO_GUARDADO, ...MIGRACION } as Partial<Parametros>);
+// round 3 (2026-11-12): the body's migration on top of 0209's (nose, tail, roof, hatch, fin, solar, second door)
+const MIGRACION_R3 = { tMorro: 0.30, tMorroLinea: 1, tMorroAlto: -0.03, tFaro: 'si', tFaroD: 0.16, tColaPlana: 1, tTechoPlano: 0.5, tCaida: 0.2, tConAleta: 'no', tSolarMorro: 'si',
+  tMalIni: 1.95, tMalLado: 30, tPuertas2: 'si', tPuerta2Parte: 1.33, tBisagra2Y: 0.85, tBisagra2Inc: 15, tPuerta2Abre: 110, tLineaCupula: 0 };
+const REAL = deDiseno(CLASICO_GUARDADO), REAL_0209 = deDiseno({ ...CLASICO_GUARDADO, ...MIGRACION } as Partial<Parametros>), REAL_MIG = deDiseno({ ...CLASICO_GUARDADO, ...MIGRACION, ...MIGRACION_R3 } as Partial<Parametros>);
 probar('clásico real, como abre hoy', REAL);
+probar('clásico real con la migración 0209', REAL_0209);
 probar('clásico real con la migración', REAL_MIG);
+{
+  // round 3: every new body key at both ends together, on the real one, and the extremes of the new shape one by one on the plain Triciclo
+  const R3 = ['tMorroLinea', 'tMorroAlto', 'tFaroD', 'tColaPlana', 'tTechoPlano', 'tCaida', 'tLineaCupula', 'tPuerta2Parte', 'tBisagra2Y', 'tBisagra2Inc', 'tPuerta2Abre', 'tMorro', 'tPuntaMorro', 'tCupFin', 'tAlto', 'tMalIni'];
+  const TR = camposTriciclo(REAL_MIG);
+  for (const lado of [0, 1] as const) probar(`clásico real · ronda 3 todo al ${lado ? 'máx.' : 'mín.'}`, { ...REAL_MIG, ...Object.fromEntries(R3.map(k => { const [a, b] = rangoTriciclo(k as never, TR); return [k, lado ? b : a]; })) } as Parametros);
+  for (const k of R3.slice(0, 7)) for (const lado of [0, 1] as const) { const f = deslizadoresTriciclo().find(x => x.clave === k)!; probar(`triciclo · ${k} = ${lado ? f.max : f.min}`, { ...PARAMETROS_TRICICLO, [k]: lado ? f.max : f.min } as Parametros); }
+  probar('triciclo · todo lo de la ronda 3, con puertas y portón', { ...PARAMETROS_TRICICLO, tAcceso: 'puertas', tMaletero: 'aptera', tPuertas2: 'si', tFaro: 'si', tSolarMorro: 'si', tConAleta: 'no', tMorroLinea: 1, tColaPlana: 1, tTechoPlano: 1, tCaida: 0.8 } as Parametros);
+}
 {
   const TR = camposTriciclo(REAL_MIG);
   for (const f of deslizadoresTriciclo()) {

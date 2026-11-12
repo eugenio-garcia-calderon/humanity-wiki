@@ -70,7 +70,9 @@ for (const [nI, nJ] of [[24, 12], [40, 16]]) {
 // ---- 4. calibration against the published Cd
 {
   console.log('\nCalibración (resolución media, 80 km/h):');
-  const filas = VEHICULOS_GARAJE.filter(v => v.aero && v.envolvente && RUEDAS_GARAJE[v.id]).map(v => {
+  // 2026-11-12: a car marked `fueraDelAjuste` (the Tesla Model Y) is computed and printed below, outside the fit
+  const enTunel = VEHICULOS_GARAJE.filter(v => v.aero && v.envolvente && RUEDAS_GARAJE[v.id]);
+  const filas = enTunel.filter(v => !RUEDAS_GARAJE[v.id].fueraDelAjuste).map(v => {
     const R = calcularTunel({ id: v.id, envolvente: v.envolvente!, n: v.seccion ?? 3, resolucion: 'media', lineas: 'pocas', area: v.aero!.area, ruedas: RUEDAS_GARAJE[v.id].ruedas, ejes: [0, -v.batalla] });
     const q = R.porVelocidad[1], A = v.aero!.area;
     // the drag model is linear in the three constants: Cd = base + K_BASE·b + K_RUEDA·r + DCD
@@ -111,6 +113,12 @@ for (const [nI, nJ] of [[24, 12], [40, 16]]) {
     const g = CALIBRACION.coches.find(c => c.id === f.id);
     const sinEl = f.cerrado ? (() => { const a2 = ajustar(cerrados.filter(x => x.id !== f.id)); return f.base + a2.kb * f.b + CONSTANTES.K_RUEDA * f.r + a2.dd; })() : f.est;
     ok(!!g && Math.abs(g.estimado - f.est) < 0.002 && Math.abs(g.sinEl - sinEl) < 0.002 && g.publicado === f.pub, `${f.id}: la tabla guardada (${g?.estimado.toFixed(3)}, sin él ${g?.sinEl.toFixed(3)}) coincide con el cálculo (${f.est.toFixed(3)}, ${sinEl.toFixed(3)})`);
+  }
+  for (const v of enTunel.filter(w => RUEDAS_GARAJE[w.id].fueraDelAjuste)) {
+    const R = calcularTunel({ id: v.id, envolvente: v.envolvente!, n: v.seccion ?? 3, resolucion: 'media', lineas: 'pocas', area: v.aero!.area, ruedas: RUEDAS_GARAJE[v.id].ruedas, ejes: [0, -v.batalla] });
+    const est = R.porVelocidad[1].cd.total, e = (est - v.aero!.cd) / v.aero!.cd;
+    console.log(`  fuera del ajuste: ${v.nombre.padEnd(24)} publicado ${v.aero!.cd.toFixed(3)}  estimado ${est.toFixed(3)}  error ${(e * 100).toFixed(0)} %  (${RUEDAS_GARAJE[v.id].fueraDelAjuste})`);
+    ok(!CALIBRACION.coches.some(c => c.id === v.id), `${v.id}: fuera de la tabla de calibración`);
   }
   // our design, the four vehicles (the Bala and the Triciclo have no editor formula: their only Cd is the tunnel's)
   // (2026-11-11: and the «Cuadriciclo Bala clásico», the Triciclo with two rear wheels in pods)

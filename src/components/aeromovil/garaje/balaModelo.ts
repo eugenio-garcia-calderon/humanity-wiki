@@ -3,7 +3,7 @@ import { FORMA_REF, monotona, punto, tAbajo, tArriba, type FormaBala, type Sec }
 import { aleta, cabina, camara, carenados, crearMateriales, malla, mats, ruedas, sinSombra, type CabinaTriciclo, type Mats } from './balaPiezas';
 import { E, loft } from './forma';
 import { ASIENTO, bandaMarco, contornoCupula, techoEn, ventanasDe, type Asientos, type OpcionesVentanas, type Ventanas } from './balaMedidas';
-import { tDeY, type Porton, type Puerta } from './balaPuertas';
+import { MONTANTE_B, MONTANTE_C, hojasPuerta, tDeY, type Porton, type Puerta } from './balaPuertas';
 
 /*
  * The «Cuadriciclo Bala en rombo» built in three.js: skin, canopy, livery, lamps and
@@ -47,7 +47,7 @@ let L = disponer(FORMA_REF);
 function disponer(F: FormaBala) {
   const C = contornoCupula(F);
   /** Navy nose cone ahead of X_ARO_MORRO and navy tail cone behind X_ARO_COLA (with the lamp rings on the joints). */
-  const X_ARO_MORRO = F.X(0.30), X_ARO_COLA = F.X(-2.86);
+  const X_ARO_MORRO = F.X_ARO_MORRO, X_ARO_COLA = F.X_ARO_COLA;
   const Y_FLOTACION = (x: number) => Y_FLOTACION_REF(F.R(x)) + F.dSuelo * 0.6 + F.elevar;
   return {
     ...C, Y_FLOTACION, X_ARO_MORRO, X_ARO_COLA,
@@ -616,11 +616,13 @@ function juntaXT(pts: [number, number][], M: Mats, nombre: string, cerrada = tru
   return [a, b];
 }
 /** The door's outline as (x, t) points, round: along its top back, down its rear edge, along its bottom forward. */
-function contornoPuerta(P: Puerta): [number, number][] {
-  const o: [number, number][] = [], n = Math.max(40, Math.round((P.xTip - P.xR) / 0.01));
-  for (let i = 0; i <= n; i++) { const x = P.xTip - (P.xTip - P.xR) * i / n; o.push([x, P.tHi(x)]); }
-  for (let k = 1; k < 12; k++) { const a = P.tHi(P.xR), b = P.tLo(P.xR); o.push([P.xR, a + (b - a) * k / 12]); }
-  for (let i = n; i > 0; i--) { const x = P.xTip - (P.xTip - P.xR) * i / n; o.push([x, P.tLo(x)]); }
+function contornoPuerta(P: Puerta, x0 = P.xTip, x1 = P.xR): [number, number][] {
+  // (round 3: one leaf's, x1..x0, with its front edge too when it does not start at the tip)
+  const o: [number, number][] = [], n = Math.max(40, Math.round((x0 - x1) / 0.01));
+  for (let i = 0; i <= n; i++) { const x = x0 - (x0 - x1) * i / n; o.push([x, P.tHi(x)]); }
+  for (let k = 1; k < 12; k++) { const a = P.tHi(x1), b = P.tLo(x1); o.push([x1, a + (b - a) * k / 12]); }
+  for (let i = n; i > 0; i--) { const x = x0 - (x0 - x1) * i / n; o.push([x, P.tLo(x)]); }
+  if (x0 < P.xTip) for (let k = 0; k < 12; k++) { const a = P.tLo(x0), b = P.tHi(x0); o.push([x0, a + (b - a) * k / 12]); }
   return o;
 }
 /** The hatch's outline (right half): across the roof at its hinge, back along its side edge, up the tail ring to the centre line. */
@@ -663,8 +665,11 @@ function conFilas(xs: number[], mas: number[]): number[] {
  * on its own, their shut lines on the body. With the doors the canopy no longer opens. `portonViejo`: the round-three
  * tail lid when the boot is not the Aptera's. Returns the parts to add and the hatch's skin pivot (the fin rides on it).
  */
-function pielConPuertas(xs: number[], M: Mats, pu: { puerta: Puerta; porton: Porton | null }, V: Ventanas | null, portonViejo: boolean, espejo: OpcionRetrovisor | null): { piezas: THREE.Object3D[]; tapa: THREE.Mesh | null; pivoteFin: THREE.Group | null; puertas: [THREE.Group, THREE.Group] } {
+function pielConPuertas(xs: number[], M: Mats, pu: { puerta: Puerta; porton: Porton | null }, V: Ventanas | null, portonViejo: boolean, espejo: OpcionRetrovisor | null): { piezas: THREE.Object3D[]; tapa: THREE.Mesh | null; pivoteFin: THREE.Group | null; puertas: [THREE.Group, THREE.Group]; traseras: [THREE.Group, THREE.Group] | null } {
   const P = pu.puerta, Q = pu.porton;
+  // round 3 (2026-11-12): with a second door the opening is cut in two leaves at x = xS, both along the same edges
+  // (`tLo`, `tHi`), so they meet each other and the body without a crack; `hojas` lists their x-ranges front to back
+  const S2 = P.segunda, hojas: [number, number][] = S2 ? hojasPuerta(P).map(h => [h.x0, h.x1] as [number, number]) : [[P.xTip, P.xR]], nH = 2 * hojas.length;
   const espejos = (r: OpcionRetrovisor) => { const d = retrovisor(M, r), i = d.clone(); i.scale.z = -1; return [d, i]; };
   // ── the skin: white and navy (the canopy's frame is the body's navy now), the old lid apart
   const R0 = rejilla(xs, columnasSkin, 'abajo', true);
@@ -678,10 +683,10 @@ function pielConPuertas(xs: number[], M: Mats, pu: { puerta: Puerta; porton: Por
   const lados = [1, -1];
   const reg = (lo: (x: number) => number, hi: (x: number) => number, x0: number, x1: number): Region[] => lados.map(lado => ({ lado, x0, x1, lo, hi }));
   const arriba = () => 1.001;
-  const c = trocear(R0, [g0[0], g0[1]], [...reg(P.tLo, P.tHi, P.xTip, P.xR), ...(Q ? reg(Q.tLo, arriba, Q.xH, Q.xFin) : [])]);
+  const c = trocear(R0, [g0[0], g0[1]], [...hojas.flatMap(([a, b]) => reg(P.tLo, P.tHi, a, b)), ...(Q ? reg(Q.tLo, arriba, Q.xH, Q.xFin) : [])]);
   const cuerpo = mallaPiel(c.R, c.fuera[0], c.fuera[1], M, 'carroceria');
-  const pielPuerta = [0, 1].map(i => mallaPiel(c.R, c.dentro[i][0], c.dentro[i][1], M, 'puerta'));
-  const pielPorton = Q ? mallaPiel(c.R, [...c.dentro[2][0], ...c.dentro[3][0]], [...c.dentro[2][1], ...c.dentro[3][1]], M, 'porton') : null;
+  const pielPuerta = Array.from({ length: nH }, (_, i) => mallaPiel(c.R, c.dentro[i][0], c.dentro[i][1], M, 'puerta'));
+  const pielPorton = Q ? mallaPiel(c.R, [...c.dentro[nH][0], ...c.dentro[nH + 1][0]], [...c.dentro[nH][1], ...c.dentro[nH + 1][1]], M, 'porton') : null;
   const aparte = (R: Rejilla, l: number[], nombre: string) => { const m = pielAparte(R, l, [M.chapa, M.forro, M.chapaDoble], nombre); m.geometry = compactar(m.geometry); return m; };
   const tapa = !Q && portonViejo ? aparte(R0, g0[2], 'porton') : null;
   // ── the glass: the door window from its line (`cintura`) up to the door's top; below that line, painted
@@ -689,12 +694,12 @@ function pielConPuertas(xs: number[], M: Mats, pu: { puerta: Puerta; porton: Por
   const RV = rejilla(xsV, s => { const a = bandas(s)[2]; const o: number[] = []; for (let k = 0; k <= n; k++) o.push(a + (1 - a) * k / n); return o; }, 'arriba', true);
   // (with the window line at the glass edge there is no painted strip: no region for it, so no slivers along the edge)
   const conCintura = P.cintura > 1e-4, tCint = (x: number) => Math.min(P.tHi(x), tDeY(F, x, P.yCintura(x)));
-  const cv = trocear(RV, caras(RV), [...(conCintura ? reg(P.tLo, tCint, P.xTip, P.xR) : []), ...reg(conCintura ? tCint : P.tLo, P.tHi, P.xTip, P.xR), ...(Q ? reg(Q.tLo, arriba, Q.xH, Q.xFin) : [])]);
-  const k0 = conCintura ? 2 : 0;
+  const cv = trocear(RV, caras(RV), [...(conCintura ? hojas.flatMap(([a, b]) => reg(P.tLo, tCint, a, b)) : []), ...hojas.flatMap(([a, b]) => reg(conCintura ? tCint : P.tLo, P.tHi, a, b)), ...(Q ? reg(Q.tLo, arriba, Q.xH, Q.xFin) : [])]);
+  const k0 = conCintura ? nH : 0;
   const nV = RV.pos.length / 3, fijo = mallaVidrio(cv.R, cv.fuera[0], M, 'cupula', nV);
-  const cintura = [0, 1].map(i => conCintura && cv.dentro[i][0].length ? aparte(cv.R, cv.dentro[i][0], 'puerta-cintura') : null);
-  const vidrioPuerta = [k0, k0 + 1].map(i => mallaVidrio(cv.R, cv.dentro[i][0], M, 'cupula-puerta', nV));
-  const vidrioPorton = Q ? mallaVidrio(cv.R, [...cv.dentro[k0 + 2][0], ...cv.dentro[k0 + 3][0]], M, 'cupula-porton', nV) : null;
+  const cintura = Array.from({ length: nH }, (_, i) => conCintura && cv.dentro[i][0].length ? aparte(cv.R, cv.dentro[i][0], 'puerta-cintura') : null);
+  const vidrioPuerta = Array.from({ length: nH }, (_, i) => mallaVidrio(cv.R, cv.dentro[k0 + i][0], M, 'cupula-puerta', nV));
+  const vidrioPorton = Q ? mallaVidrio(cv.R, [...cv.dentro[k0 + nH][0], ...cv.dentro[k0 + nH + 1][0]], M, 'cupula-porton', nV) : null;
   // ── the solar panel (never below the doors' top) and the window frames: ahead of the hinge on the roof, behind it on the hatch
   const tMin = (x: number) => (x <= P.xTip && x >= P.xR ? P.tHi(x) : 0);
   if (V) {
@@ -702,8 +707,14 @@ function pielConPuertas(xs: number[], M: Mats, pu: { puerta: Puerta; porton: Por
     const delante = techoSolar(V, M, { delante: 99, detras: corte, tMin }), detras = Q ? techoSolar(V, M, { delante: corte, detras: -99, tMin }) : null;
     if (delante) fijo.add(delante);
     if (detras) vidrioPorton!.add(detras);
-    const [mdD, mdI] = marcosVentanas(V, M, { delante: 99, detras: P.xR + 0.07, afinar: 0.06 });
+    // (round 3: with two doors the band is cut straight at the meeting edge, and the rear door's stretch tapers out before its corner)
+    const [mdD, mdI] = S2 ? marcosVentanas(V, M, { delante: 99, detras: hojas[0][1] }) : marcosVentanas(V, M, { delante: 99, detras: P.xR + 0.07, afinar: 0.06 });
     if (mdD) { vidrioPuerta[0].add(mdD); vidrioPuerta[1].add(mdI); }
+    if (S2) {
+      const [m2D, m2I] = marcosVentanas(V, M, { delante: hojas[1][0], detras: P.xR + 0.07, afinar: 0.06 }); if (m2D) { vidrioPuerta[2].add(m2D); vidrioPuerta[3].add(m2I); }
+      // the rail over the B-pillar stays on the body
+      for (const m of marcosVentanas(V, M, { delante: hojas[0][1], detras: hojas[1][0] })) fijo.add(m);
+    }
     // behind the door: on the hatch behind its hinge, on the canopy between the two if the hinge is further back
     const xH = Q ? Math.min(P.xR, Q.xH) : -99;
     for (const m of marcosVentanas(V, M, { delante: P.xR, detras: xH })) fijo.add(m);
@@ -718,8 +729,33 @@ function pielConPuertas(xs: number[], M: Mats, pu: { puerta: Puerta; porton: Por
     pivote('puerta-der-cristal', [hx, hy, hz], [ex, ey, ez], P.abre, 'puerta', [vidrioPuerta[0]]),
     pivI = pivote('puerta-izq', [hx, hy, -hz], [ex, ey, -ez], -P.abre, 'puerta', [pielPuerta[1], cintura[1], eI]),
     pivote('puerta-izq-cristal', [hx, hy, -hz], [ex, ey, -ez], -P.abre, 'puerta', [vidrioPuerta[1]]),
-    ...juntaXT(contornoPuerta(P), M, 'junta-puerta'),
+    ...(S2 ? hojas.flatMap(([a, b]) => juntaXT(contornoPuerta(P, a, b), M, 'junta-puerta')) : juntaXT(contornoPuerta(P), M, 'junta-puerta')),
   ];
+  // round 3: the passengers' doors on their rear hinges (they open the other way: up and back), and the meeting edge's shut line
+  let traseras: [THREE.Group, THREE.Group] | null = null;
+  if (S2) {
+    const [gx, gy, gz] = S2.bisagra, [fx, fy, fz] = S2.eje;
+    const d = pivote('puerta-tras-der', [gx, gy, gz], [fx, fy, fz], S2.abre, 'puerta', [pielPuerta[2], cintura[2]]);
+    const i = pivote('puerta-tras-izq', [gx, gy, -gz], [fx, fy, -fz], -S2.abre, 'puerta', [pielPuerta[3], cintura[3]]);
+    traseras = [d, i];
+    piezas.push(d, pivote('puerta-tras-der-cristal', [gx, gy, gz], [fx, fy, fz], S2.abre, 'puerta', [vidrioPuerta[2]]),
+      i, pivote('puerta-tras-izq-cristal', [gx, gy, -gz], [fx, fy, -fz], -S2.abre, 'puerta', [vidrioPuerta[3]]));
+    // The two fixed pillars, in the frame's navy laminate as the windscreen pillar: the B-pillar between the doors (both
+    // shut against it) and the C-pillar behind the passengers' door, which carries its hinges; on the glass from just
+    // under its edge up to the roof rail (below that line the body's own paint goes on). And the hinges: two knuckles
+    // on the door's axis, on the C-pillar's front edge (a knuckle is a cylinder about the axis: it looks the same open or shut).
+    if (V) {
+      const banda = (x0: number, x1: number, nombre: string) => { const d = malla(parcheXT(x0, x1, 8, s => [Math.max(0, V.tC(s.x) - 0.01), V.tR(s.x)], 16, 0.0018, 'lado'), M.marinoDoble, nombre), i = d.clone(); i.scale.z = -1; piezas.push(d, i); };
+      banda(hojas[0][1], hojas[1][0], 'montante-b');
+      banda(P.xR, P.xR - MONTANTE_C, 'montante-c');
+    }
+    for (const lado of [1, -1]) for (const k of [-1, 1]) {
+      const c = new THREE.Vector3(gx + fx * 0.11 * k, gy + fy * 0.11 * k, lado * (gz + fz * 0.11 * k)), u = new THREE.Vector3(fx, fy, lado * fz);
+      const nudo = malla(new THREE.CylinderGeometry(0.016, 0.016, 0.07, 18), M.grisOscuro, 'bisagra-trasera'); nudo.position.copy(c); nudo.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), u); piezas.push(nudo);
+      // its leaf on the pillar: a small plate from the knuckle back onto the C-pillar
+      const placa = malla(new THREE.BoxGeometry(0.05, 0.05, 0.008), M.grisOscuro, 'bisagra-trasera'); placa.position.set(c.x - 0.03, c.y, c.z - lado * 0.006); placa.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), u); piezas.push(placa);
+    }
+  }
   let pivoteFin: THREE.Group | null = null;
   if (Q) {
     const en: [number, number, number] = [Q.xH, Q.bisagra[1], 0];
@@ -727,7 +763,23 @@ function pielConPuertas(xs: number[], M: Mats, pu: { puerta: Puerta; porton: Por
     piezas.push(pivoteFin, pivote(`${PIVOTE_PORTON}-cristal`, en, [0, 0, 1], -Q.abre, 'maletero', [vidrioPorton]), ...juntaXT(contornoPorton(Q), M, 'junta-porton', false));
   }
   if (espejo && !espejo.enPuerta) piezas.push(...espejos(espejo));
-  return { piezas, tapa, pivoteFin, puertas: [pivD, pivI] };
+  return { piezas, tapa, pivoteFin, puertas: [pivD, pivI], traseras };
+}
+
+/**
+ * Round 3 (2026-11-12, «añade un faro en el centro del morro, como una moto»): one lamp on the nose's tip, an ellipsoid
+ * housing in gloss black (its back half sunk in the nose), a bright reflector and a clear lens over its front.
+ */
+function faroCentral(M: Mats, f: { c: [number, number, number]; fondo: number; alto: number; ancho: number }): THREE.Group {
+  const g = new THREE.Group(); g.name = 'faro-central';
+  const cuerpo = new THREE.SphereGeometry(1, 40, 24); cuerpo.scale(f.fondo, f.alto / 2, f.ancho / 2);
+  const carcasa = malla(cuerpo, M.negroBrillo, 'faro'); carcasa.position.set(...f.c); g.add(carcasa);
+  // the reflector: a disc across the housing 1 cm behind its front, and the lens: the front cap, a hair bigger
+  const disco = new THREE.CircleGeometry(1, 40).rotateY(Math.PI / 2); disco.scale(1, f.alto / 2 * 0.86, f.ancho / 2 * 0.86);
+  const refl = malla(disco, M.led, 'faro-led', false); refl.position.set(f.c[0] + f.fondo - 0.012, f.c[1], f.c[2]); g.add(refl);
+  const cap = new THREE.SphereGeometry(1, 40, 16, 0, Math.PI * 2, 0, Math.PI / 3).rotateZ(-Math.PI / 2); cap.scale(f.fondo * 1.01, f.alto / 2 * 1.01, f.ancho / 2 * 1.01);
+  const lente = malla(cap, M.lente, 'lente-faro', false); lente.position.set(...f.c); g.add(lente);
+  return g;
 }
 
 // ===================================================================== assembly
@@ -735,8 +787,8 @@ function pielConPuertas(xs: number[], M: Mats, pu: { puerta: Puerta; porton: Por
 export interface OpcionesBala {
   /** Where the riders sit (balaPiezas.ts `ASIENTO` by default). */
   asientos?: Asientos;
-  /** Height of the fin's tip above the road (1.00 m by default). */
-  aleta?: number;
+  /** Height of the fin's tip above the road (1.00 m by default); null: no fin (round 3, the Triciclo family's «Sin aleta»). */
+  aleta?: number | null;
   /** Materials: the editor passes its own set (`crearMateriales()`), so «Rayos X» and «Corte» never reach the garage's. */
   M?: Mats;
   /**
@@ -759,7 +811,10 @@ export interface OpcionesBala {
     /** 2026-11-12: teardrop mirrors instead of the camera pods (on the doors if there are doors). */
     retrovisor?: OpcionRetrovisor | null;
     /** 2026-11-12: the solar panel run on over the tail, from x0 back to x1, above t = tLow(x) (it rides on the lid that opens there). */
-    solarCola?: { x0: number; x1: number; tLow: (x: number) => number } | null };
+    solarCola?: { x0: number; x1: number; tLow: (x: number) => number } | null;
+    /** Round 3 (2026-11-12): the panel on top of the nose (fixed on the body), and the central headlamp (centre, depth, height, width). */
+    solarMorro?: { x0: number; x1: number; tLow: (x: number) => number } | null;
+    faro?: { c: [number, number, number]; fondo: number; alto: number; ancho: number } | null };
 }
 /** A mirror's place (right side; geometriaTriciclo.ts `retrovisor`). */
 export interface OpcionRetrovisor { base: [number, number, number]; cabeza: [number, number, number]; largo: number; alto: number; fondo: number; enPuerta: boolean }
@@ -963,6 +1018,7 @@ function armar(o: OpcionesBala): THREE.Group {
       const P = pu?.puerta, x0 = L.X_ARO_MORRO - 0.012, x1 = L.X_ARO_COLA + 0.012;
       // (2026-11-12: where a door crosses the stripe, that stretch rides on the door, cut where the door's edges cross it)
       let corte: [number, number] | null = null;
+      const xS = P?.segunda?.xS;
       if (P && conP) {
         const cruza = (x: number) => P.yLo(x) <= L.Y_FLOTACION(x) + 0.015 && P.yHi(x) >= L.Y_FLOTACION(x) + 0.015;
         let xa = NaN; for (let x = P.xTip; x >= P.xR; x -= 0.002) if (cruza(x)) { xa = x; break; }
@@ -973,8 +1029,16 @@ function armar(o: OpcionesBala): THREE.Group {
         const n = (a: number, b: number) => Math.max(4, Math.round(320 * (a - b) / (x0 - x1)));
         par(malla(parcheXT(x0, corte[0], n(x0, corte[0]), banda, 2, 0.0006, 'lado'), M.rojo, 'filete', false));
         par(malla(parcheXT(corte[1], x1, n(corte[1], x1), banda, 2, 0.0006, 'lado'), M.rojo, 'filete', false));
-        const d = malla(parcheXT(corte[0], corte[1], n(corte[0], corte[1]), banda, 2, 0.0006, 'lado'), M.rojo, 'filete', false), i = d.clone(); i.scale.z = -1;
-        for (const [m, piv] of [[d, conP.puertas[0]], [i, conP.puertas[1]]] as const) { m.position.sub(piv.position); piv.add(m); }
+        // (round 3: with two doors, the stretch on each door rides on it, cut at the meeting edge)
+        // (and the stretch on the B-pillar between them stays on the body)
+        const b0 = xS !== undefined ? xS + MONTANTE_B / 2 : 0, b1 = xS !== undefined ? xS - MONTANTE_B / 2 : 0;
+        const tramos: [number, number, [THREE.Group, THREE.Group]][] = xS !== undefined && conP.traseras
+          ? (corte[0] > b0 ? [[corte[0], b0, conP.puertas], [b1, corte[1], conP.traseras]] : [[Math.min(corte[0], b1), corte[1], conP.traseras]]) : [[corte[0], corte[1], conP.puertas]];
+        if (xS !== undefined && conP.traseras && corte[0] > b1) par(malla(parcheXT(Math.min(corte[0], b0), b1, n(Math.min(corte[0], b0), b1), banda, 2, 0.0006, 'lado'), M.rojo, 'filete', false));
+        for (const [a, b, pv] of tramos) {
+          const d = malla(parcheXT(a, b, n(a, b), banda, 2, 0.0006, 'lado'), M.rojo, 'filete', false), i = d.clone(); i.scale.z = -1;
+          for (const [m, piv] of [[d, pv[0]], [i, pv[1]]] as const) { m.position.sub(piv.position); piv.add(m); }
+        }
       }
     }
 
@@ -1039,7 +1103,7 @@ function armar(o: OpcionesBala): THREE.Group {
   const traseras = o.triciclo?.traseras ?? null;
   if (traseras) add(carenados(traseras, M, true));
   add(ruedas(F, M, !!o.triciclo, traseras));
-  const laAleta = aleta(F, M, o.aleta);
+  const laAleta = o.aleta === null ? null : aleta(F, M, o.aleta);
   // 2026-11-12: the panel over the tail rides on the lid that opens there, as the fin does
   const sc = o.triciclo?.solarCola ? panelCola(o.triciclo.solarCola, M) : null;
   if (conP?.pivoteFin) {
@@ -1063,7 +1127,12 @@ function armar(o: OpcionesBala): THREE.Group {
     const lado = [...der, ...atras], nl = [...nd, ...na];
     const izq = lado.slice().reverse().map(p => new THREE.Vector3(p.x, p.y, -p.z)), ni = nl.slice().reverse().map(n => new THREE.Vector3(n.x, n.y, -n.z));
     add(malla(cinta3D([...lado, new THREE.Vector3(L.X_ARO_COLA, techoEn(F, L.X_ARO_COLA), 0), ...izq], [...nl, normalXT(L.X_ARO_COLA, 1), ...ni], 0.0042, 0.0012, false), M.junta, 'junta-porton', false));
-  } else { add(laAleta); if (sc) add(sc); }
+  } else { if (laAleta) add(laAleta); if (sc) add(sc); }
+  // round 3 (2026-11-12): the panel on the nose (fixed: the nose never opens) and the central headlamp
+  const sm = o.triciclo?.solarMorro;
+  if (sm) add(panelCola(sm, M));
+  const fa = o.triciclo?.faro;
+  if (fa) add(faroCentral(M, fa));
   add(cabina(F, M, o.asientos ?? ASIENTO, o.triciclo));
   // the Triciclo's rear-wheel spat: a narrow navy keel under the tail, from inside the belly down to `y0`, round the wheel
   const fd = o.triciclo?.faldon;
