@@ -29,6 +29,12 @@
       "ruta": "src/components/aeromovil/Otros.tsx",
       "motivo": "Cuadriciclo Bala clásico / en rombo: nombres",
       "desde": "2026-11-12T09:33:33.780Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/Paneles.tsx",
+      "motivo": "Cuadriciclo Bala clásico / en rombo: nombres",
+      "desde": "2026-11-12T09:33:36.108Z"
     }
   ]
 }
