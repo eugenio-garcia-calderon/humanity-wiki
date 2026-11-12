@@ -11102,3 +11102,11 @@ Eugenio: «Haz un vehículo igual que el triciclo bala, pero esta vez que tenga 
 - **El vuelco** se calcula con la fórmula de cuatro ruedas: la vía media bajo el centro de gravedad entre (2 × su altura).
 - **El faldón y el basculante** no existen con dos ruedas: sus deslizadores se quedan apagados.
 - **Comprobado** en Chromium sin cabeza a 1280×800 con WebGL por software: la Bala de cuatro ruedas en 3/4, de lado, desde atrás y en 3/4 trasero; los paneles de Rodaje y Proyecto; el Triciclo sigue con tres ruedas. **No comprobado** en un móvil ni con la aplicación instalada.
+
+## 2026-11-12 · Aeromóvil: «Cuadriciclo Bala clásico» y «Cuadriciclo Bala en rombo»
+
+Eugenio: «coge la configuración de los sliders del triciclo bala y aplícasela al cuadriciclo bala nuevo, y cámbiale el nombre a cuadriciclo bala»; preguntado qué hacer con el antiguo, que ya se llamaba así: «El antiguo llámalo cuadriciclo bala en rombo, y el nuevo cuadriciclo bala clásico».
+- La Bala de cuatro ruedas (Triciclo con dos ruedas traseras en carenados) se llama ahora **«Cuadriciclo Bala clásico»** en todo el editor: cabecera, título, túnel, planos, nombre del STL (`cuadriciclo-bala-clasico-…`).
+- El antiguo, con las ruedas en rombo, se llama **«Cuadriciclo Bala en rombo»** (STL `cuadriciclo-bala-rombo-…`). Los textos del Triciclo que decían «donde el Cuadriciclo lleva su rueda delantera» dicen ahora «el Cuadriciclo en rombo», para que no se confunda con el clásico.
+- Migración `0198`: al desplegar, el diseño de cuatro ruedas del equipo recibe otra vez los parámetros del Triciclo guardado (el que esté por defecto o, si no, el último del equipo), con el nombre nuevo; la vía trasera vuelve a ser igual que la delantera. Los diseños del equipo de la familia en rombo cuyo nombre empieza por «Cuadriciclo Bala» pasan a «Cuadriciclo Bala en rombo…»; los de visitantes conservan su nombre. El registro del despliegue dice qué fila se copió y con qué valores.
+- Comprobado: la migración en un Postgres temporal (copia, renombra, se puede repetir sin efecto), `tsc`, `build` y las pruebas del Bala y del Triciclo.

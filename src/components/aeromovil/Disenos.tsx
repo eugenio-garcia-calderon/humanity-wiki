@@ -35,8 +35,8 @@ import { PARAMETROS_A1, PARAMETROS_BALA, PARAMETROS_GOTA, PARAMETROS_TRICICLO, t
 export const VEHICULOS: { k: Disposicion; n: string; d: string }[] = [
   { k: 'cuatro', n: 'Aeromóvil 1', d: 'Eléctrico de cuatro ruedas, carrocería baja con cúpula (SZEmission ×1,3), clase Twizy.' },
   { k: 'rombo', n: 'Aeromóvil Gota', d: 'Velomóvil tándem 1+2 de pedaleo asistido, rombo basculante, carenado en gota.' },
-  { k: 'bala', n: 'Cuadriciclo Bala', d: 'Biplaza a horcajadas, tipo moto carenada: el rombo de ruedas del Gota con carenados laterales fijos, morro en punta y cúpula.' },
-  { k: 'triciclo', n: 'Triciclo Bala', d: 'La carrocería del Cuadriciclo con tres ruedas: dos delante en carenados que giran, como el Aptera, y una detrás con el motor; respaldos que se reclinan. En Rodaje se le pueden poner dos ruedas detrás, también en carenados: la Bala de cuatro ruedas.' },
+  { k: 'bala', n: 'Cuadriciclo Bala en rombo', d: 'Biplaza a horcajadas, tipo moto carenada: el rombo de ruedas del Gota con carenados laterales fijos, morro en punta y cúpula.' },
+  { k: 'triciclo', n: 'Triciclo Bala', d: 'La carrocería del Cuadriciclo en rombo con tres ruedas: dos delante en carenados que giran, como el Aptera, y una detrás con el motor; respaldos que se reclinan. En Rodaje se le pueden poner dos ruedas detrás, también en carenados: el Cuadriciclo Bala clásico.' },
 ];
 /** A saved design's family: designs from before 2026-11-06 carry none and are the Gota's. */
 const familiaDe = (d: Diseno): Disposicion => { const k = d.parametros?.disposicion; return VEHICULOS.some(v => v.k === k) ? k! : 'rombo'; };
@@ -58,7 +58,7 @@ export const aDiseno = (P: Parametros): Partial<Parametros> => { const { comp: _
  * Un diseño guardado sin `disposicion` es de antes del 2026-11-06: del
  * Aeromóvil Gota, con las medidas por defecto de entonces. Desde entonces el
  * diseño por defecto es el Aeromóvil 1 y cada diseño dice de cuál es. Desde el
- * 2026-11-09 hay un tercero, el Cuadriciclo Bala ('bala'), que parte de las
+ * 2026-11-09 hay un tercero, el Cuadriciclo Bala en rombo ('bala'), que parte de las
  * medidas del Bala del garaje. Comprobado con `npx tsx scripts/bala-disenos.ts`.
  * Desde el 2026-11-10, el Triciclo Bala ('triciclo'), con sus campos `t…`
  * (`npx tsx scripts/triciclo-disenos.ts`).
@@ -76,7 +76,7 @@ export const deDiseno = (d: Partial<Parametros>): Parametros => {
     if (typeof ref === 'number') { if (typeof v === 'number' && Number.isFinite(v)) (limpio as Record<string, unknown>)[k] = v; continue; }
     if (typeof ref === typeof v) (limpio as Record<string, unknown>)[k] = v;
   }
-  // 2026-11-11 (the «Bala de cuatro ruedas»): a Triciclo saved without a rear track has it equal to its front one
+  // 2026-11-11 (the «Cuadriciclo Bala clásico»): a Triciclo saved without a rear track has it equal to its front one
   if (d.disposicion === 'triciclo' && limpio.tViaTras === undefined && limpio.tVia !== undefined) limpio.tViaTras = limpio.tVia;
   return { ...base, ...limpio, disposicion: d.disposicion ?? 'rombo', comp: 0 };
 };

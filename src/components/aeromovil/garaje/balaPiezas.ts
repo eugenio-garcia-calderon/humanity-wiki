@@ -7,7 +7,7 @@ import { ALETA, ASIENTO, brazosDe, escalaManillar, podDe, semiAncho, techoEn, ty
 export { ALETA, ASIENTO, POD, POD_SEMIANCHO, brazosDe, extremoManillar, podDe, techoEn, type Asientos } from './balaMedidas';
 
 /*
- * Materials and the separate parts of the «Cuadriciclo Bala»: wheels, the
+ * Materials and the separate parts of the «Cuadriciclo Bala en rombo»: wheels, the
  * lateral wheel pods and their arms, the tail fin, the interior (saddle,
  * tank, handlebar, dash, footrests, grab rail, backrest) and the camera pods.
  * The skin, the canopy glass and everything painted on the skin are in
@@ -203,7 +203,7 @@ function rueda(R: number, ancho: number, M: Mats, nombre: string): THREE.Group {
 export function ruedas(F: FormaBala, M: Mats, triciclo = false, traseras: FormaBala | null = null): THREE.Group {
   const g = new THREE.Group(); g.name = 'ruedas';
   if (triciclo) {
-    // the «Bala de cuatro ruedas» (2026-11-11): two rear wheels in their pods, at the rear track (`traseras`, the rear pods' view of the shape)
+    // the «Cuadriciclo Bala clásico» (2026-11-11): two rear wheels in their pods, at the rear track (`traseras`, the rear pods' view of the shape)
     if (traseras) for (const s of [1, -1]) { const t = rueda(traseras.R_LAT, traseras.ANCHO_NEU_LAT, M, 'rueda-trasera'); t.position.set(traseras.X_LAT, traseras.R_LAT - APLASTADO, s * traseras.VIA_LAT / 2); g.add(t); }
     else { const tras = rueda(F.R_DEL, F.ANCHO_NEU, M, 'rueda-trasera'); tras.position.set(-F.BATALLA, F.R_DEL - APLASTADO, 0); g.add(tras); }
     for (const s of [1, -1]) { const d = rueda(F.R_LAT, F.ANCHO_NEU_LAT, M, 'rueda-direccion'); d.position.set(F.X_LAT, F.R_LAT - APLASTADO, s * F.VIA_LAT / 2); d.userData.lado = s; g.add(d); }
@@ -222,12 +222,12 @@ const Y_FLOTACION_POD = 0.39;
 /** Radius of the reference lateral wheel (20″): the pod is drawn for it. */
 const R_LAT_REF = 0.254;
 export function carenados(F: FormaBala, M: Mats, trasero = false): THREE.Group {
-  // `trasero` (2026-11-11, the «Bala de cuatro ruedas»): the rear pods, from the rear pods' view of the shape; named
+  // `trasero` (2026-11-11, the «Cuadriciclo Bala clásico»): the rear pods, from the rear pods' view of the shape; named
   // apart and without `lado`, so the viewer never steers them
   const g = new THREE.Group(); g.name = trasero ? 'carenados-traseros' : 'carenados';
   const POD = podDe(F), k = F.R_LAT / R_LAT_REF, Y_FLOT = Y_FLOTACION_POD + F.dSuelo * 0.6, semiAnchoPod = semiAncho(POD);
   const casco = piel(POD, { N: 56, sub: 6 });
-  // the pod's ends (the Triciclo's pods change length: read from the pod itself; the Cuadriciclo's stay the drawn numbers)
+  // the pod's ends (the Triciclo's pods change length: read from the pod itself; the Cuadriciclo en rombo's stay the drawn numbers)
   const o = F.D.pod, xP0 = o ? POD[0].x - 1e-4 * k : 0.3849 * k, xP1 = o ? POD[POD.length - 1].x + 1e-4 * k : -0.5499 * k, xLuz = o ? POD[0].x : 0.385 * k;
   // navy below the body's waterline (0.39 m at the pods), so the line runs on across them
   const falda = parcheM(POD, xP0, xP1, e => {

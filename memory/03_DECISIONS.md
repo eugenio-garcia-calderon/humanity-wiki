@@ -1470,3 +1470,7 @@ Dependent ranges, all measured on this model:
 - **Motors:** two hub motors at half power each, by the same kg/kW rule. The `tMMotor` slider is both together, with a range of `[2·(3 + 0.45·p/2), 2·(8 + 0.9·p/2)]`. The stored value is kept: «mismas medidas».
 - **Rear track minimum:** the narrowest track whose rear pods clear the tail by 3 cm (`viaTraseraMinima`, cached per shape). It is a slider range, not a silent raise like the front's `viaSubida`. The rear pods do not steer, so nothing moves into the body.
 - **Frame:** unchanged. The rear arms meet the skin at the rear axle, as the front arms meet it at the cradle. See tech debt.
+
+## 2026-11-12 · Four-wheel Bala renamed «Cuadriciclo Bala clásico»; the rombo family «Cuadriciclo Bala en rombo»
+
+Eugenio chose the names after being told «Cuadriciclo Bala» was already taken by the rombo family. Display names change in code (`nombreDe`, `nombreTriciclo`, tunnel bodies, page header, STL file names); stored design names change in migration 0198 for team rows only (visitor rows keep their author's names). Bare «Cuadriciclo» in Triciclo texts now reads «Cuadriciclo en rombo», since there are now two cuadriciclos. Migration 0198 also re-copies the saved Triciclo's `parametros` onto the four-wheel team row (same source rule as 0197) and drops its `tViaTras`, so it opens with rear track = front track; it reports the source row and values with `RAISE NOTICE` in the deploy log, because the production database cannot be read from the agents' containers.

@@ -11,14 +11,14 @@
 //
 // THE SHAPE IS THE CUADRICICLO'S: the same parametrised code (garaje/balaForma.ts,
 // balaMedidas.ts), fed with this vehicle's own `t…` fields. With the defaults
-// the body (skin, canopy, nose, tail, fin, livery, lamps) is the Cuadriciclo
+// the body (skin, canopy, nose, tail, fin, livery, lamps) is the Cuadriciclo en rombo
 // Bala's default body to the last vertex (scripts/triciclo-disenos.ts checks it).
 // What changes is the wheels: a tadpole layout.
 //   · No front centre wheel. Where it was (the nose, around the front axle)
 //     goes the battery: low and as far forward as it fits, which is where a
 //     three-wheeler with two wheels in front wants its weight (see `vuelco`).
 //   · Two front wheels in Aptera-like pods on streamlined arms, beside the
-//     front of the body, at the front axle (x = 0, where the Cuadriciclo's
+//     front of the body, at the front axle (x = 0, where the Cuadriciclo en rombo's
 //     front wheel was). They steer, and the pods turn with them, as on the
 //     Aptera: a fixed pod with room for a 28° lock inside would be twice as
 //     wide. The check is that the turned pod clears the body.
@@ -39,14 +39,14 @@ import {
 
 /** Los parámetros propios del Triciclo (prefijo `t`). Opcionales en `Parametros`: los diseños de los otros tres vehículos no los llevan. */
 export interface CamposTriciclo {
-  // Carrocería: la forma del Cuadriciclo
+  // Carrocería: la forma del Cuadriciclo en rombo
   tAncho: number; tSuelo: number; tMorro: number; tPuntaMorro: number; tCola: number; tPuntaCola: number; tAleta: number;
   tCupIni: number; tCupFin: number; tAlto: number;
   // Carrocería: techo solar y ventanas (2026-11-10, segunda versión). Opcionales al guardar: un diseño de antes los toma por defecto.
-  tSolar: number;      // dónde empieza el panel solar, detrás de donde iba la rueda delantera del Cuadriciclo (m); al máximo, sin panel
+  tSolar: number;      // dónde empieza el panel solar, detrás de donde iba la rueda delantera del Cuadriciclo en rombo (m); al máximo, sin panel
   tVentAlto: number;   // alto de la ventana lateral: fracción del costado de cristal, de su borde de abajo a lo alto; encima, el techo
-  tVentanas: 'marco' | 'burbuja';   // ventanas laterales con montante (como el Aptera) o una cúpula de una pieza (como el Cuadriciclo)
-  tPilar: number;      // pie del montante delantero, detrás de donde iba la rueda delantera del Cuadriciclo (m)
+  tVentanas: 'marco' | 'burbuja';   // ventanas laterales con montante (como el Aptera) o una cúpula de una pieza (como el Cuadriciclo en rombo)
+  tPilar: number;      // pie del montante delantero, detrás de donde iba la rueda delantera del Cuadriciclo en rombo (m)
   tPilarBarrido: number;   // cuánto más atrás llega el montante arriba, donde se junta con el techo (m)
   tPilarAncho: number; // ancho del montante (m)
   // Carrocería: carenados de las ruedas delanteras, brazos y faldón trasero
@@ -54,7 +54,7 @@ export interface CamposTriciclo {
   tPodAncho: number;   // anchura del carenado (×)
   tPodCola: number;    // largo de la cola del carenado, detrás del eje (×)
   tBrazo: number;      // cuerda del carenado del brazo de arriba (m)
-  tFaldon: number;     // faldón de la rueda trasera: 0 sin faldón (asoma como en el Cuadriciclo) · 1 cerrado hasta 4 cm del suelo
+  tFaldon: number;     // faldón de la rueda trasera: 0 sin faldón (asoma como en el Cuadriciclo en rombo) · 1 cerrado hasta 4 cm del suelo
   // Carrocería: material
   tMatCarenado: MaterialCarenado; tEspCarenado: number; tEspCristal: number;   // mm
   // Interior
@@ -73,13 +73,13 @@ export interface CamposTriciclo {
   // Chasis
   tChMat: MaterialChasis; tChD: number; tChT: number; tChUniones: number;   // mm, mm, kg
   // Rodaje
-  tBatalla: number;    // la batalla de la carrocería (del Cuadriciclo): de donde iba su rueda delantera al eje trasero (m)
-  tEjeDel: number;     // eje delantero: cuánto va detrás de donde iba la rueda delantera del Cuadriciclo (m)
+  tBatalla: number;    // la batalla de la carrocería (del Cuadriciclo en rombo): de donde iba su rueda delantera al eje trasero (m)
+  tEjeDel: number;     // eje delantero: cuánto va detrás de donde iba la rueda delantera del Cuadriciclo en rombo (m)
   tVia: number; tRuedaDel: RuedaTriciclo; tRuedaTras: RuedaTriciclo;
   tGiro: number;       // giro máximo de la rueda delantera de dentro (°)
   tRecDel: number; tRecTras: number;   // recorrido de la suspensión (mm)
   tBasculante: number; // largo del basculante trasero (m)
-  // The «Bala de cuatro ruedas» (2026-11-11, Eugenio: «haz un vehículo igual que el triciclo bala, pero esta vez que
+  // The «Cuadriciclo Bala clásico» (2026-11-11, Eugenio: «haz un vehículo igual que el triciclo bala, pero esta vez que
   // tenga 4 ruedas»). Optional when saved: a design without them has one rear wheel, and its rear track is its front one.
   tTraseras: 'una' | 'dos';   // una rueda trasera en la cola (triciclo) o dos en carenados (cuatro ruedas)
   tViaTras: number;    // vía trasera, centro a centro de las dos ruedas traseras (m); solo con 'dos'
@@ -121,22 +121,22 @@ export const DEPS_TRICICLO: DepTriciclo[] = ['carroceria', 'interior', 'chasis',
 /** Lo que es cada departamento en el Triciclo (los lemas del Aeromóvil 1 hablan de sus piezas, no de estas). */
 export const LEMAS_TRICICLO: Record<DepTriciclo | 'proyecto', string> = {
   proyecto: 'el resumen: comprobaciones, peso, consumo y vuelco',
-  carroceria: 'la piel del Cuadriciclo, techo solar y ventanas, carenados y material',
+  carroceria: 'la piel del Cuadriciclo en rombo, techo solar y ventanas, carenados y material',
   interior: 'los asientos (a horcajadas o en tres filas que se pliegan), manillar, plataformas y maletero',
   chasis: 'el bastidor de tubos dentro de la carrocería',
   rodaje: 'ejes, vía, ruedas, suspensión y dirección',
   propulsion: 'el motor en el buje de la rueda trasera',
   energia: 'la batería (morro, pies y bajo los sillines) y el techo solar',
 };
-/** The «Bala de cuatro ruedas» (2026-11-11): its name and its departments' one-liners where they differ. */
+/** The «Cuadriciclo Bala clásico» (2026-11-11): its name and its departments' one-liners where they differ. */
 export const esCuatro = (T: Pick<CamposTriciclo, 'tTraseras'>) => T.tTraseras === 'dos';
-export const nombreTriciclo = (T: Pick<CamposTriciclo, 'tTraseras'>) => esCuatro(T) ? 'Bala de cuatro ruedas' : 'Triciclo Bala';
+export const nombreTriciclo = (T: Pick<CamposTriciclo, 'tTraseras'>) => esCuatro(T) ? 'Cuadriciclo Bala clásico' : 'Triciclo Bala';
 export const lemasTriciclo = (T: Pick<CamposTriciclo, 'tTraseras'>): Record<DepTriciclo | 'proyecto', string> => esCuatro(T)
   ? { ...LEMAS_TRICICLO, propulsion: 'los dos motores en los bujes de las ruedas traseras' }
   : LEMAS_TRICICLO;
 export type Unidad = 'm' | 'cm' | 'mm' | '°' | 'kg' | 'kW' | 'kWh' | 'Wh/kg' | 'Wh/L' | 'km/h' | 'x' | 'kg/m²';
 /**
- * Un deslizador del Triciclo. `bala`: la forma es la del Cuadriciclo, y su
+ * Un deslizador del Triciclo. `bala`: la forma es la del Cuadriciclo en rombo, y su
  * etiqueta, su rango y su paso se leen de su tabla (DESLIZADORES_BALA), no se
  * copian. `centrar`: el deslizador se recoloca con el valor por defecto en
  * medio (como todos en el editor); no, cuando el valor por defecto no es el
@@ -146,8 +146,8 @@ export interface FichaTriciclo { clave: ClaveNumTriciclo; n: string; dep: DepTri
 export interface SelectorTriciclo { clave: ClaveTexto; n: string; dep: DepTriciclo; bloque: string; opciones: { k: string; n: string }[] }
 
 type Fila = [ClaveNumTriciclo, DepTriciclo, string, ClaveBala | null, string, number, number, number, Unidad];
-// [clave, departamento, bloque, del Cuadriciclo, etiqueta, mín, máx, paso, unidad]
-// A row «del Cuadriciclo» takes its label from that table, and its range too when mín = máx = 0; since round two
+// [clave, departamento, bloque, del Cuadriciclo en rombo, etiqueta, mín, máx, paso, unidad]
+// A row «del Cuadriciclo en rombo» takes its label from that table, and its range too when mín = máx = 0; since round two
 // (2026-11-10, «lo has diseñado para algo muy pequeñito») most of them carry a wider range of their own.
 const FILAS: Fila[] = [
   ['tAncho', 'carroceria', 'Forma', 'bAncho', '', 0.77, 1.30, 0.01, 'm'],
@@ -220,7 +220,7 @@ let FICHAS: FichaTriciclo[] | null = null;
 /**
  * The Triciclo's sliders: ONE table, read by the page (Aeromovil.tsx) and by the
  * tunnel's improvement options (tunel/explicaciones.ts). Built on first use: the
- * shape rows read the Cuadriciclo's table, and a module cycle through
+ * shape rows read the Cuadriciclo en rombo's table, and a module cycle through
  * geometria.ts must not find it half-built.
  */
 export function deslizadoresTriciclo(): FichaTriciclo[] {
@@ -232,7 +232,7 @@ export function deslizadoresTriciclo(): FichaTriciclo[] {
   }));
 }
 /**
- * The shape's lengths along the car are stored as the Cuadriciclo's, measured from
+ * The shape's lengths along the car are stored as the Cuadriciclo en rombo's, measured from
  * where ITS front wheel is (x = 0), so that the defaults give its body exactly.
  * The Triciclo's own front axle is `tEjeDel` further back: these sliders show
  * and take their value from that axle, so «al eje delantero» is true for this
@@ -249,7 +249,7 @@ export const guardarTriciclo = (f: FichaTriciclo, v: number, T: CamposTriciclo) 
 export const fichaTriciclo = (k: ClaveNumTriciclo) => deslizadoresTriciclo().find(f => f.clave === k);
 const ruedas = (l: RuedaTriciclo[]) => l.map(k => ({ k, n: RUEDAS_TRICICLO[k].n }));
 export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
-  { clave: 'tVentanas', n: 'Cúpula', dep: 'carroceria', bloque: 'Techo solar y ventanas', opciones: [{ k: 'marco', n: 'Ventanas laterales con montante (Aptera)' }, { k: 'burbuja', n: 'De una pieza (como el Cuadriciclo)' }] },
+  { clave: 'tVentanas', n: 'Cúpula', dep: 'carroceria', bloque: 'Techo solar y ventanas', opciones: [{ k: 'marco', n: 'Ventanas laterales con montante (Aptera)' }, { k: 'burbuja', n: 'De una pieza (como el Cuadriciclo en rombo)' }] },
   { clave: 'tAsientos', n: 'Asientos', dep: 'interior', bloque: 'Asientos', opciones: [{ k: 'horcajadas', n: 'A horcajadas (2 plazas)' }, { k: 'filas', n: 'Tres filas: 1 + 2 + 1 (4 plazas)' }] },
   { clave: 'tFila2', n: 'Fila 2 (dos asientos juntos)', dep: 'interior', bloque: 'Tres filas', opciones: [{ k: 'abierta', n: 'Abierta: dos pasajeros' }, { k: 'plegada', n: 'Plegada: maletero' }] },
   { clave: 'tFila3', n: 'Fila 3 (un asiento pequeño)', dep: 'interior', bloque: 'Tres filas', opciones: [{ k: 'abierta', n: 'Abierta: un pasajero' }, { k: 'plegada', n: 'Plegada: maletero' }] },
@@ -308,7 +308,7 @@ export const ALTO_FILAS = 1.56;
 const RESPALDO_FILA3 = 0.22;
 /** The canopy ends at least this far behind row 3's hips (m), so that its falling line still clears that head. */
 const CUPULA_TRAS_FILA3 = 0.62;
-/** Row 3's hips behind where the Cuadriciclo's front wheel is (m, positive backwards). */
+/** Row 3's hips behind where the Cuadriciclo en rombo's front wheel is (m, positive backwards). */
 export const distanciaFila3 = (T: CamposTriciclo) => limitarTriciclo('tPilX', T) + limitarTriciclo('tFila2X', T) + limitarTriciclo('tFila3X', T);
 
 /** Los parámetros del Triciclo de un diseño: lo guardado (si es del tipo correcto y, en los selectores, una opción que existe) y lo que falte, el de por defecto. */
@@ -320,7 +320,7 @@ export function camposTriciclo(P: Partial<Parametros>): CamposTriciclo {
     const sel = SELECTORES_TRICICLO.find(s => s.clave === k);
     if (typeof v === 'string' && sel?.opciones.some(x => x.k === v)) o[k] = v;
   }
-  // a design saved without a rear track (every one before the «Bala de cuatro ruedas») takes its front one
+  // a design saved without a rear track (every one before the «Cuadriciclo Bala clásico») takes its front one
   const vt = (P as Record<string, unknown>).tViaTras;
   if (!(typeof vt === 'number' && Number.isFinite(vt))) o.tViaTras = o.tVia;
   return o as unknown as CamposTriciclo;
@@ -329,7 +329,7 @@ export function camposTriciclo(P: Partial<Parametros>): CamposTriciclo {
 /**
  * El rango de un deslizador para estos parámetros. Cuatro dependen de otro: la
  * cúpula acaba al menos 25 cm por delante del eje trasero y el pasajero va entre
- * 40 y 62 cm detrás del piloto (los dos, como en el Cuadriciclo); la potencia
+ * 40 y 62 cm detrás del piloto (los dos, como en el Cuadriciclo en rombo); la potencia
  * máxima no baja de la nominal; y el carenado pequeño no puede ser además
  * estrecho ni corto (el neumático dejaría de caber).
  */
@@ -426,7 +426,7 @@ export function medidasTriciclo(T: CamposTriciclo) {
   const D: DimBala = {
     batalla: L('tBatalla'), morro: L('tMorro'), cola: L('tCola'), ancho: L('tAncho'), alto: L('tAlto'), suelo, ...(elevar > 0 ? { elevar } : {}),
     cupIni: L('tCupIni'), cupFin: L('tCupFin'), puntaMorro: L('tPuntaMorro'), puntaCola: L('tPuntaCola'),
-    // the Cuadriciclo's «front and rear» wheel is our rear one; its «lateral» wheels, our front ones
+    // the Cuadriciclo en rombo's «front and rear» wheel is our rear one; its «lateral» wheels, our front ones
     rDel: rTras, rLat: rDel, anchoNeu: wTras.neuTras, anchoNeuLat: wDel.neuDel, via: L('tVia'),
     xLat: -L('tEjeDel'), pod: { esc: L('tPodEsc'), ancho: L('tPodAncho'), cola: L('tPodCola') }, cuerdaBrazo: L('tBrazo'),
   };
@@ -445,7 +445,7 @@ export function medidasTriciclo(T: CamposTriciclo) {
 // ------------------------------------------------------------------ cuatro ruedas (2026-11-11)
 /**
  * Eugenio: «Haz un vehículo igual que el triciclo bala, pero esta vez que tenga 4 ruedas… con las mismas medidas».
- * The «Bala de cuatro ruedas» is a Triciclo with `tTraseras: 'dos'`: the same body to the last vertex, the same front
+ * The «Cuadriciclo Bala clásico» is a Triciclo with `tTraseras: 'dos'`: the same body to the last vertex, the same front
  * pods, and instead of the one wheel in the tail, two rear wheels in pods mirroring the front ones (outboard, the
  * same skin, the same two faired arms from the body) that do not steer.
  *
@@ -463,7 +463,7 @@ export function formaTrasera(F: FormaBala, r: number, neu: number, via: number):
 /** One cached body per shape (the rear track's minimum asks for it on every slider read). */
 let cacheMinima: { clave: string; v: number } | null = null;
 /**
- * The narrowest rear track (m, to the cm) whose rear pods leave 3 cm to the body (as the Cuadriciclo's laterals):
+ * The narrowest rear track (m, to the cm) whose rear pods leave 3 cm to the body (as the Cuadriciclo en rombo's laterals):
  * the pods' inner face against the tail at the rear axle, all along the pod and up its height.
  */
 export function viaTraseraMinima(T: CamposTriciclo): number {
@@ -516,7 +516,7 @@ export function huecoGiro(F: FormaBala, giro: number): number {
  * en el Aeromóvil 1: el tronco se inclina entero y la cabeza un tercio (el cuello
  * la endereza). Cadera 10,8 cm sobre el sillín, hombros 50 cm por el tronco y la
  * cabeza 20 cm más allá por el cuello: con la talla media y el tronco erguido son
- * los 91,8 cm sentado del percentil 50 (ANSUR II), como en el Cuadriciclo.
+ * los 91,8 cm sentado del percentil 50 (ANSUR II), como en el Cuadriciclo en rombo.
  * Manos en los puños (piloto) o en el asidero (pasajero); pies en las plataformas
  * o en los estribos. `escala` 1 es la talla media.
  */
@@ -574,7 +574,7 @@ export interface Caja { nombre: string; x0: number; x1: number; y0: number; y1: 
 export const Z_LARGUERO = 0.11;
 /**
  * El paquete de batería, sobre los largueros. Se llena por orden:
- *   1. un módulo ancho en el morro, donde iba la rueda delantera del Cuadriciclo (20 cm de alto);
+ *   1. un módulo ancho en el morro, donde iba la rueda delantera del Cuadriciclo en rombo (20 cm de alto);
  *   2. un módulo estrecho entre los pies del piloto, hasta 2 cm del morro de su sillín;
  * y desde la segunda versión (2026-11-10, «una batería más potente», hasta 30 kWh):
  *   3. el módulo del morro sube hasta 26 cm (por encima van la cremallera de la dirección y el salpicadero);
@@ -589,7 +589,7 @@ function bateriaEn(F: FormaBala, T: CamposTriciclo, yBase: number, lim: { xSilli
   const alto = 0.20, alto2 = 0.26, partido = -0.30;
   // the nose module widens with a wider body (never narrower than today's 30 cm)
   const aF = 0.30 * Math.max(1, F.kW), aR = 0.18, aU = 0.10;
-  // its front face at 12 cm ahead of the Cuadriciclo's front wheel, or further back where a low, short nose has no room there
+  // its front face at 12 cm ahead of the Cuadriciclo en rombo's front wheel, or further back where a low, short nose has no room there
   const cabeFrente = (x: number, h: number) => [yBase, yBase + h].every(y => [-aF / 2, aF / 2].every(z => dentroDe(F, x, y, z) > 0));
   let delante = 0.12; while (delante > partido + 0.1 && !cabeFrente(delante, alto)) delante -= 0.005;
   const Vmax = (delante - partido) * aF * alto;
