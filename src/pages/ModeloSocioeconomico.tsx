@@ -25,7 +25,8 @@
 // PÁGINA PROPIA: outside the platform Layout, like /conciencia.
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageSquarePlus, Pause, Play } from 'lucide-react';
+import { Maximize2, MessageSquarePlus, Minimize2, Pause, Play } from 'lucide-react';
+import { useIntegracion } from '../components/sitio/AplicacionIncrustada';
 import '@fontsource-variable/public-sans';
 import {
   ESCALA, ESCALAS, TRAMOS, TOTAL_FIGURAS, EJEMPLO_INICIAL, type EscalaId, type Modo, type Ejemplo,
@@ -88,12 +89,14 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
     : <a href={inicioLuz} className="underline decoration-slate-300 underline-offset-2 hover:text-slate-900">Luz &amp; Humanidad</a>;
 
   const sel = anillo ? ESCALA[anillo] : null;
+  // On a luzhumanidad.com page: sit under the site bar, and offer full screen.
+  const integracion = useIntegracion();
   const selNivel = nivel ? ESCALA[nivel] : null;
 
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 antialiased" style={{ fontFamily: '"Public Sans Variable", ui-sans-serif, system-ui, sans-serif' }}>
       {/* ── Top band: what this is, who makes it, where to go, the mailbox ── */}
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur" style={integracion ? { top: integracion.altoBarra } : undefined}>
         <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-2.5 sm:px-6 min-[1700px]:max-w-none">
           <a href="#inicio" className="min-w-0 leading-tight">
             <span className="block text-[15px] font-bold tracking-tight">Modelo socioeconómico optimizado</span>
@@ -107,6 +110,13 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
           <Boton onClick={() => setVerBuzon(true)} className="ml-auto shrink-0 min-[1700px]:ml-0">
             <MessageSquarePlus className="h-4 w-4" /><span className="sm:hidden">Proponer</span><span className="hidden sm:inline">Proponer una mejora</span>
           </Boton>
+          {integracion && (
+            <Boton onClick={integracion.alternar} aria-pressed={integracion.completa} className="shrink-0"
+              title={integracion.completa ? 'Salir de pantalla completa' : 'Pantalla completa'}>
+              {integracion.completa ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+              <span className="sr-only sm:not-sr-only min-[1700px]:sr-only">{integracion.completa ? 'Salir de pantalla completa' : 'Pantalla completa'}</span>
+            </Boton>
+          )}
         </div>
         {/* Phones: the list scrolls sideways; the fade on the right says there is more. */}
         <div className="relative border-t border-slate-100 min-[1700px]:hidden">
