@@ -90,7 +90,10 @@ for (const [nI, nJ] of [[24, 12], [40, 16]]) {
   const cerrados = filas.filter(f => f.cerrado), aj = ajustar(cerrados), aj2 = ajustar(cerrados, true);
   console.log(`  ajuste (coches cerrados, K_BASE = ${CONSTANTES.K_BASE} y K_RUEDA = ${CONSTANTES.K_RUEDA} fijas): DCD_DETALLES = ${aj.dd.toFixed(4)}  ·  en arrastre.ts: ${CONSTANTES.DCD_DETALLES}`);
   console.log(`  (si también se ajustara K_BASE: K_BASE = ${aj2.kb.toFixed(3)}, DCD_DETALLES = ${aj2.dd.toFixed(4)}; no se usa)`);
-  ok(Math.abs(aj.dd - CONSTANTES.DCD_DETALLES) < 0.0011, 'la constante de arrastre.ts es la del ajuste');
+  // 2026-11-12: the fit is checked against the last recorded one (CALIBRACION.ajusteActual), so a silhouette that
+  // changes again still fails; the constant in use differs from it by Eugenio's decision, which is only a warning.
+  ok(Math.abs(aj.dd - CALIBRACION.ajusteActual.dcd) < 0.0011, `el ajuste es el guardado en calibracion.ts (ajusteActual ${CALIBRACION.ajusteActual.dcd})`);
+  if (Math.abs(aj.dd - CONSTANTES.DCD_DETALLES) >= 0.0011) console.log(`AVISO la constante en uso (arrastre.ts, ${CONSTANTES.DCD_DETALLES}) no es la del ajuste de hoy (${aj.dd.toFixed(4)}): decisión de Eugenio del ${CALIBRACION.ajusteActual.fecha}, para no mover el Cd de nuestros diseños`);
   console.log('  coche                              publicado  estimado  error   sin ese coche en el ajuste');
   const loo: number[] = [];
   for (const f of filas) {
@@ -102,7 +105,8 @@ for (const [nI, nJ] of [[24, 12], [40, 16]]) {
   }
   const rms = Math.sqrt(loo.reduce((s, e) => s + e * e, 0) / loo.length);
   console.log(`  banda (error medio cuadrático dejando cada coche cerrado fuera del ajuste): ±${(rms * 100).toFixed(0)} %  ·  en calibracion.ts: ±${(CALIBRACION.banda * 100).toFixed(0)} %`);
-  ok(Math.abs(rms - CALIBRACION.banda) < 0.011, 'la banda de calibracion.ts es la de esta prueba');
+  ok(Math.abs(rms - CALIBRACION.ajusteActual.banda) < 0.011, `la banda del ajuste es la guardada en calibracion.ts (ajusteActual ±${(CALIBRACION.ajusteActual.banda * 100).toFixed(0)} %)`);
+  if (Math.abs(rms - CALIBRACION.banda) >= 0.011) console.log(`AVISO la banda en uso (±${(CALIBRACION.banda * 100).toFixed(0)} %) es más ancha que la de hoy (±${(rms * 100).toFixed(0)} %): se mantiene a propósito (decisión de Eugenio del ${CALIBRACION.ajusteActual.fecha})`);
   for (const f of filas) {
     const g = CALIBRACION.coches.find(c => c.id === f.id);
     const sinEl = f.cerrado ? (() => { const a2 = ajustar(cerrados.filter(x => x.id !== f.id)); return f.base + a2.kb * f.b + CONSTANTES.K_RUEDA * f.r + a2.dd; })() : f.est;
