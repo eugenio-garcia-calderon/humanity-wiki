@@ -11175,3 +11175,7 @@ Eugenio: «llamado Observatorio de Polarización Política, y permite que si se 
 ### 2026-11-12 — Proyecto «Optimización del sistema de energía» con Suntropy; la cadena de valor solar dentro
 - `drizzle/0205_optimizacion_sistema_energia.sql`: fila nueva en Proyectos (En curso, 2022, Energía; equipo Pablo Sánchez y Eugenio) y su página `KWOPTIMENERGIA1`: arriba la inversión de 2022 en Suntropy (pionera en España en optimización) con la foto de Pablo Sánchez y enlace a su página, qué optimiza Suntropy y enlace a suntropy.ai. «Cadena de valor solar» pasa a ser su subelemento (sale de la rejilla de la portada).
 - `CadenaSolar.tsx`: tarjeta de Suntropy con la foto de Pablo al principio de «Qué hacemos», enlazada al proyecto madre; el reparto ya no fija la distancia en 2 km (la página de Comunidades energéticas dice 5 km).
+
+## 2026-11-12 — Modelo socioeconómico: compact top menu
+
+- Eugenio: «compacta todavía más el menú superior». The project-name row is gone (the name stays in the cover and the footer): the windows are the first row, with a small full-screen icon at its end; the sections are the second row. Header height 74 px (was ≈ 150). «Proponer una mejora» is a floating button at the bottom right (icon only on phones).
