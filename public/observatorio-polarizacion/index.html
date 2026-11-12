@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 </head>
 <body>
-<title>Observatorio de Polarización</title>
+<title>Observatorio de Polarización Política</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Un modelo interactivo de las cinco posiciones políticas de la España actual: cómo piensan, cómo hablan, cómo se ven entre sí y hasta dónde escalan. Incluye un test para saber hacia dónde te escoras.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -727,6 +727,18 @@ h3{font:400 clamp(1.5rem,2.6vw,2rem)/1.15 var(--display);margin:0}
 @media (max-width:1000px){.refs-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:640px){.refs-grid{grid-template-columns:minmax(0,1fr)}}
 
+/* ---------- Edición de textos (solo administradores en humanity.wiki) ---------- */
+.ed-barra{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;max-width:calc(100% - 32px);padding:10px 14px;border-radius:16px;background:rgba(19,24,33,.96);border:1px solid var(--warn);box-shadow:0 18px 40px rgba(0,0,0,.5);font-size:13.5px}
+.ed-quien{font:500 11px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.ed-boton,.ed-rest{min-height:40px;padding:8px 14px;border-radius:999px;border:1px solid var(--ctl);background:transparent;color:var(--ink);font:600 13.5px var(--sans);cursor:pointer}
+.ed-boton[aria-pressed="true"]{background:var(--warn);border-color:var(--warn);color:#0C0F14}
+.ed-estado{color:var(--ink-2);min-width:0}
+.ed-estado.mal{color:var(--xl)}
+.editando .ed-on{outline:1px dashed rgba(246,190,59,.55);outline-offset:3px;border-radius:3px;cursor:text}
+.editando .ed-on:hover{outline-color:var(--warn)}
+.editando .ed-on:focus{outline:2px solid var(--warn);background:rgba(246,190,59,.08)}
+.editando footer{padding-bottom:90px}
+
 /* ---------- Método ---------- */
 .method{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
 .mcard2{padding:clamp(22px,3vw,30px);border-radius:18px;background:var(--bg-2);border:1px solid var(--line)}
@@ -896,7 +908,7 @@ footer p{margin:0;max-width:70ch}
 
 <header class="top" lang="es">
   <div class="top-in">
-    <a class="brand" href="#inicio"><span class="brand-mark" aria-hidden="true"></span><span class="brand-txt">Observatorio de Polarización</span></a>
+    <a class="brand" href="#inicio"><span class="brand-mark" aria-hidden="true"></span><span class="brand-txt">Observatorio de Polarización Política</span></a>
     <nav aria-label="Capítulos">
       <ol class="nav">
         <li><a href="#hoy">1 · Hoy</a></li>
@@ -917,7 +929,7 @@ footer p{margin:0;max-width:70ch}
 <!-- ============ PORTADA: SEIS CAPÍTULOS ============ -->
 <section id="inicio" class="hero" aria-labelledby="h-inicio">
   <div class="hero-text">
-    <p class="eyebrow">Observatorio de Polarización · España</p>
+    <p class="eyebrow">Observatorio de Polarización Política · España</p>
     <h1 id="h-inicio">Seis formas de mirar una sociedad dividida.</h1>
   </div>
   <div class="cards" id="cards">
@@ -2185,6 +2197,144 @@ const REFS = [
   }));
 })();
 
+
+/* ================= Textos editables por Eugenio desde humanity.wiki ================= */
+/* Cada frase escrita lleva una clave sacada de su texto original («observatorio.t-<hash>»),
+   así que da igual si la pinta el HTML o un módulo al pasar el ratón: la clave es la misma.
+   Los cambios viven en la tabla de textos editables de la plataforma (`/api/textos`): los lee
+   cualquiera (también en luzhumanidad.com) y solo los escribe un administrador con sesión en
+   humanity.wiki. Borrar un cambio devuelve el texto original. Fuera de la plataforma (vista
+   previa, archivo suelto) no hay /api y la página se queda con sus textos de siempre. */
+(function textosEditables() {
+  const PREFIJO = "observatorio.t-";
+  const EDITOR = "eugenio@lighthumanity.org";
+  const BLOQUE = new Set(["DIV", "P", "UL", "OL", "LI", "H1", "H2", "H3", "H4", "SECTION", "ARTICLE", "DL", "DT", "DD", "FIGURE", "BUTTON", "SVG", "CANVAS", "INPUT", "DETAILS", "SUMMARY", "HEADER", "BLOCKQUOTE", "TABLE"]);
+  const CANDIDATO = new Set(["H1", "H2", "H3", "H4", "P", "LI", "Q", "BLOCKQUOTE", "DD", "DT", "SPAN", "B", "I", "EM", "SMALL", "STRONG", "FIGCAPTION"]);
+  const EXCLUIR = "svg,button,canvas,input,label,.toggle-row,.lens-arcs,.nav,.sprite,.axis5,.cis-bars,.cis-ends,.segs,.ed-barra";
+  const PERMITIDAS = new Set(["B", "STRONG", "I", "EM", "Q", "SMALL", "BR", "SPAN"]);
+  let ov = {};          // clave → texto cambiado
+  let editando = false, puede = false;
+
+  const hash = (t) => { let h = 0x811c9dc5; for (let i = 0; i < t.length; i++) { h ^= t.charCodeAt(i); h = Math.imul(h, 0x01000193); } return (h >>> 0).toString(36); };
+  const normal = (html) => html.replace(/\s+/g, " ").trim();
+  // Solo marcas de texto, sin atributos: lo que se guarda lo ve todo el mundo.
+  function limpio(html) {
+    const t = document.createElement("template"); t.innerHTML = html;
+    (function paso(n) {
+      [...n.childNodes].forEach((c) => {
+        if (c.nodeType === 1) {
+          paso(c);
+          if (!PERMITIDAS.has(c.tagName)) c.replaceWith(...c.childNodes);
+          else [...c.attributes].forEach((a) => c.removeAttribute(a.name));
+        } else if (c.nodeType !== 3) c.remove();
+      });
+    })(t.content);
+    return normal(t.innerHTML);
+  }
+  const tieneTextoPropio = (el) => [...el.childNodes].some((c) => c.nodeType === 3 && c.textContent.trim().length > 1);
+  const esHoja = (el) => ![...el.children].some((c) => BLOQUE.has(c.tagName));
+  function marcar(raizNodo) {
+    const pila = [raizNodo];
+    while (pila.length) {
+      const el = pila.pop();
+      if (el.nodeType !== 1 || el.closest(EXCLUIR)) continue;
+      if (CANDIDATO.has(el.tagName) && tieneTextoPropio(el) && esHoja(el) && el.closest("main")) {
+        if (!el.dataset.t) { el.dataset.t = PREFIJO + hash(normal(el.innerHTML)); el.dataset.def = el.innerHTML; }
+        aplicar(el);
+        if (editando) activar(el);
+        continue; // sus hijos van con él
+      }
+      pila.push(...el.children);
+    }
+  }
+  function aplicar(el) {
+    const v = ov[el.dataset.t];
+    if (v != null && el.dataset.tv !== v) { el.innerHTML = limpio(v); el.dataset.tv = v; }
+  }
+  const obs = new MutationObserver((ms) => ms.forEach((m) => m.addedNodes.forEach((n) => { if (n.nodeType === 1) marcar(n.parentNode || n); })));
+
+  async function cargar(sinCache) {
+    try {
+      const r = await fetch("/api/textos" + (sinCache ? "?t=" + Date.now() : ""), { credentials: "same-origin" });
+      if (!r.ok || !(r.headers.get("content-type") || "").includes("json")) return;
+      const m = await r.json();
+      ov = Object.fromEntries(Object.entries(m).filter(([k]) => k.startsWith(PREFIJO)));
+      $$("[data-t]").forEach((el) => { delete el.dataset.tv; aplicar(el); });
+    } catch (e) { /* sin plataforma: textos originales */ }
+  }
+
+  // ---- Modo edición ----
+  let barra = null, actual = null;
+  function toast(t, mal) { const s = $(".ed-estado", barra); s.textContent = t; s.classList.toggle("mal", !!mal); }
+  function activar(el) {
+    if (el.isContentEditable) return;
+    el.contentEditable = "true"; el.spellcheck = true; el.classList.add("ed-on");
+  }
+  function desactivar() { $$(".ed-on").forEach((el) => { el.contentEditable = "false"; el.classList.remove("ed-on"); }); }
+  async function guardar(el) {
+    const clave = el.dataset.t, valor = limpio(el.innerHTML);
+    if (!clave || valor === limpio(el.dataset.tv || el.dataset.def || "")) return;
+    toast("Guardando…");
+    try {
+      const r = await fetch("/api/textos/" + encodeURIComponent(clave), { method: "PUT", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ valor }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) return toast(j.error || "No se ha podido guardar.", true);
+      ov[clave] = valor; el.dataset.tv = valor;
+      $$(`[data-t="${clave}"]`).forEach((o) => { if (o !== el) aplicar(o); });
+      toast("Guardado. Lo verá todo el mundo en uno o dos minutos.");
+    } catch (e) { toast("Sin conexión: no se ha guardado.", true); }
+  }
+  async function restaurar() {
+    if (!actual) return toast("Pulsa primero en una frase.");
+    const clave = actual.dataset.t;
+    if (ov[clave] == null) return toast("Esta frase ya es la original.");
+    try {
+      const r = await fetch("/api/textos/" + encodeURIComponent(clave), { method: "DELETE", credentials: "same-origin" });
+      if (!r.ok) return toast("No se ha podido restaurar.", true);
+      delete ov[clave];
+      $$(`[data-t="${clave}"]`).forEach((o) => { if (o.dataset.def != null) o.innerHTML = o.dataset.def; delete o.dataset.tv; });
+      toast("Restaurada: vuelve a verse el texto original.");
+    } catch (e) { toast("Sin conexión.", true); }
+  }
+  function alternar() {
+    editando = !editando;
+    $(".ed-boton", barra).textContent = editando ? "Terminar de editar" : "Editar textos";
+    $(".ed-boton", barra).setAttribute("aria-pressed", String(editando));
+    document.documentElement.classList.toggle("editando", editando);
+    if (editando) { $$("[data-t]").forEach((el) => { if (!el.dataset.orig) el.dataset.orig = el.innerHTML; activar(el); }); toast("Pulsa en cualquier frase y escribe. Se guarda al salir de ella."); }
+    else { desactivar(); toast(""); }
+  }
+  function montarBarra(nombre) {
+    barra = document.createElement("div");
+    barra.className = "ed-barra"; barra.setAttribute("role", "region"); barra.setAttribute("aria-label", "Edición de textos");
+    barra.innerHTML = `<span class="ed-quien">${nombre}</span><button type="button" class="ed-boton" aria-pressed="false">Editar textos</button><button type="button" class="ed-rest">Restaurar original</button><span class="ed-estado" aria-live="polite"></span>`;
+    document.body.appendChild(barra);
+    $(".ed-boton", barra).addEventListener("click", alternar);
+    $(".ed-rest", barra).addEventListener("click", restaurar);
+    // En modo edición, pulsar una frase dentro de un enlace o un botón no navega
+    document.addEventListener("click", (e) => { if (editando && e.target.closest && e.target.closest("[data-t]")) { const a = e.target.closest("a"); if (a) e.preventDefault(); } }, true);
+    document.addEventListener("focusin", (e) => { const el = e.target.closest && e.target.closest("[data-t]"); if (editando && el) actual = el; });
+    document.addEventListener("focusout", (e) => { const el = e.target.closest && e.target.closest("[data-t]"); if (editando && el) guardar(el); });
+    document.addEventListener("keydown", (e) => { const el = e.target.closest && e.target.closest("[data-t]"); if (editando && el && e.key === "Enter" && !e.shiftKey) { e.preventDefault(); el.blur(); } });
+  }
+  async function quienSoy() {
+    try {
+      const r = await fetch("/api/auth/me", { credentials: "same-origin" });
+      if (!r.ok) return;
+      const { user } = await r.json();
+      if (!user) return;
+      puede = String(user.email || "").toLowerCase() === EDITOR || (user.roleLevel ?? 0) >= 4;
+      if (!puede) return;
+      montarBarra(user.display_name || user.name || user.email || "Administrador");
+      cargar(true);
+    } catch (e) { /* sin plataforma */ }
+  }
+
+  marcar(document.querySelector("main") || document.body);
+  obs.observe(document.querySelector("main") || document.body, { childList: true, subtree: true });
+  cargar(false);
+  quienSoy();
+})();
 
 /* ================= Navegación ================= */
 (function nav() {
