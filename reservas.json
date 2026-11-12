@@ -1,10 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "r3-carroceria",
-      "ruta": "drizzle/0212_aeromovil_clasico_carroceria.sql",
-      "motivo": "clásico round-3 body migration",
-      "desde": "2026-11-12T21:46:34.894Z"
-    }
-  ]
+  "reservas": []
 }
