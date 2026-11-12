@@ -3,7 +3,7 @@ import { E, loft } from './forma';
 import { barrido, curva, parcheM, piel, thetaY, torno } from './apteraPiel';
 import { APLASTADO, geometriasRueda } from './apteraDetalle';
 import { type FormaBala } from './balaForma';
-import { ALETA, ASIENTO, anchoSalpicadero, brazosDe, escalaManillar, podDe, semiAncho, techoEn, type Asientos } from './balaMedidas';
+import { ALETA, ASIENTO, BUTACA, anchoSalpicadero, brazosDe, escalaManillar, podDe, semiAncho, semiRespaldoButaca, techoEn, type Asientos } from './balaMedidas';
 export { ALETA, ASIENTO, POD, POD_SEMIANCHO, brazosDe, extremoManillar, podDe, techoEn, type Asientos } from './balaMedidas';
 
 /*
@@ -356,7 +356,13 @@ export interface CabinaTriciclo {
   alzaPas?: number;
   volante?: { c: [number, number]; r: number; inc: number } | null;
   cabezaDireccion?: [number, number, number];
-  salpicadero?: { x0: number; x1: number; yTop: number; yBajo: number; yBajoDel: number } | null;
+  salpicadero?: { x0: number; x1: number; yTop: number; yBajo: number; yBajoDel: number; blanco?: boolean } | null;
+  /**
+   * Round 3 interior (2026-11-12), absent = as before: two Aptera-style buckets in tandem instead of the saddle (hips x,
+   * cushion top y, recline), and the pilot's pedals (the ankle's x, the heel's height, each foot's z) instead of the footboards.
+   */
+  butacas?: AsientoCoche[];
+  pedales?: { x: number; talon: number; z: number } | null;
 }
 /** A car-style seat of the Triciclo's three rows (the same fields as geometriaTriciclo.ts `AsientoFila`). */
 export interface AsientoCoche { fila: 1 | 2 | 3; x: number; z: number; y: number; ancho: number; fondo: number; respaldo: number; rec: number; plegado: boolean }
@@ -414,7 +420,8 @@ export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO, t?: CabinaT
     Es(-1.745, 0.42, 0.472, 0.04, 0.055, 0.045, 2.2),
   ], { N: 48, sub: 6 });
   cajaUV(sillin, 0.5);
-  if (!t?.filas) g.add(malla(sillin, M.cuero, 'sillin'));
+  if (t?.butacas) for (const a of t.butacas) butaca(g, M, a);
+  else if (!t?.filas) g.add(malla(sillin, M.cuero, 'sillin'));
   else for (const a of t.filas) asientoCoche(g, M, a);
   // passenger backrest: a pad leaning back 12°, on two short posts
   {
@@ -427,7 +434,7 @@ export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO, t?: CabinaT
     if (!t) {
       const o = malla(pad, M.cuero, 'respaldo'); o.position.set(-1.80 + dxPas, 0.65 + dyPas, 0); o.rotation.z = 0.21; o.scale.z = kz; g.add(o);
       for (const z of [-0.09, 0.09]) { const p = new THREE.Mesh(new THREE.CylinderGeometry(0.011, 0.011, 0.2, 10), M.aluminio); p.position.set(-1.76 + dxPas, 0.49 + dyPas, z * kz); p.rotation.z = 0.21; g.add(p); }
-    } else if (!t.filas) {
+    } else if (!t.filas && !t.butacas) {
       // the Triciclo: each rider's backrest against their back, reclined about the hips (the pilot's narrower,
       // so the passenger's knees pass beside it), on two posts from the saddle
       const respaldo = (x0: number, y0: number, rec: number, ancho: number, base: [number, number]) => {
@@ -472,7 +479,7 @@ export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO, t?: CabinaT
     const capo = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.012, 0.21), M.carbono); capo.position.set(-0.43, 0.868 + piso, 0); capo.rotation.z = 0.75; g.add(capo);
     const pant = new THREE.Mesh(new THREE.PlaneGeometry(0.17, 0.085), M.pantalla); pant.position.set(-0.452, 0.85 + piso, 0); pant.rotation.set(0, -Math.PI / 2, 0); pant.rotateX(-0.82); g.add(pant);
   }
-  if (t?.salpicadero) salpicadero(g, F, M, t.salpicadero);
+  if (t?.salpicadero) { if (t.salpicadero.blanco) salpicaderoBlanco(g, F, M, t.salpicadero, t.volante ?? null); else salpicadero(g, F, M, t.salpicadero); }
   if (t?.volante) volante(g, M, t.volante, t.cabezaDireccion ?? [-0.44, 0.80 + piso, 0], !t.salpicadero);
   // handlebar: clamp on the steering head, bars swept back to the grips, levers ahead of them
   if (!t?.volante) {
@@ -492,7 +499,8 @@ export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO, t?: CabinaT
   }
   // pilot's footboards forward of the knees (toes up 20°), passenger's footpegs beside the pilot's hips
   const px = t ? t.pies[0] : 0, py = t ? t.pies[1] : 0;
-  for (const s of [1, -1]) {
+  if (t?.pedales) pedales(g, M, t.pedales);
+  if (!t?.butacas) for (const s of [1, -1]) {
     const tabla = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.012, 0.09), M.aluminio); tabla.position.set(-0.55 + dxPil + px, 0.205 + piso + py, s * 0.15 * kz); tabla.rotation.z = 0.35; g.add(tabla);
     const goma = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.006, 0.07), M.gomaMate); goma.position.set(-0.55 + dxPil + px, 0.214 + piso + py, s * 0.15 * kz); goma.rotation.z = 0.35; g.add(goma);
     if (t?.filas) continue;
@@ -502,7 +510,7 @@ export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO, t?: CabinaT
     const soporte = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.05, 0.06), M.aluminio); soporte.position.set(-1.30 + dxPas, 0.255 + piso + alza, s * 0.13 * kz); g.add(soporte);
   }
   // grab rail round the back of the passenger's seat (not with three rows)
-  if (!t?.filas) {
+  if (!t?.filas && !t?.butacas) {
     const p = (x: number, y: number, z: number) => new THREE.Vector3(x + dxPas, y + dyPas, z * kz);
     const riel = curva([p(-1.42, 0.49, 0.185), p(-1.54, 0.53, 0.20), p(-1.66, 0.555, 0.175), p(-1.73, 0.565, 0.10), p(-1.745, 0.568, 0), p(-1.73, 0.565, -0.10), p(-1.66, 0.555, -0.175), p(-1.54, 0.53, -0.20), p(-1.42, 0.49, -0.185)], 8);
     g.add(malla(barrido(riel, () => [0.012, 0.012], { lados: 10 }), M.aluminio, 'asidero'));
@@ -553,6 +561,101 @@ function salpicadero(g: THREE.Group, F: FormaBala, M: Mats, s: { x0: number; x1:
   };
   panel(Math.min(0.30, 2 * w - 0.2), 0.07, 0);
   if (w > 0.28) panel(0.14, 0.08, Math.min(0.24, w - 0.1));
+}
+/**
+ * Round 3 interior (2026-11-12, Eugenio: «los asientos por los bonitos como los de la Aptera»): a sculpted bucket in
+ * one light shell (the body's pearl white), a dark quilted cushion and backrest pad, the headrest grown out of the shell
+ * above a waist, wings at the shoulders and bolsters at the cushion's sides, on a slim pair of rails. Sizes: `BUTACA`
+ * (balaMedidas.ts), which the checks read too. Named 'butaca' (the cushion's shell) and 'respaldo-butaca'.
+ */
+function butaca(g: THREE.Group, M: Mats, a: AsientoCoche) {
+  const B = BUTACA, S = B.semi, o = new THREE.Group(); o.position.set(a.x, a.y, a.z); g.add(o);
+  // the seat pan's shell: a shallow rounded tub from the cushion's front edge back to the backrest's shell
+  const xs = [B.delante, B.delante - 0.03, 0.10, -0.08, -B.detras + 0.02, -B.detras];
+  const pan = loft(xs.map((x, i) => { const k = i === 0 ? 0.86 : i === xs.length - 1 ? 0.9 : 1; return E(x, -B.pan, 0.012 + (i === 0 ? -0.006 : 0), S.cojin * 0.78 * k, S.cojin * k, S.cojin * 0.94 * k, 3.4); }), { N: 40, sub: 4 });
+  o.add(malla(pan, M.chapa, 'butaca'));
+  // the cushion's pad, dark and quilted, sunk into the tub, and the white bolsters at its sides, rising to the rear
+  const cojin = loft([E(B.delante - 0.025, -0.012, 0.018, 0.15, 0.17, 0.16, 3), E(0.05, -0.012, 0.03, 0.16, 0.18, 0.17, 3.2), E(-B.bisagra + 0.01, -0.012, 0.026, 0.155, 0.175, 0.165, 3)], { N: 36, sub: 4 });
+  cajaUV(cojin, 0.35); o.add(malla(cojin, M.cuero, 'cojin-butaca'));
+  for (const s of [1, -1]) {
+    const flanco = loft([E(B.delante - 0.04, -0.01, 0.035, 0.02, 0.028, 0.02, 2.4), E(0.0, -0.01, 0.06, 0.028, 0.034, 0.026, 2.6), E(-B.bisagra, -0.01, 0.075, 0.03, 0.036, 0.028, 2.6)], { N: 24, sub: 4 });
+    flanco.translate(0, 0, s * (S.cojin - 0.035)); o.add(malla(flanco, M.chapa, 'flanco-butaca'));
+  }
+  // the slim base: two rails under the tub (the frame's posts meet them)
+  for (const s of [1, -1]) { const r = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.014, 0.025), M.grisOscuro); r.position.set(0.04, -B.pan - 0.007, s * 0.13); o.add(r); }
+  // the backrest, hinged at its front face's foot and reclined `rec`: shell, wings, headrest and its pad
+  const R = new THREE.Group(); R.name = 'respaldo-butaca'; R.position.set(-B.bisagra, 0, 0); R.rotation.z = a.rec * Math.PI / 180; o.add(R);
+  const H = B.respaldo, Hc = H + B.cabezal, gr = B.grueso;
+  const seccion = (x: number, k: number, y0: number, y1: number) => { const w = (h: number) => semiRespaldoButaca(h) * k; return E(x, y0, y1, w(y0), w((y0 + y1) / 2), w(y1), 3.6); };
+  const concha = loft([seccion(0.004, 0.94, -0.03, H - 0.01), seccion(-0.012, 1, -0.045, H), seccion(-gr + 0.012, 1, -0.045, H), seccion(-gr, 0.92, -0.03, H - 0.015)], { N: 44, sub: 3 });
+  R.add(malla(concha, M.chapa, 'respaldo-butaca'));
+  // the headrest out of the same shell: a waist at the neck, then the head's pad
+  const cab = loft([0.0, -0.01, -gr + 0.015, -gr + 0.002].map((x, i) => { const k = i === 0 || i === 3 ? 0.9 : 1; return E(x, H - 0.05, Hc - (i === 0 || i === 3 ? 0.01 : 0), S.cuello * k, S.cabezal * k, S.cabezal * 0.86 * k, 3.2); }), { N: 40, sub: 3 });
+  R.add(malla(cab, M.chapa, 'cabezal-butaca'));
+  // the pads, dark, standing 2 cm proud of the shell's face; and the shoulder wings, a little forward of it
+  const pad = loft([E(0.022, 0.03, H - 0.07, 0.165, 0.17, 0.15, 3.2), E(0.006, 0.02, H - 0.06, 0.175, 0.18, 0.16, 3.2)], { N: 36, sub: 3 });
+  cajaUV(pad, 0.35); R.add(malla(pad, M.cuero, 'pad-butaca'));
+  const padCab = loft([E(0.016, H + 0.035, Hc - 0.035, 0.07, 0.08, 0.07, 3), E(0.002, H + 0.03, Hc - 0.03, 0.075, 0.085, 0.075, 3)], { N: 28, sub: 3 });
+  cajaUV(padCab, 0.35); R.add(malla(padCab, M.cuero, 'pad-cabezal'));
+  for (const s of [1, -1]) {
+    const ala = loft([E(0.03, 0.10, H - 0.12, 0.012, 0.02, 0.012, 2.4), E(0.0, 0.08, H - 0.10, 0.018, 0.026, 0.016, 2.4)], { N: 20, sub: 3 });
+    ala.translate(0, 0, s * (S.hombros - 0.02)); R.add(malla(ala, M.chapa, 'ala-butaca'));
+  }
+}
+/** Round 3 interior: the pilot's pedals: a heel plate on the floor and two pads (brake and accelerator) leaning back towards the feet. */
+function pedales(g: THREE.Group, M: Mats, p: { x: number; talon: number; z: number }) {
+  const placa = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.008, 2 * p.z + 0.12), M.grisOscuro); placa.position.set(p.x - 0.02, p.talon - 0.004, 0); placa.name = 'pedales'; g.add(placa);
+  for (const s of [1, -1]) {
+    const pad = new THREE.Mesh(new THREE.BoxGeometry(0.012, s > 0 ? 0.20 : 0.075, s > 0 ? 0.06 : 0.10), M.aluminio);
+    pad.position.set(p.x + 0.13, p.talon + (s > 0 ? 0.11 : 0.12), s * p.z); pad.rotation.z = 0.5; g.add(pad);
+    poste(g, new THREE.Vector3(p.x + 0.16, p.talon + 0.17, s * p.z), new THREE.Vector3(p.x + 0.24, p.talon + 0.30, s * p.z), 0.008, M.grisOscuro);
+  }
+}
+/**
+ * Round 3 interior (2026-11-12, Eugenio: «hace un salpicadero también más bonito, blanco y con más detalles»): the same
+ * volume as the plain dashboard (it follows the windscreen's foot, 2 cm inside the skin), in the body's pearl white, with
+ * a soft dark lip along its rear edge, an instrument binnacle facing the pilot, a centre screen floating on a stem, air
+ * vents at both ends and in the middle, a row of buttons, and, with a steering wheel, the column's shroud and two stalks.
+ */
+function salpicaderoBlanco(g: THREE.Group, F: FormaBala, M: Mats, s: { x0: number; x1: number; yTop: number; yBajo: number; yBajoDel: number }, v: { c: [number, number]; r: number; inc: number } | null) {
+  const est = [];
+  for (let i = 0; i <= 10; i++) {
+    const u = i / 10, x = s.x0 + (s.x1 - s.x0) * u, yb = s.yBajoDel + (s.yBajo - s.yBajoDel) * u * u, yt = s.yTop - 0.02 * Math.max(0, (u - 0.8) / 0.2) ** 2;
+    est.push(E(x, yb, yt, anchoSalpicadero(F, x, yb), anchoSalpicadero(F, x, (yb + yt) / 2), anchoSalpicadero(F, x, yt), 6));
+  }
+  g.add(malla(loft(est, { N: 64, sub: 4 }), M.chapa, 'salpicadero'));
+  const yM = (s.yTop + s.yBajo) / 2, w = anchoSalpicadero(F, s.x1, yM);
+  // the soft lip along the rear top edge
+  const labio = curva(Array.from({ length: 9 }, (_, i) => { const z = (i / 8 * 2 - 1) * (anchoSalpicadero(F, s.x1, s.yTop - 0.03) - 0.03); return new THREE.Vector3(s.x1 + 0.004, s.yTop - 0.022, z); }), 6);
+  g.add(malla(barrido(labio, () => [0.012, 0.009], { lados: 10 }), M.gomaMate, 'labio-salpicadero'));
+  // a facing panel on the rear face: (ancho, alto) at height y and z, leaning back 20°
+  const enCara = (o: THREE.Object3D, y: number, z: number, atras = 0) => { o.position.set(s.x1 - atras, y, z); o.rotation.set(0, -Math.PI / 2, 0); o.rotateX(-0.35); g.add(o); return o; };
+  // the instrument binnacle behind the wheel: a white hood over a wide display
+  const capucha = loft([E(0.0, -0.05, 0.035, 0.15, 0.16, 0.13, 3), E(-0.05, -0.04, 0.03, 0.15, 0.16, 0.13, 3), E(-0.075, -0.012, 0.02, 0.13, 0.14, 0.11, 3)], { N: 32, sub: 3 });
+  capucha.translate(s.x1, s.yTop - 0.015, 0); g.add(malla(capucha, M.chapa, 'relojes'));
+  enCara(new THREE.Mesh(new THREE.PlaneGeometry(0.26, 0.07), M.pantalla), s.yTop - 0.045, 0, 0.055);
+  // the centre screen, floating on a stem to the pilot's right, turned a little towards him
+  const zc = Math.min(0.27, w - 0.16);
+  if (zc > 0.17) {
+    const marco = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.15, 0.25), M.chapa); marco.position.set(s.x1 - 0.06, s.yTop + 0.04, zc); marco.rotation.set(0, 0.25, 0.30); marco.name = 'pantalla-central'; g.add(marco);
+    const pant = new THREE.Mesh(new THREE.PlaneGeometry(0.23, 0.13), M.pantalla); pant.position.copy(marco.position); pant.rotation.copy(marco.rotation); pant.rotateY(-Math.PI / 2); pant.translateZ(0.0075); g.add(pant);
+    poste(g, new THREE.Vector3(s.x1 - 0.02, s.yTop - 0.01, zc), marco.position.clone(), 0.012, M.grisOscuro);
+    // a row of buttons under it
+    for (let i = 0; i < 5; i++) { const b = new THREE.Mesh(new THREE.CylinderGeometry(0.009, 0.009, 0.008, 14), i % 2 ? M.aluminio : M.negroBrillo); b.rotation.z = Math.PI / 2 - 0.35; b.position.set(s.x1 - 0.004, yM - 0.03, zc - 0.08 + i * 0.04); g.add(b); }
+  }
+  // the vents: a dark rounded slot with three slats, at both ends and either side of the binnacle
+  for (const z of [w - 0.08, -(w - 0.08), 0.20, -0.20].filter(z => Math.abs(z) > 0.18 || w > 0.36)) {
+    const caja = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.045, 0.10), M.grisOscuro); enCara(caja, yM - 0.005, z, 0.004);
+    for (let k = -1; k <= 1; k++) { const l = new THREE.Mesh(new THREE.BoxGeometry(0.016, 0.004, 0.092), M.aluminio); enCara(l, yM - 0.005 + k * 0.013, z, 0.005); }
+  }
+  // with a wheel: the column's shroud from the dashboard to the hub, and the two stalks
+  if (v) {
+    const n = new THREE.Vector3(-Math.cos(v.inc), Math.sin(v.inc), 0), c = new THREE.Vector3(v.c[0], v.c[1], 0);
+    const a = c.clone().addScaledVector(n, -0.06), b = c.clone().addScaledVector(n, -Math.max(0.10, (s.x1 - v.c[0]) / Math.max(0.3, Math.cos(v.inc)) + 0.03));
+    const L = a.distanceTo(b), funda = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.06, L, 24), M.chapa);
+    funda.position.copy(a).add(b).multiplyScalar(0.5); funda.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize()); funda.name = 'funda-columna'; g.add(funda);
+    for (const z of [1, -1]) poste(g, a.clone().addScaledVector(n, -0.01).add(new THREE.Vector3(0, 0, z * 0.04)), a.clone().addScaledVector(n, -0.03).add(new THREE.Vector3(0, -0.01, z * 0.14)), 0.006, M.negroBrillo);
+  }
 }
 /** Box-projected UVs (metres / scale) so the quilting has a constant size. */
 function cajaUV(geo: THREE.BufferGeometry, escala: number) {

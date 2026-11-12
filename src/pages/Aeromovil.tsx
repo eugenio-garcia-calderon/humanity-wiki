@@ -34,7 +34,7 @@ import {
   type Comprobacion, type Disposicion, type MaterialCarenado, type MaterialChasis, type Modelo, type ModeloBala, type ModeloTriciclo, type Neumatico, type Parametros, type Puerta, type Pulgadas, type Resultados,
 } from '../components/aeromovil/geometria';
 import {
-  ALTO_FILAS, ANCHO_FILAS, AGARRE, AUXILIARES, CRR, DEPS_TRICICLO, RENDIMIENTO, RUEDAS_TRICICLO, SELECTORES_TRICICLO, USABLE, VUELCO_OBJETIVO, bateriaChasis, camposTriciclo, conPortonAptera, conPuertas, deslizadoresTriciclo, energiaTriciclo, esCuatro, estirarTriciclo, guardarTriciclo, largoTriciclo, lemasTriciclo, limitarTriciclo, nombreTriciclo, vistaTriciclo,
+  ALTO_FILAS, ANCHO_FILAS, AGARRE, AUXILIARES, CRR, DEPS_TRICICLO, EQUIPAJE, RENDIMIENTO, RUEDAS_TRICICLO, SELECTORES_TRICICLO, USABLE, VUELCO_OBJETIVO, bateriaChasis, camposTriciclo, cargasRueda, conButacas, conSalpicadero, grupoPieza, largueroAlEje, masaButaca, conPortonAptera, conPuertas, deslizadoresTriciclo, energiaTriciclo, esCuatro, estirarTriciclo, guardarTriciclo, largoTriciclo, lemasTriciclo, limitarTriciclo, nombreTriciclo, vistaTriciclo,
   type DepTriciclo, type FichaTriciclo,
 } from '../components/aeromovil/geometriaTriciclo';
 import { cuerpoTriciclo, peticionDe as peticionTunel } from '../components/aeromovil/tunel/nuestro';
@@ -671,6 +671,14 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
       case 'tCintura': return v < 0.005 ? 'en el borde del cristal' : `${cm(v, 0)} sobre el cristal`;
       case 'tBisagraY': return v < 0.2 ? `${Math.round(v * 100)} % · casi en el pie` : v > 0.8 ? `${Math.round(v * 100)} % · casi en el techo` : `${Math.round(v * 100)} % del montante`;
       case 'tBisagraInc': return v === 0 ? '0° (tangente al montante)' : `${v > 0 ? '+' : '−'}${Math.abs(v)}°`;
+      // round 3 interior: the running gear rises with the load (geometriaTriciclo.ts `dimensionar`); the rails' spacing, as built
+      case 'tMSuspDel': case 'tMSuspTras': case 'tMFreno': {
+        const n = f.clave === 'tMSuspDel' ? 'Suspensión delantera' : f.clave === 'tMSuspTras' ? (cuatro ? 'Suspensión trasera' : 'Basculante y amortiguador') : 'Frenos';
+        const real = (res.masas[n] ?? 0) / (f.clave === 'tMFreno' ? (cuatro ? 4 : 3) : 1);
+        return real > v + 0.05 ? `${fmt(v, 1)} → ${fmt(real, 1)} kg${f.clave === 'tMFreno' ? ' de media' : ''} (por la carga)` : `${fmt(v, 1)} kg`;
+      }
+      case 'tChSep': { const real = 2 * Math.abs(modelo.tubos.find(t => t.nombre.startsWith('Larguero der'))?.b[2] ?? v / 2); return Math.abs(real - v) > 0.005 ? `${cm(v, 0)} → ${cm(real, 0)} (carrocería estrecha)` : `${cm(v, 0)} de eje a eje`; }
+      case 'tMAsiento': return butacas ? `${fmt(v, 1)} kg · butaca ${fmt(masaButaca(v), 1)} kg` : `${fmt(v, 1)} kg`;
     }
     switch (f.unidad) {
       case 'm': return m2(v);
@@ -689,11 +697,12 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
   const cuatro = esCuatro(T), lemas = lemasTriciclo(T), tresOCuatro = cuatro ? 'cuatro' : 'tres';
   // 2026-11-12: each new option's sliders only show with it on (a steering wheel's with «Volante», the handlebar's with
   // «Manillar», the doors' with doors, the hatch's with the Aptera hatch, the pack's with the battery along the frame)
-  const volante = T.tMando === 'volante', salp = T.tSalpicadero === 'si', puertas = conPuertas(T), portonA = conPortonAptera(T), paquete = bateriaChasis(T);
+  const volante = T.tMando === 'volante', salp = conSalpicadero(T), puertas = conPuertas(T), portonA = conPortonAptera(T), paquete = bateriaChasis(T), butacas = conButacas(T);
   const PUERTA = ['tPuertaDel', 'tPuertaTras', 'tUmbral', 'tCintura', 'tBisagraY', 'tBisagraInc', 'tBisagraDentro', 'tPuertaAbre'];
   const visible = (k: string) => (k === 'tManX' || k === 'tManY') ? !volante : k.startsWith('tVol') ? volante : k.startsWith('tSalp') ? salp
     : PUERTA.includes(k) ? puertas : (k === 'tMalIni' || k === 'tMalAbre' || k === 'tMalLado') ? portonA : (k.startsWith('tBat') && k !== 'tBatDisp') ? paquete : true;
-  const fichas = deslizadoresTriciclo().filter(f => f.dep === dep && !soloFilas(f.bloque) && (cuatro || f.clave !== 'tViaTras') && visible(f.clave)), sels = SELECTORES_TRICICLO.filter(s => s.dep === dep && !soloFilas(s.bloque) && (s.clave !== 'tMaletero' || puertas));
+  // (round 3 interior: the rails reach the rear axle only with two rear wheels; with one, the wheel is in the tail between them)
+  const fichas = deslizadoresTriciclo().filter(f => f.dep === dep && !soloFilas(f.bloque) && (cuatro || f.clave !== 'tViaTras') && visible(f.clave)), sels = SELECTORES_TRICICLO.filter(s => s.dep === dep && !soloFilas(s.bloque) && (s.clave !== 'tMaletero' || puertas) && (s.clave !== 'tChLargo' || cuatro));
   const nOcc = rt.ocupantes, conN = nOcc === 1 ? 'con el piloto solo' : `con ${['', 'uno', 'dos', 'tres', 'cuatro'][nOcc] ?? nOcc} ocupantes`;
   // with three rows the passenger's saddle height is the rows' seat height; its position and recline do nothing there
   const ETIQUETA_FILAS: Partial<Record<string, string>> = { tPasY: 'Asientos de las filas 2 y 3: altura' };
@@ -701,7 +710,9 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
   // four wheels: what the rear wheels' sliders are, and the swing arm and the spat, which do not exist then
   const ETIQUETA_CUATRO: Partial<Record<string, string>> = { tMSuspTras: 'Suspensión trasera (las dos)', tMMotor: 'Motores de buje (los dos)', tRuedaTras: 'Ruedas traseras (en los carenados)', tFaldon: 'Rueda trasera: faldón (no hay: van en carenados)', tBasculante: 'Basculante trasero (no hay: brazos en los carenados)' };
   const apagadoCuatro = (k: string) => cuatro && (k === 'tFaldon' || k === 'tBasculante');
-  const etiqueta = (k: string, n: string) => (filas && ETIQUETA_FILAS[k]) || (cuatro && ETIQUETA_CUATRO[k]) || n;
+  // round 3 interior: with the Aptera buckets the pilot's feet are on pedals, and «Un asiento» is a saddle's mass (a bucket weighs 1.8 times it)
+  const ETIQUETA_BUTACAS: Partial<Record<string, string>> = { tPiesX: 'Pedales: hacia delante', tPiesY: 'Pedales: altura', tMAsiento: 'Un asiento: sillín y respaldo (una butaca, ×1,8)' };
+  const etiqueta = (k: string, n: string) => (filas && ETIQUETA_FILAS[k]) || (butacas && ETIQUETA_BUTACAS[k]) || (cuatro && ETIQUETA_CUATRO[k]) || n;
   const bloques = [...new Set([...fichas.map(f => f.bloque), ...sels.map(s => s.bloque)])];
   const checks = res.comprobaciones.filter(c => dep === 'proyecto' || (c.dep ?? '').split(',').includes(dep));
   const malas = checks.filter(c => c.holgura < c.minimo).length;
@@ -733,14 +744,37 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
       <p className="text-xs text-slate-500">El Cd lo calcula el túnel con la silueta de la carrocería y sus {tresOCuatro} ruedas (no hay fórmula del editor para esta forma); los carenados y los brazos solo entran como ruedas carenadas, así que el real será algo más alto. {nOcc === 1 ? 'Con el piloto solo' : `Con ${['', 'uno', 'dos', 'tres', 'cuatro'][nOcc]} ocupantes`} de {T.tMOcc} kg ({Math.round(res.mTot)} kg en total), rodadura {fmt(CRR, 3)} (neumático de ciclomotor), motor y controlador al {Math.round(RENDIMIENTO * 100)} %, {AUXILIARES} W de equipos y la batería usable al {Math.round(USABLE * 100)} %. Todo supuesto, no medido.</p>
     </Bloque>
   );
+  // round 3 interior (2026-11-12, Eugenio: «dentro del proyecto, que lo primero que aparezca sean todos los componentes que hay y el peso de cada uno»)
+  const GRUPOS: [DepTriciclo, string][] = [['carroceria', 'Carrocería'], ['chasis', 'Chasis'], ['rodaje', 'Rodaje'], ['propulsion', 'Motor'], ['energia', 'Energía'], ['interior', 'Interior']];
+  const diseno = cargasRueda(modelo, rt.piezas);
   const peso = (
-    <Bloque titulo="Peso del vehículo" nota={`${Math.round(res.mVeh)} kg sin ocupantes`}>
-      {dl([...rt.piezas.map(p => [p.nombre, `${fmt(p.kg, 1)} kg`] as [string, string]), [`${nOcc === 1 ? 'Con el piloto' : `Con ${['', 'uno', 'dos', 'tres', 'cuatro'][nOcc]} ocupantes`} de ${T.tMOcc} kg`, `${Math.round(res.mTot)} kg`]])}
+    <Bloque titulo="Peso: todos los componentes" nota={`${Math.round(res.mVeh)} kg en vacío`}>
+      <div className="flex flex-col gap-2.5 text-[13px]">
+        {GRUPOS.map(([g, n]) => {
+          const ps = rt.piezas.filter(p => grupoPieza(p.nombre) === g); if (!ps.length) return null;
+          return (
+            <div key={g}>
+              <div className="flex items-baseline justify-between gap-3 border-b border-slate-200 pb-0.5 font-semibold text-slate-800"><span>{n}</span><span className="font-mono text-xs tabular-nums">{fmt(ps.reduce((a, p) => a + p.kg, 0), 1)} kg</span></div>
+              <dl className="mt-1 grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1">
+                {ps.map(p => (<Fragment key={p.nombre}><dt className="min-w-0 text-slate-600">{p.nombre}{p.nota && <span className="block text-[11px] leading-snug text-slate-400">{p.nota}</span>}</dt><dd className="text-right font-mono text-xs tabular-nums">{fmt(p.kg, 1)} kg</dd></Fragment>))}
+              </dl>
+            </div>
+          );
+        })}
+        <dl className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 border-t-2 border-slate-300 pt-1.5">
+          <dt className="font-semibold text-slate-800">Total en vacío</dt><dd className="text-right font-mono text-xs font-semibold tabular-nums">{fmt(res.mVeh, 1)} kg</dd>
+          <dt className="text-slate-600">{nOcc === 1 ? 'Con el piloto' : `Con ${['', 'uno', 'dos', 'tres', 'cuatro'][nOcc]} ocupantes`} de {T.tMOcc} kg</dt><dd className="text-right font-mono text-xs tabular-nums">{Math.round(res.mTot)} kg</dd>
+          <dt className="text-slate-600">Y {EQUIPAJE} kg de equipaje: masa de diseño</dt><dd className="text-right font-mono text-xs tabular-nums">{Math.round(diseno.masa)} kg</dd>
+          <dt className="text-slate-600">  por rueda: delante · detrás</dt><dd className="text-right font-mono text-xs tabular-nums">{Math.round(diseno.del)} · {Math.round(diseno.tras)} kg</dd>
+        </dl>
+      </div>
+      <p className="text-xs text-slate-500">Las suspensiones, los frenos y los neumáticos se dimensionan para la masa de diseño: todos a bordo y {EQUIPAJE} kg de equipaje. Cada deslizador de masa es lo menos que pesa esa pieza; si la carga pide más, cuenta lo que pide la carga y aquí se dice. El bastidor pesa lo que sus tubos (largo × sección × densidad) más sus uniones. Son estimaciones de piezas de su clase, no pesadas.</p>
       <p className="text-xs text-slate-500">Centro de gravedad {nOcc === 1 ? 'con el piloto' : `con los ${['', '', 'dos', 'tres', 'cuatro'][nOcc]}`}: {cm(rt.cg.y, 0)} sobre el suelo y {m2(modelo.xF - rt.cg.x)} detrás del eje delantero ({Math.round(rt.vuelco.repartoDel * 100)} % del peso delante). Vacío: {cm(rt.cg.vacio.y, 0)} de alto.</p>
     </Bloque>
   );
   return (
     <>
+      {dep === 'proyecto' && peso}
       <Bloque titulo={lemas[dep]} nota={nombreTriciclo(T)}>
         {cuatro
           ? <p className="text-xs text-slate-500">Cuatro ruedas: dos delante en carenados como el Aptera, que giran con ellas, y dos detrás en carenados iguales, que no giran, con un motor en el buje de cada una. Es el Triciclo Bala con otra parte de atrás: la carrocería y todas sus medidas son las mismas (en Rodaje, «Ruedas traseras», se vuelve a la de una rueda).</p>
@@ -774,10 +808,13 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
             : 'Los carenados delanteros giran con sus ruedas (como en el Aptera): el neumático siempre queda igual de centrado; lo que se comprueba es que, girados a tope, no toquen la carrocería. El faldón tapa la parte de abajo de la rueda trasera.'}</p>}
           {bloque === 'Asientos' && (filas
             ? <p className="-mt-1 text-xs text-slate-500">Tres filas: el piloto solo, en un asiento de coche en el centro, con {volante ? 'el volante' : 'el manillar de siempre'}; detrás, dos asientos juntos; y al final uno más pequeño en el centro. Los de las filas 2 y 3 se pliegan (abajo, «Tres filas»). Con esta disposición la carrocería tiene unos mínimos: {m2(ANCHO_FILAS)} de ancho (para los hombros de la fila 2), {fmt(ALTO_FILAS, 2)} m de cúpula y la batalla y la cúpula largas para que la fila 3 quepa delante del amortiguador trasero. El pasajero a horcajadas no existe aquí: su posición y su reclinado no hacen nada.</p>
+            : butacas ? <p className="-mt-1 text-xs text-slate-500">Dos butacas como las del Aptera, una detrás de otra en el centro: una carcasa blanca de una pieza con el reposacabezas, cojín y respaldo oscuros acolchados y una base fina sobre los largueros{paquete ? ' o el paquete' : ''}. El piloto lleva las piernas hacia delante, con los pies en los pedales (abajo, «Pedales»), hasta el {salp ? 'salpicadero' : 'morro'}; el pasajero, a los lados del asiento del piloto, con las rodillas por fuera de su respaldo, como en el asiento de atrás de un Renault Twizy. Cada butaca pesa 1,8 veces «Un asiento» ({fmt(masaButaca(T.tMAsiento), 1)} kg). Se comprueba que las rodillas y los pies del pasajero no toquen el asiento del piloto y que los pies de los dos queden dentro de la carrocería.</p>
             : <p className="-mt-1 text-xs text-slate-500">A horcajadas, como en el Cuadriciclo en rombo, con un respaldo cada uno. Reclinar baja la cabeza y la lleva hacia atrás: al piloto le da techo (la cúpula sube detrás de él), pero aleja sus manos del {volante ? 'volante' : 'manillar'}; al pasajero se lo quita, porque detrás de él la cúpula baja.</p>)}
-          {bloque === 'Asientos' && <p className="-mt-1 text-xs text-slate-500">Los asientos bajan hasta quedar con 6 cm de asiento sobre lo que tienen debajo: los largueros del bastidor{paquete ? ' o, donde pasa bajo ellos, el paquete de batería' : ''} (ahora, el piloto hasta {m2(vistaTriciclo(deslizadoresTriciclo().find(f => f.clave === 'tPilY')!, T).min)} y {filas ? 'las filas 2 y 3' : 'el pasajero'} hasta {m2(vistaTriciclo(deslizadoresTriciclo().find(f => f.clave === 'tPasY')!, T).min)} del suelo). El sillín se hace más fino al bajar. Más bajos: menos vuelco y más techo, pero las rodillas suben.</p>}
+          {bloque === 'Asientos' && <p className="-mt-1 text-xs text-slate-500">Los asientos bajan hasta quedar con 6 cm de asiento sobre lo que tienen debajo: los largueros del bastidor{paquete ? ' o, donde pasa bajo ellos, el paquete de batería' : ''} (ahora, el piloto hasta {m2(vistaTriciclo(deslizadoresTriciclo().find(f => f.clave === 'tPilY')!, T).min)} y {filas ? 'las filas 2 y 3' : 'el pasajero'} hasta {m2(vistaTriciclo(deslizadoresTriciclo().find(f => f.clave === 'tPasY')!, T).min)} del suelo).{butacas || filas ? '' : ' El sillín se hace más fino al bajar.'} Más bajos: menos vuelco y más techo, pero las rodillas suben.</p>}
+          {bloque === 'Mandos' && butacas && <p className="-mt-1 text-xs text-slate-500">Con las butacas el piloto conduce con los pies en dos pedales, freno y acelerador, con el talón en una placa sobre el suelo{paquete ? ', el paquete' : ''} o la barra de la cuna delantera, lo que quede debajo. «Pedales» los acerca o los aleja y los sube o los baja.</p>}
           {bloque === 'Mandos' && volante && <p className="-mt-1 text-xs text-slate-500">Volante de coche en una columna que baja hacia delante hasta la cabeza de dirección (donde iba el manillar), con las manos del piloto en el aro a las tres menos cuarto. Se comprueba que el aro quede dentro de la carrocería y que no toque las rodillas.{salp ? '' : ' Sin salpicadero, los relojes van en una pantallita sobre la columna.'}</p>}
-          {bloque === 'Salpicadero' && <p className="-mt-1 text-xs text-slate-500">{salp ? `Un salpicadero de lado a lado bajo el parabrisas, a 2 cm de la piel por dentro, desde donde el morro deja sitio hacia el piloto; en su cara de atrás, la pantalla de los relojes y una pantalla central. Ocupa el sitio del depósito y de la pantallita. Fondo ${cm(modelo.salpicadero ? modelo.salpicadero.x0 - modelo.salpicadero.x1 : 0, 0)}.` : 'Sin salpicadero: una pantallita sobre el depósito, delante del piloto.'}</p>}
+          {bloque === 'Salpicadero' && <p className="-mt-1 text-xs text-slate-500">{T.tSalpicadero === 'blanco' ? `Un salpicadero blanco de lado a lado bajo el parabrisas, con su forma (a 2 cm de la piel por dentro), desde donde el morro deja sitio hacia el piloto: un labio oscuro por el borde de atrás, los relojes bajo una visera delante del piloto, una pantalla central sobre un pie, a su derecha, con una fila de botones, salidas de aire en los dos extremos y a los lados de los relojes${volante ? ', y la funda de la columna del volante con sus dos palancas' : ''}. Ocupa el sitio del depósito y de la pantallita. Unos 6,5 kg (estimado). Fondo ${cm(modelo.salpicadero ? modelo.salpicadero.x0 - modelo.salpicadero.x1 : 0, 0)}.`
+            : salp ? `Un salpicadero de lado a lado bajo el parabrisas, a 2 cm de la piel por dentro, desde donde el morro deja sitio hacia el piloto; en su cara de atrás, la pantalla de los relojes y una pantalla central. Ocupa el sitio del depósito y de la pantallita. Fondo ${cm(modelo.salpicadero ? modelo.salpicadero.x0 - modelo.salpicadero.x1 : 0, 0)}.` : 'Sin salpicadero: una pantallita sobre el depósito, delante del piloto.'}</p>}
           {bloque === 'Puertas y maletero' && <p className="-mt-1 text-xs text-slate-500">{puertas
             ? `Dos puertas como las del Aptera, cortadas en esta carrocería: cada una lleva su ventana con el marco (el montante y el carril del techo) y se abre hacia arriba y hacia fuera a la vez («de mariposa»), sobre una bisagra en el montante. El eje es la tangente al montante donde va la bisagra: así toda la puerta queda por debajo y sale hacia fuera sin rozar. Con la bisagra al pie del montante (de serie) el eje sube inclinado y la puerta sube y sale a la vez, dejando libre la entrada; con la bisagra más arriba el eje se tumba y la puerta gira como un ala sobre un eje casi a lo largo del coche, pero se queda encima del hueco: «Puerta abierta: altura libre para entrar» lo dice. Con puertas la cúpula ya no se abre, y siempre lleva montante. «Abrir puertas», abajo en el 3D.${portonA ? ' El portón es como el del Aptera: con la bisagra en el techo, cerca de su punto más alto, levanta de una pieza la luna, el techo de atrás y lo alto de la cola, más o menos la mitad de atrás del vehículo, con la aleta. «Abrir maletero».' : ' El maletero sigue siendo la tapa de lo alto de la cola; el portón largo como el del Aptera se elige en «Maletero».'}`
             : 'Con la cúpula entera, se entra levantándola hacia delante («Abrir cúpula») y el maletero es la tapa de lo alto de la cola. Las puertas como el Aptera (y con ellas el portón largo) cortan la carrocería en su sitio y dejan la cúpula fija.'}
@@ -788,12 +825,12 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
             <p className="-mt-1 text-xs text-slate-500">El eje delantero va detrás de donde el Cuadriciclo en rombo lleva su rueda delantera: así el peso queda más cerca de las dos ruedas de delante y {cuatro ? 'la vía de delante pesa más en el vuelco' : 'el triciclo vuelca menos'} (abajo, «Vuelco»). Batalla {m2(modelo.batalla)}.</p>
             {bloque === 'Ejes y ruedas' && <p className="-mt-1 text-xs text-slate-500">Ruedas traseras: una dentro de la cola, sobre un basculante, como un triciclo; o dos fuera, en carenados como los de delante sobre dos brazos carenados cada uno, que no giran: cuatro ruedas. Con dos, el motor se reparte en dos motores de buje, uno en cada rueda, y la cola queda libre para el maletero.{cuatro ? ` La vía trasera va de lo justo para que los carenados queden a 3 cm de la cola (${m2(vistaTriciclo(deslizadoresTriciclo().find(f => f.clave === 'tViaTras')!, T).min)}) a la vía delantera más ancha; de serie, la de delante.` : ''}</p>}
           </>}
-          {bloque === 'Bastidor' && <p className="-mt-1 text-xs text-slate-500">Dos largueros sobre la panza con cuatro travesaños, {paquete ? 'la cuna de la suspensión delantera (con la batería a lo largo del bastidor, en el morro ya no hay batería), el paquete de batería sobre el fondo de la panza, con los largueros pasando por dentro' : 'la cuna de la batería (donde se apoya la suspensión delantera)'}, los soportes de los sillines, la torreta del amortiguador y el soporte de la columna de dirección: {fmt(rt.bastidor.metros, 1)} m de tubo. Se ve con «Rayos X» o la capa «Chasis».</p>}
+          {bloque === 'Bastidor' && <p className="-mt-1 text-xs text-slate-500">Dos largueros sobre la panza con {modelo.larguerosTraseros ? 'cinco' : 'cuatro'} travesaños, {paquete ? 'la cuna de la suspensión delantera (con la batería a lo largo del bastidor, en el morro ya no hay batería), el paquete de batería sobre el fondo de la panza, con los largueros pasando por dentro' : 'la cuna de la batería (donde se apoya la suspensión delantera)'}, los soportes de los {butacas ? 'asientos' : filas ? 'asientos' : 'sillines'}, la torreta del amortiguador{modelo.larguerosTraseros ? ', los largueros siguiendo hasta el eje trasero (suben con la panza donde la cola se levanta y se cierran donde se estrecha) y una cuna trasera hasta donde llegan los brazos de los carenados de atrás' : ''} y el soporte de la columna de dirección: {fmt(rt.bastidor.metros, 1)} m de tubo. {cuatro ? (modelo.larguerosTraseros ? '' : 'Los largueros acaban en la torreta: «Hasta el eje trasero» los lleva hasta donde las ruedas de atrás meten su peso. ') : 'Con una rueda detrás, los largueros acaban en la torreta: la rueda va entre ellos, en la cola. '}La separación de los largueros se mide de eje a eje; más separados, el bastidor es más ancho y el paquete de batería, que es un porcentaje de ese ancho, también. Se ve con «Rayos X» o la capa «Chasis».</p>}
           {bloque === 'Techo solar y ventanas' && <p className="-mt-1 text-xs text-slate-500">La forma de la cúpula no cambia: el techo solar y las ventanas se dibujan sobre ella. Detrás de donde empieza, lo alto de la cúpula es un panel solar opaco (da sombra a las cabezas: menos calor dentro en verano); por los lados, encima de la ventana. Delante, el parabrisas pasa por encima hasta el panel.{T.tSolarCola === 'si' ? ' Por detrás, el panel sigue por lo alto de la cola hasta su punta, como en el Aptera; con el portón, la parte de encima del portón se levanta con él (con la tapa del maletero, con la tapa).' : ''}{puertas ? ' Con las puertas como el Aptera hay montante siempre (la puerta se corta por él), aunque arriba diga «De una pieza».' : ''} El montante sale del borde del cristal, sube y se tumba hacia atrás en una sola curva hasta el techo, como en el Aptera, y sigue como marco entre la ventana y el techo. Panel: {res.areas.solar > 0.005 ? `${fmt(res.areas.solar)} m², ${Math.round(res.solarPico)} W a pleno sol, unos ${fmt(res.solarDia / 1000)} kWh al día (estimado)` : 'ninguno'}; cristal: {fmt(res.areas.cristal)} m².</p>}
           {bloque === 'Techo solar' && <p className="-mt-1 text-xs text-slate-500">{res.areas.solar > 0.005 ? `${fmt(res.areas.solar)} m² de panel: ${Math.round(res.solarPico)} W a 1000 W/m², y de media unos ${fmt(res.solarDia / 1000)} kWh al día (${fmt(P.sol, 1)} kWh/m² al día sobre plano, el panel curvo recoge un 70 % de eso, células al ${Math.round(0.21 * 100)} % y un 15 % de pérdidas). ${Math.round(res.masas['Paneles solares'] ?? 0)} kg de panel, sobre laminado de carrocería en lugar del cristal.` : 'Sin techo solar: la cúpula es toda de cristal (se mueve en Carrocería › Techo solar y ventanas).'}</p>}
           {bloque === 'Motor' && cuatro && <p className="-mt-1 text-xs text-slate-500">Dos motores de buje, uno en cada rueda trasera, sin cadena ni correa, con un controlador doble bajo el sillín del pasajero. Cada uno da la mitad de la potencia, así que en cada llanta cabe el doble que con una rueda: en una rueda de ciclomotor unos {RUEDAS_TRICICLO['24'].kWBuje} kW de pico por rueda; en una llanta de coche de 15″, unos {RUEDAS_TRICICLO.c15.kWBuje}. «Motores de buje» es la masa de los dos juntos: su rango es el de dos motores de media potencia, con la misma regla de kilos por kW que con uno (cada motor lleva su base, así que dos pesan algo más que uno del doble).</p>}
           {bloque === 'Motor' && !cuatro && <p className="-mt-1 text-xs text-slate-500">Motor de buje en la rueda trasera, sin cadena ni correa, con su controlador bajo el sillín del pasajero. Su masa y la del controlador siguen a la potencia máxima (su rango se mueve con ella). En una rueda de ciclomotor caben unos {RUEDAS_TRICICLO['24'].kWBuje} kW de pico; en una llanta de coche de 15″, unos {RUEDAS_TRICICLO.c15.kWBuje} (como los motores en rueda del Aptera). Por encima, lo honrado sería un motor en el basculante con correa, como en las motos eléctricas, y eso aquí no se dibuja: la comprobación «Motor de buje» lo avisa.</p>}
-          {bloque === 'Batería' && paquete && <p className="-mt-1 text-xs text-slate-500">Un solo paquete a lo largo del bastidor, centrado, apoyado en el fondo de la panza, con los largueros pasando por dentro: {Math.round(T.tBatAncho)} % del ancho del bastidor (de cara exterior a cara exterior de los largueros), así que sobresale {Math.round((T.tBatAncho - 100) / 2)} % de ese ancho a cada lado. Su tamaño decide su capacidad: {Math.round(rt.bateria.litros)} L × {Math.round(T.tWhL)} Wh/L = {fmt(modelo.kWh, 1)} kWh y {Math.round(rt.bateria.kg)} kg (el deslizador «Batería» solo la muestra). Donde pasa, es el suelo: los pies y los asientos se apoyan encima. Empieza detrás de la cuna de la suspensión delantera y llega como mucho al controlador, que va justo detrás, delante de la torreta del amortiguador; su masa cuenta en su sitio para el peso, el centro de gravedad y el vuelco.</p>}
+          {bloque === 'Batería' && paquete && <p className="-mt-1 text-xs text-slate-500">Un solo paquete a lo largo del bastidor, centrado, apoyado en el fondo de la panza, con los largueros pasando por dentro: {Math.round(limitarTriciclo('tBatAncho', T))} % del ancho del bastidor (de cara exterior a cara exterior de los largueros), así que sobresale {Math.round((limitarTriciclo('tBatAncho', T) - 100) / 2)} % de ese ancho a cada lado. Su tamaño decide su capacidad: {Math.round(rt.bateria.litros)} L × {Math.round(T.tWhL)} Wh/L = {fmt(modelo.kWh, 1)} kWh y {Math.round(rt.bateria.kg)} kg (el deslizador «Batería» solo la muestra). Donde pasa, es el suelo: los pies y los asientos se apoyan encima. Empieza detrás de la cuna de la suspensión delantera; su largo y su ancho llegan hasta lo que cabe en la carrocería (el largo, ahora, hasta {m2(vistaTriciclo(deslizadoresTriciclo().find(f => f.clave === 'tBatLargo')!, T).max)}), y lo que toca por el camino lo dicen las comprobaciones: el controlador, que va justo detrás, y la torreta del amortiguador{cuatro ? '' : ', la rueda trasera'}, los asientos de encima, la piel. Su masa cuenta en su sitio para el peso, el centro de gravedad, el vuelco y los largueros.</p>}
           {bloque === 'Batería' && !paquete && <p className="-mt-1 text-xs text-slate-500">Primero en el morro, donde el Cuadriciclo en rombo lleva la rueda delantera ({Math.round(rt.bateria.litrosMorro)} L), luego en un módulo estrecho entre los pies del piloto; si hace falta más, el módulo del morro sube, crece hacia la punta y queda un módulo plano bajo los sillines. Ahora: {Math.round(rt.bateria.litros)} L y {Math.round(rt.bateria.kg)} kg{rt.bateria.litros - rt.bateria.cabe > 0.05 ? `: caben ${Math.round(rt.bateria.cabe)} L, faltan ${Math.round(rt.bateria.litros - rt.bateria.cabe)} (un morro más largo, una carrocería más ancha o celdas más densas)` : ''}.</p>}
         </Bloque>
       ))}
@@ -811,7 +848,7 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
       {dep === 'chasis' && (
         <Bloque titulo="Estructura" nota="estimación">
           {dl([['Masa del bastidor (con uniones)', `${fmt(res.masas['Bastidor'] ?? 0, 1)} kg`], ['Momento máx. en los largueros', `${Math.round(rt.bastidor.M)} N·m`], ['Tensión dinámica (×2,5)', `${Math.round(rt.bastidor.tension)} MPa`], ['Coeficiente de seguridad', fmt(rt.bastidor.seguridad, 2)]])}
-          <p className="text-xs text-slate-500">Los dos largueros como una viga entre la cuna de la batería y el pivote del basculante, con los ocupantes y sus asientos encima, y 2,5 veces su peso por los baches (como en el Aeromóvil 1). El resto del bastidor no se cuenta: ayuda, así que el real aguanta algo más.</p>
+          <p className="text-xs text-slate-500">Los dos largueros como una viga entre la cuna delantera y {modelo.larguerosTraseros ? 'la cuna trasera, en el eje trasero' : cuatro ? 'la torreta del amortiguador' : 'el pivote del basculante'}, con los ocupantes, sus asientos y la batería encima, y 2,5 veces su peso por los baches (como en el Aeromóvil 1). El resto del bastidor no se cuenta: ayuda, así que el real aguanta algo más.</p>
         </Bloque>
       )}
       {(dep === 'rodaje' || dep === 'proyecto') && (
@@ -837,7 +874,6 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
         {checks.length ? <ListaComprobaciones lista={checks} /> : <p className="text-xs text-slate-500">Este departamento no tiene comprobaciones propias: todas están en «Proyecto».</p>}
         {(dep === 'interior' || dep === 'proyecto') && <p className="text-xs text-slate-500">Cabezas: un hombre sentado, sin casco, de talla media (91,8 cm sentado erguido) y alta (97,7 cm, percentil 95; ANSUR II, 2012); el tronco reclinado lo que diga su respaldo y la cabeza un tercio de eso. Se mide de la parte de arriba y de atrás del cráneo a la cara de dentro del cristal. El alcance compara del hombro al puño con un brazo de 58 cm, con los codos algo doblados.</p>}
       </Bloque>
-      {dep === 'proyecto' && peso}
     </>
   );
 }
@@ -847,6 +883,14 @@ const ICONO_DEP: Record<IdDepartamento, typeof Box> = { proyecto: ClipboardList,
 const CAPAS_DEP: Partial<Record<IdDepartamento, CapaId[]>> = {
   carroceria: ['carenado', 'cristales', 'solar'], chasis: ['chasis'], rodaje: ['suspension', 'direccion', 'ruedas'], propulsion: ['motor', 'transmision'],
   energia: ['baterias', 'solar'], interior: ['asientos', 'ocupantes', 'direccion'], accesos: ['carenado', 'cristales'], luces: ['carenado'],
+};
+/**
+ * Round 3 interior (2026-11-12, Eugenio: «en cada uno de los selectores… que aparezca encima de los sliders un botón que
+ * sea ver solo motor, o ver solo rodaje, o ver solo chasis… y que aparezca solo, se oculte todas las otras capas»): the
+ * Triciclo's own layers per department (its steering rack is running gear; its interior, the seats, wheel and dashboard).
+ */
+const CAPAS_DEP_TRICICLO: Record<DepTriciclo, CapaId[]> = {
+  carroceria: ['carenado', 'cristales', 'solar'], interior: ['asientos', 'ocupantes'], chasis: ['chasis'], rodaje: ['suspension', 'direccion', 'ruedas'], propulsion: ['motor'], energia: ['baterias', 'solar'],
 };
 const VISTAS_NOMBRE: Record<Vista, string> = { iso: '3/4', side: 'Lateral', top: 'Planta', front: 'Frontal', back: 'Trasera' };
 const SOLO_DEP: Partial<Record<IdDepartamento, string>> = { carroceria: 'la carrocería', chasis: 'el chasis', rodaje: 'el rodaje', propulsion: 'el motor', energia: 'la energía', interior: 'el interior', accesos: 'los accesos', luces: 'la carrocería' };
@@ -1004,13 +1048,17 @@ export default function Aeromovil() {
   const [vistaAbierta, setVistaAbierta] = useState(false);
   const [dep, setDep] = useState<IdDepartamento>(() => { try { return (localStorage.getItem('aeromovil.departamento') as IdDepartamento) || 'carroceria'; } catch { return 'carroceria'; } });
   useEffect(() => { try { localStorage.setItem('aeromovil.departamento', dep); } catch { /* sin memoria */ } }, [dep]);
-  // «Mostrar solo …»: deja visibles solo las capas del departamento; al quitarlo (o al ir a «Proyecto») se ve todo.
+  // «Ver solo …» (round 3 interior, 2026-11-12): leaves only the department's layers; turning it off (or going to
+  // «Proyecto», or to another tab) puts back the layers as they were before it was pressed.
+  const antesSolo = useRef<Record<CapaId, boolean> | null>(null);
+  const verSolo = (si: boolean) => { if (si && !soloDep) antesSolo.current = visibles; setSoloDep(si); };
+  const capasSolo = (d: IdDepartamento): CapaId[] | undefined => P.disposicion === 'triciclo' ? (d === 'proyecto' ? undefined : CAPAS_DEP_TRICICLO[d as DepTriciclo]) : CAPAS_DEP[d];
   useEffect(() => {
-    const todas = Object.fromEntries(CAPAS.map(c => [c.k, true])) as Record<CapaId, boolean>;
-    if (!soloDep || dep === 'proyecto') { setVisibles(todas); return; }
-    const suyas = CAPAS_DEP[dep]; if (!suyas) { setVisibles(todas); return; }
+    const suyas = soloDep && dep !== 'proyecto' ? capasSolo(dep) : undefined;
+    if (!suyas) { if (antesSolo.current) { setVisibles(antesSolo.current); antesSolo.current = null; } return; }
     setVisibles(Object.fromEntries(CAPAS.map(c => [c.k, suyas.includes(c.k)])) as Record<CapaId, boolean>);
-  }, [soloDep, dep]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [soloDep, dep, P.disposicion]);
   // El garaje: qué vehículos se ven y dónde están (eje delantero en el suelo, m). Se recuerda en este navegador.
   type PlazaGaraje = { id: string; visible: boolean; x: number; z: number; giro: number };
   const [garaje, setGaraje] = useState<PlazaGaraje[]>(() => {
@@ -1164,6 +1212,19 @@ export default function Aeromovil() {
   const ruedas = (Object.keys(DIAMETRO_RUEDA) as Pulgadas[]).map(k => ({ k, n: `${k}″ (${Math.round(DIAMETRO_RUEDA[k] * 1000)} mm)` }));
   const neumaticos = (Object.keys(NEUMATICOS) as Neumatico[]).map(k => ({ k, n: NEUMATICOS[k].n }));
   const malas = res.comprobaciones.filter(c => c.holgura < c.minimo).length;
+  const garajeBloque = (
+    <Bloque titulo="Garaje" nota="otros vehículos al lado">
+            <div className="flex flex-col gap-1.5">
+              {VEHICULOS_GARAJE.map(v => { const pl = garaje.find(g => g.id === v.id)!; return (
+                <Button key={v.id} variant="outline" aria-pressed={pl.visible} onClick={() => setGaraje(g => g.map(x => x.id === v.id ? { ...x, visible: !x.visible } : x))}
+                  className={cn('justify-between gap-2 px-2.5 py-1.5 text-left text-[13px] font-medium normal-case tracking-normal', !pl.visible && 'border-dashed text-slate-400')}>
+                  <span>{v.nombre}</span><span className="text-[11px] font-normal text-slate-400">{v.largo.toFixed(2).replace('.', ',')} m</span>
+                </Button>); })}
+            </div>
+            {garaje.some(g => g.visible) && <MapaGaraje garaje={garaje} largo={modelo.Lf} ancho={modelo.P.W} morro={modelo.xn} etiqueta={esA1 ? 'A1' : esBala ? 'Bala' : esTri ? (esCuatro(camposTriciclo(P)) ? 'Bala 4R' : 'Triciclo') : 'Gota'} alMover={(id, x, z) => setGaraje(g => g.map(v => v.id === id ? { ...v, x, z } : v))} alGirar={id => setGaraje(g => g.map(v => v.id === id ? { ...v, giro: (v.giro + Math.PI / 2) % (2 * Math.PI) } : v))} />}
+            <p className="-mt-1 text-xs text-slate-500">Arrastra cada coche en el 3D (pínchalo y muévelo) o en este plano; doble clic en el plano lo gira un cuarto de vuelta.</p>
+    </Bloque>
+  );
   const capas = esBala ? CAPAS.filter(c => CAPAS_BALA.includes(c.k)) : esTri ? CAPAS.filter(c => CAPAS_TRICICLO.includes(c.k)) : CAPAS.filter(c => !('solo' in c) || c.solo === modelo.tipo);
   const a1 = res.a1;
   // the department tabs: the A1's eleven; the Triciclo's six plus «Proyecto», with its own one-liners (which follow its options)
@@ -1261,7 +1322,7 @@ export default function Aeromovil() {
             </div>
           )}
           <div className="pointer-events-none absolute left-3 right-14 top-3 font-mono text-[11px] uppercase tracking-wider text-slate-500">
-            {esA1 ? `${P.plazas === 2 ? 'Tándem 1+1' : 'Monoplaza'} · cuatro ruedas · eléctrico ${P.kWNom}/${P.kWPico} kW · ${P.kWh} kWh` : esBala ? 'Biplaza a horcajadas · rombo de ruedas, laterales fijas en carenados' : esTri ? `${camposTriciclo(P).tAsientos === 'filas' ? 'Cuatro plazas en tres filas (1 + 2 + 1)' : 'Biplaza a horcajadas'} · ${esCuatro(camposTriciclo(P)) ? 'cuatro ruedas, dos delante y dos detrás en carenados' : 'tres ruedas, dos delante en carenados'} · eléctrico ${fmt(camposTriciclo(P).tKWNom, 1)}/${fmt(camposTriciclo(P).tKWPico, 1)} kW · ${fmt(modelo.tipo === 'triciclo' ? modelo.kWh : camposTriciclo(P).tKWh, 1)} kWh${modelo.tipo === 'triciclo' && modelo.paquete ? ' a lo largo del bastidor' : ''}` : 'Tándem 1+2 · rombo basculante · pedaleo asistido'}
+            {esA1 ? `${P.plazas === 2 ? 'Tándem 1+1' : 'Monoplaza'} · cuatro ruedas · eléctrico ${P.kWNom}/${P.kWPico} kW · ${P.kWh} kWh` : esBala ? 'Biplaza a horcajadas · rombo de ruedas, laterales fijas en carenados' : esTri ? `${camposTriciclo(P).tAsientos === 'filas' ? 'Cuatro plazas en tres filas (1 + 2 + 1)' : conButacas(camposTriciclo(P)) ? 'Biplaza en tándem, dos butacas como el Aptera' : 'Biplaza a horcajadas'} · ${esCuatro(camposTriciclo(P)) ? 'cuatro ruedas, dos delante y dos detrás en carenados' : 'tres ruedas, dos delante en carenados'} · eléctrico ${fmt(camposTriciclo(P).tKWNom, 1)}/${fmt(camposTriciclo(P).tKWPico, 1)} kW · ${fmt(modelo.tipo === 'triciclo' ? modelo.kWh : camposTriciclo(P).tKWh, 1)} kWh${modelo.tipo === 'triciclo' && modelo.paquete ? ' a lo largo del bastidor' : ''}` : 'Tándem 1+2 · rombo basculante · pedaleo asistido'}
             {esA1 && <span className="block normal-case tracking-normal text-slate-400">Pincha una pieza para abrir su ficha</span>}
           </div>
           <div className="absolute inset-x-2 bottom-2 flex flex-wrap items-center gap-1">
@@ -1292,14 +1353,14 @@ export default function Aeromovil() {
                       <span className={cn('h-2.5 w-2.5 shrink-0 rounded-sm', visibles[c.k] ? c.color : 'bg-transparent ring-1 ring-slate-300')} />{c.n}
                     </Button>
                   ))}
-                  <Button variant="ghost" onClick={() => { setVisibles(Object.fromEntries(CAPAS.map(c => [c.k, true])) as Record<CapaId, boolean>); setSoloDep(false); }} className="col-span-2 px-1.5 py-1 text-[11px] normal-case tracking-normal text-teal-800">Ver todo</Button>
+                  <Button variant="ghost" onClick={() => { antesSolo.current = null; setVisibles(Object.fromEntries(CAPAS.map(c => [c.k, true])) as Record<CapaId, boolean>); setSoloDep(false); }} className="col-span-2 px-1.5 py-1 text-[11px] normal-case tracking-normal text-teal-800">Ver todo</Button>
                 </div>
               )}
             </div>
-            {(esA1 || esTri) && (esTri ? depTri : dep) !== 'proyecto' && CAPAS_DEP[esTri ? depTri : dep] && (
-              <Button variant="outline" aria-pressed={soloDep} onClick={() => setSoloDep(v => !v)}
+            {(esA1 || esTri) && (esTri ? depTri : dep) !== 'proyecto' && capasSolo(esTri ? depTri : dep) && (
+              <Button variant="outline" aria-pressed={soloDep} onClick={() => verSolo(!soloDep)}
                 className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', soloDep && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
-                {soloDep ? 'Mostrar todo' : `Mostrar solo ${SOLO_DEP[dep] ?? NOMBRE_CORTO[dep].toLowerCase()}`}
+                {soloDep ? 'Mostrar todo' : `Mostrar solo ${SOLO_DEP[esTri ? depTri : dep] ?? NOMBRE_CORTO[esTri ? depTri : dep].toLowerCase()}`}
               </Button>
             )}
             {/* El Bala no se inclina ni tiene la dirección dibujada: sin «Simular curva». */}
@@ -1382,17 +1443,17 @@ export default function Aeromovil() {
         </div>
 
         <aside className="mt-4 flex flex-col gap-3 lg:mt-0">
-          {(esA1 ? dep === 'proyecto' : esTri ? depTri === 'proyecto' : true) && <Bloque titulo="Garaje" nota="otros vehículos al lado">
-            <div className="flex flex-col gap-1.5">
-              {VEHICULOS_GARAJE.map(v => { const pl = garaje.find(g => g.id === v.id)!; return (
-                <Button key={v.id} variant="outline" aria-pressed={pl.visible} onClick={() => setGaraje(g => g.map(x => x.id === v.id ? { ...x, visible: !x.visible } : x))}
-                  className={cn('justify-between gap-2 px-2.5 py-1.5 text-left text-[13px] font-medium normal-case tracking-normal', !pl.visible && 'border-dashed text-slate-400')}>
-                  <span>{v.nombre}</span><span className="text-[11px] font-normal text-slate-400">{v.largo.toFixed(2).replace('.', ',')} m</span>
-                </Button>); })}
-            </div>
-            {garaje.some(g => g.visible) && <MapaGaraje garaje={garaje} largo={modelo.Lf} ancho={modelo.P.W} morro={modelo.xn} etiqueta={esA1 ? 'A1' : esBala ? 'Bala' : esTri ? (esCuatro(camposTriciclo(P)) ? 'Bala 4R' : 'Triciclo') : 'Gota'} alMover={(id, x, z) => setGaraje(g => g.map(v => v.id === id ? { ...v, x, z } : v))} alGirar={id => setGaraje(g => g.map(v => v.id === id ? { ...v, giro: (v.giro + Math.PI / 2) % (2 * Math.PI) } : v))} />}
-            <p className="-mt-1 text-xs text-slate-500">Arrastra cada coche en el 3D (pínchalo y muévelo) o en este plano; doble clic en el plano lo gira un cuarto de vuelta.</p>
-          </Bloque>}
+          {/* round 3 interior (2026-11-12): «Ver solo …» above the sliders of each department (the Aeromóvil 1's and the Triciclo's) */}
+          {(esA1 || esTri) && (esTri ? depTri : dep) !== 'proyecto' && capasSolo(esTri ? depTri : dep) && (() => {
+            const d = esTri ? depTri : dep, n = NOMBRE_CORTO[d].toLowerCase();
+            return (
+              <Button variant="outline" aria-pressed={soloDep} onClick={() => verSolo(!soloDep)}
+                className={cn('w-full justify-center gap-1.5 bg-white px-3 py-2 text-[13px] font-semibold normal-case tracking-normal', soloDep && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
+                <Layers3 className="h-4 w-4" />{soloDep ? `Viendo solo ${n} · volver a las capas de antes` : `Ver solo ${n}`}
+              </Button>
+            );
+          })()}
+          {(esA1 ? dep === 'proyecto' : esTri ? false : true) && garajeBloque}
 
           {dueno && !dueno.puedeDecidir && (
             <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
@@ -1545,6 +1606,7 @@ export default function Aeromovil() {
 
           </>)}
           </fieldset>
+          {esTri && depTri === 'proyecto' && garajeBloque}
           <Bloque titulo="¿Algo que mejorar?">
             <FormularioMejora alEnviar={() => { recargar(); }} />
             <p className="text-xs text-slate-500">Se añade a <a className="text-teal-700 underline" href="/aeromovil/tareas" onClick={e => { e.preventDefault(); navegar('/aeromovil/tareas'); }}>Tareas</a> como pendiente.</p>

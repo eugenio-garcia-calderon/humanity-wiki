@@ -590,3 +590,10 @@ The observatory is one self-contained HTML file (`public/observatorio-polarizaci
 - **The clear-entry check is one number**: the lowest point of the open door over a box beside the seat. It does not model a person getting in.
 - **Off-default hinge settings can make the door swing through the body.** Examples: the hinge-angle slider at −12° (2.0 cm on the real clásico), or the hinge halfway up the pillar (0.5 cm). The check goes red, but the door is not stopped. The right fix is a door stop that tells an edge graze at the start of the swing apart from a real collision. The first try at a stop could not tell them apart, and held a grazing door at 2°.
 - **The controller moves with the pack**, behind it, and its old fixed place under the passenger is used only without the pack.
+### 2026-11-12 — Cuadriciclo Bala clásico round 3 interior: shortcuts
+- **The running-gear masses are rules of thumb fitted through three vehicle classes** (`masaEsquina`, `masaFreno`), not parts from a catalogue. They follow the static load only: no braking or cornering load case. A real sizing would pick a shock, a disc and a caliper from datasheets for the design mass and 120 km/h.
+- **Moped tyre load ratings are approximate** (150-170 kg, load index 41-46). The size alone does not fix the index.
+- **The frame check is still one beam of two rails.** Torsion, the body's share and the crash case are not modelled. Adding the battery made it honest about the vertical load only.
+- **The rear cradle is not subtracted from the boot volume.** Its tubes cross the boot at the rear axle; the boot still counts that space as free (a few litres).
+- **The bucket's passenger posture is a fixed spread** (feet 31 cm, knees 33 cm off the centre line, closing in only where the body is too narrow). A shorter or taller passenger does not change it.
+- **`paqueteCabe` tests the box at its four corners per station.** A belly that bulges between them could still touch; the in-body check samples the same corners.
