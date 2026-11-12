@@ -462,7 +462,7 @@ export async function paginaPublica(db: any, id: string, req?: Request): Promise
  * (`quien.humanity.wiki/…`), que es la que se comparte. `null` si no se puede
  * saber (y entonces manda la dirección de la visita, como antes).
  */
-async function canonicaDe(db: any, w: any, publica: any): Promise<string | null> {
+async function canonicaDe(db: any, w: any, publica: any, bonita?: string | null): Promise<string | null> {
   const handle = w?.handle || publica?.autor?.handle;
   if (!handle || !publica || publica.muro) return null;
   // El dominio de la página o el de la más cercana por encima (la portada
@@ -471,7 +471,8 @@ async function canonicaDe(db: any, w: any, publica: any): Promise<string | null>
   const desde = w.virtual ? publica.padre?.id : w.id;
   const ruta = (deRaiz: boolean) => w.virtual
     ? `/bd/${String(w.id).slice(3)}${slugDe(w.title) ? `/${slugDe(w.title)}` : ''}`
-    : deRaiz ? '/' : w.slug && (w.publico || String(w.slug).includes('/')) ? `/${w.slug}` : `/p/${w.id}`;
+    : deRaiz ? '/' : bonita ? `/${bonita.split('/').map(encodeURIComponent).join('/')}`
+    : w.slug && (w.publico || String(w.slug).includes('/')) ? `/${w.slug}` : `/p/${w.id}`;
   const d = (await db.execute(sql`
     WITH RECURSIVE sube(id, n) AS (
       SELECT ${desde || ''}::text, 0
@@ -998,39 +999,25 @@ export function registrarSitios(app: Express, db: any) {
           if (destino !== req.path) return res.redirect(301, destino + query);
         }
       }
-      // `/p/:id` de una ficha que tiene dirección legible lleva a ella.
+      // `/p/:id` LLEVA SIEMPRE A SU DIRECCIÓN LEGIBLE (2026-11-12, Eugenio: «cuando pincho en modelo
+      // socioeconómico me aparece una URL muy fea… que no vuelva a ocurrir, ni en humanity.wiki ni en el dominio
+      // propio»). Antes había tres reglas (la ficha `categoria/ficha`, el nombre corto solo si la página era
+      // `publico`, y el título solo fuera de la casa) y se escapaban las páginas creadas por migración, que no son
+      // `publico`. Ahora una sola: `rutaBonita`, que prueba su nombre corto y su título y se queda con el que esta
+      // misma web abre de verdad en esa página. La portada de un dominio, a `/`.
       if (w && !w.virtual && /^(\/@[^/]+)?\/p\/[^/]+\/?$/.test(req.path)) {
         await asegurarRutaDePagina(db, w.id).catch(e => console.error('sitios: ruta', e));
+        if (s.forma === 'dominio') {
+          const d = await dominioApunta(db, s.host);
+          if (d?.entidad_id === w.id) return res.redirect(301, `/${query}`);
+        }
         const r = (await db.execute(sql`SELECT slug FROM knowledge_windows WHERE id = ${w.id}`)).rows[0] as any;
-        if (r?.slug && String(r.slug).includes('/')) {
-          const prefijo = s.forma === 'casa' ? `/@${w.handle}` : '';
-          return res.redirect(301, `${prefijo}/${r.slug}${query}`);
-        }
-        // Y una página publicada con nombre corto, a él: es su canónica
-        // (`canonicaDe`), y `/p/:id` sería una segunda dirección del mismo
-        // contenido. Sólo donde ese nombre se abre de verdad.
-        const corto = w.publico && typeof r?.slug === 'string' && r.slug && !r.slug.includes('/') && !TRAMOS_RESERVADOS.has(r.slug) ? r.slug : null;
-        if (corto) {
-          let destino: string | null = null;
-          if (s.forma === 'casa') destino = `/@${w.handle}/${encodeURIComponent(corto)}`;
-          else if (s.forma === 'subdominio') destino = w.handle === s.handle ? `/${encodeURIComponent(corto)}` : null;
-          else if (s.forma === 'dominio') {
-            const d = await dominioApunta(db, s.host);
-            if (d?.entidad_id && d.entidad_tipo === 'pagina') {
-              destino = w.id === d.entidad_id ? '/' : (await cuelgaDe(db, w.id, d.entidad_id)) ? `/${encodeURIComponent(corto)}` : null;
-            }
-          }
-          if (destino) return res.redirect(301, `${destino}${query}`);
-        }
+        const b = await rutaBonita(req, { id: w.id, slug: r?.slug, title: w.title, handle: w.handle, publico: w.publico });
+        if (b) return res.redirect(301, `${s.forma === 'casa' ? `/@${w.handle}` : ''}/${b.split('/').map(encodeURIComponent).join('/')}${query}`);
       }
       // LA RED: UNA SOLA DIRECCIÓN (2026-10-21, bot evaluador). `/movilidad/` va a
       // `/movilidad`, y `/p/:id` de una entrada que se abre por su nombre, a él.
       if (w?.red && req.path.length > 1 && req.path.endsWith('/')) return res.redirect(301, req.path.replace(/\/+$/, '') + query);
-      if (w && !w.virtual && !w.red && s.forma !== 'casa' && /^\/p\/[^/]+\/?$/.test(req.path) && slugDe(w.title || '')) {
-        const bonita = `/${slugDe(w.title)}`;
-        const r = await paginaDeLaDireccion(req, bonita).catch(() => null);
-        if (r?.id === w.id && r.red) return res.redirect(301, bonita + query);
-      }
       // En un dominio propio se reescribe SIEMPRE, haya página o no: aunque
       // apunte a un espacio entero, lo que el navegador va a preguntar ya se
       // sabe aquí (ver más abajo).
@@ -1089,13 +1076,18 @@ export function registrarSitios(app: Express, db: any) {
       // La pestaña y la entrada en su contexto se declaran a sí mismas: es la dirección que se comparte.
       // La pestaña es canónica de sí misma; la entrada en contexto, de su dirección
       // por nombre (`/su-nombre`), que es la que va en el sitemap; la entidad, de `/su-nombre`.
-      let canonica = (w.seccion || (w.red && !w.contexto)) ? url.replace(/\/+$/, '') : '';
+      // Una página abierta por su nombre (`w.red`) ya no es canónica de sí misma: en `humanity.wiki/@luz/…`
+      // lo sería de una copia (2026-11-12); va a su dirección legible en su dominio, como las demás.
+      let canonica = w.seccion ? url.replace(/\/+$/, '') : '';
       if (w.contexto && slugDe(w.title || '')) {
         const pref = s.forma === 'casa' ? `/@${w.handle}` : '';
         const r = await paginaDeLaDireccion(req, `${pref}/${slugDe(w.title)}`).catch(() => null);
         canonica = r?.id === w.id ? `https://${s.host}${pref}/${slugDe(w.title)}` : url;
       }
-      if (!canonica) canonica = (await direccionCanonica(w, publica)) || url;
+      if (!canonica) {
+        const bonita = w.virtual ? null : await rutaBonita(req, { id: w.id, slug: w.slug, title: w.title, handle: w.handle, publico: w.publico });
+        canonica = (await direccionCanonica(w, publica, bonita)) || url;
+      }
       // En el dominio traducido, cada página es canónica de sí misma.
       if (idioma) canonica = traducirProfundo(canonica, s.host);
       const icono = cfg?.icono;
@@ -1331,6 +1323,17 @@ export function registrarSitios(app: Express, db: any) {
               usados.add(n); legibles[x.id] = n;
             }
           }
+          // LAS QUE AÚN NO TIENEN (2026-11-12): un nombre corto de una página no `publico` (las creadas por
+          // migración) o un título en la casa. Las mismas que da el 301 de `/p/:id` (`rutaBonita`).
+          const faltan = ids.filter(id => !legibles[id]);
+          if (faltan.length) {
+            const filas = (await db.execute(sql`
+              SELECT w.id, w.slug, w.title, w.publico, u.handle FROM knowledge_windows w JOIN users u ON u.id = w.creator_user_id
+              WHERE w.id IN (${sql.join(faltan.map(i => sql`${i}`), sql`, `)}) AND w.deleted_at IS NULL AND w.archived_at IS NULL
+                AND w.id <> ${raizDominio || ''}
+            `)).rows as any[];
+            await enParalelo(filas, async (x: any) => { const b = await rutaBonita(req, x); if (b) legibles[x.id] = b; });
+          }
           if (Object.keys(legibles).length) {
             const ruta = (slug: string) => slug.split('/').map(encodeURIComponent).join('/');
             raiz = raiz.replace(/href="(\/@[^/"]+)?\/p\/([^"/?#]+)"/g, (todo, arroba, id) =>
@@ -1375,9 +1378,32 @@ export function registrarSitios(app: Express, db: any) {
     return false;
   }
 
-  const direccionCanonica = (w: any, publica: any) => canonicaDe(db, w, publica).catch(e => { console.error('sitios: canónica', e); return null; });
+  const direccionCanonica = (w: any, publica: any, bonita?: string | null) => canonicaDe(db, w, publica, bonita).catch(e => { console.error('sitios: canónica', e); return null; });
 
   /** Qué página publicada hay en esta dirección, si hay alguna. */
+  /**
+   * LA DIRECCIÓN LEGIBLE DE UNA PÁGINA, COMPROBADA (2026-11-12). Su nombre corto (`slug`, de uno o dos
+   * tramos) o, si no, su título (`slugDe`), el primero que ESTA web (la de `req`: dominio, subdominio o
+   * casa) abre de verdad en esa misma página y no en otra ni con un 301. Sin prefijo: en la casa va
+   * detrás de `/@quien`. `null` si no tiene ninguna; entonces sigue valiendo `/p/:id`.
+   */
+  async function rutaBonita(req: Request, w: { id: string; slug?: string | null; title?: string | null; handle?: string | null; publico?: boolean | null }): Promise<string | null> {
+    const s = sitioDe(req);
+    if (s.forma === 'casa' && !w.handle) return null;
+    const pref = s.forma === 'casa' ? `/@${w.handle}` : '';
+    // En el mismo orden que el sitemap (`urlsDelSitio`): el nombre corto si es de dos tramos o la página es
+    // `publico`; si no, primero el título. Así la canónica, el 301 y el sitemap dicen siempre la misma.
+    const corto = w.slug ? String(w.slug).toLowerCase() : '', titulo = slugDe(w.title || '');
+    const primeroCorto = !!corto && (corto.includes('/') || !!w.publico);
+    const candidatos = [...new Set((primeroCorto ? [corto, titulo] : [titulo, corto]).filter(Boolean))];
+    for (const c of candidatos) {
+      if (TRAMOS_RESERVADOS.has(c.split('/')[0])) continue;
+      const r = await paginaDeLaDireccion(req, `${pref}/${c.split('/').map(encodeURIComponent).join('/')}`).catch(() => null);
+      if (r && !r.redirigir && !r.seccion && !r.contexto && !r.perdida && r.id === w.id) return c;
+    }
+    return null;
+  }
+
   async function paginaDeLaDireccion(req: Request, camino: string = req.path): Promise<any | null> {
     const s = sitioDe(req);
     let tramos: string[];
