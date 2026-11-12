@@ -144,6 +144,31 @@ function limpiarReferencias(lista: unknown): { url: string; nota?: string; tipo?
 function imagenesValidas(contenido: any): boolean {
   if (contenido?.imagen && !urlImagenValida(contenido.imagen)) return false;
   if (contenido?.alternativa && !urlImagenValida(contenido.alternativa)) return false;
+  return composicionValida(contenido?.composicion);
+}
+
+/** Lo movido y añadido en las ilustraciones por elementos (2026-11-12):
+ *  números normales y, en lo añadido, solo imágenes subidas aquí. */
+function composicionValida(comp: unknown): boolean {
+  if (comp === undefined || comp === null) return true;
+  if (typeof comp !== 'object' || Array.isArray(comp)) return false;
+  const num = (v: unknown, a: number, b: number) => v === undefined || (typeof v === 'number' && Number.isFinite(v) && v >= a && v <= b);
+  for (const [clave, d] of Object.entries(comp as Record<string, any>)) {
+    if (!/^mes-\d{2}(-[a-z])?$/.test(clave) || !d || typeof d !== 'object') return false;
+    if (d.capas !== undefined) {
+      if (typeof d.capas !== 'object' || Array.isArray(d.capas)) return false;
+      for (const a of Object.values(d.capas as Record<string, any>)) {
+        if (!a || typeof a !== 'object' || !num(a.dx, -2, 2) || !num(a.dy, -2, 2) || !num(a.escala, 0.05, 10)) return false;
+      }
+    }
+    if (d.extra !== undefined) {
+      if (!Array.isArray(d.extra) || d.extra.length > 60) return false;
+      for (const e of d.extra) {
+        if (!e || typeof e.id !== 'string' || e.id.length > 40 || !urlImagenValida(e.src)) return false;
+        if (!num(e.x, -1, 2) || !num(e.y, -1, 2) || !num(e.ancho, 0.005, 3)) return false;
+      }
+    }
+  }
   return true;
 }
 
@@ -225,7 +250,7 @@ export function registerCalendarioArteRoutes(app: Express, db: any) {
       const texto = JSON.stringify(contenido);
       if (texto.length > MAX_CONTENIDO) return res.status(413).json({ error: 'El contenido de este mes es demasiado grande.' });
       if (!imagenesValidas(contenido)) {
-        return res.status(400).json({ error: 'La ilustración tiene que ser una imagen subida desde el calendario.' });
+        return res.status(400).json({ error: 'La ilustración y los elementos añadidos tienen que ser imágenes subidas desde el calendario.' });
       }
       if (!(await conRitmo(db, FRENO_ESCRITURA, req, res))) return;
       const version = Number(req.body?.version ?? 0);

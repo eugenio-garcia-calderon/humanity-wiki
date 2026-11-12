@@ -96,3 +96,8 @@ access → Custom → Allowed domains* del entorno.
 **No hagas commits ni toques el repositorio**: los diseños nuevos viven en la base de
 datos y en `/uploads`, no en el código. Nunca toques la ilustración que se imprime
 (`imagen`) ni el favorito: eso lo eligen las personas en la web.
+
+**Los elementos que se mueven (capas) no son para ti, todavía.** Desde el 2026-11-12 las
+ilustraciones que se dibujan en el repositorio salen por piezas que se pueden arrastrar
+y agrandar en la web (`README.md`, «Illustrations as movable elements»). Ese camino
+necesita un commit, y tú no haces commits: tus diseños siguen siendo una sola imagen.

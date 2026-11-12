@@ -19,14 +19,19 @@ import math
 import numpy as np
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from capas import Capas
 from acuarela import (Lienzo, Poligono, Elipse, Trazo, Circulos, spline, bezier, arco, mezcla, remuestrea,
                       mano, cabeza, extremidad, figura, jardin, estrella, hojita, flor_simple, flor_grande,
                       capullo, pajaro, sombra_bajo, rgb, _lapiz_de)
 
 ANCHO = int(sys.argv[1]) if len(sys.argv) > 1 else 1485
 SALIDA = sys.argv[2] if len(sys.argv) > 2 else 'mes-05-d.png'
+# third argument: a folder to write the illustration as separate movable elements (capas.py)
+CARPETA_CAPAS = sys.argv[3] if len(sys.argv) > 3 else None
 
 lz = Lienzo(ANCHO, semilla=505)
+capas = Capas(lz, activo=bool(CARPETA_CAPAS))
+lz = capas.lienzo     # every element is also painted alone on a clean twin sheet
 
 TEAL = '#3f8f8c'
 CORAL = '#e8735e'
@@ -40,6 +45,7 @@ def sombra_suelo(cx, cy, rx):
     lz.aguada(Elipse(cx, cy, rx, rx * 0.11), '#c9a08a', dens=0.35, suave=8, gran=0.2)
 
 
+capas.empieza('guitarrista', 'El guitarrista')
 # ------------------------------------------------------------------ the guitarist (up, left)
 sombra_suelo(205, 508, 85)
 for (x0, y0, x1, y1) in ((150, 428, 146, 506), (226, 432, 230, 506), (160, 420, 156, 330)):
@@ -91,6 +97,7 @@ for br in (brazo1, brazo2):
 mano(lz, *Rg(-8, -6), 50, 20, 'piel2', 'abierta')
 mano(lz, *Rg(78, 5), -100, 20, 'piel2', 'sujeta')
 
+capas.empieza('musica', 'La música')
 # ------------------------------------------------------------------ the music crosses the page
 MANO_ALTA = np.array([604.0, 104.0])
 musica_pts = bezier(Rg(12, 0), (330, 300), (420, 110), (575, 118), 60)
@@ -108,6 +115,7 @@ for k in range(9):                                       # ...a little crown of 
     estrella(lz, MANO_ALTA[0] + 10 + math.cos(a_) * rr, MANO_ALTA[1] - 10 + math.sin(a_) * rr * 0.8,
              rng.uniform(4, 9), rng.choice([ORO, ORO, TEAL, CORAL, '#8d73b0']), gouache=False)
 
+capas.empieza('falda', 'La falda-jardín')
 # ------------------------------------------------------------------ the skirt-garden (protagonist)
 MANO_FALDA = np.array([772.0, 284.0])
 BORDE = spline([(596, 336), (560, 430), (512, 516), (470, 588), (500, 640), (560, 690), (640, 720), (730, 724),
@@ -210,6 +218,7 @@ lz.aguada(punto, '#5f86c0', dens=0.8, tapa=1, irreg=0.2)
 lz.lapiz([arco(*(AGUJAS + (k * 5 - 2, -2)), 1.6, 3.5, 200, 520, 10, 90 + (20 if k % 2 else -20)) for k in range(5)],
          '#2a3a6a', grosor=0.4, presion=0.4)
 
+capas.empieza('bailarina', 'La bailarina')
 # ------------------------------------------------------------------ the dancer
 J = dict(cabeza=(644, 156, 33), hi=(614, 198), hd=(670, 208), ci=(628, 272), cd=(662, 268),
          brazo_i=[(616, 204), (574, 150), MANO_ALTA], brazo_d=[(668, 214), (724, 250), MANO_FALDA - (6, 0)],
@@ -226,6 +235,7 @@ for pts in ([(664, 274), (688, 290), (708, 284)], [(664, 276), (682, 302), (696,
     lz.aguada(f, CARMIN, dens=0.9, tapa=1, irreg=0.3)
     lz.contorno(f, '#7a1f30', grosor=0.6, presion=0.5)
 
+capas.empieza('abuela', 'La abuela que teje')
 # ------------------------------------------------------------------ the grandmother knits the hem (low, left)
 sombra_suelo(330, 826, 100)
 taburete = Poligono([(250, 748), (332, 748), (328, 762), (254, 762)], suave=False)
@@ -259,6 +269,7 @@ for (bx, by, c) in ((212, 778, TEAL), (236, 776, ORO), (224, 768, '#5f86c0')):
              presion=0.45)
 lz.lapiz([bezier((224, 768), (280, 760), (330, 770), (372, 716))], '#5f86c0', grosor=1.0, presion=0.75)
 
+capas.empieza('nina', 'La niña del barro')
 # ------------------------------------------------------------------ the girl models in clay a bud that becomes a flower
 sombra_suelo(976, 816, 78)
 # kneeling for real: feet behind, knees under the dress, back leaning toward the clay
@@ -296,13 +307,20 @@ lz.lapiz([tallo], '#4f6f45', grosor=1.1, presion=0.8, temblor=0.3)
 hojita(lz, 903, 698, 12, -170, '#5f8f63', tapa=1)
 flor_grande(lz, 882, 662, 17, '#e8506a', centro=ORO)
 
+capas.empieza('flores', 'Las flores que despegan')
 # ------------------------------------------------------------------ flowers become birds (the quiet side)
 for k, (x, y) in enumerate(((1036, 430), (1060, 398))):
     flor_simple(lz, x, y, 7, [CORAL, ORO][k], centro='#fff3cf')
+capas.empieza('pajaro1', 'El pájaro coral')
 pajaro(lz, 1116, 352, 17, CORAL, ang=-20)
+capas.empieza('pajaro2', 'El pájaro turquesa')
 pajaro(lz, 1204, 284, 15, TEAL, ang=-12)
+capas.empieza('pajaro3', 'El pájaro dorado')
 pajaro(lz, 1290, 236, 12, ORO, ang=-24)
 
+capas.termina()
 lz.vineta(margen=30)
 lz.guardar(SALIDA)
+if CARPETA_CAPAS:
+    capas.guardar(CARPETA_CAPAS)
 print('ok', SALIDA)
