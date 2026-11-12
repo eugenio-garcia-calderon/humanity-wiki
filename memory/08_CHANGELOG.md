@@ -11147,6 +11147,11 @@ Eugenio: «llamado Observatorio de Polarización Política, y permite que si se 
 - Si cambia el texto original en el código, su clave cambia y la versión editada deja de aplicarse: el código manda.
 - Probado con un servidor que imita las dos rutas: sin sesión y con un usuario normal no hay barra; con Eugenio se editan, guardan, se ven sin sesión (también lo que se repinta al pasar el ratón) y se restauran.
 
+### 2026-11-12 — Sol Solidario: la marca de energía solar contra la pobreza energética
+- `drizzle/0202_sol_solidario.sql`: proyecto «Sol Solidario» (página KWSOLSOLIDARIO1, fila BDFSOLSOLIDAR01, `config.aplicacion = sol-solidario`) y 12 proyectos dentro (centros de acogida y Cañada Real en España; Amazonas, Guajira, Honduras; Kenia, Mozambique; Solar Crowd y la tienda solidaria).
+- `src/pages/SolSolidario.tsx`: portada, cifras con fuente, proyectos por zonas (`SubproyectosSitio` con `grupos`), pobreza energética en España (INE) y en el mundo (Tracking SDG7 2025), herramientas, donación (bloque de Stripe) y préstamo solidario (7 años, anual, 0 %, desde 1.000 €) con el formulario de Colabora (motivo nuevo `prestamo`).
+- `solSolidario/marca.tsx`: logo, submenú fijo bajo la barra del sitio; también en los proyectos hijos.
+- Pendiente: IBAN de donaciones y préstamos en `config.solSolidario` (ibanDonaciones, ibanPrestamos) y Stripe en modo real (hoy cs_test).
 ## 2026-11-12 — Modelo socioeconómico on luzhumanidad.com: part of the page, not a box
 
 - Eugenio: the screen-tall box was «un embed cutre» — scrolling outside it showed an almost endless white page, and the site menu should only go away in full screen. The box is gone: the app is the rest of the page under the site bar and scrolls with the window, so the document ends where the app ends (measured: document height = app bottom at 390, 1440 and 1800 px). The blank came from absolutely positioned descendants escaping the box's `overflow: hidden`.

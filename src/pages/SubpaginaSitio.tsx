@@ -33,10 +33,13 @@ import type { ContextoRuta } from '../utils/precargado';
 const Conciencia = lazy(() => import('./Conciencia'));
 const ModeloSocioeconomico = lazy(() => import('./ModeloSocioeconomico'));
 const ObservatorioPolarizacion = lazy(() => import('./ObservatorioPolarizacion'));
-const APLICACIONES: Record<string, (p: { inicio: string; conBarra: boolean }) => ReactNode> = {
+const SolSolidario = lazy(() => import('./SolSolidario'));
+const APLICACIONES: Record<string, (p: { inicio: string; conBarra: boolean; pagina: DatosPagina }) => ReactNode> = {
   conciencia: ({ inicio, conBarra }) => <Conciencia enSitio={{ inicio, conBarra }} />,
   'modelo-socioeconomico': ({ inicio }) => <ModeloSocioeconomico enSitio={{ inicio }} />,
   'observatorio-polarizacion': () => <ObservatorioPolarizacion />,
+  // 2026-11-12 (Eugenio): «crea el proyecto de Sol Solidario con su página web… con el menú arriba y abajo el Sol Solidario».
+  'sol-solidario': ({ pagina }) => <SolSolidario raizId={pagina.sitio?.raizId || null} paginaId={pagina.id} config={(pagina.config || {}) as any} />,
 };
 // Apps that sit under the site's own top bar, like any other page of the site
 // (2026-11-12, Eugenio on the consciousness map: «haz que aparezca el menú
@@ -44,7 +47,7 @@ const APLICACIONES: Record<string, (p: { inicio: string; conBarra: boolean }) =>
 // keep their full screen until someone asks; an app that joins must leave room
 // for the bar in its own heights (see `conBarra` in Conciencia.tsx).
 // The observatorio too (2026-11-12, Eugenio: «pon el menú superior en el observatorio de polarización»).
-const CON_BARRA = new Set(['conciencia', 'observatorio-polarizacion']);
+const CON_BARRA = new Set(['conciencia', 'observatorio-polarizacion', 'sol-solidario']);
 // EMBEDDED IN THE PAGE (2026-11-12, Eugenio: «que el modelo socioeconómico esté
 // embebido en la página de luzhumanidad.com, que aparezca el menú de Luz &
 // Humanidad arriba, y que se pueda expandir a pantalla completa y salir»).
@@ -86,7 +89,7 @@ export default function SubpaginaSitio({ propio, idFijo, contexto }: { propio: b
       {/* The app is the rest of the page (its own <main> and <h1>); -mt-4 undoes the bar's mb-4. */}
       <div className={conBarra ? '-mt-4' : undefined}>
         <AplicacionIncrustada>
-          <App inicio={sitio && propio ? '/' : 'https://luzhumanidad.com'} conBarra={false} />
+          <App inicio={sitio && propio ? '/' : 'https://luzhumanidad.com'} conBarra={false} pagina={pagina} />
         </AplicacionIncrustada>
       </div>
     </Suspense>;
@@ -99,7 +102,7 @@ export default function SubpaginaSitio({ propio, idFijo, contexto }: { propio: b
       </>}
       {/* …and its mb-4 would leave a white strip above a dark app. */}
       <div className={conBarra ? '-mt-4' : undefined}>
-        <App inicio={sitio && propio ? '/' : 'https://luzhumanidad.com'} conBarra={conBarra} />
+        <App inicio={sitio && propio ? '/' : 'https://luzhumanidad.com'} conBarra={conBarra} pagina={pagina} />
       </div>
     </Suspense>;
   }
