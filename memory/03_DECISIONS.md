@@ -1614,3 +1614,8 @@ Eugenio: «que cada elemento de la ilustración puedas pinchar y arrastrarlo… 
 - **What is saved:** `contenido.composicion[<illustration key>] = { capas: {id: {dx, dy, escala}}, extra: [{id, src, x, y, ancho}] }`, per illustration, so moving things in design 4 does not touch design 3. Offsets are fractions of the sheet; scaling is around the element's centre. The server validates ranges and that added images are calendar uploads.
 - **Picking is by the drawing, not the box**: alpha masks ≤256 px, threshold half of each sprite's densest alpha (capped at 90) so a glow-only sun is still grabbable; a second pass with an 8 px radius for thin things (threads, gliders).
 - **Still the composite JPG:** cover, thumbnails, folders, and the automatic drawer's designs. Moving elements does not change those yet. Cost to extend the cover: the cover renders 12 small images; switching it to `Composicion` is ~30 min but loads ~17 files per month instead of 1.
+
+## 2026-11-12 — How the «Otras propuestas» slider stays even-handed
+
+- Camps mapped as: izquierda ≈ Frente Amplio (Sumar, IU, Más Madrid, Comuns) / Podemos; centro izquierda ≈ PSOE and the Government; centro derecha ≈ PP; derecha ≈ Vox. Neutral greys for every camp, no party colours; the model in emerald.
+- Every card has identical fields; criticisms are always attributed, never asserted by the page; the model gets its own criticism box. Review the twelve files when the 29-N manifestos are complete (dates on the cards make stale ones visible).

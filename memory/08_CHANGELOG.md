@@ -11425,3 +11425,10 @@ Eugenio: «permite pinchar y arrastrar para ordenar las tarjetas de la galería 
 - `VistaProyectosSitio`: el editor de humanity.wiki pinta los mismos sectores en fila (`FilaSector`) que luzhumanidad.com, sin la etiqueta de categoría, sin los proyectos que van dentro de otro y sin la presentación si `sitio.presentacion` es false. Títulos y descripciones, a dos líneas como en la web hasta que se escribe en ellos (`TextoEnLinea lineas`).
 - Dentro de cada sector manda el orden de la tabla. Quien gestiona la web arrastra las tarjetas (en el editor, desde el asa de arriba; en la web con sesión, la tarjeta entera; también Alt + flechas). Se guarda con `PUT /api/bd/tablas/:id/orden-filas`, así que la base de datos y la web tienen el mismo orden.
 - Migración 0211: la tabla Proyectos toma una vez el orden que enseñaba la portada, para que nada se mueva al desplegar.
+
+## 2026-11-12 — «Otras propuestas»: a left-to-right slider at the top of every policy window
+
+- Twelve windows (all but Categorías) now open with «Qué proponen otros sobre …»: five stops — izquierda, centro izquierda, este modelo, centro derecha, derecha. Each camp's card: who, when (visible date), idea, 3–5 proposals, their argument, the main criticism (always attributed: «Sus críticos dicen que…»), sources. The model's stop lists its proposal and «Lo que se le puede criticar», with a note that it sits in the middle for comparison, not because it is centrist.
+- Component `EspectroPropuestas.tsx`; data `src/data/espectro/<id>.ts` (`Espectro`, `Postura` in `tipos.ts`); the submenu gains «Otras propuestas» first. Rendered from the page, so window files were not touched.
+- Written by three agents and reviewed by a blind balance evaluator (first round: balance 7, accuracy 8, dates 4); fixes applied: same critical voice for all, a visible date per card, criticism of the model, «no hemos encontrado…» notes. Positions use the 29-N 2026 campaign where published; where a party has published nothing newer, the card says 2023 (or the year).
+- Note: general election on 29 November 2026; when the remaining manifestos appear (Frente Amplio, Podemos, PSOE, Vox), these cards need a review.

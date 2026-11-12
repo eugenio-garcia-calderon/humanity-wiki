@@ -41,6 +41,8 @@ import { JusticiaVentana } from '../components/modeloSocioeconomico/JusticiaVent
 import { SanidadVentana } from '../components/modeloSocioeconomico/SanidadVentana';
 import { EducacionVentana } from '../components/modeloSocioeconomico/EducacionVentana';
 import { LegalVentana } from '../components/modeloSocioeconomico/LegalVentana';
+import { EspectroPropuestas } from '../components/modeloSocioeconomico/EspectroPropuestas';
+import { ESPECTROS } from '../data/espectro';
 import { DigitalVentana } from '../components/modeloSocioeconomico/DigitalVentana';
 import { Presupuestos } from '../components/modeloSocioeconomico/Presupuestos';
 import { BuzonProyecto } from '../components/modeloSocioeconomico/BuzonProyecto';
@@ -210,6 +212,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
       </header>
 
       <main>
+        {ventana && ESPECTROS[ventana] && <EspectroPropuestas key={ventana} ventana={ventana} datos={ESPECTROS[ventana]!} />}
         {ventana === 'impuestos' && <ImpuestosVentana onProponer={() => setVerBuzon(true)} />}
         {ventana === 'categorias' && <CategoriasVentana />}
         {ventana === 'pensiones' && <PensionesVentana />}
