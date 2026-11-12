@@ -52,4 +52,6 @@ export interface PivoteGaraje {
   tipo: 'puerta' | 'maletero';
   eje: [number, number, number];
   angulo: number;
+  /** An object (by name) that the viewer shows only while this piece is open: the frame of its opening. */
+  conHueco?: string;
 }

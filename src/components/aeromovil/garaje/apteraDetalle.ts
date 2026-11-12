@@ -101,6 +101,11 @@ export function materiales() {
     // when it opens (one without polygon offset for the painted part, one like the dark band for the rest)
     marco: fis({ color: 0x141518, metalness: 0, roughness: 0.85, side: D }),
     marcoBanda: calco({ color: 0x141518, metalness: 0, roughness: 0.85, side: D }),
+    // the moving panels (doors, hatch): the same paint and band, drawn in front of the fixed skin they sit on
+    pinturaPieza: calco({ color: 0xa6adb4, metalness: 0.55, roughness: 0.34, clearcoat: 1, clearcoatRoughness: 0.035 }),
+    bandaPieza: calco({ color: 0x0a0c0f, metalness: 0.2, roughness: 0.16, clearcoat: 1, clearcoatRoughness: 0.03, polygonOffsetFactor: -4, polygonOffsetUnits: -4 }),
+    // floors and the bulkhead seen through the open doors and hatch
+    tapizado: fis({ color: 0x1d1f22, roughness: 0.9, metalness: 0, side: D }),
     luz: calco({ color: 0xffffff, emissive: 0xf2f6ff, emissiveIntensity: 1.6, roughness: 0.25, polygonOffsetFactor: -5, polygonOffsetUnits: -5 }),
     modulo: calco({ color: modulo ? 0xffffff : 0xdde3ea, map: modulo, emissive: 0xffffff, emissiveMap: modulo, emissiveIntensity: 1.3, roughness: 0.2, polygonOffsetFactor: -7, polygonOffsetUnits: -7 }),
     lente: fis({ color: 0xffffff, transparent: true, opacity: 0.28, depthWrite: false, metalness: 0, roughness: 0.02, clearcoat: 1, clearcoatRoughness: 0.0, envMapIntensity: 1.6 }),

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import type { VehiculoGaraje } from './tipos';
 import { E, areaFrontal, envolventeDe, puntoSeccion, semiAncho, semiAnchoEn, type Est } from './forma';
 import { barrido, cintaPiel, enPiel, espejo, estacion, finas, normalSeccion, parcheM, piel, thetaY, type Rango } from './apteraPiel';
-import { APLASTADO, cabina, camaraLateral, geometriasRueda, limpia, malla, materiales, rueda } from './apteraDetalle';
+import { APLASTADO, cabina, camaraLateral, geometriasRueda, limpia, malla, materiales, rueda, type Mats } from './apteraDetalle';
 
 /**
  * Aptera (Launch Edition y vehículos de preserie, 2023–2025), dibujado por código.
@@ -193,7 +193,7 @@ function tabla(p: [number, number][], x: number): number {
  * (donde cruza el morro de lado a lado) hacia atrás por cada costado hasta
  * x = 0,50, donde acaba en punta.
  */
-const LUZ_Y: [number, number][] = [[0.880, 0.529], [0.860, 0.531], [0.800, 0.537], [0.700, 0.550], [0.600, 0.566], [0.500, 0.586], [0.420, 0.604]];
+const LUZ_Y: [number, number][] = [[0.880, 0.529], [0.860, 0.531], [0.800, 0.537], [0.700, 0.552], [0.600, 0.574], [0.550, 0.592], [0.500, 0.612], [0.420, 0.648]];
 const LUZ_H: [number, number][] = [[0.880, 0.012], [0.800, 0.015], [0.650, 0.019], [0.520, 0.019], [0.420, 0.0]];
 const X_LUZ = 0.42;
 /**
@@ -203,7 +203,7 @@ const X_LUZ = 0.42;
  * 15 cm de delante a atrás de la puerta: medido en el render de la Launch
  * Edition y en la foto del Gamma).
  */
-const BORDE_PUNTOS: [number, number][] = [[X_LUZ, 0.611], [0.30, 0.640], [0.15, 0.680], [0.0, 0.722], [-0.15, 0.775], [-0.32, 0.838], [-0.65, 0.848], [-1.0, 0.893], [-1.3, 0.938], [-1.6, 0.982], [-1.9, 1.012], [-2.2, 1.05]];
+const BORDE_PUNTOS: [number, number][] = [[X_LUZ, 0.655], [0.30, 0.668], [0.15, 0.692], [0.0, 0.722], [-0.15, 0.775], [-0.32, 0.838], [-0.65, 0.848], [-1.0, 0.893], [-1.3, 0.938], [-1.6, 0.982], [-1.9, 1.012], [-2.2, 1.05]];
 const BORDE = (x: number) => x > X_LUZ ? tabla(LUZ_Y, x) + tabla(LUZ_H, x) + 0.007 : tabla(BORDE_PUNTOS, x);
 /** Borde del parabrisas en el costado, visto de lado: del pie del pilar (−0,32; 0,84) al techo (−1,06; 1,33). */
 const PILAR = (x: number) => 0.84 + (1.33 - 0.84) * lim((-0.32 - x) / 0.74);
@@ -317,14 +317,15 @@ const VIDRIOS = [PARABRISAS, VENTANILLA, VENTANILLA_IZQ, LUNETA];
  * fuera, enseñando la cara de fuera). Dato estimado: Aptera no publica la
  * bisagra ni el ángulo.
  */
-const TH_COSTURA = 58 * GRADO; // borde de arriba de la puerta, en el techo (el techo solar empieza en 60°)
+const TH_COSTURA = 57.5 * GRADO; // borde de arriba de la puerta, en el techo (el techo solar empieza en 60°)
 /** Borde de abajo de la puerta, visto de lado, de delante a atrás (x decreciente). */
 const PUERTA_BAJO: [number, number][] = [[-0.32, 0.838], [-0.40, 0.73], [-0.49, 0.60], [-0.60, 0.46], [-0.72, 0.35], [-0.86, 0.29], [-1.15, 0.27], [-1.42, 0.29], [-1.56, 0.37], [-1.61, 0.50], [-1.635, 0.70], [-1.65, 0.90], [-1.665, 1.02], [-1.72, 1.12], [-1.78, 1.22], [-1.83, 1.31]];
 const X_PUERTA0 = -0.32, X_PUERTA1 = -1.84;
 /** The hinge line on the skin (right side), along the A-pillar: its foot is the pivot, the axis points up it. */
 const BISAGRA_PUERTA = (() => {
-  const pie = (() => { const e = estacion(CUERPO, -0.325); return enPiel(e, thetaY(e, 0.835), 0.012); })();
-  const alto = (() => { const e = estacion(CUERPO, -1.04); return enPiel(e, thetaY(e, 1.31), 0.012); })();
+  // 17 mm out of the skin: closer in, the door's front edge cuts the A-pillar near the foot when fully open
+  const pie = (() => { const e = estacion(CUERPO, -0.325); return enPiel(e, thetaY(e, 0.835), 0.017); })();
+  const alto = (() => { const e = estacion(CUERPO, -1.04); return enPiel(e, thetaY(e, 1.31), 0.017); })();
   const eje = alto.clone().sub(pie).normalize();
   return { pie, eje: [eje.x, eje.y, eje.z] as [number, number, number] };
 })();
@@ -442,10 +443,13 @@ function construir(): THREE.Group {
   carroceria.addGroup(0, carroceria.index!.count, 3);
   g.add(malla(carroceria, [M.pintura, M.bajos, M.grafito, M.forro], 'carroceria'));
   g.add(malla(piel(QUILLA, { N: 56, sub: 8 }), M.grafito, 'quilla'));
-  g.add(cabina(M));
+  g.add(cabina(M), interior(M));
 
   // --- la banda negra: capó, pilares, marcos, techo y portón (con agujeros en el cristal claro)
-  g.add(malla(parcheM(CUERPO, 0.879, X_FIN_BANDA, banda, { nx: 180, nth: 76, delta: 0.002, quitar: fuera }), M.banda, 'banda-negra'));
+  // (its cells are ~2.3 cm along x and up to ~4.7° around: the opening test uses that size, so a cell that crosses
+  // the door line stays, under the door, instead of leaving a gap)
+  const movilBanda = movilRapido(0.012, 0.025);
+  g.add(malla(parcheM(CUERPO, 0.879, X_FIN_BANDA, banda, { nx: 180, nth: 76, delta: 0.002, quitar: (x, th) => claro(x, th) || movilBanda(x, th) }), M.banda, 'banda-negra'));
   // capó solar, 4 cm dentro de la banda, con las esquinas de delante redondas
   const capo = (e: Est) => {
     const r = encoger(e, banda(e), 0.04); if (!r) return null;
@@ -460,7 +464,7 @@ function construir(): THREE.Group {
   };
   g.add(malla(parcheM(CUERPO, X_TECHO - 0.05, X_FIN_TECHO, techo, { nx: 64, nth: 32, delta: 0.0035 }), M.solar, 'techo-solar'));
   // cristales, con su franja negra (el parabrisas es fijo; la ventanilla va en la puerta y la luneta en el portón)
-  const vidrio = (v: Vidrio) => malla(parcheM(CUERPO, v.x0, v.x1, v.rango, { nx: 48, nth: 40, delta: 0.005, bordes: true, color: colorVidrio(v.franja) }), M.cristal, 'cristal', false);
+  const vidrio = (v: Vidrio, delta = 0.005) => malla(parcheM(CUERPO, v.x0, v.x1, v.rango, { nx: 48, nth: 40, delta, bordes: true, color: colorVidrio(v.franja) }), M.cristal, 'cristal', false);
   g.add(vidrio(PARABRISAS));
 
   // --- puertas: cada una cuelga de un pivote en su bisagra (el visor las gira, ver `pivotes`); la
@@ -468,23 +472,25 @@ function construir(): THREE.Group {
   {
     const P = BISAGRA_PUERTA.pie;
     const piv = new THREE.Group(); piv.name = 'puerta-d'; piv.position.copy(P);
-    const pielPuerta = parcheM(CUERPO, X_PUERTA0, X_PUERTA1, rangoPuerta, { nx: 120, nth: 64, delta: 0.002, quitar: claro });
+    // the moving panels stand 4 mm out of the fixed skin, with a polygon offset: the fixed cells that cross the
+    // cut stay under them without flickering (a real door stands proud of its frame by about that)
+    const pielPuerta = parcheM(CUERPO, X_PUERTA0, X_PUERTA1, rangoPuerta, { nx: 120, nth: 64, delta: 0.004, quitar: claro });
     const bandaPuerta = (e: Est): Rango | null => {
       const r = rangoPuerta(e), b = banda(e); if (!r || !b) return null;
       const a = Math.max(r[0], b[0]); return r[1] > a + 1e-3 ? [a, r[1]] : null;
     };
     piv.add(
-      malla(pielPuerta, M.pintura, 'puerta'), malla(pielPuerta, M.forro, 'puerta-forro'),
-      malla(parcheM(CUERPO, X_PUERTA0, X_PUERTA1, bandaPuerta, { nx: 120, nth: 40, delta: 0.0026, quitar: claro }), M.banda, 'banda-negra'),
-      vidrio(VENTANILLA),
+      malla(pielPuerta, M.pinturaPieza, 'puerta'), malla(pielPuerta, M.forro, 'puerta-forro'),
+      malla(parcheM(CUERPO, X_PUERTA0, X_PUERTA1, bandaPuerta, { nx: 120, nth: 40, delta: 0.0045, quitar: claro }), M.bandaPieza, 'banda-negra'),
+      vidrio(VENTANILLA, 0.0065),
       // la junta va en el canto de la puerta: cerrada es la raya entre puerta y carrocería
-      malla(cintaPiel(CUERPO, PUERTA_BAJO, 0.0045, { pasos: 110, delta: 0.003 }), M.junta, 'junta', false),
+      malla(cintaPiel(CUERPO, PUERTA_BAJO, 0.0045, { pasos: 110, delta: 0.0055 }), M.junta, 'junta', false),
     );
     {
       const ruta: THREE.Vector3[] = [];
       for (let k = 0; k <= 30; k++) {
         const x = -0.97 + (X_PUERTA1 + 0.012 + 0.97) * k / 30, e = estacion(CUERPO, x);
-        if (thetaY(e, PILAR(x)) - 0.006 >= TH_COSTURA - 1e-3) ruta.push(enPiel(e, TH_COSTURA, 0.003));
+        if (thetaY(e, PILAR(x)) - 0.006 >= TH_COSTURA - 1e-3) ruta.push(enPiel(e, TH_COSTURA, 0.0055));
       }
       if (ruta.length > 1) piv.add(malla(barrido(ruta, () => [0.0022, 0.0012], { lados: 6 }), M.junta, 'junta', false));
     }
@@ -499,8 +505,8 @@ function construir(): THREE.Group {
   {
     const H = new THREE.Vector3(X_BISAGRA_MAL, estacion(CUERPO, X_BISAGRA_MAL).yt - 0.012, 0);
     const piv = new THREE.Group(); piv.name = 'porton'; piv.position.copy(H);
-    const concha = parcheM(CUERPO, X_BISAGRA_MAL, X_FIN_BANDA, rangoPorton, { nx: 110, nth: 64, delta: 0.0026, quitar: claro });
-    piv.add(malla(concha, M.banda, 'banda-negra'), malla(concha, M.forro, 'porton-forro'), vidrio(LUNETA));
+    const concha = parcheM(CUERPO, X_BISAGRA_MAL, X_FIN_BANDA, rangoPorton, { nx: 110, nth: 64, delta: 0.0045, quitar: claro });
+    piv.add(malla(concha, M.bandaPieza, 'banda-negra'), malla(concha, M.forro, 'porton-forro'), vidrio(LUNETA, 0.0065));
     for (const o of piv.children) o.position.sub(H);
     g.add(piv);
   }
@@ -508,7 +514,7 @@ function construir(): THREE.Group {
   // --- morro: parte baja en grafito, hasta la tira de luz y una junta que baja desde su punta
   // the chin's rear seam leaves the light bar where its side part begins and runs down and back to the
   // rounded rear end of the chin, ahead of the pods (the LE render and the road photo of the 2024 car)
-  const COSTURA: [number, number][] = [[0.56, 0.552], [0.53, 0.49], [0.49, 0.42], [0.44, 0.35], [0.39, 0.29], [0.34, 0.24], [0.30, 0.21]];
+  const COSTURA: [number, number][] = [[0.56, 0.569], [0.53, 0.50], [0.49, 0.42], [0.44, 0.35], [0.39, 0.29], [0.34, 0.24], [0.30, 0.21]];
   const alturaMorro = (x: number) => x > COSTURA[0][0] ? tabla(LUZ_Y, x) - tabla(LUZ_H, x) - 0.005 : x >= 0.30 ? (() => {
     for (let i = 0; i < COSTURA.length - 1; i++) if (x <= COSTURA[i][0] && x >= COSTURA[i + 1][0]) { const t = (COSTURA[i][0] - x) / (COSTURA[i][0] - COSTURA[i + 1][0]); return COSTURA[i][1] + (COSTURA[i + 1][1] - COSTURA[i][1]) * t; }
     return COSTURA[0][1];
@@ -565,10 +571,17 @@ function construir(): THREE.Group {
     g.add(malla(placa, M.banda, 'trasera', false));
   }
 
-  // --- el marco de los huecos, en la parte fija: una banda oscura de 4 cm centrada en el borde de la
+  // --- el marco de los huecos, en la parte fija: una banda oscura de 4 cm por dentro del borde de la
   // puerta y del portón. El agujero de la piel va por cuadros y deja el borde escalonado; el marco lo
-  // tapa y se lee como la goma del hueco. Con la pieza cerrada queda debajo de ella y no se ve.
+  // tapa y se lee como la goma del hueco. Va en un grupo por hueco que el visor solo enseña con la pieza
+  // abierta (`conHueco` en `pivotes`): cerrado quedaría a milímetros de la pieza y parpadearía.
   {
+    const marcoPuertas = new THREE.Group(); marcoPuertas.name = 'marco-puertas'; marcoPuertas.visible = false;
+    const marcoPorton = new THREE.Group(); marcoPorton.name = 'marco-porton'; marcoPorton.visible = false;
+    g.add(marcoPuertas, marcoPorton);
+    const par = (geo: THREE.BufferGeometry, m: THREE.Material, nombre: string, _s: boolean, dest: THREE.Group = marcoPuertas) => {
+      dest.add(malla(geo, m, nombre, false)); const o = malla(geo, m, nombre, false); o.scale.z = -1; dest.add(o);
+    };
     // 4 cm hacia dentro del borde y 4 mm hacia fuera (por las rendijas)
     const A = 0.044, F = 0.004, corte = PUERTA_BAJO.findIndex(([x]) => x <= -1.665);
     /** The side curve moved `d` metres towards the inside of the door (the door is above and ahead of its lower edge). */
@@ -591,8 +604,8 @@ function construir(): THREE.Group {
     par(parcheM(CUERPO, -0.90, X_PUERTA1 - 0.02, costura, { nx: 50, nth: 2, delta: 0.0023 }), M.marcoBanda, 'marco', false);
     // el portón: sus dos cantos y el de delante, junto a la bisagra
     const canto = (e: Est): Rango | null => { const r = rangoPorton(e); return r ? [adentro(e, r[0], F, -1), adentro(e, r[0], A - F, 1)] : null; };
-    par(parcheM(CUERPO, X_BISAGRA_MAL, X_FIN_BANDA, canto, { nx: 90, nth: 2, delta: 0.0023 }), M.marcoBanda, 'marco', false);
-    g.add(malla(parcheM(CUERPO, X_BISAGRA_MAL + F, X_BISAGRA_MAL - A + F, rangoPorton, { nx: 2, nth: 40, delta: 0.0023 }), M.marcoBanda, 'marco', false));
+    par(parcheM(CUERPO, X_BISAGRA_MAL, X_FIN_BANDA, canto, { nx: 90, nth: 2, delta: 0.0023 }), M.marcoBanda, 'marco', false, marcoPorton);
+    marcoPorton.add(malla(parcheM(CUERPO, X_BISAGRA_MAL + F, X_BISAGRA_MAL - A + F, rangoPorton, { nx: 2, nth: 40, delta: 0.0023 }), M.marcoBanda, 'marco', false));
   }
 
   // --- el limpiaparabrisas (las cámaras que hacen de retrovisor van en las puertas)
@@ -634,6 +647,40 @@ function construir(): THREE.Group {
   return g;
 }
 
+/**
+ * Lo que se ve por las puertas y el portón abiertos: el suelo de la cabina, el
+ * del maletero (una bandeja plana a 0,78 m, como en la foto del maletero abierto
+ * del coche de prensa) y una mampara detrás de los asientos, hasta la altura de
+ * los respaldos. Planos oscuros que siguen la piel por dentro, 1,5 cm adentro.
+ */
+function interior(M: Mats): THREE.Group {
+  const g = new THREE.Group(); g.name = 'interior';
+  const HOLGURA = 0.015;
+  /** A flat floor at height y between x0 and x1 (x decreasing), as wide as the skin there. */
+  const suelo = (y: number, x0: number, x1: number, n: number) => {
+    const pos: number[] = [], idx: number[] = [];
+    for (let i = 0; i <= n; i++) {
+      const x = x0 + (x1 - x0) * i / n, w = Math.max(0, semiAncho(estacion(CUERPO, x), y) - HOLGURA);
+      pos.push(x, y, -w, x, y, w);
+    }
+    for (let i = 0; i < n; i++) { const a = 2 * i; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); }
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setIndex(idx); geo.computeVertexNormals();
+    return geo;
+  };
+  /** An upright wall at x, from y0 to y1, as wide as the skin at each height. */
+  const mampara = (x: number, y0: number, y1: number, n: number) => {
+    const e = estacion(CUERPO, x), pos: number[] = [], idx: number[] = [];
+    for (let i = 0; i <= n; i++) { const y = y0 + (y1 - y0) * i / n, w = Math.max(0, semiAncho(e, y) - HOLGURA); pos.push(x, y, -w, x, y, w); }
+    for (let i = 0; i < n; i++) { const a = 2 * i; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setIndex(idx); geo.computeVertexNormals();
+    return geo;
+  };
+  g.add(malla(suelo(0.30, -0.45, X_BISAGRA_MAL - 0.02, 40), M.tapizado, 'suelo'));
+  g.add(malla(suelo(0.78, X_BISAGRA_MAL - 0.02, -3.22, 40), M.tapizado, 'suelo'));
+  g.add(malla(mampara(X_BISAGRA_MAL - 0.02, 0.30, 1.02, 24), M.tapizado, 'mampara'));
+  return g;
+}
+
 /** Silueta para el túnel: la del cuerpo, con la quilla de la rueda trasera por debajo. */
 function envolvente(): [number, number, number, number][] {
   const cuerpo = envolventeDe(CUERPO), quilla = envolventeDe(QUILLA);
@@ -669,9 +716,9 @@ export const VEHICULO: VehiculoGaraje = {
   seccion: 2.5,
   construir,
   pivotes: [
-    { nombre: 'puerta-d', tipo: 'puerta', eje: EJE_PUERTA, angulo: ANGULO_PUERTA },
+    { nombre: 'puerta-d', tipo: 'puerta', eje: EJE_PUERTA, angulo: ANGULO_PUERTA, conHueco: 'marco-puertas' },
     // la izquierda está en un grupo con la escala z en −1: el mismo giro, visto en espejo
-    { nombre: 'puerta-i', tipo: 'puerta', eje: EJE_PUERTA, angulo: ANGULO_PUERTA },
-    { nombre: 'porton', tipo: 'maletero', eje: [0, 0, -1], angulo: ANGULO_PORTON },
+    { nombre: 'puerta-i', tipo: 'puerta', eje: EJE_PUERTA, angulo: ANGULO_PUERTA, conHueco: 'marco-puertas' },
+    { nombre: 'porton', tipo: 'maletero', eje: [0, 0, -1], angulo: ANGULO_PORTON, conHueco: 'marco-porton' },
   ],
 };

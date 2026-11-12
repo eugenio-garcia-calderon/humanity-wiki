@@ -12,7 +12,7 @@
 // Los colores de los materiales viven aquí y no en `src/components/ui/`
 // porque son colores de material 3D (aluminio, neumático, fibra), no de
 // interfaz. Anotado en 02_TECH_DEBT.md.
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { DoorOpen, PackageOpen, X } from 'lucide-react';
 import { Button, Card } from '../ui/core';
@@ -764,7 +764,10 @@ function colocarPivotesGaraje(obj: THREE.Object3D, def: VehiculoGaraje, a: Apert
   for (const pv of def.pivotes ?? []) {
     const o = obj.getObjectByName(pv.nombre); if (!o) continue;
     if (!o.userData.ejeGaraje) o.userData.ejeGaraje = new THREE.Vector3(...pv.eje).normalize();
-    o.quaternion.setFromAxisAngle(o.userData.ejeGaraje, pv.angulo * Math.PI / 180 * (pv.tipo === 'maletero' ? a.m : a.p));
+    const f = pv.tipo === 'maletero' ? a.m : a.p;
+    o.quaternion.setFromAxisAngle(o.userData.ejeGaraje, pv.angulo * Math.PI / 180 * f);
+    // the frame of the opening only shows while it is open (closed, it sits millimetres under the panel)
+    if (pv.conHueco) { const h = obj.getObjectByName(pv.conHueco); if (h) h.visible = f > 0; }
   }
 }
 
@@ -1358,6 +1361,29 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   const [selGaraje, setSelGaraje] = useState<string | null>(null);
   const [abiertos, setAbiertos] = useState<Record<string, { puertas: boolean; maletero: boolean }>>({});
   const elegirGaraje = useRef(setSelGaraje); elegirGaraje.current = setSelGaraje;
+  // On a phone (< 640 px) the card goes at the bottom, just above the viewer's toolbar, as one row: at the top it
+  // hid the doors rising. The toolbar belongs to the page, so its top is measured from the viewer's own box.
+  const [estrecho, setEstrecho] = useState(() => typeof window !== 'undefined' && window.matchMedia('(max-width: 639px)').matches);
+  const [bajoCarta, setBajoCarta] = useState(8);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 639px)'), cambio = () => setEstrecho(mq.matches);
+    mq.addEventListener('change', cambio); return () => mq.removeEventListener('change', cambio);
+  }, []);
+  useLayoutEffect(() => {
+    if (!selGaraje || !estrecho) return;
+    const medir = () => {
+      const caja = lienzo.current?.parentElement; if (!caja) return;
+      const r = caja.getBoundingClientRect(); let arriba = r.bottom;
+      for (const h of Array.from(caja.children) as HTMLElement[]) {
+        if (h === lienzo.current || h.dataset.tarjetaGaraje !== undefined) continue;
+        const b = h.getBoundingClientRect();
+        if (b.height > 0 && b.bottom >= r.bottom - 24 && b.height < r.height * 0.6) arriba = Math.min(arriba, b.top);
+      }
+      setBajoCarta(Math.round(r.bottom - arriba) + 8);
+    };
+    medir(); window.addEventListener('resize', medir);
+    return () => window.removeEventListener('resize', medir);
+  }, [selGaraje, estrecho]);
 
   useEffect(() => {
     const cv = lienzo.current!;
@@ -1540,7 +1566,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       if (punto) { elegirPunto.current!(punto); return; }
       // A garage car that cannot be dragged (alone with ?garaje=…, or overlaid) is picked here; a click on
       // anything else closes its card. (A car that can be dragged is picked when the drag ends without moving.)
-      const enGaraje = grupoGaraje.children.length ? cocheGarajeEn() : null;
+      const enGaraje = grupoGaraje.children.length ? cocheGarajeEn(true) : null;
       elegirCoche(enGaraje);
       if (enGaraje || !pinchar.current) return;
       const vis: THREE.Object3D[] = [];
@@ -1554,13 +1580,29 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     const suelo0 = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), pSuelo = new THREE.Vector3(), cajaTmp = new THREE.Box3();
     let arrastre: { obj: THREE.Object3D; dx: number; dz: number; id: number; x0: number; y0: number; movido: boolean } | null = null;
     const rayoDesde = (e: PointerEvent) => { const r = cv.getBoundingClientRect(); ptr.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1); ray.setFromCamera(ptr, camera); };
-    /** The garage car under the ray (the ray must be set): first each car's box (cheap), then its triangles. */
-    const cocheGarajeEn = (): THREE.Object3D | null => {
+    /**
+     * The garage car under the ray (the ray must be set): first each car's box (cheap), then its triangles.
+     * With `caja`, a ray that misses every triangle but crosses a car's own box (without its dimension lines)
+     * still picks it: with the doors open a click through the opening goes out the other side.
+     */
+    const cajaCoche = new THREE.Box3();
+    const cocheGarajeEn = (caja = false): THREE.Object3D | null => {
       const candidatos = grupoGaraje.children.filter(c => c.visible && ray.ray.intersectsBox(cajaTmp.setFromObject(c)));
       const hit = candidatos.length ? ray.intersectObjects(candidatos, true).find(h => (h.object as any).isMesh && h.object.visible) : undefined;
-      if (!hit) return null;
-      let obj: THREE.Object3D = hit.object; while (obj.parent && obj.parent !== grupoGaraje) obj = obj.parent;
-      return obj.parent === grupoGaraje ? obj : null;
+      if (hit) {
+        let obj: THREE.Object3D = hit.object; while (obj.parent && obj.parent !== grupoGaraje) obj = obj.parent;
+        return obj.parent === grupoGaraje ? obj : null;
+      }
+      if (!caja) return null;
+      let mejor: THREE.Object3D | null = null, dMejor = Infinity;
+      for (const c of candidatos) {
+        // the car's own box, measured closed when it was built (open panels and dimension lines left out)
+        if (!c.userData.cajaCerrada) continue;
+        cajaCoche.copy(c.userData.cajaCerrada).applyMatrix4(c.matrixWorld);
+        const p = ray.ray.intersectBox(cajaCoche, new THREE.Vector3());
+        if (p) { const d = p.distanceTo(ray.ray.origin); if (d < dMejor) { dMejor = d; mejor = c; } }
+      }
+      return mejor;
     };
     const abreAlgo = (obj: THREE.Object3D | null) => !!obj && !!vehiculoGaraje(obj.name)?.pivotes?.length;
     /** Picks a garage car (its card opens) or, with null or a car with nothing to open, closes the card. */
@@ -1737,6 +1779,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       let obj: THREE.Group;
       try { obj = def.construir(); } catch (e) { console.error(`[garaje] no se pudo construir «${def.nombre}»:`, e); continue; }
       obj.name = v.id; obj.traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+      // its box as built (closed, before the dimension lines): a click through an open door still picks the car
+      obj.updateMatrixWorld(true); obj.userData.cajaCerrada = new THREE.Box3().setFromObject(obj);
       const cg = cotasGaraje(st.M, def); cg.visible = verCotas && !superponer; obj.add(cg);
       if (superponer) { hacerFantasma(obj, colorSuperpuesto(v.id)); obj.add(siluetas(def, colorSuperpuesto(v.id))); }
       // a rebuilt car keeps its doors and boot as they were
@@ -1926,36 +1970,49 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   const tiposSel = new Set(defSel?.pivotes?.map(p => p.tipo));
   const estSel = (selGaraje && abiertos[selGaraje]) || { puertas: false, maletero: false };
   const alternar = (k: 'puertas' | 'maletero') => { if (selGaraje) setAbiertos(a => ({ ...a, [selGaraje]: { ...estSel, [k]: !estSel[k] } })); };
-  const botonCarta = 'gap-1.5 px-2.5 py-1.5 text-[11px] normal-case tracking-normal';
+  const botonCarta = estrecho ? 'h-10 shrink-0 px-2 text-[11px] normal-case tracking-normal' : 'gap-1.5 px-2.5 py-1.5 text-[11px] normal-case tracking-normal';
+  const botones = (
+    <>
+      {tiposSel.has('puerta') && (
+        <Button variant="outline" aria-pressed={estSel.puertas} onClick={() => alternar('puertas')} className={botonCarta}>
+          {!estrecho && <DoorOpen className="h-3.5 w-3.5" />}{estSel.puertas ? 'Cerrar puertas' : 'Abrir puertas'}
+        </Button>
+      )}
+      {tiposSel.has('maletero') && (
+        <Button variant="outline" aria-pressed={estSel.maletero} onClick={() => alternar('maletero')} className={botonCarta}>
+          {!estrecho && <PackageOpen className="h-3.5 w-3.5" />}{estSel.maletero ? 'Cerrar maletero' : 'Abrir maletero'}
+        </Button>
+      )}
+    </>
+  );
   return (
     <>
       <canvas ref={lienzo} className="absolute inset-0 h-full w-full touch-none" aria-label={modelo.tipo === 'a1' ? 'Modelo 3D del Aeromóvil 1' : modelo.tipo === 'bala' ? 'Modelo 3D del Cuadriciclo Bala en rombo' : modelo.tipo === 'triciclo' ? (modelo.traseras ? 'Modelo 3D del Cuadriciclo Bala clásico' : 'Modelo 3D del Triciclo Bala') : 'Modelo 3D del Aeromóvil Gota'} />
       {/* The card of a garage car picked with a click or a tap: its doors and its boot (2026-11-12). */}
-      {defSel && (
-        <Card role="group" aria-label={`${defSel.nombre}: puertas y maletero`} className="absolute left-3 top-12 z-[16] w-[min(280px,calc(100%-24px))] p-3 shadow-lg">
+      {defSel && estrecho && (
+        <Card role="group" data-tarjeta-garaje="" aria-label={`${defSel.nombre}: puertas y maletero`} style={{ bottom: bajoCarta }}
+          className="absolute inset-x-3 z-[16] flex items-center gap-1 p-1.5 shadow-lg">
+          <span className="min-w-0 flex-1 truncate pl-1 text-sm font-semibold text-slate-900">{defSel.nombre}</span>
+          {botones}
+          <Button variant="ghost" onClick={() => setSelGaraje(null)} aria-label="Cerrar" title="Cerrar" className="h-10 w-10 shrink-0 p-0">
+            <X className="h-5 w-5" />
+          </Button>
+        </Card>
+      )}
+      {defSel && !estrecho && (
+        <Card role="group" data-tarjeta-garaje="" aria-label={`${defSel.nombre}: puertas y maletero`} className="absolute left-3 top-12 z-[16] w-[min(280px,calc(100%-24px))] p-3 shadow-lg">
           <div className="flex items-start gap-2">
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-slate-900">{defSel.nombre}</p>
               <p className="text-[11px] leading-snug text-slate-500">
-                Ábrelo para ver cómo se abren sus puertas y su maletero.{alMoverGaraje ? ' Para moverlo, púlsalo y arrástralo.' : ''}
+                Abre sus puertas y su maletero para ver cómo se abren.{alMoverGaraje ? ' Para moverlo, púlsalo y arrástralo.' : ''}
               </p>
             </div>
-            <Button variant="ghost" onClick={() => setSelGaraje(null)} aria-label="Cerrar" title="Cerrar" className="-mr-1.5 -mt-1.5 px-1.5 py-1.5">
+            <Button variant="ghost" onClick={() => setSelGaraje(null)} aria-label="Cerrar" title="Cerrar" className="-mr-1.5 -mt-1.5 h-10 w-10 p-0">
               <X className="h-4 w-4" />
             </Button>
           </div>
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {tiposSel.has('puerta') && (
-              <Button variant="outline" aria-pressed={estSel.puertas} onClick={() => alternar('puertas')} className={botonCarta}>
-                <DoorOpen className="h-3.5 w-3.5" />{estSel.puertas ? 'Cerrar puertas' : 'Abrir puertas'}
-              </Button>
-            )}
-            {tiposSel.has('maletero') && (
-              <Button variant="outline" aria-pressed={estSel.maletero} onClick={() => alternar('maletero')} className={botonCarta}>
-                <PackageOpen className="h-3.5 w-3.5" />{estSel.maletero ? 'Cerrar maletero' : 'Abrir maletero'}
-              </Button>
-            )}
-          </div>
+          <div className="mt-2 flex flex-wrap gap-1.5">{botones}</div>
         </Card>
       )}
     </>

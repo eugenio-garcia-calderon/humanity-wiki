@@ -562,7 +562,13 @@ The observatory is one self-contained HTML file (`public/observatorio-polarizaci
 ### 2026-11-12 — Aptera doors and boot: shortcuts
 - **Panels are shells.** Doors and hatch are a painted skin with a dark lining on the back faces; they have no thickness, inner trim, hinges, gas struts, handles or seals. From the side an open door is a sheet. Adding a 2–3 cm return along the edges and two struts is about 2 h.
 - **The opening has no jamb.** The cut is hidden by a flat 4 cm dark frame on the fixed skin, not a modelled door aperture with depth. Fine at garage distances; close up it reads as a painted frame.
-- **Hinge lines and angles are estimates** from photos with the doors open (Gamma in the desert, Launch Edition render from the front, a 2020 render with the hatch up). Aptera publishes neither. The door check (`choque` sweep in the creator's scratch, every 5 % of the opening, every third vertex) finds no penetration of the fixed body or the pods; the two open doors do not meet. That check is not a script in the repo: moving the hinge means rerunning it by hand. Turning it into `scripts/aptera-puertas.ts` is about 30 min.
+- **Hinge lines and angles are estimates** from photos with the doors open (Gamma in the desert, Launch Edition render from the front, a 2020 render with the hatch up). Aptera publishes neither. The door check (`choque` sweep in the creator's scratch, every 5 % of the opening, every third vertex) finds no penetration of the fixed body or the pods; the two open doors do not meet. Round 2 replaced it with the evaluator's finer sweep, now `scripts/aptera-puertas.ts`.
 - **`construir()` grew** from about 200 to about 270 ms in Node (door and hatch patches, the corner test on every skin cell). It runs once per garage change.
 - **The cursor hint raycasts the whole car** every 120 ms while a mouse moves over the viewer with garage cars shown. A bounding-volume tree for garage meshes would make it free; not worth it until it shows in a profile.
 - **`CUERPO` and `CARENADO` are exported** from `aptera.ts` only so a check script can read the shape.
+
+### 2026-11-12 — Aptera round 2: shortcuts
+- **Panels stand 4 mm proud** of the skin instead of the fixed skin being cut exactly along the door line. From very close the fixed skin's stepped edge can show inside an open opening, under the dark frame. An exact cut is about half a day.
+- **`scripts/aptera-puertas.ts` imports `three-mesh-bvh`**, which reaches the repo only through `@react-three/drei`. If drei goes, the script needs it added as a dev dependency.
+- **The phone card measures the page's toolbar** from the viewer's box (siblings anchored at the bottom). If the toolbar stops being a bottom-anchored sibling of the canvas, the card falls back to 8 px from the bottom and can cover it.
+- **The interior is three flat dark planes** (two floors and a bulkhead). There are no trim panels, cargo walls or a sill.
