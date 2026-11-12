@@ -19,7 +19,8 @@ import { createContext, useContext, useEffect, useLayoutEffect, useState, type R
 // What the app needs to know, given through context:
 //   · `altoBarra`: the height of the site bar, so its own sticky header sits
 //     right under it instead of behind it (also the CSS variable
-//     `--alto-barra-sitio`, for `scroll-margin-top` on its sections);
+//     `--alto-barra-sitio`: the app adds its own header to it for
+//     `scroll-margin-top`, since only it knows how tall that is);
 //   · `completa` / `alternar`: full screen. It hides the site bar and, where the
 //     browser allows, puts the whole document in full screen. The button lives
 //     in the app's own header, next to its other actions.
@@ -75,8 +76,6 @@ export default function AplicacionIncrustada({ children }: { children: ReactNode
     <Ctx.Provider value={{ altoBarra, completa, alternar }}>
       <style>{`
         html.${CLASE} [data-cabecera-sitio], html.${CLASE} [data-espacio-barra] { display: none !important; }
-        [data-aplicacion-incrustada] section[id] { scroll-margin-top: calc(var(--alto-barra-sitio, 0px) + 7rem); }
-        @media (max-width: 639px) { [data-aplicacion-incrustada] section[id] { scroll-margin-top: calc(var(--alto-barra-sitio, 0px) + 10.5rem); } }
       `}</style>
       <div data-aplicacion-incrustada style={{ ['--alto-barra-sitio' as string]: `${altoBarra}px` }}>
         {children}

@@ -22,7 +22,7 @@ export function AnillosEscalas({ activa, onActiva, className }: {
   return (
     <svg viewBox={`${-total} ${-total} ${total * 2} ${total * 2}`} className={className} role="group" aria-label="Las ocho escalas del modelo, de la persona al planeta">
       <style>{`
-        @keyframes ${uid}-crece { from { opacity: 0; transform: scale(.82); } to { opacity: 1; transform: scale(1); } }
+        @keyframes ${uid}-crece { from { opacity: 0; } to { opacity: 1; } }
         @media (prefers-reduced-motion: no-preference) { .${uid}-a { animation: ${uid}-crece .7s cubic-bezier(.2,.7,.2,1) both; } }
       `}</style>
       {[...ESCALAS].reverse().map((e, iRev) => {
