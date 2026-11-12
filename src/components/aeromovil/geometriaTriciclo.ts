@@ -612,12 +612,13 @@ export function rangoTriciclo(k: ClaveNumTriciclo, T: CamposTriciclo): [number, 
   if (k === 'tBatLargo' || k === 'tBatAncho') {
     const fa = fichaTriciclo('tBatAncho')!, fl = fichaTriciclo('tBatLargo')!, fijo = (g: FichaTriciclo, v: number) => Math.min(g.max, Math.max(g.min, v));
     const hz0 = fijo(fa, T.tBatAncho) / 100 * anchoBastidor(T) / 2, l0 = fijo(fl, T.tBatLargo);
-    // (never less than the ranges had before, 2.40 m up to the controller's place and 200 %: a saved design keeps its values)
+    // (never less than the ranges had before, 2.40 m up to the controller's place and 200 % at the old spacing: a saved design keeps its values)
     const antes = Math.max(fl.min, Math.min(2.40, finPaquete(T) - limitarTriciclo('tBatX', T)));
     const c0 = paqueteCabe(T, hz0, l0), largoMax = Math.max(antes, Math.min(fl.max, Math.floor(c0.largo * 100 + 1e-6) / 100));
     if (k === 'tBatLargo') return [fl.min, largoMax];
     const c1 = l0 <= largoMax ? c0 : paqueteCabe(T, hz0, largoMax);
-    return [f.min, Math.max(200, Math.min(f.max, Math.floor(2 * c1.semi / anchoBastidor(T) * 100 / 5 + 1e-6) * 5))];
+    // (the old 200 % only at the old rails' spacing, where it was the range: with wider rails, 200 % may not fit)
+    return [f.min, Math.max(T.tChSep === TRICICLO_DEFECTO.tChSep ? 200 : f.min, Math.min(f.max, Math.floor(2 * c1.semi / anchoBastidor(T) * 100 / 5 + 1e-6) * 5))];
   }
   // round 3 interior: the rails' spacing up to what keeps them on the belly (never below the old spacing's 22 cm as its maximum)
   if (k === 'tChSep') return [f.min, Math.max(TRICICLO_DEFECTO.tChSep, Math.min(f.max, sepMaxima(T)))];
