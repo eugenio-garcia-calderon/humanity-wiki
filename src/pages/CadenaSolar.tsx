@@ -200,7 +200,7 @@ const ESLABONES: Eslabon[] = [
     id: 'reparto', fase: 'compartir', nombre: 'Reparto', Icono: Users,
     resumen: 'Autoconsumo colectivo y comunidades',
     actividades: [
-      'Reunir a los vecinos: misma finca, mismo centro de transformación o a menos de 2 km',
+      'Reunir a los vecinos: misma finca, mismo centro de transformación o dentro de la distancia que permite la ley',
       'Elegir la forma jurídica de la comunidad energética (asociación, cooperativa)',
       'Acordar el reparto: coeficientes fijos o variables hora a hora',
       'Firmar el acuerdo y mandarlo a la distribuidora',
@@ -273,6 +273,8 @@ const FUENTES: { texto: string; url: string | null }[] = [
 ];
 
 const PORTADA = '/uploads/2026/11/144a05f5-696a-4695-ad96-35c067d081d2.jpg';
+/** Pablo Sánchez, founder of Suntropy (his portada in Personas). */
+const FOTO_PABLO = '/uploads/2026/10/90900c44-6880-4566-aa65-116803d25584.png';
 const fase = (id: Fase) => FASES.find(f => f.id === id)!;
 const eslabon = (id: string) => ESLABONES.find(e => e.id === id)!;
 
@@ -615,6 +617,16 @@ export default function CadenaSolar() {
 
         <Seccion id="que-hacemos" etiqueta="Qué hacemos" titulo="Donde se atasca la cadena, ahí trabajamos."
           texto="Light for Humanity actúa en los eslabones que más valor pierden: la captación de clientes, la financiación, la formación de instaladores y el reparto entre vecinos.">
+          {/* 2026-11-12 (Eugenio): «pon bastante arriba que Luz y Humanidad ha invertido en la empresa Suntropy… Suntropy añádelo como pionero en España en optimización». */}
+          <a href="/p/KWOPTIMENERGIA1" className="group mb-5 grid items-center gap-5 rounded-3xl border border-slate-200 bg-white p-5 sm:grid-cols-[auto_1fr_auto] sm:p-8">
+            <img src={miniatura(FOTO_PABLO, 400)} alt="Pablo Sánchez, fundador de Suntropy" className="h-24 w-24 rounded-full bg-slate-100 object-cover object-top sm:h-28 sm:w-28" loading="lazy" />
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-600">Eslabones 1 a 4: captar, estudiar, diseñar y presupuestar</p>
+              <h3 className="mt-2 text-2xl font-black text-slate-900 sm:text-3xl">Invertimos en Suntropy, pionera en España en optimización</h3>
+              <p className="mt-2 max-w-3xl text-slate-600">En 2022, Luz & Humanidad invirtió en Suntropy para desarrollar sistemas inteligentes que optimicen el sector de la energía. Desde entonces incubamos a su fundador, Pablo Sánchez, para desarrollar los proyectos.</p>
+            </div>
+            <span className="inline-flex items-center gap-2 font-black text-slate-900 group-hover:text-amber-600">Optimización del sistema de energía <ArrowRight className="h-4 w-4" /></span>
+          </a>
           <div className="grid gap-5 md:grid-cols-2">
             <a href="/comunidades-energeticas-en-pueblos" className="group relative isolate block overflow-hidden rounded-3xl bg-slate-900 p-6 text-white sm:p-8" data-fondo-oscuro>
               <img src={miniatura(PORTADA, 800)} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-40 transition-opacity group-hover:opacity-50" loading="lazy" />
