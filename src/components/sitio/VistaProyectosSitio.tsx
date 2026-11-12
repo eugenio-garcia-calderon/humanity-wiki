@@ -12,6 +12,7 @@ import HistoriaSitio from './HistoriaSitio';
 import { useDatosPortada, type ProyectoPortada } from './portadaEscaparate';
 import { iconoCategoria } from './iconoCategoria';
 import InspiranSitio, { type TablaInspiran } from './InspiranSitio';
+import { columnaMadre } from './SubproyectosSitio';
 const NoticiasSitio = lazy(() => import('./NoticiasSitio'));
 
 // ============================================================================
@@ -159,8 +160,9 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
       const n = String(f.pagina?.titulo || f.celdas[sistemas?.columna_titulo || '']?.valor || '').trim();
       if (n) sistemaDe.set(f.id, { nombre: n, imagen: f.pagina?.imagen || null, orden: i });
     });
+    const madre = columnaMadre(proyectos as any);
     const usos = new Map<string, number>();
-    for (const f of proyectos.filas) for (const a of lista(f.celdas[colArea]?.valor)) usos.set(a, (usos.get(a) || 0) + 1);
+    for (const f of proyectos.filas.filter(f => !madre || lista(f.celdas[madre]?.valor).length === 0)) for (const a of lista(f.celdas[colArea]?.valor)) usos.set(a, (usos.get(a) || 0) + 1);
     const areas = [...usos.keys()]
       .map(id => ({ id, slug: plano(sistemaDe.get(id)?.nombre || id), nombre: sistemaDe.get(id)?.nombre || '', imagen: sistemaDe.get(id)?.imagen || null, n: usos.get(id) || 0, orden: sistemaDe.get(id)?.orden ?? 999 }))
       .filter(a => a.nombre)
@@ -176,6 +178,9 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
     const posicion = (f: Fila) => { const c = categoriaDe(f); return c ? lugar.get(c)! : areas.length; };
     const filas = [...proyectos.filas]
       .filter(f => (edicion ? true : !f.oculta && f.pagina_id) && String(f.celdas[colNombre]?.valor || f.pagina?.titulo || '').trim())
+      // Los que están dentro de otro proyecto (su «Elemento madre») salen en la página de ese
+      // proyecto, no aquí (2026-11-12, `SubproyectosSitio.tsx`). En el editor siguen, para editarlos.
+      .filter(f => edicion || !madre || lista(f.celdas[madre]?.valor).length === 0)
       .sort((a, b) => posicion(a) - posicion(b) || a.orden - b.orden);
     const opcionesArea: EstadoTarjeta[] = [...sistemaDe.entries()].map(([id, x]) => ({ id, label: x.nombre })).sort((a, b) => a.label.localeCompare(b.label, 'es'));
     return { colNombre, colArea, areas, filas, categoriaDe, opcionesArea, nombreArea: (id: string) => sistemaDe.get(id)?.nombre || '' };
