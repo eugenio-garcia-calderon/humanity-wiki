@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/components/aeromovil/Visor3D.tsx",
-      "motivo": "Cuadriciclo Bala clásico / en rombo: nombres",
-      "desde": "2026-11-12T09:33:41.544Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/aeromovil/explicaciones/bala.ts",
       "motivo": "Cuadriciclo Bala clásico / en rombo: nombres",
       "desde": "2026-11-12T09:33:44.143Z"
