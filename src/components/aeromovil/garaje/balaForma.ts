@@ -81,6 +81,12 @@ export interface DimBala {
    * body (with everything built on its floor) rises. Absent, 0: every number is the Cuadriciclo's, bit for bit.
    */
   elevar?: number;
+  /**
+   * The «Bala de cuatro ruedas» (2026-11-11) only: on the rear pods' view of the shape, the belly's height under
+   * the arms' roots at the rear axle (absolute, m). The tail sweeps up there, so the lower link meets the body
+   * higher than it meets its pod (balaMedidas.ts `brazosDe`). The body never reads it; absent, nothing changes.
+   */
+  vientreBrazos?: number;
 }
 
 // --------------------------------------------------- from the Aeromóvil Gota

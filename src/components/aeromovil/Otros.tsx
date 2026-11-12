@@ -23,7 +23,7 @@ export function fichaPropia(m: Modelo, r: Resultados) {
   return { L: m.Lf, W: m.P.W, H: m.P.H, batalla: m.P.B, ruedas: m.ruedas.length, ejes, via, plazas: dosRuedas ? 2 : m.asientos.length,
     masa: Number.isFinite(r.mVeh) ? r.mVeh : null, cd: Number.isFinite(r.Cd) ? r.Cd as number | null : null, huella: m.Lf * m.P.W };
 }
-export const nombreDe = (m: Modelo) => (m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala' : m.tipo === 'triciclo' ? 'Triciclo Bala' : 'Aeromóvil Gota');
+export const nombreDe = (m: Modelo) => (m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala' : m.tipo === 'triciclo' ? (m.traseras ? 'Bala de cuatro ruedas' : 'Triciclo Bala') : 'Aeromóvil Gota');
 
 export function TablaComparacion({ propia, otra, nombre, nuestro = 'Aeromóvil 1' }: { propia: ReturnType<typeof fichaPropia>; otra: ReturnType<typeof fichaComparable>; nombre: string; nuestro?: string }) {
   const filas: [string, number | null, number | null, (v: number) => string][] = [

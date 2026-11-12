@@ -36,7 +36,7 @@ export const VEHICULOS: { k: Disposicion; n: string; d: string }[] = [
   { k: 'cuatro', n: 'Aeromóvil 1', d: 'Eléctrico de cuatro ruedas, carrocería baja con cúpula (SZEmission ×1,3), clase Twizy.' },
   { k: 'rombo', n: 'Aeromóvil Gota', d: 'Velomóvil tándem 1+2 de pedaleo asistido, rombo basculante, carenado en gota.' },
   { k: 'bala', n: 'Cuadriciclo Bala', d: 'Biplaza a horcajadas, tipo moto carenada: el rombo de ruedas del Gota con carenados laterales fijos, morro en punta y cúpula.' },
-  { k: 'triciclo', n: 'Triciclo Bala', d: 'La carrocería del Cuadriciclo con tres ruedas: dos delante en carenados que giran, como el Aptera, y una detrás con el motor; respaldos que se reclinan.' },
+  { k: 'triciclo', n: 'Triciclo Bala', d: 'La carrocería del Cuadriciclo con tres ruedas: dos delante en carenados que giran, como el Aptera, y una detrás con el motor; respaldos que se reclinan. En Rodaje se le pueden poner dos ruedas detrás, también en carenados: la Bala de cuatro ruedas.' },
 ];
 /** A saved design's family: designs from before 2026-11-06 carry none and are the Gota's. */
 const familiaDe = (d: Diseno): Disposicion => { const k = d.parametros?.disposicion; return VEHICULOS.some(v => v.k === k) ? k! : 'rombo'; };
@@ -76,6 +76,8 @@ export const deDiseno = (d: Partial<Parametros>): Parametros => {
     if (typeof ref === 'number') { if (typeof v === 'number' && Number.isFinite(v)) (limpio as Record<string, unknown>)[k] = v; continue; }
     if (typeof ref === typeof v) (limpio as Record<string, unknown>)[k] = v;
   }
+  // 2026-11-11 (the «Bala de cuatro ruedas»): a Triciclo saved without a rear track has it equal to its front one
+  if (d.disposicion === 'triciclo' && limpio.tViaTras === undefined && limpio.tVia !== undefined) limpio.tViaTras = limpio.tVia;
   return { ...base, ...limpio, disposicion: d.disposicion ?? 'rombo', comp: 0 };
 };
 
