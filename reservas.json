@@ -131,6 +131,12 @@
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "Cuadriciclo Bala clásico / en rombo: nombres",
       "desde": "2026-11-12T09:34:14.829Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0198_modelo_socioeconomico_direccion.sql",
+      "motivo": "slug sin impuesto-unico",
+      "desde": "2026-11-12T09:34:23.367Z"
     }
   ]
 }
