@@ -11138,3 +11138,11 @@ Eugenio: «coge la configuración de los sliders del triciclo bala y aplícasela
 - `drizzle/0201_comunidades_energeticas_pueblos.sql`: subelementos en la tabla Proyectos («Elemento madre» / «Subelementos»), el proyecto general (modelo asociativo público-privado, 2024) y Villalbilla y Nuevo Baztán dentro de él.
 - `SubproyectosSitio.tsx`: en la página de un proyecto, sus subproyectos con las mismas tarjetas que la portada (`config.subproyectos.titulo`). `VistaProyectosSitio`: la portada no enseña los que tienen madre (el editor sí).
 - Para sumar otra comunidad: en la tabla Proyectos, poner «Comunidades energéticas en pueblos» en su «Elemento madre».
+
+### 2026-11-12 — Observatorio de Polarización Política: nombre nuevo y frases editables
+
+Eugenio: «llamado Observatorio de Polarización Política, y permite que si se abre desde humanity.wiki y eugenio@lighthumanity.org está logeado este pueda hacer cambios en las frases escritas».
+- Nombre nuevo en la página, en el marco y, con la migración 0200, en la ficha del proyecto y en su fila de «Proyectos» (solo si aún llevaban el nombre viejo; sube `version`). La dirección no cambia.
+- Frases editables: la página usa la tabla de textos editables que ya existía (`textos_editables`, `src/server/textos.ts`). Cada frase lleva una clave `observatorio.t-<hash de su texto original>`, la misma la pinte el HTML o un módulo al pasar el ratón. Al cargar, la página lee `GET /api/textos` y aplica los cambios (también en luzhumanidad.com). Si `GET /api/auth/me` dice que quien mira es eugenio@lighthumanity.org o un administrador, aparece abajo una barra «Editar textos»: cada frase se vuelve editable, se guarda al salir de ella con `PUT /api/textos/:clave` y «Restaurar original» la borra con `DELETE`. Solo funciona con sesión, es decir, en humanity.wiki (`humanity.wiki/observatorio-polarizacion/`). Lo guardado se limpia a marcas de texto (negrita, cursiva, comillas), sin atributos.
+- Si cambia el texto original en el código, su clave cambia y la versión editada deja de aplicarse: el código manda.
+- Probado con un servidor que imita las dos rutas: sin sesión y con un usuario normal no hay barra; con Eugenio se editan, guardan, se ven sin sesión (también lo que se repinta al pasar el ratón) y se restauran.
