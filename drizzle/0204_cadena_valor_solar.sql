@@ -47,12 +47,12 @@ BEGIN
     pagina, 'Cadena de valor solar', 'pagina',
     jsonb_build_object(
       'aplicacion', 'cadena-solar',
-      'subtitulo', 'Los once eslabones de una instalación solar en España: estudio, diseño, presupuesto, compras, instalación, legalización, monitorización, mantenimiento, optimización, reparto en comunidades y reciclaje',
+      'subtitulo', 'Los doce eslabones de una instalación solar en España: captación de clientes, estudio, diseño, presupuesto, compras, instalación, legalización, monitorización, mantenimiento, optimización, reparto en comunidades y reciclaje',
       'portada', imagen,
       'imagenCompartir', imagen,
       'bloques', jsonb_build_array(
         jsonb_build_object('id', 'Bcadsolar01', 'tipo', 'parrafo', 'texto',
-          'La cadena de valor de una instalación de energía solar en España, del primer vistazo a la factura al reciclaje del último panel: estudio del consumo y del tejado, diseño e ingeniería, presupuesto y financiación, compra de equipos, instalación, legalización ante el ayuntamiento, la comunidad autónoma, la distribuidora y la comercializadora, monitorización, mantenimiento, optimización, reparto de la energía en autoconsumo colectivo y comunidades energéticas, y fin de vida.'),
+          'La cadena de valor de una instalación de energía solar en España, de buscar al cliente al reciclaje del último panel: captación de clientes (generación de leads), estudio del consumo y del tejado, diseño e ingeniería, presupuesto y financiación, compra de equipos, instalación, legalización ante el ayuntamiento, la comunidad autónoma, la distribuidora y la comercializadora, monitorización, mantenimiento, optimización, reparto de la energía en autoconsumo colectivo y comunidades energéticas, y fin de vida.'),
         jsonb_build_object('id', 'Bcadsolar02', 'tipo', 'parrafo', 'texto',
           'Para cada eslabón: sus actividades, quién las hace, cuánto tarda, dónde se atasca y cómo se puede mejorar. Con los plazos (montar una instalación lleva días; legalizarla, meses), el reparto del precio y un simulador de coeficientes de reparto fijos y horarios entre vecinos.'),
         jsonb_build_object('id', 'Bcadsolar03', 'tipo', 'imagen', 'url', imagen,

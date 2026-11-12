@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ComponentType } from 'react';
 import {
-  Activity, ArrowRight, Calculator, ChevronDown, Clock, Gauge, HardHat, Lightbulb, PencilRuler,
+  Activity, ArrowRight, Megaphone, Calculator, ChevronDown, Clock, Gauge, HardHat, Lightbulb, PencilRuler,
   Recycle, SearchCheck, ShieldCheck, Stamp, Truck, TriangleAlert, Users,
 } from 'lucide-react';
 import { miniatura } from '../utils/miniatura';
@@ -27,7 +27,7 @@ import { miniatura } from '../utils/miniatura';
 type Fase = 'antes' | 'obra' | 'vida' | 'compartir';
 
 const FASES: { id: Fase; titulo: string; color: string; claro: string; texto: string }[] = [
-  { id: 'antes', titulo: 'Antes de la obra', color: '#f59e0b', claro: '#fef3c7', texto: 'Saber qué hace falta y cuánto cuesta' },
+  { id: 'antes', titulo: 'Antes de la obra', color: '#f59e0b', claro: '#fef3c7', texto: 'Encontrar al cliente, saber qué necesita y cuánto cuesta' },
   { id: 'obra', titulo: 'La obra', color: '#0ea5e9', claro: '#e0f2fe', texto: 'Comprar, montar y legalizar' },
   { id: 'vida', titulo: 'Los 30 años de vida', color: '#10b981', claro: '#d1fae5', texto: 'Que produzca lo que debe' },
   { id: 'compartir', titulo: 'Compartir y cerrar el ciclo', color: '#8b5cf6', claro: '#ede9fe', texto: 'Repartir la energía y reciclar' },
@@ -40,6 +40,23 @@ type Eslabon = {
 };
 
 const ESLABONES: Eslabon[] = [
+  {
+    // 2026-11-12 (Eugenio): «añade el eslabón de generación de leads».
+    id: 'captacion', fase: 'antes', nombre: 'Captación', Icono: Megaphone,
+    resumen: 'Generación de leads',
+    actividades: [
+      'Atraer interesados: buscador, redes sociales, anuncios y web con simulador de ahorro',
+      'Acuerdos con canales: comercializadoras, bancos, tiendas, administradores de fincas',
+      'Puerta a puerta, ferias y charlas en ayuntamientos y asociaciones',
+      'Recibir contactos (leads) y comprar leads a portales comparadores',
+      'Filtrar: ¿tiene tejado propio, consumo suficiente, decide él?',
+      'Llamar en menos de un día y pedir la factura para el estudio',
+    ],
+    quien: ['Instaladora (equipo comercial)', 'Agencias de marketing', 'Portales de leads', 'Comercializadoras y bancos'],
+    plazo: 'Continuo; de 1 a 4 semanas por cliente',
+    atasco: 'Es el eslabón más caro: un lead se paga caro, se vende a varias instaladoras a la vez y la mayoría no llega a firmar.',
+    mejora: 'Campañas colectivas con el ayuntamiento o la asociación de vecinos: confianza ya ganada y un coste por cliente mucho menor.',
+  },
   {
     id: 'estudio', fase: 'antes', nombre: 'Estudio', Icono: SearchCheck,
     resumen: 'Conocer el consumo y el tejado',
@@ -84,8 +101,8 @@ const ESLABONES: Eslabon[] = [
     ],
     quien: ['Instaladora', 'Cliente', 'Banco o financiador', 'Ayuntamiento'],
     plazo: '3 a 20 días (lo que tarde en decidirse)',
-    atasco: 'Captar al cliente es caro: visitas, anuncios y comisiones se comen buena parte del precio.',
-    mejora: 'Compras agrupadas por barrio o pueblo: una sola campaña, muchos tejados, precio más bajo.',
+    atasco: 'Los presupuestos no se pueden comparar: cada uno cuenta el ahorro a su manera y algunos prometen retornos inflados.',
+    mejora: 'Un formato común de presupuesto, con el ahorro calculado sobre la curva real y la degradación incluida.',
   },
   {
     id: 'sourcing', fase: 'obra', nombre: 'Compras', Icono: Truck,
@@ -212,7 +229,7 @@ const ESLABONES: Eslabon[] = [
 
 /** Times of a home installation, in days (min and max). Orders of magnitude. */
 const PLAZOS: { id: string; min: number; max: number }[] = [
-  { id: 'estudio', min: 1, max: 7 }, { id: 'diseno', min: 2, max: 10 }, { id: 'presupuesto', min: 3, max: 20 },
+  { id: 'captacion', min: 7, max: 28 }, { id: 'estudio', min: 1, max: 7 }, { id: 'diseno', min: 2, max: 10 }, { id: 'presupuesto', min: 3, max: 20 },
   { id: 'sourcing', min: 7, max: 28 }, { id: 'instalacion', min: 1, max: 3 }, { id: 'legalizacion', min: 30, max: 180 },
 ];
 
@@ -229,17 +246,18 @@ const COSTE: { parte: string; pct: number; color: string }[] = [
 
 /** Who takes part in each link. */
 const ACTORES: { nombre: string; en: string[] }[] = [
-  { nombre: 'Cliente o vecinos', en: ['estudio', 'presupuesto', 'monitoreo', 'optimizacion', 'reparto'] },
+  { nombre: 'Cliente o vecinos', en: ['captacion', 'estudio', 'presupuesto', 'monitoreo', 'optimizacion', 'reparto'] },
   { nombre: 'Ingeniería', en: ['estudio', 'diseno', 'legalizacion'] },
-  { nombre: 'Instaladora', en: ['estudio', 'diseno', 'presupuesto', 'sourcing', 'instalacion', 'legalizacion', 'monitoreo', 'mantenimiento', 'reciclaje'] },
+  { nombre: 'Instaladora', en: ['captacion', 'estudio', 'diseno', 'presupuesto', 'sourcing', 'instalacion', 'legalizacion', 'monitoreo', 'mantenimiento', 'reciclaje'] },
   { nombre: 'Fabricantes', en: ['sourcing', 'monitoreo', 'mantenimiento', 'reciclaje'] },
   { nombre: 'Mayoristas', en: ['sourcing'] },
-  { nombre: 'Financiadores', en: ['presupuesto'] },
-  { nombre: 'Ayuntamiento', en: ['presupuesto', 'legalizacion', 'reparto'] },
+  { nombre: 'Financiadores', en: ['captacion', 'presupuesto'] },
+  { nombre: 'Marketing y portales de leads', en: ['captacion'] },
+  { nombre: 'Ayuntamiento', en: ['captacion', 'presupuesto', 'legalizacion', 'reparto'] },
   { nombre: 'Comunidad autónoma', en: ['legalizacion'] },
   { nombre: 'Distribuidora eléctrica', en: ['estudio', 'legalizacion', 'monitoreo', 'reparto'] },
-  { nombre: 'Comercializadora', en: ['legalizacion', 'optimizacion', 'reparto'] },
-  { nombre: 'Comunidad energética', en: ['reparto', 'optimizacion', 'mantenimiento'] },
+  { nombre: 'Comercializadora', en: ['captacion', 'legalizacion', 'optimizacion', 'reparto'] },
+  { nombre: 'Comunidad energética', en: ['captacion', 'reparto', 'optimizacion', 'mantenimiento'] },
   { nombre: 'Mantenimiento (O&M)', en: ['mantenimiento', 'monitoreo'] },
   { nombre: 'Gestor de residuos', en: ['reciclaje'] },
 ];
@@ -260,7 +278,7 @@ const eslabon = (id: string) => ESLABONES.find(e => e.id === id)!;
 
 // ── The chain, horizontal, with a drop-down per link ─────────────────────────
 function Cadena() {
-  const [abiertos, setAbiertos] = useState<Set<string>>(() => new Set(['legalizacion']));
+  const [abiertos, setAbiertos] = useState<Set<string>>(() => new Set(['captacion', 'legalizacion']));
   const todos = abiertos.size === ESLABONES.length;
   const alternar = (id: string) => setAbiertos(prev => {
     const s = new Set(prev); if (s.has(id)) s.delete(id); else s.add(id); return s;
@@ -555,7 +573,7 @@ export default function CadenaSolar() {
             <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-300">Energía solar en España</p>
             <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-6xl">La cadena de valor de una instalación solar</h1>
             <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/85 sm:text-xl">
-              Del primer vistazo a la factura al reciclaje del último panel: once eslabones, quién hace cada uno, cuánto tarda y dónde se atasca.
+              De buscar al cliente al reciclaje del último panel: doce eslabones, quién hace cada uno, cuánto tarda y dónde se atasca.
             </p>
             <div className="mt-8 flex flex-wrap gap-2">
               {ESLABONES.map((e, i) => (
@@ -569,7 +587,7 @@ export default function CadenaSolar() {
       </header>
 
       <div className="mx-auto max-w-[1840px] px-4 sm:px-8">
-        <Seccion id="cadena" etiqueta="La cadena" titulo="Once eslabones, de la factura al reciclaje.">
+        <Seccion id="cadena" etiqueta="La cadena" titulo="Doce eslabones, del cliente al reciclaje.">
           <Cadena />
         </Seccion>
 
@@ -596,17 +614,17 @@ export default function CadenaSolar() {
         </Seccion>
 
         <Seccion id="que-hacemos" etiqueta="Qué hacemos" titulo="Donde se atasca la cadena, ahí trabajamos."
-          texto="Light for Humanity actúa en los eslabones que más valor pierden: la captación, la financiación, la formación de instaladores y el reparto entre vecinos.">
+          texto="Light for Humanity actúa en los eslabones que más valor pierden: la captación de clientes, la financiación, la formación de instaladores y el reparto entre vecinos.">
           <div className="grid gap-5 md:grid-cols-2">
             <a href="/comunidades-energeticas-en-pueblos" className="group relative isolate block overflow-hidden rounded-3xl bg-slate-900 p-6 text-white sm:p-8" data-fondo-oscuro>
               <img src={miniatura(PORTADA, 800)} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-40 transition-opacity group-hover:opacity-50" loading="lazy" />
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-violet-300">Eslabón 10: reparto</p>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-violet-300">Eslabones 1 y 11: captar y repartir</p>
               <h3 className="mt-2 text-2xl font-black sm:text-3xl">Comunidades energéticas en pueblos</h3>
               <p className="mt-2 text-white/85">Vecinos que comparten el sol de los tejados municipales en Villalbilla y Nuevo Baztán.</p>
               <span className="mt-5 inline-flex items-center gap-2 font-black text-amber-300">Ver el proyecto <ArrowRight className="h-4 w-4" /></span>
             </a>
             <a href="/sol-solidario" className="group block rounded-3xl bg-amber-400 p-6 text-slate-950 sm:p-8">
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-900">Eslabones 3 y 5: financiar y formar</p>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-900">Eslabones 4 y 6: financiar y formar</p>
               <h3 className="mt-2 text-2xl font-black sm:text-3xl">Sol Solidario</h3>
               <p className="mt-2 text-slate-900/80">Préstamos solidarios, donaciones e instaladores formados para llevar energía solar a quien sufre la pobreza energética.</p>
               <span className="mt-5 inline-flex items-center gap-2 font-black">Ver Sol Solidario <ArrowRight className="h-4 w-4" /></span>
