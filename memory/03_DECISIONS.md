@@ -1474,3 +1474,49 @@ Dependent ranges, all measured on this model:
 ## 2026-11-12 · Four-wheel Bala renamed «Cuadriciclo Bala clásico»; the rombo family «Cuadriciclo Bala en rombo»
 
 Eugenio chose the names after being told «Cuadriciclo Bala» was already taken by the rombo family. Display names change in code (`nombreDe`, `nombreTriciclo`, tunnel bodies, page header, STL file names); stored design names change in migration 0198 for team rows only (visitor rows keep their author's names). Bare «Cuadriciclo» in Triciclo texts now reads «Cuadriciclo en rombo», since there are now two cuadriciclos. Migration 0198 also re-copies the saved Triciclo's `parametros` onto the four-wheel team row (same source rule as 0197) and drops its `tViaTras`, so it opens with rear track = front track; it reports the source row and values with `RAISE NOTICE` in the deploy log, because the production database cannot be read from the agents' containers.
+
+## 2026-11-12 · Cuadriciclo Bala clásico: Aptera doors and hatch, pack along the frame, steering wheel, dashboard, lower seats, one top menu
+
+**Largo total.** It now writes only `tBatalla` (and `tCupFin` with it).
+- The shape is stretched piecewise between its anchors: nose tip, x = 0, canopy start, canopy end, rear axle, tail tip. When only the middle segment grows, the nose and tail sections stay as they were.
+- Rejected: a stored «largo» field. It would have needed a migration and a second source of truth.
+
+**Doors.** Cut into the skin in (x, t) space (`garaje/balaPuertas.ts`), not drawn as separate shells.
+- Each grid cell's triangles are clipped exactly along the door's top and bottom curves: Sutherland-Hodgman against two half-planes, linear in x between the cell's two rows. Rows are added at the door's ends and corners.
+- The new vertices are the skin's own points, computed identically for both sides of a cut, so there is no crack.
+- Rejected: (a) per-cell classification, which gives 2 cm staircase edges; (b) separate door shells laid over the body, which z-fight and leave the body with no hole.
+- Outline:
+  - top: the window frame band's outer edge (the band rides with the door);
+  - front edge: a straight line in side view from the pillar's foot to the bottom-front corner;
+  - bottom: the sill height;
+  - rear: a vertical edge with rounded corners.
+- **The hinge axis is the tangent to the pillar's edge at the hinge point.** The pillar is a concave curve.
+  - The first try used a straight axis through the foot, rising at 38°. It left 11 cm of door above the axis, and that part swung 11 cm into the pillar.
+  - A tangent lies above a concave curve, so the whole door stays below it and swings out.
+  - The «bisagra» slider moves the point along the pillar: near the foot it is a plain front-hinged door, in the middle the Aptera's butterfly, near the roof a gull wing.
+  - A second slider turns the axis off the tangent; the swing check reports any penetration.
+- Doors force the window frame (pillar and rail) and stop the canopy from opening.
+
+**Hatch.** Only with doors, because it takes the canopy's rear part, which a one-piece canopy carries when it opens.
+- Hinged across the roof near its highest point, and clamped so it is never ahead of that point. Ahead of the crest the roof still rises, and the hatch edge, lifting about a lower hinge, swings forward into it: 1.1 cm at the forward end of the slider with three rows.
+- Its side edge is the door's top while beside a door. Behind the door it eases down over 35 cm to the tail's shoulder (section point P4, t = 0.47) and follows it to the tail ring. That stays above the rear arms (0.52 m), the charging flap and the rear vents.
+- The first version followed the round-three lid's line (the canopy frame's outer edge). On this tail that line is the crown, so only a strip opened, which is not the Aptera's clamshell. It was caught in the screenshots and changed.
+
+**Steering wheel.** If the rim does not fit with 1 cm under a low or long canopy, the hub comes down until it does (`volante.baja`), as the handlebar narrows. The knee check stays a warning, not a constraint.
+
+**Swing checks.** 12 steps to full opening.
+- The rotated door is tested against: the fixed skin outside its own opening (points within 4 cm of the axis excluded); the front pods and their arms, with the wheels straight; and the ground.
+- The hatch is tested against the fixed skin.
+- They are point samples (17 × 9 on the door, 25 × 9 on the hatch), not a mesh-mesh intersection.
+
+**Battery along the frame.** The pack's size decides its capacity (litres × Wh/L), and the kWh slider is disabled in that layout.
+- This matches the «disposición» sliders (length, width, height, position). The other way round, length would have been a derived number.
+- Width is a % of the frame's outer width. «Sobresalga un 50 %» = 150 %, centred.
+- The pack sits on the rails and is the floor where it runs: footboards, footpegs, the rows' feet and the seat posts stand on it.
+- Mass and CG use its real box, so the rollover figure follows it.
+
+**Seat floor.** The minimum is now 6 cm of seat over whatever is under it (rails or pack).
+- A design saved before (no `tMando` key) is converted on load to the old floor (`asientosDeAntes`, Disenos.tsx). That reproduces the old clamp exactly.
+- So saved designs build vertex-identical: `triciclo-disenos` checks five saved variants, the clásico included.
+
+**Top menu.** The departments are the bar's tab row, as before 383754a; the sections fold into one dropdown. Eugenio's call («es más útil el otro»).

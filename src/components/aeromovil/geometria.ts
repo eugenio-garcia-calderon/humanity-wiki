@@ -259,6 +259,14 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   tMRueda: 4.5, tMFreno: 1.2, tMSuspDel: 9, tMSuspTras: 6, tMDir: 4.5,
   tKWNom: 5, tKWPico: 10, tMMotor: 13, tMInversor: 2.5, tVel: 80,
   tKWh: 9, tWhKg: 160, tWhL: 230, tMVarios: 12, tSolarM2: 2.2,
+  // 2026-11-12 (Eugenio, the «Cuadriciclo Bala clásico»): battery layout, steering wheel, dashboard, Aptera doors,
+  // mirrors and boot. Every option's default is what there was before, so a design saved without them is unchanged.
+  tBatDisp: 'reparto', tBatLargo: 0.94, tBatAncho: 150, tBatAlto: 0.10, tBatX: 0.70,
+  tMando: 'manillar', tVolX: 0, tVolY: 0, tVolInc: 30, tVolD: 0.32,
+  tSalpicadero: 'no', tSalpY: 0, tSalpFondo: 0.24,
+  tAcceso: 'cupula', tPuertaDel: 0.80, tPuertaTras: 1.62, tUmbral: 0.34, tCintura: 0, tBisagraY: 0.5, tBisagraInc: 0, tBisagraDentro: 14, tPuertaAbre: 62,
+  tRetrovisores: 'camaras',
+  tMaletero: 'cola', tMalIni: 1.40, tMalAbre: 48,
 };
 export const PARAMETROS_TRICICLO: Parametros = { ...PARAMETROS_GOTA, disposicion: 'triciclo', ...TRICICLO_DEFECTO };
 export const PARAMETROS_POR_DEFECTO: Parametros = PARAMETROS_A1;

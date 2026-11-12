@@ -29,7 +29,7 @@ import {
   ARM_UP, CELULA, TIRE_W, TRAVEL_F, TRAVEL_R, enZona, tramosTubo,
   type Modelo, type ModeloGota, type ModeloA1, type ModeloBala, type ModeloConPiel, type ModeloTriciclo, type Piel, type PuntosOcupante, type Superficie,
 } from './geometria';
-import { anguloFuera } from './geometriaTriciclo';
+import { anguloFuera, opcionesCabinaTriciclo } from './geometriaTriciclo';
 import { ANGULO_CUPULA, ANGULO_PORTON, PIVOTES_CUPULA, PIVOTE_PORTON, construirCon as construirBalaCon, crearMateriales as materialesBala } from './garaje/balaModelo';
 import { brazosDe } from './garaje/balaMedidas';
 import { GIRO_A1, suspensionA1 } from './geometriaA1';
@@ -1059,7 +1059,11 @@ function girarTriciclo(G: Record<CapaId, THREE.Group>, m: ModeloTriciclo, angulo
 }
 
 /** The layer each part of the Bala goes to (the 3D model's own names, balaModelo.ts / balaPiezas.ts). */
-const CAPA_BALA: Record<string, CapaId> = { ruedas: 'ruedas', cabina: 'asientos', [PIVOTES_CUPULA[1]]: 'cristales', cupula: 'cristales' };
+const CAPA_BALA: Record<string, CapaId> = {
+  ruedas: 'ruedas', cabina: 'asientos', [PIVOTES_CUPULA[1]]: 'cristales', cupula: 'cristales',
+  // 2026-11-12: the Aptera doors' and hatch's glass hang from pivots of their own (balaModelo.ts `pielConPuertas`)
+  'puerta-der-cristal': 'cristales', 'puerta-izq-cristal': 'cristales', [`${PIVOTE_PORTON}-cristal`]: 'cristales',
+};
 /**
  * The Cuadriciclo Bala en rombo: the garage model's builder with this design's shape
  * (garaje/balaModelo.ts), its own materials (`Mb`, so «Rayos X» and «Corte»
@@ -1095,10 +1099,12 @@ function repartirBala(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THRE
       puertasG.get('cupula')!.push(o as THREE.Group);
     }
     // the Triciclo's boot lid (round three): a boot, so «Abrir maletero» opens it (as the Aeromóvil 1's boots)
-    if (o.name === PIVOTE_PORTON) {
-      o.userData = { eje: new THREE.Vector3(0, 0, 1), angulo: ANGULO_PORTON * Math.PI / 180, tipo: 'maletero' };
-      if (!puertasG.has('maletero')) puertasG.set('maletero', []);
-      puertasG.get('maletero')!.push(o as THREE.Group);
+    if (o.name === PIVOTE_PORTON && !o.userData.eje) o.userData = { eje: new THREE.Vector3(0, 0, 1), angulo: ANGULO_PORTON * Math.PI / 180, tipo: 'maletero' };
+    // 2026-11-12: the Aptera doors and hatch come with their own axis and angle (balaModelo.ts `pivote`)
+    if (o.userData.eje && (o.name === PIVOTE_PORTON || o.name.startsWith(`${PIVOTE_PORTON}-`) || o.name.startsWith('puerta-'))) {
+      const k = o.userData.tipo === 'maletero' ? 'maletero' : 'puertas';
+      if (!puertasG.has(k)) puertasG.set(k, []);
+      puertasG.get(k)!.push(o as THREE.Group);
     }
     G[capa].add(o);
   }
@@ -1113,7 +1119,7 @@ function repartirBala(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THRE
 function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THREE.Group[]>, M: Mats, Mb: ReturnType<typeof materialesBala>, m: ModeloTriciclo, calidad: 'completa' | 'rapida', sinPasajero: boolean) {
   for (const c of CAPAS) vaciar(G[c.k]);
   puertasG.clear();
-  const b = construirBalaCon(m.F, { M: Mb, calidad, cupulaAparte: true, asientos: m.sillines, aleta: m.aleta, triciclo: { recPil: m.rec.piloto, recPas: m.rec.pasajero, man: m.man, pies: m.pies, faldon: m.faldon, ventanas: m.opcVentanas, maletero: true, ...(m.filas ? { filas: m.asientosFilas } : {}), traseras: m.traseras } });
+  const b = construirBalaCon(m.F, { M: Mb, calidad, cupulaAparte: true, asientos: m.sillines, aleta: m.aleta, triciclo: opcionesCabinaTriciclo(m) });
   repartirBala(G, puertasG, b);
   for (const t of m.tubos) { if (t.curva) tuboCurvo(G.chasis, t.curva, t.d, M.alu); else tube(G.chasis, t.a, t.b, t.d, M.alu); }
   for (const c of m.baterias) cajaRedonda(G.baterias, [(c.x0 + c.x1) / 2, (c.y0 + c.y1) / 2, 0], [c.x1 - c.x0, c.y1 - c.y0, 2 * c.hz], M.batt, 0.015);

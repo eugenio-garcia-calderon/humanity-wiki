@@ -13,7 +13,7 @@
 import * as THREE from 'three';
 import { PARAMETROS_A1, PARAMETROS_BALA, PARAMETROS_GOTA, PARAMETROS_TRICICLO, TRICICLO_DEFECTO, areas, calcular, crearModelo, type Parametros } from '../src/components/aeromovil/geometria';
 import { aDiseno, deDiseno } from '../src/components/aeromovil/Disenos';
-import { camposTriciclo, deslizadoresTriciclo, rangoTriciclo, type ModeloTriciclo } from '../src/components/aeromovil/geometriaTriciclo';
+import { camposTriciclo, deslizadoresTriciclo, opcionesCabinaTriciclo, rangoTriciclo, type ModeloTriciclo } from '../src/components/aeromovil/geometriaTriciclo';
 import type { ModeloBala } from '../src/components/aeromovil/geometriaBala';
 import { construirCon, crearMateriales } from '../src/components/aeromovil/garaje/balaModelo';
 
@@ -50,13 +50,31 @@ ok(igual(camposTriciclo(deDiseno({ disposicion: 'triciclo' })), TRICICLO_DEFECTO
   ok(sinCuerpo(m) === sinCuerpo(m3), 'y la misma carrocería');
 }
 
+// ── 2026-11-12: the clásico with every new option on survives save → open, and builds what it says
+{
+  const P = { ...PARAMETROS_TRICICLO, tTraseras: 'dos', tBatDisp: 'chasis', tMando: 'volante', tSalpicadero: 'si', tAcceso: 'puertas', tRetrovisores: 'espejos', tMaletero: 'aptera', tPilY: 0.37, tPasY: 0.37 } as Parametros;
+  const Q = deDiseno(JSON.parse(JSON.stringify(aDiseno(P))));
+  ok(igual(camposTriciclo(Q), camposTriciclo(P)), 'el clásico con batería a lo largo del bastidor, volante, salpicadero, puertas, retrovisores y portón se guarda y se abre igual');
+  const m = crearModelo(Q) as ModeloTriciclo;
+  ok(!!m.paquete && !!m.volante && !!m.salpicadero && !!m.puerta && !!m.porton && !!m.retrovisor && m.baterias.length === 1, 'y abre con todo eso');
+  ok(Math.abs(m.sillines.yPiloto - 0.37) < 1e-9, `y con los asientos a 37 cm (más bajo que el mínimo de antes, 38): ${m.sillines.yPiloto} m`);
+  const noA = crearModelo({ ...P, tAcceso: 'cupula' } as Parametros) as ModeloTriciclo;
+  ok(!noA.puerta && !noA.porton, 'el portón largo sin puertas no existe (con la cúpula entera, la parte de atrás de la cúpula se abre con ella)');
+}
+
 // ── clamping
 {
   const P = deDiseno({ disposicion: 'triciclo', tVia: 9, tPilY: -1, tKWh: 999, tRecPil: 90, tGiro: 80, tPodEsc: 0.1, tBatalla: 5 } as Partial<Parametros>);
   const m = crearModelo(P) as ModeloTriciclo, T = m.campos, f = (k: string) => deslizadoresTriciclo().find(x => x.clave === k)!;
   ok(Math.abs(m.F.VIA_LAT - f('tVia').max) < 1e-9, `vía 9 m → ${m.F.VIA_LAT} m (el máximo del deslizador)`);
   // (its minimum depends on the belly since round two: `rangoTriciclo`)
-  ok(Math.abs(m.sillines.yPiloto - rangoTriciclo('tPilY', T)[0]) < 1e-9, `sillín del piloto a −1 m → ${m.sillines.yPiloto} m (el mínimo con esa panza)`);
+  // (2026-11-12: a design without `tMando` was saved before the seats could come down onto the frame: it opens at the
+  // floor it had then, 38 cm less what its belly came down (Disenos.tsx `asientosDeAntes`); a current one, at the new minimum)
+  ok(Math.abs(m.sillines.yPiloto - Math.max(0.30, 0.38 + Math.min(0, T.tSuelo - 0.124))) < 1e-9, `sillín del piloto a −1 m, diseño de antes → ${m.sillines.yPiloto} m (el mínimo de entonces con esa panza)`);
+  {
+    const n = crearModelo(deDiseno({ disposicion: 'triciclo', tPilY: -1, tMando: 'manillar' } as Partial<Parametros>)) as ModeloTriciclo;
+    ok(Math.abs(n.sillines.yPiloto - rangoTriciclo('tPilY', n.campos)[0]) < 1e-9 && n.sillines.yPiloto < 0.30, `sillín del piloto a −1 m, diseño de ahora → ${n.sillines.yPiloto.toFixed(3)} m (6 cm sobre los largueros)`);
+  }
   ok(Math.abs(m.rec.piloto - f('tRecPil').max) < 1e-9 && Math.abs(m.giro * 180 / Math.PI - f('tGiro').max) < 1e-9, `reclinado 90° → ${m.rec.piloto}°; giro 80° → ${Math.round(m.giro * 180 / Math.PI)}°`);
   ok(Math.abs(m.F.BATALLA - f('tBatalla').max) < 1e-9 && m.F.D.pod!.esc === f('tPodEsc').min, `batalla de la carrocería 5 m → ${m.F.BATALLA} m; carenado ×0,1 → ×${m.F.D.pod!.esc}`);
   const res = calcular(m, areas(m));
@@ -122,14 +140,24 @@ else {
     ['Triciclo Bala por defecto', PARAMETROS_TRICICLO], ['Triciclo de base del equipo', { disposicion: 'triciclo' }],
     ['Triciclo cambiado', { ...PARAMETROS_TRICICLO, tSuelo: 0.158, tAncho: 1.0, tBatalla: 2.9, tCupFin: 2.5, tKWh: 20, tRecPas: 20, tRuedaDel: 'c14', tVentanas: 'burbuja' } as Partial<Parametros>],
     ['Triciclo bajo y estrecho', { ...PARAMETROS_TRICICLO, tSuelo: 0.05, tAncho: 0.77, tAlto: 1.2, tPilY: 0.30 } as Partial<Parametros>],
+    // (2026-11-12: the «Cuadriciclo Bala clásico» as 0198 left it, before this round's options)
+    ['Cuadriciclo Bala clásico (sin las opciones nuevas)', { ...PARAMETROS_TRICICLO, tTraseras: 'dos', tViaTras: 1.8 } as Partial<Parametros>],
   ];
   // (2026-11-11: and the «Bala de cuatro ruedas»'s two, which with one rear wheel change nothing)
-  const NUEVOS = ['tAsientos', 'tFila2', 'tFila3', 'tFila2X', 'tFila3X', 'tRecFila', 'tTraseras', 'tViaTras'];
+  // (2026-11-12: and the battery layout, steering wheel, dashboard, doors, mirrors and hatch, all off by default)
+  const NUEVOS = ['tAsientos', 'tFila2', 'tFila3', 'tFila2X', 'tFila3X', 'tRecFila', 'tTraseras', 'tViaTras',
+    'tBatDisp', 'tBatLargo', 'tBatAncho', 'tBatAlto', 'tBatX', 'tMando', 'tVolX', 'tVolY', 'tVolInc', 'tVolD', 'tSalpicadero', 'tSalpY', 'tSalpFondo',
+    'tAcceso', 'tPuertaDel', 'tPuertaTras', 'tUmbral', 'tCintura', 'tBisagraY', 'tBisagraInc', 'tBisagraDentro', 'tPuertaAbre', 'tRetrovisores', 'tMaletero', 'tMalIni', 'tMalAbre'];
+  const NUEVOS_12 = NUEVOS.slice(8);
+  /** The design as it was saved before 2026-11-12: without the keys that did not exist (this module's defaults carry them). */
+  const deAntes = (P: Partial<Parametros>) => Object.fromEntries(Object.entries(P).filter(([k]) => !NUEVOS_12.includes(k))) as Partial<Parametros>;
+  /** The seat heights as built: a stored height under the old floor opens at that floor (`asientosDeAntes`), which is what main built. */
+  const asientosComoMain = (o: Partial<Parametros>, m: { sillines: { yPiloto: number; yPasajero: number }; elevar: number }) => ({ ...o, tPilY: m.sillines.yPiloto - m.elevar, tPasY: m.sillines.yPasajero - m.elevar });
   const sinNuevos = (o: object) => Object.fromEntries(Object.entries(o).filter(([k]) => !NUEVOS.includes(k)));
   for (const [nombre, P] of triciclos) {
-    const a = d.deDiseno(P), b = deDiseno(P);
-    ok(igual(sinNuevos(a), sinNuevos(b)), `${nombre}: abre con los mismos parámetros que en main (más los campos nuevos, por defecto)`);
-    const ma = g.crearModelo(a), mb2 = crearModelo(b);
+    const a = d.deDiseno(P), b = deDiseno(deAntes(P));
+    const ma = g.crearModelo(a), mb2 = crearModelo(b) as ModeloTriciclo;
+    ok(igual(sinNuevos(asientosComoMain(a, ma)), sinNuevos(asientosComoMain(b, mb2))), `${nombre}: abre con los mismos parámetros que en main (más los campos nuevos, por defecto; los asientos, a la altura a la que se construyen)`);
     const ra = limpio(g.calcular(ma, g.areas(ma))), rb = limpio(calcular(mb2, areas(mb2)));
     // (only against a main from before round three: since it merged, main has them too and they must match as well;
     // 2026-11-11, found with the «Bala de cuatro ruedas»: this failed against main itself)
@@ -150,8 +178,9 @@ else {
       return o;
     };
     for (const [nombre, P] of triciclos) {
-      const ma = g.crearModelo(d.deDiseno(P)), mb2 = crearModelo(deDiseno(P)) as ModeloTriciclo;
-      const a = todo(bm.construirCon, bm.crearMateriales(), ma, {}), b = todo(construirCon, crearMateriales(), mb2, { traseras: mb2.traseras });
+      const ma = g.crearModelo(d.deDiseno(P)), mb2 = crearModelo(deDiseno(deAntes(P))) as ModeloTriciclo;
+      // (2026-11-12: this side as the viewer builds it now, `opcionesCabinaTriciclo`: the new options at their defaults must draw nothing new)
+      const a = todo(bm.construirCon, bm.crearMateriales(), ma, { traseras: ma.traseras ?? null }), b = todo(construirCon, crearMateriales(), mb2, opcionesCabinaTriciclo(mb2));
       ok(igual(a, b), `${nombre}: todas las mallas del vehículo (${a.length}: carrocería, carenados, ruedas, cabina) iguales que en main, vértice a vértice`);
     }
   }

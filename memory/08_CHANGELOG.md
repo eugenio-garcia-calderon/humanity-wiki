@@ -11138,3 +11138,66 @@ Eugenio: «coge la configuración de los sliders del triciclo bala y aplícasela
 - `drizzle/0201_comunidades_energeticas_pueblos.sql`: subelementos en la tabla Proyectos («Elemento madre» / «Subelementos»), el proyecto general (modelo asociativo público-privado, 2024) y Villalbilla y Nuevo Baztán dentro de él.
 - `SubproyectosSitio.tsx`: en la página de un proyecto, sus subproyectos con las mismas tarjetas que la portada (`config.subproyectos.titulo`). `VistaProyectosSitio`: la portada no enseña los que tienen madre (el editor sí).
 - Para sumar otra comunidad: en la tabla Proyectos, poner «Comunidades energéticas en pueblos» en su «Elemento madre».
+
+## 2026-11-12 — Cuadriciclo Bala clásico: largo sin tocar morro ni cola, menú de departamentos arriba, batería a lo largo del bastidor, asientos más bajos, volante, salpicadero, puertas y portón como el Aptera, retrovisores
+
+Eugenio (11:44): «Permite que cuando se modifique el largo total, que no cambie la forma del morro y la cola… vuelve a ese menú desplegado… ponlo en la parte superior y el actual menú pliégalo… sliders para… la batería… a lo largo del chasis y que sobresalga un 50 % del ancho del chasis… los asientos… todavía más bajos… cambia el manillar por un volante… crea el salpicadero… puertas y ventanas idénticas a las que tiene la Aptera… sliders para… la puerta… los retrovisores… el maletero… como el de la Aptera».
+
+Todo vale para la familia del Triciclo (el Triciclo Bala y el Cuadriciclo Bala clásico). Cada opción nueva, apagada, deja el vehículo como estaba. El Cuadriciclo Bala en rombo no cambia.
+
+- **Largo total**: ahora solo cambia la batalla (y el final de la cúpula con ella). El morro y la cola conservan su forma y su largo, sección a sección; lo comprueba `triciclo-rangos`. Antes repartía el cambio entre el morro, la batalla y la cola.
+- **Un solo menú arriba**:
+  - Los departamentos vuelven a ser una fila de pestañas, como antes del 9 de noviembre, pero dentro de la barra de arriba. En el Triciclo son Proyecto, Carrocería, Chasis, Rodaje, Motor, Energía e Interior; en el Aeromóvil 1, los once.
+  - Las secciones (Diseño 3D, Otros velomóviles, Tareas, Plan, Planos, Exportar) se pliegan en un menú al final de la barra.
+  - En el móvil, la fila de pestañas se desliza de lado.
+  - Pinchar un departamento desde otra sección vuelve al 3D.
+- **Batería** (Energía › Batería), «Dónde va la batería»:
+  - Repartida: como hasta ahora, y es la de serie.
+  - **A lo largo del bastidor**: un paquete plano encima de los largueros, centrado. Tiene deslizadores de largo, ancho, alto y de dónde empieza. El ancho se da en % del ancho del bastidor, de la cara de fuera de un larguero a la del otro.
+  - «Que sobresalga un 50 %» se ha entendido como 150 % del ancho del bastidor: un 25 % por cada lado.
+  - El tamaño del paquete decide su capacidad (litros × Wh/L). El deslizador de kWh queda apagado y la muestra.
+  - Donde pasa el paquete, es el suelo: las plataformas, los estribos, los pies de las filas y los asientos se apoyan encima.
+  - Comprobaciones: dentro de la carrocería, a la cuna de la suspensión delantera, al controlador, a la rueda trasera y bajo los asientos.
+- **Asientos más bajos**: bajan hasta quedar con 6 cm de asiento sobre lo que tienen debajo. Eso son los largueros, a unos 26 cm del suelo, o el paquete de batería. El sillín se hace más fino al bajar. Un diseño guardado antes abre a la altura de siempre: si tenía guardada una altura por debajo del suelo de entonces, se abre en ese suelo, como antes.
+- **Mando**: «Manillar» (de serie) o **«Volante»**.
+  - El volante lleva aro, radios, cubo y columna hasta la cabeza de dirección. Las manos del piloto van al aro.
+  - Deslizadores: hacia el piloto, altura, inclinación y diámetro.
+  - Comprobaciones: dentro de la carrocería y a las rodillas.
+  - Si con una cúpula baja o larga el aro no cabe bajo el parabrisas, el volante baja solo hasta que cabe (el deslizador lo dice), como el manillar se estrecha.
+- **Salpicadero**: «Pantallita sobre el depósito» (de serie) o **de lado a lado**.
+  - El de lado a lado va bajo el parabrisas, a 2 cm de la piel, con una pantalla de relojes y una pantalla central. Quita el depósito.
+  - Deslizadores: altura y fondo.
+  - Comprobaciones: dentro de la carrocería y a las rodillas.
+- **Puertas como el Aptera** (Carrocería › Puertas y maletero, «Acceso»):
+  - Dos puertas cortadas en esta carrocería. Cada una lleva su ventana y su marco (el montante y el carril del techo).
+  - Se abren hacia arriba y hacia fuera a la vez («de mariposa»), sobre una bisagra en el montante. Con puertas, la cúpula queda fija.
+  - Deslizadores: esquina de abajo delante, canto de atrás, umbral, línea de la ventanilla, bisagra (dónde va en el montante, el giro del eje y su inclinación hacia dentro) y ángulo de apertura.
+  - «Abrir puertas», abajo en el 3D. El filete rojo, el retrovisor y el marco de la ventana van con la puerta.
+  - Comprobaciones: al abrirse no entra en la carrocería, a los carenados delanteros y sus brazos, al suelo, y cuánto sale de lado.
+- **Portón como el Aptera** («Maletero», solo con puertas):
+  - La bisagra va en el techo, cerca de su punto más alto; nunca más adelante que ese punto (ahí el techo aún sube y el portón rozaría al abrirse). Levanta de una pieza la luna, el techo de atrás y toda la parte de arriba de la cola, desde el hombro del costado, con la aleta.
+  - Primer intento: el corte seguía la línea de la tapa de antes, y en esta cola eso es solo la cresta. Se abría una tira estrecha. Se vio en las capturas y se bajó el corte al hombro.
+  - Con las medidas de serie va de 1,10 m detrás del eje delantero hasta el aro de la cola: casi la mitad del vehículo.
+  - Deslizadores: dónde va la bisagra y el ángulo de apertura. Se abre con «Abrir maletero».
+  - El volumen del maletero no cambia: cambia por dónde se carga.
+- **Retrovisores**: «Cámaras en cápsulas» (de serie) o **espejos de gota** en un brazo corto. Van en cada puerta, o en la carrocería si no hay puertas. El túnel de viento no los cuenta.
+- **Masas nuevas**, estimadas y solo con su opción: bisagras y cierres de las puertas 3 kg, del portón 2 kg, volante y columna 1,8 kg, salpicadero 4,5 kg, retrovisores 0,9 kg.
+- **El clásico con todo**, y con los asientos a 37 cm:
+  - paquete de 37 L y 8,6 kWh;
+  - 198 kg sin ocupantes;
+  - vuelco con dos, 1,70 g;
+  - la puerta abierta llega a 1,24 m del centro y el portón abierto a 2,04 m de alto;
+  - todas las comprobaciones en verde.
+- **Sin cambios** en los diseños guardados:
+  - el Triciclo y el Cuadriciclo clásico tienen las mismas mallas, vértice a vértice, y los mismos resultados que en main (`triciclo-disenos`);
+  - el Cuadriciclo en rombo, igual (`bala-huella`);
+  - el Gota y el Aeromóvil 1, igual.
+- **Para el Cuadriciclo clásico guardado**: esta rama no lleva migración. Los valores que hay que añadir van en el informe de la sesión.
+- **Comprobado** en Chrome sin cabeza con WebGL por software, a 1280 y a 390 px, con los diseños servidos de prueba:
+  - el clásico cerrado en 3/4 y de lado;
+  - con las puertas abiertas en 3/4, de lado, de frente y por detrás;
+  - con el portón abierto en 3/4, de lado y por detrás;
+  - con Rayos X (el paquete a lo largo del bastidor);
+  - el interior sin carrocería (asientos, volante, salpicadero);
+  - la barra de arriba en las dos anchuras, sin desplazamiento lateral de la página. No hubo errores en la consola.
+- **No comprobado**: en un móvil de verdad ni con la aplicación instalada. Las puertas y el portón no se comprueban malla contra malla, sino por puntos.

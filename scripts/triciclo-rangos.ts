@@ -13,7 +13,7 @@
  *    checks warn about on screen.
  */
 import { PARAMETROS_TRICICLO, areas, calcular, crearModelo, type Parametros } from '../src/components/aeromovil/geometria';
-import { SELECTORES_TRICICLO, camposTriciclo, deslizadoresTriciclo, estirarTriciclo, largoTriciclo, rangoTriciclo, type ModeloTriciclo } from '../src/components/aeromovil/geometriaTriciclo';
+import { SELECTORES_TRICICLO, camposTriciclo, deslizadoresTriciclo, estirarTriciclo, largoTriciclo, opcionesCabinaTriciclo, rangoTriciclo, type ModeloTriciclo } from '../src/components/aeromovil/geometriaTriciclo';
 import { carenadoCuerpo } from '../src/components/aeromovil/geometriaBala';
 import { alturasPod, brazosDe, podDe, semiAncho } from '../src/components/aeromovil/garaje/balaMedidas';
 import { construirCon, crearMateriales } from '../src/components/aeromovil/garaje/balaModelo';
@@ -22,7 +22,9 @@ import * as THREE from 'three';
 const M = crearMateriales();
 let fallos = 0, casos = 0;
 /** What must never poke through (a clearance below zero is a failure here). */
-const NO_PASAN = ['Neumático delantero', 'Carenado delantero a la carrocería', 'Neumático trasero', 'Carenado trasero a la carrocería', 'Rueda trasera dentro', 'Manillar dentro', 'Bastidor dentro', 'Batería, ', 'Controlador dentro', 'Pies de la fila 2 dentro', 'Pies de la fila 3 dentro', 'Respaldo de la fila 3 a la torreta'];
+const NO_PASAN = ['Neumático delantero', 'Carenado delantero a la carrocería', 'Neumático trasero', 'Carenado trasero a la carrocería', 'Rueda trasera dentro', 'Manillar dentro', 'Bastidor dentro', 'Batería, ', 'Controlador dentro', 'Pies de la fila 2 dentro', 'Pies de la fila 3 dentro', 'Respaldo de la fila 3 a la torreta',
+  // 2026-11-12: the pack along the frame, the steering wheel, the dashboard, the doors and the hatch as they swing, the mirrors
+  'Batería: paquete', 'Volante dentro', 'Salpicadero dentro', 'Puerta: al abrirse', 'Puerta abierta al', 'Portón: al abrirse', 'Retrovisor al carenado'];
 
 function cruzan(a: number[], b: number[], c: number[], d: number[]) {
   const o = (p: number[], q: number[], r: number[]) => (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]);
@@ -49,7 +51,8 @@ function pielSana(m: ModeloTriciclo): string | null {
 /** Each front pod's group and its wheel's group stand on the same vertical axis (x, z), so they turn together. */
 function mismoEje(m: ModeloTriciclo): string | null {
   // (built as the viewer builds it: since round three with the boot lid apart and, with three rows, their seats)
-  const g = construirCon(m.F, { M, calidad: 'rapida', cupulaAparte: true, asientos: m.sillines, aleta: m.aleta, triciclo: { recPil: m.rec.piloto, recPas: m.rec.pasajero, man: m.man, pies: m.pies, faldon: m.faldon, ventanas: m.opcVentanas, maletero: true, ...(m.filas ? { filas: m.asientosFilas } : {}), traseras: m.traseras } });
+  // (2026-11-12: with every option, `opcionesCabinaTriciclo`, as the viewer)
+  const g = construirCon(m.F, { M, calidad: 'rapida', cupulaAparte: true, asientos: m.sillines, aleta: m.aleta, triciclo: opcionesCabinaTriciclo(m) });
   const pods: THREE.Object3D[] = [], ruedas: THREE.Object3D[] = [];
   g.traverse(o => { if (o.name === 'carenado' && o.userData.lado) pods.push(o); if (o.name === 'rueda-direccion') ruedas.push(o); });
   if (pods.length !== 2 || ruedas.length !== 2) return `${pods.length} carenados y ${ruedas.length} ruedas que giran (deberían ser 2 y 2)`;
@@ -71,6 +74,19 @@ function mismoEje(m: ModeloTriciclo): string | null {
   // round three: the boot lid hangs from its own pivot, with the fin on it
   const porton = g.getObjectByName('porton-maletero');
   if (!porton || !porton.getObjectByName('porton') || !porton.getObjectByName('aleta')) return 'falta la tapa del maletero (o la aleta no va en ella)';
+  // 2026-11-12: the Aptera doors, each on its hinge with its skin and its glass; the canopy then does not open
+  if (m.puerta) {
+    for (const n of ['puerta-der', 'puerta-izq', 'puerta-der-cristal', 'puerta-izq-cristal']) {
+      const p = g.getObjectByName(n); if (!p || !p.userData.eje) return `falta ${n} (o su eje)`;
+      let tri = 0; p.traverse(o => { const q = o as THREE.Mesh; if (q.isMesh) tri += (q.geometry.getIndex()?.count ?? 0) / 3; });
+      if (tri < 50) return `${n} casi vacía (${tri} triángulos)`;
+    }
+    if (g.getObjectByName('cupula-marco')) return 'con puertas, la cúpula sigue abriéndose';
+    if (m.retrovisor && !g.getObjectByName('puerta-der')!.getObjectByName('retrovisor')) return 'el retrovisor no va en la puerta';
+  }
+  if (m.porton && !g.getObjectByName('porton-maletero-cristal')) return 'el portón largo no se lleva su cristal';
+  if (m.volante && !g.getObjectByName('volante')) return 'falta el volante';
+  if (m.salpicadero && !g.getObjectByName('salpicadero')) return 'falta el salpicadero';
   // and the seats: three rows draw four car seats (folded ones folded), astride none
   let asientos = 0, plegados = 0; g.traverse(o => { if (o.name === 'asiento') asientos++; if (o.name === 'respaldo-plegado') plegados++; });
   const esperados = m.filas ? 4 : 0, plegEsperados = m.asientosFilas.filter(a => a.plegado).length;
@@ -103,13 +119,17 @@ function podsTraseros(m: ModeloTriciclo): string | null {
   return null;
 }
 
+/** `npx tsx scripts/triciclo-rangos.ts clásico` runs only the cases whose name starts with that (the whole run takes ~30 min on a loaded machine). */
+const SOLO = process.argv[2];
 function probar(nombre: string, P: Parametros) {
+  if (SOLO && !nombre.startsWith(SOLO)) return;
   casos++;
   let m: ModeloTriciclo;
   try { m = crearModelo(P) as ModeloTriciclo; } catch (e) { console.log(`FALLA ${nombre}: el modelo no se construye (${(e as Error).message})`); fallos++; return; }
   const res = calcular(m, areas(m)), mal: string[] = [];
   const piel = pielSana(m); if (piel) mal.push(piel);
-  for (const c of res.comprobaciones) if (NO_PASAN.some(n => c.nombre.startsWith(n)) && !(c.holgura >= 0)) mal.push(`${c.nombre}: ${(c.holgura * 100).toFixed(1)} cm`);
+  // (2026-11-12: a check whose own minimum is below 0, the doors' and the hatch's «entra», fails under that minimum)
+  for (const c of res.comprobaciones) if (NO_PASAN.some(n => c.nombre.startsWith(n)) && !(c.holgura >= Math.min(0, c.minimo))) mal.push(`${c.nombre}: ${(c.holgura * 100).toFixed(1)} cm`);
   try { const e = mismoEje(m); if (e) mal.push(e); } catch (e) { mal.push(`el 3D falla: ${(e as Error).message}`); }
   if (m.traseras) { const e = podsTraseros(m); if (e) mal.push(e); }
   const t = res.triciclo!, cab = t.cabezas.map(c => `${c.quien} ${(c.p50 * 100).toFixed(1)}/${(c.p95 * 100).toFixed(1)}`).join(', ');
@@ -177,9 +197,18 @@ probar('60 kW en una rueda de 16″ con la batería al máximo', { ...PARAMETROS
   // «Largo total»: both ends of its slider, and it moves only nose, wheelbase, tail and the canopy's end
   const lg = largoTriciclo(T0);
   for (const [n, v] of [['mín.', lg.min], ['máx.', lg.max]] as const) {
+    // 2026-11-12 («que no cambie la forma del morro y la cola»): only the wheelbase and the canopy's end with it
     const o = estirarTriciclo(T0, v), claves = Object.keys(o).sort().join(',');
-    if (claves !== 'tBatalla,tCola,tCupFin,tMorro') { console.log(`FALLA largo total ${n}: cambia ${claves}`); fallos++; }
+    if (claves !== 'tBatalla,tCupFin') { console.log(`FALLA largo total ${n}: cambia ${claves}`); fallos++; }
     probar(`largo total ${n} (${v.toFixed(2)} m)`, { ...PARAMETROS_TRICICLO, ...o });
+    // and the nose (ahead of x = 0) and the tail (behind the rear axle, measured from it) keep every section
+    const a = crearModelo(PARAMETROS_TRICICLO) as ModeloTriciclo, b = crearModelo({ ...PARAMETROS_TRICICLO, ...o } as Parametros) as ModeloTriciclo;
+    let dif = 0;
+    for (let x = 0; x < a.F.X_MORRO; x += 0.01) { const p = a.F.seccionRapida(x), q = b.F.seccionRapida(x); for (let k = 0; k < p.length; k++) dif = Math.max(dif, Math.abs(p[k] - q[k])); }
+    for (let d = 0; d < -a.F.X_COLA - a.F.BATALLA; d += 0.01) { const p = a.F.seccionRapida(-a.F.BATALLA - d), q = b.F.seccionRapida(-b.F.BATALLA - d); for (let k = 0; k < p.length; k++) dif = Math.max(dif, Math.abs(p[k] - q[k])); }
+    const lm = (mm: ModeloTriciclo) => [mm.F.X_MORRO, -mm.F.X_COLA - mm.F.BATALLA].map(v => v.toFixed(6)).join('/');
+    if (dif > 2e-4 || lm(a) !== lm(b)) { console.log(`FALLA largo total ${n}: el morro o la cola cambian (${(dif * 1000).toFixed(2)} mm; largos ${lm(a)} → ${lm(b)})`); fallos++; }
+    else { casos++; console.log(`OK    largo total ${n}: morro y cola iguales (sección a sección, ${(dif * 1000).toFixed(3)} mm), largos ${lm(b)} m`); }
   }
 }
 
@@ -249,6 +278,41 @@ for (const lado of [0, 1] as const) {
   const lg = largoTriciclo(T4);
   for (const [n, v] of [['mín.', lg.min], ['máx.', lg.max]] as const) probar(`cuatro · largo total ${n} (${v.toFixed(2)} m)`, { ...CUATRO, ...estirarTriciclo(T4, v) });
 }
+
+// ── 2026-11-12: the «Cuadriciclo Bala clásico» with the battery along the frame, steering wheel, dashboard, Aptera
+// doors and hatch and mirrors (what Eugenio asked for), every slider at both ends and every option; and the
+// options one by one on the plain Triciclo
+const CLASICO = { ...CUATRO, tBatDisp: 'chasis', tMando: 'volante', tSalpicadero: 'si', tAcceso: 'puertas', tRetrovisores: 'espejos', tMaletero: 'aptera', tPilY: 0.37, tPasY: 0.37 } as Parametros;
+const TC = camposTriciclo(CLASICO);
+probar('clásico con todo', CLASICO);
+for (const f of deslizadoresTriciclo()) {
+  const [a, b] = rangoTriciclo(f.clave, TC);
+  probar(`clásico · ${f.clave} = ${+a.toFixed(3)} (mín.)`, { ...CLASICO, [f.clave]: a });
+  probar(`clásico · ${f.clave} = ${+b.toFixed(3)} (máx.)`, { ...CLASICO, [f.clave]: b });
+}
+for (const s of SELECTORES_TRICICLO) for (const o of s.opciones) probar(`clásico · ${s.clave} = ${o.k}`, { ...CLASICO, [s.clave]: o.k });
+const NUEVAS = ['tBatLargo', 'tBatAncho', 'tBatAlto', 'tBatX', 'tVolX', 'tVolY', 'tVolInc', 'tVolD', 'tSalpY', 'tSalpFondo', 'tPuertaDel', 'tPuertaTras', 'tUmbral', 'tCintura', 'tBisagraY', 'tBisagraInc', 'tBisagraDentro', 'tPuertaAbre', 'tMalIni', 'tMalAbre'];
+for (const lado of [0, 1] as const) {
+  const v = lado ? 'máx.' : 'mín.';
+  probar(`clásico · todo lo nuevo al ${v}`, { ...extremo(lado, NUEVAS), ...Object.fromEntries(Object.entries(CLASICO).filter(([k]) => !NUEVAS.includes(k))) } as Parametros);
+  probar(`clásico · tres filas, todo lo nuevo al ${v}`, { ...extremo(lado, NUEVAS), ...Object.fromEntries(Object.entries(CLASICO).filter(([k]) => !NUEVAS.includes(k))), tAsientos: 'filas', tPasY: 0.43 } as Parametros);
+}
+probar('clásico · tres filas', { ...CLASICO, tAsientos: 'filas', tPasY: 0.43 } as Parametros);
+probar('clásico · 35 cm', { ...CLASICO, tSuelo: 0.35 } as Parametros);
+probar('clásico · grande', { ...CLASICO, ...GRANDE } as Parametros);
+probar('clásico · grande y bajo', { ...CLASICO, ...GRANDE, ...BAJO, tPilY: 0.37, tPasY: 0.37 } as Parametros);
+probar('clásico · toda la forma al mínimo', { ...extremo(0, FORMA), ...Object.fromEntries(Object.entries(CLASICO).filter(([k]) => !FORMA.includes(k))) } as Parametros);
+probar('clásico · toda la forma al máximo', { ...extremo(1, FORMA), ...Object.fromEntries(Object.entries(CLASICO).filter(([k]) => !FORMA.includes(k))) } as Parametros);
+probar('clásico · cúpula de una pieza (las puertas ponen el montante)', { ...CLASICO, tVentanas: 'burbuja' } as Parametros);
+probar('clásico · sin techo solar', { ...CLASICO, tSolar: 3 } as Parametros);
+probar('clásico · ventanilla con cintura alta', { ...CLASICO, tCintura: 0.16 } as Parametros);
+{
+  const lg = largoTriciclo(TC);
+  for (const [n, v] of [['mín.', lg.min], ['máx.', lg.max]] as const) probar(`clásico · largo total ${n} (${v.toFixed(2)} m)`, { ...CLASICO, ...estirarTriciclo(TC, v) });
+}
+for (const [k, v] of [['tBatDisp', 'chasis'], ['tMando', 'volante'], ['tSalpicadero', 'si'], ['tAcceso', 'puertas'], ['tRetrovisores', 'espejos']] as const) probar(`triciclo · ${k} = ${v}`, { ...PARAMETROS_TRICICLO, [k]: v });
+probar('triciclo · puertas y portón', { ...PARAMETROS_TRICICLO, tAcceso: 'puertas', tMaletero: 'aptera' } as Parametros);
+probar('triciclo · asientos al mínimo sobre los largueros', { ...PARAMETROS_TRICICLO, tPilY: 0.2, tPasY: 0.2 } as Parametros);
 
 console.log(`\n${casos} casos, ${fallos ? `${fallos} con fallos` : 'todos OK'}`);
 if (fallos) process.exitCode = 1;

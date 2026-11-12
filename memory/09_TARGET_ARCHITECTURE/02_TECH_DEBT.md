@@ -558,3 +558,15 @@ The observatory is one self-contained HTML file (`public/observatorio-polarizaci
 - **The rear pods carry the front ones' amber indicator strip.** It reads as a side marker. The lens is not drawn differently at the rear.
 - **The tunnel sees the rear pods only as two more `carenado` wheels**, as it does the front ones. Their arms, which are longer at the rear (narrow tail, 1.80 m track), are not shapes in the tunnel. The real Cd will be somewhat higher than 0.157.
 - **`viaTraseraMinima` keeps a single-entry cache** keyed on the shape's measures, because `rangoTriciclo` is called on every slider read. A new body field that changes the tail must be added to its key, or the minimum goes stale.
+
+### 2026-11-12 — Cuadriciclo Bala clásico: doors, hatch, pack, wheel, dashboard (shortcuts)
+- **Door and hatch skins have zero thickness**: skin plus the dark inner pass, like the canopy. There is no door inner panel, and no seals, hinges or struts are drawn. Their masses are flat estimates: 3 kg for the doors, 2 kg for the hatch.
+- **Swing checks are point samples**, not a mesh intersection.
+  - Samples: 153 points on a door, 225 on the hatch, plus the mirror's extremes, each at 12 angles. A thin feature between samples could still touch.
+  - The pods are checked with the wheels straight only.
+- **The tunnel ignores the mirrors** and open doors, so the Cd with mirrors is optimistic.
+- **The pack along the frame stops 2 cm short of the controller, at a fixed x (1.64 m)**, because the controller does not move. If the controller is ever made movable, `FIN_PAQUETE` must follow it.
+- **Three rows with the pack under the pilot's seat leave no room for row 2's feet under that seat**, and the check goes red. The fixes are moving the pack back or lowering it. Nothing resolves this automatically.
+- **The cut regions add about 100 rows near the doors and hatch**, and every door and hatch mesh is compacted (`compactar`).
+  - Build time, measured in node on this machine while it was loaded: about 1.2 s with everything on, against 0.7 s without.
+- **«Rodillas del piloto al volante» depends on where the feet are.** If the pack runs under the footboards, they rise and the knees meet the rim. The default pack starts 40 cm behind the front axle, behind the heels, so at the defaults it does not happen.

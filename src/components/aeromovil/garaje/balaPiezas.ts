@@ -3,7 +3,7 @@ import { E, loft } from './forma';
 import { barrido, curva, parcheM, piel, thetaY, torno } from './apteraPiel';
 import { APLASTADO, geometriasRueda } from './apteraDetalle';
 import { type FormaBala } from './balaForma';
-import { ALETA, ASIENTO, brazosDe, escalaManillar, podDe, semiAncho, techoEn, type Asientos } from './balaMedidas';
+import { ALETA, ASIENTO, anchoSalpicadero, brazosDe, escalaManillar, podDe, semiAncho, techoEn, type Asientos } from './balaMedidas';
 export { ALETA, ASIENTO, POD, POD_SEMIANCHO, brazosDe, extremoManillar, podDe, techoEn, type Asientos } from './balaMedidas';
 
 /*
@@ -347,6 +347,16 @@ export interface CabinaTriciclo {
    * `AsientoFila`): hips x, centre z, cushion top y, size, recline and folded. Absent: the astride cockpit.
    */
   filas?: AsientoCoche[];
+  /**
+   * 2026-11-12 (the «Cuadriciclo Bala clásico»), all optional, absent = as before: what the saddle stands on (it thins
+   * down to it, never into it); how much the passenger's footpegs rise onto the battery pack; a steering wheel instead
+   * of the handlebar (hub, rim radius, tilt), on a column from the steering head; a dashboard from side to side.
+   */
+  sueloSillin?: number;
+  alzaPas?: number;
+  volante?: { c: [number, number]; r: number; inc: number } | null;
+  cabezaDireccion?: [number, number, number];
+  salpicadero?: { x0: number; x1: number; yTop: number; yBajo: number; yBajoDel: number } | null;
 }
 /** A car-style seat of the Triciclo's three rows (the same fields as geometriaTriciclo.ts `AsientoFila`). */
 export interface AsientoCoche { fila: 1 | 2 | 3; x: number; z: number; y: number; ancho: number; fondo: number; respaldo: number; rec: number; plegado: boolean }
@@ -382,7 +392,13 @@ export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO, t?: CabinaT
   // along the saddle: 0 at the pilot's hips, 1 at the passenger's (clamped), for the stretch in between
   const w = (x: number) => Math.min(1, Math.max(0, (R0.xPiloto - x) / (R0.xPiloto - R0.xPasajero)));
   const sx = (x: number) => x + dxPil + (dxPas - dxPil) * w(x), sy = (x: number) => dyPil + (dyPas - dyPil) * w(x);
-  const Es = (x: number, yb: number, yt: number, wb: number, wm: number, wt: number, n: number) => E(sx(x), yb + sy(x), yt + sy(x), wb * kz, wm * kz, wt * kz, n);
+  const Es = (x: number, yb: number, yt: number, wb: number, wm: number, wt: number, n: number) => {
+    const e = E(sx(x), yb + sy(x), yt + sy(x), wb * kz, wm * kz, wt * kz, n);
+    // 2026-11-12: a saddle brought down onto the frame (or the battery pack) thins instead of going into it
+    const suelo = t?.sueloSillin;
+    if (suelo != null && e.yb < suelo + 0.005) { e.yb = suelo + 0.005; e.yt = Math.max(e.yt, e.yb + 0.03); }
+    return e;
+  };
   // stepped saddle (UVs from the loft are not there: the quilting uses a box projection below)
   const sillin = loft([
     Es(-0.835, 0.405, 0.442, 0.03, 0.045, 0.035, 2.4),
@@ -448,14 +464,18 @@ export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO, t?: CabinaT
     Et(-0.83, 0.42, 0.50, 0.05, 0.07, 0.05, 2.4),
     Et(-0.86, 0.43, 0.46, 0.01, 0.02, 0.01, 2.2),
   ], { N: 40, sub: 6 });
-  g.add(malla(deposito, M.marino, 'deposito'));
+  // (2026-11-12: with a steering wheel or a dashboard, neither the tank nor its little screen: the dashboard and the column take their place)
+  const cabinaCoche = !!(t?.volante || t?.salpicadero);
+  if (!cabinaCoche) g.add(malla(deposito, M.marino, 'deposito'));
   // dash: a small screen in a carbon hood on top of the tank, facing the pilot (at the steering head)
-  {
+  if (!cabinaCoche) {
     const capo = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.012, 0.21), M.carbono); capo.position.set(-0.43, 0.868 + piso, 0); capo.rotation.z = 0.75; g.add(capo);
     const pant = new THREE.Mesh(new THREE.PlaneGeometry(0.17, 0.085), M.pantalla); pant.position.set(-0.452, 0.85 + piso, 0); pant.rotation.set(0, -Math.PI / 2, 0); pant.rotateX(-0.82); g.add(pant);
   }
+  if (t?.salpicadero) salpicadero(g, F, M, t.salpicadero);
+  if (t?.volante) volante(g, M, t.volante, t.cabezaDireccion ?? [-0.44, 0.80 + piso, 0], !t.salpicadero);
   // handlebar: clamp on the steering head, bars swept back to the grips, levers ahead of them
-  {
+  if (!t?.volante) {
     const mx = t ? t.man[0] : 0, my = t ? t.man[1] : 0, kb = t ? escalaManillar(F, t.man) : escalaManillar(F);
     const p = (x: number, y: number, z: number) => new THREE.Vector3(x + mx, y + piso + my, z * kb);
     const barra = (s: number) => curva([p(-0.46, 0.875, 0), p(-0.50, 0.885, s * 0.08), p(-0.55, 0.885, s * 0.17), p(-0.585, 0.872, s * 0.215)], 8);
@@ -476,8 +496,10 @@ export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO, t?: CabinaT
     const tabla = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.012, 0.09), M.aluminio); tabla.position.set(-0.55 + dxPil + px, 0.205 + piso + py, s * 0.15 * kz); tabla.rotation.z = 0.35; g.add(tabla);
     const goma = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.006, 0.07), M.gomaMate); goma.position.set(-0.55 + dxPil + px, 0.214 + piso + py, s * 0.15 * kz); goma.rotation.z = 0.35; g.add(goma);
     if (t?.filas) continue;
-    const estribo = new THREE.Mesh(new THREE.CylinderGeometry(0.013, 0.013, 0.09, 12), M.gomaMate); estribo.position.set(-1.30 + dxPas, 0.27 + piso, s * 0.20 * kz); estribo.rotation.x = Math.PI / 2; g.add(estribo);
-    const soporte = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.05, 0.06), M.aluminio); soporte.position.set(-1.30 + dxPas, 0.255 + piso, s * 0.13 * kz); g.add(soporte);
+    // (2026-11-12: onto the battery pack where it runs under them, `alzaPas`)
+    const alza = t?.alzaPas ?? 0;
+    const estribo = new THREE.Mesh(new THREE.CylinderGeometry(0.013, 0.013, 0.09, 12), M.gomaMate); estribo.position.set(-1.30 + dxPas, 0.27 + piso + alza, s * 0.20 * kz); estribo.rotation.x = Math.PI / 2; g.add(estribo);
+    const soporte = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.05, 0.06), M.aluminio); soporte.position.set(-1.30 + dxPas, 0.255 + piso + alza, s * 0.13 * kz); g.add(soporte);
   }
   // grab rail round the back of the passenger's seat (not with three rows)
   if (!t?.filas) {
@@ -486,6 +508,51 @@ export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO, t?: CabinaT
     g.add(malla(barrido(riel, () => [0.012, 0.012], { lados: 10 }), M.aluminio, 'asidero'));
   }
   return g;
+}
+/**
+ * 2026-11-12, Eugenio: «cambia el manillar por un volante». A car-style steering wheel: a 3 cm-thick rim (radius
+ * `r`) tilted `inc` from the vertical with its top forward, three spokes (at a quarter to three and at six), a hub,
+ * and the column from the hub forward and down along the wheel's axis to the steering head. With no dashboard, a
+ * small instrument pod sits on the column.
+ */
+function volante(g: THREE.Group, M: Mats, v: { c: [number, number]; r: number; inc: number }, cabeza: [number, number, number], pod: boolean) {
+  const n = new THREE.Vector3(-Math.cos(v.inc), Math.sin(v.inc), 0), up = new THREE.Vector3(Math.sin(v.inc), Math.cos(v.inc), 0);
+  const c = new THREE.Vector3(v.c[0], v.c[1], 0), q = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 0, 1), n);
+  const aro = new THREE.Mesh(new THREE.TorusGeometry(v.r, 0.015, 14, 64), M.gomaMate); aro.position.copy(c); aro.quaternion.copy(q); aro.name = 'volante'; g.add(aro);
+  const buje = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.05, 0.045, 24), M.carbono); buje.position.copy(c).addScaledVector(n, -0.01);
+  buje.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), n); g.add(buje);
+  for (const d of [new THREE.Vector3(0, 0, 1), new THREE.Vector3(0, 0, -1), up.clone().negate()]) poste(g, c.clone().addScaledVector(n, -0.01), c.clone().addScaledVector(d, v.r * 0.97), 0.011, M.aluminio);
+  // the column: along the wheel's axis forward and down, then a universal joint to the steering head
+  const L0 = Math.max(0.05, (cabeza[0] - v.c[0]) / Math.max(0.3, Math.cos(v.inc))), codo = c.clone().addScaledVector(n, -L0);
+  poste(g, c.clone().addScaledVector(n, -0.03), codo, 0.022, M.carbono);
+  poste(g, codo, new THREE.Vector3(...cabeza), 0.018, M.aluminio);
+  if (pod) {
+    const caja = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.07, 0.17), M.carbono); caja.position.copy(c).addScaledVector(n, -0.09).addScaledVector(up, v.r * 0.55); caja.quaternion.copy(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(1, 0, 0), n.clone().negate())); g.add(caja);
+    const pant = new THREE.Mesh(new THREE.PlaneGeometry(0.15, 0.055), M.pantalla); pant.position.copy(caja.position).addScaledVector(n, 0.026); pant.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), n); g.add(pant);
+  }
+}
+/**
+ * 2026-11-12, Eugenio: «crea el salpicadero». A dashboard from side to side under the windscreen, 2 cm inside the skin
+ * (balaMedidas.ts `anchoSalpicadero`), from where the nose is just taller than it back to its rear face; deeper in front
+ * than at the rear face. On it, facing the pilot, a wide instrument display (as the Aptera's, behind the wheel) and a
+ * centre screen; along its top edge, a soft pad.
+ */
+function salpicadero(g: THREE.Group, F: FormaBala, M: Mats, s: { x0: number; x1: number; yTop: number; yBajo: number; yBajoDel: number }) {
+  const est = [];
+  for (let i = 0; i <= 8; i++) {
+    const u = i / 8, x = s.x0 + (s.x1 - s.x0) * u, yb = s.yBajoDel + (s.yBajo - s.yBajoDel) * u * u, yt = s.yTop - 0.012 * Math.max(0, (u - 0.85) / 0.15);
+    est.push(E(x, yb, yt, anchoSalpicadero(F, x, yb), anchoSalpicadero(F, x, (yb + yt) / 2), anchoSalpicadero(F, x, yt), 6));
+  }
+  g.add(malla(loft(est, { N: 64, sub: 4 }), M.carbono, 'salpicadero'));
+  // the rear face's pad and the displays, facing the pilot (the face leans back 20°)
+  const yM = (s.yTop + s.yBajo) / 2, w = anchoSalpicadero(F, s.x1, yM);
+  const pad = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.035, 2 * w - 0.04), M.plastico); pad.position.set(s.x1 + 0.005, s.yTop - 0.02, 0); g.add(pad);
+  const panel = (ancho: number, alto: number, z: number) => {
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(ancho, alto), M.pantalla); p.position.set(s.x1 - 0.003, s.yTop - 0.06, z);
+    p.rotation.set(0, -Math.PI / 2, 0); p.rotateX(-0.35); g.add(p);
+  };
+  panel(Math.min(0.30, 2 * w - 0.2), 0.07, 0);
+  if (w > 0.28) panel(0.14, 0.08, Math.min(0.24, w - 0.1));
 }
 /** Box-projected UVs (metres / scale) so the quilting has a constant size. */
 function cajaUV(geo: THREE.BufferGeometry, escala: number) {
