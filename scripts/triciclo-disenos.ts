@@ -150,7 +150,9 @@ else {
   // (2026-11-12: and the battery layout, steering wheel, dashboard, doors, mirrors and hatch, all off by default)
   const NUEVOS = ['tAsientos', 'tFila2', 'tFila3', 'tFila2X', 'tFila3X', 'tRecFila', 'tTraseras', 'tViaTras',
     'tBatDisp', 'tBatLargo', 'tBatAncho', 'tBatAlto', 'tBatX', 'tMando', 'tVolX', 'tVolY', 'tVolInc', 'tVolD', 'tSalpicadero', 'tSalpY', 'tSalpFondo',
-    'tAcceso', 'tPuertaDel', 'tPuertaTras', 'tUmbral', 'tCintura', 'tBisagraY', 'tBisagraInc', 'tBisagraDentro', 'tPuertaAbre', 'tRetrovisores', 'tMaletero', 'tMalIni', 'tMalAbre', 'tMalLado', 'tSolarCola'];
+    'tAcceso', 'tPuertaDel', 'tPuertaTras', 'tUmbral', 'tCintura', 'tBisagraY', 'tBisagraInc', 'tBisagraDentro', 'tPuertaAbre', 'tRetrovisores', 'tMaletero', 'tMalIni', 'tMalAbre', 'tMalLado', 'tSolarCola',
+    // round 3 body (2026-11-12): every one of them at its default builds what there was
+    'tMorroLinea', 'tMorroAlto', 'tFaro', 'tFaroD', 'tColaPlana', 'tTechoPlano', 'tCaida', 'tConAleta', 'tSolarMorro', 'tPuertas2', 'tPuerta2Parte', 'tBisagra2Y', 'tBisagra2Inc', 'tPuerta2Abre', 'tLineaCupula'];
   const NUEVOS_12 = NUEVOS.slice(8);
   /** The design as it was saved before 2026-11-12: without the keys that did not exist (this module's defaults carry them). */
   const deAntes = (P: Partial<Parametros>) => Object.fromEntries(Object.entries(P).filter(([k]) => !NUEVOS_12.includes(k))) as Partial<Parametros>;

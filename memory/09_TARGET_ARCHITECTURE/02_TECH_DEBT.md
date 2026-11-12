@@ -596,3 +596,10 @@ The observatory is one self-contained HTML file (`public/observatorio-polarizaci
 - **Our designs are not in the tunnel, «Superponer» or the garage map** (they do get the «Cd y consumo» label). They have no `envolvente`. Adding one from `envolventeModelo` (tunel/nuestro.ts) is ~30 min. Superponer would also need a legend entry.
 - **A design in the garage is a snapshot of what was saved when the list loaded.** If someone saves a new version, the garage shows the old one until the page reloads.
 - **Model Y: drawn without photos.** The overhangs, the side-view lines and the position of the light bars are estimates from the figures and written descriptions. A pass against real side, front and rear photos with solved cameras (as for the Aptera and the XL1) is the next step.
+
+### 2026-11-12 — Cuadriciclo Bala clásico round 3 (body): shortcuts
+- **The door/hatch collision checks cost ~0.25 s per calculation** with the hatch on (13 × 25 positions per leaf, point clouds in a hash grid). They run on the main thread with the other checks. Moving the check list to the tunnel's worker is the fix (~2 h now, more once more checks depend on it).
+- **The tunnel does not see the headlamp, the mirrors or the fin**, so «Sin aleta» and the headlamp do not change the Cd shown.
+- **The flat tail's Cd rise is the tunnel's superellipse sections' reading** of a wide, thin tail; a real truncated (Kamm) tail behaves differently. Same caveat as every tunnel figure.
+- **The hinge knuckles are drawn, not modelled:** their mass is in «Montantes B y C: refuerzos…» (2.0 kg, estimate). There is no door stop, as for the front door.
+- **Pilot's view and mirror visibility** have no check in this model; the belt-line slider moves the glass edge and the mirrors with it, but nothing measures what the driver sees.
