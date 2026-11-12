@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { HandCoins, Heart } from 'lucide-react';
 import { useSitio } from '../ContextoSitio';
 import { columnaMadre } from '../SubproyectosSitio';
+import { pedirRutas } from '../../../utils/rutasLegibles';
 import { cn } from '../../../utils/cn';
 
 // ============================================================================
@@ -70,6 +71,8 @@ function useAltoCabecera() {
 export function BarraSolSolidario({ enPortada = false }: { enPortada?: boolean }) {
   const sitio = useSitio();
   const top = useAltoCabecera();
+  const [, setRuta] = useState(0);
+  useEffect(() => { pedirRutas([PAGINA_SOL_SOLIDARIO]).then(ok => { if (ok) setRuta(n => n + 1); }); }, []);
   const inicio = sitio ? sitio.enlacePagina(PAGINA_SOL_SOLIDARIO) : `/p/${PAGINA_SOL_SOLIDARIO}`;
   const a = (id: string) => (enPortada ? `#${id}` : `${inicio}#${id}`);
   const enlace = (id: string, contenido: React.ReactNode, clase: string) => enPortada
