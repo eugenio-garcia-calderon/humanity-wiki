@@ -1,12 +1,12 @@
 // The 2D scheme Eugenio asked for: every element, with arrows showing where
 // the money goes, how it is split and what comes back. Read left to right:
-// 1 every payment → 2 the payment system sets its tier aside (10, 25 or 40 %) →
+// 1 every payment → 2 the payment system sets its tier aside (10, 20, 40 or 60 %) →
 // 3 the open common fund splits it in eighths → 4 each scale, in thirds, gives
 // back services; and the loop at the bottom: services go back to people,
 // people vote the priorities.
 import { useEffect, useState } from 'react';
 import {
-  ESCALAS, type EscalaId, type Modo, cuentasPais, euros, millones,
+  ESCALAS, TIPO_GENERAL, type EscalaId, type Modo, cuentasPais, euros, millones,
 } from '../../data/modeloSocioeconomico';
 import { Libre } from './piezas';
 
@@ -52,11 +52,11 @@ export function EsquemaFlujos({ modo, activa, onActiva, mover }: {
 
   const pagos = [
     { id: 'sueldo', t: 'Una empresa paga un sueldo', s: 'pequeña 10, mediana 25, grande 40 %' },
-    { id: 'compra', t: 'Alguien compra algo', s: 'tramo 1: 10 %, 2: 25 %, 3: 40 %' },
+    { id: 'compra', t: 'Alguien compra algo', s: 'básico 10, secundario 20, ocio 40, lujo 60 %' },
     { id: 'vivienda', t: 'Se vende una vivienda', s: 'la habitual 10 %, otra 25 %' },
     {
       id: 'empresas', t: 'Una empresa compra a otra',
-      s: modo === 'eslabon' ? 'paga y lo recupera al vender' : 'el 25 % general se queda',
+      s: modo === 'eslabon' ? 'paga y lo recupera al vender' : `paga un ${Math.round(TIPO_GENERAL * 100)} % y no deduce nada`,
       tenue: modo === 'eslabon',
     },
   ];
@@ -67,7 +67,7 @@ export function EsquemaFlujos({ modo, activa, onActiva, mover }: {
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="block h-auto w-full min-w-[820px] font-[inherit]" role="img"
-      aria-label="Esquema: cada pago aporta su tramo (10, 25 o 40 %) al sistema de pago, que lo pasa al fondo común; el fondo da un octavo a cada una de las ocho escalas; cada escala reparte lo suyo en tres tercios (producir, cuidar y libre) y devuelve servicios a las personas; las personas votan las prioridades de cada escala.">
+      aria-label="Esquema: cada pago aporta su tramo (10, 20, 40 o 60 %) al sistema de pago, que lo pasa al fondo común; el fondo da un octavo a cada una de las ocho escalas; cada escala reparte lo suyo en tres tercios (producir, cuidar y libre) y devuelve servicios a las personas; las personas votan las prioridades de cada escala.">
       <defs>
         <marker id="ms-flecha" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M0 0 L10 5 L0 10 z" className="fill-slate-500" />
@@ -115,7 +115,7 @@ export function EsquemaFlujos({ modo, activa, onActiva, mover }: {
       {/* 2 · The payment system */}
       <rect x={PAS_X} y={PAS_Y} width={PAS_W} height={PAS_H} rx={16} className="fill-slate-900" />
       <text x={PAS_X + 18} y={PAS_Y + 34} fontSize={15} fontWeight={700} className="fill-white">Aparta su tramo</text>
-      {lineas('el 10, el 25 o el 40 %, en el mismo instante del pago, con banco, tarjeta, Bizum o euro digital. Nadie declara nada.', 24).map((l, k) => (
+      {lineas('el 10, el 20, el 40 o el 60 %, en el mismo instante del pago, con banco, tarjeta, Bizum o euro digital. Nadie declara nada.', 24).map((l, k) => (
         <text key={k} x={PAS_X + 18} y={PAS_Y + 60 + k * 18} fontSize={12.5} className="fill-slate-300">{l}</text>
       ))}
       {/* the rest to whoever is paid */}
@@ -215,7 +215,7 @@ export function EsquemaVertical({ modo, activa, onActiva }: { modo: Modo; activa
     <ol className="text-[15px]">
       <li className="rounded-xl border border-slate-300 bg-white p-4">
         <p className="font-bold text-slate-900">1. Cada pago</p>
-        <p className="mt-1 text-sm text-slate-600">Un sueldo (empresa pequeña 10 %, mediana 25 %, grande 40 %), una compra (tramo 1: 10 %, 2: 25 %, 3: 40 %), la venta de una vivienda{modo === 'literal' ? '; y también las compras entre empresas, al 25 %' : '. Cuando una empresa compra a otra, paga y lo recupera al vender'}.</p>
+        <p className="mt-1 text-sm text-slate-600">Un sueldo (empresa pequeña 10 %, mediana 20 %, grande 40 %), una compra (básico 10 %, secundario 20 %, ocio 40 %, lujo 60 %), la venta de una vivienda{modo === 'literal' ? `; y las compras entre empresas, al ${Math.round(TIPO_GENERAL * 100)} % sin deducir nada` : '. Cuando una empresa compra a otra, paga y lo recupera al vender'}.</p>
       </li>
       <Flecha />
       <li className="rounded-xl bg-slate-900 p-4 text-white">

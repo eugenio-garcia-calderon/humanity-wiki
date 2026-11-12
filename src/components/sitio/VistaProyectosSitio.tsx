@@ -14,6 +14,7 @@ import { iconoCategoria } from './iconoCategoria';
 import InspiranSitio, { type TablaInspiran } from './InspiranSitio';
 import { columnaMadre } from './SubproyectosSitio';
 import FilaSector from './FilaSector';
+import { pedirRutas } from '../../utils/rutasLegibles';
 const NoticiasSitio = lazy(() => import('./NoticiasSitio'));
 
 // ============================================================================
@@ -100,6 +101,16 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
   const [fallo, setFallo] = useState(false);
   const [area, setArea] = useState(() => areaDeLaDireccion());
   const [aviso, setAviso] = useState<string | null>(null);
+  // Las direcciones legibles de los proyectos, si no venían en el HTML (se llegó desde otra página): así sus
+  // tarjetas no enlazan por `/p/:id` (2026-11-12). Al llegar, se vuelven a pintar.
+  const [, setRutas] = useState(0);
+  useEffect(() => {
+    if (!proyectos || edicion) return;
+    let vivo = true;
+    // También las personas del final de la portada.
+    pedirRutas([...proyectos.filas.map(f => f.pagina_id), ...(personas?.filas || []).map(f => f.pagina_id)]).then(ok => { if (vivo && ok) setRutas(n => n + 1); });
+    return () => { vivo = false; };
+  }, [proyectos, personas, edicion]);
 
   // EDITAR EN EL MISMO SITIO (2026-11-10, `TarjetaPortada.tsx`): en el editor esta vista es la de la
   // web, y cada texto se guarda en su celda o en su página nada más salir de él.

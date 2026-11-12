@@ -48,6 +48,7 @@ import { dibujarPaso } from '../components/conciencia/Animacion';
 import { BuzonMejoras } from '../components/conciencia/BuzonMejoras';
 import { VentanaClaves } from '../components/conciencia/VentanaClaves';
 import { VistaArtistica } from '../components/conciencia/VistaArtistica';
+import { Fenomenos } from '../components/conciencia/Fenomenos';
 import {
   MAPA_POR_DEFECTO, PALETA, RECORRIDOS, ESQUEMA_ACTUAL, esMapaValido,
   type MapaConciencia, type Nodo, type Flecha, type Canal,
@@ -62,6 +63,13 @@ type Guardado = 'listo' | 'pendiente' | 'guardando' | 'local' | 'error' | 'confl
  * same view.
  */
 type Vista = 'arte' | 'esquema';
+
+/**
+ * The two tabs of the page (2026-11-12, Eugenio): «Tres formas de sentir» — the
+ * picture and the schema above — and «Fenómenos», the experiences that point
+ * beyond the senses. Kept in the address as `?seccion=fenomenos`.
+ */
+type Seccion = 'formas' | 'fenomenos';
 
 const COPIA_LOCAL = 'conciencia.mapa.borrador';
 const MAX_DESHACER = 80;
@@ -167,6 +175,15 @@ export default function Conciencia({ enSitio }: { enSitio?: { inicio: string; co
     setParams(p => {
       const n = new URLSearchParams(p);
       if (v === 'arte') n.delete('vista'); else n.set('vista', v);
+      return n;
+    }, { replace: true });
+  }, [setParams]);
+  const seccion: Seccion = params.get('seccion') === 'fenomenos' ? 'fenomenos' : 'formas';
+  const cambiarSeccion = useCallback((s: Seccion) => {
+    if (s === 'fenomenos') { setEditando(false); setSeleccion(null); setConectarDesde(null); setRecorrido(null); setMenuDescarga(false); setCompleta(false); }
+    setParams(p => {
+      const n = new URLSearchParams(p);
+      if (s === 'formas') n.delete('seccion'); else n.set('seccion', s);
       return n;
     }, { replace: true });
   }, [setParams]);
@@ -565,7 +582,16 @@ export default function Conciencia({ enSitio }: { enSitio?: { inicio: string; co
             relacionan de tres maneras: despiertos por los sentidos, dormidos por el hipercampo y meditando por percepción directa.
           </p>
           <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2 sm:shrink-0">
-            <label className="relative flex items-center" title="Cambiar de vista">
+            {/* The two tabs */}
+            <div role="tablist" aria-label="Secciones" className="flex rounded-xl border border-white/15 bg-white/5 p-0.5">
+              {([['formas', 'Tres formas de sentir'], ['fenomenos', 'Fenómenos']] as const).map(([s, nombre]) => (
+                <BotonOscuro key={s} role="tab" aria-selected={seccion === s} activo={seccion === s} onClick={() => cambiarSeccion(s)}
+                  className="h-8 rounded-[10px] px-3 text-[13px]">
+                  {nombre}
+                </BotonOscuro>
+              ))}
+            </div>
+            {seccion === 'formas' && <label className="relative flex items-center" title="Cambiar de vista">
               <span className="sr-only">Vista del mapa</span>
               {vista === 'arte'
                 ? <Palette className="pointer-events-none absolute left-2.5 h-4 w-4 text-amber-100" aria-hidden />
@@ -579,7 +605,7 @@ export default function Conciencia({ enSitio }: { enSitio?: { inicio: string; co
                 <option value="esquema">Esquema (con texto)</option>
               </select>
               <ChevronDown className="pointer-events-none absolute right-2.5 h-4 w-4 text-slate-400" aria-hidden />
-            </label>
+            </label>}
             <BotonOscuro onClick={() => setVerBuzon(true)} className="bg-amber-200/15 text-amber-100 ring-1 ring-amber-200/40 hover:bg-amber-200/25">
               <MessageSquarePlus className="h-4 w-4" /> Añadir mejora<span className="hidden sm:inline"> o comentario</span>
             </BotonOscuro>
@@ -588,6 +614,7 @@ export default function Conciencia({ enSitio }: { enSitio?: { inicio: string; co
         </div>
       </header>
 
+      {seccion === 'fenomenos' ? <Fenomenos /> : <>
       {/* ── El mapa ── */}
       <section id="mapa" className="px-1 pt-2 sm:px-3">
         <div
@@ -853,6 +880,7 @@ export default function Conciencia({ enSitio }: { enSitio?: { inicio: string; co
           ))}
         </ol>
       </section>
+      </>}
 
       {/* ── Estudios ── */}
       <div className="mx-auto max-w-7xl px-4 pb-20">

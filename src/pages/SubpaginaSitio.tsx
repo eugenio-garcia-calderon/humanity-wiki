@@ -1,4 +1,5 @@
-import { lazy, Suspense, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, type ReactNode } from 'react';
+import { apuntarRutaConfirmada } from '../utils/rutasLegibles';
 import { useParams } from 'react-router-dom';
 import VistaPagina, { Cargando, SinPagina, type DatosPagina } from '../components/sitio/VistaPagina';
 import { useSitio, ProveedorSitio, sitioConAnfitrion, sitioEnCasa } from '../components/sitio/ContextoSitio';
@@ -68,6 +69,27 @@ export default function SubpaginaSitio({ propio, idFijo, contexto }: { propio: b
   // de un sitio con miembros, se vuelve a pedir con la sesión (ver
   // `useLecturaSitio`), y si es «solo miembros» llega el muro.
   const { pagina, muro, estado, recargar } = useLecturaSitio(id, paginaPrecargada(id) as DatosPagina | null);
+  // NUNCA SE QUEDA EN `/p/:id` (2026-11-12, Eugenio: «me aparece una URL muy fea… que esto no vuelva a
+  // ocurrir»). Un enlace que el navegador arma sin saber la dirección legible de la página la abre por su
+  // id, y en la web no se le pregunta al servidor. Aquí se le pregunta: `/p/:id` contesta con un 301 a la
+  // legible (`rutaBonita`, sitios.ts); se sigue con HEAD (sin cuerpo) y se cambia la barra sin recargar.
+  // También se apunta, para que los enlaces siguientes a esta página ya salgan bien.
+  useEffect(() => {
+    if (estado !== 'ok' || !id) return;
+    const camino = window.location.pathname;
+    if (!/^(\/@[^/]+)?\/p\/[^/]+\/?$/.test(camino)) return;
+    let vivo = true;
+    fetch(camino, { method: 'HEAD', headers: { Accept: 'text/html' }, credentials: 'same-origin' })
+      .then(r => {
+        if (!vivo || !r.redirected) return;
+        const u = new URL(r.url);
+        if (u.origin !== window.location.origin || u.pathname === camino || /\/p\/[^/]+\/?$/.test(u.pathname)) return;
+        window.history.replaceState(window.history.state, '', u.pathname + window.location.search + window.location.hash);
+        apuntarRutaConfirmada(id, u.pathname.replace(/^\/(@[^/]+\/)?/, '').split('/').map(decodeURIComponent).join('/'));
+      })
+      .catch(() => {});
+    return () => { vivo = false; };
+  }, [estado, id]);
 
   if (estado === 'cargando') return <Cargando />;
   if (muro) return <MuroMiembros muro={muro} paginaId={id} onDentro={recargar} />;

@@ -27,8 +27,8 @@ export function PreguntasCobro({ modo }: { modo: Modo }) {
     },
     {
       p: '¿Y cuando compra una empresa?',
-      r: <>Depende de la decisión que viene justo debajo. Sin cascada, el sistema sabe que quien compra es una empresa y le devuelve lo que pagó en cuanto vende, como hoy el IVA.
-        Al pie de la letra, las compras entre empresas pagan el tipo general, un {porcentaje(TIPO_GENERAL * 100, 0)}, y no se devuelve.</>,
+      r: <>Paga un {porcentaje(TIPO_GENERAL * 100, 0)} de lo que compra y no se deduce nada: no hay IVA repercutido ni soportado, ni liquidaciones, ni devoluciones.
+        (Para comparar, la página también calcula la versión que deduce como el IVA de hoy.)</>,
     },
     {
       p: '¿Pagan los sueldos que pagan las administraciones?',
@@ -47,7 +47,7 @@ export function PreguntasCobro({ modo }: { modo: Modo }) {
     },
     {
       p: '¿Qué sabe el sistema de mí?',
-      r: <>Para apartar y repartir le basta con el importe, el tramo de cada pago y dónde vives, para saber a qué escalas perteneces. Sabe el tramo, no qué compraste: una cena y una entrada de cine son las dos tramo 3.
+      r: <>Para apartar y repartir le basta con el importe, el tramo de cada pago y dónde vives, para saber a qué escalas perteneces. Sabe el tramo, no qué compraste: una cena y una entrada de cine son las dos ocio.
         Lo que sí es público es cuánto recauda cada escala y en qué lo gasta. Los pagos en efectivo están entre <a href="#retos" className="underline decoration-slate-300 underline-offset-2 hover:text-slate-900">lo que falta por resolver</a>.</>,
     },
   ];
