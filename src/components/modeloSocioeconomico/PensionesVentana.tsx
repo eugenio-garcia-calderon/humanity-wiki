@@ -58,7 +58,7 @@ export function PensionesVentana() {
             { t: 'Un único número', d: <>La pensión es el salario mínimo: {euros(SMI_MES)} al mes en 14 pagas, {euros(SMI_ANO)} al año. Si sube el salario mínimo, sube la pensión.</> },
             { t: 'Ni máxima ni mínima', d: 'Una pensión por persona. Desaparecen el tope, los complementos (lo que hoy se añade para llegar a la mínima) y las pensiones que se suman, como jubilación más viudedad.' },
             { t: 'Más, si hace falta, aparte', d: 'Quien tenga carga familiar, riesgo de exclusión o de desahucio pide ayuda a los servicios sociales, que estudian cada caso. Es una partida propia, separada de las pensiones.' },
-            { t: 'Lo demás, con ahorro', d: <>Quien quiera cobrar más al jubilarse ahorra durante su vida: 100 € al mes durante 40 años dan unos {euros(Math.round(ahorroPrivado().alMes / 10) * 10)} más al mes durante 20 años (estimación al 3,5 % real).</> },
+            { t: 'Lo demás, con ahorro', d: <>Quien quiera cobrar más al jubilarse ahorra durante su vida: 100 € al mes durante 40 años dan unos {euros(Math.round(ahorroPrivado().alMes / 10) * 10)} más al mes, en 12 pagas, durante 20 años (estimación al 3,5 % real).</> },
           ].map((r, i) => (
             <li key={r.t} className="rounded-2xl border border-slate-200 bg-white p-5">
               <p className="flex items-baseline gap-3">

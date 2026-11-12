@@ -43,18 +43,18 @@ export function Pensiones() {
             const pctPensiones = t.pensiones / TOTAL_PENSIONES_CONTRIBUTIVAS * 100;
             const pctDinero = costeMes(t) / NOMINA_PENSIONES_MES * 100;
             return (
-              <section key={t.id} aria-labelledby={`pension-${t.id}`} className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-4 gap-y-3 p-4 sm:p-5 md:grid-cols-[14rem_10rem_minmax(0,1fr)] md:items-center md:gap-6">
+              <section key={t.id} aria-labelledby={`pension-${t.id}`} className="grid grid-cols-1 gap-x-4 gap-y-2 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-y-3 sm:p-5 md:grid-cols-[14rem_10rem_minmax(0,1fr)] md:items-center md:gap-6">
                 <div>
                   <h3 id={`pension-${t.id}`} className="flex items-center gap-2 text-lg font-bold text-slate-900">
                     <span aria-hidden className={`h-3 w-3 shrink-0 rounded-full ${TONO[t.id]}`} />{t.nombre}
                   </h3>
                   <p className="text-sm text-slate-500">{t.rango}</p>
                 </div>
-                <div className="text-right md:text-left">
+                <div className="sm:text-right md:text-left">
                   <p className="text-2xl font-bold tabular-nums text-slate-900">{euros(t.cifra, t.id === 'maxima' || t.id === 'minima' ? 2 : 0)}</p>
                   <p className="text-[13px] text-slate-600">{t.cifraEtiqueta} al mes<Fuente id={t.fuente} /></p>
                 </div>
-                <div className="col-span-2 space-y-2 text-sm md:col-span-1">
+                <div className="space-y-2 text-sm sm:col-span-2 md:col-span-1">
                   <Barra etiqueta="De las pensiones" pct={pctPensiones} tono={TONO[t.id]} />
                   <Barra etiqueta="Del dinero" pct={pctDinero} tono={TONO[t.id]} />
                 </div>
