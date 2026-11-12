@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "r3-interior",
+      "ruta": "drizzle/0213_aeromovil_clasico_interior.sql",
+      "motivo": "clásico round-3 interior migration",
+      "desde": "2026-11-12T22:17:47.844Z"
+    }
+  ]
 }
