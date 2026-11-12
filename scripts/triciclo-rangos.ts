@@ -13,7 +13,7 @@
  *    checks warn about on screen.
  */
 import { PARAMETROS_TRICICLO, areas, calcular, crearModelo, type Parametros } from '../src/components/aeromovil/geometria';
-import { SELECTORES_TRICICLO, camposTriciclo, deslizadoresTriciclo, estirarTriciclo, largoTriciclo, opcionesCabinaTriciclo, rangoTriciclo, type ModeloTriciclo } from '../src/components/aeromovil/geometriaTriciclo';
+import { SELECTORES_TRICICLO, camposTriciclo, deslizadoresTriciclo, estirarTriciclo, largoTriciclo, largueroAlEje, opcionesCabinaTriciclo, rangoTriciclo, type ModeloTriciclo } from '../src/components/aeromovil/geometriaTriciclo';
 import { carenadoCuerpo } from '../src/components/aeromovil/geometriaBala';
 import { alturasPod, brazosDe, podDe, semiAncho } from '../src/components/aeromovil/garaje/balaMedidas';
 import { construirCon, crearMateriales } from '../src/components/aeromovil/garaje/balaModelo';
@@ -27,6 +27,8 @@ let fallos = 0, casos = 0;
 const NO_PASAN = ['Neumático delantero', 'Carenado delantero a la carrocería', 'Neumático trasero', 'Carenado trasero a la carrocería', 'Rueda trasera dentro', 'Manillar dentro', 'Bastidor dentro', 'Batería, ', 'Controlador dentro', 'Pies de la fila 2 dentro', 'Pies de la fila 3 dentro', 'Respaldo de la fila 3 a la torreta',
   // 2026-11-12: the pack along the frame, the steering wheel, the dashboard, the doors and the hatch as they swing, the mirrors
   'Batería: paquete', 'Volante dentro', 'Salpicadero dentro', 'Puerta: al abrirse', 'Puerta abierta al', 'Portón: al abrirse', 'Retrovisor al carenado',
+  // round 3 interior (2026-11-12): the Aptera buckets' feet inside the body
+  'Pies del piloto (en los pedales) dentro', 'Pies del pasajero dentro',
   // round 3 (2026-11-12): the passengers' door as it swings, and the leaves through each other or through the hatch (a
   // negative clearance there is one piece going under the other; under 3 cm and positive is a warning on screen)
   'Puerta de atrás: al abrirse', 'Puerta de atrás abierta a', 'Puertas: la de delante', 'Puertas y portón'];
@@ -105,6 +107,11 @@ function mismoEje(m: ModeloTriciclo): string | null {
   if (m.porton && !g.getObjectByName('porton-maletero-cristal')) return 'el portón largo no se lleva su cristal';
   if (m.volante && !g.getObjectByName('volante')) return 'falta el volante';
   if (m.salpicadero && !g.getObjectByName('salpicadero')) return 'falta el salpicadero';
+  // round 3 interior: the white dashboard's details, the two buckets (no saddle) and the pedals, the rails to the rear axle
+  if (m.salpicadero && 'blanco' in m.salpicadero && !g.getObjectByName('relojes')) return 'el salpicadero blanco no lleva sus relojes';
+  { let b = 0; g.traverse(o => { if (o.name === 'butaca') b++; }); if (b !== (m.butacas ? 2 : 0) || (m.butacas && g.getObjectByName('sillin'))) return `${b} butacas${g.getObjectByName('sillin') ? ' y el sillín' : ''} (deberían ser ${m.butacas ? 2 : 0})`; }
+  if (m.butacas && !g.getObjectByName('pedales')) return 'butacas sin pedales';
+  if (largueroAlEje(m.campos) && m.cuatro && !m.tubos.some(t => t.nombre.startsWith('Larguero trasero')) ) return 'los largueros no llegan al eje trasero';
   // and the seats: three rows draw four car seats (folded ones folded), astride none
   let asientos = 0, plegados = 0; g.traverse(o => { if (o.name === 'asiento') asientos++; if (o.name === 'respaldo-plegado') plegados++; });
   const esperados = m.filas ? 4 : 0, plegEsperados = m.asientosFilas.filter(a => a.plegado).length;
@@ -150,7 +157,10 @@ function probar(nombre: string, P: Parametros) {
   // (round 2: the hinge's own sliders, at their ends, can make the door graze the body while it swings, and the
   // screen says so in red: «Fuera de la tangente… la comprobación lo dice». There that check is listed, not required)
   const avisos: string[] = [], bisagra = /tBisagra|todo lo nuevo/.test(nombre);
-  for (const c of res.comprobaciones) if (NO_PASAN.some(n => c.nombre.startsWith(n)) && !(c.holgura >= Math.min(0, c.minimo))) (bisagra && c.nombre.startsWith('Puerta: al abrirse') ? avisos : mal).push(`${c.nombre}: ${(c.holgura * 100).toFixed(1)} cm`);
+  // (round 3 interior, «no lo limites»: the pack's length and width go up to what fits in the body, and what the pack
+  // then runs into, the screen says in red; at those sliders' far ends the pack's checks are listed, not required)
+  const paqueteLibre = /tBatLargo|tBatAncho|tBatX|tBatAlto|todo lo nuevo/.test(nombre) && /máx/.test(nombre);
+  for (const c of res.comprobaciones) if (NO_PASAN.some(n => c.nombre.startsWith(n)) && !(c.holgura >= Math.min(0, c.minimo))) ((bisagra && c.nombre.startsWith('Puerta: al abrirse')) || (paqueteLibre && /^Batería/.test(c.nombre)) ? avisos : mal).push(`${c.nombre}: ${(c.holgura * 100).toFixed(1)} cm`);
   try { const e = mismoEje(m); if (e) mal.push(e); } catch (e) { mal.push(`el 3D falla: ${(e as Error).message}`); }
   if (m.traseras) { const e = podsTraseros(m); if (e) mal.push(e); }
   const t = res.triciclo!, cab = t.cabezas.map(c => `${c.quien} ${(c.p50 * 100).toFixed(1)}/${(c.p95 * 100).toFixed(1)}`).join(', ');
@@ -312,7 +322,7 @@ for (const f of deslizadoresTriciclo()) {
   probar(`clásico · ${f.clave} = ${+b.toFixed(3)} (máx.)`, { ...CLASICO, [f.clave]: b });
 }
 for (const s of SELECTORES_TRICICLO) for (const o of s.opciones) probar(`clásico · ${s.clave} = ${o.k}`, { ...CLASICO, [s.clave]: o.k });
-const NUEVAS = ['tBatLargo', 'tBatAncho', 'tBatAlto', 'tBatX', 'tVolX', 'tVolY', 'tVolInc', 'tVolD', 'tSalpY', 'tSalpFondo', 'tPuertaDel', 'tPuertaTras', 'tUmbral', 'tCintura', 'tBisagraY', 'tBisagraInc', 'tBisagraDentro', 'tPuertaAbre', 'tMalIni', 'tMalAbre', 'tMalLado'];
+const NUEVAS = ['tChSep', 'tBatLargo', 'tBatAncho', 'tBatAlto', 'tBatX', 'tVolX', 'tVolY', 'tVolInc', 'tVolD', 'tSalpY', 'tSalpFondo', 'tPuertaDel', 'tPuertaTras', 'tUmbral', 'tCintura', 'tBisagraY', 'tBisagraInc', 'tBisagraDentro', 'tPuertaAbre', 'tMalIni', 'tMalAbre', 'tMalLado'];
 for (const lado of [0, 1] as const) {
   const v = lado ? 'máx.' : 'mín.';
   probar(`clásico · todo lo nuevo al ${v}`, { ...extremo(lado, NUEVAS), ...Object.fromEntries(Object.entries(CLASICO).filter(([k]) => !NUEVAS.includes(k))) } as Parametros);
@@ -366,6 +376,23 @@ probar('clásico real con la migración', REAL_MIG);
   const lg = largoTriciclo(TR);
   for (const [n, v] of [['mín.', lg.min], ['máx.', lg.max]] as const) probar(`clásico real · largo total ${n} (${v.toFixed(2)} m)`, { ...REAL_MIG, ...estirarTriciclo(TR, v) });
   probar('clásico real · tapa del maletero con el panel hasta la cola', { ...REAL_MIG, tMaletero: 'cola' } as Parametros);
+  // round 3 interior (2026-11-12): what this round proposes for it (buckets, white dashboard, rails to the rear axle and
+  // wider, the pack's share of the wider frame so that it keeps its width), every slider at both ends and every option
+  const R3 = { tAsientos: 'butacas', tSalpicadero: 'blanco', tChLargo: 'eje', tChSep: 0.30, tBatAncho: 115 };
+  // (on top of the body's migration too, 0212: the design as it is saved after 0213)
+  const REAL_R3 = deDiseno({ ...CLASICO_GUARDADO, ...MIGRACION, ...MIGRACION_R3, ...R3 } as Partial<Parametros>), T3 = camposTriciclo(REAL_R3);
+  probar('clásico real r3, como se propone', REAL_R3);
+  for (const f of deslizadoresTriciclo()) {
+    const [a, b] = rangoTriciclo(f.clave, T3);
+    probar(`clásico real r3 · ${f.clave} = ${+a.toFixed(3)} (mín.)`, { ...REAL_R3, [f.clave]: a });
+    probar(`clásico real r3 · ${f.clave} = ${+b.toFixed(3)} (máx.)`, { ...REAL_R3, [f.clave]: b });
+  }
+  for (const s of SELECTORES_TRICICLO) for (const o of s.opciones) probar(`clásico real r3 · ${s.clave} = ${o.k}`, { ...REAL_R3, [s.clave]: o.k });
+  for (const sep of [0.18, 0.45]) for (const ancho of [100, 265]) probar(`clásico real r3 · largueros a ${sep} m con el paquete al ${ancho} % (máx.)`, { ...REAL_R3, tChSep: sep, tBatAncho: ancho } as Parametros);
+  probar('clásico real r3 · paquete lo más largo y ancho (máx.)', { ...REAL_R3, tBatLargo: 9, tBatAncho: 999 } as Parametros);
+  probar('clásico real r3 · butacas lo más bajas y reclinadas', { ...REAL_R3, tPilY: 0, tPasY: 0, tRecPil: 35, tRecPas: 35 } as Parametros);
+  probar('clásico real r3 · butacas, pasajero lo más cerca', { ...REAL_R3, tPasX: 0 } as Parametros);
+  probar('clásico real r3 · butacas, triciclo', { ...REAL_R3, tTraseras: 'una' } as Parametros);
   probar('clásico real · cúpula entera con el panel hasta la cola', { ...REAL_MIG, tAcceso: 'cupula', tMaletero: 'cola' } as Parametros);
 }
 

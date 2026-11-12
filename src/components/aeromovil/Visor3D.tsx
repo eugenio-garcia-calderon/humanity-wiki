@@ -582,7 +582,8 @@ function ocupante(g: THREE.Object3D, M: Mats, m: { occPts: (piloto: boolean) => 
   for (const s of [-1, 1]) {
     // Pierna: muslo y pantorrilla, rodilla ya calculada en el plano; pie según dónde apoya
     const zc = lat + s * (o.anchoPiernas?.[0] ?? 0.09), zp = lat + s * (o.anchoPiernas?.[1] ?? (piloto ? 0.11 : 0.10));
-    const cad = en(o.H, zc), rod = en(o.K, (zc + zp) / 2), tob = en(o.F, zp);
+    const ap = o.anchoPiernas, zr = ap && ap.length > 2 ? lat + s * ap[2]! : (zc + zp) / 2;
+    const cad = en(o.H, zc), rod = en(o.K, zr), tob = en(o.F, zp);
     capsula(g, cad, rod, 0.068, M.pantalon);
     capsula(g, rod, tob, 0.052, M.pantalon);
     const sx = o.F[0] - o.K[0], sy = o.F[1] - o.K[1], sl = Math.hypot(sx, sy) || 1;

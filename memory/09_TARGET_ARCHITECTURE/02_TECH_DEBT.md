@@ -603,3 +603,11 @@ The observatory is one self-contained HTML file (`public/observatorio-polarizaci
 - **The flat tail's Cd rise is the tunnel's superellipse sections' reading** of a wide, thin tail; a real truncated (Kamm) tail behaves differently. Same caveat as every tunnel figure.
 - **The hinge knuckles are drawn, not modelled:** their mass is in «Montantes B y C: refuerzos…» (2.0 kg, estimate). There is no door stop, as for the front door.
 - **Pilot's view and mirror visibility** have no check in this model; the belt-line slider moves the glass edge and the mirrors with it, but nothing measures what the driver sees.
+
+### 2026-11-12 — Cuadriciclo Bala clásico round 3 interior: shortcuts
+- **The running-gear masses are rules of thumb fitted through three vehicle classes** (`masaEsquina`, `masaFreno`), not parts from a catalogue. They follow the static load only: no braking or cornering load case. A real sizing would pick a shock, a disc and a caliper from datasheets for the design mass and 120 km/h.
+- **Moped tyre load ratings are approximate** (150-170 kg, load index 41-46). The size alone does not fix the index.
+- **The frame check is still one beam of two rails.** Torsion, the body's share and the crash case are not modelled. Adding the battery made it honest about the vertical load only.
+- **The rear cradle is not subtracted from the boot volume.** Its tubes cross the boot at the rear axle; the boot still counts that space as free (a few litres).
+- **The bucket's passenger posture is a fixed spread** (feet 31 cm, knees 33 cm off the centre line, closing in only where the body is too narrow). A shorter or taller passenger does not change it.
+- **`paqueteCabe` tests the box at its four corners per station.** A belly that bulges between them could still touch; the in-body check samples the same corners.

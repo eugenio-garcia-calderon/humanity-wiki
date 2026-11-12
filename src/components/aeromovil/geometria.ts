@@ -267,6 +267,8 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   tAcceso: 'cupula', tPuertaDel: 0.80, tPuertaTras: 1.86, tUmbral: 0.34, tCintura: 0, tBisagraY: 0.05, tBisagraInc: 13, tBisagraDentro: 20, tPuertaAbre: 110,
   tRetrovisores: 'camaras',
   tMaletero: 'cola', tMalIni: 1.40, tMalAbre: 36, tMalLado: 55, tSolarCola: 'no',
+  // Round 3 interior (2026-11-12): the rails to the rear axle and their spacing. 0.22 m is 2 × Z_LARGUERO, the spacing until now.
+  tChLargo: 'torreta', tChSep: 0.22,
   // Round 3 body (2026-11-12, the «Cuadriciclo Bala clásico»: nose, tail, roof, fin, solar, second door). Every default is
   // the shape and the options as they were, so a design saved without these keys is built exactly as before.
   tMorroLinea: 0, tMorroAlto: 0, tFaro: 'no', tFaroD: 0.16, tColaPlana: 0, tTechoPlano: 0, tCaida: 0, tConAleta: 'si', tSolarMorro: 'no',
@@ -353,7 +355,8 @@ export interface PuntosOcupante {
   /** Dirección de la cabeza (cuello), si no es la del tronco: más vertical, como en un velomóvil. */
   dh?: [number, number];
   /** Separación lateral de rodillas y pies (m); sin ella, las de siempre. Un pasajero en tándem lleva las piernas a los lados del asiento de delante. */
-  anchoPiernas?: [number, number];
+  anchoPiernas?: [number, number] | [number, number, number];
+  // (round 3 interior, 2026-11-12: a third value puts the knees there instead of halfway between hip and foot: the passenger of the Aptera buckets straddles the pilot's backrest)
 }
 export interface PiezasAsiento { base: [number, number][]; respaldo: [number, number][]; cabecero: [number, number][]; marco: [number, number][]; anchoCabecero: number }
 /** Lo que el Gota y el Aeromóvil 1 tienen en común: lo que usan el visor, los planos y la comparación. El Bala no lo lleva (ver `ModeloBala`). */

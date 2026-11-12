@@ -117,6 +117,31 @@ export const ALETA = { raiz: [-2.50, -3.05] as [number, number], punta: [[-2.875
 /** Where the riders sit: hip x (negative: behind the front axle) and the saddle's height under each, above the road. */
 export interface Asientos { xPiloto: number; yPiloto: number; xPasajero: number; yPasajero: number }
 export const ASIENTO: Asientos = { xPiloto: -1.06, yPiloto: 0.44, xPasajero: -1.54, yPasajero: 0.47 };
+/**
+ * Round 3 interior (2026-11-12, Eugenio: «los asientos por los bonitos como los de la Aptera»): the Triciclo's bucket
+ * seat, sculpted as the Aptera's (press photos of Aptera's interior: a light one-piece shell, white outside, with a dark
+ * cushion and backrest pad and the headrest grown out of the shell; no drawings are published, so the sizes are a car
+ * bucket's). Metres from the rider's hips (x) and the cushion's top (y), along the backrest for its heights.
+ */
+export const BUTACA = {
+  delante: 0.31,   // the cushion's front edge, ahead of the hips
+  detras: 0.21,    // the shell's back at the cushion, behind the hips
+  bisagra: 0.17,   // the backrest's front face at its foot, behind the hips (as the car seats': the trunk leans on it)
+  pan: 0.06,       // the shell's underside below the cushion's top (as `PAN_ASIENTO`)
+  respaldo: 0.62,  // the backrest's height along it, from the cushion
+  cabezal: 0.21,   // the headrest above it, out of the same shell
+  grueso: 0.075,   // the backrest shell's thickness
+  semi: { cojin: 0.25, pie: 0.24, hombros: 0.225, cuello: 0.115, cabezal: 0.135 },
+} as const;
+/** The bucket's backrest half-width `h` metres up from the cushion (m): wide at its foot, the shoulders' wings, a waist at the neck and the headrest. */
+export function semiRespaldoButaca(h: number): number {
+  const B = BUTACA, S = B.semi, R = B.respaldo;
+  if (h <= 0) return S.pie;
+  if (h <= R) return S.pie + (S.hombros - S.pie) * h / R;
+  const u = (h - R) / B.cabezal;
+  if (u <= 0.25) return S.hombros + (S.cuello - S.hombros) * u / 0.25;
+  return u >= 1 ? S.cabezal * 0.9 : S.cuello + (S.cabezal - S.cuello) * Math.min(1, (u - 0.25) / 0.35);
+}
 /** Half-width of the reference handlebar at the bar-end weight's outer face (m). */
 const MANILLAR = 0.325 + 0.006;
 /**
