@@ -73,6 +73,9 @@ export function PildoraEstado({ estado, opciones, onCambiar, className, icono, n
   );
 }
 
+/** The image fades into the black bottom of the card, where the title goes: clear at the top, dark only under the text. */
+const FUNDIDO = 'linear-gradient(to bottom, #000 62%, transparent 100%)';
+
 export default function TarjetaPortada({ nombre, imagen, alt, encuadre, descripcion, pildora, iconoPildora, nombrePildora, Titulo = 'h3', prioridad = 9, conDescripcion = true, edicion, esquina, fondo, compacta = false }: {
   nombre: string;
   imagen: string | null | undefined;
@@ -102,16 +105,20 @@ export default function TarjetaPortada({ nombre, imagen, alt, encuadre, descripc
     compacta ? 'text-xl 2xl:text-2xl' : 'text-xl sm:text-2xl 2xl:text-3xl');
   const claseDescripcion = cn('font-medium leading-snug text-white [text-shadow:0_1px_6px_rgba(0,0,0,0.85)]', compacta ? 'text-sm 2xl:text-[15px]' : 'text-base');
   return (
-    <div className={cn('relative w-full overflow-hidden bg-slate-100', compacta ? 'aspect-[4/3]' : 'aspect-[3/2]')}>
+    // LA IMAGEN, CLARA Y MÁS ARRIBA (2026-11-12, Eugenio: «un filtro menos oscuro… que la parte de arriba de la imagen
+    // no tenga filtro negro y que se concentre en el título y el subtítulo»): la tarjeta, algo más alargada; la imagen
+    // ocupa la parte de arriba con su centro un poco más alto y se funde en negro por abajo, donde va el texto, que así
+    // no tapa nada importante. Encima, un degradado suave solo en la franja del texto.
+    <div className={cn('relative w-full overflow-hidden', imagen ? 'bg-black' : 'bg-slate-100', compacta ? 'aspect-square' : 'aspect-[4/3]')}>
       {imagen ? (
         <img src={miniatura(imagen, 400)} srcSet={`${miniatura(imagen, 400)} 800w, ${miniatura(imagen, 800)} 1600w`} sizes={compacta ? '(min-width: 1024px) 17vw, (min-width: 640px) 50vw, 100vw' : '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'} alt={alt ?? (descripcion ? `${nombre}: ${descripcion}` : nombre)} loading={prioridad < 6 ? 'eager' : 'lazy'} decoding="async"
           {...(prioridad < 3 ? { fetchPriority: 'high' as const } : {})}
-          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-          style={encuadre ? { objectPosition: `${encuadre.x ?? 50}% ${encuadre.y ?? 50}%` } : undefined} />
+          className="absolute inset-x-0 top-0 h-[84%] w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+          style={{ objectPosition: `${encuadre?.x ?? 50}% ${encuadre?.y ?? 40}%`, maskImage: FUNDIDO, WebkitMaskImage: FUNDIDO }} />
       ) : fondo || (
         <div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-400" />
       )}
-      <div aria-hidden className={cn('absolute inset-x-0 bottom-0 bg-gradient-to-t from-black to-transparent', compacta ? 'h-[90%] via-black/80 via-45%' : 'h-[85%] via-black/75 via-40%')} />
+      <div aria-hidden className="absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-black/85 via-black/35 via-45% to-transparent" />
       <PildoraEstado estado={pildora} opciones={edicion?.opciones} onCambiar={edicion?.onPildora} icono={iconoPildora} nombre={nombrePildora}
         className={compacta ? 'absolute left-2 top-2 px-2 py-0.5 text-[11px]' : 'absolute left-3 top-3 px-3.5 py-1.5 text-sm'} />
       {esquina && <div className="absolute right-3 top-3 z-10 flex items-center gap-1.5">{esquina}</div>}

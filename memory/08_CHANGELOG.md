@@ -11409,3 +11409,8 @@ Eugenio: «haz también que los paneles solares lleguen hasta la punta de la col
 - The same arrangement shows in the calendar half behind the calendar, in «Vista final» and in print (checked in the A4 PDF: moved, enlarged and added elements all present, no frames or buttons).
 - Respects the existing framing sliders (`imagen_x`, `imagen_y`).
 - Checked locally: drag, handle, −/+, «Como estaba», add + move added, reload keeps everything, Vista final, print PDF, iPhone 13 width (tap selects, second touch drags, no horizontal scroll), no day cell overflows in the twelve months, tsc and build clean. Server rejects out-of-range offsets, foreign image URLs and bad keys (400).
+
+### 2026-11-12 — Tarjetas de proyecto con la imagen clara (prog8)
+Eugenio: «un filtro menos oscuro… que la parte de arriba de la imagen no tenga filtro negro y que se concentre en el título y el subtítulo».
+- `TarjetaPortada`: la imagen ocupa el 84 % de arriba, con su centro algo más alto (`object-position` 50 % 40 % si no hay encuadre), y se funde en negro por abajo con una máscara; encima, un degradado suave solo en el 58 % inferior (de negro 85 % a transparente). Arriba la imagen queda sin filtro.
+- La tarjeta, algo más alargada: cuadrada en las filas de sectores (antes 4:3) y 4:3 en el resto (antes 3:2), para que el texto caiga sobre la parte fundida y no tape lo importante.
