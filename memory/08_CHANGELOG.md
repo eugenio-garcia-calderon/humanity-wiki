@@ -11188,3 +11188,30 @@ Eugenio: «llamado Observatorio de Polarización Política, y permite que si se 
 - `sitios.ts`: `rutaBonita(req, w)` = el nombre corto o el título que esta web abre de verdad en esa página. La usan el 301 de `/p/:id` (ahora también en la casa, `/@luz/p/…` → `/@luz/nombre`), los enlaces del HTML (`__SITIO__.legibles`, también páginas no `publico` creadas por migración) y la canónica (las páginas abiertas por su nombre en humanity.wiki ya no son canónicas de sí mismas: van a su dominio).
 - `SubpaginaSitio`: si el navegador llega a `/p/:id` por un enlace armado sin la dirección legible, pregunta con HEAD y cambia la barra a la legible.
 - `GET /api/sitio/rutas?ids=`: las direcciones legibles (`rutaBonita`) que el navegador no sabía; las piden la portada, los subproyectos y la barra de Sol Solidario antes de pintar enlaces.
+
+## 2026-11-12 — Conciencia: pestañas «Tres formas de sentir» y «Fenómenos»
+
+- Eugenio pidió una pestaña con los fenómenos que nos hacen creer que percibimos más allá de los sentidos. Los que nombró:
+  - sentir que te miran por la espalda;
+  - la visión extraocular en niños;
+  - el proyecto Stargate;
+  - y otros tres a elegir.
+
+  Todo en un menú de dos pestañas.
+- En la franja de arriba hay ahora dos pestañas: **«Tres formas de sentir»**, con el dibujo y el esquema de siempre y su menú «Vista», y **«Fenómenos»**. La pestaña queda en la dirección (`?seccion=fenomenos`).
+- **Fenómenos** (`Fenomenos.tsx` y los datos en `src/data/concienciaFenomenos.ts`): arriba, la postura del proyecto con las palabras de Eugenio: la ciencia aún no lo explica porque reduce la conciencia a los sentidos físicos tradicionales. Debajo, una nota de honestidad.
+- Seis tarjetas, filtrables por despiertos, meditando o dormidos:
+  - sentir que te miran;
+  - visión extraocular;
+  - Stargate y la visión remota;
+  - sueños telepáticos (Maimonides);
+  - experimentos Ganzfeld;
+  - cerebros que se sincronizan a distancia (el potencial transferido).
+
+  Cada tarjeta cuenta qué ocurre, «Qué dice la ciencia hoy» con los resultados a favor y las réplicas que no salieron, y sus fuentes.
+- **Comprobado** en Chrome sin cabeza a 1440 px y a 390 px:
+  - cambio de pestaña y dirección;
+  - el filtro;
+  - la vuelta al dibujo.
+
+  No hubo errores en la consola.
