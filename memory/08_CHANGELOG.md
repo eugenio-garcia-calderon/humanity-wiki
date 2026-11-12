@@ -11444,3 +11444,10 @@ Eugenio pidió achatar el morro y poder elegir entre punta y «línea» como el 
 - Segunda puerta: la de atrás cuelga de un montante C con dos bisagras a la vista y se abre hacia atrás; entre las dos puertas, un montante B fijo de 8 cm (sin él, los dos cantos se cruzaban al abrirse a la vez). «Abrir puertas» abre las cuatro.
 - Comprobaciones nuevas: la puerta de atrás al abrirse (carrocería, carenados delanteros y traseros, suelo), las dos puertas abriéndose a la vez y las puertas contra el portón a cualquier apertura de cada uno.
 - En el clásico real con la migración propuesta: panel solar de 1,67 a 2,28 m² (de 351 a 479 W de pico), Cd del túnel a 120 km/h de 0,218 a 0,223, masa del vehículo de 278,9 a 285,8 kg.
+
+## 2026-11-12 — «Otras propuestas»: a left-to-right slider at the top of every policy window
+
+- Twelve windows (all but Categorías) now open with «Qué proponen otros sobre …»: five stops — izquierda, centro izquierda, este modelo, centro derecha, derecha. Each camp's card: who, when (visible date), idea, 3–5 proposals, their argument, the main criticism (always attributed: «Sus críticos dicen que…»), sources. The model's stop lists its proposal and «Lo que se le puede criticar», with a note that it sits in the middle for comparison, not because it is centrist.
+- Component `EspectroPropuestas.tsx`; data `src/data/espectro/<id>.ts` (`Espectro`, `Postura` in `tipos.ts`); the submenu gains «Otras propuestas» first. Rendered from the page, so window files were not touched.
+- Written by three agents and reviewed by a blind balance evaluator (first round: balance 7, accuracy 8, dates 4); fixes applied: same critical voice for all, a visible date per card, criticism of the model, «no hemos encontrado…» notes. Positions use the 29-N 2026 campaign where published; where a party has published nothing newer, the card says 2023 (or the year).
+- Note: general election on 29 November 2026; when the remaining manifestos appear (Frente Amplio, Podemos, PSOE, Vox), these cards need a review.
