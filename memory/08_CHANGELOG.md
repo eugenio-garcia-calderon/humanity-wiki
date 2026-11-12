@@ -11133,3 +11133,8 @@ Eugenio: «coge la configuración de los sliders del triciclo bala y aplícasela
 ## 2026-11-12 — The page editor no longer drops `config.aplicacion`
 
 - Eugenio saw a plain project page at `luzhumanidad.com/modelo-socioeconomico-optimizado` instead of the embedded model. Checked in his Chrome: the address resolved to `KWMODELOSOCIO01`, but its config had lost `aplicacion` (and gained `cabecera` plus a hand-edited subtitle). The editor (`Documento.tsx`) rebuilds `config` from `CLAVES_AJUSTES` only, and `aplicacion` was not on that list, so any save from the editor turned an app page back into blocks. Added to the list and to the `Ajustes` type; migration 0200 puts the key back on that page and touches nothing else. The consciousness map and the observatory still had theirs; they were one save away from the same loss.
+
+### 2026-11-12 — Proyectos dentro de proyectos: «Comunidades energéticas en pueblos»
+- `drizzle/0201_comunidades_energeticas_pueblos.sql`: subelementos en la tabla Proyectos («Elemento madre» / «Subelementos»), el proyecto general (modelo asociativo público-privado, 2024) y Villalbilla y Nuevo Baztán dentro de él.
+- `SubproyectosSitio.tsx`: en la página de un proyecto, sus subproyectos con las mismas tarjetas que la portada (`config.subproyectos.titulo`). `VistaProyectosSitio`: la portada no enseña los que tienen madre (el editor sí).
+- Para sumar otra comunidad: en la tabla Proyectos, poner «Comunidades energéticas en pueblos» en su «Elemento madre».
