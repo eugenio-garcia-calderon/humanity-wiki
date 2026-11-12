@@ -40,7 +40,8 @@ export interface OpcionesPuertas {
   /** Hinge axis: turned from the pillar's tangent there (°, + steeper) and leaned in at the top (°); opening (°). */
   inc: number; dentro: number; abre: number;
 }
-export interface OpcionesPorton { x: number; abre: number }
+/** The hatch: its hinge's x, its opening (°) and (round 2) how high its side edges sit on the tail: their elevation seen from the section's centre (°). */
+export interface OpcionesPorton { x: number; abre: number; lado: number }
 
 type Contorno = { Y_VIDRIO: (x: number) => number; yMarco: (x: number) => number; XC0: number; XC1: number; XF0: number; XF1: number };
 export type V3 = [number, number, number];
@@ -100,7 +101,8 @@ export function puertaDe(F: FormaBala, V: Ventanas, C: Contorno, o: OpcionesPuer
   const bb = bordesBanda(F, V, C); if (!bb) return null;
   const arriba = enX(bb.fuera);
   const [xTip, yTip] = bb.fuera[0];
-  const xR = Math.min(o.tras, xTip - 0.3), xD = Math.min(xTip - 0.04, Math.max(xR + 0.25, o.del));
+  // (round 2: the rear edge at least 20 cm ahead of the canopy's end, where the tail crown starts)
+  const xR = Math.min(xTip - 0.3, Math.max(o.tras, C.XC1 + 0.20)), xD = Math.min(xTip - 0.04, Math.max(xR + 0.25, o.del));
   const RA = 0.07, RB = 0.06, K = 0.05;
   const linea = (x: number) => o.umbral + (yTip - o.umbral) * (x - xD) / (xTip - xD);
   const smax = (a: number, b: number) => (a + b + Math.sqrt((a - b) ** 2 + K * K)) / 2;
@@ -145,13 +147,23 @@ export function portonDe(F: FormaBala, P: Puerta, C: Contorno, o: OpcionesPorton
   const xH = Math.min(P.xTip - 0.30, xCima, Math.max(C.XF1 + 0.25, o.x));
   const dentroBanda = enX(P.banda.dentro), finBanda = P.banda.dentro[P.banda.dentro.length - 1][0];
   const tBanda = (x: number) => (x >= finBanda ? tDeY(F, x, dentroBanda(x)) : tMarco(F, C, x));
-  // behind the door the side edge eases down in 35 cm to the tail's shoulder (t = T_HOMBRO) and follows it back: the
-  // whole upper rear opens, as on the Aptera, above the rear arms, the charging flap and the rear vents. (A first try
-  // followed the round-three lid's line, the canopy frame's edge: on this tail that is its crown, and only a strip opened.)
+  // Behind the door the side edge eases in 35 cm to the line `o.lado` degrees up from the section's centre and follows
+  // it back to the tail ring: the upper rear opens, as on the Aptera, whose hatch is about half the body wide (its
+  // edges about 60° up on the tail section). Never below the tail's shoulder (T_HOMBRO), so the rear arms, the
+  // charging flap and the rear vents stay on the body. (A first try followed the round-three lid's line: on this tail
+  // that is its crown, and only a strip opened; a second one, the shoulder, opened 93 % of the width.)
+  const fi = o.lado * Math.PI / 180;
+  const tLado = (x: number) => {
+    const s = F.sec(x), yc = (punto(s, 0)[1] + punto(s, 1)[1]) / 2, ang = (t: number) => { const [z, y] = punto(s, t); return Math.atan2(y - yc, z); };
+    let a = T_HOMBRO, b = 0.999;
+    if (ang(a) >= fi) return a;
+    for (let i = 0; i < 30; i++) { const mm = (a + b) / 2; if (ang(mm) < fi) a = mm; else b = mm; }
+    return (a + b) / 2;
+  };
   const tLo = (x: number) => {
     if (x >= P.xR) return P.tHi(x);
-    const w = suave((P.xR - x) / 0.35);
-    return w >= 1 ? T_HOMBRO : tBanda(x) * (1 - w) + T_HOMBRO * w;
+    const w = suave((P.xR - x) / 0.35), tl = tLado(x);
+    return w >= 1 ? tl : tBanda(x) * (1 - w) + tl * w;
   };
   const filas = [xH, xFin]; for (let k = 1; k <= 6; k++) filas.push(xH - 0.01 * k, xH + 0.01 * k);
   return { xH, xFin, tLo, bisagra: [xH, techoEn(F, xH)] as [number, number], abre: o.abre, filas };
@@ -164,47 +176,65 @@ export function girar(p: V3, h: V3, u: V3, th: number): V3 {
   const x: V3 = [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]];
   return [h[0] + v[0] * c + x[0] * s + u[0] * k, h[1] + v[1] * c + x[1] * s + u[1] * k, h[2] + v[2] * c + x[2] * s + u[2] * k];
 }
-/** Points on the right door's skin (a 16 × 8 grid over its outline), for the swing checks. */
+/**
+ * Points on the right door's skin, for the swing checks: a 24 × 10 grid over it, and (round 2, 2026-11-12: a coarse
+ * grid missed the top edge cutting 5.8 cm into the tail crown) its whole outline every centimetre, where it meets the
+ * fixed body first.
+ */
 export function puntosPuerta(F: FormaBala, P: Puerta): V3[] {
-  const o: V3[] = [];
-  for (let i = 0; i <= 16; i++) {
-    const x = P.xR + (P.xTip - P.xR) * i / 16, a = P.tLo(x), b = P.tHi(x);
-    for (let j = 0; j <= 8; j++) { const [z, y] = punto(F.sec(x), a + (b - a) * j / 8); o.push([x, y, z]); }
-  }
+  const o: V3[] = [], en = (x: number, t: number) => { const [z, y] = punto(F.sec(x), Math.min(1, t)); o.push([x, y, z]); };
+  for (let i = 0; i <= 24; i++) { const x = P.xR + (P.xTip - P.xR) * i / 24, a = P.tLo(x), b = P.tHi(x); for (let j = 0; j <= 10; j++) en(x, a + (b - a) * j / 10); }
+  const n = Math.ceil((P.xTip - P.xR) / 0.01);
+  for (let i = 0; i <= n; i++) { const x = P.xR + (P.xTip - P.xR) * i / n; en(x, P.tHi(x)); en(x, P.tLo(x)); }
+  const a = P.tLo(P.xR), b = P.tHi(P.xR); for (let j = 0; j <= 40; j++) en(P.xR, a + (b - a) * j / 40);
   return o;
 }
 /**
- * The door's swing, checked in 12 steps to its full opening: how deep it goes into the fixed body (anything outside
- * its own opening; points within 4 cm of the hinge axis are the hinge itself and are left out), how close it comes
- * to the front pod and its arms (wheels straight), and how low it gets. `extra`: points that swing with it (the mirror).
+ * The door's swing, checked in 24 steps to its full opening:
+ *  - `entra`: how deep it goes into the fixed body (anything outside its own opening; points within 4 cm of the hinge
+ *    axis are the hinge itself and are left out);
+ *  - `carenado`: how close it comes to the front pod (straight ahead and at full lock either way, `giros`: the inner
+ *    and outer wheels' angles) and to its two faired arms;
+ *  - `suelo`, `punta`: how low it gets and how far out (from the centre line);
+ *  - `entrada` (round 2): the lowest point of the open door over the way in, the floor between the sill's front and
+ *    the door's rear edge from 5 cm inside the body's side out to 40 cm beyond it (9: nothing over it), and `alto`, its top.
+ * `extra`: points that swing with it (the mirror).
  */
-export function vueloPuerta(F: FormaBala, P: Puerta, extra: V3[] = []): { entra: number; carenado: number; suelo: number; punta: number } {
+export function vueloPuerta(F: FormaBala, P: Puerta, extra: V3[] = [], giros: number[] = []): { entra: number; carenado: number; suelo: number; punta: number; entrada: number; alto: number } {
   const pts = [...puntosPuerta(F, P), ...extra], h = P.bisagra, u = P.eje;
-  const POD = podDe(F), ancho = semiAncho(POD), zp = F.VIA_LAT / 2, br = brazosDe(F);
+  const POD = podDe(F), ancho = semiAncho(POD), zp = F.VIA_LAT / 2, br = brazosDe(F), x0p = POD[POD.length - 1].x, x1p = POD[0].x;
+  const estados = [0, ...giros.flatMap(g => [g, -g])].map(g => ({ c: Math.cos(g), s: Math.sin(g) }));
   const dEje = (p: V3) => { const v: V3 = [p[0] - h[0], p[1] - h[1], p[2] - h[2]], k = v[0] * u[0] + v[1] * u[1] + v[2] * u[2]; return Math.hypot(v[0] - k * u[0], v[1] - k * u[1], v[2] - k * u[2]); };
-  let entra = 0, carenado = 9, suelo = 9, punta = 0;
-  for (let s = 1; s <= 12; s++) {
-    const th = P.abre * Math.PI / 180 * s / 12;
+  let entra = 0, carenado = 9, suelo = 9, punta = 0, entrada = 9, alto = 0;
+  const N = 24;
+  for (let s = 1; s <= N; s++) {
+    const th = P.abre * Math.PI / 180 * s / N;
     for (const p of pts) {
       const q = girar(p, h, u, th);
       suelo = Math.min(suelo, q[1]); punta = Math.max(punta, q[2]);
+      if (s === N) {
+        alto = Math.max(alto, q[1]);
+        if (q[0] <= P.xD && q[0] >= P.xR) { const lado = F.ladoZ(q[0], 0.6); if (Number.isFinite(lado) && q[2] > lado - 0.05 && q[2] < lado + 0.40) entrada = Math.min(entrada, q[1]); }
+      }
       if (dEje(p) > 0.04 && !enPuerta(P, q[0], q[1]) && F.dentroPiel(q[0], q[1], q[2])) {
         const z = F.ladoZ(q[0], q[1]); if (Number.isFinite(z)) entra = Math.max(entra, Math.min(0.2, z - Math.abs(q[2])));
       }
-      // the front pod round its wheel (straight ahead), and its two faired arms from the body
-      const xr = q[0] - F.X_LAT, alt = alturasPod(POD, xr);
-      if (alt && q[1] > alt[0] - 0.05 && q[1] < alt[1] + 0.05) {
-        const w = ancho(xr, Math.min(alt[1] - 1e-3, Math.max(alt[0] + 1e-3, q[1])));
-        carenado = Math.min(carenado, Math.hypot(Math.max(0, Math.abs(q[2] - zp) - w), q[1] < alt[0] ? alt[0] - q[1] : q[1] > alt[1] ? q[1] - alt[1] : 0));
+      // the front pod round its wheel, which turns about its vertical axis (as the viewer steers it)
+      const dx = q[0] - F.X_LAT, dz = q[2] - zp;
+      for (const e of estados) {
+        const xr = dx * e.c + dz * e.s, zl = -dx * e.s + dz * e.c, xc = Math.min(x1p - 1e-4, Math.max(x0p + 1e-4, xr)), alt = alturasPod(POD, xc);
+        if (!alt) continue;
+        const w = ancho(xc, Math.min(alt[1] - 1e-3, Math.max(alt[0] + 1e-3, q[1])));
+        carenado = Math.min(carenado, Math.hypot(Math.abs(xr - xc), Math.max(0, Math.abs(zl) - w), q[1] < alt[0] ? alt[0] - q[1] : q[1] > alt[1] ? q[1] - alt[1] : 0));
       }
       for (const b of br) {
-        const dx = Math.max(0, Math.abs(q[0] - (F.X_LAT + b.x)) - b.cuerda / 2), dy = Math.max(0, Math.abs(q[1] - (b.y + b.yCuerpo) / 2) - b.grueso / 2 - Math.abs(b.yCuerpo - b.y) / 2);
-        const zc = F.ladoZ(F.X_LAT + b.x, b.yCuerpo), dz = Number.isFinite(zc) ? Math.max(0, Math.max(zc - q[2], q[2] - (zp - 0.02))) : 0;
-        carenado = Math.min(carenado, Math.hypot(dx, dy, dz));
+        const ddx = Math.max(0, Math.abs(q[0] - (F.X_LAT + b.x)) - b.cuerda / 2), dy = Math.max(0, Math.abs(q[1] - (b.y + b.yCuerpo) / 2) - b.grueso / 2 - Math.abs(b.yCuerpo - b.y) / 2);
+        const zc = F.ladoZ(F.X_LAT + b.x, b.yCuerpo), ddz = Number.isFinite(zc) ? Math.max(0, Math.max(zc - q[2], q[2] - (zp - 0.02))) : 0;
+        carenado = Math.min(carenado, Math.hypot(ddx, dy, ddz));
       }
     }
   }
-  return { entra, carenado, suelo, punta };
+  return { entra, carenado, suelo, punta, entrada, alto };
 }
 /** The hatch's swing about its hinge across the roof: how deep it goes into the fixed body, and how high it reaches. */
 export function vueloPorton(F: FormaBala, Q: Porton, extra: V3[] = []): { entra: number; alto: number } {

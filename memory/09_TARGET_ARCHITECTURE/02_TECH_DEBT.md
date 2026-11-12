@@ -570,3 +570,9 @@ The observatory is one self-contained HTML file (`public/observatorio-polarizaci
 - **The cut regions add about 100 rows near the doors and hatch**, and every door and hatch mesh is compacted (`compactar`).
   - Build time, measured in node on this machine while it was loaded: about 1.2 s with everything on, against 0.7 s without.
 - **«Rodillas del piloto al volante» depends on where the feet are.** If the pack runs under the footboards, they rise and the knees meet the rim. The default pack starts 40 cm behind the front axle, behind the heels, so at the defaults it does not happen.
+
+### 2026-11-12 — Cuadriciclo Bala clásico round 2: shortcuts
+- **The tail panel without the Aptera hatch starts at a fixed t = 0.66.** The old boot lid's edge eases down to t = 0.62, so the panel should stay inside it, but nothing checks that: if the lid's band moves, the panel can hang past the lid when it opens.
+- **The clear-entry check is one number**: the lowest point of the open door over a box beside the seat. It does not model a person getting in.
+- **Off-default hinge settings can make the door swing through the body.** Examples: the hinge-angle slider at −12° (2.0 cm on the real clásico), or the hinge halfway up the pillar (0.5 cm). The check goes red, but the door is not stopped. The right fix is a door stop that tells an edge graze at the start of the swing apart from a real collision. The first try at a stop could not tell them apart, and held a grazing door at 2°.
+- **The controller moves with the pack**, behind it, and its old fixed place under the passenger is used only without the pack.

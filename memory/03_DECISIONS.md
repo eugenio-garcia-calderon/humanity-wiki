@@ -1528,3 +1528,30 @@ Eugenio chose the names after being told «Cuadriciclo Bala» was already taken 
 - So saved designs build vertex-identical: `triciclo-disenos` checks five saved variants, the clásico included.
 
 **Top menu.** The departments are the bar's tab row, as before 383754a; the sections fold into one dropdown. Eugenio's call («es más útil el otro»).
+
+## 2026-11-12 · Cuadriciclo Bala clásico, round 2: measured on the real saved row; tail solar panel
+
+**The real clásico is a fixture.** The evaluator rejected round 1 because every number came from the defaults, not from the row saved in production.
+- `scripts/clasicoGuardado.ts` holds that row. `triciclo-disenos` compares it with main; it opens vertex-identical.
+- `triciclo-rangos` («clásico real») runs it as it opens today and with the proposed migration values, every slider at both ends and every option.
+
+**Pack on the belly.** The pack's floor is the belly skin plus 1.2 cm (`fondoPaquete`), raised until its lower edges sit 1 cm inside the skin. The rails run through it.
+- Rejected: the pack on top of the rails, which lifts the seats' floor by the rails' height. On the belly, with a 10 cm pack, the seats on the real clásico go down to 0.33 m.
+- The controller moved behind the pack (`finPaquete`), so the pack no longer stops at a fixed x.
+
+**Door defaults: hinge at the foot (5 %), axis +13° off the tangent, 110°.**
+- The evaluator asked for +15°. With +15° and the window height at its maximum (0.85), the door enters the body by 0.5 cm while opening. +13° clears at that maximum (checked at 10–13°) and still leaves 1.80 m of clear entry height on the real clásico.
+- New check «Puerta abierta: altura libre para entrar» (≥ 1.40 m): the lowest point of the open door over the entry footprint. It is a warning, not in `triciclo-rangos`' must-pass list, because a hinge high on the pillar legitimately puts the door above the opening.
+- The pod check now also runs at full lock, in the pod's own rotated frame.
+- **No door stop.** A door stop (stop at the last 2° step before 4 mm into the body) was written and dropped. With the hinge halfway up the pillar the door grazes the pillar's edge by about 5 mm at 4°, so the stop held it at 2°: a door that does not open is worse than a 5 mm graze shown in red. So off-default hinge settings can make the door graze, and the check says so.
+  - On the real clásico, the hinge-angle slider at −12° grazes 2.0 cm. With every new slider at its maximum and three rows on the default clásico, it grazes 0.9 cm.
+  - `triciclo-rangos` lists the door swing as a warning (AVISO) in cases that move the hinge's own sliders, and requires it everywhere else.
+
+**Steering wheel: move the column, then lower.** If the rim does not fit, the hub first moves towards the pilot in 5 mm steps (up to 25 cm, `volante.atras`), and only then lowers (`volante.baja`). Moving keeps the hands at the same height. On the real clásico it moves 21.5 cm and does not lower.
+
+**Hatch.** The hinge never goes ahead of the roof's crest (`cimaTecho`), and the slider's range starts there. The side edge is a slider (`tMalLado`, 55°): the elevation angle seen from the section's centre, found by bisection.
+
+**Tail solar panel (`tSolarCola`).** The panel is a separate mesh from the canopy's end to the tail ring, between the hatch's side edge (+0.04 in t) and the crest; without the hatch, t ≥ 0.66.
+- It rides on whichever lid opens there: the Aptera hatch's pivot, or the old boot lid's pivot. So the split at the hinge is the hatch's own cut.
+- Its area counts in the solar area, the panel mass and the energy.
+- Rejected: extending `techoSolar` past the canopy. That mesh belongs to the canopy pivot, and it would have needed a third cut.

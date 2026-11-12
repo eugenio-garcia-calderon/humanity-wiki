@@ -582,10 +582,12 @@ function mallaPiel(R: Rejilla, blanco: number[], azul: number[], M: Mats, nombre
   const m = new THREE.Mesh(geo, [M.chapa, M.marino, M.forro, M.chapaDoble, M.marinoDoble]); m.name = nombre; return m;
 }
 /** A piece of glass with its black frit along its own outline (the edges only one of its triangles uses). */
-function mallaVidrio(R: Rejilla, tris: number[], M: Mats, nombre: string): THREE.Group {
+function mallaVidrio(R: Rejilla, tris: number[], M: Mats, nombre: string, nOrig = Infinity): THREE.Group {
   const P = R.pos, cuenta = new Map<number, number>(), N = P.length / 3, FRIT = 0.03;
   for (let k = 0; k < tris.length; k += 3) for (let j = 0; j < 3; j++) { const a = tris[k + j], b = tris[k + (j + 1) % 3], key = Math.min(a, b) * N + Math.max(a, b); cuenta.set(key, (cuenta.get(key) ?? 0) + 1); }
-  const seg: [number, number][] = []; for (const [key, n] of cuenta) if (n === 1) seg.push([Math.floor(key / N), key % N]);
+  // (round 2: only the canopy's own outline, between the grid's original vertices: along a cut the frit followed the
+  // coarse cells in steps; the door's frame band covers its cut edges)
+  const seg: [number, number][] = []; for (const [key, n] of cuenta) if (n === 1) { const a = Math.floor(key / N), b = key % N; if (a < nOrig && b < nOrig) seg.push([a, b]); }
   const usados = new Set(tris), dist = new Float32Array(N).fill(1);
   for (const v of usados) {
     const px = P[v * 3], py = P[v * 3 + 1], pz = P[v * 3 + 2]; let d = Infinity;
@@ -689,10 +691,10 @@ function pielConPuertas(xs: number[], M: Mats, pu: { puerta: Puerta; porton: Por
   const conCintura = P.cintura > 1e-4, tCint = (x: number) => Math.min(P.tHi(x), tDeY(F, x, P.yCintura(x)));
   const cv = trocear(RV, caras(RV), [...(conCintura ? reg(P.tLo, tCint, P.xTip, P.xR) : []), ...reg(conCintura ? tCint : P.tLo, P.tHi, P.xTip, P.xR), ...(Q ? reg(Q.tLo, arriba, Q.xH, Q.xFin) : [])]);
   const k0 = conCintura ? 2 : 0;
-  const fijo = mallaVidrio(cv.R, cv.fuera[0], M, 'cupula');
+  const nV = RV.pos.length / 3, fijo = mallaVidrio(cv.R, cv.fuera[0], M, 'cupula', nV);
   const cintura = [0, 1].map(i => conCintura && cv.dentro[i][0].length ? aparte(cv.R, cv.dentro[i][0], 'puerta-cintura') : null);
-  const vidrioPuerta = [k0, k0 + 1].map(i => mallaVidrio(cv.R, cv.dentro[i][0], M, 'cupula-puerta'));
-  const vidrioPorton = Q ? mallaVidrio(cv.R, [...cv.dentro[k0 + 2][0], ...cv.dentro[k0 + 3][0]], M, 'cupula-porton') : null;
+  const vidrioPuerta = [k0, k0 + 1].map(i => mallaVidrio(cv.R, cv.dentro[i][0], M, 'cupula-puerta', nV));
+  const vidrioPorton = Q ? mallaVidrio(cv.R, [...cv.dentro[k0 + 2][0], ...cv.dentro[k0 + 3][0]], M, 'cupula-porton', nV) : null;
   // ── the solar panel (never below the doors' top) and the window frames: ahead of the hinge on the roof, behind it on the hatch
   const tMin = (x: number) => (x <= P.xTip && x >= P.xR ? P.tHi(x) : 0);
   if (V) {
@@ -700,7 +702,7 @@ function pielConPuertas(xs: number[], M: Mats, pu: { puerta: Puerta; porton: Por
     const delante = techoSolar(V, M, { delante: 99, detras: corte, tMin }), detras = Q ? techoSolar(V, M, { delante: corte, detras: -99, tMin }) : null;
     if (delante) fijo.add(delante);
     if (detras) vidrioPorton!.add(detras);
-    const [mdD, mdI] = marcosVentanas(V, M, { delante: 99, detras: P.xR });
+    const [mdD, mdI] = marcosVentanas(V, M, { delante: 99, detras: P.xR + 0.07, afinar: 0.06 });
     if (mdD) { vidrioPuerta[0].add(mdD); vidrioPuerta[1].add(mdI); }
     // behind the door: on the hatch behind its hinge, on the canopy between the two if the hinge is further back
     const xH = Q ? Math.min(P.xR, Q.xH) : -99;
@@ -755,7 +757,9 @@ export interface OpcionesBala {
     /** 2026-11-12: the Aptera doors (and hatch, or null), cut out of the skin (balaPuertas.ts); absent or null, the canopy opens as before. */
     puertas?: { puerta: Puerta; porton: Porton | null } | null;
     /** 2026-11-12: teardrop mirrors instead of the camera pods (on the doors if there are doors). */
-    retrovisor?: OpcionRetrovisor | null };
+    retrovisor?: OpcionRetrovisor | null;
+    /** 2026-11-12: the solar panel run on over the tail, from x0 back to x1, above t = tLow(x) (it rides on the lid that opens there). */
+    solarCola?: { x0: number; x1: number; tLow: (x: number) => number } | null };
 }
 /** A mirror's place (right side; geometriaTriciclo.ts `retrovisor`). */
 export interface OpcionRetrovisor { base: [number, number, number]; cabeza: [number, number, number]; largo: number; alto: number; fondo: number; enPuerta: boolean }
@@ -798,6 +802,25 @@ function techoSolar(V: Ventanas, M: Mats, tramo?: { delante: number; detras: num
   const m = malla(geometria(R, caras(R)), M.solar, 'panel-solar');
   return m;
 }
+/** 2026-11-12: the panel over the tail (geometriaTriciclo.ts `solarCola`): a grid on the skin, lifted 1.5 mm, cells as on the roof. */
+function panelCola(o: { x0: number; x1: number; tLow: (x: number) => number }, M: Mats): THREE.Mesh {
+  const CEL = 0.125, n = 22;
+  const xs = filasEntre(o.x0, o.x1, () => 0.015);
+  const R = rejilla(xs, s => { const a = o.tLow(s.x), r: number[] = []; for (let k = 0; k <= n; k++) r.push(a + (1 - a) * k / n); return r; }, 'arriba');
+  for (let v = 0; v < R.pos.length / 3; v++) for (let j = 0; j < 3; j++) R.pos[v * 3 + j] += R.nor[v * 3 + j] * 0.0015;
+  for (let i = 0; i < R.filas; i++) {
+    const c0 = R.n - 1; R.uv[(i * R.cols + c0) * 2] = 0;
+    for (const dir of [1, -1]) {
+      let s = 0;
+      for (let c = c0 + dir; c >= 0 && c < R.cols; c += dir) {
+        const k = (i * R.cols + c) * 3, q = k - dir * 3; s += Math.hypot(R.pos[k] - R.pos[q], R.pos[k + 1] - R.pos[q + 1], R.pos[k + 2] - R.pos[q + 2]);
+        R.uv[(i * R.cols + c) * 2] = dir * s / CEL;
+      }
+    }
+    for (let c = 0; c < R.cols; c++) R.uv[(i * R.cols + c) * 2 + 1] = R.pos[(i * R.cols + c) * 3] / CEL;
+  }
+  return malla(geometria(R, caras(R)), M.solar, 'panel-solar');
+}
 /** A ribbon on the skin through (x, t) points (right side), with its width at each point, lifted `sep`. */
 function cintaXT(pts: [number, number][], ancho: (i: number) => number, sep: number): THREE.BufferGeometry {
   const P = pts.map(([x, t]) => { const [z, y] = punto(F.sec(x), t); return new THREE.Vector3(x, y, z); });
@@ -821,7 +844,7 @@ function cintaXT(pts: [number, number][], ancho: (i: number) => number, sep: num
  * it): up from the glass edge along the pillar's quarter-ellipse, then back along the rail, narrowing from the
  * pillar's width to 60 % of it, and closing on the glass edge at the canopy's rear end.
  */
-function marcosVentanas(V: Ventanas, M: Mats, tramo?: { delante: number; detras: number }): THREE.Object3D[] {
+function marcosVentanas(V: Ventanas, M: Mats, tramo?: { delante: number; detras: number; afinar?: number }): THREE.Object3D[] {
   const b0 = bandaMarco(V, L.XC1 + 0.004); if (!b0) return [];
   // (2026-11-12: with the Aptera doors the band is split by x: the stretch on a door goes with it, the one behind the
   // hatch's hinge with the hatch, the rest stays on the canopy. `tramo` keeps detras ≤ x < delante, ending exactly there)
@@ -841,6 +864,8 @@ function marcosVentanas(V: Ventanas, M: Mats, tramo?: { delante: number; detras:
       }
     }
     if (pts.length < 2) return [];
+    // (round 2: the door's stretch tapers out before the door's rounded top-rear corner, so none of it stands proud of the cut)
+    const af = tramo.afinar; if (af) pts.forEach((p, k) => { ancho[k] *= Math.min(1, Math.max(0, (p[0] - tramo.detras) / af)); });
     b = { pts, ancho };
   }
   const der = malla(cintaXT(b.pts, k => b.ancho[k], 0.0016), M.marinoDoble, 'pilar');
@@ -1015,14 +1040,16 @@ function armar(o: OpcionesBala): THREE.Group {
   if (traseras) add(carenados(traseras, M, true));
   add(ruedas(F, M, !!o.triciclo, traseras));
   const laAleta = aleta(F, M, o.aleta);
+  // 2026-11-12: the panel over the tail rides on the lid that opens there, as the fin does
+  const sc = o.triciclo?.solarCola ? panelCola(o.triciclo.solarCola, M) : null;
   if (conP?.pivoteFin) {
     // the Aptera hatch carries the fin
-    laAleta.position.sub(conP.pivoteFin.position); conP.pivoteFin.add(laAleta);
+    for (const pieza of [laAleta, sc]) if (pieza) { pieza.position.sub(conP.pivoteFin.position); conP.pivoteFin.add(pieza); }
   } else if (porton) {
     // the boot lid and the fin on it hang from a pivot on its front hinge (the viewer opens it as a boot, `tipo: 'maletero'`)
     const bisagra = new THREE.Vector3(L.XF1, techoEn(F, L.XF1), 0);
     const piv = new THREE.Group(); piv.name = PIVOTE_PORTON; piv.position.copy(bisagra);
-    for (const pieza of [porton, laAleta]) { pieza.position.sub(bisagra); piv.add(pieza); }
+    for (const pieza of [porton, laAleta, sc]) if (pieza) { pieza.position.sub(bisagra); piv.add(pieza); }
     add(piv);
     // its shut line on the body: along the frame's column on each side, and across the tail at the ring
     const der: THREE.Vector3[] = [], nd: THREE.Vector3[] = [];
@@ -1036,7 +1063,7 @@ function armar(o: OpcionesBala): THREE.Group {
     const lado = [...der, ...atras], nl = [...nd, ...na];
     const izq = lado.slice().reverse().map(p => new THREE.Vector3(p.x, p.y, -p.z)), ni = nl.slice().reverse().map(n => new THREE.Vector3(n.x, n.y, -n.z));
     add(malla(cinta3D([...lado, new THREE.Vector3(L.X_ARO_COLA, techoEn(F, L.X_ARO_COLA), 0), ...izq], [...nl, normalXT(L.X_ARO_COLA, 1), ...ni], 0.0042, 0.0012, false), M.junta, 'junta-porton', false));
-  } else add(laAleta);
+  } else { add(laAleta); if (sc) add(sc); }
   add(cabina(F, M, o.asientos ?? ASIENTO, o.triciclo));
   // the Triciclo's rear-wheel spat: a narrow navy keel under the tail, from inside the belly down to `y0`, round the wheel
   const fd = o.triciclo?.faldon;

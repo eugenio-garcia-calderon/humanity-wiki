@@ -16,6 +16,7 @@ import { aDiseno, deDiseno } from '../src/components/aeromovil/Disenos';
 import { camposTriciclo, deslizadoresTriciclo, opcionesCabinaTriciclo, rangoTriciclo, type ModeloTriciclo } from '../src/components/aeromovil/geometriaTriciclo';
 import type { ModeloBala } from '../src/components/aeromovil/geometriaBala';
 import { construirCon, crearMateriales } from '../src/components/aeromovil/garaje/balaModelo';
+import { CLASICO_GUARDADO } from './clasicoGuardado';
 
 let fallos = 0;
 const ok = (c: boolean, m: string) => { console.log(`${c ? 'OK   ' : 'FALLA'} ${m}`); if (!c) fallos++; };
@@ -142,12 +143,14 @@ else {
     ['Triciclo bajo y estrecho', { ...PARAMETROS_TRICICLO, tSuelo: 0.05, tAncho: 0.77, tAlto: 1.2, tPilY: 0.30 } as Partial<Parametros>],
     // (2026-11-12: the «Cuadriciclo Bala clásico» as 0198 left it, before this round's options)
     ['Cuadriciclo Bala clásico (sin las opciones nuevas)', { ...PARAMETROS_TRICICLO, tTraseras: 'dos', tViaTras: 1.8 } as Partial<Parametros>],
+    // (round 2: the real one, as saved in production)
+    ['Cuadriciclo Bala clásico guardado (el de verdad)', CLASICO_GUARDADO],
   ];
   // (2026-11-11: and the «Bala de cuatro ruedas»'s two, which with one rear wheel change nothing)
   // (2026-11-12: and the battery layout, steering wheel, dashboard, doors, mirrors and hatch, all off by default)
   const NUEVOS = ['tAsientos', 'tFila2', 'tFila3', 'tFila2X', 'tFila3X', 'tRecFila', 'tTraseras', 'tViaTras',
     'tBatDisp', 'tBatLargo', 'tBatAncho', 'tBatAlto', 'tBatX', 'tMando', 'tVolX', 'tVolY', 'tVolInc', 'tVolD', 'tSalpicadero', 'tSalpY', 'tSalpFondo',
-    'tAcceso', 'tPuertaDel', 'tPuertaTras', 'tUmbral', 'tCintura', 'tBisagraY', 'tBisagraInc', 'tBisagraDentro', 'tPuertaAbre', 'tRetrovisores', 'tMaletero', 'tMalIni', 'tMalAbre'];
+    'tAcceso', 'tPuertaDel', 'tPuertaTras', 'tUmbral', 'tCintura', 'tBisagraY', 'tBisagraInc', 'tBisagraDentro', 'tPuertaAbre', 'tRetrovisores', 'tMaletero', 'tMalIni', 'tMalAbre', 'tMalLado', 'tSolarCola'];
   const NUEVOS_12 = NUEVOS.slice(8);
   /** The design as it was saved before 2026-11-12: without the keys that did not exist (this module's defaults carry them). */
   const deAntes = (P: Partial<Parametros>) => Object.fromEntries(Object.entries(P).filter(([k]) => !NUEVOS_12.includes(k))) as Partial<Parametros>;

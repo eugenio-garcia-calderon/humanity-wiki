@@ -263,10 +263,10 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   // mirrors and boot. Every option's default is what there was before, so a design saved without them is unchanged.
   tBatDisp: 'reparto', tBatLargo: 0.94, tBatAncho: 150, tBatAlto: 0.10, tBatX: 0.70,
   tMando: 'manillar', tVolX: 0, tVolY: 0, tVolInc: 30, tVolD: 0.32,
-  tSalpicadero: 'no', tSalpY: 0, tSalpFondo: 0.24,
-  tAcceso: 'cupula', tPuertaDel: 0.80, tPuertaTras: 1.62, tUmbral: 0.34, tCintura: 0, tBisagraY: 0.5, tBisagraInc: 0, tBisagraDentro: 14, tPuertaAbre: 62,
+  tSalpicadero: 'no', tSalpY: 0, tSalpFondo: 0.16,
+  tAcceso: 'cupula', tPuertaDel: 0.80, tPuertaTras: 1.86, tUmbral: 0.34, tCintura: 0, tBisagraY: 0.05, tBisagraInc: 13, tBisagraDentro: 20, tPuertaAbre: 110,
   tRetrovisores: 'camaras',
-  tMaletero: 'cola', tMalIni: 1.40, tMalAbre: 48,
+  tMaletero: 'cola', tMalIni: 1.40, tMalAbre: 36, tMalLado: 55, tSolarCola: 'no',
 };
 export const PARAMETROS_TRICICLO: Parametros = { ...PARAMETROS_GOTA, disposicion: 'triciclo', ...TRICICLO_DEFECTO };
 export const PARAMETROS_POR_DEFECTO: Parametros = PARAMETROS_A1;
