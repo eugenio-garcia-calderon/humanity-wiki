@@ -39,7 +39,7 @@ export default function ObservatorioPolarizacion() {
       ref={marco}
       data-app-observatorio
       src="/observatorio-polarizacion/index.html"
-      title="Observatorio de Polarización"
+      title="Observatorio de Polarización Política"
       className="block w-full border-0 bg-slate-950"
       style={{ height: `calc(100dvh - ${arriba}px)`, minHeight: 500 }}
     />

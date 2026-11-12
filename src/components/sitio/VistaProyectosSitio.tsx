@@ -12,6 +12,8 @@ import HistoriaSitio from './HistoriaSitio';
 import { useDatosPortada, type ProyectoPortada } from './portadaEscaparate';
 import { iconoCategoria } from './iconoCategoria';
 import InspiranSitio, { type TablaInspiran } from './InspiranSitio';
+import { columnaMadre } from './SubproyectosSitio';
+import FilaSector from './FilaSector';
 const NoticiasSitio = lazy(() => import('./NoticiasSitio'));
 
 // ============================================================================
@@ -159,8 +161,9 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
       const n = String(f.pagina?.titulo || f.celdas[sistemas?.columna_titulo || '']?.valor || '').trim();
       if (n) sistemaDe.set(f.id, { nombre: n, imagen: f.pagina?.imagen || null, orden: i });
     });
+    const madre = columnaMadre(proyectos as any);
     const usos = new Map<string, number>();
-    for (const f of proyectos.filas) for (const a of lista(f.celdas[colArea]?.valor)) usos.set(a, (usos.get(a) || 0) + 1);
+    for (const f of proyectos.filas.filter(f => !madre || lista(f.celdas[madre]?.valor).length === 0)) for (const a of lista(f.celdas[colArea]?.valor)) usos.set(a, (usos.get(a) || 0) + 1);
     const areas = [...usos.keys()]
       .map(id => ({ id, slug: plano(sistemaDe.get(id)?.nombre || id), nombre: sistemaDe.get(id)?.nombre || '', imagen: sistemaDe.get(id)?.imagen || null, n: usos.get(id) || 0, orden: sistemaDe.get(id)?.orden ?? 999 }))
       .filter(a => a.nombre)
@@ -176,6 +179,9 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
     const posicion = (f: Fila) => { const c = categoriaDe(f); return c ? lugar.get(c)! : areas.length; };
     const filas = [...proyectos.filas]
       .filter(f => (edicion ? true : !f.oculta && f.pagina_id) && String(f.celdas[colNombre]?.valor || f.pagina?.titulo || '').trim())
+      // Los que están dentro de otro proyecto (su «Elemento madre») salen en la página de ese
+      // proyecto, no aquí (2026-11-12, `SubproyectosSitio.tsx`). En el editor siguen, para editarlos.
+      .filter(f => edicion || !madre || lista(f.celdas[madre]?.valor).length === 0)
       .sort((a, b) => posicion(a) - posicion(b) || a.orden - b.orden);
     const opcionesArea: EstadoTarjeta[] = [...sistemaDe.entries()].map(([id, x]) => ({ id, label: x.nombre })).sort((a, b) => a.label.localeCompare(b.label, 'es'));
     return { colNombre, colArea, areas, filas, categoriaDe, opcionesArea, nombreArea: (id: string) => sistemaDe.get(id)?.nombre || '' };
@@ -225,6 +231,66 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
     return e && !e.includes('/p/') ? e : p.url;
   };
 
+  // Los sectores de la portada, si la raíz los define y no se está editando (en el editor, la rejilla de siempre).
+  type Sector = { titulo: string; areas?: string[]; icono?: string };
+  // Un color por sector, por su orden (no en la configuración: lo que va en ella se traduce en lighthumanity.org).
+  const COLORES_SECTOR = ['sky', 'violet', 'amber', 'emerald', 'rose'];
+  const defSectores = (raiz.config?.sitio?.sectores || null) as Sector[] | null;
+  const sectores = escaparate && !edicion && !activa && Array.isArray(defSectores) && defSectores.length ? (() => {
+    const usados = new Set<string>();
+    const areasDe = (f: Fila) => lista(f.celdas[modelo.colArea]?.valor).map(id => plano(modelo.nombreArea(id))).filter(Boolean);
+    const grupos = defSectores.map(d => {
+      const quiere = new Set((d.areas || []).map(plano));
+      const filas = visibles.filter(f => !usados.has(f.id) && areasDe(f).some(a => quiere.has(a)));
+      filas.forEach(f => usados.add(f.id));
+      return { titulo: d.titulo, icono: d.icono, color: COLORES_SECTOR[defSectores.indexOf(d) % COLORES_SECTOR.length], otros: false, filas };
+    });
+    const resto = visibles.filter(f => !usados.has(f.id));
+    if (resto.length) grupos.push({ titulo: String(raiz.config?.sitio?.sectorOtros || 'Otras innovaciones'), icono: 'Otras', color: 'slate', otros: true, filas: resto });
+    return grupos.filter(g => g.filas.length);
+  })() : null;
+
+  const tarjetaDe = (f: Fila, i: number, compacta = false, sinPildora = false, claseLi = '') => {
+    const nombre = String(f.celdas[modelo.colNombre]?.valor || f.pagina?.titulo || '').trim();
+    const img = f.pagina?.imagen || null;
+    const enc = f.pagina?.encuadre;
+    const categoria = modelo.categoriaDe(f);
+    const nombreCategoria = categoria ? modelo.nombreArea(categoria) : '';
+    const descripcion = (f.pagina?.descripcion || '').trim();
+    return (
+      <li key={f.id} className={cn('relative', claseLi)}>
+        {(() => {
+          const tarjeta = (
+            <TarjetaPortada nombre={nombre} imagen={img} encuadre={enc} descripcion={descripcion} Titulo={Titulo} prioridad={i} compacta={compacta}
+              pildora={categoria && !sinPildora ? { id: categoria, label: nombreCategoria } : null} iconoPildora={nombreCategoria ? iconoCategoria(nombreCategoria) : undefined} nombrePildora="Categoría"
+              edicion={edicion ? {
+                onNombre: v => guardarCelda(f.id, modelo.colNombre, v),
+                onDescripcion: v => guardarDescripcion(f.id, v),
+                opciones: modelo.opcionesArea,
+                onPildora: modelo.colArea ? id => guardarCelda(f.id, modelo.colArea, id ? [id] : []) : undefined,
+              } : undefined}
+              esquina={edicion ? <>
+                {f.oculta && <span className="rounded-full bg-slate-900/80 px-2.5 py-1 text-xs font-bold text-white">Oculta</span>}
+                {f.pagina_id && <Link to={`/paginas/${f.pagina_id}`} className="inline-flex h-8 items-center gap-1.5 rounded-full bg-white/90 px-3 text-xs font-bold text-slate-700 shadow-sm backdrop-blur hover:bg-white">
+                  <Pencil className="h-3.5 w-3.5" /> Abrir
+                </Link>}
+              </> : undefined} />
+          );
+          return edicion
+            ? <div className={cn(CLASE_TARJETA_PORTADA, f.oculta && 'opacity-60')}>{tarjeta}</div>
+            : <Link to={sitio ? sitio.enlacePagina(f.pagina_id!) : `/p/${f.pagina_id}`} className={CLASE_TARJETA_PORTADA}>{tarjeta}</Link>;
+        })()}
+        {equipo && !edicion && f.pagina_id && (
+          <a href={`https://humanity.wiki/paginas/${encodeURIComponent(f.pagina_id)}`} target="_blank" rel="noopener noreferrer"
+            title={`Editar «${nombre}»`} aria-label={`Editar «${nombre}»`}
+            className="absolute right-3 top-12 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-slate-600 shadow-sm backdrop-blur hover:text-slate-900">
+            <Pencil className="h-4 w-4" />
+          </a>
+        )}
+      </li>
+    );
+  };
+
   const tile = (activo: boolean) => cn(
     'flex h-[72px] w-[84px] shrink-0 flex-col items-center justify-between rounded-xl border px-1 py-1.5 transition-colors',
     activo ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
@@ -272,54 +338,48 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
       {/* LA PRESENTACIÓN (2026-11-07, Eugenio: «haz todas las propuestas… con alta calidad, no
           quiero nada cutre»): qué es el laboratorio en una línea y el botón de colaborar,
           encima de las tarjetas y sin empujarlas fuera de la primera pantalla. */}
-      {escaparate && <PresentacionSitio cfg={raiz.config} edicion={edicion} />}
+      {/* Sin el titular ni el botón cuando `sitio.presentacion` es false (2026-11-12: Colaborar sube a la barra). */}
+      {escaparate && (edicion || raiz.config?.sitio?.presentacion !== false) && <PresentacionSitio cfg={raiz.config} edicion={edicion} />}
 
       {/* LAS TARJETAS (2026-11-06, Eugenio: «el título en blanco con un poco de sombra y de fondo
           la portada, como en la página del proyecto; debajo la descripción en letra pequeña sobre
           blanco; el estado y el año arriba de la imagen y algo más grandes; todas del mismo tamaño,
           dos por fila»). Las primeras cargan ya y con prioridad; el resto, al acercarse. */}
       {escaparate && <h2 className="sr-only">Proyectos</h2>}
+      {/* LOS SECTORES DE INNOVACIÓN (2026-11-12, Eugenio: «agrupa los proyectos de la página de inicio en
+          sectores: una tarjeta grande donde están esas tarjetas un poco más pequeñas… que se vean varios
+          sectores a lo ancho y largo de la página»). `sitio.sectores` de la raíz: cada sector reúne las
+          categorías (filas de Sistemas) que nombra; lo que no cae en ninguno va a «Otras innovaciones». */}
+      {sectores ? (
+        <div data-ancla="proyectos" data-sectores className="mt-6 flex scroll-mt-36 flex-col gap-8 outline-none sm:mt-8 sm:scroll-mt-24 sm:gap-5 2xl:gap-6">
+          {(() => {
+            // TERCERA FORMA (2026-11-12, Eugenio: «que cada sector de innovación ocupe una línea… con un slider o un botón
+            // de mostrar más… que todos los proyectos tengan el mismo tamaño… quita la categoría de la tarjeta, ya
+            // están englobados en un sector»): un panel por sector a todo el ancho (`FilaSector`), tarjetas iguales y
+            // sin etiqueta. Un color por sector, por su orden.
+            const COLOR: Record<string, { borde: string; icono: string }> = {
+              sky: { borde: 'sm:border-t-sky-500', icono: 'text-sky-600' }, violet: { borde: 'sm:border-t-violet-500', icono: 'text-violet-600' },
+              amber: { borde: 'sm:border-t-amber-500', icono: 'text-amber-600' }, emerald: { borde: 'sm:border-t-emerald-500', icono: 'text-emerald-600' },
+              rose: { borde: 'sm:border-t-rose-500', icono: 'text-rose-600' }, slate: { borde: 'sm:border-t-slate-500', icono: 'text-slate-600' },
+            };
+            let n = 0;
+            return sectores.map(g => {
+              const c = COLOR[g.color || 'slate'] || COLOR.slate;
+              // En el móvil, solo lo que cambia («Movilidad»); el título entero, desde `sm`.
+              const m = g.titulo.match(/^(Innovaci[oó]n en (?:el sector (?:de la |de los |del |de )?)?)(.+)$/i);
+              const titulo = m ? <><span className="hidden sm:inline">{m[1]}</span><span className="max-sm:inline-block max-sm:first-letter:uppercase">{m[2]}</span></> : g.titulo;
+              const desde = n; n += g.filas.length;
+              return (
+                <FilaSector key={g.titulo} id={`sector-${plano(g.titulo)}`} titulo={titulo} icono={iconoCategoria(g.icono || '', 'h-5 w-5')}
+                  colorBorde={c.borde} colorIcono={c.icono} filas={g.filas}
+                  pintar={(f, claseLi) => tarjetaDe(f, desde + g.filas.indexOf(f), true, true, claseLi)} />
+              );
+            });
+          })()}
+        </div>
+      ) : (
       <ul data-ancla="proyectos" className={cn('grid list-none grid-cols-1 gap-5 p-0 sm:grid-cols-2', escaparate ? 'lg:grid-cols-3 ' + 'mt-6 scroll-mt-36 outline-none sm:mt-8 sm:scroll-mt-24' : 'mt-4')}>
-        {visibles.map((f, i) => {
-          const nombre = String(f.celdas[modelo.colNombre]?.valor || f.pagina?.titulo || '').trim();
-          const img = f.pagina?.imagen || null;
-          const enc = f.pagina?.encuadre;
-          const categoria = modelo.categoriaDe(f);
-          const nombreCategoria = categoria ? modelo.nombreArea(categoria) : '';
-          const descripcion = (f.pagina?.descripcion || '').trim();
-          return (
-            <li key={f.id} className="relative">
-              {(() => {
-                const tarjeta = (
-                  <TarjetaPortada nombre={nombre} imagen={img} encuadre={enc} descripcion={descripcion} Titulo={Titulo} prioridad={i}
-                    pildora={categoria ? { id: categoria, label: nombreCategoria } : null} iconoPildora={nombreCategoria ? iconoCategoria(nombreCategoria) : undefined} nombrePildora="Categoría"
-                    edicion={edicion ? {
-                      onNombre: v => guardarCelda(f.id, modelo.colNombre, v),
-                      onDescripcion: v => guardarDescripcion(f.id, v),
-                      opciones: modelo.opcionesArea,
-                      onPildora: modelo.colArea ? id => guardarCelda(f.id, modelo.colArea, id ? [id] : []) : undefined,
-                    } : undefined}
-                    esquina={edicion ? <>
-                      {f.oculta && <span className="rounded-full bg-slate-900/80 px-2.5 py-1 text-xs font-bold text-white">Oculta</span>}
-                      {f.pagina_id && <Link to={`/paginas/${f.pagina_id}`} className="inline-flex h-8 items-center gap-1.5 rounded-full bg-white/90 px-3 text-xs font-bold text-slate-700 shadow-sm backdrop-blur hover:bg-white">
-                        <Pencil className="h-3.5 w-3.5" /> Abrir
-                      </Link>}
-                    </> : undefined} />
-                );
-                return edicion
-                  ? <div className={cn(CLASE_TARJETA_PORTADA, f.oculta && 'opacity-60')}>{tarjeta}</div>
-                  : <Link to={sitio ? sitio.enlacePagina(f.pagina_id!) : `/p/${f.pagina_id}`} className={CLASE_TARJETA_PORTADA}>{tarjeta}</Link>;
-              })()}
-              {equipo && !edicion && f.pagina_id && (
-                <a href={`https://humanity.wiki/paginas/${encodeURIComponent(f.pagina_id)}`} target="_blank" rel="noopener noreferrer"
-                  title={`Editar «${nombre}»`} aria-label={`Editar «${nombre}»`}
-                  className="absolute right-3 top-12 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-slate-600 shadow-sm backdrop-blur hover:text-slate-900">
-                  <Pencil className="h-4 w-4" />
-                </a>
-              )}
-            </li>
-          );
-        })}
+        {visibles.map((f, i) => tarjetaDe(f, i))}
         {edicion && (
           <li>
             <button type="button" onClick={anadirProyecto}
@@ -329,6 +389,7 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
           </li>
         )}
       </ul>
+      )}
       {edicion && aviso && <p role="alert" className="mt-3 text-sm font-bold text-rose-600">{aviso}</p>}
       </div>
       {visibles.length === 0 && <p className="py-16 text-center text-sm text-slate-500">No hay proyectos en esta categoría.</p>}

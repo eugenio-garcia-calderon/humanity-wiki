@@ -28,6 +28,8 @@ import BotonOpinion from './BotonOpinion';
 import { EscaparateContexto, RaizEscaparateContexto } from './escaparate';
 import CabeceraPaginaEscaparate, { esPaginaEscaparate } from './CabeceraPaginaEscaparate';
 const CabeceraProyectoEscaparate = lazy(() => import('./CabeceraProyectoEscaparate'));
+const SubproyectosSitio = lazy(() => import('./SubproyectosSitio'));
+const BarraSiEsDeSol = lazy(() => import('./solSolidario/marca').then(m => ({ default: m.BarraSiEsDeSol })));
 
 // ============================================================================
 // UNA PÁGINA PUBLICADA, COMO SE LEE (2026-09-30)
@@ -250,6 +252,8 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
       <main id="contenido" tabIndex={-1} className="outline-none">
       <article>
         {((conBarra && esRaiz) || sinCabecera) && <h1 className="sr-only">{pagina.titulo || 'Sin título'}</h1>}
+        {/* Un proyecto de Sol Solidario lleva debajo de la barra del sitio la de la marca (2026-11-12, `solSolidario/marca.tsx`). */}
+        {proyectoEscaparate && pagina.fila?.fila_id && <Suspense fallback={null}><BarraSiEsDeSol filaId={pagina.fila.fila_id} tablaId={pagina.fila.tabla_id} /></Suspense>}
         {(conBarra && esRaiz) || sinCabecera ? null : termo
           ? <LecturaBloqueDatos bloque={{ ...termo, datos: { ...(termo.datos || {}), comoCabecera: true } }} paginaId={pagina.id} />
           : perfil ? <LecturaBloqueDatos bloque={perfil} paginaId={pagina.id} />
@@ -286,6 +290,12 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
             // títulos va pegado a él; detrás de otra sección conserva su aire (`data-subtitulo`).
             ? <div className="[&_[data-tipo=titulo1]]:mt-14 sm:[&_[data-tipo=titulo1]]:mt-20 [&>div>div:first-child>[data-tipo=titulo1]]:mt-0 [&>div>div:first-child>[data-tipo=titulo1]>*]:mt-0 [&_div:has(>[data-tipo=titulo1])+div_[data-subtitulo]]:mt-0"><BloquesLectura bloques={bloques} paginaId={pagina.id} /></div>
             : <BloquesLectura bloques={bloques} comentable={pagina.virtual ? undefined : pagina.id} paginaId={pagina.virtual ? undefined : pagina.id} />}
+        {/* Los proyectos que cuelgan de este (subelementos de la tabla de proyectos), en las
+            mismas tarjetas que la portada (2026-11-12, `SubproyectosSitio.tsx`). */}
+        {proyectoEscaparate && pagina.fila?.fila_id && <Suspense fallback={null}>
+          <SubproyectosSitio filaId={pagina.fila.fila_id} tablaId={pagina.fila!.tabla_id} sistemasId={pagina.sitio?.config?.sistemas}
+            titulo={typeof cfg.subproyectos?.titulo === 'string' ? cfg.subproyectos.titulo : undefined} />
+        </Suspense>}
         {!pagina.virtual && !escaparate && (pagina as any).ficha && <SugerirCorreccion paginaId={pagina.id} />}
         {!pagina.virtual && !paginaEscaparate && <EnlazanAqui paginaId={pagina.id} />}
       </article>

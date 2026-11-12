@@ -10,12 +10,12 @@
 // and one-off donations. Each scale has a citizens' assembly that chooses
 // priorities and a technical committee that carries them out.
 //
-// The page: the rings (hero), how it works, the 2D scheme of where the money
-// goes, the matrix scale × area, a worked example (a person in a village of 400
-// in Madrid), today's Spanish system next to the model, today's pensions in five tiers,
-// today's budgets at every scale (EU to family) as donuts, who decides, the
-// country's accounts and what is still to be solved. Every number comes from
-// `src/data/modeloSocioeconomico.ts`.
+// WINDOWS, NOT ONE LONG PAGE (2026-11-12, Eugenio): a menu of windows —
+// Impuestos, Pensiones, Presupuestos, and room for Educación and Sanidad. The
+// chosen one stays lit and the others dim; below it, its own page with its own
+// submenu. Simple first, detail behind «Más» (`ventanas.tsx`). Without a window
+// in the address, a cover with one card per window. Every number comes from
+// `src/data/`.
 //
 // TWO HOMES, ONE COMPONENT, like the consciousness map: humanity.wiki/modelo-
 // socioeconomico (App.tsx) and a project page of luzhumanidad.com whose
@@ -23,376 +23,195 @@
 // 0184). `enSitio` is set in the second case.
 //
 // PÁGINA PROPIA: outside the platform Layout, like /conciencia.
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageSquarePlus, Pause, Play } from 'lucide-react';
+import { ChevronRight, Maximize2, MessageSquarePlus, Minimize2 } from 'lucide-react';
+import { useIntegracion } from '../components/sitio/AplicacionIncrustada';
 import '@fontsource-variable/public-sans';
-import {
-  ESCALA, ESCALAS, TRAMOS, TOTAL_FIGURAS, EJEMPLO_INICIAL, type EscalaId, type Modo, type Ejemplo,
-  cuentasPais, principales, euros, millones, porcentaje, MATRIZ, TIPO_GENERAL,
-} from '../data/modeloSocioeconomico';
-import { AnillosEscalas } from '../components/modeloSocioeconomico/AnillosEscalas';
-import { EsquemaFlujos, EsquemaVertical } from '../components/modeloSocioeconomico/EsquemaFlujos';
-import { MatrizAmbitos } from '../components/modeloSocioeconomico/MatrizAmbitos';
-import { TuCaso } from '../components/modeloSocioeconomico/TuCaso';
-import { Piezas, Costes, Tabla, DondeEstaElDinero, GanaYPierde } from '../components/modeloSocioeconomico/Comparativa';
-import { PreguntasCobro } from '../components/modeloSocioeconomico/PreguntasCobro';
-import { QuienDecide } from '../components/modeloSocioeconomico/QuienDecide';
-import { Tercios, AyudaEntreEscalas } from '../components/modeloSocioeconomico/TerciosApoyo';
-import { TresTramos, CincoPagos } from '../components/modeloSocioeconomico/Tramos';
-import { LasCuentas, Retos, ListaFuentes } from '../components/modeloSocioeconomico/Cuentas';
-import { Pensiones } from '../components/modeloSocioeconomico/Pensiones';
+import { TRAMOS_PENSION } from '../data/presupuestos';
+import { SMI_MES } from '../data/pensionesPropuesta';
+import { ImpuestosVentana } from '../components/modeloSocioeconomico/ImpuestosVentana';
+import { PensionesVentana } from '../components/modeloSocioeconomico/PensionesVentana';
 import { Presupuestos } from '../components/modeloSocioeconomico/Presupuestos';
 import { BuzonProyecto } from '../components/modeloSocioeconomico/BuzonProyecto';
-import { Boton, Encabezado, Muestra, Segmentado } from '../components/modeloSocioeconomico/piezas';
+import { Boton, Libre } from '../components/modeloSocioeconomico/piezas';
+import { VENTANAS, ALIAS, ventanaDeAncla, Apartado, type VentanaId } from '../components/modeloSocioeconomico/ventanas';
+import { cn } from '../utils/cn';
 
-const SECCIONES = [
-  { id: 'como-funciona', t: 'Cómo funciona' },
-  { id: 'esquema', t: 'Esquema' },
-  { id: 'matriz', t: 'Quién hace qué' },
-  { id: 'tercios', t: 'Tercios y ayuda' },
-  { id: 'ejemplo', t: 'Un caso' },
-  { id: 'hoy', t: 'Frente a hoy' },
-  { id: 'pensiones', t: 'Pensiones' },
-  { id: 'presupuestos', t: 'Presupuestos' },
-  { id: 'decide', t: 'Quién decide' },
-  { id: 'cuentas', t: 'Cuentas' },
-  { id: 'retos', t: 'Lo que falta' },
-  { id: 'fuentes', t: 'Fuentes' },
-];
+// Each window's accent: its tab when lit, its cover card. Classes, not colours.
+const ACENTO: Record<string, { tab: string; borde: string; texto: string }> = {
+  impuestos: { tab: 'bg-amber-500 text-slate-950', borde: 'border-amber-400', texto: 'text-amber-600' },
+  pensiones: { tab: 'bg-teal-600 text-white', borde: 'border-teal-500', texto: 'text-teal-700' },
+  presupuestos: { tab: 'bg-indigo-600 text-white', borde: 'border-indigo-500', texto: 'text-indigo-600' },
+  educacion: { tab: '', borde: 'border-slate-200', texto: 'text-slate-400' },
+  sanidad: { tab: '', borde: 'border-slate-200', texto: 'text-slate-400' },
+};
 
-const LECTURA_CORTA: Record<Modo, string> = { eslabon: 'Sin cascada entre empresas', literal: 'Al pie de la letra' };
+const anclaActual = () => decodeURIComponent(window.location.hash.replace(/^#/, ''));
 
 export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: string } } = {}) {
-  const [modo, setModo] = useState<Modo>('eslabon');
-  const [anillo, setAnillo] = useState<EscalaId | null>(null);
-  const [nivel, setNivel] = useState<EscalaId | null>(null);
-  const [mover, setMover] = useState(true);
-  const [ejemplo, setEjemplo] = useState<Ejemplo>(EJEMPLO_INICIAL);
+  const [ancla, setAncla] = useState(() => (typeof window === 'undefined' ? '' : anclaActual()));
   const [verBuzon, setVerBuzon] = useState(false);
-  const pais = cuentasPais(modo);
+  const ventana = ventanaDeAncla(ancla);
+  const actual = VENTANAS.find(v => v.id === ventana) || null;
+  const integracion = useIntegracion();
+  const cabecera = useRef<HTMLElement>(null);
+  const [altoCabecera, setAltoCabecera] = useState(0);
+  const [visible, setVisible] = useState<string | null>(null);
+  const tiraVentanas = useRef<HTMLUListElement>(null);
+  const tiraApartados = useRef<HTMLUListElement>(null);
+
+  // Keep the lit window and the lit section in view inside their scrolling rows (phones).
+  useEffect(() => {
+    for (const tira of [tiraVentanas.current, tiraApartados.current]) {
+      const el = tira?.querySelector<HTMLElement>('[aria-current]');
+      if (tira && el) tira.scrollTo({ left: el.offsetLeft - tira.clientWidth / 2 + el.clientWidth / 2, behavior: 'smooth' });
+    }
+  }, [ventana, visible]);
 
   useEffect(() => {
     const titulo = document.title;
-    document.title = 'Modelo socioeconómico optimizado · Un solo impuesto en tres tramos, repartido en ocho escalas · Luz & Humanidad';
+    document.title = 'Modelo socioeconómico optimizado · Impuestos, pensiones y presupuestos · Luz & Humanidad';
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
     const anterior = meta?.content;
     if (!meta) { meta = document.createElement('meta'); meta.name = 'description'; document.head.appendChild(meta); }
-    meta.content = 'Un único impuesto en tres tramos (10, 25 y 40 %) sobre cada pago, que el sistema de pago reparte al instante entre ocho escalas (persona, comunidad vecinal, municipio, provincia, región, nación, continente y planeta), con un tercio para producir, uno para cuidar y uno libre, comparado con el sistema fiscal español actual.';
+    meta.content = 'Un único impuesto en tres tramos (10, 25 y 40 %) repartido entre ocho escalas, una pensión única igual al salario mínimo y los presupuestos de cada escala, comparados con el sistema español de hoy.';
     return () => { document.title = titulo; if (meta) meta.content = anterior ?? ''; };
   }, []);
+
+  // The window and the section live in the address (#pensiones-fondo).
+  useEffect(() => {
+    const cambio = () => setAncla(anclaActual());
+    window.addEventListener('hashchange', cambio);
+    return () => window.removeEventListener('hashchange', cambio);
+  }, []);
+
+  // How tall our own header is, so a section lands right below it.
+  useLayoutEffect(() => {
+    const el = cabecera.current; if (!el) return;
+    const medir = () => setAltoCabecera(Math.round(el.getBoundingClientRect().height));
+    medir();
+    const o = new ResizeObserver(medir); o.observe(el);
+    return () => o.disconnect();
+  }, []);
+
+  // After the window is drawn, go to the section in the address, or to its top.
+  // A window opens at its top; a section, below both headers — after they
+  // have been measured (on luzhumanidad.com the site bar is measured late).
+  useEffect(() => {
+    if (!ventana) return;
+    const id = ALIAS[ancla] || ancla;
+    const t = window.setTimeout(() => {
+      if (id === ventana) { window.scrollTo({ top: 0 }); return; }
+      document.getElementById(id)?.scrollIntoView({ block: 'start' });
+    }, 80);
+    return () => window.clearTimeout(t);
+  }, [ancla, ventana]);
+
+  // Which section of the window is on screen: lit in the submenu.
+  useEffect(() => {
+    if (!actual) { setVisible(null); return; }
+    const secciones = actual.apartados.map(a => document.getElementById(a.id)).filter(Boolean) as HTMLElement[];
+    const o = new IntersectionObserver(entradas => {
+      const vistas = entradas.filter(e => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+      if (vistas[0]) setVisible(vistas[0].target.id);
+    }, { rootMargin: '-35% 0px -55% 0px' });
+    secciones.forEach(s => o.observe(s));
+    return () => o.disconnect();
+  }, [actual]);
 
   const inicioLuz = enSitio ? enSitio.inicio : 'https://luzhumanidad.com';
   const marca = enSitio
     ? <Link to={inicioLuz} className="underline decoration-slate-300 underline-offset-2 hover:text-slate-900">Luz &amp; Humanidad</Link>
     : <a href={inicioLuz} className="underline decoration-slate-300 underline-offset-2 hover:text-slate-900">Luz &amp; Humanidad</a>;
-
-  const sel = anillo ? ESCALA[anillo] : null;
-  const selNivel = nivel ? ESCALA[nivel] : null;
+  const margen = (integracion?.altoBarra || 0) + altoCabecera + 12;
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900 antialiased" style={{ fontFamily: '"Public Sans Variable", ui-sans-serif, system-ui, sans-serif' }}>
-      {/* ── Top band: what this is, who makes it, where to go, the mailbox ── */}
-      <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-2.5 sm:px-6 min-[1700px]:max-w-none">
-          <a href="#inicio" className="min-w-0 leading-tight">
-            <span className="block text-[15px] font-bold tracking-tight">Modelo socioeconómico optimizado</span>
-            <span className="block text-xs text-slate-500">Un proyecto de {marca}</span>
-          </a>
-          <nav aria-label="Secciones" className="ml-auto hidden min-w-0 gap-0.5 text-[13px] min-[1700px]:flex">
-            {SECCIONES.map(s => (
-              <a key={s.id} href={`#${s.id}`} className="whitespace-nowrap rounded-full px-2 py-1.5 text-slate-600 hover:bg-slate-100 hover:text-slate-900">{s.t}</a>
-            ))}
+    <div data-modelo className="min-h-screen bg-slate-100 text-slate-900 antialiased" style={{ fontFamily: '"Public Sans Variable", ui-sans-serif, system-ui, sans-serif' }}>
+      <style>{`[data-modelo] section[id], [data-modelo] [id].scroll-mt-40 { scroll-margin-top: ${margen}px; }`}</style>
+
+      {/* ── The header: the windows and the open window's sections; the project's name is in the cover and the footer ── */}
+      <header ref={cabecera} className="sticky top-0 z-40 border-b border-slate-200 bg-white" style={integracion ? { top: integracion.altoBarra } : undefined}>
+        {/* The windows. The open one is lit; the others dim until you point at them. */}
+        {/* One row: the windows, and a small full-screen switch at the end (Eugenio: «compacta el menú»). */}
+        <div className="mx-auto flex max-w-6xl items-center gap-2 px-2 sm:px-4">
+          <nav aria-label="Ventanas" className="relative min-w-0 flex-1">
+            <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 z-10 flex w-14 items-center justify-end bg-gradient-to-l from-white via-white/90 to-transparent pr-1 text-slate-400 sm:hidden"><ChevronRight className="h-5 w-5" /></span>
+            <ul ref={tiraVentanas} className="flex gap-0.5 overflow-x-auto py-1 pr-12 [scrollbar-width:none] sm:pr-0">
+              {VENTANAS.map(v => {
+                const Icono = v.icono;
+                const activa = v.id === ventana;
+                if (v.pronto) return (
+                  <li key={v.id} className="shrink-0">
+                    <span aria-disabled title="Próximamente" className="flex cursor-default items-center gap-2 rounded-full px-2.5 py-1.5 text-sm font-medium text-slate-300">
+                      <Icono aria-hidden className="h-4 w-4" />{v.titulo}
+                      <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-400">pronto</span>
+                    </span>
+                  </li>
+                );
+                return (
+                  <li key={v.id} className="shrink-0">
+                    <a href={`#${v.id}`} aria-current={activa ? 'page' : undefined}
+                      className={cn('flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900',
+                        activa ? cn(ACENTO[v.id].tab, 'shadow-sm') : ventana ? 'text-slate-500 hover:bg-slate-100 hover:text-slate-900' : 'text-slate-800 hover:bg-slate-100')}>
+                      <Icono aria-hidden className="h-4 w-4" />{v.titulo}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
           </nav>
-          <Boton onClick={() => setVerBuzon(true)} className="ml-auto shrink-0 min-[1700px]:ml-0">
-            <MessageSquarePlus className="h-4 w-4" /><span className="sm:hidden">Proponer</span><span className="hidden sm:inline">Proponer una mejora</span>
-          </Boton>
+          {integracion && (
+            <Libre onClick={integracion.alternar} aria-pressed={integracion.completa}
+              title={integracion.completa ? 'Salir de pantalla completa' : 'Pantalla completa'}
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-900">
+              {integracion.completa ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+              <span className="sr-only">{integracion.completa ? 'Salir de pantalla completa' : 'Pantalla completa'}</span>
+            </Libre>
+          )}
         </div>
-        {/* Phones: the list scrolls sideways; the fade on the right says there is more. */}
-        <div className="relative border-t border-slate-100 min-[1700px]:hidden">
-          <nav aria-label="Secciones" className="flex gap-1 overflow-x-auto px-3 py-1.5 pr-10 text-[13px] [scrollbar-width:none]">
-            {SECCIONES.map(s => (
-              <a key={s.id} href={`#${s.id}`} className="whitespace-nowrap rounded-full px-2.5 py-1 text-slate-600 hover:bg-slate-100">{s.t}</a>
-            ))}
-          </nav>
-          <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-white to-transparent" />
-        </div>
+
+        {/* The open window's sections. */}
+        {actual && (
+          <div className="relative border-t border-slate-100">
+            <nav aria-label={`Apartados de ${actual.titulo}`} className="mx-auto max-w-6xl px-2 sm:px-4">
+              <ul ref={tiraApartados} className="flex gap-0.5 overflow-x-auto py-1 pr-8 text-[13px] [scrollbar-width:none]">
+                {actual.apartados.map(a => (
+                  <li key={a.id} className="shrink-0">
+                    <a href={`#${a.id}`} aria-current={visible === a.id ? 'location' : undefined}
+                      className={cn('block whitespace-nowrap rounded-full px-2.5 py-0.5', visible === a.id ? cn('font-semibold', ACENTO[actual.id].texto, 'bg-slate-100') : 'text-slate-600 hover:bg-slate-100')}>
+                      {a.t}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+            <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 flex w-12 items-center justify-end bg-gradient-to-l from-white via-white/90 to-transparent pr-1 text-slate-400 lg:hidden"><ChevronRight className="h-4 w-4" /></span>
+          </div>
+        )}
       </header>
 
       <main>
-        {/* ── Hero: the rings ── */}
-        <section id="inicio" className="mx-auto grid max-w-7xl scroll-mt-28 items-center gap-10 px-4 pb-16 pt-10 sm:px-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)] lg:pt-14">
-          <div>
-            <h1 className="text-[2.35rem] font-[800] leading-[1.02] tracking-[-0.035em] sm:text-[3.4rem]">Modelo socioeconómico optimizado</h1>
-            <p className="mt-6 max-w-[34ch] text-[1.45rem] font-medium leading-snug tracking-[-0.01em] text-slate-800 sm:text-[1.65rem]">
-              Un solo impuesto sobre cada pago, en tres tramos: un 10 % en lo básico, un 25 % en lo secundario y un 40 % en el ocio y el lujo.
-              Llega al instante, en ocho partes iguales, a las escalas en las que vivimos.
-            </p>
-            <p className="mt-5 max-w-[62ch] text-[17px] leading-relaxed text-slate-600">
-              Hoy en España conviven {TOTAL_FIGURAS} impuestos y cotizaciones distintos, cientos de tasas y las cuotas de comunidad.
-              Con este modelo nadie declara nada: el sistema de pago aparta el tramo de cada compra y de cada sueldo, y el dinero llega solo a cada escala.
-              Cada escala dedica un tercio a producir, uno a cuidar y uno a lo que decida su asamblea ciudadana.
-              A cambio, recauda ≈ {porcentaje(cuentasPais('eslabon').pctPIB, 0)} del PIB, frente al ≈ 38 % de hoy, y cambia las pensiones y el paro por apoyo mutuo: lo cuenta la página entera.
-            </p>
-            <div className="mt-7 flex flex-wrap gap-3">
-              <a href="#esquema" className="rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900">Ver adónde va el dinero</a>
-              <a href="#ejemplo" className="rounded-full border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900">Calcular un caso</a>
-            </div>
-          </div>
-
-          <div className="mx-auto w-full max-w-[600px]">
-            <AnillosEscalas activa={anillo} onActiva={setAnillo} className="w-full" />
-            <div aria-live="polite" className="mx-auto mt-5 min-h-[132px] max-w-[460px] text-center text-[15px] leading-relaxed">
-              {sel ? (
-                <>
-                  <p className="flex items-center justify-center gap-2 font-bold text-slate-900"><Muestra color={sel.color} className="h-3.5 w-3.5" />{sel.nombre}</p>
-                  <p className="mt-1 text-slate-700">{sel.recibe}.</p>
-                  <p className="mt-2 text-slate-700">{sel.devuelve}.</p>
-                  <p className="mt-3 text-sm text-slate-500">
-                    Un octavo de lo recaudado: {euros(pais.porPersonaEscala)} por habitante y año
-                    {sel.id !== 'persona' && <>; en España, {millones(pais.porEscala)}</>}.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="font-bold text-slate-900">Ocho escalas, una dentro de otra</p>
-                  <p className="mt-1 text-slate-700">Toca un anillo para ver quién recibe su parte y qué devuelve.</p>
-                  <p className="mt-3 text-sm text-slate-500">
-                    Los anillos muestran qué escala está dentro de cuál, no cuánto recibe: cada una recibe {euros(pais.porPersonaEscala)} por habitante y año.
-                    En Europa y el planeta, es lo que aporta España por cada habitante.
-                  </p>
-                </>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* ── How it works: a real sequence ── */}
-        <section id="como-funciona" aria-labelledby="como-funciona-titulo" className="scroll-mt-28 border-t border-slate-200 bg-white">
-          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-            <Encabezado id="como-funciona" titulo="Cómo funciona: tres tramos y ocho partes">
-              De cada pago se aparta su tramo: un 10 %, un 25 % o un 40 %. Lo apartado se junta y se reparte en ocho partes iguales, una por escala.
-            </Encabezado>
-            <ol className="grid gap-8 sm:grid-cols-2 lg:grid-cols-5">
-              {[
-                { t: 'Pagas', d: 'Con tarjeta, Bizum o el móvil. El precio ya lleva su tramo dentro, como hoy el IVA.' },
-                { t: 'Se aparta el tramo', d: 'En el mismo instante, el sistema de pago separa el impuesto (10, 25 o 40\u00A0% sobre el precio sin impuesto) y el resto llega a quien cobra.' },
-                { t: 'Se reparte en ocho', d: 'Lo apartado de todos los pagos se junta y cada escala recibe un octavo, lo mismo por habitante. Tu parte personal es un dividendo igual para todo el mundo.' },
-                { t: 'Cada escala, en tercios', d: 'Un tercio para comprar o mejorar medios de producción, uno para cuidados y uno libre.' },
-                { t: 'Cada escala decide', d: 'Su asamblea ciudadana elige las prioridades y su comité técnico las cumple al menor coste, de la forma más eficaz y ecológica.' },
-              ].map((p, i) => (
-                <li key={p.t}>
-                  <span className="text-5xl font-[800] tabular-nums tracking-tight text-slate-200">{i + 1}</span>
-                  <h3 className="mt-1 text-lg font-bold">{p.t}</h3>
-                  <p className="mt-1 text-[15px] leading-relaxed text-slate-600">{p.d}</p>
-                </li>
-              ))}
-            </ol>
-
-            <div className="mt-12"><TresTramos /></div>
-            <div className="mt-6"><CincoPagos /></div>
-            <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600">
-              El tramo se suma al precio sin impuesto, como el IVA de hoy: una cena de 40 € cuesta 56 € y 16 € van al fondo. De todo lo que pagas, el fondo se queda una onceava parte en el tramo 1, una quinta parte en el 2 y dos séptimas partes en el 3.
-            </p>
-
-            <PreguntasCobro modo={modo} />
-
-            {/* The one decision that changes every figure below. */}
-            <div className="mt-12 rounded-2xl border border-slate-300 bg-slate-50 p-5 sm:p-6">
-              <h3 className="text-lg font-bold">Una decisión antes de seguir: ¿pagan también las compras entre empresas?</h3>
-              <p className="mt-1 max-w-3xl text-[15px] leading-relaxed text-slate-600">
-                La panadería compra harina al molino; la fábrica de chaquetas, tela. Si esas compras también dejan su parte, el impuesto se suma en cada eslabón de la cadena.
-                «Todas las transacciones» admite dos lecturas, y todas las cifras de la página cambian con la que elijas.
-              </p>
-              <dl className="mt-4 grid gap-4 text-sm md:grid-cols-2">
-                <div>
-                  <dt className="font-semibold text-slate-900">{LECTURA_CORTA.eslabon}</dt>
-                  <dd className="mt-0.5 leading-relaxed text-slate-600">
-                    La empresa paga al comprar y lo recupera al vender, como hoy el IVA. Cada producto lleva exactamente su tramo: el pan, el 10 %; la chaqueta, el 25 %.
-                    Recauda ≈ {porcentaje(cuentasPais('eslabon').pctPIB, 0)} del PIB. Es la lectura por defecto.
-                  </dd>
-                </div>
-                <div>
-                  <dt className="font-semibold text-slate-900">{LECTURA_CORTA.literal}</dt>
-                  <dd className="mt-0.5 leading-relaxed text-slate-600">
-                    Cada pago entre empresas deja el tipo general, un {porcentaje(TIPO_GENERAL * 100, 0)}, sin devolución. Recauda ≈ {porcentaje(cuentasPais('literal').pctPIB, 0)} del PIB,
-                    pero los productos con más intermediarios salen más caros.
-                  </dd>
-                </div>
-              </dl>
-              <div className="mt-5 flex flex-wrap items-center gap-3 text-sm">
-                <Segmentado<Modo> etiqueta="Lectura del modelo" valor={modo} onChange={setModo}
-                  opciones={[{ id: 'eslabon', texto: LECTURA_CORTA.eslabon }, { id: 'literal', texto: LECTURA_CORTA.literal }]} />
-                <a href="#cuentas" className="text-slate-600 underline decoration-slate-300 underline-offset-2 hover:text-slate-900">Ver las cuentas de las dos</a>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── The 2D scheme ── */}
-        <section id="esquema" aria-labelledby="esquema-titulo" className="mx-auto max-w-7xl scroll-mt-28 px-4 py-16 sm:px-6">
-          <Encabezado id="esquema" titulo="El esquema completo: adónde va el dinero">
-            El camino de cada euro, desde el pago hasta lo que vuelve a las personas, y cómo ellas deciden. Pasa o toca una escala para seguir su parte.
-          </Encabezado>
-          <div className="mb-3 hidden justify-end md:flex">
-            <Boton onClick={() => setMover(v => !v)} aria-pressed={!mover}>
-              {mover ? <><Pause className="h-4 w-4" /> Detener el movimiento</> : <><Play className="h-4 w-4" /> Ver el dinero moverse</>}
-            </Boton>
-          </div>
-          <div className="hidden overflow-x-auto rounded-2xl border border-slate-200 bg-white p-3 sm:p-5 md:block">
-            <EsquemaFlujos modo={modo} activa={nivel} onActiva={setNivel} mover={mover} />
-          </div>
-          <div className="md:hidden"><EsquemaVertical modo={modo} activa={nivel} onActiva={setNivel} /></div>
-          <div aria-live="polite" className="mt-4 min-h-[88px] rounded-2xl border border-slate-200 bg-white p-5 text-[15px]">
-            {selNivel ? (
-              <div className="grid gap-4 md:grid-cols-[1fr_1fr]">
-                <div>
-                  <p className="flex items-center gap-2 font-bold"><Muestra color={selNivel.color} />{selNivel.nombre}</p>
-                  <p className="mt-1 text-slate-700">{selNivel.recibe}.</p>
-                </div>
-                <div className="text-slate-700">
-                  {selNivel.id === 'persona'
-                    ? <>Recibe {euros(pais.porPersonaEscala)} al año, unos {euros(pais.porPersonaEscala / 12)} al mes, y decide libremente en qué gastarlo.</>
-                    : <>Sus mayores partidas: {principales(selNivel.id).map(a => `${a.nombre.toLowerCase()} (${MATRIZ[selNivel.id][a.id].peso}\u00A0%)`).join(', ')}.</>}
-                </div>
-              </div>
-            ) : (
-              <p className="text-slate-600">
-                En España, los pagos que llevan el impuesto (la base: sueldos, compras de las familias y vivienda{modo === 'literal' ? ', compras entre empresas e inversión' : ''}) suman al año {millones(pais.base)};
-                lo apartado son {millones(pais.recaudacion)} (de media, el {porcentaje(pais.tipoMedio * 100)} de cada pago), y cada escala recibe {millones(pais.porEscala)}.
-                Lectura usada: «{LECTURA_CORTA[modo].toLowerCase()}».
-              </p>
-            )}
-          </div>
-        </section>
-
-        {/* ── The matrix ── */}
-        <section id="matriz" aria-labelledby="matriz-titulo" className="scroll-mt-28 border-t border-slate-200 bg-white">
-          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-            <Encabezado id="matriz" titulo="Quién se ocupa de qué, y en qué se invierte">
-              Ocho escalas por quince ámbitos. Cada escala hace solo lo que no puede hacerse mejor más cerca: el desfibrilador del portal, el agua del pueblo,
-              los bomberos de la comarca, el hospital de la región, el apoyo a las personas con discapacidad del país, el tren entre países y el clima del planeta.
-            </Encabezado>
-            <MatrizAmbitos modo={modo} />
-          </div>
-        </section>
-
-        {/* ── Thirds and support between scales ── */}
-        <section id="tercios" aria-labelledby="tercios-titulo" className="scroll-mt-28 border-y border-slate-200 bg-slate-50">
-          <div className="mx-auto max-w-7xl space-y-14 px-4 py-16 sm:px-6">
-          <div>
-            <Encabezado id="tercios" titulo="Un tercio para producir, uno para cuidar y uno libre">
-              Cada escala, de la persona al planeta, divide lo que recibe en tres partes iguales. Una compra o mejora lo que produce lo básico, para que sobre;
-              otra cuida de las personas; la tercera la decide su asamblea.
-            </Encabezado>
-            <Tercios modo={modo} />
-          </div>
-          <div>
-            <h2 className="mb-6 max-w-3xl text-[1.6rem] font-[750] leading-tight tracking-[-0.02em] text-slate-900 sm:text-[2rem]">
-              Ayuda entre escalas, en lugar de pensiones
-            </h2>
-            <AyudaEntreEscalas modo={modo} />
-          </div>
-          </div>
-        </section>
-
-        {/* ── The worked example ── */}
-        <section id="ejemplo" aria-labelledby="ejemplo-titulo" className="mx-auto max-w-7xl scroll-mt-28 px-4 py-16 sm:px-6">
-          <Encabezado id="ejemplo" titulo="Una persona de un pueblo de 400 habitantes">
-            Vive con su pareja en un pueblo de la Sierra Norte de Madrid, en la Comunidad de Madrid, en España, en Europa, en la Tierra.
-            Cuánto dinero maneja al día, al mes y al año, cuánto aporta a cada escala y qué cambia respecto a hoy. Mueve los mandos para ver otro caso.
-          </Encabezado>
-          <TuCaso modo={modo} ejemplo={ejemplo} onEjemplo={setEjemplo} />
-        </section>
-
-        {/* ── Today vs the model ── */}
-        <section id="hoy" aria-labelledby="hoy-titulo" className="scroll-mt-28 border-t border-slate-200 bg-white">
-          <div className="mx-auto max-w-7xl space-y-12 px-4 py-16 sm:px-6">
-            <Encabezado id="hoy" titulo="El sistema de hoy y el modelo, frente a frente">
-              Hoy cada administración cobra sus propios impuestos y tasas, con sus reglas y sus plazos, y después el dinero se redistribuye entre ellas.
-              El modelo lo sustituye por un único cobro automático que ya llega repartido.
-            </Encabezado>
-            <Piezas />
-            <div>
-              <h3 className="mb-5 text-xl font-bold">Lo que cuesta cumplir hoy</h3>
-              <Costes />
-            </div>
-            <Tabla modo={modo} />
-            <DondeEstaElDinero modo={modo} />
-            <GanaYPierde modo={modo} />
-          </div>
-        </section>
-
-        {/* ── Pensions by tier (today's system) ── */}
-        <section id="pensiones" aria-labelledby="pensiones-titulo" className="scroll-mt-28 border-t border-slate-200 bg-slate-50">
-          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-            <Encabezado id="pensiones" titulo="Las pensiones de hoy, en cinco tramos">
-              Cuántas pensiones hay en cada tramo, de la máxima a la mínima, y qué parte del dinero se lleva cada uno. Es el gasto más grande del país: sirve para ver qué sustituirían los préstamos, las donaciones y el apoyo a la discapacidad del modelo.
-            </Encabezado>
-            <Pensiones />
-          </div>
-        </section>
-
-        {/* ── Budgets at every order of magnitude ── */}
-        <section id="presupuestos" aria-labelledby="presupuestos-titulo" className="mx-auto max-w-7xl scroll-mt-28 px-4 py-16 sm:px-6">
-          <Encabezado id="presupuestos" titulo="En qué se gasta cada escala">
-            El presupuesto de hoy de Europa, España, la Comunidad de Madrid, un municipio, una comunidad de vecinos y una familia, cada uno en su quesito. Elige una escala; la tabla de abajo las pone todas juntas.
-          </Encabezado>
-          <Presupuestos />
-        </section>
-
-        {/* ── Who decides ── */}
-        <section id="decide" aria-labelledby="decide-titulo" className="mx-auto max-w-7xl scroll-mt-28 px-4 py-16 sm:px-6">
-          <Encabezado id="decide" titulo="Quién decide en cada escala">
-            En cada escala, una asamblea ciudadana elige las prioridades políticas y un comité técnico decide cómo cumplirlas al menor coste,
-            de la forma más eficaz y más ecológica. Las cuentas abiertas cierran el círculo.
-          </Encabezado>
-          <QuienDecide />
-        </section>
-
-        {/* ── The accounts ── */}
-        <section id="cuentas" aria-labelledby="cuentas-titulo" className="scroll-mt-28 border-t border-slate-200 bg-white">
-          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-            <Encabezado id="cuentas" titulo="Las cuentas del país">
-              Cuánto daría el modelo en España con los datos de 2025, según cómo se entienda «todas las transacciones». Elige la lectura: todas las cifras de la página cambian con ella.
-            </Encabezado>
-            <LasCuentas modo={modo} onModo={setModo} />
-          </div>
-        </section>
-
-        {/* ── Open problems ── */}
-        <section id="retos" aria-labelledby="retos-titulo" className="mx-auto max-w-7xl scroll-mt-28 px-4 py-16 sm:px-6">
-          <Encabezado id="retos" titulo="Lo que falta por resolver">
-            Un modelo que esconde lo que aún no cuadra no ayuda a mejorarlo. Estas son las preguntas abiertas, con las cifras de la lectura elegida.
-          </Encabezado>
-          <Retos modo={modo} />
-          <div className="mt-12 flex flex-col items-start justify-between gap-4 rounded-2xl bg-slate-900 p-6 text-white sm:flex-row sm:items-center sm:p-8">
-            <div>
-              <h3 className="text-xl font-bold">¿Cómo lo mejorarías?</h3>
-              <p className="mt-1 max-w-2xl text-slate-300">Cada propuesta se revisa y, si mejora el modelo, se aplica a esta página.</p>
-            </div>
-            <Boton onClick={() => setVerBuzon(true)} className="border-white bg-white text-slate-900 hover:bg-slate-100">
-              <MessageSquarePlus className="h-4 w-4" /> Proponer una mejora
-            </Boton>
-          </div>
-        </section>
-
-        <section id="fuentes" aria-labelledby="fuentes-titulo" className="scroll-mt-28 border-t border-slate-200 bg-white">
-          <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-            <h2 id="fuentes-titulo" className="text-xl font-bold">Fuentes y método</h2>
-            <p className="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600">
-              Las cifras de España salen de las fuentes oficiales enlazadas. Donde no hay un dato oficial exacto, la página dice que es una estimación y cómo se ha hecho.
-              Los cálculos del sistema actual son orientativos y no incluyen deducciones personales.
-              Los años no son todos el mismo: el gasto por administraciones y por funciones es de 2024 (el último cerrado), la recaudación y la base de 2025, y las reglas del IRPF y las cotizaciones del caso, de 2026.
-            </p>
-            <div className="mt-5"><ListaFuentes /></div>
-          </div>
-        </section>
+        {ventana === 'impuestos' && <ImpuestosVentana onProponer={() => setVerBuzon(true)} />}
+        {ventana === 'pensiones' && <PensionesVentana />}
+        {ventana === 'presupuestos' && (
+          <Apartado id="presupuestos" titulo="En qué se gasta cada escala"
+            entradilla="El presupuesto de hoy de la Unión Europea, España, la Comunidad de Madrid, un municipio, una comunidad de vecinos y una familia, cada uno en su quesito. Abajo, todas juntas.">
+            <Presupuestos />
+          </Apartado>
+        )}
+        {!ventana && <Portada />}
       </main>
 
-      <footer className="border-t border-slate-200 px-4 py-8 text-center text-sm text-slate-500">
+      <footer className="border-t border-slate-200 px-4 pb-24 pt-8 text-center text-sm text-slate-500">
         Modelo socioeconómico optimizado. Un proyecto de {marca}.
       </footer>
+
+      {/* The mailbox, floating at the bottom (Eugenio: «lo de proponer una mejora, abajo como un botón flotante»). */}
+      <Boton onClick={() => setVerBuzon(true)} tono="tinta"
+        className="fixed bottom-4 right-4 z-30 shadow-lg shadow-slate-900/20 sm:bottom-6 sm:right-6">
+        <MessageSquarePlus className="h-4 w-4" /><span className="hidden sm:inline">Proponer una mejora</span><span className="sr-only sm:hidden">Proponer una mejora</span>
+      </Boton>
 
       {verBuzon && (
         <BuzonProyecto
@@ -404,5 +223,80 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
         />
       )}
     </div>
+  );
+}
+
+/** The cover: what this is, and one card per window with a small picture of it. */
+function Portada() {
+  return (
+    <div className="mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6 sm:pt-14">
+      <h1 className="max-w-3xl text-[2.3rem] font-[800] leading-[1.03] tracking-[-0.035em] sm:text-[3.4rem]">Un sistema más simple, más justo y que reparte abundancia</h1>
+      <p className="mt-5 max-w-[60ch] text-[1.15rem] leading-relaxed text-slate-700">
+        Cómo funcionan hoy los impuestos, las pensiones y el gasto público en España, y cómo podrían funcionar. Elige por dónde empezar: cada ventana empieza por lo esencial y se abre en detalle cuando lo pidas.
+      </p>
+      <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {VENTANAS.map(v => {
+          const Icono = v.icono;
+          const contenido = (
+            <>
+              <span className={cn('flex h-36 items-center justify-center rounded-xl', v.pronto ? 'bg-slate-50' : 'bg-slate-50')}>
+                {v.id === 'impuestos' ? <DibujoImpuestos /> : v.id === 'pensiones' ? <DibujoPensiones /> : v.id === 'presupuestos' ? <DibujoPresupuestos /> : <Icono aria-hidden className="h-12 w-12 text-slate-300" />}
+              </span>
+              <span className={cn('mt-4 flex items-center gap-2 text-lg font-bold', v.pronto ? 'text-slate-400' : 'text-slate-900')}>
+                <Icono aria-hidden className={cn('h-5 w-5', ACENTO[v.id].texto)} />{v.titulo}
+                {v.pronto && <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-slate-500">pronto</span>}
+              </span>
+              <span className={cn('mt-1 block text-[15px] leading-relaxed', v.pronto ? 'text-slate-400' : 'text-slate-600')}>{v.lema}</span>
+            </>
+          );
+          return (
+            <li key={v.id}>
+              {v.pronto
+                ? <div className="h-full rounded-2xl border border-dashed border-slate-300 bg-white/60 p-4">{contenido}</div>
+                : <a href={`#${v.id}`} className={cn('block h-full rounded-2xl border-2 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900', ACENTO[v.id].borde)}>{contenido}</a>}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
+/** Three bars: the three tiers. */
+function DibujoImpuestos() {
+  return (
+    <svg viewBox="0 0 160 100" className="h-28" aria-hidden>
+      {[{ v: 10, x: 20 }, { v: 25, x: 65 }, { v: 40, x: 110 }].map(b => (
+        <g key={b.v}>
+          <rect x={b.x} y={88 - b.v * 1.8} width={30} height={b.v * 1.8} rx={4} className="fill-amber-400" />
+          <text x={b.x + 15} y={82 - b.v * 1.8} textAnchor="middle" className="fill-slate-700 text-[12px] font-bold">{b.v} %</text>
+        </g>
+      ))}
+      <line x1={10} x2={150} y1={88} y2={88} className="stroke-slate-300" />
+    </svg>
+  );
+}
+/** Today's uneven steps and the proposal's flat line. */
+function DibujoPensiones() {
+  const tramos = [...TRAMOS_PENSION].reverse();
+  const total = tramos.reduce((s, t) => s + t.pensiones, 0);
+  let x = 10;
+  const y = (e: number) => 90 - e / 3600 * 80;
+  return (
+    <svg viewBox="0 0 160 100" className="h-28" aria-hidden>
+      {tramos.map(t => { const w = t.pensiones / total * 140; const r = <rect key={t.id} x={x + 0.5} y={y(t.media)} width={w - 1} height={90 - y(t.media)} className="fill-slate-300" />; x += w; return r; })}
+      <line x1={10} x2={150} y1={y(SMI_MES)} y2={y(SMI_MES)} className="stroke-teal-600" strokeWidth={3} />
+    </svg>
+  );
+}
+/** A donut. */
+function DibujoPresupuestos() {
+  const partes = [{ v: 28, c: 'stroke-amber-400' }, { v: 14, c: 'stroke-emerald-600' }, { v: 13, c: 'stroke-teal-500' }, { v: 9, c: 'stroke-sky-600' }, { v: 6, c: 'stroke-rose-600' }, { v: 30, c: 'stroke-slate-300' }];
+  const C = 2 * Math.PI * 32;
+  let acum = 0;
+  return (
+    <svg viewBox="0 0 100 100" className="h-28" aria-hidden>
+      {partes.map((p, i) => { const el = <circle key={i} cx={50} cy={50} r={32} fill="none" strokeWidth={16} className={p.c} strokeDasharray={`${p.v / 100 * C - 1.5} ${C}`} strokeDashoffset={-acum / 100 * C} transform="rotate(-90 50 50)" />; acum += p.v; return el; })}
+    </svg>
   );
 }

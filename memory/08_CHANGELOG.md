@@ -11130,6 +11130,60 @@ Eugenio: «coge la configuración de los sliders del triciclo bala y aplícasela
 - `luzhumanidad.com/modelo-socioeconomico-optimizado` (migration 0199): the project page's slug loses `/impuesto-unico`; the old address is in `direcciones_anteriores`, so it answers 301 to the new one. The same migration corrects the page's subtitle, first paragraph and image alt from «0, 20 y 40 %» to 10/25/40 on top of the price — only where they were still exactly 0184's text.
 - The page now keeps the site's top bar (the same one the consciousness map got the same day, `CON_BARRA`) and shows the model inside a box as tall as the screen (`AplicacionIncrustada`), with its own scroll so its sticky header and `#section` links work inside. A «Pantalla completa» / «Salir de pantalla completa» button uses the Fullscreen API, and on browsers without it (iPhone) covers the window with CSS; Esc leaves both. Only `modelo-socioeconomico` is embedded (`INCRUSTADAS` in `SubpaginaSitio.tsx`); the consciousness map and the observatory still take the whole page.
 
+## 2026-11-12 — The page editor no longer drops `config.aplicacion`
+
+- Eugenio saw a plain project page at `luzhumanidad.com/modelo-socioeconomico-optimizado` instead of the embedded model. Checked in his Chrome: the address resolved to `KWMODELOSOCIO01`, but its config had lost `aplicacion` (and gained `cabecera` plus a hand-edited subtitle). The editor (`Documento.tsx`) rebuilds `config` from `CLAVES_AJUSTES` only, and `aplicacion` was not on that list, so any save from the editor turned an app page back into blocks. Added to the list and to the `Ajustes` type; migration 0200 puts the key back on that page and touches nothing else. The consciousness map and the observatory still had theirs; they were one save away from the same loss.
+
+### 2026-11-12 — Proyectos dentro de proyectos: «Comunidades energéticas en pueblos»
+- `drizzle/0201_comunidades_energeticas_pueblos.sql`: subelementos en la tabla Proyectos («Elemento madre» / «Subelementos»), el proyecto general (modelo asociativo público-privado, 2024) y Villalbilla y Nuevo Baztán dentro de él.
+- `SubproyectosSitio.tsx`: en la página de un proyecto, sus subproyectos con las mismas tarjetas que la portada (`config.subproyectos.titulo`). `VistaProyectosSitio`: la portada no enseña los que tienen madre (el editor sí).
+- Para sumar otra comunidad: en la tabla Proyectos, poner «Comunidades energéticas en pueblos» en su «Elemento madre».
+
+### 2026-11-12 — Observatorio de Polarización Política: nombre nuevo y frases editables
+
+Eugenio: «llamado Observatorio de Polarización Política, y permite que si se abre desde humanity.wiki y eugenio@lighthumanity.org está logeado este pueda hacer cambios en las frases escritas».
+- Nombre nuevo en la página, en el marco y, con la migración 0200, en la ficha del proyecto y en su fila de «Proyectos» (solo si aún llevaban el nombre viejo; sube `version`). La dirección no cambia.
+- Frases editables: la página usa la tabla de textos editables que ya existía (`textos_editables`, `src/server/textos.ts`). Cada frase lleva una clave `observatorio.t-<hash de su texto original>`, la misma la pinte el HTML o un módulo al pasar el ratón. Al cargar, la página lee `GET /api/textos` y aplica los cambios (también en luzhumanidad.com). Si `GET /api/auth/me` dice que quien mira es eugenio@lighthumanity.org o un administrador, aparece abajo una barra «Editar textos»: cada frase se vuelve editable, se guarda al salir de ella con `PUT /api/textos/:clave` y «Restaurar original» la borra con `DELETE`. Solo funciona con sesión, es decir, en humanity.wiki (`humanity.wiki/observatorio-polarizacion/`). Lo guardado se limpia a marcas de texto (negrita, cursiva, comillas), sin atributos.
+- Si cambia el texto original en el código, su clave cambia y la versión editada deja de aplicarse: el código manda.
+- Probado con un servidor que imita las dos rutas: sin sesión y con un usuario normal no hay barra; con Eugenio se editan, guardan, se ven sin sesión (también lo que se repinta al pasar el ratón) y se restauran.
+
+### 2026-11-12 — Sol Solidario: la marca de energía solar contra la pobreza energética
+- `drizzle/0202_sol_solidario.sql`: proyecto «Sol Solidario» (página KWSOLSOLIDARIO1, fila BDFSOLSOLIDAR01, `config.aplicacion = sol-solidario`) y 12 proyectos dentro (centros de acogida y Cañada Real en España; Amazonas, Guajira, Honduras; Kenia, Mozambique; Solar Crowd y la tienda solidaria).
+- `src/pages/SolSolidario.tsx`: portada, cifras con fuente, proyectos por zonas (`SubproyectosSitio` con `grupos`), pobreza energética en España (INE) y en el mundo (Tracking SDG7 2025), herramientas, donación (bloque de Stripe) y préstamo solidario (7 años, anual, 0 %, desde 1.000 €) con el formulario de Colabora (motivo nuevo `prestamo`).
+- `solSolidario/marca.tsx`: logo, submenú fijo bajo la barra del sitio; también en los proyectos hijos.
+- Pendiente: IBAN de donaciones y préstamos en `config.solSolidario` (ibanDonaciones, ibanPrestamos) y Stripe en modo real (hoy cs_test).
+## 2026-11-12 — Modelo socioeconómico on luzhumanidad.com: part of the page, not a box
+
+- Eugenio: the screen-tall box was «un embed cutre» — scrolling outside it showed an almost endless white page, and the site menu should only go away in full screen. The box is gone: the app is the rest of the page under the site bar and scrolls with the window, so the document ends where the app ends (measured: document height = app bottom at 390, 1440 and 1800 px). The blank came from absolutely positioned descendants escaping the box's `overflow: hidden`.
+- `AplicacionIncrustada` now gives the app the site bar's height (its sticky header sits under the bar; sections get a matching `scroll-margin-top`) and a full-screen toggle. The button is in the model's own header, next to «Proponer una mejora»: it hides the site bar and, where the browser allows, puts the document in full screen; the same button or Esc brings the bar back.
+
+### 2026-11-12 — Portada de luzhumanidad.com por sectores de innovación; eslogan «Evolución · Sistemas · Humanidad»
+- `drizzle/0203_sectores_portada_luz.sql`: `sitio.sectores` (movilidad; socioeconómico = Política y Economía; energético; educación, cultura y conciencia) y `sitio.sectorOtros`; `sitio.eslogan` para la barra (el `subtitulo` sigue para el título y los buscadores).
+- `VistaProyectosSitio`: paneles por sector con tarjetas compactas (`TarjetaPortada compacta`, 4:3), sin etiqueta si el sector tiene una sola categoría, dos columnas equilibradas por altura desde xl, «Otras innovaciones» al final y filas deslizables en el móvil. Revisado con un bot evaluador en dos vueltas (v1 4-6/10 → v2 7-8/10).
+## 2026-11-12 — Modelo socioeconómico in windows; the pension proposal
+
+- The single long page is now a menu of windows (`ventanas.tsx`): Impuestos, Pensiones, Presupuestos, and Educación / Sanidad marked «pronto». The open window's tab is lit in its colour and the others dim; below, its page with its own sticky submenu (scroll-spy). Window and section live in the hash (`#pensiones-fondo`); the old single-page anchors still land (`ALIAS`). No hash: a cover with one card per window and a small drawing of each.
+- Simple first, detail behind «Más» buttons that expand in place and nest (`Mas`).
+- Impuestos (`ImpuestosVentana.tsx`): the old sections condensed — summary, five steps, today vs proposed (cards on phones), where the money goes (thirds and matrix behind «Más»), the case reduced to three figures with the full calculator behind «Más», who decides (per-scale cards behind «Más»), accounts / open problems / sources behind «Más».
+- Pensiones (`PensionesVentana.tsx`, data `src/data/pensionesPropuesta.ts`): Eugenio's proposal — one pension per person equal to the minimum wage (1.221 € × 14, BOE RD 126/2026), no maximum or minimum, extra help through social services as a separate line, private saving. Chart of today's tiers against the flat line; who gains and loses (plus non-contributory +592 €/month and ~1,0 M people with two pensions); yearly accounts (206.134 → 170.330 M€: 18.409 M€ from levelling each pension, 17.395 M€ from one pension per person; help line and «other aids» as editable assumptions); what a wage costs (1.508 € net → 2.445 € for the company, IRPF 12 % estimated); and a simulator of the move to an invested fund (returns reinvested until they could pay everything; 57 years at 28.000 M€/year and 3,5 % real, 4,87 billones, 2,4 × Norway's fund).
+- Two blind-evaluator rounds per window (see decisions).
+
+### 2026-11-12 — Cadena de valor de la energía solar en España (luzhumanidad.com/cadena-solar)
+- `drizzle/0204_cadena_valor_solar.sql`: fila «Cadena de valor solar» en Proyectos (Estado inicial, área Energía) y su página `KWCADENASOLAR01`, slug `cadena-solar`, `config.aplicacion = 'cadena-solar'`, con bloques para la tarjeta y los buscadores.
+- `src/pages/CadenaSolar.tsx` (bajo la barra del sitio, `CON_BARRA`): la cadena en horizontal por fases, doce eslabones con desplegable (el primero, captación de clientes o generación de leads) (actividades, plazo, actores, dónde se atasca y cómo mejorarlo; «Desplegar todo»; `#e-<eslabón>` abre uno); plazos (instalar días, legalizar meses); reparto del precio; simulador de coeficientes de reparto fijos y horarios entre tres vecinos; matriz de actores; enlaces a Comunidades energéticas y Sol Solidario; normas con fuente.
+
+### 2026-11-12 — Proyecto «Optimización del sistema de energía» con Suntropy; la cadena de valor solar dentro
+- `drizzle/0205_optimizacion_sistema_energia.sql`: fila nueva en Proyectos (En curso, 2022, Energía; equipo Pablo Sánchez y Eugenio) y su página `KWOPTIMENERGIA1`: arriba la inversión de 2022 en Suntropy (pionera en España en optimización) con la foto de Pablo Sánchez y enlace a su página, qué optimiza Suntropy y enlace a suntropy.ai. «Cadena de valor solar» pasa a ser su subelemento (sale de la rejilla de la portada).
+- `CadenaSolar.tsx`: tarjeta de Suntropy con la foto de Pablo al principio de «Qué hacemos», enlazada al proyecto madre; el reparto ya no fija la distancia en 2 km (la página de Comunidades energéticas dice 5 km).
+
+### 2026-11-12 — Portada de luzhumanidad.com: un sector por línea, vivienda y comunidad, barra nueva
+- `drizzle/0206_sectores_fila_y_barra_luz.sql`: sector «vivienda y comunidad», «socioeconómico y político», eslogan «Optimización de los sistemas de la humanidad», sin titular (`sitio.presentacion: false`), Colaborar en la barra (`sitio.colaborarEnBarra`), La Voz Verde y Wiki Creator App ocultas, Pedaleo Solar → «Activismo energético» (sector energético; /pedaleo-solar da 301 a /activismo-energetico).
+- `FilaSector.tsx`: cada sector en una línea con flechas, deslizable y «Mostrar todos»; tarjetas iguales (1, 2, 3, 4 o 5 por fila según la pantalla) y sin etiqueta de categoría.
+- `CabeceraSitio` (escaparate): buscador grande a la izquierda (`BuscarBarra ancha`), marca más grande en el centro, Colaborar e idiomas a la derecha.
+## 2026-11-12 — Modelo socioeconómico: compact top menu
+
+- Eugenio: «compacta todavía más el menú superior». The project-name row is gone (the name stays in the cover and the footer): the windows are the first row, with a small full-screen icon at its end; the sections are the second row. Header height 74 px (was ≈ 150). «Proponer una mejora» is a floating button at the bottom right (icon only on phones).
+
 ## 2026-11-12 · Aeromóvil, garaje: el Aptera rehecho por delante y por arriba, y con puertas y portón que se abren
 
 Eugenio: «mejora muchísimo la carrocería de la Aptera… el morro está deformado, la parte de arriba de la cúpula está deformada… que se pueda pinchar en él… un botón de abrir puertas y abrir maletero… y que haya un bot evaluador que le vaya corrigiendo al bot creador». Esta es la primera ronda del bot creador; el evaluador la revisa después.

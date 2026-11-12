@@ -73,7 +73,7 @@ export function PildoraEstado({ estado, opciones, onCambiar, className, icono, n
   );
 }
 
-export default function TarjetaPortada({ nombre, imagen, alt, encuadre, descripcion, pildora, iconoPildora, nombrePildora, Titulo = 'h3', prioridad = 9, conDescripcion = true, edicion, esquina, fondo }: {
+export default function TarjetaPortada({ nombre, imagen, alt, encuadre, descripcion, pildora, iconoPildora, nombrePildora, Titulo = 'h3', prioridad = 9, conDescripcion = true, edicion, esquina, fondo, compacta = false }: {
   nombre: string;
   imagen: string | null | undefined;
   alt?: string;
@@ -93,26 +93,29 @@ export default function TarjetaPortada({ nombre, imagen, alt, encuadre, descripc
   esquina?: ReactNode;
   /** Lo que se pinta si no hay imagen, en vez del degradado gris. */
   fondo?: ReactNode;
+  /** Más pequeña, dentro de un panel de sector de la portada (2026-11-12, `VistaProyectosSitio`). */
+  compacta?: boolean;
 }) {
   // EL TÍTULO Y LA DESCRIPCIÓN, JUNTOS SOBRE LA IMAGEN (2026-11-10, Eugenio): letra blanca con sombra,
   // la descripción algo mayor y en dos líneas como mucho, y abajo casi negro, aclarándose hacia el centro.
-  const claseNombre = 'text-xl font-black leading-tight tracking-tight text-white [text-shadow:0_2px_8px_rgba(0,0,0,0.6)] sm:text-2xl 2xl:text-3xl';
-  const claseDescripcion = 'text-base font-medium leading-snug text-white [text-shadow:0_1px_6px_rgba(0,0,0,0.85)]';
+  const claseNombre = cn('font-black leading-tight tracking-tight text-white [text-shadow:0_2px_8px_rgba(0,0,0,0.6)]',
+    compacta ? 'text-lg 2xl:text-xl' : 'text-xl sm:text-2xl 2xl:text-3xl');
+  const claseDescripcion = cn('font-medium leading-snug text-white [text-shadow:0_1px_6px_rgba(0,0,0,0.85)]', compacta ? 'text-[13px] 2xl:text-sm' : 'text-base');
   return (
-    <div className="relative aspect-[3/2] w-full overflow-hidden bg-slate-100">
+    <div className={cn('relative w-full overflow-hidden bg-slate-100', compacta ? 'aspect-[4/3]' : 'aspect-[3/2]')}>
       {imagen ? (
-        <img src={miniatura(imagen, 400)} srcSet={`${miniatura(imagen, 400)} 800w, ${miniatura(imagen, 800)} 1600w`} sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" alt={alt ?? (descripcion ? `${nombre}: ${descripcion}` : nombre)} loading={prioridad < 6 ? 'eager' : 'lazy'} decoding="async"
+        <img src={miniatura(imagen, 400)} srcSet={`${miniatura(imagen, 400)} 800w, ${miniatura(imagen, 800)} 1600w`} sizes={compacta ? '(min-width: 1024px) 17vw, (min-width: 640px) 50vw, 100vw' : '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'} alt={alt ?? (descripcion ? `${nombre}: ${descripcion}` : nombre)} loading={prioridad < 6 ? 'eager' : 'lazy'} decoding="async"
           {...(prioridad < 3 ? { fetchPriority: 'high' as const } : {})}
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           style={encuadre ? { objectPosition: `${encuadre.x ?? 50}% ${encuadre.y ?? 50}%` } : undefined} />
       ) : fondo || (
         <div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-400" />
       )}
-      <div aria-hidden className="absolute inset-x-0 bottom-0 h-[85%] bg-gradient-to-t from-black via-black/75 via-40% to-transparent" />
+      <div aria-hidden className={cn('absolute inset-x-0 bottom-0 bg-gradient-to-t from-black to-transparent', compacta ? 'h-[90%] via-black/80 via-45%' : 'h-[85%] via-black/75 via-40%')} />
       <PildoraEstado estado={pildora} opciones={edicion?.opciones} onCambiar={edicion?.onPildora} icono={iconoPildora} nombre={nombrePildora}
-        className="absolute left-3 top-3 px-3.5 py-1.5 text-sm" />
+        className={compacta ? 'absolute left-2 top-2 px-2 py-0.5 text-[11px]' : 'absolute left-3 top-3 px-3.5 py-1.5 text-sm'} />
       {esquina && <div className="absolute right-3 top-3 z-10 flex items-center gap-1.5">{esquina}</div>}
-      <div data-fondo-oscuro="" className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
+      <div data-fondo-oscuro="" className={cn('absolute inset-x-0 bottom-0', compacta ? 'p-3 sm:p-3.5' : 'p-4 sm:p-5')}>
         {edicion
           ? <TextoEnLinea valor={nombre} onGuardar={edicion.onNombre} etiqueta="Título" obligatorio className={claseNombre} />
           : <Titulo className={cn('line-clamp-2', claseNombre)}>{nombre}</Titulo>}

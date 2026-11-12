@@ -174,8 +174,8 @@ export function TuCaso({ modo, ejemplo, onEjemplo }: { modo: Modo; ejemplo: Ejem
             «Le queda» descuenta en los dos casos sus impuestos locales y la cesta de la compra; con el modelo, además, recibe {euros(r.recibe)} del fondo.
           </p>
           <p className="mt-3 rounded-xl bg-amber-50 p-3 text-sm leading-relaxed text-amber-950">
-            <b>Lo que deja de tener.</b> El modelo no tiene pensiones de jubilación ni paro: su vejez se apoya en lo que ahorre e invierta, en su familia,
-            su comunidad y su municipio, en préstamos al IPC y en un trabajo u ocupación; si llega a tener una discapacidad, en el apoyo en especie.
+            <b>Lo que deja de tener.</b> No hay paro, y su pensión sería una sola, igual al salario mínimo (lo explica la ventana Pensiones); lo demás se apoya en lo que ahorre e invierta, en su familia,
+            su comunidad y su municipio, en préstamos que solo suben con la inflación y en un trabajo u ocupación; si llega a tener una discapacidad, en el apoyo en especie.
             Y hay menos servicios públicos: por habitante, unos {euros(serviciosModelo)} entre servicios e inversión al año en lugar de {euros(serviciosHoy)}{' '}
             (lo cuentan «Frente a hoy» y «Lo que falta por resolver»).
             {ejemplo.empleador === 'pequena' && <> Gran parte de la diferencia viene de que su empresa es pequeña: su sueldo paga solo el {porcentaje(r.tipoSueldo * 100, 0)}.</>}

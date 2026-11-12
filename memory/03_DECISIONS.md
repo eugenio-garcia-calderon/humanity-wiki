@@ -1475,6 +1475,14 @@ Dependent ranges, all measured on this model:
 
 Eugenio chose the names after being told «Cuadriciclo Bala» was already taken by the rombo family. Display names change in code (`nombreDe`, `nombreTriciclo`, tunnel bodies, page header, STL file names); stored design names change in migration 0198 for team rows only (visitor rows keep their author's names). Bare «Cuadriciclo» in Triciclo texts now reads «Cuadriciclo en rombo», since there are now two cuadriciclos. Migration 0198 also re-copies the saved Triciclo's `parametros` onto the four-wheel team row (same source rule as 0197) and drops its `tViaTras`, so it opens with rear track = front track; it reports the source row and values with `RAISE NOTICE` in the deploy log, because the production database cannot be read from the agents' containers.
 
+## 2026-11-12 — Pension proposal: units, assumptions and the fund model
+
+- Pension of the proposal = the 2026 minimum wage in gross terms (1.221 €), as Eugenio asked; the page says that net of the worker's 6,5 % contribution a minimum-wage worker keeps ≈ 1.142 €, and offers that as the alternative if they must match net.
+- Counts are pensions (the only public breakdown); people with two pensions (pensions − pensioners ≈ 1,0 M) are shown apart, and the saving is split into «level each pension» and «one per person» so the total can be rebuilt from what is on screen.
+- «Other aids that would stop being needed» has no official figure: it is a visible, editable assumption (10 % of those who gain × 100 €/month) plus the one sourced item (PNC rent supplement). Social-services help is a decision (5 % of the new payroll by default), not data.
+- Fund simulator: returns are reinvested until they could pay all pensions (the switch-over year); before that pensions keep being paid as today. Chosen after the blind evaluator flagged that counting returns as both paid out and compounding was double counting. Constant real cost and return; risks behind «Más».
+- Open, flagged on the page (Pensiones › «¿y cómo encaja con el impuesto único?», Impuestos › «Lo que falta por resolver»): the single tax split in eighths does not fund a 170.330 M€ pension bill; the nation's eighth is far smaller. The tax-model accounts (`cuentasPais`, `DondeEstaElDinero`) still assume no constant pensions. Eugenio has to choose: a pension tier of the tax, several scales paying, or the fund first.
+
 ## 2026-11-12 · Garage cars with parts that open: pivots declared by the model, state in the viewer
 
 Eugenio wants to click the garage Aptera and open its doors and boot. Options:

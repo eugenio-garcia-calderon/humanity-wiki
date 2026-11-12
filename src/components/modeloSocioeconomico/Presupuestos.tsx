@@ -154,7 +154,7 @@ function Donut({ porciones, total, foco, onFoco, centro }: {
 /** The six categories across every scale, as a share of each budget. */
 function Comparativa({ activa, onElegir }: { activa: EscalaPresupuestoId; onElegir: (id: EscalaPresupuestoId) => void }) {
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)] rounded-2xl border border-slate-200 bg-white">
+    <div id="presupuestos-comparar" className="grid scroll-mt-40 grid-cols-[minmax(0,1fr)] rounded-2xl border border-slate-200 bg-white">
       <div className="px-5 pt-5">
         <h3 className="text-lg font-bold text-slate-900">Cada categoría en cada escala</h3>
         <p className="text-sm text-slate-500">Parte de cada presupuesto, sin contar la deuda que se refinancia. «—»: esa escala no paga eso. En el móvil, desliza la tabla.</p>

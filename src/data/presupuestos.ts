@@ -90,7 +90,7 @@ export const TRAMOS_PENSION: TramoPension[] = [
     nota: 'La pensión media de todo el sistema, 1.372,16 €, cae en este tramo.',
   },
   {
-    id: 'minima', nombre: 'Mínimas y por debajo', rango: 'menos de 1.000 €', pensiones: BAJO_MIL, media: MEDIA_MINIMA,
+    id: 'minima', nombre: 'Mínimas y por debajo', rango: 'menos de 1.000\u00A0€', pensiones: BAJO_MIL, media: MEDIA_MINIMA,
     cifra: PENSION_MINIMA_JUBILACION, cifraEtiqueta: 'mínima de jubilación', estimado: true, fuente: 'pensiones-limites',
     nota: `La media del tramo, unos ${MEDIA_MINIMA} €, es menor que la mínima porque aquí están también las de orfandad (552 € de media), muchas de viudedad y las que se cobran junto a otra pensión.`,
   },
