@@ -5,6 +5,8 @@ import BuscarBarra from './BuscarBarra';
 import BotonCalificaciones from './BotonCalificaciones';
 import { VistasMenu, vistasDe, type Vista } from './VistaMapaSitio';
 import SelectorIdioma from './SelectorIdioma';
+import { enlaceColabora } from './PresentacionSitio';
+import { useSitio } from './ContextoSitio';
 
 const BotonesLectura = lazy(() => import('./BotonesLectura'));
 
@@ -40,6 +42,7 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
   simple?: boolean;
 }) {
   const [raiz, setRaiz] = useState<Raiz | null>(null);
+  const sitio = useSitio();
   useEffect(() => { let vivo = true; raizDe(raizId).then(r => { if (vivo) setRaiz(r); }); return () => { vivo = false; }; }, [raizId]);
   const c = raiz?.config || {}, icono: string | null = c.icono || null;
   // EL ESCAPARATE (`sitio.escaparate`, 2026-11-06, Eugenio en luzhumanidad.com: «quita el menú
@@ -51,25 +54,36 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
   // EL ESCAPARATE, CENTRADO (2026-11-06, Eugenio: «el logotipo con el nombre y el subtítulo en el
   // centro, y la barra de buscar más hacia la derecha»): tres columnas, la marca en medio y el
   // buscador pegado a la derecha. En el móvil, la marca arriba y el buscador debajo, a la derecha.
+  // 2026-11-12 (Eugenio): «cambia el colaborar por Participa en el menú, y reduce un 25 % el tamaño del logo».
+  // LA BARRA DEL ESCAPARATE, TERCERA FORMA (2026-11-12, Eugenio: «la barra de buscar, más grande y a la izquierda
+  // del todo; lo de colaborar, arriba a la derecha; y el logo un poco más grande para que no quede tan pequeña la
+  // letra inferior»). En el ordenador, tres columnas: buscador | marca | Colaborar e idiomas. En el móvil, la marca
+  // arriba y debajo el buscador, Colaborar y los idiomas. `sitio.colaborarEnBarra` pone el botón (lo quita de la portada).
+  const colabora = c.sitio?.colaborarEnBarra === true ? enlaceColabora(c.sitio?.colabora, sitio) : null;
+  const botonColabora = 'inline-flex h-10 shrink-0 items-center rounded-full bg-slate-900 px-4 text-sm font-bold text-white hover:bg-slate-700 sm:px-5';
   if (escaparate) return (
-    <header data-cabecera-sitio className="sticky top-0 z-40 -mt-[18px] mb-4 grid grid-cols-1 items-center gap-2 border-b border-slate-100 bg-white/95 px-4 py-2 backdrop-blur sm:-mt-5 sm:grid-cols-[1fr_auto_1fr] sm:px-6"
+    <header data-cabecera-sitio className="sticky top-0 z-40 -mt-[18px] mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-2 border-b border-slate-100 bg-white/95 px-4 py-2 backdrop-blur [grid-template-areas:'marca_marca'_'buscar_acciones'] sm:-mt-5 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:gap-x-6 sm:px-6 sm:[grid-template-areas:'buscar_marca_acciones']"
       style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }}>
       <style>{'html { overflow-x: clip; }'}</style>
-      <span aria-hidden className="hidden sm:block" />
-      {/* La marca, un 20 % más grande, y el eslogan en minúsculas del mismo ancho que el nombre
-          (2026-11-06, Eugenio): la columna la marca el nombre y el eslogan se reparte a lo ancho. */}
-      <Link to="/" className="flex min-w-0 items-center justify-center gap-3" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
+      <div className="min-w-0 [grid-area:buscar]"><BuscarBarra raizId={raizId} enLinea ancha /></div>
+      {/* La marca y el eslogan del mismo ancho que el nombre (2026-11-06, Eugenio). */}
+      <Link to="/" className="flex min-w-0 items-center justify-center gap-3 [grid-area:marca]" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
         {icono && (/^(https?:|\/)/.test(icono)
-          ? <img src={miniatura(icono, 112)} alt={raiz ? `Logo de ${raiz.titulo}` : ''} className="h-[46px] w-[46px] shrink-0 rounded-lg object-contain" />
-          : <span className="text-[1.9rem] leading-none">{icono}</span>)}
+          ? <img src={miniatura(icono, 128)} alt={raiz ? `Logo de ${raiz.titulo}` : ''} className="h-[38px] w-[38px] shrink-0 rounded-lg object-contain sm:h-[44px] sm:w-[44px] lg:h-[48px] lg:w-[48px]" />
+          : <span className="text-[1.6rem] leading-none">{icono}</span>)}
         {raiz && (
           <span className="inline-grid min-w-0 leading-none">
-            <span className="whitespace-nowrap text-[1.68rem] font-black tracking-tight text-slate-900">{raiz.titulo}</span>
+            <span className="whitespace-nowrap text-[1.46rem] font-black tracking-tight text-slate-900 sm:text-[1.76rem] lg:text-[2rem]">{raiz.titulo}</span>
             {eslogan && <Eslogan texto={eslogan} />}
           </span>
         )}
       </Link>
-      <div className="flex min-w-0 items-center justify-end gap-2"><BuscarBarra raizId={raizId} enLinea /><SelectorIdioma /></div>
+      <div className="flex min-w-0 items-center justify-end gap-2 [grid-area:acciones]">
+        {colabora && (colabora.fuera
+          ? <a href={colabora.href} target="_blank" rel="noopener noreferrer" className={botonColabora}>Participa</a>
+          : <Link to={colabora.href} data-interno="" className={botonColabora}>Participa</Link>)}
+        <SelectorIdioma />
+      </div>
     </header>
   );
   return (

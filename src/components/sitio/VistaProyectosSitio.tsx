@@ -13,6 +13,8 @@ import { useDatosPortada, type ProyectoPortada } from './portadaEscaparate';
 import { iconoCategoria } from './iconoCategoria';
 import InspiranSitio, { type TablaInspiran } from './InspiranSitio';
 import { columnaMadre } from './SubproyectosSitio';
+import FilaSector from './FilaSector';
+import { pedirRutas } from '../../utils/rutasLegibles';
 const NoticiasSitio = lazy(() => import('./NoticiasSitio'));
 
 // ============================================================================
@@ -99,6 +101,16 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
   const [fallo, setFallo] = useState(false);
   const [area, setArea] = useState(() => areaDeLaDireccion());
   const [aviso, setAviso] = useState<string | null>(null);
+  // Las direcciones legibles de los proyectos, si no venían en el HTML (se llegó desde otra página): así sus
+  // tarjetas no enlazan por `/p/:id` (2026-11-12). Al llegar, se vuelven a pintar.
+  const [, setRutas] = useState(0);
+  useEffect(() => {
+    if (!proyectos || edicion) return;
+    let vivo = true;
+    // También las personas del final de la portada.
+    pedirRutas([...proyectos.filas.map(f => f.pagina_id), ...(personas?.filas || []).map(f => f.pagina_id)]).then(ok => { if (vivo && ok) setRutas(n => n + 1); });
+    return () => { vivo = false; };
+  }, [proyectos, personas, edicion]);
 
   // EDITAR EN EL MISMO SITIO (2026-11-10, `TarjetaPortada.tsx`): en el editor esta vista es la de la
   // web, y cada texto se guarda en su celda o en su página nada más salir de él.
@@ -337,7 +349,8 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
       {/* LA PRESENTACIÓN (2026-11-07, Eugenio: «haz todas las propuestas… con alta calidad, no
           quiero nada cutre»): qué es el laboratorio en una línea y el botón de colaborar,
           encima de las tarjetas y sin empujarlas fuera de la primera pantalla. */}
-      {escaparate && <PresentacionSitio cfg={raiz.config} edicion={edicion} />}
+      {/* Sin el titular ni el botón cuando `sitio.presentacion` es false (2026-11-12: Colaborar sube a la barra). */}
+      {escaparate && (edicion || raiz.config?.sitio?.presentacion !== false) && <PresentacionSitio cfg={raiz.config} edicion={edicion} />}
 
       {/* LAS TARJETAS (2026-11-06, Eugenio: «el título en blanco con un poco de sombra y de fondo
           la portada, como en la página del proyecto; debajo la descripción en letra pequeña sobre
@@ -349,58 +362,30 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
           sectores a lo ancho y largo de la página»). `sitio.sectores` de la raíz: cada sector reúne las
           categorías (filas de Sistemas) que nombra; lo que no cae en ninguno va a «Otras innovaciones». */}
       {sectores ? (
-        <div data-ancla="proyectos" data-sectores className="mt-6 scroll-mt-36 outline-none sm:mt-8 sm:scroll-mt-24">
+        <div data-ancla="proyectos" data-sectores className="mt-6 flex scroll-mt-36 flex-col gap-8 outline-none sm:mt-8 sm:scroll-mt-24 sm:gap-5 2xl:gap-6">
           {(() => {
-            // Segunda vuelta, con el bot evaluador (2026-11-12): sin la etiqueta de categoría dentro de un sector que
-            // solo tiene una; tarjetas 4:3; dos columnas que se equilibran por altura (sin huecos entre filas) desde
-            // `xl`; «Otras innovaciones» al final, neutro y a todo el ancho; un color por sector; y en el móvil, una
-            // fila que se desliza de lado por sector en vez de apilar las tarjetas.
+            // TERCERA FORMA (2026-11-12, Eugenio: «que cada sector de innovación ocupe una línea… con un slider o un botón
+            // de mostrar más… que todos los proyectos tengan el mismo tamaño… quita la categoría de la tarjeta, ya
+            // están englobados en un sector»): un panel por sector a todo el ancho (`FilaSector`), tarjetas iguales y
+            // sin etiqueta. Un color por sector, por su orden.
             const COLOR: Record<string, { borde: string; icono: string }> = {
               sky: { borde: 'sm:border-t-sky-500', icono: 'text-sky-600' }, violet: { borde: 'sm:border-t-violet-500', icono: 'text-violet-600' },
               amber: { borde: 'sm:border-t-amber-500', icono: 'text-amber-600' }, emerald: { borde: 'sm:border-t-emerald-500', icono: 'text-emerald-600' },
               rose: { borde: 'sm:border-t-rose-500', icono: 'text-rose-600' }, slate: { borde: 'sm:border-t-slate-500', icono: 'text-slate-600' },
             };
             let n = 0;
-            const panel = (g: (typeof sectores)[number]) => {
+            return sectores.map(g => {
               const c = COLOR[g.color || 'slate'] || COLOR.slate;
-              const mezcla = new Set(g.filas.map(f => modelo.categoriaDe(f))).size > 1;
-              const columnas = g.otros ? 'sm:grid-cols-3 lg:grid-cols-4' : g.filas.length === 4 ? 'sm:grid-cols-2' : 'sm:grid-cols-3';
+              // En el móvil, solo lo que cambia («Movilidad»); el título entero, desde `sm`.
+              const m = g.titulo.match(/^(Innovaci[oó]n en (?:el sector (?:de la |de los |del |de )?)?)(.+)$/i);
+              const titulo = m ? <><span className="hidden sm:inline">{m[1]}</span><span className="max-sm:inline-block max-sm:first-letter:uppercase">{m[2]}</span></> : g.titulo;
+              const desde = n; n += g.filas.length;
               return (
-                <section key={g.titulo} data-sector aria-labelledby={`sector-${plano(g.titulo)}`}
-                  className={cn('min-w-0 sm:rounded-3xl sm:border sm:border-t-4 sm:border-slate-200 sm:p-5', 'sm:bg-slate-50', c.borde)}>
-                  <div className="mb-3 flex items-center gap-3 sm:mb-4">
-                    <span aria-hidden className={cn('grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 [&_svg]:h-5 [&_svg]:w-5', c.icono, '[&_svg]:text-current')}>{iconoCategoria(g.icono || '', 'h-5 w-5')}</span>
-                    <div className="min-w-0 flex-1">
-                      <h2 id={`sector-${plano(g.titulo)}`} className="text-lg font-black leading-tight tracking-tight text-slate-900 sm:text-xl 2xl:text-2xl">{(() => {
-                        // En el móvil, solo lo que cambia («Movilidad»); el título entero, desde `sm` (bot evaluador, 2026-11-12).
-                        const m = g.titulo.match(/^(Innovaci[oó]n en (?:el sector (?:de la |de los |del |de )?)?)(.+)$/i);
-                        return m ? <><span className="hidden sm:inline">{m[1]}</span><span className="max-sm:capitalize">{m[2]}</span></> : g.titulo;
-                      })()}</h2>
-                      <p className="text-[13px] font-semibold text-slate-500">{g.filas.length === 1 ? '1 proyecto' : `${g.filas.length} proyectos`}<span aria-hidden className="sm:hidden"> · desliza →</span></p>
-                    </div>
-                  </div>
-                  <ul className={cn('-mx-4 flex list-none snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:grid sm:overflow-visible sm:px-0 sm:pb-0', columnas)}>
-                    {g.filas.map(f => tarjetaDe(f, n++, true, !mezcla && !g.otros, 'w-[72%] shrink-0 snap-start sm:w-auto'))}
-                  </ul>
-                </section>
+                <FilaSector key={g.titulo} id={`sector-${plano(g.titulo)}`} titulo={titulo} icono={iconoCategoria(g.icono || '', 'h-5 w-5')}
+                  colorBorde={c.borde} colorIcono={c.icono} filas={g.filas}
+                  pintar={(f, claseLi) => tarjetaDe(f, desde + g.filas.indexOf(f), true, true, claseLi)} />
               );
-            };
-            const principales = sectores.filter(g => !g.otros), otros = sectores.filter(g => g.otros);
-            // El peso de un panel: sus filas de tarjetas (3 por fila; 2 si son 4) más la cabecera.
-            const peso = (g: (typeof sectores)[number]) => Math.ceil(g.filas.length / (g.filas.length === 4 ? 2 : 3)) * (g.filas.length === 4 ? 1.45 : 1) + 0.5;
-            const cols: [typeof principales, typeof principales] = [[], []];
-            const alto = [0, 0];
-            for (const g of principales) { const k = alto[0] <= alto[1] ? 0 : 1; cols[k].push(g); alto[k] += peso(g); }
-            return (
-              <div className="flex flex-col gap-8 sm:gap-5 2xl:gap-6">
-                {/* Una sola vez en la página: por debajo de `xl` las dos columnas se deshacen (`contents`) y los
-                    paneles quedan en una, en el orden izquierda y luego derecha. */}
-                <div className="flex flex-col gap-8 sm:gap-5 xl:grid xl:grid-cols-2 xl:items-start 2xl:gap-6">
-                  {cols.map((l, k) => <div key={k} className="contents xl:flex xl:min-w-0 xl:flex-col xl:gap-5 2xl:gap-6">{l.map(panel)}</div>)}
-                </div>
-                {otros.map(panel)}
-              </div>
-            );
+            });
           })()}
         </div>
       ) : (

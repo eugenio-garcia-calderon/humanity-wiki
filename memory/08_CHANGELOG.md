@@ -11176,6 +11176,64 @@ Eugenio: «llamado Observatorio de Polarización Política, y permite que si se 
 - `drizzle/0205_optimizacion_sistema_energia.sql`: fila nueva en Proyectos (En curso, 2022, Energía; equipo Pablo Sánchez y Eugenio) y su página `KWOPTIMENERGIA1`: arriba la inversión de 2022 en Suntropy (pionera en España en optimización) con la foto de Pablo Sánchez y enlace a su página, qué optimiza Suntropy y enlace a suntropy.ai. «Cadena de valor solar» pasa a ser su subelemento (sale de la rejilla de la portada).
 - `CadenaSolar.tsx`: tarjeta de Suntropy con la foto de Pablo al principio de «Qué hacemos», enlazada al proyecto madre; el reparto ya no fija la distancia en 2 km (la página de Comunidades energéticas dice 5 km).
 
+### 2026-11-12 — Portada de luzhumanidad.com: un sector por línea, vivienda y comunidad, barra nueva
+- `drizzle/0206_sectores_fila_y_barra_luz.sql`: sector «vivienda y comunidad», «socioeconómico y político», eslogan «Optimización de los sistemas de la humanidad», sin titular (`sitio.presentacion: false`), Colaborar en la barra (`sitio.colaborarEnBarra`), La Voz Verde y Wiki Creator App ocultas, Pedaleo Solar → «Activismo energético» (sector energético; /pedaleo-solar da 301 a /activismo-energetico).
+- `FilaSector.tsx`: cada sector en una línea con flechas, deslizable y «Mostrar todos»; tarjetas iguales (1, 2, 3, 4 o 5 por fila según la pantalla) y sin etiqueta de categoría.
+- `CabeceraSitio` (escaparate): buscador grande a la izquierda (`BuscarBarra ancha`), marca más grande en el centro, Colaborar e idiomas a la derecha.
+## 2026-11-12 — Modelo socioeconómico: compact top menu
+
+- Eugenio: «compacta todavía más el menú superior». The project-name row is gone (the name stays in the cover and the footer): the windows are the first row, with a small full-screen icon at its end; the sections are the second row. Header height 74 px (was ≈ 150). «Proponer una mejora» is a floating button at the bottom right (icon only on phones).
+
+### 2026-11-12 — Direcciones legibles siempre (nunca `/p/:id`), también en humanity.wiki
+- `sitios.ts`: `rutaBonita(req, w)` = el nombre corto o el título que esta web abre de verdad en esa página. La usan el 301 de `/p/:id` (ahora también en la casa, `/@luz/p/…` → `/@luz/nombre`), los enlaces del HTML (`__SITIO__.legibles`, también páginas no `publico` creadas por migración) y la canónica (las páginas abiertas por su nombre en humanity.wiki ya no son canónicas de sí mismas: van a su dominio).
+- `SubpaginaSitio`: si el navegador llega a `/p/:id` por un enlace armado sin la dirección legible, pregunta con HEAD y cambia la barra a la legible.
+- `GET /api/sitio/rutas?ids=`: las direcciones legibles (`rutaBonita`) que el navegador no sabía; las piden la portada, los subproyectos y la barra de Sol Solidario antes de pintar enlaces.
+
+## 2026-11-12 — Conciencia: pestañas «Tres formas de sentir» y «Fenómenos»
+
+- Eugenio pidió una pestaña con los fenómenos que nos hacen creer que percibimos más allá de los sentidos. Los que nombró:
+  - sentir que te miran por la espalda;
+  - la visión extraocular en niños;
+  - el proyecto Stargate;
+  - y otros tres a elegir.
+
+  Todo en un menú de dos pestañas.
+- En la franja de arriba hay ahora dos pestañas: **«Tres formas de sentir»**, con el dibujo y el esquema de siempre y su menú «Vista», y **«Fenómenos»**. La pestaña queda en la dirección (`?seccion=fenomenos`).
+- **Fenómenos** (`Fenomenos.tsx` y los datos en `src/data/concienciaFenomenos.ts`): arriba, la postura del proyecto con las palabras de Eugenio: la ciencia aún no lo explica porque reduce la conciencia a los sentidos físicos tradicionales. Debajo, una nota de honestidad.
+- Seis tarjetas, filtrables por despiertos, meditando o dormidos:
+  - sentir que te miran;
+  - visión extraocular;
+  - Stargate y la visión remota;
+  - sueños telepáticos (Maimonides);
+  - experimentos Ganzfeld;
+  - cerebros que se sincronizan a distancia (el potencial transferido).
+
+  Cada tarjeta cuenta qué ocurre, «Qué dice la ciencia hoy» con los resultados a favor y las réplicas que no salieron, y sus fuentes.
+- **Comprobado** en Chrome sin cabeza a 1440 px y a 390 px:
+  - cambio de pestaña y dirección;
+  - el filtro;
+  - la vuelta al dibujo.
+
+  No hubo errores en la consola.
+
+## 2026-11-12 — Modelo socioeconómico: four tiers, no-deduction default, Categorías and Deuda windows
+
+- Four tiers instead of three: basics 10 %, secondary 20 %, leisure 40 %, luxury 60 % (Eugenio). New spending group «Joyas, relojes, moda y artículos de lujo» (≈ 17.000 M€, Círculo Fortuny), carved out of clothing and personal care; tourists split 15/12/70/3. Wages keep three rates by company size, now 10/20/40.
+- Default reading is now «las empresas pagan el 10 % de lo que compran y no se deducen nada» (`TIPO_GENERAL`); the VAT-like reading with deductions stays as the comparison. Revenue: ≈ 35,3 % of GDP (595.884 M€) against 16,8 % deducting.
+- New window «Categorías» (`CategoriasVentana.tsx`, `src/data/categorias.ts`): 36 sectors, each in its tier, with search and a tier filter; four questions to place anything not listed; debatable cases and proposed luxury thresholds behind «Más».
+- New window «Deuda» (`DeudaVentana.tsx`, `src/data/deuda.ts`): who owes (State and Social Security 79,2 %, regions 341.642 M€, local 1,2 % of GDP, end of 2025), capital against interest (40.314 M€ interest in 2025; 230.693 M€ of State capital falling due in 2026 paid by issuing 285.693 M€), history 1980–2025, six abuses each with its remedy, today against the proposal, the contingency box simulator and the inherited-debt payoff simulator.
+- The free third: at least 20 % goes to each scale's contingency and common-savings box, which never goes below zero (`RESERVA_MIN_LIBRE`, shown in the thirds cards).
+
+### 2026-11-12 — Barra de luzhumanidad.com: «Participa» y logo un 25 % menor
+- `CabeceraSitio` (escaparate): el botón dice «Participa»; icono 38/44/48 px y nombre 1,46/1,76/2 rem.
+
+## 2026-11-12 — Modelo socioeconómico: thirteen windows (Escalas, Vivienda, Seguridad, Justicia, Sanidad, Educación, Legal, Digital)
+
+- «Impuestos» is now «Recaudación» with a euro icon (anchor `#impuestos` kept so shared links still work).
+- Eight new windows, one file pair each (`<Nombre>Ventana.tsx` + `src/data/<id>.ts`, whose `APARTADOS` feed the submenu): Escalas (first tab: the eight scales, responsibility, who decides, link to how revenue is split), Vivienda (what each scale enacts and how it regulates; empty homes), Seguridad (all forces, budgets, one body of «guardianes»), Justicia (one door for civil and criminal, judges at police stations, deadlines, judges needed), Sanidad (waiting times, collapse, one health record), Educación (0–25 «mochila», peer tutoring, projects and trades, an evaluator «bot» card), Legal (who legislates what, diagram, sectors, licence levels, a 10-question reader test), Digital (sign with the phone: SMS code, stronger signature for serious acts, phone service).
+- Each window was written by its own agent and scored by a separate blind evaluator (comprehension, completeness, figures, simple-first, mobile) until every score was ≥ 8, in two or three rounds.
+- `Fuente` accepts `url`/`titulo` so window data files keep their own sources. «Préstamos al IPC» now reads «préstamos sin intereses, solo ajustados a la subida de precios».
+
 ## 2026-11-12 — Cuadriciclo Bala clásico: largo sin tocar morro ni cola, menú de departamentos arriba, batería a lo largo del bastidor, asientos más bajos, volante, salpicadero, puertas y portón como el Aptera, retrovisores
 
 Eugenio (11:44): «Permite que cuando se modifique el largo total, que no cambie la forma del morro y la cola… vuelve a ese menú desplegado… ponlo en la parte superior y el actual menú pliégalo… sliders para… la batería… a lo largo del chasis y que sobresalga un 50 % del ancho del chasis… los asientos… todavía más bajos… cambia el manillar por un volante… crea el salpicadero… puertas y ventanas idénticas a las que tiene la Aptera… sliders para… la puerta… los retrovisores… el maletero… como el de la Aptera».

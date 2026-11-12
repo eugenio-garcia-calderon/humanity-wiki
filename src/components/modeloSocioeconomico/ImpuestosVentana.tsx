@@ -22,7 +22,7 @@ import { LasCuentas, Retos, ListaFuentes } from './Cuentas';
 import { Boton, Libre, Muestra, Segmentado } from './piezas';
 import { Apartado, Cifra, Mas } from './ventanas';
 
-const LECTURA_CORTA: Record<Modo, string> = { eslabon: 'Sin cascada entre empresas', literal: 'Al pie de la letra' };
+const LECTURA_CORTA: Record<Modo, string> = { literal: `Empresas: ${Math.round(TIPO_GENERAL * 100)} % sin deducir`, eslabon: 'Como el IVA, deduciendo' };
 
 /** The case in three numbers: what she pays today, with the model, and what she gets back. */
 function Caso({ modo, ejemplo }: { modo: Modo; ejemplo: Ejemplo }) {
@@ -41,7 +41,7 @@ function Caso({ modo, ejemplo }: { modo: Modo; ejemplo: Ejemplo }) {
 }
 
 export function ImpuestosVentana({ onProponer }: { onProponer: () => void }) {
-  const [modo, setModo] = useState<Modo>('eslabon');
+  const [modo, setModo] = useState<Modo>('literal');
   const [anillo, setAnillo] = useState<EscalaId | null>(null);
   const [nivel, setNivel] = useState<EscalaId | null>(null);
   const [mover, setMover] = useState(true);
@@ -56,14 +56,14 @@ export function ImpuestosVentana({ onProponer }: { onProponer: () => void }) {
       <section id="impuestos" aria-labelledby="impuestos-titulo" className="scroll-mt-40">
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
           <div>
-            <h2 id="impuestos-titulo" className="text-[2rem] font-[800] leading-[1.05] tracking-[-0.03em] sm:text-[2.8rem]">Un solo impuesto, en tres tramos</h2>
+            <h2 id="impuestos-titulo" className="text-[2rem] font-[800] leading-[1.05] tracking-[-0.03em] sm:text-[2.8rem]">Un solo impuesto, en cuatro tramos</h2>
             <p className="mt-5 max-w-[36ch] text-[1.3rem] font-medium leading-snug text-slate-800 sm:text-[1.45rem]">
-              Un 10 % en lo básico, un 25 % en lo secundario y un 40 % en el ocio y el lujo, sumado al precio como el IVA.
+              Un 10 % en lo básico, un 20 % en lo secundario, un 40 % en el ocio y un 60 % en el lujo, sumado al precio.
               Llega al instante, en ocho partes iguales, a las escalas en las que vivimos.
             </p>
             <div className="mt-6 grid max-w-xl grid-cols-2 gap-3">
               <Cifra valor={`${TOTAL_FIGURAS} → 1`} texto="impuestos y cotizaciones de hoy, frente a uno" />
-              <Cifra valor={`${porcentaje(cuentasPais('eslabon').pctPIB, 0)}`} texto="del PIB recaudaría, frente al ≈ 38 % de hoy" />
+              <Cifra valor={`${porcentaje(pais.pctPIB, 0)}`} texto="del PIB recaudaría, frente al ≈ 38 % de hoy" />
             </div>
           </div>
           <div className="mx-auto w-full max-w-[520px]">
@@ -104,7 +104,7 @@ export function ImpuestosVentana({ onProponer }: { onProponer: () => void }) {
         <ol className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
           {[
             { t: 'Pagas', d: 'Con tarjeta, Bizum o el móvil. El precio ya lleva su tramo, como hoy el IVA.' },
-            { t: 'Se aparta el tramo', d: 'En el mismo instante, el sistema de pago separa el 10, el 25 o el 40 % del precio sin impuesto.' },
+            { t: 'Se aparta el tramo', d: 'En el mismo instante, el sistema de pago separa el 10, el 20, el 40 o el 60 % del precio sin impuesto.' },
             { t: 'Se reparte en ocho', d: 'Cada escala recibe un octavo, lo mismo por habitante. Tu parte personal es un ingreso igual para cada persona.' },
             { t: 'Cada escala, en tercios', d: 'Un tercio para producir (invertir en lo que da trabajo y bienes), uno para cuidar (servicios a las personas) y uno libre, para lo que decida cada escala.' },
             { t: 'Cada escala decide', d: 'Su asamblea elige prioridades; su comité técnico las cumple al menor coste.' },
@@ -126,23 +126,25 @@ export function ImpuestosVentana({ onProponer }: { onProponer: () => void }) {
         <Mas titulo="preguntas sobre el cobro (efectivo, extranjero, empresas…)">
           <PreguntasCobro modo={modo} />
         </Mas>
-        <Mas titulo="una decisión técnica: ¿pagan también las compras entre empresas?">
+        <Mas titulo={`las empresas: un ${Math.round(TIPO_GENERAL * 100)} % de lo que compran, sin deducir nada`}>
           <p className="max-w-3xl text-[15px] leading-relaxed text-slate-600">
-            La panadería compra harina; la fábrica de chaquetas, tela. Si esas compras también dejan su parte, el impuesto se suma en cada eslabón.
+            Cuando una empresa compra a otra (la panadería, harina; la fábrica, tela), paga un {porcentaje(TIPO_GENERAL * 100, 0)} y ya está: no se deduce ni se devuelve nada.
+            Desaparece la contabilidad del IVA repercutido y soportado, las liquidaciones trimestrales y las devoluciones. A cambio, el impuesto se suma un poco en cada eslabón de la cadena:
+            de media, los precios llevan un {porcentaje((pais.cascada - 1) * 100, 1)} más por esa acumulación.
           </p>
           <dl className="mt-4 grid gap-4 text-sm md:grid-cols-2">
             <div>
-              <dt className="font-semibold text-slate-900">{LECTURA_CORTA.eslabon}</dt>
-              <dd className="mt-0.5 leading-relaxed text-slate-600">La empresa paga al comprar y lo recupera al vender, como hoy el IVA. Recauda ≈ {porcentaje(cuentasPais('eslabon').pctPIB, 0)} del PIB. Es la lectura por defecto.</dd>
+              <dt className="font-semibold text-slate-900">{LECTURA_CORTA.literal} (la propuesta)</dt>
+              <dd className="mt-0.5 leading-relaxed text-slate-600">Recauda ≈ {porcentaje(cuentasPais('literal').pctPIB, 0)} del PIB. Sin papeleo para ninguna empresa.</dd>
             </div>
             <div>
-              <dt className="font-semibold text-slate-900">{LECTURA_CORTA.literal}</dt>
-              <dd className="mt-0.5 leading-relaxed text-slate-600">Cada pago entre empresas deja el {porcentaje(TIPO_GENERAL * 100, 0)}, sin devolución. Recauda ≈ {porcentaje(cuentasPais('literal').pctPIB, 0)} del PIB, pero encarece lo que tiene más intermediarios.</dd>
+              <dt className="font-semibold text-slate-900">{LECTURA_CORTA.eslabon} (para comparar)</dt>
+              <dd className="mt-0.5 leading-relaxed text-slate-600">Recauda ≈ {porcentaje(cuentasPais('eslabon').pctPIB, 0)} del PIB. Cada producto lleva exactamente su tramo, pero las empresas siguen llevando la cuenta del IVA.</dd>
             </div>
           </dl>
           <div className="mt-4">
-            <Segmentado<Modo> etiqueta="Lectura del modelo" valor={modo} onChange={setModo}
-              opciones={[{ id: 'eslabon', texto: LECTURA_CORTA.eslabon }, { id: 'literal', texto: LECTURA_CORTA.literal }]} />
+            <Segmentado<Modo> etiqueta="Cómo pagan las empresas" valor={modo} onChange={setModo}
+              opciones={[{ id: 'literal', texto: LECTURA_CORTA.literal }, { id: 'eslabon', texto: LECTURA_CORTA.eslabon }]} />
           </div>
         </Mas>
       </Apartado>

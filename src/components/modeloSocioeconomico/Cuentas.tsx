@@ -1,12 +1,12 @@
 // The country's accounts under the model (the two readings of «every
-// transaction», the three tiers), a sandbox to classify purchases differently,
+// transaction», the four tiers), a sandbox to classify purchases differently,
 // and the open problems, said plainly: a proposal that hides what does not add
 // up yet teaches people to stop reading it.
 import { useState } from 'react';
 import { cn } from '../../utils/cn';
 import {
   ALQUILER_IMPUTADO, CLASIFICACION_INICIAL, EJEMPLO_INICIAL, EPF_TOTAL, EMPLEADORES, ESPANA, FUENTE, GRUPOS_GASTO, HOY, OCTAVO, TIPO_GENERAL, TRAMO, TRAMOS,
-  type Clasificacion, type Empleador, type Modo, type Tramo,
+  type Clasificacion, type Empleador, type Modo, type Tramo, porTramoDe,
   calcularEjemplo, cuentasPais, fraccion, euros, irpfMadrid, millones, modeloPorFuncion, numero, porcentaje, sumaGasto, SUPUESTOS,
 } from '../../data/modeloSocioeconomico';
 import { Boton, Fuente, Libre, Segmentado } from './piezas';
@@ -14,12 +14,12 @@ import { TONO_TRAMO } from './Tramos';
 
 const LECTURAS: { id: Modo; titulo: string; texto: string }[] = [
   {
-    id: 'eslabon', titulo: 'Sin cascada entre empresas',
-    texto: 'Los sueldos y todas las compras pagan su tramo, también las de las empresas. Cuando una empresa vende, recupera al instante lo que pagó por sus materiales: así cada producto lleva exactamente su tramo, nunca un impuesto encima de otro. Es la lectura que usa esta página por defecto.',
+    id: 'literal', titulo: `Las empresas pagan el ${porcentaje(TIPO_GENERAL * 100, 0)} de lo que compran`,
+    texto: `Cada compra entre empresas deja un ${porcentaje(TIPO_GENERAL * 100, 0)} y no se deduce nada: desaparecen el IVA repercutido, el soportado, las liquidaciones y las devoluciones. A cambio, el impuesto se acumula un poco en cada eslabón de la cadena. Es la propuesta por defecto.`,
   },
   {
-    id: 'literal', titulo: 'Al pie de la letra, también entre empresas',
-    texto: `Las compras entre empresas dejan además el tipo general, un ${porcentaje(TIPO_GENERAL * 100, 0)}, sin devolución. Recauda más del doble, pero el impuesto se acumula en cada eslabón de la cadena: hasta el pan del tramo 1 llega con mucho más impuesto del que dice su tramo.`,
+    id: 'eslabon', titulo: 'Como el IVA de hoy, deduciendo',
+    texto: 'La empresa paga al comprar y lo recupera al vender, como hoy con el IVA soportado y repercutido. Cada producto lleva exactamente su tramo, pero exige la contabilidad del IVA. Se muestra para comparar.',
   },
 ];
 
@@ -137,13 +137,13 @@ export function LasCuentas({ modo, onModo }: { modo: Modo; onModo: (m: Modo) => 
             </p>
           </div>
           <div className="rounded-2xl border border-slate-200 bg-white p-5">
-            <h3 className="text-lg font-bold text-slate-900">Un pan del tramo 1</h3>
+            <h3 className="text-lg font-bold text-slate-900">Un pan, de lo básico</h3>
             <p className="mt-1 text-sm text-slate-600">El agricultor aporta 0,50 € de valor, el molino 0,30 € y la panadería 0,80 €.</p>
             <dl className="mt-3 space-y-3 text-sm">
-              <div><dt className="font-semibold text-slate-900">Sin cascada entre empresas</dt><dd className="tabular-nums text-slate-700">Cuesta {euros(pan.precioEslabon, 2)}, con {euros(pan.impuestoEslabon, 2)} de impuesto: su {porcentaje(TRAMO[1].tipo * 100, 0)} exacto.</dd></div>
-              <div><dt className="font-semibold text-slate-900">Al pie de la letra</dt><dd className="tabular-nums text-slate-700">Cuesta {euros(pan.precioLiteral, 2)}, de los que {euros(pan.impuestoLiteral, 2)} se quedaron en el fondo por el camino: el {porcentaje((pan.impuestoLiteral / pan.precioLiteral) * 100, 0)}.</dd></div>
+              <div><dt className="font-semibold text-slate-900">Deduciendo, como el IVA</dt><dd className="tabular-nums text-slate-700">Cuesta {euros(pan.precioEslabon, 2)}, con {euros(pan.impuestoEslabon, 2)} de impuesto: su {porcentaje(TRAMO[1].tipo * 100, 0)} exacto.</dd></div>
+              <div><dt className="font-semibold text-slate-900">Empresas al {porcentaje(TIPO_GENERAL * 100, 0)} sin deducir (la propuesta)</dt><dd className="tabular-nums text-slate-700">Cuesta {euros(pan.precioLiteral, 2)}, de los que {euros(pan.impuestoLiteral, 2)} se quedaron en el fondo por el camino: el {porcentaje((pan.impuestoLiteral / pan.precioLiteral) * 100, 0)}.</dd></div>
             </dl>
-            <p className="mt-3 text-xs leading-relaxed text-slate-500">Al pie de la letra, el pan paga mucho más que su tramo: el molino y la panadería pagan al comprar el tipo general y llega dentro del precio. Por eso empuja a las empresas a fusionarse para saltarse intermediarios. España tuvo un impuesto así, el IGTE, hasta que en 1986 llegó el IVA.</p>
+            <p className="mt-3 text-xs leading-relaxed text-slate-600">Sin deducir, el pan paga algo más que su tramo: el molino y la panadería pagan al comprar el {porcentaje(TIPO_GENERAL * 100, 0)} y llega dentro del precio. Por eso empuja a las empresas a fusionarse para saltarse intermediarios. España tuvo un impuesto así, el IGTE, hasta que en 1986 llegó el IVA.</p>
           </div>
         </div>
       </div>
@@ -166,7 +166,7 @@ function Clasifica({ modo }: { modo: Modo }) {
         <div className="max-w-2xl">
           <h3 className="text-lg font-bold text-slate-900">Clasifica tú las compras</h3>
           <p className="mt-1 text-sm leading-relaxed text-slate-600">
-            Qué es primera necesidad, qué es segunda y qué es lujo lo decide la gente. Mueve cada tipo de gasto de las familias a otro tramo y mira cuánto cambia lo que se recauda.
+            Qué es básico, qué es secundario, qué es ocio y qué es lujo lo decide la gente. Mueve cada tipo de gasto de las familias a otro tramo y mira cuánto cambia lo que se recauda.
             Su peso sale de la Encuesta de Presupuestos Familiares de 2024<Fuente id="ine-epf" />.
           </p>
         </div>
@@ -206,12 +206,12 @@ export function Retos({ modo }: { modo: Modo }) {
   const nominaAnual = HOY.nominaPensionesMes * 14;
   // Who pays more, net: three wages × three company sizes, same household as the worked example,
   // spending three quarters of today's net pay, split like the example's basket.
-  const cuotas = { 1: EJEMPLO_INICIAL.gasto[1] / sumaGasto(EJEMPLO_INICIAL.gasto), 2: EJEMPLO_INICIAL.gasto[2] / sumaGasto(EJEMPLO_INICIAL.gasto), 3: EJEMPLO_INICIAL.gasto[3] / sumaGasto(EJEMPLO_INICIAL.gasto) };
+  const cuotas = porTramoDe(t => EJEMPLO_INICIAL.gasto[t] / sumaGasto(EJEMPLO_INICIAL.gasto));
   const tamanos: Empleador[] = ['pequena', 'mediana', 'grande'];
   const casos = [16_000, 26_000, 50_000].map(bruto => {
     const netoHoy = bruto - Math.min(bruto, SUPUESTOS.baseMaximaAnual) * SUPUESTOS.cotTrabajador - irpfMadrid(bruto);
     const mes = (netoHoy * 0.75) / 12;
-    const gasto = { 1: mes * cuotas[1], 2: mes * cuotas[2], 3: mes * cuotas[3] };
+    const gasto = porTramoDe(t => mes * cuotas[t]);
     const r = (empleador: Empleador) => calcularEjemplo({ ...EJEMPLO_INICIAL, bruto, empleador, gasto }, modo);
     return { bruto, hoy: r('pequena').pctHoy, modelo: tamanos.map(t => r(t).pctModelo) };
   });
@@ -225,10 +225,10 @@ export function Retos({ modo }: { modo: Modo }) {
         Esta página entiende que la dependencia por la edad cuenta como discapacidad.</>,
     },
     {
-      t: 'Recauda mucho menos que hoy',
-      d: <>Sin cascada entre empresas, el modelo recauda ≈ {porcentaje(esl.pctPIB, 0)} del PIB, frente al ≈ 38 % de hoy en impuestos y cotizaciones; al pie de la letra, ≈ {porcentaje(lit.pctPIB, 0)}, a costa de la cascada.
+      t: 'Cuánto recauda frente a hoy',
+      d: <>Con las empresas pagando el {porcentaje(TIPO_GENERAL * 100, 0)} de lo que compran sin deducir, el modelo recauda ≈ {porcentaje(lit.pctPIB, 0)} del PIB, frente al ≈ 38 % de hoy en impuestos y cotizaciones; deduciendo como el IVA, solo ≈ {porcentaje(esl.pctPIB, 0)}.
         Con el reparto inicial, la salud pasaría de {millones(salud.hoy)} a {millones(salud.modelo)} y la educación de {millones(educacion.hoy)} a {millones(educacion.modelo)}:
-        para dar lo mismo, los servicios tendrían que costar unas {numero(salud.hoy / salud.modelo, 0)} veces menos. Caminos: tramos más altos, más gasto en el tramo 2 o 3, que las asambleas den más peso a esos ámbitos, o que una parte deje de ser pública.</>,
+        para dar lo mismo, los servicios tendrían que costar unas {numero(salud.hoy / salud.modelo, 0)} veces menos. Caminos: tramos más altos, más gasto en lo secundario, el ocio o el lujo, que las asambleas den más peso a esos ámbitos, o que una parte deje de ser pública.</>,
     },
     {
       t: '¿Quién paga más?',
@@ -265,7 +265,7 @@ export function Retos({ modo }: { modo: Modo }) {
     {
       t: 'Dónde está la línea entre necesidad y lujo',
       d: <>Hoy el IVA ya discute si unas gafas, unas compresas o el veterinario son de primera necesidad. Con un 40 % en juego, cada frontera valdrá más. Y dentro del tramo 1 cabe el lujo: un coche de 90.000 € como primer vehículo, o una casa enorme como vivienda habitual.
-        Una salida: que por encima de un precio, que decide la asamblea, lo básico pase al tramo 3. No está en las cuentas de esta página. El simulador de arriba deja probar otras clasificaciones.</>,
+        Una salida: que por encima de un precio, que decide la asamblea, lo básico pase al tramo del lujo. No está en las cuentas de esta página. El simulador de arriba deja probar otras clasificaciones.</>,
     },
     {
       t: 'Turismo y hostelería al 40 %',
@@ -283,7 +283,7 @@ export function Retos({ modo }: { modo: Modo }) {
     },
     {
       t: 'Los precios y los sueldos se moverían',
-      d: <>Todas las cifras usan los precios y los sueldos de hoy. Al desaparecer las cotizaciones y cambiar los tramos, los sueldos y los precios cambiarían, y la gente compraría y trabajaría de otra manera: menos en el tramo 3, más en el 1. Esta página es una foto fija para comparar, no una previsión de lo que pasaría.</>,
+      d: <>Todas las cifras usan los precios y los sueldos de hoy. Al desaparecer las cotizaciones y cambiar los tramos, los sueldos y los precios cambiarían, y la gente compraría y trabajaría de otra manera: menos en el ocio y el lujo, más en lo básico. Esta página es una foto fija para comparar, no una previsión de lo que pasaría.</>,
     },
     {
       t: 'Europa, el planeta y los gobiernos de hoy',

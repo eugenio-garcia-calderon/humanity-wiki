@@ -39,9 +39,9 @@ export function Piezas() {
       </div>
       <div className="flex flex-col self-start rounded-2xl bg-slate-900 p-6 text-white">
         <h3 className="text-lg font-bold">Con el modelo: 1</h3>
-        <p className="mt-1 text-sm text-slate-300">Un solo impuesto sobre cada pago, con tres tramos. Lo aparta el sistema de pago y llega ya repartido:</p>
+        <p className="mt-1 text-sm text-slate-300">Un solo impuesto sobre cada pago, con cuatro tramos. Lo aparta el sistema de pago y llega ya repartido:</p>
         <div className="mt-5 flex items-stretch gap-3">
-          <span aria-hidden className="grid h-24 w-24 shrink-0 place-items-center rounded-lg bg-white text-center text-lg font-[800] leading-tight tracking-tight text-slate-900">10 · 25<br />· 40 %</span>
+          <span aria-hidden className="grid h-24 w-24 shrink-0 place-items-center rounded-lg bg-white text-center text-lg font-[800] leading-tight tracking-tight text-slate-900">10 · 20 ·<br />40 · 60 %</span>
           <ul className="grid flex-1 grid-cols-2 gap-x-3 gap-y-1 text-xs text-slate-200">
             {ESCALAS.map(e => <li key={e.id} className="flex items-center gap-1.5"><Muestra color={e.color} />{e.corto}</li>)}
           </ul>
@@ -82,12 +82,12 @@ export function Costes() {
 export function Tabla({ modo }: { modo: Modo }) {
   const pais = cuentasPais(modo);
   const filas: [string, React.ReactNode, React.ReactNode][] = [
-    ['Cuántos impuestos', <>{TOTAL_FIGURAS} impuestos y cotizaciones distintos, y cientos de tasas</>, 'Uno, con tres tramos: 10, 25 y 40 %'],
+    ['Cuántos impuestos', <>{TOTAL_FIGURAS} impuestos y cotizaciones distintos, y cientos de tasas</>, 'Uno, con cuatro tramos: 10, 20, 40 y 60 %'],
     ['Quién hace papeleo', 'Personas, autónomos, empresas y comunidades de vecinos: declaraciones, modelos trimestrales, liquidaciones y recibos', 'Nadie: lo aparta el sistema de pago en cada operación'],
     ['Cuándo se paga', 'Retenciones cada mes, declaraciones cada trimestre y cada año, recibos en fechas distintas', 'En el instante de cada pago'],
     ['Cómo llega el dinero a cada administración', 'El Estado recauda y luego reparte a comunidades y ayuntamientos con fórmulas que se negocian políticamente y se ajustan años después', 'Un octavo automático a cada escala, repartido por habitante, cada día; y en cada escala, tercios para producir, cuidar y libre'],
     ['La comunidad de vecinos', <>Cuotas aparte: unos {millones(HOY.cuotasComunidades)} al año (estimación)<Fuente id="comunidades-cuotas" /></>, 'Es una escala más y la financia el fondo común'],
-    ['Quién paga más', 'Tramos del IRPF, deducciones y exenciones', 'Quien gasta en ocio y lujo, y quien trabaja para una empresa grande; todos reciben el mismo ingreso por persona'],
+    ['Quién paga más', 'Tramos del IRPF, deducciones y exenciones', 'Quien gasta en ocio y, sobre todo, en lujo, y quien trabaja para una empresa grande; todos reciben el mismo ingreso por persona'],
     ['Pensiones', 'Según lo cotizado: de menos de 1.000 € a 3.359,60 € al mes', 'Una sola pensión igual al salario mínimo, ayudas aparte (ver la ventana Pensiones)'],
     ['Transparencia', 'Presupuestos y liquidaciones anuales', 'Cuentas abiertas: cada euro, en tiempo real'],
     ['Cuánto se recauda', <>≈ 38 % del PIB en impuestos y cotizaciones (2025)<Fuente id="ijm-2026" /></>, <>≈ {porcentaje(pais.pctPIB, 0)} del PIB, según los cálculos de este modelo</>],

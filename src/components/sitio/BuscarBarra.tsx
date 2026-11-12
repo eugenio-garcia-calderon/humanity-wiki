@@ -33,7 +33,9 @@ export function proyectosPrimero(l: Resultado[]): Resultado[] {
   return [...l.filter(esProyecto), ...l.filter(r => !esProyecto(r))];
 }
 
-export default function BuscarBarra({ raizId, enLinea = false }: { raizId: string;
+export default function BuscarBarra({ raizId, enLinea = false, ancha = false }: { raizId: string;
+  /** Grande, a la izquierda de la barra del escaparate (2026-11-12): toda la columna, y la lista se abre hacia la derecha. */
+  ancha?: boolean;
   /** Siempre abierta, como una caja de texto en el centro de la barra (2026-10-28, Eugenio: «el selector de tabla, mapa,
    *  círculos y la barra de buscar, centrados»). Sin ella, la lupa que se despliega a la derecha. */
   enLinea?: boolean }) {
@@ -81,7 +83,7 @@ export default function BuscarBarra({ raizId, enLinea = false }: { raizId: strin
   const todos = () => `${sitio ? sitio.enlaceBuscar() : '/buscar'}?q=${encodeURIComponent(texto)}${sitio ? '' : `&sitio=${encodeURIComponent(raizId)}`}`;
 
   return (
-    <div ref={caja} data-buscar-barra className={cn('shrink-0', enLinea ? 'relative w-[9.5rem] sm:w-44 2xl:w-56' : desplegada ? 'absolute right-0 top-1/2 z-50 w-[min(26rem,calc(100vw-2rem))] -translate-y-1/2' : 'relative')}>
+    <div ref={caja} data-buscar-barra className={cn('shrink-0', ancha ? 'relative w-full sm:max-w-[24rem]' : enLinea ? 'relative w-[9.5rem] sm:w-44 2xl:w-56' : desplegada ? 'absolute right-0 top-1/2 z-50 w-[min(26rem,calc(100vw-2rem))] -translate-y-1/2' : 'relative')}>
       {/* La lupa sola, hasta que se pulsa. */}
       {!desplegada && (
         <button type="button" onClick={() => setDesplegada(true)} aria-label="Buscar en esta web" title="Buscar"
@@ -91,9 +93,9 @@ export default function BuscarBarra({ raizId, enLinea = false }: { raizId: strin
       )}
       <form role="search" onSubmit={e => { e.preventDefault(); if (texto.length < 2) return; const r = res?.[elegido]; cerrar(); ir(r ? enlace(r.id) : todos()); }}
         className={cn('items-center gap-2 rounded-full border border-slate-200 bg-white px-3 focus-within:border-slate-400 focus-within:ring-2 focus-within:ring-slate-200',
-          enLinea ? 'flex h-9' : desplegada ? 'flex h-11 shadow-lg' : 'hidden')}>
+          ancha ? 'flex h-11 sm:h-12' : enLinea ? 'flex h-9' : desplegada ? 'flex h-11 shadow-lg' : 'hidden')}>
         <Search className="h-4 w-4 shrink-0 text-slate-400" aria-hidden />
-        <input ref={campo} type="search" value={q} placeholder="Buscar" aria-label="Buscar en esta web"
+        <input ref={campo} type="search" value={q} placeholder={ancha && typeof window !== 'undefined' && window.innerWidth >= 640 ? 'Buscar proyectos' : 'Buscar'} aria-label="Buscar en esta web"
           onChange={e => { setQ(e.target.value); setAbierta(true); }} onFocus={() => setAbierta(true)}
           onKeyDown={e => {
             if (e.key === 'Escape') { cerrar(); (e.target as HTMLInputElement).blur(); }
@@ -102,7 +104,7 @@ export default function BuscarBarra({ raizId, enLinea = false }: { raizId: strin
               setElegido(i => (e.key === 'ArrowDown' ? Math.min(i + 1, res.length - 1) : Math.max(i - 1, -1)));
             }
           }}
-          className="h-full min-w-0 flex-1 bg-transparent text-sm font-semibold text-slate-900 outline-none focus-visible:!outline-none placeholder:font-medium placeholder:text-slate-400 [&::-webkit-search-cancel-button]:hidden" />
+          className={cn("h-full min-w-0 flex-1 bg-transparent font-semibold text-slate-900 outline-none focus-visible:!outline-none placeholder:font-medium placeholder:text-slate-400 [&::-webkit-search-cancel-button]:hidden", ancha ? 'text-base' : 'text-sm')} />
         {(q || desplegadaSola) && (
           <button type="button" onClick={cerrar} aria-label="Cerrar la búsqueda" className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700">
             <X className="h-3.5 w-3.5" />
@@ -112,7 +114,7 @@ export default function BuscarBarra({ raizId, enLinea = false }: { raizId: strin
       {abierta && texto.length >= 2 && res && (
         // En el móvil la caja no está pegada al borde derecho: la lista va de lado a lado, fija bajo la caja.
         <div data-resultados-barra style={movil ? { position: 'fixed', left: 12, right: 12, top: movil.top, width: 'auto', marginTop: 0 } : undefined}
-          className="absolute right-0 top-full z-50 mt-2 max-h-[min(36rem,calc(100dvh-6rem))] w-[min(40rem,calc(100vw-1.5rem))] overflow-y-auto rounded-3xl border border-slate-200 bg-white p-2 shadow-2xl">
+          className={cn('absolute top-full z-50 mt-2 max-h-[min(36rem,calc(100dvh-6rem))] w-[min(40rem,calc(100vw-1.5rem))] overflow-y-auto rounded-3xl border border-slate-200 bg-white p-2 shadow-2xl', ancha ? 'left-0' : 'right-0')}>
           {res.length === 0 ? <p className="px-4 py-4 text-base text-slate-500">Nada con «{texto}».</p> : (
             <ul>
               {res.map((r, i) => {

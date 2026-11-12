@@ -1,7 +1,7 @@
 // ============================================================================
 // MODELO SOCIOECONÓMICO OPTIMIZADO (2026-11-10, Eugenio)
 // ============================================================================
-// One tax on every payment, nothing else, in three tiers (10, 25 or 40 %: by
+// One tax on every payment, nothing else, in four tiers (10, 20, 40 or 60 %: by
 // what is bought, and for wages by the size of the company that pays them),
 // collected by the payment system itself and split in eight equal parts among
 // eight scales: person, neighbourhood or family, municipality, province, region,
@@ -32,9 +32,19 @@ import { TRAMOS_PENSION } from '../data/presupuestos';
 import { SMI_MES } from '../data/pensionesPropuesta';
 import { ImpuestosVentana } from '../components/modeloSocioeconomico/ImpuestosVentana';
 import { PensionesVentana } from '../components/modeloSocioeconomico/PensionesVentana';
+import { CategoriasVentana } from '../components/modeloSocioeconomico/CategoriasVentana';
+import { DeudaVentana } from '../components/modeloSocioeconomico/DeudaVentana';
+import { EscalasVentana } from '../components/modeloSocioeconomico/EscalasVentana';
+import { ViviendaVentana } from '../components/modeloSocioeconomico/ViviendaVentana';
+import { SeguridadVentana } from '../components/modeloSocioeconomico/SeguridadVentana';
+import { JusticiaVentana } from '../components/modeloSocioeconomico/JusticiaVentana';
+import { SanidadVentana } from '../components/modeloSocioeconomico/SanidadVentana';
+import { EducacionVentana } from '../components/modeloSocioeconomico/EducacionVentana';
+import { LegalVentana } from '../components/modeloSocioeconomico/LegalVentana';
+import { DigitalVentana } from '../components/modeloSocioeconomico/DigitalVentana';
 import { Presupuestos } from '../components/modeloSocioeconomico/Presupuestos';
 import { BuzonProyecto } from '../components/modeloSocioeconomico/BuzonProyecto';
-import { Boton } from '../components/modeloSocioeconomico/piezas';
+import { Boton, Libre } from '../components/modeloSocioeconomico/piezas';
 import { VENTANAS, ALIAS, ventanaDeAncla, Apartado, type VentanaId } from '../components/modeloSocioeconomico/ventanas';
 import { cn } from '../utils/cn';
 
@@ -42,9 +52,17 @@ import { cn } from '../utils/cn';
 const ACENTO: Record<string, { tab: string; borde: string; texto: string }> = {
   impuestos: { tab: 'bg-amber-500 text-slate-950', borde: 'border-amber-400', texto: 'text-amber-600' },
   pensiones: { tab: 'bg-teal-600 text-white', borde: 'border-teal-500', texto: 'text-teal-700' },
+  categorias: { tab: 'bg-orange-700 text-white', borde: 'border-orange-600', texto: 'text-orange-700' },
   presupuestos: { tab: 'bg-indigo-600 text-white', borde: 'border-indigo-500', texto: 'text-indigo-600' },
-  educacion: { tab: '', borde: 'border-slate-200', texto: 'text-slate-400' },
-  sanidad: { tab: '', borde: 'border-slate-200', texto: 'text-slate-400' },
+  deuda: { tab: 'bg-rose-700 text-white', borde: 'border-rose-600', texto: 'text-rose-700' },
+  escalas: { tab: 'bg-emerald-700 text-white', borde: 'border-emerald-600', texto: 'text-emerald-700' },
+  vivienda: { tab: 'bg-lime-700 text-white', borde: 'border-lime-600', texto: 'text-lime-700' },
+  seguridad: { tab: 'bg-blue-800 text-white', borde: 'border-blue-700', texto: 'text-blue-800' },
+  justicia: { tab: 'bg-violet-700 text-white', borde: 'border-violet-600', texto: 'text-violet-700' },
+  sanidad: { tab: 'bg-cyan-700 text-white', borde: 'border-cyan-600', texto: 'text-cyan-700' },
+  educacion: { tab: 'bg-yellow-500 text-slate-950', borde: 'border-yellow-400', texto: 'text-yellow-600' },
+  legal: { tab: 'bg-stone-700 text-white', borde: 'border-stone-600', texto: 'text-stone-700' },
+  digital: { tab: 'bg-sky-600 text-white', borde: 'border-sky-500', texto: 'text-sky-700' },
 };
 
 const anclaActual = () => decodeURIComponent(window.location.hash.replace(/^#/, ''));
@@ -71,11 +89,11 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
 
   useEffect(() => {
     const titulo = document.title;
-    document.title = 'Modelo socioeconómico optimizado · Impuestos, pensiones y presupuestos · Luz & Humanidad';
+    document.title = 'Modelo socioeconómico optimizado · Escalas, recaudación, pensiones, deuda, servicios y leyes · Luz & Humanidad';
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
     const anterior = meta?.content;
     if (!meta) { meta = document.createElement('meta'); meta.name = 'description'; document.head.appendChild(meta); }
-    meta.content = 'Un único impuesto en tres tramos (10, 25 y 40 %) repartido entre ocho escalas, una pensión única igual al salario mínimo y los presupuestos de cada escala, comparados con el sistema español de hoy.';
+    meta.content = 'Un único impuesto en cuatro tramos (10, 20, 40 y 60 %) repartido entre ocho escalas, una pensión única igual al salario mínimo y los presupuestos de cada escala, comparados con el sistema español de hoy.';
     return () => { document.title = titulo; if (meta) meta.content = anterior ?? ''; };
   }, []);
 
@@ -130,65 +148,56 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
     <div data-modelo className="min-h-screen bg-slate-100 text-slate-900 antialiased" style={{ fontFamily: '"Public Sans Variable", ui-sans-serif, system-ui, sans-serif' }}>
       <style>{`[data-modelo] section[id], [data-modelo] [id].scroll-mt-40 { scroll-margin-top: ${margen}px; }`}</style>
 
-      {/* ── The header: the project, the windows, and the open window's sections ── */}
+      {/* ── The header: the windows and the open window's sections; the project's name is in the cover and the footer ── */}
       <header ref={cabecera} className="sticky top-0 z-40 border-b border-slate-200 bg-white" style={integracion ? { top: integracion.altoBarra } : undefined}>
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 pt-2 sm:px-6 sm:pt-2.5">
-          <a href="#" onClick={e => { e.preventDefault(); history.pushState(null, '', window.location.pathname + window.location.search); setAncla(''); window.scrollTo({ top: 0 }); }}
-            className="min-w-0 leading-tight">
-            <span className="block text-[15px] font-bold tracking-tight">Modelo socioeconómico optimizado</span>
-            <span className="hidden text-xs text-slate-500 sm:block">Un proyecto de {marca}</span>
-          </a>
-          <div className="ml-auto flex shrink-0 items-center gap-2">
-            <Boton onClick={() => setVerBuzon(true)} className="shrink-0">
-              <MessageSquarePlus className="h-4 w-4" /><span className="hidden sm:inline">Proponer una mejora</span><span className="sr-only sm:hidden">Proponer una mejora</span>
-            </Boton>
-            {integracion && (
-              <Boton onClick={integracion.alternar} aria-pressed={integracion.completa} className="shrink-0"
-                title={integracion.completa ? 'Salir de pantalla completa' : 'Pantalla completa'}>
-                {integracion.completa ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-                <span className="sr-only lg:not-sr-only">{integracion.completa ? 'Salir de pantalla completa' : 'Pantalla completa'}</span>
-              </Boton>
-            )}
-          </div>
-        </div>
-
         {/* The windows. The open one is lit; the others dim until you point at them. */}
-        <nav aria-label="Ventanas" className="relative mx-auto max-w-6xl px-2 sm:px-4">
-          <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 z-10 flex w-14 items-center justify-end bg-gradient-to-l from-white via-white/90 to-transparent pr-1 text-slate-400 sm:hidden"><ChevronRight className="h-5 w-5" /></span>
-          <ul ref={tiraVentanas} className="flex gap-1 overflow-x-auto py-1.5 pr-12 [scrollbar-width:none] sm:py-2 sm:pr-0">
-            {VENTANAS.map(v => {
-              const Icono = v.icono;
-              const activa = v.id === ventana;
-              if (v.pronto) return (
-                <li key={v.id} className="shrink-0">
-                  <span aria-disabled title="Próximamente" className="flex cursor-default items-center gap-2 rounded-full px-3.5 py-2 text-[15px] font-medium text-slate-300">
-                    <Icono aria-hidden className="h-[18px] w-[18px]" />{v.titulo}
-                    <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-400">pronto</span>
-                  </span>
-                </li>
-              );
-              return (
-                <li key={v.id} className="shrink-0">
-                  <a href={`#${v.id}`} aria-current={activa ? 'page' : undefined}
-                    className={cn('flex items-center gap-2 rounded-full px-3.5 py-2 text-[15px] font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900',
-                      activa ? cn(ACENTO[v.id].tab, 'shadow-sm') : ventana ? 'text-slate-500 hover:bg-slate-100 hover:text-slate-900' : 'text-slate-800 hover:bg-slate-100')}>
-                    <Icono aria-hidden className="h-[18px] w-[18px]" />{v.titulo}
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
+        {/* One row: the windows, and a small full-screen switch at the end (Eugenio: «compacta el menú»). */}
+        <div className="mx-auto flex max-w-6xl items-center gap-2 px-2 sm:px-4">
+          <nav aria-label="Ventanas" className="relative min-w-0 flex-1">
+            <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 z-10 flex w-14 items-center justify-end bg-gradient-to-l from-white via-white/90 to-transparent pr-1 text-slate-400 sm:hidden"><ChevronRight className="h-5 w-5" /></span>
+            <ul ref={tiraVentanas} className="flex gap-0.5 overflow-x-auto py-1 pr-12 [scrollbar-width:none] sm:pr-0">
+              {VENTANAS.map(v => {
+                const Icono = v.icono;
+                const activa = v.id === ventana;
+                if (v.pronto) return (
+                  <li key={v.id} className="shrink-0">
+                    <span aria-disabled title="Próximamente" className="flex cursor-default items-center gap-2 rounded-full px-2.5 py-1.5 text-sm font-medium text-slate-300">
+                      <Icono aria-hidden className="h-4 w-4" />{v.titulo}
+                      <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-400">pronto</span>
+                    </span>
+                  </li>
+                );
+                return (
+                  <li key={v.id} className="shrink-0">
+                    <a href={`#${v.id}`} aria-current={activa ? 'page' : undefined}
+                      className={cn('flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900',
+                        activa ? cn(ACENTO[v.id].tab, 'shadow-sm') : ventana ? 'text-slate-500 hover:bg-slate-100 hover:text-slate-900' : 'text-slate-800 hover:bg-slate-100')}>
+                      <Icono aria-hidden className="h-4 w-4" />{v.titulo}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+          {integracion && (
+            <Libre onClick={integracion.alternar} aria-pressed={integracion.completa}
+              title={integracion.completa ? 'Salir de pantalla completa' : 'Pantalla completa'}
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-900">
+              {integracion.completa ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+              <span className="sr-only">{integracion.completa ? 'Salir de pantalla completa' : 'Pantalla completa'}</span>
+            </Libre>
+          )}
+        </div>
 
         {/* The open window's sections. */}
         {actual && (
           <div className="relative border-t border-slate-100">
             <nav aria-label={`Apartados de ${actual.titulo}`} className="mx-auto max-w-6xl px-2 sm:px-4">
-              <ul ref={tiraApartados} className="flex gap-1 overflow-x-auto py-1.5 pr-8 text-[13px] [scrollbar-width:none]">
+              <ul ref={tiraApartados} className="flex gap-0.5 overflow-x-auto py-1 pr-8 text-[13px] [scrollbar-width:none]">
                 {actual.apartados.map(a => (
                   <li key={a.id} className="shrink-0">
                     <a href={`#${a.id}`} aria-current={visible === a.id ? 'location' : undefined}
-                      className={cn('block whitespace-nowrap rounded-full px-2.5 py-1', visible === a.id ? cn('font-semibold', ACENTO[actual.id].texto, 'bg-slate-100') : 'text-slate-600 hover:bg-slate-100')}>
+                      className={cn('block whitespace-nowrap rounded-full px-2.5 py-0.5', visible === a.id ? cn('font-semibold', ACENTO[actual.id].texto, 'bg-slate-100') : 'text-slate-600 hover:bg-slate-100')}>
                       {a.t}
                     </a>
                   </li>
@@ -202,7 +211,17 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
 
       <main>
         {ventana === 'impuestos' && <ImpuestosVentana onProponer={() => setVerBuzon(true)} />}
+        {ventana === 'categorias' && <CategoriasVentana />}
         {ventana === 'pensiones' && <PensionesVentana />}
+        {ventana === 'deuda' && <DeudaVentana />}
+        {ventana === 'escalas' && <EscalasVentana />}
+        {ventana === 'vivienda' && <ViviendaVentana />}
+        {ventana === 'seguridad' && <SeguridadVentana />}
+        {ventana === 'justicia' && <JusticiaVentana />}
+        {ventana === 'sanidad' && <SanidadVentana />}
+        {ventana === 'educacion' && <EducacionVentana />}
+        {ventana === 'legal' && <LegalVentana />}
+        {ventana === 'digital' && <DigitalVentana />}
         {ventana === 'presupuestos' && (
           <Apartado id="presupuestos" titulo="En qué se gasta cada escala"
             entradilla="El presupuesto de hoy de la Unión Europea, España, la Comunidad de Madrid, un municipio, una comunidad de vecinos y una familia, cada uno en su quesito. Abajo, todas juntas.">
@@ -212,9 +231,15 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
         {!ventana && <Portada />}
       </main>
 
-      <footer className="border-t border-slate-200 px-4 py-8 text-center text-sm text-slate-500">
+      <footer className="border-t border-slate-200 px-4 pb-24 pt-8 text-center text-sm text-slate-500">
         Modelo socioeconómico optimizado. Un proyecto de {marca}.
       </footer>
+
+      {/* The mailbox, floating at the bottom (Eugenio: «lo de proponer una mejora, abajo como un botón flotante»). */}
+      <Boton onClick={() => setVerBuzon(true)} tono="tinta"
+        className="fixed bottom-4 right-4 z-30 shadow-lg shadow-slate-900/20 sm:bottom-6 sm:right-6">
+        <MessageSquarePlus className="h-4 w-4" /><span className="hidden sm:inline">Proponer una mejora</span><span className="sr-only sm:hidden">Proponer una mejora</span>
+      </Boton>
 
       {verBuzon && (
         <BuzonProyecto
@@ -235,7 +260,7 @@ function Portada() {
     <div className="mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6 sm:pt-14">
       <h1 className="max-w-3xl text-[2.3rem] font-[800] leading-[1.03] tracking-[-0.035em] sm:text-[3.4rem]">Un sistema más simple, más justo y que reparte abundancia</h1>
       <p className="mt-5 max-w-[60ch] text-[1.15rem] leading-relaxed text-slate-700">
-        Cómo funcionan hoy los impuestos, las pensiones y el gasto público en España, y cómo podrían funcionar. Elige por dónde empezar: cada ventana empieza por lo esencial y se abre en detalle cuando lo pidas.
+        Cómo funcionan hoy la recaudación, las pensiones, el gasto público, la deuda, los servicios y las leyes en España, y cómo podrían funcionar. Elige por dónde empezar: cada ventana empieza por lo esencial y se abre en detalle cuando lo pidas.
       </p>
       <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {VENTANAS.map(v => {
@@ -265,14 +290,14 @@ function Portada() {
   );
 }
 
-/** Three bars: the three tiers. */
+/** Four bars: the four tiers. */
 function DibujoImpuestos() {
   return (
     <svg viewBox="0 0 160 100" className="h-28" aria-hidden>
-      {[{ v: 10, x: 20 }, { v: 25, x: 65 }, { v: 40, x: 110 }].map(b => (
+      {[{ v: 10, x: 14 }, { v: 20, x: 48 }, { v: 40, x: 82 }, { v: 60, x: 116 }].map(b => (
         <g key={b.v}>
-          <rect x={b.x} y={88 - b.v * 1.8} width={30} height={b.v * 1.8} rx={4} className="fill-amber-400" />
-          <text x={b.x + 15} y={82 - b.v * 1.8} textAnchor="middle" className="fill-slate-700 text-[12px] font-bold">{b.v} %</text>
+          <rect x={b.x} y={88 - b.v * 1.2} width={28} height={b.v * 1.2} rx={4} className="fill-amber-400" />
+          <text x={b.x + 14} y={82 - b.v * 1.2} textAnchor="middle" className="fill-slate-700 text-[12px] font-bold">{b.v} %</text>
         </g>
       ))}
       <line x1={10} x2={150} y1={88} y2={88} className="stroke-slate-300" />

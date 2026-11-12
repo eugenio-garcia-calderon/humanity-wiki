@@ -1,5 +1,5 @@
 // The eight scales as nested rings, from the person (centre) to the planet
-// (outside). The memorable thing of the page: the three tiers in the middle,
+// (outside). The memorable thing of the page: the four tiers in the middle,
 // and the same eighth going to each ring. Tap or hover a ring to read it.
 import { useId } from 'react';
 import { ESCALAS, type EscalaId } from '../../data/modeloSocioeconomico';
@@ -59,7 +59,7 @@ export function AnillosEscalas({ activa, onActiva, className }: {
       })}
       <g className={`${uid}-a`} style={{ transformOrigin: '0 0', transformBox: 'view-box', pointerEvents: 'none' }}>
         <circle r={R0 - HUECO} fill="white" />
-        <text y={2} textAnchor="middle" fontSize={29} fontWeight={800} letterSpacing="-0.03em" className="fill-slate-900">10 · 25 · 40</text>
+        <text y={2} textAnchor="middle" fontSize={22} fontWeight={800} letterSpacing="-0.03em" className="fill-slate-900">10·20·40·60</text>
         <text y={26} textAnchor="middle" fontSize={13.5} className="fill-slate-600">% según el tramo</text>
       </g>
     </svg>
