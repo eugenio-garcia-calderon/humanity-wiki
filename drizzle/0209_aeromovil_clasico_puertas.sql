@@ -21,13 +21,13 @@ BEGIN
   LIMIT 1;
 
   IF dst.id IS NULL THEN
-    RAISE NOTICE '0207: no saved Cuadriciclo Bala clásico found, nothing changed';
+    RAISE NOTICE '0209: no saved Cuadriciclo Bala clásico found, nothing changed';
   ELSE
-    RAISE NOTICE '0207: design % «%» before: %', dst.id, dst.nombre, dst.parametros::text;
+    RAISE NOTICE '0209: design % «%» before: %', dst.id, dst.nombre, dst.parametros::text;
     UPDATE aeromovil_disenos
     SET parametros = parametros || '{"tBatDisp":"chasis","tBatLargo":1.75,"tBatAncho":150,"tBatAlto":0.10,"tBatX":0.60,"tMando":"volante","tVolX":0,"tVolY":-0.03,"tVolInc":30,"tVolD":0.32,"tSalpicadero":"si","tSalpY":0,"tSalpFondo":0.16,"tAcceso":"puertas","tPuertaDel":0.80,"tPuertaTras":1.86,"tUmbral":0.34,"tCintura":0,"tBisagraY":0.05,"tBisagraInc":13,"tBisagraDentro":20,"tPuertaAbre":110,"tRetrovisores":"espejos","tMaletero":"aptera","tMalIni":1.70,"tMalAbre":36,"tMalLado":55,"tSolarCola":"si","tPilY":0.33,"tPasY":0.33}'::jsonb,
         updated_at = now()
     WHERE id = dst.id;
-    RAISE NOTICE '0207: design % updated with doors, hatch, wheel, dashboard, mirrors, pack along the frame, solar to the tail', dst.id;
+    RAISE NOTICE '0209: design % updated with doors, hatch, wheel, dashboard, mirrors, pack along the frame, solar to the tail', dst.id;
   END IF;
 END $$;

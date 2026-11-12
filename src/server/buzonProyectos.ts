@@ -16,7 +16,7 @@ import { ipDe, ritmo, esperaPendiente, type Regla } from './limites/index.js';
 
 /** The projects that have a mailbox, and the name the .txt export uses. */
 export const PROYECTOS: Record<string, string> = {
-  'modelo-socioeconomico': 'Modelo socioeconómico optimizado (humanity.wiki/modelo-socioeconomico)',
+  'modelo-socioeconomico': 'Modelo Público Optimizado (humanity.wiki/modelo-socioeconomico)',
 };
 
 // 20 an hour per connection is far above a person writing; a bot is not.

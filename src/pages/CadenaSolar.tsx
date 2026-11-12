@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ComponentType } from 'react';
 import {
   Activity, ArrowRight, Megaphone, Calculator, ChevronDown, Clock, Gauge, HardHat, Lightbulb, PencilRuler,
-  Recycle, SearchCheck, ShieldCheck, Stamp, Truck, TriangleAlert, Users,
+  Recycle, SearchCheck, ShieldCheck, Sparkles, Stamp, Truck, TriangleAlert, Users,
 } from 'lucide-react';
 import { miniatura } from '../utils/miniatura';
 
@@ -276,6 +276,26 @@ const PORTADA = '/uploads/2026/11/144a05f5-696a-4695-ad96-35c067d081d2.jpg';
 /** Pablo Sánchez, founder of Suntropy (his portada in Personas). */
 const FOTO_PABLO = '/uploads/2026/10/90900c44-6880-4566-aa65-116803d25584.png';
 const fase = (id: Fase) => FASES.find(f => f.id === id)!;
+// ── AI and software, link by link (2026-11-12, Eugenio: «no veo lo de la
+// optimización con inteligencia artificial y software de la cadena de valor,
+// integrado en el proyecto… fusiónalo»). What software can do in each link;
+// `suntropy` marks the links Suntropy already covers (its own site: leads,
+// studies in minutes, automatic quotes). No figures: nothing here is measured.
+const IA: Record<string, { texto: string; suntropy?: boolean }> = {
+  captacion: { suntropy: true, texto: 'Un simulador de ahorro en la web convierte visitas en contactos con datos útiles; la IA ordena cada lead por probabilidad de firmar y lo pasa a la instaladora en minutos.' },
+  estudio: { suntropy: true, texto: 'La IA lee la factura y estima la curva horaria; el tejado se mide sobre imagen aérea y catastro, sin visita.' },
+  diseno: { suntropy: true, texto: 'Paneles colocados sobre el mapa del tejado, con sombras y producción hora a hora calculadas al momento; varias opciones comparadas en minutos.' },
+  presupuesto: { suntropy: true, texto: 'Propuesta automática con el ahorro sobre la curva real, la financiación y el retorno, lista para firmar en línea.' },
+  sourcing: { texto: 'Comparar precios y plazos de mayoristas al momento y prever la demanda para comprar en común.' },
+  instalacion: { texto: 'Cuadrillas y rutas planificadas por software; parte de obra con fotos desde el móvil que alimenta la legalización.' },
+  legalizacion: { texto: 'Formularios rellenados con los datos del diseño y un expediente digital con avisos de cada plazo.' },
+  monitoreo: { texto: 'Comparar lo que produce con lo que debería producir según el tiempo de ese día y avisar del fallo antes de perder un mes.' },
+  mantenimiento: { texto: 'Mantenimiento predictivo: los datos del inversor deciden cuándo ir y el software agrupa las visitas por barrio.' },
+  optimizacion: { texto: 'Mover consumos y baterías según el precio de cada hora y la previsión de sol, de forma automática.' },
+  reparto: { texto: 'Coeficientes horarios calculados con la curva de cada vecino y recalculados cuando cambian sus hábitos.' },
+  reciclaje: { texto: 'Un pasaporte digital de cada panel (modelo, potencia medida, vida restante) para revenderlo o reciclarlo.' },
+};
+
 const eslabon = (id: string) => ESLABONES.find(e => e.id === id)!;
 
 // ── The chain, horizontal, with a drop-down per link ─────────────────────────
@@ -356,6 +376,10 @@ function Cadena() {
                               </div>
                               <p className="mt-4 flex gap-2 rounded-xl bg-rose-50 p-2.5 text-[13px] leading-snug text-rose-900"><TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" /> {e.atasco}</p>
                               <p className="mt-2 flex gap-2 rounded-xl bg-emerald-50 p-2.5 text-[13px] leading-snug text-emerald-900"><Lightbulb className="mt-0.5 h-4 w-4 shrink-0" /> {e.mejora}</p>
+                              <div className="mt-2 rounded-xl bg-violet-50 p-2.5 text-[13px] leading-snug text-violet-950">
+                                <p className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-[0.12em] text-violet-700"><Sparkles className="h-3.5 w-3.5" /> IA y software{IA[e.id].suntropy && <span className="ml-auto rounded-full bg-violet-700 px-2 py-0.5 text-[10px] tracking-normal text-white">Suntropy</span>}</p>
+                                <p className="mt-1">{IA[e.id].texto}</p>
+                              </div>
                             </div>
                           )}
                         </div>
@@ -517,6 +541,28 @@ function Reparto() {
   );
 }
 
+// ── The same chain, seen through software ───────────────────────────────────
+function CapaIA() {
+  return (
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      {ESLABONES.map((e, i) => {
+        const f = fase(e.fase);
+        const ia = IA[e.id];
+        return (
+          <a key={e.id} href={`#e-${e.id}`} className={`flex gap-3 rounded-2xl border p-4 hover:shadow-md ${ia.suntropy ? 'border-violet-300 bg-violet-50' : 'border-slate-200 bg-white'}`}>
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-white" style={{ background: f.color }}><e.Icono className="h-5 w-5" /></span>
+            <span className="min-w-0">
+              <span className="flex flex-wrap items-center gap-2 font-black text-slate-900"><span className="tabular-nums text-slate-400">{i + 1}</span> {e.nombre}
+                {ia.suntropy && <span className="rounded-full bg-violet-700 px-2 py-0.5 text-[10px] font-black text-white">Suntropy</span>}</span>
+              <span className="mt-1 block text-[14px] leading-snug text-slate-600">{ia.texto}</span>
+            </span>
+          </a>
+        );
+      })}
+    </div>
+  );
+}
+
 // ── Who does what ───────────────────────────────────────────────────────────
 function Actores() {
   return (
@@ -572,10 +618,10 @@ export default function CadenaSolar() {
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-slate-950 via-slate-950/80 to-slate-950/20" />
         <div className="mx-auto max-w-[1840px] px-5 py-16 sm:px-10 sm:py-24">
           <div className="max-w-3xl text-white">
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-300">Energía solar en España</p>
-            <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-6xl">La cadena de valor de una instalación solar</h1>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-300">Optimización del sistema de energía</p>
+            <h1 className="mt-4 text-4xl font-black tracking-tight sm:text-6xl">IA y software para toda la cadena de valor solar</h1>
             <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/85 sm:text-xl">
-              De buscar al cliente al reciclaje del último panel: doce eslabones, quién hace cada uno, cuánto tarda y dónde se atasca.
+              De buscar al cliente al reciclaje del último panel: doce eslabones, dónde se atasca cada uno y cómo la inteligencia artificial y el software lo hacen más rápido, más barato y más justo.
             </p>
             <div className="mt-8 flex flex-wrap gap-2">
               {ESLABONES.map((e, i) => (
@@ -589,8 +635,31 @@ export default function CadenaSolar() {
       </header>
 
       <div className="mx-auto max-w-[1840px] px-4 sm:px-8">
-        <Seccion id="cadena" etiqueta="La cadena" titulo="Doce eslabones, del cliente al reciclaje.">
+        {/* 2026-11-12 (Eugenio): «pon bastante arriba que Luz y Humanidad ha invertido en la empresa Suntropy… Suntropy añádelo como pionero en España en optimización». */}
+        <section id="suntropy" className="scroll-mt-40 pt-12 sm:pt-16">
+          <div className="grid items-center gap-6 rounded-3xl border border-violet-200 bg-violet-50 p-6 sm:grid-cols-[auto_1fr] sm:p-10">
+            <a href="/pablo-sanchez" className="mx-auto block text-center">
+              <img src={miniatura(FOTO_PABLO, 400)} alt="Pablo Sánchez, fundador de Suntropy" className="h-32 w-32 rounded-full bg-white object-cover object-top sm:h-40 sm:w-40" />
+              <span className="mt-2 block text-sm font-black text-slate-900 underline">Pablo Sánchez</span>
+              <span className="block text-[12px] text-slate-500">Fundador de Suntropy</span>
+            </a>
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-violet-700">Nuestra inversión</p>
+              <h2 className="mt-2 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">Invertimos en Suntropy, pionera en España en optimización.</h2>
+              <p className="mt-4 max-w-3xl text-lg leading-relaxed text-slate-700">En 2022, Luz & Humanidad invirtió en <b>Suntropy</b> para desarrollar sistemas inteligentes y optimizar el sector de la energía. Desde entonces incuba a su fundador, <a href="/pablo-sanchez" className="font-bold underline">Pablo Sánchez</a>, para desarrollar los proyectos.</p>
+              <p className="mt-3 max-w-3xl text-[15px] leading-relaxed text-slate-600">Su software con IA ya optimiza los cuatro primeros eslabones de la cadena, los más caros y los que más clientes pierden: capta clientes, hace el estudio y el diseño en minutos y genera el presupuesto solo. Los marcamos en morado.</p>
+              <a href="https://www.suntropy.ai" target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex items-center gap-2 font-black text-violet-700 hover:text-violet-900">suntropy.ai <ArrowRight className="h-4 w-4" /></a>
+            </div>
+          </div>
+        </section>
+
+        <Seccion id="cadena" etiqueta="La cadena" titulo="Doce eslabones, y en cada uno, IA y software.">
           <Cadena />
+        </Seccion>
+
+        <Seccion id="ia" etiqueta="IA y software" titulo="Qué optimiza el software en cada eslabón."
+          texto="La misma cadena, vista desde la optimización. En morado, lo que Suntropy ya resuelve; el resto es el camino que queda por automatizar.">
+          <CapaIA />
         </Seccion>
 
         <Seccion id="plazos" etiqueta="Plazos" titulo="Montarla, dos días. Legalizarla, meses."
@@ -617,16 +686,6 @@ export default function CadenaSolar() {
 
         <Seccion id="que-hacemos" etiqueta="Qué hacemos" titulo="Donde se atasca la cadena, ahí trabajamos."
           texto="Light for Humanity actúa en los eslabones que más valor pierden: la captación de clientes, la financiación, la formación de instaladores y el reparto entre vecinos.">
-          {/* 2026-11-12 (Eugenio): «pon bastante arriba que Luz y Humanidad ha invertido en la empresa Suntropy… Suntropy añádelo como pionero en España en optimización». */}
-          <a href="/p/KWOPTIMENERGIA1" className="group mb-5 grid items-center gap-5 rounded-3xl border border-slate-200 bg-white p-5 sm:grid-cols-[auto_1fr_auto] sm:p-8">
-            <img src={miniatura(FOTO_PABLO, 400)} alt="Pablo Sánchez, fundador de Suntropy" className="h-24 w-24 rounded-full bg-slate-100 object-cover object-top sm:h-28 sm:w-28" loading="lazy" />
-            <div>
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-amber-600">Eslabones 1 a 4: captar, estudiar, diseñar y presupuestar</p>
-              <h3 className="mt-2 text-2xl font-black text-slate-900 sm:text-3xl">Invertimos en Suntropy, pionera en España en optimización</h3>
-              <p className="mt-2 max-w-3xl text-slate-600">En 2022, Luz & Humanidad invirtió en Suntropy para desarrollar sistemas inteligentes que optimicen el sector de la energía. Desde entonces incubamos a su fundador, Pablo Sánchez, para desarrollar los proyectos.</p>
-            </div>
-            <span className="inline-flex items-center gap-2 font-black text-slate-900 group-hover:text-amber-600">Optimización del sistema de energía <ArrowRight className="h-4 w-4" /></span>
-          </a>
           <div className="grid gap-5 md:grid-cols-2">
             <a href="/comunidades-energeticas-en-pueblos" className="group relative isolate block overflow-hidden rounded-3xl bg-slate-900 p-6 text-white sm:p-8" data-fondo-oscuro>
               <img src={miniatura(PORTADA, 800)} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-40 transition-opacity group-hover:opacity-50" loading="lazy" />
