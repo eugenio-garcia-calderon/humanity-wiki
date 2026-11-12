@@ -11,13 +11,21 @@
 // The old single-page anchors (`#esquema`, `#cuentas`…) still land in the
 // taxes window, where those sections now are.
 import { useState, type ReactNode } from 'react';
-import { ChevronDown, GraduationCap, HandCoins, Landmark, PieChart, Receipt, Stethoscope, Tags, type LucideIcon } from 'lucide-react';
+import { ChevronDown, Euro, GraduationCap, HandCoins, Home, Landmark, Layers, PieChart, Scale, ScrollText, ShieldCheck, Smartphone, Stethoscope, Tags, type LucideIcon } from 'lucide-react';
+import { APARTADOS as A_ESCALAS } from '../../data/escalas';
+import { APARTADOS as A_VIVIENDA } from '../../data/vivienda';
+import { APARTADOS as A_SEGURIDAD } from '../../data/seguridad';
+import { APARTADOS as A_JUSTICIA } from '../../data/justicia';
+import { APARTADOS as A_SANIDAD } from '../../data/sanidad';
+import { APARTADOS as A_EDUCACION } from '../../data/educacion';
+import { APARTADOS as A_LEGAL } from '../../data/legal';
+import { APARTADOS as A_DIGITAL } from '../../data/digital';
 import { cn } from '../../utils/cn';
 import { Libre } from './piezas';
 
-export type VentanaId = 'impuestos' | 'categorias' | 'pensiones' | 'presupuestos' | 'deuda';
+export type VentanaId = 'escalas' | 'impuestos' | 'categorias' | 'pensiones' | 'presupuestos' | 'deuda' | 'vivienda' | 'seguridad' | 'justicia' | 'sanidad' | 'educacion' | 'legal' | 'digital';
 export interface Ventana {
-  id: VentanaId | 'educacion' | 'sanidad';
+  id: VentanaId;
   titulo: string;
   /** One line under the title, on the cover card. */
   lema: string;
@@ -30,7 +38,11 @@ export interface Ventana {
 
 export const VENTANAS: Ventana[] = [
   {
-    id: 'impuestos', titulo: 'Impuestos', icono: Receipt,
+    id: 'escalas', titulo: 'Escalas', icono: Layers, apartados: A_ESCALAS,
+    lema: 'De la persona al planeta: qué le toca a cada escala y con qué poder.',
+  },
+  {
+    id: 'impuestos', titulo: 'Recaudación', icono: Euro,
     lema: 'Un solo impuesto en cuatro tramos que se suma al precio, frente a los más de cien de hoy.',
     apartados: [
       { id: 'impuestos', t: 'Resumen' },
@@ -86,8 +98,13 @@ export const VENTANAS: Ventana[] = [
       { id: 'deuda-fuentes', t: 'Fuentes' },
     ],
   },
-  { id: 'educacion', titulo: 'Educación', icono: GraduationCap, pronto: true, lema: 'El gasto en educación de hoy y el propuesto.', apartados: [] },
-  { id: 'sanidad', titulo: 'Sanidad', icono: Stethoscope, pronto: true, lema: 'El gasto en sanidad de hoy y el propuesto.', apartados: [] },
+  { id: 'vivienda', titulo: 'Vivienda', icono: Home, apartados: A_VIVIENDA, lema: 'Lo que hoy apenas se hace, y qué promulga y regula cada escala.' },
+  { id: 'seguridad', titulo: 'Seguridad', icono: ShieldCheck, apartados: A_SEGURIDAD, lema: 'Ejército, policías y guardias: un solo cuerpo de guardianes, sin duplicidades.' },
+  { id: 'justicia', titulo: 'Justicia', icono: Scale, apartados: A_JUSTICIA, lema: 'Una sola denuncia, juicios rápidos y jueces junto a la policía.' },
+  { id: 'sanidad', titulo: 'Sanidad', icono: Stethoscope, apartados: A_SANIDAD, lema: 'Las esperas de hoy y un único expediente para cada persona.' },
+  { id: 'educacion', titulo: 'Educación', icono: GraduationCap, apartados: A_EDUCACION, lema: 'Una mochila educativa de 0 a 25 años, y alumnos que enseñan a alumnos.' },
+  { id: 'legal', titulo: 'Legal', icono: ScrollText, apartados: A_LEGAL, lema: 'Las mismas reglas en todo el país: menos leyes, y que no se contradigan.' },
+  { id: 'digital', titulo: 'Digital', icono: Smartphone, apartados: A_DIGITAL, lema: 'Firmar con el móvil, sin instalar nada.' },
 ];
 
 /** Which window an anchor belongs to: its own id, or one of its sections. */

@@ -86,7 +86,7 @@ export function AyudaEntreEscalas({ modo }: { modo: Modo }) {
               {i < escalera.length - 1 && (
                 <div className="flex items-center gap-2 py-0.5 pl-4 text-xs text-slate-500">
                   <ArrowDown aria-hidden className="h-3.5 w-3.5 text-slate-400" />
-                  {i === 0 ? 'préstamos al IPC y donaciones puntuales' : i === escalera.length - 2 ? 'y del hogar a cada persona' : ''}
+                  {i === 0 ? 'préstamos sin intereses y donaciones puntuales' : i === escalera.length - 2 ? 'y del hogar a cada persona' : ''}
                 </div>
               )}
             </li>
@@ -105,7 +105,7 @@ export function AyudaEntreEscalas({ modo }: { modo: Modo }) {
         </ul>
         <div className="rounded-2xl bg-slate-50 p-5 text-[15px] leading-relaxed text-slate-700">
           <p>
-            <b>Un préstamo al IPC, con la cifra de hoy.</b> El IPC está en el {porcentaje(HOY.ipc)}<Fuente id="ipc-2026" />: quien recibe {euros(prestamo)} devuelve {euros(prestamo * (1 + HOY.ipc / 100))} al cabo
+            <b>Un préstamo sin intereses, solo ajustado a los precios.</b> El IPC (lo que suben los precios) está en el {porcentaje(HOY.ipc)}<Fuente id="ipc-2026" />: quien recibe {euros(prestamo)} devuelve {euros(prestamo * (1 + HOY.ipc / 100))} al cabo
             de un año, que compran lo mismo que los {euros(prestamo)} de hoy. Quien presta no pierde ni gana.
           </p>
           <p className="mt-3">

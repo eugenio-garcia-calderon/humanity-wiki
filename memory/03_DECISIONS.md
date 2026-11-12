@@ -1506,3 +1506,9 @@ Eugenio asked for a tab that presents phenomena suggesting perception beyond the
 - **Detail kept, with its source:** for the age of extraocular vision, «niños de entre 5 y 13 años» is from Grinberg's own study.
 - **The three phenomena added:** dream telepathy at Maimonides, Ganzfeld, and the transferred potential. Each one fits one of the three ways of feeling (asleep, and meditating twice).
 >>>>>>> origin/main
+
+## 2026-11-12 — Thirteen windows: how they were built, and what is proposal
+
+- Built in parallel by eight agents, each restricted to its own files; the registry (`ventanas.tsx`, page) was scaffolded first so nobody touched shared files. Sources live in each window's data file (`<Fuente url titulo />`), not in the shared `FUENTES`, to avoid eight-way merge conflicts. Cost: two source mechanisms; unifying them later is a mechanical move of ~200 entries.
+- Every proposal-specific number (health and justice deadlines, police pay scale, luxury thresholds, mochila extra, licence levels, Legal test) is labelled on the page as a proposal or estimate, not data.
+- Open decisions surfaced on the pages for Eugenio: empty homes (default: municipal pool with guaranteed rent), rent paying 10 % where today it is VAT-exempt, justice and security getting less money in the model than today, the transition payment for inherited debt and pensions.
