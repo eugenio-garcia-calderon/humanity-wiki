@@ -17,10 +17,13 @@ export type EstadoTarjeta = { id: string; label: string; color?: string | null }
 export const CLASE_TARJETA_PORTADA = 'group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md';
 
 /** Un texto que se edita donde está: guarda al salir o con Intro, y Esc lo deja como estaba. */
-export function TextoEnLinea({ valor, onGuardar, className, ayuda, etiqueta, obligatorio = false, maximo }: {
+export function TextoEnLinea({ valor, onGuardar, className, ayuda, etiqueta, obligatorio = false, maximo, lineas }: {
   valor: string; onGuardar: (v: string) => void; className?: string; ayuda?: string; etiqueta: string; obligatorio?: boolean; maximo?: number;
+  /** Cuántas líneas se ven sin escribir en él, como en la web (`line-clamp`); al entrar, el texto entero. */
+  lineas?: number;
 }) {
   const [texto, setTexto] = useState(valor);
+  const [foco, setFoco] = useState(false);
   const ref = useRef<HTMLTextAreaElement>(null);
   useEffect(() => setTexto(valor), [valor]);
   // Se mide al cambiar el texto y al cambiar el ancho: si nace en un bloque escondido, mide cero
@@ -41,7 +44,8 @@ export function TextoEnLinea({ valor, onGuardar, className, ayuda, etiqueta, obl
   };
   return (
     <textarea ref={ref} rows={1} value={texto} aria-label={etiqueta} placeholder={ayuda} maxLength={maximo}
-      onChange={e => setTexto(e.target.value)} onBlur={salir}
+      onChange={e => setTexto(e.target.value)} onFocus={() => setFoco(true)} onBlur={() => { setFoco(false); salir(); }}
+      style={lineas && !foco ? { maxHeight: `${lineas}lh` } : undefined}
       onClick={e => e.stopPropagation()}
       onKeyDown={e => {
         e.stopPropagation();
@@ -111,7 +115,7 @@ export default function TarjetaPortada({ nombre, imagen, alt, encuadre, descripc
     // no tapa nada importante. Encima, un degradado suave solo en la franja del texto.
     <div className={cn('relative w-full overflow-hidden', imagen ? 'bg-black' : 'bg-slate-100', compacta ? 'aspect-square' : 'aspect-[4/3]')}>
       {imagen ? (
-        <img src={miniatura(imagen, 400)} srcSet={`${miniatura(imagen, 400)} 800w, ${miniatura(imagen, 800)} 1600w`} sizes={compacta ? '(min-width: 1024px) 17vw, (min-width: 640px) 50vw, 100vw' : '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'} alt={alt ?? (descripcion ? `${nombre}: ${descripcion}` : nombre)} loading={prioridad < 6 ? 'eager' : 'lazy'} decoding="async"
+        <img src={miniatura(imagen, 400)} srcSet={`${miniatura(imagen, 400)} 800w, ${miniatura(imagen, 800)} 1600w`} sizes={compacta ? '(min-width: 1024px) 17vw, (min-width: 640px) 50vw, 100vw' : '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw'} alt={alt ?? (descripcion ? `${nombre}: ${descripcion}` : nombre)} loading={prioridad < 6 ? 'eager' : 'lazy'} decoding="async" draggable={false}
           {...(prioridad < 3 ? { fetchPriority: 'high' as const } : {})}
           className="absolute inset-x-0 top-0 h-[84%] w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
           style={{ objectPosition: `${encuadre?.x ?? 50}% ${encuadre?.y ?? 40}%`, maskImage: FUNDIDO, WebkitMaskImage: FUNDIDO }} />
@@ -124,12 +128,12 @@ export default function TarjetaPortada({ nombre, imagen, alt, encuadre, descripc
       {esquina && <div className="absolute right-3 top-3 z-10 flex items-center gap-1.5">{esquina}</div>}
       <div data-fondo-oscuro="" className={cn('absolute inset-x-0 bottom-0', compacta ? 'p-3 sm:p-3.5' : 'p-4 sm:p-5')}>
         {edicion
-          ? <TextoEnLinea valor={nombre} onGuardar={edicion.onNombre} etiqueta="Título" obligatorio className={claseNombre} />
+          ? <TextoEnLinea valor={nombre} onGuardar={edicion.onNombre} etiqueta="Título" obligatorio lineas={2} className={claseNombre} />
           : <Titulo className={cn('line-clamp-2', claseNombre)}>{nombre}</Titulo>}
         {conDescripcion && (edicion || descripcion) && (
           <div className="mt-1.5">
             {edicion
-              ? <TextoEnLinea valor={descripcion || ''} onGuardar={edicion.onDescripcion} etiqueta="Descripción" ayuda="Añadir una descripción" maximo={300} className={cn('placeholder:text-white/70', claseDescripcion)} />
+              ? <TextoEnLinea valor={descripcion || ''} onGuardar={edicion.onDescripcion} etiqueta="Descripción" ayuda="Añadir una descripción" maximo={300} lineas={2} className={cn('placeholder:text-white/70', claseDescripcion)} />
               : <p className={cn('line-clamp-2', claseDescripcion)}>{descripcion}</p>}
           </div>
         )}

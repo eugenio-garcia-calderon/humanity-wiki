@@ -16,6 +16,7 @@ import { ESCALA } from '../../data/modeloSocioeconomico';
 import { Apartado, Cifra, Mas } from './ventanas';
 import { Fuente, Muestra, Regulador, Segmentado } from './piezas';
 import { cn } from '../../utils/cn';
+import { RusticaApartado, SueloApartado } from './ViviendaRustica';
 
 /** A «fuente» link from this window's own source list. */
 function F({ id }: { id: string }) {
@@ -34,8 +35,10 @@ export function ViviendaVentana() {
       <QuienManda />
       <Propuesta />
       <Escalas />
+      <SueloApartado />
+      <RusticaApartado />
       <Retos />
-      <Apartado id="vivienda-fuentes" titulo="Fuentes" fondo="blanco"
+      <Apartado id="vivienda-fuentes" titulo="Fuentes"
         entradilla="Consultadas en noviembre de 2026. Las cifras del modelo son estimaciones hechas en esta misma web, a partir de sus cuentas.">
         <ul className="grid max-w-4xl gap-2 text-sm">
           {Object.entries(FUENTES_VIVIENDA).map(([id, f]) => (
