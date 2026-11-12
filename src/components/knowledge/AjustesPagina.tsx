@@ -18,6 +18,10 @@ import { cabeceraFija } from './DisenoCabecera';
 // fecha nacen APAGADOS: una web no lleva firma a menos que su dueño la quiera.
 
 export type Ajustes = {
+  /** The page shows an interactive app instead of its blocks (`APLICACIONES` in SubpaginaSitio.tsx).
+   *  Not editable here, but it must travel with every save: the editor rebuilds `config` from
+   *  these keys, and on 2026-11-12 one save dropped it from the socioeconomic model's page. */
+  aplicacion?: string;
   mostrarAutor?: boolean;
   /** El título no se enseña en la página publicada (2026-10-02). Sigue en la
    *  pestaña, en Google y para los lectores de pantalla. */
@@ -58,7 +62,7 @@ export type Ajustes = {
 };
 
 /** Los campos de `config` que son ajustes, para copiarlos sin arrastrar más. */
-export const CLAVES_AJUSTES: (keyof Ajustes)[] = ['mostrarAutor', 'ocultarTitulo', 'mostrarFecha', 'anchoCompleto', 'letra', 'textoPequeno', 'ancho', 'bloqueada', 'tiempoLectura', 'descripcion', 'imagenCompartir', 'cabecera', 'subtitulo', 'subtituloOculto', 'sitio', 'botones', 'hijas'];
+export const CLAVES_AJUSTES: (keyof Ajustes)[] = ['mostrarAutor', 'ocultarTitulo', 'mostrarFecha', 'anchoCompleto', 'letra', 'textoPequeno', 'ancho', 'bloqueada', 'tiempoLectura', 'descripcion', 'imagenCompartir', 'cabecera', 'subtitulo', 'subtituloOculto', 'sitio', 'botones', 'hijas', 'aplicacion'];
 
 export default function AjustesPagina({ ajustes, portada, titulo, resumen, onCambio, onCerrar }: {
   ajustes: Ajustes;
