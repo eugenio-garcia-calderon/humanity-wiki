@@ -16,6 +16,8 @@ export const APARTADOS: { id: string; t: string }[] = [
   { id: 'vivienda-quien', t: 'Quién manda hoy' },
   { id: 'vivienda-propuesta', t: 'La propuesta' },
   { id: 'vivienda-escalas', t: 'Las 8 escalas' },
+  { id: 'vivienda-suelo', t: 'Precio del suelo' },
+  { id: 'vivienda-rustica', t: 'Casas en el campo' },
   { id: 'vivienda-retos', t: 'Lo que falta' },
   { id: 'vivienda-fuentes', t: 'Fuentes' },
 ];
@@ -41,6 +43,12 @@ export const FUENTES_VIVIENDA: Record<string, FuenteV> = {
   'plan-ue': { titulo: 'Cuatrecasas · El primer Plan Europeo de Vivienda Asequible (16 de diciembre de 2025)', url: 'https://www.cuatrecasas.com/en/spain/real-estate/art/european-affordable-housing-plan' },
   'onu-habitat': { titulo: 'ONU DESA con datos de ONU-Hábitat · 318 millones de personas sin hogar y 2.800 millones sin vivienda adecuada', url: 'https://social.desa.un.org/world-summit-2025/blog/300million-people-homeless-worldwide' },
   'dudh': { titulo: 'ONU · Declaración Universal de Derechos Humanos, artículo 25', url: 'https://www.un.org/es/about-us/universal-declaration-of-human-rights' },
+  'ley-suelo': { titulo: 'BOE · Ley de Suelo y Rehabilitación Urbana (RDL 7/2015): artículos 13, 18, 21 y 36', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-2015-11723' },
+  'mapa-tierra': { titulo: 'MAPA · Encuesta de precios de la tierra 2024: 10.248 €/ha de media; tierra arable de secano, 7.239 €/ha', url: 'https://www.mapa.gob.es/dam/mapa/contenido/prensa/notas-de-prensa/documentos/documentos-2025/25-08-04-precios-tierra.pdf' },
+  'suelo-urbano': { titulo: 'Ministerio de Vivienda vía Forbes · Precio medio del suelo urbano a finales de 2025: 171 €/m²', url: 'https://forbes.es/economia/912602/el-precio-medio-del-suelo-urbano-retrocedio-un-26-al-cierre-de-2025-segun-vivienda/' },
+  'domenech': { titulo: 'G. Doménech Pascual (Universitat de València) · Las plusvalías urbanísticas: recalificar puede multiplicar por cien el precio', url: 'https://www.uv.es/gadopas/2014.plusvalias.urbanisticas' },
+  'esyrce': { titulo: 'MAPA · Encuesta de superficies y rendimientos de cultivos (ESYRCE) 2025', url: 'https://www.mapa.gob.es/en/dam/jcr%3A4ab54d2c-65ad-4ec7-a248-33e16e3f4d0b/ComentariosEspana2025.pdf' },
+  'abandono': { titulo: 'Unión de Uniones con datos del Anuario del MAPA, vía Agronews · 3,2 millones de hectáreas de cultivo abandonadas de 1990 a 2016', url: 'https://www.agronewscastillayleon.com/union-de-uniones-destaca-la-perdida-de-un-19-de-tierras-de-cultivo-desde-1990' },
   'iva': { titulo: 'BOE · Ley 37/1992 del IVA: el alquiler de vivienda, exento (art. 20); la vivienda nueva, al 10 % (art. 91)', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-1992-28740' },
 };
 
