@@ -1482,3 +1482,11 @@ Eugenio chose the names after being told «Cuadriciclo Bala» was already taken 
 - «Other aids that would stop being needed» has no official figure: it is a visible, editable assumption (10 % of those who gain × 100 €/month) plus the one sourced item (PNC rent supplement). Social-services help is a decision (5 % of the new payroll by default), not data.
 - Fund simulator: returns are reinvested until they could pay all pensions (the switch-over year); before that pensions keep being paid as today. Chosen after the blind evaluator flagged that counting returns as both paid out and compounding was double counting. Constant real cost and return; risks behind «Más».
 - Open, flagged on the page (Pensiones › «¿y cómo encaja con el impuesto único?», Impuestos › «Lo que falta por resolver»): the single tax split in eighths does not fund a 170.330 M€ pension bill; the nation's eighth is far smaller. The tax-model accounts (`cuentasPais`, `DondeEstaElDinero`) still assume no constant pensions. Eugenio has to choose: a pension tier of the tax, several scales paying, or the fund first.
+
+## 2026-11-12 — Debt window: what the model assumes
+
+- No scale may borrow outside the system. Loans at the CPI between scales are still allowed because they move savings that exist; the system as a whole owes nobody.
+- Projects with a return are financed outside the public system (cooperatives, companies, neighbours); the public side only pays for the service under contract and never guarantees the debt. Projects with no return are saved for first, from the production third.
+- Contingency box: ≥ 20 % of the free third of each of the 8 scales (≈ 39.700 M€ a year with the default reading). It is not used to pay the inherited debt.
+- Inherited debt: each scale inherits its administration's debt; the payoff simulator uses today's average rate (interest 2025 / debt 2025 ≈ 2,4 %), constant. Where the yearly payment comes from during the transition is left open on the page, like the single pension.
+- Luxury thresholds in «Categorías» (1.000 € a watch, 500 € a garment…) are a stated proposal for an assembly to set, not data.

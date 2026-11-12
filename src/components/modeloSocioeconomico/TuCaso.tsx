@@ -8,7 +8,7 @@ import type { ReactNode } from 'react';
 import { cn } from '../../utils/cn';
 import {
   EMPLEADOR, EMPLEADORES, ESCALAS, ESPANA, TRAMO, type Empleador, type Modo, type Ejemplo, type Tramo,
-  calcularEjemplo, modeloPorFuncion, recibeLugar, euros, millones, porcentaje, sumaGasto,
+  calcularEjemplo, modeloPorFuncion, recibeLugar, euros, millones, porcentaje, sumaGasto, TIPO_GENERAL,
 } from '../../data/modeloSocioeconomico';
 import { Fuente, Muestra, Regulador, Segmentado } from './piezas';
 
@@ -35,9 +35,10 @@ export function TuCaso({ modo, ejemplo, onEjemplo }: { modo: Modo; ejemplo: Ejem
     { t: 'Aporta al fondo común', v: r.aporta, fuerte: true },
   ];
   const GASTOS: { t: Tramo; etiqueta: string; ayuda: string; max: number }[] = [
-    { t: 1, etiqueta: 'Primera necesidad, al mes', ayuda: 'Comida, alquiler, luz, agua, transporte, salud.', max: 2_000 },
-    { t: 2, etiqueta: 'Segunda necesidad, al mes', ayuda: 'Ropa, muebles, móvil e internet, seguros.', max: 1_500 },
-    { t: 3, etiqueta: 'Ocio y lujo, al mes', ayuda: 'Bares, restaurantes, viajes, ocio, tabaco.', max: 1_500 },
+    { t: 1, etiqueta: 'Lo básico, al mes', ayuda: 'Comida, alquiler, luz, agua, transporte, salud.', max: 2_000 },
+    { t: 2, etiqueta: 'Lo secundario, al mes', ayuda: 'Ropa, muebles, móvil e internet, seguros.', max: 1_500 },
+    { t: 3, etiqueta: 'El ocio, al mes', ayuda: 'Bares, restaurantes, viajes, espectáculos, tabaco.', max: 1_500 },
+    { t: 4, etiqueta: 'El lujo, al mes', ayuda: 'Joyas, relojes, moda de lujo.', max: 1_000 },
   ];
 
   return (
@@ -141,9 +142,9 @@ export function TuCaso({ modo, ejemplo, onEjemplo }: { modo: Modo; ejemplo: Ejem
           <p className="mt-3 text-xs leading-relaxed text-slate-500">
             Por sus manos pasan {euros(r.maneja)} al año ({euros(dia(r.maneja), 2)} al día): lo que vale su trabajo más lo que compra.
             La empresa paga lo mismo que hoy; los precios cambian: la misma cesta cuesta {euros(mes(r.gastoModelo))} al mes en vez de {euros(sumaGasto(ejemplo.gasto))}.
-            Lo de primera necesidad {cambio(1) < 0 ? 'baja' : 'sube'} un {porcentaje(Math.abs(cambio(1)), 0)}, porque su {porcentaje(TRAMO[1].tipo * 100, 0)} sustituye al IVA y los impuestos especiales de hoy;
-            lo de segunda necesidad sube un {porcentaje(cambio(2), 0)} y el ocio y el lujo, un {porcentaje(cambio(3), 0)}
-            {modo === 'literal' ? ', contando el 25 % que se pagan las empresas entre sí y acaba dentro de los precios' : ''}.
+            Lo básico {cambio(1) < 0 ? 'baja' : 'sube'} un {porcentaje(Math.abs(cambio(1)), 0)}, porque su {porcentaje(TRAMO[1].tipo * 100, 0)} sustituye al IVA y los impuestos especiales de hoy;
+            lo secundario sube un {porcentaje(cambio(2), 0)}, el ocio un {porcentaje(cambio(3), 0)} y el lujo un {porcentaje(cambio(4), 0)}
+            {modo === 'literal' ? `, contando el ${Math.round(TIPO_GENERAL * 100)} % que se pagan las empresas entre sí y acaba dentro de los precios` : ''}.
             De su dividendo, un tercio ({euros(r.dividendo / 3)}) va a sus participaciones en lo que produce, otro a cuidados y otro es libre.
           </p>
         </div>

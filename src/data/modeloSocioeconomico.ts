@@ -29,12 +29,14 @@
 // promises»). Real figures carry a source id (`FUENTES`); estimates say so.
 //
 // TWO READINGS OF «EVERY TRANSACTION»:
-//   · 'eslabon' (default): a business pays the tax on what it buys and recovers
-//     it when it sells (the way VAT works). Each final product carries exactly
-//     its tier, never a tax on top of a tax.
-//   · 'literal': business-to-business purchases also keep the general 20 %.
-//     It collects much more and stacks the tax along supply chains (the
-//     «cascade» Spain had with the IGTE until 1985).
+//   · 'literal' (DEFAULT since 2026-11-12, Eugenio: «las empresas pagan el 10 %
+//     de las compras y no se deducen nada; eliminamos la tontería de IVA
+//     repercutido e IVA soportado»): every business-to-business purchase keeps
+//     a flat 10 %, nothing is ever deducted or refunded. No VAT bookkeeping; the
+//     price is that the tax stacks a little along supply chains (the
+//     «cascade» Spain had with the IGTE until 1985), measured in `cascada`.
+//   · 'eslabon': the business recovers what it paid when it sells, the way VAT
+//     works today. Kept as the comparison.
 
 export type Modo = 'eslabon' | 'literal';
 
@@ -141,25 +143,32 @@ export const ESCALAS: Escala[] = [
 
 export const ESCALA = Object.fromEntries(ESCALAS.map(e => [e.id, e])) as Record<EscalaId, Escala>;
 
-/** The general rate: tier 2, and what business-to-business payments carry in the literal reading. */
-export const TIPO_GENERAL = 0.25;
+/** What every business-to-business purchase pays, with nothing deducted (the default reading). */
+export const TIPO_GENERAL = 0.1;
 /** What each scale receives of whatever is collected. */
 export const OCTAVO = 1 / ESCALAS.length;
 /** Share of a payment (tax included) that goes to the fund when the rate t goes on top of the price. */
 export const fraccion = (t: number) => t / (1 + t);
 
-// ── THE THREE TIERS ─────────────────────────────────────────────────────────
+// ── THE FOUR TIERS ──────────────────────────────────────────────────────────
+// 2026-11-12, Eugenio: «10 % en lo básico, 20 % en lo secundario, 40 % en el
+// ocio y 60 % en el lujo» (replacing 10 / 25 / 40, where leisure and luxury
+// shared one tier). Wages keep three rates by company size, now 10 / 20 / 40.
 // The rate goes ON TOP of the price without tax, like today's VAT (Eugenio,
 // 2026-11-11): a dinner worth 40 € in tier 3 costs 56 €, and 16 € go to the fund.
-// Of every euro paid, the fund gets `fraccion(t)` = t / (1 + t): 1/11 at 10 %, 1/5 at 25 %, 2/7 at 40 %.
-// Rates 10 / 25 / 40 % (Eugenio, 2026-11-11, replacing 0 / 20 / 40); wages follow the same three rates by company size.
+// Of every euro paid, the fund gets `fraccion(t)` = t / (1 + t): 1/11 at 10 %, 1/6 at 20 %, 2/7 at 40 %, 3/8 at 60 %.
+// Rates 10 / 20 / 40 / 60 % (Eugenio, 2026-11-12, replacing 10 / 25 / 40); wages keep three rates, 10 / 20 / 40, by company size.
 // Wages too: the employer pays the wage plus its tier on top.
-export type Tramo = 1 | 2 | 3;
-export interface TramoInfo { id: Tramo; tipo: number; nombre: string; compras: string; sueldos: string }
+export type Tramo = 1 | 2 | 3 | 4;
+export const TRAMO_IDS: Tramo[] = [1, 2, 3, 4];
+/** A record with one value per tier. */
+export const porTramoDe = <T,>(f: (t: Tramo) => T) => Object.fromEntries(TRAMO_IDS.map(t => [t, f(t)])) as Record<Tramo, T>;
+export interface TramoInfo { id: Tramo; tipo: number; nombre: string; corto: string; compras: string; sueldos: string }
 export const TRAMOS: TramoInfo[] = [
-  { id: 1, tipo: 0.1, nombre: 'Primera necesidad', compras: 'Agua, energía, la vivienda en la que se vive, movilidad, comida, salud y educación', sueldos: 'Empresas pequeñas, de menos de 50 personas' },
-  { id: 2, tipo: 0.25, nombre: 'Segunda necesidad', compras: 'Segunda vivienda, segundo vehículo, ropa, muebles, móvil e internet, seguros, cuidado personal', sueldos: 'Empresas medianas, de 50 a 249 personas' },
-  { id: 3, tipo: 0.4, nombre: 'Ocio y lujo', compras: 'Restaurantes, bares, hoteles, viajes, ocio, alcohol, tabaco y lujo', sueldos: 'Empresas grandes, de 250 personas o más' },
+  { id: 1, tipo: 0.1, nombre: 'Lo básico', corto: 'Básico', compras: 'Agua, energía, la vivienda en la que se vive, movilidad, comida, salud y educación', sueldos: 'Empresas pequeñas, de menos de 50 personas' },
+  { id: 2, tipo: 0.2, nombre: 'Lo secundario', corto: 'Secundario', compras: 'Segunda vivienda, segundo vehículo, ropa, muebles, móvil e internet, seguros, cuidado personal', sueldos: 'Empresas medianas, de 50 a 249 personas' },
+  { id: 3, tipo: 0.4, nombre: 'El ocio', corto: 'Ocio', compras: 'Restaurantes, bares, hoteles, viajes, espectáculos, alcohol y tabaco', sueldos: 'Empresas grandes, de 250 personas o más' },
+  { id: 4, tipo: 0.6, nombre: 'El lujo', corto: 'Lujo', compras: 'Joyas, relojes, moda y bolsos de lujo, coches de alta gama, barcos y aviones privados', sueldos: '—' },
 ];
 export const TRAMO = Object.fromEntries(TRAMOS.map(t => [t.id, t])) as Record<Tramo, TramoInfo>;
 
@@ -168,7 +177,7 @@ export type Empleador = 'pequena' | 'mediana' | 'grande' | 'publica';
 export interface EmpleadorInfo { id: Empleador; nombre: string; corto: string; tipo: number; tramo: Tramo | null; nota?: string }
 export const EMPLEADORES: EmpleadorInfo[] = [
   { id: 'pequena', nombre: 'Empresa pequeña (menos de 50 personas)', corto: 'Pequeña', tipo: 0.1, tramo: 1 },
-  { id: 'mediana', nombre: 'Empresa mediana (de 50 a 249)', corto: 'Mediana', tipo: 0.25, tramo: 2 },
+  { id: 'mediana', nombre: 'Empresa mediana (de 50 a 249)', corto: 'Mediana', tipo: 0.2, tramo: 2 },
   { id: 'grande', nombre: 'Empresa grande (250 o más)', corto: 'Grande', tipo: 0.4, tramo: 3 },
   { id: 'publica', nombre: 'Una administración o una escala', corto: 'Administración', tipo: 0, tramo: null, nota: 'No paga: sería cobrarse a sí misma y mover dinero público de una escala a otra' },
 ];
@@ -180,8 +189,14 @@ export interface TercioInfo { id: TercioId; nombre: string; corto: string; texto
 export const TERCIOS: TercioInfo[] = [
   { id: 'produccion', nombre: 'Medios de producción', corto: 'Producir', texto: 'Comprar o mejorar lo que produce lo básico (energía, movilidad, salud, alimentos, vivienda, tecnología) para que haya abundancia. Este tercio no se gasta en consumo.' },
   { id: 'cuidados', nombre: 'Cuidados', corto: 'Cuidar', texto: 'Cuidar de las personas: el apoyo en especie a quien tiene una discapacidad, la crianza, las personas mayores, los préstamos al IPC y las donaciones puntuales.' },
-  { id: 'libre', nombre: 'Libre disposición', corto: 'Libre', texto: 'Lo que decida su asamblea: el funcionamiento de los servicios, la cultura, el deporte, la seguridad…' },
+  { id: 'libre', nombre: 'Libre disposición', corto: 'Libre', texto: 'Lo que decida su asamblea: el funcionamiento de los servicios, la cultura, el deporte, la seguridad… Al menos una quinta parte de este tercio va a la caja de contingencias y ahorro común, que nunca puede bajar de cero.' },
 ];
+/**
+ * The least share of the free third every scale puts in its contingency and
+ * common-savings box (Eugenio, 2026-11-12: «al menos un 20 % de ese tercio»).
+ * Each scale may decide more. The box never goes below zero: no scale borrows.
+ */
+export const RESERVA_MIN_LIBRE = 0.2;
 export const TERCIOS_ESCALA: Record<EscalaId, Record<TercioId, string>> = {
   persona: { produccion: 'Participaciones en la placa solar de su comunidad, herramientas de su oficio, su parte de una cooperativa', cuidados: 'Su salud y la de los suyos, o apoyar a quien lo necesite', libre: 'Lo que quiera' },
   vecindad: { produccion: 'Placas solares, huerto, aislamiento del edificio', cuidados: 'Vecinos mayores o con discapacidad, préstamos al IPC a una familia del edificio', libre: 'Limpieza, fiestas, lo que vote la junta' },
@@ -455,7 +470,24 @@ export const FUENTES: Fuente[] = [
   { id: 'fondo-reserva-2026', titulo: 'La Moncloa · El Fondo de Reserva de la Seguridad Social supera los 15.200 millones de euros (abril de 2026)', url: 'https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/inclusion/Paginas/2026/130426-fondo-reserva-seguridad-social-abril.aspx' },
   { id: 'fondo-noruega', titulo: 'Europa Press · El fondo soberano noruego vale 22,68 billones de coronas (2,07 billones de euros), junio de 2026', url: 'https://www.democrata.es/economia/el-fondo-soberano-noruego-marca-un-beneficio-historico-de-159-680-millones-en-el-primer-semestre/' },
   { id: 'pnc-alquiler', titulo: 'Imserso · Complemento de alquiler de las pensiones no contributivas, 2025 (4,76 % de pensionistas, 525 € al año)', url: 'https://imserso.es/documents/20123/125723/pnccalqu2025.pdf/8eb35379-90d8-3b65-d02f-2d1795ae945f' },
+  { id: 'circulo-fortuny', titulo: 'Círculo Fortuny vía Forbes · El sector de bienes personales de lujo en España alcanza los 17.000 millones de euros (2024)', url: 'https://forbes.es/economia/642177/el-sector-de-alta-gama-crecio-en-el-ultimo-lustro-un-4-anual-en-espana-hasta-los-17-000-millones-de-euros/' },
   { id: 'ipc-2026', titulo: 'INE · Indicador adelantado del IPC, octubre de 2026 (4,9 %)', url: 'https://www.ine.es/dyngs/Prensa/adIPC1026.htm' },
+  { id: 'deuda-2025', titulo: 'Ministerio de Hacienda (datos del Banco de España) · Deuda de las administraciones públicas al cierre de 2025: 100,7 % del PIB', url: 'https://www.hacienda.gob.es/cdi/estabilidad%20presupuestaria/deuda-publica-ep-2025-1.pdf' },
+  { id: 'deuda-ccaa-2025', titulo: 'Bolsamanía (Banco de España) · La deuda pública cierra 2025 en el 100,7 % del PIB; las comunidades autónomas, 341.642 M€', url: 'https://www.bolsamania.com/noticias/economia/economia-amp-la-deuda-publica-cierra-2025-en-el-1007-del-pib-tras-caer-un-punto-y-mejora-el-objetivo-del-gobierno--22217329.html' },
+  { id: 'deuda-1980', titulo: 'Valencia Plaza · Deuda española: de 16.000 millones de euros en 1980 a 1,35 billones en 2020', url: 'https://valenciaplaza.com/valenciaplaza/deuda-espanola-de-16000-millones-de-euros-en-1980-a-1-35-billones-en-2020' },
+  { id: 'deuda-2007', titulo: 'INE · Península Ibérica en cifras 2017: deuda de las administraciones, 35,6 % del PIB en 2007 y 99,0 % en 2016', url: 'https://www.ine.es/prodyser/pubweb/pin/pin2017/55/' },
+  { id: 'superavit-2007', titulo: 'Vozpópuli · España, el país del G-20 donde más ha crecido la deuda desde 2007 (superávit del 1,9 % en 2007)', url: 'https://www.vozpopuli.com/economia/macroeconomia/espana-japon-pais-g-20-deuda-2007.html' },
+  { id: 'deuda-2020', titulo: 'Banco de España · La deuda de las administraciones públicas se situó en el 120 % del PIB en 2020', url: 'https://www.bde.es/f/webbde/GAP/Secciones/SalaPrensa/NotasInformativas/21/presbe2021_27.pdf' },
+  { id: 'sareb-2020', titulo: 'Última Hora (Banco de España) · La pandemia y la Sareb disparan la deuda al 120 % del PIB en 2020 (3 puntos, la Sareb)', url: 'https://www.ultimahora.es/noticias/nacional/2021/03/31/1251653/pandemia-sareb-disparan-deuda-record-del-120-del-pib-2020.html' },
+  { id: 'deuda-2021', titulo: 'Bolsamanía (Banco de España) · La deuda pública marca su máximo histórico: 125,3 % del PIB en el primer trimestre de 2021', url: 'https://www.bolsamania.com/noticias/economia/deuda-publica-marca-maximo-historico-139-billones-primer-trimestre-1253-pib--7984096.html' },
+  { id: 'art-135', titulo: 'BOE · Reforma del artículo 135 de la Constitución, de 27 de septiembre de 2011', url: 'https://www.boe.es/eli/es/ref/2011/09/27/(1)' },
+  { id: 'fla-2012', titulo: 'Ministerio de Hacienda · Fondo de Liquidez Autonómico (Real Decreto-ley 21/2012, de 13 de julio)', url: 'https://www.hacienda.gob.es/es-ES/Prensa/En%20Portada/Otra%20Informacion/Paginas/20120904_FLA.aspx' },
+  { id: 'fla-deuda', titulo: 'Maldita · Qué es el Fondo de Liquidez Autonómico y cuánto deben las comunidades al Estado (191.750 M€ en junio de 2023)', url: 'https://maldita.es/malditateexplica/20231103/que-es-fondo-liquidez-autonomico-deuda-estado/' },
+  { id: 'condonacion', titulo: 'Ministerio de Hacienda · El Estado asumirá 83.252 M€ de deuda de las comunidades autónomas (septiembre de 2025)', url: 'https://www.hacienda.gob.es/gl-ES/Prensa/Noticias/Paginas/2025/20250902-NP-CM-GOBIERNO-ANTEPROYECTO-DEUDA-COMUNIDADES-AUTONOMAS.aspx' },
+  { id: 'intereses-ccaa', titulo: 'El Cronista (Fedea) · Las comunidades pagarán 11.789 M€ en intereses en 2028, frente a 3.608 M€ en 2022', url: 'https://www.cronista.com/espana/economia-finanzas/las-comunidades-autonomas-deberan-pagar-mas-de-11700-millones-de-euros-en-2028-por-intereses-de-deuda' },
+  { id: 'deficit-2020', titulo: 'Ara · España registró en 2020 el déficit más alto de la UE, un 11 % del PIB (2,9 % en 2019)', url: 'https://es.ara.cat/economia/espana-registro-deficit-alto-ue-11_1_3957651.html' },
+  { id: 'ccaa-bbva', titulo: 'BBVA Research · Las finanzas autonómicas entre 2003 y 2025: el gasto corriente crece y la inversión cae a la mitad', url: 'https://www.bbvaresearch.com/publicaciones/espana-las-finanzas-autonomicas-en-2025-y-entre-2003-y-2025/' },
+  { id: 'intereses-2025', titulo: 'IGAE · Cuentas trimestrales de las administraciones públicas, cuarto trimestre de 2025: intereses de 40.314 M€', url: 'https://www.igae.pap.hacienda.gob.es/sitios/igae/es-ES/Contabilidad/ContabilidadNacional/Publicaciones/Documents/Cap_Trim/IT_4T_2025.pdf' },
 ];
 
 export const FUENTE = Object.fromEntries(FUENTES.map(f => [f.id, f])) as Record<string, Fuente>;
@@ -496,6 +528,12 @@ export function porcentaje(p: number, dec = 1) { return `${numero(p, dec)}\u00A0
 // that spending but is not a payment, so it pays nothing and is taken out.
 // `hoy` is today's VAT and excise duties inside the price of each group,
 // estimated from the rates (4, 10 or 21 % VAT; fuel, tobacco and alcohol duties).
+// Luxury is not an EPF group: it hides inside clothing and personal items.
+// Personal luxury goods move ≈ 17.000 M€ a year in Spain (circulo-fortuny),
+// a fifth bought by tourists: ≈ 13.600 M€ by residents, ≈ 1,5 % of household
+// payments. Taken out of clothing and personal items (estimate).
+const LUJO_VESTIDO = 0.8;
+const LUJO_PERSONAL = 0.7;
 export interface GrupoGasto { id: string; nombre: string; pct: number; tramo: Tramo; hoy: number; nota?: string }
 export const EPF_TOTAL = 99.8;
 export const ALQUILER_IMPUTADO = 19.0; // estimate (alquiler-imputado: 19,8 %)
@@ -505,15 +543,16 @@ export const GRUPOS_GASTO: GrupoGasto[] = [
   { id: 'sanidad', nombre: 'Salud: medicinas, consultas, gafas', pct: 4.0, tramo: 1, hoy: 0.04 },
   { id: 'transporte', nombre: 'Transporte: combustible, billetes y un vehículo', pct: 11.4 - 1.2, tramo: 1, hoy: 0.18 },
   { id: 'educacion', nombre: 'Educación', pct: 1.6, tramo: 1, hoy: 0.01 },
-  { id: 'vestido', nombre: 'Ropa y calzado', pct: 4.2, tramo: 2, hoy: 0.174 },
+  { id: 'vestido', nombre: 'Ropa y calzado', pct: 4.2 - LUJO_VESTIDO, tramo: 2, hoy: 0.174 },
   { id: 'hogar', nombre: 'Muebles, electrodomésticos y cuidado del hogar', pct: 3.7, tramo: 2, hoy: 0.17 },
   { id: 'segundoVehiculo', nombre: 'Compra de un segundo vehículo del hogar', pct: 1.2, tramo: 2, hoy: 0.2, nota: 'estimación: un tercio de los vehículos de los hogares son el segundo o el tercero' },
   { id: 'comunicaciones', nombre: 'Móvil, internet y aparatos', pct: 3.2, tramo: 2, hoy: 0.17 },
   { id: 'seguros', nombre: 'Seguros y servicios financieros', pct: 3.7, tramo: 2, hoy: 0.06 },
-  { id: 'personal', nombre: 'Cuidado personal y otros gastos', pct: 3.6, tramo: 2, hoy: 0.14 },
+  { id: 'personal', nombre: 'Cuidado personal y otros gastos', pct: 3.6 - LUJO_PERSONAL, tramo: 2, hoy: 0.14 },
   { id: 'alcohol', nombre: 'Alcohol y tabaco', pct: 1.3, tramo: 3, hoy: 0.55 },
   { id: 'ocio', nombre: 'Ocio, deporte, cultura y viajes organizados', pct: 5.0, tramo: 3, hoy: 0.15 },
   { id: 'restaurantes', nombre: 'Restaurantes, bares y alojamiento', pct: 9.9, tramo: 3, hoy: 0.09 },
+  { id: 'lujo', nombre: 'Joyas, relojes, moda y artículos de lujo', pct: LUJO_VESTIDO + LUJO_PERSONAL, tramo: 4, hoy: 0.21, nota: 'estimación: el lujo personal mueve unos 17.000 M€ al año en España, una quinta parte de turistas' },
 ];
 export type Clasificacion = Record<string, Tramo>;
 export const CLASIFICACION_INICIAL: Clasificacion = Object.fromEntries(GRUPOS_GASTO.map(g => [g.id, g.tramo]));
@@ -521,14 +560,14 @@ export const CLASIFICACION_INICIAL: Clasificacion = Object.fromEntries(GRUPOS_GA
 /** Share of household payments (imputed rent out) that falls in each tier. */
 export function cuotasTramo(clasif: Clasificacion = CLASIFICACION_INICIAL): Record<Tramo, number> {
   const pagos = EPF_TOTAL - ALQUILER_IMPUTADO;
-  const r: Record<Tramo, number> = { 1: 0, 2: 0, 3: 0 };
+  const r = porTramoDe(() => 0);
   for (const g of GRUPOS_GASTO) r[clasif[g.id] ?? g.tramo] += g.pct / pagos;
   return r;
 }
 /** Today's VAT and excise duties inside the price, on average for each tier (default classification). */
 export const INDIRECTOS_HOY: Record<Tramo, number> = (() => {
-  const r: Record<Tramo, number> = { 1: 0, 2: 0, 3: 0 };
-  for (const t of [1, 2, 3] as Tramo[]) {
+  const r = porTramoDe(() => 0);
+  for (const t of TRAMO_IDS) {
     const gs = GRUPOS_GASTO.filter(g => g.tramo === t);
     r[t] = gs.reduce((s, g) => s + g.pct * g.hoy, 0) / gs.reduce((s, g) => s + g.pct, 0);
   }
@@ -576,14 +615,14 @@ export const BASE: ComponenteBase[] = [
     partes: clasif => {
       const cuotas = cuotasTramo(clasif);
       const pagos = CONSUMO_2025 * ((EPF_TOTAL - ALQUILER_IMPUTADO) / EPF_TOTAL);
-      return ([1, 2, 3] as Tramo[]).map(t => tramoP(TRAMO[t].nombre, pagos * cuotas[t], t));
+      return TRAMO_IDS.map(t => tramoP(TRAMO[t].nombre, pagos * cuotas[t], t));
     },
   },
   {
     id: 'turistas', nombre: 'Compras de los turistas en España', modos: ['eslabon', 'literal'], fuente: 'egatur-2025',
     explicacion: 'Los visitantes de otros países pagan el tramo de lo que compran aquí, como cualquiera.',
-    estimacion: `${numero(134_712)} M€ en 2025; el 80 % se gasta en España (el resto es el viaje). De eso, ≈ 70 % hoteles, restaurantes y ocio, 15 % compras y 15 % comida y transporte.`,
-    partes: () => [tramoP('Comida y transporte', TURISTAS_EN_ESPANA * 0.15, 1), tramoP('Compras', TURISTAS_EN_ESPANA * 0.15, 2), tramoP('Hoteles, restaurantes y ocio', TURISTAS_EN_ESPANA * 0.7, 3)],
+    estimacion: `${numero(134_712)} M€ en 2025; el 80 % se gasta en España (el resto es el viaje). De eso, ≈ 70 % hoteles, restaurantes y ocio, 12 % compras, 3 % lujo (unos 3.400 M€, la quinta parte del lujo personal) y 15 % comida y transporte.`,
+    partes: () => [tramoP('Comida y transporte', TURISTAS_EN_ESPANA * 0.15, 1), tramoP('Compras', TURISTAS_EN_ESPANA * 0.12, 2), tramoP('Hoteles, restaurantes y ocio', TURISTAS_EN_ESPANA * 0.7, 3), tramoP('Lujo', TURISTAS_EN_ESPANA * 0.03, 4)],
   },
   {
     id: 'viviendaNueva', nombre: 'Compra de vivienda nueva y reformas', modos: ['eslabon', 'literal'], fuente: 'ine-hogares',
@@ -672,7 +711,7 @@ export function cuentasPais(modo: Modo, clasif: Clasificacion = CLASIFICACION_IN
   });
   const base = componentes.reduce((s, b) => s + b.millones, 0);
   const recaudacion = componentes.reduce((s, b) => s + b.recaudacion, 0);
-  const porTramo: Record<Tramo, { base: number; recaudacion: number }> = { 1: { base: 0, recaudacion: 0 }, 2: { base: 0, recaudacion: 0 }, 3: { base: 0, recaudacion: 0 } };
+  const porTramo = porTramoDe(() => ({ base: 0, recaudacion: 0 }));
   for (const c of componentes) for (const p of c.partes) if (p.tramo) { porTramo[p.tramo].base += p.millones; porTramo[p.tramo].recaudacion += p.millones * fraccion(p.tipo); }
   const porEscala = recaudacion * OCTAVO;
   const porPersonaEscala = (porEscala * 1e6) / ESPANA.poblacion;
@@ -745,15 +784,15 @@ export interface Ejemplo {
 }
 
 // 1.100 € a month, split like the average household's payments (`cuotasTramo`).
-export const EJEMPLO_INICIAL: Ejemplo = { bruto: 26_000, empleador: 'pequena', gasto: { 1: 610, 2: 270, 3: 220 }, pareja: true, enComunidad: false };
+export const EJEMPLO_INICIAL: Ejemplo = { bruto: 26_000, empleador: 'pequena', gasto: { 1: 610, 2: 260, 3: 220, 4: 10 }, pareja: true, enComunidad: false };
 
-export const sumaGasto = (g: Record<Tramo, number>) => g[1] + g[2] + g[3];
+export const sumaGasto = (g: Record<Tramo, number>) => TRAMO_IDS.reduce((s, t) => s + (g[t] || 0), 0);
 
 export function calcularEjemplo(e: Ejemplo, modo: Modo) {
   const pais = cuentasPais(modo);
   const miembros = e.pareja ? 2 : 1;
   const costeTrabajo = e.bruto + Math.min(e.bruto, SUPUESTOS.baseMaximaAnual) * SUPUESTOS.cotEmpresa;
-  const tramos = [1, 2, 3] as Tramo[];
+  const tramos = TRAMO_IDS;
   const gastoHoyTramo = Object.fromEntries(tramos.map(t => [t, e.gasto[t] * 12])) as Record<Tramo, number>;
   const gastoHoy = sumaGasto(gastoHoyTramo);
 

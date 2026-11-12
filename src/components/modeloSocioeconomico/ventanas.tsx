@@ -11,11 +11,11 @@
 // The old single-page anchors (`#esquema`, `#cuentas`…) still land in the
 // taxes window, where those sections now are.
 import { useState, type ReactNode } from 'react';
-import { ChevronDown, GraduationCap, HandCoins, PieChart, Receipt, Stethoscope, type LucideIcon } from 'lucide-react';
+import { ChevronDown, GraduationCap, HandCoins, Landmark, PieChart, Receipt, Stethoscope, Tags, type LucideIcon } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { Libre } from './piezas';
 
-export type VentanaId = 'impuestos' | 'pensiones' | 'presupuestos';
+export type VentanaId = 'impuestos' | 'categorias' | 'pensiones' | 'presupuestos' | 'deuda';
 export interface Ventana {
   id: VentanaId | 'educacion' | 'sanidad';
   titulo: string;
@@ -31,7 +31,7 @@ export interface Ventana {
 export const VENTANAS: Ventana[] = [
   {
     id: 'impuestos', titulo: 'Impuestos', icono: Receipt,
-    lema: 'Un solo impuesto en tres tramos que se suma al precio, frente a los más de cien de hoy.',
+    lema: 'Un solo impuesto en cuatro tramos que se suma al precio, frente a los más de cien de hoy.',
     apartados: [
       { id: 'impuestos', t: 'Resumen' },
       { id: 'como-funciona', t: 'Cómo funciona' },
@@ -40,6 +40,15 @@ export const VENTANAS: Ventana[] = [
       { id: 'ejemplo', t: 'Un caso' },
       { id: 'decide', t: 'Quién decide' },
       { id: 'cuentas', t: 'Cuentas y fuentes' },
+    ],
+  },
+  {
+    id: 'categorias', titulo: 'Categorías', icono: Tags,
+    lema: 'Qué es básico, secundario, ocio o lujo, sector por sector, y cómo decidirlo.',
+    apartados: [
+      { id: 'categorias', t: 'Las cuatro' },
+      { id: 'categorias-sectores', t: 'Cada sector' },
+      { id: 'categorias-decidir', t: 'Cómo decidir' },
     ],
   },
   {
@@ -62,6 +71,19 @@ export const VENTANAS: Ventana[] = [
     apartados: [
       { id: 'presupuestos', t: 'Cada escala' },
       { id: 'presupuestos-comparar', t: 'Todas juntas' },
+    ],
+  },
+  {
+    id: 'deuda', titulo: 'Deuda', icono: Landmark,
+    lema: 'La deuda de España y de las comunidades, y un sistema sin deuda con una caja para emergencias.',
+    apartados: [
+      { id: 'deuda', t: 'Resumen' },
+      { id: 'deuda-quien', t: 'Quién debe' },
+      { id: 'deuda-historia', t: 'Historia' },
+      { id: 'deuda-propuesta', t: 'Hoy y propuesta' },
+      { id: 'deuda-caja', t: 'Caja de emergencias' },
+      { id: 'deuda-heredada', t: 'La deuda de hoy' },
+      { id: 'deuda-fuentes', t: 'Fuentes' },
     ],
   },
   { id: 'educacion', titulo: 'Educación', icono: GraduationCap, pronto: true, lema: 'El gasto en educación de hoy y el propuesto.', apartados: [] },

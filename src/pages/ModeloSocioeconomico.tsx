@@ -1,7 +1,7 @@
 // ============================================================================
 // MODELO SOCIOECONÓMICO OPTIMIZADO (2026-11-10, Eugenio)
 // ============================================================================
-// One tax on every payment, nothing else, in three tiers (10, 25 or 40 %: by
+// One tax on every payment, nothing else, in four tiers (10, 20, 40 or 60 %: by
 // what is bought, and for wages by the size of the company that pays them),
 // collected by the payment system itself and split in eight equal parts among
 // eight scales: person, neighbourhood or family, municipality, province, region,
@@ -32,6 +32,8 @@ import { TRAMOS_PENSION } from '../data/presupuestos';
 import { SMI_MES } from '../data/pensionesPropuesta';
 import { ImpuestosVentana } from '../components/modeloSocioeconomico/ImpuestosVentana';
 import { PensionesVentana } from '../components/modeloSocioeconomico/PensionesVentana';
+import { CategoriasVentana } from '../components/modeloSocioeconomico/CategoriasVentana';
+import { DeudaVentana } from '../components/modeloSocioeconomico/DeudaVentana';
 import { Presupuestos } from '../components/modeloSocioeconomico/Presupuestos';
 import { BuzonProyecto } from '../components/modeloSocioeconomico/BuzonProyecto';
 import { Boton, Libre } from '../components/modeloSocioeconomico/piezas';
@@ -42,7 +44,9 @@ import { cn } from '../utils/cn';
 const ACENTO: Record<string, { tab: string; borde: string; texto: string }> = {
   impuestos: { tab: 'bg-amber-500 text-slate-950', borde: 'border-amber-400', texto: 'text-amber-600' },
   pensiones: { tab: 'bg-teal-600 text-white', borde: 'border-teal-500', texto: 'text-teal-700' },
+  categorias: { tab: 'bg-orange-700 text-white', borde: 'border-orange-600', texto: 'text-orange-700' },
   presupuestos: { tab: 'bg-indigo-600 text-white', borde: 'border-indigo-500', texto: 'text-indigo-600' },
+  deuda: { tab: 'bg-rose-700 text-white', borde: 'border-rose-600', texto: 'text-rose-700' },
   educacion: { tab: '', borde: 'border-slate-200', texto: 'text-slate-400' },
   sanidad: { tab: '', borde: 'border-slate-200', texto: 'text-slate-400' },
 };
@@ -75,7 +79,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
     const anterior = meta?.content;
     if (!meta) { meta = document.createElement('meta'); meta.name = 'description'; document.head.appendChild(meta); }
-    meta.content = 'Un único impuesto en tres tramos (10, 25 y 40 %) repartido entre ocho escalas, una pensión única igual al salario mínimo y los presupuestos de cada escala, comparados con el sistema español de hoy.';
+    meta.content = 'Un único impuesto en cuatro tramos (10, 20, 40 y 60 %) repartido entre ocho escalas, una pensión única igual al salario mínimo y los presupuestos de cada escala, comparados con el sistema español de hoy.';
     return () => { document.title = titulo; if (meta) meta.content = anterior ?? ''; };
   }, []);
 
@@ -193,7 +197,9 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
 
       <main>
         {ventana === 'impuestos' && <ImpuestosVentana onProponer={() => setVerBuzon(true)} />}
+        {ventana === 'categorias' && <CategoriasVentana />}
         {ventana === 'pensiones' && <PensionesVentana />}
+        {ventana === 'deuda' && <DeudaVentana />}
         {ventana === 'presupuestos' && (
           <Apartado id="presupuestos" titulo="En qué se gasta cada escala"
             entradilla="El presupuesto de hoy de la Unión Europea, España, la Comunidad de Madrid, un municipio, una comunidad de vecinos y una familia, cada uno en su quesito. Abajo, todas juntas.">
@@ -232,7 +238,7 @@ function Portada() {
     <div className="mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6 sm:pt-14">
       <h1 className="max-w-3xl text-[2.3rem] font-[800] leading-[1.03] tracking-[-0.035em] sm:text-[3.4rem]">Un sistema más simple, más justo y que reparte abundancia</h1>
       <p className="mt-5 max-w-[60ch] text-[1.15rem] leading-relaxed text-slate-700">
-        Cómo funcionan hoy los impuestos, las pensiones y el gasto público en España, y cómo podrían funcionar. Elige por dónde empezar: cada ventana empieza por lo esencial y se abre en detalle cuando lo pidas.
+        Cómo funcionan hoy los impuestos, las pensiones, el gasto público y la deuda en España, y cómo podrían funcionar. Elige por dónde empezar: cada ventana empieza por lo esencial y se abre en detalle cuando lo pidas.
       </p>
       <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {VENTANAS.map(v => {
@@ -262,14 +268,14 @@ function Portada() {
   );
 }
 
-/** Three bars: the three tiers. */
+/** Four bars: the four tiers. */
 function DibujoImpuestos() {
   return (
     <svg viewBox="0 0 160 100" className="h-28" aria-hidden>
-      {[{ v: 10, x: 20 }, { v: 25, x: 65 }, { v: 40, x: 110 }].map(b => (
+      {[{ v: 10, x: 14 }, { v: 20, x: 48 }, { v: 40, x: 82 }, { v: 60, x: 116 }].map(b => (
         <g key={b.v}>
-          <rect x={b.x} y={88 - b.v * 1.8} width={30} height={b.v * 1.8} rx={4} className="fill-amber-400" />
-          <text x={b.x + 15} y={82 - b.v * 1.8} textAnchor="middle" className="fill-slate-700 text-[12px] font-bold">{b.v} %</text>
+          <rect x={b.x} y={88 - b.v * 1.2} width={28} height={b.v * 1.2} rx={4} className="fill-amber-400" />
+          <text x={b.x + 14} y={82 - b.v * 1.2} textAnchor="middle" className="fill-slate-700 text-[12px] font-bold">{b.v} %</text>
         </g>
       ))}
       <line x1={10} x2={150} y1={88} y2={88} className="stroke-slate-300" />

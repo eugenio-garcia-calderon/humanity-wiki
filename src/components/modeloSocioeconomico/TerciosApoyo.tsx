@@ -5,7 +5,7 @@
 //     only people with a disability get a constant support, in kind if possible.
 import { ArrowDown, ArrowLeftRight } from 'lucide-react';
 import {
-  APOYOS, ESCALAS, HOY, TERCIOS, TERCIOS_ESCALA, type Modo, cuentasPais, euros, millones, numero, porcentaje,
+  APOYOS, ESCALAS, HOY, RESERVA_MIN_LIBRE, TERCIOS, TERCIOS_ESCALA, type Modo, cuentasPais, euros, millones, numero, porcentaje,
 } from '../../data/modeloSocioeconomico';
 import { Fuente, Muestra } from './piezas';
 
@@ -25,6 +25,11 @@ export function Tercios({ modo }: { modo: Modo }) {
             <p className="mt-3 text-sm tabular-nums text-slate-700">
               {millones(tercio)} al año en cada escala, {euros(pais.porPersonaEscala / 3)} por habitante.
             </p>
+            {t.id === 'libre' && (
+              <p className="mt-2 text-sm text-slate-700">
+                De él, al menos {millones(tercio * RESERVA_MIN_LIBRE)} al año van a la <a href="#deuda-caja" className="font-semibold underline decoration-slate-300 underline-offset-2 hover:text-slate-900">caja de contingencias</a>, que nunca baja de cero.
+              </p>
+            )}
           </li>
         ))}
       </ol>
