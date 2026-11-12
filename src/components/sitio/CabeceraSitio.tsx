@@ -45,6 +45,9 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
   // EL ESCAPARATE (`sitio.escaparate`, 2026-11-06, Eugenio en luzhumanidad.com: «quita el menú
   // entero y la opción de iniciar sesión»): sin el ☰ y sin el hueco de la cuenta.
   const escaparate = c.sitio?.escaparate === true;
+  // EL ESLOGAN DE LA BARRA (2026-11-12, Eugenio: «debajo de Luz Humanidad pon Evolución, Sistemas, Humanidad, sin
+  // determinantes»): `sitio.eslogan` manda en la barra; `subtitulo` sigue siendo el de la página (título, buscadores).
+  const eslogan: string | null = (typeof c.sitio?.eslogan === 'string' && c.sitio.eslogan.trim()) || c.subtitulo || null;
   // EL ESCAPARATE, CENTRADO (2026-11-06, Eugenio: «el logotipo con el nombre y el subtítulo en el
   // centro, y la barra de buscar más hacia la derecha»): tres columnas, la marca en medio y el
   // buscador pegado a la derecha. En el móvil, la marca arriba y el buscador debajo, a la derecha.
@@ -62,7 +65,7 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
         {raiz && (
           <span className="inline-grid min-w-0 leading-none">
             <span className="whitespace-nowrap text-[1.68rem] font-black tracking-tight text-slate-900">{raiz.titulo}</span>
-            {c.subtitulo && <Eslogan texto={c.subtitulo} />}
+            {eslogan && <Eslogan texto={eslogan} />}
           </span>
         )}
       </Link>
@@ -97,7 +100,7 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
               <span className="whitespace-nowrap text-[1.4rem] font-black tracking-tight text-slate-900">{raiz.titulo}</span>
               {/* El eslogan, debajo del nombre (2026-11-05, Eugenio: «que esté debajo de Luz y
                   Humanidad, del logo de arriba a la izquierda»). Antes solo salía en pantallas 2xl. */}
-              {c.subtitulo && <span className="mt-1 whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">{c.subtitulo}</span>}
+              {eslogan && <span className="mt-1 whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-500">{eslogan}</span>}
             </span>
           )}
         </Link>
