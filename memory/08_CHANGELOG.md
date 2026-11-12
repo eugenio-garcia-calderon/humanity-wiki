@@ -11265,8 +11265,16 @@ Eugenio: «mejora muchísimo la carrocería de la Aptera… el morro está defor
   - Que las constantes en uso (0,051 y ±15 %) sean otras sale como aviso, no como fallo. `tunel-pruebas`: 0 fallos, 2 avisos.
   - Los textos de la tarjeta del túnel y del panel de un punto dicen ahora que el margen de ±15 % es el del ajuste anterior y se deja más ancho a propósito: con los coches de hoy sale ±11 %.
 
-## 2026-11-12 — «Modelo De País Optimizado»; army inside the single security body; citizen guardians
+## 2026-11-12 — «Modelo De País Optimizado» (renamed again the same day, see below); army inside the single security body; citizen guardians
 
 - The project is renamed «Modelo De País Optimizado» (Eugenio's exact capitalisation): cover line, tab title, footer, meta description, mailbox and translations label; migration 0207 renames the luzhumanidad.com project page and its projects-table row only where the old name is untouched. Addresses do not change.
 - Seguridad: the army joins the single body of «guardianes» as the defence and emergencies section at nation and continent scale (same pay scale, hierarchy and de-escalation training). Joint figures: ≈ 381.000 people, 31.774 M€ (IGAE 2024). New section «Ciudadanos guardianes»: free voluntary training in security, order and peace paid by the administration, integrated as observers able to intervene in violence or threats, within art. 490–491 LECrim; course hours, insurance and cost are labelled proposals. New challenges: constitutional reform (arts. 8 and 104), NATO, vigilantism, liability.
+
+### 2026-11-12 — La cadena de valor solar, fusionada en «Optimización del sistema de energía» con su capa de IA y software
+- Eugenio: «no veo lo de la optimización con inteligencia artificial y software de la cadena de valor, integrado en el proyecto… fusiónalo».
+- `CadenaSolar.tsx`: abre con la inversión en Suntropy (foto y enlace de Pablo Sánchez, suntropy.ai); cada eslabón trae «IA y software» (`IA`), con la marca Suntropy en los cuatro primeros; sección nueva «Qué optimiza el software en cada eslabón» (`CapaIA`).
+- `0208`: la página del proyecto (`KWOPTIMENERGIA1`) pasa a mostrar la app `cadena-solar`; la fila «Cadena de valor solar» sale de Proyectos (borrado suave) y su página sigue viva para no romper enlaces.
+## 2026-11-12 — Renamed «Modelo Público Optimizado»
+
+- Eugenio: «Llámalo "Modelo Público Optimizado"». Same places as the previous rename; migration 0208 renames the project page and row from either earlier name. Addresses unchanged.
   - Calendario Arte: la ilustración del mes también es el fondo de la hoja del calendario (Eugenio: «en toda la página, no solo en la parte superior… haz un poco más estrechito el calendario para que en los bordes también aparezcan partes del diseño… un toque de transparencia… finita para que sean legibles las letras»). El calendario va encima en un papel hueso al 88 % de opacidad, con 6 mm de margen arriba y abajo y 12 mm a los lados, esquinas redondeadas y una sombra suave. Es la misma imagen que arriba: en pantalla, el diseño que se está mirando; al imprimir, el que se imprime. Si el mes no tiene ilustración, la hoja sigue siendo papel liso. Comprobado en local: ningún día se desborda en los doce meses.
