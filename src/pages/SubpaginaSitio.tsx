@@ -42,7 +42,8 @@ const APLICACIONES: Record<string, (p: { inicio: string; conBarra: boolean }) =>
 // superior de luzhumanidad.com en esta página»). Opt-in, so the other apps
 // keep their full screen until someone asks; an app that joins must leave room
 // for the bar in its own heights (see `conBarra` in Conciencia.tsx).
-const CON_BARRA = new Set(['conciencia']);
+// The observatorio too (2026-11-12, Eugenio: «pon el menú superior en el observatorio de polarización»).
+const CON_BARRA = new Set(['conciencia', 'observatorio-polarizacion']);
 
 export default function SubpaginaSitio({ propio, idFijo, contexto }: { propio: boolean; idFijo?: string; contexto?: ContextoRuta['contexto'] }) {
   const { id: idDeRuta } = useParams();
