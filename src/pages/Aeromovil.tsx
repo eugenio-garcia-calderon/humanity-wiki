@@ -49,6 +49,7 @@ import { fichaComparable, type Referencia } from '../components/aeromovil/refere
 import { FormularioMejora, VistaExportar, VistaPlan, VistaPlanos, VistaTareas, cargarDueno, cargarTareas, type Dueno, type Tarea } from '../components/aeromovil/Paneles';
 import { BotonesComponentes, VistaComponentes } from '../components/aeromovil/Componentes';
 import { VEHICULOS_GARAJE } from '../components/aeromovil/garaje';
+import { MisDisenosGaraje, esDisenoGaraje, useDisenosGaraje } from '../components/aeromovil/GarajeDisenos';
 import { TarjetaTunel, gastoEnRuedas, VELOCIDADES, type FilaTunel } from '../components/aeromovil/TarjetaTunel';
 import { cuerpoAeromovil, cuerpoGaraje, type CuerpoTunel } from '../components/aeromovil/tunel/cuerpos';
 import { opcionesPorDefecto, useResultadosTunel, type OpcionesTunel } from '../components/aeromovil/tunel/cliente';
@@ -1020,7 +1021,8 @@ export default function Aeromovil() {
     // Los dos XL1 (2026-11-09, Eugenio, con fotos): el de serie de 2013 enfrente del Twizy y el concept 1-Litro de 2002 al otro lado.
     // 2026-11-09, «añade el jaguar… y el velomovil aerorider» y «también este de Shell Eco Marathon»: el SZEmission,
     // el Jaguar D-Type y el AeroRider salen también por defecto, más allá de los cuatro anteriores.
-    const POR_DEFECTO: Record<string, { z: number }> = { twizy: { z: 3 }, aptera: { z: -3 }, xl1: { z: 6 }, unlitro: { z: -6 }, szemission: { z: 9 }, jaguarD: { z: -9 }, aerorider: { z: 12 }, bala: { z: -12 }, nusKruce: { z: 15 } };
+    // 2026-11-12: the Tesla Model Y, shown at −15 m. A saved v5 list does not carry it, so it shows for everybody once.
+    const POR_DEFECTO: Record<string, { z: number }> = { twizy: { z: 3 }, aptera: { z: -3 }, xl1: { z: 6 }, unlitro: { z: -6 }, szemission: { z: 9 }, jaguarD: { z: -9 }, aerorider: { z: 12 }, bala: { z: -12 }, nusKruce: { z: 15 }, modeloY: { z: -15 } };
     const base = VEHICULOS_GARAJE.map((v, i) => POR_DEFECTO[v.id] ? { id: v.id, visible: true, x: 0, z: POR_DEFECTO[v.id].z, giro: 0 } : ({ id: v.id, visible: false, x: 0, z: (i % 2 ? 1 : -1) * (2.6 + 2.2 * Math.floor(i / 2)), giro: 0 }));
     // v3 (2026-11-07): el XL1 deja de ser una caja y sale por defecto. En la lista v2 guardada estaba oculto,
     // así que al pasar de v2 a v3 se olvida solo lo que se guardó del XL1 (el resto se conserva).
@@ -1054,6 +1056,9 @@ export default function Aeromovil() {
   // El Cd que usan el consumo y el resto del editor no cambia: el del túnel se pone al lado.
   const [opcionesTunel, setOpcionesTunel] = useState<OpcionesTunel>(opcionesPorDefecto);
   const opcionesTunelVisor = useMemo(() => ({ ...opcionesTunel, kmh: kmhComparar }), [opcionesTunel, kmhComparar]);
+  // Our own saved designs in the garage (2026-11-12): built only when added; not in the tunnel, the overlay or the map.
+  const disenosGaraje = useDisenosGaraje({ actual: { xn: modelo.xn, xt: modelo.xt, W: modelo.P.W }, catalogo: garaje.filter(v => v.visible), resolucion: opcionesTunel.resolucion });
+  const garajeConDisenos = useMemo(() => (superponer || soloGaraje ? garajeVisor : [...garajeVisor, ...disenosGaraje.visor]), [garajeVisor, disenosGaraje.visor, superponer, soloGaraje]);
   // The Triciclo's Cd: the tunnel's, numbers only, in the background, at its calculation speed (its results and consumption use it).
   const cdTri = useCdTriciclo(paraCalcular, opcionesTunel.resolucion, esTri ? camposTriciclo(P).tVel : 80);
   const cdTriComparar = useCdTriciclo(paraCalcular, opcionesTunel.resolucion, kmhComparar);
@@ -1106,11 +1111,13 @@ export default function Aeromovil() {
     }
     // Los coches sin Cd publicado (Jaguar D-Type, AeroRider) también llevan su nombre, y dicen que no hay dato.
     for (const v of garajeVisor) { const d = VEHICULOS_GARAJE.find(x => x.id === v.id); if (d && !o[d.id]) o[d.id] = `${d.nombre}\nCd sin publicar`; }
+    // our designs in the garage (2026-11-12): their name and the Cd their card gives
+    Object.assign(o, disenosGaraje.carteles);
     // El Bala del editor: su Cd solo lo da el túnel.
     if (esBala && !soloGaraje && !o.aeromovil) o.aeromovil = `${nombreVehiculo}\nCd: ábrelo en el túnel`;
     if (esTri && !soloGaraje && !o.aeromovil) o.aeromovil = `${nombreVehiculo}\nCd: el túnel lo está calculando…`;
     return o;
-  }, [tunel, verConsumo, filasComparar, kmhComparar, garajeVisor, esBala, esTri, soloGaraje, nombreVehiculo]);
+  }, [tunel, verConsumo, filasComparar, kmhComparar, garajeVisor, esBala, esTri, soloGaraje, nombreVehiculo, disenosGaraje.carteles]);
   const [vista, setVista] = useState<Vista>('iso');
   // Render fotorrealista de la vista actual: la captura del visor pasa por la IA y vuelve como foto
   const [render, setRender] = useState<{ estado: 'nada' | 'creando' | 'listo' | 'error'; imagen?: string; error?: string; vista?: Vista }>({ estado: 'nada' });
@@ -1199,7 +1206,7 @@ export default function Aeromovil() {
         <section ref={ventana3d} aria-label="Vista 3D" className={cn('overflow-hidden bg-slate-50',
           completa === 'no' ? cn('relative h-[62vh] min-h-[380px] rounded-xl border border-slate-200', esA1 ? 'lg:h-[72vh]' : 'lg:sticky lg:top-[68px] lg:h-[calc(100vh-88px)]')
             : completa === 'css' ? 'fixed inset-0 z-[100] h-[100dvh] w-screen' : 'relative h-full w-full')}>
-          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeVisor} soloGaraje={!!soloGaraje} tunel={tunel} carteles={carteles} cuerposTunel={cuerposTunel} opcionesTunel={opcionesTunelVisor} alElegirPuntoTunel={setPuntoTunel} puntoTunel={puntoTunel} alMoverGaraje={superponer || soloGaraje ? undefined : (id, x, z) => setGaraje(g => g.map(v => v.id === id ? { ...v, x, z } : v))} superponer={!!superponer && !soloGaraje} vista={vista}
+          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeConDisenos} soloGaraje={!!soloGaraje} tunel={tunel} carteles={carteles} cuerposTunel={cuerposTunel} opcionesTunel={opcionesTunelVisor} alElegirPuntoTunel={setPuntoTunel} puntoTunel={puntoTunel} alMoverGaraje={superponer || soloGaraje ? undefined : (id, x, z) => (esDisenoGaraje(id) ? disenosGaraje.mover(id, x, z) : setGaraje(g => g.map(v => v.id === id ? { ...v, x, z } : v)))} fichasGaraje={disenosGaraje.fichas} alQuitarGaraje={disenosGaraje.quitar} superponer={!!superponer && !soloGaraje} vista={vista}
             referencia={referencia} modoRef={modoRef} alinear={alinear} alPinchar={esA1 ? c => { navegar(`/aeromovil/componentes/${c}`); window.scrollTo({ top: 0 }); } : undefined} />
           {/* La esquina de arriba a la derecha es del botón de pantalla completa: las tarjetas se apartan a su izquierda
               (en el móvil, debajo, que de ancho no caben). */}
@@ -1390,6 +1397,7 @@ export default function Aeromovil() {
                   <span>{v.nombre}</span><span className="text-[11px] font-normal text-slate-400">{v.largo.toFixed(2).replace('.', ',')} m</span>
                 </Button>); })}
             </div>
+            <MisDisenosGaraje g={disenosGaraje} />
             {garaje.some(g => g.visible) && <MapaGaraje garaje={garaje} largo={modelo.Lf} ancho={modelo.P.W} morro={modelo.xn} etiqueta={esA1 ? 'A1' : esBala ? 'Bala' : esTri ? (esCuatro(camposTriciclo(P)) ? 'Bala 4R' : 'Triciclo') : 'Gota'} alMover={(id, x, z) => setGaraje(g => g.map(v => v.id === id ? { ...v, x, z } : v))} alGirar={id => setGaraje(g => g.map(v => v.id === id ? { ...v, giro: (v.giro + Math.PI / 2) % (2 * Math.PI) } : v))} />}
             <p className="-mt-1 text-xs text-slate-500">Arrastra cada coche en el 3D (pínchalo y muévelo) o en este plano; doble clic en el plano lo gira un cuarto de vuelta.</p>
           </Bloque>}

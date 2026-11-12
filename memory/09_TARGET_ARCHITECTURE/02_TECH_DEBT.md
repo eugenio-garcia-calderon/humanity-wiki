@@ -590,3 +590,9 @@ The observatory is one self-contained HTML file (`public/observatorio-polarizaci
 - **The clear-entry check is one number**: the lowest point of the open door over a box beside the seat. It does not model a person getting in.
 - **Off-default hinge settings can make the door swing through the body.** Examples: the hinge-angle slider at −12° (2.0 cm on the real clásico), or the hinge halfway up the pillar (0.5 cm). The check goes red, but the door is not stopped. The right fix is a door stop that tells an edge graze at the start of the swing apart from a real collision. The first try at a stop could not tell them apart, and held a grazing door at 2°.
 - **The controller moves with the pack**, behind it, and its old fixed place under the passenger is used only without the pack.
+
+### 2026-11-12 — Garage: Model Y and our designs (shortcuts)
+- **The garage registry is module-level mutable state** (`garaje/registro.ts`). It works because the page registers a design during render, before the viewer's effect reads it. A second viewer on the same page would share it. Moving it into React state is about 1 hour today (a prop through Visor3D and its 8 lookup sites).
+- **Our designs are not in the tunnel, «Superponer» or the garage map** (they do get the «Cd y consumo» label). They have no `envolvente`. Adding one from `envolventeModelo` (tunel/nuestro.ts) is ~30 min. Superponer would also need a legend entry.
+- **A design in the garage is a snapshot of what was saved when the list loaded.** If someone saves a new version, the garage shows the old one until the page reloads.
+- **Model Y: drawn without photos.** The overhangs, the side-view lines and the position of the light bars are estimates from the figures and written descriptions. A pass against real side, front and rear photos with solved cameras (as for the Aptera and the XL1) is the next step.
