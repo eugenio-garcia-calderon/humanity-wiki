@@ -448,6 +448,13 @@ export const FUENTES: Fuente[] = [
   { id: 'housfy-comunidad', titulo: 'Housfy · Ejemplo de presupuesto anual de una comunidad de propietarios', url: 'https://housfy.com/administracion-fincas/guias/post/contabilidad-comunidad-de-propietarios' },
   { id: 'ine-epf-hogar', titulo: 'INE · EPF 2024: gasto medio por hogar, 34.044 €', url: 'https://www.ine.es/dyngs/Prensa/es/EPF2024.htm' },
   { id: 'pensiones-mayo', titulo: 'La Moncloa · Nómina de pensiones de mayo de 2026: 10.480.593 pensiones a cerca de 9,5 millones de personas', url: 'https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/inclusion/Paginas/2026/260526-pension-media-datos-mayo.aspx' },
+  { id: 'smi-2026', titulo: 'BOE · Real Decreto 126/2026: salario mínimo interprofesional de 2026, 1.221 € al mes en 14 pagas', url: 'https://www.boe.es/boe/dias/2026/02/19/pdfs/BOE-A-2026-3815.pdf' },
+  { id: 'pnc-2026', titulo: 'Imserso · Pensiones no contributivas, marzo de 2026: 464.287 pensiones', url: 'https://imserso.es/documents/20123/11215244/infmar2026.pdf/a71d2d82-3158-22ba-8286-f6ac9669281c' },
+  { id: 'pensiones-junio', titulo: 'Europa Press · Nómina de junio de 2026: casi 10,5 millones de pensiones a cerca de 9,5 millones de pensionistas', url: 'https://www.bolsamania.com/noticias_amp/economia/economia--amp-la-seguridad-social-destina-en-junio-28432-millones-a-la-paga-ordinaria-y-la-extra-de-las-pensiones--22844972.html' },
+  { id: 'cotizaciones-2026', titulo: 'Orden PJC/297/2026 (resumen de CCOO Canarias) · Tipos de cotización de 2026', url: 'https://canarias.ccoo.es/579b76aad30c66b3a5d6bf9a4989fb47000069.pdf' },
+  { id: 'fondo-reserva-2026', titulo: 'La Moncloa · El Fondo de Reserva de la Seguridad Social supera los 15.200 millones de euros (abril de 2026)', url: 'https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/inclusion/Paginas/2026/130426-fondo-reserva-seguridad-social-abril.aspx' },
+  { id: 'fondo-noruega', titulo: 'Europa Press · El fondo soberano noruego vale 22,68 billones de coronas (2,07 billones de euros), junio de 2026', url: 'https://www.democrata.es/economia/el-fondo-soberano-noruego-marca-un-beneficio-historico-de-159-680-millones-en-el-primer-semestre/' },
+  { id: 'pnc-alquiler', titulo: 'Imserso · Complemento de alquiler de las pensiones no contributivas, 2025 (4,76 % de pensionistas, 525 € al año)', url: 'https://imserso.es/documents/20123/125723/pnccalqu2025.pdf/8eb35379-90d8-3b65-d02f-2d1795ae945f' },
   { id: 'ipc-2026', titulo: 'INE · Indicador adelantado del IPC, octubre de 2026 (4,9 %)', url: 'https://www.ine.es/dyngs/Prensa/adIPC1026.htm' },
 ];
 

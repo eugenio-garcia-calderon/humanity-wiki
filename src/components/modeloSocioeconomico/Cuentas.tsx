@@ -219,8 +219,8 @@ export function Retos({ modo }: { modo: Modo }) {
     {
       t: 'De las pensiones al apoyo mutuo: la transición',
       d: <>Hoy se pagan {numero(HOY.pensionesContributivas / 1e6, 1)} millones de pensiones contributivas a unos {numero(HOY.pensionistas / 1e6, 1)} millones de personas: {millones(HOY.nominaPensionesMes)} al mes, unos {millones(nominaAnual)} al año con las pagas extra<Fuente id="pensiones-2026" /> (en 2024, contando las de las administraciones, {millones(HOY.pensiones2024)}<Fuente id="igae-cofog" />).
-        El modelo no tiene pensiones constantes salvo por discapacidad, pero quien ya cobra una, o lleva décadas cotizando, no puede quedarse sin nada de un día para otro.
-        Con el reparto inicial, todas las escalas de España juntas dedican a «apoyo mutuo y empleo» {millones(proteccion.modelo)}: la transición no cabe ahí.
+        La propuesta de la ventana Pensiones es una sola pensión igual al salario mínimo, que costaría unos 170.330 M€ al año. Estas cuentas del impuesto único todavía no la incluyen:
+        con el reparto inicial, todas las escalas de España juntas dedican a «apoyo mutuo y empleo» {millones(proteccion.modelo)}, así que la pensión no cabe ahí y hay que decidir de dónde sale.
         Caminos posibles: un fondo de transición con un tramo temporal que se extinga con las pensiones ya reconocidas; convertir lo cotizado en participaciones; o que la escala nacional dedique más a ello durante una generación.
         Esta página entiende que la dependencia por la edad cuenta como discapacidad.</>,
     },
