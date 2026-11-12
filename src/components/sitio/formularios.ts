@@ -18,6 +18,8 @@ export const MOTIVOS = [
   { id: 'empresa', texto: 'Empresa o alianza' },
   { id: 'prensa', texto: 'Prensa' },
   { id: 'trabajo', texto: 'Trabaja con nosotros' },
+  // 2026-11-12 (Sol Solidario): préstamos solidarios a 7 años, al 0 %, desde 1.000 €.
+  { id: 'prestamo', texto: 'Préstamo solidario' },
   { id: 'otro', texto: 'Otro' },
 ] as const;
 export type Motivo = typeof MOTIVOS[number]['id'];

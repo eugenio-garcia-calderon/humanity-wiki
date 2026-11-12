@@ -230,6 +230,66 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
     return e && !e.includes('/p/') ? e : p.url;
   };
 
+  // Los sectores de la portada, si la raíz los define y no se está editando (en el editor, la rejilla de siempre).
+  type Sector = { titulo: string; areas?: string[]; icono?: string };
+  // Un color por sector, por su orden (no en la configuración: lo que va en ella se traduce en lighthumanity.org).
+  const COLORES_SECTOR = ['sky', 'violet', 'amber', 'emerald', 'rose'];
+  const defSectores = (raiz.config?.sitio?.sectores || null) as Sector[] | null;
+  const sectores = escaparate && !edicion && !activa && Array.isArray(defSectores) && defSectores.length ? (() => {
+    const usados = new Set<string>();
+    const areasDe = (f: Fila) => lista(f.celdas[modelo.colArea]?.valor).map(id => plano(modelo.nombreArea(id))).filter(Boolean);
+    const grupos = defSectores.map(d => {
+      const quiere = new Set((d.areas || []).map(plano));
+      const filas = visibles.filter(f => !usados.has(f.id) && areasDe(f).some(a => quiere.has(a)));
+      filas.forEach(f => usados.add(f.id));
+      return { titulo: d.titulo, icono: d.icono, color: COLORES_SECTOR[defSectores.indexOf(d) % COLORES_SECTOR.length], otros: false, filas };
+    });
+    const resto = visibles.filter(f => !usados.has(f.id));
+    if (resto.length) grupos.push({ titulo: String(raiz.config?.sitio?.sectorOtros || 'Otras innovaciones'), icono: 'Otras', color: 'slate', otros: true, filas: resto });
+    return grupos.filter(g => g.filas.length);
+  })() : null;
+
+  const tarjetaDe = (f: Fila, i: number, compacta = false, sinPildora = false, claseLi = '') => {
+    const nombre = String(f.celdas[modelo.colNombre]?.valor || f.pagina?.titulo || '').trim();
+    const img = f.pagina?.imagen || null;
+    const enc = f.pagina?.encuadre;
+    const categoria = modelo.categoriaDe(f);
+    const nombreCategoria = categoria ? modelo.nombreArea(categoria) : '';
+    const descripcion = (f.pagina?.descripcion || '').trim();
+    return (
+      <li key={f.id} className={cn('relative', claseLi)}>
+        {(() => {
+          const tarjeta = (
+            <TarjetaPortada nombre={nombre} imagen={img} encuadre={enc} descripcion={descripcion} Titulo={Titulo} prioridad={i} compacta={compacta}
+              pildora={categoria && !sinPildora ? { id: categoria, label: nombreCategoria } : null} iconoPildora={nombreCategoria ? iconoCategoria(nombreCategoria) : undefined} nombrePildora="Categoría"
+              edicion={edicion ? {
+                onNombre: v => guardarCelda(f.id, modelo.colNombre, v),
+                onDescripcion: v => guardarDescripcion(f.id, v),
+                opciones: modelo.opcionesArea,
+                onPildora: modelo.colArea ? id => guardarCelda(f.id, modelo.colArea, id ? [id] : []) : undefined,
+              } : undefined}
+              esquina={edicion ? <>
+                {f.oculta && <span className="rounded-full bg-slate-900/80 px-2.5 py-1 text-xs font-bold text-white">Oculta</span>}
+                {f.pagina_id && <Link to={`/paginas/${f.pagina_id}`} className="inline-flex h-8 items-center gap-1.5 rounded-full bg-white/90 px-3 text-xs font-bold text-slate-700 shadow-sm backdrop-blur hover:bg-white">
+                  <Pencil className="h-3.5 w-3.5" /> Abrir
+                </Link>}
+              </> : undefined} />
+          );
+          return edicion
+            ? <div className={cn(CLASE_TARJETA_PORTADA, f.oculta && 'opacity-60')}>{tarjeta}</div>
+            : <Link to={sitio ? sitio.enlacePagina(f.pagina_id!) : `/p/${f.pagina_id}`} className={CLASE_TARJETA_PORTADA}>{tarjeta}</Link>;
+        })()}
+        {equipo && !edicion && f.pagina_id && (
+          <a href={`https://humanity.wiki/paginas/${encodeURIComponent(f.pagina_id)}`} target="_blank" rel="noopener noreferrer"
+            title={`Editar «${nombre}»`} aria-label={`Editar «${nombre}»`}
+            className="absolute right-3 top-12 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-slate-600 shadow-sm backdrop-blur hover:text-slate-900">
+            <Pencil className="h-4 w-4" />
+          </a>
+        )}
+      </li>
+    );
+  };
+
   const tile = (activo: boolean) => cn(
     'flex h-[72px] w-[84px] shrink-0 flex-col items-center justify-between rounded-xl border px-1 py-1.5 transition-colors',
     activo ? 'border-slate-900 bg-slate-900 text-white' : 'border-slate-200 bg-white text-slate-700 hover:border-slate-300',
@@ -284,47 +344,68 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
           blanco; el estado y el año arriba de la imagen y algo más grandes; todas del mismo tamaño,
           dos por fila»). Las primeras cargan ya y con prioridad; el resto, al acercarse. */}
       {escaparate && <h2 className="sr-only">Proyectos</h2>}
+      {/* LOS SECTORES DE INNOVACIÓN (2026-11-12, Eugenio: «agrupa los proyectos de la página de inicio en
+          sectores: una tarjeta grande donde están esas tarjetas un poco más pequeñas… que se vean varios
+          sectores a lo ancho y largo de la página»). `sitio.sectores` de la raíz: cada sector reúne las
+          categorías (filas de Sistemas) que nombra; lo que no cae en ninguno va a «Otras innovaciones». */}
+      {sectores ? (
+        <div data-ancla="proyectos" data-sectores className="mt-6 scroll-mt-36 outline-none sm:mt-8 sm:scroll-mt-24">
+          {(() => {
+            // Segunda vuelta, con el bot evaluador (2026-11-12): sin la etiqueta de categoría dentro de un sector que
+            // solo tiene una; tarjetas 4:3; dos columnas que se equilibran por altura (sin huecos entre filas) desde
+            // `xl`; «Otras innovaciones» al final, neutro y a todo el ancho; un color por sector; y en el móvil, una
+            // fila que se desliza de lado por sector en vez de apilar las tarjetas.
+            const COLOR: Record<string, { borde: string; icono: string }> = {
+              sky: { borde: 'sm:border-t-sky-500', icono: 'text-sky-600' }, violet: { borde: 'sm:border-t-violet-500', icono: 'text-violet-600' },
+              amber: { borde: 'sm:border-t-amber-500', icono: 'text-amber-600' }, emerald: { borde: 'sm:border-t-emerald-500', icono: 'text-emerald-600' },
+              rose: { borde: 'sm:border-t-rose-500', icono: 'text-rose-600' }, slate: { borde: 'sm:border-t-slate-500', icono: 'text-slate-600' },
+            };
+            let n = 0;
+            const panel = (g: (typeof sectores)[number]) => {
+              const c = COLOR[g.color || 'slate'] || COLOR.slate;
+              const mezcla = new Set(g.filas.map(f => modelo.categoriaDe(f))).size > 1;
+              const columnas = g.otros ? 'sm:grid-cols-3 lg:grid-cols-4' : g.filas.length === 4 ? 'sm:grid-cols-2' : 'sm:grid-cols-3';
+              return (
+                <section key={g.titulo} data-sector aria-labelledby={`sector-${plano(g.titulo)}`}
+                  className={cn('min-w-0 sm:rounded-3xl sm:border sm:border-t-4 sm:border-slate-200 sm:p-5', 'sm:bg-slate-50', c.borde)}>
+                  <div className="mb-3 flex items-center gap-3 sm:mb-4">
+                    <span aria-hidden className={cn('grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-200 [&_svg]:h-5 [&_svg]:w-5', c.icono, '[&_svg]:text-current')}>{iconoCategoria(g.icono || '', 'h-5 w-5')}</span>
+                    <div className="min-w-0 flex-1">
+                      <h2 id={`sector-${plano(g.titulo)}`} className="text-lg font-black leading-tight tracking-tight text-slate-900 sm:text-xl 2xl:text-2xl">{(() => {
+                        // En el móvil, solo lo que cambia («Movilidad»); el título entero, desde `sm` (bot evaluador, 2026-11-12).
+                        const m = g.titulo.match(/^(Innovaci[oó]n en (?:el sector (?:de la |de los |del |de )?)?)(.+)$/i);
+                        return m ? <><span className="hidden sm:inline">{m[1]}</span><span className="max-sm:capitalize">{m[2]}</span></> : g.titulo;
+                      })()}</h2>
+                      <p className="text-[13px] font-semibold text-slate-500">{g.filas.length === 1 ? '1 proyecto' : `${g.filas.length} proyectos`}<span aria-hidden className="sm:hidden"> · desliza →</span></p>
+                    </div>
+                  </div>
+                  <ul className={cn('-mx-4 flex list-none snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:grid sm:overflow-visible sm:px-0 sm:pb-0', columnas)}>
+                    {g.filas.map(f => tarjetaDe(f, n++, true, !mezcla && !g.otros, 'w-[72%] shrink-0 snap-start sm:w-auto'))}
+                  </ul>
+                </section>
+              );
+            };
+            const principales = sectores.filter(g => !g.otros), otros = sectores.filter(g => g.otros);
+            // El peso de un panel: sus filas de tarjetas (3 por fila; 2 si son 4) más la cabecera.
+            const peso = (g: (typeof sectores)[number]) => Math.ceil(g.filas.length / (g.filas.length === 4 ? 2 : 3)) * (g.filas.length === 4 ? 1.45 : 1) + 0.5;
+            const cols: [typeof principales, typeof principales] = [[], []];
+            const alto = [0, 0];
+            for (const g of principales) { const k = alto[0] <= alto[1] ? 0 : 1; cols[k].push(g); alto[k] += peso(g); }
+            return (
+              <div className="flex flex-col gap-8 sm:gap-5 2xl:gap-6">
+                {/* Una sola vez en la página: por debajo de `xl` las dos columnas se deshacen (`contents`) y los
+                    paneles quedan en una, en el orden izquierda y luego derecha. */}
+                <div className="flex flex-col gap-8 sm:gap-5 xl:grid xl:grid-cols-2 xl:items-start 2xl:gap-6">
+                  {cols.map((l, k) => <div key={k} className="contents xl:flex xl:min-w-0 xl:flex-col xl:gap-5 2xl:gap-6">{l.map(panel)}</div>)}
+                </div>
+                {otros.map(panel)}
+              </div>
+            );
+          })()}
+        </div>
+      ) : (
       <ul data-ancla="proyectos" className={cn('grid list-none grid-cols-1 gap-5 p-0 sm:grid-cols-2', escaparate ? 'lg:grid-cols-3 ' + 'mt-6 scroll-mt-36 outline-none sm:mt-8 sm:scroll-mt-24' : 'mt-4')}>
-        {visibles.map((f, i) => {
-          const nombre = String(f.celdas[modelo.colNombre]?.valor || f.pagina?.titulo || '').trim();
-          const img = f.pagina?.imagen || null;
-          const enc = f.pagina?.encuadre;
-          const categoria = modelo.categoriaDe(f);
-          const nombreCategoria = categoria ? modelo.nombreArea(categoria) : '';
-          const descripcion = (f.pagina?.descripcion || '').trim();
-          return (
-            <li key={f.id} className="relative">
-              {(() => {
-                const tarjeta = (
-                  <TarjetaPortada nombre={nombre} imagen={img} encuadre={enc} descripcion={descripcion} Titulo={Titulo} prioridad={i}
-                    pildora={categoria ? { id: categoria, label: nombreCategoria } : null} iconoPildora={nombreCategoria ? iconoCategoria(nombreCategoria) : undefined} nombrePildora="Categoría"
-                    edicion={edicion ? {
-                      onNombre: v => guardarCelda(f.id, modelo.colNombre, v),
-                      onDescripcion: v => guardarDescripcion(f.id, v),
-                      opciones: modelo.opcionesArea,
-                      onPildora: modelo.colArea ? id => guardarCelda(f.id, modelo.colArea, id ? [id] : []) : undefined,
-                    } : undefined}
-                    esquina={edicion ? <>
-                      {f.oculta && <span className="rounded-full bg-slate-900/80 px-2.5 py-1 text-xs font-bold text-white">Oculta</span>}
-                      {f.pagina_id && <Link to={`/paginas/${f.pagina_id}`} className="inline-flex h-8 items-center gap-1.5 rounded-full bg-white/90 px-3 text-xs font-bold text-slate-700 shadow-sm backdrop-blur hover:bg-white">
-                        <Pencil className="h-3.5 w-3.5" /> Abrir
-                      </Link>}
-                    </> : undefined} />
-                );
-                return edicion
-                  ? <div className={cn(CLASE_TARJETA_PORTADA, f.oculta && 'opacity-60')}>{tarjeta}</div>
-                  : <Link to={sitio ? sitio.enlacePagina(f.pagina_id!) : `/p/${f.pagina_id}`} className={CLASE_TARJETA_PORTADA}>{tarjeta}</Link>;
-              })()}
-              {equipo && !edicion && f.pagina_id && (
-                <a href={`https://humanity.wiki/paginas/${encodeURIComponent(f.pagina_id)}`} target="_blank" rel="noopener noreferrer"
-                  title={`Editar «${nombre}»`} aria-label={`Editar «${nombre}»`}
-                  className="absolute right-3 top-12 grid h-8 w-8 place-items-center rounded-full bg-white/90 text-slate-600 shadow-sm backdrop-blur hover:text-slate-900">
-                  <Pencil className="h-4 w-4" />
-                </a>
-              )}
-            </li>
-          );
-        })}
+        {visibles.map((f, i) => tarjetaDe(f, i))}
         {edicion && (
           <li>
             <button type="button" onClick={anadirProyecto}
@@ -334,6 +415,7 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
           </li>
         )}
       </ul>
+      )}
       {edicion && aviso && <p role="alert" className="mt-3 text-sm font-bold text-rose-600">{aviso}</p>}
       </div>
       {visibles.length === 0 && <p className="py-16 text-center text-sm text-slate-500">No hay proyectos en esta categoría.</p>}

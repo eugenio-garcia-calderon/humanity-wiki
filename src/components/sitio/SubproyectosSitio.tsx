@@ -35,7 +35,12 @@ const pide = (t: string) => fetch(`/api/bd/tablas/${encodeURIComponent(t)}?lectu
 export const columnaMadre = (t: { columnas?: Array<{ id: string; config?: any }> } | null) =>
   t?.columnas?.find(c => c.config?.rol === 'madre')?.id || '';
 
-export default function SubproyectosSitio({ filaId, tablaId, sistemasId, titulo }: { filaId: string; tablaId: string; sistemasId?: string | null; titulo?: string }) {
+/** Para partir la rejilla en grupos con su título (Sol Solidario: España, Latinoamérica…), por id de fila.
+ *  Lo que no está en ningún grupo va al final, en uno sin título. */
+export type GrupoSubproyectos = { titulo: string; texto?: string; ids: string[] };
+
+export default function SubproyectosSitio({ filaId, tablaId, sistemasId, titulo, grupos, ancla }: { filaId: string; tablaId: string; sistemasId?: string | null; titulo?: string;
+  grupos?: GrupoSubproyectos[]; ancla?: string }) {
   const sitio = useSitio();
   const [tabla, setTabla] = useState<Tabla | null>(null);
   const [sistemas, setSistemas] = useState<Tabla | null>(null);
@@ -63,26 +68,44 @@ export default function SubproyectosSitio({ filaId, tablaId, sistemasId, titulo 
   }, [tabla, sistemas, filaId, sistemasId]);
 
   if (!modelo || modelo.hijos.length === 0) return null;
+  const tarjeta = (f: Fila, i: number) => {
+    const nombre = String(f.celdas[modelo.colNombre]?.valor || f.pagina?.titulo || '').trim();
+    const categoria = lista(f.celdas[modelo.colArea]?.valor).find(id => modelo.nombreSistema.has(id)) || null;
+    const nombreCategoria = categoria ? modelo.nombreSistema.get(categoria)! : '';
+    return (
+      <li key={f.id} className="relative">
+        <Link to={sitio ? sitio.enlacePagina(f.pagina_id!) : `/p/${f.pagina_id}`} className={CLASE_TARJETA_PORTADA}>
+          <TarjetaPortada nombre={nombre} imagen={f.pagina?.imagen || null} encuadre={f.pagina?.encuadre} descripcion={(f.pagina?.descripcion || '').trim()}
+            Titulo="h3" prioridad={i + 10}
+            pildora={categoria ? { id: categoria, label: nombreCategoria } : null}
+            iconoPildora={nombreCategoria ? iconoCategoria(nombreCategoria) : undefined} nombrePildora="Categoría" />
+        </Link>
+      </li>
+    );
+  };
+  const rejilla = (l: Fila[], desde = 0) => <ul className="grid list-none grid-cols-1 gap-5 p-0 sm:grid-cols-2 lg:grid-cols-3">{l.map((f, i) => tarjeta(f, desde + i))}</ul>;
+  if (grupos?.length) {
+    const usados = new Set(grupos.flatMap(g => g.ids));
+    const partes = [...grupos.map(g => ({ ...g, filas: g.ids.map(id => modelo.hijos.find(f => f.id === id)).filter(Boolean) as Fila[] })),
+      { titulo: '', texto: '', ids: [], filas: modelo.hijos.filter(f => !usados.has(f.id)) }].filter(g => g.filas.length);
+    let n = 0;
+    return (
+      <section data-subproyectos id={ancla} className="scroll-mt-40">
+        {titulo && <h2 className="mb-2 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">{titulo}</h2>}
+        {partes.map(g => { const d = n; n += g.filas.length; return (
+          <div key={g.titulo || 'resto'} className="mt-10">
+            {g.titulo && <h3 className="text-xl font-black text-slate-900 sm:text-2xl">{g.titulo}</h3>}
+            {g.texto && <p className="mt-1 max-w-3xl text-[15px] text-slate-600">{g.texto}</p>}
+            <div className="mt-5">{rejilla(g.filas, d)}</div>
+          </div>
+        ); })}
+      </section>
+    );
+  }
   return (
-    <section data-subproyectos className="mt-14 sm:mt-20">
+    <section data-subproyectos id={ancla} className="mt-14 scroll-mt-40 sm:mt-20">
       <h2 className="mb-6 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">{titulo || 'Proyectos dentro de este proyecto'}</h2>
-      <ul className="grid list-none grid-cols-1 gap-5 p-0 sm:grid-cols-2 lg:grid-cols-3">
-        {modelo.hijos.map((f, i) => {
-          const nombre = String(f.celdas[modelo.colNombre]?.valor || f.pagina?.titulo || '').trim();
-          const categoria = lista(f.celdas[modelo.colArea]?.valor).find(id => modelo.nombreSistema.has(id)) || null;
-          const nombreCategoria = categoria ? modelo.nombreSistema.get(categoria)! : '';
-          return (
-            <li key={f.id} className="relative">
-              <Link to={sitio ? sitio.enlacePagina(f.pagina_id!) : `/p/${f.pagina_id}`} className={CLASE_TARJETA_PORTADA}>
-                <TarjetaPortada nombre={nombre} imagen={f.pagina?.imagen || null} encuadre={f.pagina?.encuadre} descripcion={(f.pagina?.descripcion || '').trim()}
-                  Titulo="h3" prioridad={i + 10}
-                  pildora={categoria ? { id: categoria, label: nombreCategoria } : null}
-                  iconoPildora={nombreCategoria ? iconoCategoria(nombreCategoria) : undefined} nombrePildora="Categoría" />
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+      {rejilla(modelo.hijos)}
     </section>
   );
 }

@@ -11,7 +11,7 @@ export function Piezas() {
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,8fr)_minmax(0,4fr)]">
       <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
-        <h3 className="text-lg font-bold text-slate-900">Hoy: {TOTAL_FIGURAS} figuras distintas, y cientos de tasas</h3>
+        <h3 className="text-lg font-bold text-slate-900">Hoy: {TOTAL_FIGURAS} impuestos y cotizaciones distintos, y cientos de tasas</h3>
         <p className="mt-1 text-sm text-slate-600">
           Cada cuadrado es un impuesto o una cotización con sus propias reglas, plazos y formularios. Son los de toda España: a cada persona le tocan los del Estado,
           las cotizaciones, los de su región y los de su municipio.
@@ -82,37 +82,49 @@ export function Costes() {
 export function Tabla({ modo }: { modo: Modo }) {
   const pais = cuentasPais(modo);
   const filas: [string, React.ReactNode, React.ReactNode][] = [
-    ['Cuántos impuestos', <>{TOTAL_FIGURAS} figuras y cientos de tasas</>, 'Uno, con tres tramos: 10, 25 y 40 %'],
+    ['Cuántos impuestos', <>{TOTAL_FIGURAS} impuestos y cotizaciones distintos, y cientos de tasas</>, 'Uno, con tres tramos: 10, 25 y 40 %'],
     ['Quién hace papeleo', 'Personas, autónomos, empresas y comunidades de vecinos: declaraciones, modelos trimestrales, liquidaciones y recibos', 'Nadie: lo aparta el sistema de pago en cada operación'],
     ['Cuándo se paga', 'Retenciones cada mes, declaraciones cada trimestre y cada año, recibos en fechas distintas', 'En el instante de cada pago'],
-    ['Cómo llega el dinero a cada administración', 'Impuestos cedidos, participaciones en tributos del Estado y un sistema de financiación autonómica que se negocia políticamente y se liquida años después', 'Un octavo automático a cada escala, repartido por habitante, cada día; y en cada escala, tercios para producir, cuidar y libre'],
-    ['La comunidad de vecinos', `Cuotas aparte: unos ${millones(HOY.cuotasComunidades)} al año`, 'Es una escala más y la financia el fondo común'],
-    ['Quién paga más', 'Tramos del IRPF, deducciones y exenciones', 'Quien gasta en ocio y lujo, y quien trabaja para una empresa grande; todos reciben el mismo dividendo'],
-    ['Pensiones', 'Pensiones contributivas de jubilación, viudedad e incapacidad', 'Sin pensiones constantes, salvo por discapacidad y en especie; préstamos al IPC y donaciones puntuales entre escalas'],
+    ['Cómo llega el dinero a cada administración', 'El Estado recauda y luego reparte a comunidades y ayuntamientos con fórmulas que se negocian políticamente y se ajustan años después', 'Un octavo automático a cada escala, repartido por habitante, cada día; y en cada escala, tercios para producir, cuidar y libre'],
+    ['La comunidad de vecinos', <>Cuotas aparte: unos {millones(HOY.cuotasComunidades)} al año (estimación)<Fuente id="comunidades-cuotas" /></>, 'Es una escala más y la financia el fondo común'],
+    ['Quién paga más', 'Tramos del IRPF, deducciones y exenciones', 'Quien gasta en ocio y lujo, y quien trabaja para una empresa grande; todos reciben el mismo ingreso por persona'],
+    ['Pensiones', 'Según lo cotizado: de menos de 1.000 € a 3.359,60 € al mes', 'Una sola pensión igual al salario mínimo, ayudas aparte (ver la ventana Pensiones)'],
     ['Transparencia', 'Presupuestos y liquidaciones anuales', 'Cuentas abiertas: cada euro, en tiempo real'],
-    ['Cuánto se recauda', <>≈ 38 % del PIB en impuestos y cotizaciones (2025)<Fuente id="ijm-2026" /></>, <>≈ {porcentaje(pais.pctPIB, 0)} del PIB en esta lectura del modelo</>],
+    ['Cuánto se recauda', <>≈ 38 % del PIB en impuestos y cotizaciones (2025)<Fuente id="ijm-2026" /></>, <>≈ {porcentaje(pais.pctPIB, 0)} del PIB, según los cálculos de este modelo</>],
   ];
   return (
-    <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
-      <table className="w-full min-w-[640px] text-[15px]">
-        <thead>
-          <tr className="border-b border-slate-200 text-left">
-            <th scope="col" className="w-[22%] px-5 py-3 font-medium text-slate-500"><span className="sr-only">Aspecto</span></th>
-            <th scope="col" className="px-5 py-3 font-semibold text-slate-900">Hoy en España</th>
-            <th scope="col" className="px-5 py-3 font-semibold text-slate-900">Con el modelo</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filas.map(([a, h, m]) => (
-            <tr key={a} className="border-b border-slate-100 align-top last:border-0">
-              <th scope="row" className="px-5 py-3 text-left font-semibold text-slate-900">{a}</th>
-              <td className="px-5 py-3 text-slate-600">{h}</td>
-              <td className="px-5 py-3 text-slate-900">{m}</td>
+    <>
+      {/* Phones: one card per row, «Hoy» above «Propuesta», nothing cut off. */}
+      <ul className="space-y-3 sm:hidden">
+        {filas.map(([a, h, m]) => (
+          <li key={a} className="rounded-2xl border border-slate-200 bg-white p-4 text-[15px]">
+            <p className="font-semibold text-slate-900">{a}</p>
+            <p className="mt-2 text-slate-600"><span className="mr-1 text-xs font-bold uppercase text-slate-400">Hoy</span>{h}</p>
+            <p className="mt-1.5 text-slate-900"><span className="mr-1 text-xs font-bold uppercase text-amber-600">Propuesta</span>{m}</p>
+          </li>
+        ))}
+      </ul>
+      <div className="hidden overflow-x-auto rounded-2xl border border-slate-200 bg-white sm:block">
+        <table className="w-full min-w-[640px] text-[15px]">
+          <thead>
+            <tr className="border-b border-slate-200 text-left">
+              <th scope="col" className="w-[22%] px-5 py-3 font-medium text-slate-500"><span className="sr-only">Aspecto</span></th>
+              <th scope="col" className="px-5 py-3 font-semibold text-slate-900">Hoy en España</th>
+              <th scope="col" className="px-5 py-3 font-semibold text-slate-900">Propuesta</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {filas.map(([a, h, m]) => (
+              <tr key={a} className="border-b border-slate-100 align-top last:border-0">
+                <th scope="row" className="px-5 py-3 text-left font-semibold text-slate-900">{a}</th>
+                <td className="px-5 py-3 text-slate-600">{h}</td>
+                <td className="px-5 py-3 text-slate-900">{m}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
 
@@ -214,7 +226,7 @@ export function GanaYPierde({ modo }: { modo: Modo }) {
         Por habitante: hoy, unos {euros((totalHoy * 1e6) / ESPANA.poblacion)} al año entre gasto público y cuotas de comunidad;
         con el modelo, {euros((totalModelo * 1e6) / ESPANA.poblacion)} en lo que hacen las escalas (servicios e inversión) más {euros(pais.porPersonaEscala)} de dividendo.
         En total, {millones(totalModelo)} frente a {millones(totalHoy)} (los {millones(HOY.gastoTotal2024)} de gasto público más las cuotas de comunidad). La mayor diferencia está en la protección social:
-        {' '}{millones(pension.modelo)} frente a {millones(pension.hoy)}, porque el modelo no paga pensiones constantes, salvo por discapacidad y en especie. Hay que sumar el dividendo, {millones(pais.porEscala)} al año que reciben directamente todas las personas,
+        {' '}{millones(pension.modelo)} frente a {millones(pension.hoy)}, porque estas cuentas aún no incluyen la pensión igual al salario mínimo de la ventana Pensiones (unos 170.330 M€ al año), que no cabe en este reparto. Hay que sumar el dividendo, {millones(pais.porEscala)} al año que reciben directamente todas las personas,
         y saber que hoy «administración» incluye {millones(HOY.intereses2025)} de intereses de la deuda en 2025<Fuente id="intereses" />, que el modelo todavía no resuelve.
       </p>
     </figure>

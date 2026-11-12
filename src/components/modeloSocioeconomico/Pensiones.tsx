@@ -8,6 +8,7 @@ import {
 } from '../../data/presupuestos';
 import { ESCALA, euros, numero, porcentaje } from '../../data/modeloSocioeconomico';
 import { Fuente } from './piezas';
+import { Mas } from './ventanas';
 
 // One hue, dark → light: the tiers are an order of magnitude, not identities.
 const TONO: Record<string, string> = {
@@ -42,23 +43,20 @@ export function Pensiones() {
             const pctPensiones = t.pensiones / TOTAL_PENSIONES_CONTRIBUTIVAS * 100;
             const pctDinero = costeMes(t) / NOMINA_PENSIONES_MES * 100;
             return (
-              <section key={t.id} aria-labelledby={`pension-${t.id}`} className="grid gap-4 p-5 md:grid-cols-[14rem_10rem_minmax(0,1fr)] md:items-center md:gap-6">
+              <section key={t.id} aria-labelledby={`pension-${t.id}`} className="grid grid-cols-1 gap-x-4 gap-y-2 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-y-3 sm:p-5 md:grid-cols-[14rem_10rem_minmax(0,1fr)] md:items-center md:gap-6">
                 <div>
                   <h3 id={`pension-${t.id}`} className="flex items-center gap-2 text-lg font-bold text-slate-900">
                     <span aria-hidden className={`h-3 w-3 shrink-0 rounded-full ${TONO[t.id]}`} />{t.nombre}
                   </h3>
                   <p className="text-sm text-slate-500">{t.rango}</p>
                 </div>
-                <div>
+                <div className="sm:text-right md:text-left">
                   <p className="text-2xl font-bold tabular-nums text-slate-900">{euros(t.cifra, t.id === 'maxima' || t.id === 'minima' ? 2 : 0)}</p>
-                  <p className="text-xs text-slate-500">{t.cifraEtiqueta} al mes<Fuente id={t.fuente} /></p>
+                  <p className="text-[13px] text-slate-600">{t.cifraEtiqueta} al mes<Fuente id={t.fuente} /></p>
                 </div>
-                <div className="space-y-2 text-sm">
-                  <Barra etiqueta="De las pensiones" pct={pctPensiones} tono={TONO[t.id]}
-                    texto={`${numero(t.pensiones)} pensiones${t.estimado ? ' (estimación)' : ''}`} />
-                  <Barra etiqueta="Del dinero" pct={pctDinero} tono={TONO[t.id]}
-                    texto={`${importe(costeMes(t))} al mes, ${importe(costeMes(t) * 14)} al año`} />
-                  <p className="text-xs leading-relaxed text-slate-500">{t.nota}</p>
+                <div className="space-y-2 text-sm sm:col-span-2 md:col-span-1">
+                  <Barra etiqueta="De las pensiones" pct={pctPensiones} tono={TONO[t.id]} />
+                  <Barra etiqueta="Del dinero" pct={pctDinero} tono={TONO[t.id]} />
                 </div>
               </section>
             );
@@ -66,21 +64,45 @@ export function Pensiones() {
         </div>
       </div>
 
+      <Mas titulo="las cifras de cada tramo">
+        <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
+          <table className="w-full min-w-[520px] text-sm">
+            <thead><tr className="border-b border-slate-200 text-left text-slate-600">
+              <th scope="col" className="px-4 py-2 font-medium">Tramo</th>
+              <th scope="col" className="px-4 py-2 text-right font-medium">Pensiones</th>
+              <th scope="col" className="px-4 py-2 text-right font-medium">Al mes</th>
+              <th scope="col" className="px-4 py-2 text-right font-medium">Al año</th>
+            </tr></thead>
+            <tbody>
+              {TRAMOS_PENSION.map(t => (
+                <tr key={t.id} className="border-b border-slate-100 align-top last:border-0">
+                  <th scope="row" className="px-4 py-2 text-left font-semibold text-slate-900">{t.nombre}<span className="block text-[13px] font-normal text-slate-600">{t.nota}</span></th>
+                  <td className="px-4 py-2 text-right tabular-nums text-slate-800">{numero(t.pensiones)}{t.estimado && <span className="block text-[13px] text-slate-600">estimación</span>}</td>
+                  <td className="whitespace-nowrap px-4 py-2 text-right tabular-nums text-slate-800">{importe(costeMes(t))}</td>
+                  <td className="whitespace-nowrap px-4 py-2 text-right tabular-nums text-slate-800">{importe(costeMes(t) * 14)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Mas>
+      <Mas titulo="pensiones o personas, y qué queda fuera">
       <div className="grid gap-4 md:grid-cols-2">
-        <p className="rounded-2xl bg-slate-100 p-5 text-[15px] leading-relaxed text-slate-700">
+        <p className="rounded-2xl bg-slate-50 border border-slate-200 p-5 text-[15px] leading-relaxed text-slate-700">
           <strong className="text-slate-900">Cuentan pensiones, no personas.</strong> Una de cada diez personas cobra dos, casi siempre jubilación y viudedad.
           {' '}{numero(CON_COMPLEMENTO_MINIMOS)} pensionistas reciben además un <em>complemento a mínimos</em>: la Seguridad Social les sube la pensión hasta el mínimo legal porque con lo cotizado no llegaban<Fuente id="pensiones-minimos" />.
         </p>
-        <p className="rounded-2xl bg-slate-100 p-5 text-[15px] leading-relaxed text-slate-700">
+        <p className="rounded-2xl bg-slate-50 border border-slate-200 p-5 text-[15px] leading-relaxed text-slate-700">
           <strong className="text-slate-900">Qué queda fuera.</strong> Las pensiones de los funcionarios del Estado (Clases Pasivas) y las no contributivas, para quien no cotizó lo suficiente: {euros(PENSION_NO_CONTRIBUTIVA, 2)} al mes en 2026<Fuente id="pensiones-limites" />.
           {' '}Los tramos del medio son una estimación: el reparto de 2025 aplicado a las pensiones de 2026, cuadrado con la nómina real. Las de arriba, contadas con datos de julio de 2026<Fuente id="pensiones-cuantias" />.
         </p>
       </div>
+      </Mas>
     </div>
   );
 }
 
-function Barra({ etiqueta, pct, tono, texto }: { etiqueta: string; pct: number; tono: string; texto: string }) {
+function Barra({ etiqueta, pct, tono, texto }: { etiqueta: string; pct: number; tono: string; texto?: string }) {
   return (
     <div className="grid grid-cols-[6.5rem_minmax(0,1fr)] items-center gap-3">
       <span className="text-slate-500">{etiqueta}</span>
@@ -91,7 +113,7 @@ function Barra({ etiqueta, pct, tono, texto }: { etiqueta: string; pct: number; 
           </div>
           <span className="w-14 text-right font-semibold tabular-nums text-slate-900">{porcentaje(pct)}</span>
         </div>
-        <span className="text-xs tabular-nums text-slate-600">{texto}</span>
+        {texto && <span className="text-[13px] tabular-nums text-slate-600">{texto}</span>}
       </div>
     </div>
   );

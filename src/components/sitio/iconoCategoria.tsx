@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import {
   BarChart3, Bot, Gauge, Banknote, Briefcase, Building2, Car, CloudSun, Coins, Construction, Cpu, Droplet, Factory, FlaskConical, GraduationCap, HandHeart, Handshake,
-  HeartPulse, Home, Landmark, Layers, Leaf, Music, Palette, PersonStanding, RadioTower, Recycle, Scale, Shirt, ShoppingCart, Sparkles, Store, Sun,
+  HeartPulse, Home, Landmark, Layers, Leaf, Lightbulb, Music, Palette, PersonStanding, RadioTower, Recycle, Scale, Shirt, ShoppingCart, Sparkles, Store, Sun,
   Tag, Tent, Users, Wheat, Wind, Zap, type LucideIcon,
 } from 'lucide-react';
 
@@ -15,6 +15,8 @@ const ICONOS: Record<string, LucideIcon> = {
   residuos: Recycle, justicia: Scale, comercio: Store, ciencia: FlaskConical, conciencia: Sparkles, demografia: PersonStanding,
   infraestructuras: Construction, consumo: ShoppingCart, 'vehiculo solar': Sun, 'vehiculo aerodinamico': Wind, 'mini casas': Tent,
   'contact improvisacion': HandHeart, biodanza: Music,
+  // «Otras innovaciones», el último sector de la portada (2026-11-12).
+  otras: Lightbulb,
   'datos abiertos': BarChart3, robotica: Bot, 'competicion solar': Sun, 'eficiencia energetica': Gauge,
   // En los dominios traducidos la categoría llega en su idioma.
   mobilidade: Car, saude: HeartPulse, habitacao: Home, alimentacao: Wheat, 'dados abertos': BarChart3, 'competicao solar': Sun, consciencia: Sparkles, educacao: GraduationCap,
