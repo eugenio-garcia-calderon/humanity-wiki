@@ -43,6 +43,7 @@ const APLICACIONES: Record<string, (p: { inicio: string; conBarra: boolean; pagi
   // 2026-11-12 (Eugenio): «crea el proyecto de Sol Solidario con su página web… con el menú arriba y abajo el Sol Solidario».
   'sol-solidario': ({ pagina }) => <SolSolidario raizId={pagina.sitio?.raizId || null} paginaId={pagina.id} config={(pagina.config || {}) as any} />,
   // 2026-11-12 (Eugenio): «haz un web en luzhumanidad.com que sea de la cadena de valor de instalación de energía solar en España… hazlo visual».
+  // Also the page of «Optimización del sistema de energía» (0208: «fusiónalo»).
   'cadena-solar': () => <CadenaSolar />,
 };
 // Apps that sit under the site's own top bar, like any other page of the site
