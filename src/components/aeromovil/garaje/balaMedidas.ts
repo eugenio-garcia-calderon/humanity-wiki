@@ -233,6 +233,8 @@ export function bandaMarco(V: Ventanas, xFin: number): { pts: [number, number][]
   xs.forEach((x, i) => { const u = i / Math.max(1, xs.length - 1); pts.push([x, V.tR(x)]); ancho.push(p.ancho * 0.75 * (1 - 0.2 * u) * Math.min(1, (1 - u) * 12)); });
   return { pts, ancho };
 }
+/** 2026-11-12, the Triciclo's dashboard: its half-width at (x, y), 2 cm inside the skin and never under 5 cm (the model's check and the 3D read this). */
+export const anchoSalpicadero = (F: FormaBala, x: number, y: number) => { const z = F.ladoZ(x, y); return Number.isFinite(z) ? Math.max(0.05, z - 0.02) : 0.05; };
 /** Area of that band (m², both sides): its length on the skin times its width. */
 export function areaMarco(F: FormaBala, b: { pts: [number, number][]; ancho: number[] } | null): number {
   if (!b) return 0;

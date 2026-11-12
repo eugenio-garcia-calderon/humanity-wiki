@@ -572,3 +572,21 @@ The observatory is one self-contained HTML file (`public/observatorio-polarizaci
 - **`scripts/aptera-puertas.ts` imports `three-mesh-bvh`**, which reaches the repo only through `@react-three/drei`. If drei goes, the script needs it added as a dev dependency.
 - **The phone card measures the page's toolbar** from the viewer's box (siblings anchored at the bottom). If the toolbar stops being a bottom-anchored sibling of the canvas, the card falls back to 8 px from the bottom and can cover it.
 - **The interior is three flat dark planes** (two floors and a bulkhead). There are no trim panels, cargo walls or a sill.
+
+### 2026-11-12 — Cuadriciclo Bala clásico: doors, hatch, pack, wheel, dashboard (shortcuts)
+- **Door and hatch skins have zero thickness**: skin plus the dark inner pass, like the canopy. There is no door inner panel, and no seals, hinges or struts are drawn. Their masses are flat estimates: 3 kg for the doors, 2 kg for the hatch.
+- **Swing checks are point samples**, not a mesh intersection.
+  - Samples: 153 points on a door, 225 on the hatch, plus the mirror's extremes, each at 12 angles. A thin feature between samples could still touch.
+  - The pods are checked with the wheels straight only.
+- **The tunnel ignores the mirrors** and open doors, so the Cd with mirrors is optimistic.
+- **The pack along the frame stops 2 cm short of the controller, at a fixed x (1.64 m)**, because the controller does not move. If the controller is ever made movable, `FIN_PAQUETE` must follow it.
+- **Three rows with the pack under the pilot's seat leave no room for row 2's feet under that seat**, and the check goes red. The fixes are moving the pack back or lowering it. Nothing resolves this automatically.
+- **The cut regions add about 100 rows near the doors and hatch**, and every door and hatch mesh is compacted (`compactar`).
+  - Build time, measured in node on this machine while it was loaded: about 1.2 s with everything on, against 0.7 s without.
+- **«Rodillas del piloto al volante» depends on where the feet are.** If the pack runs under the footboards, they rise and the knees meet the rim. The default pack starts 40 cm behind the front axle, behind the heels, so at the defaults it does not happen.
+
+### 2026-11-12 — Cuadriciclo Bala clásico round 2: shortcuts
+- **The tail panel without the Aptera hatch starts at a fixed t = 0.66.** The old boot lid's edge eases down to t = 0.62, so the panel should stay inside it, but nothing checks that: if the lid's band moves, the panel can hang past the lid when it opens.
+- **The clear-entry check is one number**: the lowest point of the open door over a box beside the seat. It does not model a person getting in.
+- **Off-default hinge settings can make the door swing through the body.** Examples: the hinge-angle slider at −12° (2.0 cm on the real clásico), or the hinge halfway up the pillar (0.5 cm). The check goes red, but the door is not stopped. The right fix is a door stop that tells an edge graze at the start of the swing apart from a real collision. The first try at a stop could not tell them apart, and held a grazing door at 2°.
+- **The controller moves with the pack**, behind it, and its old fixed place under the passenger is used only without the pack.

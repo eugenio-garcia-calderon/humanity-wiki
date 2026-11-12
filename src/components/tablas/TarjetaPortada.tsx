@@ -99,8 +99,8 @@ export default function TarjetaPortada({ nombre, imagen, alt, encuadre, descripc
   // EL TÍTULO Y LA DESCRIPCIÓN, JUNTOS SOBRE LA IMAGEN (2026-11-10, Eugenio): letra blanca con sombra,
   // la descripción algo mayor y en dos líneas como mucho, y abajo casi negro, aclarándose hacia el centro.
   const claseNombre = cn('font-black leading-tight tracking-tight text-white [text-shadow:0_2px_8px_rgba(0,0,0,0.6)]',
-    compacta ? 'text-lg 2xl:text-xl' : 'text-xl sm:text-2xl 2xl:text-3xl');
-  const claseDescripcion = cn('font-medium leading-snug text-white [text-shadow:0_1px_6px_rgba(0,0,0,0.85)]', compacta ? 'text-[13px] 2xl:text-sm' : 'text-base');
+    compacta ? 'text-xl 2xl:text-2xl' : 'text-xl sm:text-2xl 2xl:text-3xl');
+  const claseDescripcion = cn('font-medium leading-snug text-white [text-shadow:0_1px_6px_rgba(0,0,0,0.85)]', compacta ? 'text-sm 2xl:text-[15px]' : 'text-base');
   return (
     <div className={cn('relative w-full overflow-hidden bg-slate-100', compacta ? 'aspect-[4/3]' : 'aspect-[3/2]')}>
       {imagen ? (

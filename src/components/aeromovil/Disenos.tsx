@@ -78,8 +78,20 @@ export const deDiseno = (d: Partial<Parametros>): Parametros => {
   }
   // 2026-11-11 (the «Cuadriciclo Bala clásico»): a Triciclo saved without a rear track has it equal to its front one
   if (d.disposicion === 'triciclo' && limpio.tViaTras === undefined && limpio.tVia !== undefined) limpio.tViaTras = limpio.tVia;
+  // 2026-11-12 (the seats can come down onto the frame): a Triciclo saved before (it has no `tMando`) had a floor of
+  // 38 cm for the pilot and 42 for the passenger, less what its belly came down, and a height stored under that was
+  // built at that floor. It opens at that floor, the height it has always had (`asientosDeAntes`).
+  if (d.disposicion === 'triciclo' && d.tMando === undefined) asientosDeAntes(limpio);
   return { ...base, ...limpio, disposicion: d.disposicion ?? 'rombo', comp: 0 };
 };
+/** The seat floor before 2026-11-12, applied to a design saved then (the same numbers geometriaTriciclo.ts used to clamp with). */
+function asientosDeAntes(p: Partial<Parametros>) {
+  const suelo = Math.min(0.35, Math.max(0.04, typeof p.tSuelo === 'number' ? p.tSuelo : PARAMETROS_TRICICLO.tSuelo!)), baja = Math.min(0, suelo - 0.124);
+  for (const [k, tabla, piso] of [['tPilY', 0.30, 0.38], ['tPasY', 0.34, 0.42]] as const) {
+    const v = p[k], min = Math.max(tabla, piso + baja);
+    if (typeof v === 'number' && v < min) p[k] = min;
+  }
+}
 
 export type DisenoAbierto = { id: number; nombre: string; base: string };
 export type EstadoGuardado =
