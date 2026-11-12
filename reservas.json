@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog8-observatorio",
+      "ruta": "drizzle/0200_observatorio_polarizacion_politica.sql",
+      "motivo": "renombrar observatorio",
+      "desde": "2026-11-12T11:33:09.932Z"
+    }
+  ]
 }
