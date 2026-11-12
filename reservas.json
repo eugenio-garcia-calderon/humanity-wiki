@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "drizzle/0198_aeromovil_cuadriciclo_clasico.sql",
-      "motivo": "Cuadriciclo Bala clásico: deslizadores del Triciclo y nombres",
-      "desde": "2026-11-12T09:33:21.354Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "scripts/tunel-pruebas.ts",
       "motivo": "Cuadriciclo Bala clásico / en rombo: nombres",
       "desde": "2026-11-12T09:33:28.928Z"
