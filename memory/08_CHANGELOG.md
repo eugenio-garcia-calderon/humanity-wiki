@@ -11277,3 +11277,6 @@ Eugenio: «mejora muchísimo la carrocería de la Aptera… el morro está defor
 ## 2026-11-12 — Renamed «Modelo Público Optimizado»
 
 - Eugenio: «Llámalo "Modelo Público Optimizado"». Same places as the previous rename; migration 0208 renames the project page and row from either earlier name. Addresses unchanged.
+
+### 2026-11-12 — Tarjetas de la portada de luzhumanidad.com un 30 % más grandes
+- `FilaSector`: ancho ×1,3 (asoma la siguiente); «Mostrar todos» con una columna menos. Letra de la tarjeta compacta un paso mayor.

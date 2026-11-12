@@ -16,8 +16,10 @@ import { cn } from '../../utils/cn';
 // sector, same width. The arrows only show when something is hidden.
 
 /** The width of every card in the row, by screen: the same in every sector. */
-const ANCHO_EN_FILA = 'w-[78%] shrink-0 snap-start sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)] xl:w-[calc((100%-3rem)/4)] min-[1800px]:w-[calc((100%-4rem)/5)]';
-const REJILLA = 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 min-[1800px]:grid-cols-5';
+// UN 30 % MÁS GRANDES (2026-11-12, Eugenio: «haz las tarjetas de los proyectos un 30 % más grandes»): el ancho
+// de antes por 1,3. En la fila asoma la siguiente, que invita a deslizar; en «Mostrar todos», una columna menos.
+const ANCHO_EN_FILA = 'w-[85%] shrink-0 snap-start sm:w-[calc((100%-1rem)/2*1.3)] lg:w-[calc((100%-2rem)/3*1.3)] xl:w-[calc((100%-3rem)/4*1.3)] min-[1800px]:w-[calc((100%-4rem)/5*1.3)]';
+const REJILLA = 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 min-[1800px]:grid-cols-4';
 
 export default function FilaSector<T>({ id, titulo, icono, colorBorde, colorIcono, filas, pintar }: {
   id: string;
