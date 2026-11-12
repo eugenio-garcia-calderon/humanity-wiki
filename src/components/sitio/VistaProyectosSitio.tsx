@@ -1,6 +1,6 @@
-import { Suspense, lazy, useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { LayoutGrid, Pencil, Plus } from 'lucide-react';
+import { GripVertical, LayoutGrid, Pencil, Plus } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { useSitio } from './ContextoSitio';
 import { raizDe } from './CabeceraSitio';
@@ -101,6 +101,12 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
   const [fallo, setFallo] = useState(false);
   const [area, setArea] = useState(() => areaDeLaDireccion());
   const [aviso, setAviso] = useState<string | null>(null);
+  // ORDENAR ARRASTRANDO (2026-11-12, Eugenio: «pinchar y arrastrar para ordenar las tarjetas… si estoy
+  // logueado en Humanity Wiki»): la tarjeta que se arrastra y dónde caería (antes o después de cuál).
+  const [arrastrada, setArrastrada] = useState<string | null>(null);
+  const [destino, setDestino] = useState<{ id: string; lado: 'antes' | 'despues' } | null>(null);
+  const [anuncio, setAnuncio] = useState('');
+  const arrastradaRef = useRef<string | null>(null);
   // Las direcciones legibles de los proyectos, si no venían en el HTML (se llegó desde otra página): así sus
   // tarjetas no enlazan por `/p/:id` (2026-11-12). Al llegar, se vuelven a pintar.
   const [, setRutas] = useState(0);
@@ -135,6 +141,28 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
     if (!r?.ok) { setAviso('No se ha podido crear el proyecto.'); return; }
     const p = await pide(t);
     if (p) setProyectos(p);
+  };
+  /** Pone `id` antes o después de `ref`. El orden es el de la tabla (el mismo que ve la base de datos en
+   *  humanity.wiki): se cambia aquí al instante y se guarda con `orden-filas`, que renumera la tabla. */
+  const moverProyecto = async (id: string, ref: string, lado: 'antes' | 'despues') => {
+    const t = raiz?.config?.sitio?.proyectos;
+    if (!t || !proyectos || id === ref) return;
+    const global = proyectos.filas.map((f, i) => ({ f, i })).sort((a, b) => a.f.orden - b.f.orden || a.i - b.i).map(x => x.f);
+    const sin = global.filter(f => f.id !== id);
+    const k = sin.findIndex(f => f.id === ref);
+    const movida = global.find(f => f.id === id);
+    if (k < 0 || !movida) return;
+    const pos = lado === 'antes' ? k : k + 1;
+    const antesDe = sin[pos]?.id ?? null;
+    const nuevo = [...sin.slice(0, pos), movida, ...sin.slice(pos)];
+    if (nuevo.map(f => f.id).join() === global.map(f => f.id).join()) return;
+    const previo = proyectos;
+    const lugar = new Map(nuevo.map((f, i) => [f.id, i]));
+    setProyectos({ ...proyectos, filas: proyectos.filas.map(f => ({ ...f, orden: lugar.get(f.id)! })) });
+    setAviso(null);
+    setAnuncio(`«${String(movida.pagina?.titulo || '').trim() || 'El proyecto'}» se ha movido.`);
+    const r = await fetch(`/api/bd/tablas/${encodeURIComponent(t)}/orden-filas`, { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, antes_de: antesDe }) }).catch(() => null);
+    if (!r?.ok) { setProyectos(previo); setAviso('No se ha podido guardar el nuevo orden. Inténtalo otra vez.'); }
   };
 
   useEffect(() => {
@@ -192,7 +220,9 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
       .filter(f => (edicion ? true : !f.oculta && f.pagina_id) && String(f.celdas[colNombre]?.valor || f.pagina?.titulo || '').trim())
       // Los que están dentro de otro proyecto (su «Elemento madre») salen en la página de ese
       // proyecto, no aquí (2026-11-12, `SubproyectosSitio.tsx`). En el editor siguen, para editarlos.
-      .filter(f => edicion || !madre || lista(f.celdas[madre]?.valor).length === 0)
+      // En el editor, igual (2026-11-12, Eugenio: «tiene que ser igual lo que se ve en el dominio público de lo que
+      // hay detrás»): se editan en la página de su madre o en la base de datos («Ver los bloques»).
+      .filter(f => !madre || lista(f.celdas[madre]?.valor).length === 0)
       .sort((a, b) => posicion(a) - posicion(b) || a.orden - b.orden);
     const opcionesArea: EstadoTarjeta[] = [...sistemaDe.entries()].map(([id, x]) => ({ id, label: x.nombre })).sort((a, b) => a.label.localeCompare(b.label, 'es'));
     return { colNombre, colArea, areas, filas, categoriaDe, opcionesArea, nombreArea: (id: string) => sistemaDe.get(id)?.nombre || '' };
@@ -242,26 +272,29 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
     return e && !e.includes('/p/') ? e : p.url;
   };
 
-  // Los sectores de la portada, si la raíz los define y no se está editando (en el editor, la rejilla de siempre).
+  // Los sectores de la portada, si la raíz los define; también en el editor, que enseña lo mismo que la web
+  // (2026-11-12). Dentro de cada sector, el orden de la tabla: el que se cambia arrastrando las tarjetas.
   type Sector = { titulo: string; areas?: string[]; icono?: string };
   // Un color por sector, por su orden (no en la configuración: lo que va en ella se traduce en lighthumanity.org).
   const COLORES_SECTOR = ['sky', 'violet', 'amber', 'emerald', 'rose'];
   const defSectores = (raiz.config?.sitio?.sectores || null) as Sector[] | null;
-  const sectores = escaparate && !edicion && !activa && Array.isArray(defSectores) && defSectores.length ? (() => {
+  const sectores = escaparate && !activa && Array.isArray(defSectores) && defSectores.length ? (() => {
     const usados = new Set<string>();
     const areasDe = (f: Fila) => lista(f.celdas[modelo.colArea]?.valor).map(id => plano(modelo.nombreArea(id))).filter(Boolean);
     const grupos = defSectores.map(d => {
       const quiere = new Set((d.areas || []).map(plano));
-      const filas = visibles.filter(f => !usados.has(f.id) && areasDe(f).some(a => quiere.has(a)));
+      const filas = visibles.filter(f => !usados.has(f.id) && areasDe(f).some(a => quiere.has(a))).sort((a, b) => a.orden - b.orden);
       filas.forEach(f => usados.add(f.id));
       return { titulo: d.titulo, icono: d.icono, color: COLORES_SECTOR[defSectores.indexOf(d) % COLORES_SECTOR.length], otros: false, filas };
     });
-    const resto = visibles.filter(f => !usados.has(f.id));
+    const resto = visibles.filter(f => !usados.has(f.id)).sort((a, b) => a.orden - b.orden);
     if (resto.length) grupos.push({ titulo: String(raiz.config?.sitio?.sectorOtros || 'Otras innovaciones'), icono: 'Otras', color: 'slate', otros: true, filas: resto });
     return grupos.filter(g => g.filas.length);
   })() : null;
 
-  const tarjetaDe = (f: Fila, i: number, compacta = false, sinPildora = false, claseLi = '') => {
+  // Quien gestiona la web ordena arrastrando: en el editor de humanity.wiki y en la propia web con la sesión abierta.
+  const ordenable = !!edicion || equipo;
+  const tarjetaDe = (f: Fila, i: number, compacta = false, sinPildora = false, claseLi = '', grupo: Fila[] = visibles) => {
     const nombre = String(f.celdas[modelo.colNombre]?.valor || f.pagina?.titulo || '').trim();
     const img = f.pagina?.imagen || null;
     const enc = f.pagina?.encuadre;
@@ -269,7 +302,37 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
     const nombreCategoria = categoria ? modelo.nombreArea(categoria) : '';
     const descripcion = (f.pagina?.descripcion || '').trim();
     return (
-      <li key={f.id} className={cn('relative', claseLi)}>
+      <li key={f.id} className={cn('relative', claseLi, ordenable && 'cursor-grab active:cursor-grabbing', arrastrada === f.id && 'opacity-40')}
+        {...(ordenable ? {
+          // En el editor se arrastra desde el asa (los textos se escriben en la tarjeta); en la web, la tarjeta entera.
+          draggable: edicion ? undefined : true,
+          onDragStart: (e: React.DragEvent) => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', f.id); arrastradaRef.current = f.id; setArrastrada(f.id); },
+          onDragOver: (e: React.DragEvent) => {
+            if (!arrastrada || arrastrada === f.id) return;
+            e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+            const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+            const lado = e.clientX < r.left + r.width / 2 ? 'antes' : 'despues';
+            if (destino?.id !== f.id || destino.lado !== lado) setDestino({ id: f.id, lado });
+          },
+          onDrop: (e: React.DragEvent) => {
+            e.preventDefault();
+            const id = arrastrada, lado = destino?.id === f.id ? destino.lado : 'antes';
+            setArrastrada(null); setDestino(null);
+            if (id && id !== f.id) moverProyecto(id, f.id, lado);
+          },
+          onDragEnd: (e: React.DragEvent) => { if (edicion) (e.currentTarget as HTMLElement).removeAttribute('draggable'); arrastradaRef.current = null; setArrastrada(null); setDestino(null); },
+          // Con el teclado: Alt + flechas, dentro de su fila.
+          onKeyDown: (e: React.KeyboardEvent) => {
+            if (!e.altKey || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
+            const k = grupo.findIndex(x => x.id === f.id), otra = grupo[k + (e.key === 'ArrowLeft' ? -1 : 1)];
+            if (!otra) return;
+            e.preventDefault();
+            moverProyecto(f.id, otra.id, e.key === 'ArrowLeft' ? 'antes' : 'despues');
+          },
+        } : {})}>
+        {destino?.id === f.id && arrastrada && arrastrada !== f.id && (
+          <span aria-hidden className={cn('pointer-events-none absolute inset-y-2 z-20 w-1 rounded-full bg-sky-500', destino.lado === 'antes' ? '-left-2.5' : '-right-2.5')} />
+        )}
         {(() => {
           const tarjeta = (
             <TarjetaPortada nombre={nombre} imagen={img} encuadre={enc} descripcion={descripcion} Titulo={Titulo} prioridad={i} compacta={compacta}
@@ -277,8 +340,9 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
               edicion={edicion ? {
                 onNombre: v => guardarCelda(f.id, modelo.colNombre, v),
                 onDescripcion: v => guardarDescripcion(f.id, v),
-                opciones: modelo.opcionesArea,
-                onPildora: modelo.colArea ? id => guardarCelda(f.id, modelo.colArea, id ? [id] : []) : undefined,
+                // Sin etiqueta de categoría en los sectores, como en la web: allí el sector ya la dice.
+                opciones: sinPildora ? undefined : modelo.opcionesArea,
+                onPildora: modelo.colArea && !sinPildora ? id => guardarCelda(f.id, modelo.colArea, id ? [id] : []) : undefined,
               } : undefined}
               esquina={edicion ? <>
                 {f.oculta && <span className="rounded-full bg-slate-900/80 px-2.5 py-1 text-xs font-bold text-white">Oculta</span>}
@@ -289,8 +353,21 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
           );
           return edicion
             ? <div className={cn(CLASE_TARJETA_PORTADA, f.oculta && 'opacity-60')}>{tarjeta}</div>
-            : <Link to={sitio ? sitio.enlacePagina(f.pagina_id!) : `/p/${f.pagina_id}`} className={CLASE_TARJETA_PORTADA}>{tarjeta}</Link>;
+            : <Link to={sitio ? sitio.enlacePagina(f.pagina_id!) : `/p/${f.pagina_id}`} draggable={ordenable ? false : undefined} className={CLASE_TARJETA_PORTADA}>{tarjeta}</Link>;
         })()}
+        {ordenable && (
+          <span aria-hidden title="Arrastra para cambiar el orden (Alt + flechas con el teclado)"
+            onPointerDown={edicion ? e => {
+              const li = (e.currentTarget as HTMLElement).closest('li');
+              if (!li) return;
+              li.setAttribute('draggable', 'true');
+              const soltar = () => { if (!arrastradaRef.current) li.removeAttribute('draggable'); window.removeEventListener('pointerup', soltar); };
+              window.addEventListener('pointerup', soltar);
+            } : undefined}
+            className={cn('absolute left-1/2 top-2 z-10 grid h-7 w-7 -translate-x-1/2 place-items-center rounded-full bg-white/90 text-slate-600 shadow-sm', edicion ? 'cursor-grab' : 'pointer-events-none')}>
+            <GripVertical className="h-4 w-4" />
+          </span>
+        )}
         {equipo && !edicion && f.pagina_id && (
           <a href={`https://humanity.wiki/paginas/${encodeURIComponent(f.pagina_id)}`} target="_blank" rel="noopener noreferrer"
             title={`Editar «${nombre}»`} aria-label={`Editar «${nombre}»`}
@@ -350,7 +427,7 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
           quiero nada cutre»): qué es el laboratorio en una línea y el botón de colaborar,
           encima de las tarjetas y sin empujarlas fuera de la primera pantalla. */}
       {/* Sin el titular ni el botón cuando `sitio.presentacion` es false (2026-11-12: Colaborar sube a la barra). */}
-      {escaparate && (edicion || raiz.config?.sitio?.presentacion !== false) && <PresentacionSitio cfg={raiz.config} edicion={edicion} />}
+      {escaparate && raiz.config?.sitio?.presentacion !== false && <PresentacionSitio cfg={raiz.config} edicion={edicion} />}
 
       {/* LAS TARJETAS (2026-11-06, Eugenio: «el título en blanco con un poco de sombra y de fondo
           la portada, como en la página del proyecto; debajo la descripción en letra pequeña sobre
@@ -383,7 +460,7 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
               return (
                 <FilaSector key={g.titulo} id={`sector-${plano(g.titulo)}`} titulo={titulo} icono={iconoCategoria(g.icono || '', 'h-5 w-5')}
                   colorBorde={c.borde} colorIcono={c.icono} filas={g.filas}
-                  pintar={(f, claseLi) => tarjetaDe(f, desde + g.filas.indexOf(f), true, true, claseLi)} />
+                  pintar={(f, claseLi) => tarjetaDe(f, desde + g.filas.indexOf(f), true, true, claseLi, g.filas)} />
               );
             });
           })()}
@@ -401,7 +478,14 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
         )}
       </ul>
       )}
-      {edicion && aviso && <p role="alert" className="mt-3 text-sm font-bold text-rose-600">{aviso}</p>}
+      {sectores && edicion && (
+        <button type="button" onClick={anadirProyecto}
+          className="mt-5 inline-flex h-10 items-center gap-2 rounded-full border-2 border-dashed border-slate-300 px-4 text-sm font-bold text-slate-500 transition-colors hover:border-slate-500 hover:text-slate-800">
+          <Plus className="h-4 w-4" /> Añadir proyecto
+        </button>
+      )}
+      {aviso && (edicion || equipo) && <p role="alert" className="mt-3 text-sm font-bold text-rose-600">{aviso}</p>}
+      {ordenable && <p aria-live="polite" className="sr-only">{anuncio}</p>}
       </div>
       {visibles.length === 0 && <p className="py-16 text-center text-sm text-slate-500">No hay proyectos en esta categoría.</p>}
 

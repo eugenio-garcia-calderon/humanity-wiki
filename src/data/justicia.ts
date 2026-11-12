@@ -10,6 +10,8 @@
 export const APARTADOS: { id: string; t: string }[] = [
   { id: 'justicia', t: 'Resumen' },
   { id: 'justicia-propuesta', t: 'La propuesta' },
+  { id: 'justicia-reincidencia', t: 'Reincidencia' },
+  { id: 'justicia-ocupacion', t: 'Ocupación' },
   { id: 'justicia-hoy', t: 'Cómo funciona hoy' },
   { id: 'justicia-civil-penal', t: 'Civil o penal' },
   { id: 'justicia-cola', t: 'Cómo se vacía la cola' },
@@ -34,7 +36,20 @@ export const FUENTES_JUSTICIA: FuenteJusticia[] = [
   { id: 'sepin-telematico', url: 'https://blog.sepin.es/blog/2024/01/24/denuncias-juicios-telematicos-reforma-lecrim-rdl-6-2023/', titulo: 'Sepin · Denuncias y juicios telemáticos tras el Real Decreto-ley 6/2023' },
   { id: 'lecrim', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-1882-6036', titulo: 'BOE · Ley de Enjuiciamiento Criminal (juicios rápidos, arts. 795-803; plazos de instrucción, art. 324; acción civil, arts. 111-114)' },
   { id: 'lec', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-2000-323', titulo: 'BOE · Ley de Enjuiciamiento Civil (prejudicialidad penal, art. 40)' },
-  { id: 'constitucion', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-1978-31229', titulo: 'BOE · Constitución Española (arts. 17, 24, 117 y 126)' },
+  { id: 'cp', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-1995-25444', titulo: 'BOE · Código Penal (hurto, arts. 234-236; robo, 237-242; reincidencia, 22.8; suspensión, 80; allanamiento, 202; usurpación, 245)' },
+  { id: 'lo-1-2026', url: 'https://www.boe.es/eli/es/lo/2026/04/08/1/con', titulo: 'BOE · Ley Orgánica 1/2026, de 8 de abril, en materia de multirreincidencia' },
+  { id: 'cms-2026', url: 'https://cms.law/es/esp/publication/la-nueva-respuesta-penal-a-la-multireincidencia-y-otras-modificaciones-analisis-de-la-ley-organica-1-2026', titulo: 'CMS · Análisis de la Ley Orgánica 1/2026 (multirreincidencia)' },
+  { id: 'reincidencia-2022', url: 'https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/interior/Paginas/2022/300922-informe-reincidencia-penitenciaria.aspx', titulo: 'La Moncloa · Interior: 8 de cada 10 personas no vuelven a prisión (estudio de los excarcelados en 2009)' },
+  { id: 'reincidencia-2020', url: 'https://www.interior.gob.es/opencms/es/detalle/articulo/El-nuevo-estudio-de-reincidencia-penitenciaria-recoge-que-casi-9-de-cada-10-excarcelados-en-2020-no-volvieron-a-prision-durante-el-periodo-examinado/', titulo: 'Ministerio del Interior · Estudio de reincidencia de los excarcelados en 2020' },
+  { id: 'ine-condenados-2025', url: 'https://ine.es/dyngs/Prensa/EPCAEPCM2025.htm', titulo: 'INE · Estadística de la población condenada adulta, 2025 (14-7-2026)' },
+  { id: 'space-2025', url: 'https://wp.unil.ch/space/files/2026/05/260518_rapport-space-i-2025.pdf', titulo: 'Consejo de Europa · SPACE I 2025, estadística penitenciaria europea (coste por preso, 2024)' },
+  { id: 'space-2025-prensa', url: 'https://www.infobae.com/espana/2026/05/21/crece-la-poblacion-de-mayores-y-mujeres-en-las-carceles-europeas-mientras-espana-mantiene-largas-condenas-y-una-alta-tasa-de-suicidios/', titulo: 'Infobae · España en el informe SPACE I 2025 (tiempo medio en prisión)' },
+  { id: 'nij-disuasion', url: 'https://nij.ojp.gov/topics/articles/five-things-about-deterrence', titulo: 'Instituto Nacional de Justicia de EE. UU. · Cinco cosas sobre la disuasión' },
+  { id: 'ley-5-2018', url: 'https://www.boe.es/eli/es/l/2018/06/11/5', titulo: 'BOE · Ley 5/2018, sobre ocupación ilegal de viviendas (desahucio exprés)' },
+  { id: 'sepin-ocupacion', url: 'https://blog.sepin.es/blog/2025/03/17/allanamiento-morada-lo-1-2025/', titulo: 'Sepin · Allanamiento y usurpación por juicio rápido tras la Ley Orgánica 1/2025' },
+  { id: 'ocupacion-2025', url: 'https://www.elespanol.com/eldigitalcastillalamancha/region/20260429/semana-denuncian-okupaciones-castilla-la-mancha-toledo-lidera-ranking-mitad/1003744227060_0.html', titulo: 'El Español · Casos de ocupación en 2025, con datos del Ministerio del Interior (29-4-2026)' },
+  { id: 'sumar-desokupa', url: 'https://www.bolsamania.com/noticias_amp/empresas/economia--sumar-propone-prohibir-por-ley-grupos-como-desokupa-y-multar-con-hasta-600000-euros-a-quien-les-contrate--19764918.html', titulo: 'Europa Press · Propuesta en el Congreso para prohibir las empresas de desocupación (21-5-2025)' },
+  { id: 'constitucion', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-1978-31229', titulo: 'BOE · Constitución Española (arts. 17, 24, 25, 117 y 126)' },
 ];
 
 export const FUENTE_JUSTICIA = Object.fromEntries(FUENTES_JUSTICIA.map(f => [f.id, f])) as Record<string, FuenteJusticia>;
