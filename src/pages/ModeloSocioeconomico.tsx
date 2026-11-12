@@ -34,7 +34,7 @@ import { ImpuestosVentana } from '../components/modeloSocioeconomico/ImpuestosVe
 import { PensionesVentana } from '../components/modeloSocioeconomico/PensionesVentana';
 import { Presupuestos } from '../components/modeloSocioeconomico/Presupuestos';
 import { BuzonProyecto } from '../components/modeloSocioeconomico/BuzonProyecto';
-import { Boton } from '../components/modeloSocioeconomico/piezas';
+import { Boton, Libre } from '../components/modeloSocioeconomico/piezas';
 import { VENTANAS, ALIAS, ventanaDeAncla, Apartado, type VentanaId } from '../components/modeloSocioeconomico/ventanas';
 import { cn } from '../utils/cn';
 
@@ -130,65 +130,56 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
     <div data-modelo className="min-h-screen bg-slate-100 text-slate-900 antialiased" style={{ fontFamily: '"Public Sans Variable", ui-sans-serif, system-ui, sans-serif' }}>
       <style>{`[data-modelo] section[id], [data-modelo] [id].scroll-mt-40 { scroll-margin-top: ${margen}px; }`}</style>
 
-      {/* ── The header: the project, the windows, and the open window's sections ── */}
+      {/* ── The header: the windows and the open window's sections; the project's name is in the cover and the footer ── */}
       <header ref={cabecera} className="sticky top-0 z-40 border-b border-slate-200 bg-white" style={integracion ? { top: integracion.altoBarra } : undefined}>
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 pt-2 sm:px-6 sm:pt-2.5">
-          <a href="#" onClick={e => { e.preventDefault(); history.pushState(null, '', window.location.pathname + window.location.search); setAncla(''); window.scrollTo({ top: 0 }); }}
-            className="min-w-0 leading-tight">
-            <span className="block text-[15px] font-bold tracking-tight">Modelo socioeconómico optimizado</span>
-            <span className="hidden text-xs text-slate-500 sm:block">Un proyecto de {marca}</span>
-          </a>
-          <div className="ml-auto flex shrink-0 items-center gap-2">
-            <Boton onClick={() => setVerBuzon(true)} className="shrink-0">
-              <MessageSquarePlus className="h-4 w-4" /><span className="hidden sm:inline">Proponer una mejora</span><span className="sr-only sm:hidden">Proponer una mejora</span>
-            </Boton>
-            {integracion && (
-              <Boton onClick={integracion.alternar} aria-pressed={integracion.completa} className="shrink-0"
-                title={integracion.completa ? 'Salir de pantalla completa' : 'Pantalla completa'}>
-                {integracion.completa ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
-                <span className="sr-only lg:not-sr-only">{integracion.completa ? 'Salir de pantalla completa' : 'Pantalla completa'}</span>
-              </Boton>
-            )}
-          </div>
-        </div>
-
         {/* The windows. The open one is lit; the others dim until you point at them. */}
-        <nav aria-label="Ventanas" className="relative mx-auto max-w-6xl px-2 sm:px-4">
-          <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 z-10 flex w-14 items-center justify-end bg-gradient-to-l from-white via-white/90 to-transparent pr-1 text-slate-400 sm:hidden"><ChevronRight className="h-5 w-5" /></span>
-          <ul ref={tiraVentanas} className="flex gap-1 overflow-x-auto py-1.5 pr-12 [scrollbar-width:none] sm:py-2 sm:pr-0">
-            {VENTANAS.map(v => {
-              const Icono = v.icono;
-              const activa = v.id === ventana;
-              if (v.pronto) return (
-                <li key={v.id} className="shrink-0">
-                  <span aria-disabled title="Próximamente" className="flex cursor-default items-center gap-2 rounded-full px-3.5 py-2 text-[15px] font-medium text-slate-300">
-                    <Icono aria-hidden className="h-[18px] w-[18px]" />{v.titulo}
-                    <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-400">pronto</span>
-                  </span>
-                </li>
-              );
-              return (
-                <li key={v.id} className="shrink-0">
-                  <a href={`#${v.id}`} aria-current={activa ? 'page' : undefined}
-                    className={cn('flex items-center gap-2 rounded-full px-3.5 py-2 text-[15px] font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900',
-                      activa ? cn(ACENTO[v.id].tab, 'shadow-sm') : ventana ? 'text-slate-500 hover:bg-slate-100 hover:text-slate-900' : 'text-slate-800 hover:bg-slate-100')}>
-                    <Icono aria-hidden className="h-[18px] w-[18px]" />{v.titulo}
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
+        {/* One row: the windows, and a small full-screen switch at the end (Eugenio: «compacta el menú»). */}
+        <div className="mx-auto flex max-w-6xl items-center gap-2 px-2 sm:px-4">
+          <nav aria-label="Ventanas" className="relative min-w-0 flex-1">
+            <span aria-hidden className="pointer-events-none absolute inset-y-0 right-0 z-10 flex w-14 items-center justify-end bg-gradient-to-l from-white via-white/90 to-transparent pr-1 text-slate-400 sm:hidden"><ChevronRight className="h-5 w-5" /></span>
+            <ul ref={tiraVentanas} className="flex gap-0.5 overflow-x-auto py-1 pr-12 [scrollbar-width:none] sm:pr-0">
+              {VENTANAS.map(v => {
+                const Icono = v.icono;
+                const activa = v.id === ventana;
+                if (v.pronto) return (
+                  <li key={v.id} className="shrink-0">
+                    <span aria-disabled title="Próximamente" className="flex cursor-default items-center gap-2 rounded-full px-2.5 py-1.5 text-sm font-medium text-slate-300">
+                      <Icono aria-hidden className="h-4 w-4" />{v.titulo}
+                      <span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-400">pronto</span>
+                    </span>
+                  </li>
+                );
+                return (
+                  <li key={v.id} className="shrink-0">
+                    <a href={`#${v.id}`} aria-current={activa ? 'page' : undefined}
+                      className={cn('flex items-center gap-2 rounded-full px-3 py-1.5 text-sm font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-900',
+                        activa ? cn(ACENTO[v.id].tab, 'shadow-sm') : ventana ? 'text-slate-500 hover:bg-slate-100 hover:text-slate-900' : 'text-slate-800 hover:bg-slate-100')}>
+                      <Icono aria-hidden className="h-4 w-4" />{v.titulo}
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+          {integracion && (
+            <Libre onClick={integracion.alternar} aria-pressed={integracion.completa}
+              title={integracion.completa ? 'Salir de pantalla completa' : 'Pantalla completa'}
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-slate-500 hover:bg-slate-100 hover:text-slate-900">
+              {integracion.completa ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+              <span className="sr-only">{integracion.completa ? 'Salir de pantalla completa' : 'Pantalla completa'}</span>
+            </Libre>
+          )}
+        </div>
 
         {/* The open window's sections. */}
         {actual && (
           <div className="relative border-t border-slate-100">
             <nav aria-label={`Apartados de ${actual.titulo}`} className="mx-auto max-w-6xl px-2 sm:px-4">
-              <ul ref={tiraApartados} className="flex gap-1 overflow-x-auto py-1.5 pr-8 text-[13px] [scrollbar-width:none]">
+              <ul ref={tiraApartados} className="flex gap-0.5 overflow-x-auto py-1 pr-8 text-[13px] [scrollbar-width:none]">
                 {actual.apartados.map(a => (
                   <li key={a.id} className="shrink-0">
                     <a href={`#${a.id}`} aria-current={visible === a.id ? 'location' : undefined}
-                      className={cn('block whitespace-nowrap rounded-full px-2.5 py-1', visible === a.id ? cn('font-semibold', ACENTO[actual.id].texto, 'bg-slate-100') : 'text-slate-600 hover:bg-slate-100')}>
+                      className={cn('block whitespace-nowrap rounded-full px-2.5 py-0.5', visible === a.id ? cn('font-semibold', ACENTO[actual.id].texto, 'bg-slate-100') : 'text-slate-600 hover:bg-slate-100')}>
                       {a.t}
                     </a>
                   </li>
@@ -212,9 +203,15 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
         {!ventana && <Portada />}
       </main>
 
-      <footer className="border-t border-slate-200 px-4 py-8 text-center text-sm text-slate-500">
+      <footer className="border-t border-slate-200 px-4 pb-24 pt-8 text-center text-sm text-slate-500">
         Modelo socioeconómico optimizado. Un proyecto de {marca}.
       </footer>
+
+      {/* The mailbox, floating at the bottom (Eugenio: «lo de proponer una mejora, abajo como un botón flotante»). */}
+      <Boton onClick={() => setVerBuzon(true)} tono="tinta"
+        className="fixed bottom-4 right-4 z-30 shadow-lg shadow-slate-900/20 sm:bottom-6 sm:right-6">
+        <MessageSquarePlus className="h-4 w-4" /><span className="hidden sm:inline">Proponer una mejora</span><span className="sr-only sm:hidden">Proponer una mejora</span>
+      </Boton>
 
       {verBuzon && (
         <BuzonProyecto
