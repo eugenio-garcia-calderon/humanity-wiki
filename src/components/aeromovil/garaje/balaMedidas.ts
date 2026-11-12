@@ -2,7 +2,7 @@ import type { Est } from './forma';
 import { monotona, punto, tArriba, type FormaBala } from './balaForma';
 
 /*
- * The «Cuadriciclo Bala»'s hand-placed measurements, apart from the skin:
+ * The «Cuadriciclo Bala en rombo»'s hand-placed measurements, apart from the skin:
  * the lateral wheel pods and their arms, the fin, the seats, the handlebar's
  * reach and the canopy's outline. Pure (no three.js), so the editor's checks,
  * its frontal area and the wind tunnel's Web Worker read the same numbers the
@@ -58,7 +58,7 @@ export function podDe(F: FormaBala): Est[] {
 }
 /** The Triciclo's pods: what a tyre wider than the drawn 70 mm adds to their width factor (0 with it). */
 const masNeu = (F: FormaBala) => Math.max(0, F.ANCHO_NEU_LAT - 0.07) / 2 * 1.8 / POD_SEMIANCHO;
-/** A pod's half-width at its widest (m): the Cuadriciclo's is `POD_SEMIANCHO`. */
+/** A pod's half-width at its widest (m): the Cuadriciclo en rombo's is `POD_SEMIANCHO`. */
 export const anchoMaxPod = (F: FormaBala) => (F.D.pod ? POD_SEMIANCHO * (F.D.pod.esc * F.D.pod.ancho + masNeu(F)) : POD_SEMIANCHO);
 /** Half-width of a pod at (x relative to its axle, y); 0 outside it. */
 export const semiAncho = (POD: Est[]) => (x: number, y: number): number => {
@@ -95,7 +95,7 @@ export function brazosDe(F: FormaBala) {
   const vientre = F.D.suelo - e;
   return BRAZOS.map((b, i) => {
     const y = i === 1 && F.dSuelo > 0 ? Math.max(b.y * k, vientre + 0.056) : b.y * k;
-    // the rear pods of the «Bala de cuatro ruedas» (2026-11-11): each arm meets the body at least 5.6 cm above the
+    // the rear pods of the «Cuadriciclo Bala clásico» (2026-11-11): each arm meets the body at least 5.6 cm above the
     // tail's belly there (`vientreBrazos`), and runs down to its pod if it has to
     const vb = F.D.vientreBrazos;
     if (vb != null) { const yc = Math.max(y + e, vb + 0.056 + (i === 0 ? 0.10 : 0)); return { ...b, ...(i === 0 && cuerda != null ? { cuerda } : {}), x: b.x * k, y, yCuerpo: yc }; }
@@ -130,7 +130,7 @@ export function escalaManillar(F: FormaBala, d: [number, number] = [0, 0]): numb
 }
 /**
  * The outer end of the handlebar (the bar-end weight's outer face), for the check that it stays inside the body: [x, y, z].
- * `d` moves the bars (the Triciclo's handlebar sliders, 2026-11-10: [x, y], m); the Cuadriciclo's never move.
+ * `d` moves the bars (the Triciclo's handlebar sliders, 2026-11-10: [x, y], m); the Cuadriciclo en rombo's never move.
  */
 export const extremoManillar = (F: FormaBala, d: [number, number] = [0, 0]): [number, number, number] => [-0.592 + d[0], 0.870 + F.dSuelo + F.elevar + d[1], MANILLAR * escalaManillar(F, d)];
 
@@ -163,7 +163,7 @@ export function contornoCupula(F: FormaBala) {
  * calor… un techo solar que llegaba hasta la altura de la cabeza del piloto», and «como el Aptera original…
  * ventanas laterales con un frame que separa el cristal frontal parabrisas con las ventanas laterales. De una
  * forma elegante y curva». The canopy's SHAPE does not change: everything here lies on the canopy glass's own
- * surface, addressed by (x, t) like the skin (balaForma.ts). The Cuadriciclo never reads any of this.
+ * surface, addressed by (x, t) like the skin (balaForma.ts). The Cuadriciclo en rombo never reads any of this.
  *
  *  - tC(x): the glass's lower edge (where the canopy glass begins on the side).
  *  - tR(x) = tC + alto · (1 − tC): the roof rail, a fixed fraction of the way from that edge to the top centre.
@@ -183,7 +183,7 @@ export interface OpcionesVentanas {
   solar: number | null;
   /** Height of the side window (and of the panel's side edge): fraction of the glass from its lower edge to the top. */
   alto: number;
-  /** The A-pillar and the rail frame, or null (a single bubble, as the Cuadriciclo's). */
+  /** The A-pillar and the rail frame, or null (a single bubble, as the Cuadriciclo en rombo's). */
   pilar: { x: number; barrido: number; ancho: number } | null;
 }
 /** How much further forward the panel reaches on the centre line than at the rail (m): its rounded leading edge. */

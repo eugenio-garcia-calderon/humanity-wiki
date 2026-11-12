@@ -5,7 +5,7 @@ import { E, loft } from './forma';
 import { ASIENTO, bandaMarco, contornoCupula, techoEn, ventanasDe, type Asientos, type OpcionesVentanas, type Ventanas } from './balaMedidas';
 
 /*
- * The «Cuadriciclo Bala» built in three.js: skin, canopy, livery, lamps and
+ * The «Cuadriciclo Bala en rombo» built in three.js: skin, canopy, livery, lamps and
  * details; the wheels, pods, fin and interior come from `balaPiezas.ts` and
  * the shape itself from `balaForma.ts`. The techniques are the XL1's
  * (`xl1Modelo.ts`):
@@ -505,7 +505,7 @@ export interface OpcionesBala {
    * cockpit (`cabina`) and, if asked, a spat round the bottom of the rear wheel.
    */
   triciclo?: CabinaTriciclo & { faldon: { x0: number; x1: number; y0: number; hz: number } | null; ventanas?: OpcionesVentanas; /** Round three: the tail's top as an opening boot lid. */ maletero?: boolean;
-    /** The «Bala de cuatro ruedas» (2026-11-11): the rear pods' view of the shape (geometriaTriciclo.ts `formaTrasera`); two rear wheels in pods instead of one in the tail. */
+    /** The «Cuadriciclo Bala clásico» (2026-11-11): the rear pods' view of the shape (geometriaTriciclo.ts `formaTrasera`); two rear wheels in pods instead of one in the tail. */
     traseras?: FormaBala | null };
 }
 

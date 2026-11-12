@@ -829,7 +829,7 @@ function cotas(g: THREE.Object3D, M: Mats, m: Modelo, espacio = false) {
   }
 }
 
-/** Cotas del Cuadriciclo Bala: largo, batalla, ancho con los carenados y de la carrocería, alto y vía de las laterales. */
+/** Cotas del Cuadriciclo Bala en rombo: largo, batalla, ancho con los carenados y de la carrocería, alto y vía de las laterales. */
 function cotasBala(g: THREE.Object3D, M: Mats, m: ModeloBala) {
   const { cota, mm } = herramientasCota(g, M);
   const P = m.P, y = 0.004, W = m.anchoTotal, zL = -(W / 2 + 0.38), zB = -(W / 2 + 0.16);
@@ -1061,7 +1061,7 @@ function girarTriciclo(G: Record<CapaId, THREE.Group>, m: ModeloTriciclo, angulo
 /** The layer each part of the Bala goes to (the 3D model's own names, balaModelo.ts / balaPiezas.ts). */
 const CAPA_BALA: Record<string, CapaId> = { ruedas: 'ruedas', cabina: 'asientos', [PIVOTES_CUPULA[1]]: 'cristales', cupula: 'cristales' };
 /**
- * The Cuadriciclo Bala: the garage model's builder with this design's shape
+ * The Cuadriciclo Bala en rombo: the garage model's builder with this design's shape
  * (garaje/balaModelo.ts), its own materials (`Mb`, so «Rayos X» and «Corte»
  * never touch the garage's Bala), split into the viewer's layers: body, pods,
  * lamps and fin in «Carrocería»; the canopy glass in «Cristales»; the pod arms
@@ -1079,7 +1079,7 @@ function construirBala(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THR
   // as the garage does with its cars (glass and lenses keep their no-shadow depth material)
   for (const c of CAPAS) G[c.k].traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
 }
-/** The Bala builder's parts into the viewer's layers (the Cuadriciclo's and the Triciclo's). */
+/** The Bala builder's parts into the viewer's layers (the Cuadriciclo en rombo's and the Triciclo's). */
 function repartirBala(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THREE.Group[]>, b: THREE.Group) {
   for (const o of [...b.children]) {
     let capa: CapaId = CAPA_BALA[o.name] ?? 'carenado';
@@ -1105,7 +1105,7 @@ function repartirBala(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THRE
 }
 
 /**
- * The Triciclo Bala (2026-11-10): the Cuadriciclo's builder with three wheels and the reclining
+ * The Triciclo Bala (2026-11-10): the Cuadriciclo en rombo's builder with three wheels and the reclining
  * cockpit, split into layers as the Bala; and what only the Triciclo has, from its model: the tube
  * frame («Chasis»), the battery modules, the hub motor and its controller, the swing arm and the
  * front uprights («Suspensión»), the rack, column and tie rods («Dirección»).
@@ -1755,7 +1755,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       let destino = new THREE.Vector3(xc - 2.4 - 6.4 * d, 5.0 * d, zc + 0.6 - 6.6 * d);
       // That distance never reached the camera: OrbitControls clamps it to MAX_ORBITA (25 m), so
       // with the garage full (2026-11-09: cars from z = −12 to +12) the nearest cars fell out of
-      // the frame, the Cuadriciclo Bala at −12 among them. Now every car, its label and (with the
+      // the frame, the Cuadriciclo Bala en rombo at −12 among them. Now every car, its label and (with the
       // tunnel on) the start of its wake are checked against the actual field of view. The camera
       // keeps the distance it really had until now, and backs off along the same line only when
       // something would not fit; the orbit limit is lifted to match while this view lasts.
@@ -1858,5 +1858,5 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     }),
   }), []);
 
-  return <canvas ref={lienzo} className="absolute inset-0 h-full w-full touch-none" aria-label={modelo.tipo === 'a1' ? 'Modelo 3D del Aeromóvil 1' : modelo.tipo === 'bala' ? 'Modelo 3D del Cuadriciclo Bala' : modelo.tipo === 'triciclo' ? (modelo.traseras ? 'Modelo 3D de la Bala de cuatro ruedas' : 'Modelo 3D del Triciclo Bala') : 'Modelo 3D del Aeromóvil Gota'} />;
+  return <canvas ref={lienzo} className="absolute inset-0 h-full w-full touch-none" aria-label={modelo.tipo === 'a1' ? 'Modelo 3D del Aeromóvil 1' : modelo.tipo === 'bala' ? 'Modelo 3D del Cuadriciclo Bala en rombo' : modelo.tipo === 'triciclo' ? (modelo.traseras ? 'Modelo 3D del Cuadriciclo Bala clásico' : 'Modelo 3D del Triciclo Bala') : 'Modelo 3D del Aeromóvil Gota'} />;
 });

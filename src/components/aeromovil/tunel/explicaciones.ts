@@ -19,7 +19,7 @@ import { porVelocidad, type PuntoTunel, type TipoPunto } from './puntos';
  * on the default designs on 2026-11-09 where `origen` is 'calculo'; «Probar»
  * recomputes it on the visitor's own design.
  *
- * The Cuadriciclo Bala's sliders are not copied here: `fichasBala` reads the
+ * The Cuadriciclo Bala en rombo's sliders are not copied here: `fichasBala` reads the
  * same table the page draws them from (geometriaBala.ts, DESLIZADORES_BALA),
  * with the ranges for this design. The A1 and Gota tables are still copies.
  */
@@ -86,7 +86,7 @@ function fichasBala(P: Parametros): Partial<Record<keyof Parametros, Ficha>> {
 
 /**
  * The Triciclo Bala's sliders (2026-11-10), from the one table the page draws them from (geometriaTriciclo.ts),
- * under the Cuadriciclo's keys: its body is the Cuadriciclo's, so the improvement options are the same ones, and
+ * under the Cuadriciclo en rombo's keys: its body is the Cuadriciclo en rombo's, so the improvement options are the same ones, and
  * `opcion` turns each `b…` key into its `t…` twin. Ranges in stored values; `ver` adds what the screen adds.
  */
 function fichasTriciclo(P: Parametros): Partial<Record<keyof Parametros, Ficha>> {
@@ -129,12 +129,12 @@ function cpEn(p: { x: number[]; cp: number[] }, x: number): number {
 export function explicar(cx: Contexto): Explicacion {
   const { punto: pt, cuerpo, R, kmh, otros, P } = cx;
   const q = porVelocidad(R, kmh), G = R.geometria, v = kmh / 3.6, qd = 0.5 * RHO * v * v;
-  // the Triciclo has the Cuadriciclo's body: the same options, on its own sliders (`fichasTriciclo`)
+  // the Triciclo has the Cuadriciclo en rombo's body: the same options, on its own sliders (`fichasTriciclo`)
   const nuestro = cuerpo.id === 'aeromovil' && !!P, a1 = P?.disposicion === 'cuatro', tri = nuestro && P?.disposicion === 'triciclo', bala = nuestro && (P?.disposicion === 'bala' || tri);
   const fichas = a1 ? A1 : tri ? fichasTriciclo(P!) : bala ? fichasBala(P!) : GOTA;
   /** On our Bala the tunnel sees the body only: its pods, arms and fin are not in these numbers. */
   const cuatro = tri && camposTriciclo(P!).tTraseras === 'dos';
-  const notaBala = cuatro ? 'La Bala de cuatro ruedas tiene la carrocería del Cuadriciclo Bala, y el túnel ve esa carrocería y sus cuatro ruedas, todas en carenados: los carenados, sus brazos y la aleta no entran como formas, así que su Cd real será algo más alto. Las tendencias de «con el diseño por defecto» se comprobaron con este túnel en el Cuadriciclo; «Probar» las recalcula en este vehículo.' : tri ? 'Este triciclo tiene la carrocería del Cuadriciclo Bala, y el túnel ve esa carrocería y sus tres ruedas: los carenados de las ruedas delanteras, sus brazos, la aleta y el faldón no entran como formas, así que su Cd real será algo más alto. Las tendencias de «con el diseño por defecto» se comprobaron con este túnel en el Cuadriciclo; «Probar» las recalcula en este triciclo.' : bala ? 'El túnel solo ve la carrocería del Bala: los carenados de las ruedas laterales, sus brazos y la aleta no entran en el cálculo, así que su Cd real será algo más alto. Las tendencias de «con el diseño por defecto» se comprobaron con este túnel el 2026-11-09.' : undefined;
+  const notaBala = cuatro ? 'El Cuadriciclo Bala clásico tiene la carrocería del Cuadriciclo Bala en rombo, y el túnel ve esa carrocería y sus cuatro ruedas, todas en carenados: los carenados, sus brazos y la aleta no entran como formas, así que su Cd real será algo más alto. Las tendencias de «con el diseño por defecto» se comprobaron con este túnel en el Cuadriciclo en rombo; «Probar» las recalcula en este vehículo.' : tri ? 'Este triciclo tiene la carrocería del Cuadriciclo Bala en rombo, y el túnel ve esa carrocería y sus tres ruedas: los carenados de las ruedas delanteras, sus brazos, la aleta y el faldón no entran como formas, así que su Cd real será algo más alto. Las tendencias de «con el diseño por defecto» se comprobaron con este túnel en el Cuadriciclo en rombo; «Probar» las recalcula en este triciclo.' : bala ? 'El túnel solo ve la carrocería del Bala: los carenados de las ruedas laterales, sus brazos y la aleta no entran en el cálculo, así que su Cd real será algo más alto. Las tendencias de «con el diseño por defecto» se comprobaron con este túnel el 2026-11-09.' : undefined;
   const desdeMorro = (x: number) => G.xMorro - x;
   const escala = g(`El Cp (coeficiente de presión) dice cuánto empuja el aire en cada punto, comparado con lo que empujaría si se parase del todo contra el coche. Cp 1: el aire parado del todo (a ${kmh} km/h son ${fmt(qd, 0)} Pa, como ${fmt(qd / 9.81, 0)} kg apoyados en cada metro cuadrado). Cp 0: la misma presión que el aire libre, lejos del coche. Cp negativo: el aire pasa más rápido que el coche y tira de la carrocería hacia fuera (succión).`);
   const kWh = (cdParte: number) => qd * cdParte * cuerpo.area / 36; // kWh/100 km: 1 N for 100 km = 1/36 kWh

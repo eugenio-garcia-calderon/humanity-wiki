@@ -1,7 +1,7 @@
 import type { Explicaciones } from './tipos';
 
 // ============================================================================
-// Explicaciones de los deslizadores del Cuadriciclo Bala (2026-11-09)
+// Explicaciones de los deslizadores del Cuadriciclo Bala en rombo (2026-11-09)
 // ============================================================================
 // Eugenio: «permíteme editarlo». Cada deslizador del Bala abre su cuadro como
 // los del Aeromóvil 1 y del Gota. Los valores «de serie» son los del Bala del

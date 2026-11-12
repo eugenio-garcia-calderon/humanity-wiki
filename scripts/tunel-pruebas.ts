@@ -109,10 +109,10 @@ for (const [nI, nJ] of [[24, 12], [40, 16]]) {
     ok(!!g && Math.abs(g.estimado - f.est) < 0.002 && Math.abs(g.sinEl - sinEl) < 0.002 && g.publicado === f.pub, `${f.id}: la tabla guardada (${g?.estimado.toFixed(3)}, sin él ${g?.sinEl.toFixed(3)}) coincide con el cálculo (${f.est.toFixed(3)}, ${sinEl.toFixed(3)})`);
   }
   // our design, the four vehicles (the Bala and the Triciclo have no editor formula: their only Cd is the tunnel's)
-  // (2026-11-11: and the «Bala de cuatro ruedas», the Triciclo with two rear wheels in pods)
+  // (2026-11-11: and the «Cuadriciclo Bala clásico», the Triciclo with two rear wheels in pods)
   for (const P0 of [PARAMETROS_A1, PARAMETROS_GOTA, PARAMETROS_BALA, PARAMETROS_TRICICLO, { ...PARAMETROS_TRICICLO, tTraseras: 'dos' } as typeof PARAMETROS_TRICICLO]) {
     const m = crearModelo(ajustarCarenado(P0)), res = calcular(m, areas(m));
-    const c = cuerpoAeromovil(m, res.A), nombre = m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala' : m.tipo === 'triciclo' ? (m.cuatro ? 'Bala de cuatro ruedas' : 'Triciclo Bala') : 'Aeromóvil Gota';
+    const c = cuerpoAeromovil(m, res.A), nombre = m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala en rombo' : m.tipo === 'triciclo' ? (m.cuatro ? 'Cuadriciclo Bala clásico' : 'Triciclo Bala') : 'Aeromóvil Gota';
     for (const resol of ['baja', 'media', 'alta'] as const) {
       const R = calcularTunel({ ...peticionDe(c, resol, 'normal') });
       const q = R.porVelocidad[1];
@@ -125,12 +125,12 @@ for (const [nI, nJ] of [[24, 12], [40, 16]]) {
         `el Bala del editor por defecto entra en el túnel igual que el del garaje (silueta, sección ${c.n}, área ${c.area.toFixed(3)} m², ruedas)`);
     }
     if (m.tipo === 'triciclo') {
-      // the Triciclo's body is the Cuadriciclo's: the same silhouette and area; its own three wheels, front axle and rear axle
+      // the Triciclo's body is the Cuadriciclo en rombo's: the same silhouette and area; its own three wheels, front axle and rear axle
       const g = cuerpoGaraje({ id: 'bala', x: 0, z: 0 })!;
       ok(JSON.stringify(g.envolvente) === JSON.stringify(c.envolvente) && g.area === c.area && g.n === c.n,
-        `el Triciclo por defecto entra en el túnel con la silueta y el área del Cuadriciclo (${c.area.toFixed(3)} m²)`);
+        `el Triciclo por defecto entra en el túnel con la silueta y el área del Cuadriciclo en rombo (${c.area.toFixed(3)} m²)`);
       if (m.cuatro) ok(c.ruedas.length === 4 && c.ruedas.every(r => r.tipo === 'carenado') && Math.abs(c.ejes[0] - m.xF) < 1e-9 && Math.abs(c.ejes[1] - m.xR) < 1e-9,
-        `la Bala de cuatro ruedas lleva las cuatro carenadas (eje delantero en x = ${m.xF.toFixed(2)}, trasero en x = ${m.xR.toFixed(2)})`);
+        `el Cuadriciclo Bala clásico lleva las cuatro carenadas (eje delantero en x = ${m.xF.toFixed(2)}, trasero en x = ${m.xR.toFixed(2)})`);
       else ok(c.ruedas.length === 3 && c.ruedas.filter(r => r.tipo === 'carenado').length === 2 && Math.abs(c.ejes[0] - m.xF) < 1e-9 && Math.abs(c.ejes[1] - m.xR) < 1e-9,
         `el Triciclo lleva tres ruedas (dos carenadas delante, eje en x = ${m.xF.toFixed(2)}; una dentro detrás, en x = ${m.xR.toFixed(2)})`);
       // its results use the numbers-only run (in the background): it must give the Cd of the full run

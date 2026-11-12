@@ -12,7 +12,7 @@ import { construir } from './balaModelo';
 const { F, asientos, aleta } = medidasBala(camposBala(PARAMETROS_BALA));
 
 /*
- * The «Cuadriciclo Bala» (2026-11-09): Eugenio's own design, not a real
+ * The «Cuadriciclo Bala en rombo» (2026-11-09): Eugenio's own design, not a real
  * vehicle. His words: «Coge el vehículo aerogota tándem 1+2 … duplícalo, haz
  * una versión distinta. Llámalo cuadriciclo bala y mejora su aspecto y
  * estética para que se parezca más a una moto ultra carenada, que sea todavía
@@ -44,7 +44,7 @@ const { F, asientos, aleta } = medidasBala(camposBala(PARAMETROS_BALA));
  */
 export const VEHICULO: VehiculoGaraje = {
   id: 'bala',
-  nombre: 'Cuadriciclo Bala',
+  nombre: 'Cuadriciclo Bala en rombo',
   largo: F.LARGO, ancho: Math.round((F.VIA_LAT + 2 * POD_SEMIANCHO) * 1000) / 1000, alto: F.D.alto, batalla: F.BATALLA,
   fuente: 'Diseño propio (2026-11-09) a partir del Aeromóvil Gota; medidas propuestas, no de una ficha. Del Gota conserva el rombo de ruedas y sus tamaños (24″ delante y detrás, 20″ a los lados, a mitad de batalla); la batalla baja a 2,45 m (2,60 en el Gota) y la vía de las laterales sube a 1,10 m (1,05) para que los carenados queden fuera de la carrocería estrecha. Dos plazas a horcajadas, piloto delante y pasajero detrás. No hay Cd publicado: el del túnel es una estimación a partir de la silueta',
   // the body only: the lateral wheel pods, their arms and the tail fin stand outside it
