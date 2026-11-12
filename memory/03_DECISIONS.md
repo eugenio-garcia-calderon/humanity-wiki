@@ -1474,3 +1474,18 @@ Dependent ranges, all measured on this model:
 ## 2026-11-12 · Four-wheel Bala renamed «Cuadriciclo Bala clásico»; the rombo family «Cuadriciclo Bala en rombo»
 
 Eugenio chose the names after being told «Cuadriciclo Bala» was already taken by the rombo family. Display names change in code (`nombreDe`, `nombreTriciclo`, tunnel bodies, page header, STL file names); stored design names change in migration 0198 for team rows only (visitor rows keep their author's names). Bare «Cuadriciclo» in Triciclo texts now reads «Cuadriciclo en rombo», since there are now two cuadriciclos. Migration 0198 also re-copies the saved Triciclo's `parametros` onto the four-wheel team row (same source rule as 0197) and drops its `tViaTras`, so it opens with rear track = front track; it reports the source row and values with `RAISE NOTICE` in the deploy log, because the production database cannot be read from the agents' containers.
+
+## 2026-11-12 · Garage cars with parts that open: pivots declared by the model, state in the viewer
+
+Eugenio wants to click the garage Aptera and open its doors and boot. Options:
+- (a) The viewer knows each car's doors (names and hinges hard-coded in `Visor3D.tsx`). Rejected: every new car would touch the frozen-in-practice viewer.
+- (b) The model sets `userData` on its pivot objects and the viewer discovers them by traversal. Works, but the contract is invisible in the type.
+- (c) **Chosen:** `VehiculoGaraje.pivotes?: { nombre, tipo: 'puerta' | 'maletero', eje, angulo }[]`. `construir()` returns objects with those names placed at their hinge; the viewer turns each by `angulo · fraction` about `eje` (in its parent's axes, so a left door built as the right one inside a `scale.z = −1` group mirrors correctly). Per car the viewer keeps `{ p, pObj, m, mObj }` (`st.garajeAbre`), animates it at the same pace as our own car's doors and reapplies it when the garage is rebuilt.
+
+**Click vs drag.** A press on a garage car already starts a drag (capture listener, so the orbit never starts). The car now stays put until the pointer moves more than 6 px (the same threshold as clicking a part of our own car); a release before that is a click and picks the car. When the car cannot be dragged (alone with `?garaje=…`, or overlaid), the press reaches the ordinary click handler, which now picks garage cars too. Touch goes through the same pointer events. A click on anything else closes the card.
+
+**Hover hint.** The pointer cursor over a car with pivots costs a raycast against the whole car (~230k triangles), so it runs at most every 120 ms and only for a mouse.
+
+**Fixed body vs moving panels (Aptera).** The skin is one mesh built on a grid, so a hole for a door has stepped edges. The hole only takes grid cells that are entirely inside the panel (four corners tested), so it never shows outside the door line when closed; what the fixed skin keeps inside the door line is hidden by the closed panel and, when open, by a 4 cm dark frame laid inside the opening. The panels themselves are patches with exact edges. Alternative not taken: rebuilding the fixed skin from exact patches around each opening (clean, but it would duplicate the glass holes, the dark underside and the inner lining logic, about half a day).
+
+**Tunnel calibration not refitted.** The Aptera is one of the four cars the tunnel's detail constant is fitted on. With its new shape the fit gives `DCD_DETALLES` 0.0565 instead of 0.051 and a band of ±11 % instead of ±15 %, which would move every tunnel Cd shown in the app, our own designs included (by about +0.005). That is Eugenio's call, not a side effect of fixing a garage model: `CALIBRACION` and `DCD_DETALLES` are unchanged, and `scripts/tunel-pruebas.ts` reports the mismatch until he decides.

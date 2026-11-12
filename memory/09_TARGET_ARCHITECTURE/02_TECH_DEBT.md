@@ -558,3 +558,11 @@ The observatory is one self-contained HTML file (`public/observatorio-polarizaci
 - **The rear pods carry the front ones' amber indicator strip.** It reads as a side marker. The lens is not drawn differently at the rear.
 - **The tunnel sees the rear pods only as two more `carenado` wheels**, as it does the front ones. Their arms, which are longer at the rear (narrow tail, 1.80 m track), are not shapes in the tunnel. The real Cd will be somewhat higher than 0.157.
 - **`viaTraseraMinima` keeps a single-entry cache** keyed on the shape's measures, because `rangoTriciclo` is called on every slider read. A new body field that changes the tail must be added to its key, or the minimum goes stale.
+
+### 2026-11-12 — Aptera doors and boot: shortcuts
+- **Panels are shells.** Doors and hatch are a painted skin with a dark lining on the back faces; they have no thickness, inner trim, hinges, gas struts, handles or seals. From the side an open door is a sheet. Adding a 2–3 cm return along the edges and two struts is about 2 h.
+- **The opening has no jamb.** The cut is hidden by a flat 4 cm dark frame on the fixed skin, not a modelled door aperture with depth. Fine at garage distances; close up it reads as a painted frame.
+- **Hinge lines and angles are estimates** from photos with the doors open (Gamma in the desert, Launch Edition render from the front, a 2020 render with the hatch up). Aptera publishes neither. The door check (`choque` sweep in the creator's scratch, every 5 % of the opening, every third vertex) finds no penetration of the fixed body or the pods; the two open doors do not meet. That check is not a script in the repo: moving the hinge means rerunning it by hand. Turning it into `scripts/aptera-puertas.ts` is about 30 min.
+- **`construir()` grew** from about 200 to about 270 ms in Node (door and hatch patches, the corner test on every skin cell). It runs once per garage change.
+- **The cursor hint raycasts the whole car** every 120 ms while a mouse moves over the viewer with garage cars shown. A bounding-volume tree for garage meshes would make it free; not worth it until it shows in a profile.
+- **`CUERPO` and `CARENADO` are exported** from `aptera.ts` only so a check script can read the shape.

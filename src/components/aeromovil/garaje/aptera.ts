@@ -25,7 +25,7 @@ import { APLASTADO, cabina, camaraLateral, geometriasRueda, limpia, malla, mater
  *   en el render frontal de la Launch Edition y en una foto trasera con
  *   teleobjetivo el carenado mide el 14–15 % de la vía.
  * - Voladizos 0,88 m delante y 0,87 m detrás (el trasero sale de restar).
- * - Carrocería de 1,57 m en la cabina; la cola es un ala de 1,26 m en el borde
+ * - Carrocería de 1,58 m en la cabina; la cola es un ala de 1,26 m en el borde
  *   de salida, a 0,75–0,79 m del suelo (la punta de la cola cae en z ≈ ±0,6 en
  *   las dos fotos buenas; los prototipos de 2020–2021 la tenían más ancha, ~1,5 m).
  * - Quilla de la rueda trasera de 0,37 m de ancho (foto trasera); acaba en un
@@ -40,6 +40,24 @@ import { APLASTADO, cabina, camaraLateral, geometriasRueda, limpia, malla, mater
  * - Colores de la Launch Edition: plata; la parte baja del morro y la quilla
  *   en grafito; capó, parabrisas, techo y portón, la banda negra con células
  *   en diagonal (como en las fotos de cerca).
+ * - Morro (2026-11-12, Eugenio: «el morro está deformado»): una bala baja y
+ *   ancha, no un hocico alto y estrecho. En planta, una U amplia (medio ancho
+ *   0,40 m a 6 cm de la punta, 0,65 m a la altura de los carenados, como en la
+ *   vista cenital); de lado, la punta redondeada a 0,53 m. Cada sección es más
+ *   ancha donde va la tira de luz, que corre por ese borde de la punta hasta
+ *   delante de los carenados, con el capó abombado encima y la barbilla oscura
+ *   metida debajo (render de la Launch Edition de frente, foto en carretera del
+ *   coche de 2024).
+ * - Cúpula (misma fecha: «la parte de arriba de la cúpula está deformada»): el
+ *   techo es plano de lado a lado y los costados casi verticales hasta la
+ *   cintura. En la foto trasera con teleobjetivo la silueta mide 0,94 m de ancho
+ *   5 cm por debajo del techo y 1,30 m 14 cm por debajo; el modelo anterior,
+ *   un huevo, medía 0,64 y 0,94. La luneta del portón es grande, como en esa foto.
+ * - Puertas en mariposa y portón: ver «puertas y portón», más abajo.
+ * Cámaras resueltas (2026-11-12) sobre el render de la Launch Edition en 3/4, la
+ * foto en carretera de 2024, la foto trasera con teleobjetivo y una lateral en
+ * la nieve; con cada una, el modelo dibujado al lado de la foto con la misma
+ * cámara, y en la trasera el ancho de la silueta fila a fila.
  * Referencias (solo para medir, ninguna copiada): render de la Launch Edition
  * de enero de 2023 (3/4 delantero y frontal con puertas abiertas), render de la
  * Union Edition (2024), fotos de un prototipo Gamma en carretera (3/4 con
@@ -72,25 +90,36 @@ const R = 0.295, ANCHO_RUEDA = 0.165; // radio del neumático (llanta de 16″) 
  * las secciones son una lente (exponente bajo), con el canto de los costados
  * vivo y el lomo abombado. La quilla de la rueda trasera va aparte.
  */
-const CUERPO: Est[] = [
-  E(0.880, 0.468, 0.548, 0.006, 0.009, 0.008, 2.2),
-  E(0.872, 0.385, 0.574, 0.13, 0.18, 0.16, 2.4),
-  E(0.850, 0.325, 0.590, 0.22, 0.29, 0.27, 2.6),
-  E(0.810, 0.283, 0.600, 0.29, 0.38, 0.36, 2.7),
-  E(0.740, 0.250, 0.611, 0.35, 0.45, 0.43, 2.8),
-  E(0.650, 0.226, 0.625, 0.40, 0.51, 0.48, 2.8),
-  E(0.450, 0.193, 0.668, 0.46, 0.58, 0.54, 2.8),
-  E(0.200, 0.163, 0.748, 0.50, 0.625, 0.56, 2.7),
-  E(0.000, 0.147, 0.852, 0.53, 0.655, 0.55, 2.6),
-  E(-0.280, 0.134, 1.000, 0.57, 0.70, 0.54, 2.5),
-  E(-0.570, 0.128, 1.165, 0.61, 0.745, 0.53, 2.55),
-  E(-0.990, 0.127, 1.355, 0.64, 0.785, 0.52, 2.6),
-  E(-1.470, 0.127, 1.422, 0.645, 0.79, 0.52, 2.6),
-  E(-1.900, 0.140, 1.375, 0.60, 0.78, 0.52, 2.6),
-  E(-2.300, 0.250, 1.255, 0.42, 0.765, 0.54, 2.8),
-  E(-2.700, 0.420, 1.125, 0.28, 0.735, 0.55, 2.9),
-  E(-3.100, 0.560, 0.950, 0.25, 0.695, 0.56, 2.8),
-  E(-3.400, 0.660, 0.850, 0.27, 0.665, 0.57, 2.6),
+export const CUERPO: Est[] = [
+  // the nose: a wide, low bullet. In plan a broad U (half-width 0.40 m 6 cm behind the tip, 0.65 m at
+  // x = 0.45); each section is widest high up, where the light bar runs (the leading edge, 0.53 m at the
+  // tip rising to 0.59 m at its rear end), with the hood crowned above it and the dark chin tucked under
+  // it. Fitted section by section to those targets (wb/wm/wt/n), so the widest line is where the light is.
+  E(0.880, 0.515, 0.540, 0.010, 0.012, 0.014, 2.0),
+  E(0.875, 0.478, 0.560, 0.225, 0.168, 0.283, 1.70),
+  E(0.865, 0.445, 0.574, 0.306, 0.248, 0.424, 1.70),
+  E(0.850, 0.410, 0.588, 0.382, 0.311, 0.561, 1.70),
+  E(0.820, 0.365, 0.604, 0.431, 0.377, 0.687, 1.79),
+  E(0.780, 0.328, 0.620, 0.453, 0.432, 0.761, 1.88),
+  E(0.720, 0.292, 0.640, 0.473, 0.486, 0.840, 1.96),
+  E(0.650, 0.265, 0.660, 0.481, 0.521, 0.893, 2.02),
+  E(0.550, 0.238, 0.690, 0.518, 0.559, 0.960, 2.01),
+  E(0.450, 0.214, 0.720, 0.531, 0.584, 1.003, 2.03),
+  E(0.300, 0.186, 0.763, 0.576, 0.615, 1.053, 1.97),
+  E(0.150, 0.165, 0.806, 0.592, 0.630, 1.076, 1.96),
+  E(0.000, 0.150, 0.852, 0.610, 0.644, 1.096, 1.95),
+  // windshield and cabin: broad all the way up, the roof flat across (the rear telephoto photo: 0.47 m
+  // half-width only 5 cm under the roof, 0.65 m 14 cm under it), the sides almost vertical to the beltline
+  E(-0.280, 0.134, 1.000, 0.926, 0.742, 0.956, 2.0),
+  E(-0.570, 0.128, 1.165, 0.879, 0.763, 0.946, 2.37),
+  E(-0.990, 0.127, 1.355, 0.80, 0.785, 0.86, 2.5),
+  E(-1.470, 0.127, 1.422, 0.848, 0.787, 0.897, 2.535),
+  E(-1.900, 0.140, 1.375, 0.74, 0.777, 0.88, 2.55),
+  // the tail: the underside rises and tucks in, the top stays broad (the hatch) and flattens into the wing
+  E(-2.300, 0.250, 1.255, 0.46, 0.745, 0.80, 2.7),
+  E(-2.700, 0.420, 1.125, 0.28, 0.71, 0.72, 2.8),
+  E(-3.100, 0.560, 0.950, 0.25, 0.68, 0.64, 2.75),
+  E(-3.400, 0.660, 0.850, 0.27, 0.665, 0.60, 2.6),
   E(-3.570, 0.715, 0.805, 0.34, 0.645, 0.58, 2.45),
   E(COLA, 0.748, 0.790, 0.45, 0.632, 0.56, 2.35),
 ];
@@ -116,7 +145,7 @@ const QUILLA: Est[] = [
  * z = 0, +z hacia fuera): de lado una «D» con el frente redondo; detrás el
  * canto se inclina (abajo llega más atrás que arriba, ver `cizalla`).
  */
-const CARENADO: Est[] = [
+export const CARENADO: Est[] = [
   E(0.505, 0.215, 0.36, 0.010, 0.012, 0.010, 2.2),
   E(0.490, 0.140, 0.45, 0.055, 0.065, 0.055, 2.4),
   E(0.455, 0.105, 0.53, 0.090, 0.100, 0.085, 2.7),
@@ -164,9 +193,9 @@ function tabla(p: [number, number][], x: number): number {
  * (donde cruza el morro de lado a lado) hacia atrás por cada costado hasta
  * x = 0,50, donde acaba en punta.
  */
-const LUZ_Y: [number, number][] = [[0.880, 0.548], [0.860, 0.556], [0.800, 0.566], [0.700, 0.575], [0.600, 0.584], [0.500, 0.594]];
-const LUZ_H: [number, number][] = [[0.880, 0.013], [0.800, 0.016], [0.650, 0.021], [0.580, 0.020], [0.500, 0.0]];
-const X_LUZ = 0.50;
+const LUZ_Y: [number, number][] = [[0.880, 0.529], [0.860, 0.531], [0.800, 0.537], [0.700, 0.550], [0.600, 0.566], [0.500, 0.586], [0.420, 0.604]];
+const LUZ_H: [number, number][] = [[0.880, 0.012], [0.800, 0.015], [0.650, 0.019], [0.520, 0.019], [0.420, 0.0]];
+const X_LUZ = 0.42;
 /**
  * Borde de abajo de la banda negra, visto de lado: encima de la tira de luz,
  * sube por el costado del capó hasta el pie del pilar delantero (x = −0,32) y
@@ -174,8 +203,8 @@ const X_LUZ = 0.50;
  * 15 cm de delante a atrás de la puerta: medido en el render de la Launch
  * Edition y en la foto del Gamma).
  */
-const BORDE_PUNTOS: [number, number][] = [[0.58, 0.604], [0.45, 0.62], [0.30, 0.645], [0.15, 0.678], [0.0, 0.718], [-0.15, 0.77], [-0.32, 0.838], [-0.65, 0.848], [-1.0, 0.893], [-1.3, 0.938], [-1.6, 0.982], [-1.9, 1.012], [-2.2, 1.05]];
-const BORDE = (x: number) => x > 0.58 ? tabla(LUZ_Y, x) + tabla(LUZ_H, x) + 0.007 : tabla(BORDE_PUNTOS, x);
+const BORDE_PUNTOS: [number, number][] = [[X_LUZ, 0.611], [0.30, 0.640], [0.15, 0.680], [0.0, 0.722], [-0.15, 0.775], [-0.32, 0.838], [-0.65, 0.848], [-1.0, 0.893], [-1.3, 0.938], [-1.6, 0.982], [-1.9, 1.012], [-2.2, 1.05]];
+const BORDE = (x: number) => x > X_LUZ ? tabla(LUZ_Y, x) + tabla(LUZ_H, x) + 0.007 : tabla(BORDE_PUNTOS, x);
 /** Borde del parabrisas en el costado, visto de lado: del pie del pilar (−0,32; 0,84) al techo (−1,06; 1,33). */
 const PILAR = (x: number) => 0.84 + (1.33 - 0.84) * lim((-0.32 - x) / 0.74);
 /** Borde de delante de la ventanilla: de (−0,65; 0,855) a (−1,09; 1,245). Entre los dos, el pilar negro. */
@@ -243,15 +272,113 @@ const VENTANILLA: Vidrio = {
   },
 };
 const VENTANILLA_IZQ: Vidrio = { ...VENTANILLA, rango: e => { const r = VENTANILLA.rango(e); return r ? espejo(r) : null; } };
-/** Luneta en el portón, entre el techo solar y la punta de la banda. */
+/** θ on the upper half of the section (between 0 and π/2) where the skin is `z` metres off the centre line. */
+function thetaZ(e: Est, z: number): number {
+  let lo = 0, hi = Math.PI / 2;
+  for (let i = 0; i < 28; i++) { const m = (lo + hi) / 2; if (puntoSeccion(e, m)[1] > z) lo = m; else hi = m; }
+  return (lo + hi) / 2;
+}
+/**
+ * Luneta del portón: grande, casi del ancho del portón, desde justo detrás de
+ * la bisagra (1,28 m de alto) hasta 0,92 m (foto trasera con teleobjetivo: el
+ * cristal ocupa de z −0,48 a +0,45 y de 0,92 a 1,32 m de alto), con las
+ * esquinas redondas.
+ */
+const X_LUNETA0 = -2.17, X_LUNETA1 = -3.12;
 const LUNETA: Vidrio = {
-  x0: -2.52, x1: -3.12, franja: 0.04,
+  x0: X_LUNETA0, x1: X_LUNETA1, franja: 0.04,
   rango: e => {
-    const r = encoger(e, banda(e), 0.05); if (!r) return null;
-    return cerrar(r, Math.max(esquina(e.x, -2.52, 0.12, false), esquina(e.x, -3.12, 0.22, true)));
+    const b = encoger(e, banda(e), 0.05); if (!b) return null;
+    const t = lim((X_LUNETA0 - e.x) / (X_LUNETA0 - X_LUNETA1)), z = 0.47 - 0.07 * t;
+    const a = Math.max(b[0], thetaZ(e, z)); if (Math.PI - a <= a) return null;
+    return cerrar([a, Math.PI - a], Math.max(esquina(e.x, X_LUNETA0, 0.10, false), esquina(e.x, X_LUNETA1, 0.24, true)));
   },
 };
 const VIDRIOS = [PARABRISAS, VENTANILLA, VENTANILLA_IZQ, LUNETA];
+
+// ---------------------------------------------------------------- puertas y portón
+/**
+ * PUERTAS (la de la derecha, +z; la izquierda es su espejo). Cada una es el
+ * costado de la cabina con su ventanilla, el triángulo negro de delante y una
+ * tira del techo: en las fotos con las puertas abiertas (render de la Launch
+ * Edition de frente, Gamma en el desierto) el hueco se mete en el techo y entre
+ * las dos puertas solo queda la espina del techo solar. Por abajo llega a la
+ * junta de siempre: del pie del pilar baja por detrás del carenado, corre a
+ * 0,27 m del suelo y sube por detrás de la ventanilla hasta el techo.
+ *
+ * Se abren «en mariposa» (así las llaman las pruebas de prensa del Gamma):
+ * la bisagra va a lo largo del pilar delantero, del pie (x −0,32, y 0,84) a
+ * lo alto (x −1,06, y 1,33), siguiendo la piel; el canto de delante de la
+ * puerta gira sobre sí mismo y no barre el parabrisas, y la puerta sube hacia
+ * fuera hasta quedar con la punta de atrás arriba, atrás y afuera. Con 110°
+ * su largo apunta a (−0,57; 0,72; 0,38), como en la foto del Gamma en el
+ * desierto (la puerta cercana sube hacia atrás a unos 50°) y en el render de
+ * la Launch Edition de frente (las dos puertas casi de pie, abiertas hacia
+ * fuera, enseñando la cara de fuera). Dato estimado: Aptera no publica la
+ * bisagra ni el ángulo.
+ */
+const TH_COSTURA = 58 * GRADO; // borde de arriba de la puerta, en el techo (el techo solar empieza en 60°)
+/** Borde de abajo de la puerta, visto de lado, de delante a atrás (x decreciente). */
+const PUERTA_BAJO: [number, number][] = [[-0.32, 0.838], [-0.40, 0.73], [-0.49, 0.60], [-0.60, 0.46], [-0.72, 0.35], [-0.86, 0.29], [-1.15, 0.27], [-1.42, 0.29], [-1.56, 0.37], [-1.61, 0.50], [-1.635, 0.70], [-1.65, 0.90], [-1.665, 1.02], [-1.72, 1.12], [-1.78, 1.22], [-1.83, 1.31]];
+const X_PUERTA0 = -0.32, X_PUERTA1 = -1.84;
+/** The hinge line on the skin (right side), along the A-pillar: its foot is the pivot, the axis points up it. */
+const BISAGRA_PUERTA = (() => {
+  const pie = (() => { const e = estacion(CUERPO, -0.325); return enPiel(e, thetaY(e, 0.835), 0.012); })();
+  const alto = (() => { const e = estacion(CUERPO, -1.04); return enPiel(e, thetaY(e, 1.31), 0.012); })();
+  const eje = alto.clone().sub(pie).normalize();
+  return { pie, eje: [eje.x, eje.y, eje.z] as [number, number, number] };
+})();
+const EJE_PUERTA = BISAGRA_PUERTA.eje;
+const ANGULO_PUERTA = 110;
+/** θ-range of the right door at a station (null outside it). */
+function rangoPuerta(e: Est): Rango | null {
+  const x = e.x; if (x > X_PUERTA0 || x < X_PUERTA1) return null;
+  const lo = thetaY(e, tabla(PUERTA_BAJO, x));
+  let hi = TH_COSTURA;
+  if (x > -1.10) hi = Math.min(hi, thetaY(e, PILAR(x)) - 0.006);
+  return hi > lo + 1e-3 ? [lo, hi] : null;
+}
+/**
+ * PORTÓN (maletero): toda la banda negra de detrás de la cabina, con la
+ * luneta, de x −1,95 (justo detrás de las puertas) a la punta de la banda; la
+ * bisagra va de lado a lado en el techo y la cola sube 50°, como el portón del
+ * render de 2020 con el portón abierto (con dos amortiguadores). La cola con
+ * los pilotos y la quilla se quedan fijas. Estimado: Aptera no publica cotas
+ * del portón.
+ */
+const X_BISAGRA_MAL = -1.95;
+const ANGULO_PORTON = 50;
+const rangoPorton = (e: Est): Rango | null => e.x > X_BISAGRA_MAL || e.x < X_FIN_BANDA ? null : encoger(e, banda(e), 0.012);
+/**
+ * ¿El cuadro de la piel con centro (x, θ) cae entero en una puerta (de
+ * cualquiera de los dos lados) o en el portón? Lo que se mueve sale de la
+ * parte fija con un agujero. Se mira en las cuatro esquinas del cuadro (medio
+ * paso `dx`, `dth` a cada lado): así el agujero nunca se sale del borde de la
+ * pieza, y lo que la piel fija asoma hacia dentro lo tapa el marco del hueco.
+ * Guarda los rangos de cada x (la piel pregunta muchas veces por las mismas).
+ */
+function movilRapido(dx: number, dth: number) {
+  const cache = new Map<number, [Rango | null, Rango | null]>();
+  const rangos = (x: number) => {
+    let r = cache.get(x);
+    if (!r) {
+      const e = estacion(CUERPO, x);
+      r = [x <= X_PUERTA0 && x >= X_PUERTA1 ? rangoPuerta(e) : null, x <= X_BISAGRA_MAL && x >= X_FIN_BANDA ? rangoPorton(e) : null];
+      cache.set(x, r);
+    }
+    return r;
+  };
+  const dentro = (x: number, th: number): 0 | 1 | 2 | 3 => {
+    const [rp, rm] = rangos(x), t = th > Math.PI * 1.5 ? th - 2 * Math.PI : th;
+    if (rp && t > rp[0] && t < rp[1]) return 1;
+    if (rp && Math.PI - t > rp[0] && Math.PI - t < rp[1]) return 2;
+    return rm && t > rm[0] && t < rm[1] ? 3 : 0;
+  };
+  return (x: number, th: number): boolean => {
+    const k = dentro(x - dx, th - dth);
+    return k !== 0 && dentro(x - dx, th + dth) === k && dentro(x + dx, th - dth) === k && dentro(x + dx, th + dth) === k;
+  };
+}
 
 /**
  * ¿Está (x, θ) en el cristal claro? Ahí la piel se agujerea para ver la
@@ -298,13 +425,16 @@ function construir(): THREE.Group {
     g.add(malla(geo, m, nombre, sombra)); const o = malla(geo, m, nombre, sombra); o.scale.z = -1; g.add(o);
   };
 
-  // --- carrocería: plata, con los bajos oscuros y agujeros detrás del cristal claro
-  const hueco = claroRapido(0.5);
+  // --- carrocería: plata, con los bajos oscuros y agujeros detrás del cristal claro y donde van las
+  // puertas y el portón (esas piezas se dibujan aparte, cada una colgada de su bisagra)
+  // (medio cuadro de la piel: filas de 1,6 cm en esa zona y 136 columnas; la banda negra tiene cuadros más pequeños)
+  const claro = claroRapido(0.5), movil = movilRapido(0.008, Math.PI / 136);
+  const fuera = (x: number, th: number) => claro(x, th) || movil(x, th);
   const fondo = (th: number) => Math.abs(th - 1.5 * Math.PI) < 0.38;
   // filas cada ~2 cm donde los cristales cortan la piel (así el borde escalonado del agujero cabe bajo la
   // franja negra), más separadas en el morro y la cola; la tapa de delante va en grafito como el morro
   const pasoPiel = (x: number) => x < -0.05 && x > -3.25 ? 0.016 : 0.035;
-  const carroceria = piel(CUERPO, { N: 136, paso: pasoPiel, nClases: 3, grupoTapas: [2, 0], clase: (x, th) => hueco(x, th) ? -1 : fondo(th) && x > -2.15 ? 1 : 0 });
+  const carroceria = piel(CUERPO, { N: 136, paso: pasoPiel, nClases: 3, grupoTapas: [2, 0], clase: (x, th) => fuera(x, th) ? -1 : fondo(th) && x > -2.15 ? 1 : 0 });
   // por dentro, la misma piel en oscuro (el tapizado que se ve por los cristales): un cuarto grupo que
   // repite todos los triángulos con un material de caras traseras. Al ser la misma malla, sus agujeros
   // coinciden con los de fuera y por el borde del cristal no se cuela luz; y en «Superponer», que pone un
@@ -315,27 +445,71 @@ function construir(): THREE.Group {
   g.add(cabina(M));
 
   // --- la banda negra: capó, pilares, marcos, techo y portón (con agujeros en el cristal claro)
-  g.add(malla(parcheM(CUERPO, 0.879, X_FIN_BANDA, banda, { nx: 180, nth: 76, delta: 0.002, quitar: claroRapido(0.5) }), M.banda, 'banda-negra'));
+  g.add(malla(parcheM(CUERPO, 0.879, X_FIN_BANDA, banda, { nx: 180, nth: 76, delta: 0.002, quitar: fuera }), M.banda, 'banda-negra'));
   // capó solar, 4 cm dentro de la banda, con las esquinas de delante redondas
   const capo = (e: Est) => {
     const r = encoger(e, banda(e), 0.04); if (!r) return null;
     return cerrar(r, Math.max(esquina(e.x, 0.80, 0.16, false), esquina(e.x, X_PARABRISAS + 0.05, 0.03, true)));
   };
   g.add(malla(parcheM(CUERPO, 0.80, X_PARABRISAS + 0.05, capo, { nx: 50, nth: 44, delta: 0.0035 }), M.solar, 'capo-solar'));
-  // techo solar: de detrás del parabrisas al arranque de la luneta
+  // techo solar: la espina fija del techo, de detrás del parabrisas a la bisagra del portón
+  const X_FIN_TECHO = X_BISAGRA_MAL + 0.03;
   const techo = (e: Est) => {
     const r = encoger(e, [TECHO, Math.PI - TECHO], 0.035); if (!r) return null;
-    return cerrar(r, Math.max(esquina(e.x, X_TECHO - 0.05, 0.08, false), esquina(e.x, -2.44, 0.1, true)));
+    return cerrar(r, Math.max(esquina(e.x, X_TECHO - 0.05, 0.08, false), esquina(e.x, X_FIN_TECHO, 0.06, true)));
   };
-  g.add(malla(parcheM(CUERPO, X_TECHO - 0.05, -2.44, techo, { nx: 64, nth: 32, delta: 0.0035 }), M.solar, 'techo-solar'));
-  // cristales, con su franja negra
-  for (const v of VIDRIOS) {
-    g.add(malla(parcheM(CUERPO, v.x0, v.x1, v.rango, { nx: 48, nth: 40, delta: 0.005, bordes: true, color: colorVidrio(v.franja) }), M.cristal, 'cristal', false));
+  g.add(malla(parcheM(CUERPO, X_TECHO - 0.05, X_FIN_TECHO, techo, { nx: 64, nth: 32, delta: 0.0035 }), M.solar, 'techo-solar'));
+  // cristales, con su franja negra (el parabrisas es fijo; la ventanilla va en la puerta y la luneta en el portón)
+  const vidrio = (v: Vidrio) => malla(parcheM(CUERPO, v.x0, v.x1, v.rango, { nx: 48, nth: 40, delta: 0.005, bordes: true, color: colorVidrio(v.franja) }), M.cristal, 'cristal', false);
+  g.add(vidrio(PARABRISAS));
+
+  // --- puertas: cada una cuelga de un pivote en su bisagra (el visor las gira, ver `pivotes`); la
+  // izquierda es la misma pieza en un grupo con la escala z en −1
+  {
+    const P = BISAGRA_PUERTA.pie;
+    const piv = new THREE.Group(); piv.name = 'puerta-d'; piv.position.copy(P);
+    const pielPuerta = parcheM(CUERPO, X_PUERTA0, X_PUERTA1, rangoPuerta, { nx: 120, nth: 64, delta: 0.002, quitar: claro });
+    const bandaPuerta = (e: Est): Rango | null => {
+      const r = rangoPuerta(e), b = banda(e); if (!r || !b) return null;
+      const a = Math.max(r[0], b[0]); return r[1] > a + 1e-3 ? [a, r[1]] : null;
+    };
+    piv.add(
+      malla(pielPuerta, M.pintura, 'puerta'), malla(pielPuerta, M.forro, 'puerta-forro'),
+      malla(parcheM(CUERPO, X_PUERTA0, X_PUERTA1, bandaPuerta, { nx: 120, nth: 40, delta: 0.0026, quitar: claro }), M.banda, 'banda-negra'),
+      vidrio(VENTANILLA),
+      // la junta va en el canto de la puerta: cerrada es la raya entre puerta y carrocería
+      malla(cintaPiel(CUERPO, PUERTA_BAJO, 0.0045, { pasos: 110, delta: 0.003 }), M.junta, 'junta', false),
+    );
+    {
+      const ruta: THREE.Vector3[] = [];
+      for (let k = 0; k <= 30; k++) {
+        const x = -0.97 + (X_PUERTA1 + 0.012 + 0.97) * k / 30, e = estacion(CUERPO, x);
+        if (thetaY(e, PILAR(x)) - 0.006 >= TH_COSTURA - 1e-3) ruta.push(enPiel(e, TH_COSTURA, 0.003));
+      }
+      if (ruta.length > 1) piv.add(malla(barrido(ruta, () => [0.0022, 0.0012], { lados: 6 }), M.junta, 'junta', false));
+    }
+    // la cámara lateral va en la puerta (en las fotos con la puerta abierta sube con ella)
+    const eC = estacion(CUERPO, -0.52); piv.add(camaraLateral(M, enPiel(eC, thetaY(eC, 0.885)), 1));
+    for (const o of piv.children) o.position.sub(P);
+    const izq = new THREE.Group(); izq.name = 'lado-izquierdo'; izq.scale.z = -1;
+    const pivI = piv.clone(); pivI.name = 'puerta-i'; izq.add(pivI);
+    g.add(piv, izq);
+  }
+  // --- portón: la banda negra de detrás de la cabina con la luneta, colgada de la bisagra del techo
+  {
+    const H = new THREE.Vector3(X_BISAGRA_MAL, estacion(CUERPO, X_BISAGRA_MAL).yt - 0.012, 0);
+    const piv = new THREE.Group(); piv.name = 'porton'; piv.position.copy(H);
+    const concha = parcheM(CUERPO, X_BISAGRA_MAL, X_FIN_BANDA, rangoPorton, { nx: 110, nth: 64, delta: 0.0026, quitar: claro });
+    piv.add(malla(concha, M.banda, 'banda-negra'), malla(concha, M.forro, 'porton-forro'), vidrio(LUNETA));
+    for (const o of piv.children) o.position.sub(H);
+    g.add(piv);
   }
 
   // --- morro: parte baja en grafito, hasta la tira de luz y una junta que baja desde su punta
-  const COSTURA: [number, number][] = [[0.52, 0.586], [0.49, 0.50], [0.45, 0.40], [0.40, 0.30], [0.35, 0.22], [0.31, 0.16], [0.29, 0.13]];
-  const alturaMorro = (x: number) => x > X_LUZ + 0.02 ? tabla(LUZ_Y, x) - tabla(LUZ_H, x) - 0.005 : x >= 0.29 ? (() => {
+  // the chin's rear seam leaves the light bar where its side part begins and runs down and back to the
+  // rounded rear end of the chin, ahead of the pods (the LE render and the road photo of the 2024 car)
+  const COSTURA: [number, number][] = [[0.56, 0.552], [0.53, 0.49], [0.49, 0.42], [0.44, 0.35], [0.39, 0.29], [0.34, 0.24], [0.30, 0.21]];
+  const alturaMorro = (x: number) => x > COSTURA[0][0] ? tabla(LUZ_Y, x) - tabla(LUZ_H, x) - 0.005 : x >= 0.30 ? (() => {
     for (let i = 0; i < COSTURA.length - 1; i++) if (x <= COSTURA[i][0] && x >= COSTURA[i + 1][0]) { const t = (COSTURA[i][0] - x) / (COSTURA[i][0] - COSTURA[i + 1][0]); return COSTURA[i][1] + (COSTURA[i + 1][1] - COSTURA[i][1]) * t; }
     return COSTURA[0][1];
   })() : -1;
@@ -343,7 +517,7 @@ function construir(): THREE.Group {
     const y = alturaMorro(e.x); if (y <= e.yb + 0.004) return null;
     const a = thetaY(e, Math.min(y, e.yt)); return [Math.PI - a, 2 * Math.PI + a];
   };
-  g.add(malla(parcheM(CUERPO, 0.8799, 0.285, morro, { nx: 50, nth: 48, delta: 0.0025 }), M.grafitoCalco, 'morro'));
+  g.add(malla(parcheM(CUERPO, 0.8799, 0.295, morro, { nx: 90, nth: 48, delta: 0.0025, bordes: true }), M.grafitoCalco, 'morro'));
   par(cintaPiel(CUERPO, COSTURA, 0.005, { pasos: 40, delta: 0.003 }), M.junta, 'junta', false);
 
   // --- tira de luz blanca del morro: carcasa negra, guía de luz y lente
@@ -391,16 +565,37 @@ function construir(): THREE.Group {
     g.add(malla(placa, M.banda, 'trasera', false));
   }
 
-  // --- juntas de la puerta (se abre hacia arriba y adelante, con la bisagra en el pilar): baja
-  // desde el pie del pilar hacia atrás, pasa por detrás del carenado, corre por abajo y sube
-  // por detrás de la ventanilla, combándose un poco hacia atrás a media altura
-  par(cintaPiel(CUERPO, [[-0.32, 0.838], [-0.40, 0.73], [-0.49, 0.60], [-0.60, 0.46], [-0.72, 0.35], [-0.86, 0.29], [-1.15, 0.27], [-1.42, 0.29], [-1.56, 0.37], [-1.62, 0.52], [-1.64, 0.70], [-1.63, 0.88], [-1.62, 0.99]], 0.0045, { pasos: 90, delta: 0.0015 }), M.junta, 'junta', false);
-
-  // --- cámaras en lugar de retrovisores y el limpiaparabrisas
-  for (const s of [1, -1] as const) {
-    const e = estacion(CUERPO, -0.52), p = enPiel(e, thetaY(e, 0.885));
-    p.z *= s; g.add(camaraLateral(M, p, s));
+  // --- el marco de los huecos, en la parte fija: una banda oscura de 4 cm centrada en el borde de la
+  // puerta y del portón. El agujero de la piel va por cuadros y deja el borde escalonado; el marco lo
+  // tapa y se lee como la goma del hueco. Con la pieza cerrada queda debajo de ella y no se ve.
+  {
+    // 4 cm hacia dentro del borde y 4 mm hacia fuera (por las rendijas)
+    const A = 0.044, F = 0.004, corte = PUERTA_BAJO.findIndex(([x]) => x <= -1.665);
+    /** The side curve moved `d` metres towards the inside of the door (the door is above and ahead of its lower edge). */
+    const haciaDentro = (c: [number, number][], d: number): [number, number][] => c.map(([x, y], i) => {
+      const [xa, ya] = c[Math.max(0, i - 1)], [xb, yb] = c[Math.min(c.length - 1, i + 1)];
+      const l = Math.hypot(xb - xa, yb - ya) || 1, tx = (xb - xa) / l, ty = (yb - ya) / l;
+      return [x + ty * d, y - tx * d];
+    });
+    // por abajo (zona pintada): bajo la piel de la puerta, a 1 mm
+    par(cintaPiel(CUERPO, haciaDentro(PUERTA_BAJO.slice(0, corte + 1), A / 2 - F), A, { pasos: 90, delta: 0.001 }), M.marco, 'marco', false);
+    // detrás de la ventanilla, el pilar delantero y la costura del techo (zona negra): entre la banda y la puerta
+    par(cintaPiel(CUERPO, haciaDentro(PUERTA_BAJO.slice(corte - 1), A / 2 - F), A, { pasos: 30, delta: 0.0023 }), M.marcoBanda, 'marco', false);
+    const pilar: [number, number][] = [];
+    for (let k = 0; k <= 12; k++) { const x = X_PUERTA0 - 0.62 * k / 12; pilar.push([x, PILAR(x) - 0.006 - A / 2 + F]); }
+    par(cintaPiel(CUERPO, pilar, A, { pasos: 40, delta: 0.0023 }), M.marcoBanda, 'marco', false);
+    const costura = (e: Est): Rango | null => {
+      if (thetaY(e, PILAR(e.x)) - 0.006 < TH_COSTURA) return null;
+      return [adentro(e, TH_COSTURA, A - F, -1), adentro(e, TH_COSTURA, F, 1)];
+    };
+    par(parcheM(CUERPO, -0.90, X_PUERTA1 - 0.02, costura, { nx: 50, nth: 2, delta: 0.0023 }), M.marcoBanda, 'marco', false);
+    // el portón: sus dos cantos y el de delante, junto a la bisagra
+    const canto = (e: Est): Rango | null => { const r = rangoPorton(e); return r ? [adentro(e, r[0], F, -1), adentro(e, r[0], A - F, 1)] : null; };
+    par(parcheM(CUERPO, X_BISAGRA_MAL, X_FIN_BANDA, canto, { nx: 90, nth: 2, delta: 0.0023 }), M.marcoBanda, 'marco', false);
+    g.add(malla(parcheM(CUERPO, X_BISAGRA_MAL + F, X_BISAGRA_MAL - A + F, rangoPorton, { nx: 2, nth: 40, delta: 0.0023 }), M.marcoBanda, 'marco', false));
   }
+
+  // --- el limpiaparabrisas (las cámaras que hacen de retrovisor van en las puertas)
   {
     const x = X_PARABRISAS - 0.035, e = estacion(CUERPO, x), pts: THREE.Vector3[] = [];
     const thZ = (z: number) => { let lo = 0.2, hi = Math.PI - 0.2; for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; if (puntoSeccion(e, m)[1] > z) lo = m; else hi = m; } return (lo + hi) / 2; };
@@ -468,9 +663,15 @@ const AREA_M2 = Math.round(AREA * 100) / 100;
 export const VEHICULO: VehiculoGaraje = {
   id: 'aptera', nombre: 'Aptera',
   largo: LARGO, ancho: 2.225, alto: 1.422, batalla: BATALLA, viaDel: VIA, viaTras: 0,
-  fuente: 'Wikipedia, ficha del Aptera (Launch Edition): largo 4 496 mm, ancho 2 225 mm, alto 1 422 mm, batalla 2 743 mm, Cd 0,13 declarado; FAQ de Aptera: bajos a 5″, llantas de 16″. Estimado casando fotos y renders de prensa con el modelo (no publicado): vía 1,95 m, carenados de 0,275 m, voladizos 0,88 m delante y 0,87 m detrás, carrocería de 1,57 m, cola en ala de 1,26 m, ventanillas, pilares y puertas',
+  fuente: 'Wikipedia, ficha del Aptera (Launch Edition): largo 4 496 mm, ancho 2 225 mm, alto 1 422 mm, batalla 2 743 mm, Cd 0,13 declarado; FAQ de Aptera: bajos a 5″, llantas de 16″. Estimado casando fotos y renders de prensa con el modelo (no publicado): vía 1,95 m, carenados de 0,275 m, voladizos 0,88 m delante y 0,87 m detrás, carrocería de 1,58 m, cola en ala de 1,26 m, forma del morro y de la cúpula, ventanillas, pilares, y las bisagras y los ángulos de las puertas (en mariposa, 110°) y del portón (50°)',
   aero: { cd: 0.13, area: AREA_M2, masaVacio: 998, plazas: 2, vmax: 162.5, fuente: `Cd 0,13: lo declara Aptera (enero de 2023, Wikipedia), sin ensayo publicado. 998 kg (Launch Edition de 44 kWh, Wikipedia); 162,5 km/h (FAQ de Aptera). Área frontal ${AREA_M2.toLocaleString('es-ES')} m², medida sobre este modelo (cuerpo, quilla, carenados, brazos y lo que asoma de las ruedas), cuyas cotas no publicadas son estimadas` },
   envolvente: envolvente(),
   seccion: 2.5,
   construir,
+  pivotes: [
+    { nombre: 'puerta-d', tipo: 'puerta', eje: EJE_PUERTA, angulo: ANGULO_PUERTA },
+    // la izquierda está en un grupo con la escala z en −1: el mismo giro, visto en espejo
+    { nombre: 'puerta-i', tipo: 'puerta', eje: EJE_PUERTA, angulo: ANGULO_PUERTA },
+    { nombre: 'porton', tipo: 'maletero', eje: [0, 0, -1], angulo: ANGULO_PORTON },
+  ],
 };
