@@ -54,6 +54,7 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
   // EL ESCAPARATE, CENTRADO (2026-11-06, Eugenio: «el logotipo con el nombre y el subtítulo en el
   // centro, y la barra de buscar más hacia la derecha»): tres columnas, la marca en medio y el
   // buscador pegado a la derecha. En el móvil, la marca arriba y el buscador debajo, a la derecha.
+  // 2026-11-12 (Eugenio): «cambia el colaborar por Participa en el menú, y reduce un 25 % el tamaño del logo».
   // LA BARRA DEL ESCAPARATE, TERCERA FORMA (2026-11-12, Eugenio: «la barra de buscar, más grande y a la izquierda
   // del todo; lo de colaborar, arriba a la derecha; y el logo un poco más grande para que no quede tan pequeña la
   // letra inferior»). En el ordenador, tres columnas: buscador | marca | Colaborar e idiomas. En el móvil, la marca
@@ -68,19 +69,19 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
       {/* La marca y el eslogan del mismo ancho que el nombre (2026-11-06, Eugenio). */}
       <Link to="/" className="flex min-w-0 items-center justify-center gap-3 [grid-area:marca]" aria-label={raiz ? `${raiz.titulo} · inicio` : 'Inicio'}>
         {icono && (/^(https?:|\/)/.test(icono)
-          ? <img src={miniatura(icono, 128)} alt={raiz ? `Logo de ${raiz.titulo}` : ''} className="h-[50px] w-[50px] shrink-0 rounded-lg object-contain sm:h-[58px] sm:w-[58px] lg:h-[64px] lg:w-[64px]" />
-          : <span className="text-[2.1rem] leading-none">{icono}</span>)}
+          ? <img src={miniatura(icono, 128)} alt={raiz ? `Logo de ${raiz.titulo}` : ''} className="h-[38px] w-[38px] shrink-0 rounded-lg object-contain sm:h-[44px] sm:w-[44px] lg:h-[48px] lg:w-[48px]" />
+          : <span className="text-[1.6rem] leading-none">{icono}</span>)}
         {raiz && (
           <span className="inline-grid min-w-0 leading-none">
-            <span className="whitespace-nowrap text-[1.95rem] font-black tracking-tight text-slate-900 sm:text-[2.35rem] lg:text-[2.65rem]">{raiz.titulo}</span>
+            <span className="whitespace-nowrap text-[1.46rem] font-black tracking-tight text-slate-900 sm:text-[1.76rem] lg:text-[2rem]">{raiz.titulo}</span>
             {eslogan && <Eslogan texto={eslogan} />}
           </span>
         )}
       </Link>
       <div className="flex min-w-0 items-center justify-end gap-2 [grid-area:acciones]">
         {colabora && (colabora.fuera
-          ? <a href={colabora.href} target="_blank" rel="noopener noreferrer" className={botonColabora}>Colaborar</a>
-          : <Link to={colabora.href} data-interno="" className={botonColabora}>Colaborar</Link>)}
+          ? <a href={colabora.href} target="_blank" rel="noopener noreferrer" className={botonColabora}>Participa</a>
+          : <Link to={colabora.href} data-interno="" className={botonColabora}>Participa</Link>)}
         <SelectorIdioma />
       </div>
     </header>
