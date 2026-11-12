@@ -1,79 +1,86 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Maximize2, Minimize2 } from 'lucide-react';
-import { Button } from '../ui/core';
+import { createContext, useContext, useEffect, useLayoutEffect, useState, type ReactNode } from 'react';
 
 // ============================================================================
-// AN APPLICATION EMBEDDED IN A SITE PAGE (2026-11-12, Eugenio)
+// AN APPLICATION AS PART OF A SITE PAGE (2026-11-12, Eugenio)
 // ============================================================================
-// «Quiero que el modelo socioeconómico optimizado esté embebido en la página de
-// luzhumanidad.com, que aparezca el menú de Luz & Humanidad arriba, y que se
-// pueda expandir a pantalla completa y salir de pantalla completa.»
+// First version (morning): the app in a screen-tall box with its own scroll.
+// Eugenio, two hours later: «está muy mal embebido: cuando haces scroll fuera
+// del recuadro te enseña pantalla en blanco casi infinita. Siempre tiene que
+// hacerse scroll en la página embebida. Si pinchas en pantalla completa
+// desaparece el menú superior de Luz & Humanidad, y luego puedes volver. Que en
+// ningún lado sea un embed cutre: tiene que estar bien integrada.»
 //
-// The site's own header stays on top (it belongs to the page, outside this
-// box). The application lives in a box as tall as the screen allows, with its
-// own scroll, so its sticky header and its «#section» links work inside it.
-// One button puts the box in full screen and takes it out again.
+// So there is no box any more. The app is the page: it flows under the site's
+// bar and scrolls with the window, so every scroll moves the app and there is
+// nothing below it to scroll into. (The blank came from the box: `overflow:
+// hidden` does not clip absolutely positioned descendants whose containing
+// block is outside it, so they stretched the document below the box.)
 //
-// Full screen uses the browser's Fullscreen API when there is one. The iPhone
-// has none for a normal element, so there the box covers the window with CSS
-// instead: same button, same result for the reader. Esc leaves both.
+// What the app needs to know, given through context:
+//   · `altoBarra`: the height of the site bar, so its own sticky header sits
+//     right under it instead of behind it (also the CSS variable
+//     `--alto-barra-sitio`, for `scroll-margin-top` on its sections);
+//   · `completa` / `alternar`: full screen. It hides the site bar and, where the
+//     browser allows, puts the whole document in full screen. The button lives
+//     in the app's own header, next to its other actions.
+// Esc, or the same button, brings the bar back.
 
-export default function AplicacionIncrustada({ titulo, children }: { titulo: string; children: ReactNode }) {
-  const caja = useRef<HTMLDivElement>(null);
-  // `nativa`: the browser's full screen; `css`: the fallback covering the window.
-  const [modo, setModo] = useState<null | 'nativa' | 'css'>(null);
+type Integracion = { altoBarra: number; completa: boolean; alternar: () => void };
+const Ctx = createContext<Integracion | null>(null);
+/** Null outside a site page: the app is then on its own and needs none of this. */
+export const useIntegracion = () => useContext(Ctx);
 
+const CLASE = 'app-pantalla-completa';
+
+export default function AplicacionIncrustada({ children }: { children: ReactNode }) {
+  const [altoBarra, setAltoBarra] = useState(0);
+  const [completa, setCompleta] = useState(false);
+
+  // The bar's height: one row on a computer, two on a phone, none in full screen.
+  useLayoutEffect(() => {
+    const barra = document.querySelector<HTMLElement>('[data-cabecera-sitio]');
+    if (!barra) return;
+    const medir = () => setAltoBarra(completa ? 0 : Math.round(barra.getBoundingClientRect().height));
+    medir();
+    const o = new ResizeObserver(medir); o.observe(barra);
+    return () => o.disconnect();
+  }, [completa]);
+
+  // Full screen: a class on <html> hides the bar and the spacer above it.
+  // Leaving the browser's full screen (Esc) also brings the bar back.
   useEffect(() => {
-    const alCambiar = () => setModo(m => (document.fullscreenElement === caja.current ? 'nativa' : m === 'nativa' ? null : m));
-    document.addEventListener('fullscreenchange', alCambiar);
-    return () => document.removeEventListener('fullscreenchange', alCambiar);
-  }, []);
+    document.documentElement.classList.toggle(CLASE, completa);
+    const alSalir = () => { if (!document.fullscreenElement) setCompleta(false); };
+    const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape' && !document.fullscreenElement) setCompleta(false); };
+    document.addEventListener('fullscreenchange', alSalir);
+    if (completa) window.addEventListener('keydown', tecla);
+    return () => { document.removeEventListener('fullscreenchange', alSalir); window.removeEventListener('keydown', tecla); };
+  }, [completa]);
+  useEffect(() => () => document.documentElement.classList.remove(CLASE), []);
 
-  // The CSS fallback: the page behind must not scroll, and Esc closes it the
-  // way it closes the native one.
-  useEffect(() => {
-    if (modo !== 'css') return;
-    const antes = document.documentElement.style.overflow;
-    document.documentElement.style.overflow = 'hidden';
-    const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') setModo(null); };
-    window.addEventListener('keydown', tecla);
-    return () => { document.documentElement.style.overflow = antes; window.removeEventListener('keydown', tecla); };
-  }, [modo]);
-
-  const entrar = async () => {
-    const el = caja.current;
-    if (el && document.fullscreenEnabled && el.requestFullscreen) {
-      try { await el.requestFullscreen(); setModo('nativa'); return; } catch { /* refused: fall back below */ }
+  const alternar = async () => {
+    if (!completa) {
+      setCompleta(true);
+      // Where the browser allows it (not the iPhone), its own bars go too.
+      if (document.fullscreenEnabled && !document.fullscreenElement) {
+        try { await document.documentElement.requestFullscreen(); } catch { /* the site bar is hidden anyway */ }
+      }
+    } else {
+      setCompleta(false);
+      if (document.fullscreenElement) { try { await document.exitFullscreen(); } catch { /* already out */ } }
     }
-    setModo('css');
   };
-  const salir = async () => {
-    if (document.fullscreenElement) { try { await document.exitFullscreen(); } catch { /* already out */ } }
-    setModo(null);
-  };
-  const completa = modo !== null;
 
   return (
-    <div
-      ref={caja}
-      data-aplicacion-incrustada
-      role="region"
-      aria-label={titulo}
-      className={completa
-        ? 'fixed inset-0 z-[70] flex flex-col bg-white'
-        : 'mx-auto flex h-[calc(100dvh-6rem)] min-h-[32rem] w-full max-w-[120rem] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm'}
-    >
-      {/* Only the button: the app's own header right below already says what it is. */}
-      <div className="flex shrink-0 items-center justify-end gap-3 border-b border-slate-200 bg-slate-50 px-3 py-1">
-        <Button variant="ghost" onClick={completa ? salir : entrar} aria-pressed={completa}
-          className="shrink-0 gap-1.5 px-2.5 py-1 text-sm font-semibold normal-case tracking-normal text-slate-700 focus-visible:ring-2 focus-visible:ring-slate-400">
-          {completa
-            ? <><Minimize2 className="h-4 w-4" aria-hidden />Salir de pantalla completa</>
-            : <><Maximize2 className="h-4 w-4" aria-hidden />Pantalla completa</>}
-        </Button>
+    <Ctx.Provider value={{ altoBarra, completa, alternar }}>
+      <style>{`
+        html.${CLASE} [data-cabecera-sitio], html.${CLASE} [data-espacio-barra] { display: none !important; }
+        [data-aplicacion-incrustada] section[id] { scroll-margin-top: calc(var(--alto-barra-sitio, 0px) + 7rem); }
+        @media (max-width: 639px) { [data-aplicacion-incrustada] section[id] { scroll-margin-top: calc(var(--alto-barra-sitio, 0px) + 10.5rem); } }
+      `}</style>
+      <div data-aplicacion-incrustada style={{ ['--alto-barra-sitio' as string]: `${altoBarra}px` }}>
+        {children}
       </div>
-      {/* The scroll lives here: the app's sticky header and its anchors stay inside. */}
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">{children}</div>
-    </div>
+    </Ctx.Provider>
   );
 }
