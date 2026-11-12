@@ -11102,3 +11102,8 @@ Eugenio: «Haz un vehículo igual que el triciclo bala, pero esta vez que tenga 
 - **El vuelco** se calcula con la fórmula de cuatro ruedas: la vía media bajo el centro de gravedad entre (2 × su altura).
 - **El faldón y el basculante** no existen con dos ruedas: sus deslizadores se quedan apagados.
 - **Comprobado** en Chromium sin cabeza a 1280×800 con WebGL por software: la Bala de cuatro ruedas en 3/4, de lado, desde atrás y en 3/4 trasero; los paneles de Rodaje y Proyecto; el Triciclo sigue con tres ruedas. **No comprobado** en un móvil ni con la aplicación instalada.
+
+## 2026-11-12 — Modelo socioeconómico embedded in luzhumanidad.com, new address
+
+- `luzhumanidad.com/modelo-socioeconomico-optimizado` (migration 0198): the project page's slug loses `/impuesto-unico`; the old address is in `direcciones_anteriores`, so it answers 301 to the new one. The same migration corrects the page's subtitle, first paragraph and image alt from «0, 20 y 40 %» to 10/25/40 on top of the price — only where they were still exactly 0184's text.
+- The page now keeps the site's frame (menu, and the site bar where the site asks for it) and shows the model inside a box as tall as the screen (`AplicacionIncrustada`), with its own scroll so its sticky header and `#section` links work inside. A «Pantalla completa» / «Salir de pantalla completa» button uses the Fullscreen API, and on browsers without it (iPhone) covers the window with CSS; Esc leaves both. Only `modelo-socioeconomico` is embedded (`INCRUSTADAS` in `SubpaginaSitio.tsx`); the consciousness map and the observatory still take the whole page.

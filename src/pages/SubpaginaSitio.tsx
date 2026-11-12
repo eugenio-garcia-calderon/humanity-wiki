@@ -7,6 +7,10 @@ import MuroMiembros, { useLecturaSitio } from '../components/sitio/MuroMiembros'
 import BarraMiembro from '../components/sitio/BarraMiembro';
 import { conMenuDeSitio } from '../components/sitio/sitioWeb';
 import HerramientasPagina from '../components/acceso/HerramientasPagina';
+import AplicacionIncrustada from '../components/sitio/AplicacionIncrustada';
+import { MarcoLectura } from '../components/sitio/CabeceraLectura';
+import CabeceraSitio from '../components/sitio/CabeceraSitio';
+import { completarSitio } from '../components/sitio/sitioWeb';
 
 // ============================================================================
 // UNA SUBPÁGINA DE UN SITIO PUBLICADO — `/p/:id` (2026-09-30)
@@ -36,6 +40,12 @@ const APLICACIONES: Record<string, (p: { inicio: string }) => ReactNode> = {
   'modelo-socioeconomico': ({ inicio }) => <ModeloSocioeconomico enSitio={{ inicio }} />,
   'observatorio-polarizacion': () => <ObservatorioPolarizacion />,
 };
+// EMBEDDED, NOT FULL PAGE (2026-11-12, Eugenio: «que esté embebido en la página
+// de luzhumanidad.com, que aparezca el menú de Luz & Humanidad arriba, y que se
+// pueda expandir a pantalla completa»). These keep the site's header and menu
+// and show the app in a box with a full-screen button (`AplicacionIncrustada`).
+// The others still take the whole page.
+const INCRUSTADAS = new Set(['modelo-socioeconomico']);
 
 export default function SubpaginaSitio({ propio, idFijo, contexto }: { propio: boolean; idFijo?: string; contexto?: ContextoRuta['contexto'] }) {
   const { id: idDeRuta } = useParams();
@@ -63,7 +73,22 @@ export default function SubpaginaSitio({ propio, idFijo, contexto }: { propio: b
   if (App) {
     // No HerramientasPagina here: its comment column would sit on top of the
     // app, which brings its own mailbox.
-    return <Suspense fallback={<Cargando />}><App inicio={sitio && propio ? '/' : 'https://luzhumanidad.com'} /></Suspense>;
+    const app = <Suspense fallback={<Cargando />}><App inicio={sitio && propio ? '/' : 'https://luzhumanidad.com'} /></Suspense>;
+    if (!INCRUSTADAS.has(String(pagina.config?.aplicacion))) return app;
+    // The same top as any other page of the site (`VistaPagina`): its frame
+    // with the menu (`MarcoLectura`) and, on sites that ask for it, its bar.
+    const rutas = sitio && pagina.sitio ? { enlacePagina: sitio.enlacePagina, enlaceBd: sitio.enlaceBd, enlaceBuscar: sitio.enlaceBuscar, raizId: pagina.sitio.raizId } : undefined;
+    const menuPropio = !!(pagina.sitio?.config && completarSitio(pagina.sitio.config).menu.activo);
+    const conBarra = !!pagina.sitio?.raizId && !menuPropio && pagina.sitio?.config?.barra === true;
+    return (
+      <MarcoLectura pagina={pagina} rutas={rutas}>
+        {conBarra && <CabeceraSitio raizId={pagina.sitio!.raizId} simple={pagina.config?.barraSimple === true} />}
+        <main id="contenido">
+          <h1 className="sr-only">{pagina.titulo || 'Sin título'}</h1>
+          <AplicacionIncrustada titulo={pagina.titulo || ''}>{app}</AplicacionIncrustada>
+        </main>
+      </MarcoLectura>
+    );
   }
   return <>
     <VistaPagina pagina={pagina} propio={propio} contexto={contexto} />
