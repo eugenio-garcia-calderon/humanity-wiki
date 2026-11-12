@@ -11215,3 +11215,11 @@ Eugenio: «llamado Observatorio de Polarización Política, y permite que si se 
   - la vuelta al dibujo.
 
   No hubo errores en la consola.
+
+## 2026-11-12 — Modelo socioeconómico: four tiers, no-deduction default, Categorías and Deuda windows
+
+- Four tiers instead of three: basics 10 %, secondary 20 %, leisure 40 %, luxury 60 % (Eugenio). New spending group «Joyas, relojes, moda y artículos de lujo» (≈ 17.000 M€, Círculo Fortuny), carved out of clothing and personal care; tourists split 15/12/70/3. Wages keep three rates by company size, now 10/20/40.
+- Default reading is now «las empresas pagan el 10 % de lo que compran y no se deducen nada» (`TIPO_GENERAL`); the VAT-like reading with deductions stays as the comparison. Revenue: ≈ 35,3 % of GDP (595.884 M€) against 16,8 % deducting.
+- New window «Categorías» (`CategoriasVentana.tsx`, `src/data/categorias.ts`): 36 sectors, each in its tier, with search and a tier filter; four questions to place anything not listed; debatable cases and proposed luxury thresholds behind «Más».
+- New window «Deuda» (`DeudaVentana.tsx`, `src/data/deuda.ts`): who owes (State and Social Security 79,2 %, regions 341.642 M€, local 1,2 % of GDP, end of 2025), capital against interest (40.314 M€ interest in 2025; 230.693 M€ of State capital falling due in 2026 paid by issuing 285.693 M€), history 1980–2025, six abuses each with its remedy, today against the proposal, the contingency box simulator and the inherited-debt payoff simulator.
+- The free third: at least 20 % goes to each scale's contingency and common-savings box, which never goes below zero (`RESERVA_MIN_LIBRE`, shown in the thirds cards).
