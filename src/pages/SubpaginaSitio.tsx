@@ -43,7 +43,8 @@ const APLICACIONES: Record<string, (p: { inicio: string; conBarra: boolean }) =>
 // superior de luzhumanidad.com en esta página»). Opt-in, so the other apps
 // keep their full screen until someone asks; an app that joins must leave room
 // for the bar in its own heights (see `conBarra` in Conciencia.tsx).
-const CON_BARRA = new Set(['conciencia']);
+// The observatorio too (2026-11-12, Eugenio: «pon el menú superior en el observatorio de polarización»).
+const CON_BARRA = new Set(['conciencia', 'observatorio-polarizacion']);
 // EMBEDDED IN THE PAGE (2026-11-12, Eugenio: «que el modelo socioeconómico esté
 // embebido en la página de luzhumanidad.com, que aparezca el menú de Luz &
 // Humanidad arriba, y que se pueda expandir a pantalla completa y salir»).

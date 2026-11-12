@@ -45,7 +45,7 @@ export function envolventeModelo(m: ModeloBase): Envolvente {
 }
 
 /** Our design. `area` is the editor's frontal area (res.A), the one its Cd refers to (not for the Bala: see `cuerpoBala`). */
-export function cuerpoAeromovil(m: Modelo, area: number, nombre = m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala' : m.tipo === 'triciclo' ? (m.traseras ? 'Bala de cuatro ruedas' : 'Triciclo Bala') : 'Aeromóvil Gota'): CuerpoTunel {
+export function cuerpoAeromovil(m: Modelo, area: number, nombre = m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala en rombo' : m.tipo === 'triciclo' ? (m.traseras ? 'Cuadriciclo Bala clásico' : 'Triciclo Bala') : 'Aeromóvil Gota'): CuerpoTunel {
   if (m.tipo === 'bala') return cuerpoBala(m, nombre);
   if (m.tipo === 'triciclo') return cuerpoTriciclo(m, nombre);
   const xs = m.ruedas.map(r => r.x);
@@ -61,7 +61,7 @@ export function cuerpoAeromovil(m: Modelo, area: number, nombre = m.tipo === 'a1
 /** Section exponent of the Bala's body for the tunnel: an egg, closest to an ellipse (as its garage entry, `seccion: 2`). */
 const N_BALA = 2;
 /**
- * The Cuadriciclo Bala as our design, exactly as its garage entry goes through
+ * The Cuadriciclo Bala en rombo as our design, exactly as its garage entry goes through
  * the tunnel (garaje/bala.ts, cuerpos.ts): the body's silhouette every 5 cm,
  * an elliptical section, and as reference area the largest section of that
  * silhouette. The lateral wheel pods, their arms and the fin stand outside the
@@ -71,7 +71,7 @@ const N_BALA = 2;
  * default design) is not the reference here: the tunnel's drag is the body's,
  * and dividing it by a larger area would only make the Cd look smaller.
  */
-export function cuerpoBala(m: ModeloBala, nombre = 'Cuadriciclo Bala'): CuerpoTunel {
+export function cuerpoBala(m: ModeloBala, nombre = 'Cuadriciclo Bala en rombo'): CuerpoTunel {
   const { envolvente, area } = silueta(m.F);
   return {
     id: 'aeromovil', nombre, x: 0, z: 0, giro: 0, envolvente, n: N_BALA,
@@ -84,7 +84,7 @@ export function cuerpoBala(m: ModeloBala, nombre = 'Cuadriciclo Bala'): CuerpoTu
   };
 }
 
-/** The Bala body's silhouette and its reference area (the largest elliptical section of it): the Cuadriciclo's and the Triciclo's. */
+/** The Bala body's silhouette and its reference area (the largest elliptical section of it): the Cuadriciclo en rombo's and the Triciclo's. */
 function silueta(F: ModeloBala['F']) {
   const envolvente = F.envolvente();
   const { seccion, xMorro, xCola } = funcionSeccion(envolvente);
@@ -93,20 +93,20 @@ function silueta(F: ModeloBala['F']) {
   return { envolvente, area };
 }
 /**
- * The Triciclo Bala (2026-11-10): the Cuadriciclo's body, so the same silhouette
+ * The Triciclo Bala (2026-11-10): the Cuadriciclo en rombo's body, so the same silhouette
  * and the same reference area (the body's largest section); its three wheels:
- * the two front ones in pods on arms ('carenado', as the Cuadriciclo's laterals
+ * the two front ones in pods on arms ('carenado', as the Cuadriciclo en rombo's laterals
  * and the Aptera's front ones), the rear one inside the tail ('dentro'). The pods,
  * their arms, the fin and the rear wheel's spat are outside the silhouette.
  */
-export function cuerpoTriciclo(m: ModeloTriciclo, nombre = m.traseras ? 'Bala de cuatro ruedas' : 'Triciclo Bala'): CuerpoTunel {
+export function cuerpoTriciclo(m: ModeloTriciclo, nombre = m.traseras ? 'Cuadriciclo Bala clásico' : 'Triciclo Bala'): CuerpoTunel {
   const { envolvente, area } = silueta(m.F);
   return {
     id: 'aeromovil', nombre, x: 0, z: 0, giro: 0, envolvente, n: N_BALA,
     area, fuenteArea: m.traseras ? 'sección mayor del cuerpo (sin los carenados ni sus brazos)' : 'sección mayor del cuerpo (sin los carenados delanteros ni sus brazos)',
     ruedas: [
       { d: 2 * m.rF, w: m.F.ANCHO_NEU_LAT, tipo: 'carenado' }, { d: 2 * m.rF, w: m.F.ANCHO_NEU_LAT, tipo: 'carenado' },
-      // the «Bala de cuatro ruedas» (2026-11-11): the two rear wheels in pods, seen as the front ones are
+      // the «Cuadriciclo Bala clásico» (2026-11-11): the two rear wheels in pods, seen as the front ones are
       ...(m.traseras
         ? [{ d: 2 * m.rR, w: m.F.ANCHO_NEU, tipo: 'carenado' as const }, { d: 2 * m.rR, w: m.F.ANCHO_NEU, tipo: 'carenado' as const }]
         : [{ d: 2 * m.rR, w: m.F.ANCHO_NEU, tipo: 'dentro' as const }]),

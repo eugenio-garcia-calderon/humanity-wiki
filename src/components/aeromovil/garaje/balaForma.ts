@@ -1,5 +1,5 @@
 /*
- * Shape of the «Cuadriciclo Bala»: one closed skin swept along X.
+ * Shape of the «Cuadriciclo Bala en rombo»: one closed skin swept along X.
  *
  * Not a real vehicle: Eugenio's own design of 2026-11-09, a two-seat,
  * motorcycle-style version of the Aeromóvil Gota (same rhombus of wheels,
@@ -67,9 +67,9 @@ export interface DimBala {
   via: number;
   /**
    * The «Triciclo Bala» (2026-11-10) only: where the wheels in pods stand (x of
-   * their axle; the Cuadriciclo has them at mid-wheelbase), and the pods' and
+   * their axle; the Cuadriciclo en rombo has them at mid-wheelbase), and the pods' and
    * arms' own shape (balaMedidas.ts `podDe`, `brazosDe`). The body never reads
-   * these: with them absent every number is the Cuadriciclo's.
+   * these: with them absent every number is the Cuadriciclo en rombo's.
    */
   xLat?: number;
   pod?: { esc: number; ancho: number; cola: number };
@@ -78,11 +78,11 @@ export interface DimBala {
    * The Triciclo only (2026-11-11, round three: «que la altura libre sobre el suelo sea mucho mayor»): a rigid
    * lift of the whole body (m). `suelo` is still the real belly height; the shape below it is drawn with the
    * belly at `suelo − elevar` and then raised `elevar`, so above 15.8 cm the cabin keeps its size and the whole
-   * body (with everything built on its floor) rises. Absent, 0: every number is the Cuadriciclo's, bit for bit.
+   * body (with everything built on its floor) rises. Absent, 0: every number is the Cuadriciclo en rombo's, bit for bit.
    */
   elevar?: number;
   /**
-   * The «Bala de cuatro ruedas» (2026-11-11) only: on the rear pods' view of the shape, the belly's height under
+   * The «Cuadriciclo Bala clásico» (2026-11-11) only: on the rear pods' view of the shape, the belly's height under
    * the arms' roots at the rear axle (absolute, m). The tail sweeps up there, so the lower link meets the body
    * higher than it meets its pod (balaMedidas.ts `brazosDe`). The body never reads it; absent, nothing changes.
    */

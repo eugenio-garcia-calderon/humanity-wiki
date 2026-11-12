@@ -268,7 +268,7 @@ export function areaFrontalBala(m: Pick<ModeloBala, 'F' | 'alto' | 'ruedas' | 'a
   for (let i = 0; i < NY; i++) if (zc[i] > 0) poner(i, 0, zc[i]);
   const cuerpo = medir();
   // pods: each station's superellipse around z = via/2, and the arms from the skin to the pod
-  // (`formasPod`: since 2026-11-11 the «Bala de cuatro ruedas» also passes its rear pods' view of the shape)
+  // (`formasPod`: since 2026-11-11 the «Cuadriciclo Bala clásico» also passes its rear pods' view of the shape)
   for (const Fp of formasPod) {
   const POD = podDe(Fp), ancho = semiAncho(POD), zp = Fp.VIA_LAT / 2;
   for (let i = 0; i < NY; i++) {

@@ -493,7 +493,7 @@ function LadoA1({ P, Pa, D, set, res, modelo, neumaticos, malas, alNavegar, dep 
 }
 
 /**
- * Los deslizadores y las cifras del Cuadriciclo Bala (2026-11-09, Eugenio: «permíteme editarlo»).
+ * Los deslizadores y las cifras del Cuadriciclo Bala en rombo (2026-11-09, Eugenio: «permíteme editarlo»).
  * Etiquetas, bloques y rangos salen de `DESLIZADORES_BALA` (geometriaBala.ts), la misma tabla que leen las
  * opciones del túnel: si se cambia una etiqueta allí, cambia en los dos sitios.
  */
@@ -632,7 +632,7 @@ function useCdTriciclo(modelo: Modelo, resolucion: Resolucion, kmh: number): CdT
  * Los deslizadores y las cifras del Triciclo Bala (2026-11-10, Eugenio: «permite modificar todo lo que se permitía
  * modificar en el Apterike»), por departamentos como el Aeromóvil 1. Etiquetas, departamentos, bloques y rangos salen
  * de `deslizadoresTriciclo()` (geometriaTriciclo.ts), la misma tabla que leen las opciones del túnel; las de la forma,
- * de la del Cuadriciclo. «Proyecto» es el resumen: todas las comprobaciones, el rendimiento y el peso.
+ * de la del Cuadriciclo en rombo. «Proyecto» es el resumen: todas las comprobaciones, el rendimiento y el peso.
  */
 function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
   P: Parametros; set: <K extends keyof Parametros>(k: K, v: Parametros[K]) => void; res: Resultados; modelo: ModeloTriciclo; dep: DepTriciclo | 'proyecto'; cd: CdTriciclo;
@@ -649,7 +649,7 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
       case 'tAleta': return `${m2(v)} sobre el suelo`;
       case 'tAlto': return modelo.elevar > 0 ? `${fmt(v, 3)} m · ${fmt(v + modelo.elevar, 3)} m con la carrocería subida` : `${fmt(v, 3)} m`;
       case 'tFaldon': return v < 0.01 ? 'sin faldón' : `asoman ${cm(modelo.faldon?.y0 ?? 0)}`;
-      case 'tEjeDel': return v < 0.005 ? 'donde el Cuadriciclo' : `${cm(v, 0)} más atrás`;
+      case 'tEjeDel': return v < 0.005 ? 'donde el Cuadriciclo en rombo' : `${cm(v, 0)} más atrás`;
       case 'tSolar': return res.areas.solar < 0.005 ? 'sin techo solar' : `${m2(v)} tras el eje · ${fmt(res.areas.solar)} m²`;
       case 'tVentAlto': return `${Math.round(v * 100)} % del costado`;
       case 'tPilar': return `${m2(v)} tras el eje delantero`;
@@ -723,7 +723,7 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
       <Bloque titulo={lemas[dep]} nota={nombreTriciclo(T)}>
         {cuatro
           ? <p className="text-xs text-slate-500">Cuatro ruedas: dos delante en carenados como el Aptera, que giran con ellas, y dos detrás en carenados iguales, que no giran, con un motor en el buje de cada una. Es el Triciclo Bala con otra parte de atrás: la carrocería y todas sus medidas son las mismas (en Rodaje, «Ruedas traseras», se vuelve a la de una rueda).</p>
-          : <p className="text-xs text-slate-500">Tres ruedas: dos delante en carenados como el Aptera, que giran con ellas, y una detrás dentro de la cola, con el motor en el buje. La carrocería es la del Cuadriciclo Bala; con las medidas por defecto, la misma.</p>}
+          : <p className="text-xs text-slate-500">Tres ruedas: dos delante en carenados como el Aptera, que giran con ellas, y una detrás dentro de la cola, con el motor en el buje. La carrocería es la del Cuadriciclo Bala en rombo; con las medidas por defecto, la misma.</p>}
       </Bloque>
       {bloques.map(bloque => (
         <Bloque key={bloque} titulo={bloque}>
@@ -751,11 +751,11 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
             : 'Los carenados delanteros giran con sus ruedas (como en el Aptera): el neumático siempre queda igual de centrado; lo que se comprueba es que, girados a tope, no toquen la carrocería. El faldón tapa la parte de abajo de la rueda trasera.'}</p>}
           {bloque === 'Asientos' && (filas
             ? <p className="-mt-1 text-xs text-slate-500">Tres filas: el piloto solo, en un asiento de coche en el centro, con el manillar de siempre; detrás, dos asientos juntos; y al final uno más pequeño en el centro. Los de las filas 2 y 3 se pliegan (abajo, «Tres filas»). Con esta disposición la carrocería tiene unos mínimos: {m2(ANCHO_FILAS)} de ancho (para los hombros de la fila 2), {fmt(ALTO_FILAS, 2)} m de cúpula y la batalla y la cúpula largas para que la fila 3 quepa delante del amortiguador trasero. El pasajero a horcajadas no existe aquí: su posición y su reclinado no hacen nada.</p>
-            : <p className="-mt-1 text-xs text-slate-500">A horcajadas, como en el Cuadriciclo, con un respaldo cada uno. Reclinar baja la cabeza y la lleva hacia atrás: al piloto le da techo (la cúpula sube detrás de él), pero aleja sus manos del manillar; al pasajero se lo quita, porque detrás de él la cúpula baja.</p>)}
+            : <p className="-mt-1 text-xs text-slate-500">A horcajadas, como en el Cuadriciclo en rombo, con un respaldo cada uno. Reclinar baja la cabeza y la lleva hacia atrás: al piloto le da techo (la cúpula sube detrás de él), pero aleja sus manos del manillar; al pasajero se lo quita, porque detrás de él la cúpula baja.</p>)}
           {bloque === 'Tres filas' && <p className="-mt-1 text-xs text-slate-500">Cada fila se pliega por separado: el respaldo cae hacia delante sobre el asiento y queda un suelo plano para carga. Sus pasajeros dejan de contar en el peso, el vuelco y el consumo. Los pies de la fila 2 van bajo el asiento del piloto y los de la fila 3 bajo los de la fila 2, como en un coche. Maletero ahora: {Math.round(rt.maletero.ahora)} L ({rt.maletero.estado}).</p>}
           {bloque === 'Ejes y ruedas' && <>
             {rt.viaSubida && <p className="-mt-1 text-xs text-amber-800">La vía sube a {m2(rt.viaSubida)}: es lo mínimo para que los carenados, girados a tope, queden a 3 cm de la carrocería.</p>}
-            <p className="-mt-1 text-xs text-slate-500">El eje delantero va detrás de donde el Cuadriciclo lleva su rueda delantera: así el peso queda más cerca de las dos ruedas de delante y {cuatro ? 'la vía de delante pesa más en el vuelco' : 'el triciclo vuelca menos'} (abajo, «Vuelco»). Batalla {m2(modelo.batalla)}.</p>
+            <p className="-mt-1 text-xs text-slate-500">El eje delantero va detrás de donde el Cuadriciclo en rombo lleva su rueda delantera: así el peso queda más cerca de las dos ruedas de delante y {cuatro ? 'la vía de delante pesa más en el vuelco' : 'el triciclo vuelca menos'} (abajo, «Vuelco»). Batalla {m2(modelo.batalla)}.</p>
             {bloque === 'Ejes y ruedas' && <p className="-mt-1 text-xs text-slate-500">Ruedas traseras: una dentro de la cola, sobre un basculante, como un triciclo; o dos fuera, en carenados como los de delante sobre dos brazos carenados cada uno, que no giran: cuatro ruedas. Con dos, el motor se reparte en dos motores de buje, uno en cada rueda, y la cola queda libre para el maletero.{cuatro ? ` La vía trasera va de lo justo para que los carenados queden a 3 cm de la cola (${m2(vistaTriciclo(deslizadoresTriciclo().find(f => f.clave === 'tViaTras')!, T).min)}) a la vía delantera más ancha; de serie, la de delante.` : ''}</p>}
           </>}
           {bloque === 'Bastidor' && <p className="-mt-1 text-xs text-slate-500">Dos largueros sobre la panza con cuatro travesaños, la cuna de la batería (donde se apoya la suspensión delantera), los soportes de los sillines, la torreta del amortiguador y el soporte de la columna de dirección: {fmt(rt.bastidor.metros, 1)} m de tubo. Se ve con «Rayos X» o la capa «Chasis».</p>}
@@ -763,7 +763,7 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
           {bloque === 'Techo solar' && <p className="-mt-1 text-xs text-slate-500">{res.areas.solar > 0.005 ? `${fmt(res.areas.solar)} m² de panel: ${Math.round(res.solarPico)} W a 1000 W/m², y de media unos ${fmt(res.solarDia / 1000)} kWh al día (${fmt(P.sol, 1)} kWh/m² al día sobre plano, el panel curvo recoge un 70 % de eso, células al ${Math.round(0.21 * 100)} % y un 15 % de pérdidas). ${Math.round(res.masas['Paneles solares'] ?? 0)} kg de panel, sobre laminado de carrocería en lugar del cristal.` : 'Sin techo solar: la cúpula es toda de cristal (se mueve en Carrocería › Techo solar y ventanas).'}</p>}
           {bloque === 'Motor' && cuatro && <p className="-mt-1 text-xs text-slate-500">Dos motores de buje, uno en cada rueda trasera, sin cadena ni correa, con un controlador doble bajo el sillín del pasajero. Cada uno da la mitad de la potencia, así que en cada llanta cabe el doble que con una rueda: en una rueda de ciclomotor unos {RUEDAS_TRICICLO['24'].kWBuje} kW de pico por rueda; en una llanta de coche de 15″, unos {RUEDAS_TRICICLO.c15.kWBuje}. «Motores de buje» es la masa de los dos juntos: su rango es el de dos motores de media potencia, con la misma regla de kilos por kW que con uno (cada motor lleva su base, así que dos pesan algo más que uno del doble).</p>}
           {bloque === 'Motor' && !cuatro && <p className="-mt-1 text-xs text-slate-500">Motor de buje en la rueda trasera, sin cadena ni correa, con su controlador bajo el sillín del pasajero. Su masa y la del controlador siguen a la potencia máxima (su rango se mueve con ella). En una rueda de ciclomotor caben unos {RUEDAS_TRICICLO['24'].kWBuje} kW de pico; en una llanta de coche de 15″, unos {RUEDAS_TRICICLO.c15.kWBuje} (como los motores en rueda del Aptera). Por encima, lo honrado sería un motor en el basculante con correa, como en las motos eléctricas, y eso aquí no se dibuja: la comprobación «Motor de buje» lo avisa.</p>}
-          {bloque === 'Batería' && <p className="-mt-1 text-xs text-slate-500">Primero en el morro, donde el Cuadriciclo lleva la rueda delantera ({Math.round(rt.bateria.litrosMorro)} L), luego en un módulo estrecho entre los pies del piloto; si hace falta más, el módulo del morro sube, crece hacia la punta y queda un módulo plano bajo los sillines. Ahora: {Math.round(rt.bateria.litros)} L y {Math.round(rt.bateria.kg)} kg{rt.bateria.litros - rt.bateria.cabe > 0.05 ? `: caben ${Math.round(rt.bateria.cabe)} L, faltan ${Math.round(rt.bateria.litros - rt.bateria.cabe)} (un morro más largo, una carrocería más ancha o celdas más densas)` : ''}.</p>}
+          {bloque === 'Batería' && <p className="-mt-1 text-xs text-slate-500">Primero en el morro, donde el Cuadriciclo en rombo lleva la rueda delantera ({Math.round(rt.bateria.litrosMorro)} L), luego en un módulo estrecho entre los pies del piloto; si hace falta más, el módulo del morro sube, crece hacia la punta y queda un módulo plano bajo los sillines. Ahora: {Math.round(rt.bateria.litros)} L y {Math.round(rt.bateria.kg)} kg{rt.bateria.litros - rt.bateria.cabe > 0.05 ? `: caben ${Math.round(rt.bateria.cabe)} L, faltan ${Math.round(rt.bateria.litros - rt.bateria.cabe)} (un morro más largo, una carrocería más ancha o celdas más densas)` : ''}.</p>}
         </Bloque>
       ))}
 
@@ -916,8 +916,8 @@ export default function Aeromovil() {
   const paraCalcular = (modelo.tipo === 'bala' || modelo.tipo === 'triciclo') && diferido.tipo === modelo.tipo ? diferido : modelo;
   const res = useMemo(() => calcular(paraCalcular, areas(paraCalcular)), [paraCalcular]);
   const esA1 = modelo.tipo === 'a1', esBala = modelo.tipo === 'bala', esTri = modelo.tipo === 'triciclo';
-  // 2026-11-11: a Triciclo with two rear wheels is the «Bala de cuatro ruedas» wherever its name shows
-  const nombreVehiculo = esA1 ? 'Aeromóvil 1' : esBala ? 'Cuadriciclo Bala' : esTri ? nombreTriciclo(camposTriciclo(P)) : 'Aeromóvil Gota';
+  // 2026-11-11: a Triciclo with two rear wheels is the «Cuadriciclo Bala clásico» wherever its name shows
+  const nombreVehiculo = esA1 ? 'Aeromóvil 1' : esBala ? 'Cuadriciclo Bala en rombo' : esTri ? nombreTriciclo(camposTriciclo(P)) : 'Aeromóvil Gota';
   const NOMBRE_VISTA: Record<Vista, string> = { iso: 'tres cuartos delantera', side: 'lateral', top: 'planta (desde arriba)', front: 'frontal', back: 'trasera' };
   // «Pedir render» (2026-11-07, Eugenio: «quita lo de crear render con Gemini,
   // que gasta dinero; mantenlo bajo una petición a Claude Code con nuestra

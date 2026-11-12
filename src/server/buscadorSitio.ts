@@ -361,7 +361,96 @@ async function completarFichas(db: any, resultados: any[]) {
   for (const r of resultados) delete r.tablaId;
 }
 
+// ── SUGERENCIAS AL ESCRIBIR (2026-11-12, Eugenio en luzhumanidad.com) ───────
+// «Si pongo 2 o 3 letras, que ya aparezca un listado de los posibles resultados
+// priorizando los proyectos; si pongo OBS, el Observatorio de Polarización, sin
+// darle a Enter.» `/api/sitio/buscar` lee todas las páginas en cada pregunta
+// (2-3 s): demasiado para cada letra. Aquí, una lista en memoria de lo que el
+// sitio enseña (lo mismo que el buscador: por el camino del sitemap, sin lo de
+// miembros, cada página comprobada con `paginaVisible` y su descripción sin
+// los bloques de miembros), que se rehace cada 5 minutos sin hacer esperar a
+// nadie (se responde con la anterior mientras se rehace). Sólo se busca en el
+// título, el nombre de su tabla y su descripción: lo que la tarjeta ya enseña.
+// Los proyectos (filas de una tabla «Proyectos…») van primero.
+type Sugerible = { id: string; titulo: string; descripcion: string; tabla: string | null; portada: string | null; ruta: string | null;
+  proyecto: boolean; tituloPlano: string; pajar: string };
+const indices = new Map<string, { hasta: number; lista: Sugerible[]; rehaciendo?: Promise<Sugerible[]> }>();
+
+async function construirIndice(db: any, raiz: string): Promise<Sugerible[]> {
+  const r = await db.execute(sql`${bajaDesde(raiz)}
+    SELECT DISTINCT ON (w.id) w.id, w.title, w.slug, w.config, t.titulo AS tabla
+    FROM baja b
+    JOIN knowledge_windows w ON w.id = b.id AND w.kind = 'pagina' AND w.deleted_at IS NULL AND w.archived_at IS NULL
+    LEFT JOIN bd_filas f ON f.pagina_id = w.id AND f.deleted_at IS NULL AND f.archived_at IS NULL
+    LEFT JOIN bd_tablas t ON t.id = f.tabla_id
+    ORDER BY w.id`);
+  const lista: Sugerible[] = [];
+  for (const x of r.rows as any[]) {
+    if (x.id === raiz || !(await paginaVisible(db, x.id))) continue;
+    const { config } = await filtrarBloques(db, x.id, x.config, null);
+    const titulo = String(x.title || '').trim();
+    if (!titulo) continue;
+    const descripcion = descripcionDe(config);
+    const tabla = x.tabla ? String(x.tabla) : null;
+    lista.push({ id: x.id, titulo, descripcion, tabla, portada: config?.portada || null,
+      ruta: typeof x.slug === 'string' && x.slug.includes('/') ? x.slug : null,
+      proyecto: /proyect|project/i.test(tabla || ''),
+      tituloPlano: planoJs(titulo), pajar: planoJs([titulo, titulo.replace(/\s+/g, ''), tabla, descripcion].filter(Boolean).join(' ')) });
+  }
+  return lista;
+}
+
+export async function indiceSugerencias(db: any, raiz: string): Promise<Sugerible[]> {
+  const ya = indices.get(raiz);
+  const rehacer = () => {
+    const e = indices.get(raiz) || { hasta: 0, lista: [] as Sugerible[] };
+    if (!e.rehaciendo) {
+      e.rehaciendo = construirIndice(db, raiz)
+        .then(lista => { indices.set(raiz, { hasta: Date.now() + 5 * 60_000, lista }); return lista; })
+        .catch(err => { console.error('sugerencias', err); e.rehaciendo = undefined; return e.lista; });
+      if (indices.size > 50) indices.clear();
+      indices.set(raiz, e);
+    }
+    return e.rehaciendo;
+  };
+  if (!ya || (!ya.lista.length && ya.hasta === 0)) return rehacer();
+  if (ya.hasta < Date.now()) void rehacer();
+  return ya.lista;
+}
+
+/** Las sugerencias para `q` (ya en minúsculas y sin acentos): cada palabra en
+ *  algún sitio; puntúa el título que empieza por ella y la palabra del título
+ *  que empieza por ella; los proyectos primero. */
+export function sugerir(lista: Sugerible[], q: string, max = 8) {
+  const palabras = q.split(' ').filter(Boolean);
+  if (!palabras.length) return [];
+  const empiezaPalabra = (t: string, w: string) => t.startsWith(w) || t.includes(' ' + w) || t.includes('-' + w);
+  const out = [];
+  for (const x of lista) {
+    if (!palabras.every(w => x.pajar.includes(w))) continue;
+    const puntos = (x.tituloPlano.startsWith(q) ? 100 : 0)
+      + palabras.filter(w => empiezaPalabra(x.tituloPlano, w)).length * 30
+      + palabras.filter(w => x.tituloPlano.includes(w)).length * 10
+      + palabras.filter(w => empiezaPalabra(x.pajar, w)).length * 3;
+    out.push({ x, puntos });
+  }
+  out.sort((a, b) => Number(b.x.proyecto) - Number(a.x.proyecto) || b.puntos - a.puntos || a.x.titulo.localeCompare(b.x.titulo, 'es'));
+  return out.slice(0, max).map(({ x }) => ({ id: x.id, titulo: x.titulo, descripcion: x.descripcion, tabla: x.tabla, portada: x.portada, ruta: x.ruta }));
+}
+
 export function registrarBuscadorSitio(app: Express, db: any) {
+  app.get('/api/sitio/sugerencias', async (req: Request, res: Response) => {
+    try {
+      const raiz = String(req.query.sitio || '').trim();
+      const q = planoJs(String(req.query.q || '').replace(/\s+/g, ' ').trim()).slice(0, 100);
+      if (!raiz) return res.status(400).json({ error: 'Falta el sitio en el que buscar.' });
+      if (q.length < 2) return res.json({ q, resultados: [] });
+      if (!(await paginaVisible(db, raiz))) return res.status(404).json({ error: 'Ese sitio no existe o no está publicado.' });
+      res.set('Cache-Control', 'public, max-age=60');
+      res.json({ q, resultados: sugerir(await indiceSugerencias(db, raiz), q) });
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   // Las secciones del sitio, para la portada y la página de error.
   app.get('/api/sitio/secciones', async (req: Request, res: Response) => {
     try {

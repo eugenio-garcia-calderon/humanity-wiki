@@ -9,7 +9,7 @@ import { EXPLICACIONES as BALA } from './bala';
 // Apterike… y la reclinación del asiento». Los valores de serie son los de
 // TRICICLO_DEFECTO (geometria.ts). El Triciclo es un diseño propio: nada de él
 // se ha medido; las masas son estimaciones de piezas de su clase, y lo dicen.
-// Las de la forma que no hablan de las ruedas son las del Cuadriciclo (la
+// Las de la forma que no hablan de las ruedas son las del Cuadriciclo en rombo (la
 // carrocería es la misma); las demás se reescriben, porque aquí las ruedas
 // van en otro sitio.
 
@@ -28,7 +28,7 @@ const C = {
   bateria: 'Batería dentro de la carrocería',
 };
 const t = (k: string) => ('t' + k.slice(1)) as keyof Parametros;
-/** La del Cuadriciclo para el mismo deslizador, con sus enlaces pasados a los del Triciclo. */
+/** La del Cuadriciclo en rombo para el mismo deslizador, con sus enlaces pasados a los del Triciclo. */
 const desdeBala = (k: keyof Parametros, cambios: Partial<ExplicacionParametro> = {}): ExplicacionParametro => {
   const b = BALA[k]!;
   return { ...b, relacionados: b.relacionados.map(r => (String(r).startsWith('b') ? t(String(r)) : r)), comprobaciones: undefined, ...cambios };
@@ -37,7 +37,7 @@ const E = (nombre: string, queEs: string, porQueImporta: string, alto: [string[]
   ({ nombre, queEs, porQueImporta, masAlto: { ventajas: alto[0], desventajas: alto[1] }, masBajo: { ventajas: bajo[0], desventajas: bajo[1] }, referencias, relacionados, ...(comprobaciones ? { comprobaciones } : {}) });
 
 export const EXPLICACIONES: Explicaciones = {
-  // ── Carrocería: la forma del Cuadriciclo ────────────────────────────────────
+  // ── Carrocería: la forma del Cuadriciclo en rombo ────────────────────────────────────
   tCola: desdeBala('bCola'), tPuntaCola: desdeBala('bPuntaCola'), tSuelo: desdeBala('bSuelo', {
     comprobaciones: [C.bastidor, C.trasera, 'Bajos al suelo con la suspensión hundida', C.vuelco],
     queEs: 'Lo que hay, en centímetros, entre el suelo y lo más bajo de la panza: de 4 a 35 cm (35 es lo que lleva un todocamino pequeño).',
@@ -51,7 +51,7 @@ export const EXPLICACIONES: Explicaciones = {
     [['Más sitio para hombros, codos y rodillas.', 'Cabe más batería en el morro.'], ['Más área frontal: más aire que empujar.', 'Los carenados, girados, quedan más cerca de la carrocería.']],
     [['Menos área frontal: gasta menos.'], ['Menos sitio dentro; el manillar se estrecha con ella.']], ['tVia', 'tGiro'], [C.girado, C.recto, 'Manillar dentro de la carrocería']),
   tMorro: E('Morro: del eje delantero a la punta', 'Lo que la carrocería sale por delante del eje de las ruedas delanteras (m). Se estira la punta; la cúpula no se mueve.',
-    'Un morro largo y afilado abre el aire con más suavidad; uno corto acorta el vehículo. En el Triciclo el eje delantero va por detrás de donde el Cuadriciclo lleva su rueda delantera, así que este valor sale mayor que en el Cuadriciclo con la misma forma.',
+    'Un morro largo y afilado abre el aire con más suavidad; uno corto acorta el vehículo. En el Triciclo el eje delantero va por detrás de donde el Cuadriciclo en rombo lleva su rueda delantera, así que este valor sale mayor que en el Cuadriciclo en rombo con la misma forma.',
     [['Entrada más suave para el aire.', 'Más sitio para la batería en el morro.'], ['Más largo y algo más pesado.']],
     [['Más corto: aparca mejor.'], ['La batería del morro tiene menos sitio.']], ['tPuntaMorro', 'tEjeDel'], [C.bateria]),
   tPuntaMorro: E('Morro: afilado de la punta', 'Lo afilado del cono del morro (sin unidad): más es más en punta.',
@@ -76,7 +76,7 @@ export const EXPLICACIONES: Explicaciones = {
   tVentAlto: E('Ventana lateral: alto (encima, el techo)', 'Qué parte del costado de cristal de la cúpula es ventana, desde su borde de abajo hacia lo alto (%). Encima de esa línea va el techo: el panel solar detrás de donde empieza, y el parabrisas delante.',
     'Es la línea del techo vista de lado, la que separa la ventana del panel. Cerca de los extremos de la cúpula el borde del cristal sube hasta lo alto, y esta línea con él: la ventana se cierra en una gota alargada, como en el Aptera.',
     [['Ventanas más grandes: más vista de lado.'], ['Panel más estrecho: menos sombra y menos energía.']], [['Panel más ancho: más sombra y energía.'], ['Ventanas más bajas: menos vista.']], ['tSolar', 'tPilar']),
-  tVentanas: E('Cúpula', 'Cómo es el cristal: con ventanas laterales separadas del parabrisas por un montante curvo (como el Aptera), o de una pieza, como la del Cuadriciclo.',
+  tVentanas: E('Cúpula', 'Cómo es el cristal: con ventanas laterales separadas del parabrisas por un montante curvo (como el Aptera), o de una pieza, como la del Cuadriciclo en rombo.',
     'El montante sale del borde del cristal, sube por el costado y se tumba hacia atrás en una sola curva hasta la línea del techo, por la que sigue, más estrecho, como marco entre la ventana y el techo. Es del mismo azul marino que el marco de la cúpula. La forma no cambia: ni el Cd ni el área frontal.',
     [['Con montante: aspecto de coche, un sitio para la bisagra y el refuerzo del parabrisas.'], ['Algo menos de vista en diagonal.']], [['De una pieza: vista limpia por todos lados.'], ['Una sola pieza grande de cristal: más cara de cambiar.']], ['tPilar', 'tPilarBarrido', 'tPilarAncho']),
   tPilar: E('Montante delantero: dónde nace', 'Dónde sale el montante del borde de abajo del cristal, medido desde el eje delantero (m).',
@@ -106,10 +106,10 @@ export const EXPLICACIONES: Explicaciones = {
     'Los carenados crecen con la rueda, y con un neumático de coche se ensanchan con él. Una rueda mayor pasa mejor los baches; una de coche agarra y frena más y aguanta más peso, pero pesa más del doble (unos 10-13 kg con su neumático) y ensancha el carenado.',
     [['Pasa mejor baches y bordillos.', 'Con neumático de coche: más agarre y más carga.'], ['Carenados más grandes: más área frontal y más masa.']], [['Carenados más pequeños.'], ['Más golpes en los baches.']], ['tPodEsc', 'tVia', 'tMRueda'], [C.neumatico, C.girado],
     ['Aptera: llantas de 13″ en carenados (2024)', 'Neumático 145/70 R13: 533 mm', 'Neumático 175/55 R15: 574 mm']),
-  tRuedaTras: E('Rueda trasera (dentro de la cola)', 'El tamaño de la rueda trasera, con el motor en el buje: de ciclomotor de 20″ a 28″ (neumático de 80 mm) o de coche, 13″ a 15″ (145 a 175 mm). Con dos ruedas traseras (la Bala de cuatro ruedas), el de las dos.',
+  tRuedaTras: E('Rueda trasera (dentro de la cola)', 'El tamaño de la rueda trasera, con el motor en el buje: de ciclomotor de 20″ a 28″ (neumático de 80 mm) o de coche, 13″ a 15″ (145 a 175 mm). Con dos ruedas traseras (el Cuadriciclo Bala clásico), el de las dos.',
     'Va dentro de la cola; una más grande o más ancha necesita más sitio al hundirse la suspensión. Con dos ruedas traseras van fuera, en carenados que crecen con ellas, y cada una lleva un motor de la mitad de potencia. En una llanta de coche cabe un motor de buje mucho más potente (como los motores en rueda del Aptera): en una de ciclomotor, unos 10-12 kW de pico; en una de 15″, unos 60.',
     [['Pasa mejor baches.', 'Llanta de coche: cabe un motor más potente.'], ['Menos sitio en la cola.', 'Más masa no suspendida.']], [['Más sitio en la cola.'], ['Más golpes.', 'Limita la potencia del motor de buje.']], ['tRecTras', 'tBasculante', 'tKWPico'], [C.trasera, 'Motor de buje: potencia que cabe en la rueda trasera']),
-  tFaldon: E('Rueda trasera: faldón (cuánto asoma)','Cuánto tapa un faldón estrecho bajo la cola la parte de abajo de la rueda trasera: 0 sin faldón (asoma como en el Cuadriciclo), 1 hasta 4 cm del suelo.',
+  tFaldon: E('Rueda trasera: faldón (cuánto asoma)','Cuánto tapa un faldón estrecho bajo la cola la parte de abajo de la rueda trasera: 0 sin faldón (asoma como en el Cuadriciclo en rombo), 1 hasta 4 cm del suelo.',
     'Tapar la rueda reduce el aire que remueve. El túnel no distingue cuánto asoma, así que su efecto en el Cd no se calcula aquí.',
     [['Menos rueda al aire.'], ['Roza antes en badenes y bordillos.']], [['Más altura bajo la cola.'], ['Más rueda al aire.']], ['tSuelo']),
   tEspCarenado: E('Espesor de la carrocería', 'El espesor del laminado de la carrocería y de los carenados (mm).', 'Más espesor, más rígida y más pesada; la masa sale de la superficie real de la piel.',
@@ -173,7 +173,7 @@ export const EXPLICACIONES: Explicaciones = {
   tBatalla: E('Batalla: eje delantero a trasero', 'La distancia entre el eje de las dos ruedas delanteras y el de la trasera (m). Moverla mueve la rueda trasera y estira la carrocería.',
     'Con la misma carga, una batalla más larga deja el centro de gravedad relativamente más cerca de las ruedas de delante.',
     [['Más estable en recta.'], ['Gira peor y es más largo.']], [['Más ágil y corto.'], ['La cola se acorta.']], ['tEjeDel', 'tCola'], [C.vuelco, C.trasera]),
-  tEjeDel: E('Eje delantero: atrasado', 'Cuánto va el eje de las ruedas delanteras por detrás de donde el Cuadriciclo lleva su rueda delantera (m).',
+  tEjeDel: E('Eje delantero: atrasado', 'Cuánto va el eje de las ruedas delanteras por detrás de donde el Cuadriciclo en rombo lleva su rueda delantera (m).',
     'En un triciclo con dos ruedas delante, el vuelco depende de lo cerca que esté el peso de ese eje. Atrasarlo lo acerca al centro de gravedad: más estable. A cambio, la batalla se acorta y los carenados quedan al lado de los pies del piloto.',
     [['Vuelca menos.'], ['Batalla más corta.']], [['Batalla más larga.'], ['Vuelca antes.']], ['tVia', 'tBatalla'], [C.vuelco, C.girado]),
   tVia: E('Vía delantera', 'La distancia entre los centros de las dos ruedas delanteras (m).',
@@ -204,10 +204,10 @@ export const EXPLICACIONES: Explicaciones = {
   tMInversor: E('Controlador (inversor)', 'Lo que pesa el controlador del motor (kg), bajo el sillín del pasajero. Su rango sigue a la potencia máxima (0,08 a 0,2 kg por kW, más una base).', 'Entra en la masa.', [['Mejor refrigerado.'], ['Más masa.']], [['Menos masa.'], ['Más caro.']], ['tKWPico']),
   tVel: E('Velocidad de cálculo', 'La velocidad a la que se calculan el consumo y la autonomía (km/h).', 'El aire cuesta con el cubo de la velocidad: a 100 km/h gasta mucho más que a 60.', [['Cifras de autovía.'], ['Más consumo y menos autonomía.']], [['Cifras de ciudad.'], ['No representa la carretera.']], ['tKWh']),
   tKWh: E('Batería', 'La energía de la batería (kWh), de 5 a 30.',
-    'Va delante y baja, que es donde un triciclo con dos ruedas delante quiere el peso: primero en el morro, donde el Cuadriciclo lleva la rueda delantera; luego entre los pies del piloto; luego el módulo del morro sube y crece hacia la punta; y por último un módulo plano bajo los sillines. En esta carrocería estrecha caben unos 60 L: con 230 Wh/L, unos 14 kWh. Para más hace falta un morro más largo, una carrocería más ancha o celdas más densas; lo que no cabe no se dibuja y la comprobación «Batería: cabe en su sitio» dice cuántos litros faltan.',
+    'Va delante y baja, que es donde un triciclo con dos ruedas delante quiere el peso: primero en el morro, donde el Cuadriciclo en rombo lleva la rueda delantera; luego entre los pies del piloto; luego el módulo del morro sube y crece hacia la punta; y por último un módulo plano bajo los sillines. En esta carrocería estrecha caben unos 60 L: con 230 Wh/L, unos 14 kWh. Para más hace falta un morro más largo, una carrocería más ancha o celdas más densas; lo que no cabe no se dibuja y la comprobación «Batería: cabe en su sitio» dice cuántos litros faltan.',
     [['Más autonomía.', 'Más peso delante y bajo: vuelca menos.'], ['Más masa y más cara.', 'Por encima de unos 14 kWh no cabe en la carrocería de serie.']], [['Menos masa y más barata.'], ['Menos autonomía.']], ['tWhKg', 'tWhL', 'tAncho', 'tMorro'], [C.bateria, 'Batería: cabe en su sitio', C.vuelco]),
   // ── Cuatro ruedas (2026-11-11): «haz un vehículo igual que el triciclo bala, pero esta vez que tenga 4 ruedas»
-  tTraseras: E('Ruedas traseras', 'Una rueda trasera dentro de la cola, sobre un basculante (el Triciclo Bala), o dos fuera, cada una en un carenado como los de delante, sobre dos brazos carenados, que no giran (la Bala de cuatro ruedas). La carrocería y todas las demás medidas son las mismas.',
+  tTraseras: E('Ruedas traseras', 'Una rueda trasera dentro de la cola, sobre un basculante (el Triciclo Bala), o dos fuera, cada una en un carenado como los de delante, sobre dos brazos carenados, que no giran (el Cuadriciclo Bala clásico). La carrocería y todas las demás medidas son las mismas.',
     'Con una rueda detrás el vehículo se apoya en un triángulo: en una curva cerrada vuelca sobre la línea que va de la rueda delantera de fuera a la trasera, y por eso el vuelco depende tanto de la vía delantera y de dónde va el peso. Con dos ruedas detrás se apoya en un rectángulo, como un coche: el umbral de vuelco sube mucho (con las medidas de serie, de unos 1,1 g a unos 1,7 g). A cambio pesa unos 12 kg más (otra rueda, otro carenado con sus brazos, otro freno), el aire ve dos carenados más y sube algo el consumo; la cola queda libre y el maletero crece. Las de delante siguen siendo las únicas que giran: el radio de giro no cambia.',
     [['Vuelca mucho menos: apoyo de coche.', 'Más maletero: la cola ya no lleva rueda.', 'La potencia se reparte entre dos motores de buje.'], ['Más masa y algo más de consumo.', 'Dos carenados más que cuidar y más ancho detrás.']],
     [['Más ligero y con menos resistencia al aire.', 'Más estrecho detrás.'], ['Vuelca antes: depende de la vía delantera y del peso delante.']],

@@ -19,7 +19,7 @@ import { ESCALA_CP } from './tunel/colores';
  */
 export interface FilaTunel {
   id: string; nombre: string; cd: number; area: number; fuente: string; masa?: number; crr?: number; vmax?: number; estimado?: boolean;
-  /** Where our design's Cd comes from, when it is not the editor's formula (the Cuadriciclo Bala: the tunnel itself). */
+  /** Where our design's Cd comes from, when it is not the editor's formula (the Cuadriciclo Bala en rombo: the tunnel itself). */
   origenCd?: string;
 }
 

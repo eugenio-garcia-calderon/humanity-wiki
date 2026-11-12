@@ -33,13 +33,13 @@ export type Puerta = 'cabina' | 'gaviota' | 'aptera';
  *            un 30 % mayor), puertas, maleteros, motor de 15/32 kW y
  *            batería de 27 kWh. Es el diseño por defecto. Su geometría vive
  *            en `geometriaA1.ts`.
- *   'bala'   el Cuadriciclo Bala (2026-11-09): el modelo del garaje hecho
+ *   'bala'   el Cuadriciclo Bala en rombo (2026-11-09): el modelo del garaje hecho
  *            editable, biplaza a horcajadas con el rombo del Gota. Su forma
  *            vive en `garaje/balaForma.ts` y lo del editor en `geometriaBala.ts`.
- *   'triciclo' el Triciclo Bala (2026-11-10): la carrocería del Cuadriciclo con
+ *   'triciclo' el Triciclo Bala (2026-11-10): la carrocería del Cuadriciclo en rombo con
  *            tres ruedas, dos delante en carenados (como el Aptera) y una
  *            detrás; se edita por departamentos como el Aeromóvil 1. Vive en
- *            `geometriaTriciclo.ts` (la forma, la misma del Cuadriciclo).
+ *            `geometriaTriciclo.ts` (la forma, la misma del Cuadriciclo en rombo).
  */
 export type Disposicion = 'rombo' | 'cuatro' | 'bala' | 'triciclo';
 /** Neumáticos de coche pequeño: diámetro exterior y anchura (m). Los del Twizy son los dos primeros. */
@@ -229,7 +229,7 @@ export const PARAMETROS_A1: Parametros = {
   mAsiento: 7, matCarenado: 'carbono', espCarenado: 1.8, espCristal: 4.0, mSolarM2: 2.2, mVarios: 25,
 };
 /**
- * El Cuadriciclo Bala (2026-11-09): las medidas del modelo del garaje. Con
+ * El Cuadriciclo Bala en rombo (2026-11-09): las medidas del modelo del garaje. Con
  * ellas el editor construye exactamente el Bala del garaje. Lo que no son
  * campos `b…` viene del Gota y el Bala no lo usa (salvo el espesor del
  * cristal, para la holgura sobre la cabeza).
@@ -240,7 +240,7 @@ export const BALA_DEFECTO: CamposBala = {
 };
 export const PARAMETROS_BALA: Parametros = { ...PARAMETROS_GOTA, disposicion: 'bala', ...BALA_DEFECTO };
 /**
- * El Triciclo Bala (2026-11-10): la forma, la del Cuadriciclo (los mismos
+ * El Triciclo Bala (2026-11-10): la forma, la del Cuadriciclo en rombo (los mismos
  * valores, en sus campos `t…`); lo demás, propuesto (ver geometriaTriciclo.ts
  * y memory/03_DECISIONS.md del 2026-11-10). Lo que no son campos `t…` viene del
  * Gota y el Triciclo no lo usa.
@@ -254,7 +254,7 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   tAsientos: 'horcajadas', tFila2: 'abierta', tFila3: 'abierta', tFila2X: 0.70, tFila3X: 0.72, tRecFila: 15,
   tChMat: 'cromoly', tChD: 45, tChT: 2.4, tChUniones: 3.5,
   tBatalla: 2.45, tEjeDel: 0.30, tVia: 1.80, tRuedaDel: '20', tRuedaTras: '24', tGiro: 28, tRecDel: 80, tRecTras: 80, tBasculante: 0.50,
-  // the «Bala de cuatro ruedas» (2026-11-11): one rear wheel in the tail by default; a design without `tViaTras` takes its own `tVia` (camposTriciclo)
+  // the «Cuadriciclo Bala clásico» (2026-11-11): one rear wheel in the tail by default; a design without `tViaTras` takes its own `tVia` (camposTriciclo)
   tTraseras: 'una', tViaTras: 1.80,
   tMRueda: 4.5, tMFreno: 1.2, tMSuspDel: 9, tMSuspTras: 6, tMDir: 4.5,
   tKWNom: 5, tKWPico: 10, tMMotor: 13, tMInversor: 2.5, tVel: 80,

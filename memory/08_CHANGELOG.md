@@ -11103,6 +11103,10 @@ Eugenio: «Haz un vehículo igual que el triciclo bala, pero esta vez que tenga 
 - **El faldón y el basculante** no existen con dos ruedas: sus deslizadores se quedan apagados.
 - **Comprobado** en Chromium sin cabeza a 1280×800 con WebGL por software: la Bala de cuatro ruedas en 3/4, de lado, desde atrás y en 3/4 trasero; los paneles de Rodaje y Proyecto; el Triciclo sigue con tres ruedas. **No comprobado** en un móvil ni con la aplicación instalada.
 
+### 2026-11-12 — Buscador de luzhumanidad.com con sugerencias al momento; menú en el Observatorio de Polarización
+- `GET /api/sitio/sugerencias`: lista en memoria por sitio (5 min, se rehace sin hacer esperar) de lo visible; busca en título, tabla y descripción; proyectos primero. `/api/sitio/buscar` tardaba 2-3 s por letra.
+- `BuscarBarra.tsx`: lista grande (portada, título, descripción), grupos «Proyectos» / «Otras páginas», flechas + Intro, de lado a lado en el móvil.
+- `ObservatorioPolarizacion.tsx`: cabecera del sitio (logo → inicio) y el marco ocupa el resto de la pantalla; se quita la franja blanca de 64 px (`100dvh - 64px` sin cabecera).
 ## 2026-11-12 — Conciencia: la barra de luzhumanidad.com encima
 
 - Eugenio: «haz que aparezca el menú superior de luzhumanidad.com en esta página».
@@ -11114,7 +11118,14 @@ Eugenio: «Haz un vehículo igual que el triciclo bala, pero esta vez que tenga 
   - el mapa acaba dentro de la pantalla.
 
   No hubo errores en la consola.
+## 2026-11-12 · Aeromóvil: «Cuadriciclo Bala clásico» y «Cuadriciclo Bala en rombo»
+
+Eugenio: «coge la configuración de los sliders del triciclo bala y aplícasela al cuadriciclo bala nuevo, y cámbiale el nombre a cuadriciclo bala»; preguntado qué hacer con el antiguo, que ya se llamaba así: «El antiguo llámalo cuadriciclo bala en rombo, y el nuevo cuadriciclo bala clásico».
+- La Bala de cuatro ruedas (Triciclo con dos ruedas traseras en carenados) se llama ahora **«Cuadriciclo Bala clásico»** en todo el editor: cabecera, título, túnel, planos, nombre del STL (`cuadriciclo-bala-clasico-…`).
+- El antiguo, con las ruedas en rombo, se llama **«Cuadriciclo Bala en rombo»** (STL `cuadriciclo-bala-rombo-…`). Los textos del Triciclo que decían «donde el Cuadriciclo lleva su rueda delantera» dicen ahora «el Cuadriciclo en rombo», para que no se confunda con el clásico.
+- Migración `0198`: al desplegar, el diseño de cuatro ruedas del equipo recibe otra vez los parámetros del Triciclo guardado (el que esté por defecto o, si no, el último del equipo), con el nombre nuevo; la vía trasera vuelve a ser igual que la delantera. Los diseños del equipo de la familia en rombo cuyo nombre empieza por «Cuadriciclo Bala» pasan a «Cuadriciclo Bala en rombo…»; los de visitantes conservan su nombre. El registro del despliegue dice qué fila se copió y con qué valores.
+- Comprobado: la migración en un Postgres temporal (copia, renombra, se puede repetir sin efecto), `tsc`, `build` y las pruebas del Bala y del Triciclo.
 ## 2026-11-12 — Modelo socioeconómico embedded in luzhumanidad.com, new address
 
-- `luzhumanidad.com/modelo-socioeconomico-optimizado` (migration 0198): the project page's slug loses `/impuesto-unico`; the old address is in `direcciones_anteriores`, so it answers 301 to the new one. The same migration corrects the page's subtitle, first paragraph and image alt from «0, 20 y 40 %» to 10/25/40 on top of the price — only where they were still exactly 0184's text.
+- `luzhumanidad.com/modelo-socioeconomico-optimizado` (migration 0199): the project page's slug loses `/impuesto-unico`; the old address is in `direcciones_anteriores`, so it answers 301 to the new one. The same migration corrects the page's subtitle, first paragraph and image alt from «0, 20 y 40 %» to 10/25/40 on top of the price — only where they were still exactly 0184's text.
 - The page now keeps the site's top bar (the same one the consciousness map got the same day, `CON_BARRA`) and shows the model inside a box as tall as the screen (`AplicacionIncrustada`), with its own scroll so its sticky header and `#section` links work inside. A «Pantalla completa» / «Salir de pantalla completa» button uses the Fullscreen API, and on browsers without it (iPhone) covers the window with CSS; Esc leaves both. Only `modelo-socioeconomico` is embedded (`INCRUSTADAS` in `SubpaginaSitio.tsx`); the consciousness map and the observatory still take the whole page.
