@@ -388,7 +388,7 @@ export function TarjetaTunel({ filas, base, kmh, alCambiarKmh, alCerrar, classNa
             </tbody>
           </table>
           <p className="mt-1 text-[10.5px] leading-snug text-slate-500">
-            Calculado el {CALIBRACION.fecha.split('-').reverse().join('/')} con malla {CALIBRACION.resolucion} a {CALIBRACION.kmh} km/h. «Sin él»: lo que sale si ese coche no se usa para ajustar; con los cuatro cerrados da un error medio de ±{fmt(banda * 100, 0)} %, y esa es la banda que lleva este diseño.
+            Calculado el {CALIBRACION.fecha.split('-').reverse().join('/')} con malla {CALIBRACION.resolucion} a {CALIBRACION.kmh} km/h. «Sin él»: lo que sale si ese coche no se usa para ajustar. La banda que lleva este diseño es ±{fmt(banda * 100, 0)} %, la del ajuste anterior; con los cuatro coches cerrados de hoy sale ±{fmt(CALIBRACION.ajusteActual.banda * 100, 0)} %, y se deja la más ancha a propósito.
             * El Twizy va abierto por los lados y con las ruedas al aire: el método no ve el aire que entra en la cabina ni el que revuelven las ruedas sueltas, y se queda en la mitad. No se usa para ajustar.
             El Cd del Aptera (0,13) lo declara la marca sin ensayo publicado.
           </p>

@@ -42,6 +42,9 @@ export const EXPOSICION: Record<TipoRueda, number> = {
  *    closed garage cars with a published Cd (XL1, 1-Litro, SZEmission, Aptera),
  *    «media» resolution, 80 km/h, least squares on the relative error. The Twizy,
  *    open at the sides, is left out of the fit and shown as a test outside it.
+ *    2026-11-12: with the Aptera redrawn the same fit gives 0.0565; 0.051 is
+ *    kept by Eugenio's decision so our designs' Cd does not move (see
+ *    `CALIBRACION.ajusteActual` in calibracion.ts).
  */
 export const CONSTANTES = {
   K_BASE: 0.2,
