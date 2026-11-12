@@ -11189,6 +11189,33 @@ Eugenio: «llamado Observatorio de Polarización Política, y permite que si se 
 - `SubpaginaSitio`: si el navegador llega a `/p/:id` por un enlace armado sin la dirección legible, pregunta con HEAD y cambia la barra a la legible.
 - `GET /api/sitio/rutas?ids=`: las direcciones legibles (`rutaBonita`) que el navegador no sabía; las piden la portada, los subproyectos y la barra de Sol Solidario antes de pintar enlaces.
 
+## 2026-11-12 — Conciencia: pestañas «Tres formas de sentir» y «Fenómenos»
+
+- Eugenio pidió una pestaña con los fenómenos que nos hacen creer que percibimos más allá de los sentidos. Los que nombró:
+  - sentir que te miran por la espalda;
+  - la visión extraocular en niños;
+  - el proyecto Stargate;
+  - y otros tres a elegir.
+
+  Todo en un menú de dos pestañas.
+- En la franja de arriba hay ahora dos pestañas: **«Tres formas de sentir»**, con el dibujo y el esquema de siempre y su menú «Vista», y **«Fenómenos»**. La pestaña queda en la dirección (`?seccion=fenomenos`).
+- **Fenómenos** (`Fenomenos.tsx` y los datos en `src/data/concienciaFenomenos.ts`): arriba, la postura del proyecto con las palabras de Eugenio: la ciencia aún no lo explica porque reduce la conciencia a los sentidos físicos tradicionales. Debajo, una nota de honestidad.
+- Seis tarjetas, filtrables por despiertos, meditando o dormidos:
+  - sentir que te miran;
+  - visión extraocular;
+  - Stargate y la visión remota;
+  - sueños telepáticos (Maimonides);
+  - experimentos Ganzfeld;
+  - cerebros que se sincronizan a distancia (el potencial transferido).
+
+  Cada tarjeta cuenta qué ocurre, «Qué dice la ciencia hoy» con los resultados a favor y las réplicas que no salieron, y sus fuentes.
+- **Comprobado** en Chrome sin cabeza a 1440 px y a 390 px:
+  - cambio de pestaña y dirección;
+  - el filtro;
+  - la vuelta al dibujo.
+
+  No hubo errores en la consola.
+
 ## 2026-11-12 — Modelo socioeconómico: four tiers, no-deduction default, Categorías and Deuda windows
 
 - Four tiers instead of three: basics 10 %, secondary 20 %, leisure 40 %, luxury 60 % (Eugenio). New spending group «Joyas, relojes, moda y artículos de lujo» (≈ 17.000 M€, Círculo Fortuny), carved out of clothing and personal care; tourists split 15/12/70/3. Wages keep three rates by company size, now 10/20/40.
