@@ -11281,3 +11281,122 @@ Eugenio: «mejora muchísimo la carrocería de la Aptera… el morro está defor
 ### 2026-11-12 — Tarjetas de la portada de luzhumanidad.com un 30 % más grandes
 - `FilaSector`: ancho ×1,3 (asoma la siguiente); «Mostrar todos» con una columna menos. Letra de la tarjeta compacta un paso mayor.
   - Calendario Arte: la ilustración del mes también es el fondo de la hoja del calendario (Eugenio: «en toda la página, no solo en la parte superior… haz un poco más estrechito el calendario para que en los bordes también aparezcan partes del diseño… un toque de transparencia… finita para que sean legibles las letras»). El calendario va encima en un papel hueso al 88 % de opacidad, con 6 mm de margen arriba y abajo y 12 mm a los lados, esquinas redondeadas y una sombra suave. Es la misma imagen que arriba: en pantalla, el diseño que se está mirando; al imprimir, el que se imprime. Si el mes no tiene ilustración, la hoja sigue siendo papel liso. Comprobado en local: ningún día se desborda en los doce meses.
+
+## 2026-11-12 — Cuadriciclo Bala clásico: largo sin tocar morro ni cola, menú de departamentos arriba, batería a lo largo del bastidor, asientos más bajos, volante, salpicadero, puertas y portón como el Aptera, retrovisores
+
+Eugenio (11:44): «Permite que cuando se modifique el largo total, que no cambie la forma del morro y la cola… vuelve a ese menú desplegado… ponlo en la parte superior y el actual menú pliégalo… sliders para… la batería… a lo largo del chasis y que sobresalga un 50 % del ancho del chasis… los asientos… todavía más bajos… cambia el manillar por un volante… crea el salpicadero… puertas y ventanas idénticas a las que tiene la Aptera… sliders para… la puerta… los retrovisores… el maletero… como el de la Aptera».
+
+Todo vale para la familia del Triciclo (el Triciclo Bala y el Cuadriciclo Bala clásico). Cada opción nueva, apagada, deja el vehículo como estaba. El Cuadriciclo Bala en rombo no cambia.
+
+- **Largo total**: ahora solo cambia la batalla (y el final de la cúpula con ella). El morro y la cola conservan su forma y su largo, sección a sección; lo comprueba `triciclo-rangos`. Antes repartía el cambio entre el morro, la batalla y la cola.
+- **Un solo menú arriba**:
+  - Los departamentos vuelven a ser una fila de pestañas, como antes del 9 de noviembre, pero dentro de la barra de arriba. En el Triciclo son Proyecto, Carrocería, Chasis, Rodaje, Motor, Energía e Interior; en el Aeromóvil 1, los once.
+  - Las secciones (Diseño 3D, Otros velomóviles, Tareas, Plan, Planos, Exportar) se pliegan en un menú al final de la barra.
+  - En el móvil, la fila de pestañas se desliza de lado.
+  - Pinchar un departamento desde otra sección vuelve al 3D.
+- **Batería** (Energía › Batería), «Dónde va la batería»:
+  - Repartida: como hasta ahora, y es la de serie.
+  - **A lo largo del bastidor**: un paquete plano apoyado en el fondo de la panza, centrado; los largueros pasan por dentro de él. Tiene deslizadores de largo, ancho, alto y de dónde empieza. El ancho se da en % del ancho del bastidor, de la cara de fuera de un larguero a la del otro.
+  - «Que sobresalga un 50 %» se ha entendido como 150 % del ancho del bastidor: un 25 % por cada lado.
+  - El tamaño del paquete decide su capacidad (litros × Wh/L). El deslizador de kWh queda apagado y la muestra.
+  - Donde pasa el paquete, es el suelo: las plataformas, los estribos, los pies de las filas y los asientos se apoyan encima.
+  - El controlador va justo detrás del paquete, delante de la torreta del amortiguador; el paquete llega como mucho hasta él.
+  - Comprobaciones: dentro de la carrocería, a la cuna de la suspensión delantera, a la rueda trasera, bajo los asientos, y el controlador a la torreta.
+- **Asientos más bajos**: bajan hasta quedar con 6 cm de asiento sobre lo que tienen debajo. Eso son los largueros, a unos 26 cm del suelo, o el paquete de batería. El sillín se hace más fino al bajar. Un diseño guardado antes abre a la altura de siempre: si tenía guardada una altura por debajo del suelo de entonces, se abre en ese suelo, como antes.
+- **Mando**: «Manillar» (de serie) o **«Volante»**.
+  - El volante lleva aro, radios, cubo y columna hasta la cabeza de dirección. Las manos del piloto van al aro.
+  - Deslizadores: hacia el piloto, altura, inclinación y diámetro.
+  - Comprobaciones: dentro de la carrocería y a las rodillas.
+  - Si con una cúpula baja o larga el aro no cabe bajo el parabrisas, la columna se lleva sola hacia el piloto (hasta 25 cm) y, solo si aun así no cabe, baja. El deslizador dice cuánto.
+  - El piloto sigue a horcajadas en su sillín: el volante no trae asientos de coche.
+- **Salpicadero**: «Pantallita sobre el depósito» (de serie) o **de lado a lado**.
+  - El de lado a lado va bajo el parabrisas, a 2 cm de la piel, con una pantalla de relojes y una pantalla central. Quita el depósito.
+  - Deslizadores: altura y fondo.
+  - Comprobaciones: dentro de la carrocería y a las rodillas.
+- **Puertas como el Aptera** (Carrocería › Puertas y maletero, «Acceso»):
+  - Dos puertas cortadas en esta carrocería. Cada una lleva su ventana y su marco (el montante y el carril del techo).
+  - Se abren hacia arriba y hacia fuera a la vez («de mariposa»), sobre una bisagra en el montante. Con puertas, la cúpula queda fija.
+  - Deslizadores: esquina de abajo delante, canto de atrás, umbral, línea de la ventanilla, bisagra (dónde va en el montante, el giro del eje y su inclinación hacia dentro) y ángulo de apertura.
+  - «Abrir puertas», abajo en el 3D. El filete rojo, el retrovisor y el marco de la ventana van con la puerta.
+  - De serie: bisagra al pie del montante (5 %), eje 13° más empinado que la tangente, 110° de apertura, canto de atrás a 1,86 m del eje delantero.
+  - Comprobaciones: al abrirse no entra en la carrocería; a los carenados delanteros y sus brazos, con las ruedas rectas y giradas a tope; al suelo; cuánto sale de lado; y **altura libre para entrar** (lo más bajo de la puerta abierta encima del hueco, al menos 1,40 m).
+- **Portón como el Aptera** («Maletero», solo con puertas):
+  - La bisagra va en el techo, cerca de su punto más alto; nunca más adelante que ese punto (ahí el techo aún sube y el portón rozaría al abrirse). Levanta de una pieza la luna, el techo de atrás y toda la parte de arriba de la cola, desde el hombro del costado, con la aleta.
+  - Primer intento: el corte seguía la línea de la tapa de antes, y en esta cola eso es solo la cresta. Se abría una tira estrecha. Se vio en las capturas y se bajó el corte al hombro.
+  - De serie la bisagra va a 1,40 m del eje delantero (o en el punto más alto del techo, si está más atrás) y abre 36°.
+  - Deslizadores: dónde va la bisagra (empieza en el punto más alto del techo), el ángulo de apertura y la altura de sus cantos (55° de serie). Se abre con «Abrir maletero».
+  - El volumen del maletero no cambia: cambia por dónde se carga.
+- **Retrovisores**: «Cámaras en cápsulas» (de serie) o **espejos de gota** en un brazo corto. Van en cada puerta, o en la carrocería si no hay puertas. El túnel de viento no los cuenta.
+- **Masas nuevas**, estimadas y solo con su opción: bisagras y cierres de las puertas 3 kg, del portón 2 kg, volante y columna 1,8 kg, salpicadero 4,5 kg, retrovisores 0,9 kg.
+- Las cifras de esta entrada con el clásico de verdad están en la segunda vuelta, abajo. Las de la primera versión estaban medidas con las medidas de serie, no con el clásico guardado, y no valen para él.
+- **Sin cambios** en los diseños guardados:
+  - el Triciclo y el Cuadriciclo clásico tienen las mismas mallas, vértice a vértice, y los mismos resultados que en main (`triciclo-disenos`);
+  - el Cuadriciclo en rombo, igual (`bala-huella`);
+  - el Gota y el Aeromóvil 1, igual.
+- **Para el Cuadriciclo clásico guardado**: esta rama no lleva migración. Los valores que hay que añadir van en el informe de la sesión.
+- **Comprobado** en Chrome sin cabeza con WebGL por software, a 1280 y a 390 px, con los diseños servidos de prueba:
+  - el clásico cerrado en 3/4 y de lado;
+  - con las puertas abiertas en 3/4, de lado, de frente y por detrás;
+  - con el portón abierto en 3/4, de lado y por detrás;
+  - con Rayos X (el paquete a lo largo del bastidor);
+  - el interior sin carrocería (asientos, volante, salpicadero);
+  - la barra de arriba en las dos anchuras, sin desplazamiento lateral de la página. No hubo errores en la consola.
+- **No comprobado**: en un móvil de verdad ni con la aplicación instalada. Las puertas y el portón no se comprueban malla contra malla, sino por puntos.
+
+## 2026-11-12 — Cuadriciclo Bala clásico, segunda vuelta: medido sobre el clásico guardado de verdad; paneles solares hasta la punta de la cola
+
+La primera vuelta se midió con las medidas de serie y no con el clásico que está guardado en producción. Ahora el clásico guardado de verdad es un caso de prueba (`scripts/clasicoGuardado.ts`) y todas las cifras de aquí salen de él.
+
+Eugenio: «haz también que los paneles solares lleguen hasta la punta de la cola, como en el aptera».
+
+- **Paneles solares por detrás** (Carrocería › Techo solar y ventanas): «Solo en la cúpula» (de serie) o **«Hasta la punta de la cola»**. El panel sigue por lo alto de la cola hasta su aro. Con el portón del Aptera, la parte de encima del portón se levanta con él, cortada en la bisagra; con la tapa del maletero, con la tapa.
+- **Puertas**: bisagra al pie del montante, eje 13° más empinado que la tangente y 110° de apertura de serie (el giro del eje llega ahora a +20° y la apertura a 115°). El canto de atrás, de serie a 1,86 m, nunca pasa de 2 m ni de 20 cm antes del final de la cúpula.
+  - Nueva comprobación: **«Puerta abierta: altura libre para entrar»**, al menos 1,40 m.
+  - La comprobación de los carenados mira ahora también con las ruedas giradas a tope.
+  - Se pidió +15°; se dejó en +13° porque con +15° y la ventanilla al máximo la puerta entraba 0,5 cm en la carrocería al abrirse.
+  - Con la bisagra fuera de su sitio de serie (más arriba en el montante, o el eje girado hacia el otro lado), la puerta puede rozar la carrocería al abrirse: «Puerta: al abrirse no entra en la carrocería» se pone en rojo. En el clásico guardado: con el eje a −12°, 2,0 cm; con la bisagra a media altura, 0,5 cm.
+  - El canto de arriba de la puerta ya no muerde la corona de la cola, y la franja del marco se afina antes de la esquina redondeada de atrás. El serigrafiado del cristal sigue solo el borde de verdad, no los escalones del corte.
+- **Portón**: ángulo de 36° de serie; su altura abierto cuenta ahora la aleta, que va con él; un deslizador nuevo para la altura de sus cantos; la bisagra empieza siempre en el punto más alto del techo.
+- **Batería a lo largo del bastidor**: el paquete apoya en el fondo de la panza y los largueros pasan por dentro de él; el controlador va justo detrás del paquete. El largo del paquete llega hasta el controlador.
+- **Volante**: si el aro no cabe, la columna se acerca sola al piloto (hasta 25 cm) antes de bajar. Fondo del salpicadero de serie, 16 cm.
+- **Largo total**: la batalla puede llegar a 3,40 m, así que el clásico guardado puede crecer.
+- **Textos corregidos**: decían cosas que no eran verdad o que dejaron de serlo. Se cambiaron:
+  - la bisagra («abajo casi como una de coche»);
+  - el volante («va con asientos de coche»);
+  - la batería («encima de los largueros»), en tres sitios;
+  - el portón («más de 2 m»);
+  - el hueco alto de las puertas, que ahora se comprueba.
+
+**El clásico guardado con los valores propuestos para su migración** (no hay migración en esta rama; los valores van en el informe):
+
+| | Hoy (main) | Con la migración |
+|---|---|---|
+| Batería | 20,5 kWh repartida (89 L; caben 65: en rojo) | 16,0 kWh en un paquete de 70 L, 84 kg |
+| Masa sin ocupantes | 292 kg | 279 kg (439 kg con dos) |
+| Vuelco con dos | 1,67 g | 1,79 g (solo el piloto, 1,95 g) |
+| Asientos (piloto / pasajero) | 0,38 / 0,42 m | 0,33 / 0,33 m (lo más bajo posible con este paquete) |
+| Panel solar | 1,45 m², 304 W | 1,67 m², 351 W |
+| Comprobaciones en rojo | 6 | 2, las dos ya en rojo en main |
+
+- Las dos en rojo: «Cabeza del piloto a la cúpula (talla alta, sin casco)», con 0,6 cm de los 1 cm pedidos (en main, −4,4 cm), y «Bastidor: coeficiente de seguridad ×1,6».
+- La puerta abierta deja 1,80 m libres encima del hueco; sale 1,52 m de lado desde el centro; queda a 6,7 cm del carenado delantero girado a tope.
+- El portón abierto llega a 2,13 m con la punta de la aleta (1,85 m sin ella). La comprobación no contaba la aleta y decía 1,85: ahora la cuenta.
+- El maletero pasa de 939 a 885 L.
+- Con 20,5 kWh (paquete de 12,8 cm de alto), los asientos no bajan de 0,36 m y vuelven tres avisos de cabeza: es la otra opción.
+
+**Comprobado**:
+- `triciclo-disenos` contra main, con el clásico guardado de verdad: mismas mallas vértice a vértice y mismos resultados;
+- `triciclo-rangos` con «clásico», el clásico de verdad incluido (450 casos):
+  - dos fallaron, los dos de la puerta rozando al abrirse con la bisagra fuera de su sitio de serie (arriba);
+  - después se cambió la prueba para que, en los casos que mueven la bisagra, eso sea un aviso, y se añadió la altura de la aleta al portón;
+  - la prueba no se volvió a pasar entera después de esos dos cambios;
+- `bala-huella`, normal y `--editor`, y `tunel-pruebas`, antes de esos dos últimos cambios (no tocan el Cuadriciclo Bala ni el túnel);
+- capturas del clásico de verdad en Chrome sin cabeza con WebGL por software:
+  - cerrado de 3/4 por los dos lados;
+  - con las puertas abiertas, de lado, de frente y de 3/4;
+  - con todo abierto;
+  - con el portón abierto, de lado y de 3/4 delantero;
+  - el interior sin carrocería.
+  - No hay vista de 3/4 trasera: arrastrar para girar la cámara no la dio.
+
+**No comprobado**: en un móvil de verdad ni con la aplicación instalada.

@@ -1530,3 +1530,76 @@ Eugenio wants to click the garage Aptera and open its doors and boot. Options:
 
 - **Seams.** The moving panels sit 4 mm out of the skin with a polygon offset (`pinturaPieza`, `bandaPieza`), and the fixed skin and band lose only cells fully inside an opening (tested at each mesh's own cell size). Fixed cells that cross the door line stay under the panel and never show. The opening frame is grouped per opening and shown only while that panel is open, through a new optional `PivoteGaraje.conHueco`. Not taken: cutting the fixed skin with exact edges along the door line (clean at any distance, about half a day).
 - **Tunnel.** The evaluator found that the Aptera's new shape moves the fit (DCD_DETALLES 0.051 → 0.0565, band ±15 % → ±11 %). Eugenio decided that no constant and no Cd shown for our designs changes. The calibration table stores today's rows. The fit is recorded as data (`CALIBRACION.ajusteActual`) and the tests check it there, so a silhouette that moves again still fails. The difference from the constants in use is printed as a warning, and the card's text says the band in use is the earlier, wider one.
+
+## 2026-11-12 · Cuadriciclo Bala clásico: Aptera doors and hatch, pack along the frame, steering wheel, dashboard, lower seats, one top menu
+
+**Largo total.** It now writes only `tBatalla` (and `tCupFin` with it).
+- The shape is stretched piecewise between its anchors: nose tip, x = 0, canopy start, canopy end, rear axle, tail tip. When only the middle segment grows, the nose and tail sections stay as they were.
+- Rejected: a stored «largo» field. It would have needed a migration and a second source of truth.
+
+**Doors.** Cut into the skin in (x, t) space (`garaje/balaPuertas.ts`), not drawn as separate shells.
+- Each grid cell's triangles are clipped exactly along the door's top and bottom curves: Sutherland-Hodgman against two half-planes, linear in x between the cell's two rows. Rows are added at the door's ends and corners.
+- The new vertices are the skin's own points, computed identically for both sides of a cut, so there is no crack.
+- Rejected: (a) per-cell classification, which gives 2 cm staircase edges; (b) separate door shells laid over the body, which z-fight and leave the body with no hole.
+- Outline:
+  - top: the window frame band's outer edge (the band rides with the door);
+  - front edge: a straight line in side view from the pillar's foot to the bottom-front corner;
+  - bottom: the sill height;
+  - rear: a vertical edge with rounded corners.
+- **The hinge axis is the tangent to the pillar's edge at the hinge point.** The pillar is a concave curve.
+  - The first try used a straight axis through the foot, rising at 38°. It left 11 cm of door above the axis, and that part swung 11 cm into the pillar.
+  - A tangent lies above a concave curve, so the whole door stays below it and swings out.
+  - The «bisagra» slider moves the point along the pillar: near the foot it is a plain front-hinged door, in the middle the Aptera's butterfly, near the roof a gull wing.
+  - A second slider turns the axis off the tangent; the swing check reports any penetration.
+- Doors force the window frame (pillar and rail) and stop the canopy from opening.
+
+**Hatch.** Only with doors, because it takes the canopy's rear part, which a one-piece canopy carries when it opens.
+- Hinged across the roof near its highest point, and clamped so it is never ahead of that point. Ahead of the crest the roof still rises, and the hatch edge, lifting about a lower hinge, swings forward into it: 1.1 cm at the forward end of the slider with three rows.
+- Its side edge is the door's top while beside a door. Behind the door it eases down over 35 cm to the tail's shoulder (section point P4, t = 0.47) and follows it to the tail ring. That stays above the rear arms (0.52 m), the charging flap and the rear vents.
+- The first version followed the round-three lid's line (the canopy frame's outer edge). On this tail that line is the crown, so only a strip opened, which is not the Aptera's clamshell. It was caught in the screenshots and changed.
+
+**Steering wheel.** If the rim does not fit with 1 cm under a low or long canopy, the hub comes down until it does (`volante.baja`), as the handlebar narrows. The knee check stays a warning, not a constraint.
+
+**Swing checks.** 12 steps to full opening.
+- The rotated door is tested against: the fixed skin outside its own opening (points within 4 cm of the axis excluded); the front pods and their arms, with the wheels straight; and the ground.
+- The hatch is tested against the fixed skin.
+- They are point samples (17 × 9 on the door, 25 × 9 on the hatch), not a mesh-mesh intersection.
+
+**Battery along the frame.** The pack's size decides its capacity (litres × Wh/L), and the kWh slider is disabled in that layout.
+- This matches the «disposición» sliders (length, width, height, position). The other way round, length would have been a derived number.
+- Width is a % of the frame's outer width. «Sobresalga un 50 %» = 150 %, centred.
+- The pack sits on the rails and is the floor where it runs: footboards, footpegs, the rows' feet and the seat posts stand on it.
+- Mass and CG use its real box, so the rollover figure follows it.
+
+**Seat floor.** The minimum is now 6 cm of seat over whatever is under it (rails or pack).
+- A design saved before (no `tMando` key) is converted on load to the old floor (`asientosDeAntes`, Disenos.tsx). That reproduces the old clamp exactly.
+- So saved designs build vertex-identical: `triciclo-disenos` checks five saved variants, the clásico included.
+
+**Top menu.** The departments are the bar's tab row, as before 383754a; the sections fold into one dropdown. Eugenio's call («es más útil el otro»).
+
+## 2026-11-12 · Cuadriciclo Bala clásico, round 2: measured on the real saved row; tail solar panel
+
+**The real clásico is a fixture.** The evaluator rejected round 1 because every number came from the defaults, not from the row saved in production.
+- `scripts/clasicoGuardado.ts` holds that row. `triciclo-disenos` compares it with main; it opens vertex-identical.
+- `triciclo-rangos` («clásico real») runs it as it opens today and with the proposed migration values, every slider at both ends and every option.
+
+**Pack on the belly.** The pack's floor is the belly skin plus 1.2 cm (`fondoPaquete`), raised until its lower edges sit 1 cm inside the skin. The rails run through it.
+- Rejected: the pack on top of the rails, which lifts the seats' floor by the rails' height. On the belly, with a 10 cm pack, the seats on the real clásico go down to 0.33 m.
+- The controller moved behind the pack (`finPaquete`), so the pack no longer stops at a fixed x.
+
+**Door defaults: hinge at the foot (5 %), axis +13° off the tangent, 110°.**
+- The evaluator asked for +15°. With +15° and the window height at its maximum (0.85), the door enters the body by 0.5 cm while opening. +13° clears at that maximum (checked at 10–13°) and still leaves 1.80 m of clear entry height on the real clásico.
+- New check «Puerta abierta: altura libre para entrar» (≥ 1.40 m): the lowest point of the open door over the entry footprint. It is a warning, not in `triciclo-rangos`' must-pass list, because a hinge high on the pillar legitimately puts the door above the opening.
+- The pod check now also runs at full lock, in the pod's own rotated frame.
+- **No door stop.** A door stop (stop at the last 2° step before 4 mm into the body) was written and dropped. With the hinge halfway up the pillar the door grazes the pillar's edge by about 5 mm at 4°, so the stop held it at 2°: a door that does not open is worse than a 5 mm graze shown in red. So off-default hinge settings can make the door graze, and the check says so.
+  - On the real clásico, the hinge-angle slider at −12° grazes 2.0 cm. With every new slider at its maximum and three rows on the default clásico, it grazes 0.9 cm.
+  - `triciclo-rangos` lists the door swing as a warning (AVISO) in cases that move the hinge's own sliders, and requires it everywhere else.
+
+**Steering wheel: move the column, then lower.** If the rim does not fit, the hub first moves towards the pilot in 5 mm steps (up to 25 cm, `volante.atras`), and only then lowers (`volante.baja`). Moving keeps the hands at the same height. On the real clásico it moves 21.5 cm and does not lower.
+
+**Hatch.** The hinge never goes ahead of the roof's crest (`cimaTecho`), and the slider's range starts there. The side edge is a slider (`tMalLado`, 55°): the elevation angle seen from the section's centre, found by bisection.
+
+**Tail solar panel (`tSolarCola`).** The panel is a separate mesh from the canopy's end to the tail ring, between the hatch's side edge (+0.04 in t) and the crest; without the hatch, t ≥ 0.66.
+- It rides on whichever lid opens there: the Aptera hatch's pivot, or the old boot lid's pivot. So the split at the hinge is the hatch's own cut.
+- Its area counts in the solar area, the panel mass and the energy.
+- Rejected: extending `techoSolar` past the canopy. That mesh belongs to the canopy pivot, and it would have needed a third cut.
