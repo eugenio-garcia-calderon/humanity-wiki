@@ -213,9 +213,10 @@ const FILAS: Fila[] = [
   ['tAleta', 'carroceria', 'Morro y cola', 'bAleta', '', 0, 0, 0, 'm'],
   ['tCupIni', 'carroceria', 'Cúpula', 'bCupIni', '', 0, 0, 0, 'm'],
   // (round 3: «que el alto de la cúpula, de donde acaba la cúpula, no esté limitado»: from 1.30 m to 10 cm ahead of the
-  // rear axle, and from 1.05 to 1.90 m tall; the checks say what each end costs)
+  // rear axle, and up to 1.90 m tall; the checks say what each end costs. Not lower than 1.15: at 1.05 the real clásico's
+  // steering-column support stood 7 cm out of the body)
   ['tCupFin', 'carroceria', 'Cúpula', 'bCupFin', '', 1.30, 3.30, 0.01, 'm'],
-  ['tAlto', 'carroceria', 'Cúpula', 'bAlto', '', 1.05, 1.90, 0.002, 'm'],
+  ['tAlto', 'carroceria', 'Cúpula', 'bAlto', '', 1.15, 1.90, 0.002, 'm'],
   ['tSolar', 'carroceria', 'Techo solar y ventanas', null, 'Techo solar: dónde empieza', 0.40, 3.00, 0.01, 'm'],
   ['tVentAlto', 'carroceria', 'Techo solar y ventanas', null, 'Ventana lateral: alto (encima, el techo)', 0.30, 0.85, 0.01, 'x'],
   ['tPilar', 'carroceria', 'Techo solar y ventanas', null, 'Montante delantero: dónde nace', 0.40, 1.00, 0.01, 'm'],
@@ -247,10 +248,10 @@ const FILAS: Fila[] = [
   ['tColaPlana', 'carroceria', 'Morro y cola', null, 'Cola: en punta o plana y ancha (como el Aptera)', 0, 1, 0.05, 'x'],
   ['tTechoPlano', 'carroceria', 'Cúpula', null, 'Techo: redondeado o plano', 0, 1, 0.05, 'x'],
   ['tCaida', 'carroceria', 'Cúpula', null, 'Techo: caída hacia el maletero (antes o más tarde)', -0.60, 0.80, 0.05, 'x'],
-  ['tLineaCupula', 'carroceria', 'Cúpula', null, 'Línea entre carrocería y cristal: altura', -0.08, 0.15, 0.005, 'cm'],
+  ['tLineaCupula', 'carroceria', 'Cúpula', null, 'Línea entre carrocería y cristal: altura', -0.03, 0.15, 0.005, 'cm'],
   ['tPuerta2Parte', 'carroceria', 'Puertas y maletero', null, 'Segunda puerta: dónde se parten las dos', 0.90, 1.90, 0.01, 'm'],
   ['tBisagra2Y', 'carroceria', 'Puertas y maletero', null, 'Segunda puerta: bisagra a lo largo de su canto de atrás', 0.05, 0.95, 0.01, 'x'],
-  ['tBisagra2Inc', 'carroceria', 'Puertas y maletero', null, 'Segunda puerta: el eje, inclinado hacia delante arriba', 0, 75, 1, '°'],
+  ['tBisagra2Inc', 'carroceria', 'Puertas y maletero', null, 'Segunda puerta: el eje, inclinado hacia delante arriba', 0, 45, 1, '°'],
   ['tPuerta2Abre', 'carroceria', 'Puertas y maletero', null, 'Segunda puerta: ángulo de apertura', 40, 120, 1, '°'],
   ['tEspCarenado', 'carroceria', 'Material y espesores', null, 'Espesor de la carrocería', 0.6, 2.4, 0.1, 'mm'],
   ['tEspCristal', 'carroceria', 'Material y espesores', null, 'Espesor de la cúpula (policarbonato)', 1.5, 4.5, 0.5, 'mm'],
