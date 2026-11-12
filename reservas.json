@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0200_modelo_socioeconomico_aplicacion.sql",
+      "motivo": "devolver config.aplicacion",
+      "desde": "2026-11-12T10:31:55.956Z"
+    }
+  ]
 }
