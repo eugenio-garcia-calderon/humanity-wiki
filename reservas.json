@@ -17,6 +17,12 @@
       "ruta": "scripts/tunel-pruebas.ts",
       "motivo": "Cuadriciclo Bala clásico / en rombo: nombres",
       "desde": "2026-11-12T09:33:28.928Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/Disenos.tsx",
+      "motivo": "Cuadriciclo Bala clásico / en rombo: nombres",
+      "desde": "2026-11-12T09:33:31.271Z"
     }
   ]
 }
