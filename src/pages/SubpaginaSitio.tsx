@@ -34,12 +34,15 @@ const Conciencia = lazy(() => import('./Conciencia'));
 const ModeloSocioeconomico = lazy(() => import('./ModeloSocioeconomico'));
 const ObservatorioPolarizacion = lazy(() => import('./ObservatorioPolarizacion'));
 const SolSolidario = lazy(() => import('./SolSolidario'));
+const CadenaSolar = lazy(() => import('./CadenaSolar'));
 const APLICACIONES: Record<string, (p: { inicio: string; conBarra: boolean; pagina: DatosPagina }) => ReactNode> = {
   conciencia: ({ inicio, conBarra }) => <Conciencia enSitio={{ inicio, conBarra }} />,
   'modelo-socioeconomico': ({ inicio }) => <ModeloSocioeconomico enSitio={{ inicio }} />,
   'observatorio-polarizacion': () => <ObservatorioPolarizacion />,
   // 2026-11-12 (Eugenio): «crea el proyecto de Sol Solidario con su página web… con el menú arriba y abajo el Sol Solidario».
   'sol-solidario': ({ pagina }) => <SolSolidario raizId={pagina.sitio?.raizId || null} paginaId={pagina.id} config={(pagina.config || {}) as any} />,
+  // 2026-11-12 (Eugenio): «haz un web en luzhumanidad.com que sea de la cadena de valor de instalación de energía solar en España… hazlo visual».
+  'cadena-solar': () => <CadenaSolar />,
 };
 // Apps that sit under the site's own top bar, like any other page of the site
 // (2026-11-12, Eugenio on the consciousness map: «haz que aparezca el menú
@@ -47,7 +50,7 @@ const APLICACIONES: Record<string, (p: { inicio: string; conBarra: boolean; pagi
 // keep their full screen until someone asks; an app that joins must leave room
 // for the bar in its own heights (see `conBarra` in Conciencia.tsx).
 // The observatorio too (2026-11-12, Eugenio: «pon el menú superior en el observatorio de polarización»).
-const CON_BARRA = new Set(['conciencia', 'observatorio-polarizacion', 'sol-solidario']);
+const CON_BARRA = new Set(['conciencia', 'observatorio-polarizacion', 'sol-solidario', 'cadena-solar']);
 // EMBEDDED IN THE PAGE (2026-11-12, Eugenio: «que el modelo socioeconómico esté
 // embebido en la página de luzhumanidad.com, que aparezca el menú de Luz &
 // Humanidad arriba, y que se pueda expandir a pantalla completa y salir»).
