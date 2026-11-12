@@ -11107,3 +11107,14 @@ Eugenio: «Haz un vehículo igual que el triciclo bala, pero esta vez que tenga 
 - `GET /api/sitio/sugerencias`: lista en memoria por sitio (5 min, se rehace sin hacer esperar) de lo visible; busca en título, tabla y descripción; proyectos primero. `/api/sitio/buscar` tardaba 2-3 s por letra.
 - `BuscarBarra.tsx`: lista grande (portada, título, descripción), grupos «Proyectos» / «Otras páginas», flechas + Intro, de lado a lado en el móvil.
 - `ObservatorioPolarizacion.tsx`: cabecera del sitio (logo → inicio) y el marco ocupa el resto de la pantalla; se quita la franja blanca de 64 px (`100dvh - 64px` sin cabecera).
+## 2026-11-12 — Conciencia: la barra de luzhumanidad.com encima
+
+- Eugenio: «haz que aparezca el menú superior de luzhumanidad.com en esta página».
+- `SubpaginaSitio.tsx`: una página-aplicación puede llevar encima la barra del sitio (`CabeceraSitio`), con la misma regla que las demás páginas: solo si el sitio la pide (`sitio.barra`). Es opcional por aplicación (`CON_BARRA`), y de momento solo la tiene `conciencia`. El modelo socioeconómico y el observatorio siguen igual hasta que se pida.
+- La barra se queda fija arriba al bajar. Debajo no queda ninguna franja blanca, porque se compensan su margen de arriba y el de abajo.
+- `Conciencia.tsx`: con la barra encima, el mapa resta su altura (unos 4rem en el ordenador y 7rem en el móvil, donde el buscador baja a otra línea). Así el dibujo sigue entrando entero en la pantalla.
+- **Comprobado** en Chrome sin cabeza, a 1440 px y a 390 px, con una página de sitio simulada en el servidor de pruebas (la base de datos local no tiene sitios):
+  - la barra queda arriba y sigue ahí al bajar;
+  - el mapa acaba dentro de la pantalla.
+
+  No hubo errores en la consola.

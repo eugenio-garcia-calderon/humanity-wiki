@@ -7,6 +7,7 @@ import MuroMiembros, { useLecturaSitio } from '../components/sitio/MuroMiembros'
 import BarraMiembro from '../components/sitio/BarraMiembro';
 import { conMenuDeSitio } from '../components/sitio/sitioWeb';
 import HerramientasPagina from '../components/acceso/HerramientasPagina';
+import CabeceraSitio from '../components/sitio/CabeceraSitio';
 
 // ============================================================================
 // UNA SUBPÁGINA DE UN SITIO PUBLICADO — `/p/:id` (2026-09-30)
@@ -31,11 +32,18 @@ import type { ContextoRuta } from '../utils/precargado';
 const Conciencia = lazy(() => import('./Conciencia'));
 const ModeloSocioeconomico = lazy(() => import('./ModeloSocioeconomico'));
 const ObservatorioPolarizacion = lazy(() => import('./ObservatorioPolarizacion'));
-const APLICACIONES: Record<string, (p: { inicio: string; raizId?: string }) => ReactNode> = {
-  conciencia: ({ inicio }) => <Conciencia enSitio={{ inicio }} />,
+const APLICACIONES: Record<string, (p: { inicio: string; conBarra: boolean }) => ReactNode> = {
+  conciencia: ({ inicio, conBarra }) => <Conciencia enSitio={{ inicio, conBarra }} />,
   'modelo-socioeconomico': ({ inicio }) => <ModeloSocioeconomico enSitio={{ inicio }} />,
-  'observatorio-polarizacion': ({ raizId }) => <ObservatorioPolarizacion raizId={raizId} />,
+  'observatorio-polarizacion': () => <ObservatorioPolarizacion />,
 };
+// Apps that sit under the site's own top bar, like any other page of the site
+// (2026-11-12, Eugenio on the consciousness map: «haz que aparezca el menú
+// superior de luzhumanidad.com en esta página»). Opt-in, so the other apps
+// keep their full screen until someone asks; an app that joins must leave room
+// for the bar in its own heights (see `conBarra` in Conciencia.tsx).
+// The observatorio too (2026-11-12, Eugenio: «pon el menú superior en el observatorio de polarización»).
+const CON_BARRA = new Set(['conciencia', 'observatorio-polarizacion']);
 
 export default function SubpaginaSitio({ propio, idFijo, contexto }: { propio: boolean; idFijo?: string; contexto?: ContextoRuta['contexto'] }) {
   const { id: idDeRuta } = useParams();
@@ -59,11 +67,25 @@ export default function SubpaginaSitio({ propio, idFijo, contexto }: { propio: b
       />
     );
   }
-  const App = APLICACIONES[String(pagina.config?.aplicacion || '')];
+  const nombreApp = String(pagina.config?.aplicacion || '');
+  const App = APLICACIONES[nombreApp];
   if (App) {
+    // The same rule as VistaPagina: only sites that ask for the bar (`sitio.barra`).
+    const conBarra = CON_BARRA.has(nombreApp) && !!pagina.sitio?.raizId && pagina.sitio?.config?.barra === true;
     // No HerramientasPagina here: its comment column would sit on top of the
     // app, which brings its own mailbox.
-    return <Suspense fallback={<Cargando />}><App inicio={sitio && propio ? '/' : 'https://luzhumanidad.com'} raizId={sitio && propio ? pagina.sitio?.raizId : undefined} /></Suspense>;
+    return <Suspense fallback={<Cargando />}>
+      {conBarra && <>
+        {/* The bar pulls itself up over the reading page's top margin (-mt-[18px] / sm:-mt-5);
+            here there is no such margin, so this spacer gives it one. */}
+        <div aria-hidden className="h-[18px] sm:h-5" />
+        <CabeceraSitio raizId={pagina.sitio!.raizId} />
+      </>}
+      {/* …and its mb-4 would leave a white strip above a dark app. */}
+      <div className={conBarra ? '-mt-4' : undefined}>
+        <App inicio={sitio && propio ? '/' : 'https://luzhumanidad.com'} conBarra={conBarra} />
+      </div>
+    </Suspense>;
   }
   return <>
     <VistaPagina pagina={pagina} propio={propio} contexto={contexto} />

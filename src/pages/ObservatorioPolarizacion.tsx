@@ -1,5 +1,4 @@
-import CabeceraSitio from '../components/sitio/CabeceraSitio';
-
+import { useEffect, useRef, useState } from 'react';
 // ============================================================================
 // OBSERVATORIO DE POLARIZACIÓN (2026-11-11, Eugenio)
 // ============================================================================
@@ -20,23 +19,29 @@ import CabeceraSitio from '../components/sitio/CabeceraSitio';
 //
 // THE SITE MENU ON TOP (2026-11-12, Eugenio: «pon el menú superior en el
 // observatorio, para que aparezca el logo de Luz Humanidad y se pueda ir al
-// inicio; y corrige la franja blanca inferior»). The frame used to measure
-// `100dvh - 64px` for a header that was not there, which left a 64 px white
-// strip. Now the page is one screen high: the site header (whatever height it
-// takes, two rows on a phone) and the frame filling the rest.
-export default function ObservatorioPolarizacion({ raizId }: { raizId?: string } = {}) {
+// inicio; y corrige la franja blanca inferior»). SubpaginaSitio puts the site
+// bar above it (`CON_BARRA`). The frame used to be `100dvh - 64px` for a header
+// that was not there, which left a 64 px white strip at the bottom. Now it
+// measures where it starts (the bar is one row on a computer, two on a phone)
+// and reaches exactly the bottom of the screen.
+export default function ObservatorioPolarizacion() {
+  const marco = useRef<HTMLIFrameElement>(null);
+  const [arriba, setArriba] = useState(0);
+  useEffect(() => {
+    const medir = () => { const r = marco.current?.getBoundingClientRect(); if (r) setArriba(Math.max(0, Math.round(r.top + window.scrollY))); };
+    medir();
+    const o = new ResizeObserver(medir); o.observe(document.body);
+    window.addEventListener('resize', medir);
+    return () => { o.disconnect(); window.removeEventListener('resize', medir); };
+  }, []);
   return (
-    <div data-app-observatorio className="flex flex-col bg-slate-950" style={{ height: '100dvh', minHeight: 600 }}>
-      {raizId && (
-        <div className="shrink-0 bg-white [&_[data-cabecera-sitio]]:!my-0">
-          <CabeceraSitio raizId={raizId} />
-        </div>
-      )}
-      <iframe
-        src="/observatorio-polarizacion/index.html"
-        title="Observatorio de Polarización"
-        className="block min-h-0 w-full flex-1 border-0 bg-slate-950"
-      />
-    </div>
+    <iframe
+      ref={marco}
+      data-app-observatorio
+      src="/observatorio-polarizacion/index.html"
+      title="Observatorio de Polarización"
+      className="block w-full border-0 bg-slate-950"
+      style={{ height: `calc(100dvh - ${arriba}px)`, minHeight: 500 }}
+    />
   );
 }
