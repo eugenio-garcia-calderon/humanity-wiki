@@ -11102,3 +11102,8 @@ Eugenio: «Haz un vehículo igual que el triciclo bala, pero esta vez que tenga 
 - **El vuelco** se calcula con la fórmula de cuatro ruedas: la vía media bajo el centro de gravedad entre (2 × su altura).
 - **El faldón y el basculante** no existen con dos ruedas: sus deslizadores se quedan apagados.
 - **Comprobado** en Chromium sin cabeza a 1280×800 con WebGL por software: la Bala de cuatro ruedas en 3/4, de lado, desde atrás y en 3/4 trasero; los paneles de Rodaje y Proyecto; el Triciclo sigue con tres ruedas. **No comprobado** en un móvil ni con la aplicación instalada.
+
+### 2026-11-12 — Buscador de luzhumanidad.com con sugerencias al momento; menú en el Observatorio de Polarización
+- `GET /api/sitio/sugerencias`: lista en memoria por sitio (5 min, se rehace sin hacer esperar) de lo visible; busca en título, tabla y descripción; proyectos primero. `/api/sitio/buscar` tardaba 2-3 s por letra.
+- `BuscarBarra.tsx`: lista grande (portada, título, descripción), grupos «Proyectos» / «Otras páginas», flechas + Intro, de lado a lado en el móvil.
+- `ObservatorioPolarizacion.tsx`: cabecera del sitio (logo → inicio) y el marco ocupa el resto de la pantalla; se quita la franja blanca de 64 px (`100dvh - 64px` sin cabecera).

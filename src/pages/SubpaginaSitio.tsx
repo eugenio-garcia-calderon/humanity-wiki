@@ -31,10 +31,10 @@ import type { ContextoRuta } from '../utils/precargado';
 const Conciencia = lazy(() => import('./Conciencia'));
 const ModeloSocioeconomico = lazy(() => import('./ModeloSocioeconomico'));
 const ObservatorioPolarizacion = lazy(() => import('./ObservatorioPolarizacion'));
-const APLICACIONES: Record<string, (p: { inicio: string }) => ReactNode> = {
+const APLICACIONES: Record<string, (p: { inicio: string; raizId?: string }) => ReactNode> = {
   conciencia: ({ inicio }) => <Conciencia enSitio={{ inicio }} />,
   'modelo-socioeconomico': ({ inicio }) => <ModeloSocioeconomico enSitio={{ inicio }} />,
-  'observatorio-polarizacion': () => <ObservatorioPolarizacion />,
+  'observatorio-polarizacion': ({ raizId }) => <ObservatorioPolarizacion raizId={raizId} />,
 };
 
 export default function SubpaginaSitio({ propio, idFijo, contexto }: { propio: boolean; idFijo?: string; contexto?: ContextoRuta['contexto'] }) {
@@ -63,7 +63,7 @@ export default function SubpaginaSitio({ propio, idFijo, contexto }: { propio: b
   if (App) {
     // No HerramientasPagina here: its comment column would sit on top of the
     // app, which brings its own mailbox.
-    return <Suspense fallback={<Cargando />}><App inicio={sitio && propio ? '/' : 'https://luzhumanidad.com'} /></Suspense>;
+    return <Suspense fallback={<Cargando />}><App inicio={sitio && propio ? '/' : 'https://luzhumanidad.com'} raizId={sitio && propio ? pagina.sitio?.raizId : undefined} /></Suspense>;
   }
   return <>
     <VistaPagina pagina={pagina} propio={propio} contexto={contexto} />
