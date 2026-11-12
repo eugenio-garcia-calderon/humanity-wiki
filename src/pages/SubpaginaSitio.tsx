@@ -8,6 +8,7 @@ import BarraMiembro from '../components/sitio/BarraMiembro';
 import { conMenuDeSitio } from '../components/sitio/sitioWeb';
 import HerramientasPagina from '../components/acceso/HerramientasPagina';
 import CabeceraSitio from '../components/sitio/CabeceraSitio';
+import AplicacionIncrustada from '../components/sitio/AplicacionIncrustada';
 
 // ============================================================================
 // UNA SUBPÁGINA DE UN SITIO PUBLICADO — `/p/:id` (2026-09-30)
@@ -44,6 +45,12 @@ const APLICACIONES: Record<string, (p: { inicio: string; conBarra: boolean }) =>
 // for the bar in its own heights (see `conBarra` in Conciencia.tsx).
 // The observatorio too (2026-11-12, Eugenio: «pon el menú superior en el observatorio de polarización»).
 const CON_BARRA = new Set(['conciencia', 'observatorio-polarizacion']);
+// EMBEDDED IN THE PAGE (2026-11-12, Eugenio: «que el modelo socioeconómico esté
+// embebido en la página de luzhumanidad.com, que aparezca el menú de Luz &
+// Humanidad arriba, y que se pueda expandir a pantalla completa y salir»).
+// The site's bar on top, and the app in a screen-tall box with its own scroll
+// and a full-screen button (`AplicacionIncrustada`).
+const INCRUSTADAS = new Set(['modelo-socioeconomico']);
 
 export default function SubpaginaSitio({ propio, idFijo, contexto }: { propio: boolean; idFijo?: string; contexto?: ContextoRuta['contexto'] }) {
   const { id: idDeRuta } = useParams();
@@ -71,9 +78,17 @@ export default function SubpaginaSitio({ propio, idFijo, contexto }: { propio: b
   const App = APLICACIONES[nombreApp];
   if (App) {
     // The same rule as VistaPagina: only sites that ask for the bar (`sitio.barra`).
-    const conBarra = CON_BARRA.has(nombreApp) && !!pagina.sitio?.raizId && pagina.sitio?.config?.barra === true;
-    // No HerramientasPagina here: its comment column would sit on top of the
-    // app, which brings its own mailbox.
+    const incrustada = INCRUSTADAS.has(nombreApp);
+    const conBarra = (CON_BARRA.has(nombreApp) || incrustada) && !!pagina.sitio?.raizId && pagina.sitio?.config?.barra === true;
+    if (incrustada) return <Suspense fallback={<Cargando />}>
+      {conBarra && <><div aria-hidden className="h-[18px] sm:h-5" /><CabeceraSitio raizId={pagina.sitio!.raizId} /></>}
+      <main id="contenido" className="px-3 pb-6 sm:px-4">
+        <h1 className="sr-only">{pagina.titulo || 'Sin título'}</h1>
+        <AplicacionIncrustada titulo={pagina.titulo || ''}>
+          <App inicio={sitio && propio ? '/' : 'https://luzhumanidad.com'} conBarra={false} />
+        </AplicacionIncrustada>
+      </main>
+    </Suspense>;
     return <Suspense fallback={<Cargando />}>
       {conBarra && <>
         {/* The bar pulls itself up over the reading page's top margin (-mt-[18px] / sm:-mt-5);
