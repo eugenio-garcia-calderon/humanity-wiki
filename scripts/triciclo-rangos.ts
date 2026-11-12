@@ -379,7 +379,8 @@ probar('clásico real con la migración', REAL_MIG);
   // round 3 interior (2026-11-12): what this round proposes for it (buckets, white dashboard, rails to the rear axle and
   // wider, the pack's share of the wider frame so that it keeps its width), every slider at both ends and every option
   const R3 = { tAsientos: 'butacas', tSalpicadero: 'blanco', tChLargo: 'eje', tChSep: 0.30, tBatAncho: 115 };
-  const REAL_R3 = deDiseno({ ...CLASICO_GUARDADO, ...MIGRACION, ...R3 } as Partial<Parametros>), T3 = camposTriciclo(REAL_R3);
+  // (on top of the body's migration too, 0212: the design as it is saved after 0213)
+  const REAL_R3 = deDiseno({ ...CLASICO_GUARDADO, ...MIGRACION, ...MIGRACION_R3, ...R3 } as Partial<Parametros>), T3 = camposTriciclo(REAL_R3);
   probar('clásico real r3, como se propone', REAL_R3);
   for (const f of deslizadoresTriciclo()) {
     const [a, b] = rangoTriciclo(f.clave, T3);
