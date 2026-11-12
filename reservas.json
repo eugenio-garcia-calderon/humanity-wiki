@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "drizzle/0197_aeromovil_bala_cuatro_ruedas.sql",
-      "motivo": "Bala de cuatro ruedas: copia del Triciclo guardado",
-      "desde": "2026-11-11T22:43:58.956Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "memory/03_DECISIONS.md",
       "motivo": "Bala de cuatro ruedas",
       "desde": "2026-11-11T23:56:34.390Z"
