@@ -8,6 +8,7 @@ import type { DatosPagina } from './CabeceraLectura';
 import type { Grupo } from './RedRelaciones';
 import { PildoraEstado, TextoEnLinea } from '../tablas/TarjetaPortada';
 import { ImageIcon } from 'lucide-react';
+import { pedirRutas, rutaLegible } from '../../utils/rutasLegibles';
 
 // ============================================================================
 // LA CABECERA DE UN PROYECTO EN EL ESCAPARATE (2026-11-06, Eugenio en luzhumanidad.com)
@@ -53,7 +54,12 @@ export default function CabeceraProyectoEscaparate({ pagina, edicion }: { pagina
         setAno(m ? m[1] : null);
       }).catch(() => {});
     fetch(`/api/bd/paginas/${encodeURIComponent(pagina.id)}/red`, { credentials: 'include' })
-      .then(r => (r.ok ? r.json() : null)).then(j => { if (vivo) setGrupos((j?.grupos || []).filter((g: Grupo) => g.entradas.length)); }).catch(() => {});
+      // Antes de pintar, las direcciones legibles de lo enlazado (2026-11-12): sin ellas salían por `/p/:id`.
+      .then(r => (r.ok ? r.json() : null)).then(async j => {
+        const gs = (j?.grupos || []).filter((g: Grupo) => g.entradas.length);
+        if (!edicion) await pedirRutas(gs.flatMap((g: Grupo) => g.entradas.map(e => e.pagina_id)));
+        if (vivo) setGrupos(gs);
+      }).catch(() => {});
     return () => { vivo = false; };
   }, [pagina.id, fila?.tabla_id, fila?.fila_id]);
 
@@ -63,6 +69,9 @@ export default function CabeceraProyectoEscaparate({ pagina, edicion }: { pagina
     await fetch(`/api/bd/filas/${encodeURIComponent(fila.fila_id)}`, { method: 'PUT', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ celdas: { [colEstado.id]: id } }) }).catch(() => null);
   };
   const enlace = (id: string | null) => (id ? (edicion ? `/paginas/${id}` : sitio ? sitio.enlacePagina(id) : `/p/${id}`) : '#');
+  // Lo que no tiene dirección propia en esta web (una categoría de Sistemas, que vive en el mapa de la
+  // humanidad y no en el laboratorio) se enseña sin enlace: si no, llevaría a `/p/:id` (2026-11-12).
+  const enlazable = (id: string | null) => !!id && (!!edicion || !sitio || !!rutaLegible(id));
   const equipo = grupos?.find(g => EQUIPO.test(g.nombre)) || null;
   const resto = (grupos || []).filter(g => g !== equipo);
   // UNA PORTADA QUE ES UN VÍDEO (2026-11-07): en su lugar, la primera foto propia de la página
@@ -114,12 +123,12 @@ export default function CabeceraProyectoEscaparate({ pagina, edicion }: { pagina
             <ul className="flex list-none flex-wrap gap-x-4 gap-y-2 p-0">
               {equipo.entradas.map(p => (
                 <li key={p.fila_id}>
-                  <Link to={enlace(p.pagina_id)} data-interno className="group inline-flex items-center gap-2">
+                  <Enlace si={enlazable(p.pagina_id)} to={enlace(p.pagina_id)} className="group inline-flex items-center gap-2">
                     {p.imagen
                       ? <img src={miniatura(p.imagen, 64)} alt={p.titulo} loading="lazy" className="h-8 w-8 rounded-full object-cover ring-1 ring-slate-200" />
                       : <span className="grid h-8 w-8 place-items-center rounded-full bg-slate-100 text-xs font-black text-slate-400">{p.titulo.charAt(0)}</span>}
                     <span className="text-sm font-semibold text-slate-700 group-hover:underline">{p.titulo}</span>
-                  </Link>
+                  </Enlace>
                 </li>
               ))}
             </ul>
@@ -135,11 +144,11 @@ export default function CabeceraProyectoEscaparate({ pagina, edicion }: { pagina
               <ul className="flex list-none flex-wrap gap-1.5 p-0">
                 {g.entradas.map(x => (
                   <li key={x.fila_id}>
-                    <Link to={enlace(x.pagina_id)} data-interno
+                    <Enlace si={enlazable(x.pagina_id)} to={enlace(x.pagina_id)}
                       className={cn('inline-flex h-7 items-center gap-1.5 rounded-full border border-slate-200 bg-white pr-2.5 text-[12px] font-bold text-slate-700 hover:border-slate-400', x.imagen ? 'pl-1' : 'pl-2.5')}>
                       {x.imagen && <img src={miniatura(x.imagen, 64)} alt="" loading="lazy" className="h-5 w-5 rounded-full object-cover" />}
                       {x.titulo}
-                    </Link>
+                    </Enlace>
                   </li>
                 ))}
               </ul>
@@ -149,4 +158,9 @@ export default function CabeceraProyectoEscaparate({ pagina, edicion }: { pagina
       )}
     </header>
   );
+}
+
+/** Un enlace interno o, si no hay a dónde llevar, lo mismo sin enlace. */
+function Enlace({ si, to, className, children }: { si: boolean; to: string; className?: string; children: React.ReactNode }) {
+  return si ? <Link to={to} data-interno className={className}>{children}</Link> : <span className={className}>{children}</span>;
 }
