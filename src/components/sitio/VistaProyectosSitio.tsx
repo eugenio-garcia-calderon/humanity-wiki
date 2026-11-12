@@ -107,9 +107,10 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
   useEffect(() => {
     if (!proyectos || edicion) return;
     let vivo = true;
-    pedirRutas(proyectos.filas.map(f => f.pagina_id)).then(ok => { if (vivo && ok) setRutas(n => n + 1); });
+    // También las personas del final de la portada.
+    pedirRutas([...proyectos.filas.map(f => f.pagina_id), ...(personas?.filas || []).map(f => f.pagina_id)]).then(ok => { if (vivo && ok) setRutas(n => n + 1); });
     return () => { vivo = false; };
-  }, [proyectos, edicion]);
+  }, [proyectos, personas, edicion]);
 
   // EDITAR EN EL MISMO SITIO (2026-11-10, `TarjetaPortada.tsx`): en el editor esta vista es la de la
   // web, y cada texto se guarda en su celda o en su página nada más salir de él.
