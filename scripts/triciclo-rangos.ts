@@ -30,6 +30,7 @@ const NO_PASAN = ['Neumático delantero', 'Carenado delantero a la carrocería',
   // round 3 (2026-11-12): the passengers' door as it swings, and the leaves through each other or through the hatch (a
   // negative clearance there is one piece going under the other; under 3 cm and positive is a warning on screen)
   'Puerta de atrás: al abrirse', 'Puerta de atrás abierta a', 'Puertas: la de delante', 'Puertas y portón'];
+// (round 3: «Segunda puerta: cabe» is red, not a failure: with no room the model builds one door and says so)
 
 function cruzan(a: number[], b: number[], c: number[], d: number[]) {
   const o = (p: number[], q: number[], r: number[]) => (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]);

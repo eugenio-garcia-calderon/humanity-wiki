@@ -150,7 +150,9 @@ export function puertaDe(F: FormaBala, V: Ventanas, C: Contorno, o: OpcionesPuer
   const bisagra: V3 = [hx, hy, Number.isFinite(hz) ? hz : 0];
   // ── round 3: the passengers' door behind the split, hinged on the rear edge
   let segunda: null | (Hoja & { xS: number }) = null;
-  if (o.segunda) {
+  // (only where each door keeps 30 cm along the sill and the B-pillar fits between them; else one door, and the
+  // model's check «Segunda puerta: cabe» says so)
+  if (o.segunda && xD - xR >= 0.60 + MONTANTE_B) {
     const g = o.segunda, xS = Math.min(xD - 0.30, Math.max(xR + 0.30, g.parte)), xB = xS - MONTANTE_B / 2;
     // The hinge: a point on the opening's rear edge (the section at xR, between the door's bottom and top there) and
     // the axis along the edge's TANGENT there, as the pilot's door takes the pillar's: the rear edge is the section's
