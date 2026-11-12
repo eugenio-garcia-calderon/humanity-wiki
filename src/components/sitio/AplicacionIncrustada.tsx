@@ -61,8 +61,7 @@ export default function AplicacionIncrustada({ titulo, children }: { titulo: str
       aria-label={titulo}
       className={completa
         ? 'fixed inset-0 z-[70] flex flex-col bg-white'
-        : 'flex h-[calc(100dvh-7rem)] min-h-[32rem] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm'}
-      style={completa ? undefined : { width: 'min(100vw - 1.5rem, 120rem)', marginLeft: 'calc(50% - min(50vw - 0.75rem, 60rem))' }}
+        : 'mx-auto flex h-[calc(100dvh-6rem)] min-h-[32rem] w-full max-w-[120rem] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm'}
     >
       {/* Only the button: the app's own header right below already says what it is. */}
       <div className="flex shrink-0 items-center justify-end gap-3 border-b border-slate-200 bg-slate-50 px-3 py-1">

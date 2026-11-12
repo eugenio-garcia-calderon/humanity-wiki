@@ -7,10 +7,8 @@ import MuroMiembros, { useLecturaSitio } from '../components/sitio/MuroMiembros'
 import BarraMiembro from '../components/sitio/BarraMiembro';
 import { conMenuDeSitio } from '../components/sitio/sitioWeb';
 import HerramientasPagina from '../components/acceso/HerramientasPagina';
-import AplicacionIncrustada from '../components/sitio/AplicacionIncrustada';
-import { MarcoLectura } from '../components/sitio/CabeceraLectura';
 import CabeceraSitio from '../components/sitio/CabeceraSitio';
-import { completarSitio } from '../components/sitio/sitioWeb';
+import AplicacionIncrustada from '../components/sitio/AplicacionIncrustada';
 
 // ============================================================================
 // UNA SUBPÁGINA DE UN SITIO PUBLICADO — `/p/:id` (2026-09-30)
@@ -35,16 +33,22 @@ import type { ContextoRuta } from '../utils/precargado';
 const Conciencia = lazy(() => import('./Conciencia'));
 const ModeloSocioeconomico = lazy(() => import('./ModeloSocioeconomico'));
 const ObservatorioPolarizacion = lazy(() => import('./ObservatorioPolarizacion'));
-const APLICACIONES: Record<string, (p: { inicio: string }) => ReactNode> = {
-  conciencia: ({ inicio }) => <Conciencia enSitio={{ inicio }} />,
+const APLICACIONES: Record<string, (p: { inicio: string; conBarra: boolean }) => ReactNode> = {
+  conciencia: ({ inicio, conBarra }) => <Conciencia enSitio={{ inicio, conBarra }} />,
   'modelo-socioeconomico': ({ inicio }) => <ModeloSocioeconomico enSitio={{ inicio }} />,
   'observatorio-polarizacion': () => <ObservatorioPolarizacion />,
 };
-// EMBEDDED, NOT FULL PAGE (2026-11-12, Eugenio: «que esté embebido en la página
-// de luzhumanidad.com, que aparezca el menú de Luz & Humanidad arriba, y que se
-// pueda expandir a pantalla completa»). These keep the site's header and menu
-// and show the app in a box with a full-screen button (`AplicacionIncrustada`).
-// The others still take the whole page.
+// Apps that sit under the site's own top bar, like any other page of the site
+// (2026-11-12, Eugenio on the consciousness map: «haz que aparezca el menú
+// superior de luzhumanidad.com en esta página»). Opt-in, so the other apps
+// keep their full screen until someone asks; an app that joins must leave room
+// for the bar in its own heights (see `conBarra` in Conciencia.tsx).
+const CON_BARRA = new Set(['conciencia']);
+// EMBEDDED IN THE PAGE (2026-11-12, Eugenio: «que el modelo socioeconómico esté
+// embebido en la página de luzhumanidad.com, que aparezca el menú de Luz &
+// Humanidad arriba, y que se pueda expandir a pantalla completa y salir»).
+// The site's bar on top, and the app in a screen-tall box with its own scroll
+// and a full-screen button (`AplicacionIncrustada`).
 const INCRUSTADAS = new Set(['modelo-socioeconomico']);
 
 export default function SubpaginaSitio({ propio, idFijo, contexto }: { propio: boolean; idFijo?: string; contexto?: ContextoRuta['contexto'] }) {
@@ -69,26 +73,33 @@ export default function SubpaginaSitio({ propio, idFijo, contexto }: { propio: b
       />
     );
   }
-  const App = APLICACIONES[String(pagina.config?.aplicacion || '')];
+  const nombreApp = String(pagina.config?.aplicacion || '');
+  const App = APLICACIONES[nombreApp];
   if (App) {
-    // No HerramientasPagina here: its comment column would sit on top of the
-    // app, which brings its own mailbox.
-    const app = <Suspense fallback={<Cargando />}><App inicio={sitio && propio ? '/' : 'https://luzhumanidad.com'} /></Suspense>;
-    if (!INCRUSTADAS.has(String(pagina.config?.aplicacion))) return app;
-    // The same top as any other page of the site (`VistaPagina`): its frame
-    // with the menu (`MarcoLectura`) and, on sites that ask for it, its bar.
-    const rutas = sitio && pagina.sitio ? { enlacePagina: sitio.enlacePagina, enlaceBd: sitio.enlaceBd, enlaceBuscar: sitio.enlaceBuscar, raizId: pagina.sitio.raizId } : undefined;
-    const menuPropio = !!(pagina.sitio?.config && completarSitio(pagina.sitio.config).menu.activo);
-    const conBarra = !!pagina.sitio?.raizId && !menuPropio && pagina.sitio?.config?.barra === true;
-    return (
-      <MarcoLectura pagina={pagina} rutas={rutas}>
-        {conBarra && <CabeceraSitio raizId={pagina.sitio!.raizId} simple={pagina.config?.barraSimple === true} />}
-        <main id="contenido">
-          <h1 className="sr-only">{pagina.titulo || 'Sin título'}</h1>
-          <AplicacionIncrustada titulo={pagina.titulo || ''}>{app}</AplicacionIncrustada>
-        </main>
-      </MarcoLectura>
-    );
+    // The same rule as VistaPagina: only sites that ask for the bar (`sitio.barra`).
+    const incrustada = INCRUSTADAS.has(nombreApp);
+    const conBarra = (CON_BARRA.has(nombreApp) || incrustada) && !!pagina.sitio?.raizId && pagina.sitio?.config?.barra === true;
+    if (incrustada) return <Suspense fallback={<Cargando />}>
+      {conBarra && <><div aria-hidden className="h-[18px] sm:h-5" /><CabeceraSitio raizId={pagina.sitio!.raizId} /></>}
+      <main id="contenido" className="px-3 pb-6 sm:px-4">
+        <h1 className="sr-only">{pagina.titulo || 'Sin título'}</h1>
+        <AplicacionIncrustada titulo={pagina.titulo || ''}>
+          <App inicio={sitio && propio ? '/' : 'https://luzhumanidad.com'} conBarra={false} />
+        </AplicacionIncrustada>
+      </main>
+    </Suspense>;
+    return <Suspense fallback={<Cargando />}>
+      {conBarra && <>
+        {/* The bar pulls itself up over the reading page's top margin (-mt-[18px] / sm:-mt-5);
+            here there is no such margin, so this spacer gives it one. */}
+        <div aria-hidden className="h-[18px] sm:h-5" />
+        <CabeceraSitio raizId={pagina.sitio!.raizId} />
+      </>}
+      {/* …and its mb-4 would leave a white strip above a dark app. */}
+      <div className={conBarra ? '-mt-4' : undefined}>
+        <App inicio={sitio && propio ? '/' : 'https://luzhumanidad.com'} conBarra={conBarra} />
+      </div>
+    </Suspense>;
   }
   return <>
     <VistaPagina pagina={pagina} propio={propio} contexto={contexto} />
