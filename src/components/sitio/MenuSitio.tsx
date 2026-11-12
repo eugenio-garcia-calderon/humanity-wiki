@@ -15,6 +15,7 @@ import {
 } from './sitioWeb';
 import AltaBoletin from './AltaBoletin';
 import { responsableDe } from './formularios';
+import { pedirRutas } from '../../utils/rutasLegibles';
 
 // ============================================================================
 // EL MENÚ Y EL PIE, COMO SE VEN (2026-10-02)
@@ -520,6 +521,23 @@ export function MarcoSitio({ sitio, rutas, logo, nombre, cuenta, children }: {
   cuenta?: string | null;
   children: ReactNode;
 }) {
+  // LOS ENLACES DEL MENÚ Y DEL PIE, POR SU DIRECCIÓN LEGIBLE (2026-11-12): los que van a una página se
+  // armaban por `/p/:id` si el HTML no traía su nombre. Se piden una vez y se vuelve a pintar.
+  const [, setRutas] = useState(0);
+  useEffect(() => {
+    if (!sitio) return;
+    const ids: string[] = [];
+    const recorre = (x: any) => {
+      if (!x || typeof x !== 'object') return;
+      if (Array.isArray(x)) { x.forEach(recorre); return; }
+      if (x.tipo === 'pagina' && typeof x.id === 'string') ids.push(x.id);
+      for (const v of Object.values(x)) if (v && typeof v === 'object') recorre(v);
+    };
+    recorre(sitio.menu?.enlaces); recorre(sitio.pie?.enlaces);
+    let vivo = true;
+    pedirRutas(ids).then(ok => { if (vivo && ok) setRutas(n => n + 1); });
+    return () => { vivo = false; };
+  }, [sitio]);
   if (!sitio || (!sitio.menu.activo && !sitio.pie.activo)) return <>{children}</>;
   const mn = sitio.menu;
   const logoMenu = mn.mostrarLogo ? (mn.logo || logo || undefined) : undefined;
