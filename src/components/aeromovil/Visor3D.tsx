@@ -14,7 +14,7 @@
 // interfaz. Anotado en 02_TECH_DEBT.md.
 import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { DoorOpen, PackageOpen, X } from 'lucide-react';
+import { DoorOpen, PackageOpen, Trash2, X } from 'lucide-react';
 import { Button, Card } from '../ui/core';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { STLExporter } from 'three/examples/jsm/exporters/STLExporter.js';
@@ -37,6 +37,7 @@ import { brazosDe } from './garaje/balaMedidas';
 import { GIRO_A1, suspensionA1 } from './geometriaA1';
 import type { Referencia } from './referencias';
 import { vehiculoGaraje, type VehiculoGaraje } from './garaje';
+import type { PivoteGaraje } from './garaje/tipos';
 import { colorSuperpuesto, hacerFantasma, liberarFantasma, mostrarSiluetas, siluetas } from './garaje/superponer';
 import { cartel, crearTunel, type CuerpoTunel, type SeleccionTunel, type Tunel } from './tunelViento';
 import type { OpcionesTunel } from './tunel/cliente';
@@ -101,6 +102,10 @@ interface Props {
   alPinchar?: (componente: string) => void;
   /** Al soltar un coche del garaje arrastrado en el 3D: su nueva posición (eje delantero en el suelo). Sin ella no se arrastra. */
   alMoverGaraje?: (id: string, x: number, z: number) => void;
+  /** Our designs in the garage (2026-11-12): the lines of each one's card, by garage id. A car with lines can be picked. */
+  fichasGaraje?: Record<string, string[]>;
+  /** «Quitar del garaje» on a design's card. */
+  alQuitarGaraje?: (id: string) => void;
   /** Otro velomóvil: oculto, comparado (fantasma junto al nuestro) o solo. */
   referencia?: Referencia | null;
   modoRef?: 'no' | 'comparar' | 'sola';
@@ -1359,8 +1364,38 @@ function construirReferencia(g: THREE.Group, M: Mats, r: Referencia, fantasma: b
   g.traverse((o: any) => { if (o.isMesh && o.material?.isMaterial) (o as any).userData.ref = true; });
 }
 
-export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cuerposTunel, opcionesTunel, alElegirPuntoTunel, puntoTunel = null, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje }, ref) {
+/**
+ * One of the editor's saved designs as a garage car (2026-11-12, Eugenio: «poder comparar el cuadriciclo con el
+ * triciclo en el garaje»): the same builders the viewer uses for our own car (construirFijo/construirMovil for the
+ * Gota and the Aeromóvil 1, construirBala, construirTriciclo), into a group of its own, in full quality and closed,
+ * with materials of its own (shared by every design in the garage, so «Rayos X» and «Corte» never touch them).
+ * Its doors and boot lids come back as garage pivots (named `piv-0`, `piv-1`…), so the viewer opens them like the
+ * Aptera's. Takes about as long as building that design as our own car (a Triciclo, ~1 s): call it once per design.
+ */
+let materialesDisenos: { M: Mats; Mb: ReturnType<typeof materialesBala> } | null = null;
+export function construirDisenoGaraje(m: Modelo): { grupo: THREE.Group; pivotes: PivoteGaraje[] } {
+  if (!materialesDisenos) materialesDisenos = { M: materiales(), Mb: materialesBala() };
+  const { M, Mb } = materialesDisenos;
+  const grupo = new THREE.Group(), G = {} as Record<CapaId, THREE.Group>, puertas = new Map<string, THREE.Group[]>();
+  for (const c of CAPAS) { G[c.k] = new THREE.Group(); G[c.k].name = c.n; grupo.add(G[c.k]); }
+  if (m.tipo === 'triciclo') { construirTriciclo(G, puertas, M, Mb, m, 'completa', false); girarTriciclo(G, m, 0); }
+  else if (m.tipo === 'bala') construirBala(G, puertas, M, Mb, m, 'completa', false);
+  else { construirFijo(G, puertas, M, m, false); construirMovil(G, M, m, grupo, 0); }
+  const pivotes: PivoteGaraje[] = [];
+  let i = 0;
+  for (const lista of puertas.values()) for (const piv of lista) {
+    const u = piv.userData as { eje?: THREE.Vector3; angulo?: number; tipo?: string };
+    if (!u.eje || u.angulo == null) continue;
+    piv.name = `piv-${i++}`;
+    pivotes.push({ nombre: piv.name, tipo: u.tipo === 'maletero' ? 'maletero' : 'puerta', eje: [u.eje.x, u.eje.y, u.eje.z], angulo: u.angulo * 180 / Math.PI });
+  }
+  grupo.traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+  return { grupo, pivotes };
+}
+
+export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cuerposTunel, opcionesTunel, alElegirPuntoTunel, puntoTunel = null, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje, fichasGaraje, alQuitarGaraje }, ref) {
   const pinchar = useRef(alPinchar); pinchar.current = alPinchar;
+  const fichas = useRef(fichasGaraje); fichas.current = fichasGaraje;
   const elegirPunto = useRef(alElegirPuntoTunel); elegirPunto.current = alElegirPuntoTunel;
   const moverGaraje = useRef(alMoverGaraje); moverGaraje.current = alMoverGaraje;
   const lienzo = useRef<HTMLCanvasElement>(null);
@@ -1612,7 +1647,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       }
       return mejor;
     };
-    const abreAlgo = (obj: THREE.Object3D | null) => !!obj && !!vehiculoGaraje(obj.name)?.pivotes?.length;
+    // a car with parts that open, or one of our designs (it has a card of its own)
+    const abreAlgo = (obj: THREE.Object3D | null) => !!obj && (!!vehiculoGaraje(obj.name)?.pivotes?.length || !!fichas.current?.[obj.name]);
     /** Picks a garage car (its card opens) or, with null or a car with nothing to open, closes the card. */
     const elegirCoche = (obj: THREE.Object3D | null) => elegirGaraje.current(abreAlgo(obj) ? obj!.name : null);
     const empezarArrastre = (e: PointerEvent) => {
@@ -1975,6 +2011,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   }), []);
 
   const defSel = selGaraje ? vehiculoGaraje(selGaraje) : undefined;
+  const fichaSel = selGaraje ? fichasGaraje?.[selGaraje] : undefined;
   const tiposSel = new Set(defSel?.pivotes?.map(p => p.tipo));
   const estSel = (selGaraje && abiertos[selGaraje]) || { puertas: false, maletero: false };
   const alternar = (k: 'puertas' | 'maletero') => { if (selGaraje) setAbiertos(a => ({ ...a, [selGaraje]: { ...estSel, [k]: !estSel[k] } })); };
@@ -1997,7 +2034,30 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     <>
       <canvas ref={lienzo} className="absolute inset-0 h-full w-full touch-none" aria-label={modelo.tipo === 'a1' ? 'Modelo 3D del Aeromóvil 1' : modelo.tipo === 'bala' ? 'Modelo 3D del Cuadriciclo Bala en rombo' : modelo.tipo === 'triciclo' ? (modelo.traseras ? 'Modelo 3D del Cuadriciclo Bala clásico' : 'Modelo 3D del Triciclo Bala') : 'Modelo 3D del Aeromóvil Gota'} />
       {/* The card of a garage car picked with a click or a tap: its doors and its boot (2026-11-12). */}
-      {defSel && estrecho && (
+      {/* One of our designs in the garage (2026-11-12): its figures, its doors and «Quitar del garaje». On a phone at the bottom, above the toolbar. */}
+      {defSel && fichaSel && (
+        <Card role="group" data-tarjeta-garaje="" aria-label={`${defSel.nombre}: diseño en el garaje`} style={estrecho ? { bottom: bajoCarta } : undefined}
+          className={estrecho ? 'absolute inset-x-3 z-[16] p-2.5 shadow-lg' : 'absolute left-3 top-12 z-[16] w-[min(300px,calc(100%-24px))] p-3 shadow-lg'}>
+          <div className="flex items-start gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-slate-900">{defSel.nombre}</p>
+              {fichaSel.map((l, i) => <p key={i} className="text-[11px] leading-snug text-slate-600">{l}</p>)}
+            </div>
+            <Button variant="ghost" onClick={() => setSelGaraje(null)} aria-label="Cerrar" title="Cerrar" className="-mr-1.5 -mt-1.5 h-10 w-10 shrink-0 p-0">
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {botones}
+            {alQuitarGaraje && (
+              <Button variant="outline" onClick={() => { const id = selGaraje!; setSelGaraje(null); alQuitarGaraje(id); }} className={botonCarta}>
+                {!estrecho && <Trash2 className="h-3.5 w-3.5" />}Quitar del garaje
+              </Button>
+            )}
+          </div>
+        </Card>
+      )}
+      {defSel && !fichaSel && estrecho && (
         <Card role="group" data-tarjeta-garaje="" aria-label={`${defSel.nombre}: puertas y maletero`} style={{ bottom: bajoCarta }}
           className="absolute inset-x-3 z-[16] flex items-center gap-1 p-1.5 shadow-lg">
           <span className="min-w-0 flex-1 truncate pl-1 text-sm font-semibold text-slate-900">{defSel.nombre}</span>
@@ -2007,7 +2067,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
           </Button>
         </Card>
       )}
-      {defSel && !estrecho && (
+      {defSel && !fichaSel && !estrecho && (
         <Card role="group" data-tarjeta-garaje="" aria-label={`${defSel.nombre}: puertas y maletero`} className="absolute left-3 top-12 z-[16] w-[min(280px,calc(100%-24px))] p-3 shadow-lg">
           <div className="flex items-start gap-2">
             <div className="min-w-0 flex-1">
