@@ -11223,3 +11223,6 @@ Eugenio: «llamado Observatorio de Polarización Política, y permite que si se 
 - New window «Categorías» (`CategoriasVentana.tsx`, `src/data/categorias.ts`): 36 sectors, each in its tier, with search and a tier filter; four questions to place anything not listed; debatable cases and proposed luxury thresholds behind «Más».
 - New window «Deuda» (`DeudaVentana.tsx`, `src/data/deuda.ts`): who owes (State and Social Security 79,2 %, regions 341.642 M€, local 1,2 % of GDP, end of 2025), capital against interest (40.314 M€ interest in 2025; 230.693 M€ of State capital falling due in 2026 paid by issuing 285.693 M€), history 1980–2025, six abuses each with its remedy, today against the proposal, the contingency box simulator and the inherited-debt payoff simulator.
 - The free third: at least 20 % goes to each scale's contingency and common-savings box, which never goes below zero (`RESERVA_MIN_LIBRE`, shown in the thirds cards).
+
+### 2026-11-12 — Barra de luzhumanidad.com: «Participa» y logo un 25 % menor
+- `CabeceraSitio` (escaparate): el botón dice «Participa»; icono 38/44/48 px y nombre 1,46/1,76/2 rem.
