@@ -1012,7 +1012,7 @@ export function registrarSitios(app: Express, db: any) {
           if (d?.entidad_id === w.id) return res.redirect(301, `/${query}`);
         }
         const r = (await db.execute(sql`SELECT slug FROM knowledge_windows WHERE id = ${w.id}`)).rows[0] as any;
-        const b = await rutaBonita(req, { id: w.id, slug: r?.slug, title: w.title, handle: w.handle });
+        const b = await rutaBonita(req, { id: w.id, slug: r?.slug, title: w.title, handle: w.handle, publico: w.publico });
         if (b) return res.redirect(301, `${s.forma === 'casa' ? `/@${w.handle}` : ''}/${b.split('/').map(encodeURIComponent).join('/')}${query}`);
       }
       // LA RED: UNA SOLA DIRECCIÓN (2026-10-21, bot evaluador). `/movilidad/` va a
@@ -1085,7 +1085,7 @@ export function registrarSitios(app: Express, db: any) {
         canonica = r?.id === w.id ? `https://${s.host}${pref}/${slugDe(w.title)}` : url;
       }
       if (!canonica) {
-        const bonita = w.virtual ? null : await rutaBonita(req, { id: w.id, slug: w.slug, title: w.title, handle: w.handle });
+        const bonita = w.virtual ? null : await rutaBonita(req, { id: w.id, slug: w.slug, title: w.title, handle: w.handle, publico: w.publico });
         canonica = (await direccionCanonica(w, publica, bonita)) || url;
       }
       // En el dominio traducido, cada página es canónica de sí misma.
@@ -1328,7 +1328,7 @@ export function registrarSitios(app: Express, db: any) {
           const faltan = ids.filter(id => !legibles[id]);
           if (faltan.length) {
             const filas = (await db.execute(sql`
-              SELECT w.id, w.slug, w.title, u.handle FROM knowledge_windows w JOIN users u ON u.id = w.creator_user_id
+              SELECT w.id, w.slug, w.title, w.publico, u.handle FROM knowledge_windows w JOIN users u ON u.id = w.creator_user_id
               WHERE w.id IN (${sql.join(faltan.map(i => sql`${i}`), sql`, `)}) AND w.deleted_at IS NULL AND w.archived_at IS NULL
                 AND w.id <> ${raizDominio || ''}
             `)).rows as any[];
@@ -1387,11 +1387,15 @@ export function registrarSitios(app: Express, db: any) {
    * casa) abre de verdad en esa misma página y no en otra ni con un 301. Sin prefijo: en la casa va
    * detrás de `/@quien`. `null` si no tiene ninguna; entonces sigue valiendo `/p/:id`.
    */
-  async function rutaBonita(req: Request, w: { id: string; slug?: string | null; title?: string | null; handle?: string | null }): Promise<string | null> {
+  async function rutaBonita(req: Request, w: { id: string; slug?: string | null; title?: string | null; handle?: string | null; publico?: boolean | null }): Promise<string | null> {
     const s = sitioDe(req);
     if (s.forma === 'casa' && !w.handle) return null;
     const pref = s.forma === 'casa' ? `/@${w.handle}` : '';
-    const candidatos = [...new Set([w.slug ? String(w.slug).toLowerCase() : '', slugDe(w.title || '')].filter(Boolean))];
+    // En el mismo orden que el sitemap (`urlsDelSitio`): el nombre corto si es de dos tramos o la página es
+    // `publico`; si no, primero el título. Así la canónica, el 301 y el sitemap dicen siempre la misma.
+    const corto = w.slug ? String(w.slug).toLowerCase() : '', titulo = slugDe(w.title || '');
+    const primeroCorto = !!corto && (corto.includes('/') || !!w.publico);
+    const candidatos = [...new Set((primeroCorto ? [corto, titulo] : [titulo, corto]).filter(Boolean))];
     for (const c of candidatos) {
       if (TRAMOS_RESERVADOS.has(c.split('/')[0])) continue;
       const r = await paginaDeLaDireccion(req, `${pref}/${c.split('/').map(encodeURIComponent).join('/')}`).catch(() => null);
