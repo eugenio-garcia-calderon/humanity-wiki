@@ -126,7 +126,7 @@ const PASOS: { id: string; titulo: string; texto: string; nodo: string; canal?: 
   },
 ];
 
-export default function Conciencia({ enSitio }: { enSitio?: { inicio: string } } = {}) {
+export default function Conciencia({ enSitio }: { enSitio?: { inicio: string; conBarra?: boolean } } = {}) {
   const [mapa, setMapa] = useState<MapaConciencia>(() => clonar(MAPA_POR_DEFECTO));
   const mapaRef = useRef(mapa);
   mapaRef.current = mapa;
@@ -594,7 +594,10 @@ export default function Conciencia({ enSitio }: { enSitio?: { inicio: string } }
           ref={zonaMapa}
           className={cn(
             'relative mx-auto overflow-hidden border border-white/10 bg-slate-950 shadow-[0_0_80px_rgba(94,230,208,0.08)]',
-            completa ? 'fixed inset-0 z-50 max-w-none rounded-none border-0' : 'h-[calc(100svh-7.5rem)] min-h-[480px] max-w-[1600px] rounded-2xl lg:h-[calc(100svh-5.25rem)]',
+            completa ? 'fixed inset-0 z-50 max-w-none rounded-none border-0'
+              // Under luzhumanidad.com's top bar (about 4rem tall, 7rem on a phone, where the search drops to a second line).
+              : enSitio?.conBarra ? 'h-[calc(100svh-14.5rem)] min-h-[480px] max-w-[1600px] rounded-2xl lg:h-[calc(100svh-9.25rem)]'
+              : 'h-[calc(100svh-7.5rem)] min-h-[480px] max-w-[1600px] rounded-2xl lg:h-[calc(100svh-5.25rem)]',
           )}
         >
           {vista === 'arte' ? (

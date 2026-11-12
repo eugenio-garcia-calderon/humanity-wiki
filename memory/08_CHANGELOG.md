@@ -11102,3 +11102,15 @@ Eugenio: «Haz un vehículo igual que el triciclo bala, pero esta vez que tenga 
 - **El vuelco** se calcula con la fórmula de cuatro ruedas: la vía media bajo el centro de gravedad entre (2 × su altura).
 - **El faldón y el basculante** no existen con dos ruedas: sus deslizadores se quedan apagados.
 - **Comprobado** en Chromium sin cabeza a 1280×800 con WebGL por software: la Bala de cuatro ruedas en 3/4, de lado, desde atrás y en 3/4 trasero; los paneles de Rodaje y Proyecto; el Triciclo sigue con tres ruedas. **No comprobado** en un móvil ni con la aplicación instalada.
+
+## 2026-11-12 — Conciencia: la barra de luzhumanidad.com encima
+
+- Eugenio: «haz que aparezca el menú superior de luzhumanidad.com en esta página».
+- `SubpaginaSitio.tsx`: una página-aplicación puede llevar encima la barra del sitio (`CabeceraSitio`), con la misma regla que las demás páginas: solo si el sitio la pide (`sitio.barra`). Es opcional por aplicación (`CON_BARRA`), y de momento solo la tiene `conciencia`. El modelo socioeconómico y el observatorio siguen igual hasta que se pida.
+- La barra se queda fija arriba al bajar. Debajo no queda ninguna franja blanca, porque se compensan su margen de arriba y el de abajo.
+- `Conciencia.tsx`: con la barra encima, el mapa resta su altura (unos 4rem en el ordenador y 7rem en el móvil, donde el buscador baja a otra línea). Así el dibujo sigue entrando entero en la pantalla.
+- **Comprobado** en Chrome sin cabeza, a 1440 px y a 390 px, con una página de sitio simulada en el servidor de pruebas (la base de datos local no tiene sitios):
+  - la barra queda arriba y sigue ahí al bajar;
+  - el mapa acaba dentro de la pantalla.
+
+  No hubo errores en la consola.
