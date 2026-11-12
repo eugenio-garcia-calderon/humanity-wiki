@@ -19,6 +19,7 @@ export const APARTADOS: { id: string; t: string }[] = [
   { id: 'seguridad-duplicidades', t: 'Duplicidades' },
   { id: 'seguridad-propuesta', t: 'La propuesta' },
   { id: 'seguridad-guardianes', t: 'Guardianes' },
+  { id: 'seguridad-ciudadanos', t: 'Ciudadanos guardianes' },
   { id: 'seguridad-escalas', t: 'Cada escala' },
   { id: 'seguridad-retos', t: 'Retos' },
   { id: 'seguridad-fuentes', t: 'Fuentes' },
@@ -44,6 +45,13 @@ export const FUENTES_SEG: FuenteSeg[] = [
   { id: 'mossos-subida', titulo: 'El Español · La subida de los Mossos: casi 970 euros al mes más que un policía nacional (marzo de 2026)', url: 'https://www.elespanol.com/alicante/20260306/policias-alicante-estallan-subida-salarial-mossos-desquadra-sacan-euros-mes/1003744157611_0.html' },
   { id: 'pge-interior', titulo: 'Ministerio de Hacienda · Presupuestos Generales del Estado 2023, programa 132A «Seguridad ciudadana» (Policía y Guardia Civil)', url: 'https://www.sepg.pap.hacienda.gob.es/Presup/PGE2023Ley/MaestroTomos/PGE-ROM/doc/L_23_E_G6.PDF' },
   { id: 'pge-defensa', titulo: 'Moncloa.com · El presupuesto de Defensa para 2023 alcanza 12.825 millones (2022)', url: 'https://www.moncloa.com/2022/10/07/espana-espera-alcanzar-12-pib-gasto-defensa-2023-aumento-258-presupuestos-1651024/' },
+  { id: 'lecrim', titulo: 'BOE · Ley de Enjuiciamiento Criminal, artículos 490 y 491 (detención por cualquier persona)', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-1882-6036' },
+  { id: 'plegem', titulo: 'BOE · Plan Estatal General de Emergencias de Protección Civil (2020): el voluntariado, eslabón esencial del sistema', url: 'https://boe.es/boe/dias/2020/12/17/pdfs/BOE-A-2020-16349.pdf' },
+  { id: 'samur', titulo: 'Ayuntamiento de Madrid · El cuerpo de voluntarios de SAMUR-Protección Civil, más de 1.200 miembros (2022)', url: 'https://diario.madrid.es/blog/notas-de-prensa/el-cuerpo-de-voluntarios-de-samur-proteccion-civil-de-madrid-el-mas-amplio-y-formado-de-espana-celebra-su-40o-aniversario/' },
+  { id: 'reservistas', titulo: 'BOE · Convocatoria de 400 plazas de reservistas voluntarios de las Fuerzas Armadas (octubre de 2025)', url: 'https://www.boe.es/boe/dias/2025/10/22/pdfs/BOE-A-2025-21242.pdf' },
+  { id: 'specials', titulo: 'Home Office (Reino Unido) · Police workforce, England and Wales, 31 March 2026: 5.196 special constables', url: 'https://www.gov.uk/government/statistics/police-workforce-england-and-wales-31-march-2026/police-workforce-england-and-wales-31-march-2026' },
+  { id: 'specials-guia', titulo: 'College of Policing (Reino Unido) · Special constables: voluntarios con los mismos poderes que un policía', url: 'https://www.college.police.uk/guidance/special-constables' },
+  { id: 'mpk', titulo: 'Wikipedia · Asociación de Formación para la Defensa Nacional de Finlandia (MPK)', url: 'https://en.wikipedia.org/wiki/National_Defence_Training_Association_of_Finland' },
   { id: 'lo-2-1986', titulo: 'BOE · Ley Orgánica 2/1986, de Fuerzas y Cuerpos de Seguridad', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-1986-6859' },
   { id: 'constitucion', titulo: 'BOE · Constitución española (artículos 8, 104 y 149.1.29.ª)', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-1978-31229' },
   { id: 'cpt', titulo: 'Universitat de Barcelona · Resumen del informe de 2025 del Comité contra la Tortura del Consejo de Europa sobre España', url: 'https://www.ub.edu/portal/documents/10080835/10975974/Resumen+Informe+CPT+2025/9d3c8d49-327f-dd74-c1af-f4a8b4bc383a' },
@@ -158,7 +166,8 @@ export const COMPARA: { t: string; hoy: string; propuesta: string }[] = [
   { t: 'Formación', hoy: 'Cada cuerpo forma a los suyos en su propia academia, con temarios distintos.', propuesta: 'Una sola academia con sedes en cada región y un tronco común largo: leyes, derechos, desescalada y mediación.' },
   { t: 'Teléfono', hoy: '091, 062, 092 y 112.', propuesta: 'Solo el 112, que manda a quien esté más cerca.' },
   { t: 'Quién vigila', hoy: 'Cada cuerpo investiga a los suyos; si hay delito, un juez. No hay un órgano independiente solo para la policía.', propuesta: 'Una inspección independiente, fuera del cuerpo, que recibe quejas, revisa grabaciones y publica sus datos.' },
-  { t: 'Ejército', hoy: 'Aparte, con Defensa. Comparte con la Guardia Civil la naturaleza militar.', propuesta: 'Aparte y solo militar, con la Unidad Militar de Emergencias coordinada con los guardianes en catástrofes.' },
+  { t: 'Ejército', hoy: 'Aparte, con Defensa, con su propia jerarquía, sus sueldos y sus academias.', propuesta: 'Dentro del cuerpo de guardianes, como sección de defensa y emergencias en la nación y el continente, con la misma escala salarial, la misma jerarquía y la misma formación en desescalada.' },
+  { t: 'Ciudadanía', hoy: 'Voluntariado de Protección Civil y reservistas del ejército, por separado y con poca formación en seguridad.', propuesta: 'Ciudadanos guardianes: formación voluntaria y gratuita en seguridad, orden y paz; observan y pueden intervenir ante violencia o amenaza.' },
 ];
 
 // ── «GUARDIANES, NO AGRESORES» ──────────────────────────────────────────────
@@ -189,20 +198,51 @@ export const AHORRO_SUPUESTO = { min: 0.02, max: 0.05 };
 // ── EACH SCALE ──────────────────────────────────────────────────────────────
 /** What security means at each of the eight scales under the proposal. */
 export const SEG_ESCALA: Record<string, { quien: string; hace: string }> = {
-  persona: { quien: '', hace: 'Conoce sus derechos y el 112, puede pedir mediación antes de que un conflicto crezca, y puede quejarse a la inspección independiente.' },
+  persona: { quien: '', hace: 'Conoce sus derechos y el 112, puede pedir mediación, quejarse a la inspección independiente y, si quiere, formarse gratis como ciudadano guardián.' },
   vecindad: { quien: 'Comunidad vecinal', hace: 'Tiene un guardián de referencia que conoce el barrio por su nombre. La mediación vecinal resuelve ruidos y peleas antes de que lleguen a denuncia.' },
   municipio: { quien: 'Sección municipal', hace: 'Guardianes de proximidad: patrulla a pie y en bici, tráfico en el pueblo o la ciudad, convivencia, violencia en casa. La asamblea municipal fija sus prioridades.' },
   provincia: { quien: 'Sección provincial', hace: 'Carreteras, rescate en montaña y en el agua, investigación de delitos que pasan de un pueblo a otro, y apoyo a los municipios pequeños.' },
   region: { quien: 'Sección regional', hace: 'Unidades especializadas (delitos graves, ciberdelito cercano, policía científica), la sede regional de la academia y la sala del 112.' },
-  nacion: { quien: 'Mando nacional', hace: 'El mando único, la escala salarial, la academia, las fronteras, el crimen organizado y el terrorismo. Aquí también se coordina con el ejército.' },
-  continente: { quien: 'Europa', hace: 'Cooperación con otras policías de Europa (como Europol, la agencia europea de policía), fronteras comunes y la defensa europea, en la que encaja el ejército.' },
+  nacion: { quien: 'Mando nacional', hace: 'El mando único, la escala salarial, la academia, las fronteras, el crimen organizado y el terrorismo. Y la sección de defensa y emergencias: los antiguos ejércitos y la Unidad Militar de Emergencias.' },
+  continente: { quien: 'Europa', hace: 'Cooperación con otras policías de Europa (como Europol, la agencia europea de policía), fronteras comunes y la defensa europea, donde la sección de defensa trabaja con las de los demás países.' },
   planeta: { quien: 'Todo el planeta', hace: 'Misiones de paz de la ONU, ayuda en grandes catástrofes y búsqueda de personas y delitos entre países (como Interpol).' },
 };
+
+// ── CITIZEN GUARDIANS (proposal) ────────────────────────────────────────────
+/** Proposal figures; the cost per training hour is an assumption. */
+export const CIUDADANOS = {
+  horasBasico: 60, // initial course, hours
+  horasAnuales: 16, // yearly refresher, hours
+  euroHoraAlumno: 15, // € per student-hour: an instructor for a group of about 20. Assumption.
+  seguroAnual: 30, // € a year per volunteer for accident and liability insurance. Assumption.
+};
+export const CIUDADANOS_FORMACION: { t: string; d: string }[] = [
+  { t: 'Primeros auxilios', d: 'Reanimación, hemorragias, qué hacer hasta que llega la ambulancia.' },
+  { t: 'Mediación y desescalada', d: 'Cómo calmar una discusión, ponerse entre dos personas sin empeorar las cosas, hablar con alguien en crisis.' },
+  { t: 'Ley y derechos', d: 'Qué puede hacer cualquier persona y qué no, los derechos de quien es retenido, cómo se testifica.' },
+  { t: 'Seguridad y paz', d: 'Observar y describir, avisar bien al 112, proteger a víctimas y testigos, evacuar un lugar.' },
+];
+export const CIUDADANOS_PUEDE: string[] = [
+  'Observar, grabar si es seguro y avisar al 112.',
+  'Proteger a una víctima, ponerla a salvo y darle primeros auxilios.',
+  'Mediar para calmar una pelea o una discusión.',
+  'Retener a quien sorprende cometiendo un delito, como cualquier persona, y entregarlo enseguida a los guardianes.',
+];
+export const CIUDADANOS_NO_PUEDE: string[] = [
+  'Llevar armas, esposas ni porras.',
+  'Patrullar solo o por su cuenta, investigar, registrar o pedir documentación.',
+  'Usar más fuerza de la necesaria para parar la violencia (proporcionalidad).',
+  'Actuar fuera de una emergencia real o sin avisar al 112.',
+];
 
 // ── HONEST CHALLENGES ───────────────────────────────────────────────────────
 export const RETOS: { t: string; d: string; fuente?: string }[] = [
   { t: 'La Constitución', d: 'Dice que las fuerzas de seguridad dependen del Gobierno y que una ley orgánica fija sus funciones. También permite que las comunidades creen sus policías según sus estatutos. Un cuerpo único necesita cambiar leyes orgánicas, y probablemente la Constitución.', fuente: 'constitucion' },
   { t: 'Los estatutos de autonomía', d: 'Los Mossos, la Ertzaintza y la Policía Foral están en los estatutos de Cataluña, el País Vasco y Navarra, y son parte de su autogobierno. Integrarlos solo es posible con su acuerdo. Una salida: que sean la sección regional del cuerpo único, con su nombre y su mando regional.', fuente: 'lo-2-1986' },
+  { t: 'Integrar el ejército', d: 'La Constitución separa las Fuerzas Armadas (defender el país) de las fuerzas de seguridad (proteger derechos y libertades). Meterlas en un mismo cuerpo exige reformar la Constitución, no solo leyes.', fuente: 'constitucion' },
+  { t: 'Los compromisos con la OTAN y con Europa', d: 'España participa con tropas en misiones aliadas y se ha comprometido a un nivel de gasto en defensa. La sección de defensa tendría que seguir cumpliendo esas misiones, con su cadena de mando reconocida por los aliados.', fuente: 'defensa-2025' },
+  { t: 'Que no sean patrullas por su cuenta', d: 'El riesgo de los ciudadanos guardianes es que se conviertan en patrullas que se toman la justicia por su mano. Se evita con selección (sin antecedentes, entrevista), formación obligatoria, registro público, actuar siempre avisando al 112 y bajo un guardián profesional, y retirada del distintivo al primer abuso.' },
+  { t: 'Quién responde si un ciudadano interviene mal', d: 'Si actúa dentro de su papel y con proporción, responde la administración, como con cualquier voluntario, y un seguro cubre los daños. Si se excede, responde él, como cualquier persona, y pierde el distintivo.' },
   { t: 'La Guardia Civil es militar', d: 'Pasar a un cuerpo civil cambia sus grados, su disciplina y su forma de asociarse. Es un cambio cultural grande para más de 80.000 personas.', fuente: 'lo-2-1986' },
   { t: 'Nadie puede cobrar menos', d: 'Igualar sueldos es subir a quien cobra menos, no bajar a quien cobra más. Eso cuesta dinero cada año (abajo hay una cuenta orientativa).' },
   { t: 'Una transición larga', d: 'Más de 250.000 personas con plazas, antigüedad, pensiones y destinos distintos. Haría falta un calendario de varios años: primero el sueldo y la formación comunes, después el mando.' },

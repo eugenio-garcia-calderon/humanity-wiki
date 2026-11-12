@@ -101,18 +101,18 @@ const SECCIONES: { escala: 'municipio' | 'provincia' | 'region' | 'nacion' | 'co
   { escala: 'municipio', t: 'Municipio', d: 'Guardianes de barrio' },
   { escala: 'provincia', t: 'Provincia', d: 'Carreteras y rescate' },
   { escala: 'region', t: 'Región', d: 'Unidades especiales' },
-  { escala: 'nacion', t: 'Nación', d: 'Fronteras y crimen organizado' },
-  { escala: 'continente', t: 'Continente', d: 'Enlace con Europa' },
+  { escala: 'nacion', t: 'Nación', d: 'Fronteras, crimen organizado, y defensa y emergencias (el antiguo ejército)' },
+  { escala: 'continente', t: 'Continente', d: 'Enlace con Europa y defensa común' },
 ];
 
 function Propuesta() {
   return (
-    <div role="img" aria-label="Con la propuesta: las asambleas de cada escala fijan prioridades a un solo cuerpo de guardianes, con un mando, una escala salarial y una academia, y secciones en el municipio, la provincia, la región, la nación y el enlace con Europa. Una inspección independiente vigila al cuerpo. El ejército queda aparte, con Defensa, coordinado con el mando nacional.">
+    <div role="img" aria-label="Con la propuesta: las asambleas de cada escala fijan prioridades a un solo cuerpo de guardianes, con un mando, una escala salarial y una academia, y secciones en el municipio, la provincia, la región, la nación (con defensa y emergencias) y el enlace con Europa. El ejército entra en el mismo cuerpo como sección de defensa y emergencias. Una inspección independiente vigila al cuerpo, y los ciudadanos guardianes ayudan como voluntarios.">
       <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_260px]">
         <div className="rounded-2xl border border-emerald-200 p-3">
           <Caja tono="claro" titulo="Las asambleas de cada escala">Fijan las prioridades de su sección: qué vigilar más, dónde, con qué horario</Caja>
           <Flecha />
-          <Caja tono="oscuro" titulo="Un solo cuerpo de guardianes">Un mando, una escala salarial, una jerarquía civil, una academia</Caja>
+          <Caja tono="oscuro" titulo="Un solo cuerpo de guardianes, ejército incluido">Un mando, una escala salarial, una jerarquía civil, una academia</Caja>
           <Flecha texto="secciones por escala" />
           <ul className="grid grid-cols-2 gap-2 sm:grid-cols-5">
             {SECCIONES.map(s => (
@@ -127,12 +127,12 @@ function Propuesta() {
           <Caja tono="verde" titulo={<span className="inline-flex items-center gap-1.5"><Eye aria-hidden className="h-4 w-4" />Inspección independiente</span>}>
             Fuera del cuerpo. Recibe quejas, revisa grabaciones, publica datos y responde ante los jueces y la ciudadanía.
           </Caja>
-          <Caja tono="gris" titulo="Ejército, aparte">
-            Con Defensa y solo para defender el país. Se coordina con el mando nacional en catástrofes y con la defensa europea.
+          <Caja tono="gris" titulo="Ciudadanos guardianes">
+            Voluntarios formados gratis. Observan, avisan al 112 y pueden intervenir ante violencia, bajo los guardianes profesionales.
           </Caja>
         </div>
       </div>
-      <p className="mt-4 text-sm text-slate-600">De unos {numero(MUNICIPIOS_CON_POLICIA)} cuerpos con su propio jefe a uno solo, con un único número de emergencia: el 112.</p>
+      <p className="mt-4 text-sm text-slate-600">De unos {numero(MUNICIPIOS_CON_POLICIA)} cuerpos de policía y un ejército aparte a un solo cuerpo, con un único número de emergencia: el 112.</p>
     </div>
   );
 }
