@@ -69,8 +69,8 @@ export function Encabezado({ id, titulo, children, className }: { id: string; ti
 }
 
 /** A small link to a source, after a figure. */
-export function Fuente({ id, children }: { id: string; children?: ReactNode }) {
-  const f = FUENTE[id];
+export function Fuente({ id, url, titulo, children }: { id?: string; url?: string; titulo?: string; children?: ReactNode }) {
+  const f = url ? { url, titulo: titulo ?? url } : id ? FUENTE[id] : undefined;
   if (!f) return null;
   return (
     <a href={f.url} target="_blank" rel="noreferrer" title={f.titulo}

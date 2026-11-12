@@ -34,6 +34,14 @@ import { ImpuestosVentana } from '../components/modeloSocioeconomico/ImpuestosVe
 import { PensionesVentana } from '../components/modeloSocioeconomico/PensionesVentana';
 import { CategoriasVentana } from '../components/modeloSocioeconomico/CategoriasVentana';
 import { DeudaVentana } from '../components/modeloSocioeconomico/DeudaVentana';
+import { EscalasVentana } from '../components/modeloSocioeconomico/EscalasVentana';
+import { ViviendaVentana } from '../components/modeloSocioeconomico/ViviendaVentana';
+import { SeguridadVentana } from '../components/modeloSocioeconomico/SeguridadVentana';
+import { JusticiaVentana } from '../components/modeloSocioeconomico/JusticiaVentana';
+import { SanidadVentana } from '../components/modeloSocioeconomico/SanidadVentana';
+import { EducacionVentana } from '../components/modeloSocioeconomico/EducacionVentana';
+import { LegalVentana } from '../components/modeloSocioeconomico/LegalVentana';
+import { DigitalVentana } from '../components/modeloSocioeconomico/DigitalVentana';
 import { Presupuestos } from '../components/modeloSocioeconomico/Presupuestos';
 import { BuzonProyecto } from '../components/modeloSocioeconomico/BuzonProyecto';
 import { Boton, Libre } from '../components/modeloSocioeconomico/piezas';
@@ -47,8 +55,14 @@ const ACENTO: Record<string, { tab: string; borde: string; texto: string }> = {
   categorias: { tab: 'bg-orange-700 text-white', borde: 'border-orange-600', texto: 'text-orange-700' },
   presupuestos: { tab: 'bg-indigo-600 text-white', borde: 'border-indigo-500', texto: 'text-indigo-600' },
   deuda: { tab: 'bg-rose-700 text-white', borde: 'border-rose-600', texto: 'text-rose-700' },
-  educacion: { tab: '', borde: 'border-slate-200', texto: 'text-slate-400' },
-  sanidad: { tab: '', borde: 'border-slate-200', texto: 'text-slate-400' },
+  escalas: { tab: 'bg-emerald-700 text-white', borde: 'border-emerald-600', texto: 'text-emerald-700' },
+  vivienda: { tab: 'bg-lime-700 text-white', borde: 'border-lime-600', texto: 'text-lime-700' },
+  seguridad: { tab: 'bg-blue-800 text-white', borde: 'border-blue-700', texto: 'text-blue-800' },
+  justicia: { tab: 'bg-violet-700 text-white', borde: 'border-violet-600', texto: 'text-violet-700' },
+  sanidad: { tab: 'bg-cyan-700 text-white', borde: 'border-cyan-600', texto: 'text-cyan-700' },
+  educacion: { tab: 'bg-yellow-500 text-slate-950', borde: 'border-yellow-400', texto: 'text-yellow-600' },
+  legal: { tab: 'bg-stone-700 text-white', borde: 'border-stone-600', texto: 'text-stone-700' },
+  digital: { tab: 'bg-sky-600 text-white', borde: 'border-sky-500', texto: 'text-sky-700' },
 };
 
 const anclaActual = () => decodeURIComponent(window.location.hash.replace(/^#/, ''));
@@ -75,7 +89,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
 
   useEffect(() => {
     const titulo = document.title;
-    document.title = 'Modelo socioeconómico optimizado · Impuestos, pensiones y presupuestos · Luz & Humanidad';
+    document.title = 'Modelo socioeconómico optimizado · Escalas, recaudación, pensiones, deuda, servicios y leyes · Luz & Humanidad';
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
     const anterior = meta?.content;
     if (!meta) { meta = document.createElement('meta'); meta.name = 'description'; document.head.appendChild(meta); }
@@ -200,6 +214,14 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
         {ventana === 'categorias' && <CategoriasVentana />}
         {ventana === 'pensiones' && <PensionesVentana />}
         {ventana === 'deuda' && <DeudaVentana />}
+        {ventana === 'escalas' && <EscalasVentana />}
+        {ventana === 'vivienda' && <ViviendaVentana />}
+        {ventana === 'seguridad' && <SeguridadVentana />}
+        {ventana === 'justicia' && <JusticiaVentana />}
+        {ventana === 'sanidad' && <SanidadVentana />}
+        {ventana === 'educacion' && <EducacionVentana />}
+        {ventana === 'legal' && <LegalVentana />}
+        {ventana === 'digital' && <DigitalVentana />}
         {ventana === 'presupuestos' && (
           <Apartado id="presupuestos" titulo="En qué se gasta cada escala"
             entradilla="El presupuesto de hoy de la Unión Europea, España, la Comunidad de Madrid, un municipio, una comunidad de vecinos y una familia, cada uno en su quesito. Abajo, todas juntas.">
@@ -238,7 +260,7 @@ function Portada() {
     <div className="mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6 sm:pt-14">
       <h1 className="max-w-3xl text-[2.3rem] font-[800] leading-[1.03] tracking-[-0.035em] sm:text-[3.4rem]">Un sistema más simple, más justo y que reparte abundancia</h1>
       <p className="mt-5 max-w-[60ch] text-[1.15rem] leading-relaxed text-slate-700">
-        Cómo funcionan hoy los impuestos, las pensiones, el gasto público y la deuda en España, y cómo podrían funcionar. Elige por dónde empezar: cada ventana empieza por lo esencial y se abre en detalle cuando lo pidas.
+        Cómo funcionan hoy la recaudación, las pensiones, el gasto público, la deuda, los servicios y las leyes en España, y cómo podrían funcionar. Elige por dónde empezar: cada ventana empieza por lo esencial y se abre en detalle cuando lo pidas.
       </p>
       <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {VENTANAS.map(v => {

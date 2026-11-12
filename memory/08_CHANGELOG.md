@@ -11226,3 +11226,10 @@ Eugenio: «llamado Observatorio de Polarización Política, y permite que si se 
 
 ### 2026-11-12 — Barra de luzhumanidad.com: «Participa» y logo un 25 % menor
 - `CabeceraSitio` (escaparate): el botón dice «Participa»; icono 38/44/48 px y nombre 1,46/1,76/2 rem.
+
+## 2026-11-12 — Modelo socioeconómico: thirteen windows (Escalas, Vivienda, Seguridad, Justicia, Sanidad, Educación, Legal, Digital)
+
+- «Impuestos» is now «Recaudación» with a euro icon (anchor `#impuestos` kept so shared links still work).
+- Eight new windows, one file pair each (`<Nombre>Ventana.tsx` + `src/data/<id>.ts`, whose `APARTADOS` feed the submenu): Escalas (first tab: the eight scales, responsibility, who decides, link to how revenue is split), Vivienda (what each scale enacts and how it regulates; empty homes), Seguridad (all forces, budgets, one body of «guardianes»), Justicia (one door for civil and criminal, judges at police stations, deadlines, judges needed), Sanidad (waiting times, collapse, one health record), Educación (0–25 «mochila», peer tutoring, projects and trades, an evaluator «bot» card), Legal (who legislates what, diagram, sectors, licence levels, a 10-question reader test), Digital (sign with the phone: SMS code, stronger signature for serious acts, phone service).
+- Each window was written by its own agent and scored by a separate blind evaluator (comprehension, completeness, figures, simple-first, mobile) until every score was ≥ 8, in two or three rounds.
+- `Fuente` accepts `url`/`titulo` so window data files keep their own sources. «Préstamos al IPC» now reads «préstamos sin intereses, solo ajustados a la subida de precios».

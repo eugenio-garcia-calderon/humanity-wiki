@@ -214,7 +214,7 @@ export const TERCIOS_ESCALA: Record<EscalaId, Record<TercioId, string>> = {
 // smaller one, or between equals.
 export interface Apoyo { id: string; nombre: string; texto: string }
 export const APOYOS: Apoyo[] = [
-  { id: 'prestamo', nombre: 'Préstamos al IPC', texto: 'Una escala presta a otra más pequeña (la comunidad a una familia, la región a un municipio) o a una igual, con un interés igual al IPC: el dinero vuelve con el mismo valor y nadie gana con él.' },
+  { id: 'prestamo', nombre: 'Préstamos sin intereses', texto: 'Préstamos «al IPC»: sin intereses, solo ajustados a la subida de precios. Una escala presta a otra más pequeña (la comunidad a una familia, la región a un municipio) o a una igual, con un interés igual al IPC: el dinero vuelve con el mismo valor y nadie gana con él.' },
   { id: 'donacion', nombre: 'Donaciones puntuales', texto: 'Para lo que un préstamo no resuelve: una avería que no se puede devolver, una urgencia. Una vez, no cada mes.' },
   { id: 'ocupacion', nombre: 'Trabajo antes que paga', texto: 'Quien se queda sin ingresos recibe primero una ocupación: el municipio o la comunidad le ofrece trabajo en lo que necesita.' },
   { id: 'discapacidad', nombre: 'Apoyo constante solo con discapacidad', texto: 'Solo las personas con discapacidad reciben una ayuda constante, y en lo posible no en dinero: acceso directo a vivienda, alimentación y cuidados, pagado con el tercio de cuidados de cada escala.' },
