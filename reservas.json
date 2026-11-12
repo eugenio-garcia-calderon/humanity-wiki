@@ -71,6 +71,12 @@
       "ruta": "src/components/aeromovil/garaje/bala.ts",
       "motivo": "Cuadriciclo Bala clásico / en rombo: nombres",
       "desde": "2026-11-12T09:33:51.374Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/garaje/balaForma.ts",
+      "motivo": "Cuadriciclo Bala clásico / en rombo: nombres",
+      "desde": "2026-11-12T09:33:53.723Z"
     }
   ]
 }
