@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "src/pages/SubpaginaSitio.tsx",
+      "motivo": "modelo socioeconómico incrustado en luzhumanidad.com",
+      "desde": "2026-11-12T09:32:33.311Z"
+    }
+  ]
 }
