@@ -169,7 +169,7 @@ def nino(lz):
            mano=dict(ang=-55, gesto='abierta', lado=-1, tam=21), semilla=36)
 
 
-def mano_con_telefono(lz):
+def mano_con_telefono(lz, capas=None):
     """The fourth character: only a hand and its phone, reaching in from the left edge.
     On the screen, a wheat field under a summer sky; out of it a swallow flies into
     the real sky, trailing a wisp of the screen's cloud (no slogan).
@@ -246,6 +246,8 @@ def mano_con_telefono(lz):
     lz.lapiz([list(bezier(q - nrm * 6, q + dirp * 1.5, q + nrm * 6, n=8))], lp, grosor=0.5, presion=0.45)
 
     # the swallow leaves the screen: a wisp of the screen's cloud streams out behind it
+    if capas is not None:
+        capas.empieza('golondrina', 'La golondrina')
     salida = S(0.42, 0.3)
     ave = np.array([266.0, 438.0])
     estela = bezier(salida, salida + np.array([12, -26]), ave - np.array([42, -20]), ave - np.array([20, -10]), 40)

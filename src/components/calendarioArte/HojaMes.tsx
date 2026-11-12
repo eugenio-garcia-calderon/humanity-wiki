@@ -16,6 +16,8 @@ import type { ContenidoMes, FranjaMes, TipoFranja } from '../../data/calendarioA
 import { Editable } from './Editable';
 import { Button } from '../ui/core';
 import { CodigoQR, urlConocerMas } from './CodigoQR';
+import { Composicion } from './Composicion';
+import { claveCapas } from '../../data/calendarioArteCapas';
 
 export const NOMBRES_MES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 const DIAS_SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
@@ -120,6 +122,10 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
   // letras»). La misma imagen que arriba: la que se mira en pantalla, la que se
   // imprime al imprimir. Sin ilustración, la hoja sigue siendo papel liso.
   const fondo = comparar ? visto : (c.imagen && imagenRota !== c.imagen ? c.imagen : undefined);
+  /** Las ilustraciones por elementos (capas) se montan pieza a pieza y guardan
+   *  lo que se mueve, por clave de ilustración. */
+  const cambiarComposicion = (clave: string) => (nc: NonNullable<ContenidoMes['composicion']>[string]) =>
+    alCambiar({ composicion: { ...(c.composicion ?? {}), [clave]: nc } });
 
   const cambiarDia = (d: number, v: string) => {
     const dias = [...c.dias];
@@ -160,16 +166,30 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
         <div className="group relative flex-1 overflow-hidden" style={{ margin: '0 9mm 9mm', borderRadius: '3mm' }}>
           {comparar ? (
             // Una encima de otra: cambiar de diseño es un fundido, no un salto.
-            apiladas.map(d => (
-              <img
-                key={d.url}
-                src={d.url}
-                loading={perezosa ? 'lazy' : undefined}
-                alt={`Ilustración de ${nombre}: ${c.tema} (diseño ${d.n})`}
-                className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out"
-                style={{ objectPosition: `${c.imagen_x ?? 50}% ${c.imagen_y ?? 50}%`, opacity: visto === d.url ? 1 : 0 }}
-              />
-            ))
+            apiladas.map(d => {
+              const clave = claveCapas(d.url);
+              return clave ? (
+                <div key={d.url} className={cn('absolute inset-0 transition-opacity duration-700 ease-in-out', visto !== d.url && 'pointer-events-none')}
+                  style={{ opacity: visto === d.url ? 1 : 0 }}>
+                  <Composicion clave={clave} ajustes={c.composicion?.[clave]} editable={editando && visto === d.url}
+                    alCambiar={cambiarComposicion(clave)} perezosa={perezosa} alt={`Ilustración de ${nombre}: ${c.tema} (diseño ${d.n})`}
+                    posX={c.imagen_x} posY={c.imagen_y} />
+                </div>
+              ) : (
+                <img
+                  key={d.url}
+                  src={d.url}
+                  loading={perezosa ? 'lazy' : undefined}
+                  alt={`Ilustración de ${nombre}: ${c.tema} (diseño ${d.n})`}
+                  className="absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ease-in-out"
+                  style={{ objectPosition: `${c.imagen_x ?? 50}% ${c.imagen_y ?? 50}%`, opacity: visto === d.url ? 1 : 0 }}
+                />
+              );
+            })
+          ) : c.imagen && claveCapas(c.imagen) ? (
+            <Composicion clave={claveCapas(c.imagen)!} ajustes={c.composicion?.[claveCapas(c.imagen)!]} editable={editando}
+              alCambiar={cambiarComposicion(claveCapas(c.imagen)!)} perezosa={perezosa} alt={`Ilustración de ${nombre}: ${c.tema}`}
+              posX={c.imagen_x} posY={c.imagen_y} />
           ) : c.imagen && imagenRota !== c.imagen ? (
             <img
               src={c.imagen}
@@ -277,7 +297,10 @@ export function HojaMes({ anio, contenido: c, editando, alCambiar, alElegirImage
       {/* 2026-11-05, Eugenio: cabecera y franja más bajas para que los
           cuadrados de los días crezcan y quede sitio para anotar. */}
       <div className="ca-mitad relative flex flex-col overflow-hidden" style={{ height: '210mm' }}>
-        {fondo && (
+        {fondo && claveCapas(fondo) ? (
+          <Composicion clave={claveCapas(fondo)!} ajustes={c.composicion?.[claveCapas(fondo)!]} perezosa={perezosa}
+            posX={c.imagen_x} posY={c.imagen_y} />
+        ) : fondo && (
           <img
             src={fondo}
             alt=""

@@ -1,0 +1,97 @@
+{
+ "ancho": 3508,
+ "alto": 2008,
+ "fondo": "fondo.jpg",
+ "capas": [
+  {
+   "id": "guitarrista",
+   "nombre": "El guitarrista",
+   "src": "guitarrista.webp",
+   "x": 0.07269,
+   "y": 0.30478,
+   "w": 0.15165,
+   "h": 0.3252
+  },
+  {
+   "id": "musica",
+   "nombre": "La música",
+   "src": "musica.webp",
+   "x": 0.13569,
+   "y": 0.05777,
+   "w": 0.31727,
+   "h": 0.41285
+  },
+  {
+   "id": "falda",
+   "nombre": "La falda-jardín",
+   "src": "falda.webp",
+   "x": 0.2577,
+   "y": 0.29183,
+   "w": 0.43158,
+   "h": 0.65886
+  },
+  {
+   "id": "bailarina",
+   "nombre": "La bailarina",
+   "src": "bailarina.webp",
+   "x": 0.3797,
+   "y": 0.09412,
+   "w": 0.14652,
+   "h": 0.2749
+  },
+  {
+   "id": "abuela",
+   "nombre": "La abuela que teje",
+   "src": "abuela.webp",
+   "x": 0.12742,
+   "y": 0.66783,
+   "w": 0.17104,
+   "h": 0.33217
+  },
+  {
+   "id": "nina",
+   "nombre": "La niña del barro",
+   "src": "nina.webp",
+   "x": 0.58124,
+   "y": 0.75797,
+   "w": 0.13597,
+   "h": 0.23357
+  },
+  {
+   "id": "flores",
+   "nombre": "Las flores que despegan",
+   "src": "flores.webp",
+   "x": 0.69242,
+   "y": 0.45916,
+   "w": 0.02708,
+   "h": 0.05528
+  },
+  {
+   "id": "pajaro1",
+   "nombre": "El pájaro coral",
+   "src": "pajaro1.webp",
+   "x": 0.73204,
+   "y": 0.38645,
+   "w": 0.03278,
+   "h": 0.04731
+  },
+  {
+   "id": "pajaro2",
+   "nombre": "El pájaro turquesa",
+   "src": "pajaro2.webp",
+   "x": 0.79333,
+   "y": 0.30876,
+   "w": 0.02993,
+   "h": 0.03934
+  },
+  {
+   "id": "pajaro3",
+   "nombre": "El pájaro dorado",
+   "src": "pajaro3.webp",
+   "x": 0.8549,
+   "y": 0.25896,
+   "w": 0.02338,
+   "h": 0.03536
+  }
+ ]
+}

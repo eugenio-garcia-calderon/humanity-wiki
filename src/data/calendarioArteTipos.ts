@@ -43,6 +43,10 @@ export interface ContenidoMes {
   /** «Mi reto personal del mes» (2026-11-09): la pregunta que invita a escribir
    *  un reto propio sobre el tema. Debajo van líneas en blanco para apuntarlo. */
   reto?: string;
+  /** Lo que se ha movido, agrandado o añadido en las ilustraciones que existen
+   *  por elementos sueltos (2026-11-12). Por clave de ilustración («mes-06-d»):
+   *  así cambiar de diseño no arrastra los ajustes de otro. */
+  composicion?: Record<string, ComposicionDiseno>;
   /** A dónde lleva el QR. Por defecto, la ficha «Conocer más» del mes en humanity.wiki. */
   qr_url?: string;
   /** Evaluación del mes contra los principios de diseño. No se imprime. */
@@ -75,3 +79,14 @@ export const PORTADA_POR_DEFECTO: PortadaCalendario = {
   recaudacion: 'Parte de lo recaudado con este calendario apoya iniciativas que mejoran cada una de estas áreas de la humanidad.',
   pie: 'Asociación Luz & Humanidad · humanity.wiki',
 };
+
+/** Cuánto se ha movido y agrandado un elemento de la ilustración. dx, dy en
+ *  fracciones de la hoja (0,1 = una décima del ancho o del alto); escala desde
+ *  su centro (1 = como se dibujó). */
+export interface AjusteCapa { dx?: number; dy?: number; escala?: number }
+
+/** Una imagen que alguien añadió encima de la ilustración, como en un mural.
+ *  x, y = su centro y ancho = su anchura, en fracciones de la hoja. */
+export interface ElementoAnadido { id: string; src: string; x: number; y: number; ancho: number }
+
+export interface ComposicionDiseno { capas?: Record<string, AjusteCapa>; extra?: ElementoAnadido[] }

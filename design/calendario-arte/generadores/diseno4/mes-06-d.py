@@ -22,11 +22,16 @@ from acuarela import (Lienzo, Poligono, Elipse, Trazo, Circulos, spline, bezier,
                       hoja, hojita, flor_simple, flor_grande, mata, ramita, pajaro, estrella, motas, remuestrea)
 from extra_m678 import (cabeza2, mano2, brazo2, pierna2, torso2, cuello, sombra_lado, piel_lapiz, pie, manga_poly)
 from personajes_06 import abuelo_y_lampara, nina, labio_hoja, nino, mano_con_telefono
+from capas import Capas
 
 ANCHO = int(sys.argv[1]) if len(sys.argv) > 1 else 1485
 SALIDA = sys.argv[2] if len(sys.argv) > 2 else 'mes-06-d.png'
+# third argument: a folder to write the illustration as separate movable elements (capas.py)
+CARPETA_CAPAS = sys.argv[3] if len(sys.argv) > 3 else None
 
 lz = Lienzo(ANCHO, semilla=606)
+capas = Capas(lz, activo=bool(CARPETA_CAPAS))
+lz = capas.lienzo     # every element is also painted alone on a clean twin sheet
 
 ORO = '#f2b630'
 ORO_C = '#f7d36a'
@@ -41,6 +46,7 @@ LP = '#5e3f30'
 
 rng = np.random.default_rng(6)
 
+capas.empieza('sol', 'El sol')
 # ------------------------------------------------------------------ the June sun: only a warm glow in the corner the flower faces
 SOL = (1330, 110)
 lz.aguada(Elipse(SOL[0], SOL[1], 130, 105), '#f9e2a8', dens=0.16, suave=34, gran=0.05)
@@ -48,6 +54,7 @@ lz.aguada(Elipse(SOL[0], SOL[1], 62, 56), '#f6c45e', dens=0.42, suave=20, gran=0
 lz.aguada(Elipse(SOL[0], SOL[1], 30, 28), '#f2a63e', dens=0.55, suave=9, gran=0.05)
 lz.luz((SOL[0], SOL[1], 46), '#fff1c0', fuerza=0.5)
 
+capas.empieza('suelo', 'El suelo bajo el tallo')
 # ------------------------------------------------------------------ ground patch under the stem (only there)
 suelo = Poligono([(430, 812), (520, 786), (640, 778), (760, 790), (850, 812), (760, 834), (600, 840), (480, 832)])
 lz.aguada(suelo, '#c9b07a', dens=0.4, suave=10, gran=0.4, toques=[(640, 800, 120, '#9fb27a', 0.6)])
@@ -59,6 +66,7 @@ for k in range(26):
 for (x, y, c) in ((500, 792, '#f2d36b'), (782, 798, CORAL), (812, 806, '#fff3cf'), (468, 808, '#c33c4e')):
     flor_simple(lz, x, y, 5, c, centro='#e7a33e')
 
+capas.empieza('girasol', 'El girasol')
 # ------------------------------------------------------------------ stem
 TALLO = [(626, 830), (630, 720), (646, 600), (668, 500), (690, 420), (708, 372)]
 tallo = Trazo(TALLO, (34, 32, 30, 28, 26, 24))
@@ -227,10 +235,14 @@ for k in range(6, 78, 9):
 # ------------------------------------------------------------------ the people (redrawn 2026-11-11: personajes_06.py)
 # the leaf's curled edge behind their legs; the grandfather mends the lamp, the girl screws the bulb in, the boy throws the seeds
 labio_hoja(lz)
+capas.empieza('abuelo', 'El abuelo y la lámpara')
 abuelo_y_lampara(lz, BULBO)
+capas.empieza('nina', 'La niña')
 nina(lz)
+capas.empieza('nino', 'El niño')
 nino(lz)
 
+capas.empieza('semillas', 'Las semillas-molinillo')
 # ------------------------------------------------------------------ seeds that are wind turbines
 def molinillo(x, y, s, ang=0, color='#f6e3c4', gouache=False, semilla_=True):
     """A seed with a three-bladed rotor and a fine stem: half dandelion seed,
@@ -263,6 +275,7 @@ for k, (x, y) in enumerate(vuelo[1:]):
     if k % 2 == 0:
         molinillo(x, y, s, ang=rng.uniform(-35, 35), color=['#f6e3c4', '#f4c9b4', '#f9e9b8'][k % 3])
 
+capas.empieza('pueblo', 'El pueblo')
 # ------------------------------------------------------------------ the village (2026-11-09, Eugenio: «un pueblo con más diversidad,
 # y varios velomóviles y algún planeador»): a whole hill town, every house different -- whitewash, ochre, rose, pale blue;
 # terracotta, slate, plum and solar roofs; a bell tower on top; round trees and cypresses between the houses; a patchwork
@@ -562,6 +575,7 @@ def posa(x):
     return x, float(np.interp(x, [p[0] for p in CAMINO], [p[1] for p in CAMINO])) + 2
 
 
+capas.empieza('velomoviles', 'Los velomóviles y la bici')
 # a row along the lower road, heading up to the village behind a bicycle
 velomovil(*posa(962), 48, '#e8735e', '#8a5a3a', '#2f8f92', ropa='#f2d36b')
 velomovil(*posa(1022), 41, '#2f8f92', '#f0c8a0', '#f2b630', ropa='#c33c4e')
@@ -577,6 +591,7 @@ lz.aguada(Trazo([(cx_ - 3, cy_ - 10), (cx_ + 1, cy_ - 20)], (5, 4)), '#8d73b0', 
 lz.aguada(Elipse(cx_ + 2, cy_ - 24.5, 3.5), '#5a3a2a', dens=0.8, tapa=1)
 lz.lapiz([[(cx_ - 1, cy_ - 11), (cx_ + 4, cy_ - 4)], [(cx_ + 1, cy_ - 18), (cx_ + 5, cy_ - 10)]], '#4a5a8a', grosor=1.0, presion=0.7)
 
+capas.empieza('hilos', 'Los hilos de luz')
 # threads of light: the sunflower shares its energy with every solar roof (community energy)
 for k, (tx, ty) in enumerate(tejados):
     p = bezier(H(92, 120), (850 + k * 14, 560 + k * 8), (950 + k * 12, 610), (tx, ty + 2), 60)
@@ -614,7 +629,9 @@ def planeador(x, y, env, inclina=-8, franja='#e8735e', fu=0.42):
     lz.aguada(Elipse(*R(0.0, 0), 0.5 * env, 0.01 * env, inclina), '#c9b9a0', dens=0.1, suave=5)
 
 
+capas.empieza('planeador1', 'El planeador grande')
 planeador(1060, 104, 150, inclina=24, franja='#e8735e')
+capas.empieza('planeador2', 'El planeador pequeño')
 planeador(1338, 404, 78, inclina=-24, franja='#e8735e')
 lz.lapiz([[(1338 + 62 * math.cos(a_), 446 + 16 * math.sin(a_)) for a_ in np.linspace(a0, a0 + 0.5, 6)]
           for a0 in np.linspace(0.3, 2.9, 4)], '#c9b08a', grosor=0.45, presion=0.28, temblor=0.2)
@@ -634,6 +651,7 @@ def abeja(x, y, s=1.0, ang=0):
     lz.aguada(Elipse(*R(7, 0), 2.6 * s), '#3e2a24', dens=1.0, irreg=0.1, tapa=1)
 
 
+capas.empieza('abeja', 'La abeja')
 abeja(476, 132, 1.2, -20)
 
 
@@ -669,11 +687,16 @@ def satelite(x, y, s=1.0, ang=-14):
     lz.gouache(Elipse(*R(-3, -6), 1.2 * s, 2.2 * s, ang), '#fff6dc', alfa=0.8, irreg=0)
 
 
+capas.empieza('satelite', 'El satélite')
 satelite(214, 262, 1.0, ang=-14)   # below the web page's design buttons, which cover the top-left corner on screen
 
 # the fourth character: only a hand and its phone, reaching in from the left; a swallow flies out of the screen
-mano_con_telefono(lz)
+capas.empieza('mano', 'La mano con el móvil')
+mano_con_telefono(lz, capas)
 
+capas.termina()
 lz.vineta(margen=26)
 lz.guardar(SALIDA)
+if CARPETA_CAPAS:
+    capas.guardar(CARPETA_CAPAS)
 print('ok', SALIDA)
