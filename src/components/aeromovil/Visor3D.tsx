@@ -1083,6 +1083,8 @@ const CAPA_BALA: Record<string, CapaId> = {
   ruedas: 'ruedas', cabina: 'asientos', [PIVOTES_CUPULA[1]]: 'cristales', cupula: 'cristales',
   // 2026-11-12: the Aptera doors' and hatch's glass hang from pivots of their own (balaModelo.ts `pielConPuertas`)
   'puerta-der-cristal': 'cristales', 'puerta-izq-cristal': 'cristales', [`${PIVOTE_PORTON}-cristal`]: 'cristales',
+  // round 3: the passengers' doors' glass
+  'puerta-tras-der-cristal': 'cristales', 'puerta-tras-izq-cristal': 'cristales',
 };
 /**
  * The Cuadriciclo Bala en rombo: the garage model's builder with this design's shape

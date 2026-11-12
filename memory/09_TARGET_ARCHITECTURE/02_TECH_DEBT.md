@@ -590,3 +590,9 @@ The observatory is one self-contained HTML file (`public/observatorio-polarizaci
 - **The clear-entry check is one number**: the lowest point of the open door over a box beside the seat. It does not model a person getting in.
 - **Off-default hinge settings can make the door swing through the body.** Examples: the hinge-angle slider at −12° (2.0 cm on the real clásico), or the hinge halfway up the pillar (0.5 cm). The check goes red, but the door is not stopped. The right fix is a door stop that tells an edge graze at the start of the swing apart from a real collision. The first try at a stop could not tell them apart, and held a grazing door at 2°.
 - **The controller moves with the pack**, behind it, and its old fixed place under the passenger is used only without the pack.
+### 2026-11-12 — Cuadriciclo Bala clásico round 3 (body): shortcuts
+- **The door/hatch collision checks cost ~0.25 s per calculation** with the hatch on (13 × 25 positions per leaf, point clouds in a hash grid). They run on the main thread with the other checks. Moving the check list to the tunnel's worker is the fix (~2 h now, more once more checks depend on it).
+- **The tunnel does not see the headlamp, the mirrors or the fin**, so «Sin aleta» and the headlamp do not change the Cd shown.
+- **The flat tail's Cd rise is the tunnel's superellipse sections' reading** of a wide, thin tail; a real truncated (Kamm) tail behaves differently. Same caveat as every tunnel figure.
+- **The hinge knuckles are drawn, not modelled:** their mass is in «Montantes B y C: refuerzos…» (2.0 kg, estimate). There is no door stop, as for the front door.
+- **Pilot's view and mirror visibility** have no check in this model; the belt-line slider moves the glass edge and the mirrors with it, but nothing measures what the driver sees.

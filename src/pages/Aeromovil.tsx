@@ -658,7 +658,15 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
       case 'tFila2X': case 'tFila3X': return cm(v, 0);
       case 'tRecPil': case 'tRecPas': case 'tRecFila': return v === 0 ? '0° (erguido)' : v < 0 ? `${-v}° hacia delante` : `${v}° hacia atrás`;
       // 2026-11-12
-      case 'tBatX': case 'tPuertaDel': case 'tPuertaTras': return `${m2(v)} tras el eje delantero`;
+      case 'tBatX': case 'tPuertaDel': case 'tPuertaTras': case 'tPuerta2Parte': return `${m2(v)} tras el eje delantero`;
+      // round 3 (body)
+      case 'tMorroLinea': return v < 0.01 ? 'en punta (ojiva)' : v > 0.99 ? 'en línea (Aptera)' : `${Math.round(v * 100)} % hacia la línea`;
+      case 'tColaPlana': return v < 0.01 ? 'en punta' : v > 0.99 ? 'plana y ancha (Aptera)' : `${Math.round(v * 100)} % hacia plana`;
+      case 'tTechoPlano': return v < 0.01 ? 'redondeado' : v > 0.99 ? 'plano' : `${Math.round(v * 100)} % hacia plano`;
+      case 'tCaida': return Math.abs(v) < 0.01 ? 'como siempre' : v > 0 ? `cae más tarde (+${fmt(v, 2)})` : `cae antes (${fmt(v, 2)})`;
+      case 'tMorroAlto': case 'tLineaCupula': return Math.abs(v) < 0.0005 ? 'como siempre' : `${v > 0 ? '+' : '−'}${cm(Math.abs(v), 1)}`;
+      case 'tBisagra2Y': return `${Math.round(v * 100)} % del canto de atrás`;
+      case 'tBisagra2Inc': return v === 0 ? '0° (tangente al canto)' : `${v}° arriba hacia delante`;
       case 'tBatAncho': return `${Math.round(v)} % · ${cm(2 * (modelo.paquete?.hz ?? 0), 0)}`;
       case 'tKWh': return modelo.paquete ? `${fmt(modelo.kWh, 1)} kWh (por el tamaño del paquete)` : `${fmt(v, 1)} kWh`;
       case 'tVolY': return modelo.volante && modelo.volante.baja > 0.001 ? `${v >= 0 ? '+' : '−'}${cm(Math.abs(v), 0)} · baja ${cm(modelo.volante.baja, 0)} para caber` : `${v >= 0 ? '+' : '−'}${cm(Math.abs(v), 0)}`;
@@ -692,8 +700,11 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
   const volante = T.tMando === 'volante', salp = T.tSalpicadero === 'si', puertas = conPuertas(T), portonA = conPortonAptera(T), paquete = bateriaChasis(T);
   const PUERTA = ['tPuertaDel', 'tPuertaTras', 'tUmbral', 'tCintura', 'tBisagraY', 'tBisagraInc', 'tBisagraDentro', 'tPuertaAbre'];
   const visible = (k: string) => (k === 'tManX' || k === 'tManY') ? !volante : k.startsWith('tVol') ? volante : k.startsWith('tSalp') ? salp
-    : PUERTA.includes(k) ? puertas : (k === 'tMalIni' || k === 'tMalAbre' || k === 'tMalLado') ? portonA : (k.startsWith('tBat') && k !== 'tBatDisp') ? paquete : true;
-  const fichas = deslizadoresTriciclo().filter(f => f.dep === dep && !soloFilas(f.bloque) && (cuatro || f.clave !== 'tViaTras') && visible(f.clave)), sels = SELECTORES_TRICICLO.filter(s => s.dep === dep && !soloFilas(s.bloque) && (s.clave !== 'tMaletero' || puertas));
+    : PUERTA.includes(k) ? puertas : (k === 'tMalIni' || k === 'tMalAbre' || k === 'tMalLado') ? portonA : (k.startsWith('tBat') && k !== 'tBatDisp') ? paquete
+      // round 3 (body): the headlamp's width with the headlamp, the fin's height with the fin, the second door's with it
+      : k === 'tFaroD' ? T.tFaro === 'si' : k === 'tAleta' ? T.tConAleta !== 'no' : PUERTA2.includes(k) ? puertas && T.tPuertas2 === 'si' : true;
+  const PUERTA2 = ['tPuerta2Parte', 'tBisagra2Y', 'tBisagra2Inc', 'tPuerta2Abre'];
+  const fichas = deslizadoresTriciclo().filter(f => f.dep === dep && !soloFilas(f.bloque) && (cuatro || f.clave !== 'tViaTras') && visible(f.clave)), sels = SELECTORES_TRICICLO.filter(s => s.dep === dep && !soloFilas(s.bloque) && ((s.clave !== 'tMaletero' && s.clave !== 'tPuertas2') || puertas));
   const nOcc = rt.ocupantes, conN = nOcc === 1 ? 'con el piloto solo' : `con ${['', 'uno', 'dos', 'tres', 'cuatro'][nOcc] ?? nOcc} ocupantes`;
   // with three rows the passenger's saddle height is the rows' seat height; its position and recline do nothing there
   const ETIQUETA_FILAS: Partial<Record<string, string>> = { tPasY: 'Asientos de las filas 2 y 3: altura' };
