@@ -11514,3 +11514,12 @@ Eugenio, 2026-11-13: «Arregla las puertas traseras de pasajeros, es demasiado e
 - Ya no se arrastran los coches del garaje ni existe el plano del garaje: el sitio lo deciden las filas.
 - Arreglado de paso: un guardado automático que llegaba tarde, después de abrir otro diseño, volvía a abrir el anterior con los parámetros del nuevo.
 - De paso, en el móvil (390 px): la página medía 490 px de ancho porque un desplegable de opciones mide lo que su opción más larga («Ventanas laterales con montante (Aptera)»). Los desplegables del panel tienen ahora un ancho máximo y la página vuelve a medir 390 px.
+
+## 2026-11-13 — Aeromóvil: cambiar el nombre de los diseños y mover los coches del garaje
+
+- Eugenio: «Permite cambiar el nombre de los modelos. También permite pinchar y arrastrar los modelos editables y los no editables para cambiarlos de posición en el garaje».
+- «Cambiar nombre» en la tarjeta del diseño que editas y con el lápiz de cada fila de «Mis diseños»: un campo de texto en su sitio, con «Guardar» y «Cancelar» (Intro guarda, Esc cancela). Como el servidor: sin espacios al principio ni al final, hasta 80 caracteres y nunca vacío. Solo lo ve el dueño del Aeromóvil con su sesión. El nombre nuevo sale enseguida en la cabecera, el menú del logo, la lista, la tarjeta y el cartel encima del coche; renombrar no reconstruye el coche.
+- Todos los coches del garaje, los diseños y los de referencia, se pueden pulsar y arrastrar por el suelo. Un toque sin mover sigue siendo un clic (abre el diseño o la ficha); a partir de unos píxeles es arrastrar, y la cámara no gira mientras. Cada coche se queda donde se suelta, en este navegador, también al abrir otro diseño y al recargar.
+- El diseño que editas se queda siempre en el centro y no se arrastra: los demás se colocan a su alrededor (si lo moviste cuando no era el que editabas, los demás se ven desde su sitio).
+- «Volver a colocar en fila» en la lista del garaje (todos los movidos) y «Volver a su fila» en la tarjeta de cada coche movido.
+- Arreglado: en un navegador sin orden guardado del garaje, al guardar un diseño (el guardado automático o un cambio de nombre) ese diseño saltaba al final de la fila. Ahora se queda en su sitio.

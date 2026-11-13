@@ -628,3 +628,9 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 - **The tunnel and «Superponer» still ignore our garage designs** (as before): only the reference cars and the active design go through them.
 - **`window.__visorAeromovil`** is exposed on the dev server only (`import.meta.env.DEV`), so the browser checks can find cars on screen.
 - **The old key `aeromovil_garaje_disenos_v1`** (positions of «Mis diseños», PR #1031) is no longer read and stays in browsers that had it.
+
+## 2026-11-13 — Garage drag and rename: shortcuts
+
+- **Dragged places are per browser** (`localStorage`), not shared: Eugenio's phone and computer each have their own garage arrangement.
+- **A dragged place is absolute in the rows' frame.** When a design is added before it in the list, the cars in the row move along and a dragged car does not, so they can end up overlapping. There is no overlap check on drop.
+- **The drag snaps to 5 cm and has no grid or alignment guides**; «Volver a su fila» is the way back to a tidy row.

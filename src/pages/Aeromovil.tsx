@@ -52,7 +52,7 @@ import { FormularioMejora, VistaExportar, VistaPlan, VistaPlanos, VistaTareas, c
 import { BotonesComponentes, VistaComponentes } from '../components/aeromovil/Componentes';
 import { VEHICULOS_GARAJE } from '../components/aeromovil/garaje';
 import { useDisenosGaraje } from '../components/aeromovil/GarajeDisenos';
-import { AvisoCambios, BotonSoloReferencia, ListaGaraje, TarjetaDiseno, useEleccionDiseno } from '../components/aeromovil/garaje/NavegadorGaraje';
+import { AvisoCambios, BotonFilaReferencia, BotonSoloReferencia, ListaGaraje, TarjetaDiseno, useEleccionDiseno } from '../components/aeromovil/garaje/NavegadorGaraje';
 import { HUECO_CON_TUNEL } from '../components/aeromovil/garaje/filas';
 import { TarjetaTunel, gastoEnRuedas, VELOCIDADES, type FilaTunel } from '../components/aeromovil/TarjetaTunel';
 import { cuerpoAeromovil, cuerpoGaraje, type CuerpoTunel } from '../components/aeromovil/tunel/cuerpos';
@@ -1113,6 +1113,8 @@ export default function Aeromovil() {
   garajeRef.current = { actualizar: disenosGaraje.actualizar, tiene: id => !!disenosGaraje.lista?.some(d => d.id === id) };
   const eleccion = useEleccionDiseno({
     g: disenosGaraje, P, actual, abrirDiseno, sinGuardar: () => setActual(null), puedeDecidir: !!dueno?.puedeDecidir,
+    // (2026-11-13) a renamed design: the open one's name changes; its saved parameters («base») do not
+    alRenombrado: d => setActual(a => (a && a.id === d.id ? { ...a, nombre: d.nombre } : a)),
     nombreVehiculo, morro: modelo.xn, cola: modelo.xt,
   });
   // `?garaje=xl1`: mirar un modelo del garaje a solas, en el origen (para comprobarlo mientras se modela).
@@ -1253,7 +1255,7 @@ export default function Aeromovil() {
   // the garage's list, shared by the sidebar block and the «Garaje» panel inside the 3D view (2026-11-13: in the
   // Triciclo family the block sits at the end of «Proyecto», where Eugenio could not find «Mis diseños»)
   const garajeLista = (
-    <ListaGaraje g={disenosGaraje} e={eleccion} actual={actual} nombreVehiculo={nombreVehiculo}
+    <ListaGaraje g={disenosGaraje} e={eleccion} actual={actual} nombreVehiculo={nombreVehiculo} puedeDecidir={!!dueno?.puedeDecidir}
       referencias={VEHICULOS_GARAJE.map(v => ({ id: v.id, nombre: v.nombre, largo: v.largo, visible: !!garaje.find(g => g.id === v.id)?.visible }))}
       alAlternarReferencia={id => setGaraje(g => g.map(x => x.id === id ? { ...x, visible: !x.visible } : x))}
       alElegido={() => { if (window.matchMedia('(max-width: 639px)').matches) setPanelGaraje(false); }} />
@@ -1300,7 +1302,8 @@ export default function Aeromovil() {
             : completa === 'css' ? 'fixed inset-0 z-[100] h-[100dvh] w-screen' : 'relative h-full w-full')}>
           <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeConDisenos} soloGaraje={!!soloGaraje} tunel={tunel} carteles={carteles} cuerposTunel={cuerposTunel} opcionesTunel={opcionesTunelVisor} alElegirPuntoTunel={setPuntoTunel} puntoTunel={puntoTunel} fichasGaraje={disenosGaraje.fichas} superponer={!!superponer && !soloGaraje} vista={vista}
             referencia={referencia} modoRef={modoRef} alinear={alinear} alPinchar={esA1 ? c => { navegar(`/aeromovil/componentes/${c}`); window.scrollTo({ top: 0 }); } : undefined}
-            alPincharGaraje={eleccion.alPincharGaraje} alPincharNuestro={() => { eleccion.setTarjeta(true); eleccion.setPendiente(null); }} extraTarjeta={id => <BotonSoloReferencia e={eleccion} id={id} />}
+            alPincharGaraje={eleccion.alPincharGaraje} alPincharNuestro={() => { eleccion.setTarjeta(true); eleccion.setPendiente(null); }} extraTarjeta={id => <><BotonFilaReferencia g={disenosGaraje} id={id} /><BotonSoloReferencia e={eleccion} id={id} /></>}
+            alMoverGaraje={superponer || soloGaraje ? undefined : disenosGaraje.mover}
             seguir={eleccion.seguir} nombres={soloUrl ? undefined : disenosGaraje.nombres} resaltarNuestro={disenosGaraje.enFila > 0} verGaraje={panelGaraje && !soloGaraje}
             margenDerecho={panelGaraje && typeof window !== 'undefined' && window.matchMedia('(min-width: 640px)').matches ? 352 : 0}
             colores={colores} />
@@ -1328,7 +1331,7 @@ export default function Aeromovil() {
             </div>
           )}
           {/* The design being edited (2026-11-13): its card, and the question about unsaved changes when leaving it */}
-          <TarjetaDiseno e={eleccion} actual={actual} porDefecto={!!disenosGaraje.lista?.find(d => d.id === actual?.id)?.por_defecto} nombreVehiculo={nombreVehiculo} puedeDecidir={!!dueno?.puedeDecidir}
+          <TarjetaDiseno e={eleccion} g={disenosGaraje} actual={actual} porDefecto={!!disenosGaraje.lista?.find(d => d.id === actual?.id)?.por_defecto} nombreVehiculo={nombreVehiculo} puedeDecidir={!!dueno?.puedeDecidir}
             className={cn('inset-x-2 top-14 sm:inset-x-auto sm:left-3 sm:top-12 sm:w-[min(340px,calc(100%-24px))]', panelGaraje && 'hidden sm:block sm:w-[min(340px,calc(100%-376px))]')} />
           <AvisoCambios e={eleccion} actual={actual} puedeDecidir={!!dueno?.puedeDecidir} className={cn('inset-x-2 top-14 sm:inset-x-auto sm:left-3 sm:top-12 sm:w-[min(360px,calc(100%-24px))]', panelGaraje && 'sm:w-[min(360px,calc(100%-376px))]')} />
           {/* La explicación de un punto del túnel va dentro de la ventana 3D: así también se ve en pantalla completa. */}

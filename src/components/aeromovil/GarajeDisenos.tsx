@@ -27,6 +27,23 @@ import { colocarFilas, type CocheFila, type Plaza } from './garaje/filas';
 
 const CLAVE_ORDEN = 'aeromovil_garaje_orden_v1';
 const CLAVE_OCULTOS = 'aeromovil_garaje_ocultos_v1';
+/** Where each dragged car stands (2026-11-13), by garage id, in the rows' own frame (see `garaje/filas.ts`). */
+const CLAVE_SITIOS = 'aeromovil_garaje_sitios_v1';
+function leerSitios(): Record<string, Plaza> {
+  try {
+    const g = JSON.parse(localStorage.getItem(CLAVE_SITIOS) || '{}');
+    const ok = (v: unknown) => typeof v === 'number' && Number.isFinite(v) && Math.abs(v) < 500;
+    const out: Record<string, Plaza> = {};
+    if (g && typeof g === 'object') for (const [k, v] of Object.entries(g as Record<string, any>)) if (v && ok(v.x) && ok(v.z)) out[k] = { x: v.x, z: v.z };
+    return out;
+  } catch { return {}; }
+}
+/** A short fingerprint of a design's parameters: a new name or a new date alone does not rebuild its car. */
+function huella(o: unknown): string {
+  const t = JSON.stringify(o ?? {}); let h = 5381;
+  for (let k = 0; k < t.length; k++) h = ((h * 33) ^ t.charCodeAt(k)) >>> 0;
+  return `${t.length}-${h.toString(36)}`;
+}
 const PREFIJO = 'diseno-';
 export const esDisenoGaraje = (id: string) => id.startsWith(PREFIJO);
 export const idGaraje = (id: number) => `${PREFIJO}${id}`;
@@ -45,7 +62,7 @@ export function familia(P: Parametros, m: Modelo): string {
   return m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala en rombo' : m.tipo === 'triciclo' ? nombreTriciclo(camposTriciclo(P)) : 'Aeromóvil Gota';
 }
 
-interface Info { d: Diseno; modelo: Modelo; res: Resultados; familia: string; def: VehiculoGaraje & { preparar: () => void; listo: () => boolean } }
+interface Info { d: Diseno; clave: string; modelo: Modelo; res: Resultados; familia: string; def: VehiculoGaraje & { preparar: () => void; listo: () => boolean } }
 
 /**
  * A garage car for a saved design. Nothing is built until `preparar` (the hook calls it one design at a time, after the
@@ -125,6 +142,8 @@ export function useDisenosGaraje({ activo, referencias, resolucion, conCd, hueco
   const [orden, setOrden] = useState<number[]>(() => leerIds(CLAVE_ORDEN));
   const [ocultos, setOcultos] = useState<number[]>(() => leerIds(CLAVE_OCULTOS));
   const [listos, setListos] = useState<Set<string>>(() => new Set());
+  const [sitios, setSitios] = useState<Record<string, Plaza>>(leerSitios);
+  useEffect(() => { try { localStorage.setItem(CLAVE_SITIOS, JSON.stringify(sitios)); } catch { /* without storage it is forgotten on reload */ } }, [sitios]);
   const [, setVersion] = useState(0);
   useEffect(() => guardarIds(CLAVE_ORDEN, orden), [orden]);
   useEffect(() => guardarIds(CLAVE_OCULTOS, ocultos), [ocultos]);
@@ -138,15 +157,17 @@ export function useDisenosGaraje({ activo, referencias, resolucion, conCd, hueco
   useEffect(cargar, []);
   const lista = useMemo(() => (crudo ? ordenar(crudo, orden) : null), [crudo, orden]);
 
-  // Each design's model and figures, worked out once per saved version (`updated_at`).
+  // Each design's model and figures, worked out once per set of parameters (2026-11-13: a rename only changes its name).
   const infos = useRef(new Map<string, Info>());
   const infoDe = (d: Diseno): Info | null => {
-    const clave = `${d.id}@${d.updated_at}`;
+    const clave = `${d.id}@${huella(d.parametros)}`;
     let i = infos.current.get(clave);
+    // the same car with a newer name (or date): the built car stays, the name follows
+    if (i && i.d !== d) { i.d = d; i.def.nombre = d.nombre; }
     if (!i) {
       try {
         const P = deDiseno(d.parametros || {}), modelo = crearModelo(ajustarCarenado(P)), res = calcular(modelo, areas(modelo)), fam = familia(P, modelo);
-        i = { d, modelo, res, familia: fam, def: vehiculoDe(d, modelo, fam) };
+        i = { d, clave, modelo, res, familia: fam, def: vehiculoDe(d, modelo, fam) };
       } catch (e) { console.error(`[garaje] el diseño «${d.nombre}» no se ha podido calcular:`, e); return null; }
       // an older version of the same design is not coming back: its template goes with it
       for (const k of [...infos.current.keys()]) if (k.startsWith(`${d.id}@`)) infos.current.delete(k);
@@ -176,18 +197,18 @@ export function useDisenosGaraje({ activo, referencias, resolucion, conCd, hueco
   // draws in between (a Triciclo blocks for about a second). A design enters the viewer once it is built.
   useEffect(() => {
     const k0 = fila.findIndex(c => c.id === ID_ACTIVO);
-    const pendientes = fila.map((c, k) => ({ c, k })).filter(({ c }) => c.info && !listos.has(`${c.info.d.id}@${c.info.d.updated_at}`))
+    const pendientes = fila.map((c, k) => ({ c, k })).filter(({ c }) => c.info && !listos.has(c.info.clave))
       .sort((a, b) => Math.abs(a.k - k0) - Math.abs(b.k - k0));
     const sig = pendientes[0]?.c.info; if (!sig) return;
     const t = setTimeout(() => {
       try { sig.def.preparar(); } catch (e) { console.error(`[garaje] no se pudo construir «${sig.d.nombre}»:`, e); }
-      setListos(s => new Set(s).add(`${sig.d.id}@${sig.d.updated_at}`));
+      setListos(s => new Set(s).add(sig.clave));
     }, 30);
     return () => clearTimeout(t);
   }, [fila, listos]);
 
   // registered while on show (the viewer finds them by id); the rest forgotten
-  const visibles = useMemo(() => enGaraje.filter(i => listos.has(`${i.d.id}@${i.d.updated_at}`) || i.def.listo()), [enGaraje, listos]);
+  const visibles = useMemo(() => enGaraje.filter(i => listos.has(i.clave) || i.def.listo()), [enGaraje, listos]);
   for (const i of visibles) registrarVehiculo(i.def);
   useEffect(() => {
     const dentro = new Set(visibles.map(i => i.def.id));
@@ -195,14 +216,20 @@ export function useDisenosGaraje({ activo, referencias, resolucion, conCd, hueco
   }, [visibles]);
 
   // Where everything goes: the first row, and the reference cars behind it.
-  const plazas = useMemo<Map<string, Plaza>>(() => {
+  const { plazas, origen } = useMemo(() => {
     const fila2: CocheFila[] = referencias.flatMap(id => {
       const def = vehiculoGaraje(id); if (!def) return [];
       const xs = def.envolvente?.map(e => e[0]);
       return [{ id, morro: xs?.length ? Math.max(...xs) : 0.9, cola: xs?.length ? Math.min(...xs) : 0.9 - def.largo, ancho: def.ancho }];
     });
-    return colocarFilas(fila, ID_ACTIVO, fila2, { huecoFila2 });
-  }, [fila, referencias, huecoFila2]);
+    // the dragged ones keep their place; the one being edited by its design's own id
+    const fijas = new Map<string, Plaza>();
+    for (const c of [...fila, ...fila2]) {
+      const k = c.id === ID_ACTIVO ? (activo.id != null ? idGaraje(activo.id) : null) : c.id;
+      const p = k ? sitios[k] : undefined; if (p) fijas.set(c.id, p);
+    }
+    return colocarFilas(fila, ID_ACTIVO, fila2, { huecoFila2, fijas });
+  }, [fila, referencias, huecoFila2, sitios, activo.id]);
 
   // The Cd of the designs whose Cd only the tunnel gives, in the background, after the editor's own requests.
   const peticiones = useMemo(() => visibles.map(i => ({ i, p: peticionCd(i, resolucion) })), [visibles, resolucion]);
@@ -238,7 +265,7 @@ export function useDisenosGaraje({ activo, referencias, resolucion, conCd, hueco
 
   /** What the viewer gets: the designs that are built, with their place and their version (a new one is rebuilt). */
   const visor = useMemo(() => visibles.flatMap(i => {
-    const p = plazas.get(i.def.id); return p ? [{ id: i.def.id, x: p.x, z: p.z, giro: 0, v: i.d.updated_at }] : [];
+    const p = plazas.get(i.def.id); return p ? [{ id: i.def.id, x: p.x, z: p.z, giro: 0, v: i.clave }] : [];
   }), [visibles, plazas]);
   /** A short name over every car when no other label is on (2026-11-13: «label each with its name»). */
   const nombres = useMemo(() => {
@@ -251,11 +278,15 @@ export function useDisenosGaraje({ activo, referencias, resolucion, conCd, hueco
   // ── changes to the list ────────────────────────────────────────────────
   /** A design as the server returned it (saved, or new): replaces its old version, or goes in right after `junto`. */
   const actualizar = (d: Diseno, junto?: number | null) => {
+    const conocido = !!crudo?.some(x => x.id === d.id);
     setCrudo(l => {
       if (!l) return l;
       if (l.some(x => x.id === d.id)) return l.map(x => (x.id === d.id ? d : x));
       return [...l, d];
     });
+    // (2026-11-13) a design already in the list keeps its place: with no order stored yet in this browser, a save
+    // (an automatic one, or a rename) used to put it at the end of the row
+    if (conocido) return;
     setOrden(o => {
       if (o.includes(d.id)) return o;
       // the order as it is on screen, with the new one after `junto` (or at the end)
@@ -288,7 +319,20 @@ export function useDisenosGaraje({ activo, referencias, resolucion, conCd, hueco
     await llamar(`/api/aeromovil/disenos/${id}`, 'DELETE', { clave: leerClaves()[id] });
     setCrudo(l => (l ? l.filter(x => x.id !== id) : l));
     setOcultos(o => o.filter(x => x !== id));
+    setSitios(s => { const { [idGaraje(id)]: _quitado, ...resto } = s; return resto; });
   };
 
-  return { lista, error, cargar, visor, plazas, fichas, carteles, nombres, ocultos, alternarOculto, actualizar, ponerLista, copiar, guardar, archivar, construidos: visibles.length, enFila: enGaraje.length };
+  /** A car dropped at (x, z) on screen: its place in the rows' frame, kept in this browser. */
+  const mover = (id: string, x: number, z: number) => setSitios(s => ({ ...s, [id]: { x: Math.round((x + origen.x) * 100) / 100, z: Math.round((z + origen.z) * 100) / 100 } }));
+  /** «Volver a colocar en fila»: one car (by garage id), or all of them. */
+  const aFila = (id?: string) => setSitios(s => { if (!id) return {}; const { [id]: _quitado, ...resto } = s; return resto; });
+  const movidos = Object.keys(sitios).filter(k => (esDisenoGaraje(k) ? !!crudo?.some(d => idGaraje(d.id) === k) : true));
+  /** «Cambiar nombre»: the owner's PUT with only the name (the server trims it and keeps 80 characters). */
+  const renombrar = async (id: number, nombre: string): Promise<Diseno> => {
+    const d = await llamar(`/api/aeromovil/disenos/${id}`, 'PUT', { nombre, clave: leerClaves()[id] });
+    actualizar(d);
+    return d;
+  };
+
+  return { lista, error, cargar, visor, mover, aFila, sitios, movidos, renombrar, plazas, fichas, carteles, nombres, ocultos, alternarOculto, actualizar, ponerLista, copiar, guardar, archivar, construidos: visibles.length, enFila: enGaraje.length };
 }
