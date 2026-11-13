@@ -1,10 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "cola",
-      "ruta": "drizzle/0218_aeromovil_clasico_cubierta_lisa.sql",
-      "motivo": "clásico smooth deck migration",
-      "desde": "2026-11-13T18:51:45.406Z"
-    }
-  ]
+  "reservas": []
 }
