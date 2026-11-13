@@ -1,10 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "puertas",
-      "ruta": "drizzle/0217_aeromovil_clasico_puertas_techo.sql",
-      "motivo": "clásico round-4 doors/roof migration",
-      "desde": "2026-11-13T17:11:18.941Z"
-    }
-  ]
+  "reservas": []
 }
