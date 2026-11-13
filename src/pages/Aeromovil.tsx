@@ -1345,8 +1345,9 @@ export default function Aeromovil() {
                 ...VEHICULOS_GARAJE.filter(d => d.envolvente).map(d => ({ id: d.id, nombre: d.nombre, color: colorCss(d.id), largo: d.largo, ancho: d.ancho, alto: d.alto, batalla: d.batalla, visible: !!garaje.find(g => g.id === d.id)?.visible })),
               ]} />
           )}
+          {/* (sm: right-[156px] leaves room for the «Garaje» button, which sits at right-14 next to full screen) */}
           {verConsumo && !tunel && !superponer && (
-            <div className="absolute right-3 top-12 z-10 flex flex-wrap items-center gap-1 rounded-xl border border-slate-200 bg-white/95 px-2.5 py-1.5 text-[11px] text-slate-600 shadow-sm backdrop-blur sm:right-[52px] sm:top-3" role="group" aria-label="Velocidad de los carteles">
+            <div className="absolute right-3 top-12 z-10 flex flex-wrap items-center gap-1 rounded-xl border border-slate-200 bg-white/95 px-2.5 py-1.5 text-[11px] text-slate-600 shadow-sm backdrop-blur sm:right-[156px] sm:top-3" role="group" aria-label="Velocidad de los carteles">
               <Gauge className="h-3.5 w-3.5 text-sky-700" />Consumo en las ruedas (aire + rodadura) a
               {VELOCIDADES.map(k => (
                 <Button key={k} variant="outline" aria-pressed={kmhComparar === k} onClick={() => setKmhComparar(k)}
