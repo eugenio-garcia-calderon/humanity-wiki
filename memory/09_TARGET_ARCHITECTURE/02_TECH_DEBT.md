@@ -614,3 +614,11 @@ The observatory is one self-contained HTML file (`public/observatorio-polarizaci
 ## 2026-11-13 — Reference silhouettes left without a section
 
 Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoRef` state, `TablaComparacion`, `Referencia` in `referencias.ts`) with no way in, and `GET/POST/DELETE /api/aeromovil/referencias` plus the `aeromovil_referencias` table with no screen. Kept on purpose for this change (removal was the ask, not a refactor); deleting the ghost branch is about 1 h now. The table's rows, if any, are untouched.
+
+## 2026-11-13 — Garage as design browser: shortcuts
+
+- **Every saved design is built in full and kept in memory** (template + one clone on screen). Measured with 7 designs + 3 reference cars: ~2.4 M triangles, JS heap ~170 MB (headless SwiftShader). No level of detail: `construirDisenoGaraje` with `'rapida'` for the Bala family would roughly halve both; a cap on how many are built is the other option. ~1 h either way.
+- **A design's place is recomputed from the list order on every change**, and the active one's length moves the row while a slider is dragged (the neighbours slide). A fixed slot per design would avoid it; ~1 h.
+- **The tunnel and «Superponer» still ignore our garage designs** (as before): only the reference cars and the active design go through them.
+- **`window.__visorAeromovil`** is exposed on the dev server only (`import.meta.env.DEV`), so the browser checks can find cars on screen.
+- **The old key `aeromovil_garaje_disenos_v1`** (positions of «Mis diseños», PR #1031) is no longer read and stays in browsers that had it.

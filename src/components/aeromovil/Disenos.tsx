@@ -50,7 +50,7 @@ export async function cargarDisenoPorDefecto(): Promise<Diseno | null> {
 
 const CLAVES = 'aeromovil.claves';
 export const leerClaves = (): Record<string, string> => { try { return JSON.parse(localStorage.getItem(CLAVES) || '{}') || {}; } catch { return {}; } };
-const guardarClave = (id: number, clave: string) => { try { localStorage.setItem(CLAVES, JSON.stringify({ ...leerClaves(), [id]: clave })); } catch { /* sin almacenamiento */ } };
+export const guardarClave = (id: number, clave: string) => { try { localStorage.setItem(CLAVES, JSON.stringify({ ...leerClaves(), [id]: clave })); } catch { /* sin almacenamiento */ } };
 
 /** Solo los parámetros que sirven para el diseño; los de la vista (compresión) no viajan. */
 export const aDiseno = (P: Parametros): Partial<Parametros> => { const { comp: _c, ...resto } = P; return resto; };
@@ -163,8 +163,10 @@ export function useAutoguardado(P: Parametros, actual: DisenoAbierto | null, alG
   return { tipo: cambiado ? 'pendiente' : 'al-dia' };
 }
 
-export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, alVehiculo, nombreVehiculo, puedeDecidir, estado }: {
+export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, alVehiculo, nombreVehiculo, puedeDecidir, estado, alLista }: {
   P: Parametros;
+  /** Every list the menu reads (each time it opens or saves), so the garage drops what was removed here (2026-11-13). */
+  alLista?: (l: Diseno[]) => void;
   /** The open vehicle's name: the button is the page's logo. */
   nombreVehiculo: string;
   /** Opens a vehicle at its starting measures; only used when that vehicle has no design in the list. */
@@ -188,7 +190,7 @@ export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, alVehicu
 
   const cargar = () => fetch('/api/aeromovil/disenos', { credentials: 'include' })
     .then(async r => { if (!r.ok) throw new Error((await r.json().catch(() => null))?.error || 'No se han podido leer los diseños.'); return r.json(); })
-    .then(setLista).catch(e => setError(e.message));
+    .then((l: Diseno[]) => { setLista(l); if (Array.isArray(l)) alLista?.(l); }).catch(e => setError(e.message));
   useEffect(() => { if (abierto) { setError(null); cargar(); } }, [abierto]);
   useEffect(() => {
     if (!abierto) return;
