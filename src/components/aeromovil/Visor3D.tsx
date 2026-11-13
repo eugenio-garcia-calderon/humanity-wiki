@@ -151,14 +151,14 @@ function distanciaParaVer(puntos: THREE.Vector3[], centro: THREE.Vector3, haciaC
 }
 
 // Round 4 (2026-11-13, «más discretos como los del aptera, y con ese toque cristalizado»): the joint and the busbars
-// barely lighter than the cell (before, the joint was a light navy that drew a grid), as the Triciclo's (balaPiezas.ts)
+// dark slate and the busbars faint (before, the joint was a light navy that drew a grid), as the Triciclo's (balaPiezas.ts)
 function texturaSolar() {
   const c = document.createElement('canvas'); c.width = c.height = 128;
   const g = c.getContext('2d')!;
-  g.fillStyle = '#121828'; g.fillRect(0, 0, 128, 128);                 // la junta (apenas más clara que la célula)
-  g.fillStyle = '#0a0f1f';
+  g.fillStyle = '#262c37'; g.fillRect(0, 0, 128, 128);                 // la junta (gris pizarra oscuro, como la del Aptera del garaje)
+  g.fillStyle = '#0b1429';
   g.beginPath(); g.moveTo(8, 2); g.lineTo(120, 2); g.lineTo(126, 8); g.lineTo(126, 120); g.lineTo(120, 126); g.lineTo(8, 126); g.lineTo(2, 120); g.lineTo(2, 8); g.closePath(); g.fill();
-  g.strokeStyle = '#151c30'; g.lineWidth = 1; g.beginPath(); g.moveTo(6, 43); g.lineTo(122, 43); g.moveTo(6, 85); g.lineTo(122, 85); g.stroke();
+  g.strokeStyle = '#18213a'; g.lineWidth = 1; g.beginPath(); g.moveTo(6, 43); g.lineTo(122, 43); g.moveTo(6, 85); g.lineTo(122, 85); g.stroke();
   const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
   return t;
 }
@@ -334,7 +334,7 @@ function materiales() {
       ? new THREE.MeshPhysicalMaterial({ color: 0x9fb3c4, metalness: 0, roughness: 0.03, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.5, transmission: 0.95, thickness: 0.006, ior: 1.52, attenuationColor: new THREE.Color(0x4f6b80), attenuationDistance: 0.25, side: THREE.DoubleSide })
       : new THREE.MeshPhysicalMaterial({ color: 0x0c161f, metalness: 0.2, roughness: 0.02, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.6, transparent: true, opacity: 0.62, side: THREE.DoubleSide, depthWrite: false }),
     // (round 4: under glass, as the Aptera's: smoother, with a mirror-like clear coat, and less relief)
-    solar: new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: relieveSolar, bumpMap: relieveSolar, bumpScale: 0.0005, metalness: 0.1, roughness: 0.12, clearcoat: 1, clearcoatRoughness: 0.015, envMapIntensity: 1.6, side: THREE.DoubleSide }),
+    solar: new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: relieveSolar, bumpMap: relieveSolar, bumpScale: 0.0005, metalness: 0.15, roughness: 0.2, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.4, side: THREE.DoubleSide }),
     // Goma negra mate alrededor de los cristales, y la pieza azul marino del morro (Aptera).
     goma: new THREE.MeshStandardMaterial({ color: 0x141516, metalness: 0.05, roughness: 0.85, side: THREE.DoubleSide }),
     morro: new THREE.MeshPhysicalMaterial({ color: 0x182544, metalness: 0.2, roughness: 0.32, roughnessMap: grano, clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 1.1, side: THREE.DoubleSide }),
