@@ -1977,7 +1977,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     // The editor's Bala: its paint (and everything painted on it) goes see-through, the inner skin disappears;
     // «Corte» cuts every one of its materials at the centre plane, so the cockpit shows.
     const Mb = st.Mb as ReturnType<typeof materialesBala>;
-    for (const mt of [Mb.chapa, Mb.marino, Mb.chapaDoble, Mb.marinoDoble, Mb.chapaCalco, Mb.marinoCalco, Mb.rojo, Mb.rojoDoble, Mb.rojoPieza, Mb.junta, Mb.negroBrillo, Mb.negroMate, Mb.grisOscuro, Mb.solar]) {
+    for (const mt of [Mb.chapa, Mb.blancoInterior, Mb.marino, Mb.chapaDoble, Mb.marinoDoble, Mb.chapaCalco, Mb.marinoCalco, Mb.rojo, Mb.rojoDoble, Mb.rojoPieza, Mb.junta, Mb.negroBrillo, Mb.negroMate, Mb.grisOscuro, Mb.solar]) {
       mt.transparent = rayosX; mt.opacity = rayosX ? 0.16 : 1; mt.depthWrite = !rayosX;
     }
     Mb.forro.visible = !rayosX;
