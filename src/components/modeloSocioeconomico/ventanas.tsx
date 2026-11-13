@@ -21,10 +21,12 @@ import { APARTADOS as A_SANIDAD } from '../../data/sanidad';
 import { APARTADOS as A_EDUCACION } from '../../data/educacion';
 import { APARTADOS as A_LEGAL } from '../../data/legal';
 import { APARTADOS as A_DIGITAL } from '../../data/digital';
+import { APARTADOS as A_BANCA } from '../../data/banca';
+import { APARTADOS as A_MONEDA } from '../../data/moneda';
 import { cn } from '../../utils/cn';
 import { Libre } from './piezas';
 
-export type VentanaId = 'escalas' | 'impuestos' | 'categorias' | 'pensiones' | 'presupuestos' | 'deuda' | 'vivienda' | 'seguridad' | 'justicia' | 'sanidad' | 'educacion' | 'legal' | 'digital';
+export type VentanaId = 'escalas' | 'impuestos' | 'categorias' | 'pensiones' | 'presupuestos' | 'economia' | 'vivienda' | 'seguridad' | 'justicia' | 'sanidad' | 'educacion' | 'legal' | 'digital';
 export interface Ventana {
   id: VentanaId;
   titulo: string;
@@ -87,17 +89,10 @@ const BASE: Ventana[] = [
     ],
   },
   {
-    id: 'deuda', titulo: 'Deuda', icono: Landmark,
-    lema: 'La deuda de España y de las comunidades, y un sistema sin deuda con una caja para emergencias.',
-    apartados: [
-      { id: 'deuda', t: 'Resumen' },
-      { id: 'deuda-quien', t: 'Quién debe' },
-      { id: 'deuda-historia', t: 'Historia' },
-      { id: 'deuda-propuesta', t: 'Hoy y propuesta' },
-      { id: 'deuda-caja', t: 'Caja de emergencias' },
-      { id: 'deuda-heredada', t: 'La deuda de hoy' },
-      { id: 'deuda-fuentes', t: 'Fuentes' },
-    ],
+    id: 'economia', titulo: 'Economía', icono: Landmark,
+    lema: 'La deuda, la banca y la moneda: cómo funcionan hoy y qué se propone en cada una.',
+    // Flat list of every part's sections, so any of their anchors opens this window.
+    apartados: [],
   },
   { id: 'vivienda', titulo: 'Vivienda', icono: Home, apartados: A_VIVIENDA, lema: 'Lo que hoy apenas se hace, y qué promulga y regula cada escala.' },
   { id: 'seguridad', titulo: 'Seguridad', icono: ShieldCheck, apartados: A_SEGURIDAD, lema: 'Ejército, policías y guardias: un solo cuerpo de guardianes, sin duplicidades.' },
@@ -108,13 +103,45 @@ const BASE: Ventana[] = [
   { id: 'digital', titulo: 'Digital', icono: Smartphone, apartados: A_DIGITAL, lema: 'Firmar con el móvil, sin instalar nada.' },
 ];
 
-/** Which window an anchor belongs to: its own id, or one of its sections. */
 /** Every window with «Otras propuestas» gets it as the first entry of its submenu. */
-export const VENTANAS: Ventana[] = BASE.map(v => ESPECTROS[v.id]
-  ? { ...v, apartados: [{ id: `${v.id}-propuestas`, t: 'Otras propuestas' }, ...v.apartados] }
-  : v);
+const conPropuestas = (id: string, apartados: { id: string; t: string }[]) =>
+  ESPECTROS[id] ? [{ id: `${id}-propuestas`, t: 'Otras propuestas' }, ...apartados] : apartados;
 
+/**
+ * The «Economía» window (Eugenio, 2026-11-13) holds three parts — Deuda, Banca,
+ * Moneda — each with its own «Otras propuestas» and sections. Only the open
+ * part is drawn; its anchors keep the old ids (#deuda-caja), so links shared
+ * before the merge still land.
+ */
+export const PARTES_ECONOMIA: { id: 'deuda' | 'banca' | 'moneda'; t: string; apartados: { id: string; t: string }[] }[] = [
+  { id: 'deuda', t: 'Deuda', apartados: conPropuestas('deuda', [
+      { id: 'deuda', t: 'Resumen' },
+      { id: 'deuda-quien', t: 'Quién debe' },
+      { id: 'deuda-historia', t: 'Historia' },
+      { id: 'deuda-propuesta', t: 'Hoy y propuesta' },
+      { id: 'deuda-caja', t: 'Caja de emergencias' },
+      { id: 'deuda-heredada', t: 'La deuda de hoy' },
+      { id: 'deuda-fuentes', t: 'Fuentes' },
+  ]) },
+  { id: 'banca', t: 'Banca', apartados: conPropuestas('banca', A_BANCA) },
+  { id: 'moneda', t: 'Moneda', apartados: conPropuestas('moneda', A_MONEDA) },
+];
+export type ParteEconomia = (typeof PARTES_ECONOMIA)[number]['id'];
+
+/** The part an anchor belongs to (its id, one of its sections, or its prefix); Deuda by default. */
+export function parteDeAncla(ancla: string): ParteEconomia {
+  const p = PARTES_ECONOMIA.find(x => x.id === ancla || ancla.startsWith(`${x.id}-`) || x.apartados.some(a => a.id === ancla));
+  return p ? p.id : 'deuda';
+}
+
+/** Every window with «Otras propuestas» gets it as the first entry of its submenu. */
+export const VENTANAS: Ventana[] = BASE.map(v => v.id === 'economia'
+  ? { ...v, apartados: PARTES_ECONOMIA.flatMap(p => [{ id: p.id, t: p.t }, ...p.apartados]) }
+  : { ...v, apartados: conPropuestas(v.id, v.apartados) });
+
+/** Which window an anchor belongs to: its own id, or one of its sections (any Economía part's prefix too). */
 export function ventanaDeAncla(ancla: string): VentanaId | null {
+  if (PARTES_ECONOMIA.some(p => ancla === p.id || ancla.startsWith(`${p.id}-`))) return 'economia';
   for (const v of VENTANAS) {
     if (v.pronto) continue;
     if (v.id === ancla || v.apartados.some(a => a.id === ancla)) return v.id as VentanaId;

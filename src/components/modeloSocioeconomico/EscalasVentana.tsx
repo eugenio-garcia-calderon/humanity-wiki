@@ -258,7 +258,7 @@ export function EscalasVentana() {
         <p className="mt-5 max-w-3xl text-[15px] leading-relaxed text-slate-700">
           Con los datos de 2025, en España se recaudarían unos {millones(pais.recaudacion)} al año, y cada escala recibiría {millones(pais.porEscala)}. Es una estimación: el cálculo completo está en Recaudación.
           Hoy las administraciones gastan {millones(HOY_TOTAL)}; de ellos, {millones(HOY.pensiones2024)} son pensiones<Fuente id="igae-cofog" />, que en el modelo se pagan aparte (ventana <a href="#pensiones" className={enlace}>Pensiones</a>).
-          Sin ellas quedan {millones(sinPensiones)}: las ocho escalas recibirían unos {millones(Math.abs(diferencia))} {diferencia >= 0 ? 'más' : 'menos'}. Los intereses de la deuda, en la ventana <a href="#deuda" className={enlace}>Deuda</a>.
+          Sin ellas quedan {millones(sinPensiones)}: las ocho escalas recibirían unos {millones(Math.abs(diferencia))} {diferencia >= 0 ? 'más' : 'menos'}. Los intereses de la deuda, en la ventana Economía, parte <a href="#deuda" className={enlace}>Deuda</a>.
         </p>
         <Mas titulo="los tres tercios en cada escala">
           <Tercios modo="literal" />

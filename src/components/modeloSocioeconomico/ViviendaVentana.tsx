@@ -228,6 +228,16 @@ function Propuesta() {
       <CasasVacias />
       <Calculadora />
       <DineroModelo />
+      {/* Bridge to the «Banca» window (Eugenio, 2026-11-12): the credit rule is the other half of this proposal. */}
+      <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-5">
+        <p className="text-lg font-bold text-slate-900">El crédito para la vivienda</p>
+        <p className="mt-1 max-w-3xl text-[15px] leading-relaxed text-slate-700">
+          Los bancos crean dinero nuevo cada vez que dan una hipoteca, y ese dinero sube el precio de las casas que ya existen. La propuesta: dinero nuevo, con interés regulado, solo para la primera y la segunda vivienda de cada persona y para construir casas nuevas. La tercera vivienda, o una empresa que compra casas, se paga con dinero que ya existe.
+        </p>
+        <p className="mt-3 text-[15px]">
+          <a href="#banca-vivienda" className="font-semibold text-slate-900 underline decoration-slate-400 underline-offset-2 hover:decoration-slate-900">¿Puedo pedir un préstamo? Verlo en Banca</a>
+        </p>
+      </div>
     </Apartado>
   );
 }
