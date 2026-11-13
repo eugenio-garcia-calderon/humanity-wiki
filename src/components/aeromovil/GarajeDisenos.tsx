@@ -174,7 +174,10 @@ export function useDisenosGaraje({ actual, catalogo, resolucion }: {
       cd,
     ];
     // the label over the car with «Cd y consumo» or the tunnel on: its name and its Cd
-    carteles[i.def.id] = `${i.d.nombre}\n${cd.replace(/ \(.*\)$/, '')}`;
+    // (2026-11-13, «también pon el peso, y el área frontal»: its empty mass and the frontal area its Cd is referred to,
+    // the tunnel's for the Triciclo family and the Cuadriciclo en rombo, the editor's for the others)
+    const area = p ? p.area : res.A;
+    carteles[i.def.id] = `${i.d.nombre}\n${cd.replace(/ \(.*\)$/, '')}\n${res.mVeh > 0 ? `${Math.round(res.mVeh)} kg en vacío · ` : ''}${fmt(area)} m²`;
   }
 
   /** A free place for a new design: beside ours if there is room, otherwise in a row in front of it. */

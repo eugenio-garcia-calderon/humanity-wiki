@@ -70,22 +70,25 @@ function texturaAsiento(): THREE.CanvasTexture | null {
 }
 
 /**
- * One solar cell of the Triciclo's roof (2026-11-10, round two): monocrystalline, dark blue, with its
- * clipped corners, a fine silver grid and three busbars. uv (1, 1) is one 125 mm cell (the A1's `CELULA`).
+ * One solar cell of the Triciclo's roof (2026-11-10, round two): monocrystalline, with its clipped corners, its fine
+ * fingers and three busbars. uv (1, 1) is one 125 mm cell (the A1's `CELULA`).
+ * Round 4 (2026-11-13, Eugenio: «los paneles solares también tienen que ser más discretos como los del aptera, y con ese
+ * toque cristalizado»): dark navy-to-black cells on a black backsheet, the grid barely there (fingers at 6 %, busbars at
+ * 18 %), as the Aptera's roof under its glass: before, bright blue cells on a light grey backsheet with white busbars.
  */
 function texturaSolar(): THREE.CanvasTexture | null {
   if (typeof document === 'undefined') return null;
   const N = 128, cv = document.createElement('canvas'); cv.width = cv.height = N;
   const c = cv.getContext('2d'); if (!c) return null;
-  c.fillStyle = '#c9ced6'; c.fillRect(0, 0, N, N);   // the backsheet showing between the cells
+  c.fillStyle = '#0a0d14'; c.fillRect(0, 0, N, N);   // the backsheet showing between the cells: near black
   const m = 3, k = 14;
   c.beginPath(); c.moveTo(m + k, m); c.lineTo(N - m - k, m); c.lineTo(N - m, m + k); c.lineTo(N - m, N - m - k); c.lineTo(N - m - k, N - m); c.lineTo(m + k, N - m); c.lineTo(m, N - m - k); c.lineTo(m, m + k); c.closePath();
-  const g = c.createLinearGradient(0, 0, N, N); g.addColorStop(0, '#13234a'); g.addColorStop(0.5, '#0b1735'); g.addColorStop(1, '#0f1d40');
+  const g = c.createLinearGradient(0, 0, N, N); g.addColorStop(0, '#0e1629'); g.addColorStop(0.5, '#090e1c'); g.addColorStop(1, '#0c1325');
   c.fillStyle = g; c.fill();
   c.save(); c.clip();
-  c.strokeStyle = 'rgba(150,165,190,0.35)'; c.lineWidth = 0.6;
+  c.strokeStyle = 'rgba(120,140,175,0.06)'; c.lineWidth = 0.6;
   for (let y = m + 2; y < N; y += 3.2) { c.beginPath(); c.moveTo(0, y); c.lineTo(N, y); c.stroke(); }
-  c.strokeStyle = 'rgba(205,212,224,0.9)'; c.lineWidth = 1.6;
+  c.strokeStyle = 'rgba(150,165,190,0.18)'; c.lineWidth = 1;
   for (const x of [N * 0.25, N * 0.5, N * 0.75]) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, N); c.stroke(); }
   c.restore();
   const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4;
@@ -158,7 +161,9 @@ export function crearMateriales() {
     ambar: fis({ color: 0xffb321, emissive: 0xff9a00, emissiveIntensity: 0.8, roughness: 0.25, clearcoat: 1 }),
     proyector: fis({ color: 0x0c0f14, roughness: 0.02, metalness: 0.1, clearcoat: 1, clearcoatRoughness: 0.01 }),
     // the Triciclo's solar roof (round two): cells under a glossy film; both faces (from inside it is the cabin's roof)
-    solar: fis({ color: solar ? 0xffffff : 0x15233f, map: solar, roughness: 0.2, metalness: 0.25, clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 1.2, side: D, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 }),
+    // (round 4, «con ese toque cristalizado»: under glass, as the Aptera's: a smoother base and a mirror-like clear coat,
+    // so the sky and the surroundings reflect on it and it reads as part of the glass)
+    solar: fis({ color: solar ? 0xffffff : 0x0b1122, map: solar, roughness: 0.12, metalness: 0.1, clearcoat: 1, clearcoatRoughness: 0.015, envMapIntensity: 1.6, side: D, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 }),
     // wheels
     goma: fis({ color: 0x18191b, roughness: 0.86, metalness: 0 }),
     tapa: fis({ color: 0xd9dcdf, metalness: 0.6, roughness: 0.25, clearcoat: 0.8, clearcoatRoughness: 0.08 }),

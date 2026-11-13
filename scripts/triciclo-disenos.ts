@@ -17,6 +17,10 @@ import { camposTriciclo, deslizadoresTriciclo, opcionesCabinaTriciclo, rangoTric
 import type { ModeloBala } from '../src/components/aeromovil/geometriaBala';
 import { construirCon, crearMateriales } from '../src/components/aeromovil/garaje/balaModelo';
 import { CLASICO_GUARDADO, MIGRACION_0209 } from './clasicoGuardado';
+// round 4 (2026-11-13): migrations 0212 (body) and 0213 (interior), as in drizzle/ and triciclo-rangos.ts
+const M_0212 = { tMorro: 0.30, tMorroLinea: 1, tMorroAlto: -0.03, tFaro: 'si', tFaroD: 0.16, tColaPlana: 1, tTechoPlano: 0.5, tCaida: 0.2, tConAleta: 'no', tSolarMorro: 'si',
+  tMalIni: 1.95, tMalLado: 30, tPuertas2: 'si', tPuerta2Parte: 1.33, tBisagra2Y: 0.85, tBisagra2Inc: 15, tPuerta2Abre: 110, tLineaCupula: 0 };
+const M_0213 = { tAsientos: 'butacas', tSalpicadero: 'blanco', tChLargo: 'eje', tChSep: 0.30, tBatAncho: 115 };
 
 let fallos = 0;
 const ok = (c: boolean, m: string) => { console.log(`${c ? 'OK   ' : 'FALLA'} ${m}`); if (!c) fallos++; };
@@ -147,9 +151,11 @@ else {
     ['Cuadriciclo Bala clásico guardado (el de verdad)', CLASICO_GUARDADO],
     // (round 3 interior: and as it is in production since migration 0209, with round 2's keys)
     ['Cuadriciclo Bala clásico con la 0209 (el de verdad, hoy)', { ...CLASICO_GUARDADO, ...MIGRACION_0209 } as Partial<Parametros>],
+    // (round 4, 2026-11-13: and with 0212 and 0213, as it is in production today, before this round's migration)
+    ['Cuadriciclo Bala clásico con la 0209, 0212 y 0213 (hoy)', { ...CLASICO_GUARDADO, ...MIGRACION_0209, ...M_0212, ...M_0213 } as Partial<Parametros>],
   ];
   /** Saved with keys main already has: opened as they are on both sides (the others, as saved before 2026-11-12: `deAntes`). */
-  const ACTUALES = ['Cuadriciclo Bala clásico con la 0209 (el de verdad, hoy)'];
+  const ACTUALES = ['Cuadriciclo Bala clásico con la 0209 (el de verdad, hoy)', 'Cuadriciclo Bala clásico con la 0209, 0212 y 0213 (hoy)'];
   // (2026-11-11: and the «Bala de cuatro ruedas»'s two, which with one rear wheel change nothing)
   // (2026-11-12: and the battery layout, steering wheel, dashboard, doors, mirrors and hatch, all off by default)
   const NUEVOS = ['tAsientos', 'tFila2', 'tFila3', 'tFila2X', 'tFila3X', 'tRecFila', 'tTraseras', 'tViaTras',
@@ -158,7 +164,9 @@ else {
     // round 3 interior (2026-11-12)
     'tChLargo', 'tChSep',
     // round 3 body (2026-11-12): every one of them at its default builds what there was
-    'tMorroLinea', 'tMorroAlto', 'tFaro', 'tFaroD', 'tColaPlana', 'tTechoPlano', 'tCaida', 'tConAleta', 'tSolarMorro', 'tPuertas2', 'tPuerta2Parte', 'tBisagra2Y', 'tBisagra2Inc', 'tPuerta2Abre', 'tLineaCupula'];
+    'tMorroLinea', 'tMorroAlto', 'tFaro', 'tFaroD', 'tColaPlana', 'tTechoPlano', 'tCaida', 'tConAleta', 'tSolarMorro', 'tPuertas2', 'tPuerta2Parte', 'tBisagra2Y', 'tBisagra2Inc', 'tPuerta2Abre', 'tLineaCupula',
+    // round 4 (2026-11-13): the roof frame, 0 by default (no frame)
+    'tMarcoTecho'];
   const NUEVOS_12 = NUEVOS.slice(8);
   /** The design as it was saved before 2026-11-12: without the keys that did not exist (this module's defaults carry them). */
   const deAntes = (P: Partial<Parametros>) => Object.fromEntries(Object.entries(P).filter(([k]) => !NUEVOS_12.includes(k))) as Partial<Parametros>;
@@ -209,6 +217,12 @@ else {
       delete rb.triciclo.maletero; delete rb.triciclo.ocupantes;
       // the boot is a new check at the end of the list
       rb.comprobaciones = rb.comprobaciones.filter((c: { nombre: string }) => !c.nombre.startsWith('Maletero'));
+    }
+    // (round 4: a new check with two doors a side, the passengers' way in; listed, and out of the comparison when main has not got it)
+    const paso = rb.comprobaciones.find((c: { nombre: string }) => c.nombre.startsWith('Puerta de atrás: paso'));
+    if (paso && !ra.comprobaciones.some((c: { nombre: string }) => c.nombre.startsWith('Puerta de atrás: paso'))) {
+      console.log(`NUEVA ${nombre}: «${paso.nombre}» ${paso.holgura < paso.minimo ? 'ROJO' : 'ok'} ${paso.mostrar ?? ''}`);
+      rb.comprobaciones = rb.comprobaciones.filter((c: { nombre: string }) => c !== paso);
     }
     ok(igual(ra, rb), `${nombre}: mismos resultados que en main, aparte de las masas (área, cabezas, comprobaciones${igual(ra, rb) ? '' : `; distintos: ${diferencias(ra, rb).slice(0, 6).join(', ')}`})`);
   }
