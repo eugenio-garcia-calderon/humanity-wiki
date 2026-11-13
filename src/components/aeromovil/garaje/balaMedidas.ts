@@ -218,6 +218,13 @@ export interface OpcionesVentanas {
   alto: number;
   /** The A-pillar and the rail frame, or null (a single bubble, as the Cuadriciclo en rombo's). */
   pilar: { x: number; barrido: number; ancho: number } | null;
+  /**
+   * Round 4 (2026-11-13, Eugenio: «un montante en el parabrisas en la parte superior… que rodee todos los paneles del
+   * techo, entre el techo solar y el cristal… 10 cm de ancho»): a laminate frame this wide (m) between the roof panel and
+   * the glass: across the windscreen's top (the panel's leading edge goes back this much) and along both roof rails (the
+   * panel's side edges go up this much, measured on the skin from the rail line). Absent or 0: no frame, as before.
+   */
+  marcoTecho?: number;
 }
 /** How much further forward the panel reaches on the centre line than at the rail (m): its rounded leading edge. */
 export const BOMBEO_SOLAR = 0.14;
@@ -237,6 +244,33 @@ export function ventanasDe(F: FormaBala, C: Contorno, o: OpcionesVentanas) {
     };
     panel = { x0: C.XC1 + 1e-4, x1, xS, tLow };
   }
+  // ── round 4: the roof frame, cut out of the panel's edge (only when asked: absent, the panel is exactly as before)
+  // (`tLo` its outer edge, the panel's old one; `tHi` its inner edge, the panel's new one; `tCuenta` where its own laminate
+  // starts for the areas: above the upper half of the rail's band, which `areaMarco` already counts)
+  let marco: null | { x0: number; x1: number; tLo: (x: number) => number; tHi: (x: number) => number; tCuenta: (x: number) => number; ancho: number } = null;
+  const w = o.marcoTecho ?? 0;
+  if (panel && w > 0) {
+    const fuera = panel, xS = fuera.xS - w, x1 = fuera.x1 - w;
+    // the t on the section at x that lies `d` along the skin above t0 (the top centre at most)
+    const subir = (x: number, t0: number, d0 = w) => {
+      const s = F.sec(x); let [z, y] = punto(s, t0), d = 0;
+      for (let k = 1; k <= 60; k++) {
+        const t = t0 + (1 - t0) * k / 60, [z1, y1] = punto(s, t), l = Math.hypot(z1 - z, y1 - y);
+        if (d + l >= d0) return t - (1 - t0) / 60 * (1 - (d0 - d) / l);
+        d += l; z = z1; y = y1;
+      }
+      return 1;
+    };
+    // the leading edge, the outer one's curve moved back `w`; the sides, `w` above the rail
+    const tLow = (x: number) => {
+      const lado = subir(x, tR(x)); if (x <= xS) return lado;
+      const r = tR(x), u = (2 / Math.PI) * Math.asin(Math.min(1, (x - xS) / BOMBEO_SOLAR));
+      return Math.max(lado, r + u * (1 - r));
+    };
+    const medioCarril = o.pilar ? 0.75 * o.pilar.ancho / 2 : 0, tHi = (x: number) => (x > x1 ? 1 : tLow(x));
+    marco = { x0: fuera.x0, x1: fuera.x1, tLo: fuera.tLow, tHi, tCuenta: (x: number) => Math.min(tHi(x), Math.max(fuera.tLow(x), medioCarril ? subir(x, tR(x), medioCarril) : 0)), ancho: w };
+    panel = x1 > fuera.x0 + 0.03 ? { x0: fuera.x0, x1, xS, tLow } : null;
+  }
   // ── the pillar and the rail
   let pilar: null | { xP: number; xT: number; punto: (s: number) => [number, number]; ancho: number } = null;
   if (o.pilar) {
@@ -250,7 +284,7 @@ export function ventanasDe(F: FormaBala, C: Contorno, o: OpcionesVentanas) {
       },
     };
   }
-  return { tC, tR, panel, pilar };
+  return { tC, tR, panel, pilar, marco };
 }
 export type Ventanas = ReturnType<typeof ventanasDe>;
 /**
