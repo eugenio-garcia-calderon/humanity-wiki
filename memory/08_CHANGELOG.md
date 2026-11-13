@@ -11474,6 +11474,18 @@ Eugenio: «los asientos por los bonitos como los de la Aptera… un salpicadero 
 - Moneda (`MonedaVentana.tsx`, `MonedaPiezas.tsx`, `src/data/moneda.ts`), inspired by Eugenio's text: who creates the euro and art. 123 TFEU, inflation in Spain (October 2026: 4,9 %), debt liquidation by inflation simulator (100 % → 90,9 %), Fisher effect, debt sustainability simulator, fiscal dominance, four principles and seven proposals, the two warnings, the open question on money created as interest-bearing debt (sovereign money, Chicago plan, digital euro), reading list.
 - Both reviewed by blind evaluators; fixes applied (figure consistency, 118 € not 122 €, interest-cap rule, Werner's idle-capacity caveat).
 
+## 2026-11-13 — Aeromóvil: fuera «Otros velomóviles» y el garaje, a mano desde el 3D
+
+- Eugenio: «Elimina esto de otros velomóviles, es algo antiguo». Se quita la sección del menú (y su ruta, que ahora lleva al diseño 3D), el catálogo de modelos (AeroRider, Quatrevelo, Velomóvil rojo, SZEmission como ficha) y la herramienta de crear un modelo desde fotos. Los coches del garaje (AeroRider y SZEmission incluidos) siguen: forman parte de la calibración del túnel.
+- «Mis diseños» en el garaje existía desde el 2026-11-12, pero en el Triciclo y el Cuadriciclo el bloque del garaje había quedado al final de «Proyecto», debajo de la lista de pesos, y Eugenio no lo encontró. Ahora hay un botón «Garaje» dentro de la ventana 3D (junto a pantalla completa) que abre un panel con «Mis diseños» primero y los coches de referencia después, desde cualquier pestaña y también en pantalla completa.
+
+### 2026-11-13 — Portada de Luz: sectores en matriz de 2 × 2, sin «Dónde trabajamos» ni «Nos inspiran» (prog8)
+Eugenio: «oculta la sección de proyectos que nos inspiran… también la de dónde trabajamos… los sectores en una matriz de 2 × 2… tarjetas un poco más pequeñas… que en la primera plana de un ordenador se vean esos cuatro sectores».
+- `VistaProyectosSitio` + `FilaSector estrecha`: dos sectores por fila cuando la caja mide 64 rem o más (`@container`, así el editor estrecho sigue en una columna); en cada panel, dos tarjetas cuadradas y media. A 1440 × 900 y 1920 × 1080 los cuatro primeros sectores caben en la primera pantalla; el móvil no cambia.
+- El color de cada sector va por su icono, no por su posición.
+- `sitio.mostrarMapa: false` oculta «Dónde trabajamos»; `sitio.mostrarInspiran: false` oculta «Proyectos que nos inspiran», también en el HTML para buscadores (`cuerpoEnHtml`). Los datos siguen; con `true` vuelven.
+- Migración 0214: orden movilidad, energía, socioeconómico, vivienda, educación y las dos marcas a false.
+
 ## 2026-11-13 — «Modelo de optimización socioeconómica»: scales, cover grid, comments board, redesign
 
 - Renamed «Modelo de optimización socioeconómica» (migration 0215 renames the project page from any earlier name). On luzhumanidad.com the site bar over the project shows «Proyecto impulsado por Luz & Humanidad» top left (to the site home) and the project's name in the middle (back to the project's front page without reloading): `CabeceraSitio` gains a `proyecto` prop, passed by `SubpaginaSitio` for embedded apps.
