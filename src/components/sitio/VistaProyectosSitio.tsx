@@ -178,7 +178,8 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
       setProyectos(p); setSistemas(s);
       // Las personas, después de los proyectos: la página carga de arriba abajo.
       if (tPersonas) pide(tPersonas).then(x => { if (vivo) setPersonas(x); });
-      if (r?.config?.sitio?.inspiran) pide(r.config.sitio.inspiran).then(x => { if (vivo) setInspiran(x); });
+      // Ocultos con `sitio.mostrarInspiran: false` (2026-11-13), en la web y en el editor.
+      if (r?.config?.sitio?.inspiran && r.config.sitio.mostrarInspiran !== false) pide(r.config.sitio.inspiran).then(x => { if (vivo) setInspiran(x); });
     });
     // El lápiz y «Añadir», solo para quien gestiona la web.
     fetch(`/api/sitio-miembros/${encodeURIComponent(raizId)}/estado`, { credentials: 'include' })
@@ -277,6 +278,7 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
   type Sector = { titulo: string; areas?: string[]; icono?: string };
   // Un color por sector, por su orden (no en la configuración: lo que va en ella se traduce en lighthumanity.org).
   const COLORES_SECTOR = ['sky', 'violet', 'amber', 'emerald', 'rose'];
+  const COLOR_DEL_ICONO: Record<string, string> = { Movilidad: 'sky', 'Economía': 'violet', 'Energía': 'amber', Vivienda: 'emerald', 'Educación': 'rose' };
   const defSectores = (raiz.config?.sitio?.sectores || null) as Sector[] | null;
   const sectores = escaparate && !activa && Array.isArray(defSectores) && defSectores.length ? (() => {
     const usados = new Set<string>();
@@ -285,7 +287,9 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
       const quiere = new Set((d.areas || []).map(plano));
       const filas = visibles.filter(f => !usados.has(f.id) && areasDe(f).some(a => quiere.has(a))).sort((a, b) => a.orden - b.orden);
       filas.forEach(f => usados.add(f.id));
-      return { titulo: d.titulo, icono: d.icono, color: COLORES_SECTOR[defSectores.indexOf(d) % COLORES_SECTOR.length], otros: false, filas };
+      // El color va con el sector (por su icono), no con su sitio: así no cambia al reordenarlos (2026-11-13).
+      const color = COLOR_DEL_ICONO[d.icono || ''] || COLORES_SECTOR[defSectores.indexOf(d) % COLORES_SECTOR.length];
+      return { titulo: d.titulo, icono: d.icono, color, otros: false, filas };
     });
     const resto = visibles.filter(f => !usados.has(f.id)).sort((a, b) => a.orden - b.orden);
     if (resto.length) grupos.push({ titulo: String(raiz.config?.sitio?.sectorOtros || 'Otras innovaciones'), icono: 'Otras', color: 'slate', otros: true, filas: resto });
@@ -439,7 +443,11 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
           sectores a lo ancho y largo de la página»). `sitio.sectores` de la raíz: cada sector reúne las
           categorías (filas de Sistemas) que nombra; lo que no cae en ninguno va a «Otras innovaciones». */}
       {sectores ? (
-        <div data-ancla="proyectos" data-sectores className="mt-6 flex scroll-mt-36 flex-col gap-8 outline-none sm:mt-8 sm:scroll-mt-24 sm:gap-5 2xl:gap-6">
+        // UNA MATRIZ DE 2 × 2 (2026-11-13, Eugenio: «arriba movilidad y energía, abajo socioeconómico y vivienda… las
+        // tarjetas un poco más pequeñas, que en la primera plana de un ordenador se vean esos cuatro sectores»): dos
+        // sectores por fila cuando cabe (por el ancho de la caja, así el editor, más estrecho, sigue en una columna).
+        <div className="@container">
+        <div data-ancla="proyectos" data-sectores className="mt-6 grid scroll-mt-36 grid-cols-1 gap-8 outline-none sm:mt-8 sm:scroll-mt-24 sm:gap-5 @5xl:grid-cols-2 @5xl:items-start 2xl:gap-6">
           {(() => {
             // TERCERA FORMA (2026-11-12, Eugenio: «que cada sector de innovación ocupe una línea… con un slider o un botón
             // de mostrar más… que todos los proyectos tengan el mismo tamaño… quita la categoría de la tarjeta, ya
@@ -459,11 +467,12 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
               const desde = n; n += g.filas.length;
               return (
                 <FilaSector key={g.titulo} id={`sector-${plano(g.titulo)}`} titulo={titulo} icono={iconoCategoria(g.icono || '', 'h-5 w-5')}
-                  colorBorde={c.borde} colorIcono={c.icono} filas={g.filas}
+                  colorBorde={c.borde} colorIcono={c.icono} filas={g.filas} estrecha
                   pintar={(f, claseLi) => tarjetaDe(f, desde + g.filas.indexOf(f), true, true, claseLi, g.filas)} />
               );
             });
           })()}
+        </div>
         </div>
       ) : (
       <ul data-ancla="proyectos" className={cn('grid list-none grid-cols-1 gap-5 p-0 sm:grid-cols-2', escaparate ? 'lg:grid-cols-3 ' + 'mt-6 scroll-mt-36 outline-none sm:mt-8 sm:scroll-mt-24' : 'mt-4')}>
@@ -491,7 +500,8 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
 
       {/* DÓNDE TRABAJAMOS Y NUESTRA HISTORIA (2026-11-07): el dónde y el cuándo de los proyectos,
           después de verlos y antes de las personas y los medios. */}
-      {escaparate && datos && <MapaProyectosSitio datos={datos} enlace={enlaceProyecto} />}
+      {/* «Dónde trabajamos», oculto con `sitio.mostrarMapa: false` (2026-11-13, Eugenio: «oculta la sección de dónde trabajamos»). */}
+      {escaparate && datos && raiz.config?.sitio?.mostrarMapa !== false && <MapaProyectosSitio datos={datos} enlace={enlaceProyecto} />}
       {escaparate && datos && <HistoriaSitio datos={datos} enlace={enlaceProyecto} />}
 
       {/* LAS PERSONAS, AL FINAL DE LA PORTADA (2026-11-05, Eugenio: «que la base de datos de

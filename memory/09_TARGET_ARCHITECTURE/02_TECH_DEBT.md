@@ -615,6 +615,12 @@ The observatory is one self-contained HTML file (`public/observatorio-polarizaci
 
 Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoRef` state, `TablaComparacion`, `Referencia` in `referencias.ts`) with no way in, and `GET/POST/DELETE /api/aeromovil/referencias` plus the `aeromovil_referencias` table with no screen. Kept on purpose for this change (removal was the ask, not a refactor); deleting the ghost branch is about 1 h now. The table's rows, if any, are untouched.
 
+### 2026-11-13 — Cuadriciclo Bala clásico round 4: shortcuts
+- **The rear door's 60 cm floor is a rule of thumb** (bucket cushion 52 cm plus room to bend). No ergonomic study, no standard, no ingress simulation with the manikin.
+- **The roof frame's width is measured from the rail line**, so the visible dark strip between the side window and the panel is the frame plus the lower half of the rail band (about 2 cm more). Measuring from the glass edge would need the band's varying width inside `ventanasDe`.
+- **Under a very low roof only two parts follow it** (column support, dashboard). The handlebar, the steering wheel's reach and the door hinges do not adapt; the checks say so in red. A real low-roof variant would need the seats and the steering to be redesigned.
+- **The body colour applies to the paint and accent materials only**: the stripes, the red details, the frit and the interior keep their colours. Garage designs in a non-default colour clone 8 materials each, and nothing disposes them when the design leaves the garage (a few kB of GPU state per design).
+- **`Pforma` (Aeromovil.tsx) compares every key shallowly on each change of P** to decide whether only colour changed. That is cheap today (about 300 keys), but it is one more place to remember if a key ever holds a nested object that is rebuilt on each edit.
 ## 2026-11-13 — Garage as design browser: shortcuts
 
 - **Every saved design is built in full and kept in memory** (template + one clone on screen). Measured with 7 designs + 3 reference cars: ~2.4 M triangles, JS heap ~170 MB (headless SwiftShader). No level of detail: `construirDisenoGaraje` with `'rapida'` for the Bala family would roughly halve both; a cap on how many are built is the other option. ~1 h either way.

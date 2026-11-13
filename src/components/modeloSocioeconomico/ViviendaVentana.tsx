@@ -16,6 +16,8 @@ import { ESCALA } from '../../data/modeloSocioeconomico';
 import { Apartado, Cifra, Mas } from './ventanas';
 import { Fuente, Muestra, Regulador, Segmentado } from './piezas';
 import { cn } from '../../utils/cn';
+import { HoyPropuesta } from './graficos/HoyPropuesta';
+import { Pares } from './graficos/Pares';
 import { RusticaApartado, SueloApartado } from './ViviendaRustica';
 
 /** A «fuente» link from this window's own source list. */
@@ -152,6 +154,34 @@ function Hoy() {
           </ul>
         </Mas>
       </figure>
+
+      <div className="mt-6 grid gap-4 lg:grid-cols-2">
+        <Pares titulo="España frente a la media de la Unión Europea"
+          subtitulo="Tres medidas en unidades distintas: cada fila tiene su propia escala"
+          series={['España', 'Media de la UE']} porFila
+          pares={[
+            { etiqueta: 'Viviendas sociales de alquiler, de cada 100', a: V.publicaPct, b: V.socialUE, formato: v => porcentaje(v, v % 1 ? 1 : 0),
+              nota: <>En España, solo la pública; con la protegida en manos privadas, un 3,4 %<F id="housing-europe" /><F id="ocde-social" /></> },
+            { etiqueta: 'Ayudas a la vivienda por habitante y año', a: V.ayudaPersonaES, b: V.ayudaPersonaUE, formato: v => euros(v),
+              nota: <>Alquiler y vivienda social, 2024<F id="eurostat-ayudas" /></> },
+            { etiqueta: 'Inquilinos que gastan más del 40 % de lo que ganan en la casa', a: V.sobrecargaES, b: V.sobrecargaUE, formato: v => porcentaje(v),
+              nota: <>Quienes alquilan a precio de mercado, 2025<F id="sobrecarga-es" /><F id="sobrecarga-ue" /></> },
+          ]} />
+        <HoyPropuesta titulo="Dinero público para vivienda al año, hoy y con el modelo"
+          subtitulo="Millones de euros"
+          leyenda={[{ serie: 'gris', texto: 'Construir, comprar, rehabilitar y urbanismo' }, { serie: 'claro', texto: 'Ayudas a la vivienda' }, { serie: 'acento', texto: 'Con el modelo' }]}
+          filas={[
+            { etiqueta: 'Hoy (2024)', total: mill(GASTO_HOY), partes: [
+              { nombre: 'Construir, comprar, rehabilitar y urbanismo', valor: V.urbanismo2024, texto: mill(V.urbanismo2024), serie: 'gris' },
+              { nombre: 'Ayudas a la vivienda', valor: V.ayudas2024, texto: mill(V.ayudas2024), serie: 'claro' },
+            ] },
+            { etiqueta: 'Con el modelo', total: `≈ ${mill(redondo(GASTO_MODELO))}`, partes: [
+              { nombre: 'Municipio, provincia, región y nación juntos', valor: GASTO_MODELO, texto: `≈ ${mill(redondo(GASTO_MODELO))}`, serie: 'acento' },
+            ] },
+          ]}
+          diferencia={<>Unas {numero(GASTO_MODELO / GASTO_HOY, 1)} veces lo de hoy</>}
+          pie={<>Hoy: cuentas públicas de 2024<F id="igae-cofog" />. Con el modelo: estimación de esta página, con el peso de la vivienda en el presupuesto de cada escala.</>} />
+      </div>
 
       <div className="mt-8 grid gap-4 md:grid-cols-2">
         <Tarjeta t={`${numero(V.vacias)} viviendas vacías`}>

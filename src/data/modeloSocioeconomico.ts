@@ -98,7 +98,7 @@ export const ESCALAS: Escala[] = [
     id: 'provincia', nombre: 'Provincia o comarca', corto: 'Provincia', color: '#008F61', tinta: '#FFFFFF',
     recibe: 'Lo recibe la provincia, que da a los municipios los servicios que solos no pueden sostener',
     devuelve: 'Carreteras entre pueblos, bomberos, institutos y urgencias comarcales',
-    ejemplo: 'Provincia de Madrid, organizada por comarcas como la Sierra Norte', habitantesEjemplo: 7_229_000,
+    ejemplo: 'Provincia de Madrid, organizada por comarcas como la Sierra Norte', habitantesEjemplo: 7_113_886,
     participacion: 'Consejo de delegados elegidos por la asamblea de cada municipio, más una consulta digital de prioridades.',
     comite: 'Un equipo técnico comarcal que comparten todos los municipios.',
     ritmo: 'Prioridades cada año',
@@ -107,7 +107,7 @@ export const ESCALAS: Escala[] = [
     id: 'region', nombre: 'Región', corto: 'Región', color: '#007E80', tinta: '#FFFFFF',
     recibe: 'Lo recibe la región, que agrupa varias provincias, construye infraestructuras y apoya a las que más lo necesitan',
     devuelve: 'Hospitales, universidades, transporte regional y vivienda pública',
-    ejemplo: 'Comunidad de Madrid', habitantesEjemplo: 7_229_000,
+    ejemplo: 'Comunidad de Madrid', habitantesEjemplo: 7_113_886,
     participacion: 'Asamblea ciudadana de 150 personas elegidas por sorteo que se renueva cada año y fija prioridades; la ciudadanía las ratifica en votación digital.',
     comite: 'Profesionales seleccionados por concurso público, con datos y cuentas abiertos.',
     ritmo: 'Prioridades cada año',
@@ -498,7 +498,7 @@ export const ESPANA = {
   poblacion: 49_128_297, // 1-1-2025, INE (ine-poblacion)
   municipios: 8_132,
   municipiosMenos1000: 4_975,
-  madridRegion: 7_229_000, // the city (3.527.924) is 48,8 % of the region (madrid-poblacion)
+  madridRegion: 7_113_886, // INE, 1-1-2025 (via Ayuntamiento de Madrid, «Madrid Economía 2026»); same figure as the Madrid scale
   sierraNorte: { pueblos: 44 },
 };
 

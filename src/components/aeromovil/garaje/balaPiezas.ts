@@ -70,22 +70,27 @@ function texturaAsiento(): THREE.CanvasTexture | null {
 }
 
 /**
- * One solar cell of the Triciclo's roof (2026-11-10, round two): monocrystalline, dark blue, with its
- * clipped corners, a fine silver grid and three busbars. uv (1, 1) is one 125 mm cell (the A1's `CELULA`).
+ * One solar cell of the Triciclo's roof (2026-11-10, round two): monocrystalline, with its clipped corners, its fine
+ * fingers and three busbars. uv (1, 1) is one 125 mm cell (the A1's `CELULA`).
+ * Round 4 (2026-11-13, Eugenio: «los paneles solares también tienen que ser más discretos como los del aptera, y con ese
+ * toque cristalizado»): dark navy cells on a slate backsheet, the grid faint (fingers at 10 %, busbars at 30 %), close to
+ * the garage Aptera's cells (apteraDetalle.ts): before, bright blue cells on a light grey backsheet with white busbars.
+ * Two darker tries (a black backsheet; the Aptera's own colours with 3 px gaps) read as plain glass from the 3/4 view:
+ * the gaps are a little wider here so that, averaged at a distance, the panel still shows as a panel.
  */
 function texturaSolar(): THREE.CanvasTexture | null {
   if (typeof document === 'undefined') return null;
   const N = 128, cv = document.createElement('canvas'); cv.width = cv.height = N;
   const c = cv.getContext('2d'); if (!c) return null;
-  c.fillStyle = '#c9ced6'; c.fillRect(0, 0, N, N);   // the backsheet showing between the cells
-  const m = 3, k = 14;
+  c.fillStyle = '#3a4250'; c.fillRect(0, 0, N, N);   // the backsheet showing between the cells: slate
+  const m = 4, k = 14;
   c.beginPath(); c.moveTo(m + k, m); c.lineTo(N - m - k, m); c.lineTo(N - m, m + k); c.lineTo(N - m, N - m - k); c.lineTo(N - m - k, N - m); c.lineTo(m + k, N - m); c.lineTo(m, N - m - k); c.lineTo(m, m + k); c.closePath();
-  const g = c.createLinearGradient(0, 0, N, N); g.addColorStop(0, '#13234a'); g.addColorStop(0.5, '#0b1735'); g.addColorStop(1, '#0f1d40');
+  const g = c.createLinearGradient(0, 0, N, N); g.addColorStop(0, '#11204a'); g.addColorStop(0.5, '#0c1838'); g.addColorStop(1, '#10214a');
   c.fillStyle = g; c.fill();
   c.save(); c.clip();
-  c.strokeStyle = 'rgba(150,165,190,0.35)'; c.lineWidth = 0.6;
+  c.strokeStyle = 'rgba(120,140,170,0.10)'; c.lineWidth = 0.6;
   for (let y = m + 2; y < N; y += 3.2) { c.beginPath(); c.moveTo(0, y); c.lineTo(N, y); c.stroke(); }
-  c.strokeStyle = 'rgba(205,212,224,0.9)'; c.lineWidth = 1.6;
+  c.strokeStyle = 'rgba(150,165,190,0.30)'; c.lineWidth = 1;
   for (const x of [N * 0.25, N * 0.5, N * 0.75]) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, N); c.stroke(); }
   c.restore();
   const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4;
@@ -131,6 +136,9 @@ export function crearMateriales() {
   return {
     // the Aeromóvil's pearl white and its navy (Visor3D.tsx `body` and `morro`)
     chapa: fis(pintura),
+    // (2026-11-13, the body's colour: the white bucket shells and the white dashboard are the same pearl, but their own
+    // material, so a red body does not paint the seats red; Visor3D.tsx `pintar` recolours `chapa`, not this)
+    blancoInterior: fis(pintura),
     marino: fis(azul),
     chapaCalco: decal(pintura),
     marinoCalco: decal(azul),
@@ -158,7 +166,9 @@ export function crearMateriales() {
     ambar: fis({ color: 0xffb321, emissive: 0xff9a00, emissiveIntensity: 0.8, roughness: 0.25, clearcoat: 1 }),
     proyector: fis({ color: 0x0c0f14, roughness: 0.02, metalness: 0.1, clearcoat: 1, clearcoatRoughness: 0.01 }),
     // the Triciclo's solar roof (round two): cells under a glossy film; both faces (from inside it is the cabin's roof)
-    solar: fis({ color: solar ? 0xffffff : 0x15233f, map: solar, roughness: 0.2, metalness: 0.25, clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 1.2, side: D, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 }),
+    // (round 4, «con ese toque cristalizado»: the garage Aptera's panel material (apteraDetalle.ts), a mirror-like clear
+    // coat over a satin base, so the sky reflects on it and it reads as part of the glass)
+    solar: fis({ color: solar ? 0xffffff : 0x0c1428, map: solar, roughness: 0.2, metalness: 0.15, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.4, side: D, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -4 }),
     // wheels
     goma: fis({ color: 0x18191b, roughness: 0.86, metalness: 0 }),
     tapa: fis({ color: 0xd9dcdf, metalness: 0.6, roughness: 0.25, clearcoat: 0.8, clearcoatRoughness: 0.08 }),
@@ -573,13 +583,13 @@ function butaca(g: THREE.Group, M: Mats, a: AsientoCoche) {
   // the seat pan's shell: a shallow rounded tub from the cushion's front edge back to the backrest's shell
   const xs = [B.delante, B.delante - 0.03, 0.10, -0.08, -B.detras + 0.02, -B.detras];
   const pan = loft(xs.map((x, i) => { const k = i === 0 ? 0.86 : i === xs.length - 1 ? 0.9 : 1; return E(x, -B.pan, 0.012 + (i === 0 ? -0.006 : 0), S.cojin * 0.78 * k, S.cojin * k, S.cojin * 0.94 * k, 3.4); }), { N: 40, sub: 4 });
-  o.add(malla(pan, M.chapa, 'butaca'));
+  o.add(malla(pan, M.blancoInterior, 'butaca'));
   // the cushion's pad, dark and quilted, sunk into the tub, and the white bolsters at its sides, rising to the rear
   const cojin = loft([E(B.delante - 0.025, -0.012, 0.018, 0.15, 0.17, 0.16, 3), E(0.05, -0.012, 0.03, 0.16, 0.18, 0.17, 3.2), E(-B.bisagra + 0.01, -0.012, 0.026, 0.155, 0.175, 0.165, 3)], { N: 36, sub: 4 });
   cajaUV(cojin, 0.35); o.add(malla(cojin, M.cuero, 'cojin-butaca'));
   for (const s of [1, -1]) {
     const flanco = loft([E(B.delante - 0.04, -0.01, 0.035, 0.02, 0.028, 0.02, 2.4), E(0.0, -0.01, 0.06, 0.028, 0.034, 0.026, 2.6), E(-B.bisagra, -0.01, 0.075, 0.03, 0.036, 0.028, 2.6)], { N: 24, sub: 4 });
-    flanco.translate(0, 0, s * (S.cojin - 0.035)); o.add(malla(flanco, M.chapa, 'flanco-butaca'));
+    flanco.translate(0, 0, s * (S.cojin - 0.035)); o.add(malla(flanco, M.blancoInterior, 'flanco-butaca'));
   }
   // the slim base: two rails under the tub (the frame's posts meet them)
   for (const s of [1, -1]) { const r = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.014, 0.025), M.grisOscuro); r.position.set(0.04, -B.pan - 0.007, s * 0.13); o.add(r); }
@@ -588,10 +598,10 @@ function butaca(g: THREE.Group, M: Mats, a: AsientoCoche) {
   const H = B.respaldo, Hc = H + B.cabezal, gr = B.grueso;
   const seccion = (x: number, k: number, y0: number, y1: number) => { const w = (h: number) => semiRespaldoButaca(h) * k; return E(x, y0, y1, w(y0), w((y0 + y1) / 2), w(y1), 3.6); };
   const concha = loft([seccion(0.004, 0.94, -0.03, H - 0.01), seccion(-0.012, 1, -0.045, H), seccion(-gr + 0.012, 1, -0.045, H), seccion(-gr, 0.92, -0.03, H - 0.015)], { N: 44, sub: 3 });
-  R.add(malla(concha, M.chapa, 'respaldo-butaca'));
+  R.add(malla(concha, M.blancoInterior, 'respaldo-butaca'));
   // the headrest out of the same shell: a waist at the neck, then the head's pad
   const cab = loft([0.0, -0.01, -gr + 0.015, -gr + 0.002].map((x, i) => { const k = i === 0 || i === 3 ? 0.9 : 1; return E(x, H - 0.05, Hc - (i === 0 || i === 3 ? 0.01 : 0), S.cuello * k, S.cabezal * k, S.cabezal * 0.86 * k, 3.2); }), { N: 40, sub: 3 });
-  R.add(malla(cab, M.chapa, 'cabezal-butaca'));
+  R.add(malla(cab, M.blancoInterior, 'cabezal-butaca'));
   // the pads, dark, standing 2 cm proud of the shell's face; and the shoulder wings, a little forward of it
   const pad = loft([E(0.022, 0.03, H - 0.07, 0.165, 0.17, 0.15, 3.2), E(0.006, 0.02, H - 0.06, 0.175, 0.18, 0.16, 3.2)], { N: 36, sub: 3 });
   cajaUV(pad, 0.35); R.add(malla(pad, M.cuero, 'pad-butaca'));
@@ -599,7 +609,7 @@ function butaca(g: THREE.Group, M: Mats, a: AsientoCoche) {
   cajaUV(padCab, 0.35); R.add(malla(padCab, M.cuero, 'pad-cabezal'));
   for (const s of [1, -1]) {
     const ala = loft([E(0.03, 0.10, H - 0.12, 0.012, 0.02, 0.012, 2.4), E(0.0, 0.08, H - 0.10, 0.018, 0.026, 0.016, 2.4)], { N: 20, sub: 3 });
-    ala.translate(0, 0, s * (S.hombros - 0.02)); R.add(malla(ala, M.chapa, 'ala-butaca'));
+    ala.translate(0, 0, s * (S.hombros - 0.02)); R.add(malla(ala, M.blancoInterior, 'ala-butaca'));
   }
 }
 /** Round 3 interior: the pilot's pedals: a heel plate on the floor and two pads (brake and accelerator) leaning back towards the feet. */
@@ -623,7 +633,7 @@ function salpicaderoBlanco(g: THREE.Group, F: FormaBala, M: Mats, s: { x0: numbe
     const u = i / 10, x = s.x0 + (s.x1 - s.x0) * u, yb = s.yBajoDel + (s.yBajo - s.yBajoDel) * u * u, yt = s.yTop - 0.02 * Math.max(0, (u - 0.8) / 0.2) ** 2;
     est.push(E(x, yb, yt, anchoSalpicadero(F, x, yb), anchoSalpicadero(F, x, (yb + yt) / 2), anchoSalpicadero(F, x, yt), 6));
   }
-  g.add(malla(loft(est, { N: 64, sub: 4 }), M.chapa, 'salpicadero'));
+  g.add(malla(loft(est, { N: 64, sub: 4 }), M.blancoInterior, 'salpicadero'));
   const yM = (s.yTop + s.yBajo) / 2, w = anchoSalpicadero(F, s.x1, yM);
   // the soft lip along the rear top edge
   const labio = curva(Array.from({ length: 9 }, (_, i) => { const z = (i / 8 * 2 - 1) * (anchoSalpicadero(F, s.x1, s.yTop - 0.03) - 0.03); return new THREE.Vector3(s.x1 + 0.004, s.yTop - 0.022, z); }), 6);
@@ -632,12 +642,12 @@ function salpicaderoBlanco(g: THREE.Group, F: FormaBala, M: Mats, s: { x0: numbe
   const enCara = (o: THREE.Object3D, y: number, z: number, atras = 0) => { o.position.set(s.x1 - atras, y, z); o.rotation.set(0, -Math.PI / 2, 0); o.rotateX(-0.35); g.add(o); return o; };
   // the instrument binnacle behind the wheel: a white hood over a wide display
   const capucha = loft([E(0.0, -0.05, 0.035, 0.15, 0.16, 0.13, 3), E(-0.05, -0.04, 0.03, 0.15, 0.16, 0.13, 3), E(-0.075, -0.012, 0.02, 0.13, 0.14, 0.11, 3)], { N: 32, sub: 3 });
-  capucha.translate(s.x1, s.yTop - 0.015, 0); g.add(malla(capucha, M.chapa, 'relojes'));
+  capucha.translate(s.x1, s.yTop - 0.015, 0); g.add(malla(capucha, M.blancoInterior, 'relojes'));
   enCara(new THREE.Mesh(new THREE.PlaneGeometry(0.26, 0.07), M.pantalla), s.yTop - 0.045, 0, 0.055);
   // the centre screen, floating on a stem to the pilot's right, turned a little towards him
   const zc = Math.min(0.27, w - 0.16);
   if (zc > 0.17) {
-    const marco = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.15, 0.25), M.chapa); marco.position.set(s.x1 - 0.06, s.yTop + 0.04, zc); marco.rotation.set(0, 0.25, 0.30); marco.name = 'pantalla-central'; g.add(marco);
+    const marco = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.15, 0.25), M.blancoInterior); marco.position.set(s.x1 - 0.06, s.yTop + 0.04, zc); marco.rotation.set(0, 0.25, 0.30); marco.name = 'pantalla-central'; g.add(marco);
     const pant = new THREE.Mesh(new THREE.PlaneGeometry(0.23, 0.13), M.pantalla); pant.position.copy(marco.position); pant.rotation.copy(marco.rotation); pant.rotateY(-Math.PI / 2); pant.translateZ(0.0075); g.add(pant);
     poste(g, new THREE.Vector3(s.x1 - 0.02, s.yTop - 0.01, zc), marco.position.clone(), 0.012, M.grisOscuro);
     // a row of buttons under it
@@ -652,7 +662,7 @@ function salpicaderoBlanco(g: THREE.Group, F: FormaBala, M: Mats, s: { x0: numbe
   if (v) {
     const n = new THREE.Vector3(-Math.cos(v.inc), Math.sin(v.inc), 0), c = new THREE.Vector3(v.c[0], v.c[1], 0);
     const a = c.clone().addScaledVector(n, -0.06), b = c.clone().addScaledVector(n, -Math.max(0.10, (s.x1 - v.c[0]) / Math.max(0.3, Math.cos(v.inc)) + 0.03));
-    const L = a.distanceTo(b), funda = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.06, L, 24), M.chapa);
+    const L = a.distanceTo(b), funda = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.06, L, 24), M.blancoInterior);
     funda.position.copy(a).add(b).multiplyScalar(0.5); funda.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize()); funda.name = 'funda-columna'; g.add(funda);
     for (const z of [1, -1]) poste(g, a.clone().addScaledVector(n, -0.01).add(new THREE.Vector3(0, 0, z * 0.04)), a.clone().addScaledVector(n, -0.03).add(new THREE.Vector3(0, -0.01, z * 0.14)), 0.006, M.negroBrillo);
   }

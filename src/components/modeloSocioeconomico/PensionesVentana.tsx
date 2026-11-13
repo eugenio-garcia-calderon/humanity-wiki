@@ -15,6 +15,7 @@ import { euros, numero, porcentaje, FUENTE } from '../../data/modeloSocioeconomi
 import { Pensiones } from './Pensiones';
 import { Apartado, Cifra, Mas } from './ventanas';
 import { Fuente, Regulador } from './piezas';
+import { HoyPropuesta } from './graficos/HoyPropuesta';
 
 const mill = (e: number) => `${numero(e / 1e6)} M€`;
 const millon = (n: number) => `${numero(n / 1e6, 1)} millones`;
@@ -147,6 +148,19 @@ export function PensionesVentana() {
               mostrar={euros(otrasMes)} onChange={setOtrasMes} ayuda="Supuesto. Por ejemplo, ayudas autonómicas o de alquiler." />
           </div>
         </div>
+        <HoyPropuesta className="mt-6 max-w-3xl"
+          titulo="Lo que se paga al año, hoy y con la propuesta"
+          subtitulo="Millones de euros. La barra de la propuesta cambia al mover los supuestos de arriba"
+          leyenda={[{ serie: 'gris', texto: 'Pensiones de hoy' }, { serie: 'acento', texto: 'Pensión única' }, { serie: 'trama', texto: 'Ayudas aparte' }]}
+          filas={[
+            { etiqueta: 'Hoy', total: mill(COSTE_HOY), partes: [{ nombre: 'Pensiones de hoy', valor: COSTE_HOY, texto: mill(COSTE_HOY), serie: 'gris' }] },
+            { etiqueta: 'Con la propuesta', total: mill(COSTE_PROPUESTA + cuentas.ayudas), partes: [
+              { nombre: 'Pensión única', valor: COSTE_PROPUESTA, texto: mill(COSTE_PROPUESTA), serie: 'acento' },
+              { nombre: 'Ayudas aparte', valor: cuentas.ayudas, texto: mill(cuentas.ayudas), serie: 'trama' },
+            ] },
+          ]}
+          diferencia={<>{COSTE_HOY - COSTE_PROPUESTA - cuentas.ayudas >= 0 ? 'Diferencia' : 'Cuesta más'}: {mill(Math.abs(COSTE_HOY - COSTE_PROPUESTA - cuentas.ayudas))} al año</>}
+          pie="Sin contar las otras ayudas que dejarían de hacer falta, que suman al ahorro neto de la tabla." />
         <Mas titulo="cómo está hecha la cuenta">
           <p className="max-w-3xl text-[15px] leading-relaxed text-slate-700">
             Hoy: la nómina mensual de pensiones contributivas de julio de 2026 por catorce pagas, más las {numero(PNC)} pensiones no contributivas a {euros(8803.2, 2)} al año.

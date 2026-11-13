@@ -138,6 +138,9 @@ export interface CamposTriciclo {
   tBisagra2Inc: number;  // puerta de atrás: su eje, con lo de arriba inclinado hacia delante (°)
   tPuerta2Abre: number;  // puerta de atrás: ángulo de apertura (°)
   tLineaCupula: number;  // la línea entre la carrocería pintada y el cristal de la cúpula, más arriba (+) o más abajo (−), todo alrededor (m)
+  // ── Round 4 doors / roof frame / height (2026-11-13, Eugenio on the «Cuadriciclo Bala clásico»). Optional when saved:
+  // absent, 0 (no frame), and the design is built exactly as before.
+  tMarcoTecho: number;   // marco de laminado entre el techo solar y el cristal: arriba del parabrisas y a lo largo de los dos carriles del techo (m; 0, sin marco)
 }
 export type ClaveTriciclo = keyof CamposTriciclo;
 /**
@@ -228,7 +231,7 @@ const FILAS: Fila[] = [
   // rear axle, and up to 1.90 m tall; the checks say what each end costs. Not lower than 1.15: at 1.05 the real clásico's
   // steering-column support stood 7 cm out of the body)
   ['tCupFin', 'carroceria', 'Cúpula', 'bCupFin', '', 1.30, 3.30, 0.01, 'm'],
-  ['tAlto', 'carroceria', 'Cúpula', 'bAlto', '', 1.15, 1.90, 0.002, 'm'],
+  ['tAlto', 'carroceria', 'Cúpula', 'bAlto', '', 1.00, 1.90, 0.002, 'm'],
   ['tSolar', 'carroceria', 'Techo solar y ventanas', null, 'Techo solar: dónde empieza', 0.40, 3.00, 0.01, 'm'],
   ['tVentAlto', 'carroceria', 'Techo solar y ventanas', null, 'Ventana lateral: alto (encima, el techo)', 0.30, 0.85, 0.01, 'x'],
   ['tPilar', 'carroceria', 'Techo solar y ventanas', null, 'Montante delantero: dónde nace', 0.40, 1.00, 0.01, 'm'],
@@ -241,7 +244,8 @@ const FILAS: Fila[] = [
   ['tFaldon', 'carroceria', 'Carenados', null, 'Rueda trasera: faldón (cuánto asoma)', 0, 1, 0.05, 'x'],
   // 2026-11-12: Aptera-style doors and hatch (only with «Dos puertas como el Aptera»)
   ['tPuertaDel', 'carroceria', 'Puertas y maletero', null, 'Puerta: esquina de abajo, delante', 0.62, 0.98, 0.01, 'm'],
-  ['tPuertaTras', 'carroceria', 'Puertas y maletero', null, 'Puerta: canto de atrás', 1.40, 2.00, 0.01, 'm'],
+  // (round 4, 2026-11-13, «la puerta trasera es demasiado estrecha»: up to 2.60, so a passengers' door can be wide; its real end is 20 cm ahead of the canopy's end, `rangoTriciclo`)
+  ['tPuertaTras', 'carroceria', 'Puertas y maletero', null, 'Puerta: canto de atrás', 1.40, 2.60, 0.01, 'm'],
   ['tUmbral', 'carroceria', 'Puertas y maletero', null, 'Puerta: altura del umbral', 0.26, 0.42, 0.01, 'cm'],
   ['tCintura', 'carroceria', 'Puertas y maletero', null, 'Puerta: línea de la ventanilla (sobre el cristal)', 0, 0.16, 0.01, 'cm'],
   ['tBisagraY', 'carroceria', 'Puertas y maletero', null, 'Bisagra: dónde, a lo largo del montante', 0.02, 0.90, 0.01, 'x'],
@@ -265,6 +269,8 @@ const FILAS: Fila[] = [
   ['tBisagra2Y', 'carroceria', 'Puertas y maletero', null, 'Segunda puerta: bisagra a lo largo de su canto de atrás', 0.05, 0.95, 0.01, 'x'],
   ['tBisagra2Inc', 'carroceria', 'Puertas y maletero', null, 'Segunda puerta: el eje, inclinado hacia delante arriba', 0, 45, 1, '°'],
   ['tPuerta2Abre', 'carroceria', 'Puertas y maletero', null, 'Segunda puerta: ángulo de apertura', 40, 120, 1, '°'],
+  // ── Round 4 doors / roof frame / height (2026-11-13)
+  ['tMarcoTecho', 'carroceria', 'Techo solar y ventanas', null, 'Marco del techo solar: ancho (0, sin marco)', 0, 0.15, 0.005, 'cm'],
   ['tEspCarenado', 'carroceria', 'Material y espesores', null, 'Espesor de la carrocería', 0.6, 2.4, 0.1, 'mm'],
   ['tEspCristal', 'carroceria', 'Material y espesores', null, 'Espesor de la cúpula (policarbonato)', 1.5, 4.5, 0.5, 'mm'],
   ['tPilX', 'interior', 'Asientos', 'bPilX', '', 0, 0, 0, 'm'],
@@ -717,6 +723,12 @@ export function estirarTriciclo(T: CamposTriciclo, largo: number): Partial<Campo
   const b = limitarTriciclo('tBatalla', T), nb = Math.round((b + d) * 1e4) / 1e4;
   return { tBatalla: nb, tCupFin: Math.round((limitarTriciclo('tCupFin', T) + (nb - b)) * 1e4) / 1e4 };
 }
+/**
+ * Round 4 (2026-11-13): «Alto total» below 1.15 m, its floor until this round. Only there do the steering-column support
+ * and the dashboard come down with the roof, so every design that could be built before is built exactly as before.
+ */
+export const ALTO_ANTES = 1.15;
+const techoBajo = (T: CamposTriciclo) => limitarTriciclo('tAlto', T) < ALTO_ANTES - 1e-9;
 /** Un valor dentro de su rango (un diseño escrito a mano o de otra versión no puede construir un triciclo imposible). */
 export const limitarTriciclo = (k: ClaveNumTriciclo, T: CamposTriciclo) => { const [a, b] = rangoTriciclo(k, T); return Math.min(b, Math.max(a, comoAntes(k, T[k], T))); };
 /**
@@ -733,6 +745,7 @@ function comoAntes(k: ClaveNumTriciclo, v: number, T: CamposTriciclo): number {
     case 'tAlto': return Math.abs(v - 1.15) < 1e-9 ? 1.15 : fin(1.584);
     case 'tCupFin': { const lo = Math.min(1.80, T.tBatalla - 0.45), hi = Math.min(3.10, T.tBatalla - 0.25); return Math.abs(v - lo) < 1e-9 ? lo : Math.abs(v - hi) < 1e-9 ? hi : v; }
     case 'tMalIni': return fin(1.70);
+    case 'tPuertaTras': return fin(2.00);
     default: return v;
   }
 }
@@ -1104,7 +1117,9 @@ export function crearModeloTriciclo(P: Parametros) {
   // (seats down on the frame, 2026-11-12: the crossbar never below the rails' top)
   if (filas) { const yt = Math.max(yAsiento - 0.09, yL + dT); tubos.push(T_('Travesaño de la fila 2', [x2 - 0.02, yt, -(Z_FILA2 + 0.10)], [x2 - 0.02, yt, Z_FILA2 + 0.10])); }
   // the steering-column support: from the cradle's top bar back and up to the steering head under the dash
-  const cabeza: P3 = [-0.44 - man[0] * 0, 0.80 + F.dSuelo + elevar, 0];
+  // (round 4, 2026-11-13, «el alto total no se puede bajar más»: below the old floor of «Alto total», 1.15 m, the head comes
+  // down to stay 2 cm under the top line there; at 1.15 and above, where every saved design is, it is where it always was)
+  const cabeza: P3 = [-0.44 - man[0] * 0, techoBajo(T) ? Math.min(0.80 + F.dSuelo + elevar, techoEn(F, -0.44) - 0.02) : 0.80 + F.dSuelo + elevar, 0];
   tubos.push(T_('Soporte de la columna de dirección', [xCuna, yCuna, 0], cabeza, dT, [[xCuna, yCuna, 0], [-0.22, yCuna + 0.20, 0], cabeza]));
   // round 3 interior (2026-11-12, Eugenio: «el chasis no llega hasta el final. Debería alargarse el tubo»): with two rear
   // wheels, the rails on to the rear axle, where the rear pods' arms bring their loads in, and a cradle there
@@ -1155,11 +1170,16 @@ export function crearModeloTriciclo(P: Parametros) {
     solar: L('tSolar') >= rangoTriciclo('tSolar', T)[1] - 1e-6 ? null : -L('tSolar'), alto: L('tVentAlto'),
     // (the Aptera doors, 2026-11-12, are cut along the pillar and the rail: with doors the frame is always there)
     pilar: T.tVentanas === 'marco' || conPuertas(T) ? { x: -L('tPilar'), barrido: L('tPilarBarrido'), ancho: L('tPilarAncho') } : null,
+    // round 4: the roof frame, only when asked (absent: the panel as before)
+    ...(L('tMarcoTecho') > 0 ? { marcoTecho: L('tMarcoTecho') } : {}),
   };
   const ventanas = ventanasDe(F, cup, opcVentanas);
   const p = ventanas.panel, solar = p ? areaXT(F, p.x0, p.x1, x => [p.tLow(x), 1]) : { area: 0, x: -1.5, y: 1.2 };
   // the A-pillars and the rail frames: laminate (navy) instead of glass
   let marcoArea = areaMarco(F, bandaMarco(ventanas, cup.XC1 + 0.004));
+  // round 4: the roof frame is laminate where there was panel (the panel's area above already lost it)
+  const mt = ventanas.marco, marcoTecho = mt ? areaXT(F, mt.x0, mt.x1, x => [mt.tCuenta(x), mt.tHi(x)]).area : 0;
+  marcoArea += marcoTecho;
 
   // ── 2026-11-12: Aptera-style doors and hatch (garaje/balaPuertas.ts), the dashboard and the mirrors
   const opcPuertas: OpcionesPuertas | null = conPuertas(T) ? {
@@ -1179,7 +1199,9 @@ export function crearModeloTriciclo(P: Parametros) {
   }
   // the dashboard: from where the nose's top line is 3 cm over its top, `tSalpFondo` back towards the pilot, as wide as the cabin
   const salpicadero = conSalpicadero(T) ? (() => {
-    const yTop = 0.78 + F.dSuelo + elevar + L('tSalpY');
+    // (round 4: below the old floor of «Alto total» its top comes down to 3 cm under the top line 30 cm behind the
+    // windscreen's foot, so it stays inside; at 1.15 m and above it is where it always was)
+    const y0 = 0.78 + F.dSuelo + elevar + L('tSalpY'), yTop = techoBajo(T) ? Math.min(y0, techoEn(F, cup.XC0 - 0.3) - 0.03) : y0;
     let x0 = 0; while (x0 > cup.XC0 - 0.3 && !(techoEn(F, x0) >= yTop + 0.03)) x0 -= 0.005;
     // (round 3 interior: «más bonito, blanco y con más detalles», the same volume drawn white with its details)
     return { x0, x1: x0 - L('tSalpFondo'), yTop, yBajo: yTop - 0.16, yBajoDel: yTop - 0.30, ...(T.tSalpicadero === 'blanco' ? { blanco: true } : {}) };
@@ -1262,7 +1284,7 @@ export function crearModeloTriciclo(P: Parametros) {
     // (with two rear wheels there is no wheel under the tail to cover)
     faldon: traseras ? null : faldonDe(F, L('tFaldon'), xR, rR),
     /** The canopy's solar panel and side windows: what the 3D builder draws (`opcVentanas`), the curves, and the panel's area (m², both sides) and centre. */
-    opcVentanas, ventanas, solar, marcoArea,
+    opcVentanas, ventanas, solar, marcoArea, marcoTecho,
     /** 2026-11-12: the panel run back over the tail to its ring (or null), and all the panel together (area, centre). */
     solarCola, solarTodo,
     /** Round 3 (2026-11-12): the panel on the nose (or null) and the central headlamp (its centre, depth, height and width; or null). */
@@ -1916,6 +1938,13 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     // round 3: the two doors opening together, and the doors against the hatch at any opening of each (balaPuertas.ts `choquesHojas`)
     const ch2 = choquesHojas(F, m.puerta, espejo, m.porton);
     if (T.tPuertas2 === 'si') c('carroceria', 'Segunda puerta: cabe (las dos con 30 cm abajo y el montante B entre ellas)', m.puerta.segunda ? 1 : -1, 0, m.puerta.segunda ? 'cabe' : 'no cabe: una sola puerta');
+    // round 4 (2026-11-13, «la puerta trasera es demasiado estrecha»): the passengers' way in along the sill, from the
+    // B-pillar to the hinge, at least 60 cm (the bucket's cushion is 52 cm long, and the hips and thighs pass bent), and
+    // where the passenger's hips are in it
+    if (m.puerta.segunda) {
+      const s2 = m.puerta.segunda, ancho = s2.x0 - s2.x1, pas = m.filas ? null : m.plazas.find(q => !q.piloto);
+      c('carroceria,interior', 'Puerta de atrás: paso abajo para el pasajero (60 cm o más)', ancho, 0.60, pas ? `${cm1(ancho)} · sus caderas a ${cm1(s2.x0 - pas.pts.H[0])} del canto de delante y a ${cm1(pas.pts.H[0] - s2.x1)} de la bisagra` : cm1(ancho));
+    }
     if (ch2.entreHojas !== null) c('carroceria', 'Puertas: la de delante y la de atrás, abriéndose a la vez, no se tocan', ch2.entreHojas, 0.03, ch2.entreHojas >= 0.03 ? 'a más de 3 cm' : ch2.entreHojas < 0 ? `se cruzan en la junta (${cm1(-ch2.entreHojas)})` : `a ${cm1(ch2.entreHojas)}`);
     if (ch2.conPorton !== null) c('carroceria', 'Puertas y portón: abiertos a la vez, no se tocan', ch2.conPorton, 0.03, ch2.conPorton >= 0.03 ? 'a más de 3 cm' : ch2.conPorton < 0 ? `se cruzan en la junta (${cm1(-ch2.conPorton)})` : `a ${cm1(ch2.conPorton)}`);
   }

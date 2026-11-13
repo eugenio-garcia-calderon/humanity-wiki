@@ -1,4 +1,4 @@
-// Data for the «Banca» window of the «Modelo Público Optimizado» (Eugenio, 2026-11-12):
+// Data for the «Banca» window of the «Modelo de optimización socioeconómica» (Eugenio, 2026-11-12):
 // how banks create money, Richard Werner's work, banking in Spain today with sources,
 // and the proposal: newly created bank money only for production and for a person's
 // first and second home; a third home, or a company buying homes, only with money that
