@@ -14,6 +14,7 @@ import { FichasEscalas, QuienSeOcupa, RepartoHoyPropuesta, SubeBaja } from './Es
 import { QuienDecide } from './QuienDecide';
 import { AyudaEntreEscalas, Tercios } from './TerciosApoyo';
 import { MatrizAmbitos } from './MatrizAmbitos';
+import { Pares } from './graficos/Pares';
 
 const pais = cuentasPais('literal');
 const pct = (m: number) => (m / HOY_TOTAL) * 100;
@@ -92,6 +93,17 @@ export function EscalasVentana() {
       <Apartado id="escalas-hoy" titulo="Hoy, casi todo se decide lejos"
         entradilla={<>En 2024 las administraciones de España gastaron {millones(HOY_TOTAL)}. Solo {porcentaje(pct(local))} lo decidieron los ayuntamientos y las diputaciones; más de la mitad, el Estado y la Seguridad Social.</>}>
         <RepartoHoyPropuesta />
+        <Pares className="mt-4 max-w-3xl" titulo="De cada 100 € públicos, cuántos decide cada escala"
+          subtitulo="Hoy (gasto de 2024, según quién lo gasta) y con la propuesta (un octavo por escala)"
+          series={['Hoy', 'Con la propuesta']} colores={['gris', 'acento']} formato={v => porcentaje(v, 1)}
+          pares={[
+            { etiqueta: 'Persona y comunidad vecinal', a: 0, b: 2 * OCTAVO * 100, nota: 'Hoy no deciden nada del dinero público.' },
+            { etiqueta: 'Municipio y provincia', a: pct(local), b: 2 * OCTAVO * 100, nota: 'Hoy, ayuntamientos y diputaciones.' },
+            { etiqueta: 'Región', a: pct(HOY.gastoRegional2024), b: OCTAVO * 100, nota: 'Hoy, las comunidades autónomas: sanidad y educación sobre todo.' },
+            { etiqueta: 'Nación', a: pct(lejos), b: OCTAVO * 100, nota: 'Hoy, el Estado y la Seguridad Social (pensiones).' },
+            { etiqueta: 'Continente y planeta', a: 0, b: 2 * OCTAVO * 100, nota: 'Hoy reciben lo que el Estado decide aportar, y está dentro de su parte.' },
+          ]}
+          pie={<>Hoy: Intervención General del Estado, gasto consolidado de 2024<Fuente id="igae-cofog" />. Con la propuesta: cálculo de esta página.</>} />
         <ul className="mt-6 grid gap-3 md:grid-cols-2 md:gap-4">
           <li className="rounded-2xl border border-slate-200 bg-white p-5 text-[15px] leading-relaxed text-slate-700">
             <b className="text-slate-900">Sanidad y educación, en las comunidades autónomas.</b> Gastan el {porcentaje(HOY_REGIONAL_SANIDAD, 0)} de la sanidad pública y el {porcentaje(HOY_REGIONAL_EDUCACION, 0)} de la educación<Fuente id="igae-cofog" />.

@@ -1,4 +1,4 @@
-// Data for the «Moneda» part of the «Economía» window of the «Modelo Público Optimizado»
+// Data for the «Moneda» part of the «Economía» window of the «Modelo de optimización socioeconómica»
 // (Eugenio, 2026-11-13: «Economía» holds Deuda · Banca · Moneda, each with its proposals,
 // inspired by his text on debt debasement through inflation). What money is and who
 // creates the euro; inflation in Spain and who wins and loses; how inflation shrinks a
