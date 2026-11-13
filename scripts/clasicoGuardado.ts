@@ -9,3 +9,16 @@ export const CLASICO_GUARDADO = {"B": 2.6, "H": 1.28, "L": 3.94, "W": 1.29, "nL"
 export const MIGRACION_0209 = { tBatDisp: 'chasis', tBatLargo: 1.75, tBatAncho: 150, tBatAlto: 0.10, tBatX: 0.60, tMando: 'volante', tVolX: 0, tVolY: -0.03, tVolInc: 30, tVolD: 0.32,
   tSalpicadero: 'si', tSalpY: 0, tSalpFondo: 0.16, tAcceso: 'puertas', tPuertaDel: 0.80, tPuertaTras: 1.86, tUmbral: 0.34, tCintura: 0, tBisagraY: 0.05, tBisagraInc: 13,
   tBisagraDentro: 20, tPuertaAbre: 110, tRetrovisores: 'espejos', tMaletero: 'aptera', tMalIni: 1.70, tMalAbre: 36, tMalLado: 55, tSolarCola: 'si', tPilY: 0.33, tPasY: 0.33 } as const;
+/** Round 3 body (2026-11-12): the keys migration 0212 added to that row (nose, tail, roof, hatch, fin, nose solar, second door). */
+export const MIGRACION_0212 = { tMorro: 0.30, tMorroLinea: 1, tMorroAlto: -0.03, tFaro: 'si', tFaroD: 0.16, tColaPlana: 1, tTechoPlano: 0.5, tCaida: 0.2, tConAleta: 'no', tSolarMorro: 'si',
+  tMalIni: 1.95, tMalLado: 30, tPuertas2: 'si', tPuerta2Parte: 1.33, tBisagra2Y: 0.85, tBisagra2Inc: 15, tPuerta2Abre: 110, tLineaCupula: 0 } as const;
+/** Round 3 interior (2026-11-12): the keys migration 0213 added (Aptera buckets, white dashboard, rails to the rear axle). */
+export const MIGRACION_0213 = { tAsientos: 'butacas', tSalpicadero: 'blanco', tChLargo: 'eje', tChSep: 0.30, tBatAncho: 115 } as const;
+/** The clásico as it is in production today (2026-11-13): the saved row plus 0209, 0212 and 0213. */
+export const CLASICO_HOY = { ...CLASICO_GUARDADO, ...MIGRACION_0209, ...MIGRACION_0212, ...MIGRACION_0213 } as unknown as Partial<Parametros>;
+/**
+ * 2026-11-13, the smooth body (this round): what is proposed for the clásico's row on top of CLASICO_HOY. Eugenio:
+ * «hazlo modificando el último diseño guardado… no tengas miedo de guardar encima». The coordinator writes the migration.
+ */
+export const PROPUESTA_COLA_LISA = { tCubierta: 'lisa', tColaAncho: 1, tColaGrosor: 0.04, tColaBombeo: 0.01, tBajosIni: 0.10, tBajosCurva: 1, tPuntaCola: 0.62,
+  tMorroAncho: 0.8, tMorroGrosor: 0.10, tMorroBombeo: 0.02, tMorroAlto: 0.15, tFaro: 'barra' } as const;
