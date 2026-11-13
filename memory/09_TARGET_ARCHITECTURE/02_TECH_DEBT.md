@@ -611,6 +611,17 @@ The observatory is one self-contained HTML file (`public/observatorio-polarizaci
 - **The rear cradle is not subtracted from the boot volume.** Its tubes cross the boot at the rear axle; the boot still counts that space as free (a few litres).
 - **The bucket's passenger posture is a fixed spread** (feet 31 cm, knees 33 cm off the centre line, closing in only where the body is too narrow). A shorter or taller passenger does not change it.
 - **`paqueteCabe` tests the box at its four corners per station.** A belly that bulges between them could still touch; the in-body check samples the same corners.
+## 2026-11-13 — Reference silhouettes left without a section
+
+Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoRef` state, `TablaComparacion`, `Referencia` in `referencias.ts`) with no way in, and `GET/POST/DELETE /api/aeromovil/referencias` plus the `aeromovil_referencias` table with no screen. Kept on purpose for this change (removal was the ask, not a refactor); deleting the ghost branch is about 1 h now. The table's rows, if any, are untouched.
+
+### 2026-11-13 — Cuadriciclo Bala clásico round 4: shortcuts
+- **The rear door's 60 cm floor is a rule of thumb** (bucket cushion 52 cm plus room to bend). No ergonomic study, no standard, no ingress simulation with the manikin.
+- **The roof frame's width is measured from the rail line**, so the visible dark strip between the side window and the panel is the frame plus the lower half of the rail band (about 2 cm more). Measuring from the glass edge would need the band's varying width inside `ventanasDe`.
+- **Under a very low roof only two parts follow it** (column support, dashboard). The handlebar, the steering wheel's reach and the door hinges do not adapt; the checks say so in red. A real low-roof variant would need the seats and the steering to be redesigned.
+- **The body colour applies to the paint and accent materials only**: the stripes, the red details, the frit and the interior keep their colours. Garage designs in a non-default colour clone 8 materials each, and nothing disposes them when the design leaves the garage (a few kB of GPU state per design).
+- **`Pforma` (Aeromovil.tsx) compares every key shallowly on each change of P** to decide whether only colour changed. That is cheap today (about 300 keys), but it is one more place to remember if a key ever holds a nested object that is rebuilt on each edit.
+
 ### 2026-11-13 — Cuadriciclo Bala clásico, the smooth body: shortcuts
 - **The deck zones find the canopy glass's ends with a copy of `contornoCupula`'s crossing** (inside `crearForma`, on the plain top line, because the shape cannot call the outline that is computed from it). If the crossing's brackets in `balaMedidas.ts` change, change the copy too; both carry a comment.
 - **The hatch's side edge on the deck is set by wrapping `porton.tLo` in `geometriaTriciclo.ts`**, not inside `portonDe`, because `balaPuertas.ts` was being changed by another agent the same day. Moving it into `portonDe` (an option `borde`) is ~15 min once that work has merged.

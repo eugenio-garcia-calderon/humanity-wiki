@@ -33,6 +33,7 @@ import {
 } from './geometria';
 import { anguloFuera, opcionesCabinaTriciclo } from './geometriaTriciclo';
 import { ANGULO_CUPULA, ANGULO_PORTON, PIVOTES_CUPULA, PIVOTE_PORTON, construirCon as construirBalaCon, crearMateriales as materialesBala } from './garaje/balaModelo';
+import { COLOR_ACENTO, COLOR_CARROCERIA, coloresDe } from './coloresCarroceria';
 import { brazosDe } from './garaje/balaMedidas';
 import { GIRO_A1, suspensionA1 } from './geometriaA1';
 import type { Referencia } from './referencias';
@@ -106,6 +107,8 @@ interface Props {
   fichasGaraje?: Record<string, string[]>;
   /** «Quitar del garaje» on a design's card. */
   alQuitarGaraje?: (id: string) => void;
+  /** 2026-11-13: the body's paint and its accent (coloresCarroceria.ts); changing them only recolours the materials. */
+  colores?: { carroceria: string; acento: string };
   /** Otro velomóvil: oculto, comparado (fantasma junto al nuestro) o solo. */
   referencia?: Referencia | null;
   modoRef?: 'no' | 'comparar' | 'sola';
@@ -147,13 +150,15 @@ function distanciaParaVer(puntos: THREE.Vector3[], centro: THREE.Vector3, haciaC
   return D;
 }
 
+// Round 4 (2026-11-13, «más discretos como los del aptera, y con ese toque cristalizado»): the joint and the busbars
+// dark slate and the busbars faint (before, the joint was a light navy that drew a grid), as the Triciclo's (balaPiezas.ts)
 function texturaSolar() {
   const c = document.createElement('canvas'); c.width = c.height = 128;
   const g = c.getContext('2d')!;
-  g.fillStyle = '#2b3350'; g.fillRect(0, 0, 128, 128);                 // la junta (un poco más clara que la célula)
-  g.fillStyle = '#0b1230';
+  g.fillStyle = '#353c49'; g.fillRect(0, 0, 128, 128);                 // la junta (gris pizarra, cerca de la del Aptera del garaje)
+  g.fillStyle = '#0e1b3d';
   g.beginPath(); g.moveTo(8, 2); g.lineTo(120, 2); g.lineTo(126, 8); g.lineTo(126, 120); g.lineTo(120, 126); g.lineTo(8, 126); g.lineTo(2, 120); g.lineTo(2, 8); g.closePath(); g.fill();
-  g.strokeStyle = '#1e2a4a'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(6, 43); g.lineTo(122, 43); g.moveTo(6, 85); g.lineTo(122, 85); g.stroke();
+  g.strokeStyle = '#18213a'; g.lineWidth = 1; g.beginPath(); g.moveTo(6, 43); g.lineTo(122, 43); g.moveTo(6, 85); g.lineTo(122, 85); g.stroke();
   const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
   return t;
 }
@@ -328,7 +333,8 @@ function materiales() {
     glass: CALIDAD_ALTA
       ? new THREE.MeshPhysicalMaterial({ color: 0x9fb3c4, metalness: 0, roughness: 0.03, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.5, transmission: 0.95, thickness: 0.006, ior: 1.52, attenuationColor: new THREE.Color(0x4f6b80), attenuationDistance: 0.25, side: THREE.DoubleSide })
       : new THREE.MeshPhysicalMaterial({ color: 0x0c161f, metalness: 0.2, roughness: 0.02, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.6, transparent: true, opacity: 0.62, side: THREE.DoubleSide, depthWrite: false }),
-    solar: new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: relieveSolar, bumpMap: relieveSolar, bumpScale: 0.0012, metalness: 0.3, roughness: 0.24, clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 1.3, side: THREE.DoubleSide }),
+    // (round 4: under glass, as the Aptera's: smoother, with a mirror-like clear coat, and less relief)
+    solar: new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: relieveSolar, bumpMap: relieveSolar, bumpScale: 0.0005, metalness: 0.15, roughness: 0.2, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.4, side: THREE.DoubleSide }),
     // Goma negra mate alrededor de los cristales, y la pieza azul marino del morro (Aptera).
     goma: new THREE.MeshStandardMaterial({ color: 0x141516, metalness: 0.05, roughness: 0.85, side: THREE.DoubleSide }),
     morro: new THREE.MeshPhysicalMaterial({ color: 0x182544, metalness: 0.2, roughness: 0.32, roughnessMap: grano, clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 1.1, side: THREE.DoubleSide }),
@@ -1373,6 +1379,19 @@ function construirReferencia(g: THREE.Group, M: Mats, r: Referencia, fantasma: b
  * Its doors and boot lids come back as garage pivots (named `piv-0`, `piv-1`…), so the viewer opens them like the
  * Aptera's. Takes about as long as building that design as our own car (a Triciclo, ~1 s): call it once per design.
  */
+/**
+ * 2026-11-13 («permite también cambiar el color de la carrocería»): the body's paint and its accent. Paint: the
+ * Gota's and the Aeromóvil 1's `body`, the Bala family's `chapa` (and its decal and double-sided copies); accent: the
+ * navy `morro` and `marino`. Only the colour changes: the grain, the clear coat and the sheen stay.
+ */
+function pinturas(M: Mats, Mb: ReturnType<typeof materialesBala>) {
+  return { carroceria: [M.body, Mb.chapa, Mb.chapaCalco, Mb.chapaDoble], acento: [M.morro, Mb.marino, Mb.marinoCalco, Mb.marinoDoble] };
+}
+function pintar(M: Mats, Mb: ReturnType<typeof materialesBala>, c: { carroceria: string; acento: string }) {
+  const p = pinturas(M, Mb);
+  for (const mt of p.carroceria) mt.color.set(c.carroceria);
+  for (const mt of p.acento) mt.color.set(c.acento);
+}
 let materialesDisenos: { M: Mats; Mb: ReturnType<typeof materialesBala> } | null = null;
 export function construirDisenoGaraje(m: Modelo): { grupo: THREE.Group; pivotes: PivoteGaraje[] } {
   if (!materialesDisenos) materialesDisenos = { M: materiales(), Mb: materialesBala() };
@@ -1391,10 +1410,17 @@ export function construirDisenoGaraje(m: Modelo): { grupo: THREE.Group; pivotes:
     pivotes.push({ nombre: piv.name, tipo: u.tipo === 'maletero' ? 'maletero' : 'puerta', eje: [u.eje.x, u.eje.y, u.eje.z], angulo: u.angulo * 180 / Math.PI });
   }
   grupo.traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+  // (2026-11-13: a design in another colour gets its own copies of the paint and accent materials; the shared ones keep the defaults)
+  const c = coloresDe(m.P);
+  if (c.carroceria !== COLOR_CARROCERIA || c.acento !== COLOR_ACENTO) {
+    const p = pinturas(M, Mb), copias = new Map<THREE.Material, THREE.Material>();
+    for (const [lista, color] of [[p.carroceria, c.carroceria], [p.acento, c.acento]] as const) for (const mt of lista) { const k = mt.clone(); k.color.set(color); copias.set(mt, k); }
+    grupo.traverse((o: any) => { if (o.isMesh) o.material = Array.isArray(o.material) ? o.material.map((x: THREE.Material) => copias.get(x) ?? x) : (copias.get(o.material) ?? o.material); });
+  }
   return { grupo, pivotes };
 }
 
-export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cuerposTunel, opcionesTunel, alElegirPuntoTunel, puntoTunel = null, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje, fichasGaraje, alQuitarGaraje }, ref) {
+export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cuerposTunel, opcionesTunel, alElegirPuntoTunel, puntoTunel = null, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje, fichasGaraje, alQuitarGaraje, colores }, ref) {
   const pinchar = useRef(alPinchar); pinchar.current = alPinchar;
   const fichas = useRef(fichasGaraje); fichas.current = fichasGaraje;
   const elegirPunto = useRef(alElegirPuntoTunel); elegirPunto.current = alElegirPuntoTunel;
@@ -1951,12 +1977,18 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     // The editor's Bala: its paint (and everything painted on it) goes see-through, the inner skin disappears;
     // «Corte» cuts every one of its materials at the centre plane, so the cockpit shows.
     const Mb = st.Mb as ReturnType<typeof materialesBala>;
-    for (const mt of [Mb.chapa, Mb.marino, Mb.chapaDoble, Mb.marinoDoble, Mb.chapaCalco, Mb.marinoCalco, Mb.rojo, Mb.rojoDoble, Mb.rojoPieza, Mb.junta, Mb.negroBrillo, Mb.negroMate, Mb.grisOscuro, Mb.solar]) {
+    for (const mt of [Mb.chapa, Mb.blancoInterior, Mb.marino, Mb.chapaDoble, Mb.marinoDoble, Mb.chapaCalco, Mb.marinoCalco, Mb.rojo, Mb.rojoDoble, Mb.rojoPieza, Mb.junta, Mb.negroBrillo, Mb.negroMate, Mb.grisOscuro, Mb.solar]) {
       mt.transparent = rayosX; mt.opacity = rayosX ? 0.16 : 1; mt.depthWrite = !rayosX;
     }
     Mb.forro.visible = !rayosX;
     for (const mt of Object.values(Mb)) { mt.clippingPlanes = cp; mt.needsUpdate = true; }
   }, [rayosX, corte]);
+
+  // 2026-11-13: the body's colours, on the materials only (no rebuild)
+  useEffect(() => {
+    const st = estado.current; if (!st) return;
+    pintar(st.M, st.Mb, colores ?? { carroceria: COLOR_CARROCERIA, acento: COLOR_ACENTO }); st.sombraSucia = true;
+  }, [colores?.carroceria, colores?.acento]);
 
   useEffect(() => {
     const st = estado.current; if (!st) return;

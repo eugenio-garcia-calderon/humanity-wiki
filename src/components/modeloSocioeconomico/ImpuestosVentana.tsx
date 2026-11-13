@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { MessageSquarePlus, Pause, Play } from 'lucide-react';
 import {
   ESCALA, ESCALAS, TOTAL_FIGURAS, EJEMPLO_INICIAL, type EscalaId, type Modo, type Ejemplo,
-  cuentasPais, principales, euros, millones, porcentaje, MATRIZ, TIPO_GENERAL, calcularEjemplo,
+  cuentasPais, principales, euros, millones, porcentaje, MATRIZ, TIPO_GENERAL, calcularEjemplo, HOY, TRAMOS,
 } from '../../data/modeloSocioeconomico';
 import { AnillosEscalas } from './AnillosEscalas';
 import { EsquemaFlujos, EsquemaVertical } from './EsquemaFlujos';
@@ -19,8 +19,10 @@ import { QuienDecide } from './QuienDecide';
 import { Tercios, AyudaEntreEscalas } from './TerciosApoyo';
 import { TresTramos, CincoPagos } from './Tramos';
 import { LasCuentas, Retos, ListaFuentes } from './Cuentas';
-import { Boton, Libre, Muestra, Segmentado } from './piezas';
+import { Boton, Fuente, Libre, Muestra, Segmentado } from './piezas';
 import { Apartado, Cifra, Mas } from './ventanas';
+import { Barras } from './graficos/Barras';
+import { HoyPropuesta } from './graficos/HoyPropuesta';
 
 const LECTURA_CORTA: Record<Modo, string> = { literal: `Empresas: ${Math.round(TIPO_GENERAL * 100)} % sin deducir`, eslabon: 'Como el IVA, deduciendo' };
 
@@ -153,6 +155,29 @@ export function ImpuestosVentana({ onProponer }: { onProponer: () => void }) {
       <Apartado id="hoy" titulo="El sistema de hoy y el propuesto"
         entradilla="Hoy cada administración cobra sus impuestos y tasas, con sus reglas y plazos, y después el dinero se redistribuye. La propuesta lo sustituye por un cobro automático que ya llega repartido.">
         <Tabla modo={modo} />
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          <HoyPropuesta titulo="Lo que se recauda al año, en millones de euros"
+            subtitulo="Hoy, todos los impuestos y cotizaciones (estimación para 2025); con la propuesta, el impuesto único en sus cuatro tramos"
+            leyenda={[{ serie: 'gris', texto: 'Impuestos y cotizaciones de hoy' }, { serie: 'acento', texto: 'Impuesto único' }]}
+            filas={[
+              { etiqueta: 'Hoy', total: millones(HOY.impuestosYCotizaciones2025), partes: [{ nombre: 'Impuestos y cotizaciones de hoy', valor: HOY.impuestosYCotizaciones2025, texto: millones(HOY.impuestosYCotizaciones2025), serie: 'gris' }] },
+              { etiqueta: 'Con la propuesta', total: millones(pais.recaudacion), partes: TRAMOS.map(t => ({
+                nombre: `${t.nombre} (${Math.round(t.tipo * 100)} %)`, valor: pais.porTramo[t.id].recaudacion, texto: millones(pais.porTramo[t.id].recaudacion), serie: 'acento' as const,
+              })) },
+            ]}
+            diferencia={<>{pais.recaudacion >= HOY.impuestosYCotizaciones2025 ? 'Recauda más' : 'Recauda menos'}: {millones(Math.abs(pais.recaudacion - HOY.impuestosYCotizaciones2025))} al año</>}
+            pie={<>Hoy: Instituto Juan de Mariana con datos de Eurostat, estimación de 2025<Fuente id="ijm-2026" />. Propuesta: cálculo de esta página; cambia con la lectura elegida arriba. Pasa por la barra verde para ver lo que aporta cada tramo.</>} />
+          <Barras titulo="De dónde sale hoy, en millones de euros"
+            subtitulo="Los cinco mayores ingresos de 2025. Todos desaparecen con la propuesta"
+            barras={[
+              { etiqueta: 'Cotizaciones sociales', valor: HOY.cotizaciones2025, texto: millones(HOY.cotizaciones2025), serie: 'tinta', nota: <>Lo que pagan empresas y trabajadores a la Seguridad Social<Fuente id="ss-2025" /></> },
+              { etiqueta: 'IRPF', valor: HOY.irpf2025, texto: millones(HOY.irpf2025), nota: <>El impuesto sobre la renta<Fuente id="reaf-2026" /></> },
+              { etiqueta: 'IVA', valor: HOY.iva2025, texto: millones(HOY.iva2025), nota: <>Lo que se suma al precio de casi todo<Fuente id="aeat-iva" /></> },
+              { etiqueta: 'Impuesto de sociedades', valor: HOY.sociedades2025, texto: millones(HOY.sociedades2025), nota: <>Sobre los beneficios de las empresas<Fuente id="aeat-2025" /></> },
+              { etiqueta: 'Impuestos especiales', valor: HOY.especiales2025, texto: millones(HOY.especiales2025), nota: <>Carburantes, alcohol, tabaco y electricidad<Fuente id="aeat-especiales" /></> },
+            ]}
+            pie={<>El resto, hasta los {millones(HOY.impuestosYCotizaciones2025)}, son decenas de impuestos y tasas más pequeños.</>} />
+        </div>
         <Mas titulo="todas las piezas del sistema de hoy">
           <Piezas />
         </Mas>

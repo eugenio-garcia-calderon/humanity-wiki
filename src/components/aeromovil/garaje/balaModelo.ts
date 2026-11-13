@@ -710,6 +710,9 @@ function pielConPuertas(xs: number[], M: Mats, pu: { puerta: Puerta; porton: Por
     const delante = techoSolar(V, M, { delante: 99, detras: corte, tMin }), detras = Q ? techoSolar(V, M, { delante: corte, detras: -99, tMin }) : null;
     if (delante) fijo.add(delante);
     if (detras) vidrioPorton!.add(detras);
+    // (round 4: the roof frame, split at the hatch's hinge as the panel)
+    for (const m of marcoTecho(V, M, { delante: 99, detras: corte, tMin })) fijo.add(m);
+    if (Q) for (const m of marcoTecho(V, M, { delante: corte, detras: -99, tMin })) vidrioPorton!.add(m);
     // (round 3: with two doors the band is cut straight at the meeting edge, and the rear door's stretch tapers out before its corner)
     const [mdD, mdI] = S2 ? marcosVentanas(V, M, { delante: 99, detras: hojas[0][1] }) : marcosVentanas(V, M, { delante: 99, detras: P.xR + 0.07, afinar: 0.06 });
     if (mdD) { vidrioPuerta[0].add(mdD); vidrioPuerta[1].add(mdI); }
@@ -879,6 +882,26 @@ function techoSolar(V: Ventanas, M: Mats, tramo?: { delante: number; detras: num
   const m = malla(geometria(R, caras(R)), M.solar, 'panel-solar');
   return m;
 }
+/**
+ * Round 4 (2026-11-13, «un montante en el parabrisas en la parte superior… que rodee todos los paneles del techo»): the
+ * roof frame, the strip of laminate between the panel and the glass (balaMedidas.ts `ventanasDe` `marco`), in the frame's
+ * navy as the pillars, lifted 1.8 mm. The right half on the skin's own rows (dense round the leading edge) and its mirror:
+ * across the windscreen's top the two halves meet on the centre line. `tramo` as the panel's: a stretch, never below the doors' top.
+ */
+function marcoTecho(V: Ventanas, M: Mats, tramo?: { delante: number; detras: number; tMin: (x: number) => number }): THREE.Object3D[] {
+  const mc = V.marco; if (!mc) return [];
+  const x1 = tramo ? Math.min(mc.x1, tramo.delante) : mc.x1, x0 = tramo ? Math.max(mc.x0, tramo.detras) : mc.x0;
+  if (x1 - x0 < 0.005) return [];
+  const xs = filasEntre(x1, x0, x => (x > mc.x1 - mc.ancho - 0.20 ? 0.004 : 0.015)), n = 6;
+  const R = rejilla(xs, s => {
+    const a = tramo ? Math.max(mc.tLo(s.x), tramo.tMin(s.x)) : mc.tLo(s.x), b = Math.max(a, mc.tHi(s.x)), o: number[] = [];
+    for (let k = 0; k <= n; k++) o.push(a + (b - a) * k / n);
+    return o;
+  }, 'lado');
+  for (let v = 0; v < R.pos.length / 3; v++) for (let j = 0; j < 3; j++) R.pos[v * 3 + j] += R.nor[v * 3 + j] * 0.0018;
+  const der = malla(geometria(R, caras(R)), M.marinoDoble, 'marco-techo'), izq = der.clone(); izq.scale.z = -1;
+  return [der, izq];
+}
 /** 2026-11-12: the panel over the tail (geometriaTriciclo.ts `solarCola`): a grid on the skin, lifted 1.5 mm, cells as on the roof. */
 function panelCola(o: { x0: number; x1: number; tLow: (x: number) => number }, M: Mats): THREE.Mesh {
   const CEL = 0.125, n = 22;
@@ -1005,6 +1028,7 @@ function armar(o: OpcionesBala): THREE.Group {
   if (ov) {
     const V = ventanasDe(F, L, ov), panel = techoSolar(V, M);
     if (panel) vidrio.add(panel);
+    for (const m of marcoTecho(V, M)) vidrio.add(m);
     for (const m of marcosVentanas(V, M)) vidrio.add(m);
   }
   if (o.cupulaAparte && marco) {

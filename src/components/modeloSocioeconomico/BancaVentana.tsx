@@ -1,4 +1,4 @@
-// The «Banca» window of the «Modelo Público Optimizado» (Eugenio, 2026-11-12):
+// The «Banca» window of the «Modelo de optimización socioeconómica» (Eugenio, 2026-11-12):
 // «Añade un apartado que sea banca … propuestas para una banca que sea más
 // inclusiva y sostenible en el tiempo … Richard Werner … que solo se conceda un
 // préstamo bancario y se cree nueva masa monetaria para financiar la compra de la
@@ -15,6 +15,7 @@ import { BURBUJA, ESCALAS_BANCA, FUENTES_BANCA, HOY_BANCA as H, RETOS_BANCA, TRE
 import { Apartado, Cifra, Mas } from './ventanas';
 import { Fuente, Muestra, Regulador, Segmentado } from './piezas';
 import { cn } from '../../utils/cn';
+import { Barras } from './graficos/Barras';
 
 /** A «fuente» link from this window's own source list. */
 function F({ id }: { id: string }) {
@@ -204,6 +205,18 @@ function Hoy() {
           En 2025 la vivienda subió un <strong>{porcentaje(H.precios2025, 1)}</strong>, y las hipotecas nuevas crecieron con fuerza<F id="ief-2026" />.
         </Tarjeta>
       </div>
+
+      <Barras className="mt-8 max-w-3xl" titulo="A qué va el crédito de los bancos, en millones de euros"
+        subtitulo="Lo que deben familias y empresas, junio de 2026"
+        barras={[
+          { etiqueta: 'Empresas', valor: H.empresas2026, texto: numero(H.empresas2026), nota: 'Todo el crédito a empresas, para producir o para otras cosas.' },
+          { etiqueta: 'Hipotecas para comprar casa', valor: H.hipotecas2026, texto: numero(H.hipotecas2026), serie: 'tinta',
+            nota: <>El {porcentaje(pctHipotecas, 0)} de todo el crédito a familias y empresas.</> },
+          { etiqueta: 'Consumo de las familias', valor: H.consumo2026, texto: numero(H.consumo2026), nota: 'Coches, muebles, viajes, tarjetas.' },
+          { etiqueta: 'Otros préstamos a familias', valor: H.hogares2026 - H.hipotecas2026 - H.consumo2026, texto: numero(H.hogares2026 - H.hipotecas2026 - H.consumo2026),
+            nota: <>La resta entre todo lo que deben las familias ({numero(H.hogares2026)}) y lo que deben por casa y por consumo.</> },
+        ]}
+        pie={<>Europa Press con datos del Banco de España<F id="credito-2026" />. Los otros préstamos a familias son una resta nuestra.</>} />
 
       <Burbuja />
 

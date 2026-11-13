@@ -160,7 +160,11 @@ function probar(nombre: string, P: Parametros) {
   // (round 3 interior, «no lo limites»: the pack's length and width go up to what fits in the body, and what the pack
   // then runs into, the screen says in red; at those sliders' far ends the pack's checks are listed, not required)
   const paqueteLibre = /tBatLargo|tBatAncho|tBatX|tBatAlto|todo lo nuevo/.test(nombre) && /máx/.test(nombre);
-  for (const c of res.comprobaciones) if (NO_PASAN.some(n => c.nombre.startsWith(n)) && !(c.holgura >= Math.min(0, c.minimo))) ((bisagra && c.nombre.startsWith('Puerta: al abrirse')) || (paqueteLibre && /^Batería/.test(c.nombre)) ? avisos : mal).push(`${c.nombre}: ${(c.holgura * 100).toFixed(1)} cm`);
+  // (round 4, 2026-11-13, «el alto total no se puede bajar más»: the canopy comes down to 1 m and what it then runs into,
+  // the handlebar and the doors as they swing under a low roof, the screen says in red; at that slider's low end they are listed)
+  const altoLibre = /tAlto = [\d.]+ \(mín\.\)|alto al mínimo/.test(nombre);
+  const enRojo = (n: string) => (bisagra && n.startsWith('Puerta: al abrirse')) || (paqueteLibre && /^Batería/.test(n)) || (altoLibre && /^(Manillar dentro|Puerta: al abrirse|Puerta de atrás: al abrirse|Puertas y portón|Puertas: la de delante|Portón: al abrirse)/.test(n));
+  for (const c of res.comprobaciones) if (NO_PASAN.some(n => c.nombre.startsWith(n)) && !(c.holgura >= Math.min(0, c.minimo))) (enRojo(c.nombre) ? avisos : mal).push(`${c.nombre}: ${(c.holgura * 100).toFixed(1)} cm`);
   try { const e = mismoEje(m); if (e) mal.push(e); } catch (e) { mal.push(`el 3D falla: ${(e as Error).message}`); }
   if (m.traseras) { const e = podsTraseros(m); if (e) mal.push(e); }
   const t = res.triciclo!, cab = t.cabezas.map(c => `${c.quien} ${(c.p50 * 100).toFixed(1)}/${(c.p95 * 100).toFixed(1)}`).join(', ');
@@ -396,7 +400,28 @@ probar('clásico real con la migración', REAL_MIG);
   probar('clásico real · cúpula entera con el panel hasta la cola', { ...REAL_MIG, tAcceso: 'cupula', tMaletero: 'cola' } as Parametros);
 }
 
-// ── 2026-11-13, the smooth body: the clásico as it is in production today (0209, 0212, 0213) with this round's proposal,
+// ── round 4 (2026-11-13): the real clásico with this round's migration (the wider passengers' door, the hatch back with it,
+// the 10 cm roof frame), every slider at both ends (the new roof frame's too) and every option
+// (`npx tsx scripts/triciclo-rangos.ts "clásico real r4"`)
+{
+  const R3 = { tAsientos: 'butacas', tSalpicadero: 'blanco', tChLargo: 'eje', tChSep: 0.30, tBatAncho: 115 };
+  const MIGRACION_R4 = { tPuertaTras: 2.10, tPuerta2Parte: 1.40, tMalIni: 2.20, tMarcoTecho: 0.10 };
+  const REAL_R4 = deDiseno({ ...CLASICO_GUARDADO, ...MIGRACION, ...MIGRACION_R3, ...R3, ...MIGRACION_R4 } as Partial<Parametros>), T4 = camposTriciclo(REAL_R4);
+  probar('clásico real r4, como se propone', REAL_R4);
+  for (const f of deslizadoresTriciclo()) {
+    const [a, b] = rangoTriciclo(f.clave, T4);
+    probar(`clásico real r4 · ${f.clave} = ${+a.toFixed(3)} (mín.)`, { ...REAL_R4, [f.clave]: a });
+    probar(`clásico real r4 · ${f.clave} = ${+b.toFixed(3)} (máx.)`, { ...REAL_R4, [f.clave]: b });
+  }
+  for (const s of SELECTORES_TRICICLO) for (const o of s.opciones) probar(`clásico real r4 · ${s.clave} = ${o.k}`, { ...REAL_R4, [s.clave]: o.k });
+  probar('clásico real r4 · marco del techo sin techo solar', { ...REAL_R4, tSolar: 9 } as Parametros);
+  probar('clásico real r4 · marco del techo con la cúpula entera', { ...REAL_R4, tAcceso: 'cupula', tMaletero: 'cola' } as Parametros);
+  probar('clásico real r4 · marco del techo, una puerta por lado', { ...REAL_R4, tPuertas2: 'no' } as Parametros);
+  probar('clásico real r4 · alto al mínimo, marco al máximo, panel desde delante', { ...REAL_R4, tAlto: 0, tMarcoTecho: 1, tSolar: 0 } as Parametros);
+  probar('triciclo · marco del techo de 15 cm', { ...PARAMETROS_TRICICLO, tMarcoTecho: 0.15 } as Parametros);
+}
+
+// ── 2026-11-13, the smooth body: the clásico as it is in production today (0209, 0212, 0213, 0217) with this round's proposal,
 // every slider at both ends and every option (`npx tsx scripts/triciclo-rangos.ts "clásico lisa"`)
 {
   const LISA = deDiseno({ ...CLASICO_HOY, ...PROPUESTA_COLA_LISA } as Partial<Parametros>), TL = camposTriciclo(LISA);

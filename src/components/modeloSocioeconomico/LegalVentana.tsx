@@ -11,6 +11,8 @@ import { BookOpen, CalendarClock, FileCheck2, Layers, Map as MapIcon, MinusCircl
 import { ESCALAS, numero, porcentaje } from '../../data/modeloSocioeconomico';
 import { FUENTES_LEGAL, IMPUGNACIONES, NORMAS, PAPEL_ESCALA, PROPUESTA, RECLAMACIONES_LGUM, SECTORES, SECTORES_SIN_CIFRA, TEXTOS_MAXIMOS } from '../../data/legal';
 import { Apartado, Cifra, Mas } from './ventanas';
+import { Anillo } from './graficos/Anillo';
+import { Barras } from './graficos/Barras';
 import { Muestra } from './piezas';
 import { F, LegalDiagrama } from './LegalDiagrama';
 import { LegalLicencias } from './LegalLicencias';
@@ -306,29 +308,26 @@ function Reto({ t, children }: { t: string; children: ReactNode }) {
   );
 }
 
-/** Challenges before the Constitutional Court between the State and the regions, as a yearly average per period. */
+/** Challenges before the Constitutional Court between the State and the regions: a yearly average per period, and who brings them. */
 function ConflictosGrafica() {
   const filas = IMPUGNACIONES.periodos.map(p => ({ ...p, media: p.total / p.anos }));
-  const max = Math.max(...filas.map(f => f.media));
   return (
-    <figure className="mt-8 rounded-2xl border border-slate-200 bg-white p-5">
-      <figcaption className="text-lg font-bold text-slate-900">Choques entre el Estado y las comunidades llevados al Constitucional, al año</figcaption>
-      <p className="mt-1 text-sm text-slate-600">Media de cada periodo. Los choques fueron muchos mientras se construían las comunidades, y desde entonces rondan los 30 al año.</p>
-      <div className="mt-4 space-y-3" role="img"
-        aria-label={filas.map(f => `${f.t}: ${numero(f.media, 0)} al año (${numero(f.total)} en total)`).join('; ')}>
-        {filas.map(f => (
-          <div key={f.t} className="grid items-center gap-x-3 gap-y-1 sm:grid-cols-[110px_1fr]">
-            <span className="text-sm text-slate-600 tabular-nums">{f.t}</span>
-            <span className="flex items-center gap-2">
-              <span className="h-5 shrink-0 rounded-r-[4px] bg-rose-700" style={{ width: `${(f.media / max) * 45}%` }} />
-              <span className="text-sm leading-tight tabular-nums text-slate-800"><strong>{numero(f.media, 0)}</strong> al año<span className="block text-slate-500 sm:inline"><span className="hidden sm:inline"> · </span>{numero(f.total)} en total</span></span>
-            </span>
-          </div>
-        ))}
-      </div>
-      <p className="mt-3 text-xs leading-relaxed text-slate-500">
-        Cuenta los recursos y conflictos de competencia que el Estado y las comunidades se presentan entre sí. El dato de 2010 a 2024 lo hemos calculado restando del total ({numero(IMPUGNACIONES.total)}) los periodos anteriores.<F id="mpt-conflictividad" />
-      </p>
-    </figure>
+    <div className="mt-8 grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <Barras titulo="Choques entre el Estado y las comunidades llevados al Constitucional, al año"
+        subtitulo="Media de cada periodo. Fueron muchos mientras se construían las comunidades, y desde entonces rondan los 30 al año"
+        barras={filas.map((f, i) => ({
+          etiqueta: f.t, valor: f.media, texto: `${numero(f.media, 0)} al año`, serie: i === 0 ? 'tinta' as const : 'gris' as const,
+          nota: <>{numero(f.total)} en total en {f.anos} años{'derivado' in f && f.derivado ? ', calculado restando del total los periodos anteriores' : ''}.</>,
+        }))}
+        pie={<>Cuenta los recursos y conflictos de competencia que el Estado y las comunidades se presentan entre sí. El dato de 2010 a 2024 lo hemos calculado restando del total ({numero(IMPUGNACIONES.total)}) los periodos anteriores.<F id="mpt-conflictividad" /></>} />
+      <Anillo titulo="Quién lleva al otro al Constitucional"
+        subtitulo={`Los ${numero(IMPUGNACIONES.total)} choques de 1980 a 2024`}
+        centro={numero(IMPUGNACIONES.total)} centroTexto="choques"
+        partes={[
+          { etiqueta: 'Las comunidades, contra el Estado', valor: IMPUGNACIONES.porCCAA, texto: numero(IMPUGNACIONES.porCCAA), serie: 'tinta' },
+          { etiqueta: 'El Estado, contra las comunidades', valor: IMPUGNACIONES.porEstado, texto: numero(IMPUGNACIONES.porEstado), serie: 'gris' },
+        ]}
+        pie={<>Ministerio de Política Territorial<F id="mpt-conflictividad" /></>} />
+    </div>
   );
 }

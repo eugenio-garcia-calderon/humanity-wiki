@@ -1,14 +1,16 @@
 // The mailbox of a project page (`/api/buzon/:proyecto`, src/server/buzonProyectos.ts).
+// 2026-11-13 (Eugenio): each comment records the page it was written on, and the
+// same dialog opens as the board of pending improvements (`modo="lista"`).
 // Anyone writes, without an account; an administrator marks each proposal done
 // or discarded once it has been applied (or not). Light theme; the dark one of
 // the consciousness map is `components/conciencia/BuzonMejoras.tsx`.
 import { useEffect, useState } from 'react';
-import { X, Loader2, Send, Check, Ban, RotateCcw } from 'lucide-react';
+import { X, Loader2, Send, Check, Ban, RotateCcw, MapPin, MessageSquarePlus } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { Boton } from './piezas';
 
 interface Propuesta {
-  id: number; texto: string; autor: string | null; estado: 'pendiente' | 'hecha' | 'descartada';
+  id: number; texto: string; autor: string | null; pagina: string | null; estado: 'pendiente' | 'hecha' | 'descartada';
   respuesta: string | null; created_at: string;
 }
 
@@ -23,9 +25,17 @@ function cuando(t: string) {
   return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-export function BuzonProyecto({ proyecto, titulo, invitacion, ejemplo, onCerrar }: {
+export function BuzonProyecto({ proyecto, titulo, invitacion, ejemplo, onCerrar, pagina, modo = 'escribir', nombreDe }: {
   proyecto: string; titulo: string; invitacion: string; ejemplo: string; onCerrar(): void;
+  /** Where the person is: the comment is saved against it. */
+  pagina?: { id: string; nombre: string };
+  /** 'lista' opens as the board of pending improvements, with the form folded. */
+  modo?: 'escribir' | 'lista';
+  /** A readable name for a stored page id, for the list. */
+  nombreDe?(id: string): string | null;
 }) {
+  const [escribir, setEscribir] = useState(modo === 'escribir');
+  const [filtro, setFiltro] = useState<'pendiente' | 'todas'>(modo === 'lista' ? 'pendiente' : 'todas');
   const clave = `buzon.${proyecto}.autor`;
   const [lista, setLista] = useState<Propuesta[] | null>(null);
   const [puedeDecidir, setPuedeDecidir] = useState(false);
@@ -56,12 +66,12 @@ export function BuzonProyecto({ proyecto, titulo, invitacion, ejemplo, onCerrar 
       try { localStorage.setItem(clave, autor.trim()); } catch { /* private mode */ }
       const r = await fetch(`/api/buzon/${proyecto}/comentarios`, {
         method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ texto: texto.trim(), autor: autor.trim() || undefined, web: trampa }),
+        body: JSON.stringify({ texto: texto.trim(), autor: autor.trim() || undefined, pagina: pagina?.id, web: trampa }),
       });
       const j = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(j.error || 'No se ha podido enviar.');
       setTexto('');
-      setAviso('Enviada. Tu propuesta está en la lista y se revisará para mejorar el modelo.');
+      setAviso(`Guardada${pagina ? ` en «${pagina.nombre}»` : ''}. Ya está en la lista de mejoras pendientes y se revisará.`);
       cargar();
     } catch (e: any) { setError(e.message); } finally { setEnviando(false); }
   };
@@ -89,6 +99,12 @@ export function BuzonProyecto({ proyecto, titulo, invitacion, ejemplo, onCerrar 
           </div>
           <Boton onClick={onCerrar} aria-label="Cerrar" className="h-9 w-9 shrink-0 p-0"><X className="h-4 w-4" /></Boton>
         </div>
+        {escribir ? <>
+        {pagina && (
+          <p className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-700">
+            <MapPin aria-hidden className="h-3.5 w-3.5" />Sobre: {pagina.nombre}
+          </p>
+        )}
         <textarea
           value={texto} onChange={e => setTexto(e.target.value)} maxLength={4000} autoFocus
           placeholder={ejemplo} aria-label="Tu propuesta"
@@ -103,20 +119,39 @@ export function BuzonProyecto({ proyecto, titulo, invitacion, ejemplo, onCerrar 
             {enviando ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />} Enviar propuesta
           </Boton>
         </div>
+        </> : (
+          <Boton tono="tinta" onClick={() => setEscribir(true)}><MessageSquarePlus className="h-4 w-4" /> Añadir un comentario{pagina ? ` sobre ${pagina.nombre}` : ''}</Boton>
+        )}
         {aviso && <p className="mt-2 text-sm text-emerald-700" role="status">{aviso}</p>}
         {error && <p className="mt-2 text-sm text-red-700" role="alert">{error}</p>}
 
         <div className="mt-6 border-t border-slate-200 pt-4">
-          <h4 className="mb-2 text-sm font-semibold text-slate-700">Propuestas recibidas{lista ? `: ${pendientes} pendiente${pendientes === 1 ? '' : 's'}` : ''}</h4>
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <h4 className="text-sm font-semibold text-slate-700">Mejoras{lista ? `: ${pendientes} pendiente${pendientes === 1 ? '' : 's'}` : ''}</h4>
+            <span className="flex gap-1 text-xs">
+              {(['pendiente', 'todas'] as const).map(f => (
+                <Boton key={f} onClick={() => setFiltro(f)} aria-pressed={filtro === f}
+                  className={cn('px-3 py-1 text-xs', filtro === f && 'border-slate-900 bg-slate-900 text-white hover:bg-slate-800')}>
+                  {f === 'pendiente' ? 'Pendientes' : 'Todas'}
+                </Boton>
+              ))}
+            </span>
+          </div>
           {!lista && !error && <p className="text-sm text-slate-500"><Loader2 className="mr-2 inline h-4 w-4 animate-spin" />Cargando…</p>}
           {lista && !lista.length && <p className="text-sm text-slate-500">Todavía no hay ninguna. La primera puede ser la tuya.</p>}
           <ul className="space-y-2">
-            {lista?.map(c => (
+            {lista?.filter(c => filtro === 'todas' || c.estado === 'pendiente').map(c => (
               <li key={c.id} className={cn('rounded-xl border border-slate-200 p-3 text-sm', c.estado === 'descartada' && 'opacity-60')}>
                 <div className="mb-1 flex items-center justify-between gap-2 text-xs text-slate-500">
                   <span>{c.autor || 'Anónimo'}, {cuando(c.created_at)}</span>
                   <span className={cn('rounded-full px-2 py-0.5', ETIQUETA[c.estado].c)}>{ETIQUETA[c.estado].t}</span>
                 </div>
+                {c.pagina && (
+                  <a href={`#${c.pagina}`} onClick={onCerrar}
+                    className="mb-1 inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700 hover:bg-slate-200">
+                    <MapPin aria-hidden className="h-3 w-3" />{nombreDe?.(c.pagina) ?? c.pagina}
+                  </a>
+                )}
                 <p className="whitespace-pre-wrap leading-relaxed text-slate-800">{c.texto}</p>
                 {c.respuesta && <p className="mt-1 text-xs italic text-slate-600">Respuesta: {c.respuesta}</p>}
                 {puedeDecidir && (

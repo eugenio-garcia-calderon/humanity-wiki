@@ -14,8 +14,10 @@ export const MIGRACION_0212 = { tMorro: 0.30, tMorroLinea: 1, tMorroAlto: -0.03,
   tMalIni: 1.95, tMalLado: 30, tPuertas2: 'si', tPuerta2Parte: 1.33, tBisagra2Y: 0.85, tBisagra2Inc: 15, tPuerta2Abre: 110, tLineaCupula: 0 } as const;
 /** Round 3 interior (2026-11-12): the keys migration 0213 added (Aptera buckets, white dashboard, rails to the rear axle). */
 export const MIGRACION_0213 = { tAsientos: 'butacas', tSalpicadero: 'blanco', tChLargo: 'eje', tChSep: 0.30, tBatAncho: 115 } as const;
-/** The clásico as it is in production today (2026-11-13): the saved row plus 0209, 0212 and 0213. */
-export const CLASICO_HOY = { ...CLASICO_GUARDADO, ...MIGRACION_0209, ...MIGRACION_0212, ...MIGRACION_0213 } as unknown as Partial<Parametros>;
+/** Round 4 (2026-11-13): the keys migration 0217 added (the wider passengers' door, the hatch's hinge behind it, the 10 cm roof frame). */
+export const MIGRACION_0217 = { tPuertaTras: 2.10, tPuerta2Parte: 1.40, tMalIni: 2.20, tMarcoTecho: 0.10 } as const;
+/** The clásico as it is in production today (2026-11-13): the saved row plus 0209, 0212, 0213 and 0217. */
+export const CLASICO_HOY = { ...CLASICO_GUARDADO, ...MIGRACION_0209, ...MIGRACION_0212, ...MIGRACION_0213, ...MIGRACION_0217 } as unknown as Partial<Parametros>;
 /**
  * 2026-11-13, the smooth body (this round): what is proposed for the clásico's row on top of CLASICO_HOY. Eugenio:
  * «hazlo modificando el último diseño guardado… no tengas miedo de guardar encima». The coordinator writes the migration.

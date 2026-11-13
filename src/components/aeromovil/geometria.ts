@@ -71,6 +71,8 @@ export interface Parametros extends Partial<CamposBala>, Partial<CamposTriciclo>
   disposicion: Disposicion;
   /** Alternativa elegida por componente (ver `componentes.ts`); sin entrada = la de serie. */
   variantes?: Record<string, string>;
+  /** 2026-11-13: the body's paint and its accent, `#rrggbb` (coloresCarroceria.ts); absent, the pearl white and the navy of always. */
+  colorCarroceria?: string; colorAcento?: string;
   /** Datos escritos a mano en la ficha de un componente (nombre, proveedor, precio, peso, características); se guardan con el diseño. */
   piezas?: Record<string, PiezaManual>;
   // ── Aeromóvil 1 (disposición 'cuatro') ────────────────────────────────────
@@ -273,6 +275,8 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   // the shape and the options as they were, so a design saved without these keys is built exactly as before.
   tMorroLinea: 0, tMorroAlto: 0, tFaro: 'no', tFaroD: 0.16, tColaPlana: 0, tTechoPlano: 0, tCaida: 0, tConAleta: 'si', tSolarMorro: 'no',
   tPuertas2: 'no', tPuerta2Parte: 1.33, tBisagra2Y: 0.85, tBisagra2Inc: 15, tPuerta2Abre: 110, tLineaCupula: 0,
+  // Round 4 doors / roof frame / height (2026-11-13): no roof frame by default, so every saved design is built as before
+  tMarcoTecho: 0,
   // The smooth body (2026-11-13, the clásico: «la cola y el maletero… la misma pieza… nunca… montículos», the Aptera's
   // wide nose and tail, its light bar and the belly's sweep). Off by default: every other key below acts only with it on.
   tCubierta: 'redonda', tColaAncho: 0, tColaGrosor: 0, tColaBombeo: 0.01, tBajosIni: 0.20, tBajosCurva: 0, tMorroAncho: 0, tMorroGrosor: 0, tMorroBombeo: 0.02,
