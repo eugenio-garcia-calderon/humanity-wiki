@@ -11478,3 +11478,10 @@ Eugenio: «los asientos por los bonitos como los de la Aptera… un salpicadero 
 
 - Eugenio: «Elimina esto de otros velomóviles, es algo antiguo». Se quita la sección del menú (y su ruta, que ahora lleva al diseño 3D), el catálogo de modelos (AeroRider, Quatrevelo, Velomóvil rojo, SZEmission como ficha) y la herramienta de crear un modelo desde fotos. Los coches del garaje (AeroRider y SZEmission incluidos) siguen: forman parte de la calibración del túnel.
 - «Mis diseños» en el garaje existía desde el 2026-11-12, pero en el Triciclo y el Cuadriciclo el bloque del garaje había quedado al final de «Proyecto», debajo de la lista de pesos, y Eugenio no lo encontró. Ahora hay un botón «Garaje» dentro de la ventana 3D (junto a pantalla completa) que abre un panel con «Mis diseños» primero y los coches de referencia después, desde cualquier pestaña y también en pantalla completa.
+
+### 2026-11-13 — Portada de Luz: sectores en matriz de 2 × 2, sin «Dónde trabajamos» ni «Nos inspiran» (prog8)
+Eugenio: «oculta la sección de proyectos que nos inspiran… también la de dónde trabajamos… los sectores en una matriz de 2 × 2… tarjetas un poco más pequeñas… que en la primera plana de un ordenador se vean esos cuatro sectores».
+- `VistaProyectosSitio` + `FilaSector estrecha`: dos sectores por fila cuando la caja mide 64 rem o más (`@container`, así el editor estrecho sigue en una columna); en cada panel, dos tarjetas cuadradas y media. A 1440 × 900 y 1920 × 1080 los cuatro primeros sectores caben en la primera pantalla; el móvil no cambia.
+- El color de cada sector va por su icono, no por su posición.
+- `sitio.mostrarMapa: false` oculta «Dónde trabajamos»; `sitio.mostrarInspiran: false` oculta «Proyectos que nos inspiran», también en el HTML para buscadores (`cuerpoEnHtml`). Los datos siguen; con `true` vuelven.
+- Migración 0214: orden movilidad, energía, socioeconómico, vivienda, educación y las dos marcas a false.
