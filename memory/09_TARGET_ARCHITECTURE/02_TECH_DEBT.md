@@ -621,6 +621,14 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 - **Under a very low roof only two parts follow it** (column support, dashboard). The handlebar, the steering wheel's reach and the door hinges do not adapt; the checks say so in red. A real low-roof variant would need the seats and the steering to be redesigned.
 - **The body colour applies to the paint and accent materials only**: the stripes, the red details, the frit and the interior keep their colours. Garage designs in a non-default colour clone 8 materials each, and nothing disposes them when the design leaves the garage (a few kB of GPU state per design).
 - **`Pforma` (Aeromovil.tsx) compares every key shallowly on each change of P** to decide whether only colour changed. That is cheap today (about 300 keys), but it is one more place to remember if a key ever holds a nested object that is rebuilt on each edit.
+## 2026-11-13 — Garage as design browser: shortcuts
+
+- **Every saved design is built in full and kept in memory** (template + one clone on screen). Measured with 7 designs + 3 reference cars: ~2.4 M triangles, JS heap ~170 MB (headless SwiftShader). No level of detail: `construirDisenoGaraje` with `'rapida'` for the Bala family would roughly halve both; a cap on how many are built is the other option. ~1 h either way.
+- **A design's place is recomputed from the list order on every change**, and the active one's length moves the row while a slider is dragged (the neighbours slide). A fixed slot per design would avoid it; ~1 h.
+- **The tunnel and «Superponer» still ignore our garage designs** (as before): only the reference cars and the active design go through them.
+- **`window.__visorAeromovil`** is exposed on the dev server only (`import.meta.env.DEV`), so the browser checks can find cars on screen.
+- **The old key `aeromovil_garaje_disenos_v1`** (positions of «Mis diseños», PR #1031) is no longer read and stays in browsers that had it.
+
 
 ### 2026-11-13 — Cuadriciclo Bala clásico, the smooth body: shortcuts
 - **The deck zones find the canopy glass's ends with a copy of `contornoCupula`'s crossing** (inside `crearForma`, on the plain top line, because the shape cannot call the outline that is computed from it). If the crossing's brackets in `balaMedidas.ts` change, change the copy too; both carry a comment.
