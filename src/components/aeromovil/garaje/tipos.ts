@@ -32,6 +32,11 @@ export interface VehiculoGaraje {
   };
   /** Silueta para el túnel: [x, y del suelo de la carrocería, y del techo, media anchura], de delante a atrás. */
   envolvente?: [number, number, number, number][];
+  /**
+   * Nose and tail x (m, from the front axle) of a car with no `envolvente`: our saved designs in the garage
+   * (2026-11-13). The viewer frames them with it; the tunnel ignores it (only `envolvente` goes through the tunnel).
+   */
+  morroCola?: [number, number];
   /** Forma de la sección para el túnel: 2 elipse, 3 casi cuadrada (por defecto 3). */
   seccion?: number;
   /** Construye el vehículo: un Group nuevo cada vez (el visor lo destruye al ocultarlo). */

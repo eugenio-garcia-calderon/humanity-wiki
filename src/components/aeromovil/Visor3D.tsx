@@ -12,7 +12,7 @@
 // Los colores de los materiales viven aquí y no en `src/components/ui/`
 // porque son colores de material 3D (aluminio, neumático, fibra), no de
 // interfaz. Anotado en 02_TECH_DEBT.md.
-import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import * as THREE from 'three';
 import { DoorOpen, PackageOpen, Trash2, X } from 'lucide-react';
 import { Button, Card } from '../ui/core';
@@ -81,7 +81,7 @@ interface Props {
   /** Sin el pasajero ni su asiento, y con las cotas del espacio trasero que queda (Aeromóvil 1). */
   sinPasajero?: boolean;
   /** Otros vehículos aparcados alrededor (el garaje): id del catálogo, posición del eje delantero en el suelo y giro. */
-  garaje?: { id: string; x: number; z: number; giro?: number }[];
+  garaje?: { id: string; x: number; z: number; giro?: number; v?: string }[];
   /** Solo el garaje, sin nuestro coche (para mirar un modelo del garaje a solas). */
   soloGaraje?: boolean;
   /** Túnel de viento: flujo calculado (presión en la piel, líneas de corriente, puntos críticos, estela) alrededor de cada cuerpo de `cuerposTunel`. */
@@ -107,6 +107,25 @@ interface Props {
   fichasGaraje?: Record<string, string[]>;
   /** «Quitar del garaje» on a design's card. */
   alQuitarGaraje?: (id: string) => void;
+  // ── The garage as the way to pick a design (2026-11-13) ──
+  /** A click on a garage car. Returning true means the page handled it (one of our designs: it becomes the one being
+   *  edited) and the viewer opens no card of its own. */
+  alPincharGaraje?: (id: string) => boolean;
+  /** A click on our own car (on the Aeromóvil 1, only where no part with a sheet is hit). */
+  alPincharNuestro?: () => void;
+  /** More buttons for a reference car's card («Solo mostrar este»). With it every garage car can be picked. */
+  extraTarjeta?: (id: string) => ReactNode;
+  /** Bumped (`n`) when the design being edited changes place: the camera jumps by (dx, dz) with the cars, so the view
+   *  does not change, and then eases onto the new one. */
+  seguir?: { n: number; dx: number; dz: number };
+  /** A one-line name over each car ('aeromovil' or the garage id) while no other label («Cd y consumo», tunnel) is on. */
+  nombres?: Record<string, string>;
+  /** A soft mark on the floor under our car: the design being edited, among the others in the garage. */
+  resaltarNuestro?: boolean;
+  /** Frame every car at once, as «Cd y consumo» does (the «Garaje» panel is open: the garage seen whole). */
+  verGaraje?: boolean;
+  /** Pixels covered on the right of the view by a panel: the garage view fits the cars into the rest. */
+  margenDerecho?: number;
   /** 2026-11-13: the body's paint and its accent (coloresCarroceria.ts); changing them only recolours the materials. */
   colores?: { carroceria: string; acento: string };
   /** Otro velomóvil: oculto, comparado (fantasma junto al nuestro) o solo. */
@@ -1420,8 +1439,11 @@ export function construirDisenoGaraje(m: Modelo): { grupo: THREE.Group; pivotes:
   return { grupo, pivotes };
 }
 
-export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cuerposTunel, opcionesTunel, alElegirPuntoTunel, puntoTunel = null, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje, fichasGaraje, alQuitarGaraje, colores }, ref) {
+export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cuerposTunel, opcionesTunel, alElegirPuntoTunel, puntoTunel = null, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje, fichasGaraje, alQuitarGaraje, alPincharGaraje, alPincharNuestro, extraTarjeta, seguir, nombres, resaltarNuestro = false, verGaraje = false, margenDerecho = 0, colores }, ref) {
   const pinchar = useRef(alPinchar); pinchar.current = alPinchar;
+  const pincharGaraje = useRef(alPincharGaraje); pincharGaraje.current = alPincharGaraje;
+  const pincharNuestro = useRef(alPincharNuestro); pincharNuestro.current = alPincharNuestro;
+  const conExtra = useRef(!!extraTarjeta); conExtra.current = !!extraTarjeta;
   const fichas = useRef(fichasGaraje); fichas.current = fichasGaraje;
   const elegirPunto = useRef(alElegirPuntoTunel); elegirPunto.current = alElegirPuntoTunel;
   const moverGaraje = useRef(alMoverGaraje); moverGaraje.current = alMoverGaraje;
@@ -1615,6 +1637,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     };
     const tamano = new THREE.Vector2();
     estado.current = st;
+    // (dev server only, 2026-11-13) the browser checks find the garage cars on screen through this; a build leaves it out
+    if (import.meta.env.DEV) (window as any).__visorAeromovil = st;
     const colocarPuertas = () => {
       for (const lista of puertasG.values()) for (const piv of lista) {
         piv.quaternion.setFromAxisAngle(piv.userData.eje, piv.userData.angulo * (piv.userData.tipo === 'maletero' ? st.aperturaMal : st.apertura));
@@ -1638,11 +1662,17 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       // anything else closes its card. (A car that can be dragged is picked when the drag ends without moving.)
       const enGaraje = grupoGaraje.children.length ? cocheGarajeEn(true) : null;
       elegirCoche(enGaraje);
-      if (enGaraje || !pinchar.current) return;
+      if (enGaraje || (!pinchar.current && !pincharNuestro.current) || !coche.visible) return;
       const vis: THREE.Object3D[] = [];
-      coche.traverse((o: any) => { if (o.isMesh && o.visible && o.userData.componente) { let p = o.parent, ok = true; while (p && p !== coche) { if (!p.visible) { ok = false; break; } p = p.parent; } if (ok) vis.push(o); } });
+      coche.traverse((o: any) => { if (o.isMesh && o.visible && (o.userData.componente || !pinchar.current)) { let p = o.parent, ok = true; while (p && p !== coche) { if (!p.visible) { ok = false; break; } p = p.parent; } if (ok) vis.push(o); } });
       const hit = ray.intersectObjects(vis, false).find(h => !(h.object as any).material?.transparent || ((h.object as any).material.opacity ?? 1) > 0.3) ?? ray.intersectObjects(vis, false)[0];
-      if (hit) pinchar.current((hit.object as any).userData.componente);
+      if (hit && pinchar.current) { pinchar.current((hit.object as any).userData.componente); return; }
+      // (2026-11-13) our own car, where no part with a sheet was hit: the page opens the design's card
+      if (!pincharNuestro.current) return;
+      if (hit) { pincharNuestro.current(); return; }
+      const todas: THREE.Object3D[] = [];
+      coche.traverse((o: any) => { if (o.isMesh && o.visible) { let p = o.parent, ok = true; while (p && p !== coche) { if (!p.visible) { ok = false; break; } p = p.parent; } if (ok) todas.push(o); } });
+      if (ray.intersectObjects(todas, false).length) pincharNuestro.current();
     };
     cv.addEventListener('pointerdown', alBajar); cv.addEventListener('pointerup', alSoltar);
     // Arrastrar un coche del garaje (2026-11-07, Eugenio: «mover los vehículos pulsando sobre ellos y
@@ -1675,9 +1705,13 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       return mejor;
     };
     // a car with parts that open, or one of our designs (it has a card of its own)
-    const abreAlgo = (obj: THREE.Object3D | null) => !!obj && (!!vehiculoGaraje(obj.name)?.pivotes?.length || !!fichas.current?.[obj.name]);
-    /** Picks a garage car (its card opens) or, with null or a car with nothing to open, closes the card. */
-    const elegirCoche = (obj: THREE.Object3D | null) => elegirGaraje.current(abreAlgo(obj) ? obj!.name : null);
+    const abreAlgo = (obj: THREE.Object3D | null) => !!obj && (conExtra.current || !!vehiculoGaraje(obj.name)?.pivotes?.length || !!fichas.current?.[obj.name]);
+    /** Picks a garage car (its card opens) or, with null or a car with nothing to open, closes the card. One the page
+     *  takes (one of our designs, 2026-11-13) opens no card here. */
+    const elegirCoche = (obj: THREE.Object3D | null) => {
+      if (obj && pincharGaraje.current?.(obj.name)) { elegirGaraje.current(null); return; }
+      elegirGaraje.current(abreAlgo(obj) ? obj!.name : null);
+    };
     const empezarArrastre = (e: PointerEvent) => {
       if (!moverGaraje.current || e.button !== 0 || !grupoGaraje.children.length) return;
       rayoDesde(e);
@@ -1837,14 +1871,21 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   }, [referencia, modoRef, alinear, modelo, soloGaraje]);
   // El garaje: cada vehículo se construye una vez por cambio de lista (los
   // modelos son pesados) y se coloca con su eje delantero en (x, z).
-  const claveGaraje = garaje.map(v => v.id).join('|');
+  // (2026-11-13) Only the cars that came in, left, or changed version (`v`) are rebuilt: picking another design
+  // swaps two cars in a garage of ten, and rebuilding all ten took the whole switch. «Superponer» rebuilds them all.
+  const claveGaraje = garaje.map(v => (v.v ? `${v.id}@${v.v}` : v.id)).join('|');
   useEffect(() => {
     const st = estado.current; if (!st) return;
     const g: THREE.Group = st.grupoGaraje;
-    for (const o of g.children) liberarFantasma(o);
-    vaciar(g);
+    const todo = st.superponer !== superponer, quiero = new Map(garaje.map(v => [v.id, v.v ?? '']));
     st.superponer = superponer;
+    for (const o of [...g.children]) {
+      if (!todo && quiero.get(o.name) === o.userData.version) continue;
+      liberarFantasma(o); g.remove(o);
+      o.traverse((c: any) => { c.geometry?.dispose?.(); if (c.isSprite) { c.material.map?.dispose(); c.material.dispose(); } });
+    }
     for (const v of garaje) {
+      if (g.children.some(o => o.name === v.id)) continue;
       const def = vehiculoGaraje(v.id); if (!def) continue;
       // Un modelo del garaje que falla no puede tumbar el visor entero: se queda fuera y lo dice la consola.
       let obj: THREE.Group;
@@ -1856,10 +1897,11 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       if (superponer) { hacerFantasma(obj, colorSuperpuesto(v.id)); obj.add(siluetas(def, colorSuperpuesto(v.id))); }
       // a rebuilt car keeps its doors and boot as they were
       const a = st.garajeAbre.get(v.id); if (a) colocarPivotesGaraje(obj, def, a);
+      obj.userData.version = v.v ?? '';
       g.add(obj);
     }
     // Las posiciones se ponen ya (el efecto de abajo solo corre si cambian).
-    for (const v of garaje) { const obj = g.getObjectByName(v.id); if (obj) { obj.position.set(v.x, 0, v.z); obj.rotation.y = v.giro ?? 0; } }
+    for (const v of garaje) { const obj = g.children.find(o => o.name === v.id); if (obj) { obj.position.set(v.x, 0, v.z); obj.rotation.y = v.giro ?? 0; } }
     st.sombraSucia = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [claveGaraje, superponer]);
@@ -1872,7 +1914,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   useEffect(() => { const st = estado.current; if (st && superponer) mostrarSiluetas(st.grupoGaraje, vista); }, [vista, superponer, claveGaraje]);
   useEffect(() => {
     const st = estado.current; if (!st) return;
-    for (const v of garaje) { const obj = st.grupoGaraje.getObjectByName(v.id); if (obj) { obj.position.set(v.x, 0, v.z); obj.rotation.y = v.giro ?? 0; } }
+    for (const v of garaje) { const obj = st.grupoGaraje.children.find((o: THREE.Object3D) => o.name === v.id); if (obj) { obj.position.set(v.x, 0, v.z); obj.rotation.y = v.giro ?? 0; } }
     st.sombraSucia = true;
   }, [garaje]);
   // Túnel de viento (2026-11-09: flujo calculado, ver tunelViento.ts): se rehace cuando cambia un cuerpo, su sitio,
@@ -1906,14 +1948,60 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [claveCarteles, modelo]);
+  // (2026-11-13) Each car's name, small, while no other label is on: in a garage full of our designs they look alike.
+  const claveNombres = !claveCarteles && !tunel && nombres ? JSON.stringify(nombres) + garaje.map(v => `${v.id}@${v.x},${v.z},${v.giro ?? 0}`).join('|') + (soloGaraje ? '|solo' : '') : '';
+  useEffect(() => {
+    const st = estado.current; if (!st) return;
+    let g = st.scene.getObjectByName('nombres') as THREE.Group | undefined;
+    if (g) { g.traverse((o: any) => { if (o.isSprite) { o.material.map?.dispose(); o.material.dispose(); } }); st.scene.remove(g); }
+    if (!claveNombres || !nombres) return;
+    g = new THREE.Group(); g.name = 'nombres'; st.scene.add(g);
+    const poner = (texto: string | undefined, x: number, y: number, z: number) => { if (!texto) return; const c = cartel(texto); c.scale.multiplyScalar(0.8); c.position.set(x, y, z); g!.add(c); };
+    if (!soloGaraje && garaje.length) poner(nombres.aeromovil, (modelo.xn + modelo.xt) / 2, modelo.P.H + 0.35, 0);
+    for (const v of garaje) {
+      const def = vehiculoGaraje(v.id); if (!def) continue;
+      const xs = def.envolvente?.map(e => e[0]) ?? def.morroCola, xm = xs?.length ? (Math.max(...xs) + Math.min(...xs)) / 2 : -def.batalla / 2, gi = v.giro ?? 0;
+      poner(nombres[v.id], v.x + xm * Math.cos(gi), def.alto + 0.35, v.z - xm * Math.sin(gi));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [claveNombres, modelo.xn, modelo.xt, modelo.P.H]);
+  // The floor mark under the design being edited (only when there are other cars to tell it from).
+  const conResalte = resaltarNuestro && !soloGaraje && garaje.length > 0 && modoRef !== 'sola';
+  useEffect(() => {
+    const st = estado.current; if (!st) return;
+    let m = st.scene.getObjectByName('resalte') as THREE.Mesh | undefined;
+    if (m) { m.geometry.dispose(); (m.material as THREE.Material).dispose(); st.scene.remove(m); }
+    if (!conResalte) return;
+    const L = modelo.xn - modelo.xt + 0.5, W = modelo.P.W + 0.5, r = 0.35, f = new THREE.Shape();
+    f.moveTo(-L / 2 + r, -W / 2); f.lineTo(L / 2 - r, -W / 2); f.quadraticCurveTo(L / 2, -W / 2, L / 2, -W / 2 + r); f.lineTo(L / 2, W / 2 - r);
+    f.quadraticCurveTo(L / 2, W / 2, L / 2 - r, W / 2); f.lineTo(-L / 2 + r, W / 2); f.quadraticCurveTo(-L / 2, W / 2, -L / 2, W / 2 - r); f.lineTo(-L / 2, -W / 2 + r);
+    f.quadraticCurveTo(-L / 2, -W / 2, -L / 2 + r, -W / 2);
+    m = new THREE.Mesh(new THREE.ShapeGeometry(f, 6), new THREE.MeshBasicMaterial({ color: 0x0f766e, transparent: true, opacity: 0.16, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }));
+    m.name = 'resalte'; m.rotation.x = -Math.PI / 2; m.position.set((modelo.xn + modelo.xt) / 2, 0.004, 0); m.renderOrder = 1;
+    st.scene.add(m);
+  }, [conResalte, modelo.xn, modelo.xt, modelo.P.W]);
   // Al abrir el túnel con más de un coche, la cámara se aleja y se eleva para verlos a la vez
   // (con las estelas delante); al cerrarlo vuelve a la vista que estaba elegida.
   // Túnel o carteles de consumo: hay que ver todos los coches a la vez.
-  const verTodos = tunel || !!carteles;
+  const verTodos = tunel || !!carteles || verGaraje;
   const claveEncuadre = verTodos ? garaje.map(v => `${v.x},${v.z}`).join('|') : '';
+  // (2026-11-13) The design being edited changed place: the camera moves with the cars (the picture does not jump)
+  // and then eases onto the new one. Before the framing below, which takes over when every car must be seen.
+  useEffect(() => {
+    const st = estado.current; if (!st || !seguir) return;
+    const d = new THREE.Vector3(seguir.dx, 0, seguir.dz);
+    st.camera.position.add(d); st.controls.target.add(d);
+    st.target.set(-1.5, 0.55, 0);
+    st.tween = { from: st.camera.position.clone(), to: new THREE.Vector3(...VISTAS[vista]), tf: st.controls.target.clone(), t: 0 };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seguir?.n]);
+  // The garage on its own (no tunnel, no labels): seen from the side, a little from behind and above, as the rows run.
+  const deLado = verGaraje && !tunel && !carteles;
   useEffect(() => {
     const st = estado.current; if (!st) return;
-    const enGaraje = garaje.filter(v => vehiculoGaraje(v.id)?.envolvente);
+    // (our designs have no silhouette, only their nose and tail: `morroCola`, 2026-11-13)
+    const extremos = (id: string) => { const d = vehiculoGaraje(id); return d?.envolvente ? d.envolvente.map(e => e[0]) : d?.morroCola; };
+    const enGaraje = garaje.filter(v => extremos(v.id));
     const zs = [...(soloGaraje ? [] : [0]), ...enGaraje.map(v => v.z)];
     const xs = [...(soloGaraje ? [] : [0]), ...enGaraje.map(v => v.x)];
     if (verTodos && zs.length > 1) {
@@ -1936,14 +2024,30 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       const estela = tunel ? 2 : 0;
       if (!soloGaraje) caja(Math.max(modelo.xn, modelo.xt), Math.min(modelo.xn, modelo.xt) - estela, 0, modelo.P.W / 2, modelo.P.H + 0.9);
       for (const v of enGaraje) {
-        const def = vehiculoGaraje(v.id)!, ex = def.envolvente!.map(e => e[0]), gi = v.giro ?? 0;
+        const def = vehiculoGaraje(v.id)!, ex = extremos(v.id)!, gi = v.giro ?? 0;
         caja(Math.max(...ex), Math.min(...ex) - estela, 0, def.ancho / 2, def.alto + 0.9, gi);
         for (const p of puntos.slice(-8)) { p.x += v.x; p.z += v.z; }
       }
+      let libre = 1;
+      if (deLado) {
+        // (2026-11-13) the rows run along x: centred on every car, from the side, into the width a panel leaves free
+        const caja3 = new THREE.Box3().setFromPoints(puntos), c = caja3.getCenter(new THREE.Vector3());
+        st.target.set(c.x, 0.6, c.z);
+        destino = st.target.clone().add(new THREE.Vector3(-0.35, 0.55, -1).multiplyScalar(8));
+        const ancho = st.renderer.domElement.clientWidth || 1;
+        libre = Math.min(1, Math.max(0.4, 1 - margenDerecho / ancho));
+      }
       const haciaCamara = destino.clone().sub(st.target);
       const hastaAhora = Math.min(haciaCamara.length(), MAX_ORBITA);
-      const distancia = Math.max(hastaAhora, Math.min(75, distanciaParaVer(puntos, st.target, haciaCamara, st.camera)));
+      const distancia = Math.max(hastaAhora, Math.min(75, distanciaParaVer(puntos, st.target, haciaCamara, st.camera, 0.9 * libre)));
       destino = st.target.clone().addScaledVector(haciaCamara.normalize(), distancia);
+      if (libre < 1) {
+        // the cars move left into the free part: target and camera shift right by the covered half
+        const derecha = new THREE.Vector3().crossVectors(haciaCamara.clone().negate(), st.camera.up).normalize();
+        const mitad = distancia * Math.tan(THREE.MathUtils.degToRad(st.camera.fov) / 2) * st.camera.aspect;
+        const corre = derecha.multiplyScalar((1 - libre) * mitad);
+        st.target.add(corre); destino.add(corre);
+      }
       st.controls.maxDistance = Math.max(MAX_ORBITA, distancia + 1); st.maxOrbitaAlVolver = 0;
       st.tween = { from: st.camera.position.clone(), to: destino, tf: st.controls.target.clone(), t: 0 };
     } else if (!verTodos && (st.target.x !== -1.5 || st.target.z !== 0)) {
@@ -1951,7 +2055,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       st.tween = { from: st.camera.position.clone(), to: new THREE.Vector3(...VISTAS[vista]), tf: st.controls.target.clone(), t: 0 };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [verTodos, claveEncuadre, soloGaraje, tunel]);
+  }, [verTodos, claveEncuadre, soloGaraje, tunel, deLado, margenDerecho]);
   useEffect(() => { const st = estado.current; if (!st) return; st.coche.visible = !soloGaraje && !(referencia && modoRef === 'sola'); st.grupoCotas.visible = !soloGaraje && verCotas && modoRef !== 'sola'; }, [soloGaraje, referencia, modoRef, verCotas]);
   useEffect(() => { const st = estado.current; if (st) st.aperturaObjetivo = abierta ? 1 : 0; }, [abierta]);
   // «Abrir puertas» / «Abrir maletero» of a garage car: where each one is heading (the loop animates it)
@@ -2095,6 +2199,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
           className="absolute inset-x-3 z-[16] flex items-center gap-1 p-1.5 shadow-lg">
           <span className="min-w-0 flex-1 truncate pl-1 text-sm font-semibold text-slate-900">{defSel.nombre}</span>
           {botones}
+          {extraTarjeta?.(selGaraje!)}
           <Button variant="ghost" onClick={() => setSelGaraje(null)} aria-label="Cerrar" title="Cerrar" className="h-10 w-10 shrink-0 p-0">
             <X className="h-5 w-5" />
           </Button>
@@ -2105,15 +2210,15 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
           <div className="flex items-start gap-2">
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-slate-900">{defSel.nombre}</p>
-              <p className="text-[11px] leading-snug text-slate-500">
-                Abre sus puertas y su maletero para ver cómo se abren.{alMoverGaraje ? ' Para moverlo, púlsalo y arrástralo.' : ''}
-              </p>
+              {(tiposSel.size > 0 || alMoverGaraje) && <p className="text-[11px] leading-snug text-slate-500">
+                {tiposSel.size > 0 ? 'Abre sus puertas y su maletero para ver cómo se abren.' : ''}{alMoverGaraje ? ' Para moverlo, púlsalo y arrástralo.' : ''}
+              </p>}
             </div>
             <Button variant="ghost" onClick={() => setSelGaraje(null)} aria-label="Cerrar" title="Cerrar" className="-mr-1.5 -mt-1.5 h-10 w-10 p-0">
               <X className="h-4 w-4" />
             </Button>
           </div>
-          <div className="mt-2 flex flex-wrap gap-1.5">{botones}</div>
+          <div className="mt-2 flex flex-wrap gap-1.5">{botones}{extraTarjeta?.(selGaraje!)}</div>
         </Card>
       )}
     </>
