@@ -16,11 +16,7 @@ import { aDiseno, deDiseno } from '../src/components/aeromovil/Disenos';
 import { camposTriciclo, deslizadoresTriciclo, opcionesCabinaTriciclo, rangoTriciclo, type ModeloTriciclo } from '../src/components/aeromovil/geometriaTriciclo';
 import type { ModeloBala } from '../src/components/aeromovil/geometriaBala';
 import { construirCon, crearMateriales } from '../src/components/aeromovil/garaje/balaModelo';
-import { CLASICO_GUARDADO, MIGRACION_0209 } from './clasicoGuardado';
-// round 4 (2026-11-13): migrations 0212 (body) and 0213 (interior), as in drizzle/ and triciclo-rangos.ts
-const M_0212 = { tMorro: 0.30, tMorroLinea: 1, tMorroAlto: -0.03, tFaro: 'si', tFaroD: 0.16, tColaPlana: 1, tTechoPlano: 0.5, tCaida: 0.2, tConAleta: 'no', tSolarMorro: 'si',
-  tMalIni: 1.95, tMalLado: 30, tPuertas2: 'si', tPuerta2Parte: 1.33, tBisagra2Y: 0.85, tBisagra2Inc: 15, tPuerta2Abre: 110, tLineaCupula: 0 };
-const M_0213 = { tAsientos: 'butacas', tSalpicadero: 'blanco', tChLargo: 'eje', tChSep: 0.30, tBatAncho: 115 };
+import { CLASICO_GUARDADO, CLASICO_HOY, MIGRACION_0209, MIGRACION_0212, MIGRACION_0213 } from './clasicoGuardado';
 
 let fallos = 0;
 const ok = (c: boolean, m: string) => { console.log(`${c ? 'OK   ' : 'FALLA'} ${m}`); if (!c) fallos++; };
@@ -151,11 +147,13 @@ else {
     ['Cuadriciclo Bala clásico guardado (el de verdad)', CLASICO_GUARDADO],
     // (round 3 interior: and as it is in production since migration 0209, with round 2's keys)
     ['Cuadriciclo Bala clásico con la 0209 (el de verdad, hoy)', { ...CLASICO_GUARDADO, ...MIGRACION_0209 } as Partial<Parametros>],
-    // (round 4, 2026-11-13: and with 0212 and 0213, as it is in production today, before this round's migration)
-    ['Cuadriciclo Bala clásico con la 0209, 0212 y 0213 (hoy)', { ...CLASICO_GUARDADO, ...MIGRACION_0209, ...M_0212, ...M_0213 } as Partial<Parametros>],
+    // (round 4, 2026-11-13: and with 0212 and 0213, as it was in production before 0217)
+    ['Cuadriciclo Bala clásico con la 0209, 0212 y 0213 (hoy)', { ...CLASICO_GUARDADO, ...MIGRACION_0209, ...MIGRACION_0212, ...MIGRACION_0213 } as Partial<Parametros>],
+    // (2026-11-13: and as it really is today, with 0217 too, before this round's smooth body)
+    ['Cuadriciclo Bala clásico con la 0217 (el de verdad, hoy)', CLASICO_HOY],
   ];
   /** Saved with keys main already has: opened as they are on both sides (the others, as saved before 2026-11-12: `deAntes`). */
-  const ACTUALES = ['Cuadriciclo Bala clásico con la 0209 (el de verdad, hoy)', 'Cuadriciclo Bala clásico con la 0209, 0212 y 0213 (hoy)'];
+  const ACTUALES = ['Cuadriciclo Bala clásico con la 0209 (el de verdad, hoy)', 'Cuadriciclo Bala clásico con la 0209, 0212 y 0213 (hoy)', 'Cuadriciclo Bala clásico con la 0217 (el de verdad, hoy)'];
   // (2026-11-11: and the «Bala de cuatro ruedas»'s two, which with one rear wheel change nothing)
   // (2026-11-12: and the battery layout, steering wheel, dashboard, doors, mirrors and hatch, all off by default)
   const NUEVOS = ['tAsientos', 'tFila2', 'tFila3', 'tFila2X', 'tFila3X', 'tRecFila', 'tTraseras', 'tViaTras',
@@ -166,7 +164,9 @@ else {
     // round 3 body (2026-11-12): every one of them at its default builds what there was
     'tMorroLinea', 'tMorroAlto', 'tFaro', 'tFaroD', 'tColaPlana', 'tTechoPlano', 'tCaida', 'tConAleta', 'tSolarMorro', 'tPuertas2', 'tPuerta2Parte', 'tBisagra2Y', 'tBisagra2Inc', 'tPuerta2Abre', 'tLineaCupula',
     // round 4 (2026-11-13): the roof frame, 0 by default (no frame)
-    'tMarcoTecho'];
+    'tMarcoTecho',
+    // 2026-11-13: the smooth body, off by default (its keys act only with «Cubierta lisa»)
+    'tCubierta', 'tColaAncho', 'tColaGrosor', 'tColaBombeo', 'tBajosIni', 'tBajosCurva', 'tMorroAncho', 'tMorroGrosor', 'tMorroBombeo'];
   const NUEVOS_12 = NUEVOS.slice(8);
   /** The design as it was saved before 2026-11-12: without the keys that did not exist (this module's defaults carry them). */
   const deAntes = (P: Partial<Parametros>) => Object.fromEntries(Object.entries(P).filter(([k]) => !NUEVOS_12.includes(k))) as Partial<Parametros>;
