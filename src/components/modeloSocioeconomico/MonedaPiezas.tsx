@@ -7,6 +7,8 @@ import { DEUDA_PCT } from '../../data/deuda';
 import { FMI_SORPRESA, FUENTES_MONEDA, IPC_ANUAL, IPC_ULTIMO, IPC_PICO, licuar, trayectoria } from '../../data/moneda';
 import { Cifra } from './ventanas';
 import { Fuente, Regulador, Segmentado } from './piezas';
+import { Barras } from './graficos/Barras';
+import { Linea } from './graficos/Linea';
 
 /** A «fuente» link from this part's own source list. */
 export function F({ id }: { id: string }) {
@@ -19,42 +21,32 @@ export function Ir({ href, children }: { href: string; children: ReactNode }) {
   return <a href={href} className="font-semibold text-slate-900 underline decoration-slate-400 underline-offset-2 hover:decoration-slate-900">{children}</a>;
 }
 
-/** CPI annual averages 2021–2025, plus the latest month (a different measure, drawn apart). */
+/**
+ * CPI annual averages 2021–2025, plus the latest month (a different measure,
+ * drawn lighter), against the ECB's 2 % target; and beside it, what 100 € of
+ * 2021 cost each year after, compounding the same annual averages.
+ */
 export function GraficaIPC() {
-  const barras = [...IPC_ANUAL.map(a => ({ t: String(a.ano), v: a.v, ultimo: false })), { t: 'oct. 2026', v: IPC_ULTIMO.v, ultimo: true }];
-  const W = 420, H = 230, m = { l: 34, r: 4, t: 22, b: 30 };
-  const max = 10;
-  const ancho = (W - m.l - m.r) / barras.length;
-  const y = (v: number) => H - m.b - (v / max) * (H - m.t - m.b);
+  let p = 100;
+  const nivel = [{ x: 2021, y: 100 }, ...IPC_ANUAL.filter(a => a.ano > 2021).map(a => ({ x: a.ano, y: (p = p * (1 + a.v / 100)) }))];
   return (
-    <figure className="rounded-2xl border border-slate-200 bg-white p-5">
-      <figcaption className="text-lg font-bold text-slate-900">Cuánto subieron los precios en España</figcaption>
-      <p className="mt-1 text-sm text-slate-600">Media de cada año, y el último mes conocido comparado con el mismo mes del año anterior.</p>
-      <svg viewBox={`0 0 ${W} ${H}`} className="mt-3 w-full max-w-2xl" role="img"
-        aria-label={barras.map(b => `${b.t}: ${numero(b.v, 1)} %`).join('; ') + `. Objetivo del Banco Central Europeo: 2 %.`}>
-        {[0, 2, 4, 6, 8, 10].map(v => (
-          <g key={v}>
-            <line x1={m.l} x2={W - m.r} y1={y(v)} y2={y(v)} className="stroke-slate-100" />
-            <text x={m.l - 6} y={y(v) + 4} textAnchor="end" className="fill-slate-400 text-[11px]">{v} %</text>
-          </g>
-        ))}
-        {barras.map((b, k) => (
-          <g key={b.t}>
-            <rect x={m.l + k * ancho + ancho * 0.18} y={y(b.v)} width={ancho * 0.64} height={y(0) - y(b.v)} rx={3}
-              className={b.ultimo ? 'fill-rose-300' : b.v > 5 ? 'fill-rose-700' : 'fill-slate-500'} />
-            <text x={m.l + k * ancho + ancho / 2} y={y(b.v) - 6} textAnchor="middle" className="fill-slate-800 text-[12px] font-semibold">{numero(b.v, 1)}</text>
-            <text x={m.l + k * ancho + ancho / 2} y={H - 10} textAnchor="middle" className="fill-slate-500 text-[11px]">{b.t}</text>
-          </g>
-        ))}
-        <line x1={m.l} x2={W - m.r} y1={y(2)} y2={y(2)} className="stroke-emerald-700" strokeDasharray="5 4" strokeWidth={1.5} />
-      </svg>
-      <p className="mt-2 flex items-center gap-2 text-sm text-emerald-800">
-        <span aria-hidden className="inline-block w-6 border-t-2 border-dashed border-emerald-700" />Objetivo del Banco Central Europeo: 2 % al año
-      </p>
-      <p className="mt-2 text-xs leading-relaxed text-slate-500">
-        Medias anuales del IPC del INE<F id="ipc-medias" /><F id="ine-2025" />. La barra clara es otra medida: octubre de 2026 frente a octubre de 2025<F id={IPC_ULTIMO.fuente} />. El mes más alto fue {IPC_PICO.mes}, con un {porcentaje(IPC_PICO.v, 1)}<F id={IPC_PICO.fuente} />.
-      </p>
-    </figure>
+    <div className="grid gap-4 lg:grid-cols-2">
+      <Barras titulo="Cuánto subieron los precios en España"
+        subtitulo="Media de cada año, y el último mes conocido comparado con el mismo mes del año anterior"
+        referencia={{ valor: 2, texto: 'Objetivo del Banco Central Europeo: 2 % al año' }}
+        barras={[
+          ...IPC_ANUAL.map(a => ({ etiqueta: String(a.ano), valor: a.v, texto: porcentaje(a.v, 1), serie: a.v > 5 ? 'tinta' as const : 'gris' as const,
+            nota: a.ano === 2022 ? <>El mes más alto fue {IPC_PICO.mes}, con un {porcentaje(IPC_PICO.v, 1)}<F id={IPC_PICO.fuente} />.</> : undefined })),
+          { etiqueta: 'Octubre de 2026', valor: IPC_ULTIMO.v, texto: porcentaje(IPC_ULTIMO.v, 1), serie: 'claro' as const,
+            nota: <>Otra medida: octubre de 2026 frente a octubre de 2025. Sin energía ni alimentos frescos, un {porcentaje(IPC_ULTIMO.subyacente, 1)}<F id={IPC_ULTIMO.fuente} />.</> },
+        ]}
+        pie={<>Medias anuales del IPC del INE<F id="ipc-medias" /><F id="ine-2025" />. La barra clara es otra medida: octubre de 2026 frente a octubre de 2025<F id={IPC_ULTIMO.fuente} />. El mes más alto fue {IPC_PICO.mes}, con un {porcentaje(IPC_PICO.v, 1)}<F id={IPC_PICO.fuente} />.</>} />
+      <Linea titulo="Lo que en 2021 costaba 100 €"
+        subtitulo="Lo que costó de media cada año después, sumando las subidas de cada año"
+        desde={95} hasta={125} formato={v => `${numero(v, 1)} €`}
+        puntos={nivel.map(n => ({ ...n, nota: n.x === 2021 ? 'El punto de partida.' : `${numero(n.y - 100, 1)} € más que en 2021.` }))}
+        pie={<>Cálculo propio con las medias anuales del IPC del INE<F id="ipc-medias" /><F id="ine-2025" />. El eje empieza en 95 €.</>} />
+    </div>
   );
 }
 

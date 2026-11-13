@@ -10,6 +10,7 @@ import { ABUSOS, COMPARA, DEUDA, DEUDORES, DEUDA_PCT, HISTORIA_PCT, PAGOS, PANDE
 import { Apartado, Cifra, Mas } from './ventanas';
 import { Fuente, Regulador } from './piezas';
 import { cn } from '../../utils/cn';
+import { Linea } from './graficos/Linea';
 
 const mill = (m: number) => `${numero(m)} M€`;
 const billones = (m: number) => `${numero(m / 1e6, 2)} billones`;
@@ -160,38 +161,13 @@ export function DeudaVentana() {
 
 /** Debt as % of GDP, at the dated points we have sources for. */
 function HistoriaGrafica() {
-  const W = 640, H = 260, m = { l: 40, r: 16, t: 24, b: 28 };
-  const x = (a: number) => m.l + ((a - 1978) / (2027 - 1978)) * (W - m.l - m.r);
-  const y = (p: number) => H - m.b - (p / 130) * (H - m.t - m.b);
-  const puntos = HISTORIA_PCT.map(h => `${x(h.ano)},${y(h.pct)}`).join(' ');
   return (
-    <figure className="rounded-2xl border border-slate-200 bg-white p-5">
-      <figcaption className="text-lg font-bold text-slate-900">Deuda de las administraciones, en % del PIB</figcaption>
-      <svg viewBox={`0 0 ${W} ${H}`} className="mt-3 w-full" role="img" aria-label={HISTORIA_PCT.map(h => `${h.ano}: ${numero(h.pct, 1)} %`).join('; ')}>
-        {[0, 40, 80, 120].map(v => (
-          <g key={v}>
-            <line x1={m.l} x2={W - m.r} y1={y(v)} y2={y(v)} className="stroke-slate-100" />
-            <text x={m.l - 6} y={y(v) + 4} textAnchor="end" className="fill-slate-400 text-[11px]">{v} %</text>
-          </g>
-        ))}
-        <line x1={m.l} x2={W - m.r} y1={y(60)} y2={y(60)} className="stroke-slate-300" strokeDasharray="4 4" />
-        <text x={W - m.r} y={y(60) - 5} textAnchor="end" className="fill-slate-500 text-[11px]">límite europeo, 60 %</text>
-        <polyline points={puntos} fill="none" className="stroke-slate-900" strokeWidth={2} strokeLinejoin="round" />
-        {HISTORIA_PCT.map(h => (
-          <g key={h.ano}>
-            <circle cx={x(h.ano)} cy={y(h.pct)} r={4.5} className="fill-slate-900 stroke-white" strokeWidth={2}>
-              <title>{`${h.ano}: ${numero(h.pct, 1)} % del PIB (${h.nota})`}</title>
-            </circle>
-            <text x={h.ano === 2020 ? x(h.ano) - 9 : x(h.ano)} y={h.ano === 2020 ? y(h.pct) + 4 : y(h.pct) - 10} textAnchor={h.ano === 2020 ? 'end' : 'middle'} className="fill-slate-700 text-[11px] font-semibold">{numero(h.pct, 0)}</text>
-            <text x={x(h.ano)} y={H - 8} textAnchor="middle" className="fill-slate-500 text-[11px]">{h.ano === 2021 ? '' : h.ano}</text>
-          </g>
-        ))}
-      </svg>
-      <p className="mt-2 text-xs leading-relaxed text-slate-500">
-        Solo los años con dato; entre ellos, una línea recta. {HISTORIA_PCT.map(h => `${h.ano}: ${h.nota}`).join('. ')}.
-        {[...new Set(HISTORIA_PCT.map(h => h.fuente))].map(f => <Fuente key={f} id={f} />)}
-      </p>
-    </figure>
+    <Linea titulo="Deuda de las administraciones, en % del PIB"
+      subtitulo="El PIB es lo que produce el país en un año. Solo los años con dato; entre ellos, una línea recta"
+      desde={0} hasta={135} formato={v => porcentaje(v, v % 1 ? 1 : 0)}
+      referencia={{ valor: 60, texto: 'límite europeo, 60 %' }}
+      puntos={HISTORIA_PCT.map(h => ({ x: h.ano, y: h.pct, nota: `${h.nota.charAt(0).toUpperCase()}${h.nota.slice(1)}.` }))}
+      pie={<>{HISTORIA_PCT.map(h => `${h.ano}: ${numero(h.pct, 1)} %, ${h.nota}`).join('. ')}.{[...new Set(HISTORIA_PCT.map(h => h.fuente))].map(f => <Fuente key={f} id={f} />)}</>} />
   );
 }
 

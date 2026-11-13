@@ -14,6 +14,8 @@ import { Apartado, Cifra, Mas } from './ventanas';
 import { Fuente, Muestra, Regulador } from './piezas';
 import { SeguridadMando } from './SeguridadMando';
 import { cn } from '../../utils/cn';
+import { Barras } from './graficos/Barras';
+import { Pares } from './graficos/Pares';
 
 const mill = (m: number) => `${numero(m)} M€`;
 /** Source link by id from FUENTES_SEG. */
@@ -292,6 +294,25 @@ function Dinero() {
           ))}
         </dl>
       </figure>
+
+      <div className="mt-6 grid gap-4 lg:grid-cols-2">
+        <Barras titulo="El presupuesto de cada cuerpo, en millones de euros"
+          subtitulo="Cada cifra es de un año y cubre cosas distintas (mira la nota de cada barra): sirve para ver tamaños, no para sumar"
+          barras={CUERPOS.filter(c => c.presupuesto).sort((x, y) => y.presupuesto!.m - x.presupuesto!.m).map(c => ({
+            etiqueta: c.nombre, valor: c.presupuesto!.m, texto: mill(c.presupuesto!.m), serie: c.grupo === 'ejercito' ? 'gris' as const : 'tinta' as const,
+            nota: <>{c.presupuesto!.ano}{c.presupuesto!.que ? `, ${c.presupuesto!.que}` : ''}<F id={c.presupuesto!.fuente} /></>,
+          }))}
+          pie="Sin cifra publicada solo para ellos: Policía Foral de Navarra y Policía Canaria. El ejército, en gris: con la propuesta entra en el cuerpo único." />
+        <Pares titulo="Lo que se gasta, en % del PIB"
+          subtitulo="España frente a la media de la Unión Europea, 2022. El PIB es lo que produce el país en un año"
+          series={['España', 'Media de la UE']} formato={v => porcentaje(v)}
+          pares={[
+            { etiqueta: 'Policía', a: GASTO.policiaPibEs, b: GASTO.policiaPibUe, nota: 'España gasta más que la media en policía…' },
+            { etiqueta: 'Orden público y seguridad', a: GASTO.ordenPibEs, b: GASTO.ordenPibUe, nota: 'Incluye policía, bomberos, juzgados y cárceles.' },
+            { etiqueta: 'Defensa', a: GASTO.defensaPibEs, b: GASTO.defensaPibUe, nota: '…y menos que la media en defensa.' },
+          ]}
+          pie={<>Banco de España<F id="bde" /></>} />
+      </div>
 
       <Mas titulo="lo que gastan las comunidades con policía propia">
         <ul className="max-w-3xl list-disc space-y-2 pl-5 text-[15px] leading-relaxed text-slate-700">

@@ -25,7 +25,7 @@
 // misma geometría que el script CadQuery de `public/aeromovil/`.
 import { Fragment, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Armchair, BatteryCharging, Bike, Box, Car, Camera, ChevronDown, CircleDot, ClipboardList, Factory, Frame, Layers3, Lightbulb, ShieldCheck, Zap, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Maximize2, Minimize2, Ruler, RotateCcw, Package, Ship, Wrench, Wind } from 'lucide-react';
+import { Armchair, BatteryCharging, Box, Car, Warehouse, Camera, ChevronDown, CircleDot, ClipboardList, Factory, Frame, Layers3, Lightbulb, ShieldCheck, Zap, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Maximize2, Minimize2, Ruler, RotateCcw, Package, Ship, Wrench, Wind } from 'lucide-react';
 import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import { Visor3D, CAPAS, type CapaId, type Vista, type VisorHandle } from '../components/aeromovil/Visor3D';
@@ -46,7 +46,7 @@ import { RANGOS_MASA_A1 } from '../components/aeromovil/geometriaA1';
 import { ColoresCarroceria } from '../components/aeromovil/ColorCarroceria';
 import { CLAVES_COLOR, coloresDe } from '../components/aeromovil/coloresCarroceria';
 import { MenuDisenos, aDiseno, cargarDisenoPorDefecto, deDiseno, useAutoguardado, type Diseno } from '../components/aeromovil/Disenos';
-import { VistaOtros, TablaComparacion, fichaPropia } from '../components/aeromovil/Otros';
+import { TablaComparacion, fichaPropia } from '../components/aeromovil/Otros';
 import { fichaComparable, type Referencia } from '../components/aeromovil/referencias';
 import { FormularioMejora, VistaExportar, VistaPlan, VistaPlanos, VistaTareas, cargarDueno, cargarTareas, type Dueno, type Tarea } from '../components/aeromovil/Paneles';
 import { BotonesComponentes, VistaComponentes } from '../components/aeromovil/Componentes';
@@ -69,12 +69,11 @@ const CLAVE = 'aeromovil.parametros.v5';
 const fmt = (v: number, d = 2) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
 const m2 = (v: number) => `${fmt(v)} m`;
 
-type Seccion = 'diseno' | 'componentes' | 'aranceles' | 'otros' | 'tareas' | 'plan' | 'planos' | 'exportar';
+type Seccion = 'diseno' | 'componentes' | 'aranceles' | 'tareas' | 'plan' | 'planos' | 'exportar';
 const SECCIONES: { k: Seccion; n: string; ruta: string; icono: typeof Box }[] = [
   { k: 'diseno', n: 'Diseño 3D', ruta: '/aeromovil', icono: Box },
   { k: 'componentes', n: 'Componentes', ruta: '/aeromovil/componentes', icono: Wrench },
   { k: 'aranceles', n: 'Aranceles', ruta: '/aeromovil/aranceles', icono: Ship },
-  { k: 'otros', n: 'Otros velomóviles', ruta: '/aeromovil/otros', icono: Bike },
   { k: 'tareas', n: 'Tareas', ruta: '/aeromovil/tareas', icono: ListChecks },
   { k: 'plan', n: 'Plan', ruta: '/aeromovil/plan', icono: MapIcon },
   { k: 'planos', n: 'Planos', ruta: '/aeromovil/planos', icono: Ruler },
@@ -917,7 +916,7 @@ const NOMBRE_CORTO: Record<IdDepartamento, string> = { proyecto: 'Proyecto', car
  * carrocería, chasis, rodaje, motor, etcétera. Estaba desplegado debajo del menú superior y se podía pinchar e ir
  * cambiando… ese menú ponlo en la parte superior y el actual menú pliégalo»). The same tabs as before 383754a
  * (icon over a short name, the one open in teal, its one-liner as `title`), now the bar's own row; the sections
- * (Diseño 3D, Otros velomóviles, Tareas…) fold into `MenuSecciones`. On a phone the row scrolls sideways.
+ * (Diseño 3D, Tareas…) fold into `MenuSecciones`. On a phone the row scrolls sideways.
  * Vehicles without departments (the Gota, the Cuadriciclo en rombo) have no tabs: the bar keeps only the logo and the menu.
  */
 function PestanasDepartamento({ lista, dep, alElegir }: { lista: { id: IdDepartamento; lema: string }[]; dep: IdDepartamento | null; alElegir: (d: IdDepartamento) => void }) {
@@ -931,7 +930,7 @@ function PestanasDepartamento({ lista, dep, alElegir }: { lista: { id: IdDeparta
     </nav>
   );
 }
-/** The page's sections (Diseño 3D, Componentes, Otros velomóviles, Tareas, Plan, Planos, Exportar), folded into one menu at the end of the bar (2026-11-12). */
+/** The page's sections (Diseño 3D, Componentes, Tareas, Plan, Planos, Exportar), folded into one menu at the end of the bar (2026-11-12). */
 function MenuSecciones({ lista, seccion, abiertas, alIr }: { lista: typeof SECCIONES; seccion: Seccion; abiertas?: number; alIr: (ruta: string) => void }) {
   const [abierto, setAbierto] = useState(false);
   const caja = useRef<HTMLDivElement>(null);
@@ -1067,6 +1066,7 @@ export default function Aeromovil() {
   const [tunel, setTunel] = useState(false);
   // «Superponer»: los coches del garaje encima del nuestro, alineados por el eje delantero, el morro o la cola.
   const [superponer, setSuperponer] = useState<Alineacion | null>(null);
+  const [panelGaraje, setPanelGaraje] = useState(false);
   // Departamento abierto en el lateral y en el panel de abajo (2026-11-06, Eugenio: «el menú dividido por departamentos como una empresa de fabricación»).
   const [soloDep, setSoloDep] = useState(false);     // «Mostrar solo la carrocería», etc.
   const [capasAbierto, setCapasAbierto] = useState(false);
@@ -1232,7 +1232,6 @@ export default function Aeromovil() {
   const [referencia, setReferencia] = useState<Referencia | null>(null);
   const [modoRef, setModoRef] = useState<'no' | 'comparar' | 'sola'>('no');
   const [alinear, setAlinear] = useState<'eje' | 'morro' | 'lado'>('eje');
-  const verRef = (r: Referencia, modo: 'comparar' | 'sola') => { setReferencia(r); setModoRef(modo); setVista('side'); navegar('/aeromovil'); window.scrollTo({ top: 0 }); };
 
   const [tareas, setTareas] = useState<Tarea[] | null>(null);
   const [errorTareas, setErrorTareas] = useState<string | null>(null);
@@ -1249,8 +1248,11 @@ export default function Aeromovil() {
   const ruedas = (Object.keys(DIAMETRO_RUEDA) as Pulgadas[]).map(k => ({ k, n: `${k}″ (${Math.round(DIAMETRO_RUEDA[k] * 1000)} mm)` }));
   const neumaticos = (Object.keys(NEUMATICOS) as Neumatico[]).map(k => ({ k, n: NEUMATICOS[k].n }));
   const malas = res.comprobaciones.filter(c => c.holgura < c.minimo).length;
-  const garajeBloque = (
-    <Bloque titulo="Garaje" nota="otros vehículos al lado">
+  // the garage's list, shared by the sidebar block and the «Garaje» panel inside the 3D view (2026-11-13: in the
+  // Triciclo family the block sits at the end of «Proyecto», where Eugenio could not find «Mis diseños»)
+  const garajeLista = (<>
+            <MisDisenosGaraje g={disenosGaraje} />
+            <p className="border-t border-slate-100 pt-2.5 text-xs font-semibold text-slate-600">Coches de referencia</p>
             <div className="flex flex-col gap-1.5">
               {VEHICULOS_GARAJE.map(v => { const pl = garaje.find(g => g.id === v.id)!; return (
                 <Button key={v.id} variant="outline" aria-pressed={pl.visible} onClick={() => setGaraje(g => g.map(x => x.id === v.id ? { ...x, visible: !x.visible } : x))}
@@ -1258,7 +1260,10 @@ export default function Aeromovil() {
                   <span>{v.nombre}</span><span className="text-[11px] font-normal text-slate-400">{v.largo.toFixed(2).replace('.', ',')} m</span>
                 </Button>); })}
             </div>
-            <MisDisenosGaraje g={disenosGaraje} />
+  </>);
+  const garajeBloque = (
+    <Bloque titulo="Garaje" nota="otros vehículos al lado">
+            {garajeLista}
             {garaje.some(g => g.visible) && <MapaGaraje garaje={garaje} largo={modelo.Lf} ancho={modelo.P.W} morro={modelo.xn} etiqueta={esA1 ? 'A1' : esBala ? 'Bala' : esTri ? (esCuatro(camposTriciclo(P)) ? 'Bala 4R' : 'Triciclo') : 'Gota'} alMover={(id, x, z) => setGaraje(g => g.map(v => v.id === id ? { ...v, x, z } : v))} alGirar={id => setGaraje(g => g.map(v => v.id === id ? { ...v, giro: (v.giro + Math.PI / 2) % (2 * Math.PI) } : v))} />}
             <p className="-mt-1 text-xs text-slate-500">Arrastra cada coche en el 3D (pínchalo y muévelo) o en este plano; doble clic en el plano lo gira un cuarto de vuelta.</p>
     </Bloque>
@@ -1308,6 +1313,22 @@ export default function Aeromovil() {
             className="absolute right-3 top-3 z-[15] bg-white px-1.5 py-1.5 shadow-sm">
             {completa !== 'no' ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </Button>
+          {/* «Garaje»: the reference cars and «Mis diseños», reachable from any department and in full screen */}
+          <Button variant="outline" onClick={() => setPanelGaraje(v => !v)} aria-pressed={panelGaraje} aria-expanded={panelGaraje}
+            title="Poner coches de referencia o tus diseños al lado del tuyo"
+            className={cn('absolute right-14 top-3 z-[15] gap-1.5 bg-white px-2.5 py-1.5 text-xs normal-case tracking-normal shadow-sm', panelGaraje && 'border-teal-600 bg-teal-50 text-teal-800')}>
+            <Warehouse className="h-4 w-4" />Garaje
+          </Button>
+          {panelGaraje && (
+            <div role="dialog" aria-label="Garaje" className="absolute inset-x-2 top-14 z-[16] flex max-h-[calc(100%-8rem)] flex-col gap-2.5 overflow-y-auto rounded-xl border border-slate-200 bg-white p-3 shadow-lg sm:inset-x-auto sm:right-3 sm:w-[340px]">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-slate-800">Garaje</p>
+                <Button variant="ghost" onClick={() => setPanelGaraje(false)} aria-label="Cerrar el garaje" className="px-1.5 py-1"><X className="h-4 w-4" /></Button>
+              </div>
+              <p className="text-xs text-slate-500">Coches de referencia y tus diseños, al lado del que estás editando. Púlsalos en el 3D para ver su ficha.</p>
+              {garajeLista}
+            </div>
+          )}
           {/* La explicación de un punto del túnel va dentro de la ventana 3D: así también se ve en pantalla completa. */}
           {tunel && puntoTunel && (
             <PanelPunto sel={puntoTunel} cuerpos={cuerposTunel} resultados={resultadosTunel} kmh={kmhComparar} resolucion={opcionesTunel.resolucion}
@@ -1665,7 +1686,6 @@ export default function Aeromovil() {
       {seccion === 'aranceles' && (esA1
         ? <VistaAranceles P={P} res={res} modelo={modelo} />
         : <p className="mx-auto max-w-[1100px] px-4 py-8 text-sm text-slate-600">Los aranceles se calculan con las piezas del Aeromóvil 1. Elígelo en el menú del nombre del vehículo, arriba a la izquierda, para verlos.</p>)}
-      {seccion === 'otros' && <VistaOtros modelo={modelo} resultados={res} puedeDecidir={!!dueno?.puedeDecidir} alVer={r => verRef(r, 'sola')} alComparar={r => verRef(r, 'comparar')} />}
       {seccion === 'tareas' && <VistaTareas tareas={tareas} recargar={recargar} error={errorTareas} dueno={dueno} />}
       {seccion === 'plan' && <VistaPlan />}
       {seccion === 'planos' && <VistaPlanos modelo={modelo} />}

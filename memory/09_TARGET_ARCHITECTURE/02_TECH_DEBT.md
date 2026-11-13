@@ -611,6 +611,10 @@ The observatory is one self-contained HTML file (`public/observatorio-polarizaci
 - **The rear cradle is not subtracted from the boot volume.** Its tubes cross the boot at the rear axle; the boot still counts that space as free (a few litres).
 - **The bucket's passenger posture is a fixed spread** (feet 31 cm, knees 33 cm off the centre line, closing in only where the body is too narrow). A shorter or taller passenger does not change it.
 - **`paqueteCabe` tests the box at its four corners per station.** A belly that bulges between them could still touch; the in-body check samples the same corners.
+## 2026-11-13 — Reference silhouettes left without a section
+
+Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoRef` state, `TablaComparacion`, `Referencia` in `referencias.ts`) with no way in, and `GET/POST/DELETE /api/aeromovil/referencias` plus the `aeromovil_referencias` table with no screen. Kept on purpose for this change (removal was the ask, not a refactor); deleting the ghost branch is about 1 h now. The table's rows, if any, are untouched.
+
 ### 2026-11-13 — Cuadriciclo Bala clásico round 4: shortcuts
 - **The rear door's 60 cm floor is a rule of thumb** (bucket cushion 52 cm plus room to bend). No ergonomic study, no standard, no ingress simulation with the manikin.
 - **The roof frame's width is measured from the rail line**, so the visible dark strip between the side window and the panel is the frame plus the lower half of the rail band (about 2 cm more). Measuring from the glass edge would need the band's varying width inside `ventanasDe`.

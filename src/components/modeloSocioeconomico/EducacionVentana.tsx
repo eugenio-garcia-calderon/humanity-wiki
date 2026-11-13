@@ -14,6 +14,8 @@ import {
 import { Apartado, Cifra, Mas } from './ventanas';
 import { Fuente, Muestra, Regulador, Segmentado } from './piezas';
 import { cn } from '../../utils/cn';
+import { Barras } from './graficos/Barras';
+import { Pares } from './graficos/Pares';
 
 /** A source link by id of FUENTES_EDU. */
 function F({ id }: { id: string }) {
@@ -179,6 +181,30 @@ function Hoy() {
         <Cifra valor={numero(RESULTADOS.ratio, 1)} texto={<>alumnos por profesor en primaria y secundaria (curso 2022-2023)<F id="datos-cifras" /></>} nota="Contando a todo el profesorado; en el aula, los grupos son más grandes" />
         <Cifra valor={`${RESULTADOS.pisaMat} / ${RESULTADOS.ocdeMat}`} texto={<>puntos en matemáticas en PISA 2022 (el examen internacional a los 15 años): España y la media de la OCDE, el club de 38 países ricos<F id="pisa-2022" /></>} nota={`En lectura, ${RESULTADOS.pisaLec} frente a ${RESULTADOS.ocdeLec}; en ciencias, ${RESULTADOS.pisaCie} frente a ${RESULTADOS.ocdeCie}`} />
         <Cifra tono="mal" valor={porcentaje(RESULTADOS.abandonoExtranjeros, 1)} texto={<>de abandono entre jóvenes extranjeros, frente al {porcentaje(RESULTADOS.abandonoEspanoles, 1)} de los españoles<F id="abandono-2025" /></>} nota={`Chicos: ${porcentaje(RESULTADOS.abandonoHombres, 1)}; chicas: ${porcentaje(RESULTADOS.abandonoMujeres, 1)}`} />
+      </div>
+
+      <div className="mt-6 grid gap-4 lg:grid-cols-2">
+        <Barras titulo="Quién deja de estudiar antes de tiempo"
+          subtitulo="Jóvenes de 18 a 24 años sin bachillerato ni FP, en 2025"
+          referencia={{ valor: RESULTADOS.abandonoUE2025, texto: `Media de la Unión Europea: ${porcentaje(RESULTADOS.abandonoUE2025, 1)}` }}
+          barras={[
+            { etiqueta: 'Jóvenes extranjeros', valor: RESULTADOS.abandonoExtranjeros, texto: porcentaje(RESULTADOS.abandonoExtranjeros, 1), nota: 'Más de tres veces que entre los españoles.' },
+            { etiqueta: 'Chicos', valor: RESULTADOS.abandonoHombres, texto: porcentaje(RESULTADOS.abandonoHombres, 1) },
+            { etiqueta: 'Todos en España', valor: RESULTADOS.abandono2025, texto: porcentaje(RESULTADOS.abandono2025, 1), serie: 'tinta', nota: `Por encima de la media de la Unión Europea (${porcentaje(RESULTADOS.abandonoUE2025, 1)}).` },
+            { etiqueta: 'Jóvenes españoles', valor: RESULTADOS.abandonoEspanoles, texto: porcentaje(RESULTADOS.abandonoEspanoles, 1) },
+            { etiqueta: 'Chicas', valor: RESULTADOS.abandonoMujeres, texto: porcentaje(RESULTADOS.abandonoMujeres, 1) },
+          ]}
+          pie={<>Funcas, febrero de 2026<F id="abandono-2025" />; la media europea, Eurostat<F id="abandono-ue" /></>} />
+        <Pares titulo="PISA 2022: España, en la media"
+          subtitulo="Puntos a los 15 años en cada materia. Las barras casi coinciden: esa es la noticia"
+          series={['España', 'Media de la OCDE']}
+          pares={[
+            { etiqueta: 'Matemáticas', a: RESULTADOS.pisaMat, b: RESULTADOS.ocdeMat },
+            { etiqueta: 'Lectura', a: RESULTADOS.pisaLec, b: RESULTADOS.ocdeLec },
+            { etiqueta: 'Ciencias', a: RESULTADOS.pisaCie, b: RESULTADOS.ocdeCie },
+          ]}
+          formato={v => numero(v)}
+          pie={<>La OCDE es el club de 38 países ricos que hace el examen<F id="pisa-2022" /></>} />
       </div>
 
       <Mas titulo="más datos de hoy">

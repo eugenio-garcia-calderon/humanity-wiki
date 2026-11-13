@@ -11,7 +11,7 @@
 // The old single-page anchors (`#esquema`, `#cuentas`…) still land in the
 // taxes window, where those sections now are.
 import { useState, type ReactNode } from 'react';
-import { ChevronDown, Euro, GraduationCap, HandCoins, Home, Landmark, Layers, PieChart, Scale, ScrollText, ShieldCheck, Smartphone, Stethoscope, Tags, type LucideIcon } from 'lucide-react';
+import { Euro, GraduationCap, HandCoins, Home, Landmark, Layers, Plus, PieChart, Scale, ScrollText, ShieldCheck, Smartphone, Stethoscope, Tags, type LucideIcon } from 'lucide-react';
 import { ESPECTROS } from '../../data/espectro';
 import { APARTADOS as A_ESCALAS } from '../../data/escalas';
 import { APARTADOS as A_VIVIENDA } from '../../data/vivienda';
@@ -163,11 +163,19 @@ export function Mas({ titulo, children, className, abierto: inicial = false }: {
   return (
     <div className={cn('mt-5', className)}>
       <Libre onClick={() => setAbierto(a => !a)} aria-expanded={abierto}
-        className="group inline-flex max-w-full items-start justify-start gap-1.5 rounded-2xl border border-slate-300 bg-white px-3.5 py-2 text-left text-sm font-semibold text-slate-800 hover:border-slate-400 hover:bg-slate-50">
-        <ChevronDown aria-hidden className={cn('mt-0.5 h-4 w-4 shrink-0 transition-transform', abierto && 'rotate-180')} />
-        <span>{abierto ? 'Menos' : 'Más'}: {titulo}</span>
+        className={cn('group inline-flex max-w-full items-start justify-start gap-2.5 rounded-[1.25rem] border py-1.5 pl-1.5 pr-4 text-left text-sm font-semibold transition-colors duration-150 motion-reduce:transition-none',
+          abierto ? 'border-slate-900 bg-slate-900 text-white hover:bg-slate-800' : 'border-slate-300 bg-white text-slate-800 shadow-sm shadow-slate-900/5 hover:border-slate-900 hover:text-slate-900')}>
+        <span aria-hidden className={cn('grid h-6 w-6 shrink-0 place-items-center rounded-full transition-colors duration-150 motion-reduce:transition-none',
+          abierto ? 'bg-white text-slate-900' : 'bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white')}>
+          <Plus className={cn('h-3.5 w-3.5 transition-transform duration-200 motion-reduce:transition-none', abierto && 'rotate-45')} strokeWidth={2.5} />
+        </span>
+        <span className="py-0.5">{abierto ? 'Menos' : 'Más'}: {titulo}</span>
       </Libre>
-      {abierto && <div className="mt-4 border-l-2 border-slate-200 pl-4 sm:pl-6">{children}</div>}
+      {abierto && (
+        <div className="mt-4 border-l-2 border-slate-300 pl-4 transition duration-200 ease-out starting:-translate-y-1 starting:opacity-0 motion-reduce:transition-none sm:pl-6">
+          {children}
+        </div>
+      )}
     </div>
   );
 }
@@ -179,9 +187,11 @@ export function Apartado({ id, titulo, entradilla, children, fondo = 'claro' }: 
   return (
     <section id={id} aria-labelledby={`${id}-titulo`} className={cn('scroll-mt-40', fondo === 'blanco' && 'border-y border-slate-200 bg-white')}>
       <div className="mx-auto max-w-6xl px-4 pb-16 pt-14 sm:px-6">
-        <header className="mb-7 max-w-3xl">
-          <h2 id={`${id}-titulo`} className="text-[1.75rem] font-[750] leading-[1.12] tracking-[-0.02em] text-slate-900 sm:text-[2.2rem]">{titulo}</h2>
-          {entradilla && <div className="mt-3 text-[17px] leading-relaxed text-slate-600">{entradilla}</div>}
+        <header className="mb-8 max-w-3xl">
+          {/* The calibration mark: the same short rule opens every section (the observatory's axis, in ink). */}
+          <span aria-hidden className="mb-4 block h-[3px] w-10 rounded-full bg-gradient-to-r from-slate-900 to-slate-300" />
+          <h2 id={`${id}-titulo`} className="text-balance text-[1.75rem] font-[750] leading-[1.12] tracking-[-0.02em] text-slate-900 sm:text-[2.2rem]">{titulo}</h2>
+          {entradilla && <div className="mt-3 max-w-[64ch] text-[17px] leading-relaxed text-slate-600">{entradilla}</div>}
         </header>
         {children}
       </div>
@@ -192,11 +202,14 @@ export function Apartado({ id, titulo, entradilla, children, fondo = 'claro' }: 
 /** A big number with what it means, for the summaries. */
 export function Cifra({ valor, texto, tono = 'neutro', nota }: { valor: ReactNode; texto: ReactNode; tono?: 'neutro' | 'bien' | 'mal'; nota?: ReactNode }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5">
-      <p className={cn('text-[2rem] font-[800] leading-none tracking-tight tabular-nums',
+    <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/[0.04]">
+      {/* A short rule in the tone's colour: the reading's sign at a glance (the value repeats it in its own colour). */}
+      <span aria-hidden className={cn('mb-3 block h-[3px] w-7 rounded-full',
+        tono === 'bien' ? 'bg-emerald-600' : tono === 'mal' ? 'bg-rose-600' : 'bg-slate-300')} />
+      <p className={cn('break-words text-[2.1rem] font-[800] leading-none tracking-[-0.025em] tabular-nums',
         tono === 'bien' ? 'text-emerald-700' : tono === 'mal' ? 'text-rose-700' : 'text-slate-900')}>{valor}</p>
-      <p className="mt-2 text-[15px] leading-snug text-slate-700">{texto}</p>
-      {nota && <p className="mt-1 text-xs leading-snug text-slate-500">{nota}</p>}
+      <p className="mt-2.5 text-[15px] leading-snug text-slate-700">{texto}</p>
+      {nota && <p className="mt-auto pt-2 text-xs leading-snug text-slate-500">{nota}</p>}
     </div>
   );
 }
