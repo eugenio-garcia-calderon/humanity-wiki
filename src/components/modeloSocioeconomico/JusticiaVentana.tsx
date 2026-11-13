@@ -17,6 +17,7 @@ import {
 import { Apartado, Cifra, Mas } from './ventanas';
 import { Fuente, Muestra, Regulador } from './piezas';
 import { cn } from '../../utils/cn';
+import { Pares } from './graficos/Pares';
 
 const millonesTxt = (n: number) => `${numero(n / 1e6, 2)} millones`;
 const texto = 'max-w-3xl space-y-3 text-[15px] leading-relaxed text-slate-700';
@@ -65,34 +66,33 @@ function Resumen() {
   );
 }
 
-/** First-instance disposition time, Spain vs EU median, one shared scale. */
+/** Disposition time, Spain vs EU median: first instance and appeal, each pair on one shared scale. */
 function GraficaDuracion() {
-  const max = 450;
+  const A = DURACION_APELACION;
+  const dias = (v: number) => `${numero(v)} días`;
+  const nota = (es: number, ue: number) => (es > ue ? `España tarda ${numero(es / ue, 1)} veces lo que la mediana.` : 'Aquí España es más rápida que la mediana.');
   return (
-    <figure className="mt-8 rounded-2xl border border-slate-200 bg-white p-5">
-      <figcaption>
-        <span className="block text-lg font-bold text-slate-900">Cuánto tardaría en resolverse un asunto, en días</span>
-        <span className="mt-1 block text-sm text-slate-600">Primera instancia, 2024. España frente a la mediana de la UE: la mitad de los países tarda menos y la otra mitad, más.<F id="cepej-2024" /></span>
-      </figcaption>
-      <div className="mt-4 space-y-5" role="img"
-        aria-label={DURACION_DIAS.map(d => `${d.nombre}: España ${d.espana} días, mediana de la UE ${d.ue} días`).join('; ')}>
-        {DURACION_DIAS.map(d => (
-          <div key={d.id}>
-            <p className="text-sm font-semibold text-slate-900">{d.nombre}</p>
-            {[{ t: 'España', v: d.espana, c: 'bg-rose-700' }, { t: 'Mediana UE', v: d.ue, c: 'bg-slate-400' }].map(b => (
-              <div key={b.t} className="mt-1 flex items-center gap-2">
-                <span className="w-[4.5rem] shrink-0 text-xs text-slate-600">{b.t}</span>
-                <span className={cn('h-4 shrink-0 rounded-r-[4px]', b.c)} style={{ width: `${(b.v / max) * 70}%` }} />
-                <span className="whitespace-nowrap text-sm tabular-nums text-slate-700">{b.v}</span>
-              </div>
-            ))}
-          </div>
-        ))}
+    <div className="mt-8">
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Pares titulo="Cuánto tardaría en resolverse un asunto, en días"
+          subtitulo="Primera instancia, 2024. España frente a la mediana de la UE: la mitad de los países tarda menos y la otra mitad, más"
+          series={['España', 'Mediana de la UE']} formato={dias}
+          pares={DURACION_DIAS.map(d => ({ etiqueta: d.nombre, a: d.espana, b: d.ue, nota: nota(d.espana, d.ue) }))}
+          pie={<>Consejo de Europa (CEPEJ) para el Cuadro de Indicadores de la Justicia de la UE<F id="cepej-2024" /></>} />
+        <Pares titulo="Y si alguien recurre: la apelación, en días"
+          subtitulo="Segunda instancia, 2024. Se suma a la primera"
+          series={['España', 'Mediana de la UE']} formato={dias}
+          pares={[
+            { etiqueta: 'Civil y mercantil', a: A.civil, b: A.civilUE, nota: nota(A.civil, A.civilUE) },
+            { etiqueta: 'Contencioso', a: A.contencioso, b: A.contenciosoUE, nota: nota(A.contencioso, A.contenciosoUE) },
+            { etiqueta: 'Penal', a: A.penal, b: A.penalUE, nota: nota(A.penal, A.penalUE) },
+          ]}
+          pie={<>Misma fuente<F id="cepej-2024" /></>} />
       </div>
-      <p className="mt-4 text-xs leading-relaxed text-slate-500">
+      <p className="mt-3 max-w-3xl text-xs leading-relaxed text-slate-500">
         Es una estimación oficial, no un tiempo medido: los asuntos pendientes divididos por los que se resuelven cada día. En lo social (despidos, salarios) el Consejo General del Poder Judicial calcula {numero(DURACION_SOCIAL_MESES.total, 1)} meses de media, y {numero(DURACION_SOCIAL_MESES.despidos, 1)} en los despidos (2024)<F id="ccoo-social" />.
       </p>
-    </figure>
+    </div>
   );
 }
 

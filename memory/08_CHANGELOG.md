@@ -11485,3 +11485,11 @@ Eugenio: «oculta la sección de proyectos que nos inspiran… también la de d�
 - El color de cada sector va por su icono, no por su posición.
 - `sitio.mostrarMapa: false` oculta «Dónde trabajamos»; `sitio.mostrarInspiran: false` oculta «Proyectos que nos inspiran», también en el HTML para buscadores (`cuerpoEnHtml`). Los datos siguen; con `true` vuelven.
 - Migración 0214: orden movilidad, energía, socioeconómico, vivienda, educación y las dos marcas a false.
+
+## 2026-11-13 — «Modelo de optimización socioeconómica»: scales, cover grid, comments board, redesign
+
+- Renamed «Modelo de optimización socioeconómica» (migration 0215 renames the project page from any earlier name). On luzhumanidad.com the site bar over the project shows «Proyecto impulsado por Luz & Humanidad» top left (to the site home) and the project's name in the middle (back to the project's front page without reloading): `CabeceraSitio` gains a `proyecto` prop, passed by `SubpaginaSitio` for embedded apps.
+- Cover: a grid of big cards, one per area (Economía lists its three parts), and the scale selector top right.
+- Scales («ámbitos», `src/data/ambitos/`, `ambito.tsx`): España by default; Talamanca de Jarama, Comunidad de Madrid, Unión Europea and Naciones Unidas. Choice in `?ambito=` and localStorage; each window (and Economía part) shows above it «Hoy» / «Con el modelo» / figures for that scale; the cover shows the scale's overview. Written by four agents, reviewed by a blind evaluator (fixes: UN cut 7 % not 15 %, Madrid gets about a third of today's spending, prudent wording on Las Dunas, Europe's security figure). The Madrid population is now the INE figure (7.113.886) everywhere.
+- Comments: the floating «Añadir comentario» saves the section the person is on (`buzon_proyectos.pagina`, migration 0216); «Mejoras pendientes» opens the same dialog as a board (pending / all, each item linked to its section), seeded with ten open items found while building.
+- Redesign (one agent): instrument-like sliders, «Más» with a turning +, dossier cards in the left-to-right slider with previous/next buttons, `Cifra` with a tone rule; reusable charts in `graficos/` (bars, pairs, today vs proposal, line) used across the windows.

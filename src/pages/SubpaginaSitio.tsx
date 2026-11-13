@@ -111,7 +111,8 @@ export default function SubpaginaSitio({ propio, idFijo, contexto }: { propio: b
     const conBarra = (CON_BARRA.has(nombreApp) || incrustada) && !!pagina.sitio?.raizId && pagina.sitio?.config?.barra === true;
     if (incrustada) return <Suspense fallback={<Cargando />}>
       {/* The spacer is what the bar's negative top margin pulls into (see the CON_BARRA branch). */}
-      {conBarra && <><div aria-hidden data-espacio-barra className="h-[18px] sm:h-5" /><CabeceraSitio raizId={pagina.sitio!.raizId} /></>}
+      {conBarra && <><div aria-hidden data-espacio-barra className="h-[18px] sm:h-5" /><CabeceraSitio raizId={pagina.sitio!.raizId}
+        proyecto={{ titulo: pagina.titulo, href: typeof window === 'undefined' ? '' : window.location.pathname }} /></>}
       {/* The app is the rest of the page (its own <main> and <h1>); -mt-4 undoes the bar's mb-4. */}
       <div className={conBarra ? '-mt-4' : undefined}>
         <AplicacionIncrustada>
