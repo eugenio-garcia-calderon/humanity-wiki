@@ -549,8 +549,12 @@ function paqueteCabe(T: CamposTriciclo, hz: number, largo: number): { largo: num
  * roof's fall), each only when it is not zero: absent, the body is built exactly as before, bit for bit.
  */
 export const CLAVES_FORMA_R3: [ClaveNumTriciclo, keyof DimBala][] = [['tMorroLinea', 'morroLinea'], ['tMorroAlto', 'morroAlto'], ['tColaPlana', 'colaPlana'], ['tTechoPlano', 'techoPlano'], ['tCaida', 'caida'], ['tLineaCupula', 'lineaCupula']];
-/** 2026-11-13, the smooth body: the hatch's side edge (t, on the deck's rounded edge just outboard of where the deck begins) and the panels' (a frame inside the deck). */
-export const T_BORDE_LISA = 0.55, T_PANEL_LISA = T_CUBIERTA + 0.03;
+/**
+ * 2026-11-13, the smooth body: the hatch's side edge (t: exactly where the deck begins, at its side edge) and the panels'
+ * (a frame inside the deck). The cut was first on the rounded edge below (t = 0.55): with a canopy 1.9 m tall that
+ * stretch is a near-vertical wall, and the hatch's edge, swinging up about the roof hinge, went 1.5 cm into the side.
+ */
+export const T_BORDE_LISA = T_CUBIERTA, T_PANEL_LISA = T_CUBIERTA + 0.03;
 /** 2026-11-13: the smooth body's fields, all of them (zeros included) when it is on, none when it is off. */
 export const CLAVES_LISA: [ClaveNumTriciclo, keyof DimBala][] = [['tColaAncho', 'colaAncho'], ['tColaGrosor', 'colaGrosor'], ['tColaBombeo', 'colaBombeo'], ['tBajosIni', 'bajosIni'], ['tBajosCurva', 'bajosCurva'], ['tMorroAncho', 'morroAncho'], ['tMorroGrosor', 'morroGrosor'], ['tMorroBombeo', 'morroBombeo']];
 export const conLisa = (T: Pick<CamposTriciclo, 'tCubierta'>) => T.tCubierta === 'lisa';
@@ -1225,8 +1229,8 @@ export function crearModeloTriciclo(P: Parametros) {
   const opcPorton: OpcionesPorton | null = puerta && T.tMaletero === 'aptera' ? { x: -L('tMalIni'), abre: L('tMalAbre'), lado: L('tMalLado') } : null;
   const porton0 = puerta && opcPorton ? portonDe(F, puerta, cup, opcPorton, F.X_ARO_COLA) : null;
   // 2026-11-13, the smooth body («la cola y el maletero tienen que ser la misma pieza»): behind the doors the hatch's side
-  // edges ease (over the same 35 cm) onto the deck's own side edge, on the rounded edge just outboard of where the deck
-  // begins (`T_BORDE_LISA`), and run on it to the trailing edge's light bar: the hatch is the whole rear deck.
+  // edges ease (over the same 35 cm) onto the deck's own side edge (`T_BORDE_LISA`) and run on it to the trailing edge's
+  // light bar: the hatch is the whole rear deck.
   const porton = porton0 && lisa && puerta ? (() => {
     const xR = puerta.xR, base = porton0.tLo;
     return { ...porton0, tLo: (x: number) => { if (x >= xR) return base(x); const w = suaveCola((xR - x) / 0.35); return base(x) * (1 - w) + T_BORDE_LISA * w; } };
