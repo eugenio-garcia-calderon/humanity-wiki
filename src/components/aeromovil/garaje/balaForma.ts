@@ -445,8 +445,10 @@ export function crearForma(D: DimBala) {
   // (2026-11-13, the smooth body: each edge's height stays between the belly and the top where its cap begins, 3 cm clear
   // of each with the edge's thickness, so the hood and the deck only ever fall towards the ends and the belly only rises)
   const gMorro = lisa ? Math.max(0, D.morroGrosor ?? 0) : 0, gCola = lisa ? Math.max(0, D.colaGrosor ?? 0) : 0;
-  const entre = (cy: number, x0: number, g: number) => Math.min(yt(x0) - g / 2 - 0.03, Math.max(yb(x0) + g / 2 + 0.03, cy));
-  const cyMorro = lisa ? entre(cyMorro0, XN0, gMorro) : cyMorro0, cyCola = lisa ? entre(D.puntaCola + elevar, XT0, gCola) : D.puntaCola + elevar;
+  const entre = (cy: number, x0: number, g: number, techo = yt(x0)) => Math.min(techo - g / 2 - 0.03, Math.max(yb(x0) + g / 2 + 0.03, cy));
+  // (the tail's edge, also never above the body's widest line where its cap begins: then the belly's sweep, which ends
+  // under the edge, always stays under the widest point and the section's lower half keeps its shape)
+  const cyMorro = lisa ? entre(cyMorro0, XN0, gMorro) : cyMorro0, cyCola = lisa ? entre(D.puntaCola + elevar, XT0, gCola, Math.min(yt(XT0), ysW(XT0) + gCola / 2 + 0.02)) : D.puntaCola + elevar;
   /**
    * The deck zones (smooth body): behind the canopy glass's end and ahead of the windscreen's start, each 1 cm onto the
    * glass, with the blend `LARGO_MEZCLA` long on the canopy's side. Found as `contornoCupula` (balaMedidas.ts) finds
@@ -556,7 +558,7 @@ export function crearForma(D: DimBala) {
    */
   const subirBajos = zonas ? (() => {
     // (never behind the tail cap's joint: the cap's own belly would put its joint's crease in the line)
-    const xU = Math.max(X_COLA + 0.15, Math.min(-BATALLA + 1.0, XT0 + 0.02, -BATALLA + (D.bajosIni ?? 0)));
+    const xU = Math.max(X_COLA + 0.15, XT0 + 0.02, Math.min(-BATALLA + 1.0, -BATALLA + (D.bajosIni ?? 0)));
     const fondo = (x: number) => controlesTapas(x)[0][1];
     const bajo = guia(xU, fondo(xU), pendiente(fondo, xU), X_COLA, cyCola - gCola / 2, 4 - 3 * c01(D.bajosCurva));
     return (x: number, c: P2[]): P2[] => {
@@ -763,7 +765,9 @@ export function crearForma(D: DimBala) {
     alturaArriba, dSuelo, elevar, kW,
     controles, sec, alturaHombro, seccionRapida,
     /** The smooth body's deck at x (2026-11-13), and where its two zones begin; null without `lisa`. */
-    cubierta, zonasLisa: zonas, ladoZ, arribaY, dentroPiel, frenteX, detrasX, envolvente, seccionMayor, areaSeccion,
+    cubierta, zonasLisa: zonas,
+    /** The heights the nose's and the tail's edges close to (m), as asked and as built (the smooth body keeps them in range). */
+    puntas: { morro: cyMorro, morroPedida: cyMorro0, cola: cyCola, colaPedida: D.puntaCola + elevar }, ladoZ, arribaY, dentroPiel, frenteX, detrasX, envolvente, seccionMayor, areaSeccion,
     /** x where the skin is crossed going from xIn (inside) towards xOut, at (z, y); NaN if xIn is outside. */
     bordeX,
   };

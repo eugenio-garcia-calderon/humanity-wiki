@@ -20,5 +20,5 @@ export const CLASICO_HOY = { ...CLASICO_GUARDADO, ...MIGRACION_0209, ...MIGRACIO
  * 2026-11-13, the smooth body (this round): what is proposed for the clásico's row on top of CLASICO_HOY. Eugenio:
  * «hazlo modificando el último diseño guardado… no tengas miedo de guardar encima». The coordinator writes the migration.
  */
-export const PROPUESTA_COLA_LISA = { tCubierta: 'lisa', tColaAncho: 1, tColaGrosor: 0.04, tColaBombeo: 0.01, tBajosIni: 0.10, tBajosCurva: 1, tPuntaCola: 0.62,
+export const PROPUESTA_COLA_LISA = { tCubierta: 'lisa', tColaAncho: 1, tColaGrosor: 0.04, tColaBombeo: 0.01, tBajosIni: 0.80, tBajosCurva: 1, tPuntaCola: 0.59,
   tMorroAncho: 0.8, tMorroGrosor: 0.10, tMorroBombeo: 0.02, tMorroAlto: 0.15, tFaro: 'barra' } as const;

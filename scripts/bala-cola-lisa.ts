@@ -156,7 +156,7 @@ function medir(m: ModeloTriciclo, control = false): Peor | string {
   }
   // ── the belly's sweep: its centre line and its flat's edge, from 20 cm ahead of where it starts to the end
   if (D.bajosCurva) {
-    const xU = Math.max(F.X_COLA + 0.15, Math.min(-F.BATALLA + 1.0, F.XT0 + 0.02, -F.BATALLA + (D.bajosIni ?? 0)));
+    const xU = Math.max(F.X_COLA + 0.15, F.XT0 + 0.02, Math.min(-F.BATALLA + 1.0, -F.BATALLA + (D.bajosIni ?? 0)));
     const xs: number[] = []; for (let x = xU + 0.05; x > F.X_COLA + 0.002; x -= paso) xs.push(x);
     for (const t of [0, 0.07]) {
       const r = linea(xs.map(x => punto(F.sec(x), t)[1]), paso, 1, 0.03, xs), donde = `bajos, t = ${t}`;
