@@ -628,3 +628,13 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 - **The tunnel and «Superponer» still ignore our garage designs** (as before): only the reference cars and the active design go through them.
 - **`window.__visorAeromovil`** is exposed on the dev server only (`import.meta.env.DEV`), so the browser checks can find cars on screen.
 - **The old key `aeromovil_garaje_disenos_v1`** (positions of «Mis diseños», PR #1031) is no longer read and stays in browsers that had it.
+
+
+### 2026-11-13 — Cuadriciclo Bala clásico, the smooth body: shortcuts
+- **The deck zones find the canopy glass's ends with a copy of `contornoCupula`'s crossing** (inside `crearForma`, on the plain top line, because the shape cannot call the outline that is computed from it). If the crossing's brackets in `balaMedidas.ts` change, change the copy too; both carry a comment.
+- **The hatch's side edge on the deck is set by wrapping `porton.tLo` in `geometriaTriciclo.ts`**, not inside `portonDe`, because `balaPuertas.ts` was being changed by another agent the same day. Moving it into `portonDe` (an option `borde`) is ~15 min once that work has merged.
+- **The guarantee is a construction plus a sampling script**, not a proof checked by a machine: `bala-cola-lisa.ts` covers each related slider at both ends, both ends together, 40 pairs and 40 random combinations. A combination it does not sample is covered by the construction only.
+- **The widest point's cap on the decks (`LAMBDA_LISA`) is a smooth minimum**, so it lowers the widest point by up to about 0.3 % even where it does not bind (in the smooth body only).
+- **The nose's underside has no guide line.** The hood and the tail's top and belly do; under the nose the plain cap closes onto the edge's bottom (it is monotone, but not checked by the script).
+- **The light bar is a ribbon on the skin**: the tunnel does not see it, as it does not see the round lamp or the mirrors.
+- **The tunnel's reading of the trailing edge is sensitive**: on the proposed clásico a 3, 4 and 5 cm edge give Cd 0.2159, 0.2147 and 0.2130; with the edge's centre at 0.62 m instead of 0.59 (a value tried on the way), 3 cm gave 0.2265 against 0.2130 for 4 cm. The tunnel reads the body through superellipse sections every 5 cm; a real blade tail needs a finer model before any number this close is trusted. Constants unchanged, by decision (2026-11-12).

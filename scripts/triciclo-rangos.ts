@@ -19,7 +19,7 @@ import { alturasPod, brazosDe, podDe, semiAncho } from '../src/components/aeromo
 import { construirCon, crearMateriales } from '../src/components/aeromovil/garaje/balaModelo';
 import * as THREE from 'three';
 import { deDiseno } from '../src/components/aeromovil/Disenos';
-import { CLASICO_GUARDADO } from './clasicoGuardado';
+import { CLASICO_GUARDADO, CLASICO_HOY, PROPUESTA_COLA_LISA } from './clasicoGuardado';
 
 const M = crearMateriales();
 let fallos = 0, casos = 0;
@@ -419,6 +419,25 @@ probar('clásico real con la migración', REAL_MIG);
   probar('clásico real r4 · marco del techo, una puerta por lado', { ...REAL_R4, tPuertas2: 'no' } as Parametros);
   probar('clásico real r4 · alto al mínimo, marco al máximo, panel desde delante', { ...REAL_R4, tAlto: 0, tMarcoTecho: 1, tSolar: 0 } as Parametros);
   probar('triciclo · marco del techo de 15 cm', { ...PARAMETROS_TRICICLO, tMarcoTecho: 0.15 } as Parametros);
+}
+
+// ── 2026-11-13, the smooth body: the clásico as it is in production today (0209, 0212, 0213, 0217) with this round's proposal,
+// every slider at both ends and every option (`npx tsx scripts/triciclo-rangos.ts "clásico lisa"`)
+{
+  const LISA = deDiseno({ ...CLASICO_HOY, ...PROPUESTA_COLA_LISA } as Partial<Parametros>), TL = camposTriciclo(LISA);
+  probar('clásico lisa, como se propone', LISA);
+  probar('clásico lisa · el de hoy, sin la propuesta', deDiseno(CLASICO_HOY));
+  for (const f of deslizadoresTriciclo()) {
+    const [a, b] = rangoTriciclo(f.clave, TL);
+    probar(`clásico lisa · ${f.clave} = ${+a.toFixed(3)} (mín.)`, { ...LISA, [f.clave]: a });
+    probar(`clásico lisa · ${f.clave} = ${+b.toFixed(3)} (máx.)`, { ...LISA, [f.clave]: b });
+  }
+  for (const s of SELECTORES_TRICICLO) for (const o of s.opciones) probar(`clásico lisa · ${s.clave} = ${o.k}`, { ...LISA, [s.clave]: o.k });
+  const NUEVAS_L = ['tColaAncho', 'tColaGrosor', 'tColaBombeo', 'tBajosIni', 'tBajosCurva', 'tMorroAncho', 'tMorroGrosor', 'tMorroBombeo', 'tMorroAlto', 'tPuntaCola', 'tPuntaMorro', 'tMorro'];
+  for (const lado of [0, 1] as const) probar(`clásico lisa · todo lo de la cubierta al ${lado ? 'máx.' : 'mín.'}`, { ...LISA, ...Object.fromEntries(NUEVAS_L.map(k => { const [a, b] = rangoTriciclo(k as never, TL); return [k, lado ? b : a]; })) } as Parametros);
+  const lg = largoTriciclo(TL);
+  for (const [n, v] of [['mín.', lg.min], ['máx.', lg.max]] as const) probar(`clásico lisa · largo total ${n} (${v.toFixed(2)} m)`, { ...LISA, ...estirarTriciclo(TL, v) });
+  probar('clásico lisa · triciclo (una rueda detrás)', { ...LISA, tTraseras: 'una' } as Parametros);
 }
 
 console.log(`\n${casos} casos, ${fallos ? `${fallos} con fallos` : 'todos OK'}`);

@@ -277,6 +277,9 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   tPuertas2: 'no', tPuerta2Parte: 1.33, tBisagra2Y: 0.85, tBisagra2Inc: 15, tPuerta2Abre: 110, tLineaCupula: 0,
   // Round 4 doors / roof frame / height (2026-11-13): no roof frame by default, so every saved design is built as before
   tMarcoTecho: 0,
+  // The smooth body (2026-11-13, the clásico: «la cola y el maletero… la misma pieza… nunca… montículos», the Aptera's
+  // wide nose and tail, its light bar and the belly's sweep). Off by default: every other key below acts only with it on.
+  tCubierta: 'redonda', tColaAncho: 0, tColaGrosor: 0, tColaBombeo: 0.01, tBajosIni: 0.20, tBajosCurva: 0, tMorroAncho: 0, tMorroGrosor: 0, tMorroBombeo: 0.02,
 };
 export const PARAMETROS_TRICICLO: Parametros = { ...PARAMETROS_GOTA, disposicion: 'triciclo', ...TRICICLO_DEFECTO };
 export const PARAMETROS_POR_DEFECTO: Parametros = PARAMETROS_A1;

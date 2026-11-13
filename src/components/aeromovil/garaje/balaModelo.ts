@@ -63,6 +63,9 @@ function filasX(q = 1): number[] {
     if (x < L.XF0 + 0.03 && x > L.XF1 - 0.03) p = 0.015;
     for (const xc of [L.XC0, L.XC1, L.XF0, L.XF1]) { const d = Math.abs(x - xc); if (d < 0.08) p = Math.min(p, 0.0012 + d * 0.08); }
     const dt = Math.min(F.X_MORRO - x, x - F.X_COLA);
+    // (2026-11-13, the smooth body: a wide nose or tail turns across its end within millimetres of x, so the last
+    // centimetre gets rows every 0.4 mm)
+    if (F.D.lisa && dt < 0.01) return Math.min(p, Math.max(0.0004, 0.04 * dt)) * q;
     return Math.min(p, Math.max(0.0015, 0.08 * dt)) * q;
   };
   const xs: number[] = [];
@@ -770,6 +773,23 @@ function pielConPuertas(xs: number[], M: Mats, pu: { puerta: Puerta; porton: Por
 }
 
 /**
+ * 2026-11-13 (Eugenio: «hazlo como el aptera que tiene un faro a lo largo del morro… con el faro en horizontal»): a light
+ * bar along the nose's leading line, the widest point of each section, from `x0` round the front to the centre line and
+ * mirrored: a gloss black housing 3.2 cm high and the LED strip, 1 cm, on it. The points crowd towards the tip, where a
+ * broad nose turns across the front within millimetres of x.
+ */
+function barraFaro(M: Mats, b: { x0: number; t: number }): THREE.Group {
+  const g = new THREE.Group(); g.name = 'faro-barra';
+  const pts: [number, number][] = [], n = 90, L = F.X_MORRO - b.x0;
+  for (let i = 0; i <= n; i++) { const u = i / n; pts.push([F.X_MORRO - L * Math.pow(1 - u, 6) - (i === n ? 1e-6 : 0), b.t]); }
+  for (const [ancho, sep, mat, nombre] of [[0.032, 0.0010, M.negroBrillo, 'faro'], [0.010, 0.0018, M.ledTira, 'faro-led']] as const) {
+    const d = malla(cintaXT(pts, () => ancho, sep), mat, nombre, false), i = d.clone(); i.scale.z = -1;
+    g.add(d, i);
+  }
+  return g;
+}
+
+/**
  * Round 3 (2026-11-12, «añade un faro en el centro del morro, como una moto»): one lamp on the nose's tip, an ellipsoid
  * housing in gloss black (its back half sunk in the nose), a bright reflector and a clear lens over its front.
  */
@@ -817,7 +837,9 @@ export interface OpcionesBala {
     solarCola?: { x0: number; x1: number; tLow: (x: number) => number } | null;
     /** Round 3 (2026-11-12): the panel on top of the nose (fixed on the body), and the central headlamp (centre, depth, height, width). */
     solarMorro?: { x0: number; x1: number; tLow: (x: number) => number } | null;
-    faro?: { c: [number, number, number]; fondo: number; alto: number; ancho: number } | null };
+    faro?: { c: [number, number, number]; fondo: number; alto: number; ancho: number } | null;
+    /** 2026-11-13: the light bar along the nose's leading line (t), from x0 round the front to the centre (geometriaTriciclo.ts `faroBarra`). */
+    faroBarra?: { x0: number; t: number } | null };
 }
 /** A mirror's place (right side; geometriaTriciclo.ts `retrovisor`). */
 export interface OpcionRetrovisor { base: [number, number, number]; cabeza: [number, number, number]; largo: number; alto: number; fondo: number; enPuerta: boolean }
@@ -1157,6 +1179,8 @@ function armar(o: OpcionesBala): THREE.Group {
   if (sm) add(panelCola(sm, M));
   const fa = o.triciclo?.faro;
   if (fa) add(faroCentral(M, fa));
+  const fb = o.triciclo?.faroBarra;
+  if (fb) add(barraFaro(M, fb));
   add(cabina(F, M, o.asientos ?? ASIENTO, o.triciclo));
   // the Triciclo's rear-wheel spat: a narrow navy keel under the tail, from inside the belly down to `y0`, round the wheel
   const fd = o.triciclo?.faldon;

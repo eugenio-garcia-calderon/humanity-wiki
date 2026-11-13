@@ -30,7 +30,7 @@
 
 import type { Comprobacion, MaterialCarenado, MaterialChasis, Parametros, PuntosOcupante, Pulgadas, Resultados, Rueda, Tubo, P3 } from './geometria';
 import { MATERIALES_CARENADO, MATERIALES_CHASIS, RENDIMIENTO_SOLAR, TRICICLO_DEFECTO, largoTubo } from './geometria';
-import { crearForma, type DimBala, type FormaBala } from './garaje/balaForma';
+import { T3, T_CUBIERTA, crearForma, punto, type DimBala, type FormaBala } from './garaje/balaForma';
 import { ALETA, APLASTADO_BALA, ASIENTO, BUTACA, alturasPod, anchoMaxPod, anchoSalpicadero, areaMarco, areaXT, bandaMarco, brazosDe, contornoCupula, escalaManillar, extremoManillar, podDe, semiAncho, semiRespaldoButaca, techoEn, ventanasDe, type Asientos, type OpcionesVentanas } from './garaje/balaMedidas';
 import { MONTANTE_B, MONTANTE_C, choquesHojas, hojasPuerta, portonDe, puertaDe, vueloPorton, vueloPuerta, type OpcionesPorton, type OpcionesPuertas, type V3 } from './garaje/balaPuertas';
 import {
@@ -125,7 +125,7 @@ export interface CamposTriciclo {
   // clásico». Optional when saved: a design without them is built as before (each default is today's shape).
   tMorroLinea: number;   // la punta del morro: 0 en aguja (la ojiva de hasta ahora) … 1 una línea ancha y horizontal como el Aptera
   tMorroAlto: number;    // la punta del morro, más arriba (+) o más abajo (−) que hasta ahora (m)
-  tFaro: 'no' | 'si';    // un faro en el centro del morro, en su punta, como el de una moto
+  tFaro: 'no' | 'si' | 'barra';    // un faro en el centro del morro, en su punta, como el de una moto; o (2026-11-13) una barra de luz por todo el borde del morro, como el Aptera
   tFaroD: number;        // su ancho (m); con el morro en línea se aplasta en óvalo
   tColaPlana: number;    // la punta de la cola: 0 en punta (hasta ahora) … 1 plana, ancha y cortada como el Aptera
   tTechoPlano: number;   // lo alto de la carrocería: 0 redondeado (hasta ahora) … 1 plano
@@ -141,6 +141,16 @@ export interface CamposTriciclo {
   // ── Round 4 doors / roof frame / height (2026-11-13, Eugenio on the «Cuadriciclo Bala clásico»). Optional when saved:
   // absent, 0 (no frame), and the design is built exactly as before.
   tMarcoTecho: number;   // marco de laminado entre el techo solar y el cristal: arriba del parabrisas y a lo largo de los dos carriles del techo (m; 0, sin marco)
+  // ── The smooth body (2026-11-13). Optional when saved: absent is 'redonda', the shape as before.
+  tCubierta: 'redonda' | 'lisa';  // la parte de arriba del morro y de la cola: la de la cúpula (hasta ahora) o una cubierta lisa sin montículos, como el Aptera
+  tColaAncho: number;    // la cola vista desde arriba: 0 se estrecha (hasta ahora) … 1 todo el ancho hasta un borde recto
+  tColaGrosor: number;   // el grosor del borde de la cola (m): 0 se cierra en punta
+  tColaBombeo: number;   // lo que sube la cubierta de la cola sobre la recta de su canto al centro (m): 0 plana
+  tBajosIni: number;     // los bajos de la cola empiezan a subir esto por delante del eje trasero (m; − detrás)
+  tBajosCurva: number;   // cuánto suben: 0 como hasta ahora … 1 una curva larga hasta el borde (Aptera)
+  tMorroAncho: number;   // el morro visto desde arriba: 0 como hasta ahora … 1 todo el ancho, con el frente cuadrado y redondeado
+  tMorroGrosor: number;  // el grosor del borde del morro (m): 0 se cierra en punta
+  tMorroBombeo: number;  // lo que sube el capó sobre la recta de su canto al centro (m)
 }
 export type ClaveTriciclo = keyof CamposTriciclo;
 /**
@@ -171,7 +181,7 @@ export const RUEDAS_TRICICLO: Record<RuedaTriciclo, { d: number; neuDel: number;
   c14: { d: 0.554, neuDel: 0.165, neuTras: 0.165, n: '14″ de coche, 165/60 R14 (554 mm)', kg: 2.62, kWBuje: 45, carga: 387 },
   c15: { d: 0.574, neuDel: 0.175, neuTras: 0.175, n: '15″ de coche, 175/55 R15 (574 mm)', kg: 2.96, kWBuje: 60, carga: 412 },
 };
-type ClaveTexto = 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tTraseras' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero';
+type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tTraseras' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero';
 export type ClaveNumTriciclo = Exclude<ClaveTriciclo, ClaveTexto>;
 
 // ------------------------------------------------------------------ deslizadores
@@ -221,10 +231,10 @@ const FILAS: Fila[] = [
   // round three (2026-11-11, «mucho mayor»): up to 35 cm; above 15.8 cm the whole body rises (see SUELO_RIGIDO)
   ['tSuelo', 'carroceria', 'Forma', 'bSuelo', '', 0.04, 0.35, 0.002, 'cm'],
   // (round 3, 2026-11-12, «que el morro se pueda achatar más»: 20 cm shorter and a fuller tip than before; see rangoTriciclo)
-  ['tMorro', 'carroceria', 'Morro y cola', 'bMorro', '', 0.25, 1.00, 0.01, 'm'],
-  ['tPuntaMorro', 'carroceria', 'Morro y cola', 'bPuntaMorro', '', 0.25, 1.00, 0.01, 'x'],
+  ['tMorro', 'carroceria', 'Morro y cola', 'bMorro', '', 0.20, 1.20, 0.01, 'm'],
+  ['tPuntaMorro', 'carroceria', 'Morro y cola', 'bPuntaMorro', '', 0.15, 1.20, 0.01, 'x'],
   ['tCola', 'carroceria', 'Morro y cola', 'bCola', '', 0.45, 1.20, 0.01, 'm'],
-  ['tPuntaCola', 'carroceria', 'Morro y cola', 'bPuntaCola', '', 0, 0, 0, 'm'],
+  ['tPuntaCola', 'carroceria', 'Morro y cola', 'bPuntaCola', '', 0.30, 0.85, 0.005, 'm'],
   ['tAleta', 'carroceria', 'Morro y cola', 'bAleta', '', 0, 0, 0, 'm'],
   ['tCupIni', 'carroceria', 'Cúpula', 'bCupIni', '', 0, 0, 0, 'm'],
   // (round 3: «que el alto de la cúpula, de donde acaba la cúpula, no esté limitado»: from 1.30 m to 10 cm ahead of the
@@ -259,12 +269,21 @@ const FILAS: Fila[] = [
   ['tMalLado', 'carroceria', 'Puertas y maletero', null, 'Portón: altura de sus cantos (lo ancho que es)', 25, 75, 1, '°'],
   // ── Round 3 body (nose, tail, roof, hatch, fin, solar, second door), 2026-11-12
   ['tMorroLinea', 'carroceria', 'Morro y cola', null, 'Morro: en punta o en línea (como el Aptera)', 0, 1, 0.05, 'x'],
-  ['tMorroAlto', 'carroceria', 'Morro y cola', null, 'Morro: altura de la punta (más baja, más alta)', -0.10, 0.12, 0.005, 'cm'],
+  ['tMorroAlto', 'carroceria', 'Morro y cola', null, 'Morro: altura de la punta (más baja, más alta)', -0.12, 0.40, 0.005, 'cm'],
   ['tFaroD', 'carroceria', 'Morro y cola', null, 'Faro central: ancho', 0.10, 0.24, 0.01, 'cm'],
   ['tColaPlana', 'carroceria', 'Morro y cola', null, 'Cola: en punta o plana y ancha (como el Aptera)', 0, 1, 0.05, 'x'],
   ['tTechoPlano', 'carroceria', 'Cúpula', null, 'Techo: redondeado o plano', 0, 1, 0.05, 'x'],
   ['tCaida', 'carroceria', 'Cúpula', null, 'Techo: caída hacia el maletero (antes o más tarde)', -0.60, 0.80, 0.05, 'x'],
   ['tLineaCupula', 'carroceria', 'Cúpula', null, 'Línea entre carrocería y cristal: altura', -0.03, 0.15, 0.005, 'cm'],
+  // ── The smooth body (2026-11-13): only with «Cubierta lisa» (Aeromovil.tsx `visible`)
+  ['tMorroAncho', 'carroceria', 'Morro y cola', null, 'Morro: ancho del frente (hasta todo el ancho, como el Aptera)', 0, 1, 0.05, 'x'],
+  ['tMorroGrosor', 'carroceria', 'Morro y cola', null, 'Morro: grosor del borde de delante', 0, 0.25, 0.005, 'cm'],
+  ['tMorroBombeo', 'carroceria', 'Morro y cola', null, 'Capó: bombeo (de plano a curvado)', 0, 0.05, 0.0025, 'cm'],
+  ['tColaAncho', 'carroceria', 'Morro y cola', null, 'Cola: ancho al final (hasta todo el ancho, como el Aptera)', 0, 1, 0.05, 'x'],
+  ['tColaGrosor', 'carroceria', 'Morro y cola', null, 'Cola: grosor del borde de atrás', 0, 0.25, 0.005, 'cm'],
+  ['tColaBombeo', 'carroceria', 'Morro y cola', null, 'Cola: bombeo de la cubierta (de plana a curvada)', 0, 0.04, 0.0025, 'cm'],
+  ['tBajosIni', 'carroceria', 'Morro y cola', null, 'Bajos de la cola: dónde empiezan a subir (desde el eje trasero)', -0.05, 0.80, 0.01, 'cm'],
+  ['tBajosCurva', 'carroceria', 'Morro y cola', null, 'Bajos de la cola: cuánto suben hasta el borde', 0, 1, 0.05, 'x'],
   ['tPuerta2Parte', 'carroceria', 'Puertas y maletero', null, 'Segunda puerta: dónde se parten las dos', 0.90, 1.90, 0.01, 'm'],
   ['tBisagra2Y', 'carroceria', 'Puertas y maletero', null, 'Segunda puerta: bisagra a lo largo de su canto de atrás', 0.05, 0.95, 0.01, 'x'],
   ['tBisagra2Inc', 'carroceria', 'Puertas y maletero', null, 'Segunda puerta: el eje, inclinado hacia delante arriba', 0, 45, 1, '°'],
@@ -381,7 +400,9 @@ export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
   { clave: 'tMaletero', n: 'Maletero', dep: 'carroceria', bloque: 'Puertas y maletero', opciones: [{ k: 'cola', n: 'Tapa en lo alto de la cola' }, { k: 'aptera', n: 'Portón largo como el Aptera (con puertas)' }] },
   { clave: 'tRetrovisores', n: 'Retrovisores', dep: 'carroceria', bloque: 'Puertas y maletero', opciones: [{ k: 'camaras', n: 'Cámaras en cápsulas' }, { k: 'espejos', n: 'Espejos de gota (como el Aptera)' }] },
   // ── Round 3 body (nose, tail, roof, hatch, fin, solar, second door), 2026-11-12
-  { clave: 'tFaro', n: 'Faro central en el morro', dep: 'carroceria', bloque: 'Morro y cola', opciones: [{ k: 'no', n: 'Sin faro central' }, { k: 'si', n: 'Con faro central (como una moto)' }] },
+  { clave: 'tFaro', n: 'Faro del morro', dep: 'carroceria', bloque: 'Morro y cola', opciones: [{ k: 'no', n: 'Sin faro central' }, { k: 'si', n: 'Faro central redondo (como una moto)' }, { k: 'barra', n: 'Barra de luz por todo el borde (como el Aptera)' }] },
+  // 2026-11-13: the smooth body
+  { clave: 'tCubierta', n: 'Morro y cola por arriba', dep: 'carroceria', bloque: 'Morro y cola', opciones: [{ k: 'redonda', n: 'Como la cúpula (redondeados)' }, { k: 'lisa', n: 'Cubierta lisa, sin montículos (como el Aptera)' }] },
   { clave: 'tConAleta', n: 'Aleta', dep: 'carroceria', bloque: 'Morro y cola', opciones: [{ k: 'si', n: 'Con aleta' }, { k: 'no', n: 'Sin aleta' }] },
   { clave: 'tSolarMorro', n: 'Paneles solares en el morro', dep: 'carroceria', bloque: 'Techo solar y ventanas', opciones: [{ k: 'no', n: 'No' }, { k: 'si', n: 'Sí, encima del morro' }] },
   { clave: 'tPuertas2', n: 'Puertas por lado', dep: 'carroceria', bloque: 'Puertas y maletero', opciones: [{ k: 'no', n: 'Una' }, { k: 'si', n: 'Dos: la de atrás se abre hacia atrás' }] },
@@ -528,9 +549,19 @@ function paqueteCabe(T: CamposTriciclo, hz: number, largo: number): { largo: num
  * roof's fall), each only when it is not zero: absent, the body is built exactly as before, bit for bit.
  */
 export const CLAVES_FORMA_R3: [ClaveNumTriciclo, keyof DimBala][] = [['tMorroLinea', 'morroLinea'], ['tMorroAlto', 'morroAlto'], ['tColaPlana', 'colaPlana'], ['tTechoPlano', 'techoPlano'], ['tCaida', 'caida'], ['tLineaCupula', 'lineaCupula']];
+/**
+ * 2026-11-13, the smooth body: the hatch's side edge (t: exactly where the deck begins, at its side edge) and the panels'
+ * (a frame inside the deck). The cut was first on the rounded edge below (t = 0.55): with a canopy 1.9 m tall that
+ * stretch is a near-vertical wall, and the hatch's edge, swinging up about the roof hinge, went 1.5 cm into the side.
+ */
+export const T_BORDE_LISA = T_CUBIERTA, T_PANEL_LISA = T_CUBIERTA + 0.03;
+/** 2026-11-13: the smooth body's fields, all of them (zeros included) when it is on, none when it is off. */
+export const CLAVES_LISA: [ClaveNumTriciclo, keyof DimBala][] = [['tColaAncho', 'colaAncho'], ['tColaGrosor', 'colaGrosor'], ['tColaBombeo', 'colaBombeo'], ['tBajosIni', 'bajosIni'], ['tBajosCurva', 'bajosCurva'], ['tMorroAncho', 'morroAncho'], ['tMorroGrosor', 'morroGrosor'], ['tMorroBombeo', 'morroBombeo']];
+export const conLisa = (T: Pick<CamposTriciclo, 'tCubierta'>) => T.tCubierta === 'lisa';
 export function formaR3(T: CamposTriciclo): Partial<DimBala> {
   const o: Partial<Record<keyof DimBala, number>> = {};
   for (const [k, d] of CLAVES_FORMA_R3) { const v = limitarTriciclo(k, T); if (v) o[d] = v; }
+  if (conLisa(T)) { o.lisa = 1; for (const [k, d] of CLAVES_LISA) o[d] = limitarTriciclo(k, T); }
   return o as unknown as Partial<DimBala>;
 }
 let cacheCuerpo: { clave: string; F: FormaBala } | null = null;
@@ -739,9 +770,13 @@ export const limitarTriciclo = (k: ClaveNumTriciclo, T: CamposTriciclo) => { con
  */
 function comoAntes(k: ClaveNumTriciclo, v: number, T: CamposTriciclo): number {
   const fin = (m: number) => (Math.abs(v - m) < 1e-9 ? m : v);
+  // (2026-11-13: the nose's ranges widened again; their old ends snap the same way)
+  const fines = (...ms: number[]) => { for (const m of ms) if (Math.abs(v - m) < 1e-9) return m; return v; };
   switch (k) {
-    case 'tMorro': return fin(0.45);
-    case 'tPuntaMorro': return fin(0.50);
+    case 'tMorro': return fines(0.45, 0.25, 1.00);
+    case 'tPuntaMorro': return fines(0.50, 0.25, 1.00);
+    case 'tMorroAlto': return fines(-0.10, 0.12);
+    case 'tPuntaCola': return fines(0.36, 0.58);
     case 'tAlto': return Math.abs(v - 1.15) < 1e-9 ? 1.15 : fin(1.584);
     case 'tCupFin': { const lo = Math.min(1.80, T.tBatalla - 0.45), hi = Math.min(3.10, T.tBatalla - 0.25); return Math.abs(v - lo) < 1e-9 ? lo : Math.abs(v - hi) < 1e-9 ? hi : v; }
     case 'tMalIni': return fin(1.70);
@@ -1015,6 +1050,8 @@ export function crearModeloTriciclo(P: Parametros) {
   const { D, F, asientos, aleta, viaPedida, giro, elevar, traseras } = medidasTriciclo(T);
   const cup = contornoCupula(F);
   const L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T);
+  /** 2026-11-13: the smooth body (`tCubierta: 'lisa'`). */
+  const lisa = conLisa(T);
   const rF = F.R_LAT, rR = F.R_DEL, xR = -F.BATALLA, via = F.VIA_LAT, xF = F.X_LAT;
   const semiPod = anchoMaxPod(F);
   // four wheels (2026-11-11): the widest of the two axles, each with its pods
@@ -1190,7 +1227,14 @@ export function crearModeloTriciclo(P: Parametros) {
   } : null;
   const puerta = opcPuertas ? puertaDe(F, ventanas, cup, opcPuertas) : null;
   const opcPorton: OpcionesPorton | null = puerta && T.tMaletero === 'aptera' ? { x: -L('tMalIni'), abre: L('tMalAbre'), lado: L('tMalLado') } : null;
-  const porton = puerta && opcPorton ? portonDe(F, puerta, cup, opcPorton, F.X_ARO_COLA) : null;
+  const porton0 = puerta && opcPorton ? portonDe(F, puerta, cup, opcPorton, F.X_ARO_COLA) : null;
+  // 2026-11-13, the smooth body («la cola y el maletero tienen que ser la misma pieza»): behind the doors the hatch's side
+  // edges ease (over the same 35 cm) onto the deck's own side edge (`T_BORDE_LISA`) and run on it to the trailing edge's
+  // light bar: the hatch is the whole rear deck.
+  const porton = porton0 && lisa && puerta ? (() => {
+    const xR = puerta.xR, base = porton0.tLo;
+    return { ...porton0, tLo: (x: number) => { if (x >= xR) return base(x); const w = suaveCola((xR - x) / 0.35); return base(x) * (1 - w) + T_BORDE_LISA * w; } };
+  })() : porton0;
   // round 3: the second door's B- and C-pillars, laminate where there was glass (from just under the glass edge to the rail)
   if (puerta?.segunda) {
     const r = (x: number): [number, number] => [Math.max(0, ventanas.tC(x) - 0.01), Math.max(Math.max(0, ventanas.tC(x) - 0.01), ventanas.tR(x))];
@@ -1216,7 +1260,10 @@ export function crearModeloTriciclo(P: Parametros) {
   // Aptera hatch, 4 cm inside its edges; or the round-three lid, above t = 0.66), so it lifts with it. It widens from
   // the canopy's end (where the glass panel closes in its point) over 20 cm. On the body's laminate, as the Aptera's.
   const xColaIni = cup.XF1 - 0.005, xColaFin = F.X_ARO_COLA + 0.012;
-  const tPanelCola = (x: number) => { const base = porton ? Math.min(0.97, porton.tLo(x) + 0.04) : 0.66; return 1 - (1 - base) * suaveCola((xColaIni - x) / 0.20); };
+  // (2026-11-13, the smooth body: the panel covers the whole deck, from its side edges inset by a frame, `T_PANEL_LISA`)
+  // (with the smooth body it starts straight across, with all its width, right behind the canopy frame's rear tip: the deck
+  // begins there, and a panel that widened over 20 cm from that tip read as a narrow shield inside the hatch)
+  const tPanelCola = (x: number) => { const base0 = porton ? Math.min(0.97, porton.tLo(x) + 0.04) : 0.66; if (lisa) return Math.max(base0, T_PANEL_LISA); return 1 - (1 - base0) * suaveCola((xColaIni - x) / 0.20); };
   const solarCola = T.tSolarCola === 'si' && xColaIni > xColaFin ? { x0: xColaIni, x1: xColaFin, tLow: tPanelCola, ...areaXT(F, xColaFin, xColaIni, x => [tPanelCola(x), 1]) } : null;
   const solarTodo0 = solarCola && solarCola.area > 0 ? { area: solar.area + solarCola.area, x: (solar.area * solar.x + solarCola.area * solarCola.x) / (solar.area + solarCola.area), y: (solar.area * solar.y + solarCola.area * solarCola.y) / (solar.area + solarCola.area) } : solar;
   // ── Round 3 body (2026-11-12): the panel on top of the nose («pon paneles solares en la parte frontal del morro»), from
@@ -1225,7 +1272,9 @@ export function crearModeloTriciclo(P: Parametros) {
   // laminate, as the one over the tail
   const solarMorro = T.tSolarMorro === 'si' ? (() => {
     const x0 = F.X_ARO_MORRO - 0.02, x1 = cup.XF0 + 0.02; if (!(x0 - x1 > 0.10)) return null;
-    const tLow = (x: number) => { const a = 1 - (1 - 0.58) * suaveCola((x - x1) / 0.10), b = 1 - (1 - 0.58) * suaveCola((x0 - x) / 0.06); return Math.max(a, b); };
+    // (2026-11-13, the smooth body: on the hood's deck, inset from its side edges as the tail's)
+    const tb = lisa ? T_PANEL_LISA : 0.58;
+    const tLow = (x: number) => { const a = 1 - (1 - tb) * suaveCola((x - x1) / 0.10), b = 1 - (1 - tb) * suaveCola((x0 - x) / 0.06); return Math.max(a, b); };
     return { x0, x1, tLow, ...areaXT(F, x1, x0, x => [tLow(x), 1]) };
   })() : null;
   const solarTodo = solarMorro && solarMorro.area > 0 ? { area: solarTodo0.area + solarMorro.area, x: (solarTodo0.area * solarTodo0.x + solarMorro.area * solarMorro.x) / (solarTodo0.area + solarMorro.area), y: (solarTodo0.area * solarTodo0.y + solarMorro.area * solarMorro.y) / (solarTodo0.area + solarMorro.area) } : solarTodo0;
@@ -1237,6 +1286,13 @@ export function crearModeloTriciclo(P: Parametros) {
     const ancho = L('tFaroD'), alto = ancho * (1 - 0.55 * L('tMorroLinea')), y = (y0 + y1) / 2;
     const xf = F.frenteX(0, y), x = (Number.isFinite(xf) ? xf : F.X_MORRO) + 0.03 - 0.06;
     return { c: [x, y, 0] as P3, fondo: 0.06, alto, ancho };
+  })() : null;
+  // 2026-11-13 (Eugenio: «hazlo como el aptera que tiene un faro a lo largo del morro»): a light bar along the nose's
+  // leading line, the widest point of each section (t = T3), from where the nose cap is 55 % of the way to its tip round
+  // to the centre, both sides; the 3D draws it (balaModelo.ts `barraFaro`). Its middle is its centre of mass.
+  const faroBarra = T.tFaro === 'barra' ? (() => {
+    const x0 = F.XN0 + 0.55 * (F.X_MORRO - F.XN0), xm = F.XN0 + 0.85 * (F.X_MORRO - F.XN0);
+    return { x0, t: T3, c: [xm, punto(F.sec(xm), T3)[1], 0] as P3 };
   })() : null;
 
   // ── the seats and who sits on them (round three): astride, the two riders as before; in three rows, the pilot
@@ -1289,6 +1345,8 @@ export function crearModeloTriciclo(P: Parametros) {
     solarCola, solarTodo,
     /** Round 3 (2026-11-12): the panel on the nose (or null) and the central headlamp (its centre, depth, height and width; or null). */
     solarMorro, faro,
+    /** 2026-11-13: the light bar along the nose's leading line (or null); and whether the body is the smooth one. */
+    faroBarra, lisa,
     /**
      * 2026-11-12: the battery's capacity (kWh: the slider's, or the pack's litres × Wh/L), the pack along the frame (or
      * null), how much the footboards and footpegs rose onto it; the steering wheel, the dashboard, the mirrors; the Aptera
@@ -1319,6 +1377,8 @@ export function opcionesCabinaTriciclo(m: ModeloTriciclo) {
     ...(m.butacas ? { butacas: m.butacas, pedales: m.pedales } : {}),
     // round 3
     solarMorro: m.solarMorro, faro: m.faro,
+    // 2026-11-13 (absent with the bar off, so the default draws exactly as before)
+    ...(m.faroBarra ? { faroBarra: m.faroBarra } : {}),
   };
 }
 
@@ -1502,6 +1562,8 @@ export function piezasTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cris
     o.push({ nombre: 'Montantes B y C: refuerzos para bisagras y cierres', kg: 2.0, x: (m.puerta.segunda.xS + m.puerta.segunda.x1) / 2, y: 0.9 + m.elevar });
   }
   if (m.faro) o.push({ nombre: 'Faro central', kg: 0.7, x: m.faro.c[0], y: m.faro.c[1] });
+  // (2026-11-13: an LED strip, its black housing and lens along the leading line: about 0.9 kg, an estimate)
+  if (m.faroBarra) o.push({ nombre: 'Barra de luz del morro', kg: 0.9, x: m.faroBarra.c[0], y: m.faroBarra.c[1] });
   return dimensionar(m, o);
 }
 function piezasBase(m: ModeloTriciclo, ar: { carroceria: number; cristal: number; solar: number }, centros: { xPiel: number; yPiel: number; xCristal: number; yCristal: number }, pods: { area: number; areaTras?: number }): PiezaMasa[] {

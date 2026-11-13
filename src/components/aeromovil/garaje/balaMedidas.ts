@@ -1,5 +1,5 @@
 import type { Est } from './forma';
-import { monotona, punto, tArriba, type FormaBala } from './balaForma';
+import { Y_VIDRIO_REF, punto, tArriba, type FormaBala } from './balaForma';
 
 /*
  * The «Cuadriciclo Bala en rombo»'s hand-placed measurements, apart from the skin:
@@ -161,7 +161,8 @@ export const extremoManillar = (F: FormaBala, d: [number, number] = [0, 0]): [nu
 
 // ======================================================================= canopy
 /** Lower edge of the canopy glass in side view (reference drawing). Where it meets the top line, the glass ends (rounded in plan). */
-export const Y_VIDRIO_REF = monotona([[-0.10, 0.80], [-0.25, 0.815], [-0.45, 0.815], [-0.8, 0.815], [-1.2, 0.83], [-1.5, 0.855], [-1.65, 0.90], [-1.78, 0.99], [-1.9, 1.10], [-2.0, 1.20], [-2.1, 1.30]]);
+// (2026-11-13: the table lives in balaForma.ts, which needs it for the smooth body's deck zones; the same numbers)
+export { Y_VIDRIO_REF };
 /** The navy canopy frame: this much below the glass, all round it. Its outer edge is the canopy's shut line. */
 export const MARCO_CUPULA = 0.035;
 /** The canopy of a shape: its glass edge and frame edge in side view, and where each meets the top line. */
