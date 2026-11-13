@@ -1235,7 +1235,9 @@ export function crearModeloTriciclo(P: Parametros) {
   // the canopy's end (where the glass panel closes in its point) over 20 cm. On the body's laminate, as the Aptera's.
   const xColaIni = cup.XF1 - 0.005, xColaFin = F.X_ARO_COLA + 0.012;
   // (2026-11-13, the smooth body: the panel covers the whole deck, from its side edges inset by a frame, `T_PANEL_LISA`)
-  const tPanelCola = (x: number) => { const base0 = porton ? Math.min(0.97, porton.tLo(x) + 0.04) : 0.66, base = lisa ? Math.max(base0, T_PANEL_LISA) : base0; return 1 - (1 - base) * suaveCola((xColaIni - x) / 0.20); };
+  // (with the smooth body it starts straight across, with all its width, right behind the canopy frame's rear tip: the deck
+  // begins there, and a panel that widened over 20 cm from that tip read as a narrow shield inside the hatch)
+  const tPanelCola = (x: number) => { const base0 = porton ? Math.min(0.97, porton.tLo(x) + 0.04) : 0.66; if (lisa) return Math.max(base0, T_PANEL_LISA); return 1 - (1 - base0) * suaveCola((xColaIni - x) / 0.20); };
   const solarCola = T.tSolarCola === 'si' && xColaIni > xColaFin ? { x0: xColaIni, x1: xColaFin, tLow: tPanelCola, ...areaXT(F, xColaFin, xColaIni, x => [tPanelCola(x), 1]) } : null;
   const solarTodo0 = solarCola && solarCola.area > 0 ? { area: solar.area + solarCola.area, x: (solar.area * solar.x + solarCola.area * solarCola.x) / (solar.area + solarCola.area), y: (solar.area * solar.y + solarCola.area * solarCola.y) / (solar.area + solarCola.area) } : solar;
   // ── Round 3 body (2026-11-12): the panel on top of the nose («pon paneles solares en la parte frontal del morro»), from
