@@ -33,7 +33,7 @@ import { SMI_MES } from '../data/pensionesPropuesta';
 import { ImpuestosVentana } from '../components/modeloSocioeconomico/ImpuestosVentana';
 import { PensionesVentana } from '../components/modeloSocioeconomico/PensionesVentana';
 import { CategoriasVentana } from '../components/modeloSocioeconomico/CategoriasVentana';
-import { DeudaVentana } from '../components/modeloSocioeconomico/DeudaVentana';
+import { EconomiaVentana } from '../components/modeloSocioeconomico/EconomiaVentana';
 import { EscalasVentana } from '../components/modeloSocioeconomico/EscalasVentana';
 import { ViviendaVentana } from '../components/modeloSocioeconomico/ViviendaVentana';
 import { SeguridadVentana } from '../components/modeloSocioeconomico/SeguridadVentana';
@@ -47,7 +47,7 @@ import { DigitalVentana } from '../components/modeloSocioeconomico/DigitalVentan
 import { Presupuestos } from '../components/modeloSocioeconomico/Presupuestos';
 import { BuzonProyecto } from '../components/modeloSocioeconomico/BuzonProyecto';
 import { Boton, Libre } from '../components/modeloSocioeconomico/piezas';
-import { VENTANAS, ALIAS, ventanaDeAncla, Apartado, type VentanaId } from '../components/modeloSocioeconomico/ventanas';
+import { VENTANAS, ALIAS, PARTES_ECONOMIA, parteDeAncla, ventanaDeAncla, Apartado, type VentanaId } from '../components/modeloSocioeconomico/ventanas';
 import { cn } from '../utils/cn';
 
 // Each window's accent: its tab when lit, its cover card. Classes, not colours.
@@ -58,6 +58,7 @@ const ACENTO: Record<string, { tab: string; borde: string; texto: string }> = {
   presupuestos: { tab: 'bg-indigo-600 text-white', borde: 'border-indigo-500', texto: 'text-indigo-600' },
   deuda: { tab: 'bg-rose-700 text-white', borde: 'border-rose-600', texto: 'text-rose-700' },
   escalas: { tab: 'bg-emerald-700 text-white', borde: 'border-emerald-600', texto: 'text-emerald-700' },
+  economia: { tab: 'bg-teal-700 text-white', borde: 'border-teal-600', texto: 'text-teal-700' },
   vivienda: { tab: 'bg-lime-700 text-white', borde: 'border-lime-600', texto: 'text-lime-700' },
   seguridad: { tab: 'bg-blue-800 text-white', borde: 'border-blue-700', texto: 'text-blue-800' },
   justicia: { tab: 'bg-violet-700 text-white', borde: 'border-violet-600', texto: 'text-violet-700' },
@@ -74,6 +75,9 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
   const [verBuzon, setVerBuzon] = useState(false);
   const ventana = ventanaDeAncla(ancla);
   const actual = VENTANAS.find(v => v.id === ventana) || null;
+  // In «Economía», the submenu shows the three parts and the open part's sections.
+  const parte = ventana === 'economia' ? parteDeAncla(ancla) : null;
+  const apartados = parte ? PARTES_ECONOMIA.find(p => p.id === parte)!.apartados : actual?.apartados ?? [];
   const integracion = useIntegracion();
   const cabecera = useRef<HTMLElement>(null);
   const [altoCabecera, setAltoCabecera] = useState(0);
@@ -91,7 +95,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
 
   useEffect(() => {
     const titulo = document.title;
-    document.title = 'Modelo Público Optimizado · Escalas, recaudación, pensiones, deuda, servicios y leyes · Luz & Humanidad';
+    document.title = 'Modelo Público Optimizado · Escalas, recaudación, pensiones, economía, servicios y leyes · Luz & Humanidad';
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
     const anterior = meta?.content;
     if (!meta) { meta = document.createElement('meta'); meta.name = 'description'; document.head.appendChild(meta); }
@@ -122,7 +126,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
     if (!ventana) return;
     const id = ALIAS[ancla] || ancla;
     const t = window.setTimeout(() => {
-      if (id === ventana) { window.scrollTo({ top: 0 }); return; }
+      if (id === ventana || PARTES_ECONOMIA.some(p => p.id === id)) { window.scrollTo({ top: 0 }); return; }
       document.getElementById(id)?.scrollIntoView({ block: 'start' });
     }, 80);
     return () => window.clearTimeout(t);
@@ -131,14 +135,15 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
   // Which section of the window is on screen: lit in the submenu.
   useEffect(() => {
     if (!actual) { setVisible(null); return; }
-    const secciones = actual.apartados.map(a => document.getElementById(a.id)).filter(Boolean) as HTMLElement[];
+    const secciones = apartados.map(a => document.getElementById(a.id)).filter(Boolean) as HTMLElement[];
     const o = new IntersectionObserver(entradas => {
       const vistas = entradas.filter(e => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
       if (vistas[0]) setVisible(vistas[0].target.id);
     }, { rootMargin: '-35% 0px -55% 0px' });
     secciones.forEach(s => o.observe(s));
     return () => o.disconnect();
-  }, [actual]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actual, parte]);
 
   const inicioLuz = enSitio ? enSitio.inicio : 'https://luzhumanidad.com';
   const marca = enSitio
@@ -196,7 +201,16 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
           <div className="relative border-t border-slate-100">
             <nav aria-label={`Apartados de ${actual.titulo}`} className="mx-auto max-w-6xl px-2 sm:px-4">
               <ul ref={tiraApartados} className="flex gap-0.5 overflow-x-auto py-1 pr-8 text-[13px] [scrollbar-width:none]">
-                {actual.apartados.map(a => (
+                {parte && PARTES_ECONOMIA.map(p => (
+                  <li key={p.id} className="shrink-0">
+                    <a href={`#${p.id}`} aria-current={p.id === parte ? 'page' : undefined}
+                      className={cn('block whitespace-nowrap rounded-full border px-3 py-0.5 font-semibold', p.id === parte ? cn(ACENTO[actual.id].tab, 'border-transparent') : 'border-slate-200 text-slate-700 hover:bg-slate-100')}>
+                      {p.t}
+                    </a>
+                  </li>
+                ))}
+                {parte && <li aria-hidden className="mx-1.5 shrink-0 self-center text-slate-300">|</li>}
+                {apartados.map(a => (
                   <li key={a.id} className="shrink-0">
                     <a href={`#${a.id}`} aria-current={visible === a.id ? 'location' : undefined}
                       className={cn('block whitespace-nowrap rounded-full px-2.5 py-0.5', visible === a.id ? cn('font-semibold', ACENTO[actual.id].texto, 'bg-slate-100') : 'text-slate-600 hover:bg-slate-100')}>
@@ -216,7 +230,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
         {ventana === 'impuestos' && <ImpuestosVentana onProponer={() => setVerBuzon(true)} />}
         {ventana === 'categorias' && <CategoriasVentana />}
         {ventana === 'pensiones' && <PensionesVentana />}
-        {ventana === 'deuda' && <DeudaVentana />}
+        {ventana === 'economia' && <EconomiaVentana parte={parte!} />}
         {ventana === 'escalas' && <EscalasVentana />}
         {ventana === 'vivienda' && <ViviendaVentana />}
         {ventana === 'seguridad' && <SeguridadVentana />}

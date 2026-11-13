@@ -4,6 +4,8 @@ import { ESPECTRO as E_IMPUESTOS } from './impuestos';
 import { ESPECTRO as E_PENSIONES } from './pensiones';
 import { ESPECTRO as E_PRESUPUESTOS } from './presupuestos';
 import { ESPECTRO as E_DEUDA } from './deuda';
+import { ESPECTRO as E_BANCA } from './banca';
+import { ESPECTRO as E_MONEDA } from './moneda';
 import { ESPECTRO as E_VIVIENDA } from './vivienda';
 import { ESPECTRO as E_SEGURIDAD } from './seguridad';
 import { ESPECTRO as E_JUSTICIA } from './justicia';
@@ -18,6 +20,8 @@ export const ESPECTROS: Record<string, Espectro | null> = {
   pensiones: E_PENSIONES,
   presupuestos: E_PRESUPUESTOS,
   deuda: E_DEUDA,
+  banca: E_BANCA,
+  moneda: E_MONEDA,
   vivienda: E_VIVIENDA,
   seguridad: E_SEGURIDAD,
   justicia: E_JUSTICIA,
