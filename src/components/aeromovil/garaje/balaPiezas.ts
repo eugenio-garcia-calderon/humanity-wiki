@@ -73,23 +73,24 @@ function texturaAsiento(): THREE.CanvasTexture | null {
  * One solar cell of the Triciclo's roof (2026-11-10, round two): monocrystalline, with its clipped corners, its fine
  * fingers and three busbars. uv (1, 1) is one 125 mm cell (the A1's `CELULA`).
  * Round 4 (2026-11-13, Eugenio: «los paneles solares también tienen que ser más discretos como los del aptera, y con ese
- * toque cristalizado»): dark navy-to-black cells on a dark slate backsheet, the grid faint (fingers at 10 %, busbars at
- * 22 %), the colours of the garage Aptera's cells (apteraDetalle.ts): before, bright blue cells on a light grey backsheet
- * with white busbars. A first try with a black backsheet and 6 % / 18 % lines read as plain glass from the 3/4 view.
+ * toque cristalizado»): dark navy cells on a slate backsheet, the grid faint (fingers at 10 %, busbars at 30 %), close to
+ * the garage Aptera's cells (apteraDetalle.ts): before, bright blue cells on a light grey backsheet with white busbars.
+ * Two darker tries (a black backsheet; the Aptera's own colours with 3 px gaps) read as plain glass from the 3/4 view:
+ * the gaps are a little wider here so that, averaged at a distance, the panel still shows as a panel.
  */
 function texturaSolar(): THREE.CanvasTexture | null {
   if (typeof document === 'undefined') return null;
   const N = 128, cv = document.createElement('canvas'); cv.width = cv.height = N;
   const c = cv.getContext('2d'); if (!c) return null;
-  c.fillStyle = '#2a303b'; c.fillRect(0, 0, N, N);   // the backsheet showing between the cells: dark slate
-  const m = 3, k = 14;
+  c.fillStyle = '#3a4250'; c.fillRect(0, 0, N, N);   // the backsheet showing between the cells: slate
+  const m = 4, k = 14;
   c.beginPath(); c.moveTo(m + k, m); c.lineTo(N - m - k, m); c.lineTo(N - m, m + k); c.lineTo(N - m, N - m - k); c.lineTo(N - m - k, N - m); c.lineTo(m + k, N - m); c.lineTo(m, N - m - k); c.lineTo(m, m + k); c.closePath();
-  const g = c.createLinearGradient(0, 0, N, N); g.addColorStop(0, '#0d1830'); g.addColorStop(0.5, '#0a1226'); g.addColorStop(1, '#0e1a33');
+  const g = c.createLinearGradient(0, 0, N, N); g.addColorStop(0, '#11204a'); g.addColorStop(0.5, '#0c1838'); g.addColorStop(1, '#10214a');
   c.fillStyle = g; c.fill();
   c.save(); c.clip();
   c.strokeStyle = 'rgba(120,140,170,0.10)'; c.lineWidth = 0.6;
   for (let y = m + 2; y < N; y += 3.2) { c.beginPath(); c.moveTo(0, y); c.lineTo(N, y); c.stroke(); }
-  c.strokeStyle = 'rgba(150,165,190,0.22)'; c.lineWidth = 1;
+  c.strokeStyle = 'rgba(150,165,190,0.30)'; c.lineWidth = 1;
   for (const x of [N * 0.25, N * 0.5, N * 0.75]) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, N); c.stroke(); }
   c.restore();
   const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4;

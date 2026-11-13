@@ -155,8 +155,8 @@ function distanciaParaVer(puntos: THREE.Vector3[], centro: THREE.Vector3, haciaC
 function texturaSolar() {
   const c = document.createElement('canvas'); c.width = c.height = 128;
   const g = c.getContext('2d')!;
-  g.fillStyle = '#262c37'; g.fillRect(0, 0, 128, 128);                 // la junta (gris pizarra oscuro, como la del Aptera del garaje)
-  g.fillStyle = '#0b1429';
+  g.fillStyle = '#353c49'; g.fillRect(0, 0, 128, 128);                 // la junta (gris pizarra, cerca de la del Aptera del garaje)
+  g.fillStyle = '#0e1b3d';
   g.beginPath(); g.moveTo(8, 2); g.lineTo(120, 2); g.lineTo(126, 8); g.lineTo(126, 120); g.lineTo(120, 126); g.lineTo(8, 126); g.lineTo(2, 120); g.lineTo(2, 8); g.closePath(); g.fill();
   g.strokeStyle = '#18213a'; g.lineWidth = 1; g.beginPath(); g.moveTo(6, 43); g.lineTo(122, 43); g.moveTo(6, 85); g.lineTo(122, 85); g.stroke();
   const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
