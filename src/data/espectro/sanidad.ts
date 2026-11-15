@@ -1,5 +1,6 @@
 // «Otras propuestas» for the «sanidad» window: what other political camps in
-// Spain propose on public health, from left to right. Checked on 2026-11-12.
+// Spain propose on public health, from left to right. Checked on 2026-11-12;
+// Vox updated on 2026-11-15 from its 29-N programme.
 import type { Espectro } from './tipos';
 
 export const ESPECTRO: Espectro | null = {
@@ -78,22 +79,22 @@ export const ESPECTRO: Espectro | null = {
     {
       id: 'derecha',
       quien: 'Vox',
-      cuando: 'Programa para las elecciones andaluzas de 2026 y propuesta en el Congreso (enero de 2026)',
-      idea: 'Una sanidad coordinada desde el Estado, igual en toda España y con preferencia para los españoles.',
+      cuando: 'Programa para el 29-N, «Es sentido común», 12 de noviembre de 2026',
+      idea: 'La misma sanidad para todos los españoles en todo el país, y solo urgencias graves para quien está en situación irregular.',
       propone: [
-        'Un modelo sanitario coordinado desde el Estado, que acabe con las diferencias y duplicidades entre comunidades.',
-        'Una tarjeta sanitaria individual y una historia clínica y de farmacia digital unificada.',
-        'Auditar a fondo las listas de espera, y colaboración con la privada con control de resultados y marcha atrás si no cumple.',
-        'Que los españoles tengan acceso preferente a ayudas y servicios públicos, y publicar cuánto usan la sanidad los extranjeros.',
-        'Un código laboral propio para los médicos, y retirar el estatuto pactado entre el Ministerio y los sindicatos.',
+        'Una tarjeta sanitaria única con historia clínica compartida en toda España, y que no saber la lengua regional no impida optar a una plaza (medida 60).',
+        'Un plan contra las listas de espera, con ayuda de la privada solo si da resultados, y publicar indicadores cada cierto tiempo (medida 62).',
+        'Reforzar la atención primaria y la de pediatría, sobre todo en los pueblos (medida 61).',
+        'Mejores sueldos, incentivos para las plazas rurales y un programa para que vuelvan los sanitarios que emigraron (medida 63).',
+        'Atender a los inmigrantes en situación irregular solo en urgencias graves, y auditar ese coste (medida 20).',
       ],
-      argumento: 'Dicen que diecisiete sistemas distintos crean desigualdad entre españoles y gastos duplicados, y que quien sostiene el sistema con sus impuestos debe ser atendido primero.',
-      critica: 'Sus críticos dicen que dar preferencia por nacionalidad choca con la igualdad que garantiza la Constitución, y que un mando desde el Estado no acortaría por sí solo las esperas.',
+      argumento: 'Dicen que diecisiete sistemas distintos crean desigualdad entre españoles y gastos duplicados, y que la sanidad pública no puede cargar con la inmigración ilegal.',
+      critica: 'Sus críticos dicen que dejar sin atención ordinaria a los inmigrantes irregulares pone en riesgo la salud pública y acaba llenando las urgencias, y que el plan de esperas no tiene cifras ni plazos.',
       fuentes: [
-        { url: 'https://diariofarma.com/wp-content/uploads/2026/05/Programa-electoral-de-Vox-para-las-elecciones-andaluzas.pdf', titulo: 'Vox · Programa electoral para las elecciones andaluzas de 2026, sanidad (medidas 64 a 103)' },
-        { url: 'https://www.redaccionmedica.com/politica/20260130/omnibus-sanitario-de-vox-en-el-congreso-con-un-estatuto-para-medicos/257285_0.amp.html', titulo: 'Redacción Médica · La proposición de Vox en el Congreso sobre sanidad (30-01-2026)' },
+        { url: 'https://men.gsstatic.es/sfAttachPlugin/4847171.pdf', titulo: 'Vox · «Es sentido común», programa electoral 29-N (12-11-2026), copia en PDF publicada por Menorca · Es Diari, medidas 20 y 60 a 63' },
+        { url: 'https://www.menorca.info/actualidad/elecciones-29n/2026/11/15/2748997/programa-completo-vox-para-elecciones-generales-2026.html', titulo: 'Menorca · Es Diari · El programa completo de Vox para el 29-N (15-11-2026)' },
       ],
     },
   ],
-  revisado: '2026-11-12',
+  revisado: '2026-11-15',
 };

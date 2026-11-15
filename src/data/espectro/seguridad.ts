@@ -1,6 +1,7 @@
-// «Otras propuestas» for the «seguridad» window. Positions checked on 2026-11-12.
-// No 2026 campaign programme on security was found for Sumar or Vox, so their
-// cards rest on their 2023 programmes; the date is in every source title.
+// «Otras propuestas» for the «seguridad» window. Positions checked on 2026-11-12
+// and updated on 2026-11-15: the PP and Vox from their 29-N programmes. No 2026
+// proposal on security was found for the Frente Amplio, so the left's card rests
+// on Sumar's 2023 programme; the date is in every source title.
 import type { Espectro } from './tipos';
 
 export const ESPECTRO: Espectro | null = {
@@ -30,6 +31,7 @@ export const ESPECTRO: Espectro | null = {
         'Prohibir las identificaciones por el aspecto de la persona para aplicar la ley de extranjería.',
         'Mejorar los sueldos, las pensiones y la jornada de los policías.',
       ],
+      nota: 'No hemos encontrado propuestas del Frente Amplio sobre policía y seguridad para el 29-N en sus textos publicados; esta ficha usa el programa de Sumar de 2023.',
       argumento: 'Dicen que la ley de 2015 sirve para disuadir de protestar con multas, y que los abusos solo se corrigen si alguien de fuera del cuerpo controla a la policía.',
       critica: 'Sus críticos, entre ellos los sindicatos policiales, dicen que estos cambios restan autoridad a los agentes y los dejan más desprotegidos en la calle.',
       fuentes: [
@@ -60,41 +62,42 @@ export const ESPECTRO: Espectro | null = {
     {
       id: 'centro-derecha',
       quien: 'Partido Popular (PP)',
-      cuando: 'Programa electoral de 2023 y propuestas de 2026',
-      idea: 'Más medios y más protección legal para los agentes, y mantener la ley de seguridad ciudadana.',
+      cuando: 'Programa para el 29-N, noviembre de 2026',
+      idea: 'Más medios y más protección legal para los agentes, y más dureza con el narcotráfico y los disturbios.',
       propone: [
-        'Reconocer a policías y guardias civiles como profesión de riesgo y adelantar su jubilación (proposición de ley de 2026, que el Gobierno frenó).',
-        'Terminar de igualar sus sueldos (2023) con los de las policías autonómicas.',
-        'Recuperar y hacer permanentes las unidades contra el crimen organizado, como OCON-Sur, y atacar el dinero del narcotráfico.',
-        'Reforzar la autoridad de los agentes; votó en contra de reformar la ley de seguridad ciudadana.',
-        'Subir las Fuerzas Armadas hasta 140.000 militares (2023).',
+        'Reconocer a policías y guardias civiles como profesión de riesgo y terminar de igualar sus sueldos con los de las policías autonómicas (medida 32).',
+        'Contra el narcotráfico: una unidad permanente en la frontera sur, escáneres de contenedores en cuatro puertos y más agentes en la costa andaluza (medida 19).',
+        'Defensa jurídica de los agentes desde el primer momento, y juzgar su actuación según lo que sabían al actuar (medida 31).',
+        'Más pena por actuar con la cara tapada en disturbios, y una multa mínima de 3.000 euros por vandalismo que no sea delito (medidas 21 a 24).',
+        'Presencia policial visible en los barrios con más inseguridad y desalojo inmediato de las ocupaciones (medida 27).',
       ],
       argumento: 'Dicen que a igual peligro corresponde igual reconocimiento, y que el narcotráfico ha ganado terreno porque los cuerpos han perdido medios y unidades.',
-      critica: 'Sus críticos dicen que la ley de 2015, aprobada por el PP con su sola mayoría, sirve para multar protestas, y que reforzar la autoridad de los agentes sin un control externo facilita los abusos.',
+      critica: 'Sus críticos dicen que endurecer multas y penas por disturbios puede servir para castigar la protesta, como reprochan a la ley de 2015 que el PP aprobó con su sola mayoría, y que proteger más a los agentes sin un control externo facilita los abusos.',
       fuentes: [
-        { url: 'https://www.elindependiente.com/espana/2023/07/05/el-plan-de-seguridad-de-feijoo-mejoras-para-policias-revision-del-sistema-de-viogen-y-reservistas-militares/', titulo: 'El Independiente (5-7-2023) · El plan de seguridad del programa del PP' },
-        { url: 'https://www.elespanol.com/espana/20260910/gobierno-bloquea-jubilacion-anticipada-policia-guardia-civil-coste-arcas-publicas/1003744379538_0.html', titulo: 'El Español (10-9-2026) · El Gobierno frena la ley del PP de jubilación anticipada de policías' },
+        { url: 'https://www.democrata.es/uploads/s1/35/09/79/8/la-reconstruccion-nacional.pdf', titulo: 'PP · La reconstrucción nacional, programa electoral 29N (10-11-2026), medidas 19, 21 a 24, 27, 31 y 32' },
+        { url: 'https://www.moncloa.com/2026/11/10/pp-plan-reconstruccion-3465233/', titulo: 'Moncloa.com (10-11-2026) · El programa electoral del PP para el 29-N' },
         { url: 'https://www.moncloa.com/2026/10/07/feijoo-narco-policias-3444014/', titulo: 'Moncloa.com (7-10-2026) · El plan del PP contra el narcotráfico' },
       ],
     },
     {
       id: 'derecha',
       quien: 'Vox',
-      cuando: 'Programa electoral de 2023',
-      idea: 'Un sistema de seguridad del Estado: las policías autonómicas se integran poco a poco en los cuerpos nacionales.',
+      cuando: 'Programa para el 29-N, «Es sentido común», 12 de noviembre de 2026',
+      idea: 'Más medios, más sueldo y más reconocimiento para los agentes, y las Fuerzas Armadas en la frontera.',
       propone: [
-        'Suprimir poco a poco las policías autonómicas e integrar a sus agentes en los cuerpos nacionales; mientras, igualar sus sueldos.',
-        'Devolver al Estado la seguridad, el tráfico, la protección civil y las prisiones.',
-        'El mismo sueldo y jubilación para Fuerzas Armadas, Guardia Civil, Policía Nacional, Vigilancia Aduanera y policías autonómicas y locales.',
-        'Más pena por agredir o resistirse a un agente, y presencia policial en cada barrio.',
-        'Un mando integrado de fronteras, con unidades militares en Ceuta, Melilla y Canarias.',
+        'Igualar sueldos y reconocer como profesión de riesgo a policías, guardias civiles, militares y funcionarios de prisiones (medidas 84, 85 y 89).',
+        'Que dirijan la Guardia Civil y la Policía personas con experiencia en seguridad, no políticos de partido (medida 82).',
+        'Recuperar ya la unidad contra el narcotráfico OCON-Sur, con más medios (medida 86).',
+        'Proteger las fronteras de forma permanente con las Fuerzas Armadas, y militarizar la de Ceuta (medidas 1 y 88).',
+        'Más medios para Fuerzas Armadas, servicios de inteligencia, Guardia Civil, Policía, Vigilancia Aduanera y prisiones, y más ciberseguridad (medidas 83 y 91).',
       ],
-      argumento: 'Dicen que un solo sistema nacional evita duplicidades y diferencias entre agentes que hacen el mismo trabajo, y da la misma seguridad en todo el país.',
-      critica: 'Sus críticos dicen que la Constitución y los estatutos de Cataluña, el País Vasco y Navarra recogen sus policías propias, así que haría falta reformarlos, y los partidos de esas comunidades lo rechazan.',
+      argumento: 'Dicen que quienes se juegan la vida merecen el mismo sueldo y reconocimiento en todos los cuerpos, y que el narcotráfico y la inmigración ilegal exigen más medios y fronteras protegidas.',
+      critica: 'Sus críticos dicen que poner a las Fuerzas Armadas a vigilar fronteras mezcla la defensa con el trabajo policial, y que no explica cuánto costaría igualar los sueldos de todos los cuerpos.',
       fuentes: [
-        { url: 'https://theobjective.com/wp-content/uploads/2023/07/programa-vox-23j.pdf', titulo: 'Vox · Programa electoral de las elecciones generales de 2023 (PDF)' },
+        { url: 'https://men.gsstatic.es/sfAttachPlugin/4847171.pdf', titulo: 'Vox · «Es sentido común», programa electoral 29-N (12-11-2026), copia en PDF publicada por Menorca · Es Diari, medidas 1, 82 a 89 y 91' },
+        { url: 'https://www.menorca.info/actualidad/elecciones-29n/2026/11/15/2748997/programa-completo-vox-para-elecciones-generales-2026.html', titulo: 'Menorca · Es Diari · El programa completo de Vox para el 29-N (15-11-2026)' },
       ],
     },
   ],
-  revisado: '2026-11-12',
+  revisado: '2026-11-15',
 };

@@ -24,10 +24,10 @@ const F = {
   pe2026: { url: 'https://www.europarl.europa.eu/news/en/press-room/20251120IPR31500/meps-adopt-2026-eu-budget-focus-on-competitiveness-research-and-security', titulo: 'Parlamento Europeo · El pleno aprueba el presupuesto de 2026 (20-11-2025)' },
   mfp: { url: 'https://www.consilium.europa.eu/es/policies/eu-long-term-budget/', titulo: 'Consejo de la UE · El presupuesto a largo plazo de la UE (2021-2027 y negociación de 2028-2034)' },
   mfp2028: { url: 'https://commission.europa.eu/topics/budget/eu-budget-2028-2034-explained_es', titulo: 'Comisión Europea · El presupuesto de la UE 2028-2034, explicado' },
-  ingresos2023: { url: 'https://www.eldiario.es/economia/ue-recaudo-7-200-millones-euros-2023-nuevo-impuesto-envases-plastico_1_11655928.amp.html', titulo: 'elDiario.es, con datos del Tribunal de Cuentas Europeo · Ingresos de la UE en 2023 por recurso propio' },
+  ingresos2023: { url: 'https://eca.europa.eu/ECAPublications/SR-2024-16/SR-2024-16_EN.pdf', titulo: 'Tribunal de Cuentas Europeo · Informe especial 16/2024: el recurso propio basado en el plástico, con los ingresos de la UE de 2023 (julio de 2024)' },
   plastico: { url: 'https://commission.europa.eu/strategy-and-policy/eu-budget/long-term-eu-budget/2021-2027/revenue/own-resources/plastics-own-resource_es', titulo: 'Comisión Europea · El recurso propio basado en el plástico (0,80 € por kilo no reciclado)' },
   rnb: { url: 'https://epthinktank.eu/2025/02/10/future-of-eu-long-term-financing-post-2027-needs-and-how-to-finance-them/breakdown-of-current-own-resources', titulo: 'Servicio de Estudios del Parlamento Europeo · Reparto de los recursos propios actuales (2024)' },
-  deuda: { url: 'https://www.eunews.it/en/2025/10/09/court-of-auditors-eu-in-debt-loans-will-impact-upcoming-multi-year-budgets/', titulo: 'Eunews, sobre el informe anual 2024 del Tribunal de Cuentas Europeo · La deuda de la UE y su coste (9-10-2025)' },
+  deuda: { url: 'https://www.eca.europa.eu/ECAPublications/AR-2024-FAQ/AR-2024-FAQ_EN.pdf', titulo: 'Tribunal de Cuentas Europeo · Informe anual 2024, preguntas frecuentes: deuda de la UE, riesgo para el presupuesto e intereses (octubre de 2025)' },
   euro: { url: 'https://www.ecb.europa.eu/press/pr/date/2026/html/ecb.pr260101~c830245e42.en.html', titulo: 'Banco Central Europeo · Bulgaria entra en el euro: 21 países y 358 millones de personas (1-1-2026)' },
   bceTipos: { url: 'https://www.caixabankresearch.com/es/publicaciones/notas-breves-actualidad-economica-y-financiera/observatorio-bancos-centrales-122', titulo: 'CaixaBank Research · El BCE mantiene el tipo de depósito en el 2,50 % (29-10-2026)' },
   tfue123: { url: 'https://eur-lex.europa.eu/legal-content/ES/TXT/?uri=CELEX:12008E123', titulo: 'EUR-Lex · Tratado de Funcionamiento de la UE, artículo 123 (el BCE no puede prestar a los gobiernos)' },
@@ -45,7 +45,7 @@ const F = {
   eeds: { url: 'https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space-regulation-ehds_en', titulo: 'Comisión Europea · Reglamento del Espacio Europeo de Datos de Salud: calendario' },
   eedsEs: { url: 'https://www.sanidad.gob.es/areas/saludDigital/espacioEuropeoDS/home.htm', titulo: 'Ministerio de Sanidad · Espacio Europeo de Datos de Salud (Reglamento 2025/327)' },
   erasmus: { url: 'https://erasmus-plus.ec.europa.eu/whats-new/news/almost-15-million-people-went-on-an-erasmus-mobility-in-2024-according-to-latest-report', titulo: 'Comisión Europea · Casi 1,5 millones de personas hicieron un Erasmus+ en 2024 (14-11-2025)' },
-  vivienda: { url: 'https://es.euronews.com/2025/12/17/ue-frenar-especulacion-aumentar-transparencia-mercado-vivienda', titulo: 'Euronews · El primer Plan Europeo de Vivienda Asequible (17-12-2025)' },
+  vivienda: { url: 'https://delegacionue.camara.es/sites/default/files/2026-03/Question_and_answers_on_the_European_Affordable_Housing_Plan.pdf', titulo: 'Comisión Europea · Preguntas y respuestas sobre el primer Plan Europeo de Vivienda Asequible (16-12-2025; copia de la Cámara de Comercio de España en Bruselas)' },
 } satisfies Record<string, FuenteAmbito>;
 
 export const AMBITO: Ambito | null = {
@@ -63,7 +63,7 @@ export const AMBITO: Ambito | null = {
   cifras: [
     { valor: '452,0 millones', texto: 'Personas que vivían en la Unión Europea el 1 de enero de 2026, en 27 países.', fuente: F.poblacion },
     { valor: '192.800 M€', texto: 'Presupuesto de la Unión para 2026 (compromisos de gasto): unos 427 € por habitante (cálculo nuestro).', fuente: F.presupuesto2026 },
-    { valor: '342.000 M€', texto: 'Deuda que la Unión tenía pendiente al terminar 2024, sobre todo por el fondo de recuperación NextGenerationEU. El Tribunal de Cuentas Europeo espera que llegue a unos 567.000 M€ en 2027.', fuente: F.deuda },
+    { valor: '601.300 M€', texto: 'Deuda que la Unión tenía pendiente al terminar 2024, sobre todo por el fondo de recuperación NextGenerationEU. El Tribunal de Cuentas Europeo calcula que puede pasar de 900.000 M€ en 2027.', fuente: F.deuda },
     { valor: '21 países', texto: 'Usan el euro desde que entró Bulgaria el 1 de enero de 2026: 358 millones de personas.', fuente: F.euro },
   ],
   areas: {
@@ -111,7 +111,7 @@ export const AMBITO: Ambito | null = {
       ],
       cifras: [
         { valor: '4.200 M€', texto: 'Subida inesperada del coste de la deuda del fondo de recuperación en 2026: el doble de lo que calculó la Comisión.', fuente: F.pe2026 },
-        { valor: '> 30.000 M€', texto: 'Intereses de esa deuda que podría pagar la Unión entre 2021 y 2027, según el Tribunal de Cuentas Europeo; la Comisión había previsto 14.900 M€.', fuente: F.deuda },
+        { valor: '≈ 30.000 M€', texto: 'Intereses de esa deuda que podría pagar la Unión entre 2021 y 2027, según el Tribunal de Cuentas Europeo: el doble de los 14.900 M€ que había previsto la Comisión.', fuente: F.deuda },
       ],
     },
     moneda: {
@@ -212,8 +212,8 @@ export const AMBITO: Ambito | null = {
         'Con el reparto del modelo (3 % a vivienda), entre 21.000 y 25.000 M€ al año (estimación), cada año, para prestar.',
       ],
       cifras: [
-        { valor: '11.500 M€', texto: 'Que el plan saca del presupuesto europeo para vivienda, más los 43.000 M€ ya comprometidos para vivienda social, asequible y sostenible.', fuente: F.vivienda },
-        { valor: '+60 %', texto: 'Lo que ha subido el precio de la vivienda en la Unión desde 2013; los alquileres, cerca de un 20 %.', fuente: F.vivienda },
+        { valor: '11.500 M€', texto: 'Inversión europea que el plan añade para vivienda: unos 10.000 M€ de InvestEU en 2026 y 2027 y al menos 1.500 M€ de fondos de cohesión, sobre los 43.000 M€ ya movilizados.', fuente: F.vivienda },
+        { valor: '+60 %', texto: 'Lo que ha subido, como poco, el precio de la vivienda en la Unión desde 2013; los alquileres, cerca de un 20 %.', fuente: F.vivienda },
       ],
     },
   },

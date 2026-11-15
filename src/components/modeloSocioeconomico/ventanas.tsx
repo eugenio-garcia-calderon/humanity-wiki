@@ -10,7 +10,7 @@
 // `#pensiones` opens the window, `#pensiones-fondo` opens it at that section.
 // The old single-page anchors (`#esquema`, `#cuentas`…) still land in the
 // taxes window, where those sections now are.
-import { useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { Euro, GraduationCap, HandCoins, Home, Landmark, Layers, Plus, PieChart, Scale, ScrollText, ShieldCheck, Smartphone, Stethoscope, Tags, type LucideIcon } from 'lucide-react';
 import { ESPECTROS } from '../../data/espectro';
 import { APARTADOS as A_ESCALAS } from '../../data/escalas';
@@ -181,9 +181,45 @@ export function Mas({ titulo, children, className, abierto: inicial = false }: {
 }
 
 /** One section of a window: its anchor, its title and the one idea it holds. */
+/** Sections that fold on a phone (Eugenio, 2026-11-15, «adelante con las mejoras»: the longest windows ran to ~24.000 px
+ *  at 390 px wide, about 27 screens). Sources, open questions and the per-scale detail fold everywhere; the rest are the
+ *  longest reference blocks measured that day. On a tablet or a computer nothing folds. */
+const PLEGAR_SUFIJOS = ['-fuentes', '-retos', '-escalas'];
+const PLEGAR = new Set([
+  'vivienda-hoy', 'vivienda-suelo', 'seguridad-dinero', 'seguridad-duplicidades', 'justicia-reincidencia', 'justicia-ocupacion',
+  'educacion-riesgos', 'educacion-bot', 'legal-sectores', 'legal-prueba', 'legal-licencias',
+]);
+const sePliega = (id: string) => PLEGAR.has(id) || PLEGAR_SUFIJOS.some(s => id.endsWith(s));
+
 export function Apartado({ id, titulo, entradilla, children, fondo = 'claro' }: {
   id: string; titulo: string; entradilla?: ReactNode; children: ReactNode; fondo?: 'claro' | 'blanco';
 }) {
+  const plegable = sePliega(id);
+  const caja = useRef<HTMLDivElement>(null);
+  const [abierto, setAbierto] = useState(false);
+  const [largo, setLargo] = useState(false);
+  // Only offer the fold when the body really is taller than the folded height.
+  useLayoutEffect(() => {
+    const el = caja.current;
+    if (!plegable || !el) return;
+    const medir = () => setLargo(el.scrollHeight > 640);
+    medir();
+    const ro = new ResizeObserver(medir);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [plegable]);
+  // A link to this section, or to anything inside it, opens it.
+  useEffect(() => {
+    if (!plegable) return;
+    const mirar = () => {
+      const h = decodeURIComponent(window.location.hash.slice(1));
+      if (h && (h === id || caja.current?.querySelector(`[id="${CSS.escape(h)}"]`))) setAbierto(true);
+    };
+    mirar();
+    window.addEventListener('hashchange', mirar);
+    return () => window.removeEventListener('hashchange', mirar);
+  }, [plegable, id]);
+  const plegado = plegable && largo && !abierto;
   return (
     <section id={id} aria-labelledby={`${id}-titulo`} className={cn('scroll-mt-40', fondo === 'blanco' && 'border-y border-slate-200 bg-white')}>
       <div className="mx-auto max-w-6xl px-4 pb-16 pt-14 sm:px-6">
@@ -193,7 +229,19 @@ export function Apartado({ id, titulo, entradilla, children, fondo = 'claro' }: 
           <h2 id={`${id}-titulo`} className="text-balance text-[1.75rem] font-[750] leading-[1.12] tracking-[-0.02em] text-slate-900 sm:text-[2.2rem]">{titulo}</h2>
           {entradilla && <div className="mt-3 max-w-[64ch] text-[17px] leading-relaxed text-slate-600">{entradilla}</div>}
         </header>
-        {children}
+        <div ref={caja} id={`${id}-cuerpo`} className={cn('relative', plegado && 'max-sm:max-h-[26rem] max-sm:overflow-hidden')}>
+          {children}
+          {plegado && (
+            <div aria-hidden className={cn('pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t sm:hidden',
+              fondo === 'blanco' ? 'from-white' : 'from-slate-100')} />
+          )}
+        </div>
+        {plegable && largo && (
+          <Libre onClick={() => setAbierto(a => !a)} aria-expanded={abierto} aria-controls={`${id}-cuerpo`}
+            className="mt-4 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 sm:hidden">
+            {abierto ? 'Mostrar menos' : `Seguir leyendo: ${titulo.toLowerCase()}`}
+          </Libre>
+        )}
       </div>
     </section>
   );
