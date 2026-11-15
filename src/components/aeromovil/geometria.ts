@@ -278,7 +278,8 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   tRetrovisores: 'camaras',
   tMaletero: 'cola', tMalIni: 1.40, tMalAbre: 36, tMalLado: 55, tSolarCola: 'no',
   // Round 3 interior (2026-11-12): the rails to the rear axle and their spacing. 0.22 m is 2 × Z_LARGUERO, the spacing until now.
-  tChLargo: 'torreta', tChSep: 0.22,
+  // (2026-11-15: rails to the rear axle by default; it only applies with two rear wheels, which have no shock tower to stop at)
+  tChLargo: 'eje', tChSep: 0.22,
   // Round 3 body (2026-11-12, the «Cuadriciclo Bala clásico»: nose, tail, roof, fin, solar, second door). Every default is
   // the shape and the options as they were, so a design saved without these keys is built exactly as before.
   tMorroLinea: 0, tMorroAlto: 0, tFaro: 'no', tFaroD: 0.16, tColaPlana: 0, tTechoPlano: 0, tCaida: 0, tConAleta: 'si', tSolarMorro: 'no',
