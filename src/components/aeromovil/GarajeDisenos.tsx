@@ -17,7 +17,8 @@ import { construirDisenoGaraje } from './Visor3D';
 import { deDiseno, guardarClave, leerClaves, type Diseno } from './Disenos';
 import { ajustarCarenado, areas, calcular, crearModelo, type Modelo, type Parametros, type Resultados } from './geometria';
 import { camposTriciclo, nombreTriciclo } from './geometriaTriciclo';
-import { cuerpoAeromovil, cuerpoTriciclo, peticionDe } from './tunel/nuestro';
+import { cuerpoAeromovil, cuerpoBasculante, cuerpoTriciclo, peticionDe } from './tunel/nuestro';
+import { camposBasculante } from './geometriaBasculante';
 import { pedirTunel, resultadoEnCache } from './tunel/cliente';
 import type { Resolucion } from './tunel/malla';
 import { olvidarVehiculo, registrarVehiculo } from './garaje/registro';
@@ -59,7 +60,7 @@ const guardarIds = (clave: string, ids: number[]) => { try { localStorage.setIte
 
 /** The family's name, as the editor calls it (a Triciclo with two rear wheels is the «Cuadriciclo Bala clásico»). */
 export function familia(P: Parametros, m: Modelo): string {
-  return m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala en rombo' : m.tipo === 'triciclo' ? nombreTriciclo(camposTriciclo(P)) : 'Aeromóvil Gota';
+  return m.tipo === 'basculante' ? 'Cuadriciclo Basculante' : m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala en rombo' : m.tipo === 'triciclo' ? nombreTriciclo(camposTriciclo(P)) : 'Aeromóvil Gota';
 }
 
 interface Info { d: Diseno; clave: string; modelo: Modelo; res: Resultados; familia: string; def: VehiculoGaraje & { preparar: () => void; listo: () => boolean } }
@@ -102,6 +103,7 @@ function vehiculoDe(d: Diseno, modelo: Modelo, nombreFamilia: string): Info['def
 function peticionCd(i: Info, resolucion: Resolucion) {
   const { modelo: m, res } = i;
   if (m.tipo === 'triciclo') return { ...peticionDe({ ...cuerpoTriciclo(m), id: `garaje-cd-${i.d.id}` }, resolucion, 'pocas'), soloNumeros: true };
+  if (m.tipo === 'basculante') return { ...peticionDe({ ...cuerpoBasculante(m), id: `garaje-cd-${i.d.id}` }, resolucion, 'pocas'), soloNumeros: true };
   if (m.tipo === 'bala') return { ...peticionDe({ ...cuerpoAeromovil(m, res.A), id: `garaje-cd-${i.d.id}` }, resolucion, 'pocas'), soloNumeros: true };
   return null;
 }
@@ -244,11 +246,11 @@ export function useDisenosGaraje({ activo, referencias, resolucion, conCd, hueco
   for (const { i, p } of peticiones) {
     const { modelo: m, res } = i;
     const R = p ? resultadoEnCache(p) : undefined;
-    const kmh = m.tipo === 'triciclo' ? camposTriciclo(deDiseno(i.d.parametros || {})).tVel : 80;
+    const kmh = m.tipo === 'triciclo' ? camposTriciclo(deDiseno(i.d.parametros || {})).tVel : m.tipo === 'basculante' ? camposBasculante(deDiseno(i.d.parametros || {})).qVel : 80;
     const cd = m.tipo === 'a1' || m.tipo === 'gota'
       ? `Cd ${fmt(res.Cd, 3)} (fórmula del editor)`
       : R ? `Cd ${fmt(cdA(R, kmh), 3)} (túnel, a ${Math.round(kmh)} km/h)` : 'Cd: el túnel lo está calculando…';
-    const kWh = m.tipo === 'a1' ? m.P.kWh : m.tipo === 'triciclo' ? m.kWh : null;
+    const kWh = m.tipo === 'a1' ? m.P.kWh : m.tipo === 'triciclo' ? m.kWh : m.tipo === 'basculante' ? m.bateria.kWh : null;
     fichas[i.def.id] = [
       // (the family, unless the design is named after it)
       ...(i.familia !== i.d.nombre ? [i.familia] : []),

@@ -643,6 +643,22 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 - **Dragged places are per browser** (`localStorage`), not shared: Eugenio's phone and computer each have their own garage arrangement.
 - **A dragged place is absolute in the rows' frame.** When a design is added before it in the list, the cars in the row move along and a dragged car does not, so they can end up overlapping. There is no overlap check on drop.
 - **The drag snaps to 5 cm and has no grid or alignment guides**; «Volver a su fila» is the way back to a tidy row.
+## 2026-11-15 — Cornering circuit: shortcuts
+
+- **Quasi-steady rigid body.** No suspension roll, tyre deflection, load-transfer dynamics, transients, combined braking-cornering grip, banking or aero. A 15 % reserve stands in for compliance. A transient model (chicane, tilt actuator lag) would need a 3-4 DOF model like Rajamani et al. 2003.
+- **CdG heights of the table cars are estimated** (35 % of height). The Smera's tilt is 25° per Wikipedia/Caradisiac; auto123's prototype sheet says 20°.
+- **The «apurar» lap uses the same longitudinal limits for every car** (accelerate min(2.5 m/s², 0.5·μ·g), brake 0.7·μ·g), not each car's power: lap times compare cornering only.
+- **Editor designs other than the Triciclo/Cuadriciclo have no CdG**: the circuit estimates it (35 % of height, equal load per wheel) until those families compute one. The Bala has no masses and is not offered.
+- **Recharts colours are `var(--color-…)` strings** that exist only because the same colours are used as classes in the legend swatches (Tailwind 4 emits only used variables). Removing a swatch class could silently blank a line; a shared chart palette in `src/components/ui/` would fix it (~30 min).
+## 2026-11-15 — Cuadriciclo Basculante: shortcuts
+
+- **No click-to-sheet components, no drawings (Planos) and no STEP**: STL only, as the Bala family. Cost to add the plan sheets: the skin is sections, so `planos.ts` could cut it (~half a day).
+- **Rigid-body tilt**: the lean is drawn and checked at its maximum and at rest; no tilt-actuator dynamics, no suspension roll; the steering follows the lean in «Bascular» only for show (35 % of full lock at full lean).
+- **The rear wheel arches are cells left out of the skin**, their stepped edge hidden by a rubber trim, and a black half-cylinder liner inside: not a real wheel-well surface (STL of the body has those holes).
+- **The tunnel's «Probar» options do not know the `q…` sliders**: for this family the explanations show without «Probar» (`tunel/explicaciones.ts`).
+- **Materials and helpers come from Visor3D through `ayudasVisor`** (an object of functions): a cheap seam, but the builder depends on the viewer's helper signatures. Moving those helpers to a module of their own (~1 h) would let both import them.
+- **The shape grid is fixed at ~1 cm along the car**: fine for the viewer (≈60 ms), coarse for a mould.
+- **Default turning radius 6,5 m** (pods steer with the wheels in a narrow nose). A wider front track or shorter fairings trade width or drag for it; noted, not solved.
 
 ### 2026-11-15 — Smooth body, the egg fix: shortcuts
 - **The windscreen-to-hood join is not guaranteed.** The blend from the canopy's section into the hood's deck (`LARGO_MEZCLA`, main's code) shows sub-millimetre ripples in many cases. Some slider combinations make bumps of 5–38 mm on the deck edge's line, and creases of up to 1.3°. `bala-cola-lisa` reports these as 44 AVISO lines out of 152 cases, not as failures. The front is identical to main, to 0.0000 mm, on 89 cases of the clásico and 11 of his design. A fix needs its own round: the two crown fades tried here made it worse (see the decisions log).

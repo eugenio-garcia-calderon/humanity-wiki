@@ -13,12 +13,12 @@ export function fichaPropia(m: Modelo, r: Resultados) {
   const ejes = new Set(m.ruedas.map(w => Math.round(w.x * 100))).size;
   // The Bala has no mass estimate and the editor's Cd formula does not apply to it: '—' rather than a number that means nothing.
   // The Triciclo has a mass; its Cd is the tunnel's, computed apart (NaN here, so '—' too). Both carry two riders.
-  const dosRuedas = m.tipo === 'bala' || m.tipo === 'triciclo';
+  const dosRuedas = m.tipo === 'bala' || m.tipo === 'triciclo' || m.tipo === 'basculante';
   const via = dosRuedas ? m.P.track : Math.max(m.via.del, m.via.tras);
   return { L: m.Lf, W: m.P.W, H: m.P.H, batalla: m.P.B, ruedas: m.ruedas.length, ejes, via, plazas: dosRuedas ? 2 : m.asientos.length,
     masa: Number.isFinite(r.mVeh) ? r.mVeh : null, cd: Number.isFinite(r.Cd) ? r.Cd as number | null : null, huella: m.Lf * m.P.W };
 }
-export const nombreDe = (m: Modelo) => (m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala en rombo' : m.tipo === 'triciclo' ? (m.traseras ? 'Cuadriciclo Bala clásico' : 'Triciclo Bala') : 'Aeromóvil Gota');
+export const nombreDe = (m: Modelo) => (m.tipo === 'basculante' ? 'Cuadriciclo Basculante' : m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala en rombo' : m.tipo === 'triciclo' ? (m.traseras ? 'Cuadriciclo Bala clásico' : 'Triciclo Bala') : 'Aeromóvil Gota');
 
 export function TablaComparacion({ propia, otra, nombre, nuestro = 'Aeromóvil 1' }: { propia: ReturnType<typeof fichaPropia>; otra: ReturnType<typeof fichaComparable>; nombre: string; nuestro?: string }) {
   const filas: [string, number | null, number | null, (v: number) => string][] = [
