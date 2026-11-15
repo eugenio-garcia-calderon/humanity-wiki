@@ -38,7 +38,7 @@ export const VEHICULOS: { k: Disposicion; n: string; d: string }[] = [
   { k: 'bala', n: 'Cuadriciclo Bala en rombo', d: 'Biplaza a horcajadas, tipo moto carenada: el rombo de ruedas del Gota con carenados laterales fijos, morro en punta y cúpula.' },
   { k: 'triciclo', n: 'Triciclo Bala', d: 'La carrocería del Cuadriciclo en rombo con tres ruedas: dos delante en carenados que giran, como el Aptera, y una detrás con el motor; respaldos que se reclinan. En Rodaje se le pueden poner dos ruedas detrás, también en carenados: el Cuadriciclo Bala clásico.' },
   // 2026-11-15
-  { k: 'basculante', n: 'Cuadriciclo Basculante', d: 'Cuatro ruedas que se inclinan en las curvas, como el Lumeneo Smera, pero más bajo (el techo un 25 % más bajo, los dos reclinados como en un velomóvil) y con la cola curva del Aptera; las ruedas delanteras en carenados que giran y se inclinan con ellas.' },
+  { k: 'basculante', n: 'Cuadriciclo Basculante', d: 'Cuatro ruedas que se inclinan en las curvas, como el Lumeneo Smera, pero más bajo (el techo un 25 % más bajo, los dos reclinados como en un velomóvil) y con la cola curva del Aptera; las dos ruedas delanteras dentro del morro, en una sola pieza.' },
 ];
 /** A saved design's family: designs from before 2026-11-06 carry none and are the Gota's. */
 const familiaDe = (d: Diseno): Disposicion => { const k = d.parametros?.disposicion; return VEHICULOS.some(v => v.k === k) ? k! : 'rombo'; };

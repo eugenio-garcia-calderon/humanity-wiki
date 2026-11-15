@@ -115,10 +115,107 @@ export interface FormaBasculante {
 const BANDA_BAJOS = 0.55;
 
 /**
- * The body. `limite(x)`: the half-width the front fairings leave free at x (m), or Infinity away from them
- * (`limiteCarenados`); the body's half-width is the smooth minimum of its own and this.
+ * What the body must hold inside (2026-11-15, Eugenio: «quiero que el carenado frontal, el morro, envuelva las 2 ruedas
+ * delanteras basculantes con una sola pieza muy aerodinámica»): points (x, y, z ≥ 0, mirrored to −z) that must lie inside
+ * the skin, and `sobre`, the roof's height over the highest of them (m). The front wheel wells' roofs and outer walls.
  */
-export function crearForma(D: DimForma, limite: (x: number) => number = () => Infinity): FormaBasculante {
+export interface Envuelve { pts: P3[]; sobre: number }
+
+/** The nose cap's profile for a design: 0 at the tip, 1 from `largoPunta` back (the body's own outlines multiply by it). */
+function capNariz(D: DimForma) {
+  const Lp = Math.max(0.05, Math.min(D.largoPunta, D.xn - D.xParabrisas - 0.02));
+  return (x: number) => {
+    const s = Math.min(1, Math.max(0, (D.xn - x) / Lp));
+    if (s >= 1) return 1;
+    const par = 1 - (1 - s) * (1 - s), eli = Math.sqrt(Math.max(0, 1 - (1 - s) * (1 - s)));
+    return par + (eli - par) * D.puntaMorro;
+  };
+}
+/**
+ * How far back of the foremost point to hold, the nose must reach so that its cap does not squeeze them (the cap's
+ * profile ≥ 0.99 there): the least `xn − x` (m) for this cap's length and roundness.
+ */
+export function largoCapNariz(D: Pick<DimForma, 'largoPunta' | 'puntaMorro'>, minimo = 0.99): number {
+  const f = (s: number) => { const par = 1 - (1 - s) * (1 - s), eli = Math.sqrt(Math.max(0, 1 - (1 - s) * (1 - s))); return par + (eli - par) * D.puntaMorro; };
+  let lo = 0, hi = 1; for (let k = 0; k < 40; k++) { const mid = (lo + hi) / 2; if (f(mid) >= minimo) hi = mid; else lo = mid; }
+  return hi * Math.max(0.05, D.largoPunta);
+}
+
+/**
+ * A requirement line (m, along x): every point's need, falling away from it as a parabola of radius `rho` (so the
+ * body reaches it in a curve, not a step), then held going back from the nose (a running maximum: it never falls again
+ * behind the wheels, so no waist and no bump), then averaged over the 8 cm behind each x (the running maximum only
+ * grows going back, so the average is never under it). Tabulated every 5 mm from `x1` (the nose) back to `x0`;
+ * −Infinity outside.
+ */
+function lineaRequisito(pts: [number, number][], x0: number, x1: number, rho: number): (x: number) => number {
+  if (!pts.length || x1 <= x0) return () => -Infinity;
+  const paso = 0.005, n = Math.ceil((x1 - x0) / paso) + 1, crudo: number[] = [];
+  for (let i = 0; i < n; i++) {
+    const x = x1 - i * paso; let m = -Infinity;
+    for (const [px, v] of pts) { const r = v - (x - px) * (x - px) / (2 * rho); if (r > m) m = r; }
+    crudo.push(i ? Math.max(m, crudo[i - 1]) : m);
+  }
+  const w = Math.round(0.08 / paso), tabla = crudo.map((_, i) => { let s = 0, k = 0; for (let j = i; j <= Math.min(n - 1, i + w); j++) { s += crudo[j]; k++; } return s / k; });
+  return (x: number) => {
+    if (x > x1 + 1e-9 || x < x0 - 1e-9) return -Infinity;
+    const u = Math.min(n - 1, Math.max(0, (x1 - x) / paso)), i = Math.min(n - 2, Math.floor(u)), t = u - i;
+    return tabla[i] + (tabla[i + 1] - tabla[i]) * t;
+  };
+}
+
+/**
+ * The body. `limite(x)`: the half-width the front fairings leave free at x (m), or Infinity away from them
+ * (`limiteCarenados`); the body's half-width is the smooth minimum of its own and this. `envuelve`: what it must hold
+ * inside instead (the front wheels in the nose): the roof and the half-width grow to hold it, monotonically from the
+ * nose, so the guarantee of no bumps stands; the roof's height and the body's width grow too if it asks for more.
+ */
+export function crearForma(D0: DimForma, limite: (x: number) => number = () => Infinity, envuelve?: Envuelve): FormaBasculante {
+  if (!envuelve || !envuelve.pts.length) return construirForma(D0, limite, null);
+  const g = capNariz(D0);
+  // 1. the roof over the points: the body's own roof line (rising from the nose to xC) or this, whichever is higher
+  const narizDe = (H: number) => { const yCapo = Math.min(D0.yCapo, H - 0.12); return { yM: Math.min(D0.yMorro, yCapo - 0.04) }; };
+  const necesTecho = (yM: number) => envuelve.pts.map(([px, py]) => [px, yM + (py + envuelve.sobre - yM) / Math.max(0.05, g(px))] as [number, number]);
+  let H = Math.max(D0.H, Math.max(...envuelve.pts.map(p => p[1])) + envuelve.sobre + 0.03);
+  H = Math.max(H, Math.max(...necesTecho(narizDe(H).yM).map(p => p[1])) + 0.01);
+  const xC = Math.min(D0.xCaida, D0.xParabrisas - D0.largoParabrisas - 0.06);
+  const reqTecho = lineaRequisito(necesTecho(narizDe(H).yM), xC, D0.xn, 0.30);
+  // 2. the half-width each point needs in the section that roof gives (the superellipse through it), before the cap
+  const F0 = construirForma({ ...D0, H }, limite, { techo: reqTecho, ancho: () => -Infinity });
+  const necAncho: [number, number][] = [];
+  for (const [px, py, pz] of envuelve.pts) {
+    const f = F0.frame(px); if (py <= f.bot + 1e-4) continue;   // under the belly: it shows there, as any car's wheel does
+    const arriba = py >= f.yc, n = arriba ? D0.nU : D0.nL, hh = arriba ? f.top - f.yc : f.yc - f.bot;
+    const s = Math.min(0.97, Math.pow(Math.min(1, Math.abs(py - f.yc) / Math.max(1e-6, hh)), n));
+    necAncho.push([px, Math.abs(pz) / Math.pow(1 - s, 1 / n) / Math.max(0.05, g(px))]);
+  }
+  // the plan: the requirement held from the nose to its widest (at the wheels), then narrowing in one smooth curve
+  // (a half cosine, flat at both ends) to the body's own width where the tail starts: widest at the front wheels and
+  // narrowing all the way back, a teardrop seen from above (one top, no waist), and the cabin keeps its own width
+  // where the riders' shoulders are and where its lower corners must clear the road at full lean
+  const pico = Math.max(0, ...necAncho.map(p => p[1]));
+  const W = D0.W;
+  const subida = lineaRequisito(necAncho, D0.xAncho1, D0.xn, 0.15);
+  let xPico = D0.xn; for (let x = D0.xn; x >= D0.xAncho1; x -= 0.005) { if (subida(x) >= pico - 1e-6) { xPico = x; break; } }
+  // behind the widest, never inside any point either: the least line that only narrows going back and holds them all
+  // (each point's need, falling away as the same parabola, and the largest of those from the tail forwards)
+  const paso = 0.005, nB = Math.max(1, Math.ceil((xPico - D0.xAncho1) / paso)), detras: number[] = [];
+  for (let i = 0; i <= nB; i++) {
+    const x = D0.xAncho1 + i * paso; let v = -Infinity;
+    for (const [px, n] of necAncho) { const r = n - (x - px) * (x - px) / (2 * 0.15); if (r > v) v = r; }
+    detras.push(i ? Math.max(v, detras[i - 1]) : v);
+  }
+  const reqDetras = (x: number) => { const u = Math.min(nB, Math.max(0, (x - D0.xAncho1) / paso)), i = Math.min(nB - 1, Math.floor(u)), t = u - i; return nB < 1 ? detras[0] : detras[i] + (detras[i + 1] - detras[i]) * t; };
+  const reqAncho = pico <= W / 2 ? subida : (x: number) => {
+    if (x >= xPico) return subida(x);
+    if (x < D0.xAncho1) return -Infinity;
+    const t = (xPico - x) / Math.max(1e-6, xPico - D0.xAncho1);
+    return Math.max(reqDetras(x), W / 2 + (pico - W / 2) * (1 + Math.cos(Math.PI * t)) / 2);
+  };
+  return construirForma({ ...D0, H, W }, limite, { techo: reqTecho, ancho: reqAncho });
+}
+
+function construirForma(D: DimForma, limite: (x: number) => number, req: { techo: (x: number) => number; ancho: (x: number) => number } | null): FormaBasculante {
   const { xn, xt, H, W, suelo } = D;
   // ── the roof line: the Aptera curve from the tail edge up to `xCaida`, the roof, the windscreen, the bonnet, the nose
   const yTop = D.yCola + D.grosorCola / 2, yBot = D.yCola - D.grosorCola / 2;
@@ -129,7 +226,10 @@ export function crearForma(D: DimForma, limite: (x: number) => number = () => In
   pt.push([xC, H], [xTechoIni, H - 0.012], [D.xParabrisas - 0.45 * D.largoParabrisas, yCapo + 0.80 * (H - yCapo)], [D.xParabrisas, yCapo]);
   const yM = Math.min(D.yMorro, yCapo - 0.04);
   pt.push([xn - 0.45 * (xn - D.xParabrisas), yM + 0.70 * (yCapo - yM)], [xn, yM]);
-  const topRaw = pchip(...ordenar(pt));
+  const topLinea = pchip(...ordenar(pt));
+  // (the requirement only from the roof's top forwards, where this line only rises going back: the higher of two rising
+  // lines rises too; at xC the roof is already above the requirement, so the two meet there with no step)
+  const topRaw = req ? (x: number) => x >= xC ? Math.max(topLinea(x), req.techo(x)) : topLinea(x) : topLinea;
   // ── the belly: the tail's long rising curve (the Aptera's diffuser), flat, and up to the nose tip
   const xB = Math.min(D.xBajosCola, D.xBajosMorro - 0.05), xBM = Math.min(D.xBajosMorro, xn - 0.12);
   const pb: [number, number][] = [[xt, Math.max(suelo + 0.005, yBot)]];
@@ -140,15 +240,12 @@ export function crearForma(D: DimForma, limite: (x: number) => number = () => In
   const ph: [number, number][] = [[xt, W / 2 * D.anchoCola]];
   for (let k = 1; k < 8; k++) { const t = 1 - k / 8, x = D.xAncho1 - (D.xAncho1 - xt) * t; ph.push([x, W / 2 * (1 - (1 - D.anchoCola) * Math.pow(t, 1.8))]); }
   ph.push([D.xAncho1, W / 2], [D.xAncho0, W / 2], [D.xAncho0 + 0.5 * (xn - D.xAncho0), W / 2 * (D.anchoMorro + (1 - D.anchoMorro) * 0.45)], [xn, W / 2 * D.anchoMorro]);
-  const hwRaw = pchip(...ordenar(ph));
+  const hwLinea = pchip(...ordenar(ph));
+  // (likewise from the full width's end forwards, where this line only widens going back; there it is W/2, which the
+  // requirement never passes: crearForma widened W to hold it)
+  const hwRaw = req ? (x: number) => x >= D.xAncho1 ? Math.max(hwLinea(x), req.ancho(x)) : hwLinea(x) : hwLinea;
   // ── the nose cap: 0 a parabolic point, 1 a quarter ellipse (round); both reach the body with no kink
-  const Lp = Math.max(0.05, Math.min(D.largoPunta, xn - D.xParabrisas - 0.02));
-  const g = (x: number) => {
-    const s = Math.min(1, Math.max(0, (xn - x) / Lp));
-    if (s >= 1) return 1;
-    const par = 1 - (1 - s) * (1 - s), eli = Math.sqrt(Math.max(0, 1 - (1 - s) * (1 - s)));
-    return par + (eli - par) * D.puntaMorro;
-  };
+  const g = capNariz(D);
   const frame = (x: number): Seccion => {
     const xx = Math.min(xn, Math.max(xt, x)), k = g(xx);
     const top = yM + (topRaw(xx) - yM) * k, bot = yM - (yM - botRaw(xx)) * k;

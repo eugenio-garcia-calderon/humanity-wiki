@@ -11616,3 +11616,14 @@ Eugenio: una visualización en 2D donde cada partido no es un punto sino una geo
 - Es una web estática autónoma en `public/vision/` (como el Observatorio). El servidor contesta `/vision` con `/vision/`. Dentro de la aplicación, la ruta `vision` (`AVisionIdeal` en `App.tsx`) recarga hacia la web estática.
 - **La página antigua «Visión y hoja de ruta» ahora vive en `/hoja-de-ruta`**: menú lateral, campana (avisos de puntos y de gasto de IA), aviso del tablero (`roadmap.ts`), enlace de Veracidad y el asistente de IA apuntan allí. Los enlaces antiguos con `?pestana=` siguen funcionando: tanto la ruta de la aplicación como la web estática los mandan a `/hoja-de-ruta?pestana=…`. Los textos editables de esa página no cambian de clave.
 - Fotos: no se pudieron abrir desde el entorno de construcción (Commons bloqueado). Si una no carga, se ve un recuadro gris «Imagen no disponible».
+
+## 2026-11-15 · Cuadriciclo Basculante: el morro envuelve las dos ruedas delanteras, vía delantera −20 %
+
+- Eugenio: «quiero que el carenado frontal, el morro, envuelva las 2 ruedas delanteras basculantes con una sola pieza muy aerodinámica, y haz que las ruedas basculantes tengan un ancho de vía un 20 % menor del actual».
+- Nuevo selector «Las ruedas delanteras van»: **dentro del morro** (de serie) o cada una en su carenado (lo de antes, que sigue disponible).
+- Dentro del morro: cada rueda va en un paso de rueda cerrado, como en un velomóvil; solo asoma por debajo. El morro tapa todo lo que la rueda barre girada a tope (20°), inclinada a tope (25°) y con la suspensión hundida. Vista desde arriba, la carrocería es una gota: lo más ancho es el morro sobre las ruedas y se estrecha hasta la cola.
+- Vía delantera de serie: 0,69 m (antes 0,86).
+- Deslizadores nuevos: «Morro: altura sobre los pasos de rueda», «Paso de rueda: hueco al neumático» y «Paso de rueda: hasta dónde se abre por el lado».
+- Comprobaciones nuevas: rueda delantera dentro del morro, techo del paso bajo el capó, pies del piloto entre los pasos, rodillas sobre los pasos.
+- Diseño de serie: 3,01 × 1,04 × 1,10 m (antes 2,90 × 1,15 × 1,10); Cd del túnel 0,192 a 80 km/h (antes 0,218); área frontal 0,81 m² (antes 1,03); 2,52 kWh/100 km a 80 km/h; 37 comprobaciones en verde. El vuelco sin bascular baja de 0,80 a 0,73 g por la vía más estrecha.
+- Sin migración: el diseño del equipo solo guarda la familia y toma los valores de serie del código.

@@ -94,7 +94,7 @@ function pielDe(m: ModeloBasculante) {
 
 /** One front fairing's shell, in its own axes (x' forward from the axle, y up, z outwards; `s` mirrors it to the left). */
 function carenadoDe(m: ModeloBasculante, s: number) {
-  const p = m.pod, nx = 44, nt = 48, pos: number[] = [], idx: number[] = [];
+  const p = m.pod!, nx = 44, nt = 48, pos: number[] = [], idx: number[] = [];
   const xsl: number[] = []; for (let i = 0; i <= nx; i++) xsl.push(p.x0 + (p.x1 - p.x0) * (1 - Math.cos(Math.PI * i / nx)) / 2);
   for (const xl of xsl) { const t0 = p.th0(xl); for (let j = 0; j <= nt; j++) { const q = p.punto(xl, t0 + (Math.PI - 2 * t0) * j / nt); pos.push(q[0], q[1], s * q[2]); } }
   for (let i = 0; i < nx; i++) for (let j = 0; j < nt; j++) { const a = i * (nt + 1) + j, b = a + nt + 1; if (s > 0) idx.push(a, a + 1, b, a + 1, b + 1, b); else idx.push(a, b, a + 1, a + 1, b, b + 1); }
@@ -178,6 +178,28 @@ export function construirBasculante(G: Record<CapaB, THREE.Group>, puertasG: Map
       pared.lineTo(a.x + a.rx, yb); pared.closePath();
       const tapa = new THREE.Mesh(new THREE.ShapeGeometry(pared, 4), M.bajos); tapa.position.z = s * a.zIn; G.carenado.add(tapa);
     }
+    // the front wells (the wheels in the nose): the roof over the tyre, from the inner wall out to the side skin, and
+    // the inner wall, which follows the steered tyre's inner face along x; both seen from below and from inside
+    if (m.arcoDel && m.pasoDel) {
+      const a = m.arcoDel, pd = m.pasoDel, nx = 48, nz = 10;
+      const forro = (M.bajos as THREE.Material).clone(); forro.side = THREE.DoubleSide;
+      const malla = (punto: (i: number, j: number) => V3, ni: number, nj: number) => {
+        const pos: number[] = [], idx: number[] = [];
+        for (let i = 0; i <= ni; i++) for (let j = 0; j <= nj; j++) pos.push(...punto(i, j));
+        for (let i = 0; i < ni; i++) for (let j = 0; j < nj; j++) { const k = i * (nj + 1) + j, k2 = k + nj + 1; idx.push(k, k + 1, k2, k + 1, k2 + 1, k2); }
+        const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals(); return g;
+      };
+      const xA = (i: number) => a.x - a.rx + 2 * a.rx * i / nx;
+      for (const s of [1, -1]) {
+        const techo = malla((i, j) => {
+          const x = xA(i), y = Math.max(F.bajos(x) + 0.004, m.yArcoDel(x)), z0 = pd.zIn(x), w = F.ladoZ(x, y), z1 = Math.max(z0, (Number.isFinite(w) ? w : z0) - 0.004);
+          return [x, y, s * (z0 + (z1 - z0) * j / nz)];
+        }, nx, nz);
+        const mt = new THREE.Mesh(techo, forro); mt.receiveShadow = true; G.carenado.add(mt);
+        const pared = malla((i, j) => { const x = xA(i), y0 = F.bajos(x) + 0.004, y1 = Math.max(y0, m.yArcoDel(x)); return [x, y0 + (y1 - y0) * j / nz, s * pd.zIn(x)]; }, nx, nz);
+        G.carenado.add(new THREE.Mesh(pared, forro));
+      }
+    }
   }
   // the light bars' ends: the indicators (amber, the viewer blinks them), and the cameras on the A-pillars (as the Aptera's)
   for (const s of [1, -1]) {
@@ -206,8 +228,8 @@ export function construirBasculante(G: Record<CapaB, THREE.Group>, puertasG: Map
     A.tube(dS, [0, yR - 0.05, 0], [0, yR + 0.05, 0], 0.06, M.stanch);
     A.muelle(dS, [0, yR + 0.06, 0], [0, h - 0.02, 0], 0.034, 6, M.muelle);
     A.tube(dS, [0, yR, 0], [0, yR, s * (q.e - q.w / 2 - 0.004)], 0.03, M.black);
-    if (q.eje === 'del') {
-      A.tube(dS, [0, yR + 0.02, 0], [0.09, yR + 0.04, -s * 0.03], 0.018, M.alu);   // the steering arm
+    if (q.eje === 'del') A.tube(dS, [0, yR + 0.02, 0], [0.09, yR + 0.04, -s * 0.03], 0.018, M.alu);   // the steering arm
+    if (q.eje === 'del' && m.pod) {
       const dC = esquinaGrupo(G.carenado, q), pod = carenadoDe(m, s), mesh = new THREE.Mesh(pod.geo, M.body);
       mesh.position.set(0, yR, s * q.e); mesh.castShadow = true; mesh.name = 'carenado'; dC.add(mesh);
       for (const l of pod.labios) {

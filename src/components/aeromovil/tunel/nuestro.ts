@@ -132,9 +132,10 @@ export function cuerpoBasculante(m: ModeloBasculante, nombre = 'Cuadriciclo Basc
   const [d, t] = m.esquinas.filter(q => q.s > 0);
   return {
     id: 'aeromovil', nombre, x: 0, z: 0, giro: 0, envolvente, n,
-    area, fuenteArea: 'sección mayor de la carrocería (sin los carenados delanteros)',
+    area, fuenteArea: m.pod ? 'sección mayor de la carrocería (sin los carenados delanteros)' : 'sección mayor de la carrocería',
+    // (2026-11-15: with the front wheels in the nose, they are inside the body as the rear ones, their bottoms showing)
     ruedas: [
-      { d: 2 * d.r, w: d.w, tipo: 'carenado' }, { d: 2 * d.r, w: d.w, tipo: 'carenado' },
+      { d: 2 * d.r, w: d.w, tipo: m.pod ? 'carenado' : 'dentro' }, { d: 2 * d.r, w: d.w, tipo: m.pod ? 'carenado' : 'dentro' },
       { d: 2 * t.r, w: t.w, tipo: 'dentro' }, { d: 2 * t.r, w: t.w, tipo: 'dentro' },
     ],
     ejes: [0, m.xR],

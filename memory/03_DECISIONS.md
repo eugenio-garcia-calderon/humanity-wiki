@@ -1752,3 +1752,22 @@ Eugenio: «que cada elemento de la ilustración puedas pinchar y arrastrarlo… 
 
 - Eugenio asked for the new site at `/vision`, which was already the «Visión y hoja de ruta» page (roadmap board, economy and AI-spend tabs, target of notification links). Options: (a) put the new site elsewhere (`/vision-ideal`) — rejected, he named the URL; (b) replace the old page — rejected, it would lose the roadmap and break notification links; (c) **move the old page to `/hoja-de-ruta` and redirect `?pestana=` links** — chosen. Every in-code link was updated (grep for `/vision`); links already sent (notifications rendered earlier, bookmarks) are caught twice: in the SPA route and in a one-line script at the top of `public/vision/index.html` (a full page load of `/vision?pestana=x` never reaches the SPA, because `express.static` redirects the directory first).
 - Shipped as static files, like the Polarization Observatory, because it was built and reviewed as a standalone local site. Content lives in `public/vision/data.js` (Vivienda, Movilidad) and `data_otros.js` (the other ten sectors), not in the database.
+
+## 2026-11-15 · Cuadriciclo Basculante: front wheels inside the nose (velomobile wells), teardrop plan
+
+**Context.** Eugenio asked for the nose to wrap both front tilting wheels in one aerodynamic piece, and for a front track 20 % narrower (0.86 → 0.69 m). He read "the front track" as the subject of the sentence; the rear track (0.62 m) was left alone.
+
+**Decision.**
+- New option `qRuedasDel: 'morro' | 'carenados'`, default `'morro'`. The per-wheel fairings stay as the other option, so no code path was removed.
+- With `'morro'`, `pasoDelantero` sweeps the tyre in every position: full lock either way, full lean either way, and 60 % of the bump travel. `crearForma` (basculante/forma.ts) takes an `Envuelve` list of points the skin must hold:
+  - The roof and the half-width each grow to the requirement as a running maximum from the nose, so the lines stay monotone and there are no bumps.
+  - Behind the widest point the plan only narrows: it is the smallest non-increasing line that still holds every point, joined by a half-cosine down to the cabin's own width at `xAncho1`.
+- The skin is cut only below a low side opening (`qPasoAbre`, 6 cm over the axle by default) and outboard of an inner wall that follows the swept tyre along x.
+- The nose is lengthened automatically, so the rounded tip starts ahead of the wells (`largoCapNariz`).
+
+**Alternatives rejected.**
+1. Car-like open arches up to the well's roof. Tried first: the steered wheels show and it does not "wrap" anything.
+2. Holding the full nose width all the way back (a monotone plan). The cabin became 1.07–1.15 m wide and its lower corners touched the road at 25° of lean.
+3. A planar inner wall at the closest tyre point. That leaves 12 cm off the centre line, so the pilot's feet would not fit. The wall that follows x leaves 21 cm at the axle.
+
+**Cost.** Default 3.01 m long (+11 cm) and 1.04 m wide (the pods version was 1.15 m overall). The nose stands 0.92 m over the axle. Tunnel Cd at 80 km/h: 0.192 against 0.218 for the pods; frontal area 0.81 m² against 1.03. Upright roll limit 0.73 g against 0.80, from the narrower track.
