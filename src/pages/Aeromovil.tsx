@@ -20,12 +20,14 @@
 //                         coste, proveedor y alternativas
 //   /aeromovil/aranceles   (solo Aeromóvil 1) derechos de aduana de las piezas
 //                         compradas en China, IVA aparte, y el vehículo entero
+//   /aeromovil/circuito   estabilidad en curvas: el Lumeneo Smera (bascula), el
+//                         Aptera, otros del garaje y el diseño abierto, curva a curva
 //
 // Todo el cálculo vive en `src/components/aeromovil/geometria.ts`, que es la
 // misma geometría que el script CadQuery de `public/aeromovil/`.
-import { Fragment, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, Suspense, lazy, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Armchair, BatteryCharging, Box, Car, Warehouse, Camera, ChevronDown, CircleDot, ClipboardList, Factory, Frame, Layers3, Lightbulb, ShieldCheck, Zap, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Maximize2, Minimize2, Ruler, RotateCcw, Package, Ship, Wrench, Wind } from 'lucide-react';
+import { Armchair, BatteryCharging, Box, Car, Route as RutaIcono, Warehouse, Camera, ChevronDown, CircleDot, ClipboardList, Factory, Frame, Layers3, Lightbulb, ShieldCheck, Zap, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Maximize2, Minimize2, Ruler, RotateCcw, Package, Ship, Wrench, Wind } from 'lucide-react';
 import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import { Visor3D, CAPAS, type CapaId, type Vista, type VisorHandle } from '../components/aeromovil/Visor3D';
@@ -66,17 +68,21 @@ import { PanelDepartamento, ComparacionChasis } from '../components/aeromovil/De
 import { VistaAranceles } from '../components/aeromovil/Aranceles';
 import { tubosCelosia } from '../components/aeromovil/chasisCelosia';
 import { explicacion } from '../components/aeromovil/explicaciones';
+// The cornering circuit (2026-11-15): its own chunk, recharts comes with it and only this section needs it.
+const VistaCircuito = lazy(() => import('../components/aeromovil/circuito/VistaCircuito'));
 
 // v5 (2026-11-06): el diseño por defecto pasa a ser el Aeromóvil 1; lo guardado como v4 era del Gota y se queda en su clave.
 const CLAVE = 'aeromovil.parametros.v5';
 const fmt = (v: number, d = 2) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
 const m2 = (v: number) => `${fmt(v)} m`;
 
-type Seccion = 'diseno' | 'componentes' | 'aranceles' | 'tareas' | 'plan' | 'planos' | 'exportar';
+type Seccion = 'diseno' | 'componentes' | 'aranceles' | 'circuito' | 'tareas' | 'plan' | 'planos' | 'exportar';
 const SECCIONES: { k: Seccion; n: string; ruta: string; icono: typeof Box }[] = [
   { k: 'diseno', n: 'Diseño 3D', ruta: '/aeromovil', icono: Box },
   { k: 'componentes', n: 'Componentes', ruta: '/aeromovil/componentes', icono: Wrench },
   { k: 'aranceles', n: 'Aranceles', ruta: '/aeromovil/aranceles', icono: Ship },
+  // 2026-11-15, Eugenio: «crea además del garaje un circuito de simulación de estabilidad en curvas»
+  { k: 'circuito', n: 'Circuito', ruta: '/aeromovil/circuito', icono: RutaIcono },
   { k: 'tareas', n: 'Tareas', ruta: '/aeromovil/tareas', icono: ListChecks },
   { k: 'plan', n: 'Plan', ruta: '/aeromovil/plan', icono: MapIcon },
   { k: 'planos', n: 'Planos', ruta: '/aeromovil/planos', icono: Ruler },
@@ -1709,6 +1715,11 @@ export default function Aeromovil() {
       {seccion === 'aranceles' && (esA1
         ? <VistaAranceles P={P} res={res} modelo={modelo} />
         : <p className="mx-auto max-w-[1100px] px-4 py-8 text-sm text-slate-600">Los aranceles se calculan con las piezas del Aeromóvil 1. Elígelo en el menú del nombre del vehículo, arriba a la izquierda, para verlos.</p>)}
+      {seccion === 'circuito' && (
+        <Suspense fallback={<p className="mx-auto max-w-[1200px] px-4 py-8 text-sm text-slate-500">Cargando el circuito…</p>}>
+          <VistaCircuito modelo={paraCalcular} res={res} nombreDiseno={nombreVehiculo} />
+        </Suspense>
+      )}
       {seccion === 'tareas' && <VistaTareas tareas={tareas} recargar={recargar} error={errorTareas} dueno={dueno} />}
       {seccion === 'plan' && <VistaPlan />}
       {seccion === 'planos' && <VistaPlanos modelo={modelo} />}
