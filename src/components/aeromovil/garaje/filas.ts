@@ -36,20 +36,27 @@ const centro = (coches: CocheFila[], xs: number[]) => coches.length ? (xs[0] + c
  * Where every car goes. `fila1` is our designs in the list's order (the first one leftmost on screen, which is +x);
  * `activo` is the id of the one being edited, which lands at the origin; `fila2` is the reference cars on show,
  * centred behind the first row. A car missing from the result is not placed (an empty row, or `activo` not in it).
+ *
+ * `fijas` (2026-11-13, «permite pinchar y arrastrar los modelos… para cambiarlos de posición»): cars that were dragged
+ * somewhere, in the rows' own frame (the frame before the shift that puts `activo` at the origin, so a place does not
+ * move when another design is opened). `origen` is where `activo` stands in that frame: a dropped car's place in the
+ * frame is its place on screen plus `origen`.
  */
-export function colocarFilas(fila1: CocheFila[], activo: string, fila2: CocheFila[], { huecoFila2 = HUECO_EN_FILA } = {}): Map<string, Plaza> {
-  const out = new Map<string, Plaza>();
+export function colocarFilas(fila1: CocheFila[], activo: string, fila2: CocheFila[], { huecoFila2 = HUECO_EN_FILA, fijas }: { huecoFila2?: number; fijas?: Map<string, Plaza> } = {}): { plazas: Map<string, Plaza>; origen: Plaza } {
+  const marco = new Map<string, Plaza>();
   const x1 = enLinea(fila1, HUECO_EN_FILA), x2 = enLinea(fila2, huecoFila2);
-  const k = fila1.findIndex(c => c.id === activo);
-  const dx = k >= 0 ? -x1[k] : 0;
-  fila1.forEach((c, i) => out.set(c.id, { x: x1[i] + dx, z: 0 }));
+  fila1.forEach((c, i) => marco.set(c.id, { x: x1[i], z: 0 }));
   if (fila2.length) {
     const ancho1 = Math.max(0, ...fila1.map(c => c.ancho)), ancho2 = Math.max(0, ...fila2.map(c => c.ancho));
     const z = Math.round((ancho1 / 2 + HUECO_ENTRE_FILAS + ancho2 / 2) * 100) / 100;
-    const corrimiento = (fila1.length ? centro(fila1, x1) : 0) - centro(fila2, x2) + dx;
-    fila2.forEach((c, i) => out.set(c.id, { x: x2[i] + corrimiento, z }));
+    const corrimiento = (fila1.length ? centro(fila1, x1) : 0) - centro(fila2, x2);
+    fila2.forEach((c, i) => marco.set(c.id, { x: x2[i] + corrimiento, z }));
   }
-  return out;
+  for (const [id, p] of fijas ?? []) if (marco.has(id)) marco.set(id, p);
+  const origen = marco.get(activo) ?? { x: 0, z: 0 };
+  const plazas = new Map<string, Plaza>();
+  for (const [id, p] of marco) plazas.set(id, { x: Math.round((p.x - origen.x) * 1000) / 1000, z: Math.round((p.z - origen.z) * 1000) / 1000 });
+  return { plazas, origen };
 }
 
 /** «Cuadriciclo Bala clásico (copia)», or «… (copia 2)» and up if that name is taken. At most 80 characters (the server's limit). */

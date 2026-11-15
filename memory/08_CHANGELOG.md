@@ -11534,3 +11534,17 @@ Eugenio, con capturas del clásico junto al Aptera: «su cola ocupa todo el anch
   - Maletero 922 → 985 L; consumo a 120 km/h 67,2 → 65,4 Wh/km; el portón abierto sube a 1,58 m (antes 1,56).
   - Comprobaciones en rojo: las mismas dos de antes (cabeza del piloto alto sin casco, 0,6 → 0,8 cm; coeficiente de los largueros ×0,9).
 - **Sin cambios en ningún otro diseño**: con la cubierta «como la cúpula» (lo que tiene todo diseño guardado) la forma es la de antes, vértice a vértice. Comprobado: `bala-huella` (normal y `--editor`) IGUAL; `triciclo-disenos` contra main, Todo OK (también el clásico tal como está hoy en producción, con la 0217); `tunel-pruebas` sin fallos; `triciclo-rangos «clásico lisa»` 277 casos OK; tsc y build.
+
+## 2026-11-13 — Aeromóvil: la cúpula con tres filas ya se puede bajar
+
+- Eugenio, por segunda vez: «La cúpula sigue sin poderse bajar de 1,50 m de alto». La causa no estaba en el deslizador «Alto total» en sí (ya bajaba hasta 1,00 m con las butacas): su Cuadriciclo Bala clásico guardado lleva los asientos en «filas», y con esa disposición `rangoTriciclo` fijaba el mínimo del alto en `ALTO_FILAS` (1,56 m). Las pruebas anteriores usaban una copia con butacas, por eso no lo vieron.
+- Se quita ese tope: con tres filas el alto va de 1,00 a 1,90 m. Por debajo de unos 1,56 m las cabezas no caben y las comprobaciones lo marcan en rojo, en vez de bloquear el deslizador. Los textos de la pantalla que hablaban del mínimo se han corregido.
+
+## 2026-11-13 — Aeromóvil: cambiar el nombre de los diseños y mover los coches del garaje
+
+- Eugenio: «Permite cambiar el nombre de los modelos. También permite pinchar y arrastrar los modelos editables y los no editables para cambiarlos de posición en el garaje».
+- «Cambiar nombre» en la tarjeta del diseño que editas y con el lápiz de cada fila de «Mis diseños»: un campo de texto en su sitio, con «Guardar» y «Cancelar» (Intro guarda, Esc cancela). Como el servidor: sin espacios al principio ni al final, hasta 80 caracteres y nunca vacío. Solo lo ve el dueño del Aeromóvil con su sesión. El nombre nuevo sale enseguida en la cabecera, el menú del logo, la lista, la tarjeta y el cartel encima del coche; renombrar no reconstruye el coche.
+- Todos los coches del garaje, los diseños y los de referencia, se pueden pulsar y arrastrar por el suelo. Un toque sin mover sigue siendo un clic (abre el diseño o la ficha); a partir de unos píxeles es arrastrar, y la cámara no gira mientras. Cada coche se queda donde se suelta, en este navegador, también al abrir otro diseño y al recargar.
+- El diseño que editas se queda siempre en el centro y no se arrastra: los demás se colocan a su alrededor (si lo moviste cuando no era el que editabas, los demás se ven desde su sitio).
+- «Volver a colocar en fila» en la lista del garaje (todos los movidos) y «Volver a su fila» en la tarjeta de cada coche movido.
+- Arreglado: en un navegador sin orden guardado del garaje, al guardar un diseño (el guardado automático o un cambio de nombre) ese diseño saltaba al final de la fila. Ahora se queda en su sitio.
