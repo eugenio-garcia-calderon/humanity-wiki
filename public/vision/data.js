@@ -29,7 +29,10 @@ const SECTORES = [
        "fuente": "https://commons.wikimedia.org/wiki/File:Passivhaus_Darmstadt_Kranichstein_Fruehling_2006.JPG"
       }
      ],
-     "escena3d": "hogar"
+     "escena3d": "hogar",
+     "escalas": [
+      "individuo"
+     ]
     },
     {
      "titulo": "La comunidad y el pueblo: energía compartida",
@@ -43,7 +46,11 @@ const SECTORES = [
       "Oficinas de barrio que asesoran sobre ahorro, ayudas y rehabilitación"
      ],
      "imagenes": [],
-     "escena3d": "comunidad"
+     "escena3d": "comunidad",
+     "escalas": [
+      "comunidad",
+      "pueblo"
+     ]
     },
     {
      "titulo": "El territorio y la red: renovables con la tierra y redes inteligentes",
@@ -57,7 +64,12 @@ const SECTORES = [
       "Electricidad limpia y cocina sin humos para todas las personas del planeta"
      ],
      "imagenes": [],
-     "escena3d": "pueblo"
+     "escena3d": "pueblo",
+     "escalas": [
+      "provincia",
+      "region",
+      "pais"
+     ]
     }
    ],
    "arte": {
@@ -71,37 +83,55 @@ const SECTORES = [
     "ambito": "España",
     "titulo": "Pobreza energética: casas frías en invierno",
     "texto": "En 2024, el 17,6 % de la población no podía permitirse mantener su vivienda a una temperatura adecuada en invierno, frente al 9,1 % de 2018. Además, el 9,7 % se retrasó en el pago de las facturas de suministros de la vivienda.",
-    "fuente": "https://www.miteco.gob.es/content/dam/miteco/es/energia/files-1/bono-social/informes-indicadores/5.%20Indicadores%20de%20pobreza%20energética%202022-2024,%20balance%20y%20cierre%20ENPE%2019-24.pdf"
+    "fuente": "https://www.miteco.gob.es/content/dam/miteco/es/energia/files-1/bono-social/informes-indicadores/5.%20Indicadores%20de%20pobreza%20energética%202022-2024,%20balance%20y%20cierre%20ENPE%2019-24.pdf",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Dependencia de la energía importada",
     "texto": "En 2024 España importó el 68,9 % de la energía que consume, por encima del 61,4 % de la zona euro. El petróleo sigue siendo la primera fuente de energía primaria, seguido del gas natural, que se compran casi por completo fuera.",
-    "fuente": "https://ine.es/prodyser/espa_cifras/13_ENERGIA.pdf"
+    "fuente": "https://ine.es/prodyser/espa_cifras/13_ENERGIA.pdf",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Viviendas que pierden el calor",
     "texto": "Casi el 58 % de los edificios españoles se construyó antes de la primera norma de condiciones térmicas (NBE-CT-79), es decir, sin exigencias mínimas de aislamiento. Alrededor del 55 % es anterior a 1980.",
-    "fuente": "https://www.miteco.gob.es/eu/cambio-climatico/temas/mitigacion-politicas-y-medidas/edificacion.html"
+    "fuente": "https://www.miteco.gob.es/eu/cambio-climatico/temas/mitigacion-politicas-y-medidas/edificacion.html",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Redes eléctricas sin hueco para conectar más",
     "texto": "Según los mapas de capacidad publicados en 2026 por las distribuidoras (asociación aelec), el 83,4 % de los nudos de la red de distribución no admite nueva demanda. En 2025 se desaprovecharon además unos 2.183 GWh de autoconsumo por limitaciones de la red, valorados en unos 82 millones de euros.",
-    "fuente": "https://www.renewableenergymagazine.com/panorama/el-83-de-los-nudos-de-la-20260724"
+    "fuente": "https://www.renewableenergymagazine.com/panorama/el-83-de-los-nudos-de-la-20260724",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Estabilidad de la red: la lección del apagón",
     "texto": "El 28 de abril de 2025 la España peninsular y Portugal se quedaron sin electricidad. El informe final de los operadores europeos (ENTSO-E, marzo de 2026) concluye que no hubo una causa única, sino una cadena de subidas de tensión y desconexiones, con deficiencias en el control de tensión de distintos tipos de generación y un marco regulatorio que no lo incentivaba.",
-    "fuente": "https://sciencemediacentre.es/en/final-blackout-report-european-operators-confirms-event-was-caused-multiple-factors-recommends"
+    "fuente": "https://sciencemediacentre.es/en/final-blackout-report-european-operators-confirms-event-was-caused-multiple-factors-recommends",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "Millones de personas sin luz ni cocina limpia",
     "texto": "En 2023, más de 666 millones de personas en el mundo no tenían acceso a la electricidad, el 85 % de ellas en África subsahariana. Unos 2.100 millones seguían cocinando con combustibles y tecnologías contaminantes.",
-    "fuente": "https://www.worldbank.org/en/news/press-release/2025/06/25/energy-access-has-improved-yet-international-financial-support-still-needed-to-boost-progress-and-address-disparities"
+    "fuente": "https://www.worldbank.org/en/news/press-release/2025/06/25/energy-access-has-improved-yet-international-financial-support-still-needed-to-boost-progress-and-address-disparities",
+    "escalas": [
+     "planeta"
+    ]
    }
   ],
   "soluciones": [
@@ -110,42 +140,62 @@ const SECTORES = [
     "titulo": "Rehabilitar con el estándar de casa pasiva",
     "texto": "La casa pasiva (Passivhaus) combina mucho aislamiento, hermeticidad, ventanas de calidad y ventilación con recuperación de calor. Las mediciones en más de 1.800 viviendas nuevas y unas 170 rehabilitadas muestran un ahorro de alrededor del 90 % de la calefacción frente a los edificios antiguos, y del 80 % de media frente a las exigencias legales para obra nueva.",
     "supera": "Viviendas que pierden el calor",
-    "fuente": "https://passivehouse.com/05_service/03_literature/0303_energy_efficiency/0303_energy-efficiency_of_passive_houses.htm"
+    "fuente": "https://passivehouse.com/05_service/03_literature/0303_energy_efficiency/0303_energy-efficiency_of_passive_houses.htm",
+    "escalas": [
+     "individuo"
+    ]
    },
    {
     "ambito": "Hogar",
     "titulo": "Autoconsumo solar en tejados",
     "texto": "Producir la propia electricidad con placas solares reduce las compras de energía de fuera. En 2025 España sumaba 9.590 MW de autoconsumo, que cubrieron el 4,1 % de la demanda eléctrica; en una vivienda tipo de 5,5 kW la inversión se recupera en unos 6 a 7 años.",
     "supera": "Dependencia de la energía importada",
-    "fuente": "https://www.appa.es/wp-content/uploads/2026/02/NdP-APPA-Renovables-El-autoconsumo-consolida-su-aportacion-pero-encadena-tres-anos-de-contraccion-y-reclama-una-fiscalidad-estable_vf.pdf"
+    "fuente": "https://www.appa.es/wp-content/uploads/2026/02/NdP-APPA-Renovables-El-autoconsumo-consolida-su-aportacion-pero-encadena-tres-anos-de-contraccion-y-reclama-una-fiscalidad-estable_vf.pdf",
+    "escalas": [
+     "individuo"
+    ]
    },
    {
     "ambito": "Comunidad",
     "titulo": "Comunidades energéticas y autoconsumo colectivo",
     "texto": "Vecinos, comercios y ayuntamientos comparten instalaciones renovables y se reparten la energía. En Crevillent (Alicante) un hogar medio ahorra alrededor del 15 % en la factura sin pagar nada al entrar, y más del 25 % cuando la inversión está amortizada; desde marzo de 2026 la ley permite compartir energía hasta 5 km de distancia (Real Decreto-ley 7/2026). En 2025 había 837 comunidades energéticas activas en España.",
     "supera": "Pobreza energética: casas frías en invierno",
-    "fuente": "https://www.energias-renovables.com/autoconsumo/crevillent-la-capital-de-la-espa-a-20250707"
+    "fuente": "https://www.energias-renovables.com/autoconsumo/crevillent-la-capital-de-la-espa-a-20250707",
+    "escalas": [
+     "individuo",
+     "comunidad",
+     "pueblo"
+    ]
    },
    {
     "ambito": "Territorio",
     "titulo": "Almacenamiento y flexibilidad",
     "texto": "Guardar la energía cuando sobra y usarla cuando falta alivia las redes y evita tirar electricidad renovable. En 2025 el almacenamiento instalado en España era de 3.427 MW, casi todo bombeo hidráulico y solo 96 MW de baterías a gran escala, mientras las baterías domésticas de autoconsumo crecieron un 119 %.",
     "supera": "Redes eléctricas sin hueco para conectar más",
-    "fuente": "https://www.energias-renovables.com/panorama/la-energ-a-solar-adelanta-a-la-20260311"
+    "fuente": "https://www.energias-renovables.com/panorama/la-energ-a-solar-adelanta-a-la-20260311",
+    "escalas": [
+     "region"
+    ]
    },
    {
     "ambito": "Territorio",
     "titulo": "Control de tensión exigido a todas las centrales",
     "texto": "Los expertos europeos que analizaron el apagón recomiendan revisar el procedimiento de control de tensión, coordinar las protecciones, extender los servicios de apoyo a la red a todos los tipos de generación (también a las renovables pequeñas) y compartir más datos entre operadores. Como resumió ENTSO-E, el problema no son las renovables, sino el control de tensión, sea cual sea la tecnología.",
     "supera": "Estabilidad de la red: la lección del apagón",
-    "fuente": "https://sciencemediacentre.es/en/final-blackout-report-european-operators-confirms-event-was-caused-multiple-factors-recommends"
+    "fuente": "https://sciencemediacentre.es/en/final-blackout-report-european-operators-confirms-event-was-caused-multiple-factors-recommends",
+    "escalas": [
+     "region"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "Solar descentralizada y minirredes en zonas rurales",
     "texto": "El 84 % de las personas sin electricidad vive en zonas rurales, donde los sistemas solares domésticos y las minirredes suelen encajar mejor que extender la red. Fondos como el Universal Energy Facility (de 8,5 a 67,3 millones de dólares desde 2020, en seis países africanos) financian estas instalaciones por resultados.",
     "supera": "Millones de personas sin luz ni cocina limpia",
-    "fuente": "https://www.seforall.org/news/powering-progress-7-opportunities-to-close-the-energy-access-gap-and-accelerate-the-clean"
+    "fuente": "https://www.seforall.org/news/powering-progress-7-opportunities-to-close-the-energy-access-gap-and-accelerate-the-clean",
+    "escalas": [
+     "planeta"
+    ]
    }
   ],
   "proyectos": [
@@ -155,7 +205,10 @@ const SECTORES = [
     "tipo": "Cooperativa de energía renovable",
     "texto": "Cooperativa sin ánimo de lucro que comercializa y produce electricidad renovable, con más de 87.000 personas y entidades socias y más de 119.000 contratos en 2025. Su producción propia, 39,8 GWh al año, cubre el 10,5 % de la energía que vende.",
     "web": "https://www.somenergia.coop",
-    "fuente": "https://www.energias-renovables.com/autoconsumo/som-impulsa-en-2025-la-creaci-n-20260520"
+    "fuente": "https://www.energias-renovables.com/autoconsumo/som-impulsa-en-2025-la-creaci-n-20260520",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "Comunidad energética Comptem (Enercoop)",
@@ -163,7 +216,11 @@ const SECTORES = [
     "tipo": "Cooperativa eléctrica centenaria / comunidad energética local",
     "texto": "Enercoop, cooperativa fundada en 1925 con unos 10.000 hogares socios, lanzó en 2019 Comptem, que en 2025 tenía 4,4 MW en funcionamiento sobre cubiertas municipales y una planta solar. Unos 3.000 hogares recibían ya energía de alguno de sus nodos, con ahorros del 15 % al 25 % en la factura.",
     "web": null,
-    "fuente": "https://www.energias-renovables.com/autoconsumo/crevillent-la-capital-de-la-espa-a-20250707"
+    "fuente": "https://www.energias-renovables.com/autoconsumo/crevillent-la-capital-de-la-espa-a-20250707",
+    "escalas": [
+     "comunidad",
+     "pueblo"
+    ]
    },
    {
     "nombre": "GoiEner",
@@ -171,7 +228,11 @@ const SECTORES = [
     "tipo": "Cooperativa de energía renovable",
     "texto": "Cooperativa nacida en 2012 que comercializa electricidad renovable, centrada en Euskadi y Navarra; recibió el Premio Euskadi 2024. Tiene más de 11.000 personas socias y 14.000 contratos (cifra de un comparador, por verificar).",
     "web": null,
-    "fuente": "https://www.energias-renovables.com/panorama/la-cooperativa-goiener-premio-euskadi-2024-por-20241213/"
+    "fuente": "https://www.energias-renovables.com/panorama/la-cooperativa-goiener-premio-euskadi-2024-por-20241213/",
+    "escalas": [
+     "comunidad",
+     "region"
+    ]
    },
    {
     "nombre": "Ecooo Energía Ciudadana",
@@ -179,7 +240,11 @@ const SECTORES = [
     "tipo": "Cooperativa de trabajo sin ánimo de lucro",
     "texto": "Lleva más de 20 años abriendo la inversión en plantas solares a la ciudadanía e impulsando autoconsumos y comunidades energéticas. Desde su origen han participado 4.772 personas y ha repartido más de 18 millones de euros; en 2025 sumó 670 kW de autoconsumo en 48 instalaciones.",
     "web": "https://ecooo.es",
-    "fuente": "https://ecooo.es/wp-content/uploads/2026/01/informe-2025-Ecooo.pdf"
+    "fuente": "https://ecooo.es/wp-content/uploads/2026/01/informe-2025-Ecooo.pdf",
+    "escalas": [
+     "comunidad",
+     "pais"
+    ]
    },
    {
     "nombre": "Parque eólico de Middelgrunden",
@@ -187,7 +252,11 @@ const SECTORES = [
     "tipo": "Cooperativa ciudadana con empresa municipal",
     "texto": "Parque eólico marino de 20 aerogeneradores y 40 MW que funciona desde 2001. La mitad pertenece a unas 10.000 personas de la cooperativa Middelgrunden y la otra mitad a la empresa municipal; produce alrededor del 4 % de la electricidad de Copenhague.",
     "web": "https://www.middelgrunden.dk",
-    "fuente": "https://en.wikipedia.org/wiki/Middelgrunden_wind_farm"
+    "fuente": "https://en.wikipedia.org/wiki/Middelgrunden_wind_farm",
+    "escalas": [
+     "comunidad",
+     "pueblo"
+    ]
    },
    {
     "nombre": "Samsø, isla de energía renovable",
@@ -195,7 +264,11 @@ const SECTORES = [
     "tipo": "Programa comunitario y Academia de la Energía",
     "texto": "En 1997 la isla fue elegida para un plan de 10 años y en 2007 se declaró 100 % autosuficiente en energía gracias al viento, el sol y la biomasa. Su Academia de la Energía recibe cada año a miles de visitantes y la isla se ha marcado dejar los combustibles fósiles en 2030.",
     "web": "https://www.visitsamsoe.dk/en/inspiration/energy-academy/",
-    "fuente": "https://www.visitsamsoe.dk/en/inspiration/20-years-denmarks-renewable-energy-island/"
+    "fuente": "https://www.visitsamsoe.dk/en/inspiration/20-years-denmarks-renewable-energy-island/",
+    "escalas": [
+     "comunidad",
+     "pueblo"
+    ]
    },
    {
     "nombre": "SolarCrowd (Luz & Humanidad)",
@@ -203,7 +276,11 @@ const SECTORES = [
     "tipo": "Portal de préstamos colectivos",
     "texto": "Portal de préstamos colectivos para energía, vivienda y movilidad sostenible, iniciado en 2021 por el Laboratorio Luz y Humanidad: publica entidades de confianza y ayuda a formalizar préstamos directos de persona a entidad.",
     "web": "https://solarcrowd.com",
-    "fuente": null
+    "fuente": null,
+    "escalas": [
+     "comunidad",
+     "pais"
+    ]
    }
   ],
   "preguntas": [
@@ -260,7 +337,10 @@ const SECTORES = [
        "fuente": "https://commons.wikimedia.org/wiki/File:Messerschmitt_KR200_(8757326643).jpg"
       }
      ],
-     "escena3d": "movilidad"
+     "escena3d": "movilidad",
+     "escalas": [
+      "individuo"
+     ]
     },
     {
      "titulo": "Movilidad urbana",
@@ -299,7 +379,10 @@ const SECTORES = [
        "fuente": "https://commons.wikimedia.org/wiki/File:Fietsflat_bike_parking_AMS_12_2016_0068.jpg"
       }
      ],
-     "escena3d": "movilidad"
+     "escena3d": "movilidad",
+     "escalas": [
+      "pueblo"
+     ]
     },
     {
      "titulo": "Movilidad territorial",
@@ -338,7 +421,11 @@ const SECTORES = [
        "fuente": "https://commons.wikimedia.org/wiki/File:Navajas._Vista_desde_la_V%C3%ADa_Verde_3.jpg"
       }
      ],
-     "escena3d": "pueblo"
+     "escena3d": "pueblo",
+     "escalas": [
+      "provincia",
+      "region"
+     ]
     }
    ],
    "arte": {
@@ -352,43 +439,70 @@ const SECTORES = [
     "ambito": "España",
     "titulo": "Dependencia del coche y vehículos cada vez más grandes y pesados",
     "texto": "Los SUV superan ya la mitad de las matriculaciones en España: 309.477 de 535.423 turismos en el primer semestre de 2024 (≈58 %), y fuentes del sector sitúan su cuota por encima del 60 % en 2026. En Europa, el peso medio de los coches más populares ha crecido en siete de ocho segmentos; en el segmento C, de 1.274 kg (2001) a 1.454 kg (2024), según datos de JATO.",
-    "fuente": "https://www.diariomotor.com/noticia/segmentos-matriculaciones-espana-suv-utilitarios-compactos-2024/"
+    "fuente": "https://www.diariomotor.com/noticia/segmentos-matriculaciones-espana-suv-utilitarios-compactos-2024/",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "El transporte, primera fuente de emisiones",
     "texto": "En 2024 el transporte supuso el 33,7 % de las emisiones de gases de efecto invernadero de España (total bruto de 267,7 Mt CO2-eq), y el transporte por carretera por sí solo el 31,3 % del total nacional, según el Inventario Nacional del MITECO.",
-    "fuente": "https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/inventario-gases-efecto-invernadero/resumen-Inventario-GEI-2026.pdf"
+    "fuente": "https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/inventario-gases-efecto-invernadero/resumen-Inventario-GEI-2026.pdf",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Despoblación y falta de transporte público rural",
     "texto": "De los 8.131 municipios españoles, 6.650 son rurales; en el medio rural hay 698 vehículos por cada 1.000 habitantes (470 en las ciudades) y el vehículo privado supuso el 96,2 % del gasto en transporte en 2023. Según un estudio de BeConfluence (2024) citado por la DGT, el 46,8 % de la población rural considera claramente insuficiente la frecuencia del transporte público, y hay que recorrer de media 22 km para acceder a equipamientos básicos.",
-    "fuente": "https://www.dgt.es/comunicacion/noticias/20250801-el-rural-se-mueve-con-dificultad"
+    "fuente": "https://www.dgt.es/comunicacion/noticias/20250801-el-rural-se-mueve-con-dificultad",
+    "escalas": [
+     "pueblo",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Calles ocupadas por el coche",
     "texto": "El estudio «Callegrafías» de la Red de Ciudades que Caminan, con unas 950 calles de 85 ciudades españolas, calcula que el 68 % del espacio público se reserva al coche y solo el 32 % al peatón (25 % en las periferias). El 51,1 % de las calles analizadas no tiene una acera accesible de 2,4 m (estudio de una asociación pro peatón, con muestra limitada).",
-    "fuente": "https://www.motorpasion.com/futuro-movimiento/coches-solo-dejan-30-nuestras-calles-a-peatones-mitad-no-accesibles-este-estudio"
+    "fuente": "https://www.motorpasion.com/futuro-movimiento/coches-solo-dejan-30-nuestras-calles-a-peatones-mitad-no-accesibles-este-estudio",
+    "escalas": [
+     "pueblo",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "El coste de moverse pesa en los hogares",
     "texto": "Según la Encuesta de Presupuestos Familiares del INE, el gasto medio por hogar fue de 34.044 euros en 2024, y el transporte supuso el 11,4 % (unos 3.877 euros al año). Los hogares rurales gastan además un 10,9 % más en transporte que los urbanos, según datos recogidos por la DGT.",
-    "fuente": "https://ine.es/dyngs/Prensa/es/EPF2024.htm"
+    "fuente": "https://ine.es/dyngs/Prensa/es/EPF2024.htm",
+    "escalas": [
+     "individuo",
+     "pueblo",
+     "pais"
+    ]
    },
    {
     "ambito": "UE / España",
     "titulo": "Normativa que frena los vehículos ultraligeros",
     "texto": "El Reglamento (UE) 168/2013 solo excluye de la homologación las bicicletas de pedaleo asistido con motor de 250 W como máximo cuya asistencia se corte antes de los 25 km/h. Cualquier velomóvil o vehículo ultraligero que supere esos límites pasa a las categorías L (L1e–L7e), con homologación, matrícula, seguro y casco obligatorios, unos costes que frenan a los pequeños fabricantes. La Comisión Europea anunció en 2020 una revisión de la homologación de los vehículos eléctricos ligeros (estado actual por verificar).",
-    "fuente": "https://www.legislation.gov.uk/eur/2013/168/article/2"
+    "fuente": "https://www.legislation.gov.uk/eur/2013/168/article/2",
+    "escalas": [
+     "pais",
+     "continente"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Siniestralidad vial",
     "texto": "En 2025 murieron 1.119 personas en las vías interurbanas (dato provisional a 24 horas), 35 menos que en 2024, y 4.936 resultaron heridas con hospitalización. Los usuarios vulnerables (motoristas, peatones y ciclistas) suman el 40 % de las víctimas mortales: 304 motoristas, 103 peatones y 40 ciclistas.",
-    "fuente": "https://www.dgt.es/comunicacion/notas-de-prensa/20260108-2025-finaliza-1119-fallecidos-en-siniestros-de-trafico-en-vias-interurbanas"
+    "fuente": "https://www.dgt.es/comunicacion/notas-de-prensa/20260108-2025-finaliza-1119-fallecidos-en-siniestros-de-trafico-en-vias-interurbanas",
+    "escalas": [
+     "pueblo",
+     "pais"
+    ]
    }
   ],
   "soluciones": [
@@ -396,43 +510,72 @@ const SECTORES = [
     "ambito": "Internacional",
     "titulo": "Vehículos ultraligeros, aerodinámicos y solares",
     "texto": "Vehículos de tres ruedas en forma de gota, como Aptera, prometen hasta 643 km de autonomía y hasta 64 km diarios recargados solo con sus paneles solares; en 2026 fabricó sus primeros vehículos de validación. Los velomóviles de pedaleo asistido (unos 100 kg y 250 W) ofrecen protección frente a la lluvia con un consumo mínimo.",
-    "fuente": "https://www.electrive.com/es/2026/03/04/aptera-builds-first-solar-ev-on-validation-production-line/"
+    "fuente": "https://www.electrive.com/es/2026/03/04/aptera-builds-first-solar-ev-on-validation-production-line/",
+    "escalas": [
+     "planeta"
+    ]
    },
    {
     "ambito": "Internacional / España",
     "titulo": "Ciudad de proximidad (15 minutos)",
     "texto": "La propuesta del urbanista Carlos Moreno, aplicada en París, consiste en organizar la ciudad para que las funciones básicas de la vida diaria queden a unos 15 minutos a pie o en bici, lo que reduce la necesidad de desplazarse en coche. Las supermanzanas de Barcelona son una de sus aplicaciones en España.",
-    "fuente": "https://www.bbva.com/es/sostenibilidad/siete-lugares-donde-si-avanza-la-ciudad-de-los-15-minutos/"
+    "fuente": "https://www.bbva.com/es/sostenibilidad/siete-lugares-donde-si-avanza-la-ciudad-de-los-15-minutos/",
+    "escalas": [
+     "pueblo",
+     "pais",
+     "planeta"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Prioridad peatonal y ciclista: supermanzanas",
     "texto": "En la supermanzana del mercado de Sant Antoni (Barcelona) se midió un descenso del 25 % en los niveles de NO2, según la OMS. Extendido a toda la ciudad, el modelo podría evitar casi 700 muertes al año.",
-    "fuente": "https://www.who.int/news-room/feature-stories/detail/barcelona-using-urban-design-to-improve-urban-health"
+    "fuente": "https://www.who.int/news-room/feature-stories/detail/barcelona-using-urban-design-to-improve-urban-health",
+    "escalas": [
+     "pueblo",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Transporte a demanda rural",
     "texto": "Castilla y León lleva el sistema más desarrollado: 123 zonas, 1.966 rutas y más de 4 millones de viajes desde 2004, con un Bono Transporte Rural gratuito desde 2021. Otros ejemplos son Sierracar (28 taxis para 42 localidades de la sierra norte de Madrid, a 4 euros por viaje) y Celering (Valle de Arratia, Bizkaia).",
-    "fuente": "https://www.dgt.es/comunicacion/noticias/20250801-el-rural-se-mueve-con-dificultad"
+    "fuente": "https://www.dgt.es/comunicacion/noticias/20250801-el-rural-se-mueve-con-dificultad",
+    "escalas": [
+     "pueblo",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Carsharing comunitario y cooperativo",
     "texto": "Cooperativas de consumo sin ánimo de lucro, como Som Mobilitat, ofrecen vehículos eléctricos compartidos a vecinos y ayuntamientos; hacerse socio cuesta una cuota única de 10 euros. Varios municipios catalanes (Santa Perpètua de Mogoda, Castellbisbal, Rubí, Torelló) comparten así coches con su plantilla y sus vecinos.",
-    "fuente": "https://www.sostenible.cat/print/noticia/santa-perpetua-castellbisbal-rubi-i-torello-promouen-la-mobilitat-electrica-compartida"
+    "fuente": "https://www.sostenible.cat/print/noticia/santa-perpetua-castellbisbal-rubi-i-torello-promouen-la-mobilitat-electrica-compartida",
+    "escalas": [
+     "comunidad",
+     "pueblo",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Electrificación con energía solar comunitaria",
     "texto": "En 2025, el MITECO apoyó con 10,7 millones de euros (programa CE Implementa, IDAE) 106 nuevas comunidades energéticas. Incluyen 62 puntos de recarga para vehículos eléctricos, cinco sistemas de vehículos eléctricos compartidos y cuatro de préstamo de bicis eléctricas; 44 proyectos se dirigen a la movilidad sostenible.",
-    "fuente": "https://www.miteco.gob.es/content/dam/miteco/es/prensa/20251030_NdP_El_MITECO_apoya_la_creaci%C3%B3n_de_106_nuevas_comunidades%20(2).pdf"
+    "fuente": "https://www.miteco.gob.es/content/dam/miteco/es/prensa/20251030_NdP_El_MITECO_apoya_la_creaci%C3%B3n_de_106_nuevas_comunidades%20(2).pdf",
+    "escalas": [
+     "comunidad",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Tren y vías verdes",
     "texto": "El Programa Vías Verdes, coordinado desde 1993 por la Fundación de los Ferrocarriles Españoles, ha recuperado más de 3.600 km de antiguas líneas en desuso en 143 itinerarios para peatones y ciclistas. Solo en 1984 se cerraron 914 km de vías férreas consideradas deficitarias, una red que hoy sirve como corredor verde y que podría complementar el tren regional.",
-    "fuente": "https://www.viasverdes.com/"
+    "fuente": "https://www.viasverdes.com/",
+    "escalas": [
+     "region",
+     "pais"
+    ]
    }
   ],
   "proyectos": [
@@ -442,7 +585,11 @@ const SECTORES = [
     "tipo": "Cooperativa de carsharing eléctrico",
     "texto": "Cooperativa de consumo sin ánimo de lucro, nacida de un grupo de activistas en 2016, que ofrece servicios de vehículo eléctrico compartido y construye de forma colectiva una red de carsharing que quiere llegar a todos los barrios y municipios de Cataluña. Colabora con ayuntamientos. Número actual de socios y vehículos: por verificar.",
     "web": "https://www.sommobilitat.coop/",
-    "fuente": "https://www.cidob.org/en/publications/som-mobilitat-cooperative-whose-services-are-increasing-sustainable-mobility"
+    "fuente": "https://www.cidob.org/en/publications/som-mobilitat-cooperative-whose-services-are-increasing-sustainable-mobility",
+    "escalas": [
+     "comunidad",
+     "region"
+    ]
    },
    {
     "nombre": "Modelo urbano de Pontevedra",
@@ -450,7 +597,10 @@ const SECTORES = [
     "tipo": "Modelo urbano / peatonalización",
     "texto": "Desde 1999 Pontevedra peatonalizó todo su casco antiguo y dio prioridad absoluta al peatón en el centro, donde el tráfico está limitado a 10 km/h y solo se admite el acceso justificado. Según Euronews, en más de una década no ha habido ninguna muerte por atropello, y en 2014 recibió un reconocimiento de la ONU como ciudad más cómoda de Europa para vivir (por verificar el nombre exacto del premio).",
     "web": "https://www.pontevedra.gal/",
-    "fuente": "https://es.euronews.com/2022/09/16/la-premiada-transformacion-de-pontevedra-en-favor-de-la-peatonalizacion-y-la-mejora-de-la-"
+    "fuente": "https://es.euronews.com/2022/09/16/la-premiada-transformacion-de-pontevedra-en-favor-de-la-peatonalizacion-y-la-mejora-de-la-",
+    "escalas": [
+     "pueblo"
+    ]
    },
    {
     "nombre": "Aptera",
@@ -458,7 +608,11 @@ const SECTORES = [
     "tipo": "Vehículo eléctrico solar ultraeficiente",
     "texto": "Vehículo de tres ruedas con carrocería en gota y paneles solares integrados: hasta 643 km de autonomía y hasta 64 km diarios de recarga solar. En 2026 puso en marcha una línea de validación de 14 estaciones y ha fabricado sus primeros vehículos de prueba; las entregas a clientes están previstas para finales de 2026 (pendiente de certificación).",
     "web": "https://aptera.us/",
-    "fuente": "https://www.electrive.com/es/2026/03/04/aptera-builds-first-solar-ev-on-validation-production-line/"
+    "fuente": "https://www.electrive.com/es/2026/03/04/aptera-builds-first-solar-ev-on-validation-production-line/",
+    "escalas": [
+     "individuo",
+     "planeta"
+    ]
    },
    {
     "nombre": "Podbike Frikar (velomóvil)",
@@ -466,7 +620,11 @@ const SECTORES = [
     "tipo": "Velomóvil eléctrico de pedaleo asistido",
     "texto": "Velomóvil cerrado de cuatro ruedas, con pedaleo asistido sin cadena (250 W, 25 km/h), unos 100 kg de peso y unos 84 cm de ancho; costaba unos 10.900 euros. Referente de diseño, aunque la empresa anunció su quiebra el 16 de mayo de 2025: sirve como caso de estudio sobre lo difícil que es industrializar el sector.",
     "web": "https://podbike.com/",
-    "fuente": "https://veemo.ca/blogs/news/podbike-frikar-vs-veemo-se-what-to-buy-now-that-frikar-is-gone"
+    "fuente": "https://veemo.ca/blogs/news/podbike-frikar-vs-veemo-se-what-to-buy-now-that-frikar-is-gone",
+    "escalas": [
+     "individuo",
+     "continente"
+    ]
    },
    {
     "nombre": "Groningen, ciudad ciclista",
@@ -474,7 +632,10 @@ const SECTORES = [
     "tipo": "Plan de circulación / ciudad ciclista",
     "texto": "En 1977 el plan de circulación dividió el centro en cuatro sectores que no pueden cruzarse directamente en coche, de modo que los conductores deben usar la ronda exterior. Hoy cerca del 61 % de los desplazamientos de la ciudad, de algo más de 200.000 habitantes, se hacen en bicicleta.",
     "web": "https://gemeente.groningen.nl/",
-    "fuente": "https://www.archdaily.com/1114738/groningen-a-dutch-benchmark-for-urban-mobility"
+    "fuente": "https://www.archdaily.com/1114738/groningen-a-dutch-benchmark-for-urban-mobility",
+    "escalas": [
+     "pueblo"
+    ]
    },
    {
     "nombre": "Transporte a la Demanda de Castilla y León",
@@ -482,7 +643,10 @@ const SECTORES = [
     "tipo": "Transporte público rural a demanda",
     "texto": "Sistema autonómico en el que el autobús rural solo circula si se reserva: 123 zonas, 1.966 rutas y más de 4 millones de viajes desde 2004. El Bono Transporte Rural es gratuito desde 2021 y tuvo 354.699 viajeros en 2023.",
     "web": "https://www.jcyl.es/",
-    "fuente": "https://www.dgt.es/comunicacion/noticias/20250801-el-rural-se-mueve-con-dificultad"
+    "fuente": "https://www.dgt.es/comunicacion/noticias/20250801-el-rural-se-mueve-con-dificultad",
+    "escalas": [
+     "region"
+    ]
    },
    {
     "nombre": "Programa Vías Verdes",
@@ -490,7 +654,10 @@ const SECTORES = [
     "tipo": "Reconversión de ferrocarriles en desuso",
     "texto": "Programa coordinado por la Fundación de los Ferrocarriles Españoles desde 1993, que ha convertido más de 3.600 km de líneas ferroviarias abandonadas en 143 itinerarios para caminar y pedalear, con un fuerte impacto en el turismo rural.",
     "web": "https://www.viasverdes.com/",
-    "fuente": "https://www.viasverdes.com/"
+    "fuente": "https://www.viasverdes.com/",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "Aeromóvil (Luz & Humanidad)",
@@ -498,7 +665,10 @@ const SECTORES = [
     "tipo": "Prototipo propio",
     "texto": "Vehículo ultraligero aerodinámico de bajo consumo, inspirado en Fend 2000 / Kabinenroller y Aptera: carenado en gota, techo solar, pedaleo asistido sin cadena.",
     "web": "https://humanity.wiki/aeromovil",
-    "fuente": ""
+    "fuente": "",
+    "escalas": [
+     "individuo"
+    ]
    }
   ],
   "preguntas": [
@@ -530,7 +700,10 @@ const SECTORES = [
       "Herramientas digitales como complemento, nunca como sustituto del encuentro cara a cara."
      ],
      "imagenes": [],
-     "escena3d": "comunidad"
+     "escena3d": "comunidad",
+     "escalas": [
+      "comunidad"
+     ]
     },
     {
      "titulo": "Municipio y región: presupuestos participativos y cuentas claras",
@@ -544,7 +717,11 @@ const SECTORES = [
       "Plataformas de participación de software libre, auditables y reutilizables entre ayuntamientos."
      ],
      "imagenes": [],
-     "escena3d": "pueblo"
+     "escena3d": "pueblo",
+     "escalas": [
+      "pueblo",
+      "region"
+     ]
     },
     {
      "titulo": "País y mundo: deliberación ciudadana y democracia directa por temas",
@@ -558,7 +735,13 @@ const SECTORES = [
       "Cooperación entre países para los retos que no tienen fronteras, con participación ciudadana también a escala global."
      ],
      "imagenes": [],
-     "escena3d": "pueblo"
+     "escena3d": "pueblo",
+     "escalas": [
+      "pueblo",
+      "pais",
+      "continente",
+      "planeta"
+     ]
     }
    ],
    "arte": {
@@ -572,37 +755,56 @@ const SECTORES = [
     "ambito": "España",
     "titulo": "Poca confianza en los partidos",
     "texto": "Según la encuesta de la OCDE sobre confianza en las instituciones (trabajo de campo 2025), solo el 21% de las personas en España confía alta o moderadamente en los partidos políticos. La confianza en el Gobierno nacional es del 43%, algo por encima de la media OCDE (40%).",
-    "fuente": "https://www.oecd.org/en/publications/oecd-survey-on-drivers-of-trust-in-public-institutions-2026-results_c88c8869-en/spain_8443a0c4-en.html"
+    "fuente": "https://www.oecd.org/en/publications/oecd-survey-on-drivers-of-trust-in-public-institutions-2026-results_c88c8869-en/spain_8443a0c4-en.html",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Mucha gente siente que no tiene voz",
     "texto": "En 2025, solo el 38% de la población en España cree que la gente como ella tiene voz en lo que hace el Gobierno, según la OCDE. Es una mejora frente al 31% de 2023, pero sigue siendo una minoría.",
-    "fuente": "https://www.oecd.org/en/publications/oecd-survey-on-drivers-of-trust-in-public-institutions-2026-results_c88c8869-en/spain_8443a0c4-en.html"
+    "fuente": "https://www.oecd.org/en/publications/oecd-survey-on-drivers-of-trust-in-public-institutions-2026-results_c88c8869-en/spain_8443a0c4-en.html",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "La percepción de corrupción no mejora",
     "texto": "En el Índice de Percepción de la Corrupción 2025 de Transparencia Internacional, España obtuvo 55 puntos sobre 100 y quedó en el puesto 49. Es un punto menos que en 2024 (56).",
-    "fuente": "https://www.idealista.com/news/node/900419"
+    "fuente": "https://www.idealista.com/news/node/900419",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "UE",
     "titulo": "Baja participación en las elecciones europeas",
     "texto": "En las elecciones al Parlamento Europeo de 2024 votó el 49,21% del censo en España, frente a una media del 51% en la UE. Más de la mitad de la población con derecho a voto no participó en decisiones que le afectan a escala europea.",
-    "fuente": "https://maldita.es/malditodato/20240612/participacion-elecciones-europeas-historico/"
+    "fuente": "https://maldita.es/malditodato/20240612/participacion-elecciones-europeas-historico/",
+    "escalas": [
+     "continente"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Una polarización que rompe relaciones",
     "texto": "Según el Atlas de la Polarización 2025 de More in Common (2.508 entrevistas, noviembre de 2025), un 14% de las personas en España ha roto amistades o relaciones familiares por motivos políticos en el último año. Aun así, la mayoría sigue creyendo que nuestras diferencias no impiden unirnos.",
-    "fuente": "https://www.moreincommon.com/media/fiiclx3k/atlas-de-la-polarizacio-n-2025-more-in-common-espan-a.pdf"
+    "fuente": "https://www.moreincommon.com/media/fiiclx3k/atlas-de-la-polarizacio-n-2025-more-in-common-espan-a.pdf",
+    "escalas": [
+     "individuo",
+     "pais"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "Retroceso democrático en el mundo",
     "texto": "El Informe sobre la Democracia 2026 del instituto V-Dem estima que alrededor del 74% de la población mundial vive en autocracias, con 92 autocracias frente a 87 democracias. El nivel de democracia que disfruta la persona media ha vuelto al de 1978.",
-    "fuente": "https://www.democracywithoutborders.org/41651/v-dem-report-finds-global-democracy-is-back-at-1978-levels/"
+    "fuente": "https://www.democracywithoutborders.org/41651/v-dem-report-finds-global-democracy-is-back-at-1978-levels/",
+    "escalas": [
+     "planeta"
+    ]
    }
   ],
   "soluciones": [
@@ -611,42 +813,67 @@ const SECTORES = [
     "titulo": "Asambleas ciudadanas por sorteo",
     "texto": "Grupos de personas elegidas al azar, representativas de la población, que estudian un tema con especialistas y redactan recomendaciones. La OCDE ha registrado 716 procesos de este tipo en 28 países entre 1979 y 2023, con más de 80.000 participantes; en Irlanda, una de estas asambleas llevó a un referéndum en 2018.",
     "supera": "Poca confianza en los partidos",
-    "fuente": "https://www.oecd.org/en/publications/government-at-a-glance-2025_0efd0bcd-en/full-report/citizen-participation-and-deliberation_52b90285.html"
+    "fuente": "https://www.oecd.org/en/publications/government-at-a-glance-2025_0efd0bcd-en/full-report/citizen-participation-and-deliberation_52b90285.html",
+    "escalas": [
+     "comunidad",
+     "pueblo",
+     "planeta"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "Presupuestos participativos",
     "texto": "La ciudadanía propone y vota en qué se invierte una parte del presupuesto público. Un estudio de Touchton y Wampler (2020) encontró que en los municipios brasileños con presupuestos participativos la mortalidad infantil bajó de forma sustancial, más aún donde el programa estaba consolidado.",
     "supera": "Mucha gente siente que no tiene voz",
-    "fuente": "https://www.peoplepowered.org/resources-content/public-engagement-for-public-health"
+    "fuente": "https://www.peoplepowered.org/resources-content/public-engagement-for-public-health",
+    "escalas": [
+     "pueblo",
+     "planeta"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Datos públicos abiertos y vigilados por la ciudadanía",
     "texto": "Organizaciones independientes convierten presupuestos, boletines oficiales e indultos en herramientas que cualquiera puede consultar. En 2022, la herramienta «¿Dónde van mis impuestos?» de Civio superó los 111.000 usuarios y su asistente del bono eléctrico atendió cerca de un millón de consultas.",
     "supera": "La percepción de corrupción no mejora",
-    "fuente": "https://civio.es/en/report-2022/"
+    "fuente": "https://civio.es/en/report-2022/",
+    "escalas": [
+     "pueblo",
+     "pais"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "Deliberar con quien piensa distinto",
     "texto": "Las encuestas deliberativas reúnen a una muestra representativa de personas de todas las ideologías para informarse y debatir en grupos pequeños con moderación. En el encuentro de Pensilvania de 2025 (175 votantes), el respeto por las opiniones contrarias pasó del 72% al 91% y la disposición a llegar a acuerdos, del 80% al 90%.",
     "supera": "Una polarización que rompe relaciones",
-    "fuente": "https://fsi.stanford.edu/news/pennsylvania-voters-bridge-deep-political-divides-reduce-polarization-groundbreaking"
+    "fuente": "https://fsi.stanford.edu/news/pennsylvania-voters-bridge-deep-political-divides-reduce-polarization-groundbreaking",
+    "escalas": [
+     "planeta"
+    ]
    },
    {
     "ambito": "UE",
     "titulo": "Diálogo ciudadano permanente por ley",
     "texto": "En lugar de asambleas sueltas, un consejo ciudadano permanente elige los temas y convoca asambleas por sorteo cada año, con un procedimiento de seguimiento en el parlamento. La Comunidad germanófona de Bélgica lo creó en 2019 y, al estar fijado por decreto, se ha mantenido tras las elecciones: seis asambleas en sus primeros cinco años.",
     "supera": "Retroceso democrático en el mundo",
-    "fuente": "https://publicdeliberation.net/?p=1375"
+    "fuente": "https://publicdeliberation.net/?p=1375",
+    "escalas": [
+     "comunidad",
+     "pueblo",
+     "continente"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "Votar por temas: iniciativas y referéndums",
     "texto": "En Suiza, con 100.000 firmas en 18 meses se puede proponer un cambio constitucional, y con 50.000 firmas en 100 días se puede someter una ley a referéndum. Se vota tres o cuatro veces al año a escala federal, y desde 1848 la ciudadanía ha sido llamada a las urnas 332 veces.",
     "supera": "Baja participación en las elecciones europeas",
-    "fuente": "https://www.swissinfo.ch/spa/democracia-suiza/c%C3%B3mo-funciona-la-democracia-directa-en-suiza/89088930"
+    "fuente": "https://www.swissinfo.ch/spa/democracia-suiza/c%C3%B3mo-funciona-la-democracia-directa-en-suiza/89088930",
+    "escalas": [
+     "pueblo",
+     "planeta"
+    ]
    }
   ],
   "proyectos": [
@@ -656,7 +883,10 @@ const SECTORES = [
     "tipo": "Programa público (proceso deliberativo, finalizado en 2022)",
     "texto": "Cien personas elegidas al azar, representativas de la sociedad española por edad, género, estudios, territorio y entorno rural o urbano, respondieron a la pregunta «Una España más segura ante el cambio climático, ¿cómo lo hacemos?». En junio de 2022 entregaron 172 recomendaciones agrupadas en 58 objetivos, que el Gobierno remitió al Congreso.",
     "web": "https://www.lamoncloa.gob.es/presidente/actividades/paginas/2022/060622-sanchez-clima.aspx",
-    "fuente": "https://www.miteco.gob.es/es/prensa/210526qaasambleaciudadana_tcm30-526725.pdf"
+    "fuente": "https://www.miteco.gob.es/es/prensa/210526qaasambleaciudadana_tcm30-526725.pdf",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "Decide Madrid · Presupuestos participativos",
@@ -664,7 +894,10 @@ const SECTORES = [
     "tipo": "Programa público municipal",
     "texto": "La 7.ª edición de los presupuestos participativos de Madrid (2026) reparte 50 millones de euros: 35 millones para proyectos de distrito y 15 para toda la ciudad. Puede proponer cualquier persona mayor de 16 años, y los vecinos empadronados votan en la fase final, prevista para febrero de 2027.",
     "web": "https://decide.madrid.es",
-    "fuente": "https://diario.madrid.es/blog/2026/02/24/presupuestos-participativos-2026-guia-mejorar-madrid/"
+    "fuente": "https://diario.madrid.es/blog/2026/02/24/presupuestos-participativos-2026-guia-mejorar-madrid/",
+    "escalas": [
+     "pueblo"
+    ]
    },
    {
     "nombre": "Decidim",
@@ -672,7 +905,11 @@ const SECTORES = [
     "tipo": "Software libre de participación (asociación sin ánimo de lucro)",
     "texto": "Plataforma de código abierto nacida en Barcelona para organizar procesos participativos, presupuestos, asambleas y consultas. Su informe de 2025 cita más de 500 instalaciones; entre sus socios institucionales están el Ayuntamiento de Barcelona, la Generalitat de Cataluña, la ciudad de Nueva York y el Gobierno federal de Brasil.",
     "web": "https://decidim.org",
-    "fuente": "https://decidim.org/pdf/decidim_activity_report_2025.pdf"
+    "fuente": "https://decidim.org/pdf/decidim_activity_report_2025.pdf",
+    "escalas": [
+     "continente",
+     "planeta"
+    ]
    },
    {
     "nombre": "Fundación Ciudadana Civio",
@@ -680,7 +917,10 @@ const SECTORES = [
     "tipo": "Fundación independiente (periodismo de datos y transparencia)",
     "texto": "Vigila el sector público y explica cada día el BOE en lenguaje claro, con herramientas gratuitas como «¿Dónde van mis impuestos?» y el Indultómetro. En 2022 tenía 1.490 socios, que aportaban alrededor de un tercio de sus ingresos, y sigue publicando en noviembre de 2026.",
     "web": "https://civio.es",
-    "fuente": "https://civio.es/en/report-2022/"
+    "fuente": "https://civio.es/en/report-2022/",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "Asamblea Ciudadana de Irlanda (Citizens' Assembly)",
@@ -688,7 +928,10 @@ const SECTORES = [
     "tipo": "Programa público (asambleas ciudadanas convocadas por el Parlamento)",
     "texto": "Entre 2016 y 2018, 99 personas elegidas al azar estudiaron cinco temas, entre ellos el envejecimiento, el cambio climático y la forma de celebrar referéndums. Una de sus recomendaciones pasó a una comisión parlamentaria y después a un referéndum en 2018; la última asamblea listada en su web es la de 2023 sobre consumo de drogas.",
     "web": "https://citizensassembly.ie",
-    "fuente": "https://oecd-opsi.org/innovations/the-irish-citizens-assembly/"
+    "fuente": "https://oecd-opsi.org/innovations/the-irish-citizens-assembly/",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "Modelo Ostbelgien · Diálogo ciudadano permanente",
@@ -696,7 +939,10 @@ const SECTORES = [
     "tipo": "Programa público (institución creada por decreto parlamentario)",
     "texto": "Desde 2019 un Consejo Ciudadano permanente, formado por antiguos participantes que se renuevan por tercios, elige los temas y convoca asambleas por sorteo, con unas cinco por legislatura. La 7.ª asamblea (8 de noviembre de 2025) trató cómo hacer atractiva la vida de las personas mayores en la región.",
     "web": "https://pdg.be",
-    "fuente": "https://publicdeliberation.net/?p=1375"
+    "fuente": "https://publicdeliberation.net/?p=1375",
+    "escalas": [
+     "region"
+    ]
    },
    {
     "nombre": "Democracia directa suiza (votaciones populares federales)",
@@ -704,7 +950,10 @@ const SECTORES = [
     "tipo": "Programa público (sistema constitucional)",
     "texto": "La ciudadanía vota varias veces al año sobre temas concretos mediante iniciativas populares (100.000 firmas) y referéndums (50.000 firmas). Desde 1848 ha sido llamada a las urnas 332 veces a escala federal; hay votaciones programadas también en 2026.",
     "web": "https://www.admin.ch/en/popular-votes-chronology",
-    "fuente": "https://www.swissinfo.ch/spa/democracia-suiza/c%C3%B3mo-funciona-la-democracia-directa-en-suiza/89088930"
+    "fuente": "https://www.swissinfo.ch/spa/democracia-suiza/c%C3%B3mo-funciona-la-democracia-directa-en-suiza/89088930",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "Política · Votar por temas (Luz & Humanidad)",
@@ -712,7 +961,10 @@ const SECTORES = [
     "tipo": "Proyecto propio",
     "texto": "Observatorio que representa cada partido como una geometría con sus aristas débiles, y propuesta de democracia directa por temas: cada persona ve el estado de cada materia con datos históricos y elige su posición, con los pros y contras de cada medida.",
     "web": "https://humanity.wiki/observatorio-polarizacion/",
-    "fuente": null
+    "fuente": null,
+    "escalas": [
+     "pais"
+    ]
    }
   ],
   "preguntas": [
@@ -744,7 +996,10 @@ const SECTORES = [
       "Tiempo libre y de cuidados reconocido como parte de la riqueza del hogar."
      ],
      "imagenes": [],
-     "escena3d": "hogar"
+     "escena3d": "hogar",
+     "escalas": [
+      "individuo"
+     ]
     },
     {
      "titulo": "Comunidad: economía social, cooperativas y monedas locales",
@@ -758,7 +1013,10 @@ const SECTORES = [
       "Compra pública que prioriza a proveedores locales y de economía social."
      ],
      "imagenes": [],
-     "escena3d": "comunidad"
+     "escena3d": "comunidad",
+     "escalas": [
+      "comunidad"
+     ]
     },
     {
      "titulo": "País y planeta: fiscalidad simple y justa, banca al servicio de la producción",
@@ -772,7 +1030,12 @@ const SECTORES = [
       "Cooperación internacional contra la evasión fiscal y para un endeudamiento sostenible."
      ],
      "imagenes": [],
-     "escena3d": "pueblo"
+     "escena3d": "pueblo",
+     "escalas": [
+      "pais",
+      "continente",
+      "planeta"
+     ]
     }
    ],
    "arte": {
@@ -786,37 +1049,56 @@ const SECTORES = [
     "ambito": "España",
     "titulo": "Una de cada cuatro personas en riesgo de pobreza o exclusión",
     "texto": "Según la Encuesta de Condiciones de Vida 2025 del INE, el 25,7% de la población está en riesgo de pobreza o exclusión social (tasa AROPE) y el 19,5% en riesgo de pobreza. Un 8,1% sufre carencia material y social severa.",
-    "fuente": "https://ine.es/dyngs/Prensa/ECV2025.htm"
+    "fuente": "https://ine.es/dyngs/Prensa/ECV2025.htm",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Sin colchón para los imprevistos",
     "texto": "El 36,4% de la población vive en hogares que no pueden afrontar gastos imprevistos, y un 8,5% llega a fin de mes con mucha dificultad (INE, Encuesta de Condiciones de Vida 2025).",
-    "fuente": "https://ine.es/dyngs/Prensa/ECV2025.htm"
+    "fuente": "https://ine.es/dyngs/Prensa/ECV2025.htm",
+    "escalas": [
+     "individuo",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "IVA que no se llega a cobrar",
     "texto": "La Comisión Europea estima que en 2023 España dejó de recaudar 7.771 millones de euros de IVA por fraude, evasión, impagos o errores, el 7,6% de lo que debería haberse ingresado. En el conjunto de la UE la cifra fue de 128.000 millones (9,5%).",
-    "fuente": "https://taxation-customs.ec.europa.eu/taxation/vat/fight-against-vat-fraud/vat-gap_en"
+    "fuente": "https://taxation-customs.ec.europa.eu/taxation/vat/fight-against-vat-fraud/vat-gap_en",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Un sistema fiscal lleno de excepciones",
     "texto": "Según la Comisión Europea (datos de 2023), los tipos reducidos y las exenciones hacen que España recaude por IVA un 38,3% menos de lo que obtendría con un tipo único sobre todo el consumo. Cada excepción puede tener una razón, pero juntas hacen el sistema más complejo y difícil de vigilar.",
-    "fuente": "https://taxation-customs.ec.europa.eu/taxation/vat/fight-against-vat-fraud/vat-gap_en"
+    "fuente": "https://taxation-customs.ec.europa.eu/taxation/vat/fight-against-vat-fraud/vat-gap_en",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "Una economía mundial muy endeudada",
     "texto": "Según el FMI (septiembre de 2025), la deuda mundial supera el 235% del PIB del planeta, unos 251 billones de dólares. De ella, cerca del 93% del PIB es deuda pública y casi el 143%, privada.",
-    "fuente": "https://www.imf.org/en/Blogs/Articles/2025/09/17/global-debt-remains-above-235-of-world-GDP"
+    "fuente": "https://www.imf.org/en/Blogs/Articles/2025/09/17/global-debt-remains-above-235-of-world-GDP",
+    "escalas": [
+     "planeta"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "La riqueza, muy concentrada",
     "texto": "El Informe sobre la Desigualdad Mundial 2026 calcula que el 10% más rico posee alrededor del 75% de la riqueza del planeta, mientras que la mitad más pobre tiene en torno al 2%. Ese 10% también recibe más ingresos que el 90% restante junto.",
-    "fuente": "https://www.irishexaminer.com/news/arid-41757617.html?type=am"
+    "fuente": "https://www.irishexaminer.com/news/arid-41757617.html?type=am",
+    "escalas": [
+     "planeta"
+    ]
    }
   ],
   "soluciones": [
@@ -825,42 +1107,61 @@ const SECTORES = [
     "titulo": "Banca ética que presta a la economía real",
     "texto": "Son bancos que solo financian proyectos con impacto social o ambiental positivo y publican a quién prestan. Según el 8.º Informe sobre finanzas éticas en Europa (datos de 2023), dedican el 67,9% de su balance a préstamos (frente al 60,9% de los grandes bancos), tienen más capital propio (17,86% frente a 17,25%) y una rentabilidad sobre activos algo mayor (0,75% frente a 0,64%).",
     "supera": "Una economía mundial muy endeudada",
-    "fuente": "https://febea.org/wp-content/uploads/2025/12/8-Report-on-ethical-finance-in-Europe.pdf"
+    "fuente": "https://febea.org/wp-content/uploads/2025/12/8-Report-on-ethical-finance-in-Europe.pdf",
+    "escalas": [
+     "continente"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Cooperativas y economía social",
     "texto": "Empresas en las que la propiedad y las decisiones se reparten entre quienes trabajan o consumen. Un estudio de Abay Analistas para CEPES (2023) concluye que la economía social española resistió mejor la destrucción de empleo entre 2017 y 2021, con la covid incluida, y estima que unos 222.000 trabajadores tendrían periodos de paro si estas entidades se comportaran como empresas convencionales.",
     "supera": "La riqueza, muy concentrada",
-    "fuente": "https://www.andaluciaescoop.org/el-impacto-de-la-economia-social-mas-presencia-en-zonas-rurales-y-ciudades-medias-y-mayor-resistencia-a-la-destruccion-de-empleo"
+    "fuente": "https://www.andaluciaescoop.org/el-impacto-de-la-economia-social-mas-presencia-en-zonas-rurales-y-ciudades-medias-y-mayor-resistencia-a-la-destruccion-de-empleo",
+    "escalas": [
+     "comunidad",
+     "pais"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "Ahorro automático por defecto",
     "texto": "En lugar de pedir a cada persona que se apunte a un plan de ahorro, se la inscribe automáticamente y puede salirse si quiere. En Reino Unido, tras introducir la inscripción automática en los planes de pensiones de empresa, la participación de los trabajadores con derecho pasó del 55% en 2012 al 88% en 2019.",
     "supera": "Sin colchón para los imprevistos",
-    "fuente": "https://www.pensionsage.com/pa/Pension-participation-up-33-percentage-points-since-AE-implementation.php"
+    "fuente": "https://www.pensionsage.com/pa/Pension-participation-up-33-percentage-points-since-AE-implementation.php",
+    "escalas": [
+     "planeta"
+    ]
    },
    {
     "ambito": "UE",
     "titulo": "Factura electrónica obligatoria",
     "texto": "Todas las facturas entre empresas pasan por un sistema digital de la administración, que puede detectar el fraude antes de que ocurra. Según la Agencia Tributaria italiana, tras implantarla en 2019 la recaudación de IVA en operaciones internas creció un 3,6% (unos 3.600 millones de euros) y se detectaron 1.100 millones en créditos de IVA indebidos.",
     "supera": "IVA que no se llega a cobrar",
-    "fuente": "https://www.oecd.org/tax/forum-on-tax-administration/publications-and-products/Italy-Electronic-invoicing-May-2021.pdf"
+    "fuente": "https://www.oecd.org/tax/forum-on-tax-administration/publications-and-products/Italy-Electronic-invoicing-May-2021.pdf",
+    "escalas": [
+     "continente"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Impuestos con base amplia y pocas excepciones",
     "texto": "Gravar todo el consumo o todas las transacciones con un tipo bajo y uniforme, y proteger a quien lo necesita con ayudas directas en lugar de exenciones. Las cifras de la Comisión Europea muestran el margen: en España, los tipos reducidos suponen un 16,5% de la recaudación potencial de IVA y las exenciones nacionales un 18,7% (2023). Es un cálculo de potencial: no prueba por sí solo que el cambio funcione.",
     "supera": "Un sistema fiscal lleno de excepciones",
-    "fuente": "https://taxation-customs.ec.europa.eu/taxation/vat/fight-against-vat-fraud/vat-gap_en"
+    "fuente": "https://taxation-customs.ec.europa.eu/taxation/vat/fight-against-vat-fraud/vat-gap_en",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "Monedas complementarias para las pymes",
     "texto": "Son redes de crédito entre empresas que funcionan en paralelo a la moneda oficial. El estudio de James Stodder sobre el WIR suizo, en funcionamiento desde los años treinta, muestra que su uso crece cuando hay recesión y escasea el dinero oficial, lo que ayuda a sostener la actividad de las pequeñas empresas.",
     "supera": "Una de cada cuatro personas en riesgo de pobreza o exclusión",
-    "fuente": "https://ripess.socioeco.org/bdf_fiche-document-264_en.html"
+    "fuente": "https://ripess.socioeco.org/bdf_fiche-document-264_en.html",
+    "escalas": [
+     "planeta"
+    ]
    }
   ],
   "proyectos": [
@@ -870,7 +1171,10 @@ const SECTORES = [
     "tipo": "Banca ética cooperativa",
     "texto": "Banco cooperativo que solo financia proyectos de impacto social y ambiental y publica a quién presta. A 31 de octubre de 2026 tenía en España 4.105 socios, 310,6 millones de euros de ahorro y 175,9 millones en 474 préstamos concedidos.",
     "web": "https://www.fiarebancaetica.coop",
-    "fuente": "https://www.fiarebancaetica.coop/ca/?p=316952"
+    "fuente": "https://www.fiarebancaetica.coop/ca/?p=316952",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "Mondragón",
@@ -878,7 +1182,10 @@ const SECTORES = [
     "tipo": "Grupo de cooperativas",
     "texto": "Uno de los mayores grupos cooperativos del mundo, propiedad en buena parte de sus trabajadores. En 2025 facturó 11.322 millones de euros, dio empleo a 71.415 personas y creó 1.346 puestos nuevos.",
     "web": "https://www.mondragon-corporation.com",
-    "fuente": "https://www.thenews.coop/mondragon-posts-positive-2025-revenue-and-job-figures/"
+    "fuente": "https://www.thenews.coop/mondragon-posts-positive-2025-revenue-and-job-figures/",
+    "escalas": [
+     "region"
+    ]
    },
    {
     "nombre": "REAS Red de Redes de Economía Alternativa y Solidaria · Mercado Social",
@@ -886,7 +1193,10 @@ const SECTORES = [
     "tipo": "Red de economía social y solidaria",
     "texto": "Agrupa 1.028 entidades con más de 22.000 empleos directos y unos 1.307 millones de euros de ingresos. Cada año 685 de ellas pasan una auditoría social pública sobre igualdad, democracia interna y medio ambiente (informe 2024, datos de 2023).",
     "web": "https://www.economiasolidaria.org",
-    "fuente": "https://wecoop.es/wp-content/uploads/2025/02/Informe_Auditoria_Social_Estatal_2024_REAS_RdR.pdf"
+    "fuente": "https://wecoop.es/wp-content/uploads/2025/02/Informe_Auditoria_Social_Estatal_2024_REAS_RdR.pdf",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "Asociación Federal Española para el Fomento de la Economía del Bien Común",
@@ -894,7 +1204,10 @@ const SECTORES = [
     "tipo": "Asociación sin ánimo de lucro",
     "texto": "Promueve el modelo de Economía del Bien Común, nacido en Viena en 2010: las organizaciones elaboran un «balance del bien común» que puntúa, hasta un máximo de 1.000 puntos, su impacto en dignidad humana, solidaridad, sostenibilidad y transparencia. No hemos podido confirmar cuántas organizaciones lo aplican hoy en España (por verificar).",
     "web": "https://economiadelbiencomun.org",
-    "fuente": "https://www.ui1.es/blog-ui1/sabes-que-es-la-economia-del-bien-comun"
+    "fuente": "https://www.ui1.es/blog-ui1/sabes-que-es-la-economia-del-bien-comun",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "Triodos Bank",
@@ -902,7 +1215,10 @@ const SECTORES = [
     "tipo": "Banca ética",
     "texto": "Banco que solo presta a proyectos de transición social y ecológica. En 2025 el grupo tenía 748.619 clientes, 15.100 millones de euros en depósitos y 6.100 millones en préstamos a empresas de sus áreas de transición.",
     "web": "https://www.triodos.es",
-    "fuente": "https://www.triodos.es/binaries/content/assets/tbes/informe-anual/informe-anual-2025/infografia-ar25_es.pdf"
+    "fuente": "https://www.triodos.es/binaries/content/assets/tbes/informe-anual/informe-anual-2025/infografia-ar25_es.pdf",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "Banco WIR",
@@ -910,7 +1226,10 @@ const SECTORES = [
     "tipo": "Banco cooperativo con moneda complementaria",
     "texto": "Cooperativa con más de 90 años de historia que gestiona el WIR, una moneda complementaria para pequeñas y medianas empresas. En 2025 tuvo un balance de 6.740 millones de francos suizos y un beneficio de 17,7 millones.",
     "web": "https://www.wir.ch",
-    "fuente": "https://www.wir.ch/fileadmin/downloads/Publikationen/Medienmitteilungen/2026-02-13-Jahresergebnis-de.pdf"
+    "fuente": "https://www.wir.ch/fileadmin/downloads/Publikationen/Medienmitteilungen/2026-02-13-Jahresergebnis-de.pdf",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "Turuta, moneda social de Vilanova i la Geltrú",
@@ -918,7 +1237,10 @@ const SECTORES = [
     "tipo": "Moneda social comunitaria",
     "texto": "Proyecto nacido en 2010 como microeconomía experimental: cada participante tiene una cuenta en línea y paga con turutas bienes y servicios locales en el «mercado turuta». La plataforma europea de economía circular lo recoge como proyecto vivo, pero no hemos podido comprobar su actividad actual (por verificar).",
     "web": "https://turuta.cat",
-    "fuente": "https://circulareconomy.europa.eu/platform/en/dialogue/existing-eu-platforms/turuta-social-currency-promoting-local-production-and-exchange"
+    "fuente": "https://circulareconomy.europa.eu/platform/en/dialogue/existing-eu-platforms/turuta-social-currency-promoting-local-production-and-exchange",
+    "escalas": [
+     "pueblo"
+    ]
    },
    {
     "nombre": "Modelo de optimización socioeconómica (Luz & Humanidad)",
@@ -926,7 +1248,17 @@ const SECTORES = [
     "tipo": "Proyecto propio",
     "texto": "Un único impuesto sobre cada transacción, cobrado automáticamente y repartido a partes iguales entre ocho escalas (persona, comunidad vecinal, municipio, provincia, región, nación, continente y planeta), con asambleas que eligen prioridades y comités técnicos que ejecutan.",
     "web": "https://humanity.wiki/modelo-socioeconomico",
-    "fuente": null
+    "fuente": null,
+    "escalas": [
+     "individuo",
+     "comunidad",
+     "pueblo",
+     "provincia",
+     "region",
+     "pais",
+     "continente",
+     "planeta"
+    ]
    }
   ],
   "preguntas": [
@@ -958,7 +1290,10 @@ const SECTORES = [
       "Hábitos digitales seguros: saber reconocer estafas por teléfono, SMS o correo y a quién pedir ayuda (017)."
      ],
      "imagenes": [],
-     "escena3d": "hogar"
+     "escena3d": "hogar",
+     "escalas": [
+      "individuo"
+     ]
     },
     {
      "titulo": "Barrio: calles vivas y vecinos que se cuidan",
@@ -972,7 +1307,10 @@ const SECTORES = [
       "Refugios climáticos a pocos minutos a pie para protegerse del calor extremo."
      ],
      "imagenes": [],
-     "escena3d": "movilidad"
+     "escena3d": "movilidad",
+     "escalas": [
+      "comunidad"
+     ]
     },
     {
      "titulo": "Territorio: gestión del riesgo y protección civil",
@@ -986,7 +1324,11 @@ const SECTORES = [
       "Coordinación ágil entre administraciones, bomberos, servicios sanitarios y vecinos."
      ],
      "imagenes": [],
-     "escena3d": "naturaleza"
+     "escena3d": "naturaleza",
+     "escalas": [
+      "provincia",
+      "region"
+     ]
     }
    ],
    "arte": {
@@ -1000,37 +1342,61 @@ const SECTORES = [
     "ambito": "España",
     "titulo": "Las carreteras siguen costando más de mil vidas al año",
     "texto": "En 2025 murieron 1.119 personas en vías interurbanas (cómputo a 24 horas), 35 menos que en 2024 y la segunda cifra más baja desde 1960. Aun así, el 40 % de los fallecidos fueron usuarios vulnerables: 304 motoristas, 103 peatones y 40 ciclistas.",
-    "fuente": "https://www.dgt.es/comunicacion/notas-de-prensa/20260108-2025-finaliza-1119-fallecidos-en-siniestros-de-trafico-en-vias-interurbanas"
+    "fuente": "https://www.dgt.es/comunicacion/notas-de-prensa/20260108-2025-finaliza-1119-fallecidos-en-siniestros-de-trafico-en-vias-interurbanas",
+    "escalas": [
+     "pueblo",
+     "pais"
+    ]
    },
    {
     "ambito": "UE",
     "titulo": "Incendios forestales cada vez más extensos",
     "texto": "Según el informe avanzado del Sistema Europeo de Información sobre Incendios Forestales (EFFIS) publicado en marzo de 2026, en 2025 ardieron más de un millón de hectáreas en la Unión Europea, el peor año desde que hay registros. En España la superficie quemada rondó las 400.000 hectáreas (cifra citada por expertos a partir del informe; por verificar en la estadística oficial del MITECO).",
-    "fuente": "https://sciencemediacentre.es/los-incendios-forestales-en-2025-quemaron-mas-de-un-millon-de-hectareas-de-la-union-europea-casi-la"
+    "fuente": "https://sciencemediacentre.es/los-incendios-forestales-en-2025-quemaron-mas-de-un-millon-de-hectareas-de-la-union-europea-casi-la",
+    "escalas": [
+     "provincia",
+     "continente"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Inundaciones repentinas que sorprenden a la población",
     "texto": "La DANA del 29 de octubre de 2024 causó más de 220 víctimas mortales, sobre todo en la provincia de Valencia, según los datos difundidos por el Tribunal Superior de Justicia de la Comunitat Valenciana (la cifra judicial se ha ido actualizando después). Fue una de las catástrofes naturales más graves de la historia reciente de España.",
-    "fuente": "https://www.poderjudicial.es/cgpj/es/Poder-Judicial/Tribunales-Superiores-de-Justicia/TSJ-Comunidad-Valenciana/Oficina-de-Comunicacion/Notas-de-prensa/La-cifra-de-victimas-mortales-por-la-Dana-se-mantiene-en-222--todas-con-autopsia-y-ya-identificadas--y-los-expedientes-activos-por-desaparicion-bajan-a-4"
+    "fuente": "https://www.poderjudicial.es/cgpj/es/Poder-Judicial/Tribunales-Superiores-de-Justicia/TSJ-Comunidad-Valenciana/Oficina-de-Comunicacion/Notas-de-prensa/La-cifra-de-victimas-mortales-por-la-Dana-se-mantiene-en-222--todas-con-autopsia-y-ya-identificadas--y-los-expedientes-activos-por-desaparicion-bajan-a-4",
+    "escalas": [
+     "provincia",
+     "pais"
+    ]
    },
    {
     "ambito": "UE",
     "titulo": "El calor extremo se cobra miles de vidas cada verano",
     "texto": "Un estudio de ISGlobal publicado en Nature Medicine (septiembre de 2025) estima unas 62.775 muertes relacionadas con el calor en Europa durante el verano de 2024. España fue el segundo país más afectado, con unas 6.743 muertes estimadas.",
-    "fuente": "https://www.isglobal.org/-/62.700-muertes-asociadas-con-el-calor-del-verano-de-2024"
+    "fuente": "https://www.isglobal.org/-/62.700-muertes-asociadas-con-el-calor-del-verano-de-2024",
+    "escalas": [
+     "continente"
+    ]
    },
    {
     "ambito": "UE",
     "titulo": "Poca preparación ciudadana ante emergencias",
     "texto": "En el Eurobarómetro de 2024 sobre riesgo de catástrofes, casi dos de cada tres europeos dijeron necesitar más información para prepararse y más de un tercio tiene dificultades para encontrarla en las autoridades. Solo un 7 % colabora como voluntario en organizaciones de emergencia o resiliencia comunitaria.",
-    "fuente": "https://civil-protection-humanitarian-aid.ec.europa.eu/news-stories/news/europeans-believe-they-need-more-information-prepare-emergencies-recent-eurobarometer-survey-shows-2024-09-30_en"
+    "fuente": "https://civil-protection-humanitarian-aid.ec.europa.eu/news-stories/news/europeans-believe-they-need-more-information-prepare-emergencies-recent-eurobarometer-survey-shows-2024-09-30_en",
+    "escalas": [
+     "comunidad",
+     "pueblo",
+     "provincia",
+     "continente"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "La delincuencia se desplaza a internet",
     "texto": "Según el Balance de Criminalidad del Ministerio del Interior, en 2025 se registraron 489.248 ciberdelitos, el 19,8 % de todas las infracciones penales y un 5,3 % más que en 2024; la mayoría son estafas informáticas. La criminalidad convencional, en cambio, bajó un 0,2 % y su tasa está en la franja más baja de su serie histórica.",
-    "fuente": "https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/dam/jcr:7d3776cd-9ca4-4c02-8ca4-96b2571dbee4/Balance%20de%20Criminalidad%20Cuarto%20Trimestre%202025.pdf"
+    "fuente": "https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/dam/jcr:7d3776cd-9ca4-4c02-8ca4-96b2571dbee4/Balance%20de%20Criminalidad%20Cuarto%20Trimestre%202025.pdf",
+    "escalas": [
+     "pais"
+    ]
    }
   ],
   "soluciones": [
@@ -1039,42 +1405,64 @@ const SECTORES = [
     "titulo": "Calles a 30 km/h y Visión Cero",
     "texto": "Limitar la velocidad urbana y dar prioridad al peatón reduce la gravedad de los atropellos. Cinco años después de generalizar el límite de 30 km/h (mayo de 2021), la DGT informa de que en 2024 murieron en ciudad casi un 19 % menos de ciclistas y más de un 16 % menos de peatones que en 2019, y nueve ciudades de más de 100.000 habitantes no tuvieron ningún fallecido; la DGT lo presenta como tendencia, no como efecto causal medido.",
     "supera": "Las carreteras siguen costando más de mil vidas al año",
-    "fuente": "https://www.dgt.es/export/sites/web-DGT/.galleries/downloads/nota_prensa/2026/20260511-NP-Quinto-aniversario-entrada-vigor-30km.pdf"
+    "fuente": "https://www.dgt.es/export/sites/web-DGT/.galleries/downloads/nota_prensa/2026/20260511-NP-Quinto-aniversario-entrada-vigor-30km.pdf",
+    "escalas": [
+     "pueblo",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Paisaje en mosaico y pastoreo preventivo",
     "texto": "Rebaños que pastan en zonas estratégicas elegidas por los bomberos mantienen limpio el sotobosque y crean franjas donde el fuego pierde fuerza, a la vez que sostienen la ganadería extensiva. El modelo Ramats de Foc, iniciado en 2016 por la Fundación Pau Costa en Cataluña, reúne ya a un centenar de ganaderos; su impacto se evalúa zona a zona y no hay aún una cifra global publicada.",
     "supera": "Incendios forestales cada vez más extensos",
-    "fuente": "https://www.bbva.com/es/juntos-creando-oportunidades/rebanos-de-fuego-gestion-sostenible-del-riesgo-de-incendios-forestales/"
+    "fuente": "https://www.bbva.com/es/juntos-creando-oportunidades/rebanos-de-fuego-gestion-sostenible-del-riesgo-de-incendios-forestales/",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "Alertas tempranas y autoprotección",
     "texto": "Sistemas de aviso que llegan a tiempo a cada teléfono, unidos a una población que sabe qué hacer (subir a pisos altos, no bajar a garajes, no cruzar cauces). Según la ONU, avisar con solo 24 horas de antelación puede reducir los daños económicos un 30 %, y los países con buena cobertura de alerta temprana tienen una mortalidad por desastres ocho veces menor.",
     "supera": "Inundaciones repentinas que sorprenden a la población",
-    "fuente": "https://www.un.org/sites/un2.un.org/files/climate-change-fast-facts-updates/EarlyWarnings_FastFacts.pdf"
+    "fuente": "https://www.un.org/sites/un2.un.org/files/climate-change-fast-facts-updates/EarlyWarnings_FastFacts.pdf",
+    "escalas": [
+     "planeta"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Planes de calor y refugios climáticos",
     "texto": "Avisos sanitarios, atención a personas mayores y solas, y espacios frescos de acceso libre (bibliotecas, escuelas, parques con sombra). Un estudio de ISGlobal (PLOS Medicine, 2018) mostró que, aunque los veranos se calentaron más de 1 °C desde 1980, el riesgo de morir por calor disminuyó en España, algo que los autores relacionan con mejoras en vivienda, servicios sanitarios y campañas de concienciación.",
     "supera": "El calor extremo se cobra miles de vidas cada verano",
-    "fuente": "https://www.eurekalert.org/news-releases/484017"
+    "fuente": "https://www.eurekalert.org/news-releases/484017",
+    "escalas": [
+     "individuo",
+     "pais"
+    ]
    },
    {
     "ambito": "UE",
     "titulo": "Comunidades preparadas y voluntariado de protección civil",
     "texto": "La Estrategia de la Unión de Preparación (marzo de 2025) propone que la población pueda ser autosuficiente al menos 72 horas y que la preparación se enseñe en escuelas y barrios. Experiencias como las agrupaciones de voluntariado de protección civil o los barrios Firewise de Estados Unidos muestran que vecinos organizados y formados multiplican la capacidad de respuesta en las primeras horas.",
     "supera": "Poca preparación ciudadana ante emergencias",
-    "fuente": "https://www.euskadi.eus/contenidos/documentacion/inf_estrategia2030/es_def/20250327_Estrategia-UE-Preparacion-2030.pdf"
+    "fuente": "https://www.euskadi.eus/contenidos/documentacion/inf_estrategia2030/es_def/20250327_Estrategia-UE-Preparacion-2030.pdf",
+    "escalas": [
+     "comunidad",
+     "continente"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Ayuda y educación en ciberseguridad",
     "texto": "Una línea pública, gratuita y especializada (el 017 de INCIBE) orienta a ciudadanos, empresas y menores ante estafas, suplantaciones o acoso en línea. Recibió más de 138.000 consultas en 2025, un 40 % más que el año anterior, y las suplantaciones por teléfono, SMS o correo son el primer motivo de consulta.",
     "supera": "La delincuencia se desplaza a internet",
-    "fuente": "https://digital.gob.es/en/comunicacion/notas-prensa/secretaria-estado-telecomunicaciones-e-infraestructuras-digitales/2025/12/2025-12-26"
+    "fuente": "https://digital.gob.es/en/comunicacion/notas-prensa/secretaria-estado-telecomunicaciones-e-infraestructuras-digitales/2025/12/2025-12-26",
+    "escalas": [
+     "pueblo",
+     "pais"
+    ]
    }
   ],
   "proyectos": [
@@ -1084,7 +1472,10 @@ const SECTORES = [
     "tipo": "programa público municipal",
     "texto": "Desde 1999 la ciudad ha dado prioridad al peatón: el tráfico a motor bajó un 92 % en el centro histórico y un 77 % en el centro, con límites de 10 a 30 km/h. Según la DGT, no registra muertes por tráfico urbano desde 2007 y los heridos graves pasaron de 129 (1999) a 4 (2020); el programa de caminos escolares se suprimió porque la mayoría de los niños ya va andando al colegio.",
     "web": "https://www.pontevedra.gal",
-    "fuente": "https://www.DGT.es/.galleries/downloads/conoce_la_dgt/que-hacemos/estrategias-y-planes/Experiencias-urbanas/pdf/84000-Pontevedra.pdf"
+    "fuente": "https://www.DGT.es/.galleries/downloads/conoce_la_dgt/que-hacemos/estrategias-y-planes/Experiencias-urbanas/pdf/84000-Pontevedra.pdf",
+    "escalas": [
+     "pueblo"
+    ]
    },
    {
     "nombre": "Protegim les escoles (Protegemos las escuelas)",
@@ -1092,7 +1483,10 @@ const SECTORES = [
     "tipo": "programa público municipal",
     "texto": "Transforma los entornos escolares calmando el tráfico, mejorando los accesos y ganando espacio de estancia y verde. Empezó en 2020 con 26 escuelas, sumó 75 en 2021 y preveía 54 más en 2022, con el objetivo de llegar a todos los centros de la ciudad.",
     "web": "https://ajuntament.barcelona.cat/educacio/es/protegemos-las-escuelas",
-    "fuente": "https://ajuntament.barcelona.cat/educacio/es/protegemos-las-escuelas"
+    "fuente": "https://ajuntament.barcelona.cat/educacio/es/protegemos-las-escuelas",
+    "escalas": [
+     "pueblo"
+    ]
    },
    {
     "nombre": "Xarxa de Refugis Climàtics",
@@ -1100,7 +1494,10 @@ const SECTORES = [
     "tipo": "programa público municipal",
     "texto": "Red de espacios frescos y gratuitos (bibliotecas, escuelas, equipamientos y parques) para protegerse del calor. Nació en 2020 con unos 70 refugios y en el verano de 2026 supera los 500; según el Ayuntamiento, el 99,2 % de los vecinos tiene uno a menos de diez minutos a pie.",
     "web": "https://datos.gob.es/ca/catalogo/l01080193-red-de-refugios-climaticos-en-la-ciudad-de-barcelona",
-    "fuente": "https://www.moncloa.com/2026/06/16/refugios-climaticos-barcelona-verano-3385427/"
+    "fuente": "https://www.moncloa.com/2026/06/16/refugios-climaticos-barcelona-verano-3385427/",
+    "escalas": [
+     "pueblo"
+    ]
    },
    {
     "nombre": "Ramats de Foc (Rebaños de Fuego)",
@@ -1108,7 +1505,10 @@ const SECTORES = [
     "tipo": "proyecto de fundación (Fundación Pau Costa)",
     "texto": "Une a ganaderos de pastoreo extensivo con las zonas estratégicas de prevención de incendios definidas por los bomberos de la Generalitat. Iniciado en 2016 con tres explotaciones, hoy cuenta con alrededor de un centenar de ganaderos y una marca y mapa de productos «que cuidan los bosques».",
     "web": "https://www.ramatsdefoc.org",
-    "fuente": "https://www.vinetur.com/2025122994452/ramats-de-foc-lanza-un-mapa-interactivo-para-localizar-productos-que-cuidan-los-bosques.html"
+    "fuente": "https://www.vinetur.com/2025122994452/ramats-de-foc-lanza-un-mapa-interactivo-para-localizar-productos-que-cuidan-los-bosques.html",
+    "escalas": [
+     "region"
+    ]
    },
    {
     "nombre": "Agrupaciones de Defensa Forestal (ADF)",
@@ -1116,7 +1516,10 @@ const SECTORES = [
     "tipo": "asociaciones de voluntariado, propietarios y ayuntamientos",
     "texto": "Nacidas de grupos vecinales de los años 60 y reconocidas oficialmente en 1986, hacen prevención, vigilancia y primera intervención en incendios hasta la llegada de los bomberos. En 2022 eran más de 300 agrupaciones con más de 6.000 voluntarios.",
     "web": "http://www.federacioadfbages.org",
-    "fuente": "https://www.3cat.cat/3catinfo/les-adf-molestes-perque-es-limiten-les-seves-tasques/noticia/3170421/"
+    "fuente": "https://www.3cat.cat/3catinfo/les-adf-molestes-perque-es-limiten-les-seves-tasques/noticia/3170421/",
+    "escalas": [
+     "region"
+    ]
    },
    {
     "nombre": "Voluntariado de Protección Civil",
@@ -1124,7 +1527,10 @@ const SECTORES = [
     "tipo": "agrupaciones municipales de voluntariado",
     "texto": "Vecinos formados que apoyan a los servicios profesionales en prevención y emergencias. Solo en la Comunitat Valenciana hay más de 3.000 voluntarios en 164 agrupaciones y asociaciones, que durante la DANA de 2024 participaron en búsquedas, limpieza, achique de agua y reparto de ayuda.",
     "web": "https://www.proteccioncivil.es",
-    "fuente": "https://valencianews.es/comunidad-valenciana/emergencias-destaca-la-labor-de-los-voluntarios-en-el-dia-internacional-de-proteccion-civil/"
+    "fuente": "https://valencianews.es/comunidad-valenciana/emergencias-destaca-la-labor-de-los-voluntarios-en-el-dia-internacional-de-proteccion-civil/",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "Firewise USA",
@@ -1132,7 +1538,10 @@ const SECTORES = [
     "tipo": "programa de reconocimiento comunitario (NFPA, entidad sin ánimo de lucro)",
     "texto": "Los vecinos de una urbanización forman un comité, evalúan su riesgo de incendio, hacen un plan de acción a tres años y lo aplican juntos (limpieza de vegetación, accesos, viviendas más resistentes). En mayo de 2026 California reconoció su comunidad Firewise número 1.500.",
     "web": "https://www.nfpa.org/firewise",
-    "fuente": "https://wildfiretaskforce.org/california-continues-to-lead-nation-with-recognition-of-1500th-firewise-community/"
+    "fuente": "https://wildfiretaskforce.org/california-continues-to-lead-nation-with-recognition-of-1500th-firewise-community/",
+    "escalas": [
+     "pais"
+    ]
    }
   ],
   "preguntas": [
@@ -1164,7 +1573,10 @@ const SECTORES = [
       "Educación jurídica básica en la escuela: conocer los propios derechos y deberes."
      ],
      "imagenes": [],
-     "escena3d": "comunidad"
+     "escena3d": "comunidad",
+     "escalas": [
+      "individuo"
+     ]
     },
     {
      "titulo": "Comunidad: mediación y justicia restaurativa",
@@ -1178,7 +1590,10 @@ const SECTORES = [
       "Profesionales de la mediación reconocidos y con estándares comunes."
      ],
      "imagenes": [],
-     "escena3d": "comunidad"
+     "escena3d": "comunidad",
+     "escalas": [
+      "comunidad"
+     ]
     },
     {
      "titulo": "Sistema: justicia ágil y reinserción",
@@ -1192,7 +1607,10 @@ const SECTORES = [
       "Instituciones independientes y transparentes que generan confianza ciudadana."
      ],
      "imagenes": [],
-     "escena3d": "pueblo"
+     "escena3d": "pueblo",
+     "escalas": [
+      "pais"
+     ]
     }
    ],
    "arte": {
@@ -1206,37 +1624,57 @@ const SECTORES = [
     "ambito": "España",
     "titulo": "Millones de asuntos esperando en los juzgados",
     "texto": "Al cierre del tercer trimestre de 2025 había 4.696.050 asuntos en trámite en los órganos judiciales españoles, un 6,7 % más que un año antes, según el Consejo General del Poder Judicial. Aunque los juzgados resolvieron casi tantos asuntos como entraron, la acumulación sigue creciendo.",
-    "fuente": "https://www.poderjudicial.es/cgpj/es/Poder-Judicial/En-Portada/Los-organos-judiciales-de-toda-Espana-registraron-un-total-de-1-519-584-nuevos-asuntos-en-el-tercer-trimestre-de-2025--un-12-5---menos-que-hace-un-ano"
+    "fuente": "https://www.poderjudicial.es/cgpj/es/Poder-Judicial/En-Portada/Los-organos-judiciales-de-toda-Espana-registraron-un-total-de-1-519-584-nuevos-asuntos-en-el-tercer-trimestre-de-2025--un-12-5---menos-que-hace-un-ano",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Un lenguaje jurídico que muchos no entienden",
     "texto": "Los barómetros de opinión del CGPJ recogidos en el informe de la Comisión para la Modernización del Lenguaje Jurídico (2011) mostraban que el 82 % de la ciudadanía considera el lenguaje jurídico excesivamente complicado y difícil de entender. No hay una medición oficial más reciente comparable (por verificar).",
-    "fuente": "https://www.administracionpublica.com/lenguaje-criptico-y-modernidad"
+    "fuente": "https://www.administracionpublica.com/lenguaje-criptico-y-modernidad",
+    "escalas": [
+     "pueblo",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Baja confianza en la independencia judicial",
     "texto": "Según los datos de Eurostat que utiliza el Cuadro de Indicadores de la Justicia de la UE, en 2025 el 39 % de la población española valoraba como buena o muy buena la independencia de jueces y tribunales. En 2021 la cifra era del 35 %, la sexta más baja de los 27 países de la UE.",
-    "fuente": "https://tradingeconomics.com/spain/perceived-independence-of-the-justice-system-very-good-or-fairly-good-eurostat-data.html"
+    "fuente": "https://tradingeconomics.com/spain/perceived-independence-of-the-justice-system-very-good-or-fairly-good-eurostat-data.html",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "Una brecha mundial de acceso a la justicia",
     "texto": "El World Justice Project estimó en 2019 que unos 5.000 millones de personas en el mundo tienen necesidades de justicia no resueltas: problemas legales cotidianos (vivienda, trabajo, familia, deudas) que no consiguen solucionar o falta de documentos y protección básica.",
-    "fuente": "https://worldjusticeproject.org/news/estimated-5-billion-people-have-unmet-justice-needs-globally"
+    "fuente": "https://worldjusticeproject.org/news/estimated-5-billion-people-have-unmet-justice-needs-globally",
+    "escalas": [
+     "individuo",
+     "planeta"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "La reinserción todavía no llega a todos",
     "texto": "El último estudio de reincidencia de Instituciones Penitenciarias indica que casi 9 de cada 10 personas excarceladas en 2020 no volvieron a prisión en el periodo analizado; es decir, alrededor de una de cada diez sí lo hizo. Reducir esa cifra depende de la formación, el empleo y el apoyo tras la salida (periodo exacto de seguimiento: por verificar).",
-    "fuente": "https://www.interior.gob.es/opencms/es/detalle/articulo/El-nuevo-estudio-de-reincidencia-penitenciaria-recoge-que-casi-9-de-cada-10-excarcelados-en-2020-no-volvieron-a-prision-durante-el-periodo-examinado/"
+    "fuente": "https://www.interior.gob.es/opencms/es/detalle/articulo/El-nuevo-estudio-de-reincidencia-penitenciaria-recoge-que-casi-9-de-cada-10-excarcelados-en-2020-no-volvieron-a-prision-durante-el-periodo-examinado/",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Un cambio de modelo que aún se está asentando",
     "texto": "La Ley Orgánica 1/2025 de eficiencia del Servicio Público de Justicia obliga desde abril de 2025 a intentar un medio adecuado de solución de controversias (MASC) antes de demandar en la vía civil y reorganiza los juzgados en tribunales de instancia. Colegios de la abogacía como el de Madrid señalan, un año después, criterios de aplicación desiguales, costes para personas con pocos recursos e incidencias en la puesta en marcha.",
-    "fuente": "https://elderecho.com/el-icam-hace-balance-de-un-ano-de-la-ley-de-eficiencia"
+    "fuente": "https://elderecho.com/el-icam-hace-balance-de-un-ano-de-la-ley-de-eficiencia",
+    "escalas": [
+     "pais"
+    ]
    }
   ],
   "soluciones": [
@@ -1245,42 +1683,63 @@ const SECTORES = [
     "titulo": "Mediación y medios adecuados de solución de controversias",
     "texto": "Antes o durante un juicio, una persona mediadora neutral ayuda a las partes a llegar a su propio acuerdo, de forma voluntaria y confidencial. El CGPJ impulsa la mediación intrajudicial con protocolos para lo civil, familiar, penal, laboral y contencioso, y señala un aumento notable de los juzgados que derivan casos (sin cifras publicadas en la guía); cada acuerdo alcanzado es un juicio menos.",
     "supera": "Millones de asuntos esperando en los juzgados",
-    "fuente": "https://mediacion.icav.es/wp-content/uploads/2024/10/Guia-practica-de-la-mediacion-intrajudicial-CGPJ-2024.pdf"
+    "fuente": "https://mediacion.icav.es/wp-content/uploads/2024/10/Guia-practica-de-la-mediacion-intrajudicial-CGPJ-2024.pdf",
+    "escalas": [
+     "individuo",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Lenguaje claro y facilitadores procesales",
     "texto": "Redactar sentencias y notificaciones para que se entiendan, y ofrecer apoyos a quien lo necesita. La Ley 8/2021 reconoce la figura del profesional facilitador para que las personas con discapacidad participen en los procesos en igualdad, y el informe de 2011 de la Comisión para la Modernización del Lenguaje Jurídico dejó recomendaciones concretas para jueces, abogados y administraciones; su impacto aún no se ha medido de forma sistemática.",
     "supera": "Un lenguaje jurídico que muchos no entienden",
-    "fuente": "https://elderecho.com/convenio-abogacia-plena-inclusion-acceso-justicia-personas-discapacidad"
+    "fuente": "https://elderecho.com/convenio-abogacia-plena-inclusion-acceso-justicia-personas-discapacidad",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Transparencia y datos judiciales abiertos",
     "texto": "Publicar datos comprensibles sobre plazos, nombramientos, indultos o algoritmos que afectan a la ciudadanía permite evaluar el sistema con hechos y no con impresiones. Organizaciones como Civio ofrecen bases de datos públicas (como el Indultómetro) y en 2025 lograron que el Tribunal Supremo les diera la razón en su demanda de acceso al código del algoritmo BOSCO.",
     "supera": "Baja confianza en la independencia judicial",
-    "fuente": "https://civio.es/en/report-2025/"
+    "fuente": "https://civio.es/en/report-2025/",
+    "escalas": [
+     "pueblo",
+     "pais"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "Justicia centrada en las personas",
     "texto": "En lugar de partir de los tribunales, se parte de los problemas reales de la gente (vivienda, trabajo, familia) y se ofrecen soluciones sencillas: orientación jurídica de primer nivel, servicios en línea y en la comunidad, y vías rápidas. El World Justice Project mide la brecha de justicia con encuestas a la población para orientar estos servicios.",
     "supera": "Una brecha mundial de acceso a la justicia",
-    "fuente": "https://worldjusticeproject.org/news/estimated-5-billion-people-have-unmet-justice-needs-globally"
+    "fuente": "https://worldjusticeproject.org/news/estimated-5-billion-people-have-unmet-justice-needs-globally",
+    "escalas": [
+     "individuo",
+     "planeta"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "Justicia restaurativa",
     "texto": "Encuentros voluntarios y preparados entre víctima, autor y comunidad para hablar del daño y acordar cómo repararlo. Una revisión sistemática de la Colaboración Campbell (Strang y otros, 2013; 10 estudios) halló menos reincidencia en quienes participaron (en Reino Unido, un 27 % menos de nuevas condenas en dos años) y mayor satisfacción y menos estrés postraumático en las víctimas.",
     "supera": "La reinserción todavía no llega a todos",
-    "fuente": "https://phys.org/news/2014-02-justice-victims-crime.html"
+    "fuente": "https://phys.org/news/2014-02-justice-victims-crime.html",
+    "escalas": [
+     "planeta"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Protocolos comunes y evaluación de la reforma",
     "texto": "Guías prácticas compartidas por juzgados, abogacía y mediadores (como la Guía de mediación intrajudicial del CGPJ, actualizada en 2024) ayudan a aplicar las nuevas normas de forma homogénea. Evaluar con datos públicos la Ley 1/2025 (casos derivados, acuerdos, plazos y costes) permitiría corregir los problemas que señalan los profesionales.",
     "supera": "Un cambio de modelo que aún se está asentando",
-    "fuente": "https://mediacion.icav.es/wp-content/uploads/2024/10/Guia-practica-de-la-mediacion-intrajudicial-CGPJ-2024.pdf"
+    "fuente": "https://mediacion.icav.es/wp-content/uploads/2024/10/Guia-practica-de-la-mediacion-intrajudicial-CGPJ-2024.pdf",
+    "escalas": [
+     "pais"
+    ]
    }
   ],
   "proyectos": [
@@ -1290,7 +1749,10 @@ const SECTORES = [
     "tipo": "programa público (Gobierno Vasco)",
     "texto": "Ofrece mediación, conferencias y círculos restaurativos con víctima, autor y comunidad en casos penales derivados por los juzgados. Atiende unos 1.400 casos al año y la mitad terminan con acuerdos restaurativos; en justicia juvenil, 1.165 de 1.505 procesos (2020-2022) tuvieron resultado positivo.",
     "web": "https://www.justizia.eus",
-    "fuente": "https://www.euskadi.eus/gobierno-vasco/-/noticia/2023/la-mitad-casos-penales-del-servicio-justicia-restaurativa-terminan-medidas-alternativas-al-ingreso-prision/"
+    "fuente": "https://www.euskadi.eus/gobierno-vasco/-/noticia/2023/la-mitad-casos-penales-del-servicio-justicia-restaurativa-terminan-medidas-alternativas-al-ingreso-prision/",
+    "escalas": [
+     "region"
+    ]
    },
    {
     "nombre": "Mediación intrajudicial del CGPJ",
@@ -1298,7 +1760,10 @@ const SECTORES = [
     "tipo": "programa público (Consejo General del Poder Judicial)",
     "texto": "Red de juzgados que derivan casos a mediación con apoyo de convenios con la abogacía, la procura y otras entidades, y una guía práctica con protocolos para lo civil, familiar, penal, laboral y contencioso. La guía, aprobada en 2016, se actualizó en 2024.",
     "web": "https://www.poderjudicial.es/cgpj/es/Temas/Mediacion/",
-    "fuente": "https://mediacion.icav.es/wp-content/uploads/2024/10/Guia-practica-de-la-mediacion-intrajudicial-CGPJ-2024.pdf"
+    "fuente": "https://mediacion.icav.es/wp-content/uploads/2024/10/Guia-practica-de-la-mediacion-intrajudicial-CGPJ-2024.pdf",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "Módulos de respeto",
@@ -1306,7 +1771,10 @@ const SECTORES = [
     "tipo": "programa público penitenciario",
     "texto": "Unidades de convivencia donde las personas presas asumen voluntariamente normas de respeto, higiene, responsabilidades y participación en grupos. Nacieron en la prisión de León y se extendieron al resto de centros penitenciarios españoles (número actual de módulos e internos: por verificar).",
     "web": "https://www.institucionpenitenciaria.es",
-    "fuente": "https://www.diariodeleon.es/leon/240924/1626499/marlaska-recuerda-villahierro-exporto-nivel-mundial-modulos-respeto.html"
+    "fuente": "https://www.diariodeleon.es/leon/240924/1626499/marlaska-recuerda-villahierro-exporto-nivel-mundial-modulos-respeto.html",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "Civio",
@@ -1314,7 +1782,10 @@ const SECTORES = [
     "tipo": "fundación sin ánimo de lucro de periodismo de datos",
     "texto": "Vigila el poder y defiende el acceso a la información pública con periodismo, herramientas y acciones legales, como el Indultómetro o un simulador del algoritmo que usan las prisiones para decidir permisos. En 2025 tenía 2.297 socios, publicó 18 grandes investigaciones y el 42 % de sus ingresos procedió de donaciones.",
     "web": "https://civio.es",
-    "fuente": "https://civio.es/en/report-2025/"
+    "fuente": "https://civio.es/en/report-2025/",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "Facilitación del acceso a la justicia (Plena inclusión y Abogacía Española)",
@@ -1322,7 +1793,10 @@ const SECTORES = [
     "tipo": "ONG en alianza con la abogacía",
     "texto": "Plena inclusión y el Consejo General de la Abogacía colaboran desde 2013 en formación y desde 2022 por convenio para impulsar los ajustes de procedimiento y la figura del facilitador reconocida por la Ley 8/2021. El objetivo es que las personas con discapacidad intelectual entiendan y participen en igualdad en los procesos judiciales.",
     "web": "https://www.plenainclusion.org",
-    "fuente": "https://elderecho.com/convenio-abogacia-plena-inclusion-acceso-justicia-personas-discapacidad"
+    "fuente": "https://elderecho.com/convenio-abogacia-plena-inclusion-acceso-justicia-personas-discapacidad",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "Servicio Penitenciario de Noruega (prisión de Halden)",
@@ -1330,7 +1804,10 @@ const SECTORES = [
     "tipo": "servicio público penitenciario",
     "texto": "Aplica el principio de normalidad: la pena es la pérdida de libertad, pero se conservan los demás derechos, y la vida en prisión se parece lo más posible a la de fuera, con formación y trabajo. Según un estudio encargado por el propio servicio, la tasa de nueva condena a dos años fue del 18 % en 2018.",
     "web": "https://www.kriminalomsorgen.no",
-    "fuente": "https://www.thelocal.no/20231213/explained-how-different-is-the-norwegian-prison-system-really"
+    "fuente": "https://www.thelocal.no/20231213/explained-how-different-is-the-norwegian-prison-system-really",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "World Justice Project",
@@ -1338,7 +1815,11 @@ const SECTORES = [
     "tipo": "organización internacional sin ánimo de lucro",
     "texto": "Mide el Estado de derecho y el acceso a la justicia en numerosos países mediante encuestas a la población y a expertos. Sus estimaciones sobre la «brecha de justicia» (unos 5.000 millones de personas con necesidades no resueltas, 2019) orientan políticas de justicia centrada en las personas.",
     "web": "https://worldjusticeproject.org",
-    "fuente": "https://worldjusticeproject.org/news/estimated-5-billion-people-have-unmet-justice-needs-globally"
+    "fuente": "https://worldjusticeproject.org/news/estimated-5-billion-people-have-unmet-justice-needs-globally",
+    "escalas": [
+     "continente",
+     "planeta"
+    ]
    }
   ],
   "preguntas": [
@@ -1370,7 +1851,10 @@ const SECTORES = [
       "Personas con enfermedades crónicas formadas para cuidarse a sí mismas, con información fiable y apoyo entre pacientes"
      ],
      "imagenes": [],
-     "escena3d": "hogar"
+     "escena3d": "hogar",
+     "escalas": [
+      "individuo"
+     ]
     },
     {
      "titulo": "La comunidad: atención primaria cercana y activos en salud",
@@ -1384,7 +1868,10 @@ const SECTORES = [
       "Participación vecinal en los consejos de salud de cada zona"
      ],
      "imagenes": [],
-     "escena3d": "comunidad"
+     "escena3d": "comunidad",
+     "escalas": [
+      "comunidad"
+     ]
     },
     {
      "titulo": "El entorno: aire limpio, silencio, naturaleza y ciudades saludables",
@@ -1398,7 +1885,12 @@ const SECTORES = [
       "Municipios que evalúan el impacto en salud de sus decisiones (urbanismo, movilidad, vivienda), como propone la Red Española de Ciudades Saludables"
      ],
      "imagenes": [],
-     "escena3d": "naturaleza"
+     "escena3d": "naturaleza",
+     "escalas": [
+      "pueblo",
+      "provincia",
+      "region"
+     ]
     }
    ],
    "arte": {
@@ -1412,37 +1904,57 @@ const SECTORES = [
     "ambito": "España",
     "titulo": "Más de un tercio de los escolares con exceso de peso",
     "texto": "El estudio ALADINO 2023 encontró que el 36,1 % de los niños y niñas de 6 a 9 años tiene exceso de peso (20,2 % sobrepeso y 15,9 % obesidad). Ha bajado desde el 40,6 % de 2019, pero la brecha social crece: en familias con menos de 18.000 € al año la obesidad llega al 23,6 %, frente al 10,9 % en las de más de 30.000 €.",
-    "fuente": "https://www.dsca.gob.es/sites/default/files/publicaciones/estudio-aladino-2023.pdf"
+    "fuente": "https://www.dsca.gob.es/sites/default/files/publicaciones/estudio-aladino-2023.pdf",
+    "escalas": [
+     "individuo",
+     "pais"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "Un tercio de los adultos no se mueve lo suficiente",
     "texto": "Según la OMS, el 31 % de los adultos del mundo (unos 1.800 millones de personas) no alcanza la actividad física recomendada, 5 puntos más que en 2010; si sigue la tendencia llegará al 35 % en 2030. Entre adolescentes, el 86 % no cumple las recomendaciones.",
-    "fuente": "https://www.who.int/es/news-room/fact-sheets/detail/physical-activity"
+    "fuente": "https://www.who.int/es/news-room/fact-sheets/detail/physical-activity",
+    "escalas": [
+     "individuo",
+     "planeta"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "El suicidio sigue siendo una herida abierta",
     "texto": "En 2024 murieron por suicidio 3.953 personas en España (datos definitivos del INE), 163 menos que en 2023. Tres de cada cuatro eran hombres, y entre los menores de 20 años los casos subieron de 76 a 90.",
-    "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/sanidad14/Paginas/2025/181225-descenso-suicidios-prevencion.aspx"
+    "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/sanidad14/Paginas/2025/181225-descenso-suicidios-prevencion.aspx",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Atención primaria con esperas de más de una semana",
     "texto": "Según el Barómetro Sanitario 2024, solo el 22,3 % de los pacientes fue atendido en atención primaria el mismo día o al día siguiente de pedir cita; el resto esperó una media de 8,7 días. La atención primaria es la puerta de entrada del sistema y su saturación retrasa la prevención y el seguimiento de enfermedades crónicas.",
-    "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/sanidad14/Paginas/2025/270225-barometro-sanitario-2024.aspx"
+    "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/sanidad14/Paginas/2025/270225-barometro-sanitario-2024.aspx",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "UE",
     "titulo": "El aire contaminado acorta vidas",
     "texto": "La Agencia Europea de Medio Ambiente estima que en 2022 al menos 239.000 muertes en la UE fueron atribuibles a la exposición a partículas finas (PM2,5) por encima del nivel guía de la OMS, además de unas 70.000 por ozono y 48.000 por dióxido de nitrógeno (NO2).",
-    "fuente": "https://www.eea.europa.eu/en/newsroom/news/health-and-environment-impacts-of-air-pollution"
+    "fuente": "https://www.eea.europa.eu/en/newsroom/news/health-and-environment-impacts-of-air-pollution",
+    "escalas": [
+     "continente"
+    ]
    },
    {
     "ambito": "UE",
     "titulo": "Más de 110 millones de europeos viven con ruido dañino",
     "texto": "El informe «Environmental noise in Europe 2025» de la Agencia Europea de Medio Ambiente calcula que más del 20 % de la población europea (más de 110 millones de personas) está expuesta a niveles dañinos de ruido de tráfico; con los niveles de la OMS serían unos 150 millones. Se asocia a unas 66.000 muertes prematuras al año.",
-    "fuente": "https://www.eea.europa.eu/en/newsroom/news/europeans-exposed-to-harmful-noise-pollution-levels/"
+    "fuente": "https://www.eea.europa.eu/en/newsroom/news/europeans-exposed-to-harmful-noise-pollution-levels/",
+    "escalas": [
+     "continente"
+    ]
    }
   ],
   "soluciones": [
@@ -1451,42 +1963,68 @@ const SECTORES = [
     "titulo": "Alimentación de patrón mediterráneo",
     "texto": "Dieta basada en verduras, legumbres, frutas, frutos secos y aceite de oliva virgen extra. El ensayo español PREDIMED (7.447 participantes, publicado en The New England Journal of Medicine en 2013 y reanalizado en 2018) mostró un 30 % menos de infartos, ictus y muertes cardiovasculares frente a una dieta baja en grasa. Su efecto en la infancia depende de que esa comida sea asequible y esté presente en comedores escolares y barrios de renta baja.",
     "supera": "Más de un tercio de los escolares con exceso de peso",
-    "fuente": "https://www.wikijournalclub.org/wiki/PREDIMED"
+    "fuente": "https://www.wikijournalclub.org/wiki/PREDIMED",
+    "escalas": [
+     "individuo",
+     "comunidad"
+    ]
    },
    {
     "ambito": "Persona / atención primaria",
     "titulo": "Consejo y prescripción de actividad física desde la consulta",
     "texto": "Profesionales de atención primaria que valoran, aconsejan y derivan a programas de ejercicio supervisado. Un metaanálisis de ensayos clínicos con unas 16.000 personas (BMJ, 2022) halló que estas intervenciones aumentan las probabilidades de cumplir las recomendaciones de actividad física (odds ratio 1,33), con más efecto cuando hay cinco o más contactos; el efecto medido con dispositivos fue menor, por lo que la evidencia se considera moderada.",
     "supera": "Un tercio de los adultos no se mueve lo suficiente",
-    "fuente": "https://orca.cardiff.ac.uk/id/eprint/182834/1/bmj-2021-068465.full.pdf"
+    "fuente": "https://orca.cardiff.ac.uk/id/eprint/182834/1/bmj-2021-068465.full.pdf",
+    "escalas": [
+     "individuo",
+     "comunidad"
+    ]
    },
    {
     "ambito": "Persona / escuela",
     "titulo": "Programas escolares de prevención del suicidio con eficacia probada",
     "texto": "El programa «Youth Aware of Mental Health» enseña al alumnado a reconocer el malestar y pedir ayuda. En el ensayo europeo SEYLE (11.110 adolescentes de 168 centros en 10 países de la UE, The Lancet, 2015) redujo a la mitad los nuevos intentos de suicidio y la ideación suicida grave a los 12 meses.",
     "supera": "El suicidio sigue siendo una herida abierta",
-    "fuente": "https://read.qxmd.com/read/25579833/school-based-suicide-prevention-programmes-the-seyle-cluster-randomised-controlled-trial"
+    "fuente": "https://read.qxmd.com/read/25579833/school-based-suicide-prevention-programmes-the-seyle-cluster-randomised-controlled-trial",
+    "escalas": [
+     "individuo",
+     "comunidad"
+    ]
    },
    {
     "ambito": "Comunidad / sistema sanitario",
     "titulo": "Continuidad con el mismo médico de familia",
     "texto": "Que cada persona sea atendida a lo largo del tiempo por el mismo equipo de atención primaria, lo que exige plantillas suficientes y estables. Una revisión sistemática publicada en BMJ Open (2018) encontró que en 18 de 22 estudios de calidad (82 %) la continuidad asistencial se asociaba a menor mortalidad.",
     "supera": "Atención primaria con esperas de más de una semana",
-    "fuente": "https://news-archive.exeter.ac.uk/2018/june/title_667526_en.html"
+    "fuente": "https://news-archive.exeter.ac.uk/2018/june/title_667526_en.html",
+    "escalas": [
+     "individuo",
+     "comunidad",
+     "pais"
+    ]
    },
    {
     "ambito": "Entorno",
     "titulo": "Zonas de bajas emisiones y menos tráfico en el centro",
     "texto": "Áreas urbanas donde se restringe la entrada de los vehículos más contaminantes. Un estudio de la Universidad Complutense, la Universidad de Oviedo y la Universidad de Lisboa (revista Transportation Research; nota de prensa de 2021) mostró que Madrid Central redujo el NO2 lo suficiente para cumplir el límite anual de la UE en su estación de referencia, sin desplazar la contaminación a los barrios vecinos.",
     "supera": "El aire contaminado acorta vidas",
-    "fuente": "https://www.ucm.es/fueron-eficaces-las-restricciones-de-trafico-en-madrid-para-reducir-los-niveles-de-no2"
+    "fuente": "https://www.ucm.es/fueron-eficaces-las-restricciones-de-trafico-en-madrid-para-reducir-los-niveles-de-no2",
+    "escalas": [
+     "comunidad",
+     "pueblo"
+    ]
    },
    {
     "ambito": "Entorno",
     "titulo": "Calles a 30 km/h y más naturaleza urbana",
     "texto": "Bajar la velocidad urbana de 50 a 30 km/h reduce el ruido en origen. En Zúrich, en 15 tramos de calle, el ruido en la fachada más expuesta bajó 1,6 dB de día y 1,7 dB de noche y disminuyó la molestia de los vecinos (Environment International, 2022). La OMS Europa recoge además que las zonas verdes urbanas reducen la exposición al ruido, la contaminación y el calor y favorecen la salud mental y la actividad física.",
     "supera": "Más de 110 millones de europeos viven con ruido dañino",
-    "fuente": "https://www.pubmed.gov/36434886/"
+    "fuente": "https://www.pubmed.gov/36434886/",
+    "escalas": [
+     "individuo",
+     "comunidad",
+     "pueblo"
+    ]
    }
   ],
   "proyectos": [
@@ -1496,7 +2034,10 @@ const SECTORES = [
     "tipo": "programa público (Servicio Aragonés de Salud)",
     "texto": "Desde 2018 los centros de salud pueden recomendar desde la historia clínica recursos del barrio (grupos de paseo, talleres, asociaciones) y más de 17.000 pacientes ya han recibido una recomendación. De las más de 7.000 personas con seguimiento, más del 80 % se declara satisfecha y cerca del 70 % refiere mejoras en su salud o bienestar (datos de seguimiento, no de un ensayo controlado).",
     "web": "https://atencioncomunitaria.aragon.es",
-    "fuente": "https://www.redaccionmedica.com/autonomies/20261030/la-estrategia-d-atencio-comunitaria-ja-ha-beneficiat-mes-aragonesos/363930_0.html"
+    "fuente": "https://www.redaccionmedica.com/autonomies/20261030/la-estrategia-d-atencio-comunitaria-ja-ha-beneficiat-mes-aragonesos/363930_0.html",
+    "escalas": [
+     "region"
+    ]
    },
    {
     "nombre": "Asturias Actúa (Observatorio de Salud en Asturias)",
@@ -1504,7 +2045,10 @@ const SECTORES = [
     "tipo": "programa público (Consejería de Salud del Principado de Asturias)",
     "texto": "Sección del Observatorio de Salud en Asturias que recoge programas e intervenciones comunitarias de salud de toda la región, clasificados por áreas y con ficha descriptiva y contacto. El anteproyecto de ley de salud pública asturiana (2025) prevé dar rango legal al Observatorio como órgano asesor y le encarga el mapa de activos para la salud.",
     "web": "https://obsaludasturias.com",
-    "fuente": "https://scielosp.org/pdf/gs/2014.v28n3/183-189/es"
+    "fuente": "https://scielosp.org/pdf/gs/2014.v28n3/183-189/es",
+    "escalas": [
+     "region"
+    ]
    },
    {
     "nombre": "Programa ACTIVA",
@@ -1512,7 +2056,10 @@ const SECTORES = [
     "tipo": "programa público (Servicio Murciano de Salud con ayuntamientos)",
     "texto": "Nacido en 2011, prescribe ejercicio físico terapéutico desde la consulta de medicina o enfermería de atención primaria a personas sedentarias con enfermedades crónicas, y lo dirigen graduados en ciencias de la actividad física y del deporte en 24 localidades. Más de 4.500 personas lo habían completado (dato de 2016); su continuidad actual está (por verificar).",
     "web": "https://www.murciasalud.es",
-    "fuente": "https://www.sanidad.gob.es/areas/promocionPrevencion/entornosSaludables/local/estrategia/jornadas/docs/III_Jornada_ImplementacionLocal/Programa_Activa_Murcia.pdf"
+    "fuente": "https://www.sanidad.gob.es/areas/promocionPrevencion/entornosSaludables/local/estrategia/jornadas/docs/III_Jornada_ImplementacionLocal/Programa_Activa_Murcia.pdf",
+    "escalas": [
+     "region"
+    ]
    },
    {
     "nombre": "PACAP – Programa de Actividades Comunitarias en Atención Primaria (semFYC)",
@@ -1520,7 +2067,10 @@ const SECTORES = [
     "tipo": "programa de una sociedad científica (Sociedad Española de Medicina de Familia y Comunitaria)",
     "texto": "Impulsa, forma y reconoce a los equipos de atención primaria que trabajan con su comunidad en promoción de la salud. Sigue activo: en abril de 2026 celebró su XXIII Encuentro en Pontevedra y entregó sus premios a proyectos comunitarios.",
     "web": "https://www.semfyc.es",
-    "fuente": "https://cms.semfyc.es/storage/13224/Premios-PACAP_2026.pdf"
+    "fuente": "https://cms.semfyc.es/storage/13224/Premios-PACAP_2026.pdf",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "Escuela de Pacientes de Andalucía",
@@ -1528,7 +2078,10 @@ const SECTORES = [
     "tipo": "programa público (Consejería de Salud y Escuela Andaluza de Salud Pública)",
     "texto": "Desde 2008 forma a pacientes con enfermedades crónicas para que enseñen a otros pacientes y familias junto a profesionales sanitarios, con materiales sobre cáncer de mama, diabetes, EPOC, insuficiencia cardiaca y otras. Solo en el primer semestre de 2026 el Hospital Torrecárdenas (Almería) organizó 15 sesiones con 61 pacientes y 10 pacientes expertos.",
     "web": "https://escueladepacientes.es",
-    "fuente": "https://www.juntadeandalucia.es/organismos/presidenciasanidadyemergencias/servicios/actualidad/noticias/detalle/677953.html"
+    "fuente": "https://www.juntadeandalucia.es/organismos/presidenciasanidadyemergencias/servicios/actualidad/noticias/detalle/677953.html",
+    "escalas": [
+     "region"
+    ]
    },
    {
     "nombre": "Anillo Verde de Vitoria-Gasteiz",
@@ -1536,7 +2089,10 @@ const SECTORES = [
     "tipo": "programa público municipal (Centro de Estudios Ambientales, CEA)",
     "texto": "Red de parques periurbanos (Salburua, Zadorra, Armentia, Olarizu, Zabalgana, Errekaleor) que rodea la ciudad desde los años 90 y le valió ser Capital Verde Europea en 2012. La ciudad tiene unos 46 m² de zona verde por habitante y el 76 % de la población tiene servicios deportivos, culturales, educativos o sanitarios a menos de 600 metros (diagnóstico de 2022).",
     "web": "https://cea.vitoria-gasteiz.org",
-    "fuente": "https://www.eldiario.es/euskadi/vitoria-celebra-diez-anos-capitalidad-verde-europea-pone-deberes-seguir-siendolo-2030_1_9303089.html"
+    "fuente": "https://www.eldiario.es/euskadi/vitoria-celebra-diez-anos-capitalidad-verde-europea-pone-deberes-seguir-siendolo-2030_1_9303089.html",
+    "escalas": [
+     "pueblo"
+    ]
    },
    {
     "nombre": "Prescripción social del NHS",
@@ -1544,7 +2100,10 @@ const SECTORES = [
     "tipo": "programa público (Servicio Nacional de Salud británico)",
     "texto": "Desde 2019 los centros de salud cuentan con más de 3.300 «link workers» (profesionales de enlace) que conectan a pacientes con recursos comunitarios; en 2023 se derivó a 1,3 millones de personas, y la proporción procedente de zonas desfavorecidas pasó del 23 % al 42 % (The Lancet Public Health, 2025). Su eficacia en salud aún no está bien demostrada: la agencia sueca de evaluación SBU (2025) no encontró revisiones sistemáticas de bajo riesgo de sesgo sobre su efecto en la soledad.",
     "web": "https://socialprescribingacademy.org.uk",
-    "fuente": "https://www.ucl.ac.uk/news/2025/sep/social-prescribing-rises-sharply-among-englands-gps"
+    "fuente": "https://www.ucl.ac.uk/news/2025/sep/social-prescribing-rises-sharply-among-englands-gps",
+    "escalas": [
+     "region"
+    ]
    }
   ],
   "preguntas": [
@@ -1622,7 +2181,10 @@ const SECTORES = [
        "fuente": "https://commons.wikimedia.org/wiki/File:Viviendadeadoberebollar.JPG"
       }
      ],
-     "escena3d": "hogar"
+     "escena3d": "hogar",
+     "escalas": [
+      "individuo"
+     ]
     },
     {
      "titulo": "Urbanismo",
@@ -1665,7 +2227,10 @@ const SECTORES = [
        "fuente": "https://commons.wikimedia.org/wiki/File:Forestgarden2.jpg"
       }
      ],
-     "escena3d": "pueblo"
+     "escena3d": "pueblo",
+     "escalas": [
+      "pueblo"
+     ]
     },
     {
      "titulo": "Naturaleza",
@@ -1707,7 +2272,11 @@ const SECTORES = [
        "fuente": "https://commons.wikimedia.org/wiki/File:El_Porr%C3%B3n.jpg"
       }
      ],
-     "escena3d": "naturaleza"
+     "escena3d": "naturaleza",
+     "escalas": [
+      "provincia",
+      "region"
+     ]
     }
    ],
    "arte": {
@@ -1721,43 +2290,69 @@ const SECTORES = [
     "ambito": "España",
     "titulo": "El suelo se ha privatizado y parcelado de forma permanente",
     "texto": "El territorio está dividido en parcelas privadas a perpetuidad: se compra, se vende y se hereda como mercancía, aunque esté abandonado o se use en contra del bien común. La propiedad privada perpetua y fragmentada del suelo dificulta usarlo para el bien común. En Galicia, solo las 130 concentraciones parcelarias abiertas en 2016 afectaban a unas 117.000 hectáreas y a casi 92.000 propietarios, unas 1,3 ha por propietario según cálculo propio. Cuando el titular deja la tierra, nadie más puede trabajarla sin su permiso.",
-    "fuente": "https://www.agronewscastillayleon.com/la-xunta-destinara-285-millones-de-euros-en-2017-para-impulsar-la-reestructuracion-de-la-propiedad/"
+    "fuente": "https://www.agronewscastillayleon.com/la-xunta-destinara-285-millones-de-euros-en-2017-para-impulsar-la-reestructuracion-de-la-propiedad/",
+    "escalas": [
+     "provincia",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Precio de la vivienda desconectado de los salarios",
     "texto": "Según el Banco de España, comprar una vivienda exige de media casi siete años de renta familiar, y hasta diez en Madrid y Málaga. El esfuerzo de compra ha subido un 88,6 % desde 1980, frente a alrededor de un 10 % en la eurozona. El precio de acceso a la propiedad se ha multiplicado por 3,5 y las rentas de los hogares por 1,8.",
-    "fuente": "https://roams.es/actualidad/finanzas/banco-espana-casi-7-anos-renta-necesaria-comprar-casa/"
+    "fuente": "https://roams.es/actualidad/finanzas/banco-espana-casi-7-anos-renta-necesaria-comprar-casa/",
+    "escalas": [
+     "individuo",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Especulación y concentración de la propiedad",
     "texto": "Las viviendas en manos de propietarios con más de 10 inmuebles pasaron de unas 138.000 en 2008 a unas 626.000 en 2025, mientras caía el peso de quienes tienen una sola vivienda (-3,7 %). El Banco de España cifra en unas 400.000 las viviendas de uso turístico o de temporada y estima un déficit de unas 750.000 viviendas.",
-    "fuente": "https://www.diariodeleon.es/economia/260427/2083021/espana-deja-pais-propietarios-vivienda-pasa-grandes-tenedores.html"
+    "fuente": "https://www.diariodeleon.es/economia/260427/2083021/espana-deja-pais-propietarios-vivienda-pasa-grandes-tenedores.html",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Casas sin gente y gente sin casa",
     "texto": "El Censo 2021 del INE contabilizó 3.837.328 viviendas vacías, el 14,4 % de un parque de 26,6 millones. Los municipios de menos de 10.000 habitantes, con el 20,3 % de la población, concentran el 45 % de esas viviendas vacías.",
-    "fuente": "https://valenciaplaza.com/ine-cifra-numero-viviendas-vacias-mas-de-3-8-millones"
+    "fuente": "https://valenciaplaza.com/ine-cifra-numero-viviendas-vacias-mas-de-3-8-millones",
+    "escalas": [
+     "individuo",
+     "pueblo",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Abandono rural y tierras abandonadas",
     "texto": "Según AVA-ASAJA, con datos de la encuesta ESYRCE del Ministerio de Agricultura, en 2023 había en España 1.037.874 hectáreas de cultivo abandonadas. La Comunitat Valenciana encabeza la lista con 173.676 ha, un récord. Las causas principales son la falta de rentabilidad y de relevo generacional.",
-    "fuente": "https://alicanteplaza.es/alicanteplaza/lacomunitatvalencianabatesurecordhistoricodetierrasabandonadas173676hectareas"
+    "fuente": "https://alicanteplaza.es/alicanteplaza/lacomunitatvalencianabatesurecordhistoricodetierrasabandonadas173676hectareas",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Normativa que penaliza la bioconstrucción",
     "texto": "La tierra cruda no es un material estandarizado y solo el bloque de tierra comprimida tiene norma propia (UNE 41410). Por eso construir con tierra cumpliendo la normativa y siendo viable económicamente resulta muy difícil. En la práctica se usa sobre todo en restauraciones menores o en autopromoción, donde no se exige seguro decenal ni control técnico (OCT). La construcción con paja tampoco tiene una norma española específica (por verificar el estado actual).",
-    "fuente": "https://www.certicalia.com/blog/arquitectura-de-tierra"
+    "fuente": "https://www.certicalia.com/blog/arquitectura-de-tierra",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Dispersión urbana dependiente del coche",
     "texto": "Entre 1987 y 2000 la superficie artificial de España creció un 29,5 %, con una tasa anual del 1,9 % frente al 0,68 % del conjunto de 23 países europeos analizados. El Observatorio de la Sostenibilidad lo atribuye en parte al 'nuevo modelo de ciudad dispersa'. El 34 % del primer kilómetro de costa mediterránea está artificializado. (Datos antiguos: por verificar una serie más reciente).",
-    "fuente": "https://www.construible.es/2006/06/14/cambios-de-ocupacion-del-suelo-en-espana-implicaciones"
+    "fuente": "https://www.construible.es/2006/06/14/cambios-de-ocupacion-del-suelo-en-espana-implicaciones",
+    "escalas": [
+     "pueblo",
+     "pais"
+    ]
    }
   ],
   "soluciones": [
@@ -1766,43 +2361,74 @@ const SECTORES = [
     "titulo": "Propiedad comunitaria de la tierra con cesión de uso temporal",
     "texto": "La tierra es de la comunidad y se cede su uso a seres o comunidades mientras la utilicen de acuerdo con los valores comunes. Así se evita el abandono de tierras, el lucro por su venta y los usos no aprobados por la comunidad.",
     "supera": "Suelo privatizado y parcelado de forma permanente",
-    "fuente": "https://barcelona.cat/metropolis/en/node/1743"
+    "fuente": "https://barcelona.cat/metropolis/en/node/1743",
+    "escalas": [
+     "comunidad",
+     "pais"
+    ]
    },
    {
     "ambito": "España / Escandinavia",
     "titulo": "Cooperativas de vivienda en cesión de uso (modelo Andel)",
     "texto": "La cooperativa es siempre la propietaria del edificio y las socias tienen un derecho de uso indefinido a cambio de una aportación inicial retornable y una cuota mensual. La vivienda se trata como bien de uso, no de inversión. En Cataluña hay más de cincuenta proyectos con más de mil viviendas. El modelo nórdico Andel lleva más de un siglo funcionando: en Dinamarca supone en torno al 10 % de las viviendas y en Suecia el 35 %.",
-    "fuente": "https://www.consumer.es/medio-ambiente/viviendas-colaborativas.html"
+    "fuente": "https://www.consumer.es/medio-ambiente/viviendas-colaborativas.html",
+    "escalas": [
+     "comunidad",
+     "pais"
+    ]
    },
    {
     "ambito": "Internacional / Barcelona",
     "titulo": "Community Land Trust (fideicomiso comunitario de suelo)",
     "texto": "Una entidad sin ánimo de lucro conserva la propiedad del suelo a perpetuidad y vende o alquila los edificios con cláusulas de asequibilidad permanente. La gobernanza se reparte a partes iguales entre administración, comunidad del entorno y residentes. En 2020 Barcelona firmó un acuerdo inspirado en los CLT para unas 1.000 viviendas (40 % en cooperativa, 60 % en alquiler asequible) sobre suelo municipal con arrendamiento de larga duración.",
-    "fuente": "https://www.housingeurope.eu/barcelona-launches-its-first-clt-inspired-housing-initiative/"
+    "fuente": "https://www.housingeurope.eu/barcelona-launches-its-first-clt-inspired-housing-initiative/",
+    "escalas": [
+     "comunidad",
+     "pueblo",
+     "provincia",
+     "planeta"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Bancos de tierras y movilización de tierra abandonada",
     "texto": "Son instrumentos públicos que ponen en contacto a propietarios de fincas sin uso con personas que quieren trabajarlas, mediante arrendamientos o cesiones. Galicia cuenta además con la Ley 11/2021 de recuperación de la tierra agraria, que crea polígonos agroforestales, aldeas modelo y agrupaciones de gestión conjunta. En su convocatoria de 2021 recibió cerca de 1.000 solicitudes para unas 21.400 hectáreas.",
-    "fuente": "https://www.xunta.gal/es/hemeroteca/-/nova/128920/feijoo-constata-gran-demanda-tierra-que-existe-galicia-con-cerca-1-000-solicitudes"
+    "fuente": "https://www.xunta.gal/es/hemeroteca/-/nova/128920/feijoo-constata-gran-demanda-tierra-que-existe-galicia-con-cerca-1-000-solicitudes",
+    "escalas": [
+     "provincia",
+     "pais"
+    ]
    },
    {
     "ambito": "España (Cataluña)",
     "titulo": "Masovería urbana",
     "texto": "La persona propietaria cede una vivienda vacía y los ocupantes asumen su rehabilitación y mantenimiento en lugar de pagar renta, o pagando una renta reducida. Está recogida en la Ley catalana 18/2007 del derecho a la vivienda, Barcelona ha facilitado acuerdos en Sarrià, Sants y el Eixample, y Cardona aprobó en 2024 un reglamento municipal. No existe ley estatal específica.",
-    "fuente": "https://www.infobae.com/espana/2025/06/24/pagar-el-alquiler-con-reformas-y-mantenimiento-la-masoveria-urbana-un-modelo-de-vivienda-que-beneficia-al-inquilino-y-al-propietario/"
+    "fuente": "https://www.infobae.com/espana/2025/06/24/pagar-el-alquiler-con-reformas-y-mantenimiento-la-masoveria-urbana-un-modelo-de-vivienda-que-beneficia-al-inquilino-y-al-propietario/",
+    "escalas": [
+     "pueblo",
+     "region",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Derecho de superficie sobre suelo público",
     "texto": "La administración conserva la propiedad del suelo y cede el derecho a construir y usar por un plazo máximo de 99 años (art. 53 del TR de la Ley de Suelo, RDL 7/2015). Al terminar, lo edificado revierte al propietario del suelo. Es la base jurídica de proyectos como La Borda, sobre solar municipal cedido por 75 años, y evita que el suelo público se privatice.",
-    "fuente": "https://www.boe.es/eli/es/rdlg/2015/10/30/7"
+    "fuente": "https://www.boe.es/eli/es/rdlg/2015/10/30/7",
+    "escalas": [
+     "pueblo",
+     "provincia",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Bioconstrucción y adaptación normativa",
     "texto": "Se propone desarrollar normas técnicas, documentos de idoneidad y guías para tierra (tapial, adobe, BTC) y paja, de modo que puedan cumplir el Código Técnico y ser asegurables. El propio CTE ya obliga a calcular el potencial de calentamiento global del edificio en su ciclo de vida, lo que favorece a los materiales de bajo carbono incorporado. Se están desarrollando paneles prefabricados de paja y madera con certificación Passivhaus.",
-    "fuente": "https://www.interempresas.net/Madera/651121-paja-madera-regresan-construccion-transformar-sector-sumidero-carbono-reducir-impacto.html"
+    "fuente": "https://www.interempresas.net/Madera/651121-paja-madera-regresan-construccion-transformar-sector-sumidero-carbono-reducir-impacto.html",
+    "escalas": [
+     "pais"
+    ]
    }
   ],
   "proyectos": [
@@ -1812,7 +2438,10 @@ const SECTORES = [
     "tipo": "Cesión de uso vitalicio",
     "texto": "Comunidad con cesión de uso vitalicio de la vivienda y la tierra. (Ubicación y web por confirmar con el equipo.)",
     "web": null,
-    "fuente": null
+    "fuente": null,
+    "escalas": [
+     "comunidad"
+    ]
    },
    {
     "nombre": "Entrepatios – Las Carolinas",
@@ -1820,7 +2449,10 @@ const SECTORES = [
     "tipo": "cooperativa de vivienda en cesión de uso (derecho de uso) / cohousing ecosocial",
     "texto": "Es un edificio de 17 viviendas construido completamente en madera, con paneles solares y recuperación de agua de lluvia, y se presenta como el primer edificio de viviendas ecológico de este tipo en España. Las familias entraron hacia mediados de 2021. Se pagó una entrada de 30.000 a 50.000 € (en torno al 20 % del coste), que se devuelve al salir, más una cuota mensual muy por debajo del mercado. Arquitecto: Iñaki Alonso (sAtt). Financiación de Triodos Bank y Fiare Banca Ética. El barrio (Usera) está por verificar.",
     "web": "https://www.entrepatios.org",
-    "fuente": "https://arquitecturaviva.com/articulos/el-edificio-de-viviendas-donde-reina-el-derecho-de-uso"
+    "fuente": "https://arquitecturaviva.com/articulos/el-edificio-de-viviendas-donde-reina-el-derecho-de-uso",
+    "escalas": [
+     "comunidad"
+    ]
    },
    {
     "nombre": "La Borda",
@@ -1828,7 +2460,10 @@ const SECTORES = [
     "tipo": "cooperativa de vivienda en cesión de uso sobre suelo público (derecho de superficie 75 años)",
     "texto": "Tiene 28 viviendas en seis plantas, en el límite del recinto de Can Batlló. Se construyó entre 2017 y 2018, aunque el proceso comenzó en 2012. La estructura es de madera contralaminada (CLT) y es el edificio de madera laminada más alto de España. Los espacios comunes ocupan alrededor del 25 % de la superficie: cocina comunitaria de 80 m², sala polivalente, habitaciones de invitados, lavandería y terrazas. Arquitectura: Lacol.",
     "web": "https://www.laborda.coop",
-    "fuente": "https://www.metalocus.es/es/noticias/decidir-en-comunidad-cooperativa-de-vivienda-la-borda-por-lacol-arquitectura-cooperativa"
+    "fuente": "https://www.metalocus.es/es/noticias/decidir-en-comunidad-cooperativa-de-vivienda-la-borda-por-lacol-arquitectura-cooperativa",
+    "escalas": [
+     "comunidad"
+    ]
    },
    {
     "nombre": "Sostre Cívic",
@@ -1836,7 +2471,11 @@ const SECTORES = [
     "tipo": "cooperativa promotora de vivienda en cesión de uso (modelo Andel)",
     "texto": "Nació como asociación en 2004 y se constituyó como cooperativa en 2010. Su web indica más de 1.000 socias. Las cifras de proyectos y viviendas varían según la fuente: 17 proyectos y 86 viviendas habitadas en su página institucional, frente a unos 25 proyectos y más de 500 viviendas según el Ayuntamiento de Barcelona. Entre sus proyectos están Princesa49, La Balma, Walden XXI, Cirerers, La Voliana y La Corrala. También compra edificios mediante el derecho de tanteo.",
     "web": "https://www.sostrecivic.coop",
-    "fuente": "https://sostrecivic.coop/es/who-we-are/?lang=en"
+    "fuente": "https://sostrecivic.coop/es/who-we-are/?lang=en",
+    "escalas": [
+     "comunidad",
+     "pueblo"
+    ]
    },
    {
     "nombre": "Cal Cases",
@@ -1844,7 +2483,11 @@ const SECTORES = [
     "tipo": "cooperativa de vivienda en cesión de uso rural",
     "texto": "Se considera la primera cooperativa en cesión de uso de Cataluña. Se inició hacia 2008 en una masía con espacios comunes y módulos privados de unos 40-50 m² por familia. En 2011 vivían allí 20 adultos y 11 niños, con funcionamiento asambleario y abastecimiento como cooperativa de consumo ecológico. En 2009 acogió el II Encuentro de la Red de Construcción con Paja. La comarca (Moianès) es dato propio por verificar.",
     "web": null,
-    "fuente": "https://naciodigital.cat/manresa/societat/quedem-va-visitar-la-cooperativa-dhabitatges-cal-cases.html"
+    "fuente": "https://naciodigital.cat/manresa/societat/quedem-va-visitar-la-cooperativa-dhabitatges-cal-cases.html",
+    "escalas": [
+     "comunidad",
+     "provincia"
+    ]
    },
    {
     "nombre": "La Raval",
@@ -1852,7 +2495,10 @@ const SECTORES = [
     "tipo": "cooperativa de vivienda en cesión de uso",
     "texto": "La impulsaron sus propias socias con apoyo de La Dinamo y se terminó en 2024. La arquitectura es de Lacol. Es un ejemplo de cooperativa en cesión de uso que regenera un casco histórico. Número de viviendas: por verificar. (Se incluye como alternativa porque no se pudo identificar «Matriu»).",
     "web": null,
-    "fuente": "https://www.metalocus.es/es/noticias/habitar-los-espacios-compartidos-la-raval-por-lacol"
+    "fuente": "https://www.metalocus.es/es/noticias/habitar-los-espacios-compartidos-la-raval-por-lacol",
+    "escalas": [
+     "comunidad"
+    ]
    },
    {
     "nombre": "Champlain Housing Trust",
@@ -1860,7 +2506,10 @@ const SECTORES = [
     "tipo": "Community Land Trust",
     "texto": "Es el mayor Community Land Trust de Estados Unidos. Sus organizaciones predecesoras se fundaron en 1984 con apoyo del Ayuntamiento de Burlington y se fusionaron en 2006. Recibió el World Habitat Award en 2008. Según su informe anual de 2025, gestiona 2.929 apartamentos asequibles y más de 700 viviendas (706) en propiedad compartida, en las que el suelo queda en el fideicomiso y la asequibilidad es permanente.",
     "web": "https://www.getahome.org",
-    "fuente": "https://www.getahome.org/wp-content/uploads/CHT-Annual-Report-2025.pdf"
+    "fuente": "https://www.getahome.org/wp-content/uploads/CHT-Annual-Report-2025.pdf",
+    "escalas": [
+     "pueblo"
+    ]
    },
    {
     "nombre": "Comunidad Circular Humana (Luz & Humanidad)",
@@ -1868,7 +2517,11 @@ const SECTORES = [
     "tipo": "Proyecto propio · cesión vitalicia",
     "texto": "Diseño biomimético: 10 familias por comunidad en cesión vitalicia y heredable, espacio común productivo y ciclo de 4 generaciones. Se puede ver en el visor 3D (escala «Comunidad»).",
     "web": null,
-    "fuente": null
+    "fuente": null,
+    "escalas": [
+     "comunidad",
+     "pueblo"
+    ]
    }
   ],
   "preguntas": [
@@ -1901,7 +2554,10 @@ const SECTORES = [
       "Ningún hogar sin poder permitirse una dieta sana"
      ],
      "imagenes": [],
-     "escena3d": "hogar"
+     "escena3d": "hogar",
+     "escalas": [
+      "individuo"
+     ]
     },
     {
      "titulo": "La comunidad: huertos, grupos de consumo y comedores",
@@ -1915,7 +2571,10 @@ const SECTORES = [
       "Escuelas donde el alumnado cultiva, cocina y aprende sobre nutrición"
      ],
      "imagenes": [],
-     "escena3d": "comunidad"
+     "escena3d": "comunidad",
+     "escalas": [
+      "comunidad"
+     ]
     },
     {
      "titulo": "El territorio: soberanía alimentaria y campo vivo",
@@ -1929,7 +2588,11 @@ const SECTORES = [
       "Suelos sanos y vivos, vigilados y cuidados como un bien común"
      ],
      "imagenes": [],
-     "escena3d": "pueblo"
+     "escena3d": "pueblo",
+     "escalas": [
+      "provincia",
+      "region"
+     ]
     }
    ],
    "arte": {
@@ -1943,37 +2606,60 @@ const SECTORES = [
     "ambito": "España",
     "titulo": "Comida que acaba en la basura",
     "texto": "En 2024 los hogares españoles tiraron unos 1.097 millones de kilos o litros de alimentos y bebidas, 23,6 kg por persona. Es un 4,3 % menos que en 2023, pero más de tres cuartas partes son productos que se compraron y nunca se usaron.",
-    "fuente": "https://www.madridactual.es/images/documentos/informe-del-desperdicio-alimentario-en-espana-2024--mapa--.pdf"
+    "fuente": "https://www.madridactual.es/images/documentos/informe-del-desperdicio-alimentario-en-espana-2024--mapa--.pdf",
+    "escalas": [
+     "individuo",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Un campo envejecido sin relevo",
     "texto": "Según el Censo Agrario 2020, el 41 % de las personas al frente de una explotación agraria tiene más de 65 años y solo alrededor del 8 % tiene 40 años o menos. La tierra es cara y difícil de conseguir: la hectárea costaba de media 10.248 euros en 2024.",
-    "fuente": "https://mapa.gob.es/en/ministerio/servicios/analisis-y-prospectiva/informemapa_ca2020_tcm38-653742.pdf"
+    "fuente": "https://mapa.gob.es/en/ministerio/servicios/analisis-y-prospectiva/informemapa_ca2020_tcm38-653742.pdf",
+    "escalas": [
+     "provincia",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Cada vez menos explotaciones",
     "texto": "Entre 2009 y 2020 España perdió casi 75.000 explotaciones agrarias, un 7,6 % (de 989.796 a 914.871), y el propio Ministerio advierte de que la caída real de las pequeñas fue mayor. Con cada explotación que cierra se pierden empleo, paisaje y producción cercana.",
-    "fuente": "https://www.INE.es/prensa/cea_2020.pdf"
+    "fuente": "https://www.INE.es/prensa/cea_2020.pdf",
+    "escalas": [
+     "provincia",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Exceso de peso infantil, ligado a la renta",
     "texto": "En 2023 el 36,1 % de los escolares de 6 a 9 años tenía exceso de peso (20,2 % sobrepeso y 15,9 % obesidad). En los hogares con menos de 18.000 euros al año la cifra sube al 46,7 %, frente al 29,2 % en los de más de 30.000 euros.",
-    "fuente": "https://www.dsca.gob.es/sites/default/files/publicaciones/estudio-aladino-2023.pdf"
+    "fuente": "https://www.dsca.gob.es/sites/default/files/publicaciones/estudio-aladino-2023.pdf",
+    "escalas": [
+     "individuo",
+     "pais"
+    ]
    },
    {
     "ambito": "UE",
     "titulo": "Suelos agotados",
     "texto": "Se calcula que entre el 60 % y el 70 % de los suelos de la Unión Europea no están sanos. Su degradación cuesta al menos 50.000 millones de euros al año, según la Comisión Europea (2025).",
-    "fuente": "https://www.europarl.europa.eu/news/en/press-room/20251017IPR31009/soil-monitoring-parliament-adopts-new-eu-law-with-better-support-for-farmers"
+    "fuente": "https://www.europarl.europa.eu/news/en/press-room/20251017IPR31009/soil-monitoring-parliament-adopts-new-eu-law-with-better-support-for-farmers",
+    "escalas": [
+     "provincia",
+     "continente"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "Hambre y dietas sanas inalcanzables",
     "texto": "En 2024 unos 673 millones de personas (el 8,2 % de la humanidad) pasaron hambre, y 2.600 millones no podían permitirse una dieta saludable. En África el hambre siguió creciendo y ya afecta a más del 20 % de la población.",
-    "fuente": "https://www.who.int/news/item/28-07-2025-global-hunger-declines-but-rises-in-africa-and-western-asia-un-report"
+    "fuente": "https://www.who.int/news/item/28-07-2025-global-hunger-declines-but-rises-in-africa-and-western-asia-un-report",
+    "escalas": [
+     "planeta"
+    ]
    }
   ],
   "soluciones": [
@@ -1982,42 +2668,64 @@ const SECTORES = [
     "titulo": "Prevenir el desperdicio y redistribuir los excedentes",
     "texto": "La Ley 1/2025 obliga a la cadena alimentaria a tener planes de prevención, a priorizar el consumo humano (donación, transformación) antes que el reciclaje y, en los restaurantes, a dejar llevarse las sobras; las obligaciones de planes y donación rigen desde abril de 2026. Entidades como Espigoladors llevan desde 2014 recuperando en el campo cosechas que se perderían.",
     "supera": "Comida que acaba en la basura",
-    "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/agricultura/Paginas/2025/020425-ley-desperdicio-alimentos.aspx"
+    "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/agricultura/Paginas/2025/020425-ley-desperdicio-alimentos.aspx",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Bancos de tierras",
     "texto": "Conectan fincas sin uso con personas que quieren cultivarlas, dando confianza a ambas partes. El banco del Parque Agrario de la Conca d'Òdena (Barcelona) ofrecía 226 hectáreas en julio de 2025, un 36 % más en seis semanas, y el Ministerio de Agricultura anunció en 2026 el programa estatal Tierra Joven (despliegue por verificar).",
     "supera": "Un campo envejecido sin relevo",
-    "fuente": "https://bcnagraria.diba.cat/en/land-banks"
+    "fuente": "https://bcnagraria.diba.cat/en/land-banks",
+    "escalas": [
+     "provincia",
+     "pais"
+    ]
    },
    {
     "ambito": "Comunidad",
     "titulo": "Agricultura sostenida por la comunidad y canales cortos",
     "texto": "Las familias se comprometen a comprar la cosecha de una huerta durante todo el año con una cuota fija, lo que da a quien cultiva un ingreso estable y sin intermediarios. En la CSA Vega de Jarama (Madrid) las cuotas de unas 140 familias sostienen los sueldos de sus trabajadores, y otra iniciativa madrileña pasó de 2 a 5 empleos rurales en siete años.",
     "supera": "Cada vez menos explotaciones",
-    "fuente": "https://www.mercasa.es/wp-content/uploads/2022/10/08_Produccion-y-consumo-agroecologicos-y-su-compromiso-con-el-medio-rural.pdf"
+    "fuente": "https://www.mercasa.es/wp-content/uploads/2022/10/08_Produccion-y-consumo-agroecologicos-y-su-compromiso-con-el-medio-rural.pdf",
+    "escalas": [
+     "individuo",
+     "comunidad"
+    ]
    },
    {
     "ambito": "Comunidad",
     "titulo": "Comedores públicos ecológicos con cocina propia",
     "texto": "Copenhague sirve unas 115.000 comidas diarias en más de 1.000 cocinas públicas con cerca del 88 % de alimentos ecológicos, cocinando desde cero, con menús de temporada y menos carne, sin aumentar el presupuesto. Ha reducido además un 32 % las emisiones de CO2 de sus menús.",
     "supera": "Exceso de peso infantil, ligado a la renta",
-    "fuente": "https://www.milanurbanfoodpolicypact.org/wp-content/uploads/2025/10/COPENHAGEN_Implementing-Food-Policies_MPA2025.pdf"
+    "fuente": "https://www.milanurbanfoodpolicypact.org/wp-content/uploads/2025/10/COPENHAGEN_Implementing-Food-Policies_MPA2025.pdf",
+    "escalas": [
+     "comunidad"
+    ]
    },
    {
     "ambito": "UE",
     "titulo": "Vigilar y regenerar los suelos",
     "texto": "La primera ley europea de suelos (2025) fija el objetivo de suelos sanos en 2050, obliga a los países a medir su salud con criterios comunes y a ayudar a agricultores y silvicultores a mejorarlos. Las prácticas agroecológicas (cubiertas vegetales, rotaciones, compost) son la vía para lograrlo; su efecto en España está por medir con estos nuevos datos.",
     "supera": "Suelos agotados",
-    "fuente": "https://www.europarl.europa.eu/news/en/press-room/20251017IPR31009/soil-monitoring-parliament-adopts-new-eu-law-with-better-support-for-farmers"
+    "fuente": "https://www.europarl.europa.eu/news/en/press-room/20251017IPR31009/soil-monitoring-parliament-adopts-new-eu-law-with-better-support-for-farmers",
+    "escalas": [
+     "provincia",
+     "continente"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "Protección social y comedores escolares",
     "texto": "La FAO atribuye la bajada del hambre en Sudamérica a la combinación de transferencias de dinero, comedores escolares y más productividad agraria, como en Brasil y México. A escala mundial el hambre bajó del 8,7 % en 2022 al 8,2 % en 2024.",
     "supera": "Hambre y dietas sanas inalcanzables",
-    "fuente": "https://www.fao.org/newsroom/detail/beating-hunger-through-social-protection--investments-and-resilience--fao-chief-economist/en"
+    "fuente": "https://www.fao.org/newsroom/detail/beating-hunger-through-social-protection--investments-and-resilience--fao-chief-economist/en",
+    "escalas": [
+     "provincia",
+     "planeta"
+    ]
    }
   ],
   "proyectos": [
@@ -2027,7 +2735,10 @@ const SECTORES = [
     "tipo": "Cooperativa agroecológica de producción y consumo",
     "texto": "Nacida hacia 1999, reúne a personas que cultivan y personas que consumen en huertas periurbanas, con asambleas mensuales. En 2024 la cuota era de 70 euros al mes por una cesta semanal de al menos cinco productos de temporada.",
     "web": "https://bahperales.org",
-    "fuente": "https://lamarea.com/2024/03/14/las-canastas-de-verduras-de-la-militancia-a-una-necesidad"
+    "fuente": "https://lamarea.com/2024/03/14/las-canastas-de-verduras-de-la-militancia-a-una-necesidad",
+    "escalas": [
+     "pueblo"
+    ]
    },
    {
     "nombre": "Fundació Espigoladors",
@@ -2035,7 +2746,10 @@ const SECTORES = [
     "tipo": "Fundación / empresa social",
     "texto": "Desde 2014 recupera en el campo frutas y verduras que se perderían, con recolectas solidarias, y las transforma bajo su marca imperfect®. Participa en La Botiga, el servicio municipal de garantía alimentaria de El Prat.",
     "web": "https://espigoladors.cat",
-    "fuente": "https://abd.ong/wp-content/uploads/2025/12/Mapeo-de-buenas-propuestas-sociales-en-comunidades-agroalimentarias-en-Espana.-2.pdf"
+    "fuente": "https://abd.ong/wp-content/uploads/2025/12/Mapeo-de-buenas-propuestas-sociales-en-comunidades-agroalimentarias-en-Espana.-2.pdf",
+    "escalas": [
+     "pueblo"
+    ]
    },
    {
     "nombre": "Banco de tierras del Parque Agrario de la Conca d'Òdena",
@@ -2043,7 +2757,10 @@ const SECTORES = [
     "tipo": "Programa público (Diputació de Barcelona)",
     "texto": "Forma parte de la red de bancos de tierras de la Diputació de Barcelona, que en enero de 2025 había aumentado un 30 % su superficie. En julio de 2025 ofrecía 226 hectáreas para uso agrícola y ganadero.",
     "web": "https://bcnagraria.diba.cat/en/land-banks",
-    "fuente": "https://bcnagraria.diba.cat/en/land-banks"
+    "fuente": "https://bcnagraria.diba.cat/en/land-banks",
+    "escalas": [
+     "provincia"
+    ]
    },
    {
     "nombre": "Red Terrae",
@@ -2051,7 +2768,10 @@ const SECTORES = [
     "tipo": "Red intermunicipal",
     "texto": "Creada en 2010, ayuda a los ayuntamientos a montar bancos de tierras agroecológicos que conectan fincas infrautilizadas con personas que quieren producir alimentos. Ha devuelto al cultivo tierras abandonadas, aunque no publica cifras globales de hectáreas (por verificar).",
     "web": null,
-    "fuente": "https://accesstoland.gitbook.io/makingfarmlandwork/case-studies/red-terrae-the-network-of-municipalities-working-for-sustainable-land-use"
+    "fuente": "https://accesstoland.gitbook.io/makingfarmlandwork/case-studies/red-terrae-the-network-of-municipalities-working-for-sustainable-land-use",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "Programa municipal de huertos urbanos comunitarios",
@@ -2059,7 +2779,11 @@ const SECTORES = [
     "tipo": "Programa público con gestión vecinal",
     "texto": "Desde 2014 el Ayuntamiento cede gratis parcelas de unos 1.000 m² a asociaciones vecinales, que las cultivan con prácticas agroecológicas; empezó con 17 huertos y en 2019 superaba los 55. En noviembre de 2025 autorizó 8 huertos más.",
     "web": "https://madrid.es/go/huertosurbanoscomunitarios",
-    "fuente": "https://diario.madrid.es/huertos/programa-municipal-de-huertos-urbanos-comunitarios/"
+    "fuente": "https://diario.madrid.es/huertos/programa-municipal-de-huertos-urbanos-comunitarios/",
+    "escalas": [
+     "comunidad",
+     "pueblo"
+    ]
    },
    {
     "nombre": "Guía Slow Food Barcelona",
@@ -2067,7 +2791,10 @@ const SECTORES = [
     "tipo": "Asociación (Slow Food Barcelona)",
     "texto": "Su séptima edición, presentada en noviembre de 2025, reúne 100 restaurantes, bares y heladerías comprometidos con el producto local, la biodiversidad y la gastronomía responsable. Treinta tienen el distintivo del caracol Slow Food por su apuesta por los productores de la zona.",
     "web": "https://slowfoodguide.barcelona",
-    "fuente": "https://ajuntament.barcelona.cat/comerc/en/actuality/news/barcelona-hosts-the-presentation-of-the-new-slow-food-guide-featuring-more-than-100-sustainable-restaurants-1577575"
+    "fuente": "https://ajuntament.barcelona.cat/comerc/en/actuality/news/barcelona-hosts-the-presentation-of-the-new-slow-food-guide-featuring-more-than-100-sustainable-restaurants-1577575",
+    "escalas": [
+     "pueblo"
+    ]
    },
    {
     "nombre": "Cocinas públicas ecológicas de Copenhague",
@@ -2075,7 +2802,10 @@ const SECTORES = [
     "tipo": "Programa público municipal",
     "texto": "Unas 115.000 comidas al día en más de 1.000 cocinas públicas (escuelas, guarderías, residencias) con cerca del 88 % de alimentos ecológicos, logrado sin subir el presupuesto. Desde 2019 ha reducido un 32 % el CO2 de sus menús, por encima del objetivo del 25 %.",
     "web": null,
-    "fuente": "https://www.milanurbanfoodpolicypact.org/wp-content/uploads/2025/10/COPENHAGEN_Implementing-Food-Policies_MPA2025.pdf"
+    "fuente": "https://www.milanurbanfoodpolicypact.org/wp-content/uploads/2025/10/COPENHAGEN_Implementing-Food-Policies_MPA2025.pdf",
+    "escalas": [
+     "pueblo"
+    ]
    }
   ],
   "preguntas": [
@@ -2107,7 +2837,10 @@ const SECTORES = [
       "Ayuda accesible y gratuita ante problemas de ciberseguridad."
      ],
      "imagenes": [],
-     "escena3d": "hogar"
+     "escena3d": "hogar",
+     "escalas": [
+      "individuo"
+     ]
     },
     {
      "titulo": "Comunidad: software libre, redes comunitarias y conocimiento abierto",
@@ -2121,7 +2854,10 @@ const SECTORES = [
       "Asociaciones locales que acompañan a quien da sus primeros pasos en lo digital."
      ],
      "imagenes": [],
-     "escena3d": "comunidad"
+     "escena3d": "comunidad",
+     "escalas": [
+      "comunidad"
+     ]
     },
     {
      "titulo": "Sociedad: infraestructura pública digital, IA al servicio de las personas y cierre de la brecha digital",
@@ -2135,7 +2871,13 @@ const SECTORES = [
       "Economía circular de los aparatos electrónicos: reparación, reutilización y reciclaje real."
      ],
      "imagenes": [],
-     "escena3d": "pueblo"
+     "escena3d": "pueblo",
+     "escalas": [
+      "individuo",
+      "pais",
+      "continente",
+      "planeta"
+     ]
     }
    ],
    "arte": {
@@ -2149,37 +2891,56 @@ const SECTORES = [
     "ambito": "España",
     "titulo": "Una de cada tres personas sin competencias digitales básicas",
     "texto": "En 2025, el 66,5 % de los españoles de 16 a 74 años tenía competencias digitales básicas o superiores, por encima de la media de la UE (60,4 %) pero lejos del objetivo europeo del 80 % para 2030. La encuesta del INE de 2026 sube la cifra al 70,9 %, pero la brecha por edad sigue siendo enorme: el uso de IA generativa va del 83,3 % (16-24 años) al 19,5 % (65-74 años).",
-    "fuente": "https://digital-skills-jobs.europa.eu/en/latest/news/two-out-three-spaniards-have-basic-digital-skills-security-and-content-creation-are"
+    "fuente": "https://digital-skills-jobs.europa.eu/en/latest/news/two-out-three-spaniards-have-basic-digital-skills-security-and-content-creation-are",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Los fraudes y ataques en línea no paran de crecer",
     "texto": "INCIBE gestionó 122.223 incidentes de ciberseguridad en 2025, un 26 % más que en 2024. Cuatro de cada diez fueron fraudes en línea (45.445 casos), sobre todo suplantaciones por correo o SMS (phishing).",
-    "fuente": "https://espanadigital.gob.es/actualidad/incibe-gestiono-122223-incidentes-de-ciberseguridad-en-2025-un-26-mas-que-el-ano"
+    "fuente": "https://espanadigital.gob.es/actualidad/incibe-gestiono-122223-incidentes-de-ciberseguridad-en-2025-un-26-mas-que-el-ano",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Uso problemático de internet en adolescentes",
     "texto": "Según la encuesta ESTUDES 2025, el 19,4 % de los estudiantes de 14 a 18 años presenta un posible uso problemático de internet (23,4 % de las chicas y 15,5 % de los chicos) y el 15,3 % un posible uso problemático de redes sociales. La tendencia del primer indicador es a la baja, pero sigue afectando a uno de cada cinco.",
-    "fuente": "https://pnsd.sanidad.gob.es/profesionales/sistemasInformacion/sistemaInformacion/pdf/2026/2025_OEDA_AdiccionesComportamentales_ResumenEjecutivo.pdf"
+    "fuente": "https://pnsd.sanidad.gob.es/profesionales/sistemasInformacion/sistemaInformacion/pdf/2026/2025_OEDA_AdiccionesComportamentales_ResumenEjecutivo.pdf",
+    "escalas": [
+     "individuo",
+     "pais"
+    ]
    },
    {
     "ambito": "UE",
     "titulo": "Dependencia de unos pocos proveedores de nube",
     "texto": "Amazon, Microsoft y Google suman el 70 % del mercado europeo de servicios en la nube, mientras que los proveedores europeos se han estancado en torno al 15 % (eran el 29 % en 2017). Los datos son de Synergy Research Group, julio de 2025.",
-    "fuente": "https://srgresearch.com/articles/european-cloud-providers-local-market-share-now-holds-steady-at-15"
+    "fuente": "https://srgresearch.com/articles/european-cloud-providers-local-market-share-now-holds-steady-at-15",
+    "escalas": [
+     "continente"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "Montañas de basura electrónica",
     "texto": "En 2022 se generaron en el mundo 62 millones de toneladas de residuos electrónicos, un 82 % más que en 2010, y solo el 22,3 % se recogió y recicló de forma documentada. Si nada cambia, en 2030 se llegará a unos 82 millones de toneladas.",
-    "fuente": "https://unitar.org/about/news-stories/press/global-e-waste-monitor-2024-electronic-waste-rising-five-times-faster-documented-e-waste-recycling"
+    "fuente": "https://unitar.org/about/news-stories/press/global-e-waste-monitor-2024-electronic-waste-rising-five-times-faster-documented-e-waste-recycling",
+    "escalas": [
+     "planeta"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "El consumo eléctrico de los centros de datos se dispara",
     "texto": "Los centros de datos consumieron unos 415 TWh en 2024, alrededor del 1,5 % de la electricidad mundial. La Agencia Internacional de la Energía prevé que lleguen a unos 945 TWh en 2030 (casi el 3 %), impulsados sobre todo por la inteligencia artificial.",
-    "fuente": "https://iea.org/reports/energy-and-ai/energy-demand-from-ai"
+    "fuente": "https://iea.org/reports/energy-and-ai/energy-demand-from-ai",
+    "escalas": [
+     "planeta"
+    ]
    }
   ],
   "soluciones": [
@@ -2188,42 +2949,61 @@ const SECTORES = [
     "titulo": "Formación digital masiva y gratuita",
     "texto": "El Plan Nacional de Competencias Digitales ha formado a más de 2 millones de personas (más de 1 millón de docentes y unas 650.000 personas, el 66 % de colectivos vulnerables), según el Gobierno en octubre de 2025. En paralelo, la población con competencias básicas ha pasado del 66,5 % (2025) al 70,9 % (INE, 2026), aunque no hay una evaluación independiente que atribuya esa mejora al plan.",
     "supera": "Una de cada tres personas sin competencias digitales básicas",
-    "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/transformacion-digital-y-funcion-publica/Paginas/2025/231025-plan-nacional-competencias-digitales.aspx"
+    "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/transformacion-digital-y-funcion-publica/Paginas/2025/231025-plan-nacional-competencias-digitales.aspx",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Una línea de ayuda gratuita en ciberseguridad (017)",
     "texto": "La Línea de Ayuda en Ciberseguridad 017 de INCIBE atiende gratis a ciudadanía y empresas por teléfono y chat. En 2025 resolvió 142.767 consultas (un 44,9 % más) y casi la mitad fueron preventivas, es decir, antes de caer en el engaño; además, INCIBE y Red.es cerraron 4.600 dominios fraudulentos.",
     "supera": "Los fraudes y ataques en línea no paran de crecer",
-    "fuente": "https://espanadigital.gob.es/actualidad/incibe-gestiono-122223-incidentes-de-ciberseguridad-en-2025-un-26-mas-que-el-ano"
+    "fuente": "https://espanadigital.gob.es/actualidad/incibe-gestiono-122223-incidentes-de-ciberseguridad-en-2025-un-26-mas-que-el-ano",
+    "escalas": [
+     "pueblo",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Proteger a la infancia en los entornos digitales",
     "texto": "El proyecto de Ley Orgánica de protección de menores en entornos digitales, aprobado por el Gobierno en marzo de 2025, eleva de 14 a 16 años la edad para consentir el uso de datos, exige verificar la edad y obliga a incluir controles parentales gratuitos activados por defecto en móviles, tabletas y televisores. Su tramitación parlamentaria y su eficacia están por verificar.",
     "supera": "Uso problemático de internet en adolescentes",
-    "fuente": "https://www.osborneclarke.com/es/insights/espana-busca-proteger-los-menores-en-el-entorno-digital-claves-del-proyecto-de-ley"
+    "fuente": "https://www.osborneclarke.com/es/insights/espana-busca-proteger-los-menores-en-el-entorno-digital-claves-del-proyecto-de-ley",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "UE",
     "titulo": "Software libre en la administración pública",
     "texto": "El estado alemán de Schleswig-Holstein ha migrado cerca del 80 % de los puestos de su administración a programas libres como LibreOffice. Su Gobierno calcula un ahorro de más de 15 millones de euros al año en licencias desde 2026, con una inversión única de 9 millones.",
     "supera": "Dependencia de unos pocos proveedores de nube",
-    "fuente": "https://itsfoss.com/news/german-state-ditch-microsoft/"
+    "fuente": "https://itsfoss.com/news/german-state-ditch-microsoft/",
+    "escalas": [
+     "continente"
+    ]
    },
    {
     "ambito": "UE",
     "titulo": "Derecho a reparar los aparatos",
     "texto": "La Directiva (UE) 2024/1799 obliga a los fabricantes de móviles, tabletas, electrodomésticos o pantallas a ofrecer reparación a precio razonable y a dar acceso a piezas y herramientas, y amplía 12 meses la garantía si el cliente elige reparar. Los países debían aplicarla antes del 31 de julio de 2026; móviles como el Fairphone 6, con 12 piezas sustituibles y 8 años de actualizaciones, muestran que es viable.",
     "supera": "Montañas de basura electrónica",
-    "fuente": "https://www.garrigues.com/es_ES/noticia/europa-avanza-economia-circular-fomento-reparacion-bienes"
+    "fuente": "https://www.garrigues.com/es_ES/noticia/europa-avanza-economia-circular-fomento-reparacion-bienes",
+    "escalas": [
+     "continente"
+    ]
    },
    {
     "ambito": "UE",
     "titulo": "Transparencia energética de los centros de datos",
     "texto": "Desde 2024, los centros de datos de la UE con una potencia informática de 500 kW o más deben informar cada año de su consumo y otros indicadores a una base de datos europea (Reglamento Delegado 2024/1364), y parte de esa información debe hacerse pública. Medir es el primer paso para exigir eficiencia; sus resultados aún están por evaluar.",
     "supera": "El consumo eléctrico de los centros de datos se dispara",
-    "fuente": "https://www.miteco.gob.es/es/energia/eficiencia/centros-de-datos/preguntas-frecuentes.html"
+    "fuente": "https://www.miteco.gob.es/es/energia/eficiencia/centros-de-datos/preguntas-frecuentes.html",
+    "escalas": [
+     "continente"
+    ]
    }
   ],
   "proyectos": [
@@ -2233,7 +3013,11 @@ const SECTORES = [
     "tipo": "Software libre / asociación",
     "texto": "Plataforma de código abierto para la participación ciudadana y la democracia, nacida en Barcelona en 2017 y gobernada desde 2019 por la Asociación de Software Libre Decidim. La usan más de 450 ciudades y organizaciones en todo el mundo.",
     "web": "https://decidim.org",
-    "fuente": "https://decidim.org/es/about"
+    "fuente": "https://decidim.org/es/about",
+    "escalas": [
+     "pais",
+     "planeta"
+    ]
    },
    {
     "nombre": "Guifi.net",
@@ -2241,7 +3025,10 @@ const SECTORES = [
     "tipo": "Red comunitaria / fundación",
     "texto": "Red de telecomunicaciones libre, abierta y neutral nacida en 2004 en Osona (Cataluña) por iniciativa de vecinos voluntarios y gestionada como procomún. En 2017 sumaba más de 33.000 nodos activos (cifra actual por verificar).",
     "web": "https://guifi.net",
-    "fuente": "https://www.uoc.edu/es/news/2017/188-guifinet"
+    "fuente": "https://www.uoc.edu/es/news/2017/188-guifinet",
+    "escalas": [
+     "region"
+    ]
    },
    {
     "nombre": "Wikimedia España",
@@ -2249,7 +3036,10 @@ const SECTORES = [
     "tipo": "Asociación sin ánimo de lucro (utilidad pública)",
     "texto": "Capítulo español del movimiento Wikimedia, constituido en 2011, que impulsa Wikipedia y el conocimiento libre mediante acuerdos con museos, universidades y otras entidades. Por ejemplo, en 2024 firmó un convenio con el Museo Reina Sofía.",
     "web": "https://www.wikimedia.es",
-    "fuente": "https://meta.wikimedia.org/wiki/Wikimedia_Espa%C3%B1a/en"
+    "fuente": "https://meta.wikimedia.org/wiki/Wikimedia_Espa%C3%B1a/en",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "datos.gob.es (Iniciativa Aporta)",
@@ -2257,7 +3047,10 @@ const SECTORES = [
     "tipo": "Programa público",
     "texto": "Portal nacional de datos abiertos de las administraciones públicas españolas. En 2025 ofrecía casi 100.000 conjuntos de datos reutilizables (un 9 % más que el año anterior) y España figura entre los países de referencia en datos abiertos de la UE.",
     "web": "https://datos.gob.es",
-    "fuente": "https://datos.gob.es/es/noticias/balance-de-la-iniciativa-aporta-2025"
+    "fuente": "https://datos.gob.es/es/noticias/balance-de-la-iniciativa-aporta-2025",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "Fairphone",
@@ -2265,7 +3058,11 @@ const SECTORES = [
     "tipo": "Empresa social",
     "texto": "Fabricante de móviles modulares y reparables. Su Fairphone 6 (junio de 2025, 599 €) tiene 12 piezas que se cambian con un destornillador, 5 años de garantía y 8 años de actualizaciones.",
     "web": "https://www.fairphone.com",
-    "fuente": "https://www.androidheadlines.com/2025/06/fairphone-6-launches-specs-price-support.html"
+    "fuente": "https://www.androidheadlines.com/2025/06/fairphone-6-launches-specs-price-support.html",
+    "escalas": [
+     "continente",
+     "planeta"
+    ]
    },
    {
     "nombre": "Framasoft",
@@ -2273,7 +3070,10 @@ const SECTORES = [
     "tipo": "Asociación de educación popular",
     "texto": "Asociación financiada por donaciones que ofrece alternativas libres a los servicios de las grandes plataformas (campaña «Desgooglicemos internet») y desarrolla PeerTube y Mobilizon. En 2025 mantenía 26 servicios en línea éticos, con 10 empleados y más de 10.400 donantes.",
     "web": "https://framasoft.org",
-    "fuente": "https://framasoft.org/en/association"
+    "fuente": "https://framasoft.org/en/association",
+    "escalas": [
+     "pueblo"
+    ]
    },
    {
     "nombre": "Mastodon (Fediverso)",
@@ -2281,7 +3081,11 @@ const SECTORES = [
     "tipo": "Software libre / organización sin ánimo de lucro",
     "texto": "Red social descentralizada en la que miles de servidores independientes se comunican entre sí, sin un único dueño. Tiene unos 10 millones de cuentas registradas y menos de 1 millón de usuarios activos al mes, y en 2025 pasó a gobernarse por una junta sin ánimo de lucro.",
     "web": "https://joinmastodon.org",
-    "fuente": "https://techcrunch.com/2025/11/18/mastodon-ceo-steps-down-as-the-social-network-restructures"
+    "fuente": "https://techcrunch.com/2025/11/18/mastodon-ceo-steps-down-as-the-social-network-restructures",
+    "escalas": [
+     "continente",
+     "planeta"
+    ]
    },
    {
     "nombre": "humanity.wiki (Luz & Humanidad)",
@@ -2289,7 +3093,13 @@ const SECTORES = [
     "tipo": "Proyecto propio",
     "texto": "Plataforma de conocimiento abierta organizada por territorio: recopila la visión ideal, los retos, las soluciones y los proyectos de cada sector vital.",
     "web": "https://humanity.wiki",
-    "fuente": null
+    "fuente": null,
+    "escalas": [
+     "comunidad",
+     "pueblo",
+     "pais",
+     "planeta"
+    ]
    }
   ],
   "preguntas": [
@@ -2321,7 +3131,12 @@ const SECTORES = [
       "Ritmo propio: cada niño avanza a su paso, sin etiquetas tempranas."
      ],
      "imagenes": [],
-     "escena3d": "naturaleza"
+     "escena3d": "naturaleza",
+     "escalas": [
+      "individuo",
+      "provincia",
+      "region"
+     ]
     },
     {
      "titulo": "Escuela y comunidad: aprender haciendo, con el barrio",
@@ -2335,7 +3150,10 @@ const SECTORES = [
       "Equipos docentes estables y bien formados, con recursos extra donde más se necesitan."
      ],
      "imagenes": [],
-     "escena3d": "comunidad"
+     "escena3d": "comunidad",
+     "escalas": [
+      "comunidad"
+     ]
     },
     {
      "titulo": "Toda la vida: formación continua, conciencia y sentido",
@@ -2349,7 +3167,10 @@ const SECTORES = [
       "Acceso universal a la escuela en todo el planeta, también en zonas de conflicto."
      ],
      "imagenes": [],
-     "escena3d": "pueblo"
+     "escena3d": "pueblo",
+     "escalas": [
+      "individuo"
+     ]
     }
    ],
    "arte": {
@@ -2363,37 +3184,58 @@ const SECTORES = [
     "ambito": "España",
     "titulo": "Demasiados jóvenes dejan de estudiar pronto",
     "texto": "En 2025, el 12,8 % de los jóvenes de 18 a 24 años dejó los estudios sin pasar de la ESO: es el mínimo histórico, pero sigue 3,4 puntos por encima de la media de la UE (9,4 % en 2024). La tasa es del 15,9 % en los chicos y del 9,5 % en las chicas.",
-    "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/educacion-fp-deportes/Paginas/2026/280126-abandono-educativo-minimo-historico.aspx"
+    "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/educacion-fp-deportes/Paginas/2026/280126-abandono-educativo-minimo-historico.aspx",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "El origen familiar pesa demasiado",
     "texto": "Según la EPA de 2025 analizada por Funcas, el abandono temprano es del 32,9 % cuando la madre solo tiene estudios primarios y del 2,4 % cuando tiene estudios superiores. Entre los jóvenes de nacionalidad extranjera alcanza el 30,7 %, frente al 9,8 % de los españoles.",
-    "fuente": "https://www.funcas.es/wp-content/uploads/2026/02/Informe-sobre-el-abandono-educativo-temprano-en-Espana.pdf"
+    "fuente": "https://www.funcas.es/wp-content/uploads/2026/02/Informe-sobre-el-abandono-educativo-temprano-en-Espana.pdf",
+    "escalas": [
+     "individuo",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Se repite curso mucho más que en otros países",
     "texto": "Según PISA 2025, el 22 % del alumnado español de 15 años ha repetido algún curso, más del doble que la media de la OCDE (9,8 %); en el cuarto de alumnos con menos recursos llega al 40 %. Además, la puntuación en lectura bajó a 451 puntos, 23 menos que en 2022.",
-    "fuente": "https://www.esade.edu/ecpol/es/publicaciones/pisa-2025-equidad/"
+    "fuente": "https://www.esade.edu/ecpol/es/publicaciones/pisa-2025-equidad/",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Muchas personas adultas con competencias básicas bajas",
     "texto": "En la evaluación PIAAC de la OCDE (datos de 2023, publicados en diciembre de 2024), los adultos españoles obtuvieron 247 puntos en lectura y 250 en matemáticas, por debajo de las medias de la OCDE (260 y 263). Alrededor de tres de cada diez adultos tienen un nivel bajo en cada competencia.",
-    "fuente": "https://www.ondavasca.com/los-adultos-del-estado-estan-por-debajo-de-la-ue-y-la-ocde-en-matematicas-lectura-y-resolucion-de-problemas/"
+    "fuente": "https://www.ondavasca.com/los-adultos-del-estado-estan-por-debajo-de-la-ue-y-la-ocde-en-matematicas-lectura-y-resolucion-de-problemas/",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "Infancia y adolescencia sin moverse lo suficiente",
     "texto": "Según la Organización Mundial de la Salud, el 86 % de los adolescentes de 11 a 17 años del mundo no alcanza los niveles de actividad física recomendados. La falta de juego activo y de tiempo al aire libre afecta a la salud, al ánimo y al aprendizaje.",
-    "fuente": "https://www.who.int/news-room/fact-sheets/detail/physical-activity"
+    "fuente": "https://www.who.int/news-room/fact-sheets/detail/physical-activity",
+    "escalas": [
+     "individuo",
+     "planeta"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "272 millones de niños y jóvenes sin escuela",
     "texto": "El Informe de Seguimiento de la Educación en el Mundo de la UNESCO estimó en junio de 2025 que 272 millones de niños y jóvenes están fuera de la escuela, 21 millones más que en la estimación anterior. UNICEF advierte de que los recortes de ayuda internacional podrían sumar otros 6 millones en 2026.",
-    "fuente": "https://www.orissapost.com/unesco-report-over-272-million-children-worldwide-remain-out-of-school"
+    "fuente": "https://www.orissapost.com/unesco-report-over-272-million-children-worldwide-remain-out-of-school",
+    "escalas": [
+     "individuo",
+     "planeta"
+    ]
    }
   ],
   "soluciones": [
@@ -2402,42 +3244,64 @@ const SECTORES = [
     "titulo": "Una Formación Profesional que retiene y da empleo",
     "texto": "La FP ofrece una vía práctica para seguir estudiando. Entre las promociones de 2016-2017 y 2019-2020, el porcentaje de alumnado de FP de grado medio que la deja sin título bajó del 30,7 % al 25,4 %, y la afiliación laboral al cuarto año ronda el 67 %; Funcas advierte de que son tendencias, no una medición del efecto causal.",
     "supera": "Demasiados jóvenes dejan de estudiar pronto",
-    "fuente": "https://www.funcas.es/wp-content/uploads/2026/02/Informe-sobre-el-abandono-educativo-temprano-en-Espana.pdf"
+    "fuente": "https://www.funcas.es/wp-content/uploads/2026/02/Informe-sobre-el-abandono-educativo-temprano-en-Espana.pdf",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España / UE",
     "titulo": "Comunidades de aprendizaje y actuaciones educativas de éxito",
     "texto": "Las escuelas que se transforman en comunidades de aprendizaje abren el aula a familias y voluntariado con grupos interactivos, tertulias dialógicas y más tiempo de aprendizaje. Se basan en el proyecto europeo INCLUD-ED (2006-2011, 15 instituciones de 14 países), que la Comisión Europea destacó entre sus diez historias de éxito en investigación; los centros que las aplican describen mejoras en resultados y menos absentismo (cifras de impacto por verificar).",
     "supera": "Se repite curso mucho más que en otros países",
-    "fuente": "https://redined.educacion.gob.es/xmlui/bitstream/handle/11162/115683/actuaciones.pdf?sequence=1"
+    "fuente": "https://redined.educacion.gob.es/xmlui/bitstream/handle/11162/115683/actuaciones.pdf?sequence=1",
+    "escalas": [
+     "individuo",
+     "pais",
+     "continente"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Escuelas mezcladas socialmente",
     "texto": "Para que el origen pese menos, se proponen plazas reservadas para alumnado vulnerable, fondos extra para los centros que lo escolarizan y mejor información a las familias. En el piloto «Mézclate conmigo» de Save the Children (182 familias de Lleida y Tarragona), el 56 % comprendió la importancia de elegir una escuela diversa, aunque la propia evaluación reconoce que no pudo medir el impacto real en la matrícula.",
     "supera": "El origen familiar pesa demasiado",
-    "fuente": "https://www.savethechildren.es/sites/default/files/2025-07/Dossier%20Toolkit%20Mezclate%20Conmigo%20%28castellano%29.pdf"
+    "fuente": "https://www.savethechildren.es/sites/default/files/2025-07/Dossier%20Toolkit%20Mezclate%20Conmigo%20%28castellano%29.pdf",
+    "escalas": [
+     "individuo",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Universidades populares y educación de personas adultas",
     "texto": "Las universidades populares, la primera de ellas creada en Oviedo en 1901, ofrecen formación cercana y barata en los municipios. Según datos de 2008, había más de 300 y atendían a más de 500.000 personas en cursos (cifras actuales por verificar); su efecto sobre las competencias medidas por PIAAC no está evaluado.",
     "supera": "Muchas personas adultas con competencias básicas bajas",
-    "fuente": "https://www.consumer.es/educacion/universidades-populares.html"
+    "fuente": "https://www.consumer.es/educacion/universidades-populares.html",
+    "escalas": [
+     "pueblo",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Educación en la naturaleza",
     "texto": "Las escuelas y grupos de juego en la naturaleza hacen del bosque, el campo o el parque el aula principal, con juego libre y movimiento diario. La Asociación EdNa publicó en 2020 una guía práctica con criterios de calidad para estos proyectos; la evidencia sobre sus efectos en España está por verificar.",
     "supera": "Infancia y adolescencia sin moverse lo suficiente",
-    "fuente": "https://www.miteco.gob.es/en/ceneam/recursos/materiales/guia-escuelas-naturaleza.html"
+    "fuente": "https://www.miteco.gob.es/en/ceneam/recursos/materiales/guia-escuelas-naturaleza.html",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "Priorizar la ayuda a la educación infantil y primaria",
     "texto": "UNICEF propone dirigir al menos la mitad de la ayuda educativa a los países menos adelantados, proteger la educación en emergencias y concentrarse en el aprendizaje básico (preescolar y primaria), la etapa con mayor retorno de la inversión.",
     "supera": "272 millones de niños y jóvenes sin escuela",
-    "fuente": "https://www.unicef.org/es/comunicados-prensa/recortes-financiacion-mundial-podrian-dejar-sin-escolarizar-seis-millones-ninos"
+    "fuente": "https://www.unicef.org/es/comunicados-prensa/recortes-financiacion-mundial-podrian-dejar-sin-escolarizar-seis-millones-ninos",
+    "escalas": [
+     "planeta"
+    ]
    }
   ],
   "proyectos": [
@@ -2447,7 +3311,11 @@ const SECTORES = [
     "tipo": "Proyecto educativo basado en investigación universitaria",
     "texto": "Modelo de transformación de escuelas basado en el aprendizaje dialógico y en las actuaciones educativas de éxito del proyecto europeo INCLUD-ED, coordinado por el centro CREA de la Universidad de Barcelona. Pasó de 5 escuelas en 1995 a 194 en España en 2015 (cifra actual por verificar).",
     "web": null,
-    "fuente": "https://redined.educacion.gob.es/xmlui/bitstream/handle/11162/115683/actuaciones.pdf?sequence=1"
+    "fuente": "https://redined.educacion.gob.es/xmlui/bitstream/handle/11162/115683/actuaciones.pdf?sequence=1",
+    "escalas": [
+     "comunidad",
+     "planeta"
+    ]
    },
    {
     "nombre": "Red de Centros Comunidades de Aprendizaje de Castilla-La Mancha",
@@ -2455,7 +3323,10 @@ const SECTORES = [
     "tipo": "Programa público",
     "texto": "Red creada por una orden de la Consejería de Educación de 18 de junio de 2021 para reconocer y acompañar a los centros públicos y concertados que se transforman en comunidades de aprendizaje. Exige el apoyo de dos tercios del claustro y del consejo escolar y ofrece formación, intercambio de experiencias e investigación con la universidad regional.",
     "web": "https://educacion.castillalamancha.es",
-    "fuente": "https://educacion.castillalamancha.es/sites/default/files/2025-01/Orden%2018-06-2021%20Red%20COMUNIDADES%20DE%20APRENDIZAJE.pdf"
+    "fuente": "https://educacion.castillalamancha.es/sites/default/files/2025-01/Orden%2018-06-2021%20Red%20COMUNIDADES%20DE%20APRENDIZAJE.pdf",
+    "escalas": [
+     "region"
+    ]
    },
    {
     "nombre": "Red Amara Berri",
@@ -2463,7 +3334,10 @@ const SECTORES = [
     "tipo": "Red de escuelas públicas",
     "texto": "Sistema pedagógico nacido en Donostia que organiza toda la vida del centro en torno a cada alumno, el juego y el trabajo en equipo de alumnado, profesorado y familias. Un documento del Gobierno Vasco recoge 18 centros en la red (11 en Bizkaia, 5 en Gipuzkoa y 2 en Álava; fecha del dato por verificar).",
     "web": null,
-    "fuente": "https://redined.educacion.gob.es/xmlui/bitstream/handle/11162/203726/210004c_Doc_BGN_Hezkuntza_sareak_c.pdf?sequence=1"
+    "fuente": "https://redined.educacion.gob.es/xmlui/bitstream/handle/11162/203726/210004c_Doc_BGN_Hezkuntza_sareak_c.pdf?sequence=1",
+    "escalas": [
+     "region"
+    ]
    },
    {
     "nombre": "EdNa, Educación en la Naturaleza",
@@ -2471,7 +3345,10 @@ const SECTORES = [
     "tipo": "Asociación sin ánimo de lucro",
     "texto": "Asociación de ámbito nacional que reúne y asesora a escuelas y grupos de juego en la naturaleza, organiza un encuentro nacional anual y ha definido criterios de calidad para estos proyectos. Publicó en 2020 la «Guía de escuelas en la naturaleza».",
     "web": "https://asociacionedna.wordpress.com",
-    "fuente": "https://www.miteco.gob.es/es/ceneam/recursos/quien-es-quien/edna.html"
+    "fuente": "https://www.miteco.gob.es/es/ceneam/recursos/quien-es-quien/edna.html",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "Universidades Populares (FEUP)",
@@ -2479,7 +3356,10 @@ const SECTORES = [
     "tipo": "Red municipal de educación de personas adultas",
     "texto": "Centros de educación y cultura para adultos, la mayoría dependientes de ayuntamientos y agrupados en la Federación Española de Universidades Populares. En 2008 había más de 300 en 12 comunidades autónomas, con más de 500.000 personas en cursos (cifras actuales por verificar).",
     "web": null,
-    "fuente": "https://www.consumer.es/educacion/universidades-populares.html"
+    "fuente": "https://www.consumer.es/educacion/universidades-populares.html",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "Mézclate conmigo (Save the Children)",
@@ -2487,7 +3367,10 @@ const SECTORES = [
     "tipo": "ONG",
     "texto": "Caja de herramientas de Save the Children para talleres con familias que buscan una escolarización más diversa e inclusiva. Su piloto reunió a 21 escuelas infantiles y 182 familias de Lleida y Tarragona, y el 78 % valoró positivamente el taller.",
     "web": "https://www.savethechildren.es",
-    "fuente": "https://www.savethechildren.es/sites/default/files/2025-07/Dossier%20Toolkit%20Mezclate%20Conmigo%20%28castellano%29.pdf"
+    "fuente": "https://www.savethechildren.es/sites/default/files/2025-07/Dossier%20Toolkit%20Mezclate%20Conmigo%20%28castellano%29.pdf",
+    "escalas": [
+     "region"
+    ]
    },
    {
     "nombre": "Estudio sobre la conciencia del ser humano (Luz & Humanidad)",
@@ -2495,7 +3378,10 @@ const SECTORES = [
     "tipo": "Proyecto propio",
     "texto": "Mapa visual editable de la teoría sintérgica de Jacobo Grinberg (vigilia, sueño, meditación y comunicación entre campos mentales) con sus estudios científicos citados.",
     "web": "https://humanity.wiki/conciencia",
-    "fuente": null
+    "fuente": null,
+    "escalas": [
+     "individuo"
+    ]
    }
   ],
   "preguntas": [
@@ -2527,7 +3413,10 @@ const SECTORES = [
       "Viviendas adaptadas que permiten envejecer en casa con autonomía y seguridad"
      ],
      "imagenes": [],
-     "escena3d": "hogar"
+     "escena3d": "hogar",
+     "escalas": [
+      "individuo"
+     ]
     },
     {
      "titulo": "Comunidad: barrios que acompañan",
@@ -2541,7 +3430,10 @@ const SECTORES = [
       "Participación activa de las personas mayores en la vida del barrio, como protagonistas y no solo como receptoras de ayuda"
      ],
      "imagenes": [],
-     "escena3d": "comunidad"
+     "escena3d": "comunidad",
+     "escalas": [
+      "comunidad"
+     ]
     },
     {
      "titulo": "Sistema: cuidados cercanos, profesionales y a tiempo",
@@ -2555,7 +3447,10 @@ const SECTORES = [
       "Coordinación real entre servicios sociales y sanitarios"
      ],
      "imagenes": [],
-     "escena3d": "pueblo"
+     "escena3d": "pueblo",
+     "escalas": [
+      "pais"
+     ]
     }
    ],
    "arte": {
@@ -2569,37 +3464,58 @@ const SECTORES = [
     "ambito": "España",
     "titulo": "Morir esperando la ayuda a la dependencia",
     "texto": "Según el XXVI Dictamen del Observatorio Estatal de la Dependencia, en 2025 fallecieron 32.704 personas en lista de espera, y la tramitación media fue de 341 días. A 31 de diciembre de 2025, 148.907 personas con derecho reconocido seguían esperando su prestación.",
-    "fuente": "https://blogs.uned.es/catedraunedfuenlabrada/wp-content/uploads/sites/313/2026/07/XXVI-DICTAMEN-OBSERVATORIO-DE-LA-DEPENDENCIA.pdf"
+    "fuente": "https://blogs.uned.es/catedraunedfuenlabrada/wp-content/uploads/sites/313/2026/07/XXVI-DICTAMEN-OBSERVATORIO-DE-LA-DEPENDENCIA.pdf",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "La dependencia recibe la mitad que en Europa",
     "texto": "España destina en torno al 0,8 % del PIB a la atención a la dependencia, frente a una media europea cercana al 1,6 %, según Fedea (2026). Las comunidades autónomas financian alrededor del 74 % del sistema.",
-    "fuente": "https://documentos.fedea.net/pubs/fpp/2026/07/FPP2026-04.pdf"
+    "fuente": "https://documentos.fedea.net/pubs/fpp/2026/07/FPP2026-04.pdf",
+    "escalas": [
+     "region",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Una de cada cinco personas se siente sola",
     "texto": "El Barómetro de la soledad no deseada 2024 (Fundación ONCE y Fundación AXA) indica que el 20 % de la población sufre soledad no deseada y el 13,5 % lleva más de dos años así; afecta más a jóvenes y a personas con discapacidad. Su coste se estima en 14.141 millones de euros al año, el 1,17 % del PIB (2021).",
-    "fuente": "https://lamoncloa.gob.es/serviciosdeprensa/notasprensa/derechos-sociales-consumo-agenda-2030/Documents/2024/10-06-24-barometro-soledad-2024.pdf"
+    "fuente": "https://lamoncloa.gob.es/serviciosdeprensa/notasprensa/derechos-sociales-consumo-agenda-2030/Documents/2024/10-06-24-barometro-soledad-2024.pdf",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "El cuidado sigue recayendo en las mujeres",
     "texto": "Según el módulo de conciliación de la EPA 2025 (INE), el 8,3 % de las mujeres ocupadas con responsabilidades de cuidado ha reducido su jornada para cuidar, frente al 0,8 % de los hombres. Además, entre las personas mayores de 50 años que cuidan de manera informal, el 76 % son mujeres, una de las proporciones más altas de la OCDE (Fedea, 2026).",
-    "fuente": "https://www.ine.es/dyngs/Prensa/es/mEPA2025.htm"
+    "fuente": "https://www.ine.es/dyngs/Prensa/es/mEPA2025.htm",
+    "escalas": [
+     "individuo",
+     "pais"
+    ]
    },
    {
     "ambito": "España",
     "titulo": "Pocas manos profesionales y mal pagadas",
     "texto": "España cuenta con 4,9 trabajadores de cuidados de larga duración por cada 100 personas mayores de 65 años, frente a 5,7 de media en la OCDE, y sus salarios rondan el 60-63 % del salario medio (Fedea, 2026).",
-    "fuente": "https://documentos.fedea.net/pubs/fpp/2026/07/FPP2026-04.pdf"
+    "fuente": "https://documentos.fedea.net/pubs/fpp/2026/07/FPP2026-04.pdf",
+    "escalas": [
+     "individuo",
+     "pais"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "Un trabajo inmenso, invisible y desigual",
     "texto": "La Organización Internacional del Trabajo calculó en 2018 que cada día se dedican 16.400 millones de horas a cuidados no remunerados, el equivalente a 2.000 millones de personas trabajando ocho horas sin cobrar. Las mujeres realizan el 76,2 % de ese trabajo, y 606 millones de mujeres en edad de trabajar no podían acceder a un empleo por cuidar.",
-    "fuente": "https://news.un.org/es/story/2018/06/1436912"
+    "fuente": "https://news.un.org/es/story/2018/06/1436912",
+    "escalas": [
+     "planeta"
+    ]
    }
   ],
   "soluciones": [
@@ -2608,42 +3524,62 @@ const SECTORES = [
     "titulo": "Enfermería de barrio con equipos pequeños y autónomos",
     "texto": "Modelo nacido en Países Bajos (Buurtzorg): equipos de 10 a 12 enfermeras que se organizan solos y atienden a 50-60 personas de un barrio, reforzando la autonomía del paciente y sus redes. Un estudio de KPMG (2015) lo identificó como proveedor de bajo coste no explicado por el tipo de pacientes, y encabeza la satisfacción de usuarios en Países Bajos; aún faltan datos sólidos sobre resultados en salud.",
     "supera": "Pocas manos profesionales y mal pagadas",
-    "fuente": "https://en.wikipedia.org/wiki/Buurtzorg_Nederland"
+    "fuente": "https://en.wikipedia.org/wiki/Buurtzorg_Nederland",
+    "escalas": [
+     "comunidad",
+     "pais"
+    ]
    },
    {
     "ambito": "Sistema",
     "titulo": "Financiar la dependencia al nivel europeo y priorizar servicios",
     "texto": "Aumentar la financiación estatal del sistema de dependencia: el Real Decreto-ley 17/2026 la eleva a 5.514 millones de euros en 2026 y 7.239 millones en 2027, con el objetivo de cubrir el 50 % del coste. Coincidiendo con más recursos, la lista de espera bajó un 21 % en un año, hasta 142.887 personas en junio de 2026, aunque el tiempo medio (314 días) sigue siendo muy alto.",
     "supera": "La dependencia recibe la mitad que en Europa",
-    "fuente": "https://www.dsca.gob.es/en/comunicacion/notas-prensa/lista-espera-dependencia-acelera-su-descenso-baja-21-ultimo-ano"
+    "fuente": "https://www.dsca.gob.es/en/comunicacion/notas-prensa/lista-espera-dependencia-acelera-su-descenso-baja-21-ultimo-ano",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "Sistema",
     "titulo": "Agilizar la valoración y atender mientras se tramita",
     "texto": "Reducir plazos de valoración y resolución y empezar a prestar servicios básicos mientras se resuelve el expediente. Cataluña muestra que es posible acortar plazos: su tiempo total de espera era de 270 días en julio de 2025 (Fedea), frente a 341 de media estatal en 2025, aunque sigue muy por encima de un plazo razonable. No hay aún evaluaciones rigurosas de qué medidas concretas acortan más la espera (por verificar).",
     "supera": "Morir esperando la ayuda a la dependencia",
-    "fuente": "https://documentos.fedea.net/pubs/fpp/2026/07/FPP2026-04.pdf"
+    "fuente": "https://documentos.fedea.net/pubs/fpp/2026/07/FPP2026-04.pdf",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "ambito": "Hogar y familia",
     "titulo": "Permisos por nacimiento iguales e intransferibles",
     "texto": "Cada progenitor tiene su propio permiso, que no puede ceder al otro, de modo que los padres lo usan. La EPA 2025 muestra que el 56,4 % de los padres que criaron a menores usó el permiso por nacimiento, pero las reducciones de jornada siguen siendo diez veces más frecuentes en mujeres: el permiso igual es necesario, aunque no suficiente.",
     "supera": "El cuidado sigue recayendo en las mujeres",
-    "fuente": "https://www.ine.es/dyngs/Prensa/es/mEPA2025.htm"
+    "fuente": "https://www.ine.es/dyngs/Prensa/es/mEPA2025.htm",
+    "escalas": [
+     "individuo"
+    ]
    },
    {
     "ambito": "Comunidad",
     "titulo": "Redes vecinales de detección y acompañamiento",
     "texto": "Vecinos, comercios, farmacias y voluntariado se coordinan con los servicios sociales para detectar a personas mayores solas y conectarlas con su barrio, como hace Radars en Barcelona. Más del 80 % de las personas atendidas por Radars declara sentirse menos sola y más integrada; la evidencia científica sobre intervenciones contra la soledad todavía es escasa y heterogénea, por lo que conviene evaluarlas.",
     "supera": "Una de cada cinco personas se siente sola",
-    "fuente": "https://www.fundacionpilares.org/wp-content/uploads/2024/04/Radars.pdf"
+    "fuente": "https://www.fundacionpilares.org/wp-content/uploads/2024/04/Radars.pdf",
+    "escalas": [
+     "individuo",
+     "comunidad"
+    ]
    },
    {
     "ambito": "Mundial",
     "titulo": "Invertir en cuidados como infraestructura social",
     "texto": "Tratar el cuidado como inversión pública, igual que carreteras o escuelas. La OIT estima que elevar la inversión en cuidados hasta el 18,3 % del PIB permitiría crear 475 millones de empleos en 2030, 269 millones más que en 2015, aliviando el trabajo no pagado de las mujeres.",
     "supera": "Un trabajo inmenso, invisible y desigual",
-    "fuente": "https://news.un.org/es/story/2018/06/1436912"
+    "fuente": "https://news.un.org/es/story/2018/06/1436912",
+    "escalas": [
+     "planeta"
+    ]
    }
   ],
   "proyectos": [
@@ -2653,7 +3589,10 @@ const SECTORES = [
     "tipo": "programa público municipal con red comunitaria",
     "texto": "Desde 2008-2009, vecinos, comercios, farmacias, voluntariado y entidades detectan y acompañan a personas mayores solas mediante llamadas de compañía y actividades del barrio. En 2024 atendió a 2.487 personas con 304 voluntarios y 58.340 llamadas, y estaba presente en 57 de los 73 barrios de la ciudad (dato de 2022).",
     "web": "https://ajuntament.barcelona.cat/usosdeltemps/en/actuacio/radars",
-    "fuente": "https://ajuntament.barcelona.cat/usosdeltemps/en/actuacio/radars"
+    "fuente": "https://ajuntament.barcelona.cat/usosdeltemps/en/actuacio/radars",
+    "escalas": [
+     "pueblo"
+    ]
    },
    {
     "nombre": "Fundación Grandes Amigos",
@@ -2661,7 +3600,11 @@ const SECTORES = [
     "tipo": "ONG / fundación",
     "texto": "Desde 2003 combate la soledad de las personas mayores creando vínculos de amistad y vecindad con voluntariado. En 2022 acompañó a 1.635 personas mayores con 2.152 voluntarios.",
     "web": "https://www.grandesamigos.org",
-    "fuente": "https://fundacionlealtad.org/conoce-la-fundacion-grandes-amigos-ong-acreditada-por-fundacion-lealtad"
+    "fuente": "https://fundacionlealtad.org/conoce-la-fundacion-grandes-amigos-ong-acreditada-por-fundacion-lealtad",
+    "escalas": [
+     "comunidad",
+     "pais"
+    ]
    },
    {
     "nombre": "Madrid Vecina",
@@ -2669,7 +3612,10 @@ const SECTORES = [
     "tipo": "programa público municipal con ONG (Ayuntamiento de Madrid y Grandes Amigos)",
     "texto": "Red vecinal piloto para detectar la soledad de las personas mayores en la que participan 482 comercios y supermercados, 28 farmacias, 27 centros sociales y sanitarios y 41 recursos para mayores. El informe municipal no aporta aún evaluación de resultados ni fecha de inicio (por verificar).",
     "web": "https://www.madrid.es",
-    "fuente": "https://www.madrid.es/UnidadesDescentralizadas/Mayores/Especial%20informativo/Soledad/Informe_MadridVecina.pdf"
+    "fuente": "https://www.madrid.es/UnidadesDescentralizadas/Mayores/Especial%20informativo/Soledad/Informe_MadridVecina.pdf",
+    "escalas": [
+     "comunidad"
+    ]
    },
    {
     "nombre": "Observatorio Estatal de la Soledad No Deseada (SoledadES)",
@@ -2677,7 +3623,10 @@ const SECTORES = [
     "tipo": "observatorio impulsado por una fundación (Fundación ONCE)",
     "texto": "Mide y difunde datos sobre la soledad no deseada: su Barómetro 2024 (2.900 entrevistas) fijó la prevalencia en el 20 % de la población, y su estudio de costes la estimó en 14.141 millones de euros al año. Publica también un decálogo de políticas públicas contra la soledad.",
     "web": "https://www.soledades.es",
-    "fuente": "https://sciencemediacentre.es/soledad-no-deseada-datos-evidencias-y-conceptos-para-informar-sobre-un-problema-de-salud-publica"
+    "fuente": "https://sciencemediacentre.es/soledad-no-deseada-datos-evidencias-y-conceptos-para-informar-sobre-un-problema-de-salud-publica",
+    "escalas": [
+     "pais"
+    ]
    },
    {
     "nombre": "Trabensol (por verificar)",
@@ -2685,7 +3634,11 @@ const SECTORES = [
     "tipo": "cooperativa de vivienda colaborativa sénior (cohousing)",
     "texto": "Cooperativa de personas mayores que diseñaron y gestionan su propio conjunto de viviendas con amplios espacios comunes para envejecer juntas con autonomía (por verificar: año de apertura, número de viviendas y actividad actual; no se pudo acceder a su web en esta investigación).",
     "web": "https://www.trabensol.org",
-    "fuente": "https://www.trabensol.org"
+    "fuente": "https://www.trabensol.org",
+    "escalas": [
+     "comunidad",
+     "pueblo"
+    ]
    },
    {
     "nombre": "Viviendas intergeneracionales Plaza de América (por verificar)",
@@ -2693,7 +3646,10 @@ const SECTORES = [
     "tipo": "programa público municipal de vivienda",
     "texto": "Edificio municipal de alquiler en el que conviven personas mayores y jóvenes que se comprometen a dedicar tiempo de ayuda vecinal a sus vecinos mayores (por verificar: cifras, año de inicio, web oficial y continuidad; no se pudo confirmar con fuentes en esta investigación).",
     "web": null,
-    "fuente": null
+    "fuente": null,
+    "escalas": [
+     "pueblo"
+    ]
    },
    {
     "nombre": "Buurtzorg",
@@ -2701,7 +3657,11 @@ const SECTORES = [
     "tipo": "empresa social sin ánimo de lucro de enfermería a domicilio",
     "texto": "Fundada en 2006 en Almelo por Jos de Blok, organiza la atención a domicilio en equipos autogestionados de 10-12 enfermeras por barrio y hoy reúne a más de 14.000 profesionales. Atiende a unas 80.000 personas y KPMG (2015) la identificó como proveedor de bajo coste.",
     "web": "https://www.buurtzorg.com",
-    "fuente": "https://www.buurtzorg.com/about-us/"
+    "fuente": "https://www.buurtzorg.com/about-us/",
+    "escalas": [
+     "continente",
+     "planeta"
+    ]
    }
   ],
   "preguntas": [
