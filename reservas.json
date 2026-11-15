@@ -17,6 +17,12 @@
       "ruta": "src/components/aeromovil/geometria.ts",
       "motivo": "Chasis y batería que se alargan",
       "desde": "2026-11-15T19:36:29.931Z"
+    },
+    {
+      "agente": "phev",
+      "ruta": "src/components/aeromovil/explicaciones/triciclo.ts",
+      "motivo": "Híbrido enchufable PHEV",
+      "desde": "2026-11-15T19:45:42.793Z"
     }
   ]
 }
