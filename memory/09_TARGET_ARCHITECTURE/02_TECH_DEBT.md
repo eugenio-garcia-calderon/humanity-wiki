@@ -687,3 +687,8 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 - **Battery.** The replica's battery is 3 kWh, which is what fits in the generic battery boxes with the Smera's high floor and upright seats. The real car carried 9–10 kWh under the driver's seat. The fix is a dedicated under-seat box with a raised cushion: about 2 hours.
 - **Unused aero fields.** `DimForma` still carries the aero body's fields when a `perfil` is given (`xCaida`, `curvaCola`…). They are ignored there.
 - **Upper section.** The front-view width at 1.04 m is 7 cm too wide: the upper half is still a superellipse, and the real glass has tumblehome.
+
+## 2026-11-15 · Elbows are kept inside by the viewer, not checked by the model
+
+- `PuntosOcupante.codoZ` comes from sampling the body's half-width around the arms. The viewer then bends the elbow down until it fits. Nothing in the basculante checks looks at the arms, so a design whose arms cannot fit at all still shows green.
+- The right shape is an «Brazos dentro» check, using the same elbow the viewer draws. That needs the elbow solver (`articulacion`, now in Visor3D) moved to `geometria.ts`: about 1 hour.
