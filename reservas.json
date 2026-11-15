@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "balab",
+      "ruta": "src/components/aeromovil/geometria.ts",
+      "motivo": "Bala clásico basculante",
+      "desde": "2026-11-15T16:51:03.957Z"
+    }
+  ]
 }
