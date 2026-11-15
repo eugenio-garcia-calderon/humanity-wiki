@@ -32,6 +32,12 @@ const SECTORES = [
      "escena3d": "hogar",
      "escalas": [
       "individuo"
+     ],
+     "subtemas": [
+      "hogar",
+      "renovables",
+      "red",
+      "pobreza"
      ]
     },
     {
@@ -50,6 +56,13 @@ const SECTORES = [
      "escalas": [
       "comunidad",
       "pueblo"
+     ],
+     "subtemas": [
+      "hogar",
+      "comunidades",
+      "renovables",
+      "red",
+      "pobreza"
      ]
     },
     {
@@ -69,6 +82,12 @@ const SECTORES = [
       "provincia",
       "region",
       "pais"
+     ],
+     "subtemas": [
+      "hogar",
+      "comunidades",
+      "renovables",
+      "red"
      ]
     }
    ],
@@ -86,6 +105,10 @@ const SECTORES = [
     "fuente": "https://www.miteco.gob.es/content/dam/miteco/es/energia/files-1/bono-social/informes-indicadores/5.%20Indicadores%20de%20pobreza%20energética%202022-2024,%20balance%20y%20cierre%20ENPE%2019-24.pdf",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "hogar",
+     "pobreza"
     ]
    },
    {
@@ -95,6 +118,9 @@ const SECTORES = [
     "fuente": "https://ine.es/prodyser/espa_cifras/13_ENERGIA.pdf",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "red"
     ]
    },
    {
@@ -104,6 +130,10 @@ const SECTORES = [
     "fuente": "https://www.miteco.gob.es/eu/cambio-climatico/temas/mitigacion-politicas-y-medidas/edificacion.html",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "hogar",
+     "renovables"
     ]
    },
    {
@@ -113,6 +143,9 @@ const SECTORES = [
     "fuente": "https://www.renewableenergymagazine.com/panorama/el-83-de-los-nudos-de-la-20260724",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "red"
     ]
    },
    {
@@ -122,6 +155,11 @@ const SECTORES = [
     "fuente": "https://sciencemediacentre.es/en/final-blackout-report-european-operators-confirms-event-was-caused-multiple-factors-recommends",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "hogar",
+     "red",
+     "pobreza"
     ]
    },
    {
@@ -131,6 +169,9 @@ const SECTORES = [
     "fuente": "https://www.worldbank.org/en/news/press-release/2025/06/25/energy-access-has-improved-yet-international-financial-support-still-needed-to-boost-progress-and-address-disparities",
     "escalas": [
      "planeta"
+    ],
+    "subtemas": [
+     "pobreza"
     ]
    }
   ],
@@ -143,6 +184,10 @@ const SECTORES = [
     "fuente": "https://passivehouse.com/05_service/03_literature/0303_energy_efficiency/0303_energy-efficiency_of_passive_houses.htm",
     "escalas": [
      "individuo"
+    ],
+    "subtemas": [
+     "hogar",
+     "renovables"
     ]
    },
    {
@@ -153,6 +198,11 @@ const SECTORES = [
     "fuente": "https://www.appa.es/wp-content/uploads/2026/02/NdP-APPA-Renovables-El-autoconsumo-consolida-su-aportacion-pero-encadena-tres-anos-de-contraccion-y-reclama-una-fiscalidad-estable_vf.pdf",
     "escalas": [
      "individuo"
+    ],
+    "subtemas": [
+     "hogar",
+     "renovables",
+     "red"
     ]
    },
    {
@@ -165,6 +215,12 @@ const SECTORES = [
      "individuo",
      "comunidad",
      "pueblo"
+    ],
+    "subtemas": [
+     "hogar",
+     "comunidades",
+     "renovables",
+     "pobreza"
     ]
    },
    {
@@ -175,6 +231,10 @@ const SECTORES = [
     "fuente": "https://www.energias-renovables.com/panorama/la-energ-a-solar-adelanta-a-la-20260311",
     "escalas": [
      "region"
+    ],
+    "subtemas": [
+     "renovables",
+     "red"
     ]
    },
    {
@@ -185,6 +245,10 @@ const SECTORES = [
     "fuente": "https://sciencemediacentre.es/en/final-blackout-report-european-operators-confirms-event-was-caused-multiple-factors-recommends",
     "escalas": [
      "region"
+    ],
+    "subtemas": [
+     "renovables",
+     "red"
     ]
    },
    {
@@ -195,6 +259,11 @@ const SECTORES = [
     "fuente": "https://www.seforall.org/news/powering-progress-7-opportunities-to-close-the-energy-access-gap-and-accelerate-the-clean",
     "escalas": [
      "planeta"
+    ],
+    "subtemas": [
+     "renovables",
+     "red",
+     "pobreza"
     ]
    }
   ],
@@ -208,6 +277,10 @@ const SECTORES = [
     "fuente": "https://www.energias-renovables.com/autoconsumo/som-impulsa-en-2025-la-creaci-n-20260520",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "comunidades",
+     "renovables"
     ]
    },
    {
@@ -220,6 +293,12 @@ const SECTORES = [
     "escalas": [
      "comunidad",
      "pueblo"
+    ],
+    "subtemas": [
+     "hogar",
+     "comunidades",
+     "renovables",
+     "pobreza"
     ]
    },
    {
@@ -232,6 +311,10 @@ const SECTORES = [
     "escalas": [
      "comunidad",
      "region"
+    ],
+    "subtemas": [
+     "comunidades",
+     "renovables"
     ]
    },
    {
@@ -244,6 +327,10 @@ const SECTORES = [
     "escalas": [
      "comunidad",
      "pais"
+    ],
+    "subtemas": [
+     "comunidades",
+     "renovables"
     ]
    },
    {
@@ -256,6 +343,10 @@ const SECTORES = [
     "escalas": [
      "comunidad",
      "pueblo"
+    ],
+    "subtemas": [
+     "comunidades",
+     "renovables"
     ]
    },
    {
@@ -268,6 +359,9 @@ const SECTORES = [
     "escalas": [
      "comunidad",
      "pueblo"
+    ],
+    "subtemas": [
+     "renovables"
     ]
    },
    {
@@ -280,6 +374,12 @@ const SECTORES = [
     "escalas": [
      "comunidad",
      "pais"
+    ],
+    "subtemas": [
+     "hogar",
+     "comunidades",
+     "renovables",
+     "pobreza"
     ]
    }
   ],
@@ -288,6 +388,28 @@ const SECTORES = [
    "¿SolarCrowd tiene ya entidades o proyectos de energía publicados que podamos enlazar desde aquí, con cifras (préstamos, euros, kW)?",
    "¿Te interesa añadir la escala de la movilidad eléctrica (coche, bici, Aeromóvil) dentro de Energía o la dejamos en el sector de Movilidad?",
    "¿Tienes contacto con alguna comunidad energética o cooperativa (Som Energia, GoiEner, Enercoop, Ecooo) que quiera revisar o ampliar su ficha?"
+  ],
+  "subtemas": [
+   {
+    "id": "hogar",
+    "nombre": "Hogar y eficiencia"
+   },
+   {
+    "id": "comunidades",
+    "nombre": "Comunidades energéticas"
+   },
+   {
+    "id": "renovables",
+    "nombre": "Renovables y territorio"
+   },
+   {
+    "id": "red",
+    "nombre": "Red y almacenamiento"
+   },
+   {
+    "id": "pobreza",
+    "nombre": "Pobreza y acceso"
+   }
   ]
  },
  {
@@ -340,6 +462,11 @@ const SECTORES = [
      "escena3d": "movilidad",
      "escalas": [
       "individuo"
+     ],
+     "subtemas": [
+      "vehiculo",
+      "ciudad",
+      "emisiones"
      ]
     },
     {
@@ -382,6 +509,9 @@ const SECTORES = [
      "escena3d": "movilidad",
      "escalas": [
       "pueblo"
+     ],
+     "subtemas": [
+      "ciudad"
      ]
     },
     {
@@ -425,6 +555,13 @@ const SECTORES = [
      "escalas": [
       "provincia",
       "region"
+     ],
+     "subtemas": [
+      "vehiculo",
+      "ciudad",
+      "transporte",
+      "rural",
+      "emisiones"
      ]
     }
    ],
@@ -442,6 +579,9 @@ const SECTORES = [
     "fuente": "https://www.diariomotor.com/noticia/segmentos-matriculaciones-espana-suv-utilitarios-compactos-2024/",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "vehiculo"
     ]
    },
    {
@@ -451,6 +591,9 @@ const SECTORES = [
     "fuente": "https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/inventario-gases-efecto-invernadero/resumen-Inventario-GEI-2026.pdf",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "emisiones"
     ]
    },
    {
@@ -461,6 +604,12 @@ const SECTORES = [
     "escalas": [
      "pueblo",
      "pais"
+    ],
+    "subtemas": [
+     "vehiculo",
+     "ciudad",
+     "transporte",
+     "rural"
     ]
    },
    {
@@ -471,6 +620,9 @@ const SECTORES = [
     "escalas": [
      "pueblo",
      "pais"
+    ],
+    "subtemas": [
+     "ciudad"
     ]
    },
    {
@@ -482,6 +634,10 @@ const SECTORES = [
      "individuo",
      "pueblo",
      "pais"
+    ],
+    "subtemas": [
+     "ciudad",
+     "rural"
     ]
    },
    {
@@ -492,6 +648,10 @@ const SECTORES = [
     "escalas": [
      "pais",
      "continente"
+    ],
+    "subtemas": [
+     "vehiculo",
+     "ciudad"
     ]
    },
    {
@@ -502,6 +662,10 @@ const SECTORES = [
     "escalas": [
      "pueblo",
      "pais"
+    ],
+    "subtemas": [
+     "ciudad",
+     "seguridad"
     ]
    }
   ],
@@ -513,6 +677,10 @@ const SECTORES = [
     "fuente": "https://www.electrive.com/es/2026/03/04/aptera-builds-first-solar-ev-on-validation-production-line/",
     "escalas": [
      "planeta"
+    ],
+    "subtemas": [
+     "vehiculo",
+     "emisiones"
     ]
    },
    {
@@ -524,6 +692,9 @@ const SECTORES = [
      "pueblo",
      "pais",
      "planeta"
+    ],
+    "subtemas": [
+     "ciudad"
     ]
    },
    {
@@ -534,6 +705,10 @@ const SECTORES = [
     "escalas": [
      "pueblo",
      "pais"
+    ],
+    "subtemas": [
+     "ciudad",
+     "seguridad"
     ]
    },
    {
@@ -544,6 +719,10 @@ const SECTORES = [
     "escalas": [
      "pueblo",
      "pais"
+    ],
+    "subtemas": [
+     "transporte",
+     "rural"
     ]
    },
    {
@@ -555,6 +734,10 @@ const SECTORES = [
      "comunidad",
      "pueblo",
      "pais"
+    ],
+    "subtemas": [
+     "vehiculo",
+     "transporte"
     ]
    },
    {
@@ -565,6 +748,12 @@ const SECTORES = [
     "escalas": [
      "comunidad",
      "pais"
+    ],
+    "subtemas": [
+     "vehiculo",
+     "ciudad",
+     "transporte",
+     "emisiones"
     ]
    },
    {
@@ -575,6 +764,11 @@ const SECTORES = [
     "escalas": [
      "region",
      "pais"
+    ],
+    "subtemas": [
+     "ciudad",
+     "transporte",
+     "rural"
     ]
    }
   ],
@@ -589,6 +783,10 @@ const SECTORES = [
     "escalas": [
      "comunidad",
      "region"
+    ],
+    "subtemas": [
+     "vehiculo",
+     "transporte"
     ]
    },
    {
@@ -600,6 +798,10 @@ const SECTORES = [
     "fuente": "https://es.euronews.com/2022/09/16/la-premiada-transformacion-de-pontevedra-en-favor-de-la-peatonalizacion-y-la-mejora-de-la-",
     "escalas": [
      "pueblo"
+    ],
+    "subtemas": [
+     "ciudad",
+     "seguridad"
     ]
    },
    {
@@ -612,6 +814,10 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "planeta"
+    ],
+    "subtemas": [
+     "vehiculo",
+     "emisiones"
     ]
    },
    {
@@ -624,6 +830,9 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "continente"
+    ],
+    "subtemas": [
+     "vehiculo"
     ]
    },
    {
@@ -635,6 +844,9 @@ const SECTORES = [
     "fuente": "https://www.archdaily.com/1114738/groningen-a-dutch-benchmark-for-urban-mobility",
     "escalas": [
      "pueblo"
+    ],
+    "subtemas": [
+     "ciudad"
     ]
    },
    {
@@ -646,6 +858,10 @@ const SECTORES = [
     "fuente": "https://www.dgt.es/comunicacion/noticias/20250801-el-rural-se-mueve-con-dificultad",
     "escalas": [
      "region"
+    ],
+    "subtemas": [
+     "transporte",
+     "rural"
     ]
    },
    {
@@ -657,6 +873,9 @@ const SECTORES = [
     "fuente": "https://www.viasverdes.com/",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "rural"
     ]
    },
    {
@@ -668,6 +887,10 @@ const SECTORES = [
     "fuente": "",
     "escalas": [
      "individuo"
+    ],
+    "subtemas": [
+     "vehiculo",
+     "emisiones"
     ]
    }
   ],
@@ -676,6 +899,32 @@ const SECTORES = [
    "Podbike (velomóvil) quebró en 2025: ¿lo mantenemos como referente de diseño o buscamos un fabricante activo?",
    "¿Qué escala te importa más mostrar primero: vehículo personal, ciudad o territorio rural?",
    "¿Conoces proyectos de transporte compartido en pueblos o comunidades que quieras añadir?"
+  ],
+  "subtemas": [
+   {
+    "id": "vehiculo",
+    "nombre": "Vehículo ligero"
+   },
+   {
+    "id": "ciudad",
+    "nombre": "Ciudad y calle"
+   },
+   {
+    "id": "transporte",
+    "nombre": "Transporte público y compartido"
+   },
+   {
+    "id": "rural",
+    "nombre": "Mundo rural y territorio"
+   },
+   {
+    "id": "emisiones",
+    "nombre": "Emisiones y energía"
+   },
+   {
+    "id": "seguridad",
+    "nombre": "Seguridad vial"
+   }
   ]
  },
  {
@@ -703,6 +952,10 @@ const SECTORES = [
      "escena3d": "comunidad",
      "escalas": [
       "comunidad"
+     ],
+     "subtemas": [
+      "participacion",
+      "deliberacion"
      ]
     },
     {
@@ -721,6 +974,11 @@ const SECTORES = [
      "escalas": [
       "pueblo",
       "region"
+     ],
+     "subtemas": [
+      "participacion",
+      "transparencia",
+      "deliberacion"
      ]
     },
     {
@@ -741,6 +999,11 @@ const SECTORES = [
       "pais",
       "continente",
       "planeta"
+     ],
+     "subtemas": [
+      "participacion",
+      "deliberacion",
+      "directa"
      ]
     }
    ],
@@ -758,6 +1021,9 @@ const SECTORES = [
     "fuente": "https://www.oecd.org/en/publications/oecd-survey-on-drivers-of-trust-in-public-institutions-2026-results_c88c8869-en/spain_8443a0c4-en.html",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "confianza"
     ]
    },
    {
@@ -767,6 +1033,9 @@ const SECTORES = [
     "fuente": "https://www.oecd.org/en/publications/oecd-survey-on-drivers-of-trust-in-public-institutions-2026-results_c88c8869-en/spain_8443a0c4-en.html",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "participacion"
     ]
    },
    {
@@ -776,6 +1045,9 @@ const SECTORES = [
     "fuente": "https://www.idealista.com/news/node/900419",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "transparencia"
     ]
    },
    {
@@ -785,6 +1057,9 @@ const SECTORES = [
     "fuente": "https://maldita.es/malditodato/20240612/participacion-elecciones-europeas-historico/",
     "escalas": [
      "continente"
+    ],
+    "subtemas": [
+     "participacion"
     ]
    },
    {
@@ -795,6 +1070,9 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "pais"
+    ],
+    "subtemas": [
+     "confianza"
     ]
    },
    {
@@ -804,6 +1082,9 @@ const SECTORES = [
     "fuente": "https://www.democracywithoutborders.org/41651/v-dem-report-finds-global-democracy-is-back-at-1978-levels/",
     "escalas": [
      "planeta"
+    ],
+    "subtemas": [
+     "confianza"
     ]
    }
   ],
@@ -818,6 +1099,12 @@ const SECTORES = [
      "comunidad",
      "pueblo",
      "planeta"
+    ],
+    "subtemas": [
+     "participacion",
+     "deliberacion",
+     "directa",
+     "confianza"
     ]
    },
    {
@@ -829,6 +1116,9 @@ const SECTORES = [
     "escalas": [
      "pueblo",
      "planeta"
+    ],
+    "subtemas": [
+     "participacion"
     ]
    },
    {
@@ -840,6 +1130,9 @@ const SECTORES = [
     "escalas": [
      "pueblo",
      "pais"
+    ],
+    "subtemas": [
+     "transparencia"
     ]
    },
    {
@@ -850,6 +1143,10 @@ const SECTORES = [
     "fuente": "https://fsi.stanford.edu/news/pennsylvania-voters-bridge-deep-political-divides-reduce-polarization-groundbreaking",
     "escalas": [
      "planeta"
+    ],
+    "subtemas": [
+     "deliberacion",
+     "confianza"
     ]
    },
    {
@@ -862,6 +1159,11 @@ const SECTORES = [
      "comunidad",
      "pueblo",
      "continente"
+    ],
+    "subtemas": [
+     "participacion",
+     "deliberacion",
+     "confianza"
     ]
    },
    {
@@ -873,6 +1175,10 @@ const SECTORES = [
     "escalas": [
      "pueblo",
      "planeta"
+    ],
+    "subtemas": [
+     "participacion",
+     "directa"
     ]
    }
   ],
@@ -886,6 +1192,9 @@ const SECTORES = [
     "fuente": "https://www.miteco.gob.es/es/prensa/210526qaasambleaciudadana_tcm30-526725.pdf",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "deliberacion"
     ]
    },
    {
@@ -897,6 +1206,9 @@ const SECTORES = [
     "fuente": "https://diario.madrid.es/blog/2026/02/24/presupuestos-participativos-2026-guia-mejorar-madrid/",
     "escalas": [
      "pueblo"
+    ],
+    "subtemas": [
+     "participacion"
     ]
    },
    {
@@ -909,6 +1221,10 @@ const SECTORES = [
     "escalas": [
      "continente",
      "planeta"
+    ],
+    "subtemas": [
+     "participacion",
+     "deliberacion"
     ]
    },
    {
@@ -920,6 +1236,9 @@ const SECTORES = [
     "fuente": "https://civio.es/en/report-2022/",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "transparencia"
     ]
    },
    {
@@ -931,6 +1250,10 @@ const SECTORES = [
     "fuente": "https://oecd-opsi.org/innovations/the-irish-citizens-assembly/",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "deliberacion",
+     "directa"
     ]
    },
    {
@@ -942,6 +1265,10 @@ const SECTORES = [
     "fuente": "https://publicdeliberation.net/?p=1375",
     "escalas": [
      "region"
+    ],
+    "subtemas": [
+     "participacion",
+     "deliberacion"
     ]
    },
    {
@@ -953,6 +1280,9 @@ const SECTORES = [
     "fuente": "https://www.swissinfo.ch/spa/democracia-suiza/c%C3%B3mo-funciona-la-democracia-directa-en-suiza/89088930",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "directa"
     ]
    },
    {
@@ -964,6 +1294,9 @@ const SECTORES = [
     "fuente": null,
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "directa"
     ]
    }
   ],
@@ -972,6 +1305,28 @@ const SECTORES = [
    "Para «votar por temas», ¿qué materias quieres mostrar primero (vivienda, energía, sanidad…) y de qué fuentes oficiales sacamos los datos históricos de cada una?",
    "¿Cómo garantizamos la neutralidad de las fichas de pros y contras: un comité con personas de distintas sensibilidades, revisión por pares, o citar siempre fuentes de todas las posturas?",
    "¿Conoces asambleas ciudadanas o presupuestos participativos en tu zona que debamos añadir como proyectos?"
+  ],
+  "subtemas": [
+   {
+    "id": "participacion",
+    "nombre": "Participación"
+   },
+   {
+    "id": "transparencia",
+    "nombre": "Transparencia y cuentas claras"
+   },
+   {
+    "id": "deliberacion",
+    "nombre": "Deliberación por sorteo"
+   },
+   {
+    "id": "directa",
+    "nombre": "Democracia directa"
+   },
+   {
+    "id": "confianza",
+    "nombre": "Confianza y polarización"
+   }
   ]
  },
  {
@@ -999,6 +1354,11 @@ const SECTORES = [
      "escena3d": "hogar",
      "escalas": [
       "individuo"
+     ],
+     "subtemas": [
+      "hogar",
+      "banca",
+      "desigualdad"
      ]
     },
     {
@@ -1016,6 +1376,11 @@ const SECTORES = [
      "escena3d": "comunidad",
      "escalas": [
       "comunidad"
+     ],
+     "subtemas": [
+      "social",
+      "fiscalidad",
+      "banca"
      ]
     },
     {
@@ -1035,6 +1400,11 @@ const SECTORES = [
       "pais",
       "continente",
       "planeta"
+     ],
+     "subtemas": [
+      "social",
+      "fiscalidad",
+      "banca"
      ]
     }
    ],
@@ -1052,6 +1422,9 @@ const SECTORES = [
     "fuente": "https://ine.es/dyngs/Prensa/ECV2025.htm",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "hogar"
     ]
    },
    {
@@ -1062,6 +1435,9 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "pais"
+    ],
+    "subtemas": [
+     "hogar"
     ]
    },
    {
@@ -1071,6 +1447,9 @@ const SECTORES = [
     "fuente": "https://taxation-customs.ec.europa.eu/taxation/vat/fight-against-vat-fraud/vat-gap_en",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "fiscalidad"
     ]
    },
    {
@@ -1080,6 +1459,9 @@ const SECTORES = [
     "fuente": "https://taxation-customs.ec.europa.eu/taxation/vat/fight-against-vat-fraud/vat-gap_en",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "fiscalidad"
     ]
    },
    {
@@ -1089,6 +1471,10 @@ const SECTORES = [
     "fuente": "https://www.imf.org/en/Blogs/Articles/2025/09/17/global-debt-remains-above-235-of-world-GDP",
     "escalas": [
      "planeta"
+    ],
+    "subtemas": [
+     "fiscalidad",
+     "banca"
     ]
    },
    {
@@ -1098,6 +1484,9 @@ const SECTORES = [
     "fuente": "https://www.irishexaminer.com/news/arid-41757617.html?type=am",
     "escalas": [
      "planeta"
+    ],
+    "subtemas": [
+     "desigualdad"
     ]
    }
   ],
@@ -1110,6 +1499,10 @@ const SECTORES = [
     "fuente": "https://febea.org/wp-content/uploads/2025/12/8-Report-on-ethical-finance-in-Europe.pdf",
     "escalas": [
      "continente"
+    ],
+    "subtemas": [
+     "hogar",
+     "banca"
     ]
    },
    {
@@ -1121,6 +1514,11 @@ const SECTORES = [
     "escalas": [
      "comunidad",
      "pais"
+    ],
+    "subtemas": [
+     "social",
+     "fiscalidad",
+     "desigualdad"
     ]
    },
    {
@@ -1131,6 +1529,9 @@ const SECTORES = [
     "fuente": "https://www.pensionsage.com/pa/Pension-participation-up-33-percentage-points-since-AE-implementation.php",
     "escalas": [
      "planeta"
+    ],
+    "subtemas": [
+     "hogar"
     ]
    },
    {
@@ -1141,6 +1542,10 @@ const SECTORES = [
     "fuente": "https://www.oecd.org/tax/forum-on-tax-administration/publications-and-products/Italy-Electronic-invoicing-May-2021.pdf",
     "escalas": [
      "continente"
+    ],
+    "subtemas": [
+     "fiscalidad",
+     "banca"
     ]
    },
    {
@@ -1151,6 +1556,9 @@ const SECTORES = [
     "fuente": "https://taxation-customs.ec.europa.eu/taxation/vat/fight-against-vat-fraud/vat-gap_en",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "fiscalidad"
     ]
    },
    {
@@ -1161,6 +1569,10 @@ const SECTORES = [
     "fuente": "https://ripess.socioeco.org/bdf_fiche-document-264_en.html",
     "escalas": [
      "planeta"
+    ],
+    "subtemas": [
+     "hogar",
+     "banca"
     ]
    }
   ],
@@ -1174,6 +1586,12 @@ const SECTORES = [
     "fuente": "https://www.fiarebancaetica.coop/ca/?p=316952",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "hogar",
+     "social",
+     "fiscalidad",
+     "banca"
     ]
    },
    {
@@ -1185,6 +1603,10 @@ const SECTORES = [
     "fuente": "https://www.thenews.coop/mondragon-posts-positive-2025-revenue-and-job-figures/",
     "escalas": [
      "region"
+    ],
+    "subtemas": [
+     "social",
+     "fiscalidad"
     ]
    },
    {
@@ -1196,6 +1618,10 @@ const SECTORES = [
     "fuente": "https://wecoop.es/wp-content/uploads/2025/02/Informe_Auditoria_Social_Estatal_2024_REAS_RdR.pdf",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "social",
+     "fiscalidad"
     ]
    },
    {
@@ -1207,6 +1633,9 @@ const SECTORES = [
     "fuente": "https://www.ui1.es/blog-ui1/sabes-que-es-la-economia-del-bien-comun",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "social"
     ]
    },
    {
@@ -1218,6 +1647,10 @@ const SECTORES = [
     "fuente": "https://www.triodos.es/binaries/content/assets/tbes/informe-anual/informe-anual-2025/infografia-ar25_es.pdf",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "social",
+     "banca"
     ]
    },
    {
@@ -1229,6 +1662,11 @@ const SECTORES = [
     "fuente": "https://www.wir.ch/fileadmin/downloads/Publikationen/Medienmitteilungen/2026-02-13-Jahresergebnis-de.pdf",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "social",
+     "fiscalidad",
+     "banca"
     ]
    },
    {
@@ -1240,6 +1678,9 @@ const SECTORES = [
     "fuente": "https://circulareconomy.europa.eu/platform/en/dialogue/existing-eu-platforms/turuta-social-currency-promoting-local-production-and-exchange",
     "escalas": [
      "pueblo"
+    ],
+    "subtemas": [
+     "banca"
     ]
    },
    {
@@ -1258,6 +1699,9 @@ const SECTORES = [
      "pais",
      "continente",
      "planeta"
+    ],
+    "subtemas": [
+     "fiscalidad"
     ]
    }
   ],
@@ -1266,6 +1710,28 @@ const SECTORES = [
    "En tu modelo de impuesto único por transacción, ¿qué tipo aproximado tienes en mente y cómo se protege a los hogares con menos ingresos? Así podemos enlazarlo con los retos de pobreza y fiscalidad.",
    "¿Conoces cooperativas, bancos de tiempo o monedas locales en tu zona que debamos añadir como proyectos?",
    "¿Tienes relación con Fiare, Triodos o alguna cooperativa de crédito (Caixa Popular, Laboral Kutxa…) que quieras destacar?"
+  ],
+  "subtemas": [
+   {
+    "id": "hogar",
+    "nombre": "Economía del hogar"
+   },
+   {
+    "id": "social",
+    "nombre": "Economía social y cooperativas"
+   },
+   {
+    "id": "fiscalidad",
+    "nombre": "Fiscalidad"
+   },
+   {
+    "id": "banca",
+    "nombre": "Banca y dinero"
+   },
+   {
+    "id": "desigualdad",
+    "nombre": "Desigualdad"
+   }
   ]
  },
  {
@@ -1293,6 +1759,12 @@ const SECTORES = [
      "escena3d": "hogar",
      "escalas": [
       "individuo"
+     ],
+     "subtemas": [
+      "hogar",
+      "clima",
+      "emergencias",
+      "digital"
      ]
     },
     {
@@ -1310,6 +1782,10 @@ const SECTORES = [
      "escena3d": "movilidad",
      "escalas": [
       "comunidad"
+     ],
+     "subtemas": [
+      "calle",
+      "clima"
      ]
     },
     {
@@ -1328,6 +1804,10 @@ const SECTORES = [
      "escalas": [
       "provincia",
       "region"
+     ],
+     "subtemas": [
+      "clima",
+      "emergencias"
      ]
     }
    ],
@@ -1346,6 +1826,9 @@ const SECTORES = [
     "escalas": [
      "pueblo",
      "pais"
+    ],
+    "subtemas": [
+     "calle"
     ]
    },
    {
@@ -1356,6 +1839,9 @@ const SECTORES = [
     "escalas": [
      "provincia",
      "continente"
+    ],
+    "subtemas": [
+     "clima"
     ]
    },
    {
@@ -1366,6 +1852,9 @@ const SECTORES = [
     "escalas": [
      "provincia",
      "pais"
+    ],
+    "subtemas": [
+     "clima"
     ]
    },
    {
@@ -1375,6 +1864,9 @@ const SECTORES = [
     "fuente": "https://www.isglobal.org/-/62.700-muertes-asociadas-con-el-calor-del-verano-de-2024",
     "escalas": [
      "continente"
+    ],
+    "subtemas": [
+     "clima"
     ]
    },
    {
@@ -1387,6 +1879,10 @@ const SECTORES = [
      "pueblo",
      "provincia",
      "continente"
+    ],
+    "subtemas": [
+     "clima",
+     "emergencias"
     ]
    },
    {
@@ -1396,6 +1892,9 @@ const SECTORES = [
     "fuente": "https://estadisticasdecriminalidad.ses.mir.es/publico/portalestadistico/dam/jcr:7d3776cd-9ca4-4c02-8ca4-96b2571dbee4/Balance%20de%20Criminalidad%20Cuarto%20Trimestre%202025.pdf",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "digital"
     ]
    }
   ],
@@ -1409,6 +1908,9 @@ const SECTORES = [
     "escalas": [
      "pueblo",
      "pais"
+    ],
+    "subtemas": [
+     "calle"
     ]
    },
    {
@@ -1419,6 +1921,9 @@ const SECTORES = [
     "fuente": "https://www.bbva.com/es/juntos-creando-oportunidades/rebanos-de-fuego-gestion-sostenible-del-riesgo-de-incendios-forestales/",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "clima"
     ]
    },
    {
@@ -1429,6 +1934,10 @@ const SECTORES = [
     "fuente": "https://www.un.org/sites/un2.un.org/files/climate-change-fast-facts-updates/EarlyWarnings_FastFacts.pdf",
     "escalas": [
      "planeta"
+    ],
+    "subtemas": [
+     "clima",
+     "emergencias"
     ]
    },
    {
@@ -1440,6 +1949,10 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "pais"
+    ],
+    "subtemas": [
+     "calle",
+     "clima"
     ]
    },
    {
@@ -1451,6 +1964,12 @@ const SECTORES = [
     "escalas": [
      "comunidad",
      "continente"
+    ],
+    "subtemas": [
+     "hogar",
+     "calle",
+     "clima",
+     "emergencias"
     ]
    },
    {
@@ -1462,6 +1981,9 @@ const SECTORES = [
     "escalas": [
      "pueblo",
      "pais"
+    ],
+    "subtemas": [
+     "digital"
     ]
    }
   ],
@@ -1475,6 +1997,9 @@ const SECTORES = [
     "fuente": "https://www.DGT.es/.galleries/downloads/conoce_la_dgt/que-hacemos/estrategias-y-planes/Experiencias-urbanas/pdf/84000-Pontevedra.pdf",
     "escalas": [
      "pueblo"
+    ],
+    "subtemas": [
+     "calle"
     ]
    },
    {
@@ -1486,6 +2011,9 @@ const SECTORES = [
     "fuente": "https://ajuntament.barcelona.cat/educacio/es/protegemos-las-escuelas",
     "escalas": [
      "pueblo"
+    ],
+    "subtemas": [
+     "calle"
     ]
    },
    {
@@ -1497,6 +2025,10 @@ const SECTORES = [
     "fuente": "https://www.moncloa.com/2026/06/16/refugios-climaticos-barcelona-verano-3385427/",
     "escalas": [
      "pueblo"
+    ],
+    "subtemas": [
+     "calle",
+     "clima"
     ]
    },
    {
@@ -1508,6 +2040,9 @@ const SECTORES = [
     "fuente": "https://www.vinetur.com/2025122994452/ramats-de-foc-lanza-un-mapa-interactivo-para-localizar-productos-que-cuidan-los-bosques.html",
     "escalas": [
      "region"
+    ],
+    "subtemas": [
+     "clima"
     ]
    },
    {
@@ -1519,6 +2054,10 @@ const SECTORES = [
     "fuente": "https://www.3cat.cat/3catinfo/les-adf-molestes-perque-es-limiten-les-seves-tasques/noticia/3170421/",
     "escalas": [
      "region"
+    ],
+    "subtemas": [
+     "clima",
+     "emergencias"
     ]
    },
    {
@@ -1530,6 +2069,10 @@ const SECTORES = [
     "fuente": "https://valencianews.es/comunidad-valenciana/emergencias-destaca-la-labor-de-los-voluntarios-en-el-dia-internacional-de-proteccion-civil/",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "clima",
+     "emergencias"
     ]
    },
    {
@@ -1541,6 +2084,10 @@ const SECTORES = [
     "fuente": "https://wildfiretaskforce.org/california-continues-to-lead-nation-with-recognition-of-1500th-firewise-community/",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "clima",
+     "emergencias"
     ]
    }
   ],
@@ -1549,6 +2096,28 @@ const SECTORES = [
    "¿Damos el mismo peso a las catástrofes naturales (incendios, DANA, calor) que a la seguridad vial y ciudadana, o prefieres que el territorio y las emergencias sean el eje principal?",
    "¿Conoces alguna agrupación de Protección Civil, ADF o red vecinal cercana a ti que quieras destacar como proyecto propio de Luz & Humanidad?",
    "¿Te gustaría ofrecer en la web una guía práctica de preparación del hogar (kit de 72 horas, plan familiar) o prefieres enlazar a los recursos oficiales?"
+  ],
+  "subtemas": [
+   {
+    "id": "hogar",
+    "nombre": "Hogar preparado"
+   },
+   {
+    "id": "calle",
+    "nombre": "Calle y seguridad vial"
+   },
+   {
+    "id": "clima",
+    "nombre": "Incendios, inundaciones y calor"
+   },
+   {
+    "id": "emergencias",
+    "nombre": "Emergencias y protección civil"
+   },
+   {
+    "id": "digital",
+    "nombre": "Seguridad digital"
+   }
   ]
  },
  {
@@ -1576,6 +2145,10 @@ const SECTORES = [
      "escena3d": "comunidad",
      "escalas": [
       "individuo"
+     ],
+     "subtemas": [
+      "acceso",
+      "restaurativa"
      ]
     },
     {
@@ -1593,6 +2166,10 @@ const SECTORES = [
      "escena3d": "comunidad",
      "escalas": [
       "comunidad"
+     ],
+     "subtemas": [
+      "mediacion",
+      "restaurativa"
      ]
     },
     {
@@ -1610,6 +2187,11 @@ const SECTORES = [
      "escena3d": "pueblo",
      "escalas": [
       "pais"
+     ],
+     "subtemas": [
+      "acceso",
+      "juzgados",
+      "reinsercion"
      ]
     }
    ],
@@ -1627,6 +2209,9 @@ const SECTORES = [
     "fuente": "https://www.poderjudicial.es/cgpj/es/Poder-Judicial/En-Portada/Los-organos-judiciales-de-toda-Espana-registraron-un-total-de-1-519-584-nuevos-asuntos-en-el-tercer-trimestre-de-2025--un-12-5---menos-que-hace-un-ano",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "juzgados"
     ]
    },
    {
@@ -1637,6 +2222,10 @@ const SECTORES = [
     "escalas": [
      "pueblo",
      "pais"
+    ],
+    "subtemas": [
+     "acceso",
+     "juzgados"
     ]
    },
    {
@@ -1646,6 +2235,9 @@ const SECTORES = [
     "fuente": "https://tradingeconomics.com/spain/perceived-independence-of-the-justice-system-very-good-or-fairly-good-eurostat-data.html",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "juzgados"
     ]
    },
    {
@@ -1656,6 +2248,9 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "planeta"
+    ],
+    "subtemas": [
+     "acceso"
     ]
    },
    {
@@ -1665,6 +2260,9 @@ const SECTORES = [
     "fuente": "https://www.interior.gob.es/opencms/es/detalle/articulo/El-nuevo-estudio-de-reincidencia-penitenciaria-recoge-que-casi-9-de-cada-10-excarcelados-en-2020-no-volvieron-a-prision-durante-el-periodo-examinado/",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "reinsercion"
     ]
    },
    {
@@ -1674,6 +2272,10 @@ const SECTORES = [
     "fuente": "https://elderecho.com/el-icam-hace-balance-de-un-ano-de-la-ley-de-eficiencia",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "mediacion",
+     "juzgados"
     ]
    }
   ],
@@ -1687,6 +2289,10 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "pais"
+    ],
+    "subtemas": [
+     "mediacion",
+     "juzgados"
     ]
    },
    {
@@ -1697,6 +2303,9 @@ const SECTORES = [
     "fuente": "https://elderecho.com/convenio-abogacia-plena-inclusion-acceso-justicia-personas-discapacidad",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "acceso"
     ]
    },
    {
@@ -1708,6 +2317,10 @@ const SECTORES = [
     "escalas": [
      "pueblo",
      "pais"
+    ],
+    "subtemas": [
+     "acceso",
+     "juzgados"
     ]
    },
    {
@@ -1719,6 +2332,9 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "planeta"
+    ],
+    "subtemas": [
+     "acceso"
     ]
    },
    {
@@ -1729,6 +2345,10 @@ const SECTORES = [
     "fuente": "https://phys.org/news/2014-02-justice-victims-crime.html",
     "escalas": [
      "planeta"
+    ],
+    "subtemas": [
+     "restaurativa",
+     "reinsercion"
     ]
    },
    {
@@ -1739,6 +2359,10 @@ const SECTORES = [
     "fuente": "https://mediacion.icav.es/wp-content/uploads/2024/10/Guia-practica-de-la-mediacion-intrajudicial-CGPJ-2024.pdf",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "mediacion",
+     "juzgados"
     ]
    }
   ],
@@ -1752,6 +2376,11 @@ const SECTORES = [
     "fuente": "https://www.euskadi.eus/gobierno-vasco/-/noticia/2023/la-mitad-casos-penales-del-servicio-justicia-restaurativa-terminan-medidas-alternativas-al-ingreso-prision/",
     "escalas": [
      "region"
+    ],
+    "subtemas": [
+     "mediacion",
+     "restaurativa",
+     "juzgados"
     ]
    },
    {
@@ -1763,6 +2392,10 @@ const SECTORES = [
     "fuente": "https://mediacion.icav.es/wp-content/uploads/2024/10/Guia-practica-de-la-mediacion-intrajudicial-CGPJ-2024.pdf",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "mediacion",
+     "juzgados"
     ]
    },
    {
@@ -1774,6 +2407,9 @@ const SECTORES = [
     "fuente": "https://www.diariodeleon.es/leon/240924/1626499/marlaska-recuerda-villahierro-exporto-nivel-mundial-modulos-respeto.html",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "reinsercion"
     ]
    },
    {
@@ -1785,6 +2421,11 @@ const SECTORES = [
     "fuente": "https://civio.es/en/report-2025/",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "acceso",
+     "juzgados",
+     "reinsercion"
     ]
    },
    {
@@ -1796,6 +2437,9 @@ const SECTORES = [
     "fuente": "https://elderecho.com/convenio-abogacia-plena-inclusion-acceso-justicia-personas-discapacidad",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "acceso"
     ]
    },
    {
@@ -1807,6 +2451,9 @@ const SECTORES = [
     "fuente": "https://www.thelocal.no/20231213/explained-how-different-is-the-norwegian-prison-system-really",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "reinsercion"
     ]
    },
    {
@@ -1819,6 +2466,9 @@ const SECTORES = [
     "escalas": [
      "continente",
      "planeta"
+    ],
+    "subtemas": [
+     "acceso"
     ]
    }
   ],
@@ -1827,6 +2477,28 @@ const SECTORES = [
    "¿Cómo quieres abordar la Ley 1/2025 y los MASC: como solución en marcha, como reto, o presentando ambas visiones (apoyos y críticas) de forma neutral?",
    "¿Te interesa que la Comunidad Circular Humana tenga su propio modelo de resolución de conflictos (círculos restaurativos, mediación vecinal) y lo enlacemos desde aquí?",
    "¿Prefieres centrar la reinserción en la prisión (módulos de respeto, modelo noruego) o dar más peso a las penas alternativas y la prevención?"
+  ],
+  "subtemas": [
+   {
+    "id": "acceso",
+    "nombre": "Acceso y lenguaje claro"
+   },
+   {
+    "id": "mediacion",
+    "nombre": "Mediación"
+   },
+   {
+    "id": "restaurativa",
+    "nombre": "Justicia restaurativa"
+   },
+   {
+    "id": "juzgados",
+    "nombre": "Juzgados ágiles"
+   },
+   {
+    "id": "reinsercion",
+    "nombre": "Reinserción"
+   }
   ]
  },
  {
@@ -1854,6 +2526,12 @@ const SECTORES = [
      "escena3d": "hogar",
      "escalas": [
       "individuo"
+     ],
+     "subtemas": [
+      "prevencion",
+      "mental",
+      "primaria",
+      "comunitaria"
      ]
     },
     {
@@ -1871,6 +2549,10 @@ const SECTORES = [
      "escena3d": "comunidad",
      "escalas": [
       "comunidad"
+     ],
+     "subtemas": [
+      "primaria",
+      "comunitaria"
      ]
     },
     {
@@ -1890,6 +2572,11 @@ const SECTORES = [
       "pueblo",
       "provincia",
       "region"
+     ],
+     "subtemas": [
+      "prevencion",
+      "comunitaria",
+      "ambiental"
      ]
     }
    ],
@@ -1908,6 +2595,9 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "pais"
+    ],
+    "subtemas": [
+     "prevencion"
     ]
    },
    {
@@ -1918,6 +2608,9 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "planeta"
+    ],
+    "subtemas": [
+     "prevencion"
     ]
    },
    {
@@ -1927,6 +2620,9 @@ const SECTORES = [
     "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/sanidad14/Paginas/2025/181225-descenso-suicidios-prevencion.aspx",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "mental"
     ]
    },
    {
@@ -1936,6 +2632,10 @@ const SECTORES = [
     "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/sanidad14/Paginas/2025/270225-barometro-sanitario-2024.aspx",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "prevencion",
+     "primaria"
     ]
    },
    {
@@ -1945,6 +2645,9 @@ const SECTORES = [
     "fuente": "https://www.eea.europa.eu/en/newsroom/news/health-and-environment-impacts-of-air-pollution",
     "escalas": [
      "continente"
+    ],
+    "subtemas": [
+     "ambiental"
     ]
    },
    {
@@ -1954,6 +2657,10 @@ const SECTORES = [
     "fuente": "https://www.eea.europa.eu/en/newsroom/news/europeans-exposed-to-harmful-noise-pollution-levels/",
     "escalas": [
      "continente"
+    ],
+    "subtemas": [
+     "mental",
+     "ambiental"
     ]
    }
   ],
@@ -1967,6 +2674,10 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "comunidad"
+    ],
+    "subtemas": [
+     "prevencion",
+     "comunitaria"
     ]
    },
    {
@@ -1978,6 +2689,10 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "comunidad"
+    ],
+    "subtemas": [
+     "prevencion",
+     "primaria"
     ]
    },
    {
@@ -1989,6 +2704,10 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "comunidad"
+    ],
+    "subtemas": [
+     "prevencion",
+     "mental"
     ]
    },
    {
@@ -2001,6 +2720,9 @@ const SECTORES = [
      "individuo",
      "comunidad",
      "pais"
+    ],
+    "subtemas": [
+     "primaria"
     ]
    },
    {
@@ -2012,6 +2734,10 @@ const SECTORES = [
     "escalas": [
      "comunidad",
      "pueblo"
+    ],
+    "subtemas": [
+     "comunitaria",
+     "ambiental"
     ]
    },
    {
@@ -2024,6 +2750,11 @@ const SECTORES = [
      "individuo",
      "comunidad",
      "pueblo"
+    ],
+    "subtemas": [
+     "prevencion",
+     "mental",
+     "ambiental"
     ]
    }
   ],
@@ -2037,6 +2768,10 @@ const SECTORES = [
     "fuente": "https://www.redaccionmedica.com/autonomies/20261030/la-estrategia-d-atencio-comunitaria-ja-ha-beneficiat-mes-aragonesos/363930_0.html",
     "escalas": [
      "region"
+    ],
+    "subtemas": [
+     "primaria",
+     "comunitaria"
     ]
    },
    {
@@ -2048,6 +2783,9 @@ const SECTORES = [
     "fuente": "https://scielosp.org/pdf/gs/2014.v28n3/183-189/es",
     "escalas": [
      "region"
+    ],
+    "subtemas": [
+     "comunitaria"
     ]
    },
    {
@@ -2059,6 +2797,10 @@ const SECTORES = [
     "fuente": "https://www.sanidad.gob.es/areas/promocionPrevencion/entornosSaludables/local/estrategia/jornadas/docs/III_Jornada_ImplementacionLocal/Programa_Activa_Murcia.pdf",
     "escalas": [
      "region"
+    ],
+    "subtemas": [
+     "prevencion",
+     "primaria"
     ]
    },
    {
@@ -2070,6 +2812,10 @@ const SECTORES = [
     "fuente": "https://cms.semfyc.es/storage/13224/Premios-PACAP_2026.pdf",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "primaria",
+     "comunitaria"
     ]
    },
    {
@@ -2081,6 +2827,9 @@ const SECTORES = [
     "fuente": "https://www.juntadeandalucia.es/organismos/presidenciasanidadyemergencias/servicios/actualidad/noticias/detalle/677953.html",
     "escalas": [
      "region"
+    ],
+    "subtemas": [
+     "primaria"
     ]
    },
    {
@@ -2092,6 +2841,9 @@ const SECTORES = [
     "fuente": "https://www.eldiario.es/euskadi/vitoria-celebra-diez-anos-capitalidad-verde-europea-pone-deberes-seguir-siendolo-2030_1_9303089.html",
     "escalas": [
      "pueblo"
+    ],
+    "subtemas": [
+     "ambiental"
     ]
    },
    {
@@ -2103,6 +2855,11 @@ const SECTORES = [
     "fuente": "https://www.ucl.ac.uk/news/2025/sep/social-prescribing-rises-sharply-among-englands-gps",
     "escalas": [
      "region"
+    ],
+    "subtemas": [
+     "mental",
+     "primaria",
+     "comunitaria"
     ]
    }
   ],
@@ -2111,6 +2868,28 @@ const SECTORES = [
    "La prescripción social tiene aún evidencia débil: ¿la presentamos como «prometedora, en evaluación» o prefieres dejar en Soluciones solo lo que tiene ensayos clínicos?",
    "¿Conoces algún centro de salud, grupo de paseos o programa municipal concreto (por ejemplo, de la Red Española de Ciudades Saludables, que suma 547 ayuntamientos) que quieras destacar como proyecto?",
    "¿Incluimos la sanidad como sistema (listas de espera hospitalarias, financiación, personal) o este sector se centra solo en prevención, comunidad y entorno?"
+  ],
+  "subtemas": [
+   {
+    "id": "prevencion",
+    "nombre": "Prevención y hábitos"
+   },
+   {
+    "id": "mental",
+    "nombre": "Salud mental"
+   },
+   {
+    "id": "primaria",
+    "nombre": "Atención primaria"
+   },
+   {
+    "id": "comunitaria",
+    "nombre": "Salud comunitaria"
+   },
+   {
+    "id": "ambiental",
+    "nombre": "Salud ambiental"
+   }
   ]
  },
  {
@@ -2184,6 +2963,11 @@ const SECTORES = [
      "escena3d": "hogar",
      "escalas": [
       "individuo"
+     ],
+     "subtemas": [
+      "arquitectura",
+      "comunidad",
+      "suelo"
      ]
     },
     {
@@ -2230,6 +3014,12 @@ const SECTORES = [
      "escena3d": "pueblo",
      "escalas": [
       "pueblo"
+     ],
+     "subtemas": [
+      "urbanismo",
+      "comunidad",
+      "suelo",
+      "naturaleza"
      ]
     },
     {
@@ -2276,6 +3066,10 @@ const SECTORES = [
      "escalas": [
       "provincia",
       "region"
+     ],
+     "subtemas": [
+      "urbanismo",
+      "naturaleza"
      ]
     }
    ],
@@ -2294,6 +3088,10 @@ const SECTORES = [
     "escalas": [
      "provincia",
      "pais"
+    ],
+    "subtemas": [
+     "suelo",
+     "naturaleza"
     ]
    },
    {
@@ -2304,6 +3102,10 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "pais"
+    ],
+    "subtemas": [
+     "arquitectura",
+     "suelo"
     ]
    },
    {
@@ -2313,6 +3115,9 @@ const SECTORES = [
     "fuente": "https://www.diariodeleon.es/economia/260427/2083021/espana-deja-pais-propietarios-vivienda-pasa-grandes-tenedores.html",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "suelo"
     ]
    },
    {
@@ -2324,6 +3129,11 @@ const SECTORES = [
      "individuo",
      "pueblo",
      "pais"
+    ],
+    "subtemas": [
+     "arquitectura",
+     "suelo",
+     "naturaleza"
     ]
    },
    {
@@ -2333,6 +3143,9 @@ const SECTORES = [
     "fuente": "https://alicanteplaza.es/alicanteplaza/lacomunitatvalencianabatesurecordhistoricodetierrasabandonadas173676hectareas",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "naturaleza"
     ]
    },
    {
@@ -2342,6 +3155,9 @@ const SECTORES = [
     "fuente": "https://www.certicalia.com/blog/arquitectura-de-tierra",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "arquitectura"
     ]
    },
    {
@@ -2352,6 +3168,10 @@ const SECTORES = [
     "escalas": [
      "pueblo",
      "pais"
+    ],
+    "subtemas": [
+     "urbanismo",
+     "suelo"
     ]
    }
   ],
@@ -2365,6 +3185,11 @@ const SECTORES = [
     "escalas": [
      "comunidad",
      "pais"
+    ],
+    "subtemas": [
+     "comunidad",
+     "suelo",
+     "naturaleza"
     ]
    },
    {
@@ -2375,6 +3200,10 @@ const SECTORES = [
     "escalas": [
      "comunidad",
      "pais"
+    ],
+    "subtemas": [
+     "arquitectura",
+     "comunidad"
     ]
    },
    {
@@ -2387,6 +3216,11 @@ const SECTORES = [
      "pueblo",
      "provincia",
      "planeta"
+    ],
+    "subtemas": [
+     "arquitectura",
+     "comunidad",
+     "suelo"
     ]
    },
    {
@@ -2397,6 +3231,9 @@ const SECTORES = [
     "escalas": [
      "provincia",
      "pais"
+    ],
+    "subtemas": [
+     "naturaleza"
     ]
    },
    {
@@ -2408,6 +3245,10 @@ const SECTORES = [
      "pueblo",
      "region",
      "pais"
+    ],
+    "subtemas": [
+     "urbanismo",
+     "suelo"
     ]
    },
    {
@@ -2419,6 +3260,9 @@ const SECTORES = [
      "pueblo",
      "provincia",
      "pais"
+    ],
+    "subtemas": [
+     "suelo"
     ]
    },
    {
@@ -2428,6 +3272,9 @@ const SECTORES = [
     "fuente": "https://www.interempresas.net/Madera/651121-paja-madera-regresan-construccion-transformar-sector-sumidero-carbono-reducir-impacto.html",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "arquitectura"
     ]
    }
   ],
@@ -2441,6 +3288,9 @@ const SECTORES = [
     "fuente": null,
     "escalas": [
      "comunidad"
+    ],
+    "subtemas": [
+     "comunidad"
     ]
    },
    {
@@ -2451,6 +3301,11 @@ const SECTORES = [
     "web": "https://www.entrepatios.org",
     "fuente": "https://arquitecturaviva.com/articulos/el-edificio-de-viviendas-donde-reina-el-derecho-de-uso",
     "escalas": [
+     "comunidad"
+    ],
+    "subtemas": [
+     "arquitectura",
+     "urbanismo",
      "comunidad"
     ]
    },
@@ -2463,6 +3318,11 @@ const SECTORES = [
     "fuente": "https://www.metalocus.es/es/noticias/decidir-en-comunidad-cooperativa-de-vivienda-la-borda-por-lacol-arquitectura-cooperativa",
     "escalas": [
      "comunidad"
+    ],
+    "subtemas": [
+     "arquitectura",
+     "comunidad",
+     "suelo"
     ]
    },
    {
@@ -2475,6 +3335,10 @@ const SECTORES = [
     "escalas": [
      "comunidad",
      "pueblo"
+    ],
+    "subtemas": [
+     "arquitectura",
+     "comunidad"
     ]
    },
    {
@@ -2487,6 +3351,11 @@ const SECTORES = [
     "escalas": [
      "comunidad",
      "provincia"
+    ],
+    "subtemas": [
+     "arquitectura",
+     "comunidad",
+     "naturaleza"
     ]
    },
    {
@@ -2497,6 +3366,9 @@ const SECTORES = [
     "web": null,
     "fuente": "https://www.metalocus.es/es/noticias/habitar-los-espacios-compartidos-la-raval-por-lacol",
     "escalas": [
+     "comunidad"
+    ],
+    "subtemas": [
      "comunidad"
     ]
    },
@@ -2509,6 +3381,9 @@ const SECTORES = [
     "fuente": "https://www.getahome.org/wp-content/uploads/CHT-Annual-Report-2025.pdf",
     "escalas": [
      "pueblo"
+    ],
+    "subtemas": [
+     "suelo"
     ]
    },
    {
@@ -2521,6 +3396,9 @@ const SECTORES = [
     "escalas": [
      "comunidad",
      "pueblo"
+    ],
+    "subtemas": [
+     "comunidad"
     ]
    }
   ],
@@ -2530,6 +3408,28 @@ const SECTORES = [
    "¿Qué casas reales integradas en la tierra quieres mostrar como ejemplo principal (cuevas de Guadix, Villa Vals, Earthship…)?",
    "¿La solución de propiedad comunitaria debe proponerse a escala municipal, comarcal o estatal?",
    "¿Qué personas o artistas forman el equipo que comunica la visión de Vivienda?"
+  ],
+  "subtemas": [
+   {
+    "id": "arquitectura",
+    "nombre": "Arquitectura del hogar"
+   },
+   {
+    "id": "urbanismo",
+    "nombre": "Urbanismo"
+   },
+   {
+    "id": "comunidad",
+    "nombre": "Comunidad y cooperativas"
+   },
+   {
+    "id": "suelo",
+    "nombre": "Suelo y acceso a la vivienda"
+   },
+   {
+    "id": "naturaleza",
+    "nombre": "Naturaleza y territorio"
+   }
   ]
  },
  {
@@ -2557,6 +3457,10 @@ const SECTORES = [
      "escena3d": "hogar",
      "escalas": [
       "individuo"
+     ],
+     "subtemas": [
+      "huerto",
+      "desperdicio"
      ]
     },
     {
@@ -2574,6 +3478,12 @@ const SECTORES = [
      "escena3d": "comunidad",
      "escalas": [
       "comunidad"
+     ],
+     "subtemas": [
+      "huerto",
+      "consumo",
+      "desperdicio",
+      "comedores"
      ]
     },
     {
@@ -2592,6 +3502,10 @@ const SECTORES = [
      "escalas": [
       "provincia",
       "region"
+     ],
+     "subtemas": [
+      "consumo",
+      "campo"
      ]
     }
    ],
@@ -2610,6 +3524,10 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "pais"
+    ],
+    "subtemas": [
+     "huerto",
+     "desperdicio"
     ]
    },
    {
@@ -2620,6 +3538,9 @@ const SECTORES = [
     "escalas": [
      "provincia",
      "pais"
+    ],
+    "subtemas": [
+     "campo"
     ]
    },
    {
@@ -2630,6 +3551,9 @@ const SECTORES = [
     "escalas": [
      "provincia",
      "pais"
+    ],
+    "subtemas": [
+     "campo"
     ]
    },
    {
@@ -2640,6 +3564,10 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "pais"
+    ],
+    "subtemas": [
+     "huerto",
+     "comedores"
     ]
    },
    {
@@ -2650,6 +3578,9 @@ const SECTORES = [
     "escalas": [
      "provincia",
      "continente"
+    ],
+    "subtemas": [
+     "campo"
     ]
    },
    {
@@ -2659,6 +3590,10 @@ const SECTORES = [
     "fuente": "https://www.who.int/news/item/28-07-2025-global-hunger-declines-but-rises-in-africa-and-western-asia-un-report",
     "escalas": [
      "planeta"
+    ],
+    "subtemas": [
+     "huerto",
+     "hambre"
     ]
    }
   ],
@@ -2671,6 +3606,11 @@ const SECTORES = [
     "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/agricultura/Paginas/2025/020425-ley-desperdicio-alimentos.aspx",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "consumo",
+     "campo",
+     "desperdicio"
     ]
    },
    {
@@ -2682,6 +3622,9 @@ const SECTORES = [
     "escalas": [
      "provincia",
      "pais"
+    ],
+    "subtemas": [
+     "campo"
     ]
    },
    {
@@ -2693,6 +3636,10 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "comunidad"
+    ],
+    "subtemas": [
+     "consumo",
+     "campo"
     ]
    },
    {
@@ -2703,6 +3650,10 @@ const SECTORES = [
     "fuente": "https://www.milanurbanfoodpolicypact.org/wp-content/uploads/2025/10/COPENHAGEN_Implementing-Food-Policies_MPA2025.pdf",
     "escalas": [
      "comunidad"
+    ],
+    "subtemas": [
+     "huerto",
+     "comedores"
     ]
    },
    {
@@ -2714,6 +3665,9 @@ const SECTORES = [
     "escalas": [
      "provincia",
      "continente"
+    ],
+    "subtemas": [
+     "campo"
     ]
    },
    {
@@ -2725,6 +3679,12 @@ const SECTORES = [
     "escalas": [
      "provincia",
      "planeta"
+    ],
+    "subtemas": [
+     "huerto",
+     "campo",
+     "comedores",
+     "hambre"
     ]
    }
   ],
@@ -2738,6 +3698,10 @@ const SECTORES = [
     "fuente": "https://lamarea.com/2024/03/14/las-canastas-de-verduras-de-la-militancia-a-una-necesidad",
     "escalas": [
      "pueblo"
+    ],
+    "subtemas": [
+     "consumo",
+     "campo"
     ]
    },
    {
@@ -2749,6 +3713,10 @@ const SECTORES = [
     "fuente": "https://abd.ong/wp-content/uploads/2025/12/Mapeo-de-buenas-propuestas-sociales-en-comunidades-agroalimentarias-en-Espana.-2.pdf",
     "escalas": [
      "pueblo"
+    ],
+    "subtemas": [
+     "campo",
+     "desperdicio"
     ]
    },
    {
@@ -2760,6 +3728,9 @@ const SECTORES = [
     "fuente": "https://bcnagraria.diba.cat/en/land-banks",
     "escalas": [
      "provincia"
+    ],
+    "subtemas": [
+     "campo"
     ]
    },
    {
@@ -2771,6 +3742,9 @@ const SECTORES = [
     "fuente": "https://accesstoland.gitbook.io/makingfarmlandwork/case-studies/red-terrae-the-network-of-municipalities-working-for-sustainable-land-use",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "campo"
     ]
    },
    {
@@ -2783,6 +3757,10 @@ const SECTORES = [
     "escalas": [
      "comunidad",
      "pueblo"
+    ],
+    "subtemas": [
+     "huerto",
+     "campo"
     ]
    },
    {
@@ -2794,6 +3772,9 @@ const SECTORES = [
     "fuente": "https://ajuntament.barcelona.cat/comerc/en/actuality/news/barcelona-hosts-the-presentation-of-the-new-slow-food-guide-featuring-more-than-100-sustainable-restaurants-1577575",
     "escalas": [
      "pueblo"
+    ],
+    "subtemas": [
+     "consumo"
     ]
    },
    {
@@ -2805,6 +3786,10 @@ const SECTORES = [
     "fuente": "https://www.milanurbanfoodpolicypact.org/wp-content/uploads/2025/10/COPENHAGEN_Implementing-Food-Policies_MPA2025.pdf",
     "escalas": [
      "pueblo"
+    ],
+    "subtemas": [
+     "huerto",
+     "comedores"
     ]
    }
   ],
@@ -2813,6 +3798,32 @@ const SECTORES = [
    "¿Cómo encaja la Comunidad Circular Humana en este sector: produciría sus propios alimentos y deberíamos enlazarla como proyecto?",
    "¿Prefieres que la visión hable de reducir el consumo de carne o mantenerla neutral sobre la dieta (solo «más vegetal y de temporada»)?",
    "¿Conoces algún grupo de consumo, mercado de productores o comedor escolar ecológico en tu zona que quiera tener ficha propia?"
+  ],
+  "subtemas": [
+   {
+    "id": "huerto",
+    "nombre": "Huerto y cocina"
+   },
+   {
+    "id": "consumo",
+    "nombre": "Grupos de consumo y mercados"
+   },
+   {
+    "id": "campo",
+    "nombre": "Campo y relevo agrario"
+   },
+   {
+    "id": "desperdicio",
+    "nombre": "Desperdicio"
+   },
+   {
+    "id": "comedores",
+    "nombre": "Comedores y cocinas públicas"
+   },
+   {
+    "id": "hambre",
+    "nombre": "Hambre y derecho a la alimentación"
+   }
   ]
  },
  {
@@ -2840,6 +3851,10 @@ const SECTORES = [
      "escena3d": "hogar",
      "escalas": [
       "individuo"
+     ],
+     "subtemas": [
+      "privacidad",
+      "brecha"
      ]
     },
     {
@@ -2857,6 +3872,10 @@ const SECTORES = [
      "escena3d": "comunidad",
      "escalas": [
       "comunidad"
+     ],
+     "subtemas": [
+      "libre",
+      "redes"
      ]
     },
     {
@@ -2877,6 +3896,13 @@ const SECTORES = [
       "pais",
       "continente",
       "planeta"
+     ],
+     "subtemas": [
+      "libre",
+      "redes",
+      "brecha",
+      "sostenible",
+      "ia"
      ]
     }
    ],
@@ -2894,6 +3920,10 @@ const SECTORES = [
     "fuente": "https://digital-skills-jobs.europa.eu/en/latest/news/two-out-three-spaniards-have-basic-digital-skills-security-and-content-creation-are",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "brecha",
+     "ia"
     ]
    },
    {
@@ -2903,6 +3933,9 @@ const SECTORES = [
     "fuente": "https://espanadigital.gob.es/actualidad/incibe-gestiono-122223-incidentes-de-ciberseguridad-en-2025-un-26-mas-que-el-ano",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "privacidad"
     ]
    },
    {
@@ -2913,6 +3946,9 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "pais"
+    ],
+    "subtemas": [
+     "privacidad"
     ]
    },
    {
@@ -2922,6 +3958,10 @@ const SECTORES = [
     "fuente": "https://srgresearch.com/articles/european-cloud-providers-local-market-share-now-holds-steady-at-15",
     "escalas": [
      "continente"
+    ],
+    "subtemas": [
+     "privacidad",
+     "sostenible"
     ]
    },
    {
@@ -2931,6 +3971,9 @@ const SECTORES = [
     "fuente": "https://unitar.org/about/news-stories/press/global-e-waste-monitor-2024-electronic-waste-rising-five-times-faster-documented-e-waste-recycling",
     "escalas": [
      "planeta"
+    ],
+    "subtemas": [
+     "sostenible"
     ]
    },
    {
@@ -2940,6 +3983,10 @@ const SECTORES = [
     "fuente": "https://iea.org/reports/energy-and-ai/energy-demand-from-ai",
     "escalas": [
      "planeta"
+    ],
+    "subtemas": [
+     "sostenible",
+     "ia"
     ]
    }
   ],
@@ -2952,6 +3999,9 @@ const SECTORES = [
     "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/transformacion-digital-y-funcion-publica/Paginas/2025/231025-plan-nacional-competencias-digitales.aspx",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "brecha"
     ]
    },
    {
@@ -2963,6 +4013,9 @@ const SECTORES = [
     "escalas": [
      "pueblo",
      "pais"
+    ],
+    "subtemas": [
+     "privacidad"
     ]
    },
    {
@@ -2973,6 +4026,9 @@ const SECTORES = [
     "fuente": "https://www.osborneclarke.com/es/insights/espana-busca-proteger-los-menores-en-el-entorno-digital-claves-del-proyecto-de-ley",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "privacidad"
     ]
    },
    {
@@ -2983,6 +4039,10 @@ const SECTORES = [
     "fuente": "https://itsfoss.com/news/german-state-ditch-microsoft/",
     "escalas": [
      "continente"
+    ],
+    "subtemas": [
+     "libre",
+     "sostenible"
     ]
    },
    {
@@ -2993,6 +4053,9 @@ const SECTORES = [
     "fuente": "https://www.garrigues.com/es_ES/noticia/europa-avanza-economia-circular-fomento-reparacion-bienes",
     "escalas": [
      "continente"
+    ],
+    "subtemas": [
+     "sostenible"
     ]
    },
    {
@@ -3003,6 +4066,10 @@ const SECTORES = [
     "fuente": "https://www.miteco.gob.es/es/energia/eficiencia/centros-de-datos/preguntas-frecuentes.html",
     "escalas": [
      "continente"
+    ],
+    "subtemas": [
+     "brecha",
+     "sostenible"
     ]
    }
   ],
@@ -3017,6 +4084,10 @@ const SECTORES = [
     "escalas": [
      "pais",
      "planeta"
+    ],
+    "subtemas": [
+     "privacidad",
+     "libre"
     ]
    },
    {
@@ -3028,6 +4099,10 @@ const SECTORES = [
     "fuente": "https://www.uoc.edu/es/news/2017/188-guifinet",
     "escalas": [
      "region"
+    ],
+    "subtemas": [
+     "privacidad",
+     "redes"
     ]
    },
    {
@@ -3039,6 +4114,9 @@ const SECTORES = [
     "fuente": "https://meta.wikimedia.org/wiki/Wikimedia_Espa%C3%B1a/en",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "libre"
     ]
    },
    {
@@ -3050,6 +4128,9 @@ const SECTORES = [
     "fuente": "https://datos.gob.es/es/noticias/balance-de-la-iniciativa-aporta-2025",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "libre"
     ]
    },
    {
@@ -3062,6 +4143,9 @@ const SECTORES = [
     "escalas": [
      "continente",
      "planeta"
+    ],
+    "subtemas": [
+     "sostenible"
     ]
    },
    {
@@ -3073,6 +4157,9 @@ const SECTORES = [
     "fuente": "https://framasoft.org/en/association",
     "escalas": [
      "pueblo"
+    ],
+    "subtemas": [
+     "libre"
     ]
    },
    {
@@ -3085,6 +4172,9 @@ const SECTORES = [
     "escalas": [
      "continente",
      "planeta"
+    ],
+    "subtemas": [
+     "libre"
     ]
    },
    {
@@ -3099,6 +4189,9 @@ const SECTORES = [
      "pueblo",
      "pais",
      "planeta"
+    ],
+    "subtemas": [
+     "libre"
     ]
    }
   ],
@@ -3107,6 +4200,32 @@ const SECTORES = [
    "¿Conoces redes comunitarias, cooperativas tecnológicas o asociaciones de alfabetización digital en tu territorio que debamos añadir como proyectos?",
    "En inteligencia artificial, ¿qué línea roja quieres que destaque la visión: la privacidad, el empleo, el consumo de energía o la desinformación?",
    "¿Te interesa incluir la reparación y reutilización de aparatos (talleres de reparación, móviles reacondicionados) como parte de este sector o de otro?"
+  ],
+  "subtemas": [
+   {
+    "id": "privacidad",
+    "nombre": "Privacidad y bienestar digital"
+   },
+   {
+    "id": "libre",
+    "nombre": "Software libre y conocimiento abierto"
+   },
+   {
+    "id": "redes",
+    "nombre": "Redes comunitarias"
+   },
+   {
+    "id": "brecha",
+    "nombre": "Brecha digital"
+   },
+   {
+    "id": "sostenible",
+    "nombre": "Tecnología sostenible"
+   },
+   {
+    "id": "ia",
+    "nombre": "Inteligencia artificial"
+   }
   ]
  },
  {
@@ -3136,6 +4255,11 @@ const SECTORES = [
       "individuo",
       "provincia",
       "region"
+     ],
+     "subtemas": [
+      "infancia",
+      "escuela",
+      "naturaleza"
      ]
     },
     {
@@ -3153,6 +4277,10 @@ const SECTORES = [
      "escena3d": "comunidad",
      "escalas": [
       "comunidad"
+     ],
+     "subtemas": [
+      "escuela",
+      "equidad"
      ]
     },
     {
@@ -3170,6 +4298,10 @@ const SECTORES = [
      "escena3d": "pueblo",
      "escalas": [
       "individuo"
+     ],
+     "subtemas": [
+      "escuela",
+      "vida"
      ]
     }
    ],
@@ -3187,6 +4319,9 @@ const SECTORES = [
     "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/educacion-fp-deportes/Paginas/2026/280126-abandono-educativo-minimo-historico.aspx",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "equidad"
     ]
    },
    {
@@ -3197,6 +4332,9 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "pais"
+    ],
+    "subtemas": [
+     "equidad"
     ]
    },
    {
@@ -3206,6 +4344,9 @@ const SECTORES = [
     "fuente": "https://www.esade.edu/ecpol/es/publicaciones/pisa-2025-equidad/",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "equidad"
     ]
    },
    {
@@ -3215,6 +4356,9 @@ const SECTORES = [
     "fuente": "https://www.ondavasca.com/los-adultos-del-estado-estan-por-debajo-de-la-ue-y-la-ocde-en-matematicas-lectura-y-resolucion-de-problemas/",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "vida"
     ]
    },
    {
@@ -3225,6 +4369,10 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "planeta"
+    ],
+    "subtemas": [
+     "infancia",
+     "naturaleza"
     ]
    },
    {
@@ -3235,6 +4383,11 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "planeta"
+    ],
+    "subtemas": [
+     "infancia",
+     "escuela",
+     "equidad"
     ]
    }
   ],
@@ -3247,6 +4400,10 @@ const SECTORES = [
     "fuente": "https://www.funcas.es/wp-content/uploads/2026/02/Informe-sobre-el-abandono-educativo-temprano-en-Espana.pdf",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "equidad",
+     "vida"
     ]
    },
    {
@@ -3259,6 +4416,9 @@ const SECTORES = [
      "individuo",
      "pais",
      "continente"
+    ],
+    "subtemas": [
+     "escuela"
     ]
    },
    {
@@ -3270,6 +4430,10 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "pais"
+    ],
+    "subtemas": [
+     "escuela",
+     "equidad"
     ]
    },
    {
@@ -3281,6 +4445,9 @@ const SECTORES = [
     "escalas": [
      "pueblo",
      "pais"
+    ],
+    "subtemas": [
+     "vida"
     ]
    },
    {
@@ -3291,6 +4458,11 @@ const SECTORES = [
     "fuente": "https://www.miteco.gob.es/en/ceneam/recursos/materiales/guia-escuelas-naturaleza.html",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "infancia",
+     "escuela",
+     "naturaleza"
     ]
    },
    {
@@ -3301,6 +4473,11 @@ const SECTORES = [
     "fuente": "https://www.unicef.org/es/comunicados-prensa/recortes-financiacion-mundial-podrian-dejar-sin-escolarizar-seis-millones-ninos",
     "escalas": [
      "planeta"
+    ],
+    "subtemas": [
+     "infancia",
+     "escuela",
+     "equidad"
     ]
    }
   ],
@@ -3315,6 +4492,9 @@ const SECTORES = [
     "escalas": [
      "comunidad",
      "planeta"
+    ],
+    "subtemas": [
+     "escuela"
     ]
    },
    {
@@ -3326,6 +4506,9 @@ const SECTORES = [
     "fuente": "https://educacion.castillalamancha.es/sites/default/files/2025-01/Orden%2018-06-2021%20Red%20COMUNIDADES%20DE%20APRENDIZAJE.pdf",
     "escalas": [
      "region"
+    ],
+    "subtemas": [
+     "escuela"
     ]
    },
    {
@@ -3337,6 +4520,11 @@ const SECTORES = [
     "fuente": "https://redined.educacion.gob.es/xmlui/bitstream/handle/11162/203726/210004c_Doc_BGN_Hezkuntza_sareak_c.pdf?sequence=1",
     "escalas": [
      "region"
+    ],
+    "subtemas": [
+     "infancia",
+     "escuela",
+     "vida"
     ]
    },
    {
@@ -3348,6 +4536,11 @@ const SECTORES = [
     "fuente": "https://www.miteco.gob.es/es/ceneam/recursos/quien-es-quien/edna.html",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "infancia",
+     "escuela",
+     "naturaleza"
     ]
    },
    {
@@ -3359,6 +4552,10 @@ const SECTORES = [
     "fuente": "https://www.consumer.es/educacion/universidades-populares.html",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "escuela",
+     "vida"
     ]
    },
    {
@@ -3370,6 +4567,11 @@ const SECTORES = [
     "fuente": "https://www.savethechildren.es/sites/default/files/2025-07/Dossier%20Toolkit%20Mezclate%20Conmigo%20%28castellano%29.pdf",
     "escalas": [
      "region"
+    ],
+    "subtemas": [
+     "infancia",
+     "escuela",
+     "equidad"
     ]
    },
    {
@@ -3381,6 +4583,9 @@ const SECTORES = [
     "fuente": null,
     "escalas": [
      "individuo"
+    ],
+    "subtemas": [
+     "vida"
     ]
    }
   ],
@@ -3389,6 +4594,28 @@ const SECTORES = [
    "¿Conoces escuelas bosque, escuelas rurales o comunidades de aprendizaje concretas en tu territorio que quieras destacar con nombre propio?",
    "En el bloque «toda la vida», ¿la conciencia y el sentido deben conectar directamente con tu Estudio sobre la conciencia, o prefieres tratarlos como un sector aparte?",
    "¿Qué peso quieres dar a la educación fuera de España (los 272 millones de niños sin escuela) frente a los retos de aquí?"
+  ],
+  "subtemas": [
+   {
+    "id": "infancia",
+    "nombre": "Infancia"
+   },
+   {
+    "id": "escuela",
+    "nombre": "Escuela y comunidad"
+   },
+   {
+    "id": "equidad",
+    "nombre": "Equidad"
+   },
+   {
+    "id": "naturaleza",
+    "nombre": "Educación en la naturaleza"
+   },
+   {
+    "id": "vida",
+    "nombre": "Aprender toda la vida"
+   }
   ]
  },
  {
@@ -3416,6 +4643,12 @@ const SECTORES = [
      "escena3d": "hogar",
      "escalas": [
       "individuo"
+     ],
+     "subtemas": [
+      "familia",
+      "dependencia",
+      "profesionales",
+      "vivienda"
      ]
     },
     {
@@ -3433,6 +4666,10 @@ const SECTORES = [
      "escena3d": "comunidad",
      "escalas": [
       "comunidad"
+     ],
+     "subtemas": [
+      "soledad",
+      "vivienda"
      ]
     },
     {
@@ -3450,6 +4687,11 @@ const SECTORES = [
      "escena3d": "pueblo",
      "escalas": [
       "pais"
+     ],
+     "subtemas": [
+      "familia",
+      "dependencia",
+      "profesionales"
      ]
     }
    ],
@@ -3467,6 +4709,9 @@ const SECTORES = [
     "fuente": "https://blogs.uned.es/catedraunedfuenlabrada/wp-content/uploads/sites/313/2026/07/XXVI-DICTAMEN-OBSERVATORIO-DE-LA-DEPENDENCIA.pdf",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "dependencia"
     ]
    },
    {
@@ -3477,6 +4722,9 @@ const SECTORES = [
     "escalas": [
      "region",
      "pais"
+    ],
+    "subtemas": [
+     "dependencia"
     ]
    },
    {
@@ -3486,6 +4734,10 @@ const SECTORES = [
     "fuente": "https://lamoncloa.gob.es/serviciosdeprensa/notasprensa/derechos-sociales-consumo-agenda-2030/Documents/2024/10-06-24-barometro-soledad-2024.pdf",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "soledad",
+     "dependencia"
     ]
    },
    {
@@ -3496,6 +4748,10 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "pais"
+    ],
+    "subtemas": [
+     "familia",
+     "soledad"
     ]
    },
    {
@@ -3506,6 +4762,10 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "pais"
+    ],
+    "subtemas": [
+     "soledad",
+     "profesionales"
     ]
    },
    {
@@ -3515,6 +4775,9 @@ const SECTORES = [
     "fuente": "https://news.un.org/es/story/2018/06/1436912",
     "escalas": [
      "planeta"
+    ],
+    "subtemas": [
+     "familia"
     ]
    }
   ],
@@ -3528,6 +4791,9 @@ const SECTORES = [
     "escalas": [
      "comunidad",
      "pais"
+    ],
+    "subtemas": [
+     "profesionales"
     ]
    },
    {
@@ -3538,6 +4804,9 @@ const SECTORES = [
     "fuente": "https://www.dsca.gob.es/en/comunicacion/notas-prensa/lista-espera-dependencia-acelera-su-descenso-baja-21-ultimo-ano",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "dependencia"
     ]
    },
    {
@@ -3548,6 +4817,9 @@ const SECTORES = [
     "fuente": "https://documentos.fedea.net/pubs/fpp/2026/07/FPP2026-04.pdf",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "dependencia"
     ]
    },
    {
@@ -3558,6 +4830,9 @@ const SECTORES = [
     "fuente": "https://www.ine.es/dyngs/Prensa/es/mEPA2025.htm",
     "escalas": [
      "individuo"
+    ],
+    "subtemas": [
+     "familia"
     ]
    },
    {
@@ -3569,6 +4844,9 @@ const SECTORES = [
     "escalas": [
      "individuo",
      "comunidad"
+    ],
+    "subtemas": [
+     "soledad"
     ]
    },
    {
@@ -3579,6 +4857,9 @@ const SECTORES = [
     "fuente": "https://news.un.org/es/story/2018/06/1436912",
     "escalas": [
      "planeta"
+    ],
+    "subtemas": [
+     "familia"
     ]
    }
   ],
@@ -3592,6 +4873,9 @@ const SECTORES = [
     "fuente": "https://ajuntament.barcelona.cat/usosdeltemps/en/actuacio/radars",
     "escalas": [
      "pueblo"
+    ],
+    "subtemas": [
+     "soledad"
     ]
    },
    {
@@ -3604,6 +4888,9 @@ const SECTORES = [
     "escalas": [
      "comunidad",
      "pais"
+    ],
+    "subtemas": [
+     "soledad"
     ]
    },
    {
@@ -3615,6 +4902,9 @@ const SECTORES = [
     "fuente": "https://www.madrid.es/UnidadesDescentralizadas/Mayores/Especial%20informativo/Soledad/Informe_MadridVecina.pdf",
     "escalas": [
      "comunidad"
+    ],
+    "subtemas": [
+     "soledad"
     ]
    },
    {
@@ -3626,6 +4916,9 @@ const SECTORES = [
     "fuente": "https://sciencemediacentre.es/soledad-no-deseada-datos-evidencias-y-conceptos-para-informar-sobre-un-problema-de-salud-publica",
     "escalas": [
      "pais"
+    ],
+    "subtemas": [
+     "soledad"
     ]
    },
    {
@@ -3638,6 +4931,10 @@ const SECTORES = [
     "escalas": [
      "comunidad",
      "pueblo"
+    ],
+    "subtemas": [
+     "soledad",
+     "vivienda"
     ]
    },
    {
@@ -3649,6 +4946,10 @@ const SECTORES = [
     "fuente": null,
     "escalas": [
      "pueblo"
+    ],
+    "subtemas": [
+     "soledad",
+     "vivienda"
     ]
    },
    {
@@ -3661,6 +4962,9 @@ const SECTORES = [
     "escalas": [
      "continente",
      "planeta"
+    ],
+    "subtemas": [
+     "profesionales"
     ]
    }
   ],
@@ -3669,6 +4973,28 @@ const SECTORES = [
    "¿Incluimos la discapacidad como bloque propio (vida independiente, asistencia personal) o la dejamos integrada en el sistema de cuidados?",
    "¿El sector debe tratar también el cuidado de la infancia 0-3 años con datos de plazas y precios, o lo dejamos para el sector de Educación?",
    "¿Quieres destacar algún proyecto de cuidados cercano a la Comunidad Circular Humana (por ejemplo, una cooperativa de cuidados) como ejemplo propio?"
+  ],
+  "subtemas": [
+   {
+    "id": "familia",
+    "nombre": "Familia y conciliación"
+   },
+   {
+    "id": "soledad",
+    "nombre": "Mayores y soledad"
+   },
+   {
+    "id": "dependencia",
+    "nombre": "Dependencia"
+   },
+   {
+    "id": "profesionales",
+    "nombre": "Profesionales del cuidado"
+   },
+   {
+    "id": "vivienda",
+    "nombre": "Vivienda colaborativa e intergeneracional"
+   }
   ]
  }
 ];

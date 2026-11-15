@@ -21,7 +21,12 @@
   #ctrl button{border:0;background:rgba(255,253,249,.94);border-radius:10px;padding:8px 12px;font:inherit;font-size:13px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.1)}
   #hint{position:absolute;bottom:16px;right:16px;font-size:12px;color:#33413a;background:rgba(255,255,255,.7);padding:5px 10px;border-radius:8px}
   .tag{font-size:11px;color:#7a6a4d;background:#f1ece2;border-radius:99px;padding:2px 8px;display:inline-block;margin-bottom:6px}
+  /* Embedded in a sector page: the page's own menus choose the scale, so only the title and legend stay. */
+  .embed #ui{max-width:300px} .embed #ui .panel:nth-child(2),.embed #hint{display:none}
+  .embed .panel{padding:10px 12px} .embed .panel h1{font-size:16px} .embed .panel p{font-size:12px}
+  .embed .leyenda{display:none} .embed #ui:hover .leyenda{display:block}
 </style>
+<script>if(/[?&]embed/.test(location.search)) document.documentElement.classList.add('embed');</script>
 <script src="lib/three.min.js"></script>
 <script src="lib/OrbitControls.js"></script>
 <script src="lib/CSS2DRenderer.js"></script>
