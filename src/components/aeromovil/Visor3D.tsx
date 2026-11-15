@@ -31,7 +31,7 @@ import {
   ARM_UP, CELULA, TIRE_W, TRAVEL_F, TRAVEL_R, enZona, tramosTubo,
   type Modelo, type ModeloGota, type ModeloA1, type ModeloBala, type ModeloConPiel, type ModeloTriciclo, type Piel, type PuntosOcupante, type Superficie,
 } from './geometria';
-import { anguloFuera, opcionesCabinaTriciclo } from './geometriaTriciclo';
+import { anguloFuera, opcionesCabinaTriciclo, poseBascula } from './geometriaTriciclo';
 // ── Cuadriciclo Basculante (2026-11-15): its builder and its lean live in basculante/modelo3d.ts
 import { construirBasculante, cotasBasculante, posarBasculante, type AyudasVisor } from './basculante/modelo3d';
 import { ANGULO_CUPULA, ANGULO_PORTON, PIVOTES_CUPULA, PIVOTE_PORTON, construirCon as construirBalaCon, crearMateriales as materialesBala } from './garaje/balaModelo';
@@ -1180,6 +1180,60 @@ function repartirBala(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THRE
   }
 }
 
+// ── The «Cuadriciclo Bala clásico» leaning (2026-11-15, Eugenio: «haz que pueda bascular», on his «Smeraptera»)
+/** A pod's own parts (upright, hub motor) in a layer: one group per corner, which leaning moves with its pod. */
+function esquinaB(capa: THREE.Object3D, eje: 'del' | 'tras', s: 1 | -1): THREE.Group {
+  const k = `${eje}${s}`;
+  let g = capa.children.find(o => o.userData.esquinaB === k) as THREE.Group | undefined;
+  if (!g) { g = new THREE.Group(); g.userData.esquinaB = k; g.userData.eje = eje; g.userData.s = s; capa.add(g); }
+  return g;
+}
+const _x = new THREE.Vector3(1, 0, 0);
+function ponerBieleta(o: THREE.Object3D, a: V3, b: V3) {
+  const A = new THREE.Vector3(...a), v = new THREE.Vector3(...b).sub(A), L = v.length();
+  o.position.copy(A).addScaledVector(v, 0.5); o.quaternion.setFromUnitVectors(_up, v.normalize()); o.scale.set(1, Math.max(1e-4, L), 1);
+}
+/**
+ * The «Cuadriciclo Bala clásico» leaning `phi` (rad, + to the right) when its design leans (`m.bascula`): the whole car
+ * turns about the road under its centre line; against the body each pod (with its wheel, upright and motor) moves up or
+ * down and a little in, staying parallel to it, and each arm turns about its inner end (geometriaTriciclo.ts `poseBascula`).
+ */
+function inclinarBala(G: Record<CapaId, THREE.Group>, m: ModeloTriciclo, coche: THREE.Group, phi: number) {
+  const b = m.bascula; coche.rotation.x = b ? phi : 0; if (!b) return;
+  const ejes = { del: b.ejes[0], tras: b.ejes[1] }, pose = { del: poseBascula(ejes.del, phi), tras: poseBascula(ejes.tras, phi) };
+  const mover = (o: THREE.Object3D, eje: 'del' | 'tras', s: number) => {
+    const u = o.userData; if (!u.baseB) u.baseB = o.position.clone();
+    const p = pose[eje]; o.position.set(u.baseB.x, u.baseB.y + s * p.dy, u.baseB.z - s * p.dIn);
+  };
+  const lado = (o: THREE.Object3D) => (o.userData.baseB?.z ?? o.position.z) >= 0 ? 1 : -1;
+  G.carenado.traverse(o => { if (o.name === 'carenado' && o.userData.lado) mover(o, 'del', o.userData.lado); else if (o.name === 'carenado-trasero') mover(o, 'tras', lado(o)); });
+  G.ruedas.traverse(o => { if (o.name === 'rueda-direccion') mover(o, 'del', o.userData.lado ?? lado(o)); else if (o.name === 'rueda-trasera') mover(o, 'tras', lado(o)); });
+  for (const capa of [G.suspension, G.motor]) for (const o of capa.children) if (o.userData.esquinaB) mover(o, o.userData.eje, o.userData.s);
+  // each arm about its inner end, by as much as moves its outer end with the pod
+  const girar = (o: THREE.Object3D, eje: 'del' | 'tras', s: number, i: number) => {
+    const q = ejes[eje], a = q.brazos[i] ?? q.brazos[0]; if (!a) return;
+    const t = -Math.asin(Math.max(-1, Math.min(1, q.Lk * Math.sin(pose[eje].beta) / a.Lk)));
+    const piv = new THREE.Vector3(a.x, a.yCuerpo, s * a.zp);
+    o.quaternion.setFromAxisAngle(_x, t); o.position.copy(piv).sub(piv.clone().applyQuaternion(o.quaternion));
+  };
+  for (const o of G.suspension.children) {
+    if (o.userData.brazoB) { const u = o.userData.brazoB; girar(o, u.eje, u.s, u.i); continue; }
+    if (o.name !== 'brazo') continue;
+    // which arm this is (once): its axle and arm by the nearest inner end, its side by z
+    if (!o.userData.cualB) {
+      const c = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3()); let mejor = { eje: 'del' as 'del' | 'tras', i: 0, d: Infinity };
+      for (const eje of ['del', 'tras'] as const) ejes[eje].brazos.forEach((a, i) => { const d = Math.abs(c.x - a.x) + Math.abs(c.y - a.yCuerpo) * 0.5; if (d < mejor.d) mejor = { eje, i, d }; });
+      o.userData.cualB = { eje: mejor.eje, i: mejor.i, s: c.z >= 0 ? 1 : -1 };
+    }
+    const u = o.userData.cualB; girar(o, u.eje, u.s, u.i);
+  }
+  // the tie rods: from the rack (on the body) to the front uprights' arms (with the pods)
+  for (const o of G.direccion.children) if (o.userData.bieletaB) {
+    const u = o.userData.bieletaB, p = pose.del;
+    ponerBieleta(o, u.a, [u.b[0], u.b[1] + u.s * p.dy, u.b[2] - u.s * p.dIn]);
+  }
+}
+
 /**
  * The Triciclo Bala (2026-11-10): the Cuadriciclo en rombo's builder with three wheels and the reclining
  * cockpit, split into layers as the Bala; and what only the Triciclo has, from its model: the tube
@@ -1199,9 +1253,9 @@ function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<string,
     // four wheels (2026-11-11): a hub motor in each rear wheel, and in each rear pod an upright on the wheel's inner
     // side, held by the pod's two faired arms (drawn with the pods): a simple arm, as in front, that does not steer
     const zInT = Ft.VIA_LAT / 2 - Ft.ANCHO_NEU_LAT / 2 - 0.025, [arT, abT] = brazosDe(Ft);
-    for (const s of [1, -1]) {
-      disk(G.motor, [m.motor.c[0], m.motor.c[1], s * Ft.VIA_LAT / 2], m.motor.r, m.motor.ancho, M.motor);
-      tube(G.suspension, [m.xR, abT.y - 0.02, s * zInT], [m.xR, arT.y + 0.03, s * zInT], 0.03, M.alu);
+    for (const s of [1, -1] as const) {
+      disk(esquinaB(G.motor, 'tras', s), [m.motor.c[0], m.motor.c[1], s * Ft.VIA_LAT / 2], m.motor.r, m.motor.ancho, M.motor);
+      tube(esquinaB(G.suspension, 'tras', s), [m.xR, abT.y - 0.02, s * zInT], [m.xR, arT.y + 0.03, s * zInT], 0.03, M.alu);
     }
   } else {
   disk(G.motor, [m.motor.c[0], m.motor.c[1], 0], m.motor.r, m.motor.ancho, M.motor);
@@ -1217,21 +1271,28 @@ function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<string,
   // front: in each pod, the upright on the wheel's inner side; the coil-over lies along the upper arm, inside its
   // fairing (pushed by the upright, held at the body), so nothing but the faired arms stands in the air
   const zIn = m.via.del / 2 - m.F.ANCHO_NEU_LAT / 2 - 0.025, [arriba, abajo] = m.brazos;
-  for (const s of [1, -1]) {
-    tube(G.suspension, [m.xF, abajo.y - 0.02, s * zIn], [m.xF, arriba.y + 0.03, s * zIn], 0.03, M.alu);
+  for (const s of [1, -1] as const) {
+    tube(esquinaB(G.suspension, 'del', s), [m.xF, abajo.y - 0.02, s * zIn], [m.xF, arriba.y + 0.03, s * zIn], 0.03, M.alu);
     // (a lifted Triciclo's arm runs down from the body, at `yCuerpo`, to the pod: the coil-over follows it)
     const z0 = m.F.ladoZ(m.xF + arriba.x, arriba.yCuerpo);
     if (Number.isFinite(z0)) {
       const yEn = (z: number) => arriba.y + (arriba.yCuerpo - arriba.y) * (zIn - z) / Math.max(1e-6, zIn - z0) - 0.002;
       const a: V3 = [m.xF + arriba.x - 0.02, yEn(zIn - 0.04), s * (zIn - 0.04)], c: V3 = [m.xF + arriba.x - 0.02, yEn(z0 + 0.03), s * (z0 + 0.03)];
-      tube(G.suspension, a, c, 0.012, M.stanch); muelle(G.suspension, [a[0], yEn(zIn - 0.06), s * (zIn - 0.06)], [c[0], yEn(z0 + 0.12), s * (z0 + 0.12)], 0.013, 9, M.muelle);
+      // (it lies along the upper arm: leaning, it turns with it, 2026-11-15)
+      const conBrazo = new THREE.Group(); conBrazo.userData.brazoB = { eje: 'del', s, i: 0 }; G.suspension.add(conBrazo);
+      tube(conBrazo, a, c, 0.012, M.stanch); muelle(conBrazo, [a[0], yEn(zIn - 0.06), s * (zIn - 0.06)], [c[0], yEn(z0 + 0.12), s * (z0 + 0.12)], 0.013, 9, M.muelle);
     }
   }
   // steering: the rack across, the column up to the steering head, the tie rods out to the uprights' arms
   const k = m.cremallera;
   tube(G.direccion, [k.x, k.y, -k.z], [k.x, k.y, k.z], 0.035, M.black);
   tube(G.direccion, [k.x, k.y, 0], m.cabezaDireccion, 0.026, M.alu);
-  for (const s of [1, -1]) tube(G.direccion, [k.x, k.y, s * k.z], [m.xF - 0.07, arriba.y + 0.02, s * zIn], 0.016, M.alu);
+  for (const s of [1, -1] as const) {
+    // (a unit rod, stretched between its ends: leaning, the upright's end moves with the pod, 2026-11-15)
+    const b = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 1, 12), M.alu); b.castShadow = true;
+    b.userData.bieletaB = { a: [k.x, k.y, s * k.z] as V3, b: [m.xF - 0.07, arriba.y + 0.02, s * zIn] as V3, s };
+    ponerBieleta(b, b.userData.bieletaB.a, b.userData.bieletaB.b); G.direccion.add(b);
+  }
   // everyone on board (round three: up to four, each at their own z; a folded row carries nobody)
   if (calidad === 'completa') for (const q of m.plazas) { if (sinPasajero && !q.piloto) continue; ocupante(G.ocupantes, M, { occPts: () => q.pts }, q.z, q.piloto); }
   for (const c of CAPAS) G[c.k].traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
@@ -1829,11 +1890,14 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       }
       // ── Cuadriciclo Basculante (2026-11-15): «Bascular» leans it to its maximum to the right, back, to the left and back
       // (one sine over 6 s), the front wheels steering into the lean and the indicator on that side blinking
-      if (st.bascula && st.modelo?.tipo === 'basculante' && !st.curva) {
+      // (2026-11-15: and the «Cuadriciclo Bala clásico» whose design leans, `bascula`)
+      const mb = st.modelo, maxB = mb?.tipo === 'basculante' ? mb.P.tiltMax : mb?.tipo === 'triciclo' && mb.bascula ? mb.bascula.phiMax * 180 / Math.PI : 0;
+      if (st.bascula && mb && maxB > 0 && !st.curva) {
         const T = 6;
         st.bascula.t += reducir ? T : dt;
-        const fin = st.bascula.t >= T, phi = fin ? 0 : st.modelo.P.tiltMax * Math.sin(2 * Math.PI * st.bascula.t / T);
-        st.inclinacion = phi; construirMovil(G, M, st.modelo, coche, phi);
+        const fin = st.bascula.t >= T, phi = fin ? 0 : maxB * Math.sin(2 * Math.PI * st.bascula.t / T);
+        st.inclinacion = phi;
+        if (mb.tipo === 'triciclo') inclinarBala(G, mb, coche, phi * Math.PI / 180); else construirMovil(G, M, mb, coche, phi);
         const enc = Math.floor(ahora / 333) % 2 === 0;
         M.intermitenteD.emissiveIntensity = phi > 2 && enc ? 2.2 : 0.15; M.intermitenteI.emissiveIntensity = phi < -2 && enc ? 2.2 : 0.15;
         st.sombraSucia = true;

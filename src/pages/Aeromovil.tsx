@@ -713,7 +713,7 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
   const LISA = ['tColaAncho', 'tColaGrosor', 'tColaBombeo', 'tBajosIni', 'tBajosCurva', 'tMorroAncho', 'tMorroGrosor', 'tMorroBombeo'];
   const PUERTA2 = ['tPuerta2Parte', 'tBisagra2Y', 'tBisagra2Inc', 'tPuerta2Abre'];
   // (round 3 interior: the rails reach the rear axle only with two rear wheels; with one, the wheel is in the tail between them)
-  const fichas = deslizadoresTriciclo().filter(f => f.dep === dep && !soloFilas(f.bloque) && (cuatro || f.clave !== 'tViaTras') && visible(f.clave)), sels = SELECTORES_TRICICLO.filter(s => s.dep === dep && !soloFilas(s.bloque) && ((s.clave !== 'tMaletero' && s.clave !== 'tPuertas2') || puertas) && (s.clave !== 'tChLargo' || cuatro));
+  const fichas = deslizadoresTriciclo().filter(f => f.dep === dep && !soloFilas(f.bloque) && (cuatro || f.clave !== 'tViaTras') && (f.clave !== 'tBascMax' || (cuatro && T.tBascula === 'si')) && visible(f.clave)), sels = SELECTORES_TRICICLO.filter(s => s.dep === dep && !soloFilas(s.bloque) && ((s.clave !== 'tMaletero' && s.clave !== 'tPuertas2') || puertas) && ((s.clave !== 'tChLargo' && s.clave !== 'tBascula') || cuatro));
   const nOcc = rt.ocupantes, conN = nOcc === 1 ? 'con el piloto solo' : `con ${['', 'uno', 'dos', 'tres', 'cuatro'][nOcc] ?? nOcc} ocupantes`;
   // with three rows the passenger's saddle height is the rows' seat height; its position and recline do nothing there
   const ETIQUETA_FILAS: Partial<Record<string, string>> = { tPasY: 'Asientos de las filas 2 y 3: altura' };
@@ -1070,6 +1070,8 @@ export default function Aeromovil() {
   const [curva, setCurva] = useState(false);
   // Cuadriciclo Basculante: «Bascular» (a counter: each press leans it to the maximum each way and back)
   const [bascular, setBascular] = useState(0);
+  // (2026-11-15: and the «Cuadriciclo Bala clásico» set to lean, `tBascula`) its maximum lean, 0 for a car that does not
+  const anguloBascular = Math.round((modelo.tipo === 'basculante' ? modelo.phiMax : modelo.tipo === 'triciclo' && modelo.bascula ? modelo.bascula.phiMax : 0) * 180 / Math.PI);
   const [verCotas, setVerCotas] = useState(false);   // apagadas al cargar (2026-11-06, Eugenio)
   const [abierta, setAbierta] = useState(false);
   const [maleteros, setMaleteros] = useState(false);
@@ -1367,7 +1369,7 @@ export default function Aeromovil() {
           )}
           {/* The design being edited (2026-11-13): its card, and the question about unsaved changes when leaving it */}
           <TarjetaDiseno e={eleccion} g={disenosGaraje} actual={actual} porDefecto={!!disenosGaraje.lista?.find(d => d.id === actual?.id)?.por_defecto} nombreVehiculo={nombreVehiculo} puedeDecidir={!!dueno?.puedeDecidir}
-            bascular={modelo.tipo === 'basculante' ? { angulo: Math.round(modelo.phiMax * 180 / Math.PI), alPulsar: () => { setCurva(false); setBascular(n => n + 1); } } : undefined}
+            bascular={anguloBascular > 0 ? { angulo: anguloBascular, alPulsar: () => { setCurva(false); setBascular(n => n + 1); } } : undefined}
             className={cn('inset-x-2 top-14 sm:inset-x-auto sm:left-3 sm:top-12 sm:w-[min(340px,calc(100%-24px))]', panelGaraje && 'hidden sm:block sm:w-[min(340px,calc(100%-376px))]')} />
           <AvisoCambios e={eleccion} actual={actual} puedeDecidir={!!dueno?.puedeDecidir} className={cn('inset-x-2 top-14 sm:inset-x-auto sm:left-3 sm:top-12 sm:w-[min(360px,calc(100%-24px))]', panelGaraje && 'sm:w-[min(360px,calc(100%-376px))]')} />
           {/* La explicación de un punto del túnel va dentro de la ventana 3D: así también se ve en pantalla completa. */}
@@ -1471,9 +1473,9 @@ export default function Aeromovil() {
                 className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', v && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>{n}</Button>
             ))}
             {/* Cuadriciclo Basculante (2026-11-15): «Bascular», the car and its four wheels leaning to the maximum each way and back */}
-            {esBas && (
+            {anguloBascular > 0 && (
               <Button variant="outline" onClick={() => { setCurva(false); setBascular(n => n + 1); }}
-                title={`Inclina la carrocería y las cuatro ruedas hasta ${Math.round((modelo.tipo === 'basculante' ? modelo.phiMax : 0) * 180 / Math.PI)}° a cada lado y vuelve, como en una curva`}
+                title={`Inclina la carrocería y las cuatro ruedas hasta ${anguloBascular}° a cada lado y vuelve, como en una curva`}
                 className="bg-white px-2 py-1 text-[11px] normal-case tracking-normal">Bascular</Button>
             )}
             <Button variant="outline" aria-pressed={abierta} onClick={() => setAbierta(!abierta)}

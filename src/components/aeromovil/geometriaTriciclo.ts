@@ -84,6 +84,9 @@ export interface CamposTriciclo {
   // tenga 4 ruedas»). Optional when saved: a design without them has one rear wheel, and its rear track is its front one.
   tTraseras: 'una' | 'dos';   // una rueda trasera en la cola (triciclo) o dos en carenados (cuatro ruedas)
   tViaTras: number;    // vía trasera, centro a centro de las dos ruedas traseras (m); solo con 'dos'
+  // 2026-11-15 (Eugenio: «haz que pueda bascular», on his «Smeraptera»). Optional when saved: absent, it does not lean.
+  tBascula: 'no' | 'si';   // con cuatro ruedas: la cabina y los cuatro carenados se inclinan en las curvas, cada carenado sobre sus brazos en paralelogramo
+  tBascMax: number;    // inclinación máxima (°)
   tMRueda: number; tMFreno: number; tMSuspDel: number; tMSuspTras: number; tMDir: number;   // kg
   // Propulsión
   tKWNom: number; tKWPico: number; tMMotor: number; tMInversor: number; tVel: number;
@@ -181,7 +184,7 @@ export const RUEDAS_TRICICLO: Record<RuedaTriciclo, { d: number; neuDel: number;
   c14: { d: 0.554, neuDel: 0.165, neuTras: 0.165, n: '14″ de coche, 165/60 R14 (554 mm)', kg: 2.62, kWBuje: 45, carga: 387 },
   c15: { d: 0.574, neuDel: 0.175, neuTras: 0.175, n: '15″ de coche, 175/55 R15 (574 mm)', kg: 2.96, kWBuje: 60, carga: 412 },
 };
-type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tTraseras' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero';
+type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tTraseras' | 'tBascula' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero';
 export type ClaveNumTriciclo = Exclude<ClaveTriciclo, ClaveTexto>;
 
 // ------------------------------------------------------------------ deslizadores
@@ -327,6 +330,8 @@ const FILAS: Fila[] = [
   // four wheels (2026-11-11): its real minimum is the narrowest track whose rear pods clear the tail (`viaTraseraMinima`)
   ['tViaTras', 'rodaje', 'Ejes y ruedas', null, 'Vía trasera', 0.80, 2.40, 0.01, 'm'],
   ['tGiro', 'rodaje', 'Suspensión y dirección', null, 'Giro máximo de la dirección', 18, 38, 1, '°'],
+  // 2026-11-15: only with four wheels leaning (the page hides it otherwise)
+  ['tBascMax', 'rodaje', 'Suspensión y dirección', null, 'Bascular: inclinación máxima', 5, 30, 1, '°'],
   ['tRecDel', 'rodaje', 'Suspensión y dirección', null, 'Recorrido de la suspensión delantera', 50, 110, 5, 'mm'],
   ['tRecTras', 'rodaje', 'Suspensión y dirección', null, 'Recorrido de la suspensión trasera', 50, 110, 5, 'mm'],
   ['tBasculante', 'rodaje', 'Suspensión y dirección', null, 'Basculante trasero: largo', 0.40, 0.60, 0.01, 'm'],
@@ -395,6 +400,8 @@ export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
   { clave: 'tRuedaDel', n: 'Ruedas delanteras (en los carenados)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['16', '20', '24', '26', '28', 'c13', 'c14', 'c15']) },
   { clave: 'tRuedaTras', n: 'Rueda trasera (dentro de la cola)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['20', '24', '26', '28', 'c13', 'c14', 'c15']) },
   { clave: 'tTraseras', n: 'Ruedas traseras', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: [{ k: 'una', n: 'Una en la cola (triciclo)' }, { k: 'dos', n: 'Dos en carenados (cuatro ruedas)' }] },
+  // 2026-11-15: only with four wheels (the page hides it otherwise)
+  { clave: 'tBascula', n: 'Bascular en las curvas', dep: 'rodaje', bloque: 'Suspensión y dirección', opciones: [{ k: 'no', n: 'No: va siempre derecho' }, { k: 'si', n: 'Sí: la cabina y los cuatro carenados se inclinan' }] },
   // 2026-11-12
   { clave: 'tAcceso', n: 'Acceso', dep: 'carroceria', bloque: 'Puertas y maletero', opciones: [{ k: 'cupula', n: 'La cúpula entera se abre' }, { k: 'puertas', n: 'Dos puertas como el Aptera' }] },
   { clave: 'tMaletero', n: 'Maletero', dep: 'carroceria', bloque: 'Puertas y maletero', opciones: [{ k: 'cola', n: 'Tapa en lo alto de la cola' }, { k: 'aptera', n: 'Portón largo como el Aptera (con puertas)' }] },
@@ -1045,6 +1052,72 @@ export function largueroTrasero(F: FormaBala, Ft: FormaBala, xPiv: number, yL: n
   return { ruta, y, z: zE, yArriba, zArriba };
 }
 
+// ------------------------------------------------------------------ leaning (2026-11-15)
+/*
+ * The «Cuadriciclo Bala clásico» leaning in bends (Eugenio, 2026-11-15: «haz que pueda bascular», on his «Smeraptera»).
+ * Each pod hangs from the body on its two faired arms as on a parallelogram: the pod, its wheel and its upright stay
+ * parallel to the body, so they lean with it, and the arms turn against the body by β so that both tyres keep the
+ * road. The whole car turns φ about the ground under its centre line (+ to the right, the +z side down), as the
+ * Cuadriciclo Basculante does (geometriaBasculante.ts `esquinaEn`, here with the arms' inner ends at the body's side).
+ */
+export interface EjeBascula {
+  eje: 'del' | 'tras';
+  /** the shape as this axle's pods see it (the front's own, or `formaTrasera`) */
+  F: FormaBala;
+  /** the upper arm's length, inner end to the pod (m): the parallelogram's */
+  Lk: number;
+  /** each arm: its x, its height at the body, where it meets the body (z) and its length */
+  brazos: { x: number; yCuerpo: number; zp: number; Lk: number }[];
+}
+export function ejeBascula(eje: 'del' | 'tras', F: FormaBala): EjeBascula {
+  // (as balaPiezas.ts `carenados` draws them: from 8 mm inside the skin to 2 cm inside the pod's centre)
+  const z1 = F.VIA_LAT / 2 - 0.02;
+  const brazos = brazosDe(F).flatMap(b => {
+    const zp = F.ladoZ(F.X_LAT + b.x, b.yCuerpo) - 0.008;
+    return Number.isFinite(zp) ? [{ x: F.X_LAT + b.x, yCuerpo: b.yCuerpo, zp, Lk: Math.max(0.05, z1 - zp) }] : [];
+  });
+  return { eje, F, Lk: brazos[0]?.Lk ?? 0.3, brazos };
+}
+/**
+ * An axle at a lean φ (rad): the arms' turn β against the body, how far the right (+z) pod rises against the body
+ * (the left one goes down as much) and how far both pods come in towards it (m).
+ */
+export function poseBascula(q: EjeBascula, phi: number) {
+  const L = q.Lk, eEf = q.F.VIA_LAT / 2 - L;
+  const beta = phi + Math.asin(Math.max(-1, Math.min(1, eEf * Math.sin(phi) / L)));
+  return { beta, dy: L * Math.sin(beta), dIn: L * (1 - Math.cos(beta)) };
+}
+/** The gap (m) between a pod's inner face and the body, the pod moved in the body's frame `dy` up and `dIn` in (as `carenadoCuerpo`). */
+function carenadoCuerpoMovido(F: FormaBala, dy: number, dIn: number): number {
+  const POD = podDe(F), ancho = semiAncho(POD); let h = 9;
+  for (let i = 0; i <= 24; i++) {
+    const xr = POD[0].x + (POD[POD.length - 1].x - POD[0].x) * i / 24, alt = alturasPod(POD, xr); if (!alt) continue;
+    for (let j = 1; j < 10; j++) {
+      const y = alt[0] + (alt[1] - alt[0]) * j / 10, w = ancho(xr, y); if (w <= 0) continue;
+      const zb = F.ladoZ(F.X_LAT + xr, y + dy); if (!Number.isFinite(zb)) continue;
+      h = Math.min(h, F.VIA_LAT / 2 - dIn - w - zb);
+    }
+  }
+  return h;
+}
+/** How high a pod's lowest edge is over the road when it leans φ (rad) with its wheel, about the tyre's contact (m). */
+function carenadoAlSuelo(F: FormaBala, phi: number): number {
+  const POD = podDe(F), ancho = semiAncho(POD); let h = 9;
+  for (let i = 0; i <= 24; i++) {
+    const xr = POD[0].x + (POD[POD.length - 1].x - POD[0].x) * i / 24, alt = alturasPod(POD, xr); if (!alt) continue;
+    for (let j = 0; j <= 10; j++) { const y = alt[0] + (alt[1] - alt[0]) * j / 10, w = Math.max(0, ancho(xr, y)); h = Math.min(h, y * Math.cos(phi) - w * Math.sin(Math.abs(phi))); }
+  }
+  return h;
+}
+/** How high the body's lowest point is over the road at a lean φ (rad), turned about the ground under its centre line (m). */
+function cuerpoAlSuelo(F: FormaBala, phi: number): number {
+  let h = 9;
+  for (let x = F.X_MORRO - 0.01; x > F.X_COLA; x -= 0.04) for (let y = 0; y < 1.4; y += 0.01) {
+    const z = F.ladoZ(x, y); if (Number.isFinite(z)) h = Math.min(h, y * Math.cos(phi) - z * Math.sin(Math.abs(phi)));
+  }
+  return h;
+}
+
 /** El modelo del Triciclo: la forma, los ocupantes, el bastidor, la batería, el motor y lo que lee el visor. */
 export function crearModeloTriciclo(P: Parametros) {
   const T = camposTriciclo(P);
@@ -1337,6 +1410,8 @@ export function crearModeloTriciclo(P: Parametros) {
     ruedas, via: { del: via, tras: viaTras },
     /** Four wheels (2026-11-11): the rear pods' view of the shape (`formaTrasera`), or null with one rear wheel. */
     traseras, cuatro: !!traseras,
+    /** 2026-11-15: leaning in bends (four wheels and `tBascula: 'si'`): its maximum (rad) and each axle's arms, or null. */
+    bascula: T.tBascula === 'si' && traseras ? { phiMax: L('tBascMax') * Math.PI / 180, ejes: [ejeBascula('del', F), ejeBascula('tras', traseras)] } : null,
     tubos, baterias, bateriaCabe: bat.capacidad, inversor, motor, basculante, amortiguador, brazos, cremallera, cabezaDireccion: cabeza, recTras, recDel, yLarguero: yL,
     // (with two rear wheels there is no wheel under the tail to cover)
     faldon: traseras ? null : faldonDe(F, L('tFaldon'), xR, rR),
@@ -1928,6 +2003,18 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     // four wheels (2026-11-11): the rear pods as the front ones, but they do not steer
     c('rodaje,carroceria', 'Neumático trasero dentro de su carenado', neumaticoCarenado(m.traseras), 0.015);
     c('rodaje,carroceria', 'Carenado trasero a la carrocería', carenadoCuerpo(m.traseras), HUECO_CARENADO - 0.002);
+  }
+  if (m.bascula) {
+    // leaning (2026-11-15): at the maximum, the pod on the inside rises along the body and the outside one drops, both a little
+    // nearer; neither may touch it. And the body, turned about the road, keeps off it.
+    const ph = m.bascula.phiMax, g = Math.round(ph * 180 / Math.PI);
+    for (const q of m.bascula.ejes) {
+      const p = poseBascula(q, ph), quien = q.eje === 'del' ? 'delantero' : 'trasero';
+      c('rodaje,carroceria', `Carenado ${quien} a la carrocería, inclinado ${g}° (el de dentro)`, carenadoCuerpoMovido(q.F, p.dy, p.dIn), 0.015);
+      c('rodaje,carroceria', `Carenado ${quien} a la carrocería, inclinado ${g}° (el de fuera)`, carenadoCuerpoMovido(q.F, -p.dy, p.dIn), 0.015);
+      c('rodaje,carroceria', `Carenado ${quien} al suelo, inclinado ${g}°`, carenadoAlSuelo(q.F, ph), 0.03);
+    }
+    c('rodaje,carroceria', `Carrocería al suelo, inclinada ${g}°`, cuerpoAlSuelo(F, ph), 0.03);
   }
   c('rodaje', `Bajos al suelo con la suspensión hundida`, F.D.suelo - Math.max(m.recDel, m.recTras) * 0.6, 0.03);
   {

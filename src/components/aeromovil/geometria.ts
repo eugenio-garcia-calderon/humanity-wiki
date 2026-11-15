@@ -262,6 +262,8 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   tBatalla: 2.45, tEjeDel: 0.30, tVia: 1.80, tRuedaDel: '20', tRuedaTras: '24', tGiro: 28, tRecDel: 80, tRecTras: 80, tBasculante: 0.50,
   // the «Cuadriciclo Bala clásico» (2026-11-11): one rear wheel in the tail by default; a design without `tViaTras` takes its own `tVia` (camposTriciclo)
   tTraseras: 'una', tViaTras: 1.80,
+  // 2026-11-15 (Eugenio, «Smeraptera»): the four-wheeler tilting in bends, its cabin and the four pods on their arms; off by default
+  tBascula: 'no', tBascMax: 15,
   tMRueda: 4.5, tMFreno: 1.2, tMSuspDel: 9, tMSuspTras: 6, tMDir: 4.5,
   tKWNom: 5, tKWPico: 10, tMMotor: 13, tMInversor: 2.5, tVel: 80,
   tKWh: 9, tWhKg: 160, tWhL: 230, tMVarios: 12, tSolarM2: 2.2,
