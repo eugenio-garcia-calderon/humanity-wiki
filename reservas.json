@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "acordeon",
-      "ruta": "src/pages/Aeromovil.tsx",
-      "motivo": "Acordeón de carrocería y formas nuevas",
-      "desde": "2026-11-15T20:22:32.018Z"
-    },
-    {
-      "agente": "acordeon",
       "ruta": "src/components/aeromovil/explicaciones/triciclo.ts",
       "motivo": "Acordeón de carrocería y formas nuevas",
       "desde": "2026-11-15T20:22:34.528Z"
