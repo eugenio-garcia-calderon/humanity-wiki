@@ -23,6 +23,12 @@
       "ruta": "src/components/aeromovil/explicaciones/triciclo.ts",
       "motivo": "Acordeón de carrocería y formas nuevas",
       "desde": "2026-11-15T20:22:34.528Z"
+    },
+    {
+      "agente": "acordeon",
+      "ruta": "src/components/aeromovil/garaje/balaForma.ts",
+      "motivo": "Acordeón de carrocería y formas nuevas",
+      "desde": "2026-11-15T20:22:36.928Z"
     }
   ]
 }
