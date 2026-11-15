@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "src/App.tsx",
+      "motivo": "nueva /vision (12 sectores), hoja de ruta a /hoja-de-ruta",
+      "desde": "2026-11-15T10:22:25.054Z"
+    }
+  ]
 }
