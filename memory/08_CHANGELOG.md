@@ -11692,6 +11692,7 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
 - **`scripts/modelo-comprobar.mts`** (`npx tsx scripts/modelo-comprobar.mts`, exit 1 on failure): every «fuente» link resolves (413 today; a missing id renders nothing, so it looked sourced in code and unsourced on screen), wage rates equal their tiers, eighths add to one, no working note addressed to a person in public text. Verified it catches a planted missing source and a planted note.
 - **Migration 0222**: the «Mejoras pendientes» board marks «móvil» and «tipos de los sueldos» as done and adds a progress answer to «Otras propuestas» and «fuentes oficiales»; only items still pending, never over an admin's answer.
 - Checked in headless Chrome at 1360 and 390 px (no horizontal overflow, no JS errors); `tsc`, `build` and the new check clean. Not checked on a real phone.
+
 ## 2026-11-15 — Política: Geometrías con diez temas y los tres círculos
 
 - Eugenio: «haz la geometría de los partidos pero con todos los temas políticos… añádeles estilo a cada tema y con ilustraciones al lado del título… mejora el círculo ideal y todos sus círculos concéntricos para que entendamos qué es lo más básico y qué es lo más avanzado de cada tema haciendo hover en esas líneas y puntos».
