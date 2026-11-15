@@ -19,6 +19,18 @@ const ESCALAS = [
 ];
 let ESC = null;   // selected scale id, or null = all scales
 let PIL = null;   // selected pillar id, or null = all four
+let SUB = null;   // selected part (subtema) of the open sector, or null = the whole sector
+// Which 3D viewer scene shows each part best (parts not listed use the sector's own scene).
+const ESCENA_SUBTEMA = {
+  vivienda:{arquitectura:'hogar', urbanismo:'pueblo', comunidad:'comunidad', suelo:'pueblo', naturaleza:'naturaleza'},
+  movilidad:{vehiculo:'movilidad', ciudad:'movilidad', transporte:'movilidad', rural:'pueblo', seguridad:'movilidad'},
+  energia:{hogar:'hogar', comunidades:'comunidad', renovables:'pueblo', red:'pueblo'},
+  alimentacion:{huerto:'hogar', consumo:'comunidad', campo:'comunidad', comedores:'comunidad'},
+  seguridad:{hogar:'hogar', calle:'movilidad', clima:'naturaleza'},
+  salud:{prevencion:'naturaleza', comunitaria:'comunidad', ambiental:'naturaleza'},
+  educacion:{naturaleza:'naturaleza', escuela:'comunidad'},
+  cuidados:{familia:'hogar', soledad:'comunidad', vivienda:'comunidad'}
+};
 let SECTOR = null;
 
 const $ = s => document.querySelector(s);
@@ -28,10 +40,12 @@ const ICON3D = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strok
 const icono = n => `<svg viewBox="0 0 24 24" class="ico" aria-hidden="true">${Array.from({length:Math.min(n,4)},(_,k)=>
   `<circle cx="12" cy="12" r="${3+k*2.8}" fill="${k===0?'currentColor':'none'}" stroke="currentColor" stroke-width="1.4" opacity="${1-k*.18}"/>`).join('')}${n>4?`<circle cx="12" cy="12" r="11.2" fill="none" stroke="currentColor" stroke-width="${(n-4)*.6}" stroke-dasharray="${n>6?'none':'2 2'}"/>`:''}</svg>`;
 
-const deEscala = list => ESC ? (list||[]).filter(x => (x.escalas||[]).includes(ESC)) : (list||[]);
+// Filter by the chosen scale and, inside a sector, by the chosen part.
+const deEscala = list => (list||[]).filter(x => (!ESC || (x.escalas||[]).includes(ESC)) && (!SUB || !SECTOR || (x.subtemas||[]).includes(SUB)));
 // Every link keeps the current scale and pillar unless told otherwise.
-function link({sector=SECTOR, e=ESC, p=PIL}={}){
-  const qs = new URLSearchParams(); if(e) qs.set('e', e); if(p) qs.set('p', p);
+function link({sector=SECTOR, e=ESC, p=PIL, s}={}){
+  if(s === undefined) s = sector===SECTOR ? SUB : null;   // a part belongs to its sector
+  const qs = new URLSearchParams(); if(s && sector) qs.set('s', s); if(e) qs.set('e', e); if(p) qs.set('p', p);
   return `#${sector?`/sector/${sector}`:'/'}${qs.toString()?'?'+qs:''}`;
 }
 const cuentaPilar = (s, pid) => pid==='vision' ? deEscala(s.vision.bloques).length : deEscala(s[pid]).length;
@@ -43,6 +57,19 @@ function nav(){
     `<a href="${link({sector:s.id})}" class="${s.id===SECTOR?'on':''}">${esc(s.nombre)}</a>`).join('');
   $('#nav').classList.toggle('con-eleccion', !!SECTOR);
   $('#nav .on')?.scrollIntoView({block:'nearest', inline:'center'});
+}
+
+function menuSubtemas(){
+  const s = SECTORES.find(x=>x.id===SECTOR);
+  const el = $('#subnav');
+  if(!s || !(s.subtemas||[]).length){ el.innerHTML=''; el.hidden=true; return; }
+  el.hidden=false;
+  const guardado = SUB; SUB = null; const todos = total(s); SUB = guardado;
+  const n = id => { const g=SUB; SUB=id; const t=total(s); SUB=g; return t; };
+  el.innerHTML = `<div class="wrap ancho">
+    <a href="${link({s:null})}" class="${!SUB?'on':''}">Todo ${esc(s.nombre).toLowerCase()} <em>${todos}</em></a>
+    ${s.subtemas.map(t=>`<a href="${link({s:t.id})}" class="${t.id===SUB?'on':''}">${esc(t.nombre)} <em>${n(t.id)}</em></a>`).join('')}</div>`;
+  el.querySelector('.on')?.scrollIntoView({block:'nearest', inline:'center'});
 }
 
 function menuEscalas(){
@@ -113,30 +140,46 @@ function homePilar(){
     </section>`).join('') : `<div class="vacio">Todavía no hay ${p.nombre.toLowerCase()} a escala <b>${esc(nombreEscala())}</b> en ningún sector.</div>`}`;
 }
 
+// The 3D scene that fits what is on screen, or null when there is no model yet (pending).
+function escenaActual(s){
+  if(ESC) return ESCALAS.find(e=>e.id===ESC).escena;      // País, Continente, Planeta: no model yet
+  return (SUB && ESCENA_SUBTEMA[s.id]?.[SUB]) || s.vision.escena3d || null;
+}
+const nombreSub = s => s.subtemas?.find(t=>t.id===SUB)?.nombre;
+function visor3D(s){
+  const escena = escenaActual(s);
+  const que = [nombreSub(s), ESC && `escala ${nombreEscala()}`].filter(Boolean).join(' · ');
+  if(!escena) return `<div class="visor pendiente"><div>${ICON3D}<b>Modelo 3D pendiente</b>
+    <p>Todavía no hay modelo 3D de ${esc(s.nombre.toLowerCase())}${que?` (${esc(que)})`:''}. El equipo de la visión lo está preparando.</p></div></div>`;
+  return `<div class="visor"><iframe src="vision3d.html?embed#${escena}" title="Visión en 3D" loading="lazy"></iframe>
+    <button class="btn-mini completa" onclick="abrir3D('${escena}')">⛶ Pantalla completa</button></div>`;
+}
+
 function sector(){
   const s = SECTORES.find(x=>x.id===SECTOR);
-  const escena = (ESC && ESCALAS.find(e=>e.id===ESC).escena) || s.vision.escena3d;
+  const escena = escenaActual(s);
   const visibles = PIL ? PILARES.filter(x=>x.id===PIL) : PILARES;
   $('#app').innerHTML = `
   <div class="sector-head">
     <div>
       <div class="nota"><a href="${link({sector:null})}">Inicio</a> · Sector${ESC?` · <span class="chip-esc">Escala: ${esc(nombreEscala())} <a href="${link({e:null})}" title="Ver todas las escalas">×</a></span>`:''}</div>
-      <h1>${esc(s.nombre)}</h1>
+      <h1>${esc(s.nombre)}${SUB?` <span class="sub">· ${esc(nombreSub(s))}</span>`:''}</h1>
       <p>${esc(s.ambito || s.resumen)}</p>
     </div>
-    ${escena ? `<button class="btn3d" onclick="abrir3D('${escena}')">${ICON3D} VER LA VISIÓN EN 3D</button>`:''}
+    ${escena ? `<button class="btn3d" onclick="abrir3D('${escena}')">${ICON3D} VER LA VISIÓN EN 3D</button>` : `<span class="btn3d off">${ICON3D} MODELO 3D PENDIENTE</span>`}
   </div>
   ${visibles.map(p=>`
   <section class="seccion" style="--c:${p.c}">
     <div class="pilar-intro"><div><b>${p.nombre}${ESC?` · escala ${esc(nombreEscala())}`:''}</b> <span class="cnt">${cuentaPilar(s,p.id)}</span><p>${esc(intro(p.id, s))}</p></div></div>
+    ${p.id==='vision' ? visor3D(s) : ''}
     ${cuentaPilar(s,p.id) || p.id==='vision' ? render[p.id](s) : vacio(p)}
   </section>`).join('')}
   ${(s.preguntas||[]).length ? `<div class="preguntas"><h3>Preguntas abiertas para completar este sector</h3><ol>${s.preguntas.map(q=>`<li>${esc(q)}</li>`).join('')}</ol></div>`:''}`;
 }
 
-const vacio = p => `<div class="vacio">Todavía no hay ${p.nombre.toLowerCase()} de este sector a escala <b>${esc(nombreEscala())}</b>.
+const vacio = p => `<div class="vacio">Todavía no hay ${p.nombre.toLowerCase()} de esta parte del sector${ESC?` a escala <b>${esc(nombreEscala())}</b>`:''}.
   Es un hueco por llenar: si conoces alguno, compártelo con el equipo de humanity.wiki.
-  <a href="${link({e:null})}">Ver todas las escalas</a></div>`;
+  ${ESC?`<a href="${link({e:null})}">Ver todas las escalas</a>`:''}${SUB?`<a href="${link({s:null})}">Ver todo el sector</a>`:''}</div>`;
 
 function intro(pid, s){
   return {
@@ -194,12 +237,14 @@ function route(){
   const p = qs.get('p') || pilarRuta;
   PIL = PILARES.some(x=>x.id===p) ? p : null;
   SECTOR = tipo==='sector' && SECTORES.some(s=>s.id===id) ? id : null;
-  nav(); menuEscalas(); menuPilares();
+  const sec = SECTORES.find(x=>x.id===SECTOR);
+  SUB = sec?.subtemas?.some(t=>t.id===qs.get('s')) ? qs.get('s') : null;
+  nav(); menuSubtemas(); menuEscalas(); menuPilares();
   SECTOR ? sector() : home();
   $('#escalas').classList.toggle('con-eleccion', true);
   $('#pilares').classList.toggle('con-eleccion', true);
   // Jump to the top when the page or the pillar changes, not when only the scale changes.
-  const vista = ruta.split('/').slice(0,3).join('/') + '|' + PIL;
+  const vista = ruta.split('/').slice(0,3).join('/') + '|' + PIL + '|' + SUB;
   if(vista !== ultimaVista) window.scrollTo(0,0);
   ultimaVista = vista;
 }

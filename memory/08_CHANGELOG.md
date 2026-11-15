@@ -11789,3 +11789,11 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
   - la rueda del morro girada 29°, 1 cm fuera del morro;
   - los pies del piloto: 2,3 cm de los 3 que se piden;
   - tres comprobaciones que ya estaban en rojo antes del rombo: las cabezas en talla alta, el controlador y el bastidor.
+
+## 2026-11-15 — `/vision`: partes de cada sector, 3D cargado dentro de la página, contenido centrado
+
+- Eugenio: «en vivienda hay varias partes, como la arquitectura del hogar, el urbanismo, la comunidad… añádelo como submenú debajo de vivienda», «que esté todo centrado y los menús laterales un 20 % más pequeños», «el modelo 3D que cargue por defecto sin hacer clic» y «cuando no haya modelo 3D pon que está pendiente».
+- **Submenú de partes** bajo la cabecera, en los 12 sectores (5-6 partes cada uno; en Vivienda: Arquitectura del hogar, Urbanismo, Comunidad y cooperativas, Suelo y acceso a la vivienda, Naturaleza y territorio). «Todo …» y cada parte con su contador; mismo efecto de selección que los demás menús. Elegir una parte muestra solo lo de esa parte, combinable con la escala y el pilar; va en el enlace (`?s=urbanismo`).
+- Cada bloque, reto, solución y proyecto lleva sus partes (`subtemas`), asignadas por palabras clave con `scripts/subtemas.py` (en la sesión, fuera del repositorio). Todos los elementos tienen al menos una parte. Primera clasificación automática: a revisar.
+- **El 3D se carga solo** dentro de la sección «Visión ideal» (sin la botonera de escalas del visor, que ya la da la página), con botón de pantalla completa. La escena sigue a la parte y a la escala elegidas (Urbanismo → pueblo, Arquitectura → hogar…). En las escalas País, Continente y Planeta todavía no hay modelo: se muestra «Modelo 3D pendiente», y el botón de la cabecera dice lo mismo.
+- Contenido centrado entre los dos menús (ancho máximo 1.060 px, títulos centrados); menús laterales un 20 % más estrechos y con letra un 20 % menor.
