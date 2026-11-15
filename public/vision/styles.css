@@ -12,7 +12,6 @@ header.top{position:sticky;top:0;z-index:20;background:rgba(247,244,238,.94);bac
 .top .wrap{display:flex;align-items:center;gap:18px;height:60px}
 .brand{font-family:var(--serif);font-size:22px;font-weight:700;text-decoration:none;letter-spacing:.2px}
 .brand span{color:var(--accent)}
-.badge-local{font-size:11px;background:#fff3cd;border:1px solid #e9d48a;color:#6b5500;padding:2px 8px;border-radius:99px}
 nav.sectores{display:flex;gap:4px;overflow-x:auto;flex:1;scrollbar-width:none}
 nav.sectores a{font-size:13px;text-decoration:none;padding:6px 10px;border-radius:8px;white-space:nowrap;color:var(--muted)}
 nav.sectores a.on,nav.sectores a:hover{background:#ebe5d8;color:var(--ink)}
@@ -35,8 +34,7 @@ h2.sec{font-family:var(--serif);font-size:26px;margin:10px 0 16px}
 .card h3{margin:0;font-family:var(--serif);font-size:21px}
 .card p{margin:0;color:var(--muted);font-size:14px}
 .estado{align-self:flex-start;font-size:11px;padding:2px 8px;border-radius:99px;margin-top:6px}
-.estado.completo{background:#dcefe3;color:#24563b}
-.estado.borrador{background:#f1ece2;color:#7a6a4d}
+.estado{background:#dcefe3;color:#24563b}
 
 /* Sector */
 .sector-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:22px}
@@ -92,3 +90,7 @@ h2.sec{font-family:var(--serif);font-size:26px;margin:10px 0 16px}
 footer{border-top:1px solid var(--line);padding:22px 0;color:var(--muted);font-size:13px}
 @media (max-width:800px){.pilares{grid-template-columns:1fr 1fr}.hero h1{font-size:32px}.sector-head h1{font-size:30px}}
 .sinimg{height:150px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#8a7f6a;background:repeating-linear-gradient(45deg,#ece5d8,#ece5d8 8px,#e5ddcd 8px,#e5ddcd 16px)}
+.arte{margin:0 0 22px;background:#f3eee4;border-radius:var(--radius);overflow:hidden;border:1px solid var(--line)}
+.arte img{width:100%;max-height:440px;object-fit:contain;display:block;background:#f3eee4}
+.arte figcaption{padding:10px 16px;font-size:13px;color:var(--muted)}
+.card .mini{width:calc(100% + 36px);margin:-18px -18px 6px;height:130px;object-fit:cover;border-radius:var(--radius) var(--radius) 0 0;background:#f3eee4}

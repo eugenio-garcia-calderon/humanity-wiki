@@ -11663,3 +11663,11 @@ Eugenio: «Lo de votar por temas, llámalo así. En el menú y en el título»; 
 - **Selector de temas**: cinco tarjetas con icono, nombre, qué se vota y cuántas medidas llevas; cambia al pasar el ratón (160 ms de espera, solo con ratón), con clic, y con las flechas del teclado (`role="tablist"`).
 - Lo votado se guarda en `localStorage` con una clave nueva (`politica.votar.v2`), porque los valores ya no son posiciones de 0 a 4 sino cantidades; lo de la versión anterior no se arrastra.
 - Comprobado en Chrome sin interfaz a 1360 y 390 px: cambio al pasar el ratón, deslizador con clic y teclado, ejes de los diez gráficos, sin desbordamiento ni errores de JS.
+
+## 2026-11-15 — `/vision`: los 12 sectores completos y sin «borrador»
+
+- Eugenio: «sigue ampliando todos los temas, quita lo de borrador». Los diez sectores que tenían un solo ejemplo (Energía, Política, Economía, Seguridad, Justicia, Salud, Alimentación, Informática, Educación, Cuidados) tienen ahora, como Vivienda y Movilidad, 3 bloques de visión, 6 retos con dato y fuente, 6 soluciones (cada una dice qué reto supera) y 7-8 proyectos, la mayoría en España. Investigado por cinco agentes con búsqueda web; lo que no pudieron confirmar lleva «(por verificar)» en el propio texto.
+- Proyectos propios enlazados en su sector: SolarCrowd (Energía), Votar por temas (Política, `/observatorio-polarizacion/`), Modelo de optimización socioeconómica (Economía), humanity.wiki (Informática), Estudio sobre la conciencia (Educación), Aeromóvil (Movilidad), Comunidad Circular (Vivienda).
+- Cada sector abre su visión con la ilustración del mes correspondiente del **Calendario Arte para la Humanidad 2027** (miniatura de `public/calendario-arte/miniaturas/`; al pinchar, la grande). La portada muestra la misma ilustración en cada tarjeta. Energía, Informática y Seguridad usan otro diseño de su mes para no repetir imagen con Movilidad y Vivienda.
+- Todos los sectores tienen botón «VER LA VISIÓN EN 3D» y cada bloque su escala del visor.
+- Quitado todo rastro de «borrador»: la etiqueta de la cabecera, la de las tarjetas (ahora dicen cuántos retos, soluciones y proyectos hay) y la del visor 3D. `data_otros.js` desaparece: todo vive en `data.js`.
