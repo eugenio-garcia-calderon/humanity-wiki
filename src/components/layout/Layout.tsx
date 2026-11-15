@@ -78,7 +78,7 @@ const HERRAMIENTAS_CREAR = HERRAMIENTAS.filter(h =>
   ['proyectos', 'paginas', 'esquemas', 'mapas', 'tareas', 'tablas', 'calendario', 'archivos'].includes(h.clave));
 const SECCIONES_PIE = [
   { to: '/mercado', label: 'Mercado', icon: Store },
-  { to: '/vision', label: 'Visión y hoja de ruta', icon: Compass },
+  { to: '/hoja-de-ruta', label: 'Visión y hoja de ruta', icon: Compass },
 ];
 /** Para buscar el icono de una ventana abierta por su ruta. */
 const TODAS_SECCIONES = [...SECCIONES_COMUN, ...SECCIONES_TUYO, ...SECCIONES_PIE];

@@ -137,7 +137,7 @@ export function registerRoadmapRoutes(app: Express, db: any) {
             id: clave,
             esHojaDeRuta: !t.proyecto_id,
             titulo: t.proyecto_titulo || 'Hoja de ruta de humanity.wiki',
-            url: t.proyecto_slug ? `/carpetas/${t.proyecto_slug}` : '/vision',
+            url: t.proyecto_slug ? `/carpetas/${t.proyecto_slug}` : '/hoja-de-ruta',
             publico: t.proyecto_id ? !!t.proyecto_publico : true,
             icono: t.proyecto_icono || null,
             mio: !!yo && t.proyecto_creador === yo,

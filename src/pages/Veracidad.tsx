@@ -199,7 +199,7 @@ export default function Veracidad() {
               Diez fases, {items === null ? '…' : items.length} tarjetas. No es una lista aparte: son las
               tarjetas del grupo «veracidad» de la hoja de ruta de la plataforma, así que lo que se
               mueva aquí se mueve en{' '}
-              <Link to="/vision" className="font-bold text-purple-700 hover:underline inline-flex items-center gap-0.5">
+              <Link to="/hoja-de-ruta" className="font-bold text-purple-700 hover:underline inline-flex items-center gap-0.5">
                 Visión y hoja de ruta <ArrowUpRight className="w-3 h-3" />
               </Link>.
             </p>

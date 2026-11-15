@@ -120,6 +120,15 @@ const TerritoryProfile = lazy(() => import('./pages/TerritoryProfile'));
 const UserMapa = lazy(() => import('./pages/UserMapa'));
 import { PAGINAS_INFO } from './paginasInfo';
 const Vision = lazy(() => import('./pages/Vision'));
+
+/** `/vision` inside the SPA: hand over to the static site, or keep old roadmap links working. */
+function AVisionIdeal() {
+  const { search } = useLocation();
+  if (new URLSearchParams(search).has('pestana')) return <Navigate to={`/hoja-de-ruta${search}`} replace />;
+  // In dev Vite would answer /vision/ with the SPA again; index.html avoids the loop.
+  window.location.replace(import.meta.env.DEV ? '/vision/index.html' : '/vision/');
+  return null;
+}
 const Debates = lazy(() => import('./pages/Debates'));
 const PlantillaHumanidad = lazy(() => import('./pages/PlantillaHumanidad'));
 const Debate = lazy(() => import('./pages/Debate'));
@@ -345,6 +354,13 @@ export default function App() {
                   (2026-11-05, Eugenio). Herramienta a pantalla completa, sin
                   cuenta y fuera del Layout, como el calendario. */}
               <Route path="arquitectura" element={<Arquitectura />} />
+              {/* VISIÓN IDEAL DE LOS 12 SECTORES (2026-11-15, Eugenio: «publica esta web
+                  en humanity.wiki con la url de /vision»). A self-contained static site in
+                  `public/vision/`; the server answers `/vision` with `/vision/` itself.
+                  This route only catches in-app navigation to `/vision`: old roadmap
+                  links with `?pestana=` go to `/hoja-de-ruta`, everything else reloads
+                  into the static site. */}
+              <Route path="vision" element={<AVisionIdeal />} />
               <Route path="formulario/:token" element={<FormularioPublico />} />
               {/* Seguir un pedido en el dominio principal (2026-10-18). Los
                   WhatsApp de compra ya enlazaban `humanity.wiki/pedido?codigo=…`
@@ -442,7 +458,9 @@ export default function App() {
                     </Suspense>
                   }
                 />
-                <Route path="vision" element={<Vision />} />
+                {/* «Visión y hoja de ruta» moved here on 2026-11-15: `/vision` is now
+                    the 12-sector ideal-vision site (see AVisionIdeal above). */}
+                <Route path="hoja-de-ruta" element={<Vision />} />
                 {/* Los debates NO son páginas de información: son la
                     plataforma. Por eso van aquí y no en `paginasInfo.ts`, que
                     es la lista de lo que EXPLICA la plataforma. */}
