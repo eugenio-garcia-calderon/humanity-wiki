@@ -692,3 +692,9 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 
 - `PuntosOcupante.codoZ` comes from sampling the body's half-width around the arms. The viewer then bends the elbow down until it fits. Nothing in the basculante checks looks at the arms, so a design whose arms cannot fit at all still shows green.
 - The right shape is an «Brazos dentro» check, using the same elbow the viewer draws. That needs the elbow solver (`articulacion`, now in Visor3D) moved to `geometria.ts`: about 1 hour.
+
+## 2026-11-15 · The Bala clásico's lean is geometry only
+
+- `tBascula` moves the pods on an ideal parallelogram whose arm length is the upper arm's (`ejeBascula`). The lower arm turns by whatever angle brings its outer end along, so the two arms are not a real four-bar linkage.
+- The tilt actuator, its mass, and the lean in the rollover, mass and consumption figures are not modelled. Making the rollover lean-aware means adding the basculante family's `basculacion` block, about 2 hours.
+- The viewer finds the pods, wheels and arms by name and by position (`inclinarBala`). A rename in balaPiezas.ts would silently stop them moving.

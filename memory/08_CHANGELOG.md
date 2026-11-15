@@ -11729,3 +11729,23 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
 - **Codo.** En el Smera alargado, más bajo y con el piloto reclinado, el codo derecho del piloto asomaba por la puerta como una mancha azul. Ahora el visor dobla el brazo hacia abajo hasta que el codo queda dentro de la carrocería. En los demás diseños el brazo no cambia: solo se dobla si el codo se salía.
 - **Texto.** La tarjeta de un coche de referencia ya no promete «abre sus puertas y su maletero» cuando solo tiene puertas.
 - Comprobado en un navegador automatizado, en ordenador, con una copia local y un diseño alargado de prueba. No he visto el «smeraptera» de verdad: sus medidas están en el servidor y desde aquí no llego a él.
+
+## 2026-11-15 · El Cuadriciclo Bala clásico puede bascular
+
+- Eugenio, sobre su «Smeraptera»: «haz que pueda bascular… creo que te has equivocado de vehículo». El arreglo anterior era para la familia Cuadriciclo Basculante, y el Smeraptera es un Cuadriciclo Bala clásico, con cuatro ruedas en carenados.
+- **Opción nueva.** En Rodaje → Suspensión y dirección, solo con dos ruedas traseras, aparecen dos controles:
+  - «Bascular en las curvas» (no / sí); de serie, «no».
+  - «Bascular: inclinación máxima», de 5 a 30°; de serie, 15°.
+- **Cómo se inclina.** Toda la cabina se inclina hacia dentro, sobre el suelo bajo su línea central. Cada carenado cuelga de sus dos brazos como de un paralelogramo y se inclina igual, con su rueda, su mangueta y su motor:
+  - el de dentro sube a lo largo del costado y el de fuera baja;
+  - los dos se acercan un poco a la cabina;
+  - las cuatro ruedas siguen en el suelo.
+  - Los brazos, los amortiguadores y las bieletas de la dirección siguen a su carenado.
+- **Botón.** «Bascular» aparece en la barra de abajo y en la tarjeta del diseño que editas cuando la opción está en «sí».
+- **Comprobaciones nuevas**, a la inclinación máxima:
+  - cada carenado (delantero y trasero, el de dentro y el de fuera) a la carrocería;
+  - cada carenado al suelo;
+  - la carrocería al suelo.
+  - Con las medidas de serie y 1,80 m de vía, a 15° el carenado de dentro sube 23 cm y todo queda en verde hasta 25°.
+- **Aún no se tiene en cuenta** en el vuelco, la masa ni el consumo: ni el mecanismo ni la inclinación.
+- No he cambiado el Smeraptera guardado: la opción está en «no» hasta que él la active.

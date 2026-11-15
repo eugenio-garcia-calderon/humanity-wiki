@@ -1807,3 +1807,9 @@ Eugenio: «que cada elemento de la ilustración puedas pinchar y arrastrarlo… 
 **Reference data.** The outlines are traced by hand from Lumeneo's press photos (side and front) at 193.4 px/m, taken from the 1.70 m wheelbase. Only the measurements are in the repository, not the photos.
 
 **The evaluator.** It finds edges on the photo itself (a Sobel filter) to check the outline independently of the tracing.
+
+## 2026-11-15 · Leaning added to the Bala clásico rather than converting the design to the basculante family
+
+- Eugenio's «Smeraptera» is a Cuadriciclo Bala clásico, and he wants it to lean.
+- **Chosen:** an option on that family (`tBascula`, `tBascMax`) with the basculante's parallelogram formula, generalised to arms whose inner ends sit at the body's side: β = φ + asin((via/2 − Lk)·sin φ / Lk).
+- **Rejected:** rebuilding his shape in the Cuadriciclo Basculante family. It would lose the pods, the Bala body and every setting he made.
