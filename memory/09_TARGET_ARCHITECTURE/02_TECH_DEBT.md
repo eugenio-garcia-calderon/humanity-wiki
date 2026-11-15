@@ -638,3 +638,8 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 - **The nose's underside has no guide line.** The hood and the tail's top and belly do; under the nose the plain cap closes onto the edge's bottom (it is monotone, but not checked by the script).
 - **The light bar is a ribbon on the skin**: the tunnel does not see it, as it does not see the round lamp or the mirrors.
 - **The tunnel's reading of the trailing edge is sensitive**: on the proposed clásico a 3, 4 and 5 cm edge give Cd 0.2159, 0.2147 and 0.2130; with the edge's centre at 0.62 m instead of 0.59 (a value tried on the way), 3 cm gave 0.2265 against 0.2130 for 4 cm. The tunnel reads the body through superellipse sections every 5 cm; a real blade tail needs a finer model before any number this close is trusted. Constants unchanged, by decision (2026-11-12).
+## 2026-11-13 — Garage drag and rename: shortcuts
+
+- **Dragged places are per browser** (`localStorage`), not shared: Eugenio's phone and computer each have their own garage arrangement.
+- **A dragged place is absolute in the rows' frame.** When a design is added before it in the list, the cars in the row move along and a dragged car does not, so they can end up overlapping. There is no overlap check on drop.
+- **The drag snaps to 5 cm and has no grid or alignment guides**; «Volver a su fila» is the way back to a tidy row.

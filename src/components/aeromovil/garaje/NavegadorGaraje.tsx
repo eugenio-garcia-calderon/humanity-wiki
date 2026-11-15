@@ -12,8 +12,8 @@
 //   changes of the one being left: if it is yours and saves itself, they are saved first; otherwise the page asks.
 // · «Guardar como nuevo» and «Eliminar» are the same calls as the logo menu's (POST, and DELETE, which archives).
 //   The server lets only the owner of the Aeromóvil (or an admin) do either, so only the owner sees the buttons.
-import { useState, type ReactNode } from 'react';
-import { Check, Copy, Eye, EyeOff, Focus, Loader2, Trash2, X } from 'lucide-react';
+import { useState, type FormEvent, type ReactNode } from 'react';
+import { Check, Copy, Eye, EyeOff, Focus, Loader2, Pencil, Rows3, Trash2, X } from 'lucide-react';
 import { Button, Card } from '../../ui/core';
 import { cn } from '../../../utils/cn';
 import { aDiseno, deDiseno, leerClaves, type Diseno, type DisenoAbierto } from '../Disenos';
@@ -33,7 +33,7 @@ export function familiaGuardada(d: Diseno): string {
 /** «Solo mostrar este»: nothing hidden, only the design being edited, or only one reference car (by id). */
 export type Solo = null | 'activo' | string;
 
-export function useEleccionDiseno({ g, P, actual, abrirDiseno, sinGuardar, puedeDecidir, nombreVehiculo, morro, cola }: {
+export function useEleccionDiseno({ g, P, actual, abrirDiseno, sinGuardar, alRenombrado, puedeDecidir, nombreVehiculo, morro, cola }: {
   g: Garaje;
   P: Parametros;
   actual: DisenoAbierto | null;
@@ -41,6 +41,8 @@ export function useEleccionDiseno({ g, P, actual, abrirDiseno, sinGuardar, puede
   abrirDiseno: (d: Diseno) => void;
   /** Leaves the design being edited unsaved (when the one open was removed and there is no other). */
   sinGuardar: () => void;
+  /** A design was renamed (2026-11-13): the page updates the open design's name, if it is that one. */
+  alRenombrado: (d: Diseno) => void;
   puedeDecidir: boolean;
   nombreVehiculo: string;
   /** The design being edited: nose and tail x (m), for where its copy goes. */
@@ -126,22 +128,60 @@ export function useEleccionDiseno({ g, P, actual, abrirDiseno, sinGuardar, puede
   return {
     seguir, tarjeta, setTarjeta, cerrarTarjeta: () => { setTarjeta(false); setBorrar(false); setAviso(null); }, pendiente, setPendiente, solo, setSolo, borrar, setBorrar, ocupado, aviso, cambiado,
     elegir, guardarYCambiar, descartarYCambiar: () => pendiente && cambiar(pendiente.d), copiar, eliminar, alPincharGaraje,
+    /** «Cambiar nombre» (2026-11-13): the name only, through the server's PUT; every place that shows it follows. */
+    renombrar: async (id: number, nombre: string) => { const d = await g.renombrar(id, nombre); alRenombrado(d); },
   };
 }
 type Eleccion = ReturnType<typeof useEleccionDiseno>;
 
 const boton = 'gap-1.5 px-2.5 py-1.5 text-[11px] normal-case tracking-normal';
 
+/** The server keeps a design's name trimmed and at most 80 characters, and refuses an empty one (aeromovil.ts). */
+export const MAX_NOMBRE = 80;
+
+/** «Cambiar nombre» in place: a text field with «Guardar» and «Cancelar» (Enter saves, Escape cancels). */
+function FormNombre({ inicial, alGuardar, alCancelar, className }: { inicial: string; alGuardar: (n: string) => Promise<void>; alCancelar: () => void; className?: string }) {
+  const [nombre, setNombre] = useState(inicial);
+  const [ocupado, setOcupado] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const limpio = nombre.trim();
+  const enviar = async (ev: FormEvent) => {
+    ev.preventDefault();
+    if (!limpio) { setError('El nombre no puede quedar vacío.'); return; }
+    if (limpio === inicial) { alCancelar(); return; }
+    setOcupado(true); setError(null);
+    try { await alGuardar(limpio); } catch (e: any) { setError(e?.message || 'No se ha podido cambiar el nombre.'); setOcupado(false); }
+  };
+  return (
+    <form onSubmit={enviar} onKeyDown={ev => { if (ev.key === 'Escape') { ev.stopPropagation(); alCancelar(); } }} className={cn('flex flex-col gap-1', className)}>
+      <div className="flex min-w-0 gap-1">
+        <label className="sr-only" htmlFor={`nombre-${inicial}`}>Nombre del diseño</label>
+        <input id={`nombre-${inicial}`} autoFocus value={nombre} maxLength={MAX_NOMBRE} onChange={ev => setNombre(ev.target.value)} disabled={ocupado}
+          className="min-w-0 flex-1 rounded-md border border-slate-300 px-2 py-1 text-sm" />
+        <Button type="submit" disabled={ocupado || !limpio} className="shrink-0 bg-teal-700 px-2.5 py-1 text-xs normal-case tracking-normal hover:bg-teal-800">
+          {ocupado ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Guardar'}
+        </Button>
+        <Button type="button" variant="ghost" disabled={ocupado} onClick={alCancelar} className="shrink-0 px-2 py-1 text-xs normal-case tracking-normal">Cancelar</Button>
+      </div>
+      <p className={cn('text-[11px]', error ? 'text-red-700' : 'text-slate-400')}>{error ?? `${limpio.length}/${MAX_NOMBRE} caracteres`}</p>
+    </form>
+  );
+}
+
 /** The card of the design being edited, in the 3D view: «Solo mostrar este», «Guardar como nuevo», «Eliminar». */
-export function TarjetaDiseno({ e, actual, porDefecto, nombreVehiculo, puedeDecidir, className }: {
-  e: Eleccion; actual: DisenoAbierto | null; porDefecto: boolean; nombreVehiculo: string; puedeDecidir: boolean; className?: string;
+export function TarjetaDiseno({ e, g, actual, porDefecto, nombreVehiculo, puedeDecidir, className }: {
+  e: Eleccion; g: Garaje; actual: DisenoAbierto | null; porDefecto: boolean; nombreVehiculo: string; puedeDecidir: boolean; className?: string;
 }) {
+  const [editando, setEditando] = useState(false);
   if (!e.tarjeta && !e.aviso) return null;
+  const movido = actual ? !!g.sitios[idGaraje(actual.id)] : false;
   return (
     <Card role="group" aria-label={`${actual?.nombre ?? 'Diseño sin guardar'}: el diseño que editas`} className={cn('absolute z-[16] p-3 shadow-lg', className)}>
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-slate-900">{actual?.nombre ?? 'Diseño sin guardar'}</p>
+          {editando && actual
+            ? <FormNombre key={actual.id} inicial={actual.nombre} alCancelar={() => setEditando(false)} alGuardar={async n => { await e.renombrar(actual.id, n); setEditando(false); }} />
+            : <p className="truncate text-sm font-semibold text-slate-900">{actual?.nombre ?? 'Diseño sin guardar'}</p>}
           <p className="text-[11px] leading-snug text-slate-600">{nombreVehiculo} · el que editas: sus departamentos están arriba y sus deslizadores en el panel (en el móvil, debajo del 3D).</p>
         </div>
         <Button variant="ghost" onClick={e.cerrarTarjeta} aria-label="Cerrar" title="Cerrar" className="-mr-1.5 -mt-1.5 h-10 w-10 shrink-0 p-0">
@@ -157,6 +197,16 @@ export function TarjetaDiseno({ e, actual, porDefecto, nombreVehiculo, puedeDeci
           {puedeDecidir && (
             <Button variant="outline" disabled={!!e.ocupado} onClick={e.copiar} className={boton}>
               {e.ocupado === 'copiar' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Copy className="h-3.5 w-3.5" />}Guardar como nuevo
+            </Button>
+          )}
+          {puedeDecidir && actual && !editando && (
+            <Button variant="outline" disabled={!!e.ocupado} onClick={() => setEditando(true)} className={boton}>
+              <Pencil className="h-3.5 w-3.5" />Cambiar nombre
+            </Button>
+          )}
+          {movido && actual && (
+            <Button variant="outline" onClick={() => g.aFila(idGaraje(actual.id))} title="Vuelve a su sitio en la fila (los demás se colocan alrededor)" className={boton}>
+              <Rows3 className="h-3.5 w-3.5" />Volver a su fila
             </Button>
           )}
           {puedeDecidir && actual && (
@@ -180,7 +230,8 @@ export function TarjetaDiseno({ e, actual, porDefecto, nombreVehiculo, puedeDeci
           </div>
         </div>
       )}
-      {e.tarjeta && !puedeDecidir && <p className="mt-1.5 text-[11px] leading-snug text-slate-500">Copiar o eliminar diseños solo puede el dueño del Aeromóvil, con su sesión iniciada.</p>}
+      {e.tarjeta && !puedeDecidir && <p className="mt-1.5 text-[11px] leading-snug text-slate-500">Copiar, renombrar o eliminar diseños solo puede el dueño del Aeromóvil, con su sesión iniciada.</p>}
+      {e.tarjeta && <p className="mt-1.5 text-[11px] leading-snug text-slate-500">El que editas se queda en el centro: arrastra los demás coches para colocarlos a su alrededor.</p>}
     </Card>
   );
 }
@@ -209,6 +260,16 @@ export function AvisoCambios({ e, actual, puedeDecidir, className }: { e: Elecci
   );
 }
 
+/** «Volver a su fila» on a reference car's card, once it has been dragged (2026-11-13). */
+export function BotonFilaReferencia({ g, id }: { g: Garaje; id: string }) {
+  if (!g.sitios[id]) return null;
+  return (
+    <Button variant="outline" onClick={() => g.aFila(id)} className="h-10 shrink-0 px-2 text-[11px] normal-case tracking-normal sm:h-auto sm:gap-1.5 sm:px-2.5 sm:py-1.5">
+      <Rows3 className="hidden h-3.5 w-3.5 sm:block" />Volver a su fila
+    </Button>
+  );
+}
+
 /** «Solo mostrar este» on a reference car's card (inside the viewer's own card). */
 export function BotonSoloReferencia({ e, id }: { e: Eleccion; id: string }) {
   const activo = e.solo === id;
@@ -223,8 +284,10 @@ export function BotonSoloReferencia({ e, id }: { e: Eleccion; id: string }) {
  * The list view of the garage, in the side panel and in the «Garaje» panel of the 3D view: «Mis diseños» (the first
  * row) and «Coches de referencia» (the second), each one shown or hidden.
  */
-export function ListaGaraje({ g, e, actual, nombreVehiculo, referencias, alAlternarReferencia, alElegido, pie }: {
+export function ListaGaraje({ g, e, actual, nombreVehiculo, referencias, alAlternarReferencia, alElegido, puedeDecidir, pie }: {
   g: Garaje; e: Eleccion; actual: DisenoAbierto | null; nombreVehiculo: string;
+  /** The owner (or an admin): only they can rename, as the server checks. */
+  puedeDecidir: boolean;
   /** After a design is picked in the list (the «Garaje» panel closes on a phone, where it covers the 3D). */
   alElegido?: () => void;
   referencias: { id: string; nombre: string; largo: number; visible: boolean }[];
@@ -232,6 +295,7 @@ export function ListaGaraje({ g, e, actual, nombreVehiculo, referencias, alAlter
   pie?: ReactNode;
 }) {
   const lista = g.lista;
+  const [editando, setEditando] = useState<number | null>(null);
   const propioFuera = !actual || (lista != null && !lista.some(d => d.id === actual.id));
   const fila = 'flex items-center gap-1 rounded-lg border px-1';
   return (
@@ -255,6 +319,11 @@ export function ListaGaraje({ g, e, actual, nombreVehiculo, referencias, alAlter
           )}
           {lista?.map(d => {
             const esActivo = d.id === actual?.id, oculto = !esActivo && g.ocultos.includes(d.id);
+            if (editando === d.id) return (
+              <li key={d.id} className={cn(fila, 'border-teal-600 p-1.5')}>
+                <FormNombre inicial={d.nombre} className="min-w-0 flex-1" alCancelar={() => setEditando(null)} alGuardar={async n => { await e.renombrar(d.id, n); setEditando(null); }} />
+              </li>
+            );
             return (
               <li key={d.id} className={cn(fila, esActivo ? 'border-teal-600 bg-teal-50' : 'border-slate-200')}>
                 <Button variant="ghost" onClick={() => { void e.elegir(d); alElegido?.(); }} disabled={!!e.ocupado} aria-current={esActivo || undefined}
@@ -263,6 +332,10 @@ export function ListaGaraje({ g, e, actual, nombreVehiculo, referencias, alAlter
                   <span className={cn('block w-full truncate text-[13px] font-medium', esActivo ? 'text-teal-900' : oculto ? 'text-slate-400' : 'text-slate-800')}>{d.nombre}</span>
                   <span className={cn('block w-full truncate text-[11px] font-normal', esActivo ? 'text-teal-700' : 'text-slate-400')}>{[familiaGuardada(d), esActivo ? 'el que editas' : ''].filter(t => t && t !== d.nombre).join(' · ') || '\u00a0'}</span>
                 </Button>
+                {puedeDecidir && (
+                  <Button variant="ghost" onClick={() => setEditando(d.id)} aria-label={`Cambiar el nombre de «${d.nombre}»`} title="Cambiar nombre"
+                    className="h-9 w-9 shrink-0 p-0 text-slate-500"><Pencil className="h-4 w-4" /></Button>
+                )}
                 {!esActivo && (
                   <Button variant="ghost" aria-pressed={!oculto} onClick={() => g.alternarOculto(d.id)}
                     aria-label={oculto ? `Mostrar «${d.nombre}» en el 3D` : `Ocultar «${d.nombre}» en el 3D`} title={oculto ? 'Mostrar en el 3D' : 'Ocultar en el 3D'}
@@ -290,10 +363,16 @@ export function ListaGaraje({ g, e, actual, nombreVehiculo, referencias, alAlter
           ))}
         </div>
       </div>
+      {g.movidos.length > 0 && (
+        <Button variant="outline" onClick={() => g.aFila()} className="gap-1.5 px-2.5 py-1.5 text-xs normal-case tracking-normal">
+          <Rows3 className="h-3.5 w-3.5" />Volver a colocar en fila ({g.movidos.length} {g.movidos.length === 1 ? 'coche movido' : 'coches movidos'})
+        </Button>
+      )}
       <p className="text-[11px] leading-snug text-slate-500">
         En el 3D, tus diseños están en la primera fila, en el orden de esta lista, y los coches de referencia en la segunda, detrás.
         Pincha uno de tus diseños (aquí o en el 3D) para editarlo: pasa al centro y sus departamentos y deslizadores salen en el panel.
-        Pincha un coche de referencia para ver su ficha.
+        Pincha un coche de referencia para ver su ficha. Para mover un coche, púlsalo y arrástralo: se queda donde lo sueltes, en este navegador.
+        El que editas se queda en el centro.
       </p>
       {pie}
     </div>

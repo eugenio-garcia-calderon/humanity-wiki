@@ -1956,7 +1956,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     if (g) { g.traverse((o: any) => { if (o.isSprite) { o.material.map?.dispose(); o.material.dispose(); } }); st.scene.remove(g); }
     if (!claveNombres || !nombres) return;
     g = new THREE.Group(); g.name = 'nombres'; st.scene.add(g);
-    const poner = (texto: string | undefined, x: number, y: number, z: number) => { if (!texto) return; const c = cartel(texto); c.scale.multiplyScalar(0.8); c.position.set(x, y, z); g!.add(c); };
+    const poner = (texto: string | undefined, x: number, y: number, z: number) => { if (!texto) return; const c = cartel(texto); c.scale.multiplyScalar(0.8); c.position.set(x, y, z); c.userData.texto = texto; g!.add(c); };
     if (!soloGaraje && garaje.length) poner(nombres.aeromovil, (modelo.xn + modelo.xt) / 2, modelo.P.H + 0.35, 0);
     for (const v of garaje) {
       const def = vehiculoGaraje(v.id); if (!def) continue;
