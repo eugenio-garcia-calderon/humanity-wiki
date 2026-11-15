@@ -1,10 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "basculante",
-      "ruta": "drizzle/0219_aeromovil_basculante_base.sql",
-      "motivo": "team base design for the Cuadriciclo Basculante",
-      "desde": "2026-11-15T03:49:02.838Z"
-    }
-  ]
+  "reservas": []
 }
