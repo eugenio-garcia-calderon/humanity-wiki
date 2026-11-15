@@ -201,3 +201,46 @@ h2.sec,.grupo h2{text-align:center}
 .btn3d.off{background:#d9d3c6;color:#7a7364;box-shadow:none;cursor:default}
 @media (max-width:1150px){.layout{grid-template-columns:190px minmax(0,1fr)} #subnav .wrap{justify-content:flex-start} body:has(#subnav:not([hidden])) #pilares{top:109px}}
 @media (max-width:900px){.layout{grid-template-columns:1fr} body:has(#subnav:not([hidden])) #escalas{top:109px} body:has(#subnav:not([hidden])) #pilares{top:161px} .visor{height:360px}}
+
+/* ---- 2026-11-15: controls on a dark frame, content on a light panel ----
+   The three menus (top, left, right) share one dark background so they read as controls;
+   the centre is a light "screen" showing what they select. */
+:root{--marco:#1f2a26;--marco-2:#2a3732;--marco-txt:#e9e4d8;--marco-mute:#93a099;--marco-gris:#66736c;--pantalla:#faf7f1;--accent-oscuro:#4f9a72}
+html,body{background:var(--marco)}
+header.top{background:var(--marco);border-bottom:1px solid rgba(255,255,255,.07);backdrop-filter:none}
+.brand{color:var(--marco-txt)} .brand span{color:var(--accent-oscuro)}
+nav.sectores a{color:var(--marco-txt)}
+nav.sectores a:hover{background:var(--marco-2);color:#fff}
+nav.sectores.con-eleccion a{color:var(--marco-gris)}
+nav.sectores a.on{background:var(--accent-oscuro)}
+#subnav{background:var(--marco);border-top:1px solid rgba(255,255,255,.07);border-bottom:1px solid rgba(255,255,255,.07)}
+#subnav a{color:var(--marco-gris)}
+#subnav a:hover{background:var(--marco-2);color:var(--marco-txt)}
+#subnav a.on{background:var(--accent-oscuro);color:#fff}
+.layout{max-width:none;padding:0 18px 18px}
+#escalas a,#pilares a{color:var(--marco-txt)}
+#escalas .esc-tit,#pilares .esc-tit{color:var(--marco-mute)}
+#escalas a small,#pilares a small{color:var(--marco-mute)}
+#escalas a em,#pilares a em{background:rgba(255,255,255,.08);color:var(--marco-mute)}
+#escalas a .ico{color:var(--accent-oscuro)}
+#escalas a:hover,#pilares a:hover{background:var(--marco-2)}
+#escalas.con-eleccion a:not(.on),#pilares.con-eleccion a:not(.on){color:var(--marco-gris)}
+#escalas.con-eleccion a:not(.on) small,#escalas.con-eleccion a:not(.on) em,#escalas.con-eleccion a:not(.on) .ico,
+#pilares.con-eleccion a:not(.on) svg,#pilares.con-eleccion a:not(.on) small,#pilares.con-eleccion a:not(.on) em{color:#56625b}
+#escalas a.on{background:var(--accent-oscuro);color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.35)}
+#pilares a{background:rgba(255,255,255,.04)}
+#pilares.con-eleccion a:not(.on){border-left-color:#3a4842}
+#pilares a.on{box-shadow:0 4px 16px rgba(0,0,0,.35)}
+#pilares a.todo.on{background:#e9e4d8;color:var(--marco)!important}
+#pilares a.todo.on svg,#pilares a.todo.on small{color:var(--marco)}
+#pilares a.todo.on em{color:var(--marco)}
+/* the light screen in the middle */
+main{background:var(--pantalla);border-radius:18px;margin-top:18px;padding:28px 34px 60px;box-shadow:0 0 0 1px rgba(0,0,0,.25),0 10px 40px rgba(0,0,0,.25);align-self:start}
+footer{background:var(--marco);border-top:1px solid rgba(255,255,255,.07);color:var(--marco-mute)}
+footer a{color:var(--marco-txt)}
+@media (max-width:1150px){#pilares{background:var(--marco)}}
+@media (max-width:900px){
+  #escalas,#pilares{background:var(--marco)}
+  .layout{padding:0 8px 8px}
+  main{margin-top:8px;padding:20px 16px 40px;border-radius:14px}
+}
