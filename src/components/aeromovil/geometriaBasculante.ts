@@ -28,12 +28,12 @@
 import type { Comprobacion, MaterialCarenado, MaterialChasis, Parametros, PuntosOcupante, Resultados, Rueda, Tubo, P3 } from './geometria';
 import { MATERIALES_CARENADO, MATERIALES_CHASIS, RENDIMIENTO_SOLAR, largoTubo } from './geometria';
 import { BASCULANTE_DEFECTO, type CamposBasculante, type RuedaBasculante } from './basculante/defecto';
-import { crearForma, crearPod, limiteCarenados, type DimForma, type EsquinaDel, type FormaBasculante, type Pod } from './basculante/forma';
+import { crearForma, crearPod, largoCapNariz, limiteCarenados, type DimForma, type EsquinaDel, type FormaBasculante, type Pod } from './basculante/forma';
 import { CADERA_SOBRE_ASIENTO, MEDIA_CABEZA, TALLA_SENTADO, rodilla } from './geometriaBala';
 
 export type { CamposBasculante, RuedaBasculante };
 export type ClaveBasculante = keyof CamposBasculante;
-type ClaveTexto = 'qSolarCola' | 'qMatCarenado' | 'qChMat' | 'qRuedaDel' | 'qRuedaTras';
+type ClaveTexto = 'qRuedasDel' | 'qSolarCola' | 'qMatCarenado' | 'qChMat' | 'qRuedaDel' | 'qRuedaTras';
 export type ClaveNumBasculante = Exclude<ClaveBasculante, ClaveTexto>;
 
 export const NOMBRE_BASCULANTE = 'Cuadriciclo Basculante';
@@ -83,7 +83,7 @@ const FILAS: Fila[] = [
   ['qMorroAlto', 'carroceria', 'Morro y cola', 'Morro: altura de la punta', 0.22, 0.55, 0.005, 'cm'],
   ['qMorroPunta', 'carroceria', 'Morro y cola', 'Morro: en punta o redondo', 0, 1, 0.05, 'x'],
   ['qMorroRedondo', 'carroceria', 'Morro y cola', 'Morro: largo de la punta redondeada', 0.10, 0.45, 0.01, 'cm'],
-  ['qMorroAncho', 'carroceria', 'Morro y cola', 'Morro: ancho entre los carenados', 0.30, 0.90, 0.01, 'x'],
+  ['qMorroAncho', 'carroceria', 'Morro y cola', 'Morro: ancho de la punta', 0.30, 0.90, 0.01, 'x'],
   ['qCola', 'carroceria', 'Morro y cola', 'Cola: del eje trasero al borde', 0.40, 1.00, 0.01, 'm'],
   ['qColaAlto', 'carroceria', 'Morro y cola', 'Cola: altura del borde', 0.40, 0.80, 0.005, 'cm'],
   ['qColaCurva', 'carroceria', 'Morro y cola', 'Cola: la curva del techo hasta ella (Aptera)', 1.2, 3.2, 0.05, 'x'],
@@ -99,6 +99,9 @@ const FILAS: Fila[] = [
   ['qCupFin', 'carroceria', 'Cúpula', 'Ventanas: acaban (tras el eje delantero)', 1.40, 2.80, 0.01, 'm'],
   ['qSolarIni', 'carroceria', 'Techo solar', 'Techo solar: empieza (tras el eje delantero)', 0.50, 2.20, 0.01, 'm'],
   ['qSolarFin', 'carroceria', 'Techo solar', 'Techo solar: acaba (tras el eje delantero)', 0.80, 2.80, 0.01, 'm'],
+  ['qMorroSobre', 'carroceria', 'Ruedas delanteras', 'Morro: altura sobre los pasos de rueda', 0.03, 0.30, 0.005, 'cm'],
+  ['qPasoHueco', 'carroceria', 'Ruedas delanteras', 'Paso de rueda: hueco al neumático', 0.015, 0.06, 0.005, 'cm'],
+  ['qPasoAbre', 'carroceria', 'Ruedas delanteras', 'Paso de rueda: hasta dónde se abre por el lado (sobre el eje)', 0, 0.45, 0.005, 'cm'],
   ['qPodAlto', 'carroceria', 'Carenados delanteros', 'Carenado: tamaño alrededor de la rueda', 1.03, 1.40, 0.01, 'x'],
   ['qPodAncho', 'carroceria', 'Carenados delanteros', 'Carenado: anchura', 0.90, 1.80, 0.01, 'x'],
   ['qPodFrente', 'carroceria', 'Carenados delanteros', 'Carenado: largo por delante del eje', 1.05, 1.90, 0.01, 'x'],
@@ -158,14 +161,15 @@ export function deslizadoresBasculante(): FichaBasculante[] {
 export const fichaBasculante = (k: ClaveNumBasculante) => deslizadoresBasculante().find(f => f.clave === k)!;
 const ruedas = (l: RuedaBasculante[]) => l.map(k => ({ k, n: RUEDAS_BASCULANTE[k].n }));
 export const SELECTORES_BASCULANTE: SelectorBasculante[] = [
+  { clave: 'qRuedasDel', n: 'Las ruedas delanteras van', dep: 'carroceria', bloque: 'Ruedas delanteras', opciones: [{ k: 'morro', n: 'Dentro del morro (una sola pieza)' }, { k: 'carenados', n: 'Cada una en su carenado (giran con ella)' }] },
   { clave: 'qSolarCola', n: 'Paneles también en la cola', dep: 'carroceria', bloque: 'Techo solar', opciones: [{ k: 'no', n: 'Solo en el techo' }, { k: 'si', n: 'También en la cubierta de la cola' }] },
   { clave: 'qMatCarenado', n: 'Material de la carrocería', dep: 'carroceria', bloque: 'Material y espesores', opciones: [{ k: 'carbonoLino', n: 'Carbono-lino' }, { k: 'vidrio', n: 'Fibra de vidrio' }, { k: 'carbono', n: 'Fibra de carbono' }] },
   { clave: 'qChMat', n: 'Material de los tubos', dep: 'chasis', bloque: 'Bastidor', opciones: [{ k: 'al6061', n: 'Aluminio 6061-T6' }, { k: 'cromoly', n: 'Acero cromoly 4130' }, { k: 'carbono', n: 'Tubo de carbono' }] },
-  { clave: 'qRuedaDel', n: 'Ruedas delanteras (en los carenados)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['m13', 'm14', 'm15', 'c13']) },
+  { clave: 'qRuedaDel', n: 'Ruedas delanteras', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['m13', 'm14', 'm15', 'c13']) },
   { clave: 'qRuedaTras', n: 'Ruedas traseras (dentro de la cola)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['m13', 'm14', 'm15', 'c13']) },
 ];
 const OPCIONES: Record<ClaveTexto, readonly string[]> = {
-  qSolarCola: ['no', 'si'], qMatCarenado: ['carbonoLino', 'vidrio', 'carbono'], qChMat: ['al6061', 'cromoly', 'carbono'],
+  qRuedasDel: ['morro', 'carenados'], qSolarCola: ['no', 'si'], qMatCarenado: ['carbonoLino', 'vidrio', 'carbono'], qChMat: ['al6061', 'cromoly', 'carbono'],
   qRuedaDel: ['m13', 'm14', 'm15', 'c13'], qRuedaTras: ['m13', 'm14', 'm15', 'c13'],
 };
 
@@ -234,15 +238,88 @@ export const alMundo = (p: P3, phi: number): P3 => [p[0], p[1] * Math.cos(phi) -
 export interface Caja { nombre: string; x0: number; x1: number; y0: number; y1: number; hz: number }
 export type ZonaPiel = 'carroceria' | 'cristal' | 'solar' | 'bajos' | 'morro' | 'faro' | 'piloto';
 /** The front light bar's distance back from the nose tip and its width, and the tail lamp's (m). */
-const FARO_X = 0.055, FARO_W = 0.016, PILOTO_X0 = 0.014, PILOTO_X1 = 0.036;
+const FARO_X = 0.055, FARO_W = 0.016, FARO_X_MORRO = 0.022, PILOTO_X0 = 0.014, PILOTO_X1 = 0.036;
 /** The canopy's hinge is at the windscreen's foot; it opens this far (°, the rear rises). */
 export const ANGULO_CUPULA_B = -50;
+
+/** A front wheel well (`qRuedasDel: 'morro'`): the opening in the side, the well's roof and inner wall, what the nose must hold. */
+export interface PasoDel {
+  /** the well: centre x, half-length, its foot (the axle's height), its roof's top (m) and the opening's top over the axle (m) */
+  arco: { x: number; rx: number; y0: number; yTop: number; abre: number };
+  /** the opening in the side and the belly: the skin is cut under this height at x (m), and only outboard of `zIn` */
+  yAbre: (x: number) => number;
+  /** the well's roof at x (m), inside the body */
+  yTecho: (x: number) => number;
+  /** the inner wall's z at x (m): the steered and leaned tyre's inner face, less the gap; Infinity away from it */
+  zIn: (x: number) => number;
+  /** its least value (m) */
+  zInMin: number;
+  /** the tyre's outer surface in every position, above the opening (x, y, z ≥ 0), with the gap round it */
+  rueda: P3[];
+  /** what the nose must hold: those points and the well's roof (for crearForma) */
+  pts: P3[];
+}
+/**
+ * The front wheel's well (2026-11-15, Eugenio: «quiero que el carenado frontal, el morro, envuelva las 2 ruedas
+ * delanteras basculantes con una sola pieza»): the tyre in every position it can take, steered to full lock either way,
+ * leaned to the maximum either way (the arms swing it up by Lk·sin β and in by Lk·(1 − cos β)) and with the
+ * suspension 60 % in. The nose holds all of it that is above the opening, with `hueco` round it: as a velomobile's, the
+ * wheel goes inside the body and only its lower part comes out under it, through an opening `abre` m over the axle
+ * at its middle (a flat arch along the well). The well's inner wall follows, along x, the closest the tyre's inner face
+ * comes (at the axle, where the tyre only pivots, it stands further out than at its ends, which swing in: the pilot's
+ * feet go there); its roof clears the tyre at its highest.
+ */
+function pasoDelantero(q: Esquina, phiMax: number, giroDentro: number, giroFuera: number, subeSusp: number, hueco: number, abre: number): PasoDel {
+  const r = q.r, e = q.e, w = q.w, betaMax = Math.abs(esquinaEn(q, phiMax).beta);
+  let rx = 0; for (let k = 0; k <= 20; k++) { const d = Math.max(giroDentro, giroFuera) * k / 20; rx = Math.max(rx, r * Math.cos(d) + (e + w / 2) * Math.sin(d)); }
+  rx += hueco;
+  const yTop = 2 * r + q.Lk * Math.sin(betaMax) + subeSusp + hueco;
+  // (never above the well's own roof: past it, the opening would show the inside of the car)
+  abre = Math.min(abre, yTop - r - 0.02);
+  const yAbre = (x: number) => { const u = (x - q.x) / rx; return Math.abs(u) >= 1 ? -1 : r + abre * Math.sqrt(1 - u * u); };
+  const yTecho = (x: number) => { const u = (x - q.x) / rx; return Math.abs(u) >= 1 ? r : r + (yTop - r) * Math.sqrt(1 - u * u); };
+  // the inner face's swept points, seen from above (x, z)
+  const mues: [number, number][] = [];
+  for (const zK of [q.Lk, q.Lk * Math.cos(betaMax)]) for (let k = 0; k <= 12; k++) {
+    const d = -giroDentro + (giroDentro + giroFuera) * k / 12, cs = Math.cos(d), sn = Math.sin(d), lat = e - w / 2;
+    for (let i = 0; i <= 24; i++) { const u = -r + 2 * r * i / 24; mues.push([q.x + u * cs + lat * sn, zK + (-u * sn + lat * cs)]); }
+  }
+  const x0 = q.x - rx - 0.5, x1 = q.x + rx + 0.5, paso = 0.005, rho = 0.10, tabla: number[] = [];
+  for (let x = x0; x <= x1 + 1e-9; x += paso) { let m = Infinity; for (const [px, pz] of mues) { const v = pz + (x - px) * (x - px) / (2 * rho); if (v < m) m = v; } tabla.push(m - hueco); }
+  const zIn = (x: number) => {
+    if (x < x0 || x > x1) return Infinity;
+    const u = (x - x0) / paso, i = Math.min(tabla.length - 2, Math.floor(u)), t = u - i;
+    return tabla[i] + (tabla[i + 1] - tabla[i]) * t;
+  };
+  // the tyre's outer half (a scooter tyre: a round section of radius w/2 on a ring of radius r − w/2), in every
+  // position, where it is above the opening; each point pushed out by the gap
+  const rueda: P3[] = [];
+  const giros: number[] = []; for (let k = 0; k <= 8; k++) giros.push(-giroDentro + (giroDentro + giroFuera) * k / 8);
+  for (const phi of [-phiMax, 0, phiMax]) for (const sube of [0, subeSusp]) for (const d of giros) {
+    const E = esquinaEn(q, phi, 0), cs = Math.cos(d), sn = Math.sin(d), yC = E.centro[1] + sube, zb = E.base[2] * q.s;
+    for (const psi of [0, Math.PI / 4, Math.PI / 2]) {
+      const rho2 = r - w / 2 + (w / 2) * Math.sin(psi), lat = e + (w / 2) * Math.cos(psi);
+      for (let k = 0; k < 32; k++) {
+        const a = 2 * Math.PI * k / 32, u = rho2 * Math.sin(a), v = rho2 * Math.cos(a);
+        const x = q.x + u * cs + lat * sn, z = zb + (-u * sn + lat * cs), y = yC + v;
+        if (y < yAbre(x)) continue;   // under the opening's edge: it shows there
+        rueda.push([x, y + hueco * Math.max(0, Math.cos(a)), z + hueco]);
+      }
+    }
+  }
+  // the well's roof, 2.5 cm under the skin (the liner and the laminate)
+  const techo: P3[] = [];
+  for (let i = 0; i <= 30; i++) { const x = q.x - 0.9 * rx + 1.8 * rx * i / 30; techo.push([x, yTecho(x) + 0.025, Math.max(0, zIn(x))]); }
+  return { arco: { x: q.x, rx, y0: r, yTop, abre }, yAbre, yTecho, zIn, zInMin: Math.min(...tabla), rueda, pts: [...rueda, ...techo] };
+}
 
 export function crearModeloBasculante(P: Parametros) {
   const Q = camposBasculante(P), L = (k: ClaveNumBasculante) => limitarBasculante(k, Q);
   const rd = RUEDAS_BASCULANTE[Q.qRuedaDel], rt = RUEDAS_BASCULANTE[Q.qRuedaTras];
   const rF = rd.d / 2, rR = rt.d / 2, B = L('qBatalla'), xR = -B;
-  const xn = L('qMorro'), xt = xR - L('qCola');
+  const xt = xR - L('qCola');
+  /** the front wheels inside the nose (2026-11-15, the default) or each in its own fairing */
+  const enMorro = Q.qRuedasDel === 'morro';
   const phiMax = L('qBascMax') * Math.PI / 180, giro = L('qGiro') * Math.PI / 180;
   const yInf = L('qBrazoAlto'), ySup = yInf + L('qBrazoSep');
   // the upright stands 3.5 cm inboard of the tyre's inner face; the arms reach it
@@ -253,12 +330,15 @@ export function crearModeloBasculante(P: Parametros) {
     id, eje, s, x: eje === 'del' ? 0 : xR, Lk: eje === 'del' ? LkF : LkT, e: eje === 'del' ? eF : eT, r: eje === 'del' ? rF : rR, w: eje === 'del' ? rd.w : rt.w, yInf, ySup,
   }));
   const betaMax = (q: Esquina) => esquinaEn(q, phiMax).beta;
-  const pod: Pod = crearPod({ r: rF, w: rd.w, hueco: L('qPodHueco'), alto: L('qPodAlto'), ancho: L('qPodAncho'), frente: L('qPodFrente'), cola: L('qPodCola'), forma: L('qPodForma'), cubre: L('qPodCubre'), n: 2.6 });
+  const pod: Pod | null = enMorro ? null : crearPod({ r: rF, w: rd.w, hueco: L('qPodHueco'), alto: L('qPodAlto'), ancho: L('qPodAncho'), frente: L('qPodFrente'), cola: L('qPodCola'), forma: L('qPodForma'), cubre: L('qPodCubre'), n: 2.6 });
   // Ackermann: the outer wheel turns less (its turning circle is the inner one's plus the track)
   const giroFuera = Math.atan(B / (B / Math.tan(giro) + L('qViaDel')));
   const qDel: EsquinaDel = { x: 0, zK: LkF, e: eF, Lk: LkF, betaMax: betaMax(esquinas[0]), giroDentro: giro, giroFuera };
-  const limite = limiteCarenados(pod, qDel, L('qHuecoCuerpo'));
-  const D: DimForma = {
+  const limite = pod ? limiteCarenados(pod, qDel, L('qHuecoCuerpo')) : () => Infinity;
+  // the front wheel wells, and the nose long enough that its rounded tip starts ahead of them (it would squeeze them)
+  const pasoDel = enMorro ? pasoDelantero(esquinas[0], phiMax, giro, giroFuera, L('qRecDel') / 1000 * 0.6, L('qPasoHueco'), L('qPasoAbre')) : null;
+  const xn = pasoDel ? Math.max(L('qMorro'), pasoDel.arco.x + pasoDel.arco.rx + largoCapNariz({ largoPunta: L('qMorroRedondo'), puntaMorro: L('qMorroPunta') })) : L('qMorro');
+  const D0: DimForma = {
     xn, xt, H: L('qAlto'), W: L('qAncho'), suelo: L('qSuelo'),
     yMorro: Math.max(L('qMorroAlto'), L('qSuelo') + 0.06), puntaMorro: L('qMorroPunta'), largoPunta: L('qMorroRedondo'), anchoMorro: L('qMorroAncho'),
     yCapo: L('qCapo'), xParabrisas: Math.min(xn - 0.12, -L('qParabrisasX')), largoParabrisas: L('qParabrisas'), xCaida: Math.max(xt + 0.25, -L('qCaida')),
@@ -268,7 +348,9 @@ export function crearModeloBasculante(P: Parametros) {
     xAncho0: Math.min(xn - 0.15, -L('qAnchoIni')), xAncho1: Math.max(xt + 0.25, Math.min(-L('qAnchoIni') - 0.05, -L('qAnchoFin'))),
     cintura: L('qCintura'), ventAlto: Math.max(L('qVentAlto'), L('qCintura') + 0.15), xCupFin: Math.max(xt + 0.15, -L('qCupFin')),
   };
-  const F: FormaBasculante = crearForma(D, limite);
+  const F: FormaBasculante = crearForma(D0, limite, pasoDel ? { pts: pasoDel.pts, sobre: L('qMorroSobre') } : undefined);
+  // (the body as built: with the wheels in the nose its roof and width may have grown to hold them)
+  const D = F.D;
   const xWs = D.xParabrisas, xCup = Math.min(xWs - 0.25, D.xCupFin);
   const xS0 = Math.min(xWs - 0.6 * D.largoParabrisas, -L('qSolarIni')), xS1 = Math.max(xCup + 0.03, Math.min(xS0 - 0.10, -L('qSolarFin')));
   const conSolar = xS0 - xS1 > 0.05;
@@ -278,8 +360,11 @@ export function crearModeloBasculante(P: Parametros) {
   const qT = esquinas[2], bT = betaMax(qT), subeT = qT.Lk * Math.sin(bT) + L('qRecTras') / 1000 * 0.6;
   const arco = { x: xR, rx: rR + 0.045, y0: rR, yTop: 2 * rR + subeT + 0.03, zIn: qT.Lk * Math.cos(bT) + qT.e - qT.w / 2 - 0.025, zOut: aT + qT.w / 2 + 0.03 };
   const yArco = (x: number) => { const u = (x - arco.x) / arco.rx; return Math.abs(u) >= 1 ? -1 : arco.y0 + (arco.yTop - arco.y0) * Math.sqrt(1 - u * u); };
-  /** Is this point of the skin inside a rear wheel arch's opening? */
-  const hueco = (p: P3) => Math.abs(p[2]) > arco.zIn && p[1] < yArco(p[0]);
+  const arcoDel = pasoDel?.arco ?? null;
+  /** the front well's roof at x (inside the body), and the side opening's edge (the skin is cut under it) */
+  const yArcoDel = (x: number) => pasoDel ? pasoDel.yTecho(x) : -1, yAbreDel = (x: number) => pasoDel ? pasoDel.yAbre(x) : -1;
+  /** Is this point of the skin inside a wheel arch's opening (the rear ones, and the front ones in the nose)? */
+  const hueco = (p: P3) => (Math.abs(p[2]) > arco.zIn && p[1] < yArco(p[0])) || (!!pasoDel && p[1] < yAbreDel(p[0]) && Math.abs(p[2]) > pasoDel.zIn(p[0]));
 
   // ── the skin's grid: its lines fall on every zone's edge, so each cell is one zone
   const thB = F.thCintura, thR = F.thVentana, thK = F.thBajos;
@@ -287,12 +372,14 @@ export function crearModeloBasculante(P: Parametros) {
   const ths: number[] = [];
   for (const [a, b, n] of segTh) for (let j = 0; j < n; j++) ths.push(a + (b - a) * j / n);
   ths.push(1.5 * Math.PI);
-  const nudos = [xn, xn - FARO_X, xn - FARO_X - FARO_W, xWs, ...(conSolar ? [xS0, xS1] : []), xCup, ...(solarCola ? [xCup - 0.05, xt + 0.10] : []), arco.x + arco.rx, arco.x - arco.rx, xt + PILOTO_X1, xt + PILOTO_X0, xt]
+  // (the nose's dark tip: shorter when the nose is the wide one round the wheels, else it is most of its front)
+  const faroX = enMorro ? FARO_X_MORRO : FARO_X;
+  const nudos = [xn, xn - faroX, xn - faroX - FARO_W, xWs, ...(conSolar ? [xS0, xS1] : []), xCup, ...(solarCola ? [xCup - 0.05, xt + 0.10] : []), arco.x + arco.rx, arco.x - arco.rx, ...(arcoDel ? [arcoDel.x + arcoDel.rx, arcoDel.x - arcoDel.rx] : []), xt + PILOTO_X1, xt + PILOTO_X0, xt]
     .filter(x => x <= xn + 1e-9 && x >= xt - 1e-9).sort((a, b) => b - a);
   const xs: number[] = [];
   for (let k = 0; k < nudos.length - 1; k++) {
     const a = nudos[k], b = nudos[k + 1], Lseg = a - b; if (Lseg < 1e-4) continue;
-    const enArco = a <= arco.x + arco.rx + 1e-9 && b >= arco.x - arco.rx - 1e-9;
+    const enArco = (a <= arco.x + arco.rx + 1e-9 && b >= arco.x - arco.rx - 1e-9) || (!!arcoDel && a <= arcoDel.x + arcoDel.rx + 1e-9 && b >= arcoDel.x - arcoDel.rx - 1e-9);
     const n = Math.max(1, Math.ceil(Lseg / (enArco ? 0.008 : 0.012)));
     for (let i = 0; i < n; i++) {
       // the first segments (the nose cap) cluster towards the tip, where the section shrinks fast
@@ -304,8 +391,8 @@ export function crearModeloBasculante(P: Parametros) {
   const zona = (x: number, th: number): ZonaPiel => {
     const t = ((th + Math.PI / 2) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI / 2;   // into [−π/2, 3π/2)
     const vientre = t < thK || t > Math.PI - thK;
-    if (x > xn - FARO_X) return 'morro';
-    if (x > xn - FARO_X - FARO_W) return vientre ? 'morro' : 'faro';
+    if (x > xn - faroX) return 'morro';
+    if (x > xn - faroX - FARO_W) return vientre ? 'morro' : 'faro';
     if (x < xt + PILOTO_X0) return 'bajos';
     if (x < xt + PILOTO_X1) return vientre ? 'bajos' : 'piloto';
     if (vientre) return 'bajos';
@@ -334,6 +421,15 @@ export function crearModeloBasculante(P: Parametros) {
       if (Number.isFinite(z) && z > arco.zIn) pts.push([x, y, s * (z + 0.003)]);
     }
     if (pts.length > 2) lineas.push(pts);
+    // the front arch's lip (the wheels in the nose)
+    if (arcoDel && pasoDel) {
+      const pd: P3[] = [];
+      for (let i = 0; i <= 50; i++) {
+        const x = arcoDel.x - arcoDel.rx + 2 * arcoDel.rx * i / 50, y = Math.max(F.bajos(x) + 0.004, yAbreDel(x)), z = F.ladoZ(x, y);
+        if (Number.isFinite(z) && z > pasoDel.zIn(x)) pd.push([x, y, s * (z + 0.003)]);
+      }
+      if (pd.length > 2) lineas.push(pd);
+    }
   }
   lineas.push(linea(40, u => sobre(xWs, thB + (Math.PI - 2 * thB) * u)), linea(40, u => sobre(xCup, thB + (Math.PI - 2 * thB) * u)));
   if (conSolar) lineas.push(linea(30, u => sobre(xS0, thR + (Math.PI - 2 * thR) * u, 0.004)), linea(30, u => sobre(xS1, thR + (Math.PI - 2 * thR) * u, 0.004)));
@@ -369,7 +465,7 @@ export function crearModeloBasculante(P: Parametros) {
   const kWhPedidos = L('qKWh'), litros = kWhPedidos * 1000 / L('qWhL');
   const zRiel = 0.20, dCh = L('qChD') / 1000, yRiel0 = D.suelo + 0.025 + dCh / 2;
   /** The floor rails' distance off the centre line at x: 20 cm, or 3.5 cm inside the belly where it is narrower (in the nose, 7.5 cm at least). */
-  const zRielEn = (x: number) => { const w = F.ladoZ(x, yRiel0 - dCh / 2); return Math.max(0.075, Math.min(zRiel, (Number.isFinite(w) ? w : 0.075) - dCh / 2 - 0.035)); };
+  const zRielEn = (x: number) => { const w = F.ladoZ(x, yRiel0 - dCh / 2); return Math.max(0.075, Math.min(zRiel, (Number.isFinite(w) ? w : 0.075) - dCh / 2 - 0.035, pasoDel ? pasoDel.zIn(x) - dCh / 2 - 0.012 : Infinity)); };
   const cajaEn = (nombre: string, x0: number, x1: number, alto: number): Caja | null => {
     if (x1 - x0 < 0.08) return null;
     const y0 = sueloIn, y1 = y0 + alto;
@@ -448,18 +544,21 @@ export function crearModeloBasculante(P: Parametros) {
   const camaras = [1, -1].map(s => sobre(xWs - 0.08, s > 0 ? thB + 0.08 : Math.PI - thB - 0.08, 0.0));
 
   const ruedasR: Rueda[] = esquinas.map(q => ({ nombre: q.id, x: q.x, z: q.s * (q.Lk + q.e), r: q.r, w: q.w }));
-  const anchoPods = 2 * (LkF + eF + pod.hz(0)) + 0.01;
-  const anchoTotal = Math.max(D.W, anchoPods);
+  const anchoPods = pod ? 2 * (LkF + eF + pod.hz(0)) + 0.01 : 0;
+  // (the body's widest: its own width, or, with the wheels in the nose, the nose round them)
+  let anchoCuerpo = D.W; for (let x = xn; x >= xt; x -= 0.01) anchoCuerpo = Math.max(anchoCuerpo, 2 * F.frame(x).hw);
+  const anchoTotal = Math.max(anchoCuerpo, anchoPods);
   const Lf = xn - xt;
   const Pm: Parametros = { ...P, ...Q, L: Lf, B, W: anchoTotal, H: D.H, clear: D.suelo, track: L('qViaDel'), tiltMax: L('qBascMax') };
   return {
     tipo: 'basculante' as const, P: Pm, campos: Q, F, D, pod,
-    xn, xt, Lf, xR, xF: 0, rF, rR, batalla: B, anchoTotal, anchoCuerpo: D.W, alto: D.H,
+    xn, xt, Lf, xR, xF: 0, rF, rR, batalla: B, anchoTotal, anchoCuerpo, alto: D.H,
     via: { del: L('qViaDel'), tras: L('qViaTras') }, ruedas: ruedasR, esquinas, phiMax, giro, giroFuera, yInf, ySup,
     /** The most it leans (°): the «Circuito» section reads it (circuito/datos.ts `fichaDeDiseno`). */
     inclinacionMax: L('qBascMax'),
+    enMorro, pasoDel, arcoDel, yArcoDel, yAbreDel, morroAlargado: xn > L('qMorro') + 0.005,
     arco, hueco, rejilla: { xs, ths }, zona, enCupula, bisagra, lineas, xWs, xCup, xS0, xS1, conSolar, solarCola,
-    faro: { x: xn - FARO_X - FARO_W / 2, thK }, piloto: { x: xt + (PILOTO_X0 + PILOTO_X1) / 2 },
+    faro: { x: xn - faroX - FARO_W / 2, thK }, piloto: { x: xt + (PILOTO_X0 + PILOTO_X1) / 2 },
     sueloIn, volante, columna, cremallera, actuador, motor, inversor, camaras,
     asientos: [asiento(true), asiento(false)], plazas: [true, false].map(piloto => ({ piloto, z: 0, pts: occTalla(piloto) })),
     baterias, bateria: { litros, cabe, kWh: kWhPedidos }, tubos,
@@ -492,7 +591,7 @@ export function areasBasculante(m: Pick<ModeloBasculante, 'F' | 'rejilla' | 'zon
   }
   // the fairing's shell, both of them
   const p = m.pod, nx = 30, nt = 24;
-  for (let i = 0; i < nx; i++) for (let j = 0; j < nt; j++) {
+  if (p) for (let i = 0; i < nx; i++) for (let j = 0; j < nt; j++) {
     const x0 = p.x0 + (p.x1 - p.x0) * i / nx, x1 = p.x0 + (p.x1 - p.x0) * (i + 1) / nx;
     const th = (x: number, jj: number) => { const t0 = p.th0(x); return t0 + (Math.PI - 2 * t0) * jj / nt; };
     const a = p.punto(x0, th(x0, j)), b = p.punto(x1, th(x1, j)), c = p.punto(x0, th(x0, j + 1)), d = p.punto(x1, th(x1, j + 1));
@@ -538,7 +637,7 @@ export function piezasBasculante(m: ModeloBasculante, ar: ReturnType<typeof area
   const a0 = m.occPts(true), a1 = m.occPts(false);
   return [
     { nombre: 'Carrocería', kg: ar.carroceria * L('qEspCarenado') * kgm2mm, x: ar.centroPiel[0], y: ar.centroPiel[1], grupo: 'carroceria', nota: `${ar.carroceria.toFixed(2).replace('.', ',')} m² de laminado` },
-    { nombre: 'Carenados delanteros (los dos)', kg: ar.carenados * L('qEspCarenado') * kgm2mm, x: 0, y: m.rF, grupo: 'carroceria' },
+    ...(m.pod ? [{ nombre: 'Carenados delanteros (los dos)', kg: ar.carenados * L('qEspCarenado') * kgm2mm, x: 0, y: m.rF, grupo: 'carroceria' as const }] : []),
     { nombre: 'Cúpula de policarbonato', kg: ar.cristal * L('qEspCristal') * 1.2, x: xc, y: yc, grupo: 'carroceria' },
     { nombre: 'Paneles solares', kg: ar.solar * L('qSolarM2'), x: (m.xS0 + m.xS1) / 2, y: m.D.H, grupo: 'energia' },
     { nombre: 'Luces, cámaras y juntas', kg: 3, x: (m.xn + m.xt) / 2, y: 0.6, grupo: 'carroceria' },
@@ -636,8 +735,14 @@ export function calcularBasculante(m: ModeloBasculante, ar: ReturnType<typeof ar
   // ── frontal area: the body's largest section, the fairings' (the shell's projection), the tyres below the skin
   let secMax = 0, vol = 0;
   for (let x = m.xn - 0.01; x > m.xt; x -= 0.02) { const a = F.areaSeccion(x); secMax = Math.max(secMax, a); vol += a * 0.02; }
-  let podSec = 0; for (let xl = m.pod.x0; xl <= m.pod.x1; xl += 0.01) { const t0 = m.pod.th0(xl), hy = m.pod.hy(xl), hz = m.pod.hz(xl); const a = Math.PI * hy * hz * (0.5 + 0.5 * (1 - Math.cos(Math.PI / 2 + t0))) * 0.9; podSec = Math.max(podSec, a); }
-  const sueloDel = m.rF * (1 - L('qPodCubre')), ruedasA = 2 * RUEDAS_BASCULANTE[Q.qRuedaDel].w * sueloDel * 0.8 + 2 * RUEDAS_BASCULANTE[Q.qRuedaTras].w * Math.max(0, F.D.suelo) * 0.8;
+  let podSec = 0; if (m.pod) for (let xl = m.pod.x0; xl <= m.pod.x1; xl += 0.01) { const t0 = m.pod.th0(xl), hy = m.pod.hy(xl), hz = m.pod.hz(xl); const a = Math.PI * hy * hz * (0.5 + 0.5 * (1 - Math.cos(Math.PI / 2 + t0))) * 0.9; podSec = Math.max(podSec, a); }
+  // the front tyres' frontal area: under their fairing's lip, or (in the nose) under the nose's skin just ahead of them
+  const sueloDel = m.pod ? m.rF * (1 - L('qPodCubre')) : (() => {
+    const a = m.arcoDel!, x = a.x + a.rx + 0.02, f = F.frame(x), zR = m.esquinas[0].Lk + m.esquinas[0].e;
+    if (zR >= f.hw) return 2 * m.rF;
+    const k = Math.pow(1 - Math.pow(zR / f.hw, F.D.nL), 1 / F.D.nL);
+    return Math.max(0, Math.min(2 * m.rF, f.yc - (f.yc - f.bot) * k));
+  })(), ruedasA = 2 * RUEDAS_BASCULANTE[Q.qRuedaDel].w * sueloDel * 0.8 + 2 * RUEDAS_BASCULANTE[Q.qRuedaTras].w * Math.max(0, F.D.suelo) * 0.8;
   const area = { cuerpo: secMax, carenados: 2 * podSec, ruedas: ruedasA, total: secMax + 2 * podSec + ruedasA };
 
   // ── checks
@@ -677,7 +782,7 @@ export function calcularBasculante(m: ModeloBasculante, ar: ReturnType<typeof ar
   // the pilot's feet in the nose, toes 17 cm ahead of the ankle
   { const zp = (op.anchoPiernas?.[1] ?? 0.08) + 0.05; c('interior,carroceria', 'Pies del piloto dentro del morro', Math.min(dentro(F, op.F[0] + 0.17, op.F[1] + 0.04, zp), dentro(F, op.F[0], op.F[1] - 0.05, zp)), 0.01); }
   c('interior,carroceria', 'Rodillas del piloto bajo el capó', F.techo(op.K[0]) - 0.015 - (op.K[1] + 0.065), 0.02);
-  c('interior,carroceria', 'Rodillas del piloto a los costados (entre los carenados)', (F.ladoZ(op.K[0], op.K[1]) || 0) - 0.015 - ((op.anchoPiernas?.[2] ?? 0.11) + 0.065), 0.01);
+  c('interior,carroceria', m.pod ? 'Rodillas del piloto a los costados (entre los carenados)' : 'Rodillas del piloto a los costados', (F.ladoZ(op.K[0], op.K[1]) || 0) - 0.015 - ((op.anchoPiernas?.[2] ?? 0.11) + 0.065), 0.01);
   // the steering wheel: inside the body, clear of the knees, within reach (shoulder to grip, a 58 cm arm with the elbows a little bent)
   {
     const v = m.volante; let dentroV = 9, rod = 9;
@@ -694,7 +799,7 @@ export function calcularBasculante(m: ModeloBasculante, ar: ReturnType<typeof ar
   }
 
   // ── the front corners: steering and lean together (the fairings turn and lean with their wheels)
-  {
+  if (m.pod) {
     const q = m.esquinas[0], p = m.pod;
     let alCuerpo = 9, alSuelo = 9, neu = 9;
     const pasos = [-1, -0.5, 0, 0.5, 1];
@@ -728,10 +833,26 @@ export function calcularBasculante(m: ModeloBasculante, ar: ReturnType<typeof ar
     c('rodaje,carroceria', `Carenado delantero a la carrocería, girado ${lock}° e inclinado ${grados}°`, alCuerpo, L('qHuecoCuerpo') - 0.006);
     c('rodaje,carroceria', `Carenado delantero al suelo, inclinado ${grados}° y girado`, alSuelo, 0.03);
   }
+  // ── the front wheels in the nose: the arch's roof under the skin, the pilot's feet and knees clear of the wells
+  if (m.pasoDel && m.arcoDel) {
+    const a = m.arcoDel, pd = m.pasoDel;
+    // the tyre in every position, above the opening, inside the skin (its points already carry the gap)
+    let dentroR = 9; for (const p of pd.rueda) dentroR = Math.min(dentroR, dentro(F, p[0], p[1], p[2]));
+    c('rodaje,carroceria', `Rueda delantera dentro del morro (girada ${lock}°, inclinada ${grados}° y hundida)`, dentroR, -0.005);
+    c('rodaje,carroceria', 'Techo del paso de rueda delantero bajo el capó', F.techo(a.x) - (a.yTop + 0.02), 0.01);
+    // the feet (the pedals 7.5 cm off the centre line, a shoe 3.5 cm), heel to toe, beside the wells' inner walls
+    const zp = (op.anchoPiernas?.[1] ?? 0.075) + 0.035;
+    let pies = 9; for (let k = 0; k <= 10; k++) { const x = op.F[0] - 0.05 + 0.22 * k / 10; if (Math.abs(x - a.x) < a.rx) pies = Math.min(pies, pd.zIn(x) - zp); }
+    c('interior,rodaje', 'Pies del piloto entre los pasos de rueda delanteros', pies > 8 ? 0.1 : pies, 0.01);
+    // the knees (6.5 cm round) over the wells where they are beside them
+    const zK = (op.anchoPiernas?.[2] ?? 0.11) + 0.065, sobre = Math.abs(op.K[0] - a.x) < a.rx && zK > pd.zIn(op.K[0]);
+    c('interior,rodaje', 'Rodillas del piloto sobre los pasos de rueda delanteros', sobre ? op.K[1] - 0.065 - m.yArcoDel(op.K[0]) : 0.1, 0.02);
+  }
   // ── the body to the ground at full lean (its lowest point, turned about the ground under its centre line)
   {
     let bajo = 9;
-    for (let x = m.xn - 0.01; x > m.xt; x -= 0.03) { const f = F.frame(x); for (let j = 0; j <= 24; j++) { const p = F.sec(f, Math.PI + Math.PI * j / 24); bajo = Math.min(bajo, alMundo(p, m.phiMax)[1]); } }
+    // (not where the skin is cut away for a wheel arch: there is no body there)
+    for (let x = m.xn - 0.01; x > m.xt; x -= 0.03) { const f = F.frame(x); for (let j = 0; j <= 24; j++) { const p = F.sec(f, Math.PI + Math.PI * j / 24); if (m.hueco(p)) continue; bajo = Math.min(bajo, alMundo(p, m.phiMax)[1]); } }
     c('rodaje,carroceria', `Carrocería al suelo inclinada ${grados}°`, bajo, 0.03);
   }
   // ── the rear wheels in their arches: the arch top under the body's side (else the cut runs through the side),

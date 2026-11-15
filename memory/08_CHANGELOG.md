@@ -11595,3 +11595,14 @@ Eugenio, con capturas del clásico junto al Aptera: «su cola ocupa todo el anch
 - **Mercedes-Benz Vision EQXX (2022)**: el coche de cuatro ruedas más aerodinámico que faltaba (Cd 0,17, 1 755 kg, 4,98 m, área frontal publicada 2,12 m²; la del modelo, 2,06 m²). Es un prototipo, no se vendió. Es más largo que el Model Y, así que ordenado por largo queda después de él; «entre el Aptera y el Model Y» lo está por Cd y por peso. Pasa por el túnel como los demás, con su Cd estimado (0,197) al lado del publicado (0,17), pero fuera del ajuste: el Cd de nuestros diseños no cambia.
 - **El garaje va del más pequeño al más grande**: por largo y, si miden lo mismo, por peso. Así salen la lista de «Coches de referencia», la segunda fila del 3D y también «Mis diseños» y la primera fila (por cómo está guardado cada diseño, para que la fila no se reordene mientras mueves un deslizador). Cada fila de la lista enseña el largo y el peso. Un coche que has arrastrado se queda donde lo dejaste.
 - El «tesla3» de la lista sigue siendo una caja gris de marcador (oculta por defecto): el Model 3 no está modelado.
+
+## 2026-11-15 · Cuadriciclo Basculante: el morro envuelve las dos ruedas delanteras, vía delantera −20 %
+
+- Eugenio: «quiero que el carenado frontal, el morro, envuelva las 2 ruedas delanteras basculantes con una sola pieza muy aerodinámica, y haz que las ruedas basculantes tengan un ancho de vía un 20 % menor del actual».
+- Nuevo selector «Las ruedas delanteras van»: **dentro del morro** (de serie) o cada una en su carenado (lo de antes, que sigue disponible).
+- Dentro del morro: cada rueda va en un paso de rueda cerrado, como en un velomóvil; solo asoma por debajo. El morro tapa todo lo que la rueda barre girada a tope (20°), inclinada a tope (25°) y con la suspensión hundida. Vista desde arriba, la carrocería es una gota: lo más ancho es el morro sobre las ruedas y se estrecha hasta la cola.
+- Vía delantera de serie: 0,69 m (antes 0,86).
+- Deslizadores nuevos: «Morro: altura sobre los pasos de rueda», «Paso de rueda: hueco al neumático» y «Paso de rueda: hasta dónde se abre por el lado».
+- Comprobaciones nuevas: rueda delantera dentro del morro, techo del paso bajo el capó, pies del piloto entre los pasos, rodillas sobre los pasos.
+- Diseño de serie: 3,01 × 1,04 × 1,10 m (antes 2,90 × 1,15 × 1,10); Cd del túnel 0,192 a 80 km/h (antes 0,218); área frontal 0,81 m² (antes 1,03); 2,52 kWh/100 km a 80 km/h; 37 comprobaciones en verde. El vuelco sin bascular baja de 0,80 a 0,73 g por la vía más estrecha.
+- Sin migración: el diseño del equipo solo guarda la familia y toma los valores de serie del código.

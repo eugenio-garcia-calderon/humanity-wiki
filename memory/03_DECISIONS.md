@@ -1747,3 +1747,22 @@ Eugenio: «que cada elemento de la ilustración puedas pinchar y arrastrarlo… 
 - **The aero four-wheeler is the Mercedes Vision EQXX**, out of Lightyear 0, Ioniq 6, Lucid Air: lowest Cd (0.17), mass between the Aptera's and the Model Y's (1 755 kg), and the only one with a published frontal area (2.12 m²; the model measures 2.06). All four candidates are longer than the Model Y, so ordered by length the EQXX stands after it, not «between the Aptera and the Model Y»; that phrase is only true of its Cd and mass. Out of the tunnel fit (`fueraDelAjuste`), like the Model Y; constants untouched. Tunnel: 0.197 against the published 0.170 (+16 %, just outside the ±15 % band).
 - **Size order = length, then kerb mass, then name** (`compararTamano` in `garaje/filas.ts`). The catalogue `VEHICULOS_GARAJE` is sorted with it (the Twizy suspension stays last), and the second row sorts its cars again so it never depends on the order it is handed. Our designs are sorted by their *saved* length and empty mass, so moving a slider does not reshuffle the row while the user drags it; ties keep the per-browser order (`aeromovil_garaje_orden_v1`), so a copy still sits after its original. Dragged places (`aeromovil_garaje_sitios_v1`) still win.
 - **`VehiculoGaraje.masa`** (new, optional) carries the kerb mass of reference cars without `aero` (Smera 350, Jaguar D-Type 862, AeroRider 72, NUS KRUCE 130). `masaGaraje(v)` reads it, then `aero.masaVacio`. The Bala reference and the two placeholder boxes (`tesla3`, `caterham7`) have none and show only their length.
+
+## 2026-11-15 · Cuadriciclo Basculante: front wheels inside the nose (velomobile wells), teardrop plan
+
+**Context.** Eugenio asked for the nose to wrap both front tilting wheels in one aerodynamic piece, and for a front track 20 % narrower (0.86 → 0.69 m). He read "the front track" as the subject of the sentence; the rear track (0.62 m) was left alone.
+
+**Decision.**
+- New option `qRuedasDel: 'morro' | 'carenados'`, default `'morro'`. The per-wheel fairings stay as the other option, so no code path was removed.
+- With `'morro'`, `pasoDelantero` sweeps the tyre in every position: full lock either way, full lean either way, and 60 % of the bump travel. `crearForma` (basculante/forma.ts) takes an `Envuelve` list of points the skin must hold:
+  - The roof and the half-width each grow to the requirement as a running maximum from the nose, so the lines stay monotone and there are no bumps.
+  - Behind the widest point the plan only narrows: it is the smallest non-increasing line that still holds every point, joined by a half-cosine down to the cabin's own width at `xAncho1`.
+- The skin is cut only below a low side opening (`qPasoAbre`, 6 cm over the axle by default) and outboard of an inner wall that follows the swept tyre along x.
+- The nose is lengthened automatically, so the rounded tip starts ahead of the wells (`largoCapNariz`).
+
+**Alternatives rejected.**
+1. Car-like open arches up to the well's roof. Tried first: the steered wheels show and it does not "wrap" anything.
+2. Holding the full nose width all the way back (a monotone plan). The cabin became 1.07–1.15 m wide and its lower corners touched the road at 25° of lean.
+3. A planar inner wall at the closest tyre point. That leaves 12 cm off the centre line, so the pilot's feet would not fit. The wall that follows x leaves 21 cm at the axle.
+
+**Cost.** Default 3.01 m long (+11 cm) and 1.04 m wide (the pods version was 1.15 m overall). The nose stands 0.92 m over the axle. Tunnel Cd at 80 km/h: 0.192 against 0.218 for the pods; frontal area 0.81 m² against 1.03. Upright roll limit 0.73 g against 0.80, from the narrower track.

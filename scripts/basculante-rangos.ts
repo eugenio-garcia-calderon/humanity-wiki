@@ -5,7 +5,8 @@
  *
  *  - Builds: the model, its areas and its results (masses, checks, the lean's dynamics), all finite.
  *  - Closed: the skin's grid wraps round (its first and last angle are the same point), the nose closes to one point,
- *    the tail's edge has its cap, and the only cells left out are inside the two rear arches' openings.
+ *    the tail's edge has its cap, and the only cells left out are inside the wheel arches' openings (the rear two, and
+ *    the front two when the front wheels go inside the nose, the default since 2026-11-15).
  *  - No bumps: along the car the roof line has one top (it may be a flat stretch), the belly never rises in the middle
  *    and then falls, and the half-width rises from the nose to one plateau and falls to the tail (no waist bulging out
  *    again between the front fairings).
@@ -49,7 +50,9 @@ function revisar(P: Parametros, nombre: string): boolean {
   let fuera = 0;
   for (let i = 0; i < xs.length - 1; i++) for (let j = 0; j < ths.length - 1; j++) {
     const a = pos[i][j], d = pos[i + 1][j + 1], c: [number, number, number] = [(a[0] + d[0]) / 2, (a[1] + d[1]) / 2, (a[2] + d[2]) / 2];
-    if (m.hueco(c) && (Math.abs(c[0] - m.arco.x) > m.arco.rx + 1e-6 || c[1] > m.arco.yTop + 1e-6)) fuera++;
+    // (the rear arches' openings, and the front ones when the wheels go in the nose)
+    const enArco = (a: { x: number; rx: number; yTop: number } | null) => !!a && Math.abs(c[0] - a.x) <= a.rx + 1e-6 && c[1] <= a.yTop + 1e-6;
+    if (m.hueco(c) && !enArco(m.arco) && !enArco(m.arcoDel)) fuera++;
   }
   bien = ok(fuera === 0, `${nombre}: ${fuera} celdas de la piel faltan fuera de los pasos de rueda`) && bien;
   // no bumps

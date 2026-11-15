@@ -1184,7 +1184,7 @@ export default function Aeromovil() {
   const filasComparar = useMemo<FilaTunel[]>(() => [
     ...(soloGaraje ? [] : esBas ? (cdBasComparar.cd != null && cdBasComparar.areaRef != null ? [{
       id: 'aeromovil', nombre: nombreVehiculo, cd: cdBasComparar.cd, area: cdBasComparar.areaRef, masa: res.mTot, crr: CRR_B, estimado: true, origenCd: 'túnel (la carrocería y sus ruedas)',
-      fuente: `Este diseño. Cd estimado por el túnel con la carrocería y sus cuatro ruedas (los carenados delanteros, solo como ruedas carenadas: el real será algo más alto); masa estimada con dos ocupantes de ${camposBasculante(P).qMOcc} kg y rodadura ${CRR_B} (neumático de scooter).`,
+      fuente: `Este diseño. Cd estimado por el túnel con la carrocería y sus cuatro ruedas${camposBasculante(P).qRuedasDel === 'carenados' ? ' (los carenados delanteros, solo como ruedas carenadas: el real será algo más alto)' : ''}; masa estimada con dos ocupantes de ${camposBasculante(P).qMOcc} kg y rodadura ${CRR_B} (neumático de scooter).`,
     }] : []) : esTri ? (cdTriComparar.cd != null && cdTriComparar.areaRef != null ? [{
       // the Triciclo: the tunnel's Cd (computed in the background), with its own mass and rolling resistance
       id: 'aeromovil', nombre: nombreVehiculo, cd: cdTriComparar.cd, area: cdTriComparar.areaRef, masa: res.mTot, crr: CRR, estimado: true, origenCd: 'túnel (la carrocería y sus ruedas)',

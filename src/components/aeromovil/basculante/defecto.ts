@@ -46,7 +46,12 @@ export interface CamposBasculante {
   // ── Carrocería: techo solar
   qSolarIni: number; qSolarFin: number;   // detrás del eje delantero (m)
   qSolarCola: 'no' | 'si';                // paneles también en la cubierta de la cola
-  // ── Carrocería: carenados de las ruedas delanteras
+  // ── Carrocería: las ruedas delanteras (2026-11-15: dentro del morro, de serie; o cada una en su carenado)
+  qRuedasDel: 'morro' | 'carenados';
+  qMorroSobre: number;  // morro: altura del techo sobre lo más alto de los pasos de rueda (m)
+  qPasoHueco: number;   // paso de rueda: hueco al neumático, girado e inclinado a tope (m)
+  qPasoAbre: number;    // paso de rueda: la abertura por el lado y por debajo llega a esto sobre el eje (m)
+  // ── Carrocería: carenados de las ruedas delanteras (solo con qRuedasDel 'carenados')
   qPodAlto: number;     // tamaño (alto) alrededor de la rueda (×)
   qPodAncho: number;    // anchura (×)
   qPodFrente: number;   // largo por delante del eje (×)
@@ -89,20 +94,26 @@ export interface CamposBasculante {
  * is 25 % under the Smera's (1.48 m: auto123.com's prototype sheet, the
  * same source nube/circuito uses for its Smera row in circuito/datos.ts), which is why both riders recline 45–47° as in a velomobile; the Aptera's curved tail
  * makes it 2.85 m long against the Smera's 2.40–2.50. Masses aim at the 250 kg Eugenio asked for.
+ *
+ * 2026-11-15, Eugenio: «quiero que el carenado frontal, el morro, envuelva las 2 ruedas delanteras basculantes con una
+ * sola pieza muy aerodinámica, y haz que las ruedas basculantes tengan un ancho de vía un 20 % menor del actual». The
+ * front wheels now go inside the nose, in wheel wells (`qRuedasDel: 'morro'`), and the front track is 0.69 m (0.86 m
+ * less 20 %). The separate fairings stay as an option.
  */
 export const BASCULANTE_DEFECTO: CamposBasculante = {
-  qMorro: 0.46, qCola: 0.50, qAncho: 0.86, qAlto: 1.10, qSuelo: 0.14,
-  qSeccion: 2.6, qPanza: 2.9, qCentro: 0.42, qAnchoIni: 0.78, qAnchoFin: 1.85,
+  qMorro: 0.57, qCola: 0.50, qAncho: 0.86, qAlto: 1.10, qSuelo: 0.14,
+  qSeccion: 2.6, qPanza: 2.5, qCentro: 0.42, qAnchoIni: 0.78, qAnchoFin: 1.85,
   qMorroAlto: 0.34, qMorroPunta: 0.65, qMorroRedondo: 0.28, qMorroAncho: 0.60,
   qColaAlto: 0.58, qColaCurva: 1.9, qColaAncho: 0.52, qColaGrosor: 0.06, qBajosCola: 0.10,
   qCapo: 0.70, qParabrisasX: 0.24, qParabrisas: 0.78, qCaida: 1.95, qCintura: 0.32, qVentAlto: 0.84, qCupFin: 2.06,
   qSolarIni: 1.08, qSolarFin: 1.96, qSolarCola: 'no',
+  qRuedasDel: 'morro', qMorroSobre: 0.15, qPasoHueco: 0.025, qPasoAbre: 0.06,
   qPodAlto: 1.20, qPodAncho: 1.15, qPodFrente: 1.12, qPodCola: 1.18, qPodForma: 0.6, qPodHueco: 0.035, qPodCubre: 0.35, qHuecoCuerpo: 0.03,
   qMatCarenado: 'carbonoLino', qEspCarenado: 1.5, qEspCristal: 3,
   qPilX: 0.96, qPilY: 0.24, qRecPil: 45, qPasX: 1.48, qPasY: 0.26, qRecPas: 47,
   qVolX: 0, qVolY: 0, qPedX: -0.10, qPedY: 0, qMOcc: 80, qMAsiento: 3.5,
   qChMat: 'al6061', qChD: 40, qChT: 2.0, qChUniones: 3,
-  qBatalla: 1.94, qViaDel: 0.86, qViaTras: 0.62, qRuedaDel: 'm14', qRuedaTras: 'm14',
+  qBatalla: 1.94, qViaDel: 0.69, qViaTras: 0.62, qRuedaDel: 'm14', qRuedaTras: 'm14',
   qBascMax: 25, qBrazoAlto: 0.24, qBrazoSep: 0.22, qGiro: 20, qRecDel: 90, qRecTras: 90,
   qMRueda: 6.5, qMFreno: 1.2, qMSusp: 2.5, qMBrazos: 7, qMActuador: 6.5, qMDir: 4,
   qKWNom: 8, qKWPico: 15, qMMotor: 26, qMInversor: 4, qVel: 80,
