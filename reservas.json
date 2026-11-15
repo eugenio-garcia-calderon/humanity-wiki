@@ -11,6 +11,12 @@
       "ruta": "src/components/aeromovil/geometriaTriciclo.ts",
       "motivo": "Bala clásico basculante",
       "desde": "2026-11-15T16:51:06.682Z"
+    },
+    {
+      "agente": "balab",
+      "ruta": "src/components/aeromovil/Visor3D.tsx",
+      "motivo": "Bala clásico basculante",
+      "desde": "2026-11-15T16:51:09.186Z"
     }
   ]
 }
