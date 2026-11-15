@@ -11664,6 +11664,44 @@ Eugenio: «Lo de votar por temas, llámalo así. En el menú y en el título»; 
 - Lo votado se guarda en `localStorage` con una clave nueva (`politica.votar.v2`), porque los valores ya no son posiciones de 0 a 4 sino cantidades; lo de la versión anterior no se arrastra.
 - Comprobado en Chrome sin interfaz a 1360 y 390 px: cambio al pasar el ratón, deslizador con clic y teclado, ejes de los diez gráficos, sin desbordamiento ni errores de JS.
 
+## 2026-11-15 — Votar por temas: 100 puntos de importancia por persona
+
+Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y puede repartirlo según la importancia que le dé a sus votos… que a nivel de UX sea sencillo».
+
+- Cada medida votada tiene una fila «Importancia para ti» con «−» y «+» (pasos de 5, botones de 44 px), el número de puntos, una barra con el color de su tema y «te quedan N de 100». Antes de votar la medida, la fila está apagada y dice «Vota primero para darle puntos»; «No lo sé todavía» devuelve sus puntos.
+- No se pueden pasar de 100: el «+» se desactiva al llegar y el foco salta al «−».
+- El panel lateral abre con «Tus 100 puntos»: barra repartida por colores de tema, leyenda por tema, cuántos quedan y «Repartir a partes iguales» entre lo votado. El resumen y «Copiar mi voto» incluyen los puntos de cada medida; cada tarjeta de tema muestra una franja con sus puntos.
+- Los pasos 2 y 5 de la propuesta explican que los votos se suman con el peso que les da cada persona.
+- Se guarda en la misma clave (`politica.votar.v2`, campo `pts`); quien ya votó conserva sus votos y empieza con 100 puntos libres.
+- Comprobado en Chrome sin interfaz a 1360 y 390 px: tope de 100, reparto a partes iguales (50/50 con dos medidas), devolución con «No lo sé», sin errores de JS ni desbordamiento.
+
+## 2026-11-15 — `/vision`: los 12 sectores completos y sin «borrador»
+
+- Eugenio: «sigue ampliando todos los temas, quita lo de borrador». Los diez sectores que tenían un solo ejemplo (Energía, Política, Economía, Seguridad, Justicia, Salud, Alimentación, Informática, Educación, Cuidados) tienen ahora, como Vivienda y Movilidad, 3 bloques de visión, 6 retos con dato y fuente, 6 soluciones (cada una dice qué reto supera) y 7-8 proyectos, la mayoría en España. Investigado por cinco agentes con búsqueda web; lo que no pudieron confirmar lleva «(por verificar)» en el propio texto.
+- Proyectos propios enlazados en su sector: SolarCrowd (Energía), Votar por temas (Política, `/observatorio-polarizacion/`), Modelo de optimización socioeconómica (Economía), humanity.wiki (Informática), Estudio sobre la conciencia (Educación), Aeromóvil (Movilidad), Comunidad Circular (Vivienda).
+- Cada sector abre su visión con la ilustración del mes correspondiente del **Calendario Arte para la Humanidad 2027** (miniatura de `public/calendario-arte/miniaturas/`; al pinchar, la grande). La portada muestra la misma ilustración en cada tarjeta. Energía, Informática y Seguridad usan otro diseño de su mes para no repetir imagen con Movilidad y Vivienda.
+- Todos los sectores tienen botón «VER LA VISIÓN EN 3D» y cada bloque su escala del visor.
+- Quitado todo rastro de «borrador»: la etiqueta de la cabecera, la de las tarjetas (ahora dicen cuántos retos, soluciones y proyectos hay) y la del visor 3D. `data_otros.js` desaparece: todo vive en `data.js`.
+
+## 2026-11-15 · Modelo de optimización socioeconómica: más pedagógico, útil, real y certero
+
+- Eugenio: «qué mejorarías para que sea más pedagógico, útil, real y certero, y hazlo».
+- **Cover** (`Mirada.tsx`): «El modelo en cuatro ideas» (one tax, eight equal scales, one pension, new money only to produce) with links and a «Calcúlalo con tu sueldo» link to `#ejemplo`; «Las cuentas, en una mirada», computed live from `cuentasPais`/`modeloPorFuncion` so it cannot disagree with the windows: where every 100 € goes (12,5 person · 62,5 the five inner scales · 25 Europe and planet, vs ≈ 3 € today) and revenue today vs model; «Lo que todavía no cuadra»: 42.416 M€ less revenue, services 372.428 vs 765.001 M€ (sanidad 102.942 → 52.140, educación 65.862 → 34.263), the 170.330 M€ pension not yet in the accounts; «Qué hay en cada área» (the usual parts, honestly «casi todas») and a 12-term glossary (M€ and billones, PIB, cotizaciones, déficit, deuda, escala, tramo, tercio, dividendo, IPC, crédito).
+- **Every summary card says what kind of number it is**: `Cifra` gets `clase` = `dato` (published by a cited source) · `calculo` (this page's arithmetic) · `propuesta` (does not exist today). 96 cards tagged: 53 dato, 28 cálculo, 13 propuesta, 1 untagged («Sin dato»). Rule used: a card is `dato` only if its main value comes as published; own counts and ratios built here are `calculo` even when their inputs are sourced. Scale cards are all `dato`. Notes that only repeated «Propuesta» were removed.
+- **Working notes removed from public text**: six sentences told visitors «lo decide Eugenio», «Eugenio la confirma», «como pidió Eugenio»; now «está por decidir» / «todavía por confirmar» / «como se propone». The decisions themselves are still open and listed in the report to Eugenio.
+- **`scripts/modelo-comprobar.mts`** (`npx tsx scripts/modelo-comprobar.mts`, exit 1 on failure): every «fuente» link resolves (413 today; a missing id renders nothing, so it looked sourced in code and unsourced on screen), wage rates equal their tiers, eighths add to one, no working note addressed to a person in public text. Verified it catches a planted missing source and a planted note.
+- **Migration 0222**: the «Mejoras pendientes» board marks «móvil» and «tipos de los sueldos» as done and adds a progress answer to «Otras propuestas» and «fuentes oficiales»; only items still pending, never over an admin's answer.
+- Checked in headless Chrome at 1360 and 390 px (no horizontal overflow, no JS errors); `tsc`, `build` and the new check clean. Not checked on a real phone.
+
+## 2026-11-15 — Política: Geometrías con diez temas y los tres círculos
+
+- Eugenio: «haz la geometría de los partidos pero con todos los temas políticos… añádeles estilo a cada tema y con ilustraciones al lado del título… mejora el círculo ideal y todos sus círculos concéntricos para que entendamos qué es lo más básico y qué es lo más avanzado de cada tema haciendo hover en esas líneas y puntos».
+- **Diez temas** en el capítulo 6 (`public/observatorio-polarizacion/index.html`): a inmigración y servicios (ocho radios) se suman economía e impuestos, trabajo y pensiones, vivienda, clima y energía, modelo territorial, derechos y libertades, instituciones y justicia, y exterior y defensa (seis radios cada uno). Cada tema lleva color propio, una ilustración de línea (`ILUS`), una pregunta, sus dilemas, la nota de los nueve partidos por radio, un resumen por partido, la propuesta del círculo por radio y dos objeciones. `geometrias()` ya no tiene `N = 8` fijo: lo toma de cada tema (también `API.geoForma`, que usa la tarjeta de la portada).
+- **Selector y cabecera**: tarjetas con ilustración (`.geo-tc`, `role="tab"`, flechas, Inicio y Fin; en móvil, fila con desplazamiento horizontal) y una cabecera grande con la ilustración al lado del título (`#geo-head`).
+- **Tres círculos** en lugar de cuatro anillos: a 1/3, 2/3 y el borde = lo básico, lo intermedio y lo avanzado (el círculo ideal, con un halo del color del tema). Cada tema tiene una frase por círculo (`niv`) y cada radio una escalera de tres (`ejes[i].niv`). Al pasar el ratón por un círculo se lee qué significa en el tema y qué partidos lo alcanzan en todo; por un punto (radio × círculo), qué es ese nivel en ese aspecto y quién llega. En pantalla táctil, al tocar. Para teclado y móvil, una leyenda de los tres círculos bajo el gráfico que resalta cada uno. La ficha de un radio enseña su escalera con los partidos en cada peldaño, y la de un partido dice hasta qué nivel llega en cuántos aspectos.
+- Umbrales: 0–3 no llega a lo básico (la «pata coja» de antes), 4–6 básico, 7–9 intermedio, 10 avanzado. Las notas siguen siendo **valoración de la página** a partir de programas, leyes y declaraciones hasta noviembre de 2026, no un dato medido; 11 fuentes nuevas en el capítulo 6.
+- Verificado en un navegador automatizado sobre el archivo local (1360 px y 390 px, ratón y toque): sin errores de JavaScript, sin desbordamiento horizontal en móvil. No verificado en producción ni con la aplicación instalada desde aquí.
+
 ## 2026-11-15 · Réplica del Lumeneo Smera, evaluador de parecido y «Crear editable»
 
 - Eugenio: «mejora el modelo del Lumeneo Smera… recréalo esta vez más fiel a la realidad… que incluso se abran las puertas… Crea un bot que te evalúe la cercanía a la realidad. Haz también el piloto e interior… permite que también bascule. Y a partir de esa réplica permite crear un modelo 3D editable… más alargado, más bajito, el conductor más reclinado, paneles solares en el techo y cola».

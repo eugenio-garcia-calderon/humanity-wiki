@@ -42,11 +42,11 @@ export function LegalVentana() {
       <Apartado id="legal" titulo="Las mismas reglas en todo el país"
         entradilla={<>Hoy el Estado, cada comunidad y cada ayuntamiento pueden escribir su propia norma sobre lo mismo: el ruido, la basura, las licencias, el suelo. Quien trabaja en varios sitios tiene que cumplir una ley distinta en cada uno. La propuesta: unificar y simplificar. Una sola norma por materia básica, la misma en toda España y, a futuro, en toda Europa. Una <strong>materia básica</strong> es lo esencial que debería ser igual para todos: el ruido, el aire, los residuos, las licencias, el suelo.</>}>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Cifra valor={numero(NORMAS.desde1979)} texto={<>normas aprobaron las administraciones españolas entre 1979 y 2021<F id="bde-blog" /></>} tono="mal" />
-          <Cifra valor={`${Math.round(NORMAS.en2022 / 365)} al día`} texto={<>normas nuevas en 2022: {numero(NORMAS.en2022)} en un año<F id="bde-blog" /></>} tono="mal" />
-          <Cifra valor={`hasta ${numero(TEXTOS_MAXIMOS)}`} texto={<>textos distintos pueden regular el ruido en España: Unión Europea, Estado, 17 comunidades y {numero(NORMAS.municipios)} ayuntamientos<F id="ley-ruido" /></>} tono="mal"
+          <Cifra clase="dato" valor={numero(NORMAS.desde1979)} texto={<>normas aprobaron las administraciones españolas entre 1979 y 2021<F id="bde-blog" /></>} tono="mal" />
+          <Cifra clase="dato" valor={`${Math.round(NORMAS.en2022 / 365)} al día`} texto={<>normas nuevas en 2022: {numero(NORMAS.en2022)} en un año<F id="bde-blog" /></>} tono="mal" />
+          <Cifra clase="dato" valor={`hasta ${numero(TEXTOS_MAXIMOS)}`} texto={<>textos distintos pueden regular el ruido en España: Unión Europea, Estado, 17 comunidades y {numero(NORMAS.municipios)} ayuntamientos<F id="ley-ruido" /></>} tono="mal"
             nota="Es el máximo posible: no hay recuento oficial de ordenanzas." />
-          <Cifra valor="1" texto="texto por materia básica con la propuesta, igual en todo el país; las escalas pequeñas solo ajustan dentro de márgenes" tono="bien" />
+          <Cifra clase="propuesta" valor="1" texto="texto por materia básica con la propuesta, igual en todo el país; las escalas pequeñas solo ajustan dentro de márgenes" tono="bien" />
         </div>
 
         <div className="mt-8 grid gap-4 md:grid-cols-3">
@@ -81,9 +81,9 @@ export function LegalVentana() {
       <Apartado id="legal-cifras" titulo="Cuántas normas hay, y cuántas chocan"
         entradilla={<>Contar normas se puede. Contar cuántas se contradicen, no: nadie lo mide. Lo que sí se cuenta son los choques que llegan al Tribunal Constitucional, como los <strong>conflictos de competencia</strong>: dos administraciones discuten a cuál de las dos le toca regular algo.</>}>
         <div className="grid gap-4 md:grid-cols-3">
-          <Cifra valor={numero(NORMAS.desde1979)} texto={<>normas aprobaron todas las administraciones entre 1979 y 2021<F id="bde-blog" /></>} tono="mal" />
-          <Cifra valor={numero(IMPUGNACIONES.total)} texto={<>choques entre el Estado y las comunidades llevados al Constitucional, de 1980 a 2024<F id="mpt-conflictividad" /></>} tono="mal" />
-          <Cifra valor={`más de ${numero(RECLAMACIONES_LGUM)}`} texto={<>quejas de empresas y profesionales por trabas de una administración, de 2014 a 2024<F id="bde-lgum" /></>} tono="mal"
+          <Cifra clase="dato" valor={numero(NORMAS.desde1979)} texto={<>normas aprobaron todas las administraciones entre 1979 y 2021<F id="bde-blog" /></>} tono="mal" />
+          <Cifra clase="dato" valor={numero(IMPUGNACIONES.total)} texto={<>choques entre el Estado y las comunidades llevados al Constitucional, de 1980 a 2024<F id="mpt-conflictividad" /></>} tono="mal" />
+          <Cifra clase="dato" valor={`más de ${numero(RECLAMACIONES_LGUM)}`} texto={<>quejas de empresas y profesionales por trabas de una administración, de 2014 a 2024<F id="bde-lgum" /></>} tono="mal"
             nota="Los ayuntamientos son los que más acumulan." />
         </div>
         <p className="mt-6 max-w-3xl text-[15px] leading-relaxed text-slate-700">

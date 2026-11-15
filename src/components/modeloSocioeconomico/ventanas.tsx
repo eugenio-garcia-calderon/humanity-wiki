@@ -247,13 +247,34 @@ export function Apartado({ id, titulo, entradilla, children, fondo = 'claro' }: 
   );
 }
 
+/** What kind of number a card shows, so a reader can tell a measured fact from this page's arithmetic and from the proposal. */
+export type ClaseCifra = 'dato' | 'calculo' | 'propuesta';
+export const CLASE_CIFRA: Record<ClaseCifra, { texto: string; ayuda: string }> = {
+  dato: { texto: 'Dato', ayuda: 'Una cifra publicada por otra fuente: el enlace «fuente» lleva a ella.' },
+  calculo: { texto: 'Cálculo', ayuda: 'Una cuenta hecha en esta página con datos publicados. Puede equivocarse donde se equivoquen sus supuestos.' },
+  propuesta: { texto: 'Propuesta', ayuda: 'Lo que propone el modelo. No existe hoy.' },
+};
+/** The small tag that says which kind of number it is. */
+export function EtiquetaClase({ clase }: { clase: ClaseCifra }) {
+  const c = CLASE_CIFRA[clase];
+  return (
+    <span title={c.ayuda} className={cn('inline-flex items-center rounded-full px-2 py-px text-[11px] font-semibold leading-5',
+      clase === 'dato' ? 'bg-white text-slate-700 ring-1 ring-slate-300' : clase === 'calculo' ? 'bg-amber-50 text-amber-800 ring-1 ring-amber-200' : 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200')}>
+      {c.texto}
+    </span>
+  );
+}
+
 /** A big number with what it means, for the summaries. */
-export function Cifra({ valor, texto, tono = 'neutro', nota }: { valor: ReactNode; texto: ReactNode; tono?: 'neutro' | 'bien' | 'mal'; nota?: ReactNode }) {
+export function Cifra({ valor, texto, tono = 'neutro', nota, clase }: { valor: ReactNode; texto: ReactNode; tono?: 'neutro' | 'bien' | 'mal'; nota?: ReactNode; clase?: ClaseCifra }) {
   return (
     <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/[0.04]">
-      {/* A short rule in the tone's colour: the reading's sign at a glance (the value repeats it in its own colour). */}
-      <span aria-hidden className={cn('mb-3 block h-[3px] w-7 rounded-full',
-        tono === 'bien' ? 'bg-emerald-600' : tono === 'mal' ? 'bg-rose-600' : 'bg-slate-300')} />
+      <span className="mb-3 flex items-center justify-between gap-2">
+        {/* A short rule in the tone's colour: the reading's sign at a glance (the value repeats it in its own colour). */}
+        <span aria-hidden className={cn('block h-[3px] w-7 rounded-full',
+          tono === 'bien' ? 'bg-emerald-600' : tono === 'mal' ? 'bg-rose-600' : 'bg-slate-300')} />
+        {clase && <EtiquetaClase clase={clase} />}
+      </span>
       <p className={cn('break-words text-[2.1rem] font-[800] leading-none tracking-[-0.025em] tabular-nums',
         tono === 'bien' ? 'text-emerald-700' : tono === 'mal' ? 'text-rose-700' : 'text-slate-900')}>{valor}</p>
       <p className="mt-2.5 text-[15px] leading-snug text-slate-700">{texto}</p>

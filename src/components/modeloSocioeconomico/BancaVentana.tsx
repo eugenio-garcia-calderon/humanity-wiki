@@ -62,15 +62,15 @@ function Resumen() {
     <Apartado id="banca" titulo="Dinero nuevo para producir y para tu casa, no para acumular casas"
       entradilla={<>Casi todo el dinero que usamos lo crean los bancos al dar un préstamo. Hoy, buena parte de ese dinero nuevo se usa para comprar casas que ya existen, y eso sube su precio. La propuesta: que los bancos solo creen dinero para producir y para la primera y la segunda vivienda de cada persona. Para una tercera, o para una empresa que compra casas, solo dinero que ya existe.</>}>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Cifra valor={porcentaje(pctHipotecas, 0)} tono="mal"
+        <Cifra clase="dato" valor={porcentaje(pctHipotecas, 0)} tono="mal"
           texto={<>de todo el crédito de familias y empresas son hipotecas para comprar casa<F id="credito-2026" /></>}
           nota={<>Junio de 2026: {numero(H.hipotecas2026)} de {numero(H.hogares2026 + H.empresas2026)} millones. Cuenta propia con datos del Banco de España.</>} />
-        <Cifra valor="+150 %" tono="mal"
+        <Cifra clase="dato" valor="+150 %" tono="mal"
           texto={<>subió el precio de la vivienda entre 2001 y 2007; las hipotecas, un 250 %<F id="linde-2017" /></>} />
-        <Cifra valor={porcentaje(H.oficinasCaida, 0)} tono="mal"
+        <Cifra clase="dato" valor={porcentaje(H.oficinasCaida, 0)} tono="mal"
           texto={<>de las oficinas bancarias han cerrado desde 2008. Quedan {numero(H.oficinas2025)}<F id="ivie-2026" /></>}
           nota={<>{numero(H.municipiosSinAcceso)} municipios no tienen ningún punto de atención.</>} />
-        <Cifra valor="0 €" tono="bien"
+        <Cifra clase="propuesta" valor="0 €" tono="bien"
           texto="de dinero recién creado para comprar una tercera vivienda o para que una empresa compre casas"
           nota="Propuesta: eso se paga con ahorro o con inversores." />
       </div>

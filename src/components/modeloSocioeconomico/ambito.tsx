@@ -9,6 +9,7 @@ import { AMBITOS, OPCIONES_AMBITO } from '../../data/ambitos';
 import type { AmbitoId, AreaId, CifraAmbito } from '../../data/ambitos/tipos';
 import { cn } from '../../utils/cn';
 import { Libre } from './piezas';
+import { EtiquetaClase } from './ventanas';
 
 const CLAVE = 'modelo.ambito';
 const VALIDOS = new Set<AmbitoId>(OPCIONES_AMBITO.map(o => o.id));
@@ -68,7 +69,7 @@ function Cifras({ cifras }: { cifras: CifraAmbito[] }) {
     <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
       {cifras.map(c => (
         <li key={c.texto} className="rounded-xl bg-white p-3.5 ring-1 ring-slate-200">
-          <p className="text-xl font-[800] tabular-nums text-slate-900">{c.valor}</p>
+          <p className="flex items-start justify-between gap-2"><span className="text-xl font-[800] tabular-nums text-slate-900">{c.valor}</span><EtiquetaClase clase="dato" /></p>
           <p className="mt-0.5 text-sm leading-snug text-slate-600">{c.texto}{' '}
             <a href={c.fuente.url} target="_blank" rel="noreferrer" title={c.fuente.titulo}
               className="whitespace-nowrap text-xs text-slate-500 underline decoration-slate-300 underline-offset-2 hover:text-slate-800">fuente</a>

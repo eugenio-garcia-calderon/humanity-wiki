@@ -35,13 +35,13 @@ export function DigitalVentana() {
           La propuesta: te das de alta una vez con tu móvil y tu correo, y para firmar desbloqueas el móvil y escribes el código que te llega por SMS. Sin instalar nada.
           Y un teléfono de atención para quien no tenga móvil.</>}>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Cifra valor={`${PASOS_HOY.length} pasos`} tono="mal"
+          <Cifra clase="dato" valor={`${PASOS_HOY.length} pasos`} tono="mal"
             texto={<>para firmar por primera vez con el certificado de la FNMT: {instalar} programas que instalar y una visita a una oficina<F id="fnmt-pasos" /></>} />
-          <Cifra valor={`${CIFRAS.fnmtValidezAnos} años`} tono="mal"
+          <Cifra clase="dato" valor={`${CIFRAS.fnmtValidezAnos} años`} tono="mal"
             texto={<>dura ese certificado. Luego, o si cambias de ordenador, vuelta a empezar<F id="fnmt-validez" /></>} />
-          <Cifra valor={porcentaje(INE_2025.tratanConAdministracion, 1)}
+          <Cifra clase="dato" valor={porcentaje(INE_2025.tratanConAdministracion, 1)}
             texto={<>de las personas de 16 a 74 años hizo algún trámite por internet en 2025; solo el {porcentaje(INE_2025.usos[4].pct, 1)} presentó ella misma la renta<F id="ine-tic" /></>} />
-          <Cifra valor="3 pasos" tono="bien" nota="Propuesta, aún no existe"
+          <Cifra clase="propuesta" valor="3 pasos" tono="bien" nota="Propuesta, aún no existe"
             texto="alta una vez; luego, aviso en el móvil, desbloquear y escribir el código del SMS. Ningún programa que instalar" />
         </div>
       </Apartado>

@@ -23,10 +23,10 @@ export function DeudaVentana() {
       <Apartado id="deuda" titulo="Una deuda que no se devuelve nunca"
         entradilla={<>Las administraciones de España deben {billones(DEUDA.total)} de euros, más de lo que produce el país en un año. Cada año se pagan los intereses y lo que vence se devuelve pidiendo prestado otra vez. La propuesta: que ninguna administración pueda deber, y que cada una ahorre para las emergencias.</>}>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Cifra valor={porcentaje(DEUDA_PCT.total, 1)} texto={<>del PIB debían las administraciones a finales de 2025: {billones(DEUDA.total)}<Fuente id="deuda-2025" /></>} tono="mal" />
-          <Cifra valor={mill(PAGOS.intereses)} texto={<>de intereses en 2025, casi tres veces lo que se gasta en defensa<Fuente id="intereses-2025" /></>} tono="mal" />
-          <Cifra valor={mill(PAGOS.vencimientosEstado)} texto={<>de capital vence en 2026 solo en el Estado, y se paga pidiendo {mill(PAGOS.emisionBrutaEstado)}<Fuente id="tesoro-2026" /></>} tono="mal" />
-          <Cifra valor={`${mill(Math.round(minima.total / 100) * 100)}`} texto={<>al año ahorraría como mínimo la propuesta en cajas para emergencias, con cero deuda</>} tono="bien" />
+          <Cifra clase="dato" valor={porcentaje(DEUDA_PCT.total, 1)} texto={<>del PIB debían las administraciones a finales de 2025: {billones(DEUDA.total)}<Fuente id="deuda-2025" /></>} tono="mal" />
+          <Cifra clase="dato" valor={mill(PAGOS.intereses)} texto={<>de intereses en 2025, casi tres veces lo que se gasta en defensa<Fuente id="intereses-2025" /></>} tono="mal" />
+          <Cifra clase="dato" valor={mill(PAGOS.vencimientosEstado)} texto={<>de capital vence en 2026 solo en el Estado, y se paga pidiendo {mill(PAGOS.emisionBrutaEstado)}<Fuente id="tesoro-2026" /></>} tono="mal" />
+          <Cifra clase="calculo" valor={`${mill(Math.round(minima.total / 100) * 100)}`} texto={<>al año ahorraría como mínimo la propuesta en cajas para emergencias, con cero deuda</>} tono="bien" />
         </div>
 
         <figure className="mt-8 rounded-2xl border border-slate-200 bg-white p-5">
@@ -191,9 +191,9 @@ function CajaContingencias() {
             mostrar={`${anos} ${anos === 1 ? 'año' : 'años'}`} onChange={setAnos} />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Cifra valor={mill(Math.round(c.total))} texto={`al año entre las ${ESCALAS.length} escalas de España`} tono="bien"
+          <Cifra clase="calculo" valor={mill(Math.round(c.total))} texto={`al año entre las ${ESCALAS.length} escalas de España`} tono="bien"
             nota={`${mill(Math.round(c.porEscala))} cada escala, ${euros(c.porPersona)} por habitante`} />
-          <Cifra valor={mill(Math.round(acumulado))} texto={`en la caja después de ${anos} ${anos === 1 ? 'año' : 'años'}, sin contar lo que rinda`} tono="bien" />
+          <Cifra clase="calculo" valor={mill(Math.round(acumulado))} texto={`en la caja después de ${anos} ${anos === 1 ? 'año' : 'años'}, sin contar lo que rinda`} tono="bien" />
         </div>
       </div>
 
@@ -245,8 +245,8 @@ function DeudaHeredada() {
         </div>
         {r ? (
           <div className="grid gap-4 sm:grid-cols-2">
-            <Cifra valor={`${r.anos} años`} texto="para no deber nada" tono="bien" />
-            <Cifra valor={billones(r.intereses)} texto="de intereses pagados por el camino" tono="mal" />
+            <Cifra clase="calculo" valor={`${r.anos} años`} texto="para no deber nada" tono="bien" />
+            <Cifra clase="calculo" valor={billones(r.intereses)} texto="de intereses pagados por el camino" tono="mal" />
           </div>
         ) : (
           <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5 text-[15px] leading-relaxed text-rose-900">

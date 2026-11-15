@@ -679,6 +679,7 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 
 - The 12-sector vision site (`public/vision/`) keeps all its content in two JS files, so editing a reto or a proyecto means a commit and a deploy; nobody can edit it from the platform and its text is invisible to the site search. Moving it to a table (sector, pillar, item, source) with an admin editor is about a day today; it gets worse with every sector filled in by hand. Worth doing once Eugenio's team starts adding content themselves.
 - Same caveat as every static page: the service worker caches each navigation as the `/` shell, so after visiting `/vision/` an offline launch of the app can open the vision site instead of the app. Pre-existing for `/observatorio-polarizacion/`; not fixed here.
+- (2026-11-15) The sector artworks in `/vision` are fixed paths to the calendar's `mes-XX-d` design (the one marked for print). If Eugenio changes a month's illustration or favourite on `/calendario-arte`, `/vision` keeps the old picture: the calendar's choices live in the database (`calendario_arte_meses`), which a static page cannot read. Reading them through a public endpoint is about an hour.
 
 ## 2026-11-15 · Smera replica: cell-based cuts and a few aero-only pieces of the model
 

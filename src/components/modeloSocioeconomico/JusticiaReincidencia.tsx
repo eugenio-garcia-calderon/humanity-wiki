@@ -33,12 +33,12 @@ export function Reincidencia() {
     <Apartado id="justicia-reincidencia" titulo="Una oportunidad, pero no dos"
       entradilla="Para un delito menor sin violencia, la primera vez: un centro de reinserción y devolver diez veces lo robado. Si se repite, cárcel directamente. Con violencia o amenazas, cárcel desde la primera vez. Y un robo es un robo: un solo nombre, sin distinguir entre hurto y robo; lo que agrava es la violencia.">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Cifra valor={porcentaje(r.tasa, 0)} tono="mal"
+        <Cifra clase="dato" valor={porcentaje(r.tasa, 0)} tono="mal"
           texto={<>de quienes salieron de prisión en 2009 volvieron a entrar en los diez años siguientes<F id="reincidencia-2022" /></>}
           nota={`Dato de quienes salieron en 2009, el último estudio completo: ${numero(r.cohorte)} personas.`} />
-        <Cifra valor={porcentaje(r.hurtosPct2025, 1)} tono="neutro"
+        <Cifra clase="dato" valor={porcentaje(r.hurtosPct2025, 1)} tono="neutro"
           texto={<>de los delitos de los adultos condenados en 2025 fueron hurtos<F id="ine-condenados-2025" /></>} />
-        <Cifra valor="1 oportunidad" tono="bien" texto="La segunda vez, cárcel. Y siempre, devolver diez veces lo robado." nota="Propuesta." />
+        <Cifra clase="propuesta" valor="1 oportunidad" tono="bien" texto="La segunda vez, cárcel. Y siempre, devolver diez veces lo robado." />
       </div>
 
       <h3 className="mt-10 text-xl font-bold text-slate-900">El camino de quien comete un delito menor</h3>
@@ -137,12 +137,12 @@ export function Ocupacion() {
     <Apartado id="justicia-ocupacion" titulo="Terminar con la ocupación, sin dejar a nadie en la calle" fondo="blanco"
       entradilla="Que desalojar una casa ocupada sea rápido y lo haga la justicia pública, no empresas privadas. Y que la persona desalojada tenga siempre una alternativa, pagada por lo público y nunca a costa del propietario.">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Cifra valor={numero(o.casos2025)} tono="mal"
+        <Cifra clase="dato" valor={numero(o.casos2025)} tono="mal"
           texto={<>casos de allanamiento y usurpación registrados en 2025, un {porcentaje(baja, 1)} menos que en 2024<F id="ocupacion-2025" /></>}
           nota="Datos del Ministerio del Interior, recogidos por la prensa." />
         <Cifra valor="Sin dato" tono="neutro"
           texto="oficial de cuánto tarda hoy un desalojo. Ni el Consejo General del Poder Judicial ni Interior lo publican." />
-        <Cifra valor="72 horas" tono="bien" texto="para desalojar una vivienda vacía, con orden del juez de guardia. El mismo día si es una casa habitada." nota="Propuesta." />
+        <Cifra clase="propuesta" valor="72 horas" tono="bien" texto="para desalojar una vivienda vacía, con orden del juez de guardia. El mismo día si es una casa habitada." />
       </div>
 
       <h3 className="mt-10 text-xl font-bold text-slate-900">La propuesta</h3>
