@@ -142,6 +142,10 @@ export interface CamposTriciclo {
   tColaPlana: number;    // la punta de la cola: 0 en punta (hasta ahora) … 1 plana, ancha y cortada como el Aptera
   tTechoPlano: number;   // lo alto de la carrocería: 0 redondeado (hasta ahora) … 1 plano
   tCaida: number;        // la caída del techo hacia el maletero y la cola: − cae antes, + aguanta arriba y cae más tarde
+  // 2026-11-15 (Eugenio: «formas tan perfectas como el avión jet»)
+  tSubida: number;       // la subida de la cúpula desde el capó: + sube antes y más derecha (cabina de jet), − más tarde y tumbada
+  tBajosMorro: number;   // los bajos del morro suben hacia la punta (0 plano … 1, hasta 20 cm)
+  tMorroCurva: number;   // con la cubierta lisa: cómo cae el capó hacia el borde del morro
   tConAleta: 'si' | 'no';    // la aleta de cola (hasta ahora, siempre)
   tSolarMorro: 'no' | 'si';  // paneles solares también encima del morro
   tPuertas2: 'no' | 'si';    // una segunda puerta por lado, para los pasajeros, que se abre hacia atrás
@@ -246,11 +250,11 @@ const FILAS: Fila[] = [
   // round three (2026-11-11, «mucho mayor»): up to 35 cm; above 15.8 cm the whole body rises (see SUELO_RIGIDO)
   ['tSuelo', 'carroceria', 'Forma', 'bSuelo', '', 0.04, 0.35, 0.002, 'cm'],
   // (round 3, 2026-11-12, «que el morro se pueda achatar más»: 20 cm shorter and a fuller tip than before; see rangoTriciclo)
-  ['tMorro', 'carroceria', 'Morro y cola', 'bMorro', '', 0.20, 1.20, 0.01, 'm'],
-  ['tPuntaMorro', 'carroceria', 'Morro y cola', 'bPuntaMorro', '', 0.15, 1.20, 0.01, 'x'],
-  ['tCola', 'carroceria', 'Morro y cola', 'bCola', '', 0.45, 1.20, 0.01, 'm'],
-  ['tPuntaCola', 'carroceria', 'Morro y cola', 'bPuntaCola', '', 0.30, 0.85, 0.005, 'm'],
-  ['tAleta', 'carroceria', 'Morro y cola', 'bAleta', '', 0, 0, 0, 'm'],
+  ['tMorro', 'carroceria', 'Morro', 'bMorro', '', 0.20, 1.20, 0.01, 'm'],
+  ['tPuntaMorro', 'carroceria', 'Morro', 'bPuntaMorro', '', 0.15, 1.20, 0.01, 'x'],
+  ['tCola', 'carroceria', 'Cola', 'bCola', '', 0.45, 1.20, 0.01, 'm'],
+  ['tPuntaCola', 'carroceria', 'Cola', 'bPuntaCola', '', 0.30, 0.85, 0.005, 'm'],
+  ['tAleta', 'carroceria', 'Cola', 'bAleta', '', 0, 0, 0, 'm'],
   ['tCupIni', 'carroceria', 'Cúpula', 'bCupIni', '', 0, 0, 0, 'm'],
   // (round 3: «que el alto de la cúpula, de donde acaba la cúpula, no esté limitado»: from 1.30 m to 10 cm ahead of the
   // rear axle, and up to 1.90 m tall; the checks say what each end costs. Not lower than 1.15: at 1.05 the real clásico's
@@ -283,22 +287,26 @@ const FILAS: Fila[] = [
   // round 2: how wide the hatch is (its side edges' elevation on the tail section; the Aptera's, about 60°)
   ['tMalLado', 'carroceria', 'Puertas y maletero', null, 'Portón: altura de sus cantos (lo ancho que es)', 25, 75, 1, '°'],
   // ── Round 3 body (nose, tail, roof, hatch, fin, solar, second door), 2026-11-12
-  ['tMorroLinea', 'carroceria', 'Morro y cola', null, 'Morro: en punta o en línea (como el Aptera)', 0, 1, 0.05, 'x'],
-  ['tMorroAlto', 'carroceria', 'Morro y cola', null, 'Morro: altura de la punta (más baja, más alta)', -0.12, 0.40, 0.005, 'cm'],
-  ['tFaroD', 'carroceria', 'Morro y cola', null, 'Faro central: ancho', 0.10, 0.24, 0.01, 'cm'],
-  ['tColaPlana', 'carroceria', 'Morro y cola', null, 'Cola: en punta o plana y ancha (como el Aptera)', 0, 1, 0.05, 'x'],
+  ['tMorroLinea', 'carroceria', 'Morro', null, 'Morro: en punta o en línea (como el Aptera)', 0, 1, 0.05, 'x'],
+  ['tMorroAlto', 'carroceria', 'Morro', null, 'Morro: altura de la punta (más baja, más alta)', -0.12, 0.40, 0.005, 'cm'],
+  ['tFaroD', 'carroceria', 'Morro', null, 'Faro central: ancho', 0.10, 0.24, 0.01, 'cm'],
+  ['tColaPlana', 'carroceria', 'Cola', null, 'Cola: en punta o plana y ancha (como el Aptera)', 0, 1, 0.05, 'x'],
   ['tTechoPlano', 'carroceria', 'Cúpula', null, 'Techo: redondeado o plano', 0, 1, 0.05, 'x'],
   ['tCaida', 'carroceria', 'Cúpula', null, 'Techo: caída hacia el maletero (antes o más tarde)', -0.60, 0.80, 0.05, 'x'],
+  // 2026-11-15
+  ['tSubida', 'carroceria', 'Cúpula', null, 'Parabrisas: subida desde el capó (tumbada o derecha, como un jet)', -0.80, 0.80, 0.05, 'x'],
+  ['tBajosMorro', 'carroceria', 'Morro', null, 'Bajos del morro: cuánto suben hacia la punta', 0, 1, 0.05, 'x'],
+  ['tMorroCurva', 'carroceria', 'Morro', null, 'Capó: caída hacia el borde (antes o más tarde; cubierta lisa)', -0.80, 0.80, 0.05, 'x'],
   ['tLineaCupula', 'carroceria', 'Cúpula', null, 'Línea entre carrocería y cristal: altura', -0.03, 0.15, 0.005, 'cm'],
   // ── The smooth body (2026-11-13): only with «Cubierta lisa» (Aeromovil.tsx `visible`)
-  ['tMorroAncho', 'carroceria', 'Morro y cola', null, 'Morro: ancho del frente (hasta todo el ancho, como el Aptera)', 0, 1, 0.05, 'x'],
-  ['tMorroGrosor', 'carroceria', 'Morro y cola', null, 'Morro: grosor del borde de delante', 0, 0.25, 0.005, 'cm'],
-  ['tMorroBombeo', 'carroceria', 'Morro y cola', null, 'Capó: bombeo (de plano a curvado)', 0, 0.05, 0.0025, 'cm'],
-  ['tColaAncho', 'carroceria', 'Morro y cola', null, 'Cola: ancho al final (hasta todo el ancho, como el Aptera)', 0, 1, 0.05, 'x'],
-  ['tColaGrosor', 'carroceria', 'Morro y cola', null, 'Cola: grosor del borde de atrás', 0, 0.25, 0.005, 'cm'],
-  ['tColaBombeo', 'carroceria', 'Morro y cola', null, 'Cola: bombeo de la cubierta (de plana a curvada)', 0, 0.04, 0.0025, 'cm'],
-  ['tBajosIni', 'carroceria', 'Morro y cola', null, 'Bajos de la cola: dónde empiezan a subir (desde el eje trasero)', -0.05, 0.80, 0.01, 'cm'],
-  ['tBajosCurva', 'carroceria', 'Morro y cola', null, 'Bajos de la cola: cuánto suben hasta el borde', 0, 1, 0.05, 'x'],
+  ['tMorroAncho', 'carroceria', 'Morro', null, 'Morro: ancho del frente (hasta todo el ancho, como el Aptera)', 0, 1, 0.05, 'x'],
+  ['tMorroGrosor', 'carroceria', 'Morro', null, 'Morro: grosor del borde de delante', 0, 0.25, 0.005, 'cm'],
+  ['tMorroBombeo', 'carroceria', 'Morro', null, 'Capó: bombeo (de plano a curvado)', 0, 0.05, 0.0025, 'cm'],
+  ['tColaAncho', 'carroceria', 'Cola', null, 'Cola: ancho al final (hasta todo el ancho, como el Aptera)', 0, 1, 0.05, 'x'],
+  ['tColaGrosor', 'carroceria', 'Cola', null, 'Cola: grosor del borde de atrás', 0, 0.25, 0.005, 'cm'],
+  ['tColaBombeo', 'carroceria', 'Cola', null, 'Cola: bombeo de la cubierta (de plana a curvada)', 0, 0.04, 0.0025, 'cm'],
+  ['tBajosIni', 'carroceria', 'Cola', null, 'Bajos de la cola: dónde empiezan a subir (desde el eje trasero)', -0.05, 0.80, 0.01, 'cm'],
+  ['tBajosCurva', 'carroceria', 'Cola', null, 'Bajos de la cola: cuánto suben hasta el borde', 0, 1, 0.05, 'x'],
   ['tPuerta2Parte', 'carroceria', 'Puertas y maletero', null, 'Segunda puerta: dónde se parten las dos', 0.90, 1.90, 0.01, 'm'],
   ['tBisagra2Y', 'carroceria', 'Puertas y maletero', null, 'Segunda puerta: bisagra a lo largo de su canto de atrás', 0.05, 0.95, 0.01, 'x'],
   ['tBisagra2Inc', 'carroceria', 'Puertas y maletero', null, 'Segunda puerta: el eje, inclinado hacia delante arriba', 0, 45, 1, '°'],
@@ -430,10 +438,10 @@ export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
   { clave: 'tMaletero', n: 'Maletero', dep: 'carroceria', bloque: 'Puertas y maletero', opciones: [{ k: 'cola', n: 'Tapa en lo alto de la cola' }, { k: 'aptera', n: 'Portón largo como el Aptera (con puertas)' }] },
   { clave: 'tRetrovisores', n: 'Retrovisores', dep: 'carroceria', bloque: 'Puertas y maletero', opciones: [{ k: 'camaras', n: 'Cámaras en cápsulas' }, { k: 'espejos', n: 'Espejos de gota (como el Aptera)' }] },
   // ── Round 3 body (nose, tail, roof, hatch, fin, solar, second door), 2026-11-12
-  { clave: 'tFaro', n: 'Faro del morro', dep: 'carroceria', bloque: 'Morro y cola', opciones: [{ k: 'no', n: 'Sin faro central' }, { k: 'si', n: 'Faro central redondo (como una moto)' }, { k: 'barra', n: 'Barra de luz por todo el borde (como el Aptera)' }] },
+  { clave: 'tFaro', n: 'Faro del morro', dep: 'carroceria', bloque: 'Morro', opciones: [{ k: 'no', n: 'Sin faro central' }, { k: 'si', n: 'Faro central redondo (como una moto)' }, { k: 'barra', n: 'Barra de luz por todo el borde (como el Aptera)' }] },
   // 2026-11-13: the smooth body
-  { clave: 'tCubierta', n: 'Morro y cola por arriba', dep: 'carroceria', bloque: 'Morro y cola', opciones: [{ k: 'redonda', n: 'Como la cúpula (redondeados)' }, { k: 'lisa', n: 'Cubierta lisa, sin montículos (como el Aptera)' }] },
-  { clave: 'tConAleta', n: 'Aleta', dep: 'carroceria', bloque: 'Morro y cola', opciones: [{ k: 'si', n: 'Con aleta' }, { k: 'no', n: 'Sin aleta' }] },
+  { clave: 'tCubierta', n: 'Morro y cola por arriba', dep: 'carroceria', bloque: 'Forma', opciones: [{ k: 'redonda', n: 'Como la cúpula (redondeados)' }, { k: 'lisa', n: 'Cubierta lisa, sin montículos (como el Aptera)' }] },
+  { clave: 'tConAleta', n: 'Aleta', dep: 'carroceria', bloque: 'Cola', opciones: [{ k: 'si', n: 'Con aleta' }, { k: 'no', n: 'Sin aleta' }] },
   { clave: 'tSolarMorro', n: 'Paneles solares en el morro', dep: 'carroceria', bloque: 'Techo solar y ventanas', opciones: [{ k: 'no', n: 'No' }, { k: 'si', n: 'Sí, encima del morro' }] },
   { clave: 'tPuertas2', n: 'Puertas por lado', dep: 'carroceria', bloque: 'Puertas y maletero', opciones: [{ k: 'no', n: 'Una' }, { k: 'si', n: 'Dos: la de atrás se abre hacia atrás' }] },
   { clave: 'tMando', n: 'Mando', dep: 'interior', bloque: 'Mandos', opciones: [{ k: 'manillar', n: 'Manillar' }, { k: 'volante', n: 'Volante' }] },
@@ -578,7 +586,7 @@ function paqueteCabe(T: CamposTriciclo, hz: number, largo: number): { largo: num
  * Round 3 body (2026-11-12): the shape's new fields for `crearForma` (nose line and height, flat tail, flat roof, the
  * roof's fall), each only when it is not zero: absent, the body is built exactly as before, bit for bit.
  */
-export const CLAVES_FORMA_R3: [ClaveNumTriciclo, keyof DimBala][] = [['tMorroLinea', 'morroLinea'], ['tMorroAlto', 'morroAlto'], ['tColaPlana', 'colaPlana'], ['tTechoPlano', 'techoPlano'], ['tCaida', 'caida'], ['tLineaCupula', 'lineaCupula']];
+export const CLAVES_FORMA_R3: [ClaveNumTriciclo, keyof DimBala][] = [['tMorroLinea', 'morroLinea'], ['tMorroAlto', 'morroAlto'], ['tColaPlana', 'colaPlana'], ['tTechoPlano', 'techoPlano'], ['tCaida', 'caida'], ['tLineaCupula', 'lineaCupula'], ['tSubida', 'subida'], ['tBajosMorro', 'bajosMorro']];
 /**
  * 2026-11-13, the smooth body: the hatch's side edge (t: exactly where the deck begins, at its side edge) and the panels'
  * (a frame inside the deck). The cut was first on the rounded edge below (t = 0.55): with a canopy 1.9 m tall that
@@ -586,7 +594,7 @@ export const CLAVES_FORMA_R3: [ClaveNumTriciclo, keyof DimBala][] = [['tMorroLin
  */
 export const T_BORDE_LISA = T_CUBIERTA, T_PANEL_LISA = T_CUBIERTA + 0.03;
 /** 2026-11-13: the smooth body's fields, all of them (zeros included) when it is on, none when it is off. */
-export const CLAVES_LISA: [ClaveNumTriciclo, keyof DimBala][] = [['tColaAncho', 'colaAncho'], ['tColaGrosor', 'colaGrosor'], ['tColaBombeo', 'colaBombeo'], ['tBajosIni', 'bajosIni'], ['tBajosCurva', 'bajosCurva'], ['tMorroAncho', 'morroAncho'], ['tMorroGrosor', 'morroGrosor'], ['tMorroBombeo', 'morroBombeo']];
+export const CLAVES_LISA: [ClaveNumTriciclo, keyof DimBala][] = [['tColaAncho', 'colaAncho'], ['tColaGrosor', 'colaGrosor'], ['tColaBombeo', 'colaBombeo'], ['tBajosIni', 'bajosIni'], ['tBajosCurva', 'bajosCurva'], ['tMorroAncho', 'morroAncho'], ['tMorroGrosor', 'morroGrosor'], ['tMorroBombeo', 'morroBombeo'], ['tMorroCurva', 'morroCurva']];
 export const conLisa = (T: Pick<CamposTriciclo, 'tCubierta'>) => T.tCubierta === 'lisa';
 export function formaR3(T: CamposTriciclo): Partial<DimBala> {
   const o: Partial<Record<keyof DimBala, number>> = {};

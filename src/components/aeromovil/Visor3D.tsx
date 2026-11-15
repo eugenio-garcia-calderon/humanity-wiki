@@ -115,7 +115,11 @@ interface Props {
    *  edited) and the viewer opens no card of its own. */
   alPincharGaraje?: (id: string) => boolean;
   /** A click on our own car (on the Aeromóvil 1, only where no part with a sheet is hit). */
-  alPincharNuestro?: () => void;
+  /**
+   * (2026-11-15: and where it was hit, so the page can open that part's sliders: the point in the car's own axes, the
+   * viewer layer it belongs to, and the names of the part and its parents, nearest first)
+   */
+  alPincharNuestro?: (donde?: { punto: [number, number, number]; capa: CapaId | null; nombres: string[] }) => void;
   /** More buttons for a reference car's card («Solo mostrar este»). With it every garage car can be picked. */
   extraTarjeta?: (id: string) => ReactNode;
   /** Bumped (`n`) when the design being edited changes place: the camera jumps by (dx, dz) with the cars, so the view
@@ -1777,10 +1781,16 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       if (hit && pinchar.current) { pinchar.current((hit.object as any).userData.componente); return; }
       // (2026-11-13) our own car, where no part with a sheet was hit: the page opens the design's card
       if (!pincharNuestro.current) return;
-      if (hit) { pincharNuestro.current(); return; }
+      const donde = (h: THREE.Intersection) => {
+        const p = coche.worldToLocal(h.point.clone()), nombres: string[] = []; let capa: CapaId | null = null;
+        for (let o: THREE.Object3D | null = h.object; o && o !== coche; o = o.parent) { if (o.name) nombres.push(o.name); const c = CAPAS.find(k => k.n === o!.name && o!.parent === coche); if (c) capa = c.k; }
+        return { punto: [p.x, p.y, p.z] as [number, number, number], capa, nombres };
+      };
+      if (hit) { pincharNuestro.current(donde(hit)); return; }
       const todas: THREE.Object3D[] = [];
       coche.traverse((o: any) => { if (o.isMesh && o.visible) { let p = o.parent, ok = true; while (p && p !== coche) { if (!p.visible) { ok = false; break; } p = p.parent; } if (ok) todas.push(o); } });
-      if (ray.intersectObjects(todas, false).length) pincharNuestro.current();
+      const h2 = ray.intersectObjects(todas, false)[0];
+      if (h2) pincharNuestro.current(donde(h2));
     };
     cv.addEventListener('pointerdown', alBajar); cv.addEventListener('pointerup', alSoltar);
     // Arrastrar un coche del garaje (2026-11-07, Eugenio: «mover los vehículos pulsando sobre ellos y

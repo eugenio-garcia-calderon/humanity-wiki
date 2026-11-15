@@ -99,6 +99,13 @@ export interface DimBala {
   techoPlano?: number;
   /** How the roof falls from its crest into the tail (−1…1): + it stays high longer and drops late, − it drops early. */
   caida?: number;
+  // ── 2026-11-15 (Eugenio: «formas tan perfectas como el avión jet»). Each absent or 0 leaves the shape bit for bit.
+  /** How the canopy rises from the hood to its crest (−1…1): + early and upright (a jet's bulbous cockpit), − late and raked. */
+  subida?: number;
+  /** The nose's underside sweeping up towards its tip (0…1): 0 the flat belly, 1 up to 20 cm at the cap (a jet's nose). */
+  bajosMorro?: number;
+  /** The smooth body's hood: how it falls from the canopy to the nose's edge (−1…1), as `caida` does for the deck. */
+  morroCurva?: number;
   /**
    * The line where the painted body ends and the canopy glass begins, moved this much (m, + up), all round the car
    * (balaMedidas.ts `contornoCupula`): the glass edge, the frame under it, the door windows and the roof rail follow it.
@@ -409,11 +416,18 @@ export function crearForma(D: DimBala) {
   const kW = D.ancho / DIM_REF.ancho, dSuelo = (D.suelo - elevar) - DIM_REF.suelo, kAlto1 = (D.alto - BASE_ALTO) / (DIM_REF.alto - BASE_ALTO) - 1;
   /** A height of the reference drawing in this shape: the belly and the widest point lift, the canopy scales (and the whole body rises `elevar`). */
   const alturaArriba = (y: number) => y + (y - BASE_ALTO) * kAlto1 + elevar;
-  const yb = (x: number) => K.yb(R(x)) + dSuelo + elevar;
-  // round 3 (2026-11-12): the roof's fall from its crest (x_ref −1.40) to the tail cap (XT0_REF), re-timed by `caida`
-  const caida = D.caida ?? 0, XCIMA = -1.40;
-  const ytRef = caida ? (xr: number) => {
-    if (xr >= XCIMA || xr <= XT0_REF) return K.yt(xr);
+  // (2026-11-15: `bajosMorro` sweeps the belly up from x_ref −0.30 to the nose cap, smoothly, up to 20 cm)
+  const bajosMorro = D.bajosMorro ?? 0, X_BM = -0.30;
+  const yb = bajosMorro ? (x: number) => {
+    const xr = R(x), u = Math.min(1, Math.max(0, (xr - X_BM) / (XN0_REF - X_BM)));
+    return K.yb(xr) + dSuelo + elevar + bajosMorro * 0.20 * u * u * (3 - 2 * u);
+  } : (x: number) => K.yb(R(x)) + dSuelo + elevar;
+  // round 3 (2026-11-12): the roof's fall from its crest (x_ref −1.40) to the tail cap (XT0_REF), re-timed by `caida`;
+  // 2026-11-15: and its rise from the hood (XN0_REF) to the crest, re-timed by `subida` the same way
+  const caida = D.caida ?? 0, subida = D.subida ?? 0, XCIMA = -1.40;
+  const ytRef = caida || subida ? (xr: number) => {
+    if (subida && xr < XN0_REF && xr > XCIMA) { const u = (XN0_REF - xr) / (XN0_REF - XCIMA), w = u + subida * u * (1 - u); return K.yt(XN0_REF - (XN0_REF - XCIMA) * w); }
+    if (!caida || xr >= XCIMA || xr <= XT0_REF) return K.yt(xr);
     const u = (XCIMA - xr) / (XCIMA - XT0_REF), w = u - caida * u * (1 - u);
     return K.yt(XCIMA - (XCIMA - XT0_REF) * w);
   } : K.yt;
@@ -487,7 +501,7 @@ export function crearForma(D: DimBala) {
   // edge: − falls early and arrives flat, + stays up and falls late; 60 % of the mean slope at 0, as before)
   // (leaving the crest with the canopy line's own slope there, nearly level, so the two meet without a crease)
   const techoCola = zonas ? guia(xGuiaCola, yt(xGuiaCola), pendiente(yt, xGuiaCola), X_COLA, cyCola + gCola / 2, 0.6 * Math.exp(1.5 * (D.caida ?? 0))) : null;
-  const techoMorro = zonas ? guia(xGuiaMorro, yt(xGuiaMorro), pendiente(yt, xGuiaMorro), X_MORRO, cyMorro + gMorro / 2, 0.25) : null;
+  const techoMorro = zonas ? guia(xGuiaMorro, yt(xGuiaMorro), pendiente(yt, xGuiaMorro), X_MORRO, cyMorro + gMorro / 2, 0.25 * Math.exp(1.5 * (D.morroCurva ?? 0))) : null;
   // (and the belly stays flat from where the drawing starts to raise it, x_ref −2.1, back to where the sweep starts: its
   // own rise there, compressed by a long canopy into a few centimetres, would be a crease just ahead of the sweep)
   const xPlano = lisa ? X(-2.1) : -Infinity;
