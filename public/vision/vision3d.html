@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Visualización del ideal — Humanity.wiki</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#cfe3ea;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+  #ui{position:absolute;top:14px;left:14px;z-index:5;max-width:360px;display:flex;flex-direction:column;gap:10px}
+  .panel{background:rgba(255,253,249,.94);border-radius:14px;padding:14px 16px;box-shadow:0 4px 18px rgba(0,0,0,.12)}
+  .panel h1{font-family:Georgia,serif;font-size:20px;margin:0 0 4px}
+  .panel p{margin:0;font-size:13.5px;color:#4d5a52;line-height:1.45}
+  .escalas{display:flex;flex-wrap:wrap;gap:6px}
+  .escalas button{border:1px solid #d9d1c2;background:#fff;border-radius:99px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer}
+  .escalas button.on{background:#3d7a5a;color:#fff;border-color:#3d7a5a}
+  .leyenda{margin:8px 0 0;padding:0;list-style:none;font-size:13px}
+  .leyenda li{display:flex;gap:8px;align-items:center;margin:4px 0;color:#2c3730}
+  .leyenda i{width:12px;height:12px;border-radius:3px;flex:none}
+  .lbl{font-size:12px;background:rgba(31,42,36,.82);color:#fff;padding:3px 8px;border-radius:99px;white-space:nowrap;pointer-events:none}
+  #ctrl{position:absolute;bottom:14px;left:14px;z-index:5;display:flex;gap:8px}
+  #ctrl button{border:0;background:rgba(255,253,249,.94);border-radius:10px;padding:8px 12px;font:inherit;font-size:13px;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+  #hint{position:absolute;bottom:16px;right:16px;font-size:12px;color:#33413a;background:rgba(255,255,255,.7);padding:5px 10px;border-radius:8px}
+  .tag{font-size:11px;color:#7a6a4d;background:#f1ece2;border-radius:99px;padding:2px 8px;display:inline-block;margin-bottom:6px}
+</style>
+<script src="lib/three.min.js"></script>
+<script src="lib/OrbitControls.js"></script>
+<script src="lib/CSS2DRenderer.js"></script>
+</head>
+<body>
+<div id="ui">
+  <div class="panel">
+    <span class="tag">Herramienta de visualización del ideal · borrador</span>
+    <h1 id="titulo"></h1>
+    <p id="desc"></p>
+    <ul class="leyenda" id="leyenda"></ul>
+  </div>
+  <div class="panel"><div class="escalas" id="escalas"></div></div>
+</div>
+<div id="ctrl">
+  <button id="rot">⟳ Girar</button>
+  <button id="lbls">Etiquetas</button>
+  <button id="dia">☀ Día / atardecer</button>
+</div>
+<div id="hint">Arrastra para orbitar · rueda para acercar</div>
+<script>
+const { OrbitControls, CSS2DRenderer, CSS2DObject } = THREE;
+
+const C = { hierba:0x7fb069, tierra:0xb08a5a, tapial:0xd2a76a, madera:0x9c6b3f, cristal:0x9fd3e6, solar:0x1f3b5c,
+  agua:0x4aa3c7, camino:0xe7dcc4, bici:0xc0504d, verde:0x3f7f4a, verdeOsc:0x2f5d3a, fruta:0xe0703a, blanco:0xf3efe6,
+  comun:0xe9c46a, taller:0xa57b52, inver:0xdff2e8, vehiculo:0xf4f1ea, tren:0x2f6690, roca:0x8f8a80 };
+
+const renderer = new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+const labelR = new CSS2DRenderer(); labelR.setSize(innerWidth, innerHeight);
+Object.assign(labelR.domElement.style,{position:'absolute',top:0,left:0,pointerEvents:'none'});
+document.body.appendChild(labelR.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xcfe3ea);
+scene.fog = new THREE.Fog(0xcfe3ea, 160, 420);
+const camera = new THREE.PerspectiveCamera(45, innerWidth/innerHeight, 0.1, 1500);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.maxPolarAngle = Math.PI*0.48; controls.autoRotateSpeed = 0.6;
+
+const hemi = new THREE.HemisphereLight(0xffffff, 0x6b7f4a, 0.55); scene.add(hemi);
+const sun = new THREE.DirectionalLight(0xfff3dd, 0.85); sun.position.set(80,120,60); sun.castShadow = true; sun.shadow.bias=-0.0008; sun.shadow.normalBias=0.4;
+sun.shadow.mapSize.set(2048,2048); Object.assign(sun.shadow.camera,{left:-150,right:150,top:150,bottom:-150,far:400});
+scene.add(sun);
+const ground = new THREE.Mesh(new THREE.CircleGeometry(600,64), new THREE.MeshStandardMaterial({color:C.hierba, roughness:1}));
+ground.rotation.x = -Math.PI/2; ground.receiveShadow = true; scene.add(ground);
+
+let world = new THREE.Group(); scene.add(world);
+let anim = [];
+const mats = {};
+const M = (c, o={}) => { const k=c+JSON.stringify(o); return mats[k] ||= new THREE.MeshStandardMaterial({color:c, roughness:.85, ...o}); };
+function add(geo, color, x=0,y=0,z=0, o={}, parent=world){
+  const m = new THREE.Mesh(geo, M(color,o)); m.position.set(x,y,z); m.castShadow = m.receiveShadow = true; parent.add(m); return m;
+}
+const box=(w,h,d,c,x,y,z,o,p)=>add(new THREE.BoxGeometry(w,h,d),c,x,y+h/2,z,o,p);
+function label(t,x,y,z){ const d=document.createElement('div'); d.className='lbl'; d.textContent=t; const o=new CSS2DObject(d); o.position.set(x,y,z); world.add(o); return o; }
+let colinas=[];
+const alturaSuelo=(x,z)=>colinas.reduce((m,[cx,cz,r,h])=>{const d=Math.hypot(x-cx,z-cz); return d<r?Math.max(m,h*Math.sqrt(1-(d/r)**2)):m;},0);
+function tree(x,z,s=1,fruta=false){ const y0=alturaSuelo(x,z)-.2;
+  add(new THREE.CylinderGeometry(.15*s,.22*s,1.6*s,6),C.madera,x,y0+.8*s,z);
+  add(new THREE.SphereGeometry(1.1*s,10,8),fruta?C.verde:C.verdeOsc,x,y0+2.1*s,z);
+  if(fruta) for(let i=0;i<5;i++){const a=i*1.3; add(new THREE.SphereGeometry(.16*s,6,5),C.fruta,x+Math.cos(a)*.95*s,y0+2.1*s+Math.sin(i)*.4*s,z+Math.sin(a)*.95*s);}
+}
+function bosque(cx,cz,r,n,fruta=false,s=1){ for(let i=0;i<n;i++){const a=Math.random()*6.28, d=Math.sqrt(Math.random())*r; tree(cx+Math.cos(a)*d, cz+Math.sin(a)*d, s*(.8+Math.random()*.5), fruta);} }
+function path(points, w, c, y=.03){
+  const curve = new THREE.CatmullRomCurve3(points.map(p=>new THREE.Vector3(p[0],y,p[1])));
+  const pts = curve.getSpacedPoints(120); const g = new THREE.BufferGeometry(); const v=[]; const idx=[];
+  pts.forEach((p,i)=>{ const n = pts[Math.min(i+1,pts.length-1)].clone().sub(pts[Math.max(i-1,0)]).normalize(); const side = new THREE.Vector3(-n.z,0,n.x).multiplyScalar(w/2);
+    v.push(p.x+side.x,y,p.z+side.z, p.x-side.x,y,p.z-side.z); if(i<pts.length-1){const k=i*2; idx.push(k,k+1,k+2,k+1,k+3,k+2);} });
+  g.setAttribute('position',new THREE.Float32BufferAttribute(v,3)); g.setIndex(idx); g.computeVertexNormals();
+  const m=new THREE.Mesh(g,M(c,{side:THREE.DoubleSide})); m.receiveShadow=true; world.add(m); return curve;
+}
+function ring(r,w,c,y=.04,a0=0,a1=Math.PI*2){ const m=add(new THREE.RingGeometry(r-w/2,r+w/2,96,1,a0,a1-a0),c,0,y,0,{side:THREE.DoubleSide}); m.rotation.x=-Math.PI/2; return m; }
+function solar(x,z,w=4,d=2,rot=0){ const g=new THREE.Group(); g.position.set(x,0,z); g.rotation.y=rot; world.add(g);
+  box(.12,1.2,.12,C.roca,0,0,0,{},g); const p=add(new THREE.BoxGeometry(w,.08,d),C.solar,0,1.4,0,{metalness:.4,roughness:.3},g); p.rotation.x=-0.5; return g; }
+function turbina(x,z,h=14){ add(new THREE.CylinderGeometry(.25,.4,h,8),C.blanco,x,h/2,z); const hub=new THREE.Group(); hub.position.set(x,h,z+.5); world.add(hub);
+  for(let i=0;i<3;i++){ const b=add(new THREE.BoxGeometry(.35,5,.1),C.blanco,0,2.5,0,{},new THREE.Group()); const g=b.parent; g.rotation.z=i*2.094; hub.add(g);} anim.push(t=>hub.rotation.z=t*1.2); }
+function nido(x,z,s=1,c=C.tapial){ add(new THREE.SphereGeometry(1.2*s,14,8,0,Math.PI*2,0,Math.PI/2),c,x,0,z); add(new THREE.SphereGeometry(1.25*s,14,8,0,Math.PI*2,0,Math.PI/5),C.verde,x,.02,z); }
+function huerto(x,z,w,d,rot=0){ const g=new THREE.Group(); g.position.set(x,0,z); g.rotation.y=rot; world.add(g);
+  for(let i=0;i<Math.floor(w/1.6);i++){ box(1,.3,d,C.tierra,-w/2+i*1.6+.5,0,0,{},g); for(let j=0;j<d/1.2;j++) add(new THREE.SphereGeometry(.3,6,5),C.verde,-w/2+i*1.6+.5,.45,-d/2+j*1.2+.5,{},g);} }
+function invernadero(x,z,l=8,rot=0){ const m=add(new THREE.CylinderGeometry(2.2,2.2,l,16,1,true,0,Math.PI),C.inver,x,0,z,{transparent:true,opacity:.55,side:THREE.DoubleSide}); m.rotation.z=Math.PI/2; m.rotation.y=rot; m.rotation.order='YXZ'; return m; }
+function vehiculoGota(c=C.vehiculo){ const g=new THREE.Group(); const b=add(new THREE.SphereGeometry(1,20,12),c,0,0,0,{metalness:.2,roughness:.35},g); b.scale.set(2.1,.75,.85); b.position.y=.9;
+  const cab=add(new THREE.SphereGeometry(.7,16,10,0,Math.PI*2,0,Math.PI/2),C.cristal,.4,1.25,0,{transparent:true,opacity:.75},g); cab.scale.set(1.4,.7,.9);
+  add(new THREE.BoxGeometry(1.6,.04,1.1),C.solar,-.7,1.58,0,{},g);
+  [[1.5,0],[-1.5,0],[0,.75],[0,-.75]].forEach(([x,z])=>{ const w=add(new THREE.TorusGeometry(.32,.08,6,16),0x222222,x,.35,z,{},g); }); world.add(g); return g; }
+function mover(obj, curve, vel, off=0, y=0){ anim.push(t=>{ const u=((t*vel+off)%1+1)%1; const p=curve.getPointAt(u), q=curve.getPointAt((u+.002)%1); obj.position.set(p.x,y,p.z); obj.lookAt(q.x,y,q.z); obj.rotateY(-Math.PI/2); }); }
+function persona(x,z,c=0xc4553d){ add(new THREE.CylinderGeometry(.18,.22,1,6),c,x,.5,z); add(new THREE.SphereGeometry(.18,8,6),0xe8c39e,x,1.2,z); }
+
+/* ---------- ESCENAS ---------- */
+const ESCENAS = {
+  hogar:{ t:'Hogar ideal', d:'Casa integrada en la tierra: muros de tapial transpirable, cubierta vegetal, fachada acristalada al sur, energía solar propia, recogida de lluvia y huerto junto a la cocina.', cam:[26,16,30],
+    ley:[[C.tapial,'Tapial / tierra cruda (local, transpirable)'],[C.verde,'Cubierta vegetal aislante'],[C.cristal,'Ganancia solar pasiva al sur'],[C.solar,'Placas solares'],[C.agua,'Depósito de lluvia']],
+    build(){
+      const loma=add(new THREE.SphereGeometry(16,32,16,0,Math.PI*2,0,Math.PI/2),C.hierba,0,-6,-8); loma.scale.set(1.3,1,1);
+      const cuerpo=add(new THREE.CylinderGeometry(6,6,14,24,1,false,0,Math.PI),C.tapial,0,0,0); cuerpo.rotation.z=Math.PI/2; cuerpo.rotation.y=Math.PI/2; cuerpo.rotation.order='YZX';
+      const techo=add(new THREE.CylinderGeometry(6.4,6.4,14.6,24,1,true,0,Math.PI),C.verde,0,0,-.2,{side:THREE.DoubleSide}); techo.rotation.copy(cuerpo.rotation);
+      box(11,4.2,.2,C.cristal,0,0,6.9,{transparent:true,opacity:.6,metalness:.3,roughness:.1});
+      for(let i=-5;i<=5;i+=2.5) box(.25,4.4,.4,C.madera,i,0,7);
+      box(14,.3,3,C.madera,0,0,8.6);
+      for(let i=0;i<3;i++) solar(-10+i*4.4,12,4,2);
+      add(new THREE.CylinderGeometry(1.2,1.2,2.6,16),C.agua,10,1.3,6);
+      huerto(9,13,8,3);
+      [[-14,4],[14,-2],[-12,14],[16,16],[-18,-6]].forEach(([x,z])=>tree(x,z,1.3,true));
+      path([[0,9],[2,16],[-2,24],[0,34]],1.6,C.camino);
+      persona(3,10); persona(4,10.6,0x2f6690);
+      label('Muros de tapial',-7,4,5); label('Cubierta vegetal',0,8,-2); label('Fachada solar',2,5,8); label('Energía solar',-6,3,12); label('Huerto',9,2,13); label('Agua de lluvia',10,3.5,6);
+    }},
+  comunidad:{ t:'Comunidad circular', d:'Diseño Luz & Humanidad: mitad superior para lo común y productivo (alimento, talleres, energía); mitad inferior con 10 familias en sectores, organizadas en 4 anillos generacionales. La 4.ª generación vuelve al espacio de la 1.ª.', cam:[0,70,85],
+    ley:[[C.comun,'Centro comunitario'],[C.verde,'Huertos y bosque comestible'],[C.taller,'Talleres y fabricación'],[C.tapial,'Nidos familiares (10 × 10)'],[C.camino,'Anillos generacionales']],
+    build(){
+      const R=40;
+      add(new THREE.CylinderGeometry(R,R,.1,96,1,false,0,Math.PI),0x8fbf73,0,.05,0);
+      add(new THREE.CylinderGeometry(R,R,.1,96,1,false,Math.PI,Math.PI),0x9fc27f,0,.05,0);
+      [12,20,28,36].forEach((r,i)=>{ ring(r,1.1,C.camino,.13,Math.PI,2*Math.PI); });
+      ring(R,1.4,C.camino,.13);
+      for(let f=0;f<10;f++){ const a0=Math.PI*0+f*Math.PI/10;
+        const a=a0; const l=new THREE.Vector3(Math.cos(a)*R,0,Math.sin(a)*R); const g=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(Math.cos(a)*8,.08,Math.sin(a)*8), l.setY(.08)]);
+        world.add(new THREE.Line(g,new THREE.LineBasicMaterial({color:0x6b5b3e})));
+        const rs=[12,20,20,28,28,28,36,36,36,36].map((r,i)=>r-3.5);
+        const counts=[1,2,3,4]; let k=0;
+        counts.forEach((n,gen)=>{ const r=[8.5,16.5,24.5,32.5][gen]; for(let j=0;j<n;j++){ const aa=a+(j+1)*(Math.PI/10)/(n+1); nido(Math.cos(aa)*r,Math.sin(aa)*r,1-gen*.08); k++; } });
+      }
+      label('1.ª gen',0,3,10); label('2.ª gen',0,3,18); label('3.ª gen',0,3,26); label('4.ª gen → vuelve a la 1.ª',0,3,34);
+      label('10 familias · cesión vitalicia',26,4,26);
+      add(new THREE.CylinderGeometry(6,7,3,24),C.comun,0,1.5,0); add(new THREE.ConeGeometry(7.5,3,24),C.verde,0,4.5,0);
+      label('Centro comunitario',0,8,0);
+      huerto(-20,-12,14,5,.4); huerto(-10,-26,12,5,0); bosque(18,-22,8,14,true,1.1); invernadero(-26,-24,9,1);
+      box(9,4,6,C.taller,14,0,-8); box(6,3,5,C.taller,22,0,-12); label('Talleres',16,6,-9);
+      for(let i=0;i<4;i++) for(let j=0;j<2;j++) solar(-4+i*4.5,-32+j*4,4,2);
+      label('Energía común',2,4,-31); label('Alimento',-18,3,-18); label('Bosque comestible',18,4,-24);
+      add(new THREE.CylinderGeometry(3,3,.4,24),C.agua,-30,0.2,-4); label('Agua',-30,2,-4);
+      path([[-60,0],[-R,0]],2,C.camino); path([[R,0],[60,0]],2,C.camino); path([[0,-R],[0,-70]],2,C.camino);
+      label('← comunidad izquierda',-55,2,0); label('comunidad derecha →',55,2,0); label('↑ centro del pueblo',0,2,-62);
+    }},
+  pueblo:{ t:'Pueblo ideal', d:'10 comunidades en red alrededor de un centro de soberanía esencial (energía, movilidad, alimento). Vías verdes peatonales conectan todo; bosques comestibles en los bordes; el coche no es necesario.', cam:[0,150,170],
+    ley:[[C.comun,'Centro de soberanía esencial'],[C.camino,'Vías verdes peatonales y ciclistas'],[C.verde,'Bosques comestibles'],[C.solar,'Energía comunitaria'],[C.tren,'Estación / hub de movilidad']],
+    build(){
+      const R=85;
+      for(let i=0;i<10;i++){ const a=i*Math.PI/5; const x=Math.cos(a)*R, z=Math.sin(a)*R;
+        add(new THREE.CylinderGeometry(16,16,.1,48),0x9fc27f,x,.05,z);
+        const ring2=add(new THREE.RingGeometry(15.4,16.4,48),C.camino,x,.04,z,{side:THREE.DoubleSide}); ring2.rotation.x=-Math.PI/2; ring2.position.y=.13;
+        add(new THREE.CylinderGeometry(2,2.3,1.6,16),C.comun,x,.8,z);
+        for(let k=0;k<12;k++){ const b=Math.PI+k*Math.PI/11+a; nido(x+Math.cos(b+Math.PI/2)*11*(k%2?0.65:1), z+Math.sin(b+Math.PI/2)*11*(k%2?0.65:1), .9); }
+        bosque(x+Math.cos(a+Math.PI/2+Math.PI)*-0,z,0,0);
+        path([[x*.25,z*.25],[x*.8,z*.8]],2.4,C.camino);
+        const b=(i+1)*Math.PI/5; path([[x,z],[Math.cos((a+b)/2)*R*1.03,Math.sin((a+b)/2)*R*1.03],[Math.cos(b)*R,Math.sin(b)*R]],1.8,C.camino);
+        bosque(Math.cos(a+Math.PI/10)*(R+28),Math.sin(a+Math.PI/10)*(R+28),10,9,true,1.3);
+      }
+      label('10 comunidades · 1.000 personas',R,6,0);
+      add(new THREE.CylinderGeometry(20,20,.1,48),C.camino,0,.06,0);
+      add(new THREE.CylinderGeometry(7,8,4,24),C.comun,0,2,0); add(new THREE.ConeGeometry(9,3,24),C.verde,0,5.5,0);
+      label('Centro de soberanía esencial',0,10,0);
+      for(let i=0;i<5;i++) solar(-14+i*5,-12,4.5,2.2); label('Energía',-4,4,-13);
+      turbina(-22,6,18); turbina(-28,-4,18);
+      const hub=box(12,.3,6,C.solar,16,3.5,8,{metalness:.4}); box(.3,3.5,.3,C.roca,11,0,6); box(.3,3.5,.3,C.roca,21,0,10);
+      for(let i=0;i<3;i++){ const v=vehiculoGota(); v.position.set(13+i*3,0,8); }
+      label('Movilidad compartida',16,6,8);
+      invernadero(4,16,10,0); huerto(-8,15,10,4); label('Alimento · mercado',0,4,16);
+      const loop = new THREE.CatmullRomCurve3(Array.from({length:20},(_,i)=>{const a=i/20*Math.PI*2; return new THREE.Vector3(Math.cos(a)*48,0,Math.sin(a)*48);}),true);
+      path(loop.getSpacedPoints(60).map(p=>[p.x,p.z]),3,0x6f8f8a,.05);
+      for(let i=0;i<4;i++){ const v=vehiculoGota(i%2?0x9fd3e6:C.vehiculo); mover(v,loop,.02,i/4); }
+      label('Anillo de vehículos ligeros',0,3,48);
+    }},
+  naturaleza:{ t:'Naturaleza ideal', d:'Senderos que conectan el pueblo con el bosque, aprovechamiento cuidadoso (setas, plantas, leña de gestión), centro de interpretación y experiencias de inmersión: mirador, río, baño de bosque.', cam:[60,45,70],
+    ley:[[C.camino,'Senderos'],[C.madera,'Centro de interpretación y mirador'],[C.agua,'Río y charca'],[C.verdeOsc,'Bosque maduro']],
+    build(){
+      colinas=[[-30,-30,30,10],[25,-40,26,8],[-55,10,22,6],[50,15,20,5]]; colinas.forEach(([x,z,r,h])=>{ const m=add(new THREE.SphereGeometry(r,24,12,0,Math.PI*2,0,Math.PI/2),0x8daa6a,x,0,z); m.scale.y=h/r; });
+      const rio=path([[-90,40],[-40,22],[0,30],[30,10],[60,-20],[100,-30]],6,C.agua,.06);
+      add(new THREE.CylinderGeometry(8,8,.1,32),C.agua,10,.05,40);
+      bosque(-30,-30,26,45,false,1.6); bosque(28,-40,22,35,false,1.5); bosque(-70,-40,20,30,false,1.5); bosque(70,-10,14,14,false,1.4); bosque(-55,10,18,22,false,1.4); bosque(55,15,16,16,true,1.3);
+      path([[0,70],[5,45],[-6,25],[-10,5],[-25,-15],[-30,-28]],2,C.camino,.08);
+      path([[-10,5],[15,-10],[25,-30]],1.6,C.camino,.08);
+      box(14,4,8,C.madera,12,0,58); add(new THREE.ConeGeometry(9.5,4,4),C.verde,12,6,58).rotation.y=Math.PI/4;
+      label('Centro de interpretación',12,10,58);
+      box(3,.3,3,C.madera,-30,16,-30); for(const[dx,dz] of [[-1,-1],[1,-1],[-1,1],[1,1]]) box(.25,6,.25,C.madera,-30+dx,10,-30+dz);
+      label('Mirador',-30,20,-30); label('Senderos',-6,2,25); label('Baño de bosque',28,8,-38); label('Río · inmersión',30,2,10); label('Aprovechamiento: setas, frutos',55,8,15);
+      for(let i=0;i<4;i++) persona(-4+i*1.2,30+i*2.5,[0xc4553d,0x2f6690,0x7a4f9a,0xe9c46a][i]);
+    }},
+  movilidad:{ t:'Movilidad ideal', d:'Calle de prioridad peatonal: el espacio se recupera para personas, árboles y juego. Vehículos ultraligeros aerodinámicos y solares, bici y tren conectan casa, trabajo y naturaleza sin dependencia del coche.', cam:[38,22,48],
+    ley:[[C.camino,'Espacio peatonal'],[C.bici,'Carril bici'],[C.vehiculo,'Vehículos ligeros aerodinámicos'],[C.tren,'Tren / tranvía'],[C.solar,'Marquesina solar de recarga']],
+    build(){
+      box(120,.06,40,C.camino,0,0,0); for(let i=0;i<5;i++){ box(3,.5,1,C.madera,-40+i*20,0,13); }
+      box(120,.08,3,C.bici,0,0,-4);
+      box(120,.08,5,0x8a9a92,0,0,4);
+      box(120,.1,2,0x6b6b6b,0,0,-12); box(120,.1,.3,0x333333,0,.1,-11.4); box(120,.1,.3,0x333333,0,.1,-12.6);
+      for(let x=-55;x<=55;x+=9){ tree(x,9,1.4,x%2===0); tree(x+4.5,-8,1.2); }
+      for(let i=0;i<6;i++){ box(10,6+((i*7)%5),8,[C.tapial,C.blanco,0xe2c9a6][i%3],-50+i*20,0,-22); add(new THREE.BoxGeometry(10.2,.4,8.2),C.verde,-50+i*20,6.3+((i*7)%5),-22); }
+      const lane=new THREE.CatmullRomCurve3([new THREE.Vector3(-60,0,4),new THREE.Vector3(60,0,4)]);
+      const lane2=new THREE.CatmullRomCurve3([new THREE.Vector3(60,0,5.5),new THREE.Vector3(-60,0,5.5)]);
+      for(let i=0;i<3;i++){ mover(vehiculoGota(), lane, .03, i/3); mover(vehiculoGota(0x9fd3e6), lane2, .025, i/3+.15); }
+      const tram=new THREE.Group(); for(let i=0;i<3;i++){ add(new THREE.BoxGeometry(9,3,2.6),C.tren,i*9.4,1.8,0,{metalness:.2,roughness:.4},tram); add(new THREE.BoxGeometry(8.6,1,2.65),C.cristal,i*9.4,2.4,0,{},tram);} world.add(tram);
+      const via=new THREE.CatmullRomCurve3([new THREE.Vector3(-70,0,-12),new THREE.Vector3(70,0,-12)]); mover(tram,via,.012,0);
+      const ciclistas=new THREE.CatmullRomCurve3([new THREE.Vector3(-60,0,-4),new THREE.Vector3(60,0,-4)]);
+      for(let i=0;i<4;i++){ const g=new THREE.Group(); add(new THREE.TorusGeometry(.35,.05,6,14),0x222222,.6,.35,0,{},g); add(new THREE.TorusGeometry(.35,.05,6,14),0x222222,-.6,.35,0,{},g); add(new THREE.CylinderGeometry(.16,.2,.8,6),C.bici,0,1.1,0,{},g); add(new THREE.SphereGeometry(.16,8,6),0xe8c39e,0,1.65,0,{},g); world.add(g); mover(g,ciclistas,.05,i/4); }
+      box(14,.25,6,C.solar,-20,3.6,-1,{metalness:.4}); box(.3,3.6,.3,C.roca,-26,0,-1); box(.3,3.6,.3,C.roca,-14,0,-1);
+      for(let i=0;i<10;i++) persona(-40+i*8+(i%3),(i%2?1:-1)*1.5+0, [0xc4553d,0x2f6690,0x7a4f9a,0xe9c46a,0x3d7a5a][i%5]);
+      label('Prioridad peatonal',10,2,0); label('Carril bici',-35,2,-4); label('Vehículos ligeros solares',30,3,5); label('Tranvía / tren',0,5,-12); label('Recarga solar',-20,6,-1); label('Árboles y sombra',30,4,9);
+    }}
+};
+ESCENAS.urbanismo = ESCENAS.pueblo;
+
+let labelsOn=true;
+function cargar(id){
+  if(!ESCENAS[id]) id='hogar';
+  scene.remove(world); world.traverse(o=>{ if(o.isCSS2DObject) o.element.remove(); o.geometry?.dispose(); });
+  world=new THREE.Group(); scene.add(world); anim=[]; colinas=[];
+  const e=ESCENAS[id]; e.build();
+  world.traverse(o=>{ if(o.isCSS2DObject) o.visible=labelsOn; });
+  document.getElementById('titulo').textContent=e.t; document.getElementById('desc').textContent=e.d;
+  document.getElementById('leyenda').innerHTML=e.ley.map(([c,t])=>`<li><i style="background:#${c.toString(16).padStart(6,'0')}"></i>${t}</li>`).join('');
+  camera.position.set(...e.cam); controls.target.set(0,0,0); controls.update();
+  document.querySelectorAll('#escalas button').forEach(b=>b.classList.toggle('on',b.dataset.id===id));
+  if(location.hash.slice(1)!==id) history.replaceState(null,'','#'+id);
+}
+const ORDEN=[['hogar','Hogar'],['comunidad','Comunidad'],['pueblo','Pueblo'],['naturaleza','Naturaleza'],['movilidad','Movilidad']];
+document.getElementById('escalas').innerHTML=ORDEN.map(([id,n])=>`<button data-id="${id}">${n}</button>`).join('');
+document.getElementById('escalas').onclick=e=>{ if(e.target.dataset.id) cargar(e.target.dataset.id); };
+document.getElementById('rot').onclick=()=>controls.autoRotate=!controls.autoRotate;
+document.getElementById('lbls').onclick=()=>{ labelsOn=!labelsOn; world.traverse(o=>{ if(o.isCSS2DObject) o.visible=labelsOn; }); };
+let tarde=false;
+document.getElementById('dia').onclick=()=>{ tarde=!tarde; const bg=tarde?0xf0c9a0:0xcfe3ea; scene.background.set(bg); scene.fog.color.set(bg); sun.color.set(tarde?0xffb070:0xfff3dd); sun.position.set(tarde?140:80,tarde?40:120,60); hemi.intensity=tarde?.4:.55; };
+addEventListener('hashchange',()=>cargar(location.hash.slice(1)));
+addEventListener('resize',()=>{ camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth,innerHeight); labelR.setSize(innerWidth,innerHeight); });
+cargar((location.hash||'#hogar').slice(1).split('?')[0]);
+const clock=new THREE.Clock();
+renderer.setAnimationLoop(()=>{ const t=clock.getElapsedTime(); anim.forEach(f=>f(t)); controls.update(); renderer.render(scene,camera); labelR.render(scene,camera); });
+</script>
+</body>
+</html>

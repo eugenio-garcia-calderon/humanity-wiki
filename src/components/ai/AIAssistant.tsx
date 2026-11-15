@@ -1049,7 +1049,7 @@ export default function AIAssistant({ modo = 'panel' }: {
     const fijas: Record<string, string> = {
       '/': 'Tu perfil', '/esquemas': 'Grafos', '/mapas': 'Mapas', '/juego': 'Mundo 3D',
       '/carpetas': 'Mis carpetas', '/archivos': 'Archivos', '/explorar': 'Explorar',
-      '/mercado': 'Mercado', '/configuracion': 'Configuración', '/vision': 'Visión y hoja de ruta',
+      '/mercado': 'Mercado', '/configuracion': 'Configuración', '/hoja-de-ruta': 'Visión y hoja de ruta', '/vision': 'Visión ideal de los 12 sectores',
     };
     if (fijas[ruta]) return fijas[ruta];
     if (ruta.startsWith('/personas/')) return 'Un perfil';

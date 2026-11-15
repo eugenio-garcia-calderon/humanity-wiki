@@ -96,14 +96,14 @@ const destinoDe = (a: Aviso): string | null => {
   if (a.entity_type === 'llamadas') return `/telefono`;
   if (a.entity_type === 'mensajes') return a.payload?.de ? `/mensajes?con=${a.payload.de}` : `/mensajes`;
   // Un aviso de puntos lleva a tu saldo, donde está la fecha y lo que hacer.
-  if (a.entity_type === 'puntos') return `/vision?pestana=economia`;
+  if (a.entity_type === 'puntos') return `/hoja-de-ruta?pestana=economia`;
   // Un pedido lleva a quien lo mira: al vendedor a su panel, al comprador a
   // su pedido. El aviso trae su propio destino porque lo sabe quien lo escribe.
   if (a.entity_type === 'pedidos') return a.payload?.destino || '/comercio?pestana=pedidos';
   if (a.entity_type === 'cestas' || a.entity_type === 'favoritos') return a.payload?.destino || '/mercado';
   // El aviso del gasto lleva a la página donde se ve cuánto va y cuál es el
   // tope: enterarse sin poder mirar el detalle obliga a buscarlo a mano.
-  if (a.entity_type === 'gasto_ia') return '/vision?pestana=gasto';
+  if (a.entity_type === 'gasto_ia') return '/hoja-de-ruta?pestana=gasto';
   if (a.entity_type === 'stock') return a.payload?.destino || '/mercado';
   // Un sitio con miembros: al panel de miembros de esa página.
   if (a.entity_type === 'sitio_miembros') return a.payload?.destino || null;
