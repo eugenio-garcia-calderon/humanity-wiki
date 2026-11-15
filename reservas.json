@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "rombo",
+      "ruta": "src/components/aeromovil/geometria.ts",
+      "motivo": "Bala en rombo",
+      "desde": "2026-11-15T18:56:43.963Z"
+    }
+  ]
 }
