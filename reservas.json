@@ -11,6 +11,12 @@
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "Chasis y batería que se alargan",
       "desde": "2026-11-15T19:36:27.351Z"
+    },
+    {
+      "agente": "chasis",
+      "ruta": "src/components/aeromovil/geometria.ts",
+      "motivo": "Chasis y batería que se alargan",
+      "desde": "2026-11-15T19:36:29.931Z"
     }
   ]
 }
