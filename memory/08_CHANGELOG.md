@@ -11790,6 +11790,13 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
   - los pies del piloto: 2,3 cm de los 3 que se piden;
   - tres comprobaciones que ya estaban en rojo antes del rombo: las cabezas en talla alta, el controlador y el bastidor.
 
+## 2026-11-15 · La batería se alarga con el coche, y largueros hasta el eje trasero de serie
+
+- Eugenio: «haz que la batería se pueda alargar más cuando se alarga el vehículo, de hecho el chasis por defecto no se está alargando al alargar el vehículo».
+- **Batería.** Con la batería «a lo largo del bastidor», al cambiar «Largo total» o «Batalla» el paquete crece o encoge lo mismo que la batalla, dentro de lo que cabe. Antes se quedaba del mismo largo y el hueco de detrás crecía.
+- **Largueros.** Con dos ruedas traseras, los diseños nuevos llevan de serie los largueros hasta el eje trasero, con su cuna, en lugar de pararse en la torreta del amortiguador, que con cuatro ruedas no existe. Los diseños guardados conservan lo que tenían; se cambia en Chasis.
+- **En rombo**, los textos de Rodaje hablan de las ruedas laterales y de la del morro, no de «delanteras».
+
 ## 2026-11-15 — `/vision`: partes de cada sector, 3D cargado dentro de la página, contenido centrado
 
 - Eugenio: «en vivienda hay varias partes, como la arquitectura del hogar, el urbanismo, la comunidad… añádelo como submenú debajo de vivienda», «que esté todo centrado y los menús laterales un 20 % más pequeños», «el modelo 3D que cargue por defecto sin hacer clic» y «cuando no haya modelo 3D pon que está pendiente».

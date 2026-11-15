@@ -771,7 +771,20 @@ export function estirarTriciclo(T: CamposTriciclo, largo: number): Partial<Campo
   const ahora = largoTriciclo(T), d = Math.min(ahora.max, Math.max(ahora.min, largo)) - ahora.valor;
   if (Math.abs(d) < 1e-9) return {};
   const b = limitarTriciclo('tBatalla', T), nb = Math.round((b + d) * 1e4) / 1e4;
-  return { tBatalla: nb, tCupFin: Math.round((limitarTriciclo('tCupFin', T) + (nb - b)) * 1e4) / 1e4 };
+  return { ...conBatalla(T, nb), tCupFin: Math.round((limitarTriciclo('tCupFin', T) + (nb - b)) * 1e4) / 1e4 };
+}
+/**
+ * A new wheelbase, and with it the pack along the frame (2026-11-15, Eugenio: «haz que la batería se pueda alargar más
+ * cuando se alarga el vehículo»): the pack grows or shrinks by as much as the wheelbase, within its own range at the new
+ * length, so stretching the car keeps the gap behind it the same. With the battery spread out, only the wheelbase.
+ */
+export function conBatalla(T: CamposTriciclo, nb: number): Partial<CamposTriciclo> {
+  const b = limitarTriciclo('tBatalla', T), o: Partial<CamposTriciclo> = { tBatalla: nb };
+  if (bateriaChasis(T) && Math.abs(nb - b) > 1e-9) {
+    const T2 = { ...T, tBatalla: nb }, [lo, hi] = rangoTriciclo('tBatLargo', T2);
+    o.tBatLargo = Math.round(Math.min(hi, Math.max(lo, limitarTriciclo('tBatLargo', T) + (nb - b))) * 100) / 100;
+  }
+  return o;
 }
 /**
  * Round 4 (2026-11-13): «Alto total» below 1.15 m, its floor until this round. Only there do the steering-column support
