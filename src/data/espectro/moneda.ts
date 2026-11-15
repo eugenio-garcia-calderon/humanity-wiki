@@ -3,7 +3,8 @@
 // with prices rising again (4,9 % in October) after the war in the Middle East.
 // What the camps propose on money is mostly what they propose against inflation;
 // the digital euro and cash are where they differ most. Every card says when its
-// proposals were published (`cuando`). Podemos is not cited.
+// proposals were published (`cuando`). Podemos is not cited. Vox updated on
+// 2026-11-15 from its 29-N programme, which says nothing on the digital euro.
 import type { Espectro } from './tipos';
 
 export const ESPECTRO: Espectro | null = {
@@ -81,21 +82,23 @@ export const ESPECTRO: Espectro | null = {
     {
       id: 'derecha',
       quien: 'Vox',
-      cuando: 'Propuestas de campaña de octubre de 2026 y vídeo de su delegación en el Parlamento Europeo, noviembre de 2025',
+      cuando: 'Programa para el 29-N, «Es sentido común», 12 de noviembre de 2026; propuestas de campaña de octubre de 2026 y vídeo de su delegación en el Parlamento Europeo, noviembre de 2025',
       idea: 'Bajar los impuestos de la energía y proteger el efectivo frente al euro digital.',
       propone: [
-        'Que el ahorro no pague impuestos por lo que sube su valor solo por la inflación (2026).',
-        'IVA (el impuesto que se suma al precio) del 4 % para la luz, el gas y el agua, y quitar los impuestos especiales de la electricidad y de los carburantes (2026).',
+        'Bajar los impuestos de la electricidad y el IVA (el impuesto que se suma al precio) de los productos básicos (programa, medidas 2 y 8).',
+        'Que el ahorro no pague impuestos por lo que sube su valor solo por la inflación (octubre de 2026).',
         'Un referéndum en todos los países de la Unión antes de cualquier paso para sustituir el efectivo (2025).',
         'Iniciativas en el Parlamento Europeo para proteger el derecho a pagar en efectivo y la privacidad de los pagos (2025).',
       ],
+      nota: 'No hemos encontrado propuestas sobre el euro digital o el efectivo en su programa para el 29-N; las de esta ficha son de 2025.',
       argumento: 'Dicen que el euro digital puede servir para vigilar y limitar en qué gasta cada persona, y que los impuestos a la energía encarecen la vida de todos.',
       critica: 'Sus críticos dicen que el euro digital no sustituye al efectivo, como repite el Banco Central Europeo, y que quitar esos impuestos costaría miles de millones sin decir cómo se cubren.',
       fuentes: [
+        { url: 'https://men.gsstatic.es/sfAttachPlugin/4847171.pdf', titulo: 'Vox · «Es sentido común», programa electoral 29-N (12-11-2026), copia en PDF publicada por Menorca · Es Diari, medidas 2 y 8' },
         { url: 'https://www.democrata.es/elecciones-generales-espana/vox-lleva-29n-su-receta-economica-con-rebajas-fiscales-recorte-gasto-reforma-pensiones/', titulo: 'Demócrata · Vox lleva al 29N su receta económica (7-10-2026)' },
         { url: 'https://okdiario.com/espana/video-viral-vox-contra-euro-digital-no-metodo-pago-herramienta-control-15708060', titulo: 'OKDiario · El vídeo de Vox contra el euro digital (5-11-2025)' },
       ],
     },
   ],
-  revisado: '2026-11-13',
+  revisado: '2026-11-15',
 };

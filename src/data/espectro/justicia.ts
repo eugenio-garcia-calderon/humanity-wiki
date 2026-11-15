@@ -1,6 +1,7 @@
-// «Otras propuestas» for the «justicia» window. Positions checked on 2026-11-12.
-// Sumar's and Vox's cards rest partly on their 2023 programmes (no 2026
-// programme on justice found); the date is in every source title.
+// «Otras propuestas» for the «justicia» window. Positions checked on 2026-11-12;
+// Vox updated on 2026-11-15 from its 29-N programme. The left's card rests partly
+// on Sumar's 2023 programme (no Frente Amplio proposal on justice found); the date
+// is in every source title.
 import type { Espectro } from './tipos';
 
 export const ESPECTRO: Espectro | null = {
@@ -29,6 +30,7 @@ export const ESPECTRO: Espectro | null = {
         'Programas de tratamiento y reinserción para evitar que se vuelva a delinquir.',
         'En 2026 votaron en contra de la ley que lleva a prisión el hurto repetido (ERC se abstuvo), y piden más jueces y medios.',
       ],
+      nota: 'No hemos encontrado propuestas del Frente Amplio sobre la justicia para el 29-N en sus textos publicados; esta ficha usa el programa de Sumar de 2023.',
       argumento: 'Dicen que subir penas castiga sobre todo a quien menos tiene, y que el delito no baja por cambiar el Código Penal, sino con más medios en la justicia y con reinserción.',
       critica: 'Sus críticos dicen que no responden a la preocupación por los robos repetidos, y muchas familias de víctimas defienden la prisión permanente revisable.',
       fuentes: [
@@ -77,21 +79,22 @@ export const ESPECTRO: Espectro | null = {
     {
       id: 'derecha',
       quien: 'Vox',
-      cuando: 'Programa electoral de 2023',
-      idea: 'Una justicia del Estado, gobernada por los jueces, y penas más duras.',
+      cuando: 'Programa para el 29-N, «Es sentido común», 12 de noviembre de 2026',
+      idea: 'Una justicia gobernada por los jueces, sin manos políticas, y penas más duras.',
       propone: [
-        'Que todos los miembros del CGPJ (el órgano que gobierna a los jueces) los elijan o propongan los jueces, y que la justicia vuelva a ser del Estado, con un solo sistema de expedientes en todo el país.',
-        'Integrar el Tribunal Constitucional en el Tribunal Supremo como una sala más; mientras, que resuelva los recursos en tres meses.',
-        'Prisión permanente para violadores, bajar la edad penal y endurecer la ley del menor.',
-        'Suprimir los juzgados de violencia sobre la mujer.',
-        'Prohibir los indultos por corrupción y por delitos contra la unidad de España.',
+        'Que los jueces elijan con su voto a los 12 vocales judiciales del CGPJ (el órgano que gobierna a los jueces) (medida 100).',
+        'Sacar el control de la Constitución de los órganos políticos y limitar el papel del Tribunal Constitucional (medida 101).',
+        'Bajar la edad penal de los menores y ampliar la prisión permanente revisable (medidas 80 y 81).',
+        'Recuperar el delito de sedición, castigar más la malversación y prohibir los indultos por corrupción o contra la unidad de España (medida 103).',
+        'Que los cargos condenados por corrupción respondan con su propio patrimonio (medida 107).',
       ],
       argumento: 'Dicen que la justicia solo es independiente si los partidos no eligen a quienes la gobiernan, y que penas más duras protegen mejor a las víctimas.',
-      critica: 'Sus críticos dicen que suprimir los juzgados de violencia sobre la mujer quitaría protección a las víctimas, y que unir el Constitucional al Supremo exige reformar la Constitución.',
+      critica: 'Sus críticos dicen que derogar las leyes de violencia de género, que también propone, quitaría protección a las víctimas, y que limitar el Tribunal Constitucional exige reformar la Constitución.',
       fuentes: [
-        { url: 'https://theobjective.com/wp-content/uploads/2023/07/programa-vox-23j.pdf', titulo: 'Vox · Programa electoral de las elecciones generales de 2023 (PDF)' },
+        { url: 'https://men.gsstatic.es/sfAttachPlugin/4847171.pdf', titulo: 'Vox · «Es sentido común», programa electoral 29-N (12-11-2026), copia en PDF publicada por Menorca · Es Diari, medidas 47, 80, 81, 100, 101, 103 y 107' },
+        { url: 'https://www.menorca.info/actualidad/elecciones-29n/2026/11/15/2748997/programa-completo-vox-para-elecciones-generales-2026.html', titulo: 'Menorca · Es Diari · El programa completo de Vox para el 29-N (15-11-2026)' },
       ],
     },
   ],
-  revisado: '2026-11-12',
+  revisado: '2026-11-15',
 };

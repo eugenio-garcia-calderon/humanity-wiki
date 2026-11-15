@@ -11628,6 +11628,17 @@ Eugenio: una visualización en 2D donde cada partido no es un punto sino una geo
 - Diseño de serie: 3,01 × 1,04 × 1,10 m (antes 2,90 × 1,15 × 1,10); Cd del túnel 0,192 a 80 km/h (antes 0,218); área frontal 0,81 m² (antes 1,03); 2,52 kWh/100 km a 80 km/h; 37 comprobaciones en verde. El vuelco sin bascular baja de 0,80 a 0,73 g por la vía más estrecha.
 - Sin migración: el diseño del equipo solo guarda la familia y toma los valores de serie del código.
 
+## 2026-11-15 · Modelo de optimización socioeconómica: mejoras (móvil, sueldos, traducciones, otras propuestas, fuentes oficiales)
+
+- Eugenio: «adelante con las mejoras» (tras la lista de pendientes).
+- **Sueldos por tamaño de empresa**: `EMPLEADORES[].tipo` now reads `TRAMO[1..3].tipo` instead of repeating 0.1/0.2/0.4, so a tier change can never leave the wage rates behind. Three texts in `Cuentas.tsx` («del 10 % al 25 %», «las 49 primeras al 10 %…», «un 40 % … un 10 %») now print the tier rates.
+- **Móvil**: `Apartado` folds on phones only (`max-sm:max-h-[26rem]` plus a «Seguir leyendo: …» button) for sources, open questions, per-scale detail and eleven long reference sections (`PLEGAR` in `ventanas.tsx`). A hash pointing at the section or anything inside it opens it. At 390 px the longest windows go from ~24.000 to ~16.000 px. Nothing folds from `sm` up.
+- **Botones flotantes**: on phones they slide out while scrolling down and return on scroll up, near the top or at the end of the page (`useVisibleAlSubir`).
+- **Traducciones**: the 15 model data modules, `ESPECTROS` and the scale data (`ambitos`) are registered in the `traducciones.ts` sweep, so EN and PT get them.
+- **Otras propuestas** (13 files in `src/data/espectro/`, `revisado` 2026-11-15): Vox now cites its 29-N programme «Es sentido común» (12-11-2026, 115 measures) in all 13 windows; PP security from «La reconstrucción nacional»; Frente Amplio «100+15» via press (text unpublished); PSOE housing goal via campaign press (programme presented 15-11, not yet published); Sumar 2023 still used for the left in security, justice, legal and scales, with a note saying so.
+- **Fuentes oficiales**: 27 of 79 press sources replaced after checking the same figure (IGAE, AEAT, INE, BdE, Eurostat, CGPJ, BOE, Moncloa, Defensa, Gobierno Vasco, Tribunal de Cuentas Europeo, NBIM, Swiss Federal Council and SNB). Ids unchanged. **EU debt end-2024 corrected from 342.000 to 601.300 M€** (342.000 was budget exposure, per the ECA); EU housing plan wording corrected (InvestEU + cohesion, «movilizados»). 52 stay as press, with reasons in the session report.
+- Checked in headless Chrome at 390 and 1280 px against the dev server; `tsc` and `build` clean.
+
 ## 2026-11-15 · Cuadriciclo Basculante: una sola línea de punta a cola, paneles en morro, techo y cola
 
 - Eugenio: «hazlo más al estilo Aptera y el Cuadriciclo Bala, mejorando el tema de paneles solares; cabina, morro y cola tienen que estar los 3 en una línea suave que va de punta a cola sin interrupciones para mejorar el Cd».

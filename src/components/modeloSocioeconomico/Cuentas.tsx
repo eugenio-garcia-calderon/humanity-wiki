@@ -234,7 +234,7 @@ export function Retos({ modo }: { modo: Modo }) {
       t: '¿Quién paga más?',
       d: (
         <>
-          La progresividad ya no sale del sueldo, sino de lo que se compra y de quién paga: con el mismo trabajo, quien está en una empresa grande aporta un 40 % encima de su sueldo y quien está en una pequeña, un 10 %.
+          La progresividad ya no sale del sueldo, sino de lo que se compra y de quién paga: con el mismo trabajo, quien está en una empresa grande aporta un {porcentaje(TRAMO[3].tipo * 100, 0)} encima de su sueldo y quien está en una pequeña, un {porcentaje(TRAMO[1].tipo * 100, 0)}.
           El dividendo, igual para todas las personas, devuelve una parte. Aportación neta sobre lo que la empresa paga por cada trabajo, para el mismo hogar del caso de arriba, gastando tres cuartas partes del sueldo neto de hoy:
           <span className="mt-2 block overflow-x-auto">
             <table className="w-full min-w-[420px] text-sm tabular-nums">
@@ -259,8 +259,8 @@ export function Retos({ modo }: { modo: Modo }) {
     },
     {
       t: 'Crecer de 49 a 50 personas',
-      d: <>Con tramos por tamaño, la empresa número 50 pasa de golpe del 10 % al 25 % en todos sus sueldos, y la 250, al 40 %. Eso empuja a no crecer o a partirse. Contar el grupo de empresas lo frena, pero no del todo.
-        Una salida: que funcione como los tramos del IRPF, por persona contratada (las 49 primeras al 10 %, de la 50 a la 249 al 25 %, el resto al 40 %), para que crecer nunca cueste más de lo que añade.</>,
+      d: <>Con tramos por tamaño, la empresa número 50 pasa de golpe del {porcentaje(TRAMO[1].tipo * 100, 0)} al {porcentaje(TRAMO[2].tipo * 100, 0)} en todos sus sueldos, y la 250, al {porcentaje(TRAMO[3].tipo * 100, 0)}. Eso empuja a no crecer o a partirse. Contar el grupo de empresas lo frena, pero no del todo.
+        Una salida: que funcione como los tramos del IRPF, por persona contratada (las 49 primeras al {porcentaje(TRAMO[1].tipo * 100, 0)}, de la 50 a la 249 al {porcentaje(TRAMO[2].tipo * 100, 0)}, el resto al {porcentaje(TRAMO[3].tipo * 100, 0)}), para que crecer nunca cueste más de lo que añade.</>,
     },
     {
       t: 'Dónde está la línea entre necesidad y lujo',

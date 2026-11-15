@@ -1,6 +1,7 @@
 // «Otras propuestas» for the «digital» window: what other political camps in
 // Spain propose on digital identity and online dealings with the
-// administration, from left to right. Checked on 2026-11-12.
+// administration, from left to right. Checked on 2026-11-12; Vox updated on
+// 2026-11-15 from its 29-N programme.
 import type { Espectro } from './tipos';
 
 export const ESPECTRO: Espectro | null = {
@@ -81,22 +82,22 @@ export const ESPECTRO: Espectro | null = {
     {
       id: 'derecha',
       quien: 'Vox',
-      cuando: 'Plan de desregulación (junio de 2026) y proposición de ley en el Congreso (abril de 2024)',
-      idea: 'Menos normas y menos trámites, y que cada persona elija tratar con la administración por internet o en persona.',
+      cuando: 'Programa para el 29-N, «Es sentido común», 12 de noviembre de 2026, y proposición de ley en el Congreso (abril de 2024)',
+      idea: 'Menos trámites y una sola ventanilla, y que cada persona elija tratar con la administración por internet o en persona.',
       propone: [
-        'Eliminar la obligación de pedir cita previa.',
-        'Una sola base de datos para toda la administración.',
-        'Que cada ley nueva diga qué tres normas deroga, o no se tramita.',
+        'Acabar con la cita previa y atender en persona, en el momento, en cualquier oficina pública (medida 39).',
+        'Una ventanilla y un dato únicos: un expediente digital central, con los datos compartidos entre administraciones (medida 38).',
+        'Impulsar la inteligencia artificial en empresas y administraciones, manteniendo siempre la atención en persona (medida 37).',
+        'Proteger a los menores en internet frente al juego, la pornografía y ciertos delitos (medida 97).',
         'Que cada persona elija en cualquier momento si trata con la administración por internet o no (2024).',
-        'Reconocer el derecho a una atención presencial y personal en las oficinas (2024).',
       ],
-      argumento: 'Dicen que la administración está al servicio de la gente y no al revés, y que el exceso de normas y la obligación de usar internet dejan fuera a mayores y a quien no se maneja.',
-      critica: 'Sus críticos dicen que mantener siempre la vía en papel y en persona encarece la administración, y que una sola base de datos reúne mucha información de cada persona en un mismo sitio.',
+      argumento: 'Dicen que la administración está al servicio de la gente y no al revés, y que la obligación de usar internet y pedir cita deja fuera a mayores y a quien no se maneja.',
+      critica: 'Sus críticos dicen que mantener siempre la vía en papel y en persona encarece la administración, y que un dato único reúne mucha información de cada persona en un mismo sitio.',
       fuentes: [
-        { url: 'https://theobjective.com/espana/politica/2026-06-27/desregulacion-motosierra-vox-podar-marana-burocratica/', titulo: 'The Objective · El programa de desregulación de Vox (27-06-2026)' },
+        { url: 'https://men.gsstatic.es/sfAttachPlugin/4847171.pdf', titulo: 'Vox · «Es sentido común», programa electoral 29-N (12-11-2026), copia en PDF publicada por Menorca · Es Diari, medidas 37, 38, 39 y 97' },
         { url: 'https://www.congreso.es/public_oficiales/L15/CONG/BOCG/B/BOCG-15-B-104-1.PDF', titulo: 'Congreso · Proposición de ley de Vox para la mejora de la atención a los ciudadanos (26-04-2024)' },
       ],
     },
   ],
-  revisado: '2026-11-12',
+  revisado: '2026-11-15',
 };

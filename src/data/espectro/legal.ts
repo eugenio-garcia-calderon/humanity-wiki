@@ -1,4 +1,5 @@
-// «Otras propuestas» for the «legal» window. Positions checked on 2026-11-12.
+// «Otras propuestas» for the «legal» window. Positions checked on 2026-11-12;
+// Vox updated on 2026-11-15 from its 29-N programme.
 // The subject is who writes the rules (State, regions, towns) and how many there
 // are. Sumar's card rests on its 2023 programme; the date is in every source title.
 import type { Espectro } from './tipos';
@@ -28,7 +29,7 @@ export const ESPECTRO: Espectro | null = {
         'Que el acuerdo entre el Gobierno y la Generalitat se vote en Cataluña.',
         'ERC: que la Generalitat gestione y recaude todos los impuestos que se pagan en Cataluña (pacto de 2024 con el PSC).',
       ],
-      nota: 'No hemos encontrado una propuesta concreta sobre reducir el número de normas en sus textos publicados.',
+      nota: 'No hemos encontrado una propuesta concreta sobre reducir el número de normas en sus textos publicados, ni propuestas del Frente Amplio sobre el modelo territorial para el 29-N; se usa el programa de Sumar de 2023.',
       argumento: 'Dicen que España es diversa y que cada territorio debe poder decidir sus propias normas sobre lo que le afecta, cerca de quien las vive.',
       critica: 'Sus críticos dicen que más normas propias en cada comunidad multiplican las diferencias y los trámites para quien vive o trabaja en varias, y que recaudar por separado debilita la caja común.',
       fuentes: [
@@ -77,21 +78,22 @@ export const ESPECTRO: Espectro | null = {
     {
       id: 'derecha',
       quien: 'Vox',
-      cuando: 'Plan de desregulación de junio de 2026 y programa electoral de 2023',
-      idea: 'Un Estado unitario: una sola norma para todo el país y menos poder para las comunidades.',
+      cuando: 'Programa para el 29-N, «Es sentido común», 12 de noviembre de 2026, y plan de desregulación de junio de 2026',
+      idea: 'Lo que es legal en una comunidad, que lo sea en todo el país, con menos normas y menos trámites.',
       propone: [
-        'Devolver al Estado la educación, la sanidad, la seguridad y la justicia, y limitar lo que las comunidades pueden legislar (2023).',
-        'Una ley de mercado único que esté por encima de las normas de las 17 comunidades, y usar el artículo 150.3 de la Constitución (que deja al Estado fijar principios comunes incluso en lo que es de las comunidades) para fijar normas comunes.',
-        'Regla del tres por uno: por cada norma nueva, quitar tres.',
-        'El silencio administrativo positivo como regla general, y una sola base de datos para toda la administración.',
+        'Una ley de unidad de mercado: lo legal en una comunidad vale en toda España, sin pedir «diecisiete permisos» (medida 42).',
+        'Regla del tres por uno: cada ley nueva debe decir qué tres normas deroga, o no se tramita (medida 40).',
+        'El silencio administrativo positivo y la declaración responsable como regla general, salvo en nacionalidad e inmigración (medida 41).',
+        'Una ventanilla y un dato únicos para todas las administraciones, y que cada trámite justifique su utilidad (medidas 36 y 38).',
+        'Usar el artículo 150.3 de la Constitución (que deja al Estado fijar principios comunes incluso en lo que es de las comunidades) para fijar normas comunes (junio de 2026).',
       ],
       argumento: 'Dicen que el exceso de normas es un impuesto oculto de más de 70.000 millones de euros, unos 4.410 euros por hogar, y que 17 normas distintas rompen la unidad del mercado.',
-      critica: 'Sus críticos dicen que recentralizar exige reformar la Constitución y los estatutos, y que quitar normas en bloque puede eliminar protecciones sociales y ambientales.',
+      critica: 'Sus críticos dicen que el Tribunal Constitucional ya anuló en 2017 parte de una ley de unidad de mercado por invadir competencias de las comunidades, y que quitar normas en bloque puede eliminar protecciones sociales y ambientales.',
       fuentes: [
+        { url: 'https://men.gsstatic.es/sfAttachPlugin/4847171.pdf', titulo: 'Vox · «Es sentido común», programa electoral 29-N (12-11-2026), copia en PDF publicada por Menorca · Es Diari, medidas 36, 38, 40, 41 y 42' },
         { url: 'https://www.elindependiente.com/espana/2026/06/27/plan-desregularizacion-vox-milei-elecciones-2027/', titulo: 'El Independiente (27-6-2026) · El plan de desregulación de Vox' },
-        { url: 'https://theobjective.com/wp-content/uploads/2023/07/programa-vox-23j.pdf', titulo: 'Vox · Programa electoral de las elecciones generales de 2023 (PDF)' },
       ],
     },
   ],
-  revisado: '2026-11-12',
+  revisado: '2026-11-15',
 };

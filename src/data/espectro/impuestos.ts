@@ -1,9 +1,10 @@
 // «Otras propuestas» for the «impuestos» window (the «Recaudación» window: the
 // single tax). Camps checked on 2026-11-12, during the campaign for the general
-// election of 29 November 2026. The PP from its 29-N programme; the Frente
-// Amplio and Vox from their campaign proposals as reported by the press (Vox
-// had not published a 29-N programme on 2026-10-23, per Maldita); the PSOE
-// from the tax law it passed in government (no 29-N tax measures published).
+// election of 29 November 2026; Vox's card updated on 2026-11-15. The PP and Vox
+// from their 29-N programmes (PP 10-11-2026, Vox 12-11-2026); the Frente Amplio
+// from its campaign proposals as reported by the press (no full programme
+// published on 2026-11-15); the PSOE from the tax law it passed in government
+// (its programme was being presented on 2026-11-15, contents not yet public).
 // Every card says when its proposals were published (`cuando`).
 // The model's rates and figures are read from the data, never repeated here.
 import type { Espectro } from './tipos';
@@ -87,22 +88,23 @@ export const ESPECTRO: Espectro | null = {
     {
       id: 'derecha',
       quien: 'Vox',
-      cuando: 'Propuestas de campaña para el 29-N, octubre de 2026, y plan fiscal presentado en el Congreso en 2024',
+      cuando: 'Programa para el 29-N, «Es sentido común», 12 de noviembre de 2026, y propuestas de campaña de octubre de 2026',
       idea: 'Una gran rebaja de impuestos, pagada recortando gasto político y subvenciones.',
       propone: [
-        'Un impuesto sobre la renta (IRPF) con dos tipos, 15 % hasta 70.000 euros y 25 % por encima, y los primeros 22.000 euros sin impuesto.',
-        'Cuatro puntos menos de ese impuesto por cada hijo.',
-        'Suprimir los impuestos de patrimonio, de sucesiones y donaciones, y la plusvalía municipal.',
-        'Bajar el IVA general del 21 al 18 %, y al 4 % la luz, el gas y el agua (2024).',
+        'Bajar y simplificar el impuesto sobre la renta (IRPF), menos cuantos más hijos; en octubre habló de dos tipos, 15 % y 25 %.',
+        'Bajar el IVA (el impuesto que va en el precio), el general y el reducido, empezando por los productos básicos, y el impuesto de sociedades.',
+        'Cuota cero de autónomos para quien gane menos del salario mínimo, y desde 50 euros para quien gane más.',
+        'Que la primera vivienda de una familia española no pague impuestos: IVA del 0 % si es nueva y sin impuesto de transmisiones si es usada.',
+        'Un impuesto a las remesas, el dinero que se envía al extranjero.',
       ],
-      argumento: 'Dicen que el trabajo y las familias pagan demasiado y que la rebaja se puede pagar quitando gasto prescindible, organismos y subvenciones.',
-      critica: 'Sus críticos dicen que costaría entre 46.000 y 85.000 millones al año y que las rentas altas ahorrarían mucho más que las bajas.',
+      argumento: 'Dicen que el trabajo y las familias pagan demasiado y que la rebaja se puede pagar quitando gasto superfluo, organismos y subvenciones.',
+      critica: 'Sus críticos dicen que el programa no dice cuánto costarían las rebajas ni cómo se pagan, y que las rentas altas ahorrarían mucho más que las bajas.',
       fuentes: [
+        { url: 'https://men.gsstatic.es/sfAttachPlugin/4847171.pdf', titulo: 'Vox · «Es sentido común», programa electoral 29-N (12-11-2026), copia en PDF publicada por Menorca · Es Diari, medidas 2, 21 y 34' },
+        { url: 'https://www.infobae.com/espana/2026/11/13/consulta-en-pdf-el-programa-electoral-de-vox-deportacion-de-migrantes-prioridad-nacional-y-derogacion-de-leyes-de-genero/', titulo: 'Infobae · El programa electoral de Vox para el 29-N, en PDF (13-11-2026)' },
         { url: 'https://www.democrata.es/elecciones-generales-espana/vox-lleva-29n-su-receta-economica-con-rebajas-fiscales-recorte-gasto-reforma-pensiones/', titulo: 'Demócrata · Vox lleva al 29N su receta económica (7-10-2026)' },
-        { url: 'https://forbes.es/economia/452984/vox-presenta-en-el-congreso-su-plan-fiscal-reduccion-del-iva-dos-tipos-de-irpf-y-deducciones-por-hijo/', titulo: 'Forbes · Vox presenta en el Congreso su plan fiscal (26-4-2024)' },
-        { url: 'https://www.elsaltodiario.com/asalto-podcast/podcast-or-motosierra-sacrificio-propuestas-economicas-pp-vox-29n', titulo: 'El Salto · Las propuestas económicas de PP y Vox para el 29N (15-10-2026)' },
       ],
     },
   ],
-  revisado: '2026-11-12',
+  revisado: '2026-11-15',
 };

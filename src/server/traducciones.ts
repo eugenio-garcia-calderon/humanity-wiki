@@ -8,6 +8,23 @@ import { MAPA_POR_DEFECTO, RECORRIDOS } from '../data/concienciaMapa';
 import { ESTUDIOS, LIBROS } from '../data/concienciaEstudios';
 import { AMBITOS, APOYOS, EMPLEADORES, ESCALAS, FUENTES, FUNCIONES, GRUPOS_GASTO, IMPUESTOS_HOY, MATRIZ, TERCIOS, TERCIOS_ESCALA, TRAMOS } from '../data/modeloSocioeconomico';
 import { TRAMOS_PENSION, CATEGORIAS as CATEGORIAS_PRESUPUESTO, PRESUPUESTOS } from '../data/presupuestos';
+import * as M_banca from '../data/banca';
+import * as M_categorias from '../data/categorias';
+import * as M_deuda from '../data/deuda';
+import * as M_digital from '../data/digital';
+import * as M_educacion from '../data/educacion';
+import * as M_escalas from '../data/escalas';
+import * as M_justicia from '../data/justicia';
+import * as M_justiciaReincidencia from '../data/justiciaReincidencia';
+import * as M_legal from '../data/legal';
+import * as M_moneda from '../data/moneda';
+import * as M_pensionesPropuesta from '../data/pensionesPropuesta';
+import * as M_sanidad from '../data/sanidad';
+import * as M_seguridad from '../data/seguridad';
+import * as M_vivienda from '../data/vivienda';
+import * as M_viviendaRustica from '../data/viviendaRustica';
+import { ESPECTROS } from '../data/espectro';
+import { AMBITOS as AMBITOS_LUGAR } from '../data/ambitos';
 
 // ============================================================================
 // UNA SOLA FUENTE, TODOS LOS IDIOMAS (2026-11-10, regla 11 de la Constitución)
@@ -270,6 +287,11 @@ async function recogerPublicado(db: any, s: SitioTraducido) {
   // its text (sentences built with figures) reaches the list through the browser (`/api/traducciones/faltan`).
   anadir(textosDe({ ESCALAS, AMBITOS, MATRIZ, IMPUESTOS_HOY, FUNCIONES, FUENTES, TRAMOS, EMPLEADORES, GRUPOS_GASTO, TERCIOS, TERCIOS_ESCALA, APOYOS }), 'Modelo de optimización socioeconómica', 'interfaz');
   anadir(textosDe({ TRAMOS_PENSION, CATEGORIAS_PRESUPUESTO, PRESUPUESTOS }), 'Modelo de optimización socioeconómica', 'interfaz');
+  // Every window's data, the left-to-right «Otras propuestas» and the scales (2026-11-15): written in code, so they
+  // enter the list here instead of waiting for someone to open each window on the translated site.
+  anadir(textosDe({ M_banca, M_categorias, M_deuda, M_digital, M_educacion, M_escalas, M_justicia, M_justiciaReincidencia, M_legal, M_moneda, M_pensionesPropuesta, M_sanidad, M_seguridad, M_vivienda, M_viviendaRustica }), 'Modelo de optimización socioeconómica: ventanas', 'interfaz');
+  anadir(textosDe(ESPECTROS), 'Modelo de optimización socioeconómica: otras propuestas', 'interfaz');
+  anadir(textosDe(AMBITOS_LUGAR), 'Modelo de optimización socioeconómica: escalas', 'interfaz');
   return { textos, paginas };
 }
 
