@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "bascular",
-      "ruta": "src/pages/Aeromovil.tsx",
-      "motivo": "Bascular en la tarjeta del diseño que se edita",
-      "desde": "2026-11-15T15:07:40.841Z"
-    },
-    {
-      "agente": "bascular",
       "ruta": "src/components/aeromovil/Visor3D.tsx",
       "motivo": "Codo del piloto dentro de la carrocería",
       "desde": "2026-11-15T16:14:45.372Z"
