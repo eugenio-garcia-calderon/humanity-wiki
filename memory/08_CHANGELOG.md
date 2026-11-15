@@ -11664,6 +11664,17 @@ Eugenio: «Lo de votar por temas, llámalo así. En el menú y en el título»; 
 - Lo votado se guarda en `localStorage` con una clave nueva (`politica.votar.v2`), porque los valores ya no son posiciones de 0 a 4 sino cantidades; lo de la versión anterior no se arrastra.
 - Comprobado en Chrome sin interfaz a 1360 y 390 px: cambio al pasar el ratón, deslizador con clic y teclado, ejes de los diez gráficos, sin desbordamiento ni errores de JS.
 
+## 2026-11-15 — Votar por temas: 100 puntos de importancia por persona
+
+Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y puede repartirlo según la importancia que le dé a sus votos… que a nivel de UX sea sencillo».
+
+- Cada medida votada tiene una fila «Importancia para ti» con «−» y «+» (pasos de 5, botones de 44 px), el número de puntos, una barra con el color de su tema y «te quedan N de 100». Antes de votar la medida, la fila está apagada y dice «Vota primero para darle puntos»; «No lo sé todavía» devuelve sus puntos.
+- No se pueden pasar de 100: el «+» se desactiva al llegar y el foco salta al «−».
+- El panel lateral abre con «Tus 100 puntos»: barra repartida por colores de tema, leyenda por tema, cuántos quedan y «Repartir a partes iguales» entre lo votado. El resumen y «Copiar mi voto» incluyen los puntos de cada medida; cada tarjeta de tema muestra una franja con sus puntos.
+- Los pasos 2 y 5 de la propuesta explican que los votos se suman con el peso que les da cada persona.
+- Se guarda en la misma clave (`politica.votar.v2`, campo `pts`); quien ya votó conserva sus votos y empieza con 100 puntos libres.
+- Comprobado en Chrome sin interfaz a 1360 y 390 px: tope de 100, reparto a partes iguales (50/50 con dos medidas), devolución con «No lo sé», sin errores de JS ni desbordamiento.
+
 ## 2026-11-15 — `/vision`: los 12 sectores completos y sin «borrador»
 
 - Eugenio: «sigue ampliando todos los temas, quita lo de borrador». Los diez sectores que tenían un solo ejemplo (Energía, Política, Economía, Seguridad, Justicia, Salud, Alimentación, Informática, Educación, Cuidados) tienen ahora, como Vivienda y Movilidad, 3 bloques de visión, 6 retos con dato y fuente, 6 soluciones (cada una dice qué reto supera) y 7-8 proyectos, la mayoría en España. Investigado por cinco agentes con búsqueda web; lo que no pudieron confirmar lleva «(por verificar)» en el propio texto.
