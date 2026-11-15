@@ -52,14 +52,14 @@ function Resumen() {
     <Apartado id="justicia" titulo="Una sola puerta para la justicia, y sin listas de espera"
       entradilla={<>Hoy, quien denuncia tiene que acertar el camino: civil, penal, administrativo o laboral. Si se equivoca, empieza otra vez. Y cada camino tiene su cola. La propuesta: denunciar una sola vez, que el sistema lo reparta, jueces de guardia en las comisarías, juicios rápidos y a distancia, y plazos máximos.</>}>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Cifra valor={`${DURACION_DIAS[0].espana} días`} tono="mal"
+        <Cifra clase="dato" valor={`${DURACION_DIAS[0].espana} días`} tono="mal"
           texto={<>tardaría de media en resolverse un asunto civil, según la estimación oficial. En la mediana de la UE, {DURACION_DIAS[0].ue}<F id="cepej-2024" /></>} nota="Primera instancia, 2024. Si alguien recurre, se suma la apelación." />
-        <Cifra valor={millonesTxt(ACTIVIDAD_2025.pendientes)} tono="mal"
+        <Cifra clase="dato" valor={millonesTxt(ACTIVIDAD_2025.pendientes)} tono="mal"
           texto={<>de asuntos esperando en los juzgados a final de 2025, un {porcentaje(ACTIVIDAD_2025.pendientesVariacion, 1)} más que un año antes<F id="cgpj-2025" /></>} />
-        <Cifra valor={`≈ ${numero(Math.round(cola.faltan / 100) * 100)}`} tono="neutro"
+        <Cifra clase="calculo" valor={`≈ ${numero(Math.round(cola.faltan / 100) * 100)}`} tono="neutro"
           texto={<>jueces más harían falta para llegar a la mediana de la UE: {numero(JUECES.ue100k, 1)} por cada 100.000 habitantes. Hoy hay {numero(JUECES.por100k, 1)}<F id="cepej-2024" /></>} nota="Estimación nuestra. Ver «Cómo se vacía la cola»." />
-        <Cifra valor="1 denuncia" tono="bien"
-          texto="y el sistema la lleva a lo civil, a lo penal o a los dos. Nadie vuelve a empezar." nota="Propuesta." />
+        <Cifra clase="propuesta" valor="1 denuncia" tono="bien"
+          texto="y el sistema la lleva a lo civil, a lo penal o a los dos. Nadie vuelve a empezar." />
       </div>
       <GraficaDuracion />
     </Apartado>
@@ -287,10 +287,10 @@ function Cola() {
             ayuda={`El Gobierno ha anunciado ${REFORMA.plazasNuevas}. Para la mediana de la UE, unos ${numero(tope)}.`} />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Cifra valor={`≈ ${numero(Math.round(c.diasCivil))} días`} tono="neutro"
+          <Cifra clase="calculo" valor={`≈ ${numero(Math.round(c.diasCivil))} días`} tono="neutro"
             texto={<>tardaría un asunto civil nuevo, frente a los {DURACION_DIAS[0].espana} de hoy. Mediana de la UE: {DURACION_DIAS[0].ue}<F id="cepej-2024" /></>}
             nota="Estimación nuestra: si cada juez nuevo resuelve como la media de hoy, una vez formado." />
-          <Cifra valor={mill(Math.round(c.costeMedio / 10) * 10)} tono="neutro"
+          <Cifra clase="dato" valor={mill(Math.round(c.costeMedio / 10) * 10)} tono="neutro"
             texto={<>al año, en el punto medio. Cada plaza, con su personal, cuesta entre 100.000 € y 600.000 €<F id="moncloa-instancia" /></>}
             nota={`Horquilla: de ${mill(c.costeMin)} a ${mill(c.costeMax)} al año.`} />
         </div>

@@ -39,9 +39,9 @@ export function PensionesVentana() {
           Quien necesite más lo pide a los servicios sociales.</>}>
         <FormaPensiones />
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
-          <Cifra valor={euros(SMI_MES)} texto={`al mes, en ${PAGAS} pagas, para todas las personas jubiladas`} nota={<>El salario mínimo de 2026<Fuente id="smi-2026" /></>} />
-          <Cifra tono="bien" valor={`${numero(AHORRO_BRUTO / 1e6)} millones €`} texto="menos al año en pensiones" nota={`De ${mill(COSTE_HOY)} a ${mill(COSTE_PROPUESTA)}, antes de las ayudas aparte (M€: millones de euros)`} />
-          <Cifra valor={`${numero((GANAN + PNC) / 1e6, 1)} / ${numero(PIERDEN / 1e6, 1)}`} texto="millones de pensiones que suben / que bajan (con las no contributivas)" nota={`Además, ${numero(PERSONAS_CON_DOS / 1e6, 1)} millones de personas que cobran dos pensiones pasan a cobrar una`} />
+          <Cifra clase="dato" valor={euros(SMI_MES)} texto={`al mes, en ${PAGAS} pagas, para todas las personas jubiladas`} nota={<>El salario mínimo de 2026<Fuente id="smi-2026" /></>} />
+          <Cifra clase="calculo" tono="bien" valor={`${numero(AHORRO_BRUTO / 1e6)} millones €`} texto="menos al año en pensiones" nota={`De ${mill(COSTE_HOY)} a ${mill(COSTE_PROPUESTA)}, antes de las ayudas aparte (M€: millones de euros)`} />
+          <Cifra clase="calculo" valor={`${numero((GANAN + PNC) / 1e6, 1)} / ${numero(PIERDEN / 1e6, 1)}`} texto="millones de pensiones que suben / que bajan (con las no contributivas)" nota={`Además, ${numero(PERSONAS_CON_DOS / 1e6, 1)} millones de personas que cobran dos pensiones pasan a cobrar una`} />
         </div>
       </Apartado>
 

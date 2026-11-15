@@ -41,10 +41,10 @@ function Resumen() {
     <Apartado id="moneda" titulo="Un euro que no pierda valor, y un Estado que no gane cuando lo pierde"
       entradilla={<>El euro lo maneja el Banco Central Europeo, no España. Cuando los precios suben (eso es la inflación), cada euro compra menos: pierde quien ahorra y gana quien debe, y el que más debe es el Estado. La propuesta: dinero estable, crecer produciendo más y no pidiendo más prestado, y un sistema público sin deuda que no tenga ningún interés en que suban los precios.</>}>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Cifra valor={porcentaje(IPC_ULTIMO.v, 1)} texto={<>subieron los precios en España en un año, hasta {IPC_ULTIMO.mes}, sobre todo por la energía<F id={IPC_ULTIMO.fuente} /></>} tono="mal" />
-        <Cifra valor={porcentaje(ipc2022.v, 1)} texto={<>de subida media en 2022, la mayor en décadas; en {IPC_PICO.mes} llegó al {porcentaje(IPC_PICO.v, 1)}<F id="ipc-medias" /><F id={IPC_PICO.fuente} /></>} tono="mal" />
-        <Cifra valor={`${numero(PRECIO_2025_DE_100_2021)} €`} texto={<>costaba de media en 2025 lo que de media en 2021 costaba 100 €<F id="ipc-medias" /></>} tono="mal" nota="Cálculo propio con las subidas medias de 2022 a 2025, según el INE." />
-        <Cifra valor={porcentaje(BCE.objetivo, 0)} texto={<>al año: la subida de precios que busca el BCE y que la propuesta defiende, para que ahorrar no sea perder<F id="bce-2" /></>} tono="bien" />
+        <Cifra clase="dato" valor={porcentaje(IPC_ULTIMO.v, 1)} texto={<>subieron los precios en España en un año, hasta {IPC_ULTIMO.mes}, sobre todo por la energía<F id={IPC_ULTIMO.fuente} /></>} tono="mal" />
+        <Cifra clase="dato" valor={porcentaje(ipc2022.v, 1)} texto={<>de subida media en 2022, la mayor en décadas; en {IPC_PICO.mes} llegó al {porcentaje(IPC_PICO.v, 1)}<F id="ipc-medias" /><F id={IPC_PICO.fuente} /></>} tono="mal" />
+        <Cifra clase="calculo" valor={`${numero(PRECIO_2025_DE_100_2021)} €`} texto={<>costaba de media en 2025 lo que de media en 2021 costaba 100 €<F id="ipc-medias" /></>} tono="mal" nota="Cálculo propio con las subidas medias de 2022 a 2025, según el INE." />
+        <Cifra clase="dato" valor={porcentaje(BCE.objetivo, 0)} texto={<>al año: la subida de precios que busca el BCE y que la propuesta defiende, para que ahorrar no sea perder<F id="bce-2" /></>} tono="bien" />
       </div>
 
       <div className="mt-8 grid gap-4 md:grid-cols-3">

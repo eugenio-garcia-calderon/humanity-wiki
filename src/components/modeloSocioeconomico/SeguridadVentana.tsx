@@ -29,13 +29,13 @@ export function SeguridadVentana() {
       <Apartado id="seguridad" titulo="Unos 1.700 cuerpos de policía para una sola tarea: cuidarnos"
         entradilla={<>Hoy hay militares, policías nacionales, guardias civiles, cuatro policías autonómicas y una policía local en cada ayuntamiento que la tiene. Cada cuerpo con su jefe, su sueldo y su academia. La propuesta: un solo cuerpo de <strong className="text-slate-800">guardianes</strong>, con un sueldo igual por el mismo puesto, el ejército incluido, y ciudadanos voluntarios formados para ayudar.</>}>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Cifra tono="mal" valor={`≈ ${numero(redondo(CUERPOS_CON_MANDO, 100))}`} texto="cuerpos de policía, cada uno con su propio jefe"
+          <Cifra clase="calculo" tono="mal" valor={`≈ ${numero(redondo(CUERPOS_CON_MANDO, 100))}`} texto="cuerpos de policía, cada uno con su propio jefe"
             nota={<>Cuenta propia: 2 del Estado, 4 autonómicos y unos 1.700 locales<F id="locales" /></>} />
-          <Cifra tono="mal" valor={numero(POR_CIEN_MIL.espanaEurostat)} texto={<>policías por cada 100.000 habitantes según Eurostat<F id="statista" /></>}
+          <Cifra clase="dato" tono="mal" valor={numero(POR_CIEN_MIL.espanaEurostat)} texto={<>policías por cada 100.000 habitantes según Eurostat<F id="statista" /></>}
             nota={`${numero(POR_CIEN_MIL.espanaTodos)} si se cuentan también las policías locales (estimación nuestra con datos de 2023 a 2026)`} />
-          <Cifra tono="mal" valor={`${numero(SUELDOS.brechaMossosPN)} €`} texto={<>al mes más cobra un mosso que un policía nacional, por un trabajo parecido<F id="mossos-subida" /></>}
+          <Cifra clase="dato" tono="mal" valor={`${numero(SUELDOS.brechaMossosPN)} €`} texto={<>al mes más cobra un mosso que un policía nacional, por un trabajo parecido<F id="mossos-subida" /></>}
             nota="Es la cifra de un sindicato policial (Jupol), tras la subida de 2026: no hay una comparación oficial" />
-          <Cifra tono="bien" valor="1" texto="solo cuerpo de guardianes, ejército incluido: un sueldo por puesto, un mando, una academia y vigilado desde fuera" nota="La propuesta" />
+          <Cifra clase="propuesta" tono="bien" valor="1" texto="solo cuerpo de guardianes, ejército incluido: un sueldo por puesto, un mando, una academia y vigilado desde fuera" />
         </div>
         <p className="mt-5 max-w-3xl rounded-2xl border border-emerald-200 bg-emerald-50/60 px-5 py-4 text-[15px] leading-relaxed text-slate-700">
           <strong className="text-emerald-900">Guardianes, no agresores:</strong> formados para calmar antes que usar la fuerza, con cámara en el uniforme y un control independiente. Y <strong className="text-emerald-900">ciudadanos guardianes</strong>: cualquiera puede formarse gratis en seguridad, orden y paz para ayudar si hay violencia.
@@ -90,8 +90,8 @@ export function SeguridadVentana() {
       <Apartado id="seguridad-propuesta" fondo="blanco" titulo="Un solo cuerpo de guardianes"
         entradilla={<>Las fuerzas del orden, unificadas: un cuerpo con una escala salarial, una jerarquía y una formación únicas. Son las garantes del orden y del cumplimiento de la ley, y se organizan por escalas, del municipio al continente. El ejército entra en el mismo cuerpo, como sección de defensa y emergencias.</>}>
         <div className="mb-6 grid gap-4 sm:grid-cols-2">
-          <Cifra tono="bien" valor={`≈ ${numero(redondo(FUERZAS_ARMADAS + POLICIAS_TOTAL, 1000))}`} texto={<>personas en el cuerpo único: {numero(FUERZAS_ARMADAS)} de las Fuerzas Armadas<F id="epsap" /> y unos {numero(redondo(POLICIAS_TOTAL, 1000))} policías y guardias</>} nota="Suma nuestra con datos de 2023 a 2026" />
-          <Cifra tono="bien" valor={mill(GASTO.defensa2024 + GASTO.policia2024)} texto={<>al año entre defensa ({mill(GASTO.defensa2024)}) y policía ({mill(GASTO.policia2024)}), lo gastado en 2024<F id="igae" /></>} nota="Misma serie, la contabilidad pública. Sin bomberos, juzgados ni cárceles" />
+          <Cifra clase="calculo" tono="bien" valor={`≈ ${numero(redondo(FUERZAS_ARMADAS + POLICIAS_TOTAL, 1000))}`} texto={<>personas en el cuerpo único: {numero(FUERZAS_ARMADAS)} de las Fuerzas Armadas<F id="epsap" /> y unos {numero(redondo(POLICIAS_TOTAL, 1000))} policías y guardias</>} nota="Suma nuestra con datos de 2023 a 2026" />
+          <Cifra clase="dato" tono="bien" valor={mill(GASTO.defensa2024 + GASTO.policia2024)} texto={<>al año entre defensa ({mill(GASTO.defensa2024)}) y policía ({mill(GASTO.policia2024)}), lo gastado en 2024<F id="igae" /></>} nota="Misma serie, la contabilidad pública. Sin bomberos, juzgados ni cárceles" />
         </div>
         <div className="sm:hidden">
           <ul className="space-y-2">{COMPARA.slice(0, 3).map(c => <FilaCompara key={c.t} c={c} />)}</ul>
@@ -276,8 +276,8 @@ function Dinero() {
     <Apartado id="seguridad-dinero" fondo="blanco" titulo="Cuánto cuesta, y cuánto cobra cada uno"
       entradilla={<>Las administraciones gastaron {mill(GASTO.policia2024)} en policía en 2024. Lo pagan tres niveles de gobierno a la vez, y cada uno paga sueldos distintos por el mismo trabajo.</>}>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Cifra tono="mal" valor={mill(GASTO.policia2024)} texto={<>en policía en 2024, sumando todas las administraciones<F id="igae" /></>} />
-        <Cifra valor={mill(GASTO.defensa2024)} texto={<>en defensa en 2024 según la contabilidad pública<F id="igae" /></>} nota={<DefensaTresCifras />} />
+        <Cifra clase="dato" tono="mal" valor={mill(GASTO.policia2024)} texto={<>en policía en 2024, sumando todas las administraciones<F id="igae" /></>} />
+        <Cifra clase="dato" valor={mill(GASTO.defensa2024)} texto={<>en defensa en 2024 según la contabilidad pública<F id="igae" /></>} nota={<DefensaTresCifras />} />
       </div>
 
       <figure className="mt-8 rounded-2xl border border-slate-200 bg-white p-5">
@@ -446,9 +446,9 @@ function Ciudadanos() {
     <Apartado id="seguridad-ciudadanos" fondo="blanco" titulo="Ciudadanos guardianes"
       entradilla="Cualquier persona puede formarse, gratis y si quiere, en seguridad, orden y paz. La administración paga la formación. Quien la termina ayuda como observador y puede intervenir si hay violencia o una amenaza.">
       <div className="grid gap-4 sm:grid-cols-3">
-        <Cifra tono="bien" valor={`${c.horasBasico} h`} texto="de curso inicial gratuito, y luego un repaso de 16 horas al año" nota="Propuesta" />
-        <Cifra tono="bien" valor="0 €" texto="paga quien se forma: la formación y el seguro los paga la administración" nota="Propuesta" />
-        <Cifra valor={`${mill(Math.round(inicial))}`} texto={`costaría formar a ${numero(personas)} personas, una vez`} nota="Estimación nuestra: mueve el número abajo" />
+        <Cifra clase="propuesta" tono="bien" valor={`${c.horasBasico} h`} texto="de curso inicial gratuito, y luego un repaso de 16 horas al año" />
+        <Cifra clase="propuesta" tono="bien" valor="0 €" texto="paga quien se forma: la formación y el seguro los paga la administración" />
+        <Cifra clase="calculo" valor={`${mill(Math.round(inicial))}`} texto={`costaría formar a ${numero(personas)} personas, una vez`} nota="Estimación nuestra: mueve el número abajo" />
       </div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">

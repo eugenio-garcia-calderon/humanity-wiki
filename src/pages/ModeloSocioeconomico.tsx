@@ -46,6 +46,7 @@ import { ESPECTROS } from '../data/espectro';
 import { DigitalVentana } from '../components/modeloSocioeconomico/DigitalVentana';
 import { Presupuestos } from '../components/modeloSocioeconomico/Presupuestos';
 import { BuzonProyecto } from '../components/modeloSocioeconomico/BuzonProyecto';
+import { ComoLeer, CuentasPortada, Glosario, IdeasModelo } from '../components/modeloSocioeconomico/Mirada';
 import { Boton, Libre } from '../components/modeloSocioeconomico/piezas';
 import { VENTANAS, ALIAS, PARTES_ECONOMIA, parteDeAncla, ventanaDeAncla, Apartado } from '../components/modeloSocioeconomico/ventanas';
 import { cn } from '../utils/cn';
@@ -334,7 +335,9 @@ function Portada() {
         <SelectorAmbito grande />
       </div>
       <AmbitoPortada />
-      <ul className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <IdeasModelo />
+      <h2 className="mt-14 text-xl font-[750] tracking-tight text-slate-900">Las áreas</h2>
+      <ul className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {VENTANAS.filter(v => !v.pronto).map(v => {
           const Icono = v.icono;
           const partes = v.id === 'economia' ? PARTES_ECONOMIA : null;
@@ -359,6 +362,9 @@ function Portada() {
           );
         })}
       </ul>
+      <CuentasPortada />
+      <ComoLeer />
+      <Glosario />
     </div>
   );
 }
