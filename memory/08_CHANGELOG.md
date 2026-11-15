@@ -11852,3 +11852,8 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
   - «Parabrisas: subida desde el capó»: la cabina abombada de un jet o tumbada;
   - «Bajos del morro: cuánto suben hacia la punta»: la panza curvada del morro de un avión, hasta 20 cm;
   - «Capó: caída hacia el borde», solo con la cubierta lisa.
+
+## 2026-11-15 — `/vision`: los menús como controles sobre fondo oscuro, el contenido en un panel claro
+
+- Eugenio: que el menú superior, el izquierdo y el derecho tengan el mismo fondo, distinto del centro, «para que se entienda que son controles», oscuro en los menús y claro en el centro.
+- Cabecera, submenú de partes, menú de escalas, menú de pilares y pie de página comparten un fondo verde muy oscuro. El contenido va en un panel claro con esquinas redondeadas y sombra, como una pantalla dentro del marco. El efecto de selección se mantiene: el elegido en verde (o en el color de su pilar), el resto en gris sobre el oscuro. En el móvil las franjas de menú también son oscuras.
