@@ -11837,3 +11837,18 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
 - **Medidas publicadas** (globalair.com): 9,42 m de largo, 11,79 m de envergadura, 3,33 m de alto, cabina de 1,55 × 1,24 m y 1.610 kg en vacío.
 - **Medido en fotos y estimado:** las secciones, las cuerdas y la flecha del ala, la cola, la góndola y el tren.
 - **Fuera del túnel de viento:** no tiene silueta para el túnel, que está hecho para coches.
+
+## 2026-11-15 · Carrocería en acordeón, pinchar en el 3D abre sus ajustes, y tres formas nuevas
+
+- Eugenio: «Mejora la capacidad de configuración del morro, cúpula, cola, para que se puedan hacer formas tan perfectas como el avión jet … y que esté mejor ordenado y los slider en acordeón plegados por categoría, ejemplo COLA, MORRO, y con capacidad de pinchar y que se vea la configuración».
+- **Acordeón.** En la familia Bala, los ajustes de cada departamento van en bloques plegables, en este orden: Forma, Morro, Cúpula, Cola, Techo solar y ventanas, Carenados, Puertas y maletero, Material.
+  - Cada bloque dice cuántos ajustes tiene.
+  - El navegador recuerda cuáles dejaste abiertos.
+  - El antiguo «Morro y cola» se parte en «Morro» y «Cola».
+- **Pinchar en el 3D.** Al pinchar el coche que editas se abre el bloque de esa parte y el panel baja hasta él. Las partes son:
+  - morro, cúpula o cola, según dónde caiga el clic;
+  - carenados, puertas, ruedas, chasis, batería, motor y asientos, cada uno en su departamento.
+- **Formas nuevas**, que con 0 dejan todo como estaba:
+  - «Parabrisas: subida desde el capó»: la cabina abombada de un jet o tumbada;
+  - «Bajos del morro: cuánto suben hacia la punta»: la panza curvada del morro de un avión, hasta 20 cm;
+  - «Capó: caída hacia el borde», solo con la cubierta lisa.

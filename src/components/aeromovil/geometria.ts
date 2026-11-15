@@ -284,7 +284,7 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   tChLargo: 'eje', tChSep: 0.22,
   // Round 3 body (2026-11-12, the «Cuadriciclo Bala clásico»: nose, tail, roof, fin, solar, second door). Every default is
   // the shape and the options as they were, so a design saved without these keys is built exactly as before.
-  tMorroLinea: 0, tMorroAlto: 0, tFaro: 'no', tFaroD: 0.16, tColaPlana: 0, tTechoPlano: 0, tCaida: 0, tConAleta: 'si', tSolarMorro: 'no',
+  tMorroLinea: 0, tMorroAlto: 0, tFaro: 'no', tFaroD: 0.16, tColaPlana: 0, tTechoPlano: 0, tCaida: 0, tSubida: 0, tBajosMorro: 0, tMorroCurva: 0, tConAleta: 'si', tSolarMorro: 'no',
   tPuertas2: 'no', tPuerta2Parte: 1.33, tBisagra2Y: 0.85, tBisagra2Inc: 15, tPuerta2Abre: 110, tLineaCupula: 0,
   // Round 4 doors / roof frame / height (2026-11-13): no roof frame by default, so every saved design is built as before
   tMarcoTecho: 0,
