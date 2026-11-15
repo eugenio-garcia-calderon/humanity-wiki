@@ -11,6 +11,12 @@
       "ruta": "src/components/aeromovil/geometriaTriciclo.ts",
       "motivo": "Bala en rombo",
       "desde": "2026-11-15T18:56:46.867Z"
+    },
+    {
+      "agente": "rombo",
+      "ruta": "src/components/aeromovil/Visor3D.tsx",
+      "motivo": "Bala en rombo",
+      "desde": "2026-11-15T18:56:49.382Z"
     }
   ]
 }
