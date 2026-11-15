@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "balab",
-      "ruta": "src/pages/Aeromovil.tsx",
-      "motivo": "Bala clásico basculante",
-      "desde": "2026-11-15T16:51:11.613Z"
-    },
-    {
-      "agente": "balab",
       "ruta": "src/components/aeromovil/explicaciones/triciclo.ts",
       "motivo": "Bala clásico basculante",
       "desde": "2026-11-15T16:51:14.071Z"
