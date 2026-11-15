@@ -1367,6 +1367,7 @@ export default function Aeromovil() {
           )}
           {/* The design being edited (2026-11-13): its card, and the question about unsaved changes when leaving it */}
           <TarjetaDiseno e={eleccion} g={disenosGaraje} actual={actual} porDefecto={!!disenosGaraje.lista?.find(d => d.id === actual?.id)?.por_defecto} nombreVehiculo={nombreVehiculo} puedeDecidir={!!dueno?.puedeDecidir}
+            bascular={modelo.tipo === 'basculante' ? { angulo: Math.round(modelo.phiMax * 180 / Math.PI), alPulsar: () => { setCurva(false); setBascular(n => n + 1); } } : undefined}
             className={cn('inset-x-2 top-14 sm:inset-x-auto sm:left-3 sm:top-12 sm:w-[min(340px,calc(100%-24px))]', panelGaraje && 'hidden sm:block sm:w-[min(340px,calc(100%-376px))]')} />
           <AvisoCambios e={eleccion} actual={actual} puedeDecidir={!!dueno?.puedeDecidir} className={cn('inset-x-2 top-14 sm:inset-x-auto sm:left-3 sm:top-12 sm:w-[min(360px,calc(100%-24px))]', panelGaraje && 'sm:w-[min(360px,calc(100%-376px))]')} />
           {/* La explicación de un punto del túnel va dentro de la ventana 3D: así también se ve en pantalla completa. */}

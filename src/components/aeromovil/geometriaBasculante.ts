@@ -557,9 +557,18 @@ export function crearModeloBasculante(P: Parametros) {
   // (in the Smera the passenger sits higher, his feet on the floor beside a slimmer driver's seat, where the body is narrower)
   const piesPas: [number, number] = [xPil + 0.08, sueloIn + (smera ? 0.22 : 0.14)];
   const ANCHO_PIERNAS_PAS: [number, number, number] = smera ? [0.12, 0.19, 0.27] : [0.13, 0.27, 0.29];
-  const occTalla = (piloto: boolean, k = 1) => piloto
+  // (2026-11-15) where the arms are, how far out the body's inside reaches: a lower, longer body with its riders lying
+  // back (the stretched Smera) put the pilot's elbow out through the door. The viewer keeps the elbow within `codoZ`.
+  const conCodo = (o: PuntosOcupante): PuntosOcupante => {
+    const x0 = Math.min(o.S[0], o.mano[0]) - 0.05, x1 = Math.max(o.S[0], o.mano[0]) + 0.05;
+    const y0 = Math.min(o.S[1], o.mano[1]) - 0.15, y1 = Math.max(o.S[1], o.mano[1]);
+    let w = Infinity;
+    for (let i = 0; i <= 6; i++) for (let j = 0; j <= 4; j++) { const z = F.ladoZ(x0 + (x1 - x0) * i / 6, y0 + (y1 - y0) * j / 4); if (Number.isFinite(z)) w = Math.min(w, z); }
+    return Number.isFinite(w) ? { ...o, codoZ: w - 0.055 } : o;
+  };
+  const occTalla = (piloto: boolean, k = 1) => conCodo(piloto
     ? puntosReclinado(xPil, yPil, recPil, pedal, k, { c: volante.c, ancho: volante.r * 0.92 }, [0.09, 0.075, 0.10])
-    : puntosReclinado(xPas, yPas, recPas, piesPas, k, null, ANCHO_PIERNAS_PAS);
+    : puntosReclinado(xPas, yPas, recPas, piesPas, k, null, ANCHO_PIERNAS_PAS));
   /** A seat's side outline (x, y) and width: cushion, backrest along the trunk and a headrest, 2 cm under the rider. */
   const asiento = (piloto: boolean) => {
     const o = occTalla(piloto), d = o.d, dh = o.dh ?? d, n: [number, number] = [-d[1], d[0]];   // n: perpendicular to the trunk, backwards

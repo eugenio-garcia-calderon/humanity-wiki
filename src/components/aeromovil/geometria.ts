@@ -369,6 +369,8 @@ export interface PuntosOcupante {
   dh?: [number, number];
   /** Separación lateral de rodillas y pies (m); sin ella, las de siempre. Un pasajero en tándem lleva las piernas a los lados del asiento de delante. */
   anchoPiernas?: [number, number] | [number, number, number];
+  /** (2026-11-15) The elbow's centre at most this far from the centre line (m), where the body is narrow: the arm then bends down rather than out through the side. */
+  codoZ?: number;
   // (round 3 interior, 2026-11-12: a third value puts the knees there instead of halfway between hip and foot: the passenger of the Aptera buckets straddles the pilot's backrest)
 }
 export interface PiezasAsiento { base: [number, number][]; respaldo: [number, number][]; cabecero: [number, number][]; marco: [number, number][]; anchoCabecero: number }
