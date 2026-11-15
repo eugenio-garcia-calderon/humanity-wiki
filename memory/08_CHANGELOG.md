@@ -11573,6 +11573,20 @@ Eugenio, con capturas del clásico junto al Aptera: «su cola ocupa todo el anch
 - Se guarda como los demás («Mis diseños» y la primera fila del garaje). `npx tsx scripts/basculante-rangos.ts` construye cada deslizador en sus dos extremos y 200 mezclas, y comprueba que no haya NaN, que la piel esté cerrada y que no salgan montículos.
 - Diseño del equipo «Cuadriciclo Basculante» (migración 0219): aparece en «Diseños» y en la primera fila del garaje sin que nadie tenga que guardarlo antes. Sus parámetros solo dicen la familia; el resto sale de los valores por defecto del código.
 
+## 2026-11-15 — Cuadriciclo Bala clásico: sin el «huevo» entre el techo y el maletero
+
+- Eugenio, con una captura de su clásico: «Ese huevo que hay entre el techo y el maletero es terrible, no se puede quitar». Era el final de la cúpula: con la cubierta lisa, la cubierta empezaba donde acaba el cristal de la cúpula, y entre el punto más alto del techo y ese sitio seguía la forma redonda de la cúpula, que se hinchaba y caía de golpe sobre la cubierta. En su diseño, con la cúpula acabando 28 cm antes del eje trasero, eran unos 30 cm de bulto.
+- Ahora, con la cubierta lisa, la cubierta de atrás empieza en lo más alto del techo: desde ahí hasta el borde de la cola hay una sola bajada suave por el centro y por cada línea de arriba, y cada sección es igual o más estrecha y más plana que la de delante. En lo más alto la sección conserva la forma redonda de la cúpula, y se va aplanando a medida que baja. «Techo: caída» sigue mandando: con −, el techo empieza a bajar enseguida y llega plano a la cola; con +, aguanta arriba y cae al final.
+- Lo de delante (parabrisas, capó, cabezas y rodillas) no cambia: es exactamente lo de antes, comprobado punto a punto en su diseño. Se probó llevar la cubierta lisa también hasta lo más alto por delante y se descartó: cambiaba la forma de la cabina y metía la cabeza del piloto 9,6 cm en el cristal.
+- **Comprobado por un programa**: `scripts/bala-cola-lisa.ts` mide ahora también la parte de atrás de la cúpula y su unión con la cubierta, y lleva el diseño de verdad de Eugenio (tras la 0218) a 1,10, 1,25, 1,40 y 1,56 m de alto, con tres filas y con butacas, y cada deslizador del techo en sus dos extremos: 152 casos, todos OK. Con el código de antes, sus 19 casos fallan (secciones con un bulto de 20 mm, líneas que vuelven a subir hasta 88 mm).
+- **Aviso, no arreglado en esta ronda**: la unión del parabrisas con el capó (el código de antes, sin tocar) tiene ondas de menos de 1 mm en muchos casos y, con algunas combinaciones de deslizadores, bultos más grandes (hasta 38 mm en una combinación al azar). El programa lo enseña como AVISO sin contarlo como fallo.
+- **Números de su diseño** (túnel en «media», 120 km/h; antes → ahora):
+  - Alto 1,56 m (el suyo): Cd 0,185 → 0,215; consumo 79,3 → 87,8 Wh/km; panel 2,71 → 2,70 m²; maletero 1027 → 1019 L; vacío 438,8 → 438,7 kg; comprobaciones en rojo: las mismas siete.
+  - Alto 1,25 m: Cd 0,201 → 0,205; la cabeza de la fila 3 gana 3 cm de aire (de −5,0 a −2,1 cm, talla media); el resto igual.
+  - Alto 1,10 m: Cd 0,218 → 0,218; fila 3, de −17,7 a −15,9 cm.
+  - **El Cd sube**: el túnel dice que el «huevo» (techo arriba hasta tarde y luego caída fuerte, más estrecho por arriba) despegaba el aire más tarde. Con «Techo: caída» de −0,6 a +0,8, ahora da entre 0,200 y 0,217 (antes, entre 0,185 y 0,229). La estela de este túnel cambia mucho con pequeños cambios de la cola (ya anotado como deuda): tómese como orden de magnitud.
+- Sin cambios en ningún otro diseño: `bala-huella` (normal y `--editor`) IGUAL; `triciclo-disenos` contra main, Todo OK; `tunel-pruebas` sin fallos; `bala-disenos` Todo OK; `triciclo-rangos «clásico lisa»` 279 casos OK; tsc y build.
+
 ## 2026-11-15 — Aeromóvil: el Lumeneo Smera, el Mercedes Vision EQXX y el garaje de menor a mayor
 
 - Eugenio: «Garaje con todos los modelos desde el más pequeño al más grande… falta un coche más aerodinámico de 4 ruedas, que estaría entre el Aptera y el Model Y… y falta un vehículo de cuatro ruedas basculantes entre la moto y el microcoche tipo Twizy… Ahí añade el vehículo Lumeneo Smera».
