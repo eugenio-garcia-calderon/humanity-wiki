@@ -1,6 +1,6 @@
 import type { Parametros } from '../geometria';
 import { DESLIZADORES_BALA, camposBala, rangoBala } from '../geometriaBala';
-import { camposTriciclo, deslizadoresTriciclo, vistaTriciclo } from '../geometriaTriciclo';
+import { camposTriciclo, deslizadoresTriciclo, esCuatro, vistaTriciclo } from '../geometriaTriciclo';
 import type { ResultadoTunel, Zona } from './calculo';
 import type { CuerpoTunel } from './nuestro';
 import { porVelocidad, type PuntoTunel, type TipoPunto } from './puntos';
@@ -136,7 +136,7 @@ export function explicar(cx: Contexto): Explicacion {
   const bas = nuestro && P?.disposicion === 'basculante';
   const fichas = bas ? {} : a1 ? A1 : tri ? fichasTriciclo(P!) : bala ? fichasBala(P!) : GOTA;
   /** On our Bala the tunnel sees the body only: its pods, arms and fin are not in these numbers. */
-  const cuatro = tri && camposTriciclo(P!).tTraseras === 'dos';
+  const cuatro = tri && esCuatro(camposTriciclo(P!));
   const notaBala = bas ? 'El túnel ve la carrocería del Cuadriciclo Basculante y sus cuatro ruedas: las delanteras como ruedas carenadas (sus carenados no entran como formas) y las traseras dentro de la carrocería, asomando por abajo; así que su Cd real será algo más alto. Las opciones de abajo son conocimiento general: «Probar» aún no conoce los deslizadores de este vehículo.' : cuatro ? 'El Cuadriciclo Bala clásico tiene la carrocería del Cuadriciclo Bala en rombo, y el túnel ve esa carrocería y sus cuatro ruedas, todas en carenados: los carenados, sus brazos y la aleta no entran como formas, así que su Cd real será algo más alto. Las tendencias de «con el diseño por defecto» se comprobaron con este túnel en el Cuadriciclo en rombo; «Probar» las recalcula en este vehículo.' : tri ? 'Este triciclo tiene la carrocería del Cuadriciclo Bala en rombo, y el túnel ve esa carrocería y sus tres ruedas: los carenados de las ruedas delanteras, sus brazos, la aleta y el faldón no entran como formas, así que su Cd real será algo más alto. Las tendencias de «con el diseño por defecto» se comprobaron con este túnel en el Cuadriciclo en rombo; «Probar» las recalcula en este triciclo.' : bala ? 'El túnel solo ve la carrocería del Bala: los carenados de las ruedas laterales, sus brazos y la aleta no entran en el cálculo, así que su Cd real será algo más alto. Las tendencias de «con el diseño por defecto» se comprobaron con este túnel el 2026-11-09.' : undefined;
   const desdeMorro = (x: number) => G.xMorro - x;
   const escala = g(`El Cp (coeficiente de presión) dice cuánto empuja el aire en cada punto, comparado con lo que empujaría si se parase del todo contra el coche. Cp 1: el aire parado del todo (a ${kmh} km/h son ${fmt(qd, 0)} Pa, como ${fmt(qd / 9.81, 0)} kg apoyados en cada metro cuadrado). Cp 0: la misma presión que el aire libre, lejos del coche. Cp negativo: el aire pasa más rápido que el coche y tira de la carrocería hacia fuera (succión).`);

@@ -210,9 +210,11 @@ function rueda(R: number, ancho: number, M: Mats, nombre: string): THREE.Group {
  * The Triciclo (2026-11-10, `triciclo`): no front centre wheel; the wheels in pods are its front, steering ones
  * ('rueda-direccion', `userData.lado` ±1, turned by the viewer about their vertical axis).
  */
-export function ruedas(F: FormaBala, M: Mats, triciclo = false, traseras: FormaBala | null = null): THREE.Group {
+export function ruedas(F: FormaBala, M: Mats, triciclo = false, traseras: FormaBala | null = null, rombo = false): THREE.Group {
   const g = new THREE.Group(); g.name = 'ruedas';
   if (triciclo) {
+    // the wheels in a diamond (2026-11-15): the nose wheel, where the Cuadriciclo en rombo has its own, the rear one's size; it steers
+    if (rombo) { const m = rueda(F.R_DEL, F.ANCHO_NEU, M, 'rueda-morro'); m.position.set(0, F.R_DEL - APLASTADO, 0); g.add(m); }
     // the «Cuadriciclo Bala clásico» (2026-11-11): two rear wheels in their pods, at the rear track (`traseras`, the rear pods' view of the shape)
     if (traseras) for (const s of [1, -1]) { const t = rueda(traseras.R_LAT, traseras.ANCHO_NEU_LAT, M, 'rueda-trasera'); t.position.set(traseras.X_LAT, traseras.R_LAT - APLASTADO, s * traseras.VIA_LAT / 2); g.add(t); }
     else { const tras = rueda(F.R_DEL, F.ANCHO_NEU, M, 'rueda-trasera'); tras.position.set(-F.BATALLA, F.R_DEL - APLASTADO, 0); g.add(tras); }

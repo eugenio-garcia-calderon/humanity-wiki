@@ -11749,3 +11749,27 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
   - Con las medidas de serie y 1,80 m de vía, a 15° el carenado de dentro sube 23 cm y todo queda en verde hasta 25°.
 - **Aún no se tiene en cuenta** en el vuelco, la masa ni el consumo: ni el mecanismo ni la inclinación.
 - No he cambiado el Smeraptera guardado: la opción está en «no» hasta que él la active.
+
+## 2026-11-15 · Bala con las ruedas en rombo
+
+- Eugenio, sobre su «Rombo Bala»: «quiero que tenga las ruedas en rombo, una delante, una atrás y dos laterales basculantes, haz que esto se pueda elegir».
+- **Dónde está.** Rodaje → Ejes y ruedas tiene un control nuevo, «Disposición de las ruedas»:
+  - «Dos delante en carenados»: como hasta ahora, y es lo que viene de serie.
+  - «En rombo»: una rueda en el morro, que es la que gira; dos laterales en sus carenados, que no giran; una en la cola.
+- **Deslizador nuevo.** «Ruedas laterales: detrás de la del morro», de 0,60 a 2,40 m.
+- **Bascular.** «Bascular en las curvas» también vale en rombo: se inclinan la cabina y los dos carenados laterales.
+- **Cálculos.**
+  - Vuelco: se mide sobre la arista más cercana, de una rueda lateral a la del morro o a la de la cola.
+  - Giro: lo da la rueda del morro, girando alrededor de la línea de las laterales.
+  - Bastidor: apoyado en la horquilla del morro y en el pivote.
+  - Masa: se añaden la rueda del morro, su freno y su horquilla.
+- **Comprobaciones nuevas.**
+  - Rueda delantera dentro del morro, recta y girada.
+  - Pies del piloto detrás de la rueda delantera.
+  - Batería por detrás de la rueda delantera.
+  - Neumático y carenado laterales.
+- **Su Rombo Bala**, con las laterales a 2,20 m, las puertas abren por delante de los carenados. Quedan en rojo:
+  - el vuelco: 0,98 g con dos ocupantes, sin contar la inclinación, para un objetivo de 1,05 g;
+  - la rueda del morro girada 29°, 1 cm fuera del morro;
+  - los pies del piloto: 2,3 cm de los 3 que se piden;
+  - tres comprobaciones que ya estaban en rojo antes del rombo: las cabezas en talla alta, el controlador y el bastidor.

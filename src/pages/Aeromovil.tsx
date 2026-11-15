@@ -36,7 +36,7 @@ import {
   type Comprobacion, type Disposicion, type MaterialCarenado, type MaterialChasis, type Modelo, type ModeloBala, type ModeloTriciclo, type Neumatico, type Parametros, type Puerta, type Pulgadas, type Resultados,
 } from '../components/aeromovil/geometria';
 import {
-  ALTO_FILAS, ANCHO_FILAS, AGARRE, AUXILIARES, CRR, DEPS_TRICICLO, EQUIPAJE, RENDIMIENTO, RUEDAS_TRICICLO, SELECTORES_TRICICLO, USABLE, VUELCO_OBJETIVO, bateriaChasis, camposTriciclo, cargasRueda, conButacas, conSalpicadero, grupoPieza, largueroAlEje, masaButaca, conPortonAptera, conPuertas, deslizadoresTriciclo, energiaTriciclo, esCuatro, estirarTriciclo, guardarTriciclo, largoTriciclo, lemasTriciclo, limitarTriciclo, nombreTriciclo, vistaTriciclo,
+  ALTO_FILAS, ANCHO_FILAS, AGARRE, AUXILIARES, CRR, DEPS_TRICICLO, EQUIPAJE, RENDIMIENTO, RUEDAS_TRICICLO, SELECTORES_TRICICLO, USABLE, VUELCO_OBJETIVO, bateriaChasis, camposTriciclo, cargasRueda, conButacas, conSalpicadero, grupoPieza, largueroAlEje, masaButaca, conPortonAptera, conPuertas, deslizadoresTriciclo, energiaTriciclo, esCuatro, esRombo, estirarTriciclo, guardarTriciclo, largoTriciclo, lemasTriciclo, limitarTriciclo, nombreTriciclo, vistaTriciclo,
   type DepTriciclo, type FichaTriciclo,
 } from '../components/aeromovil/geometriaTriciclo';
 import { cuerpoTriciclo, peticionDe as peticionTunel } from '../components/aeromovil/tunel/nuestro';
@@ -699,7 +699,8 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
   // round three: the three rows' block only shows with that layout (astride it would move nothing)
   const filas = T.tAsientos === 'filas', soloFilas = (b: string) => b === 'Tres filas' && !filas;
   // four wheels (2026-11-11): the rear track only with two rear wheels
-  const cuatro = esCuatro(T), lemas = lemasTriciclo(T), tresOCuatro = cuatro ? 'cuatro' : 'tres';
+  // (2026-11-15: a diamond, `tRuedas`, has four wheels too, but one rear in the tail and the pods at the sides)
+  const cuatro = esCuatro(T), rombo = esRombo(T), lemas = lemasTriciclo(T), tresOCuatro = cuatro || rombo ? 'cuatro' : 'tres', bascula = cuatro || rombo;
   // 2026-11-12: each new option's sliders only show with it on (a steering wheel's with «Volante», the handlebar's with
   // «Manillar», the doors' with doors, the hatch's with the Aptera hatch, the pack's with the battery along the frame)
   const volante = T.tMando === 'volante', salp = conSalpicadero(T), puertas = conPuertas(T), portonA = conPortonAptera(T), paquete = bateriaChasis(T), butacas = conButacas(T);
@@ -713,7 +714,7 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
   const LISA = ['tColaAncho', 'tColaGrosor', 'tColaBombeo', 'tBajosIni', 'tBajosCurva', 'tMorroAncho', 'tMorroGrosor', 'tMorroBombeo'];
   const PUERTA2 = ['tPuerta2Parte', 'tBisagra2Y', 'tBisagra2Inc', 'tPuerta2Abre'];
   // (round 3 interior: the rails reach the rear axle only with two rear wheels; with one, the wheel is in the tail between them)
-  const fichas = deslizadoresTriciclo().filter(f => f.dep === dep && !soloFilas(f.bloque) && (cuatro || f.clave !== 'tViaTras') && (f.clave !== 'tBascMax' || (cuatro && T.tBascula === 'si')) && visible(f.clave)), sels = SELECTORES_TRICICLO.filter(s => s.dep === dep && !soloFilas(s.bloque) && ((s.clave !== 'tMaletero' && s.clave !== 'tPuertas2') || puertas) && ((s.clave !== 'tChLargo' && s.clave !== 'tBascula') || cuatro));
+  const fichas = deslizadoresTriciclo().filter(f => f.dep === dep && !soloFilas(f.bloque) && (cuatro || f.clave !== 'tViaTras') && (f.clave !== 'tBascMax' || (bascula && T.tBascula === 'si')) && (rombo ? f.clave !== 'tEjeDel' : f.clave !== 'tEjeLat') && visible(f.clave)), sels = SELECTORES_TRICICLO.filter(s => s.dep === dep && !soloFilas(s.bloque) && ((s.clave !== 'tMaletero' && s.clave !== 'tPuertas2') || puertas) && (s.clave !== 'tChLargo' || cuatro) && (s.clave !== 'tBascula' || bascula) && (s.clave !== 'tTraseras' || !rombo));
   const nOcc = rt.ocupantes, conN = nOcc === 1 ? 'con el piloto solo' : `con ${['', 'uno', 'dos', 'tres', 'cuatro'][nOcc] ?? nOcc} ocupantes`;
   // with three rows the passenger's saddle height is the rows' seat height; its position and recline do nothing there
   const ETIQUETA_FILAS: Partial<Record<string, string>> = { tPasY: 'Asientos de las filas 2 y 3: altura' };
@@ -787,8 +788,8 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
     <>
       {dep === 'proyecto' && peso}
       <Bloque titulo={lemas[dep]} nota={nombreTriciclo(T)}>
-        {cuatro
-          ? <p className="text-xs text-slate-500">Cuatro ruedas: dos delante en carenados como el Aptera, que giran con ellas, y dos detrás en carenados iguales, que no giran, con un motor en el buje de cada una. Es el Triciclo Bala con otra parte de atrás: la carrocería y todas sus medidas son las mismas (en Rodaje, «Ruedas traseras», se vuelve a la de una rueda).</p>
+        {cuatro || rombo
+          ? (rombo ? <p className="text-xs text-slate-500">Cuatro ruedas en rombo: una en el morro, que gira; dos laterales en carenados, que no giran (con «Bascular en las curvas», se inclinan con la cabina); y una en la cola con el motor en el buje. Es la disposición del Cuadriciclo Bala en rombo con esta carrocería (en Rodaje, «Disposición de las ruedas», se vuelve a la de dos delante).</p> : <p className="text-xs text-slate-500">Cuatro ruedas: dos delante en carenados como el Aptera, que giran con ellas, y dos detrás en carenados iguales, que no giran, con un motor en el buje de cada una. Es el Triciclo Bala con otra parte de atrás: la carrocería y todas sus medidas son las mismas (en Rodaje, «Ruedas traseras», se vuelve a la de una rueda).</p>)
           : <p className="text-xs text-slate-500">Tres ruedas: dos delante en carenados como el Aptera, que giran con ellas, y una detrás dentro de la cola, con el motor en el buje. La carrocería es la del Cuadriciclo Bala en rombo; con las medidas por defecto, la misma.</p>}
       </Bloque>
       {bloques.map(bloque => (
@@ -1425,7 +1426,7 @@ export default function Aeromovil() {
             </div>
           )}
           <div className="pointer-events-none absolute left-3 right-14 top-3 font-mono text-[11px] uppercase tracking-wider text-slate-500">
-            {esBas ? `Biplaza en tándem, reclinados · cuatro ruedas que se inclinan ${Math.round((modelo.tipo === 'basculante' ? modelo.phiMax : 0) * 180 / Math.PI)}° · eléctrico ${fmt(camposBasculante(P).qKWNom, 1)}/${fmt(camposBasculante(P).qKWPico, 1)} kW · ${fmt(camposBasculante(P).qKWh, 1)} kWh` : esA1 ? `${P.plazas === 2 ? 'Tándem 1+1' : 'Monoplaza'} · cuatro ruedas · eléctrico ${P.kWNom}/${P.kWPico} kW · ${P.kWh} kWh` : esBala ? 'Biplaza a horcajadas · rombo de ruedas, laterales fijas en carenados' : esTri ? `${camposTriciclo(P).tAsientos === 'filas' ? 'Cuatro plazas en tres filas (1 + 2 + 1)' : conButacas(camposTriciclo(P)) ? 'Biplaza en tándem, dos butacas como el Aptera' : 'Biplaza a horcajadas'} · ${esCuatro(camposTriciclo(P)) ? 'cuatro ruedas, dos delante y dos detrás en carenados' : 'tres ruedas, dos delante en carenados'} · eléctrico ${fmt(camposTriciclo(P).tKWNom, 1)}/${fmt(camposTriciclo(P).tKWPico, 1)} kW · ${fmt(modelo.tipo === 'triciclo' ? modelo.kWh : camposTriciclo(P).tKWh, 1)} kWh${modelo.tipo === 'triciclo' && modelo.paquete ? ' a lo largo del bastidor' : ''}` : 'Tándem 1+2 · rombo basculante · pedaleo asistido'}
+            {esBas ? `Biplaza en tándem, reclinados · cuatro ruedas que se inclinan ${Math.round((modelo.tipo === 'basculante' ? modelo.phiMax : 0) * 180 / Math.PI)}° · eléctrico ${fmt(camposBasculante(P).qKWNom, 1)}/${fmt(camposBasculante(P).qKWPico, 1)} kW · ${fmt(camposBasculante(P).qKWh, 1)} kWh` : esA1 ? `${P.plazas === 2 ? 'Tándem 1+1' : 'Monoplaza'} · cuatro ruedas · eléctrico ${P.kWNom}/${P.kWPico} kW · ${P.kWh} kWh` : esBala ? 'Biplaza a horcajadas · rombo de ruedas, laterales fijas en carenados' : esTri ? `${camposTriciclo(P).tAsientos === 'filas' ? 'Cuatro plazas en tres filas (1 + 2 + 1)' : conButacas(camposTriciclo(P)) ? 'Biplaza en tándem, dos butacas como el Aptera' : 'Biplaza a horcajadas'} · ${esRombo(camposTriciclo(P)) ? `cuatro ruedas en rombo, las laterales en carenados${modelo.tipo === 'triciclo' && modelo.bascula ? ' que se inclinan' : ''}` : esCuatro(camposTriciclo(P)) ? 'cuatro ruedas, dos delante y dos detrás en carenados' : 'tres ruedas, dos delante en carenados'} · eléctrico ${fmt(camposTriciclo(P).tKWNom, 1)}/${fmt(camposTriciclo(P).tKWPico, 1)} kW · ${fmt(modelo.tipo === 'triciclo' ? modelo.kWh : camposTriciclo(P).tKWh, 1)} kWh${modelo.tipo === 'triciclo' && modelo.paquete ? ' a lo largo del bastidor' : ''}` : 'Tándem 1+2 · rombo basculante · pedaleo asistido'}
             {esA1 && <span className="block normal-case tracking-normal text-slate-400">Pincha una pieza para abrir su ficha</span>}
           </div>
           <div className="absolute inset-x-2 bottom-2 flex flex-wrap items-center gap-1">

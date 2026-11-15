@@ -1118,6 +1118,8 @@ function construirMovil(G: Record<CapaId, THREE.Group>, M: Mats, m: Modelo, coch
 
 /** The Triciclo's front wheels and pods turned `angulo` degrees (+ to the left: the left wheel is then the inner one). */
 function girarTriciclo(G: Record<CapaId, THREE.Group>, m: ModeloTriciclo, angulo: number) {
+  // a diamond (2026-11-15): only the nose wheel steers (its fork with it); the pods at the sides stay straight
+  if (m.rombo) { G.ruedas.traverse(o => { if (o.name === 'rueda-morro' || o.userData.horquilla) o.rotation.y = angulo * Math.PI / 180; }); G.suspension.traverse(o => { if (o.userData.horquilla) o.rotation.y = angulo * Math.PI / 180; }); return; }
   const di = Math.abs(angulo) * Math.PI / 180, dout = di > 1e-6 ? anguloFuera(di, m.batalla, m.via.del) : 0, s = Math.sign(angulo);
   for (const capa of [G.carenado, G.ruedas]) capa.traverse(o => {
     if ((o.name !== 'carenado' && o.name !== 'rueda-direccion') || !o.userData.lado) return;
@@ -1200,14 +1202,16 @@ function ponerBieleta(o: THREE.Object3D, a: V3, b: V3) {
  */
 function inclinarBala(G: Record<CapaId, THREE.Group>, m: ModeloTriciclo, coche: THREE.Group, phi: number) {
   const b = m.bascula; coche.rotation.x = b ? phi : 0; if (!b) return;
-  const ejes = { del: b.ejes[0], tras: b.ejes[1] }, pose = { del: poseBascula(ejes.del, phi), tras: poseBascula(ejes.tras, phi) };
+  // (a diamond, 2026-11-15, has one axle on arms, the lateral one: the pods the builder calls the front ones)
+  const ejes = { del: b.ejes[0], tras: b.ejes.find(q => q.eje === 'tras') ?? b.ejes[0] };
+  const pose = { del: poseBascula(ejes.del, phi), tras: poseBascula(ejes.tras, phi) };
   const mover = (o: THREE.Object3D, eje: 'del' | 'tras', s: number) => {
     const u = o.userData; if (!u.baseB) u.baseB = o.position.clone();
     const p = pose[eje]; o.position.set(u.baseB.x, u.baseB.y + s * p.dy, u.baseB.z - s * p.dIn);
   };
   const lado = (o: THREE.Object3D) => (o.userData.baseB?.z ?? o.position.z) >= 0 ? 1 : -1;
   G.carenado.traverse(o => { if (o.name === 'carenado' && o.userData.lado) mover(o, 'del', o.userData.lado); else if (o.name === 'carenado-trasero') mover(o, 'tras', lado(o)); });
-  G.ruedas.traverse(o => { if (o.name === 'rueda-direccion') mover(o, 'del', o.userData.lado ?? lado(o)); else if (o.name === 'rueda-trasera') mover(o, 'tras', lado(o)); });
+  G.ruedas.traverse(o => { if (o.name === 'rueda-direccion') mover(o, 'del', o.userData.lado ?? lado(o)); else if (o.name === 'rueda-trasera' && m.traseras) mover(o, 'tras', lado(o)); });
   for (const capa of [G.suspension, G.motor]) for (const o of capa.children) if (o.userData.esquinaB) mover(o, o.userData.eje, o.userData.s);
   // each arm about its inner end, by as much as moves its outer end with the pod
   const girar = (o: THREE.Object3D, eje: 'del' | 'tras', s: number, i: number) => {
@@ -1285,9 +1289,17 @@ function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<string,
   }
   // steering: the rack across, the column up to the steering head, the tie rods out to the uprights' arms
   const k = m.cremallera;
+  if (m.rombo) {
+    // a diamond (2026-11-15): no rack to the pods; the nose wheel turns on a fork, its crown joined to the steering column
+    const yAx = m.rR - 0.006, zf = m.F.ANCHO_NEU / 2 + 0.025, yC = 2 * m.rR + 0.06, horq = new THREE.Group(); horq.userData.horquilla = true; G.suspension.add(horq);
+    for (const s of [1, -1]) tube(horq, [0, yAx, s * zf], [-0.05, yC, s * zf], 0.026, M.alu);
+    tube(horq, [-0.05, yC, -zf - 0.015], [-0.05, yC, zf + 0.015], 0.03, M.alu);
+    tube(G.direccion, [-0.05, yC, 0], m.cabezaDireccion, 0.026, M.alu);
+  } else {
   tube(G.direccion, [k.x, k.y, -k.z], [k.x, k.y, k.z], 0.035, M.black);
   tube(G.direccion, [k.x, k.y, 0], m.cabezaDireccion, 0.026, M.alu);
-  for (const s of [1, -1] as const) {
+  }
+  if (!m.rombo) for (const s of [1, -1] as const) {
     // (a unit rod, stretched between its ends: leaning, the upright's end moves with the pod, 2026-11-15)
     const b = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 1, 12), M.alu); b.castShadow = true;
     b.userData.bieletaB = { a: [k.x, k.y, s * k.z] as V3, b: [m.xF - 0.07, arriba.y + 0.02, s * zIn] as V3, s };

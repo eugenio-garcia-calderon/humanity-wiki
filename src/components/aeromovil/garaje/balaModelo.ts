@@ -829,6 +829,8 @@ export interface OpcionesBala {
   triciclo?: CabinaTriciclo & { faldon: { x0: number; x1: number; y0: number; hz: number } | null; ventanas?: OpcionesVentanas; /** Round three: the tail's top as an opening boot lid. */ maletero?: boolean;
     /** The «Cuadriciclo Bala clásico» (2026-11-11): the rear pods' view of the shape (geometriaTriciclo.ts `formaTrasera`); two rear wheels in pods instead of one in the tail. */
     traseras?: FormaBala | null;
+    /** 2026-11-15: the wheels in a diamond: a steering wheel in the nose as well (the pods' are the lateral ones) */
+    rombo?: boolean;
     /** 2026-11-12: the Aptera doors (and hatch, or null), cut out of the skin (balaPuertas.ts); absent or null, the canopy opens as before. */
     puertas?: { puerta: Puerta; porton: Porton | null } | null;
     /** 2026-11-12: teardrop mirrors instead of the camera pods (on the doors if there are doors). */
@@ -1148,7 +1150,7 @@ function armar(o: OpcionesBala): THREE.Group {
   add(carenados(F, M));
   const traseras = o.triciclo?.traseras ?? null;
   if (traseras) add(carenados(traseras, M, true));
-  add(ruedas(F, M, !!o.triciclo, traseras));
+  add(ruedas(F, M, !!o.triciclo, traseras, !!o.triciclo?.rombo));
   const laAleta = o.aleta === null ? null : aleta(F, M, o.aleta);
   // 2026-11-12: the panel over the tail rides on the lid that opens there, as the fin does
   const sc = o.triciclo?.solarCola ? panelCola(o.triciclo.solarCola, M) : null;

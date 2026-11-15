@@ -698,3 +698,13 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 - `tBascula` moves the pods on an ideal parallelogram whose arm length is the upper arm's (`ejeBascula`). The lower arm turns by whatever angle brings its outer end along, so the two arms are not a real four-bar linkage.
 - The tilt actuator, its mass, and the lean in the rollover, mass and consumption figures are not modelled. Making the rollover lean-aware means adding the basculante family's `basculacion` block, about 2 hours.
 - The viewer finds the pods, wheels and arms by name and by position (`inclinarBala`). A rename in balaPiezas.ts would silently stop them moving.
+
+## 2026-11-15 · The diamond layout reuses the front pods as the laterals
+
+- `tRuedas: 'rombo'` moves the Bala clásico's front pods (`X_LAT`, `tEjeLat`) back and adds a nose wheel at x = 0.
+- **Simplifications in the numbers:**
+  - The tail wheel does not steer, so the turning radius assumes it counter-steers.
+  - The frame beam ignores the laterals' cross-member.
+  - The nose wheel's swept width at full lock is an approximation: its width plus 0.7 × its diameter × sin(lock).
+- **Battery.** The battery pack is assumed to run under the laterals' cross-member.
+- **Steering in the viewer.** The fork turns as a group. The steering column is a fixed tube to the fork crown, with no joint drawn.
