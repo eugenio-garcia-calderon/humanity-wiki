@@ -935,6 +935,34 @@ footer p{margin:0;max-width:70ch}
 @media (max-width:760px){.dd-areas{grid-template-columns:repeat(2,minmax(0,1fr))} .dd-pc{grid-template-columns:minmax(0,1fr)} .dd-niv{margin-left:0}}
 @media (max-width:420px){.dd-tema .hn{display:none} .dd-tema{min-height:56px}}
 
+/* ================= 7 · 100 puntos de importancia ================= */
+.dd-peso{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 14px;padding:12px 14px;border-radius:12px;background:var(--bg-2);border:1px solid var(--line)}
+.dd-peso.off{opacity:.55}
+.dd-peso-l{display:grid;gap:2px}
+.dd-peso-l b{font:600 14px var(--sans);color:var(--ink)}
+.dd-peso-l small{font-size:12.5px;color:var(--muted)}
+.dd-peso-c{display:flex;align-items:center;gap:8px}
+.dd-peso-c button{width:44px;height:44px;border-radius:50%;border:1px solid var(--ctl);background:var(--bg);color:var(--ink);font:500 22px/1 var(--sans);cursor:pointer}
+.dd-peso-c button:hover:not([disabled]){border-color:var(--warn);color:var(--warn)}
+.dd-peso-c button[disabled]{opacity:.35;cursor:default}
+.dd-peso-c output{min-width:5.2em;text-align:center;font-size:13px;color:var(--muted)}
+.dd-peso-c output b{display:block;font:400 1.6rem/1 var(--display);color:var(--ink)}
+.dd-peso-bar{grid-column:1 / -1;height:6px;border-radius:3px;background:var(--bg-3);overflow:hidden}
+.dd-peso-bar i{display:block;height:100%;border-radius:3px;transition:width .2s}
+.dd-medidor{display:grid;gap:8px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.dd-med-top{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;color:var(--ink-2)}
+.dd-med-top b{color:var(--ink)}
+.dd-med-top span b{font:400 1.5rem/1 var(--display);color:var(--warn)}
+.dd-med-bar{display:flex;height:12px;border-radius:6px;background:var(--bg-3);overflow:hidden;gap:2px}
+.dd-med-bar i{display:block;height:100%}
+.dd-med-ley{display:flex;flex-wrap:wrap;gap:4px 10px;margin:0;font-size:12.5px;color:var(--muted)}
+.dd-med-ley span{display:inline-flex;align-items:center;gap:5px;color:var(--ink-2)}
+.dd-med-ley i{width:9px;height:9px;border-radius:50%}
+.dd-medidor .tbtn{justify-self:start;min-height:38px;font-size:13px}
+.dd-tema .pts{position:absolute;top:0;left:12px;height:4px;width:calc((100% - 24px) * var(--w) / 100);border-radius:0 0 3px 3px}
+.dd-side li{grid-template-columns:minmax(0,1fr)}
+.dd-side li b{text-align:left;font-weight:600}
+
 </style>
 
 <svg class="sprite" aria-hidden="true" focusable="false">
@@ -1436,10 +1464,10 @@ footer p{margin:0;max-width:70ch}
   </div>
   <div class="dd-steps">
     <div class="dd-step"><span class="n">1</span><h4>Ver el estado</h4><p>Cada materia muestra cómo está hoy y su evolución en los últimos años, con datos oficiales, su fuente y su fecha.</p></div>
-    <div class="dd-step"><span class="n">2</span><h4>Votar</h4><p>Para cada medida, un deslizador en unidades reales (euros, años, plazas, %). Según lo mueves ves el pro y el contra de esa posición. Y «no lo sé todavía», que también cuenta.</p></div>
+    <div class="dd-step"><span class="n">2</span><h4>Votar</h4><p>Para cada medida, un deslizador en unidades reales (euros, años, plazas, %). Según lo mueves ves el pro y el contra de esa posición. Y «no lo sé todavía», que también cuenta. Además repartes 100 puntos entre tus votos: más puntos a lo que más te importa.</p></div>
     <div class="dd-step"><span class="n">3</span><h4>Escuchar a quien sabe</h4><p>Argumentos firmados por personas expertas y organizaciones. Puedes seguir a quien te convence, y delegar en esa persona tu voto en una materia y retirarlo cuando quieras.</p></div>
     <div class="dd-step"><span class="n">4</span><h4>Acordar los datos</h4><p>Qué datos se enseñan y en qué orden también se debate. Una mesa del dato, con estadísticos y ciudadanos por sorteo, lo acuerda por mayoría amplia, y cualquiera puede proponer un dato nuevo.</p></div>
-    <div class="dd-step"><span class="n">5</span><h4>Un mandato concreto</h4><p>La suma de decisiones se convierte en un mandato, por ejemplo «subir un poco». Un comité técnico decide cómo cumplirlo al menor coste y rinde cuentas con los mismos datos.</p></div>
+    <div class="dd-step"><span class="n">5</span><h4>Un mandato concreto</h4><p>La suma de votos, cada uno con el peso que le dio su autor, se convierte en un mandato, por ejemplo «subir un poco». Un comité técnico decide cómo cumplirlo al menor coste y rinde cuentas con los mismos datos.</p></div>
   </div>
   <div class="dd">
     <div>
@@ -1447,6 +1475,7 @@ footer p{margin:0;max-width:70ch}
       <div class="dd-list" id="dd-list" role="tabpanel" aria-label="Medidas del tema elegido"></div>
     </div>
     <aside class="dd-side" aria-label="Tu voto por temas">
+      <div class="dd-medidor" id="dd-medidor" aria-live="polite"></div>
       <span class="cnt" id="dd-cnt"></span>
       <h4>Tu voto por temas</h4>
       <ol id="dd-mandato"></ol>
@@ -3015,7 +3044,10 @@ const AREAS = [
   const list = $("#dd-list");
   if (!list) return;
   const CLAVE = "politica.votar.v2";
-  let mem = { elec: {}, orden: {}, oculto: {} };
+  let mem = { elec: {}, orden: {}, oculto: {}, pts: {} };
+  /* 100 puntos de importancia por persona, en pasos de 5, solo para medidas con un voto numérico */
+  const TOTAL = 100, PASO = 5;
+  const COLA = { seg: "#8B9CF6", inm: "#4FB477", eco: "#F6BE3B", edu: "#6CC4E4", san: "#E07BAE" };
   try { const g = JSON.parse(localStorage.getItem(CLAVE) || "null"); if (g && typeof g === "object") mem = Object.assign(mem, g); } catch (e) { /* sin almacenamiento */ }
   const guardar = () => { try { localStorage.setItem(CLAVE, JSON.stringify(mem)); } catch (e) { /* sin almacenamiento */ } };
   let area = AREAS[0].k;
@@ -3024,6 +3056,30 @@ const AREAS = [
   const nivel = (p, v) => { const d = v - p.u.hoy; return d <= -p.u.b ? 0 : d < -p.u.s ? 1 : d <= p.u.s ? 2 : d <= p.u.b ? 3 : 4; };
   const valor = (p) => { const v = mem.elec[p.id]; return typeof v === "number" ? v : null; };
   const inicial = (p) => p.u.ini ?? p.u.hoy;
+  const puntos = (p) => (typeof mem.elec[p.id] === "number" && mem.pts[p.id]) || 0;
+  const usados = () => TODAS.reduce((t, p) => t + puntos(p), 0);
+  const quedan = () => Math.max(0, TOTAL - usados());
+  function pesoHTML(p) {
+    const on = valor(p) != null, pt = puntos(p), q = quedan();
+    return `<div class="dd-peso${on ? "" : " off"}" data-peso>
+      <span class="dd-peso-l"><b>Importancia para ti</b><small>${on ? (q ? `Te quedan ${q} de ${TOTAL} puntos` : `Has repartido tus ${TOTAL} puntos`) : "Vota primero para darle puntos"}</small></span>
+      <span class="dd-peso-c"><button type="button" data-pt="-1" aria-label="Quitar ${PASO} puntos" ${!on || pt <= 0 ? "disabled" : ""}>−</button><output><b>${pt}</b> puntos</output><button type="button" data-pt="1" aria-label="Dar ${PASO} puntos más" ${!on || q <= 0 ? "disabled" : ""}>+</button></span>
+      <span class="dd-peso-bar" aria-hidden="true"><i style="width:${pt}%;background:${COLA[p.ak]}"></i></span>
+    </div>`;
+  }
+  function medidor() {
+    const q = quedan(), con = TODAS.filter((p) => puntos(p) > 0), votadas = TODAS.filter((p) => valor(p) != null).length;
+    const porArea = AREAS.map((a) => [a, a.palancas.reduce((t, p) => t + puntos(p), 0)]).filter(([, n]) => n > 0);
+    $("#dd-medidor").innerHTML = `<div class="dd-med-top"><b>Tus ${TOTAL} puntos</b><span>${q ? `Te quedan <b>${q}</b>` : "<b>Repartidos</b>"}</span></div>
+      <div class="dd-med-bar" role="img" aria-label="Has repartido ${TOTAL - q} de ${TOTAL} puntos">${con.map((p) => `<i style="width:${puntos(p)}%;background:${COLA[p.ak]}" title="${p.t}: ${puntos(p)} puntos"></i>`).join("")}</div>
+      ${porArea.length ? `<p class="dd-med-ley">${porArea.map(([a, n]) => `<span><i style="background:${COLA[a.k]}"></i>${a.n} ${n}</span>`).join("")}</p>` : `<p class="dd-med-ley">Da más puntos a lo que más te importa: tu voto pesará más ahí.</p>`}
+      <button type="button" class="tbtn" id="dd-iguales" ${votadas ? "" : "disabled"}>Repartir a partes iguales</button>`;
+  }
+  function refrescarPesos(foco) {
+    $$("[data-peso]", list).forEach((el) => { const p = PAL[el.closest(".dd-card").dataset.id]; el.outerHTML = pesoHTML(p); });
+    medidor(); mandato(); temas();
+    if (foco) { const card = list.querySelector(`.dd-card[data-id="${foco[0]}"]`); const b = card && (card.querySelector(`[data-pt="${foco[1]}"]:not([disabled])`) || card.querySelector("[data-pt]:not([disabled])")); if (b) b.focus(); }
+  }
   let ancho = 640;
   const medir = () => { ancho = Math.round(Math.min(640, Math.max(320, (list.clientWidth || 640) - 30))); };
   let anchoPrev = 0, tRes = null;
@@ -3092,6 +3148,7 @@ const AREAS = [
         <div class="dd-rngw" style="--hoyf:${r1((p.u.hoy - p.u.min) / (p.u.max - p.u.min) * 1000) / 1000};--hoy:${r1(((p.u.hoy - p.u.min) / (p.u.max - p.u.min)) * 100)}%;--pos:${r1(((L.x - p.u.min) / (p.u.max - p.u.min)) * 100)}%"><input type="range" id="rng-${p.id}" class="dd-range" min="${p.u.min}" max="${p.u.max}" step="${p.u.step}" value="${L.x}" aria-valuetext="${p.u.f(L.x)}${L.v == null ? "" : ": " + L.et}"><i class="dd-hoymk" aria-hidden="true"></i></div>
         <div class="dd-ticks" aria-hidden="true"><span>${NIVELES[p.e][0]}</span><span>${NIVELES[p.e][2]}</span><span>${NIVELES[p.e][4]}</span></div>
         <div class="dd-pc" data-pc>${pcHTML(p, L.n, L.v == null)}</div>
+        ${pesoHTML(p)}
         <button type="button" class="dd-ns" data-ns aria-pressed="${L.ns}">No lo sé todavía</button>
       </div>
       ${p.q[0] || p.q[1] ? `<p class="dd-quien"><span class="lbl">Quién defiende cada lado</span>${p.q[0] ? `<span><b>${p.e === "abrir" ? "Abrir" : "Subir"}:</b> ${p.q[0]}</span>` : ""}${p.q[1] ? `<span><b>${p.e === "abrir" ? "Cerrar o dejar igual" : "Bajar o dejar igual"}:</b> ${p.q[1]}</span>` : ""}</p>` : ""}
@@ -3123,9 +3180,9 @@ const AREAS = [
     medir(); anchoPrev = ancho;
     const a = AREAS.find((x) => x.k === area);
     list.innerHTML = a.palancas.map(tarjeta).join("");
-    mandato(); temas();
+    mandato(); temas(); medidor();
   }
-  const texto = (p) => { const v = mem.elec[p.id]; return v == null ? null : v === "ns" ? "No lo sé" : `${p.u.f(v)} · ${NIVELES[p.e][nivel(p, v)].toLowerCase()}`; };
+  const texto = (p) => { const v = mem.elec[p.id]; return v == null ? null : v === "ns" ? "No lo sé" : `${p.u.f(v)} · ${NIVELES[p.e][nivel(p, v)].toLowerCase()}${puntos(p) ? ` · ${puntos(p)} puntos` : ""}`; };
   function mandato() {
     const hechas = TODAS.filter((p) => mem.elec[p.id] != null).length;
     $("#dd-cnt").textContent = `${hechas} de ${TODAS.length} medidas votadas`;
@@ -3134,9 +3191,9 @@ const AREAS = [
   /* Selector de temas: icono, nombre, qué se vota y cuántas medidas llevas; cambia al pasar el ratón */
   function temas() {
     $("#dd-areas").innerHTML = AREAS.map((a) => {
-      const hechas = a.palancas.filter((p) => mem.elec[p.id] != null).length;
+      const hechas = a.palancas.filter((p) => mem.elec[p.id] != null).length, pa = a.palancas.reduce((t, p) => t + puntos(p), 0);
       return `<button type="button" class="dd-tema" role="tab" data-a="${a.k}" aria-selected="${a.k === area}" tabindex="${a.k === area ? 0 : -1}" aria-controls="dd-list">
-        <svg viewBox="0 0 24 24" aria-hidden="true">${ICONOS[a.k]}</svg><span class="nm">${a.n}</span><span class="hn">${a.h}</span><span class="ct">${hechas}/${a.palancas.length}</span></button>`;
+        <svg viewBox="0 0 24 24" aria-hidden="true">${ICONOS[a.k]}</svg><span class="nm">${a.n}</span><span class="hn">${a.h}</span><span class="ct">${hechas}/${a.palancas.length}</span>${pa ? `<span class="pts" style="--w:${pa};background:${COLA[a.k]}" title="${pa} de tus ${TOTAL} puntos"></span>` : ""}</button>`;
     }).join("");
   }
   function elegir(k, foco) {
@@ -3163,11 +3220,16 @@ const AREAS = [
     const card = r.closest(".dd-card"), p = PAL[card.dataset.id], x = +r.value;
     mem.elec[p.id] = x; vivo(card, p, x);
   });
-  list.addEventListener("change", (e) => { if (e.target.closest(".dd-range")) { guardar(); mandato(); temas(); } });
+  list.addEventListener("change", (e) => { if (e.target.closest(".dd-range")) { guardar(); refrescarPesos(); } });
   list.addEventListener("click", (e) => {
     const card = e.target.closest(".dd-card"); if (!card) return;
     const p = PAL[card.dataset.id], b = e.target.closest("button"); if (!b || !p) return;
-    if (b.dataset.ns != null) { if (mem.elec[p.id] === "ns") delete mem.elec[p.id]; else mem.elec[p.id] = "ns"; }
+    if (b.dataset.pt != null) {
+      const d = +b.dataset.pt, pt = puntos(p);
+      mem.pts[p.id] = d > 0 ? pt + Math.min(PASO, quedan()) : Math.max(0, pt - PASO);
+      guardar(); refrescarPesos([p.id, b.dataset.pt]); return;
+    }
+    if (b.dataset.ns != null) { if (mem.elec[p.id] === "ns") delete mem.elec[p.id]; else { mem.elec[p.id] = "ns"; delete mem.pts[p.id]; } }
     else if (b.dataset.sube != null || b.dataset.baja != null) {
       const o = orden(p).slice(), i = +(b.dataset.sube ?? b.dataset.baja), j = b.dataset.sube != null ? i - 1 : i + 1;
       if (j < 0 || j >= o.length) return;
@@ -3177,7 +3239,7 @@ const AREAS = [
     guardar();
     const foco = b.dataset.ns != null ? "[data-ns]" : null;
     card.outerHTML = tarjeta(p);
-    mandato(); temas();
+    refrescarPesos();
     if (foco) { const f = list.querySelector(`.dd-card[data-id="${p.id}"] ${foco}`); if (f) f.focus(); }
   });
   $("#dd-copiar").addEventListener("click", async () => {
@@ -3185,7 +3247,15 @@ const AREAS = [
     try { await navigator.clipboard.writeText(txt); $("#dd-estado").textContent = "Copiado. Puedes pegarlo donde quieras."; }
     catch (e) { $("#dd-estado").textContent = "Tu navegador no deja copiar desde aquí."; }
   });
-  $("#dd-borrar").addEventListener("click", () => { mem = { elec: {}, orden: {}, oculto: {} }; guardar(); pintar(); $("#dd-estado").textContent = "Empezamos de nuevo."; });
+  $("#dd-medidor").addEventListener("click", (e) => {
+    if (!e.target.closest("#dd-iguales")) return;
+    const v = TODAS.filter((p) => valor(p) != null); if (!v.length) return;
+    const base = Math.floor(TOTAL / v.length);
+    mem.pts = {}; v.forEach((p, i) => { mem.pts[p.id] = base + (i < TOTAL - base * v.length ? 1 : 0); });
+    guardar(); refrescarPesos();
+    $("#dd-estado").textContent = `Repartidos ${TOTAL} puntos entre ${v.length} ${v.length === 1 ? "medida" : "medidas"}.`;
+  });
+  $("#dd-borrar").addEventListener("click", () => { mem = { elec: {}, orden: {}, oculto: {}, pts: {} }; guardar(); pintar(); $("#dd-estado").textContent = "Empezamos de nuevo."; });
   pintar();
 })();
 
