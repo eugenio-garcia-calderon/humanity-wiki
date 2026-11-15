@@ -38,10 +38,10 @@ export function EscalasVentana() {
         entradilla={<>Vivimos en ocho escalas, una dentro de otra: tú, tu comunidad vecinal, tu pueblo, tu provincia, tu región, tu país, tu continente y el planeta.
           El modelo quiere que cada una tenga <b className="text-slate-800">dinero propio y poder para decidir</b>, y que responda de lo que le toca. La regla es sencilla: <b className="text-slate-800">lo hace la escala más cercana que pueda hacerlo bien</b>.</>}>
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-          <Cifra tono="mal" valor={porcentaje(pct(local))} texto={<>del gasto público lo deciden hoy los ayuntamientos y las diputaciones, la administración más cercana<Fuente id="igae-cofog" /></>} nota="España, 2024" />
-          <Cifra valor={porcentaje(pct(lejos))} texto={<>lo deciden el Estado y la Seguridad Social, sobre todo pensiones<Fuente id="igae-cofog" /></>} nota="España, 2024" />
-          <Cifra tono="bien" valor={porcentaje(OCTAVO * 4 * 100, 0)} texto="de lo recaudado lo decidirían las cuatro escalas más cercanas: persona, comunidad vecinal, municipio y provincia" nota="Propuesta: un octavo para cada escala" />
-          <Cifra tono="bien" valor={euros(pais.porPersonaEscala)} texto="al año por habitante para cada escala: la misma cantidad en un pueblo que en una ciudad" nota="Estimación con datos de 2025" />
+          <Cifra clase="dato" tono="mal" valor={porcentaje(pct(local))} texto={<>del gasto público lo deciden hoy los ayuntamientos y las diputaciones, la administración más cercana<Fuente id="igae-cofog" /></>} nota="España, 2024" />
+          <Cifra clase="dato" valor={porcentaje(pct(lejos))} texto={<>lo deciden el Estado y la Seguridad Social, sobre todo pensiones<Fuente id="igae-cofog" /></>} nota="España, 2024" />
+          <Cifra clase="propuesta" tono="bien" valor={porcentaje(OCTAVO * 4 * 100, 0)} texto="de lo recaudado lo decidirían las cuatro escalas más cercanas: persona, comunidad vecinal, municipio y provincia" nota="Propuesta: un octavo para cada escala" />
+          <Cifra clase="calculo" tono="bien" valor={euros(pais.porPersonaEscala)} texto="al año por habitante para cada escala: la misma cantidad en un pueblo que en una ciudad" nota="Estimación con datos de 2025" />
         </div>
 
         <ol className="mt-6 grid gap-px overflow-hidden rounded-2xl border border-slate-200 bg-slate-200 sm:grid-cols-2 lg:grid-cols-4">

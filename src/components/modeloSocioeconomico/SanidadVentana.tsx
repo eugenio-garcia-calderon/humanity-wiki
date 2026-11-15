@@ -36,14 +36,14 @@ export function SanidadVentana() {
           La propuesta: plazos máximos que se cumplan y un único expediente para cada persona, que ella controla desde el móvil.
         </>}>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Cifra tono="mal" valor={dias(e.primaria.dias, 1)} texto={<>de media para ver al médico de familia, si no hay cita para hoy o mañana<F id="barometro-2026" /></>}
+          <Cifra clase="dato" tono="mal" valor={dias(e.primaria.dias, 1)} texto={<>de media para ver al médico de familia, si no hay cita para hoy o mañana<F id="barometro-2026" /></>}
             nota={`Solo el ${e.primaria.mismoDiaOSiguiente} % consigue cita para el mismo día o el siguiente`} />
-          <Cifra tono="mal" valor={dias(e.especialista.dias)} texto={<>de media para la primera visita al especialista<F id="sisle-nota" /></>}
+          <Cifra clase="dato" tono="mal" valor={dias(e.especialista.dias)} texto={<>de media para la primera visita al especialista<F id="sisle-nota" /></>}
             nota="Unos 4 millones de personas esperando, a finales de 2025" />
-          <Cifra tono="mal" valor={dias(e.cirugia.dias)} texto={<>de media para una operación que no es urgente<F id="sisle-rectificacion" /></>}
+          <Cifra clase="dato" tono="mal" valor={dias(e.cirugia.dias)} texto={<>de media para una operación que no es urgente<F id="sisle-rectificacion" /></>}
             nota={`${numero(e.cirugia.pacientes)} personas en la lista`} />
-          <Cifra tono="bien" valor="1 expediente" texto="por persona, para toda la vida: lo ven la pública y la privada, en cualquier comunidad, si tú das permiso"
-            nota="Propuesta" />
+          <Cifra clase="propuesta" tono="bien" valor="1 expediente" texto="por persona, para toda la vida: lo ven la pública y la privada, en cualquier comunidad, si tú das permiso"
+            />
         </div>
         <Termometro />
       </Apartado>
@@ -340,9 +340,9 @@ function Gasto() {
     <Apartado id="sanidad-gasto" titulo="Lo que cuesta, y quién lo paga" fondo="blanco"
       entradilla={<>Las administraciones gastan en sanidad unos {numero(Math.round(g.publicoEGSP2024 / 1000))} mil millones de euros al año. Y además, de cada cuatro euros que se gastan en salud en España, uno sale del bolsillo de las familias o de un seguro privado.</>}>
       <div className="grid gap-4 sm:grid-cols-3">
-        <Cifra valor={`${numero(g.publicoEGSP2024)} millones`} texto={<>de euros de gasto público en sanidad en 2024<F id="egsp-2024" /></>} nota={`El ${porcentaje(g.pctPIB)} de lo que produce el país en un año`} />
-        <Cifra valor={euros(g.porHabitante)} texto={<>por habitante y año, pagados con impuestos<F id="egsp-2024" /></>} />
-        <Cifra valor={porcentaje(g.privadoPct2022)} texto={<>de todo lo que se gasta en salud es privado (2022, último año con los dos)<F id="scs-2022" /></>} />
+        <Cifra clase="dato" valor={`${numero(g.publicoEGSP2024)} millones`} texto={<>de euros de gasto público en sanidad en 2024<F id="egsp-2024" /></>} nota={`El ${porcentaje(g.pctPIB)} de lo que produce el país en un año`} />
+        <Cifra clase="dato" valor={euros(g.porHabitante)} texto={<>por habitante y año, pagados con impuestos<F id="egsp-2024" /></>} />
+        <Cifra clase="dato" valor={porcentaje(g.privadoPct2022)} texto={<>de todo lo que se gasta en salud es privado (2022, último año con los dos)<F id="scs-2022" /></>} />
       </div>
 
       <figure className="mt-8 rounded-2xl border border-slate-200 bg-white p-5">

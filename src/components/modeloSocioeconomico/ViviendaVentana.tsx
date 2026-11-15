@@ -58,15 +58,15 @@ function Resumen() {
     <Apartado id="vivienda" titulo="Vivienda: un derecho que casi nadie construye"
       entradilla={<>La Constitución promete una vivienda digna, pero en España menos de 2 de cada 100 viviendas son públicas de alquiler, y los precios suben más de un 12 % en un año. La propuesta: que cada una de las 8 escalas sepa qué normas hace y cómo regula, y que parte de su dinero construya vivienda que no se vende nunca.</>}>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Cifra valor={porcentaje(V.publicaPct)} tono="mal"
+        <Cifra clase="dato" valor={porcentaje(V.publicaPct)} tono="mal"
           texto={<>de las viviendas son públicas de alquiler, unas {numero(V.publicas)}<F id="housing-europe" /></>}
           nota={<>En la Unión Europea, la vivienda social es de media el {porcentaje(V.socialUE, 0)}<F id="ocde-social" /></>} />
-        <Cifra valor={porcentaje(V.precios)} tono="mal"
+        <Cifra clase="dato" valor={porcentaje(V.precios)} tono="mal"
           texto={<>subió el precio de la vivienda en un año, hasta junio de 2026<F id="ine-ipv" /></>} />
-        <Cifra valor={porcentaje(V.sobrecargaES)} tono="mal"
+        <Cifra clase="dato" valor={porcentaje(V.sobrecargaES)} tono="mal"
           texto={<>de quienes alquilan a precio de mercado gastan más del 40 % de lo que ganan en la casa<F id="sobrecarga-es" /></>}
           nota={<>En la Unión Europea, el {numero(V.sobrecargaUE, 1)} %<F id="sobrecarga-ue" /></>} />
-        <Cifra valor={`≈ ${mill(redondo(GASTO_MODELO))}`} tono="bien"
+        <Cifra clase="calculo" valor={`≈ ${mill(redondo(GASTO_MODELO))}`} tono="bien"
           texto={<>al año para vivienda pública con el modelo, frente a {mill(GASTO_HOY)} de hoy</>}
           nota="Estimación del modelo: municipio, provincia, región y nación juntos." />
       </div>
@@ -292,8 +292,8 @@ function Calculadora() {
             : <Regulador etiqueta="Precio de la vivienda" valor={precio} min={50_000} max={800_000} paso={5_000} mostrar={euros(precio)} onChange={setPrecio} />}
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Cifra valor={euros(impuesto)} tono="neutro" texto={<>de impuesto{alquiler ? ' al mes' : ''}: el {numero(tipo * 100)} %, tramo {uso === 'segunda' ? 'secundario' : 'básico'}</>} />
-          <Cifra valor={euros(base + impuesto)} tono="neutro" texto={alquiler ? 'paga al mes quien alquila, con el impuesto dentro' : 'precio final, con el impuesto dentro'} />
+          <Cifra clase="calculo" valor={euros(impuesto)} tono="neutro" texto={<>de impuesto{alquiler ? ' al mes' : ''}: el {numero(tipo * 100)} %, tramo {uso === 'segunda' ? 'secundario' : 'básico'}</>} />
+          <Cifra clase="calculo" valor={euros(base + impuesto)} tono="neutro" texto={alquiler ? 'paga al mes quien alquila, con el impuesto dentro' : 'precio final, con el impuesto dentro'} />
         </div>
       </div>
       <p className="mt-4 text-sm leading-relaxed text-slate-600">
@@ -402,7 +402,7 @@ function CasasVacias() {
         <ul className="max-w-3xl list-disc space-y-2 pl-5 text-[15px] leading-relaxed text-slate-700">
           <li><strong>Alquiler obligatorio:</strong> en una zona con escasez, un piso vacío más de dos años pasa a la bolsa aunque el dueño no quiera. Mueve más casas, pero toca la propiedad y acabaría en los tribunales.</li>
           <li><strong>Un recargo:</strong> pagar algo cada año por tener un piso vacío. Funciona como el IBI de hoy, pero sería un segundo impuesto, y el modelo quiere uno solo.</li>
-          <li>Cuál se usa, y desde cuándo, lo decide Eugenio. Por ahora la página solo propone la bolsa.</li>
+          <li>Cuál se usa, y desde cuándo, está por decidir. Por ahora la página solo propone la bolsa.</li>
         </ul>
       </Mas>
     </div>
