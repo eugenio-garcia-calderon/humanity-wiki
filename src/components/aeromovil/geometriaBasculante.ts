@@ -29,11 +29,12 @@ import type { Comprobacion, MaterialCarenado, MaterialChasis, Parametros, Puntos
 import { MATERIALES_CARENADO, MATERIALES_CHASIS, RENDIMIENTO_SOLAR, largoTubo } from './geometria';
 import { BASCULANTE_DEFECTO, type CamposBasculante, type RuedaBasculante } from './basculante/defecto';
 import { crearForma, crearPod, largoCapNariz, limiteCarenados, type DimForma, type EsquinaDel, type FormaBasculante, type Pod } from './basculante/forma';
+import { SMERA_REF, dentroPoligono, detallesSmera, mapaSmera, mapearPoligono, perfilSmera } from './basculante/smera';
 import { CADERA_SOBRE_ASIENTO, MEDIA_CABEZA, TALLA_SENTADO, rodilla } from './geometriaBala';
 
 export type { CamposBasculante, RuedaBasculante };
 export type ClaveBasculante = keyof CamposBasculante;
-type ClaveTexto = 'qRuedasDel' | 'qSolarMorro' | 'qSolarCola' | 'qMatCarenado' | 'qChMat' | 'qRuedaDel' | 'qRuedaTras';
+type ClaveTexto = 'qCarroceria' | 'qRuedasDel' | 'qSolarTecho' | 'qSolarMorro' | 'qSolarCola' | 'qMatCarenado' | 'qChMat' | 'qRuedaDel' | 'qRuedaTras';
 export type ClaveNumBasculante = Exclude<ClaveBasculante, ClaveTexto>;
 
 export const NOMBRE_BASCULANTE = 'Cuadriciclo Basculante';
@@ -50,6 +51,9 @@ export const RUEDAS_BASCULANTE: Record<RuedaBasculante, { d: number; w: number; 
   m14: { d: 0.524, w: 0.12, n: '14″ de scooter, 120/70-14 (524 mm)', kg: 1, carga: 257, inclina: 45, kWBuje: 9 },
   m15: { d: 0.549, w: 0.12, n: '15″ de scooter, 120/70-15 (549 mm)', kg: 1.08, carga: 224, inclina: 45, kWBuje: 10 },
   c13: { d: 0.530, w: 0.125, n: '13″ de coche, 125/80 R13 (530 mm, Twizy)', kg: 1.25, carga: 290, inclina: 6, kWBuje: 12 },
+  // the Smera's: 145/70 R14 in auto123.com's sheet (559 mm); 520 mm measured on Lumeneo's side photo, which is what
+  // the replica draws. A round crown as a scooter's (the press front view shows the tread wrapping round the shoulder).
+  s14: { d: 0.520, w: 0.145, n: '14″ del Smera, 145/70 R14 (520 mm medidos en la foto)', kg: 1.15, carga: 325, inclina: 40, kWBuje: 15 },
 };
 
 // ------------------------------------------------------------------ sliders
@@ -72,19 +76,19 @@ type Fila = [ClaveNumBasculante, DepBasculante, string, string, number, number, 
 // [clave, departamento, bloque, etiqueta, mín, máx, paso, unidad]
 const FILAS: Fila[] = [
   ['qAncho', 'carroceria', 'Forma', 'Ancho de la carrocería', 0.72, 1.10, 0.01, 'm'],
-  ['qAlto', 'carroceria', 'Forma', 'Alto total (lo más alto del techo)', 0.95, 1.50, 0.005, 'm'],
-  ['qSuelo', 'carroceria', 'Forma', 'Altura libre al suelo', 0.08, 0.24, 0.005, 'cm'],
+  ['qAlto', 'carroceria', 'Forma', 'Alto total (lo más alto del techo)', 0.95, 1.60, 0.005, 'm'],
+  ['qSuelo', 'carroceria', 'Forma', 'Altura libre al suelo', 0.08, 0.35, 0.005, 'cm'],
   ['qAnchoIni', 'carroceria', 'Forma', 'Ancho completo: desde (tras el eje delantero)', 0.45, 1.20, 0.01, 'm'],
   ['qAnchoFin', 'carroceria', 'Forma', 'Ancho completo: hasta (tras el eje delantero)', 1.00, 2.20, 0.01, 'm'],
-  ['qSeccion', 'carroceria', 'Sección', 'Sección arriba: redonda o en cajón', 2, 3.6, 0.05, 'x'],
-  ['qPanza', 'carroceria', 'Sección', 'Sección abajo: panza redonda o plana', 2, 3.6, 0.05, 'x'],
+  ['qSeccion', 'carroceria', 'Sección', 'Sección arriba: redonda o en cajón', 1.8, 3.6, 0.05, 'x'],
+  ['qPanza', 'carroceria', 'Sección', 'Sección abajo: en quilla, redonda o plana', 1.4, 3.6, 0.05, 'x'],
   ['qCentro', 'carroceria', 'Sección', 'Cintura (lo más ancho): altura', 0.30, 0.60, 0.01, 'x'],
-  ['qMorro', 'carroceria', 'Morro y cola', 'Morro: del eje delantero a la punta', 0.30, 0.80, 0.01, 'm'],
+  ['qMorro', 'carroceria', 'Morro y cola', 'Morro: del eje delantero a la punta', 0.20, 0.80, 0.01, 'm'],
   ['qMorroAlto', 'carroceria', 'Morro y cola', 'Morro: altura de la punta', 0.22, 0.55, 0.005, 'cm'],
   ['qMorroPunta', 'carroceria', 'Morro y cola', 'Morro: en punta o redondo', 0, 1, 0.05, 'x'],
   ['qMorroRedondo', 'carroceria', 'Morro y cola', 'Morro: largo de la punta redondeada', 0.10, 0.45, 0.01, 'cm'],
   ['qMorroAncho', 'carroceria', 'Morro y cola', 'Morro: ancho de la punta', 0.30, 0.90, 0.01, 'x'],
-  ['qCola', 'carroceria', 'Morro y cola', 'Cola: del eje trasero al borde', 0.40, 1.00, 0.01, 'm'],
+  ['qCola', 'carroceria', 'Morro y cola', 'Cola: del eje trasero al borde', 0.25, 1.00, 0.01, 'm'],
   ['qColaAlto', 'carroceria', 'Morro y cola', 'Cola: altura del borde', 0.40, 0.80, 0.005, 'cm'],
   ['qColaCurva', 'carroceria', 'Morro y cola', 'Cola: la curva del techo hasta ella (Aptera)', 1.2, 3.2, 0.05, 'x'],
   ['qColaAncho', 'carroceria', 'Morro y cola', 'Cola: ancho del borde', 0.20, 0.90, 0.01, 'x'],
@@ -112,16 +116,16 @@ const FILAS: Fila[] = [
   ['qHuecoCuerpo', 'carroceria', 'Carenados delanteros', 'Carenado a la carrocería (girado e inclinado a tope)', 0.015, 0.08, 0.005, 'cm'],
   ['qEspCarenado', 'carroceria', 'Material y espesores', 'Espesor de la carrocería', 0.6, 2.4, 0.1, 'mm'],
   ['qEspCristal', 'carroceria', 'Material y espesores', 'Espesor de la cúpula (policarbonato)', 1.5, 4.5, 0.5, 'mm'],
-  ['qPilX', 'interior', 'Asientos', 'Piloto: cadera tras el eje delantero', 0.60, 1.30, 0.01, 'm'],
-  ['qPilY', 'interior', 'Asientos', 'Piloto: altura del asiento', 0.18, 0.40, 0.005, 'cm'],
+  ['qPilX', 'interior', 'Asientos', 'Piloto: cadera tras el eje delantero', 0.30, 1.30, 0.01, 'm'],
+  ['qPilY', 'interior', 'Asientos', 'Piloto: altura del asiento', 0.18, 0.75, 0.005, 'cm'],
   ['qRecPil', 'interior', 'Asientos', 'Piloto: reclinado del respaldo', 20, 65, 1, '°'],
-  ['qPasX', 'interior', 'Asientos', 'Pasajero: cadera tras el eje delantero', 1.10, 2.10, 0.01, 'm'],
-  ['qPasY', 'interior', 'Asientos', 'Pasajero: altura del asiento', 0.18, 0.45, 0.005, 'cm'],
+  ['qPasX', 'interior', 'Asientos', 'Pasajero: cadera tras el eje delantero', 0.90, 2.10, 0.01, 'm'],
+  ['qPasY', 'interior', 'Asientos', 'Pasajero: altura del asiento', 0.18, 0.85, 0.005, 'cm'],
   ['qRecPas', 'interior', 'Asientos', 'Pasajero: reclinado del respaldo', 20, 65, 1, '°'],
   ['qVolX', 'interior', 'Mandos', 'Volante: hacia delante', -0.12, 0.12, 0.01, 'cm'],
   ['qVolY', 'interior', 'Mandos', 'Volante: altura', -0.10, 0.10, 0.01, 'cm'],
   ['qPedX', 'interior', 'Mandos', 'Pedales: hacia delante', -0.15, 0.15, 0.01, 'cm'],
-  ['qPedY', 'interior', 'Mandos', 'Pedales: altura', -0.08, 0.12, 0.01, 'cm'],
+  ['qPedY', 'interior', 'Mandos', 'Pedales: altura', -0.08, 0.30, 0.01, 'cm'],
   ['qMOcc', 'interior', 'Masas', 'Masa por ocupante', 50, 110, 1, 'kg'],
   ['qMAsiento', 'interior', 'Masas', 'Un asiento (carcasa y cojín)', 1.5, 7, 0.5, 'kg'],
   ['qChD', 'chasis', 'Bastidor', 'Tubos: diámetro', 25, 60, 1, 'mm'],
@@ -161,17 +165,19 @@ export function deslizadoresBasculante(): FichaBasculante[] {
 export const fichaBasculante = (k: ClaveNumBasculante) => deslizadoresBasculante().find(f => f.clave === k)!;
 const ruedas = (l: RuedaBasculante[]) => l.map(k => ({ k, n: RUEDAS_BASCULANTE[k].n }));
 export const SELECTORES_BASCULANTE: SelectorBasculante[] = [
+  { clave: 'qCarroceria', n: 'Carrocería', dep: 'carroceria', bloque: 'Forma', opciones: [{ k: 'aero', n: 'Aerodinámica (gota, cola del Aptera)' }, { k: 'smera', n: 'Como el Lumeneo Smera (la réplica)' }] },
+  { clave: 'qSolarTecho', n: 'Paneles en el techo', dep: 'carroceria', bloque: 'Techo solar', opciones: [{ k: 'si', n: 'Sí' }, { k: 'no', n: 'No' }] },
   { clave: 'qRuedasDel', n: 'Las ruedas delanteras van', dep: 'carroceria', bloque: 'Ruedas delanteras', opciones: [{ k: 'morro', n: 'Dentro del morro (una sola pieza)' }, { k: 'carenados', n: 'Cada una en su carenado (giran con ella)' }] },
   { clave: 'qSolarMorro', n: 'Paneles también en el morro', dep: 'carroceria', bloque: 'Techo solar', opciones: [{ k: 'si', n: 'Sí, delante del parabrisas (como el Aptera)' }, { k: 'no', n: 'Solo techo y cola' }] },
   { clave: 'qSolarCola', n: 'Paneles también en la cola', dep: 'carroceria', bloque: 'Techo solar', opciones: [{ k: 'no', n: 'Solo en el techo' }, { k: 'si', n: 'También en la cubierta de la cola' }] },
   { clave: 'qMatCarenado', n: 'Material de la carrocería', dep: 'carroceria', bloque: 'Material y espesores', opciones: [{ k: 'carbonoLino', n: 'Carbono-lino' }, { k: 'vidrio', n: 'Fibra de vidrio' }, { k: 'carbono', n: 'Fibra de carbono' }] },
   { clave: 'qChMat', n: 'Material de los tubos', dep: 'chasis', bloque: 'Bastidor', opciones: [{ k: 'al6061', n: 'Aluminio 6061-T6' }, { k: 'cromoly', n: 'Acero cromoly 4130' }, { k: 'carbono', n: 'Tubo de carbono' }] },
-  { clave: 'qRuedaDel', n: 'Ruedas delanteras', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['m13', 'm14', 'm15', 'c13']) },
-  { clave: 'qRuedaTras', n: 'Ruedas traseras (dentro de la cola)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['m13', 'm14', 'm15', 'c13']) },
+  { clave: 'qRuedaDel', n: 'Ruedas delanteras', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['m13', 'm14', 'm15', 'c13', 's14']) },
+  { clave: 'qRuedaTras', n: 'Ruedas traseras', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['m13', 'm14', 'm15', 'c13', 's14']) },
 ];
 const OPCIONES: Record<ClaveTexto, readonly string[]> = {
-  qRuedasDel: ['morro', 'carenados'], qSolarMorro: ['no', 'si'], qSolarCola: ['no', 'si'], qMatCarenado: ['carbonoLino', 'vidrio', 'carbono'], qChMat: ['al6061', 'cromoly', 'carbono'],
-  qRuedaDel: ['m13', 'm14', 'm15', 'c13'], qRuedaTras: ['m13', 'm14', 'm15', 'c13'],
+  qCarroceria: ['aero', 'smera'], qRuedasDel: ['morro', 'carenados'], qSolarTecho: ['no', 'si'], qSolarMorro: ['no', 'si'], qSolarCola: ['no', 'si'], qMatCarenado: ['carbonoLino', 'vidrio', 'carbono'], qChMat: ['al6061', 'cromoly', 'carbono'],
+  qRuedaDel: ['m13', 'm14', 'm15', 'c13', 's14'], qRuedaTras: ['m13', 'm14', 'm15', 'c13', 's14'],
 };
 
 /** This vehicle's fields from a design: the defaults for what is missing, a wrong type or an unknown option. */
@@ -319,8 +325,10 @@ export function crearModeloBasculante(P: Parametros) {
   const rd = RUEDAS_BASCULANTE[Q.qRuedaDel], rt = RUEDAS_BASCULANTE[Q.qRuedaTras];
   const rF = rd.d / 2, rR = rt.d / 2, B = L('qBatalla'), xR = -B;
   const xt = xR - L('qCola');
-  /** the front wheels inside the nose (2026-11-15, the default) or each in its own fairing */
-  const enMorro = Q.qRuedasDel === 'morro';
+  /** the body: the aerodynamic drop, or as the Lumeneo Smera (the replica, 2026-11-15: basculante/smera.ts) */
+  const smera = Q.qCarroceria === 'smera';
+  /** the front wheels inside the nose (2026-11-15, the default) or each in its own fairing; the Smera's in its wells */
+  const enMorro = smera || Q.qRuedasDel === 'morro';
   const phiMax = L('qBascMax') * Math.PI / 180, giro = L('qGiro') * Math.PI / 180;
   const yInf = L('qBrazoAlto'), ySup = yInf + L('qBrazoSep');
   // the upright stands 3.5 cm inboard of the tyre's inner face; the arms reach it
@@ -337,8 +345,11 @@ export function crearModeloBasculante(P: Parametros) {
   const qDel: EsquinaDel = { x: 0, zK: LkF, e: eF, Lk: LkF, betaMax: betaMax(esquinas[0]), giroDentro: giro, giroFuera };
   const limite = pod ? limiteCarenados(pod, qDel, L('qHuecoCuerpo')) : () => Infinity;
   // the front wheel wells, and the nose long enough that its rounded tip starts ahead of them (it would squeeze them)
-  const pasoDel = enMorro ? pasoDelantero(esquinas[0], phiMax, giro, giroFuera, L('qRecDel') / 1000 * 0.6, L('qPasoHueco'), L('qPasoAbre')) : null;
-  const xn = pasoDel ? Math.max(L('qMorro'), pasoDel.arco.x + pasoDel.arco.rx + largoCapNariz({ largoPunta: L('qMorroRedondo'), puntaMorro: L('qMorroPunta') })) : L('qMorro');
+  // (the Smera's wells open to their roof, as the real car's: the wheels show in them)
+  const pasoDel = enMorro ? pasoDelantero(esquinas[0], phiMax, giro, giroFuera, L('qRecDel') / 1000 * 0.6, L('qPasoHueco'), smera ? 9 : L('qPasoAbre')) : null;
+  const mapa = smera ? mapaSmera({ morro: L('qMorro'), cola: L('qCola'), batalla: B, alto: L('qAlto'), suelo: L('qSuelo'), ancho: L('qAncho') }) : null;
+  const det = mapa ? detallesSmera(mapa) : null;
+  const xn = smera ? L('qMorro') : pasoDel ? Math.max(L('qMorro'), pasoDel.arco.x + pasoDel.arco.rx + largoCapNariz({ largoPunta: L('qMorroRedondo'), puntaMorro: L('qMorroPunta') })) : L('qMorro');
   const D0: DimForma = {
     xn, xt, H: L('qAlto'), W: L('qAncho'), suelo: L('qSuelo'),
     yMorro: Math.max(L('qMorroAlto'), L('qSuelo') + 0.06), puntaMorro: L('qMorroPunta'), largoPunta: L('qMorroRedondo'), anchoMorro: L('qMorroAncho'),
@@ -348,13 +359,18 @@ export function crearModeloBasculante(P: Parametros) {
     nU: L('qSeccion'), nL: L('qPanza'), centro: L('qCentro'),
     xAncho0: Math.min(xn - 0.15, -L('qAnchoIni')), xAncho1: Math.max(xt + 0.25, Math.min(-L('qAnchoIni') - 0.05, -L('qAnchoFin'))),
     cintura: L('qCintura'), ventAlto: Math.max(L('qVentAlto'), L('qCintura') + 0.15), xCupFin: Math.max(xt + 0.15, -L('qCupFin')),
+    // the Smera: its traced lines, its short round nose cap, and the windscreen's foot where the roof line crosses the bonnet's height
+    ...(mapa && det ? (() => {
+      const xWsS = mapa.x(-0.098);
+      return { perfil: perfilSmera(mapa), yMorro: mapa.y(SMERA_REF.techo[0][1]), largoPunta: SMERA_REF.capLargo, puntaMorro: SMERA_REF.capRedondo, xParabrisas: xWsS, largoParabrisas: xWsS - det.techoIni, xCupFin: det.lunetaX };
+    })() : {}),
   };
-  const F: FormaBasculante = crearForma(D0, limite, pasoDel ? { pts: pasoDel.pts, sobre: L('qMorroSobre') } : undefined);
+  const F: FormaBasculante = crearForma(D0, limite, pasoDel && !smera ? { pts: pasoDel.pts, sobre: L('qMorroSobre') } : undefined);
   // (the body as built: with the wheels in the nose its roof and width may have grown to hold them)
   const D = F.D;
   const xWs = D.xParabrisas, xCup = Math.min(xWs - 0.25, D.xCupFin);
   const xS0 = Math.min(xWs - 0.6 * D.largoParabrisas, -L('qSolarIni')), xS1 = Math.max(xCup + 0.03, Math.min(xS0 - 0.10, -L('qSolarFin')));
-  const conSolar = xS0 - xS1 > 0.05;
+  const conSolar = Q.qSolarTecho === 'si' && (smera || xS0 - xS1 > 0.05);
   const solarCola = Q.qSolarCola === 'si';
   // the nose's panel (as the Aptera's, on its bonnet): from just ahead of the windscreen forwards over the top of the
   // nose, stopping where the nose starts turning down to its tip (half way from the front axle), on the top of the
@@ -376,7 +392,8 @@ export function crearModeloBasculante(P: Parametros) {
   const thB = F.thCintura, thR = F.thVentana, thK = F.thBajos;
   const segTh: [number, number, number][] = [[-Math.PI / 2, thK, 8], [thK, 0, 16], [0, thB, 10], [thB, thR, 12], [thR, Math.PI / 2, 10], [Math.PI / 2, Math.PI - thR, 10], [Math.PI - thR, Math.PI - thB, 12], [Math.PI - thB, Math.PI, 10], [Math.PI, Math.PI - thK, 16], [Math.PI - thK, 1.5 * Math.PI, 8]];
   const ths: number[] = [];
-  for (const [a, b, n] of segTh) for (let j = 0; j < n; j++) ths.push(a + (b - a) * j / n);
+  // (the Smera's windows and door are drawn on the skin by height, not by angle: a finer grid for clean edges)
+  for (const [a, b, n] of segTh) for (let j = 0; j < (smera ? 2 * n : n); j++) ths.push(a + (b - a) * j / (smera ? 2 * n : n));
   ths.push(1.5 * Math.PI);
   // (the nose's dark tip, `faroX`: shorter when the nose is the wide one round the wheels, else it is most of its front)
   const nudos = [...(solarMorro ? [xSM0, xSM1] : []), xn, xn - faroX, xn - faroX - FARO_W, xWs, ...(conSolar ? [xS0, xS1] : []), xCup, ...(solarCola ? [xCup - 0.05, xt + 0.10] : []), arco.x + arco.rx, arco.x - arco.rx, ...(arcoDel ? [arcoDel.x + arcoDel.rx, arcoDel.x - arcoDel.rx] : []), xt + PILOTO_X1, xt + PILOTO_X0, xt]
@@ -385,7 +402,7 @@ export function crearModeloBasculante(P: Parametros) {
   for (let k = 0; k < nudos.length - 1; k++) {
     const a = nudos[k], b = nudos[k + 1], Lseg = a - b; if (Lseg < 1e-4) continue;
     const enArco = (a <= arco.x + arco.rx + 1e-9 && b >= arco.x - arco.rx - 1e-9) || (!!arcoDel && a <= arcoDel.x + arcoDel.rx + 1e-9 && b >= arcoDel.x - arcoDel.rx - 1e-9);
-    const n = Math.max(1, Math.ceil(Lseg / (enArco ? 0.008 : 0.012)));
+    const n = Math.max(1, Math.ceil(Lseg / (enArco || smera ? 0.007 : 0.012)));
     for (let i = 0; i < n; i++) {
       // the first segments (the nose cap) cluster towards the tip, where the section shrinks fast
       const t = i / n, u = k === 0 ? 1 - Math.cos(t * Math.PI / 2) : t;
@@ -393,7 +410,30 @@ export function crearModeloBasculante(P: Parametros) {
     }
   }
   xs.push(xt);
+  // ── the Smera's skin, by where each point is (side view and how much it faces sideways)
+  const polS = det ? { ventana: det.ventana, ventanaTras: det.ventanaTras, pilarB: mapearPoligono(mapa!, [[-1.33, 1.13], [-1.392, 1.15], [-1.392, 1.364], [-1.336, 1.351]]), puerta: det.puerta } : null;
+  const yPilarTop = det ? mapa!.y(1.362) : 0, yLuneta = det ? mapa!.y(1.03) : 0;
+  const xPilarEn = (y: number) => !det ? 0 : y >= yPilarTop ? det.techoIni : det.pilarX(y);
+  const zonaSmera = (x: number, th: number): ZonaPiel => {
+    const f = F.frame(x), p = F.sec(f, th), y = p[1], az = Math.abs(p[2]), lado = az > 0.55 * f.hw;
+    if (!det || !polS) return 'carroceria';
+    // (the rear window: between the two C-pillars, not seen from the side, where the fins are)
+    if (x < det.lunetaX && y > yLuneta && az < 0.62 * f.hw) return solarCola ? 'solar' : 'cristal';
+    if (y >= det.capoAlto && x > xPilarEn(y)) return 'cristal';
+    if (y >= det.mascaraBaja && y < det.capoAlto && x > xPilarEn(det.capoAlto) && az < 0.5 * f.hw) return 'bajos';
+    if (lado && (dentroPoligono(polS.ventana, x, y) || dentroPoligono(polS.ventanaTras, x, y))) return 'cristal';
+    if (lado && dentroPoligono(polS.pilarB, x, y)) return 'bajos';
+    if (conSolar && !lado && x < det.techoIni - 0.04 && x > det.lunetaX + 0.03 && y > yPilarTop - 0.02) return 'solar';
+    return 'carroceria';
+  };
+  /** The Smera's doors: the cells inside the door's outline on each side (+1 right, −1 left, 0 none). */
+  const enPuerta = (x: number, th: number): 0 | 1 | -1 => {
+    if (!polS) return 0;
+    const f = F.frame(x), p = F.sec(f, th);
+    return Math.abs(p[2]) > 0.3 * f.hw && dentroPoligono(polS.puerta, x, p[1]) ? (p[2] > 0 ? 1 : -1) : 0;
+  };
   const zona = (x: number, th: number): ZonaPiel => {
+    if (smera) return zonaSmera(x, th);
     const t = ((th + Math.PI / 2) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI / 2;   // into [−π/2, 3π/2)
     const vientre = t < thK || t > Math.PI - thK;
     if (x > xn - faroX) return 'morro';
@@ -407,7 +447,7 @@ export function crearModeloBasculante(P: Parametros) {
     return 'carroceria';
   };
   /** The canopy that lifts (glass, solar roof and their frame): the cells between the windscreen's foot and the windows' end, above the belt. */
-  const enCupula = (x: number, th: number) => { const t = ((th + Math.PI / 2) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI / 2; return x <= xWs + 1e-9 && x >= xCup - 1e-9 && t >= thB - 1e-9 && t <= Math.PI - thB + 1e-9; };
+  const enCupula = (x: number, th: number) => { if (smera) return false; const t = ((th + Math.PI / 2) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI / 2; return x <= xWs + 1e-9 && x >= xCup - 1e-9 && t >= thB - 1e-9 && t <= Math.PI - thB + 1e-9; };
   const bisagra: P3 = [xWs, F.techo(xWs) - 0.01, 0];
 
   // ── trims (black rubber lines) along the canopy's edges, the A-pillars and the arches' lips; the light bars' ends
@@ -415,11 +455,65 @@ export function crearModeloBasculante(P: Parametros) {
   const linea = (n: number, f: (t: number) => P3) => Array.from({ length: n + 1 }, (_, i) => f(i / n));
   const xTechoIni = xWs - D.largoParabrisas;
   const lineas: P3[][] = [];
+  // the Smera's: along the door's and the windows' outlines on the side, the windscreen's foot and top across the front
+  const ladoEn = (x: number, y: number, s: number, off = 0.003): P3 | null => { const z = F.ladoZ(x, y); return Number.isFinite(z) ? [x, y, s * (z + off)] : null; };
+  const contorno = (pol: [number, number][], s: number, n = 24) => {
+    const pts: P3[] = [];
+    for (let i = 0; i <= pol.length; i++) {
+      const a = pol[i % pol.length], b = pol[(i + 1) % pol.length];
+      if (i === pol.length) break;
+      for (let k = 0; k < n; k++) { const u = k / n, q = ladoEn(a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u, s); if (q) pts.push(q); }
+    }
+    if (pts.length) pts.push(pts[0]);
+    return pts;
+  };
+  // the wells' inner edges: where the cut meets the inner wall's plane, along the belly's sides (the opening's edge
+  // seen from below and from the front: without a trim the cells' steps show there)
+  const bordeDentro = (x: number, zIn: number, yMax: number): number | null => {
+    const f = F.frame(x); if (!(f.hw > zIn)) return null;
+    let lo = f.bot, hi = Math.min(f.yc, yMax); if (hi <= lo) return null;
+    const w = (y: number) => F.ladoZ(x, y);
+    if (!(w(hi) >= zIn)) return null;
+    for (let k = 0; k < 30; k++) { const mid = (lo + hi) / 2, v = w(mid); if (Number.isFinite(v) && v >= zIn) hi = mid; else lo = mid; }
+    return hi;
+  };
+  /** And on the upper half, where the opening reaches above the waist (the nose's sides between the wells). */
+  const bordeArriba = (x: number, zIn: number, yMax: number): number | null => {
+    const f = F.frame(x); if (!(f.hw > zIn) || yMax <= f.yc) return null;
+    const w = (y: number) => F.ladoZ(x, y);
+    if (w(yMax) >= zIn) return null;
+    let lo = f.yc, hi = yMax;
+    for (let k = 0; k < 30; k++) { const mid = (lo + hi) / 2, v = w(mid); if (Number.isFinite(v) && v >= zIn) lo = mid; else hi = mid; }
+    return lo;
+  };
+  if (smera && pasoDel && arcoDel) for (const s of [1, -1]) {
+    const pts: P3[] = [];
+    for (let i = 0; i <= 60; i++) { const x = arcoDel.x - arcoDel.rx + 2 * arcoDel.rx * i / 60, zi = pasoDel.zIn(x), y = bordeDentro(x, zi, yAbreDel(x)); if (y != null) pts.push([x, y, s * (zi + 0.002)]); }
+    if (pts.length > 3) lineas.push(pts);
+    const alto: P3[] = [];
+    for (let i = 0; i <= 60; i++) { const x = arcoDel.x - arcoDel.rx + 2 * arcoDel.rx * i / 60, zi = pasoDel.zIn(x), y = bordeArriba(x, zi, yAbreDel(x)); if (y != null) alto.push([x, y, s * (zi + 0.002)]); }
+    if (alto.length > 3) lineas.push(alto);
+  }
+  if (smera) for (const s of [1, -1]) {
+    const pts: P3[] = [];
+    for (let i = 0; i <= 50; i++) { const x = arco.x - arco.rx + 2 * arco.rx * i / 50, y = bordeDentro(x, arco.zIn, yArco(x)); if (y != null) pts.push([x, y, s * (arco.zIn + 0.002)]); }
+    if (pts.length > 3) lineas.push(pts);
+  }
+  if (det && polS) {
+    for (const s of [1, -1]) for (const pol of [polS.puerta, polS.ventana, polS.ventanaTras]) { const c = contorno(pol, s); if (c.length > 3) lineas.push(c); }
+    // the windscreen's foot: across the front at its height, from one A-pillar round the nose to the other
+    const xP = xPilarEn(det.capoAlto), pie: P3[] = [];
+    let xF = xP; while (xF < xn && F.techo(xF) > det.capoAlto) xF += 0.005;
+    for (const s of [-1, 1]) for (let i = 0; i <= 40; i++) { const u = s < 0 ? i / 40 : 1 - i / 40, x = xP + (xF - xP) * u, q = ladoEn(x, det.capoAlto, s); if (q) pie.push(q); }
+    if (pie.length > 3) lineas.push(pie);
+    // its top (the roof's front) and the rear window's top, across the roof
+    for (const xc of [det.techoIni, det.lunetaX]) { const f = F.frame(xc), tope: P3[] = []; for (let i = 0; i <= 48; i++) { const q = F.sec(f, Math.PI * i / 48, 0.003); if (q[1] > yPilarTop - 0.03) tope.push(q); } if (tope.length > 3) lineas.push(tope); }
+  }
   for (const s of [1, -1]) {
     const th = (t: number) => (s > 0 ? t : Math.PI - t);
-    lineas.push(linea(60, u => sobre(xWs + (xCup - xWs) * u, th(thB))));                                    // the belt
-    lineas.push(linea(40, u => sobre(xTechoIni + 0.10 * D.largoParabrisas + (xCup - xTechoIni - 0.10 * D.largoParabrisas) * u, th(thR))));   // the roof rail
-    lineas.push(linea(30, u => sobre(xWs - 0.02 - 0.85 * D.largoParabrisas * u, th(thB + (thR - thB) * Math.pow(u, 0.8)))));   // the A-pillar, raked back
+    if (!smera) lineas.push(linea(60, u => sobre(xWs + (xCup - xWs) * u, th(thB))));                                    // the belt
+    if (!smera) lineas.push(linea(40, u => sobre(xTechoIni + 0.10 * D.largoParabrisas + (xCup - xTechoIni - 0.10 * D.largoParabrisas) * u, th(thR))));   // the roof rail
+    if (!smera) lineas.push(linea(30, u => sobre(xWs - 0.02 - 0.85 * D.largoParabrisas * u, th(thB + (thR - thB) * Math.pow(u, 0.8)))));   // the A-pillar, raked back
     // the rear arch's lip
     const pts: P3[] = [];
     for (let i = 0; i <= 40; i++) {
@@ -437,8 +531,8 @@ export function crearModeloBasculante(P: Parametros) {
       if (pd.length > 2) lineas.push(pd);
     }
   }
-  lineas.push(linea(40, u => sobre(xWs, thB + (Math.PI - 2 * thB) * u)), linea(40, u => sobre(xCup, thB + (Math.PI - 2 * thB) * u)));
-  if (conSolar) lineas.push(linea(30, u => sobre(xS0, thR + (Math.PI - 2 * thR) * u, 0.004)), linea(30, u => sobre(xS1, thR + (Math.PI - 2 * thR) * u, 0.004)));
+  if (!smera) lineas.push(linea(40, u => sobre(xWs, thB + (Math.PI - 2 * thB) * u)), linea(40, u => sobre(xCup, thB + (Math.PI - 2 * thB) * u)));
+  if (conSolar && !smera) lineas.push(linea(30, u => sobre(xS0, thR + (Math.PI - 2 * thR) * u, 0.004)), linea(30, u => sobre(xS1, thR + (Math.PI - 2 * thR) * u, 0.004)));
   // the nose's and the tail's panels framed as the roof's
   const bandaS = (x0: number, x1: number, a: number) => {
     const b = Math.PI - a;
@@ -455,10 +549,14 @@ export function crearModeloBasculante(P: Parametros) {
   const pedal: [number, number] = [0.02 + L('qPedX'), 0.38 + L('qPedY')];
   // the steering wheel (a yoke) ahead of the pilot's chest, its rim leaning back with the rider
   const hombroPil = puntosReclinado(xPil, yPil, recPil, pedal).S;
-  const volante = { c: [hombroPil[0] + 0.40 + L('qVolX'), hombroPil[1] - 0.05 + L('qVolY')] as [number, number], r: 0.15, inc: (25 + recPil * 0.4) * Math.PI / 180 };
+  // (sitting up, as in the Smera, a round wheel lower and nearer, in front of the chest)
+  const volante = smera
+    ? { c: [hombroPil[0] + 0.32 + L('qVolX'), hombroPil[1] - 0.22 + L('qVolY')] as [number, number], r: 0.17, inc: (60 - recPil * 0.6) * Math.PI / 180 }
+    : { c: [hombroPil[0] + 0.40 + L('qVolX'), hombroPil[1] - 0.05 + L('qVolY')] as [number, number], r: 0.15, inc: (25 + recPil * 0.4) * Math.PI / 180 };
   // the passenger's feet on two footrests beside the pilot's seat, outside it (seat 21 cm off the centre line, a foot 5 cm)
-  const piesPas: [number, number] = [xPil + 0.08, sueloIn + 0.14];
-  const ANCHO_PIERNAS_PAS: [number, number, number] = [0.13, 0.27, 0.29];
+  // (in the Smera the passenger sits higher, his feet on the floor beside a slimmer driver's seat, where the body is narrower)
+  const piesPas: [number, number] = [xPil + 0.08, sueloIn + (smera ? 0.22 : 0.14)];
+  const ANCHO_PIERNAS_PAS: [number, number, number] = smera ? [0.12, 0.19, 0.27] : [0.13, 0.27, 0.29];
   const occTalla = (piloto: boolean, k = 1) => piloto
     ? puntosReclinado(xPil, yPil, recPil, pedal, k, { c: volante.c, ancho: volante.r * 0.92 }, [0.09, 0.075, 0.10])
     : puntosReclinado(xPas, yPas, recPas, piesPas, k, null, ANCHO_PIERNAS_PAS);
@@ -471,7 +569,7 @@ export function crearModeloBasculante(P: Parametros) {
     const cab: [number, number] = [o.S[0] + dh[0] * 0.30 + n[0] * bk, o.S[1] + dh[1] * 0.30 + n[1] * bk];
     // (the passenger's is 30 cm, a velomobile shell's width: its backrest stands between the rear wheel wells, which
     // come in to 18 cm off the centre line when the wheels swing at full lean)
-    return { contorno: [frente, bajo, at(-0.02, bk), at(0.55, bk), cab] as [number, number][], ancho: piloto ? 0.42 : 0.30, grosor: 0.05 };
+    return { contorno: [frente, bajo, at(-0.02, bk), at(0.55, bk), cab] as [number, number][], ancho: piloto ? (smera ? 0.36 : 0.42) : 0.30, grosor: 0.05 };
   };
 
   // ── the battery: under the pilot's thighs (between his seat and his heels), then under the passenger's seat
@@ -500,6 +598,8 @@ export function crearModeloBasculante(P: Parametros) {
     const c0 = cajaEn('Paquete entre las ruedas traseras, bajo el respaldo del pasajero', x0, x1, alto);
     if (c0) cajas.push(c0);
   }
+  // 1b. the Smera's: under the driver's seat, as the real car's (techno-science.net), between the floor and the cushion
+  if (smera) { const c = cajaEn('Paquete bajo el asiento del piloto', xPil - 0.12, xPil + 0.22, Math.max(0.03, yPil - 0.03 - sueloIn)); if (c) cajas.push(c); }
   // 2. under the pilot's thighs, where the body is already full width (ahead of that the front fairings narrow it)
   {
     // (it ends where the floor rails start closing in towards the nose)
@@ -535,11 +635,12 @@ export function crearModeloBasculante(P: Parametros) {
     tubos.push(tubo(`Torre trasera ${s > 0 ? 'der.' : 'izq.'}`, pts[0], [xTorreT, ySup + 0.03, s * 0.05]));
     // the hoop behind the pilot's back, up to the belt
     const xa = xPil - 0.42, ya = F.frame(xa).yc + (F.techo(xa) - F.frame(xa).yc) * D.cintura - 0.03, za = (F.ladoZ(xa, ya) || 0.3) - 0.035;
-    tubos.push(tubo(`Arco ${s > 0 ? 'der.' : 'izq.'}`, [xa + 0.06, yRiel, s * zRiel], [xa, ya, s * za]));
+    tubos.push(tubo(`Arco ${s > 0 ? 'der.' : 'izq.'}`, [xa + 0.06, yRiel, s * zRielEn(xa + 0.06)], [xa, ya, s * za]));
   }
   tubos.push(tubo('Travesaño delantero', [0.04, yRiel, -zNariz], [0.04, yRiel, zNariz]));
-  tubos.push(tubo('Travesaño bajo el piloto', [xPil + 0.10, yRiel, -zRiel], [xPil + 0.10, yRiel, zRiel]));
-  tubos.push(tubo('Travesaño bajo el pasajero', [xPas + 0.05, yRiel, -zRiel], [xPas + 0.05, yRiel, zRiel]));
+  // (from rail to rail where they are: where the belly is narrow they come in with it)
+  tubos.push(tubo('Travesaño bajo el piloto', [xPil + 0.10, yRiel, -zRielEn(xPil + 0.10)], [xPil + 0.10, yRiel, zRielEn(xPil + 0.10)]));
+  tubos.push(tubo('Travesaño bajo el pasajero', [xPas + 0.05, yRiel, -zRielEn(xPas + 0.05)], [xPas + 0.05, yRiel, zRielEn(xPas + 0.05)]));
   { const z0 = Math.abs(tubos[0].a[2]); tubos.push(tubo('Travesaño trasero', [xTorreT, yRiel, -z0], [xTorreT, yRiel, z0])); }
   { const xa = xPil - 0.42, ya = F.frame(xa).yc + (F.techo(xa) - F.frame(xa).yc) * D.cintura - 0.03, za = (F.ladoZ(xa, ya) || 0.3) - 0.035; tubos.push(tubo('Arco: travesaño de arriba', [xa, ya, -za], [xa, ya, za])); }
   tubos.push(tubo('Torre delantera: travesaño', [0.0, ySup + 0.03, -0.045], [0.0, ySup + 0.03, 0.045]));
@@ -560,7 +661,8 @@ export function crearModeloBasculante(P: Parametros) {
   const anchoPods = pod ? 2 * (LkF + eF + pod.hz(0)) + 0.01 : 0;
   // (the body's widest: its own width, or, with the wheels in the nose, the nose round them)
   let anchoCuerpo = D.W; for (let x = xn; x >= xt; x -= 0.01) anchoCuerpo = Math.max(anchoCuerpo, 2 * F.frame(x).hw);
-  const anchoTotal = Math.max(anchoCuerpo, anchoPods);
+  // (the Smera's wheels stand out at the sides: its overall width is over them)
+  const anchoTotal = Math.max(anchoCuerpo, anchoPods, smera ? Math.max(aF + eF, aT + eT) * 2 + 0.005 : 0);
   const Lf = xn - xt;
   const Pm: Parametros = { ...P, ...Q, L: Lf, B, W: anchoTotal, H: D.H, clear: D.suelo, track: L('qViaDel'), tiltMax: L('qBascMax') };
   return {
@@ -569,6 +671,7 @@ export function crearModeloBasculante(P: Parametros) {
     via: { del: L('qViaDel'), tras: L('qViaTras') }, ruedas: ruedasR, esquinas, phiMax, giro, giroFuera, yInf, ySup,
     /** The most it leans (°): the «Circuito» section reads it (circuito/datos.ts `fichaDeDiseno`). */
     inclinacionMax: L('qBascMax'),
+    smera, det, mapa, enPuerta,
     enMorro, pasoDel, arcoDel, yArcoDel, yAbreDel, morroAlargado: xn > L('qMorro') + 0.005,
     arco, hueco, rejilla: { xs, ths }, zona, enCupula, bisagra, lineas, xWs, xCup, xS0, xS1, conSolar, solarCola, solarMorro,
     faro: { x: xn - faroX - FARO_W / 2, thK }, piloto: { x: xt + (PILOTO_X0 + PILOTO_X1) / 2 },
@@ -788,7 +891,7 @@ export function calcularBasculante(m: ModeloBasculante, ar: ReturnType<typeof ar
     for (let t = 0.05; t <= 0.45; t += 0.05) { const p: [number, number] = [oq.H[0] + oq.d[0] * t, oq.H[1] + oq.d[1] * t]; peor = Math.min(peor, -dist(p) - 0.12 - 0.12); }
     c('interior', 'Respaldo del piloto al vientre del pasajero', peor, 0.03);
     // the passenger's knees round the pilot's backrest (seat half-width 21 cm, knee 6 cm round)
-    c('interior', 'Rodillas del pasajero a los lados del asiento del piloto', (oq.anchoPiernas?.[2] ?? 0.27) - 0.06 - 0.21, 0.0);
+    c('interior', 'Rodillas del pasajero a los lados del asiento del piloto', (oq.anchoPiernas?.[2] ?? 0.27) - 0.06 - m.asientos[0].ancho / 2, 0.0);
     c('interior,carroceria', 'Rodillas del pasajero a los costados', (F.ladoZ(oq.K[0], oq.K[1]) || 0) - esp - ((oq.anchoPiernas?.[2] ?? 0.27) + 0.065), 0.01);
     c('interior,carroceria', 'Pies del pasajero dentro de la carrocería', dentro(F, oq.F[0] + 0.10, oq.F[1] - 0.05, (oq.anchoPiernas?.[1] ?? 0.25) + 0.05), 0.01);
   }
@@ -849,9 +952,9 @@ export function calcularBasculante(m: ModeloBasculante, ar: ReturnType<typeof ar
   // ── the front wheels in the nose: the arch's roof under the skin, the pilot's feet and knees clear of the wells
   if (m.pasoDel && m.arcoDel) {
     const a = m.arcoDel, pd = m.pasoDel;
-    // the tyre in every position, above the opening, inside the skin (its points already carry the gap)
-    let dentroR = 9; for (const p of pd.rueda) dentroR = Math.min(dentroR, dentro(F, p[0], p[1], p[2]));
-    c('rodaje,carroceria', `Rueda delantera dentro del morro (girada ${lock}°, inclinada ${grados}° y hundida)`, dentroR, -0.005);
+    // the tyre in every position, above the opening, inside the skin (its points already carry the gap); the Smera's
+    // wheels show in their wells, as the real car's, so only the well's roof under the bonnet is checked there
+    if (!m.smera) { let dentroR = 9; for (const p of pd.rueda) dentroR = Math.min(dentroR, dentro(F, p[0], p[1], p[2])); c('rodaje,carroceria', `Rueda delantera dentro del morro (girada ${lock}°, inclinada ${grados}° y hundida)`, dentroR, -0.005); }
     c('rodaje,carroceria', 'Techo del paso de rueda delantero bajo el capó', F.techo(a.x) - (a.yTop + 0.02), 0.01);
     // the feet (the pedals 7.5 cm off the centre line, a shoe 3.5 cm), heel to toe, beside the wells' inner walls
     const zp = (op.anchoPiernas?.[1] ?? 0.075) + 0.035;
@@ -872,7 +975,9 @@ export function calcularBasculante(m: ModeloBasculante, ar: ReturnType<typeof ar
   // the passenger's hips clear of the wheel well's inner wall (pelvis 19 cm off the centre line and the seat's shell 2 cm)
   {
     const a = m.arco, zA = F.ladoZ(a.x, a.yTop + 0.02);
-    c('rodaje,carroceria', `Paso de rueda trasero cubierto (rueda inclinada ${grados}° y hundida)`, (Number.isFinite(zA) ? zA : 0) - a.zOut, 0.01);
+    // (the Smera's rear wheels stand out at the sides, as the real car's: its check is the arch's top under the body)
+    if (m.smera) c('rodaje,carroceria', `Paso de rueda trasero bajo la carrocería (rueda inclinada ${grados}° y hundida)`, F.techo(a.x) - (a.yTop + 0.02), 0.01);
+    else c('rodaje,carroceria', `Paso de rueda trasero cubierto (rueda inclinada ${grados}° y hundida)`, (Number.isFinite(zA) ? zA : 0) - a.zOut, 0.01);
     const solapa = oq.H[0] + 0.12 > a.x - a.rx && oq.H[0] - 0.15 < a.x + a.rx && oq.H[1] < a.yTop;
     c('interior,rodaje', 'Caderas del pasajero al paso de rueda trasero', solapa ? a.zIn - 0.015 - 0.21 : 0.10, 0.015);
     // the passenger's seat (its outline, 2.5 cm thick, half its width plus the edge's 1 cm) beside the wheel wells' inner walls
@@ -894,7 +999,7 @@ export function calcularBasculante(m: ModeloBasculante, ar: ReturnType<typeof ar
         const w = F.ladoZ(x, y); lado = Math.min(lado, (Number.isFinite(w) ? w : 0) - zo);
       }
     }
-    c('rodaje,carroceria', 'Rueda trasera bajo la carrocería, fuera del hueco de su paso', lado > 8 ? 0.1 : lado, 0.01);
+    if (!m.smera) c('rodaje,carroceria', 'Rueda trasera bajo la carrocería, fuera del hueco de su paso', lado > 8 ? 0.1 : lado, 0.01);
   }
   // ── the tyres: how far they lean on their tread, and their load (everyone on board and the luggage)
   {

@@ -20,6 +20,8 @@
 import * as THREE from 'three';
 import { CELULA, type P3, type PuntosOcupante } from '../geometria';
 import { ANGULO_CUPULA_B, esquinaEn, type Esquina, type ModeloBasculante } from '../geometriaBasculante';
+import { dentroPoligono } from './smera';
+import { construirDetallesSmera } from './smera3d';
 
 type V3 = [number, number, number];
 export type CapaB = 'carenado' | 'cristales' | 'solar' | 'chasis' | 'suspension' | 'direccion' | 'ruedas' | 'asientos' | 'ocupantes' | 'motor' | 'baterias' | 'transmision';
@@ -70,17 +72,19 @@ function pielDe(m: ModeloBasculante) {
     const a0 = pos[i][j], d0 = pos[i + 1][j + 1], c0: P3 = [(a0[0] + d0[0]) / 2, (a0[1] + d0[1]) / 2, (a0[2] + d0[2]) / 2];
     if (m.hueco(c0)) continue;
     const xc = (xs[i] + xs[i + 1]) / 2, tc = (ths[j] + ths[j + 1]) / 2;
-    const clave = `${m.enCupula(xc, tc) ? 'cupula' : 'fijo'}|${m.zona(xc, tc)}`;
+    // (the Smera's doors: their cells go to each door's own group, which turns on its hinge)
+    const ep = m.smera ? m.enPuerta(xc, tc) : 0;
+    const clave = `${m.enCupula(xc, tc) ? 'cupula' : ep ? `puerta${ep}` : 'fijo'}|${m.zona(xc, tc)}`;
     let c = cubos.get(clave); if (!c) { c = { p: [], n: [], uv: [], i: [], mapa: new Map() }; cubos.set(clave, c); }
     const a = meter(c, i, j), a1 = meter(c, i, j + 1), b = meter(c, i + 1, j), b1 = meter(c, i + 1, j + 1);
     if (i === 0) c.i.push(a1, b1, b); else c.i.push(a, a1, b, a1, b1, b);
   }
-  const out: { cupula: boolean; zona: string; geo: THREE.BufferGeometry }[] = [];
+  const out: { cupula: boolean; puerta: 0 | 1 | -1; zona: string; geo: THREE.BufferGeometry }[] = [];
   for (const [clave, c] of cubos) {
     const [donde, zona] = clave.split('|');
     const g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.Float32BufferAttribute(c.p, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(c.n, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(c.uv, 2));
-    g.setIndex(c.i); out.push({ cupula: donde === 'cupula', zona, geo: g });
+    g.setIndex(c.i); out.push({ cupula: donde === 'cupula', puerta: donde === 'puerta1' ? 1 : donde === 'puerta-1' ? -1 : 0, zona, geo: g });
   }
   // the tail's end face: a flat cap closing the edge
   const ult = pos[nu - 1], cx = xs[nu - 1], cy = ult.reduce((s, p) => s + p[1], 0) / ult.length;
@@ -88,7 +92,7 @@ function pielDe(m: ModeloBasculante) {
   for (let j = 0; j < nv; j++) { cap.push(...ult[j]); normales.push(-1, 0, 0); }
   for (let j = 1; j < nv; j++) idx.push(0, j + 1, j);
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(cap, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(normales, 3)); g.setIndex(idx);
-  out.push({ cupula: false, zona: 'tapa', geo: g });
+  out.push({ cupula: false, puerta: 0, zona: 'tapa', geo: g });
   return out;
 }
 
@@ -136,29 +140,48 @@ export function construirBasculante(G: Record<CapaB, THREE.Group>, puertasG: Map
   const F = m.F;
   // ── the skin, the canopy apart on its hinge at the windscreen's foot
   const pivotes = PIVOTES_CUPULA_B.map(n => { const p = new THREE.Group(); p.name = n; p.position.set(...m.bisagra); p.userData = { eje: new THREE.Vector3(0, 0, 1), angulo: ANGULO_CUPULA_B * Math.PI / 180, tipo: 'puerta' }; return p; });
-  const MAT: Record<string, Mat> = { carroceria: M.body, cristal: M.glass, solar: M.solar, bajos: M.bajos, morro: M.morro, faro: M.faro, piloto: M.piloto, tapa: M.bajos };
+  const MAT: Record<string, Mat> = { carroceria: M.body, cristal: M.glass, solar: M.solar, bajos: M.bajos, morro: M.morro, faro: M.faro, piloto: M.piloto, tapa: m.smera ? M.body : M.bajos };
+  // the Smera's two doors, hinged at their front edge on a vertical axis, opening outwards 65°
+  const puertasS = new Map<1 | -1, THREE.Group>();
+  if (m.smera && m.det) {
+    const xh = Math.max(...m.det.puerta.map(p => p[0])), yh = (m.det.puerta[0][1] + m.det.puerta[1][1]) / 2, zh = F.ladoZ(xh, yh);
+    for (const s of [1, -1] as const) {
+      const p = new THREE.Group(); p.name = `puerta-smera-${s > 0 ? 'der' : 'izq'}`; p.position.set(xh, 0, s * (Number.isFinite(zh) ? zh : 0.35));
+      p.userData = { eje: new THREE.Vector3(0, 1, 0), angulo: s * 65 * Math.PI / 180, tipo: 'puerta' };
+      puertasS.set(s, p); G.carenado.add(p);
+    }
+    puertasG.set('puertas', [...puertasS.values()]);
+  }
   const CAPA: Record<string, CapaB> = { cristal: 'cristales', solar: 'solar' };
   for (const t of pielDe(m)) {
     const mesh = new THREE.Mesh(t.geo, MAT[t.zona] ?? M.body); mesh.castShadow = true; mesh.receiveShadow = true; mesh.name = `piel-${t.zona}`;
     const capa = CAPA[t.zona] ?? 'carenado';
     if (t.cupula) { const piv = pivotes[capa === 'cristales' ? 1 : capa === 'solar' ? 2 : 0]; mesh.position.set(-m.bisagra[0], -m.bisagra[1], -m.bisagra[2]); piv.add(mesh); }
+    else if (t.puerta && puertasS.get(t.puerta)) { const piv = puertasS.get(t.puerta)!; mesh.position.copy(piv.position).multiplyScalar(-1); piv.add(mesh); }
     else G[capa].add(mesh);
   }
   ([['carenado', 0], ['cristales', 1], ['solar', 2]] as const).forEach(([capa, k]) => { G[capa].add(pivotes[k]); });
-  puertasG.set('cupula', [...pivotes]);
+  if (!m.smera) puertasG.set('cupula', [...pivotes]);
   // rubber trims along the canopy's edges, the A-pillars and the arches' lips (they hide the cells' steps); the ones
   // on the canopy's edges rise with it
   for (const l of m.lineas) {
     if (l.length < 2) continue;
-    const enCup = l.every(p => p[0] <= m.xWs + 1e-6 && p[0] >= m.xCup - 1e-6 && p[1] > F.frame(p[0]).yc);
+    const enCup = !m.smera && l.every(p => p[0] <= m.xWs + 1e-6 && p[0] >= m.xCup - 1e-6 && p[1] > F.frame(p[0]).yc);
+    // (the Smera's window trims are on the doors: they open with them; the door's own outline stays, as its seal)
+    const ladoPuerta = m.smera && m.det && l.every(p => dentroPoligono(m.det!.ventana, p[0], p[1]) || Math.min(...m.det!.ventana.map(v => Math.hypot(v[0] - p[0], v[1] - p[1]))) < 0.02) ? Math.sign(l[0][2]) as 1 | -1 : 0;
     const curva = new THREE.CatmullRomCurve3(l.map(p => new THREE.Vector3(...p)));
     const mesh = new THREE.Mesh(new THREE.TubeGeometry(curva, Math.max(12, l.length * 2), 0.0065, 6, false), M.bajos);
-    if (enCup) { mesh.position.set(-m.bisagra[0], -m.bisagra[1], -m.bisagra[2]); pivotes[0].add(mesh); } else G.carenado.add(mesh);
+    // (the door's outline: a seal on the body and the same edge on the door, which hides its cells' steps when open)
+    const contornoPuerta = m.smera && m.det && l.length > 20 && l.every(p => Math.min(...m.det!.puerta.map((v, i, a) => { const w = a[(i + 1) % a.length], dx = w[0] - v[0], dy = w[1] - v[1], t = Math.max(0, Math.min(1, ((p[0] - v[0]) * dx + (p[1] - v[1]) * dy) / (dx * dx + dy * dy || 1))); return Math.hypot(v[0] + dx * t - p[0], v[1] + dy * t - p[1]); })) < 0.01);
+    if (contornoPuerta) { const piv = puertasS.get(Math.sign(l[0][2]) as 1 | -1); if (piv) { const copia = mesh.clone(); copia.position.copy(piv.position).multiplyScalar(-1); piv.add(copia); } }
+    if (enCup) { mesh.position.set(-m.bisagra[0], -m.bisagra[1], -m.bisagra[2]); pivotes[0].add(mesh); }
+    else if (ladoPuerta && puertasS.get(ladoPuerta)) { const piv = puertasS.get(ladoPuerta)!; mesh.position.copy(piv.position).multiplyScalar(-1); piv.add(mesh); }
+    else G.carenado.add(mesh);
   }
   // the inside of the canopy's roof (a light lining under the solar panel), and the rear arches' liners
   {
     const xs: number[] = []; for (let x = m.xS0; x >= m.xS1 - 1e-9; x -= (m.xS0 - m.xS1) / 24) xs.push(x);
-    if (m.conSolar) {
+    if (m.conSolar && !m.smera) {
       const pos: number[] = [], idx: number[] = [], nt = 20, t0 = F.thVentana, t1 = Math.PI - F.thVentana;
       for (const x of xs) for (let j = 0; j <= nt; j++) { const q = F.sec(F.frame(x), t0 + (t1 - t0) * j / nt, -0.01); pos.push(q[0] - m.bisagra[0], q[1] - m.bisagra[1], q[2] - m.bisagra[2]); }
       for (let i = 0; i < xs.length - 1; i++) for (let j = 0; j < nt; j++) { const a = i * (nt + 1) + j, b = a + nt + 1; idx.push(a, b, a + 1, a + 1, b, b + 1); }
@@ -202,14 +225,15 @@ export function construirBasculante(G: Record<CapaB, THREE.Group>, puertasG: Map
     }
   }
   // the light bars' ends: the indicators (amber, the viewer blinks them), and the cameras on the A-pillars (as the Aptera's)
-  for (const s of [1, -1]) {
+  // (not on the Smera body: it has its own lamps, and no cameras)
+  if (!m.smera) for (const s of [1, -1]) {
     const thF = s > 0 ? m.faro.thK + 0.08 : Math.PI - m.faro.thK - 0.08;
     const pF = F.sec(F.frame(m.faro.x - 0.004), thF, 0.002), mt = s > 0 ? M.intermitenteD : M.intermitenteI;
     A.sphere(G.carenado, pF, 0.018, mt, [0.9, 0.55, 1.3]);
     const pT = F.sec(F.frame(m.piloto.x), s > 0 ? 0.05 : Math.PI - 0.05, 0.002);
     A.sphere(G.carenado, pT, 0.016, mt, [0.7, 0.6, 1.2]);
   }
-  for (const c of m.camaras) {
+  if (!m.smera) for (const c of m.camaras) {
     const cap = A.sphere(G.carenado, [c[0], c[1] + 0.01, c[2] + Math.sign(c[2]) * 0.035], 0.028, M.bajos, [1.8, 0.75, 0.75]);
     cap.rotation.y = Math.sign(c[2]) * 0.15;
     A.tube(G.carenado, [c[0] + 0.01, c[1], c[2]], [c[0], c[1] + 0.01, c[2] + Math.sign(c[2]) * 0.03], 0.012, M.bajos);
@@ -259,7 +283,8 @@ export function construirBasculante(G: Record<CapaB, THREE.Group>, puertasG: Map
   // ── steering: the yoke, its column down to the rack, the rack across, the tie rods (they move: `posarBasculante`)
   {
     const v = m.volante, c: V3 = [v.c[0], v.c[1], 0];
-    const aro = new THREE.Mesh(new THREE.TorusGeometry(v.r, 0.016, 12, 48, Math.PI * 1.55), M.black);
+    // (the Smera: a round wheel, as a car's)
+    const aro = new THREE.Mesh(new THREE.TorusGeometry(v.r, m.smera ? 0.018 : 0.016, 12, 48, m.smera ? Math.PI * 2 : Math.PI * 1.55), M.black);
     aro.position.set(...c); aro.rotation.order = 'YXZ'; aro.rotation.y = Math.PI / 2; aro.rotation.x = -v.inc; aro.rotateZ(-Math.PI * 0.275 + Math.PI); aro.castShadow = true; G.direccion.add(aro);
     const barra = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.03, 2 * v.r), M.black); barra.position.set(...c); barra.rotation.z = -v.inc; G.direccion.add(barra);
     A.sphere(G.direccion, c, 0.045, M.carcasa, [0.6, 1, 1]);
@@ -290,6 +315,7 @@ export function construirBasculante(G: Record<CapaB, THREE.Group>, puertasG: Map
   }
   // ── the riders
   if (opc.calidad === 'completa') for (const q of m.plazas) { if (opc.sinPasajero && !q.piloto) continue; A.ocupante(G.ocupantes, A.M as never, { occPts: () => q.pts }, 0, q.piloto); }
+  if (m.smera) construirDetallesSmera(G, M, m, A, puertasS);
   for (const k of Object.keys(G) as CapaB[]) G[k].traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
 }
 

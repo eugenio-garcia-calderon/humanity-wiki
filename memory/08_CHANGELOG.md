@@ -11663,3 +11663,23 @@ Eugenio: «Lo de votar por temas, llámalo así. En el menú y en el título»; 
 - **Selector de temas**: cinco tarjetas con icono, nombre, qué se vota y cuántas medidas llevas; cambia al pasar el ratón (160 ms de espera, solo con ratón), con clic, y con las flechas del teclado (`role="tablist"`).
 - Lo votado se guarda en `localStorage` con una clave nueva (`politica.votar.v2`), porque los valores ya no son posiciones de 0 a 4 sino cantidades; lo de la versión anterior no se arrastra.
 - Comprobado en Chrome sin interfaz a 1360 y 390 px: cambio al pasar el ratón, deslizador con clic y teclado, ejes de los diez gráficos, sin desbordamiento ni errores de JS.
+
+## 2026-11-15 · Réplica del Lumeneo Smera, evaluador de parecido y «Crear editable»
+
+- Eugenio: «mejora el modelo del Lumeneo Smera… recréalo esta vez más fiel a la realidad… que incluso se abran las puertas… Crea un bot que te evalúe la cercanía a la realidad. Haz también el piloto e interior… permite que también bascule. Y a partir de esa réplica permite crear un modelo 3D editable… más alargado, más bajito, el conductor más reclinado, paneles solares en el techo y cola».
+- **Réplica.** El Smera del garaje es ahora el Cuadriciclo Basculante con la carrocería «Como el Lumeneo Smera», con sus líneas calcadas de las fotos de prensa de Lumeneo:
+  - el techo, la panza a 0,29 m, la sección en bañera con el hombro en la cintura, las ventanas, la puerta, los faros, la barra negra, la visera, los pilotos y las ruedas de 0,52 m;
+  - dos puertas que se abren («Abrir puertas»), con sus ventanas y sus manillas;
+  - el conductor y el pasajero sentados casi derechos, volante redondo, asientos;
+  - «Bascular» inclina 25° la cabina y las cuatro ruedas con su paralelogramo; los guardabarros delanteros giran y se inclinan con su rueda.
+- **Crear editable.** El botón nuevo en la tarjeta del Smera del garaje guarda la réplica como diseño propio («Smera editable») y lo abre en el editor.
+  - Con la carrocería del Smera, los deslizadores la estiran sin cambiar su forma: «Largo total», «Morro», «Cola», «Alto total», «Ancho».
+  - Los paneles van en el techo («Paneles en el techo», nuevo) y en la cola (en la luna de atrás).
+  - Ejemplo comprobado: batalla 2,2 m, alto 1,25 m y los dos reclinados a 42–44°. Quedan 2 comprobaciones en rojo por milímetros (la cabeza del pasajero alto y los pies del piloto).
+- **Evaluador.** `scripts/smera-realidad.ts` puntúa de 0 a 100 el parecido de la réplica con la realidad. Hoy da 85.
+  - Medidas publicadas: 18,6 / 20.
+  - Silueta lateral contra la foto: 31,5 / 35. Coincide el 97 % del área, y el contorno cae a 1,4 px (7 mm) de media de los bordes que el programa encuentra en la foto.
+  - Anchos de la foto de frente: 9,8 / 15, con 3,5 cm de error medio.
+  - Cristales: 10,5 / 15.
+  - Comprobaciones: 15 / 15.
+- **Batería.** La réplica lleva 3 kWh, lo que cabe bajo sus asientos con este suelo. El Smera de serie llevaba 9–10 kWh bajo el asiento del conductor.

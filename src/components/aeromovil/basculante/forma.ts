@@ -79,6 +79,18 @@ export interface DimForma {
   yCapo: number; xParabrisas: number; largoParabrisas: number; xCaida: number;
   /** the line's height over the front axle (m), and the points it must pass over besides (x, y; from the wheels in the nose) */
   lineaEje: number; lineaPuntos?: [number, number][];
+  /**
+   * A body drawn from measured lines instead (2026-11-15, the Lumeneo Smera replica, basculante/smera.ts): the roof's
+   * and the belly's height and the half-width along x, as (x, value) points from the nose to the tail; each goes
+   * through a monotone spline (no overshoot between points). The nose cap still closes the front.
+   */
+  perfil?: { techo: [number, number][]; bajos: [number, number][]; ancho: [number, number][]; cintura?: number;
+    /**
+     * A lower half as a bathtub instead of a superellipse (the Smera, from its press front view): from the waist the
+     * side falls as hw − (hw − zb)·u^p (u from 0 at the waist to 1 at the floor) to a flat floor of half-width `zb`;
+     * p < 1 gives a shoulder at the waist, as the car's belt crease.
+     */
+    quilla?: { zb: number; p: number } };
   /** tail: edge height (m), the Aptera curve's exponent, its width (fraction of W), its thickness (m), where the belly starts rising (x, m) */
   yCola: number; curvaCola: number; anchoCola: number; grosorCola: number; xBajosCola: number;
   /** where the belly starts rising towards the nose (x, m) */
@@ -256,7 +268,8 @@ function construirForma(D: DimForma, limite: (x: number) => number, req: { ancho
   const yM = yMorroDe(D, H);
   // (its height over the front axle, the design's; the wheels in the nose may ask for more)
   const morro = lineaMorro(xn, yM, xR0, H, [[0, Math.min(H - 0.02, Math.max(yM + 0.02, D.lineaEje))], ...(D.lineaPuntos ?? [])]);
-  const topRaw = (x: number) => {
+  const perfilTecho = D.perfil ? pchip(...ordenar(D.perfil.techo)) : null;
+  const topRaw = perfilTecho ? (x: number) => perfilTecho(x) : (x: number) => {
     if (x >= xR0) return morro(Math.min(xn, x));
     if (x >= xC) return H;
     const t = Math.min(1, Math.max(0, (xC - x) / (xC - xt)));
@@ -267,12 +280,12 @@ function construirForma(D: DimForma, limite: (x: number) => number, req: { ancho
   const pb: [number, number][] = [[xt, Math.max(suelo + 0.005, yBot)]];
   for (let k = 1; k < 8; k++) { const t = 1 - k / 8, x = xB - (xB - xt) * t; pb.push([x, suelo + (Math.max(suelo + 0.005, yBot) - suelo) * Math.pow(t, 1.7)]); }
   pb.push([xB, suelo], [xBM, suelo], [xBM + 0.55 * (xn - xBM), suelo + 0.30 * (yM - suelo)], [xn, yM]);
-  const botRaw = pchip(...ordenar(pb));
+  const botRaw = D.perfil ? pchip(...ordenar(D.perfil.bajos)) : pchip(...ordenar(pb));
   // ── the half-width in plan: full from xAncho0 to xAncho1, the tail narrowing to its edge, the nose to its zone
   const ph: [number, number][] = [[xt, W / 2 * D.anchoCola]];
   for (let k = 1; k < 8; k++) { const t = 1 - k / 8, x = D.xAncho1 - (D.xAncho1 - xt) * t; ph.push([x, W / 2 * (1 - (1 - D.anchoCola) * Math.pow(t, 1.8))]); }
   ph.push([D.xAncho1, W / 2], [D.xAncho0, W / 2], [D.xAncho0 + 0.5 * (xn - D.xAncho0), W / 2 * (D.anchoMorro + (1 - D.anchoMorro) * 0.45)], [xn, W / 2 * D.anchoMorro]);
-  const hwLinea = pchip(...ordenar(ph));
+  const hwLinea = D.perfil ? pchip(...ordenar(D.perfil.ancho)) : pchip(...ordenar(ph));
   // (likewise from the full width's end forwards, where this line only widens going back; there it is W/2, which the
   // requirement never passes: crearForma widened W to hold it)
   const hwRaw = req ? (x: number) => x >= D.xAncho1 ? Math.max(hwLinea(x), req.ancho(x)) : hwLinea(x) : hwLinea;
@@ -282,11 +295,22 @@ function construirForma(D: DimForma, limite: (x: number) => number, req: { ancho
     const xx = Math.min(xn, Math.max(xt, x)), k = g(xx);
     const top = yM + (topRaw(xx) - yM) * k, bot = yM - (yM - botRaw(xx)) * k;
     const hw = Math.max(0, smin(hwRaw(xx), limite(xx))) * k;
-    return { x: xx, top, bot, hw, yc: bot + (top - bot) * D.centro };
+    // (a measured body keeps its waist at one height, as a car's belt: the nose's low sections are all lower half)
+    const cint = D.perfil?.cintura;
+    return { x: xx, top, bot, hw, yc: cint != null ? Math.min(top - 0.12 * (top - bot), Math.max(bot + 0.2 * (top - bot), cint)) : bot + (top - bot) * D.centro };
   };
+  const quilla = D.perfil?.quilla, TAU = 0.82;
+  /** the bathtub's floor half-width in this section (the nose cap shrinks it with the rest) */
+  const zbDe = (f: Seccion) => quilla ? Math.min(f.hw * 0.9, quilla.zb * Math.min(1, f.hw / Math.max(1e-6, W / 2))) : 0;
   const punto = (f: Seccion, th: number): [number, number] => {
     // (cos(3π/2) is −1.8e−16, not 0: snapped, so the grid's first and last angle are the very same point and the skin closes)
     const c0 = Math.cos(th), s0 = Math.sin(th), c = Math.abs(c0) < 1e-12 ? 0 : c0, s = Math.abs(s0) < 1e-12 ? 0 : s0, arriba = s >= 0, n = arriba ? D.nU : D.nL;
+    if (!arriba && quilla) {
+      // the side down to the floor over the first TAU of the way, then the floor in to the centre line
+      const t = Math.min(1, -s), zb = zbDe(f), hh = f.yc - f.bot, sg = Math.sign(c);
+      if (t <= TAU) { const u = t / TAU; return [sg * (f.hw - (f.hw - zb) * Math.pow(u, quilla.p)), f.yc - hh * u]; }
+      return [sg * zb * (1 - (t - TAU) / (1 - TAU)), f.bot];
+    }
     return [f.hw * spow(c, 2 / n), f.yc + (arriba ? f.top - f.yc : f.yc - f.bot) * spow(s, 2 / n)];
   };
   const sec = (f: Seccion, th: number, off = 0): P3 => {
@@ -300,6 +324,7 @@ function construirForma(D: DimForma, limite: (x: number) => number, req: { ancho
     if (y > f.top || y < f.bot) return NaN;
     const arriba = y >= f.yc, n = arriba ? D.nU : D.nL, hh = arriba ? f.top - f.yc : f.yc - f.bot;
     if (hh <= 1e-9) return f.hw;
+    if (!arriba && quilla) { const u = Math.min(1, (f.yc - y) / hh), zb = zbDe(f); return f.hw - (f.hw - zb) * Math.pow(u, quilla.p); }
     const s = Math.pow(Math.min(1, Math.abs(y - f.yc) / hh), n / 2), c = Math.sqrt(Math.max(0, 1 - s * s));
     return f.hw * Math.pow(c, 2 / n);
   };
