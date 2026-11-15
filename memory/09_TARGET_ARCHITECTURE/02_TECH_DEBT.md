@@ -708,3 +708,9 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
   - The nose wheel's swept width at full lock is an approximation: its width plus 0.7 × its diameter × sin(lock).
 - **Battery.** The battery pack is assumed to run under the laterals' cross-member.
 - **Steering in the viewer.** The fork turns as a group. The steering column is a fixed tube to the fork crown, with no joint drawn.
+
+## 2026-11-15 · The plug-in hybrid has numbers but no parts
+
+- `m.phev` adds masses at a fixed point ahead of the rear axle, and fuel figures from one combined efficiency. Nothing is drawn, and nothing checks that the engine, the planetary gear and the tank fit.
+- Charge-sustaining mode is modelled as constant-speed cruising, with no engine on/off map.
+- Drawing a box per part and adding `cajaDentro` checks: about 2 hours.
