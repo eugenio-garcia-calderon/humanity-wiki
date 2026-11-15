@@ -14,7 +14,7 @@
 // interfaz. Anotado en 02_TECH_DEBT.md.
 import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import * as THREE from 'three';
-import { DoorOpen, PackageOpen, Trash2, X } from 'lucide-react';
+import { DoorOpen, MoveDiagonal, PackageOpen, Trash2, X } from 'lucide-react';
 import { Button, Card } from '../ui/core';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { STLExporter } from 'three/examples/jsm/exporters/STLExporter.js';
@@ -32,6 +32,8 @@ import {
   type Modelo, type ModeloGota, type ModeloA1, type ModeloBala, type ModeloConPiel, type ModeloTriciclo, type Piel, type PuntosOcupante, type Superficie,
 } from './geometria';
 import { anguloFuera, opcionesCabinaTriciclo } from './geometriaTriciclo';
+// ── Cuadriciclo Basculante (2026-11-15): its builder and its lean live in basculante/modelo3d.ts
+import { construirBasculante, cotasBasculante, posarBasculante, type AyudasVisor } from './basculante/modelo3d';
 import { ANGULO_CUPULA, ANGULO_PORTON, PIVOTES_CUPULA, PIVOTE_PORTON, construirCon as construirBalaCon, crearMateriales as materialesBala } from './garaje/balaModelo';
 import { COLOR_ACENTO, COLOR_CARROCERIA, coloresDe } from './coloresCarroceria';
 import { brazosDe } from './garaje/balaMedidas';
@@ -128,6 +130,8 @@ interface Props {
   margenDerecho?: number;
   /** 2026-11-13: the body's paint and its accent (coloresCarroceria.ts); changing them only recolours the materials. */
   colores?: { carroceria: string; acento: string };
+  /** Cuadriciclo Basculante (2026-11-15): bumped (a counter) by «Bascular», which leans the car to its maximum angle each way and back. */
+  bascular?: number;
   /** Otro velomóvil: oculto, comparado (fantasma junto al nuestro) o solo. */
   referencia?: Referencia | null;
   modoRef?: 'no' | 'comparar' | 'sola';
@@ -790,7 +794,7 @@ function accesoriosA1(g: THREE.Object3D, M: Mats, m: ModeloA1) {
  * pivots (`VehiculoGaraje.pivotes`); the viewer turns each one by how open its
  * kind is (0 closed, 1 open), animated like our own car's doors.
  */
-interface AperturaGaraje { p: number; pObj: number; m: number; mObj: number }
+interface AperturaGaraje { p: number; pObj: number; m: number; mObj: number; b: number; bObj: number }
 function colocarPivotesGaraje(obj: THREE.Object3D, def: VehiculoGaraje, a: AperturaGaraje) {
   for (const pv of def.pivotes ?? []) {
     const o = obj.getObjectByName(pv.nombre); if (!o) continue;
@@ -800,6 +804,8 @@ function colocarPivotesGaraje(obj: THREE.Object3D, def: VehiculoGaraje, a: Apert
     // the frame of the opening only shows while it is open (closed, it sits millimetres under the panel)
     if (pv.conHueco) { const h = obj.getObjectByName(pv.conHueco); if (h) h.visible = f > 0; }
   }
+  // a tilting car (2026-11-15, the Lumeneo Smera): its model leans its body, wheels and arms itself
+  def.bascula?.poner(obj, a.b);
 }
 
 /** Cotas exteriores en el suelo y en vertical, con su número en mm. */
@@ -855,6 +861,7 @@ function cotasGaraje(M: Mats, def: { batalla: number; alto: number; ancho: numbe
 
 function cotas(g: THREE.Object3D, M: Mats, m: Modelo, espacio = false) {
   if (m.tipo === 'bala') { cotasBala(g, M, m); return; }
+  if (m.tipo === 'basculante') { const { cota, mm } = herramientasCota(g, M); cotasBasculante(g, m, cota, mm); return; }
   if (m.tipo === 'triciclo') { cotasTriciclo(g, M, m); return; }
   const { cota, mm, etiqueta } = herramientasCota(g, M);
   const P = m.P, y = 0.004, zL = -(P.W / 2 + 0.38), zB = -(P.W / 2 + 0.16);
@@ -1094,6 +1101,13 @@ function construirFijoA1(G: Record<CapaId, THREE.Group>, M: Mats, m: ModeloA1) {
 function construirMovil(G: Record<CapaId, THREE.Group>, M: Mats, m: Modelo, coche: THREE.Group, angulo: number) {
   // the Bala does not lean and has no moving suspension drawn: its wheels are built with the rest (construirBala)
   if (m.tipo === 'bala') { coche.rotation.x = 0; return; }
+  // ── Cuadriciclo Basculante (2026-11-15): `angulo` is the lean (°, + to the right); the front wheels steer into it
+  if (m.tipo === 'basculante') {
+    const phi = angulo * Math.PI / 180;
+    coche.rotation.x = phi;
+    posarBasculante(G, m, phi, m.phiMax > 1e-6 ? -phi / m.phiMax * m.giro * 0.35 : 0);
+    return;
+  }
   // the Triciclo does not lean either; «Girar ruedas» turns its two front wheels and their pods (Ackermann: the inner one more)
   if (m.tipo === 'triciclo') { coche.rotation.x = 0; girarTriciclo(G, m, angulo); return; }
   if (m.tipo === 'a1') construirMovilA1(G, M, m, coche, angulo); else construirMovilGota(G, M, m, coche, angulo);
@@ -1411,6 +1425,16 @@ function pintar(M: Mats, Mb: ReturnType<typeof materialesBala>, c: { carroceria:
   for (const mt of p.carroceria) mt.color.set(c.carroceria);
   for (const mt of p.acento) mt.color.set(c.acento);
 }
+// ── Cuadriciclo Basculante (2026-11-15): the viewer's helpers and materials, for basculante/modelo3d.ts
+function ayudasVisor(M: Mats): AyudasVisor {
+  return { tube, sphere, disk, cajaRedonda, ruedaCoche, muelle, tuboCurvo, ocupante, M };
+}
+/** The Cuadriciclo Basculante as our own car: everything rebuilt (about as quick as the Gota), the corners at rest or at the current lean. */
+function construirBasculanteVisor(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THREE.Group[]>, M: Mats, m: Extract<Modelo, { tipo: 'basculante' }>, sinPasajero: boolean) {
+  for (const c of CAPAS) vaciar(G[c.k]);
+  puertasG.clear();
+  construirBasculante(G, puertasG, M, m, ayudasVisor(M), { calidad: 'completa', sinPasajero });
+}
 let materialesDisenos: { M: Mats; Mb: ReturnType<typeof materialesBala> } | null = null;
 export function construirDisenoGaraje(m: Modelo): { grupo: THREE.Group; pivotes: PivoteGaraje[] } {
   if (!materialesDisenos) materialesDisenos = { M: materiales(), Mb: materialesBala() };
@@ -1418,6 +1442,7 @@ export function construirDisenoGaraje(m: Modelo): { grupo: THREE.Group; pivotes:
   const grupo = new THREE.Group(), G = {} as Record<CapaId, THREE.Group>, puertas = new Map<string, THREE.Group[]>();
   for (const c of CAPAS) { G[c.k] = new THREE.Group(); G[c.k].name = c.n; grupo.add(G[c.k]); }
   if (m.tipo === 'triciclo') { construirTriciclo(G, puertas, M, Mb, m, 'completa', false); girarTriciclo(G, m, 0); }
+  else if (m.tipo === 'basculante') { construirBasculante(G, puertas, M, m, ayudasVisor(M), { calidad: 'completa', sinPasajero: false }); posarBasculante(G, m, 0, 0); }
   else if (m.tipo === 'bala') construirBala(G, puertas, M, Mb, m, 'completa', false);
   else { construirFijo(G, puertas, M, m, false); construirMovil(G, M, m, grupo, 0); }
   const pivotes: PivoteGaraje[] = [];
@@ -1439,7 +1464,7 @@ export function construirDisenoGaraje(m: Modelo): { grupo: THREE.Group; pivotes:
   return { grupo, pivotes };
 }
 
-export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cuerposTunel, opcionesTunel, alElegirPuntoTunel, puntoTunel = null, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje, fichasGaraje, alQuitarGaraje, alPincharGaraje, alPincharNuestro, extraTarjeta, seguir, nombres, resaltarNuestro = false, verGaraje = false, margenDerecho = 0, colores }, ref) {
+export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cuerposTunel, opcionesTunel, alElegirPuntoTunel, puntoTunel = null, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje, fichasGaraje, alQuitarGaraje, alPincharGaraje, alPincharNuestro, extraTarjeta, seguir, nombres, resaltarNuestro = false, verGaraje = false, margenDerecho = 0, colores, bascular = 0 }, ref) {
   const pinchar = useRef(alPinchar); pinchar.current = alPinchar;
   const pincharGaraje = useRef(alPincharGaraje); pincharGaraje.current = alPincharGaraje;
   const pincharNuestro = useRef(alPincharNuestro); pincharNuestro.current = alPincharNuestro;
@@ -1451,7 +1476,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   const estado = useRef<any>(null);
   // The garage car picked with a click or a tap (only one with parts that open), and what is open on each car.
   const [selGaraje, setSelGaraje] = useState<string | null>(null);
-  const [abiertos, setAbiertos] = useState<Record<string, { puertas: boolean; maletero: boolean }>>({});
+  const [abiertos, setAbiertos] = useState<Record<string, { puertas: boolean; maletero: boolean; bascula?: boolean }>>({});
   const elegirGaraje = useRef(setSelGaraje); elegirGaraje.current = setSelGaraje;
   // On a phone (< 640 px) the card goes at the bottom, just above the viewer's toolbar, as one row: at the top it
   // hid the doors rising. The toolbar belongs to the page, so its top is measured from the viewer's own box.
@@ -1625,6 +1650,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       /** The Bala is already on screen (so a change is an edit, rebuilt quick first), not being opened. */
       balaVisto: false as false | 'bala' | 'triciclo',
       curva: false, inclinacion: 0, modelo: null as Modelo | null, plano: new THREE.Plane(new THREE.Vector3(0, 0, 1), 0),
+      /** Cuadriciclo Basculante: «Bascular» running (seconds since it was pressed), or null. */
+      bascula: null as { t: number } | null,
       apertura: 0, aperturaObjetivo: 0, aperturaMal: 0, aperturaMalObjetivo: 0, colocarPuertas: (() => {}) as () => void,
       /** How open the doors and the boot of each garage car are (by id), and where they are heading. */
       garajeAbre: new Map<string, AperturaGaraje>(),
@@ -1704,8 +1731,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       }
       return mejor;
     };
-    // a car with parts that open, or one of our designs (it has a card of its own)
-    const abreAlgo = (obj: THREE.Object3D | null) => !!obj && (conExtra.current || !!vehiculoGaraje(obj.name)?.pivotes?.length || !!fichas.current?.[obj.name]);
+    // a car with parts that open or that leans, or one of our designs (it has a card of its own)
+    const abreAlgo = (obj: THREE.Object3D | null) => !!obj && (conExtra.current || !!vehiculoGaraje(obj.name)?.pivotes?.length || !!vehiculoGaraje(obj.name)?.bascula || !!fichas.current?.[obj.name]);
     /** Picks a garage car (its card opens) or, with null or a car with nothing to open, closes the card. One the page
      *  takes (one of our designs, 2026-11-13) opens no card here. */
     const elegirCoche = (obj: THREE.Object3D | null) => {
@@ -1776,8 +1803,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       }
       // the garage cars' doors and boots, at the same pace
       for (const [id, a] of st.garajeAbre) {
-        if (a.p === a.pObj && a.m === a.mObj) continue;
-        a.p = avanzar(a.p, a.pObj); a.m = avanzar(a.m, a.mObj);
+        if (a.p === a.pObj && a.m === a.mObj && a.b === a.bObj) continue;
+        a.p = avanzar(a.p, a.pObj); a.m = avanzar(a.m, a.mObj); a.b = avanzar(a.b, a.bObj);
         const obj = grupoGaraje.getObjectByName(id), def = vehiculoGaraje(id);
         if (obj && def) colocarPivotesGaraje(obj, def, a);
         st.sombraSucia = true;
@@ -1791,6 +1818,18 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
         const enc = Math.floor(ahora / 333) % 2 === 0;
         M.intermitenteI.emissiveIntensity = st.inclinacion > 2 && enc ? 2.2 : 0.15;
         M.intermitenteD.emissiveIntensity = st.inclinacion < -2 && enc ? 2.2 : 0.15;
+      }
+      // ── Cuadriciclo Basculante (2026-11-15): «Bascular» leans it to its maximum to the right, back, to the left and back
+      // (one sine over 6 s), the front wheels steering into the lean and the indicator on that side blinking
+      if (st.bascula && st.modelo?.tipo === 'basculante' && !st.curva) {
+        const T = 6;
+        st.bascula.t += reducir ? T : dt;
+        const fin = st.bascula.t >= T, phi = fin ? 0 : st.modelo.P.tiltMax * Math.sin(2 * Math.PI * st.bascula.t / T);
+        st.inclinacion = phi; construirMovil(G, M, st.modelo, coche, phi);
+        const enc = Math.floor(ahora / 333) % 2 === 0;
+        M.intermitenteD.emissiveIntensity = phi > 2 && enc ? 2.2 : 0.15; M.intermitenteI.emissiveIntensity = phi < -2 && enc ? 2.2 : 0.15;
+        st.sombraSucia = true;
+        if (fin) st.bascula = null;
       }
       if (st.tunel) { renderer.getSize(tamano); st.tunel.actualizar(reducir ? 0 : ahora / 1000, tamano.x, tamano.y, camera); }
       // Lo que llega tarde a un coche superpuesto (la carrocería del Twizy se descarga) también pasa a fantasma.
@@ -1819,6 +1858,14 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     st.modelo = modelo;
     const cotasYPuertas = () => { vaciar(st.grupoCotas); cotas(st.grupoCotas, st.M, st.modelo, sinPasajero); st.colocarPuertas(); st.sombraSucia = true; };
     cancelAnimationFrame(st.bala.cuadro); if (st.bala.pausa) { clearTimeout(st.bala.pausa); st.bala.pausa = 0; }
+    // ── Cuadriciclo Basculante (2026-11-15): rebuilt whole on every change (~60 ms), at the current lean
+    if (modelo.tipo === 'basculante') {
+      st.balaVisto = false;
+      construirBasculanteVisor(st.G, st.puertasG, st.M, modelo, sinPasajero);
+      construirMovil(st.G, st.M, modelo, st.coche, st.curva || st.bascula ? st.inclinacion : 0);
+      cotasYPuertas();
+      return;
+    }
     if (modelo.tipo !== 'bala' && modelo.tipo !== 'triciclo') {
       st.balaVisto = false;
       construirFijo(st.G, st.puertasG, st.M, modelo, sinPasajero);
@@ -1956,7 +2003,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     if (g) { g.traverse((o: any) => { if (o.isSprite) { o.material.map?.dispose(); o.material.dispose(); } }); st.scene.remove(g); }
     if (!claveNombres || !nombres) return;
     g = new THREE.Group(); g.name = 'nombres'; st.scene.add(g);
-    const poner = (texto: string | undefined, x: number, y: number, z: number) => { if (!texto) return; const c = cartel(texto); c.scale.multiplyScalar(0.8); c.position.set(x, y, z); g!.add(c); };
+    const poner = (texto: string | undefined, x: number, y: number, z: number) => { if (!texto) return; const c = cartel(texto); c.scale.multiplyScalar(0.8); c.position.set(x, y, z); c.userData.texto = texto; g!.add(c); };
     if (!soloGaraje && garaje.length) poner(nombres.aeromovil, (modelo.xn + modelo.xt) / 2, modelo.P.H + 0.35, 0);
     for (const v of garaje) {
       const def = vehiculoGaraje(v.id); if (!def) continue;
@@ -2062,8 +2109,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   useEffect(() => {
     const st = estado.current; if (!st) return;
     for (const [id, a] of Object.entries(abiertos)) {
-      const e: AperturaGaraje = st.garajeAbre.get(id) ?? { p: 0, pObj: 0, m: 0, mObj: 0 };
-      e.pObj = a.puertas ? 1 : 0; e.mObj = a.maletero ? 1 : 0; st.garajeAbre.set(id, e);
+      const e: AperturaGaraje = st.garajeAbre.get(id) ?? { p: 0, pObj: 0, m: 0, mObj: 0, b: 0, bObj: 0 };
+      e.pObj = a.puertas ? 1 : 0; e.mObj = a.maletero ? 1 : 0; e.bObj = a.bascula ? 1 : 0; st.garajeAbre.set(id, e);
     }
   }, [abiertos]);
   // the picked car left the garage (hidden): its card goes too
@@ -2094,6 +2141,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     pintar(st.M, st.Mb, colores ?? { carroceria: COLOR_CARROCERIA, acento: COLOR_ACENTO }); st.sombraSucia = true;
   }, [colores?.carroceria, colores?.acento]);
 
+  // Cuadriciclo Basculante: «Bascular» (each press starts the lean over again)
+  useEffect(() => { const st = estado.current; if (st && bascular > 0) st.bascula = { t: 0 }; }, [bascular]);
   useEffect(() => {
     const st = estado.current; if (!st) return;
     st.curva = curva;
@@ -2150,8 +2199,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   const defSel = selGaraje ? vehiculoGaraje(selGaraje) : undefined;
   const fichaSel = selGaraje ? fichasGaraje?.[selGaraje] : undefined;
   const tiposSel = new Set(defSel?.pivotes?.map(p => p.tipo));
-  const estSel = (selGaraje && abiertos[selGaraje]) || { puertas: false, maletero: false };
-  const alternar = (k: 'puertas' | 'maletero') => { if (selGaraje) setAbiertos(a => ({ ...a, [selGaraje]: { ...estSel, [k]: !estSel[k] } })); };
+  const estSel = (selGaraje && abiertos[selGaraje]) || { puertas: false, maletero: false, bascula: false };
+  const alternar = (k: 'puertas' | 'maletero' | 'bascula') => { if (selGaraje) setAbiertos(a => ({ ...a, [selGaraje]: { ...estSel, [k]: !estSel[k] } })); };
   const botonCarta = estrecho ? 'h-10 shrink-0 px-2 text-[11px] normal-case tracking-normal' : 'gap-1.5 px-2.5 py-1.5 text-[11px] normal-case tracking-normal';
   const botones = (
     <>
@@ -2165,11 +2214,18 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
           {!estrecho && <PackageOpen className="h-3.5 w-3.5" />}{estSel.maletero ? 'Cerrar maletero' : 'Abrir maletero'}
         </Button>
       )}
+      {/* «Bascular» (2026-11-15): a tilting car leans to its maximum angle, wheels and all, and back */}
+      {defSel?.bascula && (
+        <Button variant="outline" aria-pressed={!!estSel.bascula} onClick={() => alternar('bascula')} className={botonCarta}
+          title={estSel.bascula ? 'Volver a ponerlo derecho' : `Inclinarlo ${defSel.bascula.angulo}°, como en una curva`}>
+          {!estrecho && <MoveDiagonal className="h-3.5 w-3.5" />}{estSel.bascula ? 'Enderezar' : 'Bascular'}
+        </Button>
+      )}
     </>
   );
   return (
     <>
-      <canvas ref={lienzo} className="absolute inset-0 h-full w-full touch-none" aria-label={modelo.tipo === 'a1' ? 'Modelo 3D del Aeromóvil 1' : modelo.tipo === 'bala' ? 'Modelo 3D del Cuadriciclo Bala en rombo' : modelo.tipo === 'triciclo' ? (modelo.traseras ? 'Modelo 3D del Cuadriciclo Bala clásico' : 'Modelo 3D del Triciclo Bala') : 'Modelo 3D del Aeromóvil Gota'} />
+      <canvas ref={lienzo} className="absolute inset-0 h-full w-full touch-none" aria-label={modelo.tipo === 'basculante' ? 'Modelo 3D del Cuadriciclo Basculante' : modelo.tipo === 'a1' ? 'Modelo 3D del Aeromóvil 1' : modelo.tipo === 'bala' ? 'Modelo 3D del Cuadriciclo Bala en rombo' : modelo.tipo === 'triciclo' ? (modelo.traseras ? 'Modelo 3D del Cuadriciclo Bala clásico' : 'Modelo 3D del Triciclo Bala') : 'Modelo 3D del Aeromóvil Gota'} />
       {/* The card of a garage car picked with a click or a tap: its doors and its boot (2026-11-12). */}
       {/* One of our designs in the garage (2026-11-12): its figures, its doors and «Quitar del garaje». On a phone at the bottom, above the toolbar. */}
       {defSel && fichaSel && (
@@ -2210,8 +2266,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
           <div className="flex items-start gap-2">
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-slate-900">{defSel.nombre}</p>
-              {(tiposSel.size > 0 || alMoverGaraje) && <p className="text-[11px] leading-snug text-slate-500">
-                {tiposSel.size > 0 ? 'Abre sus puertas y su maletero para ver cómo se abren.' : ''}{alMoverGaraje ? ' Para moverlo, púlsalo y arrástralo.' : ''}
+              {(tiposSel.size > 0 || defSel.bascula || alMoverGaraje) && <p className="text-[11px] leading-snug text-slate-500">
+                {tiposSel.size > 0 ? 'Abre sus puertas y su maletero para ver cómo se abren.' : ''}{defSel.bascula ? `«Bascular» lo inclina ${defSel.bascula.angulo}° con las cuatro ruedas, como en una curva.` : ''}{alMoverGaraje ? ' Para moverlo, púlsalo y arrástralo.' : ''}
               </p>}
             </div>
             <Button variant="ghost" onClick={() => setSelGaraje(null)} aria-label="Cerrar" title="Cerrar" className="-mr-1.5 -mt-1.5 h-10 w-10 p-0">

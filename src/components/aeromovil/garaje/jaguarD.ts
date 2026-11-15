@@ -28,7 +28,7 @@ import { construir } from './jaguarDModelo';
  *   on 16 x 5.5 in wheels front and rear (supercars.net). Other sources give
  *   wheelbase 2 286 and 2 294 mm.
  * - Kerb weight just over 862 kg (uniquecarsandparts); 880 kg for the long
- *   nose (ultimatecarpage). Not used: there is no `aero`.
+ *   nose (ultimatecarpage). Only as `masa`, for the garage's order: there is no `aero`.
  * - Offset bonnet bulge over the Webers' ram pipes (Wikipedia, after Porter);
  *   headrest fairing and fin one piece from 1955 (Wikipedia); Dunlop alloy
  *   disc wheels with cooling holes drilled near the rim (Motor Sport, «X-ray
@@ -71,6 +71,8 @@ import { construir } from './jaguarDModelo';
 export const VEHICULO: VehiculoGaraje = {
   id: 'jaguarD', nombre: 'Jaguar D-Type 1955 (morro corto)',
   largo: LARGO, ancho: ANCHO, alto: ALTO, batalla: BATALLA, viaDel: VIA_DEL, viaTras: VIA_TRAS,
+  // kerb weight «just over 862 kg» (uniquecarsandparts): for the garage's size order and its list (2026-11-15)
+  masa: 862,
   fuente: 'D-Type de producción de 1955, morro corto, con aleta. Largo 3 912 mm, batalla 2 300 mm, vías 1 270 / 1 219 mm y neumáticos 6.50-16: tabla de supercars.net, y largo y alto 800 mm (a la carrocería, sin la aleta) de uniquecarsandparts.com.au; ancho 1 651–1 664 mm según la fuente (el modelo, 1 660). La forma está reconstruida con esas medidas y una sola foto de 3/4: voladizos, alturas, pasos de rueda, aleta (≈1,07 m), parabrisas y piezas pequeñas son estimados. Faros y reposacabezas colocados midiendo la foto. Sin Cd publicado: no se da dato aerodinámico. Área frontal medida en el modelo: ≈1,18 m²',
   envolvente: envolvente(),
   seccion: 2.6,

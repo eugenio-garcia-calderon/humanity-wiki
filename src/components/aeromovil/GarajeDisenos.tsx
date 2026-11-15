@@ -6,7 +6,9 @@
 // garaje, en la primera fila… cuando se pinche uno de ellos… aparezcan los sliders para modificar su carrocería…».
 //
 // Every saved design (the list the logo menu shows, from /api/aeromovil/disenos) stands in the garage's first row,
-// in an order kept per browser (a copy goes right after its original). The one being edited is the viewer's own car,
+// from the shortest to the longest, then the lightest first (2026-11-15, «desde el más pequeño al más grande»); designs
+// of the same size keep the order kept per browser (a copy goes right after its original). A dragged car still stays
+// where it was dropped (`aeromovil_garaje_sitios_v1`). The one being edited is the viewer's own car,
 // at the origin; every other one is built with the viewer's own builders (`construirDisenoGaraje`) once per saved
 // version, one at a time after the page has drawn, and from then on copied (the copy shares the geometry). A design
 // can be hidden from the 3D (per browser); the one being edited never is. The reference cars stand in a second row,
@@ -17,16 +19,35 @@ import { construirDisenoGaraje } from './Visor3D';
 import { deDiseno, guardarClave, leerClaves, type Diseno } from './Disenos';
 import { ajustarCarenado, areas, calcular, crearModelo, type Modelo, type Parametros, type Resultados } from './geometria';
 import { camposTriciclo, nombreTriciclo } from './geometriaTriciclo';
-import { cuerpoAeromovil, cuerpoTriciclo, peticionDe } from './tunel/nuestro';
+import { cuerpoAeromovil, cuerpoBasculante, cuerpoTriciclo, peticionDe } from './tunel/nuestro';
+import { camposBasculante } from './geometriaBasculante';
 import { pedirTunel, resultadoEnCache } from './tunel/cliente';
 import type { Resolucion } from './tunel/malla';
 import { olvidarVehiculo, registrarVehiculo } from './garaje/registro';
 import { vehiculoGaraje } from './garaje';
 import type { VehiculoGaraje } from './garaje/tipos';
-import { colocarFilas, type CocheFila, type Plaza } from './garaje/filas';
+import { colocarFilas, compararTamano, type CocheFila, type Plaza } from './garaje/filas';
+import { masaGaraje } from './garaje/tipos';
 
 const CLAVE_ORDEN = 'aeromovil_garaje_orden_v1';
 const CLAVE_OCULTOS = 'aeromovil_garaje_ocultos_v1';
+/** Where each dragged car stands (2026-11-13), by garage id, in the rows' own frame (see `garaje/filas.ts`). */
+const CLAVE_SITIOS = 'aeromovil_garaje_sitios_v1';
+function leerSitios(): Record<string, Plaza> {
+  try {
+    const g = JSON.parse(localStorage.getItem(CLAVE_SITIOS) || '{}');
+    const ok = (v: unknown) => typeof v === 'number' && Number.isFinite(v) && Math.abs(v) < 500;
+    const out: Record<string, Plaza> = {};
+    if (g && typeof g === 'object') for (const [k, v] of Object.entries(g as Record<string, any>)) if (v && ok(v.x) && ok(v.z)) out[k] = { x: v.x, z: v.z };
+    return out;
+  } catch { return {}; }
+}
+/** A short fingerprint of a design's parameters: a new name or a new date alone does not rebuild its car. */
+function huella(o: unknown): string {
+  const t = JSON.stringify(o ?? {}); let h = 5381;
+  for (let k = 0; k < t.length; k++) h = ((h * 33) ^ t.charCodeAt(k)) >>> 0;
+  return `${t.length}-${h.toString(36)}`;
+}
 const PREFIJO = 'diseno-';
 export const esDisenoGaraje = (id: string) => id.startsWith(PREFIJO);
 export const idGaraje = (id: number) => `${PREFIJO}${id}`;
@@ -42,10 +63,10 @@ const guardarIds = (clave: string, ids: number[]) => { try { localStorage.setIte
 
 /** The family's name, as the editor calls it (a Triciclo with two rear wheels is the «Cuadriciclo Bala clásico»). */
 export function familia(P: Parametros, m: Modelo): string {
-  return m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala en rombo' : m.tipo === 'triciclo' ? nombreTriciclo(camposTriciclo(P)) : 'Aeromóvil Gota';
+  return m.tipo === 'basculante' ? 'Cuadriciclo Basculante' : m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala en rombo' : m.tipo === 'triciclo' ? nombreTriciclo(camposTriciclo(P)) : 'Aeromóvil Gota';
 }
 
-interface Info { d: Diseno; modelo: Modelo; res: Resultados; familia: string; def: VehiculoGaraje & { preparar: () => void; listo: () => boolean } }
+interface Info { d: Diseno; clave: string; modelo: Modelo; res: Resultados; familia: string; def: VehiculoGaraje & { preparar: () => void; listo: () => boolean } }
 
 /**
  * A garage car for a saved design. Nothing is built until `preparar` (the hook calls it one design at a time, after the
@@ -85,6 +106,7 @@ function vehiculoDe(d: Diseno, modelo: Modelo, nombreFamilia: string): Info['def
 function peticionCd(i: Info, resolucion: Resolucion) {
   const { modelo: m, res } = i;
   if (m.tipo === 'triciclo') return { ...peticionDe({ ...cuerpoTriciclo(m), id: `garaje-cd-${i.d.id}` }, resolucion, 'pocas'), soloNumeros: true };
+  if (m.tipo === 'basculante') return { ...peticionDe({ ...cuerpoBasculante(m), id: `garaje-cd-${i.d.id}` }, resolucion, 'pocas'), soloNumeros: true };
   if (m.tipo === 'bala') return { ...peticionDe({ ...cuerpoAeromovil(m, res.A), id: `garaje-cd-${i.d.id}` }, resolucion, 'pocas'), soloNumeros: true };
   return null;
 }
@@ -96,7 +118,7 @@ function cdA(R: NonNullable<ReturnType<typeof resultadoEnCache>>, kmh: number) {
   return pv[k].cd.total + (pv[k + 1].cd.total - pv[k].cd.total) * u;
 }
 
-/** The order of the first row: the order kept in this browser, then the rest in the order they were created. */
+/** The order kept in this browser, then the rest in the order they were created (the tie-break of the size order). */
 function ordenar(lista: Diseno[], orden: number[]): Diseno[] {
   const pos = new Map(orden.map((id, k) => [id, k]));
   return [...lista].sort((a, b) => (pos.get(a.id) ?? Infinity) - (pos.get(b.id) ?? Infinity) || a.id - b.id);
@@ -112,7 +134,7 @@ async function llamar(url: string, metodo: string, cuerpo: unknown) {
 export function useDisenosGaraje({ activo, referencias, resolucion, conCd, huecoFila2 }: {
   /** The design being edited: its saved id (null if it is not saved), its name, nose and tail x and width (m). */
   activo: { id: number | null; nombre: string; morro: number; cola: number; ancho: number };
-  /** The reference cars on show, in their catalogue order: the second row. */
+  /** The reference cars on show: the second row (placed from the smallest to the largest). */
   referencias: string[];
   resolucion: Resolucion;
   /** «Cd y consumo» or the tunnel is on: only then are the designs' Cd asked from the tunnel (it is work for the worker). */
@@ -125,6 +147,8 @@ export function useDisenosGaraje({ activo, referencias, resolucion, conCd, hueco
   const [orden, setOrden] = useState<number[]>(() => leerIds(CLAVE_ORDEN));
   const [ocultos, setOcultos] = useState<number[]>(() => leerIds(CLAVE_OCULTOS));
   const [listos, setListos] = useState<Set<string>>(() => new Set());
+  const [sitios, setSitios] = useState<Record<string, Plaza>>(leerSitios);
+  useEffect(() => { try { localStorage.setItem(CLAVE_SITIOS, JSON.stringify(sitios)); } catch { /* without storage it is forgotten on reload */ } }, [sitios]);
   const [, setVersion] = useState(0);
   useEffect(() => guardarIds(CLAVE_ORDEN, orden), [orden]);
   useEffect(() => guardarIds(CLAVE_OCULTOS, ocultos), [ocultos]);
@@ -136,17 +160,18 @@ export function useDisenosGaraje({ activo, referencias, resolucion, conCd, hueco
       .catch(e => setError(e?.message || 'No se han podido leer los diseños.'));
   };
   useEffect(cargar, []);
-  const lista = useMemo(() => (crudo ? ordenar(crudo, orden) : null), [crudo, orden]);
 
-  // Each design's model and figures, worked out once per saved version (`updated_at`).
+  // Each design's model and figures, worked out once per set of parameters (2026-11-13: a rename only changes its name).
   const infos = useRef(new Map<string, Info>());
   const infoDe = (d: Diseno): Info | null => {
-    const clave = `${d.id}@${d.updated_at}`;
+    const clave = `${d.id}@${huella(d.parametros)}`;
     let i = infos.current.get(clave);
+    // the same car with a newer name (or date): the built car stays, the name follows
+    if (i && i.d !== d) { i.d = d; i.def.nombre = d.nombre; }
     if (!i) {
       try {
         const P = deDiseno(d.parametros || {}), modelo = crearModelo(ajustarCarenado(P)), res = calcular(modelo, areas(modelo)), fam = familia(P, modelo);
-        i = { d, modelo, res, familia: fam, def: vehiculoDe(d, modelo, fam) };
+        i = { d, clave, modelo, res, familia: fam, def: vehiculoDe(d, modelo, fam) };
       } catch (e) { console.error(`[garaje] el diseño «${d.nombre}» no se ha podido calcular:`, e); return null; }
       // an older version of the same design is not coming back: its template goes with it
       for (const k of [...infos.current.keys()]) if (k.startsWith(`${d.id}@`)) infos.current.delete(k);
@@ -154,6 +179,24 @@ export function useDisenosGaraje({ activo, referencias, resolucion, conCd, hueco
     }
     return i;
   };
+
+  // The list and the first row, from the smallest to the largest (2026-11-15): by each design's SAVED length, then its
+  // empty mass. The one being edited is placed by its saved version too, so moving a slider does not reshuffle the row
+  // under the user's hands; a design that cannot be computed goes last.
+  const lista = useMemo(() => {
+    if (!crudo) return null;
+    const base = ordenar(crudo, orden), pos = new Map(base.map((d, k) => [d.id, k]));
+    const t = new Map(base.map(d => { const i = infoDe(d); return [d.id, i ? { largo: i.modelo.Lf, masa: i.res.mVeh > 0 ? i.res.mVeh : undefined } : { largo: 99 }]; }));
+    return [...base].sort((a, b) => compararTamano(t.get(a.id)!, t.get(b.id)!) || pos.get(a.id)! - pos.get(b.id)!);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [crudo, orden]);
+  /** Each saved design's length and empty mass (as saved), for the list's rows. */
+  const medidas = useMemo(() => {
+    const o: Record<number, { largo: number; masa?: number }> = {};
+    for (const d of lista ?? []) { const i = infoDe(d); if (i) o[d.id] = { largo: i.modelo.Lf, masa: i.res.mVeh > 0 ? i.res.mVeh : undefined }; }
+    return o;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lista]);
 
   // The first row: every design on show, the one being edited in its own place (first, if it is not saved).
   const { fila, enGaraje } = useMemo(() => {
@@ -176,18 +219,18 @@ export function useDisenosGaraje({ activo, referencias, resolucion, conCd, hueco
   // draws in between (a Triciclo blocks for about a second). A design enters the viewer once it is built.
   useEffect(() => {
     const k0 = fila.findIndex(c => c.id === ID_ACTIVO);
-    const pendientes = fila.map((c, k) => ({ c, k })).filter(({ c }) => c.info && !listos.has(`${c.info.d.id}@${c.info.d.updated_at}`))
+    const pendientes = fila.map((c, k) => ({ c, k })).filter(({ c }) => c.info && !listos.has(c.info.clave))
       .sort((a, b) => Math.abs(a.k - k0) - Math.abs(b.k - k0));
     const sig = pendientes[0]?.c.info; if (!sig) return;
     const t = setTimeout(() => {
       try { sig.def.preparar(); } catch (e) { console.error(`[garaje] no se pudo construir «${sig.d.nombre}»:`, e); }
-      setListos(s => new Set(s).add(`${sig.d.id}@${sig.d.updated_at}`));
+      setListos(s => new Set(s).add(sig.clave));
     }, 30);
     return () => clearTimeout(t);
   }, [fila, listos]);
 
   // registered while on show (the viewer finds them by id); the rest forgotten
-  const visibles = useMemo(() => enGaraje.filter(i => listos.has(`${i.d.id}@${i.d.updated_at}`) || i.def.listo()), [enGaraje, listos]);
+  const visibles = useMemo(() => enGaraje.filter(i => listos.has(i.clave) || i.def.listo()), [enGaraje, listos]);
   for (const i of visibles) registrarVehiculo(i.def);
   useEffect(() => {
     const dentro = new Set(visibles.map(i => i.def.id));
@@ -195,14 +238,22 @@ export function useDisenosGaraje({ activo, referencias, resolucion, conCd, hueco
   }, [visibles]);
 
   // Where everything goes: the first row, and the reference cars behind it.
-  const plazas = useMemo<Map<string, Plaza>>(() => {
-    const fila2: CocheFila[] = referencias.flatMap(id => {
-      const def = vehiculoGaraje(id); if (!def) return [];
+  const { plazas, origen } = useMemo(() => {
+    // (2026-11-15) from the smallest to the largest, whatever order they came in
+    const defs = referencias.flatMap(id => { const def = vehiculoGaraje(id); return def ? [def] : []; })
+      .sort((a, b) => compararTamano({ ...a, masa: masaGaraje(a) }, { ...b, masa: masaGaraje(b) }));
+    const fila2: CocheFila[] = defs.map(def => {
       const xs = def.envolvente?.map(e => e[0]);
-      return [{ id, morro: xs?.length ? Math.max(...xs) : 0.9, cola: xs?.length ? Math.min(...xs) : 0.9 - def.largo, ancho: def.ancho }];
+      return { id: def.id, morro: xs?.length ? Math.max(...xs) : 0.9, cola: xs?.length ? Math.min(...xs) : 0.9 - def.largo, ancho: def.ancho };
     });
-    return colocarFilas(fila, ID_ACTIVO, fila2, { huecoFila2 });
-  }, [fila, referencias, huecoFila2]);
+    // the dragged ones keep their place; the one being edited by its design's own id
+    const fijas = new Map<string, Plaza>();
+    for (const c of [...fila, ...fila2]) {
+      const k = c.id === ID_ACTIVO ? (activo.id != null ? idGaraje(activo.id) : null) : c.id;
+      const p = k ? sitios[k] : undefined; if (p) fijas.set(c.id, p);
+    }
+    return colocarFilas(fila, ID_ACTIVO, fila2, { huecoFila2, fijas });
+  }, [fila, referencias, huecoFila2, sitios, activo.id]);
 
   // The Cd of the designs whose Cd only the tunnel gives, in the background, after the editor's own requests.
   const peticiones = useMemo(() => visibles.map(i => ({ i, p: peticionCd(i, resolucion) })), [visibles, resolucion]);
@@ -217,11 +268,11 @@ export function useDisenosGaraje({ activo, referencias, resolucion, conCd, hueco
   for (const { i, p } of peticiones) {
     const { modelo: m, res } = i;
     const R = p ? resultadoEnCache(p) : undefined;
-    const kmh = m.tipo === 'triciclo' ? camposTriciclo(deDiseno(i.d.parametros || {})).tVel : 80;
+    const kmh = m.tipo === 'triciclo' ? camposTriciclo(deDiseno(i.d.parametros || {})).tVel : m.tipo === 'basculante' ? camposBasculante(deDiseno(i.d.parametros || {})).qVel : 80;
     const cd = m.tipo === 'a1' || m.tipo === 'gota'
       ? `Cd ${fmt(res.Cd, 3)} (fórmula del editor)`
       : R ? `Cd ${fmt(cdA(R, kmh), 3)} (túnel, a ${Math.round(kmh)} km/h)` : 'Cd: el túnel lo está calculando…';
-    const kWh = m.tipo === 'a1' ? m.P.kWh : m.tipo === 'triciclo' ? m.kWh : null;
+    const kWh = m.tipo === 'a1' ? m.P.kWh : m.tipo === 'triciclo' ? m.kWh : m.tipo === 'basculante' ? m.bateria.kWh : null;
     fichas[i.def.id] = [
       // (the family, unless the design is named after it)
       ...(i.familia !== i.d.nombre ? [i.familia] : []),
@@ -238,7 +289,7 @@ export function useDisenosGaraje({ activo, referencias, resolucion, conCd, hueco
 
   /** What the viewer gets: the designs that are built, with their place and their version (a new one is rebuilt). */
   const visor = useMemo(() => visibles.flatMap(i => {
-    const p = plazas.get(i.def.id); return p ? [{ id: i.def.id, x: p.x, z: p.z, giro: 0, v: i.d.updated_at }] : [];
+    const p = plazas.get(i.def.id); return p ? [{ id: i.def.id, x: p.x, z: p.z, giro: 0, v: i.clave }] : [];
   }), [visibles, plazas]);
   /** A short name over every car when no other label is on (2026-11-13: «label each with its name»). */
   const nombres = useMemo(() => {
@@ -251,11 +302,15 @@ export function useDisenosGaraje({ activo, referencias, resolucion, conCd, hueco
   // ── changes to the list ────────────────────────────────────────────────
   /** A design as the server returned it (saved, or new): replaces its old version, or goes in right after `junto`. */
   const actualizar = (d: Diseno, junto?: number | null) => {
+    const conocido = !!crudo?.some(x => x.id === d.id);
     setCrudo(l => {
       if (!l) return l;
       if (l.some(x => x.id === d.id)) return l.map(x => (x.id === d.id ? d : x));
       return [...l, d];
     });
+    // (2026-11-13) a design already in the list keeps its place: with no order stored yet in this browser, a save
+    // (an automatic one, or a rename) used to put it at the end of the row
+    if (conocido) return;
     setOrden(o => {
       if (o.includes(d.id)) return o;
       // the order as it is on screen, with the new one after `junto` (or at the end)
@@ -288,7 +343,20 @@ export function useDisenosGaraje({ activo, referencias, resolucion, conCd, hueco
     await llamar(`/api/aeromovil/disenos/${id}`, 'DELETE', { clave: leerClaves()[id] });
     setCrudo(l => (l ? l.filter(x => x.id !== id) : l));
     setOcultos(o => o.filter(x => x !== id));
+    setSitios(s => { const { [idGaraje(id)]: _quitado, ...resto } = s; return resto; });
   };
 
-  return { lista, error, cargar, visor, plazas, fichas, carteles, nombres, ocultos, alternarOculto, actualizar, ponerLista, copiar, guardar, archivar, construidos: visibles.length, enFila: enGaraje.length };
+  /** A car dropped at (x, z) on screen: its place in the rows' frame, kept in this browser. */
+  const mover = (id: string, x: number, z: number) => setSitios(s => ({ ...s, [id]: { x: Math.round((x + origen.x) * 100) / 100, z: Math.round((z + origen.z) * 100) / 100 } }));
+  /** «Volver a colocar en fila»: one car (by garage id), or all of them. */
+  const aFila = (id?: string) => setSitios(s => { if (!id) return {}; const { [id]: _quitado, ...resto } = s; return resto; });
+  const movidos = Object.keys(sitios).filter(k => (esDisenoGaraje(k) ? !!crudo?.some(d => idGaraje(d.id) === k) : true));
+  /** «Cambiar nombre»: the owner's PUT with only the name (the server trims it and keeps 80 characters). */
+  const renombrar = async (id: number, nombre: string): Promise<Diseno> => {
+    const d = await llamar(`/api/aeromovil/disenos/${id}`, 'PUT', { nombre, clave: leerClaves()[id] });
+    actualizar(d);
+    return d;
+  };
+
+  return { lista, medidas, error, cargar, visor, mover, aFila, sitios, movidos, renombrar, plazas, fichas, carteles, nombres, ocultos, alternarOculto, actualizar, ponerLista, copiar, guardar, archivar, construidos: visibles.length, enFila: enGaraje.length };
 }

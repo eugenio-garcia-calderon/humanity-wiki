@@ -638,3 +638,39 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 - **The nose's underside has no guide line.** The hood and the tail's top and belly do; under the nose the plain cap closes onto the edge's bottom (it is monotone, but not checked by the script).
 - **The light bar is a ribbon on the skin**: the tunnel does not see it, as it does not see the round lamp or the mirrors.
 - **The tunnel's reading of the trailing edge is sensitive**: on the proposed clásico a 3, 4 and 5 cm edge give Cd 0.2159, 0.2147 and 0.2130; with the edge's centre at 0.62 m instead of 0.59 (a value tried on the way), 3 cm gave 0.2265 against 0.2130 for 4 cm. The tunnel reads the body through superellipse sections every 5 cm; a real blade tail needs a finer model before any number this close is trusted. Constants unchanged, by decision (2026-11-12).
+## 2026-11-13 — Garage drag and rename: shortcuts
+
+- **Dragged places are per browser** (`localStorage`), not shared: Eugenio's phone and computer each have their own garage arrangement.
+- **A dragged place is absolute in the rows' frame.** When a design is added before it in the list, the cars in the row move along and a dragged car does not, so they can end up overlapping. There is no overlap check on drop.
+- **The drag snaps to 5 cm and has no grid or alignment guides**; «Volver a su fila» is the way back to a tidy row.
+## 2026-11-15 — Cornering circuit: shortcuts
+
+- **Quasi-steady rigid body.** No suspension roll, tyre deflection, load-transfer dynamics, transients, combined braking-cornering grip, banking or aero. A 15 % reserve stands in for compliance. A transient model (chicane, tilt actuator lag) would need a 3-4 DOF model like Rajamani et al. 2003.
+- **CdG heights of the table cars are estimated** (35 % of height). The Smera's tilt is 25° per Wikipedia/Caradisiac; auto123's prototype sheet says 20°.
+- **The «apurar» lap uses the same longitudinal limits for every car** (accelerate min(2.5 m/s², 0.5·μ·g), brake 0.7·μ·g), not each car's power: lap times compare cornering only.
+- **Editor designs other than the Triciclo/Cuadriciclo have no CdG**: the circuit estimates it (35 % of height, equal load per wheel) until those families compute one. The Bala has no masses and is not offered.
+- **Recharts colours are `var(--color-…)` strings** that exist only because the same colours are used as classes in the legend swatches (Tailwind 4 emits only used variables). Removing a swatch class could silently blank a line; a shared chart palette in `src/components/ui/` would fix it (~30 min).
+## 2026-11-15 — Cuadriciclo Basculante: shortcuts
+
+- **No click-to-sheet components, no drawings (Planos) and no STEP**: STL only, as the Bala family. Cost to add the plan sheets: the skin is sections, so `planos.ts` could cut it (~half a day).
+- **Rigid-body tilt**: the lean is drawn and checked at its maximum and at rest; no tilt-actuator dynamics, no suspension roll; the steering follows the lean in «Bascular» only for show (35 % of full lock at full lean).
+- **The rear wheel arches are cells left out of the skin**, their stepped edge hidden by a rubber trim, and a black half-cylinder liner inside: not a real wheel-well surface (STL of the body has those holes).
+- **The tunnel's «Probar» options do not know the `q…` sliders**: for this family the explanations show without «Probar» (`tunel/explicaciones.ts`).
+- **Materials and helpers come from Visor3D through `ayudasVisor`** (an object of functions): a cheap seam, but the builder depends on the viewer's helper signatures. Moving those helpers to a module of their own (~1 h) would let both import them.
+- **The shape grid is fixed at ~1 cm along the car**: fine for the viewer (≈60 ms), coarse for a mould.
+- **Default turning radius 6,5 m** (pods steer with the wheels in a narrow nose). A wider front track or shorter fairings trade width or drag for it; noted, not solved.
+
+### 2026-11-15 — Smooth body, the egg fix: shortcuts
+- **The windscreen-to-hood join is not guaranteed.** The blend from the canopy's section into the hood's deck (`LARGO_MEZCLA`, main's code) shows sub-millimetre ripples in many cases. Some slider combinations make bumps of 5–38 mm on the deck edge's line, and creases of up to 1.3°. `bala-cola-lisa` reports these as 44 AVISO lines out of 152 cases, not as failures. The front is identical to main, to 0.0000 mm, on 89 cases of the clásico and 11 of his design. A fix needs its own round: the two crown fades tried here made it worse (see the decisions log).
+- **The crest is "the rearmost point within 2 mm of the top"**, a threshold rather than a property of the shape. A long flat roof that dips by 2.1 mm is cut there.
+- **A very short canopy keeps a little of the egg.** When the crest is within 0.60 m of the windscreen's start, the rear deck starts 0.60 m back from it, and the canopy's own section stays between the crest and there. The check starts where the deck does, so it does not see that stretch.
+- **The Cd cost of removing the egg is a tunnel reading on a part of the body the tunnel reads poorly.** On his design the wake term varies by 0.017 across `tCaida` with no clear trend. See the 2026-11-13 note on the trailing edge.
+
+
+## 2026-11-15 — Garage Smera and EQXX: shortcuts
+
+- **Both bodies were modelled without looking at a single photo** (image hosts are blocked from the build environment). Proportions follow the published figures; every line, the Smera's mudguards and linkage, and the EQXX's tracks and overhangs are estimates written down in `smeraForma.ts` / `eqxxForma.ts`. A pass with photos would change the shapes, not the figures.
+- **The Smera does not steer and its tilt is a toy animation**: the same lean on both axles, no steering, no suspension travel. The cornering simulation must read `SMERA_DINAMICA`, not the mesh. Its centre of gravity (0.48 m kerb, 0.55 m with a driver) is an estimate; its tyres (145/70 R14) come from auto123.com via the circuit's table, a page this branch did not fetch.
+- **The Smera has no `aero`** (no published Cd), so it is out of «Cd y consumo» and the tunnel shows only its own estimate.
+- **`tesla3` and `caterham7` are still grey placeholder boxes** (4.0 × 1.8 × 1.4 m, hidden by default but listed as reference cars), and they now sit in the size order by that invented 4.0 m. The Model 3 is not modelled. 20 minutes to drop them from the list today; a real Model 3 is a Model Y-sized job.
+- **The EQXX's tunnel estimate is 16 % high** (0.197 against 0.170). Not tuned: shaping a reference car to agree with the tunnel would hide the method's error, and it stays out of the fit.

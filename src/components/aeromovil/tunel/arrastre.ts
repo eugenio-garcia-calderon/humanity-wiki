@@ -107,5 +107,11 @@ export const RUEDAS_GARAJE: Record<string, { ruedas: RuedaTunel[]; nota: string;
   // 255/45 R19 (0.712 m × 0.255 m) in open arches, all four (modeloYForma.ts). Added 2026-11-12, outside the fit:
   // Eugenio decided that day not to move the calibration, so no Cd shown for our designs changes
   modeloY: { ruedas: [...Array(4)].map(() => ({ ...tyre(255, 45, 19), tipo: 'paso' as const })), nota: 'cuatro ruedas de 19″ en pasos de rueda', fueraDelAjuste: 'añadido el 2026-11-12 sin tocar la calibración (decisión de Eugenio)' },
+  // 185/65 R20 (0.749 m × 0.185 m) behind flat covers in arches flush with the body (eqxxForma.ts). Added 2026-11-15,
+  // outside the fit like the Model Y: no Cd shown for our designs changes
+  eqxx: { ruedas: [...Array(4)].map(() => ({ ...tyre(185, 65, 20), tipo: 'paso' as const })), nota: 'cuatro ruedas de 20″ tras tapacubos lisos, enrasadas', fueraDelAjuste: 'añadido el 2026-11-15 sin tocar la calibración (como el Model Y)' },
+  // Lumeneo Smera: four 145/70 R14 (smeraForma.ts) at the corners, in the open under their mudguards. It has no
+  // published Cd, so it never enters the fit (the fit only takes cars with `aero`); the tunnel shows its own estimate
+  smera: { ruedas: [...Array(4)].map(() => ({ ...tyre(145, 70, 14), tipo: 'fuera' as const })), nota: 'cuatro ruedas al aire bajo sus guardabarros (145/70 R14)' },
   bala: { ruedas: [{ d: 0.61, w: 0.08, tipo: 'dentro' }, { d: 0.61, w: 0.08, tipo: 'dentro' }, { d: 0.508, w: 0.07, tipo: 'carenado' }, { d: 0.508, w: 0.07, tipo: 'carenado' }], nota: 'delantera y trasera dentro de la carrocería, las laterales en carenados sobre brazos' },
 };
