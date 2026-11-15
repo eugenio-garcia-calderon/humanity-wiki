@@ -1,6 +1,7 @@
 import type { Modelo, ModeloBase } from '../geometria';
 import type { ModeloBala } from '../geometriaBala';
 import type { ModeloTriciclo } from '../geometriaTriciclo';
+import type { ModeloBasculante } from '../geometriaBasculante';
 import { areaSuperelipse, funcionSeccion } from './malla';
 import type { RuedaTunel } from './arrastre';
 import type { Envolvente, Resolucion } from './malla';
@@ -45,7 +46,8 @@ export function envolventeModelo(m: ModeloBase): Envolvente {
 }
 
 /** Our design. `area` is the editor's frontal area (res.A), the one its Cd refers to (not for the Bala: see `cuerpoBala`). */
-export function cuerpoAeromovil(m: Modelo, area: number, nombre = m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala en rombo' : m.tipo === 'triciclo' ? (m.traseras ? 'Cuadriciclo Bala clásico' : 'Triciclo Bala') : 'Aeromóvil Gota'): CuerpoTunel {
+export function cuerpoAeromovil(m: Modelo, area: number, nombre = m.tipo === 'basculante' ? 'Cuadriciclo Basculante' : m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala en rombo' : m.tipo === 'triciclo' ? (m.traseras ? 'Cuadriciclo Bala clásico' : 'Triciclo Bala') : 'Aeromóvil Gota'): CuerpoTunel {
+  if (m.tipo === 'basculante') return cuerpoBasculante(m, nombre);
   if (m.tipo === 'bala') return cuerpoBala(m, nombre);
   if (m.tipo === 'triciclo') return cuerpoTriciclo(m, nombre);
   const xs = m.ruedas.map(r => r.x);
@@ -112,6 +114,32 @@ export function cuerpoTriciclo(m: ModeloTriciclo, nombre = m.traseras ? 'Cuadric
         : [{ d: 2 * m.rR, w: m.F.ANCHO_NEU, tipo: 'dentro' as const }]),
     ],
     ejes: [m.xF, m.xR],
+  };
+}
+
+/**
+ * The Cuadriciclo Basculante (2026-11-15): its body's silhouette every 3 cm (basculante/forma.ts), a section exponent
+ * between its upper and lower halves' (they are superellipses of their own), and as reference area the largest section
+ * of that silhouette, as the Triciclo. The front wheels in their fairings ('carenado': the fairings themselves are
+ * outside the silhouette, as the Triciclo's), the rear ones inside the body, their bottoms showing ('dentro'). The
+ * calibration (tunel/calibracion.ts, arrastre.ts) is the same for every body: nothing of it changes here.
+ */
+export function cuerpoBasculante(m: ModeloBasculante, nombre = 'Cuadriciclo Basculante'): CuerpoTunel {
+  const envolvente = m.F.envolvente(), n = Math.min(3, Math.max(2, (m.F.D.nU + m.F.D.nL) / 2));
+  const { seccion, xMorro, xCola } = funcionSeccion(envolvente);
+  let area = 0;
+  for (let k = 0; k <= 200; k++) { const s = seccion(xMorro + (xCola - xMorro) * k / 200); area = Math.max(area, areaSuperelipse(s.a, s.b, n)); }
+  const [d, t] = m.esquinas.filter(q => q.s > 0);
+  return {
+    id: 'aeromovil', nombre, x: 0, z: 0, giro: 0, envolvente, n,
+    area, fuenteArea: m.pod ? 'sección mayor de la carrocería (sin los carenados delanteros)' : 'sección mayor de la carrocería',
+    // (2026-11-15: with the front wheels in the nose, they are inside the body as the rear ones, their bottoms showing)
+    ruedas: [
+      // (the Smera body: its four wheels in open wells, standing out at the sides, as the Model Y's in their arches)
+      { d: 2 * d.r, w: d.w, tipo: m.smera ? 'paso' : m.pod ? 'carenado' : 'dentro' }, { d: 2 * d.r, w: d.w, tipo: m.smera ? 'paso' : m.pod ? 'carenado' : 'dentro' },
+      { d: 2 * t.r, w: t.w, tipo: m.smera ? 'paso' : 'dentro' }, { d: 2 * t.r, w: t.w, tipo: m.smera ? 'paso' : 'dentro' },
+    ],
+    ejes: [0, m.xR],
   };
 }
 

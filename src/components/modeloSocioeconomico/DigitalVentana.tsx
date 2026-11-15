@@ -13,6 +13,8 @@ import {
 import { Apartado, Cifra, Mas } from './ventanas';
 import { Fuente, Muestra } from './piezas';
 import { cn } from '../../utils/cn';
+import { Anillo } from './graficos/Anillo';
+import { Barras } from './graficos/Barras';
 
 /** A source link by id from this window's own list. */
 function F({ id }: { id: string }) {
@@ -33,13 +35,13 @@ export function DigitalVentana() {
           La propuesta: te das de alta una vez con tu móvil y tu correo, y para firmar desbloqueas el móvil y escribes el código que te llega por SMS. Sin instalar nada.
           Y un teléfono de atención para quien no tenga móvil.</>}>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Cifra valor={`${PASOS_HOY.length} pasos`} tono="mal"
+          <Cifra clase="dato" valor={`${PASOS_HOY.length} pasos`} tono="mal"
             texto={<>para firmar por primera vez con el certificado de la FNMT: {instalar} programas que instalar y una visita a una oficina<F id="fnmt-pasos" /></>} />
-          <Cifra valor={`${CIFRAS.fnmtValidezAnos} años`} tono="mal"
+          <Cifra clase="dato" valor={`${CIFRAS.fnmtValidezAnos} años`} tono="mal"
             texto={<>dura ese certificado. Luego, o si cambias de ordenador, vuelta a empezar<F id="fnmt-validez" /></>} />
-          <Cifra valor={porcentaje(INE_2025.tratanConAdministracion, 1)}
+          <Cifra clase="dato" valor={porcentaje(INE_2025.tratanConAdministracion, 1)}
             texto={<>de las personas de 16 a 74 años hizo algún trámite por internet en 2025; solo el {porcentaje(INE_2025.usos[4].pct, 1)} presentó ella misma la renta<F id="ine-tic" /></>} />
-          <Cifra valor="3 pasos" tono="bien" nota="Propuesta, aún no existe"
+          <Cifra clase="propuesta" valor="3 pasos" tono="bien" nota="Propuesta, aún no existe"
             texto="alta una vez; luego, aviso en el móvil, desbloquear y escribir el código del SMS. Ningún programa que instalar" />
         </div>
       </Apartado>
@@ -68,23 +70,24 @@ export function DigitalVentana() {
         <p className="mt-6 max-w-3xl text-[15px] leading-relaxed text-slate-700">
           Lo que sí funciona ya es el código por SMS de Cl@ve: <strong>{millones(CIFRAS.clavePin2022)} de personas</strong> registradas a finales de 2022, el último dato publicado que hemos encontrado<F id="aeat-clave-2022" />.
         </p>
-        <Mas titulo="qué hace la gente con la administración por internet">
-          <figure>
-            <figcaption className="text-sm text-slate-600">Personas de 16 a 74 años, en 2025. El {porcentaje(INE_2025.usanInternet, 1)} usa internet.<F id="ine-tic" /></figcaption>
-            <ul className="mt-4 max-w-3xl space-y-3" role="img"
-              aria-label={INE_2025.usos.map(u => `${u.t}: ${numero(u.pct, 1)} %`).join('; ')}>
-              {INE_2025.usos.map(u => (
-                <li key={u.t} className="grid gap-1 sm:grid-cols-[280px_1fr] sm:items-center sm:gap-4">
-                  <span className="text-sm text-slate-700">{u.t}</span>
-                  <span className="flex items-center gap-2">
-                    <span className="h-4 rounded-r-[4px] bg-sky-700" style={{ width: `${u.pct * 0.8}%` }} />
-                    <span className="text-sm font-semibold tabular-nums text-slate-900">{porcentaje(u.pct, 1)}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-3 max-w-3xl text-sm leading-relaxed text-slate-600">Mirar y pedir cita lo hace mucha gente; presentar o firmar algo, bastante menos. El INE no publica en esta nota por qué. La app Mi Carpeta Ciudadana tiene {millones(CIFRAS.carpetaUsuarios)} de usuarios<F id="carpeta" />: la gente ya usa el móvil con la administración.</p>
-          </figure>
+        <div className="mt-6 grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
+          <Anillo titulo="Quién hace trámites por internet"
+            subtitulo="Personas de 16 a 74 años, en 2025"
+            centro={porcentaje(INE_2025.tratanConAdministracion, 0)} centroTexto="hace trámites"
+            formatoPct={v => porcentaje(v, 1)}
+            partes={[
+              { etiqueta: 'Hizo algún trámite con la administración por internet', valor: INE_2025.tratanConAdministracion, texto: 'Trámites', serie: 'tinta' },
+              { etiqueta: 'Usa internet, pero no para trámites', valor: INE_2025.usanInternet - INE_2025.tratanConAdministracion, texto: 'Internet sin trámites', serie: 'gris' },
+              { etiqueta: 'No usa internet', valor: 100 - INE_2025.usanInternet, texto: 'Sin internet', serie: 'claro', nota: 'Para ellos, la propuesta mantiene un teléfono de atención.' },
+            ]}
+            pie={<>INE, encuesta de uso de tecnologías en los hogares; la parte gris es la resta entre quien usa internet ({porcentaje(INE_2025.usanInternet, 1)}) y quien hace trámites<F id="ine-tic" /></>} />
+          <Barras titulo="Qué hace la gente con la administración por internet"
+            subtitulo="De cada 100 personas de 16 a 74 años, en 2025"
+            barras={INE_2025.usos.map((u, i) => ({ etiqueta: u.t, valor: u.pct, texto: porcentaje(u.pct, 1), serie: i === INE_2025.usos.length - 1 ? 'tinta' as const : 'gris' as const }))}
+            pie={<>Mirar y pedir cita lo hace mucha gente; presentar o firmar algo, bastante menos<F id="ine-tic" /></>} />
+        </div>
+        <Mas titulo="qué dice ese dato y qué no">
+          <p className="max-w-3xl text-sm leading-relaxed text-slate-600">El INE no publica en esta nota por qué se presenta o se firma mucho menos de lo que se consulta. La app Mi Carpeta Ciudadana tiene {millones(CIFRAS.carpetaUsuarios)} de usuarios<F id="carpeta" />: la gente ya usa el móvil con la administración.</p>
         </Mas>
         <Mas titulo="la ayuda por teléfono y en persona, hoy">
           <div className="max-w-3xl space-y-3 text-[15px] leading-relaxed text-slate-700">

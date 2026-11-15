@@ -5,22 +5,19 @@
 // and courts working as one service, without the judge depending on the police.
 // Data and sources: src/data/justicia.ts.
 import { useState } from 'react';
-import { ArrowDown, CornerUpLeft, Monitor, Timer } from 'lucide-react';
+import { Monitor, Timer } from 'lucide-react';
+import { F, Recorrido } from './JusticiaPiezas';
+import { Ocupacion, Reincidencia } from './JusticiaReincidencia';
 import { ESCALAS, ESPANA, MATRIZ, TERCIOS, modeloPorFuncion, numero, porcentaje } from '../../data/modeloSocioeconomico';
 import {
-  ACTIVIDAD_2025, CAMBIOS_2025, DURACION_APELACION, DURACION_DIAS, DURACION_SOCIAL_MESES, FUENTES_JUSTICIA, FUENTE_JUSTICIA,
+  ACTIVIDAD_2025, CAMBIOS_2025, DURACION_APELACION, DURACION_DIAS, DURACION_SOCIAL_MESES, FUENTES_JUSTICIA,
   JUECES, JURISDICCIONES, JUSTICIA_ESCALAS, NO_CAMBIA_2025, PLAZOS_PROPUESTA, PRESUPUESTO_HAB_2022, RECORRIDO_HOY,
-  RECORRIDO_PROPUESTA, REFORMA, RETOS_JUSTICIA, vaciarCola, type Paso,
+  RECORRIDO_PROPUESTA, REFORMA, RETOS_JUSTICIA, vaciarCola,
 } from '../../data/justicia';
 import { Apartado, Cifra, Mas } from './ventanas';
 import { Fuente, Muestra, Regulador } from './piezas';
 import { cn } from '../../utils/cn';
-
-/** A source link by id, from this window's own list. */
-function F({ id }: { id: string }) {
-  const f = FUENTE_JUSTICIA[id];
-  return f ? <Fuente url={f.url} titulo={f.titulo} /> : null;
-}
+import { Pares } from './graficos/Pares';
 
 const millonesTxt = (n: number) => `${numero(n / 1e6, 2)} millones`;
 const texto = 'max-w-3xl space-y-3 text-[15px] leading-relaxed text-slate-700';
@@ -30,6 +27,8 @@ export function JusticiaVentana() {
     <>
       <Resumen />
       <Propuesta />
+      <Reincidencia />
+      <Ocupacion />
       <Hoy />
       <CivilPenal />
       <Cola />
@@ -53,48 +52,47 @@ function Resumen() {
     <Apartado id="justicia" titulo="Una sola puerta para la justicia, y sin listas de espera"
       entradilla={<>Hoy, quien denuncia tiene que acertar el camino: civil, penal, administrativo o laboral. Si se equivoca, empieza otra vez. Y cada camino tiene su cola. La propuesta: denunciar una sola vez, que el sistema lo reparta, jueces de guardia en las comisarías, juicios rápidos y a distancia, y plazos máximos.</>}>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Cifra valor={`${DURACION_DIAS[0].espana} días`} tono="mal"
+        <Cifra clase="dato" valor={`${DURACION_DIAS[0].espana} días`} tono="mal"
           texto={<>tardaría de media en resolverse un asunto civil, según la estimación oficial. En la mediana de la UE, {DURACION_DIAS[0].ue}<F id="cepej-2024" /></>} nota="Primera instancia, 2024. Si alguien recurre, se suma la apelación." />
-        <Cifra valor={millonesTxt(ACTIVIDAD_2025.pendientes)} tono="mal"
+        <Cifra clase="dato" valor={millonesTxt(ACTIVIDAD_2025.pendientes)} tono="mal"
           texto={<>de asuntos esperando en los juzgados a final de 2025, un {porcentaje(ACTIVIDAD_2025.pendientesVariacion, 1)} más que un año antes<F id="cgpj-2025" /></>} />
-        <Cifra valor={`≈ ${numero(Math.round(cola.faltan / 100) * 100)}`} tono="neutro"
+        <Cifra clase="calculo" valor={`≈ ${numero(Math.round(cola.faltan / 100) * 100)}`} tono="neutro"
           texto={<>jueces más harían falta para llegar a la mediana de la UE: {numero(JUECES.ue100k, 1)} por cada 100.000 habitantes. Hoy hay {numero(JUECES.por100k, 1)}<F id="cepej-2024" /></>} nota="Estimación nuestra. Ver «Cómo se vacía la cola»." />
-        <Cifra valor="1 denuncia" tono="bien"
-          texto="y el sistema la lleva a lo civil, a lo penal o a los dos. Nadie vuelve a empezar." nota="Propuesta." />
+        <Cifra clase="propuesta" valor="1 denuncia" tono="bien"
+          texto="y el sistema la lleva a lo civil, a lo penal o a los dos. Nadie vuelve a empezar." />
       </div>
       <GraficaDuracion />
     </Apartado>
   );
 }
 
-/** First-instance disposition time, Spain vs EU median, one shared scale. */
+/** Disposition time, Spain vs EU median: first instance and appeal, each pair on one shared scale. */
 function GraficaDuracion() {
-  const max = 450;
+  const A = DURACION_APELACION;
+  const dias = (v: number) => `${numero(v)} días`;
+  const nota = (es: number, ue: number) => (es > ue ? `España tarda ${numero(es / ue, 1)} veces lo que la mediana.` : 'Aquí España es más rápida que la mediana.');
   return (
-    <figure className="mt-8 rounded-2xl border border-slate-200 bg-white p-5">
-      <figcaption>
-        <span className="block text-lg font-bold text-slate-900">Cuánto tardaría en resolverse un asunto, en días</span>
-        <span className="mt-1 block text-sm text-slate-600">Primera instancia, 2024. España frente a la mediana de la UE: la mitad de los países tarda menos y la otra mitad, más.<F id="cepej-2024" /></span>
-      </figcaption>
-      <div className="mt-4 space-y-5" role="img"
-        aria-label={DURACION_DIAS.map(d => `${d.nombre}: España ${d.espana} días, mediana de la UE ${d.ue} días`).join('; ')}>
-        {DURACION_DIAS.map(d => (
-          <div key={d.id}>
-            <p className="text-sm font-semibold text-slate-900">{d.nombre}</p>
-            {[{ t: 'España', v: d.espana, c: 'bg-rose-700' }, { t: 'Mediana UE', v: d.ue, c: 'bg-slate-400' }].map(b => (
-              <div key={b.t} className="mt-1 flex items-center gap-2">
-                <span className="w-[4.5rem] shrink-0 text-xs text-slate-600">{b.t}</span>
-                <span className={cn('h-4 shrink-0 rounded-r-[4px]', b.c)} style={{ width: `${(b.v / max) * 70}%` }} />
-                <span className="whitespace-nowrap text-sm tabular-nums text-slate-700">{b.v}</span>
-              </div>
-            ))}
-          </div>
-        ))}
+    <div className="mt-8">
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Pares titulo="Cuánto tardaría en resolverse un asunto, en días"
+          subtitulo="Primera instancia, 2024. España frente a la mediana de la UE: la mitad de los países tarda menos y la otra mitad, más"
+          series={['España', 'Mediana de la UE']} formato={dias}
+          pares={DURACION_DIAS.map(d => ({ etiqueta: d.nombre, a: d.espana, b: d.ue, nota: nota(d.espana, d.ue) }))}
+          pie={<>Consejo de Europa (CEPEJ) para el Cuadro de Indicadores de la Justicia de la UE<F id="cepej-2024" /></>} />
+        <Pares titulo="Y si alguien recurre: la apelación, en días"
+          subtitulo="Segunda instancia, 2024. Se suma a la primera"
+          series={['España', 'Mediana de la UE']} formato={dias}
+          pares={[
+            { etiqueta: 'Civil y mercantil', a: A.civil, b: A.civilUE, nota: nota(A.civil, A.civilUE) },
+            { etiqueta: 'Contencioso', a: A.contencioso, b: A.contenciosoUE, nota: nota(A.contencioso, A.contenciosoUE) },
+            { etiqueta: 'Penal', a: A.penal, b: A.penalUE, nota: nota(A.penal, A.penalUE) },
+          ]}
+          pie={<>Misma fuente<F id="cepej-2024" /></>} />
       </div>
-      <p className="mt-4 text-xs leading-relaxed text-slate-500">
+      <p className="mt-3 max-w-3xl text-xs leading-relaxed text-slate-500">
         Es una estimación oficial, no un tiempo medido: los asuntos pendientes divididos por los que se resuelven cada día. En lo social (despidos, salarios) el Consejo General del Poder Judicial calcula {numero(DURACION_SOCIAL_MESES.total, 1)} meses de media, y {numero(DURACION_SOCIAL_MESES.despidos, 1)} en los despidos (2024)<F id="ccoo-social" />.
       </p>
-    </figure>
+    </div>
   );
 }
 
@@ -161,7 +159,7 @@ function Hoy() {
 
 function CivilPenal() {
   return (
-    <Apartado id="justicia-civil-penal" titulo="Lo penal va primero" fondo="blanco"
+    <Apartado id="justicia-civil-penal" fondo="blanco" titulo="Lo penal va primero"
       entradilla={<><span className="mb-2 block text-sm font-medium text-slate-500">Lo que los juristas llaman «prejudicialidad penal»</span>Hoy hay que elegir entre lo civil y lo penal porque son dos preguntas distintas. Lo penal pregunta: ¿alguien cometió un delito y merece un castigo? Lo civil pregunta: ¿alguien te debe algo y cuánto? Un mismo hecho tiene a menudo las dos caras, y cada una va por su puerta.</>}>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="rounded-2xl border border-slate-200 bg-white p-5">
@@ -231,34 +229,6 @@ function Reforma() {
   );
 }
 
-function Recorrido({ titulo, pasos, tono }: { titulo: string; pasos: Paso[]; tono: 'mal' | 'bien' }) {
-  return (
-    <div className={cn('rounded-2xl border p-5', tono === 'mal' ? 'border-rose-200 bg-rose-50/50' : 'border-emerald-200 bg-emerald-50/50')}>
-      <p className={cn('text-lg font-bold', tono === 'mal' ? 'text-rose-800' : 'text-emerald-800')}>{titulo}</p>
-      <ol className="mt-4">
-        {pasos.map((p, i) => (
-          <li key={p.t}>
-            {i > 0 && (
-              <span aria-hidden className="flex justify-center py-1 text-slate-400">
-                {p.vuelta ? <CornerUpLeft className="h-4 w-4 text-rose-600" /> : <ArrowDown className="h-4 w-4" />}
-              </span>
-            )}
-            <div className={cn('rounded-xl border bg-white p-3', p.vuelta ? 'border-dashed border-rose-300' : 'border-slate-200')}>
-              <p className="font-semibold text-slate-900"><span className="mr-1.5 tabular-nums text-slate-400">{i + 1}.</span>{p.t}</p>
-              <p className="mt-0.5 text-sm leading-relaxed text-slate-700">{p.d}{p.fuente && !p.tiempo && <F id={p.fuente} />}</p>
-              {p.tiempo && (
-                <p className={cn('mt-1.5 text-sm font-semibold', tono === 'mal' ? 'text-rose-700' : 'text-emerald-700')}>
-                  {p.tiempo}{p.fuente && <F id={p.fuente} />}
-                </p>
-              )}
-            </div>
-          </li>
-        ))}
-      </ol>
-    </div>
-  );
-}
-
 function Propuesta() {
   return (
     <Apartado id="justicia-propuesta" titulo="La propuesta: denunciar una vez, y que la justicia vaya a ti" fondo="blanco"
@@ -317,10 +287,10 @@ function Cola() {
             ayuda={`El Gobierno ha anunciado ${REFORMA.plazasNuevas}. Para la mediana de la UE, unos ${numero(tope)}.`} />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Cifra valor={`≈ ${numero(Math.round(c.diasCivil))} días`} tono="neutro"
+          <Cifra clase="calculo" valor={`≈ ${numero(Math.round(c.diasCivil))} días`} tono="neutro"
             texto={<>tardaría un asunto civil nuevo, frente a los {DURACION_DIAS[0].espana} de hoy. Mediana de la UE: {DURACION_DIAS[0].ue}<F id="cepej-2024" /></>}
             nota="Estimación nuestra: si cada juez nuevo resuelve como la media de hoy, una vez formado." />
-          <Cifra valor={mill(Math.round(c.costeMedio / 10) * 10)} tono="neutro"
+          <Cifra clase="dato" valor={mill(Math.round(c.costeMedio / 10) * 10)} tono="neutro"
             texto={<>al año, en el punto medio. Cada plaza, con su personal, cuesta entre 100.000 € y 600.000 €<F id="moncloa-instancia" /></>}
             nota={`Horquilla: de ${mill(c.costeMin)} a ${mill(c.costeMax)} al año.`} />
         </div>
@@ -343,7 +313,7 @@ function Cola() {
 
 function Escalas() {
   return (
-    <Apartado id="justicia-escalas" titulo="Qué hace cada escala" fondo="blanco"
+    <Apartado id="justicia-escalas" fondo="blanco" titulo="Qué hace cada escala"
       entradilla="La justicia la dicta un juez independiente. Pero llegar a ella, los medios y las reglas se reparten entre las ocho escalas, de la persona al planeta.">
       <TarjetasEscalas escalas={ESCALAS.slice(0, 3)} />
       <Mas titulo={`las otras ${ESCALAS.length - 3} escalas, de la provincia al planeta`}>

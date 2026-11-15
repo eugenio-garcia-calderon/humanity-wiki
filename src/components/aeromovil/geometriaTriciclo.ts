@@ -30,9 +30,9 @@
 
 import type { Comprobacion, MaterialCarenado, MaterialChasis, Parametros, PuntosOcupante, Pulgadas, Resultados, Rueda, Tubo, P3 } from './geometria';
 import { MATERIALES_CARENADO, MATERIALES_CHASIS, RENDIMIENTO_SOLAR, TRICICLO_DEFECTO, largoTubo } from './geometria';
-import { crearForma, type DimBala, type FormaBala } from './garaje/balaForma';
-import { ALETA, APLASTADO_BALA, ASIENTO, alturasPod, anchoMaxPod, anchoSalpicadero, areaMarco, areaXT, bandaMarco, brazosDe, contornoCupula, escalaManillar, extremoManillar, podDe, semiAncho, techoEn, ventanasDe, type Asientos, type OpcionesVentanas } from './garaje/balaMedidas';
-import { portonDe, puertaDe, vueloPorton, vueloPuerta, type OpcionesPorton, type OpcionesPuertas, type V3 } from './garaje/balaPuertas';
+import { T3, T_CUBIERTA, crearForma, punto, type DimBala, type FormaBala } from './garaje/balaForma';
+import { ALETA, APLASTADO_BALA, ASIENTO, BUTACA, alturasPod, anchoMaxPod, anchoSalpicadero, areaMarco, areaXT, bandaMarco, brazosDe, contornoCupula, escalaManillar, extremoManillar, podDe, semiAncho, semiRespaldoButaca, techoEn, ventanasDe, type Asientos, type OpcionesVentanas } from './garaje/balaMedidas';
+import { MONTANTE_B, MONTANTE_C, choquesHojas, hojasPuerta, portonDe, puertaDe, vueloPorton, vueloPuerta, type OpcionesPorton, type OpcionesPuertas, type V3 } from './garaje/balaPuertas';
 import {
   CADERA_SOBRE_ASIENTO, DESLIZADORES_BALA, HUECO_CARENADO, MEDIA_CABEZA, TALLA_SENTADO,
   areaFrontalBala, areasBala, carenadoCuerpo, neumaticoCarenado, pielBala, rodilla, ruedaDentro, type ClaveBala, type ResultadosBala,
@@ -65,7 +65,7 @@ export interface CamposTriciclo {
   tPiesX: number; tPiesY: number;     // plataformas del piloto: + hacia delante, + arriba (m)
   tMOcc: number; tMAsiento: number;   // kg
   // Interior, round three (2026-11-11): the seating layout and the folding rows. Optional when saved: an older design takes the defaults (astride, as before).
-  tAsientos: 'horcajadas' | 'filas';  // a horcajadas (2 plazas, como hasta ahora) o tres filas 1 + 2 + 1
+  tAsientos: 'horcajadas' | 'filas' | 'butacas';  // a horcajadas (2 plazas, como hasta ahora), tres filas 1 + 2 + 1 o (round 3 interior) dos butacas en tándem como el Aptera
   tFila2: 'abierta' | 'plegada';      // fila 2 (dos asientos juntos): con sus dos pasajeros, o plegada como suelo del maletero
   tFila3: 'abierta' | 'plegada';      // fila 3 (un asiento pequeño en el centro), lo mismo
   tFila2X: number;     // caderas de la fila 2 detrás de las del piloto (m)
@@ -84,6 +84,18 @@ export interface CamposTriciclo {
   // tenga 4 ruedas»). Optional when saved: a design without them has one rear wheel, and its rear track is its front one.
   tTraseras: 'una' | 'dos';   // una rueda trasera en la cola (triciclo) o dos en carenados (cuatro ruedas)
   tViaTras: number;    // vía trasera, centro a centro de las dos ruedas traseras (m); solo con 'dos'
+  // 2026-11-15 (Eugenio: «haz que pueda bascular», on his «Smeraptera»). Optional when saved: absent, it does not lean.
+  tBascula: 'no' | 'si';   // con cuatro ruedas: la cabina y los cuatro carenados se inclinan en las curvas, cada carenado sobre sus brazos en paralelogramo
+  tBascMax: number;    // inclinación máxima (°)
+  // 2026-11-15 (Eugenio, «Rombo Bala»: «quiero que tenga las ruedas en rombo, una delante, una atrás y dos laterales basculantes»)
+  tRuedas: 'clasica' | 'rombo';   // dos delante en carenados (hasta ahora) o en rombo: una en el morro, que gira, dos laterales en carenados y una en la cola
+  tEjeLat: number;     // en rombo: las ruedas laterales, cuánto van detrás de la del morro (m)
+  // 2026-11-15 (Eugenio: «añadir una opción de motor híbrido tipo PHEV con ejes planetarios como el Prius»)
+  tPropulsion: 'electrico' | 'phev';   // solo eléctrico (hasta ahora) o híbrido enchufable: motor de gasolina unido por un engranaje planetario
+  tPhevKW: number;     // potencia del motor de gasolina (kW)
+  tRendTerm: number;   // rendimiento del motor de gasolina (%): energía del combustible que sale en el eje
+  tRendTrans: number;  // rendimiento de la conversión mecánica (%): engranaje planetario, generador y motor eléctrico, del eje del motor a la rueda
+  tDeposito: number;   // depósito de gasolina (L)
   tMRueda: number; tMFreno: number; tMSuspDel: number; tMSuspTras: number; tMDir: number;   // kg
   // Propulsión
   tKWNom: number; tKWPico: number; tMMotor: number; tMInversor: number; tVel: number;
@@ -100,7 +112,7 @@ export interface CamposTriciclo {
   tVolX: number; tVolY: number;      // volante: + hacia el piloto, + arriba (m)
   tVolInc: number;     // inclinación del aro respecto a la vertical, arriba hacia delante (°)
   tVolD: number;       // diámetro del aro (m)
-  tSalpicadero: 'no' | 'si';        // la pantallita sobre el depósito (hasta ahora) o un salpicadero de lado a lado
+  tSalpicadero: 'no' | 'si' | 'blanco';   // la pantallita sobre el depósito (hasta ahora), un salpicadero de lado a lado o (round 3 interior) uno blanco con más detalles
   tSalpY: number;      // salpicadero: + arriba (m)
   tSalpFondo: number;  // salpicadero: cuánto llega hacia el piloto desde el pie del parabrisas (m)
   tAcceso: 'cupula' | 'puertas';    // la cúpula entera se abre (hasta ahora) o dos puertas laterales como las del Aptera
@@ -118,6 +130,43 @@ export interface CamposTriciclo {
   tMalAbre: number;    // portón: ángulo de apertura (°)
   tMalLado: number;    // portón: sus cantos, este ángulo hacia arriba desde el centro de la sección de la cola (°): más, más estrecho
   tSolarCola: 'no' | 'si';  // paneles solares: solo en la cúpula (hasta ahora) o también por encima de la cola hasta su aro
+  // Round 3 interior (seats, dashboard, chassis, masses, battery ranges). Optional when saved: absent is today's frame.
+  tChLargo: 'torreta' | 'eje';   // largueros hasta la torreta del amortiguador (hasta ahora) o hasta el eje trasero con una cuna trasera (solo con dos ruedas traseras)
+  tChSep: number;      // separación de los dos largueros, de eje a eje (m), con una carrocería de 85 cm de ancho o más (más estrecha, se juntan con ella)
+  // ── Round 3 body (nose, tail, roof, hatch, fin, solar, second door) — 2026-11-12, Eugenio on the «Cuadriciclo Bala
+  // clásico». Optional when saved: a design without them is built as before (each default is today's shape).
+  tMorroLinea: number;   // la punta del morro: 0 en aguja (la ojiva de hasta ahora) … 1 una línea ancha y horizontal como el Aptera
+  tMorroAlto: number;    // la punta del morro, más arriba (+) o más abajo (−) que hasta ahora (m)
+  tFaro: 'no' | 'si' | 'barra';    // un faro en el centro del morro, en su punta, como el de una moto; o (2026-11-13) una barra de luz por todo el borde del morro, como el Aptera
+  tFaroD: number;        // su ancho (m); con el morro en línea se aplasta en óvalo
+  tColaPlana: number;    // la punta de la cola: 0 en punta (hasta ahora) … 1 plana, ancha y cortada como el Aptera
+  tTechoPlano: number;   // lo alto de la carrocería: 0 redondeado (hasta ahora) … 1 plano
+  tCaida: number;        // la caída del techo hacia el maletero y la cola: − cae antes, + aguanta arriba y cae más tarde
+  // 2026-11-15 (Eugenio: «formas tan perfectas como el avión jet»)
+  tSubida: number;       // la subida de la cúpula desde el capó: + sube antes y más derecha (cabina de jet), − más tarde y tumbada
+  tBajosMorro: number;   // los bajos del morro suben hacia la punta (0 plano … 1, hasta 20 cm)
+  tMorroCurva: number;   // con la cubierta lisa: cómo cae el capó hacia el borde del morro
+  tConAleta: 'si' | 'no';    // la aleta de cola (hasta ahora, siempre)
+  tSolarMorro: 'no' | 'si';  // paneles solares también encima del morro
+  tPuertas2: 'no' | 'si';    // una segunda puerta por lado, para los pasajeros, que se abre hacia atrás
+  tPuerta2Parte: number; // dónde se parten las dos puertas, detrás de donde iba la rueda delantera del Cuadriciclo en rombo (m)
+  tBisagra2Y: number;    // puerta de atrás: dónde va su bisagra a lo largo de su canto de atrás (0 abajo, 1 arriba)
+  tBisagra2Inc: number;  // puerta de atrás: su eje, con lo de arriba inclinado hacia delante (°)
+  tPuerta2Abre: number;  // puerta de atrás: ángulo de apertura (°)
+  tLineaCupula: number;  // la línea entre la carrocería pintada y el cristal de la cúpula, más arriba (+) o más abajo (−), todo alrededor (m)
+  // ── Round 4 doors / roof frame / height (2026-11-13, Eugenio on the «Cuadriciclo Bala clásico»). Optional when saved:
+  // absent, 0 (no frame), and the design is built exactly as before.
+  tMarcoTecho: number;   // marco de laminado entre el techo solar y el cristal: arriba del parabrisas y a lo largo de los dos carriles del techo (m; 0, sin marco)
+  // ── The smooth body (2026-11-13). Optional when saved: absent is 'redonda', the shape as before.
+  tCubierta: 'redonda' | 'lisa';  // la parte de arriba del morro y de la cola: la de la cúpula (hasta ahora) o una cubierta lisa sin montículos, como el Aptera
+  tColaAncho: number;    // la cola vista desde arriba: 0 se estrecha (hasta ahora) … 1 todo el ancho hasta un borde recto
+  tColaGrosor: number;   // el grosor del borde de la cola (m): 0 se cierra en punta
+  tColaBombeo: number;   // lo que sube la cubierta de la cola sobre la recta de su canto al centro (m): 0 plana
+  tBajosIni: number;     // los bajos de la cola empiezan a subir esto por delante del eje trasero (m; − detrás)
+  tBajosCurva: number;   // cuánto suben: 0 como hasta ahora … 1 una curva larga hasta el borde (Aptera)
+  tMorroAncho: number;   // el morro visto desde arriba: 0 como hasta ahora … 1 todo el ancho, con el frente cuadrado y redondeado
+  tMorroGrosor: number;  // el grosor del borde del morro (m): 0 se cierra en punta
+  tMorroBombeo: number;  // lo que sube el capó sobre la recta de su canto al centro (m)
 }
 export type ClaveTriciclo = keyof CamposTriciclo;
 /**
@@ -129,18 +178,26 @@ export type ClaveTriciclo = keyof CamposTriciclo;
  * motorcycle rims, ≈ 20 kW peak; Elaphe M700 in car rims, ≈ 75 kW peak), not a measurement.
  */
 export type RuedaTriciclo = Pulgadas | 'c13' | 'c14' | 'c15';
-export const RUEDAS_TRICICLO: Record<RuedaTriciclo, { d: number; neuDel: number; neuTras: number; n: string; kg: number; kWBuje: number }> = {
-  '16': { d: 0.405, neuDel: 0.07, neuTras: 0.08, n: '16″ de ciclomotor (405 mm)', kg: 1, kWBuje: 6 },
-  '20': { d: 0.508, neuDel: 0.07, neuTras: 0.08, n: '20″ de ciclomotor (508 mm)', kg: 1, kWBuje: 10 },
-  '24': { d: 0.61, neuDel: 0.07, neuTras: 0.08, n: '24″ de ciclomotor (610 mm)', kg: 1, kWBuje: 12 },
-  '26': { d: 0.66, neuDel: 0.07, neuTras: 0.08, n: '26″ de ciclomotor (660 mm)', kg: 1, kWBuje: 12 },
-  '28': { d: 0.70, neuDel: 0.07, neuTras: 0.08, n: '28″ de ciclomotor (700 mm)', kg: 1, kWBuje: 12 },
+/**
+ * Round 3 interior (2026-11-12, «revisa el tema de los pesos»): `carga`, what one tyre carries (kg): the car sizes' load
+ * index (71, 75 and 77: 345, 387 and 412 kg, the ETRTO table; a 175/55 R15 77T, «max load 908 lbs»: tiresize.com); a
+ * moped tyre of 70-80 mm, index 41-46, about 150-170 kg (approximate: the size alone does not fix it). And the car wheels
+ * re-weighed: a 175/55 R15 tyre is 7.3 kg (Kumho Solus KH16, tiresize.com) and a 15 × 5.5″ cast alloy rim about 6 kg:
+ * 13.3 kg, 2.96 times the moped wheel's 4.5 kg (it was 2.7: 12.2 kg). The 14″ and 13″ scaled the same way (tyre about
+ * 6.3 and 5.6 kg, rim 5.5 and 5.0): 11.8 and 10.6 kg. Estimates on the published tyre, not weighed wheels.
+ */
+export const RUEDAS_TRICICLO: Record<RuedaTriciclo, { d: number; neuDel: number; neuTras: number; n: string; kg: number; kWBuje: number; carga: number }> = {
+  '16': { d: 0.405, neuDel: 0.07, neuTras: 0.08, n: '16″ de ciclomotor (405 mm)', kg: 1, kWBuje: 6, carga: 150 },
+  '20': { d: 0.508, neuDel: 0.07, neuTras: 0.08, n: '20″ de ciclomotor (508 mm)', kg: 1, kWBuje: 10, carga: 160 },
+  '24': { d: 0.61, neuDel: 0.07, neuTras: 0.08, n: '24″ de ciclomotor (610 mm)', kg: 1, kWBuje: 12, carga: 165 },
+  '26': { d: 0.66, neuDel: 0.07, neuTras: 0.08, n: '26″ de ciclomotor (660 mm)', kg: 1, kWBuje: 12, carga: 170 },
+  '28': { d: 0.70, neuDel: 0.07, neuTras: 0.08, n: '28″ de ciclomotor (700 mm)', kg: 1, kWBuje: 12, carga: 170 },
   // tyre diameter = rim + 2 × width × profile: 330 + 2·145·0.70, 356 + 2·165·0.60, 381 + 2·175·0.55 (mm)
-  c13: { d: 0.533, neuDel: 0.145, neuTras: 0.145, n: '13″ de coche, 145/70 R13 (533 mm)', kg: 2.3, kWBuje: 35 },
-  c14: { d: 0.554, neuDel: 0.165, neuTras: 0.165, n: '14″ de coche, 165/60 R14 (554 mm)', kg: 2.5, kWBuje: 45 },
-  c15: { d: 0.574, neuDel: 0.175, neuTras: 0.175, n: '15″ de coche, 175/55 R15 (574 mm)', kg: 2.7, kWBuje: 60 },
+  c13: { d: 0.533, neuDel: 0.145, neuTras: 0.145, n: '13″ de coche, 145/70 R13 (533 mm)', kg: 2.36, kWBuje: 35, carga: 345 },
+  c14: { d: 0.554, neuDel: 0.165, neuTras: 0.165, n: '14″ de coche, 165/60 R14 (554 mm)', kg: 2.62, kWBuje: 45, carga: 387 },
+  c15: { d: 0.574, neuDel: 0.175, neuTras: 0.175, n: '15″ de coche, 175/55 R15 (574 mm)', kg: 2.96, kWBuje: 60, carga: 412 },
 };
-type ClaveTexto = 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tTraseras' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero';
+type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tTraseras' | 'tBascula' | 'tRuedas' | 'tPropulsion' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero';
 export type ClaveNumTriciclo = Exclude<ClaveTriciclo, ClaveTexto>;
 
 // ------------------------------------------------------------------ deslizadores
@@ -151,25 +208,29 @@ export const DEPS_TRICICLO: DepTriciclo[] = ['carroceria', 'interior', 'chasis',
 export const LEMAS_TRICICLO: Record<DepTriciclo | 'proyecto', string> = {
   proyecto: 'el resumen: comprobaciones, peso, consumo y vuelco',
   carroceria: 'la piel del Cuadriciclo en rombo, techo solar y ventanas, carenados y material',
-  interior: 'los asientos (a horcajadas o en tres filas que se pliegan), manillar, plataformas y maletero',
+  interior: 'los asientos (a horcajadas, dos butacas como el Aptera o tres filas que se pliegan), manillar, plataformas y maletero',
   chasis: 'el bastidor de tubos dentro de la carrocería',
   rodaje: 'ejes, vía, ruedas, suspensión y dirección',
   propulsion: 'el motor en el buje de la rueda trasera',
   energia: 'la batería (morro, pies y bajo los sillines) y el techo solar',
 };
 /** The «Cuadriciclo Bala clásico» (2026-11-11): its name and its departments' one-liners where they differ. */
-export const esCuatro = (T: Pick<CamposTriciclo, 'tTraseras'>) => T.tTraseras === 'dos';
-export const nombreTriciclo = (T: Pick<CamposTriciclo, 'tTraseras'>) => esCuatro(T) ? 'Cuadriciclo Bala clásico' : 'Triciclo Bala';
+/** 2026-11-15: the wheels in a diamond (`tRuedas`): one in the nose, steering; the two pods at the sides; one in the tail. */
+export const esRombo = (T: Partial<Pick<CamposTriciclo, 'tRuedas'>>) => T.tRuedas === 'rombo';
+/** Two rear wheels in pods (a diamond always has one in the tail, whatever `tTraseras` was left at). */
+export const esCuatro = (T: Pick<CamposTriciclo, 'tTraseras'> & Partial<Pick<CamposTriciclo, 'tRuedas'>>) => T.tTraseras === 'dos' && !esRombo(T);
+export const nombreTriciclo = (T: Pick<CamposTriciclo, 'tTraseras'> & Partial<Pick<CamposTriciclo, 'tRuedas'>>) => esRombo(T) ? 'Cuadriciclo Bala en rombo' : esCuatro(T) ? 'Cuadriciclo Bala clásico' : 'Triciclo Bala';
 /** The departments' one-liners for these parameters (2026-11-12: they follow the battery's layout, the controls and the access too). */
 export const lemasTriciclo = (T: Pick<CamposTriciclo, 'tTraseras'> & Partial<CamposTriciclo>): Record<DepTriciclo | 'proyecto', string> => {
   const o = { ...LEMAS_TRICICLO };
   if (esCuatro(T)) o.propulsion = 'los dos motores en los bujes de las ruedas traseras';
   if (T.tBatDisp === 'chasis') o.energia = 'la batería (un paquete a lo largo del bastidor) y el techo solar';
-  if (T.tMando === 'volante' || T.tSalpicadero === 'si') o.interior = `los asientos (a horcajadas o en tres filas que se pliegan), ${T.tMando === 'volante' ? 'volante' : 'manillar'}${T.tSalpicadero === 'si' ? ', salpicadero' : ''}, plataformas y maletero`;
+  // (round 3 interior: either dashboard; with the Aptera buckets, pedals instead of footboards)
+  if (T.tMando === 'volante' || conSalpicadero(T as CamposTriciclo) || T.tAsientos === 'butacas') o.interior = `los asientos (a horcajadas, dos butacas como el Aptera o tres filas que se pliegan), ${T.tMando === 'volante' ? 'volante' : 'manillar'}${conSalpicadero(T as CamposTriciclo) ? ', salpicadero' : ''}, ${T.tAsientos === 'butacas' ? 'pedales' : 'plataformas'} y maletero`;
   if (T.tAcceso === 'puertas') o.carroceria = 'la piel del Cuadriciclo en rombo, techo solar y ventanas, puertas y portón como el Aptera, carenados y material';
   return o;
 };
-export type Unidad = 'm' | 'cm' | 'mm' | '°' | 'kg' | 'kW' | 'kWh' | 'Wh/kg' | 'Wh/L' | 'km/h' | 'x' | 'kg/m²' | '%';
+export type Unidad = 'm' | 'cm' | 'mm' | '°' | 'kg' | 'kW' | 'kWh' | 'Wh/kg' | 'Wh/L' | 'km/h' | 'x' | 'kg/m²' | '%' | 'L';
 /**
  * Un deslizador del Triciclo. `bala`: la forma es la del Cuadriciclo en rombo, y su
  * etiqueta, su rango y su paso se leen de su tabla (DESLIZADORES_BALA), no se
@@ -188,14 +249,18 @@ const FILAS: Fila[] = [
   ['tAncho', 'carroceria', 'Forma', 'bAncho', '', 0.77, 1.30, 0.01, 'm'],
   // round three (2026-11-11, «mucho mayor»): up to 35 cm; above 15.8 cm the whole body rises (see SUELO_RIGIDO)
   ['tSuelo', 'carroceria', 'Forma', 'bSuelo', '', 0.04, 0.35, 0.002, 'cm'],
-  ['tMorro', 'carroceria', 'Morro y cola', 'bMorro', '', 0.45, 1.00, 0.01, 'm'],
-  ['tPuntaMorro', 'carroceria', 'Morro y cola', 'bPuntaMorro', '', 0, 0, 0, 'x'],
-  ['tCola', 'carroceria', 'Morro y cola', 'bCola', '', 0.45, 1.20, 0.01, 'm'],
-  ['tPuntaCola', 'carroceria', 'Morro y cola', 'bPuntaCola', '', 0, 0, 0, 'm'],
-  ['tAleta', 'carroceria', 'Morro y cola', 'bAleta', '', 0, 0, 0, 'm'],
+  // (round 3, 2026-11-12, «que el morro se pueda achatar más»: 20 cm shorter and a fuller tip than before; see rangoTriciclo)
+  ['tMorro', 'carroceria', 'Morro', 'bMorro', '', 0.20, 1.20, 0.01, 'm'],
+  ['tPuntaMorro', 'carroceria', 'Morro', 'bPuntaMorro', '', 0.15, 1.20, 0.01, 'x'],
+  ['tCola', 'carroceria', 'Cola', 'bCola', '', 0.45, 1.20, 0.01, 'm'],
+  ['tPuntaCola', 'carroceria', 'Cola', 'bPuntaCola', '', 0.30, 0.85, 0.005, 'm'],
+  ['tAleta', 'carroceria', 'Cola', 'bAleta', '', 0, 0, 0, 'm'],
   ['tCupIni', 'carroceria', 'Cúpula', 'bCupIni', '', 0, 0, 0, 'm'],
-  ['tCupFin', 'carroceria', 'Cúpula', 'bCupFin', '', 1.80, 3.10, 0.01, 'm'],
-  ['tAlto', 'carroceria', 'Cúpula', 'bAlto', '', 1.15, 1.584, 0.002, 'm'],
+  // (round 3: «que el alto de la cúpula, de donde acaba la cúpula, no esté limitado»: from 1.30 m to 10 cm ahead of the
+  // rear axle, and up to 1.90 m tall; the checks say what each end costs. Not lower than 1.15: at 1.05 the real clásico's
+  // steering-column support stood 7 cm out of the body)
+  ['tCupFin', 'carroceria', 'Cúpula', 'bCupFin', '', 1.30, 3.30, 0.01, 'm'],
+  ['tAlto', 'carroceria', 'Cúpula', 'bAlto', '', 1.00, 1.90, 0.002, 'm'],
   ['tSolar', 'carroceria', 'Techo solar y ventanas', null, 'Techo solar: dónde empieza', 0.40, 3.00, 0.01, 'm'],
   ['tVentAlto', 'carroceria', 'Techo solar y ventanas', null, 'Ventana lateral: alto (encima, el techo)', 0.30, 0.85, 0.01, 'x'],
   ['tPilar', 'carroceria', 'Techo solar y ventanas', null, 'Montante delantero: dónde nace', 0.40, 1.00, 0.01, 'm'],
@@ -208,17 +273,46 @@ const FILAS: Fila[] = [
   ['tFaldon', 'carroceria', 'Carenados', null, 'Rueda trasera: faldón (cuánto asoma)', 0, 1, 0.05, 'x'],
   // 2026-11-12: Aptera-style doors and hatch (only with «Dos puertas como el Aptera»)
   ['tPuertaDel', 'carroceria', 'Puertas y maletero', null, 'Puerta: esquina de abajo, delante', 0.62, 0.98, 0.01, 'm'],
-  ['tPuertaTras', 'carroceria', 'Puertas y maletero', null, 'Puerta: canto de atrás', 1.40, 2.00, 0.01, 'm'],
+  // (round 4, 2026-11-13, «la puerta trasera es demasiado estrecha»: up to 2.60, so a passengers' door can be wide; its real end is 20 cm ahead of the canopy's end, `rangoTriciclo`)
+  ['tPuertaTras', 'carroceria', 'Puertas y maletero', null, 'Puerta: canto de atrás', 1.40, 2.60, 0.01, 'm'],
   ['tUmbral', 'carroceria', 'Puertas y maletero', null, 'Puerta: altura del umbral', 0.26, 0.42, 0.01, 'cm'],
   ['tCintura', 'carroceria', 'Puertas y maletero', null, 'Puerta: línea de la ventanilla (sobre el cristal)', 0, 0.16, 0.01, 'cm'],
   ['tBisagraY', 'carroceria', 'Puertas y maletero', null, 'Bisagra: dónde, a lo largo del montante', 0.02, 0.90, 0.01, 'x'],
   ['tBisagraInc', 'carroceria', 'Puertas y maletero', null, 'Bisagra: el eje, más empinado que el montante', -12, 20, 1, '°'],
   ['tBisagraDentro', 'carroceria', 'Puertas y maletero', null, 'Bisagra: el eje se inclina hacia dentro', 0, 28, 1, '°'],
   ['tPuertaAbre', 'carroceria', 'Puertas y maletero', null, 'Puerta: ángulo de apertura', 40, 115, 1, '°'],
-  ['tMalIni', 'carroceria', 'Puertas y maletero', null, 'Portón: dónde está su bisagra', 1.10, 1.70, 0.01, 'm'],
+  // (round 3: «que el maletero empiece un poco más atrás»: up to 45 cm from the tail's light ring, behind the doors; see rangoTriciclo)
+  ['tMalIni', 'carroceria', 'Puertas y maletero', null, 'Portón: dónde está su bisagra', 1.10, 3.40, 0.01, 'm'],
   ['tMalAbre', 'carroceria', 'Puertas y maletero', null, 'Portón: ángulo de apertura', 26, 70, 1, '°'],
   // round 2: how wide the hatch is (its side edges' elevation on the tail section; the Aptera's, about 60°)
   ['tMalLado', 'carroceria', 'Puertas y maletero', null, 'Portón: altura de sus cantos (lo ancho que es)', 25, 75, 1, '°'],
+  // ── Round 3 body (nose, tail, roof, hatch, fin, solar, second door), 2026-11-12
+  ['tMorroLinea', 'carroceria', 'Morro', null, 'Morro: en punta o en línea (como el Aptera)', 0, 1, 0.05, 'x'],
+  ['tMorroAlto', 'carroceria', 'Morro', null, 'Morro: altura de la punta (más baja, más alta)', -0.12, 0.40, 0.005, 'cm'],
+  ['tFaroD', 'carroceria', 'Morro', null, 'Faro central: ancho', 0.10, 0.24, 0.01, 'cm'],
+  ['tColaPlana', 'carroceria', 'Cola', null, 'Cola: en punta o plana y ancha (como el Aptera)', 0, 1, 0.05, 'x'],
+  ['tTechoPlano', 'carroceria', 'Cúpula', null, 'Techo: redondeado o plano', 0, 1, 0.05, 'x'],
+  ['tCaida', 'carroceria', 'Cúpula', null, 'Techo: caída hacia el maletero (antes o más tarde)', -0.60, 0.80, 0.05, 'x'],
+  // 2026-11-15
+  ['tSubida', 'carroceria', 'Cúpula', null, 'Parabrisas: subida desde el capó (tumbada o derecha, como un jet)', -0.80, 0.80, 0.05, 'x'],
+  ['tBajosMorro', 'carroceria', 'Morro', null, 'Bajos del morro: cuánto suben hacia la punta', 0, 1, 0.05, 'x'],
+  ['tMorroCurva', 'carroceria', 'Morro', null, 'Capó: caída hacia el borde (antes o más tarde; cubierta lisa)', -0.80, 0.80, 0.05, 'x'],
+  ['tLineaCupula', 'carroceria', 'Cúpula', null, 'Línea entre carrocería y cristal: altura', -0.03, 0.15, 0.005, 'cm'],
+  // ── The smooth body (2026-11-13): only with «Cubierta lisa» (Aeromovil.tsx `visible`)
+  ['tMorroAncho', 'carroceria', 'Morro', null, 'Morro: ancho del frente (hasta todo el ancho, como el Aptera)', 0, 1, 0.05, 'x'],
+  ['tMorroGrosor', 'carroceria', 'Morro', null, 'Morro: grosor del borde de delante', 0, 0.25, 0.005, 'cm'],
+  ['tMorroBombeo', 'carroceria', 'Morro', null, 'Capó: bombeo (de plano a curvado)', 0, 0.05, 0.0025, 'cm'],
+  ['tColaAncho', 'carroceria', 'Cola', null, 'Cola: ancho al final (hasta todo el ancho, como el Aptera)', 0, 1, 0.05, 'x'],
+  ['tColaGrosor', 'carroceria', 'Cola', null, 'Cola: grosor del borde de atrás', 0, 0.25, 0.005, 'cm'],
+  ['tColaBombeo', 'carroceria', 'Cola', null, 'Cola: bombeo de la cubierta (de plana a curvada)', 0, 0.04, 0.0025, 'cm'],
+  ['tBajosIni', 'carroceria', 'Cola', null, 'Bajos de la cola: dónde empiezan a subir (desde el eje trasero)', -0.05, 0.80, 0.01, 'cm'],
+  ['tBajosCurva', 'carroceria', 'Cola', null, 'Bajos de la cola: cuánto suben hasta el borde', 0, 1, 0.05, 'x'],
+  ['tPuerta2Parte', 'carroceria', 'Puertas y maletero', null, 'Segunda puerta: dónde se parten las dos', 0.90, 1.90, 0.01, 'm'],
+  ['tBisagra2Y', 'carroceria', 'Puertas y maletero', null, 'Segunda puerta: bisagra a lo largo de su canto de atrás', 0.05, 0.95, 0.01, 'x'],
+  ['tBisagra2Inc', 'carroceria', 'Puertas y maletero', null, 'Segunda puerta: el eje, inclinado hacia delante arriba', 0, 45, 1, '°'],
+  ['tPuerta2Abre', 'carroceria', 'Puertas y maletero', null, 'Segunda puerta: ángulo de apertura', 40, 120, 1, '°'],
+  // ── Round 4 doors / roof frame / height (2026-11-13)
+  ['tMarcoTecho', 'carroceria', 'Techo solar y ventanas', null, 'Marco del techo solar: ancho (0, sin marco)', 0, 0.15, 0.005, 'cm'],
   ['tEspCarenado', 'carroceria', 'Material y espesores', null, 'Espesor de la carrocería', 0.6, 2.4, 0.1, 'mm'],
   ['tEspCristal', 'carroceria', 'Material y espesores', null, 'Espesor de la cúpula (policarbonato)', 1.5, 4.5, 0.5, 'mm'],
   ['tPilX', 'interior', 'Asientos', 'bPilX', '', 0, 0, 0, 'm'],
@@ -247,13 +341,19 @@ const FILAS: Fila[] = [
   ['tChD', 'chasis', 'Bastidor', null, 'Tubos: diámetro', 30, 60, 1, 'mm'],
   ['tChT', 'chasis', 'Bastidor', null, 'Tubos: pared', 1.2, 3.6, 0.1, 'mm'],
   ['tChUniones', 'chasis', 'Bastidor', null, 'Uniones, chapas y tornillería', 1, 6, 0.5, 'kg'],
+  // round 3 interior (2026-11-12, «permite poder hacer un poco más ancho la separación entre los dos tubos»): its maximum, what keeps them on the belly (`rangoTriciclo`)
+  ['tChSep', 'chasis', 'Bastidor', null, 'Largueros: separación', 0.18, 0.60, 0.01, 'cm'],
   // (round 2, 2026-11-12: up to 3.40 m, so «Largo total» can still grow the saved clásico, at 3.20)
   ['tBatalla', 'rodaje', 'Ejes y ruedas', 'bBatalla', '', 2.20, 3.40, 0.01, 'm'],
   ['tEjeDel', 'rodaje', 'Ejes y ruedas', null, 'Eje delantero: atrasado', 0, 0.45, 0.01, 'cm'],
+  // 2026-11-15: only in a diamond (the page hides it otherwise)
+  ['tEjeLat', 'rodaje', 'Ejes y ruedas', null, 'Ruedas laterales: detrás de la del morro', 0.60, 2.40, 0.01, 'm'],
   ['tVia', 'rodaje', 'Ejes y ruedas', null, 'Vía delantera', 1.40, 2.40, 0.01, 'm'],
   // four wheels (2026-11-11): its real minimum is the narrowest track whose rear pods clear the tail (`viaTraseraMinima`)
   ['tViaTras', 'rodaje', 'Ejes y ruedas', null, 'Vía trasera', 0.80, 2.40, 0.01, 'm'],
   ['tGiro', 'rodaje', 'Suspensión y dirección', null, 'Giro máximo de la dirección', 18, 38, 1, '°'],
+  // 2026-11-15: only with four wheels leaning (the page hides it otherwise)
+  ['tBascMax', 'rodaje', 'Suspensión y dirección', null, 'Bascular: inclinación máxima', 5, 30, 1, '°'],
   ['tRecDel', 'rodaje', 'Suspensión y dirección', null, 'Recorrido de la suspensión delantera', 50, 110, 5, 'mm'],
   ['tRecTras', 'rodaje', 'Suspensión y dirección', null, 'Recorrido de la suspensión trasera', 50, 110, 5, 'mm'],
   ['tBasculante', 'rodaje', 'Suspensión y dirección', null, 'Basculante trasero: largo', 0.40, 0.60, 0.01, 'm'],
@@ -267,10 +367,16 @@ const FILAS: Fila[] = [
   ['tMMotor', 'propulsion', 'Motor', null, 'Motor de buje', 5, 62, 0.5, 'kg'],
   ['tMInversor', 'propulsion', 'Motor', null, 'Controlador (inversor)', 1.4, 14, 0.1, 'kg'],
   ['tVel', 'propulsion', 'Motor', null, 'Velocidad de cálculo', 40, 120, 5, 'km/h'],
+  // 2026-11-15: only with the plug-in hybrid (the page hides them otherwise)
+  ['tPhevKW', 'propulsion', 'Híbrido enchufable', null, 'Motor de gasolina: potencia', 8, 60, 0.5, 'kW'],
+  ['tRendTerm', 'propulsion', 'Híbrido enchufable', null, 'Motor de gasolina: rendimiento', 20, 42, 0.5, '%'],
+  ['tRendTrans', 'propulsion', 'Híbrido enchufable', null, 'Conversión mecánica (planetario y generador)', 75, 97, 0.5, '%'],
+  ['tDeposito', 'propulsion', 'Híbrido enchufable', null, 'Depósito de gasolina', 5, 45, 1, 'L'],
   ['tKWh', 'energia', 'Batería', null, 'Batería', 5, 30, 0.5, 'kWh'],
   // 2026-11-12: one pack along the frame (only with «A lo largo del bastidor»): its size decides its capacity
-  ['tBatLargo', 'energia', 'Batería', null, 'Paquete: largo', 0.40, 2.40, 0.01, 'm'],
-  ['tBatAncho', 'energia', 'Batería', null, 'Paquete: ancho (del ancho del bastidor)', 100, 200, 5, '%'],
+  // (round 3 interior, 2026-11-12, «no lo limites»: length and width up to what fits in the body, `rangoTriciclo`; the checks say the rest)
+  ['tBatLargo', 'energia', 'Batería', null, 'Paquete: largo', 0.40, 3.20, 0.01, 'm'],
+  ['tBatAncho', 'energia', 'Batería', null, 'Paquete: ancho (del ancho del bastidor)', 100, 400, 5, '%'],
   ['tBatAlto', 'energia', 'Batería', null, 'Paquete: alto', 0.05, 0.14, 0.005, 'cm'],
   ['tBatX', 'energia', 'Batería', null, 'Paquete: dónde empieza', 0.30, 1.20, 0.01, 'm'],
   ['tWhKg', 'energia', 'Batería', null, 'Densidad del paquete (masa)', 120, 200, 5, 'Wh/kg'],
@@ -300,39 +406,58 @@ export function deslizadoresTriciclo(): FichaTriciclo[] {
  * and take their value from that axle, so «al eje delantero» is true for this
  * vehicle (+1: ahead of the axle, the nose; −1: behind it).
  */
-const DESDE_EJE: Partial<Record<ClaveNumTriciclo, 1 | -1>> = { tMorro: 1, tCupIni: -1, tCupFin: -1, tPilX: -1, tPasX: -1, tBatalla: -1, tSolar: -1, tPilar: -1, tBatX: -1, tPuertaDel: -1, tPuertaTras: -1, tMalIni: -1 };
+const DESDE_EJE: Partial<Record<ClaveNumTriciclo, 1 | -1>> = { tMorro: 1, tCupIni: -1, tCupFin: -1, tPilX: -1, tPasX: -1, tBatalla: -1, tSolar: -1, tPilar: -1, tBatX: -1, tPuertaDel: -1, tPuertaTras: -1, tMalIni: -1, tPuerta2Parte: -1 };
 /** What a slider shows: its value and range from the Triciclo's front axle. */
 export function vistaTriciclo(f: FichaTriciclo, T: CamposTriciclo): { valor: number; min: number; max: number; defecto: number } {
-  const [a, b] = rangoTriciclo(f.clave, T), d = (f.desde ?? 0) * limitarTriciclo('tEjeDel', T);
+  const [a, b] = rangoTriciclo(f.clave, T), d = (f.desde ?? 0) * ejeDesde(T);
   return { valor: limitarTriciclo(f.clave, T) + d, min: a + d, max: b + d, defecto: TRICICLO_DEFECTO[f.clave] + d };
 }
 /** The stored value for what a slider shows. */
-export const guardarTriciclo = (f: FichaTriciclo, v: number, T: CamposTriciclo) => v - (f.desde ?? 0) * limitarTriciclo('tEjeDel', T);
+/** Where the sliders that read «from the front axle» start: the pods' axle, or in a diamond the nose wheel (x = 0). */
+const ejeDesde = (T: CamposTriciclo) => esRombo(T) ? 0 : limitarTriciclo('tEjeDel', T);
+export const guardarTriciclo = (f: FichaTriciclo, v: number, T: CamposTriciclo) => v - (f.desde ?? 0) * ejeDesde(T);
 export const fichaTriciclo = (k: ClaveNumTriciclo) => deslizadoresTriciclo().find(f => f.clave === k);
 const ruedas = (l: RuedaTriciclo[]) => l.map(k => ({ k, n: RUEDAS_TRICICLO[k].n }));
 export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
   { clave: 'tSolarCola', n: 'Paneles solares por detrás', dep: 'carroceria', bloque: 'Techo solar y ventanas', opciones: [{ k: 'no', n: 'Solo en la cúpula' }, { k: 'si', n: 'Hasta la punta de la cola (como el Aptera)' }] },
   { clave: 'tVentanas', n: 'Cúpula', dep: 'carroceria', bloque: 'Techo solar y ventanas', opciones: [{ k: 'marco', n: 'Ventanas laterales con montante (Aptera)' }, { k: 'burbuja', n: 'De una pieza (como el Cuadriciclo en rombo)' }] },
-  { clave: 'tAsientos', n: 'Asientos', dep: 'interior', bloque: 'Asientos', opciones: [{ k: 'horcajadas', n: 'A horcajadas (2 plazas)' }, { k: 'filas', n: 'Tres filas: 1 + 2 + 1 (4 plazas)' }] },
+  { clave: 'tAsientos', n: 'Asientos', dep: 'interior', bloque: 'Asientos', opciones: [{ k: 'horcajadas', n: 'A horcajadas (2 plazas)' }, { k: 'butacas', n: 'Dos butacas como el Aptera (2 plazas)' }, { k: 'filas', n: 'Tres filas: 1 + 2 + 1 (4 plazas)' }] },
   { clave: 'tFila2', n: 'Fila 2 (dos asientos juntos)', dep: 'interior', bloque: 'Tres filas', opciones: [{ k: 'abierta', n: 'Abierta: dos pasajeros' }, { k: 'plegada', n: 'Plegada: maletero' }] },
   { clave: 'tFila3', n: 'Fila 3 (un asiento pequeño)', dep: 'interior', bloque: 'Tres filas', opciones: [{ k: 'abierta', n: 'Abierta: un pasajero' }, { k: 'plegada', n: 'Plegada: maletero' }] },
   { clave: 'tMatCarenado', n: 'Material de la carrocería', dep: 'carroceria', bloque: 'Material y espesores', opciones: [{ k: 'carbonoLino', n: 'Carbono-lino' }, { k: 'vidrio', n: 'Fibra de vidrio' }, { k: 'carbono', n: 'Fibra de carbono' }] },
   { clave: 'tChMat', n: 'Material de los tubos', dep: 'chasis', bloque: 'Bastidor', opciones: [{ k: 'al6061', n: 'Aluminio 6061-T6' }, { k: 'cromoly', n: 'Acero cromoly 4130' }, { k: 'carbono', n: 'Tubo de carbono' }] },
   { clave: 'tRuedaDel', n: 'Ruedas delanteras (en los carenados)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['16', '20', '24', '26', '28', 'c13', 'c14', 'c15']) },
   { clave: 'tRuedaTras', n: 'Rueda trasera (dentro de la cola)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['20', '24', '26', '28', 'c13', 'c14', 'c15']) },
+  { clave: 'tPropulsion', n: 'Propulsión', dep: 'propulsion', bloque: 'Motor', opciones: [{ k: 'electrico', n: 'Eléctrica: solo batería' }, { k: 'phev', n: 'Híbrida enchufable (PHEV), con engranaje planetario como el Prius' }] },
+  { clave: 'tRuedas', n: 'Disposición de las ruedas', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: [{ k: 'clasica', n: 'Dos delante en carenados' }, { k: 'rombo', n: 'En rombo: una en el morro, dos laterales en carenados, una en la cola' }] },
   { clave: 'tTraseras', n: 'Ruedas traseras', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: [{ k: 'una', n: 'Una en la cola (triciclo)' }, { k: 'dos', n: 'Dos en carenados (cuatro ruedas)' }] },
+  // 2026-11-15: only with four wheels (the page hides it otherwise)
+  { clave: 'tBascula', n: 'Bascular en las curvas', dep: 'rodaje', bloque: 'Suspensión y dirección', opciones: [{ k: 'no', n: 'No: va siempre derecho' }, { k: 'si', n: 'Sí: la cabina y los cuatro carenados se inclinan' }] },
   // 2026-11-12
   { clave: 'tAcceso', n: 'Acceso', dep: 'carroceria', bloque: 'Puertas y maletero', opciones: [{ k: 'cupula', n: 'La cúpula entera se abre' }, { k: 'puertas', n: 'Dos puertas como el Aptera' }] },
   { clave: 'tMaletero', n: 'Maletero', dep: 'carroceria', bloque: 'Puertas y maletero', opciones: [{ k: 'cola', n: 'Tapa en lo alto de la cola' }, { k: 'aptera', n: 'Portón largo como el Aptera (con puertas)' }] },
   { clave: 'tRetrovisores', n: 'Retrovisores', dep: 'carroceria', bloque: 'Puertas y maletero', opciones: [{ k: 'camaras', n: 'Cámaras en cápsulas' }, { k: 'espejos', n: 'Espejos de gota (como el Aptera)' }] },
+  // ── Round 3 body (nose, tail, roof, hatch, fin, solar, second door), 2026-11-12
+  { clave: 'tFaro', n: 'Faro del morro', dep: 'carroceria', bloque: 'Morro', opciones: [{ k: 'no', n: 'Sin faro central' }, { k: 'si', n: 'Faro central redondo (como una moto)' }, { k: 'barra', n: 'Barra de luz por todo el borde (como el Aptera)' }] },
+  // 2026-11-13: the smooth body
+  { clave: 'tCubierta', n: 'Morro y cola por arriba', dep: 'carroceria', bloque: 'Forma', opciones: [{ k: 'redonda', n: 'Como la cúpula (redondeados)' }, { k: 'lisa', n: 'Cubierta lisa, sin montículos (como el Aptera)' }] },
+  { clave: 'tConAleta', n: 'Aleta', dep: 'carroceria', bloque: 'Cola', opciones: [{ k: 'si', n: 'Con aleta' }, { k: 'no', n: 'Sin aleta' }] },
+  { clave: 'tSolarMorro', n: 'Paneles solares en el morro', dep: 'carroceria', bloque: 'Techo solar y ventanas', opciones: [{ k: 'no', n: 'No' }, { k: 'si', n: 'Sí, encima del morro' }] },
+  { clave: 'tPuertas2', n: 'Puertas por lado', dep: 'carroceria', bloque: 'Puertas y maletero', opciones: [{ k: 'no', n: 'Una' }, { k: 'si', n: 'Dos: la de atrás se abre hacia atrás' }] },
   { clave: 'tMando', n: 'Mando', dep: 'interior', bloque: 'Mandos', opciones: [{ k: 'manillar', n: 'Manillar' }, { k: 'volante', n: 'Volante' }] },
-  { clave: 'tSalpicadero', n: 'Salpicadero', dep: 'interior', bloque: 'Salpicadero', opciones: [{ k: 'no', n: 'Pantallita sobre el depósito' }, { k: 'si', n: 'Salpicadero de lado a lado' }] },
+  { clave: 'tSalpicadero', n: 'Salpicadero', dep: 'interior', bloque: 'Salpicadero', opciones: [{ k: 'no', n: 'Pantallita sobre el depósito' }, { k: 'si', n: 'Salpicadero de lado a lado' }, { k: 'blanco', n: 'Salpicadero blanco con detalles (como el Aptera)' }] },
+  // round 3 interior (2026-11-12, «el chasis no llega hasta el final»): only with two rear wheels (with one, the wheel is in the tail between them)
+  { clave: 'tChLargo', n: 'Largueros: hasta', dep: 'chasis', bloque: 'Bastidor', opciones: [{ k: 'torreta', n: 'La torreta' }, { k: 'eje', n: 'El eje trasero' }] },
   { clave: 'tBatDisp', n: 'Dónde va la batería', dep: 'energia', bloque: 'Batería', opciones: [{ k: 'reparto', n: 'Morro, pies y bajo los sillines' }, { k: 'chasis', n: 'A lo largo del bastidor' }] },
 ];
 /** 2026-11-12: which of those options are on (the Aptera hatch only with doors: it takes the canopy's rear part, which a one-piece canopy carries away when it opens). */
 export const conPuertas = (T: Pick<CamposTriciclo, 'tAcceso'>) => T.tAcceso === 'puertas';
 export const conPortonAptera = (T: Pick<CamposTriciclo, 'tAcceso' | 'tMaletero'>) => T.tAcceso === 'puertas' && T.tMaletero === 'aptera';
 export const bateriaChasis = (T: Pick<CamposTriciclo, 'tBatDisp'>) => T.tBatDisp === 'chasis';
+// Round 3 interior (2026-11-12): the Aptera bucket seats, the dashboard (either style), the rails to the rear axle
+export const conButacas = (T: Pick<CamposTriciclo, 'tAsientos'>) => T.tAsientos === 'butacas';
+export const conSalpicadero = (T: Pick<CamposTriciclo, 'tSalpicadero'>) => T.tSalpicadero === 'si' || T.tSalpicadero === 'blanco';
+export const largueroAlEje = (T: Pick<CamposTriciclo, 'tChLargo' | 'tTraseras'> & Partial<Pick<CamposTriciclo, 'tRuedas'>>) => T.tChLargo === 'eje' && esCuatro(T);
 
 // ------------------------------------------------------------------ tres filas (round three, 2026-11-11)
 /**
@@ -401,18 +526,93 @@ export function paqueteX(T: CamposTriciclo): [number, number] | null {
   return [x1, x1 - limitarTriciclo('tBatLargo', T)];
 }
 /** The pack's half-width (m): `tBatAncho` % of the frame's width, outer face to outer face of the two rails. */
-export const semiPaquete = (T: CamposTriciclo) => limitarTriciclo('tBatAncho', T) / 100 * (2 * Z_LARGUERO * Math.min(1, limitarTriciclo('tAncho', T) / 0.85) + limitarTriciclo('tChD', T) / 1000) / 2;
+export const semiPaquete = (T: CamposTriciclo) => limitarTriciclo('tBatAncho', T) / 100 * anchoBastidor(T) / 2;
+/** The frame's width (m): outer face to outer face of the two rails (round 3 interior: with their spacing, `semiLarguero`). */
+const anchoBastidor = (T: CamposTriciclo) => 2 * semiLarguero(T) + limitarTriciclo('tChD', T) / 1000;
+
+// ------------------------------------------------------------------ Round 3 interior (seats, dashboard, chassis, masses, battery ranges)
+/**
+ * The rails' half-spacing (m). Eugenio, 2026-11-12: «permite poder hacer un poco más ancho la separación entre los dos
+ * tubos del chasis». `tChSep` is the spacing axis to axis with a body 85 cm wide or more; a narrower body closes them in
+ * with it, as the rails always have. At its default (0.22 m) it is exactly the old `Z_LARGUERO`, unclamped, so a saved
+ * design builds as before.
+ */
+export function semiLarguero(T: CamposTriciclo): number {
+  const k = Math.min(1, limitarTriciclo('tAncho', T) / 0.85);
+  return T.tChSep === TRICICLO_DEFECTO.tChSep ? Z_LARGUERO * k : limitarTriciclo('tChSep', T) / 2 * k;
+}
+let cacheSep: { clave: string; v: number } | null = null;
+/**
+ * The widest rail spacing (m, as the slider stores it) whose two rails keep their outer faces 1 cm inside the skin from
+ * the front cradle back to the shock tower, at their height (ahead of the cradle they close in to the old spacing, and
+ * behind the tower the extension to the rear axle follows the tail in by itself: `largueroTrasero`).
+ */
+function sepMaxima(T: CamposTriciclo): number {
+  const L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), F = cuerpoDe(T), r = L('tChD') / 2000;
+  const suelo = Math.min(L('tSuelo'), SUELO_RIGIDO), yL = suelo + 0.035 + r, x0 = -L('tEjeDel'), x1 = -L('tBatalla') + L('tBasculante');
+  const clave = JSON.stringify([F.D, r, x0, x1]);
+  if (cacheSep?.clave === clave) return cacheSep.v;
+  let h = 9;
+  for (let x = x0; x >= x1 - 1e-9; x -= 0.05) for (const y of [yL - r, yL + r]) h = Math.min(h, dentroDe(F, x, y, 0) - 0.01 - r);
+  const v = Math.floor(2 * h / Math.min(1, L('tAncho') / 0.85) * 100 + 1e-6) / 100;
+  cacheSep = { clave, v };
+  return v;
+}
+let cacheCabe: { clave: string; v: { largo: number; semi: number } } | null = null;
+/**
+ * Round 3 interior (2026-11-12, Eugenio: «el largo de la batería, del paquete de baterías, no lo limites… el ancho tampoco
+ * lo limites»): the longest and the widest pack that fits in the body, 1 cm inside the skin, lying on the belly (at most
+ * 3 cm over its floor: a pack that only fits lifted would lift the seats on it). The length: back from its front face
+ * while a box of its width and height still fits, and the controller (22 cm, right behind it, on the rails) too. The
+ * width: the widest box of its height that fits at every station of its length. What it then runs into (the shock
+ * tower, the rear wheel, the seats above) the checks say.
+ */
+function paqueteCabe(T: CamposTriciclo, hz: number, largo: number): { largo: number; semi: number } {
+  const L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), F = cuerpoDe(T), alto = L('tBatAlto'), x1 = -L('tBatX');
+  const suelo = Math.min(L('tSuelo'), SUELO_RIGIDO), clave = JSON.stringify([F.D, alto, x1, hz, largo]);
+  if (cacheCabe?.clave === clave) return cacheCabe.v;
+  const cabeEn = (x: number, z: number) => { for (let y = suelo + 0.012; y <= suelo + 0.042; y += 0.01) if ([y, y + alto].every(q => dentroDe(F, x, q, z) >= 0.01 && dentroDe(F, x, q, 0) >= 0.01)) return true; return false; };
+  // the controller behind it: 20 cm long, 14 wide, from 1 to 9 cm over the rails' top (as `crearModeloTriciclo` puts it)
+  const yC = suelo + 0.035 + L('tChD') / 1000, inversor = (x: number) => [x - 0.02, x - 0.22].every(xx => [yC + 0.01, yC + 0.09].every(y => dentroDe(F, xx, y, 0.07) >= 0.01));
+  let x = x1; while (x - 0.01 > F.X_COLA && cabeEn(x - 0.01, hz)) x -= 0.01;
+  while (x < x1 - 0.40 && !inversor(x)) x += 0.01;
+  const xs = Array.from({ length: 9 }, (_, i) => x1 - largo * i / 8);
+  let a = 0, b = 1.5; for (let i = 0; i < 24; i++) { const c = (a + b) / 2; if (xs.every(q => cabeEn(q, c))) a = c; else b = c; }
+  const v = { largo: x1 - x, semi: a };
+  cacheCabe = { clave, v };
+  return v;
+}
+/**
+ * Round 3 body (2026-11-12): the shape's new fields for `crearForma` (nose line and height, flat tail, flat roof, the
+ * roof's fall), each only when it is not zero: absent, the body is built exactly as before, bit for bit.
+ */
+export const CLAVES_FORMA_R3: [ClaveNumTriciclo, keyof DimBala][] = [['tMorroLinea', 'morroLinea'], ['tMorroAlto', 'morroAlto'], ['tColaPlana', 'colaPlana'], ['tTechoPlano', 'techoPlano'], ['tCaida', 'caida'], ['tLineaCupula', 'lineaCupula'], ['tSubida', 'subida'], ['tBajosMorro', 'bajosMorro']];
+/**
+ * 2026-11-13, the smooth body: the hatch's side edge (t: exactly where the deck begins, at its side edge) and the panels'
+ * (a frame inside the deck). The cut was first on the rounded edge below (t = 0.55): with a canopy 1.9 m tall that
+ * stretch is a near-vertical wall, and the hatch's edge, swinging up about the roof hinge, went 1.5 cm into the side.
+ */
+export const T_BORDE_LISA = T_CUBIERTA, T_PANEL_LISA = T_CUBIERTA + 0.03;
+/** 2026-11-13: the smooth body's fields, all of them (zeros included) when it is on, none when it is off. */
+export const CLAVES_LISA: [ClaveNumTriciclo, keyof DimBala][] = [['tColaAncho', 'colaAncho'], ['tColaGrosor', 'colaGrosor'], ['tColaBombeo', 'colaBombeo'], ['tBajosIni', 'bajosIni'], ['tBajosCurva', 'bajosCurva'], ['tMorroAncho', 'morroAncho'], ['tMorroGrosor', 'morroGrosor'], ['tMorroBombeo', 'morroBombeo'], ['tMorroCurva', 'morroCurva']];
+export const conLisa = (T: Pick<CamposTriciclo, 'tCubierta'>) => T.tCubierta === 'lisa';
+export function formaR3(T: CamposTriciclo): Partial<DimBala> {
+  const o: Partial<Record<keyof DimBala, number>> = {};
+  for (const [k, d] of CLAVES_FORMA_R3) { const v = limitarTriciclo(k, T); if (v) o[d] = v; }
+  if (conLisa(T)) { o.lisa = 1; for (const [k, d] of CLAVES_LISA) o[d] = limitarTriciclo(k, T); }
+  return o as unknown as Partial<DimBala>;
+}
 let cacheCuerpo: { clave: string; F: FormaBala } | null = null;
 /** The body alone for these parameters, before its rigid lift (stored heights), cached per shape: for the ranges that need it. */
 function cuerpoDe(T: CamposTriciclo): FormaBala {
   const L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), suelo = Math.min(L('tSuelo'), SUELO_RIGIDO);
   const forma = (['tBatalla', 'tMorro', 'tCola', 'tAncho', 'tAlto', 'tCupIni', 'tCupFin', 'tPuntaMorro', 'tPuntaCola', 'tEjeDel'] as ClaveNumTriciclo[]).map(L);
-  const clave = JSON.stringify([suelo, forma]);
+  const r3 = formaR3(T), clave = JSON.stringify([suelo, forma, r3]);
   if (cacheCuerpo?.clave === clave) return cacheCuerpo.F;
   const F = crearForma({
     batalla: L('tBatalla'), morro: L('tMorro'), cola: L('tCola'), ancho: L('tAncho'), alto: L('tAlto'), suelo,
     cupIni: L('tCupIni'), cupFin: L('tCupFin'), puntaMorro: L('tPuntaMorro'), puntaCola: L('tPuntaCola'),
-    rDel: 0.3, rLat: 0.25, anchoNeu: 0.08, anchoNeuLat: 0.07, via: 1.8, xLat: -L('tEjeDel'),
+    rDel: 0.3, rLat: 0.25, anchoNeu: 0.08, anchoNeuLat: 0.07, via: 1.8, xLat: -L('tEjeDel'), ...r3,
   });
   cacheCuerpo = { clave, F };
   return F;
@@ -450,7 +650,9 @@ export function sueloAsiento(T: CamposTriciclo, piloto: boolean): number {
   const carril = Math.min(limitarTriciclo('tSuelo', T), SUELO_RIGIDO) + 0.035 + limitarTriciclo('tChD', T) / 1000;
   const p = paqueteX(T); if (!p) return carril;
   const xPil = -limitarTriciclo('tPilX', T), tramos: [number, number][] = [];
-  if (T.tAsientos !== 'filas') tramos.push([xPil + 0.23, -limitarTriciclo('tPasX', T) - 0.21]);
+  // (round 3 interior: each Aptera bucket on its own footprint, `BUTACA`)
+  if (T.tAsientos === 'butacas') { const x = piloto ? xPil : -limitarTriciclo('tPasX', T); tramos.push([x + BUTACA.delante, x - BUTACA.detras]); }
+  else if (T.tAsientos !== 'filas') tramos.push([xPil + 0.23, -limitarTriciclo('tPasX', T) - 0.21]);
   else if (piloto) tramos.push([xPil + 0.29, xPil - 0.17]);
   else { const x2 = xPil - limitarTriciclo('tFila2X', T), x3 = x2 - limitarTriciclo('tFila3X', T); tramos.push([x2 + 0.27, x2 - 0.17], [x3 + 0.21, x3 - 0.17]); }
   // (the rails run through the pack: whichever is higher carries the seat)
@@ -474,7 +676,7 @@ export function camposTriciclo(P: Partial<Parametros>): CamposTriciclo {
 
 /**
  * El rango de un deslizador para estos parámetros. Cuatro dependen de otro: la
- * cúpula acaba al menos 25 cm por delante del eje trasero y el pasajero va entre
+ * cúpula acaba al menos 10 cm por delante del eje trasero (25 hasta la ronda 3) y el pasajero va entre
  * 40 y 62 cm detrás del piloto (los dos, como en el Cuadriciclo en rombo); la potencia
  * máxima no baja de la nominal; y el carenado pequeño no puede ser además
  * estrecho ni corto (el neumático dejaría de caber).
@@ -485,7 +687,8 @@ export function rangoTriciclo(k: ClaveNumTriciclo, T: CamposTriciclo): [number, 
   if (T.tAsientos === 'filas') {
     // the two seats of row 2 side by side need width at shoulder height, under the canopy's curve (see ANCHO_FILAS)
     if (k === 'tAncho') return [Math.max(f.min, ANCHO_FILAS), f.max];
-    if (k === 'tAlto') return [Math.max(f.min, ALTO_FILAS), f.max];
+    // tAlto is NOT clamped to ALTO_FILAS any more (2026-11-13, Eugenio could not lower his canopy below 1.56 m with
+    // three rows: «ya van 2 veces que lo digo»). Lower is allowed; the head and «Hombros de la fila 2» checks turn red.
     // row 3's backrest ahead of the rear shock tower, and the canopy long enough to cover row 3's head
     if (k === 'tBatalla') return [Math.min(f.max, Math.max(f.min, distanciaFila3(T) + RESPALDO_FILA3 + limitarTriciclo('tBasculante', T) - 0.01)), f.max];
     // and the rows only as far back as the longest wheelbase still leaves row 3 ahead of the shock tower. The order
@@ -504,7 +707,8 @@ export function rangoTriciclo(k: ClaveNumTriciclo, T: CamposTriciclo): [number, 
       return [Math.min(hi, Math.max(Math.min(f.min, b - 0.45), distanciaFila3(T) + CUPULA_TRAS_FILA3)), hi];
     }
   }
-  if (k === 'tCupFin') return [Math.min(f.min, T.tBatalla - 0.45), Math.min(f.max, T.tBatalla - 0.25)];
+  // (round 3: up to 10 cm ahead of the rear axle, where it was 25; the canopy's end must stay ahead of the axle, the anchors of the shape's stretch)
+  if (k === 'tCupFin') return [Math.min(f.min, T.tBatalla - 0.45), Math.min(f.max, T.tBatalla - 0.10)];
   if (k === 'tPasX') return [Math.max(f.min, T.tPilX + 0.40), Math.min(f.max, T.tPilX + 0.62)];
   // the solar roof starts anywhere from over the pilot's knees to 10 cm behind the canopy's end (there: no panel)
   if (k === 'tSolar') return [f.min, Math.min(f.max, limitarTriciclo('tCupFin', T) + 0.10)];
@@ -517,7 +721,7 @@ export function rangoTriciclo(k: ClaveNumTriciclo, T: CamposTriciclo): [number, 
   if (k === 'tMMotor' || k === 'tMInversor') {
     const p = limitarTriciclo('tKWPico', T);
     // four wheels (2026-11-11): two hub motors of half the power each, by the same rule; the slider is both together
-    if (k === 'tMMotor' && T.tTraseras === 'dos') return [Math.max(f.min, 2 * (3 + 0.45 * p / 2)), Math.min(f.max, 2 * (8 + 0.9 * p / 2))];
+    if (k === 'tMMotor' && esCuatro(T)) return [Math.max(f.min, 2 * (3 + 0.45 * p / 2)), Math.min(f.max, 2 * (8 + 0.9 * p / 2))];
     return k === 'tMMotor' ? [Math.max(f.min, 3 + 0.45 * p), Math.min(f.max, 8 + 0.9 * p)] : [Math.max(f.min, 1 + 0.08 * p), Math.min(f.max, 2 + 0.2 * p)];
   }
   // 2026-11-12 («que los asientos estén todavía más bajos, muy pegados al chasis»): a seat comes down until it has
@@ -528,13 +732,36 @@ export function rangoTriciclo(k: ClaveNumTriciclo, T: CamposTriciclo): [number, 
   // the pack along the frame: its front face 6 cm behind the front axle (the cradle's posts and the front suspension
   // stand there) and its rear face 2 cm ahead of the controller
   if (k === 'tBatX') return [Math.max(f.min, limitarTriciclo('tEjeDel', T) + 0.06), Math.max(f.min, Math.min(f.max, finPaquete(T) - fichaTriciclo('tBatLargo')!.min))];
-  if (k === 'tBatLargo') return [f.min, Math.max(f.min, Math.min(f.max, finPaquete(T) - limitarTriciclo('tBatX', T)))];
+  // round 3 interior (2026-11-12, «no lo limites»): as long and as wide as fits in the body (`paqueteCabe`), no longer
+  // stopped at the controller: the checks say what it runs into. The width's range reads the length within its own
+  // range, and the length's reads the width only within the slider's ends, so the two never ask each other.
+  if (k === 'tBatLargo' || k === 'tBatAncho') {
+    const fa = fichaTriciclo('tBatAncho')!, fl = fichaTriciclo('tBatLargo')!, fijo = (g: FichaTriciclo, v: number) => Math.min(g.max, Math.max(g.min, v));
+    const hz0 = fijo(fa, T.tBatAncho) / 100 * anchoBastidor(T) / 2, l0 = fijo(fl, T.tBatLargo);
+    // (never less than the ranges had before, 2.40 m up to the controller's place and 200 % at the old spacing: a saved design keeps its values)
+    const antes = Math.max(fl.min, Math.min(2.40, finPaquete(T) - limitarTriciclo('tBatX', T)));
+    const c0 = paqueteCabe(T, hz0, l0), largoMax = Math.max(antes, Math.min(fl.max, Math.floor(c0.largo * 100 + 1e-6) / 100));
+    if (k === 'tBatLargo') return [fl.min, largoMax];
+    const c1 = l0 <= largoMax ? c0 : paqueteCabe(T, hz0, largoMax);
+    // (the old 200 % only at the old rails' spacing, where it was the range: with wider rails, 200 % may not fit)
+    return [f.min, Math.max(T.tChSep === TRICICLO_DEFECTO.tChSep ? 200 : f.min, Math.min(f.max, Math.floor(2 * c1.semi / anchoBastidor(T) * 100 / 5 + 1e-6) * 5))];
+  }
+  // round 3 interior: the rails' spacing up to what keeps them on the belly (never below the old spacing's 22 cm as its maximum)
+  if (k === 'tChSep') return [f.min, Math.max(TRICICLO_DEFECTO.tChSep, Math.min(f.max, sepMaxima(T)))];
   // the doors: at least 45 cm long at the sill; the hatch's hinge behind the pillar's foot and ahead of the canopy's end
   if (k === 'tPuertaDel') return [Math.max(f.min, limitarTriciclo('tPilar', T) + 0.04), f.max];
   // (round 2: never closer than 20 cm to the canopy's end, where the tail crown starts: further back its top edge cut into it)
   if (k === 'tPuertaTras') { const hi = Math.max(f.min, Math.min(f.max, limitarTriciclo('tCupFin', T) - 0.20)); return [Math.min(hi, Math.max(f.min, limitarTriciclo('tPuertaDel', T) + 0.45)), hi]; }
   // (round 2: from the roof's highest point back, `cimaTecho`; ahead of it the hatch would swing into the roof)
-  if (k === 'tMalIni') { const hi = Math.max(f.min, Math.min(f.max, limitarTriciclo('tCupFin', T) - 0.30)); return [Math.min(hi, Math.max(f.min, limitarTriciclo('tPilar', T) + 0.30, cimaTecho(T))), hi]; }
+  // (round 3, 2026-11-12, «que el maletero empiece un poco más atrás, como en el Aptera»: back to 45 cm ahead of the
+  // tail's light ring, behind the doors and past the canopy's end; before, 30 cm ahead of the canopy's end at most)
+  // (and with two doors a side, behind the C-pillar that carries the rear doors' hinges, 2 cm clear of it)
+  if (k === 'tMalIni') {
+    const hi = Math.max(f.min, Math.min(f.max, -cuerpoDe(T).X_ARO_COLA - 0.45)), tras = T.tPuertas2 === 'si' && conPuertas(T) ? limitarTriciclo('tPuertaTras', T) + MONTANTE_C + 0.02 : 0;
+    return [Math.min(hi, Math.max(f.min, limitarTriciclo('tPilar', T) + 0.30, cimaTecho(T), tras)), hi];
+  }
+  // round 3: the split between the two doors leaves each at least 30 cm along the sill
+  if (k === 'tPuerta2Parte') { const a = limitarTriciclo('tPuertaDel', T) + 0.30, b = limitarTriciclo('tPuertaTras', T) - 0.30; return a <= b ? [Math.max(f.min, a), Math.min(f.max, b)] : [(a + b) / 2, (a + b) / 2]; }
   // a smaller pod is also a narrower one: below 82 % of the drawn width in all, the tyre no longer fits inside
   const esc = Math.min(fichaTriciclo('tPodEsc')!.max, Math.max(fichaTriciclo('tPodEsc')!.min, T.tPodEsc));
   if (k === 'tPodAncho') return [Math.max(f.min, 0.82 / esc), f.max];
@@ -564,10 +791,51 @@ export function estirarTriciclo(T: CamposTriciclo, largo: number): Partial<Campo
   const ahora = largoTriciclo(T), d = Math.min(ahora.max, Math.max(ahora.min, largo)) - ahora.valor;
   if (Math.abs(d) < 1e-9) return {};
   const b = limitarTriciclo('tBatalla', T), nb = Math.round((b + d) * 1e4) / 1e4;
-  return { tBatalla: nb, tCupFin: Math.round((limitarTriciclo('tCupFin', T) + (nb - b)) * 1e4) / 1e4 };
+  return { ...conBatalla(T, nb), tCupFin: Math.round((limitarTriciclo('tCupFin', T) + (nb - b)) * 1e4) / 1e4 };
 }
+/**
+ * A new wheelbase, and with it the pack along the frame (2026-11-15, Eugenio: «haz que la batería se pueda alargar más
+ * cuando se alarga el vehículo»): the pack grows or shrinks by as much as the wheelbase, within its own range at the new
+ * length, so stretching the car keeps the gap behind it the same. With the battery spread out, only the wheelbase.
+ */
+export function conBatalla(T: CamposTriciclo, nb: number): Partial<CamposTriciclo> {
+  const b = limitarTriciclo('tBatalla', T), o: Partial<CamposTriciclo> = { tBatalla: nb };
+  if (bateriaChasis(T) && Math.abs(nb - b) > 1e-9) {
+    const T2 = { ...T, tBatalla: nb }, [lo, hi] = rangoTriciclo('tBatLargo', T2);
+    o.tBatLargo = Math.round(Math.min(hi, Math.max(lo, limitarTriciclo('tBatLargo', T) + (nb - b))) * 100) / 100;
+  }
+  return o;
+}
+/**
+ * Round 4 (2026-11-13): «Alto total» below 1.15 m, its floor until this round. Only there do the steering-column support
+ * and the dashboard come down with the roof, so every design that could be built before is built exactly as before.
+ */
+export const ALTO_ANTES = 1.15;
+const techoBajo = (T: CamposTriciclo) => limitarTriciclo('tAlto', T) < ALTO_ANTES - 1e-9;
 /** Un valor dentro de su rango (un diseño escrito a mano o de otra versión no puede construir un triciclo imposible). */
-export const limitarTriciclo = (k: ClaveNumTriciclo, T: CamposTriciclo) => { const [a, b] = rangoTriciclo(k, T); return Math.min(b, Math.max(a, T[k])); };
+export const limitarTriciclo = (k: ClaveNumTriciclo, T: CamposTriciclo) => { const [a, b] = rangoTriciclo(k, T); return Math.min(b, Math.max(a, comoAntes(k, T[k], T))); };
+/**
+ * Round 3 (2026-11-12) widened some ranges. A value saved at an old end carries float noise (the editor stores what it
+ * shows less the front axle's offset: the real clásico has «tMorro» 0.44999999999999996 for 0.45), and the old range
+ * clamped it onto that end. Within a nanometre of an old end, it still builds at that end, so saved designs are built
+ * vertex for vertex as before.
+ */
+function comoAntes(k: ClaveNumTriciclo, v: number, T: CamposTriciclo): number {
+  const fin = (m: number) => (Math.abs(v - m) < 1e-9 ? m : v);
+  // (2026-11-13: the nose's ranges widened again; their old ends snap the same way)
+  const fines = (...ms: number[]) => { for (const m of ms) if (Math.abs(v - m) < 1e-9) return m; return v; };
+  switch (k) {
+    case 'tMorro': return fines(0.45, 0.25, 1.00);
+    case 'tPuntaMorro': return fines(0.50, 0.25, 1.00);
+    case 'tMorroAlto': return fines(-0.10, 0.12);
+    case 'tPuntaCola': return fines(0.36, 0.58);
+    case 'tAlto': return Math.abs(v - 1.15) < 1e-9 ? 1.15 : fin(1.584);
+    case 'tCupFin': { const lo = Math.min(1.80, T.tBatalla - 0.45), hi = Math.min(3.10, T.tBatalla - 0.25); return Math.abs(v - lo) < 1e-9 ? lo : Math.abs(v - hi) < 1e-9 ? hi : v; }
+    case 'tMalIni': return fin(1.70);
+    case 'tPuertaTras': return fin(2.00);
+    default: return v;
+  }
+}
 
 // ------------------------------------------------------------------ medidas
 /** Holgura mínima del carenado delantero, girado a tope, a la carrocería (m): la vía nunca deja menos. */
@@ -585,18 +853,20 @@ export function medidasTriciclo(T: CamposTriciclo) {
     cupIni: L('tCupIni'), cupFin: L('tCupFin'), puntaMorro: L('tPuntaMorro'), puntaCola: L('tPuntaCola'),
     // the Cuadriciclo en rombo's «front and rear» wheel is our rear one; its «lateral» wheels, our front ones
     rDel: rTras, rLat: rDel, anchoNeu: wTras.neuTras, anchoNeuLat: wDel.neuDel, via: L('tVia'),
-    xLat: -L('tEjeDel'), pod: { esc: L('tPodEsc'), ancho: L('tPodAncho'), cola: L('tPodCola') }, cuerdaBrazo: L('tBrazo'),
+    xLat: esRombo(T) ? -L('tEjeLat') : -L('tEjeDel'), pod: { esc: L('tPodEsc'), ancho: L('tPodAncho'), cola: L('tPodCola') }, cuerdaBrazo: L('tBrazo'), ...formaR3(T),
   };
   let F = crearForma(D);
   const giro = L('tGiro') * Math.PI / 180;
   // the pods only move sideways with the track: the gap grows by half of what the track grows
-  const hueco = huecoGiro(F, giro);
+  // (in a diamond the pods do not steer: the nose wheel does)
+  const hueco = huecoGiro(F, esRombo(T) ? 0 : giro);
   if (hueco < HUECO_GIRO) F = crearForma({ ...D, via: Math.ceil((D.via + 2 * (HUECO_GIRO - hueco)) * 100) / 100 });
   // the seats rise with the lifted body (`+ 0` without a lift: the same numbers)
   const asientos: Asientos = { xPiloto: -L('tPilX'), yPiloto: L('tPilY') + elevar, xPasajero: -L('tPasX'), yPasajero: L('tPasY') + elevar };
   // four wheels (2026-11-11): the rear pods, as the front ones but round the rear wheels at the rear axle
-  const traseras = T.tTraseras === 'dos' ? formaTrasera(F, rTras, wTras.neuTras, L('tViaTras')) : null;
-  return { D: F.D, F, asientos, aleta: L('tAleta') + elevar, viaPedida: D.via, giro, elevar, traseras };
+  const traseras = esCuatro(T) ? formaTrasera(F, rTras, wTras.neuTras, L('tViaTras')) : null;
+  // (round 3: «Quita la aleta»: none with «Sin aleta»)
+  return { D: F.D, F, asientos, aleta: T.tConAleta === 'no' ? null : L('tAleta') + elevar, viaPedida: D.via, giro, elevar, traseras };
 }
 
 // ------------------------------------------------------------------ cuatro ruedas (2026-11-11)
@@ -626,14 +896,14 @@ let cacheMinima: { clave: string; v: number } | null = null;
 export function viaTraseraMinima(T: CamposTriciclo): number {
   const Tsin = { ...T, tTraseras: 'una' as const };
   const L = (k: ClaveNumTriciclo) => limitarTriciclo(k, Tsin);
-  const clave = JSON.stringify([T.tRuedaDel, T.tRuedaTras, ...(['tBatalla', 'tMorro', 'tCola', 'tAncho', 'tAlto', 'tSuelo', 'tCupIni', 'tCupFin', 'tPuntaMorro', 'tPuntaCola', 'tPodEsc', 'tPodAncho', 'tPodCola', 'tBrazo', 'tEjeDel'] as ClaveNumTriciclo[]).map(L)]);
+  const r3 = formaR3(Tsin), clave = JSON.stringify([T.tRuedaDel, T.tRuedaTras, ...(['tBatalla', 'tMorro', 'tCola', 'tAncho', 'tAlto', 'tSuelo', 'tCupIni', 'tCupFin', 'tPuntaMorro', 'tPuntaCola', 'tPodEsc', 'tPodAncho', 'tPodCola', 'tBrazo', 'tEjeDel'] as ClaveNumTriciclo[]).map(L), r3]);
   if (cacheMinima?.clave === clave) return cacheMinima.v;
   const wDel = RUEDAS_TRICICLO[T.tRuedaDel], wTras = RUEDAS_TRICICLO[T.tRuedaTras], suelo = L('tSuelo'), elevar = elevarDe(suelo);
   const F = crearForma({
     batalla: L('tBatalla'), morro: L('tMorro'), cola: L('tCola'), ancho: L('tAncho'), alto: L('tAlto'), suelo, ...(elevar > 0 ? { elevar } : {}),
     cupIni: L('tCupIni'), cupFin: L('tCupFin'), puntaMorro: L('tPuntaMorro'), puntaCola: L('tPuntaCola'),
     rDel: wTras.d / 2, rLat: wDel.d / 2, anchoNeu: wTras.neuTras, anchoNeuLat: wDel.neuDel, via: 1.8,
-    xLat: -L('tEjeDel'), pod: { esc: L('tPodEsc'), ancho: L('tPodAncho'), cola: L('tPodCola') }, cuerdaBrazo: L('tBrazo'),
+    xLat: -L('tEjeDel'), pod: { esc: L('tPodEsc'), ancho: L('tPodAncho'), cola: L('tPodCola') }, cuerdaBrazo: L('tBrazo'), ...r3,
   });
   // with the track at 0 the clearance is minus the widest reach of body + pod; the track adds half of itself
   const h0 = carenadoCuerpo(formaTrasera(F, wTras.d / 2, wTras.neuTras, 0));
@@ -681,7 +951,13 @@ export function huecoGiro(F: FormaBala, giro: number): number {
  * 2026-11-12: `extra.alzaPas` lifts the passenger's footpegs and feet onto the pack along the frame; with a steering
  * wheel (`extra.volante`: hub and rim radius) the pilot's hands hold its rim at a quarter to three.
  */
-export interface ExtraOcupante { alzaPas?: number; volante?: { c: [number, number]; r: number } | null }
+export interface ExtraOcupante { alzaPas?: number; volante?: { c: [number, number]; r: number } | null; butaca?: PiernasButaca }
+/**
+ * Round 3 interior (2026-11-12): a rider in an Aptera bucket. The legs go forward as in a car: the pilot's ankle at the
+ * pedals, the passenger's beside the pilot's seat, its knees round the pilot's backrest (as the rear passenger of a
+ * Renault Twizy); `anchoPiernas`: hip, foot and knee off the rider's centre line (m); the passenger's hands on its thighs.
+ */
+export interface PiernasButaca { F: [number, number]; anchoPiernas: [number, number, number]; manoMuslo: boolean }
 export function puntosTriciclo(F: FormaBala, S: Asientos, piloto: boolean, rec: number, man: [number, number], pies: [number, number], escala = 1, extra: ExtraOcupante = {}): PuntosOcupante {
   const R = rec * Math.PI / 180, RH = R * 0.35;
   const d: [number, number] = [-Math.sin(R), Math.cos(R)], dh: [number, number] = [-Math.sin(RH), Math.cos(RH)];
@@ -690,12 +966,17 @@ export function puntosTriciclo(F: FormaBala, S: Asientos, piloto: boolean, rec: 
   const Sh: [number, number] = [H[0] + d[0] * 0.5 * escala, H[1] + d[1] * 0.5 * escala];
   const C: [number, number] = [Sh[0] + dh[0] * 0.2 * escala, Sh[1] + dh[1] * 0.2 * escala];
   const dxPil = S.xPiloto - ASIENTO.xPiloto, dxPas = S.xPasajero - ASIENTO.xPasajero, kz = Math.min(1, F.kW);
-  const Fp: [number, number] = piloto ? [-0.52 + dxPil + pies[0], 0.235 + F.dSuelo + F.elevar + pies[1]] : [-1.30 + dxPas, 0.29 + F.dSuelo + F.elevar + (extra.alzaPas ?? 0)];
+  const Fp: [number, number] = extra.butaca ? extra.butaca.F : piloto ? [-0.52 + dxPil + pies[0], 0.235 + F.dSuelo + F.elevar + pies[1]] : [-1.30 + dxPas, 0.29 + F.dSuelo + F.elevar + (extra.alzaPas ?? 0)];
   const K = rodilla(H, Fp, 0.45 * escala, 0.47 * escala);
+  if (extra.butaca?.manoMuslo) {
+    // (round 3 interior: the passenger in a bucket, hands on its thighs, as `puntosFila`)
+    const mano: [number, number] = [H[0] + (K[0] - H[0]) * 0.6, H[1] + (K[1] - H[1]) * 0.6 + 0.08];
+    return { H, S: Sh, C, K, F: Fp, d, dh, hx: xH, mano, anchoMano: 0.16, anchoPiernas: extra.butaca.anchoPiernas };
+  }
   const vol = piloto ? extra.volante : null;
   const mano: [number, number] = vol ? [vol.c[0], vol.c[1]] : piloto ? [-0.592 + man[0], 0.870 + F.dSuelo + F.elevar + man[1]] : [-1.45 + dxPas, 0.505 + (S.yPasajero - ASIENTO.yPasajero)];
   const kb = escalaManillar(F, man);
-  return { H, S: Sh, C, K, F: Fp, d, dh, hx: xH, mano, anchoMano: vol ? vol.r : piloto ? 0.265 * kb : 0.19 * kz, anchoPiernas: piloto ? [0.13, 0.15 * kz] : [0.17, 0.20 * kz] };
+  return { H, S: Sh, C, K, F: Fp, d, dh, hx: xH, mano, anchoMano: vol ? vol.r : piloto ? 0.265 * kb : 0.19 * kz, anchoPiernas: extra.butaca ? extra.butaca.anchoPiernas : piloto ? [0.13, 0.15 * kz] : [0.17, 0.20 * kz] };
 }
 /**
  * A passenger of «tres filas» (round three) on a car-style seat: the trunk and head as the astride riders
@@ -789,19 +1070,117 @@ function bateriaEn(F: FormaBala, T: CamposTriciclo, yBase: number, lim: { xSilli
   return { cajas, litros, capacidad: litros - resto * 1000 };
 }
 
+/** Round 3 interior: the pilot's ankle ahead of the hips at the pedals (m, plus «Pedales: hacia delante»), and the legs' spread (hip, foot, knee off the centre line). */
+const PEDAL_BUTACA = 0.76, PIES_BUTACA: [number, number, number] = [0.10, 0.12, 0.12];
+/** The passenger's ankle ahead of its hips (m), beside the pilot's seat; its knees round the pilot's backrest (`BUTACA`: 22.5-24 cm half-width). */
+const PIES_PASAJERO_BUTACA = 0.72, PIES_PASAJERO: [number, number, number] = [0.10, 0.31, 0.33];
+/**
+ * Round 3 interior (2026-11-12): the rails' run on from the shock tower to the rear axle (four wheels only: with one
+ * rear wheel it runs in the tail between them). Where the tail sweeps up, the rail kicks up with the belly (3.5 cm over
+ * it, as along the cabin) and closes in where the tail narrows, keeping 1.5 cm to the skin; at the rear axle a cradle
+ * (a post each side and a top bar) up to where the rear pods' upper arms meet the body.
+ */
+export function largueroTrasero(F: FormaBala, Ft: FormaBala, xPiv: number, yL: number, zL: number, dT: number) {
+  const xR = Ft.X_LAT, r = dT / 2, n = Math.max(2, Math.ceil((xPiv - xR) / 0.04));
+  const vientre = (x: number) => { const s = F.seccionRapida(x); let yb = Infinity; for (let j = 1; j < s.length; j += 2) yb = Math.min(yb, s[j]); return Number.isFinite(yb) ? yb : F.D.suelo; };
+  const cabe = (x: number, y: number, z: number) => dentroDe(F, x, y - r, z + r) >= 0.015 && dentroDe(F, x, y + r, z + r) >= 0.015;
+  const ruta: P3[] = [];
+  let z = zL;
+  for (let i = 0; i <= n; i++) {
+    const x = xPiv + (xR - xPiv) * i / n, y = Math.max(yL, vientre(x) + 0.035 + r);
+    while (z > 0.05 && !cabe(x, y, z)) z -= 0.005;
+    ruta.push([x, y, z]);
+  }
+  const [, y, zE] = ruta[ruta.length - 1], arriba = brazosDe(Ft)[0];
+  const yArriba = Math.max(y + 0.10, arriba.yCuerpo);
+  let zArriba = zE; while (zArriba > 0.05 && !(dentroDe(F, xR, yArriba, zArriba + r) >= 0.015)) zArriba -= 0.005;
+  return { ruta, y, z: zE, yArriba, zArriba };
+}
+
+// ------------------------------------------------------------------ leaning (2026-11-15)
+/*
+ * The «Cuadriciclo Bala clásico» leaning in bends (Eugenio, 2026-11-15: «haz que pueda bascular», on his «Smeraptera»).
+ * Each pod hangs from the body on its two faired arms as on a parallelogram: the pod, its wheel and its upright stay
+ * parallel to the body, so they lean with it, and the arms turn against the body by β so that both tyres keep the
+ * road. The whole car turns φ about the ground under its centre line (+ to the right, the +z side down), as the
+ * Cuadriciclo Basculante does (geometriaBasculante.ts `esquinaEn`, here with the arms' inner ends at the body's side).
+ */
+export interface EjeBascula {
+  eje: 'del' | 'tras' | 'lat';
+  /** the shape as this axle's pods see it (the front's own, or `formaTrasera`) */
+  F: FormaBala;
+  /** the upper arm's length, inner end to the pod (m): the parallelogram's */
+  Lk: number;
+  /** each arm: its x, its height at the body, where it meets the body (z) and its length */
+  brazos: { x: number; yCuerpo: number; zp: number; Lk: number }[];
+}
+export function ejeBascula(eje: 'del' | 'tras' | 'lat', F: FormaBala): EjeBascula {
+  // (as balaPiezas.ts `carenados` draws them: from 8 mm inside the skin to 2 cm inside the pod's centre)
+  const z1 = F.VIA_LAT / 2 - 0.02;
+  const brazos = brazosDe(F).flatMap(b => {
+    const zp = F.ladoZ(F.X_LAT + b.x, b.yCuerpo) - 0.008;
+    return Number.isFinite(zp) ? [{ x: F.X_LAT + b.x, yCuerpo: b.yCuerpo, zp, Lk: Math.max(0.05, z1 - zp) }] : [];
+  });
+  return { eje, F, Lk: brazos[0]?.Lk ?? 0.3, brazos };
+}
+/**
+ * An axle at a lean φ (rad): the arms' turn β against the body, how far the right (+z) pod rises against the body
+ * (the left one goes down as much) and how far both pods come in towards it (m).
+ */
+export function poseBascula(q: EjeBascula, phi: number) {
+  const L = q.Lk, eEf = q.F.VIA_LAT / 2 - L;
+  const beta = phi + Math.asin(Math.max(-1, Math.min(1, eEf * Math.sin(phi) / L)));
+  return { beta, dy: L * Math.sin(beta), dIn: L * (1 - Math.cos(beta)) };
+}
+/** The gap (m) between a pod's inner face and the body, the pod moved in the body's frame `dy` up and `dIn` in (as `carenadoCuerpo`). */
+function carenadoCuerpoMovido(F: FormaBala, dy: number, dIn: number): number {
+  const POD = podDe(F), ancho = semiAncho(POD); let h = 9;
+  for (let i = 0; i <= 24; i++) {
+    const xr = POD[0].x + (POD[POD.length - 1].x - POD[0].x) * i / 24, alt = alturasPod(POD, xr); if (!alt) continue;
+    for (let j = 1; j < 10; j++) {
+      const y = alt[0] + (alt[1] - alt[0]) * j / 10, w = ancho(xr, y); if (w <= 0) continue;
+      const zb = F.ladoZ(F.X_LAT + xr, y + dy); if (!Number.isFinite(zb)) continue;
+      h = Math.min(h, F.VIA_LAT / 2 - dIn - w - zb);
+    }
+  }
+  return h;
+}
+/** How high a pod's lowest edge is over the road when it leans φ (rad) with its wheel, about the tyre's contact (m). */
+function carenadoAlSuelo(F: FormaBala, phi: number): number {
+  const POD = podDe(F), ancho = semiAncho(POD); let h = 9;
+  for (let i = 0; i <= 24; i++) {
+    const xr = POD[0].x + (POD[POD.length - 1].x - POD[0].x) * i / 24, alt = alturasPod(POD, xr); if (!alt) continue;
+    for (let j = 0; j <= 10; j++) { const y = alt[0] + (alt[1] - alt[0]) * j / 10, w = Math.max(0, ancho(xr, y)); h = Math.min(h, y * Math.cos(phi) - w * Math.sin(Math.abs(phi))); }
+  }
+  return h;
+}
+/** How high the body's lowest point is over the road at a lean φ (rad), turned about the ground under its centre line (m). */
+function cuerpoAlSuelo(F: FormaBala, phi: number): number {
+  let h = 9;
+  for (let x = F.X_MORRO - 0.01; x > F.X_COLA; x -= 0.04) for (let y = 0; y < 1.4; y += 0.01) {
+    const z = F.ladoZ(x, y); if (Number.isFinite(z)) h = Math.min(h, y * Math.cos(phi) - z * Math.sin(Math.abs(phi)));
+  }
+  return h;
+}
+
 /** El modelo del Triciclo: la forma, los ocupantes, el bastidor, la batería, el motor y lo que lee el visor. */
 export function crearModeloTriciclo(P: Parametros) {
   const T = camposTriciclo(P);
   const { D, F, asientos, aleta, viaPedida, giro, elevar, traseras } = medidasTriciclo(T);
   const cup = contornoCupula(F);
   const L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T);
+  /** 2026-11-13: the smooth body (`tCubierta: 'lisa'`). */
+  const lisa = conLisa(T);
   const rF = F.R_LAT, rR = F.R_DEL, xR = -F.BATALLA, via = F.VIA_LAT, xF = F.X_LAT;
   const semiPod = anchoMaxPod(F);
   // four wheels (2026-11-11): the widest of the two axles, each with its pods
   const viaTras = traseras ? traseras.VIA_LAT : 0, semiPodTras = traseras ? anchoMaxPod(traseras) : 0;
   const anchoTotal = Math.round((traseras ? Math.max(via + 2 * semiPod, viaTras + 2 * semiPodTras) : via + 2 * semiPod) * 1000) / 1000;
+  // 2026-11-15: in a diamond, the nose wheel (the rear one's size, at x = 0 where the Cuadriciclo en rombo had it) and the pods' are the lateral ones
+  const rombo = esRombo(T), nPod = rombo ? 'lateral' : 'delantera';
   const ruedas: Rueda[] = [
-    { nombre: 'Rueda delantera der.', x: xF, z: via / 2, r: rF, w: F.ANCHO_NEU_LAT }, { nombre: 'Rueda delantera izq.', x: xF, z: -via / 2, r: rF, w: F.ANCHO_NEU_LAT },
+    ...(rombo ? [{ nombre: 'Rueda delantera (morro)', x: 0, z: 0, r: rR, w: F.ANCHO_NEU }] : []),
+    { nombre: `Rueda ${nPod} der.`, x: xF, z: via / 2, r: rF, w: F.ANCHO_NEU_LAT }, { nombre: `Rueda ${nPod} izq.`, x: xF, z: -via / 2, r: rF, w: F.ANCHO_NEU_LAT },
     ...(traseras
       ? [{ nombre: 'Rueda trasera der.', x: xR, z: viaTras / 2, r: rR, w: F.ANCHO_NEU }, { nombre: 'Rueda trasera izq.', x: xR, z: -viaTras / 2, r: rR, w: F.ANCHO_NEU }]
       : [{ nombre: 'Rueda trasera', x: xR, z: 0, r: rR, w: F.ANCHO_NEU }]),
@@ -810,7 +1189,11 @@ export function crearModeloTriciclo(P: Parametros) {
   // ── bastidor: dos largueros sobre la panza, travesaños, la cuna de la batería y la suspensión delantera, los soportes de los sillines y la torreta del amortiguador
   const dT = L('tChD') / 1000, pared = L('tChT') / 1000, mat = MATERIALES_CHASIS[T.tChMat].n;
   // the rails narrow with a narrower body (they run along the flat of the belly)
-  const yL = D.suelo + 0.035 + dT / 2, zL = Z_LARGUERO * Math.min(1, F.kW);
+  const yL = D.suelo + 0.035 + dT / 2, zL0 = Z_LARGUERO * Math.min(1, F.kW);
+  // round 3 interior (2026-11-12): the rails' spacing (`tChSep`); wider than before, they close in to the old spacing ahead of the front cradle
+  const zL = T.tChSep === TRICICLO_DEFECTO.tChSep ? zL0 : semiLarguero(T), xF0 = -L('tEjeDel'), xCodo = Math.min(xF0, -0.09);
+  const zRiel = (x: number) => zL === zL0 || x <= xCodo ? zL : zL0 + (zL - zL0) * Math.min(1, (0.06 - x) / (0.06 - xCodo));
+  const butacas = conButacas(T);
   // 2026-11-12 (Eugenio: «la batería esté a lo largo del chasis y que sobresalga un 50 % del ancho del chasis»): one pack
   // on the rails, centred, from `tBatX` back `tBatLargo`, `tBatAncho` % of the frame's width (outer face to outer face
   // of the two rails), `tBatAlto` tall. Where it runs, it is the floor: the feet and the seats stand on it.
@@ -821,8 +1204,8 @@ export function crearModeloTriciclo(P: Parametros) {
   const sobrePaquete = (x0: number, x1: number, z0: number, y: number) => paquete && x1 > paquete.x0 - 0.02 && x0 < paquete.x1 + 0.02 && z0 < paquete.hz + 0.02 ? Math.max(0, paquete.y1 + 0.004 - y) : 0;
   const dxPil0 = asientos.xPiloto - ASIENTO.xPiloto, dxPas0 = asientos.xPasajero - ASIENTO.xPasajero, kz0 = Math.min(1, F.kW);
   // the pilot's footboards (their lowest point 4.7 cm under their centre: tilted 20°) and the passenger's footpegs (their bracket's foot)
-  const alzaPil = sobrePaquete(-0.67 + dxPil0 + L('tPiesX'), -0.43 + dxPil0 + L('tPiesX'), 0.15 * kz0 - 0.045, 0.205 + F.dSuelo + elevar + L('tPiesY') - 0.047);
-  const alzaPas = T.tAsientos === 'filas' ? 0 : sobrePaquete(-1.33 + dxPas0, -1.27 + dxPas0, 0.10 * kz0, 0.23 + F.dSuelo + elevar);
+  const alzaPil = butacas ? 0 : sobrePaquete(-0.67 + dxPil0 + L('tPiesX'), -0.43 + dxPil0 + L('tPiesX'), 0.15 * kz0 - 0.045, 0.205 + F.dSuelo + elevar + L('tPiesY') - 0.047);
+  const alzaPas = T.tAsientos !== 'horcajadas' ? 0 : sobrePaquete(-1.33 + dxPas0, -1.27 + dxPas0, 0.10 * kz0, 0.23 + F.dSuelo + elevar);
   const man: [number, number] = [-L('tManX'), L('tManY')], pies: [number, number] = [L('tPiesX'), L('tPiesY') + alzaPil];
   // 2026-11-12: the steering wheel (Eugenio: «cambia el manillar por un volante»): hub and rim, tilted with its top forward
   const volante = T.tMando === 'volante' ? { c: [-0.60 - L('tVolX'), 0.90 + F.dSuelo + elevar + L('tVolY')] as [number, number], r: L('tVolD') / 2, inc: L('tVolInc') * Math.PI / 180, atras: 0, baja: 0 } : null;
@@ -834,7 +1217,7 @@ export function crearModeloTriciclo(P: Parametros) {
     while (fuera() && volante.atras < 0.25) { volante.c[0] -= 0.005; volante.atras += 0.005; }
     while (fuera() && volante.baja < 0.30) { volante.c[1] -= 0.005; volante.baja += 0.005; }
   }
-  const occ = (piloto: boolean, escala = 1) => puntosTriciclo(F, asientos, piloto, piloto ? rec.piloto : rec.pasajero, man, pies, escala, { alzaPas, volante });
+  const occ = (piloto: boolean, escala = 1) => puntosTriciclo(F, asientos, piloto, piloto ? rec.piloto : rec.pasajero, man, pies, escala, { alzaPas, volante, ...(butacas ? { butaca: piernasButaca(piloto) } : {}) });
   // three rows (round three): where rows 2 and 3 sit (their cushions at the passenger's saddle height), and the floor on the rails
   const filas = T.tAsientos === 'filas', yPiso = yL + dT / 2 + 0.02;
   const x2 = asientos.xPiloto - L('tFila2X'), x3 = x2 - L('tFila3X'), yAsiento = asientos.yPasajero;
@@ -866,10 +1249,14 @@ export function crearModeloTriciclo(P: Parametros) {
   const cuna = paquete ? 'Cuna de la suspensión delantera' : 'Cuna de la batería';
   for (const s of [1, -1]) {
     const lado = s > 0 ? 'der.' : 'izq.';
-    tubos.push(T_(`Larguero ${lado}`, [0.06, yL, s * zL], [xPiv, yL, s * zL]));
+    if (zL === zL0) tubos.push(T_(`Larguero ${lado}`, [0.06, yL, s * zL], [xPiv, yL, s * zL]));
+    else tubos.push(T_(`Larguero ${lado}`, [0.06, yL, s * zL0], [xPiv, yL, s * zL], dT, [[0.06, yL, s * zL0], [xCodo, yL, s * zL], [xPiv, yL, s * zL]]));
     // the cradle round the nose module: a post each side up to the top bar, on which the front suspension pivots
-    tubos.push(T_(`${cuna}: poste ${lado}`, [xCuna, yL, s * zL], [xCuna, yCuna, s * zCuna]));
+    tubos.push(T_(`${cuna}: poste ${lado}`, [xCuna, yL, s * zRiel(xCuna)], [xCuna, yCuna, s * zCuna]));
+    // round 3 interior: an Aptera bucket each, on a post each side from the rail to its shell's underside, under its hips
+    if (butacas) for (const [n, x, y] of [['piloto', asientos.xPiloto, asientos.yPiloto], ['pasajero', asientos.xPasajero, asientos.yPasajero]] as const) poste(`Soporte de la butaca del ${n} ${lado}`, [x + 0.02, yL, s * zL], [x + 0.02, y - BUTACA.pan, s * 0.13]);
     // the pilot's saddle and the passenger's: a post each side from the rail up to the saddle's underside
+    else {
     poste(`Soporte del sillín del piloto ${lado}`, [-0.95 + dxPil, yL, s * zL], [-1.02 + dxPil, 0.335 + dyPil + F.dSuelo * 0, s * 0.08]);
     if (!filas) poste(`Soporte del sillín del pasajero ${lado}`, [-1.50 + dxPas, yL, s * zL], [-1.55 + dxPas, 0.35 + dyPas, s * 0.08]);
     else {
@@ -877,10 +1264,11 @@ export function crearModeloTriciclo(P: Parametros) {
       poste(`Soporte del asiento de la fila 2 ${lado}`, [x2 + 0.04, yL, s * zL], [x2 - 0.02, yAsiento - 0.09, s * Z_FILA2]);
       poste(`Soporte del asiento de la fila 3 ${lado}`, [x3 + 0.04, yL, s * zL], [x3 - 0.02, yAsiento - 0.09, s * 0.10]);
     }
+    }
     // the shock tower: from the rail at the swing-arm pivot up and back to the shock's top mount
     tubos.push(T_(`Torreta del amortiguador ${lado}`, [xPiv + 0.04, yL, s * zL], [xPiv - 0.06, yPiv + 0.26, s * 0.05]));
   }
-  tubos.push(T_('Travesaño delantero', [0.06, yL, -zL], [0.06, yL, zL]));
+  tubos.push(T_('Travesaño delantero', [0.06, yL, -zL0], [0.06, yL, zL0]));
   tubos.push(T_(`${cuna}: barra de arriba`, [xCuna, yCuna, -zCuna], [xCuna, yCuna, zCuna]));
   tubos.push(T_('Travesaño de las plataformas', [-0.55 + dxPil + pies[0], yL, -zL], [-0.55 + dxPil + pies[0], yL, zL]));
   tubos.push(T_('Travesaño bajo los sillines', [-1.25, yL, -zL], [-1.25, yL, zL]));
@@ -888,8 +1276,44 @@ export function crearModeloTriciclo(P: Parametros) {
   // (seats down on the frame, 2026-11-12: the crossbar never below the rails' top)
   if (filas) { const yt = Math.max(yAsiento - 0.09, yL + dT); tubos.push(T_('Travesaño de la fila 2', [x2 - 0.02, yt, -(Z_FILA2 + 0.10)], [x2 - 0.02, yt, Z_FILA2 + 0.10])); }
   // the steering-column support: from the cradle's top bar back and up to the steering head under the dash
-  const cabeza: P3 = [-0.44 - man[0] * 0, 0.80 + F.dSuelo + elevar, 0];
+  // (round 4, 2026-11-13, «el alto total no se puede bajar más»: below the old floor of «Alto total», 1.15 m, the head comes
+  // down to stay 2 cm under the top line there; at 1.15 and above, where every saved design is, it is where it always was)
+  const cabeza: P3 = [-0.44 - man[0] * 0, techoBajo(T) ? Math.min(0.80 + F.dSuelo + elevar, techoEn(F, -0.44) - 0.02) : 0.80 + F.dSuelo + elevar, 0];
   tubos.push(T_('Soporte de la columna de dirección', [xCuna, yCuna, 0], cabeza, dT, [[xCuna, yCuna, 0], [-0.22, yCuna + 0.20, 0], cabeza]));
+  // round 3 interior (2026-11-12, Eugenio: «el chasis no llega hasta el final. Debería alargarse el tubo»): with two rear
+  // wheels, the rails on to the rear axle, where the rear pods' arms bring their loads in, and a cradle there
+  const trasero = largueroAlEje(T) && traseras ? largueroTrasero(F, traseras, xPiv, yL, zL, dT) : null;
+  if (trasero) {
+    for (const s of [1, -1]) {
+      const lado = s > 0 ? 'der.' : 'izq.', ruta = trasero.ruta.map(([x, y, z]) => [x, y, s * z] as P3);
+      tubos.push(T_(`Larguero trasero ${lado}`, ruta[0], ruta[ruta.length - 1], dT, ruta));
+      tubos.push(T_(`Cuna trasera: poste ${lado}`, [xR, trasero.y, s * trasero.z], [xR, trasero.yArriba, s * trasero.zArriba]));
+    }
+    tubos.push(T_('Travesaño del eje trasero', [xR, trasero.y, -trasero.z], [xR, trasero.y, trasero.z]));
+    tubos.push(T_('Cuna trasera: barra de arriba', [xR, trasero.yArriba, -trasero.zArriba], [xR, trasero.yArriba, trasero.zArriba]));
+  }
+  // round 3 interior: where the legs go with the Aptera buckets (the pilot's heel on the floor between the rails, on the
+  // pack, or on a plate over the front cradle's top bar; the passenger's beside the pilot's seat, on the belly or the pack)
+  const pisoEn = (x: number, zi: number, zo: number) => {
+    let y = D.suelo + 0.03; while (y < yL + 0.3 && dentroDe(F, x, y, zo) < 0.015) y += 0.005;
+    if (zi < zL + dT / 2) y = Math.max(y, yL + dT / 2);
+    return paquete && x > paquete.x0 - 0.02 && x < paquete.x1 + 0.02 && zi < paquete.hz + 0.02 ? Math.max(y, paquete.y1 + 0.004) : y;
+  };
+  const pedales = butacas ? (() => {
+    const x = asientos.xPiloto + PEDAL_BUTACA + L('tPiesX');
+    let y = pisoEn(x - 0.06, PIES_BUTACA[1] - 0.045, PIES_BUTACA[1] + 0.045);
+    if (Math.abs(x - 0.06 - xCuna) < 0.12) y = Math.max(y, yCuna + dT / 2 + 0.012);
+    return { x, talon: y + L('tPiesY'), z: PIES_BUTACA[1] };
+  })() : null;
+  function piernasButaca(piloto: boolean): PiernasButaca {
+    if (piloto) return { F: [pedales!.x, pedales!.talon + 0.07], anchoPiernas: PIES_BUTACA, manoMuslo: false };
+    // (its feet as far out as the body lets them, 1 cm inside the skin (as the check): in a narrow body they close in, and the check
+    // «a los lados del asiento del piloto» says when they no longer pass)
+    const x = asientos.xPasajero + PIES_PASAJERO_BUTACA, [zc, zf0, zk] = PIES_PASAJERO;
+    let zf = zf0, y = pisoEn(x - 0.06, zf - 0.045, zf + 0.045);
+    while (zf > 0.12 && ![x, x + 0.09, x + 0.18].every(xx => [y, y + 0.11].every(yy => dentroDe(F, xx, yy, zf + 0.045) >= 0.01))) { zf -= 0.005; y = pisoEn(x - 0.06, zf - 0.045, zf + 0.045); }
+    return { F: [x, y + 0.07], anchoPiernas: zf === zf0 ? PIES_PASAJERO : [zc, zf, zk - (zf0 - zf)], manoMuslo: true };
+  }
 
   // ── suspensión, dirección y motor (posiciones; el visor los dibuja y la masa los cuenta por deslizador)
   const recTras = L('tRecTras') / 1000, recDel = L('tRecDel') / 1000;
@@ -905,25 +1329,48 @@ export function crearModeloTriciclo(P: Parametros) {
     solar: L('tSolar') >= rangoTriciclo('tSolar', T)[1] - 1e-6 ? null : -L('tSolar'), alto: L('tVentAlto'),
     // (the Aptera doors, 2026-11-12, are cut along the pillar and the rail: with doors the frame is always there)
     pilar: T.tVentanas === 'marco' || conPuertas(T) ? { x: -L('tPilar'), barrido: L('tPilarBarrido'), ancho: L('tPilarAncho') } : null,
+    // round 4: the roof frame, only when asked (absent: the panel as before)
+    ...(L('tMarcoTecho') > 0 ? { marcoTecho: L('tMarcoTecho') } : {}),
   };
   const ventanas = ventanasDe(F, cup, opcVentanas);
   const p = ventanas.panel, solar = p ? areaXT(F, p.x0, p.x1, x => [p.tLow(x), 1]) : { area: 0, x: -1.5, y: 1.2 };
   // the A-pillars and the rail frames: laminate (navy) instead of glass
-  const marcoArea = areaMarco(F, bandaMarco(ventanas, cup.XC1 + 0.004));
+  let marcoArea = areaMarco(F, bandaMarco(ventanas, cup.XC1 + 0.004));
+  // round 4: the roof frame is laminate where there was panel (the panel's area above already lost it)
+  const mt = ventanas.marco, marcoTecho = mt ? areaXT(F, mt.x0, mt.x1, x => [mt.tCuenta(x), mt.tHi(x)]).area : 0;
+  marcoArea += marcoTecho;
 
   // ── 2026-11-12: Aptera-style doors and hatch (garaje/balaPuertas.ts), the dashboard and the mirrors
   const opcPuertas: OpcionesPuertas | null = conPuertas(T) ? {
     del: -L('tPuertaDel'), tras: -L('tPuertaTras'), umbral: L('tUmbral') + elevar, cintura: L('tCintura'),
     bisagraY: L('tBisagraY'), inc: L('tBisagraInc'), dentro: L('tBisagraDentro'), abre: L('tPuertaAbre'),
+    // round 3: the passengers' door behind the split (absent with one door: the opening as before)
+    ...(T.tPuertas2 === 'si' ? { segunda: { parte: -L('tPuerta2Parte'), bisagraY: L('tBisagra2Y'), inc: L('tBisagra2Inc'), abre: L('tPuerta2Abre') } } : {}),
   } : null;
   const puerta = opcPuertas ? puertaDe(F, ventanas, cup, opcPuertas) : null;
   const opcPorton: OpcionesPorton | null = puerta && T.tMaletero === 'aptera' ? { x: -L('tMalIni'), abre: L('tMalAbre'), lado: L('tMalLado') } : null;
-  const porton = puerta && opcPorton ? portonDe(F, puerta, cup, opcPorton, F.X(-2.86)) : null;
+  const porton0 = puerta && opcPorton ? portonDe(F, puerta, cup, opcPorton, F.X_ARO_COLA) : null;
+  // 2026-11-13, the smooth body («la cola y el maletero tienen que ser la misma pieza»): behind the doors the hatch's side
+  // edges ease (over the same 35 cm) onto the deck's own side edge (`T_BORDE_LISA`) and run on it to the trailing edge's
+  // light bar: the hatch is the whole rear deck.
+  const porton = porton0 && lisa && puerta ? (() => {
+    const xR = puerta.xR, base = porton0.tLo;
+    return { ...porton0, tLo: (x: number) => { if (x >= xR) return base(x); const w = suaveCola((xR - x) / 0.35); return base(x) * (1 - w) + T_BORDE_LISA * w; } };
+  })() : porton0;
+  // round 3: the second door's B- and C-pillars, laminate where there was glass (from just under the glass edge to the rail)
+  if (puerta?.segunda) {
+    const r = (x: number): [number, number] => [Math.max(0, ventanas.tC(x) - 0.01), Math.max(Math.max(0, ventanas.tC(x) - 0.01), ventanas.tR(x))];
+    const xS = puerta.segunda.xS, xR = puerta.xR;
+    marcoArea += areaXT(F, xS - MONTANTE_B / 2, xS + MONTANTE_B / 2, r, 8, 8).area + areaXT(F, xR - MONTANTE_C, xR, r, 8, 8).area;
+  }
   // the dashboard: from where the nose's top line is 3 cm over its top, `tSalpFondo` back towards the pilot, as wide as the cabin
-  const salpicadero = T.tSalpicadero === 'si' ? (() => {
-    const yTop = 0.78 + F.dSuelo + elevar + L('tSalpY');
+  const salpicadero = conSalpicadero(T) ? (() => {
+    // (round 4: below the old floor of «Alto total» its top comes down to 3 cm under the top line 30 cm behind the
+    // windscreen's foot, so it stays inside; at 1.15 m and above it is where it always was)
+    const y0 = 0.78 + F.dSuelo + elevar + L('tSalpY'), yTop = techoBajo(T) ? Math.min(y0, techoEn(F, cup.XC0 - 0.3) - 0.03) : y0;
     let x0 = 0; while (x0 > cup.XC0 - 0.3 && !(techoEn(F, x0) >= yTop + 0.03)) x0 -= 0.005;
-    return { x0, x1: x0 - L('tSalpFondo'), yTop, yBajo: yTop - 0.16, yBajoDel: yTop - 0.30 };
+    // (round 3 interior: «más bonito, blanco y con más detalles», the same volume drawn white with its details)
+    return { x0, x1: x0 - L('tSalpFondo'), yTop, yBajo: yTop - 0.16, yBajoDel: yTop - 0.30, ...(T.tSalpicadero === 'blanco' ? { blanco: true } : {}) };
   })() : null;
   // the mirrors: a teardrop on a short stalk from the door, 9 cm behind the pillar's foot and 3.5 cm under the glass
   const retrovisor = T.tRetrovisores === 'espejos' ? (() => {
@@ -934,14 +1381,50 @@ export function crearModeloTriciclo(P: Parametros) {
   // runs on from the canopy's end over the top of the tail back to its ring, inside the lid that opens there (the
   // Aptera hatch, 4 cm inside its edges; or the round-three lid, above t = 0.66), so it lifts with it. It widens from
   // the canopy's end (where the glass panel closes in its point) over 20 cm. On the body's laminate, as the Aptera's.
-  const xColaIni = cup.XF1 - 0.005, xColaFin = F.X(-2.86) + 0.012;
-  const tPanelCola = (x: number) => { const base = porton ? Math.min(0.97, porton.tLo(x) + 0.04) : 0.66; return 1 - (1 - base) * suaveCola((xColaIni - x) / 0.20); };
+  const xColaIni = cup.XF1 - 0.005, xColaFin = F.X_ARO_COLA + 0.012;
+  // (2026-11-13, the smooth body: the panel covers the whole deck, from its side edges inset by a frame, `T_PANEL_LISA`)
+  // (with the smooth body it starts straight across, with all its width, right behind the canopy frame's rear tip: the deck
+  // begins there, and a panel that widened over 20 cm from that tip read as a narrow shield inside the hatch)
+  const tPanelCola = (x: number) => { const base0 = porton ? Math.min(0.97, porton.tLo(x) + 0.04) : 0.66; if (lisa) return Math.max(base0, T_PANEL_LISA); return 1 - (1 - base0) * suaveCola((xColaIni - x) / 0.20); };
   const solarCola = T.tSolarCola === 'si' && xColaIni > xColaFin ? { x0: xColaIni, x1: xColaFin, tLow: tPanelCola, ...areaXT(F, xColaFin, xColaIni, x => [tPanelCola(x), 1]) } : null;
-  const solarTodo = solarCola && solarCola.area > 0 ? { area: solar.area + solarCola.area, x: (solar.area * solar.x + solarCola.area * solarCola.x) / (solar.area + solarCola.area), y: (solar.area * solar.y + solarCola.area * solarCola.y) / (solar.area + solarCola.area) } : solar;
+  const solarTodo0 = solarCola && solarCola.area > 0 ? { area: solar.area + solarCola.area, x: (solar.area * solar.x + solarCola.area * solarCola.x) / (solar.area + solarCola.area), y: (solar.area * solar.y + solarCola.area * solarCola.y) / (solar.area + solarCola.area) } : solar;
+  // ── Round 3 body (2026-11-12): the panel on top of the nose («pon paneles solares en la parte frontal del morro»), from
+  // 2 cm behind the nose's light band back to 2 cm ahead of the canopy's frame, over the hood's top (t 0.58 and up), its
+  // front end rounded off over 6 cm and its rear one over 10 (where the frame's line rises to the top); on the body's
+  // laminate, as the one over the tail
+  const solarMorro = T.tSolarMorro === 'si' ? (() => {
+    const x0 = F.X_ARO_MORRO - 0.02, x1 = cup.XF0 + 0.02; if (!(x0 - x1 > 0.10)) return null;
+    // (2026-11-13, the smooth body: on the hood's deck, inset from its side edges as the tail's)
+    const tb = lisa ? T_PANEL_LISA : 0.58;
+    const tLow = (x: number) => { const a = 1 - (1 - tb) * suaveCola((x - x1) / 0.10), b = 1 - (1 - tb) * suaveCola((x0 - x) / 0.06); return Math.max(a, b); };
+    return { x0, x1, tLow, ...areaXT(F, x1, x0, x => [tLow(x), 1]) };
+  })() : null;
+  const solarTodo = solarMorro && solarMorro.area > 0 ? { area: solarTodo0.area + solarMorro.area, x: (solarTodo0.area * solarTodo0.x + solarMorro.area * solarMorro.x) / (solarTodo0.area + solarMorro.area), y: (solarTodo0.area * solarTodo0.y + solarMorro.area * solarMorro.y) / (solarTodo0.area + solarMorro.area) } : solarTodo0;
+  // round 3: the central headlamp («un faro en el centro del morro, como una moto»): an ellipsoid on the nose's tip, on
+  // the centre line at the height the nose closes to, its front 3 cm proud of the skin; round with a pointed nose, an
+  // oval as wide as asked and flatter the more the nose is a line (the Aptera's)
+  const faro = T.tFaro === 'si' ? (() => {
+    const s = F.seccionRapida(F.X_MORRO - 0.004); let y0 = Infinity, y1 = -Infinity; for (let j = 1; j < s.length; j += 2) { y0 = Math.min(y0, s[j]); y1 = Math.max(y1, s[j]); }
+    const ancho = L('tFaroD'), alto = ancho * (1 - 0.55 * L('tMorroLinea')), y = (y0 + y1) / 2;
+    const xf = F.frenteX(0, y), x = (Number.isFinite(xf) ? xf : F.X_MORRO) + 0.03 - 0.06;
+    return { c: [x, y, 0] as P3, fondo: 0.06, alto, ancho };
+  })() : null;
+  // 2026-11-13 (Eugenio: «hazlo como el aptera que tiene un faro a lo largo del morro»): a light bar along the nose's
+  // leading line, the widest point of each section (t = T3), from where the nose cap is 55 % of the way to its tip round
+  // to the centre, both sides; the 3D draws it (balaModelo.ts `barraFaro`). Its middle is its centre of mass.
+  const faroBarra = T.tFaro === 'barra' ? (() => {
+    const x0 = F.XN0 + 0.55 * (F.X_MORRO - F.XN0), xm = F.XN0 + 0.85 * (F.X_MORRO - F.XN0);
+    return { x0, t: T3, c: [xm, punto(F.sec(xm), T3)[1], 0] as P3 };
+  })() : null;
 
   // ── the seats and who sits on them (round three): astride, the two riders as before; in three rows, the pilot
   // on a car-style seat with the same posture, row 2's two side by side and row 3's one, unless their row is folded
   const asientosFilas: AsientoFila[] = [];
+  // round 3 interior: the two Aptera buckets, in tandem on the centre line (the posture is the astride riders' trunk, `piernasButaca`)
+  const butacasDe: AsientoFila[] | null = butacas ? [
+    { fila: 1, x: asientos.xPiloto, z: 0, y: asientos.yPiloto, ancho: 2 * BUTACA.semi.cojin, fondo: BUTACA.delante + BUTACA.bisagra, respaldo: BUTACA.respaldo, rec: rec.piloto, plegado: false },
+    { fila: 2, x: asientos.xPasajero, z: 0, y: asientos.yPasajero, ancho: 2 * BUTACA.semi.cojin, fondo: BUTACA.delante + BUTACA.bisagra, respaldo: BUTACA.respaldo, rec: rec.pasajero, plegado: false },
+  ] : null;
   const plazas: Plaza[] = [
     { nombre: 'Piloto', fila: 1, z: 0, piloto: true, pts: occ(true), talla: e => occ(true, e) },
   ];
@@ -975,19 +1458,34 @@ export function crearModeloTriciclo(P: Parametros) {
     ruedas, via: { del: via, tras: viaTras },
     /** Four wheels (2026-11-11): the rear pods' view of the shape (`formaTrasera`), or null with one rear wheel. */
     traseras, cuatro: !!traseras,
+    /** 2026-11-15: leaning in bends (four wheels and `tBascula: 'si'`): its maximum (rad) and each axle's arms, or null. */
+    bascula: T.tBascula === 'si' && (traseras || rombo) ? { phiMax: L('tBascMax') * Math.PI / 180, ejes: traseras ? [ejeBascula('del', F), ejeBascula('tras', traseras)] : [ejeBascula('lat', F)] } : null,
+    /** 2026-11-15: the wheels in a diamond (`tRuedas`): the nose wheel at x = 0 steers, the pods do not. */
+    rombo,
+    /** 2026-11-15: the plug-in hybrid (`tPropulsion: 'phev'`), or null: its engine, efficiencies, tank and their masses. */
+    phev: T.tPropulsion === 'phev' ? {
+      kW: L('tPhevKW'), rendTerm: L('tRendTerm') / 100, rendTrans: L('tRendTrans') / 100, litros: L('tDeposito'),
+      kgMotor: 15 + 1.4 * L('tPhevKW'), kgPlanetario: 12, kgDeposito: 4 + 0.745 * L('tDeposito'),
+    } : null,
     tubos, baterias, bateriaCabe: bat.capacidad, inversor, motor, basculante, amortiguador, brazos, cremallera, cabezaDireccion: cabeza, recTras, recDel, yLarguero: yL,
     // (with two rear wheels there is no wheel under the tail to cover)
     faldon: traseras ? null : faldonDe(F, L('tFaldon'), xR, rR),
     /** The canopy's solar panel and side windows: what the 3D builder draws (`opcVentanas`), the curves, and the panel's area (m², both sides) and centre. */
-    opcVentanas, ventanas, solar, marcoArea,
+    opcVentanas, ventanas, solar, marcoArea, marcoTecho,
     /** 2026-11-12: the panel run back over the tail to its ring (or null), and all the panel together (area, centre). */
     solarCola, solarTodo,
+    /** Round 3 (2026-11-12): the panel on the nose (or null) and the central headlamp (its centre, depth, height and width; or null). */
+    solarMorro, faro,
+    /** 2026-11-13: the light bar along the nose's leading line (or null); and whether the body is the smooth one. */
+    faroBarra, lisa,
     /**
      * 2026-11-12: the battery's capacity (kWh: the slider's, or the pack's litres × Wh/L), the pack along the frame (or
      * null), how much the footboards and footpegs rose onto it; the steering wheel, the dashboard, the mirrors; the Aptera
      * doors and hatch (their options for the 3D builder and their outlines), or null.
      */
     kWh, paquete, alzaPil, alzaPas, volante, salpicadero, retrovisor, opcPuertas, puerta, opcPorton, porton,
+    /** Round 3 interior: the Aptera buckets and the pilot's pedals (or null), and the rails' run on to the rear axle (or null). */
+    butacas: butacasDe, pedales, larguerosTraseros: trasero,
     /** What the astride saddle stands on (m): the rails' top or the pack's; the 3D thins the saddle down to it. */
     sueloSillin: paquete && -0.835 + dxPil0 > paquete.x0 && -1.745 + dxPas0 < paquete.x1 ? paquete.y1 : yL + dT / 2,
     /** Los maniquíes de talla media (el visor los dibuja con la función de los otros vehículos). */
@@ -1004,9 +1502,15 @@ export type ModeloTriciclo = ReturnType<typeof crearModeloTriciclo>;
 export function opcionesCabinaTriciclo(m: ModeloTriciclo) {
   return {
     recPil: m.rec.piloto, recPas: m.rec.pasajero, man: m.man, pies: m.pies, faldon: m.faldon, ventanas: m.opcVentanas, maletero: true, ...(m.filas ? { filas: m.asientosFilas } : {}), traseras: m.traseras,
+    ...(m.rombo ? { rombo: true } : {}),
     sueloSillin: m.sueloSillin, alzaPas: m.alzaPas, volante: m.volante, cabezaDireccion: m.cabezaDireccion, salpicadero: m.salpicadero,
     puertas: m.puerta ? { puerta: m.puerta, porton: m.porton } : null, retrovisor: m.retrovisor,
     solarCola: m.solarCola,
+    ...(m.butacas ? { butacas: m.butacas, pedales: m.pedales } : {}),
+    // round 3
+    solarMorro: m.solarMorro, faro: m.faro,
+    // 2026-11-13 (absent with the bar off, so the default draws exactly as before)
+    ...(m.faroBarra ? { faroBarra: m.faroBarra } : {}),
   };
 }
 
@@ -1030,7 +1534,11 @@ function faldonDe(F: FormaBala, k: number, xR: number, rR: number) {
 }
 
 // ------------------------------------------------------------------ cálculo
-export interface PiezaMasa { nombre: string; kg: number; x: number; y: number }
+export interface PiezaMasa {
+  nombre: string; kg: number; x: number; y: number;
+  /** Round 3 interior (2026-11-12): what it is made of or why it weighs that, for the «Proyecto» list (absent: nothing to add). */
+  nota?: string;
+}
 export interface ResultadosTriciclo extends Omit<ResultadosBala, 'cabezas'> {
   /** Lo que queda sobre la cabeza de cada uno (m), sin casco: talla media y alta ('piloto', 'pasajero', 'fila 2', 'fila 3'). */
   cabezas: { quien: string; p50: number; p95: number; x: number }[];
@@ -1174,10 +1682,32 @@ export function piezasTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cris
   const o = piezasBase(m, ar, centros, pods);
   if (m.puerta) o.push({ nombre: 'Puertas: bisagras, cierres y amortiguadores', kg: 3.0, x: (m.puerta.xTip + m.puerta.xR) / 2, y: 0.75 + m.elevar });
   if (m.porton) o.push({ nombre: 'Portón: bisagras y amortiguadores de gas', kg: 2.0, x: m.porton.xH - 0.4, y: 1.1 + m.elevar });
+  // the plug-in hybrid (2026-11-15): estimates of parts of their class, not measured. The petrol engine about 15 kg
+  // plus 1,4 kg per kW (a 25 kW twin weighs some 50 kg), the planetary gear and its generator 12 kg, the tank 4 kg and
+  // its petrol full (0,745 kg/L); all ahead of the rear axle, low
+  if (m.phev) {
+    const p = m.phev, x = m.xR + 0.55, y = 0.32 + m.elevar;
+    o.push({ nombre: 'Motor de gasolina (híbrido)', kg: p.kgMotor, x, y });
+    o.push({ nombre: 'Motor: engranaje planetario y generador', kg: p.kgPlanetario, x: x + 0.2, y });
+    o.push({ nombre: 'Depósito de gasolina, lleno', kg: p.kgDeposito, x: x + 0.45, y: 0.25 + m.elevar });
+  }
+  // a diamond (2026-11-15): the nose wheel (the rear one's size), its brake and its fork (an estimate)
+  if (m.rombo) o.push({ nombre: 'Rueda delantera, freno y horquilla', kg: limitarTriciclo('tMRueda', m.campos) * RUEDAS_TRICICLO[m.campos.tRuedaTras].kg + limitarTriciclo('tMFreno', m.campos) + 5, x: 0, y: m.rR });
   if (m.volante) o.push({ nombre: 'Volante y columna (más que el manillar)', kg: 1.8, x: m.volante.c[0] + 0.1, y: m.volante.c[1] - 0.05 });
-  if (m.salpicadero) { const s = m.salpicadero; o.push({ nombre: 'Salpicadero con sus pantallas', kg: 4.5, x: (s.x0 + s.x1) / 2, y: s.yTop - 0.1 }); }
+  // (round 3 interior: the white one with its binnacle, vents, buttons, stalks and column shroud: `MASA_SALPICADERO_BLANCO`)
+  if (m.salpicadero) { const s = m.salpicadero; o.push({ nombre: 'Salpicadero con sus pantallas', kg: 'blanco' in s ? MASA_SALPICADERO_BLANCO : 4.5, x: (s.x0 + s.x1) / 2, y: s.yTop - 0.1 }); }
   if (m.retrovisor) o.push({ nombre: 'Retrovisores (dos)', kg: 0.9, x: m.retrovisor.cabeza[0], y: m.retrovisor.cabeza[1] });
-  return o;
+  // round 3 (estimates of parts of their class, not measured): the passengers' doors' hinges, struts and latches, and the headlamp
+  if (m.puerta?.segunda) {
+    o.push({ nombre: 'Puertas de atrás: bisagras, cierres y amortiguadores', kg: 2.4, x: m.puerta.segunda.x1, y: 0.8 + m.elevar });
+    // the B- and C-pillars' laminate is counted in the body (their area moves from glass to laminate); this is what
+    // stiffens them for the hinges and the latches: aluminium inserts and a thicker lay-up, both sides
+    o.push({ nombre: 'Montantes B y C: refuerzos para bisagras y cierres', kg: 2.0, x: (m.puerta.segunda.xS + m.puerta.segunda.x1) / 2, y: 0.9 + m.elevar });
+  }
+  if (m.faro) o.push({ nombre: 'Faro central', kg: 0.7, x: m.faro.c[0], y: m.faro.c[1] });
+  // (2026-11-13: an LED strip, its black housing and lens along the leading line: about 0.9 kg, an estimate)
+  if (m.faroBarra) o.push({ nombre: 'Barra de luz del morro', kg: 0.9, x: m.faroBarra.c[0], y: m.faroBarra.c[1] });
+  return dimensionar(m, o);
 }
 function piezasBase(m: ModeloTriciclo, ar: { carroceria: number; cristal: number; solar: number }, centros: { xPiel: number; yPiel: number; xCristal: number; yCristal: number }, pods: { area: number; areaTras?: number }): PiezaMasa[] {
   const T = m.campos, L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), F = m.F;
@@ -1203,7 +1733,7 @@ function piezasBase(m: ModeloTriciclo, ar: { carroceria: number; cristal: number
       { nombre: 'Carenados y brazos delanteros', kg: pods.area * kgm2, x: m.xF, y: yRF + 0.05 },
       { nombre: 'Carenados y brazos traseros', kg: (pods.areaTras ?? 0) * kgm2, x: m.xR, y: yRR + 0.05 },
       { nombre: 'Cúpula', kg: ar.cristal * L('tEspCristal') * 1.2, x: centros.xCristal, y: centros.yCristal },
-      { nombre: 'Bastidor', kg: kgTubos + L('tChUniones'), x: kgTubos ? xt / kgTubos : -1, y: kgTubos ? yt / kgTubos : 0.3 },
+      { nombre: 'Bastidor', kg: kgTubos + uniones(kgTubos, L('tChUniones')), x: kgTubos ? xt / kgTubos : -1, y: kgTubos ? yt / kgTubos : 0.3 },
       { nombre: 'Suspensión delantera', kg: L('tMSuspDel'), x: m.xF, y: yRF + 0.08 },
       { nombre: 'Suspensión trasera', kg: L('tMSuspTras'), x: m.xR, y: yRR + 0.08 },
       { nombre: 'Ruedas', kg: L('tMRueda') * nR, x: (2 * kDel * m.xF + kTras * m.xR) / nR, y: (2 * kDel * yRF + kTras * yRR) / nR },
@@ -1212,7 +1742,7 @@ function piezasBase(m: ModeloTriciclo, ar: { carroceria: number; cristal: number
       { nombre: 'Motores de buje (dos)', kg: L('tMMotor'), x: m.motor.c[0], y: m.motor.c[1] },
       { nombre: 'Controlador', kg: L('tMInversor'), x: (m.inversor.x0 + m.inversor.x1) / 2, y: (m.inversor.y0 + m.inversor.y1) / 2 },
       { nombre: 'Batería', kg: bat, x: vb ? xb / vb : 0, y: vb ? yb / vb : 0.3 },
-      m.filas ? asientosFilasMasa(m, L('tMAsiento')) : { nombre: 'Asientos', kg: 2 * L('tMAsiento'), x: (m.sillines.xPiloto + m.sillines.xPasajero) / 2, y: (ySillin(true) + ySillin(false)) / 2 },
+      m.filas ? asientosFilasMasa(m, L('tMAsiento')) : { nombre: 'Asientos', kg: 2 * (m.butacas ? masaButaca(L('tMAsiento')) : L('tMAsiento')), x: (m.sillines.xPiloto + m.sillines.xPasajero) / 2, y: (ySillin(true) + ySillin(false)) / 2 },
       { nombre: 'Varios', kg: L('tMVarios'), x: -1.0, y: 0.40 + F.dSuelo + m.elevar },
       ...(ar.solar > 0 ? [{ nombre: 'Paneles solares', kg: ar.solar * L('tSolarM2'), x: m.solarTodo.x, y: m.solarTodo.y }] : []),
     ];
@@ -1222,7 +1752,7 @@ function piezasBase(m: ModeloTriciclo, ar: { carroceria: number; cristal: number
     { nombre: 'Carrocería', kg: ar.carroceria * kgm2, x: centros.xPiel, y: centros.yPiel },
     { nombre: 'Carenados y brazos delanteros', kg: pods.area * kgm2, x: m.xF, y: yRF + 0.05 },
     { nombre: 'Cúpula', kg: ar.cristal * L('tEspCristal') * 1.2, x: centros.xCristal, y: centros.yCristal },
-    { nombre: 'Bastidor', kg: kgTubos + L('tChUniones'), x: kgTubos ? xt / kgTubos : -1, y: kgTubos ? yt / kgTubos : 0.3 },
+    { nombre: 'Bastidor', kg: kgTubos + uniones(kgTubos, L('tChUniones')), x: kgTubos ? xt / kgTubos : -1, y: kgTubos ? yt / kgTubos : 0.3 },
     { nombre: 'Suspensión delantera', kg: L('tMSuspDel'), x: m.xF, y: yRF + 0.08 },
     { nombre: 'Basculante y amortiguador', kg: L('tMSuspTras'), x: (m.basculante.pivote[0] + m.xR) / 2, y: (m.basculante.pivote[1] + yRR) / 2 },
     // a car wheel weighs a multiple of the slider's moped wheel (RUEDAS_TRICICLO `kg`)
@@ -1232,7 +1762,7 @@ function piezasBase(m: ModeloTriciclo, ar: { carroceria: number; cristal: number
     { nombre: 'Motor de buje', kg: L('tMMotor'), x: m.motor.c[0], y: m.motor.c[1] },
     { nombre: 'Controlador', kg: L('tMInversor'), x: (m.inversor.x0 + m.inversor.x1) / 2, y: (m.inversor.y0 + m.inversor.y1) / 2 },
     { nombre: 'Batería', kg: bat, x: vb ? xb / vb : 0, y: vb ? yb / vb : 0.3 },
-    m.filas ? asientosFilasMasa(m, L('tMAsiento')) : { nombre: 'Asientos', kg: 2 * L('tMAsiento'), x: (m.sillines.xPiloto + m.sillines.xPasajero) / 2, y: (ySillin(true) + ySillin(false)) / 2 },
+    m.filas ? asientosFilasMasa(m, L('tMAsiento')) : { nombre: 'Asientos', kg: 2 * (m.butacas ? masaButaca(L('tMAsiento')) : L('tMAsiento')), x: (m.sillines.xPiloto + m.sillines.xPasajero) / 2, y: (ySillin(true) + ySillin(false)) / 2 },
     { nombre: 'Varios', kg: L('tMVarios'), x: -1.0, y: 0.40 + F.dSuelo + m.elevar },
     // the panel replaces the glass there (`areasTriciclo`): laminate under it (in «Carrocería») and the panel itself
     ...(ar.solar > 0 ? [{ nombre: 'Paneles solares', kg: ar.solar * L('tSolarM2'), x: m.solarTodo.x, y: m.solarTodo.y }] : []),
@@ -1250,6 +1780,88 @@ function asientosFilasMasa(m: ModeloTriciclo, kgAsiento: number): PiezaMasa {
   return { nombre: 'Asientos', kg, x: x / kg, y: y / kg };
 }
 
+// ------------------------------------------------------------------ Round 3 interior: masses (2026-11-12)
+/*
+ * Eugenio: «revisa el tema de los pesos… creo que las suspensiones, las ruedas y tal, no están acorde al peso que pone
+ * ahí. El chasis y todo». The running gear is now sized for the vehicle it carries: every seat taken plus `EQUIPAJE`
+ * (the «masa de diseño»), split over the axles by its centre of gravity. Each slider stays, as the lightest it may be;
+ * when the load asks for more, the load wins and the «Proyecto» list says so. Estimates of parts of their class, with
+ * their references; nothing here is a measurement.
+ */
+/** Luggage counted for sizing the running gear and the tyres (kg): a suitcase and two cabin bags. Not in the consumption. */
+export const EQUIPAJE = 40;
+/**
+ * One corner's suspension (kg) for `carga` kg on its wheel: two tubular steel wishbones (about 1.2 kg each), a coil-over
+ * (motorcycle shocks: 1.5-2.5 kg on light machines; an Öhlins STX 46 road shock, 4-5 kg: polo-motorrad.com), the upright,
+ * the hub and its bearing, ball joints and brackets. A rule through three classes, estimated: a Formula Student corner
+ * (≈ 70 kg on the wheel, ≈ 6 kg), a light quadricycle such as the Renault Twizy (474 kg kerb: autozine.org; ≈ 150 kg on
+ * each wheel, ≈ 10 kg) and a small car's McPherson corner (≈ 250 kg, ≈ 14 kg). The swing arm of the Triciclo, the same.
+ */
+export const masaEsquina = (carga: number) => 3.0 + 0.045 * carga;
+/** One disc brake with its caliper (kg) for `carga` kg on its wheel: a motorcycle front disc (260-300 mm, 1.0-1.5 kg) and caliper (0.7-0.9 kg) stop some 250 kg. Estimate. */
+export const masaFreno = (carga: number) => 0.6 + 0.008 * carga;
+/** Welded brackets, gussets, suspension pick-ups and bolts: never less than 15 % of the tubes' mass (kg). Estimate. */
+const uniones = (kgTubos: number, deslizador: number) => Math.max(deslizador, 0.15 * kgTubos);
+/**
+ * An Aptera-style bucket (kg) from the «Un asiento» slider, which is a saddle with its backrest: a moulded composite shell
+ * (4-5 kg in a racing bucket of glass or carbon fibre), its pads and its mounting brackets, about 1.8 times a saddle.
+ */
+export const masaButaca = (asiento: number) => 1.8 * asiento;
+/** The white dashboard (kg): its moulded shell, an instrument binnacle and a centre screen (≈ 0.8 kg each), vents and their ducts, switches, stalks and the column's shroud. Estimate; the plain one, 4.5. */
+export const MASA_SALPICADERO_BLANCO = 6.5;
+/** Where the luggage sits (m): in the boot, behind the last seat. */
+function equipajeEn(m: ModeloTriciclo): { x: number; y: number } {
+  const ult = m.filas ? Math.min(...m.asientosFilas.map(a => a.x)) : m.sillines.xPasajero;
+  return { x: Math.max(m.xR + 0.10, ult - 0.55), y: m.yPiso + 0.15 };
+}
+/** The static load on each front and each rear wheel (kg) at the design mass: these parts, everyone on board and the luggage. */
+export function cargasRueda(m: ModeloTriciclo, piezas: PiezaMasa[]): { del: number; tras: number; masa: number } {
+  const mOcc = limitarTriciclo('tMOcc', m.campos), eq = equipajeEn(m);
+  const todo = [...piezas.map(p => [p.kg, p.x] as const), ...m.plazas.map(q => [mOcc, cgOcupante(q.pts)[0]] as const), [EQUIPAJE, eq.x] as const];
+  const M = todo.reduce((a, [k]) => a + k, 0), X = todo.reduce((a, [k, x]) => a + k * x, 0) / M;
+  const b = Math.min(1, Math.max(0, (X - m.xR) / m.batalla));
+  return { del: M * b / 2, tras: M * (1 - b) / (m.cuatro ? 2 : 1), masa: M };
+}
+const kg1 = (v: number) => v.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+/** The running gear for the load (a fixed point: its own mass is part of the load; four passes settle it to the gram). */
+function dimensionar(m: ModeloTriciclo, piezas: PiezaMasa[]): PiezaMasa[] {
+  const T = m.campos, L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), nT = m.cuatro ? 2 : 1;
+  const sD = L('tMSuspDel'), sT = L('tMSuspTras'), fr = L('tMFreno');
+  const sube = (desliz: number, k: number, carga: number) => k > desliz + 1e-9 ? `sube por la carga: ${kg1(desliz)} kg del deslizador → ${kg1(k)} kg (${Math.round(carga)} kg en cada rueda)` : undefined;
+  let o = piezas;
+  for (let i = 0; i < 4; i++) {
+    const c = cargasRueda(m, o), fD = Math.max(fr, masaFreno(c.del)), fT = Math.max(fr, masaFreno(c.tras));
+    o = o.map(p => {
+      if (p.nombre === 'Suspensión delantera') { const k = Math.max(sD, 2 * masaEsquina(c.del)); return { ...p, kg: k, nota: sube(sD, k, c.del) ?? 'las dos esquinas: brazos, amortiguadores, manguetas y bujes' }; }
+      if (p.nombre === 'Suspensión trasera' || p.nombre === 'Basculante y amortiguador') {
+        const k = Math.max(sT, nT * masaEsquina(c.tras));
+        return { ...p, kg: k, nota: sube(sT, k, c.tras) ?? (m.cuatro ? 'las dos esquinas: brazos, amortiguadores y bujes' : 'basculante, amortiguador y eje') };
+      }
+      if (p.nombre === 'Frenos') {
+        const k = 2 * fD + nT * fT;
+        return { ...p, kg: k, nota: `${2 + nT} discos con pinza: ${kg1(fD)} kg delante${fT !== fD ? `, ${kg1(fT)} kg detrás` : ''}${k > (2 + nT) * fr + 1e-9 ? ` (sube por la carga desde ${kg1(fr)} kg del deslizador)` : ''}` };
+      }
+      return p;
+    });
+  }
+  const kDel = RUEDAS_TRICICLO[T.tRuedaDel].kg * L('tMRueda'), kTras = RUEDAS_TRICICLO[T.tRuedaTras].kg * L('tMRueda');
+  const metros = m.tubos.reduce((a, t) => a + largoTubo(t), 0);
+  return o.map(p => p.nombre === 'Ruedas' ? { ...p, nota: kDel === kTras ? `${2 + nT} × ${kg1(kDel)} kg (llanta y neumático)` : `2 × ${kg1(kDel)} kg delante y ${nT} × ${kg1(kTras)} kg detrás (llanta y neumático)` }
+    : p.nombre === 'Bastidor' ? { ...p, nota: `${kg1(metros)} m de tubo de ${Math.round(L('tChD'))} × ${kg1(L('tChT'))} mm y sus uniones` }
+      : p.nombre === 'Batería' ? { ...p, nota: `${kg1(m.kWh)} kWh a ${Math.round(L('tWhKg'))} Wh/kg (el paquete entero)` }
+        : p.nombre === 'Asientos' && m.butacas ? { ...p, nota: `dos butacas de ${kg1(p.kg / 2)} kg: carcasa, cojines y anclajes` }
+          : p);
+}
+/** The department a part of the mass list belongs to (the «Proyecto» list groups by it; a part not named here, with the body). */
+export function grupoPieza(nombre: string): DepTriciclo {
+  if (nombre === 'Bastidor') return 'chasis';
+  if (/^(Suspensión|Basculante|Ruedas|Frenos|Dirección)/.test(nombre)) return 'rodaje';
+  if (/^(Motor|Controlador|Depósito)/.test(nombre)) return 'propulsion';
+  if (/^(Batería|Varios)/.test(nombre)) return 'energia';
+  if (/^(Asientos|Volante|Salpicadero)/.test(nombre)) return 'interior';
+  return 'carroceria';
+}
+
 /** Superficie (m²) de los dos carenados delanteros y sus brazos de arriba, para su masa. */
 function pielCarenados(F: FormaBala): number {
   const POD = podDe(F); let A = 0;
@@ -1260,6 +1872,31 @@ function pielCarenados(F: FormaBala): number {
   // (a lifted Triciclo's arms run down from the body to the pod: their length, not their span)
   const brazos = brazosDe(F).reduce((s, b) => s + 2.05 * b.cuerda * Math.hypot(Math.max(0, F.VIA_LAT / 2 - F.ladoZ(F.X_LAT + b.x, b.yCuerpo)), b.yCuerpo - b.y), 0);
   return 2 * (A + brazos);
+}
+
+/**
+ * Round 3 interior (2026-11-12): the Aptera buckets' own checks. The passenger's knees go round the pilot's backrest
+ * (its half-width at their height, `semiRespaldoButaca`; a knee is 6 cm round); its feet beside the pilot's seat (the
+ * shell's half-width at the cushion, a foot 4.5 cm to each side of its line); and both riders' feet inside the body
+ * (heel to toes, 17-18 cm ahead of the ankle).
+ */
+function chequeosButacas(m: ModeloTriciclo, op: PuntosOcupante, oq: PuntosOcupante, c: (dep: DepTriciclo | `${DepTriciclo},${DepTriciclo}`, nombre: string, holgura: number, minimo: number) => void) {
+  const F = m.F, bp = m.butacas![0], apQ = oq.anchoPiernas as number[], apP = op.anchoPiernas as number[];
+  // the pilot's backrest: from its foot (`bisagra` behind the hips) up along its recline; the knee's height up its face
+  const r = bp.rec * Math.PI / 180, alto = (y: number) => (y - bp.y) / Math.cos(r), atras = (y: number) => bp.x - BUTACA.bisagra - Math.max(0, y - bp.y) * Math.tan(r);
+  // what stands beside the knee: the backrest (its half-width at that height), the cushion's bolsters (up to 8 cm over
+  // it), or the pilot's own trunk between the two (half a chest, 20 cm with the arms close)
+  const [kx, ky] = oq.K, hK = alto(ky), frente = atras(ky);
+  let lado = 0;
+  if (kx + 0.06 > frente - BUTACA.grueso && kx - 0.06 < frente + 0.02 && hK > -0.06 && hK < BUTACA.respaldo + BUTACA.cabezal) lado = Math.max(lado, semiRespaldoButaca(hK));
+  if (kx + 0.06 > bp.x - BUTACA.detras && kx - 0.06 < bp.x + BUTACA.delante && ky - 0.06 < bp.y + 0.08) lado = Math.max(lado, BUTACA.semi.cojin);
+  if (kx - 0.06 < frente + 0.30 && kx + 0.06 > frente && ky - 0.06 < op.S[1]) lado = Math.max(lado, 0.20);
+  c('interior', 'Rodillas del pasajero a los lados del asiento del piloto', lado ? apQ[2] - 0.06 - lado : 0.5, 0.01);
+  const pieBajo = oq.F[0] + 0.18 > bp.x - BUTACA.detras && oq.F[0] < bp.x + BUTACA.delante && oq.F[1] + 0.04 > bp.y - BUTACA.pan;
+  c('interior', 'Pies del pasajero a los lados del asiento del piloto', pieBajo ? apQ[1] - 0.045 - BUTACA.semi.cojin : 0.5, 0.01);
+  const pies = (o: PuntosOcupante, z: number, delante: number) => { let h = 9; for (const u of [0, 0.5, 1]) for (const y of [o.F[1] - 0.07, o.F[1] + 0.04]) h = Math.min(h, dentroDe(F, o.F[0] + delante * u, y, z + 0.045)); return h; };
+  c('interior', 'Pies del piloto (en los pedales) dentro de la carrocería', pies(op, apP[1], 0.17), 0.01);
+  c('interior', 'Pies del pasajero dentro de la carrocería', pies(oq, apQ[1], 0.18), 0.01);
 }
 
 /**
@@ -1309,18 +1946,36 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   // weighted by the load on each axle (the tadpole's formula is the same with a rear track of 0)
   const tTras = m.traseras ? m.traseras.VIA_LAT : 0;
   const ssf4 = (x: number, h: number) => { const b = (x - m.xR) / Lb; return (t * b + tTras * (1 - b)) / (2 * h); };
-  const ssf = m.traseras ? ssf4(cg.x, cg.y) : umbralVuelco(t, cg.x - m.xR, cg.y, Lb), ssfSolo = m.traseras ? ssf4(cgSolo.x, cgSolo.y) : umbralVuelco(t, cgSolo.x - m.xR, cgSolo.y, Lb);
-  const repartoDel = (cg.x - m.xR) / Lb;
+  // a diamond (2026-11-15): it tips over the nearer of the two edges from a lateral wheel, to the nose or to the tail wheel
+  const ssfRombo = (x: number, h: number) => {
+    // (as `umbralVuelco`: the edge's half-track under the centre of gravity, across)
+    const a = t / 2, dTras = a * (x - m.xR) / (m.xF - m.xR), dDel = a * (0 - x) / (0 - m.xF);
+    return Math.max(0, Math.min(dTras, dDel)) / h;
+  };
+  const ssf = m.rombo ? ssfRombo(cg.x, cg.y) : m.traseras ? ssf4(cg.x, cg.y) : umbralVuelco(t, cg.x - m.xR, cg.y, Lb), ssfSolo = m.rombo ? ssfRombo(cgSolo.x, cgSolo.y) : m.traseras ? ssf4(cgSolo.x, cgSolo.y) : umbralVuelco(t, cgSolo.x - m.xR, cgSolo.y, Lb);
+  // (a diamond: the share ahead of the tail wheel, carried by the nose and the laterals)
+  const repartoDel = m.rombo ? Math.min(1, Math.max(0, (cg.x - m.xR) / -m.xR)) : (cg.x - m.xR) / Lb;
 
   // steering: Ackermann, the turning circle to the outer front wheel
-  const di = m.giro, dout = anguloFuera(di, Lb, t), radio = Lb / Math.sin(dout) + 0;
+  // (a diamond: the nose wheel steers about a centre on the laterals' line, the tail wheel steering against it)
+  const di = m.giro, dout = m.rombo ? di : anguloFuera(di, Lb, t), radio = m.rombo ? -m.xF / Math.sin(di) : Lb / Math.sin(dout) + 0;
 
   // the frame: the two rails as one beam on two supports (the battery cradle at x = 0 and the swing-arm pivot), riders and seats on it
-  const g = 9.81, apoyo = m.basculante.pivote[0], luz = m.xF - apoyo;
+  // (round 3 interior, 2026-11-12: with the rails on to the rear axle, the beam rests on the rear axle's cradle instead of the swing-arm pivot)
+  const g = 9.81, apoyo = m.larguerosTraseros ? m.xR : m.basculante.pivote[0], xDel = m.rombo ? 0 : m.xF, luz = xDel - apoyo;
+  // (a diamond, 2026-11-15: carried at the nose wheel's fork and the pivot, the laterals' cross-member ignored: the longer span, on the safe side)
+  const kgAsiento = m.butacas ? masaButaca(L('tMAsiento')) : L('tMAsiento');
   const cargas: [number, number][] = !m.filas
-    ? [[m.xF - m.sillines.xPiloto, (mOcc + L('tMAsiento')) * g], [m.xF - m.sillines.xPasajero, (mOcc + L('tMAsiento')) * g]]
+    ? [[xDel - m.sillines.xPiloto, (mOcc + kgAsiento) * g], [xDel - m.sillines.xPasajero, (mOcc + kgAsiento) * g]]
     // three rows: each seat with its occupant (if its row is open), at its hips
-    : m.asientosFilas.map(a => [m.xF - a.x, ((a.plegado ? 0 : mOcc) + L('tMAsiento') * (a.fila === 3 ? 1.2 : 1.5)) * g] as [number, number]);
+    : m.asientosFilas.map(a => [xDel - a.x, ((a.plegado ? 0 : mOcc) + L('tMAsiento') * (a.fila === 3 ? 1.2 : 1.5)) * g] as [number, number]);
+  // round 3 interior (2026-11-12, «revisa… el chasis y todo»): the battery bears on the rails too (the pack runs through
+  // them; the modules stand on them): the pack in eight slices along its length, each module at its centre, by volume
+  {
+    const kgBat = m.kWh * 1000 / L('tWhKg'), vols = m.baterias.map(b => (b.x1 - b.x0) * (b.y1 - b.y0) * b.hz), V = vols.reduce((a, v) => a + v, 0);
+    if (m.paquete) for (let i = 0; i < 8; i++) cargas.push([xDel - (m.paquete.x0 + (m.paquete.x1 - m.paquete.x0) * (i + 0.5) / 8), kgBat / 8 * g]);
+    else if (V > 0) m.baterias.forEach((b, i) => cargas.push([xDel - (b.x0 + b.x1) / 2, kgBat * vols[i] / V * g]));
+  }
   let Mmax = 0; for (const [a, Fz] of cargas) { const aa = Math.min(luz, Math.max(0, a)); Mmax = Math.max(Mmax, Fz * aa * (luz - aa) / luz); }
   // both loads together: the moment at each load point of the sum
   for (const [a0] of cargas) { let M = 0; for (const [a, Fz] of cargas) { const lo = Math.min(a, a0), hi = Math.max(a, a0); M += Fz * lo * (luz - hi) / luz; } Mmax = Math.max(Mmax, M); }
@@ -1361,6 +2016,7 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     const xVientre = oq.H[0] + oq.d[0] * Math.max(0, (yR - oq.H[1]) / oq.d[1]) + 0.12;
     c('interior', 'Respaldo del piloto al vientre del pasajero', xRespaldo - xVientre, 0.03);
     c('interior', 'Cabeza del piloto a la del pasajero', Math.hypot(op.C[0] - oq.C[0], op.C[1] - oq.C[1]) - 2 * 0.105, 0.05);
+    if (m.butacas) chequeosButacas(m, op, oq, c);
   } else {
     // three rows (round three): knees to the backrest in front (its rear face, 17 cm behind the trunk's axis; a knee is 6 cm round)
     const respaldoEn = (o: PuntosOcupante, y: number) => { const t = (y - o.H[1]) / o.d[1]; return o.H[0] + o.d[0] * t - o.d[1] * 0.17; };
@@ -1405,7 +2061,8 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     c('interior', 'Manillar dentro de la carrocería', F.ladoZ(xb, yb) - zb, 0.01);
   } else {
     // 2026-11-12: the steering wheel's rim (1.5 cm tube) inside the body, and clear of the pilot's knees (6 cm round)
-    const v = m.volante, aro = aroVolante(v, 48), Ks = m.plazas[0].pts.K, zK = m.plazas[0].pts.anchoPiernas?.[0] ?? 0.13;
+    // (round 3 interior: the knees' own spread where the posture gives one, the buckets')
+    const ap = m.plazas[0].pts.anchoPiernas as number[] | undefined, v = m.volante, aro = aroVolante(v, 48), Ks = m.plazas[0].pts.K, zK = ap?.[2] ?? ap?.[0] ?? 0.13;
     let dentro = 9, rodillas = 9;
     for (const q of aro) {
       const z = F.ladoZ(q[0], q[1]); dentro = Math.min(dentro, (Number.isFinite(z) ? z : 0) - Math.abs(q[2]) - 0.015);
@@ -1414,18 +2071,48 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     c('interior', 'Volante dentro de la carrocería', dentro, 0.01);
     c('interior', 'Rodillas del piloto al volante', rodillas, 0.02);
   }
-  c('rodaje,carroceria', 'Neumático delantero dentro de su carenado (gira con él)', neumaticoCarenado(F), 0.015);
-  c('rodaje,carroceria', 'Carenado delantero a la carrocería, recto', carenadoCuerpo(F), HUECO_CARENADO - 0.002);
-  c('rodaje,carroceria', `Carenado delantero a la carrocería, girado ${Math.round(m.giro * 180 / Math.PI)}°`, huecoGiro(F, m.giro), HUECO_GIRO - 0.002);
+  if (m.rombo) {
+    // a diamond (2026-11-15): the pods at the sides do not steer; the nose wheel does, inside the nose, ahead of the pilot's feet
+    c('rodaje,carroceria', 'Neumático lateral dentro de su carenado', neumaticoCarenado(F), 0.015);
+    c('rodaje,carroceria', 'Carenado lateral a la carrocería', carenadoCuerpo(F), HUECO_CARENADO - 0.002);
+    c('rodaje,carroceria', 'Rueda delantera dentro del morro', ruedaDentro(F, 0, m.rR, F.ANCHO_NEU), 0.02);
+    // turned to the lock, its tyre sweeps sideways: about the rim's half-chord at mid-height times the sine, on each side
+    const g = m.giro, anchoGirada = F.ANCHO_NEU * Math.cos(g) + 2 * m.rR * 0.7 * Math.sin(g);
+    c('rodaje,carroceria', `Rueda delantera dentro del morro, girada ${Math.round(g * 180 / Math.PI)}°`, ruedaDentro(F, 0, m.rR, anchoGirada), 0.01);
+    const pies = m.plazas[0]?.pts.F;
+    if (pies && pies[1] < 2 * m.rR) c('interior,rodaje', 'Pies del piloto detrás de la rueda delantera', -m.rR - (pies[0] + 0.12), 0.03);
+  } else {
+    c('rodaje,carroceria', 'Neumático delantero dentro de su carenado (gira con él)', neumaticoCarenado(F), 0.015);
+    c('rodaje,carroceria', 'Carenado delantero a la carrocería, recto', carenadoCuerpo(F), HUECO_CARENADO - 0.002);
+    c('rodaje,carroceria', `Carenado delantero a la carrocería, girado ${Math.round(m.giro * 180 / Math.PI)}°`, huecoGiro(F, m.giro), HUECO_GIRO - 0.002);
+  }
   if (!m.traseras) c('rodaje', `Rueda trasera dentro de la cola, hundida ${Math.round(m.recTras * 1000)} mm`, ruedaDentro(F, m.xR, m.rR, F.ANCHO_NEU, m.recTras), 0.02);
   else {
     // four wheels (2026-11-11): the rear pods as the front ones, but they do not steer
     c('rodaje,carroceria', 'Neumático trasero dentro de su carenado', neumaticoCarenado(m.traseras), 0.015);
     c('rodaje,carroceria', 'Carenado trasero a la carrocería', carenadoCuerpo(m.traseras), HUECO_CARENADO - 0.002);
   }
+  if (m.bascula) {
+    // leaning (2026-11-15): at the maximum, the pod on the inside rises along the body and the outside one drops, both a little
+    // nearer; neither may touch it. And the body, turned about the road, keeps off it.
+    const ph = m.bascula.phiMax, g = Math.round(ph * 180 / Math.PI);
+    for (const q of m.bascula.ejes) {
+      const p = poseBascula(q, ph), quien = q.eje === 'del' ? 'delantero' : q.eje === 'lat' ? 'lateral' : 'trasero';
+      c('rodaje,carroceria', `Carenado ${quien} a la carrocería, inclinado ${g}° (el de dentro)`, carenadoCuerpoMovido(q.F, p.dy, p.dIn), 0.015);
+      c('rodaje,carroceria', `Carenado ${quien} a la carrocería, inclinado ${g}° (el de fuera)`, carenadoCuerpoMovido(q.F, -p.dy, p.dIn), 0.015);
+      c('rodaje,carroceria', `Carenado ${quien} al suelo, inclinado ${g}°`, carenadoAlSuelo(q.F, ph), 0.03);
+    }
+    c('rodaje,carroceria', `Carrocería al suelo, inclinada ${g}°`, cuerpoAlSuelo(F, ph), 0.03);
+  }
   c('rodaje', `Bajos al suelo con la suspensión hundida`, F.D.suelo - Math.max(m.recDel, m.recTras) * 0.6, 0.03);
+  {
+    // round 3 interior (2026-11-12): what each tyre carries at the design mass (everyone on board and the luggage) against what it is rated for
+    const cr = cargasRueda(m, piezas), capD = RUEDAS_TRICICLO[T.tRuedaDel].carga, capT = RUEDAS_TRICICLO[T.tRuedaTras].carga;
+    const peor = Math.min(capD / cr.del, capT / cr.tras), [carga, cap] = capD / cr.del <= capT / cr.tras ? [cr.del, capD] : [cr.tras, capT];
+    c('rodaje', `Neumáticos: carga por rueda con todos a bordo y ${EQUIPAJE} kg de equipaje`, peor - 1, 0, `${Math.round(carga)} de ${cap} kg`);
+  }
   // the swing arm's pivot ahead of the rear wheel and behind the passenger's footpegs
-  if (!m.filas && !m.traseras) c('rodaje', 'Pivote del basculante detrás de los estribos del pasajero', (-1.30 + (m.sillines.xPasajero - ASIENTO.xPasajero) - 0.06) - m.basculante.pivote[0], 0.02);
+  if (!m.filas && !m.butacas && !m.traseras) c('rodaje', 'Pivote del basculante detrás de los estribos del pasajero', (-1.30 + (m.sillines.xPasajero - ASIENTO.xPasajero) - 0.06) - m.basculante.pivote[0], 0.02);
   let tub = 9, peor = ''; for (const tb of m.tubos) { const h = tuboDentro(F, tb); if (h < tub) { tub = h; peor = tb.nombre; } }
   c('chasis', `Bastidor dentro de la carrocería${tub < 0.01 ? ` (${peor.toLowerCase()})` : ''}`, tub, 0.01);
   c('chasis', 'Bastidor: coeficiente de seguridad de los largueros', seguridad - 1.3, 0.5, `×${fmt(seguridad, 1)}`);
@@ -1442,12 +2129,16 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     // 2026-11-12, the pack along the frame: clear of the cradle in front (its posts' rear face), of the controller
     // behind, of the rear wheel and its travel (one rear wheel), and under the seats (they stand on it, never in it)
     const k = m.paquete, rT = L('tChD') / 2000;
-    c('energia', 'Batería: paquete a la cuna de la suspensión delantera', (m.xF - rT) - k.x1, 0.02);
+    // (a diamond, 2026-11-15: the laterals' cradle is a cross-member at the sides, over the pack; in front, the nose wheel)
+    if (m.rombo) c('energia,rodaje', 'Batería: paquete a la rueda delantera', (-m.rR - 0.04) - k.x1, 0.02);
+    else c('energia', 'Batería: paquete a la cuna de la suspensión delantera', (m.xF - rT) - k.x1, 0.02);
     // (the controller stands right behind the pack: what bounds them both is the rear shock tower)
     c('energia,propulsion', 'Controlador (detrás del paquete) a la torreta del amortiguador', m.inversor.x0 - (m.basculante.pivote[0] + 0.04 + rT), 0.015);
     if (!m.traseras) c('energia,rodaje', 'Batería: paquete a la rueda trasera (hundida)', k.x0 - (m.xR + m.rR + 0.04), 0.02);
     const fondoSillin = Math.max(0.33 + Math.min(m.sillines.yPiloto - ASIENTO.yPiloto, m.sillines.yPasajero - ASIENTO.yPasajero), m.sueloSillin + 0.005);
-    const bajos = [...(m.filas ? m.asientosFilas.map(a => ({ x0: a.x - 0.17, x1: a.x - 0.17 + a.fondo, y: a.y - PAN_ASIENTO })) : [{ x0: -1.745 + (m.sillines.xPasajero - ASIENTO.xPasajero), x1: -0.835 + (m.sillines.xPiloto - ASIENTO.xPiloto), y: fondoSillin }])]
+    const bajos = [...(m.filas ? m.asientosFilas.map(a => ({ x0: a.x - 0.17, x1: a.x - 0.17 + a.fondo, y: a.y - PAN_ASIENTO }))
+      : m.butacas ? m.butacas.map(a => ({ x0: a.x - BUTACA.detras, x1: a.x + BUTACA.delante, y: a.y - BUTACA.pan }))
+        : [{ x0: -1.745 + (m.sillines.xPasajero - ASIENTO.xPasajero), x1: -0.835 + (m.sillines.xPiloto - ASIENTO.xPiloto), y: fondoSillin }])]
       .filter(a => a.x1 > k.x0 && a.x0 < k.x1);
     if (bajos.length) c('energia,interior', 'Batería: paquete bajo los asientos', Math.min(...bajos.map(a => a.y)) - k.y1, 0.0);
     c('energia', 'Batería: capacidad del paquete (sus litros × Wh/L)', 1, 0, `${fmt(m.kWh, 1)} kWh · ${Math.round(litrosBat)} L`);
@@ -1466,17 +2157,40 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   const cm1 = (v: number) => `${fmt(v * 100, 1)} cm`;
   if (m.puerta) {
     const espejo = m.retrovisor?.enPuerta ? puntasRetrovisor(m.retrovisor) : [];
-    const v = vueloPuerta(F, m.puerta, espejo, [m.giro, anguloFuera(m.giro, m.batalla, F.VIA_LAT)]);
+    const giros = m.rombo ? [0, 0] : [m.giro, anguloFuera(m.giro, m.batalla, F.VIA_LAT)];
+    // (round 3: with two doors a side, each leaf on its own hinge, densely sampled, and against the rear pods as well)
+    const hojas = m.puerta.segunda ? hojasPuerta(m.puerta) : null;
+    const v = hojas ? vueloPuerta(F, m.puerta, espejo, giros, hojas[0], m.traseras) : vueloPuerta(F, m.puerta, espejo, giros);
+    const v2 = hojas ? vueloPuerta(F, m.puerta, [], giros, hojas[1], m.traseras) : null;
     c('carroceria', 'Puerta: al abrirse no entra en la carrocería', -v.entra, -0.005, v.entra < 0.001 ? 'no entra' : `entra ${cm1(v.entra)}`);
-    c('carroceria,rodaje', 'Puerta abierta al carenado delantero y sus brazos (ruedas rectas y giradas a tope)', v.carenado, 0.02);
+    c('carroceria,rodaje', `Puerta abierta al carenado delantero y sus brazos (ruedas rectas y giradas a tope)`, v.carenado, 0.02);
+    if (v2) {
+      c('carroceria', 'Puerta de atrás: al abrirse no entra en la carrocería', -v2.entra, -0.005, v2.entra < 0.001 ? 'no entra' : `entra ${cm1(v2.entra)}`);
+      c('carroceria,rodaje', 'Puerta de atrás abierta a los carenados y sus brazos', v2.carenado, 0.02);
+      c('carroceria', 'Puerta de atrás abierta al suelo', v2.suelo, 0.05);
+    }
     // round 2 (2026-11-12): what is left of the open door over the way in, from the sill's front to its rear edge
-    c('carroceria,interior', 'Puerta abierta: altura libre para entrar', v.entrada, 1.40, v.entrada > 8 ? `nada encima · arriba a ${fmt(v.alto, 2)} m` : `${fmt(v.entrada, 2)} m libres`);
+    // (round 3: of both doors, with two)
+    const entrada = Math.min(v.entrada, v2?.entrada ?? 9), alto = Math.max(v.alto, v2?.alto ?? 0);
+    c('carroceria,interior', `Puerta${v2 ? 's abiertas' : ' abierta'}: altura libre para entrar`, entrada, 1.40, entrada > 8 ? `nada encima · arriba a ${fmt(alto, 2)} m` : `${fmt(entrada, 2)} m libres`);
     c('carroceria', 'Puerta abierta al suelo', v.suelo, 0.05);
-    c('carroceria', 'Puerta abierta: lo que sale de lado (desde el centro)', 1, 0, cm1(v.punta));
+    c('carroceria', `Puerta${v2 ? 's abiertas' : ' abierta'}: lo que sale de lado (desde el centro)`, 1, 0, cm1(Math.max(v.punta, v2?.punta ?? 0)));
+    // round 3: the two doors opening together, and the doors against the hatch at any opening of each (balaPuertas.ts `choquesHojas`)
+    const ch2 = choquesHojas(F, m.puerta, espejo, m.porton);
+    if (T.tPuertas2 === 'si') c('carroceria', 'Segunda puerta: cabe (las dos con 30 cm abajo y el montante B entre ellas)', m.puerta.segunda ? 1 : -1, 0, m.puerta.segunda ? 'cabe' : 'no cabe: una sola puerta');
+    // round 4 (2026-11-13, «la puerta trasera es demasiado estrecha»): the passengers' way in along the sill, from the
+    // B-pillar to the hinge, at least 60 cm (the bucket's cushion is 52 cm long, and the hips and thighs pass bent), and
+    // where the passenger's hips are in it
+    if (m.puerta.segunda) {
+      const s2 = m.puerta.segunda, ancho = s2.x0 - s2.x1, pas = m.filas ? null : m.plazas.find(q => !q.piloto);
+      c('carroceria,interior', 'Puerta de atrás: paso abajo para el pasajero (60 cm o más)', ancho, 0.60, pas ? `${cm1(ancho)} · sus caderas a ${cm1(s2.x0 - pas.pts.H[0])} del canto de delante y a ${cm1(pas.pts.H[0] - s2.x1)} de la bisagra` : cm1(ancho));
+    }
+    if (ch2.entreHojas !== null) c('carroceria', 'Puertas: la de delante y la de atrás, abriéndose a la vez, no se tocan', ch2.entreHojas, 0.03, ch2.entreHojas >= 0.03 ? 'a más de 3 cm' : ch2.entreHojas < 0 ? `se cruzan en la junta (${cm1(-ch2.entreHojas)})` : `a ${cm1(ch2.entreHojas)}`);
+    if (ch2.conPorton !== null) c('carroceria', 'Puertas y portón: abiertos a la vez, no se tocan', ch2.conPorton, 0.03, ch2.conPorton >= 0.03 ? 'a más de 3 cm' : ch2.conPorton < 0 ? `se cruzan en la junta (${cm1(-ch2.conPorton)})` : `a ${cm1(ch2.conPorton)}`);
   }
   if (m.porton) {
     // (round 2: with the fin's tip, which rides on the hatch: it is the highest point once the hatch opens)
-    const vp = vueloPorton(F, m.porton, [[F.X(ALETA.punta[0][0]), m.aleta, 0], [F.X(ALETA.punta[1][0]), m.aleta - 0.01, 0]]);
+    const vp = vueloPorton(F, m.porton, m.aleta === null ? [] : [[F.X(ALETA.punta[0][0]), m.aleta, 0], [F.X(ALETA.punta[1][0]), m.aleta - 0.01, 0]]);
     c('carroceria', 'Portón: al abrirse no entra en la carrocería', -vp.entra, -0.005, vp.entra < 0.001 ? 'no entra' : `entra ${cm1(vp.entra)}`);
     c('carroceria', 'Portón abierto: altura de su punto más alto', 1, 0, `${fmt(vp.alto, 2)} m`);
   }
@@ -1522,6 +2236,8 @@ export const CRR = 0.011, RENDIMIENTO = 0.85, AUXILIARES = 80, USABLE = 0.9;
  * anual en España) y 85 % de pérdidas de cableado, temperatura y carga. Estimación.
  */
 export const solarDiaTriciclo = (area: number, sol = 4.5) => area * 0.7 * RENDIMIENTO_SOLAR * sol * 1000 * 0.85;
+/** Petrol's lower heating value (kWh per litre: 32 MJ/L). */
+export const KWH_LITRO_GASOLINA = 8.9;
 export function energiaTriciclo(m: ModeloTriciclo, mTot: number, cd: { cd: number; areaRef: number }, areaSolar = m.solarTodo.area) {
   const T = m.campos, L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), g = 9.81, CdA = cd.cd * cd.areaRef;
   const potencia = (v: number) => (0.5 * 1.2 * CdA * v ** 3 + CRR * mTot * g * v) / RENDIMIENTO + AUXILIARES;
@@ -1532,7 +2248,19 @@ export function energiaTriciclo(m: ModeloTriciclo, mTot: number, cd: { cd: numbe
   const reparto = 0.4, Fmax = AGARRE * reparto * mTot * g;
   let v = 0.5, t = 0; const dt = 0.02;
   while (v < 50 / 3.6 && t < 60) { const Fz = Math.min(Fmax, L('tKWPico') * 1000 * RENDIMIENTO / v) - 0.5 * 1.2 * CdA * v * v - CRR * mTot * g; if (Fz <= 0) { t = 99; break; } v += Fz / (mTot * 1.03) * dt; t += dt; }
-  return { cd: cd.cd, areaRef: cd.areaRef, CdA, WhKm, autonomia: util / WhKm, kmSol: solarDiaTriciclo(areaSolar, m.P.sol) / WhKm, vmaxNominal: vmaxCon(L('tKWNom')), vmaxPico: vmaxCon(L('tKWPico')), acel50: t, potencia: potencia(vel / 3.6), WhKm50: consumo(50), WhKm100: consumo(100) };
+  // the plug-in hybrid (2026-11-15): once the battery is down to its reserve, the petrol engine drives through the
+  // planetary gear (part straight to the wheels, part through the generator and the motor: `rendTrans` for both
+  // together) and also feeds the equipment. Litres per 100 km: the energy at the wheels over both efficiencies, over
+  // petrol's 8,9 kWh per litre (its lower heating value)
+  const p = m.phev;
+  const litros100 = (kmh: number) => {
+    if (!p) return 0;
+    const v = kmh / 3.6, rueda = 0.5 * 1.2 * CdA * v ** 3 + CRR * mTot * g * v;
+    return ((rueda / p.rendTrans + AUXILIARES) / p.rendTerm) / v / 3.6 / KWH_LITRO_GASOLINA / 10;
+  };
+  const vmaxGasolina = p ? vmaxCon(p.kW * p.rendTrans / RENDIMIENTO) : 0;
+  const hibrido = p ? { litros100: litros100(vel), litros50: litros100(50), litros100kmh: litros100(100), kmDeposito: p.litros / litros100(vel) * 100, vmaxGasolina } : null;
+  return { cd: cd.cd, areaRef: cd.areaRef, CdA, WhKm, autonomia: util / WhKm, kmSol: solarDiaTriciclo(areaSolar, m.P.sol) / WhKm, vmaxNominal: vmaxCon(L('tKWNom')), vmaxPico: vmaxCon(L('tKWPico')), acel50: t, potencia: potencia(vel / 3.6), WhKm50: consumo(50), WhKm100: consumo(100), hibrido };
 }
 
 /**
@@ -1540,10 +2268,11 @@ export function energiaTriciclo(m: ModeloTriciclo, mTot: number, cd: { cd: numbe
  * El panel sustituye al cristal donde está: bajo él va laminado de carrocería (el panel flexible no es
  * estructural), así que su superficie cuenta como panel y como carrocería, como en el Aeromóvil 1.
  */
-export function areasTriciclo(m: Pick<ModeloTriciclo, 'F' | 'cup' | 'solar' | 'marcoArea'> & { solarCola?: { area: number } | null }) {
+export function areasTriciclo(m: Pick<ModeloTriciclo, 'F' | 'cup' | 'solar' | 'marcoArea'> & { solarCola?: { area: number } | null; solarMorro?: { area: number } | null }) {
   const b = areasBala(m), s = m.solar.area, k = m.marcoArea;
-  // (2026-11-12: the panel over the tail lies on the body's laminate, not on glass: it only adds panel)
-  return { carroceria: b.carroceria + s + k, cristal: Math.max(0, b.cristal - s - k), solar: m.solarCola ? s + m.solarCola.area : s };
+  // (2026-11-12: the panel over the tail lies on the body's laminate, not on glass: it only adds panel; round 3: the nose's too)
+  const sc = m.solarCola ? s + m.solarCola.area : s;
+  return { carroceria: b.carroceria + s + k, cristal: Math.max(0, b.cristal - s - k), solar: m.solarMorro ? sc + m.solarMorro.area : sc };
 }
 /** ¿Es este modelo un Triciclo? */
 export const esTriciclo = (m: { tipo: string }): m is ModeloTriciclo => m.tipo === 'triciclo';

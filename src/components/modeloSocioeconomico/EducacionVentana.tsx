@@ -14,6 +14,8 @@ import {
 import { Apartado, Cifra, Mas } from './ventanas';
 import { Fuente, Muestra, Regulador, Segmentado } from './piezas';
 import { cn } from '../../utils/cn';
+import { Barras } from './graficos/Barras';
+import { Pares } from './graficos/Pares';
 
 /** A source link by id of FUENTES_EDU. */
 function F({ id }: { id: string }) {
@@ -46,16 +48,16 @@ function Resumen() {
     <Apartado id="educacion" titulo="Una mochila para aprender, de 0 a 25 años"
       entradilla={<>Cada bebé que nace recibe una «mochila educativa»: el dinero de su formación hasta los 25 años. La familia (y después el propio alumno) elige la escuela, y el dinero va con él. Así se acaba el debate entre pública, concertada y privada: todas las escuelas que acepten la mochila son gratis, no eligen a sus alumnos y cumplen las mismas reglas.</>}>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Cifra tono="mal" valor={porcentaje(RESULTADOS.abandono2025, 1)}
+        <Cifra clase="dato" tono="mal" valor={porcentaje(RESULTADOS.abandono2025, 1)}
           texto={<>de los jóvenes de 18 a 24 años dejó de estudiar sin el título de bachillerato o FP en 2025<F id="abandono-2025" /></>}
           nota={<>En la Unión Europea, el {porcentaje(RESULTADOS.abandonoUE2025, 1)}<F id="abandono-ue" /></>} />
-        <Cifra tono="mal" valor={`${euros(DINERO.porAlumnoPublica)} / ${euros(DINERO.porAlumnoConcertada)}`}
+        <Cifra clase="dato" tono="mal" valor={`${euros(DINERO.porAlumnoPublica)} / ${euros(DINERO.porAlumnoConcertada)}`}
           texto={<>de dinero público por alumno en la escuela pública y en la concertada (2023)<F id="concertada-2023" /></>}
           nota="Un alumno no vale lo mismo según la puerta por la que entra" />
-        <Cifra tono="mal" valor={porcentaje(RESULTADOS.repetidores, 0)}
+        <Cifra clase="dato" tono="mal" valor={porcentaje(RESULTADOS.repetidores, 0)}
           texto={<>de los alumnos de 15 años ha repetido algún curso<F id="esade-pisa" /></>}
           nota="Con la misma nota, un alumno de familia pobre tiene casi cuatro veces más probabilidades de repetir" />
-        <Cifra tono="bien" valor={`≈ ${euros(redondo(MOCHILA_BASE, 500))}`}
+        <Cifra clase="calculo" tono="bien" valor={`≈ ${euros(redondo(MOCHILA_BASE, 500))}`}
           texto="en la mochila de cada persona, de 0 a 25 años"
           nota="Cálculo de esta página con lo que cuesta hoy un alumno en un centro público, etapa a etapa" />
       </div>
@@ -175,10 +177,34 @@ function Hoy() {
 
       <h3 className="mt-10 text-xl font-bold text-slate-900">Cómo le va</h3>
       <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Cifra valor={mill(Math.round(DINERO.publico2024))} texto={<>de gasto público en educación en 2024<F id="gasto-2024" /></>} nota="Todas las administraciones y universidades públicas" />
-        <Cifra valor={numero(RESULTADOS.ratio, 1)} texto={<>alumnos por profesor en primaria y secundaria (curso 2022-2023)<F id="datos-cifras" /></>} nota="Contando a todo el profesorado; en el aula, los grupos son más grandes" />
-        <Cifra valor={`${RESULTADOS.pisaMat} / ${RESULTADOS.ocdeMat}`} texto={<>puntos en matemáticas en PISA 2022 (el examen internacional a los 15 años): España y la media de la OCDE, el club de 38 países ricos<F id="pisa-2022" /></>} nota={`En lectura, ${RESULTADOS.pisaLec} frente a ${RESULTADOS.ocdeLec}; en ciencias, ${RESULTADOS.pisaCie} frente a ${RESULTADOS.ocdeCie}`} />
-        <Cifra tono="mal" valor={porcentaje(RESULTADOS.abandonoExtranjeros, 1)} texto={<>de abandono entre jóvenes extranjeros, frente al {porcentaje(RESULTADOS.abandonoEspanoles, 1)} de los españoles<F id="abandono-2025" /></>} nota={`Chicos: ${porcentaje(RESULTADOS.abandonoHombres, 1)}; chicas: ${porcentaje(RESULTADOS.abandonoMujeres, 1)}`} />
+        <Cifra clase="dato" valor={mill(Math.round(DINERO.publico2024))} texto={<>de gasto público en educación en 2024<F id="gasto-2024" /></>} nota="Todas las administraciones y universidades públicas" />
+        <Cifra clase="dato" valor={numero(RESULTADOS.ratio, 1)} texto={<>alumnos por profesor en primaria y secundaria (curso 2022-2023)<F id="datos-cifras" /></>} nota="Contando a todo el profesorado; en el aula, los grupos son más grandes" />
+        <Cifra clase="dato" valor={`${RESULTADOS.pisaMat} / ${RESULTADOS.ocdeMat}`} texto={<>puntos en matemáticas en PISA 2022 (el examen internacional a los 15 años): España y la media de la OCDE, el club de 38 países ricos<F id="pisa-2022" /></>} nota={`En lectura, ${RESULTADOS.pisaLec} frente a ${RESULTADOS.ocdeLec}; en ciencias, ${RESULTADOS.pisaCie} frente a ${RESULTADOS.ocdeCie}`} />
+        <Cifra clase="dato" tono="mal" valor={porcentaje(RESULTADOS.abandonoExtranjeros, 1)} texto={<>de abandono entre jóvenes extranjeros, frente al {porcentaje(RESULTADOS.abandonoEspanoles, 1)} de los españoles<F id="abandono-2025" /></>} nota={`Chicos: ${porcentaje(RESULTADOS.abandonoHombres, 1)}; chicas: ${porcentaje(RESULTADOS.abandonoMujeres, 1)}`} />
+      </div>
+
+      <div className="mt-6 grid gap-4 lg:grid-cols-2">
+        <Barras titulo="Quién deja de estudiar antes de tiempo"
+          subtitulo="Jóvenes de 18 a 24 años sin bachillerato ni FP, en 2025"
+          referencia={{ valor: RESULTADOS.abandonoUE2025, texto: `Media de la Unión Europea: ${porcentaje(RESULTADOS.abandonoUE2025, 1)}` }}
+          barras={[
+            { etiqueta: 'Jóvenes extranjeros', valor: RESULTADOS.abandonoExtranjeros, texto: porcentaje(RESULTADOS.abandonoExtranjeros, 1), nota: 'Más de tres veces que entre los españoles.' },
+            { etiqueta: 'Chicos', valor: RESULTADOS.abandonoHombres, texto: porcentaje(RESULTADOS.abandonoHombres, 1) },
+            { etiqueta: 'Todos en España', valor: RESULTADOS.abandono2025, texto: porcentaje(RESULTADOS.abandono2025, 1), serie: 'tinta', nota: `Por encima de la media de la Unión Europea (${porcentaje(RESULTADOS.abandonoUE2025, 1)}).` },
+            { etiqueta: 'Jóvenes españoles', valor: RESULTADOS.abandonoEspanoles, texto: porcentaje(RESULTADOS.abandonoEspanoles, 1) },
+            { etiqueta: 'Chicas', valor: RESULTADOS.abandonoMujeres, texto: porcentaje(RESULTADOS.abandonoMujeres, 1) },
+          ]}
+          pie={<>Funcas, febrero de 2026<F id="abandono-2025" />; la media europea, Eurostat<F id="abandono-ue" /></>} />
+        <Pares titulo="PISA 2022: España, en la media"
+          subtitulo="Puntos a los 15 años en cada materia. Las barras casi coinciden: esa es la noticia"
+          series={['España', 'Media de la OCDE']}
+          pares={[
+            { etiqueta: 'Matemáticas', a: RESULTADOS.pisaMat, b: RESULTADOS.ocdeMat },
+            { etiqueta: 'Lectura', a: RESULTADOS.pisaLec, b: RESULTADOS.ocdeLec },
+            { etiqueta: 'Ciencias', a: RESULTADOS.pisaCie, b: RESULTADOS.ocdeCie },
+          ]}
+          formato={v => numero(v)}
+          pie={<>La OCDE es el club de 38 países ricos que hace el examen<F id="pisa-2022" /></>} />
       </div>
 
       <Mas titulo="más datos de hoy">
@@ -255,8 +281,8 @@ function Mochila() {
         </div>
         <div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <Cifra tono="bien" valor={euros(redondo(usado))} texto="usados en su formación, de 0 a 25 años" />
-            <Cifra valor={euros(redondo(sinUsar))} texto="quedan sin usar en la mochila" nota={sinUsar > 0 ? `Propuesta: crédito para formarse hasta los ${CREDITO.hasta}, unos ${numero(sinUsar / CREDITO.tarifa, 1)} cursos de FP superior` : 'Lo que sobre a los 25 se guarda para formarse toda la vida'} />
+            <Cifra clase="calculo" tono="bien" valor={euros(redondo(usado))} texto="usados en su formación, de 0 a 25 años" />
+            <Cifra clase="calculo" valor={euros(redondo(sinUsar))} texto="quedan sin usar en la mochila" nota={sinUsar > 0 ? `Propuesta: crédito para formarse hasta los ${CREDITO.hasta}, unos ${numero(sinUsar / CREDITO.tarifa, 1)} cursos de FP superior` : 'Lo que sobre a los 25 se guarda para formarse toda la vida'} />
           </div>
           <GraficaMochila anos={m} />
         </div>

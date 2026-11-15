@@ -244,7 +244,7 @@ export function pielBala(F: FormaBala, cup: ReturnType<typeof contornoCupula>) {
  * ruedas que asoman, aleta) y se mide su unión: lo que una parte tapa detrás de
  * otra no cuenta dos veces. Cada parte suma lo que añade a las anteriores.
  */
-export function areaFrontalBala(m: Pick<ModeloBala, 'F' | 'alto' | 'ruedas' | 'aleta'>, extras: { y0: number; y1: number; z: number }[] = [], formasPod: FormaBala[] = [m.F]) {
+export function areaFrontalBala(m: Pick<ModeloBala, 'F' | 'alto' | 'ruedas'> & { aleta: number | null }, extras: { y0: number; y1: number; z: number }[] = [], formasPod: FormaBala[] = [m.F]) {
   const F = m.F, DY = 0.005, NY = Math.ceil((m.alto + 0.4) / DY);
   // Media anchura del cuerpo por franja: el máximo de todas las secciones a esa altura.
   const zc = new Float64Array(NY), tramos: [number, number][][] = Array.from({ length: NY }, () => []);
@@ -300,7 +300,8 @@ export function areaFrontalBala(m: Pick<ModeloBala, 'F' | 'alto' | 'ruedas' | 'a
   const conRuedas = medir();
   // the fin: its root thickness from the tail's top to the tip
   const yRaiz = techoEn(F, F.X(ALETA.punta[0][0]));
-  for (let i = Math.floor(yRaiz / DY); i <= Math.floor(m.aleta / DY); i++) poner(i, 0, ALETA.grueso[0]);
+  // (round 3, 2026-11-12: the Triciclo family may have none, `aleta` null)
+  if (m.aleta != null) for (let i = Math.floor(yRaiz / DY); i <= Math.floor(m.aleta / DY); i++) poner(i, 0, ALETA.grueso[0]);
   const total = medir();
   return { total, cuerpo, carenados: conCarenados - cuerpo, ruedas: conRuedas - conCarenados, aleta: total - conRuedas };
 }

@@ -421,8 +421,13 @@ export function bloquesEnHtml(bloques: any[], ctx: ContextoHtml, n = 0): string 
  * (`sitios.ts`), ya filtrado para un anónimo.
  */
 export async function cuerpoEnHtml(db: any, pagina: any, enlacePagina: (id: string) => string, enlaceRuta?: (slug: string) => string): Promise<string> {
-  const bloques = pagina?.config?.bloques || pagina?.config?.blocks || [];
+  let bloques = pagina?.config?.bloques || pagina?.config?.blocks || [];
   if (!Array.isArray(bloques) || !bloques.length) return '';
+  // «PROYECTOS QUE NOS INSPIRAN», OCULTOS (2026-11-13, Eugenio en luzhumanidad.com: «oculta la sección de proyectos
+  // que nos inspiran, para que no aparezca publicada»): con `sitio.mostrarInspiran: false`, su base de datos tampoco
+  // se escribe en el HTML que leen los buscadores.
+  const sitio = pagina?.config?.sitio;
+  if (sitio?.inspiran && sitio.mostrarInspiran === false) bloques = bloques.filter((b: any) => !(b?.tipo === 'basedatos' && (b.tabla_id || b.tablaId) === sitio.inspiran));
   const ctx = await prepararHtml(db, bloques, enlacePagina, pagina);
   ctx.enlaceRuta = enlaceRuta;
   return bloquesEnHtml(bloques, ctx);

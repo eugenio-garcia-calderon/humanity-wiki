@@ -20,35 +20,46 @@
 //                         coste, proveedor y alternativas
 //   /aeromovil/aranceles   (solo Aeromóvil 1) derechos de aduana de las piezas
 //                         compradas en China, IVA aparte, y el vehículo entero
+//   /aeromovil/circuito   estabilidad en curvas: el Lumeneo Smera (bascula), el
+//                         Aptera, otros del garaje y el diseño abierto, curva a curva
 //
 // Todo el cálculo vive en `src/components/aeromovil/geometria.ts`, que es la
 // misma geometría que el script CadQuery de `public/aeromovil/`.
-import { Fragment, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, Suspense, lazy, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Armchair, BatteryCharging, Bike, Box, Car, Camera, ChevronDown, CircleDot, ClipboardList, Factory, Frame, Layers3, Lightbulb, ShieldCheck, Zap, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Maximize2, Minimize2, Ruler, RotateCcw, Package, Ship, Wrench, Wind } from 'lucide-react';
+import { Armchair, BatteryCharging, Box, Car, Route as RutaIcono, Warehouse, Camera, ChevronDown, CircleDot, ClipboardList, Factory, Frame, Layers3, Lightbulb, ShieldCheck, Zap, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Maximize2, Minimize2, Ruler, RotateCcw, Package, Ship, Wrench, Wind } from 'lucide-react';
 import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import { Visor3D, CAPAS, type CapaId, type Vista, type VisorHandle } from '../components/aeromovil/Visor3D';
 import {
-  PARAMETROS_POR_DEFECTO, PARAMETROS_A1, PARAMETROS_GOTA, PARAMETROS_BALA, PARAMETROS_TRICICLO, BALA_DEFECTO, DIAMETRO_RUEDA, NEUMATICOS, MATERIALES_CARENADO, MATERIALES_CHASIS, RANGOS_MASA, ajustarCarenado, areas, calcular, crearModelo,
+  PARAMETROS_POR_DEFECTO, PARAMETROS_A1, PARAMETROS_GOTA, PARAMETROS_BALA, PARAMETROS_TRICICLO, PARAMETROS_BASCULANTE, BALA_DEFECTO, DIAMETRO_RUEDA, NEUMATICOS, MATERIALES_CARENADO, MATERIALES_CHASIS, RANGOS_MASA, ajustarCarenado, areas, calcular, crearModelo,
   type Comprobacion, type Disposicion, type MaterialCarenado, type MaterialChasis, type Modelo, type ModeloBala, type ModeloTriciclo, type Neumatico, type Parametros, type Puerta, type Pulgadas, type Resultados,
 } from '../components/aeromovil/geometria';
 import {
-  ALTO_FILAS, ANCHO_FILAS, AGARRE, AUXILIARES, CRR, DEPS_TRICICLO, RENDIMIENTO, RUEDAS_TRICICLO, SELECTORES_TRICICLO, USABLE, VUELCO_OBJETIVO, bateriaChasis, camposTriciclo, conPortonAptera, conPuertas, deslizadoresTriciclo, energiaTriciclo, esCuatro, estirarTriciclo, guardarTriciclo, largoTriciclo, lemasTriciclo, limitarTriciclo, nombreTriciclo, vistaTriciclo,
+  ALTO_FILAS, ANCHO_FILAS, AGARRE, AUXILIARES, CRR, DEPS_TRICICLO, EQUIPAJE, RENDIMIENTO, RUEDAS_TRICICLO, SELECTORES_TRICICLO, USABLE, VUELCO_OBJETIVO, bateriaChasis, camposTriciclo, cargasRueda, conButacas, conSalpicadero, grupoPieza, largueroAlEje, masaButaca, conPortonAptera, conPuertas, deslizadoresTriciclo, energiaTriciclo, conBatalla, esCuatro, esRombo, estirarTriciclo, guardarTriciclo, largoTriciclo, lemasTriciclo, limitarTriciclo, nombreTriciclo, vistaTriciclo,
   type DepTriciclo, type FichaTriciclo,
 } from '../components/aeromovil/geometriaTriciclo';
 import { cuerpoTriciclo, peticionDe as peticionTunel } from '../components/aeromovil/tunel/nuestro';
+// ── Cuadriciclo Basculante (2026-11-15): its sidebar, its Cd and its departments (basculante/, geometriaBasculante.ts)
+import { LadoBasculante, useCdBasculante } from '../components/aeromovil/basculante/LadoBasculante';
+import { CRR_B, LEMAS_BASCULANTE, NOMBRE_BASCULANTE, camposBasculante } from '../components/aeromovil/geometriaBasculante';
 import { claveTunel } from '../components/aeromovil/tunel/calculo';
 import { pedirTunel, resultadoEnCache } from '../components/aeromovil/tunel/cliente';
 import type { Resolucion } from '../components/aeromovil/tunel/malla';
 import { BLOQUES_BALA, DESLIZADORES_BALA, INCLINACION, RUEDAS_DT_BALA, RUEDAS_LAT_BALA, TALLA_SENTADO, camposBala, rangoBala, type BloqueBala, type FichaBala } from '../components/aeromovil/geometriaBala';
 import { RANGOS_MASA_A1 } from '../components/aeromovil/geometriaA1';
+import { ColoresCarroceria } from '../components/aeromovil/ColorCarroceria';
+import { CLAVES_COLOR, coloresDe } from '../components/aeromovil/coloresCarroceria';
 import { MenuDisenos, aDiseno, cargarDisenoPorDefecto, deDiseno, useAutoguardado, type Diseno } from '../components/aeromovil/Disenos';
-import { VistaOtros, TablaComparacion, fichaPropia } from '../components/aeromovil/Otros';
+import { TablaComparacion, fichaPropia } from '../components/aeromovil/Otros';
 import { fichaComparable, type Referencia } from '../components/aeromovil/referencias';
 import { FormularioMejora, VistaExportar, VistaPlan, VistaPlanos, VistaTareas, cargarDueno, cargarTareas, type Dueno, type Tarea } from '../components/aeromovil/Paneles';
 import { BotonesComponentes, VistaComponentes } from '../components/aeromovil/Componentes';
 import { VEHICULOS_GARAJE } from '../components/aeromovil/garaje';
+import { masaGaraje } from '../components/aeromovil/garaje/tipos';
+import { useDisenosGaraje } from '../components/aeromovil/GarajeDisenos';
+import { AvisoCambios, BotonEditableReferencia, BotonFilaReferencia, BotonSoloReferencia, ListaGaraje, TarjetaDiseno, useEleccionDiseno } from '../components/aeromovil/garaje/NavegadorGaraje';
+import { HUECO_CON_TUNEL } from '../components/aeromovil/garaje/filas';
 import { TarjetaTunel, gastoEnRuedas, VELOCIDADES, type FilaTunel } from '../components/aeromovil/TarjetaTunel';
 import { cuerpoAeromovil, cuerpoGaraje, type CuerpoTunel } from '../components/aeromovil/tunel/cuerpos';
 import { opcionesPorDefecto, useResultadosTunel, type OpcionesTunel } from '../components/aeromovil/tunel/cliente';
@@ -60,18 +71,21 @@ import { PanelDepartamento, ComparacionChasis } from '../components/aeromovil/De
 import { VistaAranceles } from '../components/aeromovil/Aranceles';
 import { tubosCelosia } from '../components/aeromovil/chasisCelosia';
 import { explicacion } from '../components/aeromovil/explicaciones';
+// The cornering circuit (2026-11-15): its own chunk, recharts comes with it and only this section needs it.
+const VistaCircuito = lazy(() => import('../components/aeromovil/circuito/VistaCircuito'));
 
 // v5 (2026-11-06): el diseño por defecto pasa a ser el Aeromóvil 1; lo guardado como v4 era del Gota y se queda en su clave.
 const CLAVE = 'aeromovil.parametros.v5';
 const fmt = (v: number, d = 2) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
 const m2 = (v: number) => `${fmt(v)} m`;
 
-type Seccion = 'diseno' | 'componentes' | 'aranceles' | 'otros' | 'tareas' | 'plan' | 'planos' | 'exportar';
+type Seccion = 'diseno' | 'componentes' | 'aranceles' | 'circuito' | 'tareas' | 'plan' | 'planos' | 'exportar';
 const SECCIONES: { k: Seccion; n: string; ruta: string; icono: typeof Box }[] = [
   { k: 'diseno', n: 'Diseño 3D', ruta: '/aeromovil', icono: Box },
   { k: 'componentes', n: 'Componentes', ruta: '/aeromovil/componentes', icono: Wrench },
   { k: 'aranceles', n: 'Aranceles', ruta: '/aeromovil/aranceles', icono: Ship },
-  { k: 'otros', n: 'Otros velomóviles', ruta: '/aeromovil/otros', icono: Bike },
+  // 2026-11-15, Eugenio: «crea además del garaje un circuito de simulación de estabilidad en curvas»
+  { k: 'circuito', n: 'Circuito', ruta: '/aeromovil/circuito', icono: RutaIcono },
   { k: 'tareas', n: 'Tareas', ruta: '/aeromovil/tareas', icono: ListChecks },
   { k: 'plan', n: 'Plan', ruta: '/aeromovil/plan', icono: MapIcon },
   { k: 'planos', n: 'Planos', ruta: '/aeromovil/planos', icono: Ruler },
@@ -166,7 +180,6 @@ function Deslizador({ id, etiqueta, valor, min, max, paso, mostrar, alCambiar, d
   );
 }
 
-/** Plano del garaje visto desde arriba: nuestro coche en el centro y los otros alrededor; se arrastran con el ratón o el dedo. */
 /**
  * Que dos coches del garaje no ocupen el mismo sitio (2026-11-09): si la plaza de un coche visible se solapa con
  * la de otro ya colocado, se aparta de 3 en 3 m hacia fuera hasta que quede libre. Pasó al llegar un coche nuevo
@@ -192,37 +205,24 @@ function separarGaraje<T extends { id: string; visible: boolean; x: number; z: n
   });
 }
 
-function MapaGaraje({ garaje, largo, ancho, morro, etiqueta, alMover, alGirar }: { garaje: { id: string; visible: boolean; x: number; z: number; giro: number }[]; largo: number; ancho: number; morro: number; etiqueta: string; alMover: (id: string, x: number, z: number) => void; alGirar: (id: string) => void }) {
-  const ref = useRef<SVGSVGElement>(null);
-  const R = 7;   // metros a cada lado del centro
-  const esc = (v: number) => (v / R) * 50;  // → unidades SVG (viewBox de -50 a 50)
-  const arrastre = useRef<{ id: string; dx: number; dz: number } | null>(null);
-  const aMetros = (e: React.PointerEvent) => {
-    const r = ref.current!.getBoundingClientRect();
-    return { x: ((e.clientY - r.top) / r.height - 0.5) * -2 * R, z: ((e.clientX - r.left) / r.width - 0.5) * -2 * R };   // arriba = delante (+x), izquierda del coche (+z) = izquierda del plano
-  };
-  const coches = garaje.filter(g => g.visible);
-  return (
-    <svg ref={ref} viewBox="-50 -50 100 100" className="aspect-square w-full touch-none rounded-lg border border-slate-200 bg-slate-50" aria-label="Plano del garaje"
-      onPointerMove={e => { const a = arrastre.current; if (!a) return; const p = aMetros(e); alMover(a.id, p.x - a.dx, p.z - a.dz); }}
-      onPointerUp={e => { if (arrastre.current) { (e.target as Element).releasePointerCapture?.(e.pointerId); arrastre.current = null; } }}>
-      {[-5, 0, 5].map(k => <g key={k}><line x1={esc(k)} y1={-50} x2={esc(k)} y2={50} stroke="#e2e8f0" strokeWidth={0.4} /><line x1={-50} y1={esc(k)} x2={50} y2={esc(k)} stroke="#e2e8f0" strokeWidth={0.4} /></g>)}
-      <rect x={esc(-ancho / 2)} y={esc(-morro)} width={esc(ancho)} height={esc(largo)} rx={3} fill="#0f766e" opacity={0.85} />
-      <text x={0} y={esc(largo / 2 - morro) + 2} textAnchor="middle" fontSize={4} fill="#fff">{etiqueta}</text>
-      {coches.map(c => { const v = VEHICULOS_GARAJE.find(x => x.id === c.id)!; const vert = Math.abs(Math.sin(c.giro)) < 0.5; const w = vert ? v.ancho : v.largo, h = vert ? v.largo : v.ancho;
-        const cx = -c.z, cy = -(c.x - (vert ? v.largo / 2 - (v.largo - v.batalla) / 2 : 0));   // el eje delantero va a (largo − batalla)/2 del morro
-        return (
-        <g key={c.id} className="cursor-grab" onPointerDown={e => { const p = aMetros(e); arrastre.current = { id: c.id, dx: p.x - c.x, dz: p.z - c.z }; (e.target as Element).setPointerCapture?.(e.pointerId); }} onDoubleClick={() => alGirar(c.id)}>
-          <rect x={esc(cx - w / 2)} y={esc(cy - h / 2)} width={esc(w)} height={esc(h)} rx={2.5} fill="#f59e0b" opacity={0.8} />
-          <text x={esc(cx)} y={esc(cy) + 1.5} textAnchor="middle" fontSize={3.4} fill="#1e293b">{v.nombre.split(' ')[0]}</text>
-        </g>); })}
-    </svg>
+function Bloque({ titulo, nota, children, plegable, id }: {
+  titulo: string; nota?: string; children: React.ReactNode;
+  /** (2026-11-15) an accordion: folded, only its title shows, and a click opens or closes it */
+  plegable?: { abierto: boolean; alAlternar: () => void };
+  id?: string;
+}) {
+  if (plegable) return (
+    <section id={id} className={cn('flex flex-col rounded-xl border bg-white', plegable.abierto ? 'gap-2.5 border-slate-300 p-3.5 pt-1.5' : 'border-slate-200 p-1.5')}>
+      <Button variant="ghost" onClick={plegable.alAlternar} aria-expanded={plegable.abierto}
+        className="-mx-1 w-[calc(100%+0.5rem)] justify-between px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-600 hover:bg-slate-50">
+        <span>{titulo}</span>
+        <span className="flex items-center gap-2">{nota && <span className="font-mono text-[11px] font-normal normal-case tracking-normal text-slate-400">{nota}</span>}<ChevronDown className={cn('h-4 w-4 transition-transform', plegable.abierto && 'rotate-180')} /></span>
+      </Button>
+      {plegable.abierto && children}
+    </section>
   );
-}
-
-function Bloque({ titulo, nota, children }: { titulo: string; nota?: string; children: React.ReactNode }) {
   return (
-    <section className="flex flex-col gap-2.5 rounded-xl border border-slate-200 bg-white p-3.5">
+    <section id={id} className="flex flex-col gap-2.5 rounded-xl border border-slate-200 bg-white p-3.5">
       <h3 className="flex items-baseline justify-between text-xs font-semibold uppercase tracking-wider text-slate-500">
         {titulo}{nota && <span className="font-mono text-[11px] font-normal normal-case tracking-normal text-slate-400">{nota}</span>}
       </h3>
@@ -238,7 +238,8 @@ function Selector<T extends string>({ id, etiqueta, valor, opciones, alCambiar, 
       {clave
         ? <button type="button" onClick={() => setAbierto(a => !a)} aria-expanded={abierto} className={cn('truncate text-left text-[13px] text-slate-700 underline decoration-dotted decoration-slate-300 underline-offset-2 hover:text-teal-800', abierto && 'text-teal-800')} title="Pincha para saber más de este parámetro">{etiqueta}</button>
         : <label htmlFor={id} className="text-[13px] text-slate-700">{etiqueta}</label>}
-      <select id={id} value={valor} onChange={e => alCambiar(e.target.value as T)} className="rounded-md border border-slate-300 bg-white px-1.5 py-0.5 font-mono text-xs">
+      {/* (2026-11-13) a select is as wide as its longest option: at 390 px «Ventanas laterales con montante (Aptera)» pushed the page to 490 px */}
+      <select id={id} value={valor} onChange={e => alCambiar(e.target.value as T)} className="max-w-[min(14rem,55vw)] rounded-md border border-slate-300 bg-white px-1.5 py-0.5 font-mono text-xs">
         {opciones.map(o => <option key={o.k} value={o.k}>{o.n}</option>)}
       </select>
       {abierto && clave && <Explicacion clave={clave} alCerrar={() => setAbierto(false)} />}
@@ -628,15 +629,53 @@ function useCdTriciclo(modelo: Modelo, resolucion: Resolucion, kmh: number): CdT
   return { calculando: false, cd: pv[i].cd.total + (pv[i + 1].cd.total - pv[i].cd.total) * u, areaRef: peticion.area };
 }
 
+/** The order of the side panel's blocks (2026-11-15): the body front to back, then the rest as they come. */
+const ORDEN_BLOQUES = ['Forma', 'Morro', 'Cúpula', 'Cola', 'Techo solar y ventanas', 'Carenados', 'Puertas y maletero', 'Material y espesores'];
+const ordenBloque = (b: string) => { const i = ORDEN_BLOQUES.indexOf(b); return i < 0 ? 100 : i; };
+/**
+ * Which department and block a click on the Triciclo's 3D model opens (2026-11-15): by the layer it hit, and on the
+ * body by where: ahead of the canopy's glass the nose, behind it the tail, between them the canopy (or the general sizes
+ * low on the flanks).
+ */
+function zonaTriciclo(m: ModeloTriciclo, d: { punto: [number, number, number]; capa: string | null; nombres: string[] }): { dep: DepTriciclo; bloque: string } {
+  const [x, y] = d.punto, n = d.nombres.join(' ');
+  if (/puerta|porton|maletero/i.test(n)) return { dep: 'carroceria', bloque: 'Puertas y maletero' };
+  if (/carenado|brazo/i.test(n)) return { dep: 'carroceria', bloque: 'Carenados' };
+  switch (d.capa) {
+    case 'ruedas': case 'suspension': case 'direccion': return { dep: 'rodaje', bloque: 'Ejes y ruedas' };
+    case 'chasis': return { dep: 'chasis', bloque: 'Bastidor' };
+    case 'baterias': return { dep: 'energia', bloque: 'Batería' };
+    case 'motor': case 'transmision': return { dep: 'propulsion', bloque: 'Motor' };
+    case 'asientos': case 'ocupantes': return { dep: 'interior', bloque: deslizadoresTriciclo().find(f => f.dep === 'interior')?.bloque ?? 'Asientos' };
+    case 'solar': return { dep: 'carroceria', bloque: 'Techo solar y ventanas' };
+    case 'cristales': return { dep: 'carroceria', bloque: 'Cúpula' };
+  }
+  const T = m.campos, ini = -limitarTriciclo('tCupIni', T), fin = -limitarTriciclo('tCupFin', T);
+  if (x > ini) return { dep: 'carroceria', bloque: 'Morro' };
+  if (x < fin) return { dep: 'carroceria', bloque: 'Cola' };
+  return { dep: 'carroceria', bloque: y > 0.75 + m.elevar ? 'Cúpula' : 'Forma' };
+}
 /**
  * Los deslizadores y las cifras del Triciclo Bala (2026-11-10, Eugenio: «permite modificar todo lo que se permitía
  * modificar en el Apterike»), por departamentos como el Aeromóvil 1. Etiquetas, departamentos, bloques y rangos salen
  * de `deslizadoresTriciclo()` (geometriaTriciclo.ts), la misma tabla que leen las opciones del túnel; las de la forma,
  * de la del Cuadriciclo en rombo. «Proyecto» es el resumen: todas las comprobaciones, el rendimiento y el peso.
  */
-function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
+function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
   P: Parametros; set: <K extends keyof Parametros>(k: K, v: Parametros[K]) => void; res: Resultados; modelo: ModeloTriciclo; dep: DepTriciclo | 'proyecto'; cd: CdTriciclo;
+  /** (2026-11-15) a block to open and show: the one under a click on the 3D car (`n` changes on every click) */
+  abrir?: { bloque: string; n: number } | null;
 }) {
+  // (2026-11-15, Eugenio: «los slider en acordeón plegados por categoría … y con capacidad de pinchar y que se vea la
+  // configuración»): every block folds; which are open is remembered in this browser (a convenience: it may come back empty)
+  const [abiertos, setAbiertos] = useState<Set<string>>(() => { try { return new Set(JSON.parse(localStorage.getItem('aeromovil.bloquesAbiertos') ?? '[]') as string[]); } catch { return new Set(); } });
+  const alternar = (b: string) => setAbiertos(a => { const n = new Set(a); if (n.has(b)) n.delete(b); else n.add(b); try { localStorage.setItem('aeromovil.bloquesAbiertos', JSON.stringify([...n])); } catch { /* nada */ } return n; });
+  useEffect(() => {
+    if (!abrir) return;
+    setAbiertos(a => (a.has(abrir.bloque) ? a : new Set([...a, abrir.bloque])));
+    const t = setTimeout(() => document.getElementById(`bloque-${abrir.bloque}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+    return () => clearTimeout(t);
+  }, [abrir]);
   const T = camposTriciclo(P), rt = res.triciclo!, cm = (v: number, d = 1) => `${fmt(v * 100, d)} cm`;
   const e = cd.cd != null && cd.areaRef != null ? energiaTriciclo(modelo, res.mTot, { cd: cd.cd, areaRef: cd.areaRef }) : null;
   const mostrar = (f: FichaTriciclo, v: number): string => {
@@ -658,7 +697,26 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
       case 'tFila2X': case 'tFila3X': return cm(v, 0);
       case 'tRecPil': case 'tRecPas': case 'tRecFila': return v === 0 ? '0° (erguido)' : v < 0 ? `${-v}° hacia delante` : `${v}° hacia atrás`;
       // 2026-11-12
-      case 'tBatX': case 'tPuertaDel': case 'tPuertaTras': return `${m2(v)} tras el eje delantero`;
+      case 'tBatX': case 'tPuertaDel': case 'tPuertaTras': case 'tPuerta2Parte': return `${m2(v)} tras el eje delantero`;
+      // round 3 (body)
+      case 'tMorroLinea': return v < 0.01 ? 'en punta (ojiva)' : v > 0.99 ? 'en línea (Aptera)' : `${Math.round(v * 100)} % hacia la línea`;
+      case 'tColaPlana': return v < 0.01 ? 'en punta' : v > 0.99 ? 'plana y ancha (Aptera)' : `${Math.round(v * 100)} % hacia plana`;
+      case 'tTechoPlano': return v < 0.01 ? 'redondeado' : v > 0.99 ? 'plano' : `${Math.round(v * 100)} % hacia plano`;
+      case 'tCaida': return Math.abs(v) < 0.01 ? 'como siempre' : v > 0 ? `cae más tarde (+${fmt(v, 2)})` : `cae antes (${fmt(v, 2)})`;
+      // (2026-11-13: with the smooth body the nose's and the tail's edges stay where the deck can still fall to them: what is built, if it differs)
+      case 'tMorroAlto': { const pu = modelo.F.puntas, d = pu.morro - pu.morroPedida, txt = (w: number) => (Math.abs(w) < 0.0005 ? 'como siempre' : `${w > 0 ? '+' : '−'}${cm(Math.abs(w), 1)}`); return Math.abs(d) > 0.001 ? `${txt(v)} → ${txt(v + d)} (lo que deja la cubierta lisa)` : txt(v); }
+      case 'tPuntaCola': { const pu = modelo.F.puntas, d = pu.cola - pu.colaPedida; return Math.abs(d) > 0.001 ? `${m2(v)} → ${m2(v + d)} (lo que deja la cubierta lisa)` : m2(v); }
+      case 'tLineaCupula': return Math.abs(v) < 0.0005 ? 'como siempre' : `${v > 0 ? '+' : '−'}${cm(Math.abs(v), 1)}`;
+      // 2026-11-13: the smooth body
+      case 'tColaAncho': case 'tMorroAncho': return v < 0.01 ? 'como siempre' : v > 0.99 ? 'todo el ancho (Aptera)' : `${Math.round(v * 100)} % hacia todo el ancho`;
+      case 'tColaGrosor': case 'tMorroGrosor': return v < 0.0005 ? 'se cierra en punta' : `${cm(v, 1)} de grueso`;
+      case 'tColaBombeo': case 'tMorroBombeo': return v < 0.0005 ? 'plana' : `${cm(v, 1)} sobre la recta`;
+      case 'tBajosIni': return Math.abs(v) < 0.005 ? 'en el eje trasero' : `${cm(Math.abs(v), 0)} ${v > 0 ? 'delante' : 'detrás'} del eje trasero`;
+      case 'tBajosCurva': return v < 0.01 ? 'suben tarde y de golpe' : v > 0.99 ? 'una curva larga (Aptera)' : `${Math.round(v * 100)} % hacia la curva larga`;
+      case 'tBisagra2Y': return `${Math.round(v * 100)} % del canto de atrás`;
+      // round 4 (2026-11-13): the roof frame
+      case 'tMarcoTecho': return v < 0.0005 ? 'sin marco' : cm(v, 1);
+      case 'tBisagra2Inc': return v === 0 ? '0° (tangente al canto)' : `${v}° arriba hacia delante`;
       case 'tBatAncho': return `${Math.round(v)} % · ${cm(2 * (modelo.paquete?.hz ?? 0), 0)}`;
       case 'tKWh': return modelo.paquete ? `${fmt(modelo.kWh, 1)} kWh (por el tamaño del paquete)` : `${fmt(v, 1)} kWh`;
       case 'tVolY': return modelo.volante && modelo.volante.baja > 0.001 ? `${v >= 0 ? '+' : '−'}${cm(Math.abs(v), 0)} · baja ${cm(modelo.volante.baja, 0)} para caber` : `${v >= 0 ? '+' : '−'}${cm(Math.abs(v), 0)}`;
@@ -671,6 +729,14 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
       case 'tCintura': return v < 0.005 ? 'en el borde del cristal' : `${cm(v, 0)} sobre el cristal`;
       case 'tBisagraY': return v < 0.2 ? `${Math.round(v * 100)} % · casi en el pie` : v > 0.8 ? `${Math.round(v * 100)} % · casi en el techo` : `${Math.round(v * 100)} % del montante`;
       case 'tBisagraInc': return v === 0 ? '0° (tangente al montante)' : `${v > 0 ? '+' : '−'}${Math.abs(v)}°`;
+      // round 3 interior: the running gear rises with the load (geometriaTriciclo.ts `dimensionar`); the rails' spacing, as built
+      case 'tMSuspDel': case 'tMSuspTras': case 'tMFreno': {
+        const n = f.clave === 'tMSuspDel' ? 'Suspensión delantera' : f.clave === 'tMSuspTras' ? (cuatro ? 'Suspensión trasera' : 'Basculante y amortiguador') : 'Frenos';
+        const real = (res.masas[n] ?? 0) / (f.clave === 'tMFreno' ? (cuatro ? 4 : 3) : 1);
+        return real > v + 0.05 ? `${fmt(v, 1)} → ${fmt(real, 1)} kg${f.clave === 'tMFreno' ? ' de media' : ''} (por la carga)` : `${fmt(v, 1)} kg`;
+      }
+      case 'tChSep': { const real = 2 * Math.abs(modelo.tubos.find(t => t.nombre.startsWith('Larguero der'))?.b[2] ?? v / 2); return Math.abs(real - v) > 0.005 ? `${cm(v, 0)} → ${cm(real, 0)} (carrocería estrecha)` : `${cm(v, 0)} de eje a eje`; }
+      case 'tMAsiento': return butacas ? `${fmt(v, 1)} kg · butaca ${fmt(masaButaca(v), 1)} kg` : `${fmt(v, 1)} kg`;
     }
     switch (f.unidad) {
       case 'm': return m2(v);
@@ -686,14 +752,22 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
   // round three: the three rows' block only shows with that layout (astride it would move nothing)
   const filas = T.tAsientos === 'filas', soloFilas = (b: string) => b === 'Tres filas' && !filas;
   // four wheels (2026-11-11): the rear track only with two rear wheels
-  const cuatro = esCuatro(T), lemas = lemasTriciclo(T), tresOCuatro = cuatro ? 'cuatro' : 'tres';
+  // (2026-11-15: a diamond, `tRuedas`, has four wheels too, but one rear in the tail and the pods at the sides)
+  const cuatro = esCuatro(T), rombo = esRombo(T), lemas = lemasTriciclo(T), tresOCuatro = cuatro || rombo ? 'cuatro' : 'tres', bascula = cuatro || rombo;
   // 2026-11-12: each new option's sliders only show with it on (a steering wheel's with «Volante», the handlebar's with
   // «Manillar», the doors' with doors, the hatch's with the Aptera hatch, the pack's with the battery along the frame)
-  const volante = T.tMando === 'volante', salp = T.tSalpicadero === 'si', puertas = conPuertas(T), portonA = conPortonAptera(T), paquete = bateriaChasis(T);
+  const volante = T.tMando === 'volante', salp = conSalpicadero(T), puertas = conPuertas(T), portonA = conPortonAptera(T), paquete = bateriaChasis(T), butacas = conButacas(T);
   const PUERTA = ['tPuertaDel', 'tPuertaTras', 'tUmbral', 'tCintura', 'tBisagraY', 'tBisagraInc', 'tBisagraDentro', 'tPuertaAbre'];
   const visible = (k: string) => (k === 'tManX' || k === 'tManY') ? !volante : k.startsWith('tVol') ? volante : k.startsWith('tSalp') ? salp
-    : PUERTA.includes(k) ? puertas : (k === 'tMalIni' || k === 'tMalAbre' || k === 'tMalLado') ? portonA : (k.startsWith('tBat') && k !== 'tBatDisp') ? paquete : true;
-  const fichas = deslizadoresTriciclo().filter(f => f.dep === dep && !soloFilas(f.bloque) && (cuatro || f.clave !== 'tViaTras') && visible(f.clave)), sels = SELECTORES_TRICICLO.filter(s => s.dep === dep && !soloFilas(s.bloque) && (s.clave !== 'tMaletero' || puertas));
+    : PUERTA.includes(k) ? puertas : (k === 'tMalIni' || k === 'tMalAbre' || k === 'tMalLado') ? portonA : (k.startsWith('tBat') && k !== 'tBatDisp') ? paquete
+      // round 3 (body): the headlamp's width with the headlamp, the fin's height with the fin, the second door's with it
+      : k === 'tFaroD' ? T.tFaro === 'si' : k === 'tAleta' ? T.tConAleta !== 'no' : PUERTA2.includes(k) ? puertas && T.tPuertas2 === 'si'
+        // 2026-11-13: the smooth body's sliders only with «Cubierta lisa»
+        : LISA.includes(k) ? T.tCubierta === 'lisa' : true;
+  const LISA = ['tColaAncho', 'tColaGrosor', 'tColaBombeo', 'tBajosIni', 'tBajosCurva', 'tMorroAncho', 'tMorroGrosor', 'tMorroBombeo'];
+  const PUERTA2 = ['tPuerta2Parte', 'tBisagra2Y', 'tBisagra2Inc', 'tPuerta2Abre'];
+  // (round 3 interior: the rails reach the rear axle only with two rear wheels; with one, the wheel is in the tail between them)
+  const fichas = deslizadoresTriciclo().filter(f => f.dep === dep && !soloFilas(f.bloque) && (cuatro || f.clave !== 'tViaTras') && (f.clave !== 'tBascMax' || (bascula && T.tBascula === 'si')) && (rombo ? f.clave !== 'tEjeDel' : f.clave !== 'tEjeLat') && (f.bloque !== 'Híbrido enchufable' || T.tPropulsion === 'phev') && visible(f.clave)), sels = SELECTORES_TRICICLO.filter(s => s.dep === dep && !soloFilas(s.bloque) && ((s.clave !== 'tMaletero' && s.clave !== 'tPuertas2') || puertas) && (s.clave !== 'tChLargo' || cuatro) && (s.clave !== 'tBascula' || bascula) && (s.clave !== 'tTraseras' || !rombo));
   const nOcc = rt.ocupantes, conN = nOcc === 1 ? 'con el piloto solo' : `con ${['', 'uno', 'dos', 'tres', 'cuatro'][nOcc] ?? nOcc} ocupantes`;
   // with three rows the passenger's saddle height is the rows' seat height; its position and recline do nothing there
   const ETIQUETA_FILAS: Partial<Record<string, string>> = { tPasY: 'Asientos de las filas 2 y 3: altura' };
@@ -701,7 +775,11 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
   // four wheels: what the rear wheels' sliders are, and the swing arm and the spat, which do not exist then
   const ETIQUETA_CUATRO: Partial<Record<string, string>> = { tMSuspTras: 'Suspensión trasera (las dos)', tMMotor: 'Motores de buje (los dos)', tRuedaTras: 'Ruedas traseras (en los carenados)', tFaldon: 'Rueda trasera: faldón (no hay: van en carenados)', tBasculante: 'Basculante trasero (no hay: brazos en los carenados)' };
   const apagadoCuatro = (k: string) => cuatro && (k === 'tFaldon' || k === 'tBasculante');
-  const etiqueta = (k: string, n: string) => (filas && ETIQUETA_FILAS[k]) || (cuatro && ETIQUETA_CUATRO[k]) || n;
+  // round 3 interior: with the Aptera buckets the pilot's feet are on pedals, and «Un asiento» is a saddle's mass (a bucket weighs 1.8 times it)
+  const ETIQUETA_BUTACAS: Partial<Record<string, string>> = { tPiesX: 'Pedales: hacia delante', tPiesY: 'Pedales: altura', tMAsiento: 'Un asiento: sillín y respaldo (una butaca, ×1,8)' };
+  // (2026-11-15) in a diamond the pods' wheels are the lateral ones, and the rear wheel's size is also the nose wheel's
+  const ETIQUETA_ROMBO: Partial<Record<string, string>> = { tVia: 'Vía de las ruedas laterales', tRuedaDel: 'Ruedas laterales (en los carenados)', tRuedaTras: 'Ruedas del morro y de la cola', tGiro: 'Giro máximo de la rueda del morro', tMSuspDel: 'Suspensión de las laterales (las dos)', tRecDel: 'Recorrido de la suspensión de las laterales' };
+  const etiqueta = (k: string, n: string) => (filas && ETIQUETA_FILAS[k]) || (butacas && ETIQUETA_BUTACAS[k]) || (rombo && ETIQUETA_ROMBO[k]) || (cuatro && ETIQUETA_CUATRO[k]) || n;
   const bloques = [...new Set([...fichas.map(f => f.bloque), ...sels.map(s => s.bloque)])];
   const checks = res.comprobaciones.filter(c => dep === 'proyecto' || (c.dep ?? '').split(',').includes(dep));
   const malas = checks.filter(c => c.holgura < c.minimo).length;
@@ -722,7 +800,15 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
         [`Consumo a ${kmhVel} km/h`, e ? `${fmt(e.WhKm / 10, 1)} kWh/100 km` : sinCd],
         ['Consumo a 50 y a 100 km/h', e ? `${fmt(e.WhKm50 / 10, 1)} · ${fmt(e.WhKm100 / 10, 1)} kWh/100 km` : sinCd],
         [`Potencia a ${kmhVel} km/h`, e ? `${fmt(e.potencia / 1000, 1)} kW` : sinCd],
-        [`Autonomía a ${kmhVel} km/h`, e ? `${Math.round(e.autonomia)} km` : sinCd],
+        [`Autonomía a ${kmhVel} km/h${e?.hibrido ? ', solo con la batería' : ''}`, e ? `${Math.round(e.autonomia)} km` : sinCd],
+        // the plug-in hybrid (2026-11-15): petrol per 100 km once the battery is down, and how far the tank goes
+        ...(T.tPropulsion === 'phev' ? [
+          [`Gasolina a ${kmhVel} km/h (con la batería gastada)`, e?.hibrido ? `${fmt(e.hibrido.litros100, 2)} L/100 km` : sinCd],
+          ['Gasolina a 50 y a 100 km/h', e?.hibrido ? `${fmt(e.hibrido.litros50, 2)} · ${fmt(e.hibrido.litros100kmh, 2)} L/100 km` : sinCd],
+          [`Autonomía con el depósito (${fmt(T.tDeposito, 0)} L)`, e?.hibrido ? `${Math.round(e.hibrido.kmDeposito)} km` : sinCd],
+          ['Autonomía total: batería y depósito', e?.hibrido ? `${Math.round(e.autonomia + e.hibrido.kmDeposito)} km` : sinCd],
+          [`Velocidad sostenida solo con gasolina (${fmt(T.tPhevKW, 1)} kW)`, e?.hibrido ? `${Math.round(e.hibrido.vmaxGasolina)} km/h` : sinCd],
+        ] as [string, string][] : []),
         [`Velocidad sostenida (${fmt(T.tKWNom, 1)} kW)`, e ? `${Math.round(e.vmaxNominal)} km/h` : sinCd],
         [`Velocidad punta (${fmt(T.tKWPico, 1)} kW)`, e ? `${Math.round(e.vmaxPico)} km/h` : sinCd],
         ['0 → 50 km/h', e ? (e.acel50 > 60 ? 'no llega' : `${fmt(e.acel50, 1)} s`) : sinCd],
@@ -733,21 +819,44 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
       <p className="text-xs text-slate-500">El Cd lo calcula el túnel con la silueta de la carrocería y sus {tresOCuatro} ruedas (no hay fórmula del editor para esta forma); los carenados y los brazos solo entran como ruedas carenadas, así que el real será algo más alto. {nOcc === 1 ? 'Con el piloto solo' : `Con ${['', 'uno', 'dos', 'tres', 'cuatro'][nOcc]} ocupantes`} de {T.tMOcc} kg ({Math.round(res.mTot)} kg en total), rodadura {fmt(CRR, 3)} (neumático de ciclomotor), motor y controlador al {Math.round(RENDIMIENTO * 100)} %, {AUXILIARES} W de equipos y la batería usable al {Math.round(USABLE * 100)} %. Todo supuesto, no medido.</p>
     </Bloque>
   );
+  // round 3 interior (2026-11-12, Eugenio: «dentro del proyecto, que lo primero que aparezca sean todos los componentes que hay y el peso de cada uno»)
+  const GRUPOS: [DepTriciclo, string][] = [['carroceria', 'Carrocería'], ['chasis', 'Chasis'], ['rodaje', 'Rodaje'], ['propulsion', 'Motor'], ['energia', 'Energía'], ['interior', 'Interior']];
+  const diseno = cargasRueda(modelo, rt.piezas);
   const peso = (
-    <Bloque titulo="Peso del vehículo" nota={`${Math.round(res.mVeh)} kg sin ocupantes`}>
-      {dl([...rt.piezas.map(p => [p.nombre, `${fmt(p.kg, 1)} kg`] as [string, string]), [`${nOcc === 1 ? 'Con el piloto' : `Con ${['', 'uno', 'dos', 'tres', 'cuatro'][nOcc]} ocupantes`} de ${T.tMOcc} kg`, `${Math.round(res.mTot)} kg`]])}
+    <Bloque titulo="Peso: todos los componentes" nota={`${Math.round(res.mVeh)} kg en vacío`}>
+      <div className="flex flex-col gap-2.5 text-[13px]">
+        {GRUPOS.map(([g, n]) => {
+          const ps = rt.piezas.filter(p => grupoPieza(p.nombre) === g); if (!ps.length) return null;
+          return (
+            <div key={g}>
+              <div className="flex items-baseline justify-between gap-3 border-b border-slate-200 pb-0.5 font-semibold text-slate-800"><span>{n}</span><span className="font-mono text-xs tabular-nums">{fmt(ps.reduce((a, p) => a + p.kg, 0), 1)} kg</span></div>
+              <dl className="mt-1 grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1">
+                {ps.map(p => (<Fragment key={p.nombre}><dt className="min-w-0 text-slate-600">{p.nombre}{p.nota && <span className="block text-[11px] leading-snug text-slate-400">{p.nota}</span>}</dt><dd className="text-right font-mono text-xs tabular-nums">{fmt(p.kg, 1)} kg</dd></Fragment>))}
+              </dl>
+            </div>
+          );
+        })}
+        <dl className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-1 border-t-2 border-slate-300 pt-1.5">
+          <dt className="font-semibold text-slate-800">Total en vacío</dt><dd className="text-right font-mono text-xs font-semibold tabular-nums">{fmt(res.mVeh, 1)} kg</dd>
+          <dt className="text-slate-600">{nOcc === 1 ? 'Con el piloto' : `Con ${['', 'uno', 'dos', 'tres', 'cuatro'][nOcc]} ocupantes`} de {T.tMOcc} kg</dt><dd className="text-right font-mono text-xs tabular-nums">{Math.round(res.mTot)} kg</dd>
+          <dt className="text-slate-600">Y {EQUIPAJE} kg de equipaje: masa de diseño</dt><dd className="text-right font-mono text-xs tabular-nums">{Math.round(diseno.masa)} kg</dd>
+          <dt className="text-slate-600">  por rueda: delante · detrás</dt><dd className="text-right font-mono text-xs tabular-nums">{Math.round(diseno.del)} · {Math.round(diseno.tras)} kg</dd>
+        </dl>
+      </div>
+      <p className="text-xs text-slate-500">Las suspensiones, los frenos y los neumáticos se dimensionan para la masa de diseño: todos a bordo y {EQUIPAJE} kg de equipaje. Cada deslizador de masa es lo menos que pesa esa pieza; si la carga pide más, cuenta lo que pide la carga y aquí se dice. El bastidor pesa lo que sus tubos (largo × sección × densidad) más sus uniones. Son estimaciones de piezas de su clase, no pesadas.</p>
       <p className="text-xs text-slate-500">Centro de gravedad {nOcc === 1 ? 'con el piloto' : `con los ${['', '', 'dos', 'tres', 'cuatro'][nOcc]}`}: {cm(rt.cg.y, 0)} sobre el suelo y {m2(modelo.xF - rt.cg.x)} detrás del eje delantero ({Math.round(rt.vuelco.repartoDel * 100)} % del peso delante). Vacío: {cm(rt.cg.vacio.y, 0)} de alto.</p>
     </Bloque>
   );
   return (
     <>
+      {dep === 'proyecto' && peso}
       <Bloque titulo={lemas[dep]} nota={nombreTriciclo(T)}>
-        {cuatro
-          ? <p className="text-xs text-slate-500">Cuatro ruedas: dos delante en carenados como el Aptera, que giran con ellas, y dos detrás en carenados iguales, que no giran, con un motor en el buje de cada una. Es el Triciclo Bala con otra parte de atrás: la carrocería y todas sus medidas son las mismas (en Rodaje, «Ruedas traseras», se vuelve a la de una rueda).</p>
+        {cuatro || rombo
+          ? (rombo ? <p className="text-xs text-slate-500">Cuatro ruedas en rombo: una en el morro, que gira; dos laterales en carenados, que no giran (con «Bascular en las curvas», se inclinan con la cabina); y una en la cola con el motor en el buje. Es la disposición del Cuadriciclo Bala en rombo con esta carrocería (en Rodaje, «Disposición de las ruedas», se vuelve a la de dos delante).</p> : <p className="text-xs text-slate-500">Cuatro ruedas: dos delante en carenados como el Aptera, que giran con ellas, y dos detrás en carenados iguales, que no giran, con un motor en el buje de cada una. Es el Triciclo Bala con otra parte de atrás: la carrocería y todas sus medidas son las mismas (en Rodaje, «Ruedas traseras», se vuelve a la de una rueda).</p>)
           : <p className="text-xs text-slate-500">Tres ruedas: dos delante en carenados como el Aptera, que giran con ellas, y una detrás dentro de la cola, con el motor en el buje. La carrocería es la del Cuadriciclo Bala en rombo; con las medidas por defecto, la misma.</p>}
       </Bloque>
-      {bloques.map(bloque => (
-        <Bloque key={bloque} titulo={bloque}>
+      {[...bloques].sort((a, b) => ordenBloque(a) - ordenBloque(b)).map(bloque => (
+        <Bloque key={bloque} id={`bloque-${bloque}`} titulo={bloque} plegable={{ abierto: abiertos.has(bloque), alAlternar: () => alternar(bloque) }} nota={`${fichas.filter(f => f.bloque === bloque).length + sels.filter(s => s.bloque === bloque).length} ajustes`}>
           {bloque === 'Forma' && (() => {
             // round two (2026-11-10): one lever for «hazlo un poco más grande»; it moves the nose, wheelbase and tail (see estirarTriciclo)
             const lg = largoTriciclo(T);
@@ -762,7 +871,7 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
             // (2026-11-12: with doors the window frame is always there; with the pack along the frame its size decides the kWh)
             const apagado = (T.tVentanas === 'burbuja' && !puertas && f.clave.startsWith('tPilar')) || apagadoFilas(f.clave) || apagadoCuatro(f.clave) || (paquete && f.clave === 'tKWh');
             const valor = paquete && f.clave === 'tKWh' ? Math.min(v.max, Math.max(v.min, modelo.kWh)) : v.valor;
-            return <Deslizador key={f.clave} id={`t-${f.clave}`} etiqueta={etiqueta(f.clave, f.n)} valor={valor} clave={f.clave} centro={f.centrar ? v.defecto : undefined} min={v.min} max={v.max} paso={f.paso} mostrar={mostrar(f, valor)} desactivado={apagado} alCambiar={x => set(f.clave, guardarTriciclo(f, x, T))} />;
+            return <Deslizador key={f.clave} id={`t-${f.clave}`} etiqueta={etiqueta(f.clave, f.n)} valor={valor} clave={f.clave} centro={f.centrar ? v.defecto : undefined} min={v.min} max={v.max} paso={f.paso} mostrar={mostrar(f, valor)} desactivado={apagado} alCambiar={x => { const g = guardarTriciclo(f, x, T); if (f.clave === 'tBatalla') for (const [k, v] of Object.entries(conBatalla(T, g))) set(k as keyof Parametros, v as never); else set(f.clave, g); }} />;
           })}
           {sels.filter(s => s.bloque === bloque).map(s => <Selector key={s.clave} id={`t-${s.clave}`} etiqueta={etiqueta(s.clave, s.n)} valor={T[s.clave] as string} clave={s.clave} opciones={s.opciones} alCambiar={v => {
             set(s.clave, v as never);
@@ -773,27 +882,32 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
             ? 'Los carenados delanteros giran con sus ruedas (como en el Aptera): el neumático siempre queda igual de centrado; lo que se comprueba es que, girados a tope, no toquen la carrocería. Los traseros son iguales (tamaño, anchura, cola y brazos se mueven con estos mismos deslizadores), crecen con su rueda y no giran. Sin rueda en la cola, no hay faldón.'
             : 'Los carenados delanteros giran con sus ruedas (como en el Aptera): el neumático siempre queda igual de centrado; lo que se comprueba es que, girados a tope, no toquen la carrocería. El faldón tapa la parte de abajo de la rueda trasera.'}</p>}
           {bloque === 'Asientos' && (filas
-            ? <p className="-mt-1 text-xs text-slate-500">Tres filas: el piloto solo, en un asiento de coche en el centro, con {volante ? 'el volante' : 'el manillar de siempre'}; detrás, dos asientos juntos; y al final uno más pequeño en el centro. Los de las filas 2 y 3 se pliegan (abajo, «Tres filas»). Con esta disposición la carrocería tiene unos mínimos: {m2(ANCHO_FILAS)} de ancho (para los hombros de la fila 2), {fmt(ALTO_FILAS, 2)} m de cúpula y la batalla y la cúpula largas para que la fila 3 quepa delante del amortiguador trasero. El pasajero a horcajadas no existe aquí: su posición y su reclinado no hacen nada.</p>
+            ? <p className="-mt-1 text-xs text-slate-500">Tres filas: el piloto solo, en un asiento de coche en el centro, con {volante ? 'el volante' : 'el manillar de siempre'}; detrás, dos asientos juntos; y al final uno más pequeño en el centro. Los de las filas 2 y 3 se pliegan (abajo, «Tres filas»). Con esta disposición la carrocería tiene unos mínimos: {m2(ANCHO_FILAS)} de ancho (para los hombros de la fila 2) y la batalla y la cúpula largas para que la fila 3 quepa delante del amortiguador trasero. El alto de la cúpula se puede bajar libremente; por debajo de unos {fmt(ALTO_FILAS, 2)} m las cabezas ya no caben y las comprobaciones lo marcan en rojo. El pasajero a horcajadas no existe aquí: su posición y su reclinado no hacen nada.</p>
+            : butacas ? <p className="-mt-1 text-xs text-slate-500">Dos butacas como las del Aptera, una detrás de otra en el centro: una carcasa blanca de una pieza con el reposacabezas, cojín y respaldo oscuros acolchados y una base fina sobre los largueros{paquete ? ' o el paquete' : ''}. El piloto lleva las piernas hacia delante, con los pies en los pedales (abajo, «Pedales»), hasta el {salp ? 'salpicadero' : 'morro'}; el pasajero, a los lados del asiento del piloto, con las rodillas por fuera de su respaldo, como en el asiento de atrás de un Renault Twizy. Cada butaca pesa 1,8 veces «Un asiento» ({fmt(masaButaca(T.tMAsiento), 1)} kg). Se comprueba que las rodillas y los pies del pasajero no toquen el asiento del piloto y que los pies de los dos queden dentro de la carrocería.</p>
             : <p className="-mt-1 text-xs text-slate-500">A horcajadas, como en el Cuadriciclo en rombo, con un respaldo cada uno. Reclinar baja la cabeza y la lleva hacia atrás: al piloto le da techo (la cúpula sube detrás de él), pero aleja sus manos del {volante ? 'volante' : 'manillar'}; al pasajero se lo quita, porque detrás de él la cúpula baja.</p>)}
-          {bloque === 'Asientos' && <p className="-mt-1 text-xs text-slate-500">Los asientos bajan hasta quedar con 6 cm de asiento sobre lo que tienen debajo: los largueros del bastidor{paquete ? ' o, donde pasa bajo ellos, el paquete de batería' : ''} (ahora, el piloto hasta {m2(vistaTriciclo(deslizadoresTriciclo().find(f => f.clave === 'tPilY')!, T).min)} y {filas ? 'las filas 2 y 3' : 'el pasajero'} hasta {m2(vistaTriciclo(deslizadoresTriciclo().find(f => f.clave === 'tPasY')!, T).min)} del suelo). El sillín se hace más fino al bajar. Más bajos: menos vuelco y más techo, pero las rodillas suben.</p>}
+          {bloque === 'Asientos' && <p className="-mt-1 text-xs text-slate-500">Los asientos bajan hasta quedar con 6 cm de asiento sobre lo que tienen debajo: los largueros del bastidor{paquete ? ' o, donde pasa bajo ellos, el paquete de batería' : ''} (ahora, el piloto hasta {m2(vistaTriciclo(deslizadoresTriciclo().find(f => f.clave === 'tPilY')!, T).min)} y {filas ? 'las filas 2 y 3' : 'el pasajero'} hasta {m2(vistaTriciclo(deslizadoresTriciclo().find(f => f.clave === 'tPasY')!, T).min)} del suelo).{butacas || filas ? '' : ' El sillín se hace más fino al bajar.'} Más bajos: menos vuelco y más techo, pero las rodillas suben.</p>}
+          {bloque === 'Mandos' && butacas && <p className="-mt-1 text-xs text-slate-500">Con las butacas el piloto conduce con los pies en dos pedales, freno y acelerador, con el talón en una placa sobre el suelo{paquete ? ', el paquete' : ''} o la barra de la cuna delantera, lo que quede debajo. «Pedales» los acerca o los aleja y los sube o los baja.</p>}
           {bloque === 'Mandos' && volante && <p className="-mt-1 text-xs text-slate-500">Volante de coche en una columna que baja hacia delante hasta la cabeza de dirección (donde iba el manillar), con las manos del piloto en el aro a las tres menos cuarto. Se comprueba que el aro quede dentro de la carrocería y que no toque las rodillas.{salp ? '' : ' Sin salpicadero, los relojes van en una pantallita sobre la columna.'}</p>}
-          {bloque === 'Salpicadero' && <p className="-mt-1 text-xs text-slate-500">{salp ? `Un salpicadero de lado a lado bajo el parabrisas, a 2 cm de la piel por dentro, desde donde el morro deja sitio hacia el piloto; en su cara de atrás, la pantalla de los relojes y una pantalla central. Ocupa el sitio del depósito y de la pantallita. Fondo ${cm(modelo.salpicadero ? modelo.salpicadero.x0 - modelo.salpicadero.x1 : 0, 0)}.` : 'Sin salpicadero: una pantallita sobre el depósito, delante del piloto.'}</p>}
+          {bloque === 'Salpicadero' && <p className="-mt-1 text-xs text-slate-500">{T.tSalpicadero === 'blanco' ? `Un salpicadero blanco de lado a lado bajo el parabrisas, con su forma (a 2 cm de la piel por dentro), desde donde el morro deja sitio hacia el piloto: un labio oscuro por el borde de atrás, los relojes bajo una visera delante del piloto, una pantalla central sobre un pie, a su derecha, con una fila de botones, salidas de aire en los dos extremos y a los lados de los relojes${volante ? ', y la funda de la columna del volante con sus dos palancas' : ''}. Ocupa el sitio del depósito y de la pantallita. Unos 6,5 kg (estimado). Fondo ${cm(modelo.salpicadero ? modelo.salpicadero.x0 - modelo.salpicadero.x1 : 0, 0)}.`
+            : salp ? `Un salpicadero de lado a lado bajo el parabrisas, a 2 cm de la piel por dentro, desde donde el morro deja sitio hacia el piloto; en su cara de atrás, la pantalla de los relojes y una pantalla central. Ocupa el sitio del depósito y de la pantallita. Fondo ${cm(modelo.salpicadero ? modelo.salpicadero.x0 - modelo.salpicadero.x1 : 0, 0)}.` : 'Sin salpicadero: una pantallita sobre el depósito, delante del piloto.'}</p>}
           {bloque === 'Puertas y maletero' && <p className="-mt-1 text-xs text-slate-500">{puertas
-            ? `Dos puertas como las del Aptera, cortadas en esta carrocería: cada una lleva su ventana con el marco (el montante y el carril del techo) y se abre hacia arriba y hacia fuera a la vez («de mariposa»), sobre una bisagra en el montante. El eje es la tangente al montante donde va la bisagra: así toda la puerta queda por debajo y sale hacia fuera sin rozar. Con la bisagra al pie del montante (de serie) el eje sube inclinado y la puerta sube y sale a la vez, dejando libre la entrada; con la bisagra más arriba el eje se tumba y la puerta gira como un ala sobre un eje casi a lo largo del coche, pero se queda encima del hueco: «Puerta abierta: altura libre para entrar» lo dice. Con puertas la cúpula ya no se abre, y siempre lleva montante. «Abrir puertas», abajo en el 3D.${portonA ? ' El portón es como el del Aptera: con la bisagra en el techo, cerca de su punto más alto, levanta de una pieza la luna, el techo de atrás y lo alto de la cola, más o menos la mitad de atrás del vehículo, con la aleta. «Abrir maletero».' : ' El maletero sigue siendo la tapa de lo alto de la cola; el portón largo como el del Aptera se elige en «Maletero».'}`
+            ? `Dos puertas como las del Aptera, cortadas en esta carrocería: cada una lleva su ventana con el marco (el montante y el carril del techo) y se abre hacia arriba y hacia fuera a la vez («de mariposa»), sobre una bisagra en el montante. El eje es la tangente al montante donde va la bisagra: así toda la puerta queda por debajo y sale hacia fuera sin rozar. Con la bisagra al pie del montante (de serie) el eje sube inclinado y la puerta sube y sale a la vez, dejando libre la entrada; con la bisagra más arriba el eje se tumba y la puerta gira como un ala sobre un eje casi a lo largo del coche, pero se queda encima del hueco: «Puerta abierta: altura libre para entrar» lo dice. Con puertas la cúpula ya no se abre, y siempre lleva montante. «Abrir puertas», abajo en el 3D.${portonA ? ' El portón es como el del Aptera: con la bisagra en el techo, cerca de su punto más alto, levanta de una pieza la luna, el techo de atrás y lo alto de la cola, más o menos la mitad de atrás del vehículo, con la aleta.' + (T.tCubierta === 'lisa' ? ' Con la cubierta lisa, detrás de las puertas el portón es toda la cubierta de la cola: de canto a canto y hasta el borde de atrás, una sola pieza con su panel solar.' : '') + ' «Abrir maletero».' : ' El maletero sigue siendo la tapa de lo alto de la cola; el portón largo como el del Aptera se elige en «Maletero».'}`
             : 'Con la cúpula entera, se entra levantándola hacia delante («Abrir cúpula») y el maletero es la tapa de lo alto de la cola. Las puertas como el Aptera (y con ellas el portón largo) cortan la carrocería en su sitio y dejan la cúpula fija.'}
             {T.tRetrovisores === 'espejos' ? ` Retrovisores de gota en un brazo corto, ${puertas ? 'en cada puerta' : 'en la carrocería'}, donde estaban las cámaras; el túnel de viento no los cuenta (su Cd sale algo más bajo de lo que será).` : ''}</p>}
           {bloque === 'Tres filas' && <p className="-mt-1 text-xs text-slate-500">Cada fila se pliega por separado: el respaldo cae hacia delante sobre el asiento y queda un suelo plano para carga. Sus pasajeros dejan de contar en el peso, el vuelco y el consumo. Los pies de la fila 2 van bajo el asiento del piloto y los de la fila 3 bajo los de la fila 2, como en un coche. Maletero ahora: {Math.round(rt.maletero.ahora)} L ({rt.maletero.estado}).</p>}
           {bloque === 'Ejes y ruedas' && <>
             {rt.viaSubida && <p className="-mt-1 text-xs text-amber-800">La vía sube a {m2(rt.viaSubida)}: es lo mínimo para que los carenados, girados a tope, queden a 3 cm de la carrocería.</p>}
-            <p className="-mt-1 text-xs text-slate-500">El eje delantero va detrás de donde el Cuadriciclo en rombo lleva su rueda delantera: así el peso queda más cerca de las dos ruedas de delante y {cuatro ? 'la vía de delante pesa más en el vuelco' : 'el triciclo vuelca menos'} (abajo, «Vuelco»). Batalla {m2(modelo.batalla)}.</p>
+            {rombo ? <p className="-mt-1 text-xs text-slate-500">En rombo la rueda del morro va donde la lleva el Cuadriciclo Bala en rombo, y las dos laterales a {m2(-modelo.xF)} por detrás: mejor cerca del centro de gravedad, que está a {m2(-res.triciclo!.cg.x)} (abajo, «Vuelco»). De la del morro a la de la cola, {m2(-modelo.xR)}.</p> : <p className="-mt-1 text-xs text-slate-500">El eje delantero va detrás de donde el Cuadriciclo en rombo lleva su rueda delantera: así el peso queda más cerca de las dos ruedas de delante y {cuatro ? 'la vía de delante pesa más en el vuelco' : 'el triciclo vuelca menos'} (abajo, «Vuelco»). Batalla {m2(modelo.batalla)}.</p>}
             {bloque === 'Ejes y ruedas' && <p className="-mt-1 text-xs text-slate-500">Ruedas traseras: una dentro de la cola, sobre un basculante, como un triciclo; o dos fuera, en carenados como los de delante sobre dos brazos carenados cada uno, que no giran: cuatro ruedas. Con dos, el motor se reparte en dos motores de buje, uno en cada rueda, y la cola queda libre para el maletero.{cuatro ? ` La vía trasera va de lo justo para que los carenados queden a 3 cm de la cola (${m2(vistaTriciclo(deslizadoresTriciclo().find(f => f.clave === 'tViaTras')!, T).min)}) a la vía delantera más ancha; de serie, la de delante.` : ''}</p>}
           </>}
-          {bloque === 'Bastidor' && <p className="-mt-1 text-xs text-slate-500">Dos largueros sobre la panza con cuatro travesaños, {paquete ? 'la cuna de la suspensión delantera (con la batería a lo largo del bastidor, en el morro ya no hay batería), el paquete de batería sobre el fondo de la panza, con los largueros pasando por dentro' : 'la cuna de la batería (donde se apoya la suspensión delantera)'}, los soportes de los sillines, la torreta del amortiguador y el soporte de la columna de dirección: {fmt(rt.bastidor.metros, 1)} m de tubo. Se ve con «Rayos X» o la capa «Chasis».</p>}
-          {bloque === 'Techo solar y ventanas' && <p className="-mt-1 text-xs text-slate-500">La forma de la cúpula no cambia: el techo solar y las ventanas se dibujan sobre ella. Detrás de donde empieza, lo alto de la cúpula es un panel solar opaco (da sombra a las cabezas: menos calor dentro en verano); por los lados, encima de la ventana. Delante, el parabrisas pasa por encima hasta el panel.{T.tSolarCola === 'si' ? ' Por detrás, el panel sigue por lo alto de la cola hasta su punta, como en el Aptera; con el portón, la parte de encima del portón se levanta con él (con la tapa del maletero, con la tapa).' : ''}{puertas ? ' Con las puertas como el Aptera hay montante siempre (la puerta se corta por él), aunque arriba diga «De una pieza».' : ''} El montante sale del borde del cristal, sube y se tumba hacia atrás en una sola curva hasta el techo, como en el Aptera, y sigue como marco entre la ventana y el techo. Panel: {res.areas.solar > 0.005 ? `${fmt(res.areas.solar)} m², ${Math.round(res.solarPico)} W a pleno sol, unos ${fmt(res.solarDia / 1000)} kWh al día (estimado)` : 'ninguno'}; cristal: {fmt(res.areas.cristal)} m².</p>}
+          {bloque === 'Bastidor' && <p className="-mt-1 text-xs text-slate-500">Dos largueros sobre la panza con {modelo.larguerosTraseros ? 'cinco' : 'cuatro'} travesaños, {paquete ? 'la cuna de la suspensión delantera (con la batería a lo largo del bastidor, en el morro ya no hay batería), el paquete de batería sobre el fondo de la panza, con los largueros pasando por dentro' : 'la cuna de la batería (donde se apoya la suspensión delantera)'}, los soportes de los {butacas ? 'asientos' : filas ? 'asientos' : 'sillines'}, la torreta del amortiguador{modelo.larguerosTraseros ? ', los largueros siguiendo hasta el eje trasero (suben con la panza donde la cola se levanta y se cierran donde se estrecha) y una cuna trasera hasta donde llegan los brazos de los carenados de atrás' : ''} y el soporte de la columna de dirección: {fmt(rt.bastidor.metros, 1)} m de tubo. {cuatro ? (modelo.larguerosTraseros ? '' : 'Los largueros acaban en la torreta: «Largueros: hasta» › «El eje trasero» los lleva hasta donde las ruedas de atrás meten su peso. ') : 'Con una rueda detrás, los largueros acaban en la torreta: la rueda va entre ellos, en la cola. '}La separación de los largueros se mide de eje a eje; más separados, el bastidor es más ancho y el paquete de batería, que es un porcentaje de ese ancho, también. Se ve con «Rayos X» o la capa «Chasis».</p>}
+          {bloque === 'Forma' && T.tCubierta === 'lisa' && <p className="-mt-1 text-xs text-slate-500">Cubierta lisa: detrás del cristal de la cúpula y delante del parabrisas, lo de arriba ya no sigue la forma redonda de la cúpula. Es una cubierta casi plana, un poco abombada en el centro (el «bombeo»), que solo baja hacia la punta, con un canto redondeado hacia los lados. Así no salen montículos ni hombros, se muevan como se muevan los deslizadores (lo comprueba un programa con cada deslizador en sus dos extremos y muchas combinaciones). Entre la cúpula y la cubierta la forma se funde a lo largo de 30 cm, sobre el cristal.</p>}
+          {bloque === 'Techo solar y ventanas' && <p className="-mt-1 text-xs text-slate-500">La forma de la cúpula no cambia: el techo solar y las ventanas se dibujan sobre ella. Detrás de donde empieza, lo alto de la cúpula es un panel solar opaco (da sombra a las cabezas: menos calor dentro en verano); por los lados, encima de la ventana. Delante, el parabrisas pasa por encima hasta el panel.{T.tSolarCola === 'si' ? ` Por detrás, el panel sigue por lo alto de la cola hasta su punta, como en el Aptera; con el portón, la parte de encima del portón se levanta con él (con la tapa del maletero, con la tapa).${T.tCubierta === 'lisa' ? ' Con la cubierta lisa cubre toda la cubierta de la cola, dejando un marco de unos 5 cm a cada lado.' : ''}` : ''}{puertas ? ' Con las puertas como el Aptera hay montante siempre (la puerta se corta por él), aunque arriba diga «De una pieza».' : ''} El montante sale del borde del cristal, sube y se tumba hacia atrás en una sola curva hasta el techo, como en el Aptera, y sigue como marco entre la ventana y el techo.{modelo.ventanas.marco ? ` Entre el panel y el cristal va un marco de carrocería de ${cm(modelo.ventanas.marco.ancho, 0)}: arriba del parabrisas y a lo largo de los dos carriles del techo (${fmt(modelo.marcoTecho)} m² de laminado en lugar de panel).` : ''} Panel: {res.areas.solar > 0.005 ? `${fmt(res.areas.solar)} m², ${Math.round(res.solarPico)} W a pleno sol, unos ${fmt(res.solarDia / 1000)} kWh al día (estimado)` : 'ninguno'}; cristal: {fmt(res.areas.cristal)} m².</p>}
           {bloque === 'Techo solar' && <p className="-mt-1 text-xs text-slate-500">{res.areas.solar > 0.005 ? `${fmt(res.areas.solar)} m² de panel: ${Math.round(res.solarPico)} W a 1000 W/m², y de media unos ${fmt(res.solarDia / 1000)} kWh al día (${fmt(P.sol, 1)} kWh/m² al día sobre plano, el panel curvo recoge un 70 % de eso, células al ${Math.round(0.21 * 100)} % y un 15 % de pérdidas). ${Math.round(res.masas['Paneles solares'] ?? 0)} kg de panel, sobre laminado de carrocería en lugar del cristal.` : 'Sin techo solar: la cúpula es toda de cristal (se mueve en Carrocería › Techo solar y ventanas).'}</p>}
+          {bloque === 'Híbrido enchufable' && <p className="-mt-1 text-xs text-slate-500">Híbrido enchufable como el Prius: el motor de gasolina, el generador y el eje de las ruedas van unidos por un engranaje planetario, que reparte la fuerza del motor entre las ruedas, directa, y el generador, que carga la batería o mueve el motor eléctrico. Primero gasta la batería, enchufada; cuando se acaba, la gasolina. El consumo a los 100 km se calcula con la energía que piden las ruedas (aire y rodadura), dividida por los dos rendimientos y por los 8,9 kWh que lleva un litro de gasolina. Masas estimadas: motor {fmt(15 + 1.4 * T.tPhevKW, 0)} kg, planetario y generador 12 kg, depósito lleno {fmt(4 + 0.745 * T.tDeposito, 0)} kg, delante del eje trasero. El motor de gasolina aún no se dibuja en 3D ni se comprueba que quepa.</p>}
           {bloque === 'Motor' && cuatro && <p className="-mt-1 text-xs text-slate-500">Dos motores de buje, uno en cada rueda trasera, sin cadena ni correa, con un controlador doble bajo el sillín del pasajero. Cada uno da la mitad de la potencia, así que en cada llanta cabe el doble que con una rueda: en una rueda de ciclomotor unos {RUEDAS_TRICICLO['24'].kWBuje} kW de pico por rueda; en una llanta de coche de 15″, unos {RUEDAS_TRICICLO.c15.kWBuje}. «Motores de buje» es la masa de los dos juntos: su rango es el de dos motores de media potencia, con la misma regla de kilos por kW que con uno (cada motor lleva su base, así que dos pesan algo más que uno del doble).</p>}
           {bloque === 'Motor' && !cuatro && <p className="-mt-1 text-xs text-slate-500">Motor de buje en la rueda trasera, sin cadena ni correa, con su controlador bajo el sillín del pasajero. Su masa y la del controlador siguen a la potencia máxima (su rango se mueve con ella). En una rueda de ciclomotor caben unos {RUEDAS_TRICICLO['24'].kWBuje} kW de pico; en una llanta de coche de 15″, unos {RUEDAS_TRICICLO.c15.kWBuje} (como los motores en rueda del Aptera). Por encima, lo honrado sería un motor en el basculante con correa, como en las motos eléctricas, y eso aquí no se dibuja: la comprobación «Motor de buje» lo avisa.</p>}
-          {bloque === 'Batería' && paquete && <p className="-mt-1 text-xs text-slate-500">Un solo paquete a lo largo del bastidor, centrado, apoyado en el fondo de la panza, con los largueros pasando por dentro: {Math.round(T.tBatAncho)} % del ancho del bastidor (de cara exterior a cara exterior de los largueros), así que sobresale {Math.round((T.tBatAncho - 100) / 2)} % de ese ancho a cada lado. Su tamaño decide su capacidad: {Math.round(rt.bateria.litros)} L × {Math.round(T.tWhL)} Wh/L = {fmt(modelo.kWh, 1)} kWh y {Math.round(rt.bateria.kg)} kg (el deslizador «Batería» solo la muestra). Donde pasa, es el suelo: los pies y los asientos se apoyan encima. Empieza detrás de la cuna de la suspensión delantera y llega como mucho al controlador, que va justo detrás, delante de la torreta del amortiguador; su masa cuenta en su sitio para el peso, el centro de gravedad y el vuelco.</p>}
+          {bloque === 'Batería' && paquete && <p className="-mt-1 text-xs text-slate-500">Un solo paquete a lo largo del bastidor, centrado, apoyado en el fondo de la panza, con los largueros pasando por dentro: {Math.round(limitarTriciclo('tBatAncho', T))} % del ancho del bastidor (de cara exterior a cara exterior de los largueros), así que sobresale {Math.round((limitarTriciclo('tBatAncho', T) - 100) / 2)} % de ese ancho a cada lado. Su tamaño decide su capacidad: {Math.round(rt.bateria.litros)} L × {Math.round(T.tWhL)} Wh/L = {fmt(modelo.kWh, 1)} kWh y {Math.round(rt.bateria.kg)} kg (el deslizador «Batería» solo la muestra). Donde pasa, es el suelo: los pies y los asientos se apoyan encima. Empieza detrás de la cuna de la suspensión delantera; su largo y su ancho llegan hasta lo que cabe en la carrocería (el largo, ahora, hasta {m2(vistaTriciclo(deslizadoresTriciclo().find(f => f.clave === 'tBatLargo')!, T).max)}), y lo que toca por el camino lo dicen las comprobaciones: el controlador, que va justo detrás, y la torreta del amortiguador{cuatro ? '' : ', la rueda trasera'}, los asientos de encima, la piel. Su masa cuenta en su sitio para el peso, el centro de gravedad, el vuelco y los largueros.</p>}
           {bloque === 'Batería' && !paquete && <p className="-mt-1 text-xs text-slate-500">Primero en el morro, donde el Cuadriciclo en rombo lleva la rueda delantera ({Math.round(rt.bateria.litrosMorro)} L), luego en un módulo estrecho entre los pies del piloto; si hace falta más, el módulo del morro sube, crece hacia la punta y queda un módulo plano bajo los sillines. Ahora: {Math.round(rt.bateria.litros)} L y {Math.round(rt.bateria.kg)} kg{rt.bateria.litros - rt.bateria.cabe > 0.05 ? `: caben ${Math.round(rt.bateria.cabe)} L, faltan ${Math.round(rt.bateria.litros - rt.bateria.cabe)} (un morro más largo, una carrocería más ancha o celdas más densas)` : ''}.</p>}
         </Bloque>
       ))}
@@ -811,7 +925,7 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
       {dep === 'chasis' && (
         <Bloque titulo="Estructura" nota="estimación">
           {dl([['Masa del bastidor (con uniones)', `${fmt(res.masas['Bastidor'] ?? 0, 1)} kg`], ['Momento máx. en los largueros', `${Math.round(rt.bastidor.M)} N·m`], ['Tensión dinámica (×2,5)', `${Math.round(rt.bastidor.tension)} MPa`], ['Coeficiente de seguridad', fmt(rt.bastidor.seguridad, 2)]])}
-          <p className="text-xs text-slate-500">Los dos largueros como una viga entre la cuna de la batería y el pivote del basculante, con los ocupantes y sus asientos encima, y 2,5 veces su peso por los baches (como en el Aeromóvil 1). El resto del bastidor no se cuenta: ayuda, así que el real aguanta algo más.</p>
+          <p className="text-xs text-slate-500">Los dos largueros como una viga entre la cuna delantera y {modelo.larguerosTraseros ? 'la cuna trasera, en el eje trasero' : cuatro ? 'la torreta del amortiguador' : 'el pivote del basculante'}, con los ocupantes, sus asientos y la batería encima, y 2,5 veces su peso por los baches (como en el Aeromóvil 1). El resto del bastidor no se cuenta: ayuda, así que el real aguanta algo más.</p>
         </Bloque>
       )}
       {(dep === 'rodaje' || dep === 'proyecto') && (
@@ -837,7 +951,6 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd }: {
         {checks.length ? <ListaComprobaciones lista={checks} /> : <p className="text-xs text-slate-500">Este departamento no tiene comprobaciones propias: todas están en «Proyecto».</p>}
         {(dep === 'interior' || dep === 'proyecto') && <p className="text-xs text-slate-500">Cabezas: un hombre sentado, sin casco, de talla media (91,8 cm sentado erguido) y alta (97,7 cm, percentil 95; ANSUR II, 2012); el tronco reclinado lo que diga su respaldo y la cabeza un tercio de eso. Se mide de la parte de arriba y de atrás del cráneo a la cara de dentro del cristal. El alcance compara del hombro al puño con un brazo de 58 cm, con los codos algo doblados.</p>}
       </Bloque>
-      {dep === 'proyecto' && peso}
     </>
   );
 }
@@ -848,6 +961,14 @@ const CAPAS_DEP: Partial<Record<IdDepartamento, CapaId[]>> = {
   carroceria: ['carenado', 'cristales', 'solar'], chasis: ['chasis'], rodaje: ['suspension', 'direccion', 'ruedas'], propulsion: ['motor', 'transmision'],
   energia: ['baterias', 'solar'], interior: ['asientos', 'ocupantes', 'direccion'], accesos: ['carenado', 'cristales'], luces: ['carenado'],
 };
+/**
+ * Round 3 interior (2026-11-12, Eugenio: «en cada uno de los selectores… que aparezca encima de los sliders un botón que
+ * sea ver solo motor, o ver solo rodaje, o ver solo chasis… y que aparezca solo, se oculte todas las otras capas»): the
+ * Triciclo's own layers per department (its steering rack is running gear; its interior, the seats, wheel and dashboard).
+ */
+const CAPAS_DEP_TRICICLO: Record<DepTriciclo, CapaId[]> = {
+  carroceria: ['carenado', 'cristales', 'solar'], interior: ['asientos', 'ocupantes'], chasis: ['chasis'], rodaje: ['suspension', 'direccion', 'ruedas'], propulsion: ['motor'], energia: ['baterias', 'solar'],
+};
 const VISTAS_NOMBRE: Record<Vista, string> = { iso: '3/4', side: 'Lateral', top: 'Planta', front: 'Frontal', back: 'Trasera' };
 const SOLO_DEP: Partial<Record<IdDepartamento, string>> = { carroceria: 'la carrocería', chasis: 'el chasis', rodaje: 'el rodaje', propulsion: 'el motor', energia: 'la energía', interior: 'el interior', accesos: 'los accesos', luces: 'la carrocería' };
 const NOMBRE_CORTO: Record<IdDepartamento, string> = { proyecto: 'Proyecto', carroceria: 'Carrocería', chasis: 'Chasis', rodaje: 'Rodaje', propulsion: 'Motor', energia: 'Energía', interior: 'Interior', accesos: 'Accesos', luces: 'Luces', fabricacion: 'Fabricación', homologacion: 'Homologación' };
@@ -857,7 +978,7 @@ const NOMBRE_CORTO: Record<IdDepartamento, string> = { proyecto: 'Proyecto', car
  * carrocería, chasis, rodaje, motor, etcétera. Estaba desplegado debajo del menú superior y se podía pinchar e ir
  * cambiando… ese menú ponlo en la parte superior y el actual menú pliégalo»). The same tabs as before 383754a
  * (icon over a short name, the one open in teal, its one-liner as `title`), now the bar's own row; the sections
- * (Diseño 3D, Otros velomóviles, Tareas…) fold into `MenuSecciones`. On a phone the row scrolls sideways.
+ * (Diseño 3D, Tareas…) fold into `MenuSecciones`. On a phone the row scrolls sideways.
  * Vehicles without departments (the Gota, the Cuadriciclo en rombo) have no tabs: the bar keeps only the logo and the menu.
  */
 function PestanasDepartamento({ lista, dep, alElegir }: { lista: { id: IdDepartamento; lema: string }[]; dep: IdDepartamento | null; alElegir: (d: IdDepartamento) => void }) {
@@ -871,7 +992,7 @@ function PestanasDepartamento({ lista, dep, alElegir }: { lista: { id: IdDeparta
     </nav>
   );
 }
-/** The page's sections (Diseño 3D, Componentes, Otros velomóviles, Tareas, Plan, Planos, Exportar), folded into one menu at the end of the bar (2026-11-12). */
+/** The page's sections (Diseño 3D, Componentes, Tareas, Plan, Planos, Exportar), folded into one menu at the end of the bar (2026-11-12). */
 function MenuSecciones({ lista, seccion, abiertas, alIr }: { lista: typeof SECCIONES; seccion: Seccion; abiertas?: number; alIr: (ruta: string) => void }) {
   const [abierto, setAbierto] = useState(false);
   const caja = useRef<HTMLDivElement>(null);
@@ -924,7 +1045,17 @@ export default function Aeromovil() {
     const Q = deDiseno(d.parametros || {});
     setP(Q); setActual({ id: d.id, nombre: d.nombre, base: JSON.stringify(aDiseno(Q)) });
   }, []);
-  const alGuardado = useCallback((d: Diseno) => setActual({ id: d.id, nombre: d.nombre, base: JSON.stringify(aDiseno(deDiseno(d.parametros || {}))) }), []);
+  // (2026-11-13) The garage keeps every saved version too. A save of a design that is no longer the open one (an
+  // automatic save still on its way when another design was opened) only updates the garage: it used to make that
+  // design the open one again, with the other design's parameters, which the next automatic save would write over it.
+  const garajeRef = useRef<{ actualizar: (d: Diseno, junto?: number | null) => void; tiene: (id: number) => boolean } | null>(null);
+  const actualRef = useRef(actual); actualRef.current = actual;
+  const alGuardado = useCallback((d: Diseno) => {
+    const antes = actualRef.current;
+    garajeRef.current?.actualizar(d, antes?.id ?? null);
+    if (antes && antes.id !== d.id && garajeRef.current?.tiene(d.id)) return;
+    setActual({ id: d.id, nombre: d.nombre, base: JSON.stringify(aDiseno(deDiseno(d.parametros || {}))) });
+  }, []);
   const guardadoWeb = useAutoguardado(P, actual, alGuardado);
   // Los valores del diseño por defecto (el «Aptera Like»): el punto medio de cada deslizador (2026-11-07, Eugenio).
   const [D, setD] = useState<Parametros>(PARAMETROS_POR_DEFECTO);
@@ -951,16 +1082,27 @@ export default function Aeromovil() {
   }, [loc.search, abrirDiseno]);
 
   // El ajuste automático decide W y H; lo demás sale tal cual de los deslizadores.
-  const Pa = useMemo(() => ajustarCarenado(P), [P]);
+  // (2026-11-13: the body's colours are not shape: a change of colour alone keeps the same parameters for the model, so
+  // the 3D is not rebuilt; the viewer recolours its materials from `colores`)
+  const sinColor = useRef<Parametros | null>(null);
+  const Pforma = useMemo(() => {
+    const a = sinColor.current, cambia = (k: string) => (a as unknown as Record<string, unknown>)[k] !== (P as unknown as Record<string, unknown>)[k];
+    if (a && a !== P && !Object.keys({ ...a, ...P }).some(k => !(CLAVES_COLOR as readonly string[]).includes(k) && cambia(k))) return a;
+    return (sinColor.current = P);
+  }, [P]);
+  const colores = useMemo(() => coloresDe(P), [P]);
+  const Pa = useMemo(() => ajustarCarenado(Pforma), [Pforma]);
   const modelo = useMemo(() => crearModelo(Pa), [Pa]);
   // The Bala's figures take ~30 ms (frontal area, clearances): while a slider is dragged they may lag a frame behind
   // the 3D, so the slider never waits for them. Only within the same vehicle: switching computes at once.
   const diferido = useDeferredValue(modelo);
-  const paraCalcular = (modelo.tipo === 'bala' || modelo.tipo === 'triciclo') && diferido.tipo === modelo.tipo ? diferido : modelo;
+  const paraCalcular = (modelo.tipo === 'bala' || modelo.tipo === 'triciclo' || modelo.tipo === 'basculante') && diferido.tipo === modelo.tipo ? diferido : modelo;
   const res = useMemo(() => calcular(paraCalcular, areas(paraCalcular)), [paraCalcular]);
   const esA1 = modelo.tipo === 'a1', esBala = modelo.tipo === 'bala', esTri = modelo.tipo === 'triciclo';
+  // Cuadriciclo Basculante (2026-11-15): departments as the Triciclo's (`porDeps`), its own sidebar
+  const esBas = modelo.tipo === 'basculante', porDeps = esTri || esBas;
   // 2026-11-11: a Triciclo with two rear wheels is the «Cuadriciclo Bala clásico» wherever its name shows
-  const nombreVehiculo = esA1 ? 'Aeromóvil 1' : esBala ? 'Cuadriciclo Bala en rombo' : esTri ? nombreTriciclo(camposTriciclo(P)) : 'Aeromóvil Gota';
+  const nombreVehiculo = esBas ? NOMBRE_BASCULANTE : esA1 ? 'Aeromóvil 1' : esBala ? 'Cuadriciclo Bala en rombo' : esTri ? nombreTriciclo(camposTriciclo(P)) : 'Aeromóvil Gota';
   const NOMBRE_VISTA: Record<Vista, string> = { iso: 'tres cuartos delantera', side: 'lateral', top: 'planta (desde arriba)', front: 'frontal', back: 'trasera' };
   // «Pedir render» (2026-11-07, Eugenio: «quita lo de crear render con Gemini,
   // que gasta dinero; mantenlo bajo una petición a Claude Code con nuestra
@@ -985,12 +1127,18 @@ export default function Aeromovil() {
   };
   const porDefecto = JSON.stringify(aDiseno(Pa)) === JSON.stringify(aDiseno(PARAMETROS_POR_DEFECTO));
   // Cambiar de vehículo carga su juego de medidas: los dos no comparten deslizadores.
-  const cambiarVehiculo = (k: Disposicion) => { if (k !== P.disposicion) { setP(k === 'cuatro' ? PARAMETROS_A1 : k === 'bala' ? PARAMETROS_BALA : k === 'triciclo' ? PARAMETROS_TRICICLO : PARAMETROS_GOTA); setActual(null); } };
+  const cambiarVehiculo = (k: Disposicion) => { if (k !== P.disposicion) { setP(k === 'basculante' ? PARAMETROS_BASCULANTE : k === 'cuatro' ? PARAMETROS_A1 : k === 'bala' ? PARAMETROS_BALA : k === 'triciclo' ? PARAMETROS_TRICICLO : PARAMETROS_GOTA); setActual(null); } };
 
   const [visibles, setVisibles] = useState<Record<CapaId, boolean>>(() => Object.fromEntries(CAPAS.map(c => [c.k, true])) as Record<CapaId, boolean>);
   const [rayosX, setRayosX] = useState(false);
   const [corte, setCorte] = useState(false);
   const [curva, setCurva] = useState(false);
+  // Cuadriciclo Basculante: «Bascular» (a counter: each press leans it to the maximum each way and back)
+  const [bascular, setBascular] = useState(0);
+  // (2026-11-15) the side panel's block under the last click on the 3D car
+  const [abrirBloque, setAbrirBloque] = useState<{ bloque: string; n: number } | null>(null);
+  // (2026-11-15: and the «Cuadriciclo Bala clásico» set to lean, `tBascula`) its maximum lean, 0 for a car that does not
+  const anguloBascular = Math.round((modelo.tipo === 'basculante' ? modelo.phiMax : modelo.tipo === 'triciclo' && modelo.bascula ? modelo.bascula.phiMax : 0) * 180 / Math.PI);
   const [verCotas, setVerCotas] = useState(false);   // apagadas al cargar (2026-11-06, Eugenio)
   const [abierta, setAbierta] = useState(false);
   const [maleteros, setMaleteros] = useState(false);
@@ -998,19 +1146,24 @@ export default function Aeromovil() {
   const [tunel, setTunel] = useState(false);
   // «Superponer»: los coches del garaje encima del nuestro, alineados por el eje delantero, el morro o la cola.
   const [superponer, setSuperponer] = useState<Alineacion | null>(null);
+  const [panelGaraje, setPanelGaraje] = useState(false);
   // Departamento abierto en el lateral y en el panel de abajo (2026-11-06, Eugenio: «el menú dividido por departamentos como una empresa de fabricación»).
   const [soloDep, setSoloDep] = useState(false);     // «Mostrar solo la carrocería», etc.
   const [capasAbierto, setCapasAbierto] = useState(false);
   const [vistaAbierta, setVistaAbierta] = useState(false);
   const [dep, setDep] = useState<IdDepartamento>(() => { try { return (localStorage.getItem('aeromovil.departamento') as IdDepartamento) || 'carroceria'; } catch { return 'carroceria'; } });
   useEffect(() => { try { localStorage.setItem('aeromovil.departamento', dep); } catch { /* sin memoria */ } }, [dep]);
-  // «Mostrar solo …»: deja visibles solo las capas del departamento; al quitarlo (o al ir a «Proyecto») se ve todo.
+  // «Ver solo …» (round 3 interior, 2026-11-12): leaves only the department's layers; turning it off (or going to
+  // «Proyecto», or to another tab) puts back the layers as they were before it was pressed.
+  const antesSolo = useRef<Record<CapaId, boolean> | null>(null);
+  const verSolo = (si: boolean) => { if (si && !soloDep) antesSolo.current = visibles; setSoloDep(si); };
+  const capasSolo = (d: IdDepartamento): CapaId[] | undefined => P.disposicion === 'triciclo' || P.disposicion === 'basculante' ? (d === 'proyecto' ? undefined : CAPAS_DEP_TRICICLO[d as DepTriciclo]) : CAPAS_DEP[d];
   useEffect(() => {
-    const todas = Object.fromEntries(CAPAS.map(c => [c.k, true])) as Record<CapaId, boolean>;
-    if (!soloDep || dep === 'proyecto') { setVisibles(todas); return; }
-    const suyas = CAPAS_DEP[dep]; if (!suyas) { setVisibles(todas); return; }
+    const suyas = soloDep && dep !== 'proyecto' ? capasSolo(dep) : undefined;
+    if (!suyas) { if (antesSolo.current) { setVisibles(antesSolo.current); antesSolo.current = null; } return; }
     setVisibles(Object.fromEntries(CAPAS.map(c => [c.k, suyas.includes(c.k)])) as Record<CapaId, boolean>);
-  }, [soloDep, dep]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [soloDep, dep, P.disposicion]);
   // El garaje: qué vehículos se ven y dónde están (eje delantero en el suelo, m). Se recuerda en este navegador.
   type PlazaGaraje = { id: string; visible: boolean; x: number; z: number; giro: number };
   const [garaje, setGaraje] = useState<PlazaGaraje[]>(() => {
@@ -1020,7 +1173,10 @@ export default function Aeromovil() {
     // Los dos XL1 (2026-11-09, Eugenio, con fotos): el de serie de 2013 enfrente del Twizy y el concept 1-Litro de 2002 al otro lado.
     // 2026-11-09, «añade el jaguar… y el velomovil aerorider» y «también este de Shell Eco Marathon»: el SZEmission,
     // el Jaguar D-Type y el AeroRider salen también por defecto, más allá de los cuatro anteriores.
-    const POR_DEFECTO: Record<string, { z: number }> = { twizy: { z: 3 }, aptera: { z: -3 }, xl1: { z: 6 }, unlitro: { z: -6 }, szemission: { z: 9 }, jaguarD: { z: -9 }, aerorider: { z: 12 }, bala: { z: -12 }, nusKruce: { z: 15 } };
+    // 2026-11-12: the Tesla Model Y, shown at −15 m. A saved v5 list does not carry it, so it shows for everybody once.
+    // 2026-11-15: the Lumeneo Smera and the Mercedes Vision EQXX, on show too (a saved v5 list does not carry them either).
+    // The rows place every car (`garaje/filas.ts`); these z only matter if the rows cannot.
+    const POR_DEFECTO: Record<string, { z: number }> = { twizy: { z: 3 }, aptera: { z: -3 }, xl1: { z: 6 }, unlitro: { z: -6 }, szemission: { z: 9 }, jaguarD: { z: -9 }, aerorider: { z: 12 }, bala: { z: -12 }, nusKruce: { z: 15 }, modeloY: { z: -15 }, smera: { z: 18 }, eqxx: { z: -18 } };
     const base = VEHICULOS_GARAJE.map((v, i) => POR_DEFECTO[v.id] ? { id: v.id, visible: true, x: 0, z: POR_DEFECTO[v.id].z, giro: 0 } : ({ id: v.id, visible: false, x: 0, z: (i % 2 ? 1 : -1) * (2.6 + 2.2 * Math.floor(i / 2)), giro: 0 }));
     // v3 (2026-11-07): el XL1 deja de ser una caja y sale por defecto. En la lista v2 guardada estaba oculto,
     // así que al pasar de v2 a v3 se olvida solo lo que se guardó del XL1 (el resto se conserva).
@@ -1034,19 +1190,6 @@ export default function Aeromovil() {
     return separarGaraje(base.map(b => ({ ...b, ...(guardado.find((x: any) => x?.id === b.id) || {}) })));
   });
   useEffect(() => { try { localStorage.setItem('aeromovil_garaje_v5', JSON.stringify(garaje)); } catch { /* sin memoria */ } }, [garaje]);
-  // `?garaje=xl1`: mirar un modelo del garaje a solas, en el origen (para comprobarlo mientras se modela).
-  const soloGaraje = useMemo(() => new URLSearchParams(window.location.search).get('garaje'), []);
-  const garajeVisor = useMemo(() => {
-    if (soloGaraje) return [{ id: soloGaraje, x: 0, z: 0, giro: 0 }];
-    const visibles = garaje.filter(v => v.visible);
-    if (!superponer) return visibles.map(v => ({ id: v.id, x: v.x, z: v.z, giro: v.giro }));
-    // Superpuestos: todos en el eje del nuestro; el morro y la cola salen de la silueta de cada coche.
-    return visibles.map(v => {
-      const env = VEHICULOS_GARAJE.find(d => d.id === v.id)?.envolvente, xs = env?.map(e => e[0]) ?? [0];
-      const x = superponer === 'morro' ? modelo.xn - Math.max(...xs) : superponer === 'cola' ? modelo.xt - Math.min(...xs) : 0;
-      return { id: v.id, x, z: 0, giro: 0 };
-    });
-  }, [garaje, soloGaraje, superponer, modelo.xn, modelo.xt]);
   // Comparar gasto (túnel y «Cd y consumo»): las mismas filas y la misma velocidad para la tarjeta y los carteles.
   const [kmhComparar, setKmhComparar] = useState(80);
   const [verConsumo, setVerConsumo] = useState(false);
@@ -1054,12 +1197,51 @@ export default function Aeromovil() {
   // El Cd que usan el consumo y el resto del editor no cambia: el del túnel se pone al lado.
   const [opcionesTunel, setOpcionesTunel] = useState<OpcionesTunel>(opcionesPorDefecto);
   const opcionesTunelVisor = useMemo(() => ({ ...opcionesTunel, kmh: kmhComparar }), [opcionesTunel, kmhComparar]);
+  // De quién es el Aeromóvil (el creador de su página en el menú lateral) y si quien mira puede decidir.
+  const [dueno, setDueno] = useState<Dueno | null>(null);
+  useEffect(() => { cargarDueno().then(setDueno).catch(() => setDueno(null)); }, []);
+  // ── The garage in two rows (2026-11-13) ──────────────────────────────────
+  // Every saved design in the first row (the one being edited at the origin), the reference cars on show in the second,
+  // behind (`garaje/filas.ts`). Our designs: not in the tunnel or the overlay. Picking one opens it (`eleccion`).
+  const disenosGaraje = useDisenosGaraje({
+    activo: { id: actual?.id ?? null, nombre: actual?.nombre ?? 'Sin guardar', morro: modelo.xn, cola: modelo.xt, ancho: modelo.P.W },
+    referencias: useMemo(() => garaje.filter(v => v.visible).map(v => v.id), [garaje]),
+    resolucion: opcionesTunel.resolucion, conCd: tunel || verConsumo, huecoFila2: tunel ? HUECO_CON_TUNEL : undefined,
+  });
+  garajeRef.current = { actualizar: disenosGaraje.actualizar, tiene: id => !!disenosGaraje.lista?.some(d => d.id === id) };
+  const eleccion = useEleccionDiseno({
+    g: disenosGaraje, P, actual, abrirDiseno, sinGuardar: () => setActual(null), puedeDecidir: !!dueno?.puedeDecidir,
+    // (2026-11-13) a renamed design: the open one's name changes; its saved parameters («base») do not
+    alRenombrado: d => setActual(a => (a && a.id === d.id ? { ...a, nombre: d.nombre } : a)),
+    nombreVehiculo, morro: modelo.xn, cola: modelo.xt,
+  });
+  // `?garaje=xl1`: mirar un modelo del garaje a solas, en el origen (para comprobarlo mientras se modela).
+  const soloUrl = useMemo(() => new URLSearchParams(window.location.search).get('garaje'), []);
+  // «Solo mostrar este» on a reference car shows it alone, as `?garaje=` does (2026-11-13)
+  const soloGaraje = soloUrl || (eleccion.solo && eleccion.solo !== 'activo' ? eleccion.solo : null);
+  const garajeVisor = useMemo(() => {
+    if (soloGaraje) return [{ id: soloGaraje, x: 0, z: 0, giro: 0 }];
+    const visibles = garaje.filter(v => v.visible);
+    // (2026-11-13) in the second row, behind our designs; a car the rows could not place keeps its old place
+    if (!superponer) return visibles.map(v => { const p = disenosGaraje.plazas.get(v.id); return p ? { id: v.id, x: p.x, z: p.z, giro: 0 } : { id: v.id, x: v.x, z: v.z, giro: v.giro }; });
+    // Superpuestos: todos en el eje del nuestro; el morro y la cola salen de la silueta de cada coche.
+    return visibles.map(v => {
+      const env = VEHICULOS_GARAJE.find(d => d.id === v.id)?.envolvente, xs = env?.map(e => e[0]) ?? [0];
+      const x = superponer === 'morro' ? modelo.xn - Math.max(...xs) : superponer === 'cola' ? modelo.xt - Math.min(...xs) : 0;
+      return { id: v.id, x, z: 0, giro: 0 };
+    });
+  }, [garaje, soloGaraje, superponer, modelo.xn, modelo.xt, disenosGaraje.plazas]);
+  const garajeConDisenos = useMemo(() => (eleccion.solo === 'activo' && !soloUrl ? [] : superponer || soloGaraje ? garajeVisor : [...garajeVisor, ...disenosGaraje.visor]), [garajeVisor, disenosGaraje.visor, superponer, soloGaraje, soloUrl, eleccion.solo]);
+
   // The Triciclo's Cd: the tunnel's, numbers only, in the background, at its calculation speed (its results and consumption use it).
   const cdTri = useCdTriciclo(paraCalcular, opcionesTunel.resolucion, esTri ? camposTriciclo(P).tVel : 80);
   const cdTriComparar = useCdTriciclo(paraCalcular, opcionesTunel.resolucion, kmhComparar);
   // The Triciclo's departments: the A1's choice is kept, but one the Triciclo does not have shows «Carrocería».
   const depTri: DepTriciclo | 'proyecto' = dep === 'proyecto' || (DEPS_TRICICLO as string[]).includes(dep) ? dep as DepTriciclo | 'proyecto' : 'carroceria';
-  useEffect(() => { if (esTri && dep !== depTri) setDep(depTri); }, [esTri, dep, depTri]);
+  useEffect(() => { if (porDeps && dep !== depTri) setDep(depTri); }, [porDeps, dep, depTri]);
+  // the Cuadriciclo Basculante's Cd: the tunnel's, as the Triciclo's
+  const cdBas = useCdBasculante(paraCalcular, opcionesTunel.resolucion, esBas ? camposBasculante(P).qVel : 80);
+  const cdBasComparar = useCdBasculante(paraCalcular, opcionesTunel.resolucion, kmhComparar);
   const cuerposTunel = useMemo<CuerpoTunel[]>(() => !tunel ? [] : [
     ...(soloGaraje ? [] : [cuerpoAeromovil(modelo, res.A, nombreVehiculo)]),
     ...garajeVisor.flatMap(v => { const c = cuerpoGaraje(v); return c ? [c] : []; }),
@@ -1069,7 +1251,10 @@ export default function Aeromovil() {
   const cdTunelNuestro = (() => { const R = resultadosTunel.aeromovil; return R ? (R.porVelocidad.find(q => q.kmh === kmhComparar) ?? R.porVelocidad[1]).cd.total : undefined; })();
   const areaTunelNuestro = cuerposTunel.find(c => c.id === 'aeromovil')?.area;
   const filasComparar = useMemo<FilaTunel[]>(() => [
-    ...(soloGaraje ? [] : esTri ? (cdTriComparar.cd != null && cdTriComparar.areaRef != null ? [{
+    ...(soloGaraje ? [] : esBas ? (cdBasComparar.cd != null && cdBasComparar.areaRef != null ? [{
+      id: 'aeromovil', nombre: nombreVehiculo, cd: cdBasComparar.cd, area: cdBasComparar.areaRef, masa: res.mTot, crr: CRR_B, estimado: true, origenCd: 'túnel (la carrocería y sus ruedas)',
+      fuente: `Este diseño. Cd estimado por el túnel con la carrocería y sus cuatro ruedas${camposBasculante(P).qRuedasDel === 'carenados' ? ' (los carenados delanteros, solo como ruedas carenadas: el real será algo más alto)' : ''}; masa estimada con dos ocupantes de ${camposBasculante(P).qMOcc} kg y rodadura ${CRR_B} (neumático de scooter).`,
+    }] : []) : esTri ? (cdTriComparar.cd != null && cdTriComparar.areaRef != null ? [{
       // the Triciclo: the tunnel's Cd (computed in the background), with its own mass and rolling resistance
       id: 'aeromovil', nombre: nombreVehiculo, cd: cdTriComparar.cd, area: cdTriComparar.areaRef, masa: res.mTot, crr: CRR, estimado: true, origenCd: 'túnel (la carrocería y sus ruedas)',
       fuente: `Este diseño. Cd estimado por el túnel con la carrocería y sus ${esCuatro(camposTriciclo(P)) ? 'cuatro' : 'tres'} ruedas (los carenados y los brazos, solo como ruedas carenadas: el real será algo más alto); masa estimada con dos ocupantes de ${camposTriciclo(P).tMOcc} kg y rodadura ${CRR} (neumático de ciclomotor).`,
@@ -1090,7 +1275,7 @@ export default function Aeromovil() {
         fuente: `${a.fuente}. Rodadura 0,009 supuesta (neumáticos de coche, la misma que el Aeromóvil 1) y ${plazas} ocupantes de ${P.mOcc} kg.`,
       }];
     }),
-  ], [soloGaraje, esBala, esTri, cdTriComparar.cd, cdTriComparar.areaRef, P, nombreVehiculo, cdTunelNuestro, areaTunelNuestro, res.Cd, res.A, res.mTot, res.Crr, P.plazas, P.mOcc, garajeVisor]);
+  ], [soloGaraje, esBala, esTri, esBas, cdBasComparar.cd, cdBasComparar.areaRef, cdTriComparar.cd, cdTriComparar.areaRef, P, nombreVehiculo, cdTunelNuestro, areaTunelNuestro, res.Cd, res.A, res.mTot, res.Crr, P.plazas, P.mOcc, garajeVisor]);
   // El punto crítico cuya explicación está abierta (2026-11-09, Eugenio: «una explicación de cada uno de estos parámetros cuando se hace click»).
   const [puntoTunel, setPuntoTunel] = useState<SeleccionPunto | null>(null);
   useEffect(() => { if (!tunel) setPuntoTunel(null); }, [tunel]);
@@ -1099,18 +1284,28 @@ export default function Aeromovil() {
     if (!tunel && !verConsumo) return undefined;
     const n = (v: number, d: number) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
     const o: Record<string, string> = {};
+    // (2026-11-13, Eugenio: «cuando se pincha en el CD y consumo también pon el peso, y el área frontal de cada vehículo»:
+    // a third line, the empty mass and the frontal area the Cd is referred to; ours, the editor's own figures)
+    const masaArea = (masa: number | null | undefined, area: number | null | undefined, aprox = false) =>
+      [masa != null && masa > 0 ? `${Math.round(masa).toLocaleString('es-ES')} kg en vacío` : null, area != null && area > 0 ? `${aprox ? '≈ ' : ''}${n(area, 2)} m²` : null].filter(Boolean).join(' · ');
+    const nuestraMasa = res.mVeh > 0 ? res.mVeh : null;
     for (const f of filasComparar) {
       const c = gastoEnRuedas(f, kmhComparar);
+      const d = VEHICULOS_GARAJE.find(x => x.id === f.id), linea = f.id === 'aeromovil' ? masaArea(nuestraMasa, f.area) : masaArea(d?.aero?.masaVacio, f.area);
       // La velocidad y «en las ruedas» los dice la tarjeta o la barra de arriba: el cartel, corto.
-      o[f.id] = `${f.nombre}${c.noLlega ? ' *' : ''}\nCd ${n(f.cd, 2)} · ${c.kWhTotal != null ? `${n(c.kWhTotal, 1)} kWh/100 km` : 'sin masa: solo aire'}`;
+      o[f.id] = `${f.nombre}${c.noLlega ? ' *' : ''}\nCd ${n(f.cd, 2)} · ${c.kWhTotal != null ? `${n(c.kWhTotal, 1)} kWh/100 km` : 'sin masa: solo aire'}${linea ? `\n${linea}` : ''}`;
     }
-    // Los coches sin Cd publicado (Jaguar D-Type, AeroRider) también llevan su nombre, y dicen que no hay dato.
-    for (const v of garajeVisor) { const d = VEHICULOS_GARAJE.find(x => x.id === v.id); if (d && !o[d.id]) o[d.id] = `${d.nombre}\nCd sin publicar`; }
+    // Los coches sin Cd publicado (Jaguar D-Type, AeroRider) también llevan su nombre, y dicen que no hay dato; su área, la medida en su modelo («≈»).
+    for (const v of garajeVisor) { const d = VEHICULOS_GARAJE.find(x => x.id === v.id); if (d && !o[d.id]) { const l = masaArea(null, cuerpoGaraje(v)?.area, true); o[d.id] = `${d.nombre}\nCd sin publicar${l ? `\n${l}` : ''}`; } }
+    // our designs in the garage (2026-11-12): their name and the Cd their card gives
+    Object.assign(o, disenosGaraje.carteles);
+    // (2026-11-13) with every design in the garage, ours says which design it is, not only its vehicle
+    if (actual && o.aeromovil) o.aeromovil = o.aeromovil.replace(/^[^\n*]*/, actual.nombre);
     // El Bala del editor: su Cd solo lo da el túnel.
-    if (esBala && !soloGaraje && !o.aeromovil) o.aeromovil = `${nombreVehiculo}\nCd: ábrelo en el túnel`;
-    if (esTri && !soloGaraje && !o.aeromovil) o.aeromovil = `${nombreVehiculo}\nCd: el túnel lo está calculando…`;
+    if (esBala && !soloGaraje && !o.aeromovil) o.aeromovil = `${nombreVehiculo}\nCd: ábrelo en el túnel\n${masaArea(nuestraMasa, res.A)}`;
+    if ((esTri || esBas) && !soloGaraje && !o.aeromovil) { const l = masaArea(nuestraMasa, null); o.aeromovil = `${nombreVehiculo}\nCd: el túnel lo está calculando…${l ? `\n${l}` : ''}`; }
     return o;
-  }, [tunel, verConsumo, filasComparar, kmhComparar, garajeVisor, esBala, esTri, soloGaraje, nombreVehiculo]);
+  }, [tunel, verConsumo, filasComparar, kmhComparar, garajeVisor, esBala, esTri, esBas, soloGaraje, nombreVehiculo, disenosGaraje.carteles, res.mVeh, res.A, actual]);
   const [vista, setVista] = useState<Vista>('iso');
   // Render fotorrealista de la vista actual: la captura del visor pasa por la IA y vuelve como foto
   const [render, setRender] = useState<{ estado: 'nada' | 'creando' | 'listo' | 'error'; imagen?: string; error?: string; vista?: Vista }>({ estado: 'nada' });
@@ -1147,16 +1342,13 @@ export default function Aeromovil() {
   const [referencia, setReferencia] = useState<Referencia | null>(null);
   const [modoRef, setModoRef] = useState<'no' | 'comparar' | 'sola'>('no');
   const [alinear, setAlinear] = useState<'eje' | 'morro' | 'lado'>('eje');
-  const verRef = (r: Referencia, modo: 'comparar' | 'sola') => { setReferencia(r); setModoRef(modo); setVista('side'); navegar('/aeromovil'); window.scrollTo({ top: 0 }); };
 
   const [tareas, setTareas] = useState<Tarea[] | null>(null);
   const [errorTareas, setErrorTareas] = useState<string | null>(null);
   // Fetch propio a propósito: el buzón solo lo usa esta página (excepción de src/pages/CLAUDE.md).
   const recargar = useCallback(() => { cargarTareas().then(t => { setTareas(t); setErrorTareas(null); }).catch(e => setErrorTareas(e.message)); }, []);
   useEffect(() => { recargar(); }, [recargar]);
-  // De quién es el Aeromóvil (el creador de su página en el menú lateral) y si quien mira puede decidir.
-  const [dueno, setDueno] = useState<Dueno | null>(null);
-  useEffect(() => { cargarDueno().then(setDueno).catch(() => setDueno(null)); }, []);
+  // (who owns the Aeromóvil: read further up, the garage needs it)
   const abiertas = tareas?.filter(t => t.estado === 'pendiente' || t.estado === 'en_curso').length;
 
   useEffect(() => { document.title = `${nombreVehiculo} · humanity.wiki`; }, [nombreVehiculo]);
@@ -1164,11 +1356,24 @@ export default function Aeromovil() {
   const ruedas = (Object.keys(DIAMETRO_RUEDA) as Pulgadas[]).map(k => ({ k, n: `${k}″ (${Math.round(DIAMETRO_RUEDA[k] * 1000)} mm)` }));
   const neumaticos = (Object.keys(NEUMATICOS) as Neumatico[]).map(k => ({ k, n: NEUMATICOS[k].n }));
   const malas = res.comprobaciones.filter(c => c.holgura < c.minimo).length;
-  const capas = esBala ? CAPAS.filter(c => CAPAS_BALA.includes(c.k)) : esTri ? CAPAS.filter(c => CAPAS_TRICICLO.includes(c.k)) : CAPAS.filter(c => !('solo' in c) || c.solo === modelo.tipo);
+  // the garage's list, shared by the sidebar block and the «Garaje» panel inside the 3D view (2026-11-13: in the
+  // Triciclo family the block sits at the end of «Proyecto», where Eugenio could not find «Mis diseños»)
+  const garajeLista = (
+    <ListaGaraje g={disenosGaraje} e={eleccion} actual={actual} nombreVehiculo={nombreVehiculo} puedeDecidir={!!dueno?.puedeDecidir}
+      referencias={VEHICULOS_GARAJE.map(v => ({ id: v.id, nombre: v.nombre, largo: v.largo, masa: masaGaraje(v), visible: !!garaje.find(g => g.id === v.id)?.visible }))}
+      alAlternarReferencia={id => setGaraje(g => g.map(x => x.id === id ? { ...x, visible: !x.visible } : x))}
+      alElegido={() => { if (window.matchMedia('(max-width: 639px)').matches) setPanelGaraje(false); }} />
+  );
+  const garajeBloque = (
+    <Bloque titulo="Garaje" nota="tus diseños y coches de referencia">
+            {garajeLista}
+    </Bloque>
+  );
+  const capas = esBas ? CAPAS.filter(c => c.k !== 'transmision') : esBala ? CAPAS.filter(c => CAPAS_BALA.includes(c.k)) : esTri ? CAPAS.filter(c => CAPAS_TRICICLO.includes(c.k)) : CAPAS.filter(c => !('solo' in c) || c.solo === modelo.tipo);
   const a1 = res.a1;
   // the department tabs: the A1's eleven; the Triciclo's six plus «Proyecto», with its own one-liners (which follow its options)
-  const pestanas = esTri
-    ? DEPARTAMENTOS.filter(d => d.id === 'proyecto' || (DEPS_TRICICLO as string[]).includes(d.id)).map(d => ({ ...d, lema: lemasTriciclo(camposTriciclo(P))[d.id as DepTriciclo | 'proyecto'] }))
+  const pestanas = porDeps
+    ? DEPARTAMENTOS.filter(d => d.id === 'proyecto' || (DEPS_TRICICLO as string[]).includes(d.id)).map(d => ({ ...d, lema: esBas ? LEMAS_BASCULANTE[d.id as DepTriciclo | 'proyecto'] : lemasTriciclo(camposTriciclo(P))[d.id as DepTriciclo | 'proyecto'] }))
     : DEPARTAMENTOS;
 
   return (
@@ -1180,15 +1385,15 @@ export default function Aeromovil() {
             Picking a department from another section goes back to the 3D design. */}
         {/* (on a phone the tabs take their own line under the logo, scrolling sideways: beside the logo there was room for one) */}
         <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-x-2 gap-y-0.5 px-2 py-1 sm:flex-nowrap sm:gap-3 sm:px-4">
-          <MenuDisenos P={P} actual={actual} puedeDecidir={!!dueno?.puedeDecidir} alCargar={abrirDiseno} estado={guardadoWeb}
+          <MenuDisenos P={P} actual={actual} puedeDecidir={!!dueno?.puedeDecidir} alCargar={d => (seccion === 'diseno' ? void eleccion.elegir(d) : abrirDiseno(d))} estado={guardadoWeb} alLista={disenosGaraje.ponerLista}
             nombreVehiculo={nombreVehiculo} alVehiculo={cambiarVehiculo}
             alNuevo={() => { setP(PARAMETROS_POR_DEFECTO); setActual(null); cargarDisenoPorDefecto().then(d => { if (d) { setP(deDiseno(d.parametros || {})); setActual(null); } }); }}
             alGuardado={alGuardado} />
-          {(esA1 || esTri)
-            ? <PestanasDepartamento lista={pestanas} dep={seccion === 'diseno' ? (esTri ? depTri : dep) : null} alElegir={d => { setDep(d); setSoloDep(false); if (seccion !== 'diseno') navegar('/aeromovil'); }} />
+          {(esA1 || porDeps)
+            ? <PestanasDepartamento lista={pestanas} dep={seccion === 'diseno' ? (porDeps ? depTri : dep) : null} alElegir={d => { setDep(d); setSoloDep(false); if (seccion !== 'diseno') navegar('/aeromovil'); }} />
             : null}
           <div className="flex-1 sm:hidden" />
-          {!(esA1 || esTri) && <div className="hidden flex-1 sm:block" />}
+          {!(esA1 || porDeps) && <div className="hidden flex-1 sm:block" />}
           <MenuSecciones lista={SECCIONES.filter(s => (s.k !== 'componentes' && s.k !== 'aranceles') || esA1)} seccion={seccion} abiertas={abiertas} alIr={navegar} />
         </div>
       </header>
@@ -1199,8 +1404,13 @@ export default function Aeromovil() {
         <section ref={ventana3d} aria-label="Vista 3D" className={cn('overflow-hidden bg-slate-50',
           completa === 'no' ? cn('relative h-[62vh] min-h-[380px] rounded-xl border border-slate-200', esA1 ? 'lg:h-[72vh]' : 'lg:sticky lg:top-[68px] lg:h-[calc(100vh-88px)]')
             : completa === 'css' ? 'fixed inset-0 z-[100] h-[100dvh] w-screen' : 'relative h-full w-full')}>
-          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeVisor} soloGaraje={!!soloGaraje} tunel={tunel} carteles={carteles} cuerposTunel={cuerposTunel} opcionesTunel={opcionesTunelVisor} alElegirPuntoTunel={setPuntoTunel} puntoTunel={puntoTunel} alMoverGaraje={superponer || soloGaraje ? undefined : (id, x, z) => setGaraje(g => g.map(v => v.id === id ? { ...v, x, z } : v))} superponer={!!superponer && !soloGaraje} vista={vista}
-            referencia={referencia} modoRef={modoRef} alinear={alinear} alPinchar={esA1 ? c => { navegar(`/aeromovil/componentes/${c}`); window.scrollTo({ top: 0 }); } : undefined} />
+          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} bascular={bascular} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeConDisenos} soloGaraje={!!soloGaraje} tunel={tunel} carteles={carteles} cuerposTunel={cuerposTunel} opcionesTunel={opcionesTunelVisor} alElegirPuntoTunel={setPuntoTunel} puntoTunel={puntoTunel} fichasGaraje={disenosGaraje.fichas} superponer={!!superponer && !soloGaraje} vista={vista}
+            referencia={referencia} modoRef={modoRef} alinear={alinear} alPinchar={esA1 ? c => { navegar(`/aeromovil/componentes/${c}`); window.scrollTo({ top: 0 }); } : undefined}
+            alPincharGaraje={eleccion.alPincharGaraje} alPincharNuestro={donde => { eleccion.setTarjeta(true); eleccion.setPendiente(null); if (donde && modelo.tipo === 'triciclo') { const z = zonaTriciclo(modelo, donde); setDep(z.dep); setSoloDep(false); setAbrirBloque(a => ({ bloque: z.bloque, n: (a?.n ?? 0) + 1 })); } }} extraTarjeta={id => <><BotonFilaReferencia g={disenosGaraje} id={id} /><BotonSoloReferencia e={eleccion} id={id} /><BotonEditableReferencia e={eleccion} id={id} /></>}
+            alMoverGaraje={superponer || soloGaraje ? undefined : disenosGaraje.mover}
+            seguir={eleccion.seguir} nombres={soloUrl ? undefined : disenosGaraje.nombres} resaltarNuestro={disenosGaraje.enFila > 0} verGaraje={panelGaraje && !soloGaraje}
+            margenDerecho={panelGaraje && typeof window !== 'undefined' && window.matchMedia('(min-width: 640px)').matches ? 352 : 0}
+            colores={colores} />
           {/* La esquina de arriba a la derecha es del botón de pantalla completa: las tarjetas se apartan a su izquierda
               (en el móvil, debajo, que de ancho no caben). */}
           <Button variant="outline" onClick={alternarCompleta} aria-pressed={completa !== 'no'}
@@ -1209,6 +1419,26 @@ export default function Aeromovil() {
             className="absolute right-3 top-3 z-[15] bg-white px-1.5 py-1.5 shadow-sm">
             {completa !== 'no' ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
           </Button>
+          {/* «Garaje»: the reference cars and «Mis diseños», reachable from any department and in full screen */}
+          <Button variant="outline" onClick={() => setPanelGaraje(v => !v)} aria-pressed={panelGaraje} aria-expanded={panelGaraje}
+            title="Tus diseños y los coches de referencia: cuáles se ven y cuál editas"
+            className={cn('absolute right-14 top-3 z-[15] gap-1.5 bg-white px-2.5 py-1.5 text-xs normal-case tracking-normal shadow-sm', panelGaraje && 'border-teal-600 bg-teal-50 text-teal-800')}>
+            <Warehouse className="h-4 w-4" />Garaje
+          </Button>
+          {panelGaraje && (
+            <div role="dialog" aria-label="Garaje" className="absolute inset-x-2 top-14 z-[16] flex max-h-[calc(100%-8rem)] flex-col gap-2.5 overflow-y-auto rounded-xl border border-slate-200 bg-white p-3 shadow-lg sm:inset-x-auto sm:right-3 sm:w-[340px]">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-slate-800">Garaje</p>
+                <Button variant="ghost" onClick={() => setPanelGaraje(false)} aria-label="Cerrar el garaje" className="px-1.5 py-1"><X className="h-4 w-4" /></Button>
+              </div>
+              {garajeLista}
+            </div>
+          )}
+          {/* The design being edited (2026-11-13): its card, and the question about unsaved changes when leaving it */}
+          <TarjetaDiseno e={eleccion} g={disenosGaraje} actual={actual} porDefecto={!!disenosGaraje.lista?.find(d => d.id === actual?.id)?.por_defecto} nombreVehiculo={nombreVehiculo} puedeDecidir={!!dueno?.puedeDecidir}
+            bascular={anguloBascular > 0 ? { angulo: anguloBascular, alPulsar: () => { setCurva(false); setBascular(n => n + 1); } } : undefined}
+            className={cn('inset-x-2 top-14 sm:inset-x-auto sm:left-3 sm:top-12 sm:w-[min(340px,calc(100%-24px))]', panelGaraje && 'hidden sm:block sm:w-[min(340px,calc(100%-376px))]')} />
+          <AvisoCambios e={eleccion} actual={actual} puedeDecidir={!!dueno?.puedeDecidir} className={cn('inset-x-2 top-14 sm:inset-x-auto sm:left-3 sm:top-12 sm:w-[min(360px,calc(100%-24px))]', panelGaraje && 'sm:w-[min(360px,calc(100%-376px))]')} />
           {/* La explicación de un punto del túnel va dentro de la ventana 3D: así también se ve en pantalla completa. */}
           {tunel && puntoTunel && (
             <PanelPunto sel={puntoTunel} cuerpos={cuerposTunel} resultados={resultadosTunel} kmh={kmhComparar} resolucion={opcionesTunel.resolucion}
@@ -1223,8 +1453,9 @@ export default function Aeromovil() {
                 ...VEHICULOS_GARAJE.filter(d => d.envolvente).map(d => ({ id: d.id, nombre: d.nombre, color: colorCss(d.id), largo: d.largo, ancho: d.ancho, alto: d.alto, batalla: d.batalla, visible: !!garaje.find(g => g.id === d.id)?.visible })),
               ]} />
           )}
+          {/* (sm: right-[156px] leaves room for the «Garaje» button, which sits at right-14 next to full screen) */}
           {verConsumo && !tunel && !superponer && (
-            <div className="absolute right-3 top-12 z-10 flex flex-wrap items-center gap-1 rounded-xl border border-slate-200 bg-white/95 px-2.5 py-1.5 text-[11px] text-slate-600 shadow-sm backdrop-blur sm:right-[52px] sm:top-3" role="group" aria-label="Velocidad de los carteles">
+            <div className="absolute right-3 top-12 z-10 flex flex-wrap items-center gap-1 rounded-xl border border-slate-200 bg-white/95 px-2.5 py-1.5 text-[11px] text-slate-600 shadow-sm backdrop-blur sm:right-[156px] sm:top-3" role="group" aria-label="Velocidad de los carteles">
               <Gauge className="h-3.5 w-3.5 text-sky-700" />Consumo en las ruedas (aire + rodadura) a
               {VELOCIDADES.map(k => (
                 <Button key={k} variant="outline" aria-pressed={kmhComparar === k} onClick={() => setKmhComparar(k)}
@@ -1261,10 +1492,11 @@ export default function Aeromovil() {
             </div>
           )}
           <div className="pointer-events-none absolute left-3 right-14 top-3 font-mono text-[11px] uppercase tracking-wider text-slate-500">
-            {esA1 ? `${P.plazas === 2 ? 'Tándem 1+1' : 'Monoplaza'} · cuatro ruedas · eléctrico ${P.kWNom}/${P.kWPico} kW · ${P.kWh} kWh` : esBala ? 'Biplaza a horcajadas · rombo de ruedas, laterales fijas en carenados' : esTri ? `${camposTriciclo(P).tAsientos === 'filas' ? 'Cuatro plazas en tres filas (1 + 2 + 1)' : 'Biplaza a horcajadas'} · ${esCuatro(camposTriciclo(P)) ? 'cuatro ruedas, dos delante y dos detrás en carenados' : 'tres ruedas, dos delante en carenados'} · eléctrico ${fmt(camposTriciclo(P).tKWNom, 1)}/${fmt(camposTriciclo(P).tKWPico, 1)} kW · ${fmt(modelo.tipo === 'triciclo' ? modelo.kWh : camposTriciclo(P).tKWh, 1)} kWh${modelo.tipo === 'triciclo' && modelo.paquete ? ' a lo largo del bastidor' : ''}` : 'Tándem 1+2 · rombo basculante · pedaleo asistido'}
+            {esBas ? `Biplaza en tándem, reclinados · cuatro ruedas que se inclinan ${Math.round((modelo.tipo === 'basculante' ? modelo.phiMax : 0) * 180 / Math.PI)}° · eléctrico ${fmt(camposBasculante(P).qKWNom, 1)}/${fmt(camposBasculante(P).qKWPico, 1)} kW · ${fmt(camposBasculante(P).qKWh, 1)} kWh` : esA1 ? `${P.plazas === 2 ? 'Tándem 1+1' : 'Monoplaza'} · cuatro ruedas · eléctrico ${P.kWNom}/${P.kWPico} kW · ${P.kWh} kWh` : esBala ? 'Biplaza a horcajadas · rombo de ruedas, laterales fijas en carenados' : esTri ? `${camposTriciclo(P).tAsientos === 'filas' ? 'Cuatro plazas en tres filas (1 + 2 + 1)' : conButacas(camposTriciclo(P)) ? 'Biplaza en tándem, dos butacas como el Aptera' : 'Biplaza a horcajadas'} · ${esRombo(camposTriciclo(P)) ? `cuatro ruedas en rombo, las laterales en carenados${modelo.tipo === 'triciclo' && modelo.bascula ? ' que se inclinan' : ''}` : esCuatro(camposTriciclo(P)) ? 'cuatro ruedas, dos delante y dos detrás en carenados' : 'tres ruedas, dos delante en carenados'} · eléctrico ${fmt(camposTriciclo(P).tKWNom, 1)}/${fmt(camposTriciclo(P).tKWPico, 1)} kW · ${fmt(modelo.tipo === 'triciclo' ? modelo.kWh : camposTriciclo(P).tKWh, 1)} kWh${modelo.tipo === 'triciclo' && modelo.paquete ? ' a lo largo del bastidor' : ''}` : 'Tándem 1+2 · rombo basculante · pedaleo asistido'}
             {esA1 && <span className="block normal-case tracking-normal text-slate-400">Pincha una pieza para abrir su ficha</span>}
           </div>
           <div className="absolute inset-x-2 bottom-2 flex flex-wrap items-center gap-1">
+            {eleccion.solo && <Button variant="outline" aria-pressed onClick={() => eleccion.setSolo(null)} className="border-teal-700 bg-teal-700 px-2 py-1 text-[11px] normal-case tracking-normal text-white hover:bg-teal-800">Mostrar todos</Button>}
             {/* Vista: un solo botón que despliega las cinco (2026-11-07, Eugenio: «colapsa lo de la vista en un menú») */}
             <div className="relative">
               <Button variant="outline" aria-expanded={vistaAbierta} onClick={() => { setVistaAbierta(v => !v); setCapasAbierto(false); }} className="bg-white px-2 py-1 text-[11px] normal-case tracking-normal">
@@ -1292,14 +1524,14 @@ export default function Aeromovil() {
                       <span className={cn('h-2.5 w-2.5 shrink-0 rounded-sm', visibles[c.k] ? c.color : 'bg-transparent ring-1 ring-slate-300')} />{c.n}
                     </Button>
                   ))}
-                  <Button variant="ghost" onClick={() => { setVisibles(Object.fromEntries(CAPAS.map(c => [c.k, true])) as Record<CapaId, boolean>); setSoloDep(false); }} className="col-span-2 px-1.5 py-1 text-[11px] normal-case tracking-normal text-teal-800">Ver todo</Button>
+                  <Button variant="ghost" onClick={() => { antesSolo.current = null; setVisibles(Object.fromEntries(CAPAS.map(c => [c.k, true])) as Record<CapaId, boolean>); setSoloDep(false); }} className="col-span-2 px-1.5 py-1 text-[11px] normal-case tracking-normal text-teal-800">Ver todo</Button>
                 </div>
               )}
             </div>
-            {(esA1 || esTri) && (esTri ? depTri : dep) !== 'proyecto' && CAPAS_DEP[esTri ? depTri : dep] && (
-              <Button variant="outline" aria-pressed={soloDep} onClick={() => setSoloDep(v => !v)}
+            {(esA1 || porDeps) && (porDeps ? depTri : dep) !== 'proyecto' && capasSolo(porDeps ? depTri : dep) && (
+              <Button variant="outline" aria-pressed={soloDep} onClick={() => verSolo(!soloDep)}
                 className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', soloDep && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
-                {soloDep ? 'Mostrar todo' : `Mostrar solo ${SOLO_DEP[dep] ?? NOMBRE_CORTO[dep].toLowerCase()}`}
+                {soloDep ? 'Mostrar todo' : `Mostrar solo ${SOLO_DEP[porDeps ? depTri : dep] ?? NOMBRE_CORTO[porDeps ? depTri : dep].toLowerCase()}`}
               </Button>
             )}
             {/* El Bala no se inclina ni tiene la dirección dibujada: sin «Simular curva». */}
@@ -1307,9 +1539,15 @@ export default function Aeromovil() {
               <Button key={n} variant="outline" aria-pressed={v} onClick={() => f(!v)}
                 className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', v && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>{n}</Button>
             ))}
+            {/* Cuadriciclo Basculante (2026-11-15): «Bascular», the car and its four wheels leaning to the maximum each way and back */}
+            {anguloBascular > 0 && (
+              <Button variant="outline" onClick={() => { setCurva(false); setBascular(n => n + 1); }}
+                title={`Inclina la carrocería y las cuatro ruedas hasta ${anguloBascular}° a cada lado y vuelve, como en una curva`}
+                className="bg-white px-2 py-1 text-[11px] normal-case tracking-normal">Bascular</Button>
+            )}
             <Button variant="outline" aria-pressed={abierta} onClick={() => setAbierta(!abierta)}
               className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', abierta && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
-              <DoorOpen className="mr-1 h-3 w-3" />{abierta ? 'Cerrar' : 'Abrir'} {(esBala || esTri || Pa.puerta === 'cabina') && !(esTri && conPuertas(camposTriciclo(P))) ? 'cúpula' : 'puertas'}
+              <DoorOpen className="mr-1 h-3 w-3" />{abierta ? 'Cerrar' : 'Abrir'} {esBas ? (camposBasculante(P).qCarroceria === 'smera' ? 'puertas' : 'cúpula') : (esBala || esTri || Pa.puerta === 'cabina') && !(esTri && conPuertas(camposTriciclo(P))) ? 'cúpula' : 'puertas'}
             </Button>
             {(esA1 || esTri) && (
               <Button variant="outline" aria-pressed={maleteros} onClick={() => setMaleteros(!maleteros)}
@@ -1345,7 +1583,7 @@ export default function Aeromovil() {
               <Wind className="mr-1 h-3 w-3" />Túnel de viento
             </Button>
             <Button variant="outline" aria-pressed={verConsumo} onClick={() => setVerConsumo(v => !v)}
-              title="Pone encima de cada coche su Cd y lo que gasta cada 100 km a la velocidad elegida"
+              title="Pone encima de cada coche su Cd, lo que gasta cada 100 km a la velocidad elegida, su masa en vacío y su área frontal"
               className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', verConsumo && 'border-sky-700 bg-sky-700 text-white hover:bg-sky-800')}>
               <Gauge className="mr-1 h-3 w-3" />Cd y consumo
             </Button>
@@ -1382,17 +1620,17 @@ export default function Aeromovil() {
         </div>
 
         <aside className="mt-4 flex flex-col gap-3 lg:mt-0">
-          {(esA1 ? dep === 'proyecto' : esTri ? depTri === 'proyecto' : true) && <Bloque titulo="Garaje" nota="otros vehículos al lado">
-            <div className="flex flex-col gap-1.5">
-              {VEHICULOS_GARAJE.map(v => { const pl = garaje.find(g => g.id === v.id)!; return (
-                <Button key={v.id} variant="outline" aria-pressed={pl.visible} onClick={() => setGaraje(g => g.map(x => x.id === v.id ? { ...x, visible: !x.visible } : x))}
-                  className={cn('justify-between gap-2 px-2.5 py-1.5 text-left text-[13px] font-medium normal-case tracking-normal', !pl.visible && 'border-dashed text-slate-400')}>
-                  <span>{v.nombre}</span><span className="text-[11px] font-normal text-slate-400">{v.largo.toFixed(2).replace('.', ',')} m</span>
-                </Button>); })}
-            </div>
-            {garaje.some(g => g.visible) && <MapaGaraje garaje={garaje} largo={modelo.Lf} ancho={modelo.P.W} morro={modelo.xn} etiqueta={esA1 ? 'A1' : esBala ? 'Bala' : esTri ? (esCuatro(camposTriciclo(P)) ? 'Bala 4R' : 'Triciclo') : 'Gota'} alMover={(id, x, z) => setGaraje(g => g.map(v => v.id === id ? { ...v, x, z } : v))} alGirar={id => setGaraje(g => g.map(v => v.id === id ? { ...v, giro: (v.giro + Math.PI / 2) % (2 * Math.PI) } : v))} />}
-            <p className="-mt-1 text-xs text-slate-500">Arrastra cada coche en el 3D (pínchalo y muévelo) o en este plano; doble clic en el plano lo gira un cuarto de vuelta.</p>
-          </Bloque>}
+          {/* round 3 interior (2026-11-12): «Ver solo …» above the sliders of each department (the Aeromóvil 1's and the Triciclo's) */}
+          {(esA1 || porDeps) && (porDeps ? depTri : dep) !== 'proyecto' && capasSolo(porDeps ? depTri : dep) && (() => {
+            const d = porDeps ? depTri : dep, n = NOMBRE_CORTO[d].toLowerCase();
+            return (
+              <Button variant="outline" aria-pressed={soloDep} onClick={() => verSolo(!soloDep)}
+                className={cn('w-full justify-center gap-1.5 bg-white px-3 py-2 text-[13px] font-semibold normal-case tracking-normal', soloDep && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
+                <Layers3 className="h-4 w-4" />{soloDep ? `Viendo solo ${n} · volver a las capas de antes` : `Ver solo ${n}`}
+              </Button>
+            );
+          })()}
+          {(esA1 ? dep === 'proyecto' : porDeps ? false : true) && garajeBloque}
 
           {dueno && !dueno.puedeDecidir && (
             <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
@@ -1401,9 +1639,12 @@ export default function Aeromovil() {
             </div>
           )}
           <fieldset disabled={!dueno?.puedeDecidir} className={cn('contents', !dueno?.puedeDecidir && '[&_input]:cursor-not-allowed [&_select]:opacity-70 [&_input]:opacity-70')}>
+          {/* 2026-11-13: the body's colour, in «Carrocería» (the Gota and the Cuadriciclo en rombo have no departments: always) */}
+          {((esA1 || porDeps) ? (porDeps ? depTri : dep) === 'carroceria' : true) && <Bloque titulo="Color de la carrocería"><ColoresCarroceria P={P} set={set} /></Bloque>}
           {modelo.tipo === 'a1' ? <LadoA1 P={P} Pa={Pa} D={D} set={set} res={res} modelo={modelo} neumaticos={neumaticos} malas={malas} dep={dep} alNavegar={r => { navegar(r); window.scrollTo({ top: 0 }); }} />
+            : modelo.tipo === 'basculante' ? (paraCalcular.tipo === 'basculante' && res.basculante ? <LadoBasculante P={P} set={set} res={res} modelo={paraCalcular} dep={depTri} cd={cdBas} ui={{ Bloque, Deslizador, Selector: Selector as never, ListaComprobaciones }} /> : null)
             : modelo.tipo === 'bala' ? <LadoBala P={P} set={set} res={res} modelo={modelo} cdTunel={tunel ? cdTunelNuestro : undefined} />
-            : modelo.tipo === 'triciclo' && res.triciclo ? <LadoTriciclo P={P} set={set} res={res} modelo={paraCalcular.tipo === 'triciclo' ? paraCalcular : modelo} dep={depTri} cd={cdTri} />
+            : modelo.tipo === 'triciclo' && res.triciclo ? <LadoTriciclo P={P} set={set} res={res} modelo={paraCalcular.tipo === 'triciclo' ? paraCalcular : modelo} dep={depTri} cd={cdTri} abrir={abrirBloque} />
             : modelo.tipo === 'triciclo' ? null : (<>
           <Bloque titulo="Chasis y ruedas">
             <Deslizador id="am-B" etiqueta="Batalla: rueda delantera a trasera" valor={P.B} min={2.6} max={3.8} paso={0.01} mostrar={m2(P.B)} alCambiar={v => set('B', v)} />
@@ -1545,6 +1786,7 @@ export default function Aeromovil() {
 
           </>)}
           </fieldset>
+          {porDeps && depTri === 'proyecto' && garajeBloque}
           <Bloque titulo="¿Algo que mejorar?">
             <FormularioMejora alEnviar={() => { recargar(); }} />
             <p className="text-xs text-slate-500">Se añade a <a className="text-teal-700 underline" href="/aeromovil/tareas" onClick={e => { e.preventDefault(); navegar('/aeromovil/tareas'); }}>Tareas</a> como pendiente.</p>
@@ -1563,7 +1805,11 @@ export default function Aeromovil() {
       {seccion === 'aranceles' && (esA1
         ? <VistaAranceles P={P} res={res} modelo={modelo} />
         : <p className="mx-auto max-w-[1100px] px-4 py-8 text-sm text-slate-600">Los aranceles se calculan con las piezas del Aeromóvil 1. Elígelo en el menú del nombre del vehículo, arriba a la izquierda, para verlos.</p>)}
-      {seccion === 'otros' && <VistaOtros modelo={modelo} resultados={res} puedeDecidir={!!dueno?.puedeDecidir} alVer={r => verRef(r, 'sola')} alComparar={r => verRef(r, 'comparar')} />}
+      {seccion === 'circuito' && (
+        <Suspense fallback={<p className="mx-auto max-w-[1200px] px-4 py-8 text-sm text-slate-500">Cargando el circuito…</p>}>
+          <VistaCircuito modelo={paraCalcular} res={res} nombreDiseno={nombreVehiculo} />
+        </Suspense>
+      )}
       {seccion === 'tareas' && <VistaTareas tareas={tareas} recargar={recargar} error={errorTareas} dueno={dueno} />}
       {seccion === 'plan' && <VistaPlan />}
       {seccion === 'planos' && <VistaPlanos modelo={modelo} />}

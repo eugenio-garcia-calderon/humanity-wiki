@@ -14,6 +14,7 @@ import { FichasEscalas, QuienSeOcupa, RepartoHoyPropuesta, SubeBaja } from './Es
 import { QuienDecide } from './QuienDecide';
 import { AyudaEntreEscalas, Tercios } from './TerciosApoyo';
 import { MatrizAmbitos } from './MatrizAmbitos';
+import { Pares } from './graficos/Pares';
 
 const pais = cuentasPais('literal');
 const pct = (m: number) => (m / HOY_TOTAL) * 100;
@@ -37,10 +38,10 @@ export function EscalasVentana() {
         entradilla={<>Vivimos en ocho escalas, una dentro de otra: tú, tu comunidad vecinal, tu pueblo, tu provincia, tu región, tu país, tu continente y el planeta.
           El modelo quiere que cada una tenga <b className="text-slate-800">dinero propio y poder para decidir</b>, y que responda de lo que le toca. La regla es sencilla: <b className="text-slate-800">lo hace la escala más cercana que pueda hacerlo bien</b>.</>}>
         <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-          <Cifra tono="mal" valor={porcentaje(pct(local))} texto={<>del gasto público lo deciden hoy los ayuntamientos y las diputaciones, la administración más cercana<Fuente id="igae-cofog" /></>} nota="España, 2024" />
-          <Cifra valor={porcentaje(pct(lejos))} texto={<>lo deciden el Estado y la Seguridad Social, sobre todo pensiones<Fuente id="igae-cofog" /></>} nota="España, 2024" />
-          <Cifra tono="bien" valor={porcentaje(OCTAVO * 4 * 100, 0)} texto="de lo recaudado lo decidirían las cuatro escalas más cercanas: persona, comunidad vecinal, municipio y provincia" nota="Propuesta: un octavo para cada escala" />
-          <Cifra tono="bien" valor={euros(pais.porPersonaEscala)} texto="al año por habitante para cada escala: la misma cantidad en un pueblo que en una ciudad" nota="Estimación con datos de 2025" />
+          <Cifra clase="dato" tono="mal" valor={porcentaje(pct(local))} texto={<>del gasto público lo deciden hoy los ayuntamientos y las diputaciones, la administración más cercana<Fuente id="igae-cofog" /></>} nota="España, 2024" />
+          <Cifra clase="dato" valor={porcentaje(pct(lejos))} texto={<>lo deciden el Estado y la Seguridad Social, sobre todo pensiones<Fuente id="igae-cofog" /></>} nota="España, 2024" />
+          <Cifra clase="propuesta" tono="bien" valor={porcentaje(OCTAVO * 4 * 100, 0)} texto="de lo recaudado lo decidirían las cuatro escalas más cercanas: persona, comunidad vecinal, municipio y provincia" nota="Propuesta: un octavo para cada escala" />
+          <Cifra clase="calculo" tono="bien" valor={euros(pais.porPersonaEscala)} texto="al año por habitante para cada escala: la misma cantidad en un pueblo que en una ciudad" nota="Estimación con datos de 2025" />
         </div>
 
         <ol className="mt-6 grid gap-px overflow-hidden rounded-2xl border border-slate-200 bg-slate-200 sm:grid-cols-2 lg:grid-cols-4">
@@ -92,6 +93,17 @@ export function EscalasVentana() {
       <Apartado id="escalas-hoy" titulo="Hoy, casi todo se decide lejos"
         entradilla={<>En 2024 las administraciones de España gastaron {millones(HOY_TOTAL)}. Solo {porcentaje(pct(local))} lo decidieron los ayuntamientos y las diputaciones; más de la mitad, el Estado y la Seguridad Social.</>}>
         <RepartoHoyPropuesta />
+        <Pares className="mt-4 max-w-3xl" titulo="De cada 100 € públicos, cuántos decide cada escala"
+          subtitulo="Hoy (gasto de 2024, según quién lo gasta) y con la propuesta (un octavo por escala)"
+          series={['Hoy', 'Con la propuesta']} colores={['gris', 'acento']} formato={v => porcentaje(v, 1)}
+          pares={[
+            { etiqueta: 'Persona y comunidad vecinal', a: 0, b: 2 * OCTAVO * 100, nota: 'Hoy no deciden nada del dinero público.' },
+            { etiqueta: 'Municipio y provincia', a: pct(local), b: 2 * OCTAVO * 100, nota: 'Hoy, ayuntamientos y diputaciones.' },
+            { etiqueta: 'Región', a: pct(HOY.gastoRegional2024), b: OCTAVO * 100, nota: 'Hoy, las comunidades autónomas: sanidad y educación sobre todo.' },
+            { etiqueta: 'Nación', a: pct(lejos), b: OCTAVO * 100, nota: 'Hoy, el Estado y la Seguridad Social (pensiones).' },
+            { etiqueta: 'Continente y planeta', a: 0, b: 2 * OCTAVO * 100, nota: 'Hoy reciben lo que el Estado decide aportar, y está dentro de su parte.' },
+          ]}
+          pie={<>Hoy: Intervención General del Estado, gasto consolidado de 2024<Fuente id="igae-cofog" />. Con la propuesta: cálculo de esta página.</>} />
         <ul className="mt-6 grid gap-3 md:grid-cols-2 md:gap-4">
           <li className="rounded-2xl border border-slate-200 bg-white p-5 text-[15px] leading-relaxed text-slate-700">
             <b className="text-slate-900">Sanidad y educación, en las comunidades autónomas.</b> Gastan el {porcentaje(HOY_REGIONAL_SANIDAD, 0)} de la sanidad pública y el {porcentaje(HOY_REGIONAL_EDUCACION, 0)} de la educación<Fuente id="igae-cofog" />.
@@ -258,7 +270,7 @@ export function EscalasVentana() {
         <p className="mt-5 max-w-3xl text-[15px] leading-relaxed text-slate-700">
           Con los datos de 2025, en España se recaudarían unos {millones(pais.recaudacion)} al año, y cada escala recibiría {millones(pais.porEscala)}. Es una estimación: el cálculo completo está en Recaudación.
           Hoy las administraciones gastan {millones(HOY_TOTAL)}; de ellos, {millones(HOY.pensiones2024)} son pensiones<Fuente id="igae-cofog" />, que en el modelo se pagan aparte (ventana <a href="#pensiones" className={enlace}>Pensiones</a>).
-          Sin ellas quedan {millones(sinPensiones)}: las ocho escalas recibirían unos {millones(Math.abs(diferencia))} {diferencia >= 0 ? 'más' : 'menos'}. Los intereses de la deuda, en la ventana <a href="#deuda" className={enlace}>Deuda</a>.
+          Sin ellas quedan {millones(sinPensiones)}: las ocho escalas recibirían unos {millones(Math.abs(diferencia))} {diferencia >= 0 ? 'más' : 'menos'}. Los intereses de la deuda, en la ventana Economía, parte <a href="#deuda" className={enlace}>Deuda</a>.
         </p>
         <Mas titulo="los tres tercios en cada escala">
           <Tercios modo="literal" />

@@ -16,6 +16,9 @@ import { ESCALA } from '../../data/modeloSocioeconomico';
 import { Apartado, Cifra, Mas } from './ventanas';
 import { Fuente, Muestra, Regulador, Segmentado } from './piezas';
 import { cn } from '../../utils/cn';
+import { HoyPropuesta } from './graficos/HoyPropuesta';
+import { Pares } from './graficos/Pares';
+import { RusticaApartado, SueloApartado } from './ViviendaRustica';
 
 /** A «fuente» link from this window's own source list. */
 function F({ id }: { id: string }) {
@@ -34,8 +37,10 @@ export function ViviendaVentana() {
       <QuienManda />
       <Propuesta />
       <Escalas />
+      <SueloApartado />
+      <RusticaApartado />
       <Retos />
-      <Apartado id="vivienda-fuentes" titulo="Fuentes" fondo="blanco"
+      <Apartado id="vivienda-fuentes" titulo="Fuentes"
         entradilla="Consultadas en noviembre de 2026. Las cifras del modelo son estimaciones hechas en esta misma web, a partir de sus cuentas.">
         <ul className="grid max-w-4xl gap-2 text-sm">
           {Object.entries(FUENTES_VIVIENDA).map(([id, f]) => (
@@ -53,15 +58,15 @@ function Resumen() {
     <Apartado id="vivienda" titulo="Vivienda: un derecho que casi nadie construye"
       entradilla={<>La Constitución promete una vivienda digna, pero en España menos de 2 de cada 100 viviendas son públicas de alquiler, y los precios suben más de un 12 % en un año. La propuesta: que cada una de las 8 escalas sepa qué normas hace y cómo regula, y que parte de su dinero construya vivienda que no se vende nunca.</>}>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Cifra valor={porcentaje(V.publicaPct)} tono="mal"
+        <Cifra clase="dato" valor={porcentaje(V.publicaPct)} tono="mal"
           texto={<>de las viviendas son públicas de alquiler, unas {numero(V.publicas)}<F id="housing-europe" /></>}
           nota={<>En la Unión Europea, la vivienda social es de media el {porcentaje(V.socialUE, 0)}<F id="ocde-social" /></>} />
-        <Cifra valor={porcentaje(V.precios)} tono="mal"
+        <Cifra clase="dato" valor={porcentaje(V.precios)} tono="mal"
           texto={<>subió el precio de la vivienda en un año, hasta junio de 2026<F id="ine-ipv" /></>} />
-        <Cifra valor={porcentaje(V.sobrecargaES)} tono="mal"
+        <Cifra clase="dato" valor={porcentaje(V.sobrecargaES)} tono="mal"
           texto={<>de quienes alquilan a precio de mercado gastan más del 40 % de lo que ganan en la casa<F id="sobrecarga-es" /></>}
           nota={<>En la Unión Europea, el {numero(V.sobrecargaUE, 1)} %<F id="sobrecarga-ue" /></>} />
-        <Cifra valor={`≈ ${mill(redondo(GASTO_MODELO))}`} tono="bien"
+        <Cifra clase="calculo" valor={`≈ ${mill(redondo(GASTO_MODELO))}`} tono="bien"
           texto={<>al año para vivienda pública con el modelo, frente a {mill(GASTO_HOY)} de hoy</>}
           nota="Estimación del modelo: municipio, provincia, región y nación juntos." />
       </div>
@@ -150,6 +155,34 @@ function Hoy() {
         </Mas>
       </figure>
 
+      <div className="mt-6 grid gap-4 lg:grid-cols-2">
+        <Pares titulo="España frente a la media de la Unión Europea"
+          subtitulo="Tres medidas en unidades distintas: cada fila tiene su propia escala"
+          series={['España', 'Media de la UE']} porFila
+          pares={[
+            { etiqueta: 'Viviendas sociales de alquiler, de cada 100', a: V.publicaPct, b: V.socialUE, formato: v => porcentaje(v, v % 1 ? 1 : 0),
+              nota: <>En España, solo la pública; con la protegida en manos privadas, un 3,4 %<F id="housing-europe" /><F id="ocde-social" /></> },
+            { etiqueta: 'Ayudas a la vivienda por habitante y año', a: V.ayudaPersonaES, b: V.ayudaPersonaUE, formato: v => euros(v),
+              nota: <>Alquiler y vivienda social, 2024<F id="eurostat-ayudas" /></> },
+            { etiqueta: 'Inquilinos que gastan más del 40 % de lo que ganan en la casa', a: V.sobrecargaES, b: V.sobrecargaUE, formato: v => porcentaje(v),
+              nota: <>Quienes alquilan a precio de mercado, 2025<F id="sobrecarga-es" /><F id="sobrecarga-ue" /></> },
+          ]} />
+        <HoyPropuesta titulo="Dinero público para vivienda al año, hoy y con el modelo"
+          subtitulo="Millones de euros"
+          leyenda={[{ serie: 'gris', texto: 'Construir, comprar, rehabilitar y urbanismo' }, { serie: 'claro', texto: 'Ayudas a la vivienda' }, { serie: 'acento', texto: 'Con el modelo' }]}
+          filas={[
+            { etiqueta: 'Hoy (2024)', total: mill(GASTO_HOY), partes: [
+              { nombre: 'Construir, comprar, rehabilitar y urbanismo', valor: V.urbanismo2024, texto: mill(V.urbanismo2024), serie: 'gris' },
+              { nombre: 'Ayudas a la vivienda', valor: V.ayudas2024, texto: mill(V.ayudas2024), serie: 'claro' },
+            ] },
+            { etiqueta: 'Con el modelo', total: `≈ ${mill(redondo(GASTO_MODELO))}`, partes: [
+              { nombre: 'Municipio, provincia, región y nación juntos', valor: GASTO_MODELO, texto: `≈ ${mill(redondo(GASTO_MODELO))}`, serie: 'acento' },
+            ] },
+          ]}
+          diferencia={<>Unas {numero(GASTO_MODELO / GASTO_HOY, 1)} veces lo de hoy</>}
+          pie={<>Hoy: cuentas públicas de 2024<F id="igae-cofog" />. Con el modelo: estimación de esta página, con el peso de la vivienda en el presupuesto de cada escala.</>} />
+      </div>
+
       <div className="mt-8 grid gap-4 md:grid-cols-2">
         <Tarjeta t={`${numero(V.vacias)} viviendas vacías`}>
           Son el {porcentaje(V.vaciasPct)} de todas, según el censo de 2021<F id="ine-vacias" />. Muchas están en pueblos sin demanda, en mal estado o a la venta; aun así, son la reserva más grande que hay.
@@ -225,6 +258,16 @@ function Propuesta() {
       <CasasVacias />
       <Calculadora />
       <DineroModelo />
+      {/* Bridge to the «Banca» window (Eugenio, 2026-11-12): the credit rule is the other half of this proposal. */}
+      <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-5">
+        <p className="text-lg font-bold text-slate-900">El crédito para la vivienda</p>
+        <p className="mt-1 max-w-3xl text-[15px] leading-relaxed text-slate-700">
+          Los bancos crean dinero nuevo cada vez que dan una hipoteca, y ese dinero sube el precio de las casas que ya existen. La propuesta: dinero nuevo, con interés regulado, solo para la primera y la segunda vivienda de cada persona y para construir casas nuevas. La tercera vivienda, o una empresa que compra casas, se paga con dinero que ya existe.
+        </p>
+        <p className="mt-3 text-[15px]">
+          <a href="#banca-vivienda" className="font-semibold text-slate-900 underline decoration-slate-400 underline-offset-2 hover:decoration-slate-900">¿Puedo pedir un préstamo? Verlo en Banca</a>
+        </p>
+      </div>
     </Apartado>
   );
 }
@@ -249,8 +292,8 @@ function Calculadora() {
             : <Regulador etiqueta="Precio de la vivienda" valor={precio} min={50_000} max={800_000} paso={5_000} mostrar={euros(precio)} onChange={setPrecio} />}
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Cifra valor={euros(impuesto)} tono="neutro" texto={<>de impuesto{alquiler ? ' al mes' : ''}: el {numero(tipo * 100)} %, tramo {uso === 'segunda' ? 'secundario' : 'básico'}</>} />
-          <Cifra valor={euros(base + impuesto)} tono="neutro" texto={alquiler ? 'paga al mes quien alquila, con el impuesto dentro' : 'precio final, con el impuesto dentro'} />
+          <Cifra clase="calculo" valor={euros(impuesto)} tono="neutro" texto={<>de impuesto{alquiler ? ' al mes' : ''}: el {numero(tipo * 100)} %, tramo {uso === 'segunda' ? 'secundario' : 'básico'}</>} />
+          <Cifra clase="calculo" valor={euros(base + impuesto)} tono="neutro" texto={alquiler ? 'paga al mes quien alquila, con el impuesto dentro' : 'precio final, con el impuesto dentro'} />
         </div>
       </div>
       <p className="mt-4 text-sm leading-relaxed text-slate-600">
@@ -359,7 +402,7 @@ function CasasVacias() {
         <ul className="max-w-3xl list-disc space-y-2 pl-5 text-[15px] leading-relaxed text-slate-700">
           <li><strong>Alquiler obligatorio:</strong> en una zona con escasez, un piso vacío más de dos años pasa a la bolsa aunque el dueño no quiera. Mueve más casas, pero toca la propiedad y acabaría en los tribunales.</li>
           <li><strong>Un recargo:</strong> pagar algo cada año por tener un piso vacío. Funciona como el IBI de hoy, pero sería un segundo impuesto, y el modelo quiere uno solo.</li>
-          <li>Cuál se usa, y desde cuándo, lo decide Eugenio. Por ahora la página solo propone la bolsa.</li>
+          <li>Cuál se usa, y desde cuándo, está por decidir. Por ahora la página solo propone la bolsa.</li>
         </ul>
       </Mas>
     </div>

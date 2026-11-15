@@ -12,9 +12,9 @@
 // Los colores de los materiales viven aquí y no en `src/components/ui/`
 // porque son colores de material 3D (aluminio, neumático, fibra), no de
 // interfaz. Anotado en 02_TECH_DEBT.md.
-import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import * as THREE from 'three';
-import { DoorOpen, PackageOpen, X } from 'lucide-react';
+import { DoorOpen, MoveDiagonal, PackageOpen, Trash2, X } from 'lucide-react';
 import { Button, Card } from '../ui/core';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { STLExporter } from 'three/examples/jsm/exporters/STLExporter.js';
@@ -31,12 +31,17 @@ import {
   ARM_UP, CELULA, TIRE_W, TRAVEL_F, TRAVEL_R, enZona, tramosTubo,
   type Modelo, type ModeloGota, type ModeloA1, type ModeloBala, type ModeloConPiel, type ModeloTriciclo, type Piel, type PuntosOcupante, type Superficie,
 } from './geometria';
-import { anguloFuera, opcionesCabinaTriciclo } from './geometriaTriciclo';
+import { anguloFuera, opcionesCabinaTriciclo, poseBascula } from './geometriaTriciclo';
+// ── Cuadriciclo Basculante (2026-11-15): its builder and its lean live in basculante/modelo3d.ts
+import { construirBasculante, cotasBasculante, posarBasculante, type AyudasVisor } from './basculante/modelo3d';
 import { ANGULO_CUPULA, ANGULO_PORTON, PIVOTES_CUPULA, PIVOTE_PORTON, construirCon as construirBalaCon, crearMateriales as materialesBala } from './garaje/balaModelo';
+import { COLOR_ACENTO, COLOR_CARROCERIA, coloresDe } from './coloresCarroceria';
 import { brazosDe } from './garaje/balaMedidas';
 import { GIRO_A1, suspensionA1 } from './geometriaA1';
 import type { Referencia } from './referencias';
 import { vehiculoGaraje, type VehiculoGaraje } from './garaje';
+import type { PivoteGaraje } from './garaje/tipos';
+import { registrarConstructorSmera } from './garaje/smera';
 import { colorSuperpuesto, hacerFantasma, liberarFantasma, mostrarSiluetas, siluetas } from './garaje/superponer';
 import { cartel, crearTunel, type CuerpoTunel, type SeleccionTunel, type Tunel } from './tunelViento';
 import type { OpcionesTunel } from './tunel/cliente';
@@ -79,7 +84,7 @@ interface Props {
   /** Sin el pasajero ni su asiento, y con las cotas del espacio trasero que queda (Aeromóvil 1). */
   sinPasajero?: boolean;
   /** Otros vehículos aparcados alrededor (el garaje): id del catálogo, posición del eje delantero en el suelo y giro. */
-  garaje?: { id: string; x: number; z: number; giro?: number }[];
+  garaje?: { id: string; x: number; z: number; giro?: number; v?: string }[];
   /** Solo el garaje, sin nuestro coche (para mirar un modelo del garaje a solas). */
   soloGaraje?: boolean;
   /** Túnel de viento: flujo calculado (presión en la piel, líneas de corriente, puntos críticos, estela) alrededor de cada cuerpo de `cuerposTunel`. */
@@ -101,6 +106,37 @@ interface Props {
   alPinchar?: (componente: string) => void;
   /** Al soltar un coche del garaje arrastrado en el 3D: su nueva posición (eje delantero en el suelo). Sin ella no se arrastra. */
   alMoverGaraje?: (id: string, x: number, z: number) => void;
+  /** Our designs in the garage (2026-11-12): the lines of each one's card, by garage id. A car with lines can be picked. */
+  fichasGaraje?: Record<string, string[]>;
+  /** «Quitar del garaje» on a design's card. */
+  alQuitarGaraje?: (id: string) => void;
+  // ── The garage as the way to pick a design (2026-11-13) ──
+  /** A click on a garage car. Returning true means the page handled it (one of our designs: it becomes the one being
+   *  edited) and the viewer opens no card of its own. */
+  alPincharGaraje?: (id: string) => boolean;
+  /** A click on our own car (on the Aeromóvil 1, only where no part with a sheet is hit). */
+  /**
+   * (2026-11-15: and where it was hit, so the page can open that part's sliders: the point in the car's own axes, the
+   * viewer layer it belongs to, and the names of the part and its parents, nearest first)
+   */
+  alPincharNuestro?: (donde?: { punto: [number, number, number]; capa: CapaId | null; nombres: string[] }) => void;
+  /** More buttons for a reference car's card («Solo mostrar este»). With it every garage car can be picked. */
+  extraTarjeta?: (id: string) => ReactNode;
+  /** Bumped (`n`) when the design being edited changes place: the camera jumps by (dx, dz) with the cars, so the view
+   *  does not change, and then eases onto the new one. */
+  seguir?: { n: number; dx: number; dz: number };
+  /** A one-line name over each car ('aeromovil' or the garage id) while no other label («Cd y consumo», tunnel) is on. */
+  nombres?: Record<string, string>;
+  /** A soft mark on the floor under our car: the design being edited, among the others in the garage. */
+  resaltarNuestro?: boolean;
+  /** Frame every car at once, as «Cd y consumo» does (the «Garaje» panel is open: the garage seen whole). */
+  verGaraje?: boolean;
+  /** Pixels covered on the right of the view by a panel: the garage view fits the cars into the rest. */
+  margenDerecho?: number;
+  /** 2026-11-13: the body's paint and its accent (coloresCarroceria.ts); changing them only recolours the materials. */
+  colores?: { carroceria: string; acento: string };
+  /** Cuadriciclo Basculante (2026-11-15): bumped (a counter) by «Bascular», which leans the car to its maximum angle each way and back. */
+  bascular?: number;
   /** Otro velomóvil: oculto, comparado (fantasma junto al nuestro) o solo. */
   referencia?: Referencia | null;
   modoRef?: 'no' | 'comparar' | 'sola';
@@ -142,13 +178,15 @@ function distanciaParaVer(puntos: THREE.Vector3[], centro: THREE.Vector3, haciaC
   return D;
 }
 
+// Round 4 (2026-11-13, «más discretos como los del aptera, y con ese toque cristalizado»): the joint and the busbars
+// dark slate and the busbars faint (before, the joint was a light navy that drew a grid), as the Triciclo's (balaPiezas.ts)
 function texturaSolar() {
   const c = document.createElement('canvas'); c.width = c.height = 128;
   const g = c.getContext('2d')!;
-  g.fillStyle = '#2b3350'; g.fillRect(0, 0, 128, 128);                 // la junta (un poco más clara que la célula)
-  g.fillStyle = '#0b1230';
+  g.fillStyle = '#353c49'; g.fillRect(0, 0, 128, 128);                 // la junta (gris pizarra, cerca de la del Aptera del garaje)
+  g.fillStyle = '#0e1b3d';
   g.beginPath(); g.moveTo(8, 2); g.lineTo(120, 2); g.lineTo(126, 8); g.lineTo(126, 120); g.lineTo(120, 126); g.lineTo(8, 126); g.lineTo(2, 120); g.lineTo(2, 8); g.closePath(); g.fill();
-  g.strokeStyle = '#1e2a4a'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(6, 43); g.lineTo(122, 43); g.moveTo(6, 85); g.lineTo(122, 85); g.stroke();
+  g.strokeStyle = '#18213a'; g.lineWidth = 1; g.beginPath(); g.moveTo(6, 43); g.lineTo(122, 43); g.moveTo(6, 85); g.lineTo(122, 85); g.stroke();
   const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4;
   return t;
 }
@@ -323,7 +361,8 @@ function materiales() {
     glass: CALIDAD_ALTA
       ? new THREE.MeshPhysicalMaterial({ color: 0x9fb3c4, metalness: 0, roughness: 0.03, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.5, transmission: 0.95, thickness: 0.006, ior: 1.52, attenuationColor: new THREE.Color(0x4f6b80), attenuationDistance: 0.25, side: THREE.DoubleSide })
       : new THREE.MeshPhysicalMaterial({ color: 0x0c161f, metalness: 0.2, roughness: 0.02, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.6, transparent: true, opacity: 0.62, side: THREE.DoubleSide, depthWrite: false }),
-    solar: new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: relieveSolar, bumpMap: relieveSolar, bumpScale: 0.0012, metalness: 0.3, roughness: 0.24, clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 1.3, side: THREE.DoubleSide }),
+    // (round 4: under glass, as the Aptera's: smoother, with a mirror-like clear coat, and less relief)
+    solar: new THREE.MeshPhysicalMaterial({ color: 0xffffff, map: relieveSolar, bumpMap: relieveSolar, bumpScale: 0.0005, metalness: 0.15, roughness: 0.2, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.4, side: THREE.DoubleSide }),
     // Goma negra mate alrededor de los cristales, y la pieza azul marino del morro (Aptera).
     goma: new THREE.MeshStandardMaterial({ color: 0x141516, metalness: 0.05, roughness: 0.85, side: THREE.DoubleSide }),
     morro: new THREE.MeshPhysicalMaterial({ color: 0x182544, metalness: 0.2, roughness: 0.32, roughnessMap: grano, clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 1.1, side: THREE.DoubleSide }),
@@ -577,7 +616,8 @@ function ocupante(g: THREE.Object3D, M: Mats, m: { occPts: (piloto: boolean) => 
   for (const s of [-1, 1]) {
     // Pierna: muslo y pantorrilla, rodilla ya calculada en el plano; pie según dónde apoya
     const zc = lat + s * (o.anchoPiernas?.[0] ?? 0.09), zp = lat + s * (o.anchoPiernas?.[1] ?? (piloto ? 0.11 : 0.10));
-    const cad = en(o.H, zc), rod = en(o.K, (zc + zp) / 2), tob = en(o.F, zp);
+    const ap = o.anchoPiernas, zr = ap && ap.length > 2 ? lat + s * ap[2]! : (zc + zp) / 2;
+    const cad = en(o.H, zc), rod = en(o.K, zr), tob = en(o.F, zp);
     capsula(g, cad, rod, 0.068, M.pantalon);
     capsula(g, rod, tob, 0.052, M.pantalon);
     const sx = o.F[0] - o.K[0], sy = o.F[1] - o.K[1], sl = Math.hypot(sx, sy) || 1;
@@ -587,7 +627,9 @@ function ocupante(g: THREE.Object3D, M: Mats, m: { occPts: (piloto: boolean) => 
     const hom = en(lo(0.46), lat + s * 0.19);
     sphere(g, hom, 0.06, ropa);
     const manoP: V3 = [o.mano[0], o.mano[1], lat + s * o.anchoMano];
-    const codo = articulacion(hom, manoP, 0.30, 0.28, [0, -1, s * 0.7]);
+    let codo = articulacion(hom, manoP, 0.30, 0.28, [0, -1, s * 0.7]);
+    // (2026-11-15) in a narrow body the elbow bends down instead of out, until it is inside (`codoZ`)
+    if (o.codoZ != null) for (const k of [0.45, 0.2, 0, -0.25]) { if (Math.abs(codo[2]) <= o.codoZ) break; codo = articulacion(hom, manoP, 0.30, 0.28, [0, -1, s * k]); }
     capsula(g, hom, codo, 0.046, ropa);
     capsula(g, codo, manoP, 0.038, M.skin);
     sphere(g, manoP, 0.045, M.skin, [1.25, 0.8, 0.95]);
@@ -759,7 +801,7 @@ function accesoriosA1(g: THREE.Object3D, M: Mats, m: ModeloA1) {
  * pivots (`VehiculoGaraje.pivotes`); the viewer turns each one by how open its
  * kind is (0 closed, 1 open), animated like our own car's doors.
  */
-interface AperturaGaraje { p: number; pObj: number; m: number; mObj: number }
+interface AperturaGaraje { p: number; pObj: number; m: number; mObj: number; b: number; bObj: number }
 function colocarPivotesGaraje(obj: THREE.Object3D, def: VehiculoGaraje, a: AperturaGaraje) {
   for (const pv of def.pivotes ?? []) {
     const o = obj.getObjectByName(pv.nombre); if (!o) continue;
@@ -769,6 +811,8 @@ function colocarPivotesGaraje(obj: THREE.Object3D, def: VehiculoGaraje, a: Apert
     // the frame of the opening only shows while it is open (closed, it sits millimetres under the panel)
     if (pv.conHueco) { const h = obj.getObjectByName(pv.conHueco); if (h) h.visible = f > 0; }
   }
+  // a tilting car (2026-11-15, the Lumeneo Smera): its model leans its body, wheels and arms itself
+  def.bascula?.poner(obj, a.b);
 }
 
 /** Cotas exteriores en el suelo y en vertical, con su número en mm. */
@@ -824,6 +868,7 @@ function cotasGaraje(M: Mats, def: { batalla: number; alto: number; ancho: numbe
 
 function cotas(g: THREE.Object3D, M: Mats, m: Modelo, espacio = false) {
   if (m.tipo === 'bala') { cotasBala(g, M, m); return; }
+  if (m.tipo === 'basculante') { const { cota, mm } = herramientasCota(g, M); cotasBasculante(g, m, cota, mm); return; }
   if (m.tipo === 'triciclo') { cotasTriciclo(g, M, m); return; }
   const { cota, mm, etiqueta } = herramientasCota(g, M);
   const P = m.P, y = 0.004, zL = -(P.W / 2 + 0.38), zB = -(P.W / 2 + 0.16);
@@ -1063,6 +1108,13 @@ function construirFijoA1(G: Record<CapaId, THREE.Group>, M: Mats, m: ModeloA1) {
 function construirMovil(G: Record<CapaId, THREE.Group>, M: Mats, m: Modelo, coche: THREE.Group, angulo: number) {
   // the Bala does not lean and has no moving suspension drawn: its wheels are built with the rest (construirBala)
   if (m.tipo === 'bala') { coche.rotation.x = 0; return; }
+  // ── Cuadriciclo Basculante (2026-11-15): `angulo` is the lean (°, + to the right); the front wheels steer into it
+  if (m.tipo === 'basculante') {
+    const phi = angulo * Math.PI / 180;
+    coche.rotation.x = phi;
+    posarBasculante(G, m, phi, m.phiMax > 1e-6 ? -phi / m.phiMax * m.giro * 0.35 : 0);
+    return;
+  }
   // the Triciclo does not lean either; «Girar ruedas» turns its two front wheels and their pods (Ackermann: the inner one more)
   if (m.tipo === 'triciclo') { coche.rotation.x = 0; girarTriciclo(G, m, angulo); return; }
   if (m.tipo === 'a1') construirMovilA1(G, M, m, coche, angulo); else construirMovilGota(G, M, m, coche, angulo);
@@ -1070,6 +1122,8 @@ function construirMovil(G: Record<CapaId, THREE.Group>, M: Mats, m: Modelo, coch
 
 /** The Triciclo's front wheels and pods turned `angulo` degrees (+ to the left: the left wheel is then the inner one). */
 function girarTriciclo(G: Record<CapaId, THREE.Group>, m: ModeloTriciclo, angulo: number) {
+  // a diamond (2026-11-15): only the nose wheel steers (its fork with it); the pods at the sides stay straight
+  if (m.rombo) { G.ruedas.traverse(o => { if (o.name === 'rueda-morro' || o.userData.horquilla) o.rotation.y = angulo * Math.PI / 180; }); G.suspension.traverse(o => { if (o.userData.horquilla) o.rotation.y = angulo * Math.PI / 180; }); return; }
   const di = Math.abs(angulo) * Math.PI / 180, dout = di > 1e-6 ? anguloFuera(di, m.batalla, m.via.del) : 0, s = Math.sign(angulo);
   for (const capa of [G.carenado, G.ruedas]) capa.traverse(o => {
     if ((o.name !== 'carenado' && o.name !== 'rueda-direccion') || !o.userData.lado) return;
@@ -1083,6 +1137,8 @@ const CAPA_BALA: Record<string, CapaId> = {
   ruedas: 'ruedas', cabina: 'asientos', [PIVOTES_CUPULA[1]]: 'cristales', cupula: 'cristales',
   // 2026-11-12: the Aptera doors' and hatch's glass hang from pivots of their own (balaModelo.ts `pielConPuertas`)
   'puerta-der-cristal': 'cristales', 'puerta-izq-cristal': 'cristales', [`${PIVOTE_PORTON}-cristal`]: 'cristales',
+  // round 3: the passengers' doors' glass
+  'puerta-tras-der-cristal': 'cristales', 'puerta-tras-izq-cristal': 'cristales',
 };
 /**
  * The Cuadriciclo Bala en rombo: the garage model's builder with this design's shape
@@ -1130,6 +1186,62 @@ function repartirBala(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THRE
   }
 }
 
+// ── The «Cuadriciclo Bala clásico» leaning (2026-11-15, Eugenio: «haz que pueda bascular», on his «Smeraptera»)
+/** A pod's own parts (upright, hub motor) in a layer: one group per corner, which leaning moves with its pod. */
+function esquinaB(capa: THREE.Object3D, eje: 'del' | 'tras', s: 1 | -1): THREE.Group {
+  const k = `${eje}${s}`;
+  let g = capa.children.find(o => o.userData.esquinaB === k) as THREE.Group | undefined;
+  if (!g) { g = new THREE.Group(); g.userData.esquinaB = k; g.userData.eje = eje; g.userData.s = s; capa.add(g); }
+  return g;
+}
+const _x = new THREE.Vector3(1, 0, 0);
+function ponerBieleta(o: THREE.Object3D, a: V3, b: V3) {
+  const A = new THREE.Vector3(...a), v = new THREE.Vector3(...b).sub(A), L = v.length();
+  o.position.copy(A).addScaledVector(v, 0.5); o.quaternion.setFromUnitVectors(_up, v.normalize()); o.scale.set(1, Math.max(1e-4, L), 1);
+}
+/**
+ * The «Cuadriciclo Bala clásico» leaning `phi` (rad, + to the right) when its design leans (`m.bascula`): the whole car
+ * turns about the road under its centre line; against the body each pod (with its wheel, upright and motor) moves up or
+ * down and a little in, staying parallel to it, and each arm turns about its inner end (geometriaTriciclo.ts `poseBascula`).
+ */
+function inclinarBala(G: Record<CapaId, THREE.Group>, m: ModeloTriciclo, coche: THREE.Group, phi: number) {
+  const b = m.bascula; coche.rotation.x = b ? phi : 0; if (!b) return;
+  // (a diamond, 2026-11-15, has one axle on arms, the lateral one: the pods the builder calls the front ones)
+  const ejes = { del: b.ejes[0], tras: b.ejes.find(q => q.eje === 'tras') ?? b.ejes[0] };
+  const pose = { del: poseBascula(ejes.del, phi), tras: poseBascula(ejes.tras, phi) };
+  const mover = (o: THREE.Object3D, eje: 'del' | 'tras', s: number) => {
+    const u = o.userData; if (!u.baseB) u.baseB = o.position.clone();
+    const p = pose[eje]; o.position.set(u.baseB.x, u.baseB.y + s * p.dy, u.baseB.z - s * p.dIn);
+  };
+  const lado = (o: THREE.Object3D) => (o.userData.baseB?.z ?? o.position.z) >= 0 ? 1 : -1;
+  G.carenado.traverse(o => { if (o.name === 'carenado' && o.userData.lado) mover(o, 'del', o.userData.lado); else if (o.name === 'carenado-trasero') mover(o, 'tras', lado(o)); });
+  G.ruedas.traverse(o => { if (o.name === 'rueda-direccion') mover(o, 'del', o.userData.lado ?? lado(o)); else if (o.name === 'rueda-trasera' && m.traseras) mover(o, 'tras', lado(o)); });
+  for (const capa of [G.suspension, G.motor]) for (const o of capa.children) if (o.userData.esquinaB) mover(o, o.userData.eje, o.userData.s);
+  // each arm about its inner end, by as much as moves its outer end with the pod
+  const girar = (o: THREE.Object3D, eje: 'del' | 'tras', s: number, i: number) => {
+    const q = ejes[eje], a = q.brazos[i] ?? q.brazos[0]; if (!a) return;
+    const t = -Math.asin(Math.max(-1, Math.min(1, q.Lk * Math.sin(pose[eje].beta) / a.Lk)));
+    const piv = new THREE.Vector3(a.x, a.yCuerpo, s * a.zp);
+    o.quaternion.setFromAxisAngle(_x, t); o.position.copy(piv).sub(piv.clone().applyQuaternion(o.quaternion));
+  };
+  for (const o of G.suspension.children) {
+    if (o.userData.brazoB) { const u = o.userData.brazoB; girar(o, u.eje, u.s, u.i); continue; }
+    if (o.name !== 'brazo') continue;
+    // which arm this is (once): its axle and arm by the nearest inner end, its side by z
+    if (!o.userData.cualB) {
+      const c = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3()); let mejor = { eje: 'del' as 'del' | 'tras', i: 0, d: Infinity };
+      for (const eje of ['del', 'tras'] as const) ejes[eje].brazos.forEach((a, i) => { const d = Math.abs(c.x - a.x) + Math.abs(c.y - a.yCuerpo) * 0.5; if (d < mejor.d) mejor = { eje, i, d }; });
+      o.userData.cualB = { eje: mejor.eje, i: mejor.i, s: c.z >= 0 ? 1 : -1 };
+    }
+    const u = o.userData.cualB; girar(o, u.eje, u.s, u.i);
+  }
+  // the tie rods: from the rack (on the body) to the front uprights' arms (with the pods)
+  for (const o of G.direccion.children) if (o.userData.bieletaB) {
+    const u = o.userData.bieletaB, p = pose.del;
+    ponerBieleta(o, u.a, [u.b[0], u.b[1] + u.s * p.dy, u.b[2] - u.s * p.dIn]);
+  }
+}
+
 /**
  * The Triciclo Bala (2026-11-10): the Cuadriciclo en rombo's builder with three wheels and the reclining
  * cockpit, split into layers as the Bala; and what only the Triciclo has, from its model: the tube
@@ -1149,9 +1261,9 @@ function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<string,
     // four wheels (2026-11-11): a hub motor in each rear wheel, and in each rear pod an upright on the wheel's inner
     // side, held by the pod's two faired arms (drawn with the pods): a simple arm, as in front, that does not steer
     const zInT = Ft.VIA_LAT / 2 - Ft.ANCHO_NEU_LAT / 2 - 0.025, [arT, abT] = brazosDe(Ft);
-    for (const s of [1, -1]) {
-      disk(G.motor, [m.motor.c[0], m.motor.c[1], s * Ft.VIA_LAT / 2], m.motor.r, m.motor.ancho, M.motor);
-      tube(G.suspension, [m.xR, abT.y - 0.02, s * zInT], [m.xR, arT.y + 0.03, s * zInT], 0.03, M.alu);
+    for (const s of [1, -1] as const) {
+      disk(esquinaB(G.motor, 'tras', s), [m.motor.c[0], m.motor.c[1], s * Ft.VIA_LAT / 2], m.motor.r, m.motor.ancho, M.motor);
+      tube(esquinaB(G.suspension, 'tras', s), [m.xR, abT.y - 0.02, s * zInT], [m.xR, arT.y + 0.03, s * zInT], 0.03, M.alu);
     }
   } else {
   disk(G.motor, [m.motor.c[0], m.motor.c[1], 0], m.motor.r, m.motor.ancho, M.motor);
@@ -1167,21 +1279,36 @@ function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<string,
   // front: in each pod, the upright on the wheel's inner side; the coil-over lies along the upper arm, inside its
   // fairing (pushed by the upright, held at the body), so nothing but the faired arms stands in the air
   const zIn = m.via.del / 2 - m.F.ANCHO_NEU_LAT / 2 - 0.025, [arriba, abajo] = m.brazos;
-  for (const s of [1, -1]) {
-    tube(G.suspension, [m.xF, abajo.y - 0.02, s * zIn], [m.xF, arriba.y + 0.03, s * zIn], 0.03, M.alu);
+  for (const s of [1, -1] as const) {
+    tube(esquinaB(G.suspension, 'del', s), [m.xF, abajo.y - 0.02, s * zIn], [m.xF, arriba.y + 0.03, s * zIn], 0.03, M.alu);
     // (a lifted Triciclo's arm runs down from the body, at `yCuerpo`, to the pod: the coil-over follows it)
     const z0 = m.F.ladoZ(m.xF + arriba.x, arriba.yCuerpo);
     if (Number.isFinite(z0)) {
       const yEn = (z: number) => arriba.y + (arriba.yCuerpo - arriba.y) * (zIn - z) / Math.max(1e-6, zIn - z0) - 0.002;
       const a: V3 = [m.xF + arriba.x - 0.02, yEn(zIn - 0.04), s * (zIn - 0.04)], c: V3 = [m.xF + arriba.x - 0.02, yEn(z0 + 0.03), s * (z0 + 0.03)];
-      tube(G.suspension, a, c, 0.012, M.stanch); muelle(G.suspension, [a[0], yEn(zIn - 0.06), s * (zIn - 0.06)], [c[0], yEn(z0 + 0.12), s * (z0 + 0.12)], 0.013, 9, M.muelle);
+      // (it lies along the upper arm: leaning, it turns with it, 2026-11-15)
+      const conBrazo = new THREE.Group(); conBrazo.userData.brazoB = { eje: 'del', s, i: 0 }; G.suspension.add(conBrazo);
+      tube(conBrazo, a, c, 0.012, M.stanch); muelle(conBrazo, [a[0], yEn(zIn - 0.06), s * (zIn - 0.06)], [c[0], yEn(z0 + 0.12), s * (z0 + 0.12)], 0.013, 9, M.muelle);
     }
   }
   // steering: the rack across, the column up to the steering head, the tie rods out to the uprights' arms
   const k = m.cremallera;
+  if (m.rombo) {
+    // a diamond (2026-11-15): no rack to the pods; the nose wheel turns on a fork, its crown joined to the steering column
+    const yAx = m.rR - 0.006, zf = m.F.ANCHO_NEU / 2 + 0.025, yC = 2 * m.rR + 0.06, horq = new THREE.Group(); horq.userData.horquilla = true; G.suspension.add(horq);
+    for (const s of [1, -1]) tube(horq, [0, yAx, s * zf], [-0.05, yC, s * zf], 0.026, M.alu);
+    tube(horq, [-0.05, yC, -zf - 0.015], [-0.05, yC, zf + 0.015], 0.03, M.alu);
+    tube(G.direccion, [-0.05, yC, 0], m.cabezaDireccion, 0.026, M.alu);
+  } else {
   tube(G.direccion, [k.x, k.y, -k.z], [k.x, k.y, k.z], 0.035, M.black);
   tube(G.direccion, [k.x, k.y, 0], m.cabezaDireccion, 0.026, M.alu);
-  for (const s of [1, -1]) tube(G.direccion, [k.x, k.y, s * k.z], [m.xF - 0.07, arriba.y + 0.02, s * zIn], 0.016, M.alu);
+  }
+  if (!m.rombo) for (const s of [1, -1] as const) {
+    // (a unit rod, stretched between its ends: leaning, the upright's end moves with the pod, 2026-11-15)
+    const b = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 1, 12), M.alu); b.castShadow = true;
+    b.userData.bieletaB = { a: [k.x, k.y, s * k.z] as V3, b: [m.xF - 0.07, arriba.y + 0.02, s * zIn] as V3, s };
+    ponerBieleta(b, b.userData.bieletaB.a, b.userData.bieletaB.b); G.direccion.add(b);
+  }
   // everyone on board (round three: up to four, each at their own z; a folded row carries nobody)
   if (calidad === 'completa') for (const q of m.plazas) { if (sinPasajero && !q.piloto) continue; ocupante(G.ocupantes, M, { occPts: () => q.pts }, q.z, q.piloto); }
   for (const c of CAPAS) G[c.k].traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
@@ -1357,15 +1484,84 @@ function construirReferencia(g: THREE.Group, M: Mats, r: Referencia, fantasma: b
   g.traverse((o: any) => { if (o.isMesh && o.material?.isMaterial) (o as any).userData.ref = true; });
 }
 
-export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cuerposTunel, opcionesTunel, alElegirPuntoTunel, puntoTunel = null, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje }, ref) {
+/**
+ * One of the editor's saved designs as a garage car (2026-11-12, Eugenio: «poder comparar el cuadriciclo con el
+ * triciclo en el garaje»): the same builders the viewer uses for our own car (construirFijo/construirMovil for the
+ * Gota and the Aeromóvil 1, construirBala, construirTriciclo), into a group of its own, in full quality and closed,
+ * with materials of its own (shared by every design in the garage, so «Rayos X» and «Corte» never touch them).
+ * Its doors and boot lids come back as garage pivots (named `piv-0`, `piv-1`…), so the viewer opens them like the
+ * Aptera's. Takes about as long as building that design as our own car (a Triciclo, ~1 s): call it once per design.
+ */
+/**
+ * 2026-11-13 («permite también cambiar el color de la carrocería»): the body's paint and its accent. Paint: the
+ * Gota's and the Aeromóvil 1's `body`, the Bala family's `chapa` (and its decal and double-sided copies); accent: the
+ * navy `morro` and `marino`. Only the colour changes: the grain, the clear coat and the sheen stay.
+ */
+function pinturas(M: Mats, Mb: ReturnType<typeof materialesBala>) {
+  return { carroceria: [M.body, Mb.chapa, Mb.chapaCalco, Mb.chapaDoble], acento: [M.morro, Mb.marino, Mb.marinoCalco, Mb.marinoDoble] };
+}
+function pintar(M: Mats, Mb: ReturnType<typeof materialesBala>, c: { carroceria: string; acento: string }) {
+  const p = pinturas(M, Mb);
+  for (const mt of p.carroceria) mt.color.set(c.carroceria);
+  for (const mt of p.acento) mt.color.set(c.acento);
+}
+// ── Cuadriciclo Basculante (2026-11-15): the viewer's helpers and materials, for basculante/modelo3d.ts
+function ayudasVisor(M: Mats): AyudasVisor {
+  return { tube, sphere, disk, cajaRedonda, ruedaCoche, muelle, tuboCurvo, ocupante, M };
+}
+/** The Cuadriciclo Basculante as our own car: everything rebuilt (about as quick as the Gota), the corners at rest or at the current lean. */
+function construirBasculanteVisor(G: Record<CapaId, THREE.Group>, puertasG: Map<string, THREE.Group[]>, M: Mats, m: Extract<Modelo, { tipo: 'basculante' }>, sinPasajero: boolean) {
+  for (const c of CAPAS) vaciar(G[c.k]);
+  puertasG.clear();
+  construirBasculante(G, puertasG, M, m, ayudasVisor(M), { calidad: 'completa', sinPasajero });
+}
+let materialesDisenos: { M: Mats; Mb: ReturnType<typeof materialesBala> } | null = null;
+export function construirDisenoGaraje(m: Modelo): { grupo: THREE.Group; pivotes: PivoteGaraje[] } {
+  if (!materialesDisenos) materialesDisenos = { M: materiales(), Mb: materialesBala() };
+  const { M, Mb } = materialesDisenos;
+  const grupo = new THREE.Group(), G = {} as Record<CapaId, THREE.Group>, puertas = new Map<string, THREE.Group[]>();
+  for (const c of CAPAS) { G[c.k] = new THREE.Group(); G[c.k].name = c.n; grupo.add(G[c.k]); }
+  if (m.tipo === 'triciclo') { construirTriciclo(G, puertas, M, Mb, m, 'completa', false); girarTriciclo(G, m, 0); }
+  else if (m.tipo === 'basculante') { construirBasculante(G, puertas, M, m, ayudasVisor(M), { calidad: 'completa', sinPasajero: false }); posarBasculante(G, m, 0, 0); }
+  else if (m.tipo === 'bala') construirBala(G, puertas, M, Mb, m, 'completa', false);
+  else { construirFijo(G, puertas, M, m, false); construirMovil(G, M, m, grupo, 0); }
+  const pivotes: PivoteGaraje[] = [];
+  let i = 0;
+  for (const lista of puertas.values()) for (const piv of lista) {
+    const u = piv.userData as { eje?: THREE.Vector3; angulo?: number; tipo?: string };
+    if (!u.eje || u.angulo == null) continue;
+    piv.name = `piv-${i++}`;
+    pivotes.push({ nombre: piv.name, tipo: u.tipo === 'maletero' ? 'maletero' : 'puerta', eje: [u.eje.x, u.eje.y, u.eje.z], angulo: u.angulo * 180 / Math.PI });
+  }
+  grupo.traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+  // (the layers by name and the model, for a design that poses itself: the garage's Smera leans with them)
+  grupo.userData.capas = G; grupo.userData.modelo = m;
+  // (2026-11-13: a design in another colour gets its own copies of the paint and accent materials; the shared ones keep the defaults)
+  const c = coloresDe(m.P);
+  if (c.carroceria !== COLOR_CARROCERIA || c.acento !== COLOR_ACENTO) {
+    const p = pinturas(M, Mb), copias = new Map<THREE.Material, THREE.Material>();
+    for (const [lista, color] of [[p.carroceria, c.carroceria], [p.acento, c.acento]] as const) for (const mt of lista) { const k = mt.clone(); k.color.set(color); copias.set(mt, k); }
+    grupo.traverse((o: any) => { if (o.isMesh) o.material = Array.isArray(o.material) ? o.material.map((x: THREE.Material) => copias.get(x) ?? x) : (copias.get(o.material) ?? o.material); });
+  }
+  return { grupo, pivotes };
+}
+
+// the garage's Smera is this family's own model: its builder is this one (the garage cannot import the viewer)
+registrarConstructorSmera(construirDisenoGaraje);
+
+export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cuerposTunel, opcionesTunel, alElegirPuntoTunel, puntoTunel = null, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje, fichasGaraje, alQuitarGaraje, alPincharGaraje, alPincharNuestro, extraTarjeta, seguir, nombres, resaltarNuestro = false, verGaraje = false, margenDerecho = 0, colores, bascular = 0 }, ref) {
   const pinchar = useRef(alPinchar); pinchar.current = alPinchar;
+  const pincharGaraje = useRef(alPincharGaraje); pincharGaraje.current = alPincharGaraje;
+  const pincharNuestro = useRef(alPincharNuestro); pincharNuestro.current = alPincharNuestro;
+  const conExtra = useRef(!!extraTarjeta); conExtra.current = !!extraTarjeta;
+  const fichas = useRef(fichasGaraje); fichas.current = fichasGaraje;
   const elegirPunto = useRef(alElegirPuntoTunel); elegirPunto.current = alElegirPuntoTunel;
   const moverGaraje = useRef(alMoverGaraje); moverGaraje.current = alMoverGaraje;
   const lienzo = useRef<HTMLCanvasElement>(null);
   const estado = useRef<any>(null);
   // The garage car picked with a click or a tap (only one with parts that open), and what is open on each car.
   const [selGaraje, setSelGaraje] = useState<string | null>(null);
-  const [abiertos, setAbiertos] = useState<Record<string, { puertas: boolean; maletero: boolean }>>({});
+  const [abiertos, setAbiertos] = useState<Record<string, { puertas: boolean; maletero: boolean; bascula?: boolean }>>({});
   const elegirGaraje = useRef(setSelGaraje); elegirGaraje.current = setSelGaraje;
   // On a phone (< 640 px) the card goes at the bottom, just above the viewer's toolbar, as one row: at the top it
   // hid the doors rising. The toolbar belongs to the page, so its top is measured from the viewer's own box.
@@ -1539,6 +1735,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       /** The Bala is already on screen (so a change is an edit, rebuilt quick first), not being opened. */
       balaVisto: false as false | 'bala' | 'triciclo',
       curva: false, inclinacion: 0, modelo: null as Modelo | null, plano: new THREE.Plane(new THREE.Vector3(0, 0, 1), 0),
+      /** Cuadriciclo Basculante: «Bascular» running (seconds since it was pressed), or null. */
+      bascula: null as { t: number } | null,
       apertura: 0, aperturaObjetivo: 0, aperturaMal: 0, aperturaMalObjetivo: 0, colocarPuertas: (() => {}) as () => void,
       /** How open the doors and the boot of each garage car are (by id), and where they are heading. */
       garajeAbre: new Map<string, AperturaGaraje>(),
@@ -1551,6 +1749,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     };
     const tamano = new THREE.Vector2();
     estado.current = st;
+    // (dev server only, 2026-11-13) the browser checks find the garage cars on screen through this; a build leaves it out
+    if (import.meta.env.DEV) (window as any).__visorAeromovil = st;
     const colocarPuertas = () => {
       for (const lista of puertasG.values()) for (const piv of lista) {
         piv.quaternion.setFromAxisAngle(piv.userData.eje, piv.userData.angulo * (piv.userData.tipo === 'maletero' ? st.aperturaMal : st.apertura));
@@ -1574,11 +1774,23 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       // anything else closes its card. (A car that can be dragged is picked when the drag ends without moving.)
       const enGaraje = grupoGaraje.children.length ? cocheGarajeEn(true) : null;
       elegirCoche(enGaraje);
-      if (enGaraje || !pinchar.current) return;
+      if (enGaraje || (!pinchar.current && !pincharNuestro.current) || !coche.visible) return;
       const vis: THREE.Object3D[] = [];
-      coche.traverse((o: any) => { if (o.isMesh && o.visible && o.userData.componente) { let p = o.parent, ok = true; while (p && p !== coche) { if (!p.visible) { ok = false; break; } p = p.parent; } if (ok) vis.push(o); } });
+      coche.traverse((o: any) => { if (o.isMesh && o.visible && (o.userData.componente || !pinchar.current)) { let p = o.parent, ok = true; while (p && p !== coche) { if (!p.visible) { ok = false; break; } p = p.parent; } if (ok) vis.push(o); } });
       const hit = ray.intersectObjects(vis, false).find(h => !(h.object as any).material?.transparent || ((h.object as any).material.opacity ?? 1) > 0.3) ?? ray.intersectObjects(vis, false)[0];
-      if (hit) pinchar.current((hit.object as any).userData.componente);
+      if (hit && pinchar.current) { pinchar.current((hit.object as any).userData.componente); return; }
+      // (2026-11-13) our own car, where no part with a sheet was hit: the page opens the design's card
+      if (!pincharNuestro.current) return;
+      const donde = (h: THREE.Intersection) => {
+        const p = coche.worldToLocal(h.point.clone()), nombres: string[] = []; let capa: CapaId | null = null;
+        for (let o: THREE.Object3D | null = h.object; o && o !== coche; o = o.parent) { if (o.name) nombres.push(o.name); const c = CAPAS.find(k => k.n === o!.name && o!.parent === coche); if (c) capa = c.k; }
+        return { punto: [p.x, p.y, p.z] as [number, number, number], capa, nombres };
+      };
+      if (hit) { pincharNuestro.current(donde(hit)); return; }
+      const todas: THREE.Object3D[] = [];
+      coche.traverse((o: any) => { if (o.isMesh && o.visible) { let p = o.parent, ok = true; while (p && p !== coche) { if (!p.visible) { ok = false; break; } p = p.parent; } if (ok) todas.push(o); } });
+      const h2 = ray.intersectObjects(todas, false)[0];
+      if (h2) pincharNuestro.current(donde(h2));
     };
     cv.addEventListener('pointerdown', alBajar); cv.addEventListener('pointerup', alSoltar);
     // Arrastrar un coche del garaje (2026-11-07, Eugenio: «mover los vehículos pulsando sobre ellos y
@@ -1610,9 +1822,14 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       }
       return mejor;
     };
-    const abreAlgo = (obj: THREE.Object3D | null) => !!obj && !!vehiculoGaraje(obj.name)?.pivotes?.length;
-    /** Picks a garage car (its card opens) or, with null or a car with nothing to open, closes the card. */
-    const elegirCoche = (obj: THREE.Object3D | null) => elegirGaraje.current(abreAlgo(obj) ? obj!.name : null);
+    // a car with parts that open or that leans, or one of our designs (it has a card of its own)
+    const abreAlgo = (obj: THREE.Object3D | null) => !!obj && (conExtra.current || !!vehiculoGaraje(obj.name)?.pivotes?.length || !!vehiculoGaraje(obj.name)?.bascula || !!fichas.current?.[obj.name]);
+    /** Picks a garage car (its card opens) or, with null or a car with nothing to open, closes the card. One the page
+     *  takes (one of our designs, 2026-11-13) opens no card here. */
+    const elegirCoche = (obj: THREE.Object3D | null) => {
+      if (obj && pincharGaraje.current?.(obj.name)) { elegirGaraje.current(null); return; }
+      elegirGaraje.current(abreAlgo(obj) ? obj!.name : null);
+    };
     const empezarArrastre = (e: PointerEvent) => {
       if (!moverGaraje.current || e.button !== 0 || !grupoGaraje.children.length) return;
       rayoDesde(e);
@@ -1677,8 +1894,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       }
       // the garage cars' doors and boots, at the same pace
       for (const [id, a] of st.garajeAbre) {
-        if (a.p === a.pObj && a.m === a.mObj) continue;
-        a.p = avanzar(a.p, a.pObj); a.m = avanzar(a.m, a.mObj);
+        if (a.p === a.pObj && a.m === a.mObj && a.b === a.bObj) continue;
+        a.p = avanzar(a.p, a.pObj); a.m = avanzar(a.m, a.mObj); a.b = avanzar(a.b, a.bObj);
         const obj = grupoGaraje.getObjectByName(id), def = vehiculoGaraje(id);
         if (obj && def) colocarPivotesGaraje(obj, def, a);
         st.sombraSucia = true;
@@ -1692,6 +1909,21 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
         const enc = Math.floor(ahora / 333) % 2 === 0;
         M.intermitenteI.emissiveIntensity = st.inclinacion > 2 && enc ? 2.2 : 0.15;
         M.intermitenteD.emissiveIntensity = st.inclinacion < -2 && enc ? 2.2 : 0.15;
+      }
+      // ── Cuadriciclo Basculante (2026-11-15): «Bascular» leans it to its maximum to the right, back, to the left and back
+      // (one sine over 6 s), the front wheels steering into the lean and the indicator on that side blinking
+      // (2026-11-15: and the «Cuadriciclo Bala clásico» whose design leans, `bascula`)
+      const mb = st.modelo, maxB = mb?.tipo === 'basculante' ? mb.P.tiltMax : mb?.tipo === 'triciclo' && mb.bascula ? mb.bascula.phiMax * 180 / Math.PI : 0;
+      if (st.bascula && mb && maxB > 0 && !st.curva) {
+        const T = 6;
+        st.bascula.t += reducir ? T : dt;
+        const fin = st.bascula.t >= T, phi = fin ? 0 : maxB * Math.sin(2 * Math.PI * st.bascula.t / T);
+        st.inclinacion = phi;
+        if (mb.tipo === 'triciclo') inclinarBala(G, mb, coche, phi * Math.PI / 180); else construirMovil(G, M, mb, coche, phi);
+        const enc = Math.floor(ahora / 333) % 2 === 0;
+        M.intermitenteD.emissiveIntensity = phi > 2 && enc ? 2.2 : 0.15; M.intermitenteI.emissiveIntensity = phi < -2 && enc ? 2.2 : 0.15;
+        st.sombraSucia = true;
+        if (fin) st.bascula = null;
       }
       if (st.tunel) { renderer.getSize(tamano); st.tunel.actualizar(reducir ? 0 : ahora / 1000, tamano.x, tamano.y, camera); }
       // Lo que llega tarde a un coche superpuesto (la carrocería del Twizy se descarga) también pasa a fantasma.
@@ -1720,6 +1952,14 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     st.modelo = modelo;
     const cotasYPuertas = () => { vaciar(st.grupoCotas); cotas(st.grupoCotas, st.M, st.modelo, sinPasajero); st.colocarPuertas(); st.sombraSucia = true; };
     cancelAnimationFrame(st.bala.cuadro); if (st.bala.pausa) { clearTimeout(st.bala.pausa); st.bala.pausa = 0; }
+    // ── Cuadriciclo Basculante (2026-11-15): rebuilt whole on every change (~60 ms), at the current lean
+    if (modelo.tipo === 'basculante') {
+      st.balaVisto = false;
+      construirBasculanteVisor(st.G, st.puertasG, st.M, modelo, sinPasajero);
+      construirMovil(st.G, st.M, modelo, st.coche, st.curva || st.bascula ? st.inclinacion : 0);
+      cotasYPuertas();
+      return;
+    }
     if (modelo.tipo !== 'bala' && modelo.tipo !== 'triciclo') {
       st.balaVisto = false;
       construirFijo(st.G, st.puertasG, st.M, modelo, sinPasajero);
@@ -1772,14 +2012,21 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   }, [referencia, modoRef, alinear, modelo, soloGaraje]);
   // El garaje: cada vehículo se construye una vez por cambio de lista (los
   // modelos son pesados) y se coloca con su eje delantero en (x, z).
-  const claveGaraje = garaje.map(v => v.id).join('|');
+  // (2026-11-13) Only the cars that came in, left, or changed version (`v`) are rebuilt: picking another design
+  // swaps two cars in a garage of ten, and rebuilding all ten took the whole switch. «Superponer» rebuilds them all.
+  const claveGaraje = garaje.map(v => (v.v ? `${v.id}@${v.v}` : v.id)).join('|');
   useEffect(() => {
     const st = estado.current; if (!st) return;
     const g: THREE.Group = st.grupoGaraje;
-    for (const o of g.children) liberarFantasma(o);
-    vaciar(g);
+    const todo = st.superponer !== superponer, quiero = new Map(garaje.map(v => [v.id, v.v ?? '']));
     st.superponer = superponer;
+    for (const o of [...g.children]) {
+      if (!todo && quiero.get(o.name) === o.userData.version) continue;
+      liberarFantasma(o); g.remove(o);
+      o.traverse((c: any) => { c.geometry?.dispose?.(); if (c.isSprite) { c.material.map?.dispose(); c.material.dispose(); } });
+    }
     for (const v of garaje) {
+      if (g.children.some(o => o.name === v.id)) continue;
       const def = vehiculoGaraje(v.id); if (!def) continue;
       // Un modelo del garaje que falla no puede tumbar el visor entero: se queda fuera y lo dice la consola.
       let obj: THREE.Group;
@@ -1791,10 +2038,11 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       if (superponer) { hacerFantasma(obj, colorSuperpuesto(v.id)); obj.add(siluetas(def, colorSuperpuesto(v.id))); }
       // a rebuilt car keeps its doors and boot as they were
       const a = st.garajeAbre.get(v.id); if (a) colocarPivotesGaraje(obj, def, a);
+      obj.userData.version = v.v ?? '';
       g.add(obj);
     }
     // Las posiciones se ponen ya (el efecto de abajo solo corre si cambian).
-    for (const v of garaje) { const obj = g.getObjectByName(v.id); if (obj) { obj.position.set(v.x, 0, v.z); obj.rotation.y = v.giro ?? 0; } }
+    for (const v of garaje) { const obj = g.children.find(o => o.name === v.id); if (obj) { obj.position.set(v.x, 0, v.z); obj.rotation.y = v.giro ?? 0; } }
     st.sombraSucia = true;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [claveGaraje, superponer]);
@@ -1807,7 +2055,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   useEffect(() => { const st = estado.current; if (st && superponer) mostrarSiluetas(st.grupoGaraje, vista); }, [vista, superponer, claveGaraje]);
   useEffect(() => {
     const st = estado.current; if (!st) return;
-    for (const v of garaje) { const obj = st.grupoGaraje.getObjectByName(v.id); if (obj) { obj.position.set(v.x, 0, v.z); obj.rotation.y = v.giro ?? 0; } }
+    for (const v of garaje) { const obj = st.grupoGaraje.children.find((o: THREE.Object3D) => o.name === v.id); if (obj) { obj.position.set(v.x, 0, v.z); obj.rotation.y = v.giro ?? 0; } }
     st.sombraSucia = true;
   }, [garaje]);
   // Túnel de viento (2026-11-09: flujo calculado, ver tunelViento.ts): se rehace cuando cambia un cuerpo, su sitio,
@@ -1841,14 +2089,60 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [claveCarteles, modelo]);
+  // (2026-11-13) Each car's name, small, while no other label is on: in a garage full of our designs they look alike.
+  const claveNombres = !claveCarteles && !tunel && nombres ? JSON.stringify(nombres) + garaje.map(v => `${v.id}@${v.x},${v.z},${v.giro ?? 0}`).join('|') + (soloGaraje ? '|solo' : '') : '';
+  useEffect(() => {
+    const st = estado.current; if (!st) return;
+    let g = st.scene.getObjectByName('nombres') as THREE.Group | undefined;
+    if (g) { g.traverse((o: any) => { if (o.isSprite) { o.material.map?.dispose(); o.material.dispose(); } }); st.scene.remove(g); }
+    if (!claveNombres || !nombres) return;
+    g = new THREE.Group(); g.name = 'nombres'; st.scene.add(g);
+    const poner = (texto: string | undefined, x: number, y: number, z: number) => { if (!texto) return; const c = cartel(texto); c.scale.multiplyScalar(0.8); c.position.set(x, y, z); c.userData.texto = texto; g!.add(c); };
+    if (!soloGaraje && garaje.length) poner(nombres.aeromovil, (modelo.xn + modelo.xt) / 2, modelo.P.H + 0.35, 0);
+    for (const v of garaje) {
+      const def = vehiculoGaraje(v.id); if (!def) continue;
+      const xs = def.envolvente?.map(e => e[0]) ?? def.morroCola, xm = xs?.length ? (Math.max(...xs) + Math.min(...xs)) / 2 : -def.batalla / 2, gi = v.giro ?? 0;
+      poner(nombres[v.id], v.x + xm * Math.cos(gi), def.alto + 0.35, v.z - xm * Math.sin(gi));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [claveNombres, modelo.xn, modelo.xt, modelo.P.H]);
+  // The floor mark under the design being edited (only when there are other cars to tell it from).
+  const conResalte = resaltarNuestro && !soloGaraje && garaje.length > 0 && modoRef !== 'sola';
+  useEffect(() => {
+    const st = estado.current; if (!st) return;
+    let m = st.scene.getObjectByName('resalte') as THREE.Mesh | undefined;
+    if (m) { m.geometry.dispose(); (m.material as THREE.Material).dispose(); st.scene.remove(m); }
+    if (!conResalte) return;
+    const L = modelo.xn - modelo.xt + 0.5, W = modelo.P.W + 0.5, r = 0.35, f = new THREE.Shape();
+    f.moveTo(-L / 2 + r, -W / 2); f.lineTo(L / 2 - r, -W / 2); f.quadraticCurveTo(L / 2, -W / 2, L / 2, -W / 2 + r); f.lineTo(L / 2, W / 2 - r);
+    f.quadraticCurveTo(L / 2, W / 2, L / 2 - r, W / 2); f.lineTo(-L / 2 + r, W / 2); f.quadraticCurveTo(-L / 2, W / 2, -L / 2, W / 2 - r); f.lineTo(-L / 2, -W / 2 + r);
+    f.quadraticCurveTo(-L / 2, -W / 2, -L / 2 + r, -W / 2);
+    m = new THREE.Mesh(new THREE.ShapeGeometry(f, 6), new THREE.MeshBasicMaterial({ color: 0x0f766e, transparent: true, opacity: 0.16, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }));
+    m.name = 'resalte'; m.rotation.x = -Math.PI / 2; m.position.set((modelo.xn + modelo.xt) / 2, 0.004, 0); m.renderOrder = 1;
+    st.scene.add(m);
+  }, [conResalte, modelo.xn, modelo.xt, modelo.P.W]);
   // Al abrir el túnel con más de un coche, la cámara se aleja y se eleva para verlos a la vez
   // (con las estelas delante); al cerrarlo vuelve a la vista que estaba elegida.
   // Túnel o carteles de consumo: hay que ver todos los coches a la vez.
-  const verTodos = tunel || !!carteles;
+  const verTodos = tunel || !!carteles || verGaraje;
   const claveEncuadre = verTodos ? garaje.map(v => `${v.x},${v.z}`).join('|') : '';
+  // (2026-11-13) The design being edited changed place: the camera moves with the cars (the picture does not jump)
+  // and then eases onto the new one. Before the framing below, which takes over when every car must be seen.
+  useEffect(() => {
+    const st = estado.current; if (!st || !seguir) return;
+    const d = new THREE.Vector3(seguir.dx, 0, seguir.dz);
+    st.camera.position.add(d); st.controls.target.add(d);
+    st.target.set(-1.5, 0.55, 0);
+    st.tween = { from: st.camera.position.clone(), to: new THREE.Vector3(...VISTAS[vista]), tf: st.controls.target.clone(), t: 0 };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seguir?.n]);
+  // The garage on its own (no tunnel, no labels): seen from the side, a little from behind and above, as the rows run.
+  const deLado = verGaraje && !tunel && !carteles;
   useEffect(() => {
     const st = estado.current; if (!st) return;
-    const enGaraje = garaje.filter(v => vehiculoGaraje(v.id)?.envolvente);
+    // (our designs have no silhouette, only their nose and tail: `morroCola`, 2026-11-13)
+    const extremos = (id: string) => { const d = vehiculoGaraje(id); return d?.envolvente ? d.envolvente.map(e => e[0]) : d?.morroCola; };
+    const enGaraje = garaje.filter(v => extremos(v.id));
     const zs = [...(soloGaraje ? [] : [0]), ...enGaraje.map(v => v.z)];
     const xs = [...(soloGaraje ? [] : [0]), ...enGaraje.map(v => v.x)];
     if (verTodos && zs.length > 1) {
@@ -1871,14 +2165,30 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       const estela = tunel ? 2 : 0;
       if (!soloGaraje) caja(Math.max(modelo.xn, modelo.xt), Math.min(modelo.xn, modelo.xt) - estela, 0, modelo.P.W / 2, modelo.P.H + 0.9);
       for (const v of enGaraje) {
-        const def = vehiculoGaraje(v.id)!, ex = def.envolvente!.map(e => e[0]), gi = v.giro ?? 0;
+        const def = vehiculoGaraje(v.id)!, ex = extremos(v.id)!, gi = v.giro ?? 0;
         caja(Math.max(...ex), Math.min(...ex) - estela, 0, def.ancho / 2, def.alto + 0.9, gi);
         for (const p of puntos.slice(-8)) { p.x += v.x; p.z += v.z; }
       }
+      let libre = 1;
+      if (deLado) {
+        // (2026-11-13) the rows run along x: centred on every car, from the side, into the width a panel leaves free
+        const caja3 = new THREE.Box3().setFromPoints(puntos), c = caja3.getCenter(new THREE.Vector3());
+        st.target.set(c.x, 0.6, c.z);
+        destino = st.target.clone().add(new THREE.Vector3(-0.35, 0.55, -1).multiplyScalar(8));
+        const ancho = st.renderer.domElement.clientWidth || 1;
+        libre = Math.min(1, Math.max(0.4, 1 - margenDerecho / ancho));
+      }
       const haciaCamara = destino.clone().sub(st.target);
       const hastaAhora = Math.min(haciaCamara.length(), MAX_ORBITA);
-      const distancia = Math.max(hastaAhora, Math.min(75, distanciaParaVer(puntos, st.target, haciaCamara, st.camera)));
+      const distancia = Math.max(hastaAhora, Math.min(75, distanciaParaVer(puntos, st.target, haciaCamara, st.camera, 0.9 * libre)));
       destino = st.target.clone().addScaledVector(haciaCamara.normalize(), distancia);
+      if (libre < 1) {
+        // the cars move left into the free part: target and camera shift right by the covered half
+        const derecha = new THREE.Vector3().crossVectors(haciaCamara.clone().negate(), st.camera.up).normalize();
+        const mitad = distancia * Math.tan(THREE.MathUtils.degToRad(st.camera.fov) / 2) * st.camera.aspect;
+        const corre = derecha.multiplyScalar((1 - libre) * mitad);
+        st.target.add(corre); destino.add(corre);
+      }
       st.controls.maxDistance = Math.max(MAX_ORBITA, distancia + 1); st.maxOrbitaAlVolver = 0;
       st.tween = { from: st.camera.position.clone(), to: destino, tf: st.controls.target.clone(), t: 0 };
     } else if (!verTodos && (st.target.x !== -1.5 || st.target.z !== 0)) {
@@ -1886,15 +2196,15 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       st.tween = { from: st.camera.position.clone(), to: new THREE.Vector3(...VISTAS[vista]), tf: st.controls.target.clone(), t: 0 };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [verTodos, claveEncuadre, soloGaraje, tunel]);
+  }, [verTodos, claveEncuadre, soloGaraje, tunel, deLado, margenDerecho]);
   useEffect(() => { const st = estado.current; if (!st) return; st.coche.visible = !soloGaraje && !(referencia && modoRef === 'sola'); st.grupoCotas.visible = !soloGaraje && verCotas && modoRef !== 'sola'; }, [soloGaraje, referencia, modoRef, verCotas]);
   useEffect(() => { const st = estado.current; if (st) st.aperturaObjetivo = abierta ? 1 : 0; }, [abierta]);
   // «Abrir puertas» / «Abrir maletero» of a garage car: where each one is heading (the loop animates it)
   useEffect(() => {
     const st = estado.current; if (!st) return;
     for (const [id, a] of Object.entries(abiertos)) {
-      const e: AperturaGaraje = st.garajeAbre.get(id) ?? { p: 0, pObj: 0, m: 0, mObj: 0 };
-      e.pObj = a.puertas ? 1 : 0; e.mObj = a.maletero ? 1 : 0; st.garajeAbre.set(id, e);
+      const e: AperturaGaraje = st.garajeAbre.get(id) ?? { p: 0, pObj: 0, m: 0, mObj: 0, b: 0, bObj: 0 };
+      e.pObj = a.puertas ? 1 : 0; e.mObj = a.maletero ? 1 : 0; e.bObj = a.bascula ? 1 : 0; st.garajeAbre.set(id, e);
     }
   }, [abiertos]);
   // the picked car left the garage (hidden): its card goes too
@@ -1912,13 +2222,21 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     // The editor's Bala: its paint (and everything painted on it) goes see-through, the inner skin disappears;
     // «Corte» cuts every one of its materials at the centre plane, so the cockpit shows.
     const Mb = st.Mb as ReturnType<typeof materialesBala>;
-    for (const mt of [Mb.chapa, Mb.marino, Mb.chapaDoble, Mb.marinoDoble, Mb.chapaCalco, Mb.marinoCalco, Mb.rojo, Mb.rojoDoble, Mb.rojoPieza, Mb.junta, Mb.negroBrillo, Mb.negroMate, Mb.grisOscuro, Mb.solar]) {
+    for (const mt of [Mb.chapa, Mb.blancoInterior, Mb.marino, Mb.chapaDoble, Mb.marinoDoble, Mb.chapaCalco, Mb.marinoCalco, Mb.rojo, Mb.rojoDoble, Mb.rojoPieza, Mb.junta, Mb.negroBrillo, Mb.negroMate, Mb.grisOscuro, Mb.solar]) {
       mt.transparent = rayosX; mt.opacity = rayosX ? 0.16 : 1; mt.depthWrite = !rayosX;
     }
     Mb.forro.visible = !rayosX;
     for (const mt of Object.values(Mb)) { mt.clippingPlanes = cp; mt.needsUpdate = true; }
   }, [rayosX, corte]);
 
+  // 2026-11-13: the body's colours, on the materials only (no rebuild)
+  useEffect(() => {
+    const st = estado.current; if (!st) return;
+    pintar(st.M, st.Mb, colores ?? { carroceria: COLOR_CARROCERIA, acento: COLOR_ACENTO }); st.sombraSucia = true;
+  }, [colores?.carroceria, colores?.acento]);
+
+  // Cuadriciclo Basculante: «Bascular» (each press starts the lean over again)
+  useEffect(() => { const st = estado.current; if (st && bascular > 0) st.bascula = { t: 0 }; }, [bascular]);
   useEffect(() => {
     const st = estado.current; if (!st) return;
     st.curva = curva;
@@ -1973,9 +2291,10 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   }), []);
 
   const defSel = selGaraje ? vehiculoGaraje(selGaraje) : undefined;
+  const fichaSel = selGaraje ? fichasGaraje?.[selGaraje] : undefined;
   const tiposSel = new Set(defSel?.pivotes?.map(p => p.tipo));
-  const estSel = (selGaraje && abiertos[selGaraje]) || { puertas: false, maletero: false };
-  const alternar = (k: 'puertas' | 'maletero') => { if (selGaraje) setAbiertos(a => ({ ...a, [selGaraje]: { ...estSel, [k]: !estSel[k] } })); };
+  const estSel = (selGaraje && abiertos[selGaraje]) || { puertas: false, maletero: false, bascula: false };
+  const alternar = (k: 'puertas' | 'maletero' | 'bascula') => { if (selGaraje) setAbiertos(a => ({ ...a, [selGaraje]: { ...estSel, [k]: !estSel[k] } })); };
   const botonCarta = estrecho ? 'h-10 shrink-0 px-2 text-[11px] normal-case tracking-normal' : 'gap-1.5 px-2.5 py-1.5 text-[11px] normal-case tracking-normal';
   const botones = (
     <>
@@ -1989,36 +2308,67 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
           {!estrecho && <PackageOpen className="h-3.5 w-3.5" />}{estSel.maletero ? 'Cerrar maletero' : 'Abrir maletero'}
         </Button>
       )}
+      {/* «Bascular» (2026-11-15): a tilting car leans to its maximum angle, wheels and all, and back */}
+      {defSel?.bascula && (
+        <Button variant="outline" aria-pressed={!!estSel.bascula} onClick={() => alternar('bascula')} className={botonCarta}
+          title={estSel.bascula ? 'Volver a ponerlo derecho' : `Inclinarlo ${defSel.bascula.angulo}°, como en una curva`}>
+          {!estrecho && <MoveDiagonal className="h-3.5 w-3.5" />}{estSel.bascula ? 'Enderezar' : 'Bascular'}
+        </Button>
+      )}
     </>
   );
   return (
     <>
-      <canvas ref={lienzo} className="absolute inset-0 h-full w-full touch-none" aria-label={modelo.tipo === 'a1' ? 'Modelo 3D del Aeromóvil 1' : modelo.tipo === 'bala' ? 'Modelo 3D del Cuadriciclo Bala en rombo' : modelo.tipo === 'triciclo' ? (modelo.traseras ? 'Modelo 3D del Cuadriciclo Bala clásico' : 'Modelo 3D del Triciclo Bala') : 'Modelo 3D del Aeromóvil Gota'} />
+      <canvas ref={lienzo} className="absolute inset-0 h-full w-full touch-none" aria-label={modelo.tipo === 'basculante' ? 'Modelo 3D del Cuadriciclo Basculante' : modelo.tipo === 'a1' ? 'Modelo 3D del Aeromóvil 1' : modelo.tipo === 'bala' ? 'Modelo 3D del Cuadriciclo Bala en rombo' : modelo.tipo === 'triciclo' ? (modelo.traseras ? 'Modelo 3D del Cuadriciclo Bala clásico' : 'Modelo 3D del Triciclo Bala') : 'Modelo 3D del Aeromóvil Gota'} />
       {/* The card of a garage car picked with a click or a tap: its doors and its boot (2026-11-12). */}
-      {defSel && estrecho && (
+      {/* One of our designs in the garage (2026-11-12): its figures, its doors and «Quitar del garaje». On a phone at the bottom, above the toolbar. */}
+      {defSel && fichaSel && (
+        <Card role="group" data-tarjeta-garaje="" aria-label={`${defSel.nombre}: diseño en el garaje`} style={estrecho ? { bottom: bajoCarta } : undefined}
+          className={estrecho ? 'absolute inset-x-3 z-[16] p-2.5 shadow-lg' : 'absolute left-3 top-12 z-[16] w-[min(300px,calc(100%-24px))] p-3 shadow-lg'}>
+          <div className="flex items-start gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-slate-900">{defSel.nombre}</p>
+              {fichaSel.map((l, i) => <p key={i} className="text-[11px] leading-snug text-slate-600">{l}</p>)}
+            </div>
+            <Button variant="ghost" onClick={() => setSelGaraje(null)} aria-label="Cerrar" title="Cerrar" className="-mr-1.5 -mt-1.5 h-10 w-10 shrink-0 p-0">
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {botones}
+            {alQuitarGaraje && (
+              <Button variant="outline" onClick={() => { const id = selGaraje!; setSelGaraje(null); alQuitarGaraje(id); }} className={botonCarta}>
+                {!estrecho && <Trash2 className="h-3.5 w-3.5" />}Quitar del garaje
+              </Button>
+            )}
+          </div>
+        </Card>
+      )}
+      {defSel && !fichaSel && estrecho && (
         <Card role="group" data-tarjeta-garaje="" aria-label={`${defSel.nombre}: puertas y maletero`} style={{ bottom: bajoCarta }}
           className="absolute inset-x-3 z-[16] flex items-center gap-1 p-1.5 shadow-lg">
           <span className="min-w-0 flex-1 truncate pl-1 text-sm font-semibold text-slate-900">{defSel.nombre}</span>
           {botones}
+          {extraTarjeta?.(selGaraje!)}
           <Button variant="ghost" onClick={() => setSelGaraje(null)} aria-label="Cerrar" title="Cerrar" className="h-10 w-10 shrink-0 p-0">
             <X className="h-5 w-5" />
           </Button>
         </Card>
       )}
-      {defSel && !estrecho && (
+      {defSel && !fichaSel && !estrecho && (
         <Card role="group" data-tarjeta-garaje="" aria-label={`${defSel.nombre}: puertas y maletero`} className="absolute left-3 top-12 z-[16] w-[min(280px,calc(100%-24px))] p-3 shadow-lg">
           <div className="flex items-start gap-2">
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-slate-900">{defSel.nombre}</p>
-              <p className="text-[11px] leading-snug text-slate-500">
-                Abre sus puertas y su maletero para ver cómo se abren.{alMoverGaraje ? ' Para moverlo, púlsalo y arrástralo.' : ''}
-              </p>
+              {(tiposSel.size > 0 || defSel.bascula || alMoverGaraje) && <p className="text-[11px] leading-snug text-slate-500">
+                {tiposSel.size > 0 ? `Abre ${[tiposSel.has('puerta') && 'sus puertas', tiposSel.has('maletero') && 'su maletero'].filter(Boolean).join(' y ')} para ver cómo se ${tiposSel.has('puerta') ? 'abren' : 'abre'}. ` : ''}{defSel.bascula ? `«Bascular» lo inclina ${defSel.bascula.angulo}° con las cuatro ruedas, como en una curva.` : ''}{alMoverGaraje ? ' Para moverlo, púlsalo y arrástralo.' : ''}
+              </p>}
             </div>
             <Button variant="ghost" onClick={() => setSelGaraje(null)} aria-label="Cerrar" title="Cerrar" className="-mr-1.5 -mt-1.5 h-10 w-10 p-0">
               <X className="h-4 w-4" />
             </Button>
           </div>
-          <div className="mt-2 flex flex-wrap gap-1.5">{botones}</div>
+          <div className="mt-2 flex flex-wrap gap-1.5">{botones}{extraTarjeta?.(selGaraje!)}</div>
         </Card>
       )}
     </>

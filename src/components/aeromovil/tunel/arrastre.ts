@@ -80,7 +80,11 @@ export function desgloseCd(o: {
  * (src/components/aeromovil/garaje/). Tyre diameter = rim + 2 × sidewall.
  */
 const tyre = (anchoMm: number, perfil: number, llantaPulg: number) => ({ d: llantaPulg * 0.0254 + 2 * anchoMm / 1000 * perfil / 100, w: anchoMm / 1000 });
-export const RUEDAS_GARAJE: Record<string, { ruedas: RuedaTunel[]; nota: string }> = {
+/**
+ * `fueraDelAjuste`: a car the tunnel computes and shows next to its published Cd, but that is not used to fit
+ * DCD_DETALLES (scripts/tunel-pruebas.ts leaves it out of the calibration and of `CALIBRACION.coches`).
+ */
+export const RUEDAS_GARAJE: Record<string, { ruedas: RuedaTunel[]; nota: string; fueraDelAjuste?: string }> = {
   // 125/80 R13 front, 145/80 R13 rear, all four outside the body
   twizy: { ruedas: [...Array(2)].map(() => ({ ...tyre(125, 80, 13), tipo: 'fuera' as const })).concat([...Array(2)].map(() => ({ ...tyre(145, 80, 13), tipo: 'fuera' as const }))), nota: 'cuatro ruedas al aire (125/80 R13 y 145/80 R13)' },
   // two front wheels in pods on arms, the rear one inside the keel; 16″ rim, ~0.59 m × 0.165 m (aptera.ts)
@@ -100,5 +104,14 @@ export const RUEDAS_GARAJE: Record<string, { ruedas: RuedaTunel[]; nota: string 
   // 16″ rims with narrow eco tyres (0.55 m × 0.09 m, nusKruceForma.ts) behind black disc covers, in open
   // arches: the front ones flush with the body side, the rear ones under flared fenders
   nusKruce: { ruedas: [...Array(4)].map(() => ({ d: 0.55, w: 0.09, tipo: 'paso' as const })), nota: 'cuatro ruedas en pasos de rueda, con tapacubos lisos' },
+  // 255/45 R19 (0.712 m × 0.255 m) in open arches, all four (modeloYForma.ts). Added 2026-11-12, outside the fit:
+  // Eugenio decided that day not to move the calibration, so no Cd shown for our designs changes
+  modeloY: { ruedas: [...Array(4)].map(() => ({ ...tyre(255, 45, 19), tipo: 'paso' as const })), nota: 'cuatro ruedas de 19″ en pasos de rueda', fueraDelAjuste: 'añadido el 2026-11-12 sin tocar la calibración (decisión de Eugenio)' },
+  // 185/65 R20 (0.749 m × 0.185 m) behind flat covers in arches flush with the body (eqxxForma.ts). Added 2026-11-15,
+  // outside the fit like the Model Y: no Cd shown for our designs changes
+  eqxx: { ruedas: [...Array(4)].map(() => ({ ...tyre(185, 65, 20), tipo: 'paso' as const })), nota: 'cuatro ruedas de 20″ tras tapacubos lisos, enrasadas', fueraDelAjuste: 'añadido el 2026-11-15 sin tocar la calibración (como el Model Y)' },
+  // Lumeneo Smera: four 145/70 R14 (the replica, basculante/smera.ts) at the corners, in the open under their mudguards. It has no
+  // published Cd, so it never enters the fit (the fit only takes cars with `aero`); the tunnel shows its own estimate
+  smera: { ruedas: [...Array(4)].map(() => ({ ...tyre(145, 70, 14), tipo: 'fuera' as const })), nota: 'cuatro ruedas al aire bajo sus guardabarros (145/70 R14)' },
   bala: { ruedas: [{ d: 0.61, w: 0.08, tipo: 'dentro' }, { d: 0.61, w: 0.08, tipo: 'dentro' }, { d: 0.508, w: 0.07, tipo: 'carenado' }, { d: 0.508, w: 0.07, tipo: 'carenado' }], nota: 'delantera y trasera dentro de la carrocería, las laterales en carenados sobre brazos' },
 };

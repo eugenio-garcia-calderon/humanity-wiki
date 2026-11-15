@@ -1,5 +1,5 @@
 import type { Est } from './forma';
-import { monotona, punto, tArriba, type FormaBala } from './balaForma';
+import { Y_VIDRIO_REF, punto, tArriba, type FormaBala } from './balaForma';
 
 /*
  * The «Cuadriciclo Bala en rombo»'s hand-placed measurements, apart from the skin:
@@ -117,6 +117,31 @@ export const ALETA = { raiz: [-2.50, -3.05] as [number, number], punta: [[-2.875
 /** Where the riders sit: hip x (negative: behind the front axle) and the saddle's height under each, above the road. */
 export interface Asientos { xPiloto: number; yPiloto: number; xPasajero: number; yPasajero: number }
 export const ASIENTO: Asientos = { xPiloto: -1.06, yPiloto: 0.44, xPasajero: -1.54, yPasajero: 0.47 };
+/**
+ * Round 3 interior (2026-11-12, Eugenio: «los asientos por los bonitos como los de la Aptera»): the Triciclo's bucket
+ * seat, sculpted as the Aptera's (press photos of Aptera's interior: a light one-piece shell, white outside, with a dark
+ * cushion and backrest pad and the headrest grown out of the shell; no drawings are published, so the sizes are a car
+ * bucket's). Metres from the rider's hips (x) and the cushion's top (y), along the backrest for its heights.
+ */
+export const BUTACA = {
+  delante: 0.31,   // the cushion's front edge, ahead of the hips
+  detras: 0.21,    // the shell's back at the cushion, behind the hips
+  bisagra: 0.17,   // the backrest's front face at its foot, behind the hips (as the car seats': the trunk leans on it)
+  pan: 0.06,       // the shell's underside below the cushion's top (as `PAN_ASIENTO`)
+  respaldo: 0.62,  // the backrest's height along it, from the cushion
+  cabezal: 0.21,   // the headrest above it, out of the same shell
+  grueso: 0.075,   // the backrest shell's thickness
+  semi: { cojin: 0.25, pie: 0.24, hombros: 0.225, cuello: 0.115, cabezal: 0.135 },
+} as const;
+/** The bucket's backrest half-width `h` metres up from the cushion (m): wide at its foot, the shoulders' wings, a waist at the neck and the headrest. */
+export function semiRespaldoButaca(h: number): number {
+  const B = BUTACA, S = B.semi, R = B.respaldo;
+  if (h <= 0) return S.pie;
+  if (h <= R) return S.pie + (S.hombros - S.pie) * h / R;
+  const u = (h - R) / B.cabezal;
+  if (u <= 0.25) return S.hombros + (S.cuello - S.hombros) * u / 0.25;
+  return u >= 1 ? S.cabezal * 0.9 : S.cuello + (S.cabezal - S.cuello) * Math.min(1, (u - 0.25) / 0.35);
+}
 /** Half-width of the reference handlebar at the bar-end weight's outer face (m). */
 const MANILLAR = 0.325 + 0.006;
 /**
@@ -136,18 +161,27 @@ export const extremoManillar = (F: FormaBala, d: [number, number] = [0, 0]): [nu
 
 // ======================================================================= canopy
 /** Lower edge of the canopy glass in side view (reference drawing). Where it meets the top line, the glass ends (rounded in plan). */
-export const Y_VIDRIO_REF = monotona([[-0.10, 0.80], [-0.25, 0.815], [-0.45, 0.815], [-0.8, 0.815], [-1.2, 0.83], [-1.5, 0.855], [-1.65, 0.90], [-1.78, 0.99], [-1.9, 1.10], [-2.0, 1.20], [-2.1, 1.30]]);
+// (2026-11-13: the table lives in balaForma.ts, which needs it for the smooth body's deck zones; the same numbers)
+export { Y_VIDRIO_REF };
 /** The navy canopy frame: this much below the glass, all round it. Its outer edge is the canopy's shut line. */
 export const MARCO_CUPULA = 0.035;
 /** The canopy of a shape: its glass edge and frame edge in side view, and where each meets the top line. */
 export function contornoCupula(F: FormaBala) {
-  const Y_VIDRIO = (x: number) => F.alturaArriba(Y_VIDRIO_REF(F.R(x)));
+  // round 3 (2026-11-12): the body/glass line moved `lineaCupula` (absent: exactly as before, the same brackets too)
+  const dl = F.D.lineaCupula ?? 0;
+  const Y_VIDRIO = dl ? (x: number) => F.alturaArriba(Y_VIDRIO_REF(F.R(x))) + dl : (x: number) => F.alturaArriba(Y_VIDRIO_REF(F.R(x)));
   const yMarco = (x: number) => Y_VIDRIO(x) - MARCO_CUPULA;
   /** Where a side-view line meets the top line, by bisection between xa (line below the top) and xb (line above it). */
   const cruce = (linea: (x: number) => number, xa: number, xb: number): number => {
     let a = xa, b = xb;
     for (let i = 0; i < 50; i++) { const m = (a + b) / 2; if (techoEn(F, m) - linea(m) > 0) a = m; else b = m; }
     return (a + b) / 2;
+  };
+  // (a moved line meets the top line elsewhere: searched from the crest to the nose ring and to the tail ring)
+  if (dl) return {
+    Y_VIDRIO, yMarco,
+    XC0: cruce(Y_VIDRIO, F.X(-1.30), F.X(0.30)), XC1: cruce(Y_VIDRIO, F.X(-1.30), F.X(-2.86)),
+    XF0: cruce(yMarco, F.X(-1.30), F.X(0.30)), XF1: cruce(yMarco, F.X(-1.30), F.X(-2.86)),
   };
   return {
     Y_VIDRIO, yMarco,
@@ -185,6 +219,13 @@ export interface OpcionesVentanas {
   alto: number;
   /** The A-pillar and the rail frame, or null (a single bubble, as the Cuadriciclo en rombo's). */
   pilar: { x: number; barrido: number; ancho: number } | null;
+  /**
+   * Round 4 (2026-11-13, Eugenio: «un montante en el parabrisas en la parte superior… que rodee todos los paneles del
+   * techo, entre el techo solar y el cristal… 10 cm de ancho»): a laminate frame this wide (m) between the roof panel and
+   * the glass: across the windscreen's top (the panel's leading edge goes back this much) and along both roof rails (the
+   * panel's side edges go up this much, measured on the skin from the rail line). Absent or 0: no frame, as before.
+   */
+  marcoTecho?: number;
 }
 /** How much further forward the panel reaches on the centre line than at the rail (m): its rounded leading edge. */
 export const BOMBEO_SOLAR = 0.14;
@@ -204,6 +245,33 @@ export function ventanasDe(F: FormaBala, C: Contorno, o: OpcionesVentanas) {
     };
     panel = { x0: C.XC1 + 1e-4, x1, xS, tLow };
   }
+  // ── round 4: the roof frame, cut out of the panel's edge (only when asked: absent, the panel is exactly as before)
+  // (`tLo` its outer edge, the panel's old one; `tHi` its inner edge, the panel's new one; `tCuenta` where its own laminate
+  // starts for the areas: above the upper half of the rail's band, which `areaMarco` already counts)
+  let marco: null | { x0: number; x1: number; tLo: (x: number) => number; tHi: (x: number) => number; tCuenta: (x: number) => number; ancho: number } = null;
+  const w = o.marcoTecho ?? 0;
+  if (panel && w > 0) {
+    const fuera = panel, xS = fuera.xS - w, x1 = fuera.x1 - w;
+    // the t on the section at x that lies `d` along the skin above t0 (the top centre at most)
+    const subir = (x: number, t0: number, d0 = w) => {
+      const s = F.sec(x); let [z, y] = punto(s, t0), d = 0;
+      for (let k = 1; k <= 60; k++) {
+        const t = t0 + (1 - t0) * k / 60, [z1, y1] = punto(s, t), l = Math.hypot(z1 - z, y1 - y);
+        if (d + l >= d0) return t - (1 - t0) / 60 * (1 - (d0 - d) / l);
+        d += l; z = z1; y = y1;
+      }
+      return 1;
+    };
+    // the leading edge, the outer one's curve moved back `w`; the sides, `w` above the rail
+    const tLow = (x: number) => {
+      const lado = subir(x, tR(x)); if (x <= xS) return lado;
+      const r = tR(x), u = (2 / Math.PI) * Math.asin(Math.min(1, (x - xS) / BOMBEO_SOLAR));
+      return Math.max(lado, r + u * (1 - r));
+    };
+    const medioCarril = o.pilar ? 0.75 * o.pilar.ancho / 2 : 0, tHi = (x: number) => (x > x1 ? 1 : tLow(x));
+    marco = { x0: fuera.x0, x1: fuera.x1, tLo: fuera.tLow, tHi, tCuenta: (x: number) => Math.min(tHi(x), Math.max(fuera.tLow(x), medioCarril ? subir(x, tR(x), medioCarril) : 0)), ancho: w };
+    panel = x1 > fuera.x0 + 0.03 ? { x0: fuera.x0, x1, xS, tLow } : null;
+  }
   // ── the pillar and the rail
   let pilar: null | { xP: number; xT: number; punto: (s: number) => [number, number]; ancho: number } = null;
   if (o.pilar) {
@@ -217,7 +285,7 @@ export function ventanasDe(F: FormaBala, C: Contorno, o: OpcionesVentanas) {
       },
     };
   }
-  return { tC, tR, panel, pilar };
+  return { tC, tR, panel, pilar, marco };
 }
 export type Ventanas = ReturnType<typeof ventanasDe>;
 /**

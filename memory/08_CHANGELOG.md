@@ -11410,6 +11410,454 @@ Eugenio: «haz también que los paneles solares lleguen hasta la punta de la col
 - Respects the existing framing sliders (`imagen_x`, `imagen_y`).
 - Checked locally: drag, handle, −/+, «Como estaba», add + move added, reload keeps everything, Vista final, print PDF, iPhone 13 width (tap selects, second touch drags, no horizontal scroll), no day cell overflows in the twelve months, tsc and build clean. Server rejects out-of-range offsets, foreign image URLs and bad keys (400).
 
+### 2026-11-12 — Tarjetas de proyecto con la imagen clara (prog8)
+Eugenio: «un filtro menos oscuro… que la parte de arriba de la imagen no tenga filtro negro y que se concentre en el título y el subtítulo».
+- `TarjetaPortada`: la imagen ocupa el 84 % de arriba, con su centro algo más alto (`object-position` 50 % 40 % si no hay encuadre), y se funde en negro por abajo con una máscara; encima, un degradado suave solo en el 58 % inferior (de negro 85 % a transparente). Arriba la imagen queda sin filtro.
+- La tarjeta, algo más alargada: cuadrada en las filas de sectores (antes 4:3) y 4:3 en el resto (antes 3:2), para que el texto caiga sobre la parte fundida y no tape lo importante.
+
+## 2026-11-12 — Justicia: reoffending and squatting; Vivienda: land price and eco-homes on rustic land
+
+- Justicia, two new sections (`JusticiaReincidencia.tsx`, `src/data/justiciaReincidencia.ts`): «Una oportunidad, pero no dos» — first minor non-violent offence goes to a reinsertion centre, a second one to prison; violence means trial and prison from the first time; theft and robbery share one name; tenfold restitution (victim first, the rest to a victims' fund; whoever cannot pay works it off). Estimate of people and cost, labelled. «Terminar con la ocupación» — eviction by the public justice and guardians (same day if the home is lived in, 72 h if empty: proposal), no private eviction companies, a public alternative for the evicted.
+- Vivienda, two new sections (`ViviendaRustica.tsx`, `src/data/viviendaRustica.ts`): regulated land price — every sale and resale of rezoned land capped at rustic value + 10 % (+ real urbanisation cost) until built, the scale may buy first, the uplift funds public housing; and eco-homes on rustic land — 10 % homes / 10 % productive / 80 % vegetation, calculator, minimum 200 trees per green hectare, heavy fines, training, planting aid and asphalted access.
+- Both reviewed by their blind evaluators; the open choices (violence threshold, deadlines, margins, tree minimum, fines) are labelled proposals.
+### 2026-11-12 — Ordenar arrastrando y el editor igual que la web (prog8)
+Eugenio: «permite pinchar y arrastrar para ordenar las tarjetas de la galería de proyectos… tiene que ser igual lo que se ve en el dominio público de lo que hay detrás».
+- `VistaProyectosSitio`: el editor de humanity.wiki pinta los mismos sectores en fila (`FilaSector`) que luzhumanidad.com, sin la etiqueta de categoría, sin los proyectos que van dentro de otro y sin la presentación si `sitio.presentacion` es false. Títulos y descripciones, a dos líneas como en la web hasta que se escribe en ellos (`TextoEnLinea lineas`).
+- Dentro de cada sector manda el orden de la tabla. Quien gestiona la web arrastra las tarjetas (en el editor, desde el asa de arriba; en la web con sesión, la tarjeta entera; también Alt + flechas). Se guarda con `PUT /api/bd/tablas/:id/orden-filas`, así que la base de datos y la web tienen el mismo orden.
+- Migración 0211: la tabla Proyectos toma una vez el orden que enseñaba la portada, para que nada se mueva al desplegar.
+
+### 2026-11-12 — Garaje: Tesla Model Y y nuestros propios diseños en el garaje (nube/garaje-modelo-y)
+Eugenio: «Añada el model Y de Tesla en el garaje de vehículos. Y permite en el garaje ver, agregar los otros modelos de vehículos. Por ejemplo, poder comparar el cuadriciclo con el triciclo en el garaje».
+- **Tesla Model Y (2025, «Juniper»)** en el garaje (`garaje/modeloY.ts`, `modeloYForma.ts`, `modeloYModelo.ts`): 4 797 × 1 920 × 1 624 mm, batalla 2 890 mm, vías 1 636 mm, altura libre 167 mm, neumáticos 255/45 R19, Cd 0,22 (el anterior, 0,23), 1 994 kg; fuentes citadas en la ficha. Carrocería roja con el techo de cristal y la cabina oscuros, barra de luz delantera de lado a lado con faros finos más abajo, barra de piloto trasera bajo el alerón, pasos de rueda negros, retrovisores y llantas de 19″. Área frontal medida en el modelo: 2,63 m² (evkx.net da 2,65).
+- Sale por defecto a −15 m, también para quien ya tenía el garaje guardado (su lista no lo trae y se queda con el valor por defecto; lo demás de su lista no cambia).
+- **El túnel lo calcula como a los demás, pero fuera de la calibración** (decisión de Eugenio de hoy): no entra en el ajuste ni en la tabla de calibración. Da Cd 0,201 frente al 0,22 publicado (−9 %). El Cd de nuestros diseños no cambia (comprobado con `tunel-pruebas`: las quince cifras iguales que en main, 0 FALLA).
+- Dibujado sin fotos (solo con las cifras publicadas y descripciones): los voladizos, el perfil y la posición de las luces son estimados.
+- **«Mis diseños» en el garaje**: en el bloque Garaje, la lista de diseños guardados (la misma del menú del logo); pulsar uno lo pone en el garaje, construido con las mismas piezas que el editor (Triciclo, Cuadriciclo clásico, Bala en rombo, Gota, Aeromóvil 1). Se coloca al lado del tuyo si hay sitio, y si no, delante. Se arrastra, lleva su nombre y se pueden poner hasta 4. Con «Cd y consumo» lleva su cartel con nombre y Cd. Al pulsarlo en el 3D sale una tarjeta con largo × ancho × alto, masa en vacío, batería, Cd (la fórmula del editor en el Gota y el A1; el túnel en el Triciclo y el Bala), abrir puertas y maletero si los tiene, y «Quitar del garaje».
+- Se recuerda en este navegador qué diseños hay en el garaje y dónde (`aeromovil_garaje_disenos_v1`). Un diseño borrado o archivado desaparece solo.
+- Cada diseño se construye una sola vez, al añadirlo, y no se rehace al mover los deslizadores del diseño abierto.
+
+### 2026-11-12 — Cuadriciclo Bala clásico, ronda 3: carrocería (morro, cola, techo, portón, aleta, solar, segunda puerta)
+Eugenio pidió achatar el morro y poder elegir entre punta y «línea» como el Aptera, un faro central, cola plana como el Aptera, techo más plano, la caída hacia el maletero, el portón más atrás, quitar la aleta, la cúpula sin límite, paneles en el morro, una segunda puerta que se abra al revés, la altura de la línea carrocería/cristal y un montante para las bisagras de la puerta de atrás.
+- Nuevos deslizadores (todos con su valor por defecto = la forma de antes, vértice a vértice): «Morro: en punta o en línea», «Morro: altura de la punta», «Faro central: ancho», «Cola: en punta o plana y ancha», «Techo: redondeado o plano», «Techo: caída hacia el maletero», «Línea entre carrocería y cristal: altura», y los de la segunda puerta (dónde se parten, bisagra, eje, ángulo).
+- Nuevos selectores: «Faro central en el morro», «Aleta: con / sin», «Paneles solares en el morro», «Puertas por lado: una / dos».
+- Rangos más amplios: morro hasta 0,25 m (antes 0,45) y punta hasta 0,25 (antes 0,50); cúpula de 1,30 m a 10 cm del eje trasero (antes 1,80 m y 25 cm) y hasta 1,90 m de alto (antes 1,58); portón hasta 45 cm del aro de luces de la cola, detrás de las puertas.
+- Segunda puerta: la de atrás cuelga de un montante C con dos bisagras a la vista y se abre hacia atrás; entre las dos puertas, un montante B fijo de 8 cm (sin él, los dos cantos se cruzaban al abrirse a la vez). «Abrir puertas» abre las cuatro.
+- Comprobaciones nuevas: la puerta de atrás al abrirse (carrocería, carenados delanteros y traseros, suelo), las dos puertas abriéndose a la vez y las puertas contra el portón a cualquier apertura de cada uno.
+- En el clásico real con la migración propuesta: panel solar de 1,67 a 2,28 m² (de 351 a 479 W de pico), Cd del túnel a 120 km/h de 0,218 a 0,223, masa del vehículo de 278,9 a 285,8 kg.
+
+## 2026-11-12 — «Otras propuestas»: a left-to-right slider at the top of every policy window
+
+- Twelve windows (all but Categorías) now open with «Qué proponen otros sobre …»: five stops — izquierda, centro izquierda, este modelo, centro derecha, derecha. Each camp's card: who, when (visible date), idea, 3–5 proposals, their argument, the main criticism (always attributed: «Sus críticos dicen que…»), sources. The model's stop lists its proposal and «Lo que se le puede criticar», with a note that it sits in the middle for comparison, not because it is centrist.
+- Component `EspectroPropuestas.tsx`; data `src/data/espectro/<id>.ts` (`Espectro`, `Postura` in `tipos.ts`); the submenu gains «Otras propuestas» first. Rendered from the page, so window files were not touched.
+- Written by three agents and reviewed by a blind balance evaluator (first round: balance 7, accuracy 8, dates 4); fixes applied: same critical voice for all, a visible date per card, criticism of the model, «no hemos encontrado…» notes. Positions use the 29-N 2026 campaign where published; where a party has published nothing newer, the card says 2023 (or the year).
+- Note: general election on 29 November 2026; when the remaining manifestos appear (Frente Amplio, Podemos, PSOE, Vox), these cards need a review.
+
+### 2026-11-12 — Cuadriciclo Bala clásico, ronda 3 interior: butacas como el Aptera, salpicadero blanco, largueros hasta el eje trasero, pesos según la carga, «Ver solo …»
+Eugenio: «los asientos por los bonitos como los de la Aptera… un salpicadero también más bonito, blanco y con más detalles… revisa el tema de los pesos… el chasis no llega hasta el final… un poco más ancho la separación entre los dos tubos… un botón que sea ver solo motor… el largo de la batería no lo limites… el ancho tampoco».
+- **Asientos**: nueva opción «Dos butacas como el Aptera (2 plazas)» en Interior › Asientos. Carcasa blanca de una pieza con el reposacabezas, cojín y respaldo oscuros acolchados, alas a la altura de los hombros y una base fina. El piloto lleva las piernas hacia delante, con los pies en dos pedales («Pedales: hacia delante / altura» son los antiguos deslizadores de las plataformas). El pasajero las lleva a los lados del asiento del piloto, como en el Twizy. Comprobaciones nuevas: rodillas y pies del pasajero a los lados del asiento del piloto, y pies de los dos dentro de la carrocería. Cada butaca pesa 1,8 veces «Un asiento» (6,3 kg con 3,5). «A horcajadas» sigue igual, vértice a vértice.
+- **Salpicadero**: nueva opción «Salpicadero blanco con detalles (como el Aptera)». Tiene la misma forma bajo el parabrisas, en blanco, con un labio oscuro, los relojes bajo una visera, una pantalla central sobre un pie con botones, salidas de aire y, con volante, la funda de la columna y dos palancas. Pesa 6,5 kg (estimado; el de antes, 4,5).
+- **Chasis**: «Largueros: hasta» (solo con dos ruedas traseras). «El eje trasero» los alarga desde la torreta hasta el eje trasero: suben con la panza y se cierran con la cola, y llevan una cuna trasera hasta los brazos de los carenados de atrás. Nuevo deslizador «Largueros: separación» (de eje a eje), de 18 cm hasta lo que cabe sobre la panza (45 cm en el clásico); de serie, 22 cm. Delante de la cuna delantera vuelven a la separación de serie. El cálculo de los largueros cuenta ahora también el peso de la batería, y con «hasta el eje trasero» se apoya en el eje trasero.
+- **Pesos**: en «Proyecto» lo primero es la lista de todos los componentes con su peso, agrupada por departamento (Carrocería, Chasis, Rodaje, Motor, Energía, Interior), con su subtotal, una nota de qué es o por qué pesa eso, el total en vacío, con ocupantes y la masa de diseño (con 40 kg de equipaje) por rueda. El garaje pasa al final. Las suspensiones y los frenos se dimensionan para la carga de su rueda con todos a bordo y 40 kg de equipaje: el deslizador es lo menos que pesan y, si la carga pide más, se dice al lado («9,0 → 18,6 kg (por la carga)»). Las ruedas de coche se han vuelto a pesar con un neumático publicado (175/55 R15: 7,3 kg más unos 6 kg de llanta = 13,3 kg). Las uniones del bastidor pesan al menos el 15 % de los tubos. Comprobación nueva: «Neumáticos: carga por rueda» frente a su índice de carga.
+- **Batería**: el largo y el ancho del paquete ya no se paran en el controlador ni en el 200 %: llegan hasta lo que cabe en la carrocería apoyado en la panza, con el controlador detrás. En el clásico, hasta 2,54 m de largo. Lo que toque por el camino lo dicen las comprobaciones.
+- **«Ver solo …»**: encima de los deslizadores de cada departamento (Carrocería, Interior, Chasis, Rodaje, Motor, Energía), en el Triciclo, el clásico y el Aeromóvil 1, un botón deja en el 3D solo las capas de ese departamento. Al pulsarlo otra vez vuelven las capas como estaban. El botón «Mostrar solo …» de debajo del 3D hace lo mismo.
+- **Números que cambian en los diseños guardados** (las mallas son las mismas que en main, vértice a vértice):
+  - **Clásico de verdad (con la 0209)**: vacío 278,9 → 304,9 kg; con dos ocupantes 438,9 → 464,9 kg; vuelco 1,79 → 1,81 g (piloto solo 1,95 → 1,98); centro de gravedad 46,2 → 45,5 cm; largueros ×1,59 → ×1,13 (ya en rojo; ahora cuenta la batería). Suspensión delantera 9 → 18,6 kg; trasera 6 → 16,1; ruedas 48,6 → 53,3; frenos 4,8 → 6,4. Neumáticos 140 de 412 kg.
+  - **Clásico guardado (antes de la 0209)**: 291,6 → 318,3 kg; vuelco 1,67 → 1,70 g; largueros ×1,59 → ×1,66.
+  - **Triciclo por defecto y el de base del equipo**: 177,9 → 190,8 kg; vuelco 1,09 → 1,12 g; largueros ×2,44 → ×2,54 (el módulo del morro, delante de la cuna, descarga la viga). Neumáticos 152 de 165 kg.
+  - **«Triciclo cambiado»**: 269,3 → 288,5 kg; largueros ×1,78 (rojo) → ×1,93 (verde).
+  - **Gota, Aeromóvil 1 y Cuadriciclo en rombo**: sin cambios. El Cd no cambia en ninguno.
+- **Comprobado**: tsc, build, `triciclo-disenos` contra main, `bala-huella` (normal y `--editor`), `triciclo-rangos clásico` y `tunel-pruebas`. Capturas en Chrome sin pantalla (SwiftShader). No se ha probado con la app instalada en un móvil.
+## 2026-11-13 — «Economía» window: Deuda, Banca and Moneda
+
+- Deuda and the new Banca stop being tabs: one window «Economía» (`EconomiaVentana.tsx`) with three parts, Deuda · Banca · Moneda, shown as chips at the start of the submenu, followed by the open part's sections. Each part opens with its own «Otras propuestas» slider. Old anchors (`#deuda-caja`, `#banca-…`) still land: `ventanaDeAncla` maps any `deuda-`/`banca-`/`moneda-` prefix to the window, `parteDeAncla` picks the part.
+- Banca (`BancaVentana.tsx`, `src/data/banca.ts`): how banks create money (Bank of England 2014, Bundesbank 2017, Banco de España); Richard Werner's work, nine verified references (1997, 2003, 2005, 2011, 2013, 2014 ×2, 2016, 2021) and his quantity theory of credit (production credit → growth without inflation when there is idle capacity; consumption → prices; asset purchases → asset prices); the proposal: newly created bank money only for production and a person's first and second home at a regulated rate (10-year bond + fixed margin), a third home and companies buying property with existing money; new housing construction counts as production; inclusive banking (basic account, local and ethical banks, green credit); «¿Puedo pedir un préstamo?» checker; a link block in Vivienda.
+- Moneda (`MonedaVentana.tsx`, `MonedaPiezas.tsx`, `src/data/moneda.ts`), inspired by Eugenio's text: who creates the euro and art. 123 TFEU, inflation in Spain (October 2026: 4,9 %), debt liquidation by inflation simulator (100 % → 90,9 %), Fisher effect, debt sustainability simulator, fiscal dominance, four principles and seven proposals, the two warnings, the open question on money created as interest-bearing debt (sovereign money, Chicago plan, digital euro), reading list.
+- Both reviewed by blind evaluators; fixes applied (figure consistency, 118 € not 122 €, interest-cap rule, Werner's idle-capacity caveat).
+
+## 2026-11-13 — Aeromóvil: fuera «Otros velomóviles» y el garaje, a mano desde el 3D
+
+- Eugenio: «Elimina esto de otros velomóviles, es algo antiguo». Se quita la sección del menú (y su ruta, que ahora lleva al diseño 3D), el catálogo de modelos (AeroRider, Quatrevelo, Velomóvil rojo, SZEmission como ficha) y la herramienta de crear un modelo desde fotos. Los coches del garaje (AeroRider y SZEmission incluidos) siguen: forman parte de la calibración del túnel.
+- «Mis diseños» en el garaje existía desde el 2026-11-12, pero en el Triciclo y el Cuadriciclo el bloque del garaje había quedado al final de «Proyecto», debajo de la lista de pesos, y Eugenio no lo encontró. Ahora hay un botón «Garaje» dentro de la ventana 3D (junto a pantalla completa) que abre un panel con «Mis diseños» primero y los coches de referencia después, desde cualquier pestaña y también en pantalla completa.
+
+### 2026-11-13 — Portada de Luz: sectores en matriz de 2 × 2, sin «Dónde trabajamos» ni «Nos inspiran» (prog8)
+Eugenio: «oculta la sección de proyectos que nos inspiran… también la de dónde trabajamos… los sectores en una matriz de 2 × 2… tarjetas un poco más pequeñas… que en la primera plana de un ordenador se vean esos cuatro sectores».
+- `VistaProyectosSitio` + `FilaSector estrecha`: dos sectores por fila cuando la caja mide 64 rem o más (`@container`, así el editor estrecho sigue en una columna); en cada panel, dos tarjetas cuadradas y media. A 1440 × 900 y 1920 × 1080 los cuatro primeros sectores caben en la primera pantalla; el móvil no cambia.
+- El color de cada sector va por su icono, no por su posición.
+- `sitio.mostrarMapa: false` oculta «Dónde trabajamos»; `sitio.mostrarInspiran: false` oculta «Proyectos que nos inspiran», también en el HTML para buscadores (`cuerpoEnHtml`). Los datos siguen; con `true` vuelven.
+- Migración 0214: orden movilidad, energía, socioeconómico, vivienda, educación y las dos marcas a false.
+
+## 2026-11-13 — «Modelo de optimización socioeconómica»: scales, cover grid, comments board, redesign
+
+- Renamed «Modelo de optimización socioeconómica» (migration 0215 renames the project page from any earlier name). On luzhumanidad.com the site bar over the project shows «Proyecto impulsado por Luz & Humanidad» top left (to the site home) and the project's name in the middle (back to the project's front page without reloading): `CabeceraSitio` gains a `proyecto` prop, passed by `SubpaginaSitio` for embedded apps.
+- Cover: a grid of big cards, one per area (Economía lists its three parts), and the scale selector top right.
+- Scales («ámbitos», `src/data/ambitos/`, `ambito.tsx`): España by default; Talamanca de Jarama, Comunidad de Madrid, Unión Europea and Naciones Unidas. Choice in `?ambito=` and localStorage; each window (and Economía part) shows above it «Hoy» / «Con el modelo» / figures for that scale; the cover shows the scale's overview. Written by four agents, reviewed by a blind evaluator (fixes: UN cut 7 % not 15 %, Madrid gets about a third of today's spending, prudent wording on Las Dunas, Europe's security figure). The Madrid population is now the INE figure (7.113.886) everywhere.
+- Comments: the floating «Añadir comentario» saves the section the person is on (`buzon_proyectos.pagina`, migration 0216); «Mejoras pendientes» opens the same dialog as a board (pending / all, each item linked to its section), seeded with ten open items found while building.
+- Redesign (one agent): instrument-like sliders, «Más» with a turning +, dossier cards in the left-to-right slider with previous/next buttons, `Cifra` with a tone rule; reusable charts in `graficos/` (bars, pairs, today vs proposal, line) used across the windows.
+
+### 2026-11-13 — Cuadriciclo Bala clásico, ronda 4: puerta de atrás más ancha, marco del techo, alto total hasta 1 m, paneles más discretos, color de la carrocería y peso y área en «Cd y consumo»
+Eugenio, 2026-11-13: «Arregla las puertas traseras de pasajeros, es demasiado estrecha y entra en conflicto con la puerta del piloto porque está muy adelante», «Pon un montante en el parabrisas en la parte superior, y que rodee todos los paneles del techo… 10 cm de ancho», «En la cúpula, el slider de alto total no se puede bajar más», «Los paneles solares también tienen que ser más discretos como los del aptera, y con ese toque cristalizado», «permite también cambiar el color de la carrocería» y «Cuando se pincha en el CD y consumo también pon el peso, y el área frontal de cada vehículo».
+- **Puerta de atrás**: el canto de atrás de la puerta puede ir ahora hasta 20 cm antes del final de la cúpula (antes, hasta 2 m). Comprobación nueva, «Puerta de atrás: paso abajo para el pasajero (60 cm o más)», con dónde quedan sus caderas. En el clásico (migración): montante C a 2,10 m (antes 1,86), montante B a 1,40 (antes 1,33) y la bisagra del portón a 2,20 (antes 1,95, porque tiene que ir detrás del montante C). La puerta de atrás pasa de 49 a 66 cm abajo y la del piloto de 49 a 56 cm. Todas las comprobaciones de las puertas al abrirse siguen en verde.
+- **Marco del techo** (Carrocería › Techo solar y ventanas › «Marco del techo solar: ancho»): un marco azul marino de laminado entre el panel y el cristal, arriba del parabrisas y a lo largo de los dos carriles del techo, de 0 a 15 cm (de serie, 0: sin marco). En el clásico, 10 cm: el techo solar pasa de 2,28 a 1,84 m² (de 479 a 386 W de pico). Se dibuja en 3D, cuenta como carrocería y no como cristal. Los paneles del morro y de la cola van sobre pintura, no junto a cristal, y no llevan marco.
+- **Alto total**: el deslizador baja ahora hasta 1,00 m (antes, 1,15). Por debajo de lo que piden las cabezas el deslizador no se para: lo dicen en rojo «Cabeza del piloto…» y «Cabeza del pasajero…». Por debajo de 1,15 m, el soporte de la columna de dirección y el salpicadero bajan con el techo para quedar dentro de la carrocería. En el clásico a 1,00 m también sale en rojo «Puerta de atrás: al abrirse no entra en la carrocería» (1,1 cm). En el triciclo de serie, «Manillar dentro de la carrocería».
+- **Paneles solares**: con el material de los del Aptera del garaje y colores parecidos. Las células son azul marino oscuro, las juntas gris pizarra y las líneas apenas se ven. Llevan un barniz como de cristal que refleja el cielo. Antes eran células azules con juntas gris claro y líneas blancas. Es igual en el Triciclo, en el clásico y en el Aeromóvil 1. La forma no cambia.
+- **Color de la carrocería**: en Carrocería de cada vehículo (el Gota y el Cuadriciclo en rombo, arriba) hay un bloque «Color de la carrocería» con muestras (perla, plata, grafito, negro, azul marino, azul cielo, rojo, verde inglés, arena, naranja) y un selector libre. Se elige la pintura y los detalles (el azul marino del morro, el faldón, los carenados y los montantes). Se guarda con el diseño (`colorCarroceria`, `colorAcento`); sin ellos, el perla y el azul marino de siempre. Cambiar el color no vuelve a construir el 3D, solo cambia los materiales. Los diseños puestos en el garaje («Mis diseños») salen con su color. El clásico se queda en perla.
+- **«Cd y consumo»**: cada cartel lleva una tercera línea con la masa en vacío y el área frontal («326 kg en vacío · 1,02 m²»). En nuestro diseño es la masa en vacío de «Proyecto» y el área a la que va referido su Cd (la del túnel en el Triciclo y el clásico). En los coches del garaje son la masa en vacío y el área publicadas. En los que no tienen Cd publicado (Jaguar D-Type, AeroRider…), el área medida en su modelo, con «≈».
+- **Números del clásico** (de hoy, con 0209, 0212 y 0213, a lo de esta ronda): vacío 327,2 → 326,2 kg (menos panel). Cd del túnel a 120 km/h, «media»: 0,2231 → 0,2231 (la forma no cambia). Cristal 1,86 → 1,92 m². Rojas: las mismas que hoy (cabeza del piloto alto, largueros ×0,9). El paso de la puerta de atrás, que hoy saldría en rojo (49 cm), queda en verde.
+## 2026-11-13 — Aeromóvil: el garaje es la forma de elegir, comparar, copiar y eliminar diseños
+
+- Eugenio: «quiero que todos los diseños estén… desplegados en el garaje, en la primera fila. En la segunda fila pones los otros… como el Aptera y el Tesla… cuando se pinche uno de ellos… aparezcan los sliders… borrar uno de los diseños… o guardar como nuevo, y entonces se crea una copia de ese justo al lado».
+- Todos los diseños guardados están en el garaje, en una primera fila (sin el tope de 4 de antes); el que se edita está en su sitio de la fila, marcado en el suelo, y cada coche lleva su nombre encima. Los coches de referencia a la vista van en una segunda fila, detrás. Las filas van a lo ancho de la pantalla vistas desde la cámara de siempre: así ningún coche tapa al de al lado.
+- Pinchar uno de tus diseños en el 3D (o en la lista del garaje, o en el menú del logo) lo abre para editarlo: sus departamentos y deslizadores salen en el panel y la cámara se mueve con él. Si el que dejas tiene cambios sin guardar: si es tuyo y se guarda solo, se guardan antes; si no, la página pregunta («Guardar cambios y abrirlo», «Descartar cambios y abrirlo», «Cancelar»).
+- La tarjeta del diseño que editas tiene «Solo mostrar este» (y «Mostrar todos» para volver), «Guardar como nuevo» (crea «… (copia)» justo al lado y pasa a editarse) y «Eliminar» (pregunta dentro de la página; el diseño se archiva, no se borra). Copiar y eliminar solo los ve el dueño del Aeromóvil con su sesión, igual que exige el servidor.
+- Los coches de referencia mantienen su tarjeta (puertas, maletero) y ganan «Solo mostrar este».
+- El bloque «Garaje» del panel y el panel «Garaje» del 3D son la lista de lo mismo: «Mis diseños» (primera fila) y «Coches de referencia» (segunda fila), cada uno con mostrar u ocultar. Con el panel abierto, la cámara enseña el garaje entero.
+- Ya no se arrastran los coches del garaje ni existe el plano del garaje: el sitio lo deciden las filas.
+- Arreglado de paso: un guardado automático que llegaba tarde, después de abrir otro diseño, volvía a abrir el anterior con los parámetros del nuevo.
+- De paso, en el móvil (390 px): la página medía 490 px de ancho porque un desplegable de opciones mide lo que su opción más larga («Ventanas laterales con montante (Aptera)»). Los desplegables del panel tienen ahora un ancho máximo y la página vuelve a medir 390 px.
+
+
+## 2026-11-13 — Cuadriciclo Bala clásico: cubierta lisa (cola ancha y portón de una pieza, morro ancho con barra de luz, bajos que suben)
+
+Eugenio, con capturas del clásico junto al Aptera: «su cola ocupa todo el ancho del carenado… la cola y el maletero tienen que ser la misma pieza… tienes que desarrollar un sistema en el que nunca se permita que haya esos montículos»; después, el morro ancho y elevado del Aptera con el faro en horizontal, y los bajos de la cola subiendo hasta un borde fino, «configúralo por defecto».
+
+- **«Morro y cola por arriba»** (Carrocería › Morro y cola): «Como la cúpula» (lo de siempre) o «Cubierta lisa, sin montículos (como el Aptera)». Con la cubierta lisa, detrás del cristal de la cúpula y delante del parabrisas, lo de arriba ya no sigue la forma redonda de la cúpula: cada sección es convexa, con lo más alto en el centro y casi plana (el «bombeo»), con un canto redondeado hacia el costado; y cada línea a lo largo de la cubierta solo baja hacia la punta, en una sola curva que no puede ondular. Entre la cúpula y la cubierta la forma se funde a lo largo de 30 cm, sobre el cristal.
+- **Deslizadores nuevos (solo con la cubierta lisa)**: «Cola: ancho al final» (hasta todo el ancho, con un borde recto de lado a lado), «Cola: grosor del borde de atrás», «Cola: bombeo de la cubierta», «Bajos de la cola: dónde empiezan a subir» y «cuánto suben hasta el borde», «Morro: ancho del frente» (hasta casi todo el ancho, con el frente cuadrado de esquinas redondeadas), «Morro: grosor del borde de delante» y «Capó: bombeo».
+- **Más margen en el morro y la cola**: «Morro: del eje delantero a la punta» de 0,20 a 1,20 m; «afilado de la punta» de 0,15 a 1,20; «altura de la punta» de −12 a +40 cm; «Cola: altura de la punta» de 0,30 a 0,85 m. Con la cubierta lisa, la punta se queda donde la cubierta pueda seguir bajando hasta ella, y el deslizador dice a qué altura queda de verdad si es otra.
+- **Faro del morro**: nueva opción «Barra de luz por todo el borde (como el Aptera)»: una tira LED sobre una carcasa negra por la línea más ancha de la punta, de un costado al otro (0,9 kg, estimado). El faro redondo sigue como opción.
+- **Portón y panel de la cola, una pieza**: con la cubierta lisa, detrás de las puertas el portón es toda la cubierta de la cola, de canto a canto y hasta la barra de luz del borde; el panel solar la cubre entera con un marco de unos 5 cm, empezando recto justo detrás de la cúpula. El panel del capó también va sobre la cubierta, con el mismo marco.
+- **Comprobado por un programa**: `scripts/bala-cola-lisa.ts` mide la piel construida (la misma que el 3D y el túnel) en 133 formas: el clásico con la propuesta, cada deslizador de forma en sus dos extremos, todos a la vez, parejas y 40 combinaciones al azar. Todas OK: secciones convexas (0,00 mm), un solo punto alto en el centro, ninguna línea que vuelva a subir, sin pliegues ni ondas. La misma medida sobre el clásico de hoy encuentra lo que vio Eugenio: 15 mm de hundimiento junto al final de la cúpula, un pliegue de 10° y una onda de 1,5 mm.
+- **El clásico guardado** (lo escribe la migración del coordinador): cubierta lisa, cola de todo el ancho con un borde de 4 cm a 0,59 m, bombeo 1 cm, bajos que empiezan a subir 80 cm por delante del eje trasero en una curva larga, morro al 80 % del ancho con la punta 15 cm más alta y un borde de 10 cm, capó con 2 cm de bombeo, y la barra de luz. El panel del capó se queda.
+- **Números del clásico de verdad** (fila de producción con la 0209, la 0212, la 0213 y la 0217; túnel en «media», 120 km/h):
+  - Cd 0,2231 → 0,2147 (sin la subida de los bajos, 0,2189: la subida sola baja 0,0042).
+  - Panel solar 1,84 → 2,16 m² (386 → 454 W de pico).
+  - Vacío 326,3 → 328,2 kg; largo 3,95 m igual; ancho total 1,99 → 2,00 m (la vía delantera sube sola de 1,65 a 1,66 para que los carenados, girados a tope, no toquen el morro ancho); área frontal 1,48 → 1,53 m².
+  - Maletero 922 → 985 L; consumo a 120 km/h 67,2 → 65,4 Wh/km; el portón abierto sube a 1,58 m (antes 1,56).
+  - Comprobaciones en rojo: las mismas dos de antes (cabeza del piloto alto sin casco, 0,6 → 0,8 cm; coeficiente de los largueros ×0,9).
+- **Sin cambios en ningún otro diseño**: con la cubierta «como la cúpula» (lo que tiene todo diseño guardado) la forma es la de antes, vértice a vértice. Comprobado: `bala-huella` (normal y `--editor`) IGUAL; `triciclo-disenos` contra main, Todo OK (también el clásico tal como está hoy en producción, con la 0217); `tunel-pruebas` sin fallos; `triciclo-rangos «clásico lisa»` 277 casos OK; tsc y build.
+
+## 2026-11-13 — Aeromóvil: la cúpula con tres filas ya se puede bajar
+
+- Eugenio, por segunda vez: «La cúpula sigue sin poderse bajar de 1,50 m de alto». La causa no estaba en el deslizador «Alto total» en sí (ya bajaba hasta 1,00 m con las butacas): su Cuadriciclo Bala clásico guardado lleva los asientos en «filas», y con esa disposición `rangoTriciclo` fijaba el mínimo del alto en `ALTO_FILAS` (1,56 m). Las pruebas anteriores usaban una copia con butacas, por eso no lo vieron.
+- Se quita ese tope: con tres filas el alto va de 1,00 a 1,90 m. Por debajo de unos 1,56 m las cabezas no caben y las comprobaciones lo marcan en rojo, en vez de bloquear el deslizador. Los textos de la pantalla que hablaban del mínimo se han corregido.
+
+## 2026-11-13 — Aeromóvil: cambiar el nombre de los diseños y mover los coches del garaje
+
+- Eugenio: «Permite cambiar el nombre de los modelos. También permite pinchar y arrastrar los modelos editables y los no editables para cambiarlos de posición en el garaje».
+- «Cambiar nombre» en la tarjeta del diseño que editas y con el lápiz de cada fila de «Mis diseños»: un campo de texto en su sitio, con «Guardar» y «Cancelar» (Intro guarda, Esc cancela). Como el servidor: sin espacios al principio ni al final, hasta 80 caracteres y nunca vacío. Solo lo ve el dueño del Aeromóvil con su sesión. El nombre nuevo sale enseguida en la cabecera, el menú del logo, la lista, la tarjeta y el cartel encima del coche; renombrar no reconstruye el coche.
+- Todos los coches del garaje, los diseños y los de referencia, se pueden pulsar y arrastrar por el suelo. Un toque sin mover sigue siendo un clic (abre el diseño o la ficha); a partir de unos píxeles es arrastrar, y la cámara no gira mientras. Cada coche se queda donde se suelta, en este navegador, también al abrir otro diseño y al recargar.
+- El diseño que editas se queda siempre en el centro y no se arrastra: los demás se colocan a su alrededor (si lo moviste cuando no era el que editabas, los demás se ven desde su sitio).
+- «Volver a colocar en fila» en la lista del garaje (todos los movidos) y «Volver a su fila» en la tarjeta de cada coche movido.
+- Arreglado: en un navegador sin orden guardado del garaje, al guardar un diseño (el guardado automático o un cambio de nombre) ese diseño saltaba al final de la fila. Ahora se queda en su sitio.
+## 2026-11-15 — Aeromóvil: circuito de estabilidad en curvas
+
+- Eugenio: «Crea además del garaje un circuito de simulación de estabilidad en curvas del vehículo donde el primero que se pueda probar sea el Lumeneo Smera de 4 ruedas con basculación… y compararlo con otro vehículo como el Aptera y entender su seguridad y estabilidad en curva a nivel gráfica».
+- Nueva sección «Circuito» en el menú de secciones del Aeromóvil (`/aeromovil/circuito`). Se eligen uno o dos vehículos: el Lumeneo Smera (bascula hasta 25°, el primero), el Aptera, el Twizy, el Tesla Model Y y el diseño abierto en el editor.
+- Un circuito de 980 m visto desde arriba con cinco curvas: horquilla de 15 m, chicane de 25 m, curva de 40 m, enlace de 60 m y curva rápida de 120 m. Los coches lo recorren animados, con una vista desde atrás de cada uno que enseña cómo se inclina el Smera, el centro de gravedad y la línea de la fuerza resultante (verde si cae entre las ruedas, roja si vuelca).
+- Se elige el agarre del suelo (seco 0,8, mojado 0,5, deportivo 1,0, nieve 0,2 o cualquier μ), una velocidad fija o «apurar» cada curva a un porcentaje de su límite, apagar la basculación del Smera, y subir o bajar las alturas del centro de gravedad estimadas.
+- Para cada vehículo: a cuántas g vuelca (de pie y, el Smera, inclinado), a cuántas derrapa, qué llega antes, y por curva la lectura OK / al límite / derrapa / vuelca con su margen y su velocidad límite y segura.
+- Tres gráficas: aceleración lateral según la velocidad en cada curva con los límites de cada vehículo; velocidad máxima por curva en barras; inclinación del Smera a lo largo de la vuelta (y lo que le pide la chicane en grados por segundo).
+- Los datos de cada vehículo con su fuente; lo que no se publica (casi siempre la altura del centro de gravedad) va marcado «estimado» y explicado. «Cómo se calcula», desplegable, con las fórmulas en castellano y las referencias.
+- Resultado principal, con los datos actuales: en seco el Smera, el Aptera, el Twizy y el Model Y derrapan antes de volcar (vuelcan a 1,16, 1,08, 1,07 y 1,44 g). El Smera sin basculación volcaría a 0,63 g, antes de derrapar: por eso bascula.
+- `npx tsx scripts/circuito-limites.ts` imprime todas las cifras para comprobarlas a mano.
+
+## 2026-11-15 — Aeromóvil: Cuadriciclo Basculante (quinta familia del editor)
+
+- Eugenio: «falta un vehículo de cuatro ruedas basculantes entre la moto y el microcoche tipo Twizy de unos 250 kg, como el francés, pero reclinado como el velomóvil… un modelo 3D de alta calidad pero con un techo un 25 % más bajo y un culo terminado más como el Aptera de forma curva hasta la cola, y hazle el carenado a las ruedas delanteras… permite modificarlo con slider todos los aspectos. ¡Y que bascule! Con un botón».
+- Nueva familia en el menú del vehículo: «Cuadriciclo Basculante» (`disposicion: 'basculante'`, campos `q…`). Cuatro ruedas que se inclinan juntas, como el Lumeneo Smera: en cada eje dos brazos de lado a lado (un paralelogramo) que giran sobre el bastidor y llevan en sus puntas un pilar telescópico por rueda; un actuador eléctrico mueve la inclinación.
+- Biplaza en tándem, los dos reclinados como en un velomóvil (45° y 47° desde la vertical): el techo queda a 1,10 m, un 26 % por debajo de los 1,48 m del Smera. Carrocería de una sola piel lisa, morro estrecho entre dos carenados delanteros que giran y se inclinan con sus ruedas, cúpula de policarbonato con techo solar que se abre hacia delante, barras de luz delante y detrás, y la cola del Aptera cayendo en una curva hasta un borde fino. Las ruedas traseras van dentro, en pasos de rueda que dejan sitio a que suban y bajen al inclinarse, con un motor en cada buje.
+- Diseño por defecto: 2,90 × 1,15 m (carrocería 0,86 m) × 1,10 m; 194 kg en vacío (estimado); Cd del túnel 0,218 a 80 km/h sobre 0,715 m² de sección; 6 kWh. Más largo que el Smera (2,40-2,50 m): la tándem reclinada y la cola del Aptera piden ese largo; el deslizador «Largo total» lo acorta y las comprobaciones dicen qué deja de caber.
+- Unos 80 deslizadores en los departamentos de siempre (Carrocería, Interior, Chasis, Rodaje, Motor, Energía y Proyecto): largo, ancho, alto, morro, cola y su curva, sección, cúpula, ventanas, techo solar, carenados (tamaño, anchura, largo delante y detrás, forma, hueco, cuánto bajan, hueco a la carrocería), asientos y reclinado, volante, pedales, vías, batalla, ruedas, inclinación máxima, paralelogramo, giro, recorridos, masas, motores y batería. Cada uno con su explicación al pinchar en el nombre.
+- Botón «Bascular» en el 3D: la carrocería y las cuatro ruedas se inclinan hasta la máxima a la derecha, vuelven, a la izquierda y vuelven (6 s), con las ruedas delanteras girando hacia la curva y el intermitente de ese lado. «Simular curva» lo hace sin parar.
+- 37 comprobaciones: cabezas, hombros, rodillas y pies; asiento y caderas del pasajero junto a los pasos de rueda; carenados a la carrocería girados a tope e inclinados al máximo, y al suelo; carrocería al suelo inclinada; pasos de rueda traseros; neumáticos (cuánto se inclinan y su carga); bastidor y batería dentro; vuelco inclinado y sin bascular. El diseño por defecto las pasa todas.
+- «Proyecto»: el peso de cada pieza, el centro de gravedad y «Basculación y vuelco» (curva equilibrada a 0,47 g; vuelca a 1,35 g inclinado y a 0,80 g sin bascular). El «Circuito» simula este diseño con su inclinación y su centro de gravedad.
+- Se guarda como los demás («Mis diseños» y la primera fila del garaje). `npx tsx scripts/basculante-rangos.ts` construye cada deslizador en sus dos extremos y 200 mezclas, y comprueba que no haya NaN, que la piel esté cerrada y que no salgan montículos.
+- Diseño del equipo «Cuadriciclo Basculante» (migración 0219): aparece en «Diseños» y en la primera fila del garaje sin que nadie tenga que guardarlo antes. Sus parámetros solo dicen la familia; el resto sale de los valores por defecto del código.
+
+## 2026-11-15 — Cuadriciclo Bala clásico: sin el «huevo» entre el techo y el maletero
+
+- Eugenio, con una captura de su clásico: «Ese huevo que hay entre el techo y el maletero es terrible, no se puede quitar». Era el final de la cúpula: con la cubierta lisa, la cubierta empezaba donde acaba el cristal de la cúpula, y entre el punto más alto del techo y ese sitio seguía la forma redonda de la cúpula, que se hinchaba y caía de golpe sobre la cubierta. En su diseño, con la cúpula acabando 28 cm antes del eje trasero, eran unos 30 cm de bulto.
+- Ahora, con la cubierta lisa, la cubierta de atrás empieza en lo más alto del techo: desde ahí hasta el borde de la cola hay una sola bajada suave por el centro y por cada línea de arriba, y cada sección es igual o más estrecha y más plana que la de delante. En lo más alto la sección conserva la forma redonda de la cúpula, y se va aplanando a medida que baja. «Techo: caída» sigue mandando: con −, el techo empieza a bajar enseguida y llega plano a la cola; con +, aguanta arriba y cae al final.
+- Lo de delante (parabrisas, capó, cabezas y rodillas) no cambia: es exactamente lo de antes, comprobado punto a punto en su diseño. Se probó llevar la cubierta lisa también hasta lo más alto por delante y se descartó: cambiaba la forma de la cabina y metía la cabeza del piloto 9,6 cm en el cristal.
+- **Comprobado por un programa**: `scripts/bala-cola-lisa.ts` mide ahora también la parte de atrás de la cúpula y su unión con la cubierta, y lleva el diseño de verdad de Eugenio (tras la 0218) a 1,10, 1,25, 1,40 y 1,56 m de alto, con tres filas y con butacas, y cada deslizador del techo en sus dos extremos: 152 casos, todos OK. Con el código de antes, sus 19 casos fallan (secciones con un bulto de 20 mm, líneas que vuelven a subir hasta 88 mm).
+- **Aviso, no arreglado en esta ronda**: la unión del parabrisas con el capó (el código de antes, sin tocar) tiene ondas de menos de 1 mm en muchos casos y, con algunas combinaciones de deslizadores, bultos más grandes (hasta 38 mm en una combinación al azar). El programa lo enseña como AVISO sin contarlo como fallo.
+- **Números de su diseño** (túnel en «media», 120 km/h; antes → ahora):
+  - Alto 1,56 m (el suyo): Cd 0,185 → 0,215; consumo 79,3 → 87,8 Wh/km; panel 2,71 → 2,70 m²; maletero 1027 → 1019 L; vacío 438,8 → 438,7 kg; comprobaciones en rojo: las mismas siete.
+  - Alto 1,25 m: Cd 0,201 → 0,205; la cabeza de la fila 3 gana 3 cm de aire (de −5,0 a −2,1 cm, talla media); el resto igual.
+  - Alto 1,10 m: Cd 0,218 → 0,218; fila 3, de −17,7 a −15,9 cm.
+  - **El Cd sube**: el túnel dice que el «huevo» (techo arriba hasta tarde y luego caída fuerte, más estrecho por arriba) despegaba el aire más tarde. Con «Techo: caída» de −0,6 a +0,8, ahora da entre 0,200 y 0,217 (antes, entre 0,185 y 0,229). La estela de este túnel cambia mucho con pequeños cambios de la cola (ya anotado como deuda): tómese como orden de magnitud.
+- Sin cambios en ningún otro diseño: `bala-huella` (normal y `--editor`) IGUAL; `triciclo-disenos` contra main, Todo OK; `tunel-pruebas` sin fallos; `bala-disenos` Todo OK; `triciclo-rangos «clásico lisa»` 279 casos OK; tsc y build.
+
+## 2026-11-15 — Aeromóvil: el Lumeneo Smera, el Mercedes Vision EQXX y el garaje de menor a mayor
+
+- Eugenio: «Garaje con todos los modelos desde el más pequeño al más grande… falta un coche más aerodinámico de 4 ruedas, que estaría entre el Aptera y el Model Y… y falta un vehículo de cuatro ruedas basculantes entre la moto y el microcoche tipo Twizy… Ahí añade el vehículo Lumeneo Smera».
+- **Lumeneo Smera (2008)** en los coches de referencia: biplaza en tándem (una plaza detrás de otra), estrecho y alto, cuatro ruedas al aire con guardabarros negros. Medidas del coche del Salón de París de 2008: 2,38 × 0,80 × 1,45 m, batalla 1,70 m, vías 0,655 m, 350 kg, 30 kW, 130 km/h; se inclina hasta 25°. Pesa 350 kg, no los «unos 250 kg» que se pedían; la versión posterior, más grande, pesaba 550 kg. Lleva los neumáticos publicados del prototipo posterior (145/70 R14). La altura libre, los voladizos, la suspensión y toda la forma son estimados (no se pudo ver ninguna foto al modelarlo). La sección «Circuito» lee de este coche la batalla, las vías y el alto.
+- **«Bascular»** en la tarjeta del Smera (al pincharlo en el 3D): lo inclina 25° hacia su derecha, con las cuatro ruedas, y «Enderezar» lo vuelve a poner derecho. Se ve el paralelogramo de cada eje: dos brazos que cruzan la quilla y sujetan las ruedas, que se inclinan igual que la cabina y siguen apoyadas en el suelo.
+- **Mercedes-Benz Vision EQXX (2022)**: el coche de cuatro ruedas más aerodinámico que faltaba (Cd 0,17, 1 755 kg, 4,98 m, área frontal publicada 2,12 m²; la del modelo, 2,06 m²). Es un prototipo, no se vendió. Es más largo que el Model Y, así que ordenado por largo queda después de él; «entre el Aptera y el Model Y» lo está por Cd y por peso. Pasa por el túnel como los demás, con su Cd estimado (0,197) al lado del publicado (0,17), pero fuera del ajuste: el Cd de nuestros diseños no cambia.
+- **El garaje va del más pequeño al más grande**: por largo y, si miden lo mismo, por peso. Así salen la lista de «Coches de referencia», la segunda fila del 3D y también «Mis diseños» y la primera fila (por cómo está guardado cada diseño, para que la fila no se reordene mientras mueves un deslizador). Cada fila de la lista enseña el largo y el peso. Un coche que has arrastrado se queda donde lo dejaste.
+- El «tesla3» de la lista sigue siendo una caja gris de marcador (oculta por defecto): el Model 3 no está modelado.
+
+## 2026-11-15 — «Política» (antes Observatorio de Polarización Política): capítulos 6 · Geometrías y 7 · Decidir por temas
+
+Eugenio: una visualización en 2D donde cada partido no es un punto sino una geometría, con aristas donde «le cojea», y un partido ideal que es un círculo; empezar por inmigración y seguridad fronteriza y por servicios públicos frente a privados, acotado a España. Después: «POLITICA. Así se debe llamar ahora», y una propuesta de democracia directa donde cada ciudadano vea el estado de cada materia y elija abrir, cerrar, subir, bajar, mucho, poco o nada, con datos cuyo orden y selección también se debaten.
+
+- **Nombre**: la página se llama «Política» (título, marca, portada, iframe). Migración 0220: título del proyecto `KWMOBSPOLARIZ01`, subtítulo, textos de la ficha, alt de la portada y la fila de «Proyectos», cada uno solo si sigue con el texto que escribieron 0195/0200. La dirección `/observatorio-de-polarizacion/espana` no cambia.
+- **6 · Geometrías** (`#geometrias`): radar de ocho radios por tema (inmigración y fronteras; servicios públicos y privados), nueve partidos superponibles (PP, PSOE, Vox, Frente Amplio, ERC, Junts, EH Bildu, PNV, Podemos). Entre radios vecinos el borde se curva siguiendo el círculo cuando el partido cuida los dos (`integ` = mínimo y diferencia de las dos notas) y es una recta cuando abandona uno. Círculo ideal, envolvente «lo mejor de cada uno», ficha por partido (fuerte, cojea, aristas, «el punto de un test»), ficha por radio con barras de todos, ocho propuestas del círculo con qué partidos ya las plantean en parte, objeciones de cada lado y tabla de notas.
+- **Las notas (0–10) son una valoración de la página**, escrita a partir de programas, planes y votaciones hasta el 15-11-2026 con fuentes en el capítulo 8. No son datos medidos: lo dicen el capítulo, el desplegable «Cómo se lee» y el pie. Viven en `TEMAS` dentro del HTML.
+- **7 · Decidir por temas** (`#decidir`): cinco pasos de la propuesta, cinco materias con dos medidas cada una (seguridad, inmigración, economía, educación, sanidad), cada medida con su estado, datos reales con fuente y fecha (Interior, INE, BOE, Sanidad, Educación, Seguridad Social), escala de cinco grados más «No lo sé», ordenar y marcar datos que sobran, argumentos a favor de cada lado con quién los defiende cuando está documentado, y «Tu mandato». Es un prototipo: lo elegido solo se guarda en `localStorage` (`politica.decidir.v1`), no hay ruta de escritura ni votos agregados.
+- Fuentes pasa a ser el capítulo 8, con 25 referencias nuevas y la categoría «Programas y leyes». Portada en dos filas de cuatro tarjetas.
+- Comprobado en Chrome sin interfaz a 1360 px y 390 px (sin desbordamiento horizontal, sin errores de JS salvo los de `/api` al abrirlo como archivo); `tsc` y `build` limpios. No comprobado en la app instalada ni en producción antes de fusionar.
+- Contexto: campaña de las generales del 29-N. El capítulo dice que no es una recomendación de voto.
+- **Apartados** (mismo día, Eugenio: «deja la parte de observatorio de polarización política como un apartado de la web general llamada POLITICA»): la portada agrupa las tarjetas en «Apartado 1 · Observatorio de Polarización Política» (capítulos 1 a 5) y «Apartado 2 · Geometrías y decisión directa» (6, 7 y fuentes), y cada apartado abre con una banda (`#observatorio`, `#propuestas`). La migración pasa a ser la 0220 (la 0219 la ocupó Aeromóvil) y su texto de la ficha presenta el observatorio como primer apartado de Política.
+
+## 2026-11-15 — `/vision`: la visión ideal de los 12 sectores; «Visión y hoja de ruta» pasa a `/hoja-de-ruta`
+
+- Eugenio: «Publica esta web en humanity.wiki con la url de /vision». La web se preparó antes en local: los 12 sectores (Energía, Movilidad, Política, Economía, Seguridad, Justicia, Salud, Vivienda, Alimentación, Informática, Educación, Cuidados), cada uno con Visión ideal, Retos, Soluciones y Proyectos. Vivienda y Movilidad están completos (7 retos y 7 soluciones con fuentes, 8 proyectos, fotos de ejemplo de Wikimedia Commons); los otros diez llevan un ejemplo por pilar, marcado como borrador. Cada sector termina con sus preguntas abiertas.
+- Botón **«VER LA VISIÓN EN 3D»**: abre `public/vision/vision3d.html`, una herramienta de visualización del ideal con cinco escalas (hogar integrado en la tierra, Comunidad Circular, pueblo con centro de soberanía, naturaleza, calle de movilidad). Lleva three.js r147 en `public/vision/lib/`, sin CDN.
+- Es una web estática autónoma en `public/vision/` (como el Observatorio). El servidor contesta `/vision` con `/vision/`. Dentro de la aplicación, la ruta `vision` (`AVisionIdeal` en `App.tsx`) recarga hacia la web estática.
+- **La página antigua «Visión y hoja de ruta» ahora vive en `/hoja-de-ruta`**: menú lateral, campana (avisos de puntos y de gasto de IA), aviso del tablero (`roadmap.ts`), enlace de Veracidad y el asistente de IA apuntan allí. Los enlaces antiguos con `?pestana=` siguen funcionando: tanto la ruta de la aplicación como la web estática los mandan a `/hoja-de-ruta?pestana=…`. Los textos editables de esa página no cambian de clave.
+- Fotos: no se pudieron abrir desde el entorno de construcción (Commons bloqueado). Si una no carga, se ve un recuadro gris «Imagen no disponible».
+
+## 2026-11-15 · Cuadriciclo Basculante: el morro envuelve las dos ruedas delanteras, vía delantera −20 %
+
+- Eugenio: «quiero que el carenado frontal, el morro, envuelva las 2 ruedas delanteras basculantes con una sola pieza muy aerodinámica, y haz que las ruedas basculantes tengan un ancho de vía un 20 % menor del actual».
+- Nuevo selector «Las ruedas delanteras van»: **dentro del morro** (de serie) o cada una en su carenado (lo de antes, que sigue disponible).
+- Dentro del morro: cada rueda va en un paso de rueda cerrado, como en un velomóvil; solo asoma por debajo. El morro tapa todo lo que la rueda barre girada a tope (20°), inclinada a tope (25°) y con la suspensión hundida. Vista desde arriba, la carrocería es una gota: lo más ancho es el morro sobre las ruedas y se estrecha hasta la cola.
+- Vía delantera de serie: 0,69 m (antes 0,86).
+- Deslizadores nuevos: «Morro: altura sobre los pasos de rueda», «Paso de rueda: hueco al neumático» y «Paso de rueda: hasta dónde se abre por el lado».
+- Comprobaciones nuevas: rueda delantera dentro del morro, techo del paso bajo el capó, pies del piloto entre los pasos, rodillas sobre los pasos.
+- Diseño de serie: 3,01 × 1,04 × 1,10 m (antes 2,90 × 1,15 × 1,10); Cd del túnel 0,192 a 80 km/h (antes 0,218); área frontal 0,81 m² (antes 1,03); 2,52 kWh/100 km a 80 km/h; 37 comprobaciones en verde. El vuelco sin bascular baja de 0,80 a 0,73 g por la vía más estrecha.
+- Sin migración: el diseño del equipo solo guarda la familia y toma los valores de serie del código.
+
+## 2026-11-15 · Modelo de optimización socioeconómica: mejoras (móvil, sueldos, traducciones, otras propuestas, fuentes oficiales)
+
+- Eugenio: «adelante con las mejoras» (tras la lista de pendientes).
+- **Sueldos por tamaño de empresa**: `EMPLEADORES[].tipo` now reads `TRAMO[1..3].tipo` instead of repeating 0.1/0.2/0.4, so a tier change can never leave the wage rates behind. Three texts in `Cuentas.tsx` («del 10 % al 25 %», «las 49 primeras al 10 %…», «un 40 % … un 10 %») now print the tier rates.
+- **Móvil**: `Apartado` folds on phones only (`max-sm:max-h-[26rem]` plus a «Seguir leyendo: …» button) for sources, open questions, per-scale detail and eleven long reference sections (`PLEGAR` in `ventanas.tsx`). A hash pointing at the section or anything inside it opens it. At 390 px the longest windows go from ~24.000 to ~16.000 px. Nothing folds from `sm` up.
+- **Botones flotantes**: on phones they slide out while scrolling down and return on scroll up, near the top or at the end of the page (`useVisibleAlSubir`).
+- **Traducciones**: the 15 model data modules, `ESPECTROS` and the scale data (`ambitos`) are registered in the `traducciones.ts` sweep, so EN and PT get them.
+- **Otras propuestas** (13 files in `src/data/espectro/`, `revisado` 2026-11-15): Vox now cites its 29-N programme «Es sentido común» (12-11-2026, 115 measures) in all 13 windows; PP security from «La reconstrucción nacional»; Frente Amplio «100+15» via press (text unpublished); PSOE housing goal via campaign press (programme presented 15-11, not yet published); Sumar 2023 still used for the left in security, justice, legal and scales, with a note saying so.
+- **Fuentes oficiales**: 27 of 79 press sources replaced after checking the same figure (IGAE, AEAT, INE, BdE, Eurostat, CGPJ, BOE, Moncloa, Defensa, Gobierno Vasco, Tribunal de Cuentas Europeo, NBIM, Swiss Federal Council and SNB). Ids unchanged. **EU debt end-2024 corrected from 342.000 to 601.300 M€** (342.000 was budget exposure, per the ECA); EU housing plan wording corrected (InvestEU + cohesion, «movilizados»). 52 stay as press, with reasons in the session report.
+- Checked in headless Chrome at 390 and 1280 px against the dev server; `tsc` and `build` clean.
+
+## 2026-11-15 · Cuadriciclo Basculante: una sola línea de punta a cola, paneles en morro, techo y cola
+
+- Eugenio: «hazlo más al estilo Aptera y el Cuadriciclo Bala, mejorando el tema de paneles solares; cabina, morro y cola tienen que estar los 3 en una línea suave que va de punta a cola sin interrupciones para mejorar el Cd».
+- El perfil de arriba es ahora una sola línea:
+  - sube desde la punta del morro sin doblarse nunca hacia abajo;
+  - el parabrisas va encima de esa línea, sin capó propio ni escalón en su pie;
+  - llega al techo sin quiebro y baja en una curva hasta la cola.
+- Si las ruedas van dentro del morro, la línea sube sola lo justo para taparlas.
+- El deslizador «Capó: altura al pie del parabrisas» desaparece. Lo sustituye «Línea del morro: altura sobre el eje delantero».
+- Paneles solares en una franja de punta a cola, como el Aptera: en el morro (nuevo, de serie), el techo y la cola (ahora de serie). Pasan de 0,55 a 1,36 m²: unos 290 W a pleno sol y 0,77 kWh al día (estimación).
+- Cola algo más baja (0,52 m) y con una curva más suave hasta ella (1,6).
+- La carrocería se estrecha antes detrás de las ruedas delanteras.
+- Cifras del diseño de serie: Cd del túnel 0,189 a 80 km/h (antes 0,192); CdA 0,139 m² (antes 0,141); área frontal 0,81 m²; 197 kg; 37 comprobaciones en verde.
+
+## 2026-11-15 — Política: «Votar por temas» con gráficos históricos, deslizador y selector con iconos
+
+Eugenio: «Lo de votar por temas, llámalo así. En el menú y en el título»; gráficos históricos de los datos; un deslizador para decir cuánto subir o bajar, abrir o cerrar, que diga el pro y el contra de cada posición; y un selector de temas más claro, con iconos, que cambie al pasar el ratón.
+
+- **Nombre**: capítulo 7 «Votar por temas» (menú, título, tarjeta de portada, filtro de fuentes); el apartado 2 pasa a «Geometrías y votar por temas». Migración 0221: la frase de la ficha del proyecto que escribió la 0220, solo si sigue igual. El ancla `#decidir` se mantiene para no romper enlaces.
+- **Gráfico histórico** por medida, con datos oficiales: infracciones penales 2019–2025 y estafas informáticas 2016–2025 (Interior), contratación en origen 2023–2025 (Inclusión; 2024 ≈ 20.600, el Ministerio solo dice «más de 20.000»), llegadas irregulares 2017–2025 (Interior), salario mínimo 2016–2026 (BOE), IVA general desde 1986 (escalones), media de alumnos por grupo en Primaria con el máximo legal y el del proyecto, gasto en educación 2012–2024 (INEE y F. Ramón Areces/SyE: dos ediciones con base distinta, dicho en el gráfico), espera quirúrgica 2019–2025 (SISLE) y conciertos sobre el gasto sanitario público 2019–2024 (EGSP). Ejes con valores redondos; el ancho del gráfico sigue a la tarjeta para que se lea en el móvil.
+- **Deslizador** en unidades reales (años de pena, % de medios, plazas, euros, % de IVA, alumnos, % del PIB, % del gasto) con la marca de «hoy». Cinco tramos por medida (mucho, poco o igual hacia cada lado, con umbrales propios) y un pro y un contra escritos para cada tramo, que cambian mientras se arrastra. Donde la unidad coincide con la del gráfico, el voto aparece en él como «tu voto» (o «tu máximo» en alumnos por aula). Colores neutros: subir o bajar no usa los colores de izquierda y derecha.
+- **Selector de temas**: cinco tarjetas con icono, nombre, qué se vota y cuántas medidas llevas; cambia al pasar el ratón (160 ms de espera, solo con ratón), con clic, y con las flechas del teclado (`role="tablist"`).
+- Lo votado se guarda en `localStorage` con una clave nueva (`politica.votar.v2`), porque los valores ya no son posiciones de 0 a 4 sino cantidades; lo de la versión anterior no se arrastra.
+- Comprobado en Chrome sin interfaz a 1360 y 390 px: cambio al pasar el ratón, deslizador con clic y teclado, ejes de los diez gráficos, sin desbordamiento ni errores de JS.
+
+## 2026-11-15 — Votar por temas: 100 puntos de importancia por persona
+
+Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y puede repartirlo según la importancia que le dé a sus votos… que a nivel de UX sea sencillo».
+
+- Cada medida votada tiene una fila «Importancia para ti» con «−» y «+» (pasos de 5, botones de 44 px), el número de puntos, una barra con el color de su tema y «te quedan N de 100». Antes de votar la medida, la fila está apagada y dice «Vota primero para darle puntos»; «No lo sé todavía» devuelve sus puntos.
+- No se pueden pasar de 100: el «+» se desactiva al llegar y el foco salta al «−».
+- El panel lateral abre con «Tus 100 puntos»: barra repartida por colores de tema, leyenda por tema, cuántos quedan y «Repartir a partes iguales» entre lo votado. El resumen y «Copiar mi voto» incluyen los puntos de cada medida; cada tarjeta de tema muestra una franja con sus puntos.
+- Los pasos 2 y 5 de la propuesta explican que los votos se suman con el peso que les da cada persona.
+- Se guarda en la misma clave (`politica.votar.v2`, campo `pts`); quien ya votó conserva sus votos y empieza con 100 puntos libres.
+- Comprobado en Chrome sin interfaz a 1360 y 390 px: tope de 100, reparto a partes iguales (50/50 con dos medidas), devolución con «No lo sé», sin errores de JS ni desbordamiento.
+
+## 2026-11-15 — `/vision`: los 12 sectores completos y sin «borrador»
+
+- Eugenio: «sigue ampliando todos los temas, quita lo de borrador». Los diez sectores que tenían un solo ejemplo (Energía, Política, Economía, Seguridad, Justicia, Salud, Alimentación, Informática, Educación, Cuidados) tienen ahora, como Vivienda y Movilidad, 3 bloques de visión, 6 retos con dato y fuente, 6 soluciones (cada una dice qué reto supera) y 7-8 proyectos, la mayoría en España. Investigado por cinco agentes con búsqueda web; lo que no pudieron confirmar lleva «(por verificar)» en el propio texto.
+- Proyectos propios enlazados en su sector: SolarCrowd (Energía), Votar por temas (Política, `/observatorio-polarizacion/`), Modelo de optimización socioeconómica (Economía), humanity.wiki (Informática), Estudio sobre la conciencia (Educación), Aeromóvil (Movilidad), Comunidad Circular (Vivienda).
+- Cada sector abre su visión con la ilustración del mes correspondiente del **Calendario Arte para la Humanidad 2027** (miniatura de `public/calendario-arte/miniaturas/`; al pinchar, la grande). La portada muestra la misma ilustración en cada tarjeta. Energía, Informática y Seguridad usan otro diseño de su mes para no repetir imagen con Movilidad y Vivienda.
+- Todos los sectores tienen botón «VER LA VISIÓN EN 3D» y cada bloque su escala del visor.
+- Quitado todo rastro de «borrador»: la etiqueta de la cabecera, la de las tarjetas (ahora dicen cuántos retos, soluciones y proyectos hay) y la del visor 3D. `data_otros.js` desaparece: todo vive en `data.js`.
+
+## 2026-11-15 · Modelo de optimización socioeconómica: más pedagógico, útil, real y certero
+
+- Eugenio: «qué mejorarías para que sea más pedagógico, útil, real y certero, y hazlo».
+- **Cover** (`Mirada.tsx`): «El modelo en cuatro ideas» (one tax, eight equal scales, one pension, new money only to produce) with links and a «Calcúlalo con tu sueldo» link to `#ejemplo`; «Las cuentas, en una mirada», computed live from `cuentasPais`/`modeloPorFuncion` so it cannot disagree with the windows: where every 100 € goes (12,5 person · 62,5 the five inner scales · 25 Europe and planet, vs ≈ 3 € today) and revenue today vs model; «Lo que todavía no cuadra»: 42.416 M€ less revenue, services 372.428 vs 765.001 M€ (sanidad 102.942 → 52.140, educación 65.862 → 34.263), the 170.330 M€ pension not yet in the accounts; «Qué hay en cada área» (the usual parts, honestly «casi todas») and a 12-term glossary (M€ and billones, PIB, cotizaciones, déficit, deuda, escala, tramo, tercio, dividendo, IPC, crédito).
+- **Every summary card says what kind of number it is**: `Cifra` gets `clase` = `dato` (published by a cited source) · `calculo` (this page's arithmetic) · `propuesta` (does not exist today). 96 cards tagged: 53 dato, 28 cálculo, 13 propuesta, 1 untagged («Sin dato»). Rule used: a card is `dato` only if its main value comes as published; own counts and ratios built here are `calculo` even when their inputs are sourced. Scale cards are all `dato`. Notes that only repeated «Propuesta» were removed.
+- **Working notes removed from public text**: six sentences told visitors «lo decide Eugenio», «Eugenio la confirma», «como pidió Eugenio»; now «está por decidir» / «todavía por confirmar» / «como se propone». The decisions themselves are still open and listed in the report to Eugenio.
+- **`scripts/modelo-comprobar.mts`** (`npx tsx scripts/modelo-comprobar.mts`, exit 1 on failure): every «fuente» link resolves (413 today; a missing id renders nothing, so it looked sourced in code and unsourced on screen), wage rates equal their tiers, eighths add to one, no working note addressed to a person in public text. Verified it catches a planted missing source and a planted note.
+- **Migration 0222**: the «Mejoras pendientes» board marks «móvil» and «tipos de los sueldos» as done and adds a progress answer to «Otras propuestas» and «fuentes oficiales»; only items still pending, never over an admin's answer.
+- Checked in headless Chrome at 1360 and 390 px (no horizontal overflow, no JS errors); `tsc`, `build` and the new check clean. Not checked on a real phone.
+
+## 2026-11-15 — Política: Geometrías con diez temas y los tres círculos
+
+- Eugenio: «haz la geometría de los partidos pero con todos los temas políticos… añádeles estilo a cada tema y con ilustraciones al lado del título… mejora el círculo ideal y todos sus círculos concéntricos para que entendamos qué es lo más básico y qué es lo más avanzado de cada tema haciendo hover en esas líneas y puntos».
+- **Diez temas** en el capítulo 6 (`public/observatorio-polarizacion/index.html`): a inmigración y servicios (ocho radios) se suman economía e impuestos, trabajo y pensiones, vivienda, clima y energía, modelo territorial, derechos y libertades, instituciones y justicia, y exterior y defensa (seis radios cada uno). Cada tema lleva color propio, una ilustración de línea (`ILUS`), una pregunta, sus dilemas, la nota de los nueve partidos por radio, un resumen por partido, la propuesta del círculo por radio y dos objeciones. `geometrias()` ya no tiene `N = 8` fijo: lo toma de cada tema (también `API.geoForma`, que usa la tarjeta de la portada).
+- **Selector y cabecera**: tarjetas con ilustración (`.geo-tc`, `role="tab"`, flechas, Inicio y Fin; en móvil, fila con desplazamiento horizontal) y una cabecera grande con la ilustración al lado del título (`#geo-head`).
+- **Tres círculos** en lugar de cuatro anillos: a 1/3, 2/3 y el borde = lo básico, lo intermedio y lo avanzado (el círculo ideal, con un halo del color del tema). Cada tema tiene una frase por círculo (`niv`) y cada radio una escalera de tres (`ejes[i].niv`). Al pasar el ratón por un círculo se lee qué significa en el tema y qué partidos lo alcanzan en todo; por un punto (radio × círculo), qué es ese nivel en ese aspecto y quién llega. En pantalla táctil, al tocar. Para teclado y móvil, una leyenda de los tres círculos bajo el gráfico que resalta cada uno. La ficha de un radio enseña su escalera con los partidos en cada peldaño, y la de un partido dice hasta qué nivel llega en cuántos aspectos.
+- Umbrales: 0–3 no llega a lo básico (la «pata coja» de antes), 4–6 básico, 7–9 intermedio, 10 avanzado. Las notas siguen siendo **valoración de la página** a partir de programas, leyes y declaraciones hasta noviembre de 2026, no un dato medido; 11 fuentes nuevas en el capítulo 6.
+- Verificado en un navegador automatizado sobre el archivo local (1360 px y 390 px, ratón y toque): sin errores de JavaScript, sin desbordamiento horizontal en móvil. No verificado en producción ni con la aplicación instalada desde aquí.
+
+## 2026-11-15 · Réplica del Lumeneo Smera, evaluador de parecido y «Crear editable»
+
+- Eugenio: «mejora el modelo del Lumeneo Smera… recréalo esta vez más fiel a la realidad… que incluso se abran las puertas… Crea un bot que te evalúe la cercanía a la realidad. Haz también el piloto e interior… permite que también bascule. Y a partir de esa réplica permite crear un modelo 3D editable… más alargado, más bajito, el conductor más reclinado, paneles solares en el techo y cola».
+- **Réplica.** El Smera del garaje es ahora el Cuadriciclo Basculante con la carrocería «Como el Lumeneo Smera», con sus líneas calcadas de las fotos de prensa de Lumeneo:
+  - el techo, la panza a 0,29 m, la sección en bañera con el hombro en la cintura, las ventanas, la puerta, los faros, la barra negra, la visera, los pilotos y las ruedas de 0,52 m;
+  - dos puertas que se abren («Abrir puertas»), con sus ventanas y sus manillas;
+  - el conductor y el pasajero sentados casi derechos, volante redondo, asientos;
+  - «Bascular» inclina 25° la cabina y las cuatro ruedas con su paralelogramo; los guardabarros delanteros giran y se inclinan con su rueda.
+- **Crear editable.** El botón nuevo en la tarjeta del Smera del garaje guarda la réplica como diseño propio («Smera editable») y lo abre en el editor.
+  - Con la carrocería del Smera, los deslizadores la estiran sin cambiar su forma: «Largo total», «Morro», «Cola», «Alto total», «Ancho».
+  - Los paneles van en el techo («Paneles en el techo», nuevo) y en la cola (en la luna de atrás).
+  - Ejemplo comprobado: batalla 2,2 m, alto 1,25 m y los dos reclinados a 42–44°. Quedan 2 comprobaciones en rojo por milímetros (la cabeza del pasajero alto y los pies del piloto).
+- **Evaluador.** `scripts/smera-realidad.ts` puntúa de 0 a 100 el parecido de la réplica con la realidad. Hoy da 85.
+  - Medidas publicadas: 18,6 / 20.
+  - Silueta lateral contra la foto: 31,5 / 35. Coincide el 97 % del área, y el contorno cae a 1,4 px (7 mm) de media de los bordes que el programa encuentra en la foto.
+  - Anchos de la foto de frente: 9,8 / 15, con 3,5 cm de error medio.
+  - Cristales: 10,5 / 15.
+  - Comprobaciones: 15 / 15.
+- **Batería.** La réplica lleva 3 kWh, lo que cabe bajo sus asientos con este suelo. El Smera de serie llevaba 9–10 kWh bajo el asiento del conductor.
+
+## 2026-11-15 · «Bascular» en la tarjeta de los diseños basculantes, y el codo del piloto dentro de la carrocería
+
+- Eugenio: «He creado en el garaje el smeraptera, haz que pueda bascular».
+- **Bascular.** Al pinchar un diseño propio en el garaje se abre la tarjeta del diseño que editas. Ahora, si es de la familia Cuadriciclo Basculante (como el «smeraptera», hecho a partir del Smera), esa tarjeta tiene un botón «Bascular». Hace lo mismo que el «Bascular» de la barra de abajo: inclina la carrocería y las cuatro ruedas hasta su máximo a cada lado y vuelve. Antes ese botón solo estaba en la tarjeta del Smera de referencia y en la barra.
+- **Codo.** En el Smera alargado, más bajo y con el piloto reclinado, el codo derecho del piloto asomaba por la puerta como una mancha azul. Ahora el visor dobla el brazo hacia abajo hasta que el codo queda dentro de la carrocería. En los demás diseños el brazo no cambia: solo se dobla si el codo se salía.
+- **Texto.** La tarjeta de un coche de referencia ya no promete «abre sus puertas y su maletero» cuando solo tiene puertas.
+- Comprobado en un navegador automatizado, en ordenador, con una copia local y un diseño alargado de prueba. No he visto el «smeraptera» de verdad: sus medidas están en el servidor y desde aquí no llego a él.
+
+## 2026-11-15 · El Cuadriciclo Bala clásico puede bascular
+
+- Eugenio, sobre su «Smeraptera»: «haz que pueda bascular… creo que te has equivocado de vehículo». El arreglo anterior era para la familia Cuadriciclo Basculante, y el Smeraptera es un Cuadriciclo Bala clásico, con cuatro ruedas en carenados.
+- **Opción nueva.** En Rodaje → Suspensión y dirección, solo con dos ruedas traseras, aparecen dos controles:
+  - «Bascular en las curvas» (no / sí); de serie, «no».
+  - «Bascular: inclinación máxima», de 5 a 30°; de serie, 15°.
+- **Cómo se inclina.** Toda la cabina se inclina hacia dentro, sobre el suelo bajo su línea central. Cada carenado cuelga de sus dos brazos como de un paralelogramo y se inclina igual, con su rueda, su mangueta y su motor:
+  - el de dentro sube a lo largo del costado y el de fuera baja;
+  - los dos se acercan un poco a la cabina;
+  - las cuatro ruedas siguen en el suelo.
+  - Los brazos, los amortiguadores y las bieletas de la dirección siguen a su carenado.
+- **Botón.** «Bascular» aparece en la barra de abajo y en la tarjeta del diseño que editas cuando la opción está en «sí».
+- **Comprobaciones nuevas**, a la inclinación máxima:
+  - cada carenado (delantero y trasero, el de dentro y el de fuera) a la carrocería;
+  - cada carenado al suelo;
+  - la carrocería al suelo.
+  - Con las medidas de serie y 1,80 m de vía, a 15° el carenado de dentro sube 23 cm y todo queda en verde hasta 25°.
+- **Aún no se tiene en cuenta** en el vuelco, la masa ni el consumo: ni el mecanismo ni la inclinación.
+- No he cambiado el Smeraptera guardado: la opción está en «no» hasta que él la active.
+
+## 2026-11-15 — `/vision`: menú de las 8 escalas y efecto de selección
+
+- Eugenio: «un menú izquierdo donde aparezcan las 8 escalas, desde el individuo hasta el planeta», «que al pinchar en una de ellas te muestre solo las visiones, retos, soluciones y proyectos de esa escala», y que la elegida se vea «un 20 % más grande, en negrita y con fondo de color, y el resto más grises», también en el menú superior.
+- Menú lateral con **Todas las escalas** + Individuo, Comunidad, Pueblo, Provincia, Región, País, Continente y Planeta (las mismas ocho del Modelo de optimización socioeconómica). Cada una muestra cuántos elementos tiene. En el móvil es una franja deslizable bajo la cabecera.
+- Al elegir una escala, la portada y cada sector muestran solo lo de esa escala: bloques de visión, retos, soluciones y proyectos, con los contadores de las pestañas recalculados. Si no hay nada, lo dice y lo presenta como hueco por llenar. El botón 3D abre la escala del visor que corresponde (hogar, comunidad, pueblo, naturaleza). La escala viaja en la dirección (`#/sector/vivienda/retos?e=pais`), así que se puede compartir el enlace.
+- Cada elemento lleva sus escalas como etiquetas. Se asignaron con `scripts/escalas.py` (fuera del repositorio, en la sesión) por reglas: el ámbito y el lugar de cada elemento, y de qué habla (hogar, barrio, municipio, comarca…), más ajustes a mano para los proyectos propios — el Modelo socioeconómico está en las ocho. Es una primera clasificación automática: conviene que el equipo la revise.
+- Elemento elegido en el menú de escalas y en el de sectores: letra un 20 % mayor, negrita, fondo verde; el resto en gris.
+
+## 2026-11-15 — `/vision`: menú lateral derecho para elegir Visión, Retos, Soluciones o Proyectos
+
+- Eugenio: «que se pueda elegir también de forma más grande si quieres ver la Visión, los retos, proyectos, soluciones, seleccionando y que aparezca solo eso, en el menú lateral derecho».
+- Menú derecho «Ver»: **Todo** + Visión ideal, Retos, Soluciones y Proyectos, cada uno con su color, icono y contador (del sector abierto o de los 12, según la escala). Mismo efecto de selección que los otros dos menús: el elegido un 20 % más grande, en negrita y con su color de fondo; el resto en gris. Por debajo de 1150 px pasa a franja deslizable arriba del contenido.
+- En un sector, «Todo» muestra los cuatro pilares seguidos; elegir uno muestra solo ese. Las pestañas pequeñas desaparecen.
+- En la portada, elegir un pilar muestra solo ese pilar en los 12 sectores, agrupado por sector (por ejemplo, todos los retos a escala Pueblo). Las cuatro cajas de pilares de la portada también llevan ahí.
+- La elección viaja en la dirección junto a la escala (`#/sector/vivienda?e=pueblo&p=retos`) y se mantiene al cambiar de sector o de escala. Los enlaces antiguos con el pilar en la ruta (`#/sector/salud/soluciones`) siguen funcionando.
+
+## 2026-11-15 · Bala con las ruedas en rombo
+
+- Eugenio, sobre su «Rombo Bala»: «quiero que tenga las ruedas en rombo, una delante, una atrás y dos laterales basculantes, haz que esto se pueda elegir».
+- **Dónde está.** Rodaje → Ejes y ruedas tiene un control nuevo, «Disposición de las ruedas»:
+  - «Dos delante en carenados»: como hasta ahora, y es lo que viene de serie.
+  - «En rombo»: una rueda en el morro, que es la que gira; dos laterales en sus carenados, que no giran; una en la cola.
+- **Deslizador nuevo.** «Ruedas laterales: detrás de la del morro», de 0,60 a 2,40 m.
+- **Bascular.** «Bascular en las curvas» también vale en rombo: se inclinan la cabina y los dos carenados laterales.
+- **Cálculos.**
+  - Vuelco: se mide sobre la arista más cercana, de una rueda lateral a la del morro o a la de la cola.
+  - Giro: lo da la rueda del morro, girando alrededor de la línea de las laterales.
+  - Bastidor: apoyado en la horquilla del morro y en el pivote.
+  - Masa: se añaden la rueda del morro, su freno y su horquilla.
+- **Comprobaciones nuevas.**
+  - Rueda delantera dentro del morro, recta y girada.
+  - Pies del piloto detrás de la rueda delantera.
+  - Batería por detrás de la rueda delantera.
+  - Neumático y carenado laterales.
+- **Su Rombo Bala**, con las laterales a 2,20 m, las puertas abren por delante de los carenados. Quedan en rojo:
+  - el vuelco: 0,98 g con dos ocupantes, sin contar la inclinación, para un objetivo de 1,05 g;
+  - la rueda del morro girada 29°, 1 cm fuera del morro;
+  - los pies del piloto: 2,3 cm de los 3 que se piden;
+  - tres comprobaciones que ya estaban en rojo antes del rombo: las cabezas en talla alta, el controlador y el bastidor.
+
+## 2026-11-15 · La batería se alarga con el coche, y largueros hasta el eje trasero de serie
+
+- Eugenio: «haz que la batería se pueda alargar más cuando se alarga el vehículo, de hecho el chasis por defecto no se está alargando al alargar el vehículo».
+- **Batería.** Con la batería «a lo largo del bastidor», al cambiar «Largo total» o «Batalla» el paquete crece o encoge lo mismo que la batalla, dentro de lo que cabe. Antes se quedaba del mismo largo y el hueco de detrás crecía.
+- **Largueros.** Con dos ruedas traseras, los diseños nuevos llevan de serie los largueros hasta el eje trasero, con su cuna, en lugar de pararse en la torreta del amortiguador, que con cuatro ruedas no existe. Los diseños guardados conservan lo que tenían; se cambia en Chasis.
+- **En rombo**, los textos de Rodaje hablan de las ruedas laterales y de la del morro, no de «delanteras».
+
+## 2026-11-15 · Bala: híbrido enchufable (PHEV) con engranaje planetario
+
+- Eugenio: «permite añadir una opción de motor híbrido tipo PHEV con ejes planetarios como el Prius, entonces tiene que aparecer el cálculo de consumo a los 100 km con un slider de eficiencia del motor y conversión mecánica y también ajustar el tamaño del depósito».
+- **Motor → «Propulsión».** Dos opciones: «Eléctrica» (de serie) o «Híbrida enchufable (PHEV)».
+- **Bloque nuevo «Híbrido enchufable»**, con cuatro deslizadores:
+  - potencia del motor de gasolina, de 8 a 60 kW;
+  - su rendimiento, de 20 a 42 %;
+  - conversión mecánica (planetario y generador), de 75 a 97 %;
+  - depósito, de 5 a 45 L.
+- **Rendimiento.** Se añaden la gasolina en L/100 km (a la velocidad de cálculo, y a 50 y 100 km/h, con la batería gastada), la autonomía con el depósito, la autonomía total y la velocidad sostenida solo con gasolina.
+- **Cálculo del consumo.** La energía que piden las ruedas (aire y rodadura) dividida por la conversión mecánica, más los equipos; todo dividido por el rendimiento del motor de gasolina y por los 8,9 kWh que lleva cada litro.
+- **Masas estimadas:**
+  - motor: 15 kg más 1,4 kg por kW;
+  - planetario y generador: 12 kg;
+  - depósito: 4 kg más 0,745 kg por litro de gasolina.
+  - Van todas delante del eje trasero.
+- **Falta:** el motor de gasolina aún no se dibuja en 3D ni se comprueba que quepa.
+
+## 2026-11-15 — `/vision`: partes de cada sector, 3D cargado dentro de la página, contenido centrado
+
+- Eugenio: «en vivienda hay varias partes, como la arquitectura del hogar, el urbanismo, la comunidad… añádelo como submenú debajo de vivienda», «que esté todo centrado y los menús laterales un 20 % más pequeños», «el modelo 3D que cargue por defecto sin hacer clic» y «cuando no haya modelo 3D pon que está pendiente».
+- **Submenú de partes** bajo la cabecera, en los 12 sectores (5-6 partes cada uno; en Vivienda: Arquitectura del hogar, Urbanismo, Comunidad y cooperativas, Suelo y acceso a la vivienda, Naturaleza y territorio). «Todo …» y cada parte con su contador; mismo efecto de selección que los demás menús. Elegir una parte muestra solo lo de esa parte, combinable con la escala y el pilar; va en el enlace (`?s=urbanismo`).
+- Cada bloque, reto, solución y proyecto lleva sus partes (`subtemas`), asignadas por palabras clave con `scripts/subtemas.py` (en la sesión, fuera del repositorio). Todos los elementos tienen al menos una parte. Primera clasificación automática: a revisar.
+- **El 3D se carga solo** dentro de la sección «Visión ideal» (sin la botonera de escalas del visor, que ya la da la página), con botón de pantalla completa. La escena sigue a la parte y a la escala elegidas (Urbanismo → pueblo, Arquitectura → hogar…). En las escalas País, Continente y Planeta todavía no hay modelo: se muestra «Modelo 3D pendiente», y el botón de la cabecera dice lo mismo.
+- Contenido centrado entre los dos menús (ancho máximo 1.060 px, títulos centrados); menús laterales un 20 % más estrechos y con letra un 20 % menor.
+
+## 2026-11-15 · Cirrus Vision Jet SF50 en el garaje
+
+- Eugenio, con una foto en vuelo: «Haz un modelo 3d de este avión exacto, el modelo tal cual y ponlo en el garaje».
+- **Modelo nuevo** `garaje/visionJet.ts`, en tierra con el tren bajado. Lleva:
+  - el fuselaje, con el frente azul oscuro y el parabrisas en la misma piel;
+  - las dos ventanas ovaladas por lado, dentro de la franja oscura;
+  - el ala baja con diedro y aletas en las puntas, con sus luces de navegación;
+  - la cola en V a 42°;
+  - el motor sobre el lomo, con su toma y su tobera;
+  - el tren de morro y el principal, con sus tapas.
+  - No lleva marcas del fabricante ni matrícula.
+- **Medidas publicadas** (globalair.com): 9,42 m de largo, 11,79 m de envergadura, 3,33 m de alto, cabina de 1,55 × 1,24 m y 1.610 kg en vacío.
+- **Medido en fotos y estimado:** las secciones, las cuerdas y la flecha del ala, la cola, la góndola y el tren.
+- **Fuera del túnel de viento:** no tiene silueta para el túnel, que está hecho para coches.
+
+## 2026-11-15 · Carrocería en acordeón, pinchar en el 3D abre sus ajustes, y tres formas nuevas
+
+- Eugenio: «Mejora la capacidad de configuración del morro, cúpula, cola, para que se puedan hacer formas tan perfectas como el avión jet … y que esté mejor ordenado y los slider en acordeón plegados por categoría, ejemplo COLA, MORRO, y con capacidad de pinchar y que se vea la configuración».
+- **Acordeón.** En la familia Bala, los ajustes de cada departamento van en bloques plegables, en este orden: Forma, Morro, Cúpula, Cola, Techo solar y ventanas, Carenados, Puertas y maletero, Material.
+  - Cada bloque dice cuántos ajustes tiene.
+  - El navegador recuerda cuáles dejaste abiertos.
+  - El antiguo «Morro y cola» se parte en «Morro» y «Cola».
+- **Pinchar en el 3D.** Al pinchar el coche que editas se abre el bloque de esa parte y el panel baja hasta él. Las partes son:
+  - morro, cúpula o cola, según dónde caiga el clic;
+  - carenados, puertas, ruedas, chasis, batería, motor y asientos, cada uno en su departamento.
+- **Formas nuevas**, que con 0 dejan todo como estaba:
+  - «Parabrisas: subida desde el capó»: la cabina abombada de un jet o tumbada;
+  - «Bajos del morro: cuánto suben hacia la punta»: la panza curvada del morro de un avión, hasta 20 cm;
+  - «Capó: caída hacia el borde», solo con la cubierta lisa.
+
+## 2026-11-15 — `/vision`: los menús como controles sobre fondo oscuro, el contenido en un panel claro
+
+- Eugenio: que el menú superior, el izquierdo y el derecho tengan el mismo fondo, distinto del centro, «para que se entienda que son controles», oscuro en los menús y claro en el centro.
+- Cabecera, submenú de partes, menú de escalas, menú de pilares y pie de página comparten un fondo verde muy oscuro. El contenido va en un panel claro con esquinas redondeadas y sombra, como una pantalla dentro del marco. El efecto de selección se mantiene: el elegido en verde (o en el color de su pilar), el resto en gris sobre el oscuro. En el móvil las franjas de menú también son oscuras.
+
 ## 2026-11-15 — Calendario Arte: illustrations in depth planes (design 5 for May and June) and an evaluator agent
 
 - Eugenio: «a partir de ahora todas las ilustraciones que te pidamos utilices al menos entre 3 y 5 planos y capas de profundidad… detallitos ocultos en el fondo pero bien ilustrados… juega con las luces… Genera un bot que evalúe tu trabajo y te dé mejoras». Reference: a board-game cover with a backlit forest (used only for how depth is built).

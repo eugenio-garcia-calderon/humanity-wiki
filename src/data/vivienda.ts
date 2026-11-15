@@ -16,6 +16,8 @@ export const APARTADOS: { id: string; t: string }[] = [
   { id: 'vivienda-quien', t: 'Quién manda hoy' },
   { id: 'vivienda-propuesta', t: 'La propuesta' },
   { id: 'vivienda-escalas', t: 'Las 8 escalas' },
+  { id: 'vivienda-suelo', t: 'Precio del suelo' },
+  { id: 'vivienda-rustica', t: 'Casas en el campo' },
   { id: 'vivienda-retos', t: 'Lo que falta' },
   { id: 'vivienda-fuentes', t: 'Fuentes' },
 ];
@@ -31,16 +33,22 @@ export const FUENTES_VIVIENDA: Record<string, FuenteV> = {
   'sobrecarga-es': { titulo: 'Eurostat vía Trading Economics · Inquilinos a precio de mercado que dedican más del 40 % de su renta a la vivienda: España, 2025', url: 'https://tradingeconomics.com/spain/housing-cost-overburden-rate-tenant-rent-at-market-price-eurostat-data.html' },
   'sobrecarga-ue': { titulo: 'Eurostat vía Trading Economics · Lo mismo para la media de la UE, 2025', url: 'https://tradingeconomics.com/european-union/housing-cost-overburden-rate-tenant-rent-at-market-price-eurostat-data.html' },
   'bde-2025': { titulo: 'Banco de España, Informe Anual 2025, vía elDiario.es · Déficit de 750.000 viviendas y 6,8 años de renta para comprar', url: 'https://www.eldiario.es/economia/banco-espana-eleva-750-000-viviendas-faltan-anticipa-deficit-agravara-proximos-anos_1_13313634.amp.html' },
-  'ine-vacias': { titulo: 'INE, Censo de Población y Viviendas 2021, vía Valencia Plaza · 3.837.328 viviendas vacías', url: 'https://valenciaplaza.com/ine-cifra-numero-viviendas-vacias-mas-de-3-8-millones' },
+  'ine-vacias': { titulo: 'INE · Censo de Población y Viviendas 2021: 3.837.328 viviendas vacías, el 14,4 % (30-6-2023)', url: 'https://ine.es/prensa/censo_2021_jun.pdf' },
   'protegidas': { titulo: 'La Moncloa · Viviendas protegidas iniciadas y terminadas, del 4.º trimestre de 2024 al 3.º de 2025', url: 'https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/vivienda-agenda-urbana/Paginas/2025/181225-estadistica-viviendas-protegidas.aspx' },
   'ley-vivienda': { titulo: 'BOE · Ley 12/2023, de 24 de mayo, por el derecho a la vivienda', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-2023-12203' },
   'constitucion': { titulo: 'BOE · Constitución española, artículos 47 y 148.1.3.ª', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-1978-31229' },
   'lrbrl': { titulo: 'BOE · Ley 7/1985 de Bases del Régimen Local, artículo 25.2.a', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-1985-5392' },
   'zonas': { titulo: 'Ara · Zonas tensionadas en agosto de 2026: 317 municipios en cinco comunidades', url: 'https://es.ara.cat/economia/inmobiliario/tope-alquiler-llega-municipios-espanoles-funciona_1_5815492.html' },
-  'plan-estatal': { titulo: 'El Independiente · El Plan Estatal de Vivienda 2026-2030, aprobado el 21 de abril de 2026, con 7.000 M€', url: 'https://www.elindependiente.com/economia/2026/04/21/gobierno-blinda-especulacion-parque-publico-nuevo-plan-estatal-vivienda/' },
+  'plan-estatal': { titulo: 'La Moncloa · El Consejo de Ministros aprueba el Plan Estatal de Vivienda 2026-2030, con 7.000 M€ (21-4-2026)', url: 'https://www.lamoncloa.gob.es/consejodeministros/resumenes/Paginas/2026/210426-rueda-de-prensa-ministros.aspx' },
   'plan-ue': { titulo: 'Cuatrecasas · El primer Plan Europeo de Vivienda Asequible (16 de diciembre de 2025)', url: 'https://www.cuatrecasas.com/en/spain/real-estate/art/european-affordable-housing-plan' },
   'onu-habitat': { titulo: 'ONU DESA con datos de ONU-Hábitat · 318 millones de personas sin hogar y 2.800 millones sin vivienda adecuada', url: 'https://social.desa.un.org/world-summit-2025/blog/300million-people-homeless-worldwide' },
   'dudh': { titulo: 'ONU · Declaración Universal de Derechos Humanos, artículo 25', url: 'https://www.un.org/es/about-us/universal-declaration-of-human-rights' },
+  'ley-suelo': { titulo: 'BOE · Ley de Suelo y Rehabilitación Urbana (RDL 7/2015): artículos 13, 18, 21 y 36', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-2015-11723' },
+  'mapa-tierra': { titulo: 'MAPA · Encuesta de precios de la tierra 2024: 10.248 €/ha de media; tierra arable de secano, 7.239 €/ha', url: 'https://www.mapa.gob.es/dam/mapa/contenido/prensa/notas-de-prensa/documentos/documentos-2025/25-08-04-precios-tierra.pdf' },
+  'suelo-urbano': { titulo: 'Ministerio de Vivienda vía Forbes · Precio medio del suelo urbano a finales de 2025: 171 €/m²', url: 'https://forbes.es/economia/912602/el-precio-medio-del-suelo-urbano-retrocedio-un-26-al-cierre-de-2025-segun-vivienda/' },
+  'domenech': { titulo: 'G. Doménech Pascual (Universitat de València) · Las plusvalías urbanísticas: recalificar puede multiplicar por cien el precio', url: 'https://www.uv.es/gadopas/2014.plusvalias.urbanisticas' },
+  'esyrce': { titulo: 'MAPA · Encuesta de superficies y rendimientos de cultivos (ESYRCE) 2025', url: 'https://www.mapa.gob.es/en/dam/jcr%3A4ab54d2c-65ad-4ec7-a248-33e16e3f4d0b/ComentariosEspana2025.pdf' },
+  'abandono': { titulo: 'Unión de Uniones con datos del Anuario del MAPA, vía Agronews · 3,2 millones de hectáreas de cultivo abandonadas de 1990 a 2016', url: 'https://www.agronewscastillayleon.com/union-de-uniones-destaca-la-perdida-de-un-19-de-tierras-de-cultivo-desde-1990' },
   'iva': { titulo: 'BOE · Ley 37/1992 del IVA: el alquiler de vivienda, exento (art. 20); la vivienda nueva, al 10 % (art. 91)', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-1992-28740' },
 };
 
@@ -299,11 +307,11 @@ export const TIPO_USO: Record<UsoVivienda, number> = { habitual: 0.1, segunda: 0
 // ── WHAT IS STILL OPEN ──────────────────────────────────────────────────────
 export const RETOS: { t: string; d: string }[] = [
   { t: 'El alquiler sube un 10 %', d: `Hoy el alquiler de vivienda no paga IVA. Con el modelo paga el tramo básico: con 900 € al mes, 90 € más. A cambio, el dueño deja de pagar el IBI (el modelo usa una estimación de ${SUPUESTOS.ibi} € al año por hogar, unos ${Math.round(SUPUESTOS.ibi / 12)} € al mes) y el IRPF por lo que cobra, que depende de su renta. Si el dueño baja el alquiler con lo que se ahorra no está calculado: no hay forma de saberlo de antemano.` },
-  { t: 'La bolsa de casas vacías puede no bastar', d: 'Si los dueños no quieren llevar sus pisos a la bolsa municipal, las casas siguen cerradas. Las alternativas (alquiler obligatorio o un recargo) están en «La propuesta», y las decide Eugenio.' },
+  { t: 'La bolsa de casas vacías puede no bastar', d: 'Si los dueños no quieren llevar sus pisos a la bolsa municipal, las casas siguen cerradas. Las alternativas (alquiler obligatorio o un recargo) están en «La propuesta», y están por decidir.' },
   { t: 'Qué es «habitual»', d: 'La diferencia entre el 10 % y el 20 % invita a declarar como habitual lo que no lo es. Hace falta un registro único fiable, y saber qué pasa con las parejas, los hijos que estudian fuera o quien trabaja en dos ciudades.' },
   { t: 'Construir lleva años', d: `Pasar de menos del 2 % de vivienda social a la media europea del 8 % es multiplicar el parque por más de cuatro. El Banco de España calcula que ya faltan ${HOY_VIVIENDA.deficit.toLocaleString('es-ES')} viviendas, y hoy hay menos gente trabajando en la construcción que en los noventa.` },
   { t: 'Más dinero puede subir los precios', d: 'Si las escalas compran pisos que ya existen, compiten con las familias y el precio sube. Por eso el tercio para producir debe ir, sobre todo, a construir y a rehabilitar casas vacías, no a comprar en el mercado.' },
   { t: 'Quién vota en el edificio', d: 'Que voten todas las personas que viven allí, y no solo las dueñas, choca con la ley de propiedad horizontal de hoy. Hay que decidir qué se vota entre residentes y qué sigue siendo de quien es propietario.' },
   { t: 'El paso desde hoy', d: 'Hoy la vivienda es competencia plena de las comunidades. Una sola ley para todo el país, como propone el modelo, necesitaría cambiar el reparto de competencias.' },
-  { t: 'Los pisos turísticos', d: 'Leemos que un alquiler turístico es alojamiento de viaje, y por tanto tramo del ocio (40 %). Es nuestra lectura de las categorías, y Eugenio debe confirmarla.' },
+  { t: 'Los pisos turísticos', d: 'Leemos que un alquiler turístico es alojamiento de viaje, y por tanto tramo del ocio (40 %). Es nuestra lectura de las categorías, todavía por confirmar.' },
 ];

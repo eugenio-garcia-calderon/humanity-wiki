@@ -10,8 +10,9 @@
 // `#pensiones` opens the window, `#pensiones-fondo` opens it at that section.
 // The old single-page anchors (`#esquema`, `#cuentas`…) still land in the
 // taxes window, where those sections now are.
-import { useState, type ReactNode } from 'react';
-import { ChevronDown, Euro, GraduationCap, HandCoins, Home, Landmark, Layers, PieChart, Scale, ScrollText, ShieldCheck, Smartphone, Stethoscope, Tags, type LucideIcon } from 'lucide-react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { Euro, GraduationCap, HandCoins, Home, Landmark, Layers, Plus, PieChart, Scale, ScrollText, ShieldCheck, Smartphone, Stethoscope, Tags, type LucideIcon } from 'lucide-react';
+import { ESPECTROS } from '../../data/espectro';
 import { APARTADOS as A_ESCALAS } from '../../data/escalas';
 import { APARTADOS as A_VIVIENDA } from '../../data/vivienda';
 import { APARTADOS as A_SEGURIDAD } from '../../data/seguridad';
@@ -20,10 +21,12 @@ import { APARTADOS as A_SANIDAD } from '../../data/sanidad';
 import { APARTADOS as A_EDUCACION } from '../../data/educacion';
 import { APARTADOS as A_LEGAL } from '../../data/legal';
 import { APARTADOS as A_DIGITAL } from '../../data/digital';
+import { APARTADOS as A_BANCA } from '../../data/banca';
+import { APARTADOS as A_MONEDA } from '../../data/moneda';
 import { cn } from '../../utils/cn';
 import { Libre } from './piezas';
 
-export type VentanaId = 'escalas' | 'impuestos' | 'categorias' | 'pensiones' | 'presupuestos' | 'deuda' | 'vivienda' | 'seguridad' | 'justicia' | 'sanidad' | 'educacion' | 'legal' | 'digital';
+export type VentanaId = 'escalas' | 'impuestos' | 'categorias' | 'pensiones' | 'presupuestos' | 'economia' | 'vivienda' | 'seguridad' | 'justicia' | 'sanidad' | 'educacion' | 'legal' | 'digital';
 export interface Ventana {
   id: VentanaId;
   titulo: string;
@@ -36,7 +39,7 @@ export interface Ventana {
   apartados: { id: string; t: string }[];
 }
 
-export const VENTANAS: Ventana[] = [
+const BASE: Ventana[] = [
   {
     id: 'escalas', titulo: 'Escalas', icono: Layers, apartados: A_ESCALAS,
     lema: 'De la persona al planeta: qué le toca a cada escala y con qué poder.',
@@ -86,17 +89,10 @@ export const VENTANAS: Ventana[] = [
     ],
   },
   {
-    id: 'deuda', titulo: 'Deuda', icono: Landmark,
-    lema: 'La deuda de España y de las comunidades, y un sistema sin deuda con una caja para emergencias.',
-    apartados: [
-      { id: 'deuda', t: 'Resumen' },
-      { id: 'deuda-quien', t: 'Quién debe' },
-      { id: 'deuda-historia', t: 'Historia' },
-      { id: 'deuda-propuesta', t: 'Hoy y propuesta' },
-      { id: 'deuda-caja', t: 'Caja de emergencias' },
-      { id: 'deuda-heredada', t: 'La deuda de hoy' },
-      { id: 'deuda-fuentes', t: 'Fuentes' },
-    ],
+    id: 'economia', titulo: 'Economía', icono: Landmark,
+    lema: 'La deuda, la banca y la moneda: cómo funcionan hoy y qué se propone en cada una.',
+    // Flat list of every part's sections, so any of their anchors opens this window.
+    apartados: [],
   },
   { id: 'vivienda', titulo: 'Vivienda', icono: Home, apartados: A_VIVIENDA, lema: 'Lo que hoy apenas se hace, y qué promulga y regula cada escala.' },
   { id: 'seguridad', titulo: 'Seguridad', icono: ShieldCheck, apartados: A_SEGURIDAD, lema: 'Ejército, policías y guardias: un solo cuerpo de guardianes, sin duplicidades.' },
@@ -107,8 +103,45 @@ export const VENTANAS: Ventana[] = [
   { id: 'digital', titulo: 'Digital', icono: Smartphone, apartados: A_DIGITAL, lema: 'Firmar con el móvil, sin instalar nada.' },
 ];
 
-/** Which window an anchor belongs to: its own id, or one of its sections. */
+/** Every window with «Otras propuestas» gets it as the first entry of its submenu. */
+const conPropuestas = (id: string, apartados: { id: string; t: string }[]) =>
+  ESPECTROS[id] ? [{ id: `${id}-propuestas`, t: 'Otras propuestas' }, ...apartados] : apartados;
+
+/**
+ * The «Economía» window (Eugenio, 2026-11-13) holds three parts — Deuda, Banca,
+ * Moneda — each with its own «Otras propuestas» and sections. Only the open
+ * part is drawn; its anchors keep the old ids (#deuda-caja), so links shared
+ * before the merge still land.
+ */
+export const PARTES_ECONOMIA: { id: 'deuda' | 'banca' | 'moneda'; t: string; apartados: { id: string; t: string }[] }[] = [
+  { id: 'deuda', t: 'Deuda', apartados: conPropuestas('deuda', [
+      { id: 'deuda', t: 'Resumen' },
+      { id: 'deuda-quien', t: 'Quién debe' },
+      { id: 'deuda-historia', t: 'Historia' },
+      { id: 'deuda-propuesta', t: 'Hoy y propuesta' },
+      { id: 'deuda-caja', t: 'Caja de emergencias' },
+      { id: 'deuda-heredada', t: 'La deuda de hoy' },
+      { id: 'deuda-fuentes', t: 'Fuentes' },
+  ]) },
+  { id: 'banca', t: 'Banca', apartados: conPropuestas('banca', A_BANCA) },
+  { id: 'moneda', t: 'Moneda', apartados: conPropuestas('moneda', A_MONEDA) },
+];
+export type ParteEconomia = (typeof PARTES_ECONOMIA)[number]['id'];
+
+/** The part an anchor belongs to (its id, one of its sections, or its prefix); Deuda by default. */
+export function parteDeAncla(ancla: string): ParteEconomia {
+  const p = PARTES_ECONOMIA.find(x => x.id === ancla || ancla.startsWith(`${x.id}-`) || x.apartados.some(a => a.id === ancla));
+  return p ? p.id : 'deuda';
+}
+
+/** Every window with «Otras propuestas» gets it as the first entry of its submenu. */
+export const VENTANAS: Ventana[] = BASE.map(v => v.id === 'economia'
+  ? { ...v, apartados: PARTES_ECONOMIA.flatMap(p => [{ id: p.id, t: p.t }, ...p.apartados]) }
+  : { ...v, apartados: conPropuestas(v.id, v.apartados) });
+
+/** Which window an anchor belongs to: its own id, or one of its sections (any Economía part's prefix too). */
 export function ventanaDeAncla(ancla: string): VentanaId | null {
+  if (PARTES_ECONOMIA.some(p => ancla === p.id || ancla.startsWith(`${p.id}-`))) return 'economia';
   for (const v of VENTANAS) {
     if (v.pronto) continue;
     if (v.id === ancla || v.apartados.some(a => a.id === ancla)) return v.id as VentanaId;
@@ -130,40 +163,122 @@ export function Mas({ titulo, children, className, abierto: inicial = false }: {
   return (
     <div className={cn('mt-5', className)}>
       <Libre onClick={() => setAbierto(a => !a)} aria-expanded={abierto}
-        className="group inline-flex max-w-full items-start justify-start gap-1.5 rounded-2xl border border-slate-300 bg-white px-3.5 py-2 text-left text-sm font-semibold text-slate-800 hover:border-slate-400 hover:bg-slate-50">
-        <ChevronDown aria-hidden className={cn('mt-0.5 h-4 w-4 shrink-0 transition-transform', abierto && 'rotate-180')} />
-        <span>{abierto ? 'Menos' : 'Más'}: {titulo}</span>
+        className={cn('group inline-flex max-w-full items-start justify-start gap-2.5 rounded-[1.25rem] border py-1.5 pl-1.5 pr-4 text-left text-sm font-semibold transition-colors duration-150 motion-reduce:transition-none',
+          abierto ? 'border-slate-900 bg-slate-900 text-white hover:bg-slate-800' : 'border-slate-300 bg-white text-slate-800 shadow-sm shadow-slate-900/5 hover:border-slate-900 hover:text-slate-900')}>
+        <span aria-hidden className={cn('grid h-6 w-6 shrink-0 place-items-center rounded-full transition-colors duration-150 motion-reduce:transition-none',
+          abierto ? 'bg-white text-slate-900' : 'bg-slate-100 text-slate-700 group-hover:bg-slate-900 group-hover:text-white')}>
+          <Plus className={cn('h-3.5 w-3.5 transition-transform duration-200 motion-reduce:transition-none', abierto && 'rotate-45')} strokeWidth={2.5} />
+        </span>
+        <span className="py-0.5">{abierto ? 'Menos' : 'Más'}: {titulo}</span>
       </Libre>
-      {abierto && <div className="mt-4 border-l-2 border-slate-200 pl-4 sm:pl-6">{children}</div>}
+      {abierto && (
+        <div className="mt-4 border-l-2 border-slate-300 pl-4 transition duration-200 ease-out starting:-translate-y-1 starting:opacity-0 motion-reduce:transition-none sm:pl-6">
+          {children}
+        </div>
+      )}
     </div>
   );
 }
 
 /** One section of a window: its anchor, its title and the one idea it holds. */
+/** Sections that fold on a phone (Eugenio, 2026-11-15, «adelante con las mejoras»: the longest windows ran to ~24.000 px
+ *  at 390 px wide, about 27 screens). Sources, open questions and the per-scale detail fold everywhere; the rest are the
+ *  longest reference blocks measured that day. On a tablet or a computer nothing folds. */
+const PLEGAR_SUFIJOS = ['-fuentes', '-retos', '-escalas'];
+const PLEGAR = new Set([
+  'vivienda-hoy', 'vivienda-suelo', 'seguridad-dinero', 'seguridad-duplicidades', 'justicia-reincidencia', 'justicia-ocupacion',
+  'educacion-riesgos', 'educacion-bot', 'legal-sectores', 'legal-prueba', 'legal-licencias',
+]);
+const sePliega = (id: string) => PLEGAR.has(id) || PLEGAR_SUFIJOS.some(s => id.endsWith(s));
+
 export function Apartado({ id, titulo, entradilla, children, fondo = 'claro' }: {
   id: string; titulo: string; entradilla?: ReactNode; children: ReactNode; fondo?: 'claro' | 'blanco';
 }) {
+  const plegable = sePliega(id);
+  const caja = useRef<HTMLDivElement>(null);
+  const [abierto, setAbierto] = useState(false);
+  const [largo, setLargo] = useState(false);
+  // Only offer the fold when the body really is taller than the folded height.
+  useLayoutEffect(() => {
+    const el = caja.current;
+    if (!plegable || !el) return;
+    const medir = () => setLargo(el.scrollHeight > 640);
+    medir();
+    const ro = new ResizeObserver(medir);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [plegable]);
+  // A link to this section, or to anything inside it, opens it.
+  useEffect(() => {
+    if (!plegable) return;
+    const mirar = () => {
+      const h = decodeURIComponent(window.location.hash.slice(1));
+      if (h && (h === id || caja.current?.querySelector(`[id="${CSS.escape(h)}"]`))) setAbierto(true);
+    };
+    mirar();
+    window.addEventListener('hashchange', mirar);
+    return () => window.removeEventListener('hashchange', mirar);
+  }, [plegable, id]);
+  const plegado = plegable && largo && !abierto;
   return (
     <section id={id} aria-labelledby={`${id}-titulo`} className={cn('scroll-mt-40', fondo === 'blanco' && 'border-y border-slate-200 bg-white')}>
       <div className="mx-auto max-w-6xl px-4 pb-16 pt-14 sm:px-6">
-        <header className="mb-7 max-w-3xl">
-          <h2 id={`${id}-titulo`} className="text-[1.75rem] font-[750] leading-[1.12] tracking-[-0.02em] text-slate-900 sm:text-[2.2rem]">{titulo}</h2>
-          {entradilla && <div className="mt-3 text-[17px] leading-relaxed text-slate-600">{entradilla}</div>}
+        <header className="mb-8 max-w-3xl">
+          {/* The calibration mark: the same short rule opens every section (the observatory's axis, in ink). */}
+          <span aria-hidden className="mb-4 block h-[3px] w-10 rounded-full bg-gradient-to-r from-slate-900 to-slate-300" />
+          <h2 id={`${id}-titulo`} className="text-balance text-[1.75rem] font-[750] leading-[1.12] tracking-[-0.02em] text-slate-900 sm:text-[2.2rem]">{titulo}</h2>
+          {entradilla && <div className="mt-3 max-w-[64ch] text-[17px] leading-relaxed text-slate-600">{entradilla}</div>}
         </header>
-        {children}
+        <div ref={caja} id={`${id}-cuerpo`} className={cn('relative', plegado && 'max-sm:max-h-[26rem] max-sm:overflow-hidden')}>
+          {children}
+          {plegado && (
+            <div aria-hidden className={cn('pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t sm:hidden',
+              fondo === 'blanco' ? 'from-white' : 'from-slate-100')} />
+          )}
+        </div>
+        {plegable && largo && (
+          <Libre onClick={() => setAbierto(a => !a)} aria-expanded={abierto} aria-controls={`${id}-cuerpo`}
+            className="mt-4 w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 sm:hidden">
+            {abierto ? 'Mostrar menos' : `Seguir leyendo: ${titulo.toLowerCase()}`}
+          </Libre>
+        )}
       </div>
     </section>
   );
 }
 
-/** A big number with what it means, for the summaries. */
-export function Cifra({ valor, texto, tono = 'neutro', nota }: { valor: ReactNode; texto: ReactNode; tono?: 'neutro' | 'bien' | 'mal'; nota?: ReactNode }) {
+/** What kind of number a card shows, so a reader can tell a measured fact from this page's arithmetic and from the proposal. */
+export type ClaseCifra = 'dato' | 'calculo' | 'propuesta';
+export const CLASE_CIFRA: Record<ClaseCifra, { texto: string; ayuda: string }> = {
+  dato: { texto: 'Dato', ayuda: 'Una cifra publicada por otra fuente: el enlace «fuente» lleva a ella.' },
+  calculo: { texto: 'Cálculo', ayuda: 'Una cuenta hecha en esta página con datos publicados. Puede equivocarse donde se equivoquen sus supuestos.' },
+  propuesta: { texto: 'Propuesta', ayuda: 'Lo que propone el modelo. No existe hoy.' },
+};
+/** The small tag that says which kind of number it is. */
+export function EtiquetaClase({ clase }: { clase: ClaseCifra }) {
+  const c = CLASE_CIFRA[clase];
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5">
-      <p className={cn('text-[2rem] font-[800] leading-none tracking-tight tabular-nums',
+    <span title={c.ayuda} className={cn('inline-flex items-center rounded-full px-2 py-px text-[11px] font-semibold leading-5',
+      clase === 'dato' ? 'bg-white text-slate-700 ring-1 ring-slate-300' : clase === 'calculo' ? 'bg-amber-50 text-amber-800 ring-1 ring-amber-200' : 'bg-emerald-50 text-emerald-800 ring-1 ring-emerald-200')}>
+      {c.texto}
+    </span>
+  );
+}
+
+/** A big number with what it means, for the summaries. */
+export function Cifra({ valor, texto, tono = 'neutro', nota, clase }: { valor: ReactNode; texto: ReactNode; tono?: 'neutro' | 'bien' | 'mal'; nota?: ReactNode; clase?: ClaseCifra }) {
+  return (
+    <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm shadow-slate-900/[0.04]">
+      <span className="mb-3 flex items-center justify-between gap-2">
+        {/* A short rule in the tone's colour: the reading's sign at a glance (the value repeats it in its own colour). */}
+        <span aria-hidden className={cn('block h-[3px] w-7 rounded-full',
+          tono === 'bien' ? 'bg-emerald-600' : tono === 'mal' ? 'bg-rose-600' : 'bg-slate-300')} />
+        {clase && <EtiquetaClase clase={clase} />}
+      </span>
+      <p className={cn('break-words text-[2.1rem] font-[800] leading-none tracking-[-0.025em] tabular-nums',
         tono === 'bien' ? 'text-emerald-700' : tono === 'mal' ? 'text-rose-700' : 'text-slate-900')}>{valor}</p>
-      <p className="mt-2 text-[15px] leading-snug text-slate-700">{texto}</p>
-      {nota && <p className="mt-1 text-xs leading-snug text-slate-500">{nota}</p>}
+      <p className="mt-2.5 text-[15px] leading-snug text-slate-700">{texto}</p>
+      {nota && <p className="mt-auto pt-2 text-xs leading-snug text-slate-500">{nota}</p>}
     </div>
   );
 }

@@ -590,3 +590,127 @@ The observatory is one self-contained HTML file (`public/observatorio-polarizaci
 - **The clear-entry check is one number**: the lowest point of the open door over a box beside the seat. It does not model a person getting in.
 - **Off-default hinge settings can make the door swing through the body.** Examples: the hinge-angle slider at −12° (2.0 cm on the real clásico), or the hinge halfway up the pillar (0.5 cm). The check goes red, but the door is not stopped. The right fix is a door stop that tells an edge graze at the start of the swing apart from a real collision. The first try at a stop could not tell them apart, and held a grazing door at 2°.
 - **The controller moves with the pack**, behind it, and its old fixed place under the passenger is used only without the pack.
+
+### 2026-11-12 — Garage: Model Y and our designs (shortcuts)
+- **The garage registry is module-level mutable state** (`garaje/registro.ts`). It works because the page registers a design during render, before the viewer's effect reads it. A second viewer on the same page would share it. Moving it into React state is about 1 hour today (a prop through Visor3D and its 8 lookup sites).
+- **Our designs are not in the tunnel, «Superponer» or the garage map** (they do get the «Cd y consumo» label). They have no `envolvente`. Adding one from `envolventeModelo` (tunel/nuestro.ts) is ~30 min. Superponer would also need a legend entry.
+- **A design in the garage is a snapshot of what was saved when the list loaded.** If someone saves a new version, the garage shows the old one until the page reloads.
+- **Model Y: drawn without photos.** The overhangs, the side-view lines and the position of the light bars are estimates from the figures and written descriptions. A pass against real side, front and rear photos with solved cameras (as for the Aptera and the XL1) is the next step.
+
+### 2026-11-12 — Cuadriciclo Bala clásico round 3 (body): shortcuts
+- **The door/hatch collision checks cost ~0.25 s per calculation** with the hatch on (13 × 25 positions per leaf, point clouds in a hash grid). They run on the main thread with the other checks. Moving the check list to the tunnel's worker is the fix (~2 h now, more once more checks depend on it).
+- **The tunnel does not see the headlamp, the mirrors or the fin**, so «Sin aleta» and the headlamp do not change the Cd shown.
+- **The flat tail's Cd rise is the tunnel's superellipse sections' reading** of a wide, thin tail; a real truncated (Kamm) tail behaves differently. Same caveat as every tunnel figure.
+- **The hinge knuckles are drawn, not modelled:** their mass is in «Montantes B y C: refuerzos…» (2.0 kg, estimate). There is no door stop, as for the front door.
+- **Pilot's view and mirror visibility** have no check in this model; the belt-line slider moves the glass edge and the mirrors with it, but nothing measures what the driver sees.
+
+### 2026-11-12 — Cuadriciclo Bala clásico round 3 interior: shortcuts
+- **The running-gear masses are rules of thumb fitted through three vehicle classes** (`masaEsquina`, `masaFreno`), not parts from a catalogue. They follow the static load only: no braking or cornering load case. A real sizing would pick a shock, a disc and a caliper from datasheets for the design mass and 120 km/h.
+- **Moped tyre load ratings are approximate** (150-170 kg, load index 41-46). The size alone does not fix the index.
+- **The frame check is still one beam of two rails.** Torsion, the body's share and the crash case are not modelled. Adding the battery made it honest about the vertical load only.
+- **The rear cradle is not subtracted from the boot volume.** Its tubes cross the boot at the rear axle; the boot still counts that space as free (a few litres).
+- **The bucket's passenger posture is a fixed spread** (feet 31 cm, knees 33 cm off the centre line, closing in only where the body is too narrow). A shorter or taller passenger does not change it.
+- **`paqueteCabe` tests the box at its four corners per station.** A belly that bulges between them could still touch; the in-body check samples the same corners.
+## 2026-11-13 — Reference silhouettes left without a section
+
+Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoRef` state, `TablaComparacion`, `Referencia` in `referencias.ts`) with no way in, and `GET/POST/DELETE /api/aeromovil/referencias` plus the `aeromovil_referencias` table with no screen. Kept on purpose for this change (removal was the ask, not a refactor); deleting the ghost branch is about 1 h now. The table's rows, if any, are untouched.
+
+### 2026-11-13 — Cuadriciclo Bala clásico round 4: shortcuts
+- **The rear door's 60 cm floor is a rule of thumb** (bucket cushion 52 cm plus room to bend). No ergonomic study, no standard, no ingress simulation with the manikin.
+- **The roof frame's width is measured from the rail line**, so the visible dark strip between the side window and the panel is the frame plus the lower half of the rail band (about 2 cm more). Measuring from the glass edge would need the band's varying width inside `ventanasDe`.
+- **Under a very low roof only two parts follow it** (column support, dashboard). The handlebar, the steering wheel's reach and the door hinges do not adapt; the checks say so in red. A real low-roof variant would need the seats and the steering to be redesigned.
+- **The body colour applies to the paint and accent materials only**: the stripes, the red details, the frit and the interior keep their colours. Garage designs in a non-default colour clone 8 materials each, and nothing disposes them when the design leaves the garage (a few kB of GPU state per design).
+- **`Pforma` (Aeromovil.tsx) compares every key shallowly on each change of P** to decide whether only colour changed. That is cheap today (about 300 keys), but it is one more place to remember if a key ever holds a nested object that is rebuilt on each edit.
+## 2026-11-13 — Garage as design browser: shortcuts
+
+- **Every saved design is built in full and kept in memory** (template + one clone on screen). Measured with 7 designs + 3 reference cars: ~2.4 M triangles, JS heap ~170 MB (headless SwiftShader). No level of detail: `construirDisenoGaraje` with `'rapida'` for the Bala family would roughly halve both; a cap on how many are built is the other option. ~1 h either way.
+- **A design's place is recomputed from the list order on every change**, and the active one's length moves the row while a slider is dragged (the neighbours slide). A fixed slot per design would avoid it; ~1 h.
+- **The tunnel and «Superponer» still ignore our garage designs** (as before): only the reference cars and the active design go through them.
+- **`window.__visorAeromovil`** is exposed on the dev server only (`import.meta.env.DEV`), so the browser checks can find cars on screen.
+- **The old key `aeromovil_garaje_disenos_v1`** (positions of «Mis diseños», PR #1031) is no longer read and stays in browsers that had it.
+
+
+### 2026-11-13 — Cuadriciclo Bala clásico, the smooth body: shortcuts
+- **The deck zones find the canopy glass's ends with a copy of `contornoCupula`'s crossing** (inside `crearForma`, on the plain top line, because the shape cannot call the outline that is computed from it). If the crossing's brackets in `balaMedidas.ts` change, change the copy too; both carry a comment.
+- **The hatch's side edge on the deck is set by wrapping `porton.tLo` in `geometriaTriciclo.ts`**, not inside `portonDe`, because `balaPuertas.ts` was being changed by another agent the same day. Moving it into `portonDe` (an option `borde`) is ~15 min once that work has merged.
+- **The guarantee is a construction plus a sampling script**, not a proof checked by a machine: `bala-cola-lisa.ts` covers each related slider at both ends, both ends together, 40 pairs and 40 random combinations. A combination it does not sample is covered by the construction only.
+- **The widest point's cap on the decks (`LAMBDA_LISA`) is a smooth minimum**, so it lowers the widest point by up to about 0.3 % even where it does not bind (in the smooth body only).
+- **The nose's underside has no guide line.** The hood and the tail's top and belly do; under the nose the plain cap closes onto the edge's bottom (it is monotone, but not checked by the script).
+- **The light bar is a ribbon on the skin**: the tunnel does not see it, as it does not see the round lamp or the mirrors.
+- **The tunnel's reading of the trailing edge is sensitive**: on the proposed clásico a 3, 4 and 5 cm edge give Cd 0.2159, 0.2147 and 0.2130; with the edge's centre at 0.62 m instead of 0.59 (a value tried on the way), 3 cm gave 0.2265 against 0.2130 for 4 cm. The tunnel reads the body through superellipse sections every 5 cm; a real blade tail needs a finer model before any number this close is trusted. Constants unchanged, by decision (2026-11-12).
+## 2026-11-13 — Garage drag and rename: shortcuts
+
+- **Dragged places are per browser** (`localStorage`), not shared: Eugenio's phone and computer each have their own garage arrangement.
+- **A dragged place is absolute in the rows' frame.** When a design is added before it in the list, the cars in the row move along and a dragged car does not, so they can end up overlapping. There is no overlap check on drop.
+- **The drag snaps to 5 cm and has no grid or alignment guides**; «Volver a su fila» is the way back to a tidy row.
+## 2026-11-15 — Cornering circuit: shortcuts
+
+- **Quasi-steady rigid body.** No suspension roll, tyre deflection, load-transfer dynamics, transients, combined braking-cornering grip, banking or aero. A 15 % reserve stands in for compliance. A transient model (chicane, tilt actuator lag) would need a 3-4 DOF model like Rajamani et al. 2003.
+- **CdG heights of the table cars are estimated** (35 % of height). The Smera's tilt is 25° per Wikipedia/Caradisiac; auto123's prototype sheet says 20°.
+- **The «apurar» lap uses the same longitudinal limits for every car** (accelerate min(2.5 m/s², 0.5·μ·g), brake 0.7·μ·g), not each car's power: lap times compare cornering only.
+- **Editor designs other than the Triciclo/Cuadriciclo have no CdG**: the circuit estimates it (35 % of height, equal load per wheel) until those families compute one. The Bala has no masses and is not offered.
+- **Recharts colours are `var(--color-…)` strings** that exist only because the same colours are used as classes in the legend swatches (Tailwind 4 emits only used variables). Removing a swatch class could silently blank a line; a shared chart palette in `src/components/ui/` would fix it (~30 min).
+## 2026-11-15 — Cuadriciclo Basculante: shortcuts
+
+- **No click-to-sheet components, no drawings (Planos) and no STEP**: STL only, as the Bala family. Cost to add the plan sheets: the skin is sections, so `planos.ts` could cut it (~half a day).
+- **Rigid-body tilt**: the lean is drawn and checked at its maximum and at rest; no tilt-actuator dynamics, no suspension roll; the steering follows the lean in «Bascular» only for show (35 % of full lock at full lean).
+- **The rear wheel arches are cells left out of the skin**, their stepped edge hidden by a rubber trim, and a black half-cylinder liner inside: not a real wheel-well surface (STL of the body has those holes).
+- **The tunnel's «Probar» options do not know the `q…` sliders**: for this family the explanations show without «Probar» (`tunel/explicaciones.ts`).
+- **Materials and helpers come from Visor3D through `ayudasVisor`** (an object of functions): a cheap seam, but the builder depends on the viewer's helper signatures. Moving those helpers to a module of their own (~1 h) would let both import them.
+- **The shape grid is fixed at ~1 cm along the car**: fine for the viewer (≈60 ms), coarse for a mould.
+- **Default turning radius 6,5 m** (pods steer with the wheels in a narrow nose). A wider front track or shorter fairings trade width or drag for it; noted, not solved.
+
+### 2026-11-15 — Smooth body, the egg fix: shortcuts
+- **The windscreen-to-hood join is not guaranteed.** The blend from the canopy's section into the hood's deck (`LARGO_MEZCLA`, main's code) shows sub-millimetre ripples in many cases. Some slider combinations make bumps of 5–38 mm on the deck edge's line, and creases of up to 1.3°. `bala-cola-lisa` reports these as 44 AVISO lines out of 152 cases, not as failures. The front is identical to main, to 0.0000 mm, on 89 cases of the clásico and 11 of his design. A fix needs its own round: the two crown fades tried here made it worse (see the decisions log).
+- **The crest is "the rearmost point within 2 mm of the top"**, a threshold rather than a property of the shape. A long flat roof that dips by 2.1 mm is cut there.
+- **A very short canopy keeps a little of the egg.** When the crest is within 0.60 m of the windscreen's start, the rear deck starts 0.60 m back from it, and the canopy's own section stays between the crest and there. The check starts where the deck does, so it does not see that stretch.
+- **The Cd cost of removing the egg is a tunnel reading on a part of the body the tunnel reads poorly.** On his design the wake term varies by 0.017 across `tCaida` with no clear trend. See the 2026-11-13 note on the trailing edge.
+
+
+## 2026-11-15 — Garage Smera and EQXX: shortcuts
+
+- **Both bodies were modelled without looking at a single photo** (image hosts are blocked from the build environment). Proportions follow the published figures; every line, the Smera's mudguards and linkage, and the EQXX's tracks and overhangs are estimates written down in `smeraForma.ts` / `eqxxForma.ts`. A pass with photos would change the shapes, not the figures.
+- **The Smera does not steer and its tilt is a toy animation**: the same lean on both axles, no steering, no suspension travel. The cornering simulation must read `SMERA_DINAMICA`, not the mesh. Its centre of gravity (0.48 m kerb, 0.55 m with a driver) is an estimate; its tyres (145/70 R14) come from auto123.com via the circuit's table, a page this branch did not fetch.
+- **The Smera has no `aero`** (no published Cd), so it is out of «Cd y consumo» and the tunnel shows only its own estimate.
+- **`tesla3` and `caterham7` are still grey placeholder boxes** (4.0 × 1.8 × 1.4 m, hidden by default but listed as reference cars), and they now sit in the size order by that invented 4.0 m. The Model 3 is not modelled. 20 minutes to drop them from the list today; a real Model 3 is a Model Y-sized job.
+- **The EQXX's tunnel estimate is 16 % high** (0.197 against 0.170). Not tuned: shaping a reference car to agree with the tunnel would hide the method's error, and it stays out of the fit.
+
+## 2026-11-15 — `/vision` content is static JS, not data
+
+- The 12-sector vision site (`public/vision/`) keeps all its content in two JS files, so editing a reto or a proyecto means a commit and a deploy; nobody can edit it from the platform and its text is invisible to the site search. Moving it to a table (sector, pillar, item, source) with an admin editor is about a day today; it gets worse with every sector filled in by hand. Worth doing once Eugenio's team starts adding content themselves.
+- Same caveat as every static page: the service worker caches each navigation as the `/` shell, so after visiting `/vision/` an offline launch of the app can open the vision site instead of the app. Pre-existing for `/observatorio-polarizacion/`; not fixed here.
+- (2026-11-15) The sector artworks in `/vision` are fixed paths to the calendar's `mes-XX-d` design (the one marked for print). If Eugenio changes a month's illustration or favourite on `/calendario-arte`, `/vision` keeps the old picture: the calendar's choices live in the database (`calendario_arte_meses`), which a static page cannot read. Reading them through a public endpoint is about an hour.
+
+## 2026-11-15 · Smera replica: cell-based cuts and a few aero-only pieces of the model
+
+- **Cut edges.** The door, the windows and the wheel-well openings are cut on the skin's cells. Their steps are hidden by 6.5 mm trims, but on the open door and on the nose between the wells some still show. The fix is a door and well patch with its own grid, mapped to the outline: about a day.
+- **Battery.** The replica's battery is 3 kWh, which is what fits in the generic battery boxes with the Smera's high floor and upright seats. The real car carried 9–10 kWh under the driver's seat. The fix is a dedicated under-seat box with a raised cushion: about 2 hours.
+- **Unused aero fields.** `DimForma` still carries the aero body's fields when a `perfil` is given (`xCaida`, `curvaCola`…). They are ignored there.
+- **Upper section.** The front-view width at 1.04 m is 7 cm too wide: the upper half is still a superellipse, and the real glass has tumblehome.
+
+## 2026-11-15 · Elbows are kept inside by the viewer, not checked by the model
+
+- `PuntosOcupante.codoZ` comes from sampling the body's half-width around the arms. The viewer then bends the elbow down until it fits. Nothing in the basculante checks looks at the arms, so a design whose arms cannot fit at all still shows green.
+- The right shape is an «Brazos dentro» check, using the same elbow the viewer draws. That needs the elbow solver (`articulacion`, now in Visor3D) moved to `geometria.ts`: about 1 hour.
+
+## 2026-11-15 · The Bala clásico's lean is geometry only
+
+- `tBascula` moves the pods on an ideal parallelogram whose arm length is the upper arm's (`ejeBascula`). The lower arm turns by whatever angle brings its outer end along, so the two arms are not a real four-bar linkage.
+- The tilt actuator, its mass, and the lean in the rollover, mass and consumption figures are not modelled. Making the rollover lean-aware means adding the basculante family's `basculacion` block, about 2 hours.
+- The viewer finds the pods, wheels and arms by name and by position (`inclinarBala`). A rename in balaPiezas.ts would silently stop them moving.
+
+## 2026-11-15 · The diamond layout reuses the front pods as the laterals
+
+- `tRuedas: 'rombo'` moves the Bala clásico's front pods (`X_LAT`, `tEjeLat`) back and adds a nose wheel at x = 0.
+- **Simplifications in the numbers:**
+  - The tail wheel does not steer, so the turning radius assumes it counter-steers.
+  - The frame beam ignores the laterals' cross-member.
+  - The nose wheel's swept width at full lock is an approximation: its width plus 0.7 × its diameter × sin(lock).
+- **Battery.** The battery pack is assumed to run under the laterals' cross-member.
+- **Steering in the viewer.** The fork turns as a group. The steering column is a fixed tube to the fork crown, with no joint drawn.
+
+## 2026-11-15 · The plug-in hybrid has numbers but no parts
+
+- `m.phev` adds masses at a fixed point ahead of the rear axle, and fuel figures from one combined efficiency. Nothing is drawn, and nothing checks that the engine, the planetary gear and the tank fit.
+- Charge-sustaining mode is modelled as constant-speed cruising, with no engine on/off map.
+- Drawing a box per part and adding `cajaDentro` checks: about 2 hours.

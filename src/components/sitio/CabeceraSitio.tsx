@@ -35,7 +35,11 @@ export function raizDe(id: string) {
   return p;
 }
 
-export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInicial = 'tabla' }: { raizId: string; ruta?: ReactNode;
+export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInicial = 'tabla', proyecto }: { raizId: string; ruta?: ReactNode;
+  /** A project shown inside the site (2026-11-13, Eugenio, on the socioeconomic model: «Luz & Humanidad en la esquina
+   *  superior izquierda, "proyecto impulsado por Luz & Humanidad", y en el centro el nombre del proyecto, que lleve a
+   *  su página principal»). Only the showcase bar uses it. */
+  proyecto?: { titulo: string; href: string };
   /** La vista sin `?vista=` en esta página (la portada puede abrir en otra que la tabla). */
   vistaInicial?: Vista;
   /** Solo el logo, la cuenta y el menú (2026-10-26, Eugenio: «en la página de donar, quita el territorio y buscar»). */
@@ -61,6 +65,7 @@ export default function CabeceraSitio({ raizId, ruta, simple = false, vistaInici
   // arriba y debajo el buscador, Colaborar y los idiomas. `sitio.colaborarEnBarra` pone el botón (lo quita de la portada).
   const colabora = c.sitio?.colaborarEnBarra === true ? enlaceColabora(c.sitio?.colabora, sitio) : null;
   const botonColabora = 'inline-flex h-10 shrink-0 items-center rounded-full bg-slate-900 px-4 text-sm font-bold text-white hover:bg-slate-700 sm:px-5';
+  if (escaparate && proyecto) return <CabeceraProyecto raiz={raiz} icono={icono} proyecto={proyecto} colabora={colabora} botonColabora={botonColabora} />;
   if (escaparate) return (
     <header data-cabecera-sitio className="sticky top-0 z-40 -mt-[18px] mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-2 border-b border-slate-100 bg-white/95 px-4 py-2 backdrop-blur [grid-template-areas:'marca_marca'_'buscar_acciones'] sm:-mt-5 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:gap-x-6 sm:px-6 sm:[grid-template-areas:'buscar_marca_acciones']"
       style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }}>
@@ -180,5 +185,47 @@ function Eslogan({ texto }: { texto: string }) {
   return (
     <span ref={ref} data-eslogan className="mt-1 w-0 min-w-full whitespace-nowrap font-semibold text-slate-500"
       style={{ fontSize: medida ? `${medida.tam}px` : '11.5px', letterSpacing: medida ? `${medida.espacio}px` : undefined }}>{texto}</span>
+  );
+}
+
+/** The site bar over a project: the site, small, top left («Proyecto impulsado por …»); the project's name in the
+ *  middle, back to the project's own front page; Participa and the languages on the right. */
+function CabeceraProyecto({ raiz, icono, proyecto, colabora, botonColabora }: {
+  raiz: Raiz | null; icono: string | null; proyecto: { titulo: string; href: string };
+  colabora: ReturnType<typeof enlaceColabora> | null; botonColabora: string;
+}) {
+  // The project's front page is the same address without a section (#…): going there from inside the project
+  // must not reload the app, only clear the section, so the app hears it as a hash change.
+  const alInicio = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (window.location.pathname.replace(/\/$/, '') !== proyecto.href.replace(/\/$/, '')) return;
+    e.preventDefault();
+    window.history.pushState(null, '', proyecto.href);
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    window.scrollTo({ top: 0 });
+  };
+  return (
+    <header data-cabecera-sitio className="sticky top-0 z-40 -mt-[18px] mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1.5 border-b border-slate-100 bg-white/95 px-4 py-2 backdrop-blur [grid-template-areas:'sitio_acciones'_'proyecto_proyecto'] sm:-mt-5 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:gap-x-6 sm:px-6 sm:[grid-template-areas:'sitio_proyecto_acciones']"
+      style={{ width: '100vw', marginLeft: 'calc(50% - 50vw)' }}>
+      <style>{'html { overflow-x: clip; }'}</style>
+      <Link to="/" className="flex min-w-0 items-center gap-2 [grid-area:sitio]" aria-label={raiz ? `Proyecto impulsado por ${raiz.titulo}: ir a su inicio` : 'Inicio'}>
+        {icono && (/^(https?:|\/)/.test(icono)
+          ? <img src={miniatura(icono, 96)} alt="" className="h-8 w-8 shrink-0 rounded-md object-contain sm:h-9 sm:w-9" />
+          : <span className="text-[1.3rem] leading-none">{icono}</span>)}
+        <span className="flex min-w-0 flex-col leading-tight">
+          <span className="text-[11px] font-medium text-slate-500">Proyecto impulsado por</span>
+          <span className="truncate text-[15px] font-black tracking-tight text-slate-900 sm:text-base">{raiz?.titulo ?? ''}</span>
+        </span>
+      </Link>
+      <a href={proyecto.href} onClick={alInicio}
+        className="min-w-0 justify-self-center text-center text-[1.15rem] font-black leading-tight tracking-tight text-slate-900 hover:text-slate-700 [grid-area:proyecto] sm:text-[1.5rem] lg:text-[1.75rem]">
+        {proyecto.titulo}
+      </a>
+      <div className="flex min-w-0 items-center justify-end gap-2 [grid-area:acciones]">
+        {colabora && (colabora.fuera
+          ? <a href={colabora.href} target="_blank" rel="noopener noreferrer" className={botonColabora}>Participa</a>
+          : <Link to={colabora.href} data-interno="" className={botonColabora}>Participa</Link>)}
+        <SelectorIdioma />
+      </div>
+    </header>
   );
 }

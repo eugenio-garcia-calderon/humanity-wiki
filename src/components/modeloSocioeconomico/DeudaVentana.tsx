@@ -10,6 +10,7 @@ import { ABUSOS, COMPARA, DEUDA, DEUDORES, DEUDA_PCT, HISTORIA_PCT, PAGOS, PANDE
 import { Apartado, Cifra, Mas } from './ventanas';
 import { Fuente, Regulador } from './piezas';
 import { cn } from '../../utils/cn';
+import { Linea } from './graficos/Linea';
 
 const mill = (m: number) => `${numero(m)} M€`;
 const billones = (m: number) => `${numero(m / 1e6, 2)} billones`;
@@ -22,10 +23,10 @@ export function DeudaVentana() {
       <Apartado id="deuda" titulo="Una deuda que no se devuelve nunca"
         entradilla={<>Las administraciones de España deben {billones(DEUDA.total)} de euros, más de lo que produce el país en un año. Cada año se pagan los intereses y lo que vence se devuelve pidiendo prestado otra vez. La propuesta: que ninguna administración pueda deber, y que cada una ahorre para las emergencias.</>}>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Cifra valor={porcentaje(DEUDA_PCT.total, 1)} texto={<>del PIB debían las administraciones a finales de 2025: {billones(DEUDA.total)}<Fuente id="deuda-2025" /></>} tono="mal" />
-          <Cifra valor={mill(PAGOS.intereses)} texto={<>de intereses en 2025, casi tres veces lo que se gasta en defensa<Fuente id="intereses-2025" /></>} tono="mal" />
-          <Cifra valor={mill(PAGOS.vencimientosEstado)} texto={<>de capital vence en 2026 solo en el Estado, y se paga pidiendo {mill(PAGOS.emisionBrutaEstado)}<Fuente id="tesoro-2026" /></>} tono="mal" />
-          <Cifra valor={`${mill(Math.round(minima.total / 100) * 100)}`} texto={<>al año ahorraría como mínimo la propuesta en cajas para emergencias, con cero deuda</>} tono="bien" />
+          <Cifra clase="dato" valor={porcentaje(DEUDA_PCT.total, 1)} texto={<>del PIB debían las administraciones a finales de 2025: {billones(DEUDA.total)}<Fuente id="deuda-2025" /></>} tono="mal" />
+          <Cifra clase="dato" valor={mill(PAGOS.intereses)} texto={<>de intereses en 2025, casi tres veces lo que se gasta en defensa<Fuente id="intereses-2025" /></>} tono="mal" />
+          <Cifra clase="dato" valor={mill(PAGOS.vencimientosEstado)} texto={<>de capital vence en 2026 solo en el Estado, y se paga pidiendo {mill(PAGOS.emisionBrutaEstado)}<Fuente id="tesoro-2026" /></>} tono="mal" />
+          <Cifra clase="calculo" valor={`${mill(Math.round(minima.total / 100) * 100)}`} texto={<>al año ahorraría como mínimo la propuesta en cajas para emergencias, con cero deuda</>} tono="bien" />
         </div>
 
         <figure className="mt-8 rounded-2xl border border-slate-200 bg-white p-5">
@@ -160,38 +161,13 @@ export function DeudaVentana() {
 
 /** Debt as % of GDP, at the dated points we have sources for. */
 function HistoriaGrafica() {
-  const W = 640, H = 260, m = { l: 40, r: 16, t: 24, b: 28 };
-  const x = (a: number) => m.l + ((a - 1978) / (2027 - 1978)) * (W - m.l - m.r);
-  const y = (p: number) => H - m.b - (p / 130) * (H - m.t - m.b);
-  const puntos = HISTORIA_PCT.map(h => `${x(h.ano)},${y(h.pct)}`).join(' ');
   return (
-    <figure className="rounded-2xl border border-slate-200 bg-white p-5">
-      <figcaption className="text-lg font-bold text-slate-900">Deuda de las administraciones, en % del PIB</figcaption>
-      <svg viewBox={`0 0 ${W} ${H}`} className="mt-3 w-full" role="img" aria-label={HISTORIA_PCT.map(h => `${h.ano}: ${numero(h.pct, 1)} %`).join('; ')}>
-        {[0, 40, 80, 120].map(v => (
-          <g key={v}>
-            <line x1={m.l} x2={W - m.r} y1={y(v)} y2={y(v)} className="stroke-slate-100" />
-            <text x={m.l - 6} y={y(v) + 4} textAnchor="end" className="fill-slate-400 text-[11px]">{v} %</text>
-          </g>
-        ))}
-        <line x1={m.l} x2={W - m.r} y1={y(60)} y2={y(60)} className="stroke-slate-300" strokeDasharray="4 4" />
-        <text x={W - m.r} y={y(60) - 5} textAnchor="end" className="fill-slate-500 text-[11px]">límite europeo, 60 %</text>
-        <polyline points={puntos} fill="none" className="stroke-slate-900" strokeWidth={2} strokeLinejoin="round" />
-        {HISTORIA_PCT.map(h => (
-          <g key={h.ano}>
-            <circle cx={x(h.ano)} cy={y(h.pct)} r={4.5} className="fill-slate-900 stroke-white" strokeWidth={2}>
-              <title>{`${h.ano}: ${numero(h.pct, 1)} % del PIB (${h.nota})`}</title>
-            </circle>
-            <text x={h.ano === 2020 ? x(h.ano) - 9 : x(h.ano)} y={h.ano === 2020 ? y(h.pct) + 4 : y(h.pct) - 10} textAnchor={h.ano === 2020 ? 'end' : 'middle'} className="fill-slate-700 text-[11px] font-semibold">{numero(h.pct, 0)}</text>
-            <text x={x(h.ano)} y={H - 8} textAnchor="middle" className="fill-slate-500 text-[11px]">{h.ano === 2021 ? '' : h.ano}</text>
-          </g>
-        ))}
-      </svg>
-      <p className="mt-2 text-xs leading-relaxed text-slate-500">
-        Solo los años con dato; entre ellos, una línea recta. {HISTORIA_PCT.map(h => `${h.ano}: ${h.nota}`).join('. ')}.
-        {[...new Set(HISTORIA_PCT.map(h => h.fuente))].map(f => <Fuente key={f} id={f} />)}
-      </p>
-    </figure>
+    <Linea titulo="Deuda de las administraciones, en % del PIB"
+      subtitulo="El PIB es lo que produce el país en un año. Solo los años con dato; entre ellos, una línea recta"
+      desde={0} hasta={135} formato={v => porcentaje(v, v % 1 ? 1 : 0)}
+      referencia={{ valor: 60, texto: 'límite europeo, 60 %' }}
+      puntos={HISTORIA_PCT.map(h => ({ x: h.ano, y: h.pct, nota: `${h.nota.charAt(0).toUpperCase()}${h.nota.slice(1)}.` }))}
+      pie={<>{HISTORIA_PCT.map(h => `${h.ano}: ${numero(h.pct, 1)} %, ${h.nota}`).join('. ')}.{[...new Set(HISTORIA_PCT.map(h => h.fuente))].map(f => <Fuente key={f} id={f} />)}</>} />
   );
 }
 
@@ -215,9 +191,9 @@ function CajaContingencias() {
             mostrar={`${anos} ${anos === 1 ? 'año' : 'años'}`} onChange={setAnos} />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Cifra valor={mill(Math.round(c.total))} texto={`al año entre las ${ESCALAS.length} escalas de España`} tono="bien"
+          <Cifra clase="calculo" valor={mill(Math.round(c.total))} texto={`al año entre las ${ESCALAS.length} escalas de España`} tono="bien"
             nota={`${mill(Math.round(c.porEscala))} cada escala, ${euros(c.porPersona)} por habitante`} />
-          <Cifra valor={mill(Math.round(acumulado))} texto={`en la caja después de ${anos} ${anos === 1 ? 'año' : 'años'}, sin contar lo que rinda`} tono="bien" />
+          <Cifra clase="calculo" valor={mill(Math.round(acumulado))} texto={`en la caja después de ${anos} ${anos === 1 ? 'año' : 'años'}, sin contar lo que rinda`} tono="bien" />
         </div>
       </div>
 
@@ -244,7 +220,7 @@ function CajaContingencias() {
         <ul className="max-w-3xl list-disc space-y-2 pl-5 text-[15px] leading-relaxed text-slate-700">
           <li>Cada escala tiene la suya: la comunidad vecinal, el municipio, la región, la nación… También la persona, con su propio ahorro.</li>
           <li>Solo se usa para contingencias extraordinarias: un desastre natural, una pandemia, una crisis social. Lo decide su asamblea.</li>
-          <li>Nunca baja de cero. Si a una escala no le alcanza, la ayuda una escala mayor o una igual con lo que tiene ahorrado, en un préstamo al IPC o una donación. Entre todas pueden moverse ahorros; nadie puede pedir prestado fuera.</li>
+          <li>Nunca baja de cero. Si a una escala no le alcanza, la ayuda una escala mayor o una igual con lo que tiene ahorrado, en un préstamo sin intereses, solo ajustado a la subida de los precios, o una donación. Entre todas pueden moverse ahorros; nadie puede pedir prestado fuera.</li>
           <li>Mientras no se usa, puede invertirse con prudencia, como el fondo de las pensiones, para que no pierda valor.</li>
           <li>Si la caja de una escala crece mucho más de lo que podría necesitar, su asamblea puede bajar su parte hasta el mínimo del 20 %.</li>
         </ul>
@@ -269,8 +245,8 @@ function DeudaHeredada() {
         </div>
         {r ? (
           <div className="grid gap-4 sm:grid-cols-2">
-            <Cifra valor={`${r.anos} años`} texto="para no deber nada" tono="bien" />
-            <Cifra valor={billones(r.intereses)} texto="de intereses pagados por el camino" tono="mal" />
+            <Cifra clase="calculo" valor={`${r.anos} años`} texto="para no deber nada" tono="bien" />
+            <Cifra clase="calculo" valor={billones(r.intereses)} texto="de intereses pagados por el camino" tono="mal" />
           </div>
         ) : (
           <div className="rounded-2xl border border-rose-200 bg-rose-50 p-5 text-[15px] leading-relaxed text-rose-900">

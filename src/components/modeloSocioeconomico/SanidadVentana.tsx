@@ -13,6 +13,8 @@ import {
 import { Apartado, Cifra, Mas } from './ventanas';
 import { Fuente, Muestra, Segmentado } from './piezas';
 import { cn } from '../../utils/cn';
+import { Linea } from './graficos/Linea';
+import { Pares } from './graficos/Pares';
 
 /** A source link by id from FUENTES_SANIDAD. */
 function F({ id, children }: { id: string; children?: ReactNode }) {
@@ -34,14 +36,14 @@ export function SanidadVentana() {
           La propuesta: plazos máximos que se cumplan y un único expediente para cada persona, que ella controla desde el móvil.
         </>}>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Cifra tono="mal" valor={dias(e.primaria.dias, 1)} texto={<>de media para ver al médico de familia, si no hay cita para hoy o mañana<F id="barometro-2026" /></>}
+          <Cifra clase="dato" tono="mal" valor={dias(e.primaria.dias, 1)} texto={<>de media para ver al médico de familia, si no hay cita para hoy o mañana<F id="barometro-2026" /></>}
             nota={`Solo el ${e.primaria.mismoDiaOSiguiente} % consigue cita para el mismo día o el siguiente`} />
-          <Cifra tono="mal" valor={dias(e.especialista.dias)} texto={<>de media para la primera visita al especialista<F id="sisle-nota" /></>}
+          <Cifra clase="dato" tono="mal" valor={dias(e.especialista.dias)} texto={<>de media para la primera visita al especialista<F id="sisle-nota" /></>}
             nota="Unos 4 millones de personas esperando, a finales de 2025" />
-          <Cifra tono="mal" valor={dias(e.cirugia.dias)} texto={<>de media para una operación que no es urgente<F id="sisle-rectificacion" /></>}
+          <Cifra clase="dato" tono="mal" valor={dias(e.cirugia.dias)} texto={<>de media para una operación que no es urgente<F id="sisle-rectificacion" /></>}
             nota={`${numero(e.cirugia.pacientes)} personas en la lista`} />
-          <Cifra tono="bien" valor="1 expediente" texto="por persona, para toda la vida: lo ven la pública y la privada, en cualquier comunidad, si tú das permiso"
-            nota="Propuesta" />
+          <Cifra clase="propuesta" tono="bien" valor="1 expediente" texto="por persona, para toda la vida: lo ven la pública y la privada, en cualquier comunidad, si tú das permiso"
+            />
         </div>
         <Termometro />
       </Apartado>
@@ -211,37 +213,25 @@ function Esperas() {
   );
 }
 
-/** Average wait for an operation every 31 December, 2019-2025: a small line chart. */
+/** Average wait for an operation every 31 December, 2019-2025, next to the staff that explains part of it. */
 function Evolucion() {
-  const W = 420, H = 220, m = { l: 34, r: 22, t: 30, b: 30 }, pad = 24;
   const d = EVOLUCION_CIRUGIA;
-  // The axis starts at 100 days (said in the note under the chart); the points sit `pad` away from the axis labels.
-  const x = (a: number) => m.l + pad + ((a - 2019) / 6) * (W - m.l - m.r - pad);
-  const y = (v: number) => H - m.b - ((v - 100) / 80) * (H - m.t - m.b);
   return (
-    <figure className="mt-8 rounded-2xl border border-slate-200 bg-white p-5">
-      <figcaption className="text-lg font-bold text-slate-900">Días de espera para operarse, cada 31 de diciembre</figcaption>
-      <p className="mt-1 text-sm text-slate-600">La pandemia la disparó en 2020. Desde entonces se mueve entre 120 y 128 días: no baja.</p>
-      <svg viewBox={`0 0 ${W} ${H}`} className="mt-3 w-full max-w-[560px]" role="img" aria-label={d.map(p => `${p.ano}: ${p.dias} días`).join('; ')}>
-        {[100, 140, 180].map(v => (
-          <g key={v}>
-            <line x1={m.l} x2={W - m.r} y1={y(v)} y2={y(v)} className="stroke-slate-100" />
-            <text x={m.l - 6} y={y(v) + 4} textAnchor="end" className="fill-slate-400 text-[14px]">{v}</text>
-          </g>
-        ))}
-        <polyline points={d.map(p => `${x(p.ano)},${y(p.dias)}`).join(' ')} fill="none" className="stroke-rose-700" strokeWidth={2.5} strokeLinejoin="round" />
-        {d.map(p => (
-          <g key={p.ano}>
-            <circle cx={x(p.ano)} cy={y(p.dias)} r={4.5} className="fill-rose-700 stroke-white" strokeWidth={2} />
-            <text x={x(p.ano)} y={y(p.dias) - 10} textAnchor="middle" className="fill-slate-800 text-[16px] font-semibold">{p.dias}</text>
-            <text x={x(p.ano)} y={H - 8} textAnchor="middle" className="fill-slate-500 text-[14px]">{`'${String(p.ano).slice(2)}`}</text>
-          </g>
-        ))}
-      </svg>
-      <p className="mt-2 text-xs leading-relaxed text-slate-500">
-        El eje empieza en 100 días. Años 2019 a 2025 (’19 es 2019). Registro de listas de espera del Ministerio de Sanidad; fuentes por año:{d.map(p => <F key={p.ano} id={p.fuente}>{p.ano}</F>)}. El dato de 2025 ya incluye la corrección de Castilla-La Mancha.
-      </p>
-    </figure>
+    <div className="mt-8 grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <Linea titulo="Días de espera para operarse, cada 31 de diciembre"
+        subtitulo="La pandemia la disparó en 2020. Desde entonces se mueve entre 120 y 128 días: no baja."
+        serie="tinta" desde={100} hasta={170} formato={v => `${v} días`}
+        puntos={d.map(p => ({ x: p.ano, y: p.dias, nota: p.ano === 2020 ? 'El año de la pandemia.' : p.ano === 2025 ? 'Ya con la corrección de Castilla-La Mancha.' : undefined }))}
+        pie={<>El eje empieza en 100 días. Registro de listas de espera del Ministerio de Sanidad; fuentes por año:{d.map(p => <F key={p.ano} id={p.fuente}>{p.ano}</F>)}. El dato de 2025 ya incluye la corrección de Castilla-La Mancha.</>} />
+      <Pares titulo="Médicos y enfermeras por cada 1.000 habitantes"
+        subtitulo="Profesionales en ejercicio. Hay algo más de médicos que la media; faltan enfermeras"
+        series={['España', 'Media de la OCDE']} formato={v => numero(v, 1)}
+        pares={[
+          { etiqueta: 'Médicos', a: PERSONAL.medicos, b: PERSONAL.medicosOCDE },
+          { etiqueta: 'Enfermeras', a: PERSONAL.enfermeras, b: PERSONAL.enfermerasOCDE, nota: `Un ${porcentaje((1 - PERSONAL.enfermeras / PERSONAL.enfermerasOCDE) * 100, 0)} menos que la media.` },
+        ]}
+        pie={<>Datos de la OCDE<F id="ocde-2025" /></>} />
+    </div>
   );
 }
 
@@ -350,9 +340,9 @@ function Gasto() {
     <Apartado id="sanidad-gasto" titulo="Lo que cuesta, y quién lo paga" fondo="blanco"
       entradilla={<>Las administraciones gastan en sanidad unos {numero(Math.round(g.publicoEGSP2024 / 1000))} mil millones de euros al año. Y además, de cada cuatro euros que se gastan en salud en España, uno sale del bolsillo de las familias o de un seguro privado.</>}>
       <div className="grid gap-4 sm:grid-cols-3">
-        <Cifra valor={`${numero(g.publicoEGSP2024)} millones`} texto={<>de euros de gasto público en sanidad en 2024<F id="egsp-2024" /></>} nota={`El ${porcentaje(g.pctPIB)} de lo que produce el país en un año`} />
-        <Cifra valor={euros(g.porHabitante)} texto={<>por habitante y año, pagados con impuestos<F id="egsp-2024" /></>} />
-        <Cifra valor={porcentaje(g.privadoPct2022)} texto={<>de todo lo que se gasta en salud es privado (2022, último año con los dos)<F id="scs-2022" /></>} />
+        <Cifra clase="dato" valor={`${numero(g.publicoEGSP2024)} millones`} texto={<>de euros de gasto público en sanidad en 2024<F id="egsp-2024" /></>} nota={`El ${porcentaje(g.pctPIB)} de lo que produce el país en un año`} />
+        <Cifra clase="dato" valor={euros(g.porHabitante)} texto={<>por habitante y año, pagados con impuestos<F id="egsp-2024" /></>} />
+        <Cifra clase="dato" valor={porcentaje(g.privadoPct2022)} texto={<>de todo lo que se gasta en salud es privado (2022, último año con los dos)<F id="scs-2022" /></>} />
       </div>
 
       <figure className="mt-8 rounded-2xl border border-slate-200 bg-white p-5">

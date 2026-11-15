@@ -16,7 +16,7 @@ import { ipDe, ritmo, esperaPendiente, type Regla } from './limites/index.js';
 
 /** The projects that have a mailbox, and the name the .txt export uses. */
 export const PROYECTOS: Record<string, string> = {
-  'modelo-socioeconomico': 'Modelo Público Optimizado (humanity.wiki/modelo-socioeconomico)',
+  'modelo-socioeconomico': 'Modelo de optimización socioeconómica (humanity.wiki/modelo-socioeconomico)',
 };
 
 // 20 an hour per connection is far above a person writing; a bot is not.
@@ -25,6 +25,8 @@ const MAX_TEXTO = 4_000;
 const MAX_AUTOR = 80;
 const MAX_PENDIENTES = 500;
 const ESTADOS = new Set(['pendiente', 'hecha', 'descartada']);
+/** Where on the page a proposal was written: a section anchor such as 'vivienda-rustica'. */
+const paginaDe = (v: unknown) => (typeof v === 'string' && /^[a-z0-9-]{1,60}$/.test(v) ? v : null);
 const horaActual = () => new Date().toISOString().slice(0, 13);
 
 function proyectoDe(req: Request, res: Response): string | null {
@@ -39,7 +41,7 @@ export function registerBuzonProyectosRoutes(app: Express, db: any) {
     const p = proyectoDe(req, res); if (!p) return;
     try {
       const r = await db.execute(sql`
-        SELECT id, texto, autor, estado, respuesta, created_at, resuelto_at
+        SELECT id, texto, autor, pagina, estado, respuesta, created_at, resuelto_at
         FROM buzon_proyectos WHERE proyecto = ${p}
         ORDER BY (estado = 'pendiente') DESC, created_at DESC
         LIMIT 300
@@ -57,10 +59,10 @@ export function registerBuzonProyectosRoutes(app: Express, db: any) {
     const p = proyectoDe(req, res); if (!p) return;
     try {
       const r = await db.execute(sql`
-        SELECT id, texto, autor FROM buzon_proyectos
+        SELECT id, texto, autor, pagina FROM buzon_proyectos
         WHERE proyecto = ${p} AND estado = 'pendiente' ORDER BY created_at
       `);
-      const lineas = (r.rows as any[]).map(c => `#${c.id}${c.autor ? ` (${c.autor})` : ''}: ${String(c.texto).replace(/\s+/g, ' ')}`);
+      const lineas = (r.rows as any[]).map(c => `#${c.id}${c.pagina ? ` [${c.pagina}]` : ''}${c.autor ? ` (${c.autor})` : ''}: ${String(c.texto).replace(/\s+/g, ' ')}`);
       res.set('Cache-Control', 'no-store');
       res.type('text/plain; charset=utf-8').send(`Mejoras pendientes · ${PROYECTOS[p]}: ${lineas.length}\n\n${lineas.join('\n')}\n`);
     } catch (e: any) {
@@ -68,7 +70,7 @@ export function registerBuzonProyectosRoutes(app: Express, db: any) {
     }
   });
 
-  /** POST /api/buzon/:proyecto/comentarios — Body: { texto, autor?, web? } */
+  /** POST /api/buzon/:proyecto/comentarios — Body: { texto, autor?, pagina?, web? } */
   app.post('/api/buzon/:proyecto/comentarios', async (req: Request, res: Response) => {
     const p = proyectoDe(req, res); if (!p) return;
     try {
@@ -97,9 +99,9 @@ export function registerBuzonProyectosRoutes(app: Express, db: any) {
         return res.status(503).json({ error: 'El buzón está lleno de propuestas sin revisar. Prueba dentro de unos días.' });
       }
       const r = await db.execute(sql`
-        INSERT INTO buzon_proyectos (proyecto, texto, autor, autor_user_id)
-        VALUES (${p}, ${texto}, ${autor}, ${req.user?.id ?? null})
-        RETURNING id, texto, autor, estado, respuesta, created_at, resuelto_at
+        INSERT INTO buzon_proyectos (proyecto, texto, autor, autor_user_id, pagina)
+        VALUES (${p}, ${texto}, ${autor}, ${req.user?.id ?? null}, ${paginaDe(req.body?.pagina)})
+        RETURNING id, texto, autor, pagina, estado, respuesta, created_at, resuelto_at
       `);
       res.json(r.rows[0]);
     } catch (e: any) {
@@ -123,7 +125,7 @@ export function registerBuzonProyectosRoutes(app: Express, db: any) {
         SET estado = ${estado}, respuesta = COALESCE(${respuesta}, respuesta),
             resuelto_at = CASE WHEN ${estado} = 'pendiente' THEN NULL ELSE now() END
         WHERE id = ${id} AND proyecto = ${p}
-        RETURNING id, texto, autor, estado, respuesta, created_at, resuelto_at
+        RETURNING id, texto, autor, pagina, estado, respuesta, created_at, resuelto_at
       `);
       if (!r.rows.length) return res.status(404).json({ error: 'Esa propuesta no existe.' });
       res.json(r.rows[0]);
