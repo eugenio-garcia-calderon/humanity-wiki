@@ -13,7 +13,7 @@
 // · «Guardar como nuevo» and «Eliminar» are the same calls as the logo menu's (POST, and DELETE, which archives).
 //   The server lets only the owner of the Aeromóvil (or an admin) do either, so only the owner sees the buttons.
 import { useState, type FormEvent, type ReactNode } from 'react';
-import { Check, Copy, Eye, EyeOff, Focus, Loader2, Pencil, Rows3, Trash2, X } from 'lucide-react';
+import { Check, Copy, Eye, EyeOff, Focus, Loader2, MoveDiagonal, Pencil, Rows3, Trash2, X } from 'lucide-react';
 import { Button, Card } from '../../ui/core';
 import { cn } from '../../../utils/cn';
 import { aDiseno, deDiseno, leerClaves, type Diseno, type DisenoAbierto } from '../Disenos';
@@ -186,8 +186,11 @@ function FormNombre({ inicial, alGuardar, alCancelar, className }: { inicial: st
 }
 
 /** The card of the design being edited, in the 3D view: «Solo mostrar este», «Guardar como nuevo», «Eliminar». */
-export function TarjetaDiseno({ e, g, actual, porDefecto, nombreVehiculo, puedeDecidir, className }: {
-  e: Eleccion; g: Garaje; actual: DisenoAbierto | null; porDefecto: boolean; nombreVehiculo: string; puedeDecidir: boolean; className?: string;
+export function TarjetaDiseno({ e, g, actual, porDefecto, nombreVehiculo, puedeDecidir, bascular, className }: {
+  e: Eleccion; g: Garaje; actual: DisenoAbierto | null; porDefecto: boolean; nombreVehiculo: string; puedeDecidir: boolean;
+  /** A tilting design (the Cuadriciclo Basculante family): «Bascular» on its card, the toolbar's own lean each way and back. */
+  bascular?: { angulo: number; alPulsar: () => void };
+  className?: string;
 }) {
   const [editando, setEditando] = useState(false);
   if (!e.tarjeta && !e.aviso) return null;
@@ -211,6 +214,11 @@ export function TarjetaDiseno({ e, g, actual, porDefecto, nombreVehiculo, puedeD
           <Button variant="outline" aria-pressed={e.solo === 'activo'} onClick={() => e.setSolo(e.solo === 'activo' ? null : 'activo')} className={cn(boton, e.solo === 'activo' && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
             <Focus className="h-3.5 w-3.5" />{e.solo === 'activo' ? 'Mostrar todos' : 'Solo mostrar este'}
           </Button>
+          {bascular && (
+            <Button variant="outline" onClick={bascular.alPulsar} title={`Inclina la carrocería y las cuatro ruedas hasta ${bascular.angulo}° a cada lado y vuelve, como en una curva`} className={boton}>
+              <MoveDiagonal className="h-3.5 w-3.5" />Bascular
+            </Button>
+          )}
           {puedeDecidir && (
             <Button variant="outline" disabled={!!e.ocupado} onClick={e.copiar} className={boton}>
               {e.ocupado === 'copiar' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Copy className="h-3.5 w-3.5" />}Guardar como nuevo

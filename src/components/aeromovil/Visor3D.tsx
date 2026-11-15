@@ -623,7 +623,9 @@ function ocupante(g: THREE.Object3D, M: Mats, m: { occPts: (piloto: boolean) => 
     const hom = en(lo(0.46), lat + s * 0.19);
     sphere(g, hom, 0.06, ropa);
     const manoP: V3 = [o.mano[0], o.mano[1], lat + s * o.anchoMano];
-    const codo = articulacion(hom, manoP, 0.30, 0.28, [0, -1, s * 0.7]);
+    let codo = articulacion(hom, manoP, 0.30, 0.28, [0, -1, s * 0.7]);
+    // (2026-11-15) in a narrow body the elbow bends down instead of out, until it is inside (`codoZ`)
+    if (o.codoZ != null) for (const k of [0.45, 0.2, 0, -0.25]) { if (Math.abs(codo[2]) <= o.codoZ) break; codo = articulacion(hom, manoP, 0.30, 0.28, [0, -1, s * k]); }
     capsula(g, hom, codo, 0.046, ropa);
     capsula(g, codo, manoP, 0.038, M.skin);
     sphere(g, manoP, 0.045, M.skin, [1.25, 0.8, 0.95]);
@@ -2273,7 +2275,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-slate-900">{defSel.nombre}</p>
               {(tiposSel.size > 0 || defSel.bascula || alMoverGaraje) && <p className="text-[11px] leading-snug text-slate-500">
-                {tiposSel.size > 0 ? 'Abre sus puertas y su maletero para ver cómo se abren.' : ''}{defSel.bascula ? `«Bascular» lo inclina ${defSel.bascula.angulo}° con las cuatro ruedas, como en una curva.` : ''}{alMoverGaraje ? ' Para moverlo, púlsalo y arrástralo.' : ''}
+                {tiposSel.size > 0 ? `Abre ${[tiposSel.has('puerta') && 'sus puertas', tiposSel.has('maletero') && 'su maletero'].filter(Boolean).join(' y ')} para ver cómo se ${tiposSel.has('puerta') ? 'abren' : 'abre'}. ` : ''}{defSel.bascula ? `«Bascular» lo inclina ${defSel.bascula.angulo}° con las cuatro ruedas, como en una curva.` : ''}{alMoverGaraje ? ' Para moverlo, púlsalo y arrástralo.' : ''}
               </p>}
             </div>
             <Button variant="ghost" onClick={() => setSelGaraje(null)} aria-label="Cerrar" title="Cerrar" className="-mr-1.5 -mt-1.5 h-10 w-10 p-0">

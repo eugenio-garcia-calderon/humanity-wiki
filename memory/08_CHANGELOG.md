@@ -11721,3 +11721,11 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
   - Cristales: 10,5 / 15.
   - Comprobaciones: 15 / 15.
 - **Batería.** La réplica lleva 3 kWh, lo que cabe bajo sus asientos con este suelo. El Smera de serie llevaba 9–10 kWh bajo el asiento del conductor.
+
+## 2026-11-15 · «Bascular» en la tarjeta de los diseños basculantes, y el codo del piloto dentro de la carrocería
+
+- Eugenio: «He creado en el garaje el smeraptera, haz que pueda bascular».
+- **Bascular.** Al pinchar un diseño propio en el garaje se abre la tarjeta del diseño que editas. Ahora, si es de la familia Cuadriciclo Basculante (como el «smeraptera», hecho a partir del Smera), esa tarjeta tiene un botón «Bascular». Hace lo mismo que el «Bascular» de la barra de abajo: inclina la carrocería y las cuatro ruedas hasta su máximo a cada lado y vuelve. Antes ese botón solo estaba en la tarjeta del Smera de referencia y en la barra.
+- **Codo.** En el Smera alargado, más bajo y con el piloto reclinado, el codo derecho del piloto asomaba por la puerta como una mancha azul. Ahora el visor dobla el brazo hacia abajo hasta que el codo queda dentro de la carrocería. En los demás diseños el brazo no cambia: solo se dobla si el codo se salía.
+- **Texto.** La tarjeta de un coche de referencia ya no promete «abre sus puertas y su maletero» cuando solo tiene puertas.
+- Comprobado en un navegador automatizado, en ordenador, con una copia local y un diseño alargado de prueba. No he visto el «smeraptera» de verdad: sus medidas están en el servidor y desde aquí no llego a él.
