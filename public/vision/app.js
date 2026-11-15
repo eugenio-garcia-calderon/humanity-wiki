@@ -29,10 +29,11 @@ function home(){
   <div class="grid">
     ${SECTORES.map((s,i)=>`
       <a class="card" href="#/sector/${s.id}">
+        ${s.vision.arte?`<img class="mini" loading="lazy" src="${esc(s.vision.arte.src)}" alt="">`:''}
         <span class="n">${String(i+1).padStart(2,'0')}</span>
         <h3>${esc(s.nombre)}</h3>
         <p>${esc(s.resumen)}</p>
-        <span class="estado ${s.estado}">${s.estado==='completo'?'Contenido completo':'Borrador · 1 ejemplo por pilar'}</span>
+        <span class="estado">${s.retos.length} retos · ${s.soluciones.length} soluciones · ${s.proyectos.length} proyectos</span>
       </a>`).join('')}
   </div>`;
 }
@@ -75,6 +76,8 @@ function intro(pid, s){
 const fuente = u => u ? ` · <a href="${esc(u)}" target="_blank" rel="noopener">fuente</a>` : '';
 const render = {
   vision: s => `
+    ${s.vision.arte?`<figure class="arte"><a href="${esc(s.vision.arte.grande)}" target="_blank" rel="noopener"><img src="${esc(s.vision.arte.src)}" alt="Ilustración «${esc(s.vision.arte.tema)}»"></a>
+      <figcaption>«${esc(s.vision.arte.tema)}» · Ilustración del <a href="/calendario-arte">Calendario Arte para la Humanidad 2027</a> · Luz &amp; Humanidad</figcaption></figure>`:''}
     ${(s.vision.bloques||[]).map(b=>`
       <div class="bloque">
         <div class="acc"><h3>${esc(b.titulo)}</h3>
