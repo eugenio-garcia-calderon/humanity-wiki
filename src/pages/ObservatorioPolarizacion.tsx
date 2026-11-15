@@ -24,6 +24,11 @@ import { useEffect, useRef, useState } from 'react';
 // that was not there, which left a 64 px white strip at the bottom. Now it
 // measures where it starts (the bar is one row on a computer, two on a phone)
 // and reaches exactly the bottom of the screen.
+//
+// RENAMED «POLÍTICA» (2026-11-15, Eugenio: «Así se debe llamar ahora en vez de
+// observatorio de polarización política»), with two new chapters: 6 · Geometrías
+// and 7 · Decidir por temas. Migration 0220 renames the project page; the address
+// `/observatorio-de-polarizacion/espana` and this file's name stay, so no link breaks.
 export default function ObservatorioPolarizacion() {
   const marco = useRef<HTMLIFrameElement>(null);
   const [arriba, setArriba] = useState(0);
@@ -39,7 +44,7 @@ export default function ObservatorioPolarizacion() {
       ref={marco}
       data-app-observatorio
       src="/observatorio-polarizacion/index.html"
-      title="Observatorio de Polarización Política"
+      title="Política"
       className="block w-full border-0 bg-slate-950"
       style={{ height: `calc(100dvh - ${arriba}px)`, minHeight: 500 }}
     />
