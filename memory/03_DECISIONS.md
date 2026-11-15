@@ -1813,3 +1813,7 @@ Eugenio: «que cada elemento de la ilustración puedas pinchar y arrastrarlo… 
 - Eugenio's «Smeraptera» is a Cuadriciclo Bala clásico, and he wants it to lean.
 - **Chosen:** an option on that family (`tBascula`, `tBascMax`) with the basculante's parallelogram formula, generalised to arms whose inner ends sit at the body's side: β = φ + asin((via/2 − Lk)·sin φ / Lk).
 - **Rejected:** rebuilding his shape in the Cuadriciclo Basculante family. It would lose the pods, the Bala body and every setting he made.
+
+## 2026-11-15 — `/vision` scales: stored per item, assigned by rules
+
+- Each vision block, reto, solución and proyecto in `public/vision/data.js` carries `escalas` (a subset of the 8 scales). Options were: (a) a single scale per item — rejected, most items honestly span several (a reto measured nationally that lands on households); (b) derive the scale at render time from `ambito`/`lugar` — rejected, the rules are fuzzy and nobody could correct one item; (c) **store the list per item, filled by rules once, editable by hand** — chosen. The first fill used place names, the item's stated scope and keywords in its text; Eugenio's own projects were set by hand. Retos remain country-heavy (54 of 72) because their data are national statistics.

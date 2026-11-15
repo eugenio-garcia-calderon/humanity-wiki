@@ -11750,6 +11750,22 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
 - **Aún no se tiene en cuenta** en el vuelco, la masa ni el consumo: ni el mecanismo ni la inclinación.
 - No he cambiado el Smeraptera guardado: la opción está en «no» hasta que él la active.
 
+## 2026-11-15 — `/vision`: menú de las 8 escalas y efecto de selección
+
+- Eugenio: «un menú izquierdo donde aparezcan las 8 escalas, desde el individuo hasta el planeta», «que al pinchar en una de ellas te muestre solo las visiones, retos, soluciones y proyectos de esa escala», y que la elegida se vea «un 20 % más grande, en negrita y con fondo de color, y el resto más grises», también en el menú superior.
+- Menú lateral con **Todas las escalas** + Individuo, Comunidad, Pueblo, Provincia, Región, País, Continente y Planeta (las mismas ocho del Modelo de optimización socioeconómica). Cada una muestra cuántos elementos tiene. En el móvil es una franja deslizable bajo la cabecera.
+- Al elegir una escala, la portada y cada sector muestran solo lo de esa escala: bloques de visión, retos, soluciones y proyectos, con los contadores de las pestañas recalculados. Si no hay nada, lo dice y lo presenta como hueco por llenar. El botón 3D abre la escala del visor que corresponde (hogar, comunidad, pueblo, naturaleza). La escala viaja en la dirección (`#/sector/vivienda/retos?e=pais`), así que se puede compartir el enlace.
+- Cada elemento lleva sus escalas como etiquetas. Se asignaron con `scripts/escalas.py` (fuera del repositorio, en la sesión) por reglas: el ámbito y el lugar de cada elemento, y de qué habla (hogar, barrio, municipio, comarca…), más ajustes a mano para los proyectos propios — el Modelo socioeconómico está en las ocho. Es una primera clasificación automática: conviene que el equipo la revise.
+- Elemento elegido en el menú de escalas y en el de sectores: letra un 20 % mayor, negrita, fondo verde; el resto en gris.
+
+## 2026-11-15 — `/vision`: menú lateral derecho para elegir Visión, Retos, Soluciones o Proyectos
+
+- Eugenio: «que se pueda elegir también de forma más grande si quieres ver la Visión, los retos, proyectos, soluciones, seleccionando y que aparezca solo eso, en el menú lateral derecho».
+- Menú derecho «Ver»: **Todo** + Visión ideal, Retos, Soluciones y Proyectos, cada uno con su color, icono y contador (del sector abierto o de los 12, según la escala). Mismo efecto de selección que los otros dos menús: el elegido un 20 % más grande, en negrita y con su color de fondo; el resto en gris. Por debajo de 1150 px pasa a franja deslizable arriba del contenido.
+- En un sector, «Todo» muestra los cuatro pilares seguidos; elegir uno muestra solo ese. Las pestañas pequeñas desaparecen.
+- En la portada, elegir un pilar muestra solo ese pilar en los 12 sectores, agrupado por sector (por ejemplo, todos los retos a escala Pueblo). Las cuatro cajas de pilares de la portada también llevan ahí.
+- La elección viaja en la dirección junto a la escala (`#/sector/vivienda?e=pueblo&p=retos`) y se mantiene al cambiar de sector o de escala. Los enlaces antiguos con el pilar en la ruta (`#/sector/salud/soluciones`) siguen funcionando.
+
 ## 2026-11-15 · Bala con las ruedas en rombo
 
 - Eugenio, sobre su «Rombo Bala»: «quiero que tenga las ruedas en rombo, una delante, una atrás y dos laterales basculantes, haz que esto se pueda elegir».
