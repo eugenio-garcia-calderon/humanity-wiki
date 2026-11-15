@@ -11535,6 +11535,11 @@ Eugenio, con capturas del clásico junto al Aptera: «su cola ocupa todo el anch
   - Comprobaciones en rojo: las mismas dos de antes (cabeza del piloto alto sin casco, 0,6 → 0,8 cm; coeficiente de los largueros ×0,9).
 - **Sin cambios en ningún otro diseño**: con la cubierta «como la cúpula» (lo que tiene todo diseño guardado) la forma es la de antes, vértice a vértice. Comprobado: `bala-huella` (normal y `--editor`) IGUAL; `triciclo-disenos` contra main, Todo OK (también el clásico tal como está hoy en producción, con la 0217); `tunel-pruebas` sin fallos; `triciclo-rangos «clásico lisa»` 277 casos OK; tsc y build.
 
+## 2026-11-13 — Aeromóvil: la cúpula con tres filas ya se puede bajar
+
+- Eugenio, por segunda vez: «La cúpula sigue sin poderse bajar de 1,50 m de alto». La causa no estaba en el deslizador «Alto total» en sí (ya bajaba hasta 1,00 m con las butacas): su Cuadriciclo Bala clásico guardado lleva los asientos en «filas», y con esa disposición `rangoTriciclo` fijaba el mínimo del alto en `ALTO_FILAS` (1,56 m). Las pruebas anteriores usaban una copia con butacas, por eso no lo vieron.
+- Se quita ese tope: con tres filas el alto va de 1,00 a 1,90 m. Por debajo de unos 1,56 m las cabezas no caben y las comprobaciones lo marcan en rojo, en vez de bloquear el deslizador. Los textos de la pantalla que hablaban del mínimo se han corregido.
+
 ## 2026-11-15 — «Política» (antes Observatorio de Polarización Política): capítulos 6 · Geometrías y 7 · Decidir por temas
 
 Eugenio: una visualización en 2D donde cada partido no es un punto sino una geometría, con aristas donde «le cojea», y un partido ideal que es un círculo; empezar por inmigración y seguridad fronteriza y por servicios públicos frente a privados, acotado a España. Después: «POLITICA. Así se debe llamar ahora», y una propuesta de democracia directa donde cada ciudadano vea el estado de cada materia y elija abrir, cerrar, subir, bajar, mucho, poco o nada, con datos cuyo orden y selección también se debaten.

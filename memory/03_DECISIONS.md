@@ -1693,3 +1693,7 @@ Eugenio: «que cada elemento de la ilustración puedas pinchar y arrastrarlo… 
 - **A new `disposicion` or a separate vehicle.** The same reasons as the «Bala de cuatro ruedas» (2026-11-11).
 
 **Numbers on the real clásico** (production row + 0209 + 0212 + 0213 + 0217, then this round's proposal): see the changelog entry of the same date.
+
+## 2026-11-13 — No hidden clamps on the canopy height with three rows
+
+`rangoTriciclo` clamped `tAlto` to `ALTO_FILAS` (1.56 m) whenever `tAsientos === 'filas'`. Eugenio's saved clásico uses rows, so «Alto total» could not go below 1.56 and he reported it twice; agents had tested a fixture with bucket seats and saw the slider work. Removed the clamp: the head and «Hombros de la fila 2» checks already report the consequence in red. `ALTO_FILAS` stays as the documented recommendation in the UI text. Alternative kept open: the same clamp still exists for `tAncho` (`ANCHO_FILAS`, 1.16 m); not reported, so not changed. Lesson: build fixtures from the production row (the migrations' RAISE NOTICE «before» line carries it), not from an old snapshot.
