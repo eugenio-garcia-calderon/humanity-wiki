@@ -90,6 +90,12 @@ export interface CamposTriciclo {
   // 2026-11-15 (Eugenio, «Rombo Bala»: «quiero que tenga las ruedas en rombo, una delante, una atrás y dos laterales basculantes»)
   tRuedas: 'clasica' | 'rombo';   // dos delante en carenados (hasta ahora) o en rombo: una en el morro, que gira, dos laterales en carenados y una en la cola
   tEjeLat: number;     // en rombo: las ruedas laterales, cuánto van detrás de la del morro (m)
+  // 2026-11-15 (Eugenio: «añadir una opción de motor híbrido tipo PHEV con ejes planetarios como el Prius»)
+  tPropulsion: 'electrico' | 'phev';   // solo eléctrico (hasta ahora) o híbrido enchufable: motor de gasolina unido por un engranaje planetario
+  tPhevKW: number;     // potencia del motor de gasolina (kW)
+  tRendTerm: number;   // rendimiento del motor de gasolina (%): energía del combustible que sale en el eje
+  tRendTrans: number;  // rendimiento de la conversión mecánica (%): engranaje planetario, generador y motor eléctrico, del eje del motor a la rueda
+  tDeposito: number;   // depósito de gasolina (L)
   tMRueda: number; tMFreno: number; tMSuspDel: number; tMSuspTras: number; tMDir: number;   // kg
   // Propulsión
   tKWNom: number; tKWPico: number; tMMotor: number; tMInversor: number; tVel: number;
@@ -187,7 +193,7 @@ export const RUEDAS_TRICICLO: Record<RuedaTriciclo, { d: number; neuDel: number;
   c14: { d: 0.554, neuDel: 0.165, neuTras: 0.165, n: '14″ de coche, 165/60 R14 (554 mm)', kg: 2.62, kWBuje: 45, carga: 387 },
   c15: { d: 0.574, neuDel: 0.175, neuTras: 0.175, n: '15″ de coche, 175/55 R15 (574 mm)', kg: 2.96, kWBuje: 60, carga: 412 },
 };
-type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tTraseras' | 'tBascula' | 'tRuedas' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero';
+type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tTraseras' | 'tBascula' | 'tRuedas' | 'tPropulsion' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero';
 export type ClaveNumTriciclo = Exclude<ClaveTriciclo, ClaveTexto>;
 
 // ------------------------------------------------------------------ deslizadores
@@ -220,7 +226,7 @@ export const lemasTriciclo = (T: Pick<CamposTriciclo, 'tTraseras'> & Partial<Cam
   if (T.tAcceso === 'puertas') o.carroceria = 'la piel del Cuadriciclo en rombo, techo solar y ventanas, puertas y portón como el Aptera, carenados y material';
   return o;
 };
-export type Unidad = 'm' | 'cm' | 'mm' | '°' | 'kg' | 'kW' | 'kWh' | 'Wh/kg' | 'Wh/L' | 'km/h' | 'x' | 'kg/m²' | '%';
+export type Unidad = 'm' | 'cm' | 'mm' | '°' | 'kg' | 'kW' | 'kWh' | 'Wh/kg' | 'Wh/L' | 'km/h' | 'x' | 'kg/m²' | '%' | 'L';
 /**
  * Un deslizador del Triciclo. `bala`: la forma es la del Cuadriciclo en rombo, y su
  * etiqueta, su rango y su paso se leen de su tabla (DESLIZADORES_BALA), no se
@@ -353,6 +359,11 @@ const FILAS: Fila[] = [
   ['tMMotor', 'propulsion', 'Motor', null, 'Motor de buje', 5, 62, 0.5, 'kg'],
   ['tMInversor', 'propulsion', 'Motor', null, 'Controlador (inversor)', 1.4, 14, 0.1, 'kg'],
   ['tVel', 'propulsion', 'Motor', null, 'Velocidad de cálculo', 40, 120, 5, 'km/h'],
+  // 2026-11-15: only with the plug-in hybrid (the page hides them otherwise)
+  ['tPhevKW', 'propulsion', 'Híbrido enchufable', null, 'Motor de gasolina: potencia', 8, 60, 0.5, 'kW'],
+  ['tRendTerm', 'propulsion', 'Híbrido enchufable', null, 'Motor de gasolina: rendimiento', 20, 42, 0.5, '%'],
+  ['tRendTrans', 'propulsion', 'Híbrido enchufable', null, 'Conversión mecánica (planetario y generador)', 75, 97, 0.5, '%'],
+  ['tDeposito', 'propulsion', 'Híbrido enchufable', null, 'Depósito de gasolina', 5, 45, 1, 'L'],
   ['tKWh', 'energia', 'Batería', null, 'Batería', 5, 30, 0.5, 'kWh'],
   // 2026-11-12: one pack along the frame (only with «A lo largo del bastidor»): its size decides its capacity
   // (round 3 interior, 2026-11-12, «no lo limites»: length and width up to what fits in the body, `rangoTriciclo`; the checks say the rest)
@@ -409,6 +420,7 @@ export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
   { clave: 'tChMat', n: 'Material de los tubos', dep: 'chasis', bloque: 'Bastidor', opciones: [{ k: 'al6061', n: 'Aluminio 6061-T6' }, { k: 'cromoly', n: 'Acero cromoly 4130' }, { k: 'carbono', n: 'Tubo de carbono' }] },
   { clave: 'tRuedaDel', n: 'Ruedas delanteras (en los carenados)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['16', '20', '24', '26', '28', 'c13', 'c14', 'c15']) },
   { clave: 'tRuedaTras', n: 'Rueda trasera (dentro de la cola)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['20', '24', '26', '28', 'c13', 'c14', 'c15']) },
+  { clave: 'tPropulsion', n: 'Propulsión', dep: 'propulsion', bloque: 'Motor', opciones: [{ k: 'electrico', n: 'Eléctrica: solo batería' }, { k: 'phev', n: 'Híbrida enchufable (PHEV), con engranaje planetario como el Prius' }] },
   { clave: 'tRuedas', n: 'Disposición de las ruedas', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: [{ k: 'clasica', n: 'Dos delante en carenados' }, { k: 'rombo', n: 'En rombo: una en el morro, dos laterales en carenados, una en la cola' }] },
   { clave: 'tTraseras', n: 'Ruedas traseras', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: [{ k: 'una', n: 'Una en la cola (triciclo)' }, { k: 'dos', n: 'Dos en carenados (cuatro ruedas)' }] },
   // 2026-11-15: only with four wheels (the page hides it otherwise)
@@ -1442,6 +1454,11 @@ export function crearModeloTriciclo(P: Parametros) {
     bascula: T.tBascula === 'si' && (traseras || rombo) ? { phiMax: L('tBascMax') * Math.PI / 180, ejes: traseras ? [ejeBascula('del', F), ejeBascula('tras', traseras)] : [ejeBascula('lat', F)] } : null,
     /** 2026-11-15: the wheels in a diamond (`tRuedas`): the nose wheel at x = 0 steers, the pods do not. */
     rombo,
+    /** 2026-11-15: the plug-in hybrid (`tPropulsion: 'phev'`), or null: its engine, efficiencies, tank and their masses. */
+    phev: T.tPropulsion === 'phev' ? {
+      kW: L('tPhevKW'), rendTerm: L('tRendTerm') / 100, rendTrans: L('tRendTrans') / 100, litros: L('tDeposito'),
+      kgMotor: 15 + 1.4 * L('tPhevKW'), kgPlanetario: 12, kgDeposito: 4 + 0.745 * L('tDeposito'),
+    } : null,
     tubos, baterias, bateriaCabe: bat.capacidad, inversor, motor, basculante, amortiguador, brazos, cremallera, cabezaDireccion: cabeza, recTras, recDel, yLarguero: yL,
     // (with two rear wheels there is no wheel under the tail to cover)
     faldon: traseras ? null : faldonDe(F, L('tFaldon'), xR, rR),
@@ -1657,6 +1674,15 @@ export function piezasTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cris
   const o = piezasBase(m, ar, centros, pods);
   if (m.puerta) o.push({ nombre: 'Puertas: bisagras, cierres y amortiguadores', kg: 3.0, x: (m.puerta.xTip + m.puerta.xR) / 2, y: 0.75 + m.elevar });
   if (m.porton) o.push({ nombre: 'Portón: bisagras y amortiguadores de gas', kg: 2.0, x: m.porton.xH - 0.4, y: 1.1 + m.elevar });
+  // the plug-in hybrid (2026-11-15): estimates of parts of their class, not measured. The petrol engine about 15 kg
+  // plus 1,4 kg per kW (a 25 kW twin weighs some 50 kg), the planetary gear and its generator 12 kg, the tank 4 kg and
+  // its petrol full (0,745 kg/L); all ahead of the rear axle, low
+  if (m.phev) {
+    const p = m.phev, x = m.xR + 0.55, y = 0.32 + m.elevar;
+    o.push({ nombre: 'Motor de gasolina (híbrido)', kg: p.kgMotor, x, y });
+    o.push({ nombre: 'Motor: engranaje planetario y generador', kg: p.kgPlanetario, x: x + 0.2, y });
+    o.push({ nombre: 'Depósito de gasolina, lleno', kg: p.kgDeposito, x: x + 0.45, y: 0.25 + m.elevar });
+  }
   // a diamond (2026-11-15): the nose wheel (the rear one's size), its brake and its fork (an estimate)
   if (m.rombo) o.push({ nombre: 'Rueda delantera, freno y horquilla', kg: limitarTriciclo('tMRueda', m.campos) * RUEDAS_TRICICLO[m.campos.tRuedaTras].kg + limitarTriciclo('tMFreno', m.campos) + 5, x: 0, y: m.rR });
   if (m.volante) o.push({ nombre: 'Volante y columna (más que el manillar)', kg: 1.8, x: m.volante.c[0] + 0.1, y: m.volante.c[1] - 0.05 });
@@ -1822,7 +1848,7 @@ function dimensionar(m: ModeloTriciclo, piezas: PiezaMasa[]): PiezaMasa[] {
 export function grupoPieza(nombre: string): DepTriciclo {
   if (nombre === 'Bastidor') return 'chasis';
   if (/^(Suspensión|Basculante|Ruedas|Frenos|Dirección)/.test(nombre)) return 'rodaje';
-  if (/^(Motor|Controlador)/.test(nombre)) return 'propulsion';
+  if (/^(Motor|Controlador|Depósito)/.test(nombre)) return 'propulsion';
   if (/^(Batería|Varios)/.test(nombre)) return 'energia';
   if (/^(Asientos|Volante|Salpicadero)/.test(nombre)) return 'interior';
   return 'carroceria';
@@ -2202,6 +2228,8 @@ export const CRR = 0.011, RENDIMIENTO = 0.85, AUXILIARES = 80, USABLE = 0.9;
  * anual en España) y 85 % de pérdidas de cableado, temperatura y carga. Estimación.
  */
 export const solarDiaTriciclo = (area: number, sol = 4.5) => area * 0.7 * RENDIMIENTO_SOLAR * sol * 1000 * 0.85;
+/** Petrol's lower heating value (kWh per litre: 32 MJ/L). */
+export const KWH_LITRO_GASOLINA = 8.9;
 export function energiaTriciclo(m: ModeloTriciclo, mTot: number, cd: { cd: number; areaRef: number }, areaSolar = m.solarTodo.area) {
   const T = m.campos, L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), g = 9.81, CdA = cd.cd * cd.areaRef;
   const potencia = (v: number) => (0.5 * 1.2 * CdA * v ** 3 + CRR * mTot * g * v) / RENDIMIENTO + AUXILIARES;
@@ -2212,7 +2240,19 @@ export function energiaTriciclo(m: ModeloTriciclo, mTot: number, cd: { cd: numbe
   const reparto = 0.4, Fmax = AGARRE * reparto * mTot * g;
   let v = 0.5, t = 0; const dt = 0.02;
   while (v < 50 / 3.6 && t < 60) { const Fz = Math.min(Fmax, L('tKWPico') * 1000 * RENDIMIENTO / v) - 0.5 * 1.2 * CdA * v * v - CRR * mTot * g; if (Fz <= 0) { t = 99; break; } v += Fz / (mTot * 1.03) * dt; t += dt; }
-  return { cd: cd.cd, areaRef: cd.areaRef, CdA, WhKm, autonomia: util / WhKm, kmSol: solarDiaTriciclo(areaSolar, m.P.sol) / WhKm, vmaxNominal: vmaxCon(L('tKWNom')), vmaxPico: vmaxCon(L('tKWPico')), acel50: t, potencia: potencia(vel / 3.6), WhKm50: consumo(50), WhKm100: consumo(100) };
+  // the plug-in hybrid (2026-11-15): once the battery is down to its reserve, the petrol engine drives through the
+  // planetary gear (part straight to the wheels, part through the generator and the motor: `rendTrans` for both
+  // together) and also feeds the equipment. Litres per 100 km: the energy at the wheels over both efficiencies, over
+  // petrol's 8,9 kWh per litre (its lower heating value)
+  const p = m.phev;
+  const litros100 = (kmh: number) => {
+    if (!p) return 0;
+    const v = kmh / 3.6, rueda = 0.5 * 1.2 * CdA * v ** 3 + CRR * mTot * g * v;
+    return ((rueda / p.rendTrans + AUXILIARES) / p.rendTerm) / v / 3.6 / KWH_LITRO_GASOLINA / 10;
+  };
+  const vmaxGasolina = p ? vmaxCon(p.kW * p.rendTrans / RENDIMIENTO) : 0;
+  const hibrido = p ? { litros100: litros100(vel), litros50: litros100(50), litros100kmh: litros100(100), kmDeposito: p.litros / litros100(vel) * 100, vmaxGasolina } : null;
+  return { cd: cd.cd, areaRef: cd.areaRef, CdA, WhKm, autonomia: util / WhKm, kmSol: solarDiaTriciclo(areaSolar, m.P.sol) / WhKm, vmaxNominal: vmaxCon(L('tKWNom')), vmaxPico: vmaxCon(L('tKWPico')), acel50: t, potencia: potencia(vel / 3.6), WhKm50: consumo(50), WhKm100: consumo(100), hibrido };
 }
 
 /**

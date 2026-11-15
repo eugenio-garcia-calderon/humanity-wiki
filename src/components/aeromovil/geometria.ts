@@ -266,6 +266,8 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   tBascula: 'no', tBascMax: 15,
   // 2026-11-15 (Eugenio, «Rombo Bala»): the wheels in a diamond, one in the nose, two lateral in pods, one in the tail; off by default
   tRuedas: 'clasica', tEjeLat: 1.35,
+  // 2026-11-15 (Eugenio): a plug-in hybrid like the Prius (power-split planetary gear); off by default
+  tPropulsion: 'electrico', tPhevKW: 25, tRendTerm: 38, tRendTrans: 90, tDeposito: 20,
   tMRueda: 4.5, tMFreno: 1.2, tMSuspDel: 9, tMSuspTras: 6, tMDir: 4.5,
   tKWNom: 5, tKWPico: 10, tMMotor: 13, tMInversor: 2.5, tVel: 80,
   tKWh: 9, tWhKg: 160, tWhL: 230, tMVarios: 12, tSolarM2: 2.2,
