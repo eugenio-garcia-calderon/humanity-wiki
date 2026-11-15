@@ -665,3 +665,12 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 - **The crest is "the rearmost point within 2 mm of the top"**, a threshold rather than a property of the shape. A long flat roof that dips by 2.1 mm is cut there.
 - **A very short canopy keeps a little of the egg.** When the crest is within 0.60 m of the windscreen's start, the rear deck starts 0.60 m back from it, and the canopy's own section stays between the crest and there. The check starts where the deck does, so it does not see that stretch.
 - **The Cd cost of removing the egg is a tunnel reading on a part of the body the tunnel reads poorly.** On his design the wake term varies by 0.017 across `tCaida` with no clear trend. See the 2026-11-13 note on the trailing edge.
+
+
+## 2026-11-15 — Garage Smera and EQXX: shortcuts
+
+- **Both bodies were modelled without looking at a single photo** (image hosts are blocked from the build environment). Proportions follow the published figures; every line, the Smera's mudguards and linkage, and the EQXX's tracks and overhangs are estimates written down in `smeraForma.ts` / `eqxxForma.ts`. A pass with photos would change the shapes, not the figures.
+- **The Smera does not steer and its tilt is a toy animation**: the same lean on both axles, no steering, no suspension travel. The cornering simulation must read `SMERA_DINAMICA`, not the mesh. Its centre of gravity (0.48 m kerb, 0.55 m with a driver) is an estimate; its tyres (145/70 R14) come from auto123.com via the circuit's table, a page this branch did not fetch.
+- **The Smera has no `aero`** (no published Cd), so it is out of «Cd y consumo» and the tunnel shows only its own estimate.
+- **`tesla3` and `caterham7` are still grey placeholder boxes** (4.0 × 1.8 × 1.4 m, hidden by default but listed as reference cars), and they now sit in the size order by that invented 4.0 m. The Model 3 is not modelled. 20 minutes to drop them from the list today; a real Model 3 is a Model Y-sized job.
+- **The EQXX's tunnel estimate is 16 % high** (0.197 against 0.170). Not tuned: shaping a reference car to agree with the tunnel would hide the method's error, and it stays out of the fit.

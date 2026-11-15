@@ -30,6 +30,11 @@ export interface VehiculoGaraje {
     /** Masa en vacío (kg) y plazas, para la rodadura del túnel; velocidad máxima (km/h), para avisar si no llega. */
     masaVacio?: number; plazas?: number; vmax?: number;
   };
+  /**
+   * Kerb mass (kg) for a car with no `aero` (2026-11-15): the garage is ordered by length, then by mass, and the list
+   * shows both. A car with `aero.masaVacio` needs nothing here (`masaGaraje` reads that one first).
+   */
+  masa?: number;
   /** Silueta para el túnel: [x, y del suelo de la carrocería, y del techo, media anchura], de delante a atrás. */
   envolvente?: [number, number, number, number][];
   /**
@@ -50,7 +55,16 @@ export interface VehiculoGaraje {
    * maletero». Un coche sin esto no enseña esos botones.
    */
   pivotes?: PivoteGaraje[];
+  /**
+   * A tilting car (2026-11-15, the Lumeneo Smera): «Bascular» on its card leans it to `angulo` degrees and back. The
+   * model knows its own linkage, so it poses itself: `poner(grupo, f)` takes the group `construir` returned and how far
+   * over it is (0 upright, 1 at `angulo`, leaning to its right) and moves the body, the wheels and the arms.
+   */
+  bascula?: { angulo: number; poner: (grupo: THREE.Object3D, f: number) => void };
 }
+
+/** A garage car's kerb mass (kg), if it is known: its own `masa`, or the one its aerodynamics carry. */
+export const masaGaraje = (v: Pick<VehiculoGaraje, 'masa' | 'aero'>): number | undefined => v.masa ?? v.aero?.masaVacio;
 
 export interface PivoteGaraje {
   nombre: string;

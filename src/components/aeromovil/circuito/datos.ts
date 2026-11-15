@@ -84,6 +84,9 @@ const SMERA: FichaDinamica = {
     'Wikipedia, «Lumeneo SMERA» (cita la ficha técnica de lumeneo.fr, 2011): vía 655 mm, se inclina hasta 25°, 110 km/h',
     'diariomotor.com (8/10/2012): 550 kg en orden de marcha, 2,5 m de largo',
     'Caradisiac, Salón de Ginebra 2008: basculación de 25°',
+    // (2026-11-15, nube/garaje-referencias) the garage Smera now exists: `fichaGaraje` takes its width and height,
+    // which are the 2008 show car's, so the page must say where they come from
+    'Ancho, alto, batalla y vías: los del Smera del garaje, el coche del Salón de París de 2008 (auto-swiat.pl: 2 380 × 800 × 1 450 mm, batalla 1 700 mm, vía 655 mm). La batalla y la vía coinciden en todas las fuentes; el alto y el ancho de la versión posterior eran algo mayores (1 480 y 860 mm según auto123)',
   ],
   origen: 'tabla',
 };

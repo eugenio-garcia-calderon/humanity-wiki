@@ -280,6 +280,13 @@ export function BotonSoloReferencia({ e, id }: { e: Eleccion; id: string }) {
   );
 }
 
+/** «2,38 m · 350 kg» for a row of the list (2026-11-15: the order from the smallest to the largest has to be visible). */
+function medidaFila(m?: { largo: number; masa?: number }): string {
+  if (!m) return '';
+  const largo = `${m.largo.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} m`;
+  return m.masa != null ? `${largo} · ${Math.round(m.masa).toLocaleString('es-ES')} kg` : largo;
+}
+
 /**
  * The list view of the garage, in the side panel and in the «Garaje» panel of the 3D view: «Mis diseños» (the first
  * row) and «Coches de referencia» (the second), each one shown or hidden.
@@ -290,7 +297,8 @@ export function ListaGaraje({ g, e, actual, nombreVehiculo, referencias, alAlter
   puedeDecidir: boolean;
   /** After a design is picked in the list (the «Garaje» panel closes on a phone, where it covers the 3D). */
   alElegido?: () => void;
-  referencias: { id: string; nombre: string; largo: number; visible: boolean }[];
+  /** In the catalogue's order (from the smallest to the largest), with their kerb mass when it is known. */
+  referencias: { id: string; nombre: string; largo: number; masa?: number; visible: boolean }[];
   alAlternarReferencia: (id: string) => void;
   pie?: ReactNode;
 }) {
@@ -302,7 +310,7 @@ export function ListaGaraje({ g, e, actual, nombreVehiculo, referencias, alAlter
     <div className="flex flex-col gap-2.5">
       <div className="flex flex-col gap-1.5">
         <p className="flex items-baseline justify-between text-xs font-semibold text-slate-600">
-          Mis diseños<span className="text-[11px] font-normal text-slate-400">primera fila{lista ? ` · ${lista.length - g.ocultos.filter(id => lista.some(d => d.id === id)).length + (propioFuera ? 1 : 0)} a la vista` : ''}</span>
+          Mis diseños<span className="text-[11px] font-normal text-slate-400">primera fila, de menor a mayor{lista ? ` · ${lista.length - g.ocultos.filter(id => lista.some(d => d.id === id)).length + (propioFuera ? 1 : 0)} a la vista` : ''}</span>
         </p>
         {g.error && (
           <p className="text-xs text-red-700">{g.error} <Button variant="ghost" onClick={g.cargar} className="px-1 py-0 text-xs normal-case tracking-normal underline">Reintentar</Button></p>
@@ -330,7 +338,7 @@ export function ListaGaraje({ g, e, actual, nombreVehiculo, referencias, alAlter
                   title={esActivo ? 'Es el que editas' : `Abrir «${d.nombre}» para editarlo`}
                   className="min-w-0 flex-1 flex-col items-start justify-start gap-0 px-1.5 py-1.5 text-left normal-case tracking-normal">
                   <span className={cn('block w-full truncate text-[13px] font-medium', esActivo ? 'text-teal-900' : oculto ? 'text-slate-400' : 'text-slate-800')}>{d.nombre}</span>
-                  <span className={cn('block w-full truncate text-[11px] font-normal', esActivo ? 'text-teal-700' : 'text-slate-400')}>{[familiaGuardada(d), esActivo ? 'el que editas' : ''].filter(t => t && t !== d.nombre).join(' · ') || '\u00a0'}</span>
+                  <span className={cn('block w-full truncate text-[11px] font-normal', esActivo ? 'text-teal-700' : 'text-slate-400')}>{[medidaFila(g.medidas[d.id]), familiaGuardada(d), esActivo ? 'el que editas' : ''].filter(t => t && t !== d.nombre).join(' · ') || '\u00a0'}</span>
                 </Button>
                 {puedeDecidir && (
                   <Button variant="ghost" onClick={() => setEditando(d.id)} aria-label={`Cambiar el nombre de «${d.nombre}»`} title="Cambiar nombre"
@@ -351,14 +359,14 @@ export function ListaGaraje({ g, e, actual, nombreVehiculo, referencias, alAlter
       </div>
       <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-2.5">
         <p className="flex items-baseline justify-between text-xs font-semibold text-slate-600">
-          Coches de referencia<span className="text-[11px] font-normal text-slate-400">segunda fila, detrás</span>
+          Coches de referencia<span className="text-[11px] font-normal text-slate-400">segunda fila, de menor a mayor</span>
         </p>
         <div className="flex flex-col gap-1">
           {referencias.map(v => (
             <Button key={v.id} variant="outline" aria-pressed={v.visible} onClick={() => alAlternarReferencia(v.id)}
               className={cn('justify-between gap-2 px-2.5 py-1.5 text-left text-[13px] font-medium normal-case tracking-normal', !v.visible && 'border-dashed text-slate-400')}>
               <span className="flex min-w-0 items-center gap-1.5">{v.visible ? <Eye className="h-3.5 w-3.5 shrink-0 text-slate-500" /> : <EyeOff className="h-3.5 w-3.5 shrink-0" />}<span className="truncate">{v.nombre}</span></span>
-              <span className="shrink-0 text-[11px] font-normal text-slate-400">{v.largo.toFixed(2).replace('.', ',')} m</span>
+              <span className="shrink-0 text-[11px] font-normal tabular-nums text-slate-400">{medidaFila(v)}</span>
             </Button>
           ))}
         </div>
@@ -369,7 +377,7 @@ export function ListaGaraje({ g, e, actual, nombreVehiculo, referencias, alAlter
         </Button>
       )}
       <p className="text-[11px] leading-snug text-slate-500">
-        En el 3D, tus diseños están en la primera fila, en el orden de esta lista, y los coches de referencia en la segunda, detrás.
+        En el 3D, tus diseños están en la primera fila y los coches de referencia en la segunda, detrás; las dos van del más corto al más largo (y, si miden lo mismo, del más ligero al más pesado), en el orden de esta lista. Tus diseños se miden como están guardados.
         Pincha uno de tus diseños (aquí o en el 3D) para editarlo: pasa al centro y sus departamentos y deslizadores salen en el panel.
         Pincha un coche de referencia para ver su ficha. Para mover un coche, púlsalo y arrástralo: se queda donde lo sueltes, en este navegador.
         El que editas se queda en el centro.
