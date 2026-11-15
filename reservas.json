@@ -29,6 +29,12 @@
       "ruta": "src/components/aeromovil/explicaciones/triciclo.ts",
       "motivo": "Bala en rombo",
       "desde": "2026-11-15T18:56:54.255Z"
+    },
+    {
+      "agente": "rombo",
+      "ruta": "src/components/aeromovil/garaje/balaPiezas.ts",
+      "motivo": "Bala en rombo",
+      "desde": "2026-11-15T18:56:56.722Z"
     }
   ]
 }
