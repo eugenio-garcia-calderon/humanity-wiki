@@ -305,7 +305,8 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "/calendario-arte/ilustraciones/mes-05.jpg",
       "/calendario-arte/ilustraciones/mes-05-b.jpg",
       "/calendario-arte/ilustraciones/mes-05-c.jpg",
-      "/calendario-arte/ilustraciones/mes-05-d.jpg"
+      "/calendario-arte/ilustraciones/mes-05-d.jpg",
+      "/calendario-arte/ilustraciones/mes-05-e.jpg"
     ]
   },
   {
@@ -364,7 +365,8 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "/calendario-arte/ilustraciones/mes-06.jpg",
       "/calendario-arte/ilustraciones/mes-06-b.jpg",
       "/calendario-arte/ilustraciones/mes-06-c.jpg",
-      "/calendario-arte/ilustraciones/mes-06-d.jpg"
+      "/calendario-arte/ilustraciones/mes-06-d.jpg",
+      "/calendario-arte/ilustraciones/mes-06-e.jpg"
     ]
   },
   {

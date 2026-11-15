@@ -36,6 +36,11 @@ SEPIA = '#5a3a2c'
 SEPIA_OSC = '#3a241c'
 
 
+# How far the iris turns toward where a face looks (`mira`). 1.0 = as designs 4 were
+# painted; a composition can raise it so the gaze reads clearly (planos, 2026-11-15).
+MIRA_FUERZA = 1.0
+
+
 def _v(a):
     return np.asarray(a, np.float64)
 
@@ -476,7 +481,7 @@ def cabeza3(lz, x, y, r, piel, pelo, peinado, luz, giro=0.0, inclina=0.0, edad='
         lz.aguada(Elipse(*R(cx, cy - hgt * 0.4), w * r * 1.35, hgt * r * 1.6, inclina), sp, dens=0.16, suave=w * r * 0.3)
         if ojos == 'abiertos':
             lz.aguada(forma, '#f7efe6', dens=0.55, tapa=1, irreg=0.05, borde=0.2)
-            mx, my = mira
+            mx, my = mira[0] * MIRA_FUERZA, mira[1] * MIRA_FUERZA
             ci = R(cx + mx * w * 0.5, cy - hgt * 0.05 + my * hgt * 0.35)
             ri = hgt * 0.95
             iri = Elipse(ci[0], ci[1], ri * r, ri * r * 1.02) & forma

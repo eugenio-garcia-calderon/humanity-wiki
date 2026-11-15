@@ -70,3 +70,51 @@ folders show.
 **Not yet for the automatic drawer** («Crear nuevo diseño», `DIBUJANTE.md`): its
 designs live in `/uploads` and the database, and the elements need a commit (the
 positions travel inside the web bundle so the print copy has them at once).
+
+## Illustrations in depth planes (planos.py, since 2026-11-15)
+
+Eugenio: «a partir de ahora todas las ilustraciones… al menos entre 3 y 5 planos y capas de
+profundidad… juega con las luces». The rule, in Spanish and for whoever draws, is
+`encargos/PLANOS.md`. The first two are May and June, design 5 (`mes-05-e`, `mes-06-e`).
+
+`generadores/diseno4/planos.py` builds the picture as a stack of sprites:
+
+```python
+esc = Escena(ancho, semilla=616, sol=(1250, 170))      # where the light comes from
+lz = esc.lienzo
+...paint the sky on lz...                              # becomes fondo.jpg, static
+esc.empieza('lomas', 'Las lomas', plano=4, fija=True)  # landscape band: seen, not draggable
+esc.empieza('pueblo', 'El pueblo', plano=3, escala=0.8, ancla=(1446, 818), mueve=(12, -54))
+esc.empieza('nina', 'La niña', plano=2, proyecta=dict(suelo=600, dentro=HOJA1))
+esc.rayos(...)                                         # light shafts between two planes
+esc.halos('luz_bombilla', 'La luz de la bombilla', [(534, 482, 64, 0.26)])
+esc.termina()
+esc.marco(margen=16)                                   # fade to the calendar paper, fixed on top
+esc.guardar('mes-06-e.jpg', carpeta_capas)
+```
+
+- Each element is painted alone on a clean sheet, turned into an RGBA sprite, treated as
+  its plane says (haze toward the air colour, shade, dark side away from the light, rim
+  light, cast shadow, blur), then laid over the picture. The final JPG and the web's movable
+  elements are the same sprites, so they match by construction.
+- **Opaque by reserve.** Anything painted with `tapa` (or gouache, or collage) is solid
+  in its sprite. Without that, a cream shirt or a white glider becomes a ghost over what is
+  behind it. Washes with no reserve (a cast shadow, the music ribbon) stay transparent.
+  `acuarela.Lienzo.TAPA` records it; it is `None` by default, so design 4 re-renders
+  byte-identical.
+- Pieces of earlier designs are reused as functions: `piezas_05.py` and `piezas_06.py` are
+  verbatim copies of the design-4 scripts' blocks. The design-4 scripts are not touched.
+- `fija: true` in `capas.json`: landscape bands, light and the paper border. The web shows
+  them, but does not let them be dragged or selected.
+
+```bash
+cd design/calendario-arte/generadores/diseno4
+python3 mes-06-e.py 1485 /tmp/prueba.png                                   # iterate
+python3 mes-06-e.py 3508 ../../../../public/calendario-arte/ilustraciones/mes-06-e.jpg \
+        ../../../../public/calendario-arte/capas/mes-06-e                   # final + pieces
+python3 capas_a_ts.py
+```
+
+Every illustration then goes through the evaluator (`.claude/agents/evaluador-ilustraciones.md`)
+at least twice.
+
