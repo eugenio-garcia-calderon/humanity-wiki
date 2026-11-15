@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { puntoSeccion } from './forma';
-import { barrido, cintaPiel, estacion, piel, thetaY, torno } from './apteraPiel';
+import { puntoSeccion, semiAncho } from './forma';
+import { barrido, cintaPiel, estacion, piel, torno } from './apteraPiel';
 import { malla } from './apteraDetalle';
 import {
   BATALLA, CAPSULA, CINTURA, GUARDABARROS, INCLINACION_MAX, LINK, QUILLA, R_CORONA, R_LLANTA, R_RUEDA, ANCHO_RUEDA,
@@ -156,30 +156,26 @@ function construirPlantilla(): THREE.Group {
     lado.add(malla(cintaPiel(CAPSULA, [[-0.40, 0.66], [-0.75, 0.58], [-1.16, 0.62]], 0.006, { pasos: 20 }), M.junta, 'junta', false));
     lado.add(malla(cintaPiel(CAPSULA, [[-0.80, 0.94], [-0.96, 0.945]], 0.016, { pasos: 6, delta: 0.0025 }), M.negro, 'tirador', false));
     // the shoulder: a dark line along the capsule's widest point, from the nose to the tail
-    lado.add(malla(cintaPiel(CAPSULA, [[0.22, 0.80], [0.0, 0.86], [-0.6, 0.90], [-1.3, 0.92], [-1.80, 0.95], [-1.96, 0.88]], 0.012, { pasos: 60 }), M.quilla, 'hombro', false));
+    lado.add(malla(cintaPiel(CAPSULA, [[0.02, 0.86], [-0.6, 0.90], [-1.3, 0.92], [-1.80, 0.95], [-1.96, 0.88]], 0.012, { pasos: 60 }), M.quilla, 'hombro', false));
     // a black frit along the glass line: the glass's edge is cut on the skin's grid, so it is stepped, and this covers it
-    lado.add(malla(cintaPiel(CAPSULA, [[0.10, 0.905], ...CINTURA, [-1.86, 1.03]], 0.04, { pasos: 80, delta: 0.0025 }), M.negro, 'serigrafia', false));
+    lado.add(malla(cintaPiel(CAPSULA, [[-0.02, 0.935], ...CINTURA.slice(1), [-1.86, 1.03]], 0.04, { pasos: 80, delta: 0.0025 }), M.negro, 'serigrafia', false));
     // mirror on a short stalk at the A-pillar's foot
     const cab = new THREE.SphereGeometry(1, 16, 10); cab.scale(0.05, 0.035, 0.035); cab.translate(-0.10, 0.99, 0.385);
     lado.add(malla(cab, M.negro, 'retrovisor'));
     lado.add(malla(barrido([new THREE.Vector3(-0.07, 0.97, 0.30), new THREE.Vector3(-0.10, 0.99, 0.37)], () => [0.008, 0.008], { lados: 6 }), M.negro, 'retrovisor'));
   }
 
-  // --- lights: two narrow headlamps where the nose meets the shoulder, two tail lamps high on the tail
+  // --- lights: an oval headlamp each side where the nose meets the shoulder (a dark lens with a bright lamp in it),
+  // a tail lamp each side high on the tail. Small solids set on the skin: a ribbon on a skin that faces forward folds.
   for (const s of [1, -1]) {
-    const faro: THREE.Vector3[] = [], piloto: THREE.Vector3[] = [];
-    for (let k = 0; k <= 10; k++) {
-      const x = 0.24 - 0.13 * k / 10, e = estacion(CAPSULA, x), y = 0.78 + 0.05 * k / 10;
-      const th = thetaY(e, y), [py, pz] = puntoSeccion(e, th);
-      faro.push(new THREE.Vector3(x + 0.004, py, s * (pz + 0.004)));
-      const xt = -1.90 + 0.12 * k / 10, et = estacion(CAPSULA, xt), yt = 0.98 - 0.03 * k / 10;
-      const tht = thetaY(et, yt), [qy, qz] = puntoSeccion(et, tht);
-      piloto.push(new THREE.Vector3(xt - 0.003, qy, s * (qz + 0.004)));
+    for (const [x, y, mat, k] of [[0.21, 0.80, M.negro, 1], [0.215, 0.80, M.luz, 0.6], [-1.93, 0.97, M.piloto, 1]] as [number, number, THREE.Material, number][]) {
+      const e = estacion(CAPSULA, x), z = semiAncho(e, y);
+      const lampara = new THREE.SphereGeometry(1, 18, 10); lampara.scale(0.035 * k, 0.022 * k, 0.05 * k);
+      lampara.rotateY(s * (x > 0 ? -0.7 : 0.7)); lampara.translate(x, y, s * (z - 0.012));
+      g.add(malla(lampara, mat, x > 0 ? 'faro' : 'piloto', false));
     }
-    g.add(malla(barrido(faro, t => [0.008, 0.03 - 0.012 * t], { lados: 8 }), M.negro, 'faro', false));
-    g.add(malla(barrido(faro.map(p => p.clone().add(new THREE.Vector3(0.006, 0, s * 0.006))), t => [0.005, 0.012 - 0.004 * t], { lados: 8 }), M.luz, 'faro', false));
-    g.add(malla(barrido(piloto, t => [0.006, 0.02 - 0.008 * t], { lados: 8 }), M.piloto, 'piloto', false));
   }
+
   // --- the linkage and the wheels
   const plantillaRueda = rueda(M);
   const ruedaDer = conjuntoRueda(M, plantillaRueda);
