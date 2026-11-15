@@ -11822,3 +11822,18 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
 - Cada bloque, reto, solución y proyecto lleva sus partes (`subtemas`), asignadas por palabras clave con `scripts/subtemas.py` (en la sesión, fuera del repositorio). Todos los elementos tienen al menos una parte. Primera clasificación automática: a revisar.
 - **El 3D se carga solo** dentro de la sección «Visión ideal» (sin la botonera de escalas del visor, que ya la da la página), con botón de pantalla completa. La escena sigue a la parte y a la escala elegidas (Urbanismo → pueblo, Arquitectura → hogar…). En las escalas País, Continente y Planeta todavía no hay modelo: se muestra «Modelo 3D pendiente», y el botón de la cabecera dice lo mismo.
 - Contenido centrado entre los dos menús (ancho máximo 1.060 px, títulos centrados); menús laterales un 20 % más estrechos y con letra un 20 % menor.
+
+## 2026-11-15 · Cirrus Vision Jet SF50 en el garaje
+
+- Eugenio, con una foto en vuelo: «Haz un modelo 3d de este avión exacto, el modelo tal cual y ponlo en el garaje».
+- **Modelo nuevo** `garaje/visionJet.ts`, en tierra con el tren bajado. Lleva:
+  - el fuselaje, con el frente azul oscuro y el parabrisas en la misma piel;
+  - las dos ventanas ovaladas por lado, dentro de la franja oscura;
+  - el ala baja con diedro y aletas en las puntas, con sus luces de navegación;
+  - la cola en V a 42°;
+  - el motor sobre el lomo, con su toma y su tobera;
+  - el tren de morro y el principal, con sus tapas.
+  - No lleva marcas del fabricante ni matrícula.
+- **Medidas publicadas** (globalair.com): 9,42 m de largo, 11,79 m de envergadura, 3,33 m de alto, cabina de 1,55 × 1,24 m y 1.610 kg en vacío.
+- **Medido en fotos y estimado:** las secciones, las cuerdas y la flecha del ala, la cola, la góndola y el tren.
+- **Fuera del túnel de viento:** no tiene silueta para el túnel, que está hecho para coches.
