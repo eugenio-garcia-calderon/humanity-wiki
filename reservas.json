@@ -17,6 +17,12 @@
       "ruta": "src/components/aeromovil/geometria.ts",
       "motivo": "Codo del piloto dentro de la carrocería",
       "desde": "2026-11-15T16:14:49.225Z"
+    },
+    {
+      "agente": "bascular",
+      "ruta": "src/components/aeromovil/geometriaBasculante.ts",
+      "motivo": "Codo del piloto dentro de la carrocería",
+      "desde": "2026-11-15T16:14:52.337Z"
     }
   ]
 }
