@@ -649,7 +649,8 @@ export function rangoTriciclo(k: ClaveNumTriciclo, T: CamposTriciclo): [number, 
   if (T.tAsientos === 'filas') {
     // the two seats of row 2 side by side need width at shoulder height, under the canopy's curve (see ANCHO_FILAS)
     if (k === 'tAncho') return [Math.max(f.min, ANCHO_FILAS), f.max];
-    if (k === 'tAlto') return [Math.max(f.min, ALTO_FILAS), f.max];
+    // tAlto is NOT clamped to ALTO_FILAS any more (2026-11-13, Eugenio could not lower his canopy below 1.56 m with
+    // three rows: «ya van 2 veces que lo digo»). Lower is allowed; the head and «Hombros de la fila 2» checks turn red.
     // row 3's backrest ahead of the rear shock tower, and the canopy long enough to cover row 3's head
     if (k === 'tBatalla') return [Math.min(f.max, Math.max(f.min, distanciaFila3(T) + RESPALDO_FILA3 + limitarTriciclo('tBasculante', T) - 0.01)), f.max];
     // and the rows only as far back as the longest wheelbase still leaves row 3 ahead of the shock tower. The order
