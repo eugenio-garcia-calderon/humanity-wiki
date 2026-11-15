@@ -11548,3 +11548,14 @@ Eugenio, con capturas del clásico junto al Aptera: «su cola ocupa todo el anch
 - El diseño que editas se queda siempre en el centro y no se arrastra: los demás se colocan a su alrededor (si lo moviste cuando no era el que editabas, los demás se ven desde su sitio).
 - «Volver a colocar en fila» en la lista del garaje (todos los movidos) y «Volver a su fila» en la tarjeta de cada coche movido.
 - Arreglado: en un navegador sin orden guardado del garaje, al guardar un diseño (el guardado automático o un cambio de nombre) ese diseño saltaba al final de la fila. Ahora se queda en su sitio.
+## 2026-11-15 — Aeromóvil: circuito de estabilidad en curvas
+
+- Eugenio: «Crea además del garaje un circuito de simulación de estabilidad en curvas del vehículo donde el primero que se pueda probar sea el Lumeneo Smera de 4 ruedas con basculación… y compararlo con otro vehículo como el Aptera y entender su seguridad y estabilidad en curva a nivel gráfica».
+- Nueva sección «Circuito» en el menú de secciones del Aeromóvil (`/aeromovil/circuito`). Se eligen uno o dos vehículos: el Lumeneo Smera (bascula hasta 25°, el primero), el Aptera, el Twizy, el Tesla Model Y y el diseño abierto en el editor.
+- Un circuito de 980 m visto desde arriba con cinco curvas: horquilla de 15 m, chicane de 25 m, curva de 40 m, enlace de 60 m y curva rápida de 120 m. Los coches lo recorren animados, con una vista desde atrás de cada uno que enseña cómo se inclina el Smera, el centro de gravedad y la línea de la fuerza resultante (verde si cae entre las ruedas, roja si vuelca).
+- Se elige el agarre del suelo (seco 0,8, mojado 0,5, deportivo 1,0, nieve 0,2 o cualquier μ), una velocidad fija o «apurar» cada curva a un porcentaje de su límite, apagar la basculación del Smera, y subir o bajar las alturas del centro de gravedad estimadas.
+- Para cada vehículo: a cuántas g vuelca (de pie y, el Smera, inclinado), a cuántas derrapa, qué llega antes, y por curva la lectura OK / al límite / derrapa / vuelca con su margen y su velocidad límite y segura.
+- Tres gráficas: aceleración lateral según la velocidad en cada curva con los límites de cada vehículo; velocidad máxima por curva en barras; inclinación del Smera a lo largo de la vuelta (y lo que le pide la chicane en grados por segundo).
+- Los datos de cada vehículo con su fuente; lo que no se publica (casi siempre la altura del centro de gravedad) va marcado «estimado» y explicado. «Cómo se calcula», desplegable, con las fórmulas en castellano y las referencias.
+- Resultado principal, con los datos actuales: en seco el Smera, el Aptera, el Twizy y el Model Y derrapan antes de volcar (vuelcan a 1,16, 1,08, 1,07 y 1,44 g). El Smera sin basculación volcaría a 0,63 g, antes de derrapar: por eso bascula.
+- `npx tsx scripts/circuito-limites.ts` imprime todas las cifras para comprobarlas a mano.

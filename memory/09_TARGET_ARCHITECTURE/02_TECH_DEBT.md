@@ -643,3 +643,10 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 - **Dragged places are per browser** (`localStorage`), not shared: Eugenio's phone and computer each have their own garage arrangement.
 - **A dragged place is absolute in the rows' frame.** When a design is added before it in the list, the cars in the row move along and a dragged car does not, so they can end up overlapping. There is no overlap check on drop.
 - **The drag snaps to 5 cm and has no grid or alignment guides**; «Volver a su fila» is the way back to a tidy row.
+## 2026-11-15 — Cornering circuit: shortcuts
+
+- **Quasi-steady rigid body.** No suspension roll, tyre deflection, load-transfer dynamics, transients, combined braking-cornering grip, banking or aero. A 15 % reserve stands in for compliance. A transient model (chicane, tilt actuator lag) would need a 3-4 DOF model like Rajamani et al. 2003.
+- **CdG heights of the table cars are estimated** (35 % of height). The Smera's tilt is 25° per Wikipedia/Caradisiac; auto123's prototype sheet says 20°.
+- **The «apurar» lap uses the same longitudinal limits for every car** (accelerate min(2.5 m/s², 0.5·μ·g), brake 0.7·μ·g), not each car's power: lap times compare cornering only.
+- **Editor designs other than the Triciclo/Cuadriciclo have no CdG**: the circuit estimates it (35 % of height, equal load per wheel) until those families compute one. The Bala has no masses and is not offered.
+- **Recharts colours are `var(--color-…)` strings** that exist only because the same colours are used as classes in the legend swatches (Tailwind 4 emits only used variables). Removing a swatch class could silently blank a line; a shared chart palette in `src/components/ui/` would fix it (~30 min).
