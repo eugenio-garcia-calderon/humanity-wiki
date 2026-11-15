@@ -1,5 +1,6 @@
 // «Otras propuestas» for the «educacion» window: what other political camps in
-// Spain propose on schooling, from left to right. Checked on 2026-11-12.
+// Spain propose on schooling, from left to right. Checked on 2026-11-12;
+// Vox updated on 2026-11-15 from its 29-N programme.
 import type { Espectro } from './tipos';
 
 export const ESPECTRO: Espectro | null = {
@@ -73,23 +74,22 @@ export const ESPECTRO: Espectro | null = {
     {
       id: 'derecha',
       quien: 'Vox',
-      cuando: 'Programa electoral de 2023',
-      idea: 'Que el Estado recupere la educación, con una sola ley, exámenes nacionales y más peso de los padres.',
+      cuando: 'Programa para el 29-N, «Es sentido común», 12 de noviembre de 2026',
+      idea: 'Una educación igual en toda España, centrada en las materias básicas, y con libre elección de colegio.',
       propone: [
-        'Devolver al Estado las competencias de educación y sustituir la ley actual por una ley nacional.',
-        'Que los padres conozcan y acepten antes cualquier contenido afectivo-sexual o ideológico en clase.',
-        'Una sola prueba de acceso a la universidad y exámenes nacionales en varias etapas.',
-        'Garantizar el derecho a estudiar en español en toda España.',
-        'Que no se pase de curso con asignaturas suspensas.',
+        'Derogar la ley educativa actual (la LOMLOE, de 2020), quitar «contenidos ideológicos» y prohibir el móvil en clase (medida 69).',
+        'Un currículo común, exámenes nacionales, reválidas y una misma prueba de acceso a la universidad en toda España (medida 66).',
+        'Estudiar en español en todo el país, y libre elección de colegio con distrito único (medidas 66, 67 y 74).',
+        'Un máximo por clase de alumnos que no dominen el español, con aulas para ponerse al día (medida 70).',
+        'Escuela infantil gratis de 0 a 3 años, y prioridad para los españoles en plazas y becas (medidas 74 y 94).',
       ],
-      nota: 'No hemos encontrado propuestas de Vox sobre educación para 2026, de ámbito nacional, en sus textos publicados.',
-      argumento: 'Dicen que diecisiete sistemas educativos crean desigualdad entre españoles, y que los padres son los primeros responsables de la educación de sus hijos.',
-      critica: 'Sus críticos dicen que el permiso previo de los padres puede dejar a alumnos sin contenidos del currículo, y que una sola ley nacional deja sin margen a las comunidades con lengua propia.',
+      argumento: 'Dicen que diecisiete sistemas educativos crean desigualdad entre españoles, y que la escuela debe centrarse en las materias básicas y no en la ideología.',
+      critica: 'Sus críticos dicen que limitar alumnos por su idioma y dar prioridad a los españoles separa a los niños por su origen, y que un solo currículo deja sin margen a las comunidades con lengua propia.',
       fuentes: [
-        { url: 'https://theobjective.com/wp-content/uploads/2023/07/programa-vox-23j.pdf', titulo: 'Vox · Programa electoral 2023 (medidas 47 a 51)' },
-        { url: 'https://www.eldebate.com/educacion/20230716/futuro-ley-celaa-23-j-asi-son-propuestas-educacion-principales-partidos_128172.html', titulo: 'El Debate · Las propuestas de educación de los partidos en sus programas electorales 2023 (16-07-2023)' },
+        { url: 'https://men.gsstatic.es/sfAttachPlugin/4847171.pdf', titulo: 'Vox · «Es sentido común», programa electoral 29-N (12-11-2026), copia en PDF publicada por Menorca · Es Diari, medidas 66 a 74 y 94' },
+        { url: 'https://www.menorca.info/actualidad/elecciones-29n/2026/11/15/2748997/programa-completo-vox-para-elecciones-generales-2026.html', titulo: 'Menorca · Es Diari · El programa completo de Vox para el 29-N (15-11-2026)' },
       ],
     },
   ],
-  revisado: '2026-11-12',
+  revisado: '2026-11-15',
 };

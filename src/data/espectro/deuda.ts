@@ -2,7 +2,8 @@
 // during the campaign for the general election of 29 November 2026. The
 // regional debt write-off (83.252 M€, in Congress since December 2025) is
 // where the four camps' positions on debt are most concrete. Every card says
-// when its proposals were published (`cuando`). No 2025-2026 proposal from the
+// when its proposals were published (`cuando`). Vox updated on 2026-11-15 from
+// its 29-N programme. No 2025-2026 proposal from the
 // left on fiscal rules was found, so its 2018 bill stays, marked as such.
 import type { Espectro } from './tipos';
 import { RESERVA_MIN_LIBRE } from '../modeloSocioeconomico';
@@ -80,22 +81,22 @@ export const ESPECTRO: Espectro | null = {
     {
       id: 'derecha',
       quien: 'Vox',
-      cuando: 'Votos y debates en el Congreso de noviembre de 2025 y julio de 2026, y propuestas de campaña de octubre de 2026',
-      idea: 'Frenar la deuda recortando gasto, sin perdones a las comunidades.',
+      cuando: 'Programa para el 29-N, «Es sentido común», 12 de noviembre de 2026, y votos en el Congreso de noviembre de 2025 y julio de 2026',
+      idea: 'Bajar la deuda recortando gasto, sin perdones a las comunidades.',
       propone: [
+        'Reducir la deuda pública controlando el déficit y quitando el gasto «superfluo e ideológico», a la vez que baja impuestos (medida 3).',
         'Rechazar el perdón de deuda autonómica (votó en contra en julio de 2026).',
         'Que el gasto no crezca más que la economía: votó contra el límite de gasto de 2026 por esa razón (2025).',
-        'Pasar las pensiones a un sistema mixto, que vincula con frenar la deuda (2026).',
       ],
-      nota: 'No hemos encontrado objetivos concretos de reducción de la deuda en sus textos publicados para el 29-N.',
+      nota: 'No hemos encontrado cifras ni plazos de reducción de la deuda en su programa para el 29-N.',
       argumento: 'Dicen que la deuda es uno de los mayores problemas de las cuentas públicas y que perdonarla premia a las comunidades que han gastado de forma irresponsable.',
-      critica: 'Sus críticos dicen que bajar los ingresos decenas de miles de millones al año, sin recortes cuantificados, subiría la deuda que dice querer frenar.',
+      critica: 'Sus críticos dicen que bajar los ingresos decenas de miles de millones al año, sin recortes cuantificados, subiría la deuda que dice querer reducir.',
       fuentes: [
+        { url: 'https://men.gsstatic.es/sfAttachPlugin/4847171.pdf', titulo: 'Vox · «Es sentido común», programa electoral 29-N (12-11-2026), copia en PDF publicada por Menorca · Es Diari, medidas 3' },
         { url: 'https://es.ara.cat/economia/cuentas-publicas/perdon-deuda-autonomias-esquiva-veto-vox-pp-congreso_1_5807235.html', titulo: 'Ara · El perdón de la deuda a las autonomías esquiva el veto de Vox y el PP (23-7-2026)' },
         { url: 'https://forbes.es/economia/835512/pp-vox-y-junts-confirman-que-tumbaran-en-el-congreso-la-senda-de-deficit-del-gobierno/', titulo: 'Forbes · PP, Vox y Junts tumbarán la senda de déficit del Gobierno (27-11-2025)' },
-        { url: 'https://www.democrata.es/elecciones-generales-espana/vox-lleva-29n-su-receta-economica-con-rebajas-fiscales-recorte-gasto-reforma-pensiones/', titulo: 'Demócrata · Vox lleva al 29N su receta económica (7-10-2026)' },
       ],
     },
   ],
-  revisado: '2026-11-12',
+  revisado: '2026-11-15',
 };

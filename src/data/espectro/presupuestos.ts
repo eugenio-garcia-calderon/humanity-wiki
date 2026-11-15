@@ -1,6 +1,7 @@
 // «Otras propuestas» for the «presupuestos» window: what each camp proposes on
 // public spending. Camps checked on 2026-11-12, during the campaign for the
-// general election of 29 November 2026. Every card says when its proposals
+// general election of 29 November 2026; Vox updated on 2026-11-15 from its
+// 29-N programme. Every card says when its proposals
 // were published (`cuando`). The model's figures are read from the data.
 import type { Espectro } from './tipos';
 import { ESCALAS, TERCIOS, RESERVA_MIN_LIBRE } from '../modeloSocioeconomico';
@@ -78,22 +79,21 @@ export const ESPECTRO: Espectro | null = {
     {
       id: 'derecha',
       quien: 'Vox',
-      cuando: 'Plan fiscal en el Congreso de 2024, plan de desregulación de junio de 2026 y propuestas de campaña de octubre de 2026',
-      idea: 'Recortar el gasto político y el tamaño del Estado y de las autonomías.',
+      cuando: 'Programa para el 29-N, «Es sentido común», 12 de noviembre de 2026',
+      idea: 'Recortar el gasto político y el tamaño de la administración, y gastar más en defensa y seguridad.',
       propone: [
-        'Pasar de 22 a 12 ministerios (2024).',
-        'Auditar el gasto y quitar las subvenciones a partidos, sindicatos y organizaciones empresariales (2024).',
-        'Recortar organismos, subvenciones y el gasto que no sea de servicios esenciales para pagar su bajada de impuestos (2026).',
-        'Reducir el tamaño de las autonomías y derogar tres normas por cada ley nueva (2026).',
+        'Auditar todas las administraciones y recortar el gasto «superfluo e ideológico» (medidas 3 y 43).',
+        'Reducir hasta eliminarlas las subvenciones a partidos, sindicatos, organizaciones empresariales y ONG (medida 43).',
+        'Dejar la administración en el «mínimo estrictamente necesario» y derogar tres normas por cada ley nueva (medidas 40 y 43).',
+        'Más dinero para las Fuerzas Armadas y los cuerpos de seguridad, sin cifra (medidas 83 y 89).',
       ],
       argumento: 'Dicen que el gasto político y la burocracia sobran, y que recortarlos permite bajar impuestos sin tocar los servicios esenciales.',
       critica: 'Sus críticos dicen que no concreta qué subvenciones recortaría ni cuánto ahorraría, y que eso no alcanza para pagar una bajada de impuestos de decenas de miles de millones.',
       fuentes: [
-        { url: 'https://forbes.es/economia/452984/vox-presenta-en-el-congreso-su-plan-fiscal-reduccion-del-iva-dos-tipos-de-irpf-y-deducciones-por-hijo/', titulo: 'Forbes · Vox presenta en el Congreso su plan fiscal (26-4-2024)' },
-        { url: 'https://www.democrata.es/elecciones-generales-espana/vox-lleva-29n-su-receta-economica-con-rebajas-fiscales-recorte-gasto-reforma-pensiones/', titulo: 'Demócrata · Vox lleva al 29N su receta económica (7-10-2026)' },
-        { url: 'https://theobjective.com/espana/politica/2026-06-27/desregulacion-motosierra-vox-podar-marana-burocratica/', titulo: 'The Objective · El plan de desregulación de Vox (27-6-2026)' },
+        { url: 'https://men.gsstatic.es/sfAttachPlugin/4847171.pdf', titulo: 'Vox · «Es sentido común», programa electoral 29-N (12-11-2026), copia en PDF publicada por Menorca · Es Diari, medidas 3, 40, 43, 83 y 89' },
+        { url: 'https://www.infobae.com/espana/2026/11/13/consulta-en-pdf-el-programa-electoral-de-vox-deportacion-de-migrantes-prioridad-nacional-y-derogacion-de-leyes-de-genero/', titulo: 'Infobae · El programa electoral de Vox para el 29-N, en PDF (13-11-2026)' },
       ],
     },
   ],
-  revisado: '2026-11-12',
+  revisado: '2026-11-15',
 };

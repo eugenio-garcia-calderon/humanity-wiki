@@ -1,7 +1,8 @@
-// «Otras propuestas» for the «vivienda» window. Positions checked on 2026-11-12.
-// On that date only the PP had published its programme for the 29 November 2026
-// general election; the other camps are described from their latest documents and
-// initiatives (2025-2026), with the date in each source title.
+// «Otras propuestas» for the «vivienda» window. Positions checked on 2026-11-12
+// and updated on 2026-11-15: the PP (10-11-2026) and Vox (12-11-2026) from their
+// 29-N programmes; the Frente Amplio from its «100+15» programme as reported by
+// the press (12-11-2026); the PSOE from Government measures and its campaign
+// proposals. The date is in each source title.
 import type { Espectro } from './tipos';
 
 export const ESPECTRO: Espectro | null = {
@@ -22,31 +23,32 @@ export const ESPECTRO: Espectro | null = {
     {
       id: 'izquierda',
       quien: 'Frente Amplio (Sumar, IU, Más Madrid y Comuns); Podemos va aparte; ERC, Bildu y BNG apoyan parte en el Congreso',
-      cuando: 'Iniciativas en el Congreso de 2025 y 2026, y propuestas recogidas en octubre de 2026',
+      cuando: 'Programa «100+15» del Frente Amplio, presentado el 12 de noviembre de 2026 (recogido por la prensa), e iniciativas en el Congreso de 2025 y 2026',
       idea: 'La vivienda es un derecho: menos compra para invertir, precios limitados y mucha más vivienda pública.',
       propone: [
-        'Prohibir que empresas y fondos de inversión compren vivienda: solo podrían comprar personas.',
-        'Quitar el régimen especial de las SOCIMI (sociedades que invierten en alquiler y pagan menos impuestos) y que las empresas paguen más que las familias por sus casas.',
-        'Sumar (2024): 500.000 viviendas de alquiler social en una legislatura, con rentas de 400 a 600 euros al mes.',
+        'Prohibir que los fondos de inversión compren vivienda (programa «100+15»; Sumar ya lo pidió en 2025 para empresas y fondos).',
+        'Que la vivienda pública no pueda pasar nunca al mercado libre, por ley, y mantener las prórrogas de los contratos de alquiler (programa «100+15»).',
+        'Controlar los pisos turísticos para que vuelvan al alquiler de larga duración (programa «100+15»).',
+        'Quitar el régimen especial de las SOCIMI (sociedades que invierten en alquiler y pagan menos impuestos) (Sumar, 2025).',
         'Podemos, por su cuenta: bajar los alquileres por ley para que ningún hogar dedique más del 30 % de su renta, con contratos mucho más largos.',
       ],
       argumento: 'Dicen que, cuando empresas y fondos compran casas para ganar dinero, los precios suben y las familias se quedan fuera. Por eso piden sacar la vivienda del negocio y ampliar la vivienda pública.',
       critica: 'Sus críticos dicen que limitar precios y prohibir compras reduce los pisos en alquiler y choca con el derecho de propiedad y la libre circulación de capitales en la Unión Europea. También, que un parque público así tarda años y cuesta mucho.',
       fuentes: [
+        { url: 'https://www.nosdiario.gal/politica/fronte-ampla-presenta-seu-programa-electoral-100-15-centrado-vivenda-salarios-autogoberno-da-galiza/20261112165631271586.html', titulo: 'Nós Diario (12-11-2026) · El Frente Amplio presenta su programa «100+15», centrado en la vivienda (lo recoge la prensa; el texto completo no está publicado)' },
         { url: 'https://www.bolsamania.com/noticias_print/economia/economia--sumar-exige-derogar-las-socimis-y-prohibir-a-empresas-y-fondos-buitre-la-compra-de-vivienda--19368462.html', titulo: 'Europa Press (16-4-2025) · Sumar pide prohibir a empresas y fondos comprar vivienda y derogar las socimis' },
-        { url: 'https://www.idealista.com/news/node/898214', titulo: 'idealista (20-5-2026) · El debate en el Congreso de la propuesta de Sumar y las enmiendas del PSOE' },
         { url: 'https://brainsre.news/que-propone-cada-partido-vivienda-elecciones-29n/', titulo: 'Brains Real Estate News (26-10-2026) · Qué propone cada partido sobre vivienda para el 29-N' },
       ],
     },
     {
       id: 'centro-izquierda',
       quien: 'PSOE y el Gobierno de Pedro Sánchez',
-      cuando: 'Medidas anunciadas por el Gobierno en 2025 y enmiendas en el Congreso de 2026',
+      cuando: 'Medidas anunciadas por el Gobierno en 2025, enmiendas en el Congreso de 2026 y propuestas de campaña de noviembre de 2026',
       idea: 'Más vivienda pública que no se vende, ayudas, y límites al alquiler donde falta casa, sin prohibir la compra.',
       propone: [
         'Mantener la Ley de Vivienda (2023), que permite limitar el alquiler en las zonas con escasez que declare cada comunidad autónoma.',
         'Una empresa pública estatal de vivienda con casas y suelo del Estado y de la Sareb (la sociedad que guarda pisos de los bancos rescatados), para alquiler asequible, y que lo construido con dinero público siga siendo público para siempre.',
-        'Plan Estatal de Vivienda 2026-2030, con 7.000 millones de euros.',
+        'Llevar la vivienda pública por encima del 6 % de todas las viviendas, con el Plan Estatal de Vivienda 2026-2030, de 7.000 millones (propuesta de campaña, noviembre de 2026).',
         'Impuestos: hasta el 100 % del valor para quien compra sin vivir en la Unión Europea, IVA (el impuesto sobre lo que se compra) del 21 % en pisos turísticos y un 25 % a las SOCIMI que no alquilen a precio asequible.',
         'No pagar IRPF (el impuesto sobre la renta) por el alquiler si el casero cobra el precio de referencia.',
       ],
@@ -56,6 +58,7 @@ export const ESPECTRO: Espectro | null = {
         { url: 'https://www.lamoncloa.gob.es/presidente/actividades/paginas/2025/130125-sanchez-foro-vivienda.aspx', titulo: 'La Moncloa (13-1-2025) · Las medidas de vivienda anunciadas por Pedro Sánchez' },
         { url: 'https://www.idealista.com/news/node/898214', titulo: 'idealista (20-5-2026) · Las enmiendas del PSOE: gravar pisos vacíos, IVA turístico y socimis' },
         { url: 'https://www.elespanol.com/invertia/observatorios/vivienda/20260112/anuncios-sanchez-vivienda-medidas-ley-reales-decretos/1003744086413_0.html', titulo: 'El Español (12-1-2026) · Qué se ha aplicado de los anuncios de vivienda del Gobierno' },
+        { url: 'https://www.telecinco.es/noticias/espana/20261113/elecciones-generales-2026-programas-electorales-pp-psoe-vox-sumar-podemos_18_020555572.html', titulo: 'Telecinco (13-11-2026) · Lo que proponen los partidos para el 29-N: la vivienda pública por encima del 6 % (lo recoge la prensa)' },
       ],
     },
     {
@@ -81,23 +84,23 @@ export const ESPECTRO: Espectro | null = {
     {
       id: 'derecha',
       quien: 'Vox',
-      cuando: 'Propuesta en el Congreso y plan económico de junio de 2026, y propuestas recogidas en octubre de 2026',
+      cuando: 'Programa para el 29-N, «Es sentido común», 12 de noviembre de 2026',
       idea: 'Menos impuestos y normas para construir, y prioridad para los españoles en la vivienda pública.',
       propone: [
-        '«Prioridad nacional»: que la vivienda protegida, el alquiler social y las ayudas vayan primero a los españoles.',
-        'IVA cero en la compra de la primera vivienda y recuperar la deducción del IRPF (el impuesto sobre la renta) por vivienda habitual.',
-        'Liberar suelo, quitar restricciones urbanísticas locales y regionales, no limitar el alquiler y derogar la Ley de Vivienda.',
-        'Más control del padrón para evitar empadronamientos falsos y pisos sobreocupados.',
-        'Desalojar a los ocupantes ilegales en 24 horas.',
+        '«Prioridad nacional»: que la vivienda protegida, el alquiler social y las ayudas al alquiler vayan primero a los españoles (medida 27).',
+        'Reformar la Ley del Suelo para construir más, y más vivienda protegida con empresas privadas (medidas 28 y 29).',
+        'Primera vivienda de una familia española sin impuestos, y más impuestos a compradores de fuera de la Unión Europea y a fondos que especulan (medidas 34 y 35).',
+        'Derogar la Ley de Vivienda, premiar el alquiler largo y regular los pisos turísticos (medida 30).',
+        'Desalojar las ocupaciones en menos de 24 horas y prohibir alquilar a inmigrantes en situación irregular (medidas 31 y 32).',
       ],
       argumento: 'Dicen que el exceso de normas e impuestos encarece y retrasa la vivienda, y que los recursos públicos deben ir primero a los españoles.',
-      critica: 'Sus críticos, entre ellos el Gobierno, dicen que la prioridad nacional es discriminatoria y contraria a la igualdad ante la ley; el PP votó en contra en el Congreso. Otros dicen que quitar límites al suelo favorece construir de forma dispersa.',
+      critica: 'Sus críticos, entre ellos el Gobierno, dicen que la prioridad nacional es discriminatoria y contraria a la igualdad ante la ley; el PP votó en contra en el Congreso en junio de 2026. Otros dicen que quitar límites al suelo favorece construir de forma dispersa.',
       fuentes: [
+        { url: 'https://men.gsstatic.es/sfAttachPlugin/4847171.pdf', titulo: 'Vox · «Es sentido común», programa electoral 29-N (12-11-2026), copia en PDF publicada por Menorca · Es Diari, medidas 27 a 35' },
+        { url: 'https://www.infobae.com/espana/2026/11/13/consulta-en-pdf-el-programa-electoral-de-vox-deportacion-de-migrantes-prioridad-nacional-y-derogacion-de-leyes-de-genero/', titulo: 'Infobae · El programa electoral de Vox para el 29-N, en PDF (13-11-2026)' },
         { url: 'https://www.bolsamania.com/noticias_amp/empresas/economia--vox-plantea-al-congreso-una-votacion-para-pedir-la-prioridad-nacional-en-ayudas-para-vivienda--22717404.html', titulo: 'Europa Press (12-6-2026) · Vox lleva al Congreso la prioridad nacional en vivienda' },
-        { url: 'https://www.elindependiente.com/espana/2026/06/27/plan-desregularizacion-vox-milei-elecciones-2027/', titulo: 'El Independiente (27-6-2026) · El plan de desregulación de Vox' },
-        { url: 'https://brainsre.news/que-propone-cada-partido-vivienda-elecciones-29n/', titulo: 'Brains Real Estate News (26-10-2026) · Qué propone cada partido sobre vivienda para el 29-N' },
       ],
     },
   ],
-  revisado: '2026-11-12',
+  revisado: '2026-11-15',
 };

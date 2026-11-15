@@ -1,4 +1,5 @@
-// «Otras propuestas» for the «pensiones» window. Camps checked on 2026-11-12,
+// «Otras propuestas» for the «pensiones» window. Camps checked on 2026-11-12
+// (Vox updated on 2026-11-15 from its 29-N programme),
 // during the campaign for the general election of 29 November 2026. Every card
 // says when its proposals were published (`cuando`).
 // The model's figures are read from pensionesPropuesta.ts.
@@ -79,22 +80,22 @@ export const ESPECTRO: Espectro | null = {
     {
       id: 'derecha',
       quien: 'Vox',
-      cuando: 'Propuestas de campaña para el 29-N, octubre de 2026, y programa electoral de 2023',
-      idea: 'Pasar a un sistema mixto: parte de reparto, como hoy, y parte de ahorro que se invierte.',
+      cuando: 'Programa para el 29-N, «Es sentido común», 12 de noviembre de 2026',
+      idea: 'Asegurar las pensiones con una economía más productiva y más nacimientos.',
       propone: [
-        'Combinar el sistema actual con una parte de capitalización (cada persona ahorra en una cuenta que se invierte), con Suecia como modelo.',
-        'Empezar a capitalizar un fondo público de pensiones.',
-        'Que el ahorro personal para la jubilación no pague impuestos, con condiciones.',
-        'Que las pensiones contributivas no paguen impuesto sobre la renta (2023).',
+        'Garantizar que el sistema de pensiones se pueda pagar, con una economía más productiva (medida 7).',
+        'Un plan nacional de natalidad, con más ventajas para las familias numerosas y escuela infantil gratis de 0 a 3 años (medida 94).',
+        'Que el Estado pague la cotización a la Seguridad Social de quien cuida de sus hijos (medida 94).',
+        'Más dinero para mayores y dependientes: ayuda a domicilio y plazas en residencias (medida 95).',
       ],
-      argumento: 'Dicen que el sistema actual está «quebrado» y que su coste empuja la deuda, así que hace falta un ahorro propio que lo complemente; niegan que quieran privatizarlo.',
-      critica: 'Sus críticos dicen que el cambio obliga durante años a pagar las pensiones de hoy y a la vez ahorrar para las de mañana, y que pone en riesgo las pensiones.',
+      nota: 'No hemos encontrado una reforma concreta de las pensiones en su programa para el 29-N; el sistema mixto, con una parte de ahorro invertido, que planteó en 2025 ya no aparece.',
+      argumento: 'Dicen que las pensiones solo se sostienen con más trabajadores y empleos más productivos, y que por eso la clave es el crecimiento y la natalidad.',
+      critica: 'Sus críticos dicen que más nacimientos tardarían más de veinte años en dar nuevos cotizantes, y que su programa no explica cómo se pagan las pensiones mientras tanto.',
       fuentes: [
-        { url: 'https://www.democrata.es/elecciones-generales-espana/vox-lleva-29n-su-receta-economica-con-rebajas-fiscales-recorte-gasto-reforma-pensiones/', titulo: 'Demócrata · Vox lleva al 29N su receta económica (7-10-2026)' },
-        { url: 'https://www.finect.com/usuario/eduardogarcia/articulos/revalorizar-capitalizar-o-jubilarse-antes-que-proponen-los-partidos-sobre-pensiones-el-29n', titulo: 'Finect · Qué proponen los partidos sobre pensiones el 29N (10-11-2026)' },
-        { url: 'https://maldita.es/desinfo/20261023/punto-del-programa-de-vox-las-pensiones-contributivas-estara-n-exentas-en-el-irpf-no-por-doble-tributacio-n-sino-por-justicia-con-quienes-han-tributado-durante-toda-su-vida-laboral-1915/', titulo: 'Maldita · La exención de las pensiones en el IRPF, del programa de Vox (23-10-2026)' },
+        { url: 'https://men.gsstatic.es/sfAttachPlugin/4847171.pdf', titulo: 'Vox · «Es sentido común», programa electoral 29-N (12-11-2026), copia en PDF publicada por Menorca · Es Diari, medidas 7, 94 y 95' },
+        { url: 'https://www.infobae.com/espana/2026/11/13/consulta-en-pdf-el-programa-electoral-de-vox-deportacion-de-migrantes-prioridad-nacional-y-derogacion-de-leyes-de-genero/', titulo: 'Infobae · El programa electoral de Vox para el 29-N, en PDF (13-11-2026)' },
       ],
     },
   ],
-  revisado: '2026-11-12',
+  revisado: '2026-11-15',
 };

@@ -79,6 +79,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
   const parte = ventana === 'economia' ? parteDeAncla(ancla) : null;
   const apartados = parte ? PARTES_ECONOMIA.find(p => p.id === parte)!.apartados : actual?.apartados ?? [];
   const [verLista, setVerLista] = useState(false);
+  const botonesVisibles = useVisibleAlSubir();
   const [pendientes, setPendientes] = useState<number | null>(null);
   const integracion = useIntegracion();
   const cabecera = useRef<HTMLElement>(null);
@@ -284,7 +285,10 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
 
       {/* Bottom right: add a comment about the page you are on, and the board of pending improvements
           (Eugenio, 2026-11-13: «el botón de añadir comentarios flotante abajo … y al lado una lista pendiente de mejoras»). */}
-      <div className="fixed bottom-4 right-4 z-30 flex items-center gap-2 sm:bottom-6 sm:right-6">
+      {/* On a phone the two buttons step aside while reading downwards, so they never sit on the last line of a card,
+          and come back on any scroll up or at the end of the page. */}
+      <div className={cn('fixed bottom-4 right-4 z-30 flex items-center gap-2 transition-transform duration-200 motion-reduce:transition-none sm:bottom-6 sm:right-6 sm:translate-y-0',
+        botonesVisibles ? 'translate-y-0' : 'translate-y-24')}>
         <Boton onClick={() => setVerLista(true)} className="bg-white/95 shadow-lg shadow-slate-900/10 backdrop-blur">
           <ListTodo className="h-4 w-4" /><span className="hidden sm:inline">Mejoras pendientes</span>
           {pendientes !== null && <span className="rounded-full bg-slate-900 px-1.5 text-xs font-bold text-white tabular-nums">{pendientes}</span>}
@@ -357,4 +361,22 @@ function Portada() {
       </ul>
     </div>
   );
+}
+
+/** True unless the reader is scrolling down a phone-sized page. Always true at the top and the bottom of the page. */
+function useVisibleAlSubir() {
+  const [visible, setVisible] = useState(true);
+  useEffect(() => {
+    let ultimo = window.scrollY;
+    const alMover = () => {
+      const y = window.scrollY;
+      const alFinal = window.innerHeight + y >= document.documentElement.scrollHeight - 80;
+      if (y < 80 || alFinal || y < ultimo - 4) setVisible(true);
+      else if (y > ultimo + 4) setVisible(false);
+      ultimo = y;
+    };
+    window.addEventListener('scroll', alMover, { passive: true });
+    return () => window.removeEventListener('scroll', alMover);
+  }, []);
+  return visible;
 }

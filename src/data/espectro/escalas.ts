@@ -1,7 +1,8 @@
 // «Otras propuestas» for the «escalas» window: what other political camps in
 // Spain propose on how power and money are shared between the State, the
 // regions and the town halls (centralisation versus decentralisation), from
-// left to right. Checked on 2026-11-12.
+// left to right. Checked on 2026-11-12; Vox and the Frente Amplio updated on
+// 2026-11-15 from their 29-N programmes (the latter as reported by the press).
 import type { Espectro } from './tipos';
 
 export const ESPECTRO: Espectro | null = {
@@ -20,22 +21,23 @@ export const ESPECTRO: Espectro | null = {
   posturas: [
     {
       id: 'izquierda',
-      quien: 'Sumar (programa de 2023; desde 2026, dentro del Frente Amplio)',
-      cuando: 'Programa electoral de 2023 y propuesta en el Congreso (febrero de 2025)',
+      quien: 'Sumar (programa de 2023) y Frente Amplio (Sumar, Izquierda Unida, Más Madrid y Comuns) en 2026',
+      cuando: 'Programa electoral de Sumar de 2023, propuesta en el Congreso (febrero de 2025) y programa «100+15» del Frente Amplio (12 de noviembre de 2026, recogido por la prensa)',
       idea: 'Reconocer que España es un país de naciones, con más autogobierno para las comunidades y más poder y dinero para los ayuntamientos.',
       propone: [
         'Reconocer a España como una realidad plurinacional, un «país de países» (programa de 2023).',
         'Un nuevo pacto territorial, con más autogobierno y más gobierno compartido (programa de 2023).',
-        'Que el acuerdo entre el Gobierno y la Generalitat lo vote la ciudadanía de Cataluña (programa de 2023).',
+        'Un «Estado en red» que saque instituciones de Madrid, como llevar la sede del Defensor del Pueblo a Vigo (Frente Amplio, 2026).',
         'Una ley de gobiernos locales que cambie la ley de régimen local de 2013 y reconozca competencias propias de los ayuntamientos (2025).',
         'Una ley de finanzas locales que fije qué parte de los impuestos del Estado y de las comunidades va a los ayuntamientos (2025).',
       ],
-      nota: 'No hemos encontrado una propuesta concreta del Frente Amplio sobre el reparto territorial del poder para 2026 en sus textos publicados.',
+      nota: 'No hemos encontrado un modelo territorial completo del Frente Amplio para el 29-N en sus textos publicados; salvo el «Estado en red», esta ficha usa textos de Sumar de 2023 y 2025.',
       argumento: 'Dicen que España es diversa y que el Estado funciona mejor si lo reconoce, y que los ayuntamientos cerraban sus cuentas con superávit y no necesitaban las limitaciones de la ley de 2013.',
       critica: 'Sus críticos dicen que los pactos con cada comunidad por separado rompen la igualdad entre españoles y dan más a quien más presiona.',
       fuentes: [
         { url: 'https://es.ara.cat/politica/elecciones-generales/programa-sumar-referendum-consulta-mesa-dialogo_1_4754782.html', titulo: 'Ara · El programa territorial de Sumar, programa electoral 2023 (13-07-2023)' },
         { url: 'https://www.ondavasca.com/sumar-propone-en-el-congreso-una-ley-de-gobiernos-locales-para-mejorar-la-financiacion-de-los-ayuntamientos/', titulo: 'Onda Vasca · Sumar propone en el Congreso una ley de gobiernos locales (01-02-2025)' },
+        { url: 'https://www.galiciaconfidencial.com/noticia/6089258-frente-amplio-propon-unha-ap-9-gratuita-unha-prestacion-200-euros-cada-menor-e-unha-farmaceutica-publica-santiago', titulo: 'Galicia Confidencial · El programa «100+15» del Frente Amplio: el Defensor del Pueblo a Vigo y un Estado en red (12-11-2026; lo recoge la prensa)' },
       ],
     },
     {
@@ -79,23 +81,23 @@ export const ESPECTRO: Espectro | null = {
     {
       id: 'derecha',
       quien: 'Vox',
-      cuando: 'Plan de desregulación (junio de 2026), programa para Castilla y León de 2026 y programa electoral de 2023',
-      idea: 'Menos autonomías y menos administración: que el Estado recupere las grandes competencias.',
+      cuando: 'Programa para el 29-N, «Es sentido común», 12 de noviembre de 2026; plan de desregulación (junio de 2026) y programa para Castilla y León de 2026',
+      idea: 'Los mismos derechos y las mismas reglas en toda España, con menos autonomías y menos administración.',
       propone: [
-        'Reducir el tamaño del Estado y de las autonomías.',
-        'Acabar con los solapamientos de normas entre Estado, comunidades, provincias y ayuntamientos.',
-        'Superar la fragmentación del sistema autonómico y suprimir duplicidades y gasto político.',
-        'Devolver al Estado la educación, la sanidad, la seguridad y la justicia (programa de 2023).',
-        'Una sola agencia de impuestos para toda España, cerrando las de las comunidades (programa de 2023).',
+        'Una ley de unidad de mercado: lo que es legal en una comunidad vale en toda España (medida 42).',
+        'Los mismos servicios y derechos en educación, sanidad, seguridad y justicia, se viva donde se viva (medida 25).',
+        'Un currículo escolar y unos exámenes comunes para todo el país, y una tarjeta sanitaria única (medidas 60 y 66).',
+        'Reducir el tamaño del Estado y de las autonomías, y suprimir duplicidades y gasto político (plan de junio de 2026 y programa de Castilla y León).',
       ],
+      nota: 'No hemos encontrado en su programa para el 29-N la propuesta de devolver al Estado la educación, la sanidad, la seguridad y la justicia, que sí estaba en su programa de 2023.',
       argumento: 'Dicen que el sistema autonómico ha creado desigualdad entre españoles y un gasto duplicado, y que un solo Estado garantiza los mismos derechos en todas partes.',
-      critica: 'Sus críticos dicen que devolver competencias al Estado exige reformar la Constitución, y que alejar las decisiones de cada territorio no garantiza mejores servicios.',
+      critica: 'Sus críticos dicen que igualar desde el Estado currículos y servicios choca con las competencias que la Constitución da a las comunidades, y que alejar las decisiones de cada territorio no garantiza mejores servicios.',
       fuentes: [
+        { url: 'https://men.gsstatic.es/sfAttachPlugin/4847171.pdf', titulo: 'Vox · «Es sentido común», programa electoral 29-N (12-11-2026), copia en PDF publicada por Menorca · Es Diari, medidas 25, 42, 60 y 66' },
         { url: 'https://theobjective.com/espana/politica/2026-06-27/desregulacion-motosierra-vox-podar-marana-burocratica/', titulo: 'The Objective · El programa de desregulación de Vox (27-06-2026)' },
         { url: 'https://www.eldebate.com/uploads/files/2026/03/05/Programa-Electoral-VOX-CYL-2026_compressed.pdf', titulo: 'Vox · Programa electoral de Castilla y León 2026 (medidas 19 y 21)' },
-        { url: 'https://theobjective.com/wp-content/uploads/2023/07/programa-vox-23j.pdf', titulo: 'Vox · Programa electoral 2023 (medidas 2 y 152)' },
       ],
     },
   ],
-  revisado: '2026-11-12',
+  revisado: '2026-11-15',
 };

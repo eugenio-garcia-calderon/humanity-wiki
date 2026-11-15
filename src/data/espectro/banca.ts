@@ -1,7 +1,8 @@
 // «Otras propuestas» for the «banca» window. Positions checked on 2026-11-12/13.
 // None of the camps has a proposal on *what* newly created bank money may finance;
 // what they debate is the bank tax, mortgage guarantees, fees and cash. Each card
-// says so in `nota` rather than inventing a position.
+// says so in `nota` rather than inventing a position. Vox updated on 2026-11-15
+// from its 29-N programme.
 import type { Espectro } from './tipos';
 
 export const ESPECTRO: Espectro | null = {
@@ -83,11 +84,11 @@ export const ESPECTRO: Espectro | null = {
     {
       id: 'derecha',
       quien: 'Vox',
-      cuando: 'Propuestas de vivienda de 2026, posición en el Congreso en 2024 y campaña sobre el euro digital de noviembre de 2025',
+      cuando: 'Programa para el 29-N, «Es sentido común», 12 de noviembre de 2026; posición en el Congreso en 2024 y campaña sobre el euro digital de noviembre de 2025',
       idea: 'Menos impuestos a la compra de vivienda y a la banca, y defensa del dinero en efectivo frente al euro digital.',
       propone: [
-        'IVA cero (el impuesto sobre lo que se compra) en la primera vivienda (2026).',
-        'Recuperar la deducción del IRPF (el impuesto sobre la renta) por pagar la hipoteca de la vivienda habitual (2026).',
+        'Que la primera vivienda de una familia española no pague impuestos: IVA del 0 % si es nueva y sin impuesto de transmisiones si es usada (programa).',
+        'Mejorar la financiación de promotores y constructores, y bajar mucho los impuestos de construir (programa).',
         'En contra del impuesto a la banca: dice que crea inseguridad jurídica y aleja la inversión (2024).',
         'Proteger por ley el derecho a pagar en efectivo, rechazar el euro digital y pedir un referéndum en cada país ante cualquier paso para sustituir el efectivo (2025).',
       ],
@@ -95,11 +96,11 @@ export const ESPECTRO: Espectro | null = {
       argumento: 'Dicen que la presión fiscal aleja la inversión y que el efectivo protege la libertad y la intimidad de las personas frente a un control digital de los pagos.',
       critica: 'Sus críticos dicen que el euro digital sería voluntario y no sustituiría al efectivo, que la campaña describe usos que la propuesta de ley no prevé, y que bajar impuestos a la compra puede subir el precio de las casas.',
       fuentes: [
-        { url: 'https://brainsre.news/que-propone-cada-partido-vivienda-elecciones-29n/', titulo: 'Brains Real Estate News (26-10-2026) · Qué propone cada partido sobre vivienda para el 29-N' },
+        { url: 'https://men.gsstatic.es/sfAttachPlugin/4847171.pdf', titulo: 'Vox · «Es sentido común», programa electoral 29-N (12-11-2026), copia en PDF publicada por Menorca · Es Diari, medidas 33 y 34' },
         { url: 'https://www.moncloa.com/2024/04/09/psoe-podemos-impuesto-banca-2540532/', titulo: 'Moncloa.com (9-4-2024) · Posición de Vox sobre el impuesto a la banca' },
         { url: 'https://okdiario.com/espana/video-viral-vox-contra-euro-digital-no-metodo-pago-herramienta-control-15708060', titulo: 'OKDiario (5-11-2025) · Vox contra el euro digital y en defensa del efectivo' },
       ],
     },
   ],
-  revisado: '2026-11-12',
+  revisado: '2026-11-15',
 };
