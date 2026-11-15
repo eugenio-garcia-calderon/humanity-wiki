@@ -41,6 +41,7 @@ import { GIRO_A1, suspensionA1 } from './geometriaA1';
 import type { Referencia } from './referencias';
 import { vehiculoGaraje, type VehiculoGaraje } from './garaje';
 import type { PivoteGaraje } from './garaje/tipos';
+import { registrarConstructorSmera } from './garaje/smera';
 import { colorSuperpuesto, hacerFantasma, liberarFantasma, mostrarSiluetas, siluetas } from './garaje/superponer';
 import { cartel, crearTunel, type CuerpoTunel, type SeleccionTunel, type Tunel } from './tunelViento';
 import type { OpcionesTunel } from './tunel/cliente';
@@ -1454,6 +1455,8 @@ export function construirDisenoGaraje(m: Modelo): { grupo: THREE.Group; pivotes:
     pivotes.push({ nombre: piv.name, tipo: u.tipo === 'maletero' ? 'maletero' : 'puerta', eje: [u.eje.x, u.eje.y, u.eje.z], angulo: u.angulo * 180 / Math.PI });
   }
   grupo.traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+  // (the layers by name and the model, for a design that poses itself: the garage's Smera leans with them)
+  grupo.userData.capas = G; grupo.userData.modelo = m;
   // (2026-11-13: a design in another colour gets its own copies of the paint and accent materials; the shared ones keep the defaults)
   const c = coloresDe(m.P);
   if (c.carroceria !== COLOR_CARROCERIA || c.acento !== COLOR_ACENTO) {
@@ -1463,6 +1466,9 @@ export function construirDisenoGaraje(m: Modelo): { grupo: THREE.Group; pivotes:
   }
   return { grupo, pivotes };
 }
+
+// the garage's Smera is this family's own model: its builder is this one (the garage cannot import the viewer)
+registrarConstructorSmera(construirDisenoGaraje);
 
 export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cuerposTunel, opcionesTunel, alElegirPuntoTunel, puntoTunel = null, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje, fichasGaraje, alQuitarGaraje, alPincharGaraje, alPincharNuestro, extraTarjeta, seguir, nombres, resaltarNuestro = false, verGaraje = false, margenDerecho = 0, colores, bascular = 0 }, ref) {
   const pinchar = useRef(alPinchar); pinchar.current = alPinchar;

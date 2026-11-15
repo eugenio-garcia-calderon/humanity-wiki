@@ -17,6 +17,7 @@ import { PARAMETROS_BASCULANTE, areas, calcular, crearModelo, type Parametros } 
 import { aDiseno, deDiseno } from '../src/components/aeromovil/Disenos';
 import { SELECTORES_BASCULANTE, camposBasculante, deslizadoresBasculante, dinamicaBasculante, type ModeloBasculante } from '../src/components/aeromovil/geometriaBasculante';
 import { BASCULANTE_DEFECTO } from '../src/components/aeromovil/basculante/defecto';
+import { PARAMETROS_SMERA } from '../src/components/aeromovil/basculante/smera';
 
 let fallos = 0;
 const ok = (c: boolean, m: string) => { if (!c) { console.log(`FALLA ${m}`); fallos++; } return c; };
@@ -69,6 +70,11 @@ function revisar(P: Parametros, nombre: string): boolean {
 const fichas = deslizadoresBasculante();
 let casos = 0;
 for (const f of fichas) for (const v of [f.min, f.max]) { casos++; revisar({ ...PARAMETROS_BASCULANTE, [f.clave]: v }, `${f.clave} = ${v}`); }
+// the Smera replica (2026-11-15), and every slider at both ends from it: its body follows them by stretching
+const SMERA = { ...PARAMETROS_BASCULANTE, ...PARAMETROS_SMERA } as unknown as Parametros;
+casos++; revisar(SMERA, 'réplica del Smera');
+for (const f of fichas) for (const v of [f.min, f.max]) { casos++; revisar({ ...SMERA, [f.clave]: v }, `Smera, ${f.clave} = ${v}`); }
+{ const r = calcular(crearModelo(SMERA), areas(crearModelo(SMERA))); const malas = r.comprobaciones.filter(c => c.holgura < c.minimo); ok(!malas.length, `réplica del Smera: ${malas.length} comprobaciones en rojo (${malas.map(c => c.nombre).join(', ')})`); }
 // every option
 for (const s of SELECTORES_BASCULANTE) for (const o of s.opciones) { casos++; revisar({ ...PARAMETROS_BASCULANTE, [s.clave]: o.k }, `${s.clave} = ${o.k}`); }
 // everything at once at its minimum, at its maximum, and 200 random mixes (seeded)

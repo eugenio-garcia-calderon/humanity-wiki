@@ -680,3 +680,10 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 - The 12-sector vision site (`public/vision/`) keeps all its content in two JS files, so editing a reto or a proyecto means a commit and a deploy; nobody can edit it from the platform and its text is invisible to the site search. Moving it to a table (sector, pillar, item, source) with an admin editor is about a day today; it gets worse with every sector filled in by hand. Worth doing once Eugenio's team starts adding content themselves.
 - Same caveat as every static page: the service worker caches each navigation as the `/` shell, so after visiting `/vision/` an offline launch of the app can open the vision site instead of the app. Pre-existing for `/observatorio-polarizacion/`; not fixed here.
 - (2026-11-15) The sector artworks in `/vision` are fixed paths to the calendar's `mes-XX-d` design (the one marked for print). If Eugenio changes a month's illustration or favourite on `/calendario-arte`, `/vision` keeps the old picture: the calendar's choices live in the database (`calendario_arte_meses`), which a static page cannot read. Reading them through a public endpoint is about an hour.
+
+## 2026-11-15 · Smera replica: cell-based cuts and a few aero-only pieces of the model
+
+- **Cut edges.** The door, the windows and the wheel-well openings are cut on the skin's cells. Their steps are hidden by 6.5 mm trims, but on the open door and on the nose between the wells some still show. The fix is a door and well patch with its own grid, mapped to the outline: about a day.
+- **Battery.** The replica's battery is 3 kWh, which is what fits in the generic battery boxes with the Smera's high floor and upright seats. The real car carried 9–10 kWh under the driver's seat. The fix is a dedicated under-seat box with a raised cushion: about 2 hours.
+- **Unused aero fields.** `DimForma` still carries the aero body's fields when a `perfil` is given (`xCaida`, `curvaCola`…). They are ignored there.
+- **Upper section.** The front-view width at 1.04 m is 7 cm too wide: the upper half is still a superellipse, and the real glass has tumblehome.

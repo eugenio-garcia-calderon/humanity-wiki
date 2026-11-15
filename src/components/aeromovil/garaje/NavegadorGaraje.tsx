@@ -21,6 +21,7 @@ import type { Parametros } from '../geometria';
 import { camposTriciclo, nombreTriciclo } from '../geometriaTriciclo';
 import { esDisenoGaraje, idGaraje, type useDisenosGaraje } from '../GarajeDisenos';
 import { HUECO_EN_FILA, nombreDeCopia } from './filas';
+import { PARAMETROS_REPLICA_SMERA } from './smera';
 
 type Garaje = ReturnType<typeof useDisenosGaraje>;
 
@@ -103,6 +104,22 @@ export function useEleccionDiseno({ g, P, actual, abrirDiseno, sinGuardar, alRen
     } catch (e: any) { setAviso({ texto: e?.message || 'No se ha podido crear la copia.', error: true }); }
     finally { setOcupado(null); }
   };
+  /**
+   * «Crear editable» on a reference car's card (2026-11-15, the Smera: «a partir de esa réplica permite crear un modelo
+   * 3D editable duplicando esa réplica»): a new design with that car's parameters, opened to edit.
+   */
+  const crearDesde = async (base: string, parametros: Parametros) => {
+    if (ocupado) return;
+    setOcupado('copiar'); setAviso(null); setBorrar(false);
+    try {
+      const usados = new Set((g.lista ?? []).map(d => d.nombre));
+      let nombre = base; for (let k = 2; usados.has(nombre); k++) nombre = `${base} ${k}`;
+      const d = await g.copiar(nombre, aDiseno(parametros), null);
+      abrirDiseno(d); setTarjeta(true);
+      setAviso({ texto: `Creado «${d.nombre}»: una copia editable de la réplica. Es la que editas ahora; la réplica sigue igual en el garaje.` });
+    } catch (e: any) { setAviso({ texto: e?.message || 'No se ha podido crear el diseño editable.', error: true }); }
+    finally { setOcupado(null); }
+  };
   const eliminar = async () => {
     if (!actual || ocupado) return;
     const lista = g.lista ?? [], k = lista.findIndex(d => d.id === actual.id), nombre = actual.nombre;
@@ -127,7 +144,7 @@ export function useEleccionDiseno({ g, P, actual, abrirDiseno, sinGuardar, alRen
   };
   return {
     seguir, tarjeta, setTarjeta, cerrarTarjeta: () => { setTarjeta(false); setBorrar(false); setAviso(null); }, pendiente, setPendiente, solo, setSolo, borrar, setBorrar, ocupado, aviso, cambiado,
-    elegir, guardarYCambiar, descartarYCambiar: () => pendiente && cambiar(pendiente.d), copiar, eliminar, alPincharGaraje,
+    elegir, guardarYCambiar, descartarYCambiar: () => pendiente && cambiar(pendiente.d), copiar, crearDesde, eliminar, alPincharGaraje,
     /** «Cambiar nombre» (2026-11-13): the name only, through the server's PUT; every place that shows it follows. */
     renombrar: async (id: number, nombre: string) => { const d = await g.renombrar(id, nombre); alRenombrado(d); },
   };
@@ -266,6 +283,19 @@ export function BotonFilaReferencia({ g, id }: { g: Garaje; id: string }) {
   return (
     <Button variant="outline" onClick={() => g.aFila(id)} className="h-10 shrink-0 px-2 text-[11px] normal-case tracking-normal sm:h-auto sm:gap-1.5 sm:px-2.5 sm:py-1.5">
       <Rows3 className="hidden h-3.5 w-3.5 sm:block" />Volver a su fila
+    </Button>
+  );
+}
+
+/**
+ * «Crear editable» on the card of a reference car that is one of our own families' models (the Smera replica): saves
+ * it as a new design and opens it, so its sliders change it (longer, lower, the riders more reclined, solar panels).
+ */
+export function BotonEditableReferencia({ e, id }: { e: Eleccion; id: string }) {
+  if (id !== 'smera') return null;
+  return (
+    <Button variant="outline" disabled={!!e.ocupado} onClick={() => void e.crearDesde('Smera editable', PARAMETROS_REPLICA_SMERA)} className="h-10 shrink-0 px-2 text-[11px] normal-case tracking-normal sm:h-auto sm:gap-1.5 sm:px-2.5 sm:py-1.5">
+      {e.ocupado === 'copiar' ? <Loader2 className="hidden h-3.5 w-3.5 animate-spin sm:block" /> : <Copy className="hidden h-3.5 w-3.5 sm:block" />}Crear editable
     </Button>
   );
 }

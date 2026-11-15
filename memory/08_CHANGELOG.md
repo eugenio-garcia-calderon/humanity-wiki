@@ -11701,3 +11701,23 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
 - **Tres círculos** en lugar de cuatro anillos: a 1/3, 2/3 y el borde = lo básico, lo intermedio y lo avanzado (el círculo ideal, con un halo del color del tema). Cada tema tiene una frase por círculo (`niv`) y cada radio una escalera de tres (`ejes[i].niv`). Al pasar el ratón por un círculo se lee qué significa en el tema y qué partidos lo alcanzan en todo; por un punto (radio × círculo), qué es ese nivel en ese aspecto y quién llega. En pantalla táctil, al tocar. Para teclado y móvil, una leyenda de los tres círculos bajo el gráfico que resalta cada uno. La ficha de un radio enseña su escalera con los partidos en cada peldaño, y la de un partido dice hasta qué nivel llega en cuántos aspectos.
 - Umbrales: 0–3 no llega a lo básico (la «pata coja» de antes), 4–6 básico, 7–9 intermedio, 10 avanzado. Las notas siguen siendo **valoración de la página** a partir de programas, leyes y declaraciones hasta noviembre de 2026, no un dato medido; 11 fuentes nuevas en el capítulo 6.
 - Verificado en un navegador automatizado sobre el archivo local (1360 px y 390 px, ratón y toque): sin errores de JavaScript, sin desbordamiento horizontal en móvil. No verificado en producción ni con la aplicación instalada desde aquí.
+
+## 2026-11-15 · Réplica del Lumeneo Smera, evaluador de parecido y «Crear editable»
+
+- Eugenio: «mejora el modelo del Lumeneo Smera… recréalo esta vez más fiel a la realidad… que incluso se abran las puertas… Crea un bot que te evalúe la cercanía a la realidad. Haz también el piloto e interior… permite que también bascule. Y a partir de esa réplica permite crear un modelo 3D editable… más alargado, más bajito, el conductor más reclinado, paneles solares en el techo y cola».
+- **Réplica.** El Smera del garaje es ahora el Cuadriciclo Basculante con la carrocería «Como el Lumeneo Smera», con sus líneas calcadas de las fotos de prensa de Lumeneo:
+  - el techo, la panza a 0,29 m, la sección en bañera con el hombro en la cintura, las ventanas, la puerta, los faros, la barra negra, la visera, los pilotos y las ruedas de 0,52 m;
+  - dos puertas que se abren («Abrir puertas»), con sus ventanas y sus manillas;
+  - el conductor y el pasajero sentados casi derechos, volante redondo, asientos;
+  - «Bascular» inclina 25° la cabina y las cuatro ruedas con su paralelogramo; los guardabarros delanteros giran y se inclinan con su rueda.
+- **Crear editable.** El botón nuevo en la tarjeta del Smera del garaje guarda la réplica como diseño propio («Smera editable») y lo abre en el editor.
+  - Con la carrocería del Smera, los deslizadores la estiran sin cambiar su forma: «Largo total», «Morro», «Cola», «Alto total», «Ancho».
+  - Los paneles van en el techo («Paneles en el techo», nuevo) y en la cola (en la luna de atrás).
+  - Ejemplo comprobado: batalla 2,2 m, alto 1,25 m y los dos reclinados a 42–44°. Quedan 2 comprobaciones en rojo por milímetros (la cabeza del pasajero alto y los pies del piloto).
+- **Evaluador.** `scripts/smera-realidad.ts` puntúa de 0 a 100 el parecido de la réplica con la realidad. Hoy da 85.
+  - Medidas publicadas: 18,6 / 20.
+  - Silueta lateral contra la foto: 31,5 / 35. Coincide el 97 % del área, y el contorno cae a 1,4 px (7 mm) de media de los bordes que el programa encuentra en la foto.
+  - Anchos de la foto de frente: 9,8 / 15, con 3,5 cm de error medio.
+  - Cristales: 10,5 / 15.
+  - Comprobaciones: 15 / 15.
+- **Batería.** La réplica lleva 3 kWh, lo que cabe bajo sus asientos con este suelo. El Smera de serie llevaba 9–10 kWh bajo el asiento del conductor.

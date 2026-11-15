@@ -1787,3 +1787,23 @@ Eugenio: «que cada elemento de la ilustración puedas pinchar y arrastrarlo… 
 - The nose's extra width now tapers out by `xAncho0`, no longer by `xAncho1`.
 
 **Rejected for now.** An earlier roof fall (`qCaida` 1.6–1.75) together with a belly that rises sooner in the tail (`qBajosCola` 0.30) reaches tunnel Cd 0.164–0.172 and CdA ~0.12. It puts the passenger's head through the canopy (−5 to −14 cm) and leaves no room for the battery under the backrest. It needs the passenger further forward or more reclined: Eugenio's call.
+
+## 2026-11-15 · The Smera replica is a body of the Cuadriciclo Basculante family, not a separate garage model
+
+**Decision.** `qCarroceria: 'smera'` draws the basculante family's skin from measured lines (`basculante/smera.ts`) instead of the generated drop.
+- `DimForma.perfil` carries the measured lines:
+  - roof, belly and plan, through monotone splines;
+  - a fixed waist height;
+  - a «bathtub» lower half: the side falls as `hw − (hw − zb)·u^p` to a flat floor.
+- `mapaSmera` stretches those lines piecewise: the nose, the wheelbase and the tail separately, and the height over the sill.
+- The garage's Smera is built with the viewer's design builder. `registrarConstructorSmera` breaks the garage → viewer import cycle. `poner` leans an inner `bascula` group and calls `posarBasculante`.
+
+**Why.** «Crear editable» is then just saving the replica's parameters. The replica and the copy share the linkage, the masses, the checks, the tunnel and the circuit, and the range test covers both.
+
+**Rejected.**
+1. Improving the standalone garage model (smeraForma/smeraModelo). It had no interior or doors, and the copy would have had to be a new family. Both files are deleted.
+2. Separate glass patches over the skin. The windows, the windscreen, the mask and the doors are skin zones decided by height on a finer grid (twice the angles, 7 mm in x), and black trims hide the cells' steps.
+
+**Reference data.** The outlines are traced by hand from Lumeneo's press photos (side and front) at 193.4 px/m, taken from the 1.70 m wheelbase. Only the measurements are in the repository, not the photos.
+
+**The evaluator.** It finds edges on the photo itself (a Sobel filter) to check the outline independently of the tracing.
