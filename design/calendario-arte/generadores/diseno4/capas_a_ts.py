@@ -46,9 +46,10 @@ ts = f'''// GENERADO por design/calendario-arte/generadores/diseno4/capas_a_ts.p
 // y agrandar o hacer más pequeño»). Cada una vive en
 // /calendario-arte/capas/<clave>/: el papel (fondo) y un WebP con transparencia
 // por elemento. x, y, w, h son fracciones de la hoja; el orden es el de pintado
-// (el primero, el más al fondo).
+// (el primero, el más al fondo). `fija`: el paisaje, la luz o el borde de papel de
+// una ilustración por planos (planos.py): se ve, pero no se arrastra.
 
-export interface CapaIlustracion {{ id: string; nombre: string; src: string; x: number; y: number; w: number; h: number }}
+export interface CapaIlustracion {{ id: string; nombre: string; src: string; x: number; y: number; w: number; h: number; fija?: boolean }}
 export interface ManifiestoCapas {{ ancho: number; alto: number; fondo: string; capas: CapaIlustracion[] }}
 
 export const CAPAS_ILUSTRACIONES: Record<string, ManifiestoCapas> = {cuerpo};

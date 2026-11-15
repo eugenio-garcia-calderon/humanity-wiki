@@ -126,6 +126,7 @@ export function Composicion({ clave, ajustes, editable, alCambiar, perezosa, alt
     if (!editable || !m) return;
     let vivo = true;
     for (const c of m.capas) {
+      if (c.fija) continue;
       mascara(base + c.src).then(r => { if (vivo) masc.current.set(c.id, r); });
     }
     return () => { vivo = false; };
@@ -136,7 +137,8 @@ export function Composicion({ clave, ajustes, editable, alCambiar, perezosa, alt
   const cajaCapa = useCallback((id: string): Caja | null => {
     const c = m?.capas.find(k => k.id === id);
     if (!c) return null;
-    const a: AjusteCapa = local.capas?.[id] ?? {};
+    // the sky, the landscape bands, the light and the paper border stay where they are
+    const a: AjusteCapa = c.fija ? {} : local.capas?.[id] ?? {};
     const e = a.escala ?? 1;
     const cx = c.x + c.w / 2 + (a.dx ?? 0);
     const cy = c.y + c.h / 2 + (a.dy ?? 0);
@@ -184,6 +186,7 @@ export function Composicion({ clave, ajustes, editable, alCambiar, perezosa, alt
     for (const radio of [0, 8]) {
       for (let i = m.capas.length - 1; i >= 0; i--) {
         const c = m.capas[i];
+        if (c.fija) continue;
         if (pintado(c.id, u, v, radio)) return { tipo: 'capa', id: c.id };
       }
     }

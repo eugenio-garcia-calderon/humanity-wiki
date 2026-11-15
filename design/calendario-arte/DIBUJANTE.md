@@ -77,7 +77,10 @@ access → Custom → Allowed domains* del entorno.
 2. Lee el tema del mes (`GET /api/calendario-arte/2027` y `src/data/calendarioArte.ts`)
    y el texto del encargo. El encargo manda sobre las ideas por defecto de
    `DISENO3.md`. Las reglas de forma no cambian: una metáfora, luz y sombra del mismo
-   motivo, sin letras, figuras grandes y bien pintadas.
+   motivo, sin letras, figuras grandes y bien pintadas. Y desde el 2026-11-15, **de 3 a 5
+   planos de profundidad**, con un primer plano que enmarca, detalles escondidos en el
+   fondo y una luz con dirección (`encargos/PLANOS.md`). Antes de cerrar, repásalo con la
+   lista del evaluador (`.claude/agents/evaluador-ilustraciones.md`).
 3. Mira como referencia los diseños del mes que ya existen, en
    `public/calendario-arte/ilustraciones/mes-XX*.jpg` (o sus miniaturas). El tuyo
    tiene que ser distinto y del mismo nivel.

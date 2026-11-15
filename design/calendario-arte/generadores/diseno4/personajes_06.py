@@ -25,7 +25,7 @@ ORO = '#f2b630'
 VERDE_O = '#3f6f45'
 
 
-def abuelo_y_lampara(lz, BULBO):
+def abuelo_y_lampara(lz, BULBO, bombilla=True):
     luz = (0.85, -0.5)                 # the bulb, to his right and a little up
     P1 = '#e2a882'
     PANT = '#4a5a8a'
@@ -81,6 +81,10 @@ def abuelo_y_lampara(lz, BULBO):
     modelar(lz, casq, '#9a9a8a', luz, dens=0.8, prof=0.35, rayar=False, grosor=0.6)
     lz.lapiz([[(521, 508), (533, 503)], [(523, 512), (534, 507)]], '#5a5a52', grosor=0.5, presion=0.5)
     bul = Elipse(BULBO[0] + 2, BULBO[1] - 8, 13, 15, 20)
+    if not bombilla:
+        brazo3(lz, (400, 490), (432, 546), (482, 562), 23, CHAQ, P1, luz, 'larga',
+               mano=dict(ang=-6, gesto='relajada', lado=1, tam=31), semilla=18)
+        return
     lz.aguada(bul, '#fbe7a2', dens=0.35, tapa=1, irreg=0.2, borde=0.7)
     lz.contorno(bul, '#b08a3a', grosor=0.6, presion=0.45, cortes=0.1)
     bx_, by_ = BULBO[0] + 2, BULBO[1] - 8

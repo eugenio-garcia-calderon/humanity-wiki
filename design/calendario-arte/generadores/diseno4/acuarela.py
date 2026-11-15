@@ -379,6 +379,10 @@ class Lienzo:
         # inner light (screen-blended at the end) and opaque gouache touches
         self.LUZ = np.zeros((self.H, self.W, 3), np.float32)
         self.OP = np.zeros((self.H, self.W, 4), np.float32)
+        # Optional (planos.py, 2026-11-15): when an array, records how OPAQUE each pixel
+        # was painted -- the footprint of every reserve (tapa), gouache and collage -- so a
+        # pale object painted alone can later be told apart from bare paper. None = off.
+        self.TAPA = None
 
     # -- noise -------------------------------------------------------------
     def _sem(self, semilla=None):
@@ -559,6 +563,8 @@ class Lienzo:
             lift = Mw  # reserve exactly the painted footprint (no white halo)
             T += (1 - T) * (lift * tapa)[..., None]
             self.OP[y0:y1, x0:x1] *= (1 - lift * tapa)[..., None]   # also hides gouache behind it
+            if self.TAPA is not None:
+                np.maximum(self.TAPA[y0:y1, x0:x1], np.clip(lift * tapa, 0, 1), out=self.TAPA[y0:y1, x0:x1])
         T *= np.exp(D[..., None] * L)
         if getattr(self, '_sombra_pend', None) is not None:
             Dsh, sc = self._sombra_pend
@@ -783,6 +789,8 @@ class Lienzo:
         a = np.clip(M, 0, 1)[..., None]
         O[..., :3] = O[..., :3] * (1 - a) + rgb(color) * a      # premultiplied colour
         O[..., 3:] = O[..., 3:] * (1 - a) + a
+        if self.TAPA is not None:
+            np.maximum(self.TAPA[y0:y1, x0:x1], a[..., 0], out=self.TAPA[y0:y1, x0:x1])
 
     def chispas(self, cx, cy, rx, ry, n=20, color='#fff6d8', tam=(0.8, 2.2), semilla=None, luz=0.35):
         """Floating sparks / pollen of light: tiny gouache dots with a halo."""
@@ -812,6 +820,8 @@ class Lienzo:
             sh = np.roll(np.roll(_blur(M, sombra * s), int(round(sombra * 0.8 * s)), 0), int(round(sombra * 0.5 * s)), 1)
             T *= (1 - 0.18 * np.clip(sh - M, 0, 1))[..., None]
         T += (1 - T) * M[..., None]
+        if self.TAPA is not None:
+            np.maximum(self.TAPA[y0:y1, x0:x1], np.clip(M, 0, 1), out=self.TAPA[y0:y1, x0:x1])
         fib = self.ruido(x0, y0, x1, y1, 1.3, sem)
         streak = self.ruido(x0, y0, x1, y1, 30, sem + 1)
         D = dens * M * (1 + fibras * (fib - 0.5) * 1.2 + 0.4 * (streak - 0.5))
