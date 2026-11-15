@@ -17,6 +17,12 @@
       "ruta": "src/components/aeromovil/geometriaTriciclo.ts",
       "motivo": "Híbrido enchufable PHEV",
       "desde": "2026-11-15T19:46:14.612Z"
+    },
+    {
+      "agente": "phev",
+      "ruta": "src/pages/Aeromovil.tsx",
+      "motivo": "Híbrido enchufable PHEV",
+      "desde": "2026-11-15T19:46:17.306Z"
     }
   ]
 }
