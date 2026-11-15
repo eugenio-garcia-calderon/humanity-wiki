@@ -1,5 +1,8 @@
 -- 2026-11-15 (Eugenio): «POLITICA. Así se debe llamar ahora en vez de observatorio
--- de polarización política». The page gains two chapters: 6 · Geometrías (each party
+-- de polarización política», and later the same day: «deja la parte de observatorio de
+-- polarización política como un apartado de la web general llamada POLITICA». So the
+-- page is «Política» and the original five chapters are its first section
+-- («Apartado 1 · Observatorio de Polarización Política»). The page gains two chapters: 6 · Geometrías (each party
 -- as a shape over eight aspects of immigration and of public vs private services, and
 -- the ideal circle) and 7 · Decidir por temas (a direct-democracy prototype). Words and
 -- sources moves to chapter 8.
@@ -32,7 +35,7 @@ UPDATE knowledge_windows
    SET config = jsonb_set(config, '{bloques,0,texto}',
          to_jsonb(replace(config->'bloques'->0->>'texto',
            'Un observatorio interactivo de la polarización política en España, en seis capítulos.',
-           'Una página interactiva sobre la política en España, en ocho capítulos.')), false),
+           'Política es una página interactiva sobre la política en España. Su primer apartado es el Observatorio de Polarización Política, en cinco capítulos.')), false),
        version = version + 1
  WHERE id = 'KWMOBSPOLARIZ01'
    AND config->'bloques'->0->>'id' = 'Bobspolariz01'
@@ -40,7 +43,7 @@ UPDATE knowledge_windows
 
 UPDATE knowledge_windows
    SET config = jsonb_set(config, '{bloques,1,texto}',
-         to_jsonb((config->'bloques'->1->>'texto') || ' Las geometrías muestran a cada partido como una figura, con lo que cuida y lo que abandona en inmigración y en servicios públicos, frente a un círculo que cuidaría de todo. Y una propuesta de democracia directa: ver los datos de cada materia y decidir subir, bajar, abrir o cerrar.'), false),
+         to_jsonb((config->'bloques'->1->>'texto') || ' El segundo apartado, Geometrías y decisión directa, muestra a cada partido como una figura, con lo que cuida y lo que abandona en inmigración y en servicios públicos, frente a un círculo que cuidaría de todo, y propone una democracia directa: ver los datos de cada materia y decidir subir, bajar, abrir o cerrar.'), false),
        version = version + 1
  WHERE id = 'KWMOBSPOLARIZ01'
    AND config->'bloques'->1->>'id' = 'Bobspolariz02'

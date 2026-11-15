@@ -27,7 +27,7 @@ import { useEffect, useRef, useState } from 'react';
 //
 // RENAMED «POLÍTICA» (2026-11-15, Eugenio: «Así se debe llamar ahora en vez de
 // observatorio de polarización política»), with two new chapters: 6 · Geometrías
-// and 7 · Decidir por temas. Migration 0219 renames the project page; the address
+// and 7 · Decidir por temas. Migration 0220 renames the project page; the address
 // `/observatorio-de-polarizacion/espana` and this file's name stay, so no link breaks.
 export default function ObservatorioPolarizacion() {
   const marco = useRef<HTMLIFrameElement>(null);

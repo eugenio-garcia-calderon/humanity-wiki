@@ -878,6 +878,24 @@ footer p{margin:0;max-width:70ch}
 @media (max-width:1000px){.dd{grid-template-columns:minmax(0,1fr)} .dd-side{position:static}}
 @media (max-width:760px){.dd-steps,.dd-obj{grid-template-columns:minmax(0,1fr)} .dd-args{grid-template-columns:minmax(0,1fr)} .dd-scale{grid-template-columns:repeat(3,minmax(0,1fr))} .dd-dato{grid-template-columns:minmax(0,1fr) auto} .dd-dato > div:first-child{grid-column:1 / -1}}
 
+/* ================= Apartados de Política ================= */
+.apartados{display:grid;gap:clamp(22px,3vw,34px)}
+.apartado-h{margin:0 0 4px}
+.apartado-h a{display:inline-flex;align-items:baseline;gap:12px;flex-wrap:wrap;font:400 clamp(1.35rem,2.4vw,1.8rem)/1.15 var(--display);color:var(--ink);text-decoration:none}
+.apartado-h a:hover{text-decoration:underline;text-underline-offset:4px}
+.apartado-h span{font:500 11.5px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--warn)}
+.apartado-t{font-size:15px;color:var(--ink-2);margin:0 0 14px;max-width:72ch}
+.cards.cards-5{grid-template-columns:repeat(5,minmax(0,1fr))}
+.cards.cards-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.cards-5 .card,.cards-5 .card.big,.cards-3 .card{grid-column:auto}
+.apartado-banda{max-width:var(--maxw,1200px);margin:clamp(40px,6vw,72px) auto 0;padding:clamp(20px,3vw,30px) clamp(18px,3vw,30px);border-radius:22px;border:1px solid var(--warn);background:linear-gradient(120deg,color-mix(in srgb,var(--warn) 10%,transparent),transparent 70%)}
+.apartado-banda h2{font:400 clamp(1.8rem,4vw,2.8rem)/1.08 var(--display);margin:6px 0 8px}
+.apartado-banda p{font-size:16px;color:var(--ink-2);margin:0;max-width:75ch}
+.apartado-banda .lbl{color:var(--warn)}
+@media (max-width:1100px){.cards.cards-5{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:900px){.cards.cards-5,.cards.cards-3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.cards.cards-5,.cards.cards-3{grid-template-columns:minmax(0,1fr)}}
+
 </style>
 
 <svg class="sprite" aria-hidden="true" focusable="false">
@@ -1046,9 +1064,13 @@ footer p{margin:0;max-width:70ch}
 <section id="inicio" class="hero" aria-labelledby="h-inicio">
   <div class="hero-text">
     <p class="eyebrow">Política · España</p>
-    <h1 id="h-inicio">Siete formas de mirar una sociedad dividida, y una de decidir juntos.</h1>
+    <h1 id="h-inicio">Entender por qué nos dividimos, y decidir juntos sin bandos.</h1>
   </div>
-  <div class="cards" id="cards">
+  <div id="cards" class="apartados">
+    <div class="apartado">
+      <p class="apartado-h"><a href="#observatorio"><span>Apartado 1</span>Observatorio de Polarización Política</a></p>
+      <p class="apartado-t">Cómo está dividida España, de dónde viene la división, cómo mira cada bando y cómo se escala del desacuerdo al enemigo.</p>
+      <div class="cards cards-5">
     <a class="card big" href="#hoy" style="--cc:var(--c)">
       <span class="card-img" aria-hidden="true"><svg viewBox="0 0 320 150" id="ci-hoy"></svg></span>
       <span class="card-n">Capítulo 1</span><b>La España de hoy</b>
@@ -1074,6 +1096,12 @@ footer p{margin:0;max-width:70ch}
       <span class="card-n">Capítulo 5</span><b>Del nosotros al enemigo</b>
       <span class="card-t">Los círculos de pertenencia y los nueve peldaños que llevan del desacuerdo al abismo.</span>
     </a>
+      </div>
+    </div>
+    <div class="apartado">
+      <p class="apartado-h"><a href="#propuestas"><span>Apartado 2</span>Geometrías y decisión directa</a></p>
+      <p class="apartado-t">Qué cuida y qué abandona cada partido, y una forma de decidir por temas concretos con datos.</p>
+      <div class="cards cards-3">
     <a class="card" href="#geometrias" style="--cc:#3B82F6">
       <span class="card-img" aria-hidden="true"><svg viewBox="0 0 320 150" id="ci-geometrias"></svg></span>
       <span class="card-n">Capítulo 6</span><b>Geometrías</b>
@@ -1089,8 +1117,17 @@ footer p{margin:0;max-width:70ch}
       <span class="card-n">Capítulo 8</span><b>Palabras y fuentes</b>
       <span class="card-t">De dónde vienen «facha», «rojo» o «fascista», y los estudios en que se apoya todo.</span>
     </a>
+      </div>
+    </div>
   </div>
 </section>
+
+<!-- ============ APARTADO 1 · OBSERVATORIO ============ -->
+<div class="apartado-banda" id="observatorio">
+  <span class="lbl">Apartado 1 · capítulos 1 a 5</span>
+  <h2>Observatorio de Polarización Política</h2>
+  <p>Una medición real de cómo se sitúan hoy los españoles, cien años de historia, las miradas de cada bando, doce perfiles y la escalera que lleva del desacuerdo al abismo.</p>
+</div>
 
 <!-- ============ 1 · LA ESPAÑA DE HOY ============ -->
 <section id="hoy" class="chapter" aria-labelledby="h-hoy">
@@ -1297,6 +1334,13 @@ footer p{margin:0;max-width:70ch}
     </div>
   </div>
 </section>
+
+<!-- ============ APARTADO 2 · PROPUESTAS ============ -->
+<div class="apartado-banda" id="propuestas">
+  <span class="lbl">Apartado 2 · capítulos 6 y 7</span>
+  <h2>Geometrías y decisión directa</h2>
+  <p>De mirar la división a superarla: qué cuida cada partido frente a un ideal que cuida de todo, y cómo podríamos decidir por temas en lugar de votar colores.</p>
+</div>
 
 <!-- ============ 6 · GEOMETRÍAS ============ -->
 <section id="geometrias" class="chapter" aria-labelledby="h-geometrias">
