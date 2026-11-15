@@ -674,3 +674,8 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 - **The Smera has no `aero`** (no published Cd), so it is out of «Cd y consumo» and the tunnel shows only its own estimate.
 - **`tesla3` and `caterham7` are still grey placeholder boxes** (4.0 × 1.8 × 1.4 m, hidden by default but listed as reference cars), and they now sit in the size order by that invented 4.0 m. The Model 3 is not modelled. 20 minutes to drop them from the list today; a real Model 3 is a Model Y-sized job.
 - **The EQXX's tunnel estimate is 16 % high** (0.197 against 0.170). Not tuned: shaping a reference car to agree with the tunnel would hide the method's error, and it stays out of the fit.
+
+## 2026-11-15 — `/vision` content is static JS, not data
+
+- The 12-sector vision site (`public/vision/`) keeps all its content in two JS files, so editing a reto or a proyecto means a commit and a deploy; nobody can edit it from the platform and its text is invisible to the site search. Moving it to a table (sector, pillar, item, source) with an admin editor is about a day today; it gets worse with every sector filled in by hand. Worth doing once Eugenio's team starts adding content themselves.
+- Same caveat as every static page: the service worker caches each navigation as the `/` shell, so after visiting `/vision/` an offline launch of the app can open the vision site instead of the app. Pre-existing for `/observatorio-polarizacion/`; not fixed here.
