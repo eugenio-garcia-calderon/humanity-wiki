@@ -5,12 +5,6 @@
       "ruta": "src/components/aeromovil/explicaciones/triciclo.ts",
       "motivo": "Híbrido enchufable PHEV",
       "desde": "2026-11-15T19:45:42.793Z"
-    },
-    {
-      "agente": "phev",
-      "ruta": "src/pages/Aeromovil.tsx",
-      "motivo": "Híbrido enchufable PHEV",
-      "desde": "2026-11-15T19:46:17.306Z"
     }
   ]
 }
