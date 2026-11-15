@@ -14,7 +14,7 @@
 // interfaz. Anotado en 02_TECH_DEBT.md.
 import { forwardRef, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import * as THREE from 'three';
-import { DoorOpen, PackageOpen, Trash2, X } from 'lucide-react';
+import { DoorOpen, MoveDiagonal, PackageOpen, Trash2, X } from 'lucide-react';
 import { Button, Card } from '../ui/core';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { STLExporter } from 'three/examples/jsm/exporters/STLExporter.js';
@@ -790,7 +790,7 @@ function accesoriosA1(g: THREE.Object3D, M: Mats, m: ModeloA1) {
  * pivots (`VehiculoGaraje.pivotes`); the viewer turns each one by how open its
  * kind is (0 closed, 1 open), animated like our own car's doors.
  */
-interface AperturaGaraje { p: number; pObj: number; m: number; mObj: number }
+interface AperturaGaraje { p: number; pObj: number; m: number; mObj: number; b: number; bObj: number }
 function colocarPivotesGaraje(obj: THREE.Object3D, def: VehiculoGaraje, a: AperturaGaraje) {
   for (const pv of def.pivotes ?? []) {
     const o = obj.getObjectByName(pv.nombre); if (!o) continue;
@@ -800,6 +800,8 @@ function colocarPivotesGaraje(obj: THREE.Object3D, def: VehiculoGaraje, a: Apert
     // the frame of the opening only shows while it is open (closed, it sits millimetres under the panel)
     if (pv.conHueco) { const h = obj.getObjectByName(pv.conHueco); if (h) h.visible = f > 0; }
   }
+  // a tilting car (2026-11-15, the Lumeneo Smera): its model leans its body, wheels and arms itself
+  def.bascula?.poner(obj, a.b);
 }
 
 /** Cotas exteriores en el suelo y en vertical, con su número en mm. */
@@ -1451,7 +1453,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   const estado = useRef<any>(null);
   // The garage car picked with a click or a tap (only one with parts that open), and what is open on each car.
   const [selGaraje, setSelGaraje] = useState<string | null>(null);
-  const [abiertos, setAbiertos] = useState<Record<string, { puertas: boolean; maletero: boolean }>>({});
+  const [abiertos, setAbiertos] = useState<Record<string, { puertas: boolean; maletero: boolean; bascula?: boolean }>>({});
   const elegirGaraje = useRef(setSelGaraje); elegirGaraje.current = setSelGaraje;
   // On a phone (< 640 px) the card goes at the bottom, just above the viewer's toolbar, as one row: at the top it
   // hid the doors rising. The toolbar belongs to the page, so its top is measured from the viewer's own box.
@@ -1704,8 +1706,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       }
       return mejor;
     };
-    // a car with parts that open, or one of our designs (it has a card of its own)
-    const abreAlgo = (obj: THREE.Object3D | null) => !!obj && (conExtra.current || !!vehiculoGaraje(obj.name)?.pivotes?.length || !!fichas.current?.[obj.name]);
+    // a car with parts that open or that leans, or one of our designs (it has a card of its own)
+    const abreAlgo = (obj: THREE.Object3D | null) => !!obj && (conExtra.current || !!vehiculoGaraje(obj.name)?.pivotes?.length || !!vehiculoGaraje(obj.name)?.bascula || !!fichas.current?.[obj.name]);
     /** Picks a garage car (its card opens) or, with null or a car with nothing to open, closes the card. One the page
      *  takes (one of our designs, 2026-11-13) opens no card here. */
     const elegirCoche = (obj: THREE.Object3D | null) => {
@@ -1776,8 +1778,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       }
       // the garage cars' doors and boots, at the same pace
       for (const [id, a] of st.garajeAbre) {
-        if (a.p === a.pObj && a.m === a.mObj) continue;
-        a.p = avanzar(a.p, a.pObj); a.m = avanzar(a.m, a.mObj);
+        if (a.p === a.pObj && a.m === a.mObj && a.b === a.bObj) continue;
+        a.p = avanzar(a.p, a.pObj); a.m = avanzar(a.m, a.mObj); a.b = avanzar(a.b, a.bObj);
         const obj = grupoGaraje.getObjectByName(id), def = vehiculoGaraje(id);
         if (obj && def) colocarPivotesGaraje(obj, def, a);
         st.sombraSucia = true;
@@ -2062,8 +2064,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   useEffect(() => {
     const st = estado.current; if (!st) return;
     for (const [id, a] of Object.entries(abiertos)) {
-      const e: AperturaGaraje = st.garajeAbre.get(id) ?? { p: 0, pObj: 0, m: 0, mObj: 0 };
-      e.pObj = a.puertas ? 1 : 0; e.mObj = a.maletero ? 1 : 0; st.garajeAbre.set(id, e);
+      const e: AperturaGaraje = st.garajeAbre.get(id) ?? { p: 0, pObj: 0, m: 0, mObj: 0, b: 0, bObj: 0 };
+      e.pObj = a.puertas ? 1 : 0; e.mObj = a.maletero ? 1 : 0; e.bObj = a.bascula ? 1 : 0; st.garajeAbre.set(id, e);
     }
   }, [abiertos]);
   // the picked car left the garage (hidden): its card goes too
@@ -2150,8 +2152,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   const defSel = selGaraje ? vehiculoGaraje(selGaraje) : undefined;
   const fichaSel = selGaraje ? fichasGaraje?.[selGaraje] : undefined;
   const tiposSel = new Set(defSel?.pivotes?.map(p => p.tipo));
-  const estSel = (selGaraje && abiertos[selGaraje]) || { puertas: false, maletero: false };
-  const alternar = (k: 'puertas' | 'maletero') => { if (selGaraje) setAbiertos(a => ({ ...a, [selGaraje]: { ...estSel, [k]: !estSel[k] } })); };
+  const estSel = (selGaraje && abiertos[selGaraje]) || { puertas: false, maletero: false, bascula: false };
+  const alternar = (k: 'puertas' | 'maletero' | 'bascula') => { if (selGaraje) setAbiertos(a => ({ ...a, [selGaraje]: { ...estSel, [k]: !estSel[k] } })); };
   const botonCarta = estrecho ? 'h-10 shrink-0 px-2 text-[11px] normal-case tracking-normal' : 'gap-1.5 px-2.5 py-1.5 text-[11px] normal-case tracking-normal';
   const botones = (
     <>
@@ -2163,6 +2165,13 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       {tiposSel.has('maletero') && (
         <Button variant="outline" aria-pressed={estSel.maletero} onClick={() => alternar('maletero')} className={botonCarta}>
           {!estrecho && <PackageOpen className="h-3.5 w-3.5" />}{estSel.maletero ? 'Cerrar maletero' : 'Abrir maletero'}
+        </Button>
+      )}
+      {/* «Bascular» (2026-11-15): a tilting car leans to its maximum angle, wheels and all, and back */}
+      {defSel?.bascula && (
+        <Button variant="outline" aria-pressed={!!estSel.bascula} onClick={() => alternar('bascula')} className={botonCarta}
+          title={estSel.bascula ? 'Volver a ponerlo derecho' : `Inclinarlo ${defSel.bascula.angulo}°, como en una curva`}>
+          {!estrecho && <MoveDiagonal className="h-3.5 w-3.5" />}{estSel.bascula ? 'Enderezar' : 'Bascular'}
         </Button>
       )}
     </>
@@ -2210,8 +2219,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
           <div className="flex items-start gap-2">
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-slate-900">{defSel.nombre}</p>
-              {(tiposSel.size > 0 || alMoverGaraje) && <p className="text-[11px] leading-snug text-slate-500">
-                {tiposSel.size > 0 ? 'Abre sus puertas y su maletero para ver cómo se abren.' : ''}{alMoverGaraje ? ' Para moverlo, púlsalo y arrástralo.' : ''}
+              {(tiposSel.size > 0 || defSel.bascula || alMoverGaraje) && <p className="text-[11px] leading-snug text-slate-500">
+                {tiposSel.size > 0 ? 'Abre sus puertas y su maletero para ver cómo se abren.' : ''}{defSel.bascula ? `«Bascular» lo inclina ${defSel.bascula.angulo}° con las cuatro ruedas, como en una curva.` : ''}{alMoverGaraje ? ' Para moverlo, púlsalo y arrástralo.' : ''}
               </p>}
             </div>
             <Button variant="ghost" onClick={() => setSelGaraje(null)} aria-label="Cerrar" title="Cerrar" className="-mr-1.5 -mt-1.5 h-10 w-10 p-0">

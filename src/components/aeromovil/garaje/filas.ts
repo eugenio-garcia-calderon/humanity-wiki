@@ -69,3 +69,16 @@ export function nombreDeCopia(nombre: string, ocupados: string[]): string {
     if (!usado.has(candidato)) return candidato;
   }
 }
+
+/**
+ * The garage from the smallest to the largest (2026-11-15, Eugenio: «Garaje con todos los modelos desde el más
+ * pequeño al más grande»): by length, then by kerb mass (a car with no known mass after the ones of the same length
+ * that have one), then by name so the order never depends on the list it came from.
+ */
+export function compararTamano(a: { largo: number; masa?: number; nombre?: string }, b: { largo: number; masa?: number; nombre?: string }): number {
+  const dl = Math.round(a.largo * 1000) - Math.round(b.largo * 1000);
+  if (dl) return dl;
+  const ma = a.masa ?? Infinity, mb = b.masa ?? Infinity;
+  if (ma !== mb) return ma < mb ? -1 : 1;
+  return (a.nombre ?? '').localeCompare(b.nombre ?? '', 'es');
+}

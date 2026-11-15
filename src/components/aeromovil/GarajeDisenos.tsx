@@ -6,7 +6,9 @@
 // garaje, en la primera fila… cuando se pinche uno de ellos… aparezcan los sliders para modificar su carrocería…».
 //
 // Every saved design (the list the logo menu shows, from /api/aeromovil/disenos) stands in the garage's first row,
-// in an order kept per browser (a copy goes right after its original). The one being edited is the viewer's own car,
+// from the shortest to the longest, then the lightest first (2026-11-15, «desde el más pequeño al más grande»); designs
+// of the same size keep the order kept per browser (a copy goes right after its original). A dragged car still stays
+// where it was dropped (`aeromovil_garaje_sitios_v1`). The one being edited is the viewer's own car,
 // at the origin; every other one is built with the viewer's own builders (`construirDisenoGaraje`) once per saved
 // version, one at a time after the page has drawn, and from then on copied (the copy shares the geometry). A design
 // can be hidden from the 3D (per browser); the one being edited never is. The reference cars stand in a second row,
@@ -23,7 +25,8 @@ import type { Resolucion } from './tunel/malla';
 import { olvidarVehiculo, registrarVehiculo } from './garaje/registro';
 import { vehiculoGaraje } from './garaje';
 import type { VehiculoGaraje } from './garaje/tipos';
-import { colocarFilas, type CocheFila, type Plaza } from './garaje/filas';
+import { colocarFilas, compararTamano, type CocheFila, type Plaza } from './garaje/filas';
+import { masaGaraje } from './garaje/tipos';
 
 const CLAVE_ORDEN = 'aeromovil_garaje_orden_v1';
 const CLAVE_OCULTOS = 'aeromovil_garaje_ocultos_v1';
@@ -113,7 +116,7 @@ function cdA(R: NonNullable<ReturnType<typeof resultadoEnCache>>, kmh: number) {
   return pv[k].cd.total + (pv[k + 1].cd.total - pv[k].cd.total) * u;
 }
 
-/** The order of the first row: the order kept in this browser, then the rest in the order they were created. */
+/** The order kept in this browser, then the rest in the order they were created (the tie-break of the size order). */
 function ordenar(lista: Diseno[], orden: number[]): Diseno[] {
   const pos = new Map(orden.map((id, k) => [id, k]));
   return [...lista].sort((a, b) => (pos.get(a.id) ?? Infinity) - (pos.get(b.id) ?? Infinity) || a.id - b.id);
@@ -129,7 +132,7 @@ async function llamar(url: string, metodo: string, cuerpo: unknown) {
 export function useDisenosGaraje({ activo, referencias, resolucion, conCd, huecoFila2 }: {
   /** The design being edited: its saved id (null if it is not saved), its name, nose and tail x and width (m). */
   activo: { id: number | null; nombre: string; morro: number; cola: number; ancho: number };
-  /** The reference cars on show, in their catalogue order: the second row. */
+  /** The reference cars on show: the second row (placed from the smallest to the largest). */
   referencias: string[];
   resolucion: Resolucion;
   /** «Cd y consumo» or the tunnel is on: only then are the designs' Cd asked from the tunnel (it is work for the worker). */
@@ -155,7 +158,6 @@ export function useDisenosGaraje({ activo, referencias, resolucion, conCd, hueco
       .catch(e => setError(e?.message || 'No se han podido leer los diseños.'));
   };
   useEffect(cargar, []);
-  const lista = useMemo(() => (crudo ? ordenar(crudo, orden) : null), [crudo, orden]);
 
   // Each design's model and figures, worked out once per set of parameters (2026-11-13: a rename only changes its name).
   const infos = useRef(new Map<string, Info>());
@@ -175,6 +177,24 @@ export function useDisenosGaraje({ activo, referencias, resolucion, conCd, hueco
     }
     return i;
   };
+
+  // The list and the first row, from the smallest to the largest (2026-11-15): by each design's SAVED length, then its
+  // empty mass. The one being edited is placed by its saved version too, so moving a slider does not reshuffle the row
+  // under the user's hands; a design that cannot be computed goes last.
+  const lista = useMemo(() => {
+    if (!crudo) return null;
+    const base = ordenar(crudo, orden), pos = new Map(base.map((d, k) => [d.id, k]));
+    const t = new Map(base.map(d => { const i = infoDe(d); return [d.id, i ? { largo: i.modelo.Lf, masa: i.res.mVeh > 0 ? i.res.mVeh : undefined } : { largo: 99 }]; }));
+    return [...base].sort((a, b) => compararTamano(t.get(a.id)!, t.get(b.id)!) || pos.get(a.id)! - pos.get(b.id)!);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [crudo, orden]);
+  /** Each saved design's length and empty mass (as saved), for the list's rows. */
+  const medidas = useMemo(() => {
+    const o: Record<number, { largo: number; masa?: number }> = {};
+    for (const d of lista ?? []) { const i = infoDe(d); if (i) o[d.id] = { largo: i.modelo.Lf, masa: i.res.mVeh > 0 ? i.res.mVeh : undefined }; }
+    return o;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lista]);
 
   // The first row: every design on show, the one being edited in its own place (first, if it is not saved).
   const { fila, enGaraje } = useMemo(() => {
@@ -217,10 +237,12 @@ export function useDisenosGaraje({ activo, referencias, resolucion, conCd, hueco
 
   // Where everything goes: the first row, and the reference cars behind it.
   const { plazas, origen } = useMemo(() => {
-    const fila2: CocheFila[] = referencias.flatMap(id => {
-      const def = vehiculoGaraje(id); if (!def) return [];
+    // (2026-11-15) from the smallest to the largest, whatever order they came in
+    const defs = referencias.flatMap(id => { const def = vehiculoGaraje(id); return def ? [def] : []; })
+      .sort((a, b) => compararTamano({ ...a, masa: masaGaraje(a) }, { ...b, masa: masaGaraje(b) }));
+    const fila2: CocheFila[] = defs.map(def => {
       const xs = def.envolvente?.map(e => e[0]);
-      return [{ id, morro: xs?.length ? Math.max(...xs) : 0.9, cola: xs?.length ? Math.min(...xs) : 0.9 - def.largo, ancho: def.ancho }];
+      return { id: def.id, morro: xs?.length ? Math.max(...xs) : 0.9, cola: xs?.length ? Math.min(...xs) : 0.9 - def.largo, ancho: def.ancho };
     });
     // the dragged ones keep their place; the one being edited by its design's own id
     const fijas = new Map<string, Plaza>();
@@ -334,5 +356,5 @@ export function useDisenosGaraje({ activo, referencias, resolucion, conCd, hueco
     return d;
   };
 
-  return { lista, error, cargar, visor, mover, aFila, sitios, movidos, renombrar, plazas, fichas, carteles, nombres, ocultos, alternarOculto, actualizar, ponerLista, copiar, guardar, archivar, construidos: visibles.length, enFila: enGaraje.length };
+  return { lista, medidas, error, cargar, visor, mover, aFila, sitios, movidos, renombrar, plazas, fichas, carteles, nombres, ocultos, alternarOculto, actualizar, ponerLista, copiar, guardar, archivar, construidos: visibles.length, enFila: enGaraje.length };
 }

@@ -51,6 +51,7 @@ import { fichaComparable, type Referencia } from '../components/aeromovil/refere
 import { FormularioMejora, VistaExportar, VistaPlan, VistaPlanos, VistaTareas, cargarDueno, cargarTareas, type Dueno, type Tarea } from '../components/aeromovil/Paneles';
 import { BotonesComponentes, VistaComponentes } from '../components/aeromovil/Componentes';
 import { VEHICULOS_GARAJE } from '../components/aeromovil/garaje';
+import { masaGaraje } from '../components/aeromovil/garaje/tipos';
 import { useDisenosGaraje } from '../components/aeromovil/GarajeDisenos';
 import { AvisoCambios, BotonFilaReferencia, BotonSoloReferencia, ListaGaraje, TarjetaDiseno, useEleccionDiseno } from '../components/aeromovil/garaje/NavegadorGaraje';
 import { HUECO_CON_TUNEL } from '../components/aeromovil/garaje/filas';
@@ -1091,7 +1092,9 @@ export default function Aeromovil() {
     // 2026-11-09, «añade el jaguar… y el velomovil aerorider» y «también este de Shell Eco Marathon»: el SZEmission,
     // el Jaguar D-Type y el AeroRider salen también por defecto, más allá de los cuatro anteriores.
     // 2026-11-12: the Tesla Model Y, shown at −15 m. A saved v5 list does not carry it, so it shows for everybody once.
-    const POR_DEFECTO: Record<string, { z: number }> = { twizy: { z: 3 }, aptera: { z: -3 }, xl1: { z: 6 }, unlitro: { z: -6 }, szemission: { z: 9 }, jaguarD: { z: -9 }, aerorider: { z: 12 }, bala: { z: -12 }, nusKruce: { z: 15 }, modeloY: { z: -15 } };
+    // 2026-11-15: the Lumeneo Smera and the Mercedes Vision EQXX, on show too (a saved v5 list does not carry them either).
+    // The rows place every car (`garaje/filas.ts`); these z only matter if the rows cannot.
+    const POR_DEFECTO: Record<string, { z: number }> = { twizy: { z: 3 }, aptera: { z: -3 }, xl1: { z: 6 }, unlitro: { z: -6 }, szemission: { z: 9 }, jaguarD: { z: -9 }, aerorider: { z: 12 }, bala: { z: -12 }, nusKruce: { z: 15 }, modeloY: { z: -15 }, smera: { z: 18 }, eqxx: { z: -18 } };
     const base = VEHICULOS_GARAJE.map((v, i) => POR_DEFECTO[v.id] ? { id: v.id, visible: true, x: 0, z: POR_DEFECTO[v.id].z, giro: 0 } : ({ id: v.id, visible: false, x: 0, z: (i % 2 ? 1 : -1) * (2.6 + 2.2 * Math.floor(i / 2)), giro: 0 }));
     // v3 (2026-11-07): el XL1 deja de ser una caja y sale por defecto. En la lista v2 guardada estaba oculto,
     // así que al pasar de v2 a v3 se olvida solo lo que se guardó del XL1 (el resto se conserva).
@@ -1269,7 +1272,7 @@ export default function Aeromovil() {
   // Triciclo family the block sits at the end of «Proyecto», where Eugenio could not find «Mis diseños»)
   const garajeLista = (
     <ListaGaraje g={disenosGaraje} e={eleccion} actual={actual} nombreVehiculo={nombreVehiculo} puedeDecidir={!!dueno?.puedeDecidir}
-      referencias={VEHICULOS_GARAJE.map(v => ({ id: v.id, nombre: v.nombre, largo: v.largo, visible: !!garaje.find(g => g.id === v.id)?.visible }))}
+      referencias={VEHICULOS_GARAJE.map(v => ({ id: v.id, nombre: v.nombre, largo: v.largo, masa: masaGaraje(v), visible: !!garaje.find(g => g.id === v.id)?.visible }))}
       alAlternarReferencia={id => setGaraje(g => g.map(x => x.id === id ? { ...x, visible: !x.visible } : x))}
       alElegido={() => { if (window.matchMedia('(max-width: 639px)').matches) setPanelGaraje(false); }} />
   );

@@ -65,6 +65,8 @@ export const VEHICULO: VehiculoGaraje = {
   id: 'nusKruce',
   nombre: 'NUS KRUCE (UrbanConcept)',
   largo: LARGO, ancho: ANCHO, alto: ALTO, batalla: BATALLA, viaDel: VIA_DEL, viaTras: VIA_TRAS,
+  // 130 kg (NUS press release): for the garage's size order and its list (2026-11-15)
+  masa: 130,
   fuente: 'KRUCE (Kent Ridge Urban Concept Ecocar), Universidad Nacional de Singapur, presentado el 20 de abril de 2009 (nota de prensa de la NUS; TODAY y Channel NewsAsia): 2,7 m de largo, 130 kg, una plaza, pila de hidrógeno de 1,2 kW. Su sucesor, el KRUCE 2, ganó la categoría UrbanConcept de hidrógeno en la Shell Eco-marathon Asia 2010 en Sepang (612,4 km/l). Solo el largo está publicado: la batalla (1,65 m), el alto (1,19 m), el ancho (1,26 m) y las vías (1,10 / 1,04 m) son estimaciones medidas en la foto de la presentación (con la cámara calculada a partir de las llantas) y en la foto trasera, dentro de los límites del reglamento UrbanConcept de esos años (alto 1,00–1,30 m, ancho 1,20–1,30 m, llantas de 16″). La foto de carrera no encaja del todo con estas proporciones (en ella el morro parece unos 20 cm más largo) y no había foto desde arriba, así que el morro y la planta son lo menos seguro. No hay Cd publicado: el del túnel es una estimación a partir de la silueta',
   envolvente: envolvente(),
   // the largest section is a rounded box: wide round lower tub, narrower glasshouse
