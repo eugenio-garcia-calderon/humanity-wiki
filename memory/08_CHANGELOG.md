@@ -11796,3 +11796,21 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
 - **Batería.** Con la batería «a lo largo del bastidor», al cambiar «Largo total» o «Batalla» el paquete crece o encoge lo mismo que la batalla, dentro de lo que cabe. Antes se quedaba del mismo largo y el hueco de detrás crecía.
 - **Largueros.** Con dos ruedas traseras, los diseños nuevos llevan de serie los largueros hasta el eje trasero, con su cuna, en lugar de pararse en la torreta del amortiguador, que con cuatro ruedas no existe. Los diseños guardados conservan lo que tenían; se cambia en Chasis.
 - **En rombo**, los textos de Rodaje hablan de las ruedas laterales y de la del morro, no de «delanteras».
+
+## 2026-11-15 · Bala: híbrido enchufable (PHEV) con engranaje planetario
+
+- Eugenio: «permite añadir una opción de motor híbrido tipo PHEV con ejes planetarios como el Prius, entonces tiene que aparecer el cálculo de consumo a los 100 km con un slider de eficiencia del motor y conversión mecánica y también ajustar el tamaño del depósito».
+- **Motor → «Propulsión».** Dos opciones: «Eléctrica» (de serie) o «Híbrida enchufable (PHEV)».
+- **Bloque nuevo «Híbrido enchufable»**, con cuatro deslizadores:
+  - potencia del motor de gasolina, de 8 a 60 kW;
+  - su rendimiento, de 20 a 42 %;
+  - conversión mecánica (planetario y generador), de 75 a 97 %;
+  - depósito, de 5 a 45 L.
+- **Rendimiento.** Se añaden la gasolina en L/100 km (a la velocidad de cálculo, y a 50 y 100 km/h, con la batería gastada), la autonomía con el depósito, la autonomía total y la velocidad sostenida solo con gasolina.
+- **Cálculo del consumo.** La energía que piden las ruedas (aire y rodadura) dividida por la conversión mecánica, más los equipos; todo dividido por el rendimiento del motor de gasolina y por los 8,9 kWh que lleva cada litro.
+- **Masas estimadas:**
+  - motor: 15 kg más 1,4 kg por kW;
+  - planetario y generador: 12 kg;
+  - depósito: 4 kg más 0,745 kg por litro de gasolina.
+  - Van todas delante del eje trasero.
+- **Falta:** el motor de gasolina aún no se dibuja en 3D ni se comprueba que quepa.
