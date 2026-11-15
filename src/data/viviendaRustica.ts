@@ -87,7 +87,7 @@ export const RUSTICA_VIGILANCIA: { t: string; d: string }[] = [
 
 // ── WHAT IS STILL OPEN ─────────────────────────────────────────────────────
 export const RUSTICA_RETOS: { t: string; d: string }[] = [
-  { t: 'El asfalto no deja pasar el agua', d: 'Asfaltar un camino lo impermeabiliza, justo lo contrario de retener agua. La ayuda cubre el asfalto, como pidió Eugenio; recomendamos ofrecer además, como opción, firmes permeables (tierra estabilizada, zahorra compactada o adoquín con junta verde) donde la pendiente lo permita, y cunetas que lleven el agua a la finca.' },
+  { t: 'El asfalto no deja pasar el agua', d: 'Asfaltar un camino lo impermeabiliza, justo lo contrario de retener agua. La ayuda cubre el asfalto, como se propone; recomendamos ofrecer además, como opción, firmes permeables (tierra estabilizada, zahorra compactada o adoquín con junta verde) donde la pendiente lo permita, y cunetas que lleven el agua a la finca.' },
   { t: 'Que no se llene el campo de casas sueltas', d: 'Una casa en cada finca dispersa los pueblos: más coches, más caminos y más servicios que pagar. Hay que fijar un tamaño mínimo de finca, o un tope de metros por vivienda: en 10 hectáreas, el 10 % son 10.000 m².' },
   { t: 'Incendios', d: 'Casas dentro del bosque son casas en riesgo, y bomberos que tienen que defenderlas. Hacen falta franjas sin vegetación alrededor de cada casa, especies que ardan menos cerca de ella y un acceso para camiones.' },
   { t: 'Agua, luz y basura en casas aisladas', d: 'Llevar redes a cada finca es caro. La propuesta pide que la casa se abastezca sola (renovables, lluvia, depuración natural), pero la recogida de residuos y las urgencias siguen costando más.' },

@@ -65,8 +65,8 @@ export function Ahorros() {
         <Regulador etiqueta="Años" valor={anos} min={1} max={30} paso={1} mostrar={`${anos} ${anos === 1 ? 'año' : 'años'}`} onChange={setAnos} />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Cifra valor={`${numero(real)} €`} texto={`es lo que podrás comprar con tus 10.000 € dentro de ${anos} ${anos === 1 ? 'año' : 'años'}, en precios de hoy`} tono={real < ahorro ? 'mal' : 'neutro'} />
-        <Cifra valor={`${numero(ahorro - real)} €`} texto="de poder de compra perdidos sin gastar nada" tono={real < ahorro ? 'mal' : 'neutro'} nota="Cálculo propio: la misma subida todos los años." />
+        <Cifra clase="calculo" valor={`${numero(real)} €`} texto={`es lo que podrás comprar con tus 10.000 € dentro de ${anos} ${anos === 1 ? 'año' : 'años'}, en precios de hoy`} tono={real < ahorro ? 'mal' : 'neutro'} />
+        <Cifra clase="calculo" valor={`${numero(ahorro - real)} €`} texto="de poder de compra perdidos sin gastar nada" tono={real < ahorro ? 'mal' : 'neutro'} nota="Cálculo propio: la misma subida todos los años." />
       </div>
     </div>
   );

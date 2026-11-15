@@ -31,9 +31,9 @@ function Caso({ modo, ejemplo }: { modo: Modo; ejemplo: Ejemplo }) {
   const r = calcularEjemplo(ejemplo, modo);
   return (
     <div className="grid gap-4 sm:grid-cols-3">
-      <Cifra valor={euros(r.totalHoy)} texto="paga hoy al año en impuestos y cotizaciones" nota={`el ${porcentaje(r.pctHoy * 100, 0)} de lo que cuesta su trabajo`} />
-      <Cifra valor={euros(r.aporta)} texto="aportaría con el modelo, en sus compras y su sueldo" />
-      <Cifra valor={euros(r.aportaNeto)} texto={`neto, tras recibir ${euros(r.recibe)} del fondo (un ingreso igual para cada persona)`} nota={`el ${porcentaje(r.pctModelo * 100, 0)} de lo que cuesta su trabajo`} />
+      <Cifra clase="calculo" valor={euros(r.totalHoy)} texto="paga hoy al año en impuestos y cotizaciones" nota={`el ${porcentaje(r.pctHoy * 100, 0)} de lo que cuesta su trabajo`} />
+      <Cifra clase="calculo" valor={euros(r.aporta)} texto="aportaría con el modelo, en sus compras y su sueldo" />
+      <Cifra clase="calculo" valor={euros(r.aportaNeto)} texto={`neto, tras recibir ${euros(r.recibe)} del fondo (un ingreso igual para cada persona)`} nota={`el ${porcentaje(r.pctModelo * 100, 0)} de lo que cuesta su trabajo`} />
       <p className="rounded-xl bg-amber-50 p-4 text-[15px] leading-relaxed text-amber-950 sm:col-span-3">
         <b>A cambio:</b> el modelo recauda menos que hoy ({porcentaje(cuentasPais(modo).pctPIB, 0)} del PIB frente al 38 %), así que hay menos servicios públicos; no hay paro, y su pensión sería una sola, igual al salario mínimo.
         Las cifras, con su detalle, están en el cálculo completo.
@@ -64,8 +64,8 @@ export function ImpuestosVentana({ onProponer }: { onProponer: () => void }) {
               Llega al instante, en ocho partes iguales, a las escalas en las que vivimos.
             </p>
             <div className="mt-6 grid max-w-xl grid-cols-2 gap-3">
-              <Cifra valor={`${TOTAL_FIGURAS} → 1`} texto="impuestos y cotizaciones de hoy, frente a uno" />
-              <Cifra valor={`${porcentaje(pais.pctPIB, 0)}`} texto="del PIB recaudaría, frente al ≈ 38 % de hoy" />
+              <Cifra clase="propuesta" valor={`${TOTAL_FIGURAS} → 1`} texto="impuestos y cotizaciones de hoy, frente a uno" />
+              <Cifra clase="calculo" valor={`${porcentaje(pais.pctPIB, 0)}`} texto="del PIB recaudaría, frente al ≈ 38 % de hoy" />
             </div>
           </div>
           <div className="mx-auto w-full max-w-[520px]">

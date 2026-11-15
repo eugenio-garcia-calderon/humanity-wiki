@@ -36,9 +36,9 @@ export function SueloApartado() {
     <Apartado id="vivienda-suelo" titulo="Que recalificar un campo no haga rico a nadie" fondo="blanco"
       entradilla="Cuando el plan de un municipio convierte un campo en suelo para construir, su precio se multiplica sin que el dueño haga nada. La propuesta: ese suelo se vende a un precio regulado, y la subida se queda en la escala para hacer vivienda pública.">
       <div className="grid gap-4 sm:grid-cols-3">
-        <Cifra valor={`${numero(SECANO_M2, 2)} €`} tono="neutro" texto={<>vale de media un metro cuadrado de tierra de secano (2024)<F id="mapa-tierra" /></>} />
-        <Cifra valor={`${numero(S.urbanoM2)} €`} tono="mal" texto={<>vale de media un metro cuadrado de suelo urbano (finales de 2025)<F id="suelo-urbano" /></>} />
-        <Cifra valor="hasta × 100" tono="mal" texto={<>puede multiplicarse el precio de una finca solo por recalificarla, según un profesor de derecho administrativo<F id="domenech" /></>}
+        <Cifra clase="dato" valor={`${numero(SECANO_M2, 2)} €`} tono="neutro" texto={<>vale de media un metro cuadrado de tierra de secano (2024)<F id="mapa-tierra" /></>} />
+        <Cifra clase="dato" valor={`${numero(S.urbanoM2)} €`} tono="mal" texto={<>vale de media un metro cuadrado de suelo urbano (finales de 2025)<F id="suelo-urbano" /></>} />
+        <Cifra clase="dato" valor="hasta × 100" tono="mal" texto={<>puede multiplicarse el precio de una finca solo por recalificarla, según un profesor de derecho administrativo<F id="domenech" /></>}
           nota={`Comparando esas dos medias sale unas ${numero(Math.round(SALTO / 10) * 10)} veces, pero no es la misma finca: solo da una idea del salto.`} />
       </div>
 
@@ -95,13 +95,13 @@ function PrecioSuelo() {
             mostrar={euros(mercado)} onChange={setMercado} ayuda={`La media de España fue ${numero(S.urbanoM2)} €/m² a finales de 2025.`} />
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Cifra valor={euros(tope)} tono="bien" texto="precio tope de la hectárea"
+          <Cifra clase="calculo" valor={euros(tope)} tono="bien" texto="precio tope de la hectárea"
             nota={urbanizado === 'si' ? `Valor de secano + urbanizar, + ${numero(MARGEN_SUELO * 100)} %.` : `Valor de secano + ${numero(MARGEN_SUELO * 100)} %. Sin obra, no se suma urbanizar.`} />
-          <Cifra valor={euros(subida)} tono="bien" texto="de subida que va a la escala para vivienda pública, en vez de al dueño"
+          <Cifra clase="calculo" valor={euros(subida)} tono="bien" texto="de subida que va a la escala para vivienda pública, en vez de al dueño"
             nota={`Lo que valdrían los solares (${euros(valorMercado)}) menos el precio tope.`} />
         </div>
       </div>
-      <p className="mt-4 text-sm leading-relaxed text-slate-500">El margen del {numero(MARGEN_SUELO * 100)} %, el coste de urbanizar y la parte en solares son supuestos para que Eugenio los fije. Las cifras del ejemplo no salen de una finca real.</p>
+      <p className="mt-4 text-sm leading-relaxed text-slate-500">El margen del {numero(MARGEN_SUELO * 100)} %, el coste de urbanizar y la parte en solares son supuestos, todavía por fijar. Las cifras del ejemplo no salen de una finca real.</p>
     </div>
   );
 }
@@ -112,9 +112,9 @@ export function RusticaApartado() {
     <Apartado id="vivienda-rustica" titulo="Casas en el campo, si el campo se convierte en bosque"
       entradilla="Se podrá vivir en una finca rústica con una casa ecológica, siempre que la finca se plante: árboles y plantas que den alimento o biomasa y retengan agua, en lugar de un campo de cereal. Como máximo un 10 % para casas, otro 10 % para producir, y el 80 % verde.">
       <div className="grid gap-4 sm:grid-cols-3">
-        <Cifra valor={`${numero(4_933_154 / 1e6, 1)} M ha`} tono="neutro" texto={<>de cereal de secano en España en 2025, el 86 % de todo el cereal<F id="esyrce" /></>} />
-        <Cifra valor="3,2 M ha" tono="mal" texto={<>de cultivo abandonadas entre 1990 y 2016, sobre todo de secano<F id="abandono" /></>} />
-        <Cifra valor={`${ARBOLES_HA} árboles`} tono="bien" texto="por hectárea verde como mínimo, con la propuesta" nota="Cifra propuesta; Eugenio la confirma." />
+        <Cifra clase="dato" valor={`${numero(4_933_154 / 1e6, 1)} M ha`} tono="neutro" texto={<>de cereal de secano en España en 2025, el 86 % de todo el cereal<F id="esyrce" /></>} />
+        <Cifra clase="dato" valor="3,2 M ha" tono="mal" texto={<>de cultivo abandonadas entre 1990 y 2016, sobre todo de secano<F id="abandono" /></>} />
+        <Cifra clase="propuesta" valor={`${ARBOLES_HA} árboles`} tono="bien" texto="por hectárea verde como mínimo, con la propuesta" nota="Cifra todavía por confirmar." />
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
