@@ -1771,3 +1771,19 @@ Eugenio: «que cada elemento de la ilustración puedas pinchar y arrastrarlo… 
 3. A planar inner wall at the closest tyre point. That leaves 12 cm off the centre line, so the pilot's feet would not fit. The wall that follows x leaves 21 cm at the axle.
 
 **Cost.** Default 3.01 m long (+11 cm) and 1.04 m wide (the pods version was 1.15 m overall). The nose stands 0.92 m over the axle. Tunnel Cd at 80 km/h: 0.192 against 0.218 for the pods; frontal area 0.81 m² against 1.03. Upright roll limit 0.73 g against 0.80, from the narrower track.
+
+## 2026-11-15 · Cuadriciclo Basculante: one concave nose-to-roof line, no bonnet of its own
+
+**Context.** Eugenio wanted the nose, cabin and tail in one smooth line from tip to tail, as on the Aptera and the Cuadriciclo Bala.
+
+**Decision.**
+- The roof line is now three pieces, joined with no change of slope:
+  - from the nose tip to the roof's start, `lineaMorro`;
+  - the roof itself, flat;
+  - the Aptera tail curve.
+- `lineaMorro` is the least concave line over a set of points, smoothed by a monotone spline through the corners of its upper hull. The points are the design's height over the front axle (`qLineaEje`, which replaces `qCapo`) and the wheel-well requirement. Being concave, the line never turns back down, so it has no bonnet step and no dip at the windscreen's foot.
+- `D.yCapo` is now an output: the line's height at the windscreen's foot.
+- The power-law line `1 − (1 − s)^p` was tried first. It made the whole front too full: frontal area 0.91 m² and CdA 0.156.
+- The nose's extra width now tapers out by `xAncho0`, no longer by `xAncho1`.
+
+**Rejected for now.** An earlier roof fall (`qCaida` 1.6–1.75) together with a belly that rises sooner in the tail (`qBajosCola` 0.30) reaches tunnel Cd 0.164–0.172 and CdA ~0.12. It puts the passenger's head through the canopy (−5 to −14 cm) and leaves no room for the battery under the backrest. It needs the passenger further forward or more reclined: Eugenio's call.

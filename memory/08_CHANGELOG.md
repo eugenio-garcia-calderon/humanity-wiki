@@ -11638,3 +11638,17 @@ Eugenio: una visualización en 2D donde cada partido no es un punto sino una geo
 - **Otras propuestas** (13 files in `src/data/espectro/`, `revisado` 2026-11-15): Vox now cites its 29-N programme «Es sentido común» (12-11-2026, 115 measures) in all 13 windows; PP security from «La reconstrucción nacional»; Frente Amplio «100+15» via press (text unpublished); PSOE housing goal via campaign press (programme presented 15-11, not yet published); Sumar 2023 still used for the left in security, justice, legal and scales, with a note saying so.
 - **Fuentes oficiales**: 27 of 79 press sources replaced after checking the same figure (IGAE, AEAT, INE, BdE, Eurostat, CGPJ, BOE, Moncloa, Defensa, Gobierno Vasco, Tribunal de Cuentas Europeo, NBIM, Swiss Federal Council and SNB). Ids unchanged. **EU debt end-2024 corrected from 342.000 to 601.300 M€** (342.000 was budget exposure, per the ECA); EU housing plan wording corrected (InvestEU + cohesion, «movilizados»). 52 stay as press, with reasons in the session report.
 - Checked in headless Chrome at 390 and 1280 px against the dev server; `tsc` and `build` clean.
+
+## 2026-11-15 · Cuadriciclo Basculante: una sola línea de punta a cola, paneles en morro, techo y cola
+
+- Eugenio: «hazlo más al estilo Aptera y el Cuadriciclo Bala, mejorando el tema de paneles solares; cabina, morro y cola tienen que estar los 3 en una línea suave que va de punta a cola sin interrupciones para mejorar el Cd».
+- El perfil de arriba es ahora una sola línea:
+  - sube desde la punta del morro sin doblarse nunca hacia abajo;
+  - el parabrisas va encima de esa línea, sin capó propio ni escalón en su pie;
+  - llega al techo sin quiebro y baja en una curva hasta la cola.
+- Si las ruedas van dentro del morro, la línea sube sola lo justo para taparlas.
+- El deslizador «Capó: altura al pie del parabrisas» desaparece. Lo sustituye «Línea del morro: altura sobre el eje delantero».
+- Paneles solares en una franja de punta a cola, como el Aptera: en el morro (nuevo, de serie), el techo y la cola (ahora de serie). Pasan de 0,55 a 1,36 m²: unos 290 W a pleno sol y 0,77 kWh al día (estimación).
+- Cola algo más baja (0,52 m) y con una curva más suave hasta ella (1,6).
+- La carrocería se estrecha antes detrás de las ruedas delanteras.
+- Cifras del diseño de serie: Cd del túnel 0,189 a 80 km/h (antes 0,192); CdA 0,139 m² (antes 0,141); área frontal 0,81 m²; 197 kg; 37 comprobaciones en verde.
