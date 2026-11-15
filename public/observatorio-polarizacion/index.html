@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 </head>
 <body>
-<title>Observatorio de Polarización Política</title>
+<title>Política</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Un modelo interactivo de las cinco posiciones políticas de la España actual: cómo piensan, cómo hablan, cómo se ven entre sí y hasta dónde escalan. Incluye un test para saber hacia dónde te escoras.">
+<meta name="description" content="Política: cómo se polariza España, qué cuida y qué abandona cada partido en inmigración y servicios públicos, y una propuesta de democracia directa para decidir por temas con datos.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&display=swap">
@@ -764,6 +764,120 @@ footer p{margin:0;max-width:70ch}
   .flip[aria-pressed="true"] .face.back{opacity:1}
   .flip[aria-pressed="true"] .face.front{opacity:0}
 }
+/* ================= Ocho capítulos: portada en dos filas de cuatro ================= */
+.cards{grid-template-columns:repeat(12,minmax(0,1fr))}
+.card,.card.big{grid-column:span 3}
+@media (max-width:900px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))} .card,.card.big{grid-column:auto}}
+@media (max-width:520px){.cards{grid-template-columns:minmax(0,1fr)}}
+
+/* ================= 6 · Geometrías ================= */
+.geo-top{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;margin-bottom:18px}
+.geo{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:clamp(18px,3vw,36px);align-items:start}
+.geo-stage{position:relative;border-radius:22px;background:radial-gradient(80% 80% at 50% 50%,#131A26,var(--bg) 75%);border:1px solid var(--line);padding:8px}
+.geo-stage svg{display:block;width:100%;height:auto;touch-action:manipulation}
+.geo-cap{font-size:13.5px;line-height:1.5;color:var(--muted);margin:6px 12px 10px}
+.geo-side{display:grid;gap:14px;position:sticky;top:84px}
+.geo-chips{display:flex;flex-wrap:wrap;gap:6px}
+.geo-chip{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:7px 12px;border-radius:999px;border:1px solid var(--ctl);background:transparent;color:var(--ink-2);font:500 13.5px/1.1 var(--sans);cursor:pointer}
+.geo-chip i{width:12px;height:12px;border-radius:50%;background:var(--pc);box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--pc);opacity:.45}
+.geo-chip[aria-pressed="true"]{border-color:var(--pc);color:var(--ink);background:color-mix(in srgb,var(--pc) 16%,transparent)}
+.geo-chip[aria-pressed="true"] i{opacity:1}
+.geo-chip.mini{min-height:34px;padding:5px 11px;font-size:12.5px;color:var(--muted)}
+.geo-opts .tbtn{min-height:40px;padding:7px 14px;font-size:13.5px}
+.geo-panel{padding:18px 18px 16px;border-radius:18px;background:var(--bg-2);border:1px solid var(--line);min-height:220px}
+.geo-panel h4{font:400 1.45rem/1.15 var(--display);margin:4px 0 8px}
+.geo-panel p{font-size:15px;line-height:1.55;color:var(--ink-2)}
+.geo-panel .pbar{height:4px;border-radius:2px;background:var(--pc);margin-bottom:12px}
+.geo-panel ul{list-style:none;margin:8px 0 12px;padding:0;display:grid;gap:6px}
+.geo-panel li{font-size:14.5px;line-height:1.45;color:var(--ink-2)}
+.geo-panel li b{color:var(--ink);font-weight:600}
+.geo-row{display:grid;grid-template-columns:7.2em minmax(0,1fr) 2em;align-items:center;gap:10px;font-size:13.5px;color:var(--ink-2)}
+.geo-row .bar{height:8px;border-radius:4px;background:var(--bg-3);overflow:hidden}
+.geo-row .bar i{display:block;height:100%;border-radius:4px}
+.geo-row b{font:500 13px var(--mono);color:var(--ink);text-align:right}
+.geo-link{appearance:none;border:0;background:none;padding:0;color:var(--ink);font:600 14px var(--sans);text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:32px}
+.geo-plist{display:grid;gap:8px;margin-top:10px}
+.geo-pitem{display:grid;grid-template-columns:12px minmax(0,1fr);gap:10px;align-items:start;text-align:left;appearance:none;border:1px solid var(--line);background:var(--bg);border-radius:12px;padding:10px 12px;color:var(--ink-2);font:400 13.5px/1.45 var(--sans);cursor:pointer}
+.geo-pitem:hover{border-color:var(--pc)}
+.geo-pitem i{width:12px;height:12px;border-radius:50%;background:var(--pc);margin-top:3px}
+.geo-pitem b{color:var(--ink)}
+.geo-tag{display:inline-flex;align-items:center;gap:6px;padding:3px 9px;border-radius:999px;font:500 12px var(--sans);color:var(--ink);background:color-mix(in srgb,var(--pc) 22%,transparent);border:1px solid color-mix(in srgb,var(--pc) 60%,transparent);margin:0 4px 4px 0}
+.geo-how{margin-top:22px;border:1px solid var(--line);border-radius:16px;background:var(--bg-2);padding:4px 18px}
+.geo-how summary,.geo-tabla summary{cursor:pointer;min-height:48px;display:flex;align-items:center;font:600 14.5px var(--sans);color:var(--ink)}
+.geo-how p{font-size:15px;color:var(--ink-2);max-width:86ch}
+.geo-props{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.geo-prop{padding:16px;border-radius:16px;background:var(--bg-2);border:1px solid var(--line);display:flex;flex-direction:column;gap:8px;min-width:0}
+.geo-prop .n{font:500 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--warn)}
+.geo-prop h4{font:400 1.2rem/1.2 var(--display);margin:0}
+.geo-prop p{font-size:14px;line-height:1.5;color:var(--ink-2);margin:0}
+.geo-prop .ya{margin-top:auto;padding-top:6px;font-size:12.5px;color:var(--muted)}
+.geo-obj{margin-top:16px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.geo-obj div{padding:16px 18px;border-radius:16px;border:1px dashed var(--line-2)}
+.geo-obj p{font-size:14.5px;color:var(--ink-2);margin:6px 0 0}
+.geo-tabla{margin-top:18px;border:1px solid var(--line);border-radius:16px;padding:4px 18px 10px;background:var(--bg-2)}
+.geo-tabla .tw{overflow-x:auto}
+.geo-tabla table{border-collapse:collapse;width:100%;min-width:720px;font-size:13.5px}
+.geo-tabla th,.geo-tabla td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:center;color:var(--ink-2)}
+.geo-tabla th{font:500 11.5px/1.25 var(--mono);color:var(--muted);vertical-align:bottom}
+.geo-tabla td:first-child,.geo-tabla th:first-child{text-align:left;color:var(--ink);white-space:nowrap}
+.geo-ax{cursor:pointer}
+.geo-ax:focus{outline:none}
+.geo-ax:focus-visible rect{stroke:var(--warn);stroke-width:2}
+.geo-shape{cursor:pointer;transition:opacity .25s}
+@media (max-width:1000px){.geo{grid-template-columns:minmax(0,1fr)} .geo-side{position:static} .geo-props{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.geo-props,.geo-obj{grid-template-columns:minmax(0,1fr)} .geo-stage{padding:2px;border-radius:16px}}
+
+/* ================= 7 · Decidir por temas ================= */
+.dd-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:clamp(28px,4vw,44px)}
+.dd-step{padding:16px;border-radius:16px;background:var(--bg-2);border:1px solid var(--line);display:flex;flex-direction:column;gap:6px;min-width:0}
+.dd-step .n{font:400 2rem/1 var(--display);color:var(--warn)}
+.dd-step h4{font:600 15px/1.25 var(--sans);margin:0}
+.dd-step p{font-size:13.5px;line-height:1.5;color:var(--ink-2);margin:0}
+.dd{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,19rem);gap:clamp(18px,3vw,32px);align-items:start}
+.dd-areas{margin-bottom:16px}
+.dd-list{display:grid;gap:16px}
+.dd-card{padding:clamp(16px,2.4vw,24px);border-radius:20px;background:var(--bg-2);border:1px solid var(--line);display:grid;gap:14px}
+.dd-card h4{font:400 clamp(1.35rem,2.2vw,1.7rem)/1.15 var(--display);margin:0}
+.dd-state{font-size:15px;line-height:1.55;color:var(--ink-2);margin:0}
+.dd-data{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+.dd-dato{display:grid;grid-template-columns:minmax(0,8.5em) minmax(0,1fr) auto;gap:12px;align-items:center;padding:10px 12px;border-radius:12px;background:var(--bg);border:1px solid var(--line)}
+.dd-dato.off{opacity:.45}
+.dd-dato b{font:400 clamp(1.25rem,2.2vw,1.6rem)/1.05 var(--display);color:var(--ink)}
+.dd-dato span{font-size:13.5px;line-height:1.4;color:var(--ink-2)}
+.dd-dato small{display:block;font:500 11px/1.35 var(--mono);color:var(--muted);margin-top:3px;letter-spacing:.02em}
+.dd-dctl{display:flex;gap:4px}
+.dd-dctl button{min-width:36px;min-height:36px;border-radius:10px;border:1px solid var(--line-2);background:transparent;color:var(--ink-2);font:600 13px var(--sans);cursor:pointer}
+.dd-dctl button:hover{color:var(--ink);border-color:var(--ink-2)}
+.dd-dctl button[aria-pressed="true"]{background:var(--bg-3);color:var(--warn);border-color:var(--warn)}
+.dd-hint{font-size:12.5px;color:var(--muted);margin:-4px 0 0}
+.dd-scale{display:grid;grid-template-columns:repeat(5,minmax(0,1fr)) auto;gap:6px}
+.dd-scale button{min-height:46px;padding:6px 8px;border-radius:12px;border:1px solid var(--ctl);background:transparent;color:var(--ink-2);font:500 13px/1.2 var(--sans);cursor:pointer}
+.dd-scale button:hover{border-color:var(--ink-2);color:var(--ink)}
+.dd-scale button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.dd-scale button.ns[aria-pressed="true"]{background:var(--bg-3);color:var(--ink);border-color:var(--ink-2)}
+.dd-args{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.dd-arg{padding:14px;border-radius:14px;border:1px solid var(--line);background:var(--bg);display:flex;flex-direction:column;gap:6px}
+.dd-arg .lbl{color:var(--ac)}
+.dd-arg p{font-size:14px;line-height:1.5;color:var(--ink-2);margin:0}
+.dd-arg .quien{font-size:12.5px;color:var(--muted)}
+.dd-arg button{align-self:flex-start;margin-top:auto;min-height:36px;padding:6px 12px;border-radius:999px;border:1px solid var(--ctl);background:transparent;color:var(--ink-2);font:500 12.5px var(--sans);cursor:pointer}
+.dd-arg button[aria-pressed="true"]{border-color:var(--ac);color:var(--ink);background:color-mix(in srgb,var(--ac) 18%,transparent)}
+.dd-side{position:sticky;top:84px;padding:18px;border-radius:18px;background:var(--bg-2);border:1px solid var(--warn);display:grid;gap:10px}
+.dd-side h4{font:400 1.35rem/1.15 var(--display);margin:0}
+.dd-side ol{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.dd-side li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;font-size:13.5px;line-height:1.35;color:var(--ink-2);padding-bottom:6px;border-bottom:1px solid var(--line)}
+.dd-side li b{font:600 12.5px var(--sans);color:var(--ink);text-align:right}
+.dd-side li.vacio b{color:var(--muted);font-weight:400}
+.dd-side .cnt{font:500 12px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.dd-side .tbtn{min-height:40px;font-size:13.5px}
+.dd-obj{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.dd-obj div{padding:16px;border-radius:16px;border:1px dashed var(--line-2)}
+.dd-obj h4{font:600 14.5px/1.3 var(--sans);margin:0 0 6px}
+.dd-obj p{font-size:14px;line-height:1.5;color:var(--ink-2);margin:0}
+@media (max-width:1100px){.dd-steps{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:1000px){.dd{grid-template-columns:minmax(0,1fr)} .dd-side{position:static}}
+@media (max-width:760px){.dd-steps,.dd-obj{grid-template-columns:minmax(0,1fr)} .dd-args{grid-template-columns:minmax(0,1fr)} .dd-scale{grid-template-columns:repeat(3,minmax(0,1fr))} .dd-dato{grid-template-columns:minmax(0,1fr) auto} .dd-dato > div:first-child{grid-column:1 / -1}}
+
 </style>
 
 <svg class="sprite" aria-hidden="true" focusable="false">
@@ -908,7 +1022,7 @@ footer p{margin:0;max-width:70ch}
 
 <header class="top" lang="es">
   <div class="top-in">
-    <a class="brand" href="#inicio"><span class="brand-mark" aria-hidden="true"></span><span class="brand-txt">Observatorio de Polarización Política</span></a>
+    <a class="brand" href="#inicio"><span class="brand-mark" aria-hidden="true"></span><span class="brand-txt">Política</span></a>
     <nav aria-label="Capítulos">
       <ol class="nav">
         <li><a href="#hoy">1 · Hoy</a></li>
@@ -916,7 +1030,9 @@ footer p{margin:0;max-width:70ch}
         <li><a href="#miradas">3 · Miradas</a></li>
         <li><a href="#perfiles">4 · Perfiles</a></li>
         <li><a href="#escalada">5 · Del nosotros al enemigo</a></li>
-        <li><a href="#fuentes">6 · Palabras y fuentes</a></li>
+        <li><a href="#geometrias">6 · Geometrías</a></li>
+        <li><a href="#decidir">7 · Decidir</a></li>
+        <li><a href="#fuentes">8 · Palabras y fuentes</a></li>
       </ol>
     </nav>
   </div>
@@ -926,11 +1042,11 @@ footer p{margin:0;max-width:70ch}
 <div class="page" lang="es">
 <main>
 
-<!-- ============ PORTADA: SEIS CAPÍTULOS ============ -->
+<!-- ============ PORTADA: OCHO CAPÍTULOS ============ -->
 <section id="inicio" class="hero" aria-labelledby="h-inicio">
   <div class="hero-text">
-    <p class="eyebrow">Observatorio de Polarización Política · España</p>
-    <h1 id="h-inicio">Seis formas de mirar una sociedad dividida.</h1>
+    <p class="eyebrow">Política · España</p>
+    <h1 id="h-inicio">Siete formas de mirar una sociedad dividida, y una de decidir juntos.</h1>
   </div>
   <div class="cards" id="cards">
     <a class="card big" href="#hoy" style="--cc:var(--c)">
@@ -958,9 +1074,19 @@ footer p{margin:0;max-width:70ch}
       <span class="card-n">Capítulo 5</span><b>Del nosotros al enemigo</b>
       <span class="card-t">Los círculos de pertenencia y los nueve peldaños que llevan del desacuerdo al abismo.</span>
     </a>
+    <a class="card" href="#geometrias" style="--cc:#3B82F6">
+      <span class="card-img" aria-hidden="true"><svg viewBox="0 0 320 150" id="ci-geometrias"></svg></span>
+      <span class="card-n">Capítulo 6</span><b>Geometrías</b>
+      <span class="card-t">Cada partido como una figura: dónde es fuerte, dónde le cojea y el círculo que cuidaría de todo.</span>
+    </a>
+    <a class="card" href="#decidir" style="--cc:#F6BE3B">
+      <span class="card-img" aria-hidden="true"><svg viewBox="0 0 320 150" id="ci-decidir"></svg></span>
+      <span class="card-n">Capítulo 7</span><b>Decidir por temas</b>
+      <span class="card-t">Una democracia directa: ver los datos de cada materia y decidir subir, bajar, abrir o cerrar.</span>
+    </a>
     <a class="card" href="#fuentes" style="--cc:var(--xr)">
       <span class="card-img" aria-hidden="true"><svg viewBox="0 0 320 150" id="ci-fuentes"></svg></span>
-      <span class="card-n">Capítulo 6</span><b>Palabras y fuentes</b>
+      <span class="card-n">Capítulo 8</span><b>Palabras y fuentes</b>
       <span class="card-t">De dónde vienen «facha», «rojo» o «fascista», y los estudios en que se apoya todo.</span>
     </a>
   </div>
@@ -1172,10 +1298,99 @@ footer p{margin:0;max-width:70ch}
   </div>
 </section>
 
-<!-- ============ 6 · PALABRAS Y FUENTES ============ -->
+<!-- ============ 6 · GEOMETRÍAS ============ -->
+<section id="geometrias" class="chapter" aria-labelledby="h-geometrias">
+  <div class="ch-head">
+    <p class="ch-num">Capítulo 6 · Geometrías</p>
+    <h2 id="h-geometrias">Los partidos no son puntos, <em>son formas</em>.</h2>
+    <p class="ch-lede">Un test electoral te sitúa a ti y a cada partido en un punto del mapa. Pero un programa no es un punto: cuida unos aspectos de un problema y abandona otros. Aquí cada partido es una figura con sus fuerzas y sus patas cojas, y el ideal es un círculo que llega a todo sin aristas.</p>
+  </div>
+  <div class="geo-top">
+    <div class="toggle-row" id="geo-tema" role="group" aria-label="Elige un tema"></div>
+  </div>
+  <div class="geo">
+    <div class="geo-stage">
+      <svg id="geo-svg" viewBox="0 0 820 740" role="img" aria-labelledby="geo-svg-t"><title id="geo-svg-t">Figura de cada partido sobre los ocho aspectos del tema elegido</title></svg>
+      <p class="geo-cap" id="geo-cap"></p>
+    </div>
+    <aside class="geo-side" aria-label="Partidos y detalle">
+      <div>
+        <p class="lbl" style="margin-bottom:8px">Partidos · pulsa para superponer</p>
+        <div class="geo-chips" id="geo-chips"></div>
+      </div>
+      <div class="toggle-row geo-opts">
+        <button class="tbtn" id="geo-ideal" aria-pressed="true">Círculo ideal</button>
+        <button class="tbtn" id="geo-env" aria-pressed="false">Lo mejor de cada uno</button>
+      </div>
+      <div class="geo-panel" id="geo-panel" aria-live="polite"></div>
+    </aside>
+  </div>
+  <details class="geo-how">
+    <summary>Cómo se lee y de dónde salen las formas</summary>
+    <p>Cada radio es un aspecto del problema. La distancia al centro mide cuánto y con qué detalle lo atiende la propuesta de cada partido: 0, lo ignora o lo rechaza; 5, lo menciona en general; 10, tiene una propuesta concreta y detallada. Cerca del centro todo es sencillo porque no se cuida casi nada; el círculo grande es el partido que se ocupa de todo con detalle.</p>
+    <p>Los radios opuestos son dilemas, y por eso un test los resume en un punto. Los radios vecinos se complementan: si un partido cuida los dos, el borde que los une se curva y sigue el círculo; si cuida uno y abandona el otro, el borde es una recta y aparece una arista. Esas aristas son donde chocan los partidos.</p>
+    <p>Las puntuaciones son una valoración de este observatorio a partir de programas, planes y votaciones publicados hasta noviembre de 2026, con las fuentes al final de la página. No son una encuesta ni una medida oficial, y de algunos partidos hay menos información en algunos aspectos. Son discutibles y corregibles: si un dato está mal, se cambia.</p>
+  </details>
+  <div class="sub">
+    <h3 id="geo-ideal-h">El círculo: lo que diría un partido que cuidara de todo</h3>
+    <p class="ch-lede">Una propuesta por radio, para España, tomada de lo mejor que ya plantea alguno de los partidos y unida para que no queden aristas. Es la propuesta de esta página para el debate, no la de ningún partido.</p>
+    <div class="geo-props" id="geo-props"></div>
+    <div class="geo-obj" id="geo-obj"></div>
+  </div>
+  <details class="geo-tabla">
+    <summary>Ver la tabla de valoraciones</summary>
+    <div class="tw" id="geo-tabla"></div>
+  </details>
+  <p class="note">Elecciones generales del 29 de noviembre de 2026. Esto no es una recomendación de voto: es un mapa de lo que cada propuesta cuida y de lo que deja fuera.</p>
+</section>
+
+<!-- ============ 7 · DECIDIR POR TEMAS ============ -->
+<section id="decidir" class="chapter" aria-labelledby="h-decidir">
+  <div class="ch-head">
+    <p class="ch-num">Capítulo 7 · Decidir por temas</p>
+    <h2 id="h-decidir">Votar cosas concretas, <em>no colores</em>.</h2>
+    <p class="ch-lede">Una propuesta de democracia directa. En vez de elegir cada cuatro años un partido que no recoge todo lo que piensas, cada persona ve el estado real de cada materia y decide sobre medidas concretas: subir o bajar, abrir o cerrar, mucho, poco o nada. El debate deja de ser de izquierdas contra derechas y pasa a ser sobre qué hacer y con qué datos.</p>
+  </div>
+  <div class="dd-steps">
+    <div class="dd-step"><span class="n">1</span><h4>Ver el estado</h4><p>Cada materia muestra cómo está hoy, con datos oficiales, su fuente y su fecha.</p></div>
+    <div class="dd-step"><span class="n">2</span><h4>Elegir</h4><p>Para cada medida, cinco posiciones: mucho, poco o nada hacia un lado o hacia el otro. Y «no lo sé todavía», que también cuenta.</p></div>
+    <div class="dd-step"><span class="n">3</span><h4>Escuchar a quien sabe</h4><p>Argumentos firmados por personas expertas y organizaciones. Puedes seguir a quien te convence, y delegar en esa persona tu voto en una materia y retirarlo cuando quieras.</p></div>
+    <div class="dd-step"><span class="n">4</span><h4>Acordar los datos</h4><p>Qué datos se enseñan y en qué orden también se debate. Una mesa del dato, con estadísticos y ciudadanos por sorteo, lo acuerda por mayoría amplia, y cualquiera puede proponer un dato nuevo.</p></div>
+    <div class="dd-step"><span class="n">5</span><h4>Un mandato concreto</h4><p>La suma de decisiones se convierte en un mandato, por ejemplo «subir un poco». Un comité técnico decide cómo cumplirlo al menor coste y rinde cuentas con los mismos datos.</p></div>
+  </div>
+  <div class="dd">
+    <div>
+      <div class="toggle-row dd-areas" id="dd-areas" role="group" aria-label="Elige una materia"></div>
+      <div class="dd-list" id="dd-list"></div>
+    </div>
+    <aside class="dd-side" aria-label="Tu mandato">
+      <span class="cnt" id="dd-cnt"></span>
+      <h4>Tu mandato</h4>
+      <ol id="dd-mandato"></ol>
+      <div class="toggle-row">
+        <button class="tbtn" id="dd-copiar" type="button">Copiar mi mandato</button>
+        <button class="tbtn" id="dd-borrar" type="button">Empezar de nuevo</button>
+      </div>
+      <p class="tiny" id="dd-estado" aria-live="polite">Es un prototipo: tus elecciones se guardan solo en este navegador y no se envían a ningún sitio.</p>
+    </aside>
+  </div>
+  <div class="sub">
+    <h3>Lo que se le objetará, y cómo responder</h3>
+    <div class="dd-obj">
+      <div><h4>«La mayoría puede pisar a una minoría»</h4><p>Los derechos fundamentales quedan fuera de votación, como hoy quedan fuera del alcance de una mayoría simple en el Parlamento. Se decide cuánto y cómo, no a quién se le quitan derechos.</p></div>
+      <div><h4>«Nadie puede informarse de todo»</h4><p>Por eso existe la delegación por materias: votas lo que conoces y confías el resto a quien sigues, y puedes cambiar de opinión en cualquier momento.</p></div>
+      <div><h4>«Pediremos más de todo y menos impuestos»</h4><p>Cada medida mostraría lo que cuesta y de dónde sale el dinero, y las de gasto se votarían junto a su financiación. Sin eso, el mandato sería incoherente.</p></div>
+      <div><h4>«Quien controle los datos controla el voto»</h4><p>Por eso los datos se debaten en público, con fuente y método visibles, y su selección exige una mayoría amplia, no la del gobierno de turno.</p></div>
+      <div><h4>«Participará poca gente, y no la misma»</h4><p>Puntos de voto presenciales, ayuda en bibliotecas y ayuntamientos, y muestras por sorteo para comprobar que el resultado se parece a la población.</p></div>
+      <div><h4>«Ya existe y no es tan raro»</h4><p>Suiza vota varias veces al año sobre medidas concretas, y muchos ayuntamientos usan presupuestos participativos. La novedad aquí es votar por grados y debatir también los datos.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8 · PALABRAS Y FUENTES ============ -->
 <section id="fuentes" class="chapter" aria-labelledby="h-fuentes">
   <div class="ch-head">
-    <p class="ch-num">Capítulo 6 · Palabras y fuentes</p>
+    <p class="ch-num">Capítulo 8 · Palabras y fuentes</p>
     <h2 id="h-fuentes">Palabras del siglo XX <em>para conflictos del XXI</em>.</h2>
     <p class="ch-lede">«Fascista» y «comunista» nombran regímenes que ya no existen en Europa. En España arrastran además la memoria de la Guerra Civil. Hoy funcionan como insultos, y cada época añade los suyos, venga de donde venga.</p>
   </div>
@@ -1232,7 +1447,7 @@ footer p{margin:0;max-width:70ch}
 
 </main>
 <footer>
-  <p>Herramienta educativa sin afiliación política. Los perfiles son tipos ideales, no retratos de personas ni de partidos.</p>
+  <p>Herramienta educativa sin afiliación política. Los perfiles son tipos ideales, no retratos de personas ni de partidos. Las geometrías del capítulo 6 sí sitúan a partidos reales: son una valoración de esta página a partir de sus programas y votaciones, discutible y corregible.</p>
   <p>Ningún dato sale de tu navegador.</p>
 </footer>
 </div>
@@ -2047,8 +2262,32 @@ const GRUPOS = [["todos", "Los doce"], ["linea", "La línea izquierda–derecha"
 })();
 
 /* ================= 6 · Fuentes ================= */
-const CAT = { datos: ["Datos", "#6CC4E4"], politica: ["Ciencia política", "#5B7CF0"], psico: ["Psicología", "#F2955F"], historia: ["Historia", "#EC5272"], lenguaje: ["Comunicación", "#E8E2CF"], conflicto: ["Conflicto", "#F6BE3B"] };
+const CAT = { programa: ["Programas y leyes", "#C9CCD3"], datos: ["Datos", "#6CC4E4"], politica: ["Ciencia política", "#5B7CF0"], psico: ["Psicología", "#F2955F"], historia: ["Historia", "#EC5272"], lenguaje: ["Comunicación", "#E8E2CF"], conflicto: ["Conflicto", "#F6BE3B"] };
 const REFS = [
+  { c: "programa", ch: [6], a: "Partido Popular", y: 2025, t: "Plan Nacional de Inmigración", s: "pp.es, octubre de 2025", u: "Autoridad única, visado por puntos, español y Constitución para renovar la residencia y expulsión por delitos graves: la figura del PP en inmigración." },
+  { c: "programa", ch: [6, 7], a: "Partido Popular", y: 2026, t: "La reconstrucción nacional", s: "Programa electoral del 29-N, 249 medidas", u: "Identificar en siete días, cupos ligados a los retornos, prohibir las regularizaciones masivas, 4.500 médicos de primaria y la historia clínica única." },
+  { c: "programa", ch: [6], a: "Vox", y: 2025, t: "Remigración y prioridad nacional", s: "Rueda de prensa del 7 de julio de 2025 y programas autonómicos de 2026", u: "La repatriación masiva y la prioridad nacional en ayudas y servicios: los picos de Vox en control y retorno." },
+  { c: "programa", ch: [6], a: "Vox", y: 2023, t: "Libertad de elección sanitaria", s: "Programa electoral del 23-J", u: "Extender el modelo de MUFACE a toda la población y reforzar los conciertos: su figura en servicios." },
+  { c: "programa", ch: [6], a: "Gobierno de España", y: 2026, t: "Real Decreto de regularización extraordinaria", s: "BOE, 15 de abril de 2026", u: "La regularización de unas 500.000 personas pactada por PSOE y Podemos, y el catalán y el euskera como arraigo al renovar." },
+  { c: "programa", ch: [6], a: "PSOE y Junts", y: 2025, t: "Proposición de Ley Orgánica de delegación de competencias de inmigración en Cataluña", s: "BOCG, rechazada el 29 de septiembre de 2025", u: "Permisos, expulsiones, CIE y Mossos en las fronteras: la figura de Junts, el apoyo de ERC y el no de Podemos, PP y Vox." },
+  { c: "programa", ch: [6], a: "Congreso de los Diputados", y: 2025, t: "Reparto obligatorio de menores no acompañados", s: "Reforma de la Ley de Extranjería, prorrogada hasta agosto de 2027", u: "El reparto entre comunidades y las posiciones de PP, Vox, Junts y PNV ante él." },
+  { c: "programa", ch: [6, 7], a: "Gobierno de España", y: 2026, t: "Proyecto de Ley de gestión pública e integridad del SNS", s: "BOCG, mayo de 2026", u: "La gestión directa como regla y la indirecta como excepción evaluada, y el rechazo de PP, Vox y Junts al modelo." },
+  { c: "programa", ch: [6], a: "Sumar", y: 2023, t: "Programa electoral del 23-J", s: "Sanidad, empresa farmacéutica pública y MUFACE", u: "Prohibir las formas de gestión privatizadas e integrar poco a poco a los mutualistas: la base de la figura de Frente Amplio." },
+  { c: "programa", ch: [6], a: "Gobierno Vasco", y: 2025, t: "Pacto de Salud por Osakidetza", s: "24 líneas estratégicas", u: "La colaboración privada solo con valor añadido y sin superar su peso actual: la figura del PNV, y el rechazo de EH Bildu." },
+  { c: "programa", ch: [6], a: "ERC, PNV y EH Bildu", y: 2026, t: "Competencias propias en inmigración", s: "Programas y declaraciones de 2024 a 2026", u: "El catalán y el euskera como vía de integración, la integración laboral del PNV y la soberanía migratoria que pide EH Bildu." },
+  { c: "datos", ch: [6], a: "testelectoral.com", y: 2026, t: "Test electoral", s: "Cuestionario de 42 a 129 preguntas", u: "La inspiración del capítulo: un mapa que coloca a cada partido en un punto. Aquí el punto se convierte en una figura." },
+  { c: "datos", ch: [7], a: "Ministerio del Interior", y: 2026, t: "Balance de criminalidad 2025", s: "Cuarto trimestre de 2025", u: "2.474.156 infracciones, un 0,8 % más; la bajada de los delitos contra el patrimonio y el peso de la ciberdelincuencia." },
+  { c: "programa", ch: [7], a: "Cortes Generales", y: 2026, t: "Ley Orgánica en materia de multirreincidencia", s: "BOCG, abril de 2026", u: "De uno a tres años de prisión a partir de la tercera condena por hurto, y quién la votó." },
+  { c: "datos", ch: [7], a: "Ministerio del Interior", y: 2026, t: "Balance de inmigración irregular", s: "Datos de 2025 y a 31 de octubre de 2026", u: "36.775 llegadas en 2025 y el repunte de 2026, con Baleares al alza." },
+  { c: "datos", ch: [7], a: "Seguridad Social", y: 2025, t: "Programas GECCO 2025", s: "Revista de la Seguridad Social", u: "25.767 personas con contrato en origen, un récord: el dato de la contratación en origen." },
+  { c: "datos", ch: [7], a: "Caminando Fronteras", y: 2025, t: "Monitoreo del derecho a la vida 2025", s: "Informe anual", u: "Las 3.090 muertes en las rutas hacia España: el dato que pone sobre la mesa quien pide más salvamento." },
+  { c: "datos", ch: [7], a: "INE", y: 2026, t: "Encuesta de Población Activa, tercer trimestre", s: "27 de octubre de 2026", u: "La tasa de paro del 10,18 % y los 2.591.200 parados." },
+  { c: "programa", ch: [7], a: "BOE", y: 2026, t: "Real Decreto 126/2026 del salario mínimo", s: "BOE n.º 44, 19 de febrero de 2026", u: "1.221 euros al mes en catorce pagas, un 3,1 % más, pactado con CCOO y UGT y sin CEOE ni Cepyme." },
+  { c: "datos", ch: [7], a: "Ministerio de Sanidad", y: 2026, t: "Listas de espera del SNS", s: "Datos a 31 de diciembre de 2025", u: "Los 121 días de espera media para operarse y la distancia entre comunidades." },
+  { c: "programa", ch: [7], a: "Ministerio de Educación", y: 2026, t: "Proyecto de ley de ratios y jornada lectiva", s: "Consejo de Ministros, 21 de abril de 2026", u: "22 alumnos por aula en Primaria y 25 en la ESO; su coste estimado por Esade." },
+  { c: "datos", ch: [7], a: "F. Ramón Areces y F. SyE", y: 2026, t: "Indicadores comentados sobre el sistema educativo español", s: "Edición 2026", u: "El gasto público en educación: 71.349 millones y el 4,48 % del PIB en 2024." },
+  { c: "politica", ch: [7], a: "Kriesi, H. y Trechsel, A.", y: 2008, t: "The Politics of Switzerland", s: "Cambridge University Press", u: "Cómo funciona la democracia directa suiza, con votaciones varias veces al año sobre medidas concretas." },
+  { c: "politica", ch: [7], a: "Blum, C. y Zuber, C. I.", y: 2016, t: "Liquid democracy", s: "Journal of Political Philosophy, 24(2)", u: "La delegación del voto por materias, revocable en cualquier momento: la base del paso 3 de la propuesta." },
   { c: "datos", ch: [1, 2], a: "CIS", y: 2026, t: "Barómetro de septiembre 2026", s: "Estudio n.º 3577", u: "La distribución real de la autoubicación ideológica de 1 a 10, con 4.042 entrevistas: el gráfico del capítulo 1 y las barras grises del modelo y de 2026." },
   { c: "politica", ch: [1, 2], a: "Torcal, M.", y: 2023, t: "De votantes a hooligans", s: "Catarata", u: "La idea central del capítulo 1: en España ha crecido sobre todo la polarización afectiva, el rechazo al otro bando, y el procés fue uno de sus motores." },
   { c: "politica", ch: [1], a: "Reiljan, A.", y: 2020, t: "«Fear and loathing across party lines» (also) in Europe", s: "European Journal of Political Research, 59(2)", u: "El índice comparado de polarización afectiva que sitúa a España entre los países europeos más polarizados." },
@@ -2076,16 +2315,16 @@ const REFS = [
   { c: "psico", ch: [5], a: "Tajfel y Turner", y: 1979, t: "An integrative theory of intergroup conflict", s: "Brooks/Cole", u: "La identidad social: basta trazar un «nosotros» para favorecerlo frente a «ellos». La base de los círculos de pertenencia." },
   { c: "datos", ch: [5], a: "Moreno, L.", y: 2006, t: "Scotland, Catalonia, Europeanization and the «Moreno question»", s: "Scottish Affairs, 54", u: "La pregunta sobre identidad dual que muestra que la mayoría se siente de su comunidad y española a la vez." },
   { c: "conflicto", ch: [5], a: "Glasl, F.", y: 1980, t: "Konfliktmanagement", s: "Haupt", u: "Los nueve peldaños de la escalada del conflicto, en tres niveles: ganar-ganar, ganar-perder y perder-perder." },
-  { c: "politica", ch: [6], a: "Mudde, C.", y: 2004, t: "The populist zeitgeist", s: "Government and Opposition, 39(4)", u: "El populismo como «ideología delgada»: un pueblo puro frente a una élite corrupta. La tesis sobre los extremos." },
-  { c: "politica", ch: [6], a: "Mudde, C.", y: 2019, t: "The Far Right Today", s: "Polity", u: "La distinción entre derecha radical, que acepta las urnas, y extrema derecha, que las rechaza." },
-  { c: "politica", ch: [6], a: "March, L.", y: 2011, t: "Radical Left Parties in Europe", s: "Routledge", u: "La izquierda radical europea: rechaza el orden económico capitalista, pero compite en elecciones." },
-  { c: "psico", ch: [6], a: "Van Prooijen y Krouwel", y: 2019, t: "Psychological features of extreme political ideologies", s: "Current Directions in Psychological Science, 28(2)", u: "Los rasgos que comparten los dos extremos: simplicidad cognitiva, exceso de confianza e intolerancia. El centro del diagrama." },
-  { c: "psico", ch: [6], a: "Zmigrod, Rentfrow y Robbins", y: 2020, t: "The partisan mind", s: "Journal of Experimental Psychology: General, 149(3)", u: "La rigidez cognitiva medida en laboratorio se asocia con un partidismo más extremo." }
+  { c: "politica", ch: [8], a: "Mudde, C.", y: 2004, t: "The populist zeitgeist", s: "Government and Opposition, 39(4)", u: "El populismo como «ideología delgada»: un pueblo puro frente a una élite corrupta. La tesis sobre los extremos." },
+  { c: "politica", ch: [8], a: "Mudde, C.", y: 2019, t: "The Far Right Today", s: "Polity", u: "La distinción entre derecha radical, que acepta las urnas, y extrema derecha, que las rechaza." },
+  { c: "politica", ch: [8], a: "March, L.", y: 2011, t: "Radical Left Parties in Europe", s: "Routledge", u: "La izquierda radical europea: rechaza el orden económico capitalista, pero compite en elecciones." },
+  { c: "psico", ch: [8], a: "Van Prooijen y Krouwel", y: 2019, t: "Psychological features of extreme political ideologies", s: "Current Directions in Psychological Science, 28(2)", u: "Los rasgos que comparten los dos extremos: simplicidad cognitiva, exceso de confianza e intolerancia. El centro del diagrama." },
+  { c: "psico", ch: [8], a: "Zmigrod, Rentfrow y Robbins", y: 2020, t: "The partisan mind", s: "Journal of Experimental Psychology: General, 149(3)", u: "La rigidez cognitiva medida en laboratorio se asocia con un partidismo más extremo." }
 ];
 (function fuentes() {
   const grid = $("#refs-grid"), pick = $("#ref-pick");
   if (!grid) return;
-  const NOMBRES = ["Todas", "1 · Hoy", "2 · Cien años", "3 · Miradas", "4 · Perfiles", "5 · Escalada", "6 · Palabras"];
+  const NOMBRES = ["Todas", "1 · Hoy", "2 · Cien años", "3 · Miradas", "4 · Perfiles", "5 · Escalada", "6 · Geometrías", "7 · Decidir", "8 · Palabras"];
   const ini = (a) => a.length <= 4 ? a : a.split(/[\s,()]+/).filter((w) => w.length > 2 && /^[A-ZÁÉÍÓÚ]/.test(w)).slice(0, 2).map((w) => w[0]).join("");
   grid.innerHTML = REFS.map((r) => {
     const [cn, cc] = CAT[r.c];
@@ -2197,6 +2436,467 @@ const REFS = [
   }));
 })();
 
+
+
+/* ================= 6 · Geometrías ================= */
+/* Cada partido es una figura sobre ocho radios. Valoración del observatorio, de 0 a 10, a partir de
+   programas, planes y votaciones hasta noviembre de 2026 (fuentes en el capítulo 8). Entre dos radios
+   vecinos el borde se curva siguiendo el círculo cuanto mejor cuida el partido los dos, y es una recta
+   (una arista) cuando cuida uno y abandona el otro. */
+const PARTIDOS = [
+  { k: "pp", n: "PP", c: "#3B82F6" },
+  { k: "psoe", n: "PSOE", c: "#EF4444" },
+  { k: "vox", n: "Vox", c: "#22C55E" },
+  { k: "fa", n: "Frente Amplio", c: "#E055A8" },
+  { k: "erc", n: "ERC", c: "#F59E0B" },
+  { k: "junts", n: "Junts", c: "#14B8C4" },
+  { k: "bildu", n: "EH Bildu", c: "#A3E635" },
+  { k: "pnv", n: "PNV", c: "#C9B458" },
+  { k: "pod", n: "Podemos", c: "#A855F7" }
+];
+const PMAP = Object.fromEntries(PARTIDOS.map((p) => [p.k, p]));
+const TEMAS = {
+  inm: {
+    n: "Inmigración y fronteras",
+    cap: "Arriba frente a abajo: control de fronteras frente a asilo y derechos. Derecha frente a izquierda: vías legales de trabajo frente a convivencia y normas. Los radios vecinos se completan entre sí.",
+    ejes: [
+      { l: ["Control de", "fronteras"], n: "Control de fronteras y lucha contra las mafias", d: "Saber quién entra, por dónde y cómo, y perseguir a las redes que trafican con personas.",
+        p: "Una agencia única que registre e identifique en menos de 72 horas a toda persona que llega de forma irregular, salvamento marítimo reforzado y persecución del patrimonio de las redes de tráfico, dentro del Pacto Europeo de Migración y Asilo.", ya: ["pp", "junts", "pnv"] },
+      { l: ["Cooperación", "con origen"], n: "Cooperación con los países de origen y tránsito", d: "Que nadie tenga que jugarse la vida para salir de su país: acuerdos con los países de donde se sale y por donde se pasa.",
+        p: "Acuerdos con Marruecos, Mauritania, Senegal y el Sahel que unan contratación en origen, inversión y readmisión de quien no tiene derecho a quedarse. Cada país que coopera recibe más visados de trabajo.", ya: ["psoe", "pp", "pnv"] },
+      { l: ["Vías legales", "de trabajo"], n: "Vías legales para venir a trabajar o estudiar", d: "Puertas ordenadas para entrar con papeles.",
+        p: "Un visado de búsqueda de empleo y cupos anuales por sectores con falta de mano de obra, títulos homologados en meses y no en años, y el arraigo por trabajo o formación como vía ordinaria y permanente, para no depender de regularizaciones extraordinarias.", ya: ["psoe", "pp", "fa", "pnv"] },
+      { l: ["Economía", "y pensiones"], n: "Economía, demografía y pensiones", d: "El papel de la migración en el empleo, la natalidad y las cuentas públicas.",
+        p: "Un plan plurianual de necesidades de mano de obra pactado con empresas, sindicatos y comunidades; cotizar desde el primer día; y una política propia de natalidad (vivienda, conciliación) para no fiarlo todo a la inmigración.", ya: ["psoe", "pnv", "pp"] },
+      { l: ["Asilo y", "derechos"], n: "Asilo y derechos humanos", d: "Proteger a quien huye de una guerra o de una persecución, y a los menores que llegan solos.",
+        p: "Resolver el asilo en menos de seis meses con todas las garantías, y que la decisión se cumpla en los dos sentidos. Un sistema estable de acogida de menores, repartido de forma automática según la población y pagado por el Estado, que priorice la reunificación familiar cuando sea segura.", ya: ["psoe", "fa", "pod", "bildu", "pnv"] },
+      { l: ["Integración", "e idioma"], n: "Integración: idioma, empleo, vivienda y escuela", d: "Que quien llega pueda formar parte de verdad.",
+        p: "Un itinerario de acogida gratuito y obligatorio: castellano y la lengua cooficial, la Constitución, empleo y vivienda; repartido por el territorio para evitar guetos, y con la escuela como primera puerta.", ya: ["pp", "erc", "junts", "pnv", "bildu"] },
+      { l: ["Convivencia", "y normas"], n: "Convivencia y normas comunes", d: "Las mismas reglas para todos y barrios donde se viva bien juntos.",
+        p: "Normas claras e iguales para todos (igualdad entre mujeres y hombres, libertad religiosa dentro de la ley), mediación vecinal, inversión en los barrios con más concentración y la misma firmeza contra el racismo que contra el delito.", ya: ["pp", "junts", "fa", "pnv"] },
+      { l: ["Seguridad", "y retorno"], n: "Seguridad y retorno", d: "Que quien no tiene derecho a quedarse vuelva, y que el delito tenga consecuencias.",
+        p: "Retornos efectivos tras una decisión firme y con garantías, expulsión de quien acumula condenas por delitos graves, juicios rápidos, y datos públicos de delincuencia con su contexto para desmontar bulos en los dos sentidos.", ya: ["pp", "junts", "pnv", "vox"] }
+    ],
+    v: {
+      pp: [8, 7, 6, 5, 3, 6, 8, 9], psoe: [6, 8, 8, 8, 7, 6, 4, 4], vox: [10, 4, 2, 2, 1, 2, 8, 10],
+      fa: [3, 6, 9, 7, 9, 8, 5, 2], erc: [4, 4, 7, 6, 7, 8, 7, 3], junts: [7, 3, 6, 5, 3, 7, 8, 7],
+      bildu: [3, 5, 8, 6, 9, 8, 6, 2], pnv: [5, 6, 8, 8, 6, 8, 6, 6], pod: [1, 4, 9, 6, 10, 7, 4, 1]
+    },
+    t: {
+      pp: "Su Plan Nacional de Inmigración (2025) y su programa del 29-N: una autoridad única, identificar en siete días a quien entra de forma irregular, rechazo en frontera en Ceuta y Melilla, un visado por puntos con cupos ligados a que los países de origen acepten retornos, prohibir por ley las regularizaciones masivas, español y Constitución para renovar la residencia, expulsión como regla por delitos graves y multirreincidencia, y prohibir el burka y el nicab en la calle.",
+      psoe: "Desde el Gobierno: el reglamento de extranjería de 2025, con más vías de arraigo; la regularización extraordinaria de unas 500.000 personas pactada con Podemos (real decreto de abril de 2026); contratación en origen y migración circular; y el reparto obligatorio de menores no acompañados entre comunidades. Pactó con Junts delegar competencias a Cataluña, rechazado en el Congreso en septiembre de 2025.",
+      vox: "Expulsión de quien entra de forma irregular y de los residentes legales que delinquen, «prioridad nacional» en ayudas, vivienda y servicios públicos, y desde 2025 la «remigración», una repatriación masiva. Es la forma más puntiaguda: toca el borde en control y retorno y casi no tiene superficie en asilo, vías legales o integración.",
+      fa: "La coalición de Sumar, IU, Más Madrid y Comuns, con Ada Colau de candidata, viene del espacio que apoyó la regularización, las vías legales y seguras y un enfoque de derechos y antirracismo. Llena en derechos, vías legales e integración; casi sin propuesta en control y retorno.",
+      erc: "Pide todas las competencias de inmigración para la Generalitat, con el catalán como «vehículo de inclusión», y la regularización para dinamizar la economía; consiguió que el catalán cuente como arraigo al renovar los permisos de la regularización. Rufián ha pedido además más control en las fronteras. Va al 29-N con Podemos en Cataluña.",
+      junts: "Pactó con el PSOE delegar en la Generalitat permisos, expulsiones, los CIE y que los Mossos estén en puertos y aeropuertos; el preámbulo presentaba la inmigración como un reto para el catalán. Impulsó la ley de multirreincidencia, rechaza que Cataluña entre en el reparto de menores y criticó la regularización por dejar al margen el catalán.",
+      bildu: "Pide que Euskadi y Navarra puedan regular su propia política migratoria, con el euskera como herramienta de cohesión, y defiende la acogida de refugiados. Amplia en derechos e integración; casi plana en control y retorno.",
+      pnv: "Reclama competencias integrales para Euskadi (acogida, integración y permisos de trabajo), integración por la vía laboral, una gestión «ordenada y humanitaria» y, en palabras del lehendakari, «el que la hace la paga». Pide priorizar la reunificación familiar de los menores antes que el reparto. De las formas más redondas, sin picos.",
+      pod: "Su gran logro es la regularización extraordinaria pactada con el PSOE. Votó contra delegar la inmigración a Cataluña y defiende cerrar los CIE y acabar con las devoluciones en caliente. Toca el borde en asilo y vías legales y apenas tiene superficie en control y retorno."
+    },
+    obj: [
+      ["Desde la derecha se dirá", "Que mantener el arraigo como vía permanente y un reparto obligatorio de menores produce efecto llamada, y que la integración no puede ser solo un itinerario: tiene que exigir resultados."],
+      ["Desde la izquierda se dirá", "Que ligar visados a la readmisión externaliza las fronteras a gobiernos que no respetan derechos, y que hablar de expulsión de multirreincidentes señala a los migrantes."]
+    ]
+  },
+  ser: {
+    n: "Servicios públicos y privados",
+    cap: "Arriba frente a abajo: gestión pública universal frente a colaboración privada. Derecha frente a izquierda: más financiación pública frente a contención fiscal. Los radios vecinos se completan entre sí.",
+    ejes: [
+      { l: ["Gestión pública", "universal"], n: "Gestión pública y universalidad", d: "La misma cartera de servicios para todo el mundo, con la gestión pública como columna.",
+        p: "Una cartera común garantizada a toda persona residente y la gestión pública como regla, con los conciertos como complemento evaluado y no como sustituto.", ya: ["psoe", "fa", "pod", "bildu", "pp"] },
+      { l: ["Profesionales", "suficientes"], n: "Profesionales suficientes", d: "Médicos, docentes y cuidadores suficientes, y con condiciones para quedarse.",
+        p: "Plazas de formación (MIR, magisterio) según necesidades medidas, carrera profesional e incentivos claros para las plazas difíciles, sobre todo en atención primaria y en los pueblos.", ya: ["pp", "pnv", "fa", "pod"] },
+      { l: ["Financiación", "pública"], n: "Financiación pública suficiente", d: "Cuánto dinero público se pone.",
+        p: "Un suelo de gasto por habitante en sanidad, educación y dependencia, con fondos finalistas para primaria y dependencia, revisado cada año contra resultados.", ya: ["psoe", "fa", "erc", "pp"] },
+      { l: ["Evaluación y", "resultados"], n: "Evaluación y resultados", d: "Medir y publicar: listas de espera, calidad y coste.",
+        p: "Indicadores públicos de resultados y de coste para cada centro, sea cual sea su gestión, y plazos máximos de espera garantizados por ley.", ya: ["psoe", "pp", "pnv"] },
+      { l: ["Colaboración", "privada"], n: "Colaboración con centros privados", d: "Usar centros privados pagados con dinero público.",
+        p: "Conciertos solo donde mejoren el coste y el resultado medidos, con cláusula de reversión y prohibición de seleccionar a los pacientes o alumnos más rentables.", ya: ["pnv", "pp", "vox", "junts"] },
+      { l: ["Libertad de", "elección"], n: "Libertad de elección", d: "Que cada persona elija médico, hospital o colegio.",
+        p: "Elegir médico, hospital y colegio dentro de la red pagada con dinero público, con información de resultados para elegir bien, y decidir el futuro de MUFACE con una evaluación independiente.", ya: ["pp", "vox", "junts"] },
+      { l: ["Contención", "fiscal"], n: "Contención del gasto y de los impuestos", d: "No gastar de más ni subir impuestos sin necesidad.",
+        p: "Auditar el gasto, una central de compras común, digitalización y lucha contra el fraude antes de subir la presión fiscal media.", ya: ["pp", "vox", "pnv"] },
+      { l: ["Territorio y", "cercanía"], n: "Territorio y cercanía", d: "Que el servicio llegue igual a un pueblo que a una capital, y que se decida cerca.",
+        p: "Historia clínica y tarjeta sanitaria que funcionen en toda España, unidades móviles y telemedicina en el medio rural, y gestión cercana por comunidades con un fondo de nivelación.", ya: ["pp", "vox", "pnv", "junts", "erc", "bildu"] }
+    ],
+    v: {
+      pp: [6, 7, 6, 7, 8, 8, 9, 6], psoe: [9, 6, 8, 6, 3, 3, 4, 7], vox: [3, 5, 5, 6, 8, 9, 8, 5],
+      fa: [10, 8, 9, 6, 1, 2, 2, 6], erc: [8, 6, 8, 5, 4, 3, 3, 9], junts: [6, 6, 7, 6, 8, 6, 6, 9],
+      bildu: [9, 7, 8, 5, 2, 2, 3, 8], pnv: [7, 7, 7, 7, 6, 5, 6, 9], pod: [10, 8, 9, 4, 0, 1, 1, 5]
+    },
+    t: {
+      pp: "Programa del 29-N: un pacto de Estado por la sanidad pública, 4.500 médicos más en atención primaria, una historia clínica y social única, un pacto de dependencia, una auditoría del gasto y rebajas fiscales. Donde gobierna defiende la colaboración público-privada y la libertad de elección de médico, centro y colegio, entre la red pública, la concertada y la privada.",
+      psoe: "Su Gobierno aprobó en 2026 el proyecto de Ley de gestión pública e integridad del Sistema Nacional de Salud: la gestión directa como regla, la indirecta solo en casos excepcionales y justificados, e indicadores de resultados para todos los centros. Tira hacia lo público y la financiación; corta en elección y colaboración.",
+      vox: "Un modelo mixto en el que cada persona pueda elegir sanidad pública o privada, como hoy los funcionarios con MUFACE; libertad de elección; colaboración público-privada «con transparencia y control de resultados»; y prioridad nacional en el acceso. Fuerte en elección y contención; su universalidad se recorta por la prioridad nacional.",
+      fa: "Una sanidad pública sin formas de gestión privatizadas, integrar poco a poco a los mutualistas de MUFACE en la pública, más plantilla y más gasto. La ministra de Sanidad, Mónica García (Más Madrid), impulsó la ley de gestión pública. Toca el borde en lo público y casi desaparece en colaboración y elección.",
+      erc: "Defiende la sanidad pública catalana, ampliar la cobertura pública y la financiación singular para Cataluña, y pide nuevas competencias. Fuerte en territorio, financiación y lo público; corta en elección y contención.",
+      junts: "Defiende el modelo sanitario catalán, con hospitales concertados y consorcios, y ve la ley de gestión pública como un ataque a ese modelo y a las competencias de la Generalitat. Fuerte en territorio y colaboración; media en lo demás.",
+      bildu: "Pide una Osakidetza pública fuerte y ha frenado en el Pacto de Salud vasco la colaboración público-privada. Fuerte en lo público y el autogobierno; corta en elección y contención.",
+      pnv: "En el Pacto de Salud vasco aceptó la colaboración privada solo «cuando suponga un valor añadido» y sin superar su peso actual en el gasto, y acordó con los sindicatos una nueva carrera profesional en Osakidetza. La forma más equilibrada del gráfico, sin llegar al borde casi en nada.",
+      pod: "Blindar lo público, acabar con los conciertos y las mutuas, y más plantilla. Su forma es casi una media luna: llena en lo público, la financiación y los profesionales, y vacía en la otra mitad."
+    },
+    obj: [
+      ["Desde la izquierda se dirá", "Que cualquier concierto, aunque se evalúe, abre la puerta a la privatización, y que la libertad de elección favorece a quien ya está mejor informado."],
+      ["Desde la derecha se dirá", "Que un suelo de gasto rígido y la gestión pública como regla frenan la eficiencia y la innovación, y que la libertad de elegir es un derecho, no un complemento."]
+    ]
+  }
+};
+
+(function geometrias() {
+  const svg = $("#geo-svg");
+  if (!svg) return;
+  const NS = "http://www.w3.org/2000/svg";
+  const CX = 410, CY = 372, R = 226, N = 8, STEP = (2 * Math.PI) / N;
+  const ang = (i) => -Math.PI / 2 + i * STEP;
+  const P = (a, r) => [CX + r * Math.cos(a), CY + r * Math.sin(a)];
+  const rr = (s) => (R * s) / 10;
+  const clamp = (x) => Math.min(1, Math.max(0, x));
+  // Cuánto se integran dos aspectos vecinos: 1 si los dos están bien cuidados y parejos (borde curvo).
+  const integ = (a, b) => clamp((Math.min(a, b) - 4) / 5) * clamp(1 - Math.abs(a - b) / 5);
+  function puntos(s) {
+    const out = [];
+    for (let i = 0; i < N; i++) {
+      const j = (i + 1) % N, a0 = ang(i), r0 = rr(s[i]), r1v = rr(s[j]), k = integ(s[i], s[j]);
+      const A = P(a0, r0), B = P(a0 + STEP, r1v);
+      for (let t = 0; t < 16; t++) {
+        const u = t / 16, Q = P(a0 + u * STEP, r0 + (r1v - r0) * u);
+        const C = [A[0] + (B[0] - A[0]) * u, A[1] + (B[1] - A[1]) * u];
+        out.push([C[0] + k * (Q[0] - C[0]), C[1] + k * (Q[1] - C[1])]);
+      }
+    }
+    return out;
+  }
+  const dPath = (pts) => "M" + pts.map((p) => `${r1(p[0])},${r1(p[1])}`).join("L") + "Z";
+
+  const st = { tema: "inm", sel: new Set(["pp", "psoe", "vox", "fa"]), foco: null, eje: null, ideal: true, env: false };
+  const T = () => TEMAS[st.tema];
+
+  function dibujar() {
+    const t = T(), ejes = t.ejes;
+    let s = "";
+    [2.5, 5, 7.5, 10].forEach((v) => { s += `<circle cx="${CX}" cy="${CY}" r="${rr(v)}" fill="none" stroke="#283142" stroke-width="1" ${v < 10 ? 'stroke-dasharray="3 5"' : ""}/>`; });
+    for (let i = 0; i < N; i++) { const [x, y] = P(ang(i), R); s += `<line x1="${CX}" y1="${CY}" x2="${r1(x)}" y2="${r1(y)}" stroke="#3A4660" stroke-width="1"/>`; }
+    // Escala sobre el hueco entre el primer y el segundo radio
+    const aE = ang(0) + STEP / 2;
+    [[2.5, "lo ignora"], [5, "en general"], [10, "en detalle"]].forEach(([v, txt]) => {
+      const [x, y] = P(aE, rr(v));
+      s += `<text x="${r1(x + 6)}" y="${r1(y + 4)}" font-family="IBM Plex Mono, monospace" font-size="13" fill="#5E6B88">${txt}</text>`;
+    });
+    if (st.env) {
+      const env = ejes.map((_, i) => Math.max(...PARTIDOS.map((p) => t.v[p.k][i])));
+      s += `<path d="${dPath(puntos(env))}" fill="none" stroke="#EDEBE6" stroke-opacity=".8" stroke-width="2" stroke-dasharray="7 6"/>`;
+    }
+    if (st.ideal) {
+      s += `<circle cx="${CX}" cy="${CY}" r="${R}" fill="#F6BE3B" fill-opacity=".04" stroke="#F6BE3B" stroke-width="3"/>`;
+      const [x, y] = P(ang(1) + STEP * 0.62, R + 12);
+      s += `<text x="${r1(x)}" y="${r1(y)}" font-family="IBM Plex Mono, monospace" font-size="14" fill="#F6BE3B" letter-spacing="1">CÍRCULO IDEAL</text>`;
+    }
+    const orden = PARTIDOS.filter((p) => st.sel.has(p.k)).sort((a, b) => (a.k === st.foco) - (b.k === st.foco));
+    orden.forEach((p) => {
+      const v = t.v[p.k], on = !st.foco || st.foco === p.k;
+      s += `<g class="geo-shape" data-p="${p.k}" style="opacity:${on ? 1 : 0.18}"><path d="${dPath(puntos(v))}" fill="${p.c}" fill-opacity="${st.foco === p.k ? 0.26 : 0.1}" stroke="${p.c}" stroke-width="${st.foco === p.k ? 3.2 : 2.2}" stroke-linejoin="round"/>`;
+      v.forEach((x, i) => { const [px, py] = P(ang(i), rr(x)); s += `<circle cx="${r1(px)}" cy="${r1(py)}" r="${st.foco === p.k ? 5 : 3.5}" fill="${p.c}"/>`; });
+      if (st.foco === p.k) {
+        // Patas cojas
+        v.forEach((x, i) => { if (x <= 3) { const [px, py] = P(ang(i), rr(x)); s += `<circle cx="${r1(px)}" cy="${r1(py)}" r="11" fill="none" stroke="#F6BE3B" stroke-width="2" stroke-dasharray="3 3"/>`; } });
+        // El punto al que lo reduciría un test
+        let vx = 0, vy = 0; v.forEach((x, i) => { vx += x * Math.cos(ang(i)); vy += x * Math.sin(ang(i)); });
+        vx = (vx / N) * (R / 10) * 2.2; vy = (vy / N) * (R / 10) * 2.2;
+        const L = Math.hypot(vx, vy), m = L > R * 0.9 ? (R * 0.9) / L : 1;
+        const tx = CX + vx * m, ty = CY + vy * m;
+        s += `<line x1="${CX}" y1="${CY}" x2="${r1(tx)}" y2="${r1(ty)}" stroke="#EDEBE6" stroke-width="1.5" stroke-dasharray="2 4"/><circle cx="${r1(tx)}" cy="${r1(ty)}" r="8" fill="${p.c}" stroke="#0C0F14" stroke-width="3"/>`
+          + `<text x="${r1(tx + 13)}" y="${r1(ty + 5)}" font-family="Archivo, sans-serif" font-size="15" fill="#EDEBE6" paint-order="stroke" stroke="#0C0F14" stroke-width="4">el punto de un test</text>`;
+      }
+      s += `</g>`;
+    });
+    ejes.forEach((e, i) => {
+      const a = ang(i), [x, y] = P(a, R + 26), c = Math.cos(a), sn = Math.sin(a);
+      const anchor = Math.abs(c) < 0.2 ? "middle" : c > 0 ? "start" : "end";
+      const y0 = sn < -0.5 ? y - 22 : sn > 0.5 ? y + 14 : y - 6;
+      const act = st.eje === i;
+      const w = Math.max(...e.l.map((l) => l.length)) * 11.2 + 16;
+      const bx = anchor === "middle" ? x - w / 2 : anchor === "start" ? x - 8 : x - w + 8;
+      s += `<g class="geo-ax" data-ax="${i}" tabindex="0" role="button" aria-label="${e.n}"><rect x="${r1(bx)}" y="${r1(y0 - 22)}" width="${r1(w)}" height="54" rx="10" fill="${act ? "#1B2230" : "transparent"}" stroke="${act ? "#F6BE3B" : "transparent"}"/>`
+        + e.l.map((l, j) => `<text x="${r1(x)}" y="${r1(y0 + j * 23)}" text-anchor="${anchor}" font-family="Archivo, sans-serif" font-size="20" font-weight="${j ? 400 : 600}" fill="${act ? "#F6BE3B" : j ? "#C9CCD3" : "#EDEBE6"}">${l}</text>`).join("") + `</g>`;
+    });
+    svg.innerHTML = `<title id="geo-svg-t">Figura de cada partido sobre los ocho aspectos de ${t.n.toLowerCase()}</title>` + s;
+    $("#geo-cap").textContent = t.cap;
+  }
+
+  const fuertes = (v, ejes) => v.map((x, i) => [x, i]).filter(([x]) => x >= 8).map(([, i]) => ejes[i].n);
+  const cojas = (v, ejes) => v.map((x, i) => [x, i]).filter(([x]) => x <= 3).map(([, i]) => ejes[i].n);
+  function aristas(v, ejes) {
+    const out = [];
+    for (let i = 0; i < N; i++) { const j = (i + 1) % N; if (Math.abs(v[i] - v[j]) >= 4) out.push(v[i] > v[j] ? [ejes[i].n, ejes[j].n] : [ejes[j].n, ejes[i].n]); }
+    return out;
+  }
+  const lista = (arr) => arr.length ? arr.map((x) => x.toLowerCase()).join(", ").replace(/, ([^,]*)$/, " y $1") : "";
+
+  function panel() {
+    const t = T(), el = $("#geo-panel");
+    if (st.eje != null) {
+      const e = t.ejes[st.eje];
+      el.innerHTML = `<span class="lbl">Radio ${st.eje + 1} de 8</span><h4>${e.n}</h4><p>${e.d}</p>
+        <div style="display:grid;gap:7px;margin:12px 0 14px">${PARTIDOS.map((p) => `<div class="geo-row"><span>${p.n}</span><span class="bar"><i style="width:${t.v[p.k][st.eje] * 10}%;background:${p.c}"></i></span><b>${t.v[p.k][st.eje]}</b></div>`).join("")}</div>
+        <span class="lbl" style="color:var(--warn)">Lo que haría el círculo</span><p style="margin-top:6px">${e.p}</p>
+        <button class="geo-link" data-cerrar>Volver a la vista general</button>`;
+      return;
+    }
+    if (st.foco) {
+      const p = PMAP[st.foco], v = t.v[p.k], f = fuertes(v, t.ejes), c = cojas(v, t.ejes), a = aristas(v, t.ejes);
+      el.innerHTML = `<div class="pbar" style="--pc:${p.c}"></div><span class="lbl">${t.n}</span><h4>${p.n}</h4><p>${t.t[p.k]}</p>
+        <ul>${f.length ? `<li><b>Dónde es fuerte:</b> ${lista(f)}.</li>` : ""}${c.length ? `<li><b>Dónde le cojea:</b> ${lista(c)}.</li>` : `<li><b>Sin patas cojas:</b> no deja ningún radio por debajo de 3.</li>`}
+        ${a.length ? `<li><b>Aristas:</b> ${a.slice(0, 3).map(([x, y]) => `de ${x.toLowerCase()} a ${y.toLowerCase()}`).join("; ")}.</li>` : `<li><b>Sin aristas fuertes:</b> sus radios vecinos están parejos.</li>`}</ul>
+        <p style="font-size:13.5px;color:var(--muted)">El punto con borde negro es donde lo dejaría un test que lo resume todo en una posición. La figura enseña lo que ese punto esconde.</p>
+        <button class="geo-link" data-cerrar>Ver todos los partidos elegidos</button>`;
+      return;
+    }
+    const sel = PARTIDOS.filter((p) => st.sel.has(p.k));
+    el.innerHTML = `<span class="lbl">${t.n}</span><h4>Pulsa una figura o un aspecto</h4>
+      <p>Una figura llena y redonda cuida de todo; una estrella con puntas cuida mucho unas cosas y abandona otras. Pulsa un partido para ver dónde es fuerte, dónde le cojea y dónde tiene aristas, o pulsa el nombre de un aspecto para comparar a todos en él.</p>
+      <div class="geo-plist">${sel.map((p) => { const c = cojas(t.v[p.k], t.ejes); return `<button class="geo-pitem" data-ver="${p.k}" style="--pc:${p.c}"><i></i><span><b>${p.n}</b> · ${c.length ? "le cojea " + lista(c) : "sin patas cojas"}</span></button>`; }).join("") || `<p class="tiny">Elige al menos un partido arriba.</p>`}</div>`;
+  }
+
+  function propuestas() {
+    const t = T();
+    $("#geo-props").innerHTML = t.ejes.map((e, i) => `<article class="geo-prop"><span class="n">Radio ${i + 1}</span><h4>${e.n}</h4><p>${e.p}</p>
+      <p class="ya">Ya lo plantean en parte: ${e.ya.map((k) => `<span class="geo-tag" style="--pc:${PMAP[k].c}">${PMAP[k].n}</span>`).join("")}</p></article>`).join("");
+    $("#geo-obj").innerHTML = t.obj.map(([h, p]) => `<div><span class="lbl">${h}</span><p>${p}</p></div>`).join("")
+      + `<div style="grid-column:1 / -1;border-style:solid;border-color:var(--warn)"><span class="lbl" style="color:var(--warn)">Por qué un círculo</span><p>El círculo no elimina esas discusiones: las ordena. Obliga a decir qué se hace en cada radio en lugar de ganar el debate con el radio que más conviene a cada uno.</p></div>`;
+    $("#geo-tabla").innerHTML = `<table><thead><tr><th scope="col">Partido</th>${t.ejes.map((e) => `<th scope="col">${e.l.join(" ")}</th>`).join("")}</tr></thead><tbody>`
+      + PARTIDOS.map((p) => `<tr><td>${p.n}</td>${t.v[p.k].map((x) => `<td>${x}</td>`).join("")}</tr>`).join("") + `</tbody></table>`;
+  }
+
+  function chips() {
+    $("#geo-chips").innerHTML = PARTIDOS.map((p) => `<button class="geo-chip" data-k="${p.k}" style="--pc:${p.c}" aria-pressed="${st.sel.has(p.k)}"><i></i>${p.n}</button>`).join("")
+      + `<button class="geo-chip mini" data-todos>Todos</button><button class="geo-chip mini" data-ninguno>Ninguno</button>`;
+  }
+  function todo() { chips(); dibujar(); panel(); }
+
+  $("#geo-tema").innerHTML = Object.entries(TEMAS).map(([k, t]) => `<button class="tbtn" data-t="${k}" aria-pressed="${k === st.tema}">${t.n}</button>`).join("");
+  $("#geo-tema").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-t]"); if (!b) return;
+    st.tema = b.dataset.t; st.eje = null;
+    $$("[data-t]", $("#geo-tema")).forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    todo(); propuestas();
+  });
+  $("#geo-chips").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    if (b.dataset.todos != null) PARTIDOS.forEach((p) => st.sel.add(p.k));
+    else if (b.dataset.ninguno != null) { st.sel.clear(); st.foco = null; }
+    else { const k = b.dataset.k; if (st.sel.has(k)) { st.sel.delete(k); if (st.foco === k) st.foco = null; } else st.sel.add(k); }
+    todo();
+  });
+  const enfocar = (k) => { st.foco = st.foco === k ? null : k; st.eje = null; if (k) st.sel.add(k); todo(); };
+  const eje = (i) => { st.eje = st.eje === i ? null : i; st.foco = null; dibujar(); panel(); };
+  svg.addEventListener("click", (e) => {
+    const a = e.target.closest("[data-ax]"); if (a) return eje(+a.dataset.ax);
+    const s = e.target.closest("[data-p]"); if (s) return enfocar(s.dataset.p);
+    if (st.foco || st.eje != null) { st.foco = null; st.eje = null; dibujar(); panel(); }
+  });
+  svg.addEventListener("keydown", (e) => {
+    const a = e.target.closest("[data-ax]");
+    if (a && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); eje(+a.dataset.ax); const n = svg.querySelector(`[data-ax="${a.dataset.ax}"]`); if (n) n.focus(); }
+  });
+  $("#geo-panel").addEventListener("click", (e) => {
+    const v = e.target.closest("[data-ver]"); if (v) return enfocar(v.dataset.ver);
+    if (e.target.closest("[data-cerrar]")) { st.foco = null; st.eje = null; dibujar(); panel(); }
+  });
+  $("#geo-ideal").addEventListener("click", (e) => { st.ideal = !st.ideal; e.currentTarget.setAttribute("aria-pressed", String(st.ideal)); dibujar(); });
+  $("#geo-env").addEventListener("click", (e) => { st.env = !st.env; e.currentTarget.setAttribute("aria-pressed", String(st.env)); dibujar(); });
+  API.geoForma = puntos; // usado por la tarjeta de la portada
+  todo(); propuestas();
+})();
+
+/* ================= 7 · Decidir por temas ================= */
+/* Prototipo de democracia directa por grados. Los datos son reales y llevan su fuente (capítulo 8);
+   las elecciones de cada persona viven solo en su navegador (localStorage, con try/catch). */
+const ESCALAS = {
+  subir: ["Bajar mucho", "Bajar un poco", "Quedarse igual", "Subir un poco", "Subir mucho"],
+  abrir: ["Cerrar mucho", "Cerrar un poco", "Quedarse igual", "Abrir un poco", "Abrir mucho"]
+};
+const AREAS = [
+  { k: "seg", n: "Seguridad", palancas: [
+    { id: "seg-reinc", t: "Penas para quien roba una y otra vez", e: "subir",
+      est: "Desde abril de 2026, quien acumula tres o más condenas firmes por hurtos u otros delitos menos graves puede ir de uno a tres años a prisión, sin importar el valor de lo robado; el robo de un móvil, hasta tres años.",
+      datos: [
+        ["2.474.156", "infracciones penales registradas en 2025, un 0,8 % más que en 2024", "Ministerio del Interior · Balance de criminalidad 2025"],
+        ["−3,1 %", "delitos contra el patrimonio en 2025 respecto a 2024", "Ministerio del Interior · Balance de criminalidad 2025"],
+        ["1 de cada 5", "delitos registrados ya se comete por internet", "Ministerio del Interior · Balance enero–septiembre 2025"]
+      ],
+      a: ["Para subir", "Comerciantes y alcaldes ven las mismas caras una y otra vez: sin una consecuencia real, el hurto pequeño se convierte en un oficio.", "Votaron la reforma PSOE, PP, Vox, Junts, PNV, Coalición Canaria y UPN."],
+      b: ["Para dejarla igual o bajar", "La reforma acaba de entrar en vigor: hay que medir su efecto antes de tocarla. Más cárcel sin juzgados ágiles ni reinserción puede no reducir el delito.", "La rechazaron Sumar y otros grupos a la izquierda del PSOE."] },
+    { id: "seg-ciber", t: "Medios contra las estafas por internet", e: "subir",
+      est: "Las estafas informáticas son ya el delito que más crece y la mayor parte de la ciberdelincuencia.",
+      datos: [
+        ["327.856", "estafas informáticas registradas entre enero y septiembre de 2025, un 6,4 % más que un año antes", "Ministerio del Interior · Balance enero–septiembre 2025"],
+        ["20 %", "de todas las infracciones registradas se cometen en o por medio de internet", "Ministerio del Interior · Balance enero–septiembre 2025"]
+      ],
+      a: ["Para subir", "Una unidad especializada por provincia, bancos obligados a devolver antes y cooperación con otros países: el estafador está a un clic y casi nunca se le encuentra.", ""],
+      b: ["Para dejarla igual o bajar", "Gran parte del aumento es que ahora se denuncia más; antes de gastar, conviene saber qué parte es delito nuevo y qué parte es delito que antes no se contaba.", ""] }
+  ] },
+  { k: "inm", n: "Inmigración", palancas: [
+    { id: "inm-origen", t: "Contratación en origen: venir ya con contrato", e: "abrir",
+      est: "Empresas de sectores con falta de mano de obra contratan en el país de origen con permisos de trabajo de temporada o estables; desde 2026, con permisos de cuatro años para la migración circular.",
+      datos: [
+        ["25.767", "personas trabajaron en España en 2025 con estos programas, casi un 25 % más que en 2024", "Seguridad Social · Programas GECCO 2025"],
+        ["36.775", "llegadas irregulares por mar y tierra en 2025, un 42,6 % menos que en 2024", "Ministerio del Interior · Balance de inmigración irregular 2025"],
+        ["10,18 %", "tasa de paro en el tercer trimestre de 2026", "INE · Encuesta de Población Activa, 3.er trimestre 2026"]
+      ],
+      a: ["Para abrir", "Faltan manos en el campo, la hostelería y los cuidados, y cada contrato en origen es una persona menos en manos de las mafias.", "Lo defienden el Gobierno, el PNV, y el PP con su visado ligado a un contrato."],
+      b: ["Para cerrar o dejar igual", "Con más de dos millones y medio de parados, primero hay que formar y emplear a quien ya está aquí, y no presionar más la vivienda y los servicios.", "Lo defiende Vox."] },
+    { id: "inm-frontera", t: "Vigilancia en el mar y en Ceuta y Melilla", e: "subir",
+      est: "Tras la fuerte caída de 2025, en 2026 las llegadas irregulares vuelven a subir, sobre todo hacia Baleares, y Ceuta vivió una entrada masiva a nado a finales de julio.",
+      datos: [
+        ["32.942", "llegadas irregulares entre enero y octubre de 2026, un 8,9 % más que en 2025 (sin contar la entrada masiva en Ceuta del 30 y 31 de julio)", "Ministerio del Interior · Balance a 31 de octubre de 2026"],
+        ["+14,5 %", "llegadas por mar a Baleares en el mismo periodo", "Ministerio del Interior · Balance a 31 de octubre de 2026"],
+        ["3.090", "personas murieron en 2025 intentando llegar a España, según un recuento de una organización social", "Caminando Fronteras · Informe 2025"]
+      ],
+      a: ["Para subir", "El repunte de 2026 y la nueva ruta de Baleares piden más medios de vigilancia y de salvamento, y acuerdos con Argelia y Marruecos.", "Lo defienden PP, Vox y Junts; Rufián (ERC) ha pedido más control en las fronteras."],
+      b: ["Para dejarla igual o bajar", "Más vigilancia sin vías legales desvía a la gente a rutas más largas y peligrosas; el dinero salva más vidas en salvamento y en acuerdos con los países de origen.", "Lo defienden Podemos y organizaciones como Caminando Fronteras."] }
+  ] },
+  { k: "eco", n: "Economía", palancas: [
+    { id: "eco-smi", t: "Salario mínimo", e: "subir",
+      est: "El salario mínimo de 2026 es de 1.221 euros al mes en catorce pagas (17.094 euros al año), un 3,1 % más que en 2025.",
+      datos: [
+        ["1.221 €", "al mes en 14 pagas; 9,55 euros la hora para el empleo de hogar por horas", "BOE · Real Decreto 126/2026"],
+        ["+66 %", "ha subido desde 2018, cuando era de 735,90 euros al mes", "Real Decreto 126/2026 y serie del salario mínimo"],
+        ["10,18 %", "tasa de paro en el tercer trimestre de 2026", "INE · Encuesta de Población Activa, 3.er trimestre 2026"]
+      ],
+      a: ["Para subir", "El alquiler y la cesta de la compra han subido más que los salarios bajos; un sueldo mínimo digno también sostiene el consumo.", "Lo defienden el Ministerio de Trabajo y los sindicatos CCOO y UGT."],
+      b: ["Para dejarlo igual o bajar", "En las regiones y los sectores con salarios más bajos, cada subida pesa más para la pequeña empresa y puede frenar la contratación de quien tiene menos experiencia.", "Lo defienden las patronales CEOE y Cepyme, que proponían limitar la subida de 2026 al 1,5 %."] },
+    { id: "eco-iva", t: "IVA general", e: "subir",
+      est: "El tipo general del IVA es del 21 %; hay tipos reducidos del 10 % y del 4 % para muchos bienes básicos.",
+      datos: [
+        ["21 %", "tipo general del IVA, vigente desde septiembre de 2012", "Ley 37/1992 del IVA"],
+        ["10 % y 4 %", "tipos reducido y superreducido; el 4 % se aplica, por ejemplo, al pan, la leche, las medicinas y los libros", "Ley 37/1992 del IVA"]
+      ],
+      a: ["Para subir", "Financia los servicios públicos sin tocar el trabajo, y los productos de primera necesidad ya tienen tipos rebajados.", ""],
+      b: ["Para bajar", "Lo pagan todos por igual al comprar, así que pesa más en quien gana menos; bajarlo abarata los precios al momento.", "Vox propuso en 2023 un IVA cero para los productos de primera necesidad."] }
+  ] },
+  { k: "edu", n: "Educación", palancas: [
+    { id: "edu-ratio", t: "Alumnos por aula en Primaria", e: "subir",
+      est: "El máximo legal es de 25 alumnos por aula en Primaria y 30 en la ESO. El Gobierno aprobó en abril de 2026 un proyecto de ley para bajarlo a 22 y 25, que quedó pendiente en el Congreso al convocarse las elecciones.",
+      datos: [
+        ["25", "alumnos como máximo por aula en Primaria hoy; el proyecto proponía 22", "Ministerio de Educación · proyecto de ley de ratios, abril de 2026"],
+        ["2.818 M€", "al año como mínimo costaría la bajada entre 2027 y 2036, según una estimación académica", "Esade · estimación de 2026"]
+      ],
+      a: ["Para subir el máximo", "Más alumnos por aula libera dinero para otras prioridades, como pagar mejor a los docentes o los apoyos a quien más lo necesita.", ""],
+      b: ["Para bajarlo", "Con menos alumnos el docente puede atender a cada niño, sobre todo a quien va más atrasado; es de las medidas que más piden las familias y el profesorado.", "Lo impulsó el Ministerio de Educación; las comunidades del PP pidieron más tiempo para aplicarlo."] },
+    { id: "edu-gasto", t: "Gasto público en educación", e: "subir",
+      est: "España gastó en 2024 más euros que nunca en educación, pero su peso sobre el tamaño de la economía lleva cuatro años bajando y está por debajo de la media de la OCDE.",
+      datos: [
+        ["71.349 M€", "de gasto público en educación en 2024, el máximo de la serie", "Ministerio de Educación · Estadística del gasto público en educación"],
+        ["4,48 %", "del PIB en 2024, frente al 4,89 % de 2020", "Fundación Ramón Areces y Fundación SyE · Indicadores 2026"]
+      ],
+      a: ["Para subir", "Acercarse a la media de la OCDE para pagar profesorado, apoyos y la etapa de 0 a 3 años, que es donde más rinde cada euro.", ""],
+      b: ["Para dejarlo igual", "El gasto ya sube en euros cada año; lo que falta es saber qué funciona y gastar mejor lo que ya hay antes de gastar más.", ""] }
+  ] },
+  { k: "san", n: "Sanidad", palancas: [
+    { id: "san-espera", t: "Plan de choque para las listas de espera", e: "subir",
+      est: "La espera media para una operación no urgente en la sanidad pública es de 121 días, con diferencias muy grandes entre comunidades.",
+      datos: [
+        ["121 días", "de espera media para operarse, a 31 de diciembre de 2025", "Ministerio de Sanidad · Sistema de Información sobre Listas de Espera"],
+        ["49 y 160", "días de espera media para operarse en Madrid y en Andalucía a junio de 2025: lo que cambia según dónde vivas", "Ministerio de Sanidad · Listas de espera, junio de 2025"]
+      ],
+      a: ["Para subir", "Quirófanos por la tarde, más anestesistas y pagar por resultados: una operación que tarda medio año es salud que se pierde y bajas que se alargan.", "Lo promete el PP en su programa del 29-N."],
+      b: ["Para dejarlo igual", "Los planes de choque bajan la lista unos meses y luego vuelve a crecer; mejor reorganizar la atención primaria para que lleguen menos casos al hospital.", ""] },
+    { id: "san-priv", t: "Colaboración de la sanidad privada con la pública", e: "abrir",
+      est: "Parte de la sanidad pública se presta en hospitales privados con conciertos o concesiones. El Gobierno aprobó en 2026 un proyecto de ley para que la gestión directa sea la regla y la indirecta, la excepción.",
+      datos: [
+        ["+40 %", "hospitales privados integrados en el sistema público en la última década, según el Ministerio de Sanidad", "Ministerio de Sanidad · informe sobre la colaboración público-privada, diciembre de 2025"],
+        ["Mayo 2026", "el Consejo de Ministros aprueba el proyecto de Ley de gestión pública e integridad del SNS", "Ministerio de Sanidad · nota del 12 de mayo de 2026"]
+      ],
+      a: ["Para abrir", "Usar la capacidad que ya existe en la privada acorta las esperas hoy, y una buena evaluación evita los abusos.", "Lo defienden PP, Vox y Junts."],
+      b: ["Para cerrar", "Lo que se paga a la privada no se invierte en la pública, que pierde profesionales y capacidad y acaba dependiendo de ella.", "Lo defienden Frente Amplio, Podemos y EH Bildu."] }
+  ] }
+];
+
+(function decidir() {
+  const list = $("#dd-list");
+  if (!list) return;
+  const CLAVE = "politica.decidir.v1";
+  let mem = { elec: {}, orden: {}, oculto: {}, conv: {} };
+  try { const g = JSON.parse(localStorage.getItem(CLAVE) || "null"); if (g && typeof g === "object") mem = Object.assign(mem, g); } catch (e) { /* sin almacenamiento */ }
+  const guardar = () => { try { localStorage.setItem(CLAVE, JSON.stringify(mem)); } catch (e) { /* sin almacenamiento */ } };
+  let area = AREAS[0].k;
+  const TODAS = AREAS.flatMap((a) => a.palancas.map((p) => ({ ...p, area: a.n })));
+
+  function orden(p) {
+    const o = mem.orden[p.id];
+    return Array.isArray(o) && o.length === p.datos.length ? o : p.datos.map((_, i) => i);
+  }
+  function tarjeta(p) {
+    const esc = ESCALAS[p.e], el = mem.elec[p.id], oc = mem.oculto[p.id] || {}, cv = mem.conv[p.id] || {};
+    const ord = orden(p);
+    return `<article class="dd-card" data-id="${p.id}">
+      <h4>${p.t}</h4>
+      <p class="dd-state"><span class="lbl">Cómo está hoy</span><br>${p.est}</p>
+      <ul class="dd-data">${ord.map((di, pos) => { const [v, l, f] = p.datos[di]; return `<li class="dd-dato${oc[di] ? " off" : ""}"><div><b>${v}</b></div><span>${l}<small>${f}</small></span>
+        <span class="dd-dctl"><button type="button" data-sube="${pos}" aria-label="Subir este dato" ${pos === 0 ? "disabled" : ""}>↑</button><button type="button" data-baja="${pos}" aria-label="Bajar este dato" ${pos === ord.length - 1 ? "disabled" : ""}>↓</button><button type="button" data-oculta="${di}" aria-pressed="${!!oc[di]}" title="Este dato no debería estar">Sobra</button></span></li>`; }).join("")}</ul>
+      <p class="dd-hint">Ordena los datos y marca los que sobran: en la propuesta, lo que se enseña y en qué orden se acuerda en público.</p>
+      <div class="dd-scale" role="group" aria-label="Tu decisión sobre ${p.t.toLowerCase()}">${esc.map((x, i) => `<button type="button" data-el="${i}" aria-pressed="${el === i}">${x}</button>`).join("")}<button type="button" class="ns" data-el="ns" aria-pressed="${el === "ns"}">No lo sé</button></div>
+      <div class="dd-args">${[["a", p.a, "var(--r)"], ["b", p.b, "var(--l)"]].map(([k, [lbl, txt, quien], ac]) => `<div class="dd-arg" style="--ac:${ac}"><span class="lbl">${lbl}</span><p>${txt}</p>${quien ? `<p class="quien">${quien}</p>` : `<p class="quien">Aquí firmarían su argumento las personas expertas que se ofrezcan.</p>`}<button type="button" data-cv="${k}" aria-pressed="${!!cv[k]}">Me convence</button></div>`).join("")}</div>
+    </article>`;
+  }
+  function pintar() {
+    const a = AREAS.find((x) => x.k === area);
+    list.innerHTML = a.palancas.map(tarjeta).join("");
+    mandato();
+  }
+  const texto = (p) => { const v = mem.elec[p.id]; return v == null ? null : v === "ns" ? "No lo sé" : ESCALAS[p.e][v]; };
+  function mandato() {
+    const hechas = TODAS.filter((p) => mem.elec[p.id] != null).length;
+    $("#dd-cnt").textContent = `${hechas} de ${TODAS.length} medidas decididas`;
+    $("#dd-mandato").innerHTML = TODAS.map((p) => { const t = texto(p); return `<li class="${t ? "" : "vacio"}"><span>${p.area} · ${p.t}</span><b>${t || "—"}</b></li>`; }).join("");
+  }
+  $("#dd-areas").innerHTML = AREAS.map((a, i) => `<button class="tbtn" data-a="${a.k}" aria-pressed="${i === 0}">${a.n}</button>`).join("");
+  $("#dd-areas").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-a]"); if (!b) return;
+    area = b.dataset.a;
+    $$("[data-a]", $("#dd-areas")).forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    pintar();
+  });
+  list.addEventListener("click", (e) => {
+    const card = e.target.closest(".dd-card"); if (!card) return;
+    const p = TODAS.find((x) => x.id === card.dataset.id), b = e.target.closest("button"); if (!b || !p) return;
+    if (b.dataset.el != null) { const v = b.dataset.el === "ns" ? "ns" : +b.dataset.el; if (mem.elec[p.id] === v) delete mem.elec[p.id]; else mem.elec[p.id] = v; }
+    else if (b.dataset.sube != null || b.dataset.baja != null) {
+      const o = orden(p).slice(), i = +(b.dataset.sube ?? b.dataset.baja), j = b.dataset.sube != null ? i - 1 : i + 1;
+      if (j < 0 || j >= o.length) return;
+      [o[i], o[j]] = [o[j], o[i]]; mem.orden[p.id] = o;
+    } else if (b.dataset.oculta != null) { const m = mem.oculto[p.id] || (mem.oculto[p.id] = {}); m[b.dataset.oculta] = !m[b.dataset.oculta]; }
+    else if (b.dataset.cv) { const m = mem.conv[p.id] || (mem.conv[p.id] = {}); m[b.dataset.cv] = !m[b.dataset.cv]; }
+    else return;
+    guardar();
+    const sel = b.dataset.el != null ? `[data-el="${b.dataset.el}"]` : b.dataset.cv ? `[data-cv="${b.dataset.cv}"]` : null;
+    card.outerHTML = tarjeta(p);
+    mandato();
+    const nueva = list.querySelector(`.dd-card[data-id="${p.id}"]`);
+    if (nueva && sel) { const f = nueva.querySelector(sel); if (f) f.focus(); }
+  });
+  $("#dd-copiar").addEventListener("click", async () => {
+    const txt = "Mi mandato (Política · Luz & Humanidad)\n" + TODAS.map((p) => `- ${p.area} · ${p.t}: ${texto(p) || "sin decidir"}`).join("\n");
+    try { await navigator.clipboard.writeText(txt); $("#dd-estado").textContent = "Copiado. Puedes pegarlo donde quieras."; }
+    catch (e) { $("#dd-estado").textContent = "Tu navegador no deja copiar desde aquí."; }
+  });
+  $("#dd-borrar").addEventListener("click", () => { mem = { elec: {}, orden: {}, oculto: {}, conv: {} }; guardar(); pintar(); $("#dd-estado").textContent = "Empezamos de nuevo."; });
+  pintar();
+})();
+
+/* Tarjetas nuevas de la portada */
+(function portada2() {
+  const set = (id, s) => { const e = document.getElementById(id); if (e) e.innerHTML = s; };
+  const forma = API.geoForma;
+  if (forma) {
+    // La forma calculada vive en un lienzo de 820 × 740 centrado en (410, 372): se escala a la tarjeta
+    const d = (v) => "M" + forma(v).map(([x, y]) => `${r1(160 + (x - 410) * 0.27)},${r1(76 + (y - 372) * 0.27)}`).join("L") + "Z";
+    set("ci-geometrias", `<circle cx="160" cy="76" r="61" fill="none" stroke="#F6BE3B" stroke-width="2.5"/>`
+      + [["#3B82F6", TEMAS.inm.v.pp], ["#EF4444", TEMAS.inm.v.psoe], ["#22C55E", TEMAS.inm.v.vox]].map(([c, v]) => `<path d="${d(v)}" fill="${c}" fill-opacity=".14" stroke="${c}" stroke-width="2"/>`).join(""));
+  }
+  set("ci-decidir", ["Bajar", "Igual", "Subir"].map((t, i) => `<rect x="${30 + i * 92}" y="${46}" width="80" height="56" rx="14" fill="${i === 2 ? "#EDEBE6" : "#1B2230"}" stroke="#5E6B88"/><text x="${70 + i * 92}" y="81" text-anchor="middle" font-family="Archivo, sans-serif" font-size="17" font-weight="600" fill="${i === 2 ? "#0C0F14" : "#C9CCD3"}">${t}</text>`).join("")
+    + `<rect x="30" y="116" width="264" height="8" rx="4" fill="#1B2230"/><rect x="30" y="116" width="170" height="8" rx="4" fill="#F6BE3B"/>`);
+})();
 
 /* ================= Textos editables por Eugenio desde humanity.wiki ================= */
 /* Cada frase escrita lleva una clave sacada de su texto original («observatorio.t-<hash>»),
