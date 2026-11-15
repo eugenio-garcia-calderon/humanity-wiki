@@ -650,6 +650,16 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 - **The «apurar» lap uses the same longitudinal limits for every car** (accelerate min(2.5 m/s², 0.5·μ·g), brake 0.7·μ·g), not each car's power: lap times compare cornering only.
 - **Editor designs other than the Triciclo/Cuadriciclo have no CdG**: the circuit estimates it (35 % of height, equal load per wheel) until those families compute one. The Bala has no masses and is not offered.
 - **Recharts colours are `var(--color-…)` strings** that exist only because the same colours are used as classes in the legend swatches (Tailwind 4 emits only used variables). Removing a swatch class could silently blank a line; a shared chart palette in `src/components/ui/` would fix it (~30 min).
+## 2026-11-15 — Cuadriciclo Basculante: shortcuts
+
+- **No click-to-sheet components, no drawings (Planos) and no STEP**: STL only, as the Bala family. Cost to add the plan sheets: the skin is sections, so `planos.ts` could cut it (~half a day).
+- **Rigid-body tilt**: the lean is drawn and checked at its maximum and at rest; no tilt-actuator dynamics, no suspension roll; the steering follows the lean in «Bascular» only for show (35 % of full lock at full lean).
+- **The rear wheel arches are cells left out of the skin**, their stepped edge hidden by a rubber trim, and a black half-cylinder liner inside: not a real wheel-well surface (STL of the body has those holes).
+- **The tunnel's «Probar» options do not know the `q…` sliders**: for this family the explanations show without «Probar» (`tunel/explicaciones.ts`).
+- **Materials and helpers come from Visor3D through `ayudasVisor`** (an object of functions): a cheap seam, but the builder depends on the viewer's helper signatures. Moving those helpers to a module of their own (~1 h) would let both import them.
+- **The shape grid is fixed at ~1 cm along the car**: fine for the viewer (≈60 ms), coarse for a mould.
+- **Default turning radius 6,5 m** (pods steer with the wheels in a narrow nose). A wider front track or shorter fairings trade width or drag for it; noted, not solved.
+
 
 ## 2026-11-15 — Garage Smera and EQXX: shortcuts
 
