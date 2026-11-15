@@ -11652,3 +11652,14 @@ Eugenio: una visualización en 2D donde cada partido no es un punto sino una geo
 - Cola algo más baja (0,52 m) y con una curva más suave hasta ella (1,6).
 - La carrocería se estrecha antes detrás de las ruedas delanteras.
 - Cifras del diseño de serie: Cd del túnel 0,189 a 80 km/h (antes 0,192); CdA 0,139 m² (antes 0,141); área frontal 0,81 m²; 197 kg; 37 comprobaciones en verde.
+
+## 2026-11-15 — Política: «Votar por temas» con gráficos históricos, deslizador y selector con iconos
+
+Eugenio: «Lo de votar por temas, llámalo así. En el menú y en el título»; gráficos históricos de los datos; un deslizador para decir cuánto subir o bajar, abrir o cerrar, que diga el pro y el contra de cada posición; y un selector de temas más claro, con iconos, que cambie al pasar el ratón.
+
+- **Nombre**: capítulo 7 «Votar por temas» (menú, título, tarjeta de portada, filtro de fuentes); el apartado 2 pasa a «Geometrías y votar por temas». Migración 0221: la frase de la ficha del proyecto que escribió la 0220, solo si sigue igual. El ancla `#decidir` se mantiene para no romper enlaces.
+- **Gráfico histórico** por medida, con datos oficiales: infracciones penales 2019–2025 y estafas informáticas 2016–2025 (Interior), contratación en origen 2023–2025 (Inclusión; 2024 ≈ 20.600, el Ministerio solo dice «más de 20.000»), llegadas irregulares 2017–2025 (Interior), salario mínimo 2016–2026 (BOE), IVA general desde 1986 (escalones), media de alumnos por grupo en Primaria con el máximo legal y el del proyecto, gasto en educación 2012–2024 (INEE y F. Ramón Areces/SyE: dos ediciones con base distinta, dicho en el gráfico), espera quirúrgica 2019–2025 (SISLE) y conciertos sobre el gasto sanitario público 2019–2024 (EGSP). Ejes con valores redondos; el ancho del gráfico sigue a la tarjeta para que se lea en el móvil.
+- **Deslizador** en unidades reales (años de pena, % de medios, plazas, euros, % de IVA, alumnos, % del PIB, % del gasto) con la marca de «hoy». Cinco tramos por medida (mucho, poco o igual hacia cada lado, con umbrales propios) y un pro y un contra escritos para cada tramo, que cambian mientras se arrastra. Donde la unidad coincide con la del gráfico, el voto aparece en él como «tu voto» (o «tu máximo» en alumnos por aula). Colores neutros: subir o bajar no usa los colores de izquierda y derecha.
+- **Selector de temas**: cinco tarjetas con icono, nombre, qué se vota y cuántas medidas llevas; cambia al pasar el ratón (160 ms de espera, solo con ratón), con clic, y con las flechas del teclado (`role="tablist"`).
+- Lo votado se guarda en `localStorage` con una clave nueva (`politica.votar.v2`), porque los valores ya no son posiciones de 0 a 4 sino cantidades; lo de la versión anterior no se arrastra.
+- Comprobado en Chrome sin interfaz a 1360 y 390 px: cambio al pasar el ratón, deslizador con clic y teclado, ejes de los diez gráficos, sin desbordamiento ni errores de JS.

@@ -827,14 +827,13 @@ footer p{margin:0;max-width:70ch}
 @media (max-width:1000px){.geo{grid-template-columns:minmax(0,1fr)} .geo-side{position:static} .geo-props{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:640px){.geo-props,.geo-obj{grid-template-columns:minmax(0,1fr)} .geo-stage{padding:2px;border-radius:16px}}
 
-/* ================= 7 · Decidir por temas ================= */
+/* ================= 7 · Votar por temas ================= */
 .dd-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:clamp(28px,4vw,44px)}
 .dd-step{padding:16px;border-radius:16px;background:var(--bg-2);border:1px solid var(--line);display:flex;flex-direction:column;gap:6px;min-width:0}
 .dd-step .n{font:400 2rem/1 var(--display);color:var(--warn)}
 .dd-step h4{font:600 15px/1.25 var(--sans);margin:0}
 .dd-step p{font-size:13.5px;line-height:1.5;color:var(--ink-2);margin:0}
 .dd{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,19rem);gap:clamp(18px,3vw,32px);align-items:start}
-.dd-areas{margin-bottom:16px}
 .dd-list{display:grid;gap:16px}
 .dd-card{padding:clamp(16px,2.4vw,24px);border-radius:20px;background:var(--bg-2);border:1px solid var(--line);display:grid;gap:14px}
 .dd-card h4{font:400 clamp(1.35rem,2.2vw,1.7rem)/1.15 var(--display);margin:0}
@@ -850,18 +849,6 @@ footer p{margin:0;max-width:70ch}
 .dd-dctl button:hover{color:var(--ink);border-color:var(--ink-2)}
 .dd-dctl button[aria-pressed="true"]{background:var(--bg-3);color:var(--warn);border-color:var(--warn)}
 .dd-hint{font-size:12.5px;color:var(--muted);margin:-4px 0 0}
-.dd-scale{display:grid;grid-template-columns:repeat(5,minmax(0,1fr)) auto;gap:6px}
-.dd-scale button{min-height:46px;padding:6px 8px;border-radius:12px;border:1px solid var(--ctl);background:transparent;color:var(--ink-2);font:500 13px/1.2 var(--sans);cursor:pointer}
-.dd-scale button:hover{border-color:var(--ink-2);color:var(--ink)}
-.dd-scale button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.dd-scale button.ns[aria-pressed="true"]{background:var(--bg-3);color:var(--ink);border-color:var(--ink-2)}
-.dd-args{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.dd-arg{padding:14px;border-radius:14px;border:1px solid var(--line);background:var(--bg);display:flex;flex-direction:column;gap:6px}
-.dd-arg .lbl{color:var(--ac)}
-.dd-arg p{font-size:14px;line-height:1.5;color:var(--ink-2);margin:0}
-.dd-arg .quien{font-size:12.5px;color:var(--muted)}
-.dd-arg button{align-self:flex-start;margin-top:auto;min-height:36px;padding:6px 12px;border-radius:999px;border:1px solid var(--ctl);background:transparent;color:var(--ink-2);font:500 12.5px var(--sans);cursor:pointer}
-.dd-arg button[aria-pressed="true"]{border-color:var(--ac);color:var(--ink);background:color-mix(in srgb,var(--ac) 18%,transparent)}
 .dd-side{position:sticky;top:84px;padding:18px;border-radius:18px;background:var(--bg-2);border:1px solid var(--warn);display:grid;gap:10px}
 .dd-side h4{font:400 1.35rem/1.15 var(--display);margin:0}
 .dd-side ol{margin:0;padding:0;list-style:none;display:grid;gap:6px}
@@ -876,7 +863,7 @@ footer p{margin:0;max-width:70ch}
 .dd-obj p{font-size:14px;line-height:1.5;color:var(--ink-2);margin:0}
 @media (max-width:1100px){.dd-steps{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:1000px){.dd{grid-template-columns:minmax(0,1fr)} .dd-side{position:static}}
-@media (max-width:760px){.dd-steps,.dd-obj{grid-template-columns:minmax(0,1fr)} .dd-args{grid-template-columns:minmax(0,1fr)} .dd-scale{grid-template-columns:repeat(3,minmax(0,1fr))} .dd-dato{grid-template-columns:minmax(0,1fr) auto} .dd-dato > div:first-child{grid-column:1 / -1}}
+@media (max-width:760px){.dd-steps,.dd-obj{grid-template-columns:minmax(0,1fr)} .dd-dato{grid-template-columns:minmax(0,1fr) auto} .dd-dato > div:first-child{grid-column:1 / -1}}
 
 /* ================= Apartados de Política ================= */
 .apartados{display:grid;gap:clamp(22px,3vw,34px)}
@@ -895,6 +882,58 @@ footer p{margin:0;max-width:70ch}
 @media (max-width:1100px){.cards.cards-5{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:900px){.cards.cards-5,.cards.cards-3{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:520px){.cards.cards-5,.cards.cards-3{grid-template-columns:minmax(0,1fr)}}
+
+/* ================= 7 · Votar por temas: selector, gráficos y deslizador ================= */
+.dd-areas{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:18px}
+.dd-tema{position:relative;display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;column-gap:10px;row-gap:2px;align-items:center;text-align:left;min-height:72px;padding:12px 12px 12px 12px;border-radius:16px;border:1px solid var(--line);background:var(--bg-2);color:var(--ink-2);cursor:pointer;transition:border-color .2s,background .2s,transform .2s}
+.dd-tema svg{grid-row:1 / 3;width:30px;height:30px;fill:none;stroke:var(--muted);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;transition:stroke .2s}
+.dd-tema .nm{font:600 15px/1.15 var(--sans);color:var(--ink)}
+.dd-tema .hn{font-size:12px;line-height:1.3;color:var(--muted)}
+.dd-tema{padding-right:36px}
+.dd-tema .ct{position:absolute;top:8px;right:10px;font:500 10.5px var(--mono);color:var(--muted)}
+.dd-tema:hover{border-color:var(--ink-2)}
+.dd-tema[aria-selected="true"]{border-color:var(--warn);background:linear-gradient(160deg,color-mix(in srgb,var(--warn) 16%,var(--bg-2)),var(--bg-2) 70%);transform:translateY(-2px)}
+.dd-tema[aria-selected="true"] svg{stroke:var(--warn)}
+.dd-tema[aria-selected="true"]::after{content:"";position:absolute;left:18px;right:18px;bottom:-1px;height:3px;border-radius:3px;background:var(--warn)}
+.dd-tema:focus-visible{outline:2px solid var(--warn);outline-offset:2px}
+.dd-chart{margin:0;padding:12px 12px 6px;border-radius:14px;border:1px solid var(--line);background:var(--bg)}
+.dd-chart figcaption{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:baseline;margin:0 4px 6px}
+.dd-chart figcaption b{font:600 14px var(--sans);color:var(--ink)}
+.dd-chart figcaption span{font:500 11px/1.4 var(--mono);color:var(--muted)}
+.dd-chart svg{display:block;width:100%;height:auto}
+.dd-vote{padding:16px;border-radius:16px;border:1px solid var(--line-2);background:var(--bg);display:grid;gap:10px;--vc:var(--warn)}
+.dd-vote[data-n="2"]{--vc:var(--ink-2)}
+.dd-q{font:600 14.5px/1.35 var(--sans);color:var(--ink)}
+.dd-readout{display:flex;flex-wrap:wrap;gap:6px 16px;align-items:baseline;font-size:13.5px;color:var(--muted)}
+.dd-readout b{font:400 1.3rem/1 var(--display);color:var(--ink)}
+.dd-tu b{color:var(--vc)}
+.dd-vote.sin .dd-tu b{font:500 13px var(--sans);color:var(--muted)}
+.dd-niv{margin-left:auto;padding:4px 10px;border-radius:999px;font:600 12.5px var(--sans);color:var(--bg);background:var(--vc)}
+.dd-niv:empty{display:none}
+.dd-rngw{position:relative;padding:8px 0}
+.dd-range{-webkit-appearance:none;appearance:none;width:100%;height:30px;margin:0;background:transparent;cursor:pointer}
+.dd-range::-webkit-slider-runnable-track{height:8px;border-radius:4px;background:linear-gradient(to right,var(--bg-3) 0,var(--bg-3) min(var(--hoy),var(--pos)),var(--vc) min(var(--hoy),var(--pos)),var(--vc) max(var(--hoy),var(--pos)),var(--bg-3) max(var(--hoy),var(--pos)))}
+.dd-range::-moz-range-track{height:8px;border-radius:4px;background:linear-gradient(to right,var(--bg-3) 0,var(--bg-3) min(var(--hoy),var(--pos)),var(--vc) min(var(--hoy),var(--pos)),var(--vc) max(var(--hoy),var(--pos)),var(--bg-3) max(var(--hoy),var(--pos)))}
+.dd-range::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-9px;border-radius:50%;background:var(--ink);border:4px solid var(--vc);box-shadow:0 2px 10px rgba(0,0,0,.5)}
+.dd-range::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--ink);border:4px solid var(--vc)}
+.dd-range:focus-visible{outline:2px solid var(--warn);outline-offset:4px;border-radius:8px}
+.dd-hoymk{position:absolute;top:2px;bottom:2px;left:calc(13px + (100% - 26px) * var(--hoyf));width:2px;margin-left:-1px;background:var(--ink-2);border-radius:1px;pointer-events:none}
+.dd-ticks{display:flex;justify-content:space-between;font:500 11px var(--mono);color:var(--muted);margin-top:-4px}
+.dd-pc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.dd-pc > div{padding:12px 14px;border-radius:12px;background:var(--bg-2);border-left:3px solid var(--pc2)}
+.dd-pc .pro{--pc2:#4FB477}
+.dd-pc .con{--pc2:#E0645C}
+.dd-pc .lbl{color:var(--pc2)}
+.dd-pc p{font-size:14px;line-height:1.5;color:var(--ink-2);margin:4px 0 0}
+.dd-vote.sin .dd-pc{opacity:.75}
+.dd-ns{justify-self:start;min-height:36px;padding:6px 14px;border-radius:999px;border:1px solid var(--ctl);background:transparent;color:var(--ink-2);font:500 13px var(--sans);cursor:pointer}
+.dd-ns[aria-pressed="true"]{background:var(--bg-3);color:var(--ink);border-color:var(--ink-2)}
+.dd-vote.ns .dd-rngw,.dd-vote.ns .dd-pc{opacity:.4}
+.dd-quien{display:grid;gap:4px;margin:0;font-size:13px;line-height:1.45;color:var(--muted)}
+.dd-quien b{color:var(--ink-2);font-weight:600}
+@media (max-width:1100px){.dd-areas{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:760px){.dd-areas{grid-template-columns:repeat(2,minmax(0,1fr))} .dd-pc{grid-template-columns:minmax(0,1fr)} .dd-niv{margin-left:0}}
+@media (max-width:420px){.dd-tema .hn{display:none} .dd-tema{min-height:56px}}
 
 </style>
 
@@ -1049,7 +1088,7 @@ footer p{margin:0;max-width:70ch}
         <li><a href="#perfiles">4 · Perfiles</a></li>
         <li><a href="#escalada">5 · Del nosotros al enemigo</a></li>
         <li><a href="#geometrias">6 · Geometrías</a></li>
-        <li><a href="#decidir">7 · Decidir</a></li>
+        <li><a href="#decidir">7 · Votar por temas</a></li>
         <li><a href="#fuentes">8 · Palabras y fuentes</a></li>
       </ol>
     </nav>
@@ -1099,7 +1138,7 @@ footer p{margin:0;max-width:70ch}
       </div>
     </div>
     <div class="apartado">
-      <p class="apartado-h"><a href="#propuestas"><span>Apartado 2</span>Geometrías y decisión directa</a></p>
+      <p class="apartado-h"><a href="#propuestas"><span>Apartado 2</span>Geometrías y votar por temas</a></p>
       <p class="apartado-t">Qué cuida y qué abandona cada partido, y una forma de decidir por temas concretos con datos.</p>
       <div class="cards cards-3">
     <a class="card" href="#geometrias" style="--cc:#3B82F6">
@@ -1109,8 +1148,8 @@ footer p{margin:0;max-width:70ch}
     </a>
     <a class="card" href="#decidir" style="--cc:#F6BE3B">
       <span class="card-img" aria-hidden="true"><svg viewBox="0 0 320 150" id="ci-decidir"></svg></span>
-      <span class="card-n">Capítulo 7</span><b>Decidir por temas</b>
-      <span class="card-t">Una democracia directa: ver los datos de cada materia y decidir subir, bajar, abrir o cerrar.</span>
+      <span class="card-n">Capítulo 7</span><b>Votar por temas</b>
+      <span class="card-t">Una democracia directa: ver la historia de cada dato y votar cuánto subir, bajar, abrir o cerrar.</span>
     </a>
     <a class="card" href="#fuentes" style="--cc:var(--xr)">
       <span class="card-img" aria-hidden="true"><svg viewBox="0 0 320 150" id="ci-fuentes"></svg></span>
@@ -1338,8 +1377,8 @@ footer p{margin:0;max-width:70ch}
 <!-- ============ APARTADO 2 · PROPUESTAS ============ -->
 <div class="apartado-banda" id="propuestas">
   <span class="lbl">Apartado 2 · capítulos 6 y 7</span>
-  <h2>Geometrías y decisión directa</h2>
-  <p>De mirar la división a superarla: qué cuida cada partido frente a un ideal que cuida de todo, y cómo podríamos decidir por temas en lugar de votar colores.</p>
+  <h2>Geometrías y votar por temas</h2>
+  <p>De mirar la división a superarla: qué cuida cada partido frente a un ideal que cuida de todo, y cómo podríamos votar por temas en lugar de votar colores.</p>
 </div>
 
 <!-- ============ 6 · GEOMETRÍAS ============ -->
@@ -1388,31 +1427,31 @@ footer p{margin:0;max-width:70ch}
   <p class="note">Elecciones generales del 29 de noviembre de 2026. Esto no es una recomendación de voto: es un mapa de lo que cada propuesta cuida y de lo que deja fuera.</p>
 </section>
 
-<!-- ============ 7 · DECIDIR POR TEMAS ============ -->
+<!-- ============ 7 · VOTAR POR TEMAS ============ -->
 <section id="decidir" class="chapter" aria-labelledby="h-decidir">
   <div class="ch-head">
-    <p class="ch-num">Capítulo 7 · Decidir por temas</p>
+    <p class="ch-num">Capítulo 7 · Votar por temas</p>
     <h2 id="h-decidir">Votar cosas concretas, <em>no colores</em>.</h2>
-    <p class="ch-lede">Una propuesta de democracia directa. En vez de elegir cada cuatro años un partido que no recoge todo lo que piensas, cada persona ve el estado real de cada materia y decide sobre medidas concretas: subir o bajar, abrir o cerrar, mucho, poco o nada. El debate deja de ser de izquierdas contra derechas y pasa a ser sobre qué hacer y con qué datos.</p>
+    <p class="ch-lede">Una propuesta de democracia directa. En vez de elegir cada cuatro años un partido que no recoge todo lo que piensas, cada persona ve el estado real de cada materia y cómo ha cambiado en los últimos años, y vota medidas concretas con un deslizador: cuánto subir o bajar, abrir o cerrar. El debate deja de ser de izquierdas contra derechas y pasa a ser sobre qué hacer y con qué datos.</p>
   </div>
   <div class="dd-steps">
-    <div class="dd-step"><span class="n">1</span><h4>Ver el estado</h4><p>Cada materia muestra cómo está hoy, con datos oficiales, su fuente y su fecha.</p></div>
-    <div class="dd-step"><span class="n">2</span><h4>Elegir</h4><p>Para cada medida, cinco posiciones: mucho, poco o nada hacia un lado o hacia el otro. Y «no lo sé todavía», que también cuenta.</p></div>
+    <div class="dd-step"><span class="n">1</span><h4>Ver el estado</h4><p>Cada materia muestra cómo está hoy y su evolución en los últimos años, con datos oficiales, su fuente y su fecha.</p></div>
+    <div class="dd-step"><span class="n">2</span><h4>Votar</h4><p>Para cada medida, un deslizador en unidades reales (euros, años, plazas, %). Según lo mueves ves el pro y el contra de esa posición. Y «no lo sé todavía», que también cuenta.</p></div>
     <div class="dd-step"><span class="n">3</span><h4>Escuchar a quien sabe</h4><p>Argumentos firmados por personas expertas y organizaciones. Puedes seguir a quien te convence, y delegar en esa persona tu voto en una materia y retirarlo cuando quieras.</p></div>
     <div class="dd-step"><span class="n">4</span><h4>Acordar los datos</h4><p>Qué datos se enseñan y en qué orden también se debate. Una mesa del dato, con estadísticos y ciudadanos por sorteo, lo acuerda por mayoría amplia, y cualquiera puede proponer un dato nuevo.</p></div>
     <div class="dd-step"><span class="n">5</span><h4>Un mandato concreto</h4><p>La suma de decisiones se convierte en un mandato, por ejemplo «subir un poco». Un comité técnico decide cómo cumplirlo al menor coste y rinde cuentas con los mismos datos.</p></div>
   </div>
   <div class="dd">
     <div>
-      <div class="toggle-row dd-areas" id="dd-areas" role="group" aria-label="Elige una materia"></div>
-      <div class="dd-list" id="dd-list"></div>
+      <div class="dd-areas" id="dd-areas" role="tablist" aria-label="Temas para votar"></div>
+      <div class="dd-list" id="dd-list" role="tabpanel" aria-label="Medidas del tema elegido"></div>
     </div>
-    <aside class="dd-side" aria-label="Tu mandato">
+    <aside class="dd-side" aria-label="Tu voto por temas">
       <span class="cnt" id="dd-cnt"></span>
-      <h4>Tu mandato</h4>
+      <h4>Tu voto por temas</h4>
       <ol id="dd-mandato"></ol>
       <div class="toggle-row">
-        <button class="tbtn" id="dd-copiar" type="button">Copiar mi mandato</button>
+        <button class="tbtn" id="dd-copiar" type="button">Copiar mi voto</button>
         <button class="tbtn" id="dd-borrar" type="button">Empezar de nuevo</button>
       </div>
       <p class="tiny" id="dd-estado" aria-live="polite">Es un prototipo: tus elecciones se guardan solo en este navegador y no se envían a ningún sitio.</p>
@@ -2308,6 +2347,11 @@ const GRUPOS = [["todos", "Los doce"], ["linea", "La línea izquierda–derecha"
 /* ================= 6 · Fuentes ================= */
 const CAT = { programa: ["Programas y leyes", "#C9CCD3"], datos: ["Datos", "#6CC4E4"], politica: ["Ciencia política", "#5B7CF0"], psico: ["Psicología", "#F2955F"], historia: ["Historia", "#EC5272"], lenguaje: ["Comunicación", "#E8E2CF"], conflicto: ["Conflicto", "#F6BE3B"] };
 const REFS = [
+  { c: "datos", ch: [7], a: "Ministerio del Interior", y: 2026, t: "Balances de criminalidad 2019–2025", s: "Cuarto trimestre de cada año; serie de estafas informáticas 2016–2025", u: "Las series de infracciones penales y de estafas informáticas de los gráficos de seguridad." },
+  { c: "datos", ch: [7], a: "Ministerio de Educación (INEE)", y: 2022, t: "Sistema estatal de indicadores de la educación", s: "Indicadores F1.1 (gasto) y E8.1 (alumnos por grupo)", u: "El gasto público en educación de 2012 a 2019 y la media de alumnos por grupo en Primaria." },
+  { c: "datos", ch: [7], a: "Ministerio de Sanidad", y: 2026, t: "Estadística de Gasto Sanitario Público 2024", s: "Principales resultados, tabla 2; y edición 2019", u: "El peso de los conciertos en el gasto sanitario público de 2019 a 2024." },
+  { c: "datos", ch: [7], a: "Ministerio de Sanidad", y: 2026, t: "Listas de espera quirúrgica del SNS, 2019–2025", s: "SISLE, cortes de diciembre", u: "La espera media para operarse a final de cada año." },
+  { c: "programa", ch: [7], a: "BOE", y: 2026, t: "Reales decretos del salario mínimo 2016–2026", s: "Un real decreto por año", u: "La serie del salario mínimo mensual en catorce pagas." },
   { c: "programa", ch: [6], a: "Partido Popular", y: 2025, t: "Plan Nacional de Inmigración", s: "pp.es, octubre de 2025", u: "Autoridad única, visado por puntos, español y Constitución para renovar la residencia y expulsión por delitos graves: la figura del PP en inmigración." },
   { c: "programa", ch: [6, 7], a: "Partido Popular", y: 2026, t: "La reconstrucción nacional", s: "Programa electoral del 29-N, 249 medidas", u: "Identificar en siete días, cupos ligados a los retornos, prohibir las regularizaciones masivas, 4.500 médicos de primaria y la historia clínica única." },
   { c: "programa", ch: [6], a: "Vox", y: 2025, t: "Remigración y prioridad nacional", s: "Rueda de prensa del 7 de julio de 2025 y programas autonómicos de 2026", u: "La repatriación masiva y la prioridad nacional en ayudas y servicios: los picos de Vox en control y retorno." },
@@ -2368,7 +2412,7 @@ const REFS = [
 (function fuentes() {
   const grid = $("#refs-grid"), pick = $("#ref-pick");
   if (!grid) return;
-  const NOMBRES = ["Todas", "1 · Hoy", "2 · Cien años", "3 · Miradas", "4 · Perfiles", "5 · Escalada", "6 · Geometrías", "7 · Decidir", "8 · Palabras"];
+  const NOMBRES = ["Todas", "1 · Hoy", "2 · Cien años", "3 · Miradas", "4 · Perfiles", "5 · Escalada", "6 · Geometrías", "7 · Votar", "8 · Palabras"];
   const ini = (a) => a.length <= 4 ? a : a.split(/[\s,()]+/).filter((w) => w.length > 2 && /^[A-ZÁÉÍÓÚ]/.test(w)).slice(0, 2).map((w) => w[0]).join("");
   grid.innerHTML = REFS.map((r) => {
     const [cn, cc] = CAT[r.c];
@@ -2752,179 +2796,396 @@ const TEMAS = {
   todo(); propuestas();
 })();
 
-/* ================= 7 · Decidir por temas ================= */
-/* Prototipo de democracia directa por grados. Los datos son reales y llevan su fuente (capítulo 8);
-   las elecciones de cada persona viven solo en su navegador (localStorage, con try/catch). */
-const ESCALAS = {
+/* ================= 7 · Votar por temas ================= */
+/* Prototipo de democracia directa por grados. Cada medida tiene un deslizador en unidades reales
+   (euros, años, %, plazas), su serie histórica oficial y, para cada posición del deslizador, el pro y
+   el contra. Datos reales con fuente (capítulo 8). Lo elegido vive solo en el navegador (localStorage). */
+const NIVELES = {
   subir: ["Bajar mucho", "Bajar un poco", "Quedarse igual", "Subir un poco", "Subir mucho"],
   abrir: ["Cerrar mucho", "Cerrar un poco", "Quedarse igual", "Abrir un poco", "Abrir mucho"]
 };
+const nf = (v, d = 0) => {
+  // Spanish format with a dot for thousands even in four-digit numbers (1.221), like the data cards
+  const [e, f] = Math.abs(v).toFixed(d).split(".");
+  return (v < 0 ? "−" : "") + e.replace(/\B(?=(\d{3})+(?!\d))/g, ".") + (f ? "," + f : "");
+};
+const ICONOS = {
+  seg: '<path d="M12 3l7 3v5c0 4.6-3 8.3-7 10-4-1.7-7-5.4-7-10V6z"/><path d="M9 12l2 2 4-4"/>',
+  inm: '<circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.6 2.4 3.8 5.3 3.8 8.5s-1.2 6.1-3.8 8.5c-2.6-2.4-3.8-5.3-3.8-8.5S9.4 5.9 12 3.5z"/>',
+  eco: '<path d="M4 19h16"/><path d="M6 16v-4M10 16V9M14 16v-6M18 16V6"/><path d="M5 9l4-3 4 2 6-4"/>',
+  edu: '<path d="M2.5 9.5L12 5l9.5 4.5L12 14z"/><path d="M6.5 11.5V16c1.6 1.4 3.4 2 5.5 2s3.9-.6 5.5-2v-4.5"/><path d="M21.5 9.5V15"/>',
+  san: '<path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0112 7.3 4.3 4.3 0 0119.5 10c0 5.4-7.5 10-7.5 10z"/><path d="M7.5 12.5h2.6l1.3-2.3 1.9 4.3 1.2-2h2"/>'
+};
 const AREAS = [
-  { k: "seg", n: "Seguridad", palancas: [
+  { k: "seg", n: "Seguridad", h: "Penas y estafas por internet", palancas: [
     { id: "seg-reinc", t: "Penas para quien roba una y otra vez", e: "subir",
-      est: "Desde abril de 2026, quien acumula tres o más condenas firmes por hurtos u otros delitos menos graves puede ir de uno a tres años a prisión, sin importar el valor de lo robado; el robo de un móvil, hasta tres años.",
+      est: "Desde abril de 2026, quien acumula tres o más condenas firmes por hurtos u otros delitos menos graves puede ir de uno a tres años a prisión, sin importar el valor de lo robado.",
+      u: { q: "Pena máxima de prisión a partir de la tercera condena", min: 0, max: 6, step: 0.5, hoy: 3, f: (v) => v === 0 ? "sin prisión (multa)" : `${nf(v, v % 1 ? 1 : 0)} años` , s: 0.25, b: 1.5 },
+      serie: { t: "Infracciones penales registradas al año", f: (v) => nf(v), cero: true, prop: false,
+        pts: [[2019, 2199475], [2020, 1766779], [2021, 1960113], [2022, 2325358], [2023, 2459659], [2024, 2454206], [2025, 2474156]],
+        src: "Ministerio del Interior · Balances de criminalidad 2019–2025" },
+      pc: [
+        ["Se reserva la cárcel para los delitos graves y se ahorra en prisiones.", "Quien roba a diario vuelve a salir con una multa que no paga, y los comercios quedan sin defensa."],
+        ["Penas más proporcionadas al valor de lo robado.", "Se corrige una reforma de 2026 antes de haber medido si funciona."],
+        ["La ley es de abril de 2026: dejarla un tiempo permite medir su efecto.", "Si los juicios siguen tardando, la pena no llega y el problema sigue igual."],
+        ["Más disuasión para los pocos que concentran muchos hurtos.", "Más presos por delitos menores, con cárceles llenas y poca reinserción."],
+        ["Un mensaje claro de tolerancia cero con la reincidencia.", "Penas que se acercan a las de delitos violentos: choca con la proporcionalidad de las penas."]
+      ],
       datos: [
         ["2.474.156", "infracciones penales registradas en 2025, un 0,8 % más que en 2024", "Ministerio del Interior · Balance de criminalidad 2025"],
-        ["−3,1 %", "delitos contra el patrimonio en 2025 respecto a 2024", "Ministerio del Interior · Balance de criminalidad 2025"],
-        ["1 de cada 5", "delitos registrados ya se comete por internet", "Ministerio del Interior · Balance enero–septiembre 2025"]
+        ["−3,1 %", "delitos contra el patrimonio en 2025 respecto a 2024", "Ministerio del Interior · Balance de criminalidad 2025"]
       ],
-      a: ["Para subir", "Comerciantes y alcaldes ven las mismas caras una y otra vez: sin una consecuencia real, el hurto pequeño se convierte en un oficio.", "Votaron la reforma PSOE, PP, Vox, Junts, PNV, Coalición Canaria y UPN."],
-      b: ["Para dejarla igual o bajar", "La reforma acaba de entrar en vigor: hay que medir su efecto antes de tocarla. Más cárcel sin juzgados ágiles ni reinserción puede no reducir el delito.", "La rechazaron Sumar y otros grupos a la izquierda del PSOE."] },
+      q: ["Votaron la reforma PSOE, PP, Vox, Junts, PNV, Coalición Canaria y UPN.", "La rechazaron Sumar y otros grupos a la izquierda del PSOE."] },
     { id: "seg-ciber", t: "Medios contra las estafas por internet", e: "subir",
-      est: "Las estafas informáticas son ya el delito que más crece y la mayor parte de la ciberdelincuencia.",
-      datos: [
-        ["327.856", "estafas informáticas registradas entre enero y septiembre de 2025, un 6,4 % más que un año antes", "Ministerio del Interior · Balance enero–septiembre 2025"],
-        ["20 %", "de todas las infracciones registradas se cometen en o por medio de internet", "Ministerio del Interior · Balance enero–septiembre 2025"]
+      est: "Las estafas informáticas son el delito que más ha crecido en diez años y la mayor parte de la ciberdelincuencia.",
+      u: { q: "Medios especializados (agentes, fiscales, cooperación): cambio sobre hoy", min: -50, max: 100, step: 5, hoy: 0, f: (v) => v === 0 ? "igual que hoy" : `${v > 0 ? "+" : ""}${v} %`, s: 2, b: 30 },
+      serie: { t: "Estafas informáticas registradas al año", f: (v) => nf(v), cero: true, prop: false,
+        pts: [[2016, 70178], [2017, 94792], [2018, 136656], [2019, 192375], [2020, 257907], [2021, 267011], [2022, 335995], [2023, 427448], [2024, 412850], [2025, 430493]],
+        src: "Ministerio del Interior · Balance de criminalidad 2025 (serie consolidada)" },
+      pc: [
+        ["Libera dinero para otras prioridades de seguridad.", "Con más de 400.000 estafas al año, casi ninguna se investigaría."],
+        ["Obliga a centrarse en las redes más grandes.", "Las estafas pequeñas, que son las más comunes, quedarían sin respuesta."],
+        ["Se mantiene lo que hay mientras se mide cuánto es delito nuevo y cuánto es que ahora se denuncia más.", "El delito que más crece sigue con los mismos medios."],
+        ["Más agentes y fiscales especializados, y devoluciones bancarias más rápidas.", "Cuesta dinero, y muchos estafadores operan desde fuera de España."],
+        ["Una unidad especializada por provincia y acuerdos con otros países para seguir el dinero.", "Gasto alto con resultado incierto si bancos y plataformas no colaboran."]
       ],
-      a: ["Para subir", "Una unidad especializada por provincia, bancos obligados a devolver antes y cooperación con otros países: el estafador está a un clic y casi nunca se le encuentra.", ""],
-      b: ["Para dejarla igual o bajar", "Gran parte del aumento es que ahora se denuncia más; antes de gastar, conviene saber qué parte es delito nuevo y qué parte es delito que antes no se contaba.", ""] }
-  ] },
-  { k: "inm", n: "Inmigración", palancas: [
-    { id: "inm-origen", t: "Contratación en origen: venir ya con contrato", e: "abrir",
-      est: "Empresas de sectores con falta de mano de obra contratan en el país de origen con permisos de trabajo de temporada o estables; desde 2026, con permisos de cuatro años para la migración circular.",
       datos: [
-        ["25.767", "personas trabajaron en España en 2025 con estos programas, casi un 25 % más que en 2024", "Seguridad Social · Programas GECCO 2025"],
-        ["36.775", "llegadas irregulares por mar y tierra en 2025, un 42,6 % menos que en 2024", "Ministerio del Interior · Balance de inmigración irregular 2025"],
+        ["430.493", "estafas informáticas en 2025, seis veces más que en 2016", "Ministerio del Interior · Balance de criminalidad 2025"],
+        ["19,8 %", "de todas las infracciones de 2025 se cometieron en o por medio de internet", "Ministerio del Interior · Balance de criminalidad 2025"]
+      ],
+      q: ["", ""] }
+  ] },
+  { k: "inm", n: "Inmigración", h: "Contratos en origen y fronteras", palancas: [
+    { id: "inm-origen", t: "Contratación en origen: venir ya con contrato", e: "abrir",
+      est: "Empresas de sectores con falta de mano de obra contratan en el país de origen con permisos de temporada o estables; desde 2026, con permisos de cuatro años para la migración circular.",
+      u: { q: "Personas contratadas en origen al año", min: 0, max: 60000, step: 1000, hoy: 25767, ini: 26000, f: (v) => `${nf(v)} personas`, s: 1500, b: 12000 },
+      serie: { t: "Personas contratadas en origen (programas GECCO)", f: (v) => nf(v), cero: true, prop: true,
+        pts: [[2023, 17771], [2024, 20600], [2025, 25767]], nota: "2024: «más de 20.000» según el Ministerio; cifra aproximada",
+        src: "Ministerio de Inclusión, Seguridad Social y Migraciones · Balances GECCO 2024 y 2025" },
+      pc: [
+        ["Más puestos para quien ya vive aquí y está en paro.", "Cosechas sin recoger y cuidados sin cubrir: esos empleos no desaparecen, pasan a la economía sumergida."],
+        ["Prioriza formar y emplear a los parados de cada zona.", "Menos vías legales dan más negocio a las mafias."],
+        ["Mantiene un sistema que ya funciona y crece de forma ordenada.", "No responde ni a la falta de mano de obra ni a quien pide más control."],
+        ["Cubre la falta de mano de obra del campo, la hostelería y los cuidados.", "Más presión sobre la vivienda en zonas agrícolas si no se exige alojamiento digno."],
+        ["La forma más segura y legal de venir, que resta clientes a las mafias.", "Riesgo de abusos laborales y de que no todos vuelvan al acabar el contrato si falla el control."]
+      ],
+      datos: [
+        ["25.767", "personas trabajaron en España en 2025 con estos programas, un 25 % más que en 2024", "Ministerio de Inclusión · nota del 25 de junio de 2026"],
         ["10,18 %", "tasa de paro en el tercer trimestre de 2026", "INE · Encuesta de Población Activa, 3.er trimestre 2026"]
       ],
-      a: ["Para abrir", "Faltan manos en el campo, la hostelería y los cuidados, y cada contrato en origen es una persona menos en manos de las mafias.", "Lo defienden el Gobierno, el PNV, y el PP con su visado ligado a un contrato."],
-      b: ["Para cerrar o dejar igual", "Con más de dos millones y medio de parados, primero hay que formar y emplear a quien ya está aquí, y no presionar más la vivienda y los servicios.", "Lo defiende Vox."] },
-    { id: "inm-frontera", t: "Vigilancia en el mar y en Ceuta y Melilla", e: "subir",
+      q: ["Lo defienden el Gobierno, el PNV, y el PP con su visado ligado a un contrato.", "Lo defiende Vox."] },
+    { id: "inm-frontera", t: "Vigilancia y salvamento en el mar y en Ceuta y Melilla", e: "subir",
       est: "Tras la fuerte caída de 2025, en 2026 las llegadas irregulares vuelven a subir, sobre todo hacia Baleares, y Ceuta vivió una entrada masiva a nado a finales de julio.",
+      u: { q: "Medios de vigilancia y salvamento: cambio sobre hoy", min: -50, max: 100, step: 5, hoy: 0, f: (v) => v === 0 ? "igual que hoy" : `${v > 0 ? "+" : ""}${v} %`, s: 2, b: 30 },
+      serie: { t: "Llegadas irregulares por mar y tierra al año", f: (v) => nf(v), cero: true, prop: false,
+        pts: [[2017, 28349], [2018, 64298], [2019, 32513], [2020, 41861], [2021, 41945], [2022, 31219], [2023, 56852], [2024, 63970], [2025, 36775]],
+        src: "Ministerio del Interior · Balances de inmigración irregular 2017–2025" },
+      pc: [
+        ["Dinero liberado para acogida, integración o cooperación con los países de origen.", "Menos capacidad de detectar y rescatar: más muertes en el mar y más negocio para las mafias."],
+        ["Se priorizan los acuerdos con los países de origen frente al despliegue en el mar.", "Llega en pleno repunte de 2026 hacia Baleares."],
+        ["Las llegadas de 2025 fueron las más bajas desde 2022.", "Entre enero y octubre de 2026 vuelven a subir un 8,9 %."],
+        ["Más patrulleras y salvamento para la ruta de Argelia a Baleares.", "Más vigilancia sin vías legales desvía a la gente a rutas más largas y peligrosas."],
+        ["Control efectivo de quién entra y golpe a las redes de tráfico.", "Coste muy alto y, según las organizaciones sociales, más muertes en rutas alternativas."]
+      ],
       datos: [
-        ["32.942", "llegadas irregulares entre enero y octubre de 2026, un 8,9 % más que en 2025 (sin contar la entrada masiva en Ceuta del 30 y 31 de julio)", "Ministerio del Interior · Balance a 31 de octubre de 2026"],
-        ["+14,5 %", "llegadas por mar a Baleares en el mismo periodo", "Ministerio del Interior · Balance a 31 de octubre de 2026"],
+        ["32.942", "llegadas irregulares entre enero y octubre de 2026, un 8,9 % más que en 2025", "Ministerio del Interior · Balance a 31 de octubre de 2026"],
         ["3.090", "personas murieron en 2025 intentando llegar a España, según un recuento de una organización social", "Caminando Fronteras · Informe 2025"]
       ],
-      a: ["Para subir", "El repunte de 2026 y la nueva ruta de Baleares piden más medios de vigilancia y de salvamento, y acuerdos con Argelia y Marruecos.", "Lo defienden PP, Vox y Junts; Rufián (ERC) ha pedido más control en las fronteras."],
-      b: ["Para dejarla igual o bajar", "Más vigilancia sin vías legales desvía a la gente a rutas más largas y peligrosas; el dinero salva más vidas en salvamento y en acuerdos con los países de origen.", "Lo defienden Podemos y organizaciones como Caminando Fronteras."] }
+      q: ["Lo defienden PP, Vox y Junts; Rufián (ERC) ha pedido más control en las fronteras.", "Lo defienden Podemos y organizaciones como Caminando Fronteras."] }
   ] },
-  { k: "eco", n: "Economía", palancas: [
+  { k: "eco", n: "Economía", h: "Salario mínimo e IVA", palancas: [
     { id: "eco-smi", t: "Salario mínimo", e: "subir",
       est: "El salario mínimo de 2026 es de 1.221 euros al mes en catorce pagas (17.094 euros al año), un 3,1 % más que en 2025.",
+      u: { q: "Salario mínimo al mes, en catorce pagas", min: 1001, max: 1501, step: 10, hoy: 1221, f: (v) => `${nf(v)} €`, s: 8, b: 60 },
+      serie: { t: "Salario mínimo al mes (14 pagas), en euros", f: (v) => `${nf(v)} €`, cero: false, prop: true,
+        pts: [[2016, 655.2], [2017, 707.7], [2018, 735.9], [2019, 900], [2020, 950], [2021, 965], [2022, 1000], [2023, 1080], [2024, 1134], [2025, 1184], [2026, 1221]],
+        src: "BOE · Reales decretos del salario mínimo 2016–2026" },
+      pc: [
+        ["Abarata contratar a quien tiene menos experiencia.", "Quien cobra el mínimo pierde mucho poder de compra, en plena subida del alquiler."],
+        ["Alivio para pequeñas empresas de las regiones con salarios más bajos.", "Los salarios más bajos pierden frente a los precios."],
+        ["Estabilidad tras una subida del 66 % desde 2018.", "Con inflación, quedarse igual es perder poder de compra."],
+        ["Mantiene o mejora el poder de compra de los salarios más bajos.", "Más coste para la pequeña empresa donde el mínimo pesa más."],
+        ["Un salario mínimo que permita pagar un alquiler.", "Riesgo de menos contratación y más empleo sumergido en los sectores con menos margen."]
+      ],
       datos: [
         ["1.221 €", "al mes en 14 pagas; 9,55 euros la hora para el empleo de hogar por horas", "BOE · Real Decreto 126/2026"],
-        ["+66 %", "ha subido desde 2018, cuando era de 735,90 euros al mes", "Real Decreto 126/2026 y serie del salario mínimo"],
         ["10,18 %", "tasa de paro en el tercer trimestre de 2026", "INE · Encuesta de Población Activa, 3.er trimestre 2026"]
       ],
-      a: ["Para subir", "El alquiler y la cesta de la compra han subido más que los salarios bajos; un sueldo mínimo digno también sostiene el consumo.", "Lo defienden el Ministerio de Trabajo y los sindicatos CCOO y UGT."],
-      b: ["Para dejarlo igual o bajar", "En las regiones y los sectores con salarios más bajos, cada subida pesa más para la pequeña empresa y puede frenar la contratación de quien tiene menos experiencia.", "Lo defienden las patronales CEOE y Cepyme, que proponían limitar la subida de 2026 al 1,5 %."] },
+      q: ["Lo defienden el Ministerio de Trabajo y los sindicatos CCOO y UGT.", "Lo defienden las patronales CEOE y Cepyme, que proponían limitar la subida de 2026 al 1,5 %."] },
     { id: "eco-iva", t: "IVA general", e: "subir",
-      est: "El tipo general del IVA es del 21 %; hay tipos reducidos del 10 % y del 4 % para muchos bienes básicos.",
+      est: "El tipo general del IVA es del 21 % desde septiembre de 2012; hay tipos rebajados del 10 % y del 4 % para muchos bienes básicos.",
+      u: { q: "Tipo general del IVA", min: 15, max: 25, step: 0.5, hoy: 21, f: (v) => `${nf(v, v % 1 ? 1 : 0)} %`, s: 0.25, b: 2 },
+      serie: { t: "Tipo general del IVA desde que existe (1986)", f: (v) => `${nf(v)} %`, cero: false, prop: true, escalon: true,
+        pts: [[1986, 12], [1992, 13], [1992.6, 15], [1995, 16], [2010.5, 18], [2012.7, 21], [2026, 21]], xl: ["1986", "1992", "", "1995", "2010", "2012", "2026"],
+        src: "Ley 37/1992 del IVA y sus reformas (1992, 1995, 2010 y 2012)" },
+      pc: [
+        ["Bajan los precios de casi todo al momento.", "Hacienda pierde mucha recaudación: habría que recortar gasto o subir otros impuestos."],
+        ["Alivio a las familias y al comercio.", "Menos recaudación para los servicios públicos."],
+        ["Estabilidad: lleva igual desde 2012.", "Ni reparte mejor la carga ni financia más servicios."],
+        ["Más recaudación sin subir los impuestos al trabajo.", "Pesa más en quien gana menos, porque gasta todo lo que gana."],
+        ["Mucha más recaudación para los servicios públicos.", "Subida de precios y golpe al consumo y al comercio."]
+      ],
       datos: [
         ["21 %", "tipo general del IVA, vigente desde septiembre de 2012", "Ley 37/1992 del IVA"],
         ["10 % y 4 %", "tipos reducido y superreducido; el 4 % se aplica, por ejemplo, al pan, la leche, las medicinas y los libros", "Ley 37/1992 del IVA"]
       ],
-      a: ["Para subir", "Financia los servicios públicos sin tocar el trabajo, y los productos de primera necesidad ya tienen tipos rebajados.", ""],
-      b: ["Para bajar", "Lo pagan todos por igual al comprar, así que pesa más en quien gana menos; bajarlo abarata los precios al momento.", "Vox propuso en 2023 un IVA cero para los productos de primera necesidad."] }
+      q: ["", "Vox propuso en 2023 un IVA cero para los productos de primera necesidad."] }
   ] },
-  { k: "edu", n: "Educación", palancas: [
+  { k: "edu", n: "Educación", h: "Alumnos por aula y gasto", palancas: [
     { id: "edu-ratio", t: "Alumnos por aula en Primaria", e: "subir",
-      est: "El máximo legal es de 25 alumnos por aula en Primaria y 30 en la ESO. El Gobierno aprobó en abril de 2026 un proyecto de ley para bajarlo a 22 y 25, que quedó pendiente en el Congreso al convocarse las elecciones.",
-      datos: [
-        ["25", "alumnos como máximo por aula en Primaria hoy; el proyecto proponía 22", "Ministerio de Educación · proyecto de ley de ratios, abril de 2026"],
-        ["2.818 M€", "al año como mínimo costaría la bajada entre 2027 y 2036, según una estimación académica", "Esade · estimación de 2026"]
+      est: "El máximo legal es de 25 alumnos por aula en Primaria. El Gobierno aprobó en abril de 2026 un proyecto de ley para bajarlo a 22, que quedó pendiente en el Congreso al convocarse las elecciones. La media real ronda los 21.",
+      u: { q: "Máximo de alumnos por aula en Primaria", min: 15, max: 30, step: 1, hoy: 25, f: (v) => `${v} alumnos`, s: 0.5, b: 3 },
+      serie: { t: "Media real de alumnos por grupo en Primaria", f: (v) => nf(v, 1), cero: false, prop: "linea", min: 15, max: 30,
+        pts: [[2012.7, 21.6], [2022.7, 21.0]], xl: ["2012-13", "2022-23"],
+        refs: [[25, "máximo legal hoy"], [22, "proyecto de 2026"]],
+        src: "Ministerio de Educación · Sistema estatal de indicadores de la educación (E8.1)" },
+      pc: [
+        ["Aulas pequeñas: atención casi individual.", "Habría que construir aulas y contratar miles de docentes; solo bajar a 22 costaría al menos 2.818 millones al año, según Esade."],
+        ["Lo que proponía el proyecto de ley: más tiempo para cada niño.", "Coste alto, y faltan docentes en algunas especialidades."],
+        ["La media real ya está en 21: el máximo solo afecta a algunas aulas.", "Las aulas más llenas suelen estar en los barrios que más apoyo necesitan."],
+        ["Libera dinero para apoyos y para pagar mejor al profesorado.", "Menos atención para cada alumno."],
+        ["Ahorro grande en personal.", "Vuelta a aulas masificadas, como las que permitieron los recortes de 2012."]
       ],
-      a: ["Para subir el máximo", "Más alumnos por aula libera dinero para otras prioridades, como pagar mejor a los docentes o los apoyos a quien más lo necesita.", ""],
-      b: ["Para bajarlo", "Con menos alumnos el docente puede atender a cada niño, sobre todo a quien va más atrasado; es de las medidas que más piden las familias y el profesorado.", "Lo impulsó el Ministerio de Educación; las comunidades del PP pidieron más tiempo para aplicarlo."] },
+      datos: [
+        ["25", "alumnos como máximo por aula en Primaria hoy; el proyecto de 2026 proponía 22", "Ministerio de Educación · proyecto de ley de ratios, abril de 2026"],
+        ["2.818 M€", "al año como mínimo costaría bajar a 22 entre 2027 y 2036", "Esade · estimación de 2026"]
+      ],
+      q: ["", "Lo impulsó el Ministerio de Educación; las comunidades del PP pidieron más tiempo para aplicarlo."] },
     { id: "edu-gasto", t: "Gasto público en educación", e: "subir",
       est: "España gastó en 2024 más euros que nunca en educación, pero su peso sobre el tamaño de la economía lleva cuatro años bajando y está por debajo de la media de la OCDE.",
+      u: { q: "Gasto público en educación, en % del PIB", min: 3.48, max: 6.48, step: 0.1, hoy: 4.48, f: (v) => `${nf(v, 2)} % del PIB`, s: 0.05, b: 0.5 },
+      serie: { t: "Gasto público en educación, % del PIB", f: (v) => `${nf(v, 2)} %`, cero: false, prop: true,
+        pts: [[2012, 4.51], [2013, 4.40], [2014, 4.34], [2015, 4.32], [2016, 4.27], [2017, 4.25], [2018, 4.21], [2019, 4.26], [2020, 4.89], [2021, 4.84], [2022, 4.62], [2023, 4.54], [2024, 4.48]],
+        nota: "2012–2019: indicadores del Ministerio (edición 2022); 2020–2024: Indicadores 2026 de la F. Ramón Areces y la F. SyE",
+        src: "Ministerio de Educación (INEE, F1.1) y F. Ramón Areces / F. SyE 2026" },
+      pc: [
+        ["Menos gasto público y menos impuestos.", "Por debajo del mínimo de la serie reciente (4,21 % en 2018)."],
+        ["Obliga a gastar mejor lo que hay.", "Menos profesorado y apoyos, con más alumnado vulnerable."],
+        ["El gasto en euros ya sube cada año.", "Su peso sobre la economía lleva cuatro años bajando."],
+        ["Recupera el nivel de 2020–2021 (4,8–4,9 %) para primaria, 0–3 años y apoyos.", "Hay que pagarlo con impuestos o con recortes en otra parte."],
+        ["Por encima del 5 %, más que en 2009, el máximo de la serie (5,02 %).", "Gasto muy alto sin garantía de mejores resultados si no se evalúa."]
+      ],
       datos: [
         ["71.349 M€", "de gasto público en educación en 2024, el máximo de la serie", "Ministerio de Educación · Estadística del gasto público en educación"],
-        ["4,48 %", "del PIB en 2024, frente al 4,89 % de 2020", "Fundación Ramón Areces y Fundación SyE · Indicadores 2026"]
+        ["4,48 %", "del PIB en 2024, frente al 4,89 % de 2020", "F. Ramón Areces y F. SyE · Indicadores 2026"]
       ],
-      a: ["Para subir", "Acercarse a la media de la OCDE para pagar profesorado, apoyos y la etapa de 0 a 3 años, que es donde más rinde cada euro.", ""],
-      b: ["Para dejarlo igual", "El gasto ya sube en euros cada año; lo que falta es saber qué funciona y gastar mejor lo que ya hay antes de gastar más.", ""] }
+      q: ["", ""] }
   ] },
-  { k: "san", n: "Sanidad", palancas: [
+  { k: "san", n: "Sanidad", h: "Listas de espera y conciertos", palancas: [
     { id: "san-espera", t: "Plan de choque para las listas de espera", e: "subir",
       est: "La espera media para una operación no urgente en la sanidad pública es de 121 días, con diferencias muy grandes entre comunidades.",
+      u: { q: "Actividad quirúrgica extra (tardes, más equipos): cambio sobre hoy", min: -30, max: 60, step: 5, hoy: 0, f: (v) => v === 0 ? "igual que hoy" : `${v > 0 ? "+" : ""}${v} %`, s: 2, b: 25 },
+      serie: { t: "Espera media para operarse, en días (a 31 de diciembre)", f: (v) => `${nf(v)} días`, cero: true, prop: false,
+        pts: [[2019, 121], [2020, 148], [2021, 123], [2022, 120], [2023, 128], [2024, 126], [2025, 121]],
+        src: "Ministerio de Sanidad · Sistema de Información sobre Listas de Espera (SISLE)" },
+      pc: [
+        ["Dinero para atención primaria y prevención.", "La espera media, hoy de 121 días, volvería a subir."],
+        ["Se priorizan los casos urgentes y graves.", "Más pacientes esperando más de seis meses."],
+        ["La espera baja desde 2023 (de 128 a 121 días).", "121 días de media siguen siendo cuatro meses."],
+        ["Quirófanos de tarde y más anestesistas acortan la espera.", "Si no se refuerza la primaria, la lista vuelve a crecer."],
+        ["Esperas cortas en todas las comunidades.", "Faltan profesionales: sin ellos, el dinero acaba en horas extra o en la privada."]
+      ],
       datos: [
-        ["121 días", "de espera media para operarse, a 31 de diciembre de 2025", "Ministerio de Sanidad · Sistema de Información sobre Listas de Espera"],
+        ["121 días", "de espera media para operarse, a 31 de diciembre de 2025", "Ministerio de Sanidad · SISLE"],
         ["49 y 160", "días de espera media para operarse en Madrid y en Andalucía a junio de 2025: lo que cambia según dónde vivas", "Ministerio de Sanidad · Listas de espera, junio de 2025"]
       ],
-      a: ["Para subir", "Quirófanos por la tarde, más anestesistas y pagar por resultados: una operación que tarda medio año es salud que se pierde y bajas que se alargan.", "Lo promete el PP en su programa del 29-N."],
-      b: ["Para dejarlo igual", "Los planes de choque bajan la lista unos meses y luego vuelve a crecer; mejor reorganizar la atención primaria para que lleguen menos casos al hospital.", ""] },
-    { id: "san-priv", t: "Colaboración de la sanidad privada con la pública", e: "abrir",
-      est: "Parte de la sanidad pública se presta en hospitales privados con conciertos o concesiones. El Gobierno aprobó en 2026 un proyecto de ley para que la gestión directa sea la regla y la indirecta, la excepción.",
+      q: ["Lo promete el PP en su programa del 29-N.", ""] },
+    { id: "san-priv", t: "Conciertos de la sanidad pública con centros privados", e: "abrir",
+      est: "Una parte de la sanidad pública se presta en centros privados pagados con dinero público. El Gobierno aprobó en 2026 un proyecto de ley para que la gestión directa sea la regla.",
+      u: { q: "Peso de los conciertos en el gasto sanitario público", min: 0, max: 20, step: 0.5, hoy: 10, f: (v) => `${nf(v, v % 1 ? 1 : 0)} % del gasto`, s: 0.25, b: 3 },
+      serie: { t: "Conciertos, % del gasto sanitario público", f: (v) => `${nf(v, 1)} %`, cero: true, prop: true,
+        pts: [[2019, 10.8], [2020, 10.0], [2021, 10.3], [2022, 10.1], [2023, 10.0], [2024, 10.0]],
+        src: "Ministerio de Sanidad · Estadística de Gasto Sanitario Público 2019 y 2024" },
+      pc: [
+        ["Todo el dinero va a la red pública y a sus profesionales.", "Sin la capacidad concertada, las esperas se alargarían mientras la pública crece."],
+        ["Menos dependencia de la privada.", "Algunas zonas dependen de hospitales concertados."],
+        ["Lleva seis años estable en torno al 10 %.", "No resuelve el debate de fondo sobre quién presta el servicio."],
+        ["Usa capacidad que ya existe para acortar esperas.", "Dinero que no se invierte en la red pública."],
+        ["Más opciones y más rapidez para el paciente.", "La pública pierde capacidad y profesionales y acaba dependiendo de la privada."]
+      ],
       datos: [
-        ["+40 %", "hospitales privados integrados en el sistema público en la última década, según el Ministerio de Sanidad", "Ministerio de Sanidad · informe sobre la colaboración público-privada, diciembre de 2025"],
+        ["10.143 M€", "en conciertos en 2024, el 10,0 % de los 101.739 millones de gasto sanitario público", "Ministerio de Sanidad · Estadística de Gasto Sanitario Público 2024"],
         ["Mayo 2026", "el Consejo de Ministros aprueba el proyecto de Ley de gestión pública e integridad del SNS", "Ministerio de Sanidad · nota del 12 de mayo de 2026"]
       ],
-      a: ["Para abrir", "Usar la capacidad que ya existe en la privada acorta las esperas hoy, y una buena evaluación evita los abusos.", "Lo defienden PP, Vox y Junts."],
-      b: ["Para cerrar", "Lo que se paga a la privada no se invierte en la pública, que pierde profesionales y capacidad y acaba dependiendo de ella.", "Lo defienden Frente Amplio, Podemos y EH Bildu."] }
+      q: ["Lo defienden PP, Vox y Junts.", "Lo defienden Frente Amplio, Podemos y EH Bildu."] }
   ] }
 ];
 
-(function decidir() {
+(function votar() {
   const list = $("#dd-list");
   if (!list) return;
-  const CLAVE = "politica.decidir.v1";
-  let mem = { elec: {}, orden: {}, oculto: {}, conv: {} };
+  const CLAVE = "politica.votar.v2";
+  let mem = { elec: {}, orden: {}, oculto: {} };
   try { const g = JSON.parse(localStorage.getItem(CLAVE) || "null"); if (g && typeof g === "object") mem = Object.assign(mem, g); } catch (e) { /* sin almacenamiento */ }
   const guardar = () => { try { localStorage.setItem(CLAVE, JSON.stringify(mem)); } catch (e) { /* sin almacenamiento */ } };
   let area = AREAS[0].k;
-  const TODAS = AREAS.flatMap((a) => a.palancas.map((p) => ({ ...p, area: a.n })));
+  const TODAS = AREAS.flatMap((a) => a.palancas.map((p) => ({ ...p, area: a.n, ak: a.k })));
+  const PAL = Object.fromEntries(TODAS.map((p) => [p.id, p]));
+  const nivel = (p, v) => { const d = v - p.u.hoy; return d <= -p.u.b ? 0 : d < -p.u.s ? 1 : d <= p.u.s ? 2 : d <= p.u.b ? 3 : 4; };
+  const valor = (p) => { const v = mem.elec[p.id]; return typeof v === "number" ? v : null; };
+  const inicial = (p) => p.u.ini ?? p.u.hoy;
+  let ancho = 640;
+  const medir = () => { ancho = Math.round(Math.min(640, Math.max(320, (list.clientWidth || 640) - 30))); };
+  let anchoPrev = 0, tRes = null;
+  window.addEventListener("resize", () => { clearTimeout(tRes); tRes = setTimeout(() => { medir(); if (Math.abs(ancho - anchoPrev) > 40) { anchoPrev = ancho; pintar(); } }, 200); });
 
+  /* Gráfico histórico: línea (o escalones) con la propuesta de quien vota como punto o línea discontinua */
+  function grafico(p, v) {
+    const s = p.serie, W = ancho, H = ancho < 480 ? 230 : 210, L = 60, R = ancho < 480 ? 74 : 96, T = 18, B = 30;
+    const xs = s.pts.map((q) => q[0]);
+    const prop = v != null && s.prop ? v : null;
+    const xMax = Math.max(...xs) + (prop != null && s.prop === true ? 1 : 0), xMin = Math.min(...xs);
+    let ys = s.pts.map((q) => q[1]).concat((s.refs || []).map((r) => r[0]));
+    if (prop != null) ys.push(prop);
+    let y0 = s.min ?? (s.cero ? 0 : Math.min(...ys)), y1 = s.max ?? Math.max(...ys);
+    if (s.min == null && !s.cero) { const pad = (y1 - y0) * 0.15 || 1; y0 -= pad; y1 += pad; } else if (s.max == null) y1 *= 1.08;
+    const X = (x) => L + ((x - xMin) / ((xMax - xMin) || 1)) * (W - L - R), Y = (y) => T + (1 - (y - y0) / ((y1 - y0) || 1)) * (H - T - B);
+    let g = "";
+    // Round tick values (1, 2, 2.5 or 5 times a power of ten) so the axis never shows 18.552 or 14,7 %
+    const bruto = (y1 - y0) / 4, pot = Math.pow(10, Math.floor(Math.log10(bruto || 1)));
+    const paso = [1, 2, 2.5, 5, 10].map((m) => m * pot).find((m) => m >= bruto) || 10 * pot;
+    const ticks = []; for (let t = Math.ceil(y0 / paso) * paso; t <= y1 + 1e-9; t += paso) ticks.push(+t.toFixed(6));
+    for (const yv of ticks) { const yy = Y(yv); g += `<line x1="${L}" x2="${W - R + 8}" y1="${r1(yy)}" y2="${r1(yy)}" stroke="#283142"/><text x="${L - 8}" y="${r1(yy + 4)}" text-anchor="end" font-family="IBM Plex Mono, monospace" font-size="11" fill="#7D89A6">${s.f(yv)}</text>`; }
+    (s.refs || []).forEach(([rv, rl]) => { g += `<line x1="${L}" x2="${W - R + 8}" y1="${r1(Y(rv))}" y2="${r1(Y(rv))}" stroke="#C9CCD3" stroke-dasharray="3 4"/><text x="${W - R + 12}" y="${r1(Y(rv) + 4)}" font-family="Archivo, sans-serif" font-size="12" fill="#C9CCD3">${rl}</text>`; });
+    const lab = s.xl || xs.map((x) => String(Math.floor(x)));
+    let ultimo = -1e9;
+    xs.forEach((x, i) => {
+      const px = X(x);
+      if (!lab[i] || (px - ultimo < 44 && i !== xs.length - 1) ) return;
+      if (i === xs.length - 1 && px - ultimo < 44) g = g.replace(/<text data-xl[^>]*>[^<]*<\/text>$/, "");
+      g += `<text data-xl x="${r1(px)}" y="${H - 8}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="11" fill="#7D89A6">${lab[i]}</text>`;
+      ultimo = px;
+    });
+    let d = "";
+    s.pts.forEach(([x, y], i) => { d += i === 0 ? `M${r1(X(x))},${r1(Y(y))}` : s.escalon ? `H${r1(X(x))}V${r1(Y(y))}` : `L${r1(X(x))},${r1(Y(y))}`; });
+    g += `<path d="${d}" fill="none" stroke="#6CC4E4" stroke-width="2.5" stroke-linejoin="round"/>`;
+    if (!s.escalon) s.pts.forEach(([x, y]) => { g += `<circle cx="${r1(X(x))}" cy="${r1(Y(y))}" r="3.2" fill="#6CC4E4"/>`; });
+    const [lx, ly] = s.pts[s.pts.length - 1];
+    g += `<circle cx="${r1(X(lx))}" cy="${r1(Y(ly))}" r="5.5" fill="#0C0F14" stroke="#EDEBE6" stroke-width="2"/><text x="${r1(X(lx) + 9)}" y="${r1(Y(ly) - 9)}" font-family="Archivo, sans-serif" font-size="12.5" font-weight="600" fill="#EDEBE6">hoy</text>`;
+    if (prop != null && s.prop === true) {
+      const px = X(xMax), py = Y(prop);
+      g += `<line x1="${r1(X(lx))}" y1="${r1(Y(ly))}" x2="${r1(px)}" y2="${r1(py)}" stroke="#F6BE3B" stroke-width="2.2" stroke-dasharray="6 5"/><circle cx="${r1(px)}" cy="${r1(py)}" r="6.5" fill="#F6BE3B"/>`
+        + `<text x="${r1(px + 10)}" y="${r1(py + 4)}" font-family="Archivo, sans-serif" font-size="12.5" font-weight="600" fill="#F6BE3B">tu voto</text>`;
+    }
+    if (prop != null && s.prop === "linea") {
+      g += `<line x1="${L}" x2="${W - R + 8}" y1="${r1(Y(prop))}" y2="${r1(Y(prop))}" stroke="#F6BE3B" stroke-width="2.2" stroke-dasharray="6 5"/><text x="${W - R + 12}" y="${r1(Y(prop) + 4)}" font-family="Archivo, sans-serif" font-size="12.5" font-weight="600" fill="#F6BE3B">tu máximo</text>`;
+    }
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${s.t}: de ${s.f(s.pts[0][1])} a ${s.f(ly)}">${g}</svg>`;
+  }
+
+  function lectura(p) {
+    const v = valor(p), ns = mem.elec[p.id] === "ns", x = v ?? inicial(p), n = nivel(p, x);
+    return { v, ns, x, n, et: NIVELES[p.e][n] };
+  }
+  function tarjeta(p) {
+    const oc = mem.oculto[p.id] || {}, ord = orden(p), L = lectura(p);
+    return `<article class="dd-card" data-id="${p.id}">
+      <h4>${p.t}</h4>
+      <p class="dd-state"><span class="lbl">Cómo está hoy</span><br>${p.est}</p>
+      <figure class="dd-chart"><figcaption><b>${p.serie.t}</b><span>${p.serie.src}${p.serie.nota ? ` · ${p.serie.nota}` : ""}</span></figcaption><div class="dd-chart-svg">${grafico(p, L.v)}</div></figure>
+      <ul class="dd-data">${ord.map((di, pos) => { const [v, l, f] = p.datos[di]; return `<li class="dd-dato${oc[di] ? " off" : ""}"><div><b>${v}</b></div><span>${l}<small>${f}</small></span>
+        <span class="dd-dctl"><button type="button" data-sube="${pos}" aria-label="Subir este dato" ${pos === 0 ? "disabled" : ""}>↑</button><button type="button" data-baja="${pos}" aria-label="Bajar este dato" ${pos === ord.length - 1 ? "disabled" : ""}>↓</button><button type="button" data-oculta="${di}" aria-pressed="${!!oc[di]}" title="Este dato no debería estar">Sobra</button></span></li>`; }).join("")}</ul>
+      <p class="dd-hint">Ordena los datos y marca los que sobran: en la propuesta, lo que se enseña y en qué orden se acuerda en público.</p>
+      <div class="dd-vote${L.v == null && !L.ns ? " sin" : ""}${L.ns ? " ns" : ""}" data-n="${L.n}">
+        <label class="dd-q" for="rng-${p.id}">${p.u.q}</label>
+        <div class="dd-readout"><span class="dd-hoy">Hoy: <b>${p.u.f(p.u.hoy)}</b></span><span class="dd-tu">Tu voto: <b data-out>${L.v == null ? "mueve el deslizador" : p.u.f(L.x)}</b></span><span class="dd-niv" data-niv>${L.v == null ? "" : L.et}</span></div>
+        <div class="dd-rngw" style="--hoyf:${r1((p.u.hoy - p.u.min) / (p.u.max - p.u.min) * 1000) / 1000};--hoy:${r1(((p.u.hoy - p.u.min) / (p.u.max - p.u.min)) * 100)}%;--pos:${r1(((L.x - p.u.min) / (p.u.max - p.u.min)) * 100)}%"><input type="range" id="rng-${p.id}" class="dd-range" min="${p.u.min}" max="${p.u.max}" step="${p.u.step}" value="${L.x}" aria-valuetext="${p.u.f(L.x)}${L.v == null ? "" : ": " + L.et}"><i class="dd-hoymk" aria-hidden="true"></i></div>
+        <div class="dd-ticks" aria-hidden="true"><span>${NIVELES[p.e][0]}</span><span>${NIVELES[p.e][2]}</span><span>${NIVELES[p.e][4]}</span></div>
+        <div class="dd-pc" data-pc>${pcHTML(p, L.n, L.v == null)}</div>
+        <button type="button" class="dd-ns" data-ns aria-pressed="${L.ns}">No lo sé todavía</button>
+      </div>
+      ${p.q[0] || p.q[1] ? `<p class="dd-quien"><span class="lbl">Quién defiende cada lado</span>${p.q[0] ? `<span><b>${p.e === "abrir" ? "Abrir" : "Subir"}:</b> ${p.q[0]}</span>` : ""}${p.q[1] ? `<span><b>${p.e === "abrir" ? "Cerrar o dejar igual" : "Bajar o dejar igual"}:</b> ${p.q[1]}</span>` : ""}</p>` : ""}
+    </article>`;
+  }
+  function pcHTML(p, n, sinVoto) {
+    const [pro, con] = p.pc[n];
+    return `<div class="pro"><span class="lbl">${sinVoto ? "Si se queda como hoy · " : ""}A favor</span><p>${pro}</p></div><div class="con"><span class="lbl">En contra</span><p>${con}</p></div>`;
+  }
   function orden(p) {
     const o = mem.orden[p.id];
     return Array.isArray(o) && o.length === p.datos.length ? o : p.datos.map((_, i) => i);
   }
-  function tarjeta(p) {
-    const esc = ESCALAS[p.e], el = mem.elec[p.id], oc = mem.oculto[p.id] || {}, cv = mem.conv[p.id] || {};
-    const ord = orden(p);
-    return `<article class="dd-card" data-id="${p.id}">
-      <h4>${p.t}</h4>
-      <p class="dd-state"><span class="lbl">Cómo está hoy</span><br>${p.est}</p>
-      <ul class="dd-data">${ord.map((di, pos) => { const [v, l, f] = p.datos[di]; return `<li class="dd-dato${oc[di] ? " off" : ""}"><div><b>${v}</b></div><span>${l}<small>${f}</small></span>
-        <span class="dd-dctl"><button type="button" data-sube="${pos}" aria-label="Subir este dato" ${pos === 0 ? "disabled" : ""}>↑</button><button type="button" data-baja="${pos}" aria-label="Bajar este dato" ${pos === ord.length - 1 ? "disabled" : ""}>↓</button><button type="button" data-oculta="${di}" aria-pressed="${!!oc[di]}" title="Este dato no debería estar">Sobra</button></span></li>`; }).join("")}</ul>
-      <p class="dd-hint">Ordena los datos y marca los que sobran: en la propuesta, lo que se enseña y en qué orden se acuerda en público.</p>
-      <div class="dd-scale" role="group" aria-label="Tu decisión sobre ${p.t.toLowerCase()}">${esc.map((x, i) => `<button type="button" data-el="${i}" aria-pressed="${el === i}">${x}</button>`).join("")}<button type="button" class="ns" data-el="ns" aria-pressed="${el === "ns"}">No lo sé</button></div>
-      <div class="dd-args">${[["a", p.a, "var(--r)"], ["b", p.b, "var(--l)"]].map(([k, [lbl, txt, quien], ac]) => `<div class="dd-arg" style="--ac:${ac}"><span class="lbl">${lbl}</span><p>${txt}</p>${quien ? `<p class="quien">${quien}</p>` : `<p class="quien">Aquí firmarían su argumento las personas expertas que se ofrezcan.</p>`}<button type="button" data-cv="${k}" aria-pressed="${!!cv[k]}">Me convence</button></div>`).join("")}</div>
-    </article>`;
+  /* Mientras se arrastra solo se tocan las piezas que cambian, para no perder el foco del deslizador */
+  function vivo(card, p, x) {
+    const n = nivel(p, x), et = NIVELES[p.e][n];
+    const rng = card.querySelector(".dd-range");
+    card.querySelector(".dd-rngw").style.setProperty("--pos", r1(((x - p.u.min) / (p.u.max - p.u.min)) * 100) + "%");
+    rng.setAttribute("aria-valuetext", `${p.u.f(x)}: ${et}`);
+    card.querySelector("[data-out]").textContent = p.u.f(x);
+    card.querySelector("[data-niv]").textContent = et;
+    card.querySelector("[data-pc]").innerHTML = pcHTML(p, n, false);
+    card.querySelector(".dd-vote").setAttribute("data-n", n);
+    card.querySelector(".dd-vote").classList.remove("sin", "ns");
+    card.querySelector("[data-ns]").setAttribute("aria-pressed", "false");
+    card.querySelector(".dd-chart-svg").innerHTML = grafico(p, x);
   }
   function pintar() {
+    medir(); anchoPrev = ancho;
     const a = AREAS.find((x) => x.k === area);
     list.innerHTML = a.palancas.map(tarjeta).join("");
-    mandato();
+    mandato(); temas();
   }
-  const texto = (p) => { const v = mem.elec[p.id]; return v == null ? null : v === "ns" ? "No lo sé" : ESCALAS[p.e][v]; };
+  const texto = (p) => { const v = mem.elec[p.id]; return v == null ? null : v === "ns" ? "No lo sé" : `${p.u.f(v)} · ${NIVELES[p.e][nivel(p, v)].toLowerCase()}`; };
   function mandato() {
     const hechas = TODAS.filter((p) => mem.elec[p.id] != null).length;
-    $("#dd-cnt").textContent = `${hechas} de ${TODAS.length} medidas decididas`;
+    $("#dd-cnt").textContent = `${hechas} de ${TODAS.length} medidas votadas`;
     $("#dd-mandato").innerHTML = TODAS.map((p) => { const t = texto(p); return `<li class="${t ? "" : "vacio"}"><span>${p.area} · ${p.t}</span><b>${t || "—"}</b></li>`; }).join("");
   }
-  $("#dd-areas").innerHTML = AREAS.map((a, i) => `<button class="tbtn" data-a="${a.k}" aria-pressed="${i === 0}">${a.n}</button>`).join("");
-  $("#dd-areas").addEventListener("click", (e) => {
+  /* Selector de temas: icono, nombre, qué se vota y cuántas medidas llevas; cambia al pasar el ratón */
+  function temas() {
+    $("#dd-areas").innerHTML = AREAS.map((a) => {
+      const hechas = a.palancas.filter((p) => mem.elec[p.id] != null).length;
+      return `<button type="button" class="dd-tema" role="tab" data-a="${a.k}" aria-selected="${a.k === area}" tabindex="${a.k === area ? 0 : -1}" aria-controls="dd-list">
+        <svg viewBox="0 0 24 24" aria-hidden="true">${ICONOS[a.k]}</svg><span class="nm">${a.n}</span><span class="hn">${a.h}</span><span class="ct">${hechas}/${a.palancas.length}</span></button>`;
+    }).join("");
+  }
+  function elegir(k, foco) {
+    if (k === area) return;
+    area = k; pintar();
+    if (foco) { const b = $(`.dd-tema[data-a="${k}"]`); if (b) b.focus(); }
+  }
+  let espera = null;
+  const sel = $("#dd-areas");
+  sel.addEventListener("click", (e) => { const b = e.target.closest("[data-a]"); if (b) elegir(b.dataset.a, true); });
+  sel.addEventListener("pointerover", (e) => {
+    if (e.pointerType !== "mouse") return;
     const b = e.target.closest("[data-a]"); if (!b) return;
-    area = b.dataset.a;
-    $$("[data-a]", $("#dd-areas")).forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-    pintar();
+    clearTimeout(espera); espera = setTimeout(() => elegir(b.dataset.a, false), 160);
   });
+  sel.addEventListener("pointerleave", () => clearTimeout(espera));
+  sel.addEventListener("keydown", (e) => {
+    const i = AREAS.findIndex((a) => a.k === area), m = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+    if (m == null) return; e.preventDefault();
+    elegir(AREAS[(i + m + AREAS.length) % AREAS.length].k, true);
+  });
+  list.addEventListener("input", (e) => {
+    const r = e.target.closest(".dd-range"); if (!r) return;
+    const card = r.closest(".dd-card"), p = PAL[card.dataset.id], x = +r.value;
+    mem.elec[p.id] = x; vivo(card, p, x);
+  });
+  list.addEventListener("change", (e) => { if (e.target.closest(".dd-range")) { guardar(); mandato(); temas(); } });
   list.addEventListener("click", (e) => {
     const card = e.target.closest(".dd-card"); if (!card) return;
-    const p = TODAS.find((x) => x.id === card.dataset.id), b = e.target.closest("button"); if (!b || !p) return;
-    if (b.dataset.el != null) { const v = b.dataset.el === "ns" ? "ns" : +b.dataset.el; if (mem.elec[p.id] === v) delete mem.elec[p.id]; else mem.elec[p.id] = v; }
+    const p = PAL[card.dataset.id], b = e.target.closest("button"); if (!b || !p) return;
+    if (b.dataset.ns != null) { if (mem.elec[p.id] === "ns") delete mem.elec[p.id]; else mem.elec[p.id] = "ns"; }
     else if (b.dataset.sube != null || b.dataset.baja != null) {
       const o = orden(p).slice(), i = +(b.dataset.sube ?? b.dataset.baja), j = b.dataset.sube != null ? i - 1 : i + 1;
       if (j < 0 || j >= o.length) return;
       [o[i], o[j]] = [o[j], o[i]]; mem.orden[p.id] = o;
     } else if (b.dataset.oculta != null) { const m = mem.oculto[p.id] || (mem.oculto[p.id] = {}); m[b.dataset.oculta] = !m[b.dataset.oculta]; }
-    else if (b.dataset.cv) { const m = mem.conv[p.id] || (mem.conv[p.id] = {}); m[b.dataset.cv] = !m[b.dataset.cv]; }
     else return;
     guardar();
-    const sel = b.dataset.el != null ? `[data-el="${b.dataset.el}"]` : b.dataset.cv ? `[data-cv="${b.dataset.cv}"]` : null;
+    const foco = b.dataset.ns != null ? "[data-ns]" : null;
     card.outerHTML = tarjeta(p);
-    mandato();
-    const nueva = list.querySelector(`.dd-card[data-id="${p.id}"]`);
-    if (nueva && sel) { const f = nueva.querySelector(sel); if (f) f.focus(); }
+    mandato(); temas();
+    if (foco) { const f = list.querySelector(`.dd-card[data-id="${p.id}"] ${foco}`); if (f) f.focus(); }
   });
   $("#dd-copiar").addEventListener("click", async () => {
-    const txt = "Mi mandato (Política · Luz & Humanidad)\n" + TODAS.map((p) => `- ${p.area} · ${p.t}: ${texto(p) || "sin decidir"}`).join("\n");
+    const txt = "Mi voto por temas (Política · Luz & Humanidad)\n" + TODAS.map((p) => `- ${p.area} · ${p.t}: ${texto(p) || "sin votar"}`).join("\n");
     try { await navigator.clipboard.writeText(txt); $("#dd-estado").textContent = "Copiado. Puedes pegarlo donde quieras."; }
     catch (e) { $("#dd-estado").textContent = "Tu navegador no deja copiar desde aquí."; }
   });
-  $("#dd-borrar").addEventListener("click", () => { mem = { elec: {}, orden: {}, oculto: {}, conv: {} }; guardar(); pintar(); $("#dd-estado").textContent = "Empezamos de nuevo."; });
+  $("#dd-borrar").addEventListener("click", () => { mem = { elec: {}, orden: {}, oculto: {} }; guardar(); pintar(); $("#dd-estado").textContent = "Empezamos de nuevo."; });
   pintar();
 })();
 
