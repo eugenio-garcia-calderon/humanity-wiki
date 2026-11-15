@@ -5,6 +5,12 @@
       "ruta": "src/components/aeromovil/geometriaTriciclo.ts",
       "motivo": "Chasis y batería que se alargan",
       "desde": "2026-11-15T19:36:24.091Z"
+    },
+    {
+      "agente": "chasis",
+      "ruta": "src/pages/Aeromovil.tsx",
+      "motivo": "Chasis y batería que se alargan",
+      "desde": "2026-11-15T19:36:27.351Z"
     }
   ]
 }
