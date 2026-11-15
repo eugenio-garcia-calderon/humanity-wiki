@@ -27,7 +27,7 @@ type Garaje = ReturnType<typeof useDisenosGaraje>;
 /** A design's vehicle, from its parameters alone (no model is built): for the list. */
 export function familiaGuardada(d: Diseno): string {
   const P = deDiseno(d.parametros || {});
-  return P.disposicion === 'cuatro' ? 'Aeromóvil 1' : P.disposicion === 'bala' ? 'Cuadriciclo Bala en rombo' : P.disposicion === 'triciclo' ? nombreTriciclo(camposTriciclo(P)) : 'Aeromóvil Gota';
+  return P.disposicion === 'basculante' ? 'Cuadriciclo Basculante' : P.disposicion === 'cuatro' ? 'Aeromóvil 1' : P.disposicion === 'bala' ? 'Cuadriciclo Bala en rombo' : P.disposicion === 'triciclo' ? nombreTriciclo(camposTriciclo(P)) : 'Aeromóvil Gota';
 }
 
 /** «Solo mostrar este»: nothing hidden, only the design being edited, or only one reference car (by id). */

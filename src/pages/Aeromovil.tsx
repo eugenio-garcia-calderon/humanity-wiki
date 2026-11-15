@@ -32,7 +32,7 @@ import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import { Visor3D, CAPAS, type CapaId, type Vista, type VisorHandle } from '../components/aeromovil/Visor3D';
 import {
-  PARAMETROS_POR_DEFECTO, PARAMETROS_A1, PARAMETROS_GOTA, PARAMETROS_BALA, PARAMETROS_TRICICLO, BALA_DEFECTO, DIAMETRO_RUEDA, NEUMATICOS, MATERIALES_CARENADO, MATERIALES_CHASIS, RANGOS_MASA, ajustarCarenado, areas, calcular, crearModelo,
+  PARAMETROS_POR_DEFECTO, PARAMETROS_A1, PARAMETROS_GOTA, PARAMETROS_BALA, PARAMETROS_TRICICLO, PARAMETROS_BASCULANTE, BALA_DEFECTO, DIAMETRO_RUEDA, NEUMATICOS, MATERIALES_CARENADO, MATERIALES_CHASIS, RANGOS_MASA, ajustarCarenado, areas, calcular, crearModelo,
   type Comprobacion, type Disposicion, type MaterialCarenado, type MaterialChasis, type Modelo, type ModeloBala, type ModeloTriciclo, type Neumatico, type Parametros, type Puerta, type Pulgadas, type Resultados,
 } from '../components/aeromovil/geometria';
 import {
@@ -40,6 +40,9 @@ import {
   type DepTriciclo, type FichaTriciclo,
 } from '../components/aeromovil/geometriaTriciclo';
 import { cuerpoTriciclo, peticionDe as peticionTunel } from '../components/aeromovil/tunel/nuestro';
+// ── Cuadriciclo Basculante (2026-11-15): its sidebar, its Cd and its departments (basculante/, geometriaBasculante.ts)
+import { LadoBasculante, useCdBasculante } from '../components/aeromovil/basculante/LadoBasculante';
+import { CRR_B, LEMAS_BASCULANTE, NOMBRE_BASCULANTE, camposBasculante } from '../components/aeromovil/geometriaBasculante';
 import { claveTunel } from '../components/aeromovil/tunel/calculo';
 import { pedirTunel, resultadoEnCache } from '../components/aeromovil/tunel/cliente';
 import type { Resolucion } from '../components/aeromovil/tunel/malla';
@@ -1027,11 +1030,13 @@ export default function Aeromovil() {
   // The Bala's figures take ~30 ms (frontal area, clearances): while a slider is dragged they may lag a frame behind
   // the 3D, so the slider never waits for them. Only within the same vehicle: switching computes at once.
   const diferido = useDeferredValue(modelo);
-  const paraCalcular = (modelo.tipo === 'bala' || modelo.tipo === 'triciclo') && diferido.tipo === modelo.tipo ? diferido : modelo;
+  const paraCalcular = (modelo.tipo === 'bala' || modelo.tipo === 'triciclo' || modelo.tipo === 'basculante') && diferido.tipo === modelo.tipo ? diferido : modelo;
   const res = useMemo(() => calcular(paraCalcular, areas(paraCalcular)), [paraCalcular]);
   const esA1 = modelo.tipo === 'a1', esBala = modelo.tipo === 'bala', esTri = modelo.tipo === 'triciclo';
+  // Cuadriciclo Basculante (2026-11-15): departments as the Triciclo's (`porDeps`), its own sidebar
+  const esBas = modelo.tipo === 'basculante', porDeps = esTri || esBas;
   // 2026-11-11: a Triciclo with two rear wheels is the «Cuadriciclo Bala clásico» wherever its name shows
-  const nombreVehiculo = esA1 ? 'Aeromóvil 1' : esBala ? 'Cuadriciclo Bala en rombo' : esTri ? nombreTriciclo(camposTriciclo(P)) : 'Aeromóvil Gota';
+  const nombreVehiculo = esBas ? NOMBRE_BASCULANTE : esA1 ? 'Aeromóvil 1' : esBala ? 'Cuadriciclo Bala en rombo' : esTri ? nombreTriciclo(camposTriciclo(P)) : 'Aeromóvil Gota';
   const NOMBRE_VISTA: Record<Vista, string> = { iso: 'tres cuartos delantera', side: 'lateral', top: 'planta (desde arriba)', front: 'frontal', back: 'trasera' };
   // «Pedir render» (2026-11-07, Eugenio: «quita lo de crear render con Gemini,
   // que gasta dinero; mantenlo bajo una petición a Claude Code con nuestra
@@ -1056,12 +1061,14 @@ export default function Aeromovil() {
   };
   const porDefecto = JSON.stringify(aDiseno(Pa)) === JSON.stringify(aDiseno(PARAMETROS_POR_DEFECTO));
   // Cambiar de vehículo carga su juego de medidas: los dos no comparten deslizadores.
-  const cambiarVehiculo = (k: Disposicion) => { if (k !== P.disposicion) { setP(k === 'cuatro' ? PARAMETROS_A1 : k === 'bala' ? PARAMETROS_BALA : k === 'triciclo' ? PARAMETROS_TRICICLO : PARAMETROS_GOTA); setActual(null); } };
+  const cambiarVehiculo = (k: Disposicion) => { if (k !== P.disposicion) { setP(k === 'basculante' ? PARAMETROS_BASCULANTE : k === 'cuatro' ? PARAMETROS_A1 : k === 'bala' ? PARAMETROS_BALA : k === 'triciclo' ? PARAMETROS_TRICICLO : PARAMETROS_GOTA); setActual(null); } };
 
   const [visibles, setVisibles] = useState<Record<CapaId, boolean>>(() => Object.fromEntries(CAPAS.map(c => [c.k, true])) as Record<CapaId, boolean>);
   const [rayosX, setRayosX] = useState(false);
   const [corte, setCorte] = useState(false);
   const [curva, setCurva] = useState(false);
+  // Cuadriciclo Basculante: «Bascular» (a counter: each press leans it to the maximum each way and back)
+  const [bascular, setBascular] = useState(0);
   const [verCotas, setVerCotas] = useState(false);   // apagadas al cargar (2026-11-06, Eugenio)
   const [abierta, setAbierta] = useState(false);
   const [maleteros, setMaleteros] = useState(false);
@@ -1080,7 +1087,7 @@ export default function Aeromovil() {
   // «Proyecto», or to another tab) puts back the layers as they were before it was pressed.
   const antesSolo = useRef<Record<CapaId, boolean> | null>(null);
   const verSolo = (si: boolean) => { if (si && !soloDep) antesSolo.current = visibles; setSoloDep(si); };
-  const capasSolo = (d: IdDepartamento): CapaId[] | undefined => P.disposicion === 'triciclo' ? (d === 'proyecto' ? undefined : CAPAS_DEP_TRICICLO[d as DepTriciclo]) : CAPAS_DEP[d];
+  const capasSolo = (d: IdDepartamento): CapaId[] | undefined => P.disposicion === 'triciclo' || P.disposicion === 'basculante' ? (d === 'proyecto' ? undefined : CAPAS_DEP_TRICICLO[d as DepTriciclo]) : CAPAS_DEP[d];
   useEffect(() => {
     const suyas = soloDep && dep !== 'proyecto' ? capasSolo(dep) : undefined;
     if (!suyas) { if (antesSolo.current) { setVisibles(antesSolo.current); antesSolo.current = null; } return; }
@@ -1159,7 +1166,10 @@ export default function Aeromovil() {
   const cdTriComparar = useCdTriciclo(paraCalcular, opcionesTunel.resolucion, kmhComparar);
   // The Triciclo's departments: the A1's choice is kept, but one the Triciclo does not have shows «Carrocería».
   const depTri: DepTriciclo | 'proyecto' = dep === 'proyecto' || (DEPS_TRICICLO as string[]).includes(dep) ? dep as DepTriciclo | 'proyecto' : 'carroceria';
-  useEffect(() => { if (esTri && dep !== depTri) setDep(depTri); }, [esTri, dep, depTri]);
+  useEffect(() => { if (porDeps && dep !== depTri) setDep(depTri); }, [porDeps, dep, depTri]);
+  // the Cuadriciclo Basculante's Cd: the tunnel's, as the Triciclo's
+  const cdBas = useCdBasculante(paraCalcular, opcionesTunel.resolucion, esBas ? camposBasculante(P).qVel : 80);
+  const cdBasComparar = useCdBasculante(paraCalcular, opcionesTunel.resolucion, kmhComparar);
   const cuerposTunel = useMemo<CuerpoTunel[]>(() => !tunel ? [] : [
     ...(soloGaraje ? [] : [cuerpoAeromovil(modelo, res.A, nombreVehiculo)]),
     ...garajeVisor.flatMap(v => { const c = cuerpoGaraje(v); return c ? [c] : []; }),
@@ -1169,7 +1179,10 @@ export default function Aeromovil() {
   const cdTunelNuestro = (() => { const R = resultadosTunel.aeromovil; return R ? (R.porVelocidad.find(q => q.kmh === kmhComparar) ?? R.porVelocidad[1]).cd.total : undefined; })();
   const areaTunelNuestro = cuerposTunel.find(c => c.id === 'aeromovil')?.area;
   const filasComparar = useMemo<FilaTunel[]>(() => [
-    ...(soloGaraje ? [] : esTri ? (cdTriComparar.cd != null && cdTriComparar.areaRef != null ? [{
+    ...(soloGaraje ? [] : esBas ? (cdBasComparar.cd != null && cdBasComparar.areaRef != null ? [{
+      id: 'aeromovil', nombre: nombreVehiculo, cd: cdBasComparar.cd, area: cdBasComparar.areaRef, masa: res.mTot, crr: CRR_B, estimado: true, origenCd: 'túnel (la carrocería y sus ruedas)',
+      fuente: `Este diseño. Cd estimado por el túnel con la carrocería y sus cuatro ruedas (los carenados delanteros, solo como ruedas carenadas: el real será algo más alto); masa estimada con dos ocupantes de ${camposBasculante(P).qMOcc} kg y rodadura ${CRR_B} (neumático de scooter).`,
+    }] : []) : esTri ? (cdTriComparar.cd != null && cdTriComparar.areaRef != null ? [{
       // the Triciclo: the tunnel's Cd (computed in the background), with its own mass and rolling resistance
       id: 'aeromovil', nombre: nombreVehiculo, cd: cdTriComparar.cd, area: cdTriComparar.areaRef, masa: res.mTot, crr: CRR, estimado: true, origenCd: 'túnel (la carrocería y sus ruedas)',
       fuente: `Este diseño. Cd estimado por el túnel con la carrocería y sus ${esCuatro(camposTriciclo(P)) ? 'cuatro' : 'tres'} ruedas (los carenados y los brazos, solo como ruedas carenadas: el real será algo más alto); masa estimada con dos ocupantes de ${camposTriciclo(P).tMOcc} kg y rodadura ${CRR} (neumático de ciclomotor).`,
@@ -1190,7 +1203,7 @@ export default function Aeromovil() {
         fuente: `${a.fuente}. Rodadura 0,009 supuesta (neumáticos de coche, la misma que el Aeromóvil 1) y ${plazas} ocupantes de ${P.mOcc} kg.`,
       }];
     }),
-  ], [soloGaraje, esBala, esTri, cdTriComparar.cd, cdTriComparar.areaRef, P, nombreVehiculo, cdTunelNuestro, areaTunelNuestro, res.Cd, res.A, res.mTot, res.Crr, P.plazas, P.mOcc, garajeVisor]);
+  ], [soloGaraje, esBala, esTri, esBas, cdBasComparar.cd, cdBasComparar.areaRef, cdTriComparar.cd, cdTriComparar.areaRef, P, nombreVehiculo, cdTunelNuestro, areaTunelNuestro, res.Cd, res.A, res.mTot, res.Crr, P.plazas, P.mOcc, garajeVisor]);
   // El punto crítico cuya explicación está abierta (2026-11-09, Eugenio: «una explicación de cada uno de estos parámetros cuando se hace click»).
   const [puntoTunel, setPuntoTunel] = useState<SeleccionPunto | null>(null);
   useEffect(() => { if (!tunel) setPuntoTunel(null); }, [tunel]);
@@ -1218,9 +1231,9 @@ export default function Aeromovil() {
     if (actual && o.aeromovil) o.aeromovil = o.aeromovil.replace(/^[^\n*]*/, actual.nombre);
     // El Bala del editor: su Cd solo lo da el túnel.
     if (esBala && !soloGaraje && !o.aeromovil) o.aeromovil = `${nombreVehiculo}\nCd: ábrelo en el túnel\n${masaArea(nuestraMasa, res.A)}`;
-    if (esTri && !soloGaraje && !o.aeromovil) { const l = masaArea(nuestraMasa, null); o.aeromovil = `${nombreVehiculo}\nCd: el túnel lo está calculando…${l ? `\n${l}` : ''}`; }
+    if ((esTri || esBas) && !soloGaraje && !o.aeromovil) { const l = masaArea(nuestraMasa, null); o.aeromovil = `${nombreVehiculo}\nCd: el túnel lo está calculando…${l ? `\n${l}` : ''}`; }
     return o;
-  }, [tunel, verConsumo, filasComparar, kmhComparar, garajeVisor, esBala, esTri, soloGaraje, nombreVehiculo, disenosGaraje.carteles, res.mVeh, res.A, actual]);
+  }, [tunel, verConsumo, filasComparar, kmhComparar, garajeVisor, esBala, esTri, esBas, soloGaraje, nombreVehiculo, disenosGaraje.carteles, res.mVeh, res.A, actual]);
   const [vista, setVista] = useState<Vista>('iso');
   // Render fotorrealista de la vista actual: la captura del visor pasa por la IA y vuelve como foto
   const [render, setRender] = useState<{ estado: 'nada' | 'creando' | 'listo' | 'error'; imagen?: string; error?: string; vista?: Vista }>({ estado: 'nada' });
@@ -1284,11 +1297,11 @@ export default function Aeromovil() {
             {garajeLista}
     </Bloque>
   );
-  const capas = esBala ? CAPAS.filter(c => CAPAS_BALA.includes(c.k)) : esTri ? CAPAS.filter(c => CAPAS_TRICICLO.includes(c.k)) : CAPAS.filter(c => !('solo' in c) || c.solo === modelo.tipo);
+  const capas = esBas ? CAPAS.filter(c => c.k !== 'transmision') : esBala ? CAPAS.filter(c => CAPAS_BALA.includes(c.k)) : esTri ? CAPAS.filter(c => CAPAS_TRICICLO.includes(c.k)) : CAPAS.filter(c => !('solo' in c) || c.solo === modelo.tipo);
   const a1 = res.a1;
   // the department tabs: the A1's eleven; the Triciclo's six plus «Proyecto», with its own one-liners (which follow its options)
-  const pestanas = esTri
-    ? DEPARTAMENTOS.filter(d => d.id === 'proyecto' || (DEPS_TRICICLO as string[]).includes(d.id)).map(d => ({ ...d, lema: lemasTriciclo(camposTriciclo(P))[d.id as DepTriciclo | 'proyecto'] }))
+  const pestanas = porDeps
+    ? DEPARTAMENTOS.filter(d => d.id === 'proyecto' || (DEPS_TRICICLO as string[]).includes(d.id)).map(d => ({ ...d, lema: esBas ? LEMAS_BASCULANTE[d.id as DepTriciclo | 'proyecto'] : lemasTriciclo(camposTriciclo(P))[d.id as DepTriciclo | 'proyecto'] }))
     : DEPARTAMENTOS;
 
   return (
@@ -1304,11 +1317,11 @@ export default function Aeromovil() {
             nombreVehiculo={nombreVehiculo} alVehiculo={cambiarVehiculo}
             alNuevo={() => { setP(PARAMETROS_POR_DEFECTO); setActual(null); cargarDisenoPorDefecto().then(d => { if (d) { setP(deDiseno(d.parametros || {})); setActual(null); } }); }}
             alGuardado={alGuardado} />
-          {(esA1 || esTri)
-            ? <PestanasDepartamento lista={pestanas} dep={seccion === 'diseno' ? (esTri ? depTri : dep) : null} alElegir={d => { setDep(d); setSoloDep(false); if (seccion !== 'diseno') navegar('/aeromovil'); }} />
+          {(esA1 || porDeps)
+            ? <PestanasDepartamento lista={pestanas} dep={seccion === 'diseno' ? (porDeps ? depTri : dep) : null} alElegir={d => { setDep(d); setSoloDep(false); if (seccion !== 'diseno') navegar('/aeromovil'); }} />
             : null}
           <div className="flex-1 sm:hidden" />
-          {!(esA1 || esTri) && <div className="hidden flex-1 sm:block" />}
+          {!(esA1 || porDeps) && <div className="hidden flex-1 sm:block" />}
           <MenuSecciones lista={SECCIONES.filter(s => (s.k !== 'componentes' && s.k !== 'aranceles') || esA1)} seccion={seccion} abiertas={abiertas} alIr={navegar} />
         </div>
       </header>
@@ -1319,7 +1332,7 @@ export default function Aeromovil() {
         <section ref={ventana3d} aria-label="Vista 3D" className={cn('overflow-hidden bg-slate-50',
           completa === 'no' ? cn('relative h-[62vh] min-h-[380px] rounded-xl border border-slate-200', esA1 ? 'lg:h-[72vh]' : 'lg:sticky lg:top-[68px] lg:h-[calc(100vh-88px)]')
             : completa === 'css' ? 'fixed inset-0 z-[100] h-[100dvh] w-screen' : 'relative h-full w-full')}>
-          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeConDisenos} soloGaraje={!!soloGaraje} tunel={tunel} carteles={carteles} cuerposTunel={cuerposTunel} opcionesTunel={opcionesTunelVisor} alElegirPuntoTunel={setPuntoTunel} puntoTunel={puntoTunel} fichasGaraje={disenosGaraje.fichas} superponer={!!superponer && !soloGaraje} vista={vista}
+          <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} bascular={bascular} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeConDisenos} soloGaraje={!!soloGaraje} tunel={tunel} carteles={carteles} cuerposTunel={cuerposTunel} opcionesTunel={opcionesTunelVisor} alElegirPuntoTunel={setPuntoTunel} puntoTunel={puntoTunel} fichasGaraje={disenosGaraje.fichas} superponer={!!superponer && !soloGaraje} vista={vista}
             referencia={referencia} modoRef={modoRef} alinear={alinear} alPinchar={esA1 ? c => { navegar(`/aeromovil/componentes/${c}`); window.scrollTo({ top: 0 }); } : undefined}
             alPincharGaraje={eleccion.alPincharGaraje} alPincharNuestro={() => { eleccion.setTarjeta(true); eleccion.setPendiente(null); }} extraTarjeta={id => <><BotonFilaReferencia g={disenosGaraje} id={id} /><BotonSoloReferencia e={eleccion} id={id} /></>}
             alMoverGaraje={superponer || soloGaraje ? undefined : disenosGaraje.mover}
@@ -1406,7 +1419,7 @@ export default function Aeromovil() {
             </div>
           )}
           <div className="pointer-events-none absolute left-3 right-14 top-3 font-mono text-[11px] uppercase tracking-wider text-slate-500">
-            {esA1 ? `${P.plazas === 2 ? 'Tándem 1+1' : 'Monoplaza'} · cuatro ruedas · eléctrico ${P.kWNom}/${P.kWPico} kW · ${P.kWh} kWh` : esBala ? 'Biplaza a horcajadas · rombo de ruedas, laterales fijas en carenados' : esTri ? `${camposTriciclo(P).tAsientos === 'filas' ? 'Cuatro plazas en tres filas (1 + 2 + 1)' : conButacas(camposTriciclo(P)) ? 'Biplaza en tándem, dos butacas como el Aptera' : 'Biplaza a horcajadas'} · ${esCuatro(camposTriciclo(P)) ? 'cuatro ruedas, dos delante y dos detrás en carenados' : 'tres ruedas, dos delante en carenados'} · eléctrico ${fmt(camposTriciclo(P).tKWNom, 1)}/${fmt(camposTriciclo(P).tKWPico, 1)} kW · ${fmt(modelo.tipo === 'triciclo' ? modelo.kWh : camposTriciclo(P).tKWh, 1)} kWh${modelo.tipo === 'triciclo' && modelo.paquete ? ' a lo largo del bastidor' : ''}` : 'Tándem 1+2 · rombo basculante · pedaleo asistido'}
+            {esBas ? `Biplaza en tándem, reclinados · cuatro ruedas que se inclinan ${Math.round((modelo.tipo === 'basculante' ? modelo.phiMax : 0) * 180 / Math.PI)}° · eléctrico ${fmt(camposBasculante(P).qKWNom, 1)}/${fmt(camposBasculante(P).qKWPico, 1)} kW · ${fmt(camposBasculante(P).qKWh, 1)} kWh` : esA1 ? `${P.plazas === 2 ? 'Tándem 1+1' : 'Monoplaza'} · cuatro ruedas · eléctrico ${P.kWNom}/${P.kWPico} kW · ${P.kWh} kWh` : esBala ? 'Biplaza a horcajadas · rombo de ruedas, laterales fijas en carenados' : esTri ? `${camposTriciclo(P).tAsientos === 'filas' ? 'Cuatro plazas en tres filas (1 + 2 + 1)' : conButacas(camposTriciclo(P)) ? 'Biplaza en tándem, dos butacas como el Aptera' : 'Biplaza a horcajadas'} · ${esCuatro(camposTriciclo(P)) ? 'cuatro ruedas, dos delante y dos detrás en carenados' : 'tres ruedas, dos delante en carenados'} · eléctrico ${fmt(camposTriciclo(P).tKWNom, 1)}/${fmt(camposTriciclo(P).tKWPico, 1)} kW · ${fmt(modelo.tipo === 'triciclo' ? modelo.kWh : camposTriciclo(P).tKWh, 1)} kWh${modelo.tipo === 'triciclo' && modelo.paquete ? ' a lo largo del bastidor' : ''}` : 'Tándem 1+2 · rombo basculante · pedaleo asistido'}
             {esA1 && <span className="block normal-case tracking-normal text-slate-400">Pincha una pieza para abrir su ficha</span>}
           </div>
           <div className="absolute inset-x-2 bottom-2 flex flex-wrap items-center gap-1">
@@ -1442,10 +1455,10 @@ export default function Aeromovil() {
                 </div>
               )}
             </div>
-            {(esA1 || esTri) && (esTri ? depTri : dep) !== 'proyecto' && capasSolo(esTri ? depTri : dep) && (
+            {(esA1 || porDeps) && (porDeps ? depTri : dep) !== 'proyecto' && capasSolo(porDeps ? depTri : dep) && (
               <Button variant="outline" aria-pressed={soloDep} onClick={() => verSolo(!soloDep)}
                 className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', soloDep && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
-                {soloDep ? 'Mostrar todo' : `Mostrar solo ${SOLO_DEP[esTri ? depTri : dep] ?? NOMBRE_CORTO[esTri ? depTri : dep].toLowerCase()}`}
+                {soloDep ? 'Mostrar todo' : `Mostrar solo ${SOLO_DEP[porDeps ? depTri : dep] ?? NOMBRE_CORTO[porDeps ? depTri : dep].toLowerCase()}`}
               </Button>
             )}
             {/* El Bala no se inclina ni tiene la dirección dibujada: sin «Simular curva». */}
@@ -1453,9 +1466,15 @@ export default function Aeromovil() {
               <Button key={n} variant="outline" aria-pressed={v} onClick={() => f(!v)}
                 className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', v && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>{n}</Button>
             ))}
+            {/* Cuadriciclo Basculante (2026-11-15): «Bascular», the car and its four wheels leaning to the maximum each way and back */}
+            {esBas && (
+              <Button variant="outline" onClick={() => { setCurva(false); setBascular(n => n + 1); }}
+                title={`Inclina la carrocería y las cuatro ruedas hasta ${Math.round((modelo.tipo === 'basculante' ? modelo.phiMax : 0) * 180 / Math.PI)}° a cada lado y vuelve, como en una curva`}
+                className="bg-white px-2 py-1 text-[11px] normal-case tracking-normal">Bascular</Button>
+            )}
             <Button variant="outline" aria-pressed={abierta} onClick={() => setAbierta(!abierta)}
               className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', abierta && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
-              <DoorOpen className="mr-1 h-3 w-3" />{abierta ? 'Cerrar' : 'Abrir'} {(esBala || esTri || Pa.puerta === 'cabina') && !(esTri && conPuertas(camposTriciclo(P))) ? 'cúpula' : 'puertas'}
+              <DoorOpen className="mr-1 h-3 w-3" />{abierta ? 'Cerrar' : 'Abrir'} {(esBala || esTri || esBas || Pa.puerta === 'cabina') && !(esTri && conPuertas(camposTriciclo(P))) ? 'cúpula' : 'puertas'}
             </Button>
             {(esA1 || esTri) && (
               <Button variant="outline" aria-pressed={maleteros} onClick={() => setMaleteros(!maleteros)}
@@ -1529,8 +1548,8 @@ export default function Aeromovil() {
 
         <aside className="mt-4 flex flex-col gap-3 lg:mt-0">
           {/* round 3 interior (2026-11-12): «Ver solo …» above the sliders of each department (the Aeromóvil 1's and the Triciclo's) */}
-          {(esA1 || esTri) && (esTri ? depTri : dep) !== 'proyecto' && capasSolo(esTri ? depTri : dep) && (() => {
-            const d = esTri ? depTri : dep, n = NOMBRE_CORTO[d].toLowerCase();
+          {(esA1 || porDeps) && (porDeps ? depTri : dep) !== 'proyecto' && capasSolo(porDeps ? depTri : dep) && (() => {
+            const d = porDeps ? depTri : dep, n = NOMBRE_CORTO[d].toLowerCase();
             return (
               <Button variant="outline" aria-pressed={soloDep} onClick={() => verSolo(!soloDep)}
                 className={cn('w-full justify-center gap-1.5 bg-white px-3 py-2 text-[13px] font-semibold normal-case tracking-normal', soloDep && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
@@ -1538,7 +1557,7 @@ export default function Aeromovil() {
               </Button>
             );
           })()}
-          {(esA1 ? dep === 'proyecto' : esTri ? false : true) && garajeBloque}
+          {(esA1 ? dep === 'proyecto' : porDeps ? false : true) && garajeBloque}
 
           {dueno && !dueno.puedeDecidir && (
             <div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
@@ -1548,8 +1567,9 @@ export default function Aeromovil() {
           )}
           <fieldset disabled={!dueno?.puedeDecidir} className={cn('contents', !dueno?.puedeDecidir && '[&_input]:cursor-not-allowed [&_select]:opacity-70 [&_input]:opacity-70')}>
           {/* 2026-11-13: the body's colour, in «Carrocería» (the Gota and the Cuadriciclo en rombo have no departments: always) */}
-          {((esA1 || esTri) ? (esTri ? depTri : dep) === 'carroceria' : true) && <Bloque titulo="Color de la carrocería"><ColoresCarroceria P={P} set={set} /></Bloque>}
+          {((esA1 || porDeps) ? (porDeps ? depTri : dep) === 'carroceria' : true) && <Bloque titulo="Color de la carrocería"><ColoresCarroceria P={P} set={set} /></Bloque>}
           {modelo.tipo === 'a1' ? <LadoA1 P={P} Pa={Pa} D={D} set={set} res={res} modelo={modelo} neumaticos={neumaticos} malas={malas} dep={dep} alNavegar={r => { navegar(r); window.scrollTo({ top: 0 }); }} />
+            : modelo.tipo === 'basculante' ? (paraCalcular.tipo === 'basculante' && res.basculante ? <LadoBasculante P={P} set={set} res={res} modelo={paraCalcular} dep={depTri} cd={cdBas} ui={{ Bloque, Deslizador, Selector: Selector as never, ListaComprobaciones }} /> : null)
             : modelo.tipo === 'bala' ? <LadoBala P={P} set={set} res={res} modelo={modelo} cdTunel={tunel ? cdTunelNuestro : undefined} />
             : modelo.tipo === 'triciclo' && res.triciclo ? <LadoTriciclo P={P} set={set} res={res} modelo={paraCalcular.tipo === 'triciclo' ? paraCalcular : modelo} dep={depTri} cd={cdTri} />
             : modelo.tipo === 'triciclo' ? null : (<>
@@ -1693,7 +1713,7 @@ export default function Aeromovil() {
 
           </>)}
           </fieldset>
-          {esTri && depTri === 'proyecto' && garajeBloque}
+          {porDeps && depTri === 'proyecto' && garajeBloque}
           <Bloque titulo="¿Algo que mejorar?">
             <FormularioMejora alEnviar={() => { recargar(); }} />
             <p className="text-xs text-slate-500">Se añade a <a className="text-teal-700 underline" href="/aeromovil/tareas" onClick={e => { e.preventDefault(); navegar('/aeromovil/tareas'); }}>Tareas</a> como pendiente.</p>

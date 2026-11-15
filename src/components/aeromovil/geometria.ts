@@ -19,7 +19,10 @@
 import { calcularA1, crearModeloA1, estimarMasasA1, type ModeloA1 } from './geometriaA1';
 import { areasBala, calcularBala, crearModeloBala, type CamposBala, type ModeloBala, type ResultadosBala } from './geometriaBala';
 import { areasTriciclo, calcularTriciclo, crearModeloTriciclo, type CamposTriciclo, type ModeloTriciclo, type ResultadosTriciclo } from './geometriaTriciclo';
-export type { ModeloA1, ModeloBala, ModeloTriciclo };
+// ── the Cuadriciclo Basculante (2026-11-15): its own module; its defaults in a leaf module (no import cycle at load time)
+import { areasBasculante, calcularBasculante, crearModeloBasculante, type ModeloBasculante, type ResultadosBasculante } from './geometriaBasculante';
+import { BASCULANTE_DEFECTO, type CamposBasculante } from './basculante/defecto';
+export type { ModeloA1, ModeloBala, ModeloTriciclo, ModeloBasculante };
 
 export type Pulgadas = '16' | '20' | '24' | '26' | '28';
 export type Puerta = 'cabina' | 'gaviota' | 'aptera';
@@ -41,7 +44,8 @@ export type Puerta = 'cabina' | 'gaviota' | 'aptera';
  *            detrás; se edita por departamentos como el Aeromóvil 1. Vive en
  *            `geometriaTriciclo.ts` (la forma, la misma del Cuadriciclo en rombo).
  */
-export type Disposicion = 'rombo' | 'cuatro' | 'bala' | 'triciclo';
+// 'basculante' (2026-11-15): the Cuadriciclo Basculante, four tilting wheels (geometriaBasculante.ts)
+export type Disposicion = 'rombo' | 'cuatro' | 'bala' | 'triciclo' | 'basculante';
 /** Neumáticos de coche pequeño: diámetro exterior y anchura (m). Los del Twizy son los dos primeros. */
 export const NEUMATICOS = {
   '125/80R13': { n: '125/80 R13 (Twizy delante)', d: 0.530, w: 0.125 },
@@ -67,7 +71,7 @@ export const MASAS_FIJAS_A1: Record<string, number> = { cargador: 6, cableado: 5
 export const masaFija = (P: Parametros, id: string) => P.piezas?.[id]?.masa ?? MASAS_FIJAS_A1[id] ?? 0;
 
 /** Los campos del Bala (`CamposBala`, prefijo `b`) y del Triciclo (`CamposTriciclo`, prefijo `t`) son opcionales: los diseños de los otros vehículos no los llevan. */
-export interface Parametros extends Partial<CamposBala>, Partial<CamposTriciclo> {
+export interface Parametros extends Partial<CamposBala>, Partial<CamposTriciclo>, Partial<CamposBasculante> {
   disposicion: Disposicion;
   /** Alternativa elegida por componente (ver `componentes.ts`); sin entrada = la de serie. */
   variantes?: Record<string, string>;
@@ -282,6 +286,8 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   tCubierta: 'redonda', tColaAncho: 0, tColaGrosor: 0, tColaBombeo: 0.01, tBajosIni: 0.20, tBajosCurva: 0, tMorroAncho: 0, tMorroGrosor: 0, tMorroBombeo: 0.02,
 };
 export const PARAMETROS_TRICICLO: Parametros = { ...PARAMETROS_GOTA, disposicion: 'triciclo', ...TRICICLO_DEFECTO };
+/** The Cuadriciclo Basculante (2026-11-15): its `q…` fields (basculante/defecto.ts); the rest comes from the Gota and it does not use it. */
+export const PARAMETROS_BASCULANTE: Parametros = { ...PARAMETROS_GOTA, disposicion: 'basculante', ...BASCULANTE_DEFECTO };
 export const PARAMETROS_POR_DEFECTO: Parametros = PARAMETROS_A1;
 
 export const DIAMETRO_RUEDA: Record<Pulgadas, number> = { '16': 0.405, '20': 0.508, '24': 0.61, '26': 0.66, '28': 0.70 };
@@ -390,6 +396,7 @@ export interface ModeloBase {
 
 /** Todo lo que sale de los parámetros: medidas derivadas y funciones de forma. */
 export function crearModelo(P: Parametros): Modelo {
+  if (P.disposicion === 'basculante') return crearModeloBasculante(P);
   return P.disposicion === 'cuatro' ? crearModeloA1(P) : P.disposicion === 'bala' ? crearModeloBala(P) : P.disposicion === 'triciclo' ? crearModeloTriciclo(P) : crearModeloGota(P);
 }
 
@@ -677,7 +684,7 @@ export function crearModeloGota(P: Parametros) {
   };
 }
 export type ModeloGota = ReturnType<typeof crearModeloGota>;
-export type Modelo = ModeloGota | ModeloA1 | ModeloBala | ModeloTriciclo;
+export type Modelo = ModeloGota | ModeloA1 | ModeloBala | ModeloTriciclo | ModeloBasculante;
 /** El Gota o el Aeromóvil 1: los dos que comparten la piel por superficies, el chasis de tubos y los ocupantes. */
 export type ModeloConPiel = ModeloGota | ModeloA1;
 
@@ -750,6 +757,8 @@ export interface Comprobacion { nombre: string; holgura: number; minimo: number;
 /** Áreas, resistencia, energía, estructura y holguras. Todo estimación. */
 export function calcular(m: Modelo, ar: ReturnType<typeof areas>): Resultados {
   // the Triciclo's Cd comes from the wind tunnel, computed apart (Aeromovil.tsx): here, everything but what depends on it
+  // the Cuadriciclo Basculante's Cd comes from the tunnel too (Aeromovil.tsx); its areas carry the fairings' shells
+  if (m.tipo === 'basculante') return calcularBasculante(m, 'carenados' in ar ? ar as ReturnType<typeof areasBasculante> : areasBasculante(m));
   return m.tipo === 'a1' ? calcularA1(m, ar) : m.tipo === 'bala' ? calcularBala(m, ar) : m.tipo === 'triciclo' ? calcularTriciclo(m, ar) : calcularGota(m, ar);
 }
 export function calcularGota(m: ModeloGota, ar: ReturnType<typeof areas>) {
@@ -879,7 +888,7 @@ export function calcularGota(m: ModeloGota, ar: ReturnType<typeof areas>) {
   };
 }
 /** Lo que vale para los dos vehículos, más lo propio del Aeromóvil 1 en `a1`. */
-export type Resultados = ReturnType<typeof calcularGota> & { a1?: ResultadosA1; bala?: ResultadosBala; triciclo?: ResultadosTriciclo };
+export type Resultados = ReturnType<typeof calcularGota> & { a1?: ResultadosA1; bala?: ResultadosBala; triciclo?: ResultadosTriciclo; basculante?: ResultadosBasculante; cg?: { x: number; y: number; masa: number } };
 export interface ResultadosA1 {
   WhKm100: number; autonomia100: number; vmaxNominal: number; vmaxPico: number; acel50: number; acel100: number; pendiente100: number;
   cargaHoras: { kW: number; h: number }[]; maleteroF: number; maleteroT: number; kmSolDia: number; bateriaL: number; bateriaKg: number;
@@ -890,6 +899,7 @@ export function estimarMasas(m: Modelo, ar: { carroceria: number; cristal: numbe
   if (m.tipo === 'a1') return estimarMasasA1(m, ar, P);
   if (m.tipo === 'bala') return {};   // el chasis, el motor y la batería del Bala no están diseñados
   if (m.tipo === 'triciclo') return calcularTriciclo(m, ar).masas;   // the Triciclo's own sliders (`t…`), not `P`'s shared ones
+  if (m.tipo === 'basculante') return calcularBasculante(m, areasBasculante(m)).masas;
   const mat = MATERIALES_CHASIS[P.matChasis];
   let tubos = 0, tubosSusp = 0;
   for (const t of m.tubosChasis()) {
@@ -937,6 +947,7 @@ export function enZona(z: Zona, u: number, th: number) {
 export function areas(m: Modelo) {
   if (m.tipo === 'bala') return areasBala(m);
   if (m.tipo === 'triciclo') return areasTriciclo(m);
+  if (m.tipo === 'basculante') return areasBasculante(m);
   const nu = 120, nv = 96, out = { carroceria: 0, cristal: 0, solar: 0 };
   const tri = (p: P3, q: P3, r: P3) => {
     const ux = q[0] - p[0], uy = q[1] - p[1], uz = q[2] - p[2], vx = r[0] - p[0], vy = r[1] - p[1], vz = r[2] - p[2];
