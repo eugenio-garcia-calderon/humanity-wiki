@@ -33,7 +33,7 @@ import { CADERA_SOBRE_ASIENTO, MEDIA_CABEZA, TALLA_SENTADO, rodilla } from './ge
 
 export type { CamposBasculante, RuedaBasculante };
 export type ClaveBasculante = keyof CamposBasculante;
-type ClaveTexto = 'qRuedasDel' | 'qSolarCola' | 'qMatCarenado' | 'qChMat' | 'qRuedaDel' | 'qRuedaTras';
+type ClaveTexto = 'qRuedasDel' | 'qSolarMorro' | 'qSolarCola' | 'qMatCarenado' | 'qChMat' | 'qRuedaDel' | 'qRuedaTras';
 export type ClaveNumBasculante = Exclude<ClaveBasculante, ClaveTexto>;
 
 export const NOMBRE_BASCULANTE = 'Cuadriciclo Basculante';
@@ -90,7 +90,7 @@ const FILAS: Fila[] = [
   ['qColaAncho', 'carroceria', 'Morro y cola', 'Cola: ancho del borde', 0.20, 0.90, 0.01, 'x'],
   ['qColaGrosor', 'carroceria', 'Morro y cola', 'Cola: grosor del borde', 0.02, 0.16, 0.005, 'cm'],
   ['qBajosCola', 'carroceria', 'Morro y cola', 'Bajos de la cola: empiezan a subir (desde el eje trasero)', -0.20, 0.60, 0.01, 'cm'],
-  ['qCapo', 'carroceria', 'Cúpula', 'Capó: altura al pie del parabrisas', 0.50, 0.95, 0.005, 'cm'],
+  ['qLineaEje', 'carroceria', 'Cúpula', 'Línea del morro: altura sobre el eje delantero', 0.45, 0.95, 0.005, 'cm'],
   ['qParabrisasX', 'carroceria', 'Cúpula', 'Parabrisas: su pie, tras el eje delantero', 0, 0.70, 0.01, 'm'],
   ['qParabrisas', 'carroceria', 'Cúpula', 'Parabrisas: largo (más, más tumbado)', 0.40, 1.20, 0.01, 'm'],
   ['qCaida', 'carroceria', 'Cúpula', 'Techo: empieza a caer hacia la cola', 1.10, 2.40, 0.01, 'm'],
@@ -162,6 +162,7 @@ export const fichaBasculante = (k: ClaveNumBasculante) => deslizadoresBasculante
 const ruedas = (l: RuedaBasculante[]) => l.map(k => ({ k, n: RUEDAS_BASCULANTE[k].n }));
 export const SELECTORES_BASCULANTE: SelectorBasculante[] = [
   { clave: 'qRuedasDel', n: 'Las ruedas delanteras van', dep: 'carroceria', bloque: 'Ruedas delanteras', opciones: [{ k: 'morro', n: 'Dentro del morro (una sola pieza)' }, { k: 'carenados', n: 'Cada una en su carenado (giran con ella)' }] },
+  { clave: 'qSolarMorro', n: 'Paneles también en el morro', dep: 'carroceria', bloque: 'Techo solar', opciones: [{ k: 'si', n: 'Sí, delante del parabrisas (como el Aptera)' }, { k: 'no', n: 'Solo techo y cola' }] },
   { clave: 'qSolarCola', n: 'Paneles también en la cola', dep: 'carroceria', bloque: 'Techo solar', opciones: [{ k: 'no', n: 'Solo en el techo' }, { k: 'si', n: 'También en la cubierta de la cola' }] },
   { clave: 'qMatCarenado', n: 'Material de la carrocería', dep: 'carroceria', bloque: 'Material y espesores', opciones: [{ k: 'carbonoLino', n: 'Carbono-lino' }, { k: 'vidrio', n: 'Fibra de vidrio' }, { k: 'carbono', n: 'Fibra de carbono' }] },
   { clave: 'qChMat', n: 'Material de los tubos', dep: 'chasis', bloque: 'Bastidor', opciones: [{ k: 'al6061', n: 'Aluminio 6061-T6' }, { k: 'cromoly', n: 'Acero cromoly 4130' }, { k: 'carbono', n: 'Tubo de carbono' }] },
@@ -169,7 +170,7 @@ export const SELECTORES_BASCULANTE: SelectorBasculante[] = [
   { clave: 'qRuedaTras', n: 'Ruedas traseras (dentro de la cola)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['m13', 'm14', 'm15', 'c13']) },
 ];
 const OPCIONES: Record<ClaveTexto, readonly string[]> = {
-  qRuedasDel: ['morro', 'carenados'], qSolarCola: ['no', 'si'], qMatCarenado: ['carbonoLino', 'vidrio', 'carbono'], qChMat: ['al6061', 'cromoly', 'carbono'],
+  qRuedasDel: ['morro', 'carenados'], qSolarMorro: ['no', 'si'], qSolarCola: ['no', 'si'], qMatCarenado: ['carbonoLino', 'vidrio', 'carbono'], qChMat: ['al6061', 'cromoly', 'carbono'],
   qRuedaDel: ['m13', 'm14', 'm15', 'c13'], qRuedaTras: ['m13', 'm14', 'm15', 'c13'],
 };
 
@@ -341,7 +342,7 @@ export function crearModeloBasculante(P: Parametros) {
   const D0: DimForma = {
     xn, xt, H: L('qAlto'), W: L('qAncho'), suelo: L('qSuelo'),
     yMorro: Math.max(L('qMorroAlto'), L('qSuelo') + 0.06), puntaMorro: L('qMorroPunta'), largoPunta: L('qMorroRedondo'), anchoMorro: L('qMorroAncho'),
-    yCapo: L('qCapo'), xParabrisas: Math.min(xn - 0.12, -L('qParabrisasX')), largoParabrisas: L('qParabrisas'), xCaida: Math.max(xt + 0.25, -L('qCaida')),
+    yCapo: 0, lineaEje: L('qLineaEje'), xParabrisas: Math.min(xn - 0.12, -L('qParabrisasX')), largoParabrisas: L('qParabrisas'), xCaida: Math.max(xt + 0.25, -L('qCaida')),
     yCola: Math.max(L('qColaAlto'), L('qSuelo') + L('qColaGrosor') / 2 + 0.03), curvaCola: L('qColaCurva'), anchoCola: L('qColaAncho'), grosorCola: L('qColaGrosor'),
     xBajosCola: Math.max(xt + 0.20, xR + L('qBajosCola')), xBajosMorro: Math.min(0.10, xn - 0.15),
     nU: L('qSeccion'), nL: L('qPanza'), centro: L('qCentro'),
@@ -355,6 +356,11 @@ export function crearModeloBasculante(P: Parametros) {
   const xS0 = Math.min(xWs - 0.6 * D.largoParabrisas, -L('qSolarIni')), xS1 = Math.max(xCup + 0.03, Math.min(xS0 - 0.10, -L('qSolarFin')));
   const conSolar = xS0 - xS1 > 0.05;
   const solarCola = Q.qSolarCola === 'si';
+  // the nose's panel (as the Aptera's, on its bonnet): from just ahead of the windscreen forwards over the top of the
+  // nose, stopping where the nose starts turning down to its tip (half way from the front axle), on the top of the
+  // section only (halfway between the belt and the windows' top): seen from above, a strip with the roof's and the tail's
+  const faroX = enMorro ? FARO_X_MORRO : FARO_X;
+  const xSM0 = Math.min(xn - faroX - FARO_W - 0.10, xn * 0.5), xSM1 = D.xParabrisas + 0.05, solarMorro = Q.qSolarMorro === 'si' && xSM0 - xSM1 > 0.08;
 
   // ── the rear wheel arches: big enough for the wheel at full lean and full bump, cut in the lower sides
   const qT = esquinas[2], bT = betaMax(qT), subeT = qT.Lk * Math.sin(bT) + L('qRecTras') / 1000 * 0.6;
@@ -372,9 +378,8 @@ export function crearModeloBasculante(P: Parametros) {
   const ths: number[] = [];
   for (const [a, b, n] of segTh) for (let j = 0; j < n; j++) ths.push(a + (b - a) * j / n);
   ths.push(1.5 * Math.PI);
-  // (the nose's dark tip: shorter when the nose is the wide one round the wheels, else it is most of its front)
-  const faroX = enMorro ? FARO_X_MORRO : FARO_X;
-  const nudos = [xn, xn - faroX, xn - faroX - FARO_W, xWs, ...(conSolar ? [xS0, xS1] : []), xCup, ...(solarCola ? [xCup - 0.05, xt + 0.10] : []), arco.x + arco.rx, arco.x - arco.rx, ...(arcoDel ? [arcoDel.x + arcoDel.rx, arcoDel.x - arcoDel.rx] : []), xt + PILOTO_X1, xt + PILOTO_X0, xt]
+  // (the nose's dark tip, `faroX`: shorter when the nose is the wide one round the wheels, else it is most of its front)
+  const nudos = [...(solarMorro ? [xSM0, xSM1] : []), xn, xn - faroX, xn - faroX - FARO_W, xWs, ...(conSolar ? [xS0, xS1] : []), xCup, ...(solarCola ? [xCup - 0.05, xt + 0.10] : []), arco.x + arco.rx, arco.x - arco.rx, ...(arcoDel ? [arcoDel.x + arcoDel.rx, arcoDel.x - arcoDel.rx] : []), xt + PILOTO_X1, xt + PILOTO_X0, xt]
     .filter(x => x <= xn + 1e-9 && x >= xt - 1e-9).sort((a, b) => b - a);
   const xs: number[] = [];
   for (let k = 0; k < nudos.length - 1; k++) {
@@ -397,6 +402,7 @@ export function crearModeloBasculante(P: Parametros) {
     if (x < xt + PILOTO_X1) return vientre ? 'bajos' : 'piloto';
     if (vientre) return 'bajos';
     if (x <= xWs && x >= xCup && t >= thB && t <= Math.PI - thB) return conSolar && x <= xS0 && x >= xS1 && t >= thR && t <= Math.PI - thR ? 'solar' : 'cristal';
+    if (solarMorro && x <= xSM0 && x >= xSM1 && t >= (thB + thR) / 2 && t <= Math.PI - (thB + thR) / 2) return 'solar';
     if (solarCola && x <= xCup - 0.05 && x >= xt + 0.10 && t >= thB + 0.12 && t <= Math.PI - thB - 0.12) return 'solar';
     return 'carroceria';
   };
@@ -433,6 +439,13 @@ export function crearModeloBasculante(P: Parametros) {
   }
   lineas.push(linea(40, u => sobre(xWs, thB + (Math.PI - 2 * thB) * u)), linea(40, u => sobre(xCup, thB + (Math.PI - 2 * thB) * u)));
   if (conSolar) lineas.push(linea(30, u => sobre(xS0, thR + (Math.PI - 2 * thR) * u, 0.004)), linea(30, u => sobre(xS1, thR + (Math.PI - 2 * thR) * u, 0.004)));
+  // the nose's and the tail's panels framed as the roof's
+  const bandaS = (x0: number, x1: number, a: number) => {
+    const b = Math.PI - a;
+    lineas.push(linea(30, u => sobre(x0, a + (b - a) * u, 0.004)), linea(30, u => sobre(x1, a + (b - a) * u, 0.004)), linea(40, u => sobre(x0 + (x1 - x0) * u, a, 0.004)), linea(40, u => sobre(x0 + (x1 - x0) * u, b, 0.004)));
+  };
+  if (solarMorro) bandaS(xSM0, xSM1, (thB + thR) / 2);
+  if (solarCola) bandaS(xCup - 0.05, xt + 0.10, thB + 0.12);
 
   // ── interior: the floor, the seats, the riders, the controls
   const sueloIn = D.suelo + 0.025;
@@ -557,7 +570,7 @@ export function crearModeloBasculante(P: Parametros) {
     /** The most it leans (°): the «Circuito» section reads it (circuito/datos.ts `fichaDeDiseno`). */
     inclinacionMax: L('qBascMax'),
     enMorro, pasoDel, arcoDel, yArcoDel, yAbreDel, morroAlargado: xn > L('qMorro') + 0.005,
-    arco, hueco, rejilla: { xs, ths }, zona, enCupula, bisagra, lineas, xWs, xCup, xS0, xS1, conSolar, solarCola,
+    arco, hueco, rejilla: { xs, ths }, zona, enCupula, bisagra, lineas, xWs, xCup, xS0, xS1, conSolar, solarCola, solarMorro,
     faro: { x: xn - faroX - FARO_W / 2, thK }, piloto: { x: xt + (PILOTO_X0 + PILOTO_X1) / 2 },
     sueloIn, volante, columna, cremallera, actuador, motor, inversor, camaras,
     asientos: [asiento(true), asiento(false)], plazas: [true, false].map(piloto => ({ piloto, z: 0, pts: occTalla(piloto) })),

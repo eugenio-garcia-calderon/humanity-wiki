@@ -11627,3 +11627,17 @@ Eugenio: una visualización en 2D donde cada partido no es un punto sino una geo
 - Comprobaciones nuevas: rueda delantera dentro del morro, techo del paso bajo el capó, pies del piloto entre los pasos, rodillas sobre los pasos.
 - Diseño de serie: 3,01 × 1,04 × 1,10 m (antes 2,90 × 1,15 × 1,10); Cd del túnel 0,192 a 80 km/h (antes 0,218); área frontal 0,81 m² (antes 1,03); 2,52 kWh/100 km a 80 km/h; 37 comprobaciones en verde. El vuelco sin bascular baja de 0,80 a 0,73 g por la vía más estrecha.
 - Sin migración: el diseño del equipo solo guarda la familia y toma los valores de serie del código.
+
+## 2026-11-15 · Cuadriciclo Basculante: una sola línea de punta a cola, paneles en morro, techo y cola
+
+- Eugenio: «hazlo más al estilo Aptera y el Cuadriciclo Bala, mejorando el tema de paneles solares; cabina, morro y cola tienen que estar los 3 en una línea suave que va de punta a cola sin interrupciones para mejorar el Cd».
+- El perfil de arriba es ahora una sola línea:
+  - sube desde la punta del morro sin doblarse nunca hacia abajo;
+  - el parabrisas va encima de esa línea, sin capó propio ni escalón en su pie;
+  - llega al techo sin quiebro y baja en una curva hasta la cola.
+- Si las ruedas van dentro del morro, la línea sube sola lo justo para taparlas.
+- El deslizador «Capó: altura al pie del parabrisas» desaparece. Lo sustituye «Línea del morro: altura sobre el eje delantero».
+- Paneles solares en una franja de punta a cola, como el Aptera: en el morro (nuevo, de serie), el techo y la cola (ahora de serie). Pasan de 0,55 a 1,36 m²: unos 290 W a pleno sol y 0,77 kWh al día (estimación).
+- Cola algo más baja (0,52 m) y con una curva más suave hasta ella (1,6).
+- La carrocería se estrecha antes detrás de las ruedas delanteras.
+- Cifras del diseño de serie: Cd del túnel 0,189 a 80 km/h (antes 0,192); CdA 0,139 m² (antes 0,141); área frontal 0,81 m²; 197 kg; 37 comprobaciones en verde.

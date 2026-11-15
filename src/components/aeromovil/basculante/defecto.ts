@@ -36,7 +36,7 @@ export interface CamposBasculante {
   qColaGrosor: number;  // grosor del borde de la cola (m)
   qBajosCola: number;   // los bajos empiezan a subir esto por delante del eje trasero (m)
   // ── Carrocería: cúpula
-  qCapo: number;        // altura del capó al pie del parabrisas (m)
+  qLineaEje: number;    // altura de la línea del morro sobre el eje delantero (m): una sola línea de la punta al techo, sin capó propio
   qParabrisasX: number; // pie del parabrisas, detrás del eje delantero (m)
   qParabrisas: number;  // largo del parabrisas a lo largo del coche (m): más, más tumbado
   qCaida: number;       // el techo empieza a caer hacia la cola esto detrás del eje delantero (m)
@@ -45,6 +45,7 @@ export interface CamposBasculante {
   qCupFin: number;      // las ventanas acaban esto detrás del eje delantero (m)
   // ── Carrocería: techo solar
   qSolarIni: number; qSolarFin: number;   // detrás del eje delantero (m)
+  qSolarMorro: 'no' | 'si';               // paneles también en el morro, delante del parabrisas (como el Aptera)
   qSolarCola: 'no' | 'si';                // paneles también en la cubierta de la cola
   // ── Carrocería: las ruedas delanteras (2026-11-15: dentro del morro, de serie; o cada una en su carenado)
   qRuedasDel: 'morro' | 'carenados';
@@ -104,9 +105,9 @@ export const BASCULANTE_DEFECTO: CamposBasculante = {
   qMorro: 0.57, qCola: 0.50, qAncho: 0.86, qAlto: 1.10, qSuelo: 0.14,
   qSeccion: 2.6, qPanza: 2.5, qCentro: 0.42, qAnchoIni: 0.78, qAnchoFin: 1.85,
   qMorroAlto: 0.34, qMorroPunta: 0.65, qMorroRedondo: 0.28, qMorroAncho: 0.60,
-  qColaAlto: 0.58, qColaCurva: 1.9, qColaAncho: 0.52, qColaGrosor: 0.06, qBajosCola: 0.10,
-  qCapo: 0.70, qParabrisasX: 0.24, qParabrisas: 0.78, qCaida: 1.95, qCintura: 0.32, qVentAlto: 0.84, qCupFin: 2.06,
-  qSolarIni: 1.08, qSolarFin: 1.96, qSolarCola: 'no',
+  qColaAlto: 0.52, qColaCurva: 1.6, qColaAncho: 0.52, qColaGrosor: 0.06, qBajosCola: 0.10,
+  qLineaEje: 0.70, qParabrisasX: 0.24, qParabrisas: 0.78, qCaida: 1.95, qCintura: 0.32, qVentAlto: 0.84, qCupFin: 2.06,
+  qSolarIni: 1.08, qSolarFin: 1.96, qSolarMorro: 'si', qSolarCola: 'si',
   qRuedasDel: 'morro', qMorroSobre: 0.15, qPasoHueco: 0.025, qPasoAbre: 0.06,
   qPodAlto: 1.20, qPodAncho: 1.15, qPodFrente: 1.12, qPodCola: 1.18, qPodForma: 0.6, qPodHueco: 0.035, qPodCubre: 0.35, qHuecoCuerpo: 0.03,
   qMatCarenado: 'carbonoLino', qEspCarenado: 1.5, qEspCristal: 3,

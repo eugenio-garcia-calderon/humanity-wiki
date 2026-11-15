@@ -269,7 +269,8 @@ export function construirBasculante(G: Record<CapaB, THREE.Group>, puertasG: Map
       const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 1, 10), M.alu); bar.name = `bieleta-${s > 0 ? 'der' : 'izq'}`; bar.userData.lado = s; G.direccion.add(bar);
     }
     // the dashboard under the windscreen: a dark shelf with the screen
-    const xd = m.xWs - 0.06, yd = Math.min(F.techo(xd) - 0.05, m.D.yCapo - 0.02), wd = (F.ladoZ(xd, yd) || 0.2) - 0.02;
+    // (under the windscreen's foot, at the belt's height: since 2026-11-15 there is no bonnet of its own above it)
+    const xd = m.xWs - 0.06, yd = Math.min(F.techo(xd - 0.12) - 0.16, F.sec(F.frame(xd), F.thCintura)[1] - 0.02), wd = (F.ladoZ(xd, yd) || 0.2) - 0.02;
     if (wd > 0.06) { A.cajaRedonda(G.direccion, [xd - 0.06, yd, 0], [0.16, 0.035, 2 * wd], M.black, 0.012); A.cajaRedonda(G.direccion, [xd - 0.12, yd + 0.06, 0], [0.012, 0.09, 0.20], M.glass, 0.004); }
   }
   // ── the seats: a shell along each rider's back, cushion and headrest
