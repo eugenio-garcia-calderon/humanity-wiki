@@ -87,6 +87,9 @@ export interface CamposTriciclo {
   // 2026-11-15 (Eugenio: «haz que pueda bascular», on his «Smeraptera»). Optional when saved: absent, it does not lean.
   tBascula: 'no' | 'si';   // con cuatro ruedas: la cabina y los cuatro carenados se inclinan en las curvas, cada carenado sobre sus brazos en paralelogramo
   tBascMax: number;    // inclinación máxima (°)
+  // 2026-11-15 (Eugenio, «Rombo Bala»: «quiero que tenga las ruedas en rombo, una delante, una atrás y dos laterales basculantes»)
+  tRuedas: 'clasica' | 'rombo';   // dos delante en carenados (hasta ahora) o en rombo: una en el morro, que gira, dos laterales en carenados y una en la cola
+  tEjeLat: number;     // en rombo: las ruedas laterales, cuánto van detrás de la del morro (m)
   tMRueda: number; tMFreno: number; tMSuspDel: number; tMSuspTras: number; tMDir: number;   // kg
   // Propulsión
   tKWNom: number; tKWPico: number; tMMotor: number; tMInversor: number; tVel: number;
@@ -184,7 +187,7 @@ export const RUEDAS_TRICICLO: Record<RuedaTriciclo, { d: number; neuDel: number;
   c14: { d: 0.554, neuDel: 0.165, neuTras: 0.165, n: '14″ de coche, 165/60 R14 (554 mm)', kg: 2.62, kWBuje: 45, carga: 387 },
   c15: { d: 0.574, neuDel: 0.175, neuTras: 0.175, n: '15″ de coche, 175/55 R15 (574 mm)', kg: 2.96, kWBuje: 60, carga: 412 },
 };
-type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tTraseras' | 'tBascula' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero';
+type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tTraseras' | 'tBascula' | 'tRuedas' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero';
 export type ClaveNumTriciclo = Exclude<ClaveTriciclo, ClaveTexto>;
 
 // ------------------------------------------------------------------ deslizadores
@@ -202,8 +205,11 @@ export const LEMAS_TRICICLO: Record<DepTriciclo | 'proyecto', string> = {
   energia: 'la batería (morro, pies y bajo los sillines) y el techo solar',
 };
 /** The «Cuadriciclo Bala clásico» (2026-11-11): its name and its departments' one-liners where they differ. */
-export const esCuatro = (T: Pick<CamposTriciclo, 'tTraseras'>) => T.tTraseras === 'dos';
-export const nombreTriciclo = (T: Pick<CamposTriciclo, 'tTraseras'>) => esCuatro(T) ? 'Cuadriciclo Bala clásico' : 'Triciclo Bala';
+/** 2026-11-15: the wheels in a diamond (`tRuedas`): one in the nose, steering; the two pods at the sides; one in the tail. */
+export const esRombo = (T: Partial<Pick<CamposTriciclo, 'tRuedas'>>) => T.tRuedas === 'rombo';
+/** Two rear wheels in pods (a diamond always has one in the tail, whatever `tTraseras` was left at). */
+export const esCuatro = (T: Pick<CamposTriciclo, 'tTraseras'> & Partial<Pick<CamposTriciclo, 'tRuedas'>>) => T.tTraseras === 'dos' && !esRombo(T);
+export const nombreTriciclo = (T: Pick<CamposTriciclo, 'tTraseras'> & Partial<Pick<CamposTriciclo, 'tRuedas'>>) => esRombo(T) ? 'Cuadriciclo Bala en rombo' : esCuatro(T) ? 'Cuadriciclo Bala clásico' : 'Triciclo Bala';
 /** The departments' one-liners for these parameters (2026-11-12: they follow the battery's layout, the controls and the access too). */
 export const lemasTriciclo = (T: Pick<CamposTriciclo, 'tTraseras'> & Partial<CamposTriciclo>): Record<DepTriciclo | 'proyecto', string> => {
   const o = { ...LEMAS_TRICICLO };
@@ -326,6 +332,8 @@ const FILAS: Fila[] = [
   // (round 2, 2026-11-12: up to 3.40 m, so «Largo total» can still grow the saved clásico, at 3.20)
   ['tBatalla', 'rodaje', 'Ejes y ruedas', 'bBatalla', '', 2.20, 3.40, 0.01, 'm'],
   ['tEjeDel', 'rodaje', 'Ejes y ruedas', null, 'Eje delantero: atrasado', 0, 0.45, 0.01, 'cm'],
+  // 2026-11-15: only in a diamond (the page hides it otherwise)
+  ['tEjeLat', 'rodaje', 'Ejes y ruedas', null, 'Ruedas laterales: detrás de la del morro', 0.60, 2.40, 0.01, 'm'],
   ['tVia', 'rodaje', 'Ejes y ruedas', null, 'Vía delantera', 1.40, 2.40, 0.01, 'm'],
   // four wheels (2026-11-11): its real minimum is the narrowest track whose rear pods clear the tail (`viaTraseraMinima`)
   ['tViaTras', 'rodaje', 'Ejes y ruedas', null, 'Vía trasera', 0.80, 2.40, 0.01, 'm'],
@@ -382,11 +390,13 @@ export function deslizadoresTriciclo(): FichaTriciclo[] {
 const DESDE_EJE: Partial<Record<ClaveNumTriciclo, 1 | -1>> = { tMorro: 1, tCupIni: -1, tCupFin: -1, tPilX: -1, tPasX: -1, tBatalla: -1, tSolar: -1, tPilar: -1, tBatX: -1, tPuertaDel: -1, tPuertaTras: -1, tMalIni: -1, tPuerta2Parte: -1 };
 /** What a slider shows: its value and range from the Triciclo's front axle. */
 export function vistaTriciclo(f: FichaTriciclo, T: CamposTriciclo): { valor: number; min: number; max: number; defecto: number } {
-  const [a, b] = rangoTriciclo(f.clave, T), d = (f.desde ?? 0) * limitarTriciclo('tEjeDel', T);
+  const [a, b] = rangoTriciclo(f.clave, T), d = (f.desde ?? 0) * ejeDesde(T);
   return { valor: limitarTriciclo(f.clave, T) + d, min: a + d, max: b + d, defecto: TRICICLO_DEFECTO[f.clave] + d };
 }
 /** The stored value for what a slider shows. */
-export const guardarTriciclo = (f: FichaTriciclo, v: number, T: CamposTriciclo) => v - (f.desde ?? 0) * limitarTriciclo('tEjeDel', T);
+/** Where the sliders that read «from the front axle» start: the pods' axle, or in a diamond the nose wheel (x = 0). */
+const ejeDesde = (T: CamposTriciclo) => esRombo(T) ? 0 : limitarTriciclo('tEjeDel', T);
+export const guardarTriciclo = (f: FichaTriciclo, v: number, T: CamposTriciclo) => v - (f.desde ?? 0) * ejeDesde(T);
 export const fichaTriciclo = (k: ClaveNumTriciclo) => deslizadoresTriciclo().find(f => f.clave === k);
 const ruedas = (l: RuedaTriciclo[]) => l.map(k => ({ k, n: RUEDAS_TRICICLO[k].n }));
 export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
@@ -399,6 +409,7 @@ export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
   { clave: 'tChMat', n: 'Material de los tubos', dep: 'chasis', bloque: 'Bastidor', opciones: [{ k: 'al6061', n: 'Aluminio 6061-T6' }, { k: 'cromoly', n: 'Acero cromoly 4130' }, { k: 'carbono', n: 'Tubo de carbono' }] },
   { clave: 'tRuedaDel', n: 'Ruedas delanteras (en los carenados)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['16', '20', '24', '26', '28', 'c13', 'c14', 'c15']) },
   { clave: 'tRuedaTras', n: 'Rueda trasera (dentro de la cola)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['20', '24', '26', '28', 'c13', 'c14', 'c15']) },
+  { clave: 'tRuedas', n: 'Disposición de las ruedas', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: [{ k: 'clasica', n: 'Dos delante en carenados' }, { k: 'rombo', n: 'En rombo: una en el morro, dos laterales en carenados, una en la cola' }] },
   { clave: 'tTraseras', n: 'Ruedas traseras', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: [{ k: 'una', n: 'Una en la cola (triciclo)' }, { k: 'dos', n: 'Dos en carenados (cuatro ruedas)' }] },
   // 2026-11-15: only with four wheels (the page hides it otherwise)
   { clave: 'tBascula', n: 'Bascular en las curvas', dep: 'rodaje', bloque: 'Suspensión y dirección', opciones: [{ k: 'no', n: 'No: va siempre derecho' }, { k: 'si', n: 'Sí: la cabina y los cuatro carenados se inclinan' }] },
@@ -426,7 +437,7 @@ export const bateriaChasis = (T: Pick<CamposTriciclo, 'tBatDisp'>) => T.tBatDisp
 // Round 3 interior (2026-11-12): the Aptera bucket seats, the dashboard (either style), the rails to the rear axle
 export const conButacas = (T: Pick<CamposTriciclo, 'tAsientos'>) => T.tAsientos === 'butacas';
 export const conSalpicadero = (T: Pick<CamposTriciclo, 'tSalpicadero'>) => T.tSalpicadero === 'si' || T.tSalpicadero === 'blanco';
-export const largueroAlEje = (T: Pick<CamposTriciclo, 'tChLargo' | 'tTraseras'>) => T.tChLargo === 'eje' && T.tTraseras === 'dos';
+export const largueroAlEje = (T: Pick<CamposTriciclo, 'tChLargo' | 'tTraseras'> & Partial<Pick<CamposTriciclo, 'tRuedas'>>) => T.tChLargo === 'eje' && esCuatro(T);
 
 // ------------------------------------------------------------------ tres filas (round three, 2026-11-11)
 /**
@@ -690,7 +701,7 @@ export function rangoTriciclo(k: ClaveNumTriciclo, T: CamposTriciclo): [number, 
   if (k === 'tMMotor' || k === 'tMInversor') {
     const p = limitarTriciclo('tKWPico', T);
     // four wheels (2026-11-11): two hub motors of half the power each, by the same rule; the slider is both together
-    if (k === 'tMMotor' && T.tTraseras === 'dos') return [Math.max(f.min, 2 * (3 + 0.45 * p / 2)), Math.min(f.max, 2 * (8 + 0.9 * p / 2))];
+    if (k === 'tMMotor' && esCuatro(T)) return [Math.max(f.min, 2 * (3 + 0.45 * p / 2)), Math.min(f.max, 2 * (8 + 0.9 * p / 2))];
     return k === 'tMMotor' ? [Math.max(f.min, 3 + 0.45 * p), Math.min(f.max, 8 + 0.9 * p)] : [Math.max(f.min, 1 + 0.08 * p), Math.min(f.max, 2 + 0.2 * p)];
   }
   // 2026-11-12 («que los asientos estén todavía más bajos, muy pegados al chasis»): a seat comes down until it has
@@ -809,17 +820,18 @@ export function medidasTriciclo(T: CamposTriciclo) {
     cupIni: L('tCupIni'), cupFin: L('tCupFin'), puntaMorro: L('tPuntaMorro'), puntaCola: L('tPuntaCola'),
     // the Cuadriciclo en rombo's «front and rear» wheel is our rear one; its «lateral» wheels, our front ones
     rDel: rTras, rLat: rDel, anchoNeu: wTras.neuTras, anchoNeuLat: wDel.neuDel, via: L('tVia'),
-    xLat: -L('tEjeDel'), pod: { esc: L('tPodEsc'), ancho: L('tPodAncho'), cola: L('tPodCola') }, cuerdaBrazo: L('tBrazo'), ...formaR3(T),
+    xLat: esRombo(T) ? -L('tEjeLat') : -L('tEjeDel'), pod: { esc: L('tPodEsc'), ancho: L('tPodAncho'), cola: L('tPodCola') }, cuerdaBrazo: L('tBrazo'), ...formaR3(T),
   };
   let F = crearForma(D);
   const giro = L('tGiro') * Math.PI / 180;
   // the pods only move sideways with the track: the gap grows by half of what the track grows
-  const hueco = huecoGiro(F, giro);
+  // (in a diamond the pods do not steer: the nose wheel does)
+  const hueco = huecoGiro(F, esRombo(T) ? 0 : giro);
   if (hueco < HUECO_GIRO) F = crearForma({ ...D, via: Math.ceil((D.via + 2 * (HUECO_GIRO - hueco)) * 100) / 100 });
   // the seats rise with the lifted body (`+ 0` without a lift: the same numbers)
   const asientos: Asientos = { xPiloto: -L('tPilX'), yPiloto: L('tPilY') + elevar, xPasajero: -L('tPasX'), yPasajero: L('tPasY') + elevar };
   // four wheels (2026-11-11): the rear pods, as the front ones but round the rear wheels at the rear axle
-  const traseras = T.tTraseras === 'dos' ? formaTrasera(F, rTras, wTras.neuTras, L('tViaTras')) : null;
+  const traseras = esCuatro(T) ? formaTrasera(F, rTras, wTras.neuTras, L('tViaTras')) : null;
   // (round 3: «Quita la aleta»: none with «Sin aleta»)
   return { D: F.D, F, asientos, aleta: T.tConAleta === 'no' ? null : L('tAleta') + elevar, viaPedida: D.via, giro, elevar, traseras };
 }
@@ -1061,7 +1073,7 @@ export function largueroTrasero(F: FormaBala, Ft: FormaBala, xPiv: number, yL: n
  * Cuadriciclo Basculante does (geometriaBasculante.ts `esquinaEn`, here with the arms' inner ends at the body's side).
  */
 export interface EjeBascula {
-  eje: 'del' | 'tras';
+  eje: 'del' | 'tras' | 'lat';
   /** the shape as this axle's pods see it (the front's own, or `formaTrasera`) */
   F: FormaBala;
   /** the upper arm's length, inner end to the pod (m): the parallelogram's */
@@ -1069,7 +1081,7 @@ export interface EjeBascula {
   /** each arm: its x, its height at the body, where it meets the body (z) and its length */
   brazos: { x: number; yCuerpo: number; zp: number; Lk: number }[];
 }
-export function ejeBascula(eje: 'del' | 'tras', F: FormaBala): EjeBascula {
+export function ejeBascula(eje: 'del' | 'tras' | 'lat', F: FormaBala): EjeBascula {
   // (as balaPiezas.ts `carenados` draws them: from 8 mm inside the skin to 2 cm inside the pod's centre)
   const z1 = F.VIA_LAT / 2 - 0.02;
   const brazos = brazosDe(F).flatMap(b => {
@@ -1131,8 +1143,11 @@ export function crearModeloTriciclo(P: Parametros) {
   // four wheels (2026-11-11): the widest of the two axles, each with its pods
   const viaTras = traseras ? traseras.VIA_LAT : 0, semiPodTras = traseras ? anchoMaxPod(traseras) : 0;
   const anchoTotal = Math.round((traseras ? Math.max(via + 2 * semiPod, viaTras + 2 * semiPodTras) : via + 2 * semiPod) * 1000) / 1000;
+  // 2026-11-15: in a diamond, the nose wheel (the rear one's size, at x = 0 where the Cuadriciclo en rombo had it) and the pods' are the lateral ones
+  const rombo = esRombo(T), nPod = rombo ? 'lateral' : 'delantera';
   const ruedas: Rueda[] = [
-    { nombre: 'Rueda delantera der.', x: xF, z: via / 2, r: rF, w: F.ANCHO_NEU_LAT }, { nombre: 'Rueda delantera izq.', x: xF, z: -via / 2, r: rF, w: F.ANCHO_NEU_LAT },
+    ...(rombo ? [{ nombre: 'Rueda delantera (morro)', x: 0, z: 0, r: rR, w: F.ANCHO_NEU }] : []),
+    { nombre: `Rueda ${nPod} der.`, x: xF, z: via / 2, r: rF, w: F.ANCHO_NEU_LAT }, { nombre: `Rueda ${nPod} izq.`, x: xF, z: -via / 2, r: rF, w: F.ANCHO_NEU_LAT },
     ...(traseras
       ? [{ nombre: 'Rueda trasera der.', x: xR, z: viaTras / 2, r: rR, w: F.ANCHO_NEU }, { nombre: 'Rueda trasera izq.', x: xR, z: -viaTras / 2, r: rR, w: F.ANCHO_NEU }]
       : [{ nombre: 'Rueda trasera', x: xR, z: 0, r: rR, w: F.ANCHO_NEU }]),
@@ -1411,7 +1426,9 @@ export function crearModeloTriciclo(P: Parametros) {
     /** Four wheels (2026-11-11): the rear pods' view of the shape (`formaTrasera`), or null with one rear wheel. */
     traseras, cuatro: !!traseras,
     /** 2026-11-15: leaning in bends (four wheels and `tBascula: 'si'`): its maximum (rad) and each axle's arms, or null. */
-    bascula: T.tBascula === 'si' && traseras ? { phiMax: L('tBascMax') * Math.PI / 180, ejes: [ejeBascula('del', F), ejeBascula('tras', traseras)] } : null,
+    bascula: T.tBascula === 'si' && (traseras || rombo) ? { phiMax: L('tBascMax') * Math.PI / 180, ejes: traseras ? [ejeBascula('del', F), ejeBascula('tras', traseras)] : [ejeBascula('lat', F)] } : null,
+    /** 2026-11-15: the wheels in a diamond (`tRuedas`): the nose wheel at x = 0 steers, the pods do not. */
+    rombo,
     tubos, baterias, bateriaCabe: bat.capacidad, inversor, motor, basculante, amortiguador, brazos, cremallera, cabezaDireccion: cabeza, recTras, recDel, yLarguero: yL,
     // (with two rear wheels there is no wheel under the tail to cover)
     faldon: traseras ? null : faldonDe(F, L('tFaldon'), xR, rR),
@@ -1447,6 +1464,7 @@ export type ModeloTriciclo = ReturnType<typeof crearModeloTriciclo>;
 export function opcionesCabinaTriciclo(m: ModeloTriciclo) {
   return {
     recPil: m.rec.piloto, recPas: m.rec.pasajero, man: m.man, pies: m.pies, faldon: m.faldon, ventanas: m.opcVentanas, maletero: true, ...(m.filas ? { filas: m.asientosFilas } : {}), traseras: m.traseras,
+    ...(m.rombo ? { rombo: true } : {}),
     sueloSillin: m.sueloSillin, alzaPas: m.alzaPas, volante: m.volante, cabezaDireccion: m.cabezaDireccion, salpicadero: m.salpicadero,
     puertas: m.puerta ? { puerta: m.puerta, porton: m.porton } : null, retrovisor: m.retrovisor,
     solarCola: m.solarCola,
@@ -1626,6 +1644,8 @@ export function piezasTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cris
   const o = piezasBase(m, ar, centros, pods);
   if (m.puerta) o.push({ nombre: 'Puertas: bisagras, cierres y amortiguadores', kg: 3.0, x: (m.puerta.xTip + m.puerta.xR) / 2, y: 0.75 + m.elevar });
   if (m.porton) o.push({ nombre: 'Portón: bisagras y amortiguadores de gas', kg: 2.0, x: m.porton.xH - 0.4, y: 1.1 + m.elevar });
+  // a diamond (2026-11-15): the nose wheel (the rear one's size), its brake and its fork (an estimate)
+  if (m.rombo) o.push({ nombre: 'Rueda delantera, freno y horquilla', kg: limitarTriciclo('tMRueda', m.campos) * RUEDAS_TRICICLO[m.campos.tRuedaTras].kg + limitarTriciclo('tMFreno', m.campos) + 5, x: 0, y: m.rR });
   if (m.volante) o.push({ nombre: 'Volante y columna (más que el manillar)', kg: 1.8, x: m.volante.c[0] + 0.1, y: m.volante.c[1] - 0.05 });
   // (round 3 interior: the white one with its binnacle, vents, buttons, stalks and column shroud: `MASA_SALPICADERO_BLANCO`)
   if (m.salpicadero) { const s = m.salpicadero; o.push({ nombre: 'Salpicadero con sus pantallas', kg: 'blanco' in s ? MASA_SALPICADERO_BLANCO : 4.5, x: (s.x0 + s.x1) / 2, y: s.yTop - 0.1 }); }
@@ -1879,26 +1899,35 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   // weighted by the load on each axle (the tadpole's formula is the same with a rear track of 0)
   const tTras = m.traseras ? m.traseras.VIA_LAT : 0;
   const ssf4 = (x: number, h: number) => { const b = (x - m.xR) / Lb; return (t * b + tTras * (1 - b)) / (2 * h); };
-  const ssf = m.traseras ? ssf4(cg.x, cg.y) : umbralVuelco(t, cg.x - m.xR, cg.y, Lb), ssfSolo = m.traseras ? ssf4(cgSolo.x, cgSolo.y) : umbralVuelco(t, cgSolo.x - m.xR, cgSolo.y, Lb);
-  const repartoDel = (cg.x - m.xR) / Lb;
+  // a diamond (2026-11-15): it tips over the nearer of the two edges from a lateral wheel, to the nose or to the tail wheel
+  const ssfRombo = (x: number, h: number) => {
+    // (as `umbralVuelco`: the edge's half-track under the centre of gravity, across)
+    const a = t / 2, dTras = a * (x - m.xR) / (m.xF - m.xR), dDel = a * (0 - x) / (0 - m.xF);
+    return Math.max(0, Math.min(dTras, dDel)) / h;
+  };
+  const ssf = m.rombo ? ssfRombo(cg.x, cg.y) : m.traseras ? ssf4(cg.x, cg.y) : umbralVuelco(t, cg.x - m.xR, cg.y, Lb), ssfSolo = m.rombo ? ssfRombo(cgSolo.x, cgSolo.y) : m.traseras ? ssf4(cgSolo.x, cgSolo.y) : umbralVuelco(t, cgSolo.x - m.xR, cgSolo.y, Lb);
+  // (a diamond: the share ahead of the tail wheel, carried by the nose and the laterals)
+  const repartoDel = m.rombo ? Math.min(1, Math.max(0, (cg.x - m.xR) / -m.xR)) : (cg.x - m.xR) / Lb;
 
   // steering: Ackermann, the turning circle to the outer front wheel
-  const di = m.giro, dout = anguloFuera(di, Lb, t), radio = Lb / Math.sin(dout) + 0;
+  // (a diamond: the nose wheel steers about a centre on the laterals' line, the tail wheel steering against it)
+  const di = m.giro, dout = m.rombo ? di : anguloFuera(di, Lb, t), radio = m.rombo ? -m.xF / Math.sin(di) : Lb / Math.sin(dout) + 0;
 
   // the frame: the two rails as one beam on two supports (the battery cradle at x = 0 and the swing-arm pivot), riders and seats on it
   // (round 3 interior, 2026-11-12: with the rails on to the rear axle, the beam rests on the rear axle's cradle instead of the swing-arm pivot)
-  const g = 9.81, apoyo = m.larguerosTraseros ? m.xR : m.basculante.pivote[0], luz = m.xF - apoyo;
+  const g = 9.81, apoyo = m.larguerosTraseros ? m.xR : m.basculante.pivote[0], xDel = m.rombo ? 0 : m.xF, luz = xDel - apoyo;
+  // (a diamond, 2026-11-15: carried at the nose wheel's fork and the pivot, the laterals' cross-member ignored: the longer span, on the safe side)
   const kgAsiento = m.butacas ? masaButaca(L('tMAsiento')) : L('tMAsiento');
   const cargas: [number, number][] = !m.filas
-    ? [[m.xF - m.sillines.xPiloto, (mOcc + kgAsiento) * g], [m.xF - m.sillines.xPasajero, (mOcc + kgAsiento) * g]]
+    ? [[xDel - m.sillines.xPiloto, (mOcc + kgAsiento) * g], [xDel - m.sillines.xPasajero, (mOcc + kgAsiento) * g]]
     // three rows: each seat with its occupant (if its row is open), at its hips
-    : m.asientosFilas.map(a => [m.xF - a.x, ((a.plegado ? 0 : mOcc) + L('tMAsiento') * (a.fila === 3 ? 1.2 : 1.5)) * g] as [number, number]);
+    : m.asientosFilas.map(a => [xDel - a.x, ((a.plegado ? 0 : mOcc) + L('tMAsiento') * (a.fila === 3 ? 1.2 : 1.5)) * g] as [number, number]);
   // round 3 interior (2026-11-12, «revisa… el chasis y todo»): the battery bears on the rails too (the pack runs through
   // them; the modules stand on them): the pack in eight slices along its length, each module at its centre, by volume
   {
     const kgBat = m.kWh * 1000 / L('tWhKg'), vols = m.baterias.map(b => (b.x1 - b.x0) * (b.y1 - b.y0) * b.hz), V = vols.reduce((a, v) => a + v, 0);
-    if (m.paquete) for (let i = 0; i < 8; i++) cargas.push([m.xF - (m.paquete.x0 + (m.paquete.x1 - m.paquete.x0) * (i + 0.5) / 8), kgBat / 8 * g]);
-    else if (V > 0) m.baterias.forEach((b, i) => cargas.push([m.xF - (b.x0 + b.x1) / 2, kgBat * vols[i] / V * g]));
+    if (m.paquete) for (let i = 0; i < 8; i++) cargas.push([xDel - (m.paquete.x0 + (m.paquete.x1 - m.paquete.x0) * (i + 0.5) / 8), kgBat / 8 * g]);
+    else if (V > 0) m.baterias.forEach((b, i) => cargas.push([xDel - (b.x0 + b.x1) / 2, kgBat * vols[i] / V * g]));
   }
   let Mmax = 0; for (const [a, Fz] of cargas) { const aa = Math.min(luz, Math.max(0, a)); Mmax = Math.max(Mmax, Fz * aa * (luz - aa) / luz); }
   // both loads together: the moment at each load point of the sum
@@ -1995,9 +2024,21 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     c('interior', 'Volante dentro de la carrocería', dentro, 0.01);
     c('interior', 'Rodillas del piloto al volante', rodillas, 0.02);
   }
-  c('rodaje,carroceria', 'Neumático delantero dentro de su carenado (gira con él)', neumaticoCarenado(F), 0.015);
-  c('rodaje,carroceria', 'Carenado delantero a la carrocería, recto', carenadoCuerpo(F), HUECO_CARENADO - 0.002);
-  c('rodaje,carroceria', `Carenado delantero a la carrocería, girado ${Math.round(m.giro * 180 / Math.PI)}°`, huecoGiro(F, m.giro), HUECO_GIRO - 0.002);
+  if (m.rombo) {
+    // a diamond (2026-11-15): the pods at the sides do not steer; the nose wheel does, inside the nose, ahead of the pilot's feet
+    c('rodaje,carroceria', 'Neumático lateral dentro de su carenado', neumaticoCarenado(F), 0.015);
+    c('rodaje,carroceria', 'Carenado lateral a la carrocería', carenadoCuerpo(F), HUECO_CARENADO - 0.002);
+    c('rodaje,carroceria', 'Rueda delantera dentro del morro', ruedaDentro(F, 0, m.rR, F.ANCHO_NEU), 0.02);
+    // turned to the lock, its tyre sweeps sideways: about the rim's half-chord at mid-height times the sine, on each side
+    const g = m.giro, anchoGirada = F.ANCHO_NEU * Math.cos(g) + 2 * m.rR * 0.7 * Math.sin(g);
+    c('rodaje,carroceria', `Rueda delantera dentro del morro, girada ${Math.round(g * 180 / Math.PI)}°`, ruedaDentro(F, 0, m.rR, anchoGirada), 0.01);
+    const pies = m.plazas[0]?.pts.F;
+    if (pies && pies[1] < 2 * m.rR) c('interior,rodaje', 'Pies del piloto detrás de la rueda delantera', -m.rR - (pies[0] + 0.12), 0.03);
+  } else {
+    c('rodaje,carroceria', 'Neumático delantero dentro de su carenado (gira con él)', neumaticoCarenado(F), 0.015);
+    c('rodaje,carroceria', 'Carenado delantero a la carrocería, recto', carenadoCuerpo(F), HUECO_CARENADO - 0.002);
+    c('rodaje,carroceria', `Carenado delantero a la carrocería, girado ${Math.round(m.giro * 180 / Math.PI)}°`, huecoGiro(F, m.giro), HUECO_GIRO - 0.002);
+  }
   if (!m.traseras) c('rodaje', `Rueda trasera dentro de la cola, hundida ${Math.round(m.recTras * 1000)} mm`, ruedaDentro(F, m.xR, m.rR, F.ANCHO_NEU, m.recTras), 0.02);
   else {
     // four wheels (2026-11-11): the rear pods as the front ones, but they do not steer
@@ -2009,7 +2050,7 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     // nearer; neither may touch it. And the body, turned about the road, keeps off it.
     const ph = m.bascula.phiMax, g = Math.round(ph * 180 / Math.PI);
     for (const q of m.bascula.ejes) {
-      const p = poseBascula(q, ph), quien = q.eje === 'del' ? 'delantero' : 'trasero';
+      const p = poseBascula(q, ph), quien = q.eje === 'del' ? 'delantero' : q.eje === 'lat' ? 'lateral' : 'trasero';
       c('rodaje,carroceria', `Carenado ${quien} a la carrocería, inclinado ${g}° (el de dentro)`, carenadoCuerpoMovido(q.F, p.dy, p.dIn), 0.015);
       c('rodaje,carroceria', `Carenado ${quien} a la carrocería, inclinado ${g}° (el de fuera)`, carenadoCuerpoMovido(q.F, -p.dy, p.dIn), 0.015);
       c('rodaje,carroceria', `Carenado ${quien} al suelo, inclinado ${g}°`, carenadoAlSuelo(q.F, ph), 0.03);
@@ -2041,7 +2082,9 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     // 2026-11-12, the pack along the frame: clear of the cradle in front (its posts' rear face), of the controller
     // behind, of the rear wheel and its travel (one rear wheel), and under the seats (they stand on it, never in it)
     const k = m.paquete, rT = L('tChD') / 2000;
-    c('energia', 'Batería: paquete a la cuna de la suspensión delantera', (m.xF - rT) - k.x1, 0.02);
+    // (a diamond, 2026-11-15: the laterals' cradle is a cross-member at the sides, over the pack; in front, the nose wheel)
+    if (m.rombo) c('energia,rodaje', 'Batería: paquete a la rueda delantera', (-m.rR - 0.04) - k.x1, 0.02);
+    else c('energia', 'Batería: paquete a la cuna de la suspensión delantera', (m.xF - rT) - k.x1, 0.02);
     // (the controller stands right behind the pack: what bounds them both is the rear shock tower)
     c('energia,propulsion', 'Controlador (detrás del paquete) a la torreta del amortiguador', m.inversor.x0 - (m.basculante.pivote[0] + 0.04 + rT), 0.015);
     if (!m.traseras) c('energia,rodaje', 'Batería: paquete a la rueda trasera (hundida)', k.x0 - (m.xR + m.rR + 0.04), 0.02);
@@ -2067,7 +2110,7 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   const cm1 = (v: number) => `${fmt(v * 100, 1)} cm`;
   if (m.puerta) {
     const espejo = m.retrovisor?.enPuerta ? puntasRetrovisor(m.retrovisor) : [];
-    const giros = [m.giro, anguloFuera(m.giro, m.batalla, F.VIA_LAT)];
+    const giros = m.rombo ? [0, 0] : [m.giro, anguloFuera(m.giro, m.batalla, F.VIA_LAT)];
     // (round 3: with two doors a side, each leaf on its own hinge, densely sampled, and against the rear pods as well)
     const hojas = m.puerta.segunda ? hojasPuerta(m.puerta) : null;
     const v = hojas ? vueloPuerta(F, m.puerta, espejo, giros, hojas[0], m.traseras) : vueloPuerta(F, m.puerta, espejo, giros);
