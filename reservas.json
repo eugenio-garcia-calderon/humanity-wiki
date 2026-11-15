@@ -17,6 +17,12 @@
       "ruta": "src/components/aeromovil/Visor3D.tsx",
       "motivo": "Bala en rombo",
       "desde": "2026-11-15T18:56:49.382Z"
+    },
+    {
+      "agente": "rombo",
+      "ruta": "src/pages/Aeromovil.tsx",
+      "motivo": "Bala en rombo",
+      "desde": "2026-11-15T18:56:51.790Z"
     }
   ]
 }
