@@ -17,7 +17,12 @@
  *   - un máximo: going out from the centre line, how much the curve ever rises again over the lowest it has been. A
  *     second hump shows here. Tolerance 0.1 mm.
  *   - bombeo: how far the deck (from its side edge, where the deck begins, t = T_CUBIERTA, to the centre) rises over
- *     the straight line between the two. Tolerance: the «bombeo» slider + 0.5 mm.
+ *     the straight line between the two, where the top has come down the last quarter of the way to the end. Tolerance:
+ *     the «bombeo» slider + 0.5 mm.
+ *   - ensancha / redondea (second round, 2026-11-13, «ese huevo»): going back from the roof's crest, how much the section
+ *     ever gets wider than it was, and how much its crown (the rise from the deck's edge to the centre) ever grows.
+ *     Tolerances 0.1 and 0.5 mm. The rear stretch now starts at the crest, so the canopy's rear and its join to the deck
+ *     are in; the front one at the top (or the start of the blend behind the windscreen, if that is further forward).
  * And along every line on the deck at 0, 25, 50, 75, 90 and 100 % of its half-width (every 2 mm), and the belly's
  * centre and edge lines:
  *   - sube: the most it ever rises (the deck lines) or falls (the belly lines) going towards the end, over the lowest
@@ -36,13 +41,13 @@
  */
 import { crearModelo, PARAMETROS_TRICICLO, type Parametros } from '../src/components/aeromovil/geometria';
 import { camposTriciclo, rangoTriciclo, type ClaveNumTriciclo, type ModeloTriciclo } from '../src/components/aeromovil/geometriaTriciclo';
-import { T3, T_CUBIERTA, punto, type FormaBala } from '../src/components/aeromovil/garaje/balaForma';
+import { LARGO_MEZCLA, T3, T_CUBIERTA, punto, type FormaBala } from '../src/components/aeromovil/garaje/balaForma';
 import { deDiseno } from '../src/components/aeromovil/Disenos';
 import { contornoCupula } from '../src/components/aeromovil/garaje/balaMedidas';
-import { CLASICO_HOY, PROPUESTA_COLA_LISA } from './clasicoGuardado';
+import { CLASICO_HOY, CLASICO_REAL_0218, PROPUESTA_COLA_LISA } from './clasicoGuardado';
 // (`--donde` anywhere: also say where each worst value is when it passes)
 
-const TOL = { convexa: 0.0002, maximo: 0.0001, bombeo: 0.0005, sube: 0.0001, pliegue: 0.5, onda: 0.0001 };
+const TOL = { convexa: 0.0002, maximo: 0.0001, bombeo: 0.0005, sube: 0.0001, pliegue: 0.5, onda: 0.0001, ensancha: 0.0001, redondea: 0.0005 };
 type P = [number, number];
 
 /** The upper half-section at x, from the widest point (t = T3) to the centre line, N + 1 points. */
@@ -80,7 +85,7 @@ function yEnZ(c: P[], z: number): number {
 }
 type Medida = keyof typeof TOL;
 interface Peor extends Record<Medida, number> { donde: Partial<Record<Medida, string>> }
-const nuevo = (): Peor => ({ convexa: 0, maximo: 0, bombeo: 0, sube: 0, pliegue: 0, onda: 0, donde: {} });
+const nuevo = (): Peor => ({ convexa: 0, maximo: 0, bombeo: 0, sube: 0, pliegue: 0, onda: 0, ensancha: 0, redondea: 0, donde: {} });
 /** Keeps the worst value of each measure and where it was. */
 function anotar(p: Peor, k: Medida, v: number, donde: string) { if (v > p[k]) { p[k] = v; p.donde[k] = donde; } }
 
@@ -127,11 +132,32 @@ function medir(m: ModeloTriciclo, control = false): Peor | string {
   const F = m.F, cc = control ? contornoCupula(F) : null, z = cc ? { detras: cc.XC1 + 0.01, delante: cc.XC0 - 0.01 } : F.zonasLisa;
   if (!z) return 'sin cubierta lisa';
   const p = nuevo(), D = F.D;
-  // ── cross-sections, every 1 cm on both decks
-  const estaciones: [number, number][] = [];
-  for (let x = z.detras; x > F.X_COLA + 0.002; x -= 0.01) estaciones.push([x, D.colaBombeo ?? 0]);
-  for (let x = z.delante; x < F.X_MORRO - 0.002; x += 0.01) estaciones.push([x, D.morroBombeo ?? 0]);
-  for (const [x, bomb] of estaciones) {
+  // (2026-11-13, second round, «ese huevo»: the rear stretch starts at the roof's crest, found on the built top line (the
+  // last point, going back, within 2 mm of its highest), so the canopy's rear and its join to the deck are in; the front
+  // one at the start of the blend behind the windscreen, so the windscreen-to-hood join is in)
+  const techo = (x: number) => punto(F.sec(x), 1)[1];
+  let ymax = -Infinity; for (let x = F.XN0; x > F.XT0; x -= 0.005) ymax = Math.max(ymax, techo(x));
+  let cresta = F.XN0, cima = F.XN0; for (let x = F.XN0; x > F.XT0; x -= 0.005) { if (techo(x) >= ymax - 0.002) cresta = x; if (techo(x) === ymax) cima = x; }
+  // (the rear stretch from the last point within 2 mm of the top, the front one from the top itself)
+  const x0r = Math.max(cresta, z.detras), x0f = Math.max(cima, z.delante - LARGO_MEZCLA);
+  // ── cross-sections, every 1 cm on both stretches; the deck's crown checked against «bombeo» on each deck's last third
+  const estaciones: [number, number | null][] = [];
+  // (the deck's own crown, «bombeo», where the top has come down the last quarter of the way from the crest to each end:
+  // behind the crest the canopy's crown fades only as fast as the centre comes down, so a round canopy carries some of it
+  // over the first part of the deck)
+  const yTope = techo(cresta), yCola = techo(F.X_COLA + 0.002), yMorro = techo(F.X_MORRO - 0.002);
+  const deCola = (x: number) => techo(x) <= yCola + 0.25 * (yTope - yCola), deMorro = (x: number) => techo(x) <= yMorro + 0.25 * (yTope - yMorro);
+  for (let x = x0r; x > F.X_COLA + 0.002; x -= 0.01) estaciones.push([x, deCola(x) ? D.colaBombeo ?? 0 : null]);
+  const nTrasera = estaciones.length;
+  for (let x = Math.max(cima, z.delante); x < F.X_MORRO - 0.002; x += 0.01) estaciones.push([x, deMorro(x) ? D.morroBombeo ?? 0 : null]);
+  // going back from the crest: the section never gets wider, and never rounder (its rise from the deck's edge to the centre)
+  let hwMin = Infinity, copaMin = Infinity;
+  for (const [k, [x, bomb]] of estaciones.entries()) {
+    if (k < nTrasera) {
+      const c = arriba(F, x), hw = Math.max(...c.map(q => q[0])), s0 = F.sec(x), copa = punto(s0, 1)[1] - punto(s0, T_CUBIERTA)[1], donde = `x = ${x.toFixed(3)}`;
+      anotar(p, 'ensancha', hw - hwMin, donde); anotar(p, 'redondea', copa - copaMin, donde);
+      hwMin = Math.min(hwMin, hw); copaMin = Math.min(copaMin, copa);
+    }
     const c = arriba(F, x), donde = `x = ${x.toFixed(3)}`;
     if (c.some(q => !Number.isFinite(q[0]) || !Number.isFinite(q[1]))) { anotar(p, 'convexa', 1, `${donde} (NaN)`); continue; }
     anotar(p, 'convexa', dentroDelCasco([...c, [0, c[0][1]]]), donde);
@@ -140,12 +166,12 @@ function medir(m: ModeloTriciclo, control = false): Peor | string {
     const s = F.sec(x), E = punto(s, T_CUBIERTA), C = punto(s, 1);
     let cr = 0;
     for (let i = 0; i <= 60; i++) { const q = punto(s, T_CUBIERTA + (1 - T_CUBIERTA) * i / 60), u = E[0] > 1e-9 ? q[0] / E[0] : 0; cr = Math.max(cr, q[1] - (C[1] + (E[1] - C[1]) * u)); }
-    anotar(p, 'bombeo', Math.max(0, cr - bomb), donde);
+    if (bomb !== null) anotar(p, 'bombeo', Math.max(0, cr - bomb), donde);
   }
   // ── lines along each deck, every 2 mm, at fractions of the deck's half-width (2 mm: a sharp but smooth bend, a 10 cm
   // radius, then turns 1.1° a step, and the crease measure reads it under 0.6°; a real crease reads its full angle at any step)
   const paso = 0.002;
-  for (const [x0, x1, dir] of [[z.detras, F.X_COLA + 0.002, -1], [z.delante, F.X_MORRO - 0.002, 1]] as const) {
+  for (const [x0, x1, dir] of [[x0r, F.X_COLA + 0.002, -1], [x0f, F.X_MORRO - 0.002, 1]] as const) {
     const xs: number[] = []; for (let x = x0; dir < 0 ? x > x1 : x < x1; x += dir * paso) xs.push(x);
     const cs = xs.map(x => ({ c: arriba(F, x, 160), zE: punto(F.sec(x), T_CUBIERTA)[0] }));
     for (const f of [0, 0.25, 0.5, 0.75, 0.9, 1]) {
@@ -180,14 +206,14 @@ function probar(nombre: string, P: Partial<Parametros>) {
   if (typeof r === 'string') { fallos++; console.log(`FALLA ${nombre}: ${r}`); return; }
   const malas = (Object.keys(TOL) as Medida[]).filter(k => r[k] > TOL[k]);
   if (malas.length) fallos++;
-  console.log(`${malas.length ? 'FALLA' : 'OK   '} ${nombre}: convexa ${mm(r.convexa)} mm · un máximo ${mm(r.maximo)} mm · bombeo +${mm(r.bombeo)} mm · sube ${mm(r.sube)} mm · pliegue ${r.pliegue.toFixed(2)}° · onda ${mm(r.onda)} mm${(DONDE ? (Object.keys(TOL) as Medida[]) : malas).map(k => ` · ${k}: ${r.donde[k] ?? '-'}`).join('')}`);
+  console.log(`${malas.length ? 'FALLA' : 'OK   '} ${nombre}: convexa ${mm(r.convexa)} mm · un máximo ${mm(r.maximo)} mm · bombeo +${mm(r.bombeo)} mm · sube ${mm(r.sube)} mm · pliegue ${r.pliegue.toFixed(2)}° · onda ${mm(r.onda)} mm · ensancha ${mm(r.ensancha)} mm · redondea ${mm(r.redondea)} mm${(DONDE ? (Object.keys(TOL) as Medida[]) : malas).map(k => ` · ${k}: ${r.donde[k] ?? '-'}`).join('')}`);
 }
 
 // the control: today's clásico, without the smooth deck, measured the same way. It must show the mounds Eugenio saw (if
 // it did not, these measures could not see one); it is listed, not counted
 if (!SOLO || 'control'.startsWith(SOLO)) {
   const r = medir(crearModelo(deDiseno(CLASICO_HOY)) as ModeloTriciclo, true);
-  if (typeof r !== 'string') console.log(`(control) el clásico de hoy, sin cubierta lisa: convexa ${mm(r.convexa)} mm · un máximo ${mm(r.maximo)} mm · sube ${mm(r.sube)} mm · pliegue ${r.pliegue.toFixed(2)}° · onda ${mm(r.onda)} mm${(Object.keys(TOL) as Medida[]).filter(k => k !== 'bombeo' && r[k] > TOL[k]).map(k => ` · ${k}: ${r.donde[k]}`).join('')}`);
+  if (typeof r !== 'string') console.log(`(control) el clásico de hoy, sin cubierta lisa: convexa ${mm(r.convexa)} mm · un máximo ${mm(r.maximo)} mm · sube ${mm(r.sube)} mm · pliegue ${r.pliegue.toFixed(2)}° · onda ${mm(r.onda)} mm · ensancha ${mm(r.ensancha)} mm · redondea ${mm(r.redondea)} mm${(Object.keys(TOL) as Medida[]).filter(k => k !== 'bombeo' && r[k] > TOL[k]).map(k => ` · ${k}: ${r.donde[k]}`).join('')}`);
 }
 const BASE = { ...CLASICO_HOY, ...PROPUESTA_COLA_LISA } as Partial<Parametros>;
 const TB = camposTriciclo(deDiseno(BASE));
@@ -197,6 +223,17 @@ const CLAVES: ClaveNumTriciclo[] = ['tColaAncho', 'tColaGrosor', 'tColaBombeo', 
 const ext = (k: ClaveNumTriciclo, lado: 0 | 1) => rangoTriciclo(k, TB)[lado];
 
 probar('clásico de hoy con la propuesta', BASE);
+// (second round: Eugenio's own design as production has it, and lower canopies, as he is about to try. Below 1.56 m his
+// three rows clamp the height on this code (`ALTO_FILAS`), so the low ones are also run with his body and two buckets)
+probar('real de Eugenio (0218)', CLASICO_REAL_0218);
+for (const alto of [1.10, 1.25, 1.40, 1.56]) {
+  probar(`real de Eugenio · tAlto ${alto}`, { ...CLASICO_REAL_0218, tAlto: alto } as Partial<Parametros>);
+  probar(`real de Eugenio · tAlto ${alto}, con butacas`, { ...CLASICO_REAL_0218, tAlto: alto, tAsientos: 'butacas' } as Partial<Parametros>);
+}
+for (const k of ['tCupFin', 'tCaida', 'tTechoPlano', 'tLineaCupula', 'tCupIni'] as ClaveNumTriciclo[]) {
+  const TR = camposTriciclo(deDiseno(CLASICO_REAL_0218));
+  for (const lado of [0, 1] as const) probar(`real de Eugenio · ${k} ${lado ? 'máx.' : 'mín.'}`, { ...CLASICO_REAL_0218, [k]: rangoTriciclo(k, TR)[lado], tAsientos: 'butacas', tAlto: 1.25 } as Partial<Parametros>);
+}
 for (const k of CLAVES) for (const lado of [0, 1] as const) probar(`clásico · ${k} = ${+ext(k, lado).toFixed(4)} (${lado ? 'máx.' : 'mín.'})`, { ...BASE, [k]: ext(k, lado) });
 for (const lado of [0, 1] as const) probar(`clásico · todo al ${lado ? 'máx.' : 'mín.'}`, { ...BASE, ...Object.fromEntries(CLAVES.map(k => [k, ext(k, lado)])) });
 const PARES: [ClaveNumTriciclo, ClaveNumTriciclo][] = [['tTechoPlano', 'tColaBombeo'], ['tCaida', 'tPuntaCola'], ['tColaAncho', 'tColaGrosor'], ['tBajosCurva', 'tColaGrosor'], ['tMorroAlto', 'tMorroGrosor'], ['tMorroAncho', 'tPuntaMorro'], ['tLineaCupula', 'tCaida'], ['tCupFin', 'tCaida'], ['tAlto', 'tTechoPlano'], ['tMorro', 'tMorroAlto']];
