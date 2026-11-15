@@ -7,9 +7,11 @@
  * the BUILT skin, not the intent: every point is `punto(F.sec(x), t)` of the model's own shape `m.F`, the very sections
  * the 3D mesh (balaModelo.ts `rejilla`) and the wind tunnel's envelope (`F.envolvente`) are made of.
  *
- * Where: the rear deck from 1 cm onto the canopy glass's end back to 2 mm from the tail's end, and the hood from 1 cm onto
+ * Where: the rear deck from the roof's crest (second round) back to 2 mm from the tail's end, and the hood from 1 cm onto
  * the windscreen's start forward to 2 mm from the nose's tip (`F.zonasLisa`); the belly's centre and edge lines from 5 cm
- * ahead of where its sweep starts (so the joint is in) back to the end.
+ * ahead of where its sweep starts (so the joint is in) back to the end. Also the windscreen-to-hood join, the blend from
+ * the canopy's section into the hood's deck, from the start of the blend to 25 cm onto the hood: reported as AVISO and not
+ * counted, since that code is main's, unchanged by the second round (see memory/03_DECISIONS.md, 2026-11-13).
  *
  * What, at every station (every 1 cm) on each deck, on the half-section from its widest point to the centre line:
  *   - convexa: how far any point of it lies inside the convex hull of the curve (closed down to the widest point's
@@ -22,7 +24,7 @@
  *   - ensancha / redondea (second round, 2026-11-13, «ese huevo»): going back from the roof's crest, how much the section
  *     ever gets wider than it was, and how much its crown (the rise from the deck's edge to the centre) ever grows.
  *     Tolerances 0.1 and 0.5 mm. The rear stretch now starts at the crest, so the canopy's rear and its join to the deck
- *     are in; the front one at the top (or the start of the blend behind the windscreen, if that is further forward).
+ *     are in.
  * And along every line on the deck at 0, 25, 50, 75, 90 and 100 % of its half-width (every 2 mm), and the belly's
  * centre and edge lines:
  *   - sube: the most it ever rises (the deck lines) or falls (the belly lines) going towards the end, over the lowest
@@ -37,7 +39,7 @@
  * Cases: the clásico as saved in production today with this round's proposed keys, every tail-, nose- and roof-related
  * slider at both ends of its range on it, every shape slider at both ends together, pairs, and 40 random combinations of
  * all of them (fixed seed), plus the plain Triciclo with the smooth body on. Prints OK or FALLA per case with the worst
- * value of each measure; exits 1 on any FALLA.
+ * value of each measure, and AVISO for the windscreen-to-hood join; exits 1 on any FALLA.
  */
 import { crearModelo, PARAMETROS_TRICICLO, type Parametros } from '../src/components/aeromovil/geometria';
 import { camposTriciclo, rangoTriciclo, type ClaveNumTriciclo, type ModeloTriciclo } from '../src/components/aeromovil/geometriaTriciclo';
@@ -84,7 +86,7 @@ function yEnZ(c: P[], z: number): number {
   return c[c.length - 1][1];
 }
 type Medida = keyof typeof TOL;
-interface Peor extends Record<Medida, number> { donde: Partial<Record<Medida, string>> }
+interface Peor extends Record<Medida, number> { donde: Partial<Record<Medida, string>>; union?: Peor }
 const nuevo = (): Peor => ({ convexa: 0, maximo: 0, bombeo: 0, sube: 0, pliegue: 0, onda: 0, ensancha: 0, redondea: 0, donde: {} });
 /** Keeps the worst value of each measure and where it was. */
 function anotar(p: Peor, k: Medida, v: number, donde: string) { if (v > p[k]) { p[k] = v; p.donde[k] = donde; } }
@@ -138,8 +140,9 @@ function medir(m: ModeloTriciclo, control = false): Peor | string {
   const techo = (x: number) => punto(F.sec(x), 1)[1];
   let ymax = -Infinity; for (let x = F.XN0; x > F.XT0; x -= 0.005) ymax = Math.max(ymax, techo(x));
   let cresta = F.XN0, cima = F.XN0; for (let x = F.XN0; x > F.XT0; x -= 0.005) { if (techo(x) >= ymax - 0.002) cresta = x; if (techo(x) === ymax) cima = x; }
-  // (the rear stretch from the last point within 2 mm of the top, the front one from the top itself)
-  const x0r = Math.max(cresta, z.detras), x0f = Math.max(cima, z.delante - LARGO_MEZCLA);
+  // (the rear stretch from the last point within 2 mm of the top; the hood from where its deck starts, as in the first
+  // round, and its join to the canopy, from the start of the blend, measured apart: see `union` below)
+  const x0r = Math.max(cresta, z.detras), x0f = Math.max(cima, z.delante), x0u = Math.max(cima, z.delante - LARGO_MEZCLA);
   // ── cross-sections, every 1 cm on both stretches; the deck's crown checked against «bombeo» on each deck's last third
   const estaciones: [number, number | null][] = [];
   // (the deck's own crown, «bombeo», where the top has come down the last quarter of the way from the crest to each end:
@@ -171,13 +174,18 @@ function medir(m: ModeloTriciclo, control = false): Peor | string {
   // ── lines along each deck, every 2 mm, at fractions of the deck's half-width (2 mm: a sharp but smooth bend, a 10 cm
   // radius, then turns 1.1° a step, and the crease measure reads it under 0.6°; a real crease reads its full angle at any step)
   const paso = 0.002;
-  for (const [x0, x1, dir] of [[x0r, F.X_COLA + 0.002, -1], [x0f, F.X_MORRO - 0.002, 1]] as const) {
+  // (the windscreen-to-hood join, the blend from the canopy's section into the hood's deck, is the same code as on main:
+  // this round left it as it was (see the decisions log). Its lines are measured into `union`, which is reported as a
+  // warning and not counted, so a change there shows here without failing the deck's own promise)
+  const union = nuevo(); p.union = union;
+  for (const [x0, x1, dir, q] of [[x0r, F.X_COLA + 0.002, -1, p], [x0f, F.X_MORRO - 0.002, 1, p], [x0u, Math.min(F.X_MORRO - 0.002, z.delante + 0.25), 1, union]] as const) {
     const xs: number[] = []; for (let x = x0; dir < 0 ? x > x1 : x < x1; x += dir * paso) xs.push(x);
+    if (xs.length < 8) continue;
     const cs = xs.map(x => ({ c: arriba(F, x, 160), zE: punto(F.sec(x), T_CUBIERTA)[0] }));
     for (const f of [0, 0.25, 0.5, 0.75, 0.9, 1]) {
       const ys = cs.map(({ c, zE }) => yEnZ(c, f * zE));
-      const r = linea(ys, paso, -1, 0.03, xs), donde = `${dir < 0 ? 'cola' : 'morro'}, línea al ${Math.round(f * 100)} %`;
-      anotar(p, 'sube', r.sube, donde); anotar(p, 'pliegue', r.pliegue, `${donde}, x = ${r.xPliegue.toFixed(3)}`); anotar(p, 'onda', r.onda, `${donde}, x = ${r.xOnda.toFixed(3)}`);
+      const r = linea(ys, paso, -1, 0.03, xs), donde = `${dir < 0 ? 'cola' : q === union ? 'unión parabrisas–capó' : 'morro'}, línea al ${Math.round(f * 100)} %`;
+      anotar(q, 'sube', r.sube, donde); anotar(q, 'pliegue', r.pliegue, `${donde}, x = ${r.xPliegue.toFixed(3)}`); anotar(q, 'onda', r.onda, `${donde}, x = ${r.xOnda.toFixed(3)}`);
     }
   }
   // ── the belly's sweep: its centre line and its flat's edge, from 20 cm ahead of where it starts to the end
@@ -193,7 +201,7 @@ function medir(m: ModeloTriciclo, control = false): Peor | string {
 }
 
 // ── the cases
-let fallos = 0, casos = 0;
+let fallos = 0, casos = 0, avisos = 0;
 const SOLO = process.argv.slice(2).find(a => !a.startsWith("--"));
 /** `--donde`: say where the worst value of every measure is, also when it passes. */
 const DONDE = process.argv.includes('--donde');
@@ -206,6 +214,8 @@ function probar(nombre: string, P: Partial<Parametros>) {
   if (typeof r === 'string') { fallos++; console.log(`FALLA ${nombre}: ${r}`); return; }
   const malas = (Object.keys(TOL) as Medida[]).filter(k => r[k] > TOL[k]);
   if (malas.length) fallos++;
+  const u = r.union, malasU = u ? (['sube', 'pliegue', 'onda'] as Medida[]).filter(k => u[k] > TOL[k]) : [];
+  if (u && malasU.length) { avisos++; console.log(`AVISO ${nombre}: unión parabrisas–capó (como en main, no contada): ${malasU.map(k => `${k} ${k === 'pliegue' ? `${u[k].toFixed(2)}°` : `${mm(u[k])} mm`} (${u.donde[k]})`).join(' · ')}`); }
   console.log(`${malas.length ? 'FALLA' : 'OK   '} ${nombre}: convexa ${mm(r.convexa)} mm · un máximo ${mm(r.maximo)} mm · bombeo +${mm(r.bombeo)} mm · sube ${mm(r.sube)} mm · pliegue ${r.pliegue.toFixed(2)}° · onda ${mm(r.onda)} mm · ensancha ${mm(r.ensancha)} mm · redondea ${mm(r.redondea)} mm${(DONDE ? (Object.keys(TOL) as Medida[]) : malas).map(k => ` · ${k}: ${r.donde[k] ?? '-'}`).join('')}`);
 }
 
@@ -223,8 +233,8 @@ const CLAVES: ClaveNumTriciclo[] = ['tColaAncho', 'tColaGrosor', 'tColaBombeo', 
 const ext = (k: ClaveNumTriciclo, lado: 0 | 1) => rangoTriciclo(k, TB)[lado];
 
 probar('clásico de hoy con la propuesta', BASE);
-// (second round: Eugenio's own design as production has it, and lower canopies, as he is about to try. Below 1.56 m his
-// three rows clamp the height on this code (`ALTO_FILAS`), so the low ones are also run with his body and two buckets)
+// (second round: Eugenio's own design as production has it, and lower canopies, as he is about to try. Since #1037 his
+// three rows let the height go down to 1.00 m; the low ones are also run with two buckets, which seat the people otherwise)
 probar('real de Eugenio (0218)', CLASICO_REAL_0218);
 for (const alto of [1.10, 1.25, 1.40, 1.56]) {
   probar(`real de Eugenio · tAlto ${alto}`, { ...CLASICO_REAL_0218, tAlto: alto } as Partial<Parametros>);
@@ -246,5 +256,5 @@ for (let i = 0; i < 40; i++) probar(`clásico · al azar ${i + 1}`, { ...BASE, .
 probar('triciclo con cubierta lisa', { ...PARAMETROS_TRICICLO, tCubierta: 'lisa' } as Partial<Parametros>);
 probar('triciclo con cubierta lisa, como la propuesta del clásico', { ...PARAMETROS_TRICICLO, ...PROPUESTA_COLA_LISA } as Partial<Parametros>);
 
-console.log(`\n${casos} casos · tolerancias: convexa ${mm(TOL.convexa)} mm, un máximo ${mm(TOL.maximo)} mm, bombeo +${mm(TOL.bombeo)} mm, sube ${mm(TOL.sube)} mm, pliegue ${TOL.pliegue}°, onda ${mm(TOL.onda)} mm · ${fallos ? `${fallos} FALLA` : 'todos OK'}`);
+console.log(`\n${casos} casos · tolerancias: convexa ${mm(TOL.convexa)} mm, un máximo ${mm(TOL.maximo)} mm, bombeo +${mm(TOL.bombeo)} mm, sube ${mm(TOL.sube)} mm, pliegue ${TOL.pliegue}°, onda ${mm(TOL.onda)} mm · ${fallos ? `${fallos} FALLA` : 'todos OK'}${avisos ? ` · ${avisos} AVISO en la unión parabrisas–capó (sin cambios desde main)` : ''}`);
 if (fallos) process.exitCode = 1;

@@ -465,9 +465,14 @@ export function crearForma(D: DimBala) {
     // point, going back, where the plain top line is within 2 mm of its highest.
     let ymax = -Infinity; for (let x = XN0; x > XT0; x -= 0.005) ymax = Math.max(ymax, yt(x));
     let cresta = XN0; for (let x = XN0; x > XT0; x -= 0.005) if (yt(x) >= ymax - 0.002) cresta = x;
-    // (and the front one too, after the same fix showed the windscreen's join to the hood: the canopy's own section has a
-    // waist under its shoulders, 18 mm deep on his design, so the whole top is the deck model, rear and front of the crest)
-    return { delante: Math.min(cresta, xc0 - 0.01), detras: Math.max(cresta, xc1 + 0.01), cresta, finVidrio: xc1 };
+    // (the front one stays at the windscreen's start, 1 cm onto the glass, as before: carrying the deck model forward to
+    // the crest too was tried and rejected, since it replaces the cabin's own section, squarer at the shoulders, with the
+    // deck's rounder one, and on his design that put the driver's head 9.6 cm into the glass and the knees 27 cm into the
+    // dashboard, with the hood's guide from the crest, or rounded the shoulders over all three rows without it)
+    // (and the rear deck never within two blends of the windscreen's start: on a short canopy the two blends overlapped and
+    // the deck switched from the rear's numbers to the hood's halfway, a 7–51° crease; there it starts that far back)
+    const detras = Math.max(xc1 + 0.01, Math.min(cresta, xc0 - 0.01 - 2 * LARGO_MEZCLA));
+    return { delante: Math.max(cresta, xc0 - 0.01), detras, cresta: detras, finVidrio: xc1 };
   })() : null;
   /**
    * The smooth body's guide lines: the top's centre line over the rear deck and over the hood, and (below) the belly's
@@ -480,8 +485,8 @@ export function crearForma(D: DimBala) {
   const xGuiaCola = zonas ? Math.max(zonas.detras, XT0 + 0.02) : 0, xGuiaMorro = zonas ? Math.min(zonas.delante, XN0 - 0.02) : 0;
   // (from the crest the roof's whole fall is this one curve: «Techo: caída» keeps its meaning through how it arrives at the
   // edge: − falls early and arrives flat, + stays up and falls late; 60 % of the mean slope at 0, as before)
-  // (leaving the crest level, as the hood's guide does: the two meet there with the same slope, 0)
-  const techoCola = zonas ? guia(xGuiaCola, yt(xGuiaCola), xGuiaCola === zonas.cresta ? 0 : pendiente(yt, xGuiaCola), X_COLA, cyCola + gCola / 2, 0.6 * Math.exp(1.5 * (D.caida ?? 0))) : null;
+  // (leaving the crest with the canopy line's own slope there, nearly level, so the two meet without a crease)
+  const techoCola = zonas ? guia(xGuiaCola, yt(xGuiaCola), pendiente(yt, xGuiaCola), X_COLA, cyCola + gCola / 2, 0.6 * Math.exp(1.5 * (D.caida ?? 0))) : null;
   const techoMorro = zonas ? guia(xGuiaMorro, yt(xGuiaMorro), pendiente(yt, xGuiaMorro), X_MORRO, cyMorro + gMorro / 2, 0.25) : null;
   // (and the belly stays flat from where the drawing starts to raise it, x_ref −2.1, back to where the sweep starts: its
   // own rise there, compressed by a long canopy into a few centimetres, would be a crease just ahead of the sweep)
@@ -585,9 +590,14 @@ export function crearForma(D: DimBala) {
   }
   const bombCola = lisa ? Math.max(0, D.colaBombeo ?? 0) : 0, bombMorro = lisa ? Math.max(0, D.morroBombeo ?? 0) : 0;
   /** The deck's weight at x: 1 on the deck, easing to 0 over the blend, 0 on the canopy. */
-  const pesoLisa = (x: number) => !zonas ? 0 : x <= zonas.detras ? 1 : x >= zonas.delante ? 1
-    : x < zonas.detras + LARGO_MEZCLA ? suaveL((zonas.detras + LARGO_MEZCLA - x) / LARGO_MEZCLA)
-      : x > zonas.delante - LARGO_MEZCLA ? suaveL((x - zonas.delante + LARGO_MEZCLA) / LARGO_MEZCLA) : 0;
+  // (the two blends combined as 1 − (1 − wr)(1 − wf), 2026-11-15: with the rear deck now starting at the crest, a short
+  // canopy makes them overlap, and taking whichever came first jumped between them, a 51° crease on one random design.
+  // Where they do not overlap, one of the two is 0 and this is what it was)
+  const pesoLisa = (x: number) => {
+    if (!zonas || x <= zonas.detras || x >= zonas.delante) return zonas ? 1 : 0;
+    const wr = suaveL((zonas.detras + LARGO_MEZCLA - x) / LARGO_MEZCLA), wf = suaveL((x - zonas.delante + LARGO_MEZCLA) / LARGO_MEZCLA);
+    return 1 - (1 - wr) * (1 - wf);
+  };
   /**
    * The canopy's crown behind the crest. At the crest the section keeps the canopy's own crown Dc (its rise from the deck's
    * side edge, zE, to the centre, on the plain section); going back it fades as KC·v²/(2W), v the height of the centre
@@ -598,26 +608,24 @@ export function crearForma(D: DimBala) {
    * the canopy can stay at its crest.
    */
   const dBase = (bomb: number, cFin: number, yC: number) => { const D0 = 4 * bomb; return D0 > 0 ? D0 * satura(KAPPA_LISA * (yC - cFin) / D0) : 0; };
-  const copaCresta = zonas ? (() => {
-    const xc = zonas.cresta, c = controles(xc), e: P2[] = [[-c[1][0], c[1][1]], ...c, [-c[7][0], c[7][1]]], zE = c[3][0] * (1 - RHO_LISA), yC0 = c[8][1];
+  /**
+   * The rear deck's crown fade, from where it leaves the canopy at xc (the crest): the canopy's own crown there, or less
+   * if the deck could not shed it within its 75 %, never less than the deck's own drop.
+   */
+  const copaDesde = (xc: number, bomb: number, cFin: number, yFin: number) => {
+    const c = controles(xc), e: P2[] = [[-c[1][0], c[1][1]], ...c, [-c[7][0], c[7][1]]], zE = c[3][0] * (1 - RHO_LISA), yC0 = c[8][1];
     let yE = c[3][1]; for (let i = 0; i <= 400; i++) { const [z, y] = enCurva(e, T3 + (1 - T3) * i / 400); if (z <= zE) { yE = y; break; } }
     // (and never more than 60 % of the height over the widest point: a round canopy measured at the deck's edge is nearly
     // all crown, and a drop that close to the widest point leaves the side no height for its edge)
-    return { yC0, Dc: Math.max(Math.min(yC0 - yE, 0.6 * (yC0 - c[3][1])), dBase(bombCola, cyCola, yC0), dBase(bombMorro, cyMorro, yC0)) };
-  })() : null;
-  /** One side's fade: W (and so yM) for a crown Dc at the crest; the most crown each side can shed within its 75 %. */
-  const ladoCopa = (bomb: number, cFin: number, yFin: number) => ({ d0: copaCresta ? dBase(bomb, cFin, copaCresta.yC0) : 0, Wmax: copaCresta ? 0.75 * (copaCresta.yC0 - yFin) : 0 });
-  const lc = ladoCopa(bombCola, cyCola, cyCola + gCola / 2), lm = ladoCopa(bombMorro, cyMorro, cyMorro + gMorro / 2);
-  // (the crown at the crest: the canopy's, or less if either side could not shed it in time; both sides reach this one)
-  // (and never less than either side's own deck drop there: the side with the larger «bombeo» sets the floor, and the
-  // other one sheds the difference, even if that takes it past its 75 %: the two must meet)
-  const DcEf = copaCresta ? Math.max(Math.min(copaCresta.Dc, lc.d0 + KC_LISA * lc.Wmax / 2, lm.d0 + KC_LISA * lm.Wmax / 2), lc.d0, lm.d0) : 0;
-  const copaDe = (l: { d0: number }) => {
-    const falta = DcEf - l.d0; if (!copaCresta || !(falta > 1e-6)) return null;
-    const W = 2 * falta / KC_LISA; return { yM: copaCresta.yC0 - W, W, K: KC_LISA };
+    const d0 = dBase(bomb, cFin, yC0), Dc = Math.max(Math.min(yC0 - yE, 0.6 * (yC0 - c[3][1])), d0), Wmax = 0.75 * (yC0 - yFin);
+    const falta = Math.min(Dc, d0 + KC_LISA * Wmax / 2) - d0;
+    if (!(falta > 1e-6)) return null;
+    const W = 2 * falta / KC_LISA; return { yM: yC0 - W, W, K: KC_LISA };
   };
-  // (both reach the same crown at the crest, so the two decks meet there in one section)
-  const copaCola = copaDe(lc), copaMorro = copaDe(lm);
+  // (the rear deck's only. The same fade from the windscreen's start was tried for the hood and rejected: there the top is
+  // already falling, so a fade that starts at full slope creases the deck's edge (15–20°), and one that starts level
+  // ripples it (3–5 mm). The hood keeps its own drop from the windscreen, as before)
+  const copaCola = zonas ? copaDesde(zonas.cresta, bombCola, cyCola, cyCola + gCola / 2) : null;
   const copaEn = (cp: { yM: number; W: number; K: number } | null, yC: number) => { if (!cp) return 0; const v = Math.max(0, Math.min(cp.W, yC - cp.yM)); return cp.K * v * v / (2 * cp.W); };
   /** The deck at x, from its control points (see `cubiertaLisa`). */
   function deckEn(x: number, c: P2[]) {
@@ -639,7 +647,7 @@ export function crearForma(D: DimBala) {
     // (behind the crest, the canopy's crown fades into the deck's: KC more per metre of height above yM, so at the crest the
     // section has the canopy's own crown and it flattens only as fast as the centre comes down: KAPPA + KC < 1, every
     // line still only falls)
-    const copa = copaEn(atras ? copaCola : copaMorro, yC);
+    const copa = atras ? copaEn(copaCola, yC) : 0;
     const drop = Math.max(0, Math.min(base + copa, 0.95 * (yC - P3[1])));
     return { ...cubiertaLisa(q[2], P3, yC, drop), yC, drop, q };
   }

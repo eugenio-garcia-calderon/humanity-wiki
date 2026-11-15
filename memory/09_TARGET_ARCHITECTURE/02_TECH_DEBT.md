@@ -643,3 +643,9 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 - **Dragged places are per browser** (`localStorage`), not shared: Eugenio's phone and computer each have their own garage arrangement.
 - **A dragged place is absolute in the rows' frame.** When a design is added before it in the list, the cars in the row move along and a dragged car does not, so they can end up overlapping. There is no overlap check on drop.
 - **The drag snaps to 5 cm and has no grid or alignment guides**; «Volver a su fila» is the way back to a tidy row.
+
+### 2026-11-15 — Smooth body, the egg fix: shortcuts
+- **The windscreen-to-hood join is not guaranteed.** The blend from the canopy's section into the hood's deck (`LARGO_MEZCLA`, main's code) shows sub-millimetre ripples in many cases. Some slider combinations make bumps of 5–38 mm on the deck edge's line, and creases of up to 1.3°. `bala-cola-lisa` reports these as 44 AVISO lines out of 152 cases, not as failures. The front is identical to main, to 0.0000 mm, on 89 cases of the clásico and 11 of his design. A fix needs its own round: the two crown fades tried here made it worse (see the decisions log).
+- **The crest is "the rearmost point within 2 mm of the top"**, a threshold rather than a property of the shape. A long flat roof that dips by 2.1 mm is cut there.
+- **A very short canopy keeps a little of the egg.** When the crest is within 0.60 m of the windscreen's start, the rear deck starts 0.60 m back from it, and the canopy's own section stays between the crest and there. The check starts where the deck does, so it does not see that stretch.
+- **The Cd cost of removing the egg is a tunnel reading on a part of the body the tunnel reads poorly.** On his design the wake term varies by 0.017 across `tCaida` with no clear trend. See the 2026-11-13 note on the trailing edge.
