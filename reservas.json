@@ -29,6 +29,12 @@
       "ruta": "src/components/aeromovil/garaje/balaForma.ts",
       "motivo": "colasuave: transición cabina–cola continua",
       "desde": "2026-11-16T22:57:30.267Z"
+    },
+    {
+      "agente": "colasuave",
+      "ruta": "src/components/aeromovil/explicaciones/triciclo.ts",
+      "motivo": "colasuave: explicaciones de los deslizadores nuevos de la cola",
+      "desde": "2026-11-16T22:57:33.812Z"
     }
   ]
 }
