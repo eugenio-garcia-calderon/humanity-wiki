@@ -521,7 +521,7 @@ lz.aguada(Elipse(648, 781, 19, 4), '#5a4a80', dens=0.5, suave=1.5)
 inicio_hebra = P.falda(sombra=False, con_hebra=False)
 PR.pie_bailarina()
 esc.empieza('bailarina', 'La bailarina', **FIG, **DANZA)
-P.bailarina()
+PR.bailarina()
 esc.empieza('flores', 'Las flores que se vuelven pájaros', **FIG)
 ROJO = '#d8434e'
 # 1. a flower on the hem whose top petals begin to lift (about 24 across)

@@ -499,11 +499,12 @@ def cabeza_real(lz, x, y, r, piel='piel2', pelo='#3a2a20', peinado='corto', luz=
     toques.append((*cara(0, 0.86), a2 * 0.36, mezcla(skin, '#9090a8', 0.14), 0.3))
     toques.append((*cara(0, vb - 0.25), a2 * 0.5, mezcla(skin, '#e8c070', 0.14), 0.3))
     oscuridad = 1 - float(np.dot(rgb(skin), [0.3, 0.59, 0.11]))      # darker skins keep their depth of colour
-    lz.aguada(sil, skin, dens=0.46 + 0.3 * oscuridad, tapa=1, borde=0.22, irreg=0.12, gran=0.15, var=0.22, toques=toques)
+    lz.aguada(sil, skin, dens=0.46 + 0.22 * oscuridad, tapa=1, borde=0.22, irreg=0.12, gran=0.15, var=0.22, toques=toques)
     sc = _osc(skin, 0.74, '#7a3a5a', 0.26)
     S = Msil * _ss(lit, 0.97, 0.45)
     _veladura(lz, S, x0, y0, sc, 0.34, gran=0.45, var=0.5)          # about one and a half values, lost edges
     _veladura(lz, Msil * _ss(lit, 0.6, 0.15), x0, y0, _osc(sc, 0.85), 0.12, gran=0.4, var=0.5)
+    _escalones(lz, S * Msil, x0, y0, sc, 0.16, niveles=(0.5, 0.78), irreg=0.85, gran=0.45)
     Dsil = cv2.distanceTransform((Msil > 0.5).astype(np.uint8), cv2.DIST_L2, 5)
     _levanta(lz, Msil * _ss(lit, 0.9, 0.99) * np.clip(Dsil / (0.12 * Rpx + 1), 0, 1), x0, y0, 0.16, suave=0.8)
     # a second wash, broken and granulating, dried with its own edge: skin is never one smooth tone
@@ -604,7 +605,7 @@ def _ojos(lz, G, skin, ojos, mira, iris, edad, luz, pelo_c, canas):
         else:
             # lids lowered (looking down) or closed (laughing)
             if ojos == 'abajo':
-                ln = [R2(ew * t, eh * 0.38 * (1 - t * t) ** 0.9 + 0.1 * eh) for t in ts]
+                ln = [R2(ew * t, eh * 0.12 * (1 - t * t) ** 0.9 - 0.05 * eh) for t in ts]
                 vis = Poligono(ln + dn, suave=False)
                 lz.levanta(vis, cantidad=0.35, suave=0.2)
                 lz.aguada(vis, '#2a1a1a', dens=0.55, suave=0.25)
@@ -713,8 +714,8 @@ def _boca(lz, G, skin, boca, edad, luz):
         return
     linea = [M(x, -curva * (x / xm) ** 2) for x in xs]
     if boca in ('risa', 'abierta', 'canta'):
-        alto = 0.1 if boca == 'canta' else 0.06
-        ancho = 0.55 if boca == 'canta' else 0.7
+        alto = 0.13 if boca == 'canta' else 0.06
+        ancho = 0.62 if boca == 'canta' else 0.7
         arriba = [M(x * ancho, -curva * (x / xm) ** 2 - 0.005) for x in xs]
         abajo = [M(x * ancho, alto * (1 - (x / xm) ** 2) ** 0.7 + 0.01) for x in xs[::-1]]
         hueco = Poligono(arriba + abajo)
@@ -905,7 +906,7 @@ def _pelo_detras(lz, G, peinado, col, luz, rng, adorno):
         c = G.Q(u, v)
         r_ = a2 * 0.36
         mono = Circulos([(c[0], c[1], r_), (*G.off(c, -r_ * 0.3, r_ * 0.25), r_ * 0.75)])
-        volumen(lz, mono, col, luz, dens=0.85, prof=0.5, brillo=0.08, reflejo=0.1, grosor=0.35, presion=0.25)
+        volumen(lz, mono, col, luz, dens=0.92, prof=0.5, brillo=0.0, reflejo=0.0, grosor=0.35, presion=0.25)
         osc = _osc(col, 0.55, '#1a1010', 0.3)
         vueltas = []
         for k in range(9):
@@ -1234,16 +1235,26 @@ def mano_agarre(lz, muneca, centro, ang_eje, diam, tam, piel='piel2', luz=None, 
                 proyecta=tam * 0.05)
     dedos = []
     for k in (3, 2, 1, 0):
-        off = ax * (k - 1.5) * fw * 1.02
+        off = ax * (k - 1.5) * fw * 0.94
         largo = (1.0, 1.08, 1.02, 0.82)[3 - k]
+        ancho = (1.05, 1.1, 1.02, 0.86)[3 - k] * fw
         p0 = nud[k]
         p1 = c + off + n * diam * 0.12
         p2 = c + off - n * diam * 0.5 * largo
-        dedo = Trazo([tuple(p0), tuple(p1), tuple(p2)], (fw * 1.05, fw * 0.98, fw * 0.8))
-        volumen(lz, dedo, skin, luz, dens=dd, prof=0.45, espesor=fw * 0.5, grosor=0.32, presion=0.36, sombra=sc, duro=0.4)
-        lz.lapiz([[tuple(p1 - ax * fw * 0.4), tuple(p1 + ax * fw * 0.4)]], lp, grosor=0.22, presion=0.26)
-        lz.lapiz([list(arco(p0[0], p0[1], fw * 0.4, fw * 0.3, 0, 180, 6, ang_eje))], siena, grosor=0.24, presion=0.3)
+        dedo = Trazo([tuple(p0), tuple(p1), tuple(p2)], (ancho * 1.05, ancho, ancho * 0.8))
+        volumen(lz, dedo, skin, luz, dens=dd, prof=0.45, espesor=ancho * 0.5, grosor=0.32, presion=0.36, sombra=sc, duro=0.4)
+        lz.lapiz([[tuple(p1 - ax * ancho * 0.4), tuple(p1 + ax * ancho * 0.4)]], lp, grosor=0.22, presion=0.26)
+        lz.lapiz([list(arco(p0[0], p0[1], ancho * 0.4, ancho * 0.3, 0, 180, 6, ang_eje))], siena, grosor=0.24, presion=0.3)
         dedos.append((p0, p1, p2))
+    if dorso:
+        # the thumb crosses in front, from the side of the hand over the first finger
+        t0 = nud[0] - ax * fw * 1.3 + n * fw * 0.2
+        t1 = c - ax * fw * 1.9 + n * diam * 0.05
+        t2 = c - ax * fw * 1.2 - n * diam * 0.3
+        pulgar = Trazo([tuple(t0), tuple(t1), tuple(t2)], (fw * 1.25, fw * 1.1, fw * 0.9))
+        volumen(lz, pulgar, skin, luz, dens=dd, prof=0.45, espesor=fw * 0.6, grosor=0.32, presion=0.36, sombra=sc, duro=0.4)
+        lz.aguada(Elipse(*(t2 + (t1 - t2) * 0.25), fw * 0.4, fw * 0.3, ang_eje), _cla(skin, 0.35, '#f4dcd4'), dens=0.45,
+                  suave=0.15)
     gaps = []
     for i in range(3):
         a_, b_ = dedos[i], dedos[i + 1]
@@ -1381,7 +1392,7 @@ def brazo3(lz, hombro, codo, muneca, w, manga, piel, luz, largo='larga', mano=No
         nrm = np.array([-d2[1], d2[0]])
         cf = Poligono([wr - d2 * w * 0.3 + nrm * w * 0.42, wr + d2 * w * 0.06 + nrm * w * 0.4,
                        wr + d2 * w * 0.06 - nrm * w * 0.4, wr - d2 * w * 0.3 - nrm * w * 0.42], suave=False)
-        lz.aguada(cf, puno or _osc(manga, 0.82, '#3a2448', 0.2), dens=0.4, tapa=1, irreg=0.2, borde=0.4)
+        lz.aguada(cf, puno or _osc(manga, 0.86, '#6a3a20', 0.12), dens=0.6, tapa=1, irreg=0.2, borde=0.4)
         lz.lapiz([[wr - d2 * w * 0.3 + nrm * w * 0.42, wr - d2 * w * 0.3 - nrm * w * 0.42]], _osc(manga, 0.5),
                  grosor=0.4, presion=0.35)
     else:
@@ -1453,6 +1464,36 @@ def pierna3(lz, cadera, rodilla, tobillo, w, pantalon, piel, luz, pie_ang=0, zap
                  grosor=0.3, presion=0.25)
 
 
+def torso3(lz, hi, hd, ci, cd, color, luz, cintura=0.9, escote='redondo', tapa=1, toques=None, pliegues=None,
+           semilla=None):
+    """figuras_v3.torso3's shirt with the collar where a real one sits: under the smaller
+    head the old low neckline left a long bare neck."""
+    import figuras_v3 as F
+    hi, hd, ci, cd = map(F._v, (hi, hd, ci, cd))
+    m = (hi + hd) / 2
+    w = np.linalg.norm(hd - hi)
+    up = _u(m - (ci + cd) / 2)
+    side = _u(hd - hi)
+    wi = hi * 0.42 + ci * 0.58
+    wd = hd * 0.42 + cd * 0.58
+    mc = (wi + wd) / 2
+    wi = mc + (wi - mc) * cintura
+    wd = mc + (wd - mc) * cintura
+    esc = 0.2 if escote == 'v' else 0.07
+    pts = [m - side * w * 0.18 + up * w * 0.12, hi + up * w * 0.02, hi - side * w * 0.07 - up * w * 0.1,
+           hi - side * w * 0.05 - up * w * 0.34, wi, ci - side * w * 0.02, (ci + cd) / 2 - up * w * 0.03,
+           cd + side * w * 0.02, wd, hd + side * w * 0.05 - up * w * 0.34, hd + side * w * 0.07 - up * w * 0.1,
+           hd + up * w * 0.02, m + side * w * 0.18 + up * w * 0.12, m + side * w * 0.09 + up * w * (0.12 - esc * 0.7),
+           m + up * w * (0.12 - esc), m - side * w * 0.09 + up * w * (0.12 - esc * 0.7)]
+    f = Poligono(pts)
+    volumen(lz, f, color, luz, dens=0.66, prof=0.5, tapa=tapa, toques=toques, semilla=semilla, rayar=True,
+            proyecta=2.5, grosor=0.4, presion=0.3)
+    if pliegues:
+        lz.lapiz([F.spline(p) if len(p) > 2 else np.asarray(p) for p in pliegues], _osc(color, 0.6), grosor=0.4,
+                 presion=0.28, temblor=0.25, puntas=0.45)
+    return f, dict(m=m + up * w * 0.1, w=w, up=up, side=side, mc=mc)
+
+
 def zapato3(lz, tobillo, ang, tam, color, luz, tapa=1, suela='#5a4034', semilla=None):
     """figuras_v3.zapato3's shoe with a sole you can see (a band of its own colour, the toe
     lifting a little off the ground) and the opening at the ankle."""
@@ -1467,11 +1508,13 @@ def zapato3(lz, tobillo, ang, tam, color, luz, tapa=1, suela='#5a4034', semilla=
                   P(0.86, 0.3), P(0.3, 0.33), P(-0.2, 0.33), P(-0.27, 0.2), P(-0.26, 0.0)])
     volumen(lz, f, color, luz, dens=0.82, prof=0.45, tapa=tapa, rayar=False, grosor=0.35, presion=0.3, semilla=semilla)
     claro = float(np.dot(rgb(color), [0.3, 0.59, 0.11])) > 0.45
-    sc = '#efe4d0' if claro else _hex(mezcla(color, '#1a1210', 0.55))
-    banda = Poligono([P(-0.27, 0.3), P(0.3, 0.31), P(0.86, 0.28), P(0.94, 0.22), P(0.96, 0.3), P(0.88, 0.38),
-                      P(0.3, 0.42), P(-0.26, 0.41)])
-    lz.aguada(banda, sc, dens=0.85, tapa=1, borde=0.4, irreg=0.1)
-    lz.lapiz([[tuple(P(-0.26, 0.42)), tuple(P(0.3, 0.43)), tuple(P(0.88, 0.39))]], _osc(sc, 0.5), grosor=0.35, presion=0.4)
+    sc = '#d7cdb9' if claro else _hex(mezcla(color, '#1a1210', 0.55))
+    g = 0.06
+    banda = Poligono([P(-0.25, 0.3), P(0.3, 0.32), P(0.82, 0.28), P(0.86, 0.3 + g * 0.5), P(0.8, 0.28 + g), P(0.3, 0.32 + g),
+                      P(-0.24, 0.3 + g)])
+    lz.aguada(banda, sc, dens=0.85, tapa=1, borde=0.4, irreg=0.05)
+    lz.lapiz([[tuple(P(-0.24, 0.3 + g)), tuple(P(0.3, 0.32 + g)), tuple(P(0.8, 0.28 + g))]], _osc(sc, 0.55), grosor=0.3,
+             presion=0.4)
     lz.lapiz([[tuple(P(0.18 + k * 0.08, -0.06 + k * 0.05)), tuple(P(0.24 + k * 0.08, 0.06 + k * 0.05))] for k in range(3)],
              _osc(color, 0.5), grosor=0.38, presion=0.4)
     lz.aguada(Elipse(*P(-0.04, -0.12), tam * 0.14, tam * 0.05, ang), _osc(color, 0.45), dens=0.5, suave=0.3)
@@ -1572,21 +1615,29 @@ def _cuello(lz, x, y, r, piel, base, ancho_base, giro, inclina, luz, nino):
     kc = 1.08 if nino else 1.0
     xt = x - math.sin(a) * r * 0.55 + giro * r * 0.08
     yt = y + r * 0.45
-    w0 = r * (0.66 if nino else 0.76)
+    w0 = r * (0.66 if nino else 0.68)
     w1 = min(ancho_base * 0.62, r * 1.4)
     yb = by + r * 0.05
-    pts = [(xt - w0 / 2, yt), (xt - w0 * 0.5, yt + (yb - yt) * 0.55), (bx - w0 * 0.56, yb - r * 0.2),
-           (bx - w1 * 0.5, yb - r * 0.04), (bx - w1 * 0.74, yb + r * 0.14), (bx - w1 * 0.62, yb + r * 0.55),
-           (bx, yb + r * 0.7), (bx + w1 * 0.62, yb + r * 0.55), (bx + w1 * 0.74, yb + r * 0.14), (bx + w1 * 0.5, yb - r * 0.04),
-           (bx + w0 * 0.56, yb - r * 0.2), (xt + w0 * 0.5, yt + (yb - yt) * 0.55), (xt + w0 / 2, yt)]
+    pts = [(xt - w0 / 2, yt), (xt - w0 * 0.5, yt + (yb - yt) * 0.6), (bx - w0 * 0.54, yb - r * 0.02),
+           (bx - w1 * 0.5, yb + r * 0.12), (bx - w1 * 0.7, yb + r * 0.3), (bx - w1 * 0.6, yb + r * 0.6),
+           (bx, yb + r * 0.7), (bx + w1 * 0.6, yb + r * 0.6), (bx + w1 * 0.7, yb + r * 0.3), (bx + w1 * 0.5, yb + r * 0.12),
+           (bx + w0 * 0.54, yb - r * 0.02), (xt + w0 * 0.5, yt + (yb - yt) * 0.6), (xt + w0 / 2, yt)]
     f = Poligono(pts)
     volumen(lz, f, piel_c, luz, dens=0.55 + 0.2 * (1 - float(np.dot(rgb(piel_c), [0.3, 0.59, 0.11]))), prof=0.42,
             espesor=w0 * 0.5, brillo=0.0, reflejo=0.06, linea=False, duro=0.4)
     lz.aguada(f, _osc(piel_c, 0.9, '#a05a50', 0.2), dens=0.1, borde=0.5, irreg=1.0, gran=0.6, var=0.6)
-    # the jaw's shadow on the top of the neck: sepia, 4-6 units high, its upper edge crisp
-    cy = y + math.cos(a) * kc * r + r * 0.06
-    lz.aguada(Elipse(x - math.sin(a) * kc * r + giro * r * 0.08, cy, w0 * 0.62, r * 0.14, inclina),
-              _hex(mezcla(piel_c, '#5a3020', 0.45)), dens=0.4, borde=0.4, irreg=0.3, gran=0.2)
+    # the jaw's shadow on the top of the neck: a soft wash a little darker than the skin, only on the neck,
+    # fading downward (a hard ellipse wider than the neck read as a collar)
+    cxs = x - math.sin(a) * kc * r + giro * r * 0.08
+    cy = y + math.cos(a) * kc * r
+    sombra = f & Poligono([(cxs - w0, cy - r * 0.3), (cxs + w0, cy - r * 0.3), (cxs + w0, cy + r * 0.2),
+                           (cxs - w0, cy + r * 0.2)], suave=False)
+    lz.aguada(sombra, _osc(piel_c, 0.78, '#5a3020', 0.25), dens=0.32, suave=0.6, gran=0.2,
+              desvanece=(cxs, cy - r * 0.05, cxs, cy + r * 0.22))
+    # the two neck muscles meeting at the pit of the throat, faint
+    lz.lapiz([bezier((xt - w0 * 0.38, yt + (yb - yt) * 0.4), (bx - w0 * 0.2, yb - r * 0.1), (bx - r * 0.03, yb + r * 0.02), n=8),
+              bezier((xt + w0 * 0.38, yt + (yb - yt) * 0.4), (bx + w0 * 0.2, yb - r * 0.1), (bx + r * 0.03, yb + r * 0.02), n=8)],
+             _osc(piel_c, 0.62, '#4a2a2a', 0.35), grosor=0.24, presion=0.14, temblor=0.05, cortes=0.4, puntas=0.5)
     lp = _osc(piel_c, 0.55, '#4a2a2a', 0.4)
     lz.lapiz([bezier((bx - r * 0.08, yb + r * 0.04), (bx - r * 0.3, yb - r * 0.02), (bx - r * 0.56, yb + r * 0.05), n=10),
               bezier((bx + r * 0.08, yb + r * 0.04), (bx + r * 0.3, yb - r * 0.02), (bx + r * 0.56, yb + r * 0.05), n=10)],
@@ -1711,6 +1762,7 @@ def activar(luz, *modulos, lineas=None):
         pon(mod, 'cuello3', cuello3)
         pon(mod, 'brazo3', brazo3)
         pon(mod, 'zapato3', zapato3)
+        pon(mod, 'torso3', torso3)
         pon(mod, 'pierna3', pierna3)
     # acuarela.figura's neck: the old default was a tube (extremidad); the realistic one is _cuello
     cambios.append((A, 'CUELLO_NATURAL', getattr(A, 'CUELLO_NATURAL', False)))

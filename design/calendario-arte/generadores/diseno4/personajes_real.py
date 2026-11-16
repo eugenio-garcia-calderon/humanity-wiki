@@ -136,11 +136,10 @@ def nina06(lz):
         lz.aguada(Elipse(*b_, 1.6), '#f6e2b0', dens=0.9, tapa=1, irreg=0.1)
     lz.lapiz([[(599, 512), (634, 514)]], linea_de(TEAL6, 0.5), grosor=0.42, presion=0.32, temblor=0.2)
     lz.lapiz([bezier((596, 528), (616, 532), (637, 530), n=12)], linea_de(TEAL6, 0.6), grosor=0.65, presion=0.5)
-    F.cabeza3(lz, 618, 434, 25, P2, '#2a1a14', 'afro', luz, giro=-0.5, inclina=-14, edad='nino', ojos='abiertos',
-              boca='sonrisa', mira=(-0.9, 0.7), pendiente='#f2b630', iris='#4a2a1c', semilla=26)
-    # the bulb's warm light on the side of her face turned to it, and under her chin
-    lz.luz((604, 446, 13), '#fad6a0', fuerza=0.32)
-    lz.luz((610, 462, 9), '#fad6a0', fuerza=0.2)
+    F.cabeza3(lz, 618, 434, 25, P2, '#2a1a14', 'afro', luz, giro=-0.5, inclina=-8, edad='nino', ojos='abiertos',
+              boca='sonrisa', mira=(-0.9, 0.6), pendiente='#f2b630', iris='#4a2a1c', semilla=26)
+    # the bulb's warm light: an edge on her left cheek and temple, not a haze over the face
+    lz.luz(Trazo([(600, 424), (598, 438), (600, 452)], (3.5, 4.5, 3.0)), '#fad6a0', fuerza=0.34, suave=1.6)
     F.brazo3(lz, (596, 486), (574, 530), (556, 498), 16, '#f2c04a', P2, luz, 'corta',
              mano=dict(ang=-152, gesto='abierta', abre=0.6, lado=1, tam=30), semilla=27)
 
@@ -333,19 +332,20 @@ def abuela(sombra=True):
               cara=dict(peinado='mono', pelo='#d8d2cc', canas=True, giro=0.45, inclina=20, ojos='abajo', boca='sonrisa'))
     # her skirt, painted over the old one: the thighs come toward us to two knees, the cloth pulled taut over
     # them, then falling straight to her ankles in folds
-    falda = (Poligono([(266, 740), (322, 742), (346, 750), (364, 754), (380, 762), (386, 774), (386, 796), (388, 816),
-                       (362, 821), (334, 819), (330, 796), (318, 772), (282, 766), (264, 758)]) |
-             Elipse(356, 760, 11, 8) | Elipse(376, 766, 10, 8))
-    FR.volumen(lz, falda, '#5f8f8a', luz, dens=0.82, prof=0.5, espesor=14, rayar=True, proyecta=2.0, grosor=0.38,
-               presion=0.3)
-    lz.levanta(Elipse(354, 756, 9, 4, -15), cantidad=0.16, suave=1.2)
-    lz.levanta(Elipse(375, 762, 8, 4, -15), cantidad=0.16, suave=1.2)
-    lz.lapiz([bezier((358, 770), (356, 794), (350, 817)), bezier((377, 776), (380, 796), (379, 817)),
-              bezier((366, 768), (367, 780), (366, 796)), bezier((340, 774), (338, 796), (338, 816))], '#3a5a58',
-             grosor=0.45, presion=0.32, temblor=0.15)
-    for (x_, y_) in ((346, 823), (374, 825)):
-        lz.aguada(Elipse(x_ + 8, y_ + 1, 13, 2.6), '#5a4a80', dens=0.35, suave=1.5)          # shadow, away from the sun
-        FR.volumen(lz, Elipse(x_, y_, 10, 4), '#6e4c3c', luz, dens=0.88, prof=0.45, linea=False, duro=0.5)
+    falda = (Poligono([(266, 740), (322, 742), (346, 750), (364, 754), (380, 762), (386, 774), (386, 792), (388, 805),
+                       (362, 808), (334, 807), (330, 792), (318, 772), (282, 766), (264, 758)]) |
+             Elipse(356, 760, 11, 8) | Elipse(376, 766, 11, 8))
+    FR.volumen(lz, falda, '#6c9a95', luz, dens=0.66, prof=0.45, espesor=14, rayar=True, proyecta=2.0, grosor=0.36,
+               presion=0.28)
+    lz.levanta(Elipse(352, 756, 7, 4, -25), cantidad=0.2, suave=1.2)                       # the knees, lit from the left
+    lz.levanta(Elipse(372, 762, 7, 4, -25), cantidad=0.2, suave=1.2)
+    lz.lapiz([bezier((358, 770), (356, 790), (352, 805)), bezier((377, 776), (380, 792), (380, 805)),
+              bezier((366, 768), (367, 780), (366, 794)), bezier((340, 774), (338, 792), (338, 805))], '#3a5a58',
+             grosor=0.42, presion=0.3, temblor=0.15)
+    for (x_, y_) in ((348, 812), (376, 813)):
+        lz.aguada(Elipse(x_ + 9, y_ + 1.5, 13, 2.6), '#5a4a80', dens=0.35, suave=1.5)          # shadow, away from the sun
+        FR.volumen(lz, Poligono([(x_ - 9, y_ + 3), (x_ - 7, y_ - 3), (x_ + 4, y_ - 4), (x_ + 10, y_ + 1), (x_ + 8, y_ + 4)]),
+                   '#6e4c3c', luz, dens=0.88, prof=0.45, linea=True, grosor=0.3, presion=0.3, duro=0.5)
     for brazo, col in (([(272, 668), (300, 718), (362, 714)], '#8d73b0'), ([(324, 672), (350, 724), (392, 722)], '#8d73b0')):
         P5.sombra_bajo(lz, brazo, (18, 15, 13), '#3a2a5a', dens=0.22)
         P5.extremidad(lz, brazo, (18, 15, 13), col, dens=0.84, pliegues=True)
@@ -404,7 +404,8 @@ def nina(sombra=True):
     forward to the knees, a curved back, the neck out of the top of her shoulders, the head
     bent over her hands and the clay bud; the red shoes are her feet behind, heels up."""
     P5 = _p5()
-    lz, ORO, BARRO, CORAL = P5.lz, P5.ORO, P5.BARRO, P5.CORAL
+    lz, BARRO, CORAL = P5.lz, P5.BARRO, P5.CORAL
+    ORO = FR._hex(mezcla(P5.ORO, '#b0a088', 0.18))           # a little less saturated than the old flat yellow
     luz = FR._LUZ_ESCENA[0]
     piel = 'piel4'
     if sombra:
@@ -432,7 +433,7 @@ def nina(sombra=True):
              presion=0.35)                                              # the two knees under the skirt
     # the head bent over the hands, low: the chin nearly on the neckline, a short neck of the face's tone
     FR.volumen(lz, Trazo([(945, 726), (942, 716)], (12, 11.5)), piel, luz, dens=0.82, prof=0.4, linea=False, duro=0.4)
-    FR.cabeza_real(lz, 931, 698, 22, piel=piel, pelo='#1e1410', peinado='rizado', luz=luz, giro=-0.5, inclina=-22,
+    FR.cabeza_real(lz, 931, 694, 22, piel=piel, pelo='#1e1410', peinado='rizado', luz=luz, giro=-0.5, inclina=-22,
                    edad='nino', ojos='abajo', boca='sonrisa')
     # the near arm: from the shoulder down beside the body, the forearm forward to the hands
     P5.extremidad(lz, [(940, 728), (942, 762), (918, 764)], (11.5, 10.5, 9.5), ORO, dens=0.85, pliegues=True)
@@ -486,11 +487,31 @@ def pie_bailarina():
     P5 = _p5()
     lz = P5.lz
     luz = FR._LUZ_ESCENA[0]
-    lz.aguada(Elipse(664, 783, 14, 3.2), '#5a4a80', dens=0.42, suave=1.5)
-    pierna = Trazo([(649.5, 738), (649, 750), (648, 762)], (15, 11, 7))
+    lz.aguada(Elipse(660, 781, 13, 3.0), '#5a4a80', dens=0.45, suave=1.4)
+    pierna = Trazo([(649.5, 738), (649, 750), (648, 762)], (13, 8.5, 5))
     FR.volumen(lz, pierna, 'piel3', luz, dens=0.66, prof=0.45, espesor=6, grosor=0.32, presion=0.28, duro=0.4)
     zap = Poligono([(645, 760), (652.5, 759), (655, 766), (652, 775), (649.5, 784), (646.5, 784), (643, 774), (641.5, 766)])
     FR.volumen(lz, zap, '#c33c4e', luz, dens=0.9, prof=0.45, espesor=4, grosor=0.35, presion=0.32, duro=0.5)
     lz.lapiz([[(642, 769), (651, 767)]], '#7a1f30', grosor=0.35, presion=0.4)                 # the box of the shoe
     lz.lapiz([[(641.5, 758), (655, 752)], [(655, 759), (642, 752)]], '#8a2a3a', grosor=0.45, presion=0.55)
     lz.levanta(Trazo([(645, 762), (643.5, 772)], (1.4, 0.8)), cantidad=0.25, suave=0.5)        # light on the satin
+
+
+def bailarina():
+    """piezas_05.bailarina with her eyes open, looking up at the hand she raises (closed eyes
+    on a realistic face read as sleep)."""
+    P5 = _p5()
+    lz, TEAL5, CARMIN = P5.lz, P5.TEAL, P5.CARMIN
+    MANO_ALTA, MANO_FALDA = P5.MANO_ALTA, P5.MANO_FALDA
+    J = dict(cabeza=(644, 156, 33), hi=(614, 198), hd=(670, 208), ci=(628, 272), cd=(662, 268),
+             brazo_i=[(616, 204), (574, 150), MANO_ALTA], brazo_d=[(668, 214), (724, 250), MANO_FALDA - (6, 0)],
+             mano_i=(-60, 'junta'), mano_d=(15, 'sujeta'), delante=['brazo_i', 'brazo_d'])
+    P5.figura(lz, J, dict(camisa=TEAL5, piel='piel3', grosor=0.5, cuello=0.64, pliegues=True),
+              cara=dict(peinado='mono', pelo='#1e1410', giro=0.3, inclina=-12, ojos='abiertos', boca='abierta',
+                        mira=(-0.8, -1.0), dientes=False, adorno=CARMIN))
+    P5.mano(lz, *MANO_ALTA, -70, 26, 'piel3', 'junta', pulgar=-1)
+    faja = Trazo([(624, 274), (644, 280), (664, 272)], (15, 16, 15))
+    FR.volumen(lz, faja, CARMIN, FR._LUZ_ESCENA[0], dens=0.92, prof=0.45, rayar=True, grosor=0.4, presion=0.35)
+    for pts in ([(664, 274), (688, 290), (708, 284)], [(664, 276), (682, 302), (696, 310)]):
+        f = Trazo(pts, (8, 6, 2))
+        FR.volumen(lz, f, CARMIN, FR._LUZ_ESCENA[0], dens=0.9, prof=0.4, grosor=0.35, presion=0.3, duro=0.5)
