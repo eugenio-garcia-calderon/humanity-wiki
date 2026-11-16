@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "referencias",
-      "ruta": "src/components/aeromovil/garaje/NavegadorGaraje.tsx",
-      "motivo": "referencias: quitar coches de referencia del garaje",
-      "desde": "2026-11-16T14:11:32.839Z"
-    },
-    {
       "agente": "interior",
       "ruta": "src/components/aeromovil/geometriaTriciclo.ts",
       "motivo": "interior: acabado interior (bot interior)",
