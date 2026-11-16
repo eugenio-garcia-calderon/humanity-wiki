@@ -17,6 +17,12 @@
       "ruta": "src/components/aeromovil/Visor3D.tsx",
       "motivo": "hibrido: arquitectura del híbrido + 3D motor gasolina",
       "desde": "2026-11-16T14:11:14.941Z"
+    },
+    {
+      "agente": "hibrido",
+      "ruta": "src/components/aeromovil/geometria.ts",
+      "motivo": "hibrido: arquitectura del híbrido + 3D motor gasolina",
+      "desde": "2026-11-16T14:11:18.184Z"
     }
   ]
 }
