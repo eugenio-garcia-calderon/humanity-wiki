@@ -12055,3 +12055,11 @@ Eugenio: «añade marcas de motores eléctricos y de motores térmicos que podam
 - Al elegir una pieza, sus cifras publicadas (potencia continua y de pico, masa, potencia y rendimiento del motor de gasolina) pasan a los deslizadores y quedan fijos. Sale una ficha con sus datos y el enlace.
 - Comprobaciones nuevas: tensión del controlador dentro de la del motor, corriente del controlador para la potencia máxima, par y vueltas de la reductora, velocidad a las rpm máximas del motor, y en la ficha: potencia continua frente a la que pide la velocidad de cálculo, y la del motor de gasolina frente a la que hace falta para ir solo con gasolina.
 - No hecho: el motor central (no de buje) no se dibuja en 3D; el engranaje planetario de reparto tipo Prius no se vende suelto en este tamaño, así que el del híbrido sigue estimado; no hay cargadores ni convertidores DC-DC en el catálogo.
+
+## 2026-11-16 · Acabado interior: ficha, controles que se esconden y clic en 3D
+
+Lo que faltaba del encargo del interior (PR #1077), que no cupo en su PR porque la página estaba reservada por otro bot.
+En Interior › «Acabado interior» aparece una ficha que explica qué se dibuja y lista lo que pesa cada pieza (forro,
+moldura, consola, cinturones…). Los controles que no sirven se esconden: con «Sin forro» desaparecen el color del forro,
+las molduras, la consola de techo y la luz ambiente; con la tapicería de serie, la costura; sin costura, su color. Y al
+pinchar en 3D una pieza del interior (forro, moldura, consola, cinturón…) se abre su bloque.
