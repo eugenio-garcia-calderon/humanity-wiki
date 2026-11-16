@@ -40,6 +40,27 @@ const ICON3D = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strok
 const icono = n => `<svg viewBox="0 0 24 24" class="ico" aria-hidden="true">${Array.from({length:Math.min(n,4)},(_,k)=>
   `<circle cx="12" cy="12" r="${3+k*2.8}" fill="${k===0?'currentColor':'none'}" stroke="currentColor" stroke-width="1.4" opacity="${1-k*.18}"/>`).join('')}${n>4?`<circle cx="12" cy="12" r="11.2" fill="none" stroke="currentColor" stroke-width="${(n-4)*.6}" stroke-dasharray="${n>6?'none':'2 2'}"/>`:''}</svg>`;
 
+// Large line icons for each scale, shown at the left of the white panel when a scale is chosen.
+const ICONO_ESCALA = {
+  individuo:'<circle cx="24" cy="14" r="7"/><path d="M10 42c0-8 6.3-14 14-14s14 6 14 14"/>',
+  comunidad:'<circle cx="24" cy="15" r="5.5"/><circle cx="11" cy="19" r="4.5"/><circle cx="37" cy="19" r="4.5"/><path d="M14 40c0-6.6 4.5-11 10-11s10 4.4 10 11M3 38c0-5 3.6-9 8-9 2 0 3.8.7 5.2 2M45 38c0-5-3.6-9-8-9-2 0-3.8.7-5.2 2"/>',
+  pueblo:'<path d="M4 42h40"/><path d="M7 42V28l7-6 7 6v14M27 42V24l8-7 8 7v18"/><path d="M35 17V9l-2 2M35 9l2 2M35 9V6"/><rect x="11" y="32" width="6" height="10"/><rect x="32" y="29" width="6" height="5"/>',
+  provincia:'<path d="M3 40l11-16 8 10 7-9 16 15z"/><circle cx="35" cy="11" r="4"/><path d="M14 40v-4h4v4M28 40v-3h3v3"/>',
+  region:'<path d="M9 9l10-4 10 4 10-4v34l-10 4-10-4-10 4z"/><path d="M19 5v34M29 9v34"/><circle cx="24" cy="21" r="3"/>',
+  pais:'<path d="M10 44V5"/><path d="M10 7c6-3 11 3 17 0s9-2 12 0v18c-3-2-6-3-12 0s-11-3-17 0"/>',
+  continente:'<rect x="4" y="6" width="40" height="36" rx="6"/><path d="M12 15c4-3 8-1 9 2s5 2 7 0 7 0 6 4-5 3-6 6-5 6-8 4-1-5-4-6-6-2-6-5 0-3 2-5z"/>',
+  planeta:'<circle cx="24" cy="24" r="19"/><ellipse cx="24" cy="24" rx="8" ry="19"/><path d="M5 24h38M8 14h32M8 34h32"/>'
+};
+const iconoEscala = id => `<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONO_ESCALA[id]||''}</svg>`;
+// One short sentence out of a longer text: the site shows bullets, not paragraphs.
+function corto(t){
+  t = String(t||'').trim(); if(!t) return '';
+  let f = t.split(/(?<=[.!?])\s+(?=[A-ZÁÉÍÓÚÑ¿¡«"0-9])/)[0];
+  if(f.length > 170) f = f.slice(0,160).replace(/\s+\S*$/,'') + '…';
+  if(/por verificar/i.test(t) && !/por verificar/i.test(f)) f += ' (por verificar)';
+  return f;
+}
+
 // Filter by the chosen scale and, inside a sector, by the chosen part.
 const deEscala = list => (list||[]).filter(x => (!ESC || (x.escalas||[]).includes(ESC)) && (!SUB || !SECTOR || (x.subtemas||[]).includes(SUB)));
 // Every link keeps the current scale and pillar unless told otherwise.
@@ -64,12 +85,24 @@ function menuSubtemas(){
   const el = $('#subnav');
   if(!s || !(s.subtemas||[]).length){ el.innerHTML=''; el.hidden=true; return; }
   el.hidden=false;
-  const guardado = SUB; SUB = null; const todos = total(s); SUB = guardado;
-  const n = id => { const g=SUB; SUB=id; const t=total(s); SUB=g; return t; };
   el.innerHTML = `<div class="wrap ancho">
-    <a href="${link({s:null})}" class="${!SUB?'on':''}">Todo ${esc(s.nombre).toLowerCase()} <em>${todos}</em></a>
-    ${s.subtemas.map(t=>`<a href="${link({s:t.id})}" class="${t.id===SUB?'on':''}">${esc(t.nombre)} <em>${n(t.id)}</em></a>`).join('')}</div>`;
+    <a href="${link({s:null})}" class="${!SUB?'on':''}">Todo</a>
+    ${s.subtemas.map(t=>`<a href="${link({s:t.id})}" class="${t.id===SUB?'on':''}">${esc(t.nombre)}</a>`).join('')}</div>`;
   el.querySelector('.on')?.scrollIntoView({block:'nearest', inline:'center'});
+}
+
+// What is selected, centred at the top: the sector big, and under it the part, scale and content type.
+function seleccion(){
+  const s = SECTORES.find(x=>x.id===SECTOR);
+  const p = PILARES.find(x=>x.id===PIL);
+  const chip = (txt, quitar, extra='') => `<span class="chip" ${extra}>${txt}<a href="${quitar}" title="Quitar">×</a></span>`;
+  const chips = [
+    s && SUB && chip(esc(nombreSub(s)), link({s:null})),
+    ESC && chip(`${iconoEscala(ESC)}${esc(nombreEscala())}`, link({e:null}), 'data-t="escala"'),
+    p && chip(esc(p.nombre), link({p:null}), `style="--c:${p.c}" data-t="pilar"`)
+  ].filter(Boolean);
+  $('#seleccion').innerHTML = `<div class="sel-tit">${s ? esc(s.nombre) : 'Los 12 sectores'}</div>
+    <div class="sel-linea">${chips.length ? chips.join('') : '<span class="sel-ayuda">Elige parte, escala o tipo de contenido en los menús</span>'}</div>`;
 }
 
 function menuEscalas(){
@@ -112,7 +145,7 @@ function home(){
   <div class="pilares">
     ${PILARES.map(p=>`<a class="pilar" href="${link({p:p.id})}" style="--c:${p.c}"><b>${p.nombre}</b><small>${p.desc}</small></a>`).join('')}
   </div>
-  <h2 class="sec">12 sectores${ESC?` · escala ${esc(nombreEscala())}`:''}</h2>
+  ${insignia()}
   <div class="grid">
     ${SECTORES.map((s,i)=>`
       <a class="card ${ESC&&!total(s)?'vacia':''}" href="${link({sector:s.id})}">
@@ -129,15 +162,12 @@ function home(){
 function homePilar(){
   const p = PILARES.find(x=>x.id===PIL);
   const conAlgo = SECTORES.filter(s=>cuentaPilar(s,p.id));
-  $('#app').innerHTML = `
-  <div class="sector-head"><div>
-    <div class="nota"><a href="${link({p:null})}">Inicio</a> · 12 sectores${ESC?` · <span class="chip-esc">Escala: ${esc(nombreEscala())} <a href="${link({e:null})}" title="Ver todas las escalas">×</a></span>`:''}</div>
-    <h1 style="color:${p.c}">${p.nombre}</h1><p>${esc(p.desc)} · ${intro(p.id,{vision:{}})}</p></div></div>
+  $('#app').innerHTML = `${insignia()}
   ${conAlgo.length ? conAlgo.map(s=>`
     <section class="grupo" style="--c:${p.c}">
-      <h2><a href="${link({sector:s.id})}">${esc(s.nombre)}</a><span class="cnt">${cuentaPilar(s,p.id)}</span></h2>
+      <h2><a href="${link({sector:s.id})}">${esc(s.nombre)}</a></h2>
       ${render[p.id](s, true)}
-    </section>`).join('') : `<div class="vacio">Todavía no hay ${p.nombre.toLowerCase()} a escala <b>${esc(nombreEscala())}</b> en ningún sector.</div>`}`;
+    </section>`).join('') : `<div class="vacio">Pendiente: todavía no hay ${p.nombre.toLowerCase()} a esta escala.</div>`}`;
 }
 
 // The 3D scene that fits what is on screen, or null when there is no model yet (pending).
@@ -148,38 +178,28 @@ function escenaActual(s){
 const nombreSub = s => s.subtemas?.find(t=>t.id===SUB)?.nombre;
 function visor3D(s){
   const escena = escenaActual(s);
-  const que = [nombreSub(s), ESC && `escala ${nombreEscala()}`].filter(Boolean).join(' · ');
-  if(!escena) return `<div class="visor pendiente"><div>${ICON3D}<b>Modelo 3D pendiente</b>
-    <p>Todavía no hay modelo 3D de ${esc(s.nombre.toLowerCase())}${que?` (${esc(que)})`:''}. El equipo de la visión lo está preparando.</p></div></div>`;
+  if(!escena) return `<div class="visor pendiente"><div>${ICON3D}<b>Modelo 3D pendiente</b></div></div>`;
   return `<div class="visor"><iframe src="vision3d.html?embed#${escena}" title="Visión en 3D" loading="lazy"></iframe>
     <button class="btn-mini completa" onclick="abrir3D('${escena}')">⛶ Pantalla completa</button></div>`;
 }
 
+// The scale icon at the left of the white panel, near the scales menu.
+const insignia = () => ESC ? `<div class="insignia" title="Escala: ${esc(nombreEscala())}">${iconoEscala(ESC)}<span>${esc(nombreEscala())}</span></div>` : '';
+
 function sector(){
   const s = SECTORES.find(x=>x.id===SECTOR);
-  const escena = escenaActual(s);
   const visibles = PIL ? PILARES.filter(x=>x.id===PIL) : PILARES;
-  $('#app').innerHTML = `
-  <div class="sector-head">
-    <div>
-      <div class="nota"><a href="${link({sector:null})}">Inicio</a> · Sector${ESC?` · <span class="chip-esc">Escala: ${esc(nombreEscala())} <a href="${link({e:null})}" title="Ver todas las escalas">×</a></span>`:''}</div>
-      <h1>${esc(s.nombre)}${SUB?` <span class="sub">· ${esc(nombreSub(s))}</span>`:''}</h1>
-      <p>${esc(s.ambito || s.resumen)}</p>
-    </div>
-    ${escena ? `<button class="btn3d" onclick="abrir3D('${escena}')">${ICON3D} VER LA VISIÓN EN 3D</button>` : `<span class="btn3d off">${ICON3D} MODELO 3D PENDIENTE</span>`}
-  </div>
+  $('#app').innerHTML = `${insignia()}
+  ${!PIL || PIL==='vision' ? visor3D(s) : ''}
   ${visibles.map(p=>`
   <section class="seccion" style="--c:${p.c}">
-    <div class="pilar-intro"><div><b>${p.nombre}${ESC?` · escala ${esc(nombreEscala())}`:''}</b> <span class="cnt">${cuentaPilar(s,p.id)}</span><p>${esc(intro(p.id, s))}</p></div></div>
-    ${p.id==='vision' ? visor3D(s) : ''}
-    ${cuentaPilar(s,p.id) || p.id==='vision' ? render[p.id](s) : vacio(p)}
+    ${PIL ? '' : `<h2 class="sec-tit">${p.nombre}</h2>`}
+    ${cuentaPilar(s,p.id) ? render[p.id](s) : vacio(p)}
   </section>`).join('')}
-  ${(s.preguntas||[]).length ? `<div class="preguntas"><h3>Preguntas abiertas para completar este sector</h3><ol>${s.preguntas.map(q=>`<li>${esc(q)}</li>`).join('')}</ol></div>`:''}`;
+  ${(s.preguntas||[]).length ? `<div class="preguntas"><h3>Preguntas abiertas</h3><ul>${s.preguntas.map(q=>`<li>${esc(q)}</li>`).join('')}</ul></div>`:''}`;
 }
 
-const vacio = p => `<div class="vacio">Todavía no hay ${p.nombre.toLowerCase()} de esta parte del sector${ESC?` a escala <b>${esc(nombreEscala())}</b>`:''}.
-  Es un hueco por llenar: si conoces alguno, compártelo con el equipo de humanity.wiki.
-  ${ESC?`<a href="${link({e:null})}">Ver todas las escalas</a>`:''}${SUB?`<a href="${link({s:null})}">Ver todo el sector</a>`:''}</div>`;
+const vacio = p => `<div class="vacio">Pendiente: todavía no hay ${p.nombre.toLowerCase()} aquí.</div>`;
 
 function intro(pid, s){
   return {
@@ -190,34 +210,18 @@ function intro(pid, s){
   }[pid];
 }
 
-const etiquetas = x => (x.escalas||[]).length && (x.escalas||[]).length < 8
-  ? `<div class="escs">${x.escalas.map(e=>`<span class="${e===ESC?'on':''}">${esc(ESCALAS.find(z=>z.id===e)?.nombre)}</span>`).join('')}</div>` : '';
-const fuente = u => u ? ` · <a href="${esc(u)}" target="_blank" rel="noopener">fuente</a>` : '';
+const enlace = (u, t) => u ? ` <a class="ext" href="${esc(u)}" target="_blank" rel="noopener">${t}</a>` : '';
 const render = {
+  // Vision: each block as a short heading with its bullet points; the artwork closes the section.
   vision: (s, compacto) => `
-    ${s.vision.arte && !compacto?`<figure class="arte"><a href="${esc(s.vision.arte.grande)}" target="_blank" rel="noopener"><img src="${esc(s.vision.arte.src)}" alt="Ilustración «${esc(s.vision.arte.tema)}»"></a>
-      <figcaption>«${esc(s.vision.arte.tema)}» · Ilustración del <a href="/calendario-arte">Calendario Arte para la Humanidad 2027</a> · Luz &amp; Humanidad</figcaption></figure>`:''}
-    ${deEscala(s.vision.bloques).length || compacto ? '' : vacio(PILARES[0])}
     ${deEscala(s.vision.bloques).map(b=>`
-      <div class="bloque">
-        <div class="acc"><h3>${esc(b.titulo)}</h3>
-          ${b.escena3d?`<button class="btn-mini" onclick="abrir3D('${b.escena3d}')">${'Ver en 3D →'}</button>`:''}</div>
-        ${etiquetas(b)}
-        ${b.texto?`<p class="lead">${esc(b.texto)}</p>`:''}
-        ${b.puntos?.length?`<ul>${b.puntos.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}
-        ${b.imagenes?.length?`<div class="galeria">${b.imagenes.map(im=>`
-          <figure><img loading="lazy" src="${esc(im.src)}" alt="${esc(im.titulo)}" onerror="this.outerHTML='<div class=&quot;sinimg&quot;>Imagen no disponible</div>'">
-          <figcaption><b>${esc(im.titulo)}</b><small>${esc(im.lugar||'')}</small>${im.fuente?`<br><a href="${esc(im.fuente)}" target="_blank" rel="noopener">Wikimedia Commons</a>`:''}</figcaption></figure>`).join('')}</div>`:''}
-      </div>`).join('')}
-    ${compacto?'':`<div class="equipo"><b>Equipo de la visión.</b> ${esc(s.vision.equipo || 'Un equipo humano recopila esta visión y la comunica a través del arte digital y físico para que sea accesible a todos los seres humanos.')}</div>`}`,
-  retos: s => `<div class="items">${deEscala(s.retos).map(r=>`
-    <div class="item"><span class="amb">${esc(r.ambito||'General')}</span><h4>${esc(r.titulo)}</h4><p>${esc(r.texto)}</p>${etiquetas(r)}<div class="meta">${fuente(r.fuente).replace(/^ · /,'')}</div></div>`).join('')}</div>`,
-  soluciones: s => `<div class="items">${deEscala(s.soluciones).map(r=>`
-    <div class="item"><span class="amb">${esc(r.ambito||'General')}</span><h4>${esc(r.titulo)}</h4><p>${esc(r.texto)}</p>${r.supera?`<div class="meta">Supera: ${esc(r.supera)}</div>`:''}${etiquetas(r)}<div class="meta">${fuente(r.fuente).replace(/^ · /,'')}</div></div>`).join('')}</div>`,
-  proyectos: s => `<div class="items">${deEscala(s.proyectos).map(r=>`
-    <div class="item"><span class="amb">${esc(r.lugar||'')}</span><h4>${esc(r.nombre)}</h4>
-    <div>${r.tipo?`<span class="tag">${esc(r.tipo)}</span>`:''}</div><p>${esc(r.texto)}</p>${etiquetas(r)}
-    <div class="meta">${r.web?`<a href="${esc(r.web)}" target="_blank" rel="noopener">${esc(r.web.replace(/^https?:\/\//,''))}</a>`:''}${r.web?fuente(r.fuente):fuente(r.fuente).replace(/^ · /,'')}</div></div>`).join('')}</div>`
+      <div class="bloque"><h3>${esc(b.titulo)}</h3>
+        <ul>${(b.puntos?.length ? b.puntos : [corto(b.texto)]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`).join('')}
+    ${s.vision.arte && !compacto ? `<figure class="arte"><a href="${esc(s.vision.arte.grande)}" target="_blank" rel="noopener"><img src="${esc(s.vision.arte.src)}" alt="Ilustración «${esc(s.vision.arte.tema)}»"></a>
+      <figcaption>«${esc(s.vision.arte.tema)}» · <a href="/calendario-arte">Calendario Arte para la Humanidad 2027</a></figcaption></figure>` : ''}`,
+  retos: s => `<ul class="lista">${deEscala(s.retos).map(r=>`<li><b>${esc(r.titulo)}.</b> ${esc(corto(r.texto))}${enlace(r.fuente,'fuente')}</li>`).join('')}</ul>`,
+  soluciones: s => `<ul class="lista">${deEscala(s.soluciones).map(r=>`<li><b>${esc(r.titulo)}.</b> ${esc(corto(r.texto))}${enlace(r.fuente,'fuente')}</li>`).join('')}</ul>`,
+  proyectos: s => `<ul class="lista">${deEscala(s.proyectos).map(r=>`<li><b>${esc(r.nombre)}</b>${r.lugar?` <span class="lugar">${esc(r.lugar)}</span>`:''}. ${esc(corto(r.texto))}${enlace(r.web,'web')}</li>`).join('')}</ul>`
 };
 
 function abrir3D(escena){
@@ -239,14 +243,18 @@ function route(){
   SECTOR = tipo==='sector' && SECTORES.some(s=>s.id===id) ? id : null;
   const sec = SECTORES.find(x=>x.id===SECTOR);
   SUB = sec?.subtemas?.some(t=>t.id===qs.get('s')) ? qs.get('s') : null;
-  nav(); menuSubtemas(); menuEscalas(); menuPilares();
+  nav(); seleccion(); menuSubtemas(); menuEscalas(); menuPilares();
   SECTOR ? sector() : home();
   $('#escalas').classList.toggle('con-eleccion', true);
   $('#pilares').classList.toggle('con-eleccion', true);
+  altoCabecera();
   // Jump to the top when the page or the pillar changes, not when only the scale changes.
   const vista = ruta.split('/').slice(0,3).join('/') + '|' + PIL + '|' + SUB;
   if(vista !== ultimaVista) window.scrollTo(0,0);
   ultimaVista = vista;
 }
+// The side menus stick just below the header, whose height changes with what it shows.
+function altoCabecera(){ document.body.style.setProperty('--alto-cab', $('header.top').offsetHeight + 'px'); }
+addEventListener('resize', altoCabecera);
 window.addEventListener('hashchange', route);
 window.addEventListener('DOMContentLoaded', route);
