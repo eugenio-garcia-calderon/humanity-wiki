@@ -40,6 +40,8 @@
  * (scripts/bala-huella.ts checks it).
  */
 
+import { cunaContinua, estiramientoSuave, relContinua } from './transicionCola';
+
 // ------------------------------------------------------------ the dimensions
 /** What the editor's sliders change (see `geometriaBala.ts`). Metres unless said. */
 export interface DimBala {
@@ -127,6 +129,13 @@ export interface DimBala {
   colaBombeo?: number; morroBombeo?: number;
   /** The belly's sweep up to the trailing edge: where it starts (m ahead of the rear axle; − behind it) and how much (0 today's … 1 a long curve, Aptera). */
   bajosIni?: number; bajosCurva?: number;
+  /**
+   * 2026-11-16 (Eugenio: «haz que esto no pueda ocurrir, este salto que hay entre la cola y la cabina»): the length (m) of
+   * the transition between the cabin and the tail. Set (> 0, the Triciclo always sets it), the plain body's stretch is
+   * smoothed over this length round the canopy's end and the rear axle, and the tail cap joins the body without a crease.
+   * See garaje/transicionCola.ts. Absent or 0: built exactly as before, bit for bit.
+   */
+  transCola?: number;
 }
 
 // --------------------------------------------------- from the Aeromóvil Gota
@@ -381,6 +390,8 @@ export function tAbajo(s: Sec, y: number): number {
  */
 interface Tapa {
   x0: number; largo: number; cy: number; m: number; base: P2[]; g: [number, number, number]; linea?: number; pe?: number;
+  /** 2026-11-16 (`transCola`): the flat tail's wedge leaves the joint level (transicionCola.ts `cunaContinua`). */
+  cunaSuave?: boolean;
   /**
    * 2026-11-13, the smooth body: the plan towards a superellipse of exponent `pa` at full width (`ancho`); the top follows
    * the guide line `techo` (which ends at the edge's top); the belly closes onto the edge's bottom, keeping `td` of the
@@ -409,7 +420,12 @@ export function crearForma(D: DimBala) {
   // the stretch factor jumps: 7° on the clásico's roof line at the rear axle. With `lisa` the map is a monotone cubic
   // through the same anchors (no overshoot, C1), linear beyond them as before; its inverse by bisection.)
   const R0 = tramos(anclas, ANCLAS_REF), X0 = tramos(ANCLAS_REF, anclas);
-  const R = D.lisa ? tramosSuaves(anclas, ANCLAS_REF, R0) : R0, X = D.lisa ? inversa(R, X0) : X0;
+  // (2026-11-16: without the smooth body, `transCola` rounds the stretch's corners at the canopy's end and the rear axle,
+  // where it put the crease Eugenio saw between the cabin and the tail; transicionCola.ts. Null: nothing to round)
+  const suave = !D.lisa && D.transCola ? estiramientoSuave(anclas, ANCLAS_REF, [3, 4], D.transCola, R0, X0) : null;
+  const R = D.lisa ? tramosSuaves(anclas, ANCLAS_REF, R0) : suave ? suave.R : R0, X = D.lisa ? inversa(R, X0) : suave ? suave.X : X0;
+  /** The tail cap joins the body with the body's own slopes (transicionCola.ts `capaContinua`). */
+  const continua = !D.lisa && !!D.transCola;
   const XN0 = X(XN0_REF), XT0 = X(XT0_REF);
   /** Width factor, belly lift, and the canopy scale above BASE_ALTO (k − 1, so the reference is an exact 0). */
   // `elevar` (the Triciclo's rigid lift) is added last, so with 0 every height is the same number bit for bit (v + 0)
@@ -444,7 +460,8 @@ export function crearForma(D: DimBala) {
   const lisa = !!D.lisa, c01 = (v: number | undefined) => Math.min(1, Math.max(0, v ?? 0));
   // (2026-11-16, Eugenio: «que la cola pueda ser más ancha en el formato de cola plana… como en el aptera»: without the
   // smooth body, the tail widens too, scaled by how flat it is; absent `colaAncho`, 0, and nothing changes)
-  const aCola = lisa ? c01(D.colaAncho) : c01(D.colaAncho) * c01(D.colaPlana), aMorro = lisa ? c01(D.morroAncho) : 0;
+  // (2026-11-16, `transCola`: up to 1.5, a flat tail wider than the cabin, Eugenio's «súper ancha»)
+  const aCola = lisa ? c01(D.colaAncho) : (continua ? Math.min(1.5, Math.max(0, D.colaAncho ?? 0)) : c01(D.colaAncho)) * c01(D.colaPlana), aMorro = lisa ? c01(D.morroAncho) : 0;
   /** The body's widest half-width (the reference drawing's 0.425 m from x_ref −1.1 to −1.5, scaled). */
   const HW_MAX = 0.425 * kW;
   /**
@@ -538,10 +555,18 @@ export function crearForma(D: DimBala) {
     // fall faster than a straight line at first, still leaves the joint with the body's slope: no crease there)
     const relL = (v0: number, vIn: number, ref: number) => Math.min(4, Math.max(0, ((vIn - v0) / e) * largo / Math.max(1e-3, ref)));
     if (liso) T.liso = { ancho: liso.ancho, pa: liso.pa, td: Math.min(0.9, liso.grosor / 2 / Math.max(0.01, cy - yb0)), gDn: relL(cy - yb0, cy - a[0][1], cy - yb0), techo: liso.techo };
+    // (2026-11-16, `transCola`: the tail cap takes the body's own slopes, unclipped, so it starts tangent to it)
+    if (continua && dir < 0) {
+      T.g = [relContinua(hw0, a[3][0], e, largo, hw0), relContinua(yt0, a[8][1], e, largo, yt0 - cy), relContinua(cy - yb0, cy - a[0][1], e, largo, cy - yb0)];
+      T.cunaSuave = true;
+    }
     return T;
   }
   const TAPA_MORRO = lisa ? tapa(XN0, X_MORRO, cyMorro, D.puntaMorro, D.morroLinea ?? 0, 2, { ancho: aMorro, pa: 2 + 2.5 * aMorro, grosor: gMorro, techo: techoMorro! }) : tapa(XN0, X_MORRO, cyMorro, D.puntaMorro, D.morroLinea ?? 0, 2);
-  const TAPA_COLA = lisa ? tapa(XT0, X_COLA, cyCola, PT, D.colaPlana ?? 0, 4, { ancho: aCola, pa: 4 + 6 * aCola, grosor: gCola, techo: techoCola! }) : tapa(XT0, X_COLA, D.puntaCola + elevar, PT, D.colaPlana ?? 0, aCola ? 4 + 6 * aCola : 4);
+  // (2026-11-16, `transCola`: the tip's height kept 3 cm inside the section where the cap starts, as the smooth body does:
+  // a tip above the tail's top or below its belly turned the cap's half-section inside out)
+  const cyColaPlana = continua ? entre(D.puntaCola + elevar, XT0, 0) : D.puntaCola + elevar;
+  const TAPA_COLA = lisa ? tapa(XT0, X_COLA, cyCola, PT, D.colaPlana ?? 0, 4, { ancho: aCola, pa: 4 + 6 * aCola, grosor: gCola, techo: techoCola! }) : tapa(XT0, X_COLA, cyColaPlana, PT, D.colaPlana ?? 0, aCola ? 4 + 6 * Math.min(1, aCola) : 4);
   function enTapa(T: Tapa, x: number): P2[] {
     const s = Math.min(1, Math.abs(x - T.x0) / T.largo);
     const k = (g: number) => { const m = Math.max(T.m, g); return Math.pow(1 - s, m) * (1 + (m - g) * s); };
@@ -550,7 +575,9 @@ export function crearForma(D: DimBala) {
       // Round 3 (2026-11-12): towards a wide, thin edge. In plan a superellipse of exponent `pe` (2: round, the Aptera's
       // nose; 4: nearly square, its truncated tail) that leaves the joint with the body's own slope (g) and keeps half of
       // its width or more until close to the tip; in side view the cone thins into a wedge. Blended by `linea`.
-      const g = T.g[0], ancho = Math.pow(Math.max(0, 1 - Math.pow(s, T.pe!)), 1 / T.pe!) * (1 - g * s + g * s * s / 2), cuna = 1 - 0.5 * T.linea * s;
+      // (`cunaSuave`: the body's slope may now be above 2, where 1 − g·s + g·s²/2 turns negative; (1 − s)^g is the same at 2)
+      const g = T.g[0], q = T.cunaSuave && g > 2 ? Math.pow(1 - s, g) : 1 - g * s + g * s * s / 2;
+      const ancho = Math.pow(Math.max(0, 1 - Math.pow(s, T.pe!)), 1 / T.pe!) * q, cuna = T.cunaSuave ? cunaContinua(T.linea, s) : 1 - 0.5 * T.linea * s;
       kz += (ancho - kz) * T.linea; kUp *= cuna; kDn *= cuna;
     }
     if (T.liso) {
@@ -839,7 +866,7 @@ export function crearForma(D: DimBala) {
     /** The smooth body's deck at x (2026-11-13), and where its two zones begin; null without `lisa`. */
     cubierta, zonasLisa: zonas,
     /** The heights the nose's and the tail's edges close to (m), as asked and as built (the smooth body keeps them in range). */
-    puntas: { morro: cyMorro, morroPedida: cyMorro0, cola: cyCola, colaPedida: D.puntaCola + elevar }, ladoZ, arribaY, dentroPiel, frenteX, detrasX, envolvente, seccionMayor, areaSeccion,
+    puntas: { morro: cyMorro, morroPedida: cyMorro0, cola: lisa ? cyCola : cyColaPlana, colaPedida: D.puntaCola + elevar }, ladoZ, arribaY, dentroPiel, frenteX, detrasX, envolvente, seccionMayor, areaSeccion,
     /** x where the skin is crossed going from xIn (inside) towards xOut, at (z, y); NaN if xIn is outside. */
     bordeX,
   };
