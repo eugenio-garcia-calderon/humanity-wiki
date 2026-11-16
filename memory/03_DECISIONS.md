@@ -1840,6 +1840,30 @@ Eugenio: «cambia el estilo del dibujo de ambas, para que los personajes sean m�
 - **Design 6 copies the scripts.** `mes-05-f.py` / `mes-06-f.py` are copies of the design-5 scripts with their changes (activation, redrawn people, the painter's canvas, the café heads, the storks, the bulb's light). Designs 4 and 5 are untouched: no shared library file changed.
 - **Outcome and ceiling.** Four evaluator rounds (r3, r6, r9, r11) went from 3/10 to 5-5.5/10 in figure realism, and the evaluator marked it publishable as design 6 and favourite. It also said where the ceiling of this approach is: the figures are built on design 5's joints and simple shapes, so they read as painted wooden figures rather than as people drawn from life. Going further means drawing each figure's anatomy from reference (structure of hands, faces and joints), not more layers on the same shapes.
 
+## 2026-11-16 · Calendario Arte: a realistic face from a 3D face mesh, not from a paid image model
+
+Eugenio asked for realistic, non-creepy faces, then chose: no money spent, only the May dancer's face, then look at the results. Options:
+
+- **Paid image generation (Gemini «Nano Banana»).** Most realistic, but it costs money per image and he said not to. Not taken.
+- **Keep improving figuras_real's ellipsoid heads.** The design-6 evaluator had already named their ceiling: built from simple shapes, they read as painted wooden figures. Not taken.
+- **A real face's 3D structure, painted by our own engine (taken).** MediaPipe's canonical face mesh (Apache 2.0, a file in the repo, no runtime dependency) gives the true positions of brow, sockets, nose, lips and jaw. `retrato.py` poses it, renders depth and normals, and paints them with the existing watercolour engine, so the face stays in the illustration's style. Cost: an engine of about 600 lines for one face, and only for adults seen from the front to three-quarters.
+- **How it is wired.** `retrato.cabeza` and `retrato.cuello_natural` are swapped into `acuarela.figura` for one figure only (`personajes_real.bailarina(retrato=True)`), and design 7 is a copy of design 6's script, so no other design changes.
+- **Accepted limits.**
+  - The body is still design 6's: about 12 heads tall, per the evaluator.
+  - The other people keep design 6's heads.
+  - Extending the approach to them means calling `retrato.cabeza` for each figure and checking each one's pose and neck.
+
+## 2026-11-16 · Plug-in hybrid: three architectures, and how the old slider maps
+
+- **Choice:** power split (THS), series and parallel P2. P4 was left out because the front wheels steer in pods on faired arms (or in the nose), so there is no room for a driveshaft.
+- **Power split:** the one efficiency is `mec·0.97 + (1−mec)·elec`. The mechanical share `mec` is a slider. Through Willis it sets the engine's rpm, `ω_c = ω_r·R/((R+S)·mec)`. So the split and the rpm figure cannot disagree; the other way round, they could.
+- **Migration:** old `tRendTrans` r becomes `mec = (r−0.83)/0.14` with elec 83 %. Below 85.8 % it becomes `mec = 20 %` and elec solved. The litres are exactly equal, and `scripts/triciclo-disenos.ts` checks six values.
+  - The migration lives in `camposTriciclo`. `PARAMETROS_TRICICLO` (which `deDiseno` merges under every saved design) leaves out the four new keys, so an old design can still be recognised there. `Disenos.tsx` was claimed by another bot for over two hours. Each key is migrated only while it is absent, so once Eugenio moves a hybrid slider, his value wins.
+- **Defaults:** 50 % mechanical and 83 % electrical give 90 %, the old default, so an untouched hybrid is unchanged.
+- **Parallel:** the engine's part-load penalty is the curve `min(1, 0.75 + 0.5·load)`, not a fuel map. Series caps the sustained petrol speed at the hub motor's rated power.
+- **Placement:** parts are placed, not moved to make room. `disponerHibrido` puts the engine behind the last backrest (wheel in the tail) or behind the frame's tower (four wheels), and searches the tank's and the silencer's shape and place. When something does not fit, a check says so; nothing is clamped.
+- **Code:** new code in its own files: `hibrido.ts` (pure), `hibrido3d.ts`, `FichaHibrido.tsx`. Shared files got small hooks.
+
 ## 2026-11-16 · Removing reference cars from the garage: a per-browser mark, not a server list
 Eugenio asked to be able to «borrar» reference cars too. They are code models shared by everybody, so removal means "out of my garage", recoverable. Stored as `quitado: true` on the car's entry of the existing `aeromovil_garaje_v5` localStorage list (helpers in `garaje/quitados.ts`), next to `visible` and the dragged places, which already live there.
 - Not taken: a server list. There is no per-user garage/settings store to reuse (`ajustes.ts` is the platform's money figures; `/api/aeromovil/*` stores designs, tasks and references), and a new table + migration + write route for one list of ids was out of proportion. Cost: the phone app and the desktop keep separate lists.

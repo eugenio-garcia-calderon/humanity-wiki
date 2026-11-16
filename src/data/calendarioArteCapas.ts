@@ -695,6 +695,299 @@ export const CAPAS_ILUSTRACIONES: Record<string, ManifiestoCapas> = {
       }
     ]
   },
+  "mes-05-g": {
+    "ancho": 3508,
+    "alto": 2008,
+    "fondo": "fondo.jpg?v=a17bc77b",
+    "capas": [
+      {
+        "id": "colinas",
+        "nombre": "Las colinas",
+        "src": "colinas.webp?v=ce5d7f93",
+        "x": 0.0,
+        "y": 0.35259,
+        "w": 1.0,
+        "h": 0.31275,
+        "fija": true
+      },
+      {
+        "id": "pueblo_lejano",
+        "nombre": "El pueblo amurallado",
+        "src": "pueblo_lejano.webp?v=3faaae85",
+        "x": 0.10348,
+        "y": 0.28386,
+        "w": 0.10034,
+        "h": 0.11753
+      },
+      {
+        "id": "casas",
+        "nombre": "Las casas de la plaza",
+        "src": "casas.webp?v=33dd0871",
+        "x": 0.0,
+        "y": 0.28536,
+        "w": 1.0,
+        "h": 0.27839,
+        "fija": true
+      },
+      {
+        "id": "mural",
+        "nombre": "El mural",
+        "src": "mural.webp?v=0dd420e2",
+        "x": 0.28136,
+        "y": 0.43327,
+        "w": 0.07526,
+        "h": 0.13496
+      },
+      {
+        "id": "plaza",
+        "nombre": "La plaza",
+        "src": "plaza.webp?v=377724e9",
+        "x": 0.0,
+        "y": 0.53984,
+        "w": 1.0,
+        "h": 0.46016,
+        "fija": true
+      },
+      {
+        "id": "pintora",
+        "nombre": "La pintora del caballete",
+        "src": "pintora.webp?v=cbc3976b",
+        "x": 0.24544,
+        "y": 0.51494,
+        "w": 0.09949,
+        "h": 0.16036
+      },
+      {
+        "id": "teatrillo",
+        "nombre": "El teatrillo de títeres",
+        "src": "teatrillo.webp?v=a2ecb713",
+        "x": 0.75656,
+        "y": 0.58466,
+        "w": 0.15137,
+        "h": 0.18675
+      },
+      {
+        "id": "publico",
+        "nombre": "Los niños del teatrillo",
+        "src": "publico.webp?v=2c58e04f",
+        "x": 0.75399,
+        "y": 0.69721,
+        "w": 0.12714,
+        "h": 0.16633
+      },
+      {
+        "id": "gato",
+        "nombre": "El gato",
+        "src": "gato.webp?v=fe4395b0",
+        "x": 0.72178,
+        "y": 0.82271,
+        "w": 0.01995,
+        "h": 0.03635
+      },
+      {
+        "id": "cafe",
+        "nombre": "La mesa del café",
+        "src": "cafe.webp?v=072edeb8",
+        "x": 0.86488,
+        "y": 0.54681,
+        "w": 0.09065,
+        "h": 0.0996
+      },
+      {
+        "id": "arbol",
+        "nombre": "El árbol de los farolillos",
+        "src": "arbol.webp?v=01ecbf5c",
+        "x": 0.81186,
+        "y": 0.11753,
+        "w": 0.18814,
+        "h": 0.68028
+      },
+      {
+        "id": "luces_plaza",
+        "nombre": "La luz de los farolillos",
+        "src": "luces_plaza.webp?v=3c3fec81",
+        "x": 0.10376,
+        "y": 0.22112,
+        "w": 0.89624,
+        "h": 0.43476,
+        "fija": true
+      },
+      {
+        "id": "rayos",
+        "nombre": "Los rayos de sol",
+        "src": "rayos.webp?v=86ce3afe",
+        "x": 0.0,
+        "y": 0.0,
+        "w": 0.76026,
+        "h": 0.96066,
+        "fija": true
+      },
+      {
+        "id": "verbena",
+        "nombre": "Las luces de verbena",
+        "src": "verbena.webp?v=a7b7b8f1",
+        "x": 0.10063,
+        "y": 0.3755,
+        "w": 0.79561,
+        "h": 0.15388
+      },
+      {
+        "id": "guitarrista",
+        "nombre": "El guitarrista",
+        "src": "guitarrista.webp?v=20d36eb1",
+        "x": 0.06357,
+        "y": 0.47361,
+        "w": 0.26995,
+        "h": 0.26793
+      },
+      {
+        "id": "musica",
+        "nombre": "La música",
+        "src": "musica.webp?v=ddc8fa66",
+        "x": 0.0992,
+        "y": 0.1489,
+        "w": 0.40336,
+        "h": 0.47261
+      },
+      {
+        "id": "falda",
+        "nombre": "La falda-jardín",
+        "src": "falda.webp?v=a7fc9fde",
+        "x": 0.36431,
+        "y": 0.35608,
+        "w": 0.33979,
+        "h": 0.63048
+      },
+      {
+        "id": "bailarina",
+        "nombre": "La bailarina",
+        "src": "bailarina.webp?v=f18400fd",
+        "x": 0.42702,
+        "y": 0.16633,
+        "w": 0.13426,
+        "h": 0.25647
+      },
+      {
+        "id": "flores",
+        "nombre": "Las flores que se vuelven pájaros",
+        "src": "flores.webp?v=9349e1ae",
+        "x": 0.69584,
+        "y": 0.42878,
+        "w": 0.04361,
+        "h": 0.13147
+      },
+      {
+        "id": "lana",
+        "nombre": "La lana",
+        "src": "lana.webp?v=404abeae",
+        "x": 0.24914,
+        "y": 0.70568,
+        "w": 0.1183,
+        "h": 0.16484
+      },
+      {
+        "id": "abuela",
+        "nombre": "La abuela que teje",
+        "src": "abuela.webp?v=da849e41",
+        "x": 0.12828,
+        "y": 0.69024,
+        "w": 0.32241,
+        "h": 0.30627
+      },
+      {
+        "id": "nina",
+        "nombre": "La niña del barro",
+        "src": "nina.webp?v=d078cf6b",
+        "x": 0.5821,
+        "y": 0.75747,
+        "w": 0.20439,
+        "h": 0.2251
+      },
+      {
+        "id": "pajaro1",
+        "nombre": "El pájaro coral",
+        "src": "pajaro1.webp?v=523e7dff",
+        "x": 0.73404,
+        "y": 0.38147,
+        "w": 0.03136,
+        "h": 0.04333
+      },
+      {
+        "id": "pajaro2",
+        "nombre": "El pájaro turquesa",
+        "src": "pajaro2.webp?v=15c016ad",
+        "x": 0.7939,
+        "y": 0.31026,
+        "w": 0.02822,
+        "h": 0.03685
+      },
+      {
+        "id": "pajaro3",
+        "nombre": "El pájaro dorado",
+        "src": "pajaro3.webp?v=58204073",
+        "x": 0.85576,
+        "y": 0.25996,
+        "w": 0.02109,
+        "h": 0.03137
+      },
+      {
+        "id": "parra",
+        "nombre": "La parra de arriba",
+        "src": "parra.webp?v=d5439371",
+        "x": 0.0,
+        "y": 0.0,
+        "w": 0.24145,
+        "h": 0.32171
+      },
+      {
+        "id": "maceta",
+        "nombre": "La maceta de geranios",
+        "src": "maceta.webp?v=fc9d1fe5",
+        "x": 0.00257,
+        "y": 0.60259,
+        "w": 0.17161,
+        "h": 0.38845
+      },
+      {
+        "id": "mesa",
+        "nombre": "La mesa de los pinceles",
+        "src": "mesa.webp?v=0ae100c3",
+        "x": 0.75627,
+        "y": 0.76195,
+        "w": 0.24373,
+        "h": 0.23805
+      },
+      {
+        "id": "luz_farolillos",
+        "nombre": "La luz de los farolillos de arriba",
+        "src": "luz_farolillos.webp?v=611f9d4d",
+        "x": 0.70924,
+        "y": 0.0,
+        "w": 0.29076,
+        "h": 0.28735,
+        "fija": true
+      },
+      {
+        "id": "farolillos",
+        "nombre": "Los farolillos de arriba",
+        "src": "farolillos.webp?v=b7758a30",
+        "x": 0.78107,
+        "y": 0.0,
+        "w": 0.19014,
+        "h": 0.19721
+      },
+      {
+        "id": "marco",
+        "nombre": "El borde de papel",
+        "src": "marco.webp?v=a5b9a06b",
+        "x": 0.0,
+        "y": 0.0,
+        "w": 1.0,
+        "h": 1.0,
+        "fija": true
+      }
+    ]
+  },
   "mes-06-d": {
     "ancho": 3508,
     "alto": 2008,
