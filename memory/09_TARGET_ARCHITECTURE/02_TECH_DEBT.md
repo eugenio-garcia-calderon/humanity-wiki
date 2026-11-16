@@ -723,3 +723,6 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 - **Not modelled:** the dynamic tilt controller, the lean in the rollover, consumption and range figures, and the pod-to-body clearance with the rods drawn.
 - **Hidden coupling:** the hydraulic flow passes between parts through a number formatted inside a text line.
 - **Next step:** a typed field for the flow, and a lean-aware rollover check. About 2 hours.
+
+## 2026-11-16 · Garage preferences only per browser
+The garage's per-car state (shown/hidden, removed, dragged place) lives in localStorage (`aeromovil_garaje_v5`, the designs' places key). Eugenio sees a different garage on his phone than on his desktop. Moving the three into one per-user JSON on the server (a column or a row in an existing per-user table, one GET + one PUT with `requireLevel`) is about 2 hours today, including merging what each browser already has.

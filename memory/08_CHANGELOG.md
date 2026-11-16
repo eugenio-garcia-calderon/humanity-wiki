@@ -11955,3 +11955,9 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
 - **Comprobación nueva:** que el balancín quepa dentro de la carrocería.
 - **Ejemplo:** el Rombo Bala como triciclo, con basculación eléctrica, necesita 949 N·m en el balancín y 1,8 kW de pico; el sistema pesa 16 kg.
 - **Aviso:** son estimaciones de un primer diseño, y el vuelco y el consumo aún no cuentan la inclinación.
+
+## 2026-11-16 · Los coches de referencia también se pueden eliminar del garaje
+Eugenio: «permite que se puedan borrar también los coches de referencia».
+- **Qué hay ahora.** En el Aeromóvil, cada coche de referencia del garaje (Twizy, Aptera, XL1, Smera, EQXX…) tiene «Eliminar del garaje»: en su tarjeta, al pincharlo en el 3D, y con una papelera en su fila de la lista del garaje (botón «Garaje» o el bloque «Garaje» del panel). Antes de quitarlo pregunta en la misma tarjeta («Sí, quitar» / «No»), sin ventanas del navegador.
+- **Qué hace.** El coche deja de salir en la lista y en el 3D (no solo se oculta: tampoco sale en «Superponer» ni lo saca el túnel). Debajo de la lista aparece «Coches quitados (N) · Recuperar», que lo devuelve al garaje, visible.
+- **Qué no hace.** Los coches de referencia son modelos del programa, iguales para todos: quitarlo no lo borra para nadie más. Se recuerda **en este navegador** (como el sitio donde arrastras cada coche): el móvil o la app guardan su propia lista.
