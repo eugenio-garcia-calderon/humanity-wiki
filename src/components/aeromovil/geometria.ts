@@ -297,7 +297,11 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   // wide nose and tail, its light bar and the belly's sweep). Off by default: every other key below acts only with it on.
   tCubierta: 'redonda', tColaAncho: 0, tColaGrosor: 0, tColaBombeo: 0.01, tBajosIni: 0.20, tBajosCurva: 0, tMorroAncho: 0, tMorroGrosor: 0, tMorroBombeo: 0.02,
 };
-export const PARAMETROS_TRICICLO: Parametros = { ...PARAMETROS_GOTA, disposicion: 'triciclo', ...TRICICLO_DEFECTO };
+// (2026-11-16: without the hybrid architecture's four keys. `deDiseno` merges this under every saved design, so a key
+// here is never missing by the time `camposTriciclo` runs; left out, a hybrid saved with the old «Conversión mecánica»
+// (`tRendTrans`) can be told apart there and opened as the power split that gives the same litres: hibrido.ts `migrarRendTrans`)
+const { tHibArq: _a, tHibMec: _b, tRendElec: _c, tRendCaja: _d, ...TRICICLO_SIN_HIBRIDO } = TRICICLO_DEFECTO;
+export const PARAMETROS_TRICICLO: Parametros = { ...PARAMETROS_GOTA, disposicion: 'triciclo', ...TRICICLO_SIN_HIBRIDO };
 /** The Cuadriciclo Basculante (2026-11-15): its `q…` fields (basculante/defecto.ts); the rest comes from the Gota and it does not use it. */
 export const PARAMETROS_BASCULANTE: Parametros = { ...PARAMETROS_GOTA, disposicion: 'basculante', ...BASCULANTE_DEFECTO };
 export const PARAMETROS_POR_DEFECTO: Parametros = PARAMETROS_A1;

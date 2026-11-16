@@ -268,6 +268,8 @@ else {
   const nuevo = { ...JSON.parse(JSON.stringify(aDiseno({ ...PARAMETROS_TRICICLO, tPropulsion: 'phev', tHibArq: 'serie', tRendElec: 81 } as Parametros))), tRendTrans: 95 };
   const T = camposTriciclo(deDiseno(nuevo));
   ok(T.tHibArq === 'serie' && T.tRendElec === 81, 'un híbrido guardado ya con su arquitectura no se toca aunque lleve un «tRendTrans» viejo');
+  const movido = camposTriciclo(deDiseno({ ...JSON.parse(JSON.stringify(aDiseno(PARAMETROS_TRICICLO))), tPropulsion: 'phev', tRendTrans: 95, tHibMec: 60 }));
+  ok(movido.tHibArq === 'reparto' && movido.tHibMec === 60 && movido.tRendElec === 83, 'y uno viejo en el que ya se movió «parte directa» conserva lo que se movió');
 }
 
 console.log(fallos ? `\n${fallos} fallos` : '\nTodo OK');
