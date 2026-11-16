@@ -47,6 +47,12 @@
       "ruta": "src/components/aeromovil/Disenos.tsx",
       "motivo": "filas: batería más ancha que la carrocería y asientos fila a fila",
       "desde": "2026-11-16T14:13:36.582Z"
+    },
+    {
+      "agente": "colaancha",
+      "ruta": "src/components/aeromovil/garaje/balaForma.ts",
+      "motivo": "colaancha: cola plana a todo el ancho",
+      "desde": "2026-11-16T15:36:46.797Z"
     }
   ]
 }
