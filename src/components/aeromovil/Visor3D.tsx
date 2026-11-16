@@ -33,6 +33,7 @@ import {
 } from './geometria';
 import { anguloFuera, opcionesCabinaTriciclo, poseBascula } from './geometriaTriciclo';
 // ── Cuadriciclo Basculante (2026-11-15): its builder and its lean live in basculante/modelo3d.ts
+import { dibujarHibrido } from './hibrido3d';
 import { construirBasculante, cotasBasculante, posarBasculante, type AyudasVisor } from './basculante/modelo3d';
 import { ANGULO_CUPULA, ANGULO_PORTON, PIVOTES_CUPULA, PIVOTE_PORTON, construirCon as construirBalaCon, crearMateriales as materialesBala } from './garaje/balaModelo';
 import { COLOR_ACENTO, COLOR_CARROCERIA, coloresDe } from './coloresCarroceria';
@@ -1265,6 +1266,8 @@ function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<string,
   for (const t of m.tubos) { if (t.curva) tuboCurvo(G.chasis, t.curva, t.d, M.alu); else tube(G.chasis, t.a, t.b, t.d, M.alu); }
   for (const c of m.baterias) cajaRedonda(G.baterias, [(c.x0 + c.x1) / 2, (c.y0 + c.y1) / 2, 0], [c.x1 - c.x0, c.y1 - c.y0, 2 * c.hz], M.batt, 0.015);
   const iv = m.inversor; cajaRedonda(G.motor, [(iv.x0 + iv.x1) / 2, (iv.y0 + iv.y1) / 2, 0], [iv.x1 - iv.x0, iv.y1 - iv.y0, 2 * iv.hz], M.black, 0.01);
+  // 2026-11-16: the plug-in hybrid's engine, its connection to the wheels, tank and exhaust (hibrido3d.ts)
+  if (m.phev) dibujarHibrido(G.motor, m.phev.disp);
   const Ft = m.traseras;
   if (Ft) {
     // four wheels (2026-11-11): a hub motor in each rear wheel, and in each rear pod an upright on the wheel's inner

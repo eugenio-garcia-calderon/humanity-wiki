@@ -30,6 +30,7 @@
 
 import { dimensionarTilt, TECNOLOGIAS_BASCULA, type TecBascula, type Tilt } from './basculacion';
 import { ACABADOS, AMBIENTES, CINTURONES, COLORES_COSTURA, COLORES_FORRO, CONSOLAS_CENTRALES, CONSOLAS_TECHO, COSTURAS, MOLDURAS, TAPICES, interiorTriciclo, type CamposInterior, type SeatInterior } from './interiorTriciclo';
+import { ARQUITECTURAS_HIBRIDO, RPM_MAX_MOTOR, cifrasHibrido, disponerHibrido, factorCargaParcial, migrarRendTrans, rendimientoHibrido, type ArqHibrido } from './hibrido';
 import type { Comprobacion, MaterialCarenado, MaterialChasis, Parametros, PuntosOcupante, Pulgadas, Resultados, Rueda, Tubo, P3 } from './geometria';
 import { MATERIALES_CARENADO, MATERIALES_CHASIS, RENDIMIENTO_SOLAR, TRICICLO_DEFECTO, largoTubo } from './geometria';
 import { T3, T_CUBIERTA, crearForma, punto, type DimBala, type FormaBala } from './garaje/balaForma';
@@ -103,7 +104,12 @@ export interface CamposTriciclo extends CamposInterior {
   tPropulsion: 'electrico' | 'phev';   // solo eléctrico (hasta ahora) o híbrido enchufable: motor de gasolina unido por un engranaje planetario
   tPhevKW: number;     // potencia del motor de gasolina (kW)
   tRendTerm: number;   // rendimiento del motor de gasolina (%): energía del combustible que sale en el eje
-  tRendTrans: number;  // rendimiento de la conversión mecánica (%): engranaje planetario, generador y motor eléctrico, del eje del motor a la rueda
+  // 2026-11-16 (Eugenio: «las opciones que hay para conectar el motor híbrido y el eléctrico»): hibrido.ts. They replace the
+  // single «Conversión mecánica» (`tRendTrans`), which a design saved before opens as (`camposTriciclo`, hibrido.ts `migrarRendTrans`)
+  tHibArq: ArqHibrido; // reparto con planetario (Prius), en serie (i3 REx, e-Power) o en paralelo P2
+  tHibMec: number;     // reparto: parte de la potencia que pasa directa por el planetario (%)
+  tRendElec: number;   // reparto y serie: rendimiento del camino eléctrico, generador → inversores → motor (%)
+  tRendCaja: number;   // paralelo: rendimiento de la caja de cambios y la cadena (%)
   tDeposito: number;   // depósito de gasolina (L)
   tMRueda: number; tMFreno: number; tMSuspDel: number; tMSuspTras: number; tMDir: number;   // kg
   // Propulsión
@@ -206,7 +212,7 @@ export const RUEDAS_TRICICLO: Record<RuedaTriciclo, { d: number; neuDel: number;
   c14: { d: 0.554, neuDel: 0.165, neuTras: 0.165, n: '14″ de coche, 165/60 R14 (554 mm)', kg: 2.62, kWBuje: 45, carga: 387 },
   c15: { d: 0.574, neuDel: 0.175, neuTras: 0.175, n: '15″ de coche, 175/55 R15 (574 mm)', kg: 2.96, kWBuje: 60, carga: 412 },
 };
-type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tTraseras' | 'tBascula' | 'tRuedas' | 'tPropulsion' | 'tBascTec' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero'
+type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tTraseras' | 'tBascula' | 'tRuedas' | 'tPropulsion' | 'tHibArq' | 'tBascTec' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero'
   | 'tAcabado' | 'tTapiz' | 'tCostura' | 'tCosturaColor' | 'tForroColor' | 'tMoldura' | 'tConsolaTecho' | 'tConsolaCentral' | 'tCinturon' | 'tAmbiente';
 export type ClaveNumTriciclo = Exclude<ClaveTriciclo, ClaveTexto>;
 
@@ -234,6 +240,8 @@ export const nombreTriciclo = (T: Pick<CamposTriciclo, 'tTraseras'> & Partial<Pi
 export const lemasTriciclo = (T: Pick<CamposTriciclo, 'tTraseras'> & Partial<CamposTriciclo>): Record<DepTriciclo | 'proyecto', string> => {
   const o = { ...LEMAS_TRICICLO };
   if (esCuatro(T)) o.propulsion = 'los dos motores en los bujes de las ruedas traseras';
+  // (2026-11-16) the plug-in hybrid: the petrol engine and its connection join the hub motor(s)
+  if (T.tPropulsion === 'phev') o.propulsion = `híbrido enchufable: el motor de gasolina, cómo se une a las ruedas, y ${esCuatro(T) ? 'los dos motores eléctricos en los bujes traseros' : 'el motor eléctrico en el buje trasero'}`;
   if (T.tBatDisp === 'chasis') o.energia = 'la batería (un paquete a lo largo del bastidor) y el techo solar';
   // (round 3 interior: either dashboard; with the Aptera buckets, pedals instead of footboards)
   if (T.tMando === 'volante' || conSalpicadero(T as CamposTriciclo) || T.tAsientos === 'butacas') o.interior = `los asientos (a horcajadas, dos butacas como el Aptera o tres filas que se pliegan), ${T.tMando === 'volante' ? 'volante' : 'manillar'}${conSalpicadero(T as CamposTriciclo) ? ', salpicadero' : ''}, ${T.tAsientos === 'butacas' ? 'pedales' : 'plataformas'} y maletero`;
@@ -377,15 +385,18 @@ const FILAS: Fila[] = [
   ['tMSuspDel', 'rodaje', 'Masas', null, 'Suspensión delantera (las dos)', 5, 13, 0.5, 'kg'],
   ['tMSuspTras', 'rodaje', 'Masas', null, 'Basculante y amortiguador trasero', 4, 8, 0.5, 'kg'],
   ['tMDir', 'rodaje', 'Masas', null, 'Dirección: columna, cremallera y bieletas', 3, 6, 0.5, 'kg'],
-  ['tKWNom', 'propulsion', 'Motor', null, 'Potencia nominal', 2, 30, 0.5, 'kW'],
-  ['tKWPico', 'propulsion', 'Motor', null, 'Potencia máxima', 5, 60, 0.5, 'kW'],
-  ['tMMotor', 'propulsion', 'Motor', null, 'Motor de buje', 5, 62, 0.5, 'kg'],
-  ['tMInversor', 'propulsion', 'Motor', null, 'Controlador (inversor)', 1.4, 14, 0.1, 'kg'],
-  ['tVel', 'propulsion', 'Motor', null, 'Velocidad de cálculo', 40, 120, 5, 'km/h'],
+  ['tKWNom', 'propulsion', 'Motor eléctrico', null, 'Potencia nominal', 2, 30, 0.5, 'kW'],
+  ['tKWPico', 'propulsion', 'Motor eléctrico', null, 'Potencia máxima', 5, 60, 0.5, 'kW'],
+  ['tMMotor', 'propulsion', 'Motor eléctrico', null, 'Motor de buje', 5, 62, 0.5, 'kg'],
+  ['tMInversor', 'propulsion', 'Motor eléctrico', null, 'Controlador (inversor)', 1.4, 14, 0.1, 'kg'],
+  ['tVel', 'propulsion', 'Motor eléctrico', null, 'Velocidad de cálculo', 40, 120, 5, 'km/h'],
   // 2026-11-15: only with the plug-in hybrid (the page hides them otherwise)
   ['tPhevKW', 'propulsion', 'Híbrido enchufable', null, 'Motor de gasolina: potencia', 8, 60, 0.5, 'kW'],
   ['tRendTerm', 'propulsion', 'Híbrido enchufable', null, 'Motor de gasolina: rendimiento', 20, 42, 0.5, '%'],
-  ['tRendTrans', 'propulsion', 'Híbrido enchufable', null, 'Conversión mecánica (planetario y generador)', 75, 97, 0.5, '%'],
+  // 2026-11-16: per architecture (the page shows each with its own: `tHibMec` power split, `tRendElec` split and series, `tRendCaja` parallel)
+  ['tHibMec', 'propulsion', 'Híbrido enchufable', null, 'Reparto: parte que va directa por el planetario', 20, 100, 1, '%'],
+  ['tRendElec', 'propulsion', 'Híbrido enchufable', null, 'Camino eléctrico: generador, inversores y motor', 65, 92, 0.5, '%'],
+  ['tRendCaja', 'propulsion', 'Híbrido enchufable', null, 'Caja de cambios y cadena', 85, 97, 0.5, '%'],
   ['tDeposito', 'propulsion', 'Híbrido enchufable', null, 'Depósito de gasolina', 5, 45, 1, 'L'],
   ['tKWh', 'energia', 'Batería', null, 'Batería', 5, 30, 0.5, 'kWh'],
   // 2026-11-12: one pack along the frame (only with «A lo largo del bastidor»): its size decides its capacity
@@ -443,7 +454,9 @@ export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
   { clave: 'tChMat', n: 'Material de los tubos', dep: 'chasis', bloque: 'Bastidor', opciones: [{ k: 'al6061', n: 'Aluminio 6061-T6' }, { k: 'cromoly', n: 'Acero cromoly 4130' }, { k: 'carbono', n: 'Tubo de carbono' }] },
   { clave: 'tRuedaDel', n: 'Ruedas delanteras (en los carenados)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['16', '20', '24', '26', '28', 'c13', 'c14', 'c15']) },
   { clave: 'tRuedaTras', n: 'Rueda trasera (dentro de la cola)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['20', '24', '26', '28', 'c13', 'c14', 'c15']) },
-  { clave: 'tPropulsion', n: 'Propulsión', dep: 'propulsion', bloque: 'Motor', opciones: [{ k: 'electrico', n: 'Eléctrica: solo batería' }, { k: 'phev', n: 'Híbrida enchufable (PHEV), con engranaje planetario como el Prius' }] },
+  // (2026-11-16, Eugenio: «la parte de propulsión es tan importante que tiene que estar arriba del todo»: its own block, first)
+  { clave: 'tPropulsion', n: 'Propulsión', dep: 'propulsion', bloque: 'Propulsión', opciones: [{ k: 'electrico', n: 'Eléctrica: solo batería' }, { k: 'phev', n: 'Híbrida enchufable (PHEV): batería y motor de gasolina' }] },
+  { clave: 'tHibArq', n: 'Arquitectura del híbrido', dep: 'propulsion', bloque: 'Híbrido enchufable', opciones: ARQUITECTURAS_HIBRIDO },
   { clave: 'tRuedas', n: 'Disposición de las ruedas', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: [{ k: 'clasica', n: 'Dos delante en carenados' }, { k: 'rombo', n: 'En rombo: una en el morro, dos laterales en carenados, una en la cola' }] },
   { clave: 'tTraseras', n: 'Ruedas traseras', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: [{ k: 'una', n: 'Una en la cola (triciclo)' }, { k: 'dos', n: 'Dos en carenados (cuatro ruedas)' }] },
   // 2026-11-15: only with four wheels (the page hides it otherwise)
@@ -698,6 +711,15 @@ export function camposTriciclo(P: Partial<Parametros>): CamposTriciclo {
   // a design saved without a rear track (every one before the «Cuadriciclo Bala clásico») takes its front one
   const vt = (P as Record<string, unknown>).tViaTras;
   if (!(typeof vt === 'number' && Number.isFinite(vt))) o.tViaTras = o.tVia;
+  // 2026-11-16: a hybrid saved with the one «Conversión mecánica» slider (`tRendTrans`) and no architecture opens as the
+  // power split with the same efficiency, so its litres per 100 km do not change. Only what it does not have yet: once a
+  // hybrid slider is moved, that key is in the design and wins (PARAMETROS_TRICICLO leaves these keys out for this)
+  const Q = P as Record<string, unknown>, rt = Q.tRendTrans;
+  if (Q.tHibArq === undefined && typeof rt === 'number' && Number.isFinite(rt)) {
+    const { mec, elec } = migrarRendTrans(rt); o.tHibArq = 'reparto';
+    if (typeof Q.tHibMec !== 'number') o.tHibMec = mec;
+    if (typeof Q.tRendElec !== 'number') o.tRendElec = elec;
+  }
   return o as unknown as CamposTriciclo;
 }
 
@@ -1499,6 +1521,16 @@ export function crearModeloTriciclo(P: Parametros) {
     if (!plegada3) plazas.push({ nombre: 'Fila 3', fila: 3, z: 0, piloto: false, pts: fila(x3, 0, PIES_FILA3), talla: e => fila(x3, 0, PIES_FILA3, e) });
   }
 
+  // ── 2026-11-16: the plug-in hybrid's parts, where they fit (hibrido.ts): behind the last backrest, or behind the frame's tower
+  const ultimo = filas ? asientosFilas.reduce((a, b) => (b.fila > a.fila ? b : a)) : { x: asientos.xPasajero, y: asientos.yPasajero, rec: rec.pasajero };
+  const hibArq: ArqHibrido = T.tHibArq ?? 'reparto';
+  const hib = T.tPropulsion === 'phev' ? disponerHibrido({
+    F, arq: hibArq, kW: L('tPhevKW'), litros: L('tDeposito'), xR, rR, yEje: motor.c[1], recTras, cuatro: !!traseras, viaTras: traseras ? traseras.VIA_LAT : 0,
+    pivote: basculante.pivote, torreta: amortiguador.arriba,
+    respaldo: (y: number) => ultimo.x - 0.19 - Math.max(0, y - ultimo.y) * Math.tan(Math.max(0, ultimo.rec) * Math.PI / 180),
+    cajas: [...baterias, inversor], yPiso, inversor,
+  }) : null;
+
   const Lf = F.LARGO;
   const Pm: Parametros = { ...P, ...T, L: Lf, B: xF - xR, W: anchoTotal, H: D.alto + elevar, clear: D.suelo, track: via };
   return {
@@ -1515,9 +1547,18 @@ export function crearModeloTriciclo(P: Parametros) {
     /** 2026-11-15: the wheels in a diamond (`tRuedas`): the nose wheel at x = 0 steers, the pods do not. */
     rombo,
     /** 2026-11-15: the plug-in hybrid (`tPropulsion: 'phev'`), or null: its engine, efficiencies, tank and their masses. */
-    phev: T.tPropulsion === 'phev' ? {
-      kW: L('tPhevKW'), rendTerm: L('tRendTerm') / 100, rendTrans: L('tRendTrans') / 100, litros: L('tDeposito'),
-      kgMotor: 15 + 1.4 * L('tPhevKW'), kgPlanetario: 12, kgDeposito: 4 + 0.745 * L('tDeposito'),
+    // (2026-11-16: its architecture, the efficiency that follows from it, and where its parts are: `disp`, hibrido.ts)
+    phev: hib ? {
+      arq: hibArq, kW: L('tPhevKW'), rendTerm: L('tRendTerm') / 100, litros: L('tDeposito'),
+      mec: L('tHibMec') / 100, rendElec: L('tRendElec') / 100, rendCaja: L('tRendCaja') / 100,
+      rendTrans: rendimientoHibrido(hibArq, L('tHibMec') / 100, L('tRendElec') / 100, L('tRendCaja') / 100),
+      kgMotor: 15 + 1.4 * L('tPhevKW'), kgDeposito: 4 + 0.745 * L('tDeposito'),
+      // what joins it to the wheels: the planetary and MG1 (12 kg, as since 2026-11-15), a generator alone (≈ 0,32 kg/kW
+      // over 4 kg), or a clutch, a 3-speed gearbox and a P2 motor-generator
+      transmision: hibArq === 'reparto' ? [{ nombre: 'Motor: engranaje planetario y generador', kg: 12 }]
+        : hibArq === 'serie' ? [{ nombre: 'Motor: generador acoplado al de gasolina', kg: 4 + 0.32 * L('tPhevKW') }]
+          : [{ nombre: 'Motor: embrague y caja de cambios', kg: 10 + 0.1 * L('tPhevKW') }, { nombre: 'Motor: motor-generador P2', kg: 3 + 0.12 * L('tPhevKW') }],
+      disp: hib,
     } : null,
     tubos, baterias, bateriaCabe: bat.capacidad, inversor, motor, basculante, amortiguador, brazos, cremallera, cabezaDireccion: cabeza, recTras, recDel, yLarguero: yL,
     // (with two rear wheels there is no wheel under the tail to cover)
@@ -1698,6 +1739,8 @@ export function volumenMaletero(m: ModeloTriciclo, plegada2: boolean, plegada3: 
   const plegados = m.filas ? m.asientosFilas.filter(a => a.fila > 1 && (a.fila === 2 ? plegada2 : plegada3)) : [];
   const xR = m.xR, rR = m.rR, piv = m.basculante.pivote;
   const cajas = [...m.baterias, m.inversor].map(c => ({ x0: c.x0, x1: c.x1, y0: c.y0, y1: c.y1, z: c.hz }));
+  // (2026-11-16: the hybrid's engine, its connection and its tank take boot room)
+  if (m.phev) cajas.push(...m.phev.disp.ocupa);
   // the rear wheel and its travel, 4 cm round; the swing arm and the shock tower above its pivot
   if (!m.cuatro) {
     cajas.push({ x0: xR - rR - 0.04, x1: xR + rR + 0.04, y0: 0, y1: 2 * rR + m.recTras + 0.04, z: F.ANCHO_NEU / 2 + 0.05 });
@@ -1749,11 +1792,13 @@ export function piezasTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cris
   // the plug-in hybrid (2026-11-15): estimates of parts of their class, not measured. The petrol engine about 15 kg
   // plus 1,4 kg per kW (a 25 kW twin weighs some 50 kg), the planetary gear and its generator 12 kg, the tank 4 kg and
   // its petrol full (0,745 kg/L); all ahead of the rear axle, low
+  // (2026-11-16: each at the centre of what the viewer draws, hibrido.ts, no longer at a fixed place; the engine's mass
+  // includes its exhaust, now drawn)
   if (m.phev) {
-    const p = m.phev, x = m.xR + 0.55, y = 0.32 + m.elevar;
-    o.push({ nombre: 'Motor de gasolina (híbrido)', kg: p.kgMotor, x, y });
-    o.push({ nombre: 'Motor: engranaje planetario y generador', kg: p.kgPlanetario, x: x + 0.2, y });
-    o.push({ nombre: 'Depósito de gasolina, lleno', kg: p.kgDeposito, x: x + 0.45, y: 0.25 + m.elevar });
+    const p = m.phev, c = p.disp.centros;
+    o.push({ nombre: 'Motor de gasolina (híbrido)', kg: p.kgMotor, x: c.motor[0], y: c.motor[1], nota: `${p.disp.motor.n} cilindro${p.disp.motor.n > 1 ? 's' : ''}, unos ${Math.round(p.disp.motor.cc / 10) * 10} cm³, con su escape` });
+    for (const t of p.transmision) o.push({ nombre: t.nombre, kg: t.kg, x: c.transmision[0], y: c.transmision[1] });
+    o.push({ nombre: 'Depósito de gasolina, lleno', kg: p.kgDeposito, x: c.deposito[0], y: c.deposito[1] });
   }
   // a diamond (2026-11-15): the nose wheel (the rear one's size), its brake and its fork (an estimate)
   if (m.rombo) o.push({ nombre: 'Rueda delantera, freno y horquilla', kg: limitarTriciclo('tMRueda', m.campos) * RUEDAS_TRICICLO[m.campos.tRuedaTras].kg + limitarTriciclo('tMFreno', m.campos) + 5, x: 0, y: m.rR });
@@ -2219,6 +2264,20 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     c('energia', 'Batería: capacidad del paquete (sus litros × Wh/L)', 1, 0, `${fmt(m.kWh, 1)} kWh · ${Math.round(litrosBat)} L`);
   }
   c('propulsion', 'Controlador dentro de la carrocería', cajaDentro(F, m.inversor), 0.01);
+  // 2026-11-16: the plug-in hybrid's parts, drawn where hibrido.ts puts them (a part sticking out turns red in the 3D too)
+  if (m.phev) {
+    const h = m.phev.disp.holguras, arq = m.phev.arq, asoma = (v: number) => v < 0 ? `asoma ${fmt(-v * 100, 1)} cm` : undefined;
+    const nT = arq === 'reparto' ? 'planetario y generador MG1' : arq === 'serie' ? 'generador' : 'embrague, motor-generador P2 y caja';
+    c('propulsion', 'Híbrido: motor de gasolina dentro de la carrocería', h.motor, 0.01, asoma(h.motor));
+    c('propulsion', `Híbrido: ${nT} dentro de la carrocería`, h.transmision, 0.01, asoma(h.transmision));
+    c('propulsion', 'Híbrido: depósito de gasolina dentro de la carrocería', h.deposito, 0.01, asoma(h.deposito));
+    c('propulsion', 'Híbrido: silencioso del escape dentro de la carrocería', h.escape, 0.005, asoma(h.escape));
+    if (h.torreta != null) c('propulsion,rodaje', 'Híbrido: motor de gasolina a la torreta del amortiguador', h.torreta, 0, h.torreta < 0 ? `choca ${fmt(-h.torreta * 100, 1)} cm` : undefined);
+    if (arq === 'reparto') {
+      const k = cifrasHibrido('reparto', L('tVel'), 2 * m.rR, 0, m.phev.kW, m.phev.mec);
+      c('propulsion', `Híbrido: vueltas del motor de gasolina a ${Math.round(L('tVel'))} km/h (máximo ${RPM_MAX_MOTOR} rpm)`, (RPM_MAX_MOTOR - k.motor) / RPM_MAX_MOTOR, 0, `${Math.round(k.motor / 10) * 10} rpm`);
+    }
+  }
   // a hub motor has the room its rim gives it: above that power, a motor on the swing arm with a belt (as on
   // electric motorcycles) would be the honest drive, and that is not drawn here
   const kWBuje = RUEDAS_TRICICLO[T.tRuedaTras].kWBuje, kWp = L('tKWPico');
@@ -2328,14 +2387,23 @@ export function energiaTriciclo(m: ModeloTriciclo, mTot: number, cd: { cd: numbe
   // planetary gear (part straight to the wheels, part through the generator and the motor: `rendTrans` for both
   // together) and also feeds the equipment. Litres per 100 km: the energy at the wheels over both efficiencies, over
   // petrol's 8,9 kWh per litre (its lower heating value)
+  // (2026-11-16: `rendTrans` follows from the architecture, hibrido.ts. In parallel the engine is tied to the wheels
+  // and, at part load, runs off its best point: its efficiency times `factorCargaParcial`. In series every kW passes
+  // through the electric motor, so the sustained speed on petrol is also capped by its rated power)
   const p = m.phev;
+  const motorW = (kmh: number) => { if (!p) return 0; const v = kmh / 3.6; return (0.5 * 1.2 * CdA * v ** 3 + CRR * mTot * g * v) / p.rendTrans + AUXILIARES; };
+  const rendTermA = (kmh: number) => !p ? 1 : p.arq === 'paralelo' ? p.rendTerm * factorCargaParcial(motorW(kmh) / (p.kW * 1000)) : p.rendTerm;
   const litros100 = (kmh: number) => {
     if (!p) return 0;
-    const v = kmh / 3.6, rueda = 0.5 * 1.2 * CdA * v ** 3 + CRR * mTot * g * v;
-    return ((rueda / p.rendTrans + AUXILIARES) / p.rendTerm) / v / 3.6 / KWH_LITRO_GASOLINA / 10;
+    const v = kmh / 3.6;
+    return (motorW(kmh) / rendTermA(kmh)) / v / 3.6 / KWH_LITRO_GASOLINA / 10;
   };
-  const vmaxGasolina = p ? vmaxCon(p.kW * p.rendTrans / RENDIMIENTO) : 0;
-  const hibrido = p ? { litros100: litros100(vel), litros50: litros100(50), litros100kmh: litros100(100), kmDeposito: p.litros / litros100(vel) * 100, vmaxGasolina } : null;
+  const vmaxGasolina = p ? vmaxCon(p.arq === 'serie' ? Math.min(p.kW * p.rendTrans / RENDIMIENTO, L('tKWNom')) : p.kW * p.rendTrans / RENDIMIENTO) : 0;
+  const hibrido = p ? {
+    litros100: litros100(vel), litros50: litros100(50), litros100kmh: litros100(100), kmDeposito: p.litros / litros100(vel) * 100, vmaxGasolina,
+    /** 2026-11-16: the overall efficiency from the engine's shaft to the wheel, the engine's own at this speed, and the rpm (hibrido.ts) */
+    rendTrans: p.rendTrans, rendTermVel: rendTermA(vel), cifras: cifrasHibrido(p.arq, vel, 2 * m.rR, motorW(vel), p.kW, p.mec),
+  } : null;
   return { cd: cd.cd, areaRef: cd.areaRef, CdA, WhKm, autonomia: util / WhKm, kmSol: solarDiaTriciclo(areaSolar, m.P.sol) / WhKm, vmaxNominal: vmaxCon(L('tKWNom')), vmaxPico: vmaxCon(L('tKWPico')), acel50: t, potencia: potencia(vel / 3.6), WhKm50: consumo(50), WhKm100: consumo(100), hibrido };
 }
 
