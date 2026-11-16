@@ -1892,6 +1892,16 @@ Eugenio asked for the flat tail («cola plana») to reach the vehicle's full wid
 ## 2026-11-16 · Removing reference cars from the garage: a per-browser mark, not a server list
 Eugenio asked to be able to «borrar» reference cars too. They are code models shared by everybody, so removal means "out of my garage", recoverable. Stored as `quitado: true` on the car's entry of the existing `aeromovil_garaje_v5` localStorage list (helpers in `garaje/quitados.ts`), next to `visible` and the dragged places, which already live there.
 - Not taken: a server list. There is no per-user garage/settings store to reuse (`ajustes.ts` is the platform's money figures; `/api/aeromovil/*` stores designs, tasks and references), and a new table + migration + write route for one list of ids was out of proportion. Cost: the phone app and the desktop keep separate lists.
+
+## 2026-11-16 · Department masses under the top-bar tabs: one helper, not a third copy of the grouping
+
+`kgPorDepartamento(res)` (src/components/aeromovil/PesosDepartamento.ts) sums the same pieces with the same grouping
+as the two «Peso: todos los componentes» lists (`grupoPieza` for the Triciclo, `PiezaMasaB.grupo` for the Basculante),
+and «Proyecto» is `res.mVeh`. Alternative: refactor both lists (Aeromovil.tsx `LadoTriciclo`, LadoBasculante.tsx) to
+read their group totals from this helper too. Not done now because both files were claimed by other bots at the time;
+the helper calls the very same grouping functions, so the numbers cannot diverge unless someone changes one list's
+filter by hand. «Energía» shows the whole Energía group (battery + charger/wiring/12 V, + solar panels on the
+Basculante), not the battery alone, so the tab matches the list's group header.
 ## 2026-11-16 · Interior finish: re-cover the existing seats instead of new seat models
 
 - **Choice.** The upholstery options swap the material of the seats the cabin builder already draws (`balaPiezas.ts` `cabina`: saddle and pads, Aptera buckets, row seats) for a canvas-textured MeshPhysicalMaterial (colour, grain, stitching as texture and bump). The buckets' white shell takes the darker "side" colour.

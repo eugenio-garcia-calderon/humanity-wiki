@@ -753,6 +753,12 @@ where the full width starts (fixed at the body's widest point, x_ref −1.5): ab
 ## 2026-11-16 · Garage preferences only per browser
 The garage's per-car state (shown/hidden, removed, dragged place) lives in localStorage (`aeromovil_garaje_v5`, the designs' places key). Eugenio sees a different garage on his phone than on his desktop. Moving the three into one per-user JSON on the server (a column or a row in an existing per-user table, one GET + one PUT with `requireLevel`) is about 2 hours today, including merging what each browser already has.
 
+## 2026-11-16 · Department mass totals computed in three places from the same grouping
+
+The «Peso: todos los componentes» lists in `LadoTriciclo` (Aeromovil.tsx) and `LadoBasculante.tsx` still sum their
+group totals inline; the top-bar tabs use `kgPorDepartamento` (PesosDepartamento.ts). All three call the same grouping
+(`grupoPieza` / `PiezaMasaB.grupo`), so they agree today. Making both lists read from the helper: ~15 minutes, once
+both files are free of other bots' claims.
 ## 2026-11-16 · Interior finish shortcuts
 
 - **Door edges are stepped.** The door's part of the lining is chosen per 1 × 2 cm cell, so its edge follows the shut line in small steps instead of the exact curve. Clipping the band to the door outline: about 2 hours.
