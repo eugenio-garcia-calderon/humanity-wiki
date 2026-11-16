@@ -23,6 +23,12 @@
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "ordenar2: refactor sin cambio de comportamiento (mover a archivos nuevos)",
       "desde": "2026-11-16T21:57:38.981Z"
+    },
+    {
+      "agente": "colasuave",
+      "ruta": "src/components/aeromovil/garaje/balaForma.ts",
+      "motivo": "colasuave: transición cabina–cola continua",
+      "desde": "2026-11-16T22:57:30.267Z"
     }
   ]
 }
