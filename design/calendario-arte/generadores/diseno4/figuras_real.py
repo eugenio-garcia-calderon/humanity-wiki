@@ -585,7 +585,7 @@ def _ojos(lz, G, skin, ojos, mira, iris, edad, luz, pelo_c, canas):
                                       R2(-ew * 1.3, -eh * 0.15)], suave=False), '#8a6a58', dens=0.26, suave=0.35)
             mx, my = mira
             ri = eh * (1.08 if edad == 'nino' else 1.0)
-            ic = R2(mx * ew * 0.35 + sin_ * ew * 0.04, my * eh * 0.3 + eh * 0.04)
+            ic = R2(mx * G.sg * ew * 0.42 + sin_ * ew * 0.04, my * eh * 0.42 + eh * 0.04)
             iris_f = Elipse(ic[0], ic[1], ri * (0.45 + 0.55 * f), ri, G.ang(0)) & alm
             lz.aguada(iris_f, _osc(iris, 0.85, '#2a1a10', 0.2), dens=0.9, tapa=1, borde=0.5, irreg=0.05, gran=0.1)
             lz.aguada(Elipse(ic[0], ic[1], ri * 0.46 * (0.45 + 0.55 * f), ri * 0.48) & alm, '#0c0605', dens=0.95,
@@ -605,10 +605,13 @@ def _ojos(lz, G, skin, ojos, mira, iris, edad, luz, pelo_c, canas):
         else:
             # lids lowered (looking down) or closed (laughing)
             if ojos == 'abajo':
-                ln = [R2(ew * t, eh * 0.12 * (1 - t * t) ** 0.9 - 0.05 * eh) for t in ts]
+                ln = [R2(ew * t, eh * 0.1 * (1 - t * t) ** 0.9 - 0.2 * eh) for t in ts]
                 vis = Poligono(ln + dn, suave=False)
                 lz.levanta(vis, cantidad=0.35, suave=0.2)
-                lz.aguada(vis, '#2a1a1a', dens=0.55, suave=0.25)
+                lz.aguada(vis, '#dccfb8', dens=0.25, suave=0.2)
+                ic = R2(mira[0] * G.sg * ew * 0.3, eh * 0.25)
+                lz.aguada(Elipse(ic[0], ic[1], eh * 0.9, eh * 0.75) & vis, _osc(iris, 0.8, '#2a1a10', 0.2), dens=0.9,
+                          tapa=1, irreg=0.05)
             else:
                 ln = [R2(ew * t, eh * 0.28 * (1 - t * t) + 0.05 * eh - 0.12 * eh * (-sin_) * t) for t in ts]
             lz.aguada(Poligono([R2(ew * t, -eh * 1.15 * (1 - t * t) ** 0.8) for t in ts] + ln[::-1], suave=True),
@@ -688,8 +691,8 @@ def _nariz(lz, G, skin, luz, edad='adulto'):
             lz.lapiz([bezier(w0, w1, w2, n=8)], piel_l, grosor=0.3, presion=0.3 if sd < 0 else 0.2, temblor=0.03)
     lz.aguada(Elipse(*G.off(G.P(0.0, vn + 0.05, 0.05), -lx * a2 * 0.04, 0), a2 * 0.18, b2 * 0.03, G.ang(0)), sc,
               dens=0.32, suave=a2 * 0.03)
-    lz.levanta(Elipse(*G.off(tip, lx * a2 * 0.03, ly * b2 * 0.02 - b2 * 0.01), a2 * 0.045, b2 * 0.025), cantidad=0.4,
-               suave=0.3)
+    lz.levanta(Elipse(*G.off(tip, lx * a2 * 0.03, ly * b2 * 0.02 - b2 * 0.01), a2 * 0.045, b2 * 0.025), cantidad=0.15,
+               suave=0.4)
     # in 3/4 the far side of the nose shows against the far cheek
     if G.tg > 0.12 and not nino:
         pts = [G.P(0.06, vb + 0.08 + (vn - 0.06 - vb - 0.08) * t, nz * t ** 1.2 + 0.02) for t in np.linspace(0.15, 1, 9)]
@@ -907,6 +910,7 @@ def _pelo_detras(lz, G, peinado, col, luz, rng, adorno):
         r_ = a2 * 0.36
         mono = Circulos([(c[0], c[1], r_), (*G.off(c, -r_ * 0.3, r_ * 0.25), r_ * 0.75)])
         volumen(lz, mono, col, luz, dens=0.92, prof=0.5, brillo=0.0, reflejo=0.0, grosor=0.35, presion=0.25)
+        lz.aguada(mono, col, dens=0.35, suave=0.4)
         osc = _osc(col, 0.55, '#1a1010', 0.3)
         vueltas = []
         for k in range(9):
@@ -1582,13 +1586,13 @@ def torso(lz, hi, hd, ci, cd, color, cuello=None, escote=0.3, tapa=1, toques=Non
     # the deep neckline was there to meet the old big round head; under a head of real size it
     # left a long bare column of neck, so the neckline sits where a real one does
     escote = min(escote, 0.55)
-    izq = [m - lado * w * 0.17 - abajo * w * 0.02, hi + abajo * w * 0.07, hi - lado * w * 0.06 + abajo * w * 0.22,
+    izq = [m - lado * w * 0.17 - abajo * w * 0.07, hi + abajo * w * 0.07, hi - lado * w * 0.06 + abajo * w * 0.22,
            hi + (ci - hi) * 0.42 - lado * w * 0.04, hi + (ci - hi) * 0.72 + lado * w * 0.05, ci - lado * w * 0.02]
-    der = [m + lado * w * 0.17 - abajo * w * 0.02, hd + abajo * w * 0.07, hd + lado * w * 0.06 + abajo * w * 0.22,
+    der = [m + lado * w * 0.17 - abajo * w * 0.07, hd + abajo * w * 0.07, hd + lado * w * 0.06 + abajo * w * 0.22,
            hd + (cd - hd) * 0.42 + lado * w * 0.04, hd + (cd - hd) * 0.72 - lado * w * 0.05, cd + lado * w * 0.02]
-    pts = izq + [(ci + cd) / 2 + abajo * w * 0.04] + der[::-1] + [m + lado * w * 0.1 + abajo * w * escote * 0.2,
-                                                                   m + abajo * w * escote * 0.3,
-                                                                   m - lado * w * 0.1 + abajo * w * escote * 0.2]
+    pts = izq + [(ci + cd) / 2 + abajo * w * 0.04] + der[::-1] + [m + lado * w * 0.1 + abajo * w * (escote * 0.2 - 0.05),
+                                                                   m + abajo * w * (escote * 0.3 - 0.04),
+                                                                   m - lado * w * 0.1 + abajo * w * (escote * 0.2 - 0.05)]
     f = Poligono([tuple(p) for p in pts])
     volumen(lz, f, color, _LUZ_ESCENA[0], dens=0.72, prof=0.5, tapa=tapa, toques=toques, espesor=w * 0.4,
             proyecta=2.5, grosor=0.4, presion=0.3, rayar=True)
@@ -1632,12 +1636,12 @@ def _cuello(lz, x, y, r, piel, base, ancho_base, giro, inclina, luz, nino):
     cy = y + math.cos(a) * kc * r
     sombra = f & Poligono([(cxs - w0, cy - r * 0.3), (cxs + w0, cy - r * 0.3), (cxs + w0, cy + r * 0.2),
                            (cxs - w0, cy + r * 0.2)], suave=False)
-    lz.aguada(sombra, _osc(piel_c, 0.78, '#5a3020', 0.25), dens=0.32, suave=0.6, gran=0.2,
+    lz.aguada(sombra, _osc(piel_c, 0.72, '#5a3020', 0.28), dens=0.42, suave=0.6, gran=0.2,
               desvanece=(cxs, cy - r * 0.05, cxs, cy + r * 0.22))
     # the two neck muscles meeting at the pit of the throat, faint
     lz.lapiz([bezier((xt - w0 * 0.38, yt + (yb - yt) * 0.4), (bx - w0 * 0.2, yb - r * 0.1), (bx - r * 0.03, yb + r * 0.02), n=8),
               bezier((xt + w0 * 0.38, yt + (yb - yt) * 0.4), (bx + w0 * 0.2, yb - r * 0.1), (bx + r * 0.03, yb + r * 0.02), n=8)],
-             _osc(piel_c, 0.62, '#4a2a2a', 0.35), grosor=0.24, presion=0.14, temblor=0.05, cortes=0.4, puntas=0.5)
+             _osc(piel_c, 0.62, '#4a2a2a', 0.35), grosor=0.22, presion=0.09, temblor=0.05, cortes=0.5, puntas=0.5)
     lp = _osc(piel_c, 0.55, '#4a2a2a', 0.4)
     lz.lapiz([bezier((bx - r * 0.08, yb + r * 0.04), (bx - r * 0.3, yb - r * 0.02), (bx - r * 0.56, yb + r * 0.05), n=10),
               bezier((bx + r * 0.08, yb + r * 0.04), (bx + r * 0.3, yb - r * 0.02), (bx + r * 0.56, yb + r * 0.05), n=10)],

@@ -541,43 +541,43 @@ export const CAPAS_ILUSTRACIONES: Record<string, ManifiestoCapas> = {
       {
         "id": "guitarrista",
         "nombre": "El guitarrista",
-        "src": "guitarrista.webp?v=a3c0124a",
-        "x": 0.06385,
+        "src": "guitarrista.webp?v=20d36eb1",
+        "x": 0.06357,
         "y": 0.47361,
-        "w": 0.26967,
+        "w": 0.26995,
         "h": 0.26793
       },
       {
         "id": "musica",
         "nombre": "La música",
-        "src": "musica.webp?v=6db24908",
-        "x": 0.09863,
-        "y": 0.1494,
-        "w": 0.40365,
-        "h": 0.47062
+        "src": "musica.webp?v=ddc8fa66",
+        "x": 0.0992,
+        "y": 0.1489,
+        "w": 0.40336,
+        "h": 0.47261
       },
       {
         "id": "falda",
         "nombre": "La falda-jardín",
-        "src": "falda.webp?v=a403bd7d",
-        "x": 0.36403,
-        "y": 0.35558,
-        "w": 0.34008,
+        "src": "falda.webp?v=a7fc9fde",
+        "x": 0.36431,
+        "y": 0.35608,
+        "w": 0.33979,
         "h": 0.63048
       },
       {
         "id": "bailarina",
         "nombre": "La bailarina",
-        "src": "bailarina.webp?v=69afd819",
-        "x": 0.42674,
+        "src": "bailarina.webp?v=395ed80f",
+        "x": 0.42702,
         "y": 0.16633,
-        "w": 0.13455,
+        "w": 0.13426,
         "h": 0.25647
       },
       {
         "id": "flores",
         "nombre": "Las flores que se vuelven pájaros",
-        "src": "flores.webp?v=198e4b56",
+        "src": "flores.webp?v=84c8ebb9",
         "x": 0.69612,
         "y": 0.42878,
         "w": 0.04333,
@@ -586,61 +586,61 @@ export const CAPAS_ILUSTRACIONES: Record<string, ManifiestoCapas> = {
       {
         "id": "lana",
         "nombre": "La lana",
-        "src": "lana.webp?v=f6eb67ff",
+        "src": "lana.webp?v=3a4beac2",
         "x": 0.24914,
-        "y": 0.70568,
+        "y": 0.70618,
         "w": 0.1183,
         "h": 0.16434
       },
       {
         "id": "abuela",
         "nombre": "La abuela que teje",
-        "src": "abuela.webp?v=074b3623",
+        "src": "abuela.webp?v=020143d0",
         "x": 0.12742,
-        "y": 0.68476,
-        "w": 0.32839,
-        "h": 0.31225
+        "y": 0.69024,
+        "w": 0.32326,
+        "h": 0.30627
       },
       {
         "id": "nina",
         "nombre": "La niña del barro",
-        "src": "nina.webp?v=e13d603a",
+        "src": "nina.webp?v=dd546779",
         "x": 0.58181,
-        "y": 0.75797,
-        "w": 0.20553,
-        "h": 0.2246
+        "y": 0.75747,
+        "w": 0.20468,
+        "h": 0.2251
       },
       {
         "id": "pajaro1",
         "nombre": "El pájaro coral",
-        "src": "pajaro1.webp?v=e0b568d8",
+        "src": "pajaro1.webp?v=a4f578bf",
         "x": 0.73432,
-        "y": 0.38197,
+        "y": 0.38147,
         "w": 0.03136,
-        "h": 0.04283
+        "h": 0.04333
       },
       {
         "id": "pajaro2",
         "nombre": "El pájaro turquesa",
-        "src": "pajaro2.webp?v=243737a8",
-        "x": 0.79447,
-        "y": 0.31076,
-        "w": 0.02765,
-        "h": 0.03586
+        "src": "pajaro2.webp?v=84106d88",
+        "x": 0.7939,
+        "y": 0.31026,
+        "w": 0.02851,
+        "h": 0.03635
       },
       {
         "id": "pajaro3",
         "nombre": "El pájaro dorado",
-        "src": "pajaro3.webp?v=c0fbdd8c",
-        "x": 0.85547,
-        "y": 0.25996,
-        "w": 0.02052,
-        "h": 0.03237
+        "src": "pajaro3.webp?v=0f0c51c1",
+        "x": 0.85519,
+        "y": 0.26046,
+        "w": 0.02109,
+        "h": 0.03137
       },
       {
         "id": "parra",
         "nombre": "La parra de arriba",
-        "src": "parra.webp?v=b2b5945d",
+        "src": "parra.webp?v=b5bd2518",
         "x": 0.0,
         "y": 0.0,
         "w": 0.24116,
@@ -649,20 +649,20 @@ export const CAPAS_ILUSTRACIONES: Record<string, ManifiestoCapas> = {
       {
         "id": "maceta",
         "nombre": "La maceta de geranios",
-        "src": "maceta.webp?v=066bf3b4",
+        "src": "maceta.webp?v=4bf95281",
         "x": 0.00257,
-        "y": 0.60458,
+        "y": 0.60309,
         "w": 0.17161,
-        "h": 0.38645
+        "h": 0.38795
       },
       {
         "id": "mesa",
         "nombre": "La mesa de los pinceles",
-        "src": "mesa.webp?v=31aaaf8a",
+        "src": "mesa.webp?v=d42fc23c",
         "x": 0.75627,
-        "y": 0.76394,
+        "y": 0.76494,
         "w": 0.24373,
-        "h": 0.23606
+        "h": 0.23506
       },
       {
         "id": "luz_farolillos",
@@ -677,16 +677,16 @@ export const CAPAS_ILUSTRACIONES: Record<string, ManifiestoCapas> = {
       {
         "id": "farolillos",
         "nombre": "Los farolillos de arriba",
-        "src": "farolillos.webp?v=95097c24",
+        "src": "farolillos.webp?v=a80885fe",
         "x": 0.78107,
         "y": 0.0,
         "w": 0.18985,
-        "h": 0.19821
+        "h": 0.19721
       },
       {
         "id": "marco",
         "nombre": "El borde de papel",
-        "src": "marco.webp?v=d552ffc5",
+        "src": "marco.webp?v=d6bc83ea",
         "x": 0.0,
         "y": 0.0,
         "w": 1.0,
@@ -1334,7 +1334,7 @@ export const CAPAS_ILUSTRACIONES: Record<string, ManifiestoCapas> = {
       {
         "id": "abuelo",
         "nombre": "El abuelo y la lámpara",
-        "src": "abuelo.webp?v=2c973bcf",
+        "src": "abuelo.webp?v=59ed20b4",
         "x": 0.23261,
         "y": 0.49153,
         "w": 0.13911,
@@ -1343,11 +1343,11 @@ export const CAPAS_ILUSTRACIONES: Record<string, ManifiestoCapas> = {
       {
         "id": "nina",
         "nombre": "La niña",
-        "src": "nina.webp?v=a7f02b98",
+        "src": "nina.webp?v=1a2373da",
         "x": 0.32269,
-        "y": 0.47211,
+        "y": 0.47759,
         "w": 0.11944,
-        "h": 0.29084
+        "h": 0.28536
       },
       {
         "id": "hilos",
@@ -1361,7 +1361,7 @@ export const CAPAS_ILUSTRACIONES: Record<string, ManifiestoCapas> = {
       {
         "id": "nino",
         "nombre": "El niño",
-        "src": "nino.webp?v=228d0de4",
+        "src": "nino.webp?v=4e1b63f9",
         "x": 0.48717,
         "y": 0.26643,
         "w": 0.1565,

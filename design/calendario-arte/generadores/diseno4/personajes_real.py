@@ -125,7 +125,7 @@ def nina06(lz):
         lz.gouache(Elipse(x, y, 1.9), '#fff3cf', alfa=0.9, irreg=0)
     F.brazo3(lz, (634, 482), (650, 524), (648, 560), 16, '#f2c04a', P2, luz, 'corta',
              mano=dict(ang=95, gesto='relajada', lado=1, tam=27), semilla=24)
-    F.cuello3(lz, (618, 436), 25, (616, 476), P2, luz, giro=-0.5, inclina=-14)
+    F.cuello3(lz, (618, 441), 25, (616, 476), P2, luz, giro=-0.5, inclina=-8)
     F.torso3(lz, (592, 478), (640, 480), (598, 526), (634, 528), '#f2c04a', luz, cintura=0.95, semilla=25)
     lz.lapiz([bezier((604, 478), (616, 488), (630, 479), n=12)], linea_de('#f2c04a', 0.55), grosor=0.55, presion=0.45)
     pechera = Poligono([(597, 528), (602, 497), (631, 499), (636, 530)], suave=False)
@@ -136,10 +136,10 @@ def nina06(lz):
         lz.aguada(Elipse(*b_, 1.6), '#f6e2b0', dens=0.9, tapa=1, irreg=0.1)
     lz.lapiz([[(599, 512), (634, 514)]], linea_de(TEAL6, 0.5), grosor=0.42, presion=0.32, temblor=0.2)
     lz.lapiz([bezier((596, 528), (616, 532), (637, 530), n=12)], linea_de(TEAL6, 0.6), grosor=0.65, presion=0.5)
-    F.cabeza3(lz, 618, 434, 25, P2, '#2a1a14', 'afro', luz, giro=-0.5, inclina=-8, edad='nino', ojos='abiertos',
+    F.cabeza3(lz, 618, 439, 25, P2, '#2a1a14', 'afro', luz, giro=-0.5, inclina=-8, edad='nino', ojos='abiertos',
               boca='sonrisa', mira=(-0.9, 0.6), pendiente='#f2b630', iris='#4a2a1c', semilla=26)
     # the bulb's warm light: an edge on her left cheek and temple, not a haze over the face
-    lz.luz(Trazo([(600, 424), (598, 438), (600, 452)], (3.5, 4.5, 3.0)), '#fad6a0', fuerza=0.34, suave=1.6)
+    lz.luz(Trazo([(600, 429), (598, 443), (600, 457)], (3.5, 4.5, 3.0)), '#fad6a0', fuerza=0.34, suave=1.6)
     F.brazo3(lz, (596, 486), (574, 530), (556, 498), 16, '#f2c04a', P2, luz, 'corta',
              mano=dict(ang=-152, gesto='abierta', abre=0.6, lado=1, tam=30), semilla=27)
 
@@ -324,7 +324,7 @@ def abuela(sombra=True):
         f = Trazo([(x0, 760), (x0 + (6 if x0 > 290 else -6), 818)], (6, 5), suave=False)
         FR.volumen(lz, f, '#9a6a4a', luz, dens=0.75, prof=0.45, linea=False, duro=0.5)
     FR.volumen(lz, taburete, '#b8845a', luz, dens=0.75, prof=0.4, rayar=True, grosor=0.4, presion=0.3)
-    J = dict(cabeza=(298, 614, 29), hi=(268, 660), hd=(326, 664), ci=(272, 746), cd=(320, 748),
+    J = dict(cabeza=(298, 619, 29), hi=(268, 660), hd=(326, 664), ci=(272, 746), cd=(320, 748),
              pierna_i=[(282, 748), (338, 760), (336, 818)], pierna_d=[(308, 752), (360, 768), (362, 822)],
              pie_i=0, pie_d=0)
     P5.figura(lz, J, dict(camisa='#8d73b0', falda='#5f8f8a', piel='piel1', zapato='#6e4c3c', cuello=0.55, pliegues=True,
