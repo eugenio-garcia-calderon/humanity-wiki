@@ -724,3 +724,14 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 - **Hidden coupling:** the hydraulic flow passes between parts through a number formatted inside a text line.
 - **Next step:** a typed field for the flow, and a lean-aware rollover check. About 2 hours.
 - (2026-11-16) Calendario Arte design 7 (`mes-05-g.py`) is a whole copy of design 6's script (`mes-05-f.py`, ~680 lines) that changes one call (`PR.bailarina(retrato=True)`), the same copy-per-design pattern as designs 5 and 6. Chosen so no published design can change by accident. Cost: a fix to the shared scene has to be made in each copy, now 3 for May. Making `mes-05-f.py` take a `--retrato` flag and dropping the copy is about 15 minutes today; it grows with every design that copies a script.
+
+## 2026-11-16 · The hybrid is drawn, but its engine's place is fixed
+
+- **Resolved:** the 2026-11-15 entry «The plug-in hybrid has numbers but no parts». The parts are drawn, checked and weighed where they are.
+- **Engine position:** there is no slider for it. With three rows it collides with the shock tower and only a red check says so. A position slider (x, y), plus moving the tower, is about 2 hours.
+- **Fuel model:**
+  - Charge-sustaining is still constant-speed cruising with no on/off map.
+  - The parallel part-load curve is one line, not a BSFC map: a real map per engine class would take about half a day.
+  - The P2's load-point shifting is not modelled.
+- **Drawn but not checked:** the chain, the half-shafts (four wheels) and the exhaust headers. Neither do they move with the suspension or the tilt. The half-shafts pass through the arm fairings without a cut-out.
+- **Not in the CAD export or the planos.** `cad.ts` does not export the hybrid's parts: about 1 hour.

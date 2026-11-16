@@ -1852,3 +1852,14 @@ Eugenio asked for realistic, non-creepy faces, then chose: no money spent, only 
   - The body is still design 6's: about 12 heads tall, per the evaluator.
   - The other people keep design 6's heads.
   - Extending the approach to them means calling `retrato.cabeza` for each figure and checking each one's pose and neck.
+
+## 2026-11-16 · Plug-in hybrid: three architectures, and how the old slider maps
+
+- **Choice:** power split (THS), series and parallel P2. P4 was left out because the front wheels steer in pods on faired arms (or in the nose), so there is no room for a driveshaft.
+- **Power split:** the one efficiency is `mec·0.97 + (1−mec)·elec`. The mechanical share `mec` is a slider. Through Willis it sets the engine's rpm, `ω_c = ω_r·R/((R+S)·mec)`. So the split and the rpm figure cannot disagree; the other way round, they could.
+- **Migration:** old `tRendTrans` r becomes `mec = (r−0.83)/0.14` with elec 83 %. Below 85.8 % it becomes `mec = 20 %` and elec solved. The litres are exactly equal, and `scripts/triciclo-disenos.ts` checks six values.
+  - The migration lives in `camposTriciclo`. `PARAMETROS_TRICICLO` (which `deDiseno` merges under every saved design) leaves out the four new keys, so an old design can still be recognised there. `Disenos.tsx` was claimed by another bot for over two hours. Each key is migrated only while it is absent, so once Eugenio moves a hybrid slider, his value wins.
+- **Defaults:** 50 % mechanical and 83 % electrical give 90 %, the old default, so an untouched hybrid is unchanged.
+- **Parallel:** the engine's part-load penalty is the curve `min(1, 0.75 + 0.5·load)`, not a fuel map. Series caps the sustained petrol speed at the hub motor's rated power.
+- **Placement:** parts are placed, not moved to make room. `disponerHibrido` puts the engine behind the last backrest (wheel in the tail) or behind the frame's tower (four wheels), and searches the tank's and the silencer's shape and place. When something does not fit, a check says so; nothing is clamped.
+- **Code:** new code in its own files: `hibrido.ts` (pure), `hibrido3d.ts`, `FichaHibrido.tsx`. Shared files got small hooks.
