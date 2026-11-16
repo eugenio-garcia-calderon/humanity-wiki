@@ -1,0 +1,303 @@
+{
+ "ancho": 3508,
+ "alto": 2008,
+ "fondo": "fondo.jpg",
+ "capas": [
+  {
+   "id": "cordillera",
+   "nombre": "La cordillera",
+   "src": "cordillera.webp",
+   "x": 0.0,
+   "y": 0.5996,
+   "w": 1.0,
+   "h": 0.25199,
+   "fija": true
+  },
+  {
+   "id": "eolico",
+   "nombre": "El parque eólico lejano",
+   "src": "eolico.webp",
+   "x": 0.20353,
+   "y": 0.55827,
+   "w": 0.78449,
+   "h": 0.10657
+  },
+  {
+   "id": "lomas",
+   "nombre": "Las lomas",
+   "src": "lomas.webp",
+   "x": 0.0,
+   "y": 0.69671,
+   "w": 1.0,
+   "h": 0.2007,
+   "fija": true
+  },
+  {
+   "id": "lago",
+   "nombre": "El lago",
+   "src": "lago.webp",
+   "x": 0.50086,
+   "y": 0.74203,
+   "w": 0.248,
+   "h": 0.0493,
+   "fija": true
+  },
+  {
+   "id": "pueblo_lejano",
+   "nombre": "El pueblo lejano",
+   "src": "pueblo_lejano.webp",
+   "x": 0.56613,
+   "y": 0.68526,
+   "w": 0.0439,
+   "h": 0.04283
+  },
+  {
+   "id": "globo",
+   "nombre": "El globo",
+   "src": "globo.webp",
+   "x": 0.28164,
+   "y": 0.34612,
+   "w": 0.0268,
+   "h": 0.06574
+  },
+  {
+   "id": "bandada",
+   "nombre": "Las cigüeñas",
+   "src": "bandada.webp",
+   "x": 0.16106,
+   "y": 0.31325,
+   "w": 0.08694,
+   "h": 0.15737
+  },
+  {
+   "id": "planeador2",
+   "nombre": "El planeador pequeño",
+   "src": "planeador2.webp",
+   "x": 0.87657,
+   "y": 0.45468,
+   "w": 0.04903,
+   "h": 0.04084
+  },
+  {
+   "id": "praderas",
+   "nombre": "Las praderas",
+   "src": "praderas.webp",
+   "x": 0.0,
+   "y": 0.77739,
+   "w": 1.0,
+   "h": 0.22261,
+   "fija": true
+  },
+  {
+   "id": "rio",
+   "nombre": "El río",
+   "src": "rio.webp",
+   "x": 0.13284,
+   "y": 0.79233,
+   "w": 0.36859,
+   "h": 0.12948,
+   "fija": true
+  },
+  {
+   "id": "puente",
+   "nombre": "El puente y el tren solar",
+   "src": "puente.webp",
+   "x": 0.07269,
+   "y": 0.82321,
+   "w": 0.36545,
+   "h": 0.10608
+  },
+  {
+   "id": "campo_girasoles",
+   "nombre": "El campo de girasoles",
+   "src": "campo_girasoles.webp",
+   "x": 0.42959,
+   "y": 0.76992,
+   "w": 0.26568,
+   "h": 0.23008
+  },
+  {
+   "id": "colmenas",
+   "nombre": "Las colmenas",
+   "src": "colmenas.webp",
+   "x": 0.59151,
+   "y": 0.92181,
+   "w": 0.05986,
+   "h": 0.04781
+  },
+  {
+   "id": "pueblo",
+   "nombre": "El pueblo",
+   "src": "pueblo.webp",
+   "x": 0.69327,
+   "y": 0.60608,
+   "w": 0.2919,
+   "h": 0.29432
+  },
+  {
+   "id": "velomoviles",
+   "nombre": "Los velomóviles y la bici",
+   "src": "velomoviles.webp",
+   "x": 0.69869,
+   "y": 0.78237,
+   "w": 0.12343,
+   "h": 0.07719
+  },
+  {
+   "id": "planeador1",
+   "nombre": "El planeador grande",
+   "src": "planeador1.webp",
+   "x": 0.66705,
+   "y": 0.08317,
+   "w": 0.09436,
+   "h": 0.0762
+  },
+  {
+   "id": "rayos",
+   "nombre": "Los rayos de sol",
+   "src": "rayos.webp",
+   "x": 0.63597,
+   "y": 0.26793,
+   "w": 0.27223,
+   "h": 0.45867,
+   "fija": true
+  },
+  {
+   "id": "satelite",
+   "nombre": "El satélite",
+   "src": "satelite.webp",
+   "x": 0.13284,
+   "y": 0.29532,
+   "w": 0.0362,
+   "h": 0.02839
+  },
+  {
+   "id": "girasol",
+   "nombre": "El girasol",
+   "src": "girasol.webp",
+   "x": 0.19926,
+   "y": 0.07968,
+   "w": 0.4293,
+   "h": 0.91882
+  },
+  {
+   "id": "abuelo",
+   "nombre": "El abuelo y la lámpara",
+   "src": "abuelo.webp",
+   "x": 0.23261,
+   "y": 0.49153,
+   "w": 0.13911,
+   "h": 0.31873
+  },
+  {
+   "id": "nina",
+   "nombre": "La niña",
+   "src": "nina.webp",
+   "x": 0.32269,
+   "y": 0.47759,
+   "w": 0.11944,
+   "h": 0.28536
+  },
+  {
+   "id": "hilos",
+   "nombre": "Los hilos de luz",
+   "src": "hilos.webp",
+   "x": 0.56072,
+   "y": 0.31823,
+   "w": 0.36802,
+   "h": 0.4512
+  },
+  {
+   "id": "nino",
+   "nombre": "El niño",
+   "src": "nino.webp",
+   "x": 0.48717,
+   "y": 0.26643,
+   "w": 0.1565,
+   "h": 0.27639
+  },
+  {
+   "id": "luz_bombilla",
+   "nombre": "La luz de la bombilla",
+   "src": "luz_bombilla.webp",
+   "x": 0.26853,
+   "y": 0.40886,
+   "w": 0.18615,
+   "h": 0.3257,
+   "fija": true
+  },
+  {
+   "id": "bombilla",
+   "nombre": "La bombilla",
+   "src": "bombilla.webp",
+   "x": 0.34094,
+   "y": 0.54831,
+   "w": 0.02794,
+   "h": 0.04333
+  },
+  {
+   "id": "semillas",
+   "nombre": "Las semillas-molinillo",
+   "src": "semillas.webp",
+   "x": 0.63597,
+   "y": 0.2256,
+   "w": 0.19128,
+   "h": 0.39741
+  },
+  {
+   "id": "abeja",
+   "nombre": "La abeja",
+   "src": "abeja.webp",
+   "x": 0.60519,
+   "y": 0.18376,
+   "w": 0.01397,
+   "h": 0.03237
+  },
+  {
+   "id": "rama",
+   "nombre": "La rama de arriba",
+   "src": "rama.webp",
+   "x": 0.0,
+   "y": 0.01693,
+   "w": 0.27509,
+   "h": 0.31524
+  },
+  {
+   "id": "hierbas",
+   "nombre": "Las hierbas del primer plano",
+   "src": "hierbas.webp",
+   "x": 0.0,
+   "y": 0.6758,
+   "w": 1.0,
+   "h": 0.3242
+  },
+  {
+   "id": "mano",
+   "nombre": "La mano con el móvil",
+   "src": "mano.webp",
+   "x": 0.0,
+   "y": 0.55627,
+   "w": 0.15621,
+   "h": 0.29084
+  },
+  {
+   "id": "golondrina",
+   "nombre": "La golondrina",
+   "src": "golondrina.webp",
+   "x": 0.11317,
+   "y": 0.48655,
+   "w": 0.07925,
+   "h": 0.12849
+  },
+  {
+   "id": "marco",
+   "nombre": "El borde de papel",
+   "src": "marco.webp",
+   "x": 0.0,
+   "y": 0.0,
+   "w": 1.0,
+   "h": 1.0,
+   "fija": true
+  }
+ ]
+}

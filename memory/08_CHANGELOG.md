@@ -11884,3 +11884,43 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
 - Panel: sin icono de escala; con «Todo», los pilares vacíos ya no se pintan uno a uno, sino en una sola línea al final («Aún sin contenido aquí: …»); las preguntas para el equipo quedan plegadas; ancho hasta 1.240 px con líneas de texto de máx. ~80 caracteres.
 - Revisión por un agente independiente (24 capturas en 4 tamaños, medidas con JS). Corregido lo que encontró: el tamaño y color del elegido no se aplicaban por reglas antiguas más fuertes; el logo tapaba sectores a 1.024-1.280 px (ahora la fila de la portada se reparte en dos líneas y el lado izquierdo se puede desplazar); en el móvil el logo va en su propia línea y «Pantalla completa» ya no tapa los botones del 3D; la escena 3D sigue primero a la parte (Calle → calle) y luego a la escala; grises con contraste suficiente.
 - Fondo de los menús azul marino (`#0e1f3a`) en vez de verde casi negro.
+
+## 2026-11-16 — Calendario Arte: design 6 for May and June, people as a realistic watercolour, and the new favourite
+
+- Eugenio: «cambia el estilo del dibujo de ambas, para que los personajes sean más realistas, ahora parece mucho que lo ha pintado un niño, tiene que ser una acuarela realista, mantén todos los elementos, pero cambia el estilo, y para no perder el diseño anterior, añádelo en un nuevo diseño y marca ese nuevo como favorito».
+- New **design 6** for May (`mes-05-f`) and June (`mes-06-f`). It is design 5's scene with every element and plane in place and the people repainted:
+  - real proportions (smaller heads, children's faces for the children);
+  - faces modelled by the light, with eyes, lips and ears;
+  - necks that open into the shoulders;
+  - hands about three quarters of the face that hold what they hold;
+  - elbows, knees and folds;
+  - watercolour glazes and coloured-pencil hatching instead of flat washes and outlines.
+- Figures redrawn, not only repainted:
+  - the girl with the clay, kneeling on her heels;
+  - the grandmother's lap with its knees, and her needles held in her fingers;
+  - the boy's weight on a bent knee;
+  - the grandfather's hand round the lamp;
+  - the hand with the phone;
+  - the dancer's pointe foot;
+  - the small people of the square (painter, children at the puppet theatre, neighbours at the café).
+- Other changes in design 6:
+  - the storks have bodies;
+  - the painter's canvas is one canvas;
+  - the bulb and the sun light the people.
+- Design 6 is starred as the favourite of May and June, so it is the one printed. Designs 4 and 5 are unchanged: design 5 re-renders pixel-identical.
+- Code: `figuras_real.py` (the realistic painters, swapped in for one run with `activar()`), `personajes_real.py` (the redrawn figures), `mes-05-f.py` / `mes-06-f.py`, and an optional irregular rim light in `planos.py` (off by default).
+- Evaluator rounds:
+
+  | Round | June realism / overall | May realism / overall | What it said |
+  |---|---|---|---|
+  | r3 | 3 / 5.5 | 3 / 5.5 | Mannequins with masks |
+  | r6 | 4 / 5.5 | 3.5 / 5.5 | |
+  | r9 | 4 / 5 | 4 / 5.5 | A hard jaw shadow that read as a collar |
+  | r11 | 5.5 / 6.5 | 5 / 6 | «Se pueden publicar ya como diseño 6 y marcarse como favorito» |
+
+  The evaluator's honest note at r11: it no longer looks drawn by a child, but the people still read more as painted wooden figures than as a fully realistic watercolour. Open polish it named:
+  - the grandfather's gripping fingers;
+  - the boy's eyes;
+  - the flat shading of jeans and jackets;
+  - the girl's calves;
+  - the grandmother's and the clay girl's hands.

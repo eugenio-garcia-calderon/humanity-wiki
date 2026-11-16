@@ -118,3 +118,44 @@ python3 capas_a_ts.py
 Every illustration then goes through the evaluator (`.claude/agents/evaluador-ilustraciones.md`)
 at least twice.
 
+
+## People as a realistic watercolour (figuras_real.py, since 2026-11-16)
+
+Eugenio: «cambia el estilo del dibujo… para que los personajes sean más realistas, ahora
+parece mucho que lo ha pintado un niño, tiene que ser una acuarela realista, mantén todos
+los elementos». First done for May and June as design 6 (`mes-05-f`, `mes-06-f`), copies of
+the design-5 scripts, so designs 4 and 5 render exactly as before.
+
+`generadores/diseno4/figuras_real.py` paints the same calls the figures already make
+(`cabeza`, `cabeza3`, `mano`, `mano2`, `extremidad`, `brazo3`, `pierna3`, `torso`, `torso3`
+through `modelar`, `cuello3`, `cuello_natural`), only differently. `activar(luz, *modulos,
+lineas=0.6)` swaps them in for one run and softens every pencil outline:
+
+```python
+import figuras_real as FR
+FR.activar((0.6, -0.8), personajes_06, piezas_06, lineas=0.6)   # before the people are painted
+```
+
+- **Heads.** An ellipsoid seen at a real 3/4 angle (deeper than wide: in 3/4 the back of the
+  skull shows and the ear sits behind the face), with a relief on it (brow, eye sockets,
+  nose, cheekbones, lips, chin) lit from the scene's light. Adults' heads are about 0.86 of
+  the old circle; children keep a round low cheek, a small nose with no bridge, thin brows.
+  The shadow is about one and a half values, with lost (wet) edges; hard edges only at the
+  wing of the nose, under the lower lip and along the jaw. Eyes: cream whites, a dark iris
+  with a pupil and a catch-light, a lashes line thicker toward the outer corner.
+- **Bodies.** Limbs taper (deltoid into the shoulder, a narrower joint, the forearm or calf
+  swelling below it, a slim wrist or ankle); bent elbows and knees push the outline out and
+  gather V folds inside; trousers stop above the ankle; shirts have a waist and the
+  shoulders slope from the neck.
+- **Painting.** Every form is modelled as watercolour is: a wash, the shadow in two glazes
+  that dry with an edge and granulate, a little of it graded, coloured-pencil hatching that
+  follows the form in the shadow, pencil on the outline only where it turns from the light.
+  No airbrushed highlights: they were what made the first version read as plastic.
+- `personajes_real.py` redraws the figures whose silhouette had to change, not only their
+  painting (the kneeling girl, the grandmother's lap and hands, the boy's weight, the hand
+  with the phone…). It also has `persona_espalda()` and `nuca()` in figuras_real for small
+  people seen from behind, and `cabeza_perfil()` for small heads in profile.
+
+The evaluator judged it in two rounds. In the first, repainting the inside of the old
+silhouettes was not enough: they still read as mannequins and the faces as masks. That is why
+the rules above are about outlines as much as about paint.
