@@ -12063,3 +12063,11 @@ En Interior › «Acabado interior» aparece una ficha que explica qué se dibuj
 moldura, consola, cinturones…). Los controles que no sirven se esconden: con «Sin forro» desaparecen el color del forro,
 las molduras, la consola de techo y la luz ambiente; con la tapicería de serie, la costura; sin costura, su color. Y al
 pinchar en 3D una pieza del interior (forro, moldura, consola, cinturón…) se abre su bloque.
+
+## 2026-11-16 · Ordenar el código del Aeromóvil (1/4): el visor 3D en piezas
+
+Eugenio: «optimiza el codigo de la web aeromovil para que sea más eficiente a futuro generar nuevo código».
+Primer paso, sin ningún cambio visible: el archivo del visor 3D (`Visor3D.tsx`, 2.433 líneas) se parte en una carpeta
+`src/components/aeromovil/visor/` con un archivo por tema (materiales, piezas básicas, ocupante, Triciclo/Bala, Gota,
+Aeromóvil 1, cotas, garaje y el reparto por tipo de vehículo). El visor se queda con la escena, la cámara y la
+animación (≈1.000 líneas). Se ha copiado y pegado el código tal cual: el coche se ve igual y las cifras son las mismas.

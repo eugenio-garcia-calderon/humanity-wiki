@@ -21,7 +21,7 @@ export interface OpcionesTunel {
   kmh: number;
 }
 
-/** The same test as `CALIDAD_ALTA` in Visor3D.tsx: a phone gets fewer panels and fewer lines. */
+/** The same test as `CALIDAD_ALTA` in visor/materiales.ts: a phone gets fewer panels and fewer lines. */
 export const ES_ESCRITORIO = typeof window !== 'undefined' && !!window.matchMedia?.('(pointer: fine)').matches && !/Mobi|Android/i.test(navigator.userAgent);
 
 export function opcionesPorDefecto(): OpcionesTunel {
