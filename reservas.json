@@ -41,6 +41,12 @@
       "ruta": "src/components/aeromovil/geometriaTriciclo.ts",
       "motivo": "interior: acabado interior (bot interior)",
       "desde": "2026-11-16T17:35:33.983Z"
+    },
+    {
+      "agente": "interior",
+      "ruta": "src/components/aeromovil/geometria.ts",
+      "motivo": "interior: acabado interior (bot interior)",
+      "desde": "2026-11-16T17:35:40.440Z"
     }
   ]
 }
