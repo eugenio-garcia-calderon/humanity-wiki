@@ -11956,6 +11956,45 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
 - **Ejemplo:** el Rombo Bala como triciclo, con basculación eléctrica, necesita 949 N·m en el balancín y 1,8 kW de pico; el sistema pesa 16 kg.
 - **Aviso:** son estimaciones de un primer diseño, y el vuelco y el consumo aún no cuentan la inclinación.
 
+## 2026-11-16 · Calendario Arte: design 7 for May — the dancer's face painted from a real 3D face
+
+- Eugenio: «quiero caras y cuerpos realistas, quiero diseños no tan abstractos y creepes» … «hazlo que sea realista, pero utilizan esta suscripcion sin gastar dinero, apañatelas, hazlo solo de la cara de la bailarina del diseño de Arte, para simplificar, y luego vemos resultados».
+- New **design 7** for May (`mes-05-g`): design 6's scene with only the dancer's head and neck changed. Designs 1-6 and the favourite are unchanged; design 7 is not the favourite and is not the printed design.
+- The face is built from MediaPipe's canonical 3D face mesh (468 points of a real face, Apache 2.0, in `design/calendario-arte/generadores/diseno4/datos/`) and painted with the watercolour engine. No image generator and no paid service: all code.
+- What the viewer sees: a woman with a closed smile looking up toward her raised hand, real proportions (eyes half-way down the head, a forehead a third of the face, a 13.5 cm wide face), the hair pulled back over the ears into the bun, and a neck that fits under the jaw.
+- Blind evaluator (before the last fixes): new face 5 / old face 4 for realism, 6 / 4 for «not creepy», 5 / 3 for expression. The last fixes (gaze, smile, neck) were checked by eye, not by a second round.
+- Code: `retrato.py` (new), `mes-05-g.py` (copy of `mes-05-f.py`), `personajes_real.bailarina(retrato=False)`, optional `ancho`/`prof` in `figuras_real._cuello` (defaults unchanged). Renders: `public/calendario-arte/{ilustraciones,miniaturas}/mes-05-g.jpg`, `capas/mes-05-g/`.
+
+## 2026-11-16 · Híbrido enchufable: propulsión arriba, tres arquitecturas y el motor de gasolina en 3D
+
+Eugenio (15:03): «En motor la parte de propulsión es tan importante que tiene que estar arriba del todo. El selector de si es eléctrico o híbrido. Y luego si seleccionas híbrido… que cuando hablemos de motor, que sea motor eléctrico, cambiando ahí el titular. Y luego que aparezca también más información del engranaje planetario y las opciones que hay para conectar el motor híbrido y el eléctrico. Y también que se dibuje en 3D el motor de gasolina y las opciones que hay para conectarlo al sistema planetario y que sea algo más sofisticado a la hora de diseñar.»
+
+- **Pestaña Motor (Triciclo Bala y sus variantes).** Arriba del todo, un bloque «Propulsión» que siempre está abierto: eléctrica o híbrida enchufable. Debajo, «Híbrido enchufable» (solo con el híbrido) y después «Motor eléctrico», que antes se llamaba «Motor».
+- **Arquitectura del híbrido**, un selector nuevo con tres opciones reales: reparto con engranaje planetario (Toyota Prius), en serie (BMW i3 REx, Nissan e-Power) y en paralelo P2 (embrague, motor-generador y caja). Cada una tiene sus deslizadores de rendimiento:
+  - **Reparto:** qué parte va directa por el planetario (97 %) y el camino eléctrico (83 %). La parte directa fija, con la ecuación de Willis, a qué vueltas gira el motor.
+  - **En serie:** solo el camino eléctrico. La velocidad sostenida con gasolina queda limitada por la potencia nominal del motor de buje.
+  - **En paralelo:** caja y cadena (93 %). Con poca carga el motor rinde menos, porque va atado a las ruedas.
+- **No hay P4** (gasolina en un eje y electricidad en el otro): las ruedas de delante van en carenados sobre brazos, y un palier no cabe. Lo dice la explicación.
+- **Ficha nueva dentro del bloque:**
+  - Las tres maneras de unir la gasolina con las ruedas, con sus ventajas y pegas.
+  - El engranaje planetario explicado: sol, satélites, portasatélites y corona, la ecuación de Willis y la razón 78/30 = 2,6.
+  - Qué hace cada motor en cada modo: eléctrico, híbrido, mantener la carga, frenada y arranque.
+  - Las cifras: vueltas del motor, de la corona y del MG1, y la reducción de la cadena.
+- **Tabla de Rendimiento:** dos filas nuevas, el rendimiento de la gasolina hasta la rueda y las vueltas y el rendimiento del motor a la velocidad de cálculo.
+- **En 3D (capa «Motor»):**
+  - Un motor de gasolina de 1, 2 o 3 cilindros según la potencia: cárter, bloque, culata, tapa roja de levas, bobinas, admisión y escape hasta la cola.
+  - Va atravesado en el maletero: con la rueda en la cola, entre el último respaldo y la torreta del amortiguador; con cuatro ruedas, detrás de la torreta, con diferencial y palieres.
+  - Por arquitectura: el planetario en una carcasa transparente con sus dientes reales (sol 30, cuatro satélites, corona 78) y el MG1; el generador solo con su cable naranja; o embrague, P2 y caja de cambios. En los dos casos con cadena, la cadena va a la rueda.
+  - El depósito va sobre la rueda trasera, o sobre el diferencial.
+  - Al pinchar en cualquiera de esas piezas se abre el bloque del híbrido.
+- **Comprobaciones nuevas:**
+  - Que el motor, su unión, el depósito y el silencioso quepan dentro de la carrocería. Si algo asoma, se pinta en rojo y dice cuántos centímetros.
+  - Que el motor no choque con la torreta del amortiguador.
+  - Que con el reparto el motor no pase de 6.000 rpm.
+- **Las masas cuentan donde se dibujan,** no en un punto fijo. El motor y el depósito también quitan sitio al maletero.
+- **Diseños guardados:** un híbrido guardado con el deslizador antiguo «Conversión mecánica» abre como reparto con el mismo rendimiento, y gasta exactamente lo mismo (lo comprueba `scripts/triciclo-disenos.ts`). Lo único que cambia es su centro de gravedad, porque las piezas están ahora donde se dibujan.
+- **Con tres filas de asientos el motor no cabe** (choca con la torreta unos 25 cm): la comprobación lo dice en rojo.
+- Son estimaciones de un primer diseño, no medidas.
 ## 2026-11-16 · Batería más ancha que la carrocería y asientos fila a fila (Triciclo Bala / Cuadriciclo Bala clásico)
 Eugenio: «Permite aumentar el ancho de la batería aunque se salga del carenado» y «permite fila a fila, que se pueda escoger en la fila 2 y en la fila 3 de asientos, el número de plazas y el tipo de asiento».
 - **Ancho del paquete de batería** (Energía › Batería, con «A lo largo del bastidor»): el deslizador va ya de 100 % a 400 % del ancho del bastidor (el doble del tope de 200 % que había), aunque no quepa. El paquete se dibuja al ancho pedido y sus kWh cuentan todo ese ancho. La comprobación «Batería dentro de la carrocería» sale en rojo y dice cuántos centímetros sobresale. Pasado lo que cabía, el paquete ya no sube por la panza: se queda a su altura y sobresale por los lados; y el largo máximo no se acorta al ensancharlo.
