@@ -39,6 +39,7 @@ import {
   ALTO_FILAS, ANCHO_FILAS, AGARRE, AUXILIARES, CRR, DEPS_TRICICLO, EQUIPAJE, RENDIMIENTO, RUEDAS_TRICICLO, SELECTORES_TRICICLO, USABLE, VUELCO_OBJETIVO, bateriaChasis, camposTriciclo, cargasRueda, conButacas, conSalpicadero, grupoPieza, largueroAlEje, masaButaca, conPortonAptera, conPuertas, deslizadoresTriciclo, energiaTriciclo, conBatalla, esCuatro, esRombo, estirarTriciclo, guardarTriciclo, largoTriciclo, lemasTriciclo, limitarTriciclo, nombreTriciclo, vistaTriciclo,
   type DepTriciclo, type FichaTriciclo,
 } from '../components/aeromovil/geometriaTriciclo';
+import { kgPorDepartamento, textoKg, type KgDepartamento } from '../components/aeromovil/PesosDepartamento';
 import { TECNOLOGIAS_BASCULA, type Tilt } from '../components/aeromovil/basculacion';
 import { cuerpoTriciclo, peticionDe as peticionTunel } from '../components/aeromovil/tunel/nuestro';
 // ── Cuadriciclo Basculante (2026-11-15): its sidebar, its Cd and its departments (basculante/, geometriaBasculante.ts)
@@ -1016,13 +1017,15 @@ const NOMBRE_CORTO: Record<IdDepartamento, string> = { proyecto: 'Proyecto', car
  * (Diseño 3D, Tareas…) fold into `MenuSecciones`. On a phone the row scrolls sideways.
  * Vehicles without departments (the Gota, the Cuadriciclo en rombo) have no tabs: the bar keeps only the logo and the menu.
  */
-function PestanasDepartamento({ lista, dep, alElegir }: { lista: { id: IdDepartamento; lema: string }[]; dep: IdDepartamento | null; alElegir: (d: IdDepartamento) => void }) {
+function PestanasDepartamento({ lista, dep, alElegir, kg }: { lista: { id: IdDepartamento; lema: string }[]; dep: IdDepartamento | null; alElegir: (d: IdDepartamento) => void; kg?: KgDepartamento | null }) {
   return (
     <nav aria-label="Departamentos" className="order-last flex w-full min-w-0 gap-0.5 overflow-x-auto [scrollbar-width:none] sm:order-none sm:w-auto sm:flex-1 [&::-webkit-scrollbar]:hidden">
       {lista.map(d => { const Icono = ICONO_DEP[d.id], activo = dep === d.id; return (
         <Button key={d.id} variant="ghost" aria-pressed={activo} onClick={() => alElegir(d.id)} title={d.lema}
           className={cn('shrink-0 flex-col gap-0.5 px-2.5 py-1 text-[11px] normal-case tracking-normal', activo ? 'bg-teal-700 text-white hover:bg-teal-800' : 'text-slate-600')}>
           <Icono className="h-4 w-4" />{NOMBRE_CORTO[d.id]}
+          {/* (2026-11-16) the department's mass, from the same pieces as «Peso: todos los componentes» (PesosDepartamento.ts) */}
+          {kg && textoKg(kg[d.id as keyof KgDepartamento]) && <span className={cn('-mt-0.5 font-mono text-[10px] leading-none tabular-nums', activo ? 'text-teal-100' : 'text-slate-500')}>{textoKg(kg[d.id as keyof KgDepartamento])}</span>}
         </Button>); })}
     </nav>
   );
@@ -1425,7 +1428,7 @@ export default function Aeromovil() {
             alNuevo={() => { setP(PARAMETROS_POR_DEFECTO); setActual(null); cargarDisenoPorDefecto().then(d => { if (d) { setP(deDiseno(d.parametros || {})); setActual(null); } }); }}
             alGuardado={alGuardado} />
           {(esA1 || porDeps)
-            ? <PestanasDepartamento lista={pestanas} dep={seccion === 'diseno' ? (porDeps ? depTri : dep) : null} alElegir={d => { setDep(d); setSoloDep(false); if (seccion !== 'diseno') navegar('/aeromovil'); }} />
+            ? <PestanasDepartamento lista={pestanas} kg={porDeps ? kgPorDepartamento(res) : null} dep={seccion === 'diseno' ? (porDeps ? depTri : dep) : null} alElegir={d => { setDep(d); setSoloDep(false); if (seccion !== 'diseno') navegar('/aeromovil'); }} />
             : null}
           <div className="flex-1 sm:hidden" />
           {!(esA1 || porDeps) && <div className="hidden flex-1 sm:block" />}
