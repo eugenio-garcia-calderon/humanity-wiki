@@ -5,6 +5,12 @@
       "ruta": "src/components/aeromovil/geometria.ts",
       "motivo": "Basculación detallada",
       "desde": "2026-11-16T13:48:12.115Z"
+    },
+    {
+      "agente": "basc",
+      "ruta": "src/components/aeromovil/geometriaTriciclo.ts",
+      "motivo": "Basculación detallada",
+      "desde": "2026-11-16T13:48:19.320Z"
     }
   ]
 }
