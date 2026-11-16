@@ -723,6 +723,35 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 - **Not modelled:** the dynamic tilt controller, the lean in the rollover, consumption and range figures, and the pod-to-body clearance with the rods drawn.
 - **Hidden coupling:** the hydraulic flow passes between parts through a number formatted inside a text line.
 - **Next step:** a typed field for the flow, and a lean-aware rollover check. About 2 hours.
+- (2026-11-16) Calendario Arte design 7 (`mes-05-g.py`) is a whole copy of design 6's script (`mes-05-f.py`, ~680 lines) that changes one call (`PR.bailarina(retrato=True)`), the same copy-per-design pattern as designs 5 and 6. Chosen so no published design can change by accident. Cost: a fix to the shared scene has to be made in each copy, now 3 for May. Making `mes-05-f.py` take a `--retrato` flag and dropping the copy is about 15 minutes today; it grows with every design that copies a script.
+
+## 2026-11-16 · The hybrid is drawn, but its engine's place is fixed
+
+- **Resolved:** the 2026-11-15 entry «The plug-in hybrid has numbers but no parts». The parts are drawn, checked and weighed where they are.
+- **Engine position:** there is no slider for it. With three rows it collides with the shock tower and only a red check says so. A position slider (x, y), plus moving the tower, is about 2 hours.
+- **Fuel model:**
+  - Charge-sustaining is still constant-speed cruising with no on/off map.
+  - The parallel part-load curve is one line, not a BSFC map: a real map per engine class would take about half a day.
+  - The P2's load-point shifting is not modelled.
+- **Drawn but not checked:** the chain, the half-shafts (four wheels) and the exhaust headers. Neither do they move with the suspension or the tilt. The half-shafts pass through the arm fairings without a cut-out.
+- **Not in the CAD export or the planos.** `cad.ts` does not export the hybrid's parts: about 1 hour.
+## 2026-11-16 · Two tail-width sliders for one idea
+
+`tColaAncho` (smooth body) and `tColaPlanaAncho` (round body with a flat tail) both widen the tail through the same
+`DimBala.colaAncho`. Kept apart so that no saved design changes (see 03_DECISIONS, same date). Merging them would need a
+data migration that zeroes `tColaAncho` in every saved design without `tCubierta: 'lisa'`, then one slider shown with
+either body: about 1 hour today (migration + `triciclo-disenos` check), more once designs multiply. No slider either for
+where the full width starts (fixed at the body's widest point, x_ref −1.5): about 30 minutes to add one if asked.
+
+## 2026-11-16 · Triciclo rows: one-off shortcuts
+- **Old pack top kept as a ceiling.** `paqueteAntes` keeps the pre-2026-11-16 pack range alive only so saved designs build identically and the length/height do not jump. Two options: retire it with a one-time data migration of stored designs (about 1 h with a script against the API), or keep it.
+- **Rows checked at one seat only.** The knee/foot/head checks use each row's outermost right place, plus the centre one for heads. The left side is a mirror. With three places, the centre passenger's feet are not checked separately. Checking every place: about 1 h.
+- **Frame posts ignore the seats.** The frame's seat posts for row 2 stay at ±24.5 cm (±10 cm with one seat) whatever the seats. Row 3's stay at ±10 cm. Following each seat: about 30 min.
+
+
+
+## 2026-11-16 · Garage preferences only per browser
+The garage's per-car state (shown/hidden, removed, dragged place) lives in localStorage (`aeromovil_garaje_v5`, the designs' places key). Eugenio sees a different garage on his phone than on his desktop. Moving the three into one per-user JSON on the server (a column or a row in an existing per-user table, one GET + one PUT with `requireLevel`) is about 2 hours today, including merging what each browser already has.
 
 ## 2026-11-16 · Department mass totals computed in three places from the same grouping
 

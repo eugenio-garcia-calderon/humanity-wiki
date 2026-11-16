@@ -11956,6 +11956,75 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
 - **Ejemplo:** el Rombo Bala como triciclo, con basculación eléctrica, necesita 949 N·m en el balancín y 1,8 kW de pico; el sistema pesa 16 kg.
 - **Aviso:** son estimaciones de un primer diseño, y el vuelco y el consumo aún no cuentan la inclinación.
 
+## 2026-11-16 · Calendario Arte: design 7 for May — the dancer's face painted from a real 3D face
+
+- Eugenio: «quiero caras y cuerpos realistas, quiero diseños no tan abstractos y creepes» … «hazlo que sea realista, pero utilizan esta suscripcion sin gastar dinero, apañatelas, hazlo solo de la cara de la bailarina del diseño de Arte, para simplificar, y luego vemos resultados».
+- New **design 7** for May (`mes-05-g`): design 6's scene with only the dancer's head and neck changed. Designs 1-6 and the favourite are unchanged; design 7 is not the favourite and is not the printed design.
+- The face is built from MediaPipe's canonical 3D face mesh (468 points of a real face, Apache 2.0, in `design/calendario-arte/generadores/diseno4/datos/`) and painted with the watercolour engine. No image generator and no paid service: all code.
+- What the viewer sees: a woman with a closed smile looking up toward her raised hand, real proportions (eyes half-way down the head, a forehead a third of the face, a 13.5 cm wide face), the hair pulled back over the ears into the bun, and a neck that fits under the jaw.
+- Blind evaluator (before the last fixes): new face 5 / old face 4 for realism, 6 / 4 for «not creepy», 5 / 3 for expression. The last fixes (gaze, smile, neck) were checked by eye, not by a second round.
+- Code: `retrato.py` (new), `mes-05-g.py` (copy of `mes-05-f.py`), `personajes_real.bailarina(retrato=False)`, optional `ancho`/`prof` in `figuras_real._cuello` (defaults unchanged). Renders: `public/calendario-arte/{ilustraciones,miniaturas}/mes-05-g.jpg`, `capas/mes-05-g/`.
+
+## 2026-11-16 · Híbrido enchufable: propulsión arriba, tres arquitecturas y el motor de gasolina en 3D
+
+Eugenio (15:03): «En motor la parte de propulsión es tan importante que tiene que estar arriba del todo. El selector de si es eléctrico o híbrido. Y luego si seleccionas híbrido… que cuando hablemos de motor, que sea motor eléctrico, cambiando ahí el titular. Y luego que aparezca también más información del engranaje planetario y las opciones que hay para conectar el motor híbrido y el eléctrico. Y también que se dibuje en 3D el motor de gasolina y las opciones que hay para conectarlo al sistema planetario y que sea algo más sofisticado a la hora de diseñar.»
+
+- **Pestaña Motor (Triciclo Bala y sus variantes).** Arriba del todo, un bloque «Propulsión» que siempre está abierto: eléctrica o híbrida enchufable. Debajo, «Híbrido enchufable» (solo con el híbrido) y después «Motor eléctrico», que antes se llamaba «Motor».
+- **Arquitectura del híbrido**, un selector nuevo con tres opciones reales: reparto con engranaje planetario (Toyota Prius), en serie (BMW i3 REx, Nissan e-Power) y en paralelo P2 (embrague, motor-generador y caja). Cada una tiene sus deslizadores de rendimiento:
+  - **Reparto:** qué parte va directa por el planetario (97 %) y el camino eléctrico (83 %). La parte directa fija, con la ecuación de Willis, a qué vueltas gira el motor.
+  - **En serie:** solo el camino eléctrico. La velocidad sostenida con gasolina queda limitada por la potencia nominal del motor de buje.
+  - **En paralelo:** caja y cadena (93 %). Con poca carga el motor rinde menos, porque va atado a las ruedas.
+- **No hay P4** (gasolina en un eje y electricidad en el otro): las ruedas de delante van en carenados sobre brazos, y un palier no cabe. Lo dice la explicación.
+- **Ficha nueva dentro del bloque:**
+  - Las tres maneras de unir la gasolina con las ruedas, con sus ventajas y pegas.
+  - El engranaje planetario explicado: sol, satélites, portasatélites y corona, la ecuación de Willis y la razón 78/30 = 2,6.
+  - Qué hace cada motor en cada modo: eléctrico, híbrido, mantener la carga, frenada y arranque.
+  - Las cifras: vueltas del motor, de la corona y del MG1, y la reducción de la cadena.
+- **Tabla de Rendimiento:** dos filas nuevas, el rendimiento de la gasolina hasta la rueda y las vueltas y el rendimiento del motor a la velocidad de cálculo.
+- **En 3D (capa «Motor»):**
+  - Un motor de gasolina de 1, 2 o 3 cilindros según la potencia: cárter, bloque, culata, tapa roja de levas, bobinas, admisión y escape hasta la cola.
+  - Va atravesado en el maletero: con la rueda en la cola, entre el último respaldo y la torreta del amortiguador; con cuatro ruedas, detrás de la torreta, con diferencial y palieres.
+  - Por arquitectura: el planetario en una carcasa transparente con sus dientes reales (sol 30, cuatro satélites, corona 78) y el MG1; el generador solo con su cable naranja; o embrague, P2 y caja de cambios. En los dos casos con cadena, la cadena va a la rueda.
+  - El depósito va sobre la rueda trasera, o sobre el diferencial.
+  - Al pinchar en cualquiera de esas piezas se abre el bloque del híbrido.
+- **Comprobaciones nuevas:**
+  - Que el motor, su unión, el depósito y el silencioso quepan dentro de la carrocería. Si algo asoma, se pinta en rojo y dice cuántos centímetros.
+  - Que el motor no choque con la torreta del amortiguador.
+  - Que con el reparto el motor no pase de 6.000 rpm.
+- **Las masas cuentan donde se dibujan,** no en un punto fijo. El motor y el depósito también quitan sitio al maletero.
+- **Diseños guardados:** un híbrido guardado con el deslizador antiguo «Conversión mecánica» abre como reparto con el mismo rendimiento, y gasta exactamente lo mismo (lo comprueba `scripts/triciclo-disenos.ts`). Lo único que cambia es su centro de gravedad, porque las piezas están ahora donde se dibujan.
+- **Con tres filas de asientos el motor no cabe** (choca con la torreta unos 25 cm): la comprobación lo dice en rojo.
+- Son estimaciones de un primer diseño, no medidas.
+## 2026-11-16 · Aeromóvil: la cola plana puede llegar con todo el ancho, como el Aptera
+
+Eugenio: «haz que la cola pueda ser más ancha en el formato de cola plana ocupe el máximo ancho de vehiculo, como en el aptera.»
+
+- Nuevo deslizador en Carrocería → Cola: **«Cola plana: ancho al final»** (de 0 a 100 %). Sale solo con la cola plana («Cola: en punta o plana» por encima de 0) y con la cubierta redonda; con la cubierta lisa ya existía «Cola: ancho al final», que no cambia.
+- A 100 % la cola mantiene todo el ancho de la carrocería desde su parte más ancha hasta el final (solo se cierra un 5 %) y acaba en un borde recto de lado a lado, con las esquinas redondeadas. Si la cola es plana a medias, el ancho cuenta a medias. La barra de luz de atrás, el portón y el panel solar de la cola van hasta el borde (a 3 cm del final).
+- En 0 (lo de siempre) todos los diseños guardados se construyen igual que antes: es una clave nueva, `tColaPlanaAncho`, con 0 por defecto.
+- Números en el «Rombo Bala» de Eugenio (túnel, resolución media), de 0 a 100 %: Cd 0,2128 → 0,2131; área frontal 1,1675 → 1,1739 m²; superficie mojada 9,41 → 9,92 m²; panel solar 1,68 → 1,80 m².
+- No hay otro deslizador para «hasta dónde aguanta el ancho»: el ensanche empieza siempre en la parte más ancha de la carrocería.
+## 2026-11-16 · Batería más ancha que la carrocería y asientos fila a fila (Triciclo Bala / Cuadriciclo Bala clásico)
+Eugenio: «Permite aumentar el ancho de la batería aunque se salga del carenado» y «permite fila a fila, que se pueda escoger en la fila 2 y en la fila 3 de asientos, el número de plazas y el tipo de asiento».
+- **Ancho del paquete de batería** (Energía › Batería, con «A lo largo del bastidor»): el deslizador va ya de 100 % a 400 % del ancho del bastidor (el doble del tope de 200 % que había), aunque no quepa. El paquete se dibuja al ancho pedido y sus kWh cuentan todo ese ancho. La comprobación «Batería dentro de la carrocería» sale en rojo y dice cuántos centímetros sobresale. Pasado lo que cabía, el paquete ya no sube por la panza: se queda a su altura y sobresale por los lados; y el largo máximo no se acorta al ensancharlo.
+- **Diseños guardados:** se abren igual que antes. Uno guardado con un ancho que el tope de entonces recortaba se abre con el ancho recortado, que es el que se dibujaba.
+- **Fila a fila** (Interior › Tres filas, con «Asientos: Tres filas»): en la fila 2 y en la fila 3 se escoge cuántas plazas lleva (una, dos o tres, a 49 cm de centro a centro) y el tipo de asiento:
+  - asientos de coche, como hasta ahora;
+  - banco corrido: un cojín y un respaldo para toda la fila, con un reposacabezas por plaza en la fila 2;
+  - plegables ligeros tipo transportín: asiento y respaldo finos sobre un marco de aluminio.
+  Todos se dibujan en 3D y se pliegan. De serie sigue siendo 2 + 1 asientos de coche, igual que antes.
+- **Lo que sigue a los asientos:** ocupantes, masas (estimadas: banco 1,1 veces «un asiento» por plaza, plegable 0,8; en la fila 3, 1,0 y 0,7), centro de gravedad, vuelco, maletero, cargas del bastidor y las comprobaciones de cabeza, rodillas, pies y hombros.
+- **Comprobaciones nuevas:** «Asientos de la fila 2 caben de lado» y «Asientos de la fila 3 caben de lado» (dicen cuánto falta por lado), y «Hombros de la fila 3 a la cúpula» cuando la fila 3 lleva más de una plaza.
+- **Aviso:** tres plazas en la fila 2 no caben ni con la carrocería más ancha (1,30 m): faltan unos 15 cm por lado. Las comprobaciones lo dicen en rojo.
+
+
+
+## 2026-11-16 · Los coches de referencia también se pueden eliminar del garaje
+Eugenio: «permite que se puedan borrar también los coches de referencia».
+- **Qué hay ahora.** En el Aeromóvil, cada coche de referencia del garaje (Twizy, Aptera, XL1, Smera, EQXX…) tiene «Eliminar del garaje»: en su tarjeta, al pincharlo en el 3D, y con una papelera en su fila de la lista del garaje (botón «Garaje» o el bloque «Garaje» del panel). Antes de quitarlo pregunta en la misma tarjeta («Sí, quitar» / «No»), sin ventanas del navegador.
+- **Qué hace.** El coche deja de salir en la lista y en el 3D (no solo se oculta: tampoco sale en «Superponer» ni lo saca el túnel). Debajo de la lista aparece «Coches quitados (N) · Recuperar», que lo devuelve al garaje, visible.
+- **Qué no hace.** Los coches de referencia son modelos del programa, iguales para todos: quitarlo no lo borra para nadie más. Se recuerda **en este navegador** (como el sitio donde arrastras cada coche): el móvil o la app guardan su propia lista.
+
 ## 2026-11-16 · El peso de cada departamento, debajo de su pestaña
 
 Eugenio: «cuando pinche en un modelo, que en el menú superior donde pone carrocería, pongas ahí debajo el número en kilogramos del peso de la carrocería de ese modelo, donde pone chasis… el peso del chasis, y lo mismo con rodaje, motor e interior».

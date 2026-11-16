@@ -166,7 +166,11 @@ else {
     // round 4 (2026-11-13): the roof frame, 0 by default (no frame)
     'tMarcoTecho',
     // 2026-11-13: the smooth body, off by default (its keys act only with «Cubierta lisa»)
-    'tCubierta', 'tColaAncho', 'tColaGrosor', 'tColaBombeo', 'tBajosIni', 'tBajosCurva', 'tMorroAncho', 'tMorroGrosor', 'tMorroBombeo'];
+    'tCubierta', 'tColaAncho', 'tColaGrosor', 'tColaBombeo', 'tBajosIni', 'tBajosCurva', 'tMorroAncho', 'tMorroGrosor', 'tMorroBombeo',
+    // 2026-11-16: the round body's flat tail width, 0 by default
+    'tColaPlanaAncho',
+    // 2026-11-16: rows 2 and 3 row by row (their defaults are the old 2 + 1 car seats)
+    'tFila2N', 'tFila3N', 'tFila2Tipo', 'tFila3Tipo'];
   const NUEVOS_12 = NUEVOS.slice(8);
   /** The design as it was saved before 2026-11-12: without the keys that did not exist (this module's defaults carry them). */
   const deAntes = (P: Partial<Parametros>) => Object.fromEntries(Object.entries(P).filter(([k]) => !NUEVOS_12.includes(k))) as Partial<Parametros>;
@@ -224,6 +228,8 @@ else {
       console.log(`NUEVA ${nombre}: «${paso.nombre}» ${paso.holgura < paso.minimo ? 'ROJO' : 'ok'} ${paso.mostrar ?? ''}`);
       rb.comprobaciones = rb.comprobaciones.filter((c: { nombre: string }) => c !== paso);
     }
+    // (2026-11-16: the pack's check renamed, «Batería dentro de la carrocería», in two departments: same number, same place)
+    for (const c of ra.comprobaciones) if (c.nombre === 'Batería, paquete a lo largo del bastidor: dentro de la carrocería') { c.nombre = 'Batería dentro de la carrocería'; c.dep = 'energia,carroceria'; }
     ok(igual(ra, rb), `${nombre}: mismos resultados que en main, aparte de las masas (área, cabezas, comprobaciones${igual(ra, rb) ? '' : `; distintos: ${diferencias(ra, rb).slice(0, 6).join(', ')}`})`);
   }
   // 2026-11-11 (the «Bala de cuatro ruedas»): with one rear wheel, every mesh of the whole vehicle as on main
@@ -251,6 +257,25 @@ else {
     const ra = limpio(g.calcular(ma, g.areas(ma))), rb = limpio(calcular(mb2, areas(mb2)));
     ok(igual(ra, rb), `${nombre}: mismos resultados que en main (área, Cd, masas, comprobaciones${b.disposicion === 'bala' ? ', cabezas' : ''})`);
   }
+}
+
+// ── 2026-11-16: a plug-in hybrid saved with the one «Conversión mecánica» slider (`tRendTrans`) opens as the power split
+// that gives the same efficiency: the same litres per 100 km as the formula of 2026-11-15
+{
+  const { energiaTriciclo, AUXILIARES, CRR, KWH_LITRO_GASOLINA } = await import('../src/components/aeromovil/geometriaTriciclo');
+  for (const rt of [75, 80, 85.5, 90, 95, 97]) {
+    const viejo = { ...JSON.parse(JSON.stringify(aDiseno(PARAMETROS_TRICICLO))), tPropulsion: 'phev', tRendTrans: rt } as Record<string, unknown>;
+    for (const k of ['tHibArq', 'tHibMec', 'tRendElec', 'tRendCaja']) delete viejo[k];
+    const m = crearModelo(deDiseno(viejo as Partial<Parametros>)) as ModeloTriciclo, res = calcular(m, areas(m));
+    const cd = { cd: 0.2, areaRef: 0.9 }, e = energiaTriciclo(m, res.mTot, cd)!, v = m.campos.tVel / 3.6;
+    const antes = (((0.5 * 1.2 * cd.cd * cd.areaRef * v ** 3 + CRR * res.mTot * 9.81 * v) / (rt / 100) + AUXILIARES) / (m.campos.tRendTerm / 100)) / v / 3.6 / KWH_LITRO_GASOLINA / 10;
+    ok(m.phev?.arq === 'reparto' && Math.abs(e.hibrido!.litros100 - antes) < 1e-9, `un híbrido guardado con «Conversión mecánica» ${rt} %: abre como reparto (${m.campos.tHibMec.toFixed(1)} % directo, camino eléctrico ${m.campos.tRendElec.toFixed(1)} %) y gasta lo mismo (${e.hibrido!.litros100.toFixed(4)} L/100 km)`);
+  }
+  const nuevo = { ...JSON.parse(JSON.stringify(aDiseno({ ...PARAMETROS_TRICICLO, tPropulsion: 'phev', tHibArq: 'serie', tRendElec: 81 } as Parametros))), tRendTrans: 95 };
+  const T = camposTriciclo(deDiseno(nuevo));
+  ok(T.tHibArq === 'serie' && T.tRendElec === 81, 'un híbrido guardado ya con su arquitectura no se toca aunque lleve un «tRendTrans» viejo');
+  const movido = camposTriciclo(deDiseno({ ...JSON.parse(JSON.stringify(aDiseno(PARAMETROS_TRICICLO))), tPropulsion: 'phev', tRendTrans: 95, tHibMec: 60 }));
+  ok(movido.tHibArq === 'reparto' && movido.tHibMec === 60 && movido.tRendElec === 83, 'y uno viejo en el que ya se movió «parte directa» conserva lo que se movió');
 }
 
 console.log(fallos ? `\n${fallos} fallos` : '\nTodo OK');

@@ -258,6 +258,8 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   tMatCarenado: 'carbonoLino', tEspCarenado: 1.5, tEspCristal: 3,
   tPilX: 1.06, tPilY: 0.40, tPasX: 1.54, tPasY: 0.43, tRecPil: 5, tRecPas: 0, tManX: 0, tManY: 0, tPiesX: 0, tPiesY: 0, tMOcc: 80, tMAsiento: 3.5,
   tAsientos: 'horcajadas', tFila2: 'abierta', tFila3: 'abierta', tFila2X: 0.70, tFila3X: 0.72, tRecFila: 15,
+  // 2026-11-16, row by row (filasTriciclo.ts): rows 2 and 3 as they always were, two car seats and one
+  tFila2N: '2', tFila3N: '1', tFila2Tipo: 'coche', tFila3Tipo: 'coche',
   tChMat: 'cromoly', tChD: 45, tChT: 2.4, tChUniones: 3.5,
   tBatalla: 2.45, tEjeDel: 0.30, tVia: 1.80, tRuedaDel: '20', tRuedaTras: '24', tGiro: 28, tRecDel: 80, tRecTras: 80, tBasculante: 0.50,
   // the «Cuadriciclo Bala clásico» (2026-11-11): one rear wheel in the tail by default; a design without `tViaTras` takes its own `tVia` (camposTriciclo)
@@ -269,7 +271,10 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   // 2026-11-15 (Eugenio, «Rombo Bala»): the wheels in a diamond, one in the nose, two lateral in pods, one in the tail; off by default
   tRuedas: 'clasica', tEjeLat: 1.35,
   // 2026-11-15 (Eugenio): a plug-in hybrid like the Prius (power-split planetary gear); off by default
-  tPropulsion: 'electrico', tPhevKW: 25, tRendTerm: 38, tRendTrans: 90, tDeposito: 20,
+  tPropulsion: 'electrico', tPhevKW: 25, tRendTerm: 38, tDeposito: 20,
+  // 2026-11-16: the hybrid's architecture (hibrido.ts). The power split at 50 % mechanical (97 %) and 83 % electrical gives
+  // 90 %, the old «Conversión mecánica» default: an untouched hybrid gives the same litres as before
+  tHibArq: 'reparto', tHibMec: 50, tRendElec: 83, tRendCaja: 93,
   tMRueda: 4.5, tMFreno: 1.2, tMSuspDel: 9, tMSuspTras: 6, tMDir: 4.5,
   tKWNom: 5, tKWPico: 10, tMMotor: 13, tMInversor: 2.5, tVel: 80,
   tKWh: 9, tWhKg: 160, tWhL: 230, tMVarios: 12, tSolarM2: 2.2,
@@ -293,8 +298,15 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   // The smooth body (2026-11-13, the clásico: «la cola y el maletero… la misma pieza… nunca… montículos», the Aptera's
   // wide nose and tail, its light bar and the belly's sweep). Off by default: every other key below acts only with it on.
   tCubierta: 'redonda', tColaAncho: 0, tColaGrosor: 0, tColaBombeo: 0.01, tBajosIni: 0.20, tBajosCurva: 0, tMorroAncho: 0, tMorroGrosor: 0, tMorroBombeo: 0.02,
+  // 2026-11-16 (Eugenio: «que la cola pueda ser más ancha en el formato de cola plana… como en el aptera»): the round
+  // body's flat tail towards the full width; 0 by default, so every saved design is built as before
+  tColaPlanaAncho: 0,
 };
-export const PARAMETROS_TRICICLO: Parametros = { ...PARAMETROS_GOTA, disposicion: 'triciclo', ...TRICICLO_DEFECTO };
+// (2026-11-16: without the hybrid architecture's four keys. `deDiseno` merges this under every saved design, so a key
+// here is never missing by the time `camposTriciclo` runs; left out, a hybrid saved with the old «Conversión mecánica»
+// (`tRendTrans`) can be told apart there and opened as the power split that gives the same litres: hibrido.ts `migrarRendTrans`)
+const { tHibArq: _a, tHibMec: _b, tRendElec: _c, tRendCaja: _d, ...TRICICLO_SIN_HIBRIDO } = TRICICLO_DEFECTO;
+export const PARAMETROS_TRICICLO: Parametros = { ...PARAMETROS_GOTA, disposicion: 'triciclo', ...TRICICLO_SIN_HIBRIDO };
 /** The Cuadriciclo Basculante (2026-11-15): its `q…` fields (basculante/defecto.ts); the rest comes from the Gota and it does not use it. */
 export const PARAMETROS_BASCULANTE: Parametros = { ...PARAMETROS_GOTA, disposicion: 'basculante', ...BASCULANTE_DEFECTO };
 export const PARAMETROS_POR_DEFECTO: Parametros = PARAMETROS_A1;

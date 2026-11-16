@@ -28,7 +28,9 @@
 // Pure (no three.js): the wind tunnel's Web Worker builds it for «Probar» and
 // for the Cd the results use.
 
+import { OPCIONES_NUM_FILA, OPCIONES_TIPO_FILA, factorMasaAsiento, filasDetras, medidasAsiento, nombrePlaza, numFila, type NumFila, type TipoAsientoFila } from './filasTriciclo';
 import { dimensionarTilt, TECNOLOGIAS_BASCULA, type TecBascula, type Tilt } from './basculacion';
+import { ARQUITECTURAS_HIBRIDO, RPM_MAX_MOTOR, cifrasHibrido, disponerHibrido, factorCargaParcial, migrarRendTrans, rendimientoHibrido, type ArqHibrido } from './hibrido';
 import type { Comprobacion, MaterialCarenado, MaterialChasis, Parametros, PuntosOcupante, Pulgadas, Resultados, Rueda, Tubo, P3 } from './geometria';
 import { MATERIALES_CARENADO, MATERIALES_CHASIS, RENDIMIENTO_SOLAR, TRICICLO_DEFECTO, largoTubo } from './geometria';
 import { T3, T_CUBIERTA, crearForma, punto, type DimBala, type FormaBala } from './garaje/balaForma';
@@ -72,6 +74,9 @@ export interface CamposTriciclo {
   tFila2X: number;     // caderas de la fila 2 detrás de las del piloto (m)
   tFila3X: number;     // caderas de la fila 3 detrás de las de la fila 2 (m)
   tRecFila: number;    // reclinado de los respaldos de las filas 2 y 3 (°)
+  // 2026-11-16, row by row (filasTriciclo.ts): places side by side and the kind of seat of rows 2 and 3. A design saved without them takes the old layout (2 + 1 car seats).
+  tFila2N: NumFila; tFila3N: NumFila;
+  tFila2Tipo: TipoAsientoFila; tFila3Tipo: TipoAsientoFila;
   // Chasis
   tChMat: MaterialChasis; tChD: number; tChT: number; tChUniones: number;   // mm, mm, kg
   // Rodaje
@@ -101,7 +106,12 @@ export interface CamposTriciclo {
   tPropulsion: 'electrico' | 'phev';   // solo eléctrico (hasta ahora) o híbrido enchufable: motor de gasolina unido por un engranaje planetario
   tPhevKW: number;     // potencia del motor de gasolina (kW)
   tRendTerm: number;   // rendimiento del motor de gasolina (%): energía del combustible que sale en el eje
-  tRendTrans: number;  // rendimiento de la conversión mecánica (%): engranaje planetario, generador y motor eléctrico, del eje del motor a la rueda
+  // 2026-11-16 (Eugenio: «las opciones que hay para conectar el motor híbrido y el eléctrico»): hibrido.ts. They replace the
+  // single «Conversión mecánica» (`tRendTrans`), which a design saved before opens as (`camposTriciclo`, hibrido.ts `migrarRendTrans`)
+  tHibArq: ArqHibrido; // reparto con planetario (Prius), en serie (i3 REx, e-Power) o en paralelo P2
+  tHibMec: number;     // reparto: parte de la potencia que pasa directa por el planetario (%)
+  tRendElec: number;   // reparto y serie: rendimiento del camino eléctrico, generador → inversores → motor (%)
+  tRendCaja: number;   // paralelo: rendimiento de la caja de cambios y la cadena (%)
   tDeposito: number;   // depósito de gasolina (L)
   tMRueda: number; tMFreno: number; tMSuspDel: number; tMSuspTras: number; tMDir: number;   // kg
   // Propulsión
@@ -174,6 +184,8 @@ export interface CamposTriciclo {
   tMorroAncho: number;   // el morro visto desde arriba: 0 como hasta ahora … 1 todo el ancho, con el frente cuadrado y redondeado
   tMorroGrosor: number;  // el grosor del borde del morro (m): 0 se cierra en punta
   tMorroBombeo: number;  // lo que sube el capó sobre la recta de su canto al centro (m)
+  // 2026-11-16: the flat tail without the smooth body, towards the body's full width (0 as before … 1 the Aptera's)
+  tColaPlanaAncho: number;
 }
 export type ClaveTriciclo = keyof CamposTriciclo;
 /**
@@ -204,7 +216,7 @@ export const RUEDAS_TRICICLO: Record<RuedaTriciclo, { d: number; neuDel: number;
   c14: { d: 0.554, neuDel: 0.165, neuTras: 0.165, n: '14″ de coche, 165/60 R14 (554 mm)', kg: 2.62, kWBuje: 45, carga: 387 },
   c15: { d: 0.574, neuDel: 0.175, neuTras: 0.175, n: '15″ de coche, 175/55 R15 (574 mm)', kg: 2.96, kWBuje: 60, carga: 412 },
 };
-type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tTraseras' | 'tBascula' | 'tRuedas' | 'tPropulsion' | 'tBascTec' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero';
+type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tFila2N' | 'tFila3N' | 'tFila2Tipo' | 'tFila3Tipo' | 'tTraseras' | 'tBascula' | 'tRuedas' | 'tPropulsion' | 'tHibArq' | 'tBascTec' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero';
 export type ClaveNumTriciclo = Exclude<ClaveTriciclo, ClaveTexto>;
 
 // ------------------------------------------------------------------ deslizadores
@@ -231,6 +243,8 @@ export const nombreTriciclo = (T: Pick<CamposTriciclo, 'tTraseras'> & Partial<Pi
 export const lemasTriciclo = (T: Pick<CamposTriciclo, 'tTraseras'> & Partial<CamposTriciclo>): Record<DepTriciclo | 'proyecto', string> => {
   const o = { ...LEMAS_TRICICLO };
   if (esCuatro(T)) o.propulsion = 'los dos motores en los bujes de las ruedas traseras';
+  // (2026-11-16) the plug-in hybrid: the petrol engine and its connection join the hub motor(s)
+  if (T.tPropulsion === 'phev') o.propulsion = `híbrido enchufable: el motor de gasolina, cómo se une a las ruedas, y ${esCuatro(T) ? 'los dos motores eléctricos en los bujes traseros' : 'el motor eléctrico en el buje trasero'}`;
   if (T.tBatDisp === 'chasis') o.energia = 'la batería (un paquete a lo largo del bastidor) y el techo solar';
   // (round 3 interior: either dashboard; with the Aptera buckets, pedals instead of footboards)
   if (T.tMando === 'volante' || conSalpicadero(T as CamposTriciclo) || T.tAsientos === 'butacas') o.interior = `los asientos (a horcajadas, dos butacas como el Aptera o tres filas que se pliegan), ${T.tMando === 'volante' ? 'volante' : 'manillar'}${conSalpicadero(T as CamposTriciclo) ? ', salpicadero' : ''}, ${T.tAsientos === 'butacas' ? 'pedales' : 'plataformas'} y maletero`;
@@ -298,6 +312,8 @@ const FILAS: Fila[] = [
   ['tMorroAlto', 'carroceria', 'Morro', null, 'Morro: altura de la punta (más baja, más alta)', -0.12, 0.40, 0.005, 'cm'],
   ['tFaroD', 'carroceria', 'Morro', null, 'Faro central: ancho', 0.10, 0.24, 0.01, 'cm'],
   ['tColaPlana', 'carroceria', 'Cola', null, 'Cola: en punta o plana y ancha (como el Aptera)', 0, 1, 0.05, 'x'],
+  // 2026-11-16: only with the flat tail and without «Cubierta lisa» (Aeromovil.tsx `visible`)
+  ['tColaPlanaAncho', 'carroceria', 'Cola', null, 'Cola plana: ancho al final (hasta todo el ancho, como el Aptera)', 0, 1, 0.05, 'x'],
   ['tTechoPlano', 'carroceria', 'Cúpula', null, 'Techo: redondeado o plano', 0, 1, 0.05, 'x'],
   ['tCaida', 'carroceria', 'Cúpula', null, 'Techo: caída hacia el maletero (antes o más tarde)', -0.60, 0.80, 0.05, 'x'],
   // 2026-11-15
@@ -374,15 +390,18 @@ const FILAS: Fila[] = [
   ['tMSuspDel', 'rodaje', 'Masas', null, 'Suspensión delantera (las dos)', 5, 13, 0.5, 'kg'],
   ['tMSuspTras', 'rodaje', 'Masas', null, 'Basculante y amortiguador trasero', 4, 8, 0.5, 'kg'],
   ['tMDir', 'rodaje', 'Masas', null, 'Dirección: columna, cremallera y bieletas', 3, 6, 0.5, 'kg'],
-  ['tKWNom', 'propulsion', 'Motor', null, 'Potencia nominal', 2, 30, 0.5, 'kW'],
-  ['tKWPico', 'propulsion', 'Motor', null, 'Potencia máxima', 5, 60, 0.5, 'kW'],
-  ['tMMotor', 'propulsion', 'Motor', null, 'Motor de buje', 5, 62, 0.5, 'kg'],
-  ['tMInversor', 'propulsion', 'Motor', null, 'Controlador (inversor)', 1.4, 14, 0.1, 'kg'],
-  ['tVel', 'propulsion', 'Motor', null, 'Velocidad de cálculo', 40, 120, 5, 'km/h'],
+  ['tKWNom', 'propulsion', 'Motor eléctrico', null, 'Potencia nominal', 2, 30, 0.5, 'kW'],
+  ['tKWPico', 'propulsion', 'Motor eléctrico', null, 'Potencia máxima', 5, 60, 0.5, 'kW'],
+  ['tMMotor', 'propulsion', 'Motor eléctrico', null, 'Motor de buje', 5, 62, 0.5, 'kg'],
+  ['tMInversor', 'propulsion', 'Motor eléctrico', null, 'Controlador (inversor)', 1.4, 14, 0.1, 'kg'],
+  ['tVel', 'propulsion', 'Motor eléctrico', null, 'Velocidad de cálculo', 40, 120, 5, 'km/h'],
   // 2026-11-15: only with the plug-in hybrid (the page hides them otherwise)
   ['tPhevKW', 'propulsion', 'Híbrido enchufable', null, 'Motor de gasolina: potencia', 8, 60, 0.5, 'kW'],
   ['tRendTerm', 'propulsion', 'Híbrido enchufable', null, 'Motor de gasolina: rendimiento', 20, 42, 0.5, '%'],
-  ['tRendTrans', 'propulsion', 'Híbrido enchufable', null, 'Conversión mecánica (planetario y generador)', 75, 97, 0.5, '%'],
+  // 2026-11-16: per architecture (the page shows each with its own: `tHibMec` power split, `tRendElec` split and series, `tRendCaja` parallel)
+  ['tHibMec', 'propulsion', 'Híbrido enchufable', null, 'Reparto: parte que va directa por el planetario', 20, 100, 1, '%'],
+  ['tRendElec', 'propulsion', 'Híbrido enchufable', null, 'Camino eléctrico: generador, inversores y motor', 65, 92, 0.5, '%'],
+  ['tRendCaja', 'propulsion', 'Híbrido enchufable', null, 'Caja de cambios y cadena', 85, 97, 0.5, '%'],
   ['tDeposito', 'propulsion', 'Híbrido enchufable', null, 'Depósito de gasolina', 5, 45, 1, 'L'],
   ['tKWh', 'energia', 'Batería', null, 'Batería', 5, 30, 0.5, 'kWh'],
   // 2026-11-12: one pack along the frame (only with «A lo largo del bastidor»): its size decides its capacity
@@ -433,14 +452,21 @@ const ruedas = (l: RuedaTriciclo[]) => l.map(k => ({ k, n: RUEDAS_TRICICLO[k].n 
 export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
   { clave: 'tSolarCola', n: 'Paneles solares por detrás', dep: 'carroceria', bloque: 'Techo solar y ventanas', opciones: [{ k: 'no', n: 'Solo en la cúpula' }, { k: 'si', n: 'Hasta la punta de la cola (como el Aptera)' }] },
   { clave: 'tVentanas', n: 'Cúpula', dep: 'carroceria', bloque: 'Techo solar y ventanas', opciones: [{ k: 'marco', n: 'Ventanas laterales con montante (Aptera)' }, { k: 'burbuja', n: 'De una pieza (como el Cuadriciclo en rombo)' }] },
-  { clave: 'tAsientos', n: 'Asientos', dep: 'interior', bloque: 'Asientos', opciones: [{ k: 'horcajadas', n: 'A horcajadas (2 plazas)' }, { k: 'butacas', n: 'Dos butacas como el Aptera (2 plazas)' }, { k: 'filas', n: 'Tres filas: 1 + 2 + 1 (4 plazas)' }] },
-  { clave: 'tFila2', n: 'Fila 2 (dos asientos juntos)', dep: 'interior', bloque: 'Tres filas', opciones: [{ k: 'abierta', n: 'Abierta: dos pasajeros' }, { k: 'plegada', n: 'Plegada: maletero' }] },
-  { clave: 'tFila3', n: 'Fila 3 (un asiento pequeño)', dep: 'interior', bloque: 'Tres filas', opciones: [{ k: 'abierta', n: 'Abierta: un pasajero' }, { k: 'plegada', n: 'Plegada: maletero' }] },
+  { clave: 'tAsientos', n: 'Asientos', dep: 'interior', bloque: 'Asientos', opciones: [{ k: 'horcajadas', n: 'A horcajadas (2 plazas)' }, { k: 'butacas', n: 'Dos butacas como el Aptera (2 plazas)' }, { k: 'filas', n: 'Tres filas: el piloto y dos filas detrás (de serie 1 + 2 + 1, 4 plazas)' }] },
+  { clave: 'tFila2', n: 'Fila 2: abierta o plegada', dep: 'interior', bloque: 'Tres filas', opciones: [{ k: 'abierta', n: 'Abierta: con sus pasajeros' }, { k: 'plegada', n: 'Plegada: maletero' }] },
+  { clave: 'tFila3', n: 'Fila 3: abierta o plegada', dep: 'interior', bloque: 'Tres filas', opciones: [{ k: 'abierta', n: 'Abierta: con sus pasajeros' }, { k: 'plegada', n: 'Plegada: maletero' }] },
+  // 2026-11-16, row by row (filasTriciclo.ts)
+  { clave: 'tFila2N', n: 'Fila 2: plazas una al lado de otra', dep: 'interior', bloque: 'Tres filas', opciones: OPCIONES_NUM_FILA },
+  { clave: 'tFila2Tipo', n: 'Fila 2: tipo de asiento', dep: 'interior', bloque: 'Tres filas', opciones: OPCIONES_TIPO_FILA },
+  { clave: 'tFila3N', n: 'Fila 3: plazas una al lado de otra', dep: 'interior', bloque: 'Tres filas', opciones: OPCIONES_NUM_FILA },
+  { clave: 'tFila3Tipo', n: 'Fila 3: tipo de asiento', dep: 'interior', bloque: 'Tres filas', opciones: OPCIONES_TIPO_FILA },
   { clave: 'tMatCarenado', n: 'Material de la carrocería', dep: 'carroceria', bloque: 'Material y espesores', opciones: [{ k: 'carbonoLino', n: 'Carbono-lino' }, { k: 'vidrio', n: 'Fibra de vidrio' }, { k: 'carbono', n: 'Fibra de carbono' }] },
   { clave: 'tChMat', n: 'Material de los tubos', dep: 'chasis', bloque: 'Bastidor', opciones: [{ k: 'al6061', n: 'Aluminio 6061-T6' }, { k: 'cromoly', n: 'Acero cromoly 4130' }, { k: 'carbono', n: 'Tubo de carbono' }] },
   { clave: 'tRuedaDel', n: 'Ruedas delanteras (en los carenados)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['16', '20', '24', '26', '28', 'c13', 'c14', 'c15']) },
   { clave: 'tRuedaTras', n: 'Rueda trasera (dentro de la cola)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['20', '24', '26', '28', 'c13', 'c14', 'c15']) },
-  { clave: 'tPropulsion', n: 'Propulsión', dep: 'propulsion', bloque: 'Motor', opciones: [{ k: 'electrico', n: 'Eléctrica: solo batería' }, { k: 'phev', n: 'Híbrida enchufable (PHEV), con engranaje planetario como el Prius' }] },
+  // (2026-11-16, Eugenio: «la parte de propulsión es tan importante que tiene que estar arriba del todo»: its own block, first)
+  { clave: 'tPropulsion', n: 'Propulsión', dep: 'propulsion', bloque: 'Propulsión', opciones: [{ k: 'electrico', n: 'Eléctrica: solo batería' }, { k: 'phev', n: 'Híbrida enchufable (PHEV): batería y motor de gasolina' }] },
+  { clave: 'tHibArq', n: 'Arquitectura del híbrido', dep: 'propulsion', bloque: 'Híbrido enchufable', opciones: ARQUITECTURAS_HIBRIDO },
   { clave: 'tRuedas', n: 'Disposición de las ruedas', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: [{ k: 'clasica', n: 'Dos delante en carenados' }, { k: 'rombo', n: 'En rombo: una en el morro, dos laterales en carenados, una en la cola' }] },
   { clave: 'tTraseras', n: 'Ruedas traseras', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: [{ k: 'una', n: 'Una en la cola (triciclo)' }, { k: 'dos', n: 'Dos en carenados (cuatro ruedas)' }] },
   // 2026-11-15: only with four wheels (the page hides it otherwise)
@@ -572,6 +598,25 @@ function sepMaxima(T: CamposTriciclo): number {
   return v;
 }
 let cacheCabe: { clave: string; v: { largo: number; semi: number } } | null = null;
+/** The half-width (m) of a pack `pct` % of the frame's width. */
+export const semiAnchoPaquete = (T: CamposTriciclo, pct: number) => pct / 100 * anchoBastidor(T) / 2;
+/** The pack's half-width (m) as stored, within its slider's ends only. */
+const semiAnchoFijo = (T: CamposTriciclo) => { const fa = fichaTriciclo('tBatAncho')!; return semiAnchoPaquete(T, Math.min(fa.max, Math.max(fa.min, T.tBatAncho))); };
+/**
+ * The pack's ranges as they were until 2026-11-16, for a pack of half-width `hz0` (m): the longest (m) and the widest
+ * (%) that fit in the body (`paqueteCabe`), never less than 2.40 m up to the controller's place and, at the old rails'
+ * spacing, 200 %. The width is no longer clamped to `anchoMax`; it stays as the ceiling for what the pack's width does
+ * to its length's range and to its height on the belly (`fondoPaquete`), so a design saved before builds as it did.
+ */
+export function paqueteAntes(T: CamposTriciclo, hz0: number): { largoMax: number; anchoMax: number } {
+  const fa = fichaTriciclo('tBatAncho')!, fl = fichaTriciclo('tBatLargo')!, l0 = Math.min(fl.max, Math.max(fl.min, T.tBatLargo));
+  const antes = Math.max(fl.min, Math.min(2.40, finPaquete(T) - limitarTriciclo('tBatX', T)));
+  const c0 = paqueteCabe(T, hz0, l0), largoMax = Math.max(antes, Math.min(fl.max, Math.floor(c0.largo * 100 + 1e-6) / 100));
+  const c1 = l0 <= largoMax ? c0 : paqueteCabe(T, hz0, largoMax);
+  // (the old 200 % only at the old rails' spacing, where it was the range: with wider rails, 200 % may not fit)
+  const anchoMax = Math.max(T.tChSep === TRICICLO_DEFECTO.tChSep ? 200 : fa.min, Math.min(fa.max, Math.floor(2 * c1.semi / anchoBastidor(T) * 100 / 5 + 1e-6) * 5));
+  return { largoMax, anchoMax };
+}
 /**
  * Round 3 interior (2026-11-12, Eugenio: «el largo de la batería, del paquete de baterías, no lo limites… el ancho tampoco
  * lo limites»): the longest and the widest pack that fits in the body, 1 cm inside the skin, lying on the belly (at most
@@ -613,6 +658,8 @@ export function formaR3(T: CamposTriciclo): Partial<DimBala> {
   const o: Partial<Record<keyof DimBala, number>> = {};
   for (const [k, d] of CLAVES_FORMA_R3) { const v = limitarTriciclo(k, T); if (v) o[d] = v; }
   if (conLisa(T)) { o.lisa = 1; for (const [k, d] of CLAVES_LISA) o[d] = limitarTriciclo(k, T); }
+  // 2026-11-16: the round body's flat tail, widened (balaForma reads it times `colaPlana`); only when both are set
+  else if (o.colaPlana) { const v = limitarTriciclo('tColaPlanaAncho', T); if (v) o.colaAncho = v; }
   return o as unknown as Partial<DimBala>;
 }
 let cacheCuerpo: { clave: string; F: FormaBala } | null = null;
@@ -645,7 +692,10 @@ let cacheFondo: { clave: string; v: number } | null = null;
  */
 export function fondoPaquete(T: CamposTriciclo): number {
   const p = paqueteX(T); if (!p) return 0;
-  const L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), suelo = Math.min(L('tSuelo'), SUELO_RIGIDO), hz = semiPaquete(T);
+  const L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), suelo = Math.min(L('tSuelo'), SUELO_RIGIDO);
+  // (2026-11-16: a pack wider than the old range's top, `paqueteAntes`, sits as that one would: it sticks out of the
+  // body rather than climbing up the belly's curve; the check says by how much)
+  const hz0 = semiPaquete(T), hz = Math.min(hz0, paqueteAntes(T, hz0).anchoMax / 100 * anchoBastidor(T) / 2);
   const F = cuerpoDe(T), clave = JSON.stringify([suelo, hz, p, F.D]);
   if (cacheFondo?.clave === clave) return cacheFondo.v;
   const xs = [0, 0.25, 0.5, 0.75, 1].map(u => p[0] + (p[1] - p[0]) * u);
@@ -684,6 +734,15 @@ export function camposTriciclo(P: Partial<Parametros>): CamposTriciclo {
   // a design saved without a rear track (every one before the «Cuadriciclo Bala clásico») takes its front one
   const vt = (P as Record<string, unknown>).tViaTras;
   if (!(typeof vt === 'number' && Number.isFinite(vt))) o.tViaTras = o.tVia;
+  // 2026-11-16: a hybrid saved with the one «Conversión mecánica» slider (`tRendTrans`) and no architecture opens as the
+  // power split with the same efficiency, so its litres per 100 km do not change. Only what it does not have yet: once a
+  // hybrid slider is moved, that key is in the design and wins (PARAMETROS_TRICICLO leaves these keys out for this)
+  const Q = P as Record<string, unknown>, rt = Q.tRendTrans;
+  if (Q.tHibArq === undefined && typeof rt === 'number' && Number.isFinite(rt)) {
+    const { mec, elec } = migrarRendTrans(rt); o.tHibArq = 'reparto';
+    if (typeof Q.tHibMec !== 'number') o.tHibMec = mec;
+    if (typeof Q.tRendElec !== 'number') o.tRendElec = elec;
+  }
   return o as unknown as CamposTriciclo;
 }
 
@@ -748,16 +807,14 @@ export function rangoTriciclo(k: ClaveNumTriciclo, T: CamposTriciclo): [number, 
   // round 3 interior (2026-11-12, «no lo limites»): as long and as wide as fits in the body (`paqueteCabe`), no longer
   // stopped at the controller: the checks say what it runs into. The width's range reads the length within its own
   // range, and the length's reads the width only within the slider's ends, so the two never ask each other.
-  if (k === 'tBatLargo' || k === 'tBatAncho') {
-    const fa = fichaTriciclo('tBatAncho')!, fl = fichaTriciclo('tBatLargo')!, fijo = (g: FichaTriciclo, v: number) => Math.min(g.max, Math.max(g.min, v));
-    const hz0 = fijo(fa, T.tBatAncho) / 100 * anchoBastidor(T) / 2, l0 = fijo(fl, T.tBatLargo);
-    // (never less than the ranges had before, 2.40 m up to the controller's place and 200 % at the old spacing: a saved design keeps its values)
-    const antes = Math.max(fl.min, Math.min(2.40, finPaquete(T) - limitarTriciclo('tBatX', T)));
-    const c0 = paqueteCabe(T, hz0, l0), largoMax = Math.max(antes, Math.min(fl.max, Math.floor(c0.largo * 100 + 1e-6) / 100));
-    if (k === 'tBatLargo') return [fl.min, largoMax];
-    const c1 = l0 <= largoMax ? c0 : paqueteCabe(T, hz0, largoMax);
-    // (the old 200 % only at the old rails' spacing, where it was the range: with wider rails, 200 % may not fit)
-    return [f.min, Math.max(T.tChSep === TRICICLO_DEFECTO.tChSep ? 200 : f.min, Math.min(f.max, Math.floor(2 * c1.semi / anchoBastidor(T) * 100 / 5 + 1e-6) * 5))];
+  // 2026-11-16 (Eugenio: «permite aumentar el ancho de la batería aunque se salga del carenado»): the width is no longer
+  // clamped to what fits: the whole slider, 100 to 400 % (twice the old 200 % top), and the check «Batería dentro de la
+  // carrocería» says by how much it sticks out. A design saved before opens at the width it was built with (Disenos.tsx
+  // `paqueteDeAntes`). The length's range reads the width only up to that old top, so widening never shortens the pack.
+  if (k === 'tBatAncho') return [f.min, f.max];
+  if (k === 'tBatLargo') {
+    const hz = semiAnchoFijo(T), tope = paqueteAntes(T, hz).anchoMax / 100 * anchoBastidor(T) / 2;
+    return [fichaTriciclo('tBatLargo')!.min, paqueteAntes(T, Math.min(hz, tope)).largoMax];
   }
   // round 3 interior: the rails' spacing up to what keeps them on the belly (never below the old spacing's 22 cm as its maximum)
   if (k === 'tChSep') return [f.min, Math.max(TRICICLO_DEFECTO.tChSep, Math.min(f.max, sepMaxima(T)))];
@@ -1008,7 +1065,11 @@ export function puntosFila(xH: number, yS: number, rec: number, yPiso: number, e
   return { H, S: Sh, C, K, F: Fp, d, dh, hx: xH, mano, anchoMano: 0.13, anchoPiernas: [0.09, pies] };
 }
 /** A seat of «tres filas»: hips x, centre z, cushion top y, its size, its recline and whether it is folded. */
-export interface AsientoFila { fila: 1 | 2 | 3; x: number; z: number; y: number; ancho: number; fondo: number; respaldo: number; rec: number; plegado: boolean }
+export interface AsientoFila {
+  fila: 1 | 2 | 3; x: number; z: number; y: number; ancho: number; fondo: number; respaldo: number; rec: number; plegado: boolean;
+  /** 2026-11-16 (filasTriciclo.ts): the kind of seat and, for a bench, how many places it carries. Absent: a car seat for one, as before. */
+  tipo?: TipoAsientoFila; plazas?: number;
+}
 /** Who sits where (the viewer draws them, the mass and the checks count them). */
 export interface Plaza { nombre: string; fila: 1 | 2 | 3; z: number; piloto: boolean; pts: PuntosOcupante; talla: (escala: number) => PuntosOcupante }
 
@@ -1298,7 +1359,7 @@ export function crearModeloTriciclo(P: Parametros) {
     if (!filas) poste(`Soporte del sillín del pasajero ${lado}`, [-1.50 + dxPas, yL, s * zL], [-1.55 + dxPas, 0.35 + dyPas, s * 0.08]);
     else {
       // three rows (round three): a post under each seat of row 2 and a pair under row 3, from the rails to the seat's pan
-      poste(`Soporte del asiento de la fila 2 ${lado}`, [x2 + 0.04, yL, s * zL], [x2 - 0.02, yAsiento - 0.09, s * Z_FILA2]);
+      poste(`Soporte del asiento de la fila 2 ${lado}`, [x2 + 0.04, yL, s * zL], [x2 - 0.02, yAsiento - 0.09, s * (numFila(T.tFila2N, 2) === 1 ? 0.10 : Z_FILA2)]);
       poste(`Soporte del asiento de la fila 3 ${lado}`, [x3 + 0.04, yL, s * zL], [x3 - 0.02, yAsiento - 0.09, s * 0.10]);
     }
     }
@@ -1311,7 +1372,7 @@ export function crearModeloTriciclo(P: Parametros) {
   tubos.push(T_('Travesaño bajo los sillines', [-1.25, yL, -zL], [-1.25, yL, zL]));
   tubos.push(T_('Travesaño del basculante', [xPiv, yL, -zL], [xPiv, yL, zL]));
   // (seats down on the frame, 2026-11-12: the crossbar never below the rails' top)
-  if (filas) { const yt = Math.max(yAsiento - 0.09, yL + dT); tubos.push(T_('Travesaño de la fila 2', [x2 - 0.02, yt, -(Z_FILA2 + 0.10)], [x2 - 0.02, yt, Z_FILA2 + 0.10])); }
+  if (filas) { const yt = Math.max(yAsiento - 0.09, yL + dT); const zt = numFila(T.tFila2N, 2) === 1 ? 0.20 : Z_FILA2 + 0.10; tubos.push(T_('Travesaño de la fila 2', [x2 - 0.02, yt, -zt], [x2 - 0.02, yt, zt])); }
   // the steering-column support: from the cradle's top bar back and up to the steering head under the dash
   // (round 4, 2026-11-13, «el alto total no se puede bajar más»: below the old floor of «Alto total», 1.15 m, the head comes
   // down to stay 2 cm under the top line there; at 1.15 and above, where every saved design is, it is where it always was)
@@ -1470,8 +1531,12 @@ export function crearModeloTriciclo(P: Parametros) {
     const A = ASIENTOS_FILAS, plegada2 = T.tFila2 === 'plegada', plegada3 = T.tFila3 === 'plegada';
     asientosFilas.push({ fila: 1, x: asientos.xPiloto, z: 0, y: asientos.yPiloto, ...A.piloto, rec: rec.piloto, plegado: false });
     const recF = L('tRecFila');
-    for (const z of [Z_FILA2, -Z_FILA2]) asientosFilas.push({ fila: 2, x: x2, z, y: yAsiento, ...A.fila2, rec: recF, plegado: plegada2 });
-    asientosFilas.push({ fila: 3, x: x3, z: 0, y: yAsiento, ...A.fila3, rec: recF, plegado: plegada3 });
+    // 2026-11-16, row by row: each rear row's places side by side and kind of seat (filasTriciclo.ts; by default 2 + 1 car seats, as before)
+    for (const r of filasDetras(T)) {
+      const x = r.fila === 2 ? x2 : x3, plegado = r.fila === 2 ? plegada2 : plegada3, med = medidasAsiento(r.tipo, r.fila === 2 ? A.fila2 : A.fila3, r.n);
+      const extra = { ...(r.tipo !== 'coche' ? { tipo: r.tipo } : {}), ...(r.tipo === 'banco' ? { plazas: r.n } : {}) };
+      for (const z of r.tipo === 'banco' ? [0] : r.zs) asientosFilas.push({ fila: r.fila, x, z, y: yAsiento, ...med, rec: recF, plegado, ...extra });
+    }
     // the feet: forward on the floor beside the rails (row 2 under the pilot's seat, row 3 under row 2's), as low as the
     // belly's curve lets them at their outer edge (1.5 cm inside the skin, never below the belly's floor)
     const piso = (x: number, z: number, ancho: number) => {
@@ -1481,9 +1546,23 @@ export function crearModeloTriciclo(P: Parametros) {
       return paquete ? y + sobrePaquete(x - 0.20, x + 0.02, Math.abs(z) - ancho - 0.045, y) : y;
     };
     const fila = (x: number, z: number, ancho: number, e = 1) => puntosFila(x, yAsiento, recF, piso(x + 0.60 + 0.09, z, ancho), e, ancho);
-    if (!plegada2) for (const [z, n] of [[Z_FILA2, 'der.'], [-Z_FILA2, 'izq.']] as const) plazas.push({ nombre: `Fila 2 ${n}`, fila: 2, z, piloto: false, pts: fila(x2, z, PIES_FILA2), talla: e => fila(x2, z, PIES_FILA2, e) });
-    if (!plegada3) plazas.push({ nombre: 'Fila 3', fila: 3, z: 0, piloto: false, pts: fila(x3, 0, PIES_FILA3), talla: e => fila(x3, 0, PIES_FILA3, e) });
+    // (each passenger's feet: off the centre line close together, as row 2's two always were; on it, apart, as row 3's one)
+    for (const r of filasDetras(T)) {
+      if (r.fila === 2 ? plegada2 : plegada3) continue;
+      const x = r.fila === 2 ? x2 : x3;
+      for (const z of r.zs) { const pies = Math.abs(z) < 1e-9 ? PIES_FILA3 : PIES_FILA2; plazas.push({ nombre: nombrePlaza(r.fila, z, r.n), fila: r.fila, z, piloto: false, pts: fila(x, z, pies), talla: e => fila(x, z, pies, e) }); }
+    }
   }
+
+  // ── 2026-11-16: the plug-in hybrid's parts, where they fit (hibrido.ts): behind the last backrest, or behind the frame's tower
+  const ultimo = filas ? asientosFilas.reduce((a, b) => (b.fila > a.fila ? b : a)) : { x: asientos.xPasajero, y: asientos.yPasajero, rec: rec.pasajero };
+  const hibArq: ArqHibrido = T.tHibArq ?? 'reparto';
+  const hib = T.tPropulsion === 'phev' ? disponerHibrido({
+    F, arq: hibArq, kW: L('tPhevKW'), litros: L('tDeposito'), xR, rR, yEje: motor.c[1], recTras, cuatro: !!traseras, viaTras: traseras ? traseras.VIA_LAT : 0,
+    pivote: basculante.pivote, torreta: amortiguador.arriba,
+    respaldo: (y: number) => ultimo.x - 0.19 - Math.max(0, y - ultimo.y) * Math.tan(Math.max(0, ultimo.rec) * Math.PI / 180),
+    cajas: [...baterias, inversor], yPiso, inversor,
+  }) : null;
 
   const Lf = F.LARGO;
   const Pm: Parametros = { ...P, ...T, L: Lf, B: xF - xR, W: anchoTotal, H: D.alto + elevar, clear: D.suelo, track: via };
@@ -1501,9 +1580,18 @@ export function crearModeloTriciclo(P: Parametros) {
     /** 2026-11-15: the wheels in a diamond (`tRuedas`): the nose wheel at x = 0 steers, the pods do not. */
     rombo,
     /** 2026-11-15: the plug-in hybrid (`tPropulsion: 'phev'`), or null: its engine, efficiencies, tank and their masses. */
-    phev: T.tPropulsion === 'phev' ? {
-      kW: L('tPhevKW'), rendTerm: L('tRendTerm') / 100, rendTrans: L('tRendTrans') / 100, litros: L('tDeposito'),
-      kgMotor: 15 + 1.4 * L('tPhevKW'), kgPlanetario: 12, kgDeposito: 4 + 0.745 * L('tDeposito'),
+    // (2026-11-16: its architecture, the efficiency that follows from it, and where its parts are: `disp`, hibrido.ts)
+    phev: hib ? {
+      arq: hibArq, kW: L('tPhevKW'), rendTerm: L('tRendTerm') / 100, litros: L('tDeposito'),
+      mec: L('tHibMec') / 100, rendElec: L('tRendElec') / 100, rendCaja: L('tRendCaja') / 100,
+      rendTrans: rendimientoHibrido(hibArq, L('tHibMec') / 100, L('tRendElec') / 100, L('tRendCaja') / 100),
+      kgMotor: 15 + 1.4 * L('tPhevKW'), kgDeposito: 4 + 0.745 * L('tDeposito'),
+      // what joins it to the wheels: the planetary and MG1 (12 kg, as since 2026-11-15), a generator alone (≈ 0,32 kg/kW
+      // over 4 kg), or a clutch, a 3-speed gearbox and a P2 motor-generator
+      transmision: hibArq === 'reparto' ? [{ nombre: 'Motor: engranaje planetario y generador', kg: 12 }]
+        : hibArq === 'serie' ? [{ nombre: 'Motor: generador acoplado al de gasolina', kg: 4 + 0.32 * L('tPhevKW') }]
+          : [{ nombre: 'Motor: embrague y caja de cambios', kg: 10 + 0.1 * L('tPhevKW') }, { nombre: 'Motor: motor-generador P2', kg: 3 + 0.12 * L('tPhevKW') }],
+      disp: hib,
     } : null,
     tubos, baterias, bateriaCabe: bat.capacidad, inversor, motor, basculante, amortiguador, brazos, cremallera, cabezaDireccion: cabeza, recTras, recDel, yLarguero: yL,
     // (with two rear wheels there is no wheel under the tail to cover)
@@ -1674,6 +1762,8 @@ export function volumenMaletero(m: ModeloTriciclo, plegada2: boolean, plegada3: 
   const plegados = m.filas ? m.asientosFilas.filter(a => a.fila > 1 && (a.fila === 2 ? plegada2 : plegada3)) : [];
   const xR = m.xR, rR = m.rR, piv = m.basculante.pivote;
   const cajas = [...m.baterias, m.inversor].map(c => ({ x0: c.x0, x1: c.x1, y0: c.y0, y1: c.y1, z: c.hz }));
+  // (2026-11-16: the hybrid's engine, its connection and its tank take boot room)
+  if (m.phev) cajas.push(...m.phev.disp.ocupa);
   // the rear wheel and its travel, 4 cm round; the swing arm and the shock tower above its pivot
   if (!m.cuatro) {
     cajas.push({ x0: xR - rR - 0.04, x1: xR + rR + 0.04, y0: 0, y1: 2 * rR + m.recTras + 0.04, z: F.ANCHO_NEU / 2 + 0.05 });
@@ -1725,11 +1815,13 @@ export function piezasTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cris
   // the plug-in hybrid (2026-11-15): estimates of parts of their class, not measured. The petrol engine about 15 kg
   // plus 1,4 kg per kW (a 25 kW twin weighs some 50 kg), the planetary gear and its generator 12 kg, the tank 4 kg and
   // its petrol full (0,745 kg/L); all ahead of the rear axle, low
+  // (2026-11-16: each at the centre of what the viewer draws, hibrido.ts, no longer at a fixed place; the engine's mass
+  // includes its exhaust, now drawn)
   if (m.phev) {
-    const p = m.phev, x = m.xR + 0.55, y = 0.32 + m.elevar;
-    o.push({ nombre: 'Motor de gasolina (híbrido)', kg: p.kgMotor, x, y });
-    o.push({ nombre: 'Motor: engranaje planetario y generador', kg: p.kgPlanetario, x: x + 0.2, y });
-    o.push({ nombre: 'Depósito de gasolina, lleno', kg: p.kgDeposito, x: x + 0.45, y: 0.25 + m.elevar });
+    const p = m.phev, c = p.disp.centros;
+    o.push({ nombre: 'Motor de gasolina (híbrido)', kg: p.kgMotor, x: c.motor[0], y: c.motor[1], nota: `${p.disp.motor.n} cilindro${p.disp.motor.n > 1 ? 's' : ''}, unos ${Math.round(p.disp.motor.cc / 10) * 10} cm³, con su escape` });
+    for (const t of p.transmision) o.push({ nombre: t.nombre, kg: t.kg, x: c.transmision[0], y: c.transmision[1] });
+    o.push({ nombre: 'Depósito de gasolina, lleno', kg: p.kgDeposito, x: c.deposito[0], y: c.deposito[1] });
   }
   // a diamond (2026-11-15): the nose wheel (the rear one's size), its brake and its fork (an estimate)
   if (m.rombo) o.push({ nombre: 'Rueda delantera, freno y horquilla', kg: limitarTriciclo('tMRueda', m.campos) * RUEDAS_TRICICLO[m.campos.tRuedaTras].kg + limitarTriciclo('tMFreno', m.campos) + 5, x: 0, y: m.rR });
@@ -1816,7 +1908,7 @@ function piezasBase(m: ModeloTriciclo, ar: { carroceria: number; cristal: number
  */
 function asientosFilasMasa(m: ModeloTriciclo, kgAsiento: number): PiezaMasa {
   let kg = 0, x = 0, y = 0;
-  for (const a of m.asientosFilas) { const k = kgAsiento * (a.fila === 3 ? 1.2 : 1.5); kg += k; x += k * (a.x - 0.05); y += k * (a.y + 0.08); }
+  for (const a of m.asientosFilas) { const k = kgAsiento * factorMasaAsiento(a); kg += k; x += k * (a.x - 0.05); y += k * (a.y + 0.08); }
   return { nombre: 'Asientos', kg, x: x / kg, y: y / kg };
 }
 
@@ -1954,7 +2046,7 @@ function chequeosButacas(m: ModeloTriciclo, op: PuntosOcupante, oq: PuntosOcupan
  * neumáticos, que en la realidad lo bajan un 10-15 %, ni ocupantes que se inclinan.
  */
 export const umbralVuelco = (t: number, b: number, h: number, L: number) => t * b / (2 * h * L);
-const NUMERO: Record<number, string> = { 1: 'uno', 2: 'dos', 3: 'tres', 4: 'cuatro' };
+const NUMERO: Record<number, string> = { 1: 'uno', 2: 'dos', 3: 'tres', 4: 'cuatro', 5: 'cinco', 6: 'seis', 7: 'siete' };
 
 /** Lo que agarra en seco un neumático de ciclomotor (μ ≈ 0,9): por debajo, en una curva vuelca antes de derrapar. */
 export const AGARRE = 0.9;
@@ -2011,7 +2103,8 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   const cargas: [number, number][] = !m.filas
     ? [[xDel - m.sillines.xPiloto, (mOcc + kgAsiento) * g], [xDel - m.sillines.xPasajero, (mOcc + kgAsiento) * g]]
     // three rows: each seat with its occupant (if its row is open), at its hips
-    : m.asientosFilas.map(a => [xDel - a.x, ((a.plegado ? 0 : mOcc) + L('tMAsiento') * (a.fila === 3 ? 1.2 : 1.5)) * g] as [number, number]);
+    // (2026-11-16: a bench carries all its row's places)
+    : m.asientosFilas.map(a => [xDel - a.x, ((a.plegado ? 0 : mOcc * (a.plazas ?? 1)) + L('tMAsiento') * factorMasaAsiento(a)) * g] as [number, number]);
   // round 3 interior (2026-11-12, «revisa… el chasis y todo»): the battery bears on the rails too (the pack runs through
   // them; the modules stand on them): the pack in eight slices along its length, each module at its centre, by volume
   {
@@ -2043,7 +2136,9 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     cabezas = [{ ...(() => { const a = cabezaTriciclo(m, true, TALLA_SENTADO.p50, esp), b = cabezaTriciclo(m, true, TALLA_SENTADO.p95, esp); return { p50: a.holgura, p95: b.holgura, x: a.x }; })(), quien: 'piloto' }];
     for (const q of m.plazas) if (q.fila > 1 && q.z >= 0) {
       const a = cabezaPlaza(m, q, TALLA_SENTADO.p50, esp), b = cabezaPlaza(m, q, TALLA_SENTADO.p95, esp);
-      cabezas.push({ quien: q.fila === 2 ? 'fila 2' : 'fila 3', p50: a.holgura, p95: b.holgura, x: a.x });
+      // (2026-11-16: with three places, the centre one too)
+      const centro = Math.abs(q.z) < 1e-9 && m.plazas.some(o => o.fila === q.fila && o.z > 1e-9);
+      cabezas.push({ quien: `fila ${q.fila}${centro ? ' (centro)' : ''}`, p50: a.holgura, p95: b.holgura, x: a.x });
     }
   }
   for (const k of cabezas) {
@@ -2063,7 +2158,9 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   } else {
     // three rows (round three): knees to the backrest in front (its rear face, 17 cm behind the trunk's axis; a knee is 6 cm round)
     const respaldoEn = (o: PuntosOcupante, y: number) => { const t = (y - o.H[1]) / o.d[1]; return o.H[0] + o.d[0] * t - o.d[1] * 0.17; };
-    const fila2 = m.plazas.find(q => q.fila === 2 && q.z > 0), fila3 = m.plazas.find(q => q.fila === 3);
+    // (2026-11-16: each row's outermost place on the right, or its only one: where the belly and the canopy pinch first)
+    const exterior = (f: number) => m.plazas.filter(q => q.fila === f && q.z >= -1e-9).sort((a, b) => b.z - a.z)[0];
+    const fila2 = exterior(2), fila3 = exterior(3);
     if (fila2) c('interior', 'Rodillas de la fila 2 al respaldo del piloto', respaldoEn(op, fila2.pts.K[1]) - (fila2.pts.K[0] + 0.06), 0.02);
     // row 2's backrests stand (or lie folded, then the knees pass over them) in front of row 3
     const r2 = m.asientosFilas.find(a => a.fila === 2)!;
@@ -2071,10 +2168,24 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
       const o2 = puntosFila(r2.x, r2.y, r2.rec, m.yPiso);
       c('interior', 'Rodillas de la fila 3 al respaldo de la fila 2', respaldoEn(o2, fila3.pts.K[1]) - (fila3.pts.K[0] + 0.06), 0.02);
     }
-    // row 2's outer shoulder (an average man's: Z_FILA2 + MEDIO_HOMBRO from the centre line) to the canopy's inner face
-    if (fila2) {
-      const o = fila2.pts, S = [o.H[0] + o.d[0] * 0.44, o.H[1] + o.d[1] * 0.44];
-      c('interior,carroceria', 'Hombros de la fila 2 a la cúpula (de lado)', Math.min(F.ladoZ(S[0], S[1]), F.ladoZ(o.S[0], o.S[1])) - esp - (Z_FILA2 + MEDIO_HOMBRO), 0.02);
+    // row 2's outer shoulder (an average man's: its centre + MEDIO_HOMBRO from the centre line) to the canopy's inner face
+    // (2026-11-16: whatever its places; row 3's too when it has more than one)
+    for (const q of [fila2, fila3]) if (q && (q.fila === 2 || q.z > 1e-9)) {
+      const o = q.pts, S = [o.H[0] + o.d[0] * 0.44, o.H[1] + o.d[1] * 0.44];
+      c('interior,carroceria', `Hombros de la fila ${q.fila} a la cúpula (de lado)`, Math.min(F.ladoZ(S[0], S[1]), F.ladoZ(o.S[0], o.S[1])) - esp - (Math.abs(q.z) + MEDIO_HOMBRO), 0.02);
+    }
+    // 2026-11-16, row by row: the row's seats, side by side, fit across the cabin: the outer edge of the outermost cushion
+    // and of its backrest (at mid-height) inside the skin's inner face, 1 cm clear; it says by how much they do not
+    for (const f of [2, 3] as const) {
+      const fil = m.asientosFilas.filter(a => a.fila === f); if (!fil.length) continue;
+      let h = 9;
+      for (const a of fil) {
+        const borde = Math.abs(a.z) + a.ancho / 2, r = a.rec * Math.PI / 180, hR = a.plegado ? 0 : a.respaldo / 2;
+        for (const x of [a.x - 0.17, a.x - 0.17 + a.fondo / 2, a.x - 0.17 + a.fondo]) h = Math.min(h, F.ladoZ(x, a.y) - esp - borde);
+        if (hR) h = Math.min(h, F.ladoZ(a.x - 0.17 - Math.sin(r) * hR, a.y + Math.cos(r) * hR) - esp - borde);
+      }
+      const n = numFila(f === 2 ? T.tFila2N : T.tFila3N, f === 2 ? 2 : 1);
+      c('interior,carroceria', `Asientos de la fila ${f} caben de lado (${n === 1 ? 'una plaza' : n === 2 ? 'dos plazas' : 'tres plazas'})`, h, 0.01, h < 0.01 ? `faltan ${fmt((0.01 - h) * 100, 1)} cm por lado` : undefined);
     }
     // the feet (instep 4 cm over the ankle): inside the body where they rest, and under the seat in front (its pan's underside)
     const pies = (q: Plaza, delante: AsientoFila | undefined) => {
@@ -2165,7 +2276,11 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   let tub = 9, peor = ''; for (const tb of m.tubos) { const h = tuboDentro(F, tb); if (h < tub) { tub = h; peor = tb.nombre; } }
   c('chasis', `Bastidor dentro de la carrocería${tub < 0.01 ? ` (${peor.toLowerCase()})` : ''}`, tub, 0.01);
   c('chasis', 'Bastidor: coeficiente de seguridad de los largueros', seguridad - 1.3, 0.5, `×${fmt(seguridad, 1)}`);
-  for (const b of m.baterias) c('energia', `Batería, ${b.nombre.toLowerCase()}: dentro de la carrocería`, cajaDentro(F, b), 0.01);
+  for (const b of m.baterias) {
+    // (2026-11-16: the pack along the frame may be wider than the body: this check says by how much it sticks out)
+    if (b === m.paquete) { const h = cajaDentro(F, b); c('energia,carroceria', 'Batería dentro de la carrocería', h, 0.01, h < 0 ? `sobresale ${fmt(-h * 100, 1)} cm` : h < 0.01 ? `a ${fmt(h * 100, 1)} cm de la piel` : undefined); continue; }
+    c('energia', `Batería, ${b.nombre.toLowerCase()}: dentro de la carrocería`, cajaDentro(F, b), 0.01);
+  }
   const litrosBat = m.kWh * 1000 / L('tWhL');
   if (!m.paquete) {
     // the pilot's toes (17 cm ahead of the ankle) and the saddle's nose behind the battery
@@ -2193,6 +2308,20 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     c('energia', 'Batería: capacidad del paquete (sus litros × Wh/L)', 1, 0, `${fmt(m.kWh, 1)} kWh · ${Math.round(litrosBat)} L`);
   }
   c('propulsion', 'Controlador dentro de la carrocería', cajaDentro(F, m.inversor), 0.01);
+  // 2026-11-16: the plug-in hybrid's parts, drawn where hibrido.ts puts them (a part sticking out turns red in the 3D too)
+  if (m.phev) {
+    const h = m.phev.disp.holguras, arq = m.phev.arq, asoma = (v: number) => v < 0 ? `asoma ${fmt(-v * 100, 1)} cm` : undefined;
+    const nT = arq === 'reparto' ? 'planetario y generador MG1' : arq === 'serie' ? 'generador' : 'embrague, motor-generador P2 y caja';
+    c('propulsion', 'Híbrido: motor de gasolina dentro de la carrocería', h.motor, 0.01, asoma(h.motor));
+    c('propulsion', `Híbrido: ${nT} dentro de la carrocería`, h.transmision, 0.01, asoma(h.transmision));
+    c('propulsion', 'Híbrido: depósito de gasolina dentro de la carrocería', h.deposito, 0.01, asoma(h.deposito));
+    c('propulsion', 'Híbrido: silencioso del escape dentro de la carrocería', h.escape, 0.005, asoma(h.escape));
+    if (h.torreta != null) c('propulsion,rodaje', 'Híbrido: motor de gasolina a la torreta del amortiguador', h.torreta, 0, h.torreta < 0 ? `choca ${fmt(-h.torreta * 100, 1)} cm` : undefined);
+    if (arq === 'reparto') {
+      const k = cifrasHibrido('reparto', L('tVel'), 2 * m.rR, 0, m.phev.kW, m.phev.mec);
+      c('propulsion', `Híbrido: vueltas del motor de gasolina a ${Math.round(L('tVel'))} km/h (máximo ${RPM_MAX_MOTOR} rpm)`, (RPM_MAX_MOTOR - k.motor) / RPM_MAX_MOTOR, 0, `${Math.round(k.motor / 10) * 10} rpm`);
+    }
+  }
   // a hub motor has the room its rim gives it: above that power, a motor on the swing arm with a belt (as on
   // electric motorcycles) would be the honest drive, and that is not drawn here
   const kWBuje = RUEDAS_TRICICLO[T.tRuedaTras].kWBuje, kWp = L('tKWPico');
@@ -2302,14 +2431,23 @@ export function energiaTriciclo(m: ModeloTriciclo, mTot: number, cd: { cd: numbe
   // planetary gear (part straight to the wheels, part through the generator and the motor: `rendTrans` for both
   // together) and also feeds the equipment. Litres per 100 km: the energy at the wheels over both efficiencies, over
   // petrol's 8,9 kWh per litre (its lower heating value)
+  // (2026-11-16: `rendTrans` follows from the architecture, hibrido.ts. In parallel the engine is tied to the wheels
+  // and, at part load, runs off its best point: its efficiency times `factorCargaParcial`. In series every kW passes
+  // through the electric motor, so the sustained speed on petrol is also capped by its rated power)
   const p = m.phev;
+  const motorW = (kmh: number) => { if (!p) return 0; const v = kmh / 3.6; return (0.5 * 1.2 * CdA * v ** 3 + CRR * mTot * g * v) / p.rendTrans + AUXILIARES; };
+  const rendTermA = (kmh: number) => !p ? 1 : p.arq === 'paralelo' ? p.rendTerm * factorCargaParcial(motorW(kmh) / (p.kW * 1000)) : p.rendTerm;
   const litros100 = (kmh: number) => {
     if (!p) return 0;
-    const v = kmh / 3.6, rueda = 0.5 * 1.2 * CdA * v ** 3 + CRR * mTot * g * v;
-    return ((rueda / p.rendTrans + AUXILIARES) / p.rendTerm) / v / 3.6 / KWH_LITRO_GASOLINA / 10;
+    const v = kmh / 3.6;
+    return (motorW(kmh) / rendTermA(kmh)) / v / 3.6 / KWH_LITRO_GASOLINA / 10;
   };
-  const vmaxGasolina = p ? vmaxCon(p.kW * p.rendTrans / RENDIMIENTO) : 0;
-  const hibrido = p ? { litros100: litros100(vel), litros50: litros100(50), litros100kmh: litros100(100), kmDeposito: p.litros / litros100(vel) * 100, vmaxGasolina } : null;
+  const vmaxGasolina = p ? vmaxCon(p.arq === 'serie' ? Math.min(p.kW * p.rendTrans / RENDIMIENTO, L('tKWNom')) : p.kW * p.rendTrans / RENDIMIENTO) : 0;
+  const hibrido = p ? {
+    litros100: litros100(vel), litros50: litros100(50), litros100kmh: litros100(100), kmDeposito: p.litros / litros100(vel) * 100, vmaxGasolina,
+    /** 2026-11-16: the overall efficiency from the engine's shaft to the wheel, the engine's own at this speed, and the rpm (hibrido.ts) */
+    rendTrans: p.rendTrans, rendTermVel: rendTermA(vel), cifras: cifrasHibrido(p.arq, vel, 2 * m.rR, motorW(vel), p.kW, p.mec),
+  } : null;
   return { cd: cd.cd, areaRef: cd.areaRef, CdA, WhKm, autonomia: util / WhKm, kmSol: solarDiaTriciclo(areaSolar, m.P.sol) / WhKm, vmaxNominal: vmaxCon(L('tKWNom')), vmaxPico: vmaxCon(L('tKWPico')), acel50: t, potencia: potencia(vel / 3.6), WhKm50: consumo(50), WhKm100: consumo(100), hibrido };
 }
 
