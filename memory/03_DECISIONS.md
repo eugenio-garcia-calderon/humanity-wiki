@@ -1839,3 +1839,14 @@ Eugenio: «cambia el estilo del dibujo de ambas, para que los personajes sean m�
 - **Watercolour, not render.** Shadows are glazes with dried edges and granulation plus coloured-pencil hatching, as in design 5; lifted highlights were removed because they read as plastic. Faces keep the light model but with about one and a half values of shadow and lost edges.
 - **Design 6 copies the scripts.** `mes-05-f.py` / `mes-06-f.py` are copies of the design-5 scripts with their changes (activation, redrawn people, the painter's canvas, the café heads, the storks, the bulb's light). Designs 4 and 5 are untouched: no shared library file changed.
 - **Outcome and ceiling.** Four evaluator rounds (r3, r6, r9, r11) went from 3/10 to 5-5.5/10 in figure realism, and the evaluator marked it publishable as design 6 and favourite. It also said where the ceiling of this approach is: the figures are built on design 5's joints and simple shapes, so they read as painted wooden figures rather than as people drawn from life. Going further means drawing each figure's anatomy from reference (structure of hands, faces and joints), not more layers on the same shapes.
+
+## 2026-11-16 · Plug-in hybrid: three architectures, and how the old slider maps
+
+- **Choice:** power split (THS), series and parallel P2. P4 was left out because the front wheels steer in pods on faired arms (or in the nose), so there is no room for a driveshaft.
+- **Power split:** the one efficiency is `mec·0.97 + (1−mec)·elec`. The mechanical share `mec` is a slider. Through Willis it sets the engine's rpm, `ω_c = ω_r·R/((R+S)·mec)`. So the split and the rpm figure cannot disagree; the other way round, they could.
+- **Migration:** old `tRendTrans` r becomes `mec = (r−0.83)/0.14` with elec 83 %. Below 85.8 % it becomes `mec = 20 %` and elec solved. The litres are exactly equal, and `scripts/triciclo-disenos.ts` checks six values.
+  - The migration lives in `deDiseno`, not in `camposTriciclo`: `deDiseno` already merges the defaults, so `tHibArq` is never missing by the time `camposTriciclo` runs.
+- **Defaults:** 50 % mechanical and 83 % electrical give 90 %, the old default, so an untouched hybrid is unchanged.
+- **Parallel:** the engine's part-load penalty is the curve `min(1, 0.75 + 0.5·load)`, not a fuel map. Series caps the sustained petrol speed at the hub motor's rated power.
+- **Placement:** parts are placed, not moved to make room. `disponerHibrido` puts the engine behind the last backrest (wheel in the tail) or behind the frame's tower (four wheels), and searches the tank's and the silencer's shape and place. When something does not fit, a check says so; nothing is clamped.
+- **Code:** new code in its own files: `hibrido.ts` (pure), `hibrido3d.ts`, `FichaHibrido.tsx`. Shared files got small hooks.
