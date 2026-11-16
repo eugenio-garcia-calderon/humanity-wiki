@@ -17,7 +17,12 @@ const ESCALAS = [
   {id:'continente', nombre:'Continente', desc:'Europa', escena:null},
   {id:'planeta', nombre:'Planeta', desc:'La Tierra y toda la humanidad', escena:null}
 ];
-let ESC = null;   // selected scale id, or null = all scales
+const ESC_DEFECTO = 'pais';   // the site opens at country scale (2026-11-16)
+let ESC = ESC_DEFECTO;   // selected scale id, or null = all scales
+let PAIS = 'es';         // country shown at «país» scale (only España has models so far)
+let VISTA = '2d';        // country model view: '2d' diagram or '3d'
+// Countries offered in the selector; only those in PAISES (paises.js) have content yet.
+const LISTA_PAISES = [['es','España'],['pt','Portugal'],['fr','Francia'],['it','Italia'],['de','Alemania'],['mx','México'],['ar','Argentina'],['co','Colombia'],['cl','Chile']];
 let PIL = null;   // selected pillar id, or null = all four
 let SUB = null;   // selected part (subtema) of the open sector, or null = the whole sector
 // Which 3D viewer scene shows each part best (parts not listed use the sector's own scene).
@@ -64,9 +69,11 @@ function corto(t){
 // Filter by the chosen scale and, inside a sector, by the chosen part.
 const deEscala = list => (list||[]).filter(x => (!ESC || (x.escalas||[]).includes(ESC)) && (!SUB || !SECTOR || (x.subtemas||[]).includes(SUB)));
 // Every link keeps the current scale and pillar unless told otherwise.
-function link({sector=SECTOR, e=ESC, p=PIL, s}={}){
+function link({sector=SECTOR, e=ESC, p=PIL, s, v=VISTA, c=PAIS}={}){
   if(s === undefined) s = sector===SECTOR ? SUB : null;   // a part belongs to its sector
-  const qs = new URLSearchParams(); if(s && sector) qs.set('s', s); if(e) qs.set('e', e); if(p) qs.set('p', p);
+  const qs = new URLSearchParams(); if(s && sector) qs.set('s', s);
+  if(e !== ESC_DEFECTO) qs.set('e', e || 'todas');         // country scale is the default: no parameter
+  if(p) qs.set('p', p); if(v !== '2d') qs.set('v', v); if(c !== 'es') qs.set('c', c);
   return `#${sector?`/sector/${sector}`:'/'}${qs.toString()?'?'+qs:''}`;
 }
 const cuentaPilar = (s, pid) => pid==='vision' ? deEscala(s.vision.bloques).length : deEscala(s[pid]).length;
@@ -106,7 +113,7 @@ function menuEscalas(){
   $('#escalas').innerHTML = `
     <div class="esc-tit">Escalas</div>
     <a href="${link({e:null})}" class="${!ESC?'on':''}">${icono(4)}<b>Todas</b></a>
-    ${ESCALAS.map((e,i)=>`<a href="${link({e:e.id})}" class="${e.id===ESC?'on':''}" title="${esc(e.desc)}">${iconoEscala(e.id)}<b>${e.nombre}</b></a>`).join('')}`;
+    ${ESCALAS.map((e,i)=>`<a href="${link({e:e.id})}" class="${e.id===ESC?'on':''}" title="${esc(e.desc)}">${iconoEscala(e.id)}<b>${e.nombre}</b></a>${e.id==='pais'?selectorPais():''}`).join('')}`;
   if(matchMedia('(max-width:900px)').matches) $('#escalas .on')?.scrollIntoView({block:'nearest', inline:'center'});
 }
 
@@ -117,6 +124,12 @@ const ICONOS_PILAR = {
   soluciones:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>',
   proyectos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg>'
 };
+// Which country «País» means. Only countries with content can be chosen; the rest say so.
+function selectorPais(){
+  return `<label class="selpais" title="País"><span class="vh">País</span><select onchange="location.hash=link({e:'pais',c:this.value})">
+    ${LISTA_PAISES.map(([id,n])=>`<option value="${id}" ${id===PAIS?'selected':''} ${PAISES[id]?'':'disabled'}>${n}${PAISES[id]?'':' · pronto'}</option>`).join('')}</select></label>`;
+}
+
 const NOMBRE_CORTO = {vision:'Visión', retos:'Retos', soluciones:'Soluciones', proyectos:'Proyectos'};
 function menuPilares(){
   $('#pilares').innerHTML = `
@@ -172,9 +185,103 @@ function escenaActual(s){
 const nombreSub = s => s.subtemas?.find(t=>t.id===SUB)?.nombre;
 function visor3D(s){
   const escena = escenaActual(s);
-  if(!escena) return `<div class="visor pendiente"><div>${ICON3D}<b>Modelo 3D pendiente</b></div></div>`;
+  if(!escena) return `<div class="visor pendiente"><div>${ICON3D}<b>${ESC==='pais' ? `Modelo país de ${esc(PAISES[PAIS]?.nombre||'')} pendiente` : 'Modelo 3D pendiente'}</b></div></div>`;
   return `<div class="visor"><iframe src="vision3d.html?embed#${escena}" title="Visión en 3D" loading="lazy"></iframe>
     <button class="btn-mini completa" onclick="abrir3D('${escena}')">⛶ Pantalla completa</button></div>`;
+}
+
+// ---------- Country model: the sector split into its «patas», today vs ideal ----------
+const modelo = s => ESC==='pais' ? PAISES[PAIS]?.modelos?.[s.id] : null;
+// Progress of one indicator towards its ideal, 0..1 («subir»: more is better, «bajar»: less is better).
+function progreso(i){
+  const a = +i.actual, o = +i.objetivo;
+  if(!isFinite(a) || !isFinite(o)) return null;
+  const r = i.sentido==='bajar' ? (a<=0 ? 1 : o/a) : (o<=0 ? 1 : a/o);
+  return Math.max(0, Math.min(1, r));
+}
+const media = xs => { xs = xs.filter(x=>x!=null); return xs.length ? xs.reduce((a,b)=>a+b,0)/xs.length : null; };
+const progPata = p => media((p.indicadores||[]).map(progreso));
+const progSector = m => media(m.patas.map(progPata));
+const colorProg = x => x==null ? '#9aa6b8' : x<.4 ? '#c0504d' : x<.7 ? '#d9962b' : '#3d8a5f';
+const pct = x => x==null ? '—' : Math.round(x*100)+' %';
+const num = v => typeof v==='number' ? v.toLocaleString('es-ES') : esc(v);
+
+function esquema2D(s, m){
+  const W=900, H=500, cx=W/2, cy=H/2, rx=330, ry=178, n=m.patas.length, NW=184, NH=72;
+  const ang = {}, pos = {};
+  m.patas.forEach((p,k)=>{ const a = -Math.PI/2 + k*2*Math.PI/n; ang[p.id]=a; pos[p.id] = [cx+rx*Math.cos(a), cy+ry*Math.sin(a)]; });
+  // Arrows run around the ring, never through the centre: the control point sits outside the ring at the
+  // middle angle, further out the further apart the two patas are. A reverse arrow takes a wider path.
+  const pares = new Set(m.flujos.map(f=>f.de+'>'+f.a));
+  const borde = (x,y,tx,ty) => { const dx=tx-x, dy=ty-y, t=Math.min(Math.abs((NW/2+6)/(dx||1e-6)), Math.abs((NH/2+6)/(dy||1e-6))); return [x+dx*t, y+dy*t]; };
+  const flecha = f => {
+    let a1=ang[f.de], a2=ang[f.a], d=a2-a1; while(d>Math.PI) d-=2*Math.PI; while(d<-Math.PI) d+=2*Math.PI;
+    const am=a1+d/2, k=1.12+0.55*Math.abs(d)/Math.PI + (pares.has(f.a+'>'+f.de) && f.de>f.a ? .28 : 0);
+    const c=[cx+rx*k*Math.cos(am), cy+ry*k*Math.sin(am)];
+    const a=borde(...pos[f.de], ...c), b=borde(...pos[f.a], ...c);
+    const lx=(a[0]+2*c[0]+b[0])/4, ly=(a[1]+2*c[1]+b[1])/4;
+    return `<path d="M${a[0]},${a[1]} Q${c[0]},${c[1]} ${b[0]},${b[1]}" class="flujo" marker-end="url(#punta)"/>
+      <text x="${lx}" y="${ly+4}" class="flujo-t">${esc(f.etiqueta)}</text>`; };
+  // Long names wrap onto two lines at the word nearest the middle.
+  const lineas = t => { if(t.length<=16) return [t]; const w=t.split(' '); let best=[t], dif=1e9;
+    for(let i=1;i<w.length;i++){ const A=w.slice(0,i).join(' '), B=w.slice(i).join(' '), dd=Math.abs(A.length-B.length); if(dd<dif){dif=dd; best=[A,B];} } return best; };
+  const g = progSector(m);
+  return `<svg viewBox="-40 -30 ${W+80} ${H+60}" class="esq2d" role="img" aria-label="Esquema de ${esc(s.nombre)} en ${esc(PAISES[PAIS].nombre)}">
+    <defs><marker id="punta" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#7d8ca3"/></marker></defs>
+    <ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" class="anillo"/>
+    ${m.patas.map(p=>`<line x1="${cx}" y1="${cy}" x2="${pos[p.id][0]}" y2="${pos[p.id][1]}" class="radio"/>`).join('')}
+    ${m.flujos.map(flecha).join('')}
+    <a href="${link({s:null})}"><circle cx="${cx}" cy="${cy}" r="74" class="hub ${!SUB?'on':''}"/>
+      <text x="${cx}" y="${cy-12}" class="hub-t">${esc(s.nombre)}</text>
+      <text x="${cx}" y="${cy+15}" class="hub-p" fill="${colorProg(g)}">${pct(g)}</text>
+      <text x="${cx}" y="${cy+33}" class="hub-s">hacia el ideal</text></a>
+    ${m.patas.map(p=>{ const [x,y]=pos[p.id], v=progPata(p), L=lineas(p.nombre);
+      return `<a href="${link({s:SUB===p.id?null:p.id})}" class="nodo ${SUB===p.id?'on':''} ${SUB&&SUB!==p.id?'apagado':''}">
+        <rect x="${x-NW/2}" y="${y-NH/2}" width="${NW}" height="${NH}" rx="14"/>
+        ${L.map((t,i)=>`<text x="${x}" y="${y-(L.length===2?20:9)+i*16}" class="nodo-t ${L.length===2?'dos':''}">${esc(t)}</text>`).join('')}
+        <rect x="${x-62}" y="${y+12}" width="124" height="8" rx="4" class="barra-f"/>
+        <rect x="${x-62}" y="${y+12}" width="${124*(v??0)}" height="8" rx="4" fill="${colorProg(v)}"/>
+        <text x="${x}" y="${y+32}" class="nodo-p">${pct(v)}</text></a>`; }).join('')}
+  </svg>`;
+}
+
+function esquema(s, m){
+  const p = m.patas.find(x=>x.id===SUB);
+  const ruta3d = `esquema:${s.id}:${PAIS}${SUB?':'+SUB:''}`;
+  return `<div class="esquema">
+    <div class="esq-barra"><span class="esq-pais">${esc(PAISES[PAIS].nombre)} · modelo país</span>
+      <span class="conmuta"><a href="${link({v:'2d'})}" class="${VISTA==='2d'?'on':''}">2D</a><a href="${link({v:'3d'})}" class="${VISTA==='3d'?'on':''}">3D</a></span></div>
+    ${VISTA==='3d' ? `<div class="visor"><iframe src="vision3d.html?embed#${ruta3d}" title="Esquema 3D"></iframe>
+        <button class="btn-mini completa" onclick="abrir3D('${ruta3d}')">⛶ Pantalla completa</button></div>` : esquema2D(s, m)}
+    <div class="esq-leyenda"><span><i style="background:#c0504d"></i>lejos del ideal</span><span><i style="background:#d9962b"></i>a medio camino</span><span><i style="background:#3d8a5f"></i>cerca del ideal</span><span class="nota">% = avance medio de sus indicadores hacia el objetivo · pincha una pata</span></div>
+  </div>
+  ${p ? detallePata(p) : detalleGeneral(s, m)}`;
+}
+
+function detalleGeneral(s, m){
+  return `<div class="esq-detalle">
+    <h3>${esc(m.vision.titulo)}</h3>
+    <div class="equilibrio">⚖ ${esc(m.vision.equilibrio)}</div>
+    <ul class="lista">${m.vision.ideal.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+    <div class="patas">${m.patas.map(p=>{ const v=progPata(p); return `<a class="pata" href="${link({s:p.id})}">
+      <b>${esc(p.nombre)}</b><small>${esc(p.que_es||'')}</small>
+      <span class="barra"><i style="width:${(v??0)*100}%;background:${colorProg(v)}"></i></span><em>${pct(v)}</em></a>`; }).join('')}</div>
+  </div>`;
+}
+
+function detallePata(p){
+  return `<div class="esq-detalle">
+    <div class="equilibrio">⚖ ${esc(p.equilibrio)}</div>
+    <div class="hoy-ideal">
+      <div><h4>Hoy en ${esc(PAISES[PAIS].nombre)}</h4><ul class="lista">${(p.actual||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+      <div class="ideal"><h4>Ideal</h4><ul class="lista">${(p.ideal||[]).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
+    </div>
+    ${(p.indicadores||[]).length ? `<h4>Indicadores</h4><div class="indicadores">${p.indicadores.map(i=>{ const v=progreso(i);
+      return `<div class="ind"><span class="ind-n">${esc(i.nombre)}</span>
+        <span class="barra"><i style="width:${(v??0)*100}%;background:${colorProg(v)}"></i></span>
+        <span class="ind-v"><b>${num(i.actual)}</b> → ${num(i.objetivo)} ${esc(i.unidad||'')}</span>
+        <small>${esc(i.año||'')}${i.origen_objetivo?` · objetivo: ${esc(i.origen_objetivo)}`:''}${i.fuente_url?` · <a href="${esc(i.fuente_url)}" target="_blank" rel="noopener">fuente</a>`:''}</small></div>`; }).join('')}</div>` : ''}
+  </div>`;
 }
 
 // The scale icon at the left of the white panel, near the scales menu.
@@ -184,10 +291,11 @@ function sector(){
   const s = SECTORES.find(x=>x.id===SECTOR);
   // With «Todo», empty pillars are not drawn one by one: a single line lists them at the end.
   const visibles = PIL ? PILARES.filter(x=>x.id===PIL) : PILARES.filter(p=>cuentaPilar(s,p.id));
-  const vacios = PIL ? [] : PILARES.filter(p=>!cuentaPilar(s,p.id));
+  const vacios = PIL ? [] : PILARES.filter(p=>!cuentaPilar(s,p.id) && !(modelo(s) && p.id==='vision'));
+  const m = modelo(s);
   $('#app').innerHTML = `
-  ${!PIL || PIL==='vision' ? visor3D(s) : ''}
-  ${visibles.map(p=>`
+  ${!PIL || PIL==='vision' ? (m ? esquema(s, m) : visor3D(s)) : ''}
+  ${visibles.filter(p=>!(m && p.id==='vision')).map(p=>`
   <section class="seccion" style="--c:${p.c}">
     ${PIL ? '' : `<h2 class="sec-tit">${p.nombre}</h2>`}
     ${cuentaPilar(s,p.id) ? render[p.id](s) : vacio(p)}
@@ -233,7 +341,10 @@ function route(){
   const [ruta, consulta=''] = (location.hash || '#/').slice(1).split('?');
   const qs = new URLSearchParams(consulta);
   const [, tipo, id, pilarRuta] = ruta.split('/');
-  ESC = ESCALAS.some(x=>x.id===qs.get('e')) ? qs.get('e') : null;
+  const e = qs.get('e');
+  ESC = !e ? ESC_DEFECTO : ESCALAS.some(x=>x.id===e) ? e : null;   // 'todas' (or anything unknown) = all scales
+  PAIS = PAISES[qs.get('c')] ? qs.get('c') : 'es';
+  VISTA = qs.get('v')==='3d' ? '3d' : '2d';
   // Old links carried the pillar in the path (#/sector/x/retos): still understood.
   const p = qs.get('p') || pilarRuta;
   PIL = PILARES.some(x=>x.id===p) ? p : null;
@@ -248,7 +359,7 @@ function route(){
   // Phones: the rows scroll sideways, so bring the chosen sector and part into view.
   if(matchMedia('(max-width:900px)').matches) document.querySelectorAll('.fila .on').forEach(e=>e.scrollIntoView({block:'nearest', inline:'center'}));
   // Jump to the top when the page or the pillar changes, not when only the scale changes.
-  const vista = ruta.split('/').slice(0,3).join('/') + '|' + PIL + '|' + SUB;
+  const vista = ruta.split('/').slice(0,3).join('/') + '|' + PIL;
   if(vista !== ultimaVista) window.scrollTo(0,0);
   ultimaVista = vista;
 }

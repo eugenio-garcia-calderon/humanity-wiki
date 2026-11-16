@@ -1,0 +1,620 @@
+{
+ "sector": "vivienda",
+ "pais": "es",
+ "vision_general": {
+  "titulo": "Un hogar digno y asequible para cada persona, en un territorio vivo",
+  "ideal": [
+   "Nadie dedica más del 30% de su renta a la vivienda.",
+   "Se construye y rehabilita al ritmo que se forman los hogares, con baja energía.",
+   "Cada vivienda existente cumple su función de hogar; las vacías vuelven al uso.",
+   "Un parque público y social amplio y permanente, cercano a la media europea.",
+   "Barrios compactos y verdes, y pueblos vivos que reparten la población.",
+   "Propuesta L&H: suelo en propiedad comunitaria con cesión de uso temporal ligada a valores comunes."
+  ],
+  "equilibrio": "Que la vivienda sea un derecho para vivir antes que un activo para invertir, con suelo, dinero y territorio al servicio de los hogares."
+ },
+ "patas": [
+  {
+   "id": "suelo",
+   "nombre": "Suelo",
+   "que_es": "La tierra donde se construye, se cultiva o se deja sin uso.",
+   "actual": [
+    "Suelo urbano a 171 €/m² de media en 2025; en Baleares, 388 €/m² (Ministerio de Vivienda).",
+    "Aprobar un plan urbanístico puede tardar más de 12 años (Comunidad de Madrid, 2025).",
+    "España perdería más de 1 millón de hectáreas agrarias por abandono hasta 2030 (JRC-Comisión Europea).",
+    "El 41% de los titulares agrarios tiene 65 años o más (Censo Agrario 2020)."
+   ],
+   "ideal": [
+    "Suelo para vivienda disponible a tiempo y a precio estable, sin especular con su recalificación.",
+    "Planes urbanísticos aprobados en pocos años, con reglas claras y participación vecinal.",
+    "Tierra rural abandonada movilizada mediante bancos de tierras para quien quiera cultivarla o habitarla.",
+    "Propuesta L&H: propiedad comunitaria del suelo con cesión de uso temporal, ligada a valores comunes: evita abandono, lucro por venta y usos no aprobados."
+   ],
+   "equilibrio": "Que el suelo sirva a quien lo usa y cuida, no a quien espera a que suba de precio.",
+   "indicadores": [
+    {
+     "nombre": "Plazo para aprobar un plan urbanístico",
+     "actual": 12,
+     "objetivo": 4,
+     "unidad": "años",
+     "sentido": "bajar",
+     "año": 2025,
+     "fuente_url": "https://www.vozpopuli.com/espana/madrid/de-doce-a-cuatro-anos-ayuso-lanza-su-renovada-ley-del-suelo-para-acelerar-la-construccion-de-vivienda.html",
+     "origen_objetivo": "Reforma de la Ley del Suelo de la Comunidad de Madrid (4-6 años)"
+    },
+    {
+     "nombre": "Superficie agraria que se perdería por abandono hasta 2030",
+     "actual": 1000000,
+     "objetivo": 0,
+     "unidad": "ha",
+     "sentido": "bajar",
+     "año": 2026,
+     "fuente_url": "https://maldita.es/prebunking/20260429/faltan-jovenes-en-el-campo-es-el-acceso-a-la-tierra-el-problema/",
+     "origen_objetivo": "Propuesta L&H: ninguna tierra fértil abandonada"
+    }
+   ],
+   "retos": [
+    {
+     "titulo": "Planeamiento lento y fragmentado",
+     "descripcion": "El Banco de España (2025) señala trámites, normas solapadas entre administraciones y planeamiento lento como frenos a la oferta.",
+     "fuente_url": "https://es.euronews.com/business/2026/06/18/el-banco-de-espana-senala-un-deficit-de-750000"
+    },
+    {
+     "titulo": "Tierra rural sin relevo",
+     "descripcion": "Solo 0,49% de los titulares agrarios tiene menos de 25 años; la tierra queda sin uso (Censo Agrario 2020).",
+     "fuente_url": "https://maldita.es/prebunking/20260429/faltan-jovenes-en-el-campo-es-el-acceso-a-la-tierra-el-problema/"
+    }
+   ],
+   "soluciones": [
+    {
+     "titulo": "Bancos de tierras municipales",
+     "descripcion": "Registran parcelas abandonadas y conectan propietarios con quien busca tierra; Red Terrae lo hace desde 2010 en unos 40 municipios.",
+     "fuente_url": "https://accesstoland.gitbook.io/makingfarmlandwork/case-studies/red-terrae-the-network-of-municipalities-working-for-sustainable-land-use"
+    },
+    {
+     "titulo": "Suelo público cedido, no vendido",
+     "descripcion": "Barcelona cedió el solar de La Borda a una cooperativa: el suelo sigue siendo público y la vivienda, asequible.",
+     "fuente_url": "https://www.construible.es/2018/10/16/barcelona-acoge-primer-proyecto-covivienda-edificio-sostenible-madera-consumo"
+    }
+   ],
+   "proyectos": [
+    {
+     "nombre": "Red Terrae",
+     "lugar": "España (≈40 municipios, 8 comunidades)",
+     "descripcion": "Red de ayuntamientos con bancos de tierras agroecológicos para frenar el abandono rural.",
+     "web": "https://accesstoland.gitbook.io/makingfarmlandwork/case-studies/red-terrae-the-network-of-municipalities-working-for-sustainable-land-use"
+    },
+    {
+     "nombre": "Champlain Housing Trust",
+     "lugar": "Burlington (EE. UU.)",
+     "descripcion": "Fideicomiso comunitario de suelo que mantiene las viviendas asequibles para siempre al separar suelo y casa.",
+     "web": "https://www.getahome.org/homes"
+    }
+   ]
+  },
+  {
+   "id": "construccion",
+   "nombre": "Construcción y rehabilitación",
+   "que_es": "Hacer viviendas nuevas y mejorar las que ya existen.",
+   "actual": [
+    "Faltan unas 750.000 viviendas: se forman más hogares de los que se construyen (Banco de España, 2025).",
+    "139.016 visados de obra nueva en 2025, un 8,8% más que en 2024.",
+    "El 94,2% de las viviendas certificadas tiene letras D a G, ineficientes (2026).",
+    "Solo el 19,3% de la población hizo mejoras en su vivienda en 5 años (2025); media UE 25,5%."
+   ],
+   "ideal": [
+    "Construir al ritmo al que se forman los hogares, cerrando el déficit acumulado.",
+    "Rehabilitar barrios enteros para reducir un 25% el consumo energético residencial en 2030 (PNRE).",
+    "Construcción industrializada y con materiales de bajo impacto como la madera.",
+    "Todos los edificios con emisiones casi nulas en 2050 (objetivo de neutralidad climática)."
+   ],
+   "equilibrio": "Construir lo que falta sin olvidar rehabilitar lo que ya existe.",
+   "indicadores": [
+    {
+     "nombre": "Déficit acumulado de viviendas",
+     "actual": 750000,
+     "objetivo": 0,
+     "unidad": "viviendas",
+     "sentido": "bajar",
+     "año": 2025,
+     "fuente_url": "https://es.euronews.com/business/2026/06/18/el-banco-de-espana-senala-un-deficit-de-750000",
+     "origen_objetivo": "Banco de España: cerrar la brecha entre hogares y viviendas"
+    },
+    {
+     "nombre": "Población que ha mejorado su vivienda en los últimos 5 años",
+     "actual": 19.3,
+     "objetivo": 25.5,
+     "unidad": "%",
+     "sentido": "subir",
+     "año": 2025,
+     "fuente_url": "https://www.esade.edu/ecpol/wp-content/uploads/2026/07/Brief-Rehabilitacion-de-Vivienda.pdf",
+     "origen_objetivo": "Media UE 2023"
+    },
+    {
+     "nombre": "Viviendas certificadas con letra D a G",
+     "actual": 94.2,
+     "objetivo": 0,
+     "unidad": "%",
+     "sentido": "bajar",
+     "año": 2026,
+     "fuente_url": "https://www.energias-renovables.com/eficiencia/s-lo-el-39-de-las-viviendas-20260910",
+     "origen_objetivo": "Neutralidad climática del parque en 2050 (PNRE)"
+    }
+   ],
+   "retos": [
+    {
+     "titulo": "Falta de mano de obra",
+     "descripcion": "Más de la mitad de las constructoras tiene serias dificultades para encontrar trabajadores (Comisión Europea, 2025).",
+     "fuente_url": "https://www.bolsamania.com/noticias_print/empresas/economia--bruselas-pide-a-espana-incrementar-su-oferta-de-vivienda-publica-y-asequible-muy-por-debajo-de-la-media-ue--19909798.html"
+    },
+    {
+     "titulo": "Rehabilitar cuesta demasiado al hogar",
+     "descripcion": "El 35,4% necesita mejoras y no las hace; el 78% de ellos por el coste (2025).",
+     "fuente_url": "https://www.esade.edu/ecpol/wp-content/uploads/2026/07/Brief-Rehabilitacion-de-Vivienda.pdf"
+    }
+   ],
+   "soluciones": [
+    {
+     "titulo": "Vivienda industrializada",
+     "descripcion": "El PERTE dedica 1.300 M€ en 10 años a fabricar 15.000-20.000 viviendas al año en fábrica.",
+     "fuente_url": "https://www.lamoncloa.gob.es/consejodeministros/resumenes/Documents/2025/060525-PERTE-%20RESUMEN%20EJECUTIVO.pdf"
+    },
+    {
+     "titulo": "Rehabilitación por barrios con oficina local",
+     "descripcion": "Euskadi gestiona la reforma de edificios enteros desde oficinas de barrio (Opengela), con ayudas y trámites unificados.",
+     "fuente_url": "https://www.euskadi.eus/gobierno-vasco/-/noticia/2025/ana-telleria-gobierno-vasco-ha-demostrado-que-es-posible-regenerar-barrios-vulnerables-enfoque-integral-y-justo/"
+    }
+   ],
+   "proyectos": [
+    {
+     "nombre": "La Borda",
+     "lugar": "Barcelona",
+     "descripcion": "Cooperativa de 28 viviendas con estructura de madera, el edificio de madera más alto de España al construirse.",
+     "web": "https://www.construible.es/2018/10/16/barcelona-acoge-primer-proyecto-covivienda-edificio-sostenible-madera-consumo"
+    },
+    {
+     "nombre": "Opengela",
+     "lugar": "Euskadi",
+     "descripcion": "Programa público de regeneración integral de barrios vulnerables con oficinas de barrio.",
+     "web": "https://www.euskadi.eus/gobierno-vasco/-/noticia/2025/ana-telleria-gobierno-vasco-ha-demostrado-que-es-posible-regenerar-barrios-vulnerables-enfoque-integral-y-justo/"
+    }
+   ]
+  },
+  {
+   "id": "parque",
+   "nombre": "Parque de viviendas",
+   "que_es": "Todas las casas que ya existen y para qué se usan.",
+   "actual": [
+    "26,6 millones de viviendas; 3,84 millones vacías, el 14,4% (Censo 2021).",
+    "2,5 millones de viviendas de uso esporádico, el 9,4% (Censo 2021).",
+    "341.001 viviendas turísticas en mayo de 2026, el 1,28% del parque (INE).",
+    "Vivienda social en alquiler: 1,5% del parque, frente a cerca del 9% en la UE (2025)."
+   ],
+   "ideal": [
+    "Las viviendas vacías vuelven al uso con incentivos y gestión pública del alquiler.",
+    "Uso turístico limitado allí donde falta vivienda habitual.",
+    "Un parque público y social estable que no se vende, como en Viena.",
+    "Al menos el 8% del parque en vivienda pública (meta de CASA47)."
+   ],
+   "equilibrio": "Que cada vivienda existente tenga un uso: primero, ser hogar de alguien.",
+   "indicadores": [
+    {
+     "nombre": "Vivienda social en alquiler sobre el total",
+     "actual": 1.5,
+     "objetivo": 9,
+     "unidad": "%",
+     "sentido": "subir",
+     "año": 2025,
+     "fuente_url": "https://www.bolsamania.com/noticias_print/empresas/economia--bruselas-pide-a-espana-incrementar-su-oferta-de-vivienda-publica-y-asequible-muy-por-debajo-de-la-media-ue--19909798.html",
+     "origen_objetivo": "Media UE (Comisión Europea); meta estatal CASA47: 8% vivienda pública"
+    },
+    {
+     "nombre": "Viviendas vacías sobre el total",
+     "actual": 14.4,
+     "objetivo": 7,
+     "unidad": "%",
+     "sentido": "bajar",
+     "año": 2021,
+     "fuente_url": "https://valenciaplaza.com/ine-cifra-numero-viviendas-vacias-mas-de-3-8-millones",
+     "origen_objetivo": "Propuesta L&H: reducir a la mitad"
+    }
+   ],
+   "retos": [
+    {
+     "titulo": "Casas vacías donde no hay demanda",
+     "descripcion": "Unas 450.000 viviendas de la burbuja siguen desocupadas y muchas vacías están lejos de donde se necesita vivienda (Banco de España, 2025).",
+     "fuente_url": "https://es.euronews.com/business/2026/06/18/el-banco-de-espana-senala-un-deficit-de-750000"
+    },
+    {
+     "titulo": "Viviendas desviadas a usos temporales",
+     "descripcion": "Unas 400.000 se usan como alquiler turístico o de temporada (Banco de España, 2025).",
+     "fuente_url": "https://es.euronews.com/business/2026/06/18/el-banco-de-espana-senala-un-deficit-de-750000"
+    }
+   ],
+   "soluciones": [
+    {
+     "titulo": "Alquiler garantizado de pisos vacíos",
+     "descripcion": "Bizigune (Euskadi): el propietario cede su piso vacío al Gobierno Vasco, que lo alquila a precio protegido y le garantiza la renta.",
+     "fuente_url": "https://www.euskadi.eus/gobierno-vasco/-/si-tienes-tu-vivienda-vacia/"
+    },
+    {
+     "titulo": "Parque público permanente",
+     "descripcion": "Viena tiene unas 220.000 viviendas municipales y el 60% vive en vivienda social o subvencionada.",
+     "fuente_url": "https://brainsre.news/viena-concentra-60-poblacion-vivienda-social/"
+    }
+   ],
+   "proyectos": [
+    {
+     "nombre": "Bizigune",
+     "lugar": "Euskadi",
+     "descripcion": "Programa público que moviliza viviendas vacías hacia alquiler protegido.",
+     "web": "https://www.euskadi.eus/gobierno-vasco/-/si-tienes-tu-vivienda-vacia/"
+    },
+    {
+     "nombre": "Vivienda social de Viena",
+     "lugar": "Viena (Austria)",
+     "descripcion": "Parque municipal y cooperativo donde vive el 60% de la población.",
+     "web": "https://brainsre.news/viena-concentra-60-poblacion-vivienda-social/"
+    }
+   ]
+  },
+  {
+   "id": "acceso",
+   "nombre": "Acceso",
+   "que_es": "Lo que cuesta a una familia alquilar o comprar.",
+   "actual": [
+    "La vivienda subió un 12,2% en un año (INE, 2.º trimestre de 2026).",
+    "Comprar exige 8,4 años de renta y el 38% de los ingresos el primer año (Banco de España, 2026).",
+    "Solo el 14,5% de los jóvenes de 16-29 años vive fuera de casa de sus padres (CJE, 2025).",
+    "El 67,1% de quienes tienen 18-34 años vive con sus padres (INE, 2025)."
+   ],
+   "ideal": [
+    "Ningún hogar dedica más del 30% de su renta a la vivienda (Plan Estatal 2026-2030).",
+    "Jóvenes que se emancipan antes, con alquiler estable y asequible.",
+    "Alquileres públicos de hasta 75 años, con precio según lo que se puede pagar (CASA47).",
+    "Cooperativas en cesión de uso como tercera vía entre comprar y alquilar."
+   ],
+   "equilibrio": "Que el precio de la vivienda vuelva a estar en línea con los salarios.",
+   "indicadores": [
+    {
+     "nombre": "Esfuerzo para comprar vivienda (primer año)",
+     "actual": 38,
+     "objetivo": 30,
+     "unidad": "% de la renta",
+     "sentido": "bajar",
+     "año": 2026,
+     "fuente_url": "https://www.bde.es/webbe/es/estadisticas/compartido/datos/pdf/si_1_5.pdf",
+     "origen_objetivo": "Plan Estatal de Vivienda 2026-2030: coste ≤30% de la renta"
+    },
+    {
+     "nombre": "Inquilinos que dedican más del 40% de su renta a vivienda",
+     "actual": 40,
+     "objetivo": 27,
+     "unidad": "%",
+     "sentido": "bajar",
+     "año": 2025,
+     "fuente_url": "https://www.bolsamania.com/noticias_print/empresas/economia--bruselas-pide-a-espana-incrementar-su-oferta-de-vivienda-publica-y-asequible-muy-por-debajo-de-la-media-ue--19909798.html",
+     "origen_objetivo": "Media UE (Comisión Europea)"
+    },
+    {
+     "nombre": "Tasa de emancipación de jóvenes (16-29 años)",
+     "actual": 14.5,
+     "objetivo": 30,
+     "unidad": "%",
+     "sentido": "subir",
+     "año": 2025,
+     "fuente_url": "https://es.euronews.com/2026/05/22/el-alquiler-consume-el-987-del-salario-juvenil-en-pisos-individuales-y-mas-del-33-en-compa",
+     "origen_objetivo": "Propuesta L&H: duplicarla"
+    }
+   ],
+   "retos": [
+    {
+     "titulo": "Precios que crecen más que los sueldos",
+     "descripcion": "Desde 2023 el precio subió un 30% y los salarios un 7,75%.",
+     "fuente_url": "https://www.vozpopuli.com/economia/la-vivienda-sube-un-30-en-la-era-sin-presupuestos-con-el-gasto-estancado-en-el-05-del-pib.html"
+    },
+    {
+     "titulo": "Búsquedas sin éxito",
+     "descripcion": "El 7,6% buscó vivienda en el último año sin lograrlo; el 67,2% por precios excesivos (INE, 2025).",
+     "fuente_url": "https://ine.es/dyngs/Prensa/es/m3ECV2025.htm"
+    }
+   ],
+   "soluciones": [
+    {
+     "titulo": "Empresa pública de vivienda",
+     "descripcion": "CASA47 invertirá 13.000 M€ en 10 años en alquiler asequible: ningún alquiler superará el 30% de la renta media de la zona.",
+     "fuente_url": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/vivienda-agenda-urbana/Paginas/2026/solicitud-casa-47.aspx"
+    },
+    {
+     "titulo": "Cooperativas en cesión de uso",
+     "descripcion": "En Cataluña ya hay más de 500 pisos: la cooperativa es dueña y los socios tienen uso indefinido sin especular.",
+     "fuente_url": "https://www.publico.es/economia/vivienda-cooperativa-consolida-catalunya-500-pisos-edificados.amp.html"
+    }
+   ],
+   "proyectos": [
+    {
+     "nombre": "CASA47",
+     "lugar": "España",
+     "descripcion": "Entidad pública estatal para crear un parque de alquiler asequible de larga duración.",
+     "web": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/vivienda-agenda-urbana/Paginas/2026/solicitud-casa-47.aspx"
+    },
+    {
+     "nombre": "Sostre Cívic",
+     "lugar": "Cataluña",
+     "descripcion": "Cooperativa de vivienda en cesión de uso, pionera con el Ayuntamiento de Barcelona desde 2014.",
+     "web": "https://www.publico.es/economia/vivienda-cooperativa-consolida-catalunya-500-pisos-edificados.amp.html"
+    }
+   ]
+  },
+  {
+   "id": "financiacion",
+   "nombre": "Financiación",
+   "que_es": "El dinero que paga casas: hipotecas, inversión y presupuesto público.",
+   "actual": [
+    "501.073 hipotecas sobre viviendas en 2025, un 17,8% más (INE).",
+    "Gasto público en vivienda estancado en el 0,5% del PIB desde 2020 (COFOG, 2024).",
+    "Inmuebles de grandes tenedores (más de 10): de 137.943 a 625.883 desde 2008 (Ministerio de Consumo-CSIC, 2026).",
+    "Los no residentes compraron el 7,4% de las viviendas en 2021-2025 (Banco de España)."
+   ],
+   "ideal": [
+    "Inversión pública estable y suficiente, no dependiente de ciclos.",
+    "Crédito que financia vivienda para vivir, con riesgo bajo.",
+    "Banca ética y cooperativa que financia vivienda en cesión de uso.",
+    "Plan Estatal 2026-2030 con 7.000 M€: 40% vivienda protegida permanente, 30% rehabilitación."
+   ],
+   "equilibrio": "Que el dinero que entra en la vivienda produzca hogares, no solo rentabilidad.",
+   "indicadores": [
+    {
+     "nombre": "Gasto público en vivienda",
+     "actual": 0.5,
+     "objetivo": 1,
+     "unidad": "% del PIB",
+     "sentido": "subir",
+     "año": 2024,
+     "fuente_url": "https://www.vozpopuli.com/economia/la-vivienda-sube-un-30-en-la-era-sin-presupuestos-con-el-gasto-estancado-en-el-05-del-pib.html",
+     "origen_objetivo": "Propuesta L&H: duplicarlo"
+    },
+    {
+     "nombre": "Préstamos de vivienda dudosos",
+     "actual": 1.45,
+     "objetivo": 2,
+     "unidad": "%",
+     "sentido": "bajar",
+     "año": 2026,
+     "fuente_url": "https://www.bde.es/webbe/es/estadisticas/compartido/datos/pdf/si_1_5.pdf",
+     "origen_objetivo": "Banco de España: mantener por debajo del nivel de 2025"
+    }
+   ],
+   "retos": [
+    {
+     "titulo": "Concentración de la propiedad",
+     "descripcion": "Los hogares con una sola vivienda cayeron un 22,4% entre 2008 y 2022 mientras crecían los grandes tenedores (2026).",
+     "fuente_url": "https://brainsre.news/espana-propietarios-mengua-grandes-tenedores/"
+    },
+    {
+     "titulo": "Poca inversión pública",
+     "descripcion": "Unos 7.613 M€ en 2024, apenas el 1% del gasto público total.",
+     "fuente_url": "https://www.vozpopuli.com/economia/la-vivienda-sube-un-30-en-la-era-sin-presupuestos-con-el-gasto-estancado-en-el-05-del-pib.html"
+    }
+   ],
+   "soluciones": [
+    {
+     "titulo": "Protección pública permanente",
+     "descripcion": "El Plan Estatal 2026-2030 exige que la vivienda protegida financiada siga siempre en el parque público.",
+     "fuente_url": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/vivienda-agenda-urbana/Paginas/2025/plan-estatal-de-vivienda-2026-2030.aspx"
+    },
+    {
+     "titulo": "Banca ética para cooperativas",
+     "descripcion": "En Cataluña la vivienda cooperativa se financia con banca ética y el Institut Català de Finances.",
+     "fuente_url": "https://www.publico.es/economia/vivienda-cooperativa-consolida-catalunya-500-pisos-edificados.amp.html"
+    }
+   ],
+   "proyectos": [
+    {
+     "nombre": "Plan Estatal de Vivienda 2026-2030",
+     "lugar": "España",
+     "descripcion": "7.000 M€ entre Estado (60%) y comunidades (40%) para vivienda asequible y rehabilitación.",
+     "web": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/vivienda-agenda-urbana/Paginas/2025/plan-estatal-de-vivienda-2026-2030.aspx"
+    }
+   ]
+  },
+  {
+   "id": "urbanismo",
+   "nombre": "Arquitectura y urbanismo",
+   "que_es": "Cómo se diseñan barrios, calles y espacios comunes.",
+   "actual": [
+    "Seis grandes áreas urbanas concentran el 52,5% del déficit de vivienda (Banco de España, 2025).",
+    "En 10 ciudades estudiadas, el 60% no tiene un parque de 1 ha a menos de 300 m (2026).",
+    "Los municipios de menos de 5.000 habitantes ganaron 163.027 vecinos entre 2018 y 2024.",
+    "El 61,1% vive en viviendas construidas entre 1961 y 2000 (2025)."
+   ],
+   "ideal": [
+    "Ciudad compacta y de usos mixtos, donde todo está cerca a pie.",
+    "Cada vivienda con un parque a menos de 300 m (regla 3-30-300).",
+    "Calles para las personas, como Pontevedra: centro peatonal y 10 km/h.",
+    "Pueblos vivos que reparten población y reducen la presión sobre las ciudades."
+   ],
+   "equilibrio": "Repartir mejor la población y diseñar barrios donde vivir cerca sea fácil y sano.",
+   "indicadores": [
+    {
+     "nombre": "Población sin parque a menos de 300 m (10 ciudades)",
+     "actual": 60,
+     "objetivo": 0,
+     "unidad": "%",
+     "sentido": "bajar",
+     "año": 2026,
+     "fuente_url": "https://www.elsaltodiario.com/cambio-climatico/ciudades-espanolas-suspenden-acceso-zonas-verdes-seis-cada-diez-vecinos-carecen-ellas-cerca",
+     "origen_objetivo": "Regla 3-30-300 respaldada por la OMS"
+    },
+    {
+     "nombre": "Peso de 6 áreas urbanas en el déficit de vivienda",
+     "actual": 52.5,
+     "objetivo": 36,
+     "unidad": "%",
+     "sentido": "bajar",
+     "año": 2025,
+     "fuente_url": "https://es.euronews.com/business/2026/06/18/el-banco-de-espana-senala-un-deficit-de-750000",
+     "origen_objetivo": "Propuesta L&H: igual a su peso en hogares (36%)"
+    }
+   ],
+   "retos": [
+    {
+     "titulo": "Demanda concentrada en pocas ciudades",
+     "descripcion": "En Madrid solo el 9,9% del parque podría ampliarse, frente al 27,1% de media (Banco de España, 2025).",
+     "fuente_url": "https://es.euronews.com/business/2026/06/18/el-banco-de-espana-senala-un-deficit-de-750000"
+    },
+    {
+     "titulo": "Falta de naturaleza urbana",
+     "descripcion": "En Valencia y Ourense casi el 80% carece de un parque grande cerca de casa (2026).",
+     "fuente_url": "https://www.elsaltodiario.com/cambio-climatico/ciudades-espanolas-suspenden-acceso-zonas-verdes-seis-cada-diez-vecinos-carecen-ellas-cerca"
+    }
+   ],
+   "soluciones": [
+    {
+     "titulo": "Ciudad para el peatón",
+     "descripcion": "Pontevedra peatonalizó su centro desde 1999: el comercio creció un 7% y lleva más de una década sin muertes por atropello.",
+     "fuente_url": "https://es.euronews.com/2022/09/16/la-premiada-transformacion-de-pontevedra-en-favor-de-la-peatonalizacion-y-la-mejora-de-la-"
+    },
+    {
+     "titulo": "Repoblar el medio rural",
+     "descripcion": "El 79% de los municipios pequeños tuvo saldo migratorio positivo en 2018-2024, prueba de que el campo puede atraer población.",
+     "fuente_url": "https://www.miteco.gob.es/es/prensa/ultimas-noticias/2025/diciembre/la-poblacion-del-medio-rural-crece-en-espana-por-septimo-ano-con.html"
+    }
+   ],
+   "proyectos": [
+    {
+     "nombre": "Modelo urbano de Pontevedra",
+     "lugar": "Pontevedra",
+     "descripcion": "Centro peatonal y velocidad de 10 km/h que devolvió la calle a los vecinos.",
+     "web": "https://es.euronews.com/2022/09/16/la-premiada-transformacion-de-pontevedra-en-favor-de-la-peatonalizacion-y-la-mejora-de-la-"
+    }
+   ]
+  }
+ ],
+ "flujos": [
+  {
+   "de": "urbanismo",
+   "a": "suelo",
+   "etiqueta": "planeamiento"
+  },
+  {
+   "de": "suelo",
+   "a": "construccion",
+   "etiqueta": "solares"
+  },
+  {
+   "de": "financiacion",
+   "a": "construccion",
+   "etiqueta": "inversión"
+  },
+  {
+   "de": "construccion",
+   "a": "parque",
+   "etiqueta": "viviendas"
+  },
+  {
+   "de": "parque",
+   "a": "acceso",
+   "etiqueta": "oferta"
+  },
+  {
+   "de": "financiacion",
+   "a": "acceso",
+   "etiqueta": "hipotecas, ayudas"
+  },
+  {
+   "de": "acceso",
+   "a": "financiacion",
+   "etiqueta": "rentas, cuotas"
+  },
+  {
+   "de": "parque",
+   "a": "urbanismo",
+   "etiqueta": "barrios"
+  }
+ ],
+ "reasignacion": {
+  "El suelo se ha privatizado y parcelado de forma permanente": [
+   "suelo"
+  ],
+  "Precio de la vivienda desconectado de los salarios": [
+   "acceso",
+   "financiacion"
+  ],
+  "Especulación y concentración de la propiedad": [
+   "financiacion",
+   "parque"
+  ],
+  "Casas sin gente y gente sin casa": [
+   "parque",
+   "acceso"
+  ],
+  "Abandono rural y tierras abandonadas": [
+   "suelo",
+   "urbanismo"
+  ],
+  "Normativa que penaliza la bioconstrucción": [
+   "construccion"
+  ],
+  "Dispersión urbana dependiente del coche": [
+   "urbanismo"
+  ],
+  "Propiedad comunitaria de la tierra con cesión de uso temporal": [
+   "suelo"
+  ],
+  "Cooperativas de vivienda en cesión de uso (modelo Andel)": [
+   "acceso",
+   "financiacion"
+  ],
+  "Community Land Trust (fideicomiso comunitario de suelo)": [
+   "suelo",
+   "acceso"
+  ],
+  "Bancos de tierras y movilización de tierra abandonada": [
+   "suelo"
+  ],
+  "Masovería urbana": [
+   "parque",
+   "construccion"
+  ],
+  "Derecho de superficie sobre suelo público": [
+   "suelo",
+   "financiacion"
+  ],
+  "Bioconstrucción y adaptación normativa": [
+   "construccion"
+  ],
+  "Comunidad Mapunchi": [
+   "suelo",
+   "construccion"
+  ],
+  "Entrepatios – Las Carolinas": [
+   "acceso",
+   "construccion"
+  ],
+  "La Borda": [
+   "acceso",
+   "construccion"
+  ],
+  "Sostre Cívic": [
+   "acceso",
+   "financiacion"
+  ],
+  "Cal Cases": [
+   "suelo",
+   "acceso"
+  ],
+  "La Raval": [
+   "suelo",
+   "acceso"
+  ],
+  "Champlain Housing Trust": [
+   "suelo",
+   "acceso"
+  ],
+  "Comunidad Circular Humana (Luz & Humanidad)": [
+   "suelo",
+   "urbanismo"
+  ]
+ }
+}

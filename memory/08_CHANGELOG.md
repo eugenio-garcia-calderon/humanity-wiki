@@ -11924,3 +11924,13 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
   - the flat shading of jeans and jackets;
   - the girl's calves;
   - the grandmother's and the clay girl's hands.
+
+## 2026-11-16 — `/vision`: escala País por defecto, selector de país y modelos de España en 2D y 3D
+
+- Eugenio: esquemas 2D y 3D de la visión ideal, empezando por la escala país (que pasa a ser la de por defecto) y por cinco sectores centrales — energía, vivienda, movilidad, política y economía — con sus «patas» (en energía: generación, red, distribución, mercado…), la situación actual de España frente al ideal, y los retos, soluciones y proyectos de cada pata. Un selector de país, aunque de momento solo haya España.
+- La web abre ahora en la escala **País**. Bajo «País» hay un selector con España y otros países marcados «pronto». «Todas» sigue disponible (`?e=todas`).
+- Para los cinco sectores, a escala país, el 3D pendiente se sustituye por el **modelo país**: un esquema 2D con el sector en el centro, sus 6 patas alrededor con su avance hacia el ideal (rojo, ámbar, verde) y flechas con lo que fluye entre ellas; y una vista **3D** del mismo esquema (plataforma por pata, columna sólida = hoy, columna de cristal = ideal, tubos con flujos animados). Debajo, la visión general y el equilibrio a alcanzar; al pinchar una pata, «Hoy en España» frente a «Ideal», su equilibrio y sus indicadores (valor actual → objetivo, año, origen del objetivo y fuente).
+- El avance de cada pata es la media de sus indicadores (actual/objetivo, o al revés si menos es mejor). Los objetivos vienen de planes oficiales (PNIEC, UE, OCDE…) o son propuestas de Luz & Humanidad, y así lo dicen.
+- Las patas sustituyen a las partes del submenú en esos cinco sectores; los elementos que ya había se repartieron entre ellas (los investigadores asignaron cada título). Se añadieron unos 100 retos, soluciones y proyectos nuevos a escala país.
+- Investigación de cinco agentes (uno por sector). Las elecciones generales del 29-11-2026 y la disolución de las Cortes del 6-10-2026 que cita Política se comprobaron aparte. Investigación original y scripts en `scripts/vision/`.
+- Los otros siete sectores muestran «Modelo país de España pendiente».

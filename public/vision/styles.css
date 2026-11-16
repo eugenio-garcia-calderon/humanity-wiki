@@ -376,3 +376,60 @@ details.preguntas ul{margin-top:8px;font-size:14px}
 .f-sectores.sin-eleccion{flex-wrap:wrap;padding:8px 0}
 @media (max-width:900px){.f-sectores.sin-eleccion{flex-wrap:nowrap;padding:0}}
 @media (max-width:900px){#nav .f-sectores a.on{font-size:24px}}
+
+/* ---- 2026-11-16: country model (esquema) ---- */
+.selpais{display:block;margin:2px 0 6px 34px}
+.selpais select{width:76px;font:inherit;font-size:11.5px;background:var(--marco-2);color:var(--marco-txt);border:1px solid #2c4672;border-radius:7px;padding:2px 4px}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.esquema{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px 10px;margin-bottom:22px}
+.esq-barra{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.esq-pais{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.conmuta{display:inline-flex;background:#eef0f4;border-radius:99px;padding:3px}
+.conmuta a{text-decoration:none;font-size:12.5px;font-weight:700;padding:4px 14px;border-radius:99px;color:#66748a}
+.conmuta a.on{background:var(--marco);color:#fff}
+.esq2d{width:100%;height:auto;display:block}
+.esq2d .radio{stroke:#e3e7ee;stroke-width:1.5;stroke-dasharray:3 5}
+.esq2d .flujo{fill:none;stroke:#9aa6b8;stroke-width:1.8}
+.esq2d .flujo-t{font-size:11px;fill:#6b778c;text-anchor:middle;paint-order:stroke;stroke:#fff;stroke-width:4px}
+.esq2d .hub{fill:var(--marco);stroke:#fff;stroke-width:4}
+.esq2d .hub.on{stroke:#9fc6ff}
+.esq2d .hub-t{fill:#fff;font-family:var(--serif);font-size:19px;font-weight:700;text-anchor:middle}
+.esq2d .hub-p{font-size:22px;font-weight:800;text-anchor:middle}
+.esq2d .hub-s{fill:#9fb3d1;font-size:10.5px;text-anchor:middle}
+.esq2d .nodo rect:first-child{fill:#fff;stroke:#d5dbe5;stroke-width:1.5;transition:all .15s}
+.esq2d .nodo:hover rect:first-child{stroke:var(--marco);stroke-width:2}
+.esq2d .nodo.on rect:first-child{fill:#eef4ff;stroke:var(--marco);stroke-width:3}
+.esq2d .nodo.apagado{opacity:.45}
+.esq2d .nodo-t{font-size:14.5px;font-weight:700;fill:var(--ink);text-anchor:middle}
+.esq2d .nodo-p{font-size:11px;fill:#66748a;text-anchor:middle;font-weight:700}
+.esq2d .barra-f{fill:#eceff4}
+.esq-leyenda{display:flex;flex-wrap:wrap;gap:14px;font-size:11.5px;color:var(--muted);padding:4px 4px 0}
+.esq-leyenda i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.esq-leyenda .nota{margin-left:auto}
+.esquema .visor{margin:4px 0 6px;height:500px}
+.esq-detalle{margin-bottom:26px}
+.esq-detalle h3{font-family:var(--serif);font-size:22px;margin:0 0 8px}
+.esq-detalle h4{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:16px 0 6px}
+.equilibrio{background:#eef4ff;border-left:4px solid var(--marco);border-radius:8px;padding:9px 14px;font-weight:600;color:#1d2c46;margin:0 0 12px}
+.hoy-ideal{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.hoy-ideal>div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:4px 16px 12px}
+.hoy-ideal .ideal{background:#f1f8f3;border-color:#cfe5d6}
+.hoy-ideal h4{margin-top:12px}
+.patas{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-top:14px}
+.pata{display:grid;grid-template-columns:1fr auto;gap:2px 10px;text-decoration:none;color:inherit;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.pata:hover{border-color:var(--marco)}
+.pata small{grid-column:1/-1;color:var(--muted);font-size:12px}
+.pata .barra{grid-column:1/2;align-self:center}
+.pata em{font-style:normal;font-size:12px;font-weight:700;color:var(--muted)}
+.barra{display:block;height:8px;background:#eceff4;border-radius:4px;overflow:hidden}
+.barra i{display:block;height:100%;border-radius:4px}
+.indicadores{display:grid;gap:10px}
+.ind{display:grid;grid-template-columns:minmax(140px,1.2fr) 1.4fr auto;gap:4px 14px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 12px}
+.ind-n{font-weight:600;font-size:14px}
+.ind-v{font-size:13.5px;white-space:nowrap}
+.ind small{grid-column:1/-1;color:var(--muted);font-size:11.5px}
+.ind small a{color:var(--muted)}
+@media (max-width:900px){.hoy-ideal{grid-template-columns:1fr}.ind{grid-template-columns:1fr auto}.ind .barra{grid-column:1/-1;order:3}.esq-leyenda .nota{margin-left:0}.esquema .visor{height:380px}}
+.esq2d .anillo{fill:none;stroke:#eef1f6;stroke-width:26}
+.esq2d .nodo-t.dos{font-size:13px}
+.esq2d .flujo-t{font-weight:600}

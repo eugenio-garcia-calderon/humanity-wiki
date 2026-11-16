@@ -1,0 +1,616 @@
+{
+ "sector": "economia",
+ "pais": "es",
+ "vision_general": {
+  "titulo": "Una economía que da para vivir bien a todas las personas, sin deudas que ahoguen",
+  "ideal": [
+   "Ningún hogar por debajo del umbral de pobreza y todos con un colchón para imprevistos.",
+   "Empleo para quien lo busca, con salarios ligados a una productividad que converge con Europa.",
+   "Un tejido de empresas más grandes, innovadoras y con peso creciente de la economía social.",
+   "Impuestos simples, sin fugas, y cuentas públicas que pagan pensiones y servicios sin endeudar a los jóvenes.",
+   "Un crédito bancario que financia producción y vivienda, no burbujas.",
+   "Menos dependencia del exterior en energía y una deuda externa bajo control."
+  ],
+  "equilibrio": "Que lo que el país produce cubra lo que necesita y reparte, sin vivir a crédito del futuro ni del exterior."
+ },
+ "patas": [
+  {
+   "id": "hogares",
+   "nombre": "Hogares",
+   "que_es": "Lo que las familias ganan, ahorran y pueden gastar.",
+   "actual": [
+    "El 25,7 % de la población está en riesgo de pobreza o exclusión (AROPE, INE 2025).",
+    "El 36,4 % no podría afrontar un gasto imprevisto (INE 2025).",
+    "Renta media por persona: 15.620 € al año (INE, renta de 2024).",
+    "Tasa de ahorro de los hogares: 11,0 % de su renta (INE, 2.º trimestre 2026)."
+   ],
+   "ideal": [
+    "Pobreza y exclusión al menos en la media de la UE (20,9 % en 2025) y bajando.",
+    "Reducir a la mitad la pobreza en todas sus formas (ODS 1.2).",
+    "Todos los hogares con un fondo de emergencia, gracias al ahorro automático.",
+    "Educación financiera básica para toda la población."
+   ],
+   "equilibrio": "Que la renta cubra la vida diaria y deje margen para ahorrar sin endeudarse.",
+   "indicadores": [
+    {
+     "nombre": "Población en riesgo de pobreza o exclusión (AROPE)",
+     "actual": 25.7,
+     "objetivo": 20.9,
+     "unidad": "%",
+     "sentido": "bajar",
+     "año": 2025,
+     "fuente_url": "https://ine.es/dyngs/Prensa/ECV2025.pdf",
+     "origen_objetivo": "Media UE 2025 (Eurostat)"
+    },
+    {
+     "nombre": "Población sin capacidad para afrontar gastos imprevistos",
+     "actual": 36.4,
+     "objetivo": 18.2,
+     "unidad": "%",
+     "sentido": "bajar",
+     "año": 2025,
+     "fuente_url": "https://ine.es/dyngs/Prensa/ECV2025.pdf",
+     "origen_objetivo": "ODS 1.2: reducir a la mitad la pobreza en todas sus dimensiones"
+    },
+    {
+     "nombre": "Tasa de ahorro de los hogares",
+     "actual": 11.0,
+     "objetivo": 13.0,
+     "unidad": "% renta disponible",
+     "sentido": "subir",
+     "año": 2026,
+     "fuente_url": "https://ine.es/dyngs/Prensa/CTNFSI2T26.htm?print=1",
+     "origen_objetivo": "Propuesta L&H"
+    }
+   ],
+   "retos": [
+    {
+     "titulo": "Una de cada cuatro personas en riesgo de pobreza o exclusión",
+     "descripcion": "La tasa AROPE fue del 25,7 % en 2025, frente al 20,9 % de media en la UE.",
+     "fuente_url": "https://ine.es/dyngs/Prensa/ECV2025.pdf"
+    },
+    {
+     "titulo": "Sin colchón para los imprevistos",
+     "descripcion": "El 36,4 % de la población no puede afrontar un gasto imprevisto y el 8,5 % llega a fin de mes con mucha dificultad (INE 2025).",
+     "fuente_url": "https://ine.es/dyngs/Prensa/ECV2025.pdf"
+    }
+   ],
+   "soluciones": [
+    {
+     "titulo": "Ahorro automático por defecto",
+     "descripcion": "Apuntar a la gente a un plan de ahorro salvo que diga que no. En EE. UU. disparó la participación en planes de ahorro.",
+     "fuente_url": "https://m.nber.org/papers/w7682"
+    },
+    {
+     "titulo": "Educación financiera desde la escuela",
+     "descripcion": "El Plan de Educación Financiera del Banco de España y la CNMV forma a escolares y adultos en presupuesto, ahorro y deuda.",
+     "fuente_url": "https://www.bde.es/wbe/es/areas-actuacion/educacion-financiera/comprometidos-con-la-educacion-financiera/la-educacion-financiera-en-espana/"
+    }
+   ],
+   "proyectos": [
+    {
+     "nombre": "Finanzas para Todos",
+     "lugar": "España",
+     "descripcion": "Plan de Educación Financiera del Banco de España y la CNMV.",
+     "web": "https://www.bde.es/wbe/es/areas-actuacion/educacion-financiera/comprometidos-con-la-educacion-financiera/la-educacion-financiera-en-espana/"
+    }
+   ]
+  },
+  {
+   "id": "trabajo",
+   "nombre": "Trabajo",
+   "que_es": "El empleo, los salarios y lo que produce cada hora trabajada.",
+   "actual": [
+    "Paro del 10,18 % con 22,85 millones de ocupados, récord (EPA, 3.er trimestre 2026).",
+    "Paro juvenil del 23,3 % (EPA, 3.er trimestre 2026).",
+    "Salario medio de 29.540 €, pero el más frecuente es de 16.520 € (INE, 2024).",
+    "Brecha de productividad con la zona euro: 8 % (Banco de España, 2025)."
+   ],
+   "ideal": [
+    "Paro en la media de la zona euro (6,5 % en septiembre de 2026).",
+    "Productividad igual a la de la zona euro, para sostener mejores salarios.",
+    "Igual salario por igual trabajo entre mujeres y hombres (Directiva UE 2023/970).",
+    "Más empresas propiedad de quienes trabajan en ellas."
+   ],
+   "equilibrio": "Que haya trabajo para todos y que cada hora rinda lo bastante para pagar un sueldo digno.",
+   "indicadores": [
+    {
+     "nombre": "Tasa de paro",
+     "actual": 10.18,
+     "objetivo": 6.5,
+     "unidad": "%",
+     "sentido": "bajar",
+     "año": 2026,
+     "fuente_url": "https://www.que.es/2026/10/28/epa-tercer-trimestre-2026-paro-2/",
+     "origen_objetivo": "Media zona euro, septiembre 2026 (Eurostat)"
+    },
+    {
+     "nombre": "Brecha de productividad con la zona euro",
+     "actual": 8,
+     "objetivo": 0,
+     "unidad": "%",
+     "sentido": "bajar",
+     "año": 2025,
+     "fuente_url": "https://www.bde.es/f/webbe/SES/Secciones/Publicaciones/PublicacionesAnuales/InformesAnuales/25/InfAnual_2025_Breve.pdf",
+     "origen_objetivo": "Convergencia con la zona euro (Banco de España)"
+    },
+    {
+     "nombre": "Brecha salarial de género (salario medio anual)",
+     "actual": 16.1,
+     "objetivo": 5,
+     "unidad": "%",
+     "sentido": "bajar",
+     "año": 2024,
+     "fuente_url": "https://ine.es/dyngs/Prensa/EAES2024.htm",
+     "origen_objetivo": "Umbral del 5 % de la Directiva (UE) 2023/970"
+    }
+   ],
+   "retos": [
+    {
+     "titulo": "El paro más alto de la zona euro",
+     "descripcion": "En el 3.er trimestre de 2026 el paro fue del 10,18 %, frente al 6,5 % de la zona euro en septiembre.",
+     "fuente_url": "https://www.que.es/2026/10/28/epa-tercer-trimestre-2026-paro-2/"
+    },
+    {
+     "titulo": "Productividad por debajo de Europa",
+     "descripcion": "La brecha con la zona euro bajó del 12 % (2013) al 8 % (2025), pero el PIB por ocupado apenas ha crecido en cinco años.",
+     "fuente_url": "https://www.bde.es/f/webbe/SES/Secciones/Publicaciones/PublicacionesAnuales/InformesAnuales/25/InfAnual_2025_Breve.pdf"
+    }
+   ],
+   "soluciones": [
+    {
+     "titulo": "Cooperativas de trabajo",
+     "descripcion": "Empresas propiedad de sus trabajadores. Mondragón suma 71.415 empleos y dedica el 4,4 % de sus ventas industriales a I+D (2025).",
+     "fuente_url": "https://www.thenews.coop/mondragon-posts-positive-2025-revenue-and-job-figures/"
+    },
+    {
+     "titulo": "Más inversión en innovación y digitalización",
+     "descripcion": "El Banco de España señala la poca I+D y la fragmentación normativa como los grandes frenos de la productividad.",
+     "fuente_url": "https://www.bde.es/f/webbe/SES/Secciones/Publicaciones/PublicacionesAnuales/InformesAnuales/25/InfAnual_2025_Breve.pdf"
+    }
+   ],
+   "proyectos": [
+    {
+     "nombre": "Mondragón",
+     "lugar": "País Vasco, España",
+     "descripcion": "Mayor grupo cooperativo del mundo: 71.415 personas y 11.322 M€ de ventas en 2025.",
+     "web": "https://www.mondragon-corporation.com/en/anual-report/business-areas/"
+    }
+   ]
+  },
+  {
+   "id": "empresas",
+   "nombre": "Empresas",
+   "que_es": "Quién produce bienes y servicios: pymes, grandes empresas y economía social.",
+   "actual": [
+    "Hay 2,98 millones de empresas; el 99,8 % son pymes (Ministerio de Industria, 2025).",
+    "Las pymes dan el 61,3 % del empleo (Ministerio de Industria, 2025).",
+    "La economía social genera el 4,0 % del valor añadido y el 5,8 % del empleo (INE, 2023).",
+    "Gasto en I+D: 1,5 % del PIB, frente al 2,2 % de la UE (2024)."
+   ],
+   "ideal": [
+    "Empresas que crecen de tamaño e invierten en innovación al nivel de la UE.",
+    "Más peso de cooperativas y economía social, que reparten mejor el valor.",
+    "Monedas complementarias que dan liquidez a las pymes en las crisis.",
+    "Propuesta L&H: medir el éxito de las empresas también por su balance social (Economía del Bien Común)."
+   ],
+   "equilibrio": "Que el tejido productivo genere valor suficiente y lo reparta de forma justa entre quienes lo crean.",
+   "indicadores": [
+    {
+     "nombre": "Gasto en I+D",
+     "actual": 1.5,
+     "objetivo": 2.2,
+     "unidad": "% PIB",
+     "sentido": "subir",
+     "año": 2024,
+     "fuente_url": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/ciencia-innovacion-universidades/paginas/2025/201125-morant-gasto-id-aumenta.aspx",
+     "origen_objetivo": "Media UE"
+    },
+    {
+     "nombre": "Empleo en la economía social",
+     "actual": 5.8,
+     "objetivo": 10,
+     "unidad": "% del empleo",
+     "sentido": "subir",
+     "año": 2023,
+     "fuente_url": "https://ine.es/dyngs/Prensa/CSES2023.pdf",
+     "origen_objetivo": "Propuesta L&H"
+    }
+   ],
+   "retos": [
+    {
+     "titulo": "Empresas demasiado pequeñas",
+     "descripcion": "El 99,8 % de las empresas son pymes y dan el 61,3 % del empleo (2025); el tamaño pequeño frena la inversión y la productividad.",
+     "fuente_url": "https://ipyme.org/es-es/politicasymedidas/consejo-estatal/Documents/CE_PYME_julio_2025.pdf"
+    },
+    {
+     "titulo": "Poca inversión en I+D",
+     "descripcion": "España invierte el 1,5 % del PIB en I+D (2024); la parte de las empresas está 11 puntos por debajo de la media UE.",
+     "fuente_url": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/ciencia-innovacion-universidades/paginas/2025/201125-morant-gasto-id-aumenta.aspx"
+    }
+   ],
+   "soluciones": [
+    {
+     "titulo": "Cooperativas y economía social",
+     "descripcion": "Empresas democráticas que reinvierten en su entorno. Ya suponen el 5,8 % del empleo en España (INE, 2023).",
+     "fuente_url": "https://ine.es/dyngs/Prensa/CSES2023.pdf"
+    },
+    {
+     "titulo": "Monedas complementarias para las pymes",
+     "descripcion": "Crédito mutuo entre empresas. El WIR suizo, en uso desde 1934, tiende a crecer cuando la economía cae y amortigua las crisis.",
+     "fuente_url": "https://halshs.archives-ouvertes.fr/halshs-01450197"
+    }
+   ],
+   "proyectos": [
+    {
+     "nombre": "REAS Red de Redes de Economía Alternativa y Solidaria · Mercado Social",
+     "lugar": "España",
+     "descripcion": "Red de entidades de economía solidaria con auditoría social anual.",
+     "web": "https://www.economiasolidaria.org/wp-content/uploads/2023/05/DOSSIER-REAS-Red-de-Redes_2023.pdf"
+    },
+    {
+     "nombre": "Banco WIR",
+     "lugar": "Suiza",
+     "descripcion": "Cooperativa que gestiona una moneda complementaria entre pymes desde 1934.",
+     "web": "https://monneta.org/en/wir-bank-switzerland/"
+    }
+   ]
+  },
+  {
+   "id": "publico",
+   "nombre": "Sector público",
+   "que_es": "Impuestos, gasto, deuda y pensiones del Estado y las administraciones.",
+   "actual": [
+    "Deuda pública: 100,8 % del PIB, 1,699 billones de euros (Banco de España, dic. 2025).",
+    "Déficit público: 2,18 % del PIB; 2,39 % con la DANA (Hacienda, 2025).",
+    "Presión fiscal: 37,8 % del PIB, frente al 40,3 % de la zona euro (Comisión Europea, 2025).",
+    "Gasto en pensiones públicas: 12,9 % del PIB (Instituto Santalucía, 2025)."
+   ],
+   "ideal": [
+    "Deuda pública por debajo del 60 % del PIB (Pacto de Estabilidad UE).",
+    "Facturación digital que cierra el fraude de IVA (Comisión Europea, IVA en la era digital).",
+    "Propuesta L&H: un único impuesto por transacción, cobrado automáticamente por el sistema de pago.",
+    "Propuesta L&H: tramos del 10 % (primera necesidad), 25 % (segunda necesidad) y 40 % (ocio y lujo).",
+    "Propuesta L&H: lo recaudado se reparte a partes iguales entre 8 escalas: persona, comunidad vecinal, municipio, provincia, región, nación, continente y planeta.",
+    "Propuesta L&H: cada escala dedica un tercio a medios de producción, un tercio a cuidados y un tercio a libre disposición."
+   ],
+   "equilibrio": "Que lo que se recauda pague servicios y pensiones sin trasladar deuda a las próximas generaciones.",
+   "indicadores": [
+    {
+     "nombre": "Deuda pública",
+     "actual": 100.8,
+     "objetivo": 60,
+     "unidad": "% PIB",
+     "sentido": "bajar",
+     "año": 2025,
+     "fuente_url": "https://www.bde.es/wbe/es/noticias-eventos/actualidad-banco-espana/deuda-aapp-diciembre25.html",
+     "origen_objetivo": "Pacto de Estabilidad y Crecimiento UE"
+    },
+    {
+     "nombre": "Déficit público (con DANA)",
+     "actual": 2.39,
+     "objetivo": 0,
+     "unidad": "% PIB",
+     "sentido": "bajar",
+     "año": 2025,
+     "fuente_url": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/hacienda/paginas/2026/310326-cierre-deficit-2025.aspx",
+     "origen_objetivo": "Equilibrio presupuestario (art. 135 Constitución); límite UE 3 %"
+    }
+   ],
+   "retos": [
+    {
+     "titulo": "IVA que no se llega a cobrar",
+     "descripcion": "Los países de la UE dejaron de ingresar unos 89.000 M€ de IVA en 2022 por fraude, errores e insolvencias.",
+     "fuente_url": "https://spain.representation.ec.europa.eu/noticias-eventos/noticias-0/los-estados-miembros-lograron-avances-significativos-en-el-cumplimiento-del-iva-en-2022-pero-hay-que-2024-12-18_es"
+    },
+    {
+     "titulo": "Pensiones que dependen cada vez más del Estado",
+     "descripcion": "El gasto en pensiones fue del 12,9 % del PIB en 2025 y el déficit contributivo, del 3,4 % del PIB.",
+     "fuente_url": "https://institutosantalucia.es/sala-de-prensa/el-sistema-publico-de-pensiones-necesito-56-946-millones-de-euros-del-estado-para-cubrir-su-componente-contributivo-en-2025/"
+    }
+   ],
+   "soluciones": [
+    {
+     "titulo": "Factura electrónica obligatoria",
+     "descripcion": "Obligatoria desde octubre de 2027 para empresas de más de 8 M€. La Comisión Europea atribuye a la facturación digital una mejora clara del cobro del IVA.",
+     "fuente_url": "https://www.diariodeleon.es/economia/261006/2099460/hacienda-retrasa-verifactu-octubre-2027-hacerlo-coincidir-factura-electronica_amp.html"
+    },
+    {
+     "titulo": "Impuestos con base amplia y pocas excepciones",
+     "descripcion": "Menos tipos reducidos y deducciones permiten recaudar lo mismo con tipos más bajos; Bruselas pide a España revisar el IVA reducido.",
+     "fuente_url": "https://www.diaridetarragona.com/economia/261961/bruselas-sugiere-espana-revisar-iva-reducido-hoteles-restaurantes.html"
+    }
+   ],
+   "proyectos": [
+    {
+     "nombre": "Modelo de optimización socioeconómica (Luz & Humanidad)",
+     "lugar": "España",
+     "descripcion": "Impuesto único por transacción repartido entre ocho escalas, con asambleas que eligen prioridades y comités técnicos que ejecutan.",
+     "web": "https://humanity.wiki/modelo-socioeconomico"
+    }
+   ]
+  },
+  {
+   "id": "dinero",
+   "nombre": "Dinero y banca",
+   "que_es": "Cómo se crea el dinero, a quién se presta y cómo se financia la vivienda.",
+   "actual": [
+    "Los bancos crean la mayor parte del dinero al conceder préstamos (Banco de Inglaterra, 2014).",
+    "Las nuevas hipotecas para comprar vivienda crecieron un 27,5 % en 2025 (Banco de España).",
+    "Faltan unas 750.000 viviendas (2021-2025); un joven necesita 7,1 años de renta para comprar (Banco de España).",
+    "El 10 % de hogares más ricos tiene el 52,7 % de la riqueza neta (EFF 2022)."
+   ],
+   "ideal": [
+    "Crédito orientado a producir bienes y servicios, no a inflar precios de activos (Werner).",
+    "Propuesta L&H: el dinero nuevo creado por los bancos solo para producir y para primera y segunda vivienda, a interés regulado.",
+    "Más banca ética y cooperativa que presta a la economía real.",
+    "Vivienda accesible: emancipación juvenil de vuelta a niveles de 2007."
+   ],
+   "equilibrio": "Que el dinero que se crea vaya a producir y a dar techo, no a especular.",
+   "indicadores": [
+    {
+     "nombre": "Déficit acumulado de viviendas",
+     "actual": 750000,
+     "objetivo": 0,
+     "unidad": "viviendas",
+     "sentido": "bajar",
+     "año": 2025,
+     "fuente_url": "https://www.esdiario.com/economia/260618/190880/banco-espana-vuelve-reiterarse-espana-deficit-750-000-viviendas.html",
+     "origen_objetivo": "Banco de España (Informe Anual 2025)"
+    },
+    {
+     "nombre": "Tasa de emancipación de menores de 35 años",
+     "actual": 31.5,
+     "objetivo": 45,
+     "unidad": "%",
+     "sentido": "subir",
+     "año": 2024,
+     "fuente_url": "https://www.esdiario.com/economia/260618/190880/banco-espana-vuelve-reiterarse-espana-deficit-750-000-viviendas.html",
+     "origen_objetivo": "Nivel de 2007 (Banco de España)"
+    },
+    {
+     "nombre": "Años de renta de un joven para comprar vivienda",
+     "actual": 7.1,
+     "objetivo": 4.3,
+     "unidad": "años",
+     "sentido": "bajar",
+     "año": 2025,
+     "fuente_url": "https://www.esdiario.com/economia/260618/190880/banco-espana-vuelve-reiterarse-espana-deficit-750-000-viviendas.html",
+     "origen_objetivo": "Propuesta L&H: igualar la media de todos los hogares"
+    }
+   ],
+   "retos": [
+    {
+     "titulo": "La riqueza, muy concentrada",
+     "descripcion": "El 10 % de hogares más ricos acumula el 52,7 % de la riqueza neta y el 1 %, el 19,4 % (EFF 2022).",
+     "fuente_url": "https://www.eldebate.com/economia/20240514/1-hogares-rico-atesoraba-2022-20-riqueza-total-neta_196882.html"
+    },
+    {
+     "titulo": "Crédito que sube más rápido que la vivienda",
+     "descripcion": "Las hipotecas nuevas crecieron un 27,5 % en 2025 mientras se terminaron 92.000 viviendas para 240.000 hogares nuevos.",
+     "fuente_url": "https://www.esdiario.com/economia/260618/190880/banco-espana-vuelve-reiterarse-espana-deficit-750-000-viviendas.html"
+    }
+   ],
+   "soluciones": [
+    {
+     "titulo": "Banca ética que presta a la economía real",
+     "descripcion": "Bancos que solo financian proyectos sociales y ambientales y publican a quién prestan.",
+     "fuente_url": "https://www.fiarebancaetica.coop/app/uploads/sites/2/2026/07/Report-Impatto-Banca-Etica-2026_ES.pdf"
+    },
+    {
+     "titulo": "Orientar el crédito a la producción",
+     "descripcion": "Werner mostró en 2014 que cada banco crea dinero al prestar; dirigirlo a la producción genera crecimiento sin burbujas.",
+     "fuente_url": "https://eprints.soton.ac.uk/372866"
+    }
+   ],
+   "proyectos": [
+    {
+     "nombre": "Fiare Banca Etica",
+     "lugar": "España e Italia",
+     "descripcion": "Cooperativa de crédito que solo financia la economía social y solidaria.",
+     "web": "https://fiarebancaetica.coop"
+    },
+    {
+     "nombre": "Triodos Bank",
+     "lugar": "España y Europa",
+     "descripcion": "Banco ético que publica todos los proyectos que financia.",
+     "web": "https://www.triodos.es"
+    }
+   ]
+  },
+  {
+   "id": "exterior",
+   "nombre": "Sector exterior",
+   "que_es": "Lo que España compra, vende y debe al resto del mundo.",
+   "actual": [
+    "Superávit por cuenta corriente: 2,9 % del PIB (Banco de España, 2025).",
+    "Posición inversora neta: −44,8 % del PIB; deuda externa bruta, 163,6 % (2025).",
+    "España importa el 68,4 % de la energía que consume (2024)."
+   ],
+   "ideal": [
+    "Dependencia energética del 50 % en 2030 (PNIEC 2023-2030).",
+    "Posición inversora neta mejor que −35 % del PIB (umbral de la Comisión Europea).",
+    "Comercio exterior justo, que pague precios dignos a quien produce.",
+    "Mantener el superávit exterior para reducir la deuda con el resto del mundo."
+   ],
+   "equilibrio": "Vender al exterior al menos lo que se compra, y depender menos de energía importada.",
+   "indicadores": [
+    {
+     "nombre": "Dependencia energética exterior",
+     "actual": 68.4,
+     "objetivo": 50,
+     "unidad": "%",
+     "sentido": "bajar",
+     "año": 2024,
+     "fuente_url": "https://www.eldebate.com/economia/20260719/espana-importa-casi-70-energia-consume-pese-avance-renovables_441118.html",
+     "origen_objetivo": "PNIEC 2023-2030"
+    },
+    {
+     "nombre": "Posición de inversión internacional neta",
+     "actual": -44.8,
+     "objetivo": -35,
+     "unidad": "% PIB",
+     "sentido": "subir",
+     "año": 2025,
+     "fuente_url": "https://www.bde.es/wbe/es/noticias-eventos/actualidad-banco-espana/notas-banco-espana/bop-pii-4t2025.html",
+     "origen_objetivo": "Umbral del procedimiento de desequilibrios macroeconómicos (Comisión Europea)"
+    },
+    {
+     "nombre": "Saldo por cuenta corriente",
+     "actual": 2.9,
+     "objetivo": 3.2,
+     "unidad": "% PIB",
+     "sentido": "subir",
+     "año": 2025,
+     "fuente_url": "https://www.bde.es/wbe/es/noticias-eventos/actualidad-banco-espana/notas-banco-espana/bop-pii-4t2025.html",
+     "origen_objetivo": "Nivel de 2024 (Banco de España)"
+    }
+   ],
+   "retos": [
+    {
+     "titulo": "Una economía muy endeudada con el exterior",
+     "descripcion": "España debe al exterior en términos netos el 44,8 % de su PIB y su deuda externa bruta llega al 163,6 % (2025).",
+     "fuente_url": "https://www.bde.es/wbe/es/noticias-eventos/actualidad-banco-espana/notas-banco-espana/bop-pii-4t2025.html"
+    },
+    {
+     "titulo": "Dependencia de la energía importada",
+     "descripcion": "España importa el 68,4 % de su energía (2024), lo que la expone a crisis de precios.",
+     "fuente_url": "https://www.eldebate.com/economia/20260719/espana-importa-casi-70-energia-consume-pese-avance-renovables_441118.html"
+    }
+   ],
+   "soluciones": [
+    {
+     "titulo": "Energía renovable propia",
+     "descripcion": "El PNIEC prevé bajar la dependencia energética del 73 % (2019) al 50 % (2030) con renovables y eficiencia.",
+     "fuente_url": "https://www.miteco.gob.es/es/prensa/ultimas-noticias/2024/septiembre/el-gobierno-aprueba-la-actualizacion-del-plan-nacional-integrado.html"
+    },
+    {
+     "titulo": "Comercio justo",
+     "descripcion": "Importaciones con precio mínimo y prima social para productores; en España sus ventas alcanzaron 146 M€ en 2022.",
+     "fuente_url": "https://www.corresponsables.com/actualidad/ventas-comercio-justo-espana-2022-146-millones-euros/"
+    }
+   ],
+   "proyectos": [
+    {
+     "nombre": "Coordinadora Estatal de Comercio Justo",
+     "lugar": "España",
+     "descripcion": "Red de organizaciones que importan y venden productos de comercio justo.",
+     "web": "https://comerciojusto.org"
+    }
+   ]
+  }
+ ],
+ "flujos": [
+  {
+   "de": "trabajo",
+   "a": "hogares",
+   "etiqueta": "salarios"
+  },
+  {
+   "de": "hogares",
+   "a": "empresas",
+   "etiqueta": "consumo"
+  },
+  {
+   "de": "empresas",
+   "a": "trabajo",
+   "etiqueta": "empleo"
+  },
+  {
+   "de": "hogares",
+   "a": "publico",
+   "etiqueta": "impuestos"
+  },
+  {
+   "de": "publico",
+   "a": "hogares",
+   "etiqueta": "pensiones y servicios"
+  },
+  {
+   "de": "dinero",
+   "a": "empresas",
+   "etiqueta": "crédito"
+  },
+  {
+   "de": "dinero",
+   "a": "hogares",
+   "etiqueta": "hipotecas"
+  },
+  {
+   "de": "exterior",
+   "a": "empresas",
+   "etiqueta": "energía e importaciones"
+  }
+ ],
+ "reasignacion": {
+  "Una de cada cuatro personas en riesgo de pobreza o exclusión": [
+   "hogares"
+  ],
+  "Sin colchón para los imprevistos": [
+   "hogares"
+  ],
+  "IVA que no se llega a cobrar": [
+   "publico"
+  ],
+  "Un sistema fiscal lleno de excepciones": [
+   "publico"
+  ],
+  "Una economía mundial muy endeudada": [
+   "publico",
+   "dinero",
+   "exterior"
+  ],
+  "La riqueza, muy concentrada": [
+   "hogares",
+   "dinero"
+  ],
+  "Banca ética que presta a la economía real": [
+   "dinero"
+  ],
+  "Cooperativas y economía social": [
+   "empresas",
+   "trabajo"
+  ],
+  "Ahorro automático por defecto": [
+   "hogares"
+  ],
+  "Factura electrónica obligatoria": [
+   "publico"
+  ],
+  "Impuestos con base amplia y pocas excepciones": [
+   "publico"
+  ],
+  "Monedas complementarias para las pymes": [
+   "empresas",
+   "dinero"
+  ],
+  "Fiare Banca Etica": [
+   "dinero"
+  ],
+  "Mondragón": [
+   "trabajo",
+   "empresas"
+  ],
+  "REAS Red de Redes de Economía Alternativa y Solidaria · Mercado Social": [
+   "empresas"
+  ],
+  "Asociación Federal Española para el Fomento de la Economía del Bien Común": [
+   "empresas"
+  ],
+  "Triodos Bank": [
+   "dinero"
+  ],
+  "Banco WIR": [
+   "empresas",
+   "dinero"
+  ],
+  "Turuta, moneda social de Vilanova i la Geltrú": [
+   "dinero",
+   "hogares"
+  ],
+  "Modelo de optimización socioeconómica (Luz & Humanidad)": [
+   "publico",
+   "dinero"
+  ]
+ }
+}

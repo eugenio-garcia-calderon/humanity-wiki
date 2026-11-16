@@ -714,3 +714,4 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 - `m.phev` adds masses at a fixed point ahead of the rear axle, and fuel figures from one combined efficiency. Nothing is drawn, and nothing checks that the engine, the planetary gear and the tank fit.
 - Charge-sustaining mode is modelled as constant-speed cruising, with no engine on/off map.
 - Drawing a box per part and adding `cajaDentro` checks: about 2 hours.
+- (2026-11-16) `/vision` country models are static JSON baked into `public/vision/paises.js`; indicator values age (each says its year) and nothing flags a stale one. A yearly refresh job, or moving indicators to a table with a «last checked» date, is the fix; about a day either way.

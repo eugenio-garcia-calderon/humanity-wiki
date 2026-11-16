@@ -1,0 +1,249 @@
+{
+ "sector": "energia",
+ "pais": "es",
+ "vision_general": {
+  "titulo": "Una España que vive de su sol y su viento, con energía limpia, segura y asequible para todos",
+  "ideal": [
+   "El 81% de la electricidad es renovable en 2030 y el país importa solo la mitad de su energía (PNIEC).",
+   "La red es fuerte, estable y conectada con Europa: un fallo local no deja a oscuras a todo el país.",
+   "Cada barrio puede conectar viviendas, fábricas, coches y tejados solares sin esperar años.",
+   "Un precio estable y justo: ningún hogar pasa frío ni calor por no poder pagar la factura.",
+   "La electricidad sustituye al petróleo y al gas en casas, industria y transporte (35% en 2030, PNIEC).",
+   "Baterías, bombeo y consumo flexible guardan el sol del mediodía para la noche."
+  ],
+  "equilibrio": "Producir con recursos propios y limpios al ritmo que la red, el almacenamiento y la demanda eléctrica pueden absorber, sin dejar a nadie atrás en el precio."
+ },
+ "patas": [
+  {
+   "id": "generacion",
+   "nombre": "Generación",
+   "que_es": "Las centrales que producen la energía: sol, viento, agua, nuclear y gas.",
+   "actual": [
+    "Las renovables produjeron el 55,5% de la electricidad en 2025 (REE).",
+    "Eólica 21,6%, nuclear 19%, solar 18,4% y ciclo combinado de gas 16,8% del mix eléctrico en 2025.",
+    "En 2025 se instalaron unos 10 GW renovables, casi 9 GW solares (REE).",
+    "Aun así, España dependió del exterior para el 68,6% de su energía primaria en 2025 (Foro Nuclear)."
+   ],
+   "ideal": [
+    "81% de electricidad renovable en 2030 (PNIEC).",
+    "76 GW solares y 62 GW eólicos, 3 de ellos en el mar, en 2030 (PNIEC).",
+    "La dependencia energética del exterior baja al 50% en 2030 (PNIEC).",
+    "Propuesta L&H: parte de cada parque nuevo en manos de vecinos y municipios, como en Dinamarca."
+   ],
+   "equilibrio": "Añadir renovables al ritmo que la red y el almacenamiento pueden integrarlas, repartiendo beneficios con el territorio.",
+   "indicadores": [
+    {"nombre": "Electricidad de origen renovable", "actual": 55.5, "objetivo": 81, "unidad": "%", "sentido": "subir", "año": 2025, "fuente_url": "https://www.ree.es/sites/default/files/2026-03/1103_NP_ISE_2025.pdf", "origen_objetivo": "PNIEC 2023-2030 (meta 2030)"},
+    {"nombre": "Dependencia energética del exterior", "actual": 68.6, "objetivo": 50, "unidad": "%", "sentido": "bajar", "año": 2025, "fuente_url": "https://www.foronuclear.org/wp-content/uploads/2026/06/Energia_2026.pdf", "origen_objetivo": "PNIEC 2023-2030 (meta 2030)"}
+   ],
+   "retos": [
+    {"titulo": "Seguimos importando casi 7 de cada 10 unidades de energía", "descripcion": "La dependencia exterior fue del 68,6% en 2025, por encima del 61% previsto por el PNIEC para ese año; el petróleo del transporte pesa mucho.", "fuente_url": "https://www.foronuclear.org/wp-content/uploads/2026/06/Energia_2026.pdf"},
+    {"titulo": "El sol del mediodía vale cada vez menos", "descripcion": "En 2025 la electricidad costó 33 €/MWh de media en horas solares y 101 €/MWh por la tarde-noche, lo que resta ingresos a nuevas plantas solares.", "fuente_url": "https://www.energias-renovables.com/panorama/el-precio-de-la-electricidad-en-espa-20260107"}
+   ],
+   "soluciones": [
+    {"titulo": "Parques renovables con participación ciudadana", "descripcion": "Vecinos y municipios son copropietarios de los parques; en Copenhague una cooperativa posee la mitad del parque marino de Middelgrunden desde 2000.", "fuente_url": "https://en.wikipedia.org/wiki/Middelgrunden_wind_farm"},
+    {"titulo": "Mezclar mejor sol, viento e híbridos", "descripcion": "La AIE (2026) recomienda equilibrar eólica, solar y plantas híbridas para producir también fuera de las horas de sol.", "fuente_url": "https://roams.es/actualidad/energia/espana-paso-35-56-electricidad-renovable-aie-pide-mas-electrificacion/"}
+   ],
+   "proyectos": [
+    {"nombre": "Som Energia", "lugar": "Girona (toda España)", "descripcion": "Cooperativa ciudadana que produce y vende electricidad renovable a sus socias.", "web": "https://www.somenergia.coop"},
+    {"nombre": "Parque eólico de Middelgrunden", "lugar": "Copenhague (Dinamarca)", "descripcion": "Parque marino de 40 MW, la mitad propiedad de una cooperativa de miles de vecinos.", "web": "https://www.middelgrunden.dk"}
+   ]
+  },
+  {
+   "id": "transporte",
+   "nombre": "Red de transporte",
+   "que_es": "Las autopistas eléctricas de alta tensión que gestiona Red Eléctrica, y sus enlaces con otros países.",
+   "actual": [
+    "La red de transporte tiene 46.155 km de líneas en 2025 (REE).",
+    "La Península solo puede intercambiar con el resto de Europa un 2% de su capacidad (REE).",
+    "El 28-04-2025 un apagón dejó sin luz a España y Portugal; ENTSO-E (2026) lo atribuye a una subida descontrolada de tensión.",
+    "Desde el 30-04-2025 REE opera en «modo reforzado»: 422 M€ de coste entre mayo y octubre de 2025."
+   ],
+   "ideal": [
+    "Interconexión con Europa del 15% en 2030 (objetivo del Consejo Europeo).",
+    "Todas las centrales, también las renovables, ayudan a controlar la tensión (CNMC, PO 7.4, 2026).",
+    "Planificación de red a 2030 con más de 17.000 M€ y 6.706 km de líneas nuevas (MITECO, en tramitación).",
+    "Un fallo en una zona se aísla sin arrastrar a todo el sistema (recomendación ENTSO-E)."
+   ],
+   "equilibrio": "Reforzar la red y la estabilidad al mismo ritmo que crecen las renovables, sin que la seguridad se pague con más gas y facturas más altas.",
+   "indicadores": [
+    {"nombre": "Capacidad de intercambio de la Península con el resto de Europa", "actual": 2, "objetivo": 15, "unidad": "%", "sentido": "subir", "año": 2025, "fuente_url": "https://www.ree.es/en/ecological-transition/interconnections", "origen_objetivo": "Objetivo UE de interconexión 2030"},
+    {"nombre": "Peso de los servicios de ajuste en el precio final de la luz", "actual": 18.9, "objetivo": 14.9, "unidad": "%", "sentido": "bajar", "año": 2025, "fuente_url": "https://www.energias-renovables.com/panorama/la-energ-a-solar-adelanta-a-la-20260311", "origen_objetivo": "Propuesta L&H: volver al nivel de 2024 (REE)"}
+   ],
+   "retos": [
+    {"titulo": "Una isla eléctrica", "descripcion": "Con unos 3 GW de intercambio, la Península es de las zonas peor conectadas de Europa (REE); el enlace por el golfo de Bizkaia llevará Francia de 2.800 a 5.000 MW.", "fuente_url": "https://www.ree.es/en/ecological-transition/interconnections"},
+    {"titulo": "Estabilidad de la red tras el apagón", "descripcion": "ENTSO-E (marzo 2026) señala un control de tensión insuficiente, desconexiones en cascada y normas que no exigían control dinámico; reparte responsabilidades entre varios actores.", "fuente_url": "https://www.eldiario.es/economia/expertos-europeos-reparten-culpas-gran-apagon-espana-fallo-sistemico-impulsado-problemas-tecnicos-operativos-regulatorios_1_13082766.amp.html"}
+   ],
+   "soluciones": [
+    {"titulo": "Control de tensión también con renovables", "descripcion": "La CNMC aprobó en julio de 2026 que plantas y baterías de 1 MW o más presten control de tensión, con pago por el servicio.", "fuente_url": "https://cnmc.es/prensa/procedimientos-control-tension-20260710?back=news&page=0"},
+    {"titulo": "Más red e interconexiones planificadas", "descripcion": "La planificación a 2030 prevé más de 17.000 M€, 193 subestaciones y 8.164 km de líneas repotenciadas (propuesta, septiembre 2026).", "fuente_url": "https://www.miteco.gob.es/es/prensa/ultimas-noticias/2026/septiembre/sara-aagesen-anuncia-una-inversion-superior-a-17-000-millones-en.html"}
+   ],
+   "proyectos": [
+    {"nombre": "Interconexión del golfo de Bizkaia", "lugar": "Gatika (Bizkaia) – Cubnezais (Francia)", "descripcion": "Cable submarino de 276 km de REE y RTE que elevará el intercambio con Francia a 5.000 MW.", "web": "https://www.ree.es/en/press-office/news/press-release/2026/07/red-electrica-trasladara-grandes-equipamientos-golfo-bizkaia"}
+   ]
+  },
+  {
+   "id": "distribucion",
+   "nombre": "Distribución",
+   "que_es": "Las redes de media y baja tensión que llevan la luz a cada casa, comercio y fábrica.",
+   "actual": [
+    "El 83,4% de los nudos de distribución no tenía hueco para nuevas conexiones (eléctricas, septiembre 2025).",
+    "La inversión en distribución está limitada al 0,13% del PIB al año.",
+    "El autoconsumo solar suma 9,59 GW y cubrió el 4,1% de la demanda en 2025 (APPA).",
+    "En 2025 se perdieron 2.183 GWh de autoconsumo por limitaciones de red (APPA)."
+   ],
+   "ideal": [
+    "19 GW de autoconsumo en 2030 (PNIEC).",
+    "Redes digitales que permiten conectar viviendas, puntos de recarga y bombas de calor sin esperas.",
+    "Comunidades energéticas que comparten la energía del barrio, como prevén las directivas UE.",
+    "Propuesta L&H: mapas de capacidad públicos y actualizados en cada municipio."
+   ],
+   "equilibrio": "Invertir en redes locales lo suficiente para que nadie se quede sin conectar, sin encarecer en exceso los peajes de la factura.",
+   "indicadores": [
+    {"nombre": "Nudos de distribución saturados", "actual": 83.4, "objetivo": 20, "unidad": "%", "sentido": "bajar", "año": 2025, "fuente_url": "https://forbes.es/economia/794008/el-834-de-los-nudos-de-la-red-de-distribucion-electrica-estan-ya-saturados-segun-las-grandes-electricas/", "origen_objetivo": "Propuesta L&H"},
+    {"nombre": "Potencia de autoconsumo solar acumulada", "actual": 9.59, "objetivo": 19, "unidad": "GW", "sentido": "subir", "año": 2025, "fuente_url": "https://www.appa.es/wp-content/uploads/2026/02/NdP-APPA-Renovables-El-autoconsumo-consolida-su-aportacion-pero-encadena-tres-anos-de-contraccion-y-reclama-una-fiscalidad-estable_vf.pdf", "origen_objetivo": "PNIEC 2023-2030 (meta 2030)"}
+   ],
+   "retos": [
+    {"titulo": "Redes sin hueco para conectar más", "descripcion": "Las grandes distribuidoras publicaron en septiembre de 2025 que el 83,4% de sus nudos estaba saturado, frenando viviendas, industria y recarga.", "fuente_url": "https://forbes.es/economia/794008/el-834-de-los-nudos-de-la-red-de-distribucion-electrica-estan-ya-saturados-segun-las-grandes-electricas/"},
+    {"titulo": "El autoconsumo se frena", "descripcion": "En 2025 se instalaron 1.214 MW, un 15% menos: tercer año seguido de caída, lejos del ritmo del PNIEC (APPA).", "fuente_url": "https://www.appa.es/wp-content/uploads/2026/02/NdP-APPA-Renovables-El-autoconsumo-consolida-su-aportacion-pero-encadena-tres-anos-de-contraccion-y-reclama-una-fiscalidad-estable_vf.pdf"}
+   ],
+   "soluciones": [
+    {"titulo": "Retribución y límites de inversión revisados", "descripcion": "La CNMC fijó una rentabilidad del 6,58% para redes en 2026-2031, y el Gobierno propuso superar los límites de inversión ligados a nuevas demandas.", "fuente_url": "https://www.cnmc.es/prensa/circulares-retribucion-electrica-20251222"},
+    {"titulo": "Comunidades energéticas y autoconsumo colectivo", "descripcion": "Vecinos, comercios y ayuntamientos comparten placas en edificios públicos; Crevillent (Alicante) es un caso pionero en Europa.", "fuente_url": "https://www.energias-renovables.com/autoconsumo/crevillent-la-capital-de-la-espa-a-20250707"}
+   ],
+   "proyectos": [
+    {"nombre": "Comunidad energética Comptem (Enercoop)", "lugar": "Crevillent (Alicante)", "descripcion": "Comunidad energética local que usa 21 espacios públicos para autoconsumo compartido.", "web": "https://alicanteplaza.es/crevillent-adjudica-a-enercoop-el-uso-de-21-espacios-publicos-para-el-despliegue-de-la-comunidad-energetica-comptem"}
+   ]
+  },
+  {
+   "id": "mercado",
+   "nombre": "Mercado y precio",
+   "que_es": "Dónde se fija el precio de la luz y cómo llega a la factura de cada hogar.",
+   "actual": [
+    "El precio medio del mercado diario fue 65,5 €/MWh en 2025 (Grupo ASE), el tercero más bajo de Europa (REE).",
+    "El precio final medio, con ajustes y cargos, fue 83,45 €/MWh en 2025, un 9,4% más (REE).",
+    "8,2 millones de consumidores seguían en la tarifa regulada PVPC a finales de 2025 (CNMC).",
+    "El 15,9% de la población no podía mantener su casa a temperatura adecuada en 2025 (INE)."
+   ],
+   "ideal": [
+    "Precios que reflejan el bajo coste de las renovables y son estables para los hogares (AIE 2026).",
+    "Menos impuestos y cargos sobre la electricidad que sobre los combustibles fósiles (AIE 2026).",
+    "Pobreza energética por debajo de la media UE (9,2% en 2024, Eurostat).",
+    "Propuesta L&H: comercializadoras cooperativas y comunidades energéticas como opción al alcance de todos."
+   ],
+   "equilibrio": "Un precio que pague la inversión en renovables, redes y respaldo, y que a la vez proteja a los hogares vulnerables.",
+   "indicadores": [
+    {"nombre": "Población que no puede mantener su casa a temperatura adecuada", "actual": 15.9, "objetivo": 9.2, "unidad": "%", "sentido": "bajar", "año": 2025, "fuente_url": "https://www.funcas.es/wp-content/uploads/2026/02/Indicadores-sociales-en-recuperacion.pdf", "origen_objetivo": "Media UE 2024 (Eurostat)"},
+    {"nombre": "Precio final medio de la electricidad en el mercado", "actual": 83.45, "objetivo": 76, "unidad": "€/MWh", "sentido": "bajar", "año": 2025, "fuente_url": "https://www.energias-renovables.com/panorama/la-energ-a-solar-adelanta-a-la-20260311", "origen_objetivo": "Propuesta L&H: volver al nivel de 2024 (REE)"}
+   ],
+   "retos": [
+    {"titulo": "Pobreza energética: casas frías en invierno", "descripcion": "En 2025 el 15,9% de la población no podía calentar bien su casa; bajó desde el 20,7% de 2023, pero sigue sobre la media UE.", "fuente_url": "https://www.funcas.es/wp-content/uploads/2026/02/Indicadores-sociales-en-recuperacion.pdf"},
+    {"titulo": "Una factura que sube aunque el sol abarate la luz", "descripcion": "El usuario medio pagó 975,88 € en 2025, un 15,5% más que en 2024, según FACUA.", "fuente_url": "https://roams.es/actualidad/energia/el-palo-de-la-factura-de-luz-en-2025-los-tres-motivos-por-los-que-fue-la-tercera-mas-alta-de-la-historia/"}
+   ],
+   "soluciones": [
+    {"titulo": "Tarifa regulada menos expuesta a sobresaltos", "descripcion": "Desde la reforma del PVPC, el 55% de su precio en 2026 sale de contratos a plazo, que suavizan los picos del mercado diario (CNMC).", "fuente_url": "https://www.diariodeleon.es/economia/260814/2094189/numero-consumidores-acogidos-pvpc-luz-cae.html"},
+    {"titulo": "Reequilibrar impuestos y cargos", "descripcion": "La AIE (2026) recomienda cargar menos la electricidad y proteger a los vulnerables para acelerar la electrificación.", "fuente_url": "https://roams.es/actualidad/energia/espana-paso-35-56-electricidad-renovable-aie-pide-mas-electrificacion/"}
+   ],
+   "proyectos": [
+    {"nombre": "GoiEner", "lugar": "Euskadi y Navarra", "descripcion": "Cooperativa sin ánimo de lucro que comercializa electricidad renovable a miles de socios.", "web": "https://www.goiener.com"}
+   ]
+  },
+  {
+   "id": "consumo",
+   "nombre": "Consumo y eficiencia",
+   "que_es": "Cómo y cuánta energía usan hogares, edificios, industria y transporte.",
+   "actual": [
+    "La electricidad cubrió solo el 25% del consumo final de energía en 2024 (AIE).",
+    "El transporte usa el 41% de la energía final (Eurostat 2024) y depende en un 92% del petróleo (AIE).",
+    "El 34,4% de los hogares necesita mejoras de eficiencia que no ha hecho; el 76% alega que es muy caro (INE 2025).",
+    "La demanda eléctrica creció un 2,8% en 2025, hasta 256 TWh (REE)."
+   ],
+   "ideal": [
+    "35% de electrificación del consumo final en 2030 (PNIEC).",
+    "1,38 millones de viviendas rehabilitadas en 2030 (PNIEC).",
+    "Mejora de la eficiencia energética del 43% en 2030 (PNIEC).",
+    "Bombas de calor, coches eléctricos y procesos industriales eléctricos sustituyen gas y gasóleo."
+   ],
+   "equilibrio": "Gastar menos energía en cada casa y fábrica, y electrificar lo que queda al ritmo que crecen las renovables.",
+   "indicadores": [
+    {"nombre": "Electricidad en el consumo final de energía", "actual": 25, "objetivo": 35, "unidad": "%", "sentido": "subir", "año": 2024, "fuente_url": "https://roams.es/actualidad/energia/espana-paso-35-56-electricidad-renovable-aie-pide-mas-electrificacion/", "origen_objetivo": "PNIEC 2023-2030 (meta 2030)"},
+    {"nombre": "Hogares que necesitan reformas de eficiencia y no las han hecho", "actual": 34.4, "objetivo": 15, "unidad": "%", "sentido": "bajar", "año": 2025, "fuente_url": "https://ine.es/dyngs/Prensa/m1ECV2025.htm?print=1", "origen_objetivo": "Propuesta L&H"}
+   ],
+   "retos": [
+    {"titulo": "Viviendas que pierden el calor", "descripcion": "En 2025, el 41% de los hogares de renta baja necesitaba mejorar su eficiencia, frente al 25% de los de renta alta (INE).", "fuente_url": "https://ine.es/dyngs/Prensa/m1ECV2025.htm?print=1"},
+    {"titulo": "Electrificación lenta", "descripcion": "Solo una cuarta parte de la energía final es electricidad (2024); en transporte, apenas el 2% (AIE).", "fuente_url": "https://www.hibridosyelectricos.com/energia/56-electricidad-produce-espana-ya-es-renovable-aie-destapa-gran-agujero-pais-todavia-no-ha-cerrado_90431_102.html"}
+   ],
+   "soluciones": [
+    {"titulo": "Rehabilitación por barrios con oficina local", "descripcion": "Una oficina de barrio gestiona obras, ayudas y financiación por edificio; el modelo Opengela se aplica en barrios vulnerables de Euskadi.", "fuente_url": "https://www.euskadi.eus/gobierno-vasco/-/noticia/2025/ana-telleria-gobierno-vasco-ha-demostrado-que-es-posible-regenerar-barrios-vulnerables-enfoque-integral-y-justo/"},
+    {"titulo": "Electrificar edificios, industria y transporte", "descripcion": "La AIE (2026) señala la electrificación como la vía para aprovechar del todo las renovables españolas.", "fuente_url": "https://roams.es/actualidad/energia/espana-paso-35-56-electricidad-renovable-aie-pide-mas-electrificacion/"}
+   ],
+   "proyectos": [
+    {"nombre": "Opengela", "lugar": "Euskadi (Otxarkoaga, Bilbao, y otros barrios)", "descripcion": "Programa de regeneración urbana con oficinas de barrio para rehabilitar edificios y ganar eficiencia.", "web": "https://www.euskadi.eus/gobierno-vasco/-/noticia/2021/orain-otxar-avanza-rehabilitacion-edificios-proyecto-autoconsumo-energia-y-propuestas-mejora-habilitabilidad/"}
+   ]
+  },
+  {
+   "id": "almacenamiento",
+   "nombre": "Almacenamiento y flexibilidad",
+   "que_es": "Guardar energía (bombeo, baterías) y mover el consumo a las horas de sol y viento.",
+   "actual": [
+    "España tenía 3.427 MW de almacenamiento en 2025: 3.331 MW de bombeo y solo 96 MW de baterías (REE).",
+    "En 2025 la luz costó unos 33 €/MWh en horas solares y 101 €/MWh por la tarde-noche.",
+    "Solo el 17,3% de los hogares tiene una tarifa con tramos horarios (CNMC).",
+    "Bruselas aprobó en 2026 un mecanismo de capacidad de 9.000 M€; primera subasta prevista en 2027."
+   ],
+   "ideal": [
+    "22,5 GW de almacenamiento en 2030 (PNIEC).",
+    "Baterías y bombeo que también estabilizan la red, como la batería de Hornsdale en Australia.",
+    "Hogares e industria que consumen más cuando sobra sol y menos en el pico de la tarde.",
+    "Propuesta L&H: baterías de barrio ligadas a comunidades energéticas."
+   ],
+   "equilibrio": "Guardar el excedente del mediodía para la noche, de modo que no haga falta quemar gas para cubrir la tarde.",
+   "indicadores": [
+    {"nombre": "Potencia de almacenamiento instalada", "actual": 3.43, "objetivo": 22.5, "unidad": "GW", "sentido": "subir", "año": 2025, "fuente_url": "https://www.ree.es/sites/default/files/2026-03/1103_NP_ISE_2025.pdf", "origen_objetivo": "PNIEC 2023-2030 (meta 2030)"},
+    {"nombre": "Diferencia de precio entre tarde-noche y horas solares", "actual": 67.5, "objetivo": 30, "unidad": "€/MWh", "sentido": "bajar", "año": 2025, "fuente_url": "https://www.energias-renovables.com/panorama/el-precio-de-la-electricidad-en-espa-20260107", "origen_objetivo": "Propuesta L&H"}
+   ],
+   "retos": [
+    {"titulo": "Muy poco almacenamiento para tanto sol", "descripcion": "Con 3,4 GW en 2025, España está lejos de los 22,5 GW del PNIEC; las baterías apenas suman 96 MW (REE).", "fuente_url": "https://www.ree.es/sites/default/files/2026-03/1103_NP_ISE_2025.pdf"},
+    {"titulo": "Proyectos de baterías atascados en trámites", "descripcion": "Un informe del Foro Regulación Inteligente (2026) estima más de 20 GW de proyectos de almacenamiento bloqueados en la tramitación.", "fuente_url": "https://www.merca2.es/2026/07/19/dependencia-energetica-espana-68-por-ciento-2420141/"}
+   ],
+   "soluciones": [
+    {"titulo": "Pagar por estar disponible: mecanismo de capacidad", "descripcion": "Aprobado por la Comisión Europea en 2026 (9.000 M€): paga a baterías, bombeo, gas y demanda flexible por estar listos cuando la red lo necesita.", "fuente_url": "https://www.merca2.es/2026/06/02/bruselas-aprueba-mecanismo-capacidad-espana-2388439/"},
+    {"titulo": "Baterías que estabilizan la red", "descripcion": "En Australia, la batería de Hornsdale (150 MW) presta servicios de estabilidad y fue autorizada a dar inercia a la red en 2022.", "fuente_url": "https://www.spglobal.com/energy/en/news-research/latest-news/energy-transition/072722-neoens-150-mw-south-australian-battery-cleared-to-provide-inertia-services"}
+   ],
+   "proyectos": [
+    {"nombre": "Central de bombeo Salto de Chira", "lugar": "Gran Canaria", "descripcion": "Bombeo reversible de 200 MW y 3,5 GWh de REE que elevará un 37% la renovable de la isla.", "web": "https://www.ree.es/sites/default/files/2025-03/NdP_Salto_Chira_visita_Calvino_Aagesen.pdf"},
+    {"nombre": "Hornsdale Power Reserve", "lugar": "Australia Meridional", "descripcion": "Gran batería de 150 MW que estabiliza la red junto a un parque eólico.", "web": "https://www.pv-tech.org/news/neoen-lauds-grid-stability-gains-as-south-australian-battery-reaches-150mw-capacity"}
+   ]
+  }
+ ],
+ "flujos": [
+  {"de": "generacion", "a": "transporte", "etiqueta": "electricidad"},
+  {"de": "transporte", "a": "distribucion", "etiqueta": "electricidad"},
+  {"de": "distribucion", "a": "consumo", "etiqueta": "suministro"},
+  {"de": "consumo", "a": "mercado", "etiqueta": "facturas"},
+  {"de": "mercado", "a": "generacion", "etiqueta": "precio e ingresos"},
+  {"de": "generacion", "a": "almacenamiento", "etiqueta": "excedentes solares"},
+  {"de": "almacenamiento", "a": "transporte", "etiqueta": "energía y estabilidad"},
+  {"de": "consumo", "a": "distribucion", "etiqueta": "autoconsumo"}
+ ],
+ "reasignacion": {
+  "Pobreza energética: casas frías en invierno": ["mercado", "consumo"],
+  "Dependencia de la energía importada": ["generacion", "consumo"],
+  "Viviendas que pierden el calor": ["consumo"],
+  "Redes eléctricas sin hueco para conectar más": ["distribucion", "transporte"],
+  "Estabilidad de la red: la lección del apagón": ["transporte", "almacenamiento"],
+  "Millones de personas sin luz ni cocina limpia": ["mercado", "distribucion"],
+  "Rehabilitar con el estándar de casa pasiva": ["consumo"],
+  "Autoconsumo solar en tejados": ["distribucion", "generacion"],
+  "Comunidades energéticas y autoconsumo colectivo": ["distribucion", "mercado"],
+  "Almacenamiento y flexibilidad": ["almacenamiento"],
+  "Control de tensión exigido a todas las centrales": ["transporte"],
+  "Solar descentralizada y minirredes en zonas rurales": ["distribucion", "generacion"],
+  "Som Energia": ["mercado", "generacion"],
+  "Comunidad energética Comptem (Enercoop)": ["distribucion"],
+  "GoiEner": ["mercado"],
+  "Ecooo Energía Ciudadana": ["generacion", "distribucion"],
+  "Parque eólico de Middelgrunden": ["generacion"],
+  "Samsø, isla de energía renovable": ["generacion", "consumo"],
+  "SolarCrowd (Luz & Humanidad)": ["generacion", "distribucion"]
+ }
+}

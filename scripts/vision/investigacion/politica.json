@@ -1,0 +1,576 @@
+{
+ "sector": "politica",
+ "pais": "es",
+ "vision_general": {
+  "titulo": "Una democracia que escucha, decide con datos y se controla a sí misma",
+  "ideal": [
+   "La ciudadanía vota, propone leyes y delibera por sorteo, no solo cada cuatro años.",
+   "Partidos con cuentas abiertas y elecciones gestionadas por una autoridad independiente.",
+   "Cortes paritarias que aprueban presupuestos cada año y legislan con huella pública.",
+   "Una Administración joven, digital y con datos abiertos que satisface como la media OCDE.",
+   "Jueces independientes, suficientes y elegidos según estándares europeos; control de cuentas a tiempo.",
+   "Cada decisión se toma en el nivel más cercano posible, con financiación clara y revisada."
+  ],
+  "equilibrio": "Equilibrar representación y participación directa, y poder de gobierno con control independiente, en todos los niveles del Estado."
+ },
+ "patas": [
+  {
+   "id": "participacion",
+   "nombre": "Ciudadanía y participación",
+   "que_es": "Cómo vota, propone y delibera la gente.",
+   "actual": [
+    "Participación en generales de 2023: 70,4 % de residentes en España.",
+    "Europeas de 2024: 49,21 %, algo por debajo de la media UE (~51 %).",
+    "Solo un 38 % siente que tiene voz en lo que hace el Gobierno (OCDE, 2025).",
+    "Iniciativa legislativa popular: 500.000 firmas; 4 aprobadas de 143 presentadas (1986-2023)."
+   ],
+   "ideal": [
+    "Participación electoral alta y estable, incluidas las europeas.",
+    "Asambleas por sorteo con respuesta pública (Irlanda) e iniciativa ciudadana fácil (Finlandia, 50.000 firmas).",
+    "Propuesta L&H: «Votar por temas»: cada persona ve los datos históricos de cada materia y elige posición (abrir/cerrar, subir/bajar).",
+    "Propuesta L&H: cada medida muestra sus pros y contras antes de votar."
+   ],
+   "equilibrio": "Combinar el voto a representantes con vías directas y deliberativas que tengan efectos reales.",
+   "indicadores": [
+    {
+     "nombre": "Participación en elecciones europeas",
+     "actual": 49.21,
+     "objetivo": 51,
+     "unidad": "%",
+     "sentido": "subir",
+     "año": 2024,
+     "fuente_url": "https://maldita.es/malditodato/20240612/participacion-elecciones-europeas-historico/",
+     "origen_objetivo": "Media UE 2024 (datos provisionales)"
+    },
+    {
+     "nombre": "Personas que sienten que tienen voz ante el Gobierno",
+     "actual": 38,
+     "objetivo": 50,
+     "unidad": "%",
+     "sentido": "subir",
+     "año": 2025,
+     "fuente_url": "https://www.oecd.org/en/publications/oecd-survey-on-drivers-of-trust-in-public-institutions-2026-results_c88c8869-en/spain_8443a0c4-en.html",
+     "origen_objetivo": "Propuesta L&H (mayoría con voz)"
+    }
+   ],
+   "retos": [
+    {
+     "titulo": "Pocas vías de decisión directa",
+     "descripcion": "De 143 iniciativas legislativas populares (1986-2023) solo 4 se aprobaron; el último referéndum estatal fue en 2005.",
+     "fuente_url": "https://maldita.es/malditodato/20240411/iniciativa-legislativa-popular-aprobadas-presentadas/"
+    },
+    {
+     "titulo": "Sensación de no tener voz",
+     "descripcion": "Solo el 38 % cree que la gente como él tiene voz en lo que hace el Gobierno (OCDE, 2025; 31 % en 2023).",
+     "fuente_url": "https://www.oecd.org/en/publications/oecd-survey-on-drivers-of-trust-in-public-institutions-2026-results_c88c8869-en/spain_8443a0c4-en.html"
+    }
+   ],
+   "soluciones": [
+    {
+     "titulo": "Asambleas ciudadanas con seguimiento",
+     "descripcion": "Personas elegidas por sorteo deliberan y proponen. En Irlanda sus informes llevaron a referéndums en 2015 y 2018.",
+     "fuente_url": "https://oecd-opsi.org/innovations/the-irish-citizens-assembly/"
+    },
+    {
+     "titulo": "Iniciativa ciudadana accesible",
+     "descripcion": "En Finlandia, 50.000 firmas obligan al Parlamento a debatir una propuesta de ley ciudadana.",
+     "fuente_url": "https://www.eduskunta.fi/EN/naineduskuntatoimii/eduskunnan_tehtavat/lakiensaataminen/kansalaisaloite"
+    }
+   ],
+   "proyectos": [
+    {
+     "nombre": "Política · Votar por temas (Luz & Humanidad)",
+     "lugar": "España",
+     "descripcion": "Observatorio de partidos como geometrías y propuesta de democracia directa por temas.",
+     "web": "https://humanity.wiki/observatorio-polarizacion/"
+    },
+    {
+     "nombre": "Iniciativa ciudadana al Parlamento (Kansalaisaloite)",
+     "lugar": "Finlandia",
+     "descripcion": "Con 50.000 firmas la ciudadanía lleva sus propuestas de ley al Parlamento.",
+     "web": "https://www.eduskunta.fi/EN/naineduskuntatoimii/eduskunnan_tehtavat/lakiensaataminen/kansalaisaloite"
+    }
+   ]
+  },
+  {
+   "id": "partidos",
+   "nombre": "Partidos y elecciones",
+   "que_es": "Reglas para competir, votar y financiarse.",
+   "actual": [
+    "350 escaños repartidos en 52 circunscripciones provinciales con la fórmula D'Hondt.",
+    "Solo un 21 % confía en los partidos políticos (OCDE, 2025).",
+    "El 51 % de 63 partidos no publicó sus subvenciones de 2023 (Tribunal de Cuentas, 2024).",
+    "Elecciones generales anticipadas convocadas para el 29 de noviembre de 2026."
+   ],
+   "ideal": [
+    "Cuentas de todos los partidos publicadas a tiempo, completas y en datos abiertos.",
+    "Una autoridad electoral independiente y permanente, como la creada en Irlanda en 2023.",
+    "Fiscalización de las cuentas electorales en meses, no en años.",
+    "Confianza en los partidos al menos el doble que hoy."
+   ],
+   "equilibrio": "Partidos con financiación suficiente para competir, pero totalmente transparente y controlada.",
+   "indicadores": [
+    {
+     "nombre": "Confianza en los partidos políticos",
+     "actual": 21,
+     "objetivo": 40,
+     "unidad": "%",
+     "sentido": "subir",
+     "año": 2025,
+     "fuente_url": "https://www.oecd.org/en/publications/oecd-survey-on-drivers-of-trust-in-public-institutions-2026-results_c88c8869-en/spain_8443a0c4-en.html",
+     "origen_objetivo": "Propuesta L&H (duplicar la confianza)"
+    },
+    {
+     "nombre": "Partidos que publican sus subvenciones",
+     "actual": 49,
+     "objetivo": 100,
+     "unidad": "%",
+     "sentido": "subir",
+     "año": 2024,
+     "fuente_url": "https://www.boe.es/boe/dias/2025/08/16/pdfs/BOE-A-2025-16946.pdf",
+     "origen_objetivo": "Obligación legal de publicidad activa (Tribunal de Cuentas)"
+    }
+   ],
+   "retos": [
+    {
+     "titulo": "Confianza muy baja en los partidos",
+     "descripcion": "Solo el 21 % confía en los partidos, frente al 62 % en la policía (OCDE, 2025).",
+     "fuente_url": "https://www.oecd.org/en/publications/oecd-survey-on-drivers-of-trust-in-public-institutions-2026-results_c88c8869-en/spain_8443a0c4-en.html"
+    },
+    {
+     "titulo": "Cuentas de partidos poco visibles",
+     "descripcion": "32 de 63 partidos fiscalizados no publicaron sus subvenciones de 2023 (informe 1.596 del Tribunal de Cuentas).",
+     "fuente_url": "https://www.boe.es/boe/dias/2025/08/16/pdfs/BOE-A-2025-16946.pdf"
+    }
+   ],
+   "soluciones": [
+    {
+     "titulo": "Autoridad electoral independiente",
+     "descripcion": "Irlanda creó en 2023 An Coimisiún Toghcháin para gestionar circunscripciones, registro e información electoral.",
+     "fuente_url": "https://www.electoralcommission.ie/about-us/"
+    },
+    {
+     "titulo": "Cuentas de partidos en datos abiertos",
+     "descripcion": "Publicar ingresos, subvenciones y donaciones en formato reutilizable y cumplir los plazos que vigila el Tribunal de Cuentas.",
+     "fuente_url": "https://www.boe.es/boe/dias/2025/08/16/pdfs/BOE-A-2025-16946.pdf"
+    }
+   ],
+   "proyectos": [
+    {
+     "nombre": "An Coimisiún Toghcháin (Comisión Electoral)",
+     "lugar": "Irlanda",
+     "descripcion": "Comisión electoral independiente creada en 2023 que revisa circunscripciones e informa a la ciudadanía.",
+     "web": "https://www.electoralcommission.ie/about-us/"
+    }
+   ]
+  },
+  {
+   "id": "cortes",
+   "nombre": "Cortes Generales",
+   "que_es": "Congreso y Senado: hacen leyes y controlan al Gobierno.",
+   "actual": [
+    "Los Presupuestos de 2023 se prorrogaron en 2024, 2025 y 2026.",
+    "Cortes disueltas el 6-10-2026 tras el rechazo de dos decretos de vivienda.",
+    "Mujeres en el Congreso: 43,7 % (legislatura 2023).",
+    "La ley de paridad de 2024 exige listas electorales equilibradas entre mujeres y hombres."
+   ],
+   "ideal": [
+    "Presupuestos aprobados cada año, como prevé la Constitución.",
+    "Huella legislativa y registro obligatorio de reuniones con grupos de interés.",
+    "Representación paritaria efectiva: 50 % mujeres.",
+    "Senado útil como cámara de encuentro entre territorios."
+   ],
+   "equilibrio": "Un Parlamento capaz de formar mayorías estables sin dejar de controlar al Gobierno.",
+   "indicadores": [
+    {
+     "nombre": "Años seguidos con presupuestos prorrogados",
+     "actual": 3,
+     "objetivo": 0,
+     "unidad": "años",
+     "sentido": "bajar",
+     "año": 2026,
+     "fuente_url": "https://theobjective.com/espana/2025-12-23/gobierno-prorroga-ano-consecutivo-presupuestos-2023/",
+     "origen_objetivo": "Constitución, art. 134 (presupuesto anual)"
+    },
+    {
+     "nombre": "Mujeres en el Congreso",
+     "actual": 43.7,
+     "objetivo": 50,
+     "unidad": "%",
+     "sentido": "subir",
+     "año": 2023,
+     "fuente_url": "https://www.ondavasca.com/el-nuevo-congreso-contara-con-un-437-de-mujeres-dos-diputadas-mas-que-en-la-pasada-legislatura/",
+     "origen_objetivo": "Paridad plena (ODS 5.5 y LO 2/2024)"
+    }
+   ],
+   "retos": [
+    {
+     "titulo": "Presupuestos sin aprobar",
+     "descripcion": "Las cuentas de 2023 llevan tres años prorrogadas; 2026 es el tercer año consecutivo de prórroga.",
+     "fuente_url": "https://theobjective.com/espana/2025-12-23/gobierno-prorroga-ano-consecutivo-presupuestos-2023/"
+    },
+    {
+     "titulo": "Mayorías frágiles",
+     "descripcion": "Tras perder votaciones clave, el BOE publicó el 6-10-2026 la disolución de las Cortes y elecciones para el 29-N.",
+     "fuente_url": "https://www.legaltoday.com/actualidad-juridica/noticias-de-derecho/el-boe-publica-el-real-decreto-de-disolucion-de-las-cortes-y-la-convocatoria-electoral-para-el-29-de-noviembre-2026-10-06/"
+    }
+   ],
+   "soluciones": [
+    {
+     "titulo": "Paridad obligatoria en listas",
+     "descripcion": "La Ley Orgánica 2/2024 exige listas electorales con presencia equilibrada de mujeres y hombres.",
+     "fuente_url": "https://boe.es/buscar/pdf/2024/BOE-A-2024-15936-consolidado.pdf"
+    },
+    {
+     "titulo": "Registro de grupos de interés",
+     "descripcion": "La Comisión Europea (2026) recomienda a España aprobar una ley de lobbies con registro público de reuniones.",
+     "fuente_url": "https://en.ara.cat/politics/brussels-taps-sanchez-the-wrist-for-spain-s-limited-fight-against-corruption_1_5801318.html"
+    }
+   ],
+   "proyectos": [
+    {
+     "nombre": "Portal de Transparencia del Congreso",
+     "lugar": "España",
+     "descripcion": "Publica la actividad parlamentaria y datos de diputados y diputadas.",
+     "web": "https://www.congreso.es/es/transparencia/actividad-parlamentaria"
+    }
+   ]
+  },
+  {
+   "id": "gobierno",
+   "nombre": "Gobierno y Administración",
+   "que_es": "Quien dirige y presta los servicios públicos.",
+   "actual": [
+    "Confianza en el Gobierno: 43 % (37 % en 2023), sobre la media OCDE de 40 % (2025).",
+    "Satisfacción con servicios administrativos: 57 %, frente al 66 % OCDE (2023).",
+    "El 48 % de la plantilla de la Administración central tiene 55 años o más (OCDE 27 %, 2023).",
+    "España, 5.ª de 40 países en datos abiertos (OCDE OURdata, 2023)."
+   ],
+   "ideal": [
+    "Servicios públicos tan satisfactorios como la media OCDE o mejores.",
+    "Relevo generacional en la función pública, con más jóvenes que hoy.",
+    "Datos abiertos por defecto y evaluación pública del impacto de cada norma.",
+    "Conflictos de interés y declaraciones de bienes de altos cargos con reglas estrictas."
+   ],
+   "equilibrio": "Un Gobierno con capacidad de actuar y una Administración profesional que rinde cuentas.",
+   "indicadores": [
+    {
+     "nombre": "Satisfacción con servicios administrativos",
+     "actual": 57,
+     "objetivo": 66,
+     "unidad": "%",
+     "sentido": "subir",
+     "año": 2023,
+     "fuente_url": "https://www.oecd.org/en/publications/government-at-a-glance-2025-country-notes_da3361e1-en/spain_57f4ebd0-en.html",
+     "origen_objetivo": "Media OCDE (Government at a Glance 2025)"
+    },
+    {
+     "nombre": "Plantilla de la Administración central con 55 años o más",
+     "actual": 48,
+     "objetivo": 27,
+     "unidad": "%",
+     "sentido": "bajar",
+     "año": 2023,
+     "fuente_url": "https://www.oecd.org/en/publications/government-at-a-glance-2025-country-notes_da3361e1-en/spain_57f4ebd0-en.html",
+     "origen_objetivo": "Media OCDE (Government at a Glance 2025)"
+    }
+   ],
+   "retos": [
+    {
+     "titulo": "Administración envejecida",
+     "descripcion": "Solo el 8 % del personal de la Administración central tiene 18-34 años, frente al 19 % OCDE (2023).",
+     "fuente_url": "https://www.oecd.org/en/publications/government-at-a-glance-2025-country-notes_da3361e1-en/spain_57f4ebd0-en.html"
+    },
+    {
+     "titulo": "Integridad de altos cargos",
+     "descripcion": "La Comisión Europea (2026) ve avances limitados en conflictos de interés, lobbies y declaraciones de bienes.",
+     "fuente_url": "https://en.ara.cat/politics/brussels-taps-sanchez-the-wrist-for-spain-s-limited-fight-against-corruption_1_5801318.html"
+    }
+   ],
+   "soluciones": [
+    {
+     "titulo": "Datos abiertos por defecto",
+     "descripcion": "datos.gob.es ha situado a España 5.ª de 40 países en el índice OURdata de la OCDE (2023).",
+     "fuente_url": "https://datos.gob.es/en/noticia/spain-fifth-world-power-open-data-according-latest-ourdata-report-oecd"
+    },
+    {
+     "titulo": "Evaluar el impacto de las normas",
+     "descripcion": "España puntúa 2,6 sobre 4 en calidad de evaluación de impacto regulatorio, sobre la media OCDE de 2,3 (2024).",
+     "fuente_url": "https://www.oecd.org/en/publications/government-at-a-glance-2025-country-notes_da3361e1-en/spain_57f4ebd0-en.html"
+    }
+   ],
+   "proyectos": [
+    {
+     "nombre": "datos.gob.es",
+     "lugar": "España",
+     "descripcion": "Catálogo nacional de datos abiertos de las administraciones públicas.",
+     "web": "https://datos.gob.es"
+    },
+    {
+     "nombre": "Fundación Ciudadana Civio",
+     "lugar": "España",
+     "descripcion": "Vigila el uso del dinero público y el BOE con periodismo de datos.",
+     "web": "https://civio.es/en/about-us/who-are-we/"
+    }
+   ]
+  },
+  {
+   "id": "justicia",
+   "nombre": "Justicia y control",
+   "que_es": "Tribunales y órganos que vigilan al poder.",
+   "actual": [
+    "Solo el 39 % ve buena la independencia judicial; media UE 54 % (Eurobarómetro, 2025).",
+    "11,9 jueces por 100.000 habitantes frente a 17,4 de media europea (CEPEJ, datos 2022).",
+    "El CGPJ se renovó en julio de 2024 tras más de cinco años de bloqueo.",
+    "Corrupción percibida: 55 puntos sobre 100, puesto 49 (Transparencia Internacional, 2025)."
+   ],
+   "ideal": [
+    "Al menos la mitad del CGPJ elegida por los propios jueces (Comisión de Venecia, 2025).",
+    "Fiscalía General con mandato separado del Gobierno (Comisión Europea, 2026).",
+    "Jueces suficientes para llegar a la media europea por habitante.",
+    "Órganos de control con plazos cortos y resultados públicos."
+   ],
+   "equilibrio": "Jueces y controladores independientes de los partidos, pero responsables ante la ciudadanía.",
+   "indicadores": [
+    {
+     "nombre": "Independencia judicial percibida como buena",
+     "actual": 39,
+     "objetivo": 54,
+     "unidad": "%",
+     "sentido": "subir",
+     "año": 2025,
+     "fuente_url": "https://tradingeconomics.com/spain/perceived-independence-of-the-justice-system-very-good-or-fairly-good-eurostat-data.html",
+     "origen_objetivo": "Media UE 2025 (Eurobarómetro)"
+    },
+    {
+     "nombre": "Jueces por 100.000 habitantes",
+     "actual": 11.92,
+     "objetivo": 17.43,
+     "unidad": "jueces/100.000 hab.",
+     "sentido": "subir",
+     "año": 2022,
+     "fuente_url": "https://www.legaltoday.com/actualidad-juridica/noticias-de-derecho/el-consejo-de-europa-mantiene-a-espana-muy-por-encima-en-presupuesto-judicial-por-habitante-pero-por-debajo-en-jueces-2024-10-17/",
+     "origen_objetivo": "Media europea CEPEJ (Consejo de Europa)"
+    }
+   ],
+   "retos": [
+    {
+     "titulo": "Baja confianza en la independencia judicial",
+     "descripcion": "El 39 % la valora como buena, 15 puntos por debajo de la media de la UE (2025).",
+     "fuente_url": "https://agenceurope.eu/en/bulletin/article/13688/8/according-to-eurobarometer-54-of-european-citizens-have-a-positive-opinion-of-their-justice-systems-independence"
+    },
+    {
+     "titulo": "Faltan jueces",
+     "descripcion": "España tiene 11,9 jueces por 100.000 habitantes, frente a 17,4 de media europea (datos 2022).",
+     "fuente_url": "https://www.legaltoday.com/actualidad-juridica/noticias-de-derecho/el-consejo-de-europa-mantiene-a-espana-muy-por-encima-en-presupuesto-judicial-por-habitante-pero-por-debajo-en-jueces-2024-10-17/"
+    }
+   ],
+   "soluciones": [
+    {
+     "titulo": "Jueces eligen a los vocales judiciales",
+     "descripcion": "La Comisión de Venecia (2025) recomienda que al menos la mitad del CGPJ la elijan los jueces, con garantías.",
+     "fuente_url": "https://blog-iacl-aidc.org/2026-posts/2026/2/3/setting-standards-on-judicial-councils-the-spanish-case-before-the-venice-commission-a-rare-request-from-a-non-political-institution"
+    },
+    {
+     "titulo": "Fiscalía con mandato propio",
+     "descripcion": "El Informe sobre el Estado de Derecho 2026 pide separar el mandato del Fiscal General del del Gobierno.",
+     "fuente_url": "https://commission.europa.eu/publications/2026-rule-law-report-communication-and-country-chapters_es"
+    }
+   ],
+   "proyectos": [
+    {
+     "nombre": "Consejo de Transparencia y Buen Gobierno",
+     "lugar": "España",
+     "descripcion": "Autoridad independiente que resuelve reclamaciones de acceso a la información pública.",
+     "web": "https://www.consejodetransparencia.es"
+    }
+   ]
+  },
+  {
+   "id": "territorio",
+   "nombre": "Organización territorial",
+   "que_es": "Estado, comunidades autónomas y municipios.",
+   "actual": [
+    "17 comunidades, 2 ciudades autónomas y 8.132 municipios (INE, 2025).",
+    "Las comunidades gestionan el 35 % del gasto público y los municipios el 12 % (2020).",
+    "El modelo de financiación autonómica de 2009 debía revisarse en 2014 y sigue vigente (2026).",
+    "La propuesta de nuevo modelo (enero 2026) quedó sin aprobar."
+   ],
+   "ideal": [
+    "Cada servicio en el nivel más cercano capaz de prestarlo bien (subsidiariedad).",
+    "Financiación autonómica revisada en plazo, con reglas claras y transparentes.",
+    "Ayuntamientos con un peso en el gasto cercano a la media europea (~22 %).",
+    "Cooperación estable entre Gobierno, comunidades y municipios."
+   ],
+   "equilibrio": "Autonomía para decidir cerca de la gente con solidaridad e igualdad de servicios en todo el país.",
+   "indicadores": [
+    {
+     "nombre": "Gasto público gestionado por los municipios",
+     "actual": 12.2,
+     "objetivo": 22,
+     "unidad": "% del gasto público",
+     "sentido": "subir",
+     "año": 2020,
+     "fuente_url": "https://sng-wofi.org/country_profiles/spain.html",
+     "origen_objetivo": "Media UE 2024 (European Local Government Report, KDZ)"
+    },
+    {
+     "nombre": "Años de retraso en revisar la financiación autonómica",
+     "actual": 12,
+     "objetivo": 0,
+     "unidad": "años",
+     "sentido": "bajar",
+     "año": 2026,
+     "fuente_url": "https://www.elsaltodiario.com/economia/nuevo-modelo-financiacion-autonomica-propone-gobierno-se-congelo-puede-pasar-ahora",
+     "origen_objetivo": "Revisión prevista para 2014 en el modelo de 2009"
+    }
+   ],
+   "retos": [
+    {
+     "titulo": "Financiación autonómica caducada",
+     "descripcion": "El modelo de 2009 debía renovarse en 2014; la propuesta de enero de 2026 quedó paralizada.",
+     "fuente_url": "https://www.elsaltodiario.com/economia/nuevo-modelo-financiacion-autonomica-propone-gobierno-se-congelo-puede-pasar-ahora"
+    },
+    {
+     "titulo": "Ayuntamientos con poco peso",
+     "descripcion": "Los municipios gestionan el 12,2 % del gasto público (2020), frente a ~22 % de media en la UE (2024).",
+     "fuente_url": "https://sng-wofi.org/country_profiles/spain.html"
+    }
+   ],
+   "soluciones": [
+    {
+     "titulo": "Revisión periódica de la financiación",
+     "descripcion": "Renovar el modelo en el plazo previsto, con criterios públicos de reparto, evita bloqueos de más de una década.",
+     "fuente_url": "https://www.elsaltodiario.com/economia/nuevo-modelo-financiacion-autonomica-propone-gobierno-se-congelo-puede-pasar-ahora"
+    },
+    {
+     "titulo": "Más poder y recursos locales",
+     "descripcion": "En la UE los gobiernos locales gestionan de media ~22 % del gasto público, acercando las decisiones a la gente.",
+     "fuente_url": "https://www.kdz.eu/system/files/downloads/2026-03/European%20Local%20Government%20Report%202025.pdf"
+    }
+   ],
+   "proyectos": [
+    {
+     "nombre": "Red de Entidades Locales por la Transparencia y Participación Ciudadana (FEMP)",
+     "lugar": "España",
+     "descripcion": "Red de ayuntamientos que comparten herramientas de transparencia y participación.",
+     "web": "https://www.femp.es/sites/default/files/multimedia/Red%20de%20Entidades%20Locales%20por%20la%20Transparencia%20y%20la%20Participaci%C3%B3n%20Ciudadana.pdf"
+    }
+   ]
+  }
+ ],
+ "flujos": [
+  {
+   "de": "participacion",
+   "a": "partidos",
+   "etiqueta": "votos"
+  },
+  {
+   "de": "partidos",
+   "a": "cortes",
+   "etiqueta": "escaños"
+  },
+  {
+   "de": "cortes",
+   "a": "gobierno",
+   "etiqueta": "investidura y leyes"
+  },
+  {
+   "de": "cortes",
+   "a": "justicia",
+   "etiqueta": "nombramientos"
+  },
+  {
+   "de": "justicia",
+   "a": "gobierno",
+   "etiqueta": "control"
+  },
+  {
+   "de": "justicia",
+   "a": "partidos",
+   "etiqueta": "fiscalización"
+  },
+  {
+   "de": "gobierno",
+   "a": "territorio",
+   "etiqueta": "financiación"
+  },
+  {
+   "de": "territorio",
+   "a": "participacion",
+   "etiqueta": "cercanía"
+  }
+ ],
+ "reasignacion": {
+  "Poca confianza en los partidos": [
+   "partidos"
+  ],
+  "Mucha gente siente que no tiene voz": [
+   "participacion"
+  ],
+  "La percepción de corrupción no mejora": [
+   "justicia",
+   "partidos"
+  ],
+  "Baja participación en las elecciones europeas": [
+   "participacion"
+  ],
+  "Una polarización que rompe relaciones": [
+   "partidos",
+   "participacion"
+  ],
+  "Retroceso democrático en el mundo": [
+   "justicia",
+   "cortes"
+  ],
+  "Asambleas ciudadanas por sorteo": [
+   "participacion"
+  ],
+  "Presupuestos participativos": [
+   "participacion",
+   "territorio"
+  ],
+  "Datos públicos abiertos y vigilados por la ciudadanía": [
+   "gobierno",
+   "justicia"
+  ],
+  "Deliberar con quien piensa distinto": [
+   "participacion"
+  ],
+  "Diálogo ciudadano permanente por ley": [
+   "participacion",
+   "cortes"
+  ],
+  "Votar por temas: iniciativas y referéndums": [
+   "participacion"
+  ],
+  "Asamblea Ciudadana para el Clima": [
+   "participacion"
+  ],
+  "Decide Madrid · Presupuestos participativos": [
+   "participacion",
+   "territorio"
+  ],
+  "Decidim": [
+   "participacion",
+   "territorio"
+  ],
+  "Fundación Ciudadana Civio": [
+   "gobierno",
+   "justicia"
+  ],
+  "Asamblea Ciudadana de Irlanda (Citizens' Assembly)": [
+   "participacion"
+  ],
+  "Modelo Ostbelgien · Diálogo ciudadano permanente": [
+   "participacion",
+   "cortes"
+  ],
+  "Democracia directa suiza (votaciones populares federales)": [
+   "participacion"
+  ],
+  "Política · Votar por temas (Luz & Humanidad)": [
+   "participacion"
+  ]
+ }
+}
