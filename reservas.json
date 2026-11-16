@@ -23,6 +23,12 @@
       "ruta": "src/components/aeromovil/explicaciones/triciclo.ts",
       "motivo": "interior: acabado interior (bot interior)",
       "desde": "2026-11-16T17:35:46.980Z"
+    },
+    {
+      "agente": "catalogo",
+      "ruta": "src/pages/Aeromovil.tsx",
+      "motivo": "catalogo: selectores de piezas comerciales en Motor",
+      "desde": "2026-11-16T18:35:42.034Z"
     }
   ]
 }
