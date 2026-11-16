@@ -742,3 +742,8 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 data migration that zeroes `tColaAncho` in every saved design without `tCubierta: 'lisa'`, then one slider shown with
 either body: about 1 hour today (migration + `triciclo-disenos` check), more once designs multiply. No slider either for
 where the full width starts (fixed at the body's widest point, x_ref −1.5): about 30 minutes to add one if asked.
+
+## 2026-11-16 · Triciclo rows: one-off shortcuts
+- **Old pack top kept as a ceiling.** `paqueteAntes` keeps the pre-2026-11-16 pack range alive only so saved designs build identically and the length/height do not jump. Two options: retire it with a one-time data migration of stored designs (about 1 h with a script against the API), or keep it.
+- **Rows checked at one seat only.** The knee/foot/head checks use each row's outermost right place, plus the centre one for heads. The left side is a mirror. With three places, the centre passenger's feet are not checked separately. Checking every place: about 1 h.
+- **Frame posts ignore the seats.** The frame's seat posts for row 2 stay at ±24.5 cm (±10 cm with one seat) whatever the seats. Row 3's stay at ±10 cm. Following each seat: about 30 min.

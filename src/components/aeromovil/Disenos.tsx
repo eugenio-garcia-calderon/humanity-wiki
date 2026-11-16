@@ -30,6 +30,7 @@ import { Check, ChevronDown, CloudOff, FilePlus2, Link2, Loader2, Save, Star, Tr
 import { Button } from '../ui/core';
 import { cn } from '../../utils/cn';
 import { PARAMETROS_A1, PARAMETROS_BALA, PARAMETROS_BASCULANTE, PARAMETROS_GOTA, PARAMETROS_TRICICLO, type Disposicion, type Parametros } from './geometria';
+import { camposTriciclo, fichaTriciclo, paqueteAntes, semiAnchoPaquete } from './geometriaTriciclo';
 
 /** The four vehicle families, in the order the menu lists them (the Triciclo Bala since 2026-11-10). */
 export const VEHICULOS: { k: Disposicion; n: string; d: string }[] = [
@@ -84,8 +85,21 @@ export const deDiseno = (d: Partial<Parametros>): Parametros => {
   // 38 cm for the pilot and 42 for the passenger, less what its belly came down, and a height stored under that was
   // built at that floor. It opens at that floor, the height it has always had (`asientosDeAntes`).
   if (d.disposicion === 'triciclo' && d.tMando === undefined) asientosDeAntes(limpio);
+  // 2026-11-16 (the pack's width may stick out of the body): a Triciclo saved before (it has no `tFila2N`, added the same
+  // day) had its pack's width clamped to what fit (`paqueteAntes`). It opens at the width it was built with.
+  if (d.disposicion === 'triciclo' && d.tFila2N === undefined) paqueteDeAntes(limpio);
   return { ...base, ...limpio, disposicion: d.disposicion ?? 'rombo', comp: 0 };
 };
+/** The pack's width before 2026-11-16, applied to a design saved then: the top of the slider it had then (geometriaTriciclo.ts `paqueteAntes`). */
+function paqueteDeAntes(p: Partial<Parametros>) {
+  if (typeof p.tBatAncho !== 'number') return;
+  const T = camposTriciclo({ ...PARAMETROS_TRICICLO, ...p });
+  if (T.tBatDisp !== 'chasis') return;
+  // (the length's range then read the width as stored, not as clamped: a length over it was built at its top, so it opens there too)
+  const f = fichaTriciclo('tBatAncho')!, v = Math.min(f.max, Math.max(f.min, T.tBatAncho)), r = paqueteAntes(T, semiAnchoPaquete(T, v));
+  if (T.tBatLargo > r.largoMax) p.tBatLargo = r.largoMax;
+  if (v > r.anchoMax) p.tBatAncho = r.anchoMax;
+}
 /** The seat floor before 2026-11-12, applied to a design saved then (the same numbers geometriaTriciclo.ts used to clamp with). */
 function asientosDeAntes(p: Partial<Parametros>) {
   const suelo = Math.min(0.35, Math.max(0.04, typeof p.tSuelo === 'number' ? p.tSuelo : PARAMETROS_TRICICLO.tSuelo!)), baja = Math.min(0, suelo - 0.124);
