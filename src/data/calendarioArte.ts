@@ -307,7 +307,8 @@ export const CALENDARIO_ARTE_POR_DEFECTO: ContenidoMes[] = [
       "/calendario-arte/ilustraciones/mes-05-c.jpg",
       "/calendario-arte/ilustraciones/mes-05-d.jpg",
       "/calendario-arte/ilustraciones/mes-05-e.jpg",
-      "/calendario-arte/ilustraciones/mes-05-f.jpg"
+      "/calendario-arte/ilustraciones/mes-05-f.jpg",
+      "/calendario-arte/ilustraciones/mes-05-g.jpg"
     ]
   },
   {
