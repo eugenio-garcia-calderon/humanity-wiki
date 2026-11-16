@@ -742,7 +742,7 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
       case 'tPuntaCola': { const pu = modelo.F.puntas, d = pu.cola - pu.colaPedida; return Math.abs(d) > 0.001 ? `${m2(v)} → ${m2(v + d)} (lo que deja la cubierta lisa)` : m2(v); }
       case 'tLineaCupula': return Math.abs(v) < 0.0005 ? 'como siempre' : `${v > 0 ? '+' : '−'}${cm(Math.abs(v), 1)}`;
       // 2026-11-13: the smooth body
-      case 'tColaAncho': case 'tMorroAncho': return v < 0.01 ? 'como siempre' : v > 0.99 ? 'todo el ancho (Aptera)' : `${Math.round(v * 100)} % hacia todo el ancho`;
+      case 'tColaAncho': case 'tMorroAncho': case 'tColaPlanaAncho': return v < 0.01 ? 'como siempre' : v > 0.99 ? 'todo el ancho (Aptera)' : `${Math.round(v * 100)} % hacia todo el ancho`;
       case 'tColaGrosor': case 'tMorroGrosor': return v < 0.0005 ? 'se cierra en punta' : `${cm(v, 1)} de grueso`;
       case 'tColaBombeo': case 'tMorroBombeo': return v < 0.0005 ? 'plana' : `${cm(v, 1)} sobre la recta`;
       case 'tBajosIni': return Math.abs(v) < 0.005 ? 'en el eje trasero' : `${cm(Math.abs(v), 0)} ${v > 0 ? 'delante' : 'detrás'} del eje trasero`;
@@ -797,7 +797,9 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
       // round 3 (body): the headlamp's width with the headlamp, the fin's height with the fin, the second door's with it
       : k === 'tFaroD' ? T.tFaro === 'si' : k === 'tAleta' ? T.tConAleta !== 'no' : PUERTA2.includes(k) ? puertas && T.tPuertas2 === 'si'
         // 2026-11-13: the smooth body's sliders only with «Cubierta lisa»
-        : LISA.includes(k) ? T.tCubierta === 'lisa' : true;
+        : LISA.includes(k) ? T.tCubierta === 'lisa'
+          // 2026-11-16: the round body's flat tail width, with a flat tail and without the smooth body
+          : k === 'tColaPlanaAncho' ? T.tCubierta !== 'lisa' && T.tColaPlana > 0 : true;
   const LISA = ['tColaAncho', 'tColaGrosor', 'tColaBombeo', 'tBajosIni', 'tBajosCurva', 'tMorroAncho', 'tMorroGrosor', 'tMorroBombeo'];
   const PUERTA2 = ['tPuerta2Parte', 'tBisagra2Y', 'tBisagra2Inc', 'tPuerta2Abre'];
   // (round 3 interior: the rails reach the rear axle only with two rear wheels; with one, the wheel is in the tail between them)

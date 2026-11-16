@@ -11964,3 +11964,13 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
 - What the viewer sees: a woman with a closed smile looking up toward her raised hand, real proportions (eyes half-way down the head, a forehead a third of the face, a 13.5 cm wide face), the hair pulled back over the ears into the bun, and a neck that fits under the jaw.
 - Blind evaluator (before the last fixes): new face 5 / old face 4 for realism, 6 / 4 for «not creepy», 5 / 3 for expression. The last fixes (gaze, smile, neck) were checked by eye, not by a second round.
 - Code: `retrato.py` (new), `mes-05-g.py` (copy of `mes-05-f.py`), `personajes_real.bailarina(retrato=False)`, optional `ancho`/`prof` in `figuras_real._cuello` (defaults unchanged). Renders: `public/calendario-arte/{ilustraciones,miniaturas}/mes-05-g.jpg`, `capas/mes-05-g/`.
+
+## 2026-11-16 · Aeromóvil: la cola plana puede llegar con todo el ancho, como el Aptera
+
+Eugenio: «haz que la cola pueda ser más ancha en el formato de cola plana ocupe el máximo ancho de vehiculo, como en el aptera.»
+
+- Nuevo deslizador en Carrocería → Cola: **«Cola plana: ancho al final»** (de 0 a 100 %). Sale solo con la cola plana («Cola: en punta o plana» por encima de 0) y con la cubierta redonda; con la cubierta lisa ya existía «Cola: ancho al final», que no cambia.
+- A 100 % la cola mantiene todo el ancho de la carrocería desde su parte más ancha hasta el final (solo se cierra un 5 %) y acaba en un borde recto de lado a lado, con las esquinas redondeadas. Si la cola es plana a medias, el ancho cuenta a medias. La barra de luz de atrás, el portón y el panel solar de la cola van hasta el borde (a 3 cm del final).
+- En 0 (lo de siempre) todos los diseños guardados se construyen igual que antes: es una clave nueva, `tColaPlanaAncho`, con 0 por defecto.
+- Números en el «Rombo Bala» de Eugenio (túnel, resolución media), de 0 a 100 %: Cd 0,2128 → 0,2131; área frontal 1,1675 → 1,1739 m²; superficie mojada 9,41 → 9,92 m²; panel solar 1,68 → 1,80 m².
+- No hay otro deslizador para «hasta dónde aguanta el ancho»: el ensanche empieza siempre en la parte más ancha de la carrocería.

@@ -724,3 +724,11 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 - **Hidden coupling:** the hydraulic flow passes between parts through a number formatted inside a text line.
 - **Next step:** a typed field for the flow, and a lean-aware rollover check. About 2 hours.
 - (2026-11-16) Calendario Arte design 7 (`mes-05-g.py`) is a whole copy of design 6's script (`mes-05-f.py`, ~680 lines) that changes one call (`PR.bailarina(retrato=True)`), the same copy-per-design pattern as designs 5 and 6. Chosen so no published design can change by accident. Cost: a fix to the shared scene has to be made in each copy, now 3 for May. Making `mes-05-f.py` take a `--retrato` flag and dropping the copy is about 15 minutes today; it grows with every design that copies a script.
+
+## 2026-11-16 · Two tail-width sliders for one idea
+
+`tColaAncho` (smooth body) and `tColaPlanaAncho` (round body with a flat tail) both widen the tail through the same
+`DimBala.colaAncho`. Kept apart so that no saved design changes (see 03_DECISIONS, same date). Merging them would need a
+data migration that zeroes `tColaAncho` in every saved design without `tCubierta: 'lisa'`, then one slider shown with
+either body: about 1 hour today (migration + `triciclo-disenos` check), more once designs multiply. No slider either for
+where the full width starts (fixed at the body's widest point, x_ref −1.5): about 30 minutes to add one if asked.

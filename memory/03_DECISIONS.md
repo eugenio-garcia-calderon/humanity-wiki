@@ -1852,3 +1852,15 @@ Eugenio asked for realistic, non-creepy faces, then chose: no money spent, only 
   - The body is still design 6's: about 12 heads tall, per the evaluator.
   - The other people keep design 6's heads.
   - Extending the approach to them means calling `retrato.cabeza` for each figure and checking each one's pose and neck.
+
+## 2026-11-16 · Wide flat tail on the round body: a new key, not `tColaAncho`
+
+Eugenio asked for the flat tail («cola plana») to reach the vehicle's full width, like the Aptera. The smooth body
+(`tCubierta: 'lisa'`) already had `tColaAncho` for this; the round body ignored it. Two options:
+- **Reuse `tColaAncho` in the round body too.** One slider for both bodies, but any saved design that once had the smooth
+  body on with a wide tail and was switched back to the round one still carries `tColaAncho > 0`: it would silently widen
+  on the next open, breaking «saved designs unchanged».
+- **A new key `tColaPlanaAncho` (chosen)**, default 0, read only without the smooth body and only with `tColaPlana > 0`.
+  `formaR3` maps it onto `DimBala.colaAncho`; `balaForma` reads `colaAncho × colaPlana` without `lisa`, reusing the smooth
+  body's plan widening (`anchoPlan`, full width from x_ref −1.5 back, 5 % convergence) and raising the flat cap's plan
+  superellipse exponent from 4 to 4 + 6·a (a straight trailing edge with rounded corners at 10).
