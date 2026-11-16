@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "ordenar2",
-      "ruta": "src/components/aeromovil/geometriaTriciclo.ts",
-      "motivo": "ordenar2: refactor sin cambio de comportamiento (mover a archivos nuevos)",
-      "desde": "2026-11-16T21:57:32.896Z"
-    },
-    {
-      "agente": "ordenar2",
       "ruta": "src/components/aeromovil/geometria.ts",
       "motivo": "ordenar2: refactor sin cambio de comportamiento (mover a archivos nuevos)",
       "desde": "2026-11-16T21:57:35.920Z"
