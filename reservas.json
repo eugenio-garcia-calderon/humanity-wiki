@@ -17,6 +17,12 @@
       "ruta": "src/components/aeromovil/explicaciones/triciclo.ts",
       "motivo": "colasuave: explicaciones de los deslizadores nuevos de la cola",
       "desde": "2026-11-16T22:57:33.812Z"
+    },
+    {
+      "agente": "colasuave",
+      "ruta": "src/components/aeromovil/triciclo/campos.ts",
+      "motivo": "colasuave: transición cabina–cola y rangos de la cola",
+      "desde": "2026-11-16T23:11:22.027Z"
     }
   ]
 }
