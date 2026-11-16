@@ -735,6 +735,14 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
   - The P2's load-point shifting is not modelled.
 - **Drawn but not checked:** the chain, the half-shafts (four wheels) and the exhaust headers. Neither do they move with the suspension or the tilt. The half-shafts pass through the arm fairings without a cut-out.
 - **Not in the CAD export or the planos.** `cad.ts` does not export the hybrid's parts: about 1 hour.
+## 2026-11-16 · Two tail-width sliders for one idea
+
+`tColaAncho` (smooth body) and `tColaPlanaAncho` (round body with a flat tail) both widen the tail through the same
+`DimBala.colaAncho`. Kept apart so that no saved design changes (see 03_DECISIONS, same date). Merging them would need a
+data migration that zeroes `tColaAncho` in every saved design without `tCubierta: 'lisa'`, then one slider shown with
+either body: about 1 hour today (migration + `triciclo-disenos` check), more once designs multiply. No slider either for
+where the full width starts (fixed at the body's widest point, x_ref −1.5): about 30 minutes to add one if asked.
+
 
 
 ## 2026-11-16 · Garage preferences only per browser

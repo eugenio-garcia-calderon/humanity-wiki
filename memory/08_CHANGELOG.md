@@ -11995,6 +11995,16 @@ Eugenio (15:03): «En motor la parte de propulsión es tan importante que tiene 
 - **Diseños guardados:** un híbrido guardado con el deslizador antiguo «Conversión mecánica» abre como reparto con el mismo rendimiento, y gasta exactamente lo mismo (lo comprueba `scripts/triciclo-disenos.ts`). Lo único que cambia es su centro de gravedad, porque las piezas están ahora donde se dibujan.
 - **Con tres filas de asientos el motor no cabe** (choca con la torreta unos 25 cm): la comprobación lo dice en rojo.
 - Son estimaciones de un primer diseño, no medidas.
+## 2026-11-16 · Aeromóvil: la cola plana puede llegar con todo el ancho, como el Aptera
+
+Eugenio: «haz que la cola pueda ser más ancha en el formato de cola plana ocupe el máximo ancho de vehiculo, como en el aptera.»
+
+- Nuevo deslizador en Carrocería → Cola: **«Cola plana: ancho al final»** (de 0 a 100 %). Sale solo con la cola plana («Cola: en punta o plana» por encima de 0) y con la cubierta redonda; con la cubierta lisa ya existía «Cola: ancho al final», que no cambia.
+- A 100 % la cola mantiene todo el ancho de la carrocería desde su parte más ancha hasta el final (solo se cierra un 5 %) y acaba en un borde recto de lado a lado, con las esquinas redondeadas. Si la cola es plana a medias, el ancho cuenta a medias. La barra de luz de atrás, el portón y el panel solar de la cola van hasta el borde (a 3 cm del final).
+- En 0 (lo de siempre) todos los diseños guardados se construyen igual que antes: es una clave nueva, `tColaPlanaAncho`, con 0 por defecto.
+- Números en el «Rombo Bala» de Eugenio (túnel, resolución media), de 0 a 100 %: Cd 0,2128 → 0,2131; área frontal 1,1675 → 1,1739 m²; superficie mojada 9,41 → 9,92 m²; panel solar 1,68 → 1,80 m².
+- No hay otro deslizador para «hasta dónde aguanta el ancho»: el ensanche empieza siempre en la parte más ancha de la carrocería.
+
 
 ## 2026-11-16 · Los coches de referencia también se pueden eliminar del garaje
 Eugenio: «permite que se puedan borrar también los coches de referencia».
