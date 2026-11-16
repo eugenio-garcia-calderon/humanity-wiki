@@ -11956,6 +11956,15 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
 - **Ejemplo:** el Rombo Bala como triciclo, con basculación eléctrica, necesita 949 N·m en el balancín y 1,8 kW de pico; el sistema pesa 16 kg.
 - **Aviso:** son estimaciones de un primer diseño, y el vuelco y el consumo aún no cuentan la inclinación.
 
+## 2026-11-16 · Calendario Arte: design 7 for May — the dancer's face painted from a real 3D face
+
+- Eugenio: «quiero caras y cuerpos realistas, quiero diseños no tan abstractos y creepes» … «hazlo que sea realista, pero utilizan esta suscripcion sin gastar dinero, apañatelas, hazlo solo de la cara de la bailarina del diseño de Arte, para simplificar, y luego vemos resultados».
+- New **design 7** for May (`mes-05-g`): design 6's scene with only the dancer's head and neck changed. Designs 1-6 and the favourite are unchanged; design 7 is not the favourite and is not the printed design.
+- The face is built from MediaPipe's canonical 3D face mesh (468 points of a real face, Apache 2.0, in `design/calendario-arte/generadores/diseno4/datos/`) and painted with the watercolour engine. No image generator and no paid service: all code.
+- What the viewer sees: a woman with a closed smile looking up toward her raised hand, real proportions (eyes half-way down the head, a forehead a third of the face, a 13.5 cm wide face), the hair pulled back over the ears into the bun, and a neck that fits under the jaw.
+- Blind evaluator (before the last fixes): new face 5 / old face 4 for realism, 6 / 4 for «not creepy», 5 / 3 for expression. The last fixes (gaze, smile, neck) were checked by eye, not by a second round.
+- Code: `retrato.py` (new), `mes-05-g.py` (copy of `mes-05-f.py`), `personajes_real.bailarina(retrato=False)`, optional `ancho`/`prof` in `figuras_real._cuello` (defaults unchanged). Renders: `public/calendario-arte/{ilustraciones,miniaturas}/mes-05-g.jpg`, `capas/mes-05-g/`.
+
 ## 2026-11-16 · Híbrido enchufable: propulsión arriba, tres arquitecturas y el motor de gasolina en 3D
 
 Eugenio (15:03): «En motor la parte de propulsión es tan importante que tiene que estar arriba del todo. El selector de si es eléctrico o híbrido. Y luego si seleccionas híbrido… que cuando hablemos de motor, que sea motor eléctrico, cambiando ahí el titular. Y luego que aparezca también más información del engranaje planetario y las opciones que hay para conectar el motor híbrido y el eléctrico. Y también que se dibuje en 3D el motor de gasolina y las opciones que hay para conectarlo al sistema planetario y que sea algo más sofisticado a la hora de diseñar.»

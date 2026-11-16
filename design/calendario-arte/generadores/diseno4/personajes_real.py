@@ -497,18 +497,27 @@ def pie_bailarina():
     lz.levanta(Trazo([(645, 762), (643.5, 772)], (1.4, 0.8)), cantidad=0.25, suave=0.5)        # light on the satin
 
 
-def bailarina():
+def bailarina(retrato=False):
     """piezas_05.bailarina with her eyes open, looking up at the hand she raises (closed eyes
-    on a realistic face read as sleep)."""
+    on a realistic face read as sleep). retrato: her head painted as a portrait from the 3D
+    face (retrato.cabeza_retrato) instead of figuras_real.cabeza_real."""
     P5 = _p5()
     lz, TEAL5, CARMIN = P5.lz, P5.TEAL, P5.CARMIN
     MANO_ALTA, MANO_FALDA = P5.MANO_ALTA, P5.MANO_FALDA
     J = dict(cabeza=(644, 156, 33), hi=(614, 198), hd=(670, 208), ci=(628, 272), cd=(662, 268),
              brazo_i=[(616, 204), (574, 150), MANO_ALTA], brazo_d=[(668, 214), (724, 250), MANO_FALDA - (6, 0)],
              mano_i=(-60, 'junta'), mano_d=(15, 'sujeta'), delante=['brazo_i', 'brazo_d'])
-    P5.figura(lz, J, dict(camisa=TEAL5, piel='piel3', grosor=0.5, cuello=0.64, pliegues=True),
-              cara=dict(peinado='mono', pelo='#1e1410', giro=0.3, inclina=-12, ojos='abiertos', boca='abierta',
-                        mira=(-0.8, -1.0), dientes=False, adorno=CARMIN))
+    import acuarela as A
+    antes = A.cabeza, A.cuello_natural
+    if retrato:
+        import retrato as RT
+        A.cabeza, A.cuello_natural = RT.cabeza, RT.cuello_natural
+    try:
+        P5.figura(lz, J, dict(camisa=TEAL5, piel='piel3', grosor=0.5, cuello=0.64, pliegues=True),
+                  cara=dict(peinado='mono', pelo='#1e1410', giro=0.3, inclina=-12, ojos='abiertos', boca='abierta',
+                            mira=(-0.8, -1.0), dientes=False, adorno=CARMIN, **(dict(alza=6) if retrato else {})))
+    finally:
+        A.cabeza, A.cuello_natural = antes
     P5.mano(lz, *MANO_ALTA, -70, 26, 'piel3', 'junta', pulgar=-1)
     faja = Trazo([(624, 274), (644, 280), (664, 272)], (15, 16, 15))
     FR.volumen(lz, faja, CARMIN, FR._LUZ_ESCENA[0], dens=0.92, prof=0.45, rayar=True, grosor=0.4, presion=0.35)

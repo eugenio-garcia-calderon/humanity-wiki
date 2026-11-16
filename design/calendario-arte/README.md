@@ -159,3 +159,39 @@ FR.activar((0.6, -0.8), personajes_06, piezas_06, lineas=0.6)   # before the peo
 The evaluator judged it in two rounds. In the first, repainting the inside of the old
 silhouettes was not enough: they still read as mannequins and the faces as masks. That is why
 the rules above are about outlines as much as about paint.
+
+
+## A face painted from a real 3D face (retrato.py, since 2026-11-16)
+
+Eugenio, after design 6: «quiero caras y cuerpos realistas, quiero diseños no tan abstractos y
+creepes» … «hazlo que sea realista, pero utilizan esta suscripcion sin gastar dinero,
+apañatelas, hazlo solo de la cara de la bailarina del diseño de Arte, para simplificar, y luego
+vemos resultados». So: no paid image generator, only code, and only one face — the dancer in
+May, as design 7 (`mes-05-g`, a copy of `mes-05-f.py` that calls `PR.bailarina(retrato=True)`).
+
+`generadores/diseno4/retrato.py` starts from MediaPipe's canonical face mesh
+(`datos/canonical_face_model.obj`, 468 points of a real adult face, Apache 2.0, see
+`datos/README.md`) instead of an ellipsoid with bumps:
+
+- **Shape.** `_expresion` narrows the mesh's sides to a real 13.5 cm across (it is 15.3 cm at the
+  ears), closes its half-parted lips, lifts the upper lids (more when she looks up), and adds the
+  smile. A skull fitted to the mesh (`CRANEO_C`, `CRANEO_R`) carries the forehead on to the
+  hairline and closes the top and the back; it is pushed 1.5 cm back for the depth test only, so
+  the two meshes never leave a gap.
+- **Light.** The head is posed (turn, tilt, `alza` to look up), rasterised to depth, normals and
+  head-frame coordinates, and painted: a graded mid-tone and a soft shadow family from the
+  normals, cast shadows marched on the depth buffer, hollows from the depth, warm cheeks, nose
+  and ears. Eyes, brows, nostrils and lips are drawn on the mesh's own landmarks.
+- **Hair, bun and ear** are placed in the same 3D frame, so they turn with the head: a rounded
+  hairline a third of the face above the brows, the hair pulled over the ears to the bun.
+- **Neck.** `retrato.cuello_natural` puts figuras_real's neck under this head (behind the chin,
+  about 9 cm across, `_cuello(ancho=, prof=)`), because the old neck was sized for wider heads
+  and showed beside the narrower face.
+- `retrato.cabeza` / `retrato.cuello_natural` are drop-ins for `acuarela.figura`'s head and neck;
+  `personajes_real.bailarina(retrato=True)` swaps them in for that one figure.
+
+The blind evaluator preferred it to design 6's face (realism 5 vs 4, «not creepy» 6 vs 4,
+expression 5 vs 3) and asked for the gaze toward the raised hand, a symmetric smile and a
+narrower, lighter neck. Those three were changed afterwards and checked by eye, not by a second
+evaluator round. Its remark on the body (the figure is about 12 heads tall) is out of this
+round's scope.

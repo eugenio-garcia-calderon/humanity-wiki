@@ -1840,6 +1840,19 @@ Eugenio: «cambia el estilo del dibujo de ambas, para que los personajes sean m�
 - **Design 6 copies the scripts.** `mes-05-f.py` / `mes-06-f.py` are copies of the design-5 scripts with their changes (activation, redrawn people, the painter's canvas, the café heads, the storks, the bulb's light). Designs 4 and 5 are untouched: no shared library file changed.
 - **Outcome and ceiling.** Four evaluator rounds (r3, r6, r9, r11) went from 3/10 to 5-5.5/10 in figure realism, and the evaluator marked it publishable as design 6 and favourite. It also said where the ceiling of this approach is: the figures are built on design 5's joints and simple shapes, so they read as painted wooden figures rather than as people drawn from life. Going further means drawing each figure's anatomy from reference (structure of hands, faces and joints), not more layers on the same shapes.
 
+## 2026-11-16 · Calendario Arte: a realistic face from a 3D face mesh, not from a paid image model
+
+Eugenio asked for realistic, non-creepy faces, then chose: no money spent, only the May dancer's face, then look at the results. Options:
+
+- **Paid image generation (Gemini «Nano Banana»).** Most realistic, but it costs money per image and he said not to. Not taken.
+- **Keep improving figuras_real's ellipsoid heads.** The design-6 evaluator had already named their ceiling: built from simple shapes, they read as painted wooden figures. Not taken.
+- **A real face's 3D structure, painted by our own engine (taken).** MediaPipe's canonical face mesh (Apache 2.0, a file in the repo, no runtime dependency) gives the true positions of brow, sockets, nose, lips and jaw. `retrato.py` poses it, renders depth and normals, and paints them with the existing watercolour engine, so the face stays in the illustration's style. Cost: an engine of about 600 lines for one face, and only for adults seen from the front to three-quarters.
+- **How it is wired.** `retrato.cabeza` and `retrato.cuello_natural` are swapped into `acuarela.figura` for one figure only (`personajes_real.bailarina(retrato=True)`), and design 7 is a copy of design 6's script, so no other design changes.
+- **Accepted limits.**
+  - The body is still design 6's: about 12 heads tall, per the evaluator.
+  - The other people keep design 6's heads.
+  - Extending the approach to them means calling `retrato.cabeza` for each figure and checking each one's pose and neck.
+
 ## 2026-11-16 · Plug-in hybrid: three architectures, and how the old slider maps
 
 - **Choice:** power split (THS), series and parallel P2. P4 was left out because the front wheels steer in pods on faired arms (or in the nose), so there is no room for a driveshaft.
