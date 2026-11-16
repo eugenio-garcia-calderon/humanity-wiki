@@ -28,6 +28,7 @@
 // Pure (no three.js): the wind tunnel's Web Worker builds it for «Probar» and
 // for the Cd the results use.
 
+import { dimensionarTilt, TECNOLOGIAS_BASCULA, type TecBascula, type Tilt } from './basculacion';
 import type { Comprobacion, MaterialCarenado, MaterialChasis, Parametros, PuntosOcupante, Pulgadas, Resultados, Rueda, Tubo, P3 } from './geometria';
 import { MATERIALES_CARENADO, MATERIALES_CHASIS, RENDIMIENTO_SOLAR, TRICICLO_DEFECTO, largoTubo } from './geometria';
 import { T3, T_CUBIERTA, crearForma, punto, type DimBala, type FormaBala } from './garaje/balaForma';
@@ -87,6 +88,12 @@ export interface CamposTriciclo {
   // 2026-11-15 (Eugenio: «haz que pueda bascular», on his «Smeraptera»). Optional when saved: absent, it does not lean.
   tBascula: 'no' | 'si';   // con cuatro ruedas: la cabina y los cuatro carenados se inclinan en las curvas, cada carenado sobre sus brazos en paralelogramo
   tBascMax: number;    // inclinación máxima (°)
+  // 2026-11-16 (Eugenio: «basculación tiene que ser un menú entero dentro de rodaje … qué tipo de tecnología»): basculacion.ts
+  tBascTec: TecBascula;  // activa eléctrica, activa hidráulica o libre con bloqueo
+  tBascVel: number;      // velocidad de inclinación (°/s)
+  tBascMargen: number;   // margen de diseño sobre el momento del coche parado e inclinado
+  tBascBrazo: number;    // brazo del balancín, del eje a la bieleta (m)
+  tBascBloqueo: number;  // por debajo de esta velocidad, derecho y bloqueado (km/h)
   // 2026-11-15 (Eugenio, «Rombo Bala»: «quiero que tenga las ruedas en rombo, una delante, una atrás y dos laterales basculantes»)
   tRuedas: 'clasica' | 'rombo';   // dos delante en carenados (hasta ahora) o en rombo: una en el morro, que gira, dos laterales en carenados y una en la cola
   tEjeLat: number;     // en rombo: las ruedas laterales, cuánto van detrás de la del morro (m)
@@ -197,7 +204,7 @@ export const RUEDAS_TRICICLO: Record<RuedaTriciclo, { d: number; neuDel: number;
   c14: { d: 0.554, neuDel: 0.165, neuTras: 0.165, n: '14″ de coche, 165/60 R14 (554 mm)', kg: 2.62, kWBuje: 45, carga: 387 },
   c15: { d: 0.574, neuDel: 0.175, neuTras: 0.175, n: '15″ de coche, 175/55 R15 (574 mm)', kg: 2.96, kWBuje: 60, carga: 412 },
 };
-type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tTraseras' | 'tBascula' | 'tRuedas' | 'tPropulsion' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero';
+type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tTraseras' | 'tBascula' | 'tRuedas' | 'tPropulsion' | 'tBascTec' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero';
 export type ClaveNumTriciclo = Exclude<ClaveTriciclo, ClaveTexto>;
 
 // ------------------------------------------------------------------ deslizadores
@@ -230,7 +237,7 @@ export const lemasTriciclo = (T: Pick<CamposTriciclo, 'tTraseras'> & Partial<Cam
   if (T.tAcceso === 'puertas') o.carroceria = 'la piel del Cuadriciclo en rombo, techo solar y ventanas, puertas y portón como el Aptera, carenados y material';
   return o;
 };
-export type Unidad = 'm' | 'cm' | 'mm' | '°' | 'kg' | 'kW' | 'kWh' | 'Wh/kg' | 'Wh/L' | 'km/h' | 'x' | 'kg/m²' | '%' | 'L';
+export type Unidad = 'm' | 'cm' | 'mm' | '°' | 'kg' | 'kW' | 'kWh' | 'Wh/kg' | 'Wh/L' | 'km/h' | 'x' | 'kg/m²' | '%' | 'L' | '°/s';
 /**
  * Un deslizador del Triciclo. `bala`: la forma es la del Cuadriciclo en rombo, y su
  * etiqueta, su rango y su paso se leen de su tabla (DESLIZADORES_BALA), no se
@@ -353,7 +360,12 @@ const FILAS: Fila[] = [
   ['tViaTras', 'rodaje', 'Ejes y ruedas', null, 'Vía trasera', 0.80, 2.40, 0.01, 'm'],
   ['tGiro', 'rodaje', 'Suspensión y dirección', null, 'Giro máximo de la dirección', 18, 38, 1, '°'],
   // 2026-11-15: only with four wheels leaning (the page hides it otherwise)
-  ['tBascMax', 'rodaje', 'Suspensión y dirección', null, 'Bascular: inclinación máxima', 5, 30, 1, '°'],
+  ['tBascMax', 'rodaje', 'Basculación', null, 'Inclinación máxima', 5, 30, 1, '°'],
+  // 2026-11-16: the tilt system (basculacion.ts); only when it leans (the page hides them otherwise)
+  ['tBascVel', 'rodaje', 'Basculación', null, 'Velocidad de inclinación', 10, 60, 1, '°/s'],
+  ['tBascMargen', 'rodaje', 'Basculación', null, 'Margen de diseño sobre el coche parado e inclinado', 1.2, 3, 0.1, 'x'],
+  ['tBascBrazo', 'rodaje', 'Basculación', null, 'Brazo del balancín (del eje a cada bieleta)', 0.06, 0.18, 0.005, 'cm'],
+  ['tBascBloqueo', 'rodaje', 'Basculación', null, 'Bloqueado derecho por debajo de', 0, 10, 0.5, 'km/h'],
   ['tRecDel', 'rodaje', 'Suspensión y dirección', null, 'Recorrido de la suspensión delantera', 50, 110, 5, 'mm'],
   ['tRecTras', 'rodaje', 'Suspensión y dirección', null, 'Recorrido de la suspensión trasera', 50, 110, 5, 'mm'],
   ['tBasculante', 'rodaje', 'Suspensión y dirección', null, 'Basculante trasero: largo', 0.40, 0.60, 0.01, 'm'],
@@ -432,7 +444,8 @@ export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
   { clave: 'tRuedas', n: 'Disposición de las ruedas', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: [{ k: 'clasica', n: 'Dos delante en carenados' }, { k: 'rombo', n: 'En rombo: una en el morro, dos laterales en carenados, una en la cola' }] },
   { clave: 'tTraseras', n: 'Ruedas traseras', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: [{ k: 'una', n: 'Una en la cola (triciclo)' }, { k: 'dos', n: 'Dos en carenados (cuatro ruedas)' }] },
   // 2026-11-15: only with four wheels (the page hides it otherwise)
-  { clave: 'tBascula', n: 'Bascular en las curvas', dep: 'rodaje', bloque: 'Suspensión y dirección', opciones: [{ k: 'no', n: 'No: va siempre derecho' }, { k: 'si', n: 'Sí: la cabina y los cuatro carenados se inclinan' }] },
+  { clave: 'tBascula', n: 'Bascular en las curvas', dep: 'rodaje', bloque: 'Basculación', opciones: [{ k: 'no', n: 'No: va siempre derecho' }, { k: 'si', n: 'Sí: la cabina y los carenados se inclinan' }] },
+  { clave: 'tBascTec', n: 'Tecnología de la basculación', dep: 'rodaje', bloque: 'Basculación', opciones: TECNOLOGIAS_BASCULA },
   // 2026-11-12
   { clave: 'tAcceso', n: 'Acceso', dep: 'carroceria', bloque: 'Puertas y maletero', opciones: [{ k: 'cupula', n: 'La cúpula entera se abre' }, { k: 'puertas', n: 'Dos puertas como el Aptera' }] },
   { clave: 'tMaletero', n: 'Maletero', dep: 'carroceria', bloque: 'Puertas y maletero', opciones: [{ k: 'cola', n: 'Tapa en lo alto de la cola' }, { k: 'aptera', n: 'Portón largo como el Aptera (con puertas)' }] },
@@ -1163,6 +1176,30 @@ function cuerpoAlSuelo(F: FormaBala, phi: number): number {
   return h;
 }
 
+/**
+ * The tilt system for this car (2026-11-16): each axle on arms with its share of the weight (the front axle of a
+ * three- or four-wheeler carries the front's share, the rear one the rest; a diamond's laterals nearly all of it), the
+ * mass and the centre of gravity's height with the riders on board, but without the tilt system itself.
+ */
+export function tiltTriciclo(m: ModeloTriciclo, piezas: PiezaMasa[]): Tilt | null {
+  const b = m.bascula; if (!b) return null;
+  const T = m.campos, L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), mOcc = L('tMOcc');
+  const todo = [...piezas.map(p => ({ kg: p.kg, x: p.x, y: p.y })), ...m.plazas.map(q => { const [x, y] = cgOcupante(q.pts); return { kg: mOcc, x, y }; })];
+  const M = todo.reduce((a, p) => a + p.kg, 0), cx = todo.reduce((a, p) => a + p.kg * p.x, 0) / M, cy = todo.reduce((a, p) => a + p.kg * p.y, 0) / M;
+  // the share on the front (or lateral) axle: by the lever between it and the rear wheel(s)
+  const del = Math.min(1, Math.max(0, (cx - m.xR) / (m.xF - m.xR)));
+  return dimensionarTilt({
+    tec: b.tec, masa: M, cgY: cy, phiMax: b.phiMax, velocidad: L('tBascVel'), margen: L('tBascMargen'), brazo: b.brazo, bloqueo: L('tBascBloqueo'),
+    ejes: b.ejes.map(q => {
+      const a = q.brazos[0];
+      return { nombre: q.eje === 'del' ? 'delantero' : q.eje === 'lat' ? 'lateral' : 'trasero', x: a?.x ?? q.F.X_LAT, yPivote: a?.yCuerpo ?? 0.4, zp: a?.zp ?? 0.3, Lk: q.Lk, via: q.F.VIA_LAT,
+        // (one axle on arms, a three-wheeler's or a diamond's: the wheels on the centre line lean with the body and hold no
+        // roll at all, so that axle holds the whole car)
+        parte: b.ejes.length > 1 ? (q.eje === 'del' ? del : 1 - del) : 1, beta: (ph: number) => poseBascula(q, ph).beta };
+    }),
+  });
+}
+
 /** El modelo del Triciclo: la forma, los ocupantes, el bastidor, la batería, el motor y lo que lee el visor. */
 export function crearModeloTriciclo(P: Parametros) {
   const T = camposTriciclo(P);
@@ -1459,7 +1496,8 @@ export function crearModeloTriciclo(P: Parametros) {
     /** Four wheels (2026-11-11): the rear pods' view of the shape (`formaTrasera`), or null with one rear wheel. */
     traseras, cuatro: !!traseras,
     /** 2026-11-15: leaning in bends (four wheels and `tBascula: 'si'`): its maximum (rad) and each axle's arms, or null. */
-    bascula: T.tBascula === 'si' && (traseras || rombo) ? { phiMax: L('tBascMax') * Math.PI / 180, ejes: traseras ? [ejeBascula('del', F), ejeBascula('tras', traseras)] : [ejeBascula('lat', F)] } : null,
+    // (2026-11-16: the three-wheeler leans too, on its front arms; its tail wheel, in the body, leans with it)
+    bascula: T.tBascula === 'si' ? { phiMax: L('tBascMax') * Math.PI / 180, ejes: traseras ? [ejeBascula('del', F), ejeBascula('tras', traseras)] : [ejeBascula(rombo ? 'lat' : 'del', F)], tec: T.tBascTec ?? 'electrica', brazo: L('tBascBrazo') } : null,
     /** 2026-11-15: the wheels in a diamond (`tRuedas`): the nose wheel at x = 0 steers, the pods do not. */
     rombo,
     /** 2026-11-15: the plug-in hybrid (`tPropulsion: 'phev'`), or null: its engine, efficiencies, tank and their masses. */
@@ -1540,6 +1578,8 @@ export interface PiezaMasa {
   nota?: string;
 }
 export interface ResultadosTriciclo extends Omit<ResultadosBala, 'cabezas'> {
+  /** 2026-11-16: the tilt system sized for this car (basculacion.ts), or null when it does not lean. */
+  tilt: Tilt | null;
   /** Lo que queda sobre la cabeza de cada uno (m), sin casco: talla media y alta ('piloto', 'pasajero', 'fila 2', 'fila 3'). */
   cabezas: { quien: string; p50: number; p95: number; x: number }[];
   /** Round three: the boot (litres) now and in every state of the rows, and how many ride. */
@@ -1855,7 +1895,7 @@ function dimensionar(m: ModeloTriciclo, piezas: PiezaMasa[]): PiezaMasa[] {
 /** The department a part of the mass list belongs to (the «Proyecto» list groups by it; a part not named here, with the body). */
 export function grupoPieza(nombre: string): DepTriciclo {
   if (nombre === 'Bastidor') return 'chasis';
-  if (/^(Suspensión|Basculante|Ruedas|Frenos|Dirección)/.test(nombre)) return 'rodaje';
+  if (/^(Suspensión|Basculante|Basculación|Ruedas|Frenos|Dirección)/.test(nombre)) return 'rodaje';
   if (/^(Motor|Controlador|Depósito)/.test(nombre)) return 'propulsion';
   if (/^(Batería|Varios)/.test(nombre)) return 'energia';
   if (/^(Asientos|Volante|Salpicadero)/.test(nombre)) return 'interior';
@@ -1934,6 +1974,9 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   const s = pielBala(F, m.cup);
   const centros = { xPiel: s.xPiel / s.piel, yPiel: s.yPiel / s.piel, xCristal: s.cristal ? s.xCristal / s.cristal : -1, yCristal: s.cristal ? s.yCristal / s.cristal : 1 };
   const piezas = piezasTriciclo(m, ar, centros, { area: pielCarenados(F), ...(m.traseras ? { areaTras: pielCarenados(m.traseras) } : {}) });
+  // the tilt system (2026-11-16): sized with the car as it is without it, its riders on board, then added to the masses
+  const tilt = m.bascula ? tiltTriciclo(m, piezas) : null;
+  if (tilt) for (const c of tilt.componentes) piezas.push({ nombre: `Basculación: ${c.nombre.toLowerCase()}`, kg: c.kg, x: c.x, y: c.y, nota: c.ficha.join('; ') });
   const masas: Record<string, number> = {}; for (const p of piezas) masas[p.nombre] = (masas[p.nombre] ?? 0) + p.kg;
   const mVeh = piezas.reduce((a, p) => a + p.kg, 0), mOcc = L('tMOcc');
   const momento = (l: PiezaMasa[]) => { const M = l.reduce((a, p) => a + p.kg, 0); return { masa: M, x: l.reduce((a, p) => a + p.kg * p.x, 0) / M, y: l.reduce((a, p) => a + p.kg * p.y, 0) / M }; };
@@ -2103,6 +2146,12 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
       c('rodaje,carroceria', `Carenado ${quien} al suelo, inclinado ${g}°`, carenadoAlSuelo(q.F, ph), 0.03);
     }
     c('rodaje,carroceria', `Carrocería al suelo, inclinada ${g}°`, cuerpoAlSuelo(F, ph), 0.03);
+    // (2026-11-16) each rocker, its arms swung to the full turn, inside the body at its height
+    for (const q of m.bascula.ejes) {
+      const a = q.brazos[0]; if (!a) continue;
+      const yR = a.yCuerpo - 0.12, w = q.F.ladoZ(a.x, yR), b = m.bascula.brazo;
+      if (Number.isFinite(w)) c('rodaje', `Balancín ${q.eje === 'del' ? 'delantero' : q.eje === 'lat' ? 'lateral' : 'trasero'} dentro de la carrocería`, w - b - 0.04, 0);
+    }
   }
   c('rodaje', `Bajos al suelo con la suspensión hundida`, F.D.suelo - Math.max(m.recDel, m.recTras) * 0.6, 0.03);
   {
@@ -2209,6 +2258,7 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   }
 
   const bala: ResultadosTriciclo = {
+    tilt,
     area, vol, piel: ar.carroceria + ar.cristal, cristal: ar.cristal, cupula: [-m.cup.XC0, -m.cup.XC1],
     viaSubida: F.VIA_LAT > m.viaPedida + 1e-9 ? F.VIA_LAT : null, cabezas,
     piezas, cg: { x: cg.x, y: cg.y, masa: cg.masa, vacio: { x: vacio.x, y: vacio.y } }, vuelco: { ssf, ssfSolo, repartoDel },

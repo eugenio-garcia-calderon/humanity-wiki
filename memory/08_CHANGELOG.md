@@ -11934,3 +11934,24 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
 - Las patas sustituyen a las partes del submenú en esos cinco sectores; los elementos que ya había se repartieron entre ellas (los investigadores asignaron cada título). Se añadieron unos 100 retos, soluciones y proyectos nuevos a escala país.
 - Investigación de cinco agentes (uno por sector). Las elecciones generales del 29-11-2026 y la disolución de las Cortes del 6-10-2026 que cita Política se comprobaron aparte. Investigación original y scripts en `scripts/vision/`.
 - Los otros siete sectores muestran «Modelo país de España pendiente».
+
+## 2026-11-16 · Basculación: bloque propio en Rodaje, también en triciclos, con sus piezas
+
+- Eugenio: «basculación tiene que ser un menú entero dentro de rodaje … qué tipo de tecnología de basculación activa … que todas las piezas … estén especificados para que los ingenieros entiendan qué es lo que tienen que construir».
+- **Bloque «Basculación» en Rodaje.** Vale para cualquier Bala: triciclo, cuatro ruedas o rombo. En el triciclo se inclinan los dos carenados de delante sobre sus brazos, y la rueda de la cola se inclina con la carrocería.
+- **Ajustes:**
+  - «Tecnología de la basculación»: activa eléctrica (como el Smera o el i-Road), activa hidráulica (como el Carver) o libre con bloqueo (como la Piaggio MP3);
+  - inclinación máxima;
+  - velocidad de inclinación;
+  - margen de diseño;
+  - brazo del balancín;
+  - velocidad por debajo de la cual va bloqueado derecho.
+- **Mecanismo** (`basculacion.ts`). En cada eje con brazos hay un balancín en el centro, unido a los brazos de arriba por dos bieletas, que forma un segundo paralelogramo. Lo gira, según la tecnología:
+  - eléctrica: un motor sin escobillas con reductora planetaria y sin fin;
+  - hidráulica: dos cilindros;
+  - libre: lo bloquea un freno de disco, con un amortiguador.
+- **Dimensionado.** Se parte del momento del coche parado y del todo inclinado (m·g·h·sin φ). Se multiplica por el margen y se suma la inercia; de ahí sale el par del balancín, según cuánto gira para cada grado de inclinación.
+- **Ficha de cada pieza:** qué hace, qué hay que fabricar o comprar (medidas, fuerzas, materiales) y su masa. Todas se dibujan en 3D y se mueven al inclinarse. Al pincharlas en el 3D se abre este bloque.
+- **Comprobación nueva:** que el balancín quepa dentro de la carrocería.
+- **Ejemplo:** el Rombo Bala como triciclo, con basculación eléctrica, necesita 949 N·m en el balancín y 1,8 kW de pico; el sistema pesa 16 kg.
+- **Aviso:** son estimaciones de un primer diseño, y el vuelco y el consumo aún no cuentan la inclinación.

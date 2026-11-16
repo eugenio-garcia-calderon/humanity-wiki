@@ -715,3 +715,11 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 - Charge-sustaining mode is modelled as constant-speed cruising, with no engine on/off map.
 - Drawing a box per part and adding `cajaDentro` checks: about 2 hours.
 - (2026-11-16) `/vision` country models are static JSON baked into `public/vision/paises.js`; indicator values age (each says its year) and nothing flags a stale one. A yearly refresh job, or moving indicators to a table with a «last checked» date, is the fix; about a day either way.
+
+## 2026-11-16 · The tilt system is sized by rules of thumb
+
+- `basculacion.ts` sizes parts from one design moment, built from the static lean moment × margin, plus inertia.
+- **Fixed assumptions:** efficiencies (55 % electric, 60 % pump), voltage (48 V), pressure (120 bar) and mass rules.
+- **Not modelled:** the dynamic tilt controller, the lean in the rollover, consumption and range figures, and the pod-to-body clearance with the rods drawn.
+- **Hidden coupling:** the hydraulic flow passes between parts through a number formatted inside a text line.
+- **Next step:** a typed field for the flow, and a lean-aware rollover check. About 2 hours.

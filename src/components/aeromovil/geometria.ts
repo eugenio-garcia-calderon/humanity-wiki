@@ -264,6 +264,8 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   tTraseras: 'una', tViaTras: 1.80,
   // 2026-11-15 (Eugenio, «Smeraptera»): the four-wheeler tilting in bends, its cabin and the four pods on their arms; off by default
   tBascula: 'no', tBascMax: 15,
+  // 2026-11-16: the tilt system itself (basculacion.ts)
+  tBascTec: 'electrica', tBascVel: 30, tBascMargen: 2, tBascBrazo: 0.10, tBascBloqueo: 3,
   // 2026-11-15 (Eugenio, «Rombo Bala»): the wheels in a diamond, one in the nose, two lateral in pods, one in the tail; off by default
   tRuedas: 'clasica', tEjeLat: 1.35,
   // 2026-11-15 (Eugenio): a plug-in hybrid like the Prius (power-split planetary gear); off by default
