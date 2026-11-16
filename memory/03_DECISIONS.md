@@ -1886,3 +1886,9 @@ Eugenio asked for the flat tail («cola plana») to reach the vehicle's full wid
   - A bench is one `AsientoFila` with `tipo: 'banco'` and `plazas: n`.
   - Not taken: the Aptera bucket (`butaca`) as a row type. Folding it forward does not work: an 83 cm backrest with headrest would land on the seat in front. Also not taken: an astride saddle in a row, whose loft is hard-wired to the two-rider positions.
 - **No body-width clamp for more places.** Fitting is checked, not clamped: «Asientos de la fila N caben de lado» (cushion and mid-backrest edge against the skin) and «Hombros de la fila N».
+
+
+
+## 2026-11-16 · Removing reference cars from the garage: a per-browser mark, not a server list
+Eugenio asked to be able to «borrar» reference cars too. They are code models shared by everybody, so removal means "out of my garage", recoverable. Stored as `quitado: true` on the car's entry of the existing `aeromovil_garaje_v5` localStorage list (helpers in `garaje/quitados.ts`), next to `visible` and the dragged places, which already live there.
+- Not taken: a server list. There is no per-user garage/settings store to reuse (`ajustes.ts` is the platform's money figures; `/api/aeromovil/*` stores designs, tasks and references), and a new table + migration + write route for one list of ids was out of proportion. Cost: the phone app and the desktop keep separate lists.

@@ -12016,3 +12016,11 @@ Eugenio: «Permite aumentar el ancho de la batería aunque se salga del carenado
 - **Lo que sigue a los asientos:** ocupantes, masas (estimadas: banco 1,1 veces «un asiento» por plaza, plegable 0,8; en la fila 3, 1,0 y 0,7), centro de gravedad, vuelco, maletero, cargas del bastidor y las comprobaciones de cabeza, rodillas, pies y hombros.
 - **Comprobaciones nuevas:** «Asientos de la fila 2 caben de lado» y «Asientos de la fila 3 caben de lado» (dicen cuánto falta por lado), y «Hombros de la fila 3 a la cúpula» cuando la fila 3 lleva más de una plaza.
 - **Aviso:** tres plazas en la fila 2 no caben ni con la carrocería más ancha (1,30 m): faltan unos 15 cm por lado. Las comprobaciones lo dicen en rojo.
+
+
+
+## 2026-11-16 · Los coches de referencia también se pueden eliminar del garaje
+Eugenio: «permite que se puedan borrar también los coches de referencia».
+- **Qué hay ahora.** En el Aeromóvil, cada coche de referencia del garaje (Twizy, Aptera, XL1, Smera, EQXX…) tiene «Eliminar del garaje»: en su tarjeta, al pincharlo en el 3D, y con una papelera en su fila de la lista del garaje (botón «Garaje» o el bloque «Garaje» del panel). Antes de quitarlo pregunta en la misma tarjeta («Sí, quitar» / «No»), sin ventanas del navegador.
+- **Qué hace.** El coche deja de salir en la lista y en el 3D (no solo se oculta: tampoco sale en «Superponer» ni lo saca el túnel). Debajo de la lista aparece «Coches quitados (N) · Recuperar», que lo devuelve al garaje, visible.
+- **Qué no hace.** Los coches de referencia son modelos del programa, iguales para todos: quitarlo no lo borra para nadie más. Se recuerda **en este navegador** (como el sitio donde arrastras cada coche): el móvil o la app guardan su propia lista.
