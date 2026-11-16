@@ -179,7 +179,6 @@ nav.sectores{flex:0 1 auto}
 #subnav a:hover{background:#e6dfd1;color:var(--ink)}
 #subnav a.on{font-size:1.2em;font-weight:700;background:var(--accent);color:#fff}
 #escalas,#pilares{top:var(--alto-cab,60px);max-height:calc(100vh - var(--alto-cab,60px))}
-body:has(#subnav:not([hidden])){--alto-cab:109px}
 .layout{grid-template-columns:190px minmax(0,1fr) 190px;gap:26px}
 main{max-width:1060px;width:100%;justify-self:center}
 .hero,.sector-head{text-align:center;justify-content:center;flex-direction:column;align-items:center}
@@ -199,8 +198,8 @@ h2.sec,.grupo h2{text-align:center}
 .visor.pendiente b{font-family:var(--serif);font-size:22px;display:block}
 .visor.pendiente p{margin:6px 0 0;color:var(--muted)}
 .btn3d.off{background:#d9d3c6;color:#7a7364;box-shadow:none;cursor:default}
-@media (max-width:1150px){.layout{grid-template-columns:190px minmax(0,1fr)} #subnav .wrap{justify-content:flex-start} body:has(#subnav:not([hidden])) #pilares{top:109px}}
-@media (max-width:900px){.layout{grid-template-columns:1fr} body:has(#subnav:not([hidden])) #escalas{top:109px} body:has(#subnav:not([hidden])) #pilares{top:161px} .visor{height:360px}}
+@media (max-width:1150px){.layout{grid-template-columns:190px minmax(0,1fr)} #subnav .wrap{justify-content:flex-start}}
+@media (max-width:900px){.layout{grid-template-columns:1fr} .visor{height:360px}}
 
 /* ---- 2026-11-15: controls on a dark frame, content on a light panel ----
    The three menus (top, left, right) share one dark background so they read as controls;
@@ -243,4 +242,47 @@ footer a{color:var(--marco-txt)}
   #escalas,#pilares{background:var(--marco)}
   .layout{padding:0 8px 8px}
   main{margin-top:8px;padding:20px 16px 40px;border-radius:14px}
+}
+
+/* ---- 2026-11-16: selection summary in the header, scale badge, bullets only ---- */
+#seleccion{text-align:center;padding:10px 16px 8px;border-top:1px solid rgba(255,255,255,.07);background:var(--marco)}
+.sel-tit{font-family:var(--serif);font-size:30px;font-weight:700;color:#fff;line-height:1.1}
+.sel-linea{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px;min-height:26px;align-items:center}
+.sel-linea .chip{display:inline-flex;align-items:center;gap:6px;background:var(--accent-oscuro);color:#fff;border-radius:99px;padding:3px 6px 3px 12px;font-size:13px;font-weight:700}
+.sel-linea .chip[data-t="pilar"]{background:var(--c)}
+.sel-linea .chip[data-t="escala"]{background:#e9e4d8;color:var(--marco)}
+.sel-linea .chip svg{width:16px;height:16px}
+.sel-linea .chip a{color:inherit;text-decoration:none;opacity:.7;font-size:15px;line-height:1;padding:0 4px}
+.sel-linea .chip a:hover{opacity:1}
+.sel-ayuda{font-size:12px;color:var(--marco-mute)}
+#subnav .wrap{height:36px;gap:4px}
+#subnav a{font-size:11.5px;padding:3px 9px}
+#escalas,#pilares{top:var(--alto-cab,60px);max-height:calc(100vh - var(--alto-cab,60px))}
+main{position:relative}
+main:has(.insignia){padding-left:132px}
+.insignia{position:absolute;left:22px;top:24px;width:92px;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--accent);text-align:center}
+.insignia svg{width:72px;height:72px;background:#eef5f0;border-radius:20px;padding:10px}
+.insignia span{font-size:13px;font-weight:700;color:var(--ink)}
+.visor{margin-bottom:26px}
+.sec-tit{font-family:var(--serif);font-size:22px;margin:6px 0 10px;padding-left:12px;border-left:5px solid var(--c)}
+.seccion{margin-bottom:26px}
+.seccion .bloque{background:none;border:0;border-left:3px solid var(--line);border-radius:0;padding:2px 0 2px 16px;margin-bottom:14px}
+.seccion .bloque h3{font-size:18px;margin:0 0 4px}
+.seccion .bloque ul,.lista{margin:0;padding-left:20px}
+.lista li{margin:7px 0;line-height:1.45}
+.lista li::marker,.seccion .bloque li::marker{color:var(--c)}
+.lista .lugar{font-size:12px;color:var(--muted)}
+.lista a.ext{font-size:12px;color:var(--muted)}
+.arte{max-width:620px;margin:10px 0 0}
+.arte img{max-height:300px}
+.preguntas ul{margin:0;padding-left:20px}
+.vacio{padding:12px 16px;font-size:14px}
+.grupo .bloque{margin-bottom:10px}
+@media (max-width:900px){
+  header.top{position:static}
+  #escalas,#pilares{position:static}
+  .sel-tit{font-size:24px}
+  main:has(.insignia){padding-left:16px;padding-top:92px}
+  .insignia{left:50%;transform:translateX(-50%);top:14px;flex-direction:row;width:auto}
+  .insignia svg{width:44px;height:44px;padding:6px;border-radius:12px}
 }
