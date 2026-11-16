@@ -1902,3 +1902,9 @@ read their group totals from this helper too. Not done now because both files we
 the helper calls the very same grouping functions, so the numbers cannot diverge unless someone changes one list's
 filter by hand. «Energía» shows the whole Energía group (battery + charger/wiring/12 V, + solar panels on the
 Basculante), not the battery alone, so the tab matches the list's group header.
+## 2026-11-16 · Interior finish: re-cover the existing seats instead of new seat models
+
+- **Choice.** The upholstery options swap the material of the seats the cabin builder already draws (`balaPiezas.ts` `cabina`: saddle and pads, Aptera buckets, row seats) for a canvas-textured MeshPhysicalMaterial (colour, grain, stitching as texture and bump). The buckets' white shell takes the darker "side" colour.
+- **Alternative rejected.** New sculpted seats with real bolsters and stitch tubes for each of the three layouts: about three times the code, and it would fight the `filas` bot's ongoing seat work in `balaPiezas.ts`.
+- **Lining.** Drawn on the skin's own (x, t) sections, offset inward along the section normal, so it follows any body the sliders make; cut at the canopy glass edge and under the roof panel, split by door leaf onto each door pivot.
+- **Defaults.** Every new field defaults to today's look (no lining, `serie` cover, nothing drawn), so saved designs and their masses are unchanged.

@@ -298,6 +298,10 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   // The smooth body (2026-11-13, the clásico: «la cola y el maletero… la misma pieza… nunca… montículos», the Aptera's
   // wide nose and tail, its light bar and the belly's sweep). Off by default: every other key below acts only with it on.
   tCubierta: 'redonda', tColaAncho: 0, tColaGrosor: 0, tColaBombeo: 0.01, tBajosIni: 0.20, tBajosCurva: 0, tMorroAncho: 0, tMorroGrosor: 0, tMorroBombeo: 0.02,
+  // 2026-11-16 (Eugenio, after the Vision Jet's cabin): the interior finish (interiorTriciclo.ts). Every default is today's
+  // look (no lining, the grey quilted seats, no belts drawn), so a saved design opens as it was, with the same masses.
+  tAcabado: 'chasis', tTapiz: 'serie', tCostura: 'geometrica', tCosturaColor: 'crema', tForroColor: 'crema', tMoldura: 'carbono',
+  tConsolaTecho: 'no', tConsolaCentral: 'no', tCinturon: 'no', tAmbiente: 'no',
   // 2026-11-16 (Eugenio: «que la cola pueda ser más ancha en el formato de cola plana… como en el aptera»): the round
   // body's flat tail towards the full width; 0 by default, so every saved design is built as before
   tColaPlanaAncho: 0,

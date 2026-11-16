@@ -12033,3 +12033,15 @@ Eugenio: «cuando pinche en un modelo, que en el menú superior donde pone carro
 - Sale en las familias que tienen departamentos: el Triciclo (con sus variantes de cuatro ruedas y en rombo) y el Cuadriciclo Basculante. La Gota, el A1 y el Bala no tienen pestañas de este tipo, así que no cambian.
 - Las cifras son las mismas que la lista «Peso: todos los componentes» de «Proyecto» (redondeadas al kilo; la lista lleva un decimal), porque salen de las mismas piezas: `src/components/aeromovil/PesosDepartamento.ts`. Cambian solas al mover un deslizador.
 - En el móvil la fila de pestañas sigue desplazándose de lado; las pestañas son un poco más altas (una línea más) y no se parten.
+## 2026-11-16 · Acabado interior del Triciclo / Cuadriciclo Bala: forro, tapicería, consolas y cinturones en 3D
+
+- Eugenio: «Quiero que también el interior se pueda escoger, por ejemplo, del "Modelo 1"… y quiero que el interior se diseñe en 3D y se pueda elegir con mucho detalle. Este sería la inspiración… con esos paneles que recubren el interior del chasis tubular» (foto de la cabina del Cirrus Vision Jet).
+- **Dos bloques nuevos en Interior**, plegados como los demás: «Acabado interior» y «Tapicería». Valen para toda la familia (triciclo, cuatro ruedas, rombo; a horcajadas, butacas o tres filas), así que también para «Modelo 1».
+- **Acabado interior:**
+  - Forro: sin forro (como hasta ahora, el chasis a la vista), paneles forrados de tela, o lujo (paneles acolchados de ante, moqueta gruesa y aislamiento).
+  - Los paneles siguen la piel por dentro (a 1,4 cm, o 2,2 cm los de lujo): costados desde el suelo hasta el borde del cristal, techo bajo el panel solar, suelo de moqueta sobre los largueros y una funda sobre la torreta del amortiguador. Las ventanas quedan libres con un borde enrollado; en las puertas, su trozo de panel se abre con ellas.
+  - Color del forro (crema como el Vision Jet, gris, negro, blanco roto); molduras (carbono, madera oscura, aluminio); consola de techo con focos apagados o encendidos; luz ambiente (blanca, ámbar, azul); reposabrazos con portavasos (y consola entre los asientos de la fila 2).
+- **Tapicería:** vinilo de serie (como hasta ahora), cuero coñac con laterales marrón oscuro, cuero negro, alcántara o tela técnica; costura recta o geométrica (como la del Vision Jet) y su color; cinturones de tres puntos en el color elegido.
+- **Masas:** cada opción suma lo suyo en «Peso: todos los componentes» › Interior (kg/m² de panel, de moqueta y de funda; kg/m de moldura; 1,1 kg por cinturón). Ejemplo con el diseño por defecto: paneles unos 7,5 kg, lujo unos 12 kg; cuero en dos butacas +1,3 kg, alcántara −0,8 kg.
+- **Con los valores por defecto todo queda como estaba** (mismo dibujo, mismas masas): los diseños guardados no cambian.
+- Archivos: `interiorTriciclo.ts` (opciones, regiones y masas) y `garaje/balaInterior.ts` (el 3D).
