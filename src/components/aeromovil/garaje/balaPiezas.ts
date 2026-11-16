@@ -20,7 +20,7 @@ export { ALETA, ASIENTO, POD, POD_SEMIANCHO, brazosDe, extremoManillar, podDe, t
  * ratio of their radius to the reference 20″.
  *
  * Livery: the Aeromóvil family's. The Aeromóvil 1 is pearl white with a dark
- * navy nose piece and red lamps (Visor3D.tsx: 0xf4f5f6, 0x182544,
+ * navy nose piece and red lamps (visor/materiales.ts: 0xf4f5f6, 0x182544,
  * 0xd33a2c); the Bala takes the same three: white body, navy nose cone, tail
  * cone, belly, canopy frame, fin and arms, and red only in small details
  * (a pinstripe, the fin tip, the rear light ring).
@@ -134,10 +134,10 @@ export function crearMateriales() {
   const pintura = { color: 0xf4f5f6, metalness: 0.12, roughness: 0.32, roughnessMap: grano, clearcoat: 1, clearcoatRoughness: 0.04, sheen: 0.15, sheenColor: new THREE.Color(0xffffff), envMapIntensity: 1.1 };
   const azul = { color: 0x182544, metalness: 0.2, roughness: 0.32, roughnessMap: grano, clearcoat: 1, clearcoatRoughness: 0.05, envMapIntensity: 1.1 };
   return {
-    // the Aeromóvil's pearl white and its navy (Visor3D.tsx `body` and `morro`)
+    // the Aeromóvil's pearl white and its navy (visor/materiales.ts `body` and `morro`)
     chapa: fis(pintura),
     // (2026-11-13, the body's colour: the white bucket shells and the white dashboard are the same pearl, but their own
-    // material, so a red body does not paint the seats red; Visor3D.tsx `pintar` recolours `chapa`, not this)
+    // material, so a red body does not paint the seats red; visor/materiales.ts `pintar` recolours `chapa`, not this)
     blancoInterior: fis(pintura),
     marino: fis(azul),
     chapaCalco: decal(pintura),

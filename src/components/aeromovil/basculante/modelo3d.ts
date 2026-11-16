@@ -31,7 +31,7 @@ export interface MatsB {
   body: Mat; glass: Mat; solar: Mat; goma: Mat; morro: Mat; bajos: Mat; faro: Mat; piloto: Mat; intermitenteI: Mat; intermitenteD: Mat;
   alu: Mat; susp: Mat; stanch: Mat; black: Mat; seat: Mat; motor: Mat; batt: Mat; carcasa: Mat; muelle: Mat; cableHV: Mat; techoInterior: Mat;
 }
-/** The viewer's helpers (Visor3D.tsx), so the parts look like every other vehicle's. */
+/** The viewer's helpers (visor/primitivas.ts, visor/ocupante.ts), so the parts look like every other vehicle's. */
 export interface AyudasVisor {
   tube: (g: THREE.Object3D, a: V3, b: V3, d: number, mat: Mat) => void;
   sphere: (g: THREE.Object3D, c: V3, r: number, mat: Mat, escala?: V3) => THREE.Mesh;

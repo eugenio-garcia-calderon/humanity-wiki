@@ -73,7 +73,7 @@ let modelo: ModeloBasculante | null = null;
 const modeloSmera = () => modelo ?? (modelo = crearModelo(PARAMETROS_REPLICA_SMERA) as ModeloBasculante);
 
 /**
- * The viewer's builder for a design (Visor3D's `construirDisenoGaraje`), registered by the viewer: this file cannot
+ * The viewer's builder for a design (`construirDisenoGaraje` in visor/construir.ts), registered by the viewer: this file cannot
  * import it (the viewer imports the garage).
  */
 type Constructor = (m: Modelo) => { grupo: THREE.Group; pivotes: PivoteGaraje[] };

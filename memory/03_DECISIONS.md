@@ -1912,3 +1912,18 @@ Basculante), not the battery alone, so the tab matches the list's group header.
 ## 2026-11-16 · Bala powertrain catalogue: fixed slider values via `rangoTriciclo`
 
 A chosen catalogue part (catalogoTren.ts) writes its published figures into the existing sliders and `rangoTriciclo` returns `[v, v]` for them while it is chosen, so every existing calculation (masses, energy, hybrid) uses them with no second code path. Alternative considered: a separate "catalogue" model overriding `limitarTriciclo` callers one by one — more places to forget. The choice is stored as four optional string keys (`tCatMotor`, `tCatCtrl`, `tCatReductora`, `tCatTermico`), absent = «A medida», so saved designs are unchanged. Controller current is compared as P = V × I with 95 % efficiency, treating an AC controller's phase RMS current as roughly its battery current (approximate; said on screen).
+
+## 2026-11-16 · Aeromóvil code layout («ordenar»): pure moves behind the old paths, in four PRs
+
+Eugenio asked to make future code generation on the Aeromóvil cheaper. The three hottest files (Visor3D.tsx 2,433 lines,
+geometriaTriciclo.ts 2,517, pages/Aeromovil.tsx 1,930; 30–40 commits a week each) are split into folders by topic:
+`visor/` (3D builders), `triciclo/` (Triciclo model), and per-family panels next to the page. Plan in the «ordenar»
+study; rules:
+- **Pure moves only**: cut, paste, add `export`, fix imports. No logic edited. Checked per step with tsc, the tunnel
+  tests, `triciclo-disenos`, a model+results JSON diff of seven designs against the previous main, and headless
+  screenshots of «Rombo Bala» before/after.
+- **Old paths keep working**: `Visor3D.tsx` re-exports `CAPAS`/`CapaId`/`construirDisenoGaraje`, `geometriaTriciclo.ts`
+  becomes a barrel, `geometria.ts` re-exports `TRICICLO_DEFECTO`. No importer outside the moved code changes.
+- **Not done** (rewrites, not moves): folding defaults into the FILAS rows, moving the Triciclo visibility rules from
+  the page into the model, unifying the 13 copies of `fmt`. Each is a later, separately verified step.
+- Alternative rejected: one big PR. Four PRs, each provably equivalent, so a regression points at one step.
