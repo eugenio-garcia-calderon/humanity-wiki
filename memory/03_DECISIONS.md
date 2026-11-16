@@ -1839,3 +1839,13 @@ Eugenio: «cambia el estilo del dibujo de ambas, para que los personajes sean m�
 - **Watercolour, not render.** Shadows are glazes with dried edges and granulation plus coloured-pencil hatching, as in design 5; lifted highlights were removed because they read as plastic. Faces keep the light model but with about one and a half values of shadow and lost edges.
 - **Design 6 copies the scripts.** `mes-05-f.py` / `mes-06-f.py` are copies of the design-5 scripts with their changes (activation, redrawn people, the painter's canvas, the café heads, the storks, the bulb's light). Designs 4 and 5 are untouched: no shared library file changed.
 - **Outcome and ceiling.** Four evaluator rounds (r3, r6, r9, r11) went from 3/10 to 5-5.5/10 in figure realism, and the evaluator marked it publishable as design 6 and favourite. It also said where the ceiling of this approach is: the figures are built on design 5's joints and simple shapes, so they read as painted wooden figures rather than as people drawn from life. Going further means drawing each figure's anatomy from reference (structure of hands, faces and joints), not more layers on the same shapes.
+
+## 2026-11-16 · Department masses under the top-bar tabs: one helper, not a third copy of the grouping
+
+`kgPorDepartamento(res)` (src/components/aeromovil/PesosDepartamento.ts) sums the same pieces with the same grouping
+as the two «Peso: todos los componentes» lists (`grupoPieza` for the Triciclo, `PiezaMasaB.grupo` for the Basculante),
+and «Proyecto» is `res.mVeh`. Alternative: refactor both lists (Aeromovil.tsx `LadoTriciclo`, LadoBasculante.tsx) to
+read their group totals from this helper too. Not done now because both files were claimed by other bots at the time;
+the helper calls the very same grouping functions, so the numbers cannot diverge unless someone changes one list's
+filter by hand. «Energía» shows the whole Energía group (battery + charger/wiring/12 V, + solar panels on the
+Basculante), not the battery alone, so the tab matches the list's group header.

@@ -723,3 +723,10 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 - **Not modelled:** the dynamic tilt controller, the lean in the rollover, consumption and range figures, and the pod-to-body clearance with the rods drawn.
 - **Hidden coupling:** the hydraulic flow passes between parts through a number formatted inside a text line.
 - **Next step:** a typed field for the flow, and a lean-aware rollover check. About 2 hours.
+
+## 2026-11-16 · Department mass totals computed in three places from the same grouping
+
+The «Peso: todos los componentes» lists in `LadoTriciclo` (Aeromovil.tsx) and `LadoBasculante.tsx` still sum their
+group totals inline; the top-bar tabs use `kgPorDepartamento` (PesosDepartamento.ts). All three call the same grouping
+(`grupoPieza` / `PiezaMasaB.grupo`), so they agree today. Making both lists read from the helper: ~15 minutes, once
+both files are free of other bots' claims.

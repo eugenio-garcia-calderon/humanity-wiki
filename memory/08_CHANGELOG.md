@@ -11955,3 +11955,12 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
 - **Comprobación nueva:** que el balancín quepa dentro de la carrocería.
 - **Ejemplo:** el Rombo Bala como triciclo, con basculación eléctrica, necesita 949 N·m en el balancín y 1,8 kW de pico; el sistema pesa 16 kg.
 - **Aviso:** son estimaciones de un primer diseño, y el vuelco y el consumo aún no cuentan la inclinación.
+
+## 2026-11-16 · El peso de cada departamento, debajo de su pestaña
+
+Eugenio: «cuando pinche en un modelo, que en el menú superior donde pone carrocería, pongas ahí debajo el número en kilogramos del peso de la carrocería de ese modelo, donde pone chasis… el peso del chasis, y lo mismo con rodaje, motor e interior».
+
+- En el Aeromóvil, en la barra de arriba, cada pestaña de departamento lleva debajo, en pequeño, los kilos de ese departamento en el diseño que se está editando: «Carrocería · 40 kg», «Chasis · 22 kg», «Rodaje · 106 kg»… «Proyecto» lleva el vehículo entero sin ocupantes y «Energía» el grupo Energía de la lista de pesos (la batería y el cargador, cables y 12 V; en el Basculante, también los paneles solares).
+- Sale en las familias que tienen departamentos: el Triciclo (con sus variantes de cuatro ruedas y en rombo) y el Cuadriciclo Basculante. La Gota, el A1 y el Bala no tienen pestañas de este tipo, así que no cambian.
+- Las cifras son las mismas que la lista «Peso: todos los componentes» de «Proyecto» (redondeadas al kilo; la lista lleva un decimal), porque salen de las mismas piezas: `src/components/aeromovil/PesosDepartamento.ts`. Cambian solas al mover un deslizador.
+- En el móvil la fila de pestañas sigue desplazándose de lado; las pestañas son un poco más altas (una línea más) y no se parten.
