@@ -377,23 +377,56 @@ export interface CabinaTriciclo {
   pedales?: { x: number; talon: number; z: number } | null;
 }
 /** A car-style seat of the Triciclo's three rows (the same fields as geometriaTriciclo.ts `AsientoFila`). */
-export interface AsientoCoche { fila: 1 | 2 | 3; x: number; z: number; y: number; ancho: number; fondo: number; respaldo: number; rec: number; plegado: boolean }
+export interface AsientoCoche {
+  fila: 1 | 2 | 3; x: number; z: number; y: number; ancho: number; fondo: number; respaldo: number; rec: number; plegado: boolean;
+  /** 2026-11-16 (filasTriciclo.ts): a bench across the row (`plazas` places, a headrest each in row 2) or a light flip seat. Absent: a car seat. */
+  tipo?: 'coche' | 'banco' | 'plegable'; plazas?: number;
+}
 /**
  * A car-style seat: a thin pan and cushion (6 cm) from 17 cm behind the hips forward (the backrest's rear face), and a backrest hinged at the
  * cushion's rear edge, reclined `rec`; the pilot's and row 2's with a headrest. Folded, the backrest lies forward
  * flat on the cushion (its back up, 7 cm over the cushion: the boot's floor, as `volumenMaletero` counts it).
  */
 function asientoCoche(g: THREE.Group, M: Mats, a: AsientoCoche) {
+  if (a.tipo === 'plegable') { asientoPlegable(g, M, a); return; }
   const x0 = a.x - 0.17, grueso = 0.07, w = a.ancho;
   const cojin = new THREE.Mesh(new THREE.BoxGeometry(a.fondo, 0.06, w), M.cuero); cojin.position.set(x0 + a.fondo / 2, a.y - 0.03, a.z); cojin.name = 'asiento'; g.add(cojin);
   // the side bolsters of the cushion
   for (const s of [1, -1]) { const b = new THREE.Mesh(new THREE.BoxGeometry(a.fondo * 0.85, 0.035, 0.05), M.cuero); b.position.set(x0 + a.fondo * 0.5, a.y + 0.012, a.z + s * (w / 2 - 0.025)); g.add(b); }
   const respaldo = new THREE.Group(); respaldo.name = a.plegado ? 'respaldo-plegado' : 'respaldo';
   const placa = new THREE.Mesh(new THREE.BoxGeometry(grueso, a.respaldo, w * 0.96), M.cuero); placa.position.set(-grueso / 2, a.respaldo / 2, 0); respaldo.add(placa);
-  if (a.fila < 3) { const cab = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.13, Math.min(0.24, w * 0.55)), M.cuero); cab.position.set(-0.04, a.respaldo + 0.08, 0); respaldo.add(cab); }
+  // (2026-11-16: a bench has one headrest per place, 49 cm apart, as its passengers sit)
+  const n = a.tipo === 'banco' ? Math.max(1, a.plazas ?? 1) : 1, wc = a.tipo === 'banco' ? 0.24 : Math.min(0.24, w * 0.55);
+  if (a.fila < 3) for (let i = 0; i < n; i++) { const cab = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.13, wc), M.cuero); cab.position.set(-0.04, a.respaldo + 0.08, ((n - 1) / 2 - i) * 0.49); respaldo.add(cab); }
+  // (and a seam between its places on the cushion, so it reads as one bench for several)
+  for (let i = 1; i < n; i++) { const c = new THREE.Mesh(new THREE.BoxGeometry(a.fondo * 0.9, 0.004, 0.012), M.grisOscuro); c.position.set(x0 + a.fondo * 0.5, a.y + 0.001, a.z + ((n - 1) / 2 - i + 0.5) * 0.49); g.add(c); }
   // hinged at the cushion's rear top edge
   respaldo.position.set(x0 + grueso, a.y, a.z);
   if (a.plegado) { respaldo.rotation.z = -Math.PI / 2; respaldo.position.set(x0, a.y + grueso, a.z); }
+  else respaldo.rotation.z = a.rec * Math.PI / 180;
+  g.add(respaldo);
+}
+/**
+ * 2026-11-16: a light flip seat (a van's jump seat): a thin pan (3 cm) and a thin backrest (3 cm) without headrest,
+ * on an aluminium tube frame (a hoop round the backrest and two legs under the pan's front). Folded, as a car seat's,
+ * the backrest lies forward on the pan.
+ */
+function asientoPlegable(g: THREE.Group, M: Mats, a: AsientoCoche) {
+  const x0 = a.x - 0.17, w = a.ancho, e = 0.03, r = 0.011;
+  const pan = new THREE.Mesh(new THREE.BoxGeometry(a.fondo, e, w), M.cuero); pan.position.set(x0 + a.fondo / 2, a.y - e / 2, a.z); pan.name = 'asiento'; g.add(pan);
+  // the pan's frame: a tube under each side edge and two legs from its front corners down 25 cm
+  for (const s of [1, -1]) {
+    const z = a.z + s * (w / 2 - 0.02);
+    poste(g, new THREE.Vector3(x0, a.y - e - r, z), new THREE.Vector3(x0 + a.fondo, a.y - e - r, z), r, M.aluminio);
+    poste(g, new THREE.Vector3(x0 + a.fondo - 0.03, a.y - e - r, z), new THREE.Vector3(x0 + a.fondo - 0.06, a.y - 0.25, z), r, M.aluminio);
+  }
+  const respaldo = new THREE.Group(); respaldo.name = a.plegado ? 'respaldo-plegado' : 'respaldo';
+  const placa = new THREE.Mesh(new THREE.BoxGeometry(e, a.respaldo * 0.9, w * 0.92), M.cuero); placa.position.set(-e / 2, a.respaldo * 0.45 + 0.02, 0); respaldo.add(placa);
+  // the hoop: up each side and across the top, behind the pad
+  const p = (y: number, z: number) => new THREE.Vector3(-e - r, y, z), zz = w / 2 - 0.02;
+  poste(respaldo, p(0, zz), p(a.respaldo, zz), r, M.aluminio); poste(respaldo, p(0, -zz), p(a.respaldo, -zz), r, M.aluminio); poste(respaldo, p(a.respaldo, -zz), p(a.respaldo, zz), r, M.aluminio);
+  respaldo.position.set(x0 + e, a.y, a.z);
+  if (a.plegado) { respaldo.rotation.z = -Math.PI / 2; respaldo.position.set(x0, a.y + e + 2 * r, a.z); }
   else respaldo.rotation.z = a.rec * Math.PI / 180;
   g.add(respaldo);
 }

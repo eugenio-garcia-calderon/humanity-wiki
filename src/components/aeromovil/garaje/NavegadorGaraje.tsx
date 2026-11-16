@@ -13,7 +13,7 @@
 // · «Guardar como nuevo» and «Eliminar» are the same calls as the logo menu's (POST, and DELETE, which archives).
 //   The server lets only the owner of the Aeromóvil (or an admin) do either, so only the owner sees the buttons.
 import { useState, type FormEvent, type ReactNode } from 'react';
-import { Check, Copy, Eye, EyeOff, Focus, Loader2, MoveDiagonal, Pencil, Rows3, Trash2, X } from 'lucide-react';
+import { Check, Copy, Eye, EyeOff, Focus, Loader2, MoveDiagonal, Pencil, RotateCcw, Rows3, Trash2, X } from 'lucide-react';
 import { Button, Card } from '../../ui/core';
 import { cn } from '../../../utils/cn';
 import { aDiseno, deDiseno, leerClaves, type Diseno, type DisenoAbierto } from '../Disenos';
@@ -318,6 +318,29 @@ export function BotonSoloReferencia({ e, id }: { e: Eleccion; id: string }) {
   );
 }
 
+/**
+ * «Eliminar del garaje» on a reference car's card (2026-11-16, Eugenio: «permite que se puedan borrar también los
+ * coches de referencia»). Reference cars are models in the code, shared by everybody, so «borrar» takes the car out of
+ * this garage only (the list and the 3D), remembered in this browser; «Coches quitados» in the list brings it back.
+ * Asks in place first (no browser dialog), as «Eliminar» does for designs.
+ */
+export function BotonQuitarReferencia({ id, nombre, alQuitar }: { id: string; nombre: string; alQuitar: (id: string) => void }) {
+  const [seguro, setSeguro] = useState(false);
+  const clase = 'h-10 shrink-0 px-2 text-[11px] normal-case tracking-normal sm:h-auto sm:gap-1.5 sm:px-2.5 sm:py-1.5';
+  if (!seguro) return (
+    <Button variant="outline" onClick={() => setSeguro(true)} title={`Quita «${nombre}» de tu garaje (lo puedes recuperar en la lista del garaje)`} className={cn(clase, 'text-red-700 hover:bg-red-50')}>
+      <Trash2 className="hidden h-3.5 w-3.5 sm:block" />Eliminar del garaje
+    </Button>
+  );
+  return (
+    <span role="alertdialog" aria-label={`¿Quitar «${nombre}» del garaje?`} className="flex shrink-0 items-center gap-1 rounded-lg border border-red-200 bg-red-50 px-1.5 py-1">
+      <span className="text-[11px] font-semibold text-red-800">¿Quitarlo?</span>
+      <Button variant="primary" onClick={() => { setSeguro(false); alQuitar(id); }} className={cn(clase, 'bg-red-700 hover:bg-red-800')}>Sí, quitar</Button>
+      <Button variant="ghost" onClick={() => setSeguro(false)} className={clase}>No</Button>
+    </span>
+  );
+}
+
 /** «2,38 m · 350 kg» for a row of the list (2026-11-15: the order from the smallest to the largest has to be visible). */
 function medidaFila(m?: { largo: number; masa?: number }): string {
   if (!m) return '';
@@ -329,19 +352,25 @@ function medidaFila(m?: { largo: number; masa?: number }): string {
  * The list view of the garage, in the side panel and in the «Garaje» panel of the 3D view: «Mis diseños» (the first
  * row) and «Coches de referencia» (the second), each one shown or hidden.
  */
-export function ListaGaraje({ g, e, actual, nombreVehiculo, referencias, alAlternarReferencia, alElegido, puedeDecidir, pie }: {
+export function ListaGaraje({ g, e, actual, nombreVehiculo, referencias, alAlternarReferencia, alQuitarReferencia, alRecuperarReferencia, alElegido, puedeDecidir, pie }: {
   g: Garaje; e: Eleccion; actual: DisenoAbierto | null; nombreVehiculo: string;
   /** The owner (or an admin): only they can rename, as the server checks. */
   puedeDecidir: boolean;
   /** After a design is picked in the list (the «Garaje» panel closes on a phone, where it covers the 3D). */
   alElegido?: () => void;
   /** In the catalogue's order (from the smallest to the largest), with their kerb mass when it is known. */
-  referencias: { id: string; nombre: string; largo: number; masa?: number; visible: boolean }[];
+  referencias: { id: string; nombre: string; largo: number; masa?: number; visible: boolean; quitado?: boolean }[];
   alAlternarReferencia: (id: string) => void;
+  /** «Eliminar del garaje» (2026-11-16): out of the list and the 3D, until «Recuperar». Without it, no bin is shown. */
+  alQuitarReferencia?: (id: string) => void;
+  alRecuperarReferencia?: (id: string) => void;
   pie?: ReactNode;
 }) {
   const lista = g.lista;
   const [editando, setEditando] = useState<number | null>(null);
+  const [quitando, setQuitando] = useState<string | null>(null);
+  const [verQuitados, setVerQuitados] = useState(false);
+  const enGaraje = referencias.filter(v => !v.quitado), quitados = referencias.filter(v => v.quitado);
   const propioFuera = !actual || (lista != null && !lista.some(d => d.id === actual.id));
   const fila = 'flex items-center gap-1 rounded-lg border px-1';
   return (
@@ -400,14 +429,46 @@ export function ListaGaraje({ g, e, actual, nombreVehiculo, referencias, alAlter
           Coches de referencia<span className="text-[11px] font-normal text-slate-400">segunda fila, de menor a mayor</span>
         </p>
         <div className="flex flex-col gap-1">
-          {referencias.map(v => (
-            <Button key={v.id} variant="outline" aria-pressed={v.visible} onClick={() => alAlternarReferencia(v.id)}
-              className={cn('justify-between gap-2 px-2.5 py-1.5 text-left text-[13px] font-medium normal-case tracking-normal', !v.visible && 'border-dashed text-slate-400')}>
-              <span className="flex min-w-0 items-center gap-1.5">{v.visible ? <Eye className="h-3.5 w-3.5 shrink-0 text-slate-500" /> : <EyeOff className="h-3.5 w-3.5 shrink-0" />}<span className="truncate">{v.nombre}</span></span>
-              <span className="shrink-0 text-[11px] font-normal tabular-nums text-slate-400">{medidaFila(v)}</span>
-            </Button>
+          {enGaraje.map(v => quitando === v.id && alQuitarReferencia ? (
+            <div key={v.id} role="alertdialog" aria-label={`¿Quitar «${v.nombre}» del garaje?`} className="rounded-lg border border-red-200 bg-red-50 p-2">
+              <p className="text-xs font-semibold text-red-800">¿Quitar «{v.nombre}» del garaje?</p>
+              <p className="mt-0.5 text-[11px] leading-snug text-red-800">Deja de salir en esta lista y en el 3D. Es un modelo de referencia: no se borra para nadie más, y lo puedes recuperar abajo, en «Coches quitados».</p>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                <Button variant="primary" onClick={() => { setQuitando(null); alQuitarReferencia(v.id); }} className={cn(boton, 'bg-red-700 hover:bg-red-800')}><Trash2 className="h-3.5 w-3.5" />Sí, quitar</Button>
+                <Button variant="outline" onClick={() => setQuitando(null)} className={boton}>Cancelar</Button>
+              </div>
+            </div>
+          ) : (
+            <div key={v.id} className="flex items-center gap-1">
+              <Button variant="outline" aria-pressed={v.visible} onClick={() => alAlternarReferencia(v.id)}
+                className={cn('min-w-0 flex-1 justify-between gap-2 px-2.5 py-1.5 text-left text-[13px] font-medium normal-case tracking-normal', !v.visible && 'border-dashed text-slate-400')}>
+                <span className="flex min-w-0 items-center gap-1.5">{v.visible ? <Eye className="h-3.5 w-3.5 shrink-0 text-slate-500" /> : <EyeOff className="h-3.5 w-3.5 shrink-0" />}<span className="truncate">{v.nombre}</span></span>
+                <span className="shrink-0 text-[11px] font-normal tabular-nums text-slate-400">{medidaFila(v)}</span>
+              </Button>
+              {alQuitarReferencia && (
+                <Button variant="ghost" onClick={() => setQuitando(v.id)} aria-label={`Eliminar «${v.nombre}» del garaje`} title="Eliminar del garaje"
+                  className="h-9 w-9 shrink-0 p-0 text-slate-400 hover:text-red-700"><Trash2 className="h-4 w-4" /></Button>
+              )}
+            </div>
           ))}
+          {enGaraje.length === 0 && <p className="text-xs text-slate-400">Has quitado todos los coches de referencia.</p>}
         </div>
+        {quitados.length > 0 && alRecuperarReferencia && (
+          <div className="flex flex-col gap-1 rounded-lg border border-dashed border-slate-300 p-1.5">
+            <Button variant="ghost" aria-expanded={verQuitados} onClick={() => setVerQuitados(v => !v)} className="justify-between px-1.5 py-1 text-xs font-semibold normal-case tracking-normal text-slate-600">
+              Coches quitados ({quitados.length})<span className="font-normal text-teal-700">{verQuitados ? 'Ocultar' : 'Recuperar'}</span>
+            </Button>
+            {verQuitados && quitados.map(v => (
+              <div key={v.id} className="flex items-center gap-1 pl-1.5">
+                <span className="min-w-0 flex-1 truncate text-[13px] text-slate-500">{v.nombre}</span>
+                <Button variant="outline" onClick={() => alRecuperarReferencia(v.id)} aria-label={`Recuperar «${v.nombre}» en el garaje`} className={boton}>
+                  <RotateCcw className="h-3.5 w-3.5" />Recuperar
+                </Button>
+              </div>
+            ))}
+            {verQuitados && <p className="px-1.5 text-[11px] leading-snug text-slate-400">Los coches quitados se recuerdan en este navegador (el móvil guarda su propia lista).</p>}
+          </div>
+        )}
       </div>
       {g.movidos.length > 0 && (
         <Button variant="outline" onClick={() => g.aFila()} className="gap-1.5 px-2.5 py-1.5 text-xs normal-case tracking-normal">

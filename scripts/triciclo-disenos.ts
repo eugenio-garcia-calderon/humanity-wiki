@@ -166,7 +166,11 @@ else {
     // round 4 (2026-11-13): the roof frame, 0 by default (no frame)
     'tMarcoTecho',
     // 2026-11-13: the smooth body, off by default (its keys act only with «Cubierta lisa»)
-    'tCubierta', 'tColaAncho', 'tColaGrosor', 'tColaBombeo', 'tBajosIni', 'tBajosCurva', 'tMorroAncho', 'tMorroGrosor', 'tMorroBombeo'];
+    'tCubierta', 'tColaAncho', 'tColaGrosor', 'tColaBombeo', 'tBajosIni', 'tBajosCurva', 'tMorroAncho', 'tMorroGrosor', 'tMorroBombeo',
+    // 2026-11-16: the round body's flat tail width, 0 by default
+    'tColaPlanaAncho',
+    // 2026-11-16: rows 2 and 3 row by row (their defaults are the old 2 + 1 car seats)
+    'tFila2N', 'tFila3N', 'tFila2Tipo', 'tFila3Tipo'];
   const NUEVOS_12 = NUEVOS.slice(8);
   /** The design as it was saved before 2026-11-12: without the keys that did not exist (this module's defaults carry them). */
   const deAntes = (P: Partial<Parametros>) => Object.fromEntries(Object.entries(P).filter(([k]) => !NUEVOS_12.includes(k))) as Partial<Parametros>;
@@ -224,6 +228,8 @@ else {
       console.log(`NUEVA ${nombre}: «${paso.nombre}» ${paso.holgura < paso.minimo ? 'ROJO' : 'ok'} ${paso.mostrar ?? ''}`);
       rb.comprobaciones = rb.comprobaciones.filter((c: { nombre: string }) => c !== paso);
     }
+    // (2026-11-16: the pack's check renamed, «Batería dentro de la carrocería», in two departments: same number, same place)
+    for (const c of ra.comprobaciones) if (c.nombre === 'Batería, paquete a lo largo del bastidor: dentro de la carrocería') { c.nombre = 'Batería dentro de la carrocería'; c.dep = 'energia,carroceria'; }
     ok(igual(ra, rb), `${nombre}: mismos resultados que en main, aparte de las masas (área, cabezas, comprobaciones${igual(ra, rb) ? '' : `; distintos: ${diferencias(ra, rb).slice(0, 6).join(', ')}`})`);
   }
   // 2026-11-11 (the «Bala de cuatro ruedas»): with one rear wheel, every mesh of the whole vehicle as on main
