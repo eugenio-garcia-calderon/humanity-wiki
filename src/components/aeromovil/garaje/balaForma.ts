@@ -116,7 +116,8 @@ export interface DimBala {
   // built exactly as before, bit for bit. See `cubiertaLisa` for the deck model.
   /** 1: the tops of the nose and of the tail come from the deck model (convex sections, lines that only fall towards the ends). */
   lisa?: number;
-  /** The tail's width in plan towards its end: 0 today's taper … 1 the body's full width to a straight trailing edge (Aptera). */
+  /** The tail's width in plan towards its end: 0 today's taper … 1 the body's full width to a straight trailing edge (Aptera).
+   *  (2026-11-16: also read without `lisa`, times `colaPlana`, so the flat tail of the round body can be full width too.) */
   colaAncho?: number;
   /** The nose's width in plan: 0 today's … 1 the body's full width with a broad rounded-square front (Aptera). */
   morroAncho?: number;
@@ -441,7 +442,9 @@ export function crearForma(D: DimBala) {
   const plano = D.techoPlano ?? 0, ePlano = 1 - 0.65 * plano;
   // ── the smooth body (2026-11-13): only with `lisa`; otherwise nothing below is used
   const lisa = !!D.lisa, c01 = (v: number | undefined) => Math.min(1, Math.max(0, v ?? 0));
-  const aCola = lisa ? c01(D.colaAncho) : 0, aMorro = lisa ? c01(D.morroAncho) : 0;
+  // (2026-11-16, Eugenio: «que la cola pueda ser más ancha en el formato de cola plana… como en el aptera»: without the
+  // smooth body, the tail widens too, scaled by how flat it is; absent `colaAncho`, 0, and nothing changes)
+  const aCola = lisa ? c01(D.colaAncho) : c01(D.colaAncho) * c01(D.colaPlana), aMorro = lisa ? c01(D.morroAncho) : 0;
   /** The body's widest half-width (the reference drawing's 0.425 m from x_ref −1.1 to −1.5, scaled). */
   const HW_MAX = 0.425 * kW;
   /**
@@ -538,7 +541,7 @@ export function crearForma(D: DimBala) {
     return T;
   }
   const TAPA_MORRO = lisa ? tapa(XN0, X_MORRO, cyMorro, D.puntaMorro, D.morroLinea ?? 0, 2, { ancho: aMorro, pa: 2 + 2.5 * aMorro, grosor: gMorro, techo: techoMorro! }) : tapa(XN0, X_MORRO, cyMorro, D.puntaMorro, D.morroLinea ?? 0, 2);
-  const TAPA_COLA = lisa ? tapa(XT0, X_COLA, cyCola, PT, D.colaPlana ?? 0, 4, { ancho: aCola, pa: 4 + 6 * aCola, grosor: gCola, techo: techoCola! }) : tapa(XT0, X_COLA, D.puntaCola + elevar, PT, D.colaPlana ?? 0, 4);
+  const TAPA_COLA = lisa ? tapa(XT0, X_COLA, cyCola, PT, D.colaPlana ?? 0, 4, { ancho: aCola, pa: 4 + 6 * aCola, grosor: gCola, techo: techoCola! }) : tapa(XT0, X_COLA, D.puntaCola + elevar, PT, D.colaPlana ?? 0, aCola ? 4 + 6 * aCola : 4);
   function enTapa(T: Tapa, x: number): P2[] {
     const s = Math.min(1, Math.abs(x - T.x0) / T.largo);
     const k = (g: number) => { const m = Math.max(T.m, g); return Math.pow(1 - s, m) * (1 + (m - g) * s); };

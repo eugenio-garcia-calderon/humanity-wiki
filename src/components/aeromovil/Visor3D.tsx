@@ -43,6 +43,7 @@ import type { Referencia } from './referencias';
 import { vehiculoGaraje, type VehiculoGaraje } from './garaje';
 import type { PivoteGaraje } from './garaje/tipos';
 import { registrarConstructorSmera } from './garaje/smera';
+import { construirInterior, rayosInterior } from './garaje/balaInterior';
 import { colorSuperpuesto, hacerFantasma, liberarFantasma, mostrarSiluetas, siluetas } from './garaje/superponer';
 import { cartel, crearTunel, type CuerpoTunel, type SeleccionTunel, type Tunel } from './tunelViento';
 import type { OpcionesTunel } from './tunel/cliente';
@@ -1359,6 +1360,12 @@ function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<string,
   }
   // everyone on board (round three: up to four, each at their own z; a folded row carries nobody)
   if (calidad === 'completa') for (const q of m.plazas) { if (sinPasajero && !q.piloto) continue; ocupante(G.ocupantes, M, { occPts: () => q.pts }, q.z, q.piloto); }
+  // 2026-11-16 (Eugenio, after the Vision Jet's cabin): the interior finish, garaje/balaInterior.ts; nothing with the defaults
+  {
+    const piv = new Map<string, THREE.Object3D>(); for (const o of puertasG.get('puertas') ?? []) piv.set(o.name, o);
+    const gi = construirInterior(m.F, m.interior, Mb, G.asientos.getObjectByName('cabina') ?? null, piv, m.plazas.map(q => ({ pts: q.pts, z: q.z, piloto: q.piloto, vacia: sinPasajero && !q.piloto })));
+    if (gi.children.length) G.asientos.add(gi);
+  }
   for (const c of CAPAS) G[c.k].traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
 }
 
@@ -2275,6 +2282,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     }
     Mb.forro.visible = !rayosX;
     for (const mt of Object.values(Mb)) { mt.clippingPlanes = cp; mt.needsUpdate = true; }
+    // (2026-11-16) the interior finish's lining goes see-through with it, and «Corte» cuts it too
+    rayosInterior(rayosX, cp);
   }, [rayosX, corte]);
 
   // 2026-11-13: the body's colours, on the materials only (no rebuild)

@@ -735,6 +735,37 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
   - The P2's load-point shifting is not modelled.
 - **Drawn but not checked:** the chain, the half-shafts (four wheels) and the exhaust headers. Neither do they move with the suspension or the tilt. The half-shafts pass through the arm fairings without a cut-out.
 - **Not in the CAD export or the planos.** `cad.ts` does not export the hybrid's parts: about 1 hour.
+## 2026-11-16 · Two tail-width sliders for one idea
+
+`tColaAncho` (smooth body) and `tColaPlanaAncho` (round body with a flat tail) both widen the tail through the same
+`DimBala.colaAncho`. Kept apart so that no saved design changes (see 03_DECISIONS, same date). Merging them would need a
+data migration that zeroes `tColaAncho` in every saved design without `tCubierta: 'lisa'`, then one slider shown with
+either body: about 1 hour today (migration + `triciclo-disenos` check), more once designs multiply. No slider either for
+where the full width starts (fixed at the body's widest point, x_ref −1.5): about 30 minutes to add one if asked.
+
+## 2026-11-16 · Triciclo rows: one-off shortcuts
+- **Old pack top kept as a ceiling.** `paqueteAntes` keeps the pre-2026-11-16 pack range alive only so saved designs build identically and the length/height do not jump. Two options: retire it with a one-time data migration of stored designs (about 1 h with a script against the API), or keep it.
+- **Rows checked at one seat only.** The knee/foot/head checks use each row's outermost right place, plus the centre one for heads. The left side is a mirror. With three places, the centre passenger's feet are not checked separately. Checking every place: about 1 h.
+- **Frame posts ignore the seats.** The frame's seat posts for row 2 stay at ±24.5 cm (±10 cm with one seat) whatever the seats. Row 3's stay at ±10 cm. Following each seat: about 30 min.
+
+
+
+## 2026-11-16 · Garage preferences only per browser
+The garage's per-car state (shown/hidden, removed, dragged place) lives in localStorage (`aeromovil_garaje_v5`, the designs' places key). Eugenio sees a different garage on his phone than on his desktop. Moving the three into one per-user JSON on the server (a column or a row in an existing per-user table, one GET + one PUT with `requireLevel`) is about 2 hours today, including merging what each browser already has.
+
+## 2026-11-16 · Department mass totals computed in three places from the same grouping
+
+The «Peso: todos los componentes» lists in `LadoTriciclo` (Aeromovil.tsx) and `LadoBasculante.tsx` still sum their
+group totals inline; the top-bar tabs use `kgPorDepartamento` (PesosDepartamento.ts). All three call the same grouping
+(`grupoPieza` / `PiezaMasaB.grupo`), so they agree today. Making both lists read from the helper: ~15 minutes, once
+both files are free of other bots' claims.
+## 2026-11-16 · Interior finish shortcuts
+
+- **Door edges are stepped.** The door's part of the lining is chosen per 1 × 2 cm cell, so its edge follows the shut line in small steps instead of the exact curve. Clipping the band to the door outline: about 2 hours.
+- **Floor ignores what pokes through.** The carpeted floor is one flat board on the rails; seat posts, the battery cradle and a battery pack along the frame go through it instead of having trimmed openings or a tunnel. About 3 hours.
+- **Seats are re-textured, not re-shaped.** Stitching is a texture; the cushion shapes are the old ones (see 03_DECISIONS). Sculpted seats per layout: about 1 day.
+- **Belts are not load-checked.** Belts anchor on the seats (as in the Vision Jet) but no check covers the seat-to-frame anchorage in a crash. About 2 hours for a first static check.
+- **Interior materials are a module singleton** (`materialesInterior`), shared by every Visor3D instance; fine with one editor viewer, wrong if two editors ever show different finishes side by side. About 30 minutes to make it per viewer.
 
 ## 2026-11-16 · Catalogue figures are a snapshot
 

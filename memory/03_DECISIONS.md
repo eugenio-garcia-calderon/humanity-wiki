@@ -1863,6 +1863,51 @@ Eugenio asked for realistic, non-creepy faces, then chose: no money spent, only 
 - **Parallel:** the engine's part-load penalty is the curve `min(1, 0.75 + 0.5·load)`, not a fuel map. Series caps the sustained petrol speed at the hub motor's rated power.
 - **Placement:** parts are placed, not moved to make room. `disponerHibrido` puts the engine behind the last backrest (wheel in the tail) or behind the frame's tower (four wheels), and searches the tank's and the silencer's shape and place. When something does not fit, a check says so; nothing is clamped.
 - **Code:** new code in its own files: `hibrido.ts` (pure), `hibrido3d.ts`, `FichaHibrido.tsx`. Shared files got small hooks.
+## 2026-11-16 · Wide flat tail on the round body: a new key, not `tColaAncho`
+
+Eugenio asked for the flat tail («cola plana») to reach the vehicle's full width, like the Aptera. The smooth body
+(`tCubierta: 'lisa'`) already had `tColaAncho` for this; the round body ignored it. Two options:
+- **Reuse `tColaAncho` in the round body too.** One slider for both bodies, but any saved design that once had the smooth
+  body on with a wide tail and was switched back to the round one still carries `tColaAncho > 0`: it would silently widen
+  on the next open, breaking «saved designs unchanged».
+- **A new key `tColaPlanaAncho` (chosen)**, default 0, read only without the smooth body and only with `tColaPlana > 0`.
+  `formaR3` maps it onto `DimBala.colaAncho`; `balaForma` reads `colaAncho × colaPlana` without `lisa`, reusing the smooth
+  body's plan widening (`anchoPlan`, full width from x_ref −1.5 back, 5 % convergence) and raising the flat cap's plan
+  superellipse exponent from 4 to 4 + 6·a (a straight trailing edge with rounded corners at 10).
+## 2026-11-16 · Triciclo: pack width past the body, and rows 2/3 chosen row by row
+- **Pack width.** `rangoTriciclo('tBatAncho')` is now the whole slider, 100–400 % (400 = twice the old 200 % top at the default rail spacing). Not taken: a metre cap, or a cap relative to the body. A fixed % is what the slider shows, and 400 % already reaches about 1.9 m with the default rails, wider than any body.
+- **What still uses the old top.** The old range lives on as `paqueteAntes(T, hz)` and is now only a ceiling for:
+  - the width the length's range reads, so widening the pack never shortens it;
+  - `fondoPaquete`: past the old top the pack does not climb further up the belly, it sticks out sideways.
+- **Saved designs.** A Triciclo saved before has no `tFila2N`, which was added the same day. `deDiseno` (`paqueteDeAntes`) writes its width down to the old top, and its length down to the old length top, which was computed from the unclamped width. The model then builds exactly what was built before. Checked against main's code: 42 cases (Eugenio's Rombo Bala, the defaults, three rows, and pack widths 100–400 % × body widths 0.70/0.85/1.10 m × rail spacings 0.22/0.30 m); every result is identical. Only the check's name changed: «Batería, paquete…: dentro de la carrocería» became «Batería dentro de la carrocería».
+- **Rows row by row.** New selectors `tFila2N`/`tFila3N` ('1'|'2'|'3') and `tFila2Tipo`/`tFila3Tipo` ('coche'|'banco'|'plegable'), with the logic in `filasTriciclo.ts`.
+  - The defaults rebuild today's seats exactly (z ±0.245 and 0, same sizes, same order).
+  - Places sit 49 cm apart, centre to centre.
+  - A bench is one `AsientoFila` with `tipo: 'banco'` and `plazas: n`.
+  - Not taken: the Aptera bucket (`butaca`) as a row type. Folding it forward does not work: an 83 cm backrest with headrest would land on the seat in front. Also not taken: an astride saddle in a row, whose loft is hard-wired to the two-rider positions.
+- **No body-width clamp for more places.** Fitting is checked, not clamped: «Asientos de la fila N caben de lado» (cushion and mid-backrest edge against the skin) and «Hombros de la fila N».
+
+
+
+## 2026-11-16 · Removing reference cars from the garage: a per-browser mark, not a server list
+Eugenio asked to be able to «borrar» reference cars too. They are code models shared by everybody, so removal means "out of my garage", recoverable. Stored as `quitado: true` on the car's entry of the existing `aeromovil_garaje_v5` localStorage list (helpers in `garaje/quitados.ts`), next to `visible` and the dragged places, which already live there.
+- Not taken: a server list. There is no per-user garage/settings store to reuse (`ajustes.ts` is the platform's money figures; `/api/aeromovil/*` stores designs, tasks and references), and a new table + migration + write route for one list of ids was out of proportion. Cost: the phone app and the desktop keep separate lists.
+
+## 2026-11-16 · Department masses under the top-bar tabs: one helper, not a third copy of the grouping
+
+`kgPorDepartamento(res)` (src/components/aeromovil/PesosDepartamento.ts) sums the same pieces with the same grouping
+as the two «Peso: todos los componentes» lists (`grupoPieza` for the Triciclo, `PiezaMasaB.grupo` for the Basculante),
+and «Proyecto» is `res.mVeh`. Alternative: refactor both lists (Aeromovil.tsx `LadoTriciclo`, LadoBasculante.tsx) to
+read their group totals from this helper too. Not done now because both files were claimed by other bots at the time;
+the helper calls the very same grouping functions, so the numbers cannot diverge unless someone changes one list's
+filter by hand. «Energía» shows the whole Energía group (battery + charger/wiring/12 V, + solar panels on the
+Basculante), not the battery alone, so the tab matches the list's group header.
+## 2026-11-16 · Interior finish: re-cover the existing seats instead of new seat models
+
+- **Choice.** The upholstery options swap the material of the seats the cabin builder already draws (`balaPiezas.ts` `cabina`: saddle and pads, Aptera buckets, row seats) for a canvas-textured MeshPhysicalMaterial (colour, grain, stitching as texture and bump). The buckets' white shell takes the darker "side" colour.
+- **Alternative rejected.** New sculpted seats with real bolsters and stitch tubes for each of the three layouts: about three times the code, and it would fight the `filas` bot's ongoing seat work in `balaPiezas.ts`.
+- **Lining.** Drawn on the skin's own (x, t) sections, offset inward along the section normal, so it follows any body the sliders make; cut at the canopy glass edge and under the roof panel, split by door leaf onto each door pivot.
+- **Defaults.** Every new field defaults to today's look (no lining, `serie` cover, nothing drawn), so saved designs and their masses are unchanged.
 
 ## 2026-11-16 · Bala powertrain catalogue: fixed slider values via `rangoTriciclo`
 

@@ -11995,6 +11995,56 @@ Eugenio (15:03): «En motor la parte de propulsión es tan importante que tiene 
 - **Diseños guardados:** un híbrido guardado con el deslizador antiguo «Conversión mecánica» abre como reparto con el mismo rendimiento, y gasta exactamente lo mismo (lo comprueba `scripts/triciclo-disenos.ts`). Lo único que cambia es su centro de gravedad, porque las piezas están ahora donde se dibujan.
 - **Con tres filas de asientos el motor no cabe** (choca con la torreta unos 25 cm): la comprobación lo dice en rojo.
 - Son estimaciones de un primer diseño, no medidas.
+## 2026-11-16 · Aeromóvil: la cola plana puede llegar con todo el ancho, como el Aptera
+
+Eugenio: «haz que la cola pueda ser más ancha en el formato de cola plana ocupe el máximo ancho de vehiculo, como en el aptera.»
+
+- Nuevo deslizador en Carrocería → Cola: **«Cola plana: ancho al final»** (de 0 a 100 %). Sale solo con la cola plana («Cola: en punta o plana» por encima de 0) y con la cubierta redonda; con la cubierta lisa ya existía «Cola: ancho al final», que no cambia.
+- A 100 % la cola mantiene todo el ancho de la carrocería desde su parte más ancha hasta el final (solo se cierra un 5 %) y acaba en un borde recto de lado a lado, con las esquinas redondeadas. Si la cola es plana a medias, el ancho cuenta a medias. La barra de luz de atrás, el portón y el panel solar de la cola van hasta el borde (a 3 cm del final).
+- En 0 (lo de siempre) todos los diseños guardados se construyen igual que antes: es una clave nueva, `tColaPlanaAncho`, con 0 por defecto.
+- Números en el «Rombo Bala» de Eugenio (túnel, resolución media), de 0 a 100 %: Cd 0,2128 → 0,2131; área frontal 1,1675 → 1,1739 m²; superficie mojada 9,41 → 9,92 m²; panel solar 1,68 → 1,80 m².
+- No hay otro deslizador para «hasta dónde aguanta el ancho»: el ensanche empieza siempre en la parte más ancha de la carrocería.
+## 2026-11-16 · Batería más ancha que la carrocería y asientos fila a fila (Triciclo Bala / Cuadriciclo Bala clásico)
+Eugenio: «Permite aumentar el ancho de la batería aunque se salga del carenado» y «permite fila a fila, que se pueda escoger en la fila 2 y en la fila 3 de asientos, el número de plazas y el tipo de asiento».
+- **Ancho del paquete de batería** (Energía › Batería, con «A lo largo del bastidor»): el deslizador va ya de 100 % a 400 % del ancho del bastidor (el doble del tope de 200 % que había), aunque no quepa. El paquete se dibuja al ancho pedido y sus kWh cuentan todo ese ancho. La comprobación «Batería dentro de la carrocería» sale en rojo y dice cuántos centímetros sobresale. Pasado lo que cabía, el paquete ya no sube por la panza: se queda a su altura y sobresale por los lados; y el largo máximo no se acorta al ensancharlo.
+- **Diseños guardados:** se abren igual que antes. Uno guardado con un ancho que el tope de entonces recortaba se abre con el ancho recortado, que es el que se dibujaba.
+- **Fila a fila** (Interior › Tres filas, con «Asientos: Tres filas»): en la fila 2 y en la fila 3 se escoge cuántas plazas lleva (una, dos o tres, a 49 cm de centro a centro) y el tipo de asiento:
+  - asientos de coche, como hasta ahora;
+  - banco corrido: un cojín y un respaldo para toda la fila, con un reposacabezas por plaza en la fila 2;
+  - plegables ligeros tipo transportín: asiento y respaldo finos sobre un marco de aluminio.
+  Todos se dibujan en 3D y se pliegan. De serie sigue siendo 2 + 1 asientos de coche, igual que antes.
+- **Lo que sigue a los asientos:** ocupantes, masas (estimadas: banco 1,1 veces «un asiento» por plaza, plegable 0,8; en la fila 3, 1,0 y 0,7), centro de gravedad, vuelco, maletero, cargas del bastidor y las comprobaciones de cabeza, rodillas, pies y hombros.
+- **Comprobaciones nuevas:** «Asientos de la fila 2 caben de lado» y «Asientos de la fila 3 caben de lado» (dicen cuánto falta por lado), y «Hombros de la fila 3 a la cúpula» cuando la fila 3 lleva más de una plaza.
+- **Aviso:** tres plazas en la fila 2 no caben ni con la carrocería más ancha (1,30 m): faltan unos 15 cm por lado. Las comprobaciones lo dicen en rojo.
+
+
+
+## 2026-11-16 · Los coches de referencia también se pueden eliminar del garaje
+Eugenio: «permite que se puedan borrar también los coches de referencia».
+- **Qué hay ahora.** En el Aeromóvil, cada coche de referencia del garaje (Twizy, Aptera, XL1, Smera, EQXX…) tiene «Eliminar del garaje»: en su tarjeta, al pincharlo en el 3D, y con una papelera en su fila de la lista del garaje (botón «Garaje» o el bloque «Garaje» del panel). Antes de quitarlo pregunta en la misma tarjeta («Sí, quitar» / «No»), sin ventanas del navegador.
+- **Qué hace.** El coche deja de salir en la lista y en el 3D (no solo se oculta: tampoco sale en «Superponer» ni lo saca el túnel). Debajo de la lista aparece «Coches quitados (N) · Recuperar», que lo devuelve al garaje, visible.
+- **Qué no hace.** Los coches de referencia son modelos del programa, iguales para todos: quitarlo no lo borra para nadie más. Se recuerda **en este navegador** (como el sitio donde arrastras cada coche): el móvil o la app guardan su propia lista.
+
+## 2026-11-16 · El peso de cada departamento, debajo de su pestaña
+
+Eugenio: «cuando pinche en un modelo, que en el menú superior donde pone carrocería, pongas ahí debajo el número en kilogramos del peso de la carrocería de ese modelo, donde pone chasis… el peso del chasis, y lo mismo con rodaje, motor e interior».
+
+- En el Aeromóvil, en la barra de arriba, cada pestaña de departamento lleva debajo, en pequeño, los kilos de ese departamento en el diseño que se está editando: «Carrocería · 40 kg», «Chasis · 22 kg», «Rodaje · 106 kg»… «Proyecto» lleva el vehículo entero sin ocupantes y «Energía» el grupo Energía de la lista de pesos (la batería y el cargador, cables y 12 V; en el Basculante, también los paneles solares).
+- Sale en las familias que tienen departamentos: el Triciclo (con sus variantes de cuatro ruedas y en rombo) y el Cuadriciclo Basculante. La Gota, el A1 y el Bala no tienen pestañas de este tipo, así que no cambian.
+- Las cifras son las mismas que la lista «Peso: todos los componentes» de «Proyecto» (redondeadas al kilo; la lista lleva un decimal), porque salen de las mismas piezas: `src/components/aeromovil/PesosDepartamento.ts`. Cambian solas al mover un deslizador.
+- En el móvil la fila de pestañas sigue desplazándose de lado; las pestañas son un poco más altas (una línea más) y no se parten.
+## 2026-11-16 · Acabado interior del Triciclo / Cuadriciclo Bala: forro, tapicería, consolas y cinturones en 3D
+
+- Eugenio: «Quiero que también el interior se pueda escoger, por ejemplo, del "Modelo 1"… y quiero que el interior se diseñe en 3D y se pueda elegir con mucho detalle. Este sería la inspiración… con esos paneles que recubren el interior del chasis tubular» (foto de la cabina del Cirrus Vision Jet).
+- **Dos bloques nuevos en Interior**, plegados como los demás: «Acabado interior» y «Tapicería». Valen para toda la familia (triciclo, cuatro ruedas, rombo; a horcajadas, butacas o tres filas), así que también para «Modelo 1».
+- **Acabado interior:**
+  - Forro: sin forro (como hasta ahora, el chasis a la vista), paneles forrados de tela, o lujo (paneles acolchados de ante, moqueta gruesa y aislamiento).
+  - Los paneles siguen la piel por dentro (a 1,4 cm, o 2,2 cm los de lujo): costados desde el suelo hasta el borde del cristal, techo bajo el panel solar, suelo de moqueta sobre los largueros y una funda sobre la torreta del amortiguador. Las ventanas quedan libres con un borde enrollado; en las puertas, su trozo de panel se abre con ellas.
+  - Color del forro (crema como el Vision Jet, gris, negro, blanco roto); molduras (carbono, madera oscura, aluminio); consola de techo con focos apagados o encendidos; luz ambiente (blanca, ámbar, azul); reposabrazos con portavasos (y consola entre los asientos de la fila 2).
+- **Tapicería:** vinilo de serie (como hasta ahora), cuero coñac con laterales marrón oscuro, cuero negro, alcántara o tela técnica; costura recta o geométrica (como la del Vision Jet) y su color; cinturones de tres puntos en el color elegido.
+- **Masas:** cada opción suma lo suyo en «Peso: todos los componentes» › Interior (kg/m² de panel, de moqueta y de funda; kg/m de moldura; 1,1 kg por cinturón). Ejemplo con el diseño por defecto: paneles unos 7,5 kg, lujo unos 12 kg; cuero en dos butacas +1,3 kg, alcántara −0,8 kg.
+- **Con los valores por defecto todo queda como estaba** (mismo dibujo, mismas masas): los diseños guardados no cambian.
+- Archivos: `interiorTriciclo.ts` (opciones, regiones y masas) y `garaje/balaInterior.ts` (el 3D).
 
 ## 2026-11-16 · Bala: piezas comerciales del tren de potencia (motores, controladores, reductoras, motores de gasolina)
 
