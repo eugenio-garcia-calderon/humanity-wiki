@@ -12024,3 +12024,12 @@ Eugenio: «permite que se puedan borrar también los coches de referencia».
 - **Qué hay ahora.** En el Aeromóvil, cada coche de referencia del garaje (Twizy, Aptera, XL1, Smera, EQXX…) tiene «Eliminar del garaje»: en su tarjeta, al pincharlo en el 3D, y con una papelera en su fila de la lista del garaje (botón «Garaje» o el bloque «Garaje» del panel). Antes de quitarlo pregunta en la misma tarjeta («Sí, quitar» / «No»), sin ventanas del navegador.
 - **Qué hace.** El coche deja de salir en la lista y en el 3D (no solo se oculta: tampoco sale en «Superponer» ni lo saca el túnel). Debajo de la lista aparece «Coches quitados (N) · Recuperar», que lo devuelve al garaje, visible.
 - **Qué no hace.** Los coches de referencia son modelos del programa, iguales para todos: quitarlo no lo borra para nadie más. Se recuerda **en este navegador** (como el sitio donde arrastras cada coche): el móvil o la app guardan su propia lista.
+
+## 2026-11-16 · El peso de cada departamento, debajo de su pestaña
+
+Eugenio: «cuando pinche en un modelo, que en el menú superior donde pone carrocería, pongas ahí debajo el número en kilogramos del peso de la carrocería de ese modelo, donde pone chasis… el peso del chasis, y lo mismo con rodaje, motor e interior».
+
+- En el Aeromóvil, en la barra de arriba, cada pestaña de departamento lleva debajo, en pequeño, los kilos de ese departamento en el diseño que se está editando: «Carrocería · 40 kg», «Chasis · 22 kg», «Rodaje · 106 kg»… «Proyecto» lleva el vehículo entero sin ocupantes y «Energía» el grupo Energía de la lista de pesos (la batería y el cargador, cables y 12 V; en el Basculante, también los paneles solares).
+- Sale en las familias que tienen departamentos: el Triciclo (con sus variantes de cuatro ruedas y en rombo) y el Cuadriciclo Basculante. La Gota, el A1 y el Bala no tienen pestañas de este tipo, así que no cambian.
+- Las cifras son las mismas que la lista «Peso: todos los componentes» de «Proyecto» (redondeadas al kilo; la lista lleva un decimal), porque salen de las mismas piezas: `src/components/aeromovil/PesosDepartamento.ts`. Cambian solas al mover un deslizador.
+- En el móvil la fila de pestañas sigue desplazándose de lado; las pestañas son un poco más altas (una línea más) y no se parten.
