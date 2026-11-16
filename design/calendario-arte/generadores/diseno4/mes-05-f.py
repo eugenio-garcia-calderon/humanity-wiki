@@ -503,7 +503,7 @@ esc.rayos(haces=5, abertura=(8, 26), largo=1100, fuerza=0.36, motas=40, semilla=
 
 # ======================================================================== plane 2: the people and their work
 SOMBRA = dict(largo=1.6, alto=0.09, fuerza=0.72, difusa=1.6, color='#5a4a80')
-FIG = dict(plano=2, borde_luz=1.0, ancho_borde=2.6, volumen=0.3, color_borde='#f6b858')
+FIG = dict(plano=2, borde_luz=1.0, ancho_borde=2.4, volumen=0.3, color_borde='#facd96', borde_irregular=True)
 # the guitarist comes forward and down, nearer than the painter, his white hair rimmed by the sun
 GUIT = dict(escala=0.86, ancla=(245, 505), mueve=(-60, 100))
 esc.empieza('guitarrista', 'El guitarrista', proyecta=dict(suelo=608, **SOMBRA), **FIG, **GUIT)
@@ -519,6 +519,7 @@ esc.empieza('falda', 'La falda-jardín', tinte=dict(color='#7a6aa8', fuerza=0.3,
 lz.aguada(Elipse(817, 811, 158, 16), '#5a4a80', dens=0.48, suave=7, gran=0.1)
 lz.aguada(Elipse(648, 781, 19, 4), '#5a4a80', dens=0.5, suave=1.5)
 inicio_hebra = P.falda(sombra=False, con_hebra=False)
+PR.pie_bailarina()
 esc.empieza('bailarina', 'La bailarina', **FIG, **DANZA)
 P.bailarina()
 esc.empieza('flores', 'Las flores que se vuelven pájaros', **FIG)

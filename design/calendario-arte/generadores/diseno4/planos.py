@@ -248,7 +248,8 @@ class Escena:
         # 5. rim of light on the edges that face the light
         if o.get('borde_luz'):
             rgba = self._borde_luz(rgba, x0, y0, o['borde_luz'], o.get('ancho_borde', 2.4),
-                                   rgb(o['color_borde']) if o.get('color_borde') else self.color_luz)
+                                   rgb(o['color_borde']) if o.get('color_borde') else self.color_luz,
+                                   irregular=o.get('borde_irregular', False))
         # 6. cast shadow on the ground, under the element
         if o.get('proyecta'):
             rgba, x0, y0 = self._proyecta(rgba, x0, y0, o['proyecta'])
@@ -281,7 +282,7 @@ class Escena:
         Q = cv2.warpAffine(P, M, (nw, nh), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=0)
         return _unpremul(Q), nx0, ny0
 
-    def _borde_luz(self, rgba, x0, y0, fuerza, ancho, color):
+    def _borde_luz(self, rgba, x0, y0, fuerza, ancho, color, irregular=False):
         s = self.s
         a = rgba[..., 3]
         if a.max() <= 0:
@@ -298,7 +299,20 @@ class Escena:
         M = np.float32([[1, 0, -ux * k], [0, 1, -uy * k]])
         ash = cv2.warpAffine(a, M, (w, h), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT, borderValue=0)
         R = np.clip(a - ash, 0, 1)
-        R = cv2.GaussianBlur(R, (0, 0), max(0.6, 0.35 * k))
+        if irregular:
+            # (design 6, 2026-11-16) a wet edge of light, 0 to ~1.6x the width: wider on the round
+            # forms, gone in places, instead of a stroke of fixed width that reads as a vector line
+            M2 = np.float32([[1, 0, -ux * k * 1.6], [0, 1, -uy * k * 1.6]])
+            R2 = np.clip(a - cv2.warpAffine(a, M2, (w, h), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT,
+                                            borderValue=0), 0, 1)
+            rng = np.random.default_rng(int(x0 * 7 + y0 * 13) % 100000)
+            g = rng.uniform(0, 1, (max(2, h // int(6 * s) + 2), max(2, w // int(6 * s) + 2))).astype(np.float32)
+            N = cv2.resize(g, (w, h), interpolation=cv2.INTER_CUBIC)
+            N = np.clip((N - 0.25) / 0.6, 0, 1)
+            R = R2 * N + R * (1 - N) * 0.5
+            R = cv2.GaussianBlur(R, (0, 0), max(0.8, 0.5 * k))
+        else:
+            R = cv2.GaussianBlur(R, (0, 0), max(0.6, 0.35 * k))
         R = np.clip(R * 1.6, 0, 1) * (a > 0.05)
         # brighter where the element is nearer the light
         X = (np.arange(x0, x0 + w, dtype=np.float32) + 0.5)[None, :] / s

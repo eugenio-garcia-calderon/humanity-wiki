@@ -57,7 +57,7 @@ import figuras_real as FR
 
 FR.activar((0.6, -0.8), personajes_06, P, lineas=0.6)
 from personajes_06 import nina, labio_hoja                              # noqa: E402
-from personajes_real import abuelo_y_lampara, nino, mano_con_telefono   # noqa: E402
+from personajes_real import abuelo_y_lampara, nino, mano_con_telefono, nina06   # noqa: E402
 
 ANCHO = int(sys.argv[1]) if len(sys.argv) > 1 else 1485
 SALIDA = sys.argv[2] if len(sys.argv) > 2 else 'mes-06-f.jpg'
@@ -506,13 +506,13 @@ labio_hoja(lz)
 import figuras_v3
 figuras_v3.MIRA_FUERZA = 1.2         # the gaze goes to the bulb and to the seeds, not to us (more empties the eye)
 SOBRE_HOJA = dict(largo=0.45, alto=0.1, fuerza=0.56, difusa=2.0, color='#22402c')
-RIM = dict(borde_luz=1.0, ancho_borde=2.6, color_borde='#ffd696')
+RIM = dict(borde_luz=1.0, ancho_borde=2.6, color_borde='#facd96', borde_irregular=True)
 esc.empieza('abuelo', 'El abuelo y la lámpara', plano=2, proyecta=dict(suelo=606, dentro=HOJA1, **SOBRE_HOJA), **RIM)
 figuras_v3.MIRA_FUERZA = 0.9
 abuelo_y_lampara(lz, P.BULBO, bombilla=False)
 figuras_v3.MIRA_FUERZA = 1.2
 esc.empieza('nina', 'La niña', plano=2, proyecta=dict(suelo=600, dentro=HOJA1, **SOBRE_HOJA), **RIM)
-nina(lz)
+nina06(lz)
 # threads of light leave the lower right edge of the panel, pass behind the boy (he is painted over them),
 # come out on his right and run below the trail of seeds to every solar roof, where each lights a spark
 esc.empieza('hilos', 'Los hilos de luz', plano=2, borde_luz=0, volumen=0)
@@ -551,7 +551,7 @@ lz.gouache(Elipse(508.4, 493.2, 0.8), '#fff0c0', alfa=0.9, irreg=0)
 lz.luz((537, 480, 30), '#fff0b0', fuerza=0.8)
 esc.halos('luz_bombilla', 'La luz de la bombilla', [(537, 480, 45, 0.32), (537, 486, 72, 0.16), (549, 494, 14, 0.55),
                                                     (606, 442, 14, 0.5), (600, 450, 12, 0.4), (527, 503, 8, 0.5),
-                                                    (535, 541, 14, 0.5), (512, 488, 14, 0.6), (514, 550, 16, 0.45),
+                                                    (535, 541, 14, 0.4), (512, 488, 14, 0.6), (514, 540, 14, 0.22),
                                                     (452, 452, 14, 0.35), (566, 496, 14, 0.45)],
           color='#ffd7a0')
 

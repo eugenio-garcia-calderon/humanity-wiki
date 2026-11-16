@@ -189,12 +189,45 @@ def volumen(lz, forma, color, luz=None, dens=0.62, prof=0.5, espesor=None, tapa=
             mo = cv2.moments(dentro, binaryImage=True)
             th = 0.5 * math.degrees(math.atan2(2 * mo['mu11'], mo['mu20'] - mo['mu02'] + 1e-9))
             ang_rayado = th + 40
-        zona = (S > 0.42).astype(np.float32) * M
-        if zona.sum() > 20:
-            lz.rayado(_masc(zona, x0, y0, s), _osc(color, 0.5, '#2a1a2a', 0.3), angulo=ang_rayado, sep=2.3, grosor=0.32,
-                      presion=0.24, temblor=0.2, largo=max(3.0, min(14.0, t / s * 0.9)))
+        _rayas(lz, (S > 0.4) * M, x0, y0, _osc(color, 0.66, '#3a2a3a', 0.18), ang_rayado, semilla, t / s)
     if linea:
         _borde_sombra(lz, dentro, lit, x0, y0, _osc(color, 0.45, '#2a1a1a', 0.4), grosor, presion)
+
+
+def _rayas(lz, zona, x0, y0, color, ang, semilla, alcance):
+    """Coloured-pencil hatching as a hand does it: short strokes in the shadow only, about
+    half as many as a regular screen, each at the form's angle give or take 20 degrees,
+    with gaps, in the cloth's own colour two tones darker -- never a mechanical grid."""
+    s = lz.s
+    h, w = zona.shape
+    if zona.sum() < 30:
+        return
+    rng = np.random.default_rng(semilla if semilla is not None else int(x0 * 3 + y0 * 7) % 100000)
+    paso = 3.0 * s
+    ys = np.arange(paso / 2, h, paso)
+    xs = np.arange(paso / 2, w, paso)
+    trazos = []
+    for yy in ys:
+        for xx in xs:
+            if rng.uniform() < 0.5:
+                continue
+            px = xx + rng.uniform(-paso / 2, paso / 2)
+            py = yy + rng.uniform(-paso / 2, paso / 2)
+            iy, ix = int(py), int(px)
+            if not (0 <= iy < h and 0 <= ix < w) or zona[iy, ix] < 0.5:
+                continue
+            a = math.radians(ang + rng.normal(0, 11))
+            L = s * min(alcance * 0.8, rng.uniform(2.5, 5.5))
+            dx, dy = math.cos(a) * L / 2, math.sin(a) * L / 2
+            ex, ey = int(px + dx), int(py + dy)
+            bx_, by_ = int(px - dx), int(py - dy)
+            if not (0 <= ey < h and 0 <= ex < w and 0 <= by_ < h and 0 <= bx_ < w):
+                continue
+            if zona[ey, ex] < 0.5 or zona[by_, bx_] < 0.5:
+                continue
+            trazos.append([((px - dx + x0) / s, (py - dy + y0) / s), ((px + dx + x0) / s, (py + dy + y0) / s)])
+    if trazos:
+        lz.lapiz(trazos, color, grosor=0.3, presion=0.26, temblor=0.12, puntas=0.4)
 
 
 def _borde_sombra(lz, dentro, lit, x0, y0, color, grosor, presion, umbral=0.35):
@@ -228,7 +261,7 @@ def _borde_sombra(lz, dentro, lit, x0, y0, color, grosor, presion, umbral=0.35):
 
 EDADES = {
     #        half height / old r, width / height, eyes, brow, hairline, nose base, mouth, eye width, nose depth
-    'nino': dict(alto=0.9, ancho=0.84, ve=0.12, vb=-0.01, vh=-0.44, vn=0.43, vm=0.64, ojo=0.22, nariz=0.12,
+    'nino': dict(alto=0.9, ancho=0.84, ve=0.12, vb=-0.01, vh=-0.5, vn=0.43, vm=0.64, ojo=0.24, nariz=0.12,
                  perfil=[1.0, 0.99, 0.97, 0.91, 0.78, 0.58, 0.38, 0.0]),
     'adulto': dict(alto=0.86, ancho=0.74, ve=0.0, vb=-0.14, vh=-0.6, vn=0.38, vm=0.58, ojo=0.2, nariz=0.28,
                    perfil=[1.0, 0.97, 0.91, 0.8, 0.63, 0.43, 0.27, 0.0]),
@@ -258,7 +291,8 @@ class _Cabeza:
         th = math.radians(inclina)
         self.th = th
         self.ca, self.sa = math.cos(th), math.sin(th)
-        chin = np.array([x - math.sin(th) * 0.96 * r, y + math.cos(th) * 0.96 * r])
+        kc = 1.08 if edad == 'nino' else 1.0           # the chin a little lower: a neck of real length shows
+        chin = np.array([x - math.sin(th) * kc * r, y + math.cos(th) * kc * r])
         self.O = chin - np.array([-self.sa * self.b2, self.ca * self.b2])
         self.pv = np.array(_PERFIL_V)
         self.pw = np.array(E['perfil'])
@@ -472,6 +506,17 @@ def cabeza_real(lz, x, y, r, piel='piel2', pelo='#3a2a20', peinado='corto', luz=
     _veladura(lz, Msil * _ss(lit, 0.6, 0.15), x0, y0, _osc(sc, 0.85), 0.12, gran=0.4, var=0.5)
     Dsil = cv2.distanceTransform((Msil > 0.5).astype(np.uint8), cv2.DIST_L2, 5)
     _levanta(lz, Msil * _ss(lit, 0.9, 0.99) * np.clip(Dsil / (0.12 * Rpx + 1), 0, 1), x0, y0, 0.16, suave=0.8)
+    # a second wash, broken and granulating, dried with its own edge: skin is never one smooth tone
+    lz.aguada(sil, _osc(skin, 0.9, '#a05a50', 0.2), dens=0.12, borde=0.5, irreg=1.0, gran=0.6, var=0.6, flor=1)
+    # eye sockets in sepia, the hollow under the cheekbone on the shadow side (not in children)
+    for sd in (-1, 1):
+        if sd * 0.4 < G.visible() - 0.12:
+            lz.aguada(Elipse(*G.P(sd * 0.4, ve - 0.04), a2 * 0.24, b2 * 0.1, G.ang(0)), '#8a5a48', dens=0.16,
+                      suave=a2 * 0.06, gran=0.3)
+    lado_s = -1 if lx * G.sg > 0 else 1
+    if edad != 'nino' and lado_s * 0.55 < G.visible() - 0.1:
+        lz.aguada(Elipse(*G.P(lado_s * 0.55, ve + 0.36), a2 * 0.16, b2 * 0.09, G.ang(-25 * lado_s)), sc, dens=0.14,
+                  suave=a2 * 0.05, gran=0.3)
     # the hard accent of the jaw on the side away from the light
     lado = -1 if lx * G.sg > 0 else 1                        # the shadow side, in the mirrored frame
     xs_j = [x for x in np.linspace(lado * 0.95, lado * 0.25, 9) if x < G.visible() - 0.05]
@@ -487,7 +532,6 @@ def cabeza_real(lz, x, y, r, piel='piel2', pelo='#3a2a20', peinado='corto', luz=
     Mt = cv2.GaussianBlur(Mt, (0, 0), max(1.0, k * 0.35))
     _veladura(lz, np.clip(Mt * cub * (1 - Msil), 0, 1), x0, y0, _osc(skin, 0.5, '#4a2a4a', 0.4), 0.5)
 
-    _orejas(lz, G, skin, luz, pendiente, peinado)
     _ojos(lz, G, skin, ojos, mira, iris, edad, luz, pelo_c, canas)
     _nariz(lz, G, skin, luz, edad)
     if barba:
@@ -496,6 +540,7 @@ def cabeza_real(lz, x, y, r, piel='piel2', pelo='#3a2a20', peinado='corto', luz=
     if edad == 'mayor':
         _arrugas(lz, G, skin, ojos)
     _pelo_delante(lz, G, peinado, pelo_c, luz, rng, adorno, canas)
+    _orejas(lz, G, skin, luz, pendiente, peinado)
     if gafas:
         _gafas(lz, G, luz)
     # a lost-and-found pencil edge only where the head turns from the light
@@ -668,8 +713,8 @@ def _boca(lz, G, skin, boca, edad, luz):
         return
     linea = [M(x, -curva * (x / xm) ** 2) for x in xs]
     if boca in ('risa', 'abierta', 'canta'):
-        alto = 0.1 if boca == 'canta' else 0.085
-        ancho = 0.55 if boca == 'canta' else 0.85
+        alto = 0.1 if boca == 'canta' else 0.06
+        ancho = 0.55 if boca == 'canta' else 0.7
         arriba = [M(x * ancho, -curva * (x / xm) ** 2 - 0.005) for x in xs]
         abajo = [M(x * ancho, alto * (1 - (x / xm) ** 2) ** 0.7 + 0.01) for x in xs[::-1]]
         hueco = Poligono(arriba + abajo)
@@ -1120,19 +1165,21 @@ def mano_real(lz, x, y, ang, tam, piel='piel2', gesto='abierta', lado=1, abre=1.
     puntas['palma'] = P(0.3, 0.0)
     sc = _osc(skin, 0.68, '#7a3a4a', 0.3)
     lp = _osc(skin, 0.5, '#5a2a3a', 0.4)
-    volumen(lz, palma, skin, luz, dens=0.55, prof=0.4, espesor=tam * 0.12, tapa=tapa, brillo=0.04, reflejo=0.08,
-            grosor=0.32, presion=0.26, sombra=sc, duro=0.1, irreg=0.2, gran=0.15, proyecta=tam * 0.05)
+    siena = _hex(mezcla(skin, '#8a3a1a', 0.3))
+    dd = 0.6 + 0.22 * (1 - float(np.dot(rgb(skin), [0.3, 0.59, 0.11])))     # as deep a colour as the face
+    volumen(lz, palma, skin, luz, dens=dd, prof=0.42, espesor=tam * 0.12, tapa=tapa, brillo=0.0, reflejo=0.06,
+            grosor=0.32, presion=0.26, sombra=sc, duro=0.4, irreg=0.2, gran=0.3, proyecta=tam * 0.05)
     for i in (3, 2, 1, 0):
         f, pts, w = dedos[i]
-        volumen(lz, f, skin, luz, dens=0.56, prof=0.42, espesor=w * 0.5, tapa=tapa, brillo=0.04, reflejo=0.08,
-                grosor=0.3, presion=0.3, sombra=sc, duro=0.1, irreg=0.15, gran=0.12)
+        volumen(lz, f, skin, luz, dens=dd, prof=0.45, espesor=w * 0.5, tapa=tapa, brillo=0.0, reflejo=0.06,
+                grosor=0.32, presion=0.34, sombra=sc, duro=0.4, irreg=0.15, gran=0.3)
         # knuckle creases and the nail
         for j in (1, 2):
             q = np.asarray(pts[j])
             dn_ = _u(np.asarray(pts[j + 1]) - np.asarray(pts[j - 1]))
             nn_ = np.array([-dn_[1], dn_[0]])
             lz.lapiz([[tuple(q - nn_ * w * 0.3), tuple(q + dn_ * w * 0.05), tuple(q + nn_ * w * 0.3)]], lp, grosor=0.22,
-                     presion=0.22, temblor=0.02)
+                     presion=0.26, temblor=0.02)
         tip = np.asarray(pts[-1])
         dn_ = _u(np.asarray(pts[-1]) - np.asarray(pts[-2]))
         curled = gesto in ('agarra', 'senala') and not (gesto == 'senala' and i == 0)
@@ -1141,14 +1188,68 @@ def mano_real(lz, x, y, ang, tam, piel='piel2', gesto='abierta', lado=1, abre=1.
             nc = tip - dn_ * w * 0.55
             lz.aguada(Elipse(nc[0], nc[1], w * 0.42, w * 0.32, a_), _cla(skin, 0.35, '#f4dcd4'), dens=0.45, suave=0.15)
             lz.lapiz([list(arco(nc[0], nc[1], w * 0.42, w * 0.32, 100, 260, 8, a_))], lp, grosor=0.2, presion=0.25)
-    volumen(lz, pulgar, skin, luz, dens=0.56, prof=0.42, espesor=tam * 0.06, tapa=tapa, brillo=0.04, reflejo=0.08,
-            grosor=0.3, presion=0.3, sombra=sc, duro=0.1, irreg=0.15, gran=0.12, proyecta=tam * 0.04)
-    # the knuckles of the back of the hand catch the light
+    # the gaps between the fingers: a dark line down the middle of each pair
+    gaps = []
+    for i in range(3):
+        a_, b_ = dedos[i][1], dedos[i + 1][1]
+        m_ = min(len(a_), len(b_))
+        g = [tuple((np.asarray(a_[k]) + np.asarray(b_[k])) / 2) for k in range(m_)]
+        gaps.append(g[:-1] + [tuple(np.asarray(g[-2]) * 0.4 + np.asarray(g[-1]) * 0.6)])
+    lz.lapiz(gaps, lp, grosor=0.3, presion=0.45, temblor=0.02, puntas=0.3)
+    volumen(lz, pulgar, skin, luz, dens=dd, prof=0.45, espesor=tam * 0.06, tapa=tapa, brillo=0.0, reflejo=0.06,
+            grosor=0.32, presion=0.34, sombra=sc, duro=0.4, irreg=0.15, gran=0.3, proyecta=tam * 0.04)
+    # the knuckles of the back of the hand, in burnt sienna
     for i in range(4):
-        q = P(us[i] - 0.04, vs[i])
-        lz.levanta(Elipse(q[0], q[1], tam * 0.035), cantidad=0.18, suave=0.3)
+        q = P(us[i] - 0.05, vs[i])
+        lz.lapiz([list(arco(q[0], q[1], tam * 0.04, tam * 0.03, 200, 340, 6, ang + 90))], siena, grosor=0.26,
+                 presion=0.32)
     lz.aguada(Elipse(*P(0.47, 0.0), tam * 0.12, tam * 0.07, ang), '#d97a76', dens=0.12, suave=tam * 0.05)
     return puntas
+
+
+def mano_agarre(lz, muneca, centro, ang_eje, diam, tam, piel='piel2', luz=None, nudillos=1, dorso=True):
+    """A hand closed round something long -- a column, the neck of a guitar, the edge of a
+    skirt -- seen with the fingers in front: the back of the hand from the wrist to the
+    knuckles at one side of the object, four fingers curling across its front, each its
+    own lit cylinder with the gap between them dark, the tips tucked behind the far side.
+    centro: where the grip is on the object's axis; ang_eje: the axis (degrees); diam: its
+    thickness; nudillos: +1 / -1, which side of the axis the knuckles are on."""
+    luz = luz if luz is not None else _LUZ_ESCENA[0]
+    skin = _hex(piel)
+    c = np.asarray(centro, np.float64)
+    ax = np.array([math.cos(math.radians(ang_eje)), math.sin(math.radians(ang_eje))])
+    n = np.array([-ax[1], ax[0]]) * nudillos
+    fw = tam * 0.11
+    sc = _osc(skin, 0.68, '#7a3a4a', 0.3)
+    lp = _osc(skin, 0.5, '#5a2a3a', 0.4)
+    siena = _hex(mezcla(skin, '#8a3a1a', 0.3))
+    dd = 0.6 + 0.22 * (1 - float(np.dot(rgb(skin), [0.3, 0.59, 0.11])))
+    w = np.asarray(muneca, np.float64)
+    nud = [c + n * (diam * 0.5 + fw * 0.4) + ax * (k - 1.5) * fw * 1.02 for k in range(4)]
+    if dorso:
+        volumen(lz, Poligono([tuple(w + ax * fw * 1.5), tuple(nud[3] + ax * fw * 0.5 + n * fw * 0.3),
+                              tuple(nud[3] + n * fw * 0.6), tuple(nud[0] + n * fw * 0.6),
+                              tuple(nud[0] - ax * fw * 0.5 + n * fw * 0.3), tuple(w - ax * fw * 1.5)]),
+                skin, luz, dens=dd, prof=0.42, espesor=tam * 0.12, grosor=0.32, presion=0.26, sombra=sc, duro=0.4,
+                proyecta=tam * 0.05)
+    dedos = []
+    for k in (3, 2, 1, 0):
+        off = ax * (k - 1.5) * fw * 1.02
+        largo = (1.0, 1.08, 1.02, 0.82)[3 - k]
+        p0 = nud[k]
+        p1 = c + off + n * diam * 0.12
+        p2 = c + off - n * diam * 0.5 * largo
+        dedo = Trazo([tuple(p0), tuple(p1), tuple(p2)], (fw * 1.05, fw * 0.98, fw * 0.8))
+        volumen(lz, dedo, skin, luz, dens=dd, prof=0.45, espesor=fw * 0.5, grosor=0.32, presion=0.36, sombra=sc, duro=0.4)
+        lz.lapiz([[tuple(p1 - ax * fw * 0.4), tuple(p1 + ax * fw * 0.4)]], lp, grosor=0.22, presion=0.26)
+        lz.lapiz([list(arco(p0[0], p0[1], fw * 0.4, fw * 0.3, 0, 180, 6, ang_eje))], siena, grosor=0.24, presion=0.3)
+        dedos.append((p0, p1, p2))
+    gaps = []
+    for i in range(3):
+        a_, b_ = dedos[i], dedos[i + 1]
+        gaps.append([tuple((a_[j] + b_[j]) / 2) for j in range(3)])
+    lz.lapiz(gaps, lp, grosor=0.3, presion=0.48, temblor=0.02, puntas=0.3)
+    return nud
 
 
 # ---------------------------------------------------------------- adapters: the same calls, painted this way
@@ -1195,8 +1296,8 @@ def mano2(lz, x, y, ang, tam, piel='piel2', gesto='abierta', lado=1, abre=1.0, t
 def mano(lz, x, y, ang, tam, piel='piel2', tipo='abierta', semilla=None, pulgar=1):
     g = {'abierta': 'abierta', 'junta': 'junta', 'sujeta': 'sostiene', 'puño': 'agarra', 'señala': 'senala',
          'senala': 'senala'}.get(tipo, 'relajada')
-    # the old hands were drawn small for the big heads; a real hand is about as long as the face
-    return mano_real(lz, x, y, ang, tam * 1.15, piel=piel, gesto=g, lado=pulgar, luz=_LUZ_ESCENA[0], semilla=semilla)
+    # the old hands were drawn small for the big heads; a real hand is about 3/4 of the face's length
+    return mano_real(lz, x, y, ang, tam * 1.45, piel=piel, gesto=g, lado=pulgar, luz=_LUZ_ESCENA[0], semilla=semilla)
 
 
 def _pliegues_tela(lz, a, b, w, color, rng, n=4):
@@ -1280,7 +1381,7 @@ def brazo3(lz, hombro, codo, muneca, w, manga, piel, luz, largo='larga', mano=No
         nrm = np.array([-d2[1], d2[0]])
         cf = Poligono([wr - d2 * w * 0.3 + nrm * w * 0.42, wr + d2 * w * 0.06 + nrm * w * 0.4,
                        wr + d2 * w * 0.06 - nrm * w * 0.4, wr - d2 * w * 0.3 - nrm * w * 0.42], suave=False)
-        lz.aguada(cf, puno or _osc(manga, 0.82, '#3a2448', 0.2), dens=0.4, tapa=0.3, irreg=0.2, borde=0.4)
+        lz.aguada(cf, puno or _osc(manga, 0.82, '#3a2448', 0.2), dens=0.4, tapa=1, irreg=0.2, borde=0.4)
         lz.lapiz([[wr - d2 * w * 0.3 + nrm * w * 0.42, wr - d2 * w * 0.3 - nrm * w * 0.42]], _osc(manga, 0.5),
                  grosor=0.4, presion=0.35)
     else:
@@ -1350,6 +1451,31 @@ def pierna3(lz, cadera, rodilla, tobillo, w, pantalon, piel, luz, pie_ang=0, zap
                 grosor=0.34, presion=0.26, duro=0.45)
         lz.lapiz([arco(*(k + fuera * w * 0.05), w * 0.14, w * 0.1, 200, 340, 10)], _osc(piel_c, 0.5, '#4a2a2a', 0.4),
                  grosor=0.3, presion=0.25)
+
+
+def zapato3(lz, tobillo, ang, tam, color, luz, tapa=1, suela='#5a4034', semilla=None):
+    """figuras_v3.zapato3's shoe with a sole you can see (a band of its own colour, the toe
+    lifting a little off the ground) and the opening at the ankle."""
+    import figuras_v3 as F
+    t = F._v(tobillo)
+    d = F._v([math.cos(math.radians(ang)), math.sin(math.radians(ang))])
+    n = F._v([-d[1], d[0]])
+    if n[1] < 0:
+        n = -n
+    P = lambda u, v: t + d * (u * tam) + n * (v * tam)
+    f = Poligono([P(-0.2, -0.16), P(0.12, -0.18), P(0.36, -0.02), P(0.62, 0.06), P(0.84, 0.1), P(0.92, 0.2),
+                  P(0.86, 0.3), P(0.3, 0.33), P(-0.2, 0.33), P(-0.27, 0.2), P(-0.26, 0.0)])
+    volumen(lz, f, color, luz, dens=0.82, prof=0.45, tapa=tapa, rayar=False, grosor=0.35, presion=0.3, semilla=semilla)
+    claro = float(np.dot(rgb(color), [0.3, 0.59, 0.11])) > 0.45
+    sc = '#efe4d0' if claro else _hex(mezcla(color, '#1a1210', 0.55))
+    banda = Poligono([P(-0.27, 0.3), P(0.3, 0.31), P(0.86, 0.28), P(0.94, 0.22), P(0.96, 0.3), P(0.88, 0.38),
+                      P(0.3, 0.42), P(-0.26, 0.41)])
+    lz.aguada(banda, sc, dens=0.85, tapa=1, borde=0.4, irreg=0.1)
+    lz.lapiz([[tuple(P(-0.26, 0.42)), tuple(P(0.3, 0.43)), tuple(P(0.88, 0.39))]], _osc(sc, 0.5), grosor=0.35, presion=0.4)
+    lz.lapiz([[tuple(P(0.18 + k * 0.08, -0.06 + k * 0.05)), tuple(P(0.24 + k * 0.08, 0.06 + k * 0.05))] for k in range(3)],
+             _osc(color, 0.5), grosor=0.38, presion=0.4)
+    lz.aguada(Elipse(*P(-0.04, -0.12), tam * 0.14, tam * 0.05, ang), _osc(color, 0.45), dens=0.5, suave=0.3)
+    return f
 
 
 def extremidad(lz, pts, anchos, color, tapa=1, dens=0.6, lapiz=None, toques=None, contorno=True, sombra=None,
@@ -1436,56 +1562,47 @@ def torso(lz, hi, hd, ci, cd, color, cuello=None, escote=0.3, tapa=1, toques=Non
     return f
 
 
-def cuello_natural(lz, x, y, r, piel, base, ancho_base, giro=0.0, inclina=0.0, escote=True):
-    """The same neck shape as before, modelled as a lit cylinder, the shadow under the jaw."""
+def _cuello(lz, x, y, r, piel, base, ancho_base, giro, inclina, luz, nino):
+    """A neck that reads as one: as wide as about 60 % of the face (45 % in a child), a short
+    column under the jaw that opens in two curves (the trapezius) into the shoulders, the
+    jaw's shadow cast across its top, the clavicles where the neckline is open."""
     bx, by = base
     piel_c = _hex(piel)
     a = math.radians(inclina)
+    kc = 1.08 if nino else 1.0
     xt = x - math.sin(a) * r * 0.55 + giro * r * 0.08
     yt = y + r * 0.45
-    w0 = r * 0.74
-    w1 = min(ancho_base * 0.62, r * 1.35)
+    w0 = r * (0.66 if nino else 0.76)
+    w1 = min(ancho_base * 0.62, r * 1.4)
     yb = by + r * 0.05
-    pts = [(xt - w0 / 2, yt), (xt - w0 * 0.52, yt + (yb - yt) * 0.55), (bx - w1 * 0.45, yb - r * 0.08),
-           (bx - w1 * 0.75, yb + r * 0.12), (bx - w1 * 0.7, yb + r * 0.55), (bx, yb + r * 0.7),
-           (bx + w1 * 0.7, yb + r * 0.55), (bx + w1 * 0.75, yb + r * 0.12), (bx + w1 * 0.45, yb - r * 0.08),
-           (xt + w0 * 0.52, yt + (yb - yt) * 0.55), (xt + w0 / 2, yt)]
+    pts = [(xt - w0 / 2, yt), (xt - w0 * 0.5, yt + (yb - yt) * 0.55), (bx - w0 * 0.56, yb - r * 0.2),
+           (bx - w1 * 0.5, yb - r * 0.04), (bx - w1 * 0.74, yb + r * 0.14), (bx - w1 * 0.62, yb + r * 0.55),
+           (bx, yb + r * 0.7), (bx + w1 * 0.62, yb + r * 0.55), (bx + w1 * 0.74, yb + r * 0.14), (bx + w1 * 0.5, yb - r * 0.04),
+           (bx + w0 * 0.56, yb - r * 0.2), (xt + w0 * 0.5, yt + (yb - yt) * 0.55), (xt + w0 / 2, yt)]
     f = Poligono(pts)
-    volumen(lz, f, piel_c, _LUZ_ESCENA[0], dens=0.55, prof=0.42, espesor=w0 * 0.5, brillo=0.0, reflejo=0.08,
-            linea=False, duro=0.1)
-    lz.aguada(Elipse(xt + giro * r * 0.1, y + r * 1.0, r * 0.38, r * 0.17, inclina), _osc(piel_c, 0.6, '#5a2a3a', 0.35),
-              dens=0.42, suave=r * 0.07, gran=0.05)
-    if escote:
-        lp = _osc(piel_c, 0.55, '#4a2a2a', 0.4)
-        lz.lapiz([bezier((bx - r * 0.06, yb + r * 0.02), (bx - r * 0.3, yb - r * 0.04), (bx - r * 0.62, yb + r * 0.04), n=12),
-                  bezier((bx + r * 0.06, yb + r * 0.02), (bx + r * 0.3, yb - r * 0.04), (bx + r * 0.62, yb + r * 0.04), n=12)],
-                 lp, grosor=0.3, presion=0.2, temblor=0.1, cortes=0.3)
-    return f
-
-
-def cuello3(lz, cabeza_xy, r, base, piel, luz, ancho_base=None, giro=0.0, inclina=0.0):
-    """figuras_v3.cuello3's neck, a little fuller under the smaller realistic head."""
-    x, y = cabeza_xy
-    bx, by = base
-    piel_c = _hex(piel)
-    a = math.radians(inclina)
-    xt = x - math.sin(a) * r * 0.55 + giro * r * 0.08
-    yt = y + r * 0.45
-    w0 = r * 0.72
-    w1 = min((ancho_base or r * 2.3) * 0.62, r * 1.35)
-    yb = by + r * 0.05
-    f = Poligono([(xt - w0 / 2, yt), (xt - w0 * 0.5, yt + (yb - yt) * 0.6), (bx - w1 * 0.45, yb - r * 0.08),
-                  (bx - w1 * 0.75, yb + r * 0.12), (bx - w1 * 0.7, yb + r * 0.55), (bx, yb + r * 0.7),
-                  (bx + w1 * 0.7, yb + r * 0.55), (bx + w1 * 0.75, yb + r * 0.12), (bx + w1 * 0.45, yb - r * 0.08),
-                  (xt + w0 * 0.5, yt + (yb - yt) * 0.6), (xt + w0 / 2, yt)])
-    volumen(lz, f, piel_c, luz, dens=0.55, prof=0.42, espesor=w0 * 0.5, brillo=0.0, reflejo=0.08, linea=False, duro=0.3)
-    lz.aguada(Elipse(xt + giro * r * 0.1, y + r * 1.0, r * 0.38, r * 0.16, inclina), _osc(piel_c, 0.6, '#5a2a3a', 0.35),
-              dens=0.42, suave=r * 0.07, gran=0.05)
+    volumen(lz, f, piel_c, luz, dens=0.55 + 0.2 * (1 - float(np.dot(rgb(piel_c), [0.3, 0.59, 0.11]))), prof=0.42,
+            espesor=w0 * 0.5, brillo=0.0, reflejo=0.06, linea=False, duro=0.4)
+    lz.aguada(f, _osc(piel_c, 0.9, '#a05a50', 0.2), dens=0.1, borde=0.5, irreg=1.0, gran=0.6, var=0.6)
+    # the jaw's shadow on the top of the neck: sepia, 4-6 units high, its upper edge crisp
+    cy = y + math.cos(a) * kc * r + r * 0.06
+    lz.aguada(Elipse(x - math.sin(a) * kc * r + giro * r * 0.08, cy, w0 * 0.62, r * 0.14, inclina),
+              _hex(mezcla(piel_c, '#5a3020', 0.45)), dens=0.4, borde=0.4, irreg=0.3, gran=0.2)
     lp = _osc(piel_c, 0.55, '#4a2a2a', 0.4)
     lz.lapiz([bezier((bx - r * 0.08, yb + r * 0.04), (bx - r * 0.3, yb - r * 0.02), (bx - r * 0.56, yb + r * 0.05), n=10),
               bezier((bx + r * 0.08, yb + r * 0.04), (bx + r * 0.3, yb - r * 0.02), (bx + r * 0.56, yb + r * 0.05), n=10)],
-             lp, grosor=0.3, presion=0.18, temblor=0.1, cortes=0.35)
+             lp, grosor=0.28, presion=0.16, temblor=0.1, cortes=0.35)
     return f
+
+
+def cuello_natural(lz, x, y, r, piel, base, ancho_base, giro=0.0, inclina=0.0, escote=True):
+    """acuarela.cuello_natural's neck (figura), painted as _cuello."""
+    return _cuello(lz, x, y, r, piel, base, ancho_base, giro, inclina, _LUZ_ESCENA[0], nino=False)
+
+
+def cuello3(lz, cabeza_xy, r, base, piel, luz, ancho_base=None, giro=0.0, inclina=0.0):
+    """figuras_v3.cuello3's neck, painted as _cuello (children by size: r <= 25)."""
+    x, y = cabeza_xy
+    return _cuello(lz, x, y, r, piel, base, ancho_base or r * 2.3, giro, inclina, luz, nino=r <= 25)
 
 
 # ---------------------------------------------------------------- small people in the middle distance
@@ -1593,7 +1710,11 @@ def activar(luz, *modulos, lineas=None):
         pon(mod, 'cuello_natural', cuello_natural)
         pon(mod, 'cuello3', cuello3)
         pon(mod, 'brazo3', brazo3)
+        pon(mod, 'zapato3', zapato3)
         pon(mod, 'pierna3', pierna3)
+    # acuarela.figura's neck: the old default was a tube (extremidad); the realistic one is _cuello
+    cambios.append((A, 'CUELLO_NATURAL', getattr(A, 'CUELLO_NATURAL', False)))
+    A.CUELLO_NATURAL = True
     if lineas is not None:
         orig = A.Lienzo.contorno
 

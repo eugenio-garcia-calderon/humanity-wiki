@@ -56,7 +56,7 @@ def abuelo_y_lampara(lz, BULBO, bombilla=True):
     F.pierna3(lz, (428, 572), (488, 590), (472, 672), 32, PANT, P1, luz, pie_ang=-4, zapato='#6e4c3c', pie_tam=42,
               semilla=12)
     F.brazo3(lz, (452, 484), (490, 528), (524, 548), 21, tono(CHAQ, '#7a3a2a', 0.12), P1, luz, 'larga',
-             mano=dict(ang=22, gesto='sostiene', lado=-1, tam=29), semilla=13)
+             mano=dict(ang=14, gesto='relajada', lado=-1, tam=34), semilla=13)       # palm up under the lamp's foot
     F.cuello3(lz, (426, 440), 30, (430, 478), P1, luz, giro=0.55, inclina=10)
     f, g = F.torso3(lz, (396, 480), (460, 486), (408, 574), (454, 576), CHAQ, luz, cintura=0.97, escote='v',
                     pliegues=[[(418, 500), (426, 530), (424, 562)], [(448, 512), (452, 544)], [(404, 524), (410, 556)],
@@ -95,12 +95,54 @@ def abuelo_y_lampara(lz, BULBO, bombilla=True):
     casq = Poligono([(518, 506), (532, 500), (536, 512), (524, 518)])
     F.modelar(lz, casq, '#9a9a8a', luz, dens=0.8, prof=0.35, rayar=False, grosor=0.6)
     lz.lapiz([[(521, 508), (533, 503)], [(523, 512), (534, 507)]], '#5a5a52', grosor=0.5, presion=0.5)
-    # near arm: the hand closes on the column, just under the socket
-    F.brazo3(lz, (400, 490), (434, 546), (494, 552), 23, CHAQ, P1, luz, 'larga',
-             mano=dict(ang=-24, gesto='sostiene', lado=1, tam=30), semilla=18)
-    # the warm light of the bulb, a little to his right and up, on the hands and the cheek turned to it
-    lz.luz((516, 548, 26), '#ffe2a0', fuerza=0.3)
-    lz.luz((446, 446, 16), '#ffe2a0', fuerza=0.2)
+    # near arm: the hand closes round the brass column, four fingers in front, the thumb behind
+    F.brazo3(lz, (400, 490), (434, 546), (500, 548), 23, CHAQ, P1, luz, 'larga', semilla=18)
+    FR.mano_agarre(lz, (502, 547), (517, 533), -79, 7.5, 34, P1, luz, nudillos=-1)
+    # the warm light of the bulb on the hands and the cheek turned to it (gently: it must not bleach them)
+    lz.luz((516, 540, 22), '#ffe2a0', fuerza=0.12)
+    lz.luz((446, 446, 16), '#ffe2a0', fuerza=0.12)
+
+
+def nina06(lz):
+    """personajes_06.nina seated for real: her thighs come forward under the dress, which
+    rests on two knees with a V fold between them; calves fuller under the knee, a visible
+    ankle, shoes with soles; the bulb warms the side of her face turned to it."""
+    F = _f()
+    luz = (-0.8, -0.55)
+    P2 = '#9b6141'
+    TEAL6 = '#2f8f92'
+    F.pierna3(lz, (612, 568), (566, 574), (556, 628), 25, None, P2, luz, pie_ang=160, zapato=CORAL, pie_tam=31, semilla=21)
+    F.pierna3(lz, (626, 572), (582, 584), (580, 636), 25, None, P2, luz, pie_ang=188, zapato=CORAL, pie_tam=31, semilla=22)
+    falda = Poligono([(598, 518), (636, 518), (652, 560), (644, 584), (614, 594), (594, 594), (586, 596), (576, 593),
+                      (568, 590), (556, 586), (550, 576), (554, 562), (578, 552)])
+    F.modelar(lz, falda, TEAL6, luz, dens=0.82, prof=0.42, grosor=0.8, semilla=23)
+    lz.lapiz([bezier((604, 524), (598, 552), (590, 592)), bezier((622, 526), (628, 556), (632, 586)),
+              bezier((588, 594), (592, 578), (604, 560))], linea_de(TEAL6, 0.5), grosor=0.5, presion=0.4, temblor=0.2,
+             puntas=0.45)
+    lz.lapiz([arco(565, 582, 11, 7, 200, 340, 10), arco(582, 590, 10, 6, 200, 340, 10)], linea_de(TEAL6, 0.5),
+             grosor=0.5, presion=0.42)                                       # the two knees under the cloth
+    for (x, y) in ((588, 548), (612, 562), (628, 540), (602, 578), (572, 572), (636, 572), (620, 584), (580, 560)):
+        lz.gouache(Elipse(x, y, 1.9), '#fff3cf', alfa=0.9, irreg=0)
+    F.brazo3(lz, (634, 482), (650, 524), (648, 560), 16, '#f2c04a', P2, luz, 'corta',
+             mano=dict(ang=95, gesto='relajada', lado=1, tam=27), semilla=24)
+    F.cuello3(lz, (618, 436), 25, (616, 476), P2, luz, giro=-0.5, inclina=-14)
+    F.torso3(lz, (592, 478), (640, 480), (598, 526), (634, 528), '#f2c04a', luz, cintura=0.95, semilla=25)
+    lz.lapiz([bezier((604, 478), (616, 488), (630, 479), n=12)], linea_de('#f2c04a', 0.55), grosor=0.55, presion=0.45)
+    pechera = Poligono([(597, 528), (602, 497), (631, 499), (636, 530)], suave=False)
+    F.modelar(lz, pechera, TEAL6, luz, dens=0.84, prof=0.4, grosor=0.75, semilla=28)
+    for (a_, b_) in (((600, 478), (604, 499)), ((633, 480), (629, 501))):
+        tir = Trazo([a_, b_], (5.0, 5.5))
+        F.modelar(lz, tir, TEAL6, luz, dens=0.86, prof=0.3, rayar=False, grosor=0.6)
+        lz.aguada(Elipse(*b_, 1.6), '#f6e2b0', dens=0.9, tapa=1, irreg=0.1)
+    lz.lapiz([[(599, 512), (634, 514)]], linea_de(TEAL6, 0.5), grosor=0.42, presion=0.32, temblor=0.2)
+    lz.lapiz([bezier((596, 528), (616, 532), (637, 530), n=12)], linea_de(TEAL6, 0.6), grosor=0.65, presion=0.5)
+    F.cabeza3(lz, 618, 434, 25, P2, '#2a1a14', 'afro', luz, giro=-0.5, inclina=-14, edad='nino', ojos='abiertos',
+              boca='sonrisa', mira=(-0.9, 0.7), pendiente='#f2b630', iris='#4a2a1c', semilla=26)
+    # the bulb's warm light on the side of her face turned to it, and under her chin
+    lz.luz((604, 446, 13), '#fad6a0', fuerza=0.32)
+    lz.luz((610, 462, 9), '#fad6a0', fuerza=0.2)
+    F.brazo3(lz, (596, 486), (574, 530), (556, 498), 16, '#f2c04a', P2, luz, 'corta',
+             mano=dict(ang=-152, gesto='abierta', abre=0.6, lado=1, tam=30), semilla=27)
 
 
 def nino(lz):
@@ -128,7 +170,7 @@ def nino(lz):
                        [(878, 330), (870, 356)]], semilla=34)
     lz.lapiz([bezier((838, 360), (852, 366), (868, 358), n=10)], linea_de(CAM, 0.5), grosor=0.5, presion=0.4)
     F.cabeza3(lz, 872, 268, 20, P3, '#3a2620', 'corto', luz, giro=0.5, inclina=3, edad='nino', ojos='abiertos',
-              boca='risa', mira=(1.0, -1.6), semilla=35)
+              boca='abierta', mira=(1.0, -1.6), semilla=35)
     F.brazo3(lz, (888, 302), (914, 276), (940, 246), 13, CAM, P3, luz, 'corta',
              mano=dict(ang=-55, gesto='abierta', abre=1.4, lado=-1, tam=24), semilla=36)
 
@@ -151,10 +193,9 @@ def mano_con_telefono(lz, capas=None):
     lp = linea_de(piel, 0.6)
     muneca = P(-22, 82)
     codo = np.array([-30.0, 700.0])
-    antebrazo = Trazo([codo, (codo + muneca) / 2 + (0, 4), muneca], (54, 46, 34), suave=True)
-    FR.volumen(lz, antebrazo, piel, luz, dens=0.62, prof=0.55, sombra=sp, espesor=18, linea=False, duro=0.5, gran=0.4)
-    lz.aguada(Trazo([codo + (6, 26), (codo + muneca) / 2 + (6, 26), muneca + (2, 15)], (10, 9, 6)), sp, dens=0.35,
-              borde=0.4, irreg=0.4)                                         # its lower edge, against the light
+    antebrazo = Trazo([codo, (codo + muneca) / 2 + (0, 4), muneca], (62, 48, 30), suave=True)
+    FR.volumen(lz, antebrazo, piel, luz, dens=0.62, prof=0.55, sombra=sp, espesor=20, linea=True, grosor=0.4,
+               presion=0.3, duro=0.5, gran=0.4)
     palma = Poligono([P(-28, 4), P(-42, 18), P(-48, 38), P(-44, 58), P(-34, 72), P(-22, 82), P(-4, 84), P(14, 78),
                       P(26, 64), P(30, 30)])
     FR.volumen(lz, palma, piel, luz, dens=0.62, prof=0.45, sombra=sp, espesor=14, grosor=0.4, presion=0.3, duro=0.5)
@@ -165,7 +206,7 @@ def mano_con_telefono(lz, capas=None):
     lz.aguada(Poligono([P(-31, 58), P(31, 58), P(30, 67), P(-28, 67)]) & palma, sp, dens=0.35, suave=2)
     # four fingers round the right edge, index on top, fanned 5-10 degrees apart; the little finger shorter
     # (centre v at the knuckle, width, where the tip reaches, the knuckle, how far the tip drifts)
-    dedos = ((-36, 13.0, 20.5, 43, -4.5), (-20, 13.4, 17.5, 45, -1.5), (-4.5, 12.6, 19.5, 43, 1.8), (10, 10.6, 24.0, 40, 4.5))
+    dedos = ((-36, 13.0, 20.5, 43, -4.5), (-20, 13.4, 15.0, 45, -1.5), (-4.5, 12.6, 19.5, 43, 1.8), (12, 10.2, 27.5, 39, 5.5))
     for k, (v, wd, tip, nud, deriva) in list(enumerate(dedos))[::-1]:
         base, borde, punta = P(nud, v + 1.5), P(33, v + deriva * 0.3), P(tip, v + deriva)
         dedo = Trazo([base, borde, punta], (wd * 1.02, wd * 0.9, wd * 0.72)) | Elipse(*P(nud - 1.5, v + 1.2), wd * 0.56)
@@ -264,8 +305,10 @@ def guitarrista(sombra=True):
     for br in (brazo1, brazo2):
         P5.sombra_bajo(lz, br, (15, 13, 12), '#6a5a4a', dens=0.2)
         P5.extremidad(lz, br, (15, 13, 12), '#f3e6cf', dens=0.8, pliegues=True)
-    FR.mano_real(lz, *Rg(-8, -6), 40, 24, 'piel2', 'relajada', lado=1, luz=FR._LUZ_ESCENA[0])
-    FR.mano_real(lz, *Rg(78, 5), -96, 23, 'piel2', 'sostiene', lado=1, luz=FR._LUZ_ESCENA[0])
+    FR.mano_real(lz, *Rg(-8, -6), 40, 28, 'piel2', 'relajada', lado=1, luz=FR._LUZ_ESCENA[0])
+    # the left hand: the fingers come over the top of the neck and press on the frets, the thumb behind
+    eje = math.degrees(math.atan2(*(np.asarray(Rg(1, 0)) - np.asarray(Rg(0, 0)))[::-1]))
+    FR.mano_agarre(lz, Rg(78, 9), Rg(82, 0), eje, 8.5, 28, 'piel2', FR._LUZ_ESCENA[0], nudillos=-1, dorso=False)
 
 
 def abuela(sombra=True):
@@ -288,18 +331,30 @@ def abuela(sombra=True):
     P5.figura(lz, J, dict(camisa='#8d73b0', falda='#5f8f8a', piel='piel1', zapato='#6e4c3c', cuello=0.55, pliegues=True,
                           falda_bajo=[(328, 818), (372, 820), (374, 790), (366, 764)]),
               cara=dict(peinado='mono', pelo='#d8d2cc', canas=True, giro=0.45, inclina=20, ojos='abajo', boca='sonrisa'))
-    # the skirt folds between and over the knees
-    lz.lapiz([bezier((300, 758), (326, 770), (350, 770)), bezier((348, 770), (350, 794), (346, 816)),
-              bezier((364, 772), (366, 796), (362, 818)), arco(352, 764, 12, 6, 190, 330, 10)], '#3a5a58', grosor=0.5,
-             presion=0.35, temblor=0.2)
-    for brazo, col in (([(272, 668), (300, 718), (366, 714)], '#8d73b0'), ([(324, 672), (350, 724), (394, 720)], '#8d73b0')):
+    # her skirt, painted over the old one: the thighs come toward us to two knees, the cloth pulled taut over
+    # them, then falling straight to her ankles in folds
+    falda = (Poligono([(266, 740), (322, 742), (346, 750), (364, 754), (380, 762), (386, 774), (386, 796), (388, 816),
+                       (362, 821), (334, 819), (330, 796), (318, 772), (282, 766), (264, 758)]) |
+             Elipse(356, 760, 11, 8) | Elipse(376, 766, 10, 8))
+    FR.volumen(lz, falda, '#5f8f8a', luz, dens=0.82, prof=0.5, espesor=14, rayar=True, proyecta=2.0, grosor=0.38,
+               presion=0.3)
+    lz.levanta(Elipse(354, 756, 9, 4, -15), cantidad=0.16, suave=1.2)
+    lz.levanta(Elipse(375, 762, 8, 4, -15), cantidad=0.16, suave=1.2)
+    lz.lapiz([bezier((358, 770), (356, 794), (350, 817)), bezier((377, 776), (380, 796), (379, 817)),
+              bezier((366, 768), (367, 780), (366, 796)), bezier((340, 774), (338, 796), (338, 816))], '#3a5a58',
+             grosor=0.45, presion=0.32, temblor=0.15)
+    for (x_, y_) in ((346, 823), (374, 825)):
+        lz.aguada(Elipse(x_ + 8, y_ + 1, 13, 2.6), '#5a4a80', dens=0.35, suave=1.5)          # shadow, away from the sun
+        FR.volumen(lz, Elipse(x_, y_, 10, 4), '#6e4c3c', luz, dens=0.88, prof=0.45, linea=False, duro=0.5)
+    for brazo, col in (([(272, 668), (300, 718), (362, 714)], '#8d73b0'), ([(324, 672), (350, 724), (392, 722)], '#8d73b0')):
         P5.sombra_bajo(lz, brazo, (18, 15, 13), '#3a2a5a', dens=0.22)
         P5.extremidad(lz, brazo, (18, 15, 13), col, dens=0.84, pliegues=True)
-    # the needles, then the hands round them
-    lz.lapiz([[(356, 694), (420, 734)], [(420, 690), (370, 740)]], '#8a6a52', grosor=1.1, presion=0.85, temblor=0.03)
-    lz.lapiz([[(357, 694.6), (419, 733.4)]], '#d8c0a0', grosor=0.4, presion=0.6)
-    FR.mano_real(lz, 364, 714, -18, 28, 'piel1', 'pinza', lado=1, luz=luz)
-    FR.mano_real(lz, 396, 720, 196, 28, 'piel1', 'pinza', lado=-1, luz=luz)
+    # two short needles in pale wood, coming out of her fingers
+    for (a_, b_) in (((356, 702), (398, 724)), ((410, 700), (382, 732))):
+        lz.lapiz([[a_, b_]], '#c8a476', grosor=1.0, presion=0.85, temblor=0.02)
+        lz.lapiz([[(a_[0], a_[1] - 0.5), (b_[0], b_[1] - 0.5)]], '#f6e6c8', grosor=0.35, presion=0.7)
+    FR.mano_real(lz, 360, 714, -24, 33, 'piel1', 'pinza', lado=1, luz=luz)
+    FR.mano_real(lz, 394, 724, 200, 33, 'piel1', 'relajada', lado=-1, luz=luz)
     cesta = Poligono([(196, 784), (256, 784), (250, 824), (202, 824)])
     FR.volumen(lz, cesta, '#c99a5a', luz, dens=0.7, prof=0.4, linea=False, duro=0.5)
     lz.rayado(cesta, '#8a6a3a', angulo=0, sep=4, presion=0.4)
@@ -375,9 +430,9 @@ def nina(sombra=True):
         lz.lapiz([bezier(a_, b_, c_, n=10)], '#8a5a1a', grosor=0.45, presion=0.32, temblor=0.2)
     lz.lapiz([arco(922, 802, 10, 7, 190, 340, 10), arco(936, 800, 10, 6, 190, 340, 10)], '#8a5a1a', grosor=0.45,
              presion=0.35)                                              # the two knees under the skirt
-    # the neck out of the top of the dress, the head bent over the hands
-    FR.volumen(lz, Trazo([(948, 722), (942, 708)], (12, 11)), piel, luz, dens=0.62, prof=0.45, linea=False, duro=0.4)
-    FR.cabeza_real(lz, 932, 688, 22, piel=piel, pelo='#1e1410', peinado='rizado', luz=luz, giro=-0.5, inclina=-22,
+    # the head bent over the hands, low: the chin nearly on the neckline, a short neck of the face's tone
+    FR.volumen(lz, Trazo([(945, 726), (942, 716)], (12, 11.5)), piel, luz, dens=0.82, prof=0.4, linea=False, duro=0.4)
+    FR.cabeza_real(lz, 931, 698, 22, piel=piel, pelo='#1e1410', peinado='rizado', luz=luz, giro=-0.5, inclina=-22,
                    edad='nino', ojos='abajo', boca='sonrisa')
     # the near arm: from the shoulder down beside the body, the forearm forward to the hands
     P5.extremidad(lz, [(940, 728), (942, 762), (918, 764)], (11.5, 10.5, 9.5), ORO, dens=0.85, pliegues=True)
@@ -386,8 +441,8 @@ def nina(sombra=True):
     FR.volumen(lz, yema, BARRO, luz, dens=0.85, prof=0.45, linea=True, grosor=0.4, presion=0.4, duro=0.5,
                toques=[(912, 732, 8, CORAL, 0.9)])
     lz.lapiz([[(907, 748), (917, 744)], [(908, 754), (918, 751)]], '#8a4a2a', grosor=0.45, presion=0.36)
-    FR.mano_real(lz, 924, 766, 196, 17, piel, 'sostiene', lado=1, luz=luz)
-    FR.mano_real(lz, 934, 770, 206, 17, piel, 'sostiene', lado=-1, luz=luz)
+    FR.mano_real(lz, 928, 768, 194, 22, piel, 'sostiene', lado=1, luz=luz)
+    FR.mano_real(lz, 938, 772, 204, 22, piel, 'sostiene', lado=-1, luz=luz)
     tallo = bezier((912, 728), (906, 708), (894, 690), (884, 672), 30)
     lz.lapiz([tallo], '#4f6f45', grosor=1.1, presion=0.8, temblor=0.3)
     P5.hojita(lz, 903, 698, 12, -170, '#5f8f63', tapa=1)
@@ -422,3 +477,20 @@ def cabeza_perfil(lz, x, y, r, piel, pelo, mira=1, peinado='corto', canas=False)
         masa = Poligono([Q(0.56, -0.58), Q(0.24, -1.0), Q(-0.4, -1.0), Q(-0.9, -0.6), Q(-0.96, -0.05), Q(-0.74, 0.42),
                          Q(-0.42, 0.42), Q(-0.3, -0.06), Q(0.1, -0.38), Q(0.44, -0.44)])
     FR.volumen(lz, masa, col, luz, dens=0.85, prof=0.5, espesor=r * 0.5, grosor=0.25, presion=0.25, duro=0.4)
+
+
+def pie_bailarina():
+    """Over falda()'s foot (same layer, same place): the leg narrowing to a slim ankle, the
+    instep arched forward over the pointe shoe, the heel, the ribbons; a violet shadow away
+    from the sun."""
+    P5 = _p5()
+    lz = P5.lz
+    luz = FR._LUZ_ESCENA[0]
+    lz.aguada(Elipse(664, 783, 14, 3.2), '#5a4a80', dens=0.42, suave=1.5)
+    pierna = Trazo([(649.5, 738), (649, 750), (648, 762)], (15, 11, 7))
+    FR.volumen(lz, pierna, 'piel3', luz, dens=0.66, prof=0.45, espesor=6, grosor=0.32, presion=0.28, duro=0.4)
+    zap = Poligono([(645, 760), (652.5, 759), (655, 766), (652, 775), (649.5, 784), (646.5, 784), (643, 774), (641.5, 766)])
+    FR.volumen(lz, zap, '#c33c4e', luz, dens=0.9, prof=0.45, espesor=4, grosor=0.35, presion=0.32, duro=0.5)
+    lz.lapiz([[(642, 769), (651, 767)]], '#7a1f30', grosor=0.35, presion=0.4)                 # the box of the shoe
+    lz.lapiz([[(641.5, 758), (655, 752)], [(655, 759), (642, 752)]], '#8a2a3a', grosor=0.45, presion=0.55)
+    lz.levanta(Trazo([(645, 762), (643.5, 772)], (1.4, 0.8)), cantidad=0.25, suave=0.5)        # light on the satin
