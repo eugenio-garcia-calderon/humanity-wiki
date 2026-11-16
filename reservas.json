@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "catalogo",
-      "ruta": "src/pages/Aeromovil.tsx",
-      "motivo": "catalogo: selectores de piezas comerciales en Motor",
-      "desde": "2026-11-16T18:35:42.034Z"
-    },
-    {
-      "agente": "catalogo",
       "ruta": "src/components/aeromovil/geometriaTriciclo.ts",
       "motivo": "catalogo: piezas comerciales del tren de potencia",
       "desde": "2026-11-16T18:39:10.885Z"
