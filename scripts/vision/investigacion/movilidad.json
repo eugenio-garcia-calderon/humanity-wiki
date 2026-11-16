@@ -1,0 +1,255 @@
+{
+ "sector": "movilidad",
+ "pais": "es",
+ "vision_general": {
+  "titulo": "Moverse bien sin depender del coche: cerca, limpio, seguro y para todos",
+  "ideal": [
+   "La movilidad es un derecho colectivo, como reconoce la Ley 9/2025 de Movilidad Sostenible.",
+   "La mayoría de trayectos diarios se hacen a pie, en bici o en transporte público, también en el pueblo.",
+   "Los coches que quedan son pocos, ligeros, eléctricos y compartidos: 5,5 millones de eléctricos en 2030 (PNIEC).",
+   "El tren mueve las mercancías de larga distancia: del 4% al 10% en 2030 (Mercancías 30).",
+   "Las carreteras se conservan antes que ampliarse y los corredores ferroviarios se terminan.",
+   "Muertes en carretera a la mitad en 2030 y camino a cero en 2050 (Estrategia de Seguridad Vial 2030, UE)."
+  ],
+  "equilibrio": "Que cada persona llegue a lo que necesita con el menor gasto de energía, dinero, espacio y vidas, sin que nadie quede aislado."
+ },
+ "patas": [
+  {
+   "id": "infraestructuras",
+   "nombre": "Infraestructuras",
+   "que_es": "Carreteras, vías de tren y terminales que sostienen todos los desplazamientos.",
+   "actual": [
+    "Más de la mitad de las carreteras (53,5%) tiene deterioro grave (AEC, 2025).",
+    "El déficit en conservación de carreteras llega a 13.491 millones de euros (AEC, 2025).",
+    "Adif invirtió unos 5.230 millones en ferrocarril en 2025, un 16% más que en 2024 (CNMC).",
+    "Del Corredor Mediterráneo (1.838 km), solo el 36% está en servicio (marzo 2026)."
+   ],
+   "ideal": [
+    "Conservar primero: reparar lo que existe antes de construir nuevo.",
+    "Corredores ferroviarios de la red básica europea terminados en 2030 (red TEN-T, UE).",
+    "Inversión pensada para el tren de cercanías y de mercancías, no solo la alta velocidad.",
+    "Propuesta L&H: un plan de conservación estable que elimine el déficit de carreteras en diez años."
+   ],
+   "equilibrio": "Mantener bien lo que ya existe y terminar lo que conecta, en lugar de abrir obras nuevas sin cerrar las anteriores.",
+   "indicadores": [
+    {"nombre": "Déficit de inversión en conservación de carreteras", "actual": 13491, "objetivo": 0, "unidad": "millones €", "sentido": "bajar", "año": 2025, "fuente_url": "https://asefma.es/wp-content/uploads/2025/07/NP-Auditoria-estado-carreteras-AEC-2025_DEF_con-QR_03-07-25.pdf", "origen_objetivo": "Propuesta L&H"},
+    {"nombre": "Red de carreteras con deterioro grave", "actual": 53.5, "objetivo": 10, "unidad": "%", "sentido": "bajar", "año": 2025, "fuente_url": "https://asefma.es/wp-content/uploads/2025/07/NP-Auditoria-estado-carreteras-AEC-2025_DEF_con-QR_03-07-25.pdf", "origen_objetivo": "Propuesta L&H"},
+    {"nombre": "Corredor Mediterráneo en servicio", "actual": 36, "objetivo": 100, "unidad": "%", "sentido": "subir", "año": 2026, "fuente_url": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/transportes-movilidad-sostenible/paginas/2026/220426-puente-corredor-mediterraneo.aspx", "origen_objetivo": "Red básica TEN-T 2030 (UE)"}
+   ],
+   "retos": [
+    {"titulo": "Carreteras que se rompen más rápido de lo que se arreglan", "descripcion": "54.373 de los 101.700 km de la red necesitan actuación en menos de cuatro años; en 2022 eran unos 13.000 km muy graves (AEC, 2025).", "fuente_url": "https://asefma.es/wp-content/uploads/2025/07/NP-Auditoria-estado-carreteras-AEC-2025_DEF_con-QR_03-07-25.pdf"},
+    {"titulo": "Corredores ferroviarios a medio hacer", "descripcion": "El Corredor Mediterráneo tiene 658 km en servicio de 1.838; el resto está en obras o en proyecto (marzo 2026).", "fuente_url": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/transportes-movilidad-sostenible/paginas/2026/220426-puente-corredor-mediterraneo.aspx"}
+   ],
+   "soluciones": [
+    {"titulo": "Conservar a tiempo", "descripcion": "Arreglar pronto sale más barato: el déficit subió un 43% desde 2022, y casi la mitad del aumento se debe al propio deterioro (AEC, 2025).", "fuente_url": "https://asefma.es/wp-content/uploads/2025/07/NP-Auditoria-estado-carreteras-AEC-2025_DEF_con-QR_03-07-25.pdf"},
+    {"titulo": "Priorizar el ferrocarril que conecta", "descripcion": "Concentrar la inversión en corredores y terminales de mercancías; Adif ejecutó 5.230 millones en 2025 (+16%).", "fuente_url": "https://www.cnmc.es/sites/default/files/6703004.pdf"}
+   ],
+   "proyectos": [
+    {"nombre": "Corredor Mediterráneo", "lugar": "España (de Algeciras a la frontera francesa)", "descripcion": "Eje ferroviario de pasajeros y mercancías; el 83% del trazado ya está en obras o terminado (2026).", "web": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/transportes-movilidad-sostenible/paginas/2026/220426-puente-corredor-mediterraneo.aspx"}
+   ]
+  },
+  {
+   "id": "transporte_publico",
+   "nombre": "Transporte público",
+   "que_es": "Metro, autobús, cercanías y servicios a demanda para moverse sin coche propio.",
+   "actual": [
+    "Récord de 5.784 millones de viajeros en 2025, un 3,7% más que en 2024 (INE).",
+    "Con los descuentos desde 2022, el uso subió un 33% (Gobierno, 2025).",
+    "La cuota de los modos bonificados pasó del 11,9% (2022) al 15,4% (2023).",
+    "La Ley 9/2025 crea el transporte a demanda y un fondo estatal para el transporte urbano."
+   ],
+   "ideal": [
+    "Un servicio frecuente y asequible a pocos minutos de cada casa, también en zonas rurales.",
+    "Transporte a demanda en los pueblos, como ya prevé la Ley 9/2025.",
+    "Un billete integrado para todo el país y todos los operadores.",
+    "Propuesta L&H: un 20% más de viajeros en transporte público para 2030."
+   ],
+   "equilibrio": "Que el transporte público sea la opción más cómoda y barata, con una financiación estable que no dependa de prórrogas anuales.",
+   "indicadores": [
+    {"nombre": "Viajeros de transporte público al año", "actual": 5784, "objetivo": 7000, "unidad": "millones de viajeros", "sentido": "subir", "año": 2025, "fuente_url": "https://ine.es/dyngs/Prensa/TV1225.htm", "origen_objetivo": "Propuesta L&H"},
+    {"nombre": "Cuota modal de los transportes públicos bonificados", "actual": 15.4, "objetivo": 25, "unidad": "%", "sentido": "subir", "año": 2023, "fuente_url": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/transportes-movilidad-sostenible/Paginas/2025/240125-uso-transporte-publico-descuentos.aspx", "origen_objetivo": "Propuesta L&H"}
+   ],
+   "retos": [
+    {"titulo": "Un territorio muy disperso", "descripcion": "Solo en Castilla y León hacen falta 1.840 rutas a demanda para llegar a 5.094 núcleos de población (2024).", "fuente_url": "https://elmirondesoria.es/cyl/junta-de-castilla-y-leon/el-bono-rural-gratuito-de-transporte-a-la-demanda-crece-en-2024-hasta-los-249-238-usuarios/amp"},
+    {"titulo": "Descuentos que dependen de prórrogas", "descripcion": "Las ayudas al transporte costaron 3.400 millones hasta diciembre de 2024 y se renuevan año a año.", "fuente_url": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/transportes-movilidad-sostenible/Paginas/2025/240125-uso-transporte-publico-descuentos.aspx"}
+   ],
+   "soluciones": [
+    {"titulo": "Abonos baratos y sencillos", "descripcion": "Desde los descuentos de 2022 hay unos 100 millones de viajes más al mes, un 12% por encima de 2019 (2024).", "fuente_url": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/transportes-movilidad-sostenible/Paginas/2025/240125-uso-transporte-publico-descuentos.aspx"},
+    {"titulo": "Transporte a demanda rural", "descripcion": "Autobuses que salen solo si alguien reserva; en Castilla y León lo usaron 249.238 personas en 2024 (+6%).", "fuente_url": "https://elmirondesoria.es/cyl/junta-de-castilla-y-leon/el-bono-rural-gratuito-de-transporte-a-la-demanda-crece-en-2024-hasta-los-249-238-usuarios/amp"}
+   ],
+   "proyectos": [
+    {"nombre": "Transporte a la Demanda de Castilla y León", "lugar": "Castilla y León, España", "descripcion": "123 zonas con rutas reservables por teléfono o app, gratuitas con el bono rural.", "web": "https://elmirondesoria.es/cyl/junta-de-castilla-y-leon/el-bono-rural-gratuito-de-transporte-a-la-demanda-crece-en-2024-hasta-los-249-238-usuarios/amp"}
+   ]
+  },
+  {
+   "id": "vehiculo",
+   "nombre": "Vehículo privado",
+   "que_es": "Los coches, motos y furgonetas de particulares: cuántos son, su edad y su energía.",
+   "actual": [
+    "La edad media de los turismos sube a 14,6 años; la mitad supera los 15 (ANFAC, 2025).",
+    "Hay 746.367 enchufables y eléctricos puros: solo el 2,4% del parque (ANFAC, 2025).",
+    "Los eléctricos puros fueron el 8,85% de las ventas y los enchufables en total el 19,6% (2025).",
+    "Unos 6 de cada 10 turismos vendidos son SUV, más grandes y pesados (2026)."
+   ],
+   "ideal": [
+    "Un parque de 5,5 millones de vehículos eléctricos en 2030 (PNIEC).",
+    "Coches más ligeros y aerodinámicos, que gasten menos energía por kilómetro.",
+    "Más coche compartido y cooperativo, y menos coche parado en la calle.",
+    "Propuesta L&H: normas que faciliten los vehículos ultraligeros de diseño abierto."
+   ],
+   "equilibrio": "Menos coches, más ligeros y más usados, en vez de muchos coches pesados que pasan casi todo el día aparcados.",
+   "indicadores": [
+    {"nombre": "Edad media de los turismos", "actual": 14.6, "objetivo": 12.3, "unidad": "años", "sentido": "bajar", "año": 2025, "fuente_url": "https://es.motor1.com/news/804445/coches-espana-edad-media-antiguos/", "origen_objetivo": "Media UE (ACEA)"},
+    {"nombre": "Vehículos eléctricos y enchufables en circulación", "actual": 746367, "objetivo": 5500000, "unidad": "vehículos", "sentido": "subir", "año": 2025, "fuente_url": "https://es.motor1.com/news/804445/coches-espana-edad-media-antiguos/", "origen_objetivo": "PNIEC 2030"}
+   ],
+   "retos": [
+    {"titulo": "Un parque cada vez más viejo", "descripcion": "La edad media llega a 14,6 años, con grandes diferencias: 11,3 en Madrid y 16,9 en Castilla y León (ANFAC, 2025).", "fuente_url": "https://es.motor1.com/news/804445/coches-espana-edad-media-antiguos/"},
+    {"titulo": "Coches más grandes y pesados", "descripcion": "Los SUV ya son unos 6 de cada 10 turismos matriculados (2026), lo que sube el consumo y el espacio ocupado.", "fuente_url": "https://www.motor16.com/las-ultimas-noticias/coches-suv-dominan-mercado-espanol/"}
+   ],
+   "soluciones": [
+    {"titulo": "Vehículos ultraligeros, aerodinámicos y solares", "descripcion": "Prototipos como Aptera muestran que la forma y el poco peso permiten recorrer unos 64 km diarios solo con sol.", "fuente_url": "https://www.livescience.com/technology/electric-vehicles/new-solar-powered-ev-can-drive-40-miles-daily-using-the-power-of-the-sun-and-its-50-percent-more-efficient-than-a-tesla"},
+    {"titulo": "Coche eléctrico compartido y cooperativo", "descripcion": "Cooperativas de consumo ponen coches eléctricos al servicio de barrios y pueblos para que no haga falta tener uno propio.", "fuente_url": "https://www.cidob.org/en/publications/som-mobilitat-cooperative-whose-services-are-increasing-sustainable-mobility"}
+   ],
+   "proyectos": [
+    {"nombre": "Aeromóvil (Luz & Humanidad)", "lugar": "España", "descripcion": "Vehículo ultraligero aerodinámico y solar de bajo consumo, en diseño abierto.", "web": "https://humanity.wiki/aeromovil"},
+    {"nombre": "Som Mobilitat", "lugar": "Cataluña, España", "descripcion": "Cooperativa de coche eléctrico compartido entre vecinos y municipios.", "web": "https://www.cidob.org/en/publications/som-mobilitat-cooperative-whose-services-are-increasing-sustainable-mobility"}
+   ]
+  },
+  {
+   "id": "movilidad_activa",
+   "nombre": "A pie y en bici",
+   "que_es": "Caminar, pedalear y una ciudad con lo necesario cerca.",
+   "actual": [
+    "Solo el 3,2% usa a diario la bici para ir a trabajar o estudiar; el 22,8% la usa cada semana (2024).",
+    "Desde mayo de 2021 la mayoría de calles urbanas están limitadas a 30 km/h.",
+    "Hay más de 3.500 km de Vías Verdes en 139 antiguos trazados de tren (2025).",
+    "La Ley 9/2025 obliga a los municipios de más de 20.000 habitantes a tener plan de movilidad."
+   ],
+   "ideal": [
+    "Ciudad de proximidad: comercio, escuela y salud a un paseo de casa.",
+    "Calles donde peatones y bicis van primero, como en Pontevedra.",
+    "En Países Bajos, el 27% de los viajes se hace en bici (CBS, 2023).",
+    "Propuesta L&H: que 1 de cada 10 personas vaya a diario en bici a trabajar o estudiar."
+   ],
+   "equilibrio": "Devolver la calle a las personas sin dejar sin acceso a quien necesita el vehículo.",
+   "indicadores": [
+    {"nombre": "Personas que van a diario en bici a trabajar o estudiar", "actual": 3.2, "objetivo": 10, "unidad": "%", "sentido": "subir", "año": 2024, "fuente_url": "https://www.industriambiente.com/media/uploads/noticias/documentos/2024_RedBici_Barometro_Bicicleta_Informe.pdf", "origen_objetivo": "Propuesta L&H (Países Bajos: 27% de viajes en bici)"},
+    {"nombre": "Kilómetros de Vías Verdes", "actual": 3500, "objetivo": 7600, "unidad": "km", "sentido": "subir", "año": 2025, "fuente_url": "https://viasverdes.com/pdf/Folleto_ViasVerdes_2025.pdf", "origen_objetivo": "Propuesta L&H (todas las líneas sin servicio inventariadas en 1993)"}
+   ],
+   "retos": [
+    {"titulo": "La bici aún es minoritaria", "descripcion": "Solo un 3,2% la usa a diario para ir a trabajar o estudiar (2024), frente al 27% de viajes en bici en Países Bajos.", "fuente_url": "https://www.industriambiente.com/media/uploads/noticias/documentos/2024_RedBici_Barometro_Bicicleta_Informe.pdf"},
+    {"titulo": "Calles peligrosas para quien camina", "descripcion": "En 2025 murieron 222 peatones y 29 ciclistas en vías urbanas (DGT).", "fuente_url": "https://www.dgt.es/comunicacion/notas-de-prensa/20261015-balance-de-seguridad-vial-2025/"}
+   ],
+   "soluciones": [
+    {"titulo": "Ciudad a 30 km/h", "descripcion": "Con el límite de 30, en 2024 murieron un 16% menos de peatones y un 19% menos de ciclistas en ciudad que en 2019.", "fuente_url": "https://www.dgt.es/comunicacion/notas-de-prensa/20260511-celebracion-implantacion-30-kmh"},
+    {"titulo": "Prioridad peatonal", "descripcion": "Pontevedra peatonalizó su centro desde 1999: más de una década sin muertes por atropello y comercio local +7%.", "fuente_url": "https://es.euronews.com/2022/09/16/la-premiada-transformacion-de-pontevedra-en-favor-de-la-peatonalizacion-y-la-mejora-de-la-"}
+   ],
+   "proyectos": [
+    {"nombre": "Modelo urbano de Pontevedra", "lugar": "Pontevedra, España", "descripcion": "Centro peatonal y tráfico a 10 km/h; la ONU la premió en 2014 como ciudad cómoda para vivir.", "web": "https://es.euronews.com/2022/09/16/la-premiada-transformacion-de-pontevedra-en-favor-de-la-peatonalizacion-y-la-mejora-de-la-"},
+    {"nombre": "Programa Vías Verdes", "lugar": "España", "descripcion": "Antiguas vías de tren convertidas en caminos para andar y pedalear.", "web": "https://viasverdes.com"}
+   ]
+  },
+  {
+   "id": "mercancias",
+   "nombre": "Mercancías",
+   "que_es": "Cómo llegan los productos: camión, tren, barco y reparto.",
+   "actual": [
+    "El tren mueve solo el 4% de las toneladas-kilómetro (Ley 9/2025).",
+    "El tren de mercancías creció un 6,7% en 2025, hasta 9.822 millones de t-km (CNMC).",
+    "El transporte por carretera emite el 31,3% de los gases de efecto invernadero de España (2024).",
+    "Las emisiones de la carretera subieron un 2,9% en 2024 (MITECO)."
+   ],
+   "ideal": [
+    "Duplicar la cuota del tren hasta el 10% en 2030 (Mercancías 30).",
+    "Camiones sobre el tren en los grandes ejes (autopistas ferroviarias).",
+    "Suiza ya mueve en tren el 72% de las mercancías que cruzan los Alpes (2024).",
+    "Reparto final de última milla con vehículos eléctricos y ligeros."
+   ],
+   "equilibrio": "El camión para el tramo corto y el tren para la larga distancia, cada uno donde gasta menos energía.",
+   "indicadores": [
+    {"nombre": "Cuota del tren en el transporte de mercancías", "actual": 4, "objetivo": 10, "unidad": "% t-km", "sentido": "subir", "año": 2025, "fuente_url": "https://www.boe.es/eli/es/l/2025/12/03/9", "origen_objetivo": "Mercancías 30 (Ministerio de Transportes), 2030"},
+    {"nombre": "Mercancías movidas en tren", "actual": 9822, "objetivo": 25000, "unidad": "millones t-km", "sentido": "subir", "año": 2025, "fuente_url": "https://www.cnmc.es/sites/default/files/6703004.pdf", "origen_objetivo": "Propuesta L&H (coherente con el 10% de Mercancías 30)"}
+   ],
+   "retos": [
+    {"titulo": "Casi todo va por carretera", "descripcion": "El tren solo mueve el 4% de las toneladas-kilómetro; la Ley 9/2025 lo reconoce como cuota baja.", "fuente_url": "https://www.boe.es/eli/es/l/2025/12/03/9"},
+    {"titulo": "Emisiones que siguen subiendo", "descripcion": "El transporte supone el 33,7% de las emisiones de España y la carretera el 31,3% (2024).", "fuente_url": "https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/inventario-gases-efecto-invernadero/resumen-Inventario-GEI-2026.pdf"}
+   ],
+   "soluciones": [
+    {"titulo": "Autopistas ferroviarias", "descripcion": "Trenes que llevan los remolques de camión en largos trayectos; el Ministerio licitó 110 millones para el eje Algeciras–Zaragoza.", "fuente_url": "https://www.bolsamania.com/noticias/empresas/economia--transportes-licita-dos-contratos-de-110-millones-para-la-autopista-ferroviaria-entre-algeciras-y-zaragoza--16464668.html"},
+    {"titulo": "Política estable de cambio al tren", "descripcion": "Suiza combina túneles de base y reglas al camión: el tren lleva el 72,3% del tráfico que cruza los Alpes (2024).", "fuente_url": "https://www.verkehrsrundschau.de/nachrichten/transport-logistik/schweiz-leicht-ruecklaeufiger-bahnanteil-am-alpenquerenden-gueterverkehr-3555225"}
+   ],
+   "proyectos": [
+    {"nombre": "Autopista ferroviaria Algeciras–Zaragoza", "lugar": "España", "descripcion": "Adaptación de la línea para subir semirremolques de camión al tren.", "web": "https://www.bolsamania.com/noticias/empresas/economia--transportes-licita-dos-contratos-de-110-millones-para-la-autopista-ferroviaria-entre-algeciras-y-zaragoza--16464668.html"},
+    {"nombre": "Traslado de mercancías al tren en los Alpes", "lugar": "Suiza", "descripcion": "Túneles de base (Gotardo, Lötschberg) y política de traslado de camiones al ferrocarril.", "web": "https://www.bav.admin.ch/dam/bav/it/dokumente/verkehrstraeger/eisenbahn/gueterverkehr/1-semesterbericht-2024-aqgv.pdf.download.pdf/1.%20Semesterbericht%202024.pdf"}
+   ]
+  },
+  {
+   "id": "seguridad_vial",
+   "nombre": "Seguridad vial",
+   "que_es": "Evitar muertes y heridos graves en calles y carreteras.",
+   "actual": [
+    "1.775 personas murieron en el tráfico en 2025, solo 10 menos que en 2024 (DGT).",
+    "36 muertes por millón de habitantes, por debajo de la media UE de 43 (2025).",
+    "Tres de cada cuatro muertes en carretera ocurren en vías secundarias (2025).",
+    "En ciudad, el 81% de los fallecidos son peatones, ciclistas o motoristas (2025)."
+   ],
+   "ideal": [
+    "Mitad de muertos y heridos graves en 2030 (Estrategia de Seguridad Vial 2030).",
+    "Cero muertes en 2050 (objetivo de la UE).",
+    "Visión Cero: calles y carreteras diseñadas para que un error humano no mate.",
+    "Llegar a los niveles de Suecia: 20 muertes por millón de habitantes."
+   ],
+   "equilibrio": "Que la velocidad y el diseño de la vía se ajusten a lo que el cuerpo humano puede resistir.",
+   "indicadores": [
+    {"nombre": "Fallecidos en siniestros de tráfico", "actual": 1775, "objetivo": 878, "unidad": "personas/año", "sentido": "bajar", "año": 2025, "fuente_url": "https://www.dgt.es/comunicacion/notas-de-prensa/20261015-balance-de-seguridad-vial-2025/", "origen_objetivo": "Estrategia de Seguridad Vial 2030 (-50% sobre 1.755 de 2019)"},
+    {"nombre": "Fallecidos por millón de habitantes", "actual": 36, "objetivo": 20, "unidad": "por millón", "sentido": "bajar", "año": 2025, "fuente_url": "https://www.dgt.es/comunicacion/notas-de-prensa/20261015-balance-de-seguridad-vial-2025/", "origen_objetivo": "Mejor país de la UE (Suecia)"}
+   ],
+   "retos": [
+    {"titulo": "Diez años sin bajar", "descripcion": "Las muertes apenas bajaron un 0,6% en 2025 y siguen por encima de las 1.755 de 2019.", "fuente_url": "https://www.dgt.es/comunicacion/notas-de-prensa/20261015-balance-de-seguridad-vial-2025/"},
+    {"titulo": "Motoristas y carreteras secundarias", "descripcion": "En vías interurbanas murieron 304 motoristas en 2025 (+5), y 232 de ellos en carreteras convencionales.", "fuente_url": "https://www.dgt.es/comunicacion/notas-de-prensa/20260108-2025-finaliza-1119-fallecidos-en-siniestros-de-trafico-en-vias-interurbanas"}
+   ],
+   "soluciones": [
+    {"titulo": "Visión Cero", "descripcion": "Suecia diseña vías y velocidades para que ningún error sea mortal; hoy tiene 20 muertes por millón, de las más bajas de la UE.", "fuente_url": "https://bransch.trafikverket.se/en/startpage/operations/Operations-road/vision-zero-academy/Effects-of-Vision-Zero/"},
+    {"titulo": "Velocidad adaptada a la vía", "descripcion": "Con 30 km/h el riesgo de morir atropellado baja del 80% al 10%; casi 4 de cada 10 ciudades grandes redujeron su siniestralidad.", "fuente_url": "https://www.dgt.es/comunicacion/notas-de-prensa/20260511-celebracion-implantacion-30-kmh"}
+   ],
+   "proyectos": [
+    {"nombre": "Visión Cero", "lugar": "Suecia", "descripcion": "Política nacional desde 1997 que busca cero muertos y heridos graves en la vía.", "web": "https://bransch.trafikverket.se/en/startpage/operations/Operations-road/vision-zero-academy/Effects-of-Vision-Zero/"},
+    {"nombre": "Bilbao, ciudad 30", "lugar": "Bilbao, España", "descripcion": "Gran ciudad con 30 km/h en la mayoría de sus calles y menos siniestros (DGT, 2024).", "web": "https://revista.dgt.es/images/1-La-nueva-transformacion-de-Bilbao.-Ayto-Bilbao.pdf"}
+   ]
+  }
+ ],
+ "flujos": [
+  {"de": "infraestructuras", "a": "transporte_publico", "etiqueta": "vías y estaciones"},
+  {"de": "infraestructuras", "a": "mercancias", "etiqueta": "corredores"},
+  {"de": "mercancias", "a": "infraestructuras", "etiqueta": "desgaste"},
+  {"de": "transporte_publico", "a": "vehiculo", "etiqueta": "menos coches"},
+  {"de": "movilidad_activa", "a": "transporte_publico", "etiqueta": "viajeros"},
+  {"de": "vehiculo", "a": "seguridad_vial", "etiqueta": "riesgo"},
+  {"de": "seguridad_vial", "a": "movilidad_activa", "etiqueta": "calles seguras"},
+  {"de": "vehiculo", "a": "infraestructuras", "etiqueta": "tráfico"}
+ ],
+ "reasignacion": {
+  "Dependencia del coche y vehículos cada vez más grandes y pesados": ["vehiculo", "movilidad_activa"],
+  "El transporte, primera fuente de emisiones": ["vehiculo", "mercancias"],
+  "Despoblación y falta de transporte público rural": ["transporte_publico"],
+  "Calles ocupadas por el coche": ["movilidad_activa"],
+  "El coste de moverse pesa en los hogares": ["transporte_publico", "vehiculo"],
+  "Normativa que frena los vehículos ultraligeros": ["vehiculo"],
+  "Siniestralidad vial": ["seguridad_vial"],
+  "Vehículos ultraligeros, aerodinámicos y solares": ["vehiculo"],
+  "Ciudad de proximidad (15 minutos)": ["movilidad_activa"],
+  "Prioridad peatonal y ciclista: supermanzanas": ["movilidad_activa", "seguridad_vial"],
+  "Transporte a demanda rural": ["transporte_publico"],
+  "Carsharing comunitario y cooperativo": ["vehiculo", "transporte_publico"],
+  "Electrificación con energía solar comunitaria": ["vehiculo"],
+  "Tren y vías verdes": ["infraestructuras", "movilidad_activa"],
+  "Som Mobilitat": ["vehiculo"],
+  "Modelo urbano de Pontevedra": ["movilidad_activa", "seguridad_vial"],
+  "Aptera": ["vehiculo"],
+  "Podbike Frikar (velomóvil)": ["vehiculo", "movilidad_activa"],
+  "Groningen, ciudad ciclista": ["movilidad_activa"],
+  "Transporte a la Demanda de Castilla y León": ["transporte_publico"],
+  "Programa Vías Verdes": ["movilidad_activa", "infraestructuras"],
+  "Aeromóvil (Luz & Humanidad)": ["vehiculo"]
+ }
+}

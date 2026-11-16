@@ -33,12 +33,7 @@ const SECTORES = [
      "escalas": [
       "individuo"
      ],
-     "subtemas": [
-      "hogar",
-      "renovables",
-      "red",
-      "pobreza"
-     ]
+     "subtemas": []
     },
     {
      "titulo": "La comunidad y el pueblo: energía compartida",
@@ -57,13 +52,7 @@ const SECTORES = [
       "comunidad",
       "pueblo"
      ],
-     "subtemas": [
-      "hogar",
-      "comunidades",
-      "renovables",
-      "red",
-      "pobreza"
-     ]
+     "subtemas": []
     },
     {
      "titulo": "El territorio y la red: renovables con la tierra y redes inteligentes",
@@ -83,12 +72,7 @@ const SECTORES = [
       "region",
       "pais"
      ],
-     "subtemas": [
-      "hogar",
-      "comunidades",
-      "renovables",
-      "red"
-     ]
+     "subtemas": []
     }
    ],
    "arte": {
@@ -107,8 +91,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "hogar",
-     "pobreza"
+     "mercado",
+     "consumo"
     ]
    },
    {
@@ -120,7 +104,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "red"
+     "generacion",
+     "consumo"
     ]
    },
    {
@@ -132,8 +117,7 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "hogar",
-     "renovables"
+     "consumo"
     ]
    },
    {
@@ -145,7 +129,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "red"
+     "distribucion",
+     "transporte"
     ]
    },
    {
@@ -157,9 +142,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "hogar",
-     "red",
-     "pobreza"
+     "transporte",
+     "almacenamiento"
     ]
    },
    {
@@ -171,7 +155,128 @@ const SECTORES = [
      "planeta"
     ],
     "subtemas": [
-     "pobreza"
+     "mercado",
+     "distribucion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Seguimos importando casi 7 de cada 10 unidades de energía",
+    "texto": "La dependencia exterior fue del 68,6% en 2025, por encima del 61% previsto por el PNIEC para ese año; el petróleo del transporte pesa mucho.",
+    "fuente": "https://www.foronuclear.org/wp-content/uploads/2026/06/Energia_2026.pdf",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "generacion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "El sol del mediodía vale cada vez menos",
+    "texto": "En 2025 la electricidad costó 33 €/MWh de media en horas solares y 101 €/MWh por la tarde-noche, lo que resta ingresos a nuevas plantas solares.",
+    "fuente": "https://www.energias-renovables.com/panorama/el-precio-de-la-electricidad-en-espa-20260107",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "generacion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Una isla eléctrica",
+    "texto": "Con unos 3 GW de intercambio, la Península es de las zonas peor conectadas de Europa (REE); el enlace por el golfo de Bizkaia llevará Francia de 2.800 a 5.000 MW.",
+    "fuente": "https://www.ree.es/en/ecological-transition/interconnections",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "transporte"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Estabilidad de la red tras el apagón",
+    "texto": "ENTSO-E (marzo 2026) señala un control de tensión insuficiente, desconexiones en cascada y normas que no exigían control dinámico; reparte responsabilidades entre varios actores.",
+    "fuente": "https://www.eldiario.es/economia/expertos-europeos-reparten-culpas-gran-apagon-espana-fallo-sistemico-impulsado-problemas-tecnicos-operativos-regulatorios_1_13082766.amp.html",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "transporte"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Redes sin hueco para conectar más",
+    "texto": "Las grandes distribuidoras publicaron en septiembre de 2025 que el 83,4% de sus nudos estaba saturado, frenando viviendas, industria y recarga.",
+    "fuente": "https://forbes.es/economia/794008/el-834-de-los-nudos-de-la-red-de-distribucion-electrica-estan-ya-saturados-segun-las-grandes-electricas/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "distribucion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "El autoconsumo se frena",
+    "texto": "En 2025 se instalaron 1.214 MW, un 15% menos: tercer año seguido de caída, lejos del ritmo del PNIEC (APPA).",
+    "fuente": "https://www.appa.es/wp-content/uploads/2026/02/NdP-APPA-Renovables-El-autoconsumo-consolida-su-aportacion-pero-encadena-tres-anos-de-contraccion-y-reclama-una-fiscalidad-estable_vf.pdf",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "distribucion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Una factura que sube aunque el sol abarate la luz",
+    "texto": "El usuario medio pagó 975,88 € en 2025, un 15,5% más que en 2024, según FACUA.",
+    "fuente": "https://roams.es/actualidad/energia/el-palo-de-la-factura-de-luz-en-2025-los-tres-motivos-por-los-que-fue-la-tercera-mas-alta-de-la-historia/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "mercado"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Electrificación lenta",
+    "texto": "Solo una cuarta parte de la energía final es electricidad (2024); en transporte, apenas el 2% (AIE).",
+    "fuente": "https://www.hibridosyelectricos.com/energia/56-electricidad-produce-espana-ya-es-renovable-aie-destapa-gran-agujero-pais-todavia-no-ha-cerrado_90431_102.html",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "consumo"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Muy poco almacenamiento para tanto sol",
+    "texto": "Con 3,4 GW en 2025, España está lejos de los 22,5 GW del PNIEC; las baterías apenas suman 96 MW (REE).",
+    "fuente": "https://www.ree.es/sites/default/files/2026-03/1103_NP_ISE_2025.pdf",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "almacenamiento"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Proyectos de baterías atascados en trámites",
+    "texto": "Un informe del Foro Regulación Inteligente (2026) estima más de 20 GW de proyectos de almacenamiento bloqueados en la tramitación.",
+    "fuente": "https://www.merca2.es/2026/07/19/dependencia-energetica-espana-68-por-ciento-2420141/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "almacenamiento"
     ]
    }
   ],
@@ -186,8 +291,7 @@ const SECTORES = [
      "individuo"
     ],
     "subtemas": [
-     "hogar",
-     "renovables"
+     "consumo"
     ]
    },
    {
@@ -200,9 +304,8 @@ const SECTORES = [
      "individuo"
     ],
     "subtemas": [
-     "hogar",
-     "renovables",
-     "red"
+     "distribucion",
+     "generacion"
     ]
    },
    {
@@ -217,10 +320,8 @@ const SECTORES = [
      "pueblo"
     ],
     "subtemas": [
-     "hogar",
-     "comunidades",
-     "renovables",
-     "pobreza"
+     "distribucion",
+     "mercado"
     ]
    },
    {
@@ -233,8 +334,7 @@ const SECTORES = [
      "region"
     ],
     "subtemas": [
-     "renovables",
-     "red"
+     "almacenamiento"
     ]
    },
    {
@@ -247,8 +347,7 @@ const SECTORES = [
      "region"
     ],
     "subtemas": [
-     "renovables",
-     "red"
+     "transporte"
     ]
    },
    {
@@ -261,9 +360,140 @@ const SECTORES = [
      "planeta"
     ],
     "subtemas": [
-     "renovables",
-     "red",
-     "pobreza"
+     "distribucion",
+     "generacion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Parques renovables con participación ciudadana",
+    "texto": "Vecinos y municipios son copropietarios de los parques; en Copenhague una cooperativa posee la mitad del parque marino de Middelgrunden desde 2000.",
+    "fuente": "https://en.wikipedia.org/wiki/Middelgrunden_wind_farm",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "generacion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Mezclar mejor sol, viento e híbridos",
+    "texto": "La AIE (2026) recomienda equilibrar eólica, solar y plantas híbridas para producir también fuera de las horas de sol.",
+    "fuente": "https://roams.es/actualidad/energia/espana-paso-35-56-electricidad-renovable-aie-pide-mas-electrificacion/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "generacion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Control de tensión también con renovables",
+    "texto": "La CNMC aprobó en julio de 2026 que plantas y baterías de 1 MW o más presten control de tensión, con pago por el servicio.",
+    "fuente": "https://cnmc.es/prensa/procedimientos-control-tension-20260710?back=news&page=0",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "transporte"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Más red e interconexiones planificadas",
+    "texto": "La planificación a 2030 prevé más de 17.000 M€, 193 subestaciones y 8.164 km de líneas repotenciadas (propuesta, septiembre 2026).",
+    "fuente": "https://www.miteco.gob.es/es/prensa/ultimas-noticias/2026/septiembre/sara-aagesen-anuncia-una-inversion-superior-a-17-000-millones-en.html",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "transporte"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Retribución y límites de inversión revisados",
+    "texto": "La CNMC fijó una rentabilidad del 6,58% para redes en 2026-2031, y el Gobierno propuso superar los límites de inversión ligados a nuevas demandas.",
+    "fuente": "https://www.cnmc.es/prensa/circulares-retribucion-electrica-20251222",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "distribucion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Tarifa regulada menos expuesta a sobresaltos",
+    "texto": "Desde la reforma del PVPC, el 55% de su precio en 2026 sale de contratos a plazo, que suavizan los picos del mercado diario (CNMC).",
+    "fuente": "https://www.diariodeleon.es/economia/260814/2094189/numero-consumidores-acogidos-pvpc-luz-cae.html",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "mercado"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Reequilibrar impuestos y cargos",
+    "texto": "La AIE (2026) recomienda cargar menos la electricidad y proteger a los vulnerables para acelerar la electrificación.",
+    "fuente": "https://roams.es/actualidad/energia/espana-paso-35-56-electricidad-renovable-aie-pide-mas-electrificacion/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "mercado"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Rehabilitación por barrios con oficina local",
+    "texto": "Una oficina de barrio gestiona obras, ayudas y financiación por edificio; el modelo Opengela se aplica en barrios vulnerables de Euskadi.",
+    "fuente": "https://www.euskadi.eus/gobierno-vasco/-/noticia/2025/ana-telleria-gobierno-vasco-ha-demostrado-que-es-posible-regenerar-barrios-vulnerables-enfoque-integral-y-justo/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "consumo"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Electrificar edificios, industria y transporte",
+    "texto": "La AIE (2026) señala la electrificación como la vía para aprovechar del todo las renovables españolas.",
+    "fuente": "https://roams.es/actualidad/energia/espana-paso-35-56-electricidad-renovable-aie-pide-mas-electrificacion/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "consumo"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Pagar por estar disponible: mecanismo de capacidad",
+    "texto": "Aprobado por la Comisión Europea en 2026 (9.000 M€): paga a baterías, bombeo, gas y demanda flexible por estar listos cuando la red lo necesita.",
+    "fuente": "https://www.merca2.es/2026/06/02/bruselas-aprueba-mecanismo-capacidad-espana-2388439/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "almacenamiento"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Baterías que estabilizan la red",
+    "texto": "En Australia, la batería de Hornsdale (150 MW) presta servicios de estabilidad y fue autorizada a dar inercia a la red en 2022.",
+    "fuente": "https://www.spglobal.com/energy/en/news-research/latest-news/energy-transition/072722-neoens-150-mw-south-australian-battery-cleared-to-provide-inertia-services",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "almacenamiento"
     ]
    }
   ],
@@ -279,8 +509,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "comunidades",
-     "renovables"
+     "mercado",
+     "generacion"
     ]
    },
    {
@@ -295,10 +525,7 @@ const SECTORES = [
      "pueblo"
     ],
     "subtemas": [
-     "hogar",
-     "comunidades",
-     "renovables",
-     "pobreza"
+     "distribucion"
     ]
    },
    {
@@ -313,8 +540,7 @@ const SECTORES = [
      "region"
     ],
     "subtemas": [
-     "comunidades",
-     "renovables"
+     "mercado"
     ]
    },
    {
@@ -329,8 +555,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "comunidades",
-     "renovables"
+     "generacion",
+     "distribucion"
     ]
    },
    {
@@ -345,8 +571,7 @@ const SECTORES = [
      "pueblo"
     ],
     "subtemas": [
-     "comunidades",
-     "renovables"
+     "generacion"
     ]
    },
    {
@@ -361,7 +586,8 @@ const SECTORES = [
      "pueblo"
     ],
     "subtemas": [
-     "renovables"
+     "generacion",
+     "consumo"
     ]
    },
    {
@@ -376,10 +602,68 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "hogar",
-     "comunidades",
-     "renovables",
-     "pobreza"
+     "generacion",
+     "distribucion"
+    ]
+   },
+   {
+    "nombre": "Interconexión del golfo de Bizkaia",
+    "lugar": "Gatika (Bizkaia) – Cubnezais (Francia)",
+    "tipo": null,
+    "texto": "Cable submarino de 276 km de REE y RTE que elevará el intercambio con Francia a 5.000 MW.",
+    "web": "https://www.ree.es/en/press-office/news/press-release/2026/07/red-electrica-trasladara-grandes-equipamientos-golfo-bizkaia",
+    "fuente": null,
+    "escalas": [
+     "pais",
+     "planeta"
+    ],
+    "subtemas": [
+     "transporte"
+    ]
+   },
+   {
+    "nombre": "Opengela",
+    "lugar": "Euskadi (Otxarkoaga, Bilbao, y otros barrios)",
+    "tipo": null,
+    "texto": "Programa de regeneración urbana con oficinas de barrio para rehabilitar edificios y ganar eficiencia.",
+    "web": "https://www.euskadi.eus/gobierno-vasco/-/noticia/2021/orain-otxar-avanza-rehabilitacion-edificios-proyecto-autoconsumo-energia-y-propuestas-mejora-habilitabilidad/",
+    "fuente": null,
+    "escalas": [
+     "pais",
+     "planeta"
+    ],
+    "subtemas": [
+     "consumo"
+    ]
+   },
+   {
+    "nombre": "Central de bombeo Salto de Chira",
+    "lugar": "Gran Canaria",
+    "tipo": null,
+    "texto": "Bombeo reversible de 200 MW y 3,5 GWh de REE que elevará un 37% la renovable de la isla.",
+    "web": "https://www.ree.es/sites/default/files/2025-03/NdP_Salto_Chira_visita_Calvino_Aagesen.pdf",
+    "fuente": null,
+    "escalas": [
+     "pais",
+     "planeta"
+    ],
+    "subtemas": [
+     "almacenamiento"
+    ]
+   },
+   {
+    "nombre": "Hornsdale Power Reserve",
+    "lugar": "Australia Meridional",
+    "tipo": null,
+    "texto": "Gran batería de 150 MW que estabiliza la red junto a un parque eólico.",
+    "web": "https://www.pv-tech.org/news/neoen-lauds-grid-stability-gains-as-south-australian-battery-reaches-150mw-capacity",
+    "fuente": null,
+    "escalas": [
+     "pais",
+     "planeta"
+    ],
+    "subtemas": [
+     "almacenamiento"
     ]
    }
   ],
@@ -391,24 +675,28 @@ const SECTORES = [
   ],
   "subtemas": [
    {
-    "id": "hogar",
-    "nombre": "Hogar y eficiencia"
+    "id": "generacion",
+    "nombre": "Generación"
    },
    {
-    "id": "comunidades",
-    "nombre": "Comunidades energéticas"
+    "id": "transporte",
+    "nombre": "Red de transporte"
    },
    {
-    "id": "renovables",
-    "nombre": "Renovables y territorio"
+    "id": "distribucion",
+    "nombre": "Distribución"
    },
    {
-    "id": "red",
-    "nombre": "Red y almacenamiento"
+    "id": "mercado",
+    "nombre": "Mercado y precio"
    },
    {
-    "id": "pobreza",
-    "nombre": "Pobreza y acceso"
+    "id": "consumo",
+    "nombre": "Consumo y eficiencia"
+   },
+   {
+    "id": "almacenamiento",
+    "nombre": "Almacenamiento y flexibilidad"
    }
   ]
  },
@@ -463,11 +751,7 @@ const SECTORES = [
      "escalas": [
       "individuo"
      ],
-     "subtemas": [
-      "vehiculo",
-      "ciudad",
-      "emisiones"
-     ]
+     "subtemas": []
     },
     {
      "titulo": "Movilidad urbana",
@@ -510,9 +794,7 @@ const SECTORES = [
      "escalas": [
       "pueblo"
      ],
-     "subtemas": [
-      "ciudad"
-     ]
+     "subtemas": []
     },
     {
      "titulo": "Movilidad territorial",
@@ -556,13 +838,7 @@ const SECTORES = [
       "provincia",
       "region"
      ],
-     "subtemas": [
-      "vehiculo",
-      "ciudad",
-      "transporte",
-      "rural",
-      "emisiones"
-     ]
+     "subtemas": []
     }
    ],
    "arte": {
@@ -581,7 +857,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "vehiculo"
+     "vehiculo",
+     "movilidad_activa"
     ]
    },
    {
@@ -593,7 +870,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "emisiones"
+     "vehiculo",
+     "mercancias"
     ]
    },
    {
@@ -606,10 +884,7 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "vehiculo",
-     "ciudad",
-     "transporte",
-     "rural"
+     "transporte_publico"
     ]
    },
    {
@@ -622,7 +897,7 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "ciudad"
+     "movilidad_activa"
     ]
    },
    {
@@ -636,8 +911,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "ciudad",
-     "rural"
+     "transporte_publico",
+     "vehiculo"
     ]
    },
    {
@@ -650,8 +925,7 @@ const SECTORES = [
      "continente"
     ],
     "subtemas": [
-     "vehiculo",
-     "ciudad"
+     "vehiculo"
     ]
    },
    {
@@ -664,8 +938,151 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "ciudad",
-     "seguridad"
+     "seguridad_vial"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Carreteras que se rompen más rápido de lo que se arreglan",
+    "texto": "54.373 de los 101.700 km de la red necesitan actuación en menos de cuatro años; en 2022 eran unos 13.000 km muy graves (AEC, 2025).",
+    "fuente": "https://asefma.es/wp-content/uploads/2025/07/NP-Auditoria-estado-carreteras-AEC-2025_DEF_con-QR_03-07-25.pdf",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "infraestructuras"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Corredores ferroviarios a medio hacer",
+    "texto": "El Corredor Mediterráneo tiene 658 km en servicio de 1.838; el resto está en obras o en proyecto (marzo 2026).",
+    "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/transportes-movilidad-sostenible/paginas/2026/220426-puente-corredor-mediterraneo.aspx",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "infraestructuras"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Un territorio muy disperso",
+    "texto": "Solo en Castilla y León hacen falta 1.840 rutas a demanda para llegar a 5.094 núcleos de población (2024).",
+    "fuente": "https://elmirondesoria.es/cyl/junta-de-castilla-y-leon/el-bono-rural-gratuito-de-transporte-a-la-demanda-crece-en-2024-hasta-los-249-238-usuarios/amp",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "transporte_publico"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Descuentos que dependen de prórrogas",
+    "texto": "Las ayudas al transporte costaron 3.400 millones hasta diciembre de 2024 y se renuevan año a año.",
+    "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/transportes-movilidad-sostenible/Paginas/2025/240125-uso-transporte-publico-descuentos.aspx",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "transporte_publico"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Un parque cada vez más viejo",
+    "texto": "La edad media llega a 14,6 años, con grandes diferencias: 11,3 en Madrid y 16,9 en Castilla y León (ANFAC, 2025).",
+    "fuente": "https://es.motor1.com/news/804445/coches-espana-edad-media-antiguos/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "vehiculo"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Coches más grandes y pesados",
+    "texto": "Los SUV ya son unos 6 de cada 10 turismos matriculados (2026), lo que sube el consumo y el espacio ocupado.",
+    "fuente": "https://www.motor16.com/las-ultimas-noticias/coches-suv-dominan-mercado-espanol/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "vehiculo"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "La bici aún es minoritaria",
+    "texto": "Solo un 3,2% la usa a diario para ir a trabajar o estudiar (2024), frente al 27% de viajes en bici en Países Bajos.",
+    "fuente": "https://www.industriambiente.com/media/uploads/noticias/documentos/2024_RedBici_Barometro_Bicicleta_Informe.pdf",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "movilidad_activa"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Calles peligrosas para quien camina",
+    "texto": "En 2025 murieron 222 peatones y 29 ciclistas en vías urbanas (DGT).",
+    "fuente": "https://www.dgt.es/comunicacion/notas-de-prensa/20261015-balance-de-seguridad-vial-2025/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "movilidad_activa"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Casi todo va por carretera",
+    "texto": "El tren solo mueve el 4% de las toneladas-kilómetro; la Ley 9/2025 lo reconoce como cuota baja.",
+    "fuente": "https://www.boe.es/eli/es/l/2025/12/03/9",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "mercancias"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Emisiones que siguen subiendo",
+    "texto": "El transporte supone el 33,7% de las emisiones de España y la carretera el 31,3% (2024).",
+    "fuente": "https://www.miteco.gob.es/content/dam/miteco/es/calidad-y-evaluacion-ambiental/temas/sistema-espanol-de-inventario-sei-/inventario-gases-efecto-invernadero/resumen-Inventario-GEI-2026.pdf",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "mercancias"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Diez años sin bajar",
+    "texto": "Las muertes apenas bajaron un 0,6% en 2025 y siguen por encima de las 1.755 de 2019.",
+    "fuente": "https://www.dgt.es/comunicacion/notas-de-prensa/20261015-balance-de-seguridad-vial-2025/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "seguridad_vial"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Motoristas y carreteras secundarias",
+    "texto": "En vías interurbanas murieron 304 motoristas en 2025 (+5), y 232 de ellos en carreteras convencionales.",
+    "fuente": "https://www.dgt.es/comunicacion/notas-de-prensa/20260108-2025-finaliza-1119-fallecidos-en-siniestros-de-trafico-en-vias-interurbanas",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "seguridad_vial"
     ]
    }
   ],
@@ -679,8 +1096,7 @@ const SECTORES = [
      "planeta"
     ],
     "subtemas": [
-     "vehiculo",
-     "emisiones"
+     "vehiculo"
     ]
    },
    {
@@ -694,7 +1110,7 @@ const SECTORES = [
      "planeta"
     ],
     "subtemas": [
-     "ciudad"
+     "movilidad_activa"
     ]
    },
    {
@@ -707,8 +1123,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "ciudad",
-     "seguridad"
+     "movilidad_activa",
+     "seguridad_vial"
     ]
    },
    {
@@ -721,8 +1137,7 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "transporte",
-     "rural"
+     "transporte_publico"
     ]
    },
    {
@@ -737,7 +1152,7 @@ const SECTORES = [
     ],
     "subtemas": [
      "vehiculo",
-     "transporte"
+     "transporte_publico"
     ]
    },
    {
@@ -750,10 +1165,7 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "vehiculo",
-     "ciudad",
-     "transporte",
-     "emisiones"
+     "vehiculo"
     ]
    },
    {
@@ -766,9 +1178,128 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "ciudad",
-     "transporte",
-     "rural"
+     "infraestructuras",
+     "movilidad_activa"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Conservar a tiempo",
+    "texto": "Arreglar pronto sale más barato: el déficit subió un 43% desde 2022, y casi la mitad del aumento se debe al propio deterioro (AEC, 2025).",
+    "fuente": "https://asefma.es/wp-content/uploads/2025/07/NP-Auditoria-estado-carreteras-AEC-2025_DEF_con-QR_03-07-25.pdf",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "infraestructuras"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Priorizar el ferrocarril que conecta",
+    "texto": "Concentrar la inversión en corredores y terminales de mercancías; Adif ejecutó 5.230 millones en 2025 (+16%).",
+    "fuente": "https://www.cnmc.es/sites/default/files/6703004.pdf",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "infraestructuras"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Abonos baratos y sencillos",
+    "texto": "Desde los descuentos de 2022 hay unos 100 millones de viajes más al mes, un 12% por encima de 2019 (2024).",
+    "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/transportes-movilidad-sostenible/Paginas/2025/240125-uso-transporte-publico-descuentos.aspx",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "transporte_publico"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Coche eléctrico compartido y cooperativo",
+    "texto": "Cooperativas de consumo ponen coches eléctricos al servicio de barrios y pueblos para que no haga falta tener uno propio.",
+    "fuente": "https://www.cidob.org/en/publications/som-mobilitat-cooperative-whose-services-are-increasing-sustainable-mobility",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "vehiculo"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Ciudad a 30 km/h",
+    "texto": "Con el límite de 30, en 2024 murieron un 16% menos de peatones y un 19% menos de ciclistas en ciudad que en 2019.",
+    "fuente": "https://www.dgt.es/comunicacion/notas-de-prensa/20260511-celebracion-implantacion-30-kmh",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "movilidad_activa"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Prioridad peatonal",
+    "texto": "Pontevedra peatonalizó su centro desde 1999: más de una década sin muertes por atropello y comercio local +7%.",
+    "fuente": "https://es.euronews.com/2022/09/16/la-premiada-transformacion-de-pontevedra-en-favor-de-la-peatonalizacion-y-la-mejora-de-la-",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "movilidad_activa"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Autopistas ferroviarias",
+    "texto": "Trenes que llevan los remolques de camión en largos trayectos; el Ministerio licitó 110 millones para el eje Algeciras–Zaragoza.",
+    "fuente": "https://www.bolsamania.com/noticias/empresas/economia--transportes-licita-dos-contratos-de-110-millones-para-la-autopista-ferroviaria-entre-algeciras-y-zaragoza--16464668.html",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "mercancias"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Política estable de cambio al tren",
+    "texto": "Suiza combina túneles de base y reglas al camión: el tren lleva el 72,3% del tráfico que cruza los Alpes (2024).",
+    "fuente": "https://www.verkehrsrundschau.de/nachrichten/transport-logistik/schweiz-leicht-ruecklaeufiger-bahnanteil-am-alpenquerenden-gueterverkehr-3555225",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "mercancias"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Visión Cero",
+    "texto": "Suecia diseña vías y velocidades para que ningún error sea mortal; hoy tiene 20 muertes por millón, de las más bajas de la UE.",
+    "fuente": "https://bransch.trafikverket.se/en/startpage/operations/Operations-road/vision-zero-academy/Effects-of-Vision-Zero/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "seguridad_vial"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Velocidad adaptada a la vía",
+    "texto": "Con 30 km/h el riesgo de morir atropellado baja del 80% al 10%; casi 4 de cada 10 ciudades grandes redujeron su siniestralidad.",
+    "fuente": "https://www.dgt.es/comunicacion/notas-de-prensa/20260511-celebracion-implantacion-30-kmh",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "seguridad_vial"
     ]
    }
   ],
@@ -785,8 +1316,7 @@ const SECTORES = [
      "region"
     ],
     "subtemas": [
-     "vehiculo",
-     "transporte"
+     "vehiculo"
     ]
    },
    {
@@ -800,8 +1330,8 @@ const SECTORES = [
      "pueblo"
     ],
     "subtemas": [
-     "ciudad",
-     "seguridad"
+     "movilidad_activa",
+     "seguridad_vial"
     ]
    },
    {
@@ -816,8 +1346,7 @@ const SECTORES = [
      "planeta"
     ],
     "subtemas": [
-     "vehiculo",
-     "emisiones"
+     "vehiculo"
     ]
    },
    {
@@ -832,7 +1361,8 @@ const SECTORES = [
      "continente"
     ],
     "subtemas": [
-     "vehiculo"
+     "vehiculo",
+     "movilidad_activa"
     ]
    },
    {
@@ -846,7 +1376,7 @@ const SECTORES = [
      "pueblo"
     ],
     "subtemas": [
-     "ciudad"
+     "movilidad_activa"
     ]
    },
    {
@@ -860,8 +1390,7 @@ const SECTORES = [
      "region"
     ],
     "subtemas": [
-     "transporte",
-     "rural"
+     "transporte_publico"
     ]
    },
    {
@@ -875,7 +1404,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "rural"
+     "movilidad_activa",
+     "infraestructuras"
     ]
    },
    {
@@ -889,8 +1419,79 @@ const SECTORES = [
      "individuo"
     ],
     "subtemas": [
-     "vehiculo",
-     "emisiones"
+     "vehiculo"
+    ]
+   },
+   {
+    "nombre": "Corredor Mediterráneo",
+    "lugar": "España (de Algeciras a la frontera francesa)",
+    "tipo": null,
+    "texto": "Eje ferroviario de pasajeros y mercancías; el 83% del trazado ya está en obras o terminado (2026).",
+    "web": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/transportes-movilidad-sostenible/paginas/2026/220426-puente-corredor-mediterraneo.aspx",
+    "fuente": null,
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "infraestructuras"
+    ]
+   },
+   {
+    "nombre": "Autopista ferroviaria Algeciras–Zaragoza",
+    "lugar": "España",
+    "tipo": null,
+    "texto": "Adaptación de la línea para subir semirremolques de camión al tren.",
+    "web": "https://www.bolsamania.com/noticias/empresas/economia--transportes-licita-dos-contratos-de-110-millones-para-la-autopista-ferroviaria-entre-algeciras-y-zaragoza--16464668.html",
+    "fuente": null,
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "mercancias"
+    ]
+   },
+   {
+    "nombre": "Traslado de mercancías al tren en los Alpes",
+    "lugar": "Suiza",
+    "tipo": null,
+    "texto": "Túneles de base (Gotardo, Lötschberg) y política de traslado de camiones al ferrocarril.",
+    "web": "https://www.bav.admin.ch/dam/bav/it/dokumente/verkehrstraeger/eisenbahn/gueterverkehr/1-semesterbericht-2024-aqgv.pdf.download.pdf/1.%20Semesterbericht%202024.pdf",
+    "fuente": null,
+    "escalas": [
+     "pais",
+     "planeta"
+    ],
+    "subtemas": [
+     "mercancias"
+    ]
+   },
+   {
+    "nombre": "Visión Cero",
+    "lugar": "Suecia",
+    "tipo": null,
+    "texto": "Política nacional desde 1997 que busca cero muertos y heridos graves en la vía.",
+    "web": "https://bransch.trafikverket.se/en/startpage/operations/Operations-road/vision-zero-academy/Effects-of-Vision-Zero/",
+    "fuente": null,
+    "escalas": [
+     "pais",
+     "planeta"
+    ],
+    "subtemas": [
+     "seguridad_vial"
+    ]
+   },
+   {
+    "nombre": "Bilbao, ciudad 30",
+    "lugar": "Bilbao, España",
+    "tipo": null,
+    "texto": "Gran ciudad con 30 km/h en la mayoría de sus calles y menos siniestros (DGT, 2024).",
+    "web": "https://revista.dgt.es/images/1-La-nueva-transformacion-de-Bilbao.-Ayto-Bilbao.pdf",
+    "fuente": null,
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "seguridad_vial"
     ]
    }
   ],
@@ -902,27 +1503,27 @@ const SECTORES = [
   ],
   "subtemas": [
    {
+    "id": "infraestructuras",
+    "nombre": "Infraestructuras"
+   },
+   {
+    "id": "transporte_publico",
+    "nombre": "Transporte público"
+   },
+   {
     "id": "vehiculo",
-    "nombre": "Vehículo ligero"
+    "nombre": "Vehículo privado"
    },
    {
-    "id": "ciudad",
-    "nombre": "Ciudad y calle"
+    "id": "movilidad_activa",
+    "nombre": "A pie y en bici"
    },
    {
-    "id": "transporte",
-    "nombre": "Transporte público y compartido"
+    "id": "mercancias",
+    "nombre": "Mercancías"
    },
    {
-    "id": "rural",
-    "nombre": "Mundo rural y territorio"
-   },
-   {
-    "id": "emisiones",
-    "nombre": "Emisiones y energía"
-   },
-   {
-    "id": "seguridad",
+    "id": "seguridad_vial",
     "nombre": "Seguridad vial"
    }
   ]
@@ -953,10 +1554,7 @@ const SECTORES = [
      "escalas": [
       "comunidad"
      ],
-     "subtemas": [
-      "participacion",
-      "deliberacion"
-     ]
+     "subtemas": []
     },
     {
      "titulo": "Municipio y región: presupuestos participativos y cuentas claras",
@@ -975,11 +1573,7 @@ const SECTORES = [
       "pueblo",
       "region"
      ],
-     "subtemas": [
-      "participacion",
-      "transparencia",
-      "deliberacion"
-     ]
+     "subtemas": []
     },
     {
      "titulo": "País y mundo: deliberación ciudadana y democracia directa por temas",
@@ -1000,11 +1594,7 @@ const SECTORES = [
       "continente",
       "planeta"
      ],
-     "subtemas": [
-      "participacion",
-      "deliberacion",
-      "directa"
-     ]
+     "subtemas": []
     }
    ],
    "arte": {
@@ -1023,7 +1613,7 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "confianza"
+     "partidos"
     ]
    },
    {
@@ -1047,7 +1637,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "transparencia"
+     "justicia",
+     "partidos"
     ]
    },
    {
@@ -1072,7 +1663,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "confianza"
+     "partidos",
+     "participacion"
     ]
    },
    {
@@ -1084,7 +1676,152 @@ const SECTORES = [
      "planeta"
     ],
     "subtemas": [
-     "confianza"
+     "justicia",
+     "cortes"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Pocas vías de decisión directa",
+    "texto": "De 143 iniciativas legislativas populares (1986-2023) solo 4 se aprobaron; el último referéndum estatal fue en 2005.",
+    "fuente": "https://maldita.es/malditodato/20240411/iniciativa-legislativa-popular-aprobadas-presentadas/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "participacion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Sensación de no tener voz",
+    "texto": "Solo el 38 % cree que la gente como él tiene voz en lo que hace el Gobierno (OCDE, 2025; 31 % en 2023).",
+    "fuente": "https://www.oecd.org/en/publications/oecd-survey-on-drivers-of-trust-in-public-institutions-2026-results_c88c8869-en/spain_8443a0c4-en.html",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "participacion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Confianza muy baja en los partidos",
+    "texto": "Solo el 21 % confía en los partidos, frente al 62 % en la policía (OCDE, 2025).",
+    "fuente": "https://www.oecd.org/en/publications/oecd-survey-on-drivers-of-trust-in-public-institutions-2026-results_c88c8869-en/spain_8443a0c4-en.html",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "partidos"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Cuentas de partidos poco visibles",
+    "texto": "32 de 63 partidos fiscalizados no publicaron sus subvenciones de 2023 (informe 1.596 del Tribunal de Cuentas).",
+    "fuente": "https://www.boe.es/boe/dias/2025/08/16/pdfs/BOE-A-2025-16946.pdf",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "partidos"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Presupuestos sin aprobar",
+    "texto": "Las cuentas de 2023 llevan tres años prorrogadas; 2026 es el tercer año consecutivo de prórroga.",
+    "fuente": "https://theobjective.com/espana/2025-12-23/gobierno-prorroga-ano-consecutivo-presupuestos-2023/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "cortes"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Mayorías frágiles",
+    "texto": "Tras perder votaciones clave, el BOE publicó el 6-10-2026 la disolución de las Cortes y elecciones para el 29-N.",
+    "fuente": "https://www.legaltoday.com/actualidad-juridica/noticias-de-derecho/el-boe-publica-el-real-decreto-de-disolucion-de-las-cortes-y-la-convocatoria-electoral-para-el-29-de-noviembre-2026-10-06/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "cortes"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Administración envejecida",
+    "texto": "Solo el 8 % del personal de la Administración central tiene 18-34 años, frente al 19 % OCDE (2023).",
+    "fuente": "https://www.oecd.org/en/publications/government-at-a-glance-2025-country-notes_da3361e1-en/spain_57f4ebd0-en.html",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "gobierno"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Integridad de altos cargos",
+    "texto": "La Comisión Europea (2026) ve avances limitados en conflictos de interés, lobbies y declaraciones de bienes.",
+    "fuente": "https://en.ara.cat/politics/brussels-taps-sanchez-the-wrist-for-spain-s-limited-fight-against-corruption_1_5801318.html",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "gobierno"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Baja confianza en la independencia judicial",
+    "texto": "El 39 % la valora como buena, 15 puntos por debajo de la media de la UE (2025).",
+    "fuente": "https://agenceurope.eu/en/bulletin/article/13688/8/according-to-eurobarometer-54-of-european-citizens-have-a-positive-opinion-of-their-justice-systems-independence",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "justicia"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Faltan jueces",
+    "texto": "España tiene 11,9 jueces por 100.000 habitantes, frente a 17,4 de media europea (datos 2022).",
+    "fuente": "https://www.legaltoday.com/actualidad-juridica/noticias-de-derecho/el-consejo-de-europa-mantiene-a-espana-muy-por-encima-en-presupuesto-judicial-por-habitante-pero-por-debajo-en-jueces-2024-10-17/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "justicia"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Financiación autonómica caducada",
+    "texto": "El modelo de 2009 debía renovarse en 2014; la propuesta de enero de 2026 quedó paralizada.",
+    "fuente": "https://www.elsaltodiario.com/economia/nuevo-modelo-financiacion-autonomica-propone-gobierno-se-congelo-puede-pasar-ahora",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "territorio"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Ayuntamientos con poco peso",
+    "texto": "Los municipios gestionan el 12,2 % del gasto público (2020), frente a ~22 % de media en la UE (2024).",
+    "fuente": "https://sng-wofi.org/country_profiles/spain.html",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "territorio"
     ]
    }
   ],
@@ -1101,10 +1838,7 @@ const SECTORES = [
      "planeta"
     ],
     "subtemas": [
-     "participacion",
-     "deliberacion",
-     "directa",
-     "confianza"
+     "participacion"
     ]
    },
    {
@@ -1118,7 +1852,8 @@ const SECTORES = [
      "planeta"
     ],
     "subtemas": [
-     "participacion"
+     "participacion",
+     "territorio"
     ]
    },
    {
@@ -1132,7 +1867,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "transparencia"
+     "gobierno",
+     "justicia"
     ]
    },
    {
@@ -1145,8 +1881,7 @@ const SECTORES = [
      "planeta"
     ],
     "subtemas": [
-     "deliberacion",
-     "confianza"
+     "participacion"
     ]
    },
    {
@@ -1162,8 +1897,7 @@ const SECTORES = [
     ],
     "subtemas": [
      "participacion",
-     "deliberacion",
-     "confianza"
+     "cortes"
     ]
    },
    {
@@ -1177,8 +1911,151 @@ const SECTORES = [
      "planeta"
     ],
     "subtemas": [
-     "participacion",
-     "directa"
+     "participacion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Asambleas ciudadanas con seguimiento",
+    "texto": "Personas elegidas por sorteo deliberan y proponen. En Irlanda sus informes llevaron a referéndums en 2015 y 2018.",
+    "fuente": "https://oecd-opsi.org/innovations/the-irish-citizens-assembly/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "participacion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Iniciativa ciudadana accesible",
+    "texto": "En Finlandia, 50.000 firmas obligan al Parlamento a debatir una propuesta de ley ciudadana.",
+    "fuente": "https://www.eduskunta.fi/EN/naineduskuntatoimii/eduskunnan_tehtavat/lakiensaataminen/kansalaisaloite",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "participacion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Autoridad electoral independiente",
+    "texto": "Irlanda creó en 2023 An Coimisiún Toghcháin para gestionar circunscripciones, registro e información electoral.",
+    "fuente": "https://www.electoralcommission.ie/about-us/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "partidos"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Cuentas de partidos en datos abiertos",
+    "texto": "Publicar ingresos, subvenciones y donaciones en formato reutilizable y cumplir los plazos que vigila el Tribunal de Cuentas.",
+    "fuente": "https://www.boe.es/boe/dias/2025/08/16/pdfs/BOE-A-2025-16946.pdf",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "partidos"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Paridad obligatoria en listas",
+    "texto": "La Ley Orgánica 2/2024 exige listas electorales con presencia equilibrada de mujeres y hombres.",
+    "fuente": "https://boe.es/buscar/pdf/2024/BOE-A-2024-15936-consolidado.pdf",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "cortes"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Registro de grupos de interés",
+    "texto": "La Comisión Europea (2026) recomienda a España aprobar una ley de lobbies con registro público de reuniones.",
+    "fuente": "https://en.ara.cat/politics/brussels-taps-sanchez-the-wrist-for-spain-s-limited-fight-against-corruption_1_5801318.html",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "cortes"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Datos abiertos por defecto",
+    "texto": "datos.gob.es ha situado a España 5.ª de 40 países en el índice OURdata de la OCDE (2023).",
+    "fuente": "https://datos.gob.es/en/noticia/spain-fifth-world-power-open-data-according-latest-ourdata-report-oecd",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "gobierno"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Evaluar el impacto de las normas",
+    "texto": "España puntúa 2,6 sobre 4 en calidad de evaluación de impacto regulatorio, sobre la media OCDE de 2,3 (2024).",
+    "fuente": "https://www.oecd.org/en/publications/government-at-a-glance-2025-country-notes_da3361e1-en/spain_57f4ebd0-en.html",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "gobierno"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Jueces eligen a los vocales judiciales",
+    "texto": "La Comisión de Venecia (2025) recomienda que al menos la mitad del CGPJ la elijan los jueces, con garantías.",
+    "fuente": "https://blog-iacl-aidc.org/2026-posts/2026/2/3/setting-standards-on-judicial-councils-the-spanish-case-before-the-venice-commission-a-rare-request-from-a-non-political-institution",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "justicia"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Fiscalía con mandato propio",
+    "texto": "El Informe sobre el Estado de Derecho 2026 pide separar el mandato del Fiscal General del del Gobierno.",
+    "fuente": "https://commission.europa.eu/publications/2026-rule-law-report-communication-and-country-chapters_es",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "justicia"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Revisión periódica de la financiación",
+    "texto": "Renovar el modelo en el plazo previsto, con criterios públicos de reparto, evita bloqueos de más de una década.",
+    "fuente": "https://www.elsaltodiario.com/economia/nuevo-modelo-financiacion-autonomica-propone-gobierno-se-congelo-puede-pasar-ahora",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "territorio"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Más poder y recursos locales",
+    "texto": "En la UE los gobiernos locales gestionan de media ~22 % del gasto público, acercando las decisiones a la gente.",
+    "fuente": "https://www.kdz.eu/system/files/downloads/2026-03/European%20Local%20Government%20Report%202025.pdf",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "territorio"
     ]
    }
   ],
@@ -1194,7 +2071,7 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "deliberacion"
+     "participacion"
     ]
    },
    {
@@ -1208,7 +2085,8 @@ const SECTORES = [
      "pueblo"
     ],
     "subtemas": [
-     "participacion"
+     "participacion",
+     "territorio"
     ]
    },
    {
@@ -1224,7 +2102,7 @@ const SECTORES = [
     ],
     "subtemas": [
      "participacion",
-     "deliberacion"
+     "territorio"
     ]
    },
    {
@@ -1238,7 +2116,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "transparencia"
+     "gobierno",
+     "justicia"
     ]
    },
    {
@@ -1252,8 +2131,7 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "deliberacion",
-     "directa"
+     "participacion"
     ]
    },
    {
@@ -1268,7 +2146,7 @@ const SECTORES = [
     ],
     "subtemas": [
      "participacion",
-     "deliberacion"
+     "cortes"
     ]
    },
    {
@@ -1282,7 +2160,7 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "directa"
+     "participacion"
     ]
    },
    {
@@ -1296,7 +2174,93 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "directa"
+     "participacion"
+    ]
+   },
+   {
+    "nombre": "Iniciativa ciudadana al Parlamento (Kansalaisaloite)",
+    "lugar": "Finlandia",
+    "tipo": null,
+    "texto": "Con 50.000 firmas la ciudadanía lleva sus propuestas de ley al Parlamento.",
+    "web": "https://www.eduskunta.fi/EN/naineduskuntatoimii/eduskunnan_tehtavat/lakiensaataminen/kansalaisaloite",
+    "fuente": null,
+    "escalas": [
+     "pais",
+     "planeta"
+    ],
+    "subtemas": [
+     "participacion"
+    ]
+   },
+   {
+    "nombre": "An Coimisiún Toghcháin (Comisión Electoral)",
+    "lugar": "Irlanda",
+    "tipo": null,
+    "texto": "Comisión electoral independiente creada en 2023 que revisa circunscripciones e informa a la ciudadanía.",
+    "web": "https://www.electoralcommission.ie/about-us/",
+    "fuente": null,
+    "escalas": [
+     "pais",
+     "planeta"
+    ],
+    "subtemas": [
+     "partidos"
+    ]
+   },
+   {
+    "nombre": "Portal de Transparencia del Congreso",
+    "lugar": "España",
+    "tipo": null,
+    "texto": "Publica la actividad parlamentaria y datos de diputados y diputadas.",
+    "web": "https://www.congreso.es/es/transparencia/actividad-parlamentaria",
+    "fuente": null,
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "cortes"
+    ]
+   },
+   {
+    "nombre": "datos.gob.es",
+    "lugar": "España",
+    "tipo": null,
+    "texto": "Catálogo nacional de datos abiertos de las administraciones públicas.",
+    "web": "https://datos.gob.es",
+    "fuente": null,
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "gobierno"
+    ]
+   },
+   {
+    "nombre": "Consejo de Transparencia y Buen Gobierno",
+    "lugar": "España",
+    "tipo": null,
+    "texto": "Autoridad independiente que resuelve reclamaciones de acceso a la información pública.",
+    "web": "https://www.consejodetransparencia.es",
+    "fuente": null,
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "justicia"
+    ]
+   },
+   {
+    "nombre": "Red de Entidades Locales por la Transparencia y Participación Ciudadana (FEMP)",
+    "lugar": "España",
+    "tipo": null,
+    "texto": "Red de ayuntamientos que comparten herramientas de transparencia y participación.",
+    "web": "https://www.femp.es/sites/default/files/multimedia/Red%20de%20Entidades%20Locales%20por%20la%20Transparencia%20y%20la%20Participaci%C3%B3n%20Ciudadana.pdf",
+    "fuente": null,
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "territorio"
     ]
    }
   ],
@@ -1309,23 +2273,27 @@ const SECTORES = [
   "subtemas": [
    {
     "id": "participacion",
-    "nombre": "Participación"
+    "nombre": "Ciudadanía y participación"
    },
    {
-    "id": "transparencia",
-    "nombre": "Transparencia y cuentas claras"
+    "id": "partidos",
+    "nombre": "Partidos y elecciones"
    },
    {
-    "id": "deliberacion",
-    "nombre": "Deliberación por sorteo"
+    "id": "cortes",
+    "nombre": "Cortes Generales"
    },
    {
-    "id": "directa",
-    "nombre": "Democracia directa"
+    "id": "gobierno",
+    "nombre": "Gobierno y Administración"
    },
    {
-    "id": "confianza",
-    "nombre": "Confianza y polarización"
+    "id": "justicia",
+    "nombre": "Justicia y control"
+   },
+   {
+    "id": "territorio",
+    "nombre": "Organización territorial"
    }
   ]
  },
@@ -1355,11 +2323,7 @@ const SECTORES = [
      "escalas": [
       "individuo"
      ],
-     "subtemas": [
-      "hogar",
-      "banca",
-      "desigualdad"
-     ]
+     "subtemas": []
     },
     {
      "titulo": "Comunidad: economía social, cooperativas y monedas locales",
@@ -1377,11 +2341,7 @@ const SECTORES = [
      "escalas": [
       "comunidad"
      ],
-     "subtemas": [
-      "social",
-      "fiscalidad",
-      "banca"
-     ]
+     "subtemas": []
     },
     {
      "titulo": "País y planeta: fiscalidad simple y justa, banca al servicio de la producción",
@@ -1401,11 +2361,7 @@ const SECTORES = [
       "continente",
       "planeta"
      ],
-     "subtemas": [
-      "social",
-      "fiscalidad",
-      "banca"
-     ]
+     "subtemas": []
     }
    ],
    "arte": {
@@ -1424,7 +2380,7 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "hogar"
+     "hogares"
     ]
    },
    {
@@ -1437,7 +2393,7 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "hogar"
+     "hogares"
     ]
    },
    {
@@ -1449,7 +2405,7 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "fiscalidad"
+     "publico"
     ]
    },
    {
@@ -1461,7 +2417,7 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "fiscalidad"
+     "publico"
     ]
    },
    {
@@ -1473,8 +2429,9 @@ const SECTORES = [
      "planeta"
     ],
     "subtemas": [
-     "fiscalidad",
-     "banca"
+     "publico",
+     "dinero",
+     "exterior"
     ]
    },
    {
@@ -1486,7 +2443,104 @@ const SECTORES = [
      "planeta"
     ],
     "subtemas": [
-     "desigualdad"
+     "hogares",
+     "dinero"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "El paro más alto de la zona euro",
+    "texto": "En el 3.er trimestre de 2026 el paro fue del 10,18 %, frente al 6,5 % de la zona euro en septiembre.",
+    "fuente": "https://www.que.es/2026/10/28/epa-tercer-trimestre-2026-paro-2/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "trabajo"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Productividad por debajo de Europa",
+    "texto": "La brecha con la zona euro bajó del 12 % (2013) al 8 % (2025), pero el PIB por ocupado apenas ha crecido en cinco años.",
+    "fuente": "https://www.bde.es/f/webbe/SES/Secciones/Publicaciones/PublicacionesAnuales/InformesAnuales/25/InfAnual_2025_Breve.pdf",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "trabajo"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Empresas demasiado pequeñas",
+    "texto": "El 99,8 % de las empresas son pymes y dan el 61,3 % del empleo (2025); el tamaño pequeño frena la inversión y la productividad.",
+    "fuente": "https://ipyme.org/es-es/politicasymedidas/consejo-estatal/Documents/CE_PYME_julio_2025.pdf",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "empresas"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Poca inversión en I+D",
+    "texto": "España invierte el 1,5 % del PIB en I+D (2024); la parte de las empresas está 11 puntos por debajo de la media UE.",
+    "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/ciencia-innovacion-universidades/paginas/2025/201125-morant-gasto-id-aumenta.aspx",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "empresas"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Pensiones que dependen cada vez más del Estado",
+    "texto": "El gasto en pensiones fue del 12,9 % del PIB en 2025 y el déficit contributivo, del 3,4 % del PIB.",
+    "fuente": "https://institutosantalucia.es/sala-de-prensa/el-sistema-publico-de-pensiones-necesito-56-946-millones-de-euros-del-estado-para-cubrir-su-componente-contributivo-en-2025/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "publico"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Crédito que sube más rápido que la vivienda",
+    "texto": "Las hipotecas nuevas crecieron un 27,5 % en 2025 mientras se terminaron 92.000 viviendas para 240.000 hogares nuevos.",
+    "fuente": "https://www.esdiario.com/economia/260618/190880/banco-espana-vuelve-reiterarse-espana-deficit-750-000-viviendas.html",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "dinero"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Una economía muy endeudada con el exterior",
+    "texto": "España debe al exterior en términos netos el 44,8 % de su PIB y su deuda externa bruta llega al 163,6 % (2025).",
+    "fuente": "https://www.bde.es/wbe/es/noticias-eventos/actualidad-banco-espana/notas-banco-espana/bop-pii-4t2025.html",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "exterior"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Dependencia de la energía importada",
+    "texto": "España importa el 68,4 % de su energía (2024), lo que la expone a crisis de precios.",
+    "fuente": "https://www.eldebate.com/economia/20260719/espana-importa-casi-70-energia-consume-pese-avance-renovables_441118.html",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "exterior"
     ]
    }
   ],
@@ -1501,8 +2555,7 @@ const SECTORES = [
      "continente"
     ],
     "subtemas": [
-     "hogar",
-     "banca"
+     "dinero"
     ]
    },
    {
@@ -1516,9 +2569,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "social",
-     "fiscalidad",
-     "desigualdad"
+     "empresas",
+     "trabajo"
     ]
    },
    {
@@ -1531,7 +2583,7 @@ const SECTORES = [
      "planeta"
     ],
     "subtemas": [
-     "hogar"
+     "hogares"
     ]
    },
    {
@@ -1544,8 +2596,7 @@ const SECTORES = [
      "continente"
     ],
     "subtemas": [
-     "fiscalidad",
-     "banca"
+     "publico"
     ]
    },
    {
@@ -1558,7 +2609,7 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "fiscalidad"
+     "publico"
     ]
    },
    {
@@ -1571,8 +2622,80 @@ const SECTORES = [
      "planeta"
     ],
     "subtemas": [
-     "hogar",
-     "banca"
+     "empresas",
+     "dinero"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Educación financiera desde la escuela",
+    "texto": "El Plan de Educación Financiera del Banco de España y la CNMV forma a escolares y adultos en presupuesto, ahorro y deuda.",
+    "fuente": "https://www.bde.es/wbe/es/areas-actuacion/educacion-financiera/comprometidos-con-la-educacion-financiera/la-educacion-financiera-en-espana/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "hogares"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Cooperativas de trabajo",
+    "texto": "Empresas propiedad de sus trabajadores. Mondragón suma 71.415 empleos y dedica el 4,4 % de sus ventas industriales a I+D (2025).",
+    "fuente": "https://www.thenews.coop/mondragon-posts-positive-2025-revenue-and-job-figures/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "trabajo"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Más inversión en innovación y digitalización",
+    "texto": "El Banco de España señala la poca I+D y la fragmentación normativa como los grandes frenos de la productividad.",
+    "fuente": "https://www.bde.es/f/webbe/SES/Secciones/Publicaciones/PublicacionesAnuales/InformesAnuales/25/InfAnual_2025_Breve.pdf",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "trabajo"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Orientar el crédito a la producción",
+    "texto": "Werner mostró en 2014 que cada banco crea dinero al prestar; dirigirlo a la producción genera crecimiento sin burbujas.",
+    "fuente": "https://eprints.soton.ac.uk/372866",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "dinero"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Energía renovable propia",
+    "texto": "El PNIEC prevé bajar la dependencia energética del 73 % (2019) al 50 % (2030) con renovables y eficiencia.",
+    "fuente": "https://www.miteco.gob.es/es/prensa/ultimas-noticias/2024/septiembre/el-gobierno-aprueba-la-actualizacion-del-plan-nacional-integrado.html",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "exterior"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Comercio justo",
+    "texto": "Importaciones con precio mínimo y prima social para productores; en España sus ventas alcanzaron 146 M€ en 2022.",
+    "fuente": "https://www.corresponsables.com/actualidad/ventas-comercio-justo-espana-2022-146-millones-euros/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "exterior"
     ]
    }
   ],
@@ -1588,10 +2711,7 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "hogar",
-     "social",
-     "fiscalidad",
-     "banca"
+     "dinero"
     ]
    },
    {
@@ -1605,8 +2725,8 @@ const SECTORES = [
      "region"
     ],
     "subtemas": [
-     "social",
-     "fiscalidad"
+     "trabajo",
+     "empresas"
     ]
    },
    {
@@ -1620,8 +2740,7 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "social",
-     "fiscalidad"
+     "empresas"
     ]
    },
    {
@@ -1635,7 +2754,7 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "social"
+     "empresas"
     ]
    },
    {
@@ -1649,8 +2768,7 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "social",
-     "banca"
+     "dinero"
     ]
    },
    {
@@ -1664,9 +2782,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "social",
-     "fiscalidad",
-     "banca"
+     "empresas",
+     "dinero"
     ]
    },
    {
@@ -1680,7 +2797,8 @@ const SECTORES = [
      "pueblo"
     ],
     "subtemas": [
-     "banca"
+     "dinero",
+     "hogares"
     ]
    },
    {
@@ -1701,7 +2819,36 @@ const SECTORES = [
      "planeta"
     ],
     "subtemas": [
-     "fiscalidad"
+     "publico",
+     "dinero"
+    ]
+   },
+   {
+    "nombre": "Finanzas para Todos",
+    "lugar": "España",
+    "tipo": null,
+    "texto": "Plan de Educación Financiera del Banco de España y la CNMV.",
+    "web": "https://www.bde.es/wbe/es/areas-actuacion/educacion-financiera/comprometidos-con-la-educacion-financiera/la-educacion-financiera-en-espana/",
+    "fuente": null,
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "hogares"
+    ]
+   },
+   {
+    "nombre": "Coordinadora Estatal de Comercio Justo",
+    "lugar": "España",
+    "tipo": null,
+    "texto": "Red de organizaciones que importan y venden productos de comercio justo.",
+    "web": "https://comerciojusto.org",
+    "fuente": null,
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "exterior"
     ]
    }
   ],
@@ -1713,24 +2860,28 @@ const SECTORES = [
   ],
   "subtemas": [
    {
-    "id": "hogar",
-    "nombre": "Economía del hogar"
+    "id": "hogares",
+    "nombre": "Hogares"
    },
    {
-    "id": "social",
-    "nombre": "Economía social y cooperativas"
+    "id": "trabajo",
+    "nombre": "Trabajo"
    },
    {
-    "id": "fiscalidad",
-    "nombre": "Fiscalidad"
+    "id": "empresas",
+    "nombre": "Empresas"
    },
    {
-    "id": "banca",
-    "nombre": "Banca y dinero"
+    "id": "publico",
+    "nombre": "Sector público"
    },
    {
-    "id": "desigualdad",
-    "nombre": "Desigualdad"
+    "id": "dinero",
+    "nombre": "Dinero y banca"
+   },
+   {
+    "id": "exterior",
+    "nombre": "Sector exterior"
    }
   ]
  },
@@ -2964,11 +4115,7 @@ const SECTORES = [
      "escalas": [
       "individuo"
      ],
-     "subtemas": [
-      "arquitectura",
-      "comunidad",
-      "suelo"
-     ]
+     "subtemas": []
     },
     {
      "titulo": "Urbanismo",
@@ -3015,12 +4162,7 @@ const SECTORES = [
      "escalas": [
       "pueblo"
      ],
-     "subtemas": [
-      "urbanismo",
-      "comunidad",
-      "suelo",
-      "naturaleza"
-     ]
+     "subtemas": []
     },
     {
      "titulo": "Naturaleza",
@@ -3067,10 +4209,7 @@ const SECTORES = [
       "provincia",
       "region"
      ],
-     "subtemas": [
-      "urbanismo",
-      "naturaleza"
-     ]
+     "subtemas": []
     }
    ],
    "arte": {
@@ -3090,8 +4229,7 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "suelo",
-     "naturaleza"
+     "suelo"
     ]
    },
    {
@@ -3104,8 +4242,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "arquitectura",
-     "suelo"
+     "acceso",
+     "financiacion"
     ]
    },
    {
@@ -3117,7 +4255,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "suelo"
+     "financiacion",
+     "parque"
     ]
    },
    {
@@ -3131,9 +4270,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "arquitectura",
-     "suelo",
-     "naturaleza"
+     "parque",
+     "acceso"
     ]
    },
    {
@@ -3145,7 +4283,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "naturaleza"
+     "suelo",
+     "urbanismo"
     ]
    },
    {
@@ -3157,7 +4296,7 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "arquitectura"
+     "construccion"
     ]
    },
    {
@@ -3170,8 +4309,151 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "urbanismo",
+     "urbanismo"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Planeamiento lento y fragmentado",
+    "texto": "El Banco de España (2025) señala trámites, normas solapadas entre administraciones y planeamiento lento como frenos a la oferta.",
+    "fuente": "https://es.euronews.com/business/2026/06/18/el-banco-de-espana-senala-un-deficit-de-750000",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
      "suelo"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Tierra rural sin relevo",
+    "texto": "Solo 0,49% de los titulares agrarios tiene menos de 25 años; la tierra queda sin uso (Censo Agrario 2020).",
+    "fuente": "https://maldita.es/prebunking/20260429/faltan-jovenes-en-el-campo-es-el-acceso-a-la-tierra-el-problema/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "suelo"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Falta de mano de obra",
+    "texto": "Más de la mitad de las constructoras tiene serias dificultades para encontrar trabajadores (Comisión Europea, 2025).",
+    "fuente": "https://www.bolsamania.com/noticias_print/empresas/economia--bruselas-pide-a-espana-incrementar-su-oferta-de-vivienda-publica-y-asequible-muy-por-debajo-de-la-media-ue--19909798.html",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "construccion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Rehabilitar cuesta demasiado al hogar",
+    "texto": "El 35,4% necesita mejoras y no las hace; el 78% de ellos por el coste (2025).",
+    "fuente": "https://www.esade.edu/ecpol/wp-content/uploads/2026/07/Brief-Rehabilitacion-de-Vivienda.pdf",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "construccion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Casas vacías donde no hay demanda",
+    "texto": "Unas 450.000 viviendas de la burbuja siguen desocupadas y muchas vacías están lejos de donde se necesita vivienda (Banco de España, 2025).",
+    "fuente": "https://es.euronews.com/business/2026/06/18/el-banco-de-espana-senala-un-deficit-de-750000",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "parque"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Viviendas desviadas a usos temporales",
+    "texto": "Unas 400.000 se usan como alquiler turístico o de temporada (Banco de España, 2025).",
+    "fuente": "https://es.euronews.com/business/2026/06/18/el-banco-de-espana-senala-un-deficit-de-750000",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "parque"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Precios que crecen más que los sueldos",
+    "texto": "Desde 2023 el precio subió un 30% y los salarios un 7,75%.",
+    "fuente": "https://www.vozpopuli.com/economia/la-vivienda-sube-un-30-en-la-era-sin-presupuestos-con-el-gasto-estancado-en-el-05-del-pib.html",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "acceso"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Búsquedas sin éxito",
+    "texto": "El 7,6% buscó vivienda en el último año sin lograrlo; el 67,2% por precios excesivos (INE, 2025).",
+    "fuente": "https://ine.es/dyngs/Prensa/es/m3ECV2025.htm",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "acceso"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Concentración de la propiedad",
+    "texto": "Los hogares con una sola vivienda cayeron un 22,4% entre 2008 y 2022 mientras crecían los grandes tenedores (2026).",
+    "fuente": "https://brainsre.news/espana-propietarios-mengua-grandes-tenedores/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "financiacion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Poca inversión pública",
+    "texto": "Unos 7.613 M€ en 2024, apenas el 1% del gasto público total.",
+    "fuente": "https://www.vozpopuli.com/economia/la-vivienda-sube-un-30-en-la-era-sin-presupuestos-con-el-gasto-estancado-en-el-05-del-pib.html",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "financiacion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Demanda concentrada en pocas ciudades",
+    "texto": "En Madrid solo el 9,9% del parque podría ampliarse, frente al 27,1% de media (Banco de España, 2025).",
+    "fuente": "https://es.euronews.com/business/2026/06/18/el-banco-de-espana-senala-un-deficit-de-750000",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "urbanismo"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Falta de naturaleza urbana",
+    "texto": "En Valencia y Ourense casi el 80% carece de un parque grande cerca de casa (2026).",
+    "fuente": "https://www.elsaltodiario.com/cambio-climatico/ciudades-espanolas-suspenden-acceso-zonas-verdes-seis-cada-diez-vecinos-carecen-ellas-cerca",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "urbanismo"
     ]
    }
   ],
@@ -3187,9 +4469,7 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "comunidad",
-     "suelo",
-     "naturaleza"
+     "suelo"
     ]
    },
    {
@@ -3202,8 +4482,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "arquitectura",
-     "comunidad"
+     "acceso",
+     "financiacion"
     ]
    },
    {
@@ -3218,9 +4498,8 @@ const SECTORES = [
      "planeta"
     ],
     "subtemas": [
-     "arquitectura",
-     "comunidad",
-     "suelo"
+     "suelo",
+     "acceso"
     ]
    },
    {
@@ -3233,7 +4512,7 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "naturaleza"
+     "suelo"
     ]
    },
    {
@@ -3247,8 +4526,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "urbanismo",
-     "suelo"
+     "parque",
+     "construccion"
     ]
    },
    {
@@ -3262,7 +4541,8 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "suelo"
+     "suelo",
+     "financiacion"
     ]
    },
    {
@@ -3274,7 +4554,151 @@ const SECTORES = [
      "pais"
     ],
     "subtemas": [
-     "arquitectura"
+     "construccion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Bancos de tierras municipales",
+    "texto": "Registran parcelas abandonadas y conectan propietarios con quien busca tierra; Red Terrae lo hace desde 2010 en unos 40 municipios.",
+    "fuente": "https://accesstoland.gitbook.io/makingfarmlandwork/case-studies/red-terrae-the-network-of-municipalities-working-for-sustainable-land-use",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "suelo"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Suelo público cedido, no vendido",
+    "texto": "Barcelona cedió el solar de La Borda a una cooperativa: el suelo sigue siendo público y la vivienda, asequible.",
+    "fuente": "https://www.construible.es/2018/10/16/barcelona-acoge-primer-proyecto-covivienda-edificio-sostenible-madera-consumo",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "suelo"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Vivienda industrializada",
+    "texto": "El PERTE dedica 1.300 M€ en 10 años a fabricar 15.000-20.000 viviendas al año en fábrica.",
+    "fuente": "https://www.lamoncloa.gob.es/consejodeministros/resumenes/Documents/2025/060525-PERTE-%20RESUMEN%20EJECUTIVO.pdf",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "construccion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Rehabilitación por barrios con oficina local",
+    "texto": "Euskadi gestiona la reforma de edificios enteros desde oficinas de barrio (Opengela), con ayudas y trámites unificados.",
+    "fuente": "https://www.euskadi.eus/gobierno-vasco/-/noticia/2025/ana-telleria-gobierno-vasco-ha-demostrado-que-es-posible-regenerar-barrios-vulnerables-enfoque-integral-y-justo/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "construccion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Alquiler garantizado de pisos vacíos",
+    "texto": "Bizigune (Euskadi): el propietario cede su piso vacío al Gobierno Vasco, que lo alquila a precio protegido y le garantiza la renta.",
+    "fuente": "https://www.euskadi.eus/gobierno-vasco/-/si-tienes-tu-vivienda-vacia/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "parque"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Parque público permanente",
+    "texto": "Viena tiene unas 220.000 viviendas municipales y el 60% vive en vivienda social o subvencionada.",
+    "fuente": "https://brainsre.news/viena-concentra-60-poblacion-vivienda-social/",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "parque"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Empresa pública de vivienda",
+    "texto": "CASA47 invertirá 13.000 M€ en 10 años en alquiler asequible: ningún alquiler superará el 30% de la renta media de la zona.",
+    "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/vivienda-agenda-urbana/Paginas/2026/solicitud-casa-47.aspx",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "acceso"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Cooperativas en cesión de uso",
+    "texto": "En Cataluña ya hay más de 500 pisos: la cooperativa es dueña y los socios tienen uso indefinido sin especular.",
+    "fuente": "https://www.publico.es/economia/vivienda-cooperativa-consolida-catalunya-500-pisos-edificados.amp.html",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "acceso"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Protección pública permanente",
+    "texto": "El Plan Estatal 2026-2030 exige que la vivienda protegida financiada siga siempre en el parque público.",
+    "fuente": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/vivienda-agenda-urbana/Paginas/2025/plan-estatal-de-vivienda-2026-2030.aspx",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "financiacion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Banca ética para cooperativas",
+    "texto": "En Cataluña la vivienda cooperativa se financia con banca ética y el Institut Català de Finances.",
+    "fuente": "https://www.publico.es/economia/vivienda-cooperativa-consolida-catalunya-500-pisos-edificados.amp.html",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "financiacion"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Ciudad para el peatón",
+    "texto": "Pontevedra peatonalizó su centro desde 1999: el comercio creció un 7% y lleva más de una década sin muertes por atropello.",
+    "fuente": "https://es.euronews.com/2022/09/16/la-premiada-transformacion-de-pontevedra-en-favor-de-la-peatonalizacion-y-la-mejora-de-la-",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "urbanismo"
+    ]
+   },
+   {
+    "ambito": "España",
+    "titulo": "Repoblar el medio rural",
+    "texto": "El 79% de los municipios pequeños tuvo saldo migratorio positivo en 2018-2024, prueba de que el campo puede atraer población.",
+    "fuente": "https://www.miteco.gob.es/es/prensa/ultimas-noticias/2025/diciembre/la-poblacion-del-medio-rural-crece-en-espana-por-septimo-ano-con.html",
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "urbanismo"
     ]
    }
   ],
@@ -3290,7 +4714,8 @@ const SECTORES = [
      "comunidad"
     ],
     "subtemas": [
-     "comunidad"
+     "suelo",
+     "construccion"
     ]
    },
    {
@@ -3304,9 +4729,8 @@ const SECTORES = [
      "comunidad"
     ],
     "subtemas": [
-     "arquitectura",
-     "urbanismo",
-     "comunidad"
+     "acceso",
+     "construccion"
     ]
    },
    {
@@ -3320,9 +4744,8 @@ const SECTORES = [
      "comunidad"
     ],
     "subtemas": [
-     "arquitectura",
-     "comunidad",
-     "suelo"
+     "acceso",
+     "construccion"
     ]
    },
    {
@@ -3337,8 +4760,8 @@ const SECTORES = [
      "pueblo"
     ],
     "subtemas": [
-     "arquitectura",
-     "comunidad"
+     "acceso",
+     "financiacion"
     ]
    },
    {
@@ -3353,9 +4776,8 @@ const SECTORES = [
      "provincia"
     ],
     "subtemas": [
-     "arquitectura",
-     "comunidad",
-     "naturaleza"
+     "suelo",
+     "acceso"
     ]
    },
    {
@@ -3369,7 +4791,8 @@ const SECTORES = [
      "comunidad"
     ],
     "subtemas": [
-     "comunidad"
+     "suelo",
+     "acceso"
     ]
    },
    {
@@ -3383,7 +4806,8 @@ const SECTORES = [
      "pueblo"
     ],
     "subtemas": [
-     "suelo"
+     "suelo",
+     "acceso"
     ]
    },
    {
@@ -3398,7 +4822,110 @@ const SECTORES = [
      "pueblo"
     ],
     "subtemas": [
-     "comunidad"
+     "suelo",
+     "urbanismo"
+    ]
+   },
+   {
+    "nombre": "Red Terrae",
+    "lugar": "España (≈40 municipios, 8 comunidades)",
+    "tipo": null,
+    "texto": "Red de ayuntamientos con bancos de tierras agroecológicos para frenar el abandono rural.",
+    "web": "https://accesstoland.gitbook.io/makingfarmlandwork/case-studies/red-terrae-the-network-of-municipalities-working-for-sustainable-land-use",
+    "fuente": null,
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "suelo"
+    ]
+   },
+   {
+    "nombre": "Opengela",
+    "lugar": "Euskadi",
+    "tipo": null,
+    "texto": "Programa público de regeneración integral de barrios vulnerables con oficinas de barrio.",
+    "web": "https://www.euskadi.eus/gobierno-vasco/-/noticia/2025/ana-telleria-gobierno-vasco-ha-demostrado-que-es-posible-regenerar-barrios-vulnerables-enfoque-integral-y-justo/",
+    "fuente": null,
+    "escalas": [
+     "pais",
+     "planeta"
+    ],
+    "subtemas": [
+     "construccion"
+    ]
+   },
+   {
+    "nombre": "Bizigune",
+    "lugar": "Euskadi",
+    "tipo": null,
+    "texto": "Programa público que moviliza viviendas vacías hacia alquiler protegido.",
+    "web": "https://www.euskadi.eus/gobierno-vasco/-/si-tienes-tu-vivienda-vacia/",
+    "fuente": null,
+    "escalas": [
+     "pais",
+     "planeta"
+    ],
+    "subtemas": [
+     "parque"
+    ]
+   },
+   {
+    "nombre": "Vivienda social de Viena",
+    "lugar": "Viena (Austria)",
+    "tipo": null,
+    "texto": "Parque municipal y cooperativo donde vive el 60% de la población.",
+    "web": "https://brainsre.news/viena-concentra-60-poblacion-vivienda-social/",
+    "fuente": null,
+    "escalas": [
+     "pais",
+     "planeta"
+    ],
+    "subtemas": [
+     "parque"
+    ]
+   },
+   {
+    "nombre": "CASA47",
+    "lugar": "España",
+    "tipo": null,
+    "texto": "Entidad pública estatal para crear un parque de alquiler asequible de larga duración.",
+    "web": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/vivienda-agenda-urbana/Paginas/2026/solicitud-casa-47.aspx",
+    "fuente": null,
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "acceso"
+    ]
+   },
+   {
+    "nombre": "Plan Estatal de Vivienda 2026-2030",
+    "lugar": "España",
+    "tipo": null,
+    "texto": "7.000 M€ entre Estado (60%) y comunidades (40%) para vivienda asequible y rehabilitación.",
+    "web": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/vivienda-agenda-urbana/Paginas/2025/plan-estatal-de-vivienda-2026-2030.aspx",
+    "fuente": null,
+    "escalas": [
+     "pais"
+    ],
+    "subtemas": [
+     "financiacion"
+    ]
+   },
+   {
+    "nombre": "Modelo urbano de Pontevedra",
+    "lugar": "Pontevedra",
+    "tipo": null,
+    "texto": "Centro peatonal y velocidad de 10 km/h que devolvió la calle a los vecinos.",
+    "web": "https://es.euronews.com/2022/09/16/la-premiada-transformacion-de-pontevedra-en-favor-de-la-peatonalizacion-y-la-mejora-de-la-",
+    "fuente": null,
+    "escalas": [
+     "pais",
+     "planeta"
+    ],
+    "subtemas": [
+     "urbanismo"
     ]
    }
   ],
@@ -3411,24 +4938,28 @@ const SECTORES = [
   ],
   "subtemas": [
    {
-    "id": "arquitectura",
-    "nombre": "Arquitectura del hogar"
+    "id": "suelo",
+    "nombre": "Suelo"
+   },
+   {
+    "id": "construccion",
+    "nombre": "Construcción y rehabilitación"
+   },
+   {
+    "id": "parque",
+    "nombre": "Parque de viviendas"
+   },
+   {
+    "id": "acceso",
+    "nombre": "Acceso"
+   },
+   {
+    "id": "financiacion",
+    "nombre": "Financiación"
    },
    {
     "id": "urbanismo",
-    "nombre": "Urbanismo"
-   },
-   {
-    "id": "comunidad",
-    "nombre": "Comunidad y cooperativas"
-   },
-   {
-    "id": "suelo",
-    "nombre": "Suelo y acceso a la vivienda"
-   },
-   {
-    "id": "naturaleza",
-    "nombre": "Naturaleza y territorio"
+    "nombre": "Arquitectura y urbanismo"
    }
   ]
  },

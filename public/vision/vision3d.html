@@ -25,11 +25,13 @@
   .embed #ui{max-width:300px} .embed #ui .panel:nth-child(2),.embed #hint{display:none}
   .embed .panel{padding:10px 12px} .embed .panel h1{font-size:16px} .embed .panel p{font-size:12px}
   .embed .leyenda{display:none} .embed #ui:hover .leyenda{display:block}
+  .lbl.flujo{background:rgba(47,109,181,.85);font-size:10.5px}
 </style>
 <script>if(/[?&]embed/.test(location.search)) document.documentElement.classList.add('embed');</script>
 <script src="lib/three.min.js"></script>
 <script src="lib/OrbitControls.js"></script>
 <script src="lib/CSS2DRenderer.js"></script>
+<script src="paises.js"></script>
 </head>
 <body>
 <div id="ui">
@@ -232,11 +234,53 @@ const ESCENAS = {
 ESCENAS.urbanismo = ESCENAS.pueblo;
 
 let labelsOn=true;
+/* ---- Country model as a simple 3D diagram: one platform per «pata», a solid column for today and a
+   glass column for the ideal (100 %), tubes for the flows between patas. Data: paises.js. ---- */
+const NOMBRE_SECTOR={energia:'Energía',movilidad:'Movilidad',politica:'Política',economia:'Economía',vivienda:'Vivienda',seguridad:'Seguridad',justicia:'Justicia',salud:'Salud',alimentacion:'Alimentación',informatica:'Informática',educacion:'Educación',cuidados:'Cuidados'};
+function progreso(i){ const a=+i.actual,o=+i.objetivo; if(!isFinite(a)||!isFinite(o)) return null; const r=i.sentido==='bajar'?(a<=0?1:o/a):(o<=0?1:a/o); return Math.max(0,Math.min(1,r)); }
+const media=xs=>{xs=xs.filter(x=>x!=null);return xs.length?xs.reduce((a,b)=>a+b,0)/xs.length:null;};
+const colorProg=x=>x==null?0x9aa6b8:x<.4?0xc0504d:x<.7?0xd9962b:0x3d8a5f;
+function esquemaEscena(sector, pais, pata){
+  const m = (typeof PAISES!=='undefined') && PAISES[pais]?.modelos?.[sector];
+  if(!m) return null;
+  const prog = p => media((p.indicadores||[]).map(progreso));
+  const total = media(m.patas.map(prog));
+  return { t:`${NOMBRE_SECTOR[sector]||sector} · ${PAISES[pais].nombre}`, d:m.vision.equilibrio, cam:[0,58,68], suelo:0xe4e9f0,
+    ley:[[0x3d8a5f,'Columna sólida: cómo estamos hoy'],[0xbfe3cb,'Columna de cristal: el ideal (100 %)'],[0x9aa6b8,'Tubos: lo que fluye entre patas']],
+    build(){
+      const R=27, n=m.patas.length, pos={};
+      add(new THREE.CylinderGeometry(7,7.6,2,40),0x0e1f3a,0,1,0,{metalness:.2,roughness:.5});
+      label(`${NOMBRE_SECTOR[sector]||sector} · ${total==null?'—':Math.round(total*100)+' %'}`,0,4.2,0);
+      m.patas.forEach((p,k)=>{
+        const a=-Math.PI/2+k*2*Math.PI/n, x=R*Math.cos(a), z=R*Math.sin(a), v=prog(p), sel=pata===p.id, apagado=pata&&!sel;
+        pos[p.id]=[x,z];
+        path([[0,0],[x*.8,z*.8]],1.2,0xd9dde4,.04);
+        add(new THREE.CylinderGeometry(5.6,6,sel?1.6:.8,36),colorProg(v),x,sel?.8:.4,z,{transparent:apagado,opacity:apagado?.35:1});
+        const g=add(new THREE.BoxGeometry(3.2,12,3.2),0xbfe3cb,x,6+(sel?1.6:.8),z,{transparent:true,opacity:.22,roughness:.1});
+        g.castShadow=false;
+        const e=new THREE.LineSegments(new THREE.EdgesGeometry(g.geometry),new THREE.LineBasicMaterial({color:0x6fb48a,transparent:true,opacity:.6}));
+        e.position.copy(g.position); world.add(e);
+        const h=Math.max(.15,12*(v??0));
+        add(new THREE.BoxGeometry(2.6,h,2.6),colorProg(v),x,h/2+(sel?1.6:.8),z,{transparent:apagado,opacity:apagado?.35:1});
+        if(sel){ const t=add(new THREE.TorusGeometry(6.6,.25,10,60),0x9fc6ff,x,1.7,z); t.rotation.x=Math.PI/2; anim.push(tt=>t.rotation.z=tt*.6); }
+        label(`${p.nombre} · ${v==null?'—':Math.round(v*100)+' %'}`,x,15.5,z);
+      });
+      (m.flujos||[]).forEach((f,k)=>{
+        const [x1,z1]=pos[f.de]||[], [x2,z2]=pos[f.a]||[]; if(x1==null||x2==null) return;
+        const c=new THREE.CatmullRomCurve3([new THREE.Vector3(x1,2,z1),new THREE.Vector3((x1+x2)/2*.75,8,(z1+z2)/2*.75),new THREE.Vector3(x2,2,z2)]);
+        world.add(new THREE.Mesh(new THREE.TubeGeometry(c,40,.16,6),M(0x9aa6b8)));
+        for(let j=0;j<3;j++){ const b=add(new THREE.SphereGeometry(.45,10,8),0x2f6db5,0,0,0); anim.push(t=>{ const u=((t*.18+j/3+k*.07)%1); b.position.copy(c.getPointAt(u)); }); }
+        const mid=c.getPointAt(.5); label(f.etiqueta,mid.x,mid.y+1.2,mid.z).element.classList.add('flujo');
+      });
+    }};
+}
+
 function cargar(id){
-  if(!ESCENAS[id]) id='hogar';
+  let e = id.startsWith('esquema:') ? esquemaEscena(...id.split(':').slice(1)) : null;
+  if(!e && !ESCENAS[id]) id='hogar';
   scene.remove(world); world.traverse(o=>{ if(o.isCSS2DObject) o.element.remove(); o.geometry?.dispose(); });
   world=new THREE.Group(); scene.add(world); anim=[]; colinas=[];
-  const e=ESCENAS[id]; e.build();
+  e = e || ESCENAS[id]; ground.material.color.set(e.suelo || C.hierba); e.build();
   world.traverse(o=>{ if(o.isCSS2DObject) o.visible=labelsOn; });
   document.getElementById('titulo').textContent=e.t; document.getElementById('desc').textContent=e.d;
   document.getElementById('leyenda').innerHTML=e.ley.map(([c,t])=>`<li><i style="background:#${c.toString(16).padStart(6,'0')}"></i>${t}</li>`).join('');
