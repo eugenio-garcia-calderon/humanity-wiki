@@ -30,6 +30,7 @@
 
 import { dimensionarTilt, TECNOLOGIAS_BASCULA, type TecBascula, type Tilt } from './basculacion';
 import { ARQUITECTURAS_HIBRIDO, RPM_MAX_MOTOR, cifrasHibrido, disponerHibrido, factorCargaParcial, migrarRendTrans, rendimientoHibrido, type ArqHibrido } from './hibrido';
+import { CATALOGO_CLAVES, comprobacionesCatalogo, idValido, masaReductora, motorDe, termicoDe, valoresCatalogo } from './catalogoTren';
 import type { Comprobacion, MaterialCarenado, MaterialChasis, Parametros, PuntosOcupante, Pulgadas, Resultados, Rueda, Tubo, P3 } from './geometria';
 import { MATERIALES_CARENADO, MATERIALES_CHASIS, RENDIMIENTO_SOLAR, TRICICLO_DEFECTO, largoTubo } from './geometria';
 import { T3, T_CUBIERTA, crearForma, punto, type DimBala, type FormaBala } from './garaje/balaForma';
@@ -109,6 +110,9 @@ export interface CamposTriciclo {
   tRendElec: number;   // reparto y serie: rendimiento del camino eléctrico, generador → inversores → motor (%)
   tRendCaja: number;   // paralelo: rendimiento de la caja de cambios y la cadena (%)
   tDeposito: number;   // depósito de gasolina (L)
+  // 2026-11-16 (Eugenio: «añade marcas de motores eléctricos y de motores térmicos … y de engranajes planetarios, de
+  // controladoras»): a real part from catalogoTren.ts, or 'medida' (the sliders decide, as before). Optional when saved.
+  tCatMotor?: string; tCatCtrl?: string; tCatReductora?: string; tCatTermico?: string;
   tMRueda: number; tMFreno: number; tMSuspDel: number; tMSuspTras: number; tMDir: number;   // kg
   // Propulsión
   tKWNom: number; tKWPico: number; tMMotor: number; tMInversor: number; tVel: number;
@@ -210,7 +214,7 @@ export const RUEDAS_TRICICLO: Record<RuedaTriciclo, { d: number; neuDel: number;
   c14: { d: 0.554, neuDel: 0.165, neuTras: 0.165, n: '14″ de coche, 165/60 R14 (554 mm)', kg: 2.62, kWBuje: 45, carga: 387 },
   c15: { d: 0.574, neuDel: 0.175, neuTras: 0.175, n: '15″ de coche, 175/55 R15 (574 mm)', kg: 2.96, kWBuje: 60, carga: 412 },
 };
-type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tTraseras' | 'tBascula' | 'tRuedas' | 'tPropulsion' | 'tHibArq' | 'tBascTec' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero';
+type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tTraseras' | 'tBascula' | 'tRuedas' | 'tPropulsion' | 'tHibArq' | 'tBascTec' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero' | 'tCatMotor' | 'tCatCtrl' | 'tCatReductora' | 'tCatTermico';
 export type ClaveNumTriciclo = Exclude<ClaveTriciclo, ClaveTexto>;
 
 // ------------------------------------------------------------------ deslizadores
@@ -706,6 +710,8 @@ export function camposTriciclo(P: Partial<Parametros>): CamposTriciclo {
     if (typeof Q.tHibMec !== 'number') o.tHibMec = mec;
     if (typeof Q.tRendElec !== 'number') o.tRendElec = elec;
   }
+  // (2026-11-16) a catalogue part is kept only when it is still in the catalogue (catalogoTren.ts); otherwise «A medida»
+  for (const k of CATALOGO_CLAVES) { const v = (P as Record<string, unknown>)[k]; if (typeof v === 'string' && idValido(k, v)) o[k] = v; }
   return o as unknown as CamposTriciclo;
 }
 
@@ -718,6 +724,9 @@ export function camposTriciclo(P: Partial<Parametros>): CamposTriciclo {
  */
 export function rangoTriciclo(k: ClaveNumTriciclo, T: CamposTriciclo): [number, number] {
   const f = fichaTriciclo(k)!;
+  // (2026-11-16) a catalogue part fixes what its maker publishes (catalogoTren.ts): the slider stops there
+  const fijo = valorFijoCatalogo(k, T);
+  if (fijo != null) return [fijo, fijo];
   // round three (2026-11-11): three rows need room. Only with that layout; astride, every range is as before.
   if (T.tAsientos === 'filas') {
     // the two seats of row 2 side by side need width at shoulder height, under the canopy's curve (see ANCHO_FILAS)
@@ -848,6 +857,9 @@ export function conBatalla(T: CamposTriciclo, nb: number): Partial<CamposTricicl
 export const ALTO_ANTES = 1.15;
 const techoBajo = (T: CamposTriciclo) => limitarTriciclo('tAlto', T) < ALTO_ANTES - 1e-9;
 /** Un valor dentro de su rango (un diseño escrito a mano o de otra versión no puede construir un triciclo imposible). */
+/** The value a chosen catalogue part fixes for this slider (catalogoTren.ts), or null. */
+export const valorFijoCatalogo = (k: ClaveNumTriciclo, T: CamposTriciclo): number | null =>
+  (valoresCatalogo(T, esCuatro(T) ? 2 : 1) as Partial<Record<string, number>>)[k] ?? null;
 export const limitarTriciclo = (k: ClaveNumTriciclo, T: CamposTriciclo) => { const [a, b] = rangoTriciclo(k, T); return Math.min(b, Math.max(a, comoAntes(k, T[k], T))); };
 /**
  * Round 3 (2026-11-12) widened some ranges. A value saved at an old end carries float noise (the editor stores what it
@@ -1538,7 +1550,7 @@ export function crearModeloTriciclo(P: Parametros) {
       arq: hibArq, kW: L('tPhevKW'), rendTerm: L('tRendTerm') / 100, litros: L('tDeposito'),
       mec: L('tHibMec') / 100, rendElec: L('tRendElec') / 100, rendCaja: L('tRendCaja') / 100,
       rendTrans: rendimientoHibrido(hibArq, L('tHibMec') / 100, L('tRendElec') / 100, L('tRendCaja') / 100),
-      kgMotor: 15 + 1.4 * L('tPhevKW'), kgDeposito: 4 + 0.745 * L('tDeposito'),
+      kgMotor: termicoDe(T.tCatTermico)?.kg ?? 15 + 1.4 * L('tPhevKW'), kgDeposito: 4 + 0.745 * L('tDeposito'),
       // what joins it to the wheels: the planetary and MG1 (12 kg, as since 2026-11-15), a generator alone (≈ 0,32 kg/kW
       // over 4 kg), or a clutch, a 3-speed gearbox and a P2 motor-generator
       transmision: hibArq === 'reparto' ? [{ nombre: 'Motor: engranaje planetario y generador', kg: 12 }]
@@ -1826,6 +1838,7 @@ function piezasBase(m: ModeloTriciclo, ar: { carroceria: number; cristal: number
       { nombre: 'Dirección', kg: L('tMDir'), x: (m.cremallera.x + m.cabezaDireccion[0]) / 2, y: (m.cremallera.y + m.cabezaDireccion[1]) / 2 },
       { nombre: 'Motores de buje (dos)', kg: L('tMMotor'), x: m.motor.c[0], y: m.motor.c[1] },
       { nombre: 'Controlador', kg: L('tMInversor'), x: (m.inversor.x0 + m.inversor.x1) / 2, y: (m.inversor.y0 + m.inversor.y1) / 2 },
+      ...reductoraPieza(T, m),
       { nombre: 'Batería', kg: bat, x: vb ? xb / vb : 0, y: vb ? yb / vb : 0.3 },
       m.filas ? asientosFilasMasa(m, L('tMAsiento')) : { nombre: 'Asientos', kg: 2 * (m.butacas ? masaButaca(L('tMAsiento')) : L('tMAsiento')), x: (m.sillines.xPiloto + m.sillines.xPasajero) / 2, y: (ySillin(true) + ySillin(false)) / 2 },
       { nombre: 'Varios', kg: L('tMVarios'), x: -1.0, y: 0.40 + F.dSuelo + m.elevar },
@@ -1846,6 +1859,7 @@ function piezasBase(m: ModeloTriciclo, ar: { carroceria: number; cristal: number
     { nombre: 'Dirección', kg: L('tMDir'), x: (m.cremallera.x + m.cabezaDireccion[0]) / 2, y: (m.cremallera.y + m.cabezaDireccion[1]) / 2 },
     { nombre: 'Motor de buje', kg: L('tMMotor'), x: m.motor.c[0], y: m.motor.c[1] },
     { nombre: 'Controlador', kg: L('tMInversor'), x: (m.inversor.x0 + m.inversor.x1) / 2, y: (m.inversor.y0 + m.inversor.y1) / 2 },
+    ...reductoraPieza(T, m),
     { nombre: 'Batería', kg: bat, x: vb ? xb / vb : 0, y: vb ? yb / vb : 0.3 },
     m.filas ? asientosFilasMasa(m, L('tMAsiento')) : { nombre: 'Asientos', kg: 2 * (m.butacas ? masaButaca(L('tMAsiento')) : L('tMAsiento')), x: (m.sillines.xPiloto + m.sillines.xPasajero) / 2, y: (ySillin(true) + ySillin(false)) / 2 },
     { nombre: 'Varios', kg: L('tMVarios'), x: -1.0, y: 0.40 + F.dSuelo + m.elevar },
@@ -1938,6 +1952,12 @@ function dimensionar(m: ModeloTriciclo, piezas: PiezaMasa[]): PiezaMasa[] {
           : p);
 }
 /** The department a part of the mass list belongs to (the «Proyecto» list groups by it; a part not named here, with the body). */
+/** (2026-11-16) a reduction gear chosen from the catalogue, at the motor, when its maker publishes its mass. */
+function reductoraPieza(T: CamposTriciclo, m: ModeloTriciclo) {
+  const kg = masaReductora(T);
+  return kg ? [{ nombre: 'Motor: reductora (catálogo)', kg, x: m.motor.c[0], y: m.motor.c[1] }] : [];
+}
+
 export function grupoPieza(nombre: string): DepTriciclo {
   if (nombre === 'Bastidor') return 'chasis';
   if (/^(Suspensión|Basculante|Basculación|Ruedas|Frenos|Dirección)/.test(nombre)) return 'rodaje';
@@ -2256,7 +2276,11 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   // electric motorcycles) would be the honest drive, and that is not drawn here
   const kWBuje = RUEDAS_TRICICLO[T.tRuedaTras].kWBuje, kWp = L('tKWPico');
   // four wheels (2026-11-11): the power split between two hub motors, each in its own rim
-  if (m.traseras) c('propulsion', 'Motor de buje: potencia que cabe en cada rueda trasera (regla aproximada)', kWBuje - kWp / 2, 0, `${fmt(kWp / 2, 1)} de ${kWBuje} kW por rueda`);
+  // (2026-11-16) catalogue parts: voltages, the controller's current, the reduction gear (catalogoTren.ts). An inboard
+  // motor is not in the rim, so the hub rule does not apply to it
+  for (const k of comprobacionesCatalogo(T, { kWPico: kWp, motores: m.traseras ? 2 : 1, dRueda: RUEDAS_TRICICLO[T.tRuedaTras].d, velCalculo: L('tVel') })) c((k.dep ?? 'propulsion') as never, k.nombre, k.holgura, k.minimo, k.mostrar);
+  if (motorDe(T.tCatMotor)?.montaje === 'central') { /* no hub motor: nothing in the rim */ }
+  else if (m.traseras) c('propulsion', 'Motor de buje: potencia que cabe en cada rueda trasera (regla aproximada)', kWBuje - kWp / 2, 0, `${fmt(kWp / 2, 1)} de ${kWBuje} kW por rueda`);
   else c('propulsion', 'Motor de buje: potencia que cabe en la rueda trasera (regla aproximada)', kWBuje - kWp, 0, `${fmt(kWp, 1)} de ${kWBuje} kW`);
   // round three: the boot, in litres (always passes: it says how much there is)
   const maletero = maleterosTriciclo(m);

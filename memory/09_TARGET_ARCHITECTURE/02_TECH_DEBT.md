@@ -735,3 +735,7 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
   - The P2's load-point shifting is not modelled.
 - **Drawn but not checked:** the chain, the half-shafts (four wheels) and the exhaust headers. Neither do they move with the suspension or the tilt. The half-shafts pass through the arm fairings without a cut-out.
 - **Not in the CAD export or the planos.** `cad.ts` does not export the hybrid's parts: about 1 hour.
+
+## 2026-11-16 · Catalogue figures are a snapshot
+
+`catalogoTren.ts` holds figures copied by hand on 2026-11-16 with their source URLs; nobody re-checks them, and several sources are shop listings, not datasheets. Inboard motors are not drawn in 3D and their placement is not checked (the 3D still shows a hub motor). Re-verifying the 34 entries: ~2 h; drawing an inboard motor plus chain/gear: ~4 h.

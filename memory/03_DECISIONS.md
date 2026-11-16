@@ -1863,3 +1863,7 @@ Eugenio asked for realistic, non-creepy faces, then chose: no money spent, only 
 - **Parallel:** the engine's part-load penalty is the curve `min(1, 0.75 + 0.5·load)`, not a fuel map. Series caps the sustained petrol speed at the hub motor's rated power.
 - **Placement:** parts are placed, not moved to make room. `disponerHibrido` puts the engine behind the last backrest (wheel in the tail) or behind the frame's tower (four wheels), and searches the tank's and the silencer's shape and place. When something does not fit, a check says so; nothing is clamped.
 - **Code:** new code in its own files: `hibrido.ts` (pure), `hibrido3d.ts`, `FichaHibrido.tsx`. Shared files got small hooks.
+
+## 2026-11-16 · Bala powertrain catalogue: fixed slider values via `rangoTriciclo`
+
+A chosen catalogue part (catalogoTren.ts) writes its published figures into the existing sliders and `rangoTriciclo` returns `[v, v]` for them while it is chosen, so every existing calculation (masses, energy, hybrid) uses them with no second code path. Alternative considered: a separate "catalogue" model overriding `limitarTriciclo` callers one by one — more places to forget. The choice is stored as four optional string keys (`tCatMotor`, `tCatCtrl`, `tCatReductora`, `tCatTermico`), absent = «A medida», so saved designs are unchanged. Controller current is compared as P = V × I with 95 % efficiency, treating an AC controller's phase RMS current as roughly its battery current (approximate; said on screen).

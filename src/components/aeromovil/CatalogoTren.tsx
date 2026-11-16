@@ -11,7 +11,7 @@ import {
 } from './catalogoTren';
 
 export type TipoCatalogo = 'motor' | 'controlador' | 'reductora' | 'termico';
-type SelectorUI = ComponentType<{ id: string; etiqueta: string; valor: string; opciones: { k: string; n: string }[]; alCambiar: (v: string) => void; clave?: never }>;
+type SelectorUI = ComponentType<{ id: string; etiqueta: string; valor: string; opciones: { k: string; n: string }[]; alCambiar: (v: string) => void; clave?: string }>;
 
 const ETIQUETA: Record<TipoCatalogo, string> = {
   motor: 'Motor eléctrico: modelo comercial', controlador: 'Controlador: modelo comercial',
@@ -35,13 +35,15 @@ export interface Necesidad {
 }
 
 /** One picker and, when a part is chosen, its card. */
+const CLAVE: Record<TipoCatalogo, string> = { motor: 'tCatMotor', controlador: 'tCatCtrl', reductora: 'tCatReductora', termico: 'tCatTermico' };
+
 export function CatalogoPieza({ tipo, valor, alCambiar, Selector, necesidad }: {
   tipo: TipoCatalogo; valor: string | undefined; alCambiar: (id: string) => void; Selector: SelectorUI; necesidad: Necesidad;
 }) {
   const v = valor ?? A_MEDIDA;
   return (
     <div className="flex flex-col gap-1.5">
-      <Selector id={`cat-${tipo}`} etiqueta={ETIQUETA[tipo]} valor={v} opciones={OPCIONES[tipo]} alCambiar={alCambiar} />
+      <Selector id={`cat-${tipo}`} etiqueta={ETIQUETA[tipo]} valor={v} clave={CLAVE[tipo]} opciones={OPCIONES[tipo]} alCambiar={alCambiar} />
       {v !== A_MEDIDA && <Ficha tipo={tipo} id={v} necesidad={necesidad} />}
     </div>
   );

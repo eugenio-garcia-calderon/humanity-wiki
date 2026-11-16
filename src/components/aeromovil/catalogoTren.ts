@@ -319,6 +319,10 @@ export const OPCIONES_CONTROLADOR = [MEDIDA, ...CONTROLADORES.map(opcion)];
 export const OPCIONES_REDUCTORA = [{ k: A_MEDIDA, n: 'Ninguna (motor de buje)' }, ...REDUCTORAS.map(opcion)];
 export const OPCIONES_TERMICO = [MEDIDA, ...TERMICOS.map(opcion)];
 
+/** The design's keys for the four choices, and whether an id is one of that list (a part removed later opens as «A medida»). */
+export const CATALOGO_CLAVES = ['tCatMotor', 'tCatCtrl', 'tCatReductora', 'tCatTermico'] as const;
+export const idValido = (k: typeof CATALOGO_CLAVES[number], id: string) => id === A_MEDIDA || (k === 'tCatMotor' ? MOTORES : k === 'tCatCtrl' ? CONTROLADORES : k === 'tCatReductora' ? REDUCTORAS : TERMICOS).some(p => p.id === id);
+
 /** The choices a design keeps. Absent in a saved design = «A medida». */
 export interface EleccionCatalogo { tCatMotor?: string; tCatCtrl?: string; tCatReductora?: string; tCatTermico?: string }
 

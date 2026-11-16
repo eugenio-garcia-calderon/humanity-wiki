@@ -11995,3 +11995,13 @@ Eugenio (15:03): «En motor la parte de propulsión es tan importante que tiene 
 - **Diseños guardados:** un híbrido guardado con el deslizador antiguo «Conversión mecánica» abre como reparto con el mismo rendimiento, y gasta exactamente lo mismo (lo comprueba `scripts/triciclo-disenos.ts`). Lo único que cambia es su centro de gravedad, porque las piezas están ahora donde se dibujan.
 - **Con tres filas de asientos el motor no cabe** (choca con la torreta unos 25 cm): la comprobación lo dice en rojo.
 - Son estimaciones de un primer diseño, no medidas.
+
+## 2026-11-16 · Bala: piezas comerciales del tren de potencia (motores, controladores, reductoras, motores de gasolina)
+
+Eugenio: «añade marcas de motores eléctricos y de motores térmicos que podamos seleccionar para configurar nuestro tren de potencia, y también de engranajes planetarios, de controladoras, y todo».
+
+- En la pestaña **Motor** del Triciclo / Cuadriciclo Bala, bloque «Motor eléctrico», hay tres selectores nuevos: **motor eléctrico**, **controlador** y **reductora o engranaje**; en «Híbrido enchufable», uno para el **motor de gasolina**. La primera opción es siempre «A medida (deslizadores)», así que los diseños guardados no cambian.
+- Catálogo investigado el 16/11/2026 (`src/components/aeromovil/catalogoTren.ts`): 10 motores eléctricos (QS Motor 273, V3 5 kW, 260 de coche y 138; Golden Motor HPM5000B y HPM10KW; Motenergy ME1616; EMRAX 188 y 208; Saietta AFT140i), 10 controladores (Sevcon Gen4 ×3, Curtis 1238E ×2, Kelly ×2, Fardriver ND72850, Votol EM-150 y EM-200), 7 reductoras (Neugart PLE120 ×2 y PLPE120, Apex AB142, Comex ×2, Hewland GEVD-200) y 7 motores de gasolina (Honda GX200, GX390, GX690; Kawasaki FS730V; Vanguard 37 HP; Aixro XR50; Rotax 912 iS). Cada uno con el enlace a la ficha de donde se copiaron las cifras. Lo que la ficha no publica queda vacío y se dice.
+- Al elegir una pieza, sus cifras publicadas (potencia continua y de pico, masa, potencia y rendimiento del motor de gasolina) pasan a los deslizadores y quedan fijos. Sale una ficha con sus datos y el enlace.
+- Comprobaciones nuevas: tensión del controlador dentro de la del motor, corriente del controlador para la potencia máxima, par y vueltas de la reductora, velocidad a las rpm máximas del motor, y en la ficha: potencia continua frente a la que pide la velocidad de cálculo, y la del motor de gasolina frente a la que hace falta para ir solo con gasolina.
+- No hecho: el motor central (no de buje) no se dibuja en 3D; el engranaje planetario de reparto tipo Prius no se vende suelto en este tamaño, así que el del híbrido sigue estimado; no hay cargadores ni convertidores DC-DC en el catálogo.
