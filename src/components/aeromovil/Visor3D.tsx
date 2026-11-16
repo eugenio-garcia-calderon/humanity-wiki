@@ -1235,6 +1235,14 @@ function inclinarBala(G: Record<CapaId, THREE.Group>, m: ModeloTriciclo, coche: 
     }
     const u = o.userData.cualB; girar(o, u.eje, u.s, u.i);
   }
+  // the tilt system (2026-11-16): each rocker turns as its arms do; its rods and cylinders follow its ends and the arms
+  const rotX = (p: V3, c: V3, t: number): V3 => { const dy = p[1] - c[1], dz = p[2] - c[2]; return [p[0], c[1] + dy * Math.cos(t) - dz * Math.sin(t), c[2] + dy * Math.sin(t) + dz * Math.cos(t)]; };
+  for (const o of G.suspension.children) {
+    const u = o.userData;
+    if (u.balancinB) { const t = -pose[u.balancinB.eje as 'del' | 'tras'].beta, c = u.balancinB.c as V3; o.quaternion.setFromAxisAngle(_x, t); const piv = new THREE.Vector3(...c); o.position.copy(piv).sub(piv.clone().applyQuaternion(o.quaternion)); }
+    else if (u.bieletaBalB) { const v = u.bieletaBalB, t = -pose[v.eje as 'del' | 'tras'].beta; ponerBieleta(o, rotX([v.c[0], v.c[1], v.s * v.r], v.c, t), rotX([v.p[0], v.p[1], v.s * (Math.abs(v.p[2]) + v.r)], v.p, t)); }
+    else if (u.cilindroB) { const v = u.cilindroB, t = -pose[v.eje as 'del' | 'tras'].beta; ponerBieleta(o, v.ancla, rotX([v.c[0], v.c[1], v.s * v.r], v.c, t)); }
+  }
   // the tie rods: from the rack (on the body) to the front uprights' arms (with the pods)
   for (const o of G.direccion.children) if (o.userData.bieletaB) {
     const u = o.userData.bieletaB, p = pose.del;
@@ -1308,6 +1316,43 @@ function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<string,
     const b = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 1, 12), M.alu); b.castShadow = true;
     b.userData.bieletaB = { a: [k.x, k.y, s * k.z] as V3, b: [m.xF - 0.07, arriba.y + 0.02, s * zIn] as V3, s };
     ponerBieleta(b, b.userData.bieletaB.a, b.userData.bieletaB.b); G.direccion.add(b);
+  }
+  // the tilt system (2026-11-16, basculacion.ts): on each axle on arms a rocker on the centre line, its two push rods to
+  // the upper arms (a second parallelogram), and what turns or holds it; the control unit and its sensors
+  if (m.bascula) {
+    const r = m.bascula.brazo, tec = m.bascula.tec;
+    for (const q of m.bascula.ejes) {
+      const a = q.brazos[0]; if (!a) continue;
+      const C: V3 = [a.x, a.yCuerpo - 0.12, 0], eje = q.eje === 'tras' ? 'tras' : 'del';
+      const bal = new THREE.Group(); bal.userData.balancinB = { eje, c: C }; bal.userData.componente = 'basculacion'; G.suspension.add(bal);
+      cajaRedonda(bal, C, [0.035, 0.045, 2 * r + 0.05], M.alu, 0.012).userData.componente = 'basculacion';
+      tube(bal, [C[0] + 0.05, C[1], 0], [C[0] - 0.08, C[1], 0], 0.03, M.stanch);
+      if (tec === 'libre') { const d = new THREE.Mesh(new THREE.CylinderGeometry(0.085, 0.085, 0.006, 40), M.discoFreno); d.rotation.z = Math.PI / 2; d.position.set(C[0] - 0.06, C[1], 0); d.userData.componente = 'basculacion'; bal.add(d); }
+      for (const s of [1, -1] as const) {
+        const b = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 1, 12), M.alu); b.castShadow = true; b.userData.componente = 'basculacion';
+        b.userData.bieletaBalB = { eje, s, c: C, p: [a.x, a.yCuerpo, s * a.zp] as V3, r, rIdx: 0 };
+        ponerBieleta(b, [C[0], C[1], s * r], [a.x, a.yCuerpo, s * (a.zp + r)]); G.suspension.add(b);
+        if (tec === 'hidraulica') {
+          const ci = new THREE.Mesh(new THREE.CylinderGeometry(0.022, 0.022, 1, 16), M.stanch); ci.castShadow = true; ci.userData.componente = 'basculacion';
+          ci.userData.cilindroB = { eje, s, c: C, r, ancla: [C[0], C[1] - 0.26, s * r * 1.05] as V3 };
+          ponerBieleta(ci, ci.userData.cilindroB.ancla, [C[0], C[1], s * r]); G.suspension.add(ci);
+        }
+      }
+      if (tec === 'electrica') {
+        // the motor and its planetary-and-worm gearbox, on the rocker's shaft, behind it (fixed to the body)
+        cajaRedonda(G.suspension, [C[0] - 0.11, C[1], 0], [0.08, 0.11, 0.11], M.carcasa, 0.012).userData.componente = 'basculacion';
+        const mo = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 0.14, 28), M.motor); mo.rotation.z = Math.PI / 2; mo.position.set(C[0] - 0.22, C[1], 0); mo.userData.componente = 'basculacion'; G.suspension.add(mo);
+      } else if (tec === 'libre') {
+        cajaRedonda(G.suspension, [C[0] - 0.06, C[1] + 0.085, 0], [0.05, 0.04, 0.07], M.pinza, 0.008).userData.componente = 'basculacion';
+        const am = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.07, 24), M.carcasa); am.rotation.z = Math.PI / 2; am.position.set(C[0] - 0.13, C[1], 0); am.userData.componente = 'basculacion'; G.suspension.add(am);
+      } else {
+        // the hydraulic unit (pump, valves, accumulator) once, behind the first rocker
+        if (q === m.bascula.ejes[0]) { cajaRedonda(G.suspension, [C[0] - 0.35, C[1] - 0.12, 0], [0.18, 0.12, 0.14], M.carcasa, 0.015).userData.componente = 'basculacion'; const ac = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 0.14, 20), M.stanch); ac.position.set(C[0] - 0.35, C[1] + 0.0, 0.1); ac.userData.componente = 'basculacion'; G.suspension.add(ac); }
+      }
+    }
+    // the control unit and the inertial sensor, low on the centre line
+    const q0 = m.bascula.ejes[0].brazos[0];
+    if (q0) { cajaRedonda(G.suspension, [q0.x - 0.5, q0.yCuerpo - 0.16, 0], [0.12, 0.035, 0.09], M.carcasa, 0.008).userData.componente = 'basculacion'; cajaRedonda(G.suspension, [q0.x - 0.5, q0.yCuerpo - 0.13, 0.08], [0.04, 0.02, 0.04], M.black, 0.004).userData.componente = 'basculacion'; }
   }
   // everyone on board (round three: up to four, each at their own z; a folded row carries nobody)
   if (calidad === 'completa') for (const q of m.plazas) { if (sinPasajero && !q.piloto) continue; ocupante(G.ocupantes, M, { occPts: () => q.pts }, q.z, q.piloto); }
@@ -1782,7 +1827,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       // (2026-11-13) our own car, where no part with a sheet was hit: the page opens the design's card
       if (!pincharNuestro.current) return;
       const donde = (h: THREE.Intersection) => {
-        const p = coche.worldToLocal(h.point.clone()), nombres: string[] = []; let capa: CapaId | null = null;
+        const p = coche.worldToLocal(h.point.clone()), nombres: string[] = (h.object as any).userData?.componente ? [`comp:${(h.object as any).userData.componente}`] : []; let capa: CapaId | null = null;
         for (let o: THREE.Object3D | null = h.object; o && o !== coche; o = o.parent) { if (o.name) nombres.push(o.name); const c = CAPAS.find(k => k.n === o!.name && o!.parent === coche); if (c) capa = c.k; }
         return { punto: [p.x, p.y, p.z] as [number, number, number], capa, nombres };
       };

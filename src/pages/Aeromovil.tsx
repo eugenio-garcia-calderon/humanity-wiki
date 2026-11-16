@@ -39,6 +39,7 @@ import {
   ALTO_FILAS, ANCHO_FILAS, AGARRE, AUXILIARES, CRR, DEPS_TRICICLO, EQUIPAJE, RENDIMIENTO, RUEDAS_TRICICLO, SELECTORES_TRICICLO, USABLE, VUELCO_OBJETIVO, bateriaChasis, camposTriciclo, cargasRueda, conButacas, conSalpicadero, grupoPieza, largueroAlEje, masaButaca, conPortonAptera, conPuertas, deslizadoresTriciclo, energiaTriciclo, conBatalla, esCuatro, esRombo, estirarTriciclo, guardarTriciclo, largoTriciclo, lemasTriciclo, limitarTriciclo, nombreTriciclo, vistaTriciclo,
   type DepTriciclo, type FichaTriciclo,
 } from '../components/aeromovil/geometriaTriciclo';
+import { TECNOLOGIAS_BASCULA, type Tilt } from '../components/aeromovil/basculacion';
 import { cuerpoTriciclo, peticionDe as peticionTunel } from '../components/aeromovil/tunel/nuestro';
 // ── Cuadriciclo Basculante (2026-11-15): its sidebar, its Cd and its departments (basculante/, geometriaBasculante.ts)
 import { LadoBasculante, useCdBasculante } from '../components/aeromovil/basculante/LadoBasculante';
@@ -629,6 +630,38 @@ function useCdTriciclo(modelo: Modelo, resolucion: Resolucion, kmh: number): CdT
   return { calculando: false, cd: pv[i].cd.total + (pv[i + 1].cd.total - pv[i].cd.total) * u, areaRef: peticion.area };
 }
 
+/**
+ * The tilt system's engineering sheet (2026-11-16, basculacion.ts): the figures it is sized on, then every part with
+ * what it does, what to build or buy, and its mass, for the people who will make it.
+ */
+function FichaTilt({ t, tres, rombo }: { t: Tilt; tres: boolean; rombo: boolean }) {
+  const tec = TECNOLOGIAS_BASCULA.find(x => x.k === t.tec)?.n ?? t.tec;
+  return (
+    <div className="flex flex-col gap-2.5 text-xs text-slate-600">
+      <p className="text-slate-500">{tec}. {tres ? 'El triciclo se inclina sobre los brazos de delante: la rueda de la cola va en la carrocería, se inclina con ella y no aguanta nada de lado, así que el balancín de delante sostiene el coche entero.' : rombo ? 'En rombo se inclina sobre los brazos de las laterales: las ruedas del morro y de la cola se inclinan con la carrocería.' : 'Con cuatro ruedas, un balancín en cada eje, cada uno con la parte del peso que lleva su eje.'} Un balancín en el centro, unido a los dos brazos de arriba por dos bieletas, gira lo mismo que ellos: lo que gira el balancín inclina el coche.</p>
+      <dl className="grid grid-cols-[1fr_auto] gap-x-3 gap-y-1">
+        <dt>Momento del coche parado y del todo inclinado</dt><dd className="text-right font-mono">{fmt(t.momentoEstatico, 0)} N·m</dd>
+        <dt>Momento de diseño (con el margen y la inercia)</dt><dd className="text-right font-mono">{fmt(t.momentoDiseno, 0)} N·m</dd>
+        <dt>De derecho a inclinado del todo</dt><dd className="text-right font-mono">{fmt(t.tiempo, 2)} s</dd>
+        {t.porEje.map(e => <Fragment key={e.nombre}><dt>Balancín {e.nombre}: par y giro</dt><dd className="text-right font-mono">{fmt(e.parBalancin, 0)} N·m · ×{fmt(e.relacion, 2)}</dd></Fragment>)}
+        {t.tec !== 'libre' && <><dt>Potencia de pico</dt><dd className="text-right font-mono">{fmt(t.potenciaTotal, 0)} W</dd><dt>Energía por curva (ida y vuelta)</dt><dd className="text-right font-mono">{fmt(t.energiaCurva / 3600, 2)} Wh</dd></>}
+        <dt className="font-semibold">Masa de todo el sistema</dt><dd className="text-right font-mono font-semibold">{fmt(t.kg, 1)} kg</dd>
+      </dl>
+      <h4 className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500">Piezas para fabricar o comprar</h4>
+      <ol className="flex flex-col gap-2">
+        {t.componentes.map((c, i) => (
+          <li key={c.id} className="rounded-lg border border-slate-200 p-2.5">
+            <div className="flex items-baseline justify-between gap-2"><span className="font-semibold text-slate-800">{i + 1}. {c.nombre}{c.cantidad > 1 ? ` (×${c.cantidad})` : ''}</span><span className="shrink-0 font-mono text-slate-500">{fmt(c.kg, 2)} kg</span></div>
+            <p className="mt-1 text-slate-500">{c.funcion}</p>
+            <ul className="mt-1 list-disc pl-4">{c.ficha.map(l => <li key={l}>{l}</li>)}</ul>
+          </li>
+        ))}
+      </ol>
+      <p className="text-[11px] text-slate-400">Estimaciones de un primer diseño: el momento con el coche parado y del todo inclinado por el margen, más la inercia de inclinarse en ese tiempo; el motor a 3.000 rpm y 48 V con un 55 % entre la planetaria y el sin fin; la hidráulica a 120 bar; masas por reglas de piezas de su clase. Un ingeniero tiene que comprobarlas antes de comprar nada. El vuelco, el consumo y la autonomía todavía no cuentan la inclinación.</p>
+    </div>
+  );
+}
+
 /** The order of the side panel's blocks (2026-11-15): the body front to back, then the rest as they come. */
 const ORDEN_BLOQUES = ['Forma', 'Morro', 'Cúpula', 'Cola', 'Techo solar y ventanas', 'Carenados', 'Puertas y maletero', 'Material y espesores'];
 const ordenBloque = (b: string) => { const i = ORDEN_BLOQUES.indexOf(b); return i < 0 ? 100 : i; };
@@ -639,6 +672,7 @@ const ordenBloque = (b: string) => { const i = ORDEN_BLOQUES.indexOf(b); return 
  */
 function zonaTriciclo(m: ModeloTriciclo, d: { punto: [number, number, number]; capa: string | null; nombres: string[] }): { dep: DepTriciclo; bloque: string } {
   const [x, y] = d.punto, n = d.nombres.join(' ');
+  if (/comp:basculacion/.test(n)) return { dep: 'rodaje', bloque: 'Basculación' };
   if (/puerta|porton|maletero/i.test(n)) return { dep: 'carroceria', bloque: 'Puertas y maletero' };
   if (/carenado|brazo/i.test(n)) return { dep: 'carroceria', bloque: 'Carenados' };
   switch (d.capa) {
@@ -753,7 +787,7 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
   const filas = T.tAsientos === 'filas', soloFilas = (b: string) => b === 'Tres filas' && !filas;
   // four wheels (2026-11-11): the rear track only with two rear wheels
   // (2026-11-15: a diamond, `tRuedas`, has four wheels too, but one rear in the tail and the pods at the sides)
-  const cuatro = esCuatro(T), rombo = esRombo(T), lemas = lemasTriciclo(T), tresOCuatro = cuatro || rombo ? 'cuatro' : 'tres', bascula = cuatro || rombo;
+  const cuatro = esCuatro(T), rombo = esRombo(T), lemas = lemasTriciclo(T), tresOCuatro = cuatro || rombo ? 'cuatro' : 'tres';
   // 2026-11-12: each new option's sliders only show with it on (a steering wheel's with «Volante», the handlebar's with
   // «Manillar», the doors' with doors, the hatch's with the Aptera hatch, the pack's with the battery along the frame)
   const volante = T.tMando === 'volante', salp = conSalpicadero(T), puertas = conPuertas(T), portonA = conPortonAptera(T), paquete = bateriaChasis(T), butacas = conButacas(T);
@@ -767,7 +801,7 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
   const LISA = ['tColaAncho', 'tColaGrosor', 'tColaBombeo', 'tBajosIni', 'tBajosCurva', 'tMorroAncho', 'tMorroGrosor', 'tMorroBombeo'];
   const PUERTA2 = ['tPuerta2Parte', 'tBisagra2Y', 'tBisagra2Inc', 'tPuerta2Abre'];
   // (round 3 interior: the rails reach the rear axle only with two rear wheels; with one, the wheel is in the tail between them)
-  const fichas = deslizadoresTriciclo().filter(f => f.dep === dep && !soloFilas(f.bloque) && (cuatro || f.clave !== 'tViaTras') && (f.clave !== 'tBascMax' || (bascula && T.tBascula === 'si')) && (rombo ? f.clave !== 'tEjeDel' : f.clave !== 'tEjeLat') && (f.bloque !== 'Híbrido enchufable' || T.tPropulsion === 'phev') && visible(f.clave)), sels = SELECTORES_TRICICLO.filter(s => s.dep === dep && !soloFilas(s.bloque) && ((s.clave !== 'tMaletero' && s.clave !== 'tPuertas2') || puertas) && (s.clave !== 'tChLargo' || cuatro) && (s.clave !== 'tBascula' || bascula) && (s.clave !== 'tTraseras' || !rombo));
+  const fichas = deslizadoresTriciclo().filter(f => f.dep === dep && !soloFilas(f.bloque) && (cuatro || f.clave !== 'tViaTras') && (f.bloque !== 'Basculación' || T.tBascula === 'si') && (rombo ? f.clave !== 'tEjeDel' : f.clave !== 'tEjeLat') && (f.bloque !== 'Híbrido enchufable' || T.tPropulsion === 'phev') && visible(f.clave)), sels = SELECTORES_TRICICLO.filter(s => s.dep === dep && !soloFilas(s.bloque) && ((s.clave !== 'tMaletero' && s.clave !== 'tPuertas2') || puertas) && (s.clave !== 'tChLargo' || cuatro) && (s.clave !== 'tBascTec' || T.tBascula === 'si') && (s.clave !== 'tTraseras' || !rombo));
   const nOcc = rt.ocupantes, conN = nOcc === 1 ? 'con el piloto solo' : `con ${['', 'uno', 'dos', 'tres', 'cuatro'][nOcc] ?? nOcc} ocupantes`;
   // with three rows the passenger's saddle height is the rows' seat height; its position and recline do nothing there
   const ETIQUETA_FILAS: Partial<Record<string, string>> = { tPasY: 'Asientos de las filas 2 y 3: altura' };
@@ -904,6 +938,7 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
           {bloque === 'Forma' && T.tCubierta === 'lisa' && <p className="-mt-1 text-xs text-slate-500">Cubierta lisa: detrás del cristal de la cúpula y delante del parabrisas, lo de arriba ya no sigue la forma redonda de la cúpula. Es una cubierta casi plana, un poco abombada en el centro (el «bombeo»), que solo baja hacia la punta, con un canto redondeado hacia los lados. Así no salen montículos ni hombros, se muevan como se muevan los deslizadores (lo comprueba un programa con cada deslizador en sus dos extremos y muchas combinaciones). Entre la cúpula y la cubierta la forma se funde a lo largo de 30 cm, sobre el cristal.</p>}
           {bloque === 'Techo solar y ventanas' && <p className="-mt-1 text-xs text-slate-500">La forma de la cúpula no cambia: el techo solar y las ventanas se dibujan sobre ella. Detrás de donde empieza, lo alto de la cúpula es un panel solar opaco (da sombra a las cabezas: menos calor dentro en verano); por los lados, encima de la ventana. Delante, el parabrisas pasa por encima hasta el panel.{T.tSolarCola === 'si' ? ` Por detrás, el panel sigue por lo alto de la cola hasta su punta, como en el Aptera; con el portón, la parte de encima del portón se levanta con él (con la tapa del maletero, con la tapa).${T.tCubierta === 'lisa' ? ' Con la cubierta lisa cubre toda la cubierta de la cola, dejando un marco de unos 5 cm a cada lado.' : ''}` : ''}{puertas ? ' Con las puertas como el Aptera hay montante siempre (la puerta se corta por él), aunque arriba diga «De una pieza».' : ''} El montante sale del borde del cristal, sube y se tumba hacia atrás en una sola curva hasta el techo, como en el Aptera, y sigue como marco entre la ventana y el techo.{modelo.ventanas.marco ? ` Entre el panel y el cristal va un marco de carrocería de ${cm(modelo.ventanas.marco.ancho, 0)}: arriba del parabrisas y a lo largo de los dos carriles del techo (${fmt(modelo.marcoTecho)} m² de laminado en lugar de panel).` : ''} Panel: {res.areas.solar > 0.005 ? `${fmt(res.areas.solar)} m², ${Math.round(res.solarPico)} W a pleno sol, unos ${fmt(res.solarDia / 1000)} kWh al día (estimado)` : 'ninguno'}; cristal: {fmt(res.areas.cristal)} m².</p>}
           {bloque === 'Techo solar' && <p className="-mt-1 text-xs text-slate-500">{res.areas.solar > 0.005 ? `${fmt(res.areas.solar)} m² de panel: ${Math.round(res.solarPico)} W a 1000 W/m², y de media unos ${fmt(res.solarDia / 1000)} kWh al día (${fmt(P.sol, 1)} kWh/m² al día sobre plano, el panel curvo recoge un 70 % de eso, células al ${Math.round(0.21 * 100)} % y un 15 % de pérdidas). ${Math.round(res.masas['Paneles solares'] ?? 0)} kg de panel, sobre laminado de carrocería en lugar del cristal.` : 'Sin techo solar: la cúpula es toda de cristal (se mueve en Carrocería › Techo solar y ventanas).'}</p>}
+          {bloque === 'Basculación' && (rt.tilt ? <FichaTilt t={rt.tilt} tres={!cuatro && !rombo} rombo={rombo} /> : <p className="-mt-1 text-xs text-slate-500">Con «Sí», la cabina se inclina hacia dentro en las curvas, como una moto, y los carenados de las ruedas con ella, cada uno sobre sus dos brazos en paralelogramo. {cuatro || rombo ? '' : 'En el triciclo se inclinan los dos carenados de delante; la rueda de la cola va dentro de la carrocería y se inclina con ella. '}Aquí se elige la tecnología que la mueve y salen, una a una, las piezas que hay que construir.</p>)}
           {bloque === 'Híbrido enchufable' && <p className="-mt-1 text-xs text-slate-500">Híbrido enchufable como el Prius: el motor de gasolina, el generador y el eje de las ruedas van unidos por un engranaje planetario, que reparte la fuerza del motor entre las ruedas, directa, y el generador, que carga la batería o mueve el motor eléctrico. Primero gasta la batería, enchufada; cuando se acaba, la gasolina. El consumo a los 100 km se calcula con la energía que piden las ruedas (aire y rodadura), dividida por los dos rendimientos y por los 8,9 kWh que lleva un litro de gasolina. Masas estimadas: motor {fmt(15 + 1.4 * T.tPhevKW, 0)} kg, planetario y generador 12 kg, depósito lleno {fmt(4 + 0.745 * T.tDeposito, 0)} kg, delante del eje trasero. El motor de gasolina aún no se dibuja en 3D ni se comprueba que quepa.</p>}
           {bloque === 'Motor' && cuatro && <p className="-mt-1 text-xs text-slate-500">Dos motores de buje, uno en cada rueda trasera, sin cadena ni correa, con un controlador doble bajo el sillín del pasajero. Cada uno da la mitad de la potencia, así que en cada llanta cabe el doble que con una rueda: en una rueda de ciclomotor unos {RUEDAS_TRICICLO['24'].kWBuje} kW de pico por rueda; en una llanta de coche de 15″, unos {RUEDAS_TRICICLO.c15.kWBuje}. «Motores de buje» es la masa de los dos juntos: su rango es el de dos motores de media potencia, con la misma regla de kilos por kW que con uno (cada motor lleva su base, así que dos pesan algo más que uno del doble).</p>}
           {bloque === 'Motor' && !cuatro && <p className="-mt-1 text-xs text-slate-500">Motor de buje en la rueda trasera, sin cadena ni correa, con su controlador bajo el sillín del pasajero. Su masa y la del controlador siguen a la potencia máxima (su rango se mueve con ella). En una rueda de ciclomotor caben unos {RUEDAS_TRICICLO['24'].kWBuje} kW de pico; en una llanta de coche de 15″, unos {RUEDAS_TRICICLO.c15.kWBuje} (como los motores en rueda del Aptera). Por encima, lo honrado sería un motor en el basculante con correa, como en las motos eléctricas, y eso aquí no se dibuja: la comprobación «Motor de buje» lo avisa.</p>}
