@@ -5,6 +5,12 @@
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "hibrido: arquitectura del híbrido + 3D motor gasolina",
       "desde": "2026-11-16T14:11:07.733Z"
+    },
+    {
+      "agente": "hibrido",
+      "ruta": "src/components/aeromovil/geometriaTriciclo.ts",
+      "motivo": "hibrido: arquitectura del híbrido + 3D motor gasolina",
+      "desde": "2026-11-16T14:11:11.221Z"
     }
   ]
 }
