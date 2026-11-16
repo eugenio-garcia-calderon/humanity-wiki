@@ -73,11 +73,21 @@ const cuentaPilar = (s, pid) => pid==='vision' ? deEscala(s.vision.bloques).leng
 const nombreEscala = () => ESCALAS.find(e=>e.id===ESC)?.nombre;
 const total = s => deEscala(s.vision.bloques).length + deEscala(s.retos).length + deEscala(s.soluciones).length + deEscala(s.proyectos).length;
 
+// A menu row whose chosen item always sits in the exact centre, big, with the others split
+// to its left and right (the list rotates so the chosen one lands in the middle).
+function filaCentrada(items, elegido, clase){
+  if(!elegido) return `<div class="fila sin-eleccion ${clase}">${items.map(x=>x.html).join('')}</div>`;
+  const i = items.findIndex(x=>x.id===elegido);
+  const resto = [...items.slice(i+1), ...items.slice(0,i)];
+  const mitad = Math.ceil(resto.length/2);
+  const izq = resto.slice(mitad), der = resto.slice(0,mitad);
+  return `<div class="fila ${clase}"><div class="lado izq">${izq.map(x=>x.html).join('')}</div>
+    <div class="centro">${items[i].html}</div><div class="lado der">${der.map(x=>x.html).join('')}</div></div>`;
+}
+
 function nav(){
-  $('#nav').innerHTML = SECTORES.map(s =>
-    `<a href="${link({sector:s.id})}" class="${s.id===SECTOR?'on':''}">${esc(s.nombre)}</a>`).join('');
-  $('#nav').classList.toggle('con-eleccion', !!SECTOR);
-  $('#nav .on')?.scrollIntoView({block:'nearest', inline:'center'});
+  $('#nav').innerHTML = filaCentrada(SECTORES.map(s=>({id:s.id,
+    html:`<a href="${link({sector:s.id})}" class="${s.id===SECTOR?'on':''}">${esc(s.nombre)}</a>`})), SECTOR, 'f-sectores');
 }
 
 function menuSubtemas(){
@@ -85,35 +95,18 @@ function menuSubtemas(){
   const el = $('#subnav');
   if(!s || !(s.subtemas||[]).length){ el.innerHTML=''; el.hidden=true; return; }
   el.hidden=false;
-  el.innerHTML = `<div class="wrap ancho">
-    <a href="${link({s:null})}" class="${!SUB?'on':''}">Todo</a>
-    ${s.subtemas.map(t=>`<a href="${link({s:t.id})}" class="${t.id===SUB?'on':''}">${esc(t.nombre)}</a>`).join('')}</div>`;
-  el.querySelector('.on')?.scrollIntoView({block:'nearest', inline:'center'});
+  // «Todo» is only offered while a part is chosen: it is the way back to the whole sector.
+  const items = (SUB ? [{id:'_todo', html:`<a href="${link({s:null})}">Todas las partes</a>`}] : []).concat(
+    s.subtemas.map(t=>({id:t.id, html:`<a href="${link({s:t.id})}" class="${t.id===SUB?'on':''}">${esc(t.nombre)}</a>`})));
+  el.innerHTML = filaCentrada(items, SUB, 'f-partes');
 }
 
-// What is selected, centred at the top: the sector big, and under it the part, scale and content type.
-function seleccion(){
-  const s = SECTORES.find(x=>x.id===SECTOR);
-  const p = PILARES.find(x=>x.id===PIL);
-  const chip = (txt, quitar, extra='') => `<span class="chip" ${extra}>${txt}<a href="${quitar}" title="Quitar">×</a></span>`;
-  const chips = [
-    s && SUB && chip(esc(nombreSub(s)), link({s:null})),
-    ESC && chip(`${iconoEscala(ESC)}${esc(nombreEscala())}`, link({e:null}), 'data-t="escala"'),
-    p && chip(esc(p.nombre), link({p:null}), `style="--c:${p.c}" data-t="pilar"`)
-  ].filter(Boolean);
-  $('#seleccion').innerHTML = `<div class="sel-tit">${s ? esc(s.nombre) : 'Los 12 sectores'}</div>
-    <div class="sel-linea">${chips.length ? chips.join('') : '<span class="sel-ayuda">Elige parte, escala o tipo de contenido en los menús</span>'}</div>`;
-}
-
+// Side menus: icon and one word only, so they stay narrow against the edges.
 function menuEscalas(){
-  const sectores = SECTOR ? SECTORES.filter(s=>s.id===SECTOR) : SECTORES;
-  const cuenta = id => sectores.reduce((n,s)=>n+['retos','soluciones','proyectos'].reduce((m,k)=>m+s[k].filter(x=>(x.escalas||[]).includes(id)).length,0)
-    + s.vision.bloques.filter(b=>(b.escalas||[]).includes(id)).length, 0);
   $('#escalas').innerHTML = `
     <div class="esc-tit">Escalas</div>
-    <a href="${link({e:null})}" class="todas ${!ESC?'on':''}">${icono(0)}<span><b>Todas las escalas</b><small>De la persona al planeta</small></span></a>
-    ${ESCALAS.map((e,i)=>`<a href="${link({e:e.id})}" class="${e.id===ESC?'on':''}">${icono(i+1)}<span><b>${e.nombre}</b><small>${e.desc}</small></span><em>${cuenta(e.id)}</em></a>`).join('')}`;
-  // On phones the menu is a sideways strip: keep the chosen scale in view.
+    <a href="${link({e:null})}" class="${!ESC?'on':''}">${icono(4)}<b>Todas</b></a>
+    ${ESCALAS.map((e,i)=>`<a href="${link({e:e.id})}" class="${e.id===ESC?'on':''}" title="${esc(e.desc)}">${iconoEscala(e.id)}<b>${e.nombre}</b></a>`).join('')}`;
   if(matchMedia('(max-width:900px)').matches) $('#escalas .on')?.scrollIntoView({block:'nearest', inline:'center'});
 }
 
@@ -124,14 +117,13 @@ const ICONOS_PILAR = {
   soluciones:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>',
   proyectos:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 5.6-7 10-7 10z"/></svg>'
 };
+const NOMBRE_CORTO = {vision:'Visión', retos:'Retos', soluciones:'Soluciones', proyectos:'Proyectos'};
 function menuPilares(){
-  const sectores = SECTOR ? SECTORES.filter(s=>s.id===SECTOR) : SECTORES;
-  const n = pid => sectores.reduce((a,s)=>a+cuentaPilar(s,pid),0);
   $('#pilares').innerHTML = `
-    <div class="esc-tit">Ver</div>
-    <a href="${link({p:null})}" class="todo ${!PIL?'on':''}" style="--c:var(--ink)">${ICONOS_PILAR.todo}<span><b>Todo</b><small>Visión, retos, soluciones y proyectos</small></span></a>
-    ${PILARES.map(p=>`<a href="${link({p:p.id})}" class="${p.id===PIL?'on':''}" style="--c:${p.c}">${ICONOS_PILAR[p.id]}<span><b>${p.nombre}</b><small>${p.desc}</small></span><em>${n(p.id)}</em></a>`).join('')}`;
-  if(matchMedia('(max-width:1150px)').matches) $('#pilares .on')?.scrollIntoView({block:'nearest', inline:'center'});
+    <div class="esc-tit">Contenido</div>
+    <a href="${link({p:null})}" class="${!PIL?'on':''}" style="--c:#e9eef7">${ICONOS_PILAR.todo}<b>Todo</b></a>
+    ${PILARES.map(p=>`<a href="${link({p:p.id})}" class="${p.id===PIL?'on':''}" style="--c:${p.c}" title="${esc(p.desc)}">${ICONOS_PILAR[p.id]}<b>${NOMBRE_CORTO[p.id]}</b></a>`).join('')}`;
+  if(matchMedia('(max-width:900px)').matches) $('#pilares .on')?.scrollIntoView({block:'nearest', inline:'center'});
 }
 
 function home(){
@@ -172,8 +164,10 @@ function homePilar(){
 
 // The 3D scene that fits what is on screen, or null when there is no model yet (pending).
 function escenaActual(s){
-  if(ESC) return ESCALAS.find(e=>e.id===ESC).escena;      // País, Continente, Planeta: no model yet
-  return (SUB && ESCENA_SUBTEMA[s.id]?.[SUB]) || s.vision.escena3d || null;
+  const e = ESC && ESCALAS.find(x=>x.id===ESC);
+  if(e && !e.escena) return null;                          // País, Continente, Planeta: no model yet
+  // The chosen part decides first (Calle → street scene), then the scale, then the sector.
+  return (SUB && ESCENA_SUBTEMA[s.id]?.[SUB]) || e?.escena || s.vision.escena3d || null;
 }
 const nombreSub = s => s.subtemas?.find(t=>t.id===SUB)?.nombre;
 function visor3D(s){
@@ -184,19 +178,22 @@ function visor3D(s){
 }
 
 // The scale icon at the left of the white panel, near the scales menu.
-const insignia = () => ESC ? `<div class="insignia" title="Escala: ${esc(nombreEscala())}">${iconoEscala(ESC)}<span>${esc(nombreEscala())}</span></div>` : '';
+const insignia = () => '';   // the scale icon in the panel was removed (2026-11-16): the left menu already shows it
 
 function sector(){
   const s = SECTORES.find(x=>x.id===SECTOR);
-  const visibles = PIL ? PILARES.filter(x=>x.id===PIL) : PILARES;
-  $('#app').innerHTML = `${insignia()}
+  // With «Todo», empty pillars are not drawn one by one: a single line lists them at the end.
+  const visibles = PIL ? PILARES.filter(x=>x.id===PIL) : PILARES.filter(p=>cuentaPilar(s,p.id));
+  const vacios = PIL ? [] : PILARES.filter(p=>!cuentaPilar(s,p.id));
+  $('#app').innerHTML = `
   ${!PIL || PIL==='vision' ? visor3D(s) : ''}
   ${visibles.map(p=>`
   <section class="seccion" style="--c:${p.c}">
     ${PIL ? '' : `<h2 class="sec-tit">${p.nombre}</h2>`}
     ${cuentaPilar(s,p.id) ? render[p.id](s) : vacio(p)}
   </section>`).join('')}
-  ${(s.preguntas||[]).length ? `<div class="preguntas"><h3>Preguntas abiertas</h3><ul>${s.preguntas.map(q=>`<li>${esc(q)}</li>`).join('')}</ul></div>`:''}`;
+  ${vacios.length ? `<div class="vacio">Aún sin contenido aquí: ${vacios.map(p=>p.nombre).join(', ')}.</div>` : ''}
+  ${(s.preguntas||[]).length ? `<details class="preguntas"><summary>Preguntas abiertas para el equipo</summary><ul>${s.preguntas.map(q=>`<li>${esc(q)}</li>`).join('')}</ul></details>`:''}`;
 }
 
 const vacio = p => `<div class="vacio">Pendiente: todavía no hay ${p.nombre.toLowerCase()} aquí.</div>`;
@@ -243,11 +240,13 @@ function route(){
   SECTOR = tipo==='sector' && SECTORES.some(s=>s.id===id) ? id : null;
   const sec = SECTORES.find(x=>x.id===SECTOR);
   SUB = sec?.subtemas?.some(t=>t.id===qs.get('s')) ? qs.get('s') : null;
-  nav(); seleccion(); menuSubtemas(); menuEscalas(); menuPilares();
+  nav(); menuSubtemas(); menuEscalas(); menuPilares();
   SECTOR ? sector() : home();
   $('#escalas').classList.toggle('con-eleccion', true);
   $('#pilares').classList.toggle('con-eleccion', true);
   altoCabecera();
+  // Phones: the rows scroll sideways, so bring the chosen sector and part into view.
+  if(matchMedia('(max-width:900px)').matches) document.querySelectorAll('.fila .on').forEach(e=>e.scrollIntoView({block:'nearest', inline:'center'}));
   // Jump to the top when the page or the pillar changes, not when only the scale changes.
   const vista = ruta.split('/').slice(0,3).join('/') + '|' + PIL + '|' + SUB;
   if(vista !== ultimaVista) window.scrollTo(0,0);
