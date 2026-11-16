@@ -12071,3 +12071,13 @@ Primer paso, sin ningún cambio visible: el archivo del visor 3D (`Visor3D.tsx`,
 `src/components/aeromovil/visor/` con un archivo por tema (materiales, piezas básicas, ocupante, Triciclo/Bala, Gota,
 Aeromóvil 1, cotas, garaje y el reparto por tipo de vehículo). El visor se queda con la escena, la cámara y la
 animación (≈1.000 líneas). Se ha copiado y pegado el código tal cual: el coche se ve igual y las cifras son las mismas.
+
+## 2026-11-16 · Ordenar el código del Aeromóvil (2/4): el modelo del Triciclo en piezas
+
+Eugenio: «optimiza el codigo de la web aeromovil para que sea más eficiente a futuro generar nuevo código».
+Segundo paso, sin ningún cambio visible: `geometriaTriciclo.ts` (2.517 líneas) pasa a la carpeta
+`src/components/aeromovil/triciclo/`, un archivo por tema (campos y deslizadores, medidas, ocupantes, basculación,
+modelo, masas, comprobaciones, energía). Los valores por defecto del Triciclo salen de `geometria.ts` a
+`triciclo/defecto.ts`, como ya se hizo con el Basculante: añadir un campo nuevo al Triciclo ya no toca el archivo que
+comparten los cuatro vehículos. El archivo antiguo sigue existiendo y reexporta todo, así que nada más cambia. Se
+borran dos nombres que no usaba nadie (`PARTES_LARGO`, `esTriciclo`).
