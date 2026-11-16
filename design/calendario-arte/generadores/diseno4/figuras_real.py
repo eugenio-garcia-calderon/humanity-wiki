@@ -1609,17 +1609,19 @@ def torso(lz, hi, hd, ci, cd, color, cuello=None, escote=0.3, tapa=1, toques=Non
     return f
 
 
-def _cuello(lz, x, y, r, piel, base, ancho_base, giro, inclina, luz, nino):
+def _cuello(lz, x, y, r, piel, base, ancho_base, giro, inclina, luz, nino, ancho=None, prof=0.42):
     """A neck that reads as one: as wide as about 60 % of the face (45 % in a child), a short
     column under the jaw that opens in two curves (the trapezius) into the shoulders, the
-    jaw's shadow cast across its top, the clavicles where the neckline is open."""
+    jaw's shadow cast across its top, the clavicles where the neckline is open. ancho / prof:
+    the column's width and the depth of its shading, when a head other than cabeza_real sits on it
+    (retrato.cuello_natural); by default 0.68 r and 0.42."""
     bx, by = base
     piel_c = _hex(piel)
     a = math.radians(inclina)
     kc = 1.08 if nino else 1.0
     xt = x - math.sin(a) * r * 0.55 + giro * r * 0.08
     yt = y + r * 0.45
-    w0 = r * (0.66 if nino else 0.68)
+    w0 = ancho if ancho is not None else r * (0.66 if nino else 0.68)
     w1 = min(ancho_base * 0.62, r * 1.4)
     yb = by + r * 0.05
     pts = [(xt - w0 / 2, yt), (xt - w0 * 0.5, yt + (yb - yt) * 0.6), (bx - w0 * 0.54, yb - r * 0.02),
@@ -1627,7 +1629,7 @@ def _cuello(lz, x, y, r, piel, base, ancho_base, giro, inclina, luz, nino):
            (bx, yb + r * 0.7), (bx + w1 * 0.6, yb + r * 0.6), (bx + w1 * 0.7, yb + r * 0.3), (bx + w1 * 0.5, yb + r * 0.12),
            (bx + w0 * 0.54, yb - r * 0.02), (xt + w0 * 0.5, yt + (yb - yt) * 0.6), (xt + w0 / 2, yt)]
     f = Poligono(pts)
-    volumen(lz, f, piel_c, luz, dens=0.55 + 0.2 * (1 - float(np.dot(rgb(piel_c), [0.3, 0.59, 0.11]))), prof=0.42,
+    volumen(lz, f, piel_c, luz, dens=0.55 + 0.2 * (1 - float(np.dot(rgb(piel_c), [0.3, 0.59, 0.11]))), prof=prof,
             espesor=w0 * 0.5, brillo=0.0, reflejo=0.06, linea=False, duro=0.4)
     lz.aguada(f, _osc(piel_c, 0.9, '#a05a50', 0.2), dens=0.1, borde=0.5, irreg=1.0, gran=0.6, var=0.6)
     # the jaw's shadow on the top of the neck: a soft wash a little darker than the skin, only on the neck,

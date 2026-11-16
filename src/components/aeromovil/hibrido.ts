@@ -162,9 +162,11 @@ export function disponerHibrido(e: EntradaHibrido): DisposicionHibrido {
   const salida: [number, number] = e.cuatro ? [x0 + 0.05, y0 + 0.05] : [e.pivote[0], e.pivote[1]];
   const rueda: [number, number] = [e.xR, e.yEje];
   if (arq === 'reparto') {
-    ejes.push({ nombre: 'planetario', x: xc, y: yc, r: 0.10, z0: z0 - 0.07, z1: z0 });
-    ejes.push({ nombre: 'MG1', x: xc, y: yc, r: 0.085, z0: z0 - 0.15, z1: z0 - 0.07 });
-    caja = { a: [xc, yc], ra: 0.06, b: salida, rb: 0.05, z0: z0 - 0.062, z1: z0 - 0.008, nombre: 'salida de la corona' };
+    // (MG1 against the engine, the crankshaft through its hollow rotor to the carrier, the planetary outermost: in the
+    // 3D its see-through housing shows the gears face on. The ring drives the drop case back past MG1, on a sleeve)
+    ejes.push({ nombre: 'MG1', x: xc, y: yc, r: 0.085, z0: z0 - 0.075, z1: z0 });
+    ejes.push({ nombre: 'planetario', x: xc, y: yc, r: 0.10, z0: z0 - 0.145, z1: z0 - 0.075 });
+    caja = { a: [xc, yc], ra: 0.06, b: salida, rb: 0.05, z0: z0 - 0.05, z1: z0 - 0.008, nombre: 'salida de la corona' };
   } else if (arq === 'serie') {
     ejes.push({ nombre: 'generador', x: xc, y: yc, r: 0.095, z0: z0 - 0.12, z1: z0 });
     const iv = e.inversor;

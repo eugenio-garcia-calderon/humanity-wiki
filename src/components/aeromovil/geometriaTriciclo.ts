@@ -29,7 +29,7 @@
 // for the Cd the results use.
 
 import { dimensionarTilt, TECNOLOGIAS_BASCULA, type TecBascula, type Tilt } from './basculacion';
-import { ARQUITECTURAS_HIBRIDO, RPM_MAX_MOTOR, cifrasHibrido, disponerHibrido, factorCargaParcial, rendimientoHibrido, type ArqHibrido } from './hibrido';
+import { ARQUITECTURAS_HIBRIDO, RPM_MAX_MOTOR, cifrasHibrido, disponerHibrido, factorCargaParcial, migrarRendTrans, rendimientoHibrido, type ArqHibrido } from './hibrido';
 import type { Comprobacion, MaterialCarenado, MaterialChasis, Parametros, PuntosOcupante, Pulgadas, Resultados, Rueda, Tubo, P3 } from './geometria';
 import { MATERIALES_CARENADO, MATERIALES_CHASIS, RENDIMIENTO_SOLAR, TRICICLO_DEFECTO, largoTubo } from './geometria';
 import { T3, T_CUBIERTA, crearForma, punto, type DimBala, type FormaBala } from './garaje/balaForma';
@@ -103,7 +103,7 @@ export interface CamposTriciclo {
   tPhevKW: number;     // potencia del motor de gasolina (kW)
   tRendTerm: number;   // rendimiento del motor de gasolina (%): energía del combustible que sale en el eje
   // 2026-11-16 (Eugenio: «las opciones que hay para conectar el motor híbrido y el eléctrico»): hibrido.ts. They replace the
-  // single «Conversión mecánica» (`tRendTrans`), which a design saved before opens as (Disenos.tsx `deDiseno`, hibrido.ts `migrarRendTrans`)
+  // single «Conversión mecánica» (`tRendTrans`), which a design saved before opens as (`camposTriciclo`, hibrido.ts `migrarRendTrans`)
   tHibArq: ArqHibrido; // reparto con planetario (Prius), en serie (i3 REx, e-Power) o en paralelo P2
   tHibMec: number;     // reparto: parte de la potencia que pasa directa por el planetario (%)
   tRendElec: number;   // reparto y serie: rendimiento del camino eléctrico, generador → inversores → motor (%)
@@ -697,6 +697,15 @@ export function camposTriciclo(P: Partial<Parametros>): CamposTriciclo {
   // a design saved without a rear track (every one before the «Cuadriciclo Bala clásico») takes its front one
   const vt = (P as Record<string, unknown>).tViaTras;
   if (!(typeof vt === 'number' && Number.isFinite(vt))) o.tViaTras = o.tVia;
+  // 2026-11-16: a hybrid saved with the one «Conversión mecánica» slider (`tRendTrans`) and no architecture opens as the
+  // power split with the same efficiency, so its litres per 100 km do not change. Only what it does not have yet: once a
+  // hybrid slider is moved, that key is in the design and wins (PARAMETROS_TRICICLO leaves these keys out for this)
+  const Q = P as Record<string, unknown>, rt = Q.tRendTrans;
+  if (Q.tHibArq === undefined && typeof rt === 'number' && Number.isFinite(rt)) {
+    const { mec, elec } = migrarRendTrans(rt); o.tHibArq = 'reparto';
+    if (typeof Q.tHibMec !== 'number') o.tHibMec = mec;
+    if (typeof Q.tRendElec !== 'number') o.tRendElec = elec;
+  }
   return o as unknown as CamposTriciclo;
 }
 

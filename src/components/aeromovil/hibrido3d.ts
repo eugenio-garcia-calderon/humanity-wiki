@@ -6,7 +6,7 @@
 // the petrol engine (crankcase, block, head with its cam cover and coils, intake
 // plenum and runners, the headers and silencer out to the tail), and per
 // architecture the connection: the planetary gear in a see-through housing (sun
-// 30, four planets, ring 78, as the Prius) with MG1 outboard and the drop case to
+// 30, four planets, ring 78, as the Prius) outboard of MG1, and the drop case to
 // the chain; a generator alone, with its high-voltage cable; or a clutch, a P2
 // motor-generator and a gearbox. The chain to the rear wheel (or to a differential
 // and two half-shafts with four wheels), and the fuel tank. Every mesh carries
