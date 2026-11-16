@@ -7,7 +7,7 @@ import { EXPLICACIONES as BALA } from './bala';
 // ============================================================================
 // Eugenio: «permite modificar todo lo que se permitía modificar en el
 // Apterike… y la reclinación del asiento». Los valores de serie son los de
-// TRICICLO_DEFECTO (geometria.ts). El Triciclo es un diseño propio: nada de él
+// TRICICLO_DEFECTO (triciclo/defecto.ts). El Triciclo es un diseño propio: nada de él
 // se ha medido; las masas son estimaciones de piezas de su clase, y lo dicen.
 // Las de la forma que no hablan de las ruedas son las del Cuadriciclo en rombo (la
 // carrocería es la misma); las demás se reescriben, porque aquí las ruedas
