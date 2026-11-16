@@ -7,12 +7,6 @@
       "desde": "2026-11-16T14:11:32.839Z"
     },
     {
-      "agente": "referencias",
-      "ruta": "src/pages/Aeromovil.tsx",
-      "motivo": "referencias: quitar coches de referencia del garaje",
-      "desde": "2026-11-16T17:35:32.557Z"
-    },
-    {
       "agente": "interior",
       "ruta": "src/components/aeromovil/geometriaTriciclo.ts",
       "motivo": "interior: acabado interior (bot interior)",
