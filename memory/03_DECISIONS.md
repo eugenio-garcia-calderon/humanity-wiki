@@ -1839,3 +1839,16 @@ Eugenio: «cambia el estilo del dibujo de ambas, para que los personajes sean m�
 - **Watercolour, not render.** Shadows are glazes with dried edges and granulation plus coloured-pencil hatching, as in design 5; lifted highlights were removed because they read as plastic. Faces keep the light model but with about one and a half values of shadow and lost edges.
 - **Design 6 copies the scripts.** `mes-05-f.py` / `mes-06-f.py` are copies of the design-5 scripts with their changes (activation, redrawn people, the painter's canvas, the café heads, the storks, the bulb's light). Designs 4 and 5 are untouched: no shared library file changed.
 - **Outcome and ceiling.** Four evaluator rounds (r3, r6, r9, r11) went from 3/10 to 5-5.5/10 in figure realism, and the evaluator marked it publishable as design 6 and favourite. It also said where the ceiling of this approach is: the figures are built on design 5's joints and simple shapes, so they read as painted wooden figures rather than as people drawn from life. Going further means drawing each figure's anatomy from reference (structure of hands, faces and joints), not more layers on the same shapes.
+
+## 2026-11-16 · Triciclo: pack width past the body, and rows 2/3 chosen row by row
+- **Pack width.** `rangoTriciclo('tBatAncho')` is now the whole slider, 100–400 % (400 = twice the old 200 % top at the default rail spacing). Not taken: a metre cap, or a cap relative to the body. A fixed % is what the slider shows, and 400 % already reaches about 1.9 m with the default rails, wider than any body.
+- **What still uses the old top.** The old range lives on as `paqueteAntes(T, hz)` and is now only a ceiling for:
+  - the width the length's range reads, so widening the pack never shortens it;
+  - `fondoPaquete`: past the old top the pack does not climb further up the belly, it sticks out sideways.
+- **Saved designs.** A Triciclo saved before has no `tFila2N`, which was added the same day. `deDiseno` (`paqueteDeAntes`) writes its width down to the old top, and its length down to the old length top, which was computed from the unclamped width. The model then builds exactly what was built before. Checked against main's code: 42 cases (Eugenio's Rombo Bala, the defaults, three rows, and pack widths 100–400 % × body widths 0.70/0.85/1.10 m × rail spacings 0.22/0.30 m); every result is identical. Only the check's name changed: «Batería, paquete…: dentro de la carrocería» became «Batería dentro de la carrocería».
+- **Rows row by row.** New selectors `tFila2N`/`tFila3N` ('1'|'2'|'3') and `tFila2Tipo`/`tFila3Tipo` ('coche'|'banco'|'plegable'), with the logic in `filasTriciclo.ts`.
+  - The defaults rebuild today's seats exactly (z ±0.245 and 0, same sizes, same order).
+  - Places sit 49 cm apart, centre to centre.
+  - A bench is one `AsientoFila` with `tipo: 'banco'` and `plazas: n`.
+  - Not taken: the Aptera bucket (`butaca`) as a row type. Folding it forward does not work: an 83 cm backrest with headrest would land on the seat in front. Also not taken: an astride saddle in a row, whose loft is hard-wired to the two-rider positions.
+- **No body-width clamp for more places.** Fitting is checked, not clamped: «Asientos de la fila N caben de lado» (cushion and mid-backrest edge against the skin) and «Hombros de la fila N».

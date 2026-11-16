@@ -258,6 +258,8 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   tMatCarenado: 'carbonoLino', tEspCarenado: 1.5, tEspCristal: 3,
   tPilX: 1.06, tPilY: 0.40, tPasX: 1.54, tPasY: 0.43, tRecPil: 5, tRecPas: 0, tManX: 0, tManY: 0, tPiesX: 0, tPiesY: 0, tMOcc: 80, tMAsiento: 3.5,
   tAsientos: 'horcajadas', tFila2: 'abierta', tFila3: 'abierta', tFila2X: 0.70, tFila3X: 0.72, tRecFila: 15,
+  // 2026-11-16, row by row (filasTriciclo.ts): rows 2 and 3 as they always were, two car seats and one
+  tFila2N: '2', tFila3N: '1', tFila2Tipo: 'coche', tFila3Tipo: 'coche',
   tChMat: 'cromoly', tChD: 45, tChT: 2.4, tChUniones: 3.5,
   tBatalla: 2.45, tEjeDel: 0.30, tVia: 1.80, tRuedaDel: '20', tRuedaTras: '24', tGiro: 28, tRecDel: 80, tRecTras: 80, tBasculante: 0.50,
   // the «Cuadriciclo Bala clásico» (2026-11-11): one rear wheel in the tail by default; a design without `tViaTras` takes its own `tVia` (camposTriciclo)

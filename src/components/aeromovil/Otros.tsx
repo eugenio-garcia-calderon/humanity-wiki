@@ -3,6 +3,7 @@
 // model) was removed on 2026-11-13 at Eugenio's request; these two pieces are still used by the editor.
 // ============================================================================
 import { cn } from '../../utils/cn';
+import { filasDetras } from './filasTriciclo';
 import { fichaComparable } from './referencias';
 import { type Modelo, type Resultados } from './geometria';
 
@@ -12,10 +13,11 @@ const fmt = (v: number, d = 2) => v.toLocaleString('es-ES', { minimumFractionDig
 export function fichaPropia(m: Modelo, r: Resultados) {
   const ejes = new Set(m.ruedas.map(w => Math.round(w.x * 100))).size;
   // The Bala has no mass estimate and the editor's Cd formula does not apply to it: '—' rather than a number that means nothing.
-  // The Triciclo has a mass; its Cd is the tunnel's, computed apart (NaN here, so '—' too). Both carry two riders.
+  // The Triciclo has a mass; its Cd is the tunnel's, computed apart (NaN here, so '—' too). Both carry two riders
+  // (the Triciclo in three rows, 2026-11-16: its seats, row by row, folded or not).
   const dosRuedas = m.tipo === 'bala' || m.tipo === 'triciclo' || m.tipo === 'basculante';
   const via = dosRuedas ? m.P.track : Math.max(m.via.del, m.via.tras);
-  return { L: m.Lf, W: m.P.W, H: m.P.H, batalla: m.P.B, ruedas: m.ruedas.length, ejes, via, plazas: dosRuedas ? 2 : m.asientos.length,
+  return { L: m.Lf, W: m.P.W, H: m.P.H, batalla: m.P.B, ruedas: m.ruedas.length, ejes, via, plazas: m.tipo === 'triciclo' && m.filas ? 1 + filasDetras(m.campos).reduce((n, f) => n + f.n, 0) : dosRuedas ? 2 : m.asientos.length,
     masa: Number.isFinite(r.mVeh) ? r.mVeh : null, cd: Number.isFinite(r.Cd) ? r.Cd as number | null : null, huella: m.Lf * m.P.W };
 }
 export const nombreDe = (m: Modelo) => (m.tipo === 'basculante' ? 'Cuadriciclo Basculante' : m.tipo === 'a1' ? 'Aeromóvil 1' : m.tipo === 'bala' ? 'Cuadriciclo Bala en rombo' : m.tipo === 'triciclo' ? (m.traseras ? 'Cuadriciclo Bala clásico' : 'Triciclo Bala') : 'Aeromóvil Gota');

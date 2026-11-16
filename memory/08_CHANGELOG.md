@@ -11955,3 +11955,16 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
 - **Comprobación nueva:** que el balancín quepa dentro de la carrocería.
 - **Ejemplo:** el Rombo Bala como triciclo, con basculación eléctrica, necesita 949 N·m en el balancín y 1,8 kW de pico; el sistema pesa 16 kg.
 - **Aviso:** son estimaciones de un primer diseño, y el vuelco y el consumo aún no cuentan la inclinación.
+
+## 2026-11-16 · Batería más ancha que la carrocería y asientos fila a fila (Triciclo Bala / Cuadriciclo Bala clásico)
+Eugenio: «Permite aumentar el ancho de la batería aunque se salga del carenado» y «permite fila a fila, que se pueda escoger en la fila 2 y en la fila 3 de asientos, el número de plazas y el tipo de asiento».
+- **Ancho del paquete de batería** (Energía › Batería, con «A lo largo del bastidor»): el deslizador va ya de 100 % a 400 % del ancho del bastidor (el doble del tope de 200 % que había), aunque no quepa. El paquete se dibuja al ancho pedido y sus kWh cuentan todo ese ancho. La comprobación «Batería dentro de la carrocería» sale en rojo y dice cuántos centímetros sobresale. Pasado lo que cabía, el paquete ya no sube por la panza: se queda a su altura y sobresale por los lados; y el largo máximo no se acorta al ensancharlo.
+- **Diseños guardados:** se abren igual que antes. Uno guardado con un ancho que el tope de entonces recortaba se abre con el ancho recortado, que es el que se dibujaba.
+- **Fila a fila** (Interior › Tres filas, con «Asientos: Tres filas»): en la fila 2 y en la fila 3 se escoge cuántas plazas lleva (una, dos o tres, a 49 cm de centro a centro) y el tipo de asiento:
+  - asientos de coche, como hasta ahora;
+  - banco corrido: un cojín y un respaldo para toda la fila, con un reposacabezas por plaza en la fila 2;
+  - plegables ligeros tipo transportín: asiento y respaldo finos sobre un marco de aluminio.
+  Todos se dibujan en 3D y se pliegan. De serie sigue siendo 2 + 1 asientos de coche, igual que antes.
+- **Lo que sigue a los asientos:** ocupantes, masas (estimadas: banco 1,1 veces «un asiento» por plaza, plegable 0,8; en la fila 3, 1,0 y 0,7), centro de gravedad, vuelco, maletero, cargas del bastidor y las comprobaciones de cabeza, rodillas, pies y hombros.
+- **Comprobaciones nuevas:** «Asientos de la fila 2 caben de lado» y «Asientos de la fila 3 caben de lado» (dicen cuánto falta por lado), y «Hombros de la fila 3 a la cúpula» cuando la fila 3 lleva más de una plaza.
+- **Aviso:** tres plazas en la fila 2 no caben ni con la carrocería más ancha (1,30 m): faltan unos 15 cm por lado. Las comprobaciones lo dicen en rojo.
