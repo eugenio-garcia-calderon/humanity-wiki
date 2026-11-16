@@ -53,6 +53,12 @@
       "ruta": "src/components/aeromovil/Visor3D.tsx",
       "motivo": "interior: acabado interior (bot interior)",
       "desde": "2026-11-16T17:35:43.452Z"
+    },
+    {
+      "agente": "interior",
+      "ruta": "src/components/aeromovil/explicaciones/triciclo.ts",
+      "motivo": "interior: acabado interior (bot interior)",
+      "desde": "2026-11-16T17:35:46.980Z"
     }
   ]
 }
