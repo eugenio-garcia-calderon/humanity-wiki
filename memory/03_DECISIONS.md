@@ -1839,3 +1839,10 @@ Eugenio: «cambia el estilo del dibujo de ambas, para que los personajes sean m�
 - **Watercolour, not render.** Shadows are glazes with dried edges and granulation plus coloured-pencil hatching, as in design 5; lifted highlights were removed because they read as plastic. Faces keep the light model but with about one and a half values of shadow and lost edges.
 - **Design 6 copies the scripts.** `mes-05-f.py` / `mes-06-f.py` are copies of the design-5 scripts with their changes (activation, redrawn people, the painter's canvas, the café heads, the storks, the bulb's light). Designs 4 and 5 are untouched: no shared library file changed.
 - **Outcome and ceiling.** Four evaluator rounds (r3, r6, r9, r11) went from 3/10 to 5-5.5/10 in figure realism, and the evaluator marked it publishable as design 6 and favourite. It also said where the ceiling of this approach is: the figures are built on design 5's joints and simple shapes, so they read as painted wooden figures rather than as people drawn from life. Going further means drawing each figure's anatomy from reference (structure of hands, faces and joints), not more layers on the same shapes.
+
+## 2026-11-16 · Interior finish: re-cover the existing seats instead of new seat models
+
+- **Choice.** The upholstery options swap the material of the seats the cabin builder already draws (`balaPiezas.ts` `cabina`: saddle and pads, Aptera buckets, row seats) for a canvas-textured MeshPhysicalMaterial (colour, grain, stitching as texture and bump). The buckets' white shell takes the darker "side" colour.
+- **Alternative rejected.** New sculpted seats with real bolsters and stitch tubes for each of the three layouts: about three times the code, and it would fight the `filas` bot's ongoing seat work in `balaPiezas.ts`.
+- **Lining.** Drawn on the skin's own (x, t) sections, offset inward along the section normal, so it follows any body the sliders make; cut at the canopy glass edge and under the roof panel, split by door leaf onto each door pivot.
+- **Defaults.** Every new field defaults to today's look (no lining, `serie` cover, nothing drawn), so saved designs and their masses are unchanged.

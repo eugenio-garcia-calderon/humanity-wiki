@@ -723,3 +723,11 @@ Removing «Otros velomóviles» leaves the comparison ghost (`referencia`/`modoR
 - **Not modelled:** the dynamic tilt controller, the lean in the rollover, consumption and range figures, and the pod-to-body clearance with the rods drawn.
 - **Hidden coupling:** the hydraulic flow passes between parts through a number formatted inside a text line.
 - **Next step:** a typed field for the flow, and a lean-aware rollover check. About 2 hours.
+
+## 2026-11-16 · Interior finish shortcuts
+
+- **Door edges are stepped.** The door's part of the lining is chosen per 1 × 2 cm cell, so its edge follows the shut line in small steps instead of the exact curve. Clipping the band to the door outline: about 2 hours.
+- **Floor ignores what pokes through.** The carpeted floor is one flat board on the rails; seat posts, the battery cradle and a battery pack along the frame go through it instead of having trimmed openings or a tunnel. About 3 hours.
+- **Seats are re-textured, not re-shaped.** Stitching is a texture; the cushion shapes are the old ones (see 03_DECISIONS). Sculpted seats per layout: about 1 day.
+- **Belts are not load-checked.** Belts anchor on the seats (as in the Vision Jet) but no check covers the seat-to-frame anchorage in a crash. About 2 hours for a first static check.
+- **Interior materials are a module singleton** (`materialesInterior`), shared by every Visor3D instance; fine with one editor viewer, wrong if two editors ever show different finishes side by side. About 30 minutes to make it per viewer.

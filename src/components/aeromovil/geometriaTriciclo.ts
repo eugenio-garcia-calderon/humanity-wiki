@@ -29,6 +29,7 @@
 // for the Cd the results use.
 
 import { dimensionarTilt, TECNOLOGIAS_BASCULA, type TecBascula, type Tilt } from './basculacion';
+import { ACABADOS, AMBIENTES, CINTURONES, COLORES_COSTURA, COLORES_FORRO, CONSOLAS_CENTRALES, CONSOLAS_TECHO, COSTURAS, MOLDURAS, TAPICES, interiorTriciclo, type CamposInterior, type SeatInterior } from './interiorTriciclo';
 import type { Comprobacion, MaterialCarenado, MaterialChasis, Parametros, PuntosOcupante, Pulgadas, Resultados, Rueda, Tubo, P3 } from './geometria';
 import { MATERIALES_CARENADO, MATERIALES_CHASIS, RENDIMIENTO_SOLAR, TRICICLO_DEFECTO, largoTubo } from './geometria';
 import { T3, T_CUBIERTA, crearForma, punto, type DimBala, type FormaBala } from './garaje/balaForma';
@@ -40,7 +41,8 @@ import {
 } from './geometriaBala';
 
 /** Los parámetros propios del Triciclo (prefijo `t`). Opcionales en `Parametros`: los diseños de los otros tres vehículos no los llevan. */
-export interface CamposTriciclo {
+// (2026-11-16: the interior finish's fields, `tAcabado`… `tAmbiente`, are in interiorTriciclo.ts `CamposInterior`)
+export interface CamposTriciclo extends CamposInterior {
   // Carrocería: la forma del Cuadriciclo en rombo
   tAncho: number; tSuelo: number; tMorro: number; tPuntaMorro: number; tCola: number; tPuntaCola: number; tAleta: number;
   tCupIni: number; tCupFin: number; tAlto: number;
@@ -204,7 +206,8 @@ export const RUEDAS_TRICICLO: Record<RuedaTriciclo, { d: number; neuDel: number;
   c14: { d: 0.554, neuDel: 0.165, neuTras: 0.165, n: '14″ de coche, 165/60 R14 (554 mm)', kg: 2.62, kWBuje: 45, carga: 387 },
   c15: { d: 0.574, neuDel: 0.175, neuTras: 0.175, n: '15″ de coche, 175/55 R15 (574 mm)', kg: 2.96, kWBuje: 60, carga: 412 },
 };
-type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tTraseras' | 'tBascula' | 'tRuedas' | 'tPropulsion' | 'tBascTec' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero';
+type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tTraseras' | 'tBascula' | 'tRuedas' | 'tPropulsion' | 'tBascTec' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero'
+  | 'tAcabado' | 'tTapiz' | 'tCostura' | 'tCosturaColor' | 'tForroColor' | 'tMoldura' | 'tConsolaTecho' | 'tConsolaCentral' | 'tCinturon' | 'tAmbiente';
 export type ClaveNumTriciclo = Exclude<ClaveTriciclo, ClaveTexto>;
 
 // ------------------------------------------------------------------ deslizadores
@@ -461,6 +464,17 @@ export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
   { clave: 'tSalpicadero', n: 'Salpicadero', dep: 'interior', bloque: 'Salpicadero', opciones: [{ k: 'no', n: 'Pantallita sobre el depósito' }, { k: 'si', n: 'Salpicadero de lado a lado' }, { k: 'blanco', n: 'Salpicadero blanco con detalles (como el Aptera)' }] },
   // round 3 interior (2026-11-12, «el chasis no llega hasta el final»): only with two rear wheels (with one, the wheel is in the tail between them)
   { clave: 'tChLargo', n: 'Largueros: hasta', dep: 'chasis', bloque: 'Bastidor', opciones: [{ k: 'torreta', n: 'La torreta' }, { k: 'eje', n: 'El eje trasero' }] },
+  // 2026-11-16 (Eugenio, after the Vision Jet's cabin: «que el interior se diseñe en 3D y se pueda elegir con mucho detalle»): interiorTriciclo.ts
+  { clave: 'tAcabado', n: 'Forro del interior', dep: 'interior', bloque: 'Acabado interior', opciones: ACABADOS },
+  { clave: 'tForroColor', n: 'Color del forro y del techo', dep: 'interior', bloque: 'Acabado interior', opciones: COLORES_FORRO },
+  { clave: 'tMoldura', n: 'Molduras', dep: 'interior', bloque: 'Acabado interior', opciones: MOLDURAS },
+  { clave: 'tConsolaTecho', n: 'Consola de techo', dep: 'interior', bloque: 'Acabado interior', opciones: CONSOLAS_TECHO },
+  { clave: 'tAmbiente', n: 'Luz ambiente', dep: 'interior', bloque: 'Acabado interior', opciones: AMBIENTES },
+  { clave: 'tConsolaCentral', n: 'Reposabrazos y consola', dep: 'interior', bloque: 'Acabado interior', opciones: CONSOLAS_CENTRALES },
+  { clave: 'tTapiz', n: 'Tapicería de los asientos', dep: 'interior', bloque: 'Tapicería', opciones: TAPICES },
+  { clave: 'tCostura', n: 'Costura', dep: 'interior', bloque: 'Tapicería', opciones: COSTURAS },
+  { clave: 'tCosturaColor', n: 'Color de la costura', dep: 'interior', bloque: 'Tapicería', opciones: COLORES_COSTURA },
+  { clave: 'tCinturon', n: 'Cinturones', dep: 'interior', bloque: 'Tapicería', opciones: CINTURONES },
   { clave: 'tBatDisp', n: 'Dónde va la batería', dep: 'energia', bloque: 'Batería', opciones: [{ k: 'reparto', n: 'Morro, pies y bajo los sillines' }, { k: 'chasis', n: 'A lo largo del bastidor' }] },
 ];
 /** 2026-11-12: which of those options are on (the Aptera hatch only with doors: it takes the canopy's rear part, which a one-piece canopy carries away when it opens). */
@@ -1526,6 +1540,16 @@ export function crearModeloTriciclo(P: Parametros) {
     butacas: butacasDe, pedales, larguerosTraseros: trasero,
     /** What the astride saddle stands on (m): the rails' top or the pack's; the 3D thins the saddle down to it. */
     sueloSillin: paquete && -0.835 + dxPil0 > paquete.x0 && -1.745 + dxPas0 < paquete.x1 ? paquete.y1 : yL + dT / 2,
+    /** 2026-11-16: the interior finish (interiorTriciclo.ts): the lining, the seats' covers, belts, consoles, and their masses. */
+    interior: (() => {
+      const seats: SeatInterior[] = butacasDe ? butacasDe.map(a => ({ x: a.x, y: a.y, z: a.z, fila: a.fila, piloto: a.fila === 1, rec: a.rec }))
+        : filas ? asientosFilas.map(a => ({ x: a.x, y: a.y, z: a.z, fila: a.fila, piloto: a.fila === 1, rec: a.rec }))
+          : [{ x: asientos.xPiloto, y: asientos.yPiloto, z: 0, fila: 1 as const, piloto: true, rec: rec.piloto }, { x: asientos.xPasajero, y: asientos.yPasajero, z: 0, fila: 2 as const, piloto: false, rec: rec.pasajero }];
+      // the covers' area (m²): a saddle and two backrest pads; an Aptera bucket; the rows' seats by their size
+      const funda = butacasDe ? 2.6 : filas ? 3.8 : 0.79, nombreFunda = butacasDe ? 'dos butacas' : filas ? 'cuatro asientos' : 'el sillín y los dos respaldos';
+      const torre = tubos.find(t => /^Torreta/.test(t.nombre ?? ''));
+      return interiorTriciclo(T, { F, cup, V: ventanas, P: puerta, yPiso: yL + dT / 2, torreta: torre ? [torre.b[0], torre.b[1]] : null, seats, funda, nombreFunda });
+    })(),
     /** Los maniquíes de talla media (el visor los dibuja con la función de los otros vehículos). */
     occPts: (piloto: boolean) => occ(piloto),
     occTalla: occ,
@@ -1747,6 +1771,8 @@ export function piezasTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cris
   if (m.faro) o.push({ nombre: 'Faro central', kg: 0.7, x: m.faro.c[0], y: m.faro.c[1] });
   // (2026-11-13: an LED strip, its black housing and lens along the leading line: about 0.9 kg, an estimate)
   if (m.faroBarra) o.push({ nombre: 'Barra de luz del morro', kg: 0.9, x: m.faroBarra.c[0], y: m.faroBarra.c[1] });
+  // 2026-11-16: the interior finish (none with the defaults: today's masses)
+  o.push(...m.interior.piezas);
   return dimensionar(m, o);
 }
 function piezasBase(m: ModeloTriciclo, ar: { carroceria: number; cristal: number; solar: number }, centros: { xPiel: number; yPiel: number; xCristal: number; yCristal: number }, pods: { area: number; areaTras?: number }): PiezaMasa[] {
@@ -1898,7 +1924,7 @@ export function grupoPieza(nombre: string): DepTriciclo {
   if (/^(Suspensión|Basculante|Basculación|Ruedas|Frenos|Dirección)/.test(nombre)) return 'rodaje';
   if (/^(Motor|Controlador|Depósito)/.test(nombre)) return 'propulsion';
   if (/^(Batería|Varios)/.test(nombre)) return 'energia';
-  if (/^(Asientos|Volante|Salpicadero)/.test(nombre)) return 'interior';
+  if (/^(Asientos|Volante|Salpicadero|Interior|Tapicería|Cinturones)/.test(nombre)) return 'interior';
   return 'carroceria';
 }
 
