@@ -1863,6 +1863,17 @@ Eugenio asked for realistic, non-creepy faces, then chose: no money spent, only 
 - **Parallel:** the engine's part-load penalty is the curve `min(1, 0.75 + 0.5·load)`, not a fuel map. Series caps the sustained petrol speed at the hub motor's rated power.
 - **Placement:** parts are placed, not moved to make room. `disponerHibrido` puts the engine behind the last backrest (wheel in the tail) or behind the frame's tower (four wheels), and searches the tank's and the silencer's shape and place. When something does not fit, a check says so; nothing is clamped.
 - **Code:** new code in its own files: `hibrido.ts` (pure), `hibrido3d.ts`, `FichaHibrido.tsx`. Shared files got small hooks.
+## 2026-11-16 · Wide flat tail on the round body: a new key, not `tColaAncho`
+
+Eugenio asked for the flat tail («cola plana») to reach the vehicle's full width, like the Aptera. The smooth body
+(`tCubierta: 'lisa'`) already had `tColaAncho` for this; the round body ignored it. Two options:
+- **Reuse `tColaAncho` in the round body too.** One slider for both bodies, but any saved design that once had the smooth
+  body on with a wide tail and was switched back to the round one still carries `tColaAncho > 0`: it would silently widen
+  on the next open, breaking «saved designs unchanged».
+- **A new key `tColaPlanaAncho` (chosen)**, default 0, read only without the smooth body and only with `tColaPlana > 0`.
+  `formaR3` maps it onto `DimBala.colaAncho`; `balaForma` reads `colaAncho × colaPlana` without `lisa`, reusing the smooth
+  body's plan widening (`anchoPlan`, full width from x_ref −1.5 back, 5 % convergence) and raising the flat cap's plan
+  superellipse exponent from 4 to 4 + 6·a (a straight trailing edge with rounded corners at 10).
 ## 2026-11-16 · Triciclo: pack width past the body, and rows 2/3 chosen row by row
 - **Pack width.** `rangoTriciclo('tBatAncho')` is now the whole slider, 100–400 % (400 = twice the old 200 % top at the default rail spacing). Not taken: a metre cap, or a cap relative to the body. A fixed % is what the slider shows, and 400 % already reaches about 1.9 m with the default rails, wider than any body.
 - **What still uses the old top.** The old range lives on as `paqueteAntes(T, hz)` and is now only a ceiling for:

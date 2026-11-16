@@ -184,6 +184,8 @@ export interface CamposTriciclo {
   tMorroAncho: number;   // el morro visto desde arriba: 0 como hasta ahora … 1 todo el ancho, con el frente cuadrado y redondeado
   tMorroGrosor: number;  // el grosor del borde del morro (m): 0 se cierra en punta
   tMorroBombeo: number;  // lo que sube el capó sobre la recta de su canto al centro (m)
+  // 2026-11-16: the flat tail without the smooth body, towards the body's full width (0 as before … 1 the Aptera's)
+  tColaPlanaAncho: number;
 }
 export type ClaveTriciclo = keyof CamposTriciclo;
 /**
@@ -310,6 +312,8 @@ const FILAS: Fila[] = [
   ['tMorroAlto', 'carroceria', 'Morro', null, 'Morro: altura de la punta (más baja, más alta)', -0.12, 0.40, 0.005, 'cm'],
   ['tFaroD', 'carroceria', 'Morro', null, 'Faro central: ancho', 0.10, 0.24, 0.01, 'cm'],
   ['tColaPlana', 'carroceria', 'Cola', null, 'Cola: en punta o plana y ancha (como el Aptera)', 0, 1, 0.05, 'x'],
+  // 2026-11-16: only with the flat tail and without «Cubierta lisa» (Aeromovil.tsx `visible`)
+  ['tColaPlanaAncho', 'carroceria', 'Cola', null, 'Cola plana: ancho al final (hasta todo el ancho, como el Aptera)', 0, 1, 0.05, 'x'],
   ['tTechoPlano', 'carroceria', 'Cúpula', null, 'Techo: redondeado o plano', 0, 1, 0.05, 'x'],
   ['tCaida', 'carroceria', 'Cúpula', null, 'Techo: caída hacia el maletero (antes o más tarde)', -0.60, 0.80, 0.05, 'x'],
   // 2026-11-15
@@ -654,6 +658,8 @@ export function formaR3(T: CamposTriciclo): Partial<DimBala> {
   const o: Partial<Record<keyof DimBala, number>> = {};
   for (const [k, d] of CLAVES_FORMA_R3) { const v = limitarTriciclo(k, T); if (v) o[d] = v; }
   if (conLisa(T)) { o.lisa = 1; for (const [k, d] of CLAVES_LISA) o[d] = limitarTriciclo(k, T); }
+  // 2026-11-16: the round body's flat tail, widened (balaForma reads it times `colaPlana`); only when both are set
+  else if (o.colaPlana) { const v = limitarTriciclo('tColaPlanaAncho', T); if (v) o.colaAncho = v; }
   return o as unknown as Partial<DimBala>;
 }
 let cacheCuerpo: { clave: string; F: FormaBala } | null = null;

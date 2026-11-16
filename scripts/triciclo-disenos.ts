@@ -167,6 +167,8 @@ else {
     'tMarcoTecho',
     // 2026-11-13: the smooth body, off by default (its keys act only with «Cubierta lisa»)
     'tCubierta', 'tColaAncho', 'tColaGrosor', 'tColaBombeo', 'tBajosIni', 'tBajosCurva', 'tMorroAncho', 'tMorroGrosor', 'tMorroBombeo',
+    // 2026-11-16: the round body's flat tail width, 0 by default
+    'tColaPlanaAncho',
     // 2026-11-16: rows 2 and 3 row by row (their defaults are the old 2 + 1 car seats)
     'tFila2N', 'tFila3N', 'tFila2Tipo', 'tFila3Tipo'];
   const NUEVOS_12 = NUEVOS.slice(8);

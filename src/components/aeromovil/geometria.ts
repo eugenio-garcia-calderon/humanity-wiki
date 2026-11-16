@@ -298,6 +298,9 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   // The smooth body (2026-11-13, the clásico: «la cola y el maletero… la misma pieza… nunca… montículos», the Aptera's
   // wide nose and tail, its light bar and the belly's sweep). Off by default: every other key below acts only with it on.
   tCubierta: 'redonda', tColaAncho: 0, tColaGrosor: 0, tColaBombeo: 0.01, tBajosIni: 0.20, tBajosCurva: 0, tMorroAncho: 0, tMorroGrosor: 0, tMorroBombeo: 0.02,
+  // 2026-11-16 (Eugenio: «que la cola pueda ser más ancha en el formato de cola plana… como en el aptera»): the round
+  // body's flat tail towards the full width; 0 by default, so every saved design is built as before
+  tColaPlanaAncho: 0,
 };
 // (2026-11-16: without the hybrid architecture's four keys. `deDiseno` merges this under every saved design, so a key
 // here is never missing by the time `camposTriciclo` runs; left out, a hybrid saved with the old «Conversión mecánica»
