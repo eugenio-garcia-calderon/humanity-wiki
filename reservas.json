@@ -23,6 +23,12 @@
       "ruta": "src/components/aeromovil/explicaciones/triciclo.ts",
       "motivo": "interior: acabado interior (bot interior)",
       "desde": "2026-11-16T17:35:46.980Z"
+    },
+    {
+      "agente": "pesos",
+      "ruta": "src/pages/Aeromovil.tsx",
+      "motivo": "pesos: kg bajo cada pestaña de departamento",
+      "desde": "2026-11-16T18:25:06.964Z"
     }
   ]
 }
