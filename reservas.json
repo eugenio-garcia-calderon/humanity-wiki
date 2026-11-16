@@ -41,6 +41,12 @@
       "ruta": "src/components/aeromovil/garaje/balaPiezas.ts",
       "motivo": "filas: batería más ancha que la carrocería y asientos fila a fila",
       "desde": "2026-11-16T14:13:32.808Z"
+    },
+    {
+      "agente": "filas",
+      "ruta": "src/components/aeromovil/Disenos.tsx",
+      "motivo": "filas: batería más ancha que la carrocería y asientos fila a fila",
+      "desde": "2026-11-16T14:13:36.582Z"
     }
   ]
 }
