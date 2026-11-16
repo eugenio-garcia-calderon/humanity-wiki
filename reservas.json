@@ -53,6 +53,12 @@
       "ruta": "src/components/aeromovil/garaje/balaForma.ts",
       "motivo": "colaancha: cola plana a todo el ancho",
       "desde": "2026-11-16T15:36:46.797Z"
+    },
+    {
+      "agente": "filas",
+      "ruta": "src/components/aeromovil/Otros.tsx",
+      "motivo": "filas: plazas del Triciclo con tres filas",
+      "desde": "2026-11-16T16:33:37.710Z"
     }
   ]
 }
