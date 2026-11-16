@@ -29,6 +29,12 @@
       "ruta": "src/components/aeromovil/Otros.tsx",
       "motivo": "filas: plazas del Triciclo con tres filas",
       "desde": "2026-11-16T16:33:37.710Z"
+    },
+    {
+      "agente": "referencias",
+      "ruta": "src/pages/Aeromovil.tsx",
+      "motivo": "referencias: quitar coches de referencia del garaje",
+      "desde": "2026-11-16T17:35:32.557Z"
     }
   ]
 }
