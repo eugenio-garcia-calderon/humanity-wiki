@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "basc",
-      "ruta": "src/components/aeromovil/geometriaTriciclo.ts",
-      "motivo": "Basculación detallada",
-      "desde": "2026-11-16T13:48:19.320Z"
-    },
-    {
-      "agente": "basc",
       "ruta": "src/components/aeromovil/Visor3D.tsx",
       "motivo": "Basculación detallada",
       "desde": "2026-11-16T13:48:22.350Z"
