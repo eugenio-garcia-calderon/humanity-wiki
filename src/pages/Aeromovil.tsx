@@ -41,6 +41,7 @@ import {
 } from '../components/aeromovil/geometriaTriciclo';
 import { kgPorDepartamento, textoKg, type KgDepartamento } from '../components/aeromovil/PesosDepartamento';
 import { TECNOLOGIAS_BASCULA, type Tilt } from '../components/aeromovil/basculacion';
+import { TAPICES } from '../components/aeromovil/interiorTriciclo';
 import { cuerpoTriciclo, peticionDe as peticionTunel } from '../components/aeromovil/tunel/nuestro';
 // ── Cuadriciclo Basculante (2026-11-15): its sidebar, its Cd and its departments (basculante/, geometriaBasculante.ts)
 import { LadoBasculante, useCdBasculante } from '../components/aeromovil/basculante/LadoBasculante';
@@ -668,6 +669,22 @@ function FichaTilt({ t, tres, rombo }: { t: Tilt; tres: boolean; rombo: boolean 
   );
 }
 
+/**
+ * The interior finish's sheet (2026-11-16, interiorTriciclo.ts): what is drawn and what it weighs, part by part.
+ */
+function FichaAcabado({ T, piezas, areas, consola }: { T: { tAcabado: string; tConsolaTecho: string; tConsolaCentral: string; tAmbiente: string }; piezas: { nombre: string; kg: number; nota?: string }[]; areas: { lados: number; techo: number; suelo: number } | null; consola: boolean }) {
+  const ps = piezas.filter(p => /^(Interior|Tapicería|Cinturones)/.test(p.nombre));
+  return (
+    <div className="-mt-1 flex flex-col gap-1.5 text-xs text-slate-500">
+      <p>{T.tAcabado === 'chasis'
+        ? 'Sin forro, como hasta ahora: por dentro se ven la piel de la carrocería y el chasis tubular (largueros, travesaños, la cuna y la torreta del amortiguador). Con «Paneles» o «Lujo» se forran los costados hasta el borde del cristal, el techo bajo el panel solar y el suelo sobre los largueros, y se tapa la torreta.'
+        : `${T.tAcabado === 'lujo' ? 'Lujo: paneles acolchados de ante (como el techo del Vision Jet) con espuma y fieltro acústico detrás, a 2,2 cm de la piel' : 'Paneles forrados de tela a 1,4 cm de la piel'}: cubren los costados desde el suelo hasta el borde del cristal (en las puertas, el trozo de cada puerta se abre con ella), el techo bajo el panel solar y su marco, y un suelo de moqueta sobre los largueros; una funda tapa la torreta del amortiguador. Las ventanas quedan libres, con un borde enrollado alrededor. Una moldura recorre los dos costados a la altura de los codos.${areas ? ` Costados ${areas.lados.toFixed(2).replace('.', ',')} m², techo ${areas.techo.toFixed(2).replace('.', ',')} m², suelo ${areas.suelo.toFixed(2).replace('.', ',')} m².` : ''}${T.tConsolaTecho !== 'no' && !consola ? ' La consola de techo necesita techo opaco (el panel solar) encima de los asientos: con esta cúpula no cabe.' : ''}`}</p>
+      {ps.length > 0 && <dl className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-0.5">{ps.map(p => <Fragment key={p.nombre}><dt>{p.nombre}{p.nota && <span className="block text-[11px] text-slate-400">{p.nota}</span>}</dt><dd className="text-right font-mono tabular-nums">{p.kg >= 0 ? '+' : '−'}{Math.abs(p.kg).toFixed(1).replace('.', ',')} kg</dd></Fragment>)}</dl>}
+      <p className="text-[11px] text-slate-400">Masas estimadas para piezas de su clase (kg por m² de panel, de moqueta, de funda; kg por metro de moldura), no pesadas.</p>
+    </div>
+  );
+}
+
 /** The order of the side panel's blocks (2026-11-15): the body front to back, then the rest as they come. */
 // (2026-11-16, Eugenio: «la parte de propulsión … tiene que estar arriba del todo»: in Motor, propulsion first, then the hybrid, then the electric motor)
 const ORDEN_BLOQUES = ['Propulsión', 'Híbrido enchufable', 'Motor eléctrico', 'Forma', 'Morro', 'Cúpula', 'Cola', 'Techo solar y ventanas', 'Carenados', 'Puertas y maletero', 'Material y espesores'];
@@ -682,6 +699,9 @@ function zonaTriciclo(m: ModeloTriciclo, d: { punto: [number, number, number]; c
   if (/comp:basculacion/.test(n)) return { dep: 'rodaje', bloque: 'Basculación' };
   // (2026-11-16) the hybrid's engine, its connection, tank and exhaust (hibrido3d.ts)
   if (/comp:hibrido/.test(n)) return { dep: 'propulsion', bloque: 'Híbrido enchufable' };
+  // (2026-11-16) the interior finish's parts (garaje/balaInterior.ts)
+  if (/cinturon/.test(n)) return { dep: 'interior', bloque: 'Tapicería' };
+  if (/forro|moldura|consola|reposabrazos|suelo-moqueta|borde-ventana|funda-torreta|luz-ambiente|foco/.test(n)) return { dep: 'interior', bloque: 'Acabado interior' };
   if (/puerta|porton|maletero/i.test(n)) return { dep: 'carroceria', bloque: 'Puertas y maletero' };
   if (/carenado|brazo/i.test(n)) return { dep: 'carroceria', bloque: 'Carenados' };
   switch (d.capa) {
@@ -827,7 +847,9 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
   const LISA = ['tColaAncho', 'tColaGrosor', 'tColaBombeo', 'tBajosIni', 'tBajosCurva', 'tMorroAncho', 'tMorroGrosor', 'tMorroBombeo'];
   const PUERTA2 = ['tPuerta2Parte', 'tBisagra2Y', 'tBisagra2Inc', 'tPuerta2Abre'];
   // (round 3 interior: the rails reach the rear axle only with two rear wheels; with one, the wheel is in the tail between them)
-  const fichas = deslizadoresTriciclo().filter(f => f.dep === dep && !soloFilas(f.bloque) && (cuatro || f.clave !== 'tViaTras') && (f.bloque !== 'Basculación' || T.tBascula === 'si') && (rombo ? f.clave !== 'tEjeDel' : f.clave !== 'tEjeLat') && (f.bloque !== 'Híbrido enchufable' || T.tPropulsion === 'phev') && hibridoVisible(f.clave) && visible(f.clave)), sels = SELECTORES_TRICICLO.filter(s => s.dep === dep && !soloFilas(s.bloque) && ((s.clave !== 'tMaletero' && s.clave !== 'tPuertas2') || puertas) && (s.clave !== 'tChLargo' || cuatro) && (s.clave !== 'tBascTec' || T.tBascula === 'si') && (s.clave !== 'tTraseras' || !rombo) && (s.bloque !== 'Híbrido enchufable' || T.tPropulsion === 'phev'));
+  // 2026-11-16, the interior finish: the lining's colour, trim, roof console and light only with a lining; the stitching only on a new cover
+  const selInterior = (k: string) => (['tForroColor', 'tMoldura', 'tConsolaTecho', 'tAmbiente'].includes(k) ? T.tAcabado !== 'chasis' : k === 'tCostura' ? T.tTapiz !== 'serie' : k === 'tCosturaColor' ? T.tTapiz !== 'serie' && T.tCostura !== 'no' : true);
+  const fichas = deslizadoresTriciclo().filter(f => f.dep === dep && !soloFilas(f.bloque) && (cuatro || f.clave !== 'tViaTras') && (f.bloque !== 'Basculación' || T.tBascula === 'si') && (rombo ? f.clave !== 'tEjeDel' : f.clave !== 'tEjeLat') && (f.bloque !== 'Híbrido enchufable' || T.tPropulsion === 'phev') && hibridoVisible(f.clave) && visible(f.clave)), sels = SELECTORES_TRICICLO.filter(s => s.dep === dep && !soloFilas(s.bloque) && ((s.clave !== 'tMaletero' && s.clave !== 'tPuertas2') || puertas) && (s.clave !== 'tChLargo' || cuatro) && (s.clave !== 'tBascTec' || T.tBascula === 'si') && (s.clave !== 'tTraseras' || !rombo) && (s.bloque !== 'Híbrido enchufable' || T.tPropulsion === 'phev') && selInterior(s.clave));
   const nOcc = rt.ocupantes, conN = nOcc === 1 ? 'con el piloto solo' : `con ${['', 'uno', 'dos', 'tres', 'cuatro'][nOcc] ?? nOcc} ocupantes`;
   // with three rows the passenger's saddle height is the rows' seat height; its position and recline do nothing there
   const ETIQUETA_FILAS: Partial<Record<string, string>> = { tPasY: 'Asientos de las filas 2 y 3: altura' };
@@ -983,6 +1005,8 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
           {bloque === 'Motor eléctrico' && modelo.phev && <p className="-mt-1 text-xs text-slate-500">{modelo.phev.arq === 'serie' ? 'Con el híbrido en serie, el motor eléctrico lo mueve todo también con gasolina: el generador le manda la electricidad por el controlador. Su potencia nominal limita la velocidad que se sostiene con gasolina.' : `Con el híbrido, ${modelo.phev.arq === 'reparto' ? 'la corona del planetario' : 'la caja de cambios'} empuja ${cuatro ? 'las ruedas traseras por una cadena, un diferencial y dos palieres' : 'la rueda trasera por una cadena, en el lado izquierdo'}, junto al motor de buje${cuatro ? ' de cada rueda' : ''}${modelo.phev.arq === 'reparto' ? ', que hace de MG2' : ''}.`}</p>}
           {bloque === 'Motor eléctrico' && !cuatro && <p className="-mt-1 text-xs text-slate-500">Motor de buje en la rueda trasera, sin cadena ni correa, con su controlador bajo el sillín del pasajero. Su masa y la del controlador siguen a la potencia máxima (su rango se mueve con ella). En una rueda de ciclomotor caben unos {RUEDAS_TRICICLO['24'].kWBuje} kW de pico; en una llanta de coche de 15″, unos {RUEDAS_TRICICLO.c15.kWBuje} (como los motores en rueda del Aptera). Por encima, lo honrado sería un motor en el basculante con correa, como en las motos eléctricas, y eso aquí no se dibuja: la comprobación «Motor de buje» lo avisa.</p>}
           {bloque === 'Batería' && paquete && <p className="-mt-1 text-xs text-slate-500">Un solo paquete a lo largo del bastidor, centrado, apoyado en el fondo de la panza, con los largueros pasando por dentro: {Math.round(limitarTriciclo('tBatAncho', T))} % del ancho del bastidor (de cara exterior a cara exterior de los largueros), así que sobresale {Math.round((limitarTriciclo('tBatAncho', T) - 100) / 2)} % de ese ancho a cada lado. Su tamaño decide su capacidad: {Math.round(rt.bateria.litros)} L × {Math.round(T.tWhL)} Wh/L = {fmt(modelo.kWh, 1)} kWh y {Math.round(rt.bateria.kg)} kg (el deslizador «Batería» solo la muestra). Donde pasa, es el suelo: los pies y los asientos se apoyan encima. Empieza detrás de la cuna de la suspensión delantera; su largo llega hasta lo que cabe en la carrocería y su ancho puede pasarse de ella hasta 400 % (si se sale, «Batería dentro de la carrocería» dice cuánto sobresale) (el largo, ahora, hasta {m2(vistaTriciclo(deslizadoresTriciclo().find(f => f.clave === 'tBatLargo')!, T).max)}), y lo que toca por el camino lo dicen las comprobaciones: el controlador, que va justo detrás, y la torreta del amortiguador{cuatro ? '' : ', la rueda trasera'}, los asientos de encima, la piel. Su masa cuenta en su sitio para el peso, el centro de gravedad, el vuelco y los largueros.</p>}
+          {bloque === 'Acabado interior' && <FichaAcabado T={T} piezas={rt.piezas} areas={modelo.interior.forro?.areas ?? null} consola={!!modelo.interior.consola} />}
+          {bloque === 'Tapicería' && <p className="-mt-1 text-xs text-slate-500">{T.tTapiz === 'serie' ? 'Los asientos de serie: vinilo gris oscuro acolchado en rombos con un pespunte rojo. Al elegir otra tapicería, la funda cambia en los mismos asientos (sillín y respaldos, butacas o asientos de las filas); en las butacas, la carcasa blanca pasa al color de los laterales.' : `${TAPICES.find(t => t.k === T.tTapiz)?.n ?? ''}: la funda nueva cubre los mismos asientos${T.tAsientos === 'butacas' ? ' y la carcasa de las butacas toma el color oscuro de los laterales, como los costados de los asientos del Vision Jet' : ''}. ${T.tCostura === 'no' ? 'Sin costura vista.' : T.tCostura === 'recta' ? 'Costura recta: canales a lo largo, con un pespunte doble a cada lado.' : 'Costura geométrica: líneas que se cruzan desde dos nudos, como la del Vision Jet, con pespunte doble.'} Masa: la diferencia de la funda con la de serie (que ya cuenta «Un asiento»).`}{T.tCinturon !== 'no' ? ' Cinturones de tres puntos: del hombro, por encima del pecho, a la hebilla en la otra cadera, y la cinta de las caderas; en un asiento vacío, recogido por su costado.' : ''}</p>}
           {bloque === 'Batería' && !paquete && <p className="-mt-1 text-xs text-slate-500">Primero en el morro, donde el Cuadriciclo en rombo lleva la rueda delantera ({Math.round(rt.bateria.litrosMorro)} L), luego en un módulo estrecho entre los pies del piloto; si hace falta más, el módulo del morro sube, crece hacia la punta y queda un módulo plano bajo los sillines. Ahora: {Math.round(rt.bateria.litros)} L y {Math.round(rt.bateria.kg)} kg{rt.bateria.litros - rt.bateria.cabe > 0.05 ? `: caben ${Math.round(rt.bateria.cabe)} L, faltan ${Math.round(rt.bateria.litros - rt.bateria.cabe)} (un morro más largo, una carrocería más ancha o celdas más densas)` : ''}.</p>}
         </Bloque>
       ))}
