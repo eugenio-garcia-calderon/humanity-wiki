@@ -11907,7 +11907,7 @@ Eugenio: «Asígnale un peso específico, cada ciudadano tiene 100 puntos, y pue
   - the storks have bodies;
   - the painter's canvas is one canvas;
   - the bulb and the sun light the people.
-- Design 6 is starred as the favourite of May and June, so it is the one printed. Designs 4 and 5 are unchanged: design 5 re-renders pixel-identical.
+- Design 6 is starred as the favourite of May and June (set from the page after the deploy), so it is what the calendar shows by default and on the full screen. **What is printed is a separate choice** («Imprimir el diseño N», the printer icon), and it is still design 4 for both months: Eugenio asked for the favourite, not for the print. Designs 4 and 5 are unchanged: design 5 re-renders pixel-identical.
 - Code: `figuras_real.py` (the realistic painters, swapped in for one run with `activar()`), `personajes_real.py` (the redrawn figures), `mes-05-f.py` / `mes-06-f.py`, and an optional irregular rim light in `planos.py` (off by default).
 - Evaluator rounds:
 
