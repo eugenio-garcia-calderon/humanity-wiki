@@ -17,6 +17,12 @@
       "ruta": "src/components/aeromovil/Visor3D.tsx",
       "motivo": "Basculación detallada",
       "desde": "2026-11-16T13:48:22.350Z"
+    },
+    {
+      "agente": "basc",
+      "ruta": "src/pages/Aeromovil.tsx",
+      "motivo": "Basculación detallada",
+      "desde": "2026-11-16T13:48:25.761Z"
     }
   ]
 }
