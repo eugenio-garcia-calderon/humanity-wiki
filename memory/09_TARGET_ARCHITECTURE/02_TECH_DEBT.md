@@ -766,3 +766,7 @@ both files are free of other bots' claims.
 - **Seats are re-textured, not re-shaped.** Stitching is a texture; the cushion shapes are the old ones (see 03_DECISIONS). Sculpted seats per layout: about 1 day.
 - **Belts are not load-checked.** Belts anchor on the seats (as in the Vision Jet) but no check covers the seat-to-frame anchorage in a crash. About 2 hours for a first static check.
 - **Interior materials are a module singleton** (`materialesInterior`), shared by every Visor3D instance; fine with one editor viewer, wrong if two editors ever show different finishes side by side. About 30 minutes to make it per viewer.
+
+## 2026-11-16 · Catalogue figures are a snapshot
+
+`catalogoTren.ts` holds figures copied by hand on 2026-11-16 with their source URLs; nobody re-checks them, and several sources are shop listings, not datasheets. Inboard motors are not drawn in 3D and their placement is not checked (the 3D still shows a hub motor). Re-verifying the 34 entries: ~2 h; drawing an inboard motor plus chain/gear: ~4 h.

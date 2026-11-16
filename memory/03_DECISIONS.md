@@ -1908,3 +1908,7 @@ Basculante), not the battery alone, so the tab matches the list's group header.
 - **Alternative rejected.** New sculpted seats with real bolsters and stitch tubes for each of the three layouts: about three times the code, and it would fight the `filas` bot's ongoing seat work in `balaPiezas.ts`.
 - **Lining.** Drawn on the skin's own (x, t) sections, offset inward along the section normal, so it follows any body the sliders make; cut at the canopy glass edge and under the roof panel, split by door leaf onto each door pivot.
 - **Defaults.** Every new field defaults to today's look (no lining, `serie` cover, nothing drawn), so saved designs and their masses are unchanged.
+
+## 2026-11-16 · Bala powertrain catalogue: fixed slider values via `rangoTriciclo`
+
+A chosen catalogue part (catalogoTren.ts) writes its published figures into the existing sliders and `rangoTriciclo` returns `[v, v]` for them while it is chosen, so every existing calculation (masses, energy, hybrid) uses them with no second code path. Alternative considered: a separate "catalogue" model overriding `limitarTriciclo` callers one by one — more places to forget. The choice is stored as four optional string keys (`tCatMotor`, `tCatCtrl`, `tCatReductora`, `tCatTermico`), absent = «A medida», so saved designs are unchanged. Controller current is compared as P = V × I with 95 % efficiency, treating an AC controller's phase RMS current as roughly its battery current (approximate; said on screen).

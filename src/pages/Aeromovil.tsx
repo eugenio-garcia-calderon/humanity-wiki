@@ -36,7 +36,7 @@ import {
   type Comprobacion, type Disposicion, type MaterialCarenado, type MaterialChasis, type Modelo, type ModeloBala, type ModeloTriciclo, type Neumatico, type Parametros, type Puerta, type Pulgadas, type Resultados,
 } from '../components/aeromovil/geometria';
 import {
-  ALTO_FILAS, ANCHO_FILAS, AGARRE, AUXILIARES, CRR, DEPS_TRICICLO, EQUIPAJE, RENDIMIENTO, RUEDAS_TRICICLO, SELECTORES_TRICICLO, USABLE, VUELCO_OBJETIVO, bateriaChasis, camposTriciclo, cargasRueda, conButacas, conSalpicadero, grupoPieza, largueroAlEje, masaButaca, conPortonAptera, conPuertas, deslizadoresTriciclo, energiaTriciclo, conBatalla, esCuatro, esRombo, estirarTriciclo, guardarTriciclo, largoTriciclo, lemasTriciclo, limitarTriciclo, nombreTriciclo, vistaTriciclo,
+  ALTO_FILAS, ANCHO_FILAS, AGARRE, AUXILIARES, valorFijoCatalogo, CRR, DEPS_TRICICLO, EQUIPAJE, RENDIMIENTO, RUEDAS_TRICICLO, SELECTORES_TRICICLO, USABLE, VUELCO_OBJETIVO, bateriaChasis, camposTriciclo, cargasRueda, conButacas, conSalpicadero, grupoPieza, largueroAlEje, masaButaca, conPortonAptera, conPuertas, deslizadoresTriciclo, energiaTriciclo, conBatalla, esCuatro, esRombo, estirarTriciclo, guardarTriciclo, largoTriciclo, lemasTriciclo, limitarTriciclo, nombreTriciclo, vistaTriciclo,
   type DepTriciclo, type FichaTriciclo,
 } from '../components/aeromovil/geometriaTriciclo';
 import { kgPorDepartamento, textoKg, type KgDepartamento } from '../components/aeromovil/PesosDepartamento';
@@ -54,6 +54,8 @@ import { ColoresCarroceria } from '../components/aeromovil/ColorCarroceria';
 import { CLAVES_COLOR, coloresDe } from '../components/aeromovil/coloresCarroceria';
 import { filasDetras, fraseFila, rotuloFilas } from '../components/aeromovil/filasTriciclo';
 import { FichaHibrido } from '../components/aeromovil/FichaHibrido';
+import { CatalogoPieza, type Necesidad } from '../components/aeromovil/CatalogoTren';
+import { valoresCatalogo, type CATALOGO_CLAVES } from '../components/aeromovil/catalogoTren';
 import { MenuDisenos, aDiseno, cargarDisenoPorDefecto, deDiseno, useAutoguardado, type Diseno } from '../components/aeromovil/Disenos';
 import { TablaComparacion, fichaPropia } from '../components/aeromovil/Otros';
 import { fichaComparable, type Referencia } from '../components/aeromovil/referencias';
@@ -795,6 +797,18 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
   // four wheels (2026-11-11): the rear track only with two rear wheels
   // (2026-11-15: a diamond, `tRuedas`, has four wheels too, but one rear in the tail and the pods at the sides)
   const cuatro = esCuatro(T), rombo = esRombo(T), lemas = lemasTriciclo(T), tresOCuatro = cuatro || rombo ? 'cuatro' : 'tres';
+  // (2026-11-16, Eugenio: «añade marcas de motores … que podamos seleccionar»): a catalogue part writes its published
+  // figures into the sliders (and rangoTriciclo keeps them there while it is chosen); catalogoTren.ts
+  const motoresBuje = cuatro ? 2 : 1;
+  const elegirCatalogo = (k: typeof CATALOGO_CLAVES[number], id: string) => {
+    set(k, id as never);
+    for (const [c, v] of Object.entries(valoresCatalogo({ ...T, [k]: id }, motoresBuje))) set(c as keyof Parametros, v as never);
+  };
+  const necesidad: Necesidad = {
+    vel: T.tVel, kWVel: e ? e.potencia / 1000 : null, vmaxPico: e ? e.vmaxPico : null, motores: motoresBuje,
+    // on petrol alone: what the wheels ask, through the hybrid's connection, plus the equipment
+    kWTermicoVel: e && modelo.phev ? ((e.potencia - AUXILIARES) * RENDIMIENTO / modelo.phev.rendTrans + AUXILIARES) / 1000 : null,
+  };
   // 2026-11-12: each new option's sliders only show with it on (a steering wheel's with «Volante», the handlebar's with
   // «Manillar», the doors' with doors, the hatch's with the Aptera hatch, the pack's with the battery along the frame)
   const volante = T.tMando === 'volante', salp = conSalpicadero(T), puertas = conPuertas(T), portonA = conPortonAptera(T), paquete = bateriaChasis(T), butacas = conButacas(T);
@@ -916,11 +930,18 @@ function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
           })()}
           {/* (2026-11-16) the hybrid's architecture first in its block: the sliders under it depend on it */}
           {bloque === 'Híbrido enchufable' && sels.filter(s => s.clave === 'tHibArq').map(s => <Selector key={s.clave} id={`t-${s.clave}`} etiqueta={s.n} valor={T[s.clave] as string} clave={s.clave} opciones={s.opciones} alCambiar={v => set(s.clave, v as never)} />)}
+          {bloque === 'Híbrido enchufable' && <CatalogoPieza tipo="termico" valor={T.tCatTermico} alCambiar={id => elegirCatalogo('tCatTermico', id)} Selector={Selector as never} necesidad={necesidad} />}
+          {bloque === 'Motor eléctrico' && <>
+            <CatalogoPieza tipo="motor" valor={T.tCatMotor} alCambiar={id => elegirCatalogo('tCatMotor', id)} Selector={Selector as never} necesidad={necesidad} />
+            <CatalogoPieza tipo="controlador" valor={T.tCatCtrl} alCambiar={id => elegirCatalogo('tCatCtrl', id)} Selector={Selector as never} necesidad={necesidad} />
+            <CatalogoPieza tipo="reductora" valor={T.tCatReductora} alCambiar={id => elegirCatalogo('tCatReductora', id)} Selector={Selector as never} necesidad={necesidad} />
+            <p className="-mt-0.5 text-xs text-slate-500">Piezas que se venden hoy, con las cifras que publica su fabricante o su vendedor (enlace en cada ficha). Al elegir una, sus cifras pasan a los deslizadores de abajo y quedan fijas; lo que no publica, sigue en su deslizador. «A medida» vuelve a dejarlo todo libre.</p>
+          </>}
           {fichas.filter(f => f.bloque === bloque).map(f => {
             const v = vistaTriciclo(f, T);
             // the A-pillar's sliders do nothing on a one-piece canopy
             // (2026-11-12: with doors the window frame is always there; with the pack along the frame its size decides the kWh)
-            const apagado = (T.tVentanas === 'burbuja' && !puertas && f.clave.startsWith('tPilar')) || apagadoFilas(f.clave) || apagadoCuatro(f.clave) || (paquete && f.clave === 'tKWh');
+            const apagado = (T.tVentanas === 'burbuja' && !puertas && f.clave.startsWith('tPilar')) || apagadoFilas(f.clave) || apagadoCuatro(f.clave) || (paquete && f.clave === 'tKWh') || valorFijoCatalogo(f.clave, T) != null;
             const valor = paquete && f.clave === 'tKWh' ? Math.min(v.max, Math.max(v.min, modelo.kWh)) : v.valor;
             return <Deslizador key={f.clave} id={`t-${f.clave}`} etiqueta={etiqueta(f.clave, f.n)} valor={valor} clave={f.clave} centro={f.centrar ? v.defecto : undefined} min={v.min} max={v.max} paso={f.paso} mostrar={mostrar(f, valor)} desactivado={apagado} alCambiar={x => { const g = guardarTriciclo(f, x, T); if (f.clave === 'tBatalla') for (const [k, v] of Object.entries(conBatalla(T, g))) set(k as keyof Parametros, v as never); else set(f.clave, g); }} />;
           })}
