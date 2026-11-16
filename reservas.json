@@ -35,6 +35,12 @@
       "ruta": "src/components/aeromovil/garaje/NavegadorGaraje.tsx",
       "motivo": "referencias: quitar coches de referencia del garaje",
       "desde": "2026-11-16T14:11:32.839Z"
+    },
+    {
+      "agente": "filas",
+      "ruta": "src/components/aeromovil/garaje/balaPiezas.ts",
+      "motivo": "filas: batería más ancha que la carrocería y asientos fila a fila",
+      "desde": "2026-11-16T14:13:32.808Z"
     }
   ]
 }
