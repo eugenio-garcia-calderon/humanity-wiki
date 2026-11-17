@@ -12535,6 +12535,8 @@ sus tubos. O ves solo la parte del bloque del motor. O ves solo la parte del eng
   cárter y filtro 1,6 kg; estimaciones de piezas de su clase, no medidas), cada una donde se dibuja. El peso en vacío no
   cambia; el centro de gravedad de un híbrido se mueve un poco (el escape ya no cuenta en el cigüeñal sino en la cola).
   Un diseño eléctrico (sin motor de gasolina) no cambia en nada.
-- **El radiador y sus tubos** los pone el bot «capo» en paralelo: el grupo «Refrigeración» ya los espera
-  (`piezasMotor.ts`); quien publique segundo hace la unión.
+- **Unido con el radiador del bot «capo»** (publicado antes): «Refrigeración» muestra el radiador con su ventilador,
+  los tubos del refrigerante, la bomba de agua y los manguitos; con el motor delante, su árbol de transmisión va en
+  «Engranaje planetario / transmisión». Las tomas de aire del radiador están en la carrocería, así que no salen con
+  «Ver solo motor».
 - No comprobado en un móvil: con la app instalada, `humanity.wiki/?sw=off` quita la copia vieja.

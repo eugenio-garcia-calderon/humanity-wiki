@@ -965,8 +965,11 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   `componente` tags and show no parts list. ≈ 30 min each if ever needed.
 - **The oil is not counted** (a dry engine figure leaves it out; ≈ 2 kg on a 25 kW twin). Adding it changes every
   hybrid's empty mass on purpose: 10 min plus a changelog line.
-- **The two coolant hoses end in open stubs** forward of the engine until the radiator exists (bot «capo»): joining them
-  to its inlet/outlet is ≈ 15 min once its position is in the model.
+- **Two coolant hose stubs** (piezasMotor.ts `auxiliaresMotor`) still leave the thermostat and the pump forward 15 cm
+  even though capo's `refrigeracion-tubos` now run from the engine to the radiator: two hoses where one belongs. Start
+  capo's lines at the stubs' ends (or drop the stubs when `refrigeracionDe(m)` has tubes): ≈ 15 min.
+- **Label spacing assumes a camera ~2 m away** (`aplicarPiezasMotor(…, distancia = 2)`); Visor3D was claimed when the
+  framing distance was to be passed in. Passing `d` from the framing effect: 3 lines, ≈ 10 min.
 - **Labels are placed on the top of each part's box and stacked when they collide**; on a crowded engine two can still
   overlap on screen from some angles. Screen-space de-overlap ≈ 1 h.
 - **The clicked-part card sits top left over the 3D**, where a garage car's card also opens; both could show at once
