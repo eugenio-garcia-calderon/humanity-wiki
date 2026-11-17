@@ -89,6 +89,12 @@
       "ruta": "src/components/aeromovil/basculante/defecto.ts",
       "motivo": "ruedas: catálogo de ruedas de moto",
       "desde": "2026-11-17T10:23:20.501Z"
+    },
+    {
+      "agente": "ruedas",
+      "ruta": "src/components/aeromovil/triciclo/energia.ts",
+      "motivo": "ruedas: catálogo de ruedas de moto",
+      "desde": "2026-11-17T10:23:23.608Z"
     }
   ]
 }
