@@ -1,11 +1,12 @@
 // Shared panel controls of the Aeromóvil editor: slider, selector, collapsible block, explanation popup, checks list, number formats.
 // Moved out of pages/Aeromovil.tsx unchanged (2026-11-16, refactor «ordenar»). See ./CLAUDE.md for the layout.
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { Button } from '../ui/core';
 import { cn } from '../../utils/cn';
 import type { Comprobacion, Parametros } from './geometria';
 import { explicacion } from './explicaciones';
+import { BotonNotas, PanelNotas } from './notas/NotasSeccion';
 
 export const fmt = (v: number, d = 2) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
 export const m2 = (v: number) => `${fmt(v)} m`;
@@ -90,21 +91,30 @@ export function Bloque({ titulo, nota, children, plegable, id, peso }: {
   plegable?: { abierto: boolean; alAlternar: () => void };
   id?: string;
 }) {
+  // (2026-11-17) every section takes notes: an icon in the header, the notes in a dialog (notas/NotasSeccion.tsx)
+  const [notas, setNotas] = useState(false);
+  const cerrarNotas = useCallback(() => setNotas(false), []);
+  const botonNotas = <BotonNotas seccion={titulo} abierto={notas} alAlternar={() => setNotas(a => !a)} />;
   if (plegable) return (
     <section id={id} className={cn('flex flex-col rounded-xl border bg-white', plegable.abierto ? 'gap-2.5 border-slate-300 p-3.5 pt-1.5' : 'border-slate-200 p-1.5')}>
+      <div className="-mx-1 flex w-[calc(100%+0.5rem)] items-center">
       <Button variant="ghost" onClick={plegable.alAlternar} aria-expanded={plegable.abierto}
-        className="-mx-1 w-[calc(100%+0.5rem)] justify-between px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-600 hover:bg-slate-50">
+        className="min-w-0 flex-1 justify-between px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-600 hover:bg-slate-50">
         <span>{titulo}</span>
         <span className="flex items-center gap-2">{peso && <PesoCabecera texto={peso} />}{nota && <span className="font-mono text-[11px] font-normal normal-case tracking-normal text-slate-400">{nota}</span>}<ChevronDown className={cn('h-4 w-4 transition-transform', plegable.abierto && 'rotate-180')} /></span>
       </Button>
+      {botonNotas}
+      </div>
+      {notas && <PanelNotas seccion={titulo} alCerrar={cerrarNotas} />}
       {plegable.abierto && children}
     </section>
   );
   return (
     <section id={id} className="flex flex-col gap-2.5 rounded-xl border border-slate-200 bg-white p-3.5">
-      <h3 className="flex items-baseline justify-between text-xs font-semibold uppercase tracking-wider text-slate-500">
-        {titulo}{(nota || peso) && <span className="flex items-baseline gap-2">{peso && <PesoCabecera texto={peso} />}{nota && <span className="font-mono text-[11px] font-normal normal-case tracking-normal text-slate-400">{nota}</span>}</span>}
+      <h3 className="flex items-center justify-between gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500">
+        {titulo}<span className="flex items-center gap-2">{peso && <PesoCabecera texto={peso} />}{nota && <span className="font-mono text-[11px] font-normal normal-case tracking-normal text-slate-400">{nota}</span>}<span className="-my-1 -mr-1.5">{botonNotas}</span></span>
       </h3>
+      {notas && <PanelNotas seccion={titulo} alCerrar={cerrarNotas} />}
       {children}
     </section>
   );

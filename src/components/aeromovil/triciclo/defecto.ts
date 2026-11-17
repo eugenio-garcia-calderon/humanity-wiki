@@ -32,6 +32,8 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   // 2026-11-16: the hybrid's architecture (hibrido.ts). The power split at 50 % mechanical (97 %) and 83 % electrical gives
   // 90 %, the old «Conversión mecánica» default: an untouched hybrid gives the same litres as before
   tHibArq: 'reparto', tHibMec: 50, tRendElec: 83, tRendCaja: 93,
+  // 2026-11-17 (masas): the engine and the tank where they go by default (hibrido.ts), not moved
+  tMotX: 0, tMotY: 0, tMotZ: 0, tDepX: 0, tDepY: 0, tDepZ: 0,
   // 2026-11-17: the electric motor in the hub, as every design saved before (the central MG2 on the planetary is chosen)
   tMotorElec: 'buje',
   tMRueda: 4.5, tMFreno: 1.2, tMSuspDel: 9, tMSuspTras: 6, tMDir: 4.5,
