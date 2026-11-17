@@ -12082,6 +12082,16 @@ modelo, masas, comprobaciones, energía). Los valores por defecto del Triciclo s
 comparten los cuatro vehículos. El archivo antiguo sigue existiendo y reexporta todo, así que nada más cambia. Se
 borran dos nombres que no usaba nadie (`PARTES_LARGO`, `esTriciclo`).
 
+## 2026-11-16 · Un evaluador para el salto entre la cabina y la cola
+
+Eugenio, sobre su «Modelo 1»: «haz que esto no pueda ocurrir, este salto que hay entre la cola y la cabina… genera un
+bot que evalúe esta capacidad». Nuevo `scripts/cola-continuidad.ts`: sin navegador, mide la piel ya construida desde
+40 cm delante del final de la cúpula hasta la punta de la cola, cada milímetro, en 759 diseños (el Triciclo, el Rombo
+Bala de Eugenio, un caso como el Modelo 1, una rejilla de extremos y 160 diseños al azar). Busca saltos en la piel,
+pliegues (un cambio de ángulo de más de 8° en un centímetro, arriba y en los hombros), secciones rotas y el panel solar
+de la cola mal puesto, y acaba con «COLA OK» o «COLA FALLA n casos». Hoy en main: 278 casos fallan, todos por
+pliegues (hasta 50°) donde la cúpula o el techo caen sobre la cola; ningún salto de más de 0,3 mm. Es solo la prueba:
+el arreglo lo hace otro bot.
 ## 2026-11-16 · Ordenar el código del Aeromóvil (3/4): los paneles laterales en sus propios archivos
 
 Eugenio: «optimiza el codigo de la web aeromovil para que sea más eficiente a futuro generar nuevo código».
