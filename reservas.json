@@ -137,12 +137,6 @@
       "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
       "motivo": "munecos: talla y complexión de los ocupantes (pocas líneas)",
       "desde": "2026-11-17T17:06:41.481Z"
-    },
-    {
-      "agente": "solopiezas",
-      "ruta": "src/components/aeromovil/Visor3D.tsx",
-      "motivo": "solopiezas: encuadrar el motor al verlo solo (2 líneas)",
-      "desde": "2026-11-17T17:23:45.898Z"
     }
   ]
 }
