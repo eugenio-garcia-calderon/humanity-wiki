@@ -173,6 +173,12 @@
       "ruta": "src/components/aeromovil/triciclo/campos.ts",
       "motivo": "masas: deslizadores del motor y del depósito",
       "desde": "2026-11-17T14:26:55.038Z"
+    },
+    {
+      "agente": "masas2",
+      "ruta": "src/components/aeromovil/explicaciones/triciclo.ts",
+      "motivo": "masas: deslizadores del motor y del depósito",
+      "desde": "2026-11-17T14:26:59.781Z"
     }
   ]
 }
