@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "electronica",
-      "ruta": "src/components/aeromovil/triciclo/energia.ts",
-      "motivo": "electronica: Electrónica de potencia y estudio L7e (pocas líneas)",
-      "desde": "2026-11-17T17:59:50.421Z"
-    },
-    {
-      "agente": "electronica",
       "ruta": "src/components/aeromovil/explicaciones/triciclo.ts",
       "motivo": "electronica: Electrónica de potencia y estudio L7e (pocas líneas)",
       "desde": "2026-11-17T17:59:53.498Z"
