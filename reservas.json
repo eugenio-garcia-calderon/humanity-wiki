@@ -227,6 +227,12 @@
       "ruta": "src/components/aeromovil/FichaHibrido.tsx",
       "motivo": "mgplanetario: motor eléctrico central (MG2) unido al planetario",
       "desde": "2026-11-17T14:18:00.800Z"
+    },
+    {
+      "agente": "munecos",
+      "ruta": "src/components/aeromovil/triciclo/ocupantes.ts",
+      "motivo": "munecos: talla y complexión de los ocupantes (pocas líneas)",
+      "desde": "2026-11-17T14:19:17.799Z"
     }
   ]
 }
