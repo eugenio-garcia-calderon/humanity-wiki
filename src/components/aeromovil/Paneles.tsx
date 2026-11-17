@@ -45,7 +45,7 @@ export async function cargarTareas(): Promise<Tarea[]> {
   return r.json();
 }
 
-/** Formulario de comentario de mejora: lo usan la vista Tareas y el botón flotante. */
+/** Formulario de comentario de mejora: lo usa la vista Tareas. */
 export function FormularioMejora({ areaInicial = 'general', alEnviar }: { areaInicial?: string; alEnviar: (t: Tarea) => void }) {
   const [texto, setTexto] = useState('');
   const [area, setArea] = useState(areaInicial);

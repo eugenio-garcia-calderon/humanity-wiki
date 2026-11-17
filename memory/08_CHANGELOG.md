@@ -12451,6 +12451,7 @@ elementos. Y podemos ir jugando también con su precio, los proveedores, todo es
   roja dice que hay que subirlo a 18 kg (no lo he subido yo: cambiaría el peso del coche; es decisión de Eugenio).
 - Rombo Bala (a 120 km/h): ver el informe del bot. No visto en un teléfono de verdad: si sale la versión vieja,
   `humanity.wiki/?sw=off`.
+
 ## 2026-11-17 · Fuera «¿Algo que mejorar?» y «Empezar un diseño nuevo» del panel del Aeromóvil
 
 Eugenio: «Quita esta parte en todas las secciones, la de mejoras y la de empezar de nuevo, todo fuera».
