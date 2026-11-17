@@ -77,6 +77,12 @@
       "ruta": "src/server/seguridad/clasificacion.ts",
       "motivo": "proveedores: clasificar aeromovil_adjuntos (1 línea)",
       "desde": "2026-11-17T18:21:31.092Z"
+    },
+    {
+      "agente": "electronica",
+      "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
+      "motivo": "electronica: bloque Electrónica de potencia (4 líneas)",
+      "desde": "2026-11-17T18:42:31.923Z"
     }
   ]
 }
