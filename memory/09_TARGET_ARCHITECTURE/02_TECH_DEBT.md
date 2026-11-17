@@ -946,3 +946,4 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   `POST /api/aeromovil/disenos` (an `origen` id in the body): ≈ 20 min.
 - **Anonymous notes never leave the browser** (by design, rule 3). If Eugenio wants visitors' notes shared, they would
   go through moderation like the tasks: ≈ 1 h.
+- **Power electronics: thermal start logic is descriptive** (2026-11-17, electronica). `tEpArrKW`, `tEpArrVel`, `tEpHist`, `tEpCalent` only drive a table of which motor runs at each speed; only `tEpArrSoc` acts (electric range of a hybrid). A drive-cycle SOC simulation (WMTC) that uses them for litres and range: ≈ 1 day. The regen limit `tEpRegen` does not reduce consumption yet: ≈ 2 h with a stop-and-go share per speed. The HCU (hybrid control unit) has no part in any parts list (consumos' electrical system or Motor): ≈ 30 min once a product is chosen.

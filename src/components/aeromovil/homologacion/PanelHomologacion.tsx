@@ -8,6 +8,7 @@ import { cn } from '../../../utils/cn';
 import type { Modelo, Parametros, Resultados } from '../geometria';
 import { CATEGORIAS, ETIQUETA_ESTADO, FUENTES, GRUPOS, categoria, type Estado, type IdCategoria } from './normas';
 import { fichaHomologacion, type CdConocido } from './ficha';
+import { EstudioL7e } from './EstudioL7e';
 import { candidatas, elegirCategoria, evaluarCategoria, fraseMargen, margenes, type Evaluacion, type Resultado } from './evaluar';
 
 const COLOR: Record<Estado, string> = {
@@ -72,6 +73,9 @@ export function PanelHomologacion({ P, modelo, res, cd, nombre }: { P: Parametro
       </div>
 
       <Margenes ev={ev} />
+
+      {/* (2026-11-17) the L7e power study and the tests, one tab each (l7e.ts): only where the power electronics exist */}
+      {ficha.electronica && <EstudioL7e ficha={ficha} />}
 
       <div className="flex flex-wrap gap-1.5 text-xs">
         {(['cumple', 'no', 'condicion', 'comprobar'] as Estado[]).map(e => <span key={e} className={cn('rounded-full border px-2 py-0.5 font-semibold', COLOR[e])}>{ETIQUETA_ESTADO[e]}: {ev.cuenta[e]}</span>)}

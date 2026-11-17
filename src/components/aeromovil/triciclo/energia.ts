@@ -8,6 +8,7 @@ import { crrMezcla } from '../ruedas/catalogo';
 import { limitarTriciclo } from './medidas';
 import type { ModeloTriciclo } from './modelo';
 import { AGARRE } from './comprobaciones';
+import { electronicaTriciclo } from './electronica';
 
 /** Rodadura de neumático de ciclomotor (0,011), motor de buje y controlador al 85 %, 80 W de equipos y la batería usable al 90 %. Supuestos, no medidos. */
 export const CRR = 0.011, RENDIMIENTO = 0.85, AUXILIARES = 80, USABLE = 0.9;
@@ -30,12 +31,16 @@ export function energiaTriciclo(m: ModeloTriciclo, mTot: number, cd: { cd: numbe
   const T = m.campos, L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), g = 9.81, CdA = cd.cd * cd.areaRef, CRR = crrTriciclo(T);
   const potencia = (v: number) => (0.5 * 1.2 * CdA * v ** 3 + CRR * mTot * g * v) / RENDIMIENTO + AUXILIARES;
   const consumo = (kmh: number) => { const v = kmh / 3.6; return potencia(v) / v / 3.6; };
-  const vel = L('tVel'), WhKm = consumo(vel), util = m.kWh * 1000 * USABLE;
+  // (2026-11-17) the power electronics (electronica.ts): the electric mode's continuous and peak power after the configured
+  // limits and map, the engine after its derating. Defaults: exactly the sliders, as before. A hybrid spends the battery
+  // down to the engine's start threshold (`tEpArrSoc`; its default 10 % is the old USABLE 90 %)
+  const el = electronicaTriciclo(T);
+  const vel = L('tVel'), WhKm = consumo(vel), util = m.kWh * 1000 * (m.phev ? 1 - L('tEpArrSoc') / 100 : USABLE);
   const vmaxCon = (kW: number) => { let v = 10; for (let i = 0; i < 80; i++) v *= Math.pow(kW * 1000 / potencia(v), 0.34); return v * 3.6; };
   // 0 → 50 km/h: peak power, limited by the grip of the one driven wheel (≈ 40 % of the weight on it, μ 0.9)
   const reparto = 0.4, Fmax = AGARRE * reparto * mTot * g;
   let v = 0.5, t = 0; const dt = 0.02;
-  while (v < 50 / 3.6 && t < 60) { const Fz = Math.min(Fmax, L('tKWPico') * 1000 * RENDIMIENTO / v) - 0.5 * 1.2 * CdA * v * v - CRR * mTot * g; if (Fz <= 0) { t = 99; break; } v += Fz / (mTot * 1.03) * dt; t += dt; }
+  while (v < 50 / 3.6 && t < 60) { const Fz = Math.min(Fmax, el.ruedasElecPico * 1000 * RENDIMIENTO / v) - 0.5 * 1.2 * CdA * v * v - CRR * mTot * g; if (Fz <= 0) { t = 99; break; } v += Fz / (mTot * 1.03) * dt; t += dt; }
   // the plug-in hybrid (2026-11-15): once the battery is down to its reserve, the petrol engine drives through the
   // planetary gear (part straight to the wheels, part through the generator and the motor: `rendTrans` for both
   // together) and also feeds the equipment. Litres per 100 km: the energy at the wheels over both efficiencies, over
@@ -51,13 +56,18 @@ export function energiaTriciclo(m: ModeloTriciclo, mTot: number, cd: { cd: numbe
     const v = kmh / 3.6;
     return (motorW(kmh) / rendTermA(kmh)) / v / 3.6 / KWH_LITRO_GASOLINA / 10;
   };
-  const vmaxGasolina = p ? vmaxCon(p.arq === 'serie' ? Math.min(p.kW * p.rendTrans / RENDIMIENTO, L('tKWNom')) : p.kW * p.rendTrans / RENDIMIENTO) : 0;
+  const kWT = el.ruedasTermico;
+  const vmaxGasolina = p ? vmaxCon(p.arq === 'serie' ? Math.min(kWT * p.rendTrans / RENDIMIENTO, el.ruedasElecCont) : kWT * p.rendTrans / RENDIMIENTO) : 0;
+  // (2026-11-17) both motors at once, in the strongest mode, for at most the peak's seconds: what the vehicle can reach
+  // when the hybrid adds them up (new figure: the others above are unchanged). The engine counted at the wheel's terms
+  const mp = el.modoPico, sumaEq = mp.termico * (p ? p.rendTrans / RENDIMIENTO : 0) + mp.elecPico, sumaDecl = mp.termico + mp.elecPico;
+  const vmaxConjunta = vmaxCon(sumaDecl > 0 ? sumaEq * Math.min(1, mp.pico / sumaDecl) : 0);
   const hibrido = p ? {
     litros100: litros100(vel), litros50: litros100(50), litros100kmh: litros100(100), kmDeposito: p.litros / litros100(vel) * 100, vmaxGasolina,
     /** 2026-11-16: the overall efficiency from the engine's shaft to the wheel, the engine's own at this speed, and the rpm (hibrido.ts) */
     rendTrans: p.rendTrans, rendTermVel: rendTermA(vel), cifras: cifrasHibrido(p.arq, vel, 2 * m.rR, motorW(vel), p.kW, p.mec),
   } : null;
-  return { cd: cd.cd, areaRef: cd.areaRef, CdA, WhKm, autonomia: util / WhKm, kmSol: solarDiaTriciclo(areaSolar, m.P.sol) / WhKm, vmaxNominal: vmaxCon(L('tKWNom')), vmaxPico: vmaxCon(L('tKWPico')), acel50: t, potencia: potencia(vel / 3.6), WhKm50: consumo(50), WhKm100: consumo(100), hibrido };
+  return { cd: cd.cd, areaRef: cd.areaRef, CdA, WhKm, autonomia: util / WhKm, kmSol: solarDiaTriciclo(areaSolar, m.P.sol) / WhKm, vmaxNominal: vmaxCon(el.ruedasElecCont), vmaxPico: vmaxCon(el.ruedasElecPico), vmaxConjunta, acel50: t, potencia: potencia(vel / 3.6), WhKm50: consumo(50), WhKm100: consumo(100), hibrido };
 }
 
 /**

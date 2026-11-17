@@ -165,3 +165,17 @@ what fails and the margins, and must end «Todo OK».
 **Before you change this, decide**: the figures were read on 2026-11-17 mostly from legislation.gov.uk (the EU text
 as of 31-1-2020) and the consolidated 44/2014 on EUR-Lex; `FUENTES[x].leido: false` marks what was cited without
 rereading. Re-check against EUR-Lex consolidated texts before trusting a margin of a few kg or kW.
+
+## Power electronics («Motor › Electrónica de potencia», 2026-11-17) and the L7e study
+
+- `triciclo/electronica.ts` (pure): from the `tEp…` fields, the driving modes and, per mode, the engine's net power, the
+  e-motor's continuous and peak, and the drive's continuous and peak totals; the strongest mode is what homologation
+  counts (134/2014 annex X app. 2.4). `energia.ts` drives the electric speeds/acceleration with its limited power and
+  adds `vmaxConjunta`; `homologacion/ficha.ts` takes `potenciaCategoria = contTotal`. **Defaults change nothing** (0 =
+  no limit, «libre», no sport, «normal» map, start at 10 % SOC = USABLE): keep it so.
+- `electronica/BloqueElectronica.tsx` draws the block with its own grouped sliders; `LadoTriciclo` leaves the block
+  `BLOQUE_ELECTRONICA` out of its generic list. A new `tEp…` field: campos.ts row/selector + default + explanation + one
+  line in the block.
+- `homologacion/l7e.ts` + `EstudioL7e.tsx`: the L7e-A2 OK / No OK / A comprobar points (901/2014 fields 1.8.3–1.8.9,
+  modes, two limiters, tampering), the scenarios table, and the tests (`ensayosL7e`, one tab each, all «pendiente»).
+  `scripts/homologacion.ts` prints them and checks the study's numbers (28 / 45 / 15 kW).
