@@ -12660,6 +12660,15 @@ Eugenio: «Haz que el garaje se pueda ocultar con un botón arriba en el menú d
 - El menú de secciones ya no escribe «Diseño 3D»: queda solo el icono, más pequeño (el nombre sigue dentro del menú).
 - «Ver solo …» no aparece con el garaje oculto, porque no hay 3D sobre el que actuar.
 - Cada navegador recuerda la elección (`aeromovil.verGaraje`). El 3D sigue montado pero no se dibuja mientras está oculto.
+
+## 2026-11-17 · Electrónica de potencia en Motor, estudio L7e y ensayos en Homologación
+
+Eugenio: «Crea un nuevo apartado dentro de MOTOR que sea Electronica de potencia y añade el control de potencia, todas logicas de arranque del termico y cuando se activa con sliders, mapa de motor, y esas cosas importantes. Añade ese texto que te adjunto en la parte de homologación, resumiendo el tema de homologación de L7, y sobre todo qué cosas están OK y que cosas no, conectando con el tema de Electronica de control y de potencia pico y potencia continua configurada. y también añade los ensayos necesarios segun la normativa, añadiendo una pestaña por cada ensayo».
+
+- **Motor › Electrónica de potencia** (familia Triciclo): límite de potencia continua y pico del conjunto, cuánto dura el pico, reparto entre los dos motores (sin gestión, límite dinámico, térmico rebajado, modos separados), modo sport, mapa del acelerador (normal/eco/a elegir), frenada regenerativa, cuándo arranca el motor de gasolina (batería por debajo de un %, potencia pedida, velocidad, histéresis para pararlo, calentamiento) con una tabla de qué pasa a 30, 50, 90 y 120 km/h, y los dos limitadores independientes del Reglamento 3/2014. Debajo, lo que llega a las ruedas modo a modo y las velocidades.
+- Las cifras se usan: la velocidad sostenida y punta en eléctrico, la aceleración y la velocidad solo con gasolina respetan los límites; nueva «velocidad con los dos a la vez»; la potencia de la homologación es la continua total del modo más potente. Con los ajustes de serie (sin límite) todo da lo mismo que antes, y los diseños guardados no cambian.
+- **Homologación › Estudio L7e-A2**: el estudio de Eugenio resumido y calculado en vivo para el diseño: OK / No OK / A comprobar para los campos 1.8.3, 1.8.5, 1.8.7 y 1.8.9 de la ficha (901/2014), cada modo ensayado (134/2014), los dos limitadores (3/2014 anexo XVIII) y la protección contra la manipulación; y la tabla de escenarios (28 / 45 / 15 kW) con los números del diseño.
+- **Homologación › Ensayos**: una pestaña por ensayo (térmico, eléctrico 30 min según UN 85, conjunto híbrido en cada modo, limitaciones no eliminables, velocidad máxima, emisiones, ruido, frenado, alta tensión y compatibilidad electromagnética), con objetivo, cómo se hace, qué declarar, las cifras del diseño y lo que se espera. Todos pendientes. `scripts/homologacion.ts` los imprime y comprueba los números del estudio.
 ## 2026-11-17 · Proveedor, modelo y archivos en cada componente
 
 Eugenio: «también añade en que todos los componentes, aparte de tener un peso y un precio, se pueda elegir un proveedor

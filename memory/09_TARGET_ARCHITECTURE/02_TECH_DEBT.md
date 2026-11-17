@@ -1030,6 +1030,9 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **The clicked-part card sits top left over the 3D**, where a garage car's card also opens; both could show at once
   if a garage car is clicked while «Ver solo motor» is on. Moving it into the viewer's card slot ≈ 20 min. Not checked
   on a phone.
+- **Power electronics: thermal start logic is descriptive** (2026-11-17, electronica). `tEpArrKW`, `tEpArrVel`, `tEpHist`, `tEpCalent` only drive a table of which motor runs at each speed; only `tEpArrSoc` acts (electric range of a hybrid). A drive-cycle SOC simulation (WMTC) that uses them for litres and range: ≈ 1 day. The regen limit `tEpRegen` does not reduce consumption yet: ≈ 2 h with a stop-and-go share per speed. The HCU (hybrid control unit) has no part in any parts list (consumos' electrical system or Motor): ≈ 30 min once a product is chosen.
+- **Power electronics, not seen in a browser before merging** (2026-11-17, electronica). Eugenio asked to publish at once; everything passed tsc, build and every Aeromóvil script in CI and the «Motor › Electrónica de potencia» block was seen in a headless browser with the Aeromóvil S, but the «Homologación › Estudio L7e / Ensayos» sections were not (the screenshot run timed out). Also: the block says «Energía › Sistema solar y de carga», and that tab is now labelled «Batería». Check them on humanity.wiki (`?sw=off`) with the Aeromóvil S: ≈ 15 min.
+- **The power electronics ignore the e-motor position option `tMotorElec`** (merged the same day by mgplanetario): with the central MG2 on the planetary, the e-motor's power still reaches the wheels as before; whether the HCU limits apply differently there is not modelled: ≈ 1 h.
 ## 2026-11-17 · Supplier/model/files per part: shortcuts of the first version (bot «proveedores»)
 
 - **`Parametros.proveedores` is declared by module augmentation** in `proveedores/datos.ts`, not in `geometria.ts` next
@@ -1042,3 +1045,7 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   volume to `copias-remoto`: ~1 h for prog6/servidores.
 - **Triciclo family only** (Eugenio, 2026-11-17: focus on the «Aeromóvil S»); the Basculante's and A1's parts lists do
   not show it. Same component in `LadoBasculante`: ~15 min if ever wanted.
+- **Not seen in a browser** (bot «proveedores», 2026-11-17): typing a supplier while logged OUT. The anonymous run saw the
+  «inicia sesión» notice, no upload button and the catalogue suggestion, but the scripted `fill` into the wheels line's
+  field never completed under a loaded machine, so the save itself was only seen logged in (same code path: no session
+  check on typing). One headless rerun: ~10 min.
