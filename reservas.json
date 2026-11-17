@@ -1,10 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "colasuave",
-      "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
-      "motivo": "colasuave: texto y visibilidad de los deslizadores de la cola",
-      "desde": "2026-11-17T00:37:32.427Z"
-    }
-  ]
+  "reservas": []
 }
