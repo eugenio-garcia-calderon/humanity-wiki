@@ -12425,4 +12425,6 @@ añadido donde se le puede poner un precio, y ponlo en el menú».
 - **Rombo Bala**: materiales y piezas 13.870 €, mano de obra 21.545 € (521 h), total 35.415 € (116 €/kg). Todo estimado
   menos lo que se elija del catálogo: tu Rombo Bala no tiene ninguna pieza del catálogo elegida.
 - Un diseño guardado sin precios abre con los estimados; nada más cambia. Comprobado con
-  `npx tsx scripts/precios-secciones.ts` («Todo OK»). No comprobado en un móvil: `humanity.wiki/?sw=off` quita la copia vieja.
+  `npx tsx scripts/precios-secciones.ts` («Todo OK»). Visto en el navegador automático a 1300 px y a 390 px (pestañas,
+  Proyecto, Mano de obra, cabeceras con precio); el editor de precio solo se probó a 1300 px. No comprobado en un móvil
+  de verdad: `humanity.wiki/?sw=off` quita la copia vieja.

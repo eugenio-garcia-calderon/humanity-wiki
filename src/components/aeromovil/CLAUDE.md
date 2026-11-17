@@ -165,3 +165,16 @@ what fails and the margins, and must end «Todo OK».
 **Before you change this, decide**: the figures were read on 2026-11-17 mostly from legislation.gov.uk (the EU text
 as of 31-1-2020) and the consolidated 44/2014 on EUR-Lex; `FUENTES[x].leido: false` marks what was cited without
 rereading. Re-check against EUR-Lex consolidated texts before trusting a margin of a few kg or kW.
+
+## `precios/` — prices and labour (2026-11-17)
+
+The price of every part rides on the mass sections (`masasSecciones.ts`): `precios.ts` gives each part a price by its
+name — the catalogue's published price when the design picked a priced part (`catalogoTren.ts`), otherwise an estimate
+from a rule in `estimar` (per kg of laminate, m², kWh, kW, or per unit), always with its reason in `como`. The user's
+own price is `P.precios[nombre]`; labour is `manoObra.ts` (`P.manoObra[id]`: hours × €/h); `coste.ts` adds them up for
+«Proyecto › Coste del prototipo» (`BloqueCoste.tsx`) and the «Mano de obra» tab (`PanelManoObra.tsx`, a tab id like
+«Masas», not a `Departamento`). In the Triciclo panel a section's header reads «4,8 kg · 550 €» (`textoPesoPrecio`) and
+`DesglosePeso` takes `precios={{ s: precioSeccion(…), alCambiar }}`: each price is a link that opens the editor
+(`EditorPrecio.tsx`). **A new part** needs no price code if the fallback (20 €/kg) is fair; otherwise one rule in
+`estimar`, before the fallbacks. Then `npx tsx scripts/precios-secciones.ts [diseño.json]` must end «Todo OK».
+Renaming a part drops its saved user price (the name is the key).
