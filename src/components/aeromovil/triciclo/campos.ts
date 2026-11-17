@@ -255,7 +255,7 @@ export const lemasTriciclo = (T: Pick<CamposTriciclo, 'tTraseras'> & Partial<Cam
   if (T.tAcceso === 'puertas') o.carroceria = 'la piel del Cuadriciclo en rombo, techo solar y ventanas, puertas y portón como el Aptera, carenados y material';
   return o;
 };
-export type Unidad = 'm' | 'cm' | 'mm' | '°' | 'kg' | 'kW' | 'kWh' | 'Wh/kg' | 'Wh/L' | 'km/h' | 'x' | 'kg/m²' | '%' | 'L' | '°/s';
+export type Unidad = 'm' | 'cm' | 'mm' | '°' | 'kg' | 'kW' | 'kWh' | 'Wh/kg' | 'Wh/L' | 'km/h' | 'x' | 'kg/m²' | '%' | 'L' | '°/s' | 's';
 /**
  * Un deslizador del Triciclo. `bala`: la forma es la del Cuadriciclo en rombo, y su
  * etiqueta, su rango y su paso se leen de su tabla (DESLIZADORES_BALA), no se
