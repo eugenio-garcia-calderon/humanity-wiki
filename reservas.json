@@ -91,12 +91,6 @@
       "desde": "2026-11-17T10:44:07.275Z"
     },
     {
-      "agente": "motores",
-      "ruta": "src/components/aeromovil/catalogoTren.ts",
-      "motivo": "motores: precio estimado y cifras para comparar motores",
-      "desde": "2026-11-17T10:51:05.597Z"
-    },
-    {
       "agente": "autogiro",
       "ruta": "src/components/aeromovil/garaje/index.ts",
       "motivo": "autogiro: añadir el ELA Eclipse REVO al garaje",
