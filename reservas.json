@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "homologacion",
-      "ruta": "src/components/aeromovil/CLAUDE.md",
-      "motivo": "homologacion: sección homologacion/",
-      "desde": "2026-11-17T12:06:33.129Z"
-    },
-    {
       "agente": "ahorcajadas",
       "ruta": "src/components/aeromovil/triciclo/medidas.ts",
       "motivo": "ahorcajadas: pasajero más atrás (rango de tPasX)",
@@ -89,24 +83,6 @@
       "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
       "motivo": "neumaticos: tipo de neumático por eje",
       "desde": "2026-11-17T13:38:31.777Z"
-    },
-    {
-      "agente": "homologacion",
-      "ruta": "src/pages/Aeromovil.tsx",
-      "motivo": "homologacion: pestaña y unión con puntos críticos",
-      "desde": "2026-11-17T13:44:44.066Z"
-    },
-    {
-      "agente": "homologacion",
-      "ruta": "src/components/aeromovil/LadoResumen.tsx",
-      "motivo": "homologacion: pestaña y unión con puntos críticos",
-      "desde": "2026-11-17T13:44:44.066Z"
-    },
-    {
-      "agente": "homologacion",
-      "ruta": "src/components/aeromovil/PanelProyecto.tsx",
-      "motivo": "homologacion: pestaña y unión con puntos críticos",
-      "desde": "2026-11-17T13:44:44.066Z"
     },
     {
       "agente": "precios",
