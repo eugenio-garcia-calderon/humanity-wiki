@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "proveedores",
-      "ruta": "src/components/aeromovil/PesoSeccion.tsx",
-      "motivo": "proveedores: una línea, proveedor/modelo/archivos en cada pieza",
-      "desde": "2026-11-17T18:21:28.123Z"
-    },
-    {
-      "agente": "proveedores",
       "ruta": "src/server/seguridad/clasificacion.ts",
       "motivo": "proveedores: clasificar aeromovil_adjuntos (1 línea)",
       "desde": "2026-11-17T18:21:31.092Z"
