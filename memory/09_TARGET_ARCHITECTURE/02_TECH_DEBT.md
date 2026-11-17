@@ -890,3 +890,9 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   `LEMAS_TRICICLO`, removing `LadoTriciclo.tsx`'s now-unreachable `proyecto` blocks, and the `CLAUDE.md` section on masses.
 - **The new mass checks are appended in `geometria.ts` `calcular`** (`conMasasTriciclo`), not inside `calcularTriciclo`,
   for the same reason: moving them in is ≈ 10 min.
+- **(2026-11-17, mgplanetario) Central MG2**: the previous entry («a catalogue central motor is not drawn») is done for
+  the power split only. Still pending: a central motor for the pure electric car and for series/P2 (≈ 2 h, the same
+  `CilZ` next to the controller with a chain); with one rear wheel the coaxial MG2 sticks out of the narrow tail (4–5 cm
+  in tests): a counter-shaft MG2 is ≈ 2 h; the MG2's size is a rule from mass and power, not the catalogue motor's own
+  diameter and length (≈ 30 min: add `diametro`/`largo` to `MotorCatalogo`); `tMMotor`'s range is still the hub rule for
+  «two motors of half power» with two rear wheels (≈ 20 min to give the central motor its own range).
