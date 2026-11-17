@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "munecos",
-      "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
-      "motivo": "munecos: talla y complexión de los ocupantes (pocas líneas)",
-      "desde": "2026-11-17T17:06:41.481Z"
-    },
-    {
       "agente": "legado",
       "ruta": "src/server/aeromovil.ts",
       "motivo": "legado: el servidor no cambia ni quita diseños legado (2 líneas)",
