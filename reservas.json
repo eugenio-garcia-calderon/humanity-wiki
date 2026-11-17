@@ -167,6 +167,12 @@
       "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
       "motivo": "capo: refrigeración (pocas líneas)",
       "desde": "2026-11-17T14:27:47.084Z"
+    },
+    {
+      "agente": "mgplanetario",
+      "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
+      "motivo": "mgplanetario: MG2 central (pocas líneas)",
+      "desde": "2026-11-17T14:27:49.009Z"
     }
   ]
 }
