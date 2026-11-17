@@ -43,12 +43,6 @@
       "desde": "2026-11-17T13:38:28.079Z"
     },
     {
-      "agente": "neumaticos",
-      "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
-      "motivo": "neumaticos: tipo de neumático por eje",
-      "desde": "2026-11-17T13:38:31.777Z"
-    },
-    {
       "agente": "precios",
       "ruta": "src/components/aeromovil/geometria.ts",
       "motivo": "precios: precio por sección y pestaña Mano de obra",
