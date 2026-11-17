@@ -789,3 +789,13 @@ The «ordenar» refactor (PRs #1081, #1082, #1084) only moved code. Still open, 
   dropping the old one is ~1 h plus re-baselining bala-huella and two tunnel/disenos assertions.
 - **The worst shoulder bend in the evaluator's sweep is 7.9° against an 8° limit** (a random design): the margin is thin;
   a new tail slider can tip it. Run `scripts/cola-continuidad.ts` after any tail/canopy change (~6 min).
+- **Edge-line warnings in the tail (AVISO «arista» > 35°, ~18–28 cases per evaluator sweep, 2026-11-17)**: not fixed.
+  The evaluator does not list the cases individually, and the ones seen are the flat tail's superellipse corners and
+  the smooth body's thick trailing edge, both drawn on purpose. Listing them (a `--avisos` print) and deciding per
+  family is ~1–2 h.
+- **The canopy-to-panel navy collar is an overlay patch** (balaModelo.ts `cuelloPanel`), not part of the skin's frame
+  band; it does not open with the canopy and its area is not in `marcoArea`. Folding it into `bandas` is ~1 h (the
+  hatch split and the frame mesh read the same bands).
+- **Seed 4242's worst shoulder bend is 7.9° (limit 8°)**, a smooth-body design with a very short canopy where the two
+  deck blends meet head to head (only 60 cm between the windscreen's start and the deck's). Lengthening those blends
+  means re-placing the deck zones: ~2 h, and it moves every smooth-body design.

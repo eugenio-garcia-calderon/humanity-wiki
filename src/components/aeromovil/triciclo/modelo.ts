@@ -6,7 +6,7 @@ import { disponerHibrido, rendimientoHibrido, type ArqHibrido } from '../hibrido
 import { termicoDe } from '../catalogoTren';
 import { type Parametros, type Rueda, type Tubo, type P3, MATERIALES_CHASIS } from '../geometria';
 import { TRICICLO_DEFECTO } from './defecto';
-import { T3, punto, type FormaBala } from '../garaje/balaForma';
+import { T3, punto, tArriba, type FormaBala } from '../garaje/balaForma';
 import { APLASTADO_BALA, ASIENTO, BUTACA, anchoMaxPod, areaMarco, areaXT, bandaMarco, brazosDe, contornoCupula, techoEn, ventanasDe, type OpcionesVentanas } from '../garaje/balaMedidas';
 import { MONTANTE_B, MONTANTE_C, portonDe, puertaDe, type OpcionesPorton, type OpcionesPuertas, type V3 } from '../garaje/balaPuertas';
 import { type ClaveNumTriciclo, esRombo, conPuertas, conButacas, conSalpicadero, largueroAlEje } from './campos';
@@ -236,8 +236,12 @@ export function crearModeloTriciclo(P: Parametros) {
   // (2026-11-13, the smooth body: the panel covers the whole deck, from its side edges inset by a frame, `T_PANEL_LISA`)
   // (with the smooth body it starts straight across, with all its width, right behind the canopy frame's rear tip: the deck
   // begins there, and a panel that widened over 20 cm from that tip read as a narrow shield inside the hatch)
-  const tPanelCola = (x: number) => { const base0 = porton ? Math.min(0.97, porton.tLo(x) + 0.04) : 0.66; if (lisa) return Math.max(base0, T_PANEL_LISA); return 1 - (1 - base0) * suaveCola((xColaIni - x) / 0.20); };
-  const solarCola = T.tSolarCola === 'si' && xColaIni > xColaFin ? { x0: xColaIni, x1: xColaFin, tLow: tPanelCola, ...areaXT(F, xColaFin, xColaIni, x => [tPanelCola(x), 1]) } : null;
+  // (2026-11-17, Eugenio's «Modelo 1»: the round body's panel started from a point, right behind the frame's own point,
+  // and the white body showed between the two points as a spike. It now starts as wide as the frame is `CUELLO_PANEL`
+  // ahead of its tip, and a navy collar (balaModelo.ts `cuelloPanel`) fills the frame's tip down to that width)
+  const tCuello = Math.min(0.995, tArriba(F.sec(cup.XF1 + CUELLO_PANEL), cup.yMarco(cup.XF1 + CUELLO_PANEL)));
+  const tPanelCola = (x: number) => { const base0 = porton ? Math.min(0.97, porton.tLo(x) + 0.04) : 0.66; if (lisa) return Math.max(base0, T_PANEL_LISA); const t0 = Math.max(base0, tCuello); return t0 - (t0 - base0) * suaveCola((xColaIni - x) / 0.20); };
+  const solarCola = T.tSolarCola === 'si' && xColaIni > xColaFin ? { x0: xColaIni, x1: xColaFin, tLow: tPanelCola, ...(lisa ? {} : { cuello: true }), ...areaXT(F, xColaFin, xColaIni, x => [tPanelCola(x), 1]) } : null;
   const solarTodo0 = solarCola && solarCola.area > 0 ? { area: solar.area + solarCola.area, x: (solar.area * solar.x + solarCola.area * solarCola.x) / (solar.area + solarCola.area), y: (solar.area * solar.y + solarCola.area * solarCola.y) / (solar.area + solarCola.area) } : solar;
   // ── Round 3 body (2026-11-12): the panel on top of the nose («pon paneles solares en la parte frontal del morro»), from
   // 2 cm behind the nose's light band back to 2 cm ahead of the canopy's frame, over the hood's top (t 0.58 and up), its
@@ -403,6 +407,8 @@ export function opcionesCabinaTriciclo(m: ModeloTriciclo) {
   };
 }
 
+/** 2026-11-17: how far ahead of the canopy frame's rear tip (m) the frame is as wide as the tail panel starts. */
+export const CUELLO_PANEL = 0.08;
 export const suaveCola = (u: number) => { const v = Math.min(1, Math.max(0, u)); return v * v * (3 - 2 * v); };
 /** 2026-11-12: points on the steering wheel's rim (hub `c`, radius `r`, its plane tilted `inc` from the vertical with its top forward). */
 export function aroVolante(v: { c: [number, number]; r: number; inc: number }, n = 32): P3[] {

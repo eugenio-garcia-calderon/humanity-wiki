@@ -362,6 +362,7 @@ function guia(x0: number, y0: number, m0: number, x1: number, y1: number, beta: 
 /** σ(v) = v / (1 + v⁴)^¼: v for small v, 1 for large, σ' in (0, 1]. */
 const satura = (v: number) => (v <= 0 ? 0 : v / Math.pow(1 + v * v * v * v, 0.25));
 const suaveL = (u: number) => { const v = Math.min(1, Math.max(0, u)); return v * v * (3 - 2 * v); };
+const suaveL2 = (u: number) => { const v = Math.min(1, Math.max(0, u)); return v * v * v * (v * (6 * v - 15) + 10); };
 /** The lower edge of the canopy glass in side view (reference drawing); balaMedidas.ts reads it from here. */
 export const Y_VIDRIO_REF = monotona([[-0.10, 0.80], [-0.25, 0.815], [-0.45, 0.815], [-0.8, 0.815], [-1.2, 0.83], [-1.5, 0.855], [-1.65, 0.90], [-1.78, 0.99], [-1.9, 1.10], [-2.0, 1.20], [-2.1, 1.30]]);
 /** t on the upper side (from the widest point to the top) where the section reaches height y. */
@@ -401,6 +402,8 @@ interface Tapa {
    * the belly and the widest point; with a tip high on the tail the shoulders creased 24°).
    */
   empalme?: { L: number; d: P2[] };
+  /** 2026-11-17: the joint's slopes unclipped (the new cap's); `g` keeps the old cap's clipped ones. */
+  gN?: [number, number, number];
   /** How much of the guides and of the blend (`transCola`): 0 the old cap, 1 the new. */
   gamma?: number;
   /**
@@ -411,6 +414,8 @@ interface Tapa {
   liso?: { ancho: number; pa: number; td: number; gDn: number; techo: (x: number) => number };
 }
 
+/** 2026-11-17: the shortest tail cap (m) with `transCola`. */
+const CAPA_MIN = 0.42;
 /** Half-section polyline resolution of the lookup cache. */
 const NT = 120;
 const PASO_CACHE = 0.008, PASO_FINO = 0.001, LARGO_FINO = 0.06;
@@ -442,7 +447,10 @@ export function crearForma(D: DimBala) {
   const R = D.lisa ? (lam > 0 ? (x: number) => RL(x) + (suave!.R(x) - RL(x)) * lam : RL) : suave ? suave.R : R0, X = D.lisa ? inversa(R, X0) : suave ? suave.X : X0;
   /** The tail cap joins the body with the body's own slopes (transicionCola.ts `capaContinua`). */
   const continua = !D.lisa && !!D.transCola;
-  const XN0 = X(XN0_REF), XT0 = X(XT0_REF);
+  // (2026-11-17, `transCola`: the tail cap never shorter than `CAPA_MIN`: on a 30 cm tail the reference's proportion left
+  // it 25 cm to close the whole section, and it bent 8–12° in 1 cm wherever it started. Below a 50 cm tail it starts
+  // further forward; every tail of 50 cm and up keeps its joint where it was)
+  const XN0 = X(XN0_REF), XT0 = continua ? Math.max(X(XT0_REF), X_COLA + CAPA_MIN) : X(XT0_REF);
   /** Width factor, belly lift, and the canopy scale above BASE_ALTO (k − 1, so the reference is an exact 0). */
   // `elevar` (the Triciclo's rigid lift) is added last, so with 0 every height is the same number bit for bit (v + 0)
   const elevar = D.elevar ?? 0;
@@ -579,14 +587,22 @@ export function crearForma(D: DimBala) {
     const exceso = Math.abs(gC[0] - T.g[0]) + Math.abs(gC[1] - T.g[1]) + Math.abs(gC[2] - T.g[2]);
     const gamma = continua && dir < 0 ? Math.min(1, Math.max(linea / 0.2, exceso / 0.2, Math.abs(cy - (D.puntaCola + elevar)) / 0.02)) : 0;
     if (gamma > 0) {
-      T.g = gC; T.gamma = gamma;
+      T.gN = gC; T.gamma = gamma;
       T.cunaSuave = true;
       // the top and the belly as guide lines (one monotone rational each, as the smooth body's deck): they leave the joint
       // with the body's height and slope whatever it is, and reach the tip's height without rippling. The ogive, scaled by
       // the slope relative to the height left over the tip, could not follow a body falling steeply onto a high tip
       const fT = (x: number) => controlesBase(x)[8][1], fB = (x: number) => controlesBase(x)[0][1];
-      T.empalme = { L: Math.min(largo, Math.max(0.30, D.transCola ?? 0)), d: b.map((p, i) => [(p[0] - a[i][0]) / e, (p[1] - a[i][1]) / e] as P2) };
-      T.guias = { arriba: guia(x0, yt0, pendiente(fT, x0 + 0.004), xPunta, cy, 3), abajo: guia(x0, yb0, pendiente(fB, x0 + 0.004), xPunta, cy, 3) };
+      // (2026-11-17: each arrives at the tip with `llegada` times its mean slope: 3 for a line that leaves the joint at its
+      // mean slope, more for one that leaves it flatter, less for one that leaves it steeper (1.2 … 6), so the turn is
+      // spread over the cap instead of piled up at one end. A fixed 3 bent a 26 cm tail 8° in 1 cm, at its joint when it
+      // left nearly level, near its tip when it left steep)
+      const llegada = (y0: number, m0: number) => { const r = m0 * (xPunta - x0) / (cy - y0); return Math.min(6, Math.max(1.2, 3 / Math.max(0.5, r > 0 ? r : 0))); };
+      const mT = pendiente(fT, x0 + 0.004), mB = pendiente(fB, x0 + 0.004);
+      T.guias = { arriba: guia(x0, yt0, mT, xPunta, cy, llegada(yt0, mT)), abajo: guia(x0, yb0, mB, xPunta, cy, llegada(yb0, mB)) };
+      // 2026-11-17: the joint's tangent given back point by point by a correction that dies out over `L` (see `empalme`)
+      const h = 0.002, c1 = enTapa(T, x0 + dir * h), L = Math.min(largo, Math.max(0.30, D.transCola ?? 0));
+      T.empalme = { L, d: b.map((p, i) => [(p[0] - a[i][0]) / e - (c1[i][0] - p[0]) / h, (p[1] - a[i][1]) / e - (c1[i][1] - p[1]) / h] as P2) };
     }
     return T;
   }
@@ -606,8 +622,10 @@ export function crearForma(D: DimBala) {
     const s = Math.min(1, Math.abs(x - T.x0) / T.largo);
     const k = (g: number) => { const m = Math.max(T.m, g); return Math.pow(1 - s, m) * (1 + (m - g) * s); };
     let kz = k(T.g[0]), kUp = k(T.g[1]), kDn = k(T.g[2]);
-    if (T.guias) {
-      const G = T.gamma ?? 1;
+    // (the new cap, by `gamma`: the plan from the unclipped slope, the top and the belly along their guide lines)
+    const G = T.gamma ?? 0, gz = T.gN ? T.g[0] + (T.gN[0] - T.g[0]) * G : T.g[0];
+    if (T.guias && T.gN) {
+      kz += (k(T.gN[0]) - kz) * G;
       kUp += ((T.guias.arriba(x) - T.cy) / (T.base[8][1] - T.cy) - kUp) * G; kDn += ((T.cy - T.guias.abajo(x)) / (T.cy - T.base[0][1]) - kDn) * G;
     }
     if (T.linea) {
@@ -615,7 +633,7 @@ export function crearForma(D: DimBala) {
       // nose; 4: nearly square, its truncated tail) that leaves the joint with the body's own slope (g) and keeps half of
       // its width or more until close to the tip; in side view the cone thins into a wedge. Blended by `linea`.
       // (`cunaSuave`: the body's slope may now be above 2, where 1 − g·s + g·s²/2 turns negative; (1 − s)^g is the same at 2)
-      const g = T.g[0], q = T.cunaSuave && g > 2 ? Math.pow(1 - s, g) : 1 - g * s + g * s * s / 2;
+      const g = gz, q = T.cunaSuave && g > 2 ? Math.pow(1 - s, g) : 1 - g * s + g * s * s / 2;
       const ancho = Math.pow(Math.max(0, 1 - Math.pow(s, T.pe!)), 1 / T.pe!) * q, cuna = T.cunaSuave ? cunaContinua(T.linea, s) : 1 - 0.5 * T.linea * s;
       kz += (ancho - kz) * T.linea; kUp *= cuna; kDn *= cuna;
     }
@@ -641,12 +659,12 @@ export function crearForma(D: DimBala) {
       return [z * f * kz, T.cy + dy * f * (dy > 0 ? kUp : kDn)] as P2;
     });
     if (T.empalme) {
+      // the slope each control point lacks at the joint (`d`, body's − cap's), added as d·u·(1 − u/L)³: it gives the body's
+      // tangent back at u = 0 and is gone, with its slope and curvature, at u = L. A blend with the body's section carried
+      // on in a straight line (the first version) pulled a steep roof below the tip on a 25 cm tail: 22° bends
       const u = Math.abs(x - T.x0), E = T.empalme; if (u >= E.L) return out;
-      const v = u / E.L, w = 1 - (T.gamma ?? 1) * (1 - v * v * v * (v * (6 * v - 15) + 10));
-      return out.map(([z, y], i) => {
-        const zl = T.base[i][0] + E.d[i][0] * u, yl = T.base[i][1] + E.d[i][1] * u;
-        return [Math.max(0, zl + (z - zl) * w), yl + (y - yl) * w] as P2;
-      });
+      const v = 1 - u / E.L, f = G * u * v * v * v;
+      return out.map(([z, y], i) => [Math.max(0, z + E.d[i][0] * f), y + E.d[i][1] * f] as P2);
     }
     return out;
   }
@@ -685,10 +703,17 @@ export function crearForma(D: DimBala) {
   // (the two blends combined as 1 − (1 − wr)(1 − wf), 2026-11-15: with the rear deck now starting at the crest, a short
   // canopy makes them overlap, and taking whichever came first jumped between them, a 51° crease on one random design.
   // Where they do not overlap, one of the two is 0 and this is what it was)
+  /** 2026-11-17: how far behind the roof's real crest the rear deck had to start, 0 at it … 1 from 5 cm. */
+  const muCola = zonas ? Math.min(1, Math.max(0, (zonas.crestaReal - zonas.detras) / 0.05)) : 0;
   const pesoLisa = (x: number) => {
     if (!zonas || x <= zonas.detras || x >= zonas.delante) return zonas ? 1 : 0;
     const wr = suaveL((zonas.detras + LARGO_MEZCLA - x) / LARGO_MEZCLA), wf = suaveL((x - zonas.delante + LARGO_MEZCLA) / LARGO_MEZCLA);
-    return 1 - (1 - wr) * (1 - wf);
+    const w = 1 - (1 - wr) * (1 - wf); if (!(muCola > 0)) return w;
+    // (2026-11-17: where a short canopy forces the deck to start behind the crest, the two blends meet head to head at
+    // the canopy's own section, and the smoothstep's jump in curvature there bent the deck's edge 8–10°: by `muCola`, a
+    // smootherstep, level in slope and curvature at both ends)
+    const wr2 = suaveL2((zonas.detras + LARGO_MEZCLA - x) / LARGO_MEZCLA), wf2 = suaveL2((x - zonas.delante + LARGO_MEZCLA) / LARGO_MEZCLA);
+    return w + (1 - (1 - wr2) * (1 - wf2) - w) * muCola;
   };
   /**
    * The canopy's crown behind the crest. At the crest the section keeps the canopy's own crown Dc (its rise from the deck's
@@ -718,7 +743,9 @@ export function crearForma(D: DimBala) {
   // (the rear deck's only. The same fade from the windscreen's start was tried for the hood and rejected: there the top is
   // already falling, so a fade that starts at full slope creases the deck's edge (15–20°), and one that starts level
   // ripples it (3–5 mm). The hood keeps its own drop from the windscreen, as before)
-  const copaCola = zonas ? copaDesde(zonas.cresta, bombCola, cyCola, cyCola + gCola / 2) : null;
+  // (2026-11-17: from the real crest when the deck had to start behind it: there the roof is level, so the fade's start, whose
+  // slope in the height is K, leaves no crease; from the deck's start it creased the edge where the roof was falling)
+  const copaCola = zonas ? copaDesde(muCola > 0 ? zonas.crestaReal : zonas.cresta, bombCola, cyCola, cyCola + gCola / 2) : null;
   // (2026-11-16: the fade K·v²/(2W) leaves its start with slope K in the height, which is level only at the real crest. Where
   // a short canopy makes the deck start behind it (`detras` kept two blends from the windscreen), the roof is already
   // falling there and the deck's edge creased (15–22°, the evaluator's random designs). There, by `mu`, the fade turns into

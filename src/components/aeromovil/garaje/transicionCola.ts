@@ -47,8 +47,12 @@ export function estiramientoSuave(de: number[], a: number[], indices: number[], 
   // a corner at de[i]: slope s(i − 1) on the side towards the front (x > de[i]), s(i) behind it
   const esquinas = indices.filter(i => i > 0 && i < de.length - 1).map(i => ({ x: de[i], d: s(i - 1) - s(i) })).filter(e => Math.abs(e.d) > 1e-12);
   if (!esquinas.length || !(largo > 0)) return null;
-  // (never wider than twice the shorter neighbour of each corner, so a window cannot reach past the next anchor but one)
-  const L = esquinas.map(e => { const i = de.indexOf(e.x); return Math.min(largo, 2 * Math.abs(de[i - 1] - de[i]), 2 * Math.abs(de[i + 1] - de[i])); });
+  // (never wider than twice the distance to a neighbouring anchor that is not rounded too, so a window cannot reach past
+  // a corner it does not know about. Two rounded corners may share their windows: with one width for all, the slope is
+  // still a convex blend of the stretches. 2026-11-17: the gap between the canopy's end and the rear axle no longer
+  // limits it; a canopy ending 10 cm before the axle had a 20 cm window and bent its tail 7.9° in 1 cm)
+  const redondeadas = new Set(esquinas.map(e => de.indexOf(e.x)));
+  const L = esquinas.map(e => { const i = de.indexOf(e.x); return Math.min(largo, ...[i - 1, i + 1].filter(j => !redondeadas.has(j)).map(j => 2 * Math.abs(de[j] - de[i]))); });
   const L0 = Math.min(...L);
   // R'(x) = s(i) + d·H((x − c)/L): behind the corner the rear slope, ahead the front one. R − lineal = d·L·area(u).
   const R = (x: number) => {

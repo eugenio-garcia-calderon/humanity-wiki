@@ -12127,3 +12127,16 @@ hora de hacerse súper ancha y súper grande o súper pequeña para que esto no 
   diseños con pliegue, ahora «COLA OK».
 - **Cambia un poco la forma de los diseños guardados con cúpula redonda** (el pliegue era un fallo): Rombo Bala, Cd del
   túnel 0,2128 → 0,2129; el Triciclo por defecto no cambia nada. Ver 03_DECISIONS.
+
+## 2026-11-17 · Aeromóvil: colas muy cortas sin pliegue y sin «pico» blanco entre el cristal y el panel
+
+Eugenio: «que esto no pueda ocurrir más». Tras el arreglo anterior, el evaluador independiente probó diseños nuevos y
+encontró 5 colas muy cortas (30 cm) que todavía se doblaban dentro de la punta.
+- **Colas cortas suaves.** La punta de la cola ya no mezcla su forma con una prolongación recta de la carrocería (en una
+  cola de 25 cm eso tiraba del techo hacia abajo); ahora solo corrige la pendiente justo en la unión y esa corrección
+  se apaga sola. El techo y los bajos de la punta reparten la curva a lo largo de toda la punta. El tramo de
+  transición ya no se acorta cuando la cúpula acaba muy cerca del eje. El mínimo de la cola sigue en 30 cm.
+- **Sin «pico» blanco.** Con la cúpula redonda, el panel solar de la cola empezaba en punta justo detrás de la punta
+  del marco del cristal, y entre las dos puntas asomaba carrocería blanca. Ahora el panel empieza ya con anchura y el
+  marco azul del cristal baja hasta esa anchura: cristal → marco → panel, sin hueco.
+- Comprobado con el evaluador en cuatro semillas (7, 2027, 31337 y 4242): «COLA OK» en todas.
