@@ -2277,6 +2277,18 @@ and resizing while its canvas has zero size.
 **Alternatives.** (a) Keep a small 3D of the Aeromóvil S above the panel: still takes ~40 % of a phone screen and the
 garage cars would need a separate «hide others» path. (b) Unmount the viewer: loses the scene state and the ref other
 sections rely on.
+## 2026-11-17 · Engine parts isolated by `userData.componente`, registry in `piezasMotor.ts` (solopiezas)
+- **Chosen**: one pure registry (`src/components/aeromovil/piezasMotor.ts`: groups → `componente` ids, names, which
+  parts a design has, where the auxiliaries go, how the engine's mass splits). The 3D hides meshes of the «Motor» layer
+  whose `componente` is not chosen (`visor/piezasMotor3d.ts`), so a part is isolatable by tagging its meshes; no new
+  layer per part. **Rejected**: one `CapaId` per part (the layer menu would grow by 20 entries and every builder would
+  need to know the groups) and a list reported back by the viewer at runtime (an extra callback and state round trip).
+- **The engine's mass is split, not added**: the auxiliaries come out of the existing figure (15 kg + 1.4 kg/kW or the
+  catalogue's dry mass), capped at 40 % of it, the block keeps the rest. Empty mass unchanged; CG of hybrids moves
+  slightly because each piece sits where it is drawn.
+- **Seam with bot «capo»** (radiator, coolant pipes, intakes): ids `radiador` and `tubos-refrigeracion` are already in
+  the «Refrigeración» group; `piezasPresentes` shows them when the model has `radiador`. Capo must draw them in
+  `G.motor` (not the body layer) for «Ver solo motor» to show them. Whoever merges second makes the join.
 
 ## 2026-11-17 · Power electronics as configuration, defaults that change nothing
 
