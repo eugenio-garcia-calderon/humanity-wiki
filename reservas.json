@@ -143,6 +143,12 @@
       "ruta": "src/components/aeromovil/triciclo/campos.ts",
       "motivo": "ruedas: catálogo de ruedas de moto",
       "desde": "2026-11-17T11:12:44.813Z"
+    },
+    {
+      "agente": "ruedas",
+      "ruta": "src/components/aeromovil/triciclo/comprobaciones.ts",
+      "motivo": "ruedas: catálogo de ruedas de moto",
+      "desde": "2026-11-17T11:12:47.217Z"
     }
   ]
 }
