@@ -62,4 +62,7 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   // 2026-11-16 (Eugenio: «que la cola pueda ser más ancha en el formato de cola plana… como en el aptera»): the round
   // body's flat tail towards the full width; 0 by default, so every saved design is built as before
   tColaPlanaAncho: 0,
+  // 2026-11-16 (Eugenio: «haz que esto no pueda ocurrir, este salto que hay entre la cola y la cabina»): the cabin–tail
+  // transition, 40 cm. Every saved design of the round body takes it: the crease it removes was a bug
+  tColaTrans: 0.40,
 };

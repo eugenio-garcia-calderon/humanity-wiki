@@ -784,3 +784,8 @@ The «ordenar» refactor (PRs #1081, #1082, #1084) only moved code. Still open, 
   but touches files other bots edit often.
 - **The barrel exports more than before**: `geometriaTriciclo.ts` uses `export *`, so 49 formerly private helpers are now
   importable from it. Harmless today; an explicit export list is ~15 min if it ever matters.
+- **Tail cap has two models blended by `gamma`** (balaForma.ts `tapa`, 2026-11-17): the old ogive cap and the guided,
+  blended one, so the default Triciclo stays the garage body bit for bit. Moving the garage Bala to the new cap too and
+  dropping the old one is ~1 h plus re-baselining bala-huella and two tunnel/disenos assertions.
+- **The worst shoulder bend in the evaluator's sweep is 7.9° against an 8° limit** (a random design): the margin is thin;
+  a new tail slider can tip it. Run `scripts/cola-continuidad.ts` after any tail/canopy change (~6 min).

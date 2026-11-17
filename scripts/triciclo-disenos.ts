@@ -169,6 +169,8 @@ else {
     'tCubierta', 'tColaAncho', 'tColaGrosor', 'tColaBombeo', 'tBajosIni', 'tBajosCurva', 'tMorroAncho', 'tMorroGrosor', 'tMorroBombeo',
     // 2026-11-16: the round body's flat tail width, 0 by default
     'tColaPlanaAncho',
+    // 2026-11-16: the cabin–tail transition (round body), 0.40 m by default
+    'tColaTrans',
     // 2026-11-16: rows 2 and 3 row by row (their defaults are the old 2 + 1 car seats)
     'tFila2N', 'tFila3N', 'tFila2Tipo', 'tFila3Tipo'];
   const NUEVOS_12 = NUEVOS.slice(8);
@@ -230,6 +232,23 @@ else {
     }
     // (2026-11-16: the pack's check renamed, «Batería dentro de la carrocería», in two departments: same number, same place)
     for (const c of ra.comprobaciones) if (c.nombre === 'Batería, paquete a lo largo del bastidor: dentro de la carrocería') { c.nombre = 'Batería dentro de la carrocería'; c.dep = 'energia,carroceria'; }
+    // (2026-11-16: a round body whose canopy end or rear axle is not where the reference drawing has them had a crease
+    // there, the «salto entre la cola y la cabina»; the transition (garaje/transicionCola.ts) rounds it, on purpose. Those
+    // designs' shape numbers may change, by under 1 %, and they are listed; every other number must still be the same)
+    if (mb2.F.transicion > 0 && !igual(ra, rb)) {
+      const plano = (o: unknown, r = ''): [string, unknown][] => (o && typeof o === 'object' ? Object.entries(o).flatMap(([k, v]) => plano(v, `${r}.${k}`)) : [[r, o]]);
+      const A = Object.fromEntries(plano(ra)), B = Object.fromEntries(plano(rb)), cambios: string[] = [], fuera: string[] = [];
+      for (const k of new Set([...Object.keys(A), ...Object.keys(B)])) {
+        if (JSON.stringify(A[k]) === JSON.stringify(B[k])) continue;
+        const va = A[k], vb = B[k], rel = typeof va === 'number' && typeof vb === 'number' ? Math.abs(vb - va) / Math.max(1e-9, Math.abs(va)) : Infinity;
+        const texto = typeof va === 'string' && typeof vb === 'string' && /^\.comprobaciones\.\d+\.mostrar$/.test(k);
+        (rel < 0.01 || texto ? cambios : fuera).push(`${k} ${typeof va === 'number' ? +va.toFixed(4) : JSON.stringify(va)?.slice(0, 40)} → ${typeof vb === 'number' ? +vb.toFixed(4) : JSON.stringify(vb)?.slice(0, 40)}`);
+      }
+      console.log(`CAMBIA ${nombre} (la transición cabina–cola, ${(mb2.F.transicion * 100).toFixed(0)} cm, a propósito):\n        ${cambios.join('\n        ')}`);
+      const rojo = (r: { comprobaciones: { nombre: string; holgura: number; minimo: number }[] }) => r.comprobaciones.map(c => `${c.nombre}:${c.holgura < c.minimo}`).join('|');
+      ok(!fuera.length && rojo(ra) === rojo(rb), `${nombre}: con la transición cabina–cola, solo cambian números de la forma, cada uno menos de un 1 %, y ninguna comprobación cambia de color${fuera.length ? `; fuera: ${fuera.slice(0, 6).join(', ')}` : ''}`);
+      continue;
+    }
     ok(igual(ra, rb), `${nombre}: mismos resultados que en main, aparte de las masas (área, cabezas, comprobaciones${igual(ra, rb) ? '' : `; distintos: ${diferencias(ra, rb).slice(0, 6).join(', ')}`})`);
   }
   // 2026-11-11 (the «Bala de cuatro ruedas»): with one rear wheel, every mesh of the whole vehicle as on main
@@ -247,6 +266,8 @@ else {
       // (2026-11-12: this side as the viewer builds it now, `opcionesCabinaTriciclo`: the new options at their defaults must draw nothing new)
       // (round 3 interior: and main's side as main's viewer builds it, with its own `opcionesCabinaTriciclo`)
       const a = todo(bm.construirCon, bm.crearMateriales(), ma, gtm.opcionesCabinaTriciclo ? gtm.opcionesCabinaTriciclo(ma) : { traseras: ma.traseras ?? null }), b = todo(construirCon, crearMateriales(), mb2, opcionesCabinaTriciclo(mb2));
+      // (2026-11-16: with the cabin–tail transition the body's meshes move, on purpose; the same meshes, the same vertex counts)
+      if (mb2.F.transicion > 0) { const cuenta = (l: string[]) => l.map(s => s.replace(/:[^:]*$/, '')); ok(igual(cuenta(a), cuenta(b)), `${nombre}: con la transición cabina–cola, las mismas ${a.length} mallas que en main, con los mismos vértices (movidos: ${a.filter((s, i) => s !== b[i]).length})`); continue; }
       ok(igual(a, b), `${nombre}: todas las mallas del vehículo (${a.length}: carrocería, carenados, ruedas, cabina) iguales que en main, vértice a vértice`);
     }
   }

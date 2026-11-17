@@ -175,10 +175,13 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
       case 'tCaida': return Math.abs(v) < 0.01 ? 'como siempre' : v > 0 ? `cae más tarde (+${fmt(v, 2)})` : `cae antes (${fmt(v, 2)})`;
       // (2026-11-13: with the smooth body the nose's and the tail's edges stay where the deck can still fall to them: what is built, if it differs)
       case 'tMorroAlto': { const pu = modelo.F.puntas, d = pu.morro - pu.morroPedida, txt = (w: number) => (Math.abs(w) < 0.0005 ? 'como siempre' : `${w > 0 ? '+' : '−'}${cm(Math.abs(w), 1)}`); return Math.abs(d) > 0.001 ? `${txt(v)} → ${txt(v + d)} (lo que deja la cubierta lisa)` : txt(v); }
-      case 'tPuntaCola': { const pu = modelo.F.puntas, d = pu.cola - pu.colaPedida; return Math.abs(d) > 0.001 ? `${m2(v)} → ${m2(v + d)} (lo que deja la cubierta lisa)` : m2(v); }
+      case 'tPuntaCola': { const pu = modelo.F.puntas, d = pu.cola - pu.colaPedida; return Math.abs(d) > 0.001 ? `${m2(v)} → ${m2(v + d)} (${T.tCubierta === 'lisa' ? 'lo que deja la cubierta lisa' : 'lo que cabe dentro de la cola'})` : m2(v); }
       case 'tLineaCupula': return Math.abs(v) < 0.0005 ? 'como siempre' : `${v > 0 ? '+' : '−'}${cm(Math.abs(v), 1)}`;
       // 2026-11-13: the smooth body
-      case 'tColaAncho': case 'tMorroAncho': case 'tColaPlanaAncho': return v < 0.01 ? 'como siempre' : v > 0.99 ? 'todo el ancho (Aptera)' : `${Math.round(v * 100)} % hacia todo el ancho`;
+      // (2026-11-16: the round body's flat tail up to 1.5, wider than the cabin; and the cabin–tail transition)
+      case 'tColaPlanaAncho': return v < 0.01 ? 'como siempre' : Math.abs(v - 1) < 0.01 ? 'todo el ancho (Aptera)' : v > 1 ? `más ancha que la cabina (+${Math.round((v - 1) * 100)} %)` : `${Math.round(v * 100)} % hacia todo el ancho`;
+      case 'tColaTrans': { const t = modelo.F.transicion; return t > 0 && t < v - 0.005 ? `${cm(v, 0)} → ${cm(t, 0)} (lo que cabe entre el final de la cúpula y el eje)` : cm(v, 0); }
+      case 'tColaAncho': case 'tMorroAncho': return v < 0.01 ? 'como siempre' : v > 0.99 ? 'todo el ancho (Aptera)' : `${Math.round(v * 100)} % hacia todo el ancho`;
       case 'tColaGrosor': case 'tMorroGrosor': return v < 0.0005 ? 'se cierra en punta' : `${cm(v, 1)} de grueso`;
       case 'tColaBombeo': case 'tMorroBombeo': return v < 0.0005 ? 'plana' : `${cm(v, 1)} sobre la recta`;
       case 'tBajosIni': return Math.abs(v) < 0.005 ? 'en el eje trasero' : `${cm(Math.abs(v), 0)} ${v > 0 ? 'delante' : 'detrás'} del eje trasero`;

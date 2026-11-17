@@ -12106,3 +12106,24 @@ Eugenio: «optimiza el codigo de la web aeromovil para que sea más eficiente a 
 Último paso: `src/components/aeromovil/CLAUDE.md` (en inglés, para los bots) explica qué hay en cada archivo de la
 carpeta y dónde se añade un deslizador nuevo, una pieza 3D, una comprobación o un coche del garaje. No cambia nada
 de la página.
+
+## 2026-11-17 · Aeromóvil: la cola se une a la cúpula sin escalón, y la cola es mucho más flexible
+
+Eugenio, sobre su «Modelo 1»: «haz que esto no pueda ocurrir, este salto que hay entre la cola y la cabina. Tiene que
+haber como una especie de parte intermedia que comunique con las dos y también que la cola sea mucho más flexible a la
+hora de hacerse súper ancha y súper grande o súper pequeña para que esto no pueda ocurrir más.»
+
+- **De dónde salía el escalón.** La carrocería redonda se dibuja estirando un dibujo de referencia, por tramos. Donde
+  acaba la cúpula y en el eje trasero el estirado cambiaba de golpe, y todo el techo se doblaba ahí: con la cúpula
+  acabando cerca del eje, un pliegue de hasta 34°. Además, la punta de la cola empezaba con su propia pendiente y no
+  con la de la carrocería.
+- **Ahora hay una parte intermedia.** Nuevo deslizador en Carrocería › Cola: «Transición cabina–cola: largo» (40 cm por
+  defecto, de 10 cm a 1,20 m). En ese tramo la cúpula pasa a ser la cola con una curva sin esquinas; el cristal, el
+  panel solar de la cola y el portón siguen la piel. La punta de la cola arranca con la pendiente de la carrocería.
+- **Cola más flexible.** «Largo de la cola» de 0,30 a 1,80 m (antes 0,45–1,20); «Altura de la punta» de 0,20 a 1,10 m
+  (antes 0,30–0,85), y la propia forma la deja siempre dentro de la cola; «Cola plana: ancho al final» hasta 1,5 (más
+  ancha que la cabina).
+- **Comprobado** con el evaluador independiente de otro bot (`scripts/cola-continuidad.ts`, 759 diseños): antes 278
+  diseños con pliegue, ahora «COLA OK».
+- **Cambia un poco la forma de los diseños guardados con cúpula redonda** (el pliegue era un fallo): Rombo Bala, Cd del
+  túnel 0,2128 → 0,2129; el Triciclo por defecto no cambia nada. Ver 03_DECISIONS.

@@ -158,6 +158,8 @@ export interface CamposTriciclo extends CamposInterior {
   tMorroBombeo: number;  // lo que sube el capó sobre la recta de su canto al centro (m)
   // 2026-11-16: the flat tail without the smooth body, towards the body's full width (0 as before … 1 the Aptera's)
   tColaPlanaAncho: number;
+  // 2026-11-16 (Eugenio: «una especie de parte intermedia que comunique con las dos»): the cabin–tail transition's length (m)
+  tColaTrans: number;
 }
 export type ClaveTriciclo = keyof CamposTriciclo;
 /**
@@ -247,8 +249,10 @@ export const FILAS: Fila[] = [
   // (round 3, 2026-11-12, «que el morro se pueda achatar más»: 20 cm shorter and a fuller tip than before; see rangoTriciclo)
   ['tMorro', 'carroceria', 'Morro', 'bMorro', '', 0.20, 1.20, 0.01, 'm'],
   ['tPuntaMorro', 'carroceria', 'Morro', 'bPuntaMorro', '', 0.15, 1.20, 0.01, 'x'],
-  ['tCola', 'carroceria', 'Cola', 'bCola', '', 0.45, 1.20, 0.01, 'm'],
-  ['tPuntaCola', 'carroceria', 'Cola', 'bPuntaCola', '', 0.30, 0.85, 0.005, 'm'],
+  // (2026-11-16, «que la cola sea mucho más flexible… súper grande o súper pequeña»: 0.30–1.80 m, was 0.45–1.20; the tip's
+  // height 0.20–1.10, was 0.30–0.85, kept 3 cm inside the tail's section by the shape itself, balaForma.ts `cyColaPlana`)
+  ['tCola', 'carroceria', 'Cola', 'bCola', '', 0.30, 1.80, 0.01, 'm'],
+  ['tPuntaCola', 'carroceria', 'Cola', 'bPuntaCola', '', 0.20, 1.10, 0.005, 'm'],
   ['tAleta', 'carroceria', 'Cola', 'bAleta', '', 0, 0, 0, 'm'],
   ['tCupIni', 'carroceria', 'Cúpula', 'bCupIni', '', 0, 0, 0, 'm'],
   // (round 3: «que el alto de la cúpula, de donde acaba la cúpula, no esté limitado»: from 1.30 m to 10 cm ahead of the
@@ -287,7 +291,10 @@ export const FILAS: Fila[] = [
   ['tFaroD', 'carroceria', 'Morro', null, 'Faro central: ancho', 0.10, 0.24, 0.01, 'cm'],
   ['tColaPlana', 'carroceria', 'Cola', null, 'Cola: en punta o plana y ancha (como el Aptera)', 0, 1, 0.05, 'x'],
   // 2026-11-16: only with the flat tail and without «Cubierta lisa» (Aeromovil.tsx `visible`)
-  ['tColaPlanaAncho', 'carroceria', 'Cola', null, 'Cola plana: ancho al final (hasta todo el ancho, como el Aptera)', 0, 1, 0.05, 'x'],
+  // (2026-11-16: up to 1.5, wider than the cabin)
+  ['tColaPlanaAncho', 'carroceria', 'Cola', null, 'Cola plana: ancho al final (1 = todo el ancho, como el Aptera; más, más ancha que la cabina)', 0, 1.5, 0.05, 'x'],
+  // 2026-11-16: the cabin–tail transition (garaje/transicionCola.ts); with the smooth body only near the rear axle
+  ['tColaTrans', 'carroceria', 'Cola', null, 'Transición cabina–cola: largo', 0.10, 1.20, 0.01, 'm'],
   ['tTechoPlano', 'carroceria', 'Cúpula', null, 'Techo: redondeado o plano', 0, 1, 0.05, 'x'],
   ['tCaida', 'carroceria', 'Cúpula', null, 'Techo: caída hacia el maletero (antes o más tarde)', -0.60, 0.80, 0.05, 'x'],
   // 2026-11-15
