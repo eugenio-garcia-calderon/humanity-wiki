@@ -173,6 +173,12 @@
       "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
       "motivo": "mgplanetario: MG2 central (pocas líneas)",
       "desde": "2026-11-17T14:27:49.009Z"
+    },
+    {
+      "agente": "mgplanetario",
+      "ruta": "src/components/aeromovil/triciclo/energia.ts",
+      "motivo": "mgplanetario: MG2 central (pocas líneas)",
+      "desde": "2026-11-17T14:27:54.239Z"
     }
   ]
 }
