@@ -1927,3 +1927,37 @@ study; rules:
 - **Not done** (rewrites, not moves): folding defaults into the FILAS rows, moving the Triciclo visibility rules from
   the page into the model, unifying the 13 copies of `fmt`. Each is a later, separately verified step.
 - Alternative rejected: one big PR. Four PRs, each provably equivalent, so a regression points at one step.
+
+## 2026-11-17 · Cabin-to-tail transition: smooth the stretch, blend the tail cap in, and let saved designs move
+
+Eugenio: «haz que esto no pueda ocurrir, este salto que hay entre la cola y la cabina». Root cause: the round body maps
+the reference drawing through a piecewise-linear stretch (`tramos`); at the canopy-end and rear-axle anchors the stretch
+factor jumps, creasing every line along the body (34° with a canopy ending 15 cm before the axle). The tail cap also
+clipped its joint slopes to [0, 0.95] and thinned its flat-tail wedge linearly from the joint.
+
+Chosen (garaje/transicionCola.ts, balaForma.ts, new key `tColaTrans`, DimBala `transCola`):
+1. The stretch's slope changes over `tColaTrans` round those two anchors along a smootherstep. The correction integrates
+   to exactly zero across each window, so outside the windows the map is the old one bit for bit.
+2. Tail cap, scaled by `gamma` (0…1, continuous: the flat-tail wedge, clipped slopes, a tip moved inside the section):
+   unclipped joint slopes, a wedge leaving the joint level, the top and belly as monotone guide lines, and a point-by-
+   point smootherstep blend from the body's own extrapolated section into the cap over min(cap length, max(0.30,
+   tColaTrans)). With gamma 0 the old cap is kept bit for bit, so the default Triciclo is still the Cuadriciclo en
+   rombo's body (tunnel test and triciclo-disenos unchanged).
+3. The tip height is kept 3 cm inside the cap's start section and with room for the top/belly to keep half their slope.
+4. Smooth body: unchanged, except (a) with the canopy ending within 25 cm of the rear axle its monotone cubic stretch is
+   blended (convexly, λ from 25 → 10 cm) into the transition map, and (b) where a short canopy forces the rear deck to
+   start behind the real crest, the crown fade becomes a smoothstep (by `mu`, 0 at the crest … 1 from 5 cm). Both are
+   0, bit for bit, on designs that did not need them (bala-cola-lisa.ts all OK).
+
+Rejected: re-fitting the shape with one global spline (rewrites every design and the garage model); clamping tCupFin
+or tPuntaCola to dodge the creases (Eugenio asked for more range, not less).
+
+Saved designs (tunnel Cd at «media», frontal area A m², wetted = body + glass m², solar m²), main → this change:
+- Triciclo por defecto: identical (0.1344, 1.137, 9.508, 0.630).
+- Rombo Bala: Cd 0.2128 → 0.2129, A 1.1675 → 1.1674, wetted 9.812 → 9.850, solar 1.677 → 1.676.
+- Modelo 1-like (Rombo Bala, round canopy, flat tail 100 %, full width, solar tail): Cd 0.2131 → 0.2210, A 1.1739 →
+  1.1742, wetted 10.344 → 10.385, solar 1.803 → 1.826 (the tail keeps the body's slopes into the cap: a fuller tail).
+- The real clásico (0217, round body): A 1.4755 → 1.4764, solar 1.8362 → 1.8381, every change < 1 %, no check changes
+  colour (triciclo-disenos with main's folder lists them as CAMBIA).
+Evaluator (scripts/cola-continuidad.ts, 759 designs): main 278 FALLA (worst 49.7° top, 51.5° shoulders) → COLA OK
+(worst 3.9° top, 7.9° shoulders, limit 8°).
