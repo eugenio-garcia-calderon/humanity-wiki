@@ -832,3 +832,9 @@ the frame's tube masses (same formula as `piezasBase`/`piezasBasculante`). Renam
 `PiezaMasa`/`PiezaMasaB` set where the part is created, and the tube breakdown returned by the parts list itself:
 ≈ 2 h now (≈ 45 parts in 3 files), more as parts are added. The Gota's blocks (inline in `pages/Aeromovil.tsx`) and
 the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper already; see the changelog for which are shown.
+- (2026-11-17, motores) The engine comparison's L/100 km per option changes the mass by the engine only, not by the
+  connection whose mass follows the engine's kW in series/parallel (a few kg; < 1 % of the figure). Running the full
+  model per option: ≈ 2 h plus a cache, and ~17 model builds per render.
+- (2026-11-17, motores) The engine comparison table is 10 columns in a ~380 px side panel: it scrolls sideways (the
+  name column stays fixed). On a phone the consumption and price columns need a swipe. A card layout per engine for
+  narrow screens: ≈ 1 h. Prices exist for 11 of 19 engines/motors; the rest sell on request (≈ 2 h of asking shops).

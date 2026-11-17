@@ -2048,3 +2048,23 @@ design's centre of gravity by a few millimetres (each zone at its own centroid i
 keeps one total by construction. Cost: the frame's tube formula is written twice (the parts list and the breakdown;
 the check catches a drift). A block maps to a part by the part's name (regex), not by a field on the part: cheaper now,
 and a part that no rule takes is shown as «sin desplegable» rather than lost.
+## 2026-11-17 · Engine comparison: prices in the catalogue, consumption from the model, block renamed by display only
+
+- **Prices.** `catalogoTren.ts` said «no prices (they change every week)». Eugenio now asks for an estimated cost, so
+  electric motors and petrol engines carry `precio`: one shop's listed price as published (currency, VAT status, URL,
+  date read), or `null` when no public price exists. Shown as «≈ N €» (USD at a fixed 0,86 €/$, `EUR_POR_USD`) plus
+  the raw figure in «De dónde salen los precios». Rejected: an average of several shops (no reliable second source for
+  most parts; it would look more precise than it is).
+- **Consumption per option** comes from the model's own `energiaTriciclo`, run on a shallow copy of the model with
+  `tVel = 90`, that part's power/efficiency in `phev`, and the vehicle mass changed by that part's mass only (the
+  hybrid connection's mass, which in series/parallel depends on the engine's kW, is not recomputed: a full
+  `crearModelo` + `calcular` per option would cost ~17 model builds per render). Electric Wh/km uses the maker's
+  published efficiency with an assumed 97 % controller when published, else the model's 85 %.
+- **«Híbrido enchufable» → «Motor gasolina».** Only the displayed title changes (`TITULO_BLOQUE` in
+  `LadoTriciclo.tsx`); the block key in `FILAS`, `ORDEN_BLOQUES`, `zonaTriciclo` and the remembered open blocks stays
+  `Híbrido enchufable`, so saved UI state and other bots' code keep working. Renaming the key everywhere: ≈ 30 min,
+  6 files, plus migrating `aeromovil.bloquesAbiertos`.
+- **Block mass** comes from `masasSecciones.ts` (bot «pesossecciones», merged first): `pesoSeccion(seccionesTriciclo(res,
+  modelo), 'propulsion', bloque)` and its `peso` prop on `Bloque`. A first version had its own `pesoMotores.ts` with the
+  same regexes; it was deleted at merge time so there is one rule for which part belongs to which block. The
+  comparison's «En el coche ahora» line lists that same section's parts.
