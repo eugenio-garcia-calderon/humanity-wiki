@@ -12560,3 +12560,16 @@ para ver cómo entran en el vehículo.» Solo en la familia Triciclo (el Aeromó
 - La masa sigue a la talla («Masa por ocupante» es la del hombre medio × estatura² × índice de masa corporal; se puede
   escribir a mano) y entra en el peso, el centro de gravedad, el vuelco, las cargas de las ruedas y el consumo.
 - Sin tocar nada, todo es como antes: el mismo muñeco y los mismos kilos.
+
+
+## 2026-11-17 · Fuera «¿Algo que mejorar?» y «Empezar un diseño nuevo» del panel del Aeromóvil
+
+Eugenio: «Quita esta parte en todas las secciones, la de mejoras y la de empezar de nuevo, todo fuera».
+
+- **Quitado del panel lateral** (salía al final de todas las pestañas y de todos los vehículos): la tarjeta
+  «¿Algo que mejorar?» (comentario, parte, nombre, «Añadir a las tareas») y el enlace «Empezar un diseño nuevo
+  (medidas por defecto)».
+- **No se ha borrado nada guardado**: las tareas siguen en la base de datos, la página Tareas
+  (`/aeromovil/tareas`) sigue mostrándolas y conserva su propio formulario, y la API no cambia.
+- Para dejar comentarios sobre una parte concreta, ahora están las notas por sección (bot «notas»).
+- No visto en un teléfono de verdad: si sale la versión vieja, `humanity.wiki/?sw=off`.
