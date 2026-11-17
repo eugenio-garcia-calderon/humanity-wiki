@@ -19,7 +19,7 @@ export function box(g: THREE.Object3D, c: V3, s: V3, mat: THREE.Material) {
   const m = new THREE.Mesh(new THREE.BoxGeometry(...s), mat); m.position.set(...c); m.castShadow = true; g.add(m);
 }
 export function disk(g: THREE.Object3D, c: V3, r: number, w: number, mat: THREE.Material) {
-  const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, w, 40), mat); m.rotation.x = Math.PI / 2; m.position.set(...c); m.castShadow = true; g.add(m);
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, w, 40), mat); m.rotation.x = Math.PI / 2; m.position.set(...c); m.castShadow = true; g.add(m); return m;
 }
 export function vaciar(g: THREE.Object3D) {
   while (g.children.length) { const o = g.children.pop()!; o.traverse((c: any) => { c.geometry?.dispose?.(); if (c.isSprite) { c.material.map?.dispose(); c.material.dispose(); } }); }

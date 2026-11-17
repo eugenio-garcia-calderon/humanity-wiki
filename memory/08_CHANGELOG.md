@@ -12566,6 +12566,33 @@ Eugenio: «Permite también añadir el tipo de neumático.»
   rodadura de verdad de las ruedas y neumáticos elegidos.
 - Las cifras son estimaciones en el orden que dan las fuentes (Cossalter, etiqueta europea, guías de duración por tipo),
   no medidas de cada medida; el precio es una regla por anchura y diámetro (±40 %), sin mirar tiendas hoy.
+## 2026-11-17 · El motor, pieza a pieza: «Mostrar solo esta pieza»
+
+Eugenio: «Que también aparezca la bomba de agua, la bomba de aceite, el tubo escape, que todo eso aparezca indicado
+cuando se le dé al botón de mostrar solo, en este caso, la parte de motor… y que luego también todas esas partes se les
+pueda también pinchar en mostrar solo esta parte… imagínate que solo ves la parte del radiador con su circuito de agua y
+sus tubos. O ves solo la parte del bloque del motor. O ves solo la parte del engranaje planetario.»
+
+- **Triciclo (familia, incluido el rombo), pestaña Motor › «Ver solo motor»**: debajo aparece «Piezas del motor», la
+  lista de las piezas que tiene ESTE diseño por grupos: Bloque motor, Engranaje planetario / transmisión, Generador,
+  Motor eléctrico, Controlador, Depósito y conducto de combustible, Refrigeración, Lubricación, Escape y Admisión. Cada
+  grupo tiene «Ver solo» y cada pieza de un grupo con varias, «Ver solo esto»; «Todo el motor» vuelve. La cámara se
+  acerca a lo que eliges y vuelve a la vista de antes al volver a todo el motor.
+- **Etiquetas en el 3D**: con el motor solo, cada grupo lleva su cartelito encima; con un grupo solo, cada pieza el suyo.
+- **Pinchar una pieza en el 3D** mientras se ve solo el motor ya no te saca de ese modo: sale una tarjeta con su nombre,
+  «Mostrar solo esta pieza» y «Solo <su grupo>».
+- **Piezas nuevas dibujadas en el motor de gasolina** (solo cuando el diseño es híbrido): bomba de agua con su polea,
+  termostato y manguitos (dos salen hacia delante, hacia donde vaya el radiador), cárter de aceite, bomba de aceite,
+  filtro de aceite y filtro de aire con su conducto. El escape (colectores, silencioso y tubo hasta la cola) ya estaba.
+- **Peso**: el motor de gasolina pesa lo mismo que antes; ahora se reparte en su bloque y cuatro líneas más (escape
+  2 kg + 0,1 kg por kW; admisión y filtro de aire 2,0 kg; bomba de agua, termostato y manguitos 1,3 kg; bomba de aceite,
+  cárter y filtro 1,6 kg; estimaciones de piezas de su clase, no medidas), cada una donde se dibuja. El peso en vacío no
+  cambia; el centro de gravedad de un híbrido se mueve un poco (el escape ya no cuenta en el cigüeñal sino en la cola).
+  Un diseño eléctrico (sin motor de gasolina) no cambia en nada.
+- **Unido con el radiador del bot «capo»** (publicado antes): «Refrigeración» muestra el radiador con su ventilador,
+  los tubos del refrigerante, la bomba de agua y los manguitos; con el motor delante, su árbol de transmisión va en
+  «Engranaje planetario / transmisión». Las tomas de aire del radiador están en la carrocería, así que no salen con
+  «Ver solo motor».
 - No comprobado en un móvil: con la app instalada, `humanity.wiki/?sw=off` quita la copia vieja.
 ## 2026-11-17 · El tamaño de los muñecos: más altos o más gordos
 
@@ -12624,6 +12651,15 @@ añadido donde se le puede poner un precio, y ponlo en el menú».
   `npx tsx scripts/precios-secciones.ts` («Todo OK»). Visto en el navegador automático a 1300 px y a 390 px (pestañas,
   Proyecto, Mano de obra, cabeceras con precio); el editor de precio solo se probó a 1300 px. No comprobado en un móvil
   de verdad: `humanity.wiki/?sw=off` quita la copia vieja.
+## 2026-11-17 · «Ocultar garaje»: los paneles ocupan la página
+
+Eugenio: «Haz que el garaje se pueda ocultar con un botón arriba en el menú donde pone diseño 3D, eso quítalo y ponlo más pequeñito y pon ver garaje o ocultar garaje, y de esta manera se puede ver con más detalle todos los componentes. Por ejemplo, si pincho en motor, pues veo todos los desplegables de forma mucho más agradable y no tan esquinada hacia un lado.»
+
+- En la barra de arriba del Aeromóvil hay un botón pequeño «Ocultar garaje» / «Ver garaje» (solo en la sección del diseño).
+- Con el garaje oculto desaparece toda la vista 3D y el panel del departamento (Motor, Chasis…) pasa al centro, con hasta 768 px de ancho en vez de 380.
+- El menú de secciones ya no escribe «Diseño 3D»: queda solo el icono, más pequeño (el nombre sigue dentro del menú).
+- «Ver solo …» no aparece con el garaje oculto, porque no hay 3D sobre el que actuar.
+- Cada navegador recuerda la elección (`aeromovil.verGaraje`). El 3D sigue montado pero no se dibuja mientras está oculto.
 ## 2026-11-17 · Proveedor, modelo y archivos en cada componente
 
 Eugenio: «también añade en que todos los componentes, aparte de tener un peso y un precio, se pueda elegir un proveedor

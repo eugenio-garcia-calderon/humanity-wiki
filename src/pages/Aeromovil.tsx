@@ -86,6 +86,7 @@ import { fmt, m2, Deslizador, Bloque, Selector, ListaComprobaciones } from '../c
 import { LadoA1 } from '../components/aeromovil/LadoA1';
 import { LadoBala } from '../components/aeromovil/LadoBala';
 import { useCdTriciclo, zonaTriciclo, LadoTriciclo } from '../components/aeromovil/LadoTriciclo';
+import { usePiezasMotor, ListaPiezasMotor, TarjetaPiezaPinchada } from '../components/aeromovil/PiezasMotor';
 import { BloqueAerodinamica } from '../components/aeromovil/estudio/EstudioAerodinamico';
 // (2026-11-17) the «Homologación» tab: the design against its EU category (homologacion/)
 import { PanelHomologacion, ResumenHomologacion } from '../components/aeromovil/homologacion/PanelHomologacion';
@@ -217,8 +218,9 @@ function MenuSecciones({ lista, seccion, abiertas, alIr }: { lista: typeof SECCI
   return (
     <div ref={caja} className="relative shrink-0">
       <Button variant="outline" aria-expanded={abierto} aria-haspopup="menu" aria-label={`Sección: ${actual.n}`} title="Secciones" onClick={() => setAbierto(a => !a)}
-        className={cn('gap-1.5 px-2.5 py-1.5 text-sm normal-case tracking-normal text-slate-800', abierto && 'bg-slate-100')}>
-        <Icono className="h-4 w-4 shrink-0" /><span className="hidden whitespace-nowrap lg:inline">{actual.n}</span>
+        className={cn('gap-1 px-1.5 py-1 text-xs normal-case tracking-normal text-slate-800', abierto && 'bg-slate-100')}>
+        {/* (2026-11-17, Eugenio: «donde pone diseño 3D, eso quítalo y ponlo más pequeñito») icon only on «Diseño 3D» */}
+        <Icono className="h-3.5 w-3.5 shrink-0" />{actual.k !== 'diseno' && <span className="hidden whitespace-nowrap lg:inline">{actual.n}</span>}
         {abiertas ? <span className="rounded-full bg-amber-500 px-1.5 text-[11px] font-bold tabular-nums text-white">{abiertas}</span> : null}
         <ChevronDown className={cn('h-3.5 w-3.5 shrink-0 transition-transform', abierto && 'rotate-180')} />
       </Button>
@@ -357,6 +359,11 @@ export default function Aeromovil() {
   // «Superponer»: los coches del garaje encima del nuestro, alineados por el eje delantero, el morro o la cola.
   const [superponer, setSuperponer] = useState<Alineacion | null>(null);
   const [panelGaraje, setPanelGaraje] = useState(false);
+  // «Ver garaje / Ocultar garaje» (2026-11-17, Eugenio: «haz que el garaje se pueda ocultar con un botón arriba en el
+  // menú… y de esta manera se puede ver con más detalle todos los componentes»). Hidden = no 3D view at all: the side
+  // panel takes the page, centred and wider. The viewer stays mounted (Exportar and Planos use it) but stops drawing.
+  const [verGaraje, setVerGaraje] = useState<boolean>(() => { try { return localStorage.getItem('aeromovil.verGaraje') !== '0'; } catch { return true; } });
+  useEffect(() => { try { localStorage.setItem('aeromovil.verGaraje', verGaraje ? '1' : '0'); } catch { /* sin almacenamiento */ } }, [verGaraje]);
   // Departamento abierto en el lateral y en el panel de abajo (2026-11-06, Eugenio: «el menú dividido por departamentos como una empresa de fabricación»).
   const [soloDep, setSoloDep] = useState(false);     // «Mostrar solo la carrocería», etc.
   const [capasAbierto, setCapasAbierto] = useState(false);
@@ -460,6 +467,8 @@ export default function Aeromovil() {
   // the masses of the design (LadoResumen.tsx): the «Masas» tab, and the 3D's centre of gravity while it is open
   const masas = useMasas(paraCalcular, res);
   useEffect(() => { if (porDeps && dep !== depTri) setDep(depTri); }, [porDeps, dep, depTri]);
+  // 2026-11-17: with «Motor» shown alone, its parts one by one (PiezasMotor.tsx)
+  const piezas = usePiezasMotor(modelo, porDeps && soloDep && depTri === 'propulsion');
   // (2026-11-17) «Masas» remembered from a Triciclo opens «Proyecto» on a vehicle without that tab (the Aeromóvil 1)
   useEffect(() => { if (!porDeps && (dep === 'masas' || dep === 'consumos' || dep === 'manoobra')) setDep('proyecto'); }, [porDeps, dep]);
   // (2026-11-17) the prototype's cost: parts by department + labour (precios/coste.ts), for «Proyecto» and «Mano de obra»
@@ -640,23 +649,31 @@ export default function Aeromovil() {
             : null}
           <div className="flex-1 sm:hidden" />
           {!(esA1 || porDeps) && <div className="hidden flex-1 sm:block" />}
+          {seccion === 'diseno' && (
+            <Button variant="outline" onClick={() => setVerGaraje(v => !v)} aria-pressed={!verGaraje}
+              title={verGaraje ? 'Oculta la vista 3D del garaje: el panel de cada departamento ocupa la página' : 'Vuelve a mostrar la vista 3D del garaje'}
+              className="shrink-0 gap-1 px-2 py-1 text-[11px] normal-case tracking-normal text-slate-700">
+              <Warehouse className="h-3.5 w-3.5 shrink-0" />{verGaraje ? 'Ocultar garaje' : 'Ver garaje'}
+            </Button>
+          )}
           <MenuSecciones lista={SECCIONES.filter(s => (s.k !== 'componentes' && s.k !== 'aranceles') || esA1)} seccion={seccion} abiertas={abiertas} alIr={navegar} />
         </div>
       </header>
 
       {/* El diseño se queda montado aunque se mire otra vista: así «Exportar» puede sacar el STL de lo que se ve. */}
-      <main className={cn('mx-auto max-w-[1600px] gap-4 px-4 py-4', seccion === 'diseno' ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_380px]' : 'hidden')}>
+      <main className={cn('mx-auto max-w-[1600px] gap-4 px-4 py-4', seccion !== 'diseno' ? 'hidden' : verGaraje ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_380px]' : 'flex max-w-3xl flex-col')}>
         <div className="min-w-0">
-        <section ref={ventana3d} aria-label="Vista 3D" className={cn('overflow-hidden bg-slate-50',
+        <section ref={ventana3d} aria-label="Vista 3D" className={cn('overflow-hidden bg-slate-50', !verGaraje && completa === 'no' && 'hidden',
           completa === 'no' ? cn('relative h-[62vh] min-h-[380px] rounded-xl border border-slate-200', esA1 ? 'lg:h-[72vh]' : 'lg:sticky lg:top-[68px] lg:h-[calc(100vh-88px)]')
             : completa === 'css' ? 'fixed inset-0 z-[100] h-[100dvh] w-screen' : 'relative h-full w-full')}>
           <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} bascular={bascular} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeConDisenos} soloGaraje={!!soloGaraje} tunel={tunel} carteles={carteles} cuerposTunel={cuerposTunel} opcionesTunel={opcionesTunelVisor} alElegirPuntoTunel={setPuntoTunel} puntoTunel={puntoTunel} fichasGaraje={disenosGaraje.fichas} superponer={!!superponer && !soloGaraje} vista={vista}
             referencia={referencia} modoRef={modoRef} alinear={alinear} alPinchar={esA1 ? c => { navegar(`/aeromovil/componentes/${c}`); window.scrollTo({ top: 0 }); } : undefined}
-            alPincharGaraje={eleccion.alPincharGaraje} alPincharNuestro={donde => { eleccion.setTarjeta(true); eleccion.setPendiente(null); if (donde && modelo.tipo === 'triciclo') { const z = zonaTriciclo(modelo, donde); setDep(z.dep); setSoloDep(false); setAbrirBloque(a => ({ bloque: z.bloque, n: (a?.n ?? 0) + 1 })); } }} extraTarjeta={id => <><BotonFilaReferencia g={disenosGaraje} id={id} /><BotonSoloReferencia e={eleccion} id={id} /><BotonEditableReferencia e={eleccion} id={id} />{VEHICULOS_GARAJE.some(v => v.id === id) && !soloUrl && <BotonQuitarReferencia key={id} id={id} nombre={VEHICULOS_GARAJE.find(v => v.id === id)!.nombre} alQuitar={quitarDelGaraje} />}</>}
+            alPincharGaraje={eleccion.alPincharGaraje} alPincharNuestro={donde => { if (piezas.pinchar(donde)) return; eleccion.setTarjeta(true); eleccion.setPendiente(null); if (donde && modelo.tipo === 'triciclo') { const z = zonaTriciclo(modelo, donde); setDep(z.dep); setSoloDep(false); setAbrirBloque(a => ({ bloque: z.bloque, n: (a?.n ?? 0) + 1 })); } }} extraTarjeta={id => <><BotonFilaReferencia g={disenosGaraje} id={id} /><BotonSoloReferencia e={eleccion} id={id} /><BotonEditableReferencia e={eleccion} id={id} />{VEHICULOS_GARAJE.some(v => v.id === id) && !soloUrl && <BotonQuitarReferencia key={id} id={id} nombre={VEHICULOS_GARAJE.find(v => v.id === id)!.nombre} alQuitar={quitarDelGaraje} />}</>}
             alMoverGaraje={superponer || soloGaraje ? undefined : disenosGaraje.mover}
             seguir={eleccion.seguir} nombres={soloUrl ? undefined : disenosGaraje.nombres} resaltarNuestro={disenosGaraje.enFila > 0} verGaraje={panelGaraje && !soloGaraje}
             margenDerecho={panelGaraje && typeof window !== 'undefined' && window.matchMedia('(min-width: 640px)').matches ? 352 : 0}
-            colores={colores} centroGravedad={seccion === 'diseno' && porDeps && depTri === 'masas' ? centroParaVisor(masas) : null} />
+            colores={colores} centroGravedad={seccion === 'diseno' && porDeps && depTri === 'masas' ? centroParaVisor(masas) : null} piezasMotor={piezas.visor} />
+          <TarjetaPiezaPinchada p={piezas} />
           {/* La esquina de arriba a la derecha es del botón de pantalla completa: las tarjetas se apartan a su izquierda
               (en el móvil, debajo, que de ancho no caben). */}
           <Button variant="outline" onClick={alternarCompleta} aria-pressed={completa !== 'no'}
@@ -871,7 +888,8 @@ export default function Aeromovil() {
 
         <aside className="mt-4 flex flex-col gap-3 lg:mt-0">
           {/* round 3 interior (2026-11-12): «Ver solo …» above the sliders of each department (the Aeromóvil 1's and the Triciclo's) */}
-          {(esA1 || porDeps) && (porDeps ? depTri : dep) !== 'proyecto' && capasSolo(porDeps ? depTri : dep) && (() => {
+          {/* (no «Ver solo …» with the garage hidden: there is no 3D view for it to act on) */}
+          {verGaraje && (esA1 || porDeps) && (porDeps ? depTri : dep) !== 'proyecto' && capasSolo(porDeps ? depTri : dep) && (() => {
             const d = porDeps ? depTri : dep, n = NOMBRE_CORTO[d].toLowerCase();
             return (
               <Button variant="outline" aria-pressed={soloDep} onClick={() => verSolo(!soloDep)}
@@ -880,6 +898,7 @@ export default function Aeromovil() {
               </Button>
             );
           })()}
+          <ListaPiezasMotor p={piezas} />
           {(esA1 ? dep === 'proyecto' : porDeps ? false : true) && garajeBloque}
 
           {dueno && !dueno.puedeDecidir && (
