@@ -13,6 +13,7 @@ import { tube, disk, vaciar, tuboCurvo, cajaRedonda, muelle, _x, ponerBieleta } 
 import { ocupante } from './ocupante';
 import { vestirRueda } from './ruedaCatalogo';
 import { fichaRueda } from '../ruedas/catalogo';
+import { dibujarRefrigeracion } from './refrigeracion';
 
 /** The Triciclo's front wheels and pods turned `angulo` degrees (+ to the left: the left wheel is then the inner one). */
 export function girarTriciclo(G: Record<CapaId, THREE.Group>, m: ModeloTriciclo, angulo: number) {
@@ -161,11 +162,12 @@ export function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<
     // side, held by the pod's two faired arms (drawn with the pods): a simple arm, as in front, that does not steer
     const zInT = Ft.VIA_LAT / 2 - Ft.ANCHO_NEU_LAT / 2 - 0.025, [arT, abT] = brazosDe(Ft);
     for (const s of [1, -1] as const) {
-      disk(esquinaB(G.motor, 'tras', s), [m.motor.c[0], m.motor.c[1], s * Ft.VIA_LAT / 2], m.motor.r, m.motor.ancho, M.motor);
+      // (2026-11-17: no hub motor when the traction motor is MG2 on the planetary, drawn by hibrido3d.ts)
+      if (m.motor.tipo === 'buje') disk(esquinaB(G.motor, 'tras', s), [m.motor.c[0], m.motor.c[1], s * Ft.VIA_LAT / 2], m.motor.r, m.motor.ancho, M.motor);
       tube(esquinaB(G.suspension, 'tras', s), [m.xR, abT.y - 0.02, s * zInT], [m.xR, arT.y + 0.03, s * zInT], 0.03, M.alu);
     }
   } else {
-  disk(G.motor, [m.motor.c[0], m.motor.c[1], 0], m.motor.r, m.motor.ancho, M.motor);
+  if (m.motor.tipo === 'buje') disk(G.motor, [m.motor.c[0], m.motor.c[1], 0], m.motor.r, m.motor.ancho, M.motor);
   // rear: the swing arm's two legs round the tyre, its pivot tube and the mono-shock
   const [px, py] = m.basculante.pivote, [ex, ey] = m.basculante.eje, zb = m.basculante.z;
   for (const s of [1, -1]) tube(G.suspension, [px, py, s * zb], [ex, ey, s * zb], 0.032, M.susp);
@@ -256,6 +258,8 @@ export function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<
   // 2026-11-17: a wheel from the catalogue (motorcycle, eco, velomobile) is drawn with its own section and rim; the pods'
   // wheels are `tRuedaDel` (the front ones, or the side ones in a diamond), the rest `tRuedaTras`. Old sizes: unchanged
   vestirRuedasTriciclo(G.ruedas, M, m);
+  // 2026-11-17 (capo): the hood that opens, the intakes cut in the skin, the radiator and the coolant pipes
+  dibujarRefrigeracion(G, puertasG, m);
   for (const c of CAPAS) G[c.k].traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
 }
 function vestirRuedasTriciclo(capa: THREE.Object3D, M: Mats, m: ModeloTriciclo) {

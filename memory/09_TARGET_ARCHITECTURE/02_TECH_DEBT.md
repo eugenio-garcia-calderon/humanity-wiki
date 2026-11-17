@@ -946,3 +946,45 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   `POST /api/aeromovil/disenos` (an `origen` id in the body): ≈ 20 min.
 - **Anonymous notes never leave the browser** (by design, rule 3). If Eugenio wants visitors' notes shared, they would
   go through moderation like the tasks: ≈ 1 h.
+
+
+## 2026-11-17 · Cooling and engine position (bot «capo»)
+
+- **Cooling fields outside `campos.ts`**: no `Explicacion` per slider (the block has one paragraph) and the study's
+  `ficha()` does not know them (its rule's test is `tunel: false`). Moving them into `FILAS`/`SELECTORES_TRICICLO` +
+  `explicaciones/triciclo.ts`: ≈ 45 min.
+- **Pipes and radiators only check the skin and a few boxes** (engine, tank, battery, nose wheel), not the seats, feet,
+  frame tubes or the battery pack along the frame: ≈ 1 h with `hibrido.ts`'s `choquesDe`.
+- **Radiator is always vertical**; in a low nose it may not fit (check says «asoma»). A tilted core: ≈ 1 h.
+- **The propshaft and the engine in the nose are drawn by `visor/refrigeracion.ts`**, not `hibrido3d.ts` (claimed);
+  the front engine has no specific check for the pilot's pedals or the front suspension cradle. ≈ 40 min.
+- **Hood hinge/latch mass (≈ 1 kg) not counted**, and the nose solar panel (`tSolarMorro`) does not lift with the hood:
+  ≈ 20 min each.
+- **Blocked by claims on 2026-11-17 (both held by bot capo the whole session), ~20 min together once free:**
+  (1) `LadoTriciclo.tsx` still draws its own «Rendimiento» block in Motor and Batería: change
+  `(dep === 'propulsion' || dep === 'energia' || dep === 'proyecto') && rendimiento` to `dep === 'proyecto'` and add a
+  one-line pointer to «Consumos» (the block now lives in `electrico/LadoConsumos.tsx`);
+  (2) `masasSecciones.ts` `seccionesTriciclo`: give «Varios» its `hijos: desgloseVarios(p.kg, sistemaElectrico(m, res))`
+  (`electrico/sistema.ts`, already exact to the part) so the «Varios» section lists the electrical parts and «precios» /
+  «proveedores» pick them up; then `scripts/pesos-secciones.ts` must stay «Todo OK».
+## 2026-11-17 · Occupant size («muñecos»): fields outside `CamposTriciclo`
+
+- **The six size fields (`tTallaPil/Pas`, `tComplPil/Pas`, `tMPil/Pas`) live in `triciclo/talla.ts` `CamposTalla`, not
+  in `CamposTriciclo` / `FILAS` / `TRICICLO_DEFECTO`** (those files were held by other bots). The model reads them from
+  the raw `Parametros` (`cuerpoDe(P, …)`), the panel block is its own component (`TallasOcupantes.tsx`), and absent
+  means today's figure. Consequences: no `Explicacion` popover for them, the aerodynamic study and `camposTriciclo`
+  do not see them, and `scripts/triciclo-disenos.ts` does not round-trip them. Moving them into the recipe's five
+  places: ≈ 30 min.
+- **Two knee checks are computed twice**: «Rodillas del piloto al volante / al salpicadero» stay inline in
+  `calcularTriciclo` and `ajusteOcupantes.ts` repeats the same formula only to paint the knees red. Making
+  `calcularTriciclo` emit them from `ajustePlaza`: ≈ 15 min.
+- `pages/Aeromovil.tsx` (garage card text, «dos ocupantes de N kg») still quotes `tMOcc`, not each rider's mass: 5 min.
+- Also still quoting `tMOcc` rather than each rider's mass: `electrico/LadoConsumos.tsx` (the consumption note, a copy
+  of the one fixed in `LadoTriciclo.tsx`) and `homologacion/ficha.ts` (`masaOcupante`, `masaMaxima` without the wheel
+  loads in a diamond). 10 min together.
+- **(2026-11-17, mgplanetario) Central MG2**: the previous entry («a catalogue central motor is not drawn») is done for
+  the power split only. Still pending: a central motor for the pure electric car and for series/P2 (≈ 2 h, the same
+  `CilZ` next to the controller with a chain); with one rear wheel the coaxial MG2 sticks out of the narrow tail (4–5 cm
+  in tests): a counter-shaft MG2 is ≈ 2 h; the MG2's size is a rule from mass and power, not the catalogue motor's own
+  diameter and length (≈ 30 min: add `diametro`/`largo` to `MotorCatalogo`); `tMMotor`'s range is still the hub rule for
+  «two motors of half power» with two rear wheels (≈ 20 min to give the central motor its own range).

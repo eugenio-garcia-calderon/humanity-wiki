@@ -8,6 +8,7 @@ import { crrMezcla } from '../ruedas/catalogo';
 import { limitarTriciclo } from './medidas';
 import type { ModeloTriciclo } from './modelo';
 import { AGARRE } from './comprobaciones';
+import { dCdARefrigeracion } from './refrigeracion';
 
 /** Rodadura de neumático de ciclomotor (0,011), motor de buje y controlador al 85 %, 80 W de equipos y la batería usable al 90 %. Supuestos, no medidos. */
 export const CRR = 0.011, RENDIMIENTO = 0.85, AUXILIARES = 80, USABLE = 0.9;
@@ -26,16 +27,19 @@ export const crrTriciclo = (T: Pick<CamposTriciclo, 'tRuedaDel' | 'tRuedaTras' |
 export const solarDiaTriciclo = (area: number, sol = 4.5) => area * 0.7 * RENDIMIENTO_SOLAR * sol * 1000 * 0.85;
 /** Petrol's lower heating value (kWh per litre: 32 MJ/L). */
 export const KWH_LITRO_GASOLINA = 8.9;
+// (2026-11-17, capo: plus the cooling air's drag, which the tunnel does not see: refrigeracion.ts `dCdARefrigeracion`)
 export function energiaTriciclo(m: ModeloTriciclo, mTot: number, cd: { cd: number; areaRef: number }, areaSolar = m.solarTodo.area) {
-  const T = m.campos, L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), g = 9.81, CdA = cd.cd * cd.areaRef, CRR = crrTriciclo(T);
-  const potencia = (v: number) => (0.5 * 1.2 * CdA * v ** 3 + CRR * mTot * g * v) / RENDIMIENTO + AUXILIARES;
+  const T = m.campos, L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), g = 9.81, CdA = cd.cd * cd.areaRef + dCdARefrigeracion(m), CRR = crrTriciclo(T);
+  // (2026-11-17: a central MG2 drives the wheels through the drop case and the chain, `m.motor.rend`; a hub motor, directly)
+  const rendM = RENDIMIENTO * (m.motor.rend ?? 1);
+  const potencia = (v: number) => (0.5 * 1.2 * CdA * v ** 3 + CRR * mTot * g * v) / rendM + AUXILIARES;
   const consumo = (kmh: number) => { const v = kmh / 3.6; return potencia(v) / v / 3.6; };
   const vel = L('tVel'), WhKm = consumo(vel), util = m.kWh * 1000 * USABLE;
   const vmaxCon = (kW: number) => { let v = 10; for (let i = 0; i < 80; i++) v *= Math.pow(kW * 1000 / potencia(v), 0.34); return v * 3.6; };
   // 0 → 50 km/h: peak power, limited by the grip of the one driven wheel (≈ 40 % of the weight on it, μ 0.9)
   const reparto = 0.4, Fmax = AGARRE * reparto * mTot * g;
   let v = 0.5, t = 0; const dt = 0.02;
-  while (v < 50 / 3.6 && t < 60) { const Fz = Math.min(Fmax, L('tKWPico') * 1000 * RENDIMIENTO / v) - 0.5 * 1.2 * CdA * v * v - CRR * mTot * g; if (Fz <= 0) { t = 99; break; } v += Fz / (mTot * 1.03) * dt; t += dt; }
+  while (v < 50 / 3.6 && t < 60) { const Fz = Math.min(Fmax, L('tKWPico') * 1000 * rendM / v) - 0.5 * 1.2 * CdA * v * v - CRR * mTot * g; if (Fz <= 0) { t = 99; break; } v += Fz / (mTot * 1.03) * dt; t += dt; }
   // the plug-in hybrid (2026-11-15): once the battery is down to its reserve, the petrol engine drives through the
   // planetary gear (part straight to the wheels, part through the generator and the motor: `rendTrans` for both
   // together) and also feeds the equipment. Litres per 100 km: the energy at the wheels over both efficiencies, over

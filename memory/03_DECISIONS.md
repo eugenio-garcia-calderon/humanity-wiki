@@ -2198,6 +2198,50 @@ Eugenio asked for a dated, authored note on every side-panel section, «anónimo
 **Decision.** New workflow `.github/workflows/comprobar.yml` runs on `pull_request` to main: tsc, build, and a matrix of the Aeromóvil scripts (tunnel, triciclo-disenos, estudio-aerodinamico, pesos-secciones, homologacion, bala-cola-lisa, cola-continuidad seed 7), each job in parallel on GitHub runners. Read-only, no secrets. Bots open the PR, wait for green, then merge under the deploy lock. Local heavy work is limited to what CI cannot do (headless screenshots of the feature).
 **Alternatives.** (a) Allow 2 concurrent heavy jobs locally: at most 2× and risks OOM on 8 GB. (b) Skip checks: rejected. (c) Bigger cloud machine: not in our control.
 
+
+## 2026-11-17 · Cooling, intakes, hood and engine position of the Triciclo (bot «capo»)
+
+- **Fields outside `CamposTriciclo`.** `tToma…`, `tBranq…`, `tRad…`, `tTuboD`, `tMotorPos` live in
+  `triciclo/refrigeracion.ts` (`CamposRefrigeracion`, `FILAS_REFRIGERACION`, read from `m.P` with
+  `camposRefrigeracion`), because `campos.ts`/`defecto.ts` were claimed by other bots all afternoon. Absent = «Ninguna»
+  / «Detrás», so every saved design builds identically (checked: hash of the hybrid layout + checks + masses equal to
+  main for 3 bodies × 3 architectures × 2 propulsions). Alternative: rows in `FILAS` — moving them is ≈ 30 min.
+- **True holes, not decals.** The intakes remove the body mesh's triangles inside each outline (`visor/refrigeracion.ts`
+  `cortarPiel`); a 12 mm black bezel hides the saw-tooth of the ≈ 1 cm skin cells; a dark duct runs to the radiator.
+  Cheaper than re-gridding the skin around the outline, which would have touched `garaje/balaModelo.ts`.
+- **The hood is the same triangles on a pivot**, registered as a «maletero» so the existing animation opens it; closed it
+  draws exactly the old body. No extra mass (hinges ≈ 1 kg not counted, so saved designs keep their mass).
+- **Cooling drag is a literature estimate added to the consumption's CdA** (`energia.ts`), never to the tunnel or its
+  calibration: ΔCdA = 0,5 × intake area (Hucho, 0,3–0,7). Heat: 25 % of fuel energy (Heywood); radiator ε 0,5, fan 3 m/s,
+  ΔT 70 K.
+- **Engine in the nose** (`hibrido.ts` `delante`): same search (nearest the cabin, lowest), drive by a propshaft along the
+  floor to the unchanged chain sprocket; tank stays behind the seats; exhaust under the floor. Masses of the propshaft
+  (1,9 kg/m + 1 kg) go through `piezasRefrigeracion` (the one hook into `masas.ts`).
+## 2026-11-17 · How a rider's size scales («muñecos»)
+
+- **One length scale per rider** (`k` = stature / 1.756 m, ANSUR II's mean man, today's figure): every segment the
+  model already scaled with `escala` (hip over the cushion, trunk, neck, thigh, shank) plus, in the viewer, arms, head and
+  feet. Considered: separate sitting-height and leg-length ratios (women have relatively longer legs); rejected for
+  now, the difference is ~1 % of stature and Eugenio asked for «más altos o más gordos».
+- **Build as four classes, not free sliders** (delgado, medio, corpulento, muy corpulento): widths ×0.92–1.20 over `k`,
+  belly ×0.85–1.6, BMI 21/26/31/37. Four named people read better than three sliders that interact.
+- **Mass = `tMOcc` × k² × BMI/26**, with an optional typed value. `tMOcc` keeps its meaning («the average man») so
+  every saved design with a changed `tMOcc` keeps its mass; the medium build at 1.756 m is exactly `tMOcc`.
+- **The hip stays on the cushion and the feet on the pedals/footpegs**: a taller rider's knees rise (`rodilla()`), as
+  in a real car with the seat not moved. Red = the check's clearance < 0, amber = below its minimum.
+## 2026-11-17 · Central traction motor (MG2) on the power split's ring
+
+- **Coaxial, outboard of the planetary** (engine | MG1 | planetary | MG2), as in the THS of the Prius II, rather than on
+  a parallel counter-shaft (Prius IV). Coaxial is what Eugenio described («junto al motor de gasolina … conectado al
+  planetario») and reuses the existing drop case and chain. The cost is width (≈ 55 cm for the row), so with two rear
+  wheels the row is centred by default (`dz0` in `disponerHibrido`). A counter-shaft MG2 behind the planetary would be
+  ≈ 15 cm narrower: ≈ 2 h if the single-rear-wheel car needs it.
+- **Opt-in field `tMotorElec` (default 'buje')**, not «central by default for the power split»: designs 7 (Aermovil M)
+  and 14 (Rombo Bala) are power-split hybrids too and would have changed silently. Eugenio selects it and saves design 16.
+  No migration edits the saved design.
+- **Drivetrain loss**: `REND_SALIDA = 0.97` on the electric drive (energia.ts) and on the hybrid's electrical share
+  (`rendimientoHibrido`). The model's 85 % motor+controller is kept; a high-rpm central motor is often more efficient
+  than a direct-drive hub, which the model does not credit (the comparator does when the maker publishes η).
 ## 2026-11-17 · «Ocultar garaje» hides the whole 3D view, not just the other cars
 
 **Context.** Eugenio wanted the department panels wider and centred («no tan esquinada hacia un lado»).

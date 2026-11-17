@@ -12483,6 +12483,96 @@ es el autor, si no será anónimo.»
 
 Eugenio: «busca una solución para que las pruebas no sean el cuello de botella». Hasta ahora cada bot pasaba `tsc`, la compilación y los scripts del Aeromóvil en la misma máquina de la nube, de uno en uno: con diez bots la cola tardaba horas. Ahora, cada solicitud de cambios las pasa en las máquinas de GitHub, todas a la vez (`.github/workflows/comprobar.yml`): `tsc`, compilación, túnel, diseños guardados, estudio aerodinámico, pesos por sección, homologación, cola lisa y continuidad de la cola. Un bot abre su solicitud y la fusiona cuando todo sale en verde.
 
+
+## 2026-11-17 · Capó que se abre, tomas de aire (morro o branquias), radiador, tubos de refrigeración y motor delante o detrás
+
+Eugenio: «Haz que en el aermovil S se pueda abrir el Capó, y permite crear una apertura en el morro que pueda ser de una
+sola boca o que sean dos bocas, una a cada lado del morro, y que pueda jugar con la geometría de esa boca y esa apertura,
+y que se puede elegir entre esa apertura frontal del morro o una apertura lateral en ambos lados de la cola, al estilo
+branquias … Y que se pueda colocar aquí el radiador de refrigeración. O se pueda colocar delante. Y también que el motor
+se pueda colocar atrás o delante. Y se pueda jugar con todo ello. También con los tubos de refrigeración en el circuito.»
+
+- **Capó** (toda la familia Triciclo, también el Aeromóvil S): lo alto del morro, desde justo delante del marco de la
+  cúpula hasta la banda de luz, es una pieza aparte con su bisagra atrás. Cerrado se ve igual que antes; se abre 50° con
+  el botón del 3D, que ahora se llama «Abrir maletero y capó».
+- **Motor › «Refrigeración y tomas de aire»** (solo con la propulsión híbrida enchufable): toma de aire «Ninguna» (lo de
+  siempre: los diseños guardados no cambian), «Morro: una boca», «Morro: dos bocas» o «Branquias laterales» (ranuras
+  inclinadas en los dos costados, bajas, antes de la cola). Deslizadores: ancho, alto, altura y esquinas de la boca,
+  separación de las dos bocas; número de ranuras, largo, alto, posición y altura de las branquias; área del radiador y
+  diámetro de los tubos. Las bocas y las ranuras son agujeros de verdad en la piel, con embellecedor negro y un conducto
+  oscuro hasta el radiador.
+- **Radiador** detrás de la toma, o forzado delante (en el morro) o a los lados (detrás de las branquias, dos mitades);
+  con ventilador. **Tubos**: rojo el caliente (del motor a lo alto del radiador), azul claro el frío (de vuelta), por el suelo.
+- **Motor de gasolina: Detrás / Delante.** Delante va en el morro, por delante de los pies del piloto; empuja la rueda
+  trasera con un árbol de transmisión por el suelo hasta la cadena (en serie, solo un cable). El depósito se queda detrás
+  de los asientos y el escape va por debajo del suelo. En el rombo con rueda en el morro no cabe: las comprobaciones lo dicen.
+- **Física, estimada y dicha como estimación**: calor al refrigerante = 25 % de la energía de la gasolina a plena potencia
+  (Heywood); lo que saca el radiador con su ventilador a 35 °C; la boca, al menos el 25 % del radiador (Hucho). El
+  túnel no ve el aire que entra por la boca: su arrastre (0,5 × el área de la boca, Hucho) se suma al CdA del consumo.
+  Nueva regla en el estudio aerodinámico: «Toma de aire más grande de lo que el radiador aprovecha».
+- **Masas**: radiador, ventilador, tubos, refrigerante, conductos y el árbol, en la lista de pesos y en el desplegable
+  «Refrigeración» (y con ellos sus precios).
+## 2026-11-17 · El motor eléctrico, junto al de gasolina y unido al planetario (Aeromóvil S)
+
+Eugenio: «Haz que el motor eléctrico del aeromóvil S no esté en el buje de la rueda, sino que esté junto al motor de
+gasolina y que se conecte al engranaje planetario.»
+
+- Nueva opción en Motor › «Motor eléctrico»: **«Dónde va el motor eléctrico»**: «En el buje de la rueda trasera» (lo
+  de siempre) o **«Central, junto al motor de gasolina, unido a la corona del planetario (MG2, como el Prius)»**. Sale
+  solo con el híbrido enchufable de reparto (el del planetario, que es el que tiene el Aeromóvil S).
+- Con «Central»: un solo motor eléctrico (el MG2) va en el mismo eje que el MG1 y el planetario, por fuera de este,
+  atornillado a la corona, como en el Toyota THS: gasolina → portasatélites, MG1 → sol, MG2 y salida → corona. Desde la
+  corona, la misma caja de salida, la cadena y (con dos ruedas traseras) el diferencial. Se dibuja en 3D (pieza
+  «hibrido-mg2», capa «Motor»); en las ruedas ya no hay motores de buje. Su tamaño sale de su masa y su potencia.
+- Con dos ruedas traseras, todo el conjunto (motor de gasolina + MG1 + planetario + MG2, unos 55 cm) se centra a lo
+  ancho del coche por defecto (el motor de gasolina se corre 11 cm a la derecha), para que no asome por la cola, que se
+  estrecha. Con una rueda en la cola no se centra (la cadena tiene que ir al lado de la rueda) y, en las pruebas, el
+  MG2 asoma 4–5 cm: la comprobación lo dice en rojo.
+- Su masa cuenta donde está (centro de gravedad, también de lado), como «Motor eléctrico central (MG2)», y ya no es
+  masa no suspendida. La comprobación «Motor de buje: potencia que cabe en la rueda» ya no se aplica.
+- Consumo: la fuerza del motor eléctrico pasa ahora por la cadena (97 %), y la parte eléctrica del híbrido también.
+- La lista de motores del catálogo (y la tabla comparativa) ofrece solo motores centrales en esa posición; si se elige
+  uno de buje, una comprobación lo marca. Nueva comprobación: las vueltas del MG2 en la corona a la velocidad de
+  cálculo (la corona gira 3.000 rpm a 100 km/h). Un motor central ya no pide «reductora»: la cadena lo es.
+- **El Aeromóvil S guardado no cambia solo**: el Aermovil M y el Rombo Bala también son híbridos de reparto, y poner
+  «Central» por defecto los habría cambiado sin avisar. Eugenio tiene que elegir «Central…» en Motor › Motor eléctrico
+  y guardar el diseño.
+- Con la copia del Aeromóvil S leída de la API hoy (vacío 375,5 kg): la masa no suspendida baja 20,2 kg (10,1 kg por
+  rueda trasera; el deslizador pone 13 kg, pero con 31,5 kW de pico su rango empieza en 20,2); el motor de gasolina
+  queda en el mismo sitio a lo largo y 3 cm más alto; consumo eléctrico a 120 km/h, de 71,8 a 74,0 Wh/km (+3 %, con un
+  Cd de prueba de 0,20 × 1,2 m²); gasolina, de 1,98 a 2,00 L/100 km. Ninguna comprobación nueva en rojo.
+- No comprobado en un móvil: con la app instalada, `humanity.wiki/?sw=off` quita la copia vieja.
+## 2026-11-17 · El tamaño de los muñecos: más altos o más gordos
+
+Eugenio: «También en la parte de interior permite cambiar el tamaño de los muñecos para que sean más altos o más gordos
+para ver cómo entran en el vehículo.» Solo en la familia Triciclo (el Aeromóvil S).
+
+- En **Interior › Asientos** hay un recuadro para el **piloto** y otro para el **pasajero** (con tres filas, uno para
+  todos los de atrás): talla de referencia (mujer baja 1,52 m, mujer media 1,63, hombre medio 1,76, hombre alto 1,87,
+  muy alto 1,92 y neerlandés muy alto 2,00; de ANSUR II y DINED), la estatura a mano (1,45 a 2,05 m), la complexión
+  (delgado, medio, corpulento, muy corpulento) y la masa.
+- El muñeco crece en proporción: la cadera se queda en el asiento y los pies en los pedales o las plataformas, así que
+  a uno más alto le suben las rodillas. Uno más corpulento es más ancho de hombros y caderas y tiene más barriga.
+- Lo que toca se pinta **en rojo** en el 3D, y lo que queda justo, en naranja. Nuevas comprobaciones «con su talla»:
+  cabeza a la cúpula, hombros y caderas a los lados, rodillas y pies dentro de la carrocería, vientre del piloto al
+  volante, puntas de los pies a la rueda delantera (rombo). Las que ya había (rodillas al volante y al salpicadero,
+  respaldo al vientre del pasajero) ya miden al muñeco de su tamaño.
+- La masa sigue a la talla («Masa por ocupante» es la del hombre medio × estatura² × índice de masa corporal; se puede
+  escribir a mano) y entra en el peso, el centro de gravedad, el vuelco, las cargas de las ruedas y el consumo.
+- Sin tocar nada, todo es como antes: el mismo muñeco y los mismos kilos.
+
+
+## 2026-11-17 · Fuera «¿Algo que mejorar?» y «Empezar un diseño nuevo» del panel del Aeromóvil
+
+Eugenio: «Quita esta parte en todas las secciones, la de mejoras y la de empezar de nuevo, todo fuera».
+
+- **Quitado del panel lateral** (salía al final de todas las pestañas y de todos los vehículos): la tarjeta
+  «¿Algo que mejorar?» (comentario, parte, nombre, «Añadir a las tareas») y el enlace «Empezar un diseño nuevo
+  (medidas por defecto)».
+- **No se ha borrado nada guardado**: las tareas siguen en la base de datos, la página Tareas
+  (`/aeromovil/tareas`) sigue mostrándolas y conserva su propio formulario, y la API no cambia.
+- Para dejar comentarios sobre una parte concreta, ahora están las notas por sección (bot «notas»).
+- No visto en un teléfono de verdad: si sale la versión vieja, `humanity.wiki/?sw=off`.
 ## 2026-11-17 · «Ocultar garaje»: los paneles ocupan la página
 
 Eugenio: «Haz que el garaje se pueda ocultar con un botón arriba en el menú donde pone diseño 3D, eso quítalo y ponlo más pequeñito y pon ver garaje o ocultar garaje, y de esta manera se puede ver con más detalle todos los componentes. Por ejemplo, si pincho en motor, pues veo todos los desplegables de forma mucho más agradable y no tan esquinada hacia un lado.»

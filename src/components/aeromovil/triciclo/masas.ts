@@ -12,6 +12,8 @@ import { centroDe, repartirCargas } from '../masasVehiculo';
 import { ruedasTriciclo } from './centroMasas';
 
 // ------------------------------------------------------------------ cálculo
+import { piezasRefrigeracion } from './refrigeracion';
+
 export interface PiezaMasa {
   nombre: string; kg: number; x: number; y: number;
   /** 2026-11-17 (masas): across the car (m, + to the right); absent, on the centre line. */
@@ -122,6 +124,8 @@ export function piezasTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cris
   if (m.faroBarra) o.push({ nombre: 'Barra de luz del morro', kg: 0.9, x: m.faroBarra.c[0], y: m.faroBarra.c[1] });
   // 2026-11-16: the interior finish (none with the defaults: today's masses)
   o.push(...m.interior.piezas);
+  // 2026-11-17 (capo): the hybrid's radiator, fan, pipes, coolant and intake ducts (none with «Toma de aire: Ninguna»)
+  o.push(...piezasRefrigeracion(m));
   return dimensionar(m, o);
 }
 export function piezasBase(m: ModeloTriciclo, ar: { carroceria: number; cristal: number; solar: number }, centros: { xPiel: number; yPiel: number; xCristal: number; yCristal: number }, pods: { area: number; areaTras?: number }): PiezaMasa[] {
@@ -154,7 +158,7 @@ export function piezasBase(m: ModeloTriciclo, ar: { carroceria: number; cristal:
       { nombre: 'Ruedas', kg: L('tMRueda') * nR, x: (2 * kDel * m.xF + kTras * m.xR) / nR, y: (2 * kDel * yRF + kTras * yRR) / nR },
       { nombre: 'Frenos', kg: 4 * L('tMFreno'), x: (m.xF + m.xR) / 2, y: (yRF + yRR) / 2 },
       { nombre: 'Dirección', kg: L('tMDir'), x: (m.cremallera.x + m.cabezaDireccion[0]) / 2, y: (m.cremallera.y + m.cabezaDireccion[1]) / 2 },
-      { nombre: 'Motores de buje (dos)', kg: L('tMMotor'), x: m.motor.c[0], y: m.motor.c[1] },
+      motorPieza(m, L('tMMotor'), 'Motores de buje (dos)'),
       { nombre: 'Controlador', kg: L('tMInversor'), x: (m.inversor.x0 + m.inversor.x1) / 2, y: (m.inversor.y0 + m.inversor.y1) / 2 },
       ...reductoraPieza(T, m),
       { nombre: 'Batería', kg: bat, x: vb ? xb / vb : 0, y: vb ? yb / vb : 0.3 },
@@ -175,7 +179,7 @@ export function piezasBase(m: ModeloTriciclo, ar: { carroceria: number; cristal:
     { nombre: 'Ruedas', kg: L('tMRueda') * (2 * kDel + kTras), x: (2 * kDel * m.xF + kTras * m.xR) / (2 * kDel + kTras), y: (2 * kDel * yRF + kTras * yRR) / (2 * kDel + kTras) },
     { nombre: 'Frenos', kg: 3 * L('tMFreno'), x: (2 * m.xF + m.xR) / 3, y: (2 * yRF + yRR) / 3 },
     { nombre: 'Dirección', kg: L('tMDir'), x: (m.cremallera.x + m.cabezaDireccion[0]) / 2, y: (m.cremallera.y + m.cabezaDireccion[1]) / 2 },
-    { nombre: 'Motor de buje', kg: L('tMMotor'), x: m.motor.c[0], y: m.motor.c[1] },
+    motorPieza(m, L('tMMotor'), 'Motor de buje'),
     { nombre: 'Controlador', kg: L('tMInversor'), x: (m.inversor.x0 + m.inversor.x1) / 2, y: (m.inversor.y0 + m.inversor.y1) / 2 },
     ...reductoraPieza(T, m),
     { nombre: 'Batería', kg: bat, x: vb ? xb / vb : 0, y: vb ? yb / vb : 0.3 },
@@ -236,8 +240,8 @@ export function equipajeEn(m: ModeloTriciclo): { x: number; y: number } {
 // «Masas» tab shows. Until then this was the lever rule between `xF` and `xR`, which in a diamond put the whole weight
 // on the laterals and none on the tail wheel (its swing arm and brake were sized for no load). Two axles: the same as before)
 export function cargasRueda(m: ModeloTriciclo, piezas: PiezaMasa[]): { del: number; tras: number; masa: number } {
-  const mOcc = limitarTriciclo('tMOcc', m.campos), eq = equipajeEn(m);
-  const todo = [...piezas.map(p => ({ nombre: p.nombre, kg: p.kg, x: p.x, y: p.y, z: p.z ?? 0 })), ...m.plazas.map(q => ({ nombre: q.nombre, kg: mOcc, x: cgOcupante(q.pts)[0], y: 0, z: q.z })), { nombre: 'Equipaje', kg: EQUIPAJE, x: eq.x, y: eq.y, z: 0 }];
+  const eq = equipajeEn(m);
+  const todo = [...piezas.map(p => ({ nombre: p.nombre, kg: p.kg, x: p.x, y: p.y, z: p.z ?? 0 })), ...m.plazas.map(q => ({ nombre: q.nombre, kg: q.kg, x: cgOcupante(q.pts)[0], y: 0, z: q.z })), { nombre: 'Equipaje', kg: EQUIPAJE, x: eq.x, y: eq.y, z: 0 }];
   const cg = centroDe(todo), ruedas = ruedasTriciclo(m), cargas = repartirCargas(ruedas, cg.masa, cg.x, cg.z).map(k => Math.max(0, k));
   // the most loaded front wheel (in a diamond, lateral) and rear wheel: the suspension, the brakes and the tyres are sized for them
   const del = Math.max(...ruedas.map((r, i) => (r.eje === 'Eje delantero' || r.eje === 'Laterales' ? cargas[i] : 0)));
@@ -278,7 +282,13 @@ export function dimensionar(m: ModeloTriciclo, piezas: PiezaMasa[]): PiezaMasa[]
 /** (2026-11-16) a reduction gear chosen from the catalogue, at the motor, when its maker publishes its mass. */
 export function reductoraPieza(T: CamposTriciclo, m: ModeloTriciclo) {
   const kg = masaReductora(T);
-  return kg ? [{ nombre: 'Motor: reductora (catálogo)', kg, x: m.motor.c[0], y: m.motor.c[1] }] : [];
+  return kg ? [{ nombre: 'Motor: reductora (catálogo)', kg, x: m.motor.c[0], y: m.motor.c[1], z: m.motor.z }] : [];
+}
+/** (2026-11-17) the traction motor: in the hub, or central (MG2 on the planetary's ring, next to the petrol engine). */
+export function motorPieza(m: ModeloTriciclo, kg: number, buje: string): PiezaMasa {
+  return m.motor.tipo === 'central'
+    ? { nombre: 'Motor eléctrico central (MG2)', kg, x: m.motor.c[0], y: m.motor.c[1], z: m.motor.z, nota: 'junto al motor de gasolina, en la corona del planetario: masa suspendida' }
+    : { nombre: buje, kg, x: m.motor.c[0], y: m.motor.c[1] };
 }
 
 export function grupoPieza(nombre: string): DepTriciclo {
