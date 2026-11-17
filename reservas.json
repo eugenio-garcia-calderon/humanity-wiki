@@ -89,6 +89,24 @@
       "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
       "motivo": "neumaticos: tipo de neumático por eje",
       "desde": "2026-11-17T13:38:31.777Z"
+    },
+    {
+      "agente": "homologacion",
+      "ruta": "src/pages/Aeromovil.tsx",
+      "motivo": "homologacion: pestaña y unión con puntos críticos",
+      "desde": "2026-11-17T13:44:44.066Z"
+    },
+    {
+      "agente": "homologacion",
+      "ruta": "src/components/aeromovil/LadoResumen.tsx",
+      "motivo": "homologacion: pestaña y unión con puntos críticos",
+      "desde": "2026-11-17T13:44:44.066Z"
+    },
+    {
+      "agente": "homologacion",
+      "ruta": "src/components/aeromovil/PanelProyecto.tsx",
+      "motivo": "homologacion: pestaña y unión con puntos críticos",
+      "desde": "2026-11-17T13:44:44.066Z"
     }
   ]
 }
