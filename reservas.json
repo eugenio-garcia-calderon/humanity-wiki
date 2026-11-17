@@ -59,6 +59,12 @@
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "estudioaero: bloque Aerodinámica en Carrocería",
       "desde": "2026-11-17T09:36:36.421Z"
+    },
+    {
+      "agente": "colacorte",
+      "ruta": "src/components/aeromovil/estudio/reglas.ts",
+      "motivo": "colacorte: reglas de la cola Kamm",
+      "desde": "2026-11-17T10:11:42.393Z"
     }
   ]
 }
