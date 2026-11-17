@@ -901,3 +901,14 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **Tyre speed symbol, headlamp heights (500–1200 mm), plate space, R-point ≥ 400 mm**: the model knows some of these
   (lamp positions, seat hip) but they are not wired: ~3 h.
 - **The Cuadriciclo Bala has no masses/motor** (body only): mass, power and speed rows read «no se puede comprobar».
+
+## 2026-11-17 · Legacy Aeromóvil vehicles: what was left (bot «legado»)
+
+- **The logo menu (`Disenos.tsx`, `MenuDisenos`) still lists every design and vehicle type in one list**, without the
+  three groups the garage has; opening a legacy one there is read-only too. Grouping it: ≈ 30 min.
+- **The 3D garage still puts the legacy designs in the first row next to the S** (the list groups them, the 3D does not);
+  a third row for legacy, or hiding them by default: ≈ 1 h (`garaje/filas.ts`, `GarajeDisenos.tsx`).
+- **«Empezar un diseño nuevo»** opens unsaved default measures, which are read-only now; it should start from a copy of
+  the S: ≈ 20 min.
+- No «Duplicar como base» on legacy vehicles (left out on purpose; «Guardar como nuevo» on the S still works).
+- Legacy is by id (≤ 15) in code; a column would let Eugenio toggle it himself: ≈ 45 min.

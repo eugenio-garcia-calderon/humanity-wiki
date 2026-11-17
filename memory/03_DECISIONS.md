@@ -2143,3 +2143,16 @@ Eugenio: «permite añadir más tipos de ruedas, por ejemplo de motos de todo ti
   the tunnel's Cd; gearing/rpm limits are not modelled.
 - **Polycarbonate canopy outside L1e–L5e flagged «No cumple»** (3/2014 annex VII part 1 point 2.1.2 allows rigid
   plastic windscreens only on L1e–L5e). Read from legislation.gov.uk's copy; to confirm with a technical service.
+
+## 2026-11-17 · Legacy Aeromóvil designs: by id in code, not a column (bot «legado»)
+
+Eugenio wants to work only on the «Aeromovil S» (design 16); every earlier design and vehicle type becomes read-only
+«legado». Options: (a) a `legado boolean` column on `aeromovil_disenos` set by migration, plus an owner toggle;
+(b) a code constant. Chosen **(b)**: `src/components/aeromovil/legado.ts` — `ID_AEROMOVIL_S = 16`,
+`ULTIMO_ID_LEGADO = 15`, every saved design with id ≤ 15 is legacy; the S and anything saved after it stay editable.
+The page and `src/server/aeromovil.ts` (PUT/DELETE refuse a legacy id with 403) import the same file, so they cannot
+disagree. Reasons: no schema change while ten bots share the table's routes, nothing to backfill, and the list is
+closed by construction (new designs get higher ids). Cost of switching to (a) later: ≈ 45 min (column, migration,
+read it in GET, swap the two helpers). An unsaved vehicle (a type picked from the logo menu) is legacy too.
+The default design is set by a guarded migration (`0226`, the same UPDATE the owner's «por defecto» route runs), not by
+hand in production, and the page opens the S by id regardless (`cargarAeromovilS`), so it works even before the deploy.

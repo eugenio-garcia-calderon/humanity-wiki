@@ -17,11 +17,12 @@ import { Check, Copy, Eye, EyeOff, Focus, Loader2, MoveDiagonal, Pencil, RotateC
 import { Button, Card } from '../../ui/core';
 import { cn } from '../../../utils/cn';
 import { aDiseno, deDiseno, leerClaves, type Diseno, type DisenoAbierto } from '../Disenos';
-import type { Parametros } from '../geometria';
+import type { Disposicion, Parametros } from '../geometria';
 import { camposTriciclo, nombreTriciclo } from '../geometriaTriciclo';
 import { esDisenoGaraje, idGaraje, type useDisenosGaraje } from '../GarajeDisenos';
 import { HUECO_EN_FILA, nombreDeCopia } from './filas';
 import { PARAMETROS_REPLICA_SMERA } from './smera';
+import { esDisenoLegado, esEditableAbierto, ID_AEROMOVIL_S, TEXTO_LEGADO } from '../legado';
 
 type Garaje = ReturnType<typeof useDisenosGaraje>;
 
@@ -59,7 +60,8 @@ export function useEleccionDiseno({ g, P, actual, abrirDiseno, sinGuardar, alRen
 
   const datos = JSON.stringify(aDiseno(P));
   /** Changes that would be lost: against the design as opened or saved, or (unsaved) against its vehicle's starting measures. */
-  const cambiado = actual ? datos !== actual.base : datos !== JSON.stringify(aDiseno(deDiseno({ disposicion: P.disposicion })));
+  // (2026-11-17) a legacy vehicle is read-only: nothing of it can be lost, so leaving it never asks
+  const cambiado = !esEditableAbierto(actual) ? false : actual ? datos !== actual.base : datos !== JSON.stringify(aDiseno(deDiseno({ disposicion: P.disposicion })));
   const moverCamara = (x: number, z: number) => setSeguir(s => ({ n: (s?.n ?? 0) + 1, dx: -x, dz: -z }));
 
   const cambiar = (d: Diseno) => {
@@ -195,6 +197,8 @@ export function TarjetaDiseno({ e, g, actual, porDefecto, nombreVehiculo, puedeD
   const [editando, setEditando] = useState(false);
   if (!e.tarjeta && !e.aviso) return null;
   const movido = actual ? !!g.sitios[idGaraje(actual.id)] : false;
+  // (2026-11-17) a legacy vehicle: no copy, rename or delete (nothing is lost), and a banner says why
+  const legado = !esEditableAbierto(actual);
   return (
     <Card role="group" aria-label={`${actual?.nombre ?? 'Diseño sin guardar'}: el diseño que editas`} className={cn('absolute z-[16] p-3 shadow-lg', className)}>
       <div className="flex items-start gap-2">
@@ -202,7 +206,9 @@ export function TarjetaDiseno({ e, g, actual, porDefecto, nombreVehiculo, puedeD
           {editando && actual
             ? <FormNombre key={actual.id} inicial={actual.nombre} alCancelar={() => setEditando(false)} alGuardar={async n => { await e.renombrar(actual.id, n); setEditando(false); }} />
             : <p className="truncate text-sm font-semibold text-slate-900">{actual?.nombre ?? 'Diseño sin guardar'}</p>}
-          <p className="text-[11px] leading-snug text-slate-600">{nombreVehiculo} · el que editas: sus departamentos están arriba y sus deslizadores en el panel (en el móvil, debajo del 3D).</p>
+          {legado
+            ? <p className="text-[11px] leading-snug text-slate-600">{nombreVehiculo} · <span className="font-semibold text-amber-800">{TEXTO_LEGADO}</span>: se puede mirar en 3D y leer sus cifras, pero no cambiar. El que se trabaja es el Aeromóvil S.</p>
+            : <p className="text-[11px] leading-snug text-slate-600">{nombreVehiculo} · el que editas: sus departamentos están arriba y sus deslizadores en el panel (en el móvil, debajo del 3D).</p>}
         </div>
         <Button variant="ghost" onClick={e.cerrarTarjeta} aria-label="Cerrar" title="Cerrar" className="-mr-1.5 -mt-1.5 h-10 w-10 shrink-0 p-0">
           <X className="h-4 w-4" />
@@ -219,12 +225,12 @@ export function TarjetaDiseno({ e, g, actual, porDefecto, nombreVehiculo, puedeD
               <MoveDiagonal className="h-3.5 w-3.5" />Bascular
             </Button>
           )}
-          {puedeDecidir && (
+          {puedeDecidir && !legado && (
             <Button variant="outline" disabled={!!e.ocupado} onClick={e.copiar} className={boton}>
               {e.ocupado === 'copiar' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Copy className="h-3.5 w-3.5" />}Guardar como nuevo
             </Button>
           )}
-          {puedeDecidir && actual && !editando && (
+          {puedeDecidir && actual && !editando && !legado && (
             <Button variant="outline" disabled={!!e.ocupado} onClick={() => setEditando(true)} className={boton}>
               <Pencil className="h-3.5 w-3.5" />Cambiar nombre
             </Button>
@@ -234,7 +240,7 @@ export function TarjetaDiseno({ e, g, actual, porDefecto, nombreVehiculo, puedeD
               <Rows3 className="h-3.5 w-3.5" />Volver a su fila
             </Button>
           )}
-          {puedeDecidir && actual && (
+          {puedeDecidir && actual && !legado && (
             <Button variant="outline" disabled={!!e.ocupado} onClick={() => e.setBorrar(true)} className={cn(boton, 'text-red-700 hover:bg-red-50')}>
               <Trash2 className="h-3.5 w-3.5" />Eliminar
             </Button>
@@ -352,8 +358,13 @@ function medidaFila(m?: { largo: number; masa?: number }): string {
  * The list view of the garage, in the side panel and in the «Garaje» panel of the 3D view: «Mis diseños» (the first
  * row) and «Coches de referencia» (the second), each one shown or hidden.
  */
-export function ListaGaraje({ g, e, actual, nombreVehiculo, referencias, alAlternarReferencia, alQuitarReferencia, alRecuperarReferencia, alElegido, puedeDecidir, pie }: {
+export function ListaGaraje({ g, e, actual, nombreVehiculo, referencias, alAlternarReferencia, alQuitarReferencia, alRecuperarReferencia, alElegido, puedeDecidir, pie, vehiculosLegado, alVehiculoLegado, disposicion }: {
   g: Garaje; e: Eleccion; actual: DisenoAbierto | null; nombreVehiculo: string;
+  /** (2026-11-17) The earlier vehicle types (Gota, Aeromóvil 1, Bala…): listed under «Vehículos legado», opened read-only. */
+  vehiculosLegado?: { k: Disposicion; n: string }[];
+  alVehiculoLegado?: (k: Disposicion) => void;
+  /** The vehicle type on screen (marks an unsaved legacy type as the one open). */
+  disposicion?: Disposicion;
   /** The owner (or an admin): only they can rename, as the server checks. */
   puedeDecidir: boolean;
   /** After a design is picked in the list (the «Garaje» panel closes on a phone, where it covers the 3D). */
@@ -373,18 +384,54 @@ export function ListaGaraje({ g, e, actual, nombreVehiculo, referencias, alAlter
   const enGaraje = referencias.filter(v => !v.quitado), quitados = referencias.filter(v => v.quitado);
   const propioFuera = !actual || (lista != null && !lista.some(d => d.id === actual.id));
   const fila = 'flex items-center gap-1 rounded-lg border px-1';
+  // (2026-11-17) the S first, then whatever was saved after it; the legacy designs in their own group
+  const trabajo = (lista ?? []).filter(d => !esDisenoLegado(d.id)).sort((a, b) => Number(b.id === ID_AEROMOVIL_S) - Number(a.id === ID_AEROMOVIL_S));
+  const legados = (lista ?? []).filter(d => esDisenoLegado(d.id));
+  const legadoAbierto = !esEditableAbierto(actual);
+  const filaDiseno = (d: Diseno, legado: boolean) => {
+    const esActivo = d.id === actual?.id, oculto = !esActivo && g.ocultos.includes(d.id);
+    if (editando === d.id && !legado) return (
+      <li key={d.id} className={cn(fila, 'border-teal-600 p-1.5')}>
+        <FormNombre inicial={d.nombre} className="min-w-0 flex-1" alCancelar={() => setEditando(null)} alGuardar={async n => { await e.renombrar(d.id, n); setEditando(null); }} />
+      </li>
+    );
+    const activoCls = legado ? 'border-amber-500 bg-amber-50' : 'border-teal-600 bg-teal-50';
+    return (
+      <li key={d.id} className={cn(fila, esActivo ? activoCls : legado ? 'border-slate-200' : 'border-teal-200 bg-white')}>
+        <Button variant="ghost" onClick={() => { void e.elegir(d); alElegido?.(); }} disabled={!!e.ocupado} aria-current={esActivo || undefined}
+          title={esActivo ? (legado ? 'Es el que tienes abierto (solo lectura)' : 'Es el que editas') : legado ? `Abrir «${d.nombre}» para verlo (solo lectura)` : `Abrir «${d.nombre}» para editarlo`}
+          className="min-w-0 flex-1 flex-col items-start justify-start gap-0 px-1.5 py-1.5 text-left normal-case tracking-normal">
+          <span className={cn('block w-full truncate text-[13px] font-medium', esActivo ? (legado ? 'text-amber-900' : 'text-teal-900') : oculto ? 'text-slate-400' : 'text-slate-800')}>{d.nombre}</span>
+          <span className={cn('block w-full truncate text-[11px] font-normal', esActivo && !legado ? 'text-teal-700' : 'text-slate-400')}>{[medidaFila(g.medidas[d.id]), familiaGuardada(d), esActivo ? (legado ? 'abierto, solo lectura' : 'el que editas') : ''].filter(t => t && t !== d.nombre).join(' · ') || '\u00a0'}</span>
+        </Button>
+        {puedeDecidir && !legado && (
+          <Button variant="ghost" onClick={() => setEditando(d.id)} aria-label={`Cambiar el nombre de «${d.nombre}»`} title="Cambiar nombre"
+            className="h-9 w-9 shrink-0 p-0 text-slate-500"><Pencil className="h-4 w-4" /></Button>
+        )}
+        {!esActivo && (
+          <Button variant="ghost" aria-pressed={!oculto} onClick={() => g.alternarOculto(d.id)}
+            aria-label={oculto ? `Mostrar «${d.nombre}» en el 3D` : `Ocultar «${d.nombre}» en el 3D`} title={oculto ? 'Mostrar en el 3D' : 'Ocultar en el 3D'}
+            className="h-9 w-9 shrink-0 p-0 text-slate-500">
+            {oculto ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </Button>
+        )}
+      </li>
+    );
+  };
   return (
     <div className="flex flex-col gap-2.5">
-      <div className="flex flex-col gap-1.5">
-        <p className="flex items-baseline justify-between text-xs font-semibold text-slate-600">
-          Mis diseños<span className="text-[11px] font-normal text-slate-400">primera fila, de menor a mayor{lista ? ` · ${lista.length - g.ocultos.filter(id => lista.some(d => d.id === id)).length + (propioFuera ? 1 : 0)} a la vista` : ''}</span>
+      {/* (2026-11-17, Eugenio: «están los vehículos de referencia, los vehículos legado y luego está el aeromóvil S»)
+          three groups: the S (and any design saved after it) first, then the reference cars, then the legacy ones */}
+      <div className="flex flex-col gap-1.5 rounded-xl border border-teal-200 bg-teal-50/40 p-1.5">
+        <p className="flex items-baseline justify-between px-0.5 text-xs font-semibold text-teal-900">
+          Aeromóvil S<span className="text-[11px] font-normal text-teal-700">el diseño que se trabaja</span>
         </p>
         {g.error && (
           <p className="text-xs text-red-700">{g.error} <Button variant="ghost" onClick={g.cargar} className="px-1 py-0 text-xs normal-case tracking-normal underline">Reintentar</Button></p>
         )}
         {!lista && !g.error && <p className="text-xs text-slate-400">Cargando los diseños…</p>}
         <ul className="flex flex-col gap-1">
-          {propioFuera && (
+          {propioFuera && !legadoAbierto && (
             <li className={cn(fila, 'border-teal-600 bg-teal-50')}>
               <span className="min-w-0 flex-1 px-1.5 py-1.5 text-[13px] font-medium text-teal-900">
                 <span className="block truncate">{actual?.nombre ?? 'Sin guardar'}</span>
@@ -392,41 +439,13 @@ export function ListaGaraje({ g, e, actual, nombreVehiculo, referencias, alAlter
               </span>
             </li>
           )}
-          {lista?.map(d => {
-            const esActivo = d.id === actual?.id, oculto = !esActivo && g.ocultos.includes(d.id);
-            if (editando === d.id) return (
-              <li key={d.id} className={cn(fila, 'border-teal-600 p-1.5')}>
-                <FormNombre inicial={d.nombre} className="min-w-0 flex-1" alCancelar={() => setEditando(null)} alGuardar={async n => { await e.renombrar(d.id, n); setEditando(null); }} />
-              </li>
-            );
-            return (
-              <li key={d.id} className={cn(fila, esActivo ? 'border-teal-600 bg-teal-50' : 'border-slate-200')}>
-                <Button variant="ghost" onClick={() => { void e.elegir(d); alElegido?.(); }} disabled={!!e.ocupado} aria-current={esActivo || undefined}
-                  title={esActivo ? 'Es el que editas' : `Abrir «${d.nombre}» para editarlo`}
-                  className="min-w-0 flex-1 flex-col items-start justify-start gap-0 px-1.5 py-1.5 text-left normal-case tracking-normal">
-                  <span className={cn('block w-full truncate text-[13px] font-medium', esActivo ? 'text-teal-900' : oculto ? 'text-slate-400' : 'text-slate-800')}>{d.nombre}</span>
-                  <span className={cn('block w-full truncate text-[11px] font-normal', esActivo ? 'text-teal-700' : 'text-slate-400')}>{[medidaFila(g.medidas[d.id]), familiaGuardada(d), esActivo ? 'el que editas' : ''].filter(t => t && t !== d.nombre).join(' · ') || '\u00a0'}</span>
-                </Button>
-                {puedeDecidir && (
-                  <Button variant="ghost" onClick={() => setEditando(d.id)} aria-label={`Cambiar el nombre de «${d.nombre}»`} title="Cambiar nombre"
-                    className="h-9 w-9 shrink-0 p-0 text-slate-500"><Pencil className="h-4 w-4" /></Button>
-                )}
-                {!esActivo && (
-                  <Button variant="ghost" aria-pressed={!oculto} onClick={() => g.alternarOculto(d.id)}
-                    aria-label={oculto ? `Mostrar «${d.nombre}» en el 3D` : `Ocultar «${d.nombre}» en el 3D`} title={oculto ? 'Mostrar en el 3D' : 'Ocultar en el 3D'}
-                    className="h-9 w-9 shrink-0 p-0 text-slate-500">
-                    {oculto ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </Button>
-                )}
-              </li>
-            );
-          })}
+          {trabajo.map(d => filaDiseno(d, false))}
         </ul>
-        {lista && lista.length === 0 && <p className="text-xs text-slate-400">Aún no hay diseños guardados.</p>}
+        {lista && trabajo.length === 0 && <p className="text-xs text-slate-500">No se encuentra el Aeromóvil S entre los diseños guardados.</p>}
       </div>
       <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-2.5">
         <p className="flex items-baseline justify-between text-xs font-semibold text-slate-600">
-          Coches de referencia<span className="text-[11px] font-normal text-slate-400">segunda fila, de menor a mayor</span>
+          Vehículos de referencia<span className="text-[11px] font-normal text-slate-400">segunda fila, de menor a mayor</span>
         </p>
         <div className="flex flex-col gap-1">
           {enGaraje.map(v => quitando === v.id && alQuitarReferencia ? (
@@ -470,14 +489,36 @@ export function ListaGaraje({ g, e, actual, nombreVehiculo, referencias, alAlter
           </div>
         )}
       </div>
+      <div className="flex flex-col gap-1.5 border-t border-slate-100 pt-2.5">
+        <p className="flex items-baseline justify-between text-xs font-semibold text-slate-600">
+          Vehículos legado<span className="text-[11px] font-normal text-slate-400">solo lectura</span>
+        </p>
+        <p className="text-[11px] leading-snug text-slate-500">Los diseños y vehículos anteriores al Aeromóvil S: se pueden abrir, ver en 3D y leer sus cifras, pero ya no se editan. No se ha borrado nada.</p>
+        <ul className="flex flex-col gap-1">
+          {legados.map(d => filaDiseno(d, true))}
+          {vehiculosLegado?.map(v => {
+            const abierto = !actual && disposicion === v.k;
+            return (
+              <li key={`tipo-${v.k}`} className={cn(fila, abierto ? 'border-amber-500 bg-amber-50' : 'border-slate-200')}>
+                <Button variant="ghost" disabled={!alVehiculoLegado || !!e.ocupado} aria-current={abierto || undefined} onClick={() => { alVehiculoLegado?.(v.k); alElegido?.(); }}
+                  title={abierto ? 'Es el que tienes abierto (solo lectura)' : `Abrir «${v.n}» para verlo (solo lectura)`}
+                  className="min-w-0 flex-1 flex-col items-start justify-start gap-0 px-1.5 py-1.5 text-left normal-case tracking-normal">
+                  <span className="block w-full truncate text-[13px] font-medium text-slate-800">{v.n}</span>
+                  <span className="block w-full truncate text-[11px] font-normal text-slate-400">tipo de vehículo, con sus medidas de partida · legado{abierto ? ' · abierto' : ''}</span>
+                </Button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
       {g.movidos.length > 0 && (
         <Button variant="outline" onClick={() => g.aFila()} className="gap-1.5 px-2.5 py-1.5 text-xs normal-case tracking-normal">
           <Rows3 className="h-3.5 w-3.5" />Volver a colocar en fila ({g.movidos.length} {g.movidos.length === 1 ? 'coche movido' : 'coches movidos'})
         </Button>
       )}
       <p className="text-[11px] leading-snug text-slate-500">
-        En el 3D, tus diseños están en la primera fila y los coches de referencia en la segunda, detrás; las dos van del más corto al más largo (y, si miden lo mismo, del más ligero al más pesado), en el orden de esta lista. Tus diseños se miden como están guardados.
-        Pincha uno de tus diseños (aquí o en el 3D) para editarlo: pasa al centro y sus departamentos y deslizadores salen en el panel.
+        En el 3D, el Aeromóvil S y los diseños legado están en la primera fila y los coches de referencia en la segunda, detrás; las dos van del más corto al más largo (y, si miden lo mismo, del más ligero al más pesado), en el orden de esta lista. Tus diseños se miden como están guardados.
+        Pincha el Aeromóvil S (aquí o en el 3D) para editarlo: pasa al centro y sus departamentos y deslizadores salen en el panel. Un vehículo legado se abre igual, pero solo para mirarlo.
         Pincha un coche de referencia para ver su ficha. Para mover un coche, púlsalo y arrástralo: se queda donde lo sueltes, en este navegador.
         El que editas se queda en el centro.
       </p>

@@ -12402,3 +12402,23 @@ para ponerle más potencia, más peso, etcétera.»
 - Fuentes: Reglamento (UE) 168/2013 (anexo I, arts. 3–5, anexos VI y VIII), Reglamentos Delegados 3/2014 y 44/2014
   (consolidado de EUR-Lex), DGT/MAPFRE/RACE para los permisos. Lo citado sin releer lleva «por confirmar».
 - No visto en un teléfono de verdad: si sale la versión vieja, `humanity.wiki/?sw=off`.
+
+## 2026-11-17 · Aeromóvil: el Aeromóvil S es el diseño que se trabaja; los anteriores, «vehículos legado» de solo lectura
+
+Eugenio: «ahora me quiero centrar en el aeromóvil S. Es decir, que los vehículos anteriores del garaje, haz que ya no se
+puedan editar, que se queden como vehículos legado, ¿vale? Y así hay menos información. Y esos vehículos de legado los
+pones en el garaje en una categoría distinta. O sea, están los vehículos de referencia, los vehículos legado y luego está
+el aeromóvil S. Que es el que vamos a trabajar sobre él y va a ser el que realmente salga a producción.»
+
+- **El garaje tiene tres grupos**: «Aeromóvil S» (arriba, resaltado: el diseño guardado «Aeromovil S», nº 16, y lo que
+  se guarde a partir de él), «Vehículos de referencia» (los coches reales, como antes) y «Vehículos legado» (todos los
+  diseños guardados antes del S —Aermovil M, Rombo Bala, Cuadriciclo Bala clásico, Cuadriciclo Bala en rombo, Aptera
+  Like…— y los tipos de vehículo anteriores: Aeromóvil 1, Gota, Cuadriciclo Bala en rombo, Triciclo Bala, Basculante).
+- **Un vehículo legado se abre para mirarlo**: 3D, pestañas y cifras como siempre, pero con el aviso «Vehículo legado:
+  solo lectura», los deslizadores bloqueados, sin «Guardar como nuevo», «Cambiar nombre» ni «Eliminar», y sin
+  guardado automático. El servidor también se niega a cambiar o quitar un diseño legado. **No se ha borrado ni archivado
+  nada.**
+- **Al abrir la página se abre el Aeromóvil S** (cada navegador una vez, aunque tuviera otro diseño abierto), y la
+  migración `0226` lo deja marcado como diseño por defecto en la web (lo mismo que haría el botón «por defecto»).
+- Los scripts de los vehículos anteriores siguen igual (el código de esos vehículos no se toca: solo la pantalla).
+- No visto en un teléfono de verdad: si sale la versión vieja, `humanity.wiki/?sw=off`.
