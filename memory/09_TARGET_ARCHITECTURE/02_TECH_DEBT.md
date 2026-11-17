@@ -770,3 +770,17 @@ both files are free of other bots' claims.
 ## 2026-11-16 · Catalogue figures are a snapshot
 
 `catalogoTren.ts` holds figures copied by hand on 2026-11-16 with their source URLs; nobody re-checks them, and several sources are shop listings, not datasheets. Inboard motors are not drawn in 3D and their placement is not checked (the 3D still shows a hub motor). Re-verifying the 34 entries: ~2 h; drawing an inboard motor plus chain/gear: ~4 h.
+
+## 2026-11-16 · Aeromóvil layout refactor: what was moved but not yet rewritten
+
+The «ordenar» refactor (PRs #1081, #1082, #1084) only moved code. Still open, each a separate, verified rewrite:
+- **Triciclo visibility rules live in the page component** (`LadoTriciclo.tsx`: `visible`, `hibridoVisible`, the `fichas`
+  and `sels` filters). Moving them to `triciclo/campos.ts` beside each row: ≈40 lines, ~1 h with an old-vs-new filter
+  comparison over every field × option combination. After it, a new slider touches no `.tsx` file.
+- **The 60-case `mostrar` switch** (value text per field) also lives in `LadoTriciclo.tsx`: ≈70 lines to `triciclo/`, ~30 min.
+- **Defaults are separate from the `FILAS` rows** (`triciclo/defecto.ts`): folding them in rewrites 150 rows, ~2 h,
+  `triciclo-disenos` catches any slip.
+- **`fmt` is defined 13 times** across the Aeromóvil files (one now in `controles.tsx`), `suave` 6 times: unifying is ~20 min
+  but touches files other bots edit often.
+- **The barrel exports more than before**: `geometriaTriciclo.ts` uses `export *`, so 49 formerly private helpers are now
+  importable from it. Harmless today; an explicit export list is ~15 min if it ever matters.

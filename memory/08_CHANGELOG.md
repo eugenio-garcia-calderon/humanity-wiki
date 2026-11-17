@@ -12099,3 +12099,10 @@ Tercer paso, sin ningún cambio visible: la página `Aeromovil.tsx` (1.930 líne
 archivos propios junto al visor (`LadoTriciclo.tsx`, `LadoA1.tsx`, `LadoBala.tsx`) y los controles comunes
 (deslizador, selector, bloque, explicación, lista de comprobaciones) en `controles.tsx`. La página se queda en ≈1.030
 líneas con la distribución, el estado y la barra del 3D. Los paneles de todos los departamentos se leen igual que antes.
+
+## 2026-11-16 · Ordenar el código del Aeromóvil (4/4): el mapa para quien venga detrás
+
+Eugenio: «optimiza el codigo de la web aeromovil para que sea más eficiente a futuro generar nuevo código».
+Último paso: `src/components/aeromovil/CLAUDE.md` (en inglés, para los bots) explica qué hay en cada archivo de la
+carpeta y dónde se añade un deslizador nuevo, una pieza 3D, una comprobación o un coche del garaje. No cambia nada
+de la página.
