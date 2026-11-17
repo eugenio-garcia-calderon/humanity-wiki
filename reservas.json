@@ -155,6 +155,12 @@
       "ruta": "src/components/aeromovil/triciclo/modelo.ts",
       "motivo": "capo: motor delante (pocas líneas)",
       "desde": "2026-11-17T14:27:22.853Z"
+    },
+    {
+      "agente": "capo",
+      "ruta": "src/components/aeromovil/triciclo/masas.ts",
+      "motivo": "capo: refrigeración (pocas líneas)",
+      "desde": "2026-11-17T14:27:43.974Z"
     }
   ]
 }
