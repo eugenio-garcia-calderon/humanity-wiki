@@ -22,6 +22,9 @@ import { CELULA, type P3, type PuntosOcupante } from '../geometria';
 import { ANGULO_CUPULA_B, esquinaEn, type Esquina, type ModeloBasculante } from '../geometriaBasculante';
 import { dentroPoligono } from './smera';
 import { construirDetallesSmera } from './smera3d';
+import { fichaRueda } from '../ruedas/catalogo';
+import { ruedaDeCatalogo } from '../visor/ruedaCatalogo';
+import type { Mats } from '../visor/materiales';
 
 type V3 = [number, number, number];
 export type CapaB = 'carenado' | 'cristales' | 'solar' | 'chasis' | 'suspension' | 'direccion' | 'ruedas' | 'asientos' | 'ocupantes' | 'motor' | 'baterias' | 'transmision';
@@ -243,7 +246,10 @@ export function construirBasculante(G: Record<CapaB, THREE.Group>, puertasG: Map
   for (const q of m.esquinas) {
     const yR = q.r - q.yInf, s = q.s;
     const dRueda = esquinaGrupo(G.ruedas, q);
-    A.ruedaCoche(dRueda, A.M as never, 0, yR, s * Math.max(1e-6, q.e), q.r, q.w, Math.min(0.26, q.r * 0.95), 0);
+    // 2026-11-17: a catalogue wheel (motorcycle, eco car, velomobile) with its own section and rim; the old sizes, as before
+    const fq = fichaRueda(q.eje === 'del' ? m.campos.qRuedaDel : m.campos.qRuedaTras);
+    if (fq) { const rw = ruedaDeCatalogo(A.M as unknown as Mats, fq, q.r, q.w, { freno: q.eje === 'del', sombra: true, lado: s }); rw.position.set(0, yR, s * Math.max(1e-6, q.e)); dRueda.add(rw); }
+    else A.ruedaCoche(dRueda, A.M as never, 0, yR, s * Math.max(1e-6, q.e), q.r, q.w, Math.min(0.26, q.r * 0.95), 0);
     if (q.eje === 'tras') { const dm = esquinaGrupo(G.motor, q); A.disk(dm, [0, yR, s * (q.e - q.w * 0.12)], m.motor.r, m.motor.ancho, M.motor); }
     const dS = esquinaGrupo(G.suspension, q), h = q.ySup - q.yInf;
     // the upright: a telescopic pillar (as the Piaggio MP3's) from the lower arm to the upper one, the wheel's carrier

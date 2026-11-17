@@ -10,8 +10,11 @@
 // fields behind it are positive numbers. A design saved without one of these
 // keys takes the value here.
 
+import type { IdRueda } from '../ruedas/catalogo';
+
 /** Wheels: scooter tyres (round profile, they lean like a motorcycle's) and the Twizy's car tyre (flat: it hardly leans). */
-export type RuedaBasculante = 'm13' | 'm14' | 'm15' | 'c13' | 's14';
+/** 2026-11-17: or any wheel of the catalogue (`ruedas/catalogo.ts`): motorcycle, eco car, velomobile. */
+export type RuedaBasculante = 'm13' | 'm14' | 'm15' | 'c13' | 's14' | IdRueda;
 
 export interface CamposBasculante {
   // ── Carrocería: forma
