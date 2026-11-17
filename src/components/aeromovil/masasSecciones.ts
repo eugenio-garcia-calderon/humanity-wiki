@@ -159,7 +159,7 @@ export function seccionesTriciclo(res: Resultados, m: ModeloTriciclo): PesosSecc
     ['rodaje', 'Suspensión y dirección', /^(Suspensión|Basculante y|Dirección)/],
     ['rodaje', 'Basculación', /^Basculación/],
     ['propulsion', 'Híbrido enchufable', /^(Motor de gasolina|Motor: (engranaje|generador|embrague|motor-generador)|Depósito)/],
-    ['propulsion', 'Motor eléctrico', /^(Motor(es)? de buje|Controlador|Motor: reductora)/],
+    ['propulsion', 'Motor eléctrico', /^(Motor(es)? de buje|Motor eléctrico|Controlador|Motor: reductora)/],
     ['energia', 'Batería', /^Batería/],
     ['energia', 'Varios', /^Varios/],
     ['interior', 'Asientos', /^Asientos/],

@@ -3,7 +3,7 @@
 import { OPCIONES_NUM_FILA, OPCIONES_TIPO_FILA, type NumFila, type TipoAsientoFila } from '../filasTriciclo';
 import { TECNOLOGIAS_BASCULA, type TecBascula } from '../basculacion';
 import { ACABADOS, AMBIENTES, CINTURONES, COLORES_COSTURA, COLORES_FORRO, CONSOLAS_CENTRALES, CONSOLAS_TECHO, COSTURAS, MOLDURAS, TAPICES, type CamposInterior } from '../interiorTriciclo';
-import { ARQUITECTURAS_HIBRIDO, type ArqHibrido } from '../hibrido';
+import { ARQUITECTURAS_HIBRIDO, POSICIONES_MG2, type ArqHibrido, type PosMG2 } from '../hibrido';
 import type { MaterialCarenado, MaterialChasis, Pulgadas } from '../geometria';
 import { TRICICLO_DEFECTO } from './defecto';
 import { CATALOGO_RUEDAS, IDS_CATALOGO, nombreRueda, type FichaRueda, type IdRueda } from '../ruedas/catalogo';
@@ -86,6 +86,9 @@ export interface CamposTriciclo extends CamposInterior {
   // 2026-11-16 (Eugenio: «añade marcas de motores eléctricos y de motores térmicos … y de engranajes planetarios, de
   // controladoras»): a real part from catalogoTren.ts, or 'medida' (the sliders decide, as before). Optional when saved.
   tCatMotor?: string; tCatCtrl?: string; tCatReductora?: string; tCatTermico?: string;
+  // 2026-11-17 (Eugenio, «Aeromóvil S»: «que el motor eléctrico … esté junto al motor de gasolina y que se conecte al
+  // engranaje planetario»): the traction motor in the hub (until now) or central, MG2 on the ring (hibrido.ts)
+  tMotorElec: PosMG2;
   tMRueda: number; tMFreno: number; tMSuspDel: number; tMSuspTras: number; tMDir: number;   // kg
   // Propulsión
   tKWNom: number; tKWPico: number; tMMotor: number; tMInversor: number; tVel: number;
@@ -198,7 +201,7 @@ export const RUEDAS_TRICICLO: Record<RuedaTriciclo, { d: number; neuDel: number;
   // 2026-11-17: the catalogue's wheels, `kg` over the slider's 4.5 kg moped wheel (the default `tMRueda`)
   ...Object.fromEntries(IDS_CATALOGO.map(k => { const f: FichaRueda = CATALOGO_RUEDAS[k]; return [k, { d: f.d, neuDel: f.w, neuTras: f.w, n: nombreRueda(k), kg: f.kg / TRICICLO_DEFECTO.tMRueda, kWBuje: f.kWBuje, carga: f.carga }]; })) as Record<IdRueda, { d: number; neuDel: number; neuTras: number; n: string; kg: number; kWBuje: number; carga: number }>,
 };
-export type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tFila2N' | 'tFila3N' | 'tFila2Tipo' | 'tFila3Tipo' | 'tTraseras' | 'tBascula' | 'tRuedas' | 'tPropulsion' | 'tHibArq' | 'tBascTec' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero'
+export type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tFila2N' | 'tFila3N' | 'tFila2Tipo' | 'tFila3Tipo' | 'tTraseras' | 'tBascula' | 'tRuedas' | 'tPropulsion' | 'tHibArq' | 'tMotorElec' | 'tBascTec' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero'
   | 'tAcabado' | 'tTapiz' | 'tCostura' | 'tCosturaColor' | 'tForroColor' | 'tMoldura' | 'tConsolaTecho' | 'tConsolaCentral' | 'tCinturon' | 'tAmbiente'
   | 'tCatMotor' | 'tCatCtrl' | 'tCatReductora' | 'tCatTermico' | 'tColaCorte';
 export type ClaveNumTriciclo = Exclude<ClaveTriciclo, ClaveTexto>;
@@ -228,7 +231,7 @@ export const lemasTriciclo = (T: Pick<CamposTriciclo, 'tTraseras'> & Partial<Cam
   const o = { ...LEMAS_TRICICLO };
   if (esCuatro(T)) o.propulsion = 'los dos motores en los bujes de las ruedas traseras';
   // (2026-11-16) the plug-in hybrid: the petrol engine and its connection join the hub motor(s)
-  if (T.tPropulsion === 'phev') o.propulsion = `híbrido enchufable: el motor de gasolina, cómo se une a las ruedas, y ${esCuatro(T) ? 'los dos motores eléctricos en los bujes traseros' : 'el motor eléctrico en el buje trasero'}`;
+  if (T.tPropulsion === 'phev') o.propulsion = `híbrido enchufable: el motor de gasolina, cómo se une a las ruedas, y ${(T.tHibArq ?? 'reparto') === 'reparto' && T.tMotorElec === 'planetario' ? 'el motor eléctrico MG2 junto a él, en el planetario' : esCuatro(T) ? 'los dos motores eléctricos en los bujes traseros' : 'el motor eléctrico en el buje trasero'}`;
   if (T.tBatDisp === 'chasis') o.energia = 'la batería (un paquete a lo largo del bastidor) y el techo solar';
   // (round 3 interior: either dashboard; with the Aptera buckets, pedals instead of footboards)
   if (T.tMando === 'volante' || conSalpicadero(T as CamposTriciclo) || T.tAsientos === 'butacas') o.interior = `los asientos (a horcajadas, dos butacas como el Aptera o tres filas que se pliegan), ${T.tMando === 'volante' ? 'volante' : 'manillar'}${conSalpicadero(T as CamposTriciclo) ? ', salpicadero' : ''}, ${T.tAsientos === 'butacas' ? 'pedales' : 'plataformas'} y maletero`;
@@ -459,6 +462,8 @@ export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
   // (2026-11-16, Eugenio: «la parte de propulsión es tan importante que tiene que estar arriba del todo»: its own block, first)
   { clave: 'tPropulsion', n: 'Propulsión', dep: 'propulsion', bloque: 'Propulsión', opciones: [{ k: 'electrico', n: 'Eléctrica: solo batería' }, { k: 'phev', n: 'Híbrida enchufable (PHEV): batería y motor de gasolina' }] },
   { clave: 'tHibArq', n: 'Arquitectura del híbrido', dep: 'propulsion', bloque: 'Híbrido enchufable', opciones: ARQUITECTURAS_HIBRIDO },
+  // 2026-11-17: only with the power split (the page hides it otherwise)
+  { clave: 'tMotorElec', n: 'Dónde va el motor eléctrico', dep: 'propulsion', bloque: 'Motor eléctrico', opciones: POSICIONES_MG2 },
   { clave: 'tRuedas', n: 'Disposición de las ruedas', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: [{ k: 'clasica', n: 'Dos delante en carenados' }, { k: 'rombo', n: 'En rombo: una en el morro, dos laterales en carenados, una en la cola' }] },
   { clave: 'tTraseras', n: 'Ruedas traseras', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: [{ k: 'una', n: 'Una en la cola (triciclo)' }, { k: 'dos', n: 'Dos en carenados (cuatro ruedas)' }] },
   // 2026-11-15: only with four wheels (the page hides it otherwise)
