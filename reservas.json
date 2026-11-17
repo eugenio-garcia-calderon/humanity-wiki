@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "ruedas",
-      "ruta": "src/components/aeromovil/basculante/LadoBasculante.tsx",
-      "motivo": "ruedas: catálogo de ruedas",
-      "desde": "2026-11-17T10:26:39.865Z"
-    },
-    {
       "agente": "masas",
       "ruta": "src/components/aeromovil/hibrido.ts",
       "motivo": "masas: motor y depósito libres, pestaña MASAS, Proyecto limpio",
