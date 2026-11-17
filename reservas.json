@@ -103,12 +103,6 @@
       "desde": "2026-11-17T14:26:46.163Z"
     },
     {
-      "agente": "capo",
-      "ruta": "src/pages/Aeromovil.tsx",
-      "motivo": "capo: refrigeración, capó y motor delante (pocas líneas)",
-      "desde": "2026-11-17T14:26:49.237Z"
-    },
-    {
       "agente": "masas2",
       "ruta": "src/components/aeromovil/explicaciones/triciclo.ts",
       "motivo": "masas: deslizadores del motor y del depósito",
