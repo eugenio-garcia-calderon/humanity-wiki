@@ -901,3 +901,15 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **Tyre speed symbol, headlamp heights (500–1200 mm), plate space, R-point ≥ 400 mm**: the model knows some of these
   (lamp positions, seat hip) but they are not wired: ~3 h.
 - **The Cuadriciclo Bala has no masses/motor** (body only): mass, power and speed rows read «no se puede comprobar».
+
+## 2026-11-17 · Electrical system v1 (bot consumos): what is left
+
+- **No per-part choice**: each part is the first catalogue item that fits; letting Eugenio pick one (a `tCat…` key per
+  part, like the motor's) needs fields in `triciclo/campos.ts` + defaults: ~1.5 h.
+- **System voltage is inferred**, not a slider: a «Tensión del sistema» selector (48/72/96/144 V) ~45 min.
+- **Several masses are estimates** (DC-DC, contactors, inlet, Daly, generics): read datasheets and replace: ~1 h.
+- **«Varios» vs catalogue parts**: the check fails on every Triciclo design (parts ≈ 14–17 kg, slider 12 kg). Raising
+  the default changes every saved design: Eugenio's call; 5 min once decided.
+- **`tVel` lives in Motor's FILAS row and is drawn a second time in «Consumos»**: moving the row's `dep` needs a
+  `DepTriciclo` 'consumos' (touches ~6 Records): ~30 min.
+- **Basculante, A1, Gota, Bala: no «Consumos» tab** (legacy since 2026-11-17).
