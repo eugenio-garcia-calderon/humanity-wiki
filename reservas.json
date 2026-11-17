@@ -67,12 +67,6 @@
       "desde": "2026-11-17T13:45:40.407Z"
     },
     {
-      "agente": "neumaticos",
-      "ruta": "src/components/aeromovil/explicaciones/index.ts",
-      "motivo": "neumaticos: explicaciones del tipo de neumático",
-      "desde": "2026-11-17T13:47:13.740Z"
-    },
-    {
       "agente": "capo",
       "ruta": "src/components/aeromovil/masasSecciones.ts",
       "motivo": "capo: capó, tomas de aire y radiador (pocas líneas)",
