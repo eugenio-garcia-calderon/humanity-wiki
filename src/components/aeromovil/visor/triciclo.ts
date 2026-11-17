@@ -13,6 +13,7 @@ import { tube, disk, vaciar, tuboCurvo, cajaRedonda, muelle, _x, ponerBieleta } 
 import { ocupante } from './ocupante';
 import { vestirRueda } from './ruedaCatalogo';
 import { fichaRueda } from '../ruedas/catalogo';
+import { dibujarRefrigeracion } from './refrigeracion';
 
 /** The Triciclo's front wheels and pods turned `angulo` degrees (+ to the left: the left wheel is then the inner one). */
 export function girarTriciclo(G: Record<CapaId, THREE.Group>, m: ModeloTriciclo, angulo: number) {
@@ -256,6 +257,8 @@ export function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<
   // 2026-11-17: a wheel from the catalogue (motorcycle, eco, velomobile) is drawn with its own section and rim; the pods'
   // wheels are `tRuedaDel` (the front ones, or the side ones in a diamond), the rest `tRuedaTras`. Old sizes: unchanged
   vestirRuedasTriciclo(G.ruedas, M, m);
+  // 2026-11-17 (capo): the hood that opens, the intakes cut in the skin, the radiator and the coolant pipes
+  dibujarRefrigeracion(G, puertasG, m);
   for (const c of CAPAS) G[c.k].traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
 }
 function vestirRuedasTriciclo(capa: THREE.Object3D, M: Mats, m: ModeloTriciclo) {

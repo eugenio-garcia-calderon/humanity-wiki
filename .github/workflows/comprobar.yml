@@ -1,0 +1,81 @@
+# ============================================================================
+# Comprobaciones de cada solicitud de cambios (2026-11-17)
+# ============================================================================
+# Eugenio: «busca una solución para que las pruebas no sean el cuello de
+# botella». Until now every bot ran tsc, the build and the Aeromóvil scripts
+# on the shared 2-CPU cloud machine, one at a time behind a lock: with ten bots
+# the queue took hours. These checks now run here, on GitHub's machines, in
+# parallel jobs, for every pull request. A bot opens its PR and merges when
+# all of them are green.
+#
+# Every job is read-only: no secrets, no access to the server.
+
+name: Comprobar
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: comprobar-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  tipos:
+    name: tsc
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci --legacy-peer-deps
+      - run: NODE_OPTIONS=--max-old-space-size=6144 npx tsc --noEmit
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci --legacy-peer-deps
+      - run: NODE_OPTIONS=--max-old-space-size=6144 npm run build
+
+  aeromovil:
+    name: aeromovil ${{ matrix.script }} ${{ matrix.args }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        script:
+          - tunel-pruebas
+          - triciclo-disenos
+          - estudio-aerodinamico
+          - pesos-secciones
+          - homologacion
+          - bala-cola-lisa
+        args: ['']
+        include:
+          - script: cola-continuidad
+            args: --semilla 7
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci --legacy-peer-deps
+      # Each script exits non-zero on failure. The tunnel prints «FALLA» on a
+      # failed case, so it is also counted explicitly.
+      - name: Ejecutar
+        run: |
+          set -o pipefail
+          npx tsx scripts/${{ matrix.script }}.ts ${{ matrix.args }} 2>&1 | tee salida.txt
+          if grep -q "FALLA" salida.txt && [ "${{ matrix.script }}" = "tunel-pruebas" ]; then
+            echo "::error::tunel-pruebas tiene casos FALLA"; exit 1
+          fi

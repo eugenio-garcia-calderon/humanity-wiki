@@ -83,6 +83,9 @@ export interface CamposTriciclo extends CamposInterior {
   tRendElec: number;   // reparto y serie: rendimiento del camino eléctrico, generador → inversores → motor (%)
   tRendCaja: number;   // paralelo: rendimiento de la caja de cambios y la cadena (%)
   tDeposito: number;   // depósito de gasolina (L)
+  // 2026-11-17 (masas; Eugenio: «que el depósito también se pueda colocar de manera libre, también haz que el motor se pueda
+  // colocar de manera libre»): each one's move from where it goes by default (m: forward, up, to the right), hibrido.ts
+  tMotX: number; tMotY: number; tMotZ: number; tDepX: number; tDepY: number; tDepZ: number;
   // 2026-11-16 (Eugenio: «añade marcas de motores eléctricos y de motores térmicos … y de engranajes planetarios, de
   // controladoras»): a real part from catalogoTren.ts, or 'medida' (the sliders decide, as before). Optional when saved.
   tCatMotor?: string; tCatCtrl?: string; tCatReductora?: string; tCatTermico?: string;
@@ -209,7 +212,7 @@ export type DepTriciclo = 'carroceria' | 'interior' | 'chasis' | 'rodaje' | 'pro
 export const DEPS_TRICICLO: DepTriciclo[] = ['carroceria', 'interior', 'chasis', 'rodaje', 'propulsion', 'energia'];
 /** Lo que es cada departamento en el Triciclo (los lemas del Aeromóvil 1 hablan de sus piezas, no de estas). */
 export const LEMAS_TRICICLO: Record<DepTriciclo | 'proyecto', string> = {
-  proyecto: 'el resumen: comprobaciones, peso, consumo y vuelco',
+  proyecto: 'lo que falta por hacer y la revisión de los puntos críticos que no están bien',
   carroceria: 'la piel del Cuadriciclo en rombo, techo solar y ventanas, carenados y material',
   interior: 'los asientos (a horcajadas, dos butacas como el Aptera o tres filas que se pliegan), manillar, plataformas y maletero',
   chasis: 'el bastidor de tubos dentro de la carrocería',
@@ -395,6 +398,13 @@ export const FILAS: Fila[] = [
   ['tRendElec', 'propulsion', 'Híbrido enchufable', null, 'Camino eléctrico: generador, inversores y motor', 65, 92, 0.5, '%'],
   ['tRendCaja', 'propulsion', 'Híbrido enchufable', null, 'Caja de cambios y cadena', 85, 97, 0.5, '%'],
   ['tDeposito', 'propulsion', 'Híbrido enchufable', null, 'Depósito de gasolina', 5, 45, 1, 'L'],
+  // 2026-11-17 (masas): where the engine and the tank go, moved freely from their place by default (0: by default)
+  ['tMotX', 'propulsion', 'Híbrido enchufable', null, 'Motor de gasolina: adelante (+) o atrás (−)', -1.5, 1.5, 0.01, 'm'],
+  ['tMotY', 'propulsion', 'Híbrido enchufable', null, 'Motor de gasolina: arriba (+) o abajo (−)', -0.25, 0.5, 0.005, 'm'],
+  ['tMotZ', 'propulsion', 'Híbrido enchufable', null, 'Motor de gasolina: a la derecha (+) o a la izquierda (−)', -0.3, 0.3, 0.005, 'm'],
+  ['tDepX', 'propulsion', 'Híbrido enchufable', null, 'Depósito: adelante (+) o atrás (−)', -1.5, 1.5, 0.01, 'm'],
+  ['tDepY', 'propulsion', 'Híbrido enchufable', null, 'Depósito: arriba (+) o abajo (−)', -0.25, 0.6, 0.005, 'm'],
+  ['tDepZ', 'propulsion', 'Híbrido enchufable', null, 'Depósito: a la derecha (+) o a la izquierda (−)', -0.3, 0.3, 0.005, 'm'],
   ['tKWh', 'energia', 'Batería', null, 'Batería', 5, 30, 0.5, 'kWh'],
   // 2026-11-12: one pack along the frame (only with «A lo largo del bastidor»): its size decides its capacity
   // (round 3 interior, 2026-11-12, «no lo limites»: length and width up to what fits in the body, `rangoTriciclo`; the checks say the rest)

@@ -13,6 +13,7 @@ import { type ClaveNumTriciclo, esRombo, conPuertas, conButacas, conSalpicadero,
 import { dentroDe, PAN_ASIENTO, ASIENTOS_FILAS, Z_FILA2, PIES_FILA2, PIES_FILA3, paqueteX, semiPaquete, semiLarguero, T_BORDE_LISA, T_PANEL_LISA, conLisa, fondoPaquete, camposTriciclo, rangoTriciclo, techoBajo, limitarTriciclo, medidasTriciclo } from './medidas';
 import { type PiernasButaca, puntosTriciclo, puntosFila, type AsientoFila, type Plaza, type Caja, Z_LARGUERO, bateriaEn, PEDAL_BUTACA, PIES_BUTACA, PIES_PASAJERO_BUTACA, PIES_PASAJERO, largueroTrasero } from './ocupantes';
 import { ejeBascula } from './bascula';
+import { camposRefrigeracion } from './refrigeracion';
 
 /** El modelo del Triciclo: la forma, los ocupantes, el bastidor, la batería, el motor y lo que lee el visor. */
 export function crearModeloTriciclo(P: Parametros) {
@@ -321,7 +322,19 @@ export function crearModeloTriciclo(P: Parametros) {
     cajas: [...baterias, inversor], yPiso, inversor,
     // 2026-11-17 (masas): what the engine and the tank keep clear of, and the user's move of each (hibrido.ts)
     ...entornoHibrido(),
+    // 2026-11-17 (capo): «Motor de gasolina: Delante» puts it in the nose (refrigeracion.ts `tMotorPos`)
+    delante: camposRefrigeracion(P).tMotorPos === 'delante' ? motorEnMorro() : null,
   }) : null;
+  function motorEnMorro(): NonNullable<EntradaHibrido['delante']> {
+    // from the pilot's toes (as the seat zones count them: 80 cm ahead of the seat) to 3 cm behind the nose's tip
+    const xMin = (butacasDe ? Math.max(...butacasDe.filter(a => a.fila === 1).map(a => a.x)) : asientos.xPiloto) + 0.82;
+    const obstaculos: Obstaculo[] = rombo
+      // the nose wheel with its travel, its fork and the steering column above it
+      ? [{ nombre: 'la rueda del morro y su recorrido', cajas: [{ x0: -rR - 0.04, x1: rR + 0.04, y0: 0, y1: 2 * rR + recDel + 0.02, z0: -F.ANCHO_NEU / 2 - 0.05, z1: F.ANCHO_NEU / 2 + 0.05 }] }]
+      // the steering rack across, between the front wheels
+      : [{ nombre: 'la cremallera de la dirección', cajas: [{ x0: cremallera.x - 0.04, x1: cremallera.x + 0.04, y0: cremallera.y - 0.04, y1: cremallera.y + 0.04, z0: -cremallera.z, z1: cremallera.z }] }];
+    return { xMin, xMax: F.X_MORRO - 0.03, obstaculos };
+  }
   function entornoHibrido(): Pick<EntradaHibrido, 'asientos' | 'obstaculos' | 'brazo' | 'mover'> {
     const mov = (k: string, max: number, min = -max) => { const v = (T as unknown as Record<string, unknown>)[k]; return typeof v === 'number' && Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : 0; };
     // every seat with whoever sits on it: from its backrest (leaning back as it rises) to the toes, 6 cm under its cushion up
