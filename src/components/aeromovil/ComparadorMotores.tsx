@@ -31,6 +31,8 @@ interface Fila {
   celdas: (string | null)[];
   /** gives what the car needs (with the slope), or null when unknown */
   basta: boolean | null;
+  /** its consumption uses the maker's published figure (false: the slider's, marked *) */
+  consumoPublicado?: boolean;
   precio: Precio | null | undefined; n: number;
 }
 
@@ -52,7 +54,7 @@ function Tabla({ cabeceras, filas, actual, alElegir, notaPie }: { cabeceras: str
                     {r.basta === false && <span className="block text-[10px] font-normal text-amber-700">se queda corto</span>}
                   </button>
                 </th>
-                {r.celdas.map((c, i) => <td key={i} className={cn('px-1.5 py-1 text-right font-mono', c == null ? 'text-slate-300' : 'text-slate-800')}>{c ?? '—'}</td>)}
+                {r.celdas.map((c, i) => <td key={i} className={cn('whitespace-nowrap px-1.5 py-1 text-right font-mono', c == null ? 'text-slate-300' : 'text-slate-800')}>{c ?? '—'}</td>)}
               </tr>
             );
           })}
@@ -115,7 +117,7 @@ export function ComparadorMotores({ tipo, modelo, mTot, cd, actual, alElegir, mo
         const e = cd ? energiaTriciclo({ ...a90, phev: { ...p, kW: t.kW, rendTerm: rend != null ? rend / 100 : p.rendTerm } } as ModeloTriciclo, mTot + (t.kg ?? kgAhora) - kgAhora, cd) : null;
         const kWUso = t.kWCont ?? t.kW;
         return {
-          id: t.id, nombre: `${t.marca} ${t.modelo}`, precio: t.precio, n: 1,
+          id: t.id, nombre: `${t.marca} ${t.modelo}`, precio: t.precio, n: 1, consumoPublicado: rend != null,
           basta: pideCuesta != null ? kWUso >= pideCuesta : null,
           celdas: [
             t.cc != null ? `${f(t.cc)}` : null,
@@ -143,7 +145,7 @@ export function ComparadorMotores({ tipo, modelo, mTot, cd, actual, alElegir, mo
       const whKm = P != null ? P / v / 3.6 : null;
       const kWCont = m.kWCont != null ? m.kWCont * n : null;
       return {
-        id: m.id, nombre: `${m.marca} ${m.modelo}`, precio: m.precio, n,
+        id: m.id, nombre: `${m.marca} ${m.modelo}`, precio: m.precio, n, consumoPublicado: m.rendimiento != null,
         basta: kWCont != null && pideCuesta != null ? kWCont >= pideCuesta : null,
         celdas: [
           `${m.montaje === 'buje' ? 'buje' : 'central'}${n > 1 ? ' ×2' : ''}`,
@@ -174,7 +176,8 @@ export function ComparadorMotores({ tipo, modelo, mTot, cd, actual, alElegir, mo
   const num = (r: Fila, i: number) => { const c = r.celdas[i]; return c == null ? Infinity : Number(c.replace(/[^\d,]/g, '').replace(',', '.')); };
   const iCons = tipo === 'gasolina' ? 6 : 7, iKg = tipo === 'gasolina' ? 4 : 5;
   const masLigero = [...sirven].sort((a, b) => num(a, iKg) - num(b, iKg))[0];
-  const menosGasta = [...sirven].sort((a, b) => num(a, iCons) - num(b, iCons))[0];
+  // (only among those whose consumption is their maker's: the others carry the slider's efficiency, not theirs)
+  const menosGasta = [...sirven].filter(r => r.consumoPublicado).sort((a, b) => num(a, iCons) - num(b, iCons))[0];
   const masBarato = [...sirven].filter(r => precioEuros(r.precio) != null).sort((a, b) => precioEuros(a.precio)! * a.n - precioEuros(b.precio)! * b.n)[0];
 
   const cab = tipo === 'gasolina'
@@ -193,7 +196,7 @@ export function ComparadorMotores({ tipo, modelo, mTot, cd, actual, alElegir, mo
           : <>
             <p>Con su CdA del túnel ({f(base!.CdA, 3)} m²) y {f(mTot)} kg con los ocupantes, a {VEL_COMPARAR} km/h este coche pide <b>{f(pideLlano, 1)} kW</b> {tipo === 'gasolina' ? 'al motor de gasolina en llano (con la unión al híbrido y los equipos)' : 'en la rueda en llano'}, y <b>{f(pideCuesta, 1)} kW</b> subiendo una cuesta del {f(CUESTA * 100)} %. {tipo === 'gasolina' ? 'Para viajar solo con gasolina, mejor un motor que dé eso en continuo, sin ir al máximo.' : 'Un motor que dé eso en continuo no se calienta en un viaje; para adelantar se tira del pico.'}</p>
             {sirven.length
-              ? <p>Lo dan {sirven.length} de {filas.length}. {masLigero && <>El más ligero: <b>{masLigero.nombre}</b>. </>}{menosGasta && menosGasta !== masLigero && <>El que menos gasta: <b>{menosGasta.nombre}</b>. </>}{masBarato && masBarato !== masLigero && masBarato !== menosGasta && <>El más barato con precio publicado: <b>{masBarato.nombre}</b>. </>}Más potencia que eso es más masa y más dinero sin ir más rápido.</p>
+              ? <p>Lo dan {sirven.length} de {filas.length} (en continuo; los que no publican la continua, a su potencia máxima). {masLigero && <>El más ligero: <b>{masLigero.nombre}</b>. </>}{menosGasta && menosGasta !== masLigero && <>El que menos gasta (con consumo publicado): <b>{menosGasta.nombre}</b>. </>}{masBarato && masBarato !== masLigero && masBarato !== menosGasta && <>El más barato con precio publicado: <b>{masBarato.nombre}</b>. </>}Más potencia que eso es más masa y más dinero sin ir más rápido.</p>
               : <p>Ninguno del catálogo lo da en continuo según lo que publica: los de potencia continua sin publicar no se cuentan.</p>}
           </>}
       </div>

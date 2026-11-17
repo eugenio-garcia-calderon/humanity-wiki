@@ -830,3 +830,6 @@ The «ordenar» refactor (PRs #1081, #1082, #1084) only moved code. Still open, 
 - (2026-11-17, motores) The engine comparison's L/100 km per option changes the mass by the engine only, not by the
   connection whose mass follows the engine's kW in series/parallel (a few kg; < 1 % of the figure). Running the full
   model per option: ≈ 2 h plus a cache, and ~17 model builds per render.
+- (2026-11-17, motores) The engine comparison table is 10 columns in a ~380 px side panel: it scrolls sideways (the
+  name column stays fixed). On a phone the consumption and price columns need a swipe. A card layout per engine for
+  narrow screens: ≈ 1 h. Prices exist for 11 of 19 engines/motors; the rest sell on request (≈ 2 h of asking shops).
