@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "colasuave2",
-      "ruta": "src/components/aeromovil/triciclo/modelo.ts",
-      "motivo": "colasuave2: el pico blanco entre el cristal y el panel de la cola",
-      "desde": "2026-11-17T01:48:55.877Z"
-    },
-    {
-      "agente": "colasuave2",
       "ruta": "src/components/aeromovil/garaje/balaModelo.ts",
       "motivo": "colasuave2: el pico blanco entre el cristal y el panel de la cola",
       "desde": "2026-11-17T01:48:58.258Z"
