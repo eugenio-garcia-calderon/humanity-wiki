@@ -38,12 +38,6 @@
     },
     {
       "agente": "ajustes",
-      "ruta": "src/pages/Aeromovil.tsx",
-      "motivo": "ajustes: rodadura del diseño en el comparador (2 líneas)",
-      "desde": "2026-11-17T19:59:32.376Z"
-    },
-    {
-      "agente": "ajustes",
       "ruta": "src/components/aeromovil/explicaciones/triciclo.ts",
       "motivo": "ajustes: Crr ciclomotor, Varios 18 kg (pocas líneas)",
       "desde": "2026-11-17T20:17:35.693Z"
