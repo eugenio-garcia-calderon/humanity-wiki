@@ -104,12 +104,6 @@
     },
     {
       "agente": "mgplanetario",
-      "ruta": "src/components/aeromovil/triciclo/campos.ts",
-      "motivo": "mgplanetario: campo tMotorElec (pocas líneas)",
-      "desde": "2026-11-17T17:01:08.009Z"
-    },
-    {
-      "agente": "mgplanetario",
       "ruta": "src/components/aeromovil/masasSecciones.ts",
       "motivo": "mgplanetario: MG2 en la sección Motor eléctrico (1 línea)",
       "desde": "2026-11-17T17:01:18.291Z"
