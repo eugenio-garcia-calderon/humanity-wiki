@@ -131,6 +131,12 @@
       "ruta": "src/components/aeromovil/garaje/index.ts",
       "motivo": "autogiro: añadir el ELA Eclipse REVO al garaje",
       "desde": "2026-11-17T11:02:04.419Z"
+    },
+    {
+      "agente": "motores",
+      "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
+      "motivo": "motores: títulos Motor gasolina / Motor eléctrico con su peso y tabla para comparar",
+      "desde": "2026-11-17T11:12:35.788Z"
     }
   ]
 }
