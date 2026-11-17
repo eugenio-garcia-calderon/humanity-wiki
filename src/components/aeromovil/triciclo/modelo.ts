@@ -13,6 +13,8 @@ import { type ClaveNumTriciclo, esRombo, conPuertas, conButacas, conSalpicadero,
 import { dentroDe, PAN_ASIENTO, ASIENTOS_FILAS, Z_FILA2, PIES_FILA2, PIES_FILA3, paqueteX, semiPaquete, semiLarguero, T_BORDE_LISA, T_PANEL_LISA, conLisa, fondoPaquete, camposTriciclo, rangoTriciclo, techoBajo, limitarTriciclo, medidasTriciclo } from './medidas';
 import { type PiernasButaca, puntosTriciclo, puntosFila, type AsientoFila, type Plaza, type Caja, Z_LARGUERO, bateriaEn, PEDAL_BUTACA, PIES_BUTACA, PIES_PASAJERO_BUTACA, PIES_PASAJERO, largueroTrasero } from './ocupantes';
 import { ejeBascula } from './bascula';
+import { cuerpoDe } from './talla';
+import { choquesPlaza, type PuntosConCuerpo } from './ajusteOcupantes';
 
 /** El modelo del Triciclo: la forma, los ocupantes, el bastidor, la batería, el motor y lo que lee el visor. */
 export function crearModeloTriciclo(P: Parametros) {
@@ -68,7 +70,14 @@ export function crearModeloTriciclo(P: Parametros) {
     while (fuera() && volante.atras < 0.25) { volante.c[0] -= 0.005; volante.atras += 0.005; }
     while (fuera() && volante.baja < 0.30) { volante.c[1] -= 0.005; volante.baja += 0.005; }
   }
-  const occ = (piloto: boolean, escala = 1) => puntosTriciclo(F, asientos, piloto, piloto ? rec.piloto : rec.pasajero, man, pies, escala, { alzaPas, volante, ...(butacas ? { butaca: piernasButaca(piloto) } : {}) });
+  // 2026-11-17 («muñecos», talla.ts): each rider at its own stature and build; absent, today's figure (escala 1, tMOcc)
+  const cuerpoPil = cuerpoDe(P, true, L('tMOcc')), cuerpoPas = cuerpoDe(P, false, L('tMOcc'));
+  // (an explicit `escala` is a reference size, as the head checks' «talla media / alta»: then no rider's own size)
+  const occ = (piloto: boolean, escala?: number): PuntosConCuerpo => {
+    const cu = piloto ? cuerpoPil : cuerpoPas, o: PuntosConCuerpo = puntosTriciclo(F, asientos, piloto, piloto ? rec.piloto : rec.pasajero, man, pies, escala ?? cu.k, { alzaPas, volante, ...(butacas ? { butaca: piernasButaca(piloto) } : {}) });
+    if (escala == null) o.cuerpo = cu;
+    return o;
+  };
   // three rows (round three): where rows 2 and 3 sit (their cushions at the passenger's saddle height), and the floor on the rails
   const filas = T.tAsientos === 'filas', yPiso = yL + dT / 2 + 0.02;
   const x2 = asientos.xPiloto - L('tFila2X'), x3 = x2 - L('tFila3X'), yAsiento = asientos.yPasajero;
@@ -281,9 +290,9 @@ export function crearModeloTriciclo(P: Parametros) {
     { fila: 2, x: asientos.xPasajero, z: 0, y: asientos.yPasajero, ancho: 2 * BUTACA.semi.cojin, fondo: BUTACA.delante + BUTACA.bisagra, respaldo: BUTACA.respaldo, rec: rec.pasajero, plegado: false },
   ] : null;
   const plazas: Plaza[] = [
-    { nombre: 'Piloto', fila: 1, z: 0, piloto: true, pts: occ(true), talla: e => occ(true, e) },
+    { nombre: 'Piloto', fila: 1, z: 0, piloto: true, pts: occ(true), talla: e => occ(true, e), cuerpo: cuerpoPil, kg: cuerpoPil.kg },
   ];
-  if (!filas) plazas.push({ nombre: 'Pasajero', fila: 2, z: 0, piloto: false, pts: occ(false), talla: e => occ(false, e) });
+  if (!filas) plazas.push({ nombre: 'Pasajero', fila: 2, z: 0, piloto: false, pts: occ(false), talla: e => occ(false, e), cuerpo: cuerpoPas, kg: cuerpoPas.kg });
   else {
     const A = ASIENTOS_FILAS, plegada2 = T.tFila2 === 'plegada', plegada3 = T.tFila3 === 'plegada';
     asientosFilas.push({ fila: 1, x: asientos.xPiloto, z: 0, y: asientos.yPiloto, ...A.piloto, rec: rec.piloto, plegado: false });
@@ -302,12 +311,12 @@ export function crearModeloTriciclo(P: Parametros) {
       // (2026-11-12: on the pack along the frame where it runs under the foot)
       return paquete ? y + sobrePaquete(x - 0.20, x + 0.02, Math.abs(z) - ancho - 0.045, y) : y;
     };
-    const fila = (x: number, z: number, ancho: number, e = 1) => puntosFila(x, yAsiento, recF, piso(x + 0.60 + 0.09, z, ancho), e, ancho);
+    const fila = (x: number, z: number, ancho: number, e?: number): PuntosConCuerpo => { const o: PuntosConCuerpo = puntosFila(x, yAsiento, recF, piso(x + 0.60 + 0.09, z, ancho), e ?? cuerpoPas.k, ancho); if (e == null) o.cuerpo = cuerpoPas; return o; };
     // (each passenger's feet: off the centre line close together, as row 2's two always were; on it, apart, as row 3's one)
     for (const r of filasDetras(T)) {
       if (r.fila === 2 ? plegada2 : plegada3) continue;
       const x = r.fila === 2 ? x2 : x3;
-      for (const z of r.zs) { const pies = Math.abs(z) < 1e-9 ? PIES_FILA3 : PIES_FILA2; plazas.push({ nombre: nombrePlaza(r.fila, z, r.n), fila: r.fila, z, piloto: false, pts: fila(x, z, pies), talla: e => fila(x, z, pies, e) }); }
+      for (const z of r.zs) { const pies = Math.abs(z) < 1e-9 ? PIES_FILA3 : PIES_FILA2; plazas.push({ nombre: nombrePlaza(r.fila, z, r.n), fila: r.fila, z, piloto: false, pts: fila(x, z, pies), talla: e => fila(x, z, pies, e), cuerpo: cuerpoPas, kg: cuerpoPas.kg }); }
     }
   }
 
@@ -354,7 +363,7 @@ export function crearModeloTriciclo(P: Parametros) {
 
   const Lf = F.LARGO;
   const Pm: Parametros = { ...P, ...T, L: Lf, B: xF - xR, W: anchoTotal, H: D.alto + elevar, clear: D.suelo, track: via };
-  return {
+  const modelo = {
     tipo: 'triciclo' as const, P: Pm, campos: T, F, D, sillines: asientos, aleta, cup, viaPedida, giro, rec, man, pies,
     xn: F.X_MORRO, xt: F.X_COLA, Lf, rF, rR, rL: rF, xR, xL: xF, xF, batalla: xF - xR, anchoTotal, anchoCuerpo: D.ancho, alto: D.alto + elevar, semiPod,
     /** Round three: the rigid lift above 15.8 cm (m), the seating layout, its seats, who sits where, and the floor's height. */
@@ -415,7 +424,12 @@ export function crearModeloTriciclo(P: Parametros) {
     /** Los maniquíes de talla media (el visor los dibuja con la función de los otros vehículos). */
     occPts: (piloto: boolean) => occ(piloto),
     occTalla: occ,
+    /** 2026-11-17: the pilot's and the passengers' size and mass (talla.ts). */
+    cuerpos: { piloto: cuerpoPil, pasajero: cuerpoPas },
   };
+  // (2026-11-17) what each rider touches, for the viewer to paint it (ajusteOcupantes.ts), worked out the first time it is asked
+  for (const q of plazas) { let memo: ReturnType<typeof choquesPlaza> | null = null; (q.pts as PuntosConCuerpo).choques = () => (memo ??= choquesPlaza(modelo, q)); }
+  return modelo;
 }
 export type ModeloTriciclo = ReturnType<typeof crearModeloTriciclo>;
 /**

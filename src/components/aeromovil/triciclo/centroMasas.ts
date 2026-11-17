@@ -4,7 +4,6 @@
 import { analizarMasas, centroDe, bordeLongitudinal, rangoReparto, traccionCuesta, CUESTA, AGARRE_MOJADO, FRENADA, type Masa, type RuedaApoyo, type AnalisisMasas, type Centro } from '../masasVehiculo';
 import type { ModeloTriciclo } from './modelo';
 import type { PiezaMasa } from './masas';
-import { limitarTriciclo } from './medidas';
 import { cgOcupante } from './ocupantes';
 
 /** Where each wheel touches the ground (x forward, z + to the right), which axle it is on, and which drive. */
@@ -29,8 +28,8 @@ export function ruedasTriciclo(m: ModeloTriciclo): RuedaApoyo[] {
 
 /** Everyone on board, each at their own centre (the same places as the checks' centre of gravity and the wheel loads). */
 export function ocupantesTriciclo(m: ModeloTriciclo): Masa[] {
-  const kg = limitarTriciclo('tMOcc', m.campos);
-  return m.plazas.map(q => { const [x, y] = cgOcupante(q.pts); return { nombre: q.nombre, kg, x, y, z: q.z, grupo: 'ocupantes' }; });
+  // (2026-11-17: each rider's own mass, from its size: talla.ts)
+  return m.plazas.map(q => { const [x, y] = cgOcupante(q.pts); return { nombre: q.nombre, kg: q.kg, x, y, z: q.z, grupo: 'ocupantes' }; });
 }
 
 /** The parts, the occupants and the luggage, as `analizarMasas` wants them. */

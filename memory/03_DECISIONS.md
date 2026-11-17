@@ -2125,3 +2125,16 @@ Eugenio: «permite añadir más tipos de ruedas, por ejemplo de motos de todo ti
   the engine as far as needed to be clean put it 13 cm higher on the default Triciclo, the opposite of the request.
 - **«Masas» is a tab id, not a `Departamento`**: it has no tasks, suppliers or messages, so it is not in
   `DEPARTAMENTOS` (the Aeromóvil 1's eleven tabs do not change).
+
+## 2026-11-17 · How a rider's size scales («muñecos»)
+
+- **One length scale per rider** (`k` = stature / 1.756 m, ANSUR II's mean man, today's figure): every segment the
+  model already scaled with `escala` (hip over the cushion, trunk, neck, thigh, shank) plus, in the viewer, arms, head and
+  feet. Considered: separate sitting-height and leg-length ratios (women have relatively longer legs); rejected for
+  now, the difference is ~1 % of stature and Eugenio asked for «más altos o más gordos».
+- **Build as four classes, not free sliders** (delgado, medio, corpulento, muy corpulento): widths ×0.92–1.20 over `k`,
+  belly ×0.85–1.6, BMI 21/26/31/37. Four named people read better than three sliders that interact.
+- **Mass = `tMOcc` × k² × BMI/26**, with an optional typed value. `tMOcc` keeps its meaning («the average man») so
+  every saved design with a changed `tMOcc` keeps its mass; the medium build at 1.756 m is exactly `tMOcc`.
+- **The hip stays on the cushion and the feet on the pedals/footpegs**: a taller rider's knees rise (`rodilla()`), as
+  in a real car with the seat not moved. Red = the check's clearance < 0, amber = below its minimum.
