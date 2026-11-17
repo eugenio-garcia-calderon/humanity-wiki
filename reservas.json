@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "colacorte",
-      "ruta": "src/components/aeromovil/triciclo/medidas.ts",
-      "motivo": "colacorte: cola cortada Kamm en Modelo 1",
-      "desde": "2026-11-17T09:32:44.243Z"
-    },
-    {
-      "agente": "colacorte",
       "ruta": "src/components/aeromovil/garaje/balaModelo.ts",
       "motivo": "colacorte: cola cortada Kamm en Modelo 1",
       "desde": "2026-11-17T09:32:46.918Z"
