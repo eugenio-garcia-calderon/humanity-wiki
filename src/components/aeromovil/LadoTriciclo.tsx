@@ -15,6 +15,7 @@ import { FichaHibrido } from './FichaHibrido';
 import { CatalogoPieza, type Necesidad } from './CatalogoTren';
 import { valoresCatalogo, type CATALOGO_CLAVES } from './catalogoTren';
 import { fmt, m2, Deslizador, Bloque, Selector, ListaComprobaciones } from './controles';
+import { ANGULO_MAX, estimacionKamm } from './garaje/kamm';
 
 /** El Cd del túnel para el Triciclo: lo que da, a qué área se refiere y si aún calcula. */
 export interface CdTriciclo { calculando: boolean; cd?: number; areaRef?: number }
@@ -180,6 +181,9 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
       // 2026-11-13: the smooth body
       // (2026-11-16: the round body's flat tail up to 1.5, wider than the cabin; and the cabin–tail transition)
       case 'tColaPlanaAncho': return v < 0.01 ? 'como siempre' : Math.abs(v - 1) < 0.01 ? 'todo el ancho (Aptera)' : v > 1 ? `más ancha que la cabina (+${Math.round((v - 1) * 100)} %)` : `${Math.round(v * 100)} % hacia todo el ancho`;
+      // 2026-11-17: the Kamm tail
+      case 'tKammSeccion': { const k = modelo.F.kamm; return `${Math.round(v * 100)} % de la sección mayor${k ? `${k.limitado ? ` → ${Math.round(k.fraccion * 100)} % (lo más adelante que deja la cúpula, 15 cm detrás de su final)` : ''} · a ${m2(-k.x)} del eje delantero, ${cm(k.ahorro, 0)} más corta que la cola larga` : ''}`; }
+      case 'tKammCavidad': return v < 0.0005 ? 'culote plano' : `${cm(v, 1)} de hondo`;
       case 'tColaTrans': { const t = modelo.F.transicion; return t > 0 && t < v - 0.005 ? `${cm(v, 0)} → ${cm(t, 0)} (lo que cabe entre el final de la cúpula y el eje)` : cm(v, 0); }
       case 'tColaAncho': case 'tMorroAncho': return v < 0.01 ? 'como siempre' : v > 0.99 ? 'todo el ancho (Aptera)' : `${Math.round(v * 100)} % hacia todo el ancho`;
       case 'tColaGrosor': case 'tMorroGrosor': return v < 0.0005 ? 'se cierra en punta' : `${cm(v, 1)} de grueso`;
@@ -250,7 +254,9 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
         // 2026-11-13: the smooth body's sliders only with «Cubierta lisa»
         : LISA.includes(k) ? T.tCubierta === 'lisa'
           // 2026-11-16: the round body's flat tail width, with a flat tail and without the smooth body
-          : k === 'tColaPlanaAncho' ? T.tCubierta !== 'lisa' && T.tColaPlana > 0 : true;
+          : k === 'tColaPlanaAncho' ? T.tCubierta !== 'lisa' && T.tColaPlana > 0
+            // 2026-11-17: the Kamm tail's sliders only with «Cola cortada»
+            : k === 'tKammSeccion' || k === 'tKammCavidad' ? T.tColaCorte === 'kamm' : true;
   // 2026-11-16: each hybrid architecture shows its own efficiency sliders (hibrido.ts)
   const arqH = T.tHibArq ?? 'reparto';
   const hibridoVisible = (k: string) => k === 'tHibMec' ? arqH === 'reparto' : k === 'tRendElec' ? arqH !== 'paralelo' : k === 'tRendCaja' ? arqH === 'paralelo' : true;
@@ -405,6 +411,7 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
             {bloque === 'Ejes y ruedas' && <p className="-mt-1 text-xs text-slate-500">Ruedas traseras: una dentro de la cola, sobre un basculante, como un triciclo; o dos fuera, en carenados como los de delante sobre dos brazos carenados cada uno, que no giran: cuatro ruedas. Con dos, el motor se reparte en dos motores de buje, uno en cada rueda, y la cola queda libre para el maletero.{cuatro ? ` La vía trasera va de lo justo para que los carenados queden a 3 cm de la cola (${m2(vistaTriciclo(deslizadoresTriciclo().find(f => f.clave === 'tViaTras')!, T).min)}) a la vía delantera más ancha; de serie, la de delante.` : ''}</p>}
           </>}
           {bloque === 'Bastidor' && <p className="-mt-1 text-xs text-slate-500">Dos largueros sobre la panza con {modelo.larguerosTraseros ? 'cinco' : 'cuatro'} travesaños, {paquete ? 'la cuna de la suspensión delantera (con la batería a lo largo del bastidor, en el morro ya no hay batería), el paquete de batería sobre el fondo de la panza, con los largueros pasando por dentro' : 'la cuna de la batería (donde se apoya la suspensión delantera)'}, los soportes de los {butacas ? 'asientos' : filas ? 'asientos' : 'sillines'}, la torreta del amortiguador{modelo.larguerosTraseros ? ', los largueros siguiendo hasta el eje trasero (suben con la panza donde la cola se levanta y se cierran donde se estrecha) y una cuna trasera hasta donde llegan los brazos de los carenados de atrás' : ''} y el soporte de la columna de dirección: {fmt(rt.bastidor.metros, 1)} m de tubo. {cuatro ? (modelo.larguerosTraseros ? '' : 'Los largueros acaban en la torreta: «Largueros: hasta» › «El eje trasero» los lleva hasta donde las ruedas de atrás meten su peso. ') : 'Con una rueda detrás, los largueros acaban en la torreta: la rueda va entre ellos, en la cola. '}La separación de los largueros se mide de eje a eje; más separados, el bastidor es más ancho y el paquete de batería, que es un porcentaje de ese ancho, también. Se ve con «Rayos X» o la capa «Chasis».</p>}
+          {bloque === 'Cola' && modelo.F.kamm && <ParrafoKamm modelo={modelo} cd={cd} />}
           {bloque === 'Forma' && T.tCubierta === 'lisa' && <p className="-mt-1 text-xs text-slate-500">Cubierta lisa: detrás del cristal de la cúpula y delante del parabrisas, lo de arriba ya no sigue la forma redonda de la cúpula. Es una cubierta casi plana, un poco abombada en el centro (el «bombeo»), que solo baja hacia la punta, con un canto redondeado hacia los lados. Así no salen montículos ni hombros, se muevan como se muevan los deslizadores (lo comprueba un programa con cada deslizador en sus dos extremos y muchas combinaciones). Entre la cúpula y la cubierta la forma se funde a lo largo de 30 cm, sobre el cristal.</p>}
           {bloque === 'Techo solar y ventanas' && <p className="-mt-1 text-xs text-slate-500">La forma de la cúpula no cambia: el techo solar y las ventanas se dibujan sobre ella. Detrás de donde empieza, lo alto de la cúpula es un panel solar opaco (da sombra a las cabezas: menos calor dentro en verano); por los lados, encima de la ventana. Delante, el parabrisas pasa por encima hasta el panel.{T.tSolarCola === 'si' ? ` Por detrás, el panel sigue por lo alto de la cola hasta su punta, como en el Aptera; con el portón, la parte de encima del portón se levanta con él (con la tapa del maletero, con la tapa).${T.tCubierta === 'lisa' ? ' Con la cubierta lisa cubre toda la cubierta de la cola, dejando un marco de unos 5 cm a cada lado.' : ''}` : ''}{puertas ? ' Con las puertas como el Aptera hay montante siempre (la puerta se corta por él), aunque arriba diga «De una pieza».' : ''} El montante sale del borde del cristal, sube y se tumba hacia atrás en una sola curva hasta el techo, como en el Aptera, y sigue como marco entre la ventana y el techo.{modelo.ventanas.marco ? ` Entre el panel y el cristal va un marco de carrocería de ${cm(modelo.ventanas.marco.ancho, 0)}: arriba del parabrisas y a lo largo de los dos carriles del techo (${fmt(modelo.marcoTecho)} m² de laminado en lugar de panel).` : ''} Panel: {res.areas.solar > 0.005 ? `${fmt(res.areas.solar)} m², ${Math.round(res.solarPico)} W a pleno sol, unos ${fmt(res.solarDia / 1000)} kWh al día (estimado)` : 'ninguno'}; cristal: {fmt(res.areas.cristal)} m².</p>}
           {bloque === 'Techo solar' && <p className="-mt-1 text-xs text-slate-500">{res.areas.solar > 0.005 ? `${fmt(res.areas.solar)} m² de panel: ${Math.round(res.solarPico)} W a 1000 W/m², y de media unos ${fmt(res.solarDia / 1000)} kWh al día (${fmt(P.sol, 1)} kWh/m² al día sobre plano, el panel curvo recoge un 70 % de eso, células al ${Math.round(0.21 * 100)} % y un 15 % de pérdidas). ${Math.round(res.masas['Paneles solares'] ?? 0)} kg de panel, sobre laminado de carrocería en lugar del cristal.` : 'Sin techo solar: la cúpula es toda de cristal (se mueve en Carrocería › Techo solar y ventanas).'}</p>}
@@ -461,5 +468,26 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
         {(dep === 'interior' || dep === 'proyecto') && <p className="text-xs text-slate-500">Cabezas: un hombre sentado, sin casco, de talla media (91,8 cm sentado erguido) y alta (97,7 cm, percentil 95; ANSUR II, 2012); el tronco reclinado lo que diga su respaldo y la cabeza un tercio de eso. Se mide de la parte de arriba y de atrás del cráneo a la cara de dentro del cristal. El alcance compara del hombro al puño con un brazo de 58 cm, con los codos algo doblados.</p>}
       </Bloque>
     </>
+  );
+}
+
+/**
+ * The Kamm tail in the «Cola» block (2026-11-17): where it is cut, what it saves, the taper ahead of the cut, and the
+ * literature's base drag next to the tunnel's Cd, labelled as what it is (garaje/kamm.ts). The tunnel sees the cut through
+ * the body's silhouette; its constants are not touched.
+ */
+function ParrafoKamm({ modelo, cd }: { modelo: ModeloTriciclo; cd: CdTriciclo }) {
+  const k = modelo.F.kamm!, areaRef = cd.areaRef ?? null, e = areaRef ? estimacionKamm(k, areaRef) : null;
+  const cm = (v: number, d = 0) => `${fmt(v * 100, d)} cm`, grados = (v: number) => `${Math.round(v)}°`;
+  const pend = Math.max(k.angTecho, k.angLado, k.angBajos);
+  return (
+    <p className="-mt-1 text-xs text-slate-500">
+      Cola cortada: la carrocería se dibuja con su cola larga y se corta en recto donde su sección ha bajado al {Math.round(k.fraccion * 100)} % de la mayor
+      (Kamm cortaba al 50 %). Largo del coche {m2(modelo.F.LARGO)}: {cm(k.ahorro)} menos que con la cola entera. El culote mide {cm(k.alto)} de alto por {cm(k.ancho)} de ancho
+      ({fmt(k.area, 2)} m²){k.cavidad > 0.0005 ? `, con un hueco de ${cm(k.cavidad, 1)}` : ''}. Justo antes del corte la cola se cierra {grados(k.angTecho)} por arriba,
+      {' '}{grados(k.angLado)} por los lados y {grados(k.angBajos)} por abajo{pend > ANGULO_MAX ? `: más de ${ANGULO_MAX}°, el aire ya se ha soltado antes de llegar al corte y el corte no ayuda (alarga la cola imaginaria, «Techo: caída» más tarde o sube la punta, o corta más atrás)` : ': el aire llega pegado al borde, que es lo que hace funcionar el corte'}.
+      {' '}Cd del túnel con este corte: {cd.cd != null ? fmt(cd.cd, 3) : 'calculando…'} (lo ve por la silueta: el culote, menos superficie y menos largo).
+      {e ? ` Estimación aparte, de la literatura (no del túnel): solo el culote cuesta entre ${fmt(e.min, 3)} y ${fmt(e.max, 3)} de Cd (succión de ${fmt(0.15, 2)}–${fmt(0.20, 2)} sobre ${fmt(k.area, 2)} m² de culote${k.cavidad > 0.0005 ? `, ${Math.round((1 - e.factorCavidad) * 100)} % menos por el hueco` : ''}). Una cola larga bien cerrada no paga ese culote; el corte cambia largo por arrastre.` : ''}
+    </p>
   );
 }

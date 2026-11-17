@@ -2014,6 +2014,29 @@ design's weak points with recommendations.
   https://en.wikipedia.org/wiki/Kammback (cut at 50 % of the largest section);
   https://en.wikipedia.org/wiki/Automotive_aerodynamics (mirrors 2–7 % of drag; Honda e cameras −3.8 %).
 
+## 2026-11-17 · Kamm (cut) tail: cut the built long tail, by section fraction
+
+Eugenio: «estudia los cortes drásticos de las colas… sin tener que hacer una cola muy alargada, y permite seleccionarla en
+el "Modelo 1"». Options considered:
+- **Cut the existing shape where its section is a fraction of the largest (chosen).** `DimBala.corte` in
+  garaje/balaForma.ts: the whole shape is built as before (the long, «virtual» tail sets the taper) and `X_COLA`,
+  `LARGO`, the cache, `envolvente()`, `dentroPiel` read the cut as the end. Everything downstream (tunnel silhouette,
+  masses, checks, 3D rows) follows without changes; with `corte` absent the code path is bit for bit the old one.
+  The 3D closes the cut with a flat plate (balaModelo.ts `culote`), optional cavity walls.
+- A taper-angle slider that reshapes the tail: rejected; the tail's top line comes from the canopy's fall, the
+  stretch and the tail cap (three systems tuned for continuity, scripts/cola-continuidad.ts). The angle is measured and
+  checked instead («Cola cortada: el aire llega pegado al corte», ≤ 15°), and the panel names the sliders that soften it.
+- Cut by % of length: rejected; Kamm's rule and the literature are in section area.
+- Base drag: the tunnel already charges K_BASE 0.2 × area behind separation, and it sees the cut base through the
+  silhouette (its own elliptical cap closes it). No constant was touched. The cavity and the edge sharpness are invisible
+  to it, so garaje/kamm.ts gives a separate, labelled literature estimate (base suction 0.15–0.20, −18 % with a cavity of
+  27 % of the base height), used by the panel and by the study rule «kamm-culote».
+- The long-tail ↔ cut comparison of the aerodynamic study is in rule «cola-kamm», not in «cola-corta» as the study's
+  author suggested: it moves `tColaCorte`, and a key may belong to one rule only.
+Numbers (tunnel «media», 80 km/h, Rombo Bala): 0.63 m pointed 3.83 m Cd 0.2066; 1.8 m long 5.00 m 0.1992; cut at
+40 / 50 / 60 %: 3.49 m 0.2338 / 3.22 m 0.2510 / 3.09 m 0.2681. Sources: Wikipedia «Kammback»; Mercedes-Benz Classic
+«History of aerodynamics»; SAE 2020-01-0673; Evrard, Cadot et al. (core.ac.uk 52674332); Transport Canada / NRC
+trailer-based drag reduction; Hucho 1998.
 ## 2026-11-17 · Section weights: a derived breakdown, not a new parts list
 
 Eugenio asked for the weight of every side-panel section and a finer chassis (tubes vs bolts). Options:

@@ -809,6 +809,21 @@ The «ordenar» refactor (PRs #1081, #1082, #1084) only moved code. Still open, 
 - The A1 and Gota slider labels and ranges come from `tunel/explicaciones.ts` (`A1`, `GOTA`, now exported), still a
   copy of what their panels draw (third reader of that copy). Moving both panels to a table like `FILAS`: ≈ 2 h.
 
+## 2026-11-17 · Kamm tail: what the tunnel cannot see
+
+- **Base cavity and edge sharpness are not in the tunnel.** It sees the silhouette only, closes the cut with its own
+  elliptical cap (0.6 × the smaller half-axis, ≤ 15 cm) and charges K_BASE 0.2 × the area behind separation. The cavity's
+  −18 % is a literature estimate shown apart (garaje/kamm.ts). Making the tunnel take a per-body base-suction factor
+  is ~3 h plus a recalibration Eugenio has to approve («tranqui con lo de los CD»).
+- **The tunnel may favour short, steep pointed tails.** Rombo Bala's 63 cm tail closes ~35° on top yet the tunnel finds
+  only 0.048 m² behind separation; a literature reading would separate it earlier. Cut tails of the same length then look
+  worse by comparison. Checking the separation model against a published steep-tail case (Ahmed body 25°/35°) is ~4 h.
+- **The cut is clamped 15 cm behind `cupFin`**, not behind the glass's real end (`contornoCupula`): crearForma does not
+  know the canopy outline. On designs where the glass ends further back the clamp could be short; ~1 h to pass it in.
+- **The base cavity is not checked against the parts inside the tail.** On the Rombo Bala with the tail cut at 40 % and
+  a 6 cm cavity, an unnamed part of the «Suspensión» layer (rear, at x −3.009 m, the plate at −2.976) shows through the
+  plate as a red disc inside the hollow. The cavity is drawn only; nothing reserves its volume. A check «hueco del culote
+  libre» (sample the cavity's volume against the parts' boxes, as `dentroPiel` does for the skin) is ~1.5 h.
 ## 2026-11-17 · Section weights map parts to blocks by name
 
 `masasSecciones.ts` assigns each part of the parts list to a side-panel block with a regex on its name, and recomputes

@@ -176,6 +176,8 @@ export function formaR3(T: CamposTriciclo): Partial<DimBala> {
   // 2026-11-16: the round body always joins the cabin and the tail without a crease (garaje/transicionCola.ts)
   // (with the smooth body it only acts where the canopy ends within 25 cm of the rear axle: balaForma.ts `lam`)
   o.transCola = limitarTriciclo('tColaTrans', T);
+  // 2026-11-17: the Kamm cut, only when chosen (absent, the body is built as before, bit for bit)
+  if (T.tColaCorte === 'kamm') { o.corte = limitarTriciclo('tKammSeccion', T); o.cavidad = limitarTriciclo('tKammCavidad', T); }
   return o as unknown as Partial<DimBala>;
 }
 export let cacheCuerpo: { clave: string; F: FormaBala } | null = null;
