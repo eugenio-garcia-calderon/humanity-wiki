@@ -97,12 +97,6 @@
       "desde": "2026-11-17T14:19:28.282Z"
     },
     {
-      "agente": "masas2",
-      "ruta": "src/components/aeromovil/explicaciones/triciclo.ts",
-      "motivo": "masas: deslizadores del motor y del depósito",
-      "desde": "2026-11-17T14:26:59.781Z"
-    },
-    {
       "agente": "legado",
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "legado: aviso solo lectura y abrir el Aeromóvil S (pocas líneas)",
