@@ -173,6 +173,12 @@
       "ruta": "src/components/aeromovil/estudio/reglas.ts",
       "motivo": "capo: capó, tomas de aire y radiador (pocas líneas)",
       "desde": "2026-11-17T14:07:07.966Z"
+    },
+    {
+      "agente": "proveedores",
+      "ruta": "drizzle/0224_aeromovil_adjuntos.sql",
+      "motivo": "proveedores: registro de archivos adjuntos por componente",
+      "desde": "2026-11-17T14:13:30.504Z"
     }
   ]
 }
