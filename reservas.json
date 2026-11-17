@@ -113,6 +113,12 @@
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "quitar: fuera «¿Algo que mejorar?» y «Empezar un diseño nuevo» (pocas líneas)",
       "desde": "2026-11-17T17:01:22.447Z"
+    },
+    {
+      "agente": "munecos",
+      "ruta": "src/components/aeromovil/triciclo/modelo.ts",
+      "motivo": "munecos: talla y complexión de los ocupantes (pocas líneas)",
+      "desde": "2026-11-17T17:06:31.216Z"
     }
   ]
 }
