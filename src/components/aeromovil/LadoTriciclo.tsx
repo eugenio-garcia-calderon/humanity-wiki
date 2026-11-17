@@ -15,6 +15,7 @@ import { FichaHibrido } from './FichaHibrido';
 import { CatalogoPieza, type Necesidad } from './CatalogoTren';
 import { ComparadorMotores } from './ComparadorMotores';
 import { pesoSeccion, seccionesTriciclo, textoPesoSeccion } from './masasSecciones';
+import { DesglosePeso, SinSeccion } from './PesoSeccion';
 import { valoresCatalogo, type CATALOGO_CLAVES } from './catalogoTren';
 import { fmt, m2, Deslizador, Bloque, Selector, ListaComprobaciones } from './controles';
 import { ANGULO_MAX, estimacionKamm } from './garaje/kamm';
@@ -291,7 +292,10 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
   const bloques = [...new Set([...fichas.map(f => f.bloque), ...sels.map(s => s.bloque)])];
   const tituloBloque = (b: string) => TITULO_BLOQUE[b] ?? b;
   // (2026-11-17) the engine blocks' weight: the same sections as every other block's (masasSecciones.ts)
-  const pesosSec = dep === 'propulsion' ? seccionesTriciclo(res, modelo) : null;
+  // and every other block's (2026-11-17, «pesossecciones»: «en todos los demás desplegables … el peso sumado de toda esa
+  // sección»); a block with no mass shows nothing
+  const pesosSec = dep === 'proyecto' ? null : seccionesTriciclo(res, modelo);
+  const seccionDe = (b: string) => (dep === 'proyecto' ? null : pesoSeccion(pesosSec, dep, b));
   const seccionMotor = (b: string) => (BLOQUES_MOTOR.includes(b) ? pesoSeccion(pesosSec, 'propulsion', b) : null);
   const cdComparar = cd.cd != null && cd.areaRef != null ? { cd: cd.cd, areaRef: cd.areaRef } : null;
   const checks = res.comprobaciones.filter(c => dep === 'proyecto' || (c.dep ?? '').split(',').includes(dep));
@@ -370,9 +374,10 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
         {cuatro || rombo
           ? (rombo ? <p className="text-xs text-slate-500">Cuatro ruedas en rombo: una en el morro, que gira; dos laterales en carenados, que no giran (con «Bascular en las curvas», se inclinan con la cabina); y una en la cola con el motor en el buje. Es la disposición del Cuadriciclo Bala en rombo con esta carrocería (en Rodaje, «Disposición de las ruedas», se vuelve a la de dos delante).</p> : <p className="text-xs text-slate-500">Cuatro ruedas: dos delante en carenados como el Aptera, que giran con ellas, y dos detrás en carenados iguales, que no giran, con un motor en el buje de cada una. Es el Triciclo Bala con otra parte de atrás: la carrocería y todas sus medidas son las mismas (en Rodaje, «Ruedas traseras», se vuelve a la de una rueda).</p>)
           : <p className="text-xs text-slate-500">Tres ruedas: dos delante en carenados como el Aptera, que giran con ellas, y una detrás dentro de la cola, con el motor en el buje. La carrocería es la del Cuadriciclo Bala en rombo; con las medidas por defecto, la misma.</p>}
+        <SinSeccion partes={dep === 'proyecto' ? undefined : pesosSec?.sinSeccion[dep]} />
       </Bloque>
       {[...bloques].sort((a, b) => ordenBloque(a) - ordenBloque(b)).map(bloque => (
-        <Bloque key={bloque} id={`bloque-${bloque}`} titulo={tituloBloque(bloque)} peso={textoPesoSeccion(seccionMotor(bloque))} plegable={bloque === 'Propulsión' ? undefined : { abierto: abiertos.has(bloque), alAlternar: () => alternar(bloque) }} nota={`${fichas.filter(f => f.bloque === bloque).length + sels.filter(s => s.bloque === bloque).length} ajustes`}>
+        <Bloque key={bloque} id={`bloque-${bloque}`} titulo={tituloBloque(bloque)} peso={textoPesoSeccion(seccionDe(bloque))} plegable={bloque === 'Propulsión' ? undefined : { abierto: abiertos.has(bloque), alAlternar: () => alternar(bloque) }} nota={`${fichas.filter(f => f.bloque === bloque).length + sels.filter(s => s.bloque === bloque).length} ajustes`}>
           {bloque === 'Forma' && (() => {
             // round two (2026-11-10): one lever for «hazlo un poco más grande»; it moves the nose, wheelbase and tail (see estirarTriciclo)
             const lg = largoTriciclo(T);
@@ -442,6 +447,7 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
           {bloque === 'Acabado interior' && <FichaAcabado T={T} piezas={rt.piezas} areas={modelo.interior.forro?.areas ?? null} consola={!!modelo.interior.consola} />}
           {bloque === 'Tapicería' && <p className="-mt-1 text-xs text-slate-500">{T.tTapiz === 'serie' ? 'Los asientos de serie: vinilo gris oscuro acolchado en rombos con un pespunte rojo. Al elegir otra tapicería, la funda cambia en los mismos asientos (sillín y respaldos, butacas o asientos de las filas); en las butacas, la carcasa blanca pasa al color de los laterales.' : `${TAPICES.find(t => t.k === T.tTapiz)?.n ?? ''}: la funda nueva cubre los mismos asientos${T.tAsientos === 'butacas' ? ' y la carcasa de las butacas toma el color oscuro de los laterales, como los costados de los asientos del Vision Jet' : ''}. ${T.tCostura === 'no' ? 'Sin costura vista.' : T.tCostura === 'recta' ? 'Costura recta: canales a lo largo, con un pespunte doble a cada lado.' : 'Costura geométrica: líneas que se cruzan desde dos nudos, como la del Vision Jet, con pespunte doble.'} Masa: la diferencia de la funda con la de serie (que ya cuenta «Un asiento»).`}{T.tCinturon !== 'no' ? ' Cinturones de tres puntos: del hombro, por encima del pecho, a la hebilla en la otra cadera, y la cinta de las caderas; en un asiento vacío, recogido por su costado.' : ''}</p>}
           {bloque === 'Batería' && !paquete && <p className="-mt-1 text-xs text-slate-500">Primero en el morro, donde el Cuadriciclo en rombo lleva la rueda delantera ({Math.round(rt.bateria.litrosMorro)} L), luego en un módulo estrecho entre los pies del piloto; si hace falta más, el módulo del morro sube, crece hacia la punta y queda un módulo plano bajo los sillines. Ahora: {Math.round(rt.bateria.litros)} L y {Math.round(rt.bateria.kg)} kg{rt.bateria.litros - rt.bateria.cabe > 0.05 ? `: caben ${Math.round(rt.bateria.cabe)} L, faltan ${Math.round(rt.bateria.litros - rt.bateria.cabe)} (un morro más largo, una carrocería más ancha o celdas más densas)` : ''}.</p>}
+          {!BLOQUES_MOTOR.includes(bloque) && <DesglosePeso s={seccionDe(bloque)} abierto={bloque === 'Bastidor'} />}
         </Bloque>
       ))}
 
