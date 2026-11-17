@@ -191,6 +191,12 @@
       "ruta": "src/components/aeromovil/legado.ts",
       "motivo": "legado: fichero nuevo",
       "desde": "2026-11-17T14:14:46.975Z"
+    },
+    {
+      "agente": "legado",
+      "ruta": "drizzle/0226_aeromovil_s_por_defecto.sql",
+      "motivo": "legado: el Aeromóvil S por defecto",
+      "desde": "2026-11-17T14:16:00.009Z"
     }
   ]
 }
