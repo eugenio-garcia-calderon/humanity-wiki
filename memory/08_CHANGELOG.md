@@ -12250,6 +12250,14 @@ tengas, pues que aparezca también el peso de ese desplegable.»
   precios»). Orientativos. EMRAX, Saietta, Rotax, Kubota y algunos QS/Golden no publican precio: sale «—».
 - Dos motores de gasolina más: Honda GX270 (5,1 kW continuos, 25,8 kg) y Kubota WG752 (3 cilindros, agua, 18,5 kW, 62 kg).
 - Los diseños guardados no cambian (siguen con su motor). No se ha tocado el túnel.
+
+## 2026-11-17 · Aeromóvil: el peso en los desplegables del Triciclo (segunda parte)
+
+- Lo anterior ya se ve en el Triciclo, el rombo y el de cuatro ruedas: cada desplegable de Carrocería, Chasis, Rodaje,
+  Energía, Interior y Motor dice su peso en el título; Chasis › Bastidor abre el desglose de tubos, tornillería,
+  soportes y soldaduras. Los dos de motor usan la misma cuenta (lo hizo el trabajo de los motores).
+- Todavía no: la Gota y el Cuadriciclo Basculante. Las cifras ya existen (`masasSecciones.ts`); falta ponerlas en su
+  panel, que otros estaban tocando en ese momento.
 ## 2026-11-17 · Autogiro ELA Eclipse REVO en el garaje
 
 - Eugenio, con una foto de un autogiro color cobre: «haz un modelo 3D del autogiro de ELA Aviación, el ultimo modelo».
