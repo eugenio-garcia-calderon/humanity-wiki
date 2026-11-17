@@ -83,6 +83,12 @@
       "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
       "motivo": "electronica: bloque Electrónica de potencia (4 líneas)",
       "desde": "2026-11-17T18:42:31.923Z"
+    },
+    {
+      "agente": "garajeboton",
+      "ruta": "src/pages/Aeromovil.tsx",
+      "motivo": "garajeboton: botón Ver/Ocultar garaje en la barra (pocas líneas)",
+      "desde": "2026-11-17T18:53:59.850Z"
     }
   ]
 }
