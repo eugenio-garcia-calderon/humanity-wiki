@@ -47,6 +47,12 @@
       "ruta": "src/components/aeromovil/triciclo/comprobaciones.ts",
       "motivo": "colacorte: cola cortada Kamm en Modelo 1",
       "desde": "2026-11-17T09:32:54.425Z"
+    },
+    {
+      "agente": "colacorte",
+      "ruta": "scripts/cola-continuidad.ts",
+      "motivo": "colacorte: cola cortada Kamm en Modelo 1",
+      "desde": "2026-11-17T09:32:56.845Z"
     }
   ]
 }
