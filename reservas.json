@@ -119,6 +119,12 @@
       "ruta": "src/components/aeromovil/Disenos.tsx",
       "motivo": "notas: diseño abierto para las notas",
       "desde": "2026-11-17T13:37:52.284Z"
+    },
+    {
+      "agente": "notas",
+      "ruta": "src/server/seguridad/clasificacion.ts",
+      "motivo": "notas: clasificar aeromovil_notas",
+      "desde": "2026-11-17T13:37:55.302Z"
     }
   ]
 }
