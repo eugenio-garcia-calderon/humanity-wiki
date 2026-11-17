@@ -824,3 +824,16 @@ The «ordenar» refactor (PRs #1081, #1082, #1084) only moved code. Still open, 
   a 6 cm cavity, an unnamed part of the «Suspensión» layer (rear, at x −3.009 m, the plate at −2.976) shows through the
   plate as a red disc inside the hollow. The cavity is drawn only; nothing reserves its volume. A check «hueco del culote
   libre» (sample the cavity's volume against the parts' boxes, as `dentroPiel` does for the skin) is ~1.5 h.
+
+## 2026-11-17 · Homologation pre-check: what the first version leaves out (Eugenio: «publish a first version asap»)
+
+- **Not read on EUR-Lex itself**: 168/2013 and 3/2014 were read on legislation.gov.uk (EU text as of 31-1-2020); 134/2014,
+  2018/858, 2019/2144 and RD 750/2010 are cited, not reread (`FUENTES[x].leido: false`). Re-check every limit against
+  the consolidated EUR-Lex texts, especially Euro 5/5+ and OBD dates (2019/129) and the Euro 5 noise column: ~3 h.
+- **Rombo layout**: front-axle share and per-tyre load are «no se puede comprobar» (the model does not share the load
+  among four diamond supports): ~2 h with a 4-support static solve.
+- **Tyre speed symbol, headlamp heights (500–1200 mm), plate space, R-point ≥ 400 mm**: the model knows some of these
+  (lamp positions, seat hip) but they are not wired: ~3 h.
+- **Not joined to «Revisión de puntos críticos»** (bot «masas», not on main when this merged): `fallosHomologacion(ficha)`
+  in `evaluar.ts` returns the fails of the design's category for that list: ~30 min once it is on main.
+- **The Cuadriciclo Bala has no masses/motor** (body only): mass, power and speed rows read «no se puede comprobar».

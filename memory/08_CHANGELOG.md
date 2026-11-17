@@ -12199,3 +12199,28 @@ una cola muy alargada, y permite seleccionarla en el "Modelo 1"».
   Evrard, Cadot y otros (cavidad en la base: −18 % de succión, ΔCd −9 % en un cuerpo de culote recto); Transport
   Canada / NRC (colas de barco en remolques: −6 a −7 %, igual con 2 que con 4 pies).
 - No visto en un teléfono: si sale la versión vieja, `humanity.wiki/?sw=off`.
+
+## 2026-11-17 · Aeromóvil: pestaña «Homologación» (comprobación previa de la categoría europea)
+
+Eugenio: «Falta un apartado en el menú que sea de homologación. Igual puedes ponerlo en uno al lado de interior, arriba
+en el menú, que sea homologación y que indiques ahí, pues por ejemplo, para el triciclo, pues que sea la de
+homologación europea de triciclo pesado. Y pongas ahí las características de homologación y las restricciones que hay
+según normativa con todo lujo de detalles. Y ver si cumple o no cumple con algunas de ellas y qué margen hay todavía
+para ponerle más potencia, más peso, etcétera.»
+
+- **Dónde está.** En el Triciclo, el clásico, el rombo y el Basculante: pestaña «Homologación» arriba, justo después de
+  «Interior». En el Aeromóvil 1, dentro de su pestaña «Homologación» de siempre, debajo de las tareas. En el Gota y el
+  Cuadriciclo Bala (que no tienen pestañas): un botón «Homologación» debajo de la vista 3D.
+- **Qué hace.** Elige sola la categoría en la que cae el diseño (la de «triciclo pesado» es la **L5e-A, triciclo de
+  motor**), con un selector para comparar con las otras (bicicleta asistida, L3e, L2e, L6e-A, L6e-BP, L7e-CP, L7e-A2,
+  L7e-A1 y M1). Dice por qué no entra en las de abajo, y para cada requisito: «Cumple», «No cumple», «No cumple tal cual
+  · se arregla limitando» (potencia o velocidad con limitador) o «No se puede comprobar», con la cifra, el límite, el
+  margen («te quedan 233 kg…») y, al abrirlo, la norma entera y su artículo con enlace.
+- **Las cifras salen del propio diseño**: la masa de «Peso» menos la batería (la ley no la cuenta), la potencia nominal
+  de la pestaña Motor, la velocidad máxima de la misma cuenta que la pestaña Motor (con el Cd del túnel), largo, ancho,
+  alto, plazas, tipo de asiento y mando, radio de giro, carga de cada neumático.
+- **Aviso visible**: es una comprobación previa orientativa, no una homologación.
+- **Lo que sale hoy** (script `npx tsx scripts/homologacion.ts`): ver el informe del bot y `memory/03_DECISIONS.md`.
+- Fuentes: Reglamento (UE) 168/2013 (anexo I, arts. 3–5, anexos VI y VIII), Reglamentos Delegados 3/2014 y 44/2014
+  (consolidado de EUR-Lex), DGT/MAPFRE/RACE para los permisos. Lo citado sin releer lleva «por confirmar».
+- No visto en un teléfono de verdad: si sale la versión vieja, `humanity.wiki/?sw=off`.
