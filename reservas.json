@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "estudioaero",
-      "ruta": "src/pages/Aeromovil.tsx",
-      "motivo": "estudioaero: bloque Aerodinámica en Carrocería",
-      "desde": "2026-11-17T09:36:36.421Z"
-    },
-    {
       "agente": "ruedas",
       "ruta": "src/components/aeromovil/visor/triciclo.ts",
       "motivo": "ruedas: catálogo de ruedas de moto",
