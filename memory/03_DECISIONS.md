@@ -2125,3 +2125,19 @@ Eugenio: «permite añadir más tipos de ruedas, por ejemplo de motos de todo ti
   the engine as far as needed to be clean put it 13 cm higher on the default Triciclo, the opposite of the request.
 - **«Masas» is a tab id, not a `Departamento`**: it has no tasks, suppliers or messages, so it is not in
   `DEPARTAMENTOS` (the Aeromóvil 1's eleven tabs do not change).
+
+## 2026-11-17 · Tyre type as a factor over the size's own tyre (bot «neumaticos»)
+
+Eugenio asked to choose the tyre type separately from the wheel size. Alternatives: (a) absolute figures per type
+(a «sport» tyre always μ 1.1, Crr X) — would change every saved design, because each catalogue size already carries its
+own tyre's Crr and every vehicle's grip constant is 0.9; (b) a full matrix size × type — 27 × 10 sheets with no source
+for most cells; (c) **chosen**: each size has an implied own type and construction (catalogue group → type, size code
+→ radial/bias, spoked rim → tube; the older sizes are declared by each vehicle), and the chosen option applies the ratio
+chosen/own to Crr, tyre mass (55 % of the wheel), grip, plus life and price. «De serie» is exactly 1, so saved designs
+are untouched. Code: `ruedas/neumaticos.ts` (data, `efectoNeumatico`, `crrEjes`, `precioNeumatico`),
+`triciclo/neumaticos.ts` (`neumaticosTriciclo`), `geometriaBasculante.ts` (`neumaticosBasculante`, `agarreBasculante`).
+Cost of (c): grip is relative, so a road tyre on an enduro size reads 1.13 g while a sport size «de serie» reads 0.90 g
+(every size's own tyre is assumed to grip 0.9 g, as before). Making grip absolute changes saved designs' 0-50 times:
+a decision for Eugenio, like the moped Crr.
+Price for the «precios» bot: `efectoNeumatico(...).precio` (€ per tyre), reachable per vehicle as
+`neumaticosTriciclo(T).del/.tras.precio` and `neumaticosBasculante(Q).del/.tras.precio`.

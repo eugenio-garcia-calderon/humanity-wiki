@@ -7,6 +7,7 @@ import { ARQUITECTURAS_HIBRIDO, type ArqHibrido } from '../hibrido';
 import type { MaterialCarenado, MaterialChasis, Pulgadas } from '../geometria';
 import { TRICICLO_DEFECTO } from './defecto';
 import { CATALOGO_RUEDAS, IDS_CATALOGO, nombreRueda, type FichaRueda, type IdRueda } from '../ruedas/catalogo';
+import { OPCIONES_CONSTRUCCION, OPCIONES_TIPO, type OpcionConstruccion, type OpcionTipo } from '../ruedas/neumaticos';
 import { DESLIZADORES_BALA, type ClaveBala } from '../geometriaBala';
 import { rangoTriciclo, limitarTriciclo } from './medidas';
 
@@ -53,6 +54,10 @@ export interface CamposTriciclo extends CamposInterior {
   tBatalla: number;    // la batalla de la carrocería (del Cuadriciclo en rombo): de donde iba su rueda delantera al eje trasero (m)
   tEjeDel: number;     // eje delantero: cuánto va detrás de donde iba la rueda delantera del Cuadriciclo en rombo (m)
   tVia: number; tRuedaDel: RuedaTriciclo; tRuedaTras: RuedaTriciclo;
+  // 2026-11-17: tyre type and construction per axle (`ruedas/neumaticos.ts`; 'serie': the size's own tyre, today's numbers).
+  // «Tras» is every wheel of `tRuedaTras`: the tail's, and in a diamond the nose's too.
+  // Optional in the type only because `defecto.ts` was held by another bot: their defaults are added below (`NEUMATICOS_DEFECTO`).
+  tNeuDel?: OpcionTipo; tNeuTras?: OpcionTipo; tConsDel?: OpcionConstruccion; tConsTras?: OpcionConstruccion;
   tGiro: number;       // giro máximo de la rueda delantera de dentro (°)
   tRecDel: number; tRecTras: number;   // recorrido de la suspensión (mm)
   tBasculante: number; // largo del basculante trasero (m)
@@ -198,7 +203,7 @@ export const RUEDAS_TRICICLO: Record<RuedaTriciclo, { d: number; neuDel: number;
   // 2026-11-17: the catalogue's wheels, `kg` over the slider's 4.5 kg moped wheel (the default `tMRueda`)
   ...Object.fromEntries(IDS_CATALOGO.map(k => { const f: FichaRueda = CATALOGO_RUEDAS[k]; return [k, { d: f.d, neuDel: f.w, neuTras: f.w, n: nombreRueda(k), kg: f.kg / TRICICLO_DEFECTO.tMRueda, kWBuje: f.kWBuje, carga: f.carga }]; })) as Record<IdRueda, { d: number; neuDel: number; neuTras: number; n: string; kg: number; kWBuje: number; carga: number }>,
 };
-export type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tFila2N' | 'tFila3N' | 'tFila2Tipo' | 'tFila3Tipo' | 'tTraseras' | 'tBascula' | 'tRuedas' | 'tPropulsion' | 'tHibArq' | 'tBascTec' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero'
+export type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tNeuDel' | 'tNeuTras' | 'tConsDel' | 'tConsTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tFila2N' | 'tFila3N' | 'tFila2Tipo' | 'tFila3Tipo' | 'tTraseras' | 'tBascula' | 'tRuedas' | 'tPropulsion' | 'tHibArq' | 'tBascTec' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero'
   | 'tAcabado' | 'tTapiz' | 'tCostura' | 'tCosturaColor' | 'tForroColor' | 'tMoldura' | 'tConsolaTecho' | 'tConsolaCentral' | 'tCinturon' | 'tAmbiente'
   | 'tCatMotor' | 'tCatCtrl' | 'tCatReductora' | 'tCatTermico' | 'tColaCorte';
 export type ClaveNumTriciclo = Exclude<ClaveTriciclo, ClaveTexto>;
@@ -440,6 +445,10 @@ export function vistaTriciclo(f: FichaTriciclo, T: CamposTriciclo): { valor: num
 export const ejeDesde = (T: CamposTriciclo) => esRombo(T) ? 0 : limitarTriciclo('tEjeDel', T);
 export const guardarTriciclo = (f: FichaTriciclo, v: number, T: CamposTriciclo) => v - (f.desde ?? 0) * ejeDesde(T);
 export const fichaTriciclo = (k: ClaveNumTriciclo) => deslizadoresTriciclo().find(f => f.clave === k);
+// 2026-11-17: the tyre fields' defaults, added to TRICICLO_DEFECTO here (so `camposTriciclo` copies and validates them)
+// because `defecto.ts` was held by another bot. Move them into `defecto.ts` and make the fields required: ≈ 5 min (tech debt).
+export const NEUMATICOS_DEFECTO = { tNeuDel: 'serie', tNeuTras: 'serie', tConsDel: 'serie', tConsTras: 'serie' } as const;
+Object.assign(TRICICLO_DEFECTO, NEUMATICOS_DEFECTO);
 export const ruedas = (l: RuedaTriciclo[]) => l.map(k => ({ k, n: RUEDAS_TRICICLO[k].n }));
 export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
   { clave: 'tSolarCola', n: 'Paneles solares por detrás', dep: 'carroceria', bloque: 'Techo solar y ventanas', opciones: [{ k: 'no', n: 'Solo en la cúpula' }, { k: 'si', n: 'Hasta la punta de la cola (como el Aptera)' }] },
@@ -455,7 +464,11 @@ export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
   { clave: 'tMatCarenado', n: 'Material de la carrocería', dep: 'carroceria', bloque: 'Material y espesores', opciones: [{ k: 'carbonoLino', n: 'Carbono-lino' }, { k: 'vidrio', n: 'Fibra de vidrio' }, { k: 'carbono', n: 'Fibra de carbono' }] },
   { clave: 'tChMat', n: 'Material de los tubos', dep: 'chasis', bloque: 'Bastidor', opciones: [{ k: 'al6061', n: 'Aluminio 6061-T6' }, { k: 'cromoly', n: 'Acero cromoly 4130' }, { k: 'carbono', n: 'Tubo de carbono' }] },
   { clave: 'tRuedaDel', n: 'Ruedas delanteras (en los carenados)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['16', '20', '24', '26', '28', 'c13', 'c14', 'c15', ...IDS_CATALOGO]) },
+  { clave: 'tNeuDel', n: 'Neumáticos delanteros: tipo', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: OPCIONES_TIPO },
+  { clave: 'tConsDel', n: 'Neumáticos delanteros: construcción', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: OPCIONES_CONSTRUCCION },
   { clave: 'tRuedaTras', n: 'Rueda trasera (dentro de la cola)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['20', '24', '26', '28', 'c13', 'c14', 'c15', ...IDS_CATALOGO]) },
+  { clave: 'tNeuTras', n: 'Neumático trasero: tipo', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: OPCIONES_TIPO },
+  { clave: 'tConsTras', n: 'Neumático trasero: construcción', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: OPCIONES_CONSTRUCCION },
   // (2026-11-16, Eugenio: «la parte de propulsión es tan importante que tiene que estar arriba del todo»: its own block, first)
   { clave: 'tPropulsion', n: 'Propulsión', dep: 'propulsion', bloque: 'Propulsión', opciones: [{ k: 'electrico', n: 'Eléctrica: solo batería' }, { k: 'phev', n: 'Híbrida enchufable (PHEV): batería y motor de gasolina' }] },
   { clave: 'tHibArq', n: 'Arquitectura del híbrido', dep: 'propulsion', bloque: 'Híbrido enchufable', opciones: ARQUITECTURAS_HIBRIDO },
