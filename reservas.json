@@ -95,6 +95,12 @@
       "ruta": "src/components/aeromovil/Visor3D.tsx",
       "motivo": "garajeboton: no dibujar con el visor oculto (2 líneas)",
       "desde": "2026-11-17T17:56:56.946Z"
+    },
+    {
+      "agente": "electronica",
+      "ruta": "src/components/aeromovil/triciclo/campos.ts",
+      "motivo": "electronica: Electrónica de potencia y estudio L7e (pocas líneas)",
+      "desde": "2026-11-17T17:59:44.176Z"
     }
   ]
 }
