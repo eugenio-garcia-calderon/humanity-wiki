@@ -56,12 +56,6 @@
     },
     {
       "agente": "capo",
-      "ruta": "src/components/aeromovil/masasSecciones.ts",
-      "motivo": "capo: capó, tomas de aire y radiador (pocas líneas)",
-      "desde": "2026-11-17T14:07:04.095Z"
-    },
-    {
-      "agente": "capo",
       "ruta": "src/components/aeromovil/estudio/reglas.ts",
       "motivo": "capo: capó, tomas de aire y radiador (pocas líneas)",
       "desde": "2026-11-17T14:07:07.966Z"
