@@ -12251,6 +12251,13 @@ tengas, pues que aparezca también el peso de ese desplegable.»
 - Dos motores de gasolina más: Honda GX270 (5,1 kW continuos, 25,8 kg) y Kubota WG752 (3 cilindros, agua, 18,5 kW, 62 kg).
 - Los diseños guardados no cambian (siguen con su motor). No se ha tocado el túnel.
 
+## 2026-11-17 · Aeromóvil: el peso en los desplegables del Triciclo (segunda parte)
+
+- Lo anterior ya se ve en el Triciclo, el rombo y el de cuatro ruedas: cada desplegable de Carrocería, Chasis, Rodaje,
+  Energía, Interior y Motor dice su peso en el título; Chasis › Bastidor abre el desglose de tubos, tornillería,
+  soportes y soldaduras. Los dos de motor usan la misma cuenta (lo hizo el trabajo de los motores).
+- Todavía no: la Gota y el Cuadriciclo Basculante. Las cifras ya existen (`masasSecciones.ts`); falta ponerlas en su
+  panel, que otros estaban tocando en ese momento.
 ## 2026-11-17 · Pestaña «Masas», motor y depósito libres, «Proyecto» como lista de pendientes (masas)
 - Eugenio: «haz que el motor por defecto esté mucho más cerca de la rueda trasera y más abajo, para bajar el centro de
   gravedad, y que el depósito también se pueda colocar de manera libre, también haz que el motor se pueda colocar de
@@ -12297,3 +12304,5 @@ tengas, pues que aparezca también el peso de ese desplegable.»
   va son los ocupantes y la batería.
 - Una pestaña recordada sigue abriendo lo mismo; «masas» guardada en un vehículo sin esa pestaña (el Aeromóvil 1) abre
   «Proyecto». No comprobado en un móvil: con la app instalada, `humanity.wiki/?sw=off` quita la copia vieja.
+- (masas) En rombo, «Rueda delantera, freno y horquilla» (unos 10,7 kg) pasa de la pestaña Carrocería a Rodaje, donde
+  debía estar: los kilos de esas dos pestañas cambian a propósito (aviso de pesossecciones).

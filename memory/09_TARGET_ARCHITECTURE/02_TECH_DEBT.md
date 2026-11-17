@@ -838,6 +838,15 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - (2026-11-17, motores) The engine comparison table is 10 columns in a ~380 px side panel: it scrolls sideways (the
   name column stays fixed). On a phone the consumption and price columns need a swipe. A card layout per engine for
   narrow screens: ≈ 1 h. Prices exist for 11 of 19 engines/motors; the rest sell on request (≈ 2 h of asking shops).
+- (2026-11-17, pending) Section weights not shown yet on the Gota (`pages/Aeromovil.tsx`, 3 blocks: «Chasis y ruedas»,
+  «Asientos», «Carenado aerodinámico») and the Basculante (`basculante/LadoBasculante.tsx`, whose `ui.Bloque` type needs
+  `peso`): the numbers already come from `seccionesGota`/`seccionesBasculante`; ≈ 20 min to wire both. Also: in a
+  diamond Triciclo the nose wheel («Rueda delantera, freno y horquilla») falls into Carrocería in `grupoPieza`
+  (`triciclo/masas.ts`, the name does not match `^Ruedas`), so the Carrocería tab is 10,7 kg too heavy and Rodaje too
+  light on that layout; one regex, ≈ 5 min, changes those two tab totals on purpose.
+- (2026-11-17) `src/components/aeromovil/CLAUDE.md`, «The weight of a section», last line is stale: the engine blocks
+  DO show their weight now (`seccionDe` in `LadoTriciclo.tsx`; their parts are in `ComparadorMotores`), there is no
+  `sinPeso`. Not fixed then because another agent held that file; 1 min.
 
 ## 2026-11-17 · Masses and the hybrid's placement (masas)
 - **Resolved**: 2026-11-16 «The hybrid is drawn, but its engine's place is fixed» (position sliders added; the seats of

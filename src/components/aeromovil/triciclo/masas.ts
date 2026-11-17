@@ -283,7 +283,8 @@ export function reductoraPieza(T: CamposTriciclo, m: ModeloTriciclo) {
 
 export function grupoPieza(nombre: string): DepTriciclo {
   if (nombre === 'Bastidor') return 'chasis';
-  if (/^(Suspensión|Basculante|Basculación|Ruedas|Frenos|Dirección)/.test(nombre)) return 'rodaje';
+  // (2026-11-17: and the diamond's nose wheel with its brake and fork, which fell to the body before)
+  if (/^(Suspensión|Basculante|Basculación|Ruedas|Frenos|Dirección|Rueda delantera)/.test(nombre)) return 'rodaje';
   if (/^(Motor|Controlador|Depósito)/.test(nombre)) return 'propulsion';
   if (/^(Batería|Varios)/.test(nombre)) return 'energia';
   if (/^(Asientos|Volante|Salpicadero|Interior|Tapicería|Cinturones)/.test(nombre)) return 'interior';
