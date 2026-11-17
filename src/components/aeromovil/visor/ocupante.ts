@@ -5,6 +5,14 @@ import { TIRE_W, type ModeloConPiel, type PuntosOcupante } from '../geometria';
 import type { V3 } from './capas';
 import { sombraContacto, perfilNeumatico, type Mats } from './materiales';
 import { tube, sphere, capsula, cajaRedonda } from './primitivas';
+import type { PuntosConCuerpo, ParteCuerpo } from '../triciclo/ajusteOcupantes';
+
+// 2026-11-17 («muñecos»): a part of the rider that does not fit is painted red (it touches) or amber (closer than its check asks)
+let marcas: Record<'roza' | 'justo', THREE.MeshStandardMaterial> | null = null;
+const marca = (k: 'roza' | 'justo') => (marcas ??= {
+  roza: new THREE.MeshStandardMaterial({ color: 0xe0242c, roughness: 0.55, emissive: 0x5a0000 }),
+  justo: new THREE.MeshStandardMaterial({ color: 0xf2a516, roughness: 0.55, emissive: 0x3a2400 }),
+})[k];
 
 export function rueda(g: THREE.Object3D, M: Mats, x: number, y: number, z: number, r: number) {
   const w = new THREE.Group(); w.position.set(x, y, z); g.add(w);
@@ -52,43 +60,49 @@ export function articulacion(a: V3, b: V3, l1: number, l2: number, polo: V3): V3
 
 /** Maniquí articulado: cabeza, cuello, tronco, pelvis, brazos con codos y piernas con pies. */
 export function ocupante(g: THREE.Object3D, M: Mats, m: { occPts: (piloto: boolean) => PuntosOcupante }, lat: number, piloto: boolean) {
-  const o = m.occPts(piloto), d = o.d;
+  const o = m.occPts(piloto) as PuntosConCuerpo, d = o.d;
+  // (2026-11-17) the rider's own size: `k` the lengths, `A` the widths, `V` the belly and chest (talla.ts); absent, 1
+  const k = o.cuerpo?.k ?? 1, A = (o.cuerpo?.ancho ?? 1) * k, V = o.cuerpo?.fondo ?? 1, choques = o.choques?.();
+  const pinta = (p: ParteCuerpo, mat: THREE.Material) => { const c = choques?.get(p); return c ? marca(c) : mat; };
   const ropa = piloto ? M.ropaPiloto : M.ropaPasajero;
   const en = (q: [number, number], l: number): V3 => [q[0], q[1], l];
-  const lo = (t: number): [number, number] => [o.H[0] + d[0] * t, o.H[1] + d[1] * t];
+  const lo = (t: number): [number, number] => [o.H[0] + d[0] * t * k, o.H[1] + d[1] * t * k];
   const atras = [-d[1], d[0]] as [number, number];   // perpendicular al tronco, hacia el respaldo
   // Tronco: pelvis, abdomen y pecho, más anchos que hondos
-  capsula(g, en(lo(-0.02), lat), en(lo(0.10), lat), 0.12, M.pantalon, 1.35, 0.85);
-  capsula(g, en(lo(0.12), lat), en(lo(0.30), lat), 0.12, ropa, 1.25, 0.8);
-  capsula(g, en(lo(0.30), lat), en(lo(0.47), lat), 0.135, ropa, 1.35, 0.8);
+  // (the build widens the hips and the shoulders, and deepens the belly most and the chest half as much)
+  const Vp = 1 + (V - 1) * 0.5;
+  capsula(g, en(lo(-0.02), lat), en(lo(0.10), lat), 0.12 * k, pinta('caderas', M.pantalon), 1.35 * A / k, 0.85 * Vp);
+  capsula(g, en(lo(0.12), lat), en(lo(0.30), lat), 0.12 * k, pinta('vientre', ropa), 1.25 * A / k, 0.8 * V);
+  capsula(g, en(lo(0.30), lat), en(lo(0.47), lat), 0.135 * k, ropa, 1.35 * A / k, 0.8 * Vp);
   // Cuello y cabeza (un poco más alta que ancha), con pelo; la cabeza va más recta que el tronco si el modelo lo dice (`dh`)
   const dh = o.dh ?? d;
-  capsula(g, en(lo(0.50), lat), [o.C[0] - dh[0] * 0.08, o.C[1] - dh[1] * 0.08, lat], 0.045, M.skin);
-  const cab = new THREE.Mesh(new THREE.SphereGeometry(0.098, 28, 20), M.skin);
+  capsula(g, en(lo(0.50), lat), [o.C[0] - dh[0] * 0.08 * k, o.C[1] - dh[1] * 0.08 * k, lat], 0.045 * k, M.skin);
+  const cab = new THREE.Mesh(new THREE.SphereGeometry(0.098 * k, 28, 20), pinta('cabeza', M.skin));
   cab.position.set(o.C[0], o.C[1], lat); cab.scale.set(1.05, 1.12, 0.88); cab.rotation.z = -Math.atan2(dh[0], dh[1]); cab.castShadow = true; g.add(cab);
-  const pelo = new THREE.Mesh(new THREE.SphereGeometry(0.102, 28, 14, 0, Math.PI * 2, 0, Math.PI * 0.55), M.pelo);
+  const pelo = new THREE.Mesh(new THREE.SphereGeometry(0.102 * k, 28, 14, 0, Math.PI * 2, 0, Math.PI * 0.55), pinta('cabeza', M.pelo));
   pelo.position.copy(cab.position); pelo.scale.copy(cab.scale); pelo.rotation.z = cab.rotation.z;
-  pelo.position.x += atras[0] * 0.008; pelo.position.y += atras[1] * 0.008; g.add(pelo);
+  pelo.position.x += atras[0] * 0.008 * k; pelo.position.y += atras[1] * 0.008 * k; g.add(pelo);
   for (const s of [-1, 1]) {
     // Pierna: muslo y pantorrilla, rodilla ya calculada en el plano; pie según dónde apoya
     const zc = lat + s * (o.anchoPiernas?.[0] ?? 0.09), zp = lat + s * (o.anchoPiernas?.[1] ?? (piloto ? 0.11 : 0.10));
     const ap = o.anchoPiernas, zr = ap && ap.length > 2 ? lat + s * ap[2]! : (zc + zp) / 2;
     const cad = en(o.H, zc), rod = en(o.K, zr), tob = en(o.F, zp);
-    capsula(g, cad, rod, 0.068, M.pantalon);
-    capsula(g, rod, tob, 0.052, M.pantalon);
+    capsula(g, cad, rod, 0.068 * A, pinta('rodillas', M.pantalon));
+    capsula(g, rod, tob, 0.052 * A, M.pantalon);
     const sx = o.F[0] - o.K[0], sy = o.F[1] - o.K[1], sl = Math.hypot(sx, sy) || 1;
-    const pie: V3 = piloto ? [tob[0] - sy / sl * 0.17, tob[1] + sx / sl * 0.17, zp] : [tob[0] + 0.18, tob[1] - 0.02, zp];
-    capsula(g, tob, pie, 0.042, M.zapato, 1.1, 0.8);
+    const pie: V3 = piloto ? [tob[0] - sy / sl * 0.17 * k, tob[1] + sx / sl * 0.17 * k, zp] : [tob[0] + 0.18 * k, tob[1] - 0.02 * k, zp];
+    capsula(g, tob, pie, 0.042 * k, pinta('pies', M.zapato), 1.1, 0.8);
     // Brazo: hombro, codo hacia fuera y abajo, mano en el puño o sobre el muslo
-    const hom = en(lo(0.46), lat + s * 0.19);
-    sphere(g, hom, 0.06, ropa);
+    const hom = en(lo(0.46), lat + s * 0.19 * A);
+    sphere(g, hom, 0.06 * A, pinta('hombros', ropa));
     const manoP: V3 = [o.mano[0], o.mano[1], lat + s * o.anchoMano];
-    let codo = articulacion(hom, manoP, 0.30, 0.28, [0, -1, s * 0.7]);
+    const brazo = 0.30 * k, antebrazo = 0.28 * k;
+    let codo = articulacion(hom, manoP, brazo, antebrazo, [0, -1, s * 0.7]);
     // (2026-11-15) in a narrow body the elbow bends down instead of out, until it is inside (`codoZ`)
-    if (o.codoZ != null) for (const k of [0.45, 0.2, 0, -0.25]) { if (Math.abs(codo[2]) <= o.codoZ) break; codo = articulacion(hom, manoP, 0.30, 0.28, [0, -1, s * k]); }
-    capsula(g, hom, codo, 0.046, ropa);
-    capsula(g, codo, manoP, 0.038, M.skin);
-    sphere(g, manoP, 0.045, M.skin, [1.25, 0.8, 0.95]);
+    if (o.codoZ != null) for (const kc of [0.45, 0.2, 0, -0.25]) { if (Math.abs(codo[2]) <= o.codoZ) break; codo = articulacion(hom, manoP, brazo, antebrazo, [0, -1, s * kc]); }
+    capsula(g, hom, codo, 0.046 * A, ropa);
+    capsula(g, codo, manoP, 0.038 * A, M.skin);
+    sphere(g, manoP, 0.045 * k, M.skin, [1.25, 0.8, 0.95]);
   }
 }
 
