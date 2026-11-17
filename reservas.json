@@ -103,12 +103,6 @@
       "desde": "2026-11-17T14:26:59.781Z"
     },
     {
-      "agente": "mgplanetario",
-      "ruta": "src/components/aeromovil/masasSecciones.ts",
-      "motivo": "mgplanetario: MG2 en la sección Motor eléctrico (1 línea)",
-      "desde": "2026-11-17T17:01:18.291Z"
-    },
-    {
       "agente": "legado",
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "legado: aviso solo lectura y abrir el Aeromóvil S (pocas líneas)",
