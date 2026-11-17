@@ -33,7 +33,7 @@ Shared panel controls (`Deslizador`, `Selector`, `Bloque`, `Explicacion`, `Lista
 | `ocupantes.ts` | rider body points, places, battery boxes, rear rail |
 | `bascula.ts` | tilt axes and pose, how far it leans before touching |
 | `modelo.ts` | `crearModeloTriciclo` (geometry from the fields) |
-| `masas.ts` | parts list with masses, boots, wheel loads, `grupoPieza` |
+| `masas.ts` | parts list with masses, boots, wheel loads, `grupoPieza` (the section of each part: `../masasSecciones.ts`) |
 | `comprobaciones.ts` | `calcularTriciclo`: every check and the results |
 | `energia.ts` | consumption, range, solar, areas |
 
@@ -101,6 +101,23 @@ object in `REGLAS`:
 4. `porQue` is one sentence in plain Spanish with this design's number; cite the general knowledge (Hucho, Hoerner…).
 Then `npx tsx scripts/estudio-aerodinamico.ts [diseño.json]` prints every design's findings and must end «Todo OK».
 The study only reads the tunnel: never change `tunel/calibracion.ts` or `tunel/arrastre.ts` constants for it.
+
+**The weight of a section** («desplegable», 2026-11-17). Every side-panel block that maps to mass shows it in its
+header («Cúpula · 4,8 kg») and, inside, what it is made of. One helper, `masasSecciones.ts`, from the same parts list as
+«Peso: todos los componentes» and the department tabs (`PesosDepartamento.ts`) — never a second total:
+1. a new part of the parts list goes to a section by its name: add or widen a rule in `seccionesTriciclo` (or
+   `seccionesBasculante`, `seccionesA1`, `seccionesGota`): `[dep, bloque, /^Nombre/]`. A part no rule takes lands in
+   `sinSeccion` and is listed in the department's first block («Sin desplegable propio: …»), so it is never lost;
+2. a block whose sliders set other sections' masses («Masas», «Material y espesores») goes in the second list
+   (`ajusta`): its header reads «ajusta 62,0 kg» and it does not count in the sums;
+3. show it: `<Bloque … peso={textoPesoSeccion(pesoSeccion(pesos, dep, bloque))}>` and, inside,
+   `<DesglosePeso s={pesoSeccion(pesos, dep, bloque)} />` (`PesoSeccion.tsx`). A section with no mass shows nothing;
+4. a lump split into pieces (the body's laminate by zone, the frame into tube groups and joints) must add up to the
+   part exactly: give the remainder to the last piece. Then `npx tsx scripts/pesos-secciones.ts [diseño.json]` must
+   end «Todo OK»: sections + «sin desplegable» = each department tab = the empty vehicle, every split = its part.
+The frame's joints are the parts list's own figure (the part minus its tubes); how they split into bolts, brackets and
+gussets is an estimate by count (`Fijaciones`), scaled down with a warning when the count would weigh more.
+The engine blocks (dep `propulsion`) are computed but not shown yet (`sinPeso` in `LadoTriciclo.tsx`).
 
 ## Before you change this, decide
 
