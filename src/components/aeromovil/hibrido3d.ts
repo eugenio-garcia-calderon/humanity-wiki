@@ -14,6 +14,7 @@
 // whose check fails (sticking out of the body, or into the shock tower) is red.
 
 import * as THREE from 'three';
+import { auxiliaresMotor } from './piezasMotor';
 import { DIENTES_PLANETARIO, type CajaZ, type CilZ, type DisposicionHibrido, type V3 } from './hibrido';
 
 let MATS: Record<string, THREE.Material> | null = null;
@@ -98,7 +99,7 @@ export function dibujarHibrido(g: THREE.Object3D, h: DisposicionHibrido) {
   // ── the engine: crankcase, the alternator and timing covers at its ends, the block, the head, the cam cover and coils
   cajaR(g, mo.carter, malMotor ? M.mal : M.bloque, cMotor, 0.03);
   // (the sump's ribs underneath)
-  for (let i = 1; i < 5; i++) { const x = mo.x0 + (mo.x1 - mo.x0) * i / 5; cajaR(g, { x0: x - 0.004, x1: x + 0.004, y0: mo.y0 - 0.006, y1: mo.y0 + 0.02, z0: mo.z0 + 0.03, z1: mo.z1 - 0.03 }, M.bloque, cMotor, 0.002); }
+  for (let i = 1; i < 5; i++) { const x = mo.x0 + (mo.x1 - mo.x0) * i / 5; cajaR(g, { x0: x - 0.004, x1: x + 0.004, y0: mo.y0 - 0.006, y1: mo.y0 + 0.02, z0: mo.z0 + 0.03, z1: mo.z1 - 0.03 }, M.bloque, 'hibrido-carter', 0.002); }
   cilZ(g, mo.xc, mo.yc, 0.075, mo.z1, mo.z1 + 0.025, malMotor ? M.mal : M.culata, cMotor);
   cilZ(g, mo.xc, mo.yc, 0.035, mo.z1 + 0.025, mo.z1 + 0.035, M.negro, cMotor, 6);
   cajaR(g, mo.bloque, malMotor ? M.mal : M.bloque, cMotor, 0.01);
@@ -109,9 +110,12 @@ export function dibujarHibrido(g: THREE.Object3D, h: DisposicionHibrido) {
   cajaR(g, tapa, malMotor ? M.mal : M.tapa, cMotor, 0.008);
   for (const z of mo.cilindrosZ) { const b = malla(g, new THREE.CylinderGeometry(0.012, 0.012, 0.04, 16), M.negro, cMotor); b.position.set((tapa.x0 + tapa.x1) / 2, tapa.y1 + 0.012, z); }
   // the intake: a runner from each port on the head's front face up into the plenum, and the throttle body on its end
-  cajaR(g, mo.admision, M.plastico, cMotor, 0.02);
-  for (const z of mo.cilindrosZ) tubo(g, [[mo.culata.x1 - 0.005, (mo.culata.y0 + mo.culata.y1) / 2, z], [mo.culata.x1 + 0.012, mo.culata.y1, z], [mo.culata.x1 - 0.005, mo.admision.y0 + 0.01, z]], 0.014, M.plastico, cMotor);
-  cilZ(g, (mo.admision.x0 + mo.admision.x1) / 2, (mo.admision.y0 + mo.admision.y1) / 2, 0.022, mo.admision.z1, mo.admision.z1 + 0.04, M.culata, cMotor);
+  // (2026-11-17: the intake is its own part, `hibrido-admision`, so it can be shown alone: piezasMotor.ts)
+  const cAdm = 'hibrido-admision';
+  cajaR(g, mo.admision, M.plastico, cAdm, 0.02);
+  for (const z of mo.cilindrosZ) tubo(g, [[mo.culata.x1 - 0.005, (mo.culata.y0 + mo.culata.y1) / 2, z], [mo.culata.x1 + 0.012, mo.culata.y1, z], [mo.culata.x1 - 0.005, mo.admision.y0 + 0.01, z]], 0.014, M.plastico, cAdm);
+  cilZ(g, (mo.admision.x0 + mo.admision.x1) / 2, (mo.admision.y0 + mo.admision.y1) / 2, 0.022, mo.admision.z1, mo.admision.z1 + 0.04, M.culata, cAdm);
+  auxiliares(g, h);
   // ── the exhaust: one header per cylinder, the silencer, the tailpipe to the skin
   const mE = H.escape < 0 ? M.mal : M.escape, s = h.escape.silencioso;
   for (const c of h.escape.colectores) tubo(g, c, 0.015, M.escape, 'hibrido-escape');
@@ -167,6 +171,28 @@ export function dibujarHibrido(g: THREE.Object3D, h: DisposicionHibrido) {
   return g;
 }
 
+/**
+ * 2026-11-17 (Eugenio: «que también aparezca la bomba de agua, la bomba de aceite, el tubo escape»): the engine's
+ * auxiliaries, where piezasMotor.ts `auxiliaresMotor` puts them. The water pump on the block's right end with its pulley,
+ * the thermostat housing on the head and the hoses (two stubs leave forward towards the radiator); the sump pan round the
+ * crankcase's bottom, the oil pump on the right end, low, and the spin-on filter on the front; the air box on the plenum
+ * and its duct to the throttle body. Each its own `componente`, so «Mostrar solo esta pieza» can isolate it.
+ */
+function auxiliares(g: THREE.Object3D, h: DisposicionHibrido) {
+  const M = mats(), a = auxiliaresMotor(h), b = a.bombaAgua;
+  cilZ(g, b.x, b.y, b.r, b.z0, b.z1, M.culata, 'hibrido-bomba-agua', 28);
+  cilZ(g, b.x, b.y, b.polea, b.z1, b.z1 + 0.012, M.negro, 'hibrido-bomba-agua', 32);
+  cilZ(g, b.x, b.y, 0.008, b.z1 + 0.012, b.z1 + 0.02, M.acero, 'hibrido-bomba-agua', 12);
+  const t = a.termostato; cilZ(g, t.x, t.y, 0.02, t.z - 0.015, t.z + 0.012, M.culata, 'hibrido-manguitos', 20);
+  for (const m of a.manguitos) tubo(g, m, 0.011, M.goma, 'hibrido-manguitos');
+  cajaR(g, a.carter, M.negro, 'hibrido-carter', 0.012);
+  cajaR(g, a.bombaAceite, M.bloque, 'hibrido-bomba-aceite', 0.006);
+  cilZ(g, (a.bombaAceite.x0 + a.bombaAceite.x1) / 2, (a.bombaAceite.y0 + a.bombaAceite.y1) / 2, 0.016, a.bombaAceite.z1, a.bombaAceite.z1 + 0.008, M.acero, 'hibrido-bomba-aceite', 16);
+  const f = a.filtroAceite, mf = malla(g, new THREE.CylinderGeometry(f.r, f.r, f.x1 - f.x0, 24), M.tapa, 'hibrido-filtro-aceite'); mf.rotation.z = Math.PI / 2; mf.position.set((f.x0 + f.x1) / 2, f.y, f.z);
+  cajaR(g, a.filtroAire, M.plastico, 'hibrido-filtro-aire', 0.015);
+  tubo(g, a.conductoAire, 0.02, M.goma, 'hibrido-filtro-aire');
+}
+
 /** The power-split gear in a see-through housing: ring 78, four planets on the carrier, sun 30 (the Prius's teeth). */
 function planetario(g: THREE.Object3D, e: CilZ, mal: boolean) {
   const M = mats(), c = 'hibrido-planetario', zA = e.z0 + 0.012, zB = e.z1 - 0.012;
@@ -196,5 +222,7 @@ export const NOMBRES_HIBRIDO: Record<string, string> = {
   'hibrido-motor': 'Motor de gasolina', 'hibrido-planetario': 'Engranaje planetario', 'hibrido-mg1': 'Generador MG1', 'hibrido-generador': 'Generador',
   'hibrido-embrague': 'Embrague', 'hibrido-p2': 'Motor-generador P2', 'hibrido-caja': 'Caja de cambios', 'hibrido-cadena': 'Cadena a la rueda',
   'hibrido-diferencial': 'Diferencial y palieres', 'hibrido-deposito': 'Depósito de gasolina', 'hibrido-escape': 'Escape',
+  'hibrido-admision': 'Admisión', 'hibrido-filtro-aire': 'Filtro de aire', 'hibrido-bomba-agua': 'Bomba de agua', 'hibrido-manguitos': 'Termostato y manguitos',
+  'hibrido-carter': 'Cárter de aceite', 'hibrido-bomba-aceite': 'Bomba de aceite', 'hibrido-filtro-aceite': 'Filtro de aceite',
 };
 

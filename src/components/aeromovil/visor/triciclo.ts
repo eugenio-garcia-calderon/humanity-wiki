@@ -152,7 +152,8 @@ export function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<
   repartirBala(G, puertasG, b);
   for (const t of m.tubos) { if (t.curva) tuboCurvo(G.chasis, t.curva, t.d, M.alu); else tube(G.chasis, t.a, t.b, t.d, M.alu); }
   for (const c of m.baterias) cajaRedonda(G.baterias, [(c.x0 + c.x1) / 2, (c.y0 + c.y1) / 2, 0], [c.x1 - c.x0, c.y1 - c.y0, 2 * c.hz], M.batt, 0.015);
-  const iv = m.inversor; cajaRedonda(G.motor, [(iv.x0 + iv.x1) / 2, (iv.y0 + iv.y1) / 2, 0], [iv.x1 - iv.x0, iv.y1 - iv.y0, 2 * iv.hz], M.black, 0.01);
+  // (2026-11-17: the controller and the hub motors carry a `componente`, so «Mostrar solo esta pieza» finds them: piezasMotor.ts)
+  const iv = m.inversor; cajaRedonda(G.motor, [(iv.x0 + iv.x1) / 2, (iv.y0 + iv.y1) / 2, 0], [iv.x1 - iv.x0, iv.y1 - iv.y0, 2 * iv.hz], M.black, 0.01).userData.componente = 'controlador';
   // 2026-11-16: the plug-in hybrid's engine, its connection to the wheels, tank and exhaust (hibrido3d.ts)
   if (m.phev) dibujarHibrido(G.motor, m.phev.disp);
   const Ft = m.traseras;
@@ -161,11 +162,11 @@ export function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<
     // side, held by the pod's two faired arms (drawn with the pods): a simple arm, as in front, that does not steer
     const zInT = Ft.VIA_LAT / 2 - Ft.ANCHO_NEU_LAT / 2 - 0.025, [arT, abT] = brazosDe(Ft);
     for (const s of [1, -1] as const) {
-      disk(esquinaB(G.motor, 'tras', s), [m.motor.c[0], m.motor.c[1], s * Ft.VIA_LAT / 2], m.motor.r, m.motor.ancho, M.motor);
+      disk(esquinaB(G.motor, 'tras', s), [m.motor.c[0], m.motor.c[1], s * Ft.VIA_LAT / 2], m.motor.r, m.motor.ancho, M.motor).userData.componente = 'motor-electrico';
       tube(esquinaB(G.suspension, 'tras', s), [m.xR, abT.y - 0.02, s * zInT], [m.xR, arT.y + 0.03, s * zInT], 0.03, M.alu);
     }
   } else {
-  disk(G.motor, [m.motor.c[0], m.motor.c[1], 0], m.motor.r, m.motor.ancho, M.motor);
+  disk(G.motor, [m.motor.c[0], m.motor.c[1], 0], m.motor.r, m.motor.ancho, M.motor).userData.componente = 'motor-electrico';
   // rear: the swing arm's two legs round the tyre, its pivot tube and the mono-shock
   const [px, py] = m.basculante.pivote, [ex, ey] = m.basculante.eje, zb = m.basculante.z;
   for (const s of [1, -1]) tube(G.suspension, [px, py, s * zb], [ex, ey, s * zb], 0.032, M.susp);
