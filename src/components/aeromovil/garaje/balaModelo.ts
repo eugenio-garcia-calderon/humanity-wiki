@@ -1199,6 +1199,8 @@ function armar(o: OpcionesBala): THREE.Group {
   const fb = o.triciclo?.faroBarra;
   if (fb) add(barraFaro(M, fb));
   add(cabina(F, M, o.asientos ?? ASIENTO, o.triciclo));
+  // 2026-11-17: the Kamm tail's base, where the skin is cut (balaForma.ts `corte`)
+  if (F.kamm) add(culote(M));
   // the Triciclo's rear-wheel spat: a narrow navy keel under the tail, from inside the belly down to `y0`, round the wheel
   const fd = o.triciclo?.faldon;
   if (fd) {
@@ -1219,3 +1221,41 @@ function armar(o: OpcionesBala): THREE.Group {
 }
 /** A new set of the Bala's materials (re-exported for the editor). */
 export { crearMateriales };
+
+/**
+ * The Kamm tail's base (2026-11-17): the skin ends at the cut (`F.X_COLA`) with its full section, and this closes it. A flat
+ * navy plate across the cut section, so the edge where the skin meets it is sharp, which is the point of a Kamm tail (a
+ * rounded edge lets the air turn in and the base drag comes back). With a cavity (`cavidad`), the skin is carried straight
+ * on, forward into the body, as the cavity's wall, and the plate sits at its bottom: a sharp edge still, round a hollow.
+ * Double-sided material: seen from behind and through the canopy alike, with no winding to get wrong.
+ */
+function culote(M: Mats): THREE.Group {
+  const k = F.kamm!, x = F.X_COLA, s = F.sec(x), N = 96;
+  // the cut outline, right half from the bottom centre to the top centre, then the left half back down
+  const der: P2[] = []; for (let i = 0; i <= N; i++) der.push(punto(s, i / N));
+  const anillo: P2[] = [...der, ...der.slice(1, -1).reverse().map(([z, y]) => [-z, y] as P2)];
+  const g = new THREE.Group(); g.name = 'culote';
+  const xPlaca = x + k.cavidad;
+  // the plate: the outline triangulated in its own plane (earcut), at the cavity's bottom
+  const tris = THREE.ShapeUtils.triangulateShape(anillo.map(([z, y]) => new THREE.Vector2(z, y)), []);
+  const pos: number[] = [], nor: number[] = [];
+  for (const t of tris) for (const i of t) { pos.push(xPlaca, anillo[i][1], anillo[i][0]); nor.push(-1, 0, 0); }
+  const placa = new THREE.BufferGeometry();
+  placa.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); placa.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+  g.add(malla(placa, M.marinoDoble, 'culote-placa'));
+  if (k.cavidad > 1e-4) {
+    // the wall: the outline from the cut forward to the plate, its normals pointing into the hollow
+    const n = anillo.length, wp: number[] = [], wn: number[] = [];
+    const cz = 0, cy = anillo.reduce((a, p) => a + p[1], 0) / n;
+    const dentro = (p: P2) => { const dz = cz - p[0], dy = cy - p[1], l = Math.hypot(dz, dy) || 1; return [0, dy / l, dz / l]; };
+    for (let i = 0; i < n; i++) {
+      const a = anillo[i], b = anillo[(i + 1) % n], na = dentro(a), nb = dentro(b);
+      const q = [[x, a], [xPlaca, a], [xPlaca, b], [x, a], [xPlaca, b], [x, b]] as [number, P2][];
+      for (const [xx, p] of q) { wp.push(xx, p[1], p[0]); const m = p === a ? na : nb; wn.push(m[0], m[1], m[2]); }
+    }
+    const pared = new THREE.BufferGeometry();
+    pared.setAttribute('position', new THREE.Float32BufferAttribute(wp, 3)); pared.setAttribute('normal', new THREE.Float32BufferAttribute(wn, 3));
+    g.add(malla(pared, M.marinoDoble, 'culote-pared', false));
+  }
+  return g;
+}
