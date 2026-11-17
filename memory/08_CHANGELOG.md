@@ -12460,3 +12460,7 @@ elementos. Y podemos ir jugando también con su precio, los proveedores, todo es
 - La pestaña «Proyecto» se presenta ahora como «lo que falta por hacer y la revisión de los puntos críticos que no
   están bien».
 - Ningún diseño guardado cambia: los seis valen cero si no se tocan.
+
+## 2026-11-17 · Las comprobaciones pasan a GitHub
+
+Eugenio: «busca una solución para que las pruebas no sean el cuello de botella». Hasta ahora cada bot pasaba `tsc`, la compilación y los scripts del Aeromóvil en la misma máquina de la nube, de uno en uno: con diez bots la cola tardaba horas. Ahora, cada solicitud de cambios las pasa en las máquinas de GitHub, todas a la vez (`.github/workflows/comprobar.yml`): `tsc`, compilación, túnel, diseños guardados, estudio aerodinámico, pesos por sección, homologación, cola lisa y continuidad de la cola. Un bot abre su solicitud y la fusiona cuando todo sale en verde.
