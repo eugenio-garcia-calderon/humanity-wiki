@@ -12199,6 +12199,32 @@ una cola muy alargada, y permite seleccionarla en el "Modelo 1"».
   Evrard, Cadot y otros (cavidad en la base: −18 % de succión, ΔCd −9 % en un cuerpo de culote recto); Transport
   Canada / NRC (colas de barco en remolques: −6 a −7 %, igual con 2 que con 4 pies).
 - No visto en un teléfono: si sale la versión vieja, `humanity.wiki/?sw=off`.
+## 2026-11-17 · Aeromóvil: el peso de cada desplegable, y el chasis pieza a pieza
+
+Eugenio: «También en todos los demás desplegables de toda la herramienta en general, por ejemplo de la carrocería, del
+chasis, tiene que aparecer el peso sumado de toda esa sección. Por ejemplo de la cúpula, pues el peso de la cúpula. El
+chasis, pues el peso del chasis tubular, los tubos, los tornillos. De hecho, en la parte de chasis separa la parte de
+tubos de tornillería y todo esto…»
+
+- Cada desplegable del panel lateral que tiene piezas con peso lo dice a la derecha de su título, en verde oscuro
+  («Cúpula … 4,8 kg»), y se actualiza al mover cualquier deslizador. Dentro, «De qué está hecho este peso» lista sus
+  piezas con sus kilos. Triciclo, Triciclo en rombo, cuatro ruedas y Aeromóvil 1. Los desplegables que solo ponen el
+  peso de piezas que están en otros («Masas», «Material y espesores», «Techo solar» de Energía) dicen «ajusta … kg»: no
+  se suman dos veces.
+- Las cifras salen de la misma lista que «Peso: todos los componentes» y que los kilos de las pestañas de arriba. Con
+  los diseños guardados no cambia ningún total.
+- La carrocería ya no es un solo número: el laminado se reparte por zonas (morro, cola, costados y panza, y lo que va
+  bajo el panel solar y el marco del techo), cada una en su desplegable; la cúpula es el cristal.
+- Chasis › Bastidor, abierto de serie: los tubos por grupos (largueros, travesaños, cuna, torreta, soportes de los
+  asientos, soporte de la columna…), cada uno con cuántos tubos, cuántos metros y de qué diámetro y pared; y las
+  uniones separadas en tornillería (unos 38-48 tornillos M8 y 16 M6, contados), soportes de chapa y cartelas/soldaduras.
+  El total de uniones es el del modelo (el deslizador «Uniones, chapas y tornillería»); el reparto entre las tres es
+  una estimación por recuento, y si lo contado pesaría más que ese total, lo dice y propone subir el deslizador.
+- Lo que no tiene desplegable propio (por ejemplo en el Basculante, las luces o el forro) se dice en el primer bloque
+  del departamento, para que el total de la pestaña cuadre siempre.
+- Comprobación nueva: `npx tsx scripts/pesos-secciones.ts [diseño.json]`: desplegables + «sin desplegable» = cada
+  pestaña = el vehículo en vacío, y cada desglose = su pieza. «Todo OK».
+
 
 ## 2026-11-17 · Catálogo de ruedas: ruedas de moto de todo tipo
 

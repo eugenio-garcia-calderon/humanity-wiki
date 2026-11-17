@@ -2037,6 +2037,18 @@ Numbers (tunnel «media», 80 km/h, Rombo Bala): 0.63 m pointed 3.83 m Cd 0.2066
 40 / 50 / 60 %: 3.49 m 0.2338 / 3.22 m 0.2510 / 3.09 m 0.2681. Sources: Wikipedia «Kammback»; Mercedes-Benz Classic
 «History of aerodynamics»; SAE 2020-01-0673; Evrard, Cadot et al. (core.ac.uk 52674332); Transport Canada / NRC
 trailer-based drag reduction; Hucho 1998.
+## 2026-11-17 · Section weights: a derived breakdown, not a new parts list
+
+Eugenio asked for the weight of every side-panel section and a finer chassis (tubes vs bolts). Options:
+(a) split the lumps («Carrocería», «Bastidor») inside the parts list itself (`triciclo/masas.ts`), so the «Peso» list,
+the centre of gravity and the MASAS tab see the pieces; (b) keep the parts list as it is and derive the pieces in a
+helper (`masasSecciones.ts`) that adds up to each part exactly, checked by `scripts/pesos-secciones.ts`.
+Chose (b): `masas.ts` was being changed at the same moment by another agent (the MASAS tab), (a) would move every saved
+design's centre of gravity by a few millimetres (each zone at its own centroid instead of the whole skin's), and (b)
+keeps one total by construction. Cost: the frame's tube formula is written twice (the parts list and the breakdown;
+the check catches a drift). A block maps to a part by the part's name (regex), not by a field on the part: cheaper now,
+and a part that no rule takes is shown as «sin desplegable» rather than lost.
+
 
 ## 2026-11-17 · Wheel catalogue: one shared table, added as extra options of each vehicle's existing wheel selector
 
