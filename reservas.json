@@ -152,12 +152,6 @@
     },
     {
       "agente": "mgplanetario",
-      "ruta": "src/components/aeromovil/triciclo/modelo.ts",
-      "motivo": "mgplanetario: motor eléctrico central (MG2) unido al planetario",
-      "desde": "2026-11-17T14:17:52.319Z"
-    },
-    {
-      "agente": "mgplanetario",
       "ruta": "src/components/aeromovil/catalogoTren.ts",
       "motivo": "mgplanetario: motor eléctrico central (MG2) unido al planetario",
       "desde": "2026-11-17T14:17:55.133Z"
