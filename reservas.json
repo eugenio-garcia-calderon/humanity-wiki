@@ -149,6 +149,12 @@
       "ruta": "src/components/aeromovil/triciclo/campos.ts",
       "motivo": "neumaticos: tipo de neumático por eje",
       "desde": "2026-11-17T13:38:24.581Z"
+    },
+    {
+      "agente": "neumaticos",
+      "ruta": "src/components/aeromovil/triciclo/energia.ts",
+      "motivo": "neumaticos: tipo de neumático por eje",
+      "desde": "2026-11-17T13:38:28.079Z"
     }
   ]
 }
