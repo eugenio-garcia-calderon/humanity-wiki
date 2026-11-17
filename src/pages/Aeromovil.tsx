@@ -35,6 +35,7 @@ import { Armchair, BatteryCharging, Box, Fuel, Car, Route as RutaIcono, Warehous
 import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import { Visor3D, CAPAS, type CapaId, type Vista, type VisorHandle } from '../components/aeromovil/Visor3D';
+import { animarPliegueBWB } from '../components/aeromovil/visor/bwb';
 import {
   PARAMETROS_POR_DEFECTO, PARAMETROS_A1, PARAMETROS_GOTA, PARAMETROS_BALA, PARAMETROS_TRICICLO, PARAMETROS_BASCULANTE, DIAMETRO_RUEDA, NEUMATICOS, MATERIALES_CARENADO, MATERIALES_CHASIS, RANGOS_MASA, ajustarCarenado, areas, calcular, crearModelo, type Disposicion, type MaterialCarenado, type MaterialChasis, type Neumatico, type Parametros, type Puerta, type Pulgadas,
 } from '../components/aeromovil/geometria';
@@ -297,39 +298,36 @@ export default function Aeromovil() {
   // El ajuste automático decide W y H; lo demás sale tal cual de los deslizadores.
   // (2026-11-13: the body's colours are not shape: a change of colour alone keeps the same parameters for the model, so
   // the 3D is not rebuilt; the viewer recolours its materials from `colores`)
-  // Plegar / desplegar las alas del carenado BWB despacio (2026-11-17, Eugenio: «que la acción se haga lento, no
-  // instantáneo»; y «más pasos, que no sea tan ortopédico»): dura 3 s con curva suave (entra y sale despacio) y se
-  // recalcula el coche cada ~100 ms. El tiempo manda, no el número de fotogramas. Sólo al final se guarda el ajuste.
-  const [plieg, setPlieg] = useState<{ f: number; dest: 'si' | 'no'; desde: number; t0: number } | null>(null);
-  const DURACION_PLIEG = 3000, PASO_PLIEG_MS = 100;
-  useEffect(() => {
-    if (!plieg) return;
-    const hasta = plieg.dest === 'si' ? 1 : 0;
-    const t = setTimeout(() => {
-      const u = Math.min(1, (performance.now() - plieg.t0) / DURACION_PLIEG);
-      const e = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2; // curva suave, entra y sale despacio
-      if (u >= 1) { set('tBwbPlegadas' as keyof Parametros, plieg.dest as never); setPlieg(null); return; }
-      setPlieg(q => q && { ...q, f: plieg.desde + (hasta - plieg.desde) * e });
-    }, PASO_PLIEG_MS);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [plieg]);
-  const Pmostrar = useMemo<Parametros>(() => plieg
-    ? { ...P, tBwbPlegadas: 'si', tBwbPliegueAng: ((P as Parametros & { tBwbPliegueAng?: number }).tBwbPliegueAng ?? 90) * plieg.f } as Parametros
-    : P, [P, plieg]);
+  // Plegar / desplegar las alas del carenado BWB despacio (2026-11-17, Eugenio: «que la acción se haga lento» y
+  // «fluido, sin interrupciones visuales»). Durante los 3 s sólo se mueven las alas en el 3D (`animarPliegueBWB`),
+  // sin tocar el estado de React: el coche no se recalcula. Al terminar se guarda el ajuste y se recalcula una vez.
+  const [pliegando, setPliegando] = useState<'si' | 'no' | null>(null);
+  const DURACION_PLIEG = 3000;
+  const pliegRaf = useRef(0);
+  useEffect(() => () => cancelAnimationFrame(pliegRaf.current), []);
+  const alternarAlas = () => {
+    if (pliegando) return;
+    const ahora = (P as Parametros & { tBwbPlegadas?: string }).tBwbPlegadas === 'si';
+    const dest: 'si' | 'no' = ahora ? 'no' : 'si';
+    const desde = ahora ? 1 : 0, hasta = dest === 'si' ? 1 : 0;
+    const t0 = performance.now();
+    setPliegando(dest);
+    const paso = () => {
+      const u = Math.min(1, (performance.now() - t0) / DURACION_PLIEG);
+      const e = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2; // curva suave: entra y sale despacio
+      animarPliegueBWB(desde + (hasta - desde) * e);
+      if (u < 1) { pliegRaf.current = requestAnimationFrame(paso); return; }
+      set('tBwbPlegadas' as keyof Parametros, dest as never);
+      setPliegando(null);
+    };
+    pliegRaf.current = requestAnimationFrame(paso);
+  };
   const sinColor = useRef<Parametros | null>(null);
   const Pforma = useMemo(() => {
-    const a = sinColor.current, cambia = (k: string) => (a as unknown as Record<string, unknown>)[k] !== (Pmostrar as unknown as Record<string, unknown>)[k];
-    if (a && a !== Pmostrar && !Object.keys({ ...a, ...Pmostrar }).some(k => !(CLAVES_COLOR as readonly string[]).includes(k) && cambia(k))) return a;
-    return (sinColor.current = Pmostrar);
-  }, [Pmostrar]);
-  const pliegando = plieg !== null;
-  const alternarAlas = () => {
-    if (plieg) return;
-    const ahora = (P as Parametros & { tBwbPlegadas?: string }).tBwbPlegadas === 'si';
-    const desde = ahora ? 1 : 0;
-    setPlieg({ f: desde, dest: ahora ? 'no' : 'si', desde, t0: performance.now() });
-  };
+    const a = sinColor.current, cambia = (k: string) => (a as unknown as Record<string, unknown>)[k] !== (P as unknown as Record<string, unknown>)[k];
+    if (a && a !== P && !Object.keys({ ...a, ...P }).some(k => !(CLAVES_COLOR as readonly string[]).includes(k) && cambia(k))) return a;
+    return (sinColor.current = P);
+  }, [P]);
   const colores = useMemo(() => coloresDe(P), [P]);
   const Pa = useMemo(() => ajustarCarenado(Pforma), [Pforma]);
   const modelo = useMemo(() => crearModelo(Pa), [Pa]);
@@ -720,10 +718,10 @@ export default function Aeromovil() {
           {P.disposicion === 'triciclo' && (P as Parametros & { tBwb?: string }).tBwb === 'si' && (() => {
             const plegadas = (P as Parametros & { tBwbPlegadas?: string }).tBwbPlegadas === 'si';
             return (
-              <Button variant="outline" onClick={alternarAlas} disabled={pliegando} aria-pressed={plegadas}
+              <Button variant="outline" onClick={alternarAlas} disabled={pliegando !== null} aria-pressed={plegadas}
                 title={plegadas ? 'Despliega las alas del carenado BWB (tarda unos segundos)' : 'Pliega las alas del carenado BWB a mitad de cada ala (tarda unos segundos)'}
                 className={cn('absolute right-[8.5rem] top-3 z-[15] gap-1.5 bg-white px-2.5 py-1.5 text-xs normal-case tracking-normal shadow-sm', plegadas && 'border-teal-600 bg-teal-50 text-teal-800')}>
-                {pliegando ? (plieg!.dest === 'si' ? 'Plegando alas…' : 'Desplegando alas…') : plegadas ? 'Desplegar alas' : 'Plegar alas'}
+                {pliegando ? (pliegando === 'si' ? 'Plegando alas…' : 'Desplegando alas…') : plegadas ? 'Desplegar alas' : 'Plegar alas'}
               </Button>
             );
           })()}
