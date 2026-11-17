@@ -890,3 +890,16 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   `LEMAS_TRICICLO`, removing `LadoTriciclo.tsx`'s now-unreachable `proyecto` blocks, and the `CLAUDE.md` section on masses.
 - **The new mass checks are appended in `geometria.ts` `calcular`** (`conMasasTriciclo`), not inside `calcularTriciclo`,
   for the same reason: moving them in is ≈ 10 min.
+
+## 2026-11-17 · Engine parts one by one (solopiezas)
+- **Only the Triciclo family** (Eugenio focuses on the Aeromóvil S). The Basculante, A1 and Gota motor layers have no
+  `componente` tags and show no parts list. ≈ 30 min each if ever needed.
+- **The oil is not counted** (a dry engine figure leaves it out; ≈ 2 kg on a 25 kW twin). Adding it changes every
+  hybrid's empty mass on purpose: 10 min plus a changelog line.
+- **The two coolant hoses end in open stubs** forward of the engine until the radiator exists (bot «capo»): joining them
+  to its inlet/outlet is ≈ 15 min once its position is in the model.
+- **Labels are placed on the top of each part's box and stacked when they collide**; on a crowded engine two can still
+  overlap on screen from some angles. Screen-space de-overlap ≈ 1 h.
+- **The clicked-part card sits top left over the 3D**, where a garage car's card also opens; both could show at once
+  if a garage car is clicked while «Ver solo motor» is on. Moving it into the viewer's card slot ≈ 20 min. Not checked
+  on a phone.

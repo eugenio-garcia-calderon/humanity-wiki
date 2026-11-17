@@ -9,6 +9,9 @@ export interface OpcionesPiezas {
   /** Small labels over what is shown: one per group, or one per part when a single group (or part) is shown. */
   etiquetas: boolean;
 }
+/** How far the camera will be (m): the labels are a fixed size on screen, so how much room they take in the scene
+ *  depends on it; two that would cover each other are stacked. */
+export const ALTO_ETIQUETA = 0.02;
 
 const NOMBRE_ETIQUETAS = 'etiquetas-piezas-motor';
 
@@ -29,7 +32,7 @@ function etiqueta(texto: string): THREE.Sprite {
 }
 
 /** Shows only `o.solo` in the «Motor» layer (or all of it with null) and puts the labels. Call it after every rebuild too. */
-export function aplicarPiezasMotor(motor: THREE.Object3D, o: OpcionesPiezas | null) {
+export function aplicarPiezasMotor(motor: THREE.Object3D, o: OpcionesPiezas | null, distancia = 2) {
   const viejas = motor.getObjectByName(NOMBRE_ETIQUETAS);
   if (viejas) { viejas.traverse((c: any) => { if (c.isSprite) { c.material.map?.dispose(); c.material.dispose(); } }); motor.remove(viejas); }
   const solo = o?.solo ? new Set(o.solo) : null;
@@ -58,13 +61,14 @@ export function aplicarPiezasMotor(motor: THREE.Object3D, o: OpcionesPiezas | nu
     ? comps.map(c => ({ texto: NOMBRES_PIEZA[c] ?? c, caja: cajas.get(c)! }))
     : grupos.map(g => ({ texto: g.n, caja: g.componentes.filter(c => cajas.has(c)).reduce((b, c) => b.union(cajas.get(c)!), new THREE.Box3()) }));
   const grupo = new THREE.Group(); grupo.name = NOMBRE_ETIQUETAS;
-  // over the top of each part; two labels that would land on each other (within 7 cm) are stacked
-  const puestos: THREE.Vector3[] = [];
+  // over the top of each part; a label that would cover one already placed (seen from about `distancia`) goes up
+  const h = ALTO_ETIQUETA * distancia * 1.15, puestos: { c: THREE.Vector3; w: number }[] = [];
   for (const mk of marcas.sort((a, b) => a.caja.max.y - b.caja.max.y)) {
+    const s = etiqueta(mk.texto), w = h * s.scale.x / s.scale.y;
     const c = mk.caja.getCenter(new THREE.Vector3()); c.y = mk.caja.max.y + 0.02;
-    while (puestos.some(p => Math.abs(p.x - c.x) < 0.2 && Math.abs(p.z - c.z) < 0.25 && Math.abs(p.y - c.y) < 0.07)) c.y += 0.07;
-    puestos.push(c.clone());
-    const s = etiqueta(mk.texto); s.position.copy(c); grupo.add(s);
+    while (puestos.some(p => Math.hypot(p.c.x - c.x, p.c.z - c.z) < (p.w + w) / 2 && Math.abs(p.c.y - c.y) < h)) c.y += h / 2;
+    puestos.push({ c: c.clone(), w });
+    s.position.copy(c); grupo.add(s);
   }
   motor.add(grupo);
 }
