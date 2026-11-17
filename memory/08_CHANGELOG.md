@@ -12727,3 +12727,9 @@ Eugenio delegó tres decisiones («Me dan igual, lo que tú veas»); las decidi�
 - Triciclo por defecto, antes → después: consumo a 80 km/h 25,0 → 31,5 Wh/km; autonomía 324 → 257 km; 0–50 km/h
   5,2 → 5,5 s; masa con ocupantes 351 → 357 kg; vuelco 1,12 g (verde) → 1,12 g (verde, contra 0,86 g de agarre).
   Rombo Bala (ruedas de coche de 13″, «Varios» guardado en 12): sin cambios.
+
+## 2026-11-17 · Plegar y desplegar las alas desde el panel Garaje
+
+> «haz que las alas se puedan plegar o desplegar desde el panel del garaje con un botón»
+
+En el panel «Garaje» aparece un botón «Plegar alas» / «Desplegar alas» cuando el diseño tiene el carenado BWB puesto (Triciclo). Cambia el mismo ajuste que el selector «Alas plegadas» de Carrocería. Por defecto no cambia ningún diseño.
