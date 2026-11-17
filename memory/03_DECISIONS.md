@@ -2296,29 +2296,6 @@ sections rely on.
 **Decision.** Fields `tEp…` in `CamposTriciclo`, model in `triciclo/electronica.ts` (pure: modes, continuous and peak totals, limiters), UI in `electronica/BloqueElectronica.tsx` (its own grouped sliders; LadoTriciclo skips that block in its generic list). `energia.ts` drives the electric speeds and acceleration with the limited power and adds `vmaxConjunta`; `ficha.ts` takes `potenciaCategoria` = continuous total. Every default (no limit = 0, strategy «libre», no sport, map «normal», engine start at 10 % SOC = the old USABLE) reproduces the previous numbers exactly.
 **Alternatives.** (a) Simulate the start logic over a drive cycle (SOC over time): ≈ 1 day, and no cycle exists in the model; the start logic is shown as a speed table instead. (b) Generic sliders only: «0» would read «0,0 kW» instead of «sin límite» and the thermal start rows would need more visibility rules in LadoTriciclo.
 **Not modelled.** The combined top speed and the hybrid limits are the controller's configuration, not a measurement; the regen limit is declared only (the consumption does not use it yet).
-<<<<<<< HEAD
-
-## 2026-11-17 · Triciclo family: moped Crr, absolute tyre grip, «Varios» 18 kg (decided by Claude, delegated by Eugenio 2026-11-17)
-
-Eugenio delegated these three («Me dan igual, lo que tú veas»); the coordinating Claude decided them, bot «ajustes» built them.
-They change saved designs' numbers on purpose.
-- **Moped tyres' rolling resistance 0.011 → 0.0165** (`triciclo/energia.ts` `CRR_CICLOMOTOR = 0.0085 + 0.018 / 2.25`):
-  Cossalter, «Motorcycle Dynamics» (2006), ch. 2, static part at 2.25 bar — the same formula the wheel catalogue uses.
-  Quoted from the book, not confirmed online (a web search on 2026-11-17 did not find the formula). The car sizes
-  (c13–c15) keep 0.011 (`CRR_COCHE`): the decision was about moped tyres only. `CRR` stays as an alias of the moped one
-  for importers; `crrTriciclo` now picks per size (`crrLegado`) instead of `crrEjes(…, CRR)`. Alternatives rejected:
-  one constant for every older size (would have made the car-tyre Rombo Bala roll like a moped tyre); the speed term
-  (the editor uses one Crr for every speed, as the catalogue does).
-- **Absolute grip** (`ruedas/neumaticos.ts` `efectoNeumatico(…, absoluto)`, opt-in; the Basculante keeps relative):
-  μ = 0.9 × the type's `seco`/`mojado` × the construction's factor. A radial road tyre is 0.90 g at any size; the older
-  moped sizes (bias, tube) 0.855. The rollover check compares with `agarreTriciclo(T)` (mean over the wheels) and asks
-  `objetivoVuelco(μ) = max(1.05, μ × 1.05/0.9)`; `res.triciclo.vuelco` now carries `agarre` and `objetivo` and the side
-  panels read them. Alternative rejected: the axle with the most grip (more conservative for rollover, but the mean is
-  how the 0–50 and the editors already average tyres).
-- **«Varios» default 12 → 18 kg** (`triciclo/defecto.ts`), slider max 18 → 24. Only the default: `camposTriciclo`
-  takes every stored number, and saving writes the whole `Parametros` (`aDiseno`), so every design saved before today
-  (Rombo Bala, the clásico: `tMVarios: 12`) keeps 12 and its «súbelo a 18 kg» check stays red until raised by hand.
-=======
 ## 2026-11-17 · Supplier, model and files per part: where they live (bot «proveedores»)
 
 - **Text and links live in the design** (`Parametros.proveedores`, keyed by the part's name in the mass model — the
@@ -2346,4 +2323,24 @@ They change saved designs' numbers on purpose.
   public). The panel says so under the fields.
 - **Field declared by module augmentation** in `proveedores/datos.ts` (`declare module '../geometria'`), because
   `geometria.ts` was claimed by another bot: TypeScript merges it into `Parametros` everywhere.
->>>>>>> origin/main
+
+## 2026-11-17 · Triciclo family: moped Crr, absolute tyre grip, «Varios» 18 kg (decided by Claude, delegated by Eugenio 2026-11-17)
+
+Eugenio delegated these three («Me dan igual, lo que tú veas»); the coordinating Claude decided them, bot «ajustes» built them.
+They change saved designs' numbers on purpose.
+- **Moped tyres' rolling resistance 0.011 → 0.0165** (`triciclo/energia.ts` `CRR_CICLOMOTOR = 0.0085 + 0.018 / 2.25`):
+  Cossalter, «Motorcycle Dynamics» (2006), ch. 2, static part at 2.25 bar — the same formula the wheel catalogue uses.
+  Quoted from the book, not confirmed online (a web search on 2026-11-17 did not find the formula). The car sizes
+  (c13–c15) keep 0.011 (`CRR_COCHE`): the decision was about moped tyres only. `CRR` stays as an alias of the moped one
+  for importers; `crrTriciclo` now picks per size (`crrLegado`) instead of `crrEjes(…, CRR)`. Alternatives rejected:
+  one constant for every older size (would have made the car-tyre Rombo Bala roll like a moped tyre); the speed term
+  (the editor uses one Crr for every speed, as the catalogue does).
+- **Absolute grip** (`ruedas/neumaticos.ts` `efectoNeumatico(…, absoluto)`, opt-in; the Basculante keeps relative):
+  μ = 0.9 × the type's `seco`/`mojado` × the construction's factor. A radial road tyre is 0.90 g at any size; the older
+  moped sizes (bias, tube) 0.855. The rollover check compares with `agarreTriciclo(T)` (mean over the wheels) and asks
+  `objetivoVuelco(μ) = max(1.05, μ × 1.05/0.9)`; `res.triciclo.vuelco` now carries `agarre` and `objetivo` and the side
+  panels read them. Alternative rejected: the axle with the most grip (more conservative for rollover, but the mean is
+  how the 0–50 and the editors already average tyres).
+- **«Varios» default 12 → 18 kg** (`triciclo/defecto.ts`), slider max 18 → 24. Only the default: `camposTriciclo`
+  takes every stored number, and saving writes the whole `Parametros` (`aDiseno`), so every design saved before today
+  (Rombo Bala, the clásico: `tMVarios: 12`) keeps 12 and its «súbelo a 18 kg» check stays red until raised by hand.

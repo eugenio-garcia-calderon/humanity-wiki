@@ -12669,24 +12669,6 @@ Eugenio: «Crea un nuevo apartado dentro de MOTOR que sea Electronica de potenci
 - Las cifras se usan: la velocidad sostenida y punta en eléctrico, la aceleración y la velocidad solo con gasolina respetan los límites; nueva «velocidad con los dos a la vez»; la potencia de la homologación es la continua total del modo más potente. Con los ajustes de serie (sin límite) todo da lo mismo que antes, y los diseños guardados no cambian.
 - **Homologación › Estudio L7e-A2**: el estudio de Eugenio resumido y calculado en vivo para el diseño: OK / No OK / A comprobar para los campos 1.8.3, 1.8.5, 1.8.7 y 1.8.9 de la ficha (901/2014), cada modo ensayado (134/2014), los dos limitadores (3/2014 anexo XVIII) y la protección contra la manipulación; y la tabla de escenarios (28 / 45 / 15 kW) con los números del diseño.
 - **Homologación › Ensayos**: una pestaña por ensayo (térmico, eléctrico 30 min según UN 85, conjunto híbrido en cada modo, limitaciones no eliminables, velocidad máxima, emisiones, ruido, frenado, alta tensión y compatibilidad electromagnética), con objetivo, cómo se hace, qué declarar, las cifras del diseño y lo que se espera. Todos pendientes. `scripts/homologacion.ts` los imprime y comprueba los números del estudio.
-<<<<<<< HEAD
-
-## 2026-11-17 · Triciclo: rodadura de ciclomotor, agarre absoluto y «Varios» 18 kg
-
-Eugenio delegó tres decisiones («Me dan igual, lo que tú veas»); las decidió Claude:
-- **Rodadura de las ruedas de ciclomotor de siempre: 0,011 → 0,0165**, con la fórmula de Cossalter («Motorcycle
-  Dynamics», 2006) para neumáticos de moto a 2,25 bar, la misma del catálogo de ruedas. Citada del libro; no se pudo
-  comprobar en internet. Las medidas de coche (13″–15″) siguen en 0,011.
-- **El agarre ya no depende de la medida**: un neumático de carretera radial agarra 0,90 g en seco sea cual sea su
-  tamaño; uno diagonal de ciclomotor, 0,86; deportivo, semi-slick, eco… lo suyo. La comprobación de vuelco compara con
-  el agarre de los neumáticos elegidos, no con 0,9 g fijo, y pide 1,05 g o más si los neumáticos agarran más.
-- **«Varios: cargador, cables, luces, 12 V» por defecto 18 kg** (antes 12; el deslizador llega ahora a 24): las piezas
-  del sistema eléctrico suman 14–16,5 kg. Solo cambia el valor por defecto: los diseños guardados con 12 kg (Rombo Bala,
-  el clásico) los conservan y su aviso «súbelo a 18 kg» sigue en rojo hasta que se suba a mano.
-- Triciclo por defecto, antes → después: consumo a 80 km/h 25,0 → 31,5 Wh/km; autonomía 324 → 257 km; 0–50 km/h
-  5,2 → 5,5 s; masa con ocupantes 351 → 357 kg; vuelco 1,12 g (verde) → 1,12 g (verde, contra 0,86 g de agarre).
-  Rombo Bala (ruedas de coche de 13″, «Varios» guardado en 12): sin cambios.
-=======
 ## 2026-11-17 · Proveedor, modelo y archivos en cada componente
 
 Eugenio: «también añade en que todos los componentes, aparte de tener un peso y un precio, se pueda elegir un proveedor
@@ -12708,4 +12690,19 @@ detallada, un PDF o lo que sea.»
   Los ve cualquiera que abra el diseño. «Quitar» lo quita de este diseño; quien lo subió (o un administrador) tiene
   además una papelera que lo borra del servidor.
 - No visto en un teléfono de verdad: si sale la versión vieja, `humanity.wiki/?sw=off`.
->>>>>>> origin/main
+
+## 2026-11-17 · Triciclo: rodadura de ciclomotor, agarre absoluto y «Varios» 18 kg
+
+Eugenio delegó tres decisiones («Me dan igual, lo que tú veas»); las decidió Claude:
+- **Rodadura de las ruedas de ciclomotor de siempre: 0,011 → 0,0165**, con la fórmula de Cossalter («Motorcycle
+  Dynamics», 2006) para neumáticos de moto a 2,25 bar, la misma del catálogo de ruedas. Citada del libro; no se pudo
+  comprobar en internet. Las medidas de coche (13″–15″) siguen en 0,011.
+- **El agarre ya no depende de la medida**: un neumático de carretera radial agarra 0,90 g en seco sea cual sea su
+  tamaño; uno diagonal de ciclomotor, 0,86; deportivo, semi-slick, eco… lo suyo. La comprobación de vuelco compara con
+  el agarre de los neumáticos elegidos, no con 0,9 g fijo, y pide 1,05 g o más si los neumáticos agarran más.
+- **«Varios: cargador, cables, luces, 12 V» por defecto 18 kg** (antes 12; el deslizador llega ahora a 24): las piezas
+  del sistema eléctrico suman 14–16,5 kg. Solo cambia el valor por defecto: los diseños guardados con 12 kg (Rombo Bala,
+  el clásico) los conservan y su aviso «súbelo a 18 kg» sigue en rojo hasta que se suba a mano.
+- Triciclo por defecto, antes → después: consumo a 80 km/h 25,0 → 31,5 Wh/km; autonomía 324 → 257 km; 0–50 km/h
+  5,2 → 5,5 s; masa con ocupantes 351 → 357 kg; vuelco 1,12 g (verde) → 1,12 g (verde, contra 0,86 g de agarre).
+  Rombo Bala (ruedas de coche de 13″, «Varios» guardado en 12): sin cambios.
