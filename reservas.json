@@ -239,6 +239,12 @@
       "ruta": "src/components/aeromovil/triciclo/centroMasas.ts",
       "motivo": "munecos: talla y complexión de los ocupantes (pocas líneas)",
       "desde": "2026-11-17T14:19:21.162Z"
+    },
+    {
+      "agente": "munecos",
+      "ruta": "src/components/aeromovil/triciclo/bascula.ts",
+      "motivo": "munecos: talla y complexión de los ocupantes (pocas líneas)",
+      "desde": "2026-11-17T14:19:24.900Z"
     }
   ]
 }
