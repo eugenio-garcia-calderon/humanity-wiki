@@ -18,21 +18,22 @@ import * as THREE from 'three';
 import type { CapaId } from './capas';
 import type { ModeloTriciclo } from '../triciclo/modelo';
 import { enContorno, refrigeracionDe, type P2, type Radiador, type V3 } from '../triciclo/refrigeracion';
+import { punto, tArriba, type Sec } from '../garaje/balaForma';
 
 /** The hood's opening angle (degrees). */
 export const ANGULO_CAPO = 50;
 
 let MATS: Record<string, THREE.Material> | null = null;
 const mats = () => MATS ?? (MATS = {
-  embellecedor: new THREE.MeshStandardMaterial({ color: 0x141518, metalness: 0.2, roughness: 0.45, side: THREE.DoubleSide }),
+  embellecedor: new THREE.MeshStandardMaterial({ color: 0x8d939a, metalness: 0.7, roughness: 0.32, side: THREE.DoubleSide }),
   conducto: new THREE.MeshStandardMaterial({ color: 0x0b0c0e, metalness: 0, roughness: 0.95, side: THREE.DoubleSide }),
   rejilla: new THREE.MeshStandardMaterial({ color: 0x2a2d31, metalness: 0.5, roughness: 0.4 }),
   panal: new THREE.MeshStandardMaterial({ color: 0x9aa1a8, metalness: 0.75, roughness: 0.38 }),
   deposito: new THREE.MeshStandardMaterial({ color: 0x24272b, metalness: 0.1, roughness: 0.6 }),
   ventilador: new THREE.MeshStandardMaterial({ color: 0x16181b, metalness: 0.2, roughness: 0.55 }),
   caliente: new THREE.MeshStandardMaterial({ color: 0xb3261e, metalness: 0.1, roughness: 0.55 }),
-  fria: new THREE.MeshStandardMaterial({ color: 0x1f5fa8, metalness: 0.1, roughness: 0.55 }),
-  junta: new THREE.LineBasicMaterial({ color: 0x2a2d31 }),
+  fria: new THREE.MeshStandardMaterial({ color: 0x19b3c4, metalness: 0.1, roughness: 0.55 }),
+  goma: new THREE.MeshStandardMaterial({ color: 0x1a1b1d, metalness: 0, roughness: 0.8, side: THREE.DoubleSide }),
   arbol: new THREE.MeshStandardMaterial({ color: 0xc0c5ca, metalness: 0.9, roughness: 0.25 }),
 });
 
@@ -72,19 +73,17 @@ function manguera(pts: V3[]): THREE.Curve<THREE.Vector3> {
   return new THREE.CatmullRomCurve3(o, false, 'centripetal');
 }
 
-/**
- * Split the body mesh: take out the triangles inside the openings, and move the hood's to their own piece. Returns the
- * hood mesh (sharing the body's vertices and materials), or null when there is no room for one.
- */
-function cortarPiel(cuerpo: THREE.Mesh, m: ModeloTriciclo, quitar: (c: THREE.Vector3, n: THREE.Vector3) => boolean, capo: ((c: THREE.Vector3, n: THREE.Vector3) => boolean) | null): THREE.Mesh | null {
-  const geo = cuerpo.geometry as THREE.BufferGeometry, idx = geo.index; if (!idx) return null;
+/** Take out of the body mesh the triangles `quitar` picks (the openings and the hood's place); keeps its groups. */
+function cortarPiel(cuerpo: THREE.Mesh, quitar: (c: THREE.Vector3, n: THREE.Vector3) => boolean): void {
+  const geo = cuerpo.geometry as THREE.BufferGeometry, idx = geo.index; if (!idx) return;
   const P = geo.attributes.position as THREE.BufferAttribute, I = idx.array as ArrayLike<number>;
   const grupos = geo.groups.length ? geo.groups : [{ start: 0, count: I.length, materialIndex: 0 }];
   const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3(), cen = new THREE.Vector3(), n = new THREE.Vector3();
-  const resto: number[] = [], tapa: number[] = [], gResto: { start: number; count: number; mi: number }[] = [], gTapa: { start: number; count: number; mi: number }[] = [];
-  const cache = new Map<number, number>(); // first index of a triangle → 0 keep, 1 remove, 2 hood (same triangle in the inner pass)
+  const resto: number[] = [], gs: { start: number; count: number; mi: number }[] = [];
+  const cache = new Map<number, boolean>(); // (the inner pass repeats the same triangles)
+  let quitados = 0;
   for (const g of grupos) {
-    const r0 = resto.length, t0 = tapa.length;
+    const r0 = resto.length;
     for (let k = g.start; k < g.start + g.count; k += 3) {
       const u = I[k], v = I[k + 1], w = I[k + 2], clave = u * 1e6 + Math.min(v, w);
       let q = cache.get(clave);
@@ -92,34 +91,42 @@ function cortarPiel(cuerpo: THREE.Mesh, m: ModeloTriciclo, quitar: (c: THREE.Vec
         a.fromBufferAttribute(P, u); b.fromBufferAttribute(P, v); c.fromBufferAttribute(P, w);
         cen.copy(a).add(b).add(c).multiplyScalar(1 / 3);
         n.subVectors(b, a).cross(c.clone().sub(a)); const l = n.length(); if (l > 0) n.multiplyScalar(1 / l);
-        q = quitar(cen, n) ? 1 : capo && capo(cen, n) ? 2 : 0; cache.set(clave, q);
+        q = quitar(cen, n); cache.set(clave, q);
       }
-      if (q === 0) resto.push(u, v, w); else if (q === 2) tapa.push(u, v, w);
+      if (!q) resto.push(u, v, w); else quitados++;
     }
-    gResto.push({ start: r0, count: resto.length - r0, mi: g.materialIndex ?? 0 });
-    gTapa.push({ start: t0, count: tapa.length - t0, mi: g.materialIndex ?? 0 });
+    gs.push({ start: r0, count: resto.length - r0, mi: g.materialIndex ?? 0 });
   }
-  const nueva = (l: number[], gs: typeof gResto) => {
-    const G = new THREE.BufferGeometry();
-    for (const k of Object.keys(geo.attributes)) G.setAttribute(k, geo.attributes[k]);
-    G.setIndex(new THREE.BufferAttribute(new Uint32Array(l), 1));
-    for (const g of gs) if (g.count) G.addGroup(g.start, g.count, g.mi);
-    return G;
-  };
-  cuerpo.geometry = nueva(resto, gResto);
-  if (!tapa.length) return null;
-  const h = new THREE.Mesh(nueva(tapa, gTapa), cuerpo.material); h.name = 'capo'; h.castShadow = true; h.receiveShadow = true;
-  // the shut line: the hood's edges that belong to one of its triangles only (outer pass)
-  const cuenta = new Map<string, [number, number, number]>();
-  const nT = gTapa[0]?.count ?? tapa.length;
-  for (let k = 0; k < nT; k += 3) for (const [p, q] of [[tapa[k], tapa[k + 1]], [tapa[k + 1], tapa[k + 2]], [tapa[k + 2], tapa[k]]]) {
-    const s = p < q ? `${p},${q}` : `${q},${p}`, e = cuenta.get(s); if (e) e[2]++; else cuenta.set(s, [p, q, 1]);
+  if (!quitados) return;
+  const G = new THREE.BufferGeometry();
+  for (const k of Object.keys(geo.attributes)) G.setAttribute(k, geo.attributes[k]);
+  G.setIndex(new THREE.BufferAttribute(new Uint32Array(resto), 1));
+  for (const g of gs) if (g.count) G.addGroup(g.start, g.count, g.mi);
+  cuerpo.geometry = G;
+}
+
+/**
+ * A strip of skin from the body's own sections: rows x from x1 down to x0, across each section from `t0(x)` over the
+ * top (t = 1) to the same t on the left, `fuera` m outside the skin.
+ */
+function pielXT(F: ModeloTriciclo['F'], x0: number, x1: number, t0: (s: Sec) => number, fuera: number, filas = 48, cols = 24): THREE.BufferGeometry {
+  const pos: number[] = [], idx: number[] = [], C = 2 * cols - 1;
+  for (let i = 0; i <= filas; i++) {
+    const x = x1 + (x0 - x1) * i / filas, s = F.sec(x), ta = t0(s);
+    for (let c = 0; c < C; c++) {
+      const k = c < cols ? c : C - 1 - c, sg = c < cols ? 1 : -1, t = ta + (1 - ta) * k / (cols - 1);
+      const [z, y] = punto(s, t), q0 = punto(s, Math.max(0, t - 0.004)), q1 = punto(s, Math.min(1, t + 0.004));
+      let ny = -(q1[0] - q0[0]), nz = q1[1] - q0[1]; const l = Math.hypot(ny, nz) || 1; ny /= l; nz /= l;
+      if (k === cols - 1) { ny = 1; nz = 0; }
+      pos.push(x, y + ny * fuera, sg * (z + nz * fuera));
+    }
   }
-  const lin: number[] = [], N = geo.attributes.normal as THREE.BufferAttribute;
-  for (const [p, q, k] of cuenta.values()) if (k === 1) for (const i of [p, q]) lin.push(P.getX(i) + N.getX(i) * 0.002, P.getY(i) + N.getY(i) * 0.002, P.getZ(i) + N.getZ(i) * 0.002);
-  const gl = new THREE.BufferGeometry(); gl.setAttribute('position', new THREE.Float32BufferAttribute(lin, 3));
-  const junta = new THREE.LineSegments(gl, mats().junta); junta.name = 'capo-junta'; h.add(junta);
-  return h;
+  for (let i = 0; i < filas; i++) for (let c = 0; c < C - 1; c++) { const a = i * C + c, b = a + C; idx.push(a, b, a + 1, a + 1, b, b + 1); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx); g.computeVertexNormals();
+  // (outward: the top centre's normal must point up; otherwise flip the winding)
+  const nrm = g.attributes.normal as THREE.BufferAttribute, mid = Math.floor(filas / 2) * C + cols - 1;
+  if (nrm.getY(mid) < 0) { for (let k = 0; k < idx.length; k += 3) { const t = idx[k + 1]; idx[k + 1] = idx[k + 2]; idx[k + 2] = t; } g.setIndex(idx); g.computeVertexNormals(); }
+  return g;
 }
 
 /**
@@ -136,24 +143,47 @@ export function dibujarRefrigeracion(G: Record<CapaId, THREE.Group>, puertasG: M
     if (ranuras.length && Math.abs(n.z) > 0.3) for (const q of ranuras) if (enContorno(q.contorno, c.x, c.y)) return true;
     return false;
   };
-  // ── the hood: from 3 cm ahead of the canopy frame to 1,5 cm behind the nose's light band, the top 38 % of the section
+  // ── the hood: from 3 cm ahead of the canopy frame to 1,5 cm behind the nose's light band, the top 38 % of each
+  // section. Its place is taken out of the body (a saw-tooth edge, ≈ 1 cm cells) and the hood is drawn again from the
+  // body's own sections, 1 mm outside, reaching 1,2 cm lower than the cut: closed, it covers the saw-tooth and looks
+  // as before; open, a dark rubber seal on the body follows the cut's smooth line
   const xh0 = m.cup.XF0 + 0.03, xh1 = F.X_ARO_MORRO - 0.015;
   const corte = (x: number) => { const s = F.seccionRapida(x); let lo = Infinity, hi = -Infinity; for (let j = 1; j < s.length; j += 2) { lo = Math.min(lo, s[j]); hi = Math.max(hi, s[j]); } return lo + 0.62 * (hi - lo); };
-  const conCapo = xh1 - xh0 >= 0.12;
-  const capo = conCapo ? (c: THREE.Vector3, n: THREE.Vector3) => c.x > xh0 && c.x < xh1 && n.y > -0.1 && c.y > corte(c.x) : null;
-  for (const cu of cuerpos) {
-    const h = cortarPiel(cu, m, quitar, capo);
-    if (h) {
-      // (the hinge on the hood's back edge, at the top of the skin there)
-      const s = F.seccionRapida(xh0); let hi = -Infinity; for (let j = 1; j < s.length; j += 2) hi = Math.max(hi, s[j]);
-      const bisagra = new THREE.Vector3(xh0, hi, 0);
-      const piv = new THREE.Group(); piv.name = 'capo-bisagra'; piv.position.copy(bisagra);
-      h.position.sub(bisagra); piv.add(h);
-      piv.userData = { eje: new THREE.Vector3(0, 0, 1), angulo: ANGULO_CAPO * Math.PI / 180, tipo: 'maletero' };
-      (cu.parent ?? G.carenado).add(piv);
-      if (!puertasG.has('maletero')) puertasG.set('maletero', []);
-      puertasG.get('maletero')!.push(piv);
+  const conCapo = xh1 - xh0 >= 0.12 && cuerpos.length > 0;
+  const enCapo = (c: THREE.Vector3, n: THREE.Vector3) => conCapo && c.x > xh0 + 0.004 && c.x < xh1 - 0.004 && n.y > -0.1 && c.y > corte(c.x) + 0.004;
+  for (const cu of cuerpos) cortarPiel(cu, (c, n) => quitar(c, n) || enCapo(c, n));
+  if (conCapo) {
+    const cu = cuerpos[0], mm = cu.material as THREE.Material[];
+    const geo = pielXT(F, xh0, xh1, s => tArriba(s, corte(s.x) - 0.012), 0.001);
+    const nIdx = geo.index!.count; geo.addGroup(0, nIdx, 0); geo.addGroup(0, nIdx, 1);
+    const h = new THREE.Mesh(geo, Array.isArray(mm) ? [mm[0], mm[2] ?? mm[0]] : [mm, mm]); h.name = 'capo'; h.castShadow = true; h.receiveShadow = true;
+    // its edge: a thin dark line on the hood (the shut line, closed)
+    const borde = pielXT(F, xh0, xh1, s => tArriba(s, corte(s.x) - 0.012), 0.0016, 48, 24);
+    const ib: number[] = [], C = 47, A = borde.index!.array;
+    for (let k = 0; k < A.length; k += 3) {
+      // (only the triangles touching the outline: the first or last row, or the outer column on either side)
+      const vs = [A[k], A[k + 1], A[k + 2]];
+      if (vs.some(v => { const i = Math.floor(v / C), c = v % C; return i === 0 || i === 48 || c === 0 || c === C - 1; }) && vs.every(v => { const i = Math.floor(v / C), c = v % C; return i <= 1 || i >= 47 || c <= 1 || c >= C - 2; })) ib.push(...vs);
     }
+    borde.setIndex(ib); const junta = new THREE.Mesh(borde, M.goma); junta.name = 'capo-junta'; h.add(junta);
+    // the hinge on the hood's back edge, at the top of the skin there
+    const s0 = F.seccionRapida(xh0); let hi = -Infinity; for (let j = 1; j < s0.length; j += 2) hi = Math.max(hi, s0[j]);
+    const bisagra = new THREE.Vector3(xh0, hi, 0);
+    const piv = new THREE.Group(); piv.name = 'capo-bisagra'; piv.position.copy(bisagra);
+    h.position.sub(bisagra); piv.add(h);
+    piv.userData = { eje: new THREE.Vector3(0, 0, 1), angulo: ANGULO_CAPO * Math.PI / 180, tipo: 'maletero' };
+    (cu.parent ?? G.carenado).add(piv);
+    if (!puertasG.has('maletero')) puertasG.set('maletero', []);
+    puertasG.get('maletero')!.push(piv);
+    // the seal on the body, along the cut on both sides, 2 cm tall round the cut's line (it covers the saw-tooth when the hood is up)
+    const pos: number[] = [], idx: number[] = [], N = 60;
+    for (const sg of [1, -1]) for (let i = 0; i <= N; i++) {
+      const x = xh1 + (xh0 - xh1) * i / N, s = F.sec(x), y = corte(x);
+      for (const t of [tArriba(s, y - 0.007), tArriba(s, y + 0.013)]) { const [z, yy] = punto(s, t); pos.push(x, yy + 0.0006, sg * (z + 0.0006)); }
+    }
+    for (let side = 0; side < 2; side++) for (let i = 0; i < N; i++) { const a = side * (N + 1) * 2 + i * 2; idx.push(a, a + 2, a + 1, a + 1, a + 2, a + 3); }
+    const sello = new THREE.BufferGeometry(); sello.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); sello.setIndex(idx); sello.computeVertexNormals();
+    const sm = new THREE.Mesh(sello, M.goma); sm.name = 'capo-sello'; (cu.parent ?? G.carenado).add(sm);
   }
   // ── 2026-11-17: the engine in the nose: its shaft back to the chain (hibrido.ts `arbol`)
   const arbol = m.phev?.disp.arbol;
