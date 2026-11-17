@@ -155,6 +155,12 @@
       "ruta": "src/components/aeromovil/triciclo/comprobaciones.ts",
       "motivo": "capo: refrigeración, capó y motor delante (pocas líneas)",
       "desde": "2026-11-17T14:26:42.993Z"
+    },
+    {
+      "agente": "capo",
+      "ruta": "src/components/aeromovil/visor/triciclo.ts",
+      "motivo": "capo: refrigeración, capó y motor delante (pocas líneas)",
+      "desde": "2026-11-17T14:26:46.163Z"
     }
   ]
 }
