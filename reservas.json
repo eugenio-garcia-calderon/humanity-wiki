@@ -167,6 +167,12 @@
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "capo: refrigeración, capó y motor delante (pocas líneas)",
       "desde": "2026-11-17T14:26:49.237Z"
+    },
+    {
+      "agente": "capo",
+      "ruta": "src/components/aeromovil/hibrido.ts",
+      "motivo": "capo: refrigeración, capó y motor delante (pocas líneas)",
+      "desde": "2026-11-17T14:26:52.292Z"
     }
   ]
 }
