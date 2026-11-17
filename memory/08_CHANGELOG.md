@@ -12092,3 +12092,10 @@ pliegues (un cambio de ángulo de más de 8° en un centímetro, arriba y en los
 de la cola mal puesto, y acaba con «COLA OK» o «COLA FALLA n casos». Hoy en main: 278 casos fallan, todos por
 pliegues (hasta 50°) donde la cúpula o el techo caen sobre la cola; ningún salto de más de 0,3 mm. Es solo la prueba:
 el arreglo lo hace otro bot.
+## 2026-11-16 · Ordenar el código del Aeromóvil (3/4): los paneles laterales en sus propios archivos
+
+Eugenio: «optimiza el codigo de la web aeromovil para que sea más eficiente a futuro generar nuevo código».
+Tercer paso, sin ningún cambio visible: la página `Aeromovil.tsx` (1.930 líneas) deja los paneles de cada vehículo en
+archivos propios junto al visor (`LadoTriciclo.tsx`, `LadoA1.tsx`, `LadoBala.tsx`) y los controles comunes
+(deslizador, selector, bloque, explicación, lista de comprobaciones) en `controles.tsx`. La página se queda en ≈1.030
+líneas con la distribución, el estado y la barra del 3D. Los paneles de todos los departamentos se leen igual que antes.
