@@ -824,3 +824,27 @@ The «ordenar» refactor (PRs #1081, #1082, #1084) only moved code. Still open, 
   a 6 cm cavity, an unnamed part of the «Suspensión» layer (rear, at x −3.009 m, the plate at −2.976) shows through the
   plate as a red disc inside the hollow. The cavity is drawn only; nothing reserves its volume. A check «hueco del culote
   libre» (sample the cavity's volume against the parts' boxes, as `dentroPiel` does for the skin) is ~1.5 h.
+
+## 2026-11-17 · Masses and the hybrid's placement (masas)
+- **Resolved**: 2026-11-16 «The hybrid is drawn, but its engine's place is fixed» (position sliders added; the seats of
+  all three rows, the swing arm and the wheel's travel are checked). Not resolved: with three rows the engine still
+  collides (≈ 10–12 cm with the tower, the arm and row 3) because there is no room behind row 3; moving the shock tower
+  is a frame change, ≈ 3 h.
+- **The hub and central electric motors are not placeable**: a hub motor lives in the wheel; a catalogue «central»
+  motor is still not drawn and its mass counts at the rear axle. Drawing and placing it like the petrol engine: ≈ 2 h.
+- **The nose wheel's fork (rombo) is a fixed 5 kg**, not sized by its load (it carries ≈ 170 kg on Rombo Bala): ≈ 20 min.
+- **Dead branches**: `LadoBasculante.tsx` still has its `dep === 'proyecto'` blocks (weight, rollover, performance,
+  all checks), unreachable since «Proyecto» is `LadoResumen.tsx` (the file was held by another bot): ≈ 15 min.
+- **The Basculante's occupants count as one mass in «Masas»** (its results give the centre with them, not each seat):
+  exposing its places as the Triciclo does, ≈ 30 min.
+- **The engine search costs ≈ 15–20 ms per model build** with the hybrid on (300 places tried, memoised body widths).
+  A coarser first pass would halve it: ≈ 30 min.
+- **Engine still drawn upright**: a laid-down engine (cylinders forward, as on scooters) would be ≈ 15 cm lower;
+  ≈ 2 h in `hibrido.ts`/`hibrido3d.ts`.
+- **Pending, second step (≈ 20 min, code ready in the bot's patch)**: the six sliders `tMotX/Y/Z`, `tDepX/Y/Z` in
+  `triciclo/campos.ts` + `defecto.ts` + their explanations + their `mostrar` in `LadoTriciclo.tsx` (those files were held
+  by other bots). Until then `modelo.ts` reads the offsets if a design carries them (`mov`). Also pending: the unified
+  centre-of-gravity sum inside `calcularTriciclo` (it still has its own identical `momento`), the «Proyecto» lema in
+  `LEMAS_TRICICLO`, removing `LadoTriciclo.tsx`'s now-unreachable `proyecto` blocks, and the `CLAUDE.md` section on masses.
+- **The new mass checks are appended in `geometria.ts` `calcular`** (`conMasasTriciclo`), not inside `calcularTriciclo`,
+  for the same reason: moving them in is ≈ 10 min.

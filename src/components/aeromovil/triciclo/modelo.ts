@@ -2,7 +2,7 @@
 // Moved out of geometriaTriciclo.ts unchanged (2026-11-16, refactor «ordenar»); that file re-exports everything. See ../CLAUDE.md.
 import { filasDetras, medidasAsiento, nombrePlaza, numFila } from '../filasTriciclo';
 import { interiorTriciclo, type SeatInterior } from '../interiorTriciclo';
-import { disponerHibrido, rendimientoHibrido, type ArqHibrido } from '../hibrido';
+import { disponerHibrido, rendimientoHibrido, type ArqHibrido, type EntradaHibrido, type Obstaculo, type ZonaAsiento, tuboCajas } from '../hibrido';
 import { termicoDe } from '../catalogoTren';
 import { type Parametros, type Rueda, type Tubo, type P3, MATERIALES_CHASIS } from '../geometria';
 import { TRICICLO_DEFECTO } from './defecto';
@@ -10,7 +10,7 @@ import { T3, punto, tArriba, type FormaBala } from '../garaje/balaForma';
 import { APLASTADO_BALA, ASIENTO, BUTACA, anchoMaxPod, areaMarco, areaXT, bandaMarco, brazosDe, contornoCupula, techoEn, ventanasDe, type OpcionesVentanas } from '../garaje/balaMedidas';
 import { MONTANTE_B, MONTANTE_C, portonDe, puertaDe, type OpcionesPorton, type OpcionesPuertas, type V3 } from '../garaje/balaPuertas';
 import { type ClaveNumTriciclo, esRombo, conPuertas, conButacas, conSalpicadero, largueroAlEje } from './campos';
-import { dentroDe, ASIENTOS_FILAS, Z_FILA2, PIES_FILA2, PIES_FILA3, paqueteX, semiPaquete, semiLarguero, T_BORDE_LISA, T_PANEL_LISA, conLisa, fondoPaquete, camposTriciclo, rangoTriciclo, techoBajo, limitarTriciclo, medidasTriciclo } from './medidas';
+import { dentroDe, PAN_ASIENTO, ASIENTOS_FILAS, Z_FILA2, PIES_FILA2, PIES_FILA3, paqueteX, semiPaquete, semiLarguero, T_BORDE_LISA, T_PANEL_LISA, conLisa, fondoPaquete, camposTriciclo, rangoTriciclo, techoBajo, limitarTriciclo, medidasTriciclo } from './medidas';
 import { type PiernasButaca, puntosTriciclo, puntosFila, type AsientoFila, type Plaza, type Caja, Z_LARGUERO, bateriaEn, PEDAL_BUTACA, PIES_BUTACA, PIES_PASAJERO_BUTACA, PIES_PASAJERO, largueroTrasero } from './ocupantes';
 import { ejeBascula } from './bascula';
 
@@ -319,7 +319,38 @@ export function crearModeloTriciclo(P: Parametros) {
     pivote: basculante.pivote, torreta: amortiguador.arriba,
     respaldo: (y: number) => ultimo.x - 0.19 - Math.max(0, y - ultimo.y) * Math.tan(Math.max(0, ultimo.rec) * Math.PI / 180),
     cajas: [...baterias, inversor], yPiso, inversor,
+    // 2026-11-17 (masas): what the engine and the tank keep clear of, and the user's move of each (hibrido.ts)
+    ...entornoHibrido(),
   }) : null;
+  function entornoHibrido(): Pick<EntradaHibrido, 'asientos' | 'obstaculos' | 'brazo' | 'mover'> {
+    const mov = (k: string, max: number, min = -max) => { const v = (T as unknown as Record<string, unknown>)[k]; return typeof v === 'number' && Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : 0; };
+    // every seat with whoever sits on it: from its backrest (leaning back as it rises) to the toes, 6 cm under its cushion up
+    // (a folded row: only the folded seat, low). Astride, the two saddles with their riders, 25 cm to each side
+    const atras = (x: number, y: number, r: number) => (yy: number) => x - 0.19 - Math.max(0, yy - y) * Math.tan(Math.max(0, r) * Math.PI / 180);
+    const lista = filas || butacasDe ? [...(filas ? asientosFilas : butacasDe!)] : null;
+    const zonas: ZonaAsiento[] = lista
+      ? lista.map(a => a.plegado
+        ? { nombre: `fila ${a.fila}`, atras: () => a.x - 0.19, delante: a.x - 0.17 + Math.max(a.fondo, a.respaldo), y0: a.y - PAN_ASIENTO, y1: a.y + 0.07, z0: a.z - a.ancho / 2, z1: a.z + a.ancho / 2 }
+        : { nombre: `fila ${a.fila}`, atras: atras(a.x, a.y, a.rec), delante: a.x + 0.80, y0: a.y - PAN_ASIENTO - 0.04, z0: a.z - a.ancho / 2 - 0.02, z1: a.z + a.ancho / 2 + 0.02 })
+      : [{ nombre: 'piloto', atras: atras(asientos.xPiloto, asientos.yPiloto, rec.piloto), delante: asientos.xPiloto + 0.80, y0: asientos.yPiloto - 0.10, z0: -0.25, z1: 0.25 },
+        { nombre: 'pasajero', atras: atras(asientos.xPasajero, asientos.yPasajero, rec.pasajero), delante: asientos.xPasajero + 0.80, y0: asientos.yPasajero - 0.10, z0: -0.25, z1: 0.25 }];
+    const obstaculos: Obstaculo[] = traseras
+      // two rear wheels: the frame's tower (as the boot counts it), the differential and its half-shafts on the rear axle
+      ? [{ nombre: 'la torreta del bastidor', cajas: [{ x0: basculante.pivote[0] - 0.12, x1: basculante.pivote[0] + 0.06, y0: 0, y1: basculante.pivote[1] + 0.30, z0: -basculante.z - 0.04, z1: basculante.z + 0.04 }] },
+        { nombre: 'el diferencial y los palieres', cajas: [{ x0: xR - 0.09, x1: xR + 0.09, y0: motor.c[1] - 0.09, y1: motor.c[1] + 0.09, z0: -traseras.VIA_LAT / 2, z1: traseras.VIA_LAT / 2 }] }]
+      // the wheel in the tail with its travel (4 cm ahead and behind, 2 cm over the tyre at full bump); the rear shock (its spring, 4 cm round) and its tower's two tubes
+      : [{ nombre: 'la rueda trasera y su recorrido', cajas: [{ x0: xR - rR - 0.04, x1: xR + rR + 0.04, y0: 0, y1: motor.c[1] + rR + recTras + 0.02, z0: -F.ANCHO_NEU / 2 - 0.05, z1: F.ANCHO_NEU / 2 + 0.05 }] },
+        { nombre: 'el amortiguador trasero y su torreta', cajas: [
+          ...tuboCajas([amortiguador.abajo[0], amortiguador.abajo[1] + 0.4 * recTras, 0], [amortiguador.arriba[0], amortiguador.arriba[1], 0], 0.045, 6),
+          ...[1, -1].flatMap(sg => tuboCajas([xPiv + 0.04, yL, sg * zL], [xPiv - 0.06, yPiv + 0.26, sg * 0.05], dT / 2 + 0.005)),
+        ] }];
+    return {
+      asientos: zonas, obstaculos,
+      brazo: traseras ? null : { pivote: basculante.pivote, eje: basculante.eje, rec: recTras, z: basculante.z },
+      // (the sliders `tMot…`/`tDep…` arrive in a second step, when campos.ts is free: until then a design may carry them, read here and clamped)
+      mover: { motor: [mov('tMotX', 1.5), mov('tMotY', 0.5, -0.25), mov('tMotZ', 0.3)], deposito: [mov('tDepX', 1.5), mov('tDepY', 0.6, -0.25), mov('tDepZ', 0.3)] },
+    };
+  }
 
   const Lf = F.LARGO;
   const Pm: Parametros = { ...P, ...T, L: Lf, B: xF - xR, W: anchoTotal, H: D.alto + elevar, clear: D.suelo, track: via };
