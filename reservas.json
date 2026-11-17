@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "garajeboton",
-      "ruta": "src/components/aeromovil/Visor3D.tsx",
-      "motivo": "garajeboton: no dibujar con el visor oculto (2 líneas)",
-      "desde": "2026-11-17T17:56:56.946Z"
-    },
-    {
       "agente": "electronica",
       "ruta": "src/components/aeromovil/triciclo/campos.ts",
       "motivo": "electronica: Electrónica de potencia y estudio L7e (pocas líneas)",
@@ -77,12 +71,6 @@
       "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
       "motivo": "electronica: bloque Electrónica de potencia (4 líneas)",
       "desde": "2026-11-17T18:42:31.923Z"
-    },
-    {
-      "agente": "garajeboton",
-      "ruta": "src/pages/Aeromovil.tsx",
-      "motivo": "garajeboton: botón Ver/Ocultar garaje en la barra (pocas líneas)",
-      "desde": "2026-11-17T18:53:59.850Z"
     },
     {
       "agente": "ajustes",
