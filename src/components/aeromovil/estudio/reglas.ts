@@ -6,6 +6,16 @@ import { camposBasculante, deslizadoresBasculante } from '../geometriaBasculante
 import { A1 as FICHAS_A1, GOTA as FICHAS_GOTA } from '../tunel/explicaciones';
 import { CONSTANTES, EXPOSICION } from '../tunel/arrastre';
 import type { PorVelocidad, ResultadoTunel } from '../tunel/calculo';
+import { CATALOGO_RUEDAS, fichaRueda, type IdRueda } from '../ruedas/catalogo';
+
+/** Wider than this (m), a catalogue tyre is a weak point («neumatico-ancho»): wider than the widest scooter or eco tyre in the catalogue. */
+const ANCHO_NEUMATICO = 0.16;
+const NOMBRE_EJE: Record<'tRuedaDel' | 'tRuedaTras' | 'qRuedaDel' | 'qRuedaTras', string> = { tRuedaDel: 'Ruedas delanteras (en los carenados)', tRuedaTras: 'Rueda trasera (dentro de la cola)', qRuedaDel: 'Ruedas delanteras', qRuedaTras: 'Ruedas traseras' };
+/** For each wide catalogue tyre, the narrower one of the same class (rim size and use) the study tries instead. */
+const ESTRECHA: Partial<Record<IdRueda, IdRueda>> = {
+  maxi15t: 'scooter12t', nakedT: 'moto125t', superT: 'moto125t', touringT: 'touringD', trail18t: 'cafe18t', trail17t: 'cafe18t',
+  cruiser16t: 'cruiser16d', cruiser240t: 'cruiser16d', ecoPrimacy: 'ecoI3',
+};
 
 /**
  * «Hacer estudio aerodinámico» (2026-11-17, Eugenio: «mete la parte de aerodinámica dentro de carrocería añadiendo los
@@ -593,6 +603,25 @@ export const REGLAS: Regla[] = [
       recomendacion: 'Brazos con perfil de ala (no tubo redondo), carenados lo más ceñidos a la rueda y con la cola larga, y el hueco entre carenado y carrocería lo más grande posible para que sus estelas no se junten.',
       estimacion: { dCdA: 0.01, fuente: 'orden de magnitud, no calculado: lo que puede faltar en el Cd del túnel por la forma de los dos carenados y los brazos al aire (se suma, no se ahorra)' },
     }),
+  },
+  // 2026-11-17 (catálogo de ruedas, `ruedas/catalogo.ts`): a wide motorcycle or car tyre from the catalogue. The tunnel
+  // counts what shows of each wheel as a plate of its width (tunel/arrastre.ts), so a narrower tyre of the same kind
+  // is a change it can compute; the study then reruns the checks (the narrower one may carry less load)
+  {
+    id: 'neumatico-ancho', zona: 'ruedas', vehiculos: ['triciclo', 'basculante'], claves: ['tRuedaDel', 'tRuedaTras', 'qRuedaDel', 'qRuedaTras'],
+    evaluar: cx => {
+      const [kDel, kTras] = cx.tipo === 'triciclo' ? ['tRuedaDel', 'tRuedaTras'] as const : ['qRuedaDel', 'qRuedaTras'] as const;
+      const anchas = ([kDel, kTras] as const).map(k => ({ k, id: String(cx.P[k]), f: fichaRueda(String(cx.P[k])) })).filter(x => x.f && x.f.w > ANCHO_NEUMATICO);
+      if (!anchas.length) return null;
+      const peor = anchas.reduce((a, b) => (b.f!.w > a.f!.w ? b : a)), r = cx.base.q.cd.ruedas / cx.base.q.cd.total;
+      const pruebas = anchas.flatMap(x => { const alt = ESTRECHA[x.id as IdRueda]; return alt ? [{ cambios: { [x.k]: alt } as Partial<Parametros>, texto: `«${NOMBRE_EJE[x.k]}» (Rodaje › Ejes y ruedas): de ${CATALOGO_RUEDAS[x.id as IdRueda].medida} a ${CATALOGO_RUEDAS[alt].medida} (${Math.round(CATALOGO_RUEDAS[alt].w * 1000)} mm)` }] : []; });
+      return {
+        titulo: `Neumático ancho: ${peor.f!.medida}, ${Math.round(peor.f!.w * 1000)} mm`, gravedad: peor.f!.w > 0.2 ? 'media' : 'baja',
+        porQue: `Una rueda arrastra en proporción a su área frontal, y su anchura la multiplica (Hoerner, «Fluid-Dynamic Drag», cap. 13; las ruedas son el 25 % del Cd de un coche: SAE 970133). Este diseño lleva ${anchas.map(x => `${x.f!.medida} (${Math.round(x.f!.w * 1000)} mm)`).join(' y ')}; según el túnel las ruedas son el ${pct(r)} del Cd. Un neumático ancho es para tracción y agarre de una moto potente, no para un vehículo de bajo consumo.`,
+        recomendacion: 'Un neumático más estrecho de la misma clase, si aguanta la carga por rueda (el estudio vuelve a pasar las comprobaciones): rueda menos, pesa menos y tapa menos aire.',
+        pruebas,
+      };
+    },
   },
   // ── DETALLES ────────────────────────────────────────────────────────────
   {

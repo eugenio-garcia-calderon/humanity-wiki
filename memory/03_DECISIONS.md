@@ -2037,3 +2037,22 @@ Numbers (tunnel «media», 80 km/h, Rombo Bala): 0.63 m pointed 3.83 m Cd 0.2066
 40 / 50 / 60 %: 3.49 m 0.2338 / 3.22 m 0.2510 / 3.09 m 0.2681. Sources: Wikipedia «Kammback»; Mercedes-Benz Classic
 «History of aerodynamics»; SAE 2020-01-0673; Evrard, Cadot et al. (core.ac.uk 52674332); Transport Canada / NRC
 trailer-based drag reduction; Hucho 1998.
+
+## 2026-11-17 · Wheel catalogue: one shared table, added as extra options of each vehicle's existing wheel selector
+
+Eugenio: «permite añadir más tipos de ruedas, por ejemplo de motos de todo tipo». Alternatives considered:
+- **A new «tyre type» selector next to the size selector** (size from one, type from the other): two controls that can
+  contradict each other (a 21″ enduro tyre on a 13″ car rim). Rejected.
+- **Replacing each vehicle's wheel table with the catalogue**: would change every saved design (masses, Crr). Rejected.
+- **Chosen:** `ruedas/catalogo.ts` holds the real wheels with sources; the Triciclo (`RUEDAS_TRICICLO`) and the
+  Basculante (`RUEDAS_BASCULANTE`) append them, by id, to the tables they already had, and to their selectors and option
+  whitelists. Old keys keep their entries untouched; `crrMezcla` returns the vehicle's old constant (`CRR` 0.011,
+  `CRR_B` 0.010) whenever no axle uses a catalogue wheel, so saved designs keep their numbers exactly.
+- 3D: catalogue wheels are drawn by `visor/ruedaCatalogo.ts` (lathe with the motorcycle's round crown, spokes merged into
+  one mesh, cast split spokes, disc, hub-motor drum). On the Triciclo it re-dresses the wheel groups the body builder
+  already placed (`rueda-direccion`, `rueda-trasera`, `rueda-morro`), keeping their names and `userData`, so steering and
+  leaning work unchanged; old sizes keep the Bala's aero-cover wheel.
+- Not done: the Aeromóvil 1 and the Gota keep their own tyre lists (car tyres and bicycle sizes): a moto tyre on the A1's
+  McPherson car is not a design anyone asked for. Adding them is the same three steps (≈1 h).
+- Mismatch found, not changed: the Triciclo's old moped wheels roll at 0.011, while Cossalter's formula gives ≈ 0.016 for a
+  moped tyre at 2.25 bar. Changing it would change every saved design; it is Eugenio's call.
