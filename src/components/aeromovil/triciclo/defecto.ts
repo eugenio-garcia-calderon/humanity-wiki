@@ -34,6 +34,8 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   tHibArq: 'reparto', tHibMec: 50, tRendElec: 83, tRendCaja: 93,
   // 2026-11-17 (masas): the engine and the tank where they go by default (hibrido.ts), not moved
   tMotX: 0, tMotY: 0, tMotZ: 0, tDepX: 0, tDepY: 0, tDepZ: 0,
+  // 2026-11-17: the electric motor in the hub, as every design saved before (the central MG2 on the planetary is chosen)
+  tMotorElec: 'buje',
   // 2026-11-17 (electrónica de potencia, triciclo/electronica.ts): no combined limit, no sport, the full map, no limiter
   // declared, and the engine starting when the battery reaches the 10 % the range has always left in it (USABLE = 90 %):
   // a design saved without these keys has the same power, speeds, range and homologation figures as before

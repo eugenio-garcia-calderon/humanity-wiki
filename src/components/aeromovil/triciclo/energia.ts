@@ -4,7 +4,8 @@ import { cifrasHibrido, factorCargaParcial } from '../hibrido';
 import { RENDIMIENTO_SOLAR } from '../geometria';
 import { areasBala } from '../geometriaBala';
 import type { CamposTriciclo, ClaveNumTriciclo } from './campos';
-import { crrMezcla } from '../ruedas/catalogo';
+import { crrEjes } from '../ruedas/neumaticos';
+import { neumaticosTriciclo } from './neumaticos';
 import { limitarTriciclo } from './medidas';
 import type { ModeloTriciclo } from './modelo';
 import { AGARRE } from './comprobaciones';
@@ -17,8 +18,11 @@ export const CRR = 0.011, RENDIMIENTO = 0.85, AUXILIARES = 80, USABLE = 0.9;
  * 2026-11-17: with a catalogue wheel (`ruedas/catalogo.ts`) on an axle, the mean of each wheel's own rolling resistance,
  * wheel by wheel (pods: `tRuedaDel`; the tail's, and in a diamond the nose's too: `tRuedaTras`). The old sizes roll at `CRR`.
  */
-export const crrTriciclo = (T: Pick<CamposTriciclo, 'tRuedaDel' | 'tRuedaTras' | 'tTraseras' | 'tRuedas'>) =>
-  crrMezcla([{ k: T.tRuedaDel, n: 2 }, { k: T.tRuedaTras, n: T.tRuedas === 'rombo' || T.tTraseras === 'dos' ? 2 : 1 }], CRR);
+export const crrTriciclo = (T: Pick<CamposTriciclo, 'tRuedaDel' | 'tRuedaTras' | 'tTraseras' | 'tRuedas'> & Partial<Pick<CamposTriciclo, 'tNeuDel' | 'tNeuTras' | 'tConsDel' | 'tConsTras'>>) => {
+  // 2026-11-17: each axle's tyre type multiplies its size's rolling resistance (exactly 1 «De serie»: `ruedas/neumaticos.ts`)
+  const n = neumaticosTriciclo(T);
+  return crrEjes([{ k: T.tRuedaDel, n: 2, f: n.del.fCrr }, { k: T.tRuedaTras, n: T.tRuedas === 'rombo' || T.tTraseras === 'dos' ? 2 : 1, f: n.tras.fCrr }], CRR);
+};
 /** Consumo, autonomía y velocidades con el Cd del túnel (referido a su área: la sección mayor de la carrocería). */
 /**
  * Lo que da el techo solar en un día (Wh), como en el Aeromóvil 1: el panel, curvo, recoge de media ~70 % de lo
@@ -31,7 +35,9 @@ export const KWH_LITRO_GASOLINA = 8.9;
 // (2026-11-17, capo: plus the cooling air's drag, which the tunnel does not see: refrigeracion.ts `dCdARefrigeracion`)
 export function energiaTriciclo(m: ModeloTriciclo, mTot: number, cd: { cd: number; areaRef: number }, areaSolar = m.solarTodo.area) {
   const T = m.campos, L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), g = 9.81, CdA = cd.cd * cd.areaRef + dCdARefrigeracion(m), CRR = crrTriciclo(T);
-  const potencia = (v: number) => (0.5 * 1.2 * CdA * v ** 3 + CRR * mTot * g * v) / RENDIMIENTO + AUXILIARES;
+  // (2026-11-17: a central MG2 drives the wheels through the drop case and the chain, `m.motor.rend`; a hub motor, directly)
+  const rendM = RENDIMIENTO * (m.motor.rend ?? 1);
+  const potencia = (v: number) => (0.5 * 1.2 * CdA * v ** 3 + CRR * mTot * g * v) / rendM + AUXILIARES;
   const consumo = (kmh: number) => { const v = kmh / 3.6; return potencia(v) / v / 3.6; };
   // (2026-11-17) the power electronics (electronica.ts): the electric mode's continuous and peak power after the configured
   // limits and map, the engine after its derating. Defaults: exactly the sliders, as before. A hybrid spends the battery
@@ -40,9 +46,9 @@ export function energiaTriciclo(m: ModeloTriciclo, mTot: number, cd: { cd: numbe
   const vel = L('tVel'), WhKm = consumo(vel), util = m.kWh * 1000 * (m.phev ? 1 - L('tEpArrSoc') / 100 : USABLE);
   const vmaxCon = (kW: number) => { let v = 10; for (let i = 0; i < 80; i++) v *= Math.pow(kW * 1000 / potencia(v), 0.34); return v * 3.6; };
   // 0 → 50 km/h: peak power, limited by the grip of the one driven wheel (≈ 40 % of the weight on it, μ 0.9)
-  const reparto = 0.4, Fmax = AGARRE * reparto * mTot * g;
+  const reparto = 0.4, Fmax = AGARRE * neumaticosTriciclo(T).tras.fSeco * reparto * mTot * g;
   let v = 0.5, t = 0; const dt = 0.02;
-  while (v < 50 / 3.6 && t < 60) { const Fz = Math.min(Fmax, el.ruedasElecPico * 1000 * RENDIMIENTO / v) - 0.5 * 1.2 * CdA * v * v - CRR * mTot * g; if (Fz <= 0) { t = 99; break; } v += Fz / (mTot * 1.03) * dt; t += dt; }
+  while (v < 50 / 3.6 && t < 60) { const Fz = Math.min(Fmax, el.ruedasElecPico * 1000 * rendM / v) - 0.5 * 1.2 * CdA * v * v - CRR * mTot * g; if (Fz <= 0) { t = 99; break; } v += Fz / (mTot * 1.03) * dt; t += dt; }
   // the plug-in hybrid (2026-11-15): once the battery is down to its reserve, the petrol engine drives through the
   // planetary gear (part straight to the wheels, part through the generator and the motor: `rendTrans` for both
   // together) and also feeds the equipment. Litres per 100 km: the energy at the wheels over both efficiencies, over

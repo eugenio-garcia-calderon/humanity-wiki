@@ -12512,6 +12512,60 @@ se pueda colocar atrás o delante. Y se pueda jugar con todo ello. También con 
   Nueva regla en el estudio aerodinámico: «Toma de aire más grande de lo que el radiador aprovecha».
 - **Masas**: radiador, ventilador, tubos, refrigerante, conductos y el árbol, en la lista de pesos y en el desplegable
   «Refrigeración» (y con ellos sus precios).
+## 2026-11-17 · El motor eléctrico, junto al de gasolina y unido al planetario (Aeromóvil S)
+
+Eugenio: «Haz que el motor eléctrico del aeromóvil S no esté en el buje de la rueda, sino que esté junto al motor de
+gasolina y que se conecte al engranaje planetario.»
+
+- Nueva opción en Motor › «Motor eléctrico»: **«Dónde va el motor eléctrico»**: «En el buje de la rueda trasera» (lo
+  de siempre) o **«Central, junto al motor de gasolina, unido a la corona del planetario (MG2, como el Prius)»**. Sale
+  solo con el híbrido enchufable de reparto (el del planetario, que es el que tiene el Aeromóvil S).
+- Con «Central»: un solo motor eléctrico (el MG2) va en el mismo eje que el MG1 y el planetario, por fuera de este,
+  atornillado a la corona, como en el Toyota THS: gasolina → portasatélites, MG1 → sol, MG2 y salida → corona. Desde la
+  corona, la misma caja de salida, la cadena y (con dos ruedas traseras) el diferencial. Se dibuja en 3D (pieza
+  «hibrido-mg2», capa «Motor»); en las ruedas ya no hay motores de buje. Su tamaño sale de su masa y su potencia.
+- Con dos ruedas traseras, todo el conjunto (motor de gasolina + MG1 + planetario + MG2, unos 55 cm) se centra a lo
+  ancho del coche por defecto (el motor de gasolina se corre 11 cm a la derecha), para que no asome por la cola, que se
+  estrecha. Con una rueda en la cola no se centra (la cadena tiene que ir al lado de la rueda) y, en las pruebas, el
+  MG2 asoma 4–5 cm: la comprobación lo dice en rojo.
+- Su masa cuenta donde está (centro de gravedad, también de lado), como «Motor eléctrico central (MG2)», y ya no es
+  masa no suspendida. La comprobación «Motor de buje: potencia que cabe en la rueda» ya no se aplica.
+- Consumo: la fuerza del motor eléctrico pasa ahora por la cadena (97 %), y la parte eléctrica del híbrido también.
+- La lista de motores del catálogo (y la tabla comparativa) ofrece solo motores centrales en esa posición; si se elige
+  uno de buje, una comprobación lo marca. Nueva comprobación: las vueltas del MG2 en la corona a la velocidad de
+  cálculo (la corona gira 3.000 rpm a 100 km/h). Un motor central ya no pide «reductora»: la cadena lo es.
+- **El Aeromóvil S guardado no cambia solo**: el Aermovil M y el Rombo Bala también son híbridos de reparto, y poner
+  «Central» por defecto los habría cambiado sin avisar. Eugenio tiene que elegir «Central…» en Motor › Motor eléctrico
+  y guardar el diseño.
+- Con la copia del Aeromóvil S leída de la API hoy (vacío 375,5 kg): la masa no suspendida baja 20,2 kg (10,1 kg por
+  rueda trasera; el deslizador pone 13 kg, pero con 31,5 kW de pico su rango empieza en 20,2); el motor de gasolina
+  queda en el mismo sitio a lo largo y 3 cm más alto; consumo eléctrico a 120 km/h, de 71,8 a 74,0 Wh/km (+3 %, con un
+  Cd de prueba de 0,20 × 1,2 m²); gasolina, de 1,98 a 2,00 L/100 km. Ninguna comprobación nueva en rojo.
+## 2026-11-17 · Tipo de neumático en cada eje (Triciclo, Cuadriciclo en rombo y clásico, Basculante)
+
+Eugenio: «Permite también añadir el tipo de neumático.»
+
+- En **Rodaje › Ejes y ruedas**, junto a la medida de cada eje, dos selectores nuevos: **tipo** de neumático
+  (carretera/turismo, deportivo, hiperdeportivo/semi-slick, eco de baja rodadura, lluvia/mixto, todo tiempo/invierno,
+  trail 90/10, trail 50/50, tacos/off-road, scooter) y **construcción** (radial o diagonal, con o sin cámara, run-flat).
+  Delante y detrás por separado. En el Triciclo en rombo, el «trasero» vale también para la rueda del morro (son de la
+  misma medida).
+- Debajo, una línea por eje con lo que hace: rodadura y masa de la rueda en % respecto al neumático de serie de esa
+  medida, agarre en seco y en mojado (g), cuánto dura (km) y lo que cuesta cada neumático (€, estimado).
+- Todo se mide **respecto al neumático que ya tenía esa medida** («De serie»): una medida deportiva ya es deportiva, una
+  de enduro ya es de tacos. Con «De serie» no cambia ningún número: los diseños guardados siguen igual (comprobado:
+  `triciclo-disenos` «Todo OK»). La rodadura 0,011 de las ruedas de ciclomotor no se ha tocado (sigue pendiente tu
+  decisión de subirla a ~0,016).
+- Qué cambia de verdad en el cálculo: la rodadura (consumo y autonomía), la masa de las ruedas (peso, centro de
+  gravedad), y el agarre del eje que empuja en la aceleración 0-50; en el Basculante, también el agarre en la
+  comprobación de vuelco inclinado. Duración y precio solo se enseñan.
+- Ejemplos: una 180/55 ZR17 deportiva de serie rueda 0,0147; con semi-slick +5 %, agarre 1,00 g en seco y 0,41 en
+  mojado, unos 3.000 km. La 120/90-18 de enduro con neumático de carretera rueda un 26 % mejor. Con tacos delante y
+  detrás, el Triciclo de serie pasa de rodadura 0,011 a 0,0149 y pesa 1,2 kg más.
+- Arreglado de paso: el texto del Triciclo que siempre decía «rodadura 0,011 (neumático de ciclomotor)» ahora dice la
+  rodadura de verdad de las ruedas y neumáticos elegidos.
+- Las cifras son estimaciones en el orden que dan las fuentes (Cossalter, etiqueta europea, guías de duración por tipo),
+  no medidas de cada medida; el precio es una regla por anchura y diámetro (±40 %), sin mirar tiendas hoy.
 - No comprobado en un móvil: con la app instalada, `humanity.wiki/?sw=off` quita la copia vieja.
 ## 2026-11-17 · El tamaño de los muñecos: más altos o más gordos
 
@@ -12531,6 +12585,45 @@ para ver cómo entran en el vehículo.» Solo en la familia Triciclo (el Aeromó
 - La masa sigue a la talla («Masa por ocupante» es la del hombre medio × estatura² × índice de masa corporal; se puede
   escribir a mano) y entra en el peso, el centro de gravedad, el vuelco, las cargas de las ruedas y el consumo.
 - Sin tocar nada, todo es como antes: el mismo muñeco y los mismos kilos.
+
+
+## 2026-11-17 · Fuera «¿Algo que mejorar?» y «Empezar un diseño nuevo» del panel del Aeromóvil
+
+Eugenio: «Quita esta parte en todas las secciones, la de mejoras y la de empezar de nuevo, todo fuera».
+
+- **Quitado del panel lateral** (salía al final de todas las pestañas y de todos los vehículos): la tarjeta
+  «¿Algo que mejorar?» (comentario, parte, nombre, «Añadir a las tareas») y el enlace «Empezar un diseño nuevo
+  (medidas por defecto)».
+- **No se ha borrado nada guardado**: las tareas siguen en la base de datos, la página Tareas
+  (`/aeromovil/tareas`) sigue mostrándolas y conserva su propio formulario, y la API no cambia.
+- Para dejar comentarios sobre una parte concreta, ahora están las notas por sección (bot «notas»).
+- No visto en un teléfono de verdad: si sale la versión vieja, `humanity.wiki/?sw=off`.
+## 2026-11-17 · Precio de cada pieza y sección, coste del proyecto y pestaña «Mano de obra»
+
+Eugenio: «aparte del peso, vamos a añadir en todas las secciones y todos los componentes el precio. Y que sea un slider
+para que podamos indicar el precio … que a nivel de experiencia de usuario no sea un engorro total, tantos sliders …
+y el precio global tiene que aparecer sumado debajo de proyecto. Luego también incluye la mano de obra como un apartado
+añadido donde se le puede poner un precio, y ponlo en el menú».
+
+- **Cada desplegable del Triciclo** (Triciclo, clásico, rombo) dice ahora su peso y su precio en la cabecera:
+  «4,8 kg · 550 €». Dentro, en «De qué está hecho este peso», cada pieza lleva su precio al lado de sus kilos.
+- **No hay un deslizador por pieza a la vista.** El precio es un enlace discreto («≈ 550 €»); al pulsarlo se abre debajo
+  de esa línea un deslizador y una casilla para escribirlo, con de dónde sale el estimado y «Volver al estimado». Un
+  precio puesto por ti se marca «tuyo» en azul y se guarda con el diseño.
+- **De dónde salen los precios**: si en el catálogo has elegido un motor o un motor de gasolina con precio publicado,
+  ese precio (convertido a euros); si no, una estimación por clase de pieza, escrita junto a ella (kg de laminado por su
+  material, m² de cúpula y de panel solar, kWh de batería a 230 €/kWh, kW de motor, una unidad para frenos, asientos,
+  bisagras…). Son piezas y materiales comprados para un prototipo, sin horas.
+- **Proyecto › «Coste del prototipo»** (arriba del todo): materiales por departamento, mano de obra, total y € por kg.
+- **Nueva pestaña «Mano de obra»** al final del menú, con su total debajo: diseño, chasis, moldes, laminado, montaje
+  eléctrico, montaje mecánico, interior, pintura y homologación, cada uno horas × €/hora (pulsa uno para cambiarlos).
+  El chasis sigue a los metros de tubo y los moldes y el laminado a los m² de carrocería.
+- **Rombo Bala**: materiales y piezas 13.870 €, mano de obra 21.545 € (521 h), total 35.415 € (116 €/kg). Todo estimado
+  menos lo que se elija del catálogo: tu Rombo Bala no tiene ninguna pieza del catálogo elegida.
+- Un diseño guardado sin precios abre con los estimados; nada más cambia. Comprobado con
+  `npx tsx scripts/precios-secciones.ts` («Todo OK»). Visto en el navegador automático a 1300 px y a 390 px (pestañas,
+  Proyecto, Mano de obra, cabeceras con precio); el editor de precio solo se probó a 1300 px. No comprobado en un móvil
+  de verdad: `humanity.wiki/?sw=off` quita la copia vieja.
 
 ## 2026-11-17 · Electrónica de potencia en Motor, estudio L7e y ensayos en Homologación
 

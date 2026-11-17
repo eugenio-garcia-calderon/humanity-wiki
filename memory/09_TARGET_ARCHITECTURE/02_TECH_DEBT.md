@@ -982,4 +982,39 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - Also still quoting `tMOcc` rather than each rider's mass: `electrico/LadoConsumos.tsx` (the consumption note, a copy
   of the one fixed in `LadoTriciclo.tsx`) and `homologacion/ficha.ts` (`masaOcupante`, `masaMaxima` without the wheel
   loads in a diamond). 10 min together.
+- **(2026-11-17, mgplanetario) Central MG2**: the previous entry («a catalogue central motor is not drawn») is done for
+  the power split only. Still pending: a central motor for the pure electric car and for series/P2 (≈ 2 h, the same
+  `CilZ` next to the controller with a chain); with one rear wheel the coaxial MG2 sticks out of the narrow tail (4–5 cm
+  in tests): a counter-shaft MG2 is ≈ 2 h; the MG2's size is a rule from mass and power, not the catalogue motor's own
+  diameter and length (≈ 30 min: add `diametro`/`largo` to `MotorCatalogo`); `tMMotor`'s range is still the hub rule for
+  «two motors of half power» with two rear wheels (≈ 20 min to give the central motor its own range).
+## 2026-11-17 · Tyre type (bot «neumaticos»)
+
+- **Triciclo rollover check still uses the fixed `AGARRE` 0.9** (`triciclo/comprobaciones.ts`, held by another bot):
+  the tyre type changes the Triciclo's 0-50 traction but not «Vuelco». Swap in `max(neumaticosTriciclo(T).del/.tras.muSeco)`
+  and the panel texts «Un neumático de ciclomotor agarra unos 0,9 g» in `LadoTriciclo.tsx`: ≈ 15 min.
+- **`pages/Aeromovil.tsx` (comparison card «fuente») still says «rodadura 0,011 (neumático de ciclomotor)»** (file was
+  held): use `crrTriciclo(camposTriciclo(P))` as `LadoTriciclo.tsx` now does: ≈ 5 min.
+- **Grip is relative to the size's own tyre** (`memory/03_DECISIONS.md`): absolute grip per type ≈ 30 min plus Eugenio's
+  OK, since saved designs' acceleration would change.
+- **Price is a rule by width and diameter, ±40 %, not checked in shops**; life is one figure per type (×1.5 front, ×2.5
+  car, ×0.4 bicycle). A real price per catalogue size: ≈ 1 h of shop lookups for 27 sizes.
+- The 3D does not draw the tread (knobs, slicks): ≈ 1 h in `visor/ruedaCatalogo.ts`.
+- **The Triciclo's four tyre fields are optional and get their defaults by `Object.assign(TRICICLO_DEFECTO,
+  NEUMATICOS_DEFECTO)` in `triciclo/campos.ts`**, because `triciclo/defecto.ts` was held by bot «masas2» while that bot
+  waited for `campos.ts`, held by this one. Move the four `'serie'` into `defecto.ts`, make the fields required, delete
+  the `Object.assign`: ≈ 5 min.
+## 2026-11-17 · Prices (precios/), first version
+
+- **Estimates are code, not data** (`estimar` in `precios/precios.ts`, ~45 rules by part name). A table Eugenio could
+  edit, with a source per row, is ≈ 2 h now. Part names are the keys of user prices: renaming a part in the parts list
+  drops its saved price silently (≈ 30 min to add a rename map when it first happens).
+- **Only the Triciclo family shows prices inside its sections.** The Basculante's sections are priced and counted in
+  «Proyecto» and «Mano de obra», but `LadoBasculante.tsx` shows no breakdown yet (≈ 30 min once it shows `DesglosePeso`).
+  The Gota, the Aeromóvil 1 (which has its own component costs in `componentes.ts`) and the Bala: no prices (≈ 1 h).
+- **Catalogue prices only for motors and petrol engines**: controllers and reduction gears publish none, so they are
+  estimated; the tyres from bot «neumaticos» are not wired yet (≈ 20 min once its catalogue has prices).
+- `aeromovil/CLAUDE.md` has no recipe for prices yet (file held by another bot): ≈ 10 min.
 - **Power electronics: thermal start logic is descriptive** (2026-11-17, electronica). `tEpArrKW`, `tEpArrVel`, `tEpHist`, `tEpCalent` only drive a table of which motor runs at each speed; only `tEpArrSoc` acts (electric range of a hybrid). A drive-cycle SOC simulation (WMTC) that uses them for litres and range: ≈ 1 day. The regen limit `tEpRegen` does not reduce consumption yet: ≈ 2 h with a stop-and-go share per speed. The HCU (hybrid control unit) has no part in any parts list (consumos' electrical system or Motor): ≈ 30 min once a product is chosen.
+- **Power electronics, not seen in a browser before merging** (2026-11-17, electronica). Eugenio asked to publish at once; the «Motor › Electrónica de potencia» block and the «Homologación › Estudio L7e / Ensayos» sections passed tsc, build and every Aeromóvil script in CI, but the headless screenshots were still queued. Check them on humanity.wiki (`?sw=off`) with the Aeromóvil S: ≈ 15 min.
+- **The power electronics ignore the e-motor position option `tMotorElec`** (merged the same day by mgplanetario): with the central MG2 on the planetary, the e-motor's power still reaches the wheels as before; whether the HCU limits apply differently there is not modelled: ≈ 1 h.
