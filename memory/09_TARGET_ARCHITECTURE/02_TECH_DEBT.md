@@ -808,3 +808,12 @@ The «ordenar» refactor (PRs #1081, #1082, #1084) only moved code. Still open, 
   would make them computed, but it touches the method and therefore the calibration: a decision for Eugenio, ≈ 1 day.
 - The A1 and Gota slider labels and ranges come from `tunel/explicaciones.ts` (`A1`, `GOTA`, now exported), still a
   copy of what their panels draw (third reader of that copy). Moving both panels to a table like `FILAS`: ≈ 2 h.
+
+## 2026-11-17 · Section weights map parts to blocks by name
+
+`masasSecciones.ts` assigns each part of the parts list to a side-panel block with a regex on its name, and recomputes
+the frame's tube masses (same formula as `piezasBase`/`piezasBasculante`). Renaming a part silently moves it to
+«sin desplegable» (visible, and `scripts/pesos-secciones.ts` still adds up). Proper fix: a `seccion` field on
+`PiezaMasa`/`PiezaMasaB` set where the part is created, and the tube breakdown returned by the parts list itself:
+≈ 2 h now (≈ 45 parts in 3 files), more as parts are added. The Gota's blocks (inline in `pages/Aeromovil.tsx`) and
+the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper already; see the changelog for which are shown.

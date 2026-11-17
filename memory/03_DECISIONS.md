@@ -2013,3 +2013,15 @@ design's weak points with recommendations.
   (https://saemobilus.sae.org/papers/streamlined-tails-effects-truncation-aerodynamic-drag-2020-01-0673);
   https://en.wikipedia.org/wiki/Kammback (cut at 50 % of the largest section);
   https://en.wikipedia.org/wiki/Automotive_aerodynamics (mirrors 2–7 % of drag; Honda e cameras −3.8 %).
+
+## 2026-11-17 · Section weights: a derived breakdown, not a new parts list
+
+Eugenio asked for the weight of every side-panel section and a finer chassis (tubes vs bolts). Options:
+(a) split the lumps («Carrocería», «Bastidor») inside the parts list itself (`triciclo/masas.ts`), so the «Peso» list,
+the centre of gravity and the MASAS tab see the pieces; (b) keep the parts list as it is and derive the pieces in a
+helper (`masasSecciones.ts`) that adds up to each part exactly, checked by `scripts/pesos-secciones.ts`.
+Chose (b): `masas.ts` was being changed at the same moment by another agent (the MASAS tab), (a) would move every saved
+design's centre of gravity by a few millimetres (each zone at its own centroid instead of the whole skin's), and (b)
+keeps one total by construction. Cost: the frame's tube formula is written twice (the parts list and the breakdown;
+the check catches a drift). A block maps to a part by the part's name (regex), not by a field on the part: cheaper now,
+and a part that no rule takes is shown as «sin desplegable» rather than lost.
