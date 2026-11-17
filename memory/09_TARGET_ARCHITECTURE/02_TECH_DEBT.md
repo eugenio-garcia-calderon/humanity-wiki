@@ -901,3 +901,16 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **Tyre speed symbol, headlamp heights (500–1200 mm), plate space, R-point ≥ 400 mm**: the model knows some of these
   (lamp positions, seat hip) but they are not wired: ~3 h.
 - **The Cuadriciclo Bala has no masses/motor** (body only): mass, power and speed rows read «no se puede comprobar».
+
+## 2026-11-17 · Supplier/model/files per part: shortcuts of the first version (bot «proveedores»)
+
+- **`Parametros.proveedores` is declared by module augmentation** in `proveedores/datos.ts`, not in `geometria.ts` next
+  to `precios` (the file was claimed). Moving the 4 lines: ~5 min.
+- **Keyed by the part's name** (like `precios`): renaming a part in `triciclo/masas.ts` orphans its supplier and files
+  in saved designs. A stable part id across the mass model: ~2 h, shared with prices.
+- **No sweep for files no design references**: «Quitar» unlinks, the bytes stay on disk until the uploader or an admin
+  deletes them. A nightly job that deletes files no saved design mentions after 15 days (recycle-bin rule): ~2 h.
+- **Uploaded files are not in the off-site backup** (database only, platform-wide, not just these): adding the uploads
+  volume to `copias-remoto`: ~1 h for prog6/servidores.
+- **Triciclo family only** (Eugenio, 2026-11-17: focus on the «Aeromóvil S»); the Basculante's and A1's parts lists do
+  not show it. Same component in `LadoBasculante`: ~15 min if ever wanted.

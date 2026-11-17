@@ -12402,3 +12402,25 @@ para ponerle más potencia, más peso, etcétera.»
 - Fuentes: Reglamento (UE) 168/2013 (anexo I, arts. 3–5, anexos VI y VIII), Reglamentos Delegados 3/2014 y 44/2014
   (consolidado de EUR-Lex), DGT/MAPFRE/RACE para los permisos. Lo citado sin releer lleva «por confirmar».
 - No visto en un teléfono de verdad: si sale la versión vieja, `humanity.wiki/?sw=off`.
+
+## 2026-11-17 · Proveedor, modelo y archivos en cada componente
+
+Eugenio: «también añade en que todos los componentes, aparte de tener un peso y un precio, se pueda elegir un proveedor
+y un modelo. De esa manera, quizá lo del proveedor y el modelo lo tienes que permitir que se ponga de dos maneras. O
+escrito, como el nombre, y también permitir que aparte de escribir el nombre del modelo o del proveedor, también se pueda
+meter un enlace o subir un archivo. De ese componente, subir varios archivos, igual hay presupuestos, hay información más
+detallada, un PDF o lo que sea.»
+
+- **Dónde está.** En el Triciclo, el clásico y el rombo (el Aeromóvil S): en cada desplegable, «De qué está hecho este
+  peso», cada pieza tiene a la derecha un enlace pequeño «Proveedor». Al pulsarlo se abre debajo de esa línea, y solo
+  de esa: proveedor (nombre y enlace), modelo (nombre y enlace) y los archivos. Cuando ya hay algo, la línea dice en
+  pequeño «Proveedor · Modelo · 2 archivos» y el enlace pasa a «Ver».
+- **Lo del catálogo sale solo.** El motor, el controlador, la reductora, el motor de gasolina y las ruedas, si vienen del
+  catálogo, ya muestran su marca, su modelo y el enlace a su ficha, en gris, hasta que escribas los tuyos.
+- **Nombres y enlaces se guardan con el diseño**, igual que el precio. Sin cuenta también se pueden escribir. Solo se
+  aceptan enlaces web (http o https); se abren en otra pestaña.
+- **Archivos**: varios por pieza (hasta 12): PDF, fotos (JPG, PNG, WebP; las HEIC del iPhone se pasan a JPG), Word,
+  Excel, PowerPoint, CSV y texto, hasta 10 MB cada uno. **Para subirlos hay que iniciar sesión** (la pantalla lo dice).
+  Los ve cualquiera que abra el diseño. «Quitar» lo quita de este diseño; quien lo subió (o un administrador) tiene
+  además una papelera que lo borra del servidor.
+- No visto en un teléfono de verdad: si sale la versión vieja, `humanity.wiki/?sw=off`.
