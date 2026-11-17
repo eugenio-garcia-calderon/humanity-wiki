@@ -934,6 +934,18 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   pending from step one: `calcularTriciclo`'s own CG sum (≈ 10 min), `LadoTriciclo.tsx`'s unreachable «proyecto»
   blocks (≈ 15 min), the CLAUDE.md section on masses (≈ 10 min), and `modelo.ts` reading the offsets with its own
   clamp (`mov`, same ranges) instead of `limitarTriciclo` (file held by another bot, ≈ 5 min).
+## 2026-11-17 · Aeromóvil section notes (`components/aeromovil/notas/`)
+
+- **A section is its block's title.** Renaming a block leaves its notes behind (still in the table, not shown), and the
+  blocks that share a title across departments («Comprobaciones de este departamento») share their notes. A stable
+  `seccion` id per block (dep + bloque from `LadoTriciclo`/`LadoBasculante`, passed to `Bloque`): ≈ 45 min plus a
+  one-off rename migration of existing rows.
+- **The destination is set from `MenuDisenos`** (a menu publishing page state). A `NotasProvider` in
+  `pages/Aeromovil.tsx` with `actual?.id` and `P.disposicion`: ≈ 10 min once that file is free.
+- **«Guardar como nuevo» does not copy the notes** to the new design; they stay on the original. Copying on create in
+  `POST /api/aeromovil/disenos` (an `origen` id in the body): ≈ 20 min.
+- **Anonymous notes never leave the browser** (by design, rule 3). If Eugenio wants visitors' notes shared, they would
+  go through moderation like the tasks: ≈ 1 h.
 - **Blocked by claims on 2026-11-17 (both held by bot capo the whole session), ~20 min together once free:**
   (1) `LadoTriciclo.tsx` still draws its own «Rendimiento» block in Motor and Batería: change
   `(dep === 'propulsion' || dep === 'energia' || dep === 'proyecto') && rendimiento` to `dep === 'proyecto'` and add a
