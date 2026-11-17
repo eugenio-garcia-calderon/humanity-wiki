@@ -160,6 +160,10 @@ export interface CamposTriciclo extends CamposInterior {
   tColaPlanaAncho: number;
   // 2026-11-16 (Eugenio: «una especie de parte intermedia que comunique con las dos»): the cabin–tail transition's length (m)
   tColaTrans: number;
+  // 2026-11-17 (Eugenio: «estudia los cortes drásticos de las colas… permite seleccionarla en el "Modelo 1"»): the Kamm tail
+  tColaCorte: 'no' | 'kamm';   // la cola: larga hasta la punta (hasta ahora) o cortada en recto (cola Kamm)
+  tKammSeccion: number;        // dónde se corta: la fracción de la sección mayor que queda en el corte (Kamm: 0,5)
+  tKammCavidad: number;        // hueco en el culote (m): 0 plano
 }
 export type ClaveTriciclo = keyof CamposTriciclo;
 /**
@@ -192,7 +196,7 @@ export const RUEDAS_TRICICLO: Record<RuedaTriciclo, { d: number; neuDel: number;
 };
 export type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tFila2N' | 'tFila3N' | 'tFila2Tipo' | 'tFila3Tipo' | 'tTraseras' | 'tBascula' | 'tRuedas' | 'tPropulsion' | 'tHibArq' | 'tBascTec' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero'
   | 'tAcabado' | 'tTapiz' | 'tCostura' | 'tCosturaColor' | 'tForroColor' | 'tMoldura' | 'tConsolaTecho' | 'tConsolaCentral' | 'tCinturon' | 'tAmbiente'
-  | 'tCatMotor' | 'tCatCtrl' | 'tCatReductora' | 'tCatTermico';
+  | 'tCatMotor' | 'tCatCtrl' | 'tCatReductora' | 'tCatTermico' | 'tColaCorte';
 export type ClaveNumTriciclo = Exclude<ClaveTriciclo, ClaveTexto>;
 
 // ------------------------------------------------------------------ deslizadores
@@ -295,6 +299,9 @@ export const FILAS: Fila[] = [
   ['tColaPlanaAncho', 'carroceria', 'Cola', null, 'Cola plana: ancho al final (1 = todo el ancho, como el Aptera; más, más ancha que la cabina)', 0, 1.5, 0.05, 'x'],
   // 2026-11-16: the cabin–tail transition (garaje/transicionCola.ts); with the smooth body only near the rear axle
   ['tColaTrans', 'carroceria', 'Cola', null, 'Transición cabina–cola: largo', 0.10, 1.20, 0.01, 'm'],
+  // 2026-11-17: the Kamm tail, only with «Cola cortada» (LadoTriciclo.tsx `visible`); garaje/balaForma.ts `corte`
+  ['tKammSeccion', 'carroceria', 'Cola', null, 'Cola cortada: dónde se corta (sección que queda)', 0.20, 0.80, 0.01, 'x'],
+  ['tKammCavidad', 'carroceria', 'Cola', null, 'Cola cortada: hueco en el culote', 0, 0.15, 0.005, 'cm'],
   ['tTechoPlano', 'carroceria', 'Cúpula', null, 'Techo: redondeado o plano', 0, 1, 0.05, 'x'],
   ['tCaida', 'carroceria', 'Cúpula', null, 'Techo: caída hacia el maletero (antes o más tarde)', -0.60, 0.80, 0.05, 'x'],
   // 2026-11-15
@@ -461,6 +468,7 @@ export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
   { clave: 'tFaro', n: 'Faro del morro', dep: 'carroceria', bloque: 'Morro', opciones: [{ k: 'no', n: 'Sin faro central' }, { k: 'si', n: 'Faro central redondo (como una moto)' }, { k: 'barra', n: 'Barra de luz por todo el borde (como el Aptera)' }] },
   // 2026-11-13: the smooth body
   { clave: 'tCubierta', n: 'Morro y cola por arriba', dep: 'carroceria', bloque: 'Forma', opciones: [{ k: 'redonda', n: 'Como la cúpula (redondeados)' }, { k: 'lisa', n: 'Cubierta lisa, sin montículos (como el Aptera)' }] },
+  { clave: 'tColaCorte', n: 'Formato de la cola', dep: 'carroceria', bloque: 'Cola', opciones: [{ k: 'no', n: 'Larga, hasta la punta (como siempre)' }, { k: 'kamm', n: 'Cortada en recto (cola Kamm)' }] },
   { clave: 'tConAleta', n: 'Aleta', dep: 'carroceria', bloque: 'Cola', opciones: [{ k: 'si', n: 'Con aleta' }, { k: 'no', n: 'Sin aleta' }] },
   { clave: 'tSolarMorro', n: 'Paneles solares en el morro', dep: 'carroceria', bloque: 'Techo solar y ventanas', opciones: [{ k: 'no', n: 'No' }, { k: 'si', n: 'Sí, encima del morro' }] },
   { clave: 'tPuertas2', n: 'Puertas por lado', dep: 'carroceria', bloque: 'Puertas y maletero', opciones: [{ k: 'no', n: 'Una' }, { k: 'si', n: 'Dos: la de atrás se abre hacia atrás' }] },
