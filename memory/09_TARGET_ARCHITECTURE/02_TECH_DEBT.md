@@ -960,3 +960,10 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   the front engine has no specific check for the pilot's pedals or the front suspension cradle. ≈ 40 min.
 - **Hood hinge/latch mass (≈ 1 kg) not counted**, and the nose solar panel (`tSolarMorro`) does not lift with the hood:
   ≈ 20 min each.
+- **Blocked by claims on 2026-11-17 (both held by bot capo the whole session), ~20 min together once free:**
+  (1) `LadoTriciclo.tsx` still draws its own «Rendimiento» block in Motor and Batería: change
+  `(dep === 'propulsion' || dep === 'energia' || dep === 'proyecto') && rendimiento` to `dep === 'proyecto'` and add a
+  one-line pointer to «Consumos» (the block now lives in `electrico/LadoConsumos.tsx`);
+  (2) `masasSecciones.ts` `seccionesTriciclo`: give «Varios» its `hijos: desgloseVarios(p.kg, sistemaElectrico(m, res))`
+  (`electrico/sistema.ts`, already exact to the part) so the «Varios» section lists the electrical parts and «precios» /
+  «proveedores» pick them up; then `scripts/pesos-secciones.ts` must stay «Todo OK».
