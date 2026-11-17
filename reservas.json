@@ -179,6 +179,12 @@
       "ruta": "src/components/aeromovil/LadoA1.tsx",
       "motivo": "pesossecciones: peso de cada desplegable",
       "desde": "2026-11-17T10:51:55.928Z"
+    },
+    {
+      "agente": "pesossecciones",
+      "ruta": "src/components/aeromovil/CLAUDE.md",
+      "motivo": "pesossecciones: peso de cada desplegable",
+      "desde": "2026-11-17T10:51:58.759Z"
     }
   ]
 }
