@@ -13,12 +13,6 @@
       "desde": "2026-11-17T18:21:31.092Z"
     },
     {
-      "agente": "electronica",
-      "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
-      "motivo": "electronica: bloque Electrónica de potencia (4 líneas)",
-      "desde": "2026-11-17T18:42:31.923Z"
-    },
-    {
       "agente": "ajustes",
       "ruta": "src/components/aeromovil/ruedas/neumaticos.ts",
       "motivo": "ajustes: Crr ciclomotor, agarre absoluto, Varios 18 kg (pocas líneas)",
