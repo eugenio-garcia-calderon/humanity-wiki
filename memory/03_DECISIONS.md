@@ -2197,3 +2197,15 @@ Eugenio asked for a dated, authored note on every side-panel section, «anónimo
 **Context.** Ten bots shared one 2-CPU / 8 GB cloud machine and ran tsc, vite build, the Aeromóvil scripts and headless screenshots one at a time behind `aeromovil-pesado.lock`. The queue reached ~10 jobs of up to 15 min each; ready PRs waited hours.
 **Decision.** New workflow `.github/workflows/comprobar.yml` runs on `pull_request` to main: tsc, build, and a matrix of the Aeromóvil scripts (tunnel, triciclo-disenos, estudio-aerodinamico, pesos-secciones, homologacion, bala-cola-lisa, cola-continuidad seed 7), each job in parallel on GitHub runners. Read-only, no secrets. Bots open the PR, wait for green, then merge under the deploy lock. Local heavy work is limited to what CI cannot do (headless screenshots of the feature).
 **Alternatives.** (a) Allow 2 concurrent heavy jobs locally: at most 2× and risks OOM on 8 GB. (b) Skip checks: rejected. (c) Bigger cloud machine: not in our control.
+## 2026-11-17 · Legacy Aeromóvil designs: by id in code, not a column (bot «legado»)
+
+Eugenio wants to work only on the «Aeromovil S» (design 16); every earlier design and vehicle type becomes read-only
+«legado». Options: (a) a `legado boolean` column on `aeromovil_disenos` set by migration, plus an owner toggle;
+(b) a code constant. Chosen **(b)**: `src/components/aeromovil/legado.ts` — `ID_AEROMOVIL_S = 16`,
+`ULTIMO_ID_LEGADO = 15`, every saved design with id ≤ 15 is legacy; the S and anything saved after it stay editable.
+The page and `src/server/aeromovil.ts` (PUT/DELETE refuse a legacy id with 403) import the same file, so they cannot
+disagree. Reasons: no schema change while ten bots share the table's routes, nothing to backfill, and the list is
+closed by construction (new designs get higher ids). Cost of switching to (a) later: ≈ 45 min (column, migration,
+read it in GET, swap the two helpers). An unsaved vehicle (a type picked from the logo menu) is legacy too.
+The default design is set by a guarded migration (`0226`, the same UPDATE the owner's «por defecto» route runs), not by
+hand in production, and the page opens the S by id regardless (`cargarAeromovilS`), so it works even before the deploy.

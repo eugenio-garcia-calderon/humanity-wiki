@@ -946,3 +946,13 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   `POST /api/aeromovil/disenos` (an `origen` id in the body): ≈ 20 min.
 - **Anonymous notes never leave the browser** (by design, rule 3). If Eugenio wants visitors' notes shared, they would
   go through moderation like the tasks: ≈ 1 h.
+## 2026-11-17 · Legacy Aeromóvil vehicles: what was left (bot «legado»)
+
+- **The logo menu (`Disenos.tsx`, `MenuDisenos`) still lists every design and vehicle type in one list**, without the
+  three groups the garage has; opening a legacy one there is read-only too. Grouping it: ≈ 30 min.
+- **The 3D garage still puts the legacy designs in the first row next to the S** (the list groups them, the 3D does not);
+  a third row for legacy, or hiding them by default: ≈ 1 h (`garaje/filas.ts`, `GarajeDisenos.tsx`).
+- **«Empezar un diseño nuevo»** opens unsaved default measures, which are read-only now; it should start from a copy of
+  the S: ≈ 20 min.
+- No «Duplicar como base» on legacy vehicles (left out on purpose; «Guardar como nuevo» on the S still works).
+- Legacy is by id (≤ 15) in code; a column would let Eugenio toggle it himself: ≈ 45 min.

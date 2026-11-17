@@ -26,6 +26,11 @@ import { sql } from 'drizzle-orm';
 import { createHash, randomBytes } from 'node:crypto';
 import { ipDe, ritmo, esperaPendiente, type Regla } from './limites/index.js';
 import { generarImagenDesdeImagen } from './ai/provider.js';
+import { esDisenoLegado } from '../components/aeromovil/legado';
+
+// 2026-11-17 (Eugenio: «los vehículos anteriores del garaje, haz que ya no se puedan editar, que se queden como
+// vehículos legado»): a legacy design is neither changed nor removed, whoever asks. Nothing is lost.
+const NO_LEGADO = 'Es un vehículo legado: ya no se puede cambiar ni quitar. El que se trabaja es el Aeromóvil S.';
 import { registrarNotasAeromovil } from './aeromovilNotas.js';
 
 const MAX_TEXTO = 4_000;
@@ -242,6 +247,7 @@ export function registerAeromovilRoutes(app: Express, db: any) {
       const p = await puedeCambiarDiseno(req, id);
       if (!p.existe) return res.status(404).json({ error: 'Ese diseño no existe.' });
       if (!p.puede) return res.status(403).json({ error: 'Solo el dueño del Aeromóvil puede cambiar los diseños. Inicia sesión con su cuenta.' });
+      if (esDisenoLegado(id)) return res.status(403).json({ error: NO_LEGADO });
       if (!(await conRitmo(db, req, res, FRENO_DISENO))) return;
       const r = await db.execute(sql`
         UPDATE aeromovil_disenos
@@ -285,6 +291,7 @@ export function registerAeromovilRoutes(app: Express, db: any) {
       const p = await puedeCambiarDiseno(req, id);
       if (!p.existe) return res.status(404).json({ error: 'Ese diseño no existe.' });
       if (!p.puede) return res.status(403).json({ error: 'Solo el dueño del Aeromóvil puede quitar diseños. Inicia sesión con su cuenta.' });
+      if (esDisenoLegado(id)) return res.status(403).json({ error: NO_LEGADO });
       await db.execute(sql`UPDATE aeromovil_disenos SET archived_at = now() WHERE id = ${id}`);
       res.json({ ok: true });
     } catch (e: any) {

@@ -57,7 +57,8 @@ import { CRR_B, LEMAS_BASCULANTE, NOMBRE_BASCULANTE, camposBasculante } from '..
 import { ColoresCarroceria } from '../components/aeromovil/ColorCarroceria';
 import { CLAVES_COLOR, coloresDe } from '../components/aeromovil/coloresCarroceria';
 import { rotuloFilas } from '../components/aeromovil/filasTriciclo';
-import { MenuDisenos, aDiseno, cargarDisenoPorDefecto, deDiseno, useAutoguardado, type Diseno } from '../components/aeromovil/Disenos';
+import { MenuDisenos, VEHICULOS, aDiseno, cargarDisenoPorDefecto, deDiseno, useAutoguardado, type Diseno } from '../components/aeromovil/Disenos';
+import { cargarAeromovilS, esEditableAbierto, TEXTO_LEGADO } from '../components/aeromovil/legado';
 import { TablaComparacion, fichaPropia } from '../components/aeromovil/Otros';
 import { fichaComparable, type Referencia } from '../components/aeromovil/referencias';
 import { FormularioMejora, VistaExportar, VistaPlan, VistaPlanos, VistaTareas, cargarDueno, cargarTareas, type Dueno, type Tarea } from '../components/aeromovil/Paneles';
@@ -257,7 +258,9 @@ export default function Aeromovil() {
     if (antes && antes.id !== d.id && garajeRef.current?.tiene(d.id)) return;
     setActual({ id: d.id, nombre: d.nombre, base: JSON.stringify(aDiseno(deDiseno(d.parametros || {}))) });
   }, []);
-  const guardadoWeb = useAutoguardado(P, actual, alGuardado);
+  // (2026-11-17) a legacy vehicle is read-only: it is never saved over
+  const editable = esEditableAbierto(actual);
+  const guardadoWeb = useAutoguardado(P, editable ? actual : null, alGuardado);
   // Los valores del diseño por defecto (el «Aptera Like»): el punto medio de cada deslizador (2026-11-07, Eugenio).
   const [D, setD] = useState<Parametros>(PARAMETROS_POR_DEFECTO);
   useEffect(() => { cargarDisenoPorDefecto().then(d => { if (d) setD(deDiseno(d.parametros || {})); }); }, []);
@@ -266,11 +269,12 @@ export default function Aeromovil() {
   useEffect(() => {
     // 2026-11-10 (Eugenio): the Triciclo Bala became the default design and he wanted it to open on load.
     // A browser that already had a design open would keep it, so each browser opens the default once more.
-    const UNA_VEZ = 'aeromovil.inicio.triciclo';
+    // 2026-11-17 (Eugenio: «me quiero centrar en el aeromóvil S»): every browser opens the S once more.
+    const UNA_VEZ = 'aeromovil.inicio.s';
     let hayAlgo = false, yaAbierto = true;
     try { hayAlgo = !!localStorage.getItem(CLAVE) || !!localStorage.getItem('aeromovil.diseno'); yaAbierto = !!localStorage.getItem(UNA_VEZ); localStorage.setItem(UNA_VEZ, '1'); } catch { /* sin almacenamiento */ }
     if ((hayAlgo && yaAbierto) || new URLSearchParams(loc.search).get('diseno')) return;
-    cargarDisenoPorDefecto().then(d => { if (d) abrirDiseno(d); });
+    cargarAeromovilS<Diseno>().then(d => { if (d) abrirDiseno(d); });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   // `?diseno=ID` abre ese diseño (es el enlace que se comparte desde el menú).
@@ -328,7 +332,8 @@ export default function Aeromovil() {
   };
   const porDefecto = JSON.stringify(aDiseno(Pa)) === JSON.stringify(aDiseno(PARAMETROS_POR_DEFECTO));
   // Cambiar de vehículo carga su juego de medidas: los dos no comparten deslizadores.
-  const cambiarVehiculo = (k: Disposicion) => { if (k !== P.disposicion) { setP(k === 'basculante' ? PARAMETROS_BASCULANTE : k === 'cuatro' ? PARAMETROS_A1 : k === 'bala' ? PARAMETROS_BALA : k === 'triciclo' ? PARAMETROS_TRICICLO : PARAMETROS_GOTA); setActual(null); } };
+  // (2026-11-17) also with a saved design open: the garage's «Vehículos legado» opens a type's starting measures
+  const cambiarVehiculo = (k: Disposicion) => { if (k !== P.disposicion || actual) { setP(k === 'basculante' ? PARAMETROS_BASCULANTE : k === 'cuatro' ? PARAMETROS_A1 : k === 'bala' ? PARAMETROS_BALA : k === 'triciclo' ? PARAMETROS_TRICICLO : PARAMETROS_GOTA); setActual(null); } };
 
   const [visibles, setVisibles] = useState<Record<CapaId, boolean>>(() => Object.fromEntries(CAPAS.map(c => [c.k, true])) as Record<CapaId, boolean>);
   const [rayosX, setRayosX] = useState(false);
@@ -590,10 +595,11 @@ export default function Aeromovil() {
       referencias={VEHICULOS_GARAJE.map(v => { const g = garaje.find(x => x.id === v.id); return { id: v.id, nombre: v.nombre, largo: v.largo, masa: masaGaraje(v), visible: !!g?.visible, quitado: !!g?.quitado }; })}
       alAlternarReferencia={id => setGaraje(g => alternarReferencia(g, id))}
       alQuitarReferencia={quitarDelGaraje} alRecuperarReferencia={id => setGaraje(g => recuperarReferencia(g, id))}
-      alElegido={() => { if (window.matchMedia('(max-width: 639px)').matches) setPanelGaraje(false); }} />
+      alElegido={() => { if (window.matchMedia('(max-width: 639px)').matches) setPanelGaraje(false); }}
+      vehiculosLegado={VEHICULOS} alVehiculoLegado={cambiarVehiculo} disposicion={P.disposicion} />
   );
   const garajeBloque = (
-    <Bloque titulo="Garaje" nota="tus diseños y coches de referencia">
+    <Bloque titulo="Garaje" nota="el Aeromóvil S, vehículos de referencia y legado">
             {garajeLista}
     </Bloque>
   );
@@ -874,7 +880,14 @@ export default function Aeromovil() {
               {!dueno.sesion && <> <Link to="/login" className="font-semibold underline">Iniciar sesión</Link></>}
             </div>
           )}
-          <fieldset disabled={!dueno?.puedeDecidir} className={cn('contents', !dueno?.puedeDecidir && '[&_input]:cursor-not-allowed [&_select]:opacity-70 [&_input]:opacity-70')}>
+          {!editable && (
+            <div role="status" className="rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+              <p className="font-semibold">{TEXTO_LEGADO}</p>
+              <p className="mt-0.5 leading-snug">«{actual?.nombre ?? nombreVehiculo}» es anterior al Aeromóvil S: se puede mirar en 3D y leer sus cifras, pero sus deslizadores ya no se mueven. El que se trabaja es el Aeromóvil S.</p>
+              <Button variant="outline" onClick={() => { void cargarAeromovilS<Diseno>().then(d => { if (d) void eleccion.elegir(d); }); }} className="mt-1.5 bg-white px-2.5 py-1 text-xs normal-case tracking-normal">Abrir el Aeromóvil S</Button>
+            </div>
+          )}
+          <fieldset disabled={!dueno?.puedeDecidir || !editable} className={cn('contents', (!dueno?.puedeDecidir || !editable) && '[&_input]:cursor-not-allowed [&_select]:opacity-70 [&_input]:opacity-70')}>
           {/* 2026-11-13: the body's colour, in «Carrocería» (the Gota and the Cuadriciclo en rombo have no departments: always) */}
           {((esA1 || porDeps) ? (porDeps ? depTri : dep) === 'carroceria' : true) && <Bloque titulo="Color de la carrocería"><ColoresCarroceria P={P} set={set} /></Bloque>}
           {/* 2026-11-17 (Eugenio: «mete la parte de aerodinámica dentro de carrocería… un botón que diga "hacer estudio aerodinámico"»): the tunnel and the study, in «Carrocería» (always for the vehicles without departments) */}
