@@ -859,3 +859,11 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   that prints `CRR`) when a catalogue wheel is chosen: the file was held by another bot and Eugenio asked to publish now.
   The numbers are right (`crrTriciclo`); only that sentence is stale. Fix: print `crrTriciclo(T)` and the sheet of each
   chosen wheel in «Ejes y ruedas», as `basculante/LadoBasculante.tsx` already does. ~15 min.
+## 2026-11-17 · Garage aircraft: copied aerofoil helpers, no «aircraft» flag
+
+- `garaje/autogiroModelo.ts` carries its own copy of `rejilla`/`perfil` (≈ 25 lines) that `garaje/visionJet.ts` also
+  has privately. Moving both to `garaje/forma.ts` and importing: ≈ 15 min today, ≈ 30 min once a third aircraft copies
+  them.
+- Garage aircraft are recognised only by having no `envolvente`/`aero`; the consumption card still labels them «Cd sin
+  publicar» instead of «aeronave, fuera del túnel». A `aeronave?: true` field in `garaje/tipos.ts` read by that card in
+  `pages/Aeromovil.tsx`: ≈ 15 min (the page was claimed by another bot when this was written).
