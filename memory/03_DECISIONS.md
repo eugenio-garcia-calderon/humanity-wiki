@@ -2198,14 +2198,6 @@ Eugenio asked for a dated, authored note on every side-panel section, «anónimo
 **Decision.** New workflow `.github/workflows/comprobar.yml` runs on `pull_request` to main: tsc, build, and a matrix of the Aeromóvil scripts (tunnel, triciclo-disenos, estudio-aerodinamico, pesos-secciones, homologacion, bala-cola-lisa, cola-continuidad seed 7), each job in parallel on GitHub runners. Read-only, no secrets. Bots open the PR, wait for green, then merge under the deploy lock. Local heavy work is limited to what CI cannot do (headless screenshots of the feature).
 **Alternatives.** (a) Allow 2 concurrent heavy jobs locally: at most 2× and risks OOM on 8 GB. (b) Skip checks: rejected. (c) Bigger cloud machine: not in our control.
 
-<<<<<<< HEAD
-## 2026-11-17 · Power electronics as configuration, defaults that change nothing
-
-**Context.** Eugenio asked for a «Electrónica de potencia» section in Motor (combined power limits, thermal start logic, maps) tied to his L7e-A2 study (hybrid category power = continuous total of the strongest mode, 134/2014 annex X app. 2.4; 901/2014 fields 1.8.3/1.8.5/1.8.7/1.8.9).
-**Decision.** Fields `tEp…` in `CamposTriciclo`, model in `triciclo/electronica.ts` (pure: modes, continuous and peak totals, limiters), UI in `electronica/BloqueElectronica.tsx` (its own grouped sliders; LadoTriciclo skips that block in its generic list). `energia.ts` drives the electric speeds and acceleration with the limited power and adds `vmaxConjunta`; `ficha.ts` takes `potenciaCategoria` = continuous total. Every default (no limit = 0, strategy «libre», no sport, map «normal», engine start at 10 % SOC = the old USABLE) reproduces the previous numbers exactly.
-**Alternatives.** (a) Simulate the start logic over a drive cycle (SOC over time): ≈ 1 day, and no cycle exists in the model; the start logic is shown as a speed table instead. (b) Generic sliders only: «0» would read «0,0 kW» instead of «sin límite» and the thermal start rows would need more visibility rules in LadoTriciclo.
-**Not modelled.** The combined top speed and the hybrid limits are the controller's configuration, not a measurement; the regen limit is declared only (the consumption does not use it yet).
-=======
 
 ## 2026-11-17 · Cooling, intakes, hood and engine position of the Triciclo (bot «capo»)
 
@@ -2225,9 +2217,6 @@ Eugenio asked for a dated, authored note on every side-panel section, «anónimo
 - **Engine in the nose** (`hibrido.ts` `delante`): same search (nearest the cabin, lowest), drive by a propshaft along the
   floor to the unchanged chain sprocket; tank stays behind the seats; exhaust under the floor. Masses of the propshaft
   (1,9 kg/m + 1 kg) go through `piezasRefrigeracion` (the one hook into `masas.ts`).
-<<<<<<< HEAD
->>>>>>> origin/main
-=======
 ## 2026-11-17 · How a rider's size scales («muñecos»)
 
 - **One length scale per rider** (`k` = stature / 1.756 m, ANSUR II's mean man, today's figure): every segment the
@@ -2240,4 +2229,10 @@ Eugenio asked for a dated, authored note on every side-panel section, «anónimo
   every saved design with a changed `tMOcc` keeps its mass; the medium build at 1.756 m is exactly `tMOcc`.
 - **The hip stays on the cushion and the feet on the pedals/footpegs**: a taller rider's knees rise (`rodilla()`), as
   in a real car with the seat not moved. Red = the check's clearance < 0, amber = below its minimum.
->>>>>>> origin/main
+
+## 2026-11-17 · Power electronics as configuration, defaults that change nothing
+
+**Context.** Eugenio asked for a «Electrónica de potencia» section in Motor (combined power limits, thermal start logic, maps) tied to his L7e-A2 study (hybrid category power = continuous total of the strongest mode, 134/2014 annex X app. 2.4; 901/2014 fields 1.8.3/1.8.5/1.8.7/1.8.9).
+**Decision.** Fields `tEp…` in `CamposTriciclo`, model in `triciclo/electronica.ts` (pure: modes, continuous and peak totals, limiters), UI in `electronica/BloqueElectronica.tsx` (its own grouped sliders; LadoTriciclo skips that block in its generic list). `energia.ts` drives the electric speeds and acceleration with the limited power and adds `vmaxConjunta`; `ficha.ts` takes `potenciaCategoria` = continuous total. Every default (no limit = 0, strategy «libre», no sport, map «normal», engine start at 10 % SOC = the old USABLE) reproduces the previous numbers exactly.
+**Alternatives.** (a) Simulate the start logic over a drive cycle (SOC over time): ≈ 1 day, and no cycle exists in the model; the start logic is shown as a speed table instead. (b) Generic sliders only: «0» would read «0,0 kW» instead of «sin límite» and the thermal start rows would need more visibility rules in LadoTriciclo.
+**Not modelled.** The combined top speed and the hybrid limits are the controller's configuration, not a measurement; the regen limit is declared only (the consumption does not use it yet).

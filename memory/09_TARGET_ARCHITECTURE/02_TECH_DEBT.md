@@ -946,9 +946,6 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   `POST /api/aeromovil/disenos` (an `origen` id in the body): ≈ 20 min.
 - **Anonymous notes never leave the browser** (by design, rule 3). If Eugenio wants visitors' notes shared, they would
   go through moderation like the tasks: ≈ 1 h.
-<<<<<<< HEAD
-- **Power electronics: thermal start logic is descriptive** (2026-11-17, electronica). `tEpArrKW`, `tEpArrVel`, `tEpHist`, `tEpCalent` only drive a table of which motor runs at each speed; only `tEpArrSoc` acts (electric range of a hybrid). A drive-cycle SOC simulation (WMTC) that uses them for litres and range: ≈ 1 day. The regen limit `tEpRegen` does not reduce consumption yet: ≈ 2 h with a stop-and-go share per speed. The HCU (hybrid control unit) has no part in any parts list (consumos' electrical system or Motor): ≈ 30 min once a product is chosen.
-=======
 
 
 ## 2026-11-17 · Cooling and engine position (bot «capo»)
@@ -963,9 +960,6 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   the front engine has no specific check for the pilot's pedals or the front suspension cradle. ≈ 40 min.
 - **Hood hinge/latch mass (≈ 1 kg) not counted**, and the nose solar panel (`tSolarMorro`) does not lift with the hood:
   ≈ 20 min each.
-<<<<<<< HEAD
->>>>>>> origin/main
-=======
 - **Blocked by claims on 2026-11-17 (both held by bot capo the whole session), ~20 min together once free:**
   (1) `LadoTriciclo.tsx` still draws its own «Rendimiento» block in Motor and Batería: change
   `(dep === 'propulsion' || dep === 'energia' || dep === 'proyecto') && rendimiento` to `dep === 'proyecto'` and add a
@@ -988,4 +982,4 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - Also still quoting `tMOcc` rather than each rider's mass: `electrico/LadoConsumos.tsx` (the consumption note, a copy
   of the one fixed in `LadoTriciclo.tsx`) and `homologacion/ficha.ts` (`masaOcupante`, `masaMaxima` without the wheel
   loads in a diamond). 10 min together.
->>>>>>> origin/main
+- **Power electronics: thermal start logic is descriptive** (2026-11-17, electronica). `tEpArrKW`, `tEpArrVel`, `tEpHist`, `tEpCalent` only drive a table of which motor runs at each speed; only `tEpArrSoc` acts (electric range of a hybrid). A drive-cycle SOC simulation (WMTC) that uses them for litres and range: ≈ 1 day. The regen limit `tEpRegen` does not reduce consumption yet: ≈ 2 h with a stop-and-go share per speed. The HCU (hybrid control unit) has no part in any parts list (consumos' electrical system or Motor): ≈ 30 min once a product is chosen.
