@@ -227,6 +227,12 @@
       "ruta": "src/components/aeromovil/visor/ocupante.ts",
       "motivo": "munecos: talla y complexión de los ocupantes (pocas líneas)",
       "desde": "2026-11-17T14:19:28.282Z"
+    },
+    {
+      "agente": "consumos",
+      "ruta": "src/pages/Aeromovil.tsx",
+      "motivo": "consumos: pestaña Consumos y Energía→Batería (pocas líneas)",
+      "desde": "2026-11-17T14:20:51.151Z"
     }
   ]
 }
