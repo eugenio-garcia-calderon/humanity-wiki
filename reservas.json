@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "ajustes",
-      "ruta": "src/components/aeromovil/PanelMasas.tsx",
-      "motivo": "ajustes: texto del agarre (1 línea)",
-      "desde": "2026-11-17T19:23:14.663Z"
-    },
-    {
       "agente": "bwb",
       "ruta": "src/components/aeromovil/triciclo/modelo.ts",
       "motivo": "bwb: carenado BWB (pocas líneas)",
