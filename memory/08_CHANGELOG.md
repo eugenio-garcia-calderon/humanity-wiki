@@ -12326,3 +12326,51 @@ Eugenio: «permite añadir más tipos de ruedas, por ejemplo de motos de todo ti
   https://evtol.news/news/aero-friedrichshafen-2024 · https://www.aircraft.com/aircraft/246590431/na-2026-ela-aviation-eclipse-revo ·
   https://dulv.de/Tragschrauber_Kennblaetter/details.php?id=21126 · https://aeroexpo.online/prod/ela-aviacion-sl/product-171316-69471.html ·
   https://elaaviacion.com/eclipse-evo/ · https://en.wikipedia.org/wiki/ELA_10_Eclipse
+## 2026-11-17 · Pestaña «Masas», motor y depósito libres, «Proyecto» como lista de pendientes (masas)
+- Eugenio: «haz que el motor por defecto esté mucho más cerca de la rueda trasera y más abajo, para bajar el centro de
+  gravedad, y que el depósito también se pueda colocar de manera libre, también haz que el motor se pueda colocar de
+  manera libre. Y que haya un cálculo de centro de gravedad y de pesos en cada eje, que aparezca en un nuevo apartado del
+  menú que sea MASAS, y te de esta relación calculado, y así en PROYECTO lo dejas despejado como una lista de cosas
+  pendientes, y también una revisión de los puntos críticos a mejorar que no están OK».
+- **Motor de gasolina y depósito, donde quieras**: el cálculo ya los coloca donde se le diga (el motor y el depósito se
+  mueven adelante/atrás, arriba/abajo y de lado desde su sitio de serie, y todas las comprobaciones lo siguen), pero
+  los seis deslizadores que lo hacen en pantalla llegan en un segundo paso: el fichero de los deslizadores lo tenía
+  otro bot ocupado y Eugenio pidió publicar ya.
+- **Su sitio de serie, nuevo**: el motor va lo más cerca de la rueda trasera que cabe (justo delante del amortiguador
+  trasero y su torreta; con dos ruedas detrás, justo delante del diferencial) y lo más bajo que deja lo que tiene debajo
+  (el suelo, la batería o el controlador); puede subir como mucho 5 cm para no chocar. El depósito va en el suelo justo
+  delante del motor si cabe ahí (más bajo y más cerca del centro de gravedad); si no, encima de la rueda trasera, como
+  antes.
+- **Comprobaciones nuevas** del motor y del depósito (en «Masas», «Proyecto» y Motor): la rueda trasera con su recorrido, el basculante con la suspensión
+  comprimida del todo, el amortiguador y su torreta (ahora sus tubos de verdad, inclinados), los asientos con quien va
+  sentado (las tres filas también), la batería y el controlador, y el depósito al motor. Lo que choca se pinta en rojo
+  en el 3D.
+- **Pestaña nueva «Masas»** (Triciclo, clásico, rombo y Basculante), justo después de «Proyecto», con su peso debajo:
+  masa total vacío, con los ocupantes y con equipaje; el centro de gravedad en altura, adelante-atrás y de lado; el peso
+  en cada eje y en cada rueda (en kg y %), con un dibujo desde arriba y de lado; lo que más sube el centro de gravedad;
+  la lista de todas las piezas (antes en «Proyecto»); y una explicación en palabras de por qué importan la altura y el
+  reparto (vuelco, frenada, tracción). Con «Masas» abierta, el 3D marca el centro de gravedad con el símbolo blanco y
+  negro y una línea hasta el suelo, visible a través de la carrocería.
+- **Comprobaciones nuevas de masas**: frenar a 0,8 g sin que se levanten las ruedas de atrás; subir una cuesta del
+  16 % en mojado con la rueda que empuja; «Reparto» (entre qué porcentajes de peso delante se cumplen a la vez el
+  vuelco, la frenada y la cuesta, a la altura que tiene el centro de gravedad); y el centro de gravedad centrado de lado.
+- **«Proyecto» despejado**: arriba, «Pendiente» (lo que falta en este diseño: arreglar lo que está en rojo, elegir motor,
+  controlador y motor de gasolina de catálogo si no se ha hecho, pesar las piezas, el estudio aerodinámico, que un
+  ingeniero revise el bastidor y la basculación), cada cosa con un botón que abre su pestaña. Debajo, «Revisión de
+  puntos críticos»: todas las comprobaciones que no están bien (rojas y justas), agrupadas por el departamento donde se
+  arreglan, con su botón. Al final, plegadas, todas las comprobaciones. El rendimiento, el maletero y el vuelco siguen
+  en sus pestañas (Motor y Energía, Interior, Rodaje); el peso se ha ido a «Masas». No se ha quitado ningún control.
+- **Arreglado de paso**: en rombo, el peso de cada rueda para dimensionar suspensiones y frenos salía mal (todo en las
+  laterales, nada en la cola). Ahora se reparte entre las cuatro con el mismo cálculo que enseña «Masas». En tu Rombo
+  Bala eso quita 13,4 kg de suspensiones y frenos de más.
+- **Rombo Bala (la copia del 15/11, con el híbrido)**: antes 553,1 kg con los dos, centro de gravedad a 48,7 cm, vuelco
+  1,07 g; ahora 539,3 kg, 49,4 cm, 1,04 g. Peso: morro 172 kg (32 %), laterales 252 kg (47 %), cola 115 kg (21 %). En
+  esa copia el motor **no puede acercarse más a la rueda ni bajar**: detrás tiene la torreta del amortiguador y debajo
+  el paquete de batería, que llega hasta el basculante; se mueve 5 cm adelante y sube 3 cm (antes su generador y su
+  planetario se metían 3 cm en la batería sin que nada lo dijera), y sigue tocando la torreta (4 cm) y el respaldo del
+  pasajero (4 cm), en rojo. Bajar el motor 10 cm bajaría el centro de gravedad solo 0,9 cm: lo que más pesa y más alto
+  va son los ocupantes y la batería.
+- Una pestaña recordada sigue abriendo lo mismo; «masas» guardada en un vehículo sin esa pestaña (el Aeromóvil 1) abre
+  «Proyecto». No comprobado en un móvil: con la app instalada, `humanity.wiki/?sw=off` quita la copia vieja.
+- (masas) En rombo, «Rueda delantera, freno y horquilla» (unos 10,7 kg) pasa de la pestaña Carrocería a Rodaje, donde
+  debía estar: los kilos de esas dos pestañas cambian a propósito (aviso de pesossecciones).
