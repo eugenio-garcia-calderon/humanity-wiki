@@ -125,6 +125,12 @@
       "ruta": "src/components/aeromovil/triciclo/defecto.ts",
       "motivo": "ajustes: Crr ciclomotor, Varios 18 kg (pocas líneas)",
       "desde": "2026-11-17T20:17:41.450Z"
+    },
+    {
+      "agente": "ajustes",
+      "ruta": "src/components/aeromovil/triciclo/energia.ts",
+      "motivo": "ajustes: Crr ciclomotor, Varios 18 kg (pocas líneas)",
+      "desde": "2026-11-17T20:17:44.434Z"
     }
   ]
 }
