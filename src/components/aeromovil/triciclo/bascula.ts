@@ -82,8 +82,8 @@ export function cuerpoAlSuelo(F: FormaBala, phi: number): number {
  */
 export function tiltTriciclo(m: ModeloTriciclo, piezas: PiezaMasa[]): Tilt | null {
   const b = m.bascula; if (!b) return null;
-  const T = m.campos, L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), mOcc = L('tMOcc');
-  const todo = [...piezas.map(p => ({ kg: p.kg, x: p.x, y: p.y })), ...m.plazas.map(q => { const [x, y] = cgOcupante(q.pts); return { kg: mOcc, x, y }; })];
+  const T = m.campos, L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T);
+  const todo = [...piezas.map(p => ({ kg: p.kg, x: p.x, y: p.y })), ...m.plazas.map(q => { const [x, y] = cgOcupante(q.pts); return { kg: q.kg, x, y }; })];
   const M = todo.reduce((a, p) => a + p.kg, 0), cx = todo.reduce((a, p) => a + p.kg * p.x, 0) / M, cy = todo.reduce((a, p) => a + p.kg * p.y, 0) / M;
   // the share on the front (or lateral) axle: by the lever between it and the rear wheel(s)
   const del = Math.min(1, Math.max(0, (cx - m.xR) / (m.xF - m.xR)));

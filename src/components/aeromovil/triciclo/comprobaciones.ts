@@ -3,7 +3,7 @@
 import { ANGULO_MAX } from '../garaje/kamm';
 import { factorMasaAsiento, numFila } from '../filasTriciclo';
 import type { Tilt } from '../basculacion';
-import { RPM_MAX_MOTOR, cifrasHibrido } from '../hibrido';
+import { CORONA_A_100, RPM_MAX_MOTOR, cifrasHibrido } from '../hibrido';
 import { comprobacionesCatalogo, motorDe } from '../catalogoTren';
 import { type Comprobacion, type PuntosOcupante, type Resultados, type P3, MATERIALES_CHASIS, RENDIMIENTO_SOLAR, largoTubo } from '../geometria';
 import type { FormaBala } from '../garaje/balaForma';
@@ -19,6 +19,7 @@ import { poseBascula, carenadoCuerpoMovido, carenadoAlSuelo, cuerpoAlSuelo, tilt
 import { type ModeloTriciclo, aroVolante, puntasRetrovisor } from './modelo';
 import { type PiezaMasa, type Maleteros, maleterosTriciclo, piezasTriciclo, EQUIPAJE, masaButaca, cargasRueda } from './masas';
 import { crrTriciclo, solarDiaTriciclo, energiaTriciclo } from './energia';
+import { chequeosTalla } from './ajusteOcupantes';
 import { chequeosPasajeroAtras } from './pasajero';
 import { fichaRueda } from '../ruedas/catalogo';
 import { comprobacionesRefrigeracion } from './refrigeracion';
@@ -156,11 +157,12 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   const tilt = m.bascula ? tiltTriciclo(m, piezas) : null;
   if (tilt) for (const c of tilt.componentes) piezas.push({ nombre: `Basculación: ${c.nombre.toLowerCase()}`, kg: c.kg, x: c.x, y: c.y, nota: c.ficha.join('; ') });
   const masas: Record<string, number> = {}; for (const p of piezas) masas[p.nombre] = (masas[p.nombre] ?? 0) + p.kg;
-  const mVeh = piezas.reduce((a, p) => a + p.kg, 0), mOcc = L('tMOcc');
+  // (2026-11-17, «muñecos»: each rider's mass follows its size, triciclo/talla.ts; `tMOcc` is the average man's)
+  const mVeh = piezas.reduce((a, p) => a + p.kg, 0), kgPil = m.cuerpos.piloto.kg, kgPas = m.cuerpos.pasajero.kg;
   const momento = (l: PiezaMasa[]) => { const M = l.reduce((a, p) => a + p.kg, 0); return { masa: M, x: l.reduce((a, p) => a + p.kg * p.x, 0) / M, y: l.reduce((a, p) => a + p.kg * p.y, 0) / M }; };
   // everyone on board (round three: up to four; a folded row carries nobody)
-  const ocupantes = m.plazas.map(q => { const [x, y] = cgOcupante(q.pts); return { nombre: q.nombre, kg: mOcc, x, y }; });
-  const nOcc = ocupantes.length;
+  const ocupantes = m.plazas.map(q => { const [x, y] = cgOcupante(q.pts); return { nombre: q.nombre, kg: q.kg, x, y }; });
+  const nOcc = ocupantes.length, kgOcc = ocupantes.reduce((a, o) => a + o.kg, 0);
   const cg = momento([...piezas, ...ocupantes]), cgSolo = momento([...piezas, ocupantes[0]]), vacio = momento(piezas);
   const Lb = m.batalla, t = F.VIA_LAT;
   // four wheels (2026-11-11): SSF = t_eff / (2h), the track under the centre of gravity: the front and rear tracks
@@ -187,10 +189,10 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   // (a diamond, 2026-11-15: carried at the nose wheel's fork and the pivot, the laterals' cross-member ignored: the longer span, on the safe side)
   const kgAsiento = m.butacas ? masaButaca(L('tMAsiento')) : L('tMAsiento');
   const cargas: [number, number][] = !m.filas
-    ? [[xDel - m.sillines.xPiloto, (mOcc + kgAsiento) * g], [xDel - m.sillines.xPasajero, (mOcc + kgAsiento) * g]]
+    ? [[xDel - m.sillines.xPiloto, (kgPil + kgAsiento) * g], [xDel - m.sillines.xPasajero, (kgPas + kgAsiento) * g]]
     // three rows: each seat with its occupant (if its row is open), at its hips
     // (2026-11-16: a bench carries all its row's places)
-    : m.asientosFilas.map(a => [xDel - a.x, ((a.plegado ? 0 : mOcc * (a.plazas ?? 1)) + L('tMAsiento') * factorMasaAsiento(a)) * g] as [number, number]);
+    : m.asientosFilas.map(a => [xDel - a.x, ((a.plegado ? 0 : (a.fila === 1 ? kgPil : kgPas) * (a.plazas ?? 1)) + L('tMAsiento') * factorMasaAsiento(a)) * g] as [number, number]);
   // round 3 interior (2026-11-12, «revisa… el chasis y todo»): the battery bears on the rails too (the pack runs through
   // them; the modules stand on them): the pack in eight slices along its length, each module at its centre, by volume
   {
@@ -232,12 +234,14 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     c('interior,carroceria', `Cabeza ${quien} a la cúpula (talla media, sin casco)`, k.p50, 0.03);
     c('interior,carroceria', `Cabeza ${quien} a la cúpula (talla alta, sin casco)`, k.p95, 0.03);
   }
+  // 2026-11-17 («muñecos»): every rider at its own height and build: head, shoulders, hips, knees, belly, feet (ajusteOcupantes.ts)
+  chequeosTalla(m, c);
   const op = m.occPts(true);
   // the pilot's backrest against the passenger: its back face (pad 3 cm, 14 cm behind the trunk's axis) to the passenger's belly (12 cm ahead of the hips)
   if (!m.filas) {
     const oq = m.occPts(false), t0 = 0.30;
     const xRespaldo = op.H[0] + op.d[0] * t0 - op.d[1] * 0.17, yR = op.H[1] + op.d[1] * t0;
-    const xVientre = oq.H[0] + oq.d[0] * Math.max(0, (yR - oq.H[1]) / oq.d[1]) + 0.12;
+    const xVientre = oq.H[0] + oq.d[0] * Math.max(0, (yR - oq.H[1]) / oq.d[1]) + 0.12 * m.cuerpos.pasajero.fondo * m.cuerpos.pasajero.k;
     c('interior', 'Respaldo del piloto al vientre del pasajero', xRespaldo - xVientre, 0.03);
     c('interior', 'Cabeza del piloto a la del pasajero', Math.hypot(op.C[0] - oq.C[0], op.C[1] - oq.C[1]) - 2 * 0.105, 0.05);
     if (m.butacas) chequeosButacas(m, op, oq, c);
@@ -405,7 +409,7 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   // 2026-11-16: the plug-in hybrid's parts, drawn where hibrido.ts puts them (a part sticking out turns red in the 3D too)
   if (m.phev) {
     const h = m.phev.disp.holguras, arq = m.phev.arq, asoma = (v: number) => v < 0 ? `asoma ${fmt(-v * 100, 1)} cm` : undefined;
-    const nT = arq === 'reparto' ? 'planetario y generador MG1' : arq === 'serie' ? 'generador' : 'embrague, motor-generador P2 y caja';
+    const nT = arq === 'reparto' ? (m.phev.disp.mg2 ? 'planetario, generador MG1 y motor MG2' : 'planetario y generador MG1') : arq === 'serie' ? 'generador' : 'embrague, motor-generador P2 y caja';
     c('propulsion', 'Híbrido: motor de gasolina dentro de la carrocería', h.motor, 0.01, asoma(h.motor));
     c('propulsion', `Híbrido: ${nT} dentro de la carrocería`, h.transmision, 0.01, asoma(h.transmision));
     c('propulsion', 'Híbrido: depósito de gasolina dentro de la carrocería', h.deposito, 0.01, asoma(h.deposito));
@@ -424,8 +428,8 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   // four wheels (2026-11-11): the power split between two hub motors, each in its own rim
   // (2026-11-16) catalogue parts: voltages, the controller's current, the reduction gear (catalogoTren.ts). An inboard
   // motor is not in the rim, so the hub rule does not apply to it
-  for (const k of comprobacionesCatalogo(T, { kWPico: kWp, motores: m.traseras ? 2 : 1, dRueda: RUEDAS_TRICICLO[T.tRuedaTras].d, velCalculo: L('tVel') })) c((k.dep ?? 'propulsion') as never, k.nombre, k.holgura, k.minimo, k.mostrar);
-  if (motorDe(T.tCatMotor)?.montaje === 'central') { /* no hub motor: nothing in the rim */ }
+  for (const k of comprobacionesCatalogo(T, { kWPico: kWp, motores: m.traseras ? 2 : 1, dRueda: RUEDAS_TRICICLO[T.tRuedaTras].d, velCalculo: L('tVel'), planetario: m.motor.tipo === 'central' ? CORONA_A_100 : null })) c((k.dep ?? 'propulsion') as never, k.nombre, k.holgura, k.minimo, k.mostrar);
+  if (motorDe(T.tCatMotor)?.montaje === 'central' || m.motor.tipo === 'central') { /* no hub motor: nothing in the rim (2026-11-17: or MG2 on the planetary) */ }
   else if (m.traseras) c('propulsion', 'Motor de buje: potencia que cabe en cada rueda trasera (regla aproximada)', kWBuje - kWp / 2, 0, `${fmt(kWp / 2, 1)} de ${kWBuje} kW por rueda`);
   else c('propulsion', 'Motor de buje: potencia que cabe en la rueda trasera (regla aproximada)', kWBuje - kWp, 0, `${fmt(kWp, 1)} de ${kWBuje} kW`);
   // round three: the boot, in litres (always passes: it says how much there is)
@@ -494,7 +498,7 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     giro: { radio, dentro: di * 180 / Math.PI, fuera: dout * 180 / Math.PI },
     bastidor: { M: Mmax, tension, seguridad, metros },
     bateria: { litros: m.kWh * 1000 / L('tWhL'), kg: m.kWh * 1000 / L('tWhKg'), litrosMorro: 0.42 * 0.30 * Math.max(1, F.kW) * 0.20 * 1000, cabe: m.bateriaCabe },
-    energia: cd ? energiaTriciclo(m, mVeh + nOcc * mOcc, cd, ar.solar) : null,
+    energia: cd ? energiaTriciclo(m, mVeh + kgOcc, cd, ar.solar) : null,
     maletero, ocupantes: nOcc,
   };
   const e = bala.energia, nada = NaN;
@@ -504,7 +508,7 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   return {
     A: area.total, FR: nada, Cd: e?.cd ?? nada, CdA: e?.CdA ?? nada, Crr: crrTriciclo(T), vol, Paero: nada, Proll: nada, Pw: e?.potencia ?? nada, WhKm: e?.WhKm ?? nada, pedWhKm: 0,
     autonomia: e?.autonomia ?? nada, vmax: e?.vmaxNominal ?? nada,
-    masas, mVeh, mTot: mVeh + nOcc * mOcc, rangoMasa: [nada, nada], Mmax, tension, seguridad, cargaRueda: nada,
+    masas, mVeh, mTot: mVeh + kgOcc, rangoMasa: [nada, nada], Mmax, tension, seguridad, cargaRueda: nada,
     solarPico: ar.solar * RENDIMIENTO_SOLAR * 1000, solarDia: solarDiaTriciclo(ar.solar, m.P.sol), kmSol: e?.kmSol ?? nada, areas: ar, comprobaciones: ch, triciclo: bala,
   };
 }

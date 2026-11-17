@@ -2217,6 +2217,57 @@ Eugenio asked for a dated, authored note on every side-panel section, «anónimo
 - **Engine in the nose** (`hibrido.ts` `delante`): same search (nearest the cabin, lowest), drive by a propshaft along the
   floor to the unchanged chain sprocket; tank stays behind the seats; exhaust under the floor. Masses of the propshaft
   (1,9 kg/m + 1 kg) go through `piezasRefrigeracion` (the one hook into `masas.ts`).
+## 2026-11-17 · How a rider's size scales («muñecos»)
+
+- **One length scale per rider** (`k` = stature / 1.756 m, ANSUR II's mean man, today's figure): every segment the
+  model already scaled with `escala` (hip over the cushion, trunk, neck, thigh, shank) plus, in the viewer, arms, head and
+  feet. Considered: separate sitting-height and leg-length ratios (women have relatively longer legs); rejected for
+  now, the difference is ~1 % of stature and Eugenio asked for «más altos o más gordos».
+- **Build as four classes, not free sliders** (delgado, medio, corpulento, muy corpulento): widths ×0.92–1.20 over `k`,
+  belly ×0.85–1.6, BMI 21/26/31/37. Four named people read better than three sliders that interact.
+- **Mass = `tMOcc` × k² × BMI/26**, with an optional typed value. `tMOcc` keeps its meaning («the average man») so
+  every saved design with a changed `tMOcc` keeps its mass; the medium build at 1.756 m is exactly `tMOcc`.
+- **The hip stays on the cushion and the feet on the pedals/footpegs**: a taller rider's knees rise (`rodilla()`), as
+  in a real car with the seat not moved. Red = the check's clearance < 0, amber = below its minimum.
+## 2026-11-17 · Central traction motor (MG2) on the power split's ring
+
+- **Coaxial, outboard of the planetary** (engine | MG1 | planetary | MG2), as in the THS of the Prius II, rather than on
+  a parallel counter-shaft (Prius IV). Coaxial is what Eugenio described («junto al motor de gasolina … conectado al
+  planetario») and reuses the existing drop case and chain. The cost is width (≈ 55 cm for the row), so with two rear
+  wheels the row is centred by default (`dz0` in `disponerHibrido`). A counter-shaft MG2 behind the planetary would be
+  ≈ 15 cm narrower: ≈ 2 h if the single-rear-wheel car needs it.
+- **Opt-in field `tMotorElec` (default 'buje')**, not «central by default for the power split»: designs 7 (Aermovil M)
+  and 14 (Rombo Bala) are power-split hybrids too and would have changed silently. Eugenio selects it and saves design 16.
+  No migration edits the saved design.
+- **Drivetrain loss**: `REND_SALIDA = 0.97` on the electric drive (energia.ts) and on the hybrid's electrical share
+  (`rendimientoHibrido`). The model's 85 % motor+controller is kept; a high-rpm central motor is often more efficient
+  than a direct-drive hub, which the model does not credit (the comparator does when the maker publishes η).
+## 2026-11-17 · Tyre type as a factor over the size's own tyre (bot «neumaticos»)
+
+Eugenio asked to choose the tyre type separately from the wheel size. Alternatives: (a) absolute figures per type
+(a «sport» tyre always μ 1.1, Crr X) — would change every saved design, because each catalogue size already carries its
+own tyre's Crr and every vehicle's grip constant is 0.9; (b) a full matrix size × type — 27 × 10 sheets with no source
+for most cells; (c) **chosen**: each size has an implied own type and construction (catalogue group → type, size code
+→ radial/bias, spoked rim → tube; the older sizes are declared by each vehicle), and the chosen option applies the ratio
+chosen/own to Crr, tyre mass (55 % of the wheel), grip, plus life and price. «De serie» is exactly 1, so saved designs
+are untouched. Code: `ruedas/neumaticos.ts` (data, `efectoNeumatico`, `crrEjes`, `precioNeumatico`),
+`triciclo/neumaticos.ts` (`neumaticosTriciclo`), `geometriaBasculante.ts` (`neumaticosBasculante`, `agarreBasculante`).
+Cost of (c): grip is relative, so a road tyre on an enduro size reads 1.13 g while a sport size «de serie» reads 0.90 g
+(every size's own tyre is assumed to grip 0.9 g, as before). Making grip absolute changes saved designs' 0-50 times:
+a decision for Eugenio, like the moped Crr.
+Price for the «precios» bot: `efectoNeumatico(...).precio` (€ per tyre), reachable per vehicle as
+`neumaticosTriciclo(T).del/.tras.precio` and `neumaticosBasculante(Q).del/.tras.precio`.
+## 2026-11-17 · Prices: one model on top of the mass sections, hidden editor (precios/)
+
+- **Prices hang off `masasSecciones.ts`**, not a parallel component list: each part the sections hold gets a price by
+  its name (`precios/precios.ts`). Section = its parts, department = own sections + «sin desplegable», vehicle =
+  departments — the same sums `pesos-secciones` checks for kg, checked by `scripts/precios-secciones.ts`.
+- **User prices keyed by part name** (`P.precios[nombre]`), labour by item id (`P.manoObra[id]`), both optional fields
+  of `Parametros`: designs saved before open with the estimates and nothing else changes. Alternative rejected: a
+  `t…` slider per part in `FILAS` (≈ 40 new fields, defaults to keep in step with every estimate, and 40 visible sliders).
+- **UX**: no slider visible until a price is tapped (Eugenio asked for it not to be «un engorro»). The editor debounces
+  250 ms because every change recalculates the vehicle.
+- **«Mano de obra» is a tab id, not a `Departamento`**, like «Masas».
 ## 2026-11-17 · Supplier, model and files per part: where they live (bot «proveedores»)
 
 - **Text and links live in the design** (`Parametros.proveedores`, keyed by the part's name in the mass model — the

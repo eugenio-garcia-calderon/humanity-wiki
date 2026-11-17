@@ -84,6 +84,10 @@ export interface Parametros extends Partial<CamposBala>, Partial<CamposTriciclo>
   colorCarroceria?: string; colorAcento?: string;
   /** Datos escritos a mano en la ficha de un componente (nombre, proveedor, precio, peso, características); se guardan con el diseño. */
   piezas?: Record<string, PiezaManual>;
+  /** (2026-11-17) the user's own price of a part, € by the part's name in the mass model (`precios/precios.ts`); absent: the estimates */
+  precios?: Record<string, number>;
+  /** (2026-11-17) the user's own hours and €/h of a labour item, by its id (`precios/manoObra.ts`); absent: the estimates */
+  manoObra?: Record<string, { h?: number; eurh?: number }>;
   // ── Aeromóvil 1 (disposición 'cuatro') ────────────────────────────────────
   plazas: 1 | 2;    // monoplaza (como el SZEmission) o tándem 1+1 (como el Twizy)
   L: number;        // largo total de la carrocería (m)

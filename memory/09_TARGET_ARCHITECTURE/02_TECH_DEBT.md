@@ -960,6 +960,61 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   the front engine has no specific check for the pilot's pedals or the front suspension cradle. ≈ 40 min.
 - **Hood hinge/latch mass (≈ 1 kg) not counted**, and the nose solar panel (`tSolarMorro`) does not lift with the hood:
   ≈ 20 min each.
+- **Blocked by claims on 2026-11-17 (both held by bot capo the whole session), ~20 min together once free:**
+  (1) `LadoTriciclo.tsx` still draws its own «Rendimiento» block in Motor and Batería: change
+  `(dep === 'propulsion' || dep === 'energia' || dep === 'proyecto') && rendimiento` to `dep === 'proyecto'` and add a
+  one-line pointer to «Consumos» (the block now lives in `electrico/LadoConsumos.tsx`);
+  (2) `masasSecciones.ts` `seccionesTriciclo`: give «Varios» its `hijos: desgloseVarios(p.kg, sistemaElectrico(m, res))`
+  (`electrico/sistema.ts`, already exact to the part) so the «Varios» section lists the electrical parts and «precios» /
+  «proveedores» pick them up; then `scripts/pesos-secciones.ts` must stay «Todo OK».
+## 2026-11-17 · Occupant size («muñecos»): fields outside `CamposTriciclo`
+
+- **The six size fields (`tTallaPil/Pas`, `tComplPil/Pas`, `tMPil/Pas`) live in `triciclo/talla.ts` `CamposTalla`, not
+  in `CamposTriciclo` / `FILAS` / `TRICICLO_DEFECTO`** (those files were held by other bots). The model reads them from
+  the raw `Parametros` (`cuerpoDe(P, …)`), the panel block is its own component (`TallasOcupantes.tsx`), and absent
+  means today's figure. Consequences: no `Explicacion` popover for them, the aerodynamic study and `camposTriciclo`
+  do not see them, and `scripts/triciclo-disenos.ts` does not round-trip them. Moving them into the recipe's five
+  places: ≈ 30 min.
+- **Two knee checks are computed twice**: «Rodillas del piloto al volante / al salpicadero» stay inline in
+  `calcularTriciclo` and `ajusteOcupantes.ts` repeats the same formula only to paint the knees red. Making
+  `calcularTriciclo` emit them from `ajustePlaza`: ≈ 15 min.
+- `pages/Aeromovil.tsx` (garage card text, «dos ocupantes de N kg») still quotes `tMOcc`, not each rider's mass: 5 min.
+- Also still quoting `tMOcc` rather than each rider's mass: `electrico/LadoConsumos.tsx` (the consumption note, a copy
+  of the one fixed in `LadoTriciclo.tsx`) and `homologacion/ficha.ts` (`masaOcupante`, `masaMaxima` without the wheel
+  loads in a diamond). 10 min together.
+- **(2026-11-17, mgplanetario) Central MG2**: the previous entry («a catalogue central motor is not drawn») is done for
+  the power split only. Still pending: a central motor for the pure electric car and for series/P2 (≈ 2 h, the same
+  `CilZ` next to the controller with a chain); with one rear wheel the coaxial MG2 sticks out of the narrow tail (4–5 cm
+  in tests): a counter-shaft MG2 is ≈ 2 h; the MG2's size is a rule from mass and power, not the catalogue motor's own
+  diameter and length (≈ 30 min: add `diametro`/`largo` to `MotorCatalogo`); `tMMotor`'s range is still the hub rule for
+  «two motors of half power» with two rear wheels (≈ 20 min to give the central motor its own range).
+## 2026-11-17 · Tyre type (bot «neumaticos»)
+
+- **Triciclo rollover check still uses the fixed `AGARRE` 0.9** (`triciclo/comprobaciones.ts`, held by another bot):
+  the tyre type changes the Triciclo's 0-50 traction but not «Vuelco». Swap in `max(neumaticosTriciclo(T).del/.tras.muSeco)`
+  and the panel texts «Un neumático de ciclomotor agarra unos 0,9 g» in `LadoTriciclo.tsx`: ≈ 15 min.
+- **`pages/Aeromovil.tsx` (comparison card «fuente») still says «rodadura 0,011 (neumático de ciclomotor)»** (file was
+  held): use `crrTriciclo(camposTriciclo(P))` as `LadoTriciclo.tsx` now does: ≈ 5 min.
+- **Grip is relative to the size's own tyre** (`memory/03_DECISIONS.md`): absolute grip per type ≈ 30 min plus Eugenio's
+  OK, since saved designs' acceleration would change.
+- **Price is a rule by width and diameter, ±40 %, not checked in shops**; life is one figure per type (×1.5 front, ×2.5
+  car, ×0.4 bicycle). A real price per catalogue size: ≈ 1 h of shop lookups for 27 sizes.
+- The 3D does not draw the tread (knobs, slicks): ≈ 1 h in `visor/ruedaCatalogo.ts`.
+- **The Triciclo's four tyre fields are optional and get their defaults by `Object.assign(TRICICLO_DEFECTO,
+  NEUMATICOS_DEFECTO)` in `triciclo/campos.ts`**, because `triciclo/defecto.ts` was held by bot «masas2» while that bot
+  waited for `campos.ts`, held by this one. Move the four `'serie'` into `defecto.ts`, make the fields required, delete
+  the `Object.assign`: ≈ 5 min.
+## 2026-11-17 · Prices (precios/), first version
+
+- **Estimates are code, not data** (`estimar` in `precios/precios.ts`, ~45 rules by part name). A table Eugenio could
+  edit, with a source per row, is ≈ 2 h now. Part names are the keys of user prices: renaming a part in the parts list
+  drops its saved price silently (≈ 30 min to add a rename map when it first happens).
+- **Only the Triciclo family shows prices inside its sections.** The Basculante's sections are priced and counted in
+  «Proyecto» and «Mano de obra», but `LadoBasculante.tsx` shows no breakdown yet (≈ 30 min once it shows `DesglosePeso`).
+  The Gota, the Aeromóvil 1 (which has its own component costs in `componentes.ts`) and the Bala: no prices (≈ 1 h).
+- **Catalogue prices only for motors and petrol engines**: controllers and reduction gears publish none, so they are
+  estimated; the tyres from bot «neumaticos» are not wired yet (≈ 20 min once its catalogue has prices).
+- `aeromovil/CLAUDE.md` has no recipe for prices yet (file held by another bot): ≈ 10 min.
 ## 2026-11-17 · Supplier/model/files per part: shortcuts of the first version (bot «proveedores»)
 
 - **`Parametros.proveedores` is declared by module augmentation** in `proveedores/datos.ts`, not in `geometria.ts` next

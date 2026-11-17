@@ -18,7 +18,9 @@ export type IdDepartamento =
   | 'interior' | 'accesos' | 'luces' | 'fabricacion' | 'homologacion'
   // 2026-11-17: «Masas», a tab of the Triciclo family and the Basculante only (LadoResumen.tsx); it has no
   // `Departamento` of its own (no tasks, suppliers or messages), so it is not in `DEPARTAMENTOS`
-  | 'masas';
+  | 'masas'
+  // 2026-11-17: «Mano de obra», the labour's tab (precios/PanelManoObra.tsx), the same kind of tab as «Masas»
+  | 'manoobra';
 
 export interface Tarea {
   titulo: string;
