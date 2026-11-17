@@ -8,12 +8,6 @@
     },
     {
       "agente": "ahorcajadas",
-      "ruta": "src/components/aeromovil/triciclo/comprobaciones.ts",
-      "motivo": "ahorcajadas: comprobaciones del pasajero detrás",
-      "desde": "2026-11-17T13:28:31.042Z"
-    },
-    {
-      "agente": "ahorcajadas",
       "ruta": "src/components/aeromovil/explicaciones/triciclo.ts",
       "motivo": "ahorcajadas: texto del rango del pasajero",
       "desde": "2026-11-17T13:28:34.734Z"
