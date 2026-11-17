@@ -161,6 +161,12 @@
       "ruta": "src/components/aeromovil/catalogoTren.ts",
       "motivo": "motores: precio estimado y cifras para comparar motores",
       "desde": "2026-11-17T10:51:05.597Z"
+    },
+    {
+      "agente": "pesossecciones",
+      "ruta": "src/components/aeromovil/geometriaBala.ts",
+      "motivo": "pesossecciones: peso de cada desplegable",
+      "desde": "2026-11-17T10:51:49.412Z"
     }
   ]
 }
