@@ -23,6 +23,7 @@ import { chequeosTalla } from './ajusteOcupantes';
 import { chequeosPasajeroAtras } from './pasajero';
 import { fichaRueda } from '../ruedas/catalogo';
 import { comprobacionesRefrigeracion } from './refrigeracion';
+import { agarreTriciclo } from './neumaticos';
 
 /** The check's name, also in `explicaciones/triciclo.ts`. */
 export const NEUMATICO_MOTO_SIN_INCLINAR = 'Neumáticos de moto en un vehículo que no se inclina: gastan el centro y agarran menos en curva';
@@ -39,7 +40,8 @@ export interface ResultadosTriciclo extends Omit<ResultadosBala, 'cabezas'> {
   piezas: PiezaMasa[];
   cg: { x: number; y: number; masa: number; vacio: { x: number; y: number } };
   /** Umbral de vuelco estático (g) con dos ocupantes y con el piloto solo, y lo que pesa el eje delantero. */
-  vuelco: { ssf: number; ssfSolo: number; repartoDel: number };
+  /** (2026-11-17: `agarre`, the tyres' dry grip, `agarreTriciclo`, and `objetivo`, what the check asks: `objetivoVuelco`) */
+  vuelco: { ssf: number; ssfSolo: number; repartoDel: number; agarre: number; objetivo: number };
   /** Radio de giro (m): a la rueda delantera de fuera; ángulos de las dos ruedas (°). */
   giro: { radio: number; dentro: number; fuera: number };
   /** El bastidor: momento, tensión y coeficiente de seguridad de los largueros. */
@@ -135,10 +137,15 @@ export function chequeosButacas(m: ModeloTriciclo, op: PuntosOcupante, oq: Punto
 export const umbralVuelco = (t: number, b: number, h: number, L: number) => t * b / (2 * h * L);
 export const NUMERO: Record<number, string> = { 1: 'uno', 2: 'dos', 3: 'tres', 4: 'cuatro', 5: 'cinco', 6: 'seis', 7: 'siete' };
 
-/** Lo que agarra en seco un neumático de ciclomotor (μ ≈ 0,9): por debajo, en una curva vuelca antes de derrapar. */
+/**
+ * Lo que agarra en seco un neumático de carretera radial, de cualquier medida (μ ≈ 0,9). Desde el 2026-11-17 el vuelco
+ * no compara con esta cifra fija sino con el agarre de los neumáticos elegidos (`agarreTriciclo`, `neumaticos.ts`).
+ */
 export const AGARRE = 0.9;
-/** Lo que se pide al umbral de vuelco: el agarre y un 15 % más, por lo que el cálculo rígido no ve. */
+/** Lo que se pide al umbral de vuelco como mínimo: el agarre de un neumático de carretera y un 15 % más, por lo que el cálculo rígido no ve. */
 export const VUELCO_OBJETIVO = 1.05;
+/** 2026-11-17: con neumáticos que agarran más, se pide lo mismo en proporción (el agarre × 1,05/0,9); nunca menos de `VUELCO_OBJETIVO`. */
+export const objetivoVuelco = (agarre: number) => Math.max(VUELCO_OBJETIVO, agarre * VUELCO_OBJETIVO / AGARRE);
 
 /**
  * Áreas, masas, centro de gravedad, vuelco, estructura y holguras. Lo que depende
@@ -211,8 +218,10 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   const ch: Comprobacion[] = [];
   const c = (dep: DepTriciclo | `${DepTriciclo},${DepTriciclo}`, nombre: string, holgura: number, minimo: number, mostrar?: string) => ch.push({ nombre, holgura, minimo, dep, ...(mostrar ? { mostrar } : {}) });
   const fmt = (v: number, d = 2) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
-  c('rodaje', `Vuelco: aceleración lateral que lo tumba, con ${NUMERO[nOcc] ?? nOcc} (objetivo ${fmt(VUELCO_OBJETIVO)} g)`, ssf - AGARRE, VUELCO_OBJETIVO - AGARRE, `${fmt(ssf)} g`);
-  c('rodaje', 'Vuelco: con el piloto solo', ssfSolo - AGARRE, VUELCO_OBJETIVO - AGARRE, `${fmt(ssfSolo)} g`);
+  // (2026-11-17: against the chosen tyres' grip, `agarreTriciclo`, no longer a fixed 0.9 g)
+  const agarre = agarreTriciclo(T), objetivo = objetivoVuelco(agarre);
+  c('rodaje', `Vuelco: aceleración lateral que lo tumba, con ${NUMERO[nOcc] ?? nOcc} (objetivo ${fmt(objetivo)} g; los neumáticos agarran ${fmt(agarre)} g)`, ssf - agarre, objetivo - agarre, `${fmt(ssf)} g`);
+  c('rodaje', 'Vuelco: con el piloto solo', ssfSolo - agarre, objetivo - agarre, `${fmt(ssfSolo)} g`);
   let cabezas: { quien: string; p50: number; p95: number; x: number }[];
   if (!m.filas) {
     cabezas = ([true, false] as const).map(piloto => {
@@ -494,7 +503,7 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     tilt,
     area, vol, piel: ar.carroceria + ar.cristal, cristal: ar.cristal, cupula: [-m.cup.XC0, -m.cup.XC1],
     viaSubida: F.VIA_LAT > m.viaPedida + 1e-9 ? F.VIA_LAT : null, cabezas,
-    piezas, cg: { x: cg.x, y: cg.y, masa: cg.masa, vacio: { x: vacio.x, y: vacio.y } }, vuelco: { ssf, ssfSolo, repartoDel },
+    piezas, cg: { x: cg.x, y: cg.y, masa: cg.masa, vacio: { x: vacio.x, y: vacio.y } }, vuelco: { ssf, ssfSolo, repartoDel, agarre, objetivo },
     giro: { radio, dentro: di * 180 / Math.PI, fuera: dout * 180 / Math.PI },
     bastidor: { M: Mmax, tension, seguridad, metros },
     bateria: { litros: m.kWh * 1000 / L('tWhL'), kg: m.kWh * 1000 / L('tWhKg'), litrosMorro: 0.42 * 0.30 * Math.max(1, F.kW) * 0.20 * 1000, cabe: m.bateriaCabe },

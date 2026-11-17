@@ -2268,3 +2268,24 @@ Price for the «precios» bot: `efectoNeumatico(...).precio` (€ per tyre), rea
 - **UX**: no slider visible until a price is tapped (Eugenio asked for it not to be «un engorro»). The editor debounces
   250 ms because every change recalculates the vehicle.
 - **«Mano de obra» is a tab id, not a `Departamento`**, like «Masas».
+
+## 2026-11-17 · Triciclo family: moped Crr, absolute tyre grip, «Varios» 18 kg (decided by Claude, delegated by Eugenio 2026-11-17)
+
+Eugenio delegated these three («Me dan igual, lo que tú veas»); the coordinating Claude decided them, bot «ajustes» built them.
+They change saved designs' numbers on purpose.
+- **Moped tyres' rolling resistance 0.011 → 0.0165** (`triciclo/energia.ts` `CRR_CICLOMOTOR = 0.0085 + 0.018 / 2.25`):
+  Cossalter, «Motorcycle Dynamics» (2006), ch. 2, static part at 2.25 bar — the same formula the wheel catalogue uses.
+  Quoted from the book, not confirmed online (a web search on 2026-11-17 did not find the formula). The car sizes
+  (c13–c15) keep 0.011 (`CRR_COCHE`): the decision was about moped tyres only. `CRR` stays as an alias of the moped one
+  for importers; `crrTriciclo` now picks per size (`crrLegado`) instead of `crrEjes(…, CRR)`. Alternatives rejected:
+  one constant for every older size (would have made the car-tyre Rombo Bala roll like a moped tyre); the speed term
+  (the editor uses one Crr for every speed, as the catalogue does).
+- **Absolute grip** (`ruedas/neumaticos.ts` `efectoNeumatico(…, absoluto)`, opt-in; the Basculante keeps relative):
+  μ = 0.9 × the type's `seco`/`mojado` × the construction's factor. A radial road tyre is 0.90 g at any size; the older
+  moped sizes (bias, tube) 0.855. The rollover check compares with `agarreTriciclo(T)` (mean over the wheels) and asks
+  `objetivoVuelco(μ) = max(1.05, μ × 1.05/0.9)`; `res.triciclo.vuelco` now carries `agarre` and `objetivo` and the side
+  panels read them. Alternative rejected: the axle with the most grip (more conservative for rollover, but the mean is
+  how the 0–50 and the editors already average tyres).
+- **«Varios» default 12 → 18 kg** (`triciclo/defecto.ts`), slider max 18 → 24. Only the default: `camposTriciclo`
+  takes every stored number, and saving writes the whole `Parametros` (`aDiseno`), so every design saved before today
+  (Rombo Bala, the clásico: `tMVarios: 12`) keeps 12 and its «súbelo a 18 kg» check stays red until raised by hand.

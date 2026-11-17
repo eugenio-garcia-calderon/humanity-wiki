@@ -283,13 +283,15 @@ else {
 // ── 2026-11-16: a plug-in hybrid saved with the one «Conversión mecánica» slider (`tRendTrans`) opens as the power split
 // that gives the same efficiency: the same litres per 100 km as the formula of 2026-11-15
 {
-  const { energiaTriciclo, AUXILIARES, CRR, KWH_LITRO_GASOLINA } = await import('../src/components/aeromovil/geometriaTriciclo');
+  const { energiaTriciclo, AUXILIARES, KWH_LITRO_GASOLINA } = await import('../src/components/aeromovil/geometriaTriciclo');
+  // (2026-11-17: the moped tyres roll at Cossalter's 0.0165, no longer 0.011: the formula of 2026-11-15 with this design's own Crr)
+  const { crrTriciclo } = await import('../src/components/aeromovil/triciclo/energia');
   for (const rt of [75, 80, 85.5, 90, 95, 97]) {
     const viejo = { ...JSON.parse(JSON.stringify(aDiseno(PARAMETROS_TRICICLO))), tPropulsion: 'phev', tRendTrans: rt } as Record<string, unknown>;
     for (const k of ['tHibArq', 'tHibMec', 'tRendElec', 'tRendCaja']) delete viejo[k];
     const m = crearModelo(deDiseno(viejo as Partial<Parametros>)) as ModeloTriciclo, res = calcular(m, areas(m));
     const cd = { cd: 0.2, areaRef: 0.9 }, e = energiaTriciclo(m, res.mTot, cd)!, v = m.campos.tVel / 3.6;
-    const antes = (((0.5 * 1.2 * cd.cd * cd.areaRef * v ** 3 + CRR * res.mTot * 9.81 * v) / (rt / 100) + AUXILIARES) / (m.campos.tRendTerm / 100)) / v / 3.6 / KWH_LITRO_GASOLINA / 10;
+    const antes = (((0.5 * 1.2 * cd.cd * cd.areaRef * v ** 3 + crrTriciclo(m.campos) * res.mTot * 9.81 * v) / (rt / 100) + AUXILIARES) / (m.campos.tRendTerm / 100)) / v / 3.6 / KWH_LITRO_GASOLINA / 10;
     ok(m.phev?.arq === 'reparto' && Math.abs(e.hibrido!.litros100 - antes) < 1e-9, `un híbrido guardado con «Conversión mecánica» ${rt} %: abre como reparto (${m.campos.tHibMec.toFixed(1)} % directo, camino eléctrico ${m.campos.tRendElec.toFixed(1)} %) y gasta lo mismo (${e.hibrido!.litros100.toFixed(4)} L/100 km)`);
   }
   const nuevo = { ...JSON.parse(JSON.stringify(aDiseno({ ...PARAMETROS_TRICICLO, tPropulsion: 'phev', tHibArq: 'serie', tRendElec: 81 } as Parametros))), tRendTrans: 95 };

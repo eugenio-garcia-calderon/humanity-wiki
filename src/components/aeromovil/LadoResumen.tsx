@@ -9,7 +9,6 @@ import { grupoPieza } from './geometriaTriciclo';
 import { EQUIPAJE, equipajeEn } from './triciclo/masas';
 import { masasTriciclo } from './triciclo/centroMasas';
 import { pendientesTriciclo, type Pendiente } from './triciclo/pendientes';
-import { VUELCO_OBJETIVO, AGARRE } from './triciclo/comprobaciones';
 import { analizarMasas, entradaBasculante, type AnalisisMasas } from './masasVehiculo';
 import { PanelMasas } from './PanelMasas';
 import { PanelProyecto } from './PanelProyecto';
@@ -44,7 +43,7 @@ export function LadoResumen({ dep, modelo, res, masas, alIr, extra }: {
     if (!masas) return null;
     const tri = modelo.tipo === 'triciclo' ? modelo : null, rt = res.triciclo;
     return <PanelMasas a={masas} checks={res.comprobaciones.filter(esDeMasas)}
-      vuelco={rt ? { ssf: rt.vuelco.ssf, ssfSolo: rt.vuelco.ssfSolo, objetivo: VUELCO_OBJETIVO, agarre: AGARRE } : null}
+      vuelco={rt ? { ssf: rt.vuelco.ssf, ssfSolo: rt.vuelco.ssfSolo, objetivo: rt.vuelco.objetivo, agarre: rt.vuelco.agarre } : null}
       alturaVehiculo={modelo.alto}
       hibrido={tri?.phev ? { kgMotor: tri.phev.kgMotor, kgDeposito: tri.phev.kgDeposito } : null}
       notaEstimacion={tri

@@ -39,8 +39,9 @@ import {
   PARAMETROS_POR_DEFECTO, PARAMETROS_A1, PARAMETROS_GOTA, PARAMETROS_BALA, PARAMETROS_TRICICLO, PARAMETROS_BASCULANTE, DIAMETRO_RUEDA, NEUMATICOS, MATERIALES_CARENADO, MATERIALES_CHASIS, RANGOS_MASA, ajustarCarenado, areas, calcular, crearModelo, type Disposicion, type MaterialCarenado, type MaterialChasis, type Neumatico, type Parametros, type Puerta, type Pulgadas,
 } from '../components/aeromovil/geometria';
 import {
-  CRR, DEPS_TRICICLO, camposTriciclo, energiaTriciclo, conButacas, conPuertas, esCuatro, esRombo, lemasTriciclo, nombreTriciclo, type DepTriciclo,
+  DEPS_TRICICLO, camposTriciclo, energiaTriciclo, conButacas, conPuertas, esCuatro, esRombo, lemasTriciclo, nombreTriciclo, type DepTriciclo,
 } from '../components/aeromovil/geometriaTriciclo';
+import { crrTriciclo, textoCrrTriciclo } from '../components/aeromovil/triciclo/energia';
 import { kgPorDepartamento, textoKg, type KgDepartamento } from '../components/aeromovil/PesosDepartamento';
 import { LadoConsumos } from '../components/aeromovil/electrico/LadoConsumos';
 import { BloqueSistemaElectrico, textoConsumoPestana } from '../components/aeromovil/electrico/SistemaElectrico';
@@ -486,8 +487,8 @@ export default function Aeromovil() {
       fuente: `Este diseño. Cd estimado por el túnel con la carrocería y sus cuatro ruedas${camposBasculante(P).qRuedasDel === 'carenados' ? ' (los carenados delanteros, solo como ruedas carenadas: el real será algo más alto)' : ''}; masa estimada con dos ocupantes de ${camposBasculante(P).qMOcc} kg y rodadura ${CRR_B} (neumático de scooter).`,
     }] : []) : esTri ? (cdTriComparar.cd != null && cdTriComparar.areaRef != null ? [{
       // the Triciclo: the tunnel's Cd (computed in the background), with its own mass and rolling resistance
-      id: 'aeromovil', nombre: nombreVehiculo, cd: cdTriComparar.cd, area: cdTriComparar.areaRef, masa: res.mTot, crr: CRR, estimado: true, origenCd: 'túnel (la carrocería y sus ruedas)',
-      fuente: `Este diseño. Cd estimado por el túnel con la carrocería y sus ${esCuatro(camposTriciclo(P)) ? 'cuatro' : 'tres'} ruedas (los carenados y los brazos, solo como ruedas carenadas: el real será algo más alto); masa estimada con dos ocupantes de ${camposTriciclo(P).tMOcc} kg y rodadura ${CRR} (neumático de ciclomotor).`,
+      id: 'aeromovil', nombre: nombreVehiculo, cd: cdTriComparar.cd, area: cdTriComparar.areaRef, masa: res.mTot, crr: crrTriciclo(camposTriciclo(P)), estimado: true, origenCd: 'túnel (la carrocería y sus ruedas)',
+      fuente: `Este diseño. Cd estimado por el túnel con la carrocería y sus ${esCuatro(camposTriciclo(P)) ? 'cuatro' : 'tres'} ruedas (los carenados y los brazos, solo como ruedas carenadas: el real será algo más alto); masa estimada con dos ocupantes de ${camposTriciclo(P).tMOcc} kg y rodadura ${crrTriciclo(camposTriciclo(P)).toFixed(4).replace('.', ',')} (${textoCrrTriciclo(camposTriciclo(P))}).`,
     }] : []) : esBala ? (cdTunelNuestro != null && areaTunelNuestro != null ? [{
       // the Bala: no editor formula and no mass, so the tunnel's Cd on the body's area, and air only
       id: 'aeromovil', nombre: nombreVehiculo, cd: cdTunelNuestro, area: areaTunelNuestro, estimado: true, origenCd: 'túnel (solo la carrocería)',
