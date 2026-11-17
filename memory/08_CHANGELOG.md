@@ -12167,3 +12167,33 @@ encontró 5 colas muy cortas (30 cm) que todavía se doblaban dentro de la punta
   `npx tsx scripts/estudio-aerodinamico.ts [diseño.json]` (todos los vehículos, un diseño malo a propósito y el que le
   pases; «Todo OK» si ninguna pega se contradice, ninguna recomienda algo sin ganancia y ningún cambio se sale de rango).
 - Si alguien tenía guardada una pestaña que no existe (una antigua «aerodinámica»), ahora abre Carrocería.
+
+## 2026-11-17 · Autogiro ELA Eclipse REVO en el garaje
+
+- Eugenio, con una foto de un autogiro color cobre: «haz un modelo 3D del autogiro de ELA Aviación, el ultimo modelo».
+- **Cuál es el último modelo:** el **Eclipse REVO** de ELA Aviación (Fuente Obejuna, Córdoba), presentado en AERO
+  Friedrichshafen 2024 y en producción (se anuncian unidades de 2026). Es la misma célula biplaza en tándem cerrada del
+  Eclipse/Eclipse EVO de la foto, con un motor Rotax 916 iS de 160 CV que además hace girar el rotor a 500 rpm antes de
+  despegar: sale en unos 10 m.
+- **Modelo nuevo** en el garaje, «Autogiro ELA Eclipse REVO» (`garaje/autogiro.ts`, `autogiroForma.ts`,
+  `autogiroModelo.ts`). Lleva:
+  - la cabina con el morro en punta y la gran cúpula de cristal (se ven los dos asientos en tándem y el panel);
+  - el mástil carenado con la cabeza del rotor y las dos palas, aparcadas a lo largo;
+  - el motor detrás de la cabina y la hélice propulsora de tres palas;
+  - el botalón por debajo de la hélice, el estabilizador horizontal con una deriva en cada punta y la deriva central;
+  - la rueda de morro con su horquilla y las dos ruedas principales carenadas sobre ballestas de acero.
+  - Color cobre satinado, como la foto. Sin letras del fabricante ni matrícula.
+- **Datos publicados:** rotor de 8,53 m y hélice Helix de 3 palas y 1,72 m, 331 kg en vacío y 560 kg máximo del EVO
+  (ficha DULV 988-22); REVO: Rotax 916 iS 160 CV, 530 kg máximo al despegue, crucero hasta 160 km/h, más de 500 km de
+  autonomía (anuncio en aircraft.com), unos 20 kg más que el EVO por el nuevo arrastre del rotor (evtol.news); EVO:
+  81 l de depósito y 200 km/h de máxima (aeroexpo, elaaviacion.com).
+- **Estimado en la foto** (ELA no publica estas medidas en texto; su hoja técnica es una imagen que no se pudo
+  descargar): 5,10 m de largo sin el rotor, 1,94 m de ancho, 2,70 m de alto, batalla 1,95 m, vía 1,70 m, cabina de
+  0,80 m; masa en vacío del REVO 351 kg (331 + 20).
+- **Es una aeronave:** como el Vision Jet, no pasa por el túnel de viento ni por la comparación de consumo ni por el
+  circuito de estabilidad (son para coches); el estudio aerodinámico solo mira nuestro diseño. Las palas aparcadas
+  sobresalen 2,6 m por delante del morro y 1,5 m por detrás, a 2,7 m de altura, por encima de los coches vecinos.
+- Fuentes: https://revo.elaaviacion.com · https://elaaviacion.com/revo-taking-off-into-the-future-of-personal-aviation/ ·
+  https://evtol.news/news/aero-friedrichshafen-2024 · https://www.aircraft.com/aircraft/246590431/na-2026-ela-aviation-eclipse-revo ·
+  https://dulv.de/Tragschrauber_Kennblaetter/details.php?id=21126 · https://aeroexpo.online/prod/ela-aviacion-sl/product-171316-69471.html ·
+  https://elaaviacion.com/eclipse-evo/ · https://en.wikipedia.org/wiki/ELA_10_Eclipse

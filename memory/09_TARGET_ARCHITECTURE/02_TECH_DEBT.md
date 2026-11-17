@@ -808,3 +808,12 @@ The «ordenar» refactor (PRs #1081, #1082, #1084) only moved code. Still open, 
   would make them computed, but it touches the method and therefore the calibration: a decision for Eugenio, ≈ 1 day.
 - The A1 and Gota slider labels and ranges come from `tunel/explicaciones.ts` (`A1`, `GOTA`, now exported), still a
   copy of what their panels draw (third reader of that copy). Moving both panels to a table like `FILAS`: ≈ 2 h.
+
+## 2026-11-17 · Garage aircraft: copied aerofoil helpers, no «aircraft» flag
+
+- `garaje/autogiroModelo.ts` carries its own copy of `rejilla`/`perfil` (≈ 25 lines) that `garaje/visionJet.ts` also
+  has privately. Moving both to `garaje/forma.ts` and importing: ≈ 15 min today, ≈ 30 min once a third aircraft copies
+  them.
+- Garage aircraft are recognised only by having no `envolvente`/`aero`; the consumption card still labels them «Cd sin
+  publicar» instead of «aeronave, fuera del túnel». A `aeronave?: true` field in `garaje/tipos.ts` read by that card in
+  `pages/Aeromovil.tsx`: ≈ 15 min (the page was claimed by another bot when this was written).
