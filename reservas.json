@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "legado",
-      "ruta": "src/server/aeromovil.ts",
-      "motivo": "legado: el servidor no cambia ni quita diseños legado (2 líneas)",
-      "desde": "2026-11-17T17:55:53.559Z"
-    },
-    {
       "agente": "garajeboton",
       "ruta": "src/components/aeromovil/Visor3D.tsx",
       "motivo": "garajeboton: no dibujar con el visor oculto (2 líneas)",
