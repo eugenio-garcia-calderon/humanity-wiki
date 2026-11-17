@@ -8,12 +8,16 @@
 // you isolate one by one; where the engine's auxiliaries go (water pump, oil pump and sump, oil filter, air filter),
 // which hibrido3d.ts draws; and how the engine's mass splits among them (triciclo/masas.ts).
 //
-// A part is found in the 3D by its mesh's `userData.componente`. To add a part (bot «capo»: radiator, coolant pipes,
-// intakes): draw it in the viewer's «Motor» layer (`G.motor`), give its meshes a `componente`, add that id to its group's
-// `componentes` below with its name in `NOMBRES_PIEZA`, and say when the design has it in `presente`. A part drawn in
-// another layer (the body) does not show with «Mostrar solo el motor».
+// A part is found in the 3D by its mesh's `userData.componente`. To add a part: draw it in the viewer's «Motor» layer
+// (`G.motor`), give its meshes a `componente`, add that id to its group's `componentes` below with its name in
+// `NOMBRES_PIEZA`, and say when the design has it in `piezasPresentes`. A part drawn in another layer (the body, as the
+// radiator's intakes `refrigeracion-toma`) does not show with «Mostrar solo el motor».
+// (Joined 2026-11-17 with bot «capo»'s cooling, visor/refrigeracion.ts: radiator, coolant pipes, the shaft of an engine
+// in the nose.)
 
 import type { DisposicionHibrido, CajaZ, V3 } from './hibrido';
+import type { ModeloTriciclo } from './triciclo/modelo';
+import { refrigeracionDe } from './triciclo/refrigeracion';
 
 export interface GrupoMotor {
   id: string;
@@ -25,13 +29,12 @@ export interface GrupoMotor {
 /** The groups, in the order the list shows them. */
 export const GRUPOS_MOTOR: GrupoMotor[] = [
   { id: 'bloque', n: 'Bloque motor', componentes: ['hibrido-motor'] },
-  { id: 'transmision', n: 'Engranaje planetario / transmisión', componentes: ['hibrido-planetario', 'hibrido-embrague', 'hibrido-caja', 'hibrido-cadena', 'hibrido-diferencial'] },
+  { id: 'transmision', n: 'Engranaje planetario / transmisión', componentes: ['hibrido-planetario', 'hibrido-embrague', 'hibrido-caja', 'hibrido-arbol', 'hibrido-cadena', 'hibrido-diferencial'] },
   { id: 'generador', n: 'Generador', componentes: ['hibrido-mg1', 'hibrido-generador', 'hibrido-p2'] },
   { id: 'electrico', n: 'Motor eléctrico', componentes: ['motor-electrico'] },
   { id: 'controlador', n: 'Controlador', componentes: ['controlador'] },
   { id: 'deposito', n: 'Depósito y conducto de combustible', componentes: ['hibrido-deposito'] },
-  // (the radiator and its pipes are bot «capo»'s: `radiador`, `tubos-refrigeracion` join here when they exist)
-  { id: 'refrigeracion', n: 'Refrigeración', componentes: ['radiador', 'tubos-refrigeracion', 'hibrido-bomba-agua', 'hibrido-manguitos'] },
+  { id: 'refrigeracion', n: 'Refrigeración', componentes: ['refrigeracion-radiador', 'refrigeracion-tubos', 'hibrido-bomba-agua', 'hibrido-manguitos'] },
   { id: 'lubricacion', n: 'Lubricación', componentes: ['hibrido-bomba-aceite', 'hibrido-carter', 'hibrido-filtro-aceite'] },
   { id: 'escape', n: 'Escape', componentes: ['hibrido-escape'] },
   { id: 'admision', n: 'Admisión', componentes: ['hibrido-admision', 'hibrido-filtro-aire'] },
@@ -43,7 +46,7 @@ export const NOMBRES_PIEZA: Record<string, string> = {
   'hibrido-caja': 'Caja de cambios', 'hibrido-cadena': 'Cadena a la rueda', 'hibrido-diferencial': 'Diferencial y palieres',
   'hibrido-mg1': 'Generador MG1', 'hibrido-generador': 'Generador y su cable', 'hibrido-p2': 'Motor-generador P2',
   'motor-electrico': 'Motor de buje', controlador: 'Controlador (inversor)', 'hibrido-deposito': 'Depósito, boca y conducto',
-  radiador: 'Radiador', 'tubos-refrigeracion': 'Tubos al radiador', 'hibrido-bomba-agua': 'Bomba de agua', 'hibrido-manguitos': 'Termostato y manguitos',
+  'refrigeracion-radiador': 'Radiador y ventilador', 'refrigeracion-tubos': 'Tubos del refrigerante', 'hibrido-arbol': 'Árbol de transmisión', 'hibrido-bomba-agua': 'Bomba de agua', 'hibrido-manguitos': 'Termostato y manguitos',
   'hibrido-bomba-aceite': 'Bomba de aceite', 'hibrido-carter': 'Cárter de aceite', 'hibrido-filtro-aceite': 'Filtro de aceite',
   'hibrido-escape': 'Colectores, silencioso y tubo de escape', 'hibrido-admision': 'Colector de admisión y mariposa', 'hibrido-filtro-aire': 'Filtro de aire',
 };
@@ -52,12 +55,9 @@ export const NOMBRES_PIEZA: Record<string, string> = {
 export const grupoDePieza = (comp: string): GrupoMotor | null => GRUPOS_MOTOR.find(g => g.componentes.includes(comp)) ?? null;
 
 /** What the model needs to say which parts exist: the Triciclo family's model, read loosely (no import of the model). */
-export interface ModeloConMotor { tipo: string; traseras?: unknown; phev?: { disp: DisposicionHibrido } | null; radiador?: unknown }
+export interface ModeloConMotor { tipo: string; phev?: { disp: DisposicionHibrido } | null }
 
-/**
- * The parts this design has, in list order. (Bot «capo»: a part of yours exists when the model says so; widen the
- * line marked below.)
- */
+/** The parts this design has, in list order. */
 export function piezasPresentes(m: ModeloConMotor): string[] {
   if (m.tipo !== 'triciclo') return [];
   const s = new Set<string>(['motor-electrico', 'controlador']);
@@ -68,9 +68,12 @@ export function piezasPresentes(m: ModeloConMotor): string[] {
     if (d.caja) s.add(d.caja.nombre === 'caja de cambios' ? 'hibrido-caja' : 'hibrido-planetario');
     if (d.cadena) s.add('hibrido-cadena');
     if (d.diferencial) s.add('hibrido-diferencial');
+    if (d.arbol) s.add('hibrido-arbol');
+    // (the radiator and its pipes: none with the cooling «Ninguna»)
+    const r = refrigeracionDe(m as ModeloTriciclo);
+    if (r?.radiadores.length) s.add('refrigeracion-radiador');
+    if (r && (r.tubos.caliente.length || r.tubos.fria.length)) s.add('refrigeracion-tubos');
   }
-  // (capo: the radiator and its pipes)
-  if (m.radiador) { s.add('radiador'); s.add('tubos-refrigeracion'); }
   return GRUPOS_MOTOR.flatMap(g => g.componentes.filter(c => s.has(c)));
 }
 
