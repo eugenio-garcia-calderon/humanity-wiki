@@ -143,12 +143,6 @@
       "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
       "motivo": "capo: refrigeración (pocas líneas)",
       "desde": "2026-11-17T14:27:47.084Z"
-    },
-    {
-      "agente": "capo",
-      "ruta": "src/components/aeromovil/triciclo/energia.ts",
-      "motivo": "capo: arrastre del aire de refrigeración (1 línea)",
-      "desde": "2026-11-17T14:38:19.784Z"
     }
   ]
 }
