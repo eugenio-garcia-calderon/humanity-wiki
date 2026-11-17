@@ -2277,6 +2277,25 @@ and resizing while its canvas has zero size.
 **Alternatives.** (a) Keep a small 3D of the Aeromóvil S above the panel: still takes ~40 % of a phone screen and the
 garage cars would need a separate «hide others» path. (b) Unmount the viewer: loses the scene state and the ref other
 sections rely on.
+## 2026-11-17 · Engine parts isolated by `userData.componente`, registry in `piezasMotor.ts` (solopiezas)
+- **Chosen**: one pure registry (`src/components/aeromovil/piezasMotor.ts`: groups → `componente` ids, names, which
+  parts a design has, where the auxiliaries go, how the engine's mass splits). The 3D hides meshes of the «Motor» layer
+  whose `componente` is not chosen (`visor/piezasMotor3d.ts`), so a part is isolatable by tagging its meshes; no new
+  layer per part. **Rejected**: one `CapaId` per part (the layer menu would grow by 20 entries and every builder would
+  need to know the groups) and a list reported back by the viewer at runtime (an extra callback and state round trip).
+- **The engine's mass is split, not added**: the auxiliaries come out of the existing figure (15 kg + 1.4 kg/kW or the
+  catalogue's dry mass), capped at 40 % of it, the block keeps the rest. Empty mass unchanged; CG of hybrids moves
+  slightly because each piece sits where it is drawn.
+- **Seam with bot «capo»** (radiator, coolant pipes, intakes): ids `radiador` and `tubos-refrigeracion` are already in
+  the «Refrigeración» group; `piezasPresentes` shows them when the model has `radiador`. Capo must draw them in
+  `G.motor` (not the body layer) for «Ver solo motor» to show them. Whoever merges second makes the join.
+
+## 2026-11-17 · Power electronics as configuration, defaults that change nothing
+
+**Context.** Eugenio asked for a «Electrónica de potencia» section in Motor (combined power limits, thermal start logic, maps) tied to his L7e-A2 study (hybrid category power = continuous total of the strongest mode, 134/2014 annex X app. 2.4; 901/2014 fields 1.8.3/1.8.5/1.8.7/1.8.9).
+**Decision.** Fields `tEp…` in `CamposTriciclo`, model in `triciclo/electronica.ts` (pure: modes, continuous and peak totals, limiters), UI in `electronica/BloqueElectronica.tsx` (its own grouped sliders; LadoTriciclo skips that block in its generic list). `energia.ts` drives the electric speeds and acceleration with the limited power and adds `vmaxConjunta`; `ficha.ts` takes `potenciaCategoria` = continuous total. Every default (no limit = 0, strategy «libre», no sport, map «normal», engine start at 10 % SOC = the old USABLE) reproduces the previous numbers exactly.
+**Alternatives.** (a) Simulate the start logic over a drive cycle (SOC over time): ≈ 1 day, and no cycle exists in the model; the start logic is shown as a speed table instead. (b) Generic sliders only: «0» would read «0,0 kW» instead of «sin límite» and the thermal start rows would need more visibility rules in LadoTriciclo.
+**Not modelled.** The combined top speed and the hybrid limits are the controller's configuration, not a measurement; the regen limit is declared only (the consumption does not use it yet).
 
 ## 2026-11-17 · BWB fairing: own optional fields and own block, not FILAS
 

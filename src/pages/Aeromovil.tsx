@@ -86,6 +86,7 @@ import { fmt, m2, Deslizador, Bloque, Selector, ListaComprobaciones } from '../c
 import { LadoA1 } from '../components/aeromovil/LadoA1';
 import { LadoBala } from '../components/aeromovil/LadoBala';
 import { useCdTriciclo, zonaTriciclo, LadoTriciclo } from '../components/aeromovil/LadoTriciclo';
+import { usePiezasMotor, ListaPiezasMotor, TarjetaPiezaPinchada } from '../components/aeromovil/PiezasMotor';
 import { BloqueAerodinamica } from '../components/aeromovil/estudio/EstudioAerodinamico';
 // (2026-11-17) the «Homologación» tab: the design against its EU category (homologacion/)
 import { PanelHomologacion, ResumenHomologacion } from '../components/aeromovil/homologacion/PanelHomologacion';
@@ -466,6 +467,8 @@ export default function Aeromovil() {
   // the masses of the design (LadoResumen.tsx): the «Masas» tab, and the 3D's centre of gravity while it is open
   const masas = useMasas(paraCalcular, res);
   useEffect(() => { if (porDeps && dep !== depTri) setDep(depTri); }, [porDeps, dep, depTri]);
+  // 2026-11-17: with «Motor» shown alone, its parts one by one (PiezasMotor.tsx)
+  const piezas = usePiezasMotor(modelo, porDeps && soloDep && depTri === 'propulsion');
   // (2026-11-17) «Masas» remembered from a Triciclo opens «Proyecto» on a vehicle without that tab (the Aeromóvil 1)
   useEffect(() => { if (!porDeps && (dep === 'masas' || dep === 'consumos' || dep === 'manoobra')) setDep('proyecto'); }, [porDeps, dep]);
   // (2026-11-17) the prototype's cost: parts by department + labour (precios/coste.ts), for «Proyecto» and «Mano de obra»
@@ -665,11 +668,12 @@ export default function Aeromovil() {
             : completa === 'css' ? 'fixed inset-0 z-[100] h-[100dvh] w-screen' : 'relative h-full w-full')}>
           <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} bascular={bascular} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeConDisenos} soloGaraje={!!soloGaraje} tunel={tunel} carteles={carteles} cuerposTunel={cuerposTunel} opcionesTunel={opcionesTunelVisor} alElegirPuntoTunel={setPuntoTunel} puntoTunel={puntoTunel} fichasGaraje={disenosGaraje.fichas} superponer={!!superponer && !soloGaraje} vista={vista}
             referencia={referencia} modoRef={modoRef} alinear={alinear} alPinchar={esA1 ? c => { navegar(`/aeromovil/componentes/${c}`); window.scrollTo({ top: 0 }); } : undefined}
-            alPincharGaraje={eleccion.alPincharGaraje} alPincharNuestro={donde => { eleccion.setTarjeta(true); eleccion.setPendiente(null); if (donde && modelo.tipo === 'triciclo') { const z = zonaTriciclo(modelo, donde); setDep(z.dep); setSoloDep(false); setAbrirBloque(a => ({ bloque: z.bloque, n: (a?.n ?? 0) + 1 })); } }} extraTarjeta={id => <><BotonFilaReferencia g={disenosGaraje} id={id} /><BotonSoloReferencia e={eleccion} id={id} /><BotonEditableReferencia e={eleccion} id={id} />{VEHICULOS_GARAJE.some(v => v.id === id) && !soloUrl && <BotonQuitarReferencia key={id} id={id} nombre={VEHICULOS_GARAJE.find(v => v.id === id)!.nombre} alQuitar={quitarDelGaraje} />}</>}
+            alPincharGaraje={eleccion.alPincharGaraje} alPincharNuestro={donde => { if (piezas.pinchar(donde)) return; eleccion.setTarjeta(true); eleccion.setPendiente(null); if (donde && modelo.tipo === 'triciclo') { const z = zonaTriciclo(modelo, donde); setDep(z.dep); setSoloDep(false); setAbrirBloque(a => ({ bloque: z.bloque, n: (a?.n ?? 0) + 1 })); } }} extraTarjeta={id => <><BotonFilaReferencia g={disenosGaraje} id={id} /><BotonSoloReferencia e={eleccion} id={id} /><BotonEditableReferencia e={eleccion} id={id} />{VEHICULOS_GARAJE.some(v => v.id === id) && !soloUrl && <BotonQuitarReferencia key={id} id={id} nombre={VEHICULOS_GARAJE.find(v => v.id === id)!.nombre} alQuitar={quitarDelGaraje} />}</>}
             alMoverGaraje={superponer || soloGaraje ? undefined : disenosGaraje.mover}
             seguir={eleccion.seguir} nombres={soloUrl ? undefined : disenosGaraje.nombres} resaltarNuestro={disenosGaraje.enFila > 0} verGaraje={panelGaraje && !soloGaraje}
             margenDerecho={panelGaraje && typeof window !== 'undefined' && window.matchMedia('(min-width: 640px)').matches ? 352 : 0}
-            colores={colores} centroGravedad={seccion === 'diseno' && porDeps && depTri === 'masas' ? centroParaVisor(masas) : null} />
+            colores={colores} centroGravedad={seccion === 'diseno' && porDeps && depTri === 'masas' ? centroParaVisor(masas) : null} piezasMotor={piezas.visor} />
+          <TarjetaPiezaPinchada p={piezas} />
           {/* La esquina de arriba a la derecha es del botón de pantalla completa: las tarjetas se apartan a su izquierda
               (en el móvil, debajo, que de ancho no caben). */}
           <Button variant="outline" onClick={alternarCompleta} aria-pressed={completa !== 'no'}
@@ -894,6 +898,7 @@ export default function Aeromovil() {
               </Button>
             );
           })()}
+          <ListaPiezasMotor p={piezas} />
           {(esA1 ? dep === 'proyecto' : porDeps ? false : true) && garajeBloque}
 
           {dueno && !dueno.puedeDecidir && (

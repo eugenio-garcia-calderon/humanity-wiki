@@ -1,6 +1,7 @@
 // Triciclo masses: the parts list, boots, wheel loads, sizing and the group of each part.
 // Moved out of geometriaTriciclo.ts unchanged (2026-11-16, refactor «ordenar»); that file re-exports everything. See ../CLAUDE.md.
 import { factorMasaAsiento } from '../filasTriciclo';
+import { desgloseMotorGasolina } from '../piezasMotor';
 import { masaReductora } from '../catalogoTren';
 import { piezasBWB } from './bwb';
 import { MATERIALES_CARENADO, MATERIALES_CHASIS, largoTubo } from '../geometria';
@@ -104,7 +105,10 @@ export function piezasTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cris
     const p = m.phev, c = p.disp.centros;
     // (2026-11-17: and across the car, for the centre of gravity's side: `centrosZ`)
     const cz = p.disp.centrosZ;
-    o.push({ nombre: 'Motor de gasolina (híbrido)', kg: p.kgMotor, x: c.motor[0], y: c.motor[1], z: cz.motor, nota: `${p.disp.motor.n} cilindro${p.disp.motor.n > 1 ? 's' : ''}, unos ${Math.round(p.disp.motor.cc / 10) * 10} cm³, con su escape` });
+    // (2026-11-17: split into the block and its auxiliaries, each where it is drawn; the sum is the same figure: ../piezasMotor.ts)
+    const aux = desgloseMotorGasolina(p.disp, p.kgMotor, p.kW), kgAux = aux.reduce((t, x) => t + x.kg, 0);
+    o.push({ nombre: 'Motor de gasolina (híbrido)', kg: p.kgMotor - kgAux, x: c.motor[0], y: c.motor[1], z: cz.motor, nota: `${p.disp.motor.n} cilindro${p.disp.motor.n > 1 ? 's' : ''}, unos ${Math.round(p.disp.motor.cc / 10) * 10} cm³: bloque, culata y cigüeñal (el motor entero pesa ${Math.round(p.kgMotor)} kg con lo de debajo)` });
+    o.push(...aux);
     for (const t of p.transmision) o.push({ nombre: t.nombre, kg: t.kg, x: c.transmision[0], y: c.transmision[1], z: cz.transmision });
     o.push({ nombre: 'Depósito de gasolina, lleno', kg: p.kgDeposito, x: c.deposito[0], y: c.deposito[1], z: cz.deposito });
   }

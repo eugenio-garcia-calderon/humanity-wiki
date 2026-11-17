@@ -12566,6 +12566,33 @@ Eugenio: «Permite también añadir el tipo de neumático.»
   rodadura de verdad de las ruedas y neumáticos elegidos.
 - Las cifras son estimaciones en el orden que dan las fuentes (Cossalter, etiqueta europea, guías de duración por tipo),
   no medidas de cada medida; el precio es una regla por anchura y diámetro (±40 %), sin mirar tiendas hoy.
+## 2026-11-17 · El motor, pieza a pieza: «Mostrar solo esta pieza»
+
+Eugenio: «Que también aparezca la bomba de agua, la bomba de aceite, el tubo escape, que todo eso aparezca indicado
+cuando se le dé al botón de mostrar solo, en este caso, la parte de motor… y que luego también todas esas partes se les
+pueda también pinchar en mostrar solo esta parte… imagínate que solo ves la parte del radiador con su circuito de agua y
+sus tubos. O ves solo la parte del bloque del motor. O ves solo la parte del engranaje planetario.»
+
+- **Triciclo (familia, incluido el rombo), pestaña Motor › «Ver solo motor»**: debajo aparece «Piezas del motor», la
+  lista de las piezas que tiene ESTE diseño por grupos: Bloque motor, Engranaje planetario / transmisión, Generador,
+  Motor eléctrico, Controlador, Depósito y conducto de combustible, Refrigeración, Lubricación, Escape y Admisión. Cada
+  grupo tiene «Ver solo» y cada pieza de un grupo con varias, «Ver solo esto»; «Todo el motor» vuelve. La cámara se
+  acerca a lo que eliges y vuelve a la vista de antes al volver a todo el motor.
+- **Etiquetas en el 3D**: con el motor solo, cada grupo lleva su cartelito encima; con un grupo solo, cada pieza el suyo.
+- **Pinchar una pieza en el 3D** mientras se ve solo el motor ya no te saca de ese modo: sale una tarjeta con su nombre,
+  «Mostrar solo esta pieza» y «Solo <su grupo>».
+- **Piezas nuevas dibujadas en el motor de gasolina** (solo cuando el diseño es híbrido): bomba de agua con su polea,
+  termostato y manguitos (dos salen hacia delante, hacia donde vaya el radiador), cárter de aceite, bomba de aceite,
+  filtro de aceite y filtro de aire con su conducto. El escape (colectores, silencioso y tubo hasta la cola) ya estaba.
+- **Peso**: el motor de gasolina pesa lo mismo que antes; ahora se reparte en su bloque y cuatro líneas más (escape
+  2 kg + 0,1 kg por kW; admisión y filtro de aire 2,0 kg; bomba de agua, termostato y manguitos 1,3 kg; bomba de aceite,
+  cárter y filtro 1,6 kg; estimaciones de piezas de su clase, no medidas), cada una donde se dibuja. El peso en vacío no
+  cambia; el centro de gravedad de un híbrido se mueve un poco (el escape ya no cuenta en el cigüeñal sino en la cola).
+  Un diseño eléctrico (sin motor de gasolina) no cambia en nada.
+- **Unido con el radiador del bot «capo»** (publicado antes): «Refrigeración» muestra el radiador con su ventilador,
+  los tubos del refrigerante, la bomba de agua y los manguitos; con el motor delante, su árbol de transmisión va en
+  «Engranaje planetario / transmisión». Las tomas de aire del radiador están en la carrocería, así que no salen con
+  «Ver solo motor».
 - No comprobado en un móvil: con la app instalada, `humanity.wiki/?sw=off` quita la copia vieja.
 ## 2026-11-17 · El tamaño de los muñecos: más altos o más gordos
 
@@ -12634,6 +12661,14 @@ Eugenio: «Haz que el garaje se pueda ocultar con un botón arriba en el menú d
 - «Ver solo …» no aparece con el garaje oculto, porque no hay 3D sobre el que actuar.
 - Cada navegador recuerda la elección (`aeromovil.verGaraje`). El 3D sigue montado pero no se dibuja mientras está oculto.
 
+## 2026-11-17 · Electrónica de potencia en Motor, estudio L7e y ensayos en Homologación
+
+Eugenio: «Crea un nuevo apartado dentro de MOTOR que sea Electronica de potencia y añade el control de potencia, todas logicas de arranque del termico y cuando se activa con sliders, mapa de motor, y esas cosas importantes. Añade ese texto que te adjunto en la parte de homologación, resumiendo el tema de homologación de L7, y sobre todo qué cosas están OK y que cosas no, conectando con el tema de Electronica de control y de potencia pico y potencia continua configurada. y también añade los ensayos necesarios segun la normativa, añadiendo una pestaña por cada ensayo».
+
+- **Motor › Electrónica de potencia** (familia Triciclo): límite de potencia continua y pico del conjunto, cuánto dura el pico, reparto entre los dos motores (sin gestión, límite dinámico, térmico rebajado, modos separados), modo sport, mapa del acelerador (normal/eco/a elegir), frenada regenerativa, cuándo arranca el motor de gasolina (batería por debajo de un %, potencia pedida, velocidad, histéresis para pararlo, calentamiento) con una tabla de qué pasa a 30, 50, 90 y 120 km/h, y los dos limitadores independientes del Reglamento 3/2014. Debajo, lo que llega a las ruedas modo a modo y las velocidades.
+- Las cifras se usan: la velocidad sostenida y punta en eléctrico, la aceleración y la velocidad solo con gasolina respetan los límites; nueva «velocidad con los dos a la vez»; la potencia de la homologación es la continua total del modo más potente. Con los ajustes de serie (sin límite) todo da lo mismo que antes, y los diseños guardados no cambian.
+- **Homologación › Estudio L7e-A2**: el estudio de Eugenio resumido y calculado en vivo para el diseño: OK / No OK / A comprobar para los campos 1.8.3, 1.8.5, 1.8.7 y 1.8.9 de la ficha (901/2014), cada modo ensayado (134/2014), los dos limitadores (3/2014 anexo XVIII) y la protección contra la manipulación; y la tabla de escenarios (28 / 45 / 15 kW) con los números del diseño.
+- **Homologación › Ensayos**: una pestaña por ensayo (térmico, eléctrico 30 min según UN 85, conjunto híbrido en cada modo, limitaciones no eliminables, velocidad máxima, emisiones, ruido, frenado, alta tensión y compatibilidad electromagnética), con objetivo, cómo se hace, qué declarar, las cifras del diseño y lo que se espera. Todos pendientes. `scripts/homologacion.ts` los imprime y comprueba los números del estudio.
 ## 2026-11-16 · Carenado BWB (ala integrada) y la propuesta «Aeromóvil BWB»
 
 Eugenio: «desarrolla la opción de hacer un carenado extra, que sea al estilo Blended Wing Body para que el Aeromóvil se

@@ -1015,6 +1015,24 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **Catalogue prices only for motors and petrol engines**: controllers and reduction gears publish none, so they are
   estimated; the tyres from bot «neumaticos» are not wired yet (≈ 20 min once its catalogue has prices).
 - `aeromovil/CLAUDE.md` has no recipe for prices yet (file held by another bot): ≈ 10 min.
+## 2026-11-17 · Engine parts one by one (solopiezas)
+- **Only the Triciclo family** (Eugenio focuses on the Aeromóvil S). The Basculante, A1 and Gota motor layers have no
+  `componente` tags and show no parts list. ≈ 30 min each if ever needed.
+- **The oil is not counted** (a dry engine figure leaves it out; ≈ 2 kg on a 25 kW twin). Adding it changes every
+  hybrid's empty mass on purpose: 10 min plus a changelog line.
+- **Two coolant hose stubs** (piezasMotor.ts `auxiliaresMotor`) still leave the thermostat and the pump forward 15 cm
+  even though capo's `refrigeracion-tubos` now run from the engine to the radiator: two hoses where one belongs. Start
+  capo's lines at the stubs' ends (or drop the stubs when `refrigeracionDe(m)` has tubes): ≈ 15 min.
+- **Label spacing assumes a camera ~2 m away** (`aplicarPiezasMotor(…, distancia = 2)`); Visor3D was claimed when the
+  framing distance was to be passed in. Passing `d` from the framing effect: 3 lines, ≈ 10 min.
+- **Labels are placed on the top of each part's box and stacked when they collide**; on a crowded engine two can still
+  overlap on screen from some angles. Screen-space de-overlap ≈ 1 h.
+- **The clicked-part card sits top left over the 3D**, where a garage car's card also opens; both could show at once
+  if a garage car is clicked while «Ver solo motor» is on. Moving it into the viewer's card slot ≈ 20 min. Not checked
+  on a phone.
+- **Power electronics: thermal start logic is descriptive** (2026-11-17, electronica). `tEpArrKW`, `tEpArrVel`, `tEpHist`, `tEpCalent` only drive a table of which motor runs at each speed; only `tEpArrSoc` acts (electric range of a hybrid). A drive-cycle SOC simulation (WMTC) that uses them for litres and range: ≈ 1 day. The regen limit `tEpRegen` does not reduce consumption yet: ≈ 2 h with a stop-and-go share per speed. The HCU (hybrid control unit) has no part in any parts list (consumos' electrical system or Motor): ≈ 30 min once a product is chosen.
+- **Power electronics, not seen in a browser before merging** (2026-11-17, electronica). Eugenio asked to publish at once; everything passed tsc, build and every Aeromóvil script in CI and the «Motor › Electrónica de potencia» block was seen in a headless browser with the Aeromóvil S, but the «Homologación › Estudio L7e / Ensayos» sections were not (the screenshot run timed out). Also: the block says «Energía › Sistema solar y de carga», and that tab is now labelled «Batería». Check them on humanity.wiki (`?sw=off`) with the Aeromóvil S: ≈ 15 min.
+- **The power electronics ignore the e-motor position option `tMotorElec`** (merged the same day by mgplanetario): with the central MG2 on the planetary, the e-motor's power still reaches the wheels as before; whether the HCU limits apply differently there is not modelled: ≈ 1 h.
 - **BWB fairing (2026-11-17) shortcuts**: (1) its fields are not in `CamposTriciclo`/`Parametros` (cast `Parametros &
   CamposBWB`), and its sliders have no «¿qué es?» explanation (`explicaciones/triciclo.ts` was held): ≈ 30 min. (2) The
   wings' drag is not added to the Energía consumption, and the lift check lives in the block, not in
