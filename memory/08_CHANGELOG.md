@@ -12140,3 +12140,30 @@ encontró 5 colas muy cortas (30 cm) que todavía se doblaban dentro de la punta
   del marco del cristal, y entre las dos puntas asomaba carrocería blanca. Ahora el panel empieza ya con anchura y el
   marco azul del cristal baja hasta esa anchura: cristal → marco → panel, sin hueco.
 - Comprobado con el evaluador en cuatro semillas (7, 2027, 31337 y 4242): «COLA OK» en todas.
+
+## 2026-11-17 · Aerodinámica dentro de Carrocería y «Hacer estudio aerodinámico»
+- Eugenio: «mete la parte de aerodinámica dentro de carrocería añadiendo los puntos débiles de esa configuración
+  concreta y de todas las demás para intentar recibir consejos que mejoren, quizás con un botón que diga "hacer estudio
+  aerodinámico" y te saque pegas al diseño actual y te haga recomendaciones».
+- **Nuevo bloque «Aerodinámica» en la pestaña Carrocería** (en todos los vehículos; el Gota y el Cuadriciclo Bala, que
+  no tienen pestañas, lo ven siempre). Tiene el botón para abrir o cerrar el túnel de viento (el mismo que el de la vista
+  3D, que sigue ahí) y el botón **«Hacer estudio aerodinámico»**.
+- **El estudio**: calcula el diseño en el túnel, enseña de dónde sale su Cd (rozamiento, forma, estela, ruedas y la parte
+  fija de detalles) y busca sus puntos débiles en un catálogo de 26 reglas (cola corta, despegue en el techo o en los
+  bajos, cola plana ancha, cola más ancha que la cabina, borde de cola grueso, transición cabina–cola brusca, techo que
+  cae pronto, parabrisas derecho, sección en cajón, alto, ancho, altura al suelo, morro en aguja, morro corto, morro
+  ancho, cuatro ruedas en carenados, ruedas al aire del Smera, faldón trasero, carenados grandes o con la cola corta,
+  carenados no vistos por el túnel, retrovisores de espejo…), para los cinco vehículos.
+- Cada pega dice qué tan grave es, por qué empeora (una frase) y **qué deslizador mover y a qué valor**. El cambio se
+  prueba en una copia del diseño con el túnel: la ganancia que sale es **calculada** (−X % de CdA y kWh cada 100 km).
+  Lo que el túnel no ve (espejos, la forma de los carenados, el faldón) sale como **estimado**, con su fuente. Si el
+  túnel no ve mejora en ningún sentido, la pega va a «Probado y descartado» y no se recomienda.
+- Además dice qué comprobaciones dejarían de cumplirse con el cambio (por ejemplo, bajar el techo choca con la cabeza) y
+  tiene un botón «Aplicar este cambio». Si el diseño cambia después, avisa de que el estudio es viejo.
+- Rombo Bala de Eugenio: Cd 0,207 · CdA 0,163 m². Lo más importante: las cuatro ruedas en carenados son el 44 % del Cd
+  (una sola rueda trasera en la cola: −19 % de CdA, pero falla el vuelco); alargar la cola 35 cm: −3,7 %; carenados con
+  la cola más larga ≈ −4 % y cámaras en vez de espejos ≈ −3 % (estimados).
+- No se ha tocado la calibración del túnel (ni los Cd que ya salían). Comprobación nueva:
+  `npx tsx scripts/estudio-aerodinamico.ts [diseño.json]` (todos los vehículos, un diseño malo a propósito y el que le
+  pases; «Todo OK» si ninguna pega se contradice, ninguna recomienda algo sin ganancia y ningún cambio se sale de rango).
+- Si alguien tenía guardada una pestaña que no existe (una antigua «aerodinámica»), ahora abre Carrocería.

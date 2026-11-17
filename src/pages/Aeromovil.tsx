@@ -72,6 +72,7 @@ import { fmt, m2, Deslizador, Bloque, Selector, ListaComprobaciones } from '../c
 import { LadoA1 } from '../components/aeromovil/LadoA1';
 import { LadoBala } from '../components/aeromovil/LadoBala';
 import { useCdTriciclo, zonaTriciclo, LadoTriciclo } from '../components/aeromovil/LadoTriciclo';
+import { BloqueAerodinamica } from '../components/aeromovil/estudio/EstudioAerodinamico';
 
 // The cornering circuit (2026-11-15): its own chunk, recharts comes with it and only this section needs it.
 const VistaCircuito = lazy(() => import('../components/aeromovil/circuito/VistaCircuito'));
@@ -333,7 +334,9 @@ export default function Aeromovil() {
   const [soloDep, setSoloDep] = useState(false);     // «Mostrar solo la carrocería», etc.
   const [capasAbierto, setCapasAbierto] = useState(false);
   const [vistaAbierta, setVistaAbierta] = useState(false);
-  const [dep, setDep] = useState<IdDepartamento>(() => { try { return (localStorage.getItem('aeromovil.departamento') as IdDepartamento) || 'carroceria'; } catch { return 'carroceria'; } });
+  // (2026-11-17: the aerodynamics now lives inside «Carrocería»: a remembered tab that is not a department, such as an old
+  // «aerodinamica»/«tunel» one, opens «Carrocería» instead of an empty panel)
+  const [dep, setDep] = useState<IdDepartamento>(() => { try { const g = localStorage.getItem('aeromovil.departamento'); return g && DEPARTAMENTOS.some(d => d.id === g) ? g as IdDepartamento : 'carroceria'; } catch { return 'carroceria'; } });
   useEffect(() => { try { localStorage.setItem('aeromovil.departamento', dep); } catch { /* sin memoria */ } }, [dep]);
   // «Ver solo …» (round 3 interior, 2026-11-12): leaves only the department's layers; turning it off (or going to
   // «Proyecto», or to another tab) puts back the layers as they were before it was pressed.
@@ -461,6 +464,13 @@ export default function Aeromovil() {
   ], [soloGaraje, esBala, esTri, esBas, cdBasComparar.cd, cdBasComparar.areaRef, cdTriComparar.cd, cdTriComparar.areaRef, P, nombreVehiculo, cdTunelNuestro, areaTunelNuestro, res.Cd, res.A, res.mTot, res.Crr, P.plazas, P.mOcc, garajeVisor]);
   // El punto crítico cuya explicación está abierta (2026-11-09, Eugenio: «una explicación de cada uno de estos parámetros cuando se hace click»).
   const [puntoTunel, setPuntoTunel] = useState<SeleccionPunto | null>(null);
+  /** The tunnel on and off: the 3D view's button and «Carrocería › Aerodinámica» (2026-11-17) do the same. */
+  const alternarTunel = () => {
+    // Al abrir el túnel, si no hay con quién comparar, se saca el Twizy del garaje.
+    if (!tunel && !garaje.some(g => g.visible && VEHICULOS_GARAJE.find(v => v.id === g.id)?.aero)) setGaraje(g => g.map(x => x.id === 'twizy' && !x.quitado ? { ...x, visible: true } : x));
+    if (!tunel) setSuperponer(null);
+    setTunel(!tunel);
+  };
   useEffect(() => { if (!tunel) setPuntoTunel(null); }, [tunel]);
   // Carteles encima de cada coche (2026-11-07, Eugenio: «que aparezca con un botón el Cd y consumo en kWh a los 100 km de cada uno»).
   const carteles = useMemo(() => {
@@ -758,12 +768,7 @@ export default function Aeromovil() {
               className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', superponer && 'border-sky-700 bg-sky-700 text-white hover:bg-sky-800')}>
               <Layers className="mr-1 h-3 w-3" />Superponer
             </Button>
-            <Button variant="outline" aria-pressed={tunel} onClick={() => {
-                // Al abrir el túnel, si no hay con quién comparar, se saca el Twizy del garaje.
-                if (!tunel && !garaje.some(g => g.visible && VEHICULOS_GARAJE.find(v => v.id === g.id)?.aero)) setGaraje(g => g.map(x => x.id === 'twizy' && !x.quitado ? { ...x, visible: true } : x));
-                if (!tunel) setSuperponer(null);
-                setTunel(!tunel);
-              }}
+            <Button variant="outline" aria-pressed={tunel} onClick={alternarTunel}
               title="Calcula el aire alrededor de este diseño y de los coches del garaje (presiones, líneas de corriente, puntos críticos y un Cd estimado) y lo que cuesta empujarlo"
               className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', tunel && 'border-sky-700 bg-sky-700 text-white hover:bg-sky-800')}>
               <Wind className="mr-1 h-3 w-3" />Túnel de viento
@@ -827,6 +832,8 @@ export default function Aeromovil() {
           <fieldset disabled={!dueno?.puedeDecidir} className={cn('contents', !dueno?.puedeDecidir && '[&_input]:cursor-not-allowed [&_select]:opacity-70 [&_input]:opacity-70')}>
           {/* 2026-11-13: the body's colour, in «Carrocería» (the Gota and the Cuadriciclo en rombo have no departments: always) */}
           {((esA1 || porDeps) ? (porDeps ? depTri : dep) === 'carroceria' : true) && <Bloque titulo="Color de la carrocería"><ColoresCarroceria P={P} set={set} /></Bloque>}
+          {/* 2026-11-17 (Eugenio: «mete la parte de aerodinámica dentro de carrocería… un botón que diga "hacer estudio aerodinámico"»): the tunnel and the study, in «Carrocería» (always for the vehicles without departments) */}
+          {((esA1 || porDeps) ? (porDeps ? depTri : dep) === 'carroceria' : true) && <BloqueAerodinamica P={P} set={set} kmh={kmhComparar} resolucion={opcionesTunel.resolucion} tunel={tunel} alTunel={alternarTunel} />}
           {modelo.tipo === 'a1' ? <LadoA1 P={P} Pa={Pa} D={D} set={set} res={res} modelo={modelo} neumaticos={neumaticos} malas={malas} dep={dep} alNavegar={r => { navegar(r); window.scrollTo({ top: 0 }); }} />
             : modelo.tipo === 'basculante' ? (paraCalcular.tipo === 'basculante' && res.basculante ? <LadoBasculante P={P} set={set} res={res} modelo={paraCalcular} dep={depTri} cd={cdBas} ui={{ Bloque, Deslizador, Selector: Selector as never, ListaComprobaciones }} /> : null)
             : modelo.tipo === 'bala' ? <LadoBala P={P} set={set} res={res} modelo={modelo} cdTunel={tunel ? cdTunelNuestro : undefined} />

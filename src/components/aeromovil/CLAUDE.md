@@ -82,6 +82,26 @@ forward, Y up, front axle at x = 0, metres; real dimensions with a `fuente`), th
 `garaje/index.ts`. A Cd and frontal area (`aero`) only with a cited source; without one the tunnel estimates its own.
 A design saved by a user reaches the garage through `garaje/registro.ts`, not this list.
 
+**A new rule of the aerodynamic study** («Carrocería › Aerodinámica › Hacer estudio aerodinámico», 2026-11-17).
+The study lives in `estudio/`: `reglas.ts` (the catalogue `REGLAS`), `estudio.ts` (runs the tunnel on the design and on
+a copy per proposed change, keeps the best, reruns the checks) and `EstudioAerodinamico.tsx` (the block). One rule is one
+object in `REGLAS`:
+1. `id`, `zona` (cola, morro, cupula, tamano, bajos, ruedas, detalles), `vehiculos` (`gota`, `a1`, `bala`, `triciclo`,
+   `basculante`) and `claves`: every slider or option it may move. **A key belongs to one rule only**: that is what
+   keeps two pieces of advice from pulling one slider in opposite directions (`scripts/estudio-aerodinamico.ts`
+   fails otherwise). A second weak point on the same slider goes inside the same rule.
+2. `evaluar(cx)` returns `null` when the weak point is not there, or `{ titulo, gravedad, porQue, recomendacion, … }`.
+   `cx` has the parameters `P`, the model, the checks (`res`), the tunnel result `base` (Cd, area, CdA, the breakdown
+   `base.q.cd`, separation `despegue(base)`, slenderness `esbeltez(base)`) and `ficha(k)` (label, place, range).
+3. What the tunnel can see (the body's silhouette, its section, which wheels are inside): give `pruebas` with
+   `mover(cx, k, delta)`, `poner(cx, k, valor)` or `ambos(cx, k, paso)` (null at the slider's end, so never a change
+   that changes nothing). The study computes each one and recommends only a gain of at least `RUIDO` (1 % of CdA);
+   otherwise the finding goes to «Probado y descartado». What it cannot see (mirrors, the pods' shape, a spat): add
+   `estimacion: { dCdA, fuente }` with the source of the figure, and mark the `pruebas` `tunel: false`.
+4. `porQue` is one sentence in plain Spanish with this design's number; cite the general knowledge (Hucho, Hoerner…).
+Then `npx tsx scripts/estudio-aerodinamico.ts [diseño.json]` prints every design's findings and must end «Todo OK».
+The study only reads the tunnel: never change `tunel/calibracion.ts` or `tunel/arrastre.ts` constants for it.
+
 ## Before you change this, decide
 
 - **Moving vs rewriting.** The 2026-11-16 split was cut-and-paste only. Still pending, each a rewrite to verify on its
@@ -92,5 +112,8 @@ A design saved by a user reaches the garage through `garaje/registro.ts`, not th
   (`crearModelo` + `calcular` + `areas` for Rombo Bala, the defaults, Bala, A1, Gota) and take headless screenshots with
   `Math.random` seeded: the GTAO pass draws random noise, so unseeded screenshots of the same code differ by ~20,000
   pixels and hide real changes.
+- **The study's rules as code vs as data.** Today a rule is a function (its condition and its sentences need this
+  design's numbers). A table of rules in JSON that Eugenio could edit would need a small expression language for the
+  conditions: ≈ 1 day now, more once there are 50 rules. Until someone other than an agent writes rules, keep code.
 - **Never touch the tunnel calibration** (`tunel/calibracion.ts`). `npx tsx scripts/tunel-pruebas.ts | grep -c FALLA`
   must stay at 0.
