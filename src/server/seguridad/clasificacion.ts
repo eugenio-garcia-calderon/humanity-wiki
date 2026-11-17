@@ -169,6 +169,7 @@ export const CLASIFICACION: Clase[] = [
   c('aeromovil_tareas', 'MEDIA', 'BAJA', 'MEDIA', 'BAJA', 'comentarios de mejora del Aeromóvil, abiertos y sin cuenta; nada se borra'),
   c('aeromovil_disenos', 'MEDIA', 'BAJA', 'MEDIA', 'BAJA', 'configuraciones guardadas del Aeromóvil; cambiarlas cambia lo que se fabrica a partir de ellas'),
   c('aeromovil_notas', 'BAJA', 'BAJA', 'MEDIA', 'MEDIA', 'notas por sección del Aeromóvil, con cuenta; el autor es un id, el nombre se lee al mostrarla'),
+  c('aeromovil_adjuntos', 'BAJA', 'BAJA', 'MEDIA', 'MEDIA', 'registro de archivos de cada pieza del Aeromóvil (presupuestos, fichas): nombre, tipo, tamaño y un id de quien lo subió; el archivo está en el volumen de subidas'),
   c('aeromovil_referencias', 'BAJA', 'BAJA', 'MEDIA', 'BAJA', 'siluetas de otros velomóviles para comparar; sin fotos ni datos personales'),
   c('incidencias', 'MEDIA', 'MEDIA', 'ALTA', 'ALTA', 'el hormiguero: quién pidió qué y quién lo contestó'),
   c('ai_proposed_actions', 'MEDIA', 'MEDIA', 'ALTA', 'ALTA', 'lo que la IA propone hacer y quién lo aprobó'),
