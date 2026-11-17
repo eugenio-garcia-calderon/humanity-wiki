@@ -902,6 +902,31 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   (lamp positions, seat hip) but they are not wired: ~3 h.
 - **The Cuadriciclo Bala has no masses/motor** (body only): mass, power and speed rows read «no se puede comprobar».
 
+## 2026-11-17 · Astride passenger far back (bot «ahorcajadas»)
+
+- **No straddle seat type for rows 2/3.** Eugenio's straddle layout is `tAsientos: 'horcajadas'` (pilot + one passenger).
+  A «a horcajadas» option in `OPCIONES_TIPO_FILA` (`filasTriciclo.ts`) for three rows would need a straddle figure per
+  row in `ocupantes.ts`/`modelo.ts` and its checks: ≈ 3 h.
+- **The long saddle just stretches** between the two hips (`cabina`, `garaje/balaPiezas.ts`, `w(x)`): at 1.40 m it is one
+  very long bench. Two separate saddles with a gap (and a mass that grows with the length) would be more honest: ≈ 1 h.
+  The seat mass (`tMAsiento`) does not grow with the saddle's length either.
+- **The Aptera buckets' backrest/headrest is not checked against the skin** (`pasajero.ts`): in the default body the
+  headrest corner is already 0.9 cm outside at today's 62 cm, so a check would turn untouched designs red. The headrest's
+  geometry vs the canopy needs a look first: ≈ 45 min.
+- **Seam with «masas» (checked, no debt):** the hybrid's engine and tank collide-check against «los asientos» in
+  `hibrido.ts` `choques`, shown by `centroMasas.ts`, which reads the seats from the same model; the passenger's mass is
+  `m.sillines` → `ocupantesTriciclo`, so the centre of gravity follows the passenger with no second copy.
+## 2026-11-17 · Electrical system v1 (bot consumos): what is left
+
+- **No per-part choice**: each part is the first catalogue item that fits; letting Eugenio pick one (a `tCat…` key per
+  part, like the motor's) needs fields in `triciclo/campos.ts` + defaults: ~1.5 h.
+- **System voltage is inferred**, not a slider: a «Tensión del sistema» selector (48/72/96/144 V) ~45 min.
+- **Several masses are estimates** (DC-DC, contactors, inlet, Daly, generics): read datasheets and replace: ~1 h.
+- **«Varios» vs catalogue parts**: the check fails on every Triciclo design (parts ≈ 14–17 kg, slider 12 kg). Raising
+  the default changes every saved design: Eugenio's call; 5 min once decided.
+- **`tVel` lives in Motor's FILAS row and is drawn a second time in «Consumos»**: moving the row's `dep` needs a
+  `DepTriciclo` 'consumos' (touches ~6 Records): ~30 min.
+- **Basculante, A1, Gota, Bala: no «Consumos» tab** (legacy since 2026-11-17).
 ## 2026-11-17 · Legacy Aeromóvil vehicles: what was left (bot «legado»)
 
 - **The logo menu (`Disenos.tsx`, `MenuDisenos`) still lists every design and vehicle type in one list**, without the
