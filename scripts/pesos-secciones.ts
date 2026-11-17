@@ -48,7 +48,8 @@ for (const [n, P] of casos) {
     porDep[d] = (porDep[d] ?? 0) + suma(l!);
   }
   ok(cerca(Object.values(porDep).reduce((a, b) => a + b, 0), res.mVeh), `${n}: las secciones suman ${Object.values(porDep).reduce((a, b) => a + b, 0)} y el vehículo ${res.mVeh}`);
-  if (deps) for (const [d, kg] of Object.entries(deps)) if (d !== 'proyecto') ok(cerca(porDep[d] ?? 0, kg!), `${n} › departamento ${d}: secciones ${porDep[d]} ≠ pestaña ${kg}`);
+  // («proyecto» is the empty vehicle and «masas» (2026-11-17) the vehicle with everyone on board: whole-vehicle totals, not departments)
+  if (deps) for (const [d, kg] of Object.entries(deps)) if (d !== 'proyecto' && d !== 'masas') ok(cerca(porDep[d] ?? 0, kg!), `${n} › departamento ${d}: secciones ${porDep[d]} ≠ pestaña ${kg}`);
 }
 console.log(fallos ? `\n${fallos} fallos` : '\nTodo OK');
 process.exit(fallos ? 1 : 0);

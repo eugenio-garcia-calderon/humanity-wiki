@@ -92,7 +92,8 @@ function casco(a: [number, number], ra: number, b: [number, number], rb: number)
 
 export function dibujarHibrido(g: THREE.Object3D, h: DisposicionHibrido) {
   const M = mats(), mo = h.motor, H = h.holguras;
-  const malMotor = H.motor < 0 || (H.torreta != null && H.torreta < 0) || (H.respaldo != null && H.respaldo < 0);
+  // (2026-11-17: red when it collides with anything around it, hibrido.ts `choques`)
+  const malMotor = H.motor < 0 || (H.torreta != null && H.torreta < 0) || (H.respaldo != null && H.respaldo < 0) || H.choques.some(k => k.pieza === 'motor' && k.holgura < 0);
   const cMotor = 'hibrido-motor';
   // ── the engine: crankcase, the alternator and timing covers at its ends, the block, the head, the cam cover and coils
   cajaR(g, mo.carter, malMotor ? M.mal : M.bloque, cMotor, 0.03);
@@ -160,7 +161,7 @@ export function dibujarHibrido(g: THREE.Object3D, h: DisposicionHibrido) {
   if (h.cable) tubo(g, h.cable, 0.009, M.cable, 'hibrido-generador');
   // ── the tank, its filler neck and the fuel line to the engine
   const dp = h.deposito, cD = 'hibrido-deposito';
-  cajaR(g, dp, H.deposito < 0 ? M.mal : M.deposito, cD, 0.03);
+  cajaR(g, dp, H.deposito < 0 || H.choques.some(k => k.pieza === 'deposito' && k.holgura < 0) ? M.mal : M.deposito, cD, 0.03);
   cilZ(g, dp.x1 - 0.06, dp.y1 + 0.01, 0.022, dp.z1 - 0.07, dp.z1 - 0.03, M.negro, cD, 20).rotation.set(0, 0, 0);
   tubo(g, [[dp.x1 - 0.02, dp.y0 + 0.02, dp.z0 + 0.04], [mo.x0 - 0.02, mo.y0 + 0.05, mo.z1 - 0.02], [mo.x0 + 0.01, mo.culata.y0, mo.z1 - 0.04]], 0.004, M.negro, cD);
   return g;
