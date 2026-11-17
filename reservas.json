@@ -155,6 +155,12 @@
       "ruta": "src/components/aeromovil/Visor3D.tsx",
       "motivo": "solopiezas: piezas del motor aislables (pocas líneas)",
       "desde": "2026-11-17T14:06:02.681Z"
+    },
+    {
+      "agente": "solopiezas",
+      "ruta": "src/components/aeromovil/visor/triciclo.ts",
+      "motivo": "solopiezas: piezas del motor aislables (pocas líneas)",
+      "desde": "2026-11-17T14:06:06.040Z"
     }
   ]
 }
