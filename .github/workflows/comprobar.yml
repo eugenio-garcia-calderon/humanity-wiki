@@ -59,6 +59,7 @@ jobs:
           - triciclo-disenos
           - estudio-aerodinamico
           - pesos-secciones
+          - precios-secciones
           - homologacion
           - bala-cola-lisa
         args: ['']
