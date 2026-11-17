@@ -449,7 +449,7 @@ export const FILAS: Fila[] = [
   ['tBatX', 'energia', 'Batería', null, 'Paquete: dónde empieza', 0.30, 1.20, 0.01, 'm'],
   ['tWhKg', 'energia', 'Batería', null, 'Densidad del paquete (masa)', 120, 200, 5, 'Wh/kg'],
   ['tWhL', 'energia', 'Batería', null, 'Densidad del paquete (volumen)', 160, 300, 5, 'Wh/L'],
-  ['tMVarios', 'energia', 'Varios', null, 'Varios: cargador, cables, luces, 12 V', 6, 18, 1, 'kg'],
+  ['tMVarios', 'energia', 'Varios', null, 'Varios: cargador, cables, luces, 12 V', 6, 24, 1, 'kg'],
   ['tSolarM2', 'energia', 'Techo solar', null, 'Paneles solares: masa por m²', 1.2, 3.5, 0.1, 'kg/m²'],
 ];
 export let FICHAS: FichaTriciclo[] | null = null;

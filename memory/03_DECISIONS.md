@@ -2308,3 +2308,51 @@ lift are textbook estimates (Raymer, DATCOM) shown in the block; the tunnel and 
 another bot today; and 21 rows in 4 files. (b) Add the wings to the tunnel's body: the tunnel has no lift and is calibrated
 on cars without wings; it would move every calibration figure. (c) A preset saved in the database: agents must not write
 production data by hand, so it is a built-in proposal with a negative id in `Disenos.tsx` `PROPUESTAS`.
+## 2026-11-17 · Supplier, model and files per part: where they live (bot «proveedores»)
+
+- **Text and links live in the design** (`Parametros.proveedores`, keyed by the part's name in the mass model — the
+  same key as `Parametros.precios`). Alternative: a server table keyed like `aeromovil_notas` (design id + vehicle +
+  part). Rejected: a supplier's name is part of what the design *is* (it travels with "save as", with the browser's
+  unsaved copy, and with no session), and it needs no auth to type, exactly like a price.
+- **Files: the platform's upload store, plus a register.** Bytes go through `uploads.ts` `guardarArchivo` (same volume
+  `UPLOADS_DIR`, UUID names, served with `nosniff`, a CSP, and `Content-Disposition: attachment` for everything but
+  images and PDF — PDF opens in the browser's sandboxed viewer, never as HTML). New route
+  `POST /api/aeromovil/adjuntos` (`src/server/aeromovilAdjuntos.ts`): `requireLevel(1)`, its own short whitelist
+  (PDF, JPG/PNG/WebP, DOCX/XLSX/PPTX, CSV, TXT — no SVG, HTML, zip, video), 10 MB, 40 files/hour per account
+  (`limites` freno). Each upload writes one row in `aeromovil_adjuntos` (migration 0224): url, original name, type,
+  size, part, `created_by`. Not a junction table: one row per file, no FK to a part. The design keeps
+  `{ id, url, nombre, tipo, bytes, fecha }` per file. Alternative: the generic `/api/uploads` with no register —
+  rejected: it accepts video, zip and SVG up to 60 MB, and leaves a file nobody can attribute or take down.
+- **Removing**: «Quitar» only unlinks from this design (another saved design may hold the same file).
+  `DELETE /api/aeromovil/adjuntos/:id` (uploader or admin) deletes the bytes and archives the row: the content is gone,
+  the register keeps the name. The trash icon shows only on files the server says are yours (`GET …/adjuntos/mios`).
+- **Backups and account deletion**: the nightly dump copies the register (original file name, type, size, opaque user
+  id) — not the bytes; uploads are not in the off-site copy at all (deploy/copias/CLAUDE.md: database only). Emptying an
+  account (`vaciarCuentas.ts`) does not touch these files: they are project documents attached to a shared design, like
+  a supplier's quote pinned to a workshop board, and the row only holds an id. Whoever uploaded can delete their files
+  before leaving. If one day a file must go with its account, `created_by` is what finds them.
+- **Visibility**: anyone who can open the design sees names, links and files (the Aeromóvil and its designs are
+  public). The panel says so under the fields.
+- **Field declared by module augmentation** in `proveedores/datos.ts` (`declare module '../geometria'`), because
+  `geometria.ts` was claimed by another bot: TypeScript merges it into `Parametros` everywhere.
+
+## 2026-11-17 · Triciclo family: moped Crr, absolute tyre grip, «Varios» 18 kg (decided by Claude, delegated by Eugenio 2026-11-17)
+
+Eugenio delegated these three («Me dan igual, lo que tú veas»); the coordinating Claude decided them, bot «ajustes» built them.
+They change saved designs' numbers on purpose.
+- **Moped tyres' rolling resistance 0.011 → 0.0165** (`triciclo/energia.ts` `CRR_CICLOMOTOR = 0.0085 + 0.018 / 2.25`):
+  Cossalter, «Motorcycle Dynamics» (2006), ch. 2, static part at 2.25 bar — the same formula the wheel catalogue uses.
+  Quoted from the book, not confirmed online (a web search on 2026-11-17 did not find the formula). The car sizes
+  (c13–c15) keep 0.011 (`CRR_COCHE`): the decision was about moped tyres only. `CRR` stays as an alias of the moped one
+  for importers; `crrTriciclo` now picks per size (`crrLegado`) instead of `crrEjes(…, CRR)`. Alternatives rejected:
+  one constant for every older size (would have made the car-tyre Rombo Bala roll like a moped tyre); the speed term
+  (the editor uses one Crr for every speed, as the catalogue does).
+- **Absolute grip** (`ruedas/neumaticos.ts` `efectoNeumatico(…, absoluto)`, opt-in; the Basculante keeps relative):
+  μ = 0.9 × the type's `seco`/`mojado` × the construction's factor. A radial road tyre is 0.90 g at any size; the older
+  moped sizes (bias, tube) 0.855. The rollover check compares with `agarreTriciclo(T)` (mean over the wheels) and asks
+  `objetivoVuelco(μ) = max(1.05, μ × 1.05/0.9)`; `res.triciclo.vuelco` now carries `agarre` and `objetivo` and the side
+  panels read them. Alternative rejected: the axle with the most grip (more conservative for rollover, but the mean is
+  how the 0–50 and the editors already average tyres).
+- **«Varios» default 12 → 18 kg** (`triciclo/defecto.ts`), slider max 18 → 24. Only the default: `camposTriciclo`
+  takes every stored number, and saving writes the whole `Parametros` (`aDiseno`), so every design saved before today
+  (Rombo Bala, the clásico: `tMVarios: 12`) keeps 12 and its «súbelo a 18 kg» check stays red until raised by hand.

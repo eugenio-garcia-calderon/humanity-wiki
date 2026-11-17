@@ -105,17 +105,22 @@ export const precioNeumatico = (p: Pick<PropioNeumatico, 'd' | 'w' | 'perfil'>) 
 
 export interface EfectoNeumatico {
   tipo: TipoNeumatico; nombre: string; construccion: string;
-  /** Multipliers over today's numbers for that size: exactly 1 with «De serie». */
+  /** Multipliers over today's numbers for that size: exactly 1 with «De serie» (`fSeco`/`fMojado` with `absoluto`: over a radial road tyre's `agarre`). */
   fCrr: number; fKg: number; fSeco: number; fMojado: number;
-  /** Peak friction with this tyre, dry and wet, given the vehicle's dry grip with the size's own tyre (`agarre`, 0.9 g). */
+  /** Peak friction with this tyre, dry and wet, given the vehicle's dry grip with the size's own tyre (`agarre`, 0.9 g); with `absoluto`, a radial road tyre's. */
   muSeco: number; muMojado: number;
   /** Life (km, `delantera` ×1.5) and price (€ per tyre, estimate). */
   km: number; precio: number;
   serie: boolean;
 }
 
-/** What the tyre chosen for one axle does, relative to the tyre the size has. */
-export function efectoNeumatico(rueda: string, tipo: string | undefined, cons: string | undefined, legado: (k: string) => PropioNeumatico, agarre: number, delantera = false): EfectoNeumatico {
+/**
+ * What the tyre chosen for one axle does, relative to the tyre the size has.
+ * `absoluto` (2026-11-17, the Triciclo family; decided by Claude, delegated by Eugenio): the grip no longer stays at
+ * `agarre` for the size's own tyre. It is `agarre` (a radial road tyre's dry grip) × the type's `seco`/`mojado` × the
+ * construction's factor, so a road tyre grips the same whatever its size, and a bias moped tyre a little less.
+ */
+export function efectoNeumatico(rueda: string, tipo: string | undefined, cons: string | undefined, legado: (k: string) => PropioNeumatico, agarre: number, delantera = false, absoluto = false): EfectoNeumatico {
   const p = propioDe(rueda, legado), t = valido(tipo, IDS_TIPO), c = valido(cons, IDS_CONSTRUCCION);
   const T0 = TIPOS_NEUMATICO[p.tipo], T1 = TIPOS_NEUMATICO[t ?? p.tipo], c0 = construccion(p, null), c1 = construccion(p, c);
   const serie = !t && !c;
@@ -123,8 +128,8 @@ export function efectoNeumatico(rueda: string, tipo: string | undefined, cons: s
   const tubo = (c1.camara ? 0.08 : 0) - (c0.camara ? 0.08 : 0);
   const fKg = serie ? 1 : 1 + FRACCION_NEUMATICO * (T1.kg * fKgNeuCons(c1) / (T0.kg * fKgNeuCons(c0)) - 1) + tubo;
   const fCrr = serie ? 1 : T1.crr * fCrrCons(c1) / (T0.crr * fCrrCons(c0));
-  const fSeco = serie ? 1 : T1.seco * fMuCons(c1) / (T0.seco * fMuCons(c0));
-  const fMojado = T1.mojado * fMuCons(c1) / (T0.seco * fMuCons(c0));
+  const fSeco = absoluto ? T1.seco * fMuCons(c1) : serie ? 1 : T1.seco * fMuCons(c1) / (T0.seco * fMuCons(c0));
+  const fMojado = absoluto ? T1.mojado * fMuCons(c1) : T1.mojado * fMuCons(c1) / (T0.seco * fMuCons(c0));
   const km = T1.km * fKmPerfil[p.perfil] * (c1.radial ? 1 : 0.9) * (delantera ? 1.5 : 1);
   const precio = precioNeumatico(p) * T1.precio * fPrecioCons(c1);
   return {

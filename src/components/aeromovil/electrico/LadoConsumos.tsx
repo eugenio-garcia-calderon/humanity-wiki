@@ -9,7 +9,8 @@
  */
 import { Wind } from 'lucide-react';
 import type { ModeloTriciclo, Parametros, Resultados } from '../geometria';
-import { AUXILIARES, CRR, RENDIMIENTO, USABLE, camposTriciclo, deslizadoresTriciclo, energiaTriciclo, esCuatro, esRombo, guardarTriciclo, vistaTriciclo } from '../geometriaTriciclo';
+import { AUXILIARES, RENDIMIENTO, USABLE, camposTriciclo, deslizadoresTriciclo, energiaTriciclo, esCuatro, esRombo, guardarTriciclo, vistaTriciclo } from '../geometriaTriciclo';
+import { crrTriciclo, textoCrrTriciclo } from '../triciclo/energia';
 import type { CdTriciclo } from '../LadoTriciclo';
 import { Bloque, Deslizador, fmt } from '../controles';
 import { Fragment } from 'react';
@@ -64,7 +65,7 @@ export function LadoConsumos({ P, set, res, modelo, cd }: {
           ['  energía solar al día (estimada)', res.areas.solar > 0.005 ? `${fmt(res.solarDia / 1000)} kWh · ${e ? `${Math.round(e.kmSol)} km` : sinCd}` : '—'],
         ])}
         {cd.calculando && <p className="flex items-center gap-1.5 text-xs text-sky-800"><Wind className="h-3.5 w-3.5 animate-pulse" />El túnel de viento está calculando el Cd de esta forma (unos segundos). Hasta que acabe, no hay cifra.</p>}
-        <p className="text-xs text-slate-500">El Cd lo calcula el túnel con la silueta de la carrocería y sus {tresOCuatro} ruedas (no hay fórmula del editor para esta forma); los carenados y los brazos solo entran como ruedas carenadas, así que el real será algo más alto. {nOcc === 1 ? 'Con el piloto solo' : `Con ${['', 'uno', 'dos', 'tres', 'cuatro'][nOcc]} ocupantes`} de {T.tMOcc} kg ({Math.round(res.mTot)} kg en total), rodadura {fmt(CRR, 3)} (neumático de ciclomotor), motor y controlador al {Math.round(RENDIMIENTO * 100)} %, {AUXILIARES} W de equipos y la batería usable al {Math.round(USABLE * 100)} %. Todo supuesto, no medido.</p>
+        <p className="text-xs text-slate-500">El Cd lo calcula el túnel con la silueta de la carrocería y sus {tresOCuatro} ruedas (no hay fórmula del editor para esta forma); los carenados y los brazos solo entran como ruedas carenadas, así que el real será algo más alto. {nOcc === 1 ? 'Con el piloto solo' : `Con ${['', 'uno', 'dos', 'tres', 'cuatro'][nOcc]} ocupantes`} de {T.tMOcc} kg ({Math.round(res.mTot)} kg en total), rodadura {fmt(crrTriciclo(T), 4)} ({textoCrrTriciclo(T)}), motor y controlador al {Math.round(RENDIMIENTO * 100)} %, {AUXILIARES} W de equipos y la batería usable al {Math.round(USABLE * 100)} %. Todo supuesto, no medido.</p>
       </Bloque>
       <BloqueDelEnchufe modelo={modelo} res={res} whKm={e?.WhKm ?? null} kmh={kmhVel} />
     </>

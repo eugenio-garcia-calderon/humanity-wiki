@@ -9,6 +9,7 @@ import type { PartePeso, SeccionPeso } from './masasSecciones';
 // (2026-11-17, «precios»: each part's price on its line, tap to edit — precios/)
 import { eur, type PrecioSeccion } from './precios/precios';
 import { BotonPrecio, EditorPrecio } from './precios/EditorPrecio';
+import { ProveedorParte } from './proveedores/ProveedorParte';
 
 /** The prices of a section's parts and how to change one (absent: weights only, as before). */
 export interface PreciosDesglose { s: PrecioSeccion | null; alCambiar: (nombre: string, v: number | null) => void }
@@ -25,6 +26,8 @@ function Parte({ p, nivel, precios, editando, alEditar }: { p: PartePeso; nivel:
         </span>
       </div>
       {pr && precios && alEditar && editando === p.nombre && <EditorPrecio p={pr} alCambiar={v => precios.alCambiar(p.nombre, v)} alCerrar={() => alEditar(null)} />}
+      {/* (2026-11-17, «proveedores») supplier, model and files of the part (proveedores/ProveedorParte.tsx) */}
+      {nivel === 0 && <ProveedorParte nombre={p.nombre} />}
       {p.nota && <p className="text-[11px] leading-snug text-slate-400">{p.nota}</p>}
       {p.hijos && <ul className="mt-1 flex flex-col gap-1">{p.hijos.map(h => <Parte key={h.nombre} p={h} nivel={nivel + 1} />)}</ul>}
     </li>
