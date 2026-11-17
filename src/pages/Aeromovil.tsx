@@ -298,19 +298,19 @@ export default function Aeromovil() {
   // (2026-11-13: the body's colours are not shape: a change of colour alone keeps the same parameters for the model, so
   // the 3D is not rebuilt; the viewer recolours its materials from `colores`)
   // Plegar / desplegar las alas del carenado BWB despacio (2026-11-17, Eugenio: «que la acción se haga lento, no
-  // instantáneo, que tarde unos segundos»): `f` va de 0 (planas) a 1 (plegadas) en unos 3 s, dando pasos de 250 ms,
-  // y sólo al final se guarda el ajuste en el diseño. Mientras tanto el modelo se calcula con el ángulo parcial.
-  const [plieg, setPlieg] = useState<{ f: number; dest: 'si' | 'no' } | null>(null);
-  const PASO_PLIEG = 1 / 12;
+  // instantáneo»; y «más pasos, que no sea tan ortopédico»): dura 3 s con curva suave (entra y sale despacio) y se
+  // recalcula el coche cada ~100 ms. El tiempo manda, no el número de fotogramas. Sólo al final se guarda el ajuste.
+  const [plieg, setPlieg] = useState<{ f: number; dest: 'si' | 'no'; desde: number; t0: number } | null>(null);
+  const DURACION_PLIEG = 3000, PASO_PLIEG_MS = 100;
   useEffect(() => {
     if (!plieg) return;
-    const hacia = plieg.dest === 'si' ? 1 : 0;
-    if (plieg.f === hacia) { set('tBwbPlegadas' as keyof Parametros, plieg.dest as never); setPlieg(null); return; }
-    const t = setTimeout(() => setPlieg(q => {
-      if (!q) return q;
-      const h = q.dest === 'si' ? 1 : 0;
-      return { ...q, f: Math.abs(h - q.f) <= PASO_PLIEG ? h : q.f + Math.sign(h - q.f) * PASO_PLIEG };
-    }), 250);
+    const hasta = plieg.dest === 'si' ? 1 : 0;
+    const t = setTimeout(() => {
+      const u = Math.min(1, (performance.now() - plieg.t0) / DURACION_PLIEG);
+      const e = u < 0.5 ? 2 * u * u : 1 - Math.pow(-2 * u + 2, 2) / 2; // curva suave, entra y sale despacio
+      if (u >= 1) { set('tBwbPlegadas' as keyof Parametros, plieg.dest as never); setPlieg(null); return; }
+      setPlieg(q => q && { ...q, f: plieg.desde + (hasta - plieg.desde) * e });
+    }, PASO_PLIEG_MS);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [plieg]);
@@ -327,7 +327,8 @@ export default function Aeromovil() {
   const alternarAlas = () => {
     if (plieg) return;
     const ahora = (P as Parametros & { tBwbPlegadas?: string }).tBwbPlegadas === 'si';
-    setPlieg({ f: ahora ? 1 : 0, dest: ahora ? 'no' : 'si' });
+    const desde = ahora ? 1 : 0;
+    setPlieg({ f: desde, dest: ahora ? 'no' : 'si', desde, t0: performance.now() });
   };
   const colores = useMemo(() => coloresDe(P), [P]);
   const Pa = useMemo(() => ajustarCarenado(Pforma), [Pforma]);

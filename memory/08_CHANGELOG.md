@@ -12739,3 +12739,9 @@ En el panel «Garaje» aparece un botón «Plegar alas» / «Desplegar alas» cu
 > «Haz que el plegado/desplegado de alas esté en un botón en la pantalla del garaje, y que la acción se haga lento, no instantáneo, que tarde unos segundos»
 
 El botón «Plegar alas» / «Desplegar alas» pasa a la pantalla 3D, a la izquierda del botón Garaje, y sólo sale con el carenado BWB puesto. El plegado tarda unos 3 segundos: el ala se va doblando en pasos de un cuarto de segundo y el ajuste se guarda al terminar. Mientras tanto el botón dice «Plegando alas…» y no se puede pulsar otra vez.
+
+## 2026-11-17 · Plegado de alas más suave
+
+> «haz que haya más pasos de plegado para que no sea tan ortopédico y se vea una animación de plegado/desplegado suave, no a trompicones»
+
+El plegado y el desplegado siguen durando 3 segundos, pero ahora el coche se recalcula cada 0,1 s y el movimiento sigue una curva que entra y sale despacio. El tiempo manda, no el número de fotogramas.
