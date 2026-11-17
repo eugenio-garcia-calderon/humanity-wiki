@@ -29,6 +29,12 @@
       "ruta": "src/components/aeromovil/triciclo/defecto.ts",
       "motivo": "colasuave: transición cabina–cola y rangos de la cola",
       "desde": "2026-11-16T23:11:36.192Z"
+    },
+    {
+      "agente": "colasuave",
+      "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
+      "motivo": "colasuave: texto y visibilidad de los deslizadores de la cola",
+      "desde": "2026-11-17T00:37:32.427Z"
     }
   ]
 }
