@@ -12478,3 +12478,7 @@ es el autor, si no será anónimo.»
 - **Sin sesión**: la nota se firma «Anónimo» y se queda solo en ese navegador («solo en este dispositivo»); se puede
   editar y borrar desde ahí. Para que la vean los demás hay que iniciar sesión.
 - Tabla nueva `aeromovil_notas` (migración 0223). Los diseños guardados no cambian.
+
+## 2026-11-17 · Las comprobaciones pasan a GitHub
+
+Eugenio: «busca una solución para que las pruebas no sean el cuello de botella». Hasta ahora cada bot pasaba `tsc`, la compilación y los scripts del Aeromóvil en la misma máquina de la nube, de uno en uno: con diez bots la cola tardaba horas. Ahora, cada solicitud de cambios las pasa en las máquinas de GitHub, todas a la vez (`.github/workflows/comprobar.yml`): `tsc`, compilación, túnel, diseños guardados, estudio aerodinámico, pesos por sección, homologación, cola lisa y continuidad de la cola. Un bot abre su solicitud y la fusiona cuando todo sale en verde.
