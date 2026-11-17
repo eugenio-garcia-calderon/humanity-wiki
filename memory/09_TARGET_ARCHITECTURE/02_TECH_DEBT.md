@@ -832,6 +832,22 @@ the frame's tube masses (same formula as `piezasBase`/`piezasBasculante`). Renam
 `PiezaMasa`/`PiezaMasaB` set where the part is created, and the tube breakdown returned by the parts list itself:
 ≈ 2 h now (≈ 45 parts in 3 files), more as parts are added. The Gota's blocks (inline in `pages/Aeromovil.tsx`) and
 the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper already; see the changelog for which are shown.
+- (2026-11-17, motores) The engine comparison's L/100 km per option changes the mass by the engine only, not by the
+  connection whose mass follows the engine's kW in series/parallel (a few kg; < 1 % of the figure). Running the full
+  model per option: ≈ 2 h plus a cache, and ~17 model builds per render.
+- (2026-11-17, motores) The engine comparison table is 10 columns in a ~380 px side panel: it scrolls sideways (the
+  name column stays fixed). On a phone the consumption and price columns need a swipe. A card layout per engine for
+  narrow screens: ≈ 1 h. Prices exist for 11 of 19 engines/motors; the rest sell on request (≈ 2 h of asking shops).
+- (2026-11-17, pending) Section weights not shown yet on the Gota (`pages/Aeromovil.tsx`, 3 blocks: «Chasis y ruedas»,
+  «Asientos», «Carenado aerodinámico») and the Basculante (`basculante/LadoBasculante.tsx`, whose `ui.Bloque` type needs
+  `peso`): the numbers already come from `seccionesGota`/`seccionesBasculante`; ≈ 20 min to wire both. Also: in a
+  diamond Triciclo the nose wheel («Rueda delantera, freno y horquilla») falls into Carrocería in `grupoPieza`
+  (`triciclo/masas.ts`, the name does not match `^Ruedas`), so the Carrocería tab is 10,7 kg too heavy and Rodaje too
+  light on that layout; one regex, ≈ 5 min, changes those two tab totals on purpose.
+- (2026-11-17) `src/components/aeromovil/CLAUDE.md`, «The weight of a section», last line is stale: the engine blocks
+  DO show their weight now (`seccionDe` in `LadoTriciclo.tsx`; their parts are in `ComparadorMotores`), there is no
+  `sinPeso`. Not fixed then because another agent held that file; 1 min.
+
 
 - **Mixed-axle rolling resistance counts wheels, not load** (2026-11-17, `ruedas/catalogo.ts` `crrMezcla`): Σ nᵢ·Crrᵢ / Σ nᵢ
   as if every wheel carried the same load. Weighting by `cargasRueda` (Triciclo) and `repartoDel` (Basculante) is ~30 min.

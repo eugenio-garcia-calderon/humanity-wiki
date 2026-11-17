@@ -5,13 +5,21 @@
  *
  * Every figure below was read from the page in `fuente` on `leido` and copied as published. `null` means the source
  * does not publish it: nothing here is estimated or filled in. Where two sources disagree, `notas` says so and the
- * figure kept is the one in `fuente`. No logos, no prices (they change every week).
+ * figure kept is the one in `fuente`. No logos.
+ *
+ * (2026-11-17, Eugenio: «sabiendo qué potencia y qué peso y qué cilindrada y qué consumo tienen cada uno de los
+ * motores … y qué coste estimado también»): electric motors and petrol engines now carry `precio`, ONE shop's
+ * listed price on the day it was read, as published (currency, with or without VAT). It is an estimate of the order
+ * of magnitude, not a quote: prices move every week and differ a lot between shops. `null` = no public price found
+ * (EMRAX, Saietta, Rotax sell on request).
  *
  * The design stores only the chosen `id` (tCatMotor, tCatCtrl, tCatReductora, tCatTermico); 'medida' (the first
  * option, «A medida (deslizadores)») keeps the sliders as they were, so every saved design is unchanged.
  */
 
 export const LEIDO = '2026-11-16';
+/** (2026-11-17) when the prices and the parts added that day were read. */
+export const LEIDO_PRECIO = '2026-11-17';
 /** «A medida (deslizadores)»: no catalogue part, the sliders decide. */
 export const A_MEDIDA = 'medida';
 
@@ -23,6 +31,15 @@ interface Base {
   fuente: string; tipoFuente: TipoFuente; leido: string;
   /** what the source leaves out, disagreements between sources, conditions of a rating (in Spanish: it is shown) */
   notas?: string;
+}
+
+/** One shop's listed price for a new part, as published on `leido` (2026-11-17). An estimate, not a quote. */
+export interface Precio {
+  valor: number; moneda: 'EUR' | 'USD';
+  /** what the listing says about VAT */
+  iva: 'incluido' | 'sin IVA' | 'sin aclarar';
+  fuente: string; leido: string;
+  nota?: string;
 }
 
 export interface MotorCatalogo extends Base {
@@ -41,6 +58,9 @@ export interface MotorCatalogo extends Base {
   reduccion?: number;
   /** the inverter is built into the motor (Saietta AFT140i): no separate controller to buy */
   controladorIntegrado?: boolean;
+  /** (2026-11-17) the efficiency (%) the maker publishes, when it does (peak, as published) */
+  rendimiento?: number | null;
+  precio?: Precio | null;
 }
 
 export interface ControladorCatalogo extends Base {
@@ -79,6 +99,7 @@ export interface TermicoCatalogo extends Base {
   nm: number | null; kg: number | null;
   /** fuel consumption the maker publishes (L/h) and the power it is measured at (kW) */
   consumoLh: number | null; consumoKW: number | null;
+  precio?: Precio | null;
 }
 
 // ─────────────────────────────── electric motors ───────────────────────────────
@@ -87,60 +108,70 @@ export const MOTORES: MotorCatalogo[] = [
     id: 'qs273v3', marca: 'QS Motor', modelo: '273 V3 40H, 8 kW (motor de buje)', montaje: 'buje', tecnologia: 'BLDC de imanes, buje directo, 16 pares de polos',
     vNom: 72, vMin: 48, vMax: 96, kWCont: 8, kWPico: null, nmCont: null, nmPico: 250, rpmMax: null, kg: null, refrigeracion: 'aire (IP54)',
     fuente: 'https://e-smartway.com/products/nbpower-qs-v3-273-40h-motorcycle-18-19-21-48-96v-8000w-ebike-motor-wheel-electric-bike-rear-hub-motor-150mm-dropout-width', tipoFuente: 'distribuidor', leido: LEIDO,
+    precio: { valor: 898, moneda: 'USD', iva: 'sin aclarar', fuente: 'https://e-smartway.com/products/nbpower-qs-v3-273-40h-motorcycle-18-19-21-48-96v-8000w-ebike-motor-wheel-electric-bike-rear-hub-motor-150mm-dropout-width', leido: LEIDO_PRECIO, nota: 'el motor solo, sin controlador' },
     notas: 'La tienda no publica la potencia de pico, la masa ni las rpm; el par máximo lo da como «aprox. 250 N·m». 130 km/h de punta en llanta de moto.',
   },
   {
     id: 'qsv3-5kw', marca: 'QS Motor', modelo: 'V3 5 kW buje directo (EM3ev)', montaje: 'buje', tecnologia: 'BLDC de imanes, buje directo',
     vNom: 72, vMin: null, vMax: null, kWCont: 5, kWPico: 5, nmCont: null, nmPico: 220, rpmMax: null, kg: 12.8, refrigeracion: 'aire (IP54), sensor de temperatura',
     fuente: 'https://em3ev.com/shop/5kw-qs-v3-rear-direct-drive-hub-motor/', tipoFuente: 'distribuidor', leido: LEIDO,
+    precio: { valor: 379, moneda: 'USD', iva: 'sin aclarar', fuente: 'https://em3ev.com/shop/5kw-qs-v3-rear-direct-drive-hub-motor/', leido: LEIDO_PRECIO, nota: 'el motor solo, sin llanta ni controlador' },
     notas: 'Da «5 kW nominal» y «5.000 W de pico» (5,7 kW a 72 V con un controlador de 80 A); par «más de 220 N·m»; 12,8 kg el motor desnudo.',
   },
   {
     id: 'qs260-4kw', marca: 'QS Motor', modelo: '260 de coche, 4 kW (motor de buje)', montaje: 'buje', tecnologia: 'BLDC de imanes, buje directo para coche',
     vNom: 72, vMin: 72, vMax: 96, kWCont: 4, kWPico: 8, nmCont: 30, nmPico: 181, rpmMax: null, kg: 18, refrigeracion: 'aire (IP54)',
     fuente: 'https://everythingpe.com/products/ev-traction-motors/qs-motor/1069-2210-4000w-260-car-motor', tipoFuente: 'distribuidor', leido: LEIDO,
+    precio: null,
     notas: 'Ficha de un distribuidor: 30 N·m de par continuo y 181 N·m de pico, tal cual. Velocidad del vehículo 30–85 km/h; sin rpm.',
   },
   {
     id: 'qs138-90h', marca: 'QS Motor', modelo: '138 90H V4, 4 kW (motor central con reductora 1:2,35)', montaje: 'central', tecnologia: 'PMSM de imanes interiores, motor central',
     vNom: 72, vMin: null, vMax: null, kWCont: 4, kWPico: null, nmCont: null, nmPico: 150, rpmMax: 7000, kg: null, refrigeracion: null, reduccion: 2.35,
     fuente: 'https://e-smartway.com/products/qs-138-v4-90h-4000w-mid-drive-hub-motor-for-motorcycles-high-power-magnet-motor-with-1-2-35-gear-ratio', tipoFuente: 'distribuidor', leido: LEIDO,
+    precio: { valor: 668, moneda: 'USD', iva: 'sin aclarar', fuente: 'https://e-smartway.com/products/qs-138-v4-90h-4000w-mid-drive-hub-motor-for-motorcycles-high-power-magnet-motor-with-1-2-35-gear-ratio', leido: LEIDO_PRECIO, nota: 'en oferta (738 $ de lista)' },
     notas: '4.800 rpm nominales y 7.000 con debilitamiento de campo; 150 N·m máximos. La tienda no publica potencia de pico ni masa. Lleva una reductora 1:2,35 dentro: hace falta otra (cadena o correa) hasta la rueda.',
   },
   {
     id: 'gm-hpm5000b', marca: 'Golden Motor', modelo: 'HPM5000B, refrigerado por líquido', montaje: 'central', tecnologia: 'BLDC',
     vNom: null, vMin: 48, vMax: 120, kWCont: null, kWPico: null, nmCont: null, nmPico: null, rpmMax: 6000, kg: 11.35, refrigeracion: 'líquido, con ventilador',
     fuente: 'https://goldenmotor.bike/product/48-volt-5kw-bldc-motor-liquid-cooled', tipoFuente: 'fabricante', leido: LEIDO,
+    precio: null, rendimiento: 91,
     notas: 'Potencia nominal «3–7,5 kW» según la tensión (48, 72, 96 o 120 V), sin decir cuál a cuál: no se rellena la potencia. Sin par publicado. 2.000–6.000 rpm; rendimiento 91 %.',
   },
   {
     id: 'gm-hpm10kw', marca: 'Golden Motor', modelo: 'HPM10KW, refrigerado por líquido', montaje: 'central', tecnologia: 'BLDC',
     vNom: null, vMin: 48, vMax: 120, kWCont: null, kWPico: null, nmCont: null, nmPico: null, rpmMax: 6000, kg: 17.7, refrigeracion: 'líquido',
     fuente: 'https://goldenmotor.bike/product/48-volt-10kw-bldc-motor-liquid-cooled/', tipoFuente: 'fabricante', leido: LEIDO,
+    precio: { valor: 1056, moneda: 'USD', iva: 'sin aclarar', fuente: 'https://goldenmotor.bike/product/48-volt-10kw-bldc-motor-liquid-cooled/', leido: LEIDO_PRECIO, nota: 'de 48 a 96 V; el de 120 V, 1.269 $' }, rendimiento: 91,
     notas: 'Potencia nominal «8–20 kW según la tensión», sin decir cuál a cuál: no se rellena la potencia. Sin pico ni par publicados. Hasta 91 % de rendimiento.',
   },
   {
     id: 'me1616', marca: 'Motenergy', modelo: 'ME1616, refrigerado por agua', montaje: 'central', tecnologia: 'PMSM de imanes interiores (IPM)',
     vNom: null, vMin: 48, vMax: 120, kWCont: 20, kWPico: 55, nmCont: null, nmPico: 134, rpmMax: 6000, kg: 21.8, refrigeracion: 'agua con 50 % de glicol',
     fuente: 'https://www.electricmotorsport.com/ev-parts/motors/brushless-pmac-ipm-motors/me1616-brushless-65hp-liquid-cooled-ipm-motor-24-120v.html', tipoFuente: 'distribuidor', leido: LEIDO,
+    precio: { valor: 1170, moneda: 'USD', iva: 'sin aclarar', fuente: 'https://www.thunderstruck-ev.com/me1616.html', leido: LEIDO_PRECIO, nota: 'el motor solo' },
     notas: 'Electric Motorsport: 20 kW continuos, 55 kW de pico (sin decir a qué tensión), 134 N·m, 48 libras (21,8 kg). Otra tienda (Thunderstruck) da 120 N·m y 55 libras (24,9 kg): no coinciden.',
   },
   {
     id: 'emrax188-lv-lc', marca: 'EMRAX', modelo: '188 LV, refrigerado por líquido', montaje: 'central', tecnologia: 'flujo axial, imanes permanentes',
     vNom: null, vMin: 50, vMax: 830, vPico: 160, kWCont: 29, kWPico: 60, nmCont: 43, nmPico: 100, rpmMax: 8000, kg: 7.9, refrigeracion: 'líquido',
     fuente: 'https://emrax.com/wp-content/uploads/2025/03/EMRAX-188_datasheet_v1.7.pdf', tipoFuente: 'fabricante', leido: LEIDO,
+    precio: null, rendimiento: 96,
     notas: '60 kW a 6.500 rpm durante 30 s, y para eso pide 160 V de continua; a menos tensión da menos pico. EMRAX dice que el 188 irá dejando de fabricarse.',
   },
   {
     id: 'emrax208-lv-lc', marca: 'EMRAX', modelo: '208 LV, refrigerado por líquido', montaje: 'central', tecnologia: 'flujo axial, imanes permanentes',
     vNom: null, vMin: 50, vMax: 830, vPico: 170, kWCont: 47, kWPico: 86, nmCont: 75, nmPico: 150, rpmMax: 7000, kg: 10.3, refrigeracion: 'líquido',
     fuente: 'https://emrax.com/wp-content/uploads/2025/03/EMRAX-208_datasheet_v1.7.pdf', tipoFuente: 'fabricante', leido: LEIDO,
+    precio: null, rendimiento: 96,
     notas: '86 kW a 6.000 rpm, para lo que pide 170 V de continua. Más de lo que necesita un coche de 300–700 kg: es la cota alta.',
   },
   {
     id: 'aft140i-96', marca: 'Saietta (hoy Turntide)', modelo: 'AFT140i 96 V, con inversor integrado', montaje: 'central', tecnologia: 'flujo axial, imanes permanentes',
     vNom: 96, vMin: 60, vMax: 120, kWCont: 21, kWPico: 43, nmCont: 65, nmPico: 105, rpmMax: 8000, kg: 22, refrigeracion: 'agua-glicol, 9 L/min', controladorIntegrado: true,
     fuente: 'https://saietta.com/media/1vbiy5l2/aft140i-96v-spec-sheet-006.pdf', tipoFuente: 'fabricante', leido: LEIDO,
+    precio: null,
     notas: '43 kW durante 2 min (45 kW y 135 N·m durante 10 s). Lleva el inversor dentro; la ficha no dice si sus 22 kg lo incluyen. El conjunto con reductora («eDrive») pesa 42 kg.',
   },
 ];
@@ -261,43 +292,65 @@ export const TERMICOS: TermicoCatalogo[] = [
     id: 'gx200', marca: 'Honda', modelo: 'GX200', cc: 196, cilindros: 1, ciclo: '4 tiempos OHV', refrigeracion: 'aire',
     kW: 4.1, rpm: 3600, potencia: 'neta', kWCont: 3.7, nm: 12.4, kg: 16.1, consumoLh: 1.7, consumoKW: 3.7,
     fuente: 'https://cdn.honda.co.za/pub/general/gx200/brochure/GX200.pdf', tipoFuente: 'fabricante', leido: LEIDO,
+    precio: { valor: 475, moneda: 'EUR', iva: 'incluido', fuente: 'https://www.mastercity.lt/en/honda-gx200-gasoline-engine-43-kw-20mm-shaft', leido: LEIDO_PRECIO, nota: '392,56 € sin IVA' },
     notas: '3,7 kW continuos a 3.600 rpm, gastando 1,7 L/h.',
   },
   {
     id: 'gx390', marca: 'Honda', modelo: 'GX390', cc: 389, cilindros: 1, ciclo: '4 tiempos OHV', refrigeracion: 'aire',
     kW: 8.7, rpm: 3600, potencia: 'neta', kWCont: 7.0, nm: 26.5, kg: 31.7, consumoLh: 3.5, consumoKW: 7.0,
     fuente: 'https://www.honda.co.jp/engines/pdf/GX390.pdf', tipoFuente: 'fabricante', leido: LEIDO,
+    precio: { valor: 1263, moneda: 'EUR', iva: 'incluido', fuente: 'https://www.mastercity.lt/en/petrol-engine-honda-gx390-without-fuel-tank-for-generator-87-kw-crankshaft', leido: LEIDO_PRECIO, nota: 'versión para generador, sin depósito; 1.043,80 € sin IVA' },
     notas: '7,0 kW continuos a 3.600 rpm, gastando 3,5 L/h.',
   },
   {
     id: 'gx690', marca: 'Honda', modelo: 'GX690 (V2)', cc: 688, cilindros: 2, ciclo: '4 tiempos OHV', refrigeracion: 'aire',
     kW: 16.6, rpm: 3600, potencia: 'neta', kWCont: 13.0, nm: 48.3, kg: 44.4, consumoLh: 6.2, consumoKW: 13.0,
     fuente: 'https://www.honda.sk/content/dam/local/slovakia/industrial/engines/pdf/industrial/GX690.pdf', tipoFuente: 'fabricante', leido: LEIDO,
+    precio: { valor: 2625, moneda: 'EUR', iva: 'sin aclarar', fuente: 'https://www.smartbuytool.gr/en/ergaleia/honda-gx690-kinitiras-benzinis-me-sfina-ilektriki-ekkinisi.html', leido: LEIDO_PRECIO, nota: 'con arranque eléctrico' },
     notas: '13,0 kW continuos a 3.600 rpm, gastando 6,2 L/h.',
   },
   {
     id: 'fs730v-efi', marca: 'Kawasaki', modelo: 'FS730V EFI (V2)', cc: 726, cilindros: 2, ciclo: '4 tiempos, inyección', refrigeracion: 'aire',
     kW: 17.2, rpm: 3600, potencia: 'neta', kWCont: null, nm: 50.4, kg: 46.5, consumoLh: null, consumoKW: null,
     fuente: 'https://www.kawasaki-engines.eu/pdf/en-GB_fs730v-efi.pdf', tipoFuente: 'fabricante', leido: LEIDO,
+    precio: null,
     notas: 'Eje vertical (de cortacésped). Sin consumo publicado: el rendimiento no se rellena.',
   },
   {
     id: 'vanguard37-efi', marca: 'Vanguard (Briggs & Stratton)', modelo: 'Big Block 37 HP EFI (993 cc)', cc: 993, cilindros: 2, ciclo: '4 tiempos, inyección', refrigeracion: 'aire',
     kW: 27.6, rpm: null, potencia: 'bruta', kWCont: null, nm: null, kg: 56.7, consumoLh: null, consumoKW: null,
     fuente: 'https://www.vanguardpower.com/en-au/products/37hp-efi-hs', tipoFuente: 'fabricante', leido: LEIDO,
+    precio: { valor: 4799, moneda: 'USD', iva: 'sin aclarar', fuente: 'https://smallenginewarehouse.com/61e377-0140', leido: LEIDO_PRECIO, nota: 'modelo 61E377-0140; agotado el día de la lectura' },
     notas: '«37,0 HP brutos» (27,6 kW; lo neto, lo que llega al eje, es menos). 125 libras (56,7 kg) sin decir si en seco. Sin par ni consumo publicados.',
   },
   {
     id: 'aixro-xr50', marca: 'Aixro', modelo: 'XR50 (rotativo Wankel)', cc: 294, cilindros: 1, ciclo: 'Wankel, mezcla de aceite 50:1', refrigeracion: 'por la mezcla que entra (rotor), y aire',
     kW: 35.8, rpm: 8750, potencia: 'máxima', kWCont: null, nm: 39.3, kg: 17.0, consumoLh: null, consumoKW: null,
     fuente: 'https://www.renntechmercedes.com/index.php/products/powersports/aixro-xr-50-rotary-karting-engine-w-standard-idm-magneto-ignition-791-detail', tipoFuente: 'distribuidor', leido: LEIDO,
+    precio: { valor: 5480, moneda: 'USD', iva: 'sin IVA', fuente: 'https://www.renntechmercedes.com/index.php/products/powersports/aixro-xr-50-rotary-karting-engine-w-standard-idm-magneto-ignition-791-detail', leido: LEIDO_PRECIO },
     notas: 'Motor de kart: 48 CV a 8.750 rpm, 29 lbf·ft (39,3 N·m), 37,5 libras (17 kg). Quema aceite con la gasolina; no está pensado para un generador homologable.',
   },
   {
     id: 'rotax912is', marca: 'Rotax', modelo: '912 iS Sport (avión)', cc: 1352, cilindros: 4, ciclo: '4 tiempos bóxer, inyección', refrigeracion: 'culatas por líquido, cilindros por aire',
     kW: 73.5, rpm: 5800, potencia: 'máxima', kWCont: 72.0, nm: 132, kg: 63.6, consumoLh: null, consumoKW: null,
     fuente: 'https://www.flyrotax.com/assets/files/products/Datasheet-Aircraft-Engine-912-iS-iSc-Sport.pdf', tipoFuente: 'fabricante', leido: LEIDO,
+    precio: null,
     notas: '63,6 kg con la reductora de hélice y el embrague; el escape, el alternador y las bombas van aparte. La cota alta: mucho más de lo que pide este coche.',
+  },
+  // (2026-11-17) two more, between the GX390 and the GX690, and a liquid-cooled three-cylinder (a car-like range extender)
+  {
+    id: 'gx270', marca: 'Honda', modelo: 'GX270', cc: 270, cilindros: 1, ciclo: '4 tiempos OHV', refrigeracion: 'aire',
+    kW: 6.3, rpm: 3600, potencia: 'neta', kWCont: 5.1, nm: 19.1, kg: 25.8, consumoLh: 2.4, consumoKW: 5.1,
+    fuente: 'https://www.honda.co.jp/engines/pdf/GX270.pdf', tipoFuente: 'fabricante', leido: LEIDO_PRECIO,
+    precio: { valor: 1419.57, moneda: 'EUR', iva: 'incluido', fuente: 'https://manelservice.com/en/professional-engines/honda-gx270ut2-qhq4-engine', leido: LEIDO_PRECIO, nota: '1.163,58 € sin IVA' },
+    notas: '5,1 kW continuos a 3.600 rpm, gastando 2,4 L/h; 19,1 N·m a 2.500 rpm.',
+  },
+  {
+    id: 'kubota-wg752', marca: 'Kubota', modelo: 'WG752 (3 cilindros, agua)', cc: 736, cilindros: 3, ciclo: '4 tiempos, gasolina', refrigeracion: 'líquido',
+    kW: 18.5, rpm: 3600, potencia: 'máxima', kWCont: null, nm: 56, kg: 62, consumoLh: null, consumoKW: null,
+    fuente: 'https://www.lectura-specs.com/en/model/components/engines-kubota/wg752-g-e3-11703515', tipoFuente: 'distribuidor', leido: LEIDO_PRECIO,
+    precio: null,
+    notas: 'Ficha de una base de datos de maquinaria (Lectura): 0,74 L, tres en línea, 18,5 kW a 3.600 rpm, 56 N·m, 62 kg. Sin consumo publicado. Kubota vende por distribuidor, sin precio público.',
   },
 ];
 
@@ -398,3 +451,21 @@ export function comprobacionesCatalogo(E: EleccionCatalogo, x: { kWPico: number;
 
 /** The mass a chosen reduction gear adds (kg), or 0; null when the maker does not publish it. */
 export const masaReductora = (E: EleccionCatalogo) => { const r = reductoraDe(E.tCatReductora); return r ? r.kg : 0; };
+
+// ─────────────────────────────── comparing (2026-11-17) ───────────────────────────────
+/** Petrol's density (kg/L), the same 0,745 the tank's mass uses (triciclo/modelo.ts). */
+const KG_LITRO = 0.745;
+/**
+ * Brake-specific fuel consumption (g/kWh): grams of petrol per kWh at the shaft, from the consumption the maker
+ * publishes at a published power; null when it publishes none. A good small engine is ≈ 250–300 g/kWh at its best
+ * point; an air-cooled one at its continuous rating, more.
+ */
+export const bsfc = (t: TermicoCatalogo) => t.consumoLh && t.consumoKW ? t.consumoLh * KG_LITRO * 1000 / t.consumoKW : null;
+/** One horsepower (CV, metric) is 0,7355 kW. */
+export const cv = (kW: number) => kW / 0.7355;
+/**
+ * A USD price in euros, at an approximate rate (0,86 € per dollar, autumn 2026): the comparison is an order of
+ * magnitude; the card always shows the price as published too.
+ */
+export const EUR_POR_USD = 0.86;
+export const precioEuros = (p: Precio | null | undefined) => p == null ? null : p.moneda === 'EUR' ? p.valor : p.valor * EUR_POR_USD;
