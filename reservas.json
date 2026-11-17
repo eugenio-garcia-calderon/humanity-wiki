@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "notas",
-      "ruta": "src/components/aeromovil/controles.tsx",
-      "motivo": "notas: icono de notas en la cabecera de Bloque",
-      "desde": "2026-11-17T13:37:49.159Z"
-    },
-    {
-      "agente": "notas",
       "ruta": "src/components/aeromovil/Disenos.tsx",
       "motivo": "notas: diseño abierto para las notas",
       "desde": "2026-11-17T13:37:52.284Z"
