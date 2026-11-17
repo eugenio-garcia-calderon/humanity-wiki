@@ -12625,3 +12625,38 @@ Eugenio: «Quita esta parte en todas las secciones, la de mejoras y la de empeza
   (`/aeromovil/tareas`) sigue mostrándolas y conserva su propio formulario, y la API no cambia.
 - Para dejar comentarios sobre una parte concreta, ahora están las notas por sección (bot «notas»).
 - No visto en un teléfono de verdad: si sale la versión vieja, `humanity.wiki/?sw=off`.
+## 2026-11-17 · Precio de cada pieza y sección, coste del proyecto y pestaña «Mano de obra»
+
+Eugenio: «aparte del peso, vamos a añadir en todas las secciones y todos los componentes el precio. Y que sea un slider
+para que podamos indicar el precio … que a nivel de experiencia de usuario no sea un engorro total, tantos sliders …
+y el precio global tiene que aparecer sumado debajo de proyecto. Luego también incluye la mano de obra como un apartado
+añadido donde se le puede poner un precio, y ponlo en el menú».
+
+- **Cada desplegable del Triciclo** (Triciclo, clásico, rombo) dice ahora su peso y su precio en la cabecera:
+  «4,8 kg · 550 €». Dentro, en «De qué está hecho este peso», cada pieza lleva su precio al lado de sus kilos.
+- **No hay un deslizador por pieza a la vista.** El precio es un enlace discreto («≈ 550 €»); al pulsarlo se abre debajo
+  de esa línea un deslizador y una casilla para escribirlo, con de dónde sale el estimado y «Volver al estimado». Un
+  precio puesto por ti se marca «tuyo» en azul y se guarda con el diseño.
+- **De dónde salen los precios**: si en el catálogo has elegido un motor o un motor de gasolina con precio publicado,
+  ese precio (convertido a euros); si no, una estimación por clase de pieza, escrita junto a ella (kg de laminado por su
+  material, m² de cúpula y de panel solar, kWh de batería a 230 €/kWh, kW de motor, una unidad para frenos, asientos,
+  bisagras…). Son piezas y materiales comprados para un prototipo, sin horas.
+- **Proyecto › «Coste del prototipo»** (arriba del todo): materiales por departamento, mano de obra, total y € por kg.
+- **Nueva pestaña «Mano de obra»** al final del menú, con su total debajo: diseño, chasis, moldes, laminado, montaje
+  eléctrico, montaje mecánico, interior, pintura y homologación, cada uno horas × €/hora (pulsa uno para cambiarlos).
+  El chasis sigue a los metros de tubo y los moldes y el laminado a los m² de carrocería.
+- **Rombo Bala**: materiales y piezas 13.870 €, mano de obra 21.545 € (521 h), total 35.415 € (116 €/kg). Todo estimado
+  menos lo que se elija del catálogo: tu Rombo Bala no tiene ninguna pieza del catálogo elegida.
+- Un diseño guardado sin precios abre con los estimados; nada más cambia. Comprobado con
+  `npx tsx scripts/precios-secciones.ts` («Todo OK»). Visto en el navegador automático a 1300 px y a 390 px (pestañas,
+  Proyecto, Mano de obra, cabeceras con precio); el editor de precio solo se probó a 1300 px. No comprobado en un móvil
+  de verdad: `humanity.wiki/?sw=off` quita la copia vieja.
+## 2026-11-17 · «Ocultar garaje»: los paneles ocupan la página
+
+Eugenio: «Haz que el garaje se pueda ocultar con un botón arriba en el menú donde pone diseño 3D, eso quítalo y ponlo más pequeñito y pon ver garaje o ocultar garaje, y de esta manera se puede ver con más detalle todos los componentes. Por ejemplo, si pincho en motor, pues veo todos los desplegables de forma mucho más agradable y no tan esquinada hacia un lado.»
+
+- En la barra de arriba del Aeromóvil hay un botón pequeño «Ocultar garaje» / «Ver garaje» (solo en la sección del diseño).
+- Con el garaje oculto desaparece toda la vista 3D y el panel del departamento (Motor, Chasis…) pasa al centro, con hasta 768 px de ancho en vez de 380.
+- El menú de secciones ya no escribe «Diseño 3D»: queda solo el icono, más pequeño (el nombre sigue dentro del menú).
+- «Ver solo …» no aparece con el garaje oculto, porque no hay 3D sobre el que actuar.
+- Cada navegador recuerda la elección (`aeromovil.verGaraje`). El 3D sigue montado pero no se dibuja mientras está oculto.

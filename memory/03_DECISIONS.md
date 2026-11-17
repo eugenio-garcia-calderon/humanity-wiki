@@ -2257,6 +2257,26 @@ Cost of (c): grip is relative, so a road tyre on an enduro size reads 1.13 g whi
 a decision for Eugenio, like the moped Crr.
 Price for the «precios» bot: `efectoNeumatico(...).precio` (€ per tyre), reachable per vehicle as
 `neumaticosTriciclo(T).del/.tras.precio` and `neumaticosBasculante(Q).del/.tras.precio`.
+## 2026-11-17 · Prices: one model on top of the mass sections, hidden editor (precios/)
+
+- **Prices hang off `masasSecciones.ts`**, not a parallel component list: each part the sections hold gets a price by
+  its name (`precios/precios.ts`). Section = its parts, department = own sections + «sin desplegable», vehicle =
+  departments — the same sums `pesos-secciones` checks for kg, checked by `scripts/precios-secciones.ts`.
+- **User prices keyed by part name** (`P.precios[nombre]`), labour by item id (`P.manoObra[id]`), both optional fields
+  of `Parametros`: designs saved before open with the estimates and nothing else changes. Alternative rejected: a
+  `t…` slider per part in `FILAS` (≈ 40 new fields, defaults to keep in step with every estimate, and 40 visible sliders).
+- **UX**: no slider visible until a price is tapped (Eugenio asked for it not to be «un engorro»). The editor debounces
+  250 ms because every change recalculates the vehicle.
+- **«Mano de obra» is a tab id, not a `Departamento`**, like «Masas».
+## 2026-11-17 · «Ocultar garaje» hides the whole 3D view, not just the other cars
+
+**Context.** Eugenio wanted the department panels wider and centred («no tan esquinada hacia un lado»).
+**Decision.** The toggle hides the whole `section[aria-label="Vista 3D"]` (display: none) and the main layout becomes a
+single centred column (`max-w-3xl`). The viewer stays mounted (Planos/Exportar use its ref) and `Visor3D` skips drawing
+and resizing while its canvas has zero size.
+**Alternatives.** (a) Keep a small 3D of the Aeromóvil S above the panel: still takes ~40 % of a phone screen and the
+garage cars would need a separate «hide others» path. (b) Unmount the viewer: loses the scene state and the ref other
+sections rely on.
 ## 2026-11-17 · Engine parts isolated by `userData.componente`, registry in `piezasMotor.ts` (solopiezas)
 - **Chosen**: one pure registry (`src/components/aeromovil/piezasMotor.ts`: groups → `componente` ids, names, which
   parts a design has, where the auxiliaries go, how the engine's mass splits). The 3D hides meshes of the «Motor» layer

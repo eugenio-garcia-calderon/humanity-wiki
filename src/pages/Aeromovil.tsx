@@ -31,7 +31,7 @@
 // slider/selector/block controls in controles.tsx. This page keeps the layout, the state and the 3D toolbar.
 import { Fragment, Suspense, lazy, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Armchair, BatteryCharging, Box, Fuel, Car, Route as RutaIcono, Warehouse, Camera, ChevronDown, CircleDot, ClipboardList, Factory, Weight, Frame, Layers3, Lightbulb, ShieldCheck, Zap, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Maximize2, Minimize2, Ruler, Package, Ship, Wrench, Wind } from 'lucide-react';
+import { Armchair, BatteryCharging, Box, Fuel, Car, Route as RutaIcono, Warehouse, Camera, ChevronDown, CircleDot, ClipboardList, Factory, Weight, Hammer, Frame, Layers3, Lightbulb, ShieldCheck, Zap, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Maximize2, Minimize2, Ruler, Package, Ship, Wrench, Wind } from 'lucide-react';
 import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import { Visor3D, CAPAS, type CapaId, type Vista, type VisorHandle } from '../components/aeromovil/Visor3D';
@@ -51,6 +51,11 @@ import { BloqueSistemaElectrico, textoConsumoPestana } from '../components/aerom
  */
 type IdPestana = IdDepartamento | 'consumos';
 import { LadoResumen, centroParaVisor, useMasas } from '../components/aeromovil/LadoResumen';
+// (2026-11-17) prices: «Proyecto › Coste del prototipo» and the «Mano de obra» tab (precios/)
+import { costeProyecto } from '../components/aeromovil/precios/coste';
+import { eur } from '../components/aeromovil/precios/precios';
+import { BloqueCoste } from '../components/aeromovil/precios/BloqueCoste';
+import { PanelManoObra } from '../components/aeromovil/precios/PanelManoObra';
 // ── Cuadriciclo Basculante (2026-11-15): its sidebar, its Cd and its departments (basculante/, geometriaBasculante.ts)
 import { LadoBasculante, useCdBasculante } from '../components/aeromovil/basculante/LadoBasculante';
 import { CRR_B, LEMAS_BASCULANTE, NOMBRE_BASCULANTE, camposBasculante } from '../components/aeromovil/geometriaBasculante';
@@ -150,7 +155,7 @@ function cargarParametros(): Parametros {
   return PARAMETROS_POR_DEFECTO;
 }
 
-const ICONO_DEP: Record<IdPestana, typeof Box> = { consumos: Fuel, proyecto: ClipboardList, masas: Weight, carroceria: Car, chasis: Frame, rodaje: CircleDot, propulsion: Zap, energia: BatteryCharging, interior: Armchair, accesos: DoorOpen, luces: Lightbulb, fabricacion: Factory, homologacion: ShieldCheck };
+const ICONO_DEP: Record<IdPestana, typeof Box> = { consumos: Fuel, proyecto: ClipboardList, masas: Weight, manoobra: Hammer, carroceria: Car, chasis: Frame, rodaje: CircleDot, propulsion: Zap, energia: BatteryCharging, interior: Armchair, accesos: DoorOpen, luces: Lightbulb, fabricacion: Factory, homologacion: ShieldCheck };
 /** Qué capas del 3D son de cada departamento (para «Mostrar solo …»). Sin entrada = se ve todo. */
 const CAPAS_DEP: Partial<Record<IdDepartamento, CapaId[]>> = {
   carroceria: ['carenado', 'cristales', 'solar'], chasis: ['chasis'], rodaje: ['suspension', 'direccion', 'ruedas'], propulsion: ['motor', 'transmision'],
@@ -168,7 +173,7 @@ const CAPAS_DEP_TRICICLO: Record<DepTriciclo, CapaId[]> = {
 const PESTANA_HOMOLOGACION = { id: 'homologacion' as IdDepartamento, lema: 'la categoría europea que le toca, lo que cumple y lo que no, y el margen que queda de masa, potencia y velocidad' };
 const VISTAS_NOMBRE: Record<Vista, string> = { iso: '3/4', side: 'Lateral', top: 'Planta', front: 'Frontal', back: 'Trasera' };
 const SOLO_DEP: Partial<Record<IdDepartamento, string>> = { carroceria: 'la carrocería', chasis: 'el chasis', rodaje: 'el rodaje', propulsion: 'el motor', energia: 'la batería', interior: 'el interior', accesos: 'los accesos', luces: 'la carrocería' };
-const NOMBRE_CORTO: Record<IdPestana, string> = { consumos: 'Consumos', proyecto: 'Proyecto', masas: 'Masas', carroceria: 'Carrocería', chasis: 'Chasis', rodaje: 'Rodaje', propulsion: 'Motor', energia: 'Batería', interior: 'Interior', accesos: 'Accesos', luces: 'Luces', fabricacion: 'Fabricación', homologacion: 'Homologación' };
+const NOMBRE_CORTO: Record<IdPestana, string> = { consumos: 'Consumos', proyecto: 'Proyecto', masas: 'Masas', manoobra: 'Mano de obra', carroceria: 'Carrocería', chasis: 'Chasis', rodaje: 'Rodaje', propulsion: 'Motor', energia: 'Batería', interior: 'Interior', accesos: 'Accesos', luces: 'Luces', fabricacion: 'Fabricación', homologacion: 'Homologación' };
 
 /**
  * The departments as a row of tabs IN the top bar (2026-11-12, Eugenio: «Me gustaba cómo estaba antes el menú de
@@ -178,7 +183,9 @@ const NOMBRE_CORTO: Record<IdPestana, string> = { consumos: 'Consumos', proyecto
  * (Diseño 3D, Tareas…) fold into `MenuSecciones`. On a phone the row scrolls sideways.
  * Vehicles without departments (the Gota, the Cuadriciclo en rombo) have no tabs: the bar keeps only the logo and the menu.
  */
-function PestanasDepartamento({ lista, dep, alElegir, kg, consumo }: { lista: { id: IdPestana; lema: string }[]; dep: IdPestana | null; alElegir: (d: IdPestana) => void; kg?: KgDepartamento | null;
+function PestanasDepartamento({ lista, dep, alElegir, kg, consumo, extra }: { lista: { id: IdPestana; lema: string }[]; dep: IdPestana | null; alElegir: (d: IdPestana) => void; kg?: KgDepartamento | null;
+  /** (2026-11-17, «precios») a tab's own figure where it has no mass («Mano de obra»: its euros) */
+  extra?: Partial<Record<IdPestana, string>>;
   /** (2026-11-17) the line(s) under «Consumos»: litres per 100 km (electric: ≈ litres of equal energy, and kWh) */
   consumo?: { lineas: string[]; largo: string } | null }) {
   return (
@@ -190,6 +197,8 @@ function PestanasDepartamento({ lista, dep, alElegir, kg, consumo }: { lista: { 
           {/* (2026-11-16) the department's mass, from the same pieces as «Peso: todos los componentes» (PesosDepartamento.ts) */}
           {d.id === 'consumos' && consumo && consumo.lineas.map(l => <span key={l} className={cn('-mt-0.5 whitespace-nowrap font-mono text-[10px] leading-none tabular-nums', activo ? 'text-teal-100' : 'text-slate-500')}>{l}</span>)}
           {kg && textoKg(kg[d.id as keyof KgDepartamento]) && <span className={cn('-mt-0.5 font-mono text-[10px] leading-none tabular-nums', activo ? 'text-teal-100' : 'text-slate-500')}>{textoKg(kg[d.id as keyof KgDepartamento])}</span>}
+          {/* (2026-11-17) a tab's own figure where it has no mass («Mano de obra»: its euros) */}
+          {extra?.[d.id] && <span className={cn('-mt-0.5 font-mono text-[10px] leading-none tabular-nums', activo ? 'text-teal-100' : 'text-slate-500')}>{extra[d.id]}</span>}
         </Button>); })}
     </nav>
   );
@@ -209,8 +218,9 @@ function MenuSecciones({ lista, seccion, abiertas, alIr }: { lista: typeof SECCI
   return (
     <div ref={caja} className="relative shrink-0">
       <Button variant="outline" aria-expanded={abierto} aria-haspopup="menu" aria-label={`Sección: ${actual.n}`} title="Secciones" onClick={() => setAbierto(a => !a)}
-        className={cn('gap-1.5 px-2.5 py-1.5 text-sm normal-case tracking-normal text-slate-800', abierto && 'bg-slate-100')}>
-        <Icono className="h-4 w-4 shrink-0" /><span className="hidden whitespace-nowrap lg:inline">{actual.n}</span>
+        className={cn('gap-1 px-1.5 py-1 text-xs normal-case tracking-normal text-slate-800', abierto && 'bg-slate-100')}>
+        {/* (2026-11-17, Eugenio: «donde pone diseño 3D, eso quítalo y ponlo más pequeñito») icon only on «Diseño 3D» */}
+        <Icono className="h-3.5 w-3.5 shrink-0" />{actual.k !== 'diseno' && <span className="hidden whitespace-nowrap lg:inline">{actual.n}</span>}
         {abiertas ? <span className="rounded-full bg-amber-500 px-1.5 text-[11px] font-bold tabular-nums text-white">{abiertas}</span> : null}
         <ChevronDown className={cn('h-3.5 w-3.5 shrink-0 transition-transform', abierto && 'rotate-180')} />
       </Button>
@@ -349,6 +359,11 @@ export default function Aeromovil() {
   // «Superponer»: los coches del garaje encima del nuestro, alineados por el eje delantero, el morro o la cola.
   const [superponer, setSuperponer] = useState<Alineacion | null>(null);
   const [panelGaraje, setPanelGaraje] = useState(false);
+  // «Ver garaje / Ocultar garaje» (2026-11-17, Eugenio: «haz que el garaje se pueda ocultar con un botón arriba en el
+  // menú… y de esta manera se puede ver con más detalle todos los componentes»). Hidden = no 3D view at all: the side
+  // panel takes the page, centred and wider. The viewer stays mounted (Exportar and Planos use it) but stops drawing.
+  const [verGaraje, setVerGaraje] = useState<boolean>(() => { try { return localStorage.getItem('aeromovil.verGaraje') !== '0'; } catch { return true; } });
+  useEffect(() => { try { localStorage.setItem('aeromovil.verGaraje', verGaraje ? '1' : '0'); } catch { /* sin almacenamiento */ } }, [verGaraje]);
   // Departamento abierto en el lateral y en el panel de abajo (2026-11-06, Eugenio: «el menú dividido por departamentos como una empresa de fabricación»).
   const [soloDep, setSoloDep] = useState(false);     // «Mostrar solo la carrocería», etc.
   const [capasAbierto, setCapasAbierto] = useState(false);
@@ -358,13 +373,13 @@ export default function Aeromovil() {
   // (2026-11-17: the aerodynamics now lives inside «Carrocería»: a remembered tab that is not a department, such as an old
   // «aerodinamica»/«tunel» one, opens «Carrocería» instead of an empty panel)
   // (2026-11-17: and «masas», which is a tab and not a department; the Aeromóvil 1, which has no such tab, opens «Proyecto» for it)
-  const [dep, setDep] = useState<IdPestana>(() => { try { const g = localStorage.getItem('aeromovil.departamento'); return g && (g === 'masas' || g === 'consumos' || DEPARTAMENTOS.some(d => d.id === g)) ? g as IdPestana : 'carroceria'; } catch { return 'carroceria'; } });
+  const [dep, setDep] = useState<IdPestana>(() => { try { const g = localStorage.getItem('aeromovil.departamento'); return g && (g === 'masas' || g === 'consumos' || g === 'manoobra' || DEPARTAMENTOS.some(d => d.id === g)) ? g as IdPestana : 'carroceria'; } catch { return 'carroceria'; } });
   useEffect(() => { try { localStorage.setItem('aeromovil.departamento', dep); } catch { /* sin memoria */ } }, [dep]);
   // «Ver solo …» (round 3 interior, 2026-11-12): leaves only the department's layers; turning it off (or going to
   // «Proyecto», or to another tab) puts back the layers as they were before it was pressed.
   const antesSolo = useRef<Record<CapaId, boolean> | null>(null);
   const verSolo = (si: boolean) => { if (si && !soloDep) antesSolo.current = visibles; setSoloDep(si); };
-  const capasSolo = (d: IdPestana): CapaId[] | undefined => d === 'consumos' ? undefined : P.disposicion === 'triciclo' || P.disposicion === 'basculante' ? (d === 'proyecto' || d === 'masas' ? undefined : CAPAS_DEP_TRICICLO[d as DepTriciclo]) : CAPAS_DEP[d];
+  const capasSolo = (d: IdPestana): CapaId[] | undefined => d === 'consumos' ? undefined : P.disposicion === 'triciclo' || P.disposicion === 'basculante' ? (d === 'proyecto' || d === 'masas' || d === 'manoobra' ? undefined : CAPAS_DEP_TRICICLO[d as DepTriciclo]) : CAPAS_DEP[d];
   useEffect(() => {
     const suyas = soloDep && dep !== 'proyecto' ? capasSolo(dep) : undefined;
     if (!suyas) { if (antesSolo.current) { setVisibles(antesSolo.current); antesSolo.current = null; } return; }
@@ -447,14 +462,17 @@ export default function Aeromovil() {
   // The Triciclo's departments: the A1's choice is kept, but one the Triciclo does not have shows «Carrocería».
   // (2026-11-17: and «Masas», the masses' own tab; and «Homologación», next to «Interior»)
   // (2026-11-17) «Consumos» is the Triciclo family's: on the Basculante it opens «Batería», where its consumption still is
-  const depTri: DepTriciclo | 'proyecto' | 'masas' | 'homologacion' | 'consumos' = dep === 'consumos' ? (esTri ? 'consumos' : 'energia') : dep === 'proyecto' || dep === 'masas' || dep === 'homologacion' || (DEPS_TRICICLO as string[]).includes(dep) ? dep as DepTriciclo | 'proyecto' | 'masas' | 'homologacion' : 'carroceria';
+  // (2026-11-17, «precios») and «Mano de obra», the labour's tab
+  const depTri: DepTriciclo | 'proyecto' | 'masas' | 'homologacion' | 'consumos' | 'manoobra' = dep === 'consumos' ? (esTri ? 'consumos' : 'energia') : dep === 'proyecto' || dep === 'masas' || dep === 'homologacion' || dep === 'manoobra' || (DEPS_TRICICLO as string[]).includes(dep) ? dep as DepTriciclo | 'proyecto' | 'masas' | 'homologacion' | 'manoobra' : 'carroceria';
   // the masses of the design (LadoResumen.tsx): the «Masas» tab, and the 3D's centre of gravity while it is open
   const masas = useMasas(paraCalcular, res);
   useEffect(() => { if (porDeps && dep !== depTri) setDep(depTri); }, [porDeps, dep, depTri]);
   // 2026-11-17: with «Motor» shown alone, its parts one by one (PiezasMotor.tsx)
   const piezas = usePiezasMotor(modelo, porDeps && soloDep && depTri === 'propulsion');
   // (2026-11-17) «Masas» remembered from a Triciclo opens «Proyecto» on a vehicle without that tab (the Aeromóvil 1)
-  useEffect(() => { if (!porDeps && (dep === 'masas' || dep === 'consumos')) setDep('proyecto'); }, [porDeps, dep]);
+  useEffect(() => { if (!porDeps && (dep === 'masas' || dep === 'consumos' || dep === 'manoobra')) setDep('proyecto'); }, [porDeps, dep]);
+  // (2026-11-17) the prototype's cost: parts by department + labour (precios/coste.ts), for «Proyecto» and «Mano de obra»
+  const coste = useMemo(() => (porDeps ? costeProyecto(P, paraCalcular, res) : null), [porDeps, P, paraCalcular, res]);
   // (2026-11-17) the consumption under «Consumos»: the same calculation as its «Rendimiento» block, once the tunnel has the Cd
   const consumoPestana = esTri && paraCalcular.tipo === 'triciclo' && cdTri.cd != null && cdTri.areaRef != null ? textoConsumoPestana(energiaTriciclo(paraCalcular, res.mTot, { cd: cdTri.cd, areaRef: cdTri.areaRef })) : null;
   // the Cuadriciclo Basculante's Cd: the tunnel's, as the Triciclo's
@@ -609,6 +627,8 @@ export default function Aeromovil() {
       ...(d.id === 'proyecto' ? [{ id: 'masas' as IdDepartamento, lema: 'el peso total, el centro de gravedad y el peso en cada eje y en cada rueda' }] : []),
       // (2026-11-17, «consumos») «Consumos» right after «Motor», before «Batería» (Triciclo family only)
       ...(d.id === 'propulsion' && esTri ? [{ id: 'consumos' as IdPestana, lema: 'consumo en litros y kWh a los 100 km, autonomía, velocidades y del enchufe a la rueda' }] : [])] as { id: IdPestana; lema: string }[])
+      // (2026-11-17, «precios») «Mano de obra» at the end
+      .concat([{ id: 'manoobra', lema: 'las horas de taller para construir el prototipo y lo que cuestan' }])
     : DEPARTAMENTOS;
 
   return (
@@ -625,18 +645,25 @@ export default function Aeromovil() {
             alNuevo={() => { setP(PARAMETROS_POR_DEFECTO); setActual(null); cargarDisenoPorDefecto().then(d => { if (d) { setP(deDiseno(d.parametros || {})); setActual(null); } }); }}
             alGuardado={alGuardado} />
           {(esA1 || porDeps)
-            ? <PestanasDepartamento lista={porDeps ? [...pestanas, PESTANA_HOMOLOGACION] : pestanas} kg={porDeps ? kgPorDepartamento(res) : null} consumo={consumoPestana} dep={seccion === 'diseno' ? (porDeps ? depTri : dep) : null} alElegir={d => { setDep(d); setSoloDep(false); if (seccion !== 'diseno') navegar('/aeromovil'); }} />
+            ? <PestanasDepartamento lista={porDeps ? [...pestanas, PESTANA_HOMOLOGACION] : pestanas} kg={porDeps ? kgPorDepartamento(res) : null} consumo={consumoPestana} extra={coste ? { manoobra: eur(coste.manoObra) } : undefined} dep={seccion === 'diseno' ? (porDeps ? depTri : dep) : null} alElegir={d => { setDep(d); setSoloDep(false); if (seccion !== 'diseno') navegar('/aeromovil'); }} />
             : null}
           <div className="flex-1 sm:hidden" />
           {!(esA1 || porDeps) && <div className="hidden flex-1 sm:block" />}
+          {seccion === 'diseno' && (
+            <Button variant="outline" onClick={() => setVerGaraje(v => !v)} aria-pressed={!verGaraje}
+              title={verGaraje ? 'Oculta la vista 3D del garaje: el panel de cada departamento ocupa la página' : 'Vuelve a mostrar la vista 3D del garaje'}
+              className="shrink-0 gap-1 px-2 py-1 text-[11px] normal-case tracking-normal text-slate-700">
+              <Warehouse className="h-3.5 w-3.5 shrink-0" />{verGaraje ? 'Ocultar garaje' : 'Ver garaje'}
+            </Button>
+          )}
           <MenuSecciones lista={SECCIONES.filter(s => (s.k !== 'componentes' && s.k !== 'aranceles') || esA1)} seccion={seccion} abiertas={abiertas} alIr={navegar} />
         </div>
       </header>
 
       {/* El diseño se queda montado aunque se mire otra vista: así «Exportar» puede sacar el STL de lo que se ve. */}
-      <main className={cn('mx-auto max-w-[1600px] gap-4 px-4 py-4', seccion === 'diseno' ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_380px]' : 'hidden')}>
+      <main className={cn('mx-auto max-w-[1600px] gap-4 px-4 py-4', seccion !== 'diseno' ? 'hidden' : verGaraje ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_380px]' : 'flex max-w-3xl flex-col')}>
         <div className="min-w-0">
-        <section ref={ventana3d} aria-label="Vista 3D" className={cn('overflow-hidden bg-slate-50',
+        <section ref={ventana3d} aria-label="Vista 3D" className={cn('overflow-hidden bg-slate-50', !verGaraje && completa === 'no' && 'hidden',
           completa === 'no' ? cn('relative h-[62vh] min-h-[380px] rounded-xl border border-slate-200', esA1 ? 'lg:h-[72vh]' : 'lg:sticky lg:top-[68px] lg:h-[calc(100vh-88px)]')
             : completa === 'css' ? 'fixed inset-0 z-[100] h-[100dvh] w-screen' : 'relative h-full w-full')}>
           <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} bascular={bascular} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeConDisenos} soloGaraje={!!soloGaraje} tunel={tunel} carteles={carteles} cuerposTunel={cuerposTunel} opcionesTunel={opcionesTunelVisor} alElegirPuntoTunel={setPuntoTunel} puntoTunel={puntoTunel} fichasGaraje={disenosGaraje.fichas} superponer={!!superponer && !soloGaraje} vista={vista}
@@ -861,7 +888,8 @@ export default function Aeromovil() {
 
         <aside className="mt-4 flex flex-col gap-3 lg:mt-0">
           {/* round 3 interior (2026-11-12): «Ver solo …» above the sliders of each department (the Aeromóvil 1's and the Triciclo's) */}
-          {(esA1 || porDeps) && (porDeps ? depTri : dep) !== 'proyecto' && capasSolo(porDeps ? depTri : dep) && (() => {
+          {/* (no «Ver solo …» with the garage hidden: there is no 3D view for it to act on) */}
+          {verGaraje && (esA1 || porDeps) && (porDeps ? depTri : dep) !== 'proyecto' && capasSolo(porDeps ? depTri : dep) && (() => {
             const d = porDeps ? depTri : dep, n = NOMBRE_CORTO[d].toLowerCase();
             return (
               <Button variant="outline" aria-pressed={soloDep} onClick={() => verSolo(!soloDep)}
@@ -884,15 +912,19 @@ export default function Aeromovil() {
           {((esA1 || porDeps) ? (porDeps ? depTri : dep) === 'carroceria' : true) && <Bloque titulo="Color de la carrocería"><ColoresCarroceria P={P} set={set} /></Bloque>}
           {/* 2026-11-17 (Eugenio: «mete la parte de aerodinámica dentro de carrocería… un botón que diga "hacer estudio aerodinámico"»): the tunnel and the study, in «Carrocería» (always for the vehicles without departments) */}
           {((esA1 || porDeps) ? (porDeps ? depTri : dep) === 'carroceria' : true) && <BloqueAerodinamica P={P} set={set} kmh={kmhComparar} resolucion={opcionesTunel.resolucion} tunel={tunel} alTunel={alternarTunel} />}
+          {/* (2026-11-17) «Proyecto»: the prototype's cost first (precios/BloqueCoste.tsx) */}
+          {porDeps && depTri === 'proyecto' && coste && <BloqueCoste c={coste} alIr={d => { setDep(d as IdDepartamento); setSoloDep(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />}
           {/* (2026-11-17) «Homologación» of the vehicles with departments: a short card here, the detail under the 3D view */}
           {porDeps && depTri === 'homologacion' ? <ResumenHomologacion P={paraCalcular.P} modelo={paraCalcular} res={res} cd={esTri ? cdTri : esBas ? cdBas : null} nombre={nombreVehiculo} />
+            /* (2026-11-17) «Mano de obra»: the labour's tab (precios/PanelManoObra.tsx) */
+            : porDeps && depTri === 'manoobra' ? (coste ? <PanelManoObra c={coste} P={P} set={set} /> : null)
             /* (2026-11-17) «Masas» and «Proyecto» of the vehicles with departments: their own panels (LadoResumen.tsx) */
             : porDeps && (depTri === 'masas' || depTri === 'proyecto') && (paraCalcular.tipo === 'triciclo' || paraCalcular.tipo === 'basculante') ? <LadoResumen dep={depTri} modelo={paraCalcular} res={res} masas={masas} alIr={d => { setDep(d as IdDepartamento); setSoloDep(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}  extra={depTri === 'proyecto' ? fallosHomologacion : undefined} />
             : modelo.tipo === 'a1' ? <LadoA1 P={P} Pa={Pa} D={D} set={set} res={res} modelo={modelo} neumaticos={neumaticos} malas={malas} dep={dep as IdDepartamento} alNavegar={r => { navegar(r); window.scrollTo({ top: 0 }); }} />
-            : modelo.tipo === 'basculante' ? (paraCalcular.tipo === 'basculante' && res.basculante ? <LadoBasculante P={P} set={set} res={res} modelo={paraCalcular} dep={depTri as Exclude<typeof depTri, 'masas' | 'homologacion' | 'consumos'>} cd={cdBas} ui={{ Bloque, Deslizador, Selector: Selector as never, ListaComprobaciones }} /> : null)
+            : modelo.tipo === 'basculante' ? (paraCalcular.tipo === 'basculante' && res.basculante ? <LadoBasculante P={P} set={set} res={res} modelo={paraCalcular} dep={depTri as Exclude<typeof depTri, 'masas' | 'homologacion' | 'consumos' | 'manoobra'>} cd={cdBas} ui={{ Bloque, Deslizador, Selector: Selector as never, ListaComprobaciones }} /> : null)
             : modelo.tipo === 'bala' ? <LadoBala P={P} set={set} res={res} modelo={modelo} cdTunel={tunel ? cdTunelNuestro : undefined} />
             : modelo.tipo === 'triciclo' && res.triciclo && depTri === 'consumos' && paraCalcular.tipo === 'triciclo' ? <LadoConsumos P={P} set={set} res={res} modelo={paraCalcular} cd={cdTri} />
-            : modelo.tipo === 'triciclo' && res.triciclo ? <><LadoTriciclo P={P} set={set} res={res} modelo={paraCalcular.tipo === 'triciclo' ? paraCalcular : modelo} dep={depTri as Exclude<typeof depTri, 'masas' | 'homologacion' | 'consumos'>} cd={cdTri} abrir={abrirBloque} />
+            : modelo.tipo === 'triciclo' && res.triciclo ? <><LadoTriciclo P={P} set={set} res={res} modelo={paraCalcular.tipo === 'triciclo' ? paraCalcular : modelo} dep={depTri as Exclude<typeof depTri, 'masas' | 'homologacion' | 'consumos' | 'manoobra'>} cd={cdTri} abrir={abrirBloque} />
               {/* (2026-11-17) «Batería»: the solar and charging system, part by part (electrico/) */}
               {depTri === 'energia' && paraCalcular.tipo === 'triciclo' && <BloqueSistemaElectrico modelo={paraCalcular} res={res} />}</>
             : modelo.tipo === 'triciclo' ? null : (<>
