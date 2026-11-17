@@ -131,6 +131,12 @@
       "ruta": "src/components/aeromovil/triciclo/masas.ts",
       "motivo": "masas: motor y depósito libres, pestaña MASAS, Proyecto limpio",
       "desde": "2026-11-17T10:41:59.451Z"
+    },
+    {
+      "agente": "masas",
+      "ruta": "src/components/aeromovil/Visor3D.tsx",
+      "motivo": "masas: motor y depósito libres, pestaña MASAS, Proyecto limpio",
+      "desde": "2026-11-17T10:42:01.825Z"
     }
   ]
 }
