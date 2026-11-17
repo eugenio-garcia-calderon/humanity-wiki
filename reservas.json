@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "src/pages/Aeromovil.tsx",
+      "motivo": "plegado fluido: solo se mueven las alas",
+      "desde": "2026-11-17T22:17:18.316Z"
+    }
+  ]
 }
