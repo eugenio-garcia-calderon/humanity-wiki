@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "ahorcajadas",
-      "ruta": "src/components/aeromovil/triciclo/medidas.ts",
-      "motivo": "ahorcajadas: pasajero más atrás (rango de tPasX)",
-      "desde": "2026-11-17T13:06:12.220Z"
-    },
-    {
       "agente": "notas",
       "ruta": "drizzle/0223_aeromovil_notas.sql",
       "motivo": "notas: notas por desplegable",
