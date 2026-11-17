@@ -613,7 +613,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
 
   useEffect(() => { const st = estado.current; if (!st) return; for (const c of CAPAS) st.G[c.k].visible = visibles[c.k]; }, [visibles]);
   // 2026-11-17: «Mostrar solo esta pieza» inside the «Motor» layer, and its labels (visor/piezasMotor3d.ts). Choosing a
-  // part or a group frames it; going back to the whole engine returns the camera to the view it was in.
+  // part or a group frames it; leaving «Ver solo motor» returns the camera to the view it was in.
   const clavePiezas = piezasMotor ? `${piezasMotor.solo?.join(',') ?? '*'}|${piezasMotor.etiquetas}` : '';
   useEffect(() => {
     const st = estado.current; if (!st) return;
@@ -621,14 +621,15 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     st.piezas = piezasMotor;
     aplicarPiezasMotor(st.G.motor, piezasMotor);
     st.sombraSucia = true;
-    if (piezasMotor?.solo) {
+    // (and pressing «Ver solo motor» frames the whole engine: in the full car view it is a few centimetres on screen)
+    if (piezasMotor && (piezasMotor.solo || !antes || antes.solo)) {
       const b = cajaVisibleMotor(st.G.motor); if (!b) return;
       const c = b.getCenter(new THREE.Vector3()), r = Math.max(0.12, b.getSize(new THREE.Vector3()).length() / 2);
       const dir = st.camera.position.clone().sub(st.controls.target).normalize();
       const d = Math.min(6, 1.6 * r / Math.tan(THREE.MathUtils.degToRad(st.camera.fov) / 2));
       st.target.copy(c);
       st.tween = { from: st.camera.position.clone(), to: c.clone().addScaledVector(dir, d), tf: st.controls.target.clone(), t: 0 };
-    } else if (antes?.solo) {
+    } else if (antes && !piezasMotor) {
       st.target.set(-1.5, 0.55, 0);
       st.tween = { from: st.camera.position.clone(), to: new THREE.Vector3(...VISTAS[vista]), tf: st.controls.target.clone(), t: 0 };
     }
