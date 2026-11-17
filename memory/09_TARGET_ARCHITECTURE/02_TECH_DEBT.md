@@ -988,6 +988,22 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   in tests): a counter-shaft MG2 is ≈ 2 h; the MG2's size is a rule from mass and power, not the catalogue motor's own
   diameter and length (≈ 30 min: add `diametro`/`largo` to `MotorCatalogo`); `tMMotor`'s range is still the hub rule for
   «two motors of half power» with two rear wheels (≈ 20 min to give the central motor its own range).
+## 2026-11-17 · Tyre type (bot «neumaticos»)
+
+- **Triciclo rollover check still uses the fixed `AGARRE` 0.9** (`triciclo/comprobaciones.ts`, held by another bot):
+  the tyre type changes the Triciclo's 0-50 traction but not «Vuelco». Swap in `max(neumaticosTriciclo(T).del/.tras.muSeco)`
+  and the panel texts «Un neumático de ciclomotor agarra unos 0,9 g» in `LadoTriciclo.tsx`: ≈ 15 min.
+- **`pages/Aeromovil.tsx` (comparison card «fuente») still says «rodadura 0,011 (neumático de ciclomotor)»** (file was
+  held): use `crrTriciclo(camposTriciclo(P))` as `LadoTriciclo.tsx` now does: ≈ 5 min.
+- **Grip is relative to the size's own tyre** (`memory/03_DECISIONS.md`): absolute grip per type ≈ 30 min plus Eugenio's
+  OK, since saved designs' acceleration would change.
+- **Price is a rule by width and diameter, ±40 %, not checked in shops**; life is one figure per type (×1.5 front, ×2.5
+  car, ×0.4 bicycle). A real price per catalogue size: ≈ 1 h of shop lookups for 27 sizes.
+- The 3D does not draw the tread (knobs, slicks): ≈ 1 h in `visor/ruedaCatalogo.ts`.
+- **The Triciclo's four tyre fields are optional and get their defaults by `Object.assign(TRICICLO_DEFECTO,
+  NEUMATICOS_DEFECTO)` in `triciclo/campos.ts`**, because `triciclo/defecto.ts` was held by bot «masas2» while that bot
+  waited for `campos.ts`, held by this one. Move the four `'serie'` into `defecto.ts`, make the fields required, delete
+  the `Object.assign`: ≈ 5 min.
 ## 2026-11-17 · Engine parts one by one (solopiezas)
 - **Only the Triciclo family** (Eugenio focuses on the Aeromóvil S). The Basculante, A1 and Gota motor layers have no
   `componente` tags and show no parts list. ≈ 30 min each if ever needed.

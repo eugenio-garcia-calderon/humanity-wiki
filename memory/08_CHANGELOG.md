@@ -12541,6 +12541,31 @@ gasolina y que se conecte al engranaje planetario.»
   rueda trasera; el deslizador pone 13 kg, pero con 31,5 kW de pico su rango empieza en 20,2); el motor de gasolina
   queda en el mismo sitio a lo largo y 3 cm más alto; consumo eléctrico a 120 km/h, de 71,8 a 74,0 Wh/km (+3 %, con un
   Cd de prueba de 0,20 × 1,2 m²); gasolina, de 1,98 a 2,00 L/100 km. Ninguna comprobación nueva en rojo.
+## 2026-11-17 · Tipo de neumático en cada eje (Triciclo, Cuadriciclo en rombo y clásico, Basculante)
+
+Eugenio: «Permite también añadir el tipo de neumático.»
+
+- En **Rodaje › Ejes y ruedas**, junto a la medida de cada eje, dos selectores nuevos: **tipo** de neumático
+  (carretera/turismo, deportivo, hiperdeportivo/semi-slick, eco de baja rodadura, lluvia/mixto, todo tiempo/invierno,
+  trail 90/10, trail 50/50, tacos/off-road, scooter) y **construcción** (radial o diagonal, con o sin cámara, run-flat).
+  Delante y detrás por separado. En el Triciclo en rombo, el «trasero» vale también para la rueda del morro (son de la
+  misma medida).
+- Debajo, una línea por eje con lo que hace: rodadura y masa de la rueda en % respecto al neumático de serie de esa
+  medida, agarre en seco y en mojado (g), cuánto dura (km) y lo que cuesta cada neumático (€, estimado).
+- Todo se mide **respecto al neumático que ya tenía esa medida** («De serie»): una medida deportiva ya es deportiva, una
+  de enduro ya es de tacos. Con «De serie» no cambia ningún número: los diseños guardados siguen igual (comprobado:
+  `triciclo-disenos` «Todo OK»). La rodadura 0,011 de las ruedas de ciclomotor no se ha tocado (sigue pendiente tu
+  decisión de subirla a ~0,016).
+- Qué cambia de verdad en el cálculo: la rodadura (consumo y autonomía), la masa de las ruedas (peso, centro de
+  gravedad), y el agarre del eje que empuja en la aceleración 0-50; en el Basculante, también el agarre en la
+  comprobación de vuelco inclinado. Duración y precio solo se enseñan.
+- Ejemplos: una 180/55 ZR17 deportiva de serie rueda 0,0147; con semi-slick +5 %, agarre 1,00 g en seco y 0,41 en
+  mojado, unos 3.000 km. La 120/90-18 de enduro con neumático de carretera rueda un 26 % mejor. Con tacos delante y
+  detrás, el Triciclo de serie pasa de rodadura 0,011 a 0,0149 y pesa 1,2 kg más.
+- Arreglado de paso: el texto del Triciclo que siempre decía «rodadura 0,011 (neumático de ciclomotor)» ahora dice la
+  rodadura de verdad de las ruedas y neumáticos elegidos.
+- Las cifras son estimaciones en el orden que dan las fuentes (Cossalter, etiqueta europea, guías de duración por tipo),
+  no medidas de cada medida; el precio es una regla por anchura y diámetro (±40 %), sin mirar tiendas hoy.
 ## 2026-11-17 · El motor, pieza a pieza: «Mostrar solo esta pieza»
 
 Eugenio: «Que también aparezca la bomba de agua, la bomba de aceite, el tubo escape, que todo eso aparezca indicado
