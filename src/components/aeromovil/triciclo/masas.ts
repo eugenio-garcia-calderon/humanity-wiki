@@ -244,8 +244,8 @@ export function equipajeEn(m: ModeloTriciclo): { x: number; y: number } {
 // «Masas» tab shows. Until then this was the lever rule between `xF` and `xR`, which in a diamond put the whole weight
 // on the laterals and none on the tail wheel (its swing arm and brake were sized for no load). Two axles: the same as before)
 export function cargasRueda(m: ModeloTriciclo, piezas: PiezaMasa[]): { del: number; tras: number; masa: number } {
-  const mOcc = limitarTriciclo('tMOcc', m.campos), eq = equipajeEn(m);
-  const todo = [...piezas.map(p => ({ nombre: p.nombre, kg: p.kg, x: p.x, y: p.y, z: p.z ?? 0 })), ...m.plazas.map(q => ({ nombre: q.nombre, kg: mOcc, x: cgOcupante(q.pts)[0], y: 0, z: q.z })), { nombre: 'Equipaje', kg: EQUIPAJE, x: eq.x, y: eq.y, z: 0 }];
+  const eq = equipajeEn(m);
+  const todo = [...piezas.map(p => ({ nombre: p.nombre, kg: p.kg, x: p.x, y: p.y, z: p.z ?? 0 })), ...m.plazas.map(q => ({ nombre: q.nombre, kg: q.kg, x: cgOcupante(q.pts)[0], y: 0, z: q.z })), { nombre: 'Equipaje', kg: EQUIPAJE, x: eq.x, y: eq.y, z: 0 }];
   const cg = centroDe(todo), ruedas = ruedasTriciclo(m), cargas = repartirCargas(ruedas, cg.masa, cg.x, cg.z).map(k => Math.max(0, k));
   // the most loaded front wheel (in a diamond, lateral) and rear wheel: the suspension, the brakes and the tyres are sized for them
   const del = Math.max(...ruedas.map((r, i) => (r.eje === 'Eje delantero' || r.eje === 'Laterales' ? cargas[i] : 0)));
