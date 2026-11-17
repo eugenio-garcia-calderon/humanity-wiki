@@ -12411,8 +12411,9 @@ ellas. Y haz que ese comentario tenga una fecha y un autor. Si está registrado 
 es el autor, si no será anónimo.»
 
 - Cada desplegable del panel lateral (Morro, Cola, Cúpula, Motor…, en los cinco vehículos) tiene en su cabecera un
-  icono de nota pequeño y gris; cuando la sección tiene notas se pone ámbar con el número. Al pulsarlo se abre la
-  lista de notas (la más reciente arriba) y una caja para añadir otra, aunque el desplegable esté cerrado.
+  icono de nota pequeño y gris; cuando la sección tiene notas se pone ámbar con el número. Al pulsarlo se abre una
+  ventanita con las notas de esa sección (la más reciente arriba) y una caja para añadir otra, aunque el desplegable
+  esté cerrado. Funciona también para quien no es el dueño (el panel lateral está bloqueado para ellos: las notas no).
 - Cada nota lleva el texto, la fecha y la hora, y el autor: el nombre de la cuenta si hay sesión iniciada.
 - **Con sesión**: la nota se guarda en la web con el diseño abierto (o con el vehículo si no hay un diseño guardado
   abierto) y la ve cualquiera que abra la página. Solo quien la escribió puede editarla; puede quitarla quien la

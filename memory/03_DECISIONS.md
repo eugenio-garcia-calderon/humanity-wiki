@@ -2163,3 +2163,8 @@ Eugenio asked for a dated, authored note on every side-panel section, «anónimo
   blocks). `MenuDisenos` sets where notes go, since it already receives the open design and `P.disposicion`
   (`pages/Aeromovil.tsx` was claimed by another bot; a context provider there is the cleaner home).
 - Reading is public, like the tasks and the designs.
+- **The notes open in a dialog portalled to `document.body`, and the header icon is a `span role="button"`.** For
+  anyone but the owner the side panel is inside `<fieldset disabled>` (pages/Aeromovil.tsx), which disables every
+  button and textarea inside it; inline notes worked only for the owner (caught in the headless test as an anonymous
+  visitor). Alternative: carve the notes out of that fieldset in `pages/Aeromovil.tsx` — more invasive, and that file
+  was claimed by another bot.
