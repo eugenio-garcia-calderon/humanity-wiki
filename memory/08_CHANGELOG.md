@@ -12745,3 +12745,9 @@ El botón «Plegar alas» / «Desplegar alas» pasa a la pantalla 3D, a la izqui
 > «haz que haya más pasos de plegado para que no sea tan ortopédico y se vea una animación de plegado/desplegado suave, no a trompicones»
 
 El plegado y el desplegado siguen durando 3 segundos, pero ahora el coche se recalcula cada 0,1 s y el movimiento sigue una curva que entra y sale despacio. El tiempo manda, no el número de fotogramas.
+
+## 2026-11-17 · Plegado de alas fluido
+
+> «el plegado y desplegado sigue siendo a trompicones, en vez de fluido sin interrupciones visuales»
+
+Antes cada paso del plegado recalculaba todo el coche. Ahora, durante los 3 segundos sólo se mueven las alas en la pantalla 3D, sin recalcular nada; al terminar se guarda el ajuste y se recalcula una vez. Las bisagras se ocultan mientras se mueven.

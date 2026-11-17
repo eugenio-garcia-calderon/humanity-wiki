@@ -29,9 +29,37 @@ function ala(w: CarenadoBWB, lado: 1 | -1, mat: THREE.Material): THREE.Mesh {
   return m;
 }
 
+/** The wing groups on screen: `animarPliegueBWB` moves them in place, with no rebuild of the car. */
+const activos = new Set<THREE.Group>();
+
+/**
+ * Moves the wings to fold fraction `f` (0 flat … 1 folded) by rewriting their vertices, so the fold can animate smoothly.
+ * The hinge seams are hidden while moving; the car is rebuilt with its final setting when the animation ends.
+ */
+export function animarPliegueBWB(f: number): void {
+  for (const G of [...activos]) {
+    const w = G.userData.w as CarenadoBWB | undefined;
+    if (!w || !G.parent) { activos.delete(G); continue; }
+    const v = w.marco(f), nE = w.estaciones, nA = w.puntosAnillo;
+    for (const m of G.children) {
+      if (m.name === 'carenado-bwb-bisagra') { m.visible = false; continue; }
+      if (!(m instanceof THREE.Mesh)) continue;
+      const lado = m.userData.lado as 1 | -1, pos = m.geometry.getAttribute('position') as THREE.BufferAttribute;
+      for (let k = 0; k < nE * nA; k++) { pos.setXYZ(k, v[3 * k], v[3 * k + 1], lado * v[3 * k + 2]); }
+      let cx = 0, cy = 0, cz = 0;
+      for (let j = 0; j < nA; j++) { const k = (nE - 1) * nA + j; cx += v[3 * k]; cy += v[3 * k + 1]; cz += lado * v[3 * k + 2]; }
+      pos.setXYZ(nE * nA, cx / nA, cy / nA, cz / nA);
+      pos.needsUpdate = true;
+      m.geometry.computeVertexNormals();
+    }
+  }
+}
+
 /** Both wings and their hinge lines, as one group. */
 export function construirBWB(w: CarenadoBWB, pintura: THREE.Material, junta: THREE.Material): THREE.Group {
   const G = new THREE.Group(); G.name = 'carenado-bwb';
+  G.userData.w = w;
+  activos.add(G);
   G.add(ala(w, 1, pintura), ala(w, -1, pintura));
   // the fold: a dark seam over the hinge station's upper surface, both wings
   const nA = w.puntosAnillo, i = w.bisagra.estacion, v = w.vista, mitad = Math.floor(nA / 2);

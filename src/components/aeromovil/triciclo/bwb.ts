@@ -150,6 +150,8 @@ export interface CarenadoBWB {
   plegadas: boolean; anguloPliegue: number;
   /** Span tip to tip (m): unfolded, folded at the slider's angle, and as shown. */
   envergadura: number; envergaduraPlegada: number; envergaduraVista: number;
+  /** The wing vertices at fold fraction f (0 flat … 1 folded at the slider angle): animates without rebuilding the car. */
+  marco: (f: number) => Float32Array;
   /** The exposed planform (both wings, m²), wetted area (m², both, outside the body), frontal area added to the body's (m²). */
   areaPlanta: number; areaMojada: number; areaFrontal: number; areaWinglets: number;
   /** Mean chord (m), aspect ratio of the exposed wing, the mid-chord sweep (°), the outer thickness (fraction). */
@@ -346,6 +348,8 @@ export function carenadoBWB(T: ConBWB, F: FormaBala, ruedas: { xLat: number; via
     centro: mojada > 0 ? [cx / mojada, cy / mojada] : [le0 - cB / 2, yR],
     raiz: { le: est[0].le, te: est[0].le - est[0].c, y: yR, z: zS },
     holguraPods,
+    // (2026-11-17) the wing vertices at any fold fraction f (0 flat … 1 at the slider's angle), for a smooth animation
+    marco: (f: number): Float32Array => construir(ang * f),
   };
 }
 
