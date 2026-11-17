@@ -153,6 +153,8 @@ export function seccionesTriciclo(res: Resultados, m: ModeloTriciclo): PesosSecc
     ['carroceria', 'Cúpula', /^Cúpula$/],
     ['carroceria', 'Techo solar y ventanas', /^(Carrocería: bajo el panel|Paneles solares)/],
     ['carroceria', 'Carenados', /^Carenados/],
+    // 2026-11-17: the blended-wing-body fairing (triciclo/bwb.ts)
+    ['carroceria', 'Carenado BWB (ala integrada)', /^Carenado BWB/],
     ['carroceria', 'Puertas y maletero', /^(Puertas|Portón|Montantes|Retrovisores)/],
     ['chasis', 'Bastidor', /^Bastidor$/],
     ['rodaje', 'Ejes y ruedas', /^(Ruedas?\b|Frenos)/],

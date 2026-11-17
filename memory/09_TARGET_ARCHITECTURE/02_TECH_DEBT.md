@@ -1033,6 +1033,12 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **Power electronics: thermal start logic is descriptive** (2026-11-17, electronica). `tEpArrKW`, `tEpArrVel`, `tEpHist`, `tEpCalent` only drive a table of which motor runs at each speed; only `tEpArrSoc` acts (electric range of a hybrid). A drive-cycle SOC simulation (WMTC) that uses them for litres and range: ≈ 1 day. The regen limit `tEpRegen` does not reduce consumption yet: ≈ 2 h with a stop-and-go share per speed. The HCU (hybrid control unit) has no part in any parts list (consumos' electrical system or Motor): ≈ 30 min once a product is chosen.
 - **Power electronics, not seen in a browser before merging** (2026-11-17, electronica). Eugenio asked to publish at once; everything passed tsc, build and every Aeromóvil script in CI and the «Motor › Electrónica de potencia» block was seen in a headless browser with the Aeromóvil S, but the «Homologación › Estudio L7e / Ensayos» sections were not (the screenshot run timed out). Also: the block says «Energía › Sistema solar y de carga», and that tab is now labelled «Batería». Check them on humanity.wiki (`?sw=off`) with the Aeromóvil S: ≈ 15 min.
 - **The power electronics ignore the e-motor position option `tMotorElec`** (merged the same day by mgplanetario): with the central MG2 on the planetary, the e-motor's power still reaches the wheels as before; whether the HCU limits apply differently there is not modelled: ≈ 1 h.
+- **BWB fairing (2026-11-17) shortcuts**: (1) its fields are not in `CamposTriciclo`/`Parametros` (cast `Parametros &
+  CamposBWB`), and its sliders have no «¿qué es?» explanation (`explicaciones/triciclo.ts` was held): ≈ 30 min. (2) The
+  wings' drag is not added to the Energía consumption, and the lift check lives in the block, not in
+  `comprobaciones.ts` (held by another bot): ≈ 20 min. (3) A click on a wing in the 3D does not open its block
+  (`zonaTriciclo`): ≈ 10 min. (4) The wing root ring sits on the skin at a fixed height; a wing much thicker than the
+  body at the tail falls back to the centre plane (no gap, but a visible joint): a true surface-surface fillet ≈ 1 day.
 ## 2026-11-17 · Supplier/model/files per part: shortcuts of the first version (bot «proveedores»)
 
 - **`Parametros.proveedores` is declared by module augmentation** in `proveedores/datos.ts`, not in `geometria.ts` next

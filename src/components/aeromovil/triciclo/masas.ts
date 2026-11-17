@@ -3,6 +3,7 @@
 import { factorMasaAsiento } from '../filasTriciclo';
 import { desgloseMotorGasolina } from '../piezasMotor';
 import { masaReductora } from '../catalogoTren';
+import { piezasBWB } from './bwb';
 import { MATERIALES_CARENADO, MATERIALES_CHASIS, largoTubo } from '../geometria';
 import { APLASTADO_BALA } from '../garaje/balaMedidas';
 import { neumaticosTriciclo } from './neumaticos';
@@ -131,6 +132,8 @@ export function piezasTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cris
   o.push(...m.interior.piezas);
   // 2026-11-17 (capo): the hybrid's radiator, fan, pipes, coolant and intake ducts (none with «Toma de aire: Ninguna»)
   o.push(...piezasRefrigeracion(m));
+  // 2026-11-17: the blended-wing-body fairing's wings, their inner structure and the fold (bwb.ts; none when it is off)
+  if (m.bwb) o.push(...piezasBWB(m.bwb, MATERIALES_CARENADO[m.campos.tMatCarenado].kgm2mm * limitarTriciclo('tEspCarenado', m.campos)));
   return dimensionar(m, o);
 }
 export function piezasBase(m: ModeloTriciclo, ar: { carroceria: number; cristal: number; solar: number }, centros: { xPiel: number; yPiel: number; xCristal: number; yCristal: number }, pods: { area: number; areaTras?: number }): PiezaMasa[] {

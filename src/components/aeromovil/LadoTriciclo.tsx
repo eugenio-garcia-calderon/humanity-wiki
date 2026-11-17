@@ -23,6 +23,7 @@ import { ContextoProveedores } from './proveedores/ProveedorParte';
 import { conPrecio, precioSeccion, preciosDiseno, textoPesoPrecio, type ContextoPrecio } from './precios/precios';
 import { valoresCatalogo, type CATALOGO_CLAVES } from './catalogoTren';
 import { fmt, m2, Deslizador, Bloque, Selector, ListaComprobaciones } from './controles';
+import { BloqueBWB, BLOQUE_BWB } from './BloqueBWB';
 import { neumaticosTriciclo } from './triciclo/neumaticos';
 import { crrTriciclo, textoCrrTriciclo } from './triciclo/energia';
 import { lineaNeumatico } from './ruedas/neumaticos';
@@ -478,6 +479,8 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
       {dep === 'propulsion' && <BloqueElectronica T={T} set={set} modelo={modelo} mTot={res.mTot} e={e} plegable={{ abierto: abiertos.has(BLOQUE_ELECTRONICA), alAlternar: () => alternar(BLOQUE_ELECTRONICA) }} />}
       {/* (2026-11-17, capo) the hybrid's cooling and air intakes: RefrigeracionTriciclo.tsx */}
       {dep === 'propulsion' && modelo.phev && <BloqueRefrigeracion P={P} set={set} modelo={modelo} seccion={pesoSeccion(pesosSec, 'propulsion', BLOQUE_REFRIGERACION)} plegable={{ abierto: abiertos.has(BLOQUE_REFRIGERACION), alAlternar: () => alternar(BLOQUE_REFRIGERACION) }} />}
+      {/* (2026-11-17) the blended-wing-body fairing: BloqueBWB.tsx, triciclo/bwb.ts */}
+      {dep === 'carroceria' && <BloqueBWB P={P} set={set} modelo={modelo} res={res} cdA={cd.cd != null && cd.areaRef != null ? cd.cd * cd.areaRef : null} seccion={pesoSeccion(pesosSec, 'carroceria', BLOQUE_BWB)} plegable={{ abierto: abiertos.has(BLOQUE_BWB), alAlternar: () => alternar(BLOQUE_BWB) }} />}
 
       {dep === 'carroceria' && (
         <Bloque titulo="Lo que se mide" nota="estimación">

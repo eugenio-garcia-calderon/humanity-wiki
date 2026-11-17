@@ -14,6 +14,7 @@ import { ocupante } from './ocupante';
 import { vestirRueda } from './ruedaCatalogo';
 import { fichaRueda } from '../ruedas/catalogo';
 import { dibujarRefrigeracion } from './refrigeracion';
+import { construirBWB } from './bwb';
 
 /** The Triciclo's front wheels and pods turned `angulo` degrees (+ to the left: the left wheel is then the inner one). */
 export function girarTriciclo(G: Record<CapaId, THREE.Group>, m: ModeloTriciclo, angulo: number) {
@@ -151,6 +152,8 @@ export function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<
   puertasG.clear();
   const b = construirBalaCon(m.F, { M: Mb, calidad, cupulaAparte: true, asientos: m.sillines, aleta: m.aleta, triciclo: opcionesCabinaTriciclo(m) });
   repartirBala(G, puertasG, b);
+  // 2026-11-17: the blended-wing-body fairing (triciclo/bwb.ts), in the body's paint
+  if (m.bwb) G.carenado.add(construirBWB(m.bwb, Mb.chapa, Mb.junta));
   for (const t of m.tubos) { if (t.curva) tuboCurvo(G.chasis, t.curva, t.d, M.alu); else tube(G.chasis, t.a, t.b, t.d, M.alu); }
   for (const c of m.baterias) cajaRedonda(G.baterias, [(c.x0 + c.x1) / 2, (c.y0 + c.y1) / 2, 0], [c.x1 - c.x0, c.y1 - c.y0, 2 * c.hz], M.batt, 0.015);
   // (2026-11-17: the controller and the hub motors carry a `componente`, so «Mostrar solo esta pieza» finds them: piezasMotor.ts)

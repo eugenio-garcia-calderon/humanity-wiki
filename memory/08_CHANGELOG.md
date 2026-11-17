@@ -12669,6 +12669,27 @@ Eugenio: «Crea un nuevo apartado dentro de MOTOR que sea Electronica de potenci
 - Las cifras se usan: la velocidad sostenida y punta en eléctrico, la aceleración y la velocidad solo con gasolina respetan los límites; nueva «velocidad con los dos a la vez»; la potencia de la homologación es la continua total del modo más potente. Con los ajustes de serie (sin límite) todo da lo mismo que antes, y los diseños guardados no cambian.
 - **Homologación › Estudio L7e-A2**: el estudio de Eugenio resumido y calculado en vivo para el diseño: OK / No OK / A comprobar para los campos 1.8.3, 1.8.5, 1.8.7 y 1.8.9 de la ficha (901/2014), cada modo ensayado (134/2014), los dos limitadores (3/2014 anexo XVIII) y la protección contra la manipulación; y la tabla de escenarios (28 / 45 / 15 kW) con los números del diseño.
 - **Homologación › Ensayos**: una pestaña por ensayo (térmico, eléctrico 30 min según UN 85, conjunto híbrido en cada modo, limitaciones no eliminables, velocidad máxima, emisiones, ruido, frenado, alta tensión y compatibilidad electromagnética), con objetivo, cómo se hace, qué declarar, las cifras del diseño y lo que se espera. Todos pendientes. `scripts/homologacion.ts` los imprime y comprueba los números del estudio.
+## 2026-11-16 · Carenado BWB (ala integrada) y la propuesta «Aeromóvil BWB»
+
+Eugenio: «desarrolla la opción de hacer un carenado extra, que sea al estilo Blended Wing Body para que el Aeromóvil se
+parezca a un avión como el Airbus ZeroE … y que a la mitad de cada ala exista la capacidad de que se pliegue» (2026-11-17).
+
+- Nuevo bloque «Carenado BWB (ala integrada)» en Carrocería de la familia Triciclo. Apagado por defecto: ningún diseño
+  guardado cambia. Con él encendido salen dos alas que nacen del costado de la carrocería y se funden con ella.
+- Deslizadores: envergadura, posición detrás del morro, altura en el costado, cuerda en la raíz y en la punta, flecha,
+  diedro, espesor del ala y espesor junto a la carrocería, torsión, incidencia, largo de la integración, cuerda extra junto
+  a la carrocería, radio del filete, alto e inclinación del winglet, línea de plegado y ángulo de plegado. Opciones: perfil
+  (reflejado, simétrico, curvo), punta (redondeada, recta, winglet, sharklet) y «Alas plegadas».
+- El bloque dice la envergadura abierta y plegada contra los límites de anchura (1,5 / 2,0 / 2,55 m); la pestaña
+  Homologación lee el ancho que se ve (plegado o no). También la masa añadida, la superficie mojada, el área frontal y, como
+  estimación de libro (el túnel no ve sustentación), el arrastre de las alas, la potencia que cuestan y la sustentación a
+  velocidad máxima, con aviso si levantan más del 5 % del peso. Avisa si el ala atraviesa los carenados de las ruedas.
+- Masas en su desplegable (piel, largueros, bisagras y actuadores) y sus precios.
+- Propuesta «Aeromóvil BWB (propuesta)» en el menú de diseños (familia Triciclo): el «Aermovil Rombo» (id 14) con el
+  carenado encendido. No se guarda sola; «Guardar como nuevo» la guarda de verdad. Envergadura 3,21 m abierta, 1,96 m
+  plegada a 120°, +20,6 kg, +895 €.
+- Para cargarla sin pantalla (otro bot): `PROPUESTA_BWB` de `src/components/aeromovil/triciclo/propuestaBWB.ts` en
+  `localStorage['aeromovil.parametros.v5']` y `localStorage['aeromovil.diseno'] = 'null'`, y recargar `/aeromovil`.
 ## 2026-11-17 · Proveedor, modelo y archivos en cada componente
 
 Eugenio: «también añade en que todos los componentes, aparte de tener un peso y un precio, se pueda elegir un proveedor

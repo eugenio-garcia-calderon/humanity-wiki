@@ -2296,6 +2296,18 @@ sections rely on.
 **Decision.** Fields `tEp…` in `CamposTriciclo`, model in `triciclo/electronica.ts` (pure: modes, continuous and peak totals, limiters), UI in `electronica/BloqueElectronica.tsx` (its own grouped sliders; LadoTriciclo skips that block in its generic list). `energia.ts` drives the electric speeds and acceleration with the limited power and adds `vmaxConjunta`; `ficha.ts` takes `potenciaCategoria` = continuous total. Every default (no limit = 0, strategy «libre», no sport, map «normal», engine start at 10 % SOC = the old USABLE) reproduces the previous numbers exactly.
 **Alternatives.** (a) Simulate the start logic over a drive cycle (SOC over time): ≈ 1 day, and no cycle exists in the model; the start logic is shown as a speed table instead. (b) Generic sliders only: «0» would read «0,0 kW» instead of «sin límite» and the thermal start rows would need more visibility rules in LadoTriciclo.
 **Not modelled.** The combined top speed and the hybrid limits are the controller's configuration, not a measurement; the regen limit is declared only (the consumption does not use it yet).
+
+## 2026-11-17 · BWB fairing: own optional fields and own block, not FILAS
+
+**Decision.** The blended-wing-body fairing (`triciclo/bwb.ts`) keeps its 21 fields optional (`tBwb…`, `CamposBWB`) with
+defaults inside its own module (`BWB_DEFECTO`), its own slider table (`FILAS_BWB`) and its own block (`BloqueBWB.tsx`),
+instead of `CamposTriciclo` / `FILAS` / `TRICICLO_DEFECTO`. Its wings are a vertex grid computed in the pure model (so
+masses, width and the pods' clearance read the same geometry) and turned into a mesh in `visor/bwb.ts`. The wings' drag and
+lift are textbook estimates (Raymer, DATCOM) shown in the block; the tunnel and the consumption are not touched.
+**Alternatives.** (a) The FILAS recipe: needs `campos.ts`, `defecto.ts` and `explicaciones/triciclo.ts`, all held by
+another bot today; and 21 rows in 4 files. (b) Add the wings to the tunnel's body: the tunnel has no lift and is calibrated
+on cars without wings; it would move every calibration figure. (c) A preset saved in the database: agents must not write
+production data by hand, so it is a built-in proposal with a negative id in `Disenos.tsx` `PROPUESTAS`.
 ## 2026-11-17 · Supplier, model and files per part: where they live (bot «proveedores»)
 
 - **Text and links live in the design** (`Parametros.proveedores`, keyed by the part's name in the mass model — the
