@@ -82,8 +82,10 @@ export function Deslizador({ id, etiqueta, valor, min, max, paso, mostrar, alCam
   );
 }
 
-export function Bloque({ titulo, nota, children, plegable, id }: {
+export function Bloque({ titulo, nota, children, plegable, id, peso }: {
   titulo: string; nota?: string; children: React.ReactNode;
+  /** (2026-11-17) the section's weight, «8,4 kg» (`textoPesoSeccion`, masasSecciones.ts); absent or null: no weight */
+  peso?: string | null;
   /** (2026-11-15) an accordion: folded, only its title shows, and a click opens or closes it */
   plegable?: { abierto: boolean; alAlternar: () => void };
   id?: string;
@@ -93,7 +95,7 @@ export function Bloque({ titulo, nota, children, plegable, id }: {
       <Button variant="ghost" onClick={plegable.alAlternar} aria-expanded={plegable.abierto}
         className="-mx-1 w-[calc(100%+0.5rem)] justify-between px-2 py-1.5 text-xs font-semibold uppercase tracking-wider text-slate-600 hover:bg-slate-50">
         <span>{titulo}</span>
-        <span className="flex items-center gap-2">{nota && <span className="font-mono text-[11px] font-normal normal-case tracking-normal text-slate-400">{nota}</span>}<ChevronDown className={cn('h-4 w-4 transition-transform', plegable.abierto && 'rotate-180')} /></span>
+        <span className="flex items-center gap-2">{peso && <PesoCabecera texto={peso} />}{nota && <span className="font-mono text-[11px] font-normal normal-case tracking-normal text-slate-400">{nota}</span>}<ChevronDown className={cn('h-4 w-4 transition-transform', plegable.abierto && 'rotate-180')} /></span>
       </Button>
       {plegable.abierto && children}
     </section>
@@ -101,11 +103,16 @@ export function Bloque({ titulo, nota, children, plegable, id }: {
   return (
     <section id={id} className="flex flex-col gap-2.5 rounded-xl border border-slate-200 bg-white p-3.5">
       <h3 className="flex items-baseline justify-between text-xs font-semibold uppercase tracking-wider text-slate-500">
-        {titulo}{nota && <span className="font-mono text-[11px] font-normal normal-case tracking-normal text-slate-400">{nota}</span>}
+        {titulo}{(nota || peso) && <span className="flex items-baseline gap-2">{peso && <PesoCabecera texto={peso} />}{nota && <span className="font-mono text-[11px] font-normal normal-case tracking-normal text-slate-400">{nota}</span>}</span>}
       </h3>
       {children}
     </section>
   );
+}
+
+/** A section's weight in its header (2026-11-17): darker than the note, so it reads first. */
+function PesoCabecera({ texto }: { texto: string }) {
+  return <span className="whitespace-nowrap font-mono text-[11px] font-semibold normal-case tracking-normal text-teal-800" title="Lo que pesa lo que controla este desplegable (estimación del modelo)">{texto}</span>;
 }
 
 export function Selector<T extends string>({ id, etiqueta, valor, opciones, alCambiar, clave }: { id: string; etiqueta: string; valor: T; opciones: { k: T; n: string }[]; alCambiar: (v: T) => void; clave?: keyof Parametros }) {
