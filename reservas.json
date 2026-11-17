@@ -191,6 +191,12 @@
       "ruta": "src/components/aeromovil/garaje/NavegadorGaraje.tsx",
       "motivo": "legado: categorías Aeromóvil S / referencia / legado",
       "desde": "2026-11-17T14:14:35.903Z"
+    },
+    {
+      "agente": "legado",
+      "ruta": "src/components/aeromovil/legado.ts",
+      "motivo": "legado: fichero nuevo",
+      "desde": "2026-11-17T14:14:46.975Z"
     }
   ]
 }
