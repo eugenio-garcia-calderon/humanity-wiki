@@ -3,7 +3,7 @@
 import { Fragment, useEffect, useMemo, useState } from 'react';
 import { Wind } from 'lucide-react';
 import { type Modelo, type ModeloTriciclo, type Parametros, type Resultados } from './geometria';
-import { ALTO_FILAS, ANCHO_FILAS, AGARRE, AUXILIARES, valorFijoCatalogo, CRR, EQUIPAJE, RENDIMIENTO, RUEDAS_TRICICLO, SELECTORES_TRICICLO, USABLE, VUELCO_OBJETIVO, bateriaChasis, camposTriciclo, cargasRueda, conButacas, conSalpicadero, grupoPieza, masaButaca, conPortonAptera, conPuertas, deslizadoresTriciclo, energiaTriciclo, conBatalla, esCuatro, esRombo, estirarTriciclo, guardarTriciclo, largoTriciclo, lemasTriciclo, limitarTriciclo, nombreTriciclo, vistaTriciclo, type DepTriciclo, type FichaTriciclo } from './geometriaTriciclo';
+import { ALTO_FILAS, ANCHO_FILAS, AUXILIARES, valorFijoCatalogo, EQUIPAJE, RENDIMIENTO, RUEDAS_TRICICLO, SELECTORES_TRICICLO, USABLE, bateriaChasis, camposTriciclo, cargasRueda, conButacas, conSalpicadero, grupoPieza, masaButaca, conPortonAptera, conPuertas, deslizadoresTriciclo, energiaTriciclo, conBatalla, esCuatro, esRombo, estirarTriciclo, guardarTriciclo, largoTriciclo, lemasTriciclo, limitarTriciclo, nombreTriciclo, vistaTriciclo, type DepTriciclo, type FichaTriciclo } from './geometriaTriciclo';
 import { TECNOLOGIAS_BASCULA, type Tilt } from './basculacion';
 import { TAPICES } from './interiorTriciclo';
 import { cuerpoTriciclo, peticionDe as peticionTunel } from './tunel/nuestro';
@@ -19,11 +19,12 @@ import { BloqueElectronica, BLOQUE_ELECTRONICA } from './electronica/BloqueElect
 import { BLOQUE_REFRIGERACION, BloqueRefrigeracion } from './RefrigeracionTriciclo';
 import { pesoSeccion, seccionesTriciclo, textoPesoSeccion } from './masasSecciones';
 import { DesglosePeso, SinSeccion } from './PesoSeccion';
+import { ContextoProveedores } from './proveedores/ProveedorParte';
 import { conPrecio, precioSeccion, preciosDiseno, textoPesoPrecio, type ContextoPrecio } from './precios/precios';
 import { valoresCatalogo, type CATALOGO_CLAVES } from './catalogoTren';
 import { fmt, m2, Deslizador, Bloque, Selector, ListaComprobaciones } from './controles';
 import { neumaticosTriciclo } from './triciclo/neumaticos';
-import { crrTriciclo } from './triciclo/energia';
+import { crrTriciclo, textoCrrTriciclo } from './triciclo/energia';
 import { lineaNeumatico } from './ruedas/neumaticos';
 import { ANGULO_MAX, estimacionKamm } from './garaje/kamm';
 
@@ -353,7 +354,7 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
         ['  energía solar al día (estimada)', res.areas.solar > 0.005 ? `${fmt(res.solarDia / 1000)} kWh · ${e ? `${Math.round(e.kmSol)} km` : sinCd}` : '—'],
       ])}
       {cd.calculando && <p className="flex items-center gap-1.5 text-xs text-sky-800"><Wind className="h-3.5 w-3.5 animate-pulse" />El túnel de viento está calculando el Cd de esta forma (unos segundos). Hasta que acabe, no hay cifra.</p>}
-      <p className="text-xs text-slate-500">El Cd lo calcula el túnel con la silueta de la carrocería y sus {tresOCuatro} ruedas (no hay fórmula del editor para esta forma); los carenados y los brazos solo entran como ruedas carenadas, así que el real será algo más alto. {nOcc === 1 ? 'Con el piloto solo' : `Con ${['', 'uno', 'dos', 'tres', 'cuatro'][nOcc]} ocupantes`} de {deKg} ({Math.round(res.mTot)} kg en total), rodadura {fmt(crrTriciclo(T), crrTriciclo(T) === CRR ? 3 : 4)} ({crrTriciclo(T) === CRR ? 'neumático de ciclomotor' : 'la media de los neumáticos elegidos, con su tipo, en «Ejes y ruedas»'}), motor y controlador al {Math.round(RENDIMIENTO * 100)} %, {AUXILIARES} W de equipos y la batería usable al {Math.round(USABLE * 100)} %. Todo supuesto, no medido.</p>
+      <p className="text-xs text-slate-500">El Cd lo calcula el túnel con la silueta de la carrocería y sus {tresOCuatro} ruedas (no hay fórmula del editor para esta forma); los carenados y los brazos solo entran como ruedas carenadas, así que el real será algo más alto. {nOcc === 1 ? 'Con el piloto solo' : `Con ${['', 'uno', 'dos', 'tres', 'cuatro'][nOcc]} ocupantes`} de {deKg} ({Math.round(res.mTot)} kg en total), rodadura {fmt(crrTriciclo(T), 4)} ({textoCrrTriciclo(T)}), motor y controlador al {Math.round(RENDIMIENTO * 100)} %, {AUXILIARES} W de equipos y la batería usable al {Math.round(USABLE * 100)} %. Todo supuesto, no medido.</p>
     </Bloque>
   );
   // round 3 interior (2026-11-12, Eugenio: «dentro del proyecto, que lo primero que aparezca sean todos los componentes que hay y el peso de cada uno»)
@@ -385,7 +386,8 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
     </Bloque>
   );
   return (
-    <>
+    // (2026-11-17, «proveedores») each part's supplier, model and files read the design from here (proveedores/)
+    <ContextoProveedores.Provider value={{ P, set }}>
       {dep === 'proyecto' && peso}
       <Bloque titulo={lemas[dep]} nota={nombreTriciclo(T)}>
         {cuatro || rombo
@@ -452,7 +454,7 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
             {rt.viaSubida && <p className="-mt-1 text-xs text-amber-800">La vía sube a {m2(rt.viaSubida)}: es lo mínimo para que los carenados, girados a tope, queden a 3 cm de la carrocería.</p>}
             {rombo ? <p className="-mt-1 text-xs text-slate-500">En rombo la rueda del morro va donde la lleva el Cuadriciclo Bala en rombo, y las dos laterales a {m2(-modelo.xF)} por detrás: mejor cerca del centro de gravedad, que está a {m2(-res.triciclo!.cg.x)} (abajo, «Vuelco»). De la del morro a la de la cola, {m2(-modelo.xR)}.</p> : <p className="-mt-1 text-xs text-slate-500">El eje delantero va detrás de donde el Cuadriciclo en rombo lleva su rueda delantera: así el peso queda más cerca de las dos ruedas de delante y {cuatro ? 'la vía de delante pesa más en el vuelco' : 'el triciclo vuelca menos'} (abajo, «Vuelco»). Batalla {m2(modelo.batalla)}.</p>}
             {bloque === 'Ejes y ruedas' && <p className="-mt-1 text-xs text-slate-500">Ruedas traseras: una dentro de la cola, sobre un basculante, como un triciclo; o dos fuera, en carenados como los de delante sobre dos brazos carenados cada uno, que no giran: cuatro ruedas. Con dos, el motor se reparte en dos motores de buje, uno en cada rueda, y la cola queda libre para el maletero.{cuatro ? ` La vía trasera va de lo justo para que los carenados queden a 3 cm de la cola (${m2(vistaTriciclo(deslizadoresTriciclo().find(f => f.clave === 'tViaTras')!, T).min)}) a la vía delantera más ancha; de serie, la de delante.` : ''}</p>}
-            {(() => { const n = neumaticosTriciclo(T); return <p className="-mt-1 text-xs text-slate-600"><b>Neumáticos delanteros:</b> {lineaNeumatico(n.del)} <b>{rombo ? 'Morro y cola:' : cuatro ? 'Traseros:' : 'Trasero:'}</b> {lineaNeumatico(n.tras)} Comparado con el neumático de serie de esa medida; agarre en seco y mojado, duración y precio son estimaciones con sus fuentes en el código.</p>; })()}
+            {(() => { const n = neumaticosTriciclo(T); return <p className="-mt-1 text-xs text-slate-600"><b>Neumáticos delanteros:</b> {lineaNeumatico(n.del)} <b>{rombo ? 'Morro y cola:' : cuatro ? 'Traseros:' : 'Trasero:'}</b> {lineaNeumatico(n.tras)} Rodadura y masa, comparadas con el neumático de serie de esa medida; el agarre es absoluto: un neumático de carretera radial agarra 0,90 g en seco sea cual sea su medida (uno diagonal de ciclomotor, 0,86). Agarre, duración y precio son estimaciones con sus fuentes en el código.</p>; })()}
           </>}
           {bloque === 'Bastidor' && <p className="-mt-1 text-xs text-slate-500">Dos largueros sobre la panza con {modelo.larguerosTraseros ? 'cinco' : 'cuatro'} travesaños, {paquete ? 'la cuna de la suspensión delantera (con la batería a lo largo del bastidor, en el morro ya no hay batería), el paquete de batería sobre el fondo de la panza, con los largueros pasando por dentro' : 'la cuna de la batería (donde se apoya la suspensión delantera)'}, los soportes de los {butacas ? 'asientos' : filas ? 'asientos' : 'sillines'}, la torreta del amortiguador{modelo.larguerosTraseros ? ', los largueros siguiendo hasta el eje trasero (suben con la panza donde la cola se levanta y se cierran donde se estrecha) y una cuna trasera hasta donde llegan los brazos de los carenados de atrás' : ''} y el soporte de la columna de dirección: {fmt(rt.bastidor.metros, 1)} m de tubo. {cuatro ? (modelo.larguerosTraseros ? '' : 'Los largueros acaban en la torreta: «Largueros: hasta» › «El eje trasero» los lleva hasta donde las ruedas de atrás meten su peso. ') : 'Con una rueda detrás, los largueros acaban en la torreta: la rueda va entre ellos, en la cola. '}La separación de los largueros se mide de eje a eje; más separados, el bastidor es más ancho y el paquete de batería, que es un porcentaje de ese ancho, también. Se ve con «Rayos X» o la capa «Chasis».</p>}
           {bloque === 'Cola' && modelo.F.kamm && <ParrafoKamm modelo={modelo} cd={cd} />}
@@ -500,8 +502,8 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
             ['Centro de gravedad: altura', cm(rt.cg.y, 0)], ['  detrás del eje delantero', m2(modelo.xF - rt.cg.x)], ['  peso sobre las ruedas delanteras', `${Math.round(rt.vuelco.repartoDel * 100)} %`],
             ['Radio de giro (rueda de fuera)', m2(rt.giro.radio)], ['Ruedas a tope: dentro · fuera', `${Math.round(rt.giro.dentro)}° · ${fmt(rt.giro.fuera, 1)}°`],
           ])}
-          {cuatro && <p className="text-xs text-slate-500">Con cuatro ruedas, umbral de vuelco = vía efectiva ÷ (2 × altura del centro de gravedad), con la vía efectiva entre la de delante ({m2(modelo.via.del)}) y la de detrás ({m2(modelo.via.tras)}) según el peso que lleva cada eje: la aceleración lateral, en g, a la que una curva lo tumbaría sobre las dos ruedas de fuera. Un neumático de ciclomotor agarra unos {fmt(AGARRE, 1)} g en seco: por debajo de eso vuelca antes de derrapar (rojo); se pide {fmt(VUELCO_OBJETIVO)} g porque el cálculo es de un sólido rígido. Con la misma vía delante y detrás, es la mitad de la vía entre la altura del centro de gravedad, como en un coche: mucho más que con una rueda detrás, que solo apoya en un punto del centro. Solo giran las de delante: el radio de giro es el mismo.</p>}
-          {!cuatro && <p className="text-xs text-slate-500">Umbral de vuelco = vía × distancia del centro de gravedad al eje trasero ÷ (2 × altura del centro de gravedad × batalla): la aceleración lateral, en g, a la que una curva lo tumbaría sobre una rueda delantera y la trasera. Un neumático de ciclomotor agarra unos {fmt(AGARRE, 1)} g en seco: por debajo de eso vuelca antes de derrapar (rojo). Se pide {fmt(VUELCO_OBJETIVO)} g porque el cálculo es de un sólido rígido: la suspensión y los neumáticos, al ceder, lo bajan un 10-15 %. Más vía, el eje delantero más atrás, la batería más pesada o los sillines más bajos lo suben; más altura libre al suelo y más ocupantes, sobre todo detrás, lo bajan.</p>}
+          {cuatro && <p className="text-xs text-slate-500">Con cuatro ruedas, umbral de vuelco = vía efectiva ÷ (2 × altura del centro de gravedad), con la vía efectiva entre la de delante ({m2(modelo.via.del)}) y la de detrás ({m2(modelo.via.tras)}) según el peso que lleva cada eje: la aceleración lateral, en g, a la que una curva lo tumbaría sobre las dos ruedas de fuera. Sus neumáticos agarran unos {fmt(rt.vuelco.agarre)} g en seco (la media de las ruedas, con el tipo y la construcción de cada eje): por debajo de eso vuelca antes de derrapar (rojo); se pide {fmt(rt.vuelco.objetivo)} g porque el cálculo es de un sólido rígido. Con la misma vía delante y detrás, es la mitad de la vía entre la altura del centro de gravedad, como en un coche: mucho más que con una rueda detrás, que solo apoya en un punto del centro. Solo giran las de delante: el radio de giro es el mismo.</p>}
+          {!cuatro && <p className="text-xs text-slate-500">Umbral de vuelco = vía × distancia del centro de gravedad al eje trasero ÷ (2 × altura del centro de gravedad × batalla): la aceleración lateral, en g, a la que una curva lo tumbaría sobre una rueda delantera y la trasera. Sus neumáticos agarran unos {fmt(rt.vuelco.agarre)} g en seco (la media de las ruedas, con el tipo y la construcción de cada eje): por debajo de eso vuelca antes de derrapar (rojo). Se pide {fmt(rt.vuelco.objetivo)} g porque el cálculo es de un sólido rígido: la suspensión y los neumáticos, al ceder, lo bajan un 10-15 %. Más vía, el eje delantero más atrás, la batería más pesada o los sillines más bajos lo suben; más altura libre al suelo y más ocupantes, sobre todo detrás, lo bajan.</p>}
         </Bloque>
       )}
       {(dep === 'propulsion' || dep === 'energia' || dep === 'proyecto') && rendimiento}
@@ -516,7 +518,7 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
         {checks.length ? <ListaComprobaciones lista={checks} /> : <p className="text-xs text-slate-500">Este departamento no tiene comprobaciones propias: todas están en «Proyecto».</p>}
         {(dep === 'interior' || dep === 'proyecto') && <p className="text-xs text-slate-500">Cabezas: un hombre sentado, sin casco, de talla media (91,8 cm sentado erguido) y alta (97,7 cm, percentil 95; ANSUR II, 2012); el tronco reclinado lo que diga su respaldo y la cabeza un tercio de eso. Se mide de la parte de arriba y de atrás del cráneo a la cara de dentro del cristal. El alcance compara del hombro al puño con un brazo de 58 cm, con los codos algo doblados.</p>}
       </Bloque>
-    </>
+    </ContextoProveedores.Provider>
   );
 }
 
