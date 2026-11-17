@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "masas",
-      "ruta": "src/components/aeromovil/triciclo/defecto.ts",
-      "motivo": "masas: posiciones del motor y del depósito",
-      "desde": "2026-11-17T11:25:41.048Z"
-    },
-    {
-      "agente": "masas",
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "masas: pestaña MASAS y marca del centro de gravedad",
       "desde": "2026-11-17T11:50:39.544Z"
