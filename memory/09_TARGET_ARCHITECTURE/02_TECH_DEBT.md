@@ -902,6 +902,20 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   (lamp positions, seat hip) but they are not wired: ~3 h.
 - **The Cuadriciclo Bala has no masses/motor** (body only): mass, power and speed rows read «no se puede comprobar».
 
+## 2026-11-17 · Astride passenger far back (bot «ahorcajadas»)
+
+- **No straddle seat type for rows 2/3.** Eugenio's straddle layout is `tAsientos: 'horcajadas'` (pilot + one passenger).
+  A «a horcajadas» option in `OPCIONES_TIPO_FILA` (`filasTriciclo.ts`) for three rows would need a straddle figure per
+  row in `ocupantes.ts`/`modelo.ts` and its checks: ≈ 3 h.
+- **The long saddle just stretches** between the two hips (`cabina`, `garaje/balaPiezas.ts`, `w(x)`): at 1.40 m it is one
+  very long bench. Two separate saddles with a gap (and a mass that grows with the length) would be more honest: ≈ 1 h.
+  The seat mass (`tMAsiento`) does not grow with the saddle's length either.
+- **The Aptera buckets' backrest/headrest is not checked against the skin** (`pasajero.ts`): in the default body the
+  headrest corner is already 0.9 cm outside at today's 62 cm, so a check would turn untouched designs red. The headrest's
+  geometry vs the canopy needs a look first: ≈ 45 min.
+- **Seam with «masas» (checked, no debt):** the hybrid's engine and tank collide-check against «los asientos» in
+  `hibrido.ts` `choques`, shown by `centroMasas.ts`, which reads the seats from the same model; the passenger's mass is
+  `m.sillines` → `ocupantesTriciclo`, so the centre of gravity follows the passenger with no second copy.
 ## 2026-11-17 · Supplier/model/files per part: shortcuts of the first version (bot «proveedores»)
 
 - **`Parametros.proveedores` is declared by module augmentation** in `proveedores/datos.ts`, not in `geometria.ts` next
