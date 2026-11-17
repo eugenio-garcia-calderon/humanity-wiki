@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "proveedores",
-      "ruta": "src/server/seguridad/clasificacion.ts",
-      "motivo": "proveedores: clasificar aeromovil_adjuntos (1 línea)",
-      "desde": "2026-11-17T18:21:31.092Z"
-    },
-    {
       "agente": "ajustes",
       "ruta": "src/components/aeromovil/ruedas/neumaticos.ts",
       "motivo": "ajustes: Crr ciclomotor, agarre absoluto, Varios 18 kg (pocas líneas)",
