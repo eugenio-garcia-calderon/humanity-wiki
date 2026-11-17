@@ -131,6 +131,12 @@
       "ruta": "src/components/aeromovil/triciclo/defecto.ts",
       "motivo": "masas: deslizadores del motor y del depósito",
       "desde": "2026-11-17T13:45:40.407Z"
+    },
+    {
+      "agente": "neumaticos",
+      "ruta": "src/components/aeromovil/explicaciones/index.ts",
+      "motivo": "neumaticos: explicaciones del tipo de neumático",
+      "desde": "2026-11-17T13:47:13.740Z"
     }
   ]
 }
