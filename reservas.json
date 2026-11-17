@@ -197,6 +197,12 @@
       "ruta": "drizzle/0226_aeromovil_s_por_defecto.sql",
       "motivo": "legado: el Aeromóvil S por defecto",
       "desde": "2026-11-17T14:16:00.009Z"
+    },
+    {
+      "agente": "mgplanetario",
+      "ruta": "src/components/aeromovil/hibrido.ts",
+      "motivo": "mgplanetario: motor eléctrico central (MG2) unido al planetario",
+      "desde": "2026-11-17T14:17:49.312Z"
     }
   ]
 }
