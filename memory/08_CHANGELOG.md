@@ -12538,3 +12538,21 @@ Eugenio: «Permite también añadir el tipo de neumático.»
 - Las cifras son estimaciones en el orden que dan las fuentes (Cossalter, etiqueta europea, guías de duración por tipo),
   no medidas de cada medida; el precio es una regla por anchura y diámetro (±40 %), sin mirar tiendas hoy.
 - No comprobado en un móvil: con la app instalada, `humanity.wiki/?sw=off` quita la copia vieja.
+## 2026-11-17 · El tamaño de los muñecos: más altos o más gordos
+
+Eugenio: «También en la parte de interior permite cambiar el tamaño de los muñecos para que sean más altos o más gordos
+para ver cómo entran en el vehículo.» Solo en la familia Triciclo (el Aeromóvil S).
+
+- En **Interior › Asientos** hay un recuadro para el **piloto** y otro para el **pasajero** (con tres filas, uno para
+  todos los de atrás): talla de referencia (mujer baja 1,52 m, mujer media 1,63, hombre medio 1,76, hombre alto 1,87,
+  muy alto 1,92 y neerlandés muy alto 2,00; de ANSUR II y DINED), la estatura a mano (1,45 a 2,05 m), la complexión
+  (delgado, medio, corpulento, muy corpulento) y la masa.
+- El muñeco crece en proporción: la cadera se queda en el asiento y los pies en los pedales o las plataformas, así que
+  a uno más alto le suben las rodillas. Uno más corpulento es más ancho de hombros y caderas y tiene más barriga.
+- Lo que toca se pinta **en rojo** en el 3D, y lo que queda justo, en naranja. Nuevas comprobaciones «con su talla»:
+  cabeza a la cúpula, hombros y caderas a los lados, rodillas y pies dentro de la carrocería, vientre del piloto al
+  volante, puntas de los pies a la rueda delantera (rombo). Las que ya había (rodillas al volante y al salpicadero,
+  respaldo al vientre del pasajero) ya miden al muñeco de su tamaño.
+- La masa sigue a la talla («Masa por ocupante» es la del hombre medio × estatura² × índice de masa corporal; se puede
+  escribir a mano) y entra en el peso, el centro de gravedad, el vuelco, las cargas de las ruedas y el consumo.
+- Sin tocar nada, todo es como antes: el mismo muñeco y los mismos kilos.

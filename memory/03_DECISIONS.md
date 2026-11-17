@@ -2217,6 +2217,18 @@ Eugenio asked for a dated, authored note on every side-panel section, «anónimo
 - **Engine in the nose** (`hibrido.ts` `delante`): same search (nearest the cabin, lowest), drive by a propshaft along the
   floor to the unchanged chain sprocket; tank stays behind the seats; exhaust under the floor. Masses of the propshaft
   (1,9 kg/m + 1 kg) go through `piezasRefrigeracion` (the one hook into `masas.ts`).
+## 2026-11-17 · How a rider's size scales («muñecos»)
+
+- **One length scale per rider** (`k` = stature / 1.756 m, ANSUR II's mean man, today's figure): every segment the
+  model already scaled with `escala` (hip over the cushion, trunk, neck, thigh, shank) plus, in the viewer, arms, head and
+  feet. Considered: separate sitting-height and leg-length ratios (women have relatively longer legs); rejected for
+  now, the difference is ~1 % of stature and Eugenio asked for «más altos o más gordos».
+- **Build as four classes, not free sliders** (delgado, medio, corpulento, muy corpulento): widths ×0.92–1.20 over `k`,
+  belly ×0.85–1.6, BMI 21/26/31/37. Four named people read better than three sliders that interact.
+- **Mass = `tMOcc` × k² × BMI/26**, with an optional typed value. `tMOcc` keeps its meaning («the average man») so
+  every saved design with a changed `tMOcc` keeps its mass; the medium build at 1.756 m is exactly `tMOcc`.
+- **The hip stays on the cushion and the feet on the pedals/footpegs**: a taller rider's knees rise (`rodilla()`), as
+  in a real car with the seat not moved. Red = the check's clearance < 0, amber = below its minimum.
 ## 2026-11-17 · Tyre type as a factor over the size's own tyre (bot «neumaticos»)
 
 Eugenio asked to choose the tyre type separately from the wheel size. Alternatives: (a) absolute figures per type

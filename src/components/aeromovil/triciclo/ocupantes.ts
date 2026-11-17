@@ -7,6 +7,7 @@ import { ASIENTO, brazosDe, escalaManillar, type Asientos } from '../garaje/bala
 import { CADERA_SOBRE_ASIENTO, rodilla } from '../geometriaBala';
 import type { CamposTriciclo } from './campos';
 import { dentroDe, limitarTriciclo } from './medidas';
+import type { Cuerpo } from './talla';
 
 // ------------------------------------------------------------------ ocupantes
 /**
@@ -72,7 +73,11 @@ export interface AsientoFila {
   tipo?: TipoAsientoFila; plazas?: number;
 }
 /** Who sits where (the viewer draws them, the mass and the checks count them). */
-export interface Plaza { nombre: string; fila: 1 | 2 | 3; z: number; piloto: boolean; pts: PuntosOcupante; talla: (escala: number) => PuntosOcupante }
+export interface Plaza {
+  nombre: string; fila: 1 | 2 | 3; z: number; piloto: boolean; pts: PuntosOcupante; talla: (escala: number) => PuntosOcupante;
+  /** 2026-11-17 (talla.ts): this rider's size and mass (kg); `pts` is already drawn at that size. */
+  cuerpo: Cuerpo; kg: number;
+}
 
 /**
  * Centro de gravedad de una persona sentada, de sus puntos: cabeza 8 %, tronco

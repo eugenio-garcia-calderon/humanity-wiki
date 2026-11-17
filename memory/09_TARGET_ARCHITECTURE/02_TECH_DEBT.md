@@ -967,6 +967,21 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   (2) `masasSecciones.ts` `seccionesTriciclo`: give «Varios» its `hijos: desgloseVarios(p.kg, sistemaElectrico(m, res))`
   (`electrico/sistema.ts`, already exact to the part) so the «Varios» section lists the electrical parts and «precios» /
   «proveedores» pick them up; then `scripts/pesos-secciones.ts` must stay «Todo OK».
+## 2026-11-17 · Occupant size («muñecos»): fields outside `CamposTriciclo`
+
+- **The six size fields (`tTallaPil/Pas`, `tComplPil/Pas`, `tMPil/Pas`) live in `triciclo/talla.ts` `CamposTalla`, not
+  in `CamposTriciclo` / `FILAS` / `TRICICLO_DEFECTO`** (those files were held by other bots). The model reads them from
+  the raw `Parametros` (`cuerpoDe(P, …)`), the panel block is its own component (`TallasOcupantes.tsx`), and absent
+  means today's figure. Consequences: no `Explicacion` popover for them, the aerodynamic study and `camposTriciclo`
+  do not see them, and `scripts/triciclo-disenos.ts` does not round-trip them. Moving them into the recipe's five
+  places: ≈ 30 min.
+- **Two knee checks are computed twice**: «Rodillas del piloto al volante / al salpicadero» stay inline in
+  `calcularTriciclo` and `ajusteOcupantes.ts` repeats the same formula only to paint the knees red. Making
+  `calcularTriciclo` emit them from `ajustePlaza`: ≈ 15 min.
+- `pages/Aeromovil.tsx` (garage card text, «dos ocupantes de N kg») still quotes `tMOcc`, not each rider's mass: 5 min.
+- Also still quoting `tMOcc` rather than each rider's mass: `electrico/LadoConsumos.tsx` (the consumption note, a copy
+  of the one fixed in `LadoTriciclo.tsx`) and `homologacion/ficha.ts` (`masaOcupante`, `masaMaxima` without the wheel
+  loads in a diamond). 10 min together.
 ## 2026-11-17 · Tyre type (bot «neumaticos»)
 
 - **Triciclo rollover check still uses the fixed `AGARRE` 0.9** (`triciclo/comprobaciones.ts`, held by another bot):
