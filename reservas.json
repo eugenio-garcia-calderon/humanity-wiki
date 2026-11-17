@@ -101,6 +101,12 @@
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "ajustes: rodadura del diseño en el comparador (2 líneas)",
       "desde": "2026-11-17T19:59:32.376Z"
+    },
+    {
+      "agente": "proveedores",
+      "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
+      "motivo": "proveedores: 3 líneas, contexto para proveedor/modelo/archivos",
+      "desde": "2026-11-17T20:08:41.394Z"
     }
   ]
 }
