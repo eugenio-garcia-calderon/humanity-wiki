@@ -22,7 +22,7 @@ export function BloqueRefrigeracion({ P, set, modelo, seccion, plegable }: {
   return (
     <Bloque id={`bloque-${BLOQUE_REFRIGERACION}`} titulo="Refrigeración y tomas de aire" peso={textoPesoSeccion(seccion)} plegable={plegable} nota={C.tToma === 'ninguna' ? 'sin toma' : OPCIONES_TOMA.find(o => o.k === C.tToma)?.n}>
       <p className="-mt-1 text-xs text-slate-500">
-        El motor de gasolina tiene que soltar su calor en algún sitio: una toma de aire, un radiador detrás y dos tubos que llevan el refrigerante del motor al radiador (rojo, caliente) y de vuelta (azul).
+        El motor de gasolina tiene que soltar su calor en algún sitio: una toma de aire, un radiador detrás y dos tubos que llevan el refrigerante del motor al radiador (rojo, caliente) y de vuelta (azul claro).
         La toma puede ser una boca en el morro, dos bocas (una a cada lado del morro) o unas branquias en los dos costados, bajas, justo antes de que empiece la cola, que recogen el aire como colectores.
         Las aberturas son agujeros de verdad en la carrocería, con su embellecedor y un conducto oscuro hasta el radiador. El capó (lo alto del morro) se abre con «Abrir maletero y capó», abajo en el 3D.
       </p>

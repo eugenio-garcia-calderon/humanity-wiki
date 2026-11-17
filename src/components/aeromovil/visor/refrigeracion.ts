@@ -206,10 +206,12 @@ export function dibujarRefrigeracion(G: Record<CapaId, THREE.Group>, puertasG: M
       return [rad.c[0] + rad.grueso / 2 + 0.004, rad.c[1] + (y - cy) * ky * 0.97, rad.c[2] + (z - cx) * kz * 0.97];
     });
     malla(G.carenado, banda(piel, fondo), M.conducto, 'refrigeracion-toma', 'toma-conducto');
-    const xr = (Number.isFinite(x0) ? x0 : F.X_MORRO) - 0.02;
+    // (a grille of three bars, 1,5 cm inside the mouth's deepest edge, so they never stick out of a round nose)
     for (const k of [-1, 0, 1]) {
-      const y = cy + k * b.alto * 0.27, bar = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.006, b.ancho * 0.96), M.rejilla);
-      bar.position.set(xr - 0.01, y, cx); bar.userData.componente = 'refrigeracion-toma'; bar.name = 'toma-rejilla'; G.carenado.add(bar);
+      const y = cy + k * b.alto * 0.27, xs = [-0.48, 0, 0.48].map(f => F.frenteX(cx + f * b.ancho, y)).filter(Number.isFinite);
+      if (!xs.length) continue;
+      const bar = new THREE.Mesh(new THREE.BoxGeometry(0.008, 0.006, b.ancho * 0.94), M.rejilla);
+      bar.position.set(Math.min(...xs) - 0.015, y, cx); bar.userData.componente = 'refrigeracion-toma'; bar.name = 'toma-rejilla'; G.carenado.add(bar);
     }
   }
   // ── the gills: each slot's bezel and duct on the right, mirrored to the left

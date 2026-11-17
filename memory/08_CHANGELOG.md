@@ -12421,7 +12421,7 @@ se pueda colocar atrás o delante. Y se pueda jugar con todo ello. También con 
   diámetro de los tubos. Las bocas y las ranuras son agujeros de verdad en la piel, con embellecedor negro y un conducto
   oscuro hasta el radiador.
 - **Radiador** detrás de la toma, o forzado delante (en el morro) o a los lados (detrás de las branquias, dos mitades);
-  con ventilador. **Tubos**: rojo el caliente (del motor a lo alto del radiador), azul el frío (de vuelta), por el suelo.
+  con ventilador. **Tubos**: rojo el caliente (del motor a lo alto del radiador), azul claro el frío (de vuelta), por el suelo.
 - **Motor de gasolina: Detrás / Delante.** Delante va en el morro, por delante de los pies del piloto; empuja la rueda
   trasera con un árbol de transmisión por el suelo hasta la cadena (en serie, solo un cable). El depósito se queda detrás
   de los asientos y el escape va por debajo del suelo. En el rombo con rueda en el morro no cabe: las comprobaciones lo dicen.
