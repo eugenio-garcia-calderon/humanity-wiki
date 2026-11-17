@@ -131,6 +131,12 @@
       "ruta": "src/components/aeromovil/triciclo/defecto.ts",
       "motivo": "mgplanetario: tMotorElec por defecto (1 línea)",
       "desde": "2026-11-17T17:01:34.771Z"
+    },
+    {
+      "agente": "mgplanetario",
+      "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
+      "motivo": "mgplanetario: texto del departamento con MG2 (1 línea)",
+      "desde": "2026-11-17T17:01:38.138Z"
     }
   ]
 }
