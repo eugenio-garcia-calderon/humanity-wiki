@@ -2296,3 +2296,30 @@ sections rely on.
 **Decision.** Fields `tEp…` in `CamposTriciclo`, model in `triciclo/electronica.ts` (pure: modes, continuous and peak totals, limiters), UI in `electronica/BloqueElectronica.tsx` (its own grouped sliders; LadoTriciclo skips that block in its generic list). `energia.ts` drives the electric speeds and acceleration with the limited power and adds `vmaxConjunta`; `ficha.ts` takes `potenciaCategoria` = continuous total. Every default (no limit = 0, strategy «libre», no sport, map «normal», engine start at 10 % SOC = the old USABLE) reproduces the previous numbers exactly.
 **Alternatives.** (a) Simulate the start logic over a drive cycle (SOC over time): ≈ 1 day, and no cycle exists in the model; the start logic is shown as a speed table instead. (b) Generic sliders only: «0» would read «0,0 kW» instead of «sin límite» and the thermal start rows would need more visibility rules in LadoTriciclo.
 **Not modelled.** The combined top speed and the hybrid limits are the controller's configuration, not a measurement; the regen limit is declared only (the consumption does not use it yet).
+## 2026-11-17 · Supplier, model and files per part: where they live (bot «proveedores»)
+
+- **Text and links live in the design** (`Parametros.proveedores`, keyed by the part's name in the mass model — the
+  same key as `Parametros.precios`). Alternative: a server table keyed like `aeromovil_notas` (design id + vehicle +
+  part). Rejected: a supplier's name is part of what the design *is* (it travels with "save as", with the browser's
+  unsaved copy, and with no session), and it needs no auth to type, exactly like a price.
+- **Files: the platform's upload store, plus a register.** Bytes go through `uploads.ts` `guardarArchivo` (same volume
+  `UPLOADS_DIR`, UUID names, served with `nosniff`, a CSP, and `Content-Disposition: attachment` for everything but
+  images and PDF — PDF opens in the browser's sandboxed viewer, never as HTML). New route
+  `POST /api/aeromovil/adjuntos` (`src/server/aeromovilAdjuntos.ts`): `requireLevel(1)`, its own short whitelist
+  (PDF, JPG/PNG/WebP, DOCX/XLSX/PPTX, CSV, TXT — no SVG, HTML, zip, video), 10 MB, 40 files/hour per account
+  (`limites` freno). Each upload writes one row in `aeromovil_adjuntos` (migration 0224): url, original name, type,
+  size, part, `created_by`. Not a junction table: one row per file, no FK to a part. The design keeps
+  `{ id, url, nombre, tipo, bytes, fecha }` per file. Alternative: the generic `/api/uploads` with no register —
+  rejected: it accepts video, zip and SVG up to 60 MB, and leaves a file nobody can attribute or take down.
+- **Removing**: «Quitar» only unlinks from this design (another saved design may hold the same file).
+  `DELETE /api/aeromovil/adjuntos/:id` (uploader or admin) deletes the bytes and archives the row: the content is gone,
+  the register keeps the name. The trash icon shows only on files the server says are yours (`GET …/adjuntos/mios`).
+- **Backups and account deletion**: the nightly dump copies the register (original file name, type, size, opaque user
+  id) — not the bytes; uploads are not in the off-site copy at all (deploy/copias/CLAUDE.md: database only). Emptying an
+  account (`vaciarCuentas.ts`) does not touch these files: they are project documents attached to a shared design, like
+  a supplier's quote pinned to a workshop board, and the row only holds an id. Whoever uploaded can delete their files
+  before leaving. If one day a file must go with its account, `created_by` is what finds them.
+- **Visibility**: anyone who can open the design sees names, links and files (the Aeromóvil and its designs are
+  public). The panel says so under the fields.
+- **Field declared by module augmentation** in `proveedores/datos.ts` (`declare module '../geometria'`), because
+  `geometria.ts` was claimed by another bot: TypeScript merges it into `Parametros` everywhere.

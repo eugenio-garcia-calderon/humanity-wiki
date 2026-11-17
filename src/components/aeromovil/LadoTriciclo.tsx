@@ -19,6 +19,7 @@ import { BloqueElectronica, BLOQUE_ELECTRONICA } from './electronica/BloqueElect
 import { BLOQUE_REFRIGERACION, BloqueRefrigeracion } from './RefrigeracionTriciclo';
 import { pesoSeccion, seccionesTriciclo, textoPesoSeccion } from './masasSecciones';
 import { DesglosePeso, SinSeccion } from './PesoSeccion';
+import { ContextoProveedores } from './proveedores/ProveedorParte';
 import { conPrecio, precioSeccion, preciosDiseno, textoPesoPrecio, type ContextoPrecio } from './precios/precios';
 import { valoresCatalogo, type CATALOGO_CLAVES } from './catalogoTren';
 import { fmt, m2, Deslizador, Bloque, Selector, ListaComprobaciones } from './controles';
@@ -385,7 +386,8 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
     </Bloque>
   );
   return (
-    <>
+    // (2026-11-17, «proveedores») each part's supplier, model and files read the design from here (proveedores/)
+    <ContextoProveedores.Provider value={{ P, set }}>
       {dep === 'proyecto' && peso}
       <Bloque titulo={lemas[dep]} nota={nombreTriciclo(T)}>
         {cuatro || rombo
@@ -516,7 +518,7 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
         {checks.length ? <ListaComprobaciones lista={checks} /> : <p className="text-xs text-slate-500">Este departamento no tiene comprobaciones propias: todas están en «Proyecto».</p>}
         {(dep === 'interior' || dep === 'proyecto') && <p className="text-xs text-slate-500">Cabezas: un hombre sentado, sin casco, de talla media (91,8 cm sentado erguido) y alta (97,7 cm, percentil 95; ANSUR II, 2012); el tronco reclinado lo que diga su respaldo y la cabeza un tercio de eso. Se mide de la parte de arriba y de atrás del cráneo a la cara de dentro del cristal. El alcance compara del hombro al puño con un brazo de 58 cm, con los codos algo doblados.</p>}
       </Bloque>
-    </>
+    </ContextoProveedores.Provider>
   );
 }
 
