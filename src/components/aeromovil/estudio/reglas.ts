@@ -7,6 +7,7 @@ import { A1 as FICHAS_A1, GOTA as FICHAS_GOTA } from '../tunel/explicaciones';
 import { CONSTANTES, EXPOSICION } from '../tunel/arrastre';
 import type { PorVelocidad, ResultadoTunel } from '../tunel/calculo';
 import { CATALOGO_RUEDAS, fichaRueda, type IdRueda } from '../ruedas/catalogo';
+import { refrigeracionDe } from '../triciclo/refrigeracion';
 
 /** Wider than this (m), a catalogue tyre is a weak point («neumatico-ancho»): wider than the widest scooter or eco tyre in the catalogue. */
 const ANCHO_NEUMATICO = 0.16;
@@ -634,6 +635,29 @@ export const REGLAS: Regla[] = [
         recomendacion: '«Retrovisores: Cámaras en cápsulas». El Honda e bajó un 3,8 % el Cd del coche entero al cambiar espejos por cámaras. Para matricular, las cámaras tienen que cumplir el reglamento UN R46.',
         pruebas: [{ cambios: { tRetrovisores: 'camaras' } as Partial<Parametros>, texto: '«Retrovisores» (Carrocería › Puertas y maletero): «Cámaras en cápsulas»', tunel: false }],
         estimacion: { dCdA: -0.03 * cx.base.cdA, fuente: 'estimado: un 3 % del CdA (los espejos son el 2–7 % de un coche; Honda e −3,8 %)' },
+      };
+    },
+  },
+  // ── 2026-11-17 (capo): the hybrid's cooling air. The tunnel sees the silhouette only, not the air through the mouth:
+  // an estimate (Hucho, cooling drag ≈ 0,3–0,7 × the mouth's area in CdA; inlet 25–40 % of the core is enough)
+  {
+    id: 'refrigeracion-boca', zona: 'morro', vehiculos: ['triciclo'], claves: ['tTomaAncho', 'tBranqLargo'] as unknown as (keyof Parametros)[],
+    evaluar: cx => {
+      if (cx.modelo.tipo !== 'triciclo') return null;
+      const r = refrigeracionDe(cx.modelo as ModeloTriciclo); if (!r) return null;
+      const frac = r.areaToma / r.areaRadiador, sobra = r.calor.radiador > 1.1 * r.calor.motor;
+      if (frac <= 0.40) return null;
+      // (shrink the mouth to 30 % of the core: the length slider the intake has)
+      const objetivo = 0.30 * r.areaRadiador, k = objetivo / r.areaToma, gills = r.toma === 'branquias';
+      const clave = gills ? 'tBranqLargo' : 'tTomaAncho', ahora = gills ? r.campos.tBranqLargo : r.campos.tTomaAncho;
+      const nuevo = Math.max(gills ? 10 : 6, Math.round(ahora * k * 2) / 2);
+      const dCdA = 0.5 * (r.areaToma * nuevo / ahora - r.areaToma);
+      return {
+        titulo: `Toma de aire más grande de lo que el radiador aprovecha: ${pct(frac)} de su cara`, gravedad: sobra ? 'media' : 'baja',
+        porQue: `El aire que entra por la boca y atraviesa el radiador se frena y es arrastre (Hucho, «Aerodynamics of Road Vehicles», refrigeración: 0,02–0,04 de Cd en un turismo); con más del 25–40 % de la cara del radiador ya no entra más aire útil, solo más arrastre. Esta boca mide ${fmt(r.areaToma * 100, 2)} dm² para ${fmt(r.areaRadiador * 100, 1)} dm² de radiador. El túnel no ve el aire que entra: es una estimación.`,
+        recomendacion: `${gills ? '«Branquias: largo de la zona»' : '«Boca: ancho»'} (Motor › Refrigeración) de ${fmt(ahora, 1)} a ${fmt(nuevo, 1)} cm, si «el radiador saca el calor del motor» sigue en verde.`,
+        pruebas: [{ cambios: { [clave]: nuevo } as Partial<Parametros>, texto: `${gills ? '«Branquias: largo de la zona»' : '«Boca: ancho»'} de ${fmt(ahora, 1)} a ${fmt(nuevo, 1)} cm`, tunel: false }],
+        estimacion: { dCdA, fuente: 'estimado: 0,5 × el área de boca que se quita (Hucho, aire de refrigeración 0,3–0,7 × el área de la boca)' },
       };
     },
   },

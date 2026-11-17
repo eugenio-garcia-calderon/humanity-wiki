@@ -119,6 +119,8 @@ export interface DisposicionHibrido {
   diferencial: { c: V3; r: number; zSemieje: number } | null;
   /** Series: the high-voltage cable from the generator to the controller. */
   cable: V3[] | null;
+  /** 2026-11-17 (capo): the engine in the nose: the shaft from its output back to the chain's sprocket; null behind. */
+  arbol: V3[] | null;
   deposito: CajaZ;
   /** The exhaust: the headers from each port, the silencer (a cylinder along x) and the tailpipe's end. */
   escape: { colectores: V3[][]; silencioso: { x0: number; x1: number; y: number; z: number; r: number }; salida: number };
@@ -173,6 +175,13 @@ export interface EntradaHibrido {
   mover?: { motor: V3; deposito: V3 };
   /** 2026-11-17: the power split's MG2 central, on the ring (its mass and peak power size it); absent or null: in the hub. */
   mg2?: { kg: number; kWPico: number } | null;
+  /**
+   * 2026-11-17 (capo; Eugenio: «que el motor se pueda colocar atrás o delante»): the engine in the nose, between `xMin`
+   * (ahead of the pilot's toes) and `xMax` (the nose's front), clear of `obstaculos` (the nose wheel…). Its drive goes
+   * back to the rear wheel by a shaft along the floor (`arbol`); the tank stays behind the seats; the exhaust runs
+   * under the floor to the tail. Absent: behind, as always.
+   */
+  delante?: { xMin: number; xMax: number; obstaculos: Obstaculo[] } | null;
 }
 
 /** The gap between two boxes (m): positive, how far apart along the axis that separates them; negative, how deep they overlap. */
@@ -206,7 +215,7 @@ export function sobreBrazo(a: CajaZ, b: NonNullable<EntradaHibrido['brazo']>): n
 export function disponerHibrido(e: EntradaHibrido): DisposicionHibrido {
   const { F, arq, kW } = e;
   const mover = e.mover ?? { motor: [0, 0, 0] as V3, deposito: [0, 0, 0] as V3 };
-  const asientos = e.asientos ?? [], obst = e.obstaculos ?? [], brazo = e.brazo ?? null;
+  const asientos = e.asientos ?? [], delante = e.delante ?? null, obst = delante ? delante.obstaculos : e.obstaculos ?? [], brazo = delante ? null : e.brazo ?? null;
   // ── the engine's size from its power: 24 cc per kW, square bore and stroke; one cylinder up to 12 kW, two up to 32, then three
   const n = kW <= 12 ? 1 : kW <= 32 ? 2 : 3, cc = CC_POR_KW * kW, bore = Math.cbrt(4 * cc / n / Math.PI) / 100;
   const W = n * (bore + 0.02) + 0.07, D = Math.max(0.17, 2.3 * bore + 0.02);
@@ -262,15 +271,20 @@ export function disponerHibrido(e: EntradaHibrido): DisposicionHibrido {
   const xAtras = e.cuatro ? e.xR + 0.08 + 0.03 : e.xR + e.rR + 0.05;
   let xDelante = e.cuatro ? e.pivote[0] - 0.15 - D : e.respaldo(0.75) - 0.02 - D;
   xDelante = Math.max(xDelante, xAtras + 0.6);
+  // (2026-11-17, capo: where the tank goes when the engine is in the nose: the rear spot's front end, low)
+  const xTrasMotor = xDelante + D;
+  // (the engine in the nose: the search runs from the pilot's toes forward, the place nearest the cabin first)
+  const xIni = delante ? delante.xMin : xAtras, xFin = delante ? Math.max(delante.xMin, delante.xMax - D) : xDelante;
+  if (delante) xDelante = xFin;
   // (low before clean: it stands on what is under it and may rise at most 5 cm to clear something; if nothing in that band
   // is clear, it takes the place there that overlaps least, and the checks say by how much: an engine lifted 13 cm to
   // clear a tower tube by 1 cm is not what anyone asked for)
-  let mejor: { x0: number; y0: number; coste: number } | null = null, menosMalo = { x0: xDelante, y0: apoyo(xDelante, xDelante + D, -0.085 + dz0, W - 0.085 + dz0, true), peor: -9, coste: 9 };
+  let mejor: { x0: number; y0: number; coste: number } | null = null, menosMalo = { x0: xFin, y0: apoyo(xFin, xFin + D, -0.085 + dz0, W - 0.085 + dz0, true), peor: -9, coste: 9 };
   const yMin = e.yPiso + 0.01;
-  for (let x0 = xAtras; x0 <= xDelante + 1e-9; x0 += 0.02) {
+  for (let x0 = xIni; x0 <= xFin + 1e-9; x0 += 0.02) {
     const y00 = apoyo(x0, x0 + D, -0.085 + dz0, W - 0.085 + dz0, true);
     for (let y0 = y00; y0 <= y00 + 0.05 + 1e-9; y0 += 0.01) {
-      const coste = (x0 - xAtras) + 1.5 * (y0 - yMin);
+      const coste = (x0 - xIni) + 1.5 * (y0 - yMin);
       if (mejor && coste >= mejor.coste) break;
       const p = piezas(x0, y0, dz0);
       const hs = choquesDe(p.cajas, 'motor', false), peor = Math.min(9, pielMotor(p) - 0.01, ...hs.map(h => h.holgura - h.minimo));
@@ -288,11 +302,15 @@ export function disponerHibrido(e: EntradaHibrido): DisposicionHibrido {
 
   // ── the connection, on the crank axis at the engine's left end
   const ejes: CilZ[] = [];
-  let caja: DisposicionHibrido['caja'] = null, cadena: DisposicionHibrido['cadena'] = null, diferencial: DisposicionHibrido['diferencial'] = null, cable: V3[] | null = null;
+  let caja: DisposicionHibrido['caja'] = null, cadena: DisposicionHibrido['cadena'] = null, diferencial: DisposicionHibrido['diferencial'] = null, cable: V3[] | null = null, arbol: V3[] | null = null;
   const zCadena = z0 - 0.035;
   // the output sprocket: at the swing arm's pivot (the chain keeps its length as the arm swings), or, with two rear
   // wheels, low at the engine's rear, chained back to a differential on the rear axle
-  const salida: [number, number] = e.cuatro ? [x0 + 0.05, y0 + 0.05] : [e.pivote[0], e.pivote[1]];
+  const pinon: [number, number] = e.cuatro ? (delante ? [e.xR + 0.40, e.yEje + 0.05] : [x0 + 0.05, y0 + 0.05]) : [e.pivote[0], e.pivote[1]];
+  // (in the nose, 2026-11-17: the drop case or gearbox comes down to a shaft low on the engine, which runs back along the
+  // floor to that same sprocket)
+  const salida: [number, number] = delante ? [xc - 0.02, y0 + 0.03] : pinon;
+  if (delante && arq !== 'serie') arbol = [[salida[0], salida[1], zCadena], [salida[0] - 0.12, e.yPiso + 0.02, zCadena], [pinon[0] + 0.15, e.yPiso + 0.02, zCadena], [pinon[0], pinon[1], zCadena]];
   const rueda: [number, number] = [e.xR, e.yEje];
   if (arq === 'reparto') {
     // (MG1 against the engine, the crankshaft through its hollow rotor to the carrier, the planetary outermost: in the
@@ -314,9 +332,9 @@ export function disponerHibrido(e: EntradaHibrido): DisposicionHibrido {
     ejes.push({ nombre: 'P2', x: xc, y: yc, r: 0.095, z0: z0 - 0.17, z1: z0 - 0.107 });
   }
   if (arq !== 'serie') {
-    if (!e.cuatro) cadena = { a: salida, ra: 0.045, b: rueda, rb: 0.10, z: zCadena };
+    if (!e.cuatro) cadena = { a: pinon, ra: 0.045, b: rueda, rb: 0.10, z: zCadena };
     else {
-      cadena = { a: salida, ra: 0.045, b: rueda, rb: 0.09, z: zCadena };
+      cadena = { a: pinon, ra: 0.045, b: rueda, rb: 0.09, z: zCadena };
       diferencial = { c: [e.xR, e.yEje, 0], r: 0.08, zSemieje: e.viaTras / 2 - 0.07 };
     }
   }
@@ -332,28 +350,31 @@ export function disponerHibrido(e: EntradaHibrido): DisposicionHibrido {
   const ladoZ = (x: number, y: number) => { const k = Math.round(x * 200) * 4096 + Math.round(y * 200); let z = anchos.get(k); if (z === undefined) { z = F.ladoZ(Math.round(x * 200) / 200, Math.round(y * 200) / 200); anchos.set(k, z); } return z; };
   const mitad = (xa: number, xb: number, ya: number, yb: number) => { let mn = 9; for (let x = xb; x >= xa - 1e-9; x -= 0.02) for (const y of [ya, (ya + yb) / 2, yb]) { const z = ladoZ(x, y); mn = Math.min(mn, Number.isFinite(z) ? z : 0); } return mn; };
   const motorCajas = pm.cajas;
+  const delanteM = !!e.delante;
   const buscar = (delante: boolean): CajaZ | null => {
     for (let L = 0.15; L <= 0.80 + 1e-9; L += 0.01) for (let h = 0.08; h <= 0.20 + 1e-9; h += 0.01) {
       let xa: number, xb: number, ya: number;
-      if (delante) { xa = x1 + 0.03; xb = xa + L; ya = apoyo(xa, xb, -0.15, 0.15); }
-      else { xb = x0 - 0.03; xa = xb - L; ya = e.cuatro ? e.yEje + 0.13 : e.yEje + e.rR + e.recTras + 0.03; }
+      if (delanteM) { xb = xTrasMotor; xa = xb - L; ya = apoyo(xa, xb, -0.15, 0.15); }
+      else if (delante) { xa = x1 + 0.03; xb = xa + L; ya = apoyo(xa, xb, -0.15, 0.15); }
+      else { xb = (delanteM ? xTrasMotor - D : x0) - 0.03; xa = xb - L; ya = e.cuatro ? e.yEje + 0.13 : e.yEje + e.rR + e.recTras + 0.03; }
       const w = Math.min(0.6, 2 * (mitad(xa, xb, ya, ya + h) - 0.03)); if (w < 0.12 || L * w * h * 0.92 < V) continue;
       const ww = V / (L * h * 0.92), c: CajaZ = { x0: xa, x1: xb, y0: ya, y1: ya + h, z0: -ww / 2, z1: ww / 2 };
       if (cajaH(F, c) < 0.01) continue;
-      if (delante && (Math.min(...motorCajas.map(k => separacion(c, k))) < 0.02 || choquesDe([c], 'deposito', true).some(k => k.holgura < k.minimo))) continue;
+      if ((delante || delanteM) && (Math.min(...motorCajas.map(k => separacion(c, k))) < 0.02 || choquesDe([c], 'deposito', true).some(k => k.holgura < k.minimo))) continue;
       return c;
     }
     return null;
   };
   let deposito = buscar(true) ?? buscar(false);
-  if (!deposito) { const L = 0.5, h = 0.16, w = V / (L * h * 0.92), yT0 = e.cuatro ? e.yEje + 0.13 : e.yEje + e.rR + e.recTras + 0.03; deposito = { x0: x0 - 0.03 - L, x1: x0 - 0.03, y0: yT0, y1: yT0 + h, z0: -w / 2, z1: w / 2 }; }
+  const xTope = (delanteM ? xTrasMotor - D : x0) - 0.03;
+  if (!deposito) { const L = 0.5, h = 0.16, w = V / (L * h * 0.92), yT0 = e.cuatro ? e.yEje + 0.13 : e.yEje + e.rR + e.recTras + 0.03; deposito = { x0: xTope - L, x1: xTope, y0: yT0, y1: yT0 + h, z0: -w / 2, z1: w / 2 }; }
   { const [dx, dy, dz] = mover.deposito; deposito = { x0: deposito.x0 + dx, x1: deposito.x1 + dx, y0: deposito.y0 + dy, y1: deposito.y1 + dy, z0: deposito.z0 + dz, z1: deposito.z1 + dz }; }
   const w = deposito.z1 - deposito.z0;
 
   // ── the exhaust: a header from each port on the head's rear face, down to a silencer on the right of the rear wheel
   // (where it fits: on the right, clear of the wheel and the swing arm (of the half-shafts with four wheels), searched
   // from the outside in and from low up; if nowhere, the first place, and its check turns red)
-  const rS = 0.05, xS1 = Math.min(e.xR + 0.22, x0 - 0.06), xS0 = xS1 - 0.30;
+  const rS = 0.05, xS1 = delanteM ? e.xR + 0.22 : Math.min(e.xR + 0.22, x0 - 0.06), xS0 = xS1 - 0.30;
   let zS = 0.17, yS = e.yEje + 0.07;
   sitioS: for (const z of e.cuatro ? [0.17, 0.15, 0.13, 0.11, 0.09] : [0.17, 0.16, 0.15, 0.14]) for (const y of [e.yEje + 0.07, e.yEje + 0.1, e.yEje + 0.13, e.yEje + 0.16]) {
     let hh = 9; for (let k = 0; k < 8; k++) { const a = k * Math.PI / 4; for (const x of [xS0, xS1]) hh = Math.min(hh, dentroPielH(F, x, y + rS * Math.sin(a), z + rS * Math.cos(a))); }
@@ -361,7 +382,10 @@ export function disponerHibrido(e: EntradaHibrido): DisposicionHibrido {
   }
   let salidaX = xS0; while (salidaX > F.X_COLA && F.dentroPiel(salidaX, yS, zS)) salidaX -= 0.01;
   const yPuerto = culata.y0 + 0.35 * hH;
-  const colectores = cilindrosZ.map(z => [[culata.x0, yPuerto, z], [culata.x0 - 0.06, yPuerto - 0.02, z + 0.02], [x0 - 0.06, (yPuerto + yS) / 2, (z + zS) / 2 + 0.02], [xS1 + 0.02, yS, zS]] as V3[]);
+  const colectores = delanteM
+    // (the engine in the nose: down behind it and back under the floor, on the right of the rails, to the silencer)
+    ? cilindrosZ.map(z => [[culata.x0, yPuerto, z], [culata.x0 - 0.06, yPuerto - 0.02, z + 0.02], [x0 - 0.08, e.yPiso + 0.03, 0.17], [xS1 + 0.12, e.yPiso + 0.03, zS], [xS1 + 0.02, yS, zS]] as V3[])
+    : cilindrosZ.map(z => [[culata.x0, yPuerto, z], [culata.x0 - 0.06, yPuerto - 0.02, z + 0.02], [x0 - 0.06, (yPuerto + yS) / 2, (z + zS) / 2 + 0.02], [xS1 + 0.02, yS, zS]] as V3[]);
 
   // ── checks
   const tr = [...ejes.map(c => cilH(F, c)), ...(caja ? [cilH(F, { nombre: '', x: caja.a[0], y: caja.a[1], r: caja.ra, z0: caja.z0, z1: caja.z1 }), cilH(F, { nombre: '', x: caja.b[0], y: caja.b[1], r: caja.rb, z0: caja.z0, z1: caja.z1 })] : [])];
@@ -389,7 +413,7 @@ export function disponerHibrido(e: EntradaHibrido): DisposicionHibrido {
   ];
   return {
     arq, motor: { n, bore, cc, xc, yc, z0, z1, x0, x1, y0, yTop, carter, bloque, culata, admision, cilindrosZ },
-    ejes, mg2: ejes.find(c => c.nombre === 'MG2') ?? null, caja, cadena, diferencial, cable, deposito,
+    ejes, mg2: ejes.find(c => c.nombre === 'MG2') ?? null, caja, cadena, diferencial, cable, arbol, deposito,
     escape: { colectores, silencioso: { x0: xS0, x1: xS1, y: yS, z: zS, r: rS }, salida: salidaX },
     holguras, centros: { motor: [xc, y0 + 0.42 * H], transmision, deposito: [(deposito.x0 + deposito.x1) / 2, (deposito.y0 + deposito.y1) / 2] },
     centrosZ: { motor: (z0 + z1) / 2, transmision: ejesT.length ? ejesT.reduce((a, c) => a + (c.z0 + c.z1) / 2, 0) / ejesT.length : (z0 + z1) / 2, deposito: (deposito.z0 + deposito.z1) / 2 },

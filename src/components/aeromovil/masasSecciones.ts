@@ -158,7 +158,9 @@ export function seccionesTriciclo(res: Resultados, m: ModeloTriciclo): PesosSecc
     ['rodaje', 'Ejes y ruedas', /^(Ruedas?\b|Frenos)/],
     ['rodaje', 'Suspensión y dirección', /^(Suspensión|Basculante y|Dirección)/],
     ['rodaje', 'Basculación', /^Basculación/],
-    ['propulsion', 'Híbrido enchufable', /^(Motor de gasolina|Motor: (engranaje|generador|embrague|motor-generador)|Depósito)/],
+    // (2026-11-17, capo) the hybrid's cooling: radiator, fan, pipes, coolant, intake ducts (triciclo/refrigeracion.ts)
+    ['propulsion', 'Refrigeración', /^Motor: (radiador|ventilador del radiador|tubos de refrigeración|refrigerante|conductos de la toma)/],
+    ['propulsion', 'Híbrido enchufable', /^(Motor de gasolina|Motor: (engranaje|generador|embrague|motor-generador|árbol)|Depósito)/],
     ['propulsion', 'Motor eléctrico', /^(Motor(es)? de buje|Motor eléctrico|Controlador|Motor: reductora)/],
     ['energia', 'Batería', /^Batería/],
     ['energia', 'Varios', /^Varios/],
