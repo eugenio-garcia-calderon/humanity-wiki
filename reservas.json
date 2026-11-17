@@ -1,10 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog1",
-      "ruta": "src/pages/Aeromovil.tsx",
-      "motivo": "boton plegar alas (commit)",
-      "desde": "2026-11-17T21:01:23.618Z"
-    }
-  ]
+  "reservas": []
 }
