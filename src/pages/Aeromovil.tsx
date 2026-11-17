@@ -695,6 +695,18 @@ export default function Aeromovil() {
                 <p className="text-sm font-semibold text-slate-800">Garaje</p>
                 <Button variant="ghost" onClick={() => setPanelGaraje(false)} aria-label="Cerrar el garaje" className="px-1.5 py-1"><X className="h-4 w-4" /></Button>
               </div>
+              {/* Plegar / desplegar las alas del carenado BWB (2026-11-17, Eugenio: «haz que las alas se puedan plegar o
+                  desplegar desde el panel del garaje con un botón»). Sólo aparece con el carenado BWB puesto. */}
+              {P.disposicion === 'triciclo' && (P as Parametros & { tBwb?: string }).tBwb === 'si' && (() => {
+                const plegadas = (P as Parametros & { tBwbPlegadas?: string }).tBwbPlegadas === 'si';
+                return (
+                  <Button variant="outline" onClick={() => set('tBwbPlegadas' as keyof Parametros, (plegadas ? 'no' : 'si') as never)}
+                    aria-pressed={plegadas} title="Pliega o despliega las alas del carenado BWB a mitad de cada ala"
+                    className={cn('w-full gap-1.5 text-xs normal-case tracking-normal', plegadas && 'border-teal-600 bg-teal-50 text-teal-800')}>
+                    {plegadas ? 'Desplegar alas' : 'Plegar alas'}
+                  </Button>
+                );
+              })()}
               {garajeLista}
             </div>
           )}
