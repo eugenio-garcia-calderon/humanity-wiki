@@ -167,6 +167,12 @@
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "masas: pestaña MASAS y marca del centro de gravedad",
       "desde": "2026-11-17T11:50:39.544Z"
+    },
+    {
+      "agente": "masas",
+      "ruta": "src/components/aeromovil/geometria.ts",
+      "motivo": "masas: comprobaciones de masas tras calcularTriciclo",
+      "desde": "2026-11-17T11:51:07.401Z"
     }
   ]
 }
