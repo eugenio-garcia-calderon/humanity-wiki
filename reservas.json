@@ -17,6 +17,12 @@
       "ruta": "src/components/aeromovil/triciclo/defecto.ts",
       "motivo": "colacorte: cola cortada Kamm en Modelo 1",
       "desde": "2026-11-17T09:32:41.735Z"
+    },
+    {
+      "agente": "colacorte",
+      "ruta": "src/components/aeromovil/triciclo/medidas.ts",
+      "motivo": "colacorte: cola cortada Kamm en Modelo 1",
+      "desde": "2026-11-17T09:32:44.243Z"
     }
   ]
 }
