@@ -1015,3 +1015,9 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **Catalogue prices only for motors and petrol engines**: controllers and reduction gears publish none, so they are
   estimated; the tyres from bot «neumaticos» are not wired yet (≈ 20 min once its catalogue has prices).
 - `aeromovil/CLAUDE.md` has no recipe for prices yet (file held by another bot): ≈ 10 min.
+- **BWB fairing (2026-11-17) shortcuts**: (1) its fields are not in `CamposTriciclo`/`Parametros` (cast `Parametros &
+  CamposBWB`), and its sliders have no «¿qué es?» explanation (`explicaciones/triciclo.ts` was held): ≈ 30 min. (2) The
+  wings' drag is not added to the Energía consumption, and the lift check lives in the block, not in
+  `comprobaciones.ts` (held by another bot): ≈ 20 min. (3) A click on a wing in the 3D does not open its block
+  (`zonaTriciclo`): ≈ 10 min. (4) The wing root ring sits on the skin at a fixed height; a wing much thicker than the
+  body at the tail falls back to the centre plane (no gap, but a visible joint): a true surface-surface fillet ≈ 1 day.

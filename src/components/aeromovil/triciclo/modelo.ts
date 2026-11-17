@@ -16,6 +16,7 @@ import { ejeBascula } from './bascula';
 import { cuerpoDe } from './talla';
 import { choquesPlaza, type PuntosConCuerpo } from './ajusteOcupantes';
 import { camposRefrigeracion } from './refrigeracion';
+import { carenadoBWB, type CamposBWB } from './bwb';
 
 /** El modelo del Triciclo: la forma, los ocupantes, el bastidor, la batería, el motor y lo que lee el visor. */
 export function crearModeloTriciclo(P: Parametros) {
@@ -384,11 +385,14 @@ export function crearModeloTriciclo(P: Parametros) {
     };
   }
 
+  // 2026-11-17 (Eugenio, «Carenado BWB»): the blended-wing-body fairing (bwb.ts), or null (off by default). With it the
+  // overall width is the wings' span as shown (folded or not), which is what the homologation tab and the dimensions read
+  const bwb = carenadoBWB(P as Parametros & CamposBWB, F, { xLat: xF, via });
   const Lf = F.LARGO;
   const Pm: Parametros = { ...P, ...T, L: Lf, B: xF - xR, W: anchoTotal, H: D.alto + elevar, clear: D.suelo, track: via };
   const modelo = {
     tipo: 'triciclo' as const, P: Pm, campos: T, F, D, sillines: asientos, aleta, cup, viaPedida, giro, rec, man, pies,
-    xn: F.X_MORRO, xt: F.X_COLA, Lf, rF, rR, rL: rF, xR, xL: xF, xF, batalla: xF - xR, anchoTotal, anchoCuerpo: D.ancho, alto: D.alto + elevar, semiPod,
+    xn: F.X_MORRO, xt: F.X_COLA, Lf, rF, rR, rL: rF, xR, xL: xF, xF, batalla: xF - xR, anchoTotal: bwb ? Math.max(anchoTotal, bwb.envergaduraVista) : anchoTotal, anchoCuerpo: D.ancho, alto: D.alto + elevar, semiPod,
     /** Round three: the rigid lift above 15.8 cm (m), the seating layout, its seats, who sits where, and the floor's height. */
     elevar, filas, asientosFilas, plazas, yPiso,
     ruedas, via: { del: via, tras: viaTras },
@@ -449,6 +453,8 @@ export function crearModeloTriciclo(P: Parametros) {
     occTalla: occ,
     /** 2026-11-17: the pilot's and the passengers' size and mass (talla.ts). */
     cuerpos: { piloto: cuerpoPil, pasajero: cuerpoPas },
+    /** 2026-11-17: the blended-wing-body fairing (bwb.ts), or null. */
+    bwb,
   };
   // (2026-11-17) what each rider touches, for the viewer to paint it (ajusteOcupantes.ts), worked out the first time it is asked
   for (const q of plazas) { let memo: ReturnType<typeof choquesPlaza> | null = null; (q.pts as PuntosConCuerpo).choques = () => (memo ??= choquesPlaza(modelo, q)); }

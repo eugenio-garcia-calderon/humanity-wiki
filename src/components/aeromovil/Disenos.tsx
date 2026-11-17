@@ -29,6 +29,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Check, ChevronDown, CloudOff, FilePlus2, Link2, Loader2, Save, Star, Trash2 } from 'lucide-react';
 import { Button } from '../ui/core';
 import { cn } from '../../utils/cn';
+import { NOMBRE_PROPUESTA_BWB, PROPUESTA_BWB } from './triciclo/propuestaBWB';
 import { PARAMETROS_A1, PARAMETROS_BALA, PARAMETROS_BASCULANTE, PARAMETROS_GOTA, PARAMETROS_TRICICLO, type Disposicion, type Parametros } from './geometria';
 import { camposTriciclo, fichaTriciclo, paqueteAntes, semiAnchoPaquete } from './geometriaTriciclo';
 import { ponerDestino } from './notas/almacen';
@@ -46,6 +47,14 @@ export const VEHICULOS: { k: Disposicion; n: string; d: string }[] = [
 const familiaDe = (d: Diseno): Disposicion => { const k = d.parametros?.disposicion; return VEHICULOS.some(v => v.k === k) ? k! : 'rombo'; };
 
 export interface Diseno { id: number; nombre: string; parametros: Partial<Parametros>; autor: string | null; origen: 'equipo' | 'visitante'; por_defecto?: boolean; updated_at: string }
+/**
+ * Built-in proposals (2026-11-17): designs made by an agent in code, listed with the saved ones of their family. A
+ * negative id: no key, so they never autosave; the star, the bin and the link are hidden; «Guardar cambios» asks for a
+ * name and saves a copy. The first: «Aeromóvil BWB (propuesta)», the «Aermovil Rombo» with the BWB fairing (triciclo/propuestaBWB.ts).
+ */
+export const PROPUESTAS: Diseno[] = [
+  { id: -14, nombre: NOMBRE_PROPUESTA_BWB, parametros: PROPUESTA_BWB, autor: 'propuesta', origen: 'equipo', updated_at: '2026-11-17T18:00:00Z' },
+];
 
 /** El diseño por defecto guardado en la web (el que abre quien llega por primera vez), o null si no hay. */
 export async function cargarDisenoPorDefecto(): Promise<Diseno | null> {
@@ -237,7 +246,7 @@ export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, alVehicu
     } catch (e: any) { setAviso(e.message); } finally { setOcupado(false); }
   };
   const guardarCambios = async () => {
-    if (!actual) { setModoNuevo(true); return; }
+    if (!actual || actual.id < 0) { setModoNuevo(true); if (actual) setNombre(actual.nombre.replace(' (propuesta)', '')); return; }
     setOcupado(true); setAviso(null);
     try {
       const j = await llamar(`/api/aeromovil/disenos/${actual.id}`, 'PUT', { parametros: aDiseno(P), clave: leerClaves()[actual.id] });
@@ -270,14 +279,14 @@ export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, alVehicu
                     className="min-w-0 flex-1 justify-start gap-2 px-2 py-1.5 text-left text-sm font-medium normal-case tracking-normal text-slate-800">
                     {esActual ? <Check className="h-3.5 w-3.5 shrink-0 text-teal-700" /> : <span className="w-3.5 shrink-0" />}
                     <span className="min-w-0 flex-1 truncate">{d.nombre}</span>
-                    <span className="shrink-0 text-[11px] font-normal text-slate-400">{d.por_defecto ? 'por defecto · ' : ''}{d.origen === 'equipo' ? 'base' : (d.autor || 'anónimo')} · {new Date(d.updated_at).toLocaleDateString('es-ES')}</span>
+                    <span className="shrink-0 text-[11px] font-normal text-slate-400">{d.id < 0 ? 'propuesta, sin guardar · ' : ''}{d.por_defecto ? 'por defecto · ' : ''}{d.origen === 'equipo' ? 'base' : (d.autor || 'anónimo')} · {new Date(d.updated_at).toLocaleDateString('es-ES')}</span>
                   </Button>
-                  {puedeDecidir && (
+                  {puedeDecidir && d.id > 0 && (
                     <Button variant="ghost" aria-label={d.por_defecto ? `${d.nombre} es el diseño por defecto` : `Poner ${d.nombre} por defecto`} aria-pressed={!!d.por_defecto} disabled={!!d.por_defecto || ocupado} onClick={() => ponerPorDefecto(d)}
                       className={cn('px-1.5 py-1.5', d.por_defecto ? 'text-amber-500' : 'text-slate-400 hover:text-amber-500')}><Star className={cn('h-3.5 w-3.5', d.por_defecto && 'fill-current')} /></Button>
                   )}
-                  <Button variant="ghost" aria-label={`Copiar enlace de ${d.nombre}`} onClick={() => copiarEnlace(d)} className="px-1.5 py-1.5 text-slate-500"><Link2 className="h-3.5 w-3.5" /></Button>
-                  {puedeDecidir && (
+                  {d.id > 0 && <Button variant="ghost" aria-label={`Copiar enlace de ${d.nombre}`} onClick={() => copiarEnlace(d)} className="px-1.5 py-1.5 text-slate-500"><Link2 className="h-3.5 w-3.5" /></Button>}
+                  {puedeDecidir && d.id > 0 && (
                     <Button variant="ghost" aria-label={`Quitar ${d.nombre}`} onClick={() => quitar(d)} className="px-1.5 py-1.5 text-slate-500 hover:text-red-700"><Trash2 className="h-3.5 w-3.5" /></Button>
                   )}
                 </li>
@@ -342,7 +351,7 @@ export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, alVehicu
           {!lista && !error && <p className="flex items-center gap-2 px-2 py-2 text-xs text-slate-500"><Loader2 className="h-3.5 w-3.5 animate-spin" />Cargando…</p>}
           <ul className="max-h-[60vh] overflow-y-auto py-1">
             {lista && VEHICULOS.map(v => {
-              const suyos = lista.filter(d => familiaDe(d) === v.k), abiertoAhora = P.disposicion === v.k;
+              const suyos = [...lista, ...PROPUESTAS].filter(d => familiaDe(d) === v.k), abiertoAhora = P.disposicion === v.k;
               return (
                 <li key={v.k} className="py-1">
                   <p className={cn('flex items-baseline gap-2 px-2 pb-0.5 pt-1 text-[11px] font-semibold uppercase tracking-wide', abiertoAhora ? 'text-teal-800' : 'text-slate-500')}>

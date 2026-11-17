@@ -12633,3 +12633,25 @@ Eugenio: «Haz que el garaje se pueda ocultar con un botón arriba en el menú d
 - El menú de secciones ya no escribe «Diseño 3D»: queda solo el icono, más pequeño (el nombre sigue dentro del menú).
 - «Ver solo …» no aparece con el garaje oculto, porque no hay 3D sobre el que actuar.
 - Cada navegador recuerda la elección (`aeromovil.verGaraje`). El 3D sigue montado pero no se dibuja mientras está oculto.
+
+## 2026-11-16 · Carenado BWB (ala integrada) y la propuesta «Aeromóvil BWB»
+
+Eugenio: «desarrolla la opción de hacer un carenado extra, que sea al estilo Blended Wing Body para que el Aeromóvil se
+parezca a un avión como el Airbus ZeroE … y que a la mitad de cada ala exista la capacidad de que se pliegue» (2026-11-17).
+
+- Nuevo bloque «Carenado BWB (ala integrada)» en Carrocería de la familia Triciclo. Apagado por defecto: ningún diseño
+  guardado cambia. Con él encendido salen dos alas que nacen del costado de la carrocería y se funden con ella.
+- Deslizadores: envergadura, posición detrás del morro, altura en el costado, cuerda en la raíz y en la punta, flecha,
+  diedro, espesor del ala y espesor junto a la carrocería, torsión, incidencia, largo de la integración, cuerda extra junto
+  a la carrocería, radio del filete, alto e inclinación del winglet, línea de plegado y ángulo de plegado. Opciones: perfil
+  (reflejado, simétrico, curvo), punta (redondeada, recta, winglet, sharklet) y «Alas plegadas».
+- El bloque dice la envergadura abierta y plegada contra los límites de anchura (1,5 / 2,0 / 2,55 m); la pestaña
+  Homologación lee el ancho que se ve (plegado o no). También la masa añadida, la superficie mojada, el área frontal y, como
+  estimación de libro (el túnel no ve sustentación), el arrastre de las alas, la potencia que cuestan y la sustentación a
+  velocidad máxima, con aviso si levantan más del 5 % del peso. Avisa si el ala atraviesa los carenados de las ruedas.
+- Masas en su desplegable (piel, largueros, bisagras y actuadores) y sus precios.
+- Propuesta «Aeromóvil BWB (propuesta)» en el menú de diseños (familia Triciclo): el «Aermovil Rombo» (id 14) con el
+  carenado encendido. No se guarda sola; «Guardar como nuevo» la guarda de verdad. Envergadura 3,21 m abierta, 1,96 m
+  plegada a 120°, +20,6 kg, +895 €.
+- Para cargarla sin pantalla (otro bot): `PROPUESTA_BWB` de `src/components/aeromovil/triciclo/propuestaBWB.ts` en
+  `localStorage['aeromovil.parametros.v5']` y `localStorage['aeromovil.diseno'] = 'null'`, y recargar `/aeromovil`.

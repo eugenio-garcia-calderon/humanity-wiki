@@ -2277,3 +2277,15 @@ and resizing while its canvas has zero size.
 **Alternatives.** (a) Keep a small 3D of the Aeromóvil S above the panel: still takes ~40 % of a phone screen and the
 garage cars would need a separate «hide others» path. (b) Unmount the viewer: loses the scene state and the ref other
 sections rely on.
+
+## 2026-11-17 · BWB fairing: own optional fields and own block, not FILAS
+
+**Decision.** The blended-wing-body fairing (`triciclo/bwb.ts`) keeps its 21 fields optional (`tBwb…`, `CamposBWB`) with
+defaults inside its own module (`BWB_DEFECTO`), its own slider table (`FILAS_BWB`) and its own block (`BloqueBWB.tsx`),
+instead of `CamposTriciclo` / `FILAS` / `TRICICLO_DEFECTO`. Its wings are a vertex grid computed in the pure model (so
+masses, width and the pods' clearance read the same geometry) and turned into a mesh in `visor/bwb.ts`. The wings' drag and
+lift are textbook estimates (Raymer, DATCOM) shown in the block; the tunnel and the consumption are not touched.
+**Alternatives.** (a) The FILAS recipe: needs `campos.ts`, `defecto.ts` and `explicaciones/triciclo.ts`, all held by
+another bot today; and 21 rows in 4 files. (b) Add the wings to the tunnel's body: the tunnel has no lift and is calibrated
+on cars without wings; it would move every calibration figure. (c) A preset saved in the database: agents must not write
+production data by hand, so it is a built-in proposal with a negative id in `Disenos.tsx` `PROPUESTAS`.

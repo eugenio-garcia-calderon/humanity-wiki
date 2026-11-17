@@ -92,6 +92,11 @@ function estimar(nombre: string, kg: number, cx: ContextoPrecio): Estimacion {
   const matLam = String(P.tMatCarenado ?? P.qMatCarenado ?? P.matCarenado ?? 'vidrio');
   const [kgLam, nLam] = EUR_KG_LAMINADO[matLam] ?? EUR_KG_LAMINADO.vidrio;
   if (/^(Carrocería|Carenados)/.test(nombre)) return est(kg * kgLam, `estimado: ${n1(kg)} kg de laminado de ${nLam} a ${kgLam} €/kg (tela, resina y consumibles; sin moldes ni horas)`);
+  // 2026-11-17: the BWB fairing (triciclo/bwb.ts): its skin is the body's laminate; the inner structure a sandwich of
+  // the same cloth with foam; the fold two hinges with their locks (≈ 60 € each) and two 12 V linear actuators (≈ 120 € each)
+  if (/^Carenado BWB: piel/.test(nombre)) return est(kg * kgLam, `estimado: ${n1(kg)} kg de laminado de ${nLam} a ${kgLam} €/kg (tela, resina y consumibles; sin moldes ni horas)`);
+  if (/^Carenado BWB: largueros/.test(nombre)) return est(kg * kgLam * 1.3, `estimado: ${n1(kg)} kg de largueros y costillas de ${nLam} con espuma a ${Math.round(kgLam * 1.3)} €/kg`);
+  if (/^Carenado BWB: bisagras/.test(nombre)) return est(2 * (60 + 120), 'estimado: por ala, una bisagra de piano con cierre (≈ 60 €) y un actuador lineal de 12 V (≈ 120 €)');
   if (/^Suelo de sándwich/.test(nombre)) return est(kg * kgLam * 1.3, `estimado: ${n1(kg)} kg de sándwich de ${nLam} a ${Math.round(kgLam * 1.3)} €/kg (con el núcleo)`);
   // the canopy: a thermoformed polycarbonate canopy made to measure, by its area
   if (/^Cúpula/.test(nombre)) {
