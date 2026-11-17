@@ -4,7 +4,7 @@ import { cifrasHibrido, factorCargaParcial } from '../hibrido';
 import { RENDIMIENTO_SOLAR } from '../geometria';
 import { areasBala } from '../geometriaBala';
 import type { CamposTriciclo, ClaveNumTriciclo } from './campos';
-import { crrEjes } from '../ruedas/neumaticos';
+import { fichaRueda } from '../ruedas/catalogo';
 import { neumaticosTriciclo } from './neumaticos';
 import { limitarTriciclo } from './medidas';
 import type { ModeloTriciclo } from './modelo';
@@ -12,16 +12,35 @@ import { AGARRE } from './comprobaciones';
 import { electronicaTriciclo } from './electronica';
 import { dCdARefrigeracion } from './refrigeracion';
 
-/** Rodadura de neumático de ciclomotor (0,011), motor de buje y controlador al 85 %, 80 W de equipos y la batería usable al 90 %. Supuestos, no medidos. */
-export const CRR = 0.011, RENDIMIENTO = 0.85, AUXILIARES = 80, USABLE = 0.9;
+/**
+ * Rodadura de los neumáticos de las medidas antiguas (2026-11-17, decidido por Claude, delegado por Eugenio):
+ * - ciclomotor de 16″ a 28″ (diagonal, con cámara): V. Cossalter, «Motorcycle Dynamics» (2.ª ed., 2006), cap. 2,
+ *   f = 0,0085 + 0,018/p + 1,59·10⁻⁶·V²/p (p en bar, V en km/h), la parte estática a 2,25 bar: 0,0165. Antes, 0,011.
+ *   La misma fórmula y fuente que el catálogo (`ruedas/catalogo.ts`); citada del libro, NO comprobada en internet hoy.
+ * - coche de 13″ a 15″ (radial, de carretera): 0,011, como siempre.
+ */
+export const CRR_CICLOMOTOR = 0.0085 + 0.018 / 2.25, CRR_COCHE = 0.011;
+/** Rodadura de neumático de ciclomotor (`CRR_CICLOMOTOR`), motor de buje y controlador al 85 %, 80 W de equipos y la batería usable al 90 %. Supuestos, no medidos. */
+export const CRR = CRR_CICLOMOTOR, RENDIMIENTO = 0.85, AUXILIARES = 80, USABLE = 0.9;
+/** The rolling resistance of an older size's own tyre: the car sizes (c13–c15) `CRR_COCHE`, the moped ones `CRR_CICLOMOTOR`. */
+const crrLegado = (k: string) => k.startsWith('c') ? CRR_COCHE : CRR_CICLOMOTOR;
 /**
  * 2026-11-17: with a catalogue wheel (`ruedas/catalogo.ts`) on an axle, the mean of each wheel's own rolling resistance,
- * wheel by wheel (pods: `tRuedaDel`; the tail's, and in a diamond the nose's too: `tRuedaTras`). The old sizes roll at `CRR`.
+ * wheel by wheel (pods: `tRuedaDel`; the tail's, and in a diamond the nose's too: `tRuedaTras`). The old sizes roll at `crrLegado`.
  */
 export const crrTriciclo = (T: Pick<CamposTriciclo, 'tRuedaDel' | 'tRuedaTras' | 'tTraseras' | 'tRuedas'> & Partial<Pick<CamposTriciclo, 'tNeuDel' | 'tNeuTras' | 'tConsDel' | 'tConsTras'>>) => {
   // 2026-11-17: each axle's tyre type multiplies its size's rolling resistance (exactly 1 «De serie»: `ruedas/neumaticos.ts`)
   const n = neumaticosTriciclo(T);
-  return crrEjes([{ k: T.tRuedaDel, n: 2, f: n.del.fCrr }, { k: T.tRuedaTras, n: T.tRuedas === 'rombo' || T.tTraseras === 'dos' ? 2 : 1, f: n.tras.fCrr }], CRR);
+  // (2026-11-17: each older size at its own tyre's, `crrLegado`: the moped and the car sizes no longer share 0.011)
+  const ejes = [{ k: T.tRuedaDel, n: 2, f: n.del.fCrr }, { k: T.tRuedaTras, n: T.tRuedas === 'rombo' || T.tTraseras === 'dos' ? 2 : 1, f: n.tras.fCrr }];
+  return ejes.reduce((a, e) => a + e.n * (fichaRueda(e.k)?.crr ?? crrLegado(e.k)) * e.f, 0) / ejes.reduce((a, e) => a + e.n, 0);
+};
+/** What the rolling resistance figure is, in words, for the editors' notes: the older sizes' own tyres, or the chosen ones. */
+export const textoCrrTriciclo = (T: Parameters<typeof crrTriciclo>[0]) => {
+  const n = neumaticosTriciclo(T), propio = !fichaRueda(T.tRuedaDel) && !fichaRueda(T.tRuedaTras) && n.del.serie && n.tras.serie;
+  if (!propio) return 'la media de los neumáticos elegidos, con su tipo, en «Ejes y ruedas»';
+  const moto = [T.tRuedaDel, T.tRuedaTras].map(k => !k.startsWith('c'));
+  return moto.every(Boolean) ? 'neumático de ciclomotor, fórmula de Cossalter a 2,25 bar' : moto.some(Boolean) ? 'la media de los de ciclomotor (Cossalter) y los de coche' : 'neumático de coche';
 };
 /** Consumo, autonomía y velocidades con el Cd del túnel (referido a su área: la sección mayor de la carrocería). */
 /**
@@ -45,7 +64,7 @@ export function energiaTriciclo(m: ModeloTriciclo, mTot: number, cd: { cd: numbe
   const el = electronicaTriciclo(T);
   const vel = L('tVel'), WhKm = consumo(vel), util = m.kWh * 1000 * (m.phev ? 1 - L('tEpArrSoc') / 100 : USABLE);
   const vmaxCon = (kW: number) => { let v = 10; for (let i = 0; i < 80; i++) v *= Math.pow(kW * 1000 / potencia(v), 0.34); return v * 3.6; };
-  // 0 → 50 km/h: peak power, limited by the grip of the one driven wheel (≈ 40 % of the weight on it, μ 0.9)
+  // 0 → 50 km/h: peak power, limited by the grip of the one driven wheel (≈ 40 % of the weight on it, μ: the rear tyre's own, absolute since 2026-11-17, `neumaticosTriciclo(T).tras.muSeco`)
   const reparto = 0.4, Fmax = AGARRE * neumaticosTriciclo(T).tras.fSeco * reparto * mTot * g;
   let v = 0.5, t = 0; const dt = 0.02;
   while (v < 50 / 3.6 && t < 60) { const Fz = Math.min(Fmax, el.ruedasElecPico * 1000 * rendM / v) - 0.5 * 1.2 * CdA * v * v - CRR * mTot * g; if (Fz <= 0) { t = 99; break; } v += Fz / (mTot * 1.03) * dt; t += dt; }

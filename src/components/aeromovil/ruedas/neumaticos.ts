@@ -107,7 +107,7 @@ export interface EfectoNeumatico {
   tipo: TipoNeumatico; nombre: string; construccion: string;
   /** Multipliers over today's numbers for that size: exactly 1 with «De serie» (`fSeco`/`fMojado` with `absoluto`: over a radial road tyre's `agarre`). */
   fCrr: number; fKg: number; fSeco: number; fMojado: number;
-  /** Peak friction with this tyre, dry and wet, given the vehicle's dry grip with the size's own tyre (`agarre`, 0.9 g). */
+  /** Peak friction with this tyre, dry and wet, given the vehicle's dry grip with the size's own tyre (`agarre`, 0.9 g); with `absoluto`, a radial road tyre's. */
   muSeco: number; muMojado: number;
   /** Life (km, `delantera` ×1.5) and price (€ per tyre, estimate). */
   km: number; precio: number;
