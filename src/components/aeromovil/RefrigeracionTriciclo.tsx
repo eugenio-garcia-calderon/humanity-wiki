@@ -6,7 +6,7 @@ import type { ModeloTriciclo, Parametros } from './geometria';
 import { Bloque, Deslizador, Selector, fmt } from './controles';
 import { DesglosePeso } from './PesoSeccion';
 import { textoPesoSeccion, type SeccionPeso } from './masasSecciones';
-import { FILAS_REFRIGERACION, OPCIONES_RADIADOR, OPCIONES_TOMA, camposRefrigeracion, refrigeracionDe, type ClaveRefrigeracion } from './triciclo/refrigeracion';
+import { FILAS_REFRIGERACION, OPCIONES_MOTOR, OPCIONES_RADIADOR, OPCIONES_TOMA, camposRefrigeracion, refrigeracionDe, type ClaveRefrigeracion } from './triciclo/refrigeracion';
 
 export const BLOQUE_REFRIGERACION = 'Refrigeración';
 
@@ -26,6 +26,8 @@ export function BloqueRefrigeracion({ P, set, modelo, seccion, plegable }: {
         La toma puede ser una boca en el morro, dos bocas (una a cada lado del morro) o unas branquias en los dos costados, bajas, justo antes de que empiece la cola, que recogen el aire como colectores.
         Las aberturas son agujeros de verdad en la carrocería, con su embellecedor y un conducto oscuro hasta el radiador. El capó (lo alto del morro) se abre con «Abrir maletero y capó», abajo en el 3D.
       </p>
+      <Selector id="t-tMotorPos" etiqueta="Motor de gasolina" valor={C.tMotorPos} opciones={OPCIONES_MOTOR} alCambiar={v => poner('tMotorPos', v)} />
+      {C.tMotorPos === 'delante' && <p className="-mt-1 text-xs text-slate-500">Delante: el motor va en el morro, por delante de los pies del piloto, lo más atrás y abajo que cabe. {modelo.phev?.arq === 'serie' ? 'En serie solo hace electricidad: un cable lleva la corriente al controlador.' : 'Empuja la rueda trasera con un árbol de transmisión a lo largo del suelo hasta el piñón de la cadena, que sigue igual.'} El depósito se queda detrás de los asientos y el escape va por debajo del suelo hasta la cola. Sus choques (la rueda del morro o la dirección, los pies, la piel) los dicen las comprobaciones.</p>}
       <Selector id="t-tToma" etiqueta="Toma de aire" valor={C.tToma} opciones={OPCIONES_TOMA} alCambiar={v => poner('tToma', v)} />
       {C.tToma !== 'ninguna' && <Selector id="t-tRad" etiqueta="Radiador" valor={C.tRad} opciones={OPCIONES_RADIADOR} alCambiar={v => poner('tRad', v)} />}
       {filas.map(([k, n, min, max, paso, u]) => (

@@ -281,7 +281,11 @@ export const dCdARefrigeracion = (m: ModeloTriciclo) => refrigeracionDe(m)?.dCdA
 
 /** The cooling's parts for the parts list (names start «Motor: …», so `grupoPieza` sends them to Motor). */
 export function piezasRefrigeracion(m: ModeloTriciclo): PiezaMasa[] {
-  const r = refrigeracionDe(m); if (!r) return [];
+  // (and, with the engine in the nose, its shaft back to the rear wheel's sprocket: a Ø 40 × 2 mm steel tube, ≈ 1,9 kg/m,
+  // and its two joints, 1 kg: an estimate)
+  const a = m.phev?.disp.arbol ?? null;
+  const arbol: PiezaMasa[] = a ? (() => { const L = a.slice(1).reduce((s, p, i) => s + Math.hypot(p[0] - a[i][0], p[1] - a[i][1], p[2] - a[i][2]), 0); return [{ nombre: 'Motor: árbol de transmisión (motor delante)', kg: 1.9 * L + 1, x: (a[0][0] + a[a.length - 1][0]) / 2, y: (a[0][1] + a[a.length - 1][1]) / 2, z: a[0][2], nota: `${Math.round(L * 10) / 10} m de tubo de acero con sus dos juntas` }]; })() : [];
+  const r = refrigeracionDe(m); if (!r) return arbol;
   const A = r.areaRadiador * 100, n = r.radiadores.length;
   const cRad = (k: 0 | 1 | 2) => r.radiadores.reduce((a, q) => a + q.c[k], 0) / n;
   const todos = [...r.tubos.caliente, ...r.tubos.fria].flat(), cTubo = (k: 0 | 1 | 2) => todos.reduce((a, p) => a + p[k], 0) / todos.length;
@@ -296,6 +300,7 @@ export function piezasRefrigeracion(m: ModeloTriciclo): PiezaMasa[] {
     { nombre: 'Motor: tubos de refrigeración', kg: 0.012 * dmm * r.tubos.largo, x: cTubo(0), y: cTubo(1), z: cTubo(2), nota: `${Math.round(r.tubos.largo * 10) / 10} m de manguito de ${Math.round(dmm)} mm, ida y vuelta` },
     { nombre: 'Motor: refrigerante', kg: 1.07 * litros, x: (mot[0] + cRad(0)) / 2, y: (mot[1] + cRad(1)) / 2, nota: `${Math.round(litros * 10) / 10} L de anticongelante` },
     { nombre: `Motor: conductos de la toma de aire`, kg: 0.25 * nConductos, x: xToma, y: yToma },
+    ...arbol,
   ];
 }
 

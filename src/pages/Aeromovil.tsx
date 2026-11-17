@@ -768,7 +768,7 @@ export default function Aeromovil() {
             {(esA1 || esTri) && (
               <Button variant="outline" aria-pressed={maleteros} onClick={() => setMaleteros(!maleteros)}
                 className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', maleteros && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
-                <Package className="mr-1 h-3 w-3" />{maleteros ? 'Cerrar' : 'Abrir'} {esTri ? 'maletero' : 'maleteros'}
+                <Package className="mr-1 h-3 w-3" />{maleteros ? 'Cerrar' : 'Abrir'} {esTri ? 'maletero y capó' : 'maleteros'}
               </Button>
             )}
             {esA1 && P.plazas === 2 && (

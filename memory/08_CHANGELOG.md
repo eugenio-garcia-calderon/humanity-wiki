@@ -12402,3 +12402,33 @@ para ponerle más potencia, más peso, etcétera.»
 - Fuentes: Reglamento (UE) 168/2013 (anexo I, arts. 3–5, anexos VI y VIII), Reglamentos Delegados 3/2014 y 44/2014
   (consolidado de EUR-Lex), DGT/MAPFRE/RACE para los permisos. Lo citado sin releer lleva «por confirmar».
 - No visto en un teléfono de verdad: si sale la versión vieja, `humanity.wiki/?sw=off`.
+
+## 2026-11-17 · Capó que se abre, tomas de aire (morro o branquias), radiador, tubos de refrigeración y motor delante o detrás
+
+Eugenio: «Haz que en el aermovil S se pueda abrir el Capó, y permite crear una apertura en el morro que pueda ser de una
+sola boca o que sean dos bocas, una a cada lado del morro, y que pueda jugar con la geometría de esa boca y esa apertura,
+y que se puede elegir entre esa apertura frontal del morro o una apertura lateral en ambos lados de la cola, al estilo
+branquias … Y que se pueda colocar aquí el radiador de refrigeración. O se pueda colocar delante. Y también que el motor
+se pueda colocar atrás o delante. Y se pueda jugar con todo ello. También con los tubos de refrigeración en el circuito.»
+
+- **Capó** (toda la familia Triciclo, también el Aeromóvil S): lo alto del morro, desde justo delante del marco de la
+  cúpula hasta la banda de luz, es una pieza aparte con su bisagra atrás. Cerrado se ve igual que antes; se abre 50° con
+  el botón del 3D, que ahora se llama «Abrir maletero y capó».
+- **Motor › «Refrigeración y tomas de aire»** (solo con la propulsión híbrida enchufable): toma de aire «Ninguna» (lo de
+  siempre: los diseños guardados no cambian), «Morro: una boca», «Morro: dos bocas» o «Branquias laterales» (ranuras
+  inclinadas en los dos costados, bajas, antes de la cola). Deslizadores: ancho, alto, altura y esquinas de la boca,
+  separación de las dos bocas; número de ranuras, largo, alto, posición y altura de las branquias; área del radiador y
+  diámetro de los tubos. Las bocas y las ranuras son agujeros de verdad en la piel, con embellecedor negro y un conducto
+  oscuro hasta el radiador.
+- **Radiador** detrás de la toma, o forzado delante (en el morro) o a los lados (detrás de las branquias, dos mitades);
+  con ventilador. **Tubos**: rojo el caliente (del motor a lo alto del radiador), azul el frío (de vuelta), por el suelo.
+- **Motor de gasolina: Detrás / Delante.** Delante va en el morro, por delante de los pies del piloto; empuja la rueda
+  trasera con un árbol de transmisión por el suelo hasta la cadena (en serie, solo un cable). El depósito se queda detrás
+  de los asientos y el escape va por debajo del suelo. En el rombo con rueda en el morro no cabe: las comprobaciones lo dicen.
+- **Física, estimada y dicha como estimación**: calor al refrigerante = 25 % de la energía de la gasolina a plena potencia
+  (Heywood); lo que saca el radiador con su ventilador a 35 °C; la boca, al menos el 25 % del radiador (Hucho). El
+  túnel no ve el aire que entra por la boca: su arrastre (0,5 × el área de la boca, Hucho) se suma al CdA del consumo.
+  Nueva regla en el estudio aerodinámico: «Toma de aire más grande de lo que el radiador aprovecha».
+- **Masas**: radiador, ventilador, tubos, refrigerante, conductos y el árbol, en la lista de pesos y en el desplegable
+  «Refrigeración» (y con ellos sus precios).
+- No comprobado en un móvil: con la app instalada, `humanity.wiki/?sw=off` quita la copia vieja.

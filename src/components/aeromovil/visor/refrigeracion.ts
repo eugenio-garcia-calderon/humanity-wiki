@@ -33,6 +33,7 @@ const mats = () => MATS ?? (MATS = {
   caliente: new THREE.MeshStandardMaterial({ color: 0xb3261e, metalness: 0.1, roughness: 0.55 }),
   fria: new THREE.MeshStandardMaterial({ color: 0x1f5fa8, metalness: 0.1, roughness: 0.55 }),
   junta: new THREE.LineBasicMaterial({ color: 0x2a2d31 }),
+  arbol: new THREE.MeshStandardMaterial({ color: 0xc0c5ca, metalness: 0.9, roughness: 0.25 }),
 });
 
 const malla = (g: THREE.Object3D, geo: THREE.BufferGeometry, mat: THREE.Material, comp: string, nombre: string) => {
@@ -154,6 +155,9 @@ export function dibujarRefrigeracion(G: Record<CapaId, THREE.Group>, puertasG: M
       puertasG.get('maletero')!.push(piv);
     }
   }
+  // ── 2026-11-17: the engine in the nose: its shaft back to the chain (hibrido.ts `arbol`)
+  const arbol = m.phev?.disp.arbol;
+  if (arbol) malla(G.motor, new THREE.TubeGeometry(manguera(arbol), 48, 0.02, 12, false), M.arbol, 'hibrido-arbol', 'arbol-transmision');
   if (!r) return;
   // ── the nose mouths: bezel, duct to the radiator, a grille of three bars
   const frente = (z: number, y: number, xPrev: number) => { const x = F.frenteX(z, y); return Number.isFinite(x) ? x : xPrev; };

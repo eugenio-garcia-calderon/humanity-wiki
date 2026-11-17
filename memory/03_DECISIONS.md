@@ -2143,3 +2143,22 @@ Eugenio: «permite añadir más tipos de ruedas, por ejemplo de motos de todo ti
   the tunnel's Cd; gearing/rpm limits are not modelled.
 - **Polycarbonate canopy outside L1e–L5e flagged «No cumple»** (3/2014 annex VII part 1 point 2.1.2 allows rigid
   plastic windscreens only on L1e–L5e). Read from legislation.gov.uk's copy; to confirm with a technical service.
+
+## 2026-11-17 · Cooling, intakes, hood and engine position of the Triciclo (bot «capo»)
+
+- **Fields outside `CamposTriciclo`.** `tToma…`, `tBranq…`, `tRad…`, `tTuboD`, `tMotorPos` live in
+  `triciclo/refrigeracion.ts` (`CamposRefrigeracion`, `FILAS_REFRIGERACION`, read from `m.P` with
+  `camposRefrigeracion`), because `campos.ts`/`defecto.ts` were claimed by other bots all afternoon. Absent = «Ninguna»
+  / «Detrás», so every saved design builds identically (checked: hash of the hybrid layout + checks + masses equal to
+  main for 3 bodies × 3 architectures × 2 propulsions). Alternative: rows in `FILAS` — moving them is ≈ 30 min.
+- **True holes, not decals.** The intakes remove the body mesh's triangles inside each outline (`visor/refrigeracion.ts`
+  `cortarPiel`); a 12 mm black bezel hides the saw-tooth of the ≈ 1 cm skin cells; a dark duct runs to the radiator.
+  Cheaper than re-gridding the skin around the outline, which would have touched `garaje/balaModelo.ts`.
+- **The hood is the same triangles on a pivot**, registered as a «maletero» so the existing animation opens it; closed it
+  draws exactly the old body. No extra mass (hinges ≈ 1 kg not counted, so saved designs keep their mass).
+- **Cooling drag is a literature estimate added to the consumption's CdA** (`energia.ts`), never to the tunnel or its
+  calibration: ΔCdA = 0,5 × intake area (Hucho, 0,3–0,7). Heat: 25 % of fuel energy (Heywood); radiator ε 0,5, fan 3 m/s,
+  ΔT 70 K.
+- **Engine in the nose** (`hibrido.ts` `delante`): same search (nearest the cabin, lowest), drive by a propshaft along the
+  floor to the unchanged chain sprocket; tank stays behind the seats; exhaust under the floor. Masses of the propshaft
+  (1,9 kg/m + 1 kg) go through `piezasRefrigeracion` (the one hook into `masas.ts`).

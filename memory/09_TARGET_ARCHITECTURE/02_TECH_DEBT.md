@@ -901,3 +901,16 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **Tyre speed symbol, headlamp heights (500–1200 mm), plate space, R-point ≥ 400 mm**: the model knows some of these
   (lamp positions, seat hip) but they are not wired: ~3 h.
 - **The Cuadriciclo Bala has no masses/motor** (body only): mass, power and speed rows read «no se puede comprobar».
+
+## 2026-11-17 · Cooling and engine position (bot «capo»)
+
+- **Cooling fields outside `campos.ts`**: no `Explicacion` per slider (the block has one paragraph) and the study's
+  `ficha()` does not know them (its rule's test is `tunel: false`). Moving them into `FILAS`/`SELECTORES_TRICICLO` +
+  `explicaciones/triciclo.ts`: ≈ 45 min.
+- **Pipes and radiators only check the skin and a few boxes** (engine, tank, battery, nose wheel), not the seats, feet,
+  frame tubes or the battery pack along the frame: ≈ 1 h with `hibrido.ts`'s `choquesDe`.
+- **Radiator is always vertical**; in a low nose it may not fit (check says «asoma»). A tilted core: ≈ 1 h.
+- **The propshaft and the engine in the nose are drawn by `visor/refrigeracion.ts`**, not `hibrido3d.ts` (claimed);
+  the front engine has no specific check for the pilot's pedals or the front suspension cradle. ≈ 40 min.
+- **Hood hinge/latch mass (≈ 1 kg) not counted**, and the nose solar panel (`tSolarMorro`) does not lift with the hood:
+  ≈ 20 min each.
