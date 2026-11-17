@@ -96,7 +96,8 @@ export function conFicha(P: Parametros, nombre: string, cambios: Partial<Proveed
   const antes = fichaDe(P, nombre);
   const f: ProveedorPieza = { ...antes, ...cambios };
   for (const k of ['proveedor', 'modelo'] as const) { const v = (f[k] ?? '').slice(0, MAX_TEXTO); if (v.trim()) f[k] = v; else delete f[k]; }
-  for (const k of ['proveedorUrl', 'modeloUrl'] as const) { const v = (f[k] ?? '').slice(0, MAX_URL); if (v.trim()) f[k] = v; else delete f[k]; }
+  // a link that is not http(s) (javascript:, data:…) never reaches the design; the field says why (ProveedorParte.tsx)
+  for (const k of ['proveedorUrl', 'modeloUrl'] as const) { const v = (f[k] ?? '').slice(0, MAX_URL); if (v.trim() && enlaceSeguro(v)) f[k] = v.trim(); else delete f[k]; }
   if (!f.adjuntos?.length) delete f.adjuntos;
   const todo = { ...(P.proveedores ?? {}) };
   if (tieneDatos(f)) todo[nombre] = f; else delete todo[nombre];

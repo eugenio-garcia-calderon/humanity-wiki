@@ -41,13 +41,19 @@ export function ProveedorParte({ nombre }: { nombre: string }) {
   if (!cx) return null;
   const f = fichaDe(cx.P, nombre), sug = sugerencia(nombre, cx.P);
   const n = f.adjuntos?.length ?? 0;
-  const prov = f.proveedor || sug?.proveedor, mod = f.modelo || sug?.modelo;
-  const resumen = [prov, mod, n ? `${n} archivo${n > 1 ? 's' : ''}` : ''].filter(Boolean).join(' · ');
+  // own text wins; a name typed without a link keeps no link from the catalogue (it may be another supplier)
+  const prov = f.proveedor || f.proveedorUrl ? { t: f.proveedor || enlaceSeguro(f.proveedorUrl)?.replace(/^https?:\/\/(www\.)?/, '').split('/')[0] || '', u: f.proveedorUrl } : sug?.proveedor ? { t: sug.proveedor, u: sug.proveedorUrl } : null;
+  const mod = f.modelo || f.modeloUrl ? { t: f.modelo || 'ficha', u: f.modeloUrl } : sug?.modelo ? { t: sug.modelo, u: sug.modeloUrl } : null;
+  const trozos = [prov, mod].filter((x): x is { t: string; u?: string } => !!x && !!x.t);
+  const resumen = trozos.map(x => x.t).concat(n ? [`${n} archivo${n > 1 ? 's' : ''}`] : []).join(' · ');
   return (
     <div className="mt-0.5">
       <div className="flex items-baseline justify-between gap-2">
         {resumen
-          ? <span className={cn('min-w-0 truncate text-[11px]', tieneDatos(f) ? 'text-slate-600' : 'text-slate-400')} title={tieneDatos(f) ? resumen : `Del ${sug?.de}`}>{resumen}</span>
+          ? <span className={cn('min-w-0 truncate text-[11px]', tieneDatos(f) ? 'text-slate-600' : 'text-slate-400')} title={tieneDatos(f) ? resumen : `Del ${sug?.de}`}>
+              {trozos.map((x, i) => <span key={i}>{i > 0 && ' · '}{x.u ? <Enlace href={x.u}>{x.t}</Enlace> : x.t}</span>)}
+              {n > 0 && <>{trozos.length ? ' · ' : ''}<Button variant="ghost" onClick={() => setAbierto(true)} className="inline p-0 text-[11px] font-normal normal-case tracking-normal underline decoration-dotted underline-offset-2">{n} archivo{n > 1 ? 's' : ''}</Button></>}
+            </span>
           : <span />}
         <Button variant="ghost" onClick={() => setAbierto(a => !a)} aria-expanded={abierto} title="Proveedor, modelo, enlaces y archivos de esta pieza"
           className={cn('shrink-0 gap-1 rounded px-1 py-0 text-[11px] font-normal normal-case tracking-normal text-slate-500 underline decoration-dotted underline-offset-2', abierto && 'bg-slate-100')}>

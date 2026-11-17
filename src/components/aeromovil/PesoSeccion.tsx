@@ -5,6 +5,7 @@
  */
 import { fmt } from './controles';
 import type { PartePeso, SeccionPeso } from './masasSecciones';
+import { ProveedorParte } from './proveedores/ProveedorParte';
 
 function Parte({ p, nivel }: { p: PartePeso; nivel: number }) {
   return (
@@ -13,6 +14,8 @@ function Parte({ p, nivel }: { p: PartePeso; nivel: number }) {
         <span className={nivel ? 'text-slate-600' : 'font-medium text-slate-700'}>{p.nombre}</span>
         <span className="shrink-0 font-mono tabular-nums text-slate-700">{fmt(p.kg, p.kg < 1 ? 2 : 1)} kg</span>
       </div>
+      {/* (2026-11-17, «proveedores») supplier, model and files of the part (proveedores/ProveedorParte.tsx) */}
+      {nivel === 0 && <ProveedorParte nombre={p.nombre} />}
       {p.nota && <p className="text-[11px] leading-snug text-slate-400">{p.nota}</p>}
       {p.hijos && <ul className="mt-1 flex flex-col gap-1">{p.hijos.map(h => <Parte key={h.nombre} p={h} nivel={nivel + 1} />)}</ul>}
     </li>
