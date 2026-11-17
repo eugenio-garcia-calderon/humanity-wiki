@@ -9,6 +9,7 @@ import { limitarTriciclo } from './medidas';
 import type { ModeloTriciclo } from './modelo';
 import { AGARRE } from './comprobaciones';
 import { electronicaTriciclo } from './electronica';
+import { dCdARefrigeracion } from './refrigeracion';
 
 /** Rodadura de neumático de ciclomotor (0,011), motor de buje y controlador al 85 %, 80 W de equipos y la batería usable al 90 %. Supuestos, no medidos. */
 export const CRR = 0.011, RENDIMIENTO = 0.85, AUXILIARES = 80, USABLE = 0.9;
@@ -27,8 +28,9 @@ export const crrTriciclo = (T: Pick<CamposTriciclo, 'tRuedaDel' | 'tRuedaTras' |
 export const solarDiaTriciclo = (area: number, sol = 4.5) => area * 0.7 * RENDIMIENTO_SOLAR * sol * 1000 * 0.85;
 /** Petrol's lower heating value (kWh per litre: 32 MJ/L). */
 export const KWH_LITRO_GASOLINA = 8.9;
+// (2026-11-17, capo: plus the cooling air's drag, which the tunnel does not see: refrigeracion.ts `dCdARefrigeracion`)
 export function energiaTriciclo(m: ModeloTriciclo, mTot: number, cd: { cd: number; areaRef: number }, areaSolar = m.solarTodo.area) {
-  const T = m.campos, L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), g = 9.81, CdA = cd.cd * cd.areaRef, CRR = crrTriciclo(T);
+  const T = m.campos, L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), g = 9.81, CdA = cd.cd * cd.areaRef + dCdARefrigeracion(m), CRR = crrTriciclo(T);
   const potencia = (v: number) => (0.5 * 1.2 * CdA * v ** 3 + CRR * mTot * g * v) / RENDIMIENTO + AUXILIARES;
   const consumo = (kmh: number) => { const v = kmh / 3.6; return potencia(v) / v / 3.6; };
   // (2026-11-17) the power electronics (electronica.ts): the electric mode's continuous and peak power after the configured

@@ -12483,6 +12483,7 @@ es el autor, si no será anónimo.»
 
 Eugenio: «busca una solución para que las pruebas no sean el cuello de botella». Hasta ahora cada bot pasaba `tsc`, la compilación y los scripts del Aeromóvil en la misma máquina de la nube, de uno en uno: con diez bots la cola tardaba horas. Ahora, cada solicitud de cambios las pasa en las máquinas de GitHub, todas a la vez (`.github/workflows/comprobar.yml`): `tsc`, compilación, túnel, diseños guardados, estudio aerodinámico, pesos por sección, homologación, cola lisa y continuidad de la cola. Un bot abre su solicitud y la fusiona cuando todo sale en verde.
 
+<<<<<<< HEAD
 ## 2026-11-17 · Electrónica de potencia en Motor, estudio L7e y ensayos en Homologación
 
 Eugenio: «Crea un nuevo apartado dentro de MOTOR que sea Electronica de potencia y añade el control de potencia, todas logicas de arranque del termico y cuando se activa con sliders, mapa de motor, y esas cosas importantes. Añade ese texto que te adjunto en la parte de homologación, resumiendo el tema de homologación de L7, y sobre todo qué cosas están OK y que cosas no, conectando con el tema de Electronica de control y de potencia pico y potencia continua configurada. y también añade los ensayos necesarios segun la normativa, añadiendo una pestaña por cada ensayo».
@@ -12491,3 +12492,35 @@ Eugenio: «Crea un nuevo apartado dentro de MOTOR que sea Electronica de potenci
 - Las cifras se usan: la velocidad sostenida y punta en eléctrico, la aceleración y la velocidad solo con gasolina respetan los límites; nueva «velocidad con los dos a la vez»; la potencia de la homologación es la continua total del modo más potente. Con los ajustes de serie (sin límite) todo da lo mismo que antes, y los diseños guardados no cambian.
 - **Homologación › Estudio L7e-A2**: el estudio de Eugenio resumido y calculado en vivo para el diseño: OK / No OK / A comprobar para los campos 1.8.3, 1.8.5, 1.8.7 y 1.8.9 de la ficha (901/2014), cada modo ensayado (134/2014), los dos limitadores (3/2014 anexo XVIII) y la protección contra la manipulación; y la tabla de escenarios (28 / 45 / 15 kW) con los números del diseño.
 - **Homologación › Ensayos**: una pestaña por ensayo (térmico, eléctrico 30 min según UN 85, conjunto híbrido en cada modo, limitaciones no eliminables, velocidad máxima, emisiones, ruido, frenado, alta tensión y compatibilidad electromagnética), con objetivo, cómo se hace, qué declarar, las cifras del diseño y lo que se espera. Todos pendientes. `scripts/homologacion.ts` los imprime y comprueba los números del estudio.
+=======
+
+## 2026-11-17 · Capó que se abre, tomas de aire (morro o branquias), radiador, tubos de refrigeración y motor delante o detrás
+
+Eugenio: «Haz que en el aermovil S se pueda abrir el Capó, y permite crear una apertura en el morro que pueda ser de una
+sola boca o que sean dos bocas, una a cada lado del morro, y que pueda jugar con la geometría de esa boca y esa apertura,
+y que se puede elegir entre esa apertura frontal del morro o una apertura lateral en ambos lados de la cola, al estilo
+branquias … Y que se pueda colocar aquí el radiador de refrigeración. O se pueda colocar delante. Y también que el motor
+se pueda colocar atrás o delante. Y se pueda jugar con todo ello. También con los tubos de refrigeración en el circuito.»
+
+- **Capó** (toda la familia Triciclo, también el Aeromóvil S): lo alto del morro, desde justo delante del marco de la
+  cúpula hasta la banda de luz, es una pieza aparte con su bisagra atrás. Cerrado se ve igual que antes; se abre 50° con
+  el botón del 3D, que ahora se llama «Abrir maletero y capó».
+- **Motor › «Refrigeración y tomas de aire»** (solo con la propulsión híbrida enchufable): toma de aire «Ninguna» (lo de
+  siempre: los diseños guardados no cambian), «Morro: una boca», «Morro: dos bocas» o «Branquias laterales» (ranuras
+  inclinadas en los dos costados, bajas, antes de la cola). Deslizadores: ancho, alto, altura y esquinas de la boca,
+  separación de las dos bocas; número de ranuras, largo, alto, posición y altura de las branquias; área del radiador y
+  diámetro de los tubos. Las bocas y las ranuras son agujeros de verdad en la piel, con embellecedor negro y un conducto
+  oscuro hasta el radiador.
+- **Radiador** detrás de la toma, o forzado delante (en el morro) o a los lados (detrás de las branquias, dos mitades);
+  con ventilador. **Tubos**: rojo el caliente (del motor a lo alto del radiador), azul claro el frío (de vuelta), por el suelo.
+- **Motor de gasolina: Detrás / Delante.** Delante va en el morro, por delante de los pies del piloto; empuja la rueda
+  trasera con un árbol de transmisión por el suelo hasta la cadena (en serie, solo un cable). El depósito se queda detrás
+  de los asientos y el escape va por debajo del suelo. En el rombo con rueda en el morro no cabe: las comprobaciones lo dicen.
+- **Física, estimada y dicha como estimación**: calor al refrigerante = 25 % de la energía de la gasolina a plena potencia
+  (Heywood); lo que saca el radiador con su ventilador a 35 °C; la boca, al menos el 25 % del radiador (Hucho). El
+  túnel no ve el aire que entra por la boca: su arrastre (0,5 × el área de la boca, Hucho) se suma al CdA del consumo.
+  Nueva regla en el estudio aerodinámico: «Toma de aire más grande de lo que el radiador aprovecha».
+- **Masas**: radiador, ventilador, tubos, refrigerante, conductos y el árbol, en la lista de pesos y en el desplegable
+  «Refrigeración» (y con ellos sus precios).
+- No comprobado en un móvil: con la app instalada, `humanity.wiki/?sw=off` quita la copia vieja.
+>>>>>>> origin/main

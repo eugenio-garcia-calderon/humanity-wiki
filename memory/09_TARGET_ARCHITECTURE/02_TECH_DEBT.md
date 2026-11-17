@@ -946,4 +946,21 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   `POST /api/aeromovil/disenos` (an `origen` id in the body): ≈ 20 min.
 - **Anonymous notes never leave the browser** (by design, rule 3). If Eugenio wants visitors' notes shared, they would
   go through moderation like the tasks: ≈ 1 h.
+<<<<<<< HEAD
 - **Power electronics: thermal start logic is descriptive** (2026-11-17, electronica). `tEpArrKW`, `tEpArrVel`, `tEpHist`, `tEpCalent` only drive a table of which motor runs at each speed; only `tEpArrSoc` acts (electric range of a hybrid). A drive-cycle SOC simulation (WMTC) that uses them for litres and range: ≈ 1 day. The regen limit `tEpRegen` does not reduce consumption yet: ≈ 2 h with a stop-and-go share per speed. The HCU (hybrid control unit) has no part in any parts list (consumos' electrical system or Motor): ≈ 30 min once a product is chosen.
+=======
+
+
+## 2026-11-17 · Cooling and engine position (bot «capo»)
+
+- **Cooling fields outside `campos.ts`**: no `Explicacion` per slider (the block has one paragraph) and the study's
+  `ficha()` does not know them (its rule's test is `tunel: false`). Moving them into `FILAS`/`SELECTORES_TRICICLO` +
+  `explicaciones/triciclo.ts`: ≈ 45 min.
+- **Pipes and radiators only check the skin and a few boxes** (engine, tank, battery, nose wheel), not the seats, feet,
+  frame tubes or the battery pack along the frame: ≈ 1 h with `hibrido.ts`'s `choquesDe`.
+- **Radiator is always vertical**; in a low nose it may not fit (check says «asoma»). A tilted core: ≈ 1 h.
+- **The propshaft and the engine in the nose are drawn by `visor/refrigeracion.ts`**, not `hibrido3d.ts` (claimed);
+  the front engine has no specific check for the pilot's pedals or the front suspension cradle. ≈ 40 min.
+- **Hood hinge/latch mass (≈ 1 kg) not counted**, and the nose solar panel (`tSolarMorro`) does not lift with the hood:
+  ≈ 20 min each.
+>>>>>>> origin/main
