@@ -1015,3 +1015,18 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **Catalogue prices only for motors and petrol engines**: controllers and reduction gears publish none, so they are
   estimated; the tyres from bot «neumaticos» are not wired yet (≈ 20 min once its catalogue has prices).
 - `aeromovil/CLAUDE.md` has no recipe for prices yet (file held by another bot): ≈ 10 min.
+## 2026-11-17 · Engine parts one by one (solopiezas)
+- **Only the Triciclo family** (Eugenio focuses on the Aeromóvil S). The Basculante, A1 and Gota motor layers have no
+  `componente` tags and show no parts list. ≈ 30 min each if ever needed.
+- **The oil is not counted** (a dry engine figure leaves it out; ≈ 2 kg on a 25 kW twin). Adding it changes every
+  hybrid's empty mass on purpose: 10 min plus a changelog line.
+- **Two coolant hose stubs** (piezasMotor.ts `auxiliaresMotor`) still leave the thermostat and the pump forward 15 cm
+  even though capo's `refrigeracion-tubos` now run from the engine to the radiator: two hoses where one belongs. Start
+  capo's lines at the stubs' ends (or drop the stubs when `refrigeracionDe(m)` has tubes): ≈ 15 min.
+- **Label spacing assumes a camera ~2 m away** (`aplicarPiezasMotor(…, distancia = 2)`); Visor3D was claimed when the
+  framing distance was to be passed in. Passing `d` from the framing effect: 3 lines, ≈ 10 min.
+- **Labels are placed on the top of each part's box and stacked when they collide**; on a crowded engine two can still
+  overlap on screen from some angles. Screen-space de-overlap ≈ 1 h.
+- **The clicked-part card sits top left over the 3D**, where a garage car's card also opens; both could show at once
+  if a garage car is clicked while «Ver solo motor» is on. Moving it into the viewer's card slot ≈ 20 min. Not checked
+  on a phone.
