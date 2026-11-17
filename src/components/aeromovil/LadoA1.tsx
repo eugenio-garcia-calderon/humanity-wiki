@@ -10,6 +10,7 @@ import type { IdDepartamento } from './departamentos';
 import { ComparacionChasis } from './Departamentos';
 import { tubosCelosia } from './chasisCelosia';
 import { fmt, m2, Deslizador, Bloque, Selector } from './controles';
+import { pesoSeccion, seccionesA1, textoPesoSeccion } from './masasSecciones';
 
 export const PUERTAS_A1: { k: Puerta; n: string; d: string }[] = [
   { k: 'gaviota', n: 'Alas de gaviota (Aptera)', d: 'La ventanilla con su costado y el panel lateral suben juntos, con bisagra en el canto del techo. El techo se queda en su sitio.' },
@@ -24,6 +25,8 @@ export function LadoA1({ P, Pa, D, set, res, modelo, neumaticos, malas, alNavega
   const a1 = res.a1!;
   const hayCelosia = useMemo(() => { try { return tubosCelosia((modelo as any).contextoChasis()).length > 0; } catch { return false; } }, [modelo]);
   const cm = (v: number) => `${Math.round(v * 100)} cm`;
+  // (2026-11-17) each section's weight in its header, from the same list as «Peso del vehículo» (masasSecciones.ts)
+  const pesos = useMemo(() => seccionesA1(res), [res]), pk = (b: string) => textoPesoSeccion(pesoSeccion(pesos, 'a1', b));
   const h = (v: number) => (v >= 10 ? `${Math.round(v)} h` : `${fmt(v, 1)} h`);
   // Cada departamento ve solo sus deslizadores (2026-11-06, Eugenio: «divide el menú por departamentos… y compacta los selectores»).
   return (
@@ -85,7 +88,7 @@ export function LadoA1({ P, Pa, D, set, res, modelo, neumaticos, malas, alNavega
       </>)}
 
       {dep === 'carroceria' && (<>
-      <Bloque titulo="Carrocería y cúpula" nota={`${m2(Pa.W)} × ${m2(Pa.H)}`}>
+      <Bloque titulo="Carrocería y cúpula" peso={pk('Carrocería y cúpula')} nota={`${m2(Pa.W)} × ${m2(Pa.H)}`}>
         <Deslizador id="a1-L" etiqueta="Largo total" valor={P.L} clave="L" centro={D.L} min={2.6} max={4.4} paso={0.01} mostrar={m2(P.L)} alCambiar={v => set('L', v)} />
         <Deslizador id="a1-fm" etiqueta="Voladizo del morro" valor={P.fMorro} clave="fMorro" centro={D.fMorro} min={0.15} max={0.40} paso={0.005} mostrar={`${Math.round(P.fMorro * 100)} % del largo · ${m2(P.fMorro * P.L)}`} alCambiar={v => set('fMorro', v)} />
         <Deslizador id="a1-W" etiqueta="Ancho máximo" valor={P.W} clave="W" centro={D.W} min={1.2} max={2.0} paso={0.01} mostrar={m2(P.W)} alCambiar={v => set('W', v)} />
@@ -115,7 +118,7 @@ export function LadoA1({ P, Pa, D, set, res, modelo, neumaticos, malas, alNavega
         <Deslizador id="a1-nU" etiqueta="Sección superior de la carrocería" valor={P.nU} clave="nU" centro={D.nU} min={2.0} max={3.4} paso={0.1} mostrar={P.nU < 2.3 ? 'elíptica' : P.nU > 2.9 ? 'cuadrada' : 'redondeada'} alCambiar={v => set('nU', v)} />
         <Deslizador id="a1-nL" etiqueta="Fondo" valor={P.nL} clave="nL" centro={D.nL} min={2.0} max={5.0} paso={0.1} mostrar={P.nL < 2.6 ? 'redondo' : P.nL > 3.6 ? 'plano' : 'semiplano'} alCambiar={v => set('nL', v)} />
       </Bloque>
-      <Bloque titulo="Material y espesores">
+      <Bloque titulo="Material y espesores" peso={pk('Material y espesores')}>
         <Selector id="a1-matK" etiqueta="Material de la carrocería" valor={P.matCarenado} clave="matCarenado" opciones={(Object.keys(MATERIALES_CARENADO) as MaterialCarenado[]).map(k => ({ k, n: MATERIALES_CARENADO[k].n }))} alCambiar={v => set('matCarenado', v)} />
         <Deslizador id="a1-eK" etiqueta="Espesor de la carrocería" valor={P.espCarenado} clave="espCarenado" centro={D.espCarenado} min={RANGOS_MASA_A1.espCarenado[0]} max={RANGOS_MASA_A1.espCarenado[1]} paso={0.1} mostrar={`${fmt(P.espCarenado, 1)} mm`} alCambiar={v => set('espCarenado', v)} />
         <Deslizador id="a1-eV" etiqueta="Espesor de la cúpula (policarbonato)" valor={P.espCristal} clave="espCristal" centro={D.espCristal} min={RANGOS_MASA_A1.espCristal[0]} max={RANGOS_MASA_A1.espCristal[1]} paso={0.5} mostrar={`${fmt(P.espCristal, 1)} mm`} alCambiar={v => set('espCristal', v)} />
@@ -123,7 +126,7 @@ export function LadoA1({ P, Pa, D, set, res, modelo, neumaticos, malas, alNavega
       </>)}
 
       {dep === 'chasis' && (<>
-      <Bloque titulo="Chasis" nota={P.chasis === 'celosia' ? 'versión 2 · celosía' : 'versión 1 · largueros'}>
+      <Bloque titulo="Chasis" peso={pk('Chasis')} nota={P.chasis === 'celosia' ? 'versión 2 · celosía' : 'versión 1 · largueros'}>
         <div className="flex gap-1.5" role="radiogroup" aria-label="Versión del chasis">
           {([['largueros', 'Versión 1', 'largueros y travesaños'], ['celosia', 'Versión 2', 'celosía triangulada (Caterham)']] as ['largueros' | 'celosia', string, string][]).map(([k, n, d]) => (
             <Button key={k} variant="outline" role="radio" aria-checked={P.chasis === k} disabled={k === 'celosia' && !hayCelosia} title={k === 'celosia' && !hayCelosia ? 'La está diseñando un bot' : undefined} onClick={() => set('chasis', k)}
@@ -154,7 +157,7 @@ export function LadoA1({ P, Pa, D, set, res, modelo, neumaticos, malas, alNavega
       </>)}
 
       {dep === 'rodaje' && (<>
-      <Bloque titulo="Ejes, ruedas y suspensión" nota="clase Twizy">
+      <Bloque titulo="Ejes, ruedas y suspensión" peso={pk('Ejes, ruedas y suspensión')} nota="clase Twizy">
         <Deslizador id="a1-B" etiqueta="Batalla: eje delantero a trasero" valor={P.B} clave="B" centro={D.B} min={1.3} max={Math.min(2.6, P.L - 0.9)} paso={0.01} mostrar={m2(P.B)} alCambiar={v => set('B', v)} />
         <Deslizador id="a1-vF" etiqueta="Vía delantera" valor={P.viaF} clave="viaF" centro={D.viaF} min={0.9} max={1.5} paso={0.01} mostrar={m2(P.viaF)} alCambiar={v => set('viaF', v)} />
         <Deslizador id="a1-vR" etiqueta="Vía trasera" valor={P.viaR} clave="viaR" centro={D.viaR} min={0.8} max={1.5} paso={0.01} mostrar={m2(P.viaR)} alCambiar={v => set('viaR', v)} />
@@ -169,7 +172,7 @@ export function LadoA1({ P, Pa, D, set, res, modelo, neumaticos, malas, alNavega
       </>)}
 
       {dep === 'propulsion' && (<>
-      <Bloque titulo="Motor y transmisión" nota={`${P.kWNom}/${P.kWPico} kW`}>
+      <Bloque titulo="Motor y transmisión" peso={pk('Motor y transmisión')} nota={`${P.kWNom}/${P.kWPico} kW`}>
         <Deslizador id="a1-kn" etiqueta="Potencia nominal" valor={P.kWNom} clave="kWNom" centro={D.kWNom} min={4} max={40} paso={0.5} mostrar={`${fmt(P.kWNom, 1)} kW`} alCambiar={v => set('kWNom', v)} />
         <Deslizador id="a1-kp" etiqueta="Potencia máxima" valor={P.kWPico} clave="kWPico" centro={D.kWPico} min={P.kWNom} max={80} paso={0.5} mostrar={`${fmt(P.kWPico, 1)} kW`} alCambiar={v => set('kWPico', v)} />
         <Deslizador id="a1-v" etiqueta="Velocidad de cálculo" valor={P.speed} clave="speed" centro={D.speed} min={30} max={160} paso={5} mostrar={`${P.speed} km/h`} alCambiar={v => set('speed', v)} />
@@ -180,7 +183,7 @@ export function LadoA1({ P, Pa, D, set, res, modelo, neumaticos, malas, alNavega
       </>)}
 
       {dep === 'energia' && (<>
-      <Bloque titulo="Batería y energía solar" nota={`${a1.bateriaKg.toFixed(0)} kg · ${a1.bateriaL.toFixed(0)} L`}>
+      <Bloque titulo="Batería y energía solar" peso={pk('Batería y energía solar')} nota={`${a1.bateriaKg.toFixed(0)} kg · ${a1.bateriaL.toFixed(0)} L`}>
         <Deslizador id="a1-kwh" etiqueta="Batería" valor={P.kWh} clave="kWh" centro={D.kWh} min={5} max={45} paso={0.5} mostrar={`${fmt(P.kWh, 1)} kWh`} alCambiar={v => set('kWh', v)} />
         <Deslizador id="a1-wkg" etiqueta="Densidad del paquete (masa)" valor={P.whKg} clave="whKg" centro={D.whKg} min={100} max={220} paso={5} mostrar={`${P.whKg} Wh/kg`} alCambiar={v => set('whKg', v)} />
         <Deslizador id="a1-wl" etiqueta="Densidad del paquete (volumen)" valor={P.whL} clave="whL" centro={D.whL} min={120} max={320} paso={5} mostrar={`${P.whL} Wh/L`} alCambiar={v => set('whL', v)} />
@@ -192,7 +195,7 @@ export function LadoA1({ P, Pa, D, set, res, modelo, neumaticos, malas, alNavega
       </>)}
 
       {dep === 'interior' && (<>
-      <Bloque titulo="Plazas y asientos">
+      <Bloque titulo="Plazas y asientos" peso={pk('Plazas y asientos')}>
         <div className="flex gap-1.5" role="radiogroup" aria-label="Plazas">
           {([[1, 'Monoplaza'], [2, 'Tándem 1+1']] as [1 | 2, string][]).map(([k, n]) => (
             <Button key={k} variant="outline" role="radio" aria-checked={P.plazas === k} onClick={() => set('plazas', k)}
@@ -237,7 +240,7 @@ export function LadoA1({ P, Pa, D, set, res, modelo, neumaticos, malas, alNavega
       </>)}
 
       {dep === 'fabricacion' && (<>
-      <Bloque titulo="Varios" nota="lo que no tiene ficha propia">
+      <Bloque titulo="Varios" peso={pk('Varios')} nota="lo que no tiene ficha propia">
         <Deslizador id="a1-mV" etiqueta="Varios: cables, cargador, luces, cierres" valor={P.mVarios} clave="mVarios" centro={D.mVarios} min={RANGOS_MASA_A1.mVarios[0]} max={RANGOS_MASA_A1.mVarios[1]} paso={1} mostrar={`${fmt(P.mVarios, 0)} kg`} alCambiar={v => set('mVarios', v)} />
       </Bloque>
       <Bloque titulo="Componentes" nota="ficha de cada pieza">

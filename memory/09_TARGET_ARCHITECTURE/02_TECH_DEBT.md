@@ -824,6 +824,20 @@ The «ordenar» refactor (PRs #1081, #1082, #1084) only moved code. Still open, 
   a 6 cm cavity, an unnamed part of the «Suspensión» layer (rear, at x −3.009 m, the plate at −2.976) shows through the
   plate as a red disc inside the hollow. The cavity is drawn only; nothing reserves its volume. A check «hueco del culote
   libre» (sample the cavity's volume against the parts' boxes, as `dentroPiel` does for the skin) is ~1.5 h.
+## 2026-11-17 · Section weights map parts to blocks by name
+
+`masasSecciones.ts` assigns each part of the parts list to a side-panel block with a regex on its name, and recomputes
+the frame's tube masses (same formula as `piezasBase`/`piezasBasculante`). Renaming a part silently moves it to
+«sin desplegable» (visible, and `scripts/pesos-secciones.ts` still adds up). Proper fix: a `seccion` field on
+`PiezaMasa`/`PiezaMasaB` set where the part is created, and the tube breakdown returned by the parts list itself:
+≈ 2 h now (≈ 45 parts in 3 files), more as parts are added. The Gota's blocks (inline in `pages/Aeromovil.tsx`) and
+the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper already; see the changelog for which are shown.
+- (2026-11-17, motores) The engine comparison's L/100 km per option changes the mass by the engine only, not by the
+  connection whose mass follows the engine's kW in series/parallel (a few kg; < 1 % of the figure). Running the full
+  model per option: ≈ 2 h plus a cache, and ~17 model builds per render.
+- (2026-11-17, motores) The engine comparison table is 10 columns in a ~380 px side panel: it scrolls sideways (the
+  name column stays fixed). On a phone the consumption and price columns need a swipe. A card layout per engine for
+  narrow screens: ≈ 1 h. Prices exist for 11 of 19 engines/motors; the rest sell on request (≈ 2 h of asking shops).
 ## 2026-11-17 · Garage aircraft: copied aerofoil helpers, no «aircraft» flag
 
 - `garaje/autogiroModelo.ts` carries its own copy of `rejilla`/`perfil` (≈ 25 lines) that `garaje/visionJet.ts` also

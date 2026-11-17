@@ -2037,6 +2037,37 @@ Numbers (tunnel «media», 80 km/h, Rombo Bala): 0.63 m pointed 3.83 m Cd 0.2066
 40 / 50 / 60 %: 3.49 m 0.2338 / 3.22 m 0.2510 / 3.09 m 0.2681. Sources: Wikipedia «Kammback»; Mercedes-Benz Classic
 «History of aerodynamics»; SAE 2020-01-0673; Evrard, Cadot et al. (core.ac.uk 52674332); Transport Canada / NRC
 trailer-based drag reduction; Hucho 1998.
+## 2026-11-17 · Section weights: a derived breakdown, not a new parts list
+
+Eugenio asked for the weight of every side-panel section and a finer chassis (tubes vs bolts). Options:
+(a) split the lumps («Carrocería», «Bastidor») inside the parts list itself (`triciclo/masas.ts`), so the «Peso» list,
+the centre of gravity and the MASAS tab see the pieces; (b) keep the parts list as it is and derive the pieces in a
+helper (`masasSecciones.ts`) that adds up to each part exactly, checked by `scripts/pesos-secciones.ts`.
+Chose (b): `masas.ts` was being changed at the same moment by another agent (the MASAS tab), (a) would move every saved
+design's centre of gravity by a few millimetres (each zone at its own centroid instead of the whole skin's), and (b)
+keeps one total by construction. Cost: the frame's tube formula is written twice (the parts list and the breakdown;
+the check catches a drift). A block maps to a part by the part's name (regex), not by a field on the part: cheaper now,
+and a part that no rule takes is shown as «sin desplegable» rather than lost.
+## 2026-11-17 · Engine comparison: prices in the catalogue, consumption from the model, block renamed by display only
+
+- **Prices.** `catalogoTren.ts` said «no prices (they change every week)». Eugenio now asks for an estimated cost, so
+  electric motors and petrol engines carry `precio`: one shop's listed price as published (currency, VAT status, URL,
+  date read), or `null` when no public price exists. Shown as «≈ N €» (USD at a fixed 0,86 €/$, `EUR_POR_USD`) plus
+  the raw figure in «De dónde salen los precios». Rejected: an average of several shops (no reliable second source for
+  most parts; it would look more precise than it is).
+- **Consumption per option** comes from the model's own `energiaTriciclo`, run on a shallow copy of the model with
+  `tVel = 90`, that part's power/efficiency in `phev`, and the vehicle mass changed by that part's mass only (the
+  hybrid connection's mass, which in series/parallel depends on the engine's kW, is not recomputed: a full
+  `crearModelo` + `calcular` per option would cost ~17 model builds per render). Electric Wh/km uses the maker's
+  published efficiency with an assumed 97 % controller when published, else the model's 85 %.
+- **«Híbrido enchufable» → «Motor gasolina».** Only the displayed title changes (`TITULO_BLOQUE` in
+  `LadoTriciclo.tsx`); the block key in `FILAS`, `ORDEN_BLOQUES`, `zonaTriciclo` and the remembered open blocks stays
+  `Híbrido enchufable`, so saved UI state and other bots' code keep working. Renaming the key everywhere: ≈ 30 min,
+  6 files, plus migrating `aeromovil.bloquesAbiertos`.
+- **Block mass** comes from `masasSecciones.ts` (bot «pesossecciones», merged first): `pesoSeccion(seccionesTriciclo(res,
+  modelo), 'propulsion', bloque)` and its `peso` prop on `Bloque`. A first version had its own `pesoMotores.ts` with the
+  same regexes; it was deleted at merge time so there is one rule for which part belongs to which block. The
+  comparison's «En el coche ahora» line lists that same section's parts.
 ## 2026-11-17 · ELA Eclipse REVO autogyro in the garage: which model, which numbers, and how an aircraft fits
 
 - Request (Eugenio, with a photo of a copper enclosed tandem gyro): «haz un modelo 3D del autogiro de ELA Aviación, el
