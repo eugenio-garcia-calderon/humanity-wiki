@@ -73,12 +73,6 @@
       "desde": "2026-11-17T13:47:13.740Z"
     },
     {
-      "agente": "neumaticos",
-      "ruta": "src/components/aeromovil/triciclo/masas.ts",
-      "motivo": "neumaticos: masa de la rueda según el neumático (3 líneas)",
-      "desde": "2026-11-17T13:58:35.413Z"
-    },
-    {
       "agente": "capo",
       "ruta": "src/components/aeromovil/masasSecciones.ts",
       "motivo": "capo: capó, tomas de aire y radiador (pocas líneas)",
