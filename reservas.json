@@ -149,6 +149,12 @@
       "ruta": "scripts/pesos-secciones.ts",
       "motivo": "masas: la pestaña Masas es un total, no un departamento",
       "desde": "2026-11-17T12:24:12.468Z"
+    },
+    {
+      "agente": "pesossecciones",
+      "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
+      "motivo": "pesossecciones: peso en cada desplegable del Triciclo",
+      "desde": "2026-11-17T13:00:19.181Z"
     }
   ]
 }
