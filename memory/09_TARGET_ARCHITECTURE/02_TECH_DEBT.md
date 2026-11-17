@@ -982,6 +982,12 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - Also still quoting `tMOcc` rather than each rider's mass: `electrico/LadoConsumos.tsx` (the consumption note, a copy
   of the one fixed in `LadoTriciclo.tsx`) and `homologacion/ficha.ts` (`masaOcupante`, `masaMaxima` without the wheel
   loads in a diamond). 10 min together.
+- **(2026-11-17, mgplanetario) Central MG2**: the previous entry («a catalogue central motor is not drawn») is done for
+  the power split only. Still pending: a central motor for the pure electric car and for series/P2 (≈ 2 h, the same
+  `CilZ` next to the controller with a chain); with one rear wheel the coaxial MG2 sticks out of the narrow tail (4–5 cm
+  in tests): a counter-shaft MG2 is ≈ 2 h; the MG2's size is a rule from mass and power, not the catalogue motor's own
+  diameter and length (≈ 30 min: add `diametro`/`largo` to `MotorCatalogo`); `tMMotor`'s range is still the hub rule for
+  «two motors of half power» with two rear wheels (≈ 20 min to give the central motor its own range).
 ## 2026-11-17 · Tyre type (bot «neumaticos»)
 
 - **Triciclo rollover check still uses the fixed `AGARRE` 0.9** (`triciclo/comprobaciones.ts`, held by another bot):

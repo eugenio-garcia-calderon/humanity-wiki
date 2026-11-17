@@ -10,7 +10,7 @@
 // what each machine does in each mode), and where the parts are drawn.
 
 import { Fragment } from 'react';
-import { CORONA_A_100, DIENTES_PLANETARIO, MOTOR_A_100_PARALELO, RAZON_PLANETARIO, REND_PLANETARIO, RPM_MAX_MOTOR, cifrasHibrido, type ArqHibrido } from './hibrido';
+import { CORONA_A_100, DIENTES_PLANETARIO, MOTOR_A_100_PARALELO, RAZON_PLANETARIO, REND_PLANETARIO, REND_SALIDA, RPM_MAX_MOTOR, cifrasHibrido, type ArqHibrido } from './hibrido';
 import type { ModeloTriciclo } from './geometriaTriciclo';
 
 const f = (v: number, d = 0) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -42,7 +42,9 @@ export function FichaHibrido({ modelo, vel, hib }: {
   hib: { rendTrans: number; rendTermVel: number; cifras: ReturnType<typeof cifrasHibrido> } | null;
 }) {
   const p = modelo.phev; if (!p) return null;
-  const arq = p.arq, d = p.disp, op = OPCIONES[arq];
+  const arq = p.arq, d = p.disp, mg2 = d.mg2;
+  // 2026-11-17: with MG2 central (on the ring, next to the engine) the power split's sentence says so
+  const op = mg2 ? { ...OPCIONES[arq], como: 'El motor de gasolina mueve el portasatélites; el generador MG1, el sol; la corona lleva el motor eléctrico MG2 en su mismo eje, junto al motor de gasolina, y va a las ruedas por una cadena. Una parte de la fuerza va directa, otra se hace electricidad en el MG1 y vuelve por el MG2.' } : OPCIONES[arq];
   // without the tunnel's Cd yet: the figures that do not need the power (the power split's rpm)
   const k = hib?.cifras ?? cifrasHibrido(arq, vel, 2 * modelo.rR, 0, p.kW, p.mec);
   const filas: [string, string][] = [
@@ -52,6 +54,10 @@ export function FichaHibrido({ modelo, vel, hib }: {
     ['Planetario: dientes de la corona / del sol', `${DIENTES_PLANETARIO.corona} / ${DIENTES_PLANETARIO.sol} = ${f(RAZON_PLANETARIO, 2)}`],
     ['Parte directa · parte eléctrica', `${f(p.mec * 100)} % (al ${f(REND_PLANETARIO * 100)} %) · ${f(100 - p.mec * 100)} % (al ${f(p.rendElec * 100, 1)} %)`],
     ['Cadena de la corona a la rueda', `1 : ${f(k.cadena, 2)} (corona a ${f(CORONA_A_100)} rpm a 100 km/h)`],
+    ...(mg2 ? [
+      ['Motor eléctrico MG2', `central, en la corona: Ø ${f(mg2.r * 2000)} × ${f((mg2.z1 - mg2.z0) * 1000)} mm, ${f(modelo.motor.kg, 1)} kg`],
+      [`A ${f(vel)} km/h: MG2 (corona)`, `${rpm(k.corona)}; a la rueda por la cadena, al ${f(REND_SALIDA * 100)} %`],
+    ] as [string, string][] : []),
     [`A ${f(vel)} km/h: rueda · corona`, `${rpm(k.rueda)} · ${rpm(k.corona)}`],
     [`A ${f(vel)} km/h: motor de gasolina`, `${rpm(k.motor)}${k.motor > RPM_MAX_MOTOR ? ' (demasiado: sube la parte directa)' : ''}`],
     [`A ${f(vel)} km/h: generador MG1 (sol)`, `${rpm(Math.abs(k.mg1))}${k.mg1 < -1 ? ', al revés: hace de motor' : k.mg1 > 1 ? ', genera' : ', parado (punto mecánico)'}`],
@@ -96,7 +102,7 @@ export function FichaHibrido({ modelo, vel, hib }: {
           <p>La parte de potencia que va directa es (R/(R+S)) × vueltas de la corona / vueltas del motor. Por eso «Reparto: parte que va directa» fija las vueltas del motor: con el 100 %, el sol se para y todo va directo (el «punto mecánico»).</p>
           <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-2 gap-y-1">
             {([
-              ['Eléctrico (EV)', 'Motor de gasolina parado (el portasatélites, quieto). El MG2, el de buje, mueve el coche con la batería; el MG1 gira suelto hacia atrás, sin hacer fuerza.'],
+              ['Eléctrico (EV)', `Motor de gasolina parado (el portasatélites, quieto). El MG2, ${mg2 ? 'en la corona, mueve el coche con la batería por la cadena' : 'el de buje, mueve el coche con la batería'}; el MG1 gira suelto hacia atrás, sin hacer fuerza.`],
               ['Híbrido', 'Motor de gasolina en marcha, en su mejor punto. Una parte de su fuerza va directa a la corona; el MG1 frena el sol y genera, y esa electricidad mueve el MG2. Si se pide más, la batería ayuda al MG2.'],
               ['Mantener la carga', 'Con la batería en su reserva: el motor de gasolina da un poco más de lo que piden las ruedas y el MG1 manda lo que sobra a la batería, que se queda en su nivel. Es el modo de los viajes largos, el que cuentan los litros a los 100 km.'],
               ['Frenada (regeneración)', 'Motor de gasolina parado. El MG2 frena la rueda haciendo de generador y carga la batería; los frenos de disco solo para el final o para frenar fuerte.'],
@@ -105,7 +111,7 @@ export function FichaHibrido({ modelo, vel, hib }: {
           </dl>
         </div>
       </details>
-      <p>En 3D (capa «Motor», mejor con rayos X): el motor de gasolina va atravesado, de serie {modelo.cuatro ? 'justo delante del diferencial, con dos palieres hasta las ruedas traseras' : 'lo más cerca de la rueda trasera que cabe: justo delante del amortiguador trasero y su torreta'} y lo más bajo que deja lo que tiene debajo (el suelo, la batería o el controlador); {arq === 'reparto' ? 'el MG1 pegado a su izquierda y, por fuera, el planetario en una carcasa transparente para verlo por dentro (sol, satélites y corona), con la caja de salida y la cadena' : arq === 'serie' ? 'el generador pegado a su izquierda, y el cable naranja hasta el controlador' : 'el embrague, el P2 y la caja de cambios a su izquierda, con la cadena'}; el depósito, de serie, en el suelo justo delante del motor si cabe ahí (cerca del centro de gravedad), y si no {modelo.cuatro ? 'sobre el diferencial' : 'sobre la rueda trasera'}; y el escape hasta la cola. Los dos se mueven libremente con «Motor de gasolina: adelante…» y «Depósito: adelante…» (cero es su sitio de serie), y las comprobaciones dicen si tocan la rueda y su recorrido, el basculante, el amortiguador, los asientos, la batería o la piel. Su masa cuenta donde se dibuja (pestaña «Masas»). Si una pieza no cabe, se pinta en rojo y la comprobación dice cuántos centímetros. Al pinchar en cualquiera se abre este bloque.</p>
+      <p>En 3D (capa «Motor», mejor con rayos X): el motor de gasolina va atravesado, de serie {modelo.cuatro ? 'justo delante del diferencial, con dos palieres hasta las ruedas traseras' : 'lo más cerca de la rueda trasera que cabe: justo delante del amortiguador trasero y su torreta'} y lo más bajo que deja lo que tiene debajo (el suelo, la batería o el controlador); {arq === 'reparto' ? `el MG1 pegado a su izquierda y, por fuera, el planetario en una carcasa transparente para verlo por dentro (sol, satélites y corona)${mg2 ? ', y más por fuera, en el mismo eje, el motor eléctrico MG2' : ''}, con la caja de salida y la cadena` : arq === 'serie' ? 'el generador pegado a su izquierda, y el cable naranja hasta el controlador' : 'el embrague, el P2 y la caja de cambios a su izquierda, con la cadena'}; el depósito, de serie, en el suelo justo delante del motor si cabe ahí (cerca del centro de gravedad), y si no {modelo.cuatro ? 'sobre el diferencial' : 'sobre la rueda trasera'}; y el escape hasta la cola. Los dos se mueven libremente con «Motor de gasolina: adelante…» y «Depósito: adelante…» (cero es su sitio de serie), y las comprobaciones dicen si tocan la rueda y su recorrido, el basculante, el amortiguador, los asientos, la batería o la piel. Su masa cuenta donde se dibuja (pestaña «Masas»). Si una pieza no cabe, se pinta en rojo y la comprobación dice cuántos centímetros. Al pinchar en cualquiera se abre este bloque.</p>
       <p className="text-[11px] text-slate-400">Estimaciones de un primer diseño: tamaño y masa del motor por reglas de motores de su clase (24 cm³ y 1,4 kg por kW), rendimientos típicos, la curva de carga parcial del paralelo aproximada. No medido.</p>
     </div>
   );

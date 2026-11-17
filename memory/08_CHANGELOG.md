@@ -12512,6 +12512,35 @@ se pueda colocar atrás o delante. Y se pueda jugar con todo ello. También con 
   Nueva regla en el estudio aerodinámico: «Toma de aire más grande de lo que el radiador aprovecha».
 - **Masas**: radiador, ventilador, tubos, refrigerante, conductos y el árbol, en la lista de pesos y en el desplegable
   «Refrigeración» (y con ellos sus precios).
+## 2026-11-17 · El motor eléctrico, junto al de gasolina y unido al planetario (Aeromóvil S)
+
+Eugenio: «Haz que el motor eléctrico del aeromóvil S no esté en el buje de la rueda, sino que esté junto al motor de
+gasolina y que se conecte al engranaje planetario.»
+
+- Nueva opción en Motor › «Motor eléctrico»: **«Dónde va el motor eléctrico»**: «En el buje de la rueda trasera» (lo
+  de siempre) o **«Central, junto al motor de gasolina, unido a la corona del planetario (MG2, como el Prius)»**. Sale
+  solo con el híbrido enchufable de reparto (el del planetario, que es el que tiene el Aeromóvil S).
+- Con «Central»: un solo motor eléctrico (el MG2) va en el mismo eje que el MG1 y el planetario, por fuera de este,
+  atornillado a la corona, como en el Toyota THS: gasolina → portasatélites, MG1 → sol, MG2 y salida → corona. Desde la
+  corona, la misma caja de salida, la cadena y (con dos ruedas traseras) el diferencial. Se dibuja en 3D (pieza
+  «hibrido-mg2», capa «Motor»); en las ruedas ya no hay motores de buje. Su tamaño sale de su masa y su potencia.
+- Con dos ruedas traseras, todo el conjunto (motor de gasolina + MG1 + planetario + MG2, unos 55 cm) se centra a lo
+  ancho del coche por defecto (el motor de gasolina se corre 11 cm a la derecha), para que no asome por la cola, que se
+  estrecha. Con una rueda en la cola no se centra (la cadena tiene que ir al lado de la rueda) y, en las pruebas, el
+  MG2 asoma 4–5 cm: la comprobación lo dice en rojo.
+- Su masa cuenta donde está (centro de gravedad, también de lado), como «Motor eléctrico central (MG2)», y ya no es
+  masa no suspendida. La comprobación «Motor de buje: potencia que cabe en la rueda» ya no se aplica.
+- Consumo: la fuerza del motor eléctrico pasa ahora por la cadena (97 %), y la parte eléctrica del híbrido también.
+- La lista de motores del catálogo (y la tabla comparativa) ofrece solo motores centrales en esa posición; si se elige
+  uno de buje, una comprobación lo marca. Nueva comprobación: las vueltas del MG2 en la corona a la velocidad de
+  cálculo (la corona gira 3.000 rpm a 100 km/h). Un motor central ya no pide «reductora»: la cadena lo es.
+- **El Aeromóvil S guardado no cambia solo**: el Aermovil M y el Rombo Bala también son híbridos de reparto, y poner
+  «Central» por defecto los habría cambiado sin avisar. Eugenio tiene que elegir «Central…» en Motor › Motor eléctrico
+  y guardar el diseño.
+- Con la copia del Aeromóvil S leída de la API hoy (vacío 375,5 kg): la masa no suspendida baja 20,2 kg (10,1 kg por
+  rueda trasera; el deslizador pone 13 kg, pero con 31,5 kW de pico su rango empieza en 20,2); el motor de gasolina
+  queda en el mismo sitio a lo largo y 3 cm más alto; consumo eléctrico a 120 km/h, de 71,8 a 74,0 Wh/km (+3 %, con un
+  Cd de prueba de 0,20 × 1,2 m²); gasolina, de 1,98 a 2,00 L/100 km. Ninguna comprobación nueva en rojo.
 ## 2026-11-17 · Tipo de neumático en cada eje (Triciclo, Cuadriciclo en rombo y clásico, Basculante)
 
 Eugenio: «Permite también añadir el tipo de neumático.»
@@ -12556,3 +12585,16 @@ para ver cómo entran en el vehículo.» Solo en la familia Triciclo (el Aeromó
 - La masa sigue a la talla («Masa por ocupante» es la del hombre medio × estatura² × índice de masa corporal; se puede
   escribir a mano) y entra en el peso, el centro de gravedad, el vuelco, las cargas de las ruedas y el consumo.
 - Sin tocar nada, todo es como antes: el mismo muñeco y los mismos kilos.
+
+
+## 2026-11-17 · Fuera «¿Algo que mejorar?» y «Empezar un diseño nuevo» del panel del Aeromóvil
+
+Eugenio: «Quita esta parte en todas las secciones, la de mejoras y la de empezar de nuevo, todo fuera».
+
+- **Quitado del panel lateral** (salía al final de todas las pestañas y de todos los vehículos): la tarjeta
+  «¿Algo que mejorar?» (comentario, parte, nombre, «Añadir a las tareas») y el enlace «Empezar un diseño nuevo
+  (medidas por defecto)».
+- **No se ha borrado nada guardado**: las tareas siguen en la base de datos, la página Tareas
+  (`/aeromovil/tareas`) sigue mostrándolas y conserva su propio formulario, y la API no cambia.
+- Para dejar comentarios sobre una parte concreta, ahora están las notas por sección (bot «notas»).
+- No visto en un teléfono de verdad: si sale la versión vieja, `humanity.wiki/?sw=off`.
