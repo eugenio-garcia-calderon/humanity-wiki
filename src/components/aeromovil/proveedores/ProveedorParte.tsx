@@ -44,7 +44,7 @@ export function ProveedorParte({ nombre }: { nombre: string }) {
   // own text wins; a name typed without a link keeps no link from the catalogue (it may be another supplier)
   const prov = f.proveedor || f.proveedorUrl ? { t: f.proveedor || enlaceSeguro(f.proveedorUrl)?.replace(/^https?:\/\/(www\.)?/, '').split('/')[0] || '', u: f.proveedorUrl } : sug?.proveedor ? { t: sug.proveedor, u: sug.proveedorUrl } : null;
   const mod = f.modelo || f.modeloUrl ? { t: f.modelo || 'ficha', u: f.modeloUrl } : sug?.modelo ? { t: sug.modelo, u: sug.modeloUrl } : null;
-  const trozos = [prov, mod].filter((x): x is { t: string; u?: string } => !!x && !!x.t);
+  const trozos = [prov, mod].filter((x): x is { t: string; u: string | undefined } => !!x && !!x.t);
   const resumen = trozos.map(x => x.t).concat(n ? [`${n} archivo${n > 1 ? 's' : ''}`] : []).join(' · ');
   return (
     <div className="mt-0.5">
