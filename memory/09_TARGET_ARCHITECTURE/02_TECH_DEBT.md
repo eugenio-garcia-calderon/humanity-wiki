@@ -782,5 +782,5 @@ The «ordenar» refactor (PRs #1081, #1082, #1084) only moved code. Still open, 
   `triciclo-disenos` catches any slip.
 - **`fmt` is defined 13 times** across the Aeromóvil files (one now in `controles.tsx`), `suave` 6 times: unifying is ~20 min
   but touches files other bots edit often.
-- **The barrel exports more than before**: `geometriaTriciclo.ts` uses `export *`, so 47 formerly private helpers are now
+- **The barrel exports more than before**: `geometriaTriciclo.ts` uses `export *`, so 49 formerly private helpers are now
   importable from it. Harmless today; an explicit export list is ~15 min if it ever matters.
