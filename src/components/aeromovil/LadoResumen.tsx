@@ -35,8 +35,10 @@ export function useMasas(modelo: { tipo: string }, res: Resultados): AnalisisMas
   }, [modelo, res]);
 }
 
-export function LadoResumen({ dep, modelo, res, masas, alIr }: {
+export function LadoResumen({ dep, modelo, res, masas, alIr, extra }: {
   dep: 'masas' | 'proyecto'; modelo: ModeloTriciclo | ModeloBasculante; res: Resultados; masas: AnalisisMasas | null; alIr: (dep: string) => void;
+  /** (2026-11-17, homologacion) more checks for «Revisión de puntos críticos»: the homologation fails */
+  extra?: Comprobacion[];
 }) {
   if (dep === 'masas') {
     if (!masas) return null;
@@ -56,5 +58,5 @@ export function LadoResumen({ dep, modelo, res, masas, alIr }: {
       { titulo: 'Pesar las piezas de verdad', porQue: 'Las masas son estimaciones de piezas de su clase: el centro de gravedad y el reparto («Masas») valen lo que valgan ellas.', dep: 'masas' },
       { titulo: 'Hacer el estudio aerodinámico', porQue: 'Prueba cambios de forma en el túnel y dice cuáles bajan el consumo (Carrocería › Aerodinámica).', dep: 'carroceria' },
     ];
-  return <PanelProyecto checks={res.comprobaciones} pendientes={pendientes} alIr={alIr} />;
+  return <PanelProyecto checks={extra?.length ? [...res.comprobaciones, ...extra] : res.comprobaciones} pendientes={pendientes} alIr={alIr} />;
 }
