@@ -19,7 +19,6 @@
 import { calcularA1, crearModeloA1, estimarMasasA1, type ModeloA1 } from './geometriaA1';
 import { areasBala, calcularBala, crearModeloBala, type CamposBala, type ModeloBala, type ResultadosBala } from './geometriaBala';
 import { comprobacionesExtraTriciclo } from './triciclo/centroMasas';
-import { VUELCO_OBJETIVO } from './triciclo/comprobaciones';
 import { areasTriciclo, calcularTriciclo, crearModeloTriciclo, type CamposTriciclo, type ModeloTriciclo, type ResultadosTriciclo } from './geometriaTriciclo';
 // ── the Cuadriciclo Basculante (2026-11-15): its own module; its defaults in a leaf module (no import cycle at load time)
 import { areasBasculante, calcularBasculante, crearModeloBasculante, type ModeloBasculante, type ResultadosBasculante } from './geometriaBasculante';
@@ -732,7 +731,7 @@ export interface Comprobacion { nombre: string; holgura: number; minimo: number;
 /** Áreas, resistencia, energía, estructura y holguras. Todo estimación. */
 /** 2026-11-17 (masas): the Triciclo's checks that follow from where its mass is, and its hybrid's placement (triciclo/centroMasas.ts). */
 function conMasasTriciclo(m: ModeloTriciclo, r: Resultados): Resultados {
-  if (r.triciclo) r.comprobaciones.push(...comprobacionesExtraTriciclo(m, r.triciclo.piezas, VUELCO_OBJETIVO));
+  if (r.triciclo) r.comprobaciones.push(...comprobacionesExtraTriciclo(m, r.triciclo.piezas, r.triciclo.vuelco.objetivo));
   return r;
 }
 export function calcular(m: Modelo, ar: ReturnType<typeof areas>): Resultados {

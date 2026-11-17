@@ -43,7 +43,9 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   tEpEstrategia: 'libre', tEpSport: 'no', tEpMapa: 'normal', tEpLim1: 'ninguno', tEpLim2: 'ninguno',
   tMRueda: 4.5, tMFreno: 1.2, tMSuspDel: 9, tMSuspTras: 6, tMDir: 4.5,
   tKWNom: 5, tKWPico: 10, tMMotor: 13, tMInversor: 2.5, tVel: 80,
-  tKWh: 9, tWhKg: 160, tWhL: 230, tMVarios: 12, tSolarM2: 2.2,
+  // (2026-11-17: «Varios» 12 → 18 kg, the catalogue's charging and 12 V parts add up to 16.5 kg, electrico/sistema.ts; a design that
+  // stored 12 keeps 12: camposTriciclo takes every stored number)
+  tKWh: 9, tWhKg: 160, tWhL: 230, tMVarios: 18, tSolarM2: 2.2,
   // 2026-11-12 (Eugenio, the «Cuadriciclo Bala clásico»): battery layout, steering wheel, dashboard, Aptera doors,
   // mirrors and boot. Every option's default is what there was before, so a design saved without them is unchanged.
   tBatDisp: 'reparto', tBatLargo: 0.94, tBatAncho: 150, tBatAlto: 0.10, tBatX: 0.70,
