@@ -6,6 +6,7 @@
 // (`deslizadoresBasculante()`, geometriaBasculante.ts). The page's own small
 // components (block, slider, selector, list of checks) are passed in, so this
 // looks exactly like the other families and the page keeps one copy of them.
+import { esDelCatalogo, lineaRueda } from '../ruedas/catalogo';
 import { Fragment, useEffect, useMemo, useState, type ComponentType, type ReactNode } from 'react';
 import { claveTunel } from '../tunel/calculo';
 import { pedirTunel, resultadoEnCache } from '../tunel/cliente';
@@ -15,7 +16,7 @@ import type { Modelo } from '../geometria';
 import { Wind } from 'lucide-react';
 import type { Comprobacion, Parametros, Resultados } from '../geometria';
 import {
-  AGARRE_B, AUXILIARES_B, CRR_B, EQUIPAJE_B, LEMAS_BASCULANTE, NOMBRE_BASCULANTE, RENDIMIENTO_B, RUEDAS_BASCULANTE, SELECTORES_BASCULANTE, USABLE_B,
+  AGARRE_B, AUXILIARES_B, crrBasculante, EQUIPAJE_B, LEMAS_BASCULANTE, NOMBRE_BASCULANTE, RENDIMIENTO_B, RUEDAS_BASCULANTE, SELECTORES_BASCULANTE, USABLE_B,
   camposBasculante, deslizadoresBasculante, energiaBasculante, largoBasculante, limitarBasculante,
   type DepBasculante, type FichaBasculante, type ModeloBasculante,
 } from '../geometriaBasculante';
@@ -28,6 +29,9 @@ export interface CdBasculante { calculando: boolean; cd?: number; areaRef?: numb
  * background, half a second after the silhouette last changed; at another speed than the three it computes (50, 80,
  * 120 km/h) it is interpolated. Sliders that do not change the silhouette do not ask again.
  */
+/** 2026-11-17: the sheet of each catalogue wheel chosen (size, mass, rolling resistance, load, who uses it). */
+const fichasElegidas = (del: string, tras: string) => del === tras && esDelCatalogo(del) ? ` Delante y detrás: ${lineaRueda(del)}`
+  : `${esDelCatalogo(del) ? ` Delante: ${lineaRueda(del)}` : ''}${esDelCatalogo(tras) ? ` Detrás: ${lineaRueda(tras)}` : ''}`;
 export function useCdBasculante(modelo: Modelo, resolucion: Resolucion, kmh: number): CdBasculante {
   const peticion = useMemo(() => modelo.tipo === 'basculante' ? { ...peticionDe({ ...cuerpoBasculante(modelo), id: 'basculante-cd' }, resolucion, 'pocas'), soloNumeros: true } : null, [modelo, resolucion]);
   const clave = peticion ? claveTunel(peticion) : '';
@@ -121,7 +125,7 @@ function nota(bloque: string, m: ModeloBasculante, res: Resultados): string | nu
     case 'Mandos': if (m.smera) return 'Volante redondo, como el del Smera, delante del pecho del conductor, que va sentado casi derecho; dos pedales entre las ruedas delanteras. La inclinación no se maneja: la decide un controlador con la velocidad y el giro.';
       return 'Volante tipo «yoke» delante del pecho del piloto, con la columna hasta la cremallera en el morro; dos pedales (acelerador y freno) entre las ruedas delanteras, con los talones altos para que las rodillas se doblen y no toquen el volante. La inclinación no se maneja: la decide un controlador con la velocidad y el giro (como en el Smera).';
     case 'Bastidor': return `Dos largueros sobre la panza (se juntan hacia el morro para ir entre las ruedas delanteras), la torre delantera y la trasera que sostienen los paralelogramos, travesaños bajo los asientos y un arco detrás del piloto hasta la cintura: ${fmt(b.bastidor.metros, 1)} m de tubo. Se ve con «Rayos X» o la capa «Chasis».`;
-    case 'Ejes y ruedas': return `Ruedas de scooter delante y detrás: su banda redonda deja inclinar unos 45° (un neumático de coche, plano, apenas unos grados). ${m.enMorro ? 'Las cuatro van dentro de la carrocería' : 'Las traseras van dentro de la carrocería'}, en pasos de rueda que dejan sitio a que suban y bajen al inclinarse. Vía efectiva ${m2(b.basculacion.viaEf)}.`;
+    case 'Ejes y ruedas': return `${esDelCatalogo(Q.qRuedaDel) || esDelCatalogo(Q.qRuedaTras) ? 'Las ruedas de moto' : 'Ruedas de scooter delante y detrás'}: su banda redonda deja inclinar unos 45° (un neumático de coche, plano, apenas unos grados). ${m.enMorro ? 'Las cuatro van dentro de la carrocería' : 'Las traseras van dentro de la carrocería'}, en pasos de rueda que dejan sitio a que suban y bajen al inclinarse. Vía efectiva ${m2(b.basculacion.viaEf)}.${fichasElegidas(Q.qRuedaDel, Q.qRuedaTras)}`;
     case 'Basculación': return `En cada eje, dos brazos de lado a lado giran sobre el bastidor en el centro y sostienen en sus puntas un pilar por rueda: un paralelogramo. Al inclinar, los brazos se quedan paralelos a la carretera y la carrocería y las cuatro ruedas se inclinan juntas alrededor del suelo bajo el centro del coche; un actuador eléctrico mueve el paralelogramo delantero. Inclinado ${Math.round(b.basculacion.phiMax * 180 / Math.PI)}° equilibra una curva de ${fmt(b.basculacion.aEquilibrada)} g sin cargar los neumáticos de lado. «Bascular», abajo en el 3D.`;
     case 'Suspensión y dirección': return `Cada rueda va en un pilar telescópico con su muelle (como el Piaggio MP3). Las delanteras giran sobre ese pilar; la de dentro de la curva gira más (Ackermann). Más giro, menos radio (ahora ${m2(b.basculacion.radio)} a la rueda de fuera), pero ${m.enMorro ? 'los pasos de rueda tienen que ser más largos y más anchos por dentro (menos sitio para los pies)' : 'los carenados barren más y el morro se estrecha'}.`;
     case 'Motores': return `Un motor en el buje de cada rueda trasera, sin cadena ni correa, con sus controladores en la torre trasera. En una llanta de scooter caben unos ${RUEDAS_BASCULANTE[Q.qRuedaTras].kWBuje} kW de pico por rueda (regla aproximada).`;
@@ -165,7 +169,7 @@ export function LadoBasculante({ P, set, res, modelo, dep, cd, ui }: {
         ['  energía solar al día (estimada)', res.areas.solar > 0.005 ? `${fmt(res.solarDia / 1000)} kWh · ${e ? `${Math.round(e.kmSol)} km` : sinCd}` : '—'],
       ])}
       {cd.calculando && <p className="flex items-center gap-1.5 text-xs text-sky-800"><Wind className="h-3.5 w-3.5 animate-pulse" />El túnel de viento está calculando el Cd de esta forma (unos segundos). Hasta que acabe, no hay cifra.</p>}
-      <p className="text-xs text-slate-500">El Cd lo calcula el túnel con la silueta de la carrocería y sus cuatro ruedas (no hay fórmula del editor para esta forma); {modelo.enMorro ? 'las ruedas delanteras, como las traseras, van dentro con la parte de abajo al aire' : 'los carenados delanteros solo entran como ruedas carenadas, así que el real será algo más alto'}. Con los dos ocupantes de {Q.qMOcc} kg ({Math.round(res.mTot)} kg en total), rodadura {fmt(CRR_B, 3)} (neumático de scooter), motores y controladores al {Math.round(RENDIMIENTO_B * 100)} %, {AUXILIARES_B} W de equipos y la batería usable al {Math.round(USABLE_B * 100)} %. Todo supuesto, no medido.</p>
+      <p className="text-xs text-slate-500">El Cd lo calcula el túnel con la silueta de la carrocería y sus cuatro ruedas (no hay fórmula del editor para esta forma); {modelo.enMorro ? 'las ruedas delanteras, como las traseras, van dentro con la parte de abajo al aire' : 'los carenados delanteros solo entran como ruedas carenadas, así que el real será algo más alto'}. Con los dos ocupantes de {Q.qMOcc} kg ({Math.round(res.mTot)} kg en total), rodadura {fmt(crrBasculante(Q), 4)} ({esDelCatalogo(Q.qRuedaDel) || esDelCatalogo(Q.qRuedaTras) ? 'la media de los neumáticos elegidos, con sus fuentes en «Ejes y ruedas»' : 'neumático de scooter'}), motores y controladores al {Math.round(RENDIMIENTO_B * 100)} %, {AUXILIARES_B} W de equipos y la batería usable al {Math.round(USABLE_B * 100)} %. Todo supuesto, no medido.</p>
     </Bloque>
   );
   const peso = (

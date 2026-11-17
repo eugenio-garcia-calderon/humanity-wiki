@@ -12258,3 +12258,42 @@ tengas, pues que aparezca también el peso de ese desplegable.»
   soportes y soldaduras. Los dos de motor usan la misma cuenta (lo hizo el trabajo de los motores).
 - Todavía no: la Gota y el Cuadriciclo Basculante. Las cifras ya existen (`masasSecciones.ts`); falta ponerlas en su
   panel, que otros estaban tocando en ese momento.
+
+
+
+## 2026-11-17 · Catálogo de ruedas: ruedas de moto de todo tipo
+
+Eugenio: «permite añadir más tipos de ruedas, por ejemplo de motos de todo tipo».
+
+- **Dónde:** Rodaje › Ejes y ruedas, en el Cuadriciclo Basculante («Ruedas delanteras» / «Ruedas traseras») y en la
+  familia Triciclo (Triciclo, Bala clásico, rombo, el «Rombo Bala»: «Ruedas delanteras (en los carenados)» / «Rueda
+  trasera»). Las medidas de siempre siguen ahí; debajo, 27 ruedas reales nuevas. Delante y detrás pueden ser distintas,
+  como en una moto.
+- **Las ruedas:** scooter (3.50-10 de Vespa, 120/70-12 y 130/70-12, 160/60 R15 de maxiscooter), 125 (100/80-17 y
+  130/70-17), deportiva (120/70 ZR17, 180/55 ZR17 de naked, 190/55 ZR17 de superdeportiva), turismo (Gold Wing
+  130/70 R18 y 200/55 R16), trail (90/90-21, 120/70 R19, 150/70 R18, 170/60 R17), enduro (80/100-21 y 120/90-18 de
+  tacos), custom (130/90 B16, 150/80 B16 y la 240/40 R18 de la Fat Boy), café racer de radios (100/90-18 y 130/70-18),
+  sidecar (4.00-19 del Ural), moto eléctrica con motor de buje (2.75-17 en un QS 205), y para comparar dos neumáticos eco
+  de coche de 19″ (los del BMW i3, etiqueta C y A) y una rueda de velomóvil de 20″. Cada una con diámetro, anchura,
+  perfil (redondo de moto o plano de coche), peso, rodadura, carga y velocidad máximas, tipo de llanta (radios,
+  aleación, disco o motor de buje) y motos reales que la llevan. Todo en `src/components/aeromovil/ruedas/catalogo.ts`.
+- **Qué cambia al elegir una:** el peso de las ruedas, la rodadura y por tanto el consumo y la autonomía (la media de
+  las ruedas elegidas), el tamaño del carenado o del paso de rueda, y lo que ve el túnel. En 3D se dibuja con su forma:
+  banda redonda de moto, radios o llanta de aleación de cinco brazos dobles, disco de freno, o el tambor del motor de buje.
+- **Comprobaciones nuevas:** carga por rueda frente a la del neumático (ya existía; ahora con la carga de cada rueda),
+  que quepa en su carenado o paso de rueda (ya existían; ahora con su tamaño), **«Neumáticos de moto en un vehículo que
+  no se inclina»** (aviso amarillo: la banda redonda apoya en una tira estrecha, gasta el centro y agarra menos en curva;
+  no sale si el vehículo bascula, ni en el Basculante) y **«velocidad que admiten»** (su código de velocidad frente a la
+  velocidad máxima).
+- **Estudio aerodinámico:** regla nueva «Neumático ancho» (más de 160 mm): el túnel prueba uno más estrecho de su clase
+  y el estudio vuelve a pasar las comprobaciones.
+- **Lo que hay que saber:** un neumático de moto rueda peor que uno de coche: unos 0,015 frente a 0,006-0,009
+  (Cossalter, «Motorcycle Dynamics»). Con ruedas de moto en el Triciclo por defecto el consumo sube; con los neumáticos eco
+  de coche baja. La rueda de velomóvil rueda poquísimo pero solo aguanta unos 100 kg: no pasa la comprobación de carga.
+- Los diseños guardados no cambian: siguen con sus ruedas y sus números (la rodadura de antes solo cambia si eliges una
+  rueda del catálogo).
+- Fuentes: Metzeler Technical Manual 2020 (diámetros y anchos medidos), tablas ETRTO (índices de carga y velocidad),
+  V. Cossalter «Motorcycle Dynamics» (rodadura), Reglamento (UE) 2020/740 y reifen.com (etiquetas eco),
+  bicyclerollingresistance.com (velomóvil), canyonchasers.net y ducatiforum.co.uk (pesos de llantas), em3ev.com (motor QS
+  205), tiremart.com (rueda del Ural).
+- No visto en un teléfono: si sale la versión vieja, `humanity.wiki/?sw=off`.

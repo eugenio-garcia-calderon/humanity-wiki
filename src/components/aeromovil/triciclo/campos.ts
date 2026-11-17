@@ -6,6 +6,7 @@ import { ACABADOS, AMBIENTES, CINTURONES, COLORES_COSTURA, COLORES_FORRO, CONSOL
 import { ARQUITECTURAS_HIBRIDO, type ArqHibrido } from '../hibrido';
 import type { MaterialCarenado, MaterialChasis, Pulgadas } from '../geometria';
 import { TRICICLO_DEFECTO } from './defecto';
+import { CATALOGO_RUEDAS, IDS_CATALOGO, nombreRueda, type FichaRueda, type IdRueda } from '../ruedas/catalogo';
 import { DESLIZADORES_BALA, type ClaveBala } from '../geometriaBala';
 import { rangoTriciclo, limitarTriciclo } from './medidas';
 
@@ -174,7 +175,8 @@ export type ClaveTriciclo = keyof CamposTriciclo;
  * motor in that hub can credibly give (the «Motor de buje» check): a rough rule from motors on sale (QS 273 in
  * motorcycle rims, ≈ 20 kW peak; Elaphe M700 in car rims, ≈ 75 kW peak), not a measurement.
  */
-export type RuedaTriciclo = Pulgadas | 'c13' | 'c14' | 'c15';
+/** 2026-11-17: or any wheel of the catalogue (`ruedas/catalogo.ts`): motorcycle of every kind, eco car, velomobile. */
+export type RuedaTriciclo = Pulgadas | 'c13' | 'c14' | 'c15' | IdRueda;
 /**
  * Round 3 interior (2026-11-12, «revisa el tema de los pesos»): `carga`, what one tyre carries (kg): the car sizes' load
  * index (71, 75 and 77: 345, 387 and 412 kg, the ETRTO table; a 175/55 R15 77T, «max load 908 lbs»: tiresize.com); a
@@ -193,6 +195,8 @@ export const RUEDAS_TRICICLO: Record<RuedaTriciclo, { d: number; neuDel: number;
   c13: { d: 0.533, neuDel: 0.145, neuTras: 0.145, n: '13″ de coche, 145/70 R13 (533 mm)', kg: 2.36, kWBuje: 35, carga: 345 },
   c14: { d: 0.554, neuDel: 0.165, neuTras: 0.165, n: '14″ de coche, 165/60 R14 (554 mm)', kg: 2.62, kWBuje: 45, carga: 387 },
   c15: { d: 0.574, neuDel: 0.175, neuTras: 0.175, n: '15″ de coche, 175/55 R15 (574 mm)', kg: 2.96, kWBuje: 60, carga: 412 },
+  // 2026-11-17: the catalogue's wheels, `kg` over the slider's 4.5 kg moped wheel (the default `tMRueda`)
+  ...Object.fromEntries(IDS_CATALOGO.map(k => { const f: FichaRueda = CATALOGO_RUEDAS[k]; return [k, { d: f.d, neuDel: f.w, neuTras: f.w, n: nombreRueda(k), kg: f.kg / TRICICLO_DEFECTO.tMRueda, kWBuje: f.kWBuje, carga: f.carga }]; })) as Record<IdRueda, { d: number; neuDel: number; neuTras: number; n: string; kg: number; kWBuje: number; carga: number }>,
 };
 export type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tFila2N' | 'tFila3N' | 'tFila2Tipo' | 'tFila3Tipo' | 'tTraseras' | 'tBascula' | 'tRuedas' | 'tPropulsion' | 'tHibArq' | 'tBascTec' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero'
   | 'tAcabado' | 'tTapiz' | 'tCostura' | 'tCosturaColor' | 'tForroColor' | 'tMoldura' | 'tConsolaTecho' | 'tConsolaCentral' | 'tCinturon' | 'tAmbiente'
@@ -450,8 +454,8 @@ export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
   { clave: 'tFila3Tipo', n: 'Fila 3: tipo de asiento', dep: 'interior', bloque: 'Tres filas', opciones: OPCIONES_TIPO_FILA },
   { clave: 'tMatCarenado', n: 'Material de la carrocería', dep: 'carroceria', bloque: 'Material y espesores', opciones: [{ k: 'carbonoLino', n: 'Carbono-lino' }, { k: 'vidrio', n: 'Fibra de vidrio' }, { k: 'carbono', n: 'Fibra de carbono' }] },
   { clave: 'tChMat', n: 'Material de los tubos', dep: 'chasis', bloque: 'Bastidor', opciones: [{ k: 'al6061', n: 'Aluminio 6061-T6' }, { k: 'cromoly', n: 'Acero cromoly 4130' }, { k: 'carbono', n: 'Tubo de carbono' }] },
-  { clave: 'tRuedaDel', n: 'Ruedas delanteras (en los carenados)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['16', '20', '24', '26', '28', 'c13', 'c14', 'c15']) },
-  { clave: 'tRuedaTras', n: 'Rueda trasera (dentro de la cola)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['20', '24', '26', '28', 'c13', 'c14', 'c15']) },
+  { clave: 'tRuedaDel', n: 'Ruedas delanteras (en los carenados)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['16', '20', '24', '26', '28', 'c13', 'c14', 'c15', ...IDS_CATALOGO]) },
+  { clave: 'tRuedaTras', n: 'Rueda trasera (dentro de la cola)', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['20', '24', '26', '28', 'c13', 'c14', 'c15', ...IDS_CATALOGO]) },
   // (2026-11-16, Eugenio: «la parte de propulsión es tan importante que tiene que estar arriba del todo»: its own block, first)
   { clave: 'tPropulsion', n: 'Propulsión', dep: 'propulsion', bloque: 'Propulsión', opciones: [{ k: 'electrico', n: 'Eléctrica: solo batería' }, { k: 'phev', n: 'Híbrida enchufable (PHEV): batería y motor de gasolina' }] },
   { clave: 'tHibArq', n: 'Arquitectura del híbrido', dep: 'propulsion', bloque: 'Híbrido enchufable', opciones: ARQUITECTURAS_HIBRIDO },
