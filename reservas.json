@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "notas",
-      "ruta": "src/server/seguridad/clasificacion.ts",
-      "motivo": "notas: clasificar aeromovil_notas",
-      "desde": "2026-11-17T13:37:55.302Z"
-    },
-    {
       "agente": "precios",
       "ruta": "src/components/aeromovil/geometria.ts",
       "motivo": "precios: precio por sección y pestaña Mano de obra",
