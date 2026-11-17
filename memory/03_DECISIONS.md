@@ -2268,3 +2268,12 @@ Price for the «precios» bot: `efectoNeumatico(...).precio` (€ per tyre), rea
 - **UX**: no slider visible until a price is tapped (Eugenio asked for it not to be «un engorro»). The editor debounces
   250 ms because every change recalculates the vehicle.
 - **«Mano de obra» is a tab id, not a `Departamento`**, like «Masas».
+## 2026-11-17 · «Ocultar garaje» hides the whole 3D view, not just the other cars
+
+**Context.** Eugenio wanted the department panels wider and centred («no tan esquinada hacia un lado»).
+**Decision.** The toggle hides the whole `section[aria-label="Vista 3D"]` (display: none) and the main layout becomes a
+single centred column (`max-w-3xl`). The viewer stays mounted (Planos/Exportar use its ref) and `Visor3D` skips drawing
+and resizing while its canvas has zero size.
+**Alternatives.** (a) Keep a small 3D of the Aeromóvil S above the panel: still takes ~40 % of a phone screen and the
+garage cars would need a separate «hide others» path. (b) Unmount the viewer: loses the scene state and the ref other
+sections rely on.

@@ -12624,3 +12624,12 @@ añadido donde se le puede poner un precio, y ponlo en el menú».
   `npx tsx scripts/precios-secciones.ts` («Todo OK»). Visto en el navegador automático a 1300 px y a 390 px (pestañas,
   Proyecto, Mano de obra, cabeceras con precio); el editor de precio solo se probó a 1300 px. No comprobado en un móvil
   de verdad: `humanity.wiki/?sw=off` quita la copia vieja.
+## 2026-11-17 · «Ocultar garaje»: los paneles ocupan la página
+
+Eugenio: «Haz que el garaje se pueda ocultar con un botón arriba en el menú donde pone diseño 3D, eso quítalo y ponlo más pequeñito y pon ver garaje o ocultar garaje, y de esta manera se puede ver con más detalle todos los componentes. Por ejemplo, si pincho en motor, pues veo todos los desplegables de forma mucho más agradable y no tan esquinada hacia un lado.»
+
+- En la barra de arriba del Aeromóvil hay un botón pequeño «Ocultar garaje» / «Ver garaje» (solo en la sección del diseño).
+- Con el garaje oculto desaparece toda la vista 3D y el panel del departamento (Motor, Chasis…) pasa al centro, con hasta 768 px de ancho en vez de 380.
+- El menú de secciones ya no escribe «Diseño 3D»: queda solo el icono, más pequeño (el nombre sigue dentro del menú).
+- «Ver solo …» no aparece con el garaje oculto, porque no hay 3D sobre el que actuar.
+- Cada navegador recuerda la elección (`aeromovil.verGaraje`). El 3D sigue montado pero no se dibuja mientras está oculto.
