@@ -18,6 +18,8 @@
 
 import { calcularA1, crearModeloA1, estimarMasasA1, type ModeloA1 } from './geometriaA1';
 import { areasBala, calcularBala, crearModeloBala, type CamposBala, type ModeloBala, type ResultadosBala } from './geometriaBala';
+import { comprobacionesExtraTriciclo } from './triciclo/centroMasas';
+import { VUELCO_OBJETIVO } from './triciclo/comprobaciones';
 import { areasTriciclo, calcularTriciclo, crearModeloTriciclo, type CamposTriciclo, type ModeloTriciclo, type ResultadosTriciclo } from './geometriaTriciclo';
 // ── the Cuadriciclo Basculante (2026-11-15): its own module; its defaults in a leaf module (no import cycle at load time)
 import { areasBasculante, calcularBasculante, crearModeloBasculante, type ModeloBasculante, type ResultadosBasculante } from './geometriaBasculante';
@@ -724,11 +726,16 @@ export function ajustarCarenado(P: Parametros): Parametros {
 export interface Comprobacion { nombre: string; holgura: number; minimo: number; mostrar?: string; dep?: string }
 
 /** Áreas, resistencia, energía, estructura y holguras. Todo estimación. */
+/** 2026-11-17 (masas): the Triciclo's checks that follow from where its mass is, and its hybrid's placement (triciclo/centroMasas.ts). */
+function conMasasTriciclo(m: ModeloTriciclo, r: Resultados): Resultados {
+  if (r.triciclo) r.comprobaciones.push(...comprobacionesExtraTriciclo(m, r.triciclo.piezas, VUELCO_OBJETIVO));
+  return r;
+}
 export function calcular(m: Modelo, ar: ReturnType<typeof areas>): Resultados {
   // the Triciclo's Cd comes from the wind tunnel, computed apart (Aeromovil.tsx): here, everything but what depends on it
   // the Cuadriciclo Basculante's Cd comes from the tunnel too (Aeromovil.tsx); its areas carry the fairings' shells
   if (m.tipo === 'basculante') return calcularBasculante(m, 'carenados' in ar ? ar as ReturnType<typeof areasBasculante> : areasBasculante(m));
-  return m.tipo === 'a1' ? calcularA1(m, ar) : m.tipo === 'bala' ? calcularBala(m, ar) : m.tipo === 'triciclo' ? calcularTriciclo(m, ar) : calcularGota(m, ar);
+  return m.tipo === 'a1' ? calcularA1(m, ar) : m.tipo === 'bala' ? calcularBala(m, ar) : m.tipo === 'triciclo' ? conMasasTriciclo(m, calcularTriciclo(m, ar)) : calcularGota(m, ar);
 }
 export function calcularGota(m: ModeloGota, ar: ReturnType<typeof areas>) {
   const P = m.P;

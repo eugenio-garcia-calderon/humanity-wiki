@@ -832,6 +832,64 @@ the frame's tube masses (same formula as `piezasBase`/`piezasBasculante`). Renam
 `PiezaMasa`/`PiezaMasaB` set where the part is created, and the tube breakdown returned by the parts list itself:
 ≈ 2 h now (≈ 45 parts in 3 files), more as parts are added. The Gota's blocks (inline in `pages/Aeromovil.tsx`) and
 the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper already; see the changelog for which are shown.
+- (2026-11-17, motores) The engine comparison's L/100 km per option changes the mass by the engine only, not by the
+  connection whose mass follows the engine's kW in series/parallel (a few kg; < 1 % of the figure). Running the full
+  model per option: ≈ 2 h plus a cache, and ~17 model builds per render.
+- (2026-11-17, motores) The engine comparison table is 10 columns in a ~380 px side panel: it scrolls sideways (the
+  name column stays fixed). On a phone the consumption and price columns need a swipe. A card layout per engine for
+  narrow screens: ≈ 1 h. Prices exist for 11 of 19 engines/motors; the rest sell on request (≈ 2 h of asking shops).
+- (2026-11-17, pending) Section weights not shown yet on the Gota (`pages/Aeromovil.tsx`, 3 blocks: «Chasis y ruedas»,
+  «Asientos», «Carenado aerodinámico») and the Basculante (`basculante/LadoBasculante.tsx`, whose `ui.Bloque` type needs
+  `peso`): the numbers already come from `seccionesGota`/`seccionesBasculante`; ≈ 20 min to wire both. Also: in a
+  diamond Triciclo the nose wheel («Rueda delantera, freno y horquilla») falls into Carrocería in `grupoPieza`
+  (`triciclo/masas.ts`, the name does not match `^Ruedas`), so the Carrocería tab is 10,7 kg too heavy and Rodaje too
+  light on that layout; one regex, ≈ 5 min, changes those two tab totals on purpose.
+- (2026-11-17) `src/components/aeromovil/CLAUDE.md`, «The weight of a section», last line is stale: the engine blocks
+  DO show their weight now (`seccionDe` in `LadoTriciclo.tsx`; their parts are in `ComparadorMotores`), there is no
+  `sinPeso`. Not fixed then because another agent held that file; 1 min.
+
+
+- **Mixed-axle rolling resistance counts wheels, not load** (2026-11-17, `ruedas/catalogo.ts` `crrMezcla`): Σ nᵢ·Crrᵢ / Σ nᵢ
+  as if every wheel carried the same load. Weighting by `cargasRueda` (Triciclo) and `repartoDel` (Basculante) is ~30 min.
+- **Catalogue wheel masses are estimates** (a typical tyre of the size plus a rim of its class, anchored on three weighed
+  rims); no tyre in the catalogue was weighed. Replacing them with manufacturer weights is ~1 h of searching.
+- **The garage's drawing of a saved Triciclo design** (`construirDisenoGaraje`) still shows the old aero-cover wheel for a
+  catalogue wheel: only the editor's builder re-dresses them. ~15 min.
+- **The Triciclo's consumption note still says «rodadura 0,011 (neumático de ciclomotor)»** (`LadoTriciclo.tsx`, the line
+  that prints `CRR`) when a catalogue wheel is chosen: the file was held by another bot and Eugenio asked to publish now.
+  The numbers are right (`crrTriciclo`); only that sentence is stale. Fix: print `crrTriciclo(T)` and the sheet of each
+  chosen wheel in «Ejes y ruedas», as `basculante/LadoBasculante.tsx` already does. ~15 min.
+## 2026-11-17 · Garage aircraft: copied aerofoil helpers, no «aircraft» flag
+
+- `garaje/autogiroModelo.ts` carries its own copy of `rejilla`/`perfil` (≈ 25 lines) that `garaje/visionJet.ts` also
+  has privately. Moving both to `garaje/forma.ts` and importing: ≈ 15 min today, ≈ 30 min once a third aircraft copies
+  them.
+- Garage aircraft are recognised only by having no `envolvente`/`aero`; the consumption card still labels them «Cd sin
+  publicar» instead of «aeronave, fuera del túnel». A `aeronave?: true` field in `garaje/tipos.ts` read by that card in
+  `pages/Aeromovil.tsx`: ≈ 15 min (the page was claimed by another bot when this was written).
+## 2026-11-17 · Masses and the hybrid's placement (masas)
+- **Resolved**: 2026-11-16 «The hybrid is drawn, but its engine's place is fixed» (position sliders added; the seats of
+  all three rows, the swing arm and the wheel's travel are checked). Not resolved: with three rows the engine still
+  collides (≈ 10–12 cm with the tower, the arm and row 3) because there is no room behind row 3; moving the shock tower
+  is a frame change, ≈ 3 h.
+- **The hub and central electric motors are not placeable**: a hub motor lives in the wheel; a catalogue «central»
+  motor is still not drawn and its mass counts at the rear axle. Drawing and placing it like the petrol engine: ≈ 2 h.
+- **The nose wheel's fork (rombo) is a fixed 5 kg**, not sized by its load (it carries ≈ 170 kg on Rombo Bala): ≈ 20 min.
+- **Dead branches**: `LadoBasculante.tsx` still has its `dep === 'proyecto'` blocks (weight, rollover, performance,
+  all checks), unreachable since «Proyecto» is `LadoResumen.tsx` (the file was held by another bot): ≈ 15 min.
+- **The Basculante's occupants count as one mass in «Masas»** (its results give the centre with them, not each seat):
+  exposing its places as the Triciclo does, ≈ 30 min.
+- **The engine search costs ≈ 15–20 ms per model build** with the hybrid on (300 places tried, memoised body widths).
+  A coarser first pass would halve it: ≈ 30 min.
+- **Engine still drawn upright**: a laid-down engine (cylinders forward, as on scooters) would be ≈ 15 cm lower;
+  ≈ 2 h in `hibrido.ts`/`hibrido3d.ts`.
+- **Pending, second step (≈ 20 min, code ready in the bot's patch)**: the six sliders `tMotX/Y/Z`, `tDepX/Y/Z` in
+  `triciclo/campos.ts` + `defecto.ts` + their explanations + their `mostrar` in `LadoTriciclo.tsx` (those files were held
+  by other bots). Until then `modelo.ts` reads the offsets if a design carries them (`mov`). Also pending: the unified
+  centre-of-gravity sum inside `calcularTriciclo` (it still has its own identical `momento`), the «Proyecto» lema in
+  `LEMAS_TRICICLO`, removing `LadoTriciclo.tsx`'s now-unreachable `proyecto` blocks, and the `CLAUDE.md` section on masses.
+- **The new mass checks are appended in `geometria.ts` `calcular`** (`conMasasTriciclo`), not inside `calcularTriciclo`,
+  for the same reason: moving them in is ≈ 10 min.
 
 ## 2026-11-17 · Homologation pre-check: what the first version leaves out (Eugenio: «publish a first version asap»)
 
@@ -842,6 +900,4 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   among four diamond supports): ~2 h with a 4-support static solve.
 - **Tyre speed symbol, headlamp heights (500–1200 mm), plate space, R-point ≥ 400 mm**: the model knows some of these
   (lamp positions, seat hip) but they are not wired: ~3 h.
-- **Not joined to «Revisión de puntos críticos»** (bot «masas», not on main when this merged): `fallosHomologacion(ficha)`
-  in `evaluar.ts` returns the fails of the design's category for that list: ~30 min once it is on main.
 - **The Cuadriciclo Bala has no masses/motor** (body only): mass, power and speed rows read «no se puede comprobar».

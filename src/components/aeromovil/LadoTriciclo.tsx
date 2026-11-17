@@ -13,6 +13,9 @@ import type { Resolucion } from './tunel/malla';
 import { filasDetras, fraseFila } from './filasTriciclo';
 import { FichaHibrido } from './FichaHibrido';
 import { CatalogoPieza, type Necesidad } from './CatalogoTren';
+import { ComparadorMotores } from './ComparadorMotores';
+import { pesoSeccion, seccionesTriciclo, textoPesoSeccion } from './masasSecciones';
+import { DesglosePeso, SinSeccion } from './PesoSeccion';
 import { valoresCatalogo, type CATALOGO_CLAVES } from './catalogoTren';
 import { fmt, m2, Deslizador, Bloque, Selector, ListaComprobaciones } from './controles';
 import { ANGULO_MAX, estimacionKamm } from './garaje/kamm';
@@ -97,6 +100,14 @@ export function FichaAcabado({ T, piezas, areas, consola }: { T: { tAcabado: str
 // (2026-11-16, Eugenio: «la parte de propulsión … tiene que estar arriba del todo»: in Motor, propulsion first, then the hybrid, then the electric motor)
 export const ORDEN_BLOQUES = ['Propulsión', 'Híbrido enchufable', 'Motor eléctrico', 'Forma', 'Morro', 'Cúpula', 'Cola', 'Techo solar y ventanas', 'Carenados', 'Puertas y maletero', 'Material y espesores'];
 export const ordenBloque = (b: string) => { const i = ORDEN_BLOQUES.indexOf(b); return i < 0 ? 100 : i; };
+/**
+ * (2026-11-17, Eugenio: «que en los desplegables también de motor eléctrico y motor gasolina que aparezcan con esos
+ * nombres, y que según la selección que tengas, pues que aparezca también el peso de ese desplegable»): the hybrid's
+ * block shows as «Motor gasolina»; its key stays «Híbrido enchufable» (FILAS, ORDEN_BLOQUES, zonaTriciclo and the
+ * remembered open blocks use it). Both engine blocks carry their mass in the header (`peso`, masasSecciones.ts).
+ */
+const TITULO_BLOQUE: Partial<Record<string, string>> = { 'Híbrido enchufable': 'Motor gasolina' };
+const BLOQUES_MOTOR = ['Motor eléctrico', 'Híbrido enchufable'];
 /**
  * Which department and block a click on the Triciclo's 3D model opens (2026-11-15): by the layer it hit, and on the
  * body by where: ahead of the canopy's glass the nose, behind it the tail, between them the canopy (or the general sizes
@@ -279,6 +290,14 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
   const ETIQUETA_ROMBO: Partial<Record<string, string>> = { tVia: 'Vía de las ruedas laterales', tRuedaDel: 'Ruedas laterales (en los carenados)', tRuedaTras: 'Ruedas del morro y de la cola', tGiro: 'Giro máximo de la rueda del morro', tMSuspDel: 'Suspensión de las laterales (las dos)', tRecDel: 'Recorrido de la suspensión de las laterales' };
   const etiqueta = (k: string, n: string) => (filas && ETIQUETA_FILAS[k]) || (butacas && ETIQUETA_BUTACAS[k]) || (rombo && ETIQUETA_ROMBO[k]) || (cuatro && ETIQUETA_CUATRO[k]) || n;
   const bloques = [...new Set([...fichas.map(f => f.bloque), ...sels.map(s => s.bloque)])];
+  const tituloBloque = (b: string) => TITULO_BLOQUE[b] ?? b;
+  // (2026-11-17) the engine blocks' weight: the same sections as every other block's (masasSecciones.ts)
+  // and every other block's (2026-11-17, «pesossecciones»: «en todos los demás desplegables … el peso sumado de toda esa
+  // sección»); a block with no mass shows nothing
+  const pesosSec = dep === 'proyecto' ? null : seccionesTriciclo(res, modelo);
+  const seccionDe = (b: string) => (dep === 'proyecto' ? null : pesoSeccion(pesosSec, dep, b));
+  const seccionMotor = (b: string) => (BLOQUES_MOTOR.includes(b) ? pesoSeccion(pesosSec, 'propulsion', b) : null);
+  const cdComparar = cd.cd != null && cd.areaRef != null ? { cd: cd.cd, areaRef: cd.areaRef } : null;
   const checks = res.comprobaciones.filter(c => dep === 'proyecto' || (c.dep ?? '').split(',').includes(dep));
   const malas = checks.filter(c => c.holgura < c.minimo).length;
   const dl = (filas: [string, string][]) => (
@@ -355,9 +374,10 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
         {cuatro || rombo
           ? (rombo ? <p className="text-xs text-slate-500">Cuatro ruedas en rombo: una en el morro, que gira; dos laterales en carenados, que no giran (con «Bascular en las curvas», se inclinan con la cabina); y una en la cola con el motor en el buje. Es la disposición del Cuadriciclo Bala en rombo con esta carrocería (en Rodaje, «Disposición de las ruedas», se vuelve a la de dos delante).</p> : <p className="text-xs text-slate-500">Cuatro ruedas: dos delante en carenados como el Aptera, que giran con ellas, y dos detrás en carenados iguales, que no giran, con un motor en el buje de cada una. Es el Triciclo Bala con otra parte de atrás: la carrocería y todas sus medidas son las mismas (en Rodaje, «Ruedas traseras», se vuelve a la de una rueda).</p>)
           : <p className="text-xs text-slate-500">Tres ruedas: dos delante en carenados como el Aptera, que giran con ellas, y una detrás dentro de la cola, con el motor en el buje. La carrocería es la del Cuadriciclo Bala en rombo; con las medidas por defecto, la misma.</p>}
+        <SinSeccion partes={dep === 'proyecto' ? undefined : pesosSec?.sinSeccion[dep]} />
       </Bloque>
       {[...bloques].sort((a, b) => ordenBloque(a) - ordenBloque(b)).map(bloque => (
-        <Bloque key={bloque} id={`bloque-${bloque}`} titulo={bloque} plegable={bloque === 'Propulsión' ? undefined : { abierto: abiertos.has(bloque), alAlternar: () => alternar(bloque) }} nota={`${fichas.filter(f => f.bloque === bloque).length + sels.filter(s => s.bloque === bloque).length} ajustes`}>
+        <Bloque key={bloque} id={`bloque-${bloque}`} titulo={tituloBloque(bloque)} peso={textoPesoSeccion(seccionDe(bloque))} plegable={bloque === 'Propulsión' ? undefined : { abierto: abiertos.has(bloque), alAlternar: () => alternar(bloque) }} nota={`${fichas.filter(f => f.bloque === bloque).length + sels.filter(s => s.bloque === bloque).length} ajustes`}>
           {bloque === 'Forma' && (() => {
             // round two (2026-11-10): one lever for «hazlo un poco más grande»; it moves the nose, wheelbase and tail (see estirarTriciclo)
             const lg = largoTriciclo(T);
@@ -368,8 +388,10 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
           })()}
           {/* (2026-11-16) the hybrid's architecture first in its block: the sliders under it depend on it */}
           {bloque === 'Híbrido enchufable' && sels.filter(s => s.clave === 'tHibArq').map(s => <Selector key={s.clave} id={`t-${s.clave}`} etiqueta={s.n} valor={T[s.clave] as string} clave={s.clave} opciones={s.opciones} alCambiar={v => set(s.clave, v as never)} />)}
+          {bloque === 'Híbrido enchufable' && <ComparadorMotores tipo="gasolina" modelo={modelo} mTot={res.mTot} cd={cdComparar} actual={T.tCatTermico} alElegir={id => elegirCatalogo('tCatTermico', id)} motores={motoresBuje} partes={seccionMotor(bloque)?.partes ?? []} />}
           {bloque === 'Híbrido enchufable' && <CatalogoPieza tipo="termico" valor={T.tCatTermico} alCambiar={id => elegirCatalogo('tCatTermico', id)} Selector={Selector as never} necesidad={necesidad} />}
           {bloque === 'Motor eléctrico' && <>
+            <ComparadorMotores tipo="electrico" modelo={modelo} mTot={res.mTot} cd={cdComparar} actual={T.tCatMotor} alElegir={id => elegirCatalogo('tCatMotor', id)} motores={motoresBuje} partes={seccionMotor(bloque)?.partes ?? []} />
             <CatalogoPieza tipo="motor" valor={T.tCatMotor} alCambiar={id => elegirCatalogo('tCatMotor', id)} Selector={Selector as never} necesidad={necesidad} />
             <CatalogoPieza tipo="controlador" valor={T.tCatCtrl} alCambiar={id => elegirCatalogo('tCatCtrl', id)} Selector={Selector as never} necesidad={necesidad} />
             <CatalogoPieza tipo="reductora" valor={T.tCatReductora} alCambiar={id => elegirCatalogo('tCatReductora', id)} Selector={Selector as never} necesidad={necesidad} />
@@ -416,7 +438,7 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
           {bloque === 'Techo solar y ventanas' && <p className="-mt-1 text-xs text-slate-500">La forma de la cúpula no cambia: el techo solar y las ventanas se dibujan sobre ella. Detrás de donde empieza, lo alto de la cúpula es un panel solar opaco (da sombra a las cabezas: menos calor dentro en verano); por los lados, encima de la ventana. Delante, el parabrisas pasa por encima hasta el panel.{T.tSolarCola === 'si' ? ` Por detrás, el panel sigue por lo alto de la cola hasta su punta, como en el Aptera; con el portón, la parte de encima del portón se levanta con él (con la tapa del maletero, con la tapa).${T.tCubierta === 'lisa' ? ' Con la cubierta lisa cubre toda la cubierta de la cola, dejando un marco de unos 5 cm a cada lado.' : ''}` : ''}{puertas ? ' Con las puertas como el Aptera hay montante siempre (la puerta se corta por él), aunque arriba diga «De una pieza».' : ''} El montante sale del borde del cristal, sube y se tumba hacia atrás en una sola curva hasta el techo, como en el Aptera, y sigue como marco entre la ventana y el techo.{modelo.ventanas.marco ? ` Entre el panel y el cristal va un marco de carrocería de ${cm(modelo.ventanas.marco.ancho, 0)}: arriba del parabrisas y a lo largo de los dos carriles del techo (${fmt(modelo.marcoTecho)} m² de laminado en lugar de panel).` : ''} Panel: {res.areas.solar > 0.005 ? `${fmt(res.areas.solar)} m², ${Math.round(res.solarPico)} W a pleno sol, unos ${fmt(res.solarDia / 1000)} kWh al día (estimado)` : 'ninguno'}; cristal: {fmt(res.areas.cristal)} m².</p>}
           {bloque === 'Techo solar' && <p className="-mt-1 text-xs text-slate-500">{res.areas.solar > 0.005 ? `${fmt(res.areas.solar)} m² de panel: ${Math.round(res.solarPico)} W a 1000 W/m², y de media unos ${fmt(res.solarDia / 1000)} kWh al día (${fmt(P.sol, 1)} kWh/m² al día sobre plano, el panel curvo recoge un 70 % de eso, células al ${Math.round(0.21 * 100)} % y un 15 % de pérdidas). ${Math.round(res.masas['Paneles solares'] ?? 0)} kg de panel, sobre laminado de carrocería en lugar del cristal.` : 'Sin techo solar: la cúpula es toda de cristal (se mueve en Carrocería › Techo solar y ventanas).'}</p>}
           {bloque === 'Basculación' && (rt.tilt ? <FichaTilt t={rt.tilt} tres={!cuatro && !rombo} rombo={rombo} /> : <p className="-mt-1 text-xs text-slate-500">Con «Sí», la cabina se inclina hacia dentro en las curvas, como una moto, y los carenados de las ruedas con ella, cada uno sobre sus dos brazos en paralelogramo. {cuatro || rombo ? '' : 'En el triciclo se inclinan los dos carenados de delante; la rueda de la cola va dentro de la carrocería y se inclina con ella. '}Aquí se elige la tecnología que la mueve y salen, una a una, las piezas que hay que construir.</p>)}
-          {bloque === 'Propulsión' && <p className="-mt-1 text-xs text-slate-500">{T.tPropulsion === 'phev' ? 'Híbrido enchufable: se carga enchufado y gasta primero la batería; cuando se acaba, sigue con gasolina. Debajo, cómo se une el motor de gasolina a las ruedas («Híbrido enchufable») y, después, el motor eléctrico.' : 'Solo eléctrico: la batería y el motor de buje. Con «Híbrida enchufable» se añade un motor de gasolina en el maletero, con tres maneras de unirlo a las ruedas.'}</p>}
+          {bloque === 'Propulsión' && <p className="-mt-1 text-xs text-slate-500">{T.tPropulsion === 'phev' ? 'Híbrido enchufable: se carga enchufado y gasta primero la batería; cuando se acaba, sigue con gasolina. Debajo, el motor de gasolina y cómo se une a las ruedas («Motor gasolina») y, después, el motor eléctrico («Motor eléctrico»); cada uno con lo que pesa en su título.' : 'Solo eléctrico: la batería y el motor de buje. Con «Híbrida enchufable» se añade un motor de gasolina en el maletero, con tres maneras de unirlo a las ruedas.'}</p>}
           {bloque === 'Híbrido enchufable' && modelo.phev && <FichaHibrido modelo={modelo} vel={T.tVel} hib={e?.hibrido ?? null} />}
           {bloque === 'Motor eléctrico' && cuatro && <p className="-mt-1 text-xs text-slate-500">Dos motores de buje, uno en cada rueda trasera, sin cadena ni correa, con un controlador doble bajo el sillín del pasajero. Cada uno da la mitad de la potencia, así que en cada llanta cabe el doble que con una rueda: en una rueda de ciclomotor unos {RUEDAS_TRICICLO['24'].kWBuje} kW de pico por rueda; en una llanta de coche de 15″, unos {RUEDAS_TRICICLO.c15.kWBuje}. «Motores de buje» es la masa de los dos juntos: su rango es el de dos motores de media potencia, con la misma regla de kilos por kW que con uno (cada motor lleva su base, así que dos pesan algo más que uno del doble).</p>}
           {bloque === 'Motor eléctrico' && modelo.phev && <p className="-mt-1 text-xs text-slate-500">{modelo.phev.arq === 'serie' ? 'Con el híbrido en serie, el motor eléctrico lo mueve todo también con gasolina: el generador le manda la electricidad por el controlador. Su potencia nominal limita la velocidad que se sostiene con gasolina.' : `Con el híbrido, ${modelo.phev.arq === 'reparto' ? 'la corona del planetario' : 'la caja de cambios'} empuja ${cuatro ? 'las ruedas traseras por una cadena, un diferencial y dos palieres' : 'la rueda trasera por una cadena, en el lado izquierdo'}, junto al motor de buje${cuatro ? ' de cada rueda' : ''}${modelo.phev.arq === 'reparto' ? ', que hace de MG2' : ''}.`}</p>}
@@ -425,6 +447,7 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
           {bloque === 'Acabado interior' && <FichaAcabado T={T} piezas={rt.piezas} areas={modelo.interior.forro?.areas ?? null} consola={!!modelo.interior.consola} />}
           {bloque === 'Tapicería' && <p className="-mt-1 text-xs text-slate-500">{T.tTapiz === 'serie' ? 'Los asientos de serie: vinilo gris oscuro acolchado en rombos con un pespunte rojo. Al elegir otra tapicería, la funda cambia en los mismos asientos (sillín y respaldos, butacas o asientos de las filas); en las butacas, la carcasa blanca pasa al color de los laterales.' : `${TAPICES.find(t => t.k === T.tTapiz)?.n ?? ''}: la funda nueva cubre los mismos asientos${T.tAsientos === 'butacas' ? ' y la carcasa de las butacas toma el color oscuro de los laterales, como los costados de los asientos del Vision Jet' : ''}. ${T.tCostura === 'no' ? 'Sin costura vista.' : T.tCostura === 'recta' ? 'Costura recta: canales a lo largo, con un pespunte doble a cada lado.' : 'Costura geométrica: líneas que se cruzan desde dos nudos, como la del Vision Jet, con pespunte doble.'} Masa: la diferencia de la funda con la de serie (que ya cuenta «Un asiento»).`}{T.tCinturon !== 'no' ? ' Cinturones de tres puntos: del hombro, por encima del pecho, a la hebilla en la otra cadera, y la cinta de las caderas; en un asiento vacío, recogido por su costado.' : ''}</p>}
           {bloque === 'Batería' && !paquete && <p className="-mt-1 text-xs text-slate-500">Primero en el morro, donde el Cuadriciclo en rombo lleva la rueda delantera ({Math.round(rt.bateria.litrosMorro)} L), luego en un módulo estrecho entre los pies del piloto; si hace falta más, el módulo del morro sube, crece hacia la punta y queda un módulo plano bajo los sillines. Ahora: {Math.round(rt.bateria.litros)} L y {Math.round(rt.bateria.kg)} kg{rt.bateria.litros - rt.bateria.cabe > 0.05 ? `: caben ${Math.round(rt.bateria.cabe)} L, faltan ${Math.round(rt.bateria.litros - rt.bateria.cabe)} (un morro más largo, una carrocería más ancha o celdas más densas)` : ''}.</p>}
+          {!BLOQUES_MOTOR.includes(bloque) && <DesglosePeso s={seccionDe(bloque)} abierto={bloque === 'Bastidor'} />}
         </Bloque>
       ))}
 

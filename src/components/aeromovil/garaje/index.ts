@@ -14,6 +14,7 @@ import { VEHICULO as jaguarD } from './jaguarD';
 import { VEHICULO as smera } from './smera';
 import { VEHICULO as eqxx } from './eqxx';
 import { VEHICULO as visionJet } from './visionJet';
+import { VEHICULO as autogiro } from './autogiro';
 import { VEHICULO as suspensionTwizy } from '../piezas/suspensionTwizy';
 import { vehiculoRegistrado } from './registro';
 import { compararTamano } from './filas';
@@ -29,7 +30,8 @@ export type { VehiculoGaraje } from './tipos';
 // and a more aerodynamic four-wheeler (the Mercedes Vision EQXX). The cars go from the shortest to the longest (then
 // the lightest first: `compararTamano`); this order is the list's and the second row's. The Twizy's suspension stays last.
 // 2026-11-15, Eugenio, with a photo: «Haz un modelo 3d de este avión exacto … y ponlo en el garaje» (the Cirrus Vision Jet).
-const COCHES: VehiculoGaraje[] = [twizy, aptera, xl1, unlitro, szemission, jaguarD, aerorider, bala, nusKruce, modeloY, tesla3, caterham7, smera, eqxx, visionJet];
+// 2026-11-17, Eugenio, with a photo: «haz un modelo 3D del autogiro de ELA Aviación, el último modelo» (the Eclipse REVO).
+const COCHES: VehiculoGaraje[] = [twizy, aptera, xl1, unlitro, szemission, jaguarD, aerorider, bala, nusKruce, modeloY, tesla3, caterham7, smera, eqxx, visionJet, autogiro];
 export const VEHICULOS_GARAJE: VehiculoGaraje[] = [
   ...[...COCHES].sort((a, b) => compararTamano({ ...a, masa: masaGaraje(a) }, { ...b, masa: masaGaraje(b) })),
   suspensionTwizy,

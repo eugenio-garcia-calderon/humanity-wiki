@@ -15,7 +15,10 @@ import type { Parametros } from '../geometria';
  */
 export type IdDepartamento =
   | 'proyecto' | 'carroceria' | 'chasis' | 'rodaje' | 'propulsion' | 'energia'
-  | 'interior' | 'accesos' | 'luces' | 'fabricacion' | 'homologacion';
+  | 'interior' | 'accesos' | 'luces' | 'fabricacion' | 'homologacion'
+  // 2026-11-17: «Masas», a tab of the Triciclo family and the Basculante only (LadoResumen.tsx); it has no
+  // `Departamento` of its own (no tasks, suppliers or messages), so it is not in `DEPARTAMENTOS`
+  | 'masas';
 
 export interface Tarea {
   titulo: string;

@@ -12224,6 +12224,156 @@ tubos de tornillería y todo esto…»
   del departamento, para que el total de la pestaña cuadre siempre.
 - Comprobación nueva: `npx tsx scripts/pesos-secciones.ts [diseño.json]`: desplegables + «sin desplegable» = cada
   pestaña = el vehículo en vacío, y cada desglose = su pieza. «Todo OK».
+## 2026-11-17 · Elegir el motor de gasolina y el eléctrico sabiendo lo que se elige
+
+Eugenio: «En cuanto a la elección de los motores de gasolina y los motores eléctricos, quiero que la elección pueda
+tomarse de manera mucho más consciente, sabiendo qué potencia y qué peso y qué cilindrada y qué consumo tienen cada uno
+de los motores que se propone y qué coste estimado también, para poder tomar una decisión coherente. Y que en los
+desplegables también de motor eléctrico y motor gasolina que aparezcan con esos nombres, y que según la selección que
+tengas, pues que aparezca también el peso de ese desplegable.»
+
+- En la pestaña Motor del Triciclo (y sus variantes), el desplegable que se llamaba «Híbrido enchufable» ahora se llama
+  **«Motor gasolina»**, y junto a «Motor eléctrico» los dos llevan el peso en la cabecera (por ejemplo «Motor gasolina
+  80,9 kg» en el diseño Rombo Bala híbrido; con un Honda GX390, 62,6 kg). Se actualiza al elegir otro motor. Es la suma de lo que hay en ese desplegable,
+  con la misma regla que el peso de todos los demás desplegables (masasSecciones.ts) y la misma lista de piezas que
+  «Proyecto › Peso» y que el número bajo la pestaña (no hay otra fórmula): en el eléctrico,
+  el motor (o los dos de buje), el controlador y la reductora; en el de gasolina, el motor, su unión a las ruedas
+  (planetario, generador o embrague y caja) y el depósito lleno.
+- Dentro de cada uno, una tabla para comparar todos los motores del catálogo a la vez, con el elegido en verde; al pinchar
+  en una fila se elige (como el selector). Gasolina: cilindrada, potencia en kW y CV, potencia continua, par, masa,
+  consumo específico (g/kWh), **litros a los 100 km de este coche a 90 km/h** (con su Cd del túnel, su unión al híbrido
+  y la masa de ese motor), la velocidad que sostiene solo con gasolina y el precio. Eléctrico: buje o central, tensión,
+  potencia continua (kW y CV) y de pico, par, masa, rendimiento publicado, **Wh/km de este coche a 90 km/h** y precio.
+- Encima, «Cuál te conviene»: cuánta potencia pide el coche a 90 km/h en llano y subiendo una cuesta del 3 %, cuántos
+  motores la dan en continuo, y cuál de ellos es el más ligero, el que menos gasta y el más barato.
+- Precios nuevos en el catálogo: el de una tienda, leído hoy, con su enlace y si lleva IVA («De dónde salen los
+  precios»). Orientativos. EMRAX, Saietta, Rotax, Kubota y algunos QS/Golden no publican precio: sale «—».
+- Dos motores de gasolina más: Honda GX270 (5,1 kW continuos, 25,8 kg) y Kubota WG752 (3 cilindros, agua, 18,5 kW, 62 kg).
+- Los diseños guardados no cambian (siguen con su motor). No se ha tocado el túnel.
+
+## 2026-11-17 · Aeromóvil: el peso en los desplegables del Triciclo (segunda parte)
+
+- Lo anterior ya se ve en el Triciclo, el rombo y el de cuatro ruedas: cada desplegable de Carrocería, Chasis, Rodaje,
+  Energía, Interior y Motor dice su peso en el título; Chasis › Bastidor abre el desglose de tubos, tornillería,
+  soportes y soldaduras. Los dos de motor usan la misma cuenta (lo hizo el trabajo de los motores).
+- Todavía no: la Gota y el Cuadriciclo Basculante. Las cifras ya existen (`masasSecciones.ts`); falta ponerlas en su
+  panel, que otros estaban tocando en ese momento.
+
+
+
+## 2026-11-17 · Catálogo de ruedas: ruedas de moto de todo tipo
+
+Eugenio: «permite añadir más tipos de ruedas, por ejemplo de motos de todo tipo».
+
+- **Dónde:** Rodaje › Ejes y ruedas, en el Cuadriciclo Basculante («Ruedas delanteras» / «Ruedas traseras») y en la
+  familia Triciclo (Triciclo, Bala clásico, rombo, el «Rombo Bala»: «Ruedas delanteras (en los carenados)» / «Rueda
+  trasera»). Las medidas de siempre siguen ahí; debajo, 27 ruedas reales nuevas. Delante y detrás pueden ser distintas,
+  como en una moto.
+- **Las ruedas:** scooter (3.50-10 de Vespa, 120/70-12 y 130/70-12, 160/60 R15 de maxiscooter), 125 (100/80-17 y
+  130/70-17), deportiva (120/70 ZR17, 180/55 ZR17 de naked, 190/55 ZR17 de superdeportiva), turismo (Gold Wing
+  130/70 R18 y 200/55 R16), trail (90/90-21, 120/70 R19, 150/70 R18, 170/60 R17), enduro (80/100-21 y 120/90-18 de
+  tacos), custom (130/90 B16, 150/80 B16 y la 240/40 R18 de la Fat Boy), café racer de radios (100/90-18 y 130/70-18),
+  sidecar (4.00-19 del Ural), moto eléctrica con motor de buje (2.75-17 en un QS 205), y para comparar dos neumáticos eco
+  de coche de 19″ (los del BMW i3, etiqueta C y A) y una rueda de velomóvil de 20″. Cada una con diámetro, anchura,
+  perfil (redondo de moto o plano de coche), peso, rodadura, carga y velocidad máximas, tipo de llanta (radios,
+  aleación, disco o motor de buje) y motos reales que la llevan. Todo en `src/components/aeromovil/ruedas/catalogo.ts`.
+- **Qué cambia al elegir una:** el peso de las ruedas, la rodadura y por tanto el consumo y la autonomía (la media de
+  las ruedas elegidas), el tamaño del carenado o del paso de rueda, y lo que ve el túnel. En 3D se dibuja con su forma:
+  banda redonda de moto, radios o llanta de aleación de cinco brazos dobles, disco de freno, o el tambor del motor de buje.
+- **Comprobaciones nuevas:** carga por rueda frente a la del neumático (ya existía; ahora con la carga de cada rueda),
+  que quepa en su carenado o paso de rueda (ya existían; ahora con su tamaño), **«Neumáticos de moto en un vehículo que
+  no se inclina»** (aviso amarillo: la banda redonda apoya en una tira estrecha, gasta el centro y agarra menos en curva;
+  no sale si el vehículo bascula, ni en el Basculante) y **«velocidad que admiten»** (su código de velocidad frente a la
+  velocidad máxima).
+- **Estudio aerodinámico:** regla nueva «Neumático ancho» (más de 160 mm): el túnel prueba uno más estrecho de su clase
+  y el estudio vuelve a pasar las comprobaciones.
+- **Lo que hay que saber:** un neumático de moto rueda peor que uno de coche: unos 0,015 frente a 0,006-0,009
+  (Cossalter, «Motorcycle Dynamics»). Con ruedas de moto en el Triciclo por defecto el consumo sube; con los neumáticos eco
+  de coche baja. La rueda de velomóvil rueda poquísimo pero solo aguanta unos 100 kg: no pasa la comprobación de carga.
+- Los diseños guardados no cambian: siguen con sus ruedas y sus números (la rodadura de antes solo cambia si eliges una
+  rueda del catálogo).
+- Fuentes: Metzeler Technical Manual 2020 (diámetros y anchos medidos), tablas ETRTO (índices de carga y velocidad),
+  V. Cossalter «Motorcycle Dynamics» (rodadura), Reglamento (UE) 2020/740 y reifen.com (etiquetas eco),
+  bicyclerollingresistance.com (velomóvil), canyonchasers.net y ducatiforum.co.uk (pesos de llantas), em3ev.com (motor QS
+  205), tiremart.com (rueda del Ural).
+- No visto en un teléfono: si sale la versión vieja, `humanity.wiki/?sw=off`.
+## 2026-11-17 · Autogiro ELA Eclipse REVO en el garaje
+
+- Eugenio, con una foto de un autogiro color cobre: «haz un modelo 3D del autogiro de ELA Aviación, el ultimo modelo».
+- **Cuál es el último modelo:** el **Eclipse REVO** de ELA Aviación (Fuente Obejuna, Córdoba), presentado en AERO
+  Friedrichshafen 2024 y en producción (se anuncian unidades de 2026). Es la misma célula biplaza en tándem cerrada del
+  Eclipse/Eclipse EVO de la foto, con un motor Rotax 916 iS de 160 CV que además hace girar el rotor a 500 rpm antes de
+  despegar: sale en unos 10 m.
+- **Modelo nuevo** en el garaje, «Autogiro ELA Eclipse REVO» (`garaje/autogiro.ts`, `autogiroForma.ts`,
+  `autogiroModelo.ts`). Lleva:
+  - la cabina con el morro en punta y la gran cúpula de cristal (se ven los dos asientos en tándem y el panel);
+  - el mástil carenado con la cabeza del rotor y las dos palas, aparcadas a lo largo;
+  - el motor detrás de la cabina y la hélice propulsora de tres palas;
+  - el botalón por debajo de la hélice, el estabilizador horizontal con una deriva en cada punta y la deriva central;
+  - la rueda de morro con su horquilla y las dos ruedas principales carenadas sobre ballestas de acero.
+  - Color cobre satinado, como la foto. Sin letras del fabricante ni matrícula.
+- **Datos publicados:** rotor de 8,53 m y hélice Helix de 3 palas y 1,72 m, 331 kg en vacío y 560 kg máximo del EVO
+  (ficha DULV 988-22); REVO: Rotax 916 iS 160 CV, 530 kg máximo al despegue, crucero hasta 160 km/h, más de 500 km de
+  autonomía (anuncio en aircraft.com), unos 20 kg más que el EVO por el nuevo arrastre del rotor (evtol.news); EVO:
+  81 l de depósito y 200 km/h de máxima (aeroexpo, elaaviacion.com).
+- **Estimado en la foto** (ELA no publica estas medidas en texto; su hoja técnica es una imagen que no se pudo
+  descargar): 5,10 m de largo sin el rotor, 1,94 m de ancho, 2,70 m de alto, batalla 1,95 m, vía 1,70 m, cabina de
+  0,80 m; masa en vacío del REVO 351 kg (331 + 20).
+- **Es una aeronave:** como el Vision Jet, no pasa por el túnel de viento ni por la comparación de consumo ni por el
+  circuito de estabilidad (son para coches); el estudio aerodinámico solo mira nuestro diseño. Las palas aparcadas
+  sobresalen 2,6 m por delante del morro y 1,5 m por detrás, a 2,7 m de altura, por encima de los coches vecinos.
+- Fuentes: https://revo.elaaviacion.com · https://elaaviacion.com/revo-taking-off-into-the-future-of-personal-aviation/ ·
+  https://evtol.news/news/aero-friedrichshafen-2024 · https://www.aircraft.com/aircraft/246590431/na-2026-ela-aviation-eclipse-revo ·
+  https://dulv.de/Tragschrauber_Kennblaetter/details.php?id=21126 · https://aeroexpo.online/prod/ela-aviacion-sl/product-171316-69471.html ·
+  https://elaaviacion.com/eclipse-evo/ · https://en.wikipedia.org/wiki/ELA_10_Eclipse
+## 2026-11-17 · Pestaña «Masas», motor y depósito libres, «Proyecto» como lista de pendientes (masas)
+- Eugenio: «haz que el motor por defecto esté mucho más cerca de la rueda trasera y más abajo, para bajar el centro de
+  gravedad, y que el depósito también se pueda colocar de manera libre, también haz que el motor se pueda colocar de
+  manera libre. Y que haya un cálculo de centro de gravedad y de pesos en cada eje, que aparezca en un nuevo apartado del
+  menú que sea MASAS, y te de esta relación calculado, y así en PROYECTO lo dejas despejado como una lista de cosas
+  pendientes, y también una revisión de los puntos críticos a mejorar que no están OK».
+- **Motor de gasolina y depósito, donde quieras**: el cálculo ya los coloca donde se le diga (el motor y el depósito se
+  mueven adelante/atrás, arriba/abajo y de lado desde su sitio de serie, y todas las comprobaciones lo siguen), pero
+  los seis deslizadores que lo hacen en pantalla llegan en un segundo paso: el fichero de los deslizadores lo tenía
+  otro bot ocupado y Eugenio pidió publicar ya.
+- **Su sitio de serie, nuevo**: el motor va lo más cerca de la rueda trasera que cabe (justo delante del amortiguador
+  trasero y su torreta; con dos ruedas detrás, justo delante del diferencial) y lo más bajo que deja lo que tiene debajo
+  (el suelo, la batería o el controlador); puede subir como mucho 5 cm para no chocar. El depósito va en el suelo justo
+  delante del motor si cabe ahí (más bajo y más cerca del centro de gravedad); si no, encima de la rueda trasera, como
+  antes.
+- **Comprobaciones nuevas** del motor y del depósito (en «Masas», «Proyecto» y Motor): la rueda trasera con su recorrido, el basculante con la suspensión
+  comprimida del todo, el amortiguador y su torreta (ahora sus tubos de verdad, inclinados), los asientos con quien va
+  sentado (las tres filas también), la batería y el controlador, y el depósito al motor. Lo que choca se pinta en rojo
+  en el 3D.
+- **Pestaña nueva «Masas»** (Triciclo, clásico, rombo y Basculante), justo después de «Proyecto», con su peso debajo:
+  masa total vacío, con los ocupantes y con equipaje; el centro de gravedad en altura, adelante-atrás y de lado; el peso
+  en cada eje y en cada rueda (en kg y %), con un dibujo desde arriba y de lado; lo que más sube el centro de gravedad;
+  la lista de todas las piezas (antes en «Proyecto»); y una explicación en palabras de por qué importan la altura y el
+  reparto (vuelco, frenada, tracción). Con «Masas» abierta, el 3D marca el centro de gravedad con el símbolo blanco y
+  negro y una línea hasta el suelo, visible a través de la carrocería.
+- **Comprobaciones nuevas de masas**: frenar a 0,8 g sin que se levanten las ruedas de atrás; subir una cuesta del
+  16 % en mojado con la rueda que empuja; «Reparto» (entre qué porcentajes de peso delante se cumplen a la vez el
+  vuelco, la frenada y la cuesta, a la altura que tiene el centro de gravedad); y el centro de gravedad centrado de lado.
+- **«Proyecto» despejado**: arriba, «Pendiente» (lo que falta en este diseño: arreglar lo que está en rojo, elegir motor,
+  controlador y motor de gasolina de catálogo si no se ha hecho, pesar las piezas, el estudio aerodinámico, que un
+  ingeniero revise el bastidor y la basculación), cada cosa con un botón que abre su pestaña. Debajo, «Revisión de
+  puntos críticos»: todas las comprobaciones que no están bien (rojas y justas), agrupadas por el departamento donde se
+  arreglan, con su botón. Al final, plegadas, todas las comprobaciones. El rendimiento, el maletero y el vuelco siguen
+  en sus pestañas (Motor y Energía, Interior, Rodaje); el peso se ha ido a «Masas». No se ha quitado ningún control.
+- **Arreglado de paso**: en rombo, el peso de cada rueda para dimensionar suspensiones y frenos salía mal (todo en las
+  laterales, nada en la cola). Ahora se reparte entre las cuatro con el mismo cálculo que enseña «Masas». En tu Rombo
+  Bala eso quita 13,4 kg de suspensiones y frenos de más.
+- **Rombo Bala (la copia del 15/11, con el híbrido)**: antes 553,1 kg con los dos, centro de gravedad a 48,7 cm, vuelco
+  1,07 g; ahora 539,3 kg, 49,4 cm, 1,04 g. Peso: morro 172 kg (32 %), laterales 252 kg (47 %), cola 115 kg (21 %). En
+  esa copia el motor **no puede acercarse más a la rueda ni bajar**: detrás tiene la torreta del amortiguador y debajo
+  el paquete de batería, que llega hasta el basculante; se mueve 5 cm adelante y sube 3 cm (antes su generador y su
+  planetario se metían 3 cm en la batería sin que nada lo dijera), y sigue tocando la torreta (4 cm) y el respaldo del
+  pasajero (4 cm), en rojo. Bajar el motor 10 cm bajaría el centro de gravedad solo 0,9 cm: lo que más pesa y más alto
+  va son los ocupantes y la batería.
+- Una pestaña recordada sigue abriendo lo mismo; «masas» guardada en un vehículo sin esa pestaña (el Aeromóvil 1) abre
+  «Proyecto». No comprobado en un móvil: con la app instalada, `humanity.wiki/?sw=off` quita la copia vieja.
+- (masas) En rombo, «Rueda delantera, freno y horquilla» (unos 10,7 kg) pasa de la pestaña Carrocería a Rodaje, donde
+  debía estar: los kilos de esas dos pestañas cambian a propósito (aviso de pesossecciones).
 
 ## 2026-11-17 · Aeromóvil: pestaña «Homologación» (comprobación previa de la categoría europea)
 
@@ -12245,6 +12395,9 @@ para ponerle más potencia, más peso, etcétera.»
   de la pestaña Motor, la velocidad máxima de la misma cuenta que la pestaña Motor (con el Cd del túnel), largo, ancho,
   alto, plazas, tipo de asiento y mando, radio de giro, carga de cada neumático.
 - **Aviso visible**: es una comprobación previa orientativa, no una homologación.
+- **Unido a «Proyecto › Revisión de puntos críticos»** (del bot «masas», que se fusionó antes): lo que no cumple sale en
+  rojo y lo que se arregla limitando en ámbar, en un grupo «Homologación» con su botón. La unión la hizo este bot, que llegó
+  segundo.
 - **Lo que sale hoy** (script `npx tsx scripts/homologacion.ts`): ver el informe del bot y `memory/03_DECISIONS.md`.
 - Fuentes: Reglamento (UE) 168/2013 (anexo I, arts. 3–5, anexos VI y VIII), Reglamentos Delegados 3/2014 y 44/2014
   (consolidado de EUR-Lex), DGT/MAPFRE/RACE para los permisos. Lo citado sin releer lleva «por confirmar».

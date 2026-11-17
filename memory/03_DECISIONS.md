@@ -2048,6 +2048,83 @@ design's centre of gravity by a few millimetres (each zone at its own centroid i
 keeps one total by construction. Cost: the frame's tube formula is written twice (the parts list and the breakdown;
 the check catches a drift). A block maps to a part by the part's name (regex), not by a field on the part: cheaper now,
 and a part that no rule takes is shown as «sin desplegable» rather than lost.
+## 2026-11-17 · Engine comparison: prices in the catalogue, consumption from the model, block renamed by display only
+
+- **Prices.** `catalogoTren.ts` said «no prices (they change every week)». Eugenio now asks for an estimated cost, so
+  electric motors and petrol engines carry `precio`: one shop's listed price as published (currency, VAT status, URL,
+  date read), or `null` when no public price exists. Shown as «≈ N €» (USD at a fixed 0,86 €/$, `EUR_POR_USD`) plus
+  the raw figure in «De dónde salen los precios». Rejected: an average of several shops (no reliable second source for
+  most parts; it would look more precise than it is).
+- **Consumption per option** comes from the model's own `energiaTriciclo`, run on a shallow copy of the model with
+  `tVel = 90`, that part's power/efficiency in `phev`, and the vehicle mass changed by that part's mass only (the
+  hybrid connection's mass, which in series/parallel depends on the engine's kW, is not recomputed: a full
+  `crearModelo` + `calcular` per option would cost ~17 model builds per render). Electric Wh/km uses the maker's
+  published efficiency with an assumed 97 % controller when published, else the model's 85 %.
+- **«Híbrido enchufable» → «Motor gasolina».** Only the displayed title changes (`TITULO_BLOQUE` in
+  `LadoTriciclo.tsx`); the block key in `FILAS`, `ORDEN_BLOQUES`, `zonaTriciclo` and the remembered open blocks stays
+  `Híbrido enchufable`, so saved UI state and other bots' code keep working. Renaming the key everywhere: ≈ 30 min,
+  6 files, plus migrating `aeromovil.bloquesAbiertos`.
+- **Block mass** comes from `masasSecciones.ts` (bot «pesossecciones», merged first): `pesoSeccion(seccionesTriciclo(res,
+  modelo), 'propulsion', bloque)` and its `peso` prop on `Bloque`. A first version had its own `pesoMotores.ts` with the
+  same regexes; it was deleted at merge time so there is one rule for which part belongs to which block. The
+  comparison's «En el coche ahora» line lists that same section's parts.
+
+
+
+## 2026-11-17 · Wheel catalogue: one shared table, added as extra options of each vehicle's existing wheel selector
+
+Eugenio: «permite añadir más tipos de ruedas, por ejemplo de motos de todo tipo». Alternatives considered:
+- **A new «tyre type» selector next to the size selector** (size from one, type from the other): two controls that can
+  contradict each other (a 21″ enduro tyre on a 13″ car rim). Rejected.
+- **Replacing each vehicle's wheel table with the catalogue**: would change every saved design (masses, Crr). Rejected.
+- **Chosen:** `ruedas/catalogo.ts` holds the real wheels with sources; the Triciclo (`RUEDAS_TRICICLO`) and the
+  Basculante (`RUEDAS_BASCULANTE`) append them, by id, to the tables they already had, and to their selectors and option
+  whitelists. Old keys keep their entries untouched; `crrMezcla` returns the vehicle's old constant (`CRR` 0.011,
+  `CRR_B` 0.010) whenever no axle uses a catalogue wheel, so saved designs keep their numbers exactly.
+- 3D: catalogue wheels are drawn by `visor/ruedaCatalogo.ts` (lathe with the motorcycle's round crown, spokes merged into
+  one mesh, cast split spokes, disc, hub-motor drum). On the Triciclo it re-dresses the wheel groups the body builder
+  already placed (`rueda-direccion`, `rueda-trasera`, `rueda-morro`), keeping their names and `userData`, so steering and
+  leaning work unchanged; old sizes keep the Bala's aero-cover wheel.
+- Not done: the Aeromóvil 1 and the Gota keep their own tyre lists (car tyres and bicycle sizes): a moto tyre on the A1's
+  McPherson car is not a design anyone asked for. Adding them is the same three steps (≈1 h).
+- Mismatch found, not changed: the Triciclo's old moped wheels roll at 0.011, while Cossalter's formula gives ≈ 0.016 for a
+  moped tyre at 2.25 bar. Changing it would change every saved design; it is Eugenio's call.
+## 2026-11-17 · ELA Eclipse REVO autogyro in the garage: which model, which numbers, and how an aircraft fits
+
+- Request (Eugenio, with a photo of a copper enclosed tandem gyro): «haz un modelo 3D del autogiro de ELA Aviación, el
+  ultimo modelo». Reading taken: a garage reference vehicle, like the Vision Jet.
+- **Which model.** Candidates: ELA 10 Eclipse (2014), Eclipse EVO (Rotax 915 iS), Eclipse REVO (Rotax 916 iS, AERO 2024,
+  in production, 2026 units listed). Chose the REVO: newest, same airframe as the photo. Sources: revo.elaaviacion.com,
+  elaaviacion.com (April 2024 article), evtol.news «AERO Friedrichshafen 2024», aircraft.com 2026 REVO listing.
+- **Numbers.** Published: rotor 8.53 m, propeller 1.72 m (DULV EVO type sheet 988-22). ELA's own spec sheet is a JPG
+  (elaaviacion.com/wp-content/uploads/2023/03/Eclipse-EVO-Technical-specifications-scaled.jpg) and the DULV PDF
+  (dulv.de/kennblatt/Tragschrauber/988-221.pdf); neither could be fetched from this session (proxy refused the hosts).
+  So length, width, height, wheelbase, track and cabin width are estimated from the photo with the rotor/propeller
+  as scale, and say so in `fuente`. If someone reads that JPG, replace the constants in `garaje/autogiroForma.ts`
+  (≈ 10 min).
+- **Aircraft vs the road tools.** Same pattern as the Vision Jet: no `envolvente`, no `aero`. The tunnel
+  (`cuerpoGaraje` returns null), consumption cards, the stability circuit and `tunel-pruebas` all key on those fields
+  and skip it; the aerodynamic study only runs on our design. Alternative rejected: a silhouette for the tunnel — its
+  calibration is for road car bodies; a gyro's drag is dominated by the rotor, which the tunnel cannot model.
+- **Rotor parked fore and aft, level.** Its blades overhang the row neighbours at 2.7 m height; row spacing still uses
+  `largo` (fuselage, 5.10 m), so the garage stays compact. Alternative: spacing by rotor (8.5 m) — wastes a row slot.
+## 2026-11-17 · Masses: one sum, one load split, offsets for the hybrid's parts (masas)
+- **One centre-of-gravity sum** (`masasVehiculo.ts` `centroDe`) used by `cargasRueda`, the new mass checks and the
+  «Masas» tab. `calcularTriciclo` keeps its own identical `momento` until its file is free (tech debt); the two give the
+  same number (checked on Rombo Bala: 539.3 kg, x −1.614 m, h 0.494 m both ways).
+- **Wheel loads as a rigid plane on equal springs** (`repartirCargas`): exact for three wheels, the lever rule for two
+  axles, and the only defined answer for the diamond (four supports at three x positions, statically indeterminate).
+  The old lever rule gave the diamond's laterals the whole weight and the tail wheel none, so the rear swing arm and
+  brake were sized for 0 kg and the laterals for 2×. Alternative: per-wheel spring rates from the sliders (would need
+  a stiffness per corner that the model does not have): ≈ 2 h once those exist.
+- **Engine and tank positions as offsets from a searched default** (`tMotX/Y/Z`, `tDepX/Y/Z`, 0 = default), not absolute
+  coordinates: a saved design that never had them opens at 0 = the new default, and the part keeps following the car
+  when the seats or the swing arm move. Absolute positions would have needed a «sin fijar» sentinel in every saved design.
+- **Default search** (`disponerHibrido`): rearmost and lowest (1.5 cm of height costs as much as 1 cm of length), at
+  most 5 cm above what it stands on; if nothing in that band is clear, the least overlapping place, shown red. Lifting
+  the engine as far as needed to be clean put it 13 cm higher on the default Triciclo, the opposite of the request.
+- **«Masas» is a tab id, not a `Departamento`**: it has no tasks, suppliers or messages, so it is not in
+  `DEPARTAMENTOS` (the Aeromóvil 1's eleven tabs do not change).
 
 ## 2026-11-17 · Homologation pre-check: rules as data, category chosen by the model
 

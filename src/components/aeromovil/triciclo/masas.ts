@@ -8,10 +8,14 @@ import { type CamposTriciclo, RUEDAS_TRICICLO, type ClaveNumTriciclo, type DepTr
 import { limitarTriciclo } from './medidas';
 import { cgOcupante } from './ocupantes';
 import type { ModeloTriciclo } from './modelo';
+import { centroDe, repartirCargas } from '../masasVehiculo';
+import { ruedasTriciclo } from './centroMasas';
 
 // ------------------------------------------------------------------ cálculo
 export interface PiezaMasa {
   nombre: string; kg: number; x: number; y: number;
+  /** 2026-11-17 (masas): across the car (m, + to the right); absent, on the centre line. */
+  z?: number;
   /** Round 3 interior (2026-11-12): what it is made of or why it weighs that, for the «Proyecto» list (absent: nothing to add). */
   nota?: string;
 }
@@ -94,9 +98,11 @@ export function piezasTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cris
   // includes its exhaust, now drawn)
   if (m.phev) {
     const p = m.phev, c = p.disp.centros;
-    o.push({ nombre: 'Motor de gasolina (híbrido)', kg: p.kgMotor, x: c.motor[0], y: c.motor[1], nota: `${p.disp.motor.n} cilindro${p.disp.motor.n > 1 ? 's' : ''}, unos ${Math.round(p.disp.motor.cc / 10) * 10} cm³, con su escape` });
-    for (const t of p.transmision) o.push({ nombre: t.nombre, kg: t.kg, x: c.transmision[0], y: c.transmision[1] });
-    o.push({ nombre: 'Depósito de gasolina, lleno', kg: p.kgDeposito, x: c.deposito[0], y: c.deposito[1] });
+    // (2026-11-17: and across the car, for the centre of gravity's side: `centrosZ`)
+    const cz = p.disp.centrosZ;
+    o.push({ nombre: 'Motor de gasolina (híbrido)', kg: p.kgMotor, x: c.motor[0], y: c.motor[1], z: cz.motor, nota: `${p.disp.motor.n} cilindro${p.disp.motor.n > 1 ? 's' : ''}, unos ${Math.round(p.disp.motor.cc / 10) * 10} cm³, con su escape` });
+    for (const t of p.transmision) o.push({ nombre: t.nombre, kg: t.kg, x: c.transmision[0], y: c.transmision[1], z: cz.transmision });
+    o.push({ nombre: 'Depósito de gasolina, lleno', kg: p.kgDeposito, x: c.deposito[0], y: c.deposito[1], z: cz.deposito });
   }
   // a diamond (2026-11-15): the nose wheel (the rear one's size), its brake and its fork (an estimate)
   if (m.rombo) o.push({ nombre: 'Rueda delantera, freno y horquilla', kg: limitarTriciclo('tMRueda', m.campos) * RUEDAS_TRICICLO[m.campos.tRuedaTras].kg + limitarTriciclo('tMFreno', m.campos) + 5, x: 0, y: m.rR });
@@ -226,12 +232,17 @@ export function equipajeEn(m: ModeloTriciclo): { x: number; y: number } {
   return { x: Math.max(m.xR + 0.10, ult - 0.55), y: m.yPiso + 0.15 };
 }
 /** The static load on each front and each rear wheel (kg) at the design mass: these parts, everyone on board and the luggage. */
+// (2026-11-17, masas: one way to share the weight over the wheels, `masasVehiculo.ts` `repartirCargas`, the same the
+// «Masas» tab shows. Until then this was the lever rule between `xF` and `xR`, which in a diamond put the whole weight
+// on the laterals and none on the tail wheel (its swing arm and brake were sized for no load). Two axles: the same as before)
 export function cargasRueda(m: ModeloTriciclo, piezas: PiezaMasa[]): { del: number; tras: number; masa: number } {
   const mOcc = limitarTriciclo('tMOcc', m.campos), eq = equipajeEn(m);
-  const todo = [...piezas.map(p => [p.kg, p.x] as const), ...m.plazas.map(q => [mOcc, cgOcupante(q.pts)[0]] as const), [EQUIPAJE, eq.x] as const];
-  const M = todo.reduce((a, [k]) => a + k, 0), X = todo.reduce((a, [k, x]) => a + k * x, 0) / M;
-  const b = Math.min(1, Math.max(0, (X - m.xR) / m.batalla));
-  return { del: M * b / 2, tras: M * (1 - b) / (m.cuatro ? 2 : 1), masa: M };
+  const todo = [...piezas.map(p => ({ nombre: p.nombre, kg: p.kg, x: p.x, y: p.y, z: p.z ?? 0 })), ...m.plazas.map(q => ({ nombre: q.nombre, kg: mOcc, x: cgOcupante(q.pts)[0], y: 0, z: q.z })), { nombre: 'Equipaje', kg: EQUIPAJE, x: eq.x, y: eq.y, z: 0 }];
+  const cg = centroDe(todo), ruedas = ruedasTriciclo(m), cargas = repartirCargas(ruedas, cg.masa, cg.x, cg.z).map(k => Math.max(0, k));
+  // the most loaded front wheel (in a diamond, lateral) and rear wheel: the suspension, the brakes and the tyres are sized for them
+  const del = Math.max(...ruedas.map((r, i) => (r.eje === 'Eje delantero' || r.eje === 'Laterales' ? cargas[i] : 0)));
+  const tras = Math.max(...ruedas.map((r, i) => (r.eje === 'Eje trasero' || r.eje === 'Cola' ? cargas[i] : 0)));
+  return { del, tras, masa: cg.masa };
 }
 export const kg1 = (v: number) => v.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 /** The running gear for the load (a fixed point: its own mass is part of the load; four passes settle it to the gram). */
@@ -272,7 +283,8 @@ export function reductoraPieza(T: CamposTriciclo, m: ModeloTriciclo) {
 
 export function grupoPieza(nombre: string): DepTriciclo {
   if (nombre === 'Bastidor') return 'chasis';
-  if (/^(Suspensión|Basculante|Basculación|Ruedas|Frenos|Dirección)/.test(nombre)) return 'rodaje';
+  // (2026-11-17: and the diamond's nose wheel with its brake and fork, which fell to the body before)
+  if (/^(Suspensión|Basculante|Basculación|Ruedas|Frenos|Dirección|Rueda delantera)/.test(nombre)) return 'rodaje';
   if (/^(Motor|Controlador|Depósito)/.test(nombre)) return 'propulsion';
   if (/^(Batería|Varios)/.test(nombre)) return 'energia';
   if (/^(Asientos|Volante|Salpicadero|Interior|Tapicería|Cinturones)/.test(nombre)) return 'interior';

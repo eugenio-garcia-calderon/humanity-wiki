@@ -95,3 +95,16 @@ export function fallosHomologacion(ficha: FichaHomologacion): { cat: IdCategoria
   const { cat } = elegirCategoria(ficha), ev = evaluarCategoria(ficha, cat);
   return { cat, fallos: ev.resultados.filter(r => r.estado === 'no' || r.estado === 'condicion') };
 }
+
+/**
+ * The same fails as checks for «Proyecto › Revisión de puntos críticos» (bot «masas», PanelProyecto.tsx): red for
+ * «No cumple», amber for «se arregla limitando»; `dep: 'homologacion'` groups them under the «Homologación» tab.
+ */
+export function comprobacionesHomologacion(ficha: FichaHomologacion): { nombre: string; holgura: number; minimo: number; mostrar: string; dep: string }[] {
+  const { cat, fallos } = fallosHomologacion(ficha);
+  const n = (v: number, d: number) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
+  return fallos.map(r => ({
+    nombre: `${cat}: ${r.req.titulo}`, holgura: r.estado === 'no' ? -1 : 0, minimo: 1, dep: 'homologacion',
+    mostrar: r.margen != null && r.margen < 0 ? `se pasa ${n(-r.margen, r.unidad === 'kg' || r.unidad === 'km/h' ? 0 : r.unidad === 'kW' ? 1 : 2)} ${r.unidad}` : r.estado === 'condicion' ? 'limitar' : 'no cumple',
+  }));
+}
