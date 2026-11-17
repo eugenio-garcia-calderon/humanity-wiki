@@ -1,5 +1,6 @@
 // Triciclo checks: calcularTriciclo (every check and the results), seats, rollover.
 // Moved out of geometriaTriciclo.ts unchanged (2026-11-16, refactor «ordenar»); that file re-exports everything. See ../CLAUDE.md.
+import { ANGULO_MAX } from '../garaje/kamm';
 import { factorMasaAsiento, numFila } from '../filasTriciclo';
 import type { Tilt } from '../basculacion';
 import { RPM_MAX_MOTOR, cifrasHibrido } from '../hibrido';
@@ -325,6 +326,9 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     c('rodaje,carroceria', 'Neumático trasero dentro de su carenado', neumaticoCarenado(m.traseras), 0.015);
     c('rodaje,carroceria', 'Carenado trasero a la carrocería', carenadoCuerpo(m.traseras), HUECO_CARENADO - 0.002);
   }
+  // 2026-11-17, the Kamm tail: the cut only works if the air reaches its edge still attached, so the tail may close at most
+  // ANGULO_MAX (15°) just ahead of it, on top, at the sides and underneath (garaje/kamm.ts, garaje/balaForma.ts `kamm`)
+  if (F.kamm) { const k = F.kamm, a = Math.max(k.angTecho, k.angLado, k.angBajos); c('carroceria', 'Cola cortada: el aire llega pegado al corte', ANGULO_MAX - a, 0, `se cierra ${Math.round(a)}° antes del corte (máx. ${ANGULO_MAX}°)`); }
   if (m.bascula) {
     // leaning (2026-11-15): at the maximum, the pod on the inside rises along the body and the outside one drops, both a little
     // nearer; neither may touch it. And the body, turned about the road, keeps off it.
