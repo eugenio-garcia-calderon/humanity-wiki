@@ -32,12 +32,6 @@
     },
     {
       "agente": "neumaticos",
-      "ruta": "src/components/aeromovil/basculante/defecto.ts",
-      "motivo": "neumaticos: tipo de neumático por eje",
-      "desde": "2026-11-17T13:38:18.928Z"
-    },
-    {
-      "agente": "neumaticos",
       "ruta": "src/components/aeromovil/triciclo/energia.ts",
       "motivo": "neumaticos: tipo de neumático por eje",
       "desde": "2026-11-17T13:38:28.079Z"
