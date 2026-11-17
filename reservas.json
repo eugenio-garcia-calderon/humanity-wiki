@@ -149,6 +149,12 @@
       "ruta": "src/components/aeromovil/geometria.ts",
       "motivo": "masas: comprobaciones de masas tras calcularTriciclo",
       "desde": "2026-11-17T11:51:07.401Z"
+    },
+    {
+      "agente": "homologacion",
+      "ruta": "src/components/aeromovil/CLAUDE.md",
+      "motivo": "homologacion: sección homologacion/",
+      "desde": "2026-11-17T12:06:33.129Z"
     }
   ]
 }
