@@ -808,3 +808,9 @@ The «ordenar» refactor (PRs #1081, #1082, #1084) only moved code. Still open, 
   would make them computed, but it touches the method and therefore the calibration: a decision for Eugenio, ≈ 1 day.
 - The A1 and Gota slider labels and ranges come from `tunel/explicaciones.ts` (`A1`, `GOTA`, now exported), still a
   copy of what their panels draw (third reader of that copy). Moving both panels to a table like `FILAS`: ≈ 2 h.
+- (2026-11-17, motores) `pesoMotores.ts` picks the engine blocks' parts by regex on the part's Spanish name
+  (`Motor de buje`, `Controlador`, `Motor de gasolina`, `Depósito de gasolina`…). Renaming a part in
+  `triciclo/masas.ts` or `modelo.ts` silently drops it from the header. A `bloque` field on `PiezaMasa`: ≈ 1 h today.
+- (2026-11-17, motores) The engine comparison's L/100 km per option changes the mass by the engine only, not by the
+  connection whose mass follows the engine's kW in series/parallel (a few kg; < 1 % of the figure). Running the full
+  model per option: ≈ 2 h plus a cache, and ~17 model builds per render.

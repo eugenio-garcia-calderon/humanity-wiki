@@ -2013,3 +2013,22 @@ design's weak points with recommendations.
   (https://saemobilus.sae.org/papers/streamlined-tails-effects-truncation-aerodynamic-drag-2020-01-0673);
   https://en.wikipedia.org/wiki/Kammback (cut at 50 % of the largest section);
   https://en.wikipedia.org/wiki/Automotive_aerodynamics (mirrors 2–7 % of drag; Honda e cameras −3.8 %).
+
+## 2026-11-17 · Engine comparison: prices in the catalogue, consumption from the model, block renamed by display only
+
+- **Prices.** `catalogoTren.ts` said «no prices (they change every week)». Eugenio now asks for an estimated cost, so
+  electric motors and petrol engines carry `precio`: one shop's listed price as published (currency, VAT status, URL,
+  date read), or `null` when no public price exists. Shown as «≈ N €» (USD at a fixed 0,86 €/$, `EUR_POR_USD`) plus
+  the raw figure in «De dónde salen los precios». Rejected: an average of several shops (no reliable second source for
+  most parts; it would look more precise than it is).
+- **Consumption per option** comes from the model's own `energiaTriciclo`, run on a shallow copy of the model with
+  `tVel = 90`, that part's power/efficiency in `phev`, and the vehicle mass changed by that part's mass only (the
+  hybrid connection's mass, which in series/parallel depends on the engine's kW, is not recomputed: a full
+  `crearModelo` + `calcular` per option would cost ~17 model builds per render). Electric Wh/km uses the maker's
+  published efficiency with an assumed 97 % controller when published, else the model's 85 %.
+- **«Híbrido enchufable» → «Motor gasolina».** Only the displayed title changes (`TITULO_BLOQUE` in
+  `LadoTriciclo.tsx`); the block key in `FILAS`, `ORDEN_BLOQUES`, `zonaTriciclo` and the remembered open blocks stays
+  `Híbrido enchufable`, so saved UI state and other bots' code keep working. Renaming the key everywhere: ≈ 30 min,
+  6 files, plus migrating `aeromovil.bloquesAbiertos`.
+- **Block mass** (`pesoMotores.ts`) sums `res.triciclo.piezas` by part name, the same list as «Proyecto › Peso» and
+  the top bar (`PesosDepartamento.ts`), so the MASAS tab and the header cannot disagree.
