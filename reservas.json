@@ -98,12 +98,6 @@
     },
     {
       "agente": "pesossecciones",
-      "ruta": "src/components/aeromovil/geometriaBala.ts",
-      "motivo": "pesossecciones: peso de cada desplegable",
-      "desde": "2026-11-17T10:51:49.412Z"
-    },
-    {
-      "agente": "pesossecciones",
       "ruta": "src/components/aeromovil/controles.tsx",
       "motivo": "pesossecciones: peso de cada desplegable",
       "desde": "2026-11-17T10:51:52.294Z"
