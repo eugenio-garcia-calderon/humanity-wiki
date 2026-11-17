@@ -56,12 +56,6 @@
     },
     {
       "agente": "ruedas",
-      "ruta": "src/components/aeromovil/explicaciones/triciclo.ts",
-      "motivo": "ruedas: catálogo de ruedas de moto",
-      "desde": "2026-11-17T11:12:49.866Z"
-    },
-    {
-      "agente": "ruedas",
       "ruta": "src/components/aeromovil/estudio/reglas.ts",
       "motivo": "ruedas: catálogo de ruedas de moto",
       "desde": "2026-11-17T11:12:52.700Z"
