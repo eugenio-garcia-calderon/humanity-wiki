@@ -2229,6 +2229,19 @@ Eugenio asked for a dated, authored note on every side-panel section, «anónimo
   every saved design with a changed `tMOcc` keeps its mass; the medium build at 1.756 m is exactly `tMOcc`.
 - **The hip stays on the cushion and the feet on the pedals/footpegs**: a taller rider's knees rise (`rodilla()`), as
   in a real car with the seat not moved. Red = the check's clearance < 0, amber = below its minimum.
+## 2026-11-17 · Central traction motor (MG2) on the power split's ring
+
+- **Coaxial, outboard of the planetary** (engine | MG1 | planetary | MG2), as in the THS of the Prius II, rather than on
+  a parallel counter-shaft (Prius IV). Coaxial is what Eugenio described («junto al motor de gasolina … conectado al
+  planetario») and reuses the existing drop case and chain. The cost is width (≈ 55 cm for the row), so with two rear
+  wheels the row is centred by default (`dz0` in `disponerHibrido`). A counter-shaft MG2 behind the planetary would be
+  ≈ 15 cm narrower: ≈ 2 h if the single-rear-wheel car needs it.
+- **Opt-in field `tMotorElec` (default 'buje')**, not «central by default for the power split»: designs 7 (Aermovil M)
+  and 14 (Rombo Bala) are power-split hybrids too and would have changed silently. Eugenio selects it and saves design 16.
+  No migration edits the saved design.
+- **Drivetrain loss**: `REND_SALIDA = 0.97` on the electric drive (energia.ts) and on the hybrid's electrical share
+  (`rendimientoHibrido`). The model's 85 % motor+controller is kept; a high-rpm central motor is often more efficient
+  than a direct-drive hub, which the model does not credit (the comparator does when the maker publishes η).
 ## 2026-11-17 · Prices: one model on top of the mass sections, hidden editor (precios/)
 
 - **Prices hang off `masasSecciones.ts`**, not a parallel component list: each part the sections hold gets a price by

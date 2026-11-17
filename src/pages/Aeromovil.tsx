@@ -31,7 +31,7 @@
 // slider/selector/block controls in controles.tsx. This page keeps the layout, the state and the 3D toolbar.
 import { Fragment, Suspense, lazy, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Armchair, BatteryCharging, Box, Fuel, Car, Route as RutaIcono, Warehouse, Camera, ChevronDown, CircleDot, ClipboardList, Factory, Weight, Hammer, Frame, Layers3, Lightbulb, ShieldCheck, Zap, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Maximize2, Minimize2, Ruler, RotateCcw, Package, Ship, Wrench, Wind } from 'lucide-react';
+import { Armchair, BatteryCharging, Box, Fuel, Car, Route as RutaIcono, Warehouse, Camera, ChevronDown, CircleDot, ClipboardList, Factory, Weight, Hammer, Frame, Layers3, Lightbulb, ShieldCheck, Zap, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Maximize2, Minimize2, Ruler, Package, Ship, Wrench, Wind } from 'lucide-react';
 import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import { Visor3D, CAPAS, type CapaId, type Vista, type VisorHandle } from '../components/aeromovil/Visor3D';
@@ -65,7 +65,7 @@ import { rotuloFilas } from '../components/aeromovil/filasTriciclo';
 import { MenuDisenos, aDiseno, cargarDisenoPorDefecto, deDiseno, useAutoguardado, type Diseno } from '../components/aeromovil/Disenos';
 import { TablaComparacion, fichaPropia } from '../components/aeromovil/Otros';
 import { fichaComparable, type Referencia } from '../components/aeromovil/referencias';
-import { FormularioMejora, VistaExportar, VistaPlan, VistaPlanos, VistaTareas, cargarDueno, cargarTareas, type Dueno, type Tarea } from '../components/aeromovil/Paneles';
+import { VistaExportar, VistaPlan, VistaPlanos, VistaTareas, cargarDueno, cargarTareas, type Dueno, type Tarea } from '../components/aeromovil/Paneles';
 import { VistaComponentes } from '../components/aeromovil/Componentes';
 import { VEHICULOS_GARAJE } from '../components/aeromovil/garaje';
 import { alternarReferencia, quitarReferencia, recuperarReferencia } from '../components/aeromovil/garaje/quitados';
@@ -1050,14 +1050,6 @@ export default function Aeromovil() {
           </>)}
           </fieldset>
           {porDeps && depTri === 'proyecto' && garajeBloque}
-          <Bloque titulo="¿Algo que mejorar?">
-            <FormularioMejora alEnviar={() => { recargar(); }} />
-            <p className="text-xs text-slate-500">Se añade a <a className="text-teal-700 underline" href="/aeromovil/tareas" onClick={e => { e.preventDefault(); navegar('/aeromovil/tareas'); }}>Tareas</a> como pendiente.</p>
-          </Bloque>
-
-          <Button variant="ghost" onClick={() => { setP(PARAMETROS_POR_DEFECTO); setActual(null); }} className="self-start text-xs normal-case tracking-normal">
-            <RotateCcw className="mr-1.5 h-3.5 w-3.5" />Empezar un diseño nuevo (medidas por defecto)
-          </Button>
         </aside>
       </main>
 
