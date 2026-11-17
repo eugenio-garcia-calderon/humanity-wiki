@@ -2126,6 +2126,23 @@ Eugenio: «permite añadir más tipos de ruedas, por ejemplo de motos de todo ti
 - **«Masas» is a tab id, not a `Departamento`**: it has no tasks, suppliers or messages, so it is not in
   `DEPARTAMENTOS` (the Aeromóvil 1's eleven tabs do not change).
 
+## 2026-11-17 · Homologation pre-check: rules as data, category chosen by the model
+
+- **Rules as data** in `src/components/aeromovil/homologacion/normas.ts` (categories, sources, requirements with a
+  per-category limit table), evaluated by `evaluar.ts` on `ficha.ts` (the design's numbers). Alternative: hard-coded
+  checks in each vehicle's `comprobaciones.ts` — rejected: five vehicles would each repeat ten categories.
+- **Category choice**: the first category in climbing order (art. 4.4 of 168/2013: L2e→L5e, L6e→L7e; inside L7e our
+  own order CP, A2, A1; then M1) whose deciding criteria pass (wheels after the 460 mm twinned-wheel rule, mass in
+  running order, seats, size, straddle/handlebar, closed cabin) and whose speed cap is not below the design's own
+  «Velocidad de cálculo». Power and top speed over a limit do NOT rule a category out: they show as «se arregla
+  limitando» (3/2014 annex XVIII allows limitation by design). Alternative: rule out on power too — rejected, it would
+  send the Rombo Bala to M1 over 0.5 kW.
+- **Mass in running order** = the «Peso» total minus the traction battery (168/2013 art. 5.2.c) minus 10 % of the fuel
+  (tank at 90 %). **Power** = nominal (continuous) kW of the Motor tab, plus the petrol engine's kW for a PHEV (the
+  prudent reading; to confirm with a technical service). **Top speed** = the Motor tab's own power-limited figure with
+  the tunnel's Cd; gearing/rpm limits are not modelled.
+- **Polycarbonate canopy outside L1e–L5e flagged «No cumple»** (3/2014 annex VII part 1 point 2.1.2 allows rigid
+  plastic windscreens only on L1e–L5e). Read from legislation.gov.uk's copy; to confirm with a technical service.
 ## 2026-11-17 · Prices: one model on top of the mass sections, hidden editor (precios/)
 
 - **Prices hang off `masasSecciones.ts`**, not a parallel component list: each part the sections hold gets a price by

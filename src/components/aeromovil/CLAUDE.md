@@ -134,3 +134,34 @@ The engine blocks (dep `propulsion`) are computed but not shown yet (`sinPeso` i
   conditions: ≈ 1 day now, more once there are 50 rules. Until someone other than an agent writes rules, keep code.
 - **Never touch the tunnel calibration** (`tunel/calibracion.ts`). `npx tsx scripts/tunel-pruebas.ts | grep -c FALLA`
   must stay at 0.
+
+## `homologacion/` — the homologation pre-check («Homologación» tab, 2026-11-17)
+
+The design against the EU type-approval rules for L-category vehicles (Reglamento 168/2013 and its delegated acts
+3/2014, 44/2014, 134/2014) and M1 above them. An orientative pre-check, never a legal approval: the panel says so.
+
+| File | What |
+|---|---|
+| `normas.ts` | THE RULES AS DATA: `FUENTES` (every legal text with its URL and whether it was read), `CATEGORIAS` (EPAC, L3e, L2e, L5e-A, L6e-A, L6e-BP, L7e-CP, L7e-A2, L7e-A1, M1, cheapest first) and `REQUISITOS` |
+| `ficha.ts` | `fichaHomologacion(P, modelo, res, cd)`: the design's own numbers (mass in running order = «Peso» minus the traction battery, continuous power = the Motor tab's nominal kW, top speed = the Motor tab's energy calc with the tunnel's Cd, size, seats, wheels, turning radius, wheel loads) for each of the five vehicles |
+| `evaluar.ts` | `evaluarCategoria` (one result per requirement: cumple / no / condicion = fixable with a limiter / comprobar), `elegirCategoria` (the category it falls in), `fraseMargen`, `fallosHomologacion` |
+| `PanelHomologacion.tsx` | the panel under the 3D view and `ResumenHomologacion`, the side card |
+
+**A new requirement**: one object in `REQUISITOS` with `id`, `grupo`, `titulo`, `detalle` (the rule in full, plain
+Spanish), `ref` (article/annex/point), `fuente` (a key of `FUENTES`), `categorias`, and one of:
+- `medida: { magnitud, limite: { 'L7e-CP': 450, … }, sentido: 'max' | 'min' | 'igual', limitable?, decide? }` — a
+  number of the ficha against a limit per category; a listed category with no entry in `limite` reads «sin límite».
+  `limitable` (a sentence: how a limiter fixes it) turns a failure into «se arregla limitando»; `decide` makes a failure
+  rule the category out of the automatic choice;
+- `comprobar(f, cat)` → `{ estado, texto }` or null (the model cannot tell);
+- `queHaceFalta`: what would be needed to check it (shown when it is «no se puede comprobar»).
+A new number the model knows goes in `FichaHomologacion`/`VistaFicha` (and in `Magnitud` + `UNIDAD` if a `medida` reads it).
+
+**A new category**: one entry in `CATEGORIAS` (in climbing order), then add its id to the `categorias` and `limite`
+of every requirement that applies. `npx tsx scripts/homologacion.ts [diseño.json]` checks the catalogue (unique ids,
+known sources, no limit for an unlisted category, every category with requirements), prints each design's category,
+what fails and the margins, and must end «Todo OK».
+
+**Before you change this, decide**: the figures were read on 2026-11-17 mostly from legislation.gov.uk (the EU text
+as of 31-1-2020) and the consolidated 44/2014 on EUR-Lex; `FUENTES[x].leido: false` marks what was cited without
+rereading. Re-check against EUR-Lex consolidated texts before trusting a margin of a few kg or kW.

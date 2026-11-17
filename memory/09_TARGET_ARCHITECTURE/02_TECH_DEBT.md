@@ -891,6 +891,16 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **The new mass checks are appended in `geometria.ts` `calcular`** (`conMasasTriciclo`), not inside `calcularTriciclo`,
   for the same reason: moving them in is ≈ 10 min.
 
+## 2026-11-17 · Homologation pre-check: what the first version leaves out (Eugenio: «publish a first version asap»)
+
+- **Not read on EUR-Lex itself**: 168/2013 and 3/2014 were read on legislation.gov.uk (EU text as of 31-1-2020); 134/2014,
+  2018/858, 2019/2144 and RD 750/2010 are cited, not reread (`FUENTES[x].leido: false`). Re-check every limit against
+  the consolidated EUR-Lex texts, especially Euro 5/5+ and OBD dates (2019/129) and the Euro 5 noise column: ~3 h.
+- **Rombo layout**: front-axle share and per-tyre load are «no se puede comprobar» (the model does not share the load
+  among four diamond supports): ~2 h with a 4-support static solve.
+- **Tyre speed symbol, headlamp heights (500–1200 mm), plate space, R-point ≥ 400 mm**: the model knows some of these
+  (lamp positions, seat hip) but they are not wired: ~3 h.
+- **The Cuadriciclo Bala has no masses/motor** (body only): mass, power and speed rows read «no se puede comprobar».
 ## 2026-11-17 · Prices (precios/), first version
 
 - **Estimates are code, not data** (`estimar` in `precios/precios.ts`, ~45 rules by part name). A table Eugenio could
