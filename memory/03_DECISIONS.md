@@ -2143,3 +2143,27 @@ Eugenio: «permite añadir más tipos de ruedas, por ejemplo de motos de todo ti
   the tunnel's Cd; gearing/rpm limits are not modelled.
 - **Polycarbonate canopy outside L1e–L5e flagged «No cumple»** (3/2014 annex VII part 1 point 2.1.2 allows rigid
   plastic windscreens only on L1e–L5e). Read from legislation.gov.uk's copy; to confirm with a technical service.
+
+## 2026-11-17 · Astride passenger: wide range plus collision checks instead of a 62 cm clamp
+
+`tPasX` was clamped to `tPilX + 0.40…0.62` (`rangoTriciclo`, `triciclo/medidas.ts`). Eugenio asked for more. Options:
+(a) raise the clamp to a fixed new number; (b) a clamp computed from what is behind (shock tower, canopy); (c) a wide
+range (`SEPARACION_PASAJERO_MAX` = 1.40 m) with checks that say what is hit. Chosen (c): the project already moved this way
+for the battery width and the canopy height («no lo limites»), and a computed clamp hides *why* the slider stops. The
+checks live in a new file `triciclo/pasajero.ts` (`chequeosPasajeroAtras`), called once from `calcularTriciclo`. The body
+does not grow with the passenger: growing the canopy/wheelbase automatically would change saved designs' bodies and the
+tunnel's Cd silently. The near end (40 cm, pilot's backrest vs passenger's belly) is unchanged.
+## 2026-11-17 · «Consumos» tab and the electrical system (bot consumos)
+
+- **«Consumos» is a page-level tab id (`IdPestana` in `pages/Aeromovil.tsx`), not an `IdDepartamento`**: it has no
+  department content (tasks, suppliers), like «Masas», and `departamentos/tipos.ts` was claimed. «Energía» keeps the id
+  `energia` and is only renamed «Batería», so every remembered tab and every `dep: 'energia'` check still works.
+- **The electrical parts split the «Varios» slider instead of adding mass.** Alternative: add them to the parts list
+  (changes every saved design's mass, CG, range — `triciclo-disenos` would fail). Chosen: no result changes; a check says
+  when the catalogue parts outweigh «Varios» (Rombo Bala: 16.5 kg vs 12 kg) and the split is scaled with a warning.
+- **System voltage**: the chosen catalogue controller's, else 48/72/96 V by peak power (≤12 kW / ≤25 kW / above).
+  Chemistry from pack density (≥170 Wh/kg → NMC). Both labelled as assumptions on screen.
+- **Solar**: one string per zone (they face different ways); a zone too small for any MPPT alone joins the roof's string
+  in series. At 96 V only the Elmar boost MPPT (solar-car class, no public price) fits; the Victron/Genasun ones stop at 48 V.
+- **Efficiencies**: the battery-side consumption is untouched; new derived figures only (plug consumption = battery /
+  charger efficiency; MPPT share of the existing 85 % solar losses; DC-DC output of the 80 W auxiliaries).

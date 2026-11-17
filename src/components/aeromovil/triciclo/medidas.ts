@@ -59,6 +59,13 @@ export const ALTO_FILAS = 1.56;
 export const RESPALDO_FILA3 = 0.22;
 /** The canopy ends at least this far behind row 3's hips (m), so that its falling line still clears that head. */
 export const CUPULA_TRAS_FILA3 = 0.62;
+/**
+ * The astride passenger's hips behind the pilot's (m, 2026-11-17). The near end is the pilot's backrest against the
+ * passenger's belly (the check «Respaldo del piloto al vientre del pasajero»). The far end was 62 cm until Eugenio asked
+ * for more room: 1.40 m now, about a whole Gota cabin, so the slider is not what stops him; what stops the passenger is
+ * told by the checks (the canopy over the head, the swing arm, the shock tower, the rear wheel, the boot, the body).
+ */
+export const SEPARACION_PASAJERO_MIN = 0.40, SEPARACION_PASAJERO_MAX = 1.40;
 /** Row 3's hips behind where the Cuadriciclo en rombo's front wheel is (m, positive backwards). */
 export const distanciaFila3 = (T: CamposTriciclo) => limitarTriciclo('tPilX', T) + limitarTriciclo('tFila2X', T) + limitarTriciclo('tFila3X', T);
 
@@ -269,7 +276,7 @@ export function camposTriciclo(P: Partial<Parametros>): CamposTriciclo {
 /**
  * El rango de un deslizador para estos parámetros. Cuatro dependen de otro: la
  * cúpula acaba al menos 10 cm por delante del eje trasero (25 hasta la ronda 3) y el pasajero va entre
- * 40 y 62 cm detrás del piloto (los dos, como en el Cuadriciclo en rombo); la potencia
+ * 40 cm y 1,40 m detrás del piloto (62 cm hasta el 2026-11-17) (los dos, como en el Cuadriciclo en rombo); la potencia
  * máxima no baja de la nominal; y el carenado pequeño no puede ser además
  * estrecho ni corto (el neumático dejaría de caber).
  */
@@ -304,7 +311,10 @@ export function rangoTriciclo(k: ClaveNumTriciclo, T: CamposTriciclo): [number, 
   }
   // (round 3: up to 10 cm ahead of the rear axle, where it was 25; the canopy's end must stay ahead of the axle, the anchors of the shape's stretch)
   if (k === 'tCupFin') return [Math.min(f.min, T.tBatalla - 0.45), Math.min(f.max, T.tBatalla - 0.10)];
-  if (k === 'tPasX') return [Math.max(f.min, T.tPilX + 0.40), Math.min(f.max, T.tPilX + 0.62)];
+  // 2026-11-17 (Eugenio: «que el asiento del copiloto, el que va detrás, se pueda separar más del asiento frontal»): the
+  // gap was 40–62 cm. Now up to SEPARACION_PASAJERO_MAX; what the passenger runs into behind is told by the checks
+  // (`chequeosPasajeroAtras`, ./pasajero.ts), not by the slider's end.
+  if (k === 'tPasX') return [Math.max(f.min, T.tPilX + SEPARACION_PASAJERO_MIN), T.tPilX + SEPARACION_PASAJERO_MAX];
   // the solar roof starts anywhere from over the pilot's knees to 10 cm behind the canopy's end (there: no panel)
   if (k === 'tSolar') return [f.min, Math.min(f.max, limitarTriciclo('tCupFin', T) + 0.10)];
   if (k === 'tKWPico') return [Math.max(f.min, T.tKWNom), f.max];
