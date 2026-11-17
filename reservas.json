@@ -107,6 +107,12 @@
       "ruta": "src/components/aeromovil/LadoResumen.tsx",
       "motivo": "ajustes: Crr ciclomotor, agarre absoluto, Varios 18 kg (pocas líneas)",
       "desde": "2026-11-17T19:22:09.062Z"
+    },
+    {
+      "agente": "ajustes",
+      "ruta": "src/components/aeromovil/geometria.ts",
+      "motivo": "ajustes: Crr ciclomotor, agarre absoluto, Varios 18 kg (pocas líneas)",
+      "desde": "2026-11-17T19:22:12.498Z"
     }
   ]
 }
