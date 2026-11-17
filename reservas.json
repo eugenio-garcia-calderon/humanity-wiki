@@ -125,6 +125,12 @@
       "ruta": "scripts/triciclo-disenos.ts",
       "motivo": "ajustes: Crr ciclomotor, agarre absoluto, Varios 18 kg (pocas líneas)",
       "desde": "2026-11-17T19:22:19.082Z"
+    },
+    {
+      "agente": "ajustes",
+      "ruta": "src/components/aeromovil/PanelMasas.tsx",
+      "motivo": "ajustes: texto del agarre (1 línea)",
+      "desde": "2026-11-17T19:23:14.663Z"
     }
   ]
 }
