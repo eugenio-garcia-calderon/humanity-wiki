@@ -155,6 +155,12 @@
       "ruta": "src/components/aeromovil/CLAUDE.md",
       "motivo": "homologacion: sección homologacion/",
       "desde": "2026-11-17T12:06:33.129Z"
+    },
+    {
+      "agente": "masas",
+      "ruta": "scripts/pesos-secciones.ts",
+      "motivo": "masas: la pestaña Masas es un total, no un departamento",
+      "desde": "2026-11-17T12:24:12.468Z"
     }
   ]
 }
