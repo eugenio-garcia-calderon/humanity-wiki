@@ -2197,3 +2197,13 @@ Eugenio asked for a dated, authored note on every side-panel section, «anónimo
 **Context.** Ten bots shared one 2-CPU / 8 GB cloud machine and ran tsc, vite build, the Aeromóvil scripts and headless screenshots one at a time behind `aeromovil-pesado.lock`. The queue reached ~10 jobs of up to 15 min each; ready PRs waited hours.
 **Decision.** New workflow `.github/workflows/comprobar.yml` runs on `pull_request` to main: tsc, build, and a matrix of the Aeromóvil scripts (tunnel, triciclo-disenos, estudio-aerodinamico, pesos-secciones, homologacion, bala-cola-lisa, cola-continuidad seed 7), each job in parallel on GitHub runners. Read-only, no secrets. Bots open the PR, wait for green, then merge under the deploy lock. Local heavy work is limited to what CI cannot do (headless screenshots of the feature).
 **Alternatives.** (a) Allow 2 concurrent heavy jobs locally: at most 2× and risks OOM on 8 GB. (b) Skip checks: rejected. (c) Bigger cloud machine: not in our control.
+
+## 2026-11-17 · «Ocultar garaje» hides the whole 3D view, not just the other cars
+
+**Context.** Eugenio wanted the department panels wider and centred («no tan esquinada hacia un lado»).
+**Decision.** The toggle hides the whole `section[aria-label="Vista 3D"]` (display: none) and the main layout becomes a
+single centred column (`max-w-3xl`). The viewer stays mounted (Planos/Exportar use its ref) and `Visor3D` skips drawing
+and resizing while its canvas has zero size.
+**Alternatives.** (a) Keep a small 3D of the Aeromóvil S above the panel: still takes ~40 % of a phone screen and the
+garage cars would need a separate «hide others» path. (b) Unmount the viewer: loses the scene state and the ref other
+sections rely on.

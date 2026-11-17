@@ -12482,3 +12482,13 @@ es el autor, si no será anónimo.»
 ## 2026-11-17 · Las comprobaciones pasan a GitHub
 
 Eugenio: «busca una solución para que las pruebas no sean el cuello de botella». Hasta ahora cada bot pasaba `tsc`, la compilación y los scripts del Aeromóvil en la misma máquina de la nube, de uno en uno: con diez bots la cola tardaba horas. Ahora, cada solicitud de cambios las pasa en las máquinas de GitHub, todas a la vez (`.github/workflows/comprobar.yml`): `tsc`, compilación, túnel, diseños guardados, estudio aerodinámico, pesos por sección, homologación, cola lisa y continuidad de la cola. Un bot abre su solicitud y la fusiona cuando todo sale en verde.
+
+## 2026-11-17 · «Ocultar garaje»: los paneles ocupan la página
+
+Eugenio: «Haz que el garaje se pueda ocultar con un botón arriba en el menú donde pone diseño 3D, eso quítalo y ponlo más pequeñito y pon ver garaje o ocultar garaje, y de esta manera se puede ver con más detalle todos los componentes. Por ejemplo, si pincho en motor, pues veo todos los desplegables de forma mucho más agradable y no tan esquinada hacia un lado.»
+
+- En la barra de arriba del Aeromóvil hay un botón pequeño «Ocultar garaje» / «Ver garaje» (solo en la sección del diseño).
+- Con el garaje oculto desaparece toda la vista 3D y el panel del departamento (Motor, Chasis…) pasa al centro, con hasta 768 px de ancho en vez de 380.
+- El menú de secciones ya no escribe «Diseño 3D»: queda solo el icono, más pequeño (el nombre sigue dentro del menú).
+- «Ver solo …» no aparece con el garaje oculto, porque no hay 3D sobre el que actuar.
+- Cada navegador recuerda la elección (`aeromovil.verGaraje`). El 3D sigue montado pero no se dibuja mientras está oculto.

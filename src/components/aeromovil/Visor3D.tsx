@@ -336,6 +336,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     const dibujar = () => composer.render();
     const resize = () => {
       const r = cv.getBoundingClientRect();
+      // (2026-11-17) «Ocultar garaje» hides the 3D view (display: none): keep the last size instead of 0 × 0 targets
+      if (r.width < 1 || r.height < 1) return;
       renderer.setSize(r.width, r.height, false); camera.aspect = r.width / Math.max(1, r.height); camera.updateProjectionMatrix();
       const pr = renderer.getPixelRatio(); composer.setSize(r.width, r.height); composer.setPixelRatio(pr); aoPass?.setSize(r.width * pr, r.height * pr);
     };
@@ -544,7 +546,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       // Lo que llega tarde a un coche superpuesto (la carrocería del Twizy se descarga) también pasa a fantasma.
       if (st.superponer && ahora - st.ultimoFantasma > 400) { st.ultimoFantasma = ahora; for (const o of grupoGaraje.children) hacerFantasma(o, colorSuperpuesto(o.name)); }
       if (st.sombraSucia || ahora - ultimaSombra > 1000) { st.sombraSucia = false; ultimaSombra = ahora; ajustarSombra(); }
-      controls.update(); dibujar(); raf = requestAnimationFrame(bucle);
+      controls.update(); if (cv.clientWidth > 0) dibujar(); raf = requestAnimationFrame(bucle);
     };
     raf = requestAnimationFrame(bucle);
     return () => {
