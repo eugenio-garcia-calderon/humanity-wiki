@@ -125,6 +125,12 @@
       "ruta": "src/server/seguridad/clasificacion.ts",
       "motivo": "notas: clasificar aeromovil_notas",
       "desde": "2026-11-17T13:37:55.302Z"
+    },
+    {
+      "agente": "neumaticos",
+      "ruta": "src/components/aeromovil/geometriaBasculante.ts",
+      "motivo": "neumaticos: tipo de neumático por eje",
+      "desde": "2026-11-17T13:38:16.042Z"
     }
   ]
 }
