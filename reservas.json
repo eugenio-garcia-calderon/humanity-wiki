@@ -35,12 +35,6 @@
       "ruta": "src/components/aeromovil/Disenos.tsx",
       "motivo": "bwb: carenado BWB (pocas líneas)",
       "desde": "2026-11-17T19:34:06.586Z"
-    },
-    {
-      "agente": "bwb",
-      "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
-      "motivo": "bwb: bloque Carenado BWB (3 líneas)",
-      "desde": "2026-11-17T20:33:14.799Z"
     }
   ]
 }
