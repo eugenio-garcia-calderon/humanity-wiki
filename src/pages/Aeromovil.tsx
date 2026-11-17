@@ -430,6 +430,8 @@ export default function Aeromovil() {
   // the masses of the design (LadoResumen.tsx): the «Masas» tab, and the 3D's centre of gravity while it is open
   const masas = useMasas(paraCalcular, res);
   useEffect(() => { if (porDeps && dep !== depTri) setDep(depTri); }, [porDeps, dep, depTri]);
+  // (2026-11-17) «Masas» remembered from a Triciclo opens «Proyecto» on a vehicle without that tab (the Aeromóvil 1)
+  useEffect(() => { if (!porDeps && dep === 'masas') setDep('proyecto'); }, [porDeps, dep]);
   // the Cuadriciclo Basculante's Cd: the tunnel's, as the Triciclo's
   const cdBas = useCdBasculante(paraCalcular, opcionesTunel.resolucion, esBas ? camposBasculante(P).qVel : 80);
   const cdBasComparar = useCdBasculante(paraCalcular, opcionesTunel.resolucion, kmhComparar);
