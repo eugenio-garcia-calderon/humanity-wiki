@@ -113,6 +113,12 @@
       "ruta": "src/components/aeromovil/geometria.ts",
       "motivo": "ajustes: Crr ciclomotor, agarre absoluto, Varios 18 kg (pocas líneas)",
       "desde": "2026-11-17T19:22:12.498Z"
+    },
+    {
+      "agente": "ajustes",
+      "ruta": "src/components/aeromovil/electrico/LadoConsumos.tsx",
+      "motivo": "ajustes: Crr ciclomotor, agarre absoluto, Varios 18 kg (pocas líneas)",
+      "desde": "2026-11-17T19:22:15.726Z"
     }
   ]
 }
