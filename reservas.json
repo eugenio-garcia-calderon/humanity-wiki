@@ -125,6 +125,12 @@
       "ruta": "src/components/aeromovil/triciclo/comprobaciones.ts",
       "motivo": "munecos: talla y complexión de los ocupantes (pocas líneas)",
       "desde": "2026-11-17T17:06:35.067Z"
+    },
+    {
+      "agente": "munecos",
+      "ruta": "src/components/aeromovil/triciclo/masas.ts",
+      "motivo": "munecos: talla y complexión de los ocupantes (pocas líneas)",
+      "desde": "2026-11-17T17:06:38.166Z"
     }
   ]
 }
