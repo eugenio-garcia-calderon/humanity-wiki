@@ -927,6 +927,25 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **`tVel` lives in Motor's FILAS row and is drawn a second time in «Consumos»**: moving the row's `dep` needs a
   `DepTriciclo` 'consumos' (touches ~6 Records): ~30 min.
 - **Basculante, A1, Gota, Bala: no «Consumos» tab** (legacy since 2026-11-17).
+## 2026-11-17 · Masses, second step (masas)
+- **Resolved**: the six engine/tank sliders and the «Proyecto» lema (pending in «Masses and the hybrid's placement»).
+- **Still pending**: the sliders show the move in metres, not where it puts the part («a 1,14 m del eje trasero»);
+  the `mostrar` cases in `LadoTriciclo.tsx` were ready but that file was held by another bot: ≈ 10 min. Also still
+  pending from step one: `calcularTriciclo`'s own CG sum (≈ 10 min), `LadoTriciclo.tsx`'s unreachable «proyecto»
+  blocks (≈ 15 min), the CLAUDE.md section on masses (≈ 10 min), and `modelo.ts` reading the offsets with its own
+  clamp (`mov`, same ranges) instead of `limitarTriciclo` (file held by another bot, ≈ 5 min).
+## 2026-11-17 · Aeromóvil section notes (`components/aeromovil/notas/`)
+
+- **A section is its block's title.** Renaming a block leaves its notes behind (still in the table, not shown), and the
+  blocks that share a title across departments («Comprobaciones de este departamento») share their notes. A stable
+  `seccion` id per block (dep + bloque from `LadoTriciclo`/`LadoBasculante`, passed to `Bloque`): ≈ 45 min plus a
+  one-off rename migration of existing rows.
+- **The destination is set from `MenuDisenos`** (a menu publishing page state). A `NotasProvider` in
+  `pages/Aeromovil.tsx` with `actual?.id` and `P.disposicion`: ≈ 10 min once that file is free.
+- **«Guardar como nuevo» does not copy the notes** to the new design; they stay on the original. Copying on create in
+  `POST /api/aeromovil/disenos` (an `origen` id in the body): ≈ 20 min.
+- **Anonymous notes never leave the browser** (by design, rule 3). If Eugenio wants visitors' notes shared, they would
+  go through moderation like the tasks: ≈ 1 h.
 ## 2026-11-17 · Tyre type (bot «neumaticos»)
 
 - **Triciclo rollover check still uses the fixed `AGARRE` 0.9** (`triciclo/comprobaciones.ts`, held by another bot):
