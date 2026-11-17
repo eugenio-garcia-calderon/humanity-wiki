@@ -89,6 +89,12 @@
       "ruta": "src/components/aeromovil/triciclo/medidas.ts",
       "motivo": "ahorcajadas: pasajero más atrás (rango de tPasX)",
       "desde": "2026-11-17T13:06:12.220Z"
+    },
+    {
+      "agente": "ahorcajadas",
+      "ruta": "src/components/aeromovil/triciclo/comprobaciones.ts",
+      "motivo": "ahorcajadas: comprobaciones del pasajero detrás",
+      "desde": "2026-11-17T13:28:31.042Z"
     }
   ]
 }
