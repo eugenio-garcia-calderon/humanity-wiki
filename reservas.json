@@ -155,6 +155,12 @@
       "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
       "motivo": "pesossecciones: peso en cada desplegable del Triciclo",
       "desde": "2026-11-17T13:00:19.181Z"
+    },
+    {
+      "agente": "ahorcajadas",
+      "ruta": "src/components/aeromovil/triciclo/medidas.ts",
+      "motivo": "ahorcajadas: pasajero más atrás (rango de tPasX)",
+      "desde": "2026-11-17T13:06:12.220Z"
     }
   ]
 }
