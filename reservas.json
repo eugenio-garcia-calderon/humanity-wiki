@@ -113,6 +113,12 @@
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "quitar: fuera «¿Algo que mejorar?» y «Empezar un diseño nuevo» (pocas líneas)",
       "desde": "2026-11-17T17:01:22.447Z"
+    },
+    {
+      "agente": "solopiezas",
+      "ruta": "src/components/aeromovil/triciclo/masas.ts",
+      "motivo": "solopiezas: motor de gasolina repartido en sus piezas (4 líneas)",
+      "desde": "2026-11-17T17:03:06.914Z"
     }
   ]
 }
