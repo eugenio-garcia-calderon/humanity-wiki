@@ -1984,3 +1984,32 @@ Numbers (tunnel Cd «media», A m², wetted m², solar m²), main 27eb952 → th
 - Rombo Bala: Cd 0.2129 → 0.2066, A 1.1674 → 1.1674, wetted 9.850 → 9.857, solar 1.676 → 1.750 (wider panel start).
 - Modelo 1-like: Cd 0.2210 → 0.2214, A 1.1742 → 1.1740, wetted 10.385 → 10.388, solar 1.826 → 1.908.
 Evaluator: seeds 7 / 2027 / 31337 / 4242 all COLA OK (worst shoulders 6.1 / 6.4 / 6.6 / 7.9°, top 3.4 / 3.3 / 3.4 / 3.5°).
+
+## 2026-11-17 · Aerodynamic study: computed what-ifs over a rule catalogue (estudioaero)
+Eugenio asked for the aerodynamics inside «Carrocería» and a «Hacer estudio aerodinámico» button that lists the current
+design's weak points with recommendations.
+- **Where**: a new «Aerodinámica» block in the Carrocería tab (always shown for the Gota and the Bala, which have no
+  tabs). The tunnel card itself still opens under the 3D view: it is 860 px wide and the side panel is 380 px. The 3D
+  toolbar's tunnel button stays; both call the same `alternarTunel`. There was no «aerodinámica» tab to remove: an
+  unknown remembered tab id now opens Carrocería.
+- **Rules as code, gains computed**: `estudio/reglas.ts` is a catalogue of 26 rules (one weak point each, per vehicle).
+  A rule proposes concrete slider changes; `estudio/estudio.ts` reruns the tunnel (`probarParametros`, the existing
+  worker path) on a copy with each one and keeps the best. Alternatives rejected: (a) fixed advice text per rule — it
+  would recommend changes the tunnel finds useless or harmful on a given design (on Rombo Bala, flattening the tail
+  computes +0.3 %, not a gain); (b) an optimiser over all sliders — slow (≈ 0.6 s per run at «media») and it would chase
+  the panel method's noise. With what-ifs, a rule whose changes gain < 1 % of CdA (`RUIDO`) is shown as «descartado»;
+  1 % because «baja» vs «media» resolution flipped the sign of several ±1 % changes in a probe.
+- **Honesty**: parts the tunnel does not see (mirrors, pod shape, the rear spat) give an estimate with its source and
+  are never labelled «importante». Each change also reruns the checks; the ones it would newly break are listed.
+- **No contradictions by construction**: a slider key belongs to one rule only (checked by
+  `scripts/estudio-aerodinamico.ts`).
+- **Calibration untouched**: the study only reads `CONSTANTES`/`EXPOSICION` (the rear-spat estimate uses the tunnel's
+  own wheel formula). `tunel-pruebas` 0 FALLA.
+- **Seam with colacorte (Kamm tail)**: colacorte's PR was not on main when this merged, so colacorte (second) adds the
+  Kamm rules; the spot is marked in `reglas.ts`.
+- Sources: Hucho, «Aerodynamics of Road Vehicles» (1998); Hoerner, «Fluid-Dynamic Drag» (1965); Ahmed, Ramm & Faltin,
+  SAE 840300; Wickern, Zwicker & Pfadenhauer, SAE 970133 (wheels ≈ 25 % of a car's drag); Fackrell & Harvey (1975);
+  SAE 2020-01-0673 «Streamlined Tails – The Effects of Truncation on Aerodynamic Drag»
+  (https://saemobilus.sae.org/papers/streamlined-tails-effects-truncation-aerodynamic-drag-2020-01-0673);
+  https://en.wikipedia.org/wiki/Kammback (cut at 50 % of the largest section);
+  https://en.wikipedia.org/wiki/Automotive_aerodynamics (mirrors 2–7 % of drag; Honda e cameras −3.8 %).

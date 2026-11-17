@@ -799,3 +799,12 @@ The «ordenar» refactor (PRs #1081, #1082, #1084) only moved code. Still open, 
 - **Seed 4242's worst shoulder bend is 7.9° (limit 8°)**, a smooth-body design with a very short canopy where the two
   deck blends meet head to head (only 60 cm between the windscreen's start and the deck's). Lengthening those blends
   means re-placing the deck zones: ~2 h, and it moves every smooth-body design.
+
+## 2026-11-17 · Aerodynamic study: changes tried one at a time, pod estimates by hand (estudioaero)
+- Each proposed change is computed alone; the gains do not add up when several are applied (the screen says so).
+  Trying the best changes together at the end would be ≈ 1 h and +1–3 tunnel runs per study.
+- The pods' own shape is outside the tunnel's silhouette, so «carenados grandes» and «cola de carenado corta» use
+  order-of-magnitude formulas (Hoerner) in `reglas.ts`, not a computation. Adding the pods as extra bodies to the tunnel
+  would make them computed, but it touches the method and therefore the calibration: a decision for Eugenio, ≈ 1 day.
+- The A1 and Gota slider labels and ranges come from `tunel/explicaciones.ts` (`A1`, `GOTA`, now exported), still a
+  copy of what their panels draw (third reader of that copy). Moving both panels to a table like `FILAS`: ≈ 2 h.
