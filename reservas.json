@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "colasuave2",
+      "ruta": "src/components/aeromovil/garaje/balaForma.ts",
+      "motivo": "colasuave: colas muy cortas sin pliegue",
+      "desde": "2026-11-17T01:33:56.507Z"
+    }
+  ]
 }
