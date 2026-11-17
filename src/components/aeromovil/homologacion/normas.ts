@@ -12,7 +12,7 @@
 // Where a later amendment may have changed a figure, the requirement says so («por confirmar en EUR-Lex»).
 // The UI text is Spanish (it is for Eugenio); the comments are English.
 
-export type IdFuente = 'r168' | 'r168art' | 'r168anx6' | 'r168anx8' | 'r3' | 'r44' | 'r134' | 'r2018' | 'r2019' | 'rd750' | 'permisos' | 'permisoB' | 'b1';
+export type IdFuente = 'r168' | 'r168art' | 'r168anx6' | 'r168anx8' | 'r3' | 'r44' | 'r134' | 'r2018' | 'r2019' | 'rd750' | 'permisos' | 'permisoB' | 'b1' | 'r901' | 'r85' | 'r134anx';
 
 /** The texts behind every figure. `leido`: read on 2026-11-17 (false: cited from memory of the text, to confirm). */
 export const FUENTES: Record<IdFuente, { titulo: string; url: string; leido: boolean }> = {
@@ -28,6 +28,10 @@ export const FUENTES: Record<IdFuente, { titulo: string; url: string; leido: boo
   rd750: { titulo: 'Real Decreto 750/2010 (homologación individual y de series cortas en España)', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-2010-9673', leido: false },
   permisos: { titulo: 'Permisos de conducir para triciclos de motor (A1 hasta 15 kW; A o B con 21 años por encima)', url: 'https://practicatest.com/preguntas/qA1A2/cual-de-estos-permisos-autoriza-a-conducir-triciclos-de-motor-de-potencia-maxima-superior-a-15-kw/ZJyToA==', leido: true },
   permisoB: { titulo: 'MAPFRE: qué vehículos se conducen con el permiso B (triciclos de más de 15 kW, desde los 21 años)', url: 'https://www.motor.mapfre.es/consejos-practicos/consejos-de-conduccion/permiso-b-que-vehiculos-puedes-conducir/', leido: true },
+  // 2026-11-17 (electronica, from Eugenio's study «Estudio de homologación L7e-A2: híbrido en paralelo»): cited, not reread here
+  r901: { titulo: 'Reglamento de Ejecución (UE) 901/2014 (documentos administrativos de homologación): ficha de características, campos 1.8.3, 1.8.5, 1.8.7 y 1.8.9', url: 'https://eur-lex.europa.eu/eli/reg_impl/2014/901/oj', leido: false },
+  r85: { titulo: 'Reglamento UN n.º 85 (medida de la potencia neta y de la potencia máxima de 30 minutos de los grupos de tracción eléctricos)', url: 'https://eur-lex.europa.eu/legal-content/ES/TXT/?uri=CELEX:42014X0919(01)', leido: false },
+  r134anx: { titulo: 'Reglamento Delegado (UE) 134/2014, anexo X, apéndice 2.4 (par y potencia máximos de la propulsión híbrida: cada modo, el resultado más alto)', url: 'https://www.legislation.gov.uk/eur/2014/134/annex/X', leido: false },
   b1: { titulo: 'RACE: el permiso B1 para cuadriciclos pesados (en consulta desde julio de 2024, no en vigor)', url: 'https://www.race.es/?p=254932', leido: true },
 };
 
@@ -266,7 +270,7 @@ export const REQUISITOS: Requisito[] = [
   // ─────────────────────────────── Propulsión y velocidad
   {
     id: 'potencia', grupo: 'Propulsión y velocidad', titulo: 'Potencia continua máxima',
-    detalle: 'En un eléctrico cuenta la potencia continua máxima: la de 30 minutos en el eje del motor, medida como dice el Reglamento UN 85 (art. 3.35), NO la de pico. En un motor térmico, la potencia neta máxima. Límites: L2e y L6e-A 4 kW, L6e-B 6 kW, L7e-A y L7e-C 15 kW. L5e y M1 no tienen límite. Si se limita por programa, el anexo XVIII del 3/2014 pide dos métodos independientes, que el usuario no pueda cambiar (ni interruptor, ni menú, ni puente) y el 44/2014, anexo II, protección contra la manipulación (salvo en L5e). En un híbrido, a comprobar con el servicio técnico cómo se suman el motor de gasolina y el eléctrico (134/2014, anexo X); aquí se suman, que es lo prudente.',
+    detalle: 'En un eléctrico cuenta la potencia continua máxima: la de 30 minutos en el eje del motor, medida como dice el Reglamento UN 85 (art. 3.35), NO la de pico. En un motor térmico, la potencia neta máxima. Límites: L2e y L6e-A 4 kW, L6e-B 6 kW, L7e-A y L7e-C 15 kW. L5e y M1 no tienen límite. Si se limita por programa, el anexo XVIII del 3/2014 pide dos métodos independientes, que el usuario no pueda cambiar (ni interruptor, ni menú, ni puente) y el 44/2014, anexo II, protección contra la manipulación (salvo en L5e). En un híbrido, el 134/2014 (anexo X, apéndice 2.4) mide la potencia total del conjunto en cada modo y toma el resultado más alto: aquí se suman los dos motores en el modo más potente que deja la electrónica de potencia (Motor › Electrónica de potencia; sin límite configurado, la suma entera), que es lo prudente. El detalle, en «Estudio L7e: potencia del híbrido».',
     ref: 'Reglamento 168/2013, art. 3.35 y anexo I; 3/2014, anexo XVIII; 134/2014, anexo X', fuente: 'r168', categorias: ['L2e', 'L6e-A', 'L6e-BP', 'L7e-A1', 'L7e-A2', 'L7e-CP', 'L5e-A', 'M1'],
     medida: { magnitud: 'potenciaCategoria', limite: { 'L2e': 4, 'L6e-A': 4, 'L6e-BP': 6, 'L7e-A1': 15, 'L7e-A2': 15, 'L7e-CP': 15 }, sentido: 'max', limitable: 'limitar la potencia continua en el controlador (dos métodos independientes, anexo XVIII del 3/2014)' },
   },

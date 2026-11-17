@@ -17,6 +17,8 @@ import { camposTriciclo, nombreTriciclo } from '../src/components/aeromovil/geom
 import { CATEGORIAS, FUENTES, REQUISITOS, ETIQUETA_ESTADO } from '../src/components/aeromovil/homologacion/normas';
 import { fichaHomologacion } from '../src/components/aeromovil/homologacion/ficha';
 import { elegirCategoria, evaluarCategoria, fraseMargen } from '../src/components/aeromovil/homologacion/evaluar';
+import { ETIQUETA_L7E, estudioL7e } from '../src/components/aeromovil/homologacion/l7e';
+import { electronicaTriciclo } from '../src/components/aeromovil/triciclo/electronica';
 
 let fallos = 0;
 const ok = (c: boolean, m: string) => { if (!c) { console.log(`FALLA ${m}`); fallos++; } };
@@ -39,6 +41,10 @@ const disenos: [string, Parametros][] = [
   ['Triciclo por defecto', PARAMETROS_TRICICLO],
   ['Triciclo por defecto con dos ruedas traseras', { ...PARAMETROS_TRICICLO, tTraseras: 'dos' }],
   ['Triciclo por defecto en rombo', { ...PARAMETROS_TRICICLO, tRuedas: 'rombo' }],
+  // 2026-11-17 (electronica): the case of Eugenio's L7e-A2 study (15 kW engine, 13 kW continuous / 30 kW peak e-motor), as it
+  // is and with the power electronics that fit it (a 15 kW dynamic limit and two independent limiters)
+  ['Híbrido del estudio L7e-A2, sin gestión', { ...PARAMETROS_TRICICLO, tTraseras: 'dos', tAsientos: 'butacas', tPropulsion: 'phev', tPhevKW: 15, tKWNom: 13, tKWPico: 30 } as Parametros],
+  ['Híbrido del estudio L7e-A2, límite dinámico de 15 kW', { ...PARAMETROS_TRICICLO, tTraseras: 'dos', tAsientos: 'butacas', tPropulsion: 'phev', tPhevKW: 15, tKWNom: 13, tKWPico: 30, tEpEstrategia: 'dinamica', tEpLimCont: 15, tEpLim1: 'hcu', tEpLim2: 'velocidad' } as Parametros],
   ['Cuadriciclo Basculante', PARAMETROS_BASCULANTE], ['Aeromóvil 1', PARAMETROS_A1], ['Aeromóvil Gota', PARAMETROS_GOTA], ['Cuadriciclo Bala', PARAMETROS_BALA],
   ...process.argv.slice(2).map(f => [f.split('/').pop()!, deDiseno(JSON.parse(readFileSync(f, 'utf8')))] as [string, Parametros]),
 ];
@@ -65,6 +71,37 @@ for (const [nombre, P0] of disenos) {
   // sanity: a measured result carries numbers; the chosen category is one of the candidates
   for (const r of e.resultados) if (r.limite != null && r.valor != null) ok(Number.isFinite(r.valor) && Number.isFinite(r.margen ?? 0), `${titulo}: «${r.req.id}» sin cifra`);
   ok(f.ruedasLegales >= 2, `${titulo}: ${f.ruedasLegales} ruedas legales`);
+  // (2026-11-17) the L7e power study and the tests (l7e.ts), for the Triciclo family
+  const l7 = estudioL7e(f);
+  if (m.tipo === 'triciclo') {
+    ok(!!l7, `${titulo}: sin estudio L7e`);
+    if (l7) {
+      const el = f.electronica!;
+      console.log(`   L7e-A2: ${l7.resumen} Continua total ${n0(el.contTotal, 1)} kW («${el.modoCont.nombre}»), pico ${n0(el.picoTotal, 1)} kW${f.vmaxConjunta != null ? `, con los dos a la vez ${n0(f.vmaxConjunta)} km/h` : ''}`);
+      for (const p of l7.puntos) console.log(`     [${ETIQUETA_L7E[p.estado].padEnd(11)}] ${p.campo ? p.campo + ' ' : ''}${p.titulo}: ${p.valor}`);
+      for (const e of l7.ensayos) {
+        console.log(`     ensayo ${e.corto} — ${ETIQUETA_L7E[e.expectativa.estado]}: ${e.expectativa.texto}`);
+        ok(e.pasos.length > 0 && e.declarar.length > 0 && e.valores.length > 0 && e.fuente in FUENTES, `${titulo}: el ensayo «${e.id}» está incompleto`);
+      }
+      ok(new Set(l7.ensayos.map(e => e.id)).size === l7.ensayos.length, `${titulo}: ensayos repetidos`);
+      ok(l7.puntos.every(p => p.fuente in FUENTES), `${titulo}: un punto del estudio L7e con fuente desconocida`);
+      // the category's power is the electronics' strongest mode, and with the defaults it is what it always was
+      ok(Math.abs((f.potenciaCategoria ?? 0) - el.contTotal) < 1e-9, `${titulo}: la potencia de la categoría no es la continua total`);
+      const T = camposTriciclo(P);
+      const sinGestion = T.tEpEstrategia === 'libre' && T.tEpLimCont === 0 && T.tEpSport === 'no' && T.tEpMapa === 'normal';
+      if (sinGestion) ok(Math.abs(el.contTotal - (T.tKWNom + (T.tPropulsion === 'phev' ? T.tPhevKW : 0))) < 1e-9, `${titulo}: sin electrónica configurada la potencia cambió (${el.contTotal})`);
+    }
+  }
+}
+// ── the power electronics alone (triciclo/electronica.ts): the study's numbers
+{
+  const base = { ...PARAMETROS_TRICICLO, tPropulsion: 'phev', tPhevKW: 15, tKWNom: 13, tKWPico: 30 } as Parametros;
+  const el = (o: Record<string, unknown>) => electronicaTriciclo(camposTriciclo({ ...base, ...o } as Parametros));
+  ok(el({}).contTotal === 28 && el({}).picoTotal === 45, 'estudio: sin gestión, 28 kW continuos y 45 de pico');
+  ok(el({ tEpEstrategia: 'dinamica', tEpLimCont: 15 }).contTotal === 15, 'estudio: con límite dinámico de 15 kW, 15 continuos');
+  ok(el({ tEpEstrategia: 'termico', tEpLimCont: 15 }).termicoNeto === 2, 'estudio: térmico rebajado a 2 kW para sumar 15 con los 13 eléctricos');
+  ok(el({ tEpEstrategia: 'dinamica', tEpLimCont: 15, tEpSport: 'si' }).contTotal === 45, 'estudio: un modo sport sin límite continuo vuelve a dar el pico (45)');
+  ok(el({ tEpEstrategia: 'libre', tEpLimCont: 15 }).contTotal === 28, 'estudio: un límite sin gestión no limita la suma');
 }
 console.log(fallos ? `\n${fallos} fallos` : '\nTodo OK');
 process.exit(fallos ? 1 : 0);

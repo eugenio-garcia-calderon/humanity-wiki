@@ -15,6 +15,7 @@ import { FichaHibrido } from './FichaHibrido';
 import { TallasOcupantes } from './TallasOcupantes';
 import { CatalogoPieza, type Necesidad } from './CatalogoTren';
 import { ComparadorMotores } from './ComparadorMotores';
+import { BloqueElectronica, BLOQUE_ELECTRONICA } from './electronica/BloqueElectronica';
 import { BLOQUE_REFRIGERACION, BloqueRefrigeracion } from './RefrigeracionTriciclo';
 import { pesoSeccion, seccionesTriciclo, textoPesoSeccion } from './masasSecciones';
 import { DesglosePeso, SinSeccion } from './PesoSeccion';
@@ -284,7 +285,7 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
   // (round 3 interior: the rails reach the rear axle only with two rear wheels; with one, the wheel is in the tail between them)
   // 2026-11-16, the interior finish: the lining's colour, trim, roof console and light only with a lining; the stitching only on a new cover
   const selInterior = (k: string) => (['tForroColor', 'tMoldura', 'tConsolaTecho', 'tAmbiente'].includes(k) ? T.tAcabado !== 'chasis' : k === 'tCostura' ? T.tTapiz !== 'serie' : k === 'tCosturaColor' ? T.tTapiz !== 'serie' && T.tCostura !== 'no' : true);
-  const fichas = deslizadoresTriciclo().filter(f => f.dep === dep && !soloFilas(f.bloque) && (cuatro || f.clave !== 'tViaTras') && (f.bloque !== 'Basculación' || T.tBascula === 'si') && (rombo ? f.clave !== 'tEjeDel' : f.clave !== 'tEjeLat') && (f.bloque !== 'Híbrido enchufable' || T.tPropulsion === 'phev') && hibridoVisible(f.clave) && visible(f.clave)), sels = SELECTORES_TRICICLO.filter(s => s.dep === dep && !soloFilas(s.bloque) && ((s.clave !== 'tMaletero' && s.clave !== 'tPuertas2') || puertas) && (s.clave !== 'tChLargo' || cuatro) && (s.clave !== 'tBascTec' || T.tBascula === 'si') && (s.clave !== 'tTraseras' || !rombo) && (s.bloque !== 'Híbrido enchufable' || T.tPropulsion === 'phev') && (s.clave !== 'tMotorElec' || (T.tPropulsion === 'phev' && arqH === 'reparto')) && selInterior(s.clave));
+  const fichas = deslizadoresTriciclo().filter(f => f.dep === dep && f.bloque !== BLOQUE_ELECTRONICA && !soloFilas(f.bloque) && (cuatro || f.clave !== 'tViaTras') && (f.bloque !== 'Basculación' || T.tBascula === 'si') && (rombo ? f.clave !== 'tEjeDel' : f.clave !== 'tEjeLat') && (f.bloque !== 'Híbrido enchufable' || T.tPropulsion === 'phev') && hibridoVisible(f.clave) && visible(f.clave)), sels = SELECTORES_TRICICLO.filter(s => s.dep === dep && s.bloque !== BLOQUE_ELECTRONICA && !soloFilas(s.bloque) && ((s.clave !== 'tMaletero' && s.clave !== 'tPuertas2') || puertas) && (s.clave !== 'tChLargo' || cuatro) && (s.clave !== 'tBascTec' || T.tBascula === 'si') && (s.clave !== 'tTraseras' || !rombo) && (s.bloque !== 'Híbrido enchufable' || T.tPropulsion === 'phev') && (s.clave !== 'tMotorElec' || (T.tPropulsion === 'phev' && arqH === 'reparto')) && selInterior(s.clave));
   // (2026-11-17, «muñecos»: each rider weighs what its size says, triciclo/talla.ts)
   const kgsOcc = modelo.plazas.map(q => Math.round(q.kg)), deKg = kgsOcc.every(k => k === kgsOcc[0]) ? `${kgsOcc[0] ?? T.tMOcc} kg` : `${kgsOcc.join(' + ')} kg`;
   const nOcc = rt.ocupantes, conN = nOcc === 1 ? 'con el piloto solo' : `con ${['', 'uno', 'dos', 'tres', 'cuatro'][nOcc] ?? nOcc} ocupantes`;
@@ -471,6 +472,8 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
           <DesglosePeso s={seccionDe(bloque)} abierto={bloque === 'Bastidor'} precios={{ s: precioDe(bloque), alCambiar: alPrecio }} />
         </Bloque>
       ))}
+      {/* (2026-11-17) Motor › Electrónica de potencia: its own block (electronica/BloqueElectronica.tsx) */}
+      {dep === 'propulsion' && <BloqueElectronica T={T} set={set} modelo={modelo} mTot={res.mTot} e={e} plegable={{ abierto: abiertos.has(BLOQUE_ELECTRONICA), alAlternar: () => alternar(BLOQUE_ELECTRONICA) }} />}
       {/* (2026-11-17, capo) the hybrid's cooling and air intakes: RefrigeracionTriciclo.tsx */}
       {dep === 'propulsion' && modelo.phev && <BloqueRefrigeracion P={P} set={set} modelo={modelo} seccion={pesoSeccion(pesosSec, 'propulsion', BLOQUE_REFRIGERACION)} plegable={{ abierto: abiertos.has(BLOQUE_REFRIGERACION), alAlternar: () => alternar(BLOQUE_REFRIGERACION) }} />}
 
