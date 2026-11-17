@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "notas",
-      "ruta": "drizzle/0223_aeromovil_notas.sql",
-      "motivo": "notas: notas por desplegable",
-      "desde": "2026-11-17T13:35:51.517Z"
-    },
-    {
-      "agente": "notas",
       "ruta": "src/server/aeromovil.ts",
       "motivo": "notas: registrar rutas de notas",
       "desde": "2026-11-17T13:37:46.272Z"
