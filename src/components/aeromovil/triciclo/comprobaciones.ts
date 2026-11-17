@@ -3,7 +3,7 @@
 import { ANGULO_MAX } from '../garaje/kamm';
 import { factorMasaAsiento, numFila } from '../filasTriciclo';
 import type { Tilt } from '../basculacion';
-import { RPM_MAX_MOTOR, cifrasHibrido } from '../hibrido';
+import { CORONA_A_100, RPM_MAX_MOTOR, cifrasHibrido } from '../hibrido';
 import { comprobacionesCatalogo, motorDe } from '../catalogoTren';
 import { type Comprobacion, type PuntosOcupante, type Resultados, type P3, MATERIALES_CHASIS, RENDIMIENTO_SOLAR, largoTubo } from '../geometria';
 import type { FormaBala } from '../garaje/balaForma';
@@ -401,7 +401,7 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   // 2026-11-16: the plug-in hybrid's parts, drawn where hibrido.ts puts them (a part sticking out turns red in the 3D too)
   if (m.phev) {
     const h = m.phev.disp.holguras, arq = m.phev.arq, asoma = (v: number) => v < 0 ? `asoma ${fmt(-v * 100, 1)} cm` : undefined;
-    const nT = arq === 'reparto' ? 'planetario y generador MG1' : arq === 'serie' ? 'generador' : 'embrague, motor-generador P2 y caja';
+    const nT = arq === 'reparto' ? (m.phev.disp.mg2 ? 'planetario, generador MG1 y motor MG2' : 'planetario y generador MG1') : arq === 'serie' ? 'generador' : 'embrague, motor-generador P2 y caja';
     c('propulsion', 'Híbrido: motor de gasolina dentro de la carrocería', h.motor, 0.01, asoma(h.motor));
     c('propulsion', `Híbrido: ${nT} dentro de la carrocería`, h.transmision, 0.01, asoma(h.transmision));
     c('propulsion', 'Híbrido: depósito de gasolina dentro de la carrocería', h.deposito, 0.01, asoma(h.deposito));
@@ -418,8 +418,8 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   // four wheels (2026-11-11): the power split between two hub motors, each in its own rim
   // (2026-11-16) catalogue parts: voltages, the controller's current, the reduction gear (catalogoTren.ts). An inboard
   // motor is not in the rim, so the hub rule does not apply to it
-  for (const k of comprobacionesCatalogo(T, { kWPico: kWp, motores: m.traseras ? 2 : 1, dRueda: RUEDAS_TRICICLO[T.tRuedaTras].d, velCalculo: L('tVel') })) c((k.dep ?? 'propulsion') as never, k.nombre, k.holgura, k.minimo, k.mostrar);
-  if (motorDe(T.tCatMotor)?.montaje === 'central') { /* no hub motor: nothing in the rim */ }
+  for (const k of comprobacionesCatalogo(T, { kWPico: kWp, motores: m.traseras ? 2 : 1, dRueda: RUEDAS_TRICICLO[T.tRuedaTras].d, velCalculo: L('tVel'), planetario: m.motor.tipo === 'central' ? CORONA_A_100 : null })) c((k.dep ?? 'propulsion') as never, k.nombre, k.holgura, k.minimo, k.mostrar);
+  if (motorDe(T.tCatMotor)?.montaje === 'central' || m.motor.tipo === 'central') { /* no hub motor: nothing in the rim (2026-11-17: or MG2 on the planetary) */ }
   else if (m.traseras) c('propulsion', 'Motor de buje: potencia que cabe en cada rueda trasera (regla aproximada)', kWBuje - kWp / 2, 0, `${fmt(kWp / 2, 1)} de ${kWBuje} kW por rueda`);
   else c('propulsion', 'Motor de buje: potencia que cabe en la rueda trasera (regla aproximada)', kWBuje - kWp, 0, `${fmt(kWp, 1)} de ${kWBuje} kW`);
   // round three: the boot, in litres (always passes: it says how much there is)
