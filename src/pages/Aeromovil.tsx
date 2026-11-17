@@ -74,6 +74,10 @@ import { LadoA1 } from '../components/aeromovil/LadoA1';
 import { LadoBala } from '../components/aeromovil/LadoBala';
 import { useCdTriciclo, zonaTriciclo, LadoTriciclo } from '../components/aeromovil/LadoTriciclo';
 import { BloqueAerodinamica } from '../components/aeromovil/estudio/EstudioAerodinamico';
+// (2026-11-17) the «Homologación» tab: the design against its EU category (homologacion/)
+import { PanelHomologacion, ResumenHomologacion } from '../components/aeromovil/homologacion/PanelHomologacion';
+import { fichaHomologacion } from '../components/aeromovil/homologacion/ficha';
+import { comprobacionesHomologacion } from '../components/aeromovil/homologacion/evaluar';
 
 // The cornering circuit (2026-11-15): its own chunk, recharts comes with it and only this section needs it.
 const VistaCircuito = lazy(() => import('../components/aeromovil/circuito/VistaCircuito'));
@@ -151,6 +155,8 @@ const CAPAS_DEP: Partial<Record<IdDepartamento, CapaId[]>> = {
 const CAPAS_DEP_TRICICLO: Record<DepTriciclo, CapaId[]> = {
   carroceria: ['carenado', 'cristales', 'solar'], interior: ['asientos', 'ocupantes'], chasis: ['chasis'], rodaje: ['suspension', 'direccion', 'ruedas'], propulsion: ['motor'], energia: ['baterias', 'solar'],
 };
+/** (2026-11-17) The Triciclo family's and the Basculante's «Homologación» tab, after «Interior» (the A1 has it among its eleven). */
+const PESTANA_HOMOLOGACION = { id: 'homologacion' as IdDepartamento, lema: 'la categoría europea que le toca, lo que cumple y lo que no, y el margen que queda de masa, potencia y velocidad' };
 const VISTAS_NOMBRE: Record<Vista, string> = { iso: '3/4', side: 'Lateral', top: 'Planta', front: 'Frontal', back: 'Trasera' };
 const SOLO_DEP: Partial<Record<IdDepartamento, string>> = { carroceria: 'la carrocería', chasis: 'el chasis', rodaje: 'el rodaje', propulsion: 'el motor', energia: 'la energía', interior: 'el interior', accesos: 'los accesos', luces: 'la carrocería' };
 const NOMBRE_CORTO: Record<IdDepartamento, string> = { proyecto: 'Proyecto', masas: 'Masas', carroceria: 'Carrocería', chasis: 'Chasis', rodaje: 'Rodaje', propulsion: 'Motor', energia: 'Energía', interior: 'Interior', accesos: 'Accesos', luces: 'Luces', fabricacion: 'Fabricación', homologacion: 'Homologación' };
@@ -335,6 +341,8 @@ export default function Aeromovil() {
   const [soloDep, setSoloDep] = useState(false);     // «Mostrar solo la carrocería», etc.
   const [capasAbierto, setCapasAbierto] = useState(false);
   const [vistaAbierta, setVistaAbierta] = useState(false);
+  // (2026-11-17) the Gota's and the Bala's homologation panel (they have no department tabs)
+  const [verHomologacion, setVerHomologacion] = useState(false);
   // (2026-11-17: the aerodynamics now lives inside «Carrocería»: a remembered tab that is not a department, such as an old
   // «aerodinamica»/«tunel» one, opens «Carrocería» instead of an empty panel)
   // (2026-11-17: and «masas», which is a tab and not a department; the Aeromóvil 1, which has no such tab, opens «Proyecto» for it)
@@ -425,8 +433,8 @@ export default function Aeromovil() {
   const cdTri = useCdTriciclo(paraCalcular, opcionesTunel.resolucion, esTri ? camposTriciclo(P).tVel : 80);
   const cdTriComparar = useCdTriciclo(paraCalcular, opcionesTunel.resolucion, kmhComparar);
   // The Triciclo's departments: the A1's choice is kept, but one the Triciclo does not have shows «Carrocería».
-  // (2026-11-17: and «Masas», the masses' own tab)
-  const depTri: DepTriciclo | 'proyecto' | 'masas' = dep === 'proyecto' || dep === 'masas' || (DEPS_TRICICLO as string[]).includes(dep) ? dep as DepTriciclo | 'proyecto' | 'masas' : 'carroceria';
+  // (2026-11-17: and «Masas», the masses' own tab; and «Homologación», next to «Interior»)
+  const depTri: DepTriciclo | 'proyecto' | 'masas' | 'homologacion' = dep === 'proyecto' || dep === 'masas' || dep === 'homologacion' || (DEPS_TRICICLO as string[]).includes(dep) ? dep as DepTriciclo | 'proyecto' | 'masas' | 'homologacion' : 'carroceria';
   // the masses of the design (LadoResumen.tsx): the «Masas» tab, and the 3D's centre of gravity while it is open
   const masas = useMasas(paraCalcular, res);
   useEffect(() => { if (porDeps && dep !== depTri) setDep(depTri); }, [porDeps, dep, depTri]);
@@ -435,6 +443,9 @@ export default function Aeromovil() {
   // the Cuadriciclo Basculante's Cd: the tunnel's, as the Triciclo's
   const cdBas = useCdBasculante(paraCalcular, opcionesTunel.resolucion, esBas ? camposBasculante(P).qVel : 80);
   const cdBasComparar = useCdBasculante(paraCalcular, opcionesTunel.resolucion, kmhComparar);
+  // (2026-11-17) the homologation fails, for «Proyecto › Revisión de puntos críticos» (homologacion/evaluar.ts)
+  const cdHom = esTri ? cdTri : esBas ? cdBas : null;
+  const fallosHomologacion = useMemo(() => porDeps && depTri === 'proyecto' ? comprobacionesHomologacion(fichaHomologacion(paraCalcular.P, paraCalcular, res, cdHom, nombreVehiculo)) : [], [porDeps, depTri, paraCalcular, res, cdHom?.cd, cdHom?.areaRef, nombreVehiculo]); // eslint-disable-line react-hooks/exhaustive-deps
   const cuerposTunel = useMemo<CuerpoTunel[]>(() => !tunel ? [] : [
     ...(soloGaraje ? [] : [cuerpoAeromovil(modelo, res.A, nombreVehiculo)]),
     ...garajeVisor.flatMap(v => { const c = cuerpoGaraje(v); return c ? [c] : []; }),
@@ -595,7 +606,7 @@ export default function Aeromovil() {
             alNuevo={() => { setP(PARAMETROS_POR_DEFECTO); setActual(null); cargarDisenoPorDefecto().then(d => { if (d) { setP(deDiseno(d.parametros || {})); setActual(null); } }); }}
             alGuardado={alGuardado} />
           {(esA1 || porDeps)
-            ? <PestanasDepartamento lista={pestanas} kg={porDeps ? kgPorDepartamento(res) : null} dep={seccion === 'diseno' ? (porDeps ? depTri : dep) : null} alElegir={d => { setDep(d); setSoloDep(false); if (seccion !== 'diseno') navegar('/aeromovil'); }} />
+            ? <PestanasDepartamento lista={porDeps ? [...pestanas, PESTANA_HOMOLOGACION] : pestanas} kg={porDeps ? kgPorDepartamento(res) : null} dep={seccion === 'diseno' ? (porDeps ? depTri : dep) : null} alElegir={d => { setDep(d); setSoloDep(false); if (seccion !== 'diseno') navegar('/aeromovil'); }} />
             : null}
           <div className="flex-1 sm:hidden" />
           {!(esA1 || porDeps) && <div className="hidden flex-1 sm:block" />}
@@ -817,6 +828,15 @@ export default function Aeromovil() {
             if (v) window.scrollTo({ top: window.scrollY + v.getBoundingClientRect().top - cab - 8, behavior: 'smooth' });
           }} />}
         {esA1 && <PanelDepartamento d={DEPARTAMENTOS.find(x => x.id === dep)!} P={P} res={res} modelo={modelo} />}
+        {/* (2026-11-17, Eugenio: «Falta un apartado en el menú que sea de homologación») the pre-check under the 3D view;
+            the Gota and the Bala, which have no tabs, open it with a button */}
+        {((esA1 && dep === 'homologacion') || (porDeps && depTri === 'homologacion') || (!esA1 && !porDeps && verHomologacion)) &&
+          <PanelHomologacion P={paraCalcular.P} modelo={paraCalcular} res={res} cd={esTri ? cdTri : esBas ? cdBas : null} nombre={nombreVehiculo} />}
+        {!esA1 && !porDeps && (
+          <Button variant="outline" onClick={() => setVerHomologacion(v => !v)} aria-expanded={verHomologacion} className="mt-3 w-full justify-center gap-1.5 bg-white px-3 py-2 text-[13px] normal-case tracking-normal">
+            <ShieldCheck className="h-4 w-4" />{verHomologacion ? 'Ocultar la homologación' : 'Homologación: ¿en qué categoría entra y qué cumple?'}
+          </Button>
+        )}
         </div>
 
         <aside className="mt-4 flex flex-col gap-3 lg:mt-0">
@@ -843,12 +863,14 @@ export default function Aeromovil() {
           {((esA1 || porDeps) ? (porDeps ? depTri : dep) === 'carroceria' : true) && <Bloque titulo="Color de la carrocería"><ColoresCarroceria P={P} set={set} /></Bloque>}
           {/* 2026-11-17 (Eugenio: «mete la parte de aerodinámica dentro de carrocería… un botón que diga "hacer estudio aerodinámico"»): the tunnel and the study, in «Carrocería» (always for the vehicles without departments) */}
           {((esA1 || porDeps) ? (porDeps ? depTri : dep) === 'carroceria' : true) && <BloqueAerodinamica P={P} set={set} kmh={kmhComparar} resolucion={opcionesTunel.resolucion} tunel={tunel} alTunel={alternarTunel} />}
-          {/* (2026-11-17) «Masas» and «Proyecto» of the vehicles with departments: their own panels (LadoResumen.tsx) */}
-          {porDeps && (depTri === 'masas' || depTri === 'proyecto') && (paraCalcular.tipo === 'triciclo' || paraCalcular.tipo === 'basculante') ? <LadoResumen dep={depTri} modelo={paraCalcular} res={res} masas={masas} alIr={d => { setDep(d as IdDepartamento); setSoloDep(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
+          {/* (2026-11-17) «Homologación» of the vehicles with departments: a short card here, the detail under the 3D view */}
+          {porDeps && depTri === 'homologacion' ? <ResumenHomologacion P={paraCalcular.P} modelo={paraCalcular} res={res} cd={esTri ? cdTri : esBas ? cdBas : null} nombre={nombreVehiculo} />
+            /* (2026-11-17) «Masas» and «Proyecto» of the vehicles with departments: their own panels (LadoResumen.tsx) */
+            : porDeps && (depTri === 'masas' || depTri === 'proyecto') && (paraCalcular.tipo === 'triciclo' || paraCalcular.tipo === 'basculante') ? <LadoResumen dep={depTri} modelo={paraCalcular} res={res} masas={masas} alIr={d => { setDep(d as IdDepartamento); setSoloDep(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}  extra={depTri === 'proyecto' ? fallosHomologacion : undefined} />
             : modelo.tipo === 'a1' ? <LadoA1 P={P} Pa={Pa} D={D} set={set} res={res} modelo={modelo} neumaticos={neumaticos} malas={malas} dep={dep} alNavegar={r => { navegar(r); window.scrollTo({ top: 0 }); }} />
-            : modelo.tipo === 'basculante' ? (paraCalcular.tipo === 'basculante' && res.basculante ? <LadoBasculante P={P} set={set} res={res} modelo={paraCalcular} dep={depTri as Exclude<typeof depTri, 'masas'>} cd={cdBas} ui={{ Bloque, Deslizador, Selector: Selector as never, ListaComprobaciones }} /> : null)
+            : modelo.tipo === 'basculante' ? (paraCalcular.tipo === 'basculante' && res.basculante ? <LadoBasculante P={P} set={set} res={res} modelo={paraCalcular} dep={depTri as Exclude<typeof depTri, 'masas' | 'homologacion'>} cd={cdBas} ui={{ Bloque, Deslizador, Selector: Selector as never, ListaComprobaciones }} /> : null)
             : modelo.tipo === 'bala' ? <LadoBala P={P} set={set} res={res} modelo={modelo} cdTunel={tunel ? cdTunelNuestro : undefined} />
-            : modelo.tipo === 'triciclo' && res.triciclo ? <LadoTriciclo P={P} set={set} res={res} modelo={paraCalcular.tipo === 'triciclo' ? paraCalcular : modelo} dep={depTri as Exclude<typeof depTri, 'masas'>} cd={cdTri} abrir={abrirBloque} />
+            : modelo.tipo === 'triciclo' && res.triciclo ? <LadoTriciclo P={P} set={set} res={res} modelo={paraCalcular.tipo === 'triciclo' ? paraCalcular : modelo} dep={depTri as Exclude<typeof depTri, 'masas' | 'homologacion'>} cd={cdTri} abrir={abrirBloque} />
             : modelo.tipo === 'triciclo' ? null : (<>
           <Bloque titulo="Chasis y ruedas">
             <Deslizador id="am-B" etiqueta="Batalla: rueda delantera a trasera" valor={P.B} min={2.6} max={3.8} paso={0.01} mostrar={m2(P.B)} alCambiar={v => set('B', v)} />
