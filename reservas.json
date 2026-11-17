@@ -11,6 +11,12 @@
       "ruta": "src/components/aeromovil/visor/bwb.ts",
       "motivo": "plegado fluido",
       "desde": "2026-11-17T22:17:21.262Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/triciclo/bwb.ts",
+      "motivo": "plegado fluido",
+      "desde": "2026-11-17T22:17:23.881Z"
     }
   ]
 }
