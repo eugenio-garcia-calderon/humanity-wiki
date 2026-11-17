@@ -125,6 +125,12 @@
       "ruta": "src/components/aeromovil/triciclo/modelo.ts",
       "motivo": "bwb: carenado BWB (pocas líneas)",
       "desde": "2026-11-17T19:33:51.966Z"
+    },
+    {
+      "agente": "bwb",
+      "ruta": "src/components/aeromovil/triciclo/masas.ts",
+      "motivo": "bwb: carenado BWB (pocas líneas)",
+      "desde": "2026-11-17T19:33:55.325Z"
     }
   ]
 }
