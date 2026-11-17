@@ -22,6 +22,7 @@ import { crrTriciclo, solarDiaTriciclo, energiaTriciclo } from './energia';
 import { chequeosTalla } from './ajusteOcupantes';
 import { chequeosPasajeroAtras } from './pasajero';
 import { fichaRueda } from '../ruedas/catalogo';
+import { comprobacionesRefrigeracion } from './refrigeracion';
 
 /** The check's name, also in `explicaciones/triciclo.ts`. */
 export const NEUMATICO_MOTO_SIN_INCLINAR = 'Neumáticos de moto en un vehículo que no se inclina: gastan el centro y agarran menos en curva';
@@ -419,6 +420,8 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
       c('propulsion', `Híbrido: vueltas del motor de gasolina a ${Math.round(L('tVel'))} km/h (máximo ${RPM_MAX_MOTOR} rpm)`, (RPM_MAX_MOTOR - k.motor) / RPM_MAX_MOTOR, 0, `${Math.round(k.motor / 10) * 10} rpm`);
     }
   }
+  // 2026-11-17 (capo): the hybrid's cooling (intake, radiator, pipes): triciclo/refrigeracion.ts
+  for (const k of comprobacionesRefrigeracion(m)) c('propulsion', k.nombre, k.holgura, k.minimo, k.mostrar);
   // a hub motor has the room its rim gives it: above that power, a motor on the swing arm with a belt (as on
   // electric motorcycles) would be the honest drive, and that is not drawn here
   const kWBuje = RUEDAS_TRICICLO[T.tRuedaTras].kWBuje, kWp = L('tKWPico');
