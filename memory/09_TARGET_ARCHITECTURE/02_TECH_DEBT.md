@@ -847,6 +847,18 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - (2026-11-17) `src/components/aeromovil/CLAUDE.md`, «The weight of a section», last line is stale: the engine blocks
   DO show their weight now (`seccionDe` in `LadoTriciclo.tsx`; their parts are in `ComparadorMotores`), there is no
   `sinPeso`. Not fixed then because another agent held that file; 1 min.
+
+
+- **Mixed-axle rolling resistance counts wheels, not load** (2026-11-17, `ruedas/catalogo.ts` `crrMezcla`): Σ nᵢ·Crrᵢ / Σ nᵢ
+  as if every wheel carried the same load. Weighting by `cargasRueda` (Triciclo) and `repartoDel` (Basculante) is ~30 min.
+- **Catalogue wheel masses are estimates** (a typical tyre of the size plus a rim of its class, anchored on three weighed
+  rims); no tyre in the catalogue was weighed. Replacing them with manufacturer weights is ~1 h of searching.
+- **The garage's drawing of a saved Triciclo design** (`construirDisenoGaraje`) still shows the old aero-cover wheel for a
+  catalogue wheel: only the editor's builder re-dresses them. ~15 min.
+- **The Triciclo's consumption note still says «rodadura 0,011 (neumático de ciclomotor)»** (`LadoTriciclo.tsx`, the line
+  that prints `CRR`) when a catalogue wheel is chosen: the file was held by another bot and Eugenio asked to publish now.
+  The numbers are right (`crrTriciclo`); only that sentence is stale. Fix: print `crrTriciclo(T)` and the sheet of each
+  chosen wheel in «Ejes y ruedas», as `basculante/LadoBasculante.tsx` already does. ~15 min.
 ## 2026-11-17 · Garage aircraft: copied aerofoil helpers, no «aircraft» flag
 
 - `garaje/autogiroModelo.ts` carries its own copy of `rejilla`/`perfil` (≈ 25 lines) that `garaje/visionJet.ts` also

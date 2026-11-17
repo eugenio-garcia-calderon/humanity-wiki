@@ -28,6 +28,7 @@
 import type { Comprobacion, MaterialCarenado, MaterialChasis, Parametros, PuntosOcupante, Resultados, Rueda, Tubo, P3 } from './geometria';
 import { MATERIALES_CARENADO, MATERIALES_CHASIS, RENDIMIENTO_SOLAR, largoTubo } from './geometria';
 import { BASCULANTE_DEFECTO, type CamposBasculante, type RuedaBasculante } from './basculante/defecto';
+import { CATALOGO_RUEDAS, IDS_CATALOGO, crrMezcla, fichaRueda, nombreRueda, type FichaRueda, type IdRueda } from './ruedas/catalogo';
 import { crearForma, crearPod, largoCapNariz, limiteCarenados, type DimForma, type EsquinaDel, type FormaBasculante, type Pod } from './basculante/forma';
 import { SMERA_REF, dentroPoligono, detallesSmera, mapaSmera, mapearPoligono, perfilSmera } from './basculante/smera';
 import { CADERA_SOBRE_ASIENTO, MEDIA_CABEZA, TALLA_SENTADO, rodilla } from './geometriaBala';
@@ -54,6 +55,8 @@ export const RUEDAS_BASCULANTE: Record<RuedaBasculante, { d: number; w: number; 
   // the Smera's: 145/70 R14 in auto123.com's sheet (559 mm); 520 mm measured on Lumeneo's side photo, which is what
   // the replica draws. A round crown as a scooter's (the press front view shows the tread wrapping round the shoulder).
   s14: { d: 0.520, w: 0.145, n: '14″ del Smera, 145/70 R14 (520 mm medidos en la foto)', kg: 1.15, carga: 325, inclina: 40, kWBuje: 15 },
+  // 2026-11-17: the catalogue's wheels (motorcycle of every kind, eco car, velomobile), `kg` over the slider's 6.5 kg wheel
+  ...Object.fromEntries(IDS_CATALOGO.map(k => { const f: FichaRueda = CATALOGO_RUEDAS[k]; return [k, { d: f.d, w: f.w, n: nombreRueda(k), kg: f.kg / BASCULANTE_DEFECTO.qMRueda, carga: f.carga, inclina: f.inclina, kWBuje: f.kWBuje }]; })) as Record<IdRueda, { d: number; w: number; n: string; kg: number; carga: number; inclina: number; kWBuje: number }>,
 };
 
 // ------------------------------------------------------------------ sliders
@@ -172,12 +175,12 @@ export const SELECTORES_BASCULANTE: SelectorBasculante[] = [
   { clave: 'qSolarCola', n: 'Paneles también en la cola', dep: 'carroceria', bloque: 'Techo solar', opciones: [{ k: 'no', n: 'Solo en el techo' }, { k: 'si', n: 'También en la cubierta de la cola' }] },
   { clave: 'qMatCarenado', n: 'Material de la carrocería', dep: 'carroceria', bloque: 'Material y espesores', opciones: [{ k: 'carbonoLino', n: 'Carbono-lino' }, { k: 'vidrio', n: 'Fibra de vidrio' }, { k: 'carbono', n: 'Fibra de carbono' }] },
   { clave: 'qChMat', n: 'Material de los tubos', dep: 'chasis', bloque: 'Bastidor', opciones: [{ k: 'al6061', n: 'Aluminio 6061-T6' }, { k: 'cromoly', n: 'Acero cromoly 4130' }, { k: 'carbono', n: 'Tubo de carbono' }] },
-  { clave: 'qRuedaDel', n: 'Ruedas delanteras', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['m13', 'm14', 'm15', 'c13', 's14']) },
-  { clave: 'qRuedaTras', n: 'Ruedas traseras', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['m13', 'm14', 'm15', 'c13', 's14']) },
+  { clave: 'qRuedaDel', n: 'Ruedas delanteras', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['m13', 'm14', 'm15', 'c13', 's14', ...IDS_CATALOGO]) },
+  { clave: 'qRuedaTras', n: 'Ruedas traseras', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['m13', 'm14', 'm15', 'c13', 's14', ...IDS_CATALOGO]) },
 ];
 const OPCIONES: Record<ClaveTexto, readonly string[]> = {
   qCarroceria: ['aero', 'smera'], qRuedasDel: ['morro', 'carenados'], qSolarTecho: ['no', 'si'], qSolarMorro: ['no', 'si'], qSolarCola: ['no', 'si'], qMatCarenado: ['carbonoLino', 'vidrio', 'carbono'], qChMat: ['al6061', 'cromoly', 'carbono'],
-  qRuedaDel: ['m13', 'm14', 'm15', 'c13', 's14'], qRuedaTras: ['m13', 'm14', 'm15', 'c13', 's14'],
+  qRuedaDel: ['m13', 'm14', 'm15', 'c13', 's14', ...IDS_CATALOGO], qRuedaTras: ['m13', 'm14', 'm15', 'c13', 's14', ...IDS_CATALOGO],
 };
 
 /** This vehicle's fields from a design: the defaults for what is missing, a wrong type or an unknown option. */
@@ -740,6 +743,8 @@ export interface ResultadosBasculante {
 }
 /** Scooter tyres at 2.5 bar (rolling 0.010), hub motors and controllers at 88 %, 80 W of equipment, 90 % of the battery usable. Assumed, not measured. */
 export const CRR_B = 0.010, RENDIMIENTO_B = 0.88, AUXILIARES_B = 80, USABLE_B = 0.9;
+/** 2026-11-17: with a catalogue wheel on an axle, the mean of each wheel's own rolling resistance (`ruedas/catalogo.ts`); the old sizes keep `CRR_B`. */
+export const crrBasculante = (Q: Pick<CamposBasculante, 'qRuedaDel' | 'qRuedaTras'>) => crrMezcla([{ k: Q.qRuedaDel, n: 2 }, { k: Q.qRuedaTras, n: 2 }], CRR_B);
 /** Dry grip of a scooter tyre (g): the lean holds a curve without leaning on the tyres' sideways grip up to tan φ. */
 export const AGARRE_B = 0.9;
 /** Luggage counted for the tyres' load (kg). */
@@ -802,14 +807,14 @@ function cgOcupante(o: PuntosOcupante): [number, number] {
 /** Consumption, range and speeds with the tunnel's Cd (referred to its area, the body's largest section). */
 export function energiaBasculante(m: ModeloBasculante, mTot: number, cd: { cd: number; areaRef: number }, areaSolar: number, reparto = 0.45) {
   const Q = m.campos, L = (k: ClaveNumBasculante) => limitarBasculante(k, Q), g = 9.81, CdA = cd.cd * cd.areaRef;
-  const potencia = (v: number) => (0.5 * 1.2 * CdA * v ** 3 + CRR_B * mTot * g * v) / RENDIMIENTO_B + AUXILIARES_B;
+  const crr = crrBasculante(Q), potencia = (v: number) => (0.5 * 1.2 * CdA * v ** 3 + crr * mTot * g * v) / RENDIMIENTO_B + AUXILIARES_B;
   const consumo = (kmh: number) => { const v = kmh / 3.6; return potencia(v) / v / 3.6; };
   const vel = L('qVel'), WhKm = consumo(vel), util = m.bateria.kWh * 1000 * USABLE_B;
   const vmaxCon = (kW: number) => { let v = 10; for (let i = 0; i < 80; i++) v *= Math.pow(kW * 1000 / potencia(v), 0.34); return v * 3.6; };
   // 0 → 50 km/h: peak power, limited by the grip of the two driven rear wheels (their share of the weight, μ 0.9)
   const Fmax = AGARRE_B * (1 - reparto) * mTot * g;
   let v = 0.5, t = 0; const dt = 0.02;
-  while (v < 50 / 3.6 && t < 60) { const Fz = Math.min(Fmax, L('qKWPico') * 1000 * RENDIMIENTO_B / v) - 0.5 * 1.2 * CdA * v * v - CRR_B * mTot * g; if (Fz <= 0) { t = 99; break; } v += Fz / (mTot * 1.03) * dt; t += dt; }
+  while (v < 50 / 3.6 && t < 60) { const Fz = Math.min(Fmax, L('qKWPico') * 1000 * RENDIMIENTO_B / v) - 0.5 * 1.2 * CdA * v * v - crr * mTot * g; if (Fz <= 0) { t = 99; break; } v += Fz / (mTot * 1.03) * dt; t += dt; }
   const solarDia = areaSolar * 0.7 * RENDIMIENTO_SOLAR * 4.5 * 1000 * 0.85;
   return { cd: cd.cd, areaRef: cd.areaRef, CdA, WhKm, autonomia: util / WhKm, kmSol: solarDia / WhKm, vmaxNominal: vmaxCon(L('qKWNom')), vmaxPico: vmaxCon(L('qKWPico')), acel50: t, potencia: potencia(vel / 3.6), WhKm50: consumo(50), WhKm100: consumo(100) };
 }
@@ -1043,6 +1048,11 @@ export function calcularBasculante(m: ModeloBasculante, ar: ReturnType<typeof ar
 
   const kgBat = m.bateria.kWh * 1000 / L('qWhKg');
   const energia = cd ? energiaBasculante(m, mVeh + 2 * mOcc, cd, ar.solar, repartoDel) : null;
+  // 2026-11-17: a catalogue tyre's speed symbol against the top speed (the old sizes have no symbol on record: no check)
+  {
+    const v = Math.min(...[Q.qRuedaDel, Q.qRuedaTras].map(k => fichaRueda(k)?.vmax ?? Infinity)), vmax = energia?.vmaxNominal;
+    if (Number.isFinite(v) && vmax != null && Number.isFinite(vmax)) c('rodaje', 'Neumáticos: velocidad que admiten (su código de velocidad)', (v - vmax) / 100, 0, `${Math.round(vmax)} de ${v} km/h`);
+  }
   const rb: ResultadosBasculante = {
     area, vol, piezas, cg: { x: cg.x, y: cg.y, masa: cg.masa, vacio: { x: vacio.x, y: vacio.y } },
     basculacion: { phiMax: phi, aEquilibrada: aEq, ssfInclinado, ssfRecto, repartoDel, viaEf: tEf, radio },
@@ -1052,7 +1062,7 @@ export function calcularBasculante(m: ModeloBasculante, ar: ReturnType<typeof ar
   const e = energia, nada = NaN;
   const solarDia = ar.solar * 0.7 * RENDIMIENTO_SOLAR * 4.5 * 1000 * 0.85;
   return {
-    A: area.total, FR: nada, Cd: e?.cd ?? nada, CdA: e?.CdA ?? nada, Crr: CRR_B, vol, Paero: nada, Proll: nada, Pw: e?.potencia ?? nada, WhKm: e?.WhKm ?? nada, pedWhKm: 0,
+    A: area.total, FR: nada, Cd: e?.cd ?? nada, CdA: e?.CdA ?? nada, Crr: crrBasculante(Q), vol, Paero: nada, Proll: nada, Pw: e?.potencia ?? nada, WhKm: e?.WhKm ?? nada, pedWhKm: 0,
     autonomia: e?.autonomia ?? nada, vmax: e?.vmaxNominal ?? nada,
     masas, mVeh, mTot: mVeh + 2 * mOcc, rangoMasa: [nada, nada], Mmax: nada, tension: nada, seguridad: nada, cargaRueda: nada,
     solarPico: ar.solar * RENDIMIENTO_SOLAR * 1000, solarDia, kmSol: e?.kmSol ?? nada, areas: { carroceria: ar.carroceria, cristal: ar.cristal, solar: ar.solar }, comprobaciones: ch, basculante: rb,

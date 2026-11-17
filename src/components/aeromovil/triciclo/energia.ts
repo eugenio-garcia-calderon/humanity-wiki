@@ -3,13 +3,20 @@
 import { cifrasHibrido, factorCargaParcial } from '../hibrido';
 import { RENDIMIENTO_SOLAR } from '../geometria';
 import { areasBala } from '../geometriaBala';
-import type { ClaveNumTriciclo } from './campos';
+import type { CamposTriciclo, ClaveNumTriciclo } from './campos';
+import { crrMezcla } from '../ruedas/catalogo';
 import { limitarTriciclo } from './medidas';
 import type { ModeloTriciclo } from './modelo';
 import { AGARRE } from './comprobaciones';
 
 /** Rodadura de neumático de ciclomotor (0,011), motor de buje y controlador al 85 %, 80 W de equipos y la batería usable al 90 %. Supuestos, no medidos. */
 export const CRR = 0.011, RENDIMIENTO = 0.85, AUXILIARES = 80, USABLE = 0.9;
+/**
+ * 2026-11-17: with a catalogue wheel (`ruedas/catalogo.ts`) on an axle, the mean of each wheel's own rolling resistance,
+ * wheel by wheel (pods: `tRuedaDel`; the tail's, and in a diamond the nose's too: `tRuedaTras`). The old sizes roll at `CRR`.
+ */
+export const crrTriciclo = (T: Pick<CamposTriciclo, 'tRuedaDel' | 'tRuedaTras' | 'tTraseras' | 'tRuedas'>) =>
+  crrMezcla([{ k: T.tRuedaDel, n: 2 }, { k: T.tRuedaTras, n: T.tRuedas === 'rombo' || T.tTraseras === 'dos' ? 2 : 1 }], CRR);
 /** Consumo, autonomía y velocidades con el Cd del túnel (referido a su área: la sección mayor de la carrocería). */
 /**
  * Lo que da el techo solar en un día (Wh), como en el Aeromóvil 1: el panel, curvo, recoge de media ~70 % de lo
@@ -20,7 +27,7 @@ export const solarDiaTriciclo = (area: number, sol = 4.5) => area * 0.7 * RENDIM
 /** Petrol's lower heating value (kWh per litre: 32 MJ/L). */
 export const KWH_LITRO_GASOLINA = 8.9;
 export function energiaTriciclo(m: ModeloTriciclo, mTot: number, cd: { cd: number; areaRef: number }, areaSolar = m.solarTodo.area) {
-  const T = m.campos, L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), g = 9.81, CdA = cd.cd * cd.areaRef;
+  const T = m.campos, L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), g = 9.81, CdA = cd.cd * cd.areaRef, CRR = crrTriciclo(T);
   const potencia = (v: number) => (0.5 * 1.2 * CdA * v ** 3 + CRR * mTot * g * v) / RENDIMIENTO + AUXILIARES;
   const consumo = (kmh: number) => { const v = kmh / 3.6; return potencia(v) / v / 3.6; };
   const vel = L('tVel'), WhKm = consumo(vel), util = m.kWh * 1000 * USABLE;
