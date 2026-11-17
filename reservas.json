@@ -125,6 +125,12 @@
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "quitar: fuera «¿Algo que mejorar?» y «Empezar un diseño nuevo» (pocas líneas)",
       "desde": "2026-11-17T17:01:22.447Z"
+    },
+    {
+      "agente": "mgplanetario",
+      "ruta": "src/components/aeromovil/triciclo/defecto.ts",
+      "motivo": "mgplanetario: tMotorElec por defecto (1 línea)",
+      "desde": "2026-11-17T17:01:34.771Z"
     }
   ]
 }
