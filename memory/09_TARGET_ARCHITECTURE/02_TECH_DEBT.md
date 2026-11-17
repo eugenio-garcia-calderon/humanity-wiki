@@ -891,6 +891,75 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **The new mass checks are appended in `geometria.ts` `calcular`** (`conMasasTriciclo`), not inside `calcularTriciclo`,
   for the same reason: moving them in is ≈ 10 min.
 
+## 2026-11-17 · Homologation pre-check: what the first version leaves out (Eugenio: «publish a first version asap»)
+
+- **Not read on EUR-Lex itself**: 168/2013 and 3/2014 were read on legislation.gov.uk (EU text as of 31-1-2020); 134/2014,
+  2018/858, 2019/2144 and RD 750/2010 are cited, not reread (`FUENTES[x].leido: false`). Re-check every limit against
+  the consolidated EUR-Lex texts, especially Euro 5/5+ and OBD dates (2019/129) and the Euro 5 noise column: ~3 h.
+- **Rombo layout**: front-axle share and per-tyre load are «no se puede comprobar» (the model does not share the load
+  among four diamond supports): ~2 h with a 4-support static solve.
+- **Tyre speed symbol, headlamp heights (500–1200 mm), plate space, R-point ≥ 400 mm**: the model knows some of these
+  (lamp positions, seat hip) but they are not wired: ~3 h.
+- **The Cuadriciclo Bala has no masses/motor** (body only): mass, power and speed rows read «no se puede comprobar».
+
+## 2026-11-17 · Astride passenger far back (bot «ahorcajadas»)
+
+- **No straddle seat type for rows 2/3.** Eugenio's straddle layout is `tAsientos: 'horcajadas'` (pilot + one passenger).
+  A «a horcajadas» option in `OPCIONES_TIPO_FILA` (`filasTriciclo.ts`) for three rows would need a straddle figure per
+  row in `ocupantes.ts`/`modelo.ts` and its checks: ≈ 3 h.
+- **The long saddle just stretches** between the two hips (`cabina`, `garaje/balaPiezas.ts`, `w(x)`): at 1.40 m it is one
+  very long bench. Two separate saddles with a gap (and a mass that grows with the length) would be more honest: ≈ 1 h.
+  The seat mass (`tMAsiento`) does not grow with the saddle's length either.
+- **The Aptera buckets' backrest/headrest is not checked against the skin** (`pasajero.ts`): in the default body the
+  headrest corner is already 0.9 cm outside at today's 62 cm, so a check would turn untouched designs red. The headrest's
+  geometry vs the canopy needs a look first: ≈ 45 min.
+- **Seam with «masas» (checked, no debt):** the hybrid's engine and tank collide-check against «los asientos» in
+  `hibrido.ts` `choques`, shown by `centroMasas.ts`, which reads the seats from the same model; the passenger's mass is
+  `m.sillines` → `ocupantesTriciclo`, so the centre of gravity follows the passenger with no second copy.
+## 2026-11-17 · Electrical system v1 (bot consumos): what is left
+
+- **No per-part choice**: each part is the first catalogue item that fits; letting Eugenio pick one (a `tCat…` key per
+  part, like the motor's) needs fields in `triciclo/campos.ts` + defaults: ~1.5 h.
+- **System voltage is inferred**, not a slider: a «Tensión del sistema» selector (48/72/96/144 V) ~45 min.
+- **Several masses are estimates** (DC-DC, contactors, inlet, Daly, generics): read datasheets and replace: ~1 h.
+- **«Varios» vs catalogue parts**: the check fails on every Triciclo design (parts ≈ 14–17 kg, slider 12 kg). Raising
+  the default changes every saved design: Eugenio's call; 5 min once decided.
+- **`tVel` lives in Motor's FILAS row and is drawn a second time in «Consumos»**: moving the row's `dep` needs a
+  `DepTriciclo` 'consumos' (touches ~6 Records): ~30 min.
+- **Basculante, A1, Gota, Bala: no «Consumos» tab** (legacy since 2026-11-17).
+## 2026-11-17 · Masses, second step (masas)
+- **Resolved**: the six engine/tank sliders and the «Proyecto» lema (pending in «Masses and the hybrid's placement»).
+- **Still pending**: the sliders show the move in metres, not where it puts the part («a 1,14 m del eje trasero»);
+  the `mostrar` cases in `LadoTriciclo.tsx` were ready but that file was held by another bot: ≈ 10 min. Also still
+  pending from step one: `calcularTriciclo`'s own CG sum (≈ 10 min), `LadoTriciclo.tsx`'s unreachable «proyecto»
+  blocks (≈ 15 min), the CLAUDE.md section on masses (≈ 10 min), and `modelo.ts` reading the offsets with its own
+  clamp (`mov`, same ranges) instead of `limitarTriciclo` (file held by another bot, ≈ 5 min).
+## 2026-11-17 · Aeromóvil section notes (`components/aeromovil/notas/`)
+
+- **A section is its block's title.** Renaming a block leaves its notes behind (still in the table, not shown), and the
+  blocks that share a title across departments («Comprobaciones de este departamento») share their notes. A stable
+  `seccion` id per block (dep + bloque from `LadoTriciclo`/`LadoBasculante`, passed to `Bloque`): ≈ 45 min plus a
+  one-off rename migration of existing rows.
+- **The destination is set from `MenuDisenos`** (a menu publishing page state). A `NotasProvider` in
+  `pages/Aeromovil.tsx` with `actual?.id` and `P.disposicion`: ≈ 10 min once that file is free.
+- **«Guardar como nuevo» does not copy the notes** to the new design; they stay on the original. Copying on create in
+  `POST /api/aeromovil/disenos` (an `origen` id in the body): ≈ 20 min.
+- **Anonymous notes never leave the browser** (by design, rule 3). If Eugenio wants visitors' notes shared, they would
+  go through moderation like the tasks: ≈ 1 h.
+
+
+## 2026-11-17 · Cooling and engine position (bot «capo»)
+
+- **Cooling fields outside `campos.ts`**: no `Explicacion` per slider (the block has one paragraph) and the study's
+  `ficha()` does not know them (its rule's test is `tunel: false`). Moving them into `FILAS`/`SELECTORES_TRICICLO` +
+  `explicaciones/triciclo.ts`: ≈ 45 min.
+- **Pipes and radiators only check the skin and a few boxes** (engine, tank, battery, nose wheel), not the seats, feet,
+  frame tubes or the battery pack along the frame: ≈ 1 h with `hibrido.ts`'s `choquesDe`.
+- **Radiator is always vertical**; in a low nose it may not fit (check says «asoma»). A tilted core: ≈ 1 h.
+- **The propshaft and the engine in the nose are drawn by `visor/refrigeracion.ts`**, not `hibrido3d.ts` (claimed);
+  the front engine has no specific check for the pilot's pedals or the front suspension cradle. ≈ 40 min.
+- **Hood hinge/latch mass (≈ 1 kg) not counted**, and the nose solar panel (`tSolarMorro`) does not lift with the hood:
+  ≈ 20 min each.
 ## 2026-11-17 · Engine parts one by one (solopiezas)
 - **Only the Triciclo family** (Eugenio focuses on the Aeromóvil S). The Basculante, A1 and Gota motor layers have no
   `componente` tags and show no parts list. ≈ 30 min each if ever needed.

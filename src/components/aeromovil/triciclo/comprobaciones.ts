@@ -19,7 +19,9 @@ import { poseBascula, carenadoCuerpoMovido, carenadoAlSuelo, cuerpoAlSuelo, tilt
 import { type ModeloTriciclo, aroVolante, puntasRetrovisor } from './modelo';
 import { type PiezaMasa, type Maleteros, maleterosTriciclo, piezasTriciclo, EQUIPAJE, masaButaca, cargasRueda } from './masas';
 import { crrTriciclo, solarDiaTriciclo, energiaTriciclo } from './energia';
+import { chequeosPasajeroAtras } from './pasajero';
 import { fichaRueda } from '../ruedas/catalogo';
+import { comprobacionesRefrigeracion } from './refrigeracion';
 
 /** The check's name, also in `explicaciones/triciclo.ts`. */
 export const NEUMATICO_MOTO_SIN_INCLINAR = 'Neumáticos de moto en un vehículo que no se inclina: gastan el centro y agarran menos en curva';
@@ -363,6 +365,8 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   if (!m.bascula && [T.tRuedaDel, T.tRuedaTras].some(k => fichaRueda(k)?.perfil === 'moto')) c('rodaje', NEUMATICO_MOTO_SIN_INCLINAR, 0, 1, 'aviso');
   // the swing arm's pivot ahead of the rear wheel and behind the passenger's footpegs
   if (!m.filas && !m.butacas && !m.traseras) c('rodaje', 'Pivote del basculante detrás de los estribos del pasajero', (-1.30 + (m.sillines.xPasajero - ASIENTO.xPasajero) - 0.06) - m.basculante.pivote[0], 0.02);
+  // 2026-11-17: the passenger may go much further back (up to 1.40 m behind the pilot): what the seat runs into (./pasajero.ts)
+  chequeosPasajeroAtras(m, c);
   let tub = 9, peor = ''; for (const tb of m.tubos) { const h = tuboDentro(F, tb); if (h < tub) { tub = h; peor = tb.nombre; } }
   c('chasis', `Bastidor dentro de la carrocería${tub < 0.01 ? ` (${peor.toLowerCase()})` : ''}`, tub, 0.01);
   c('chasis', 'Bastidor: coeficiente de seguridad de los largueros', seguridad - 1.3, 0.5, `×${fmt(seguridad, 1)}`);
@@ -412,6 +416,8 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
       c('propulsion', `Híbrido: vueltas del motor de gasolina a ${Math.round(L('tVel'))} km/h (máximo ${RPM_MAX_MOTOR} rpm)`, (RPM_MAX_MOTOR - k.motor) / RPM_MAX_MOTOR, 0, `${Math.round(k.motor / 10) * 10} rpm`);
     }
   }
+  // 2026-11-17 (capo): the hybrid's cooling (intake, radiator, pipes): triciclo/refrigeracion.ts
+  for (const k of comprobacionesRefrigeracion(m)) c('propulsion', k.nombre, k.holgura, k.minimo, k.mostrar);
   // a hub motor has the room its rim gives it: above that power, a motor on the swing arm with a belt (as on
   // electric motorcycles) would be the honest drive, and that is not drawn here
   const kWBuje = RUEDAS_TRICICLO[T.tRuedaTras].kWBuje, kWp = L('tKWPico');

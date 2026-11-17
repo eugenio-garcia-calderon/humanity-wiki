@@ -2126,6 +2126,97 @@ Eugenio: «permite añadir más tipos de ruedas, por ejemplo de motos de todo ti
 - **«Masas» is a tab id, not a `Departamento`**: it has no tasks, suppliers or messages, so it is not in
   `DEPARTAMENTOS` (the Aeromóvil 1's eleven tabs do not change).
 
+## 2026-11-17 · Homologation pre-check: rules as data, category chosen by the model
+
+- **Rules as data** in `src/components/aeromovil/homologacion/normas.ts` (categories, sources, requirements with a
+  per-category limit table), evaluated by `evaluar.ts` on `ficha.ts` (the design's numbers). Alternative: hard-coded
+  checks in each vehicle's `comprobaciones.ts` — rejected: five vehicles would each repeat ten categories.
+- **Category choice**: the first category in climbing order (art. 4.4 of 168/2013: L2e→L5e, L6e→L7e; inside L7e our
+  own order CP, A2, A1; then M1) whose deciding criteria pass (wheels after the 460 mm twinned-wheel rule, mass in
+  running order, seats, size, straddle/handlebar, closed cabin) and whose speed cap is not below the design's own
+  «Velocidad de cálculo». Power and top speed over a limit do NOT rule a category out: they show as «se arregla
+  limitando» (3/2014 annex XVIII allows limitation by design). Alternative: rule out on power too — rejected, it would
+  send the Rombo Bala to M1 over 0.5 kW.
+- **Mass in running order** = the «Peso» total minus the traction battery (168/2013 art. 5.2.c) minus 10 % of the fuel
+  (tank at 90 %). **Power** = nominal (continuous) kW of the Motor tab, plus the petrol engine's kW for a PHEV (the
+  prudent reading; to confirm with a technical service). **Top speed** = the Motor tab's own power-limited figure with
+  the tunnel's Cd; gearing/rpm limits are not modelled.
+- **Polycarbonate canopy outside L1e–L5e flagged «No cumple»** (3/2014 annex VII part 1 point 2.1.2 allows rigid
+  plastic windscreens only on L1e–L5e). Read from legislation.gov.uk's copy; to confirm with a technical service.
+
+## 2026-11-17 · Astride passenger: wide range plus collision checks instead of a 62 cm clamp
+
+`tPasX` was clamped to `tPilX + 0.40…0.62` (`rangoTriciclo`, `triciclo/medidas.ts`). Eugenio asked for more. Options:
+(a) raise the clamp to a fixed new number; (b) a clamp computed from what is behind (shock tower, canopy); (c) a wide
+range (`SEPARACION_PASAJERO_MAX` = 1.40 m) with checks that say what is hit. Chosen (c): the project already moved this way
+for the battery width and the canopy height («no lo limites»), and a computed clamp hides *why* the slider stops. The
+checks live in a new file `triciclo/pasajero.ts` (`chequeosPasajeroAtras`), called once from `calcularTriciclo`. The body
+does not grow with the passenger: growing the canopy/wheelbase automatically would change saved designs' bodies and the
+tunnel's Cd silently. The near end (40 cm, pilot's backrest vs passenger's belly) is unchanged.
+## 2026-11-17 · «Consumos» tab and the electrical system (bot consumos)
+
+- **«Consumos» is a page-level tab id (`IdPestana` in `pages/Aeromovil.tsx`), not an `IdDepartamento`**: it has no
+  department content (tasks, suppliers), like «Masas», and `departamentos/tipos.ts` was claimed. «Energía» keeps the id
+  `energia` and is only renamed «Batería», so every remembered tab and every `dep: 'energia'` check still works.
+- **The electrical parts split the «Varios» slider instead of adding mass.** Alternative: add them to the parts list
+  (changes every saved design's mass, CG, range — `triciclo-disenos` would fail). Chosen: no result changes; a check says
+  when the catalogue parts outweigh «Varios» (Rombo Bala: 16.5 kg vs 12 kg) and the split is scaled with a warning.
+- **System voltage**: the chosen catalogue controller's, else 48/72/96 V by peak power (≤12 kW / ≤25 kW / above).
+  Chemistry from pack density (≥170 Wh/kg → NMC). Both labelled as assumptions on screen.
+- **Solar**: one string per zone (they face different ways); a zone too small for any MPPT alone joins the roof's string
+  in series. At 96 V only the Elmar boost MPPT (solar-car class, no public price) fits; the Victron/Genasun ones stop at 48 V.
+- **Efficiencies**: the battery-side consumption is untouched; new derived figures only (plug consumption = battery /
+  charger efficiency; MPPT share of the existing 85 % solar losses; DC-DC output of the 80 W auxiliaries).
+## 2026-11-17 · Aeromóvil section notes: where they live and how the author is stored
+
+Eugenio asked for a dated, authored note on every side-panel section, «anónimo» when not logged in.
+- **Own table `aeromovil_notas` (migration 0223), not inside `aeromovil_disenos.parametros`.** Saving a design is
+  owner-only (2026-11-07); notes from anyone else could never be stored there, and a note would rewrite the design's
+  parameters (and its autosave race). Keyed by `diseno_id` (nullable: no saved design open → the vehicle family's
+  notes), `vehiculo` (`disposicion`) and `seccion` (the block's title). Not a junction table: a note is an entity.
+- **Writes need a session (level 1)**; root CLAUDE.md rule 3. Anonymous notes stay in that browser
+  (`localStorage` `aeromovil.notas.locales`), signed «Anónimo», editable there. Alternative rejected: an open write
+  route with IP throttling like `/api/aeromovil/tareas` — it breaks rule 3 and lets anyone fill every section of
+  Eugenio's design with text that the page then shows to everybody.
+- **The author is `created_by` (a user id); the name is resolved by a JOIN at read time.** In a backup the table holds
+  text and an opaque id, and an emptied account (`vaciarCuentas.ts` keeps the `users` row as «Usuario eliminado»)
+  shows that name on its notes with nothing to clean here. Alternative rejected: copying the display name into the row —
+  it would survive account deletion in every nightly backup.
+- **One fetch per open design**, in a module store (`components/aeromovil/notas/almacen.ts`), not one per block (~60
+  blocks). `MenuDisenos` sets where notes go, since it already receives the open design and `P.disposicion`
+  (`pages/Aeromovil.tsx` was claimed by another bot; a context provider there is the cleaner home).
+- Reading is public, like the tasks and the designs.
+- **The notes open in a dialog portalled to `document.body`, and the header icon is a `span role="button"`.** For
+  anyone but the owner the side panel is inside `<fieldset disabled>` (pages/Aeromovil.tsx), which disables every
+  button and textarea inside it; inline notes worked only for the owner (caught in the headless test as an anonymous
+  visitor). Alternative: carve the notes out of that fieldset in `pages/Aeromovil.tsx` — more invasive, and that file
+  was claimed by another bot.
+
+## 2026-11-17 · Checks run in GitHub Actions on every pull request
+
+**Context.** Ten bots shared one 2-CPU / 8 GB cloud machine and ran tsc, vite build, the Aeromóvil scripts and headless screenshots one at a time behind `aeromovil-pesado.lock`. The queue reached ~10 jobs of up to 15 min each; ready PRs waited hours.
+**Decision.** New workflow `.github/workflows/comprobar.yml` runs on `pull_request` to main: tsc, build, and a matrix of the Aeromóvil scripts (tunnel, triciclo-disenos, estudio-aerodinamico, pesos-secciones, homologacion, bala-cola-lisa, cola-continuidad seed 7), each job in parallel on GitHub runners. Read-only, no secrets. Bots open the PR, wait for green, then merge under the deploy lock. Local heavy work is limited to what CI cannot do (headless screenshots of the feature).
+**Alternatives.** (a) Allow 2 concurrent heavy jobs locally: at most 2× and risks OOM on 8 GB. (b) Skip checks: rejected. (c) Bigger cloud machine: not in our control.
+
+
+## 2026-11-17 · Cooling, intakes, hood and engine position of the Triciclo (bot «capo»)
+
+- **Fields outside `CamposTriciclo`.** `tToma…`, `tBranq…`, `tRad…`, `tTuboD`, `tMotorPos` live in
+  `triciclo/refrigeracion.ts` (`CamposRefrigeracion`, `FILAS_REFRIGERACION`, read from `m.P` with
+  `camposRefrigeracion`), because `campos.ts`/`defecto.ts` were claimed by other bots all afternoon. Absent = «Ninguna»
+  / «Detrás», so every saved design builds identically (checked: hash of the hybrid layout + checks + masses equal to
+  main for 3 bodies × 3 architectures × 2 propulsions). Alternative: rows in `FILAS` — moving them is ≈ 30 min.
+- **True holes, not decals.** The intakes remove the body mesh's triangles inside each outline (`visor/refrigeracion.ts`
+  `cortarPiel`); a 12 mm black bezel hides the saw-tooth of the ≈ 1 cm skin cells; a dark duct runs to the radiator.
+  Cheaper than re-gridding the skin around the outline, which would have touched `garaje/balaModelo.ts`.
+- **The hood is the same triangles on a pivot**, registered as a «maletero» so the existing animation opens it; closed it
+  draws exactly the old body. No extra mass (hinges ≈ 1 kg not counted, so saved designs keep their mass).
+- **Cooling drag is a literature estimate added to the consumption's CdA** (`energia.ts`), never to the tunnel or its
+  calibration: ΔCdA = 0,5 × intake area (Hucho, 0,3–0,7). Heat: 25 % of fuel energy (Heywood); radiator ε 0,5, fan 3 m/s,
+  ΔT 70 K.
+- **Engine in the nose** (`hibrido.ts` `delante`): same search (nearest the cabin, lowest), drive by a propshaft along the
+  floor to the unchanged chain sprocket; tank stays behind the seats; exhaust under the floor. Masses of the propshaft
+  (1,9 kg/m + 1 kg) go through `piezasRefrigeracion` (the one hook into `masas.ts`).
 ## 2026-11-17 · Engine parts isolated by `userData.componente`, registry in `piezasMotor.ts` (solopiezas)
 - **Chosen**: one pure registry (`src/components/aeromovil/piezasMotor.ts`: groups → `componente` ids, names, which
   parts a design has, where the auxiliaries go, how the engine's mass splits). The 3D hides meshes of the «Motor» layer

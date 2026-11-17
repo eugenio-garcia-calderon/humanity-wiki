@@ -10,7 +10,7 @@ import type { Comprobacion } from './geometria';
 import { Bloque, ListaComprobaciones } from './controles';
 import type { Pendiente } from './triciclo/pendientes';
 
-const NOMBRES: Record<string, string> = { carroceria: 'Carrocería', interior: 'Interior', chasis: 'Chasis', rodaje: 'Rodaje', propulsion: 'Motor', energia: 'Energía', masas: 'Masas' };
+const NOMBRES: Record<string, string> = { carroceria: 'Carrocería', interior: 'Interior', chasis: 'Chasis', rodaje: 'Rodaje', propulsion: 'Motor', energia: 'Energía', masas: 'Masas', homologacion: 'Homologación' };
 /** The tab a check is fixed in: the first department it names (the checks list «dep» as «a,b»). */
 const depDe = (c: Comprobacion) => (c.dep ?? 'carroceria').split(',')[0];
 
