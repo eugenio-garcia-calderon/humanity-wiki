@@ -185,6 +185,12 @@
       "ruta": "src/components/aeromovil/explicaciones/triciclo.ts",
       "motivo": "mgplanetario: MG2 central (pocas líneas)",
       "desde": "2026-11-17T14:26:59.983Z"
+    },
+    {
+      "agente": "mgplanetario",
+      "ruta": "src/components/aeromovil/hibrido3d.ts",
+      "motivo": "mgplanetario: MG2 central (pocas líneas)",
+      "desde": "2026-11-17T14:27:08.096Z"
     }
   ]
 }
