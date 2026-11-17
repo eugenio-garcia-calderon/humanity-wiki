@@ -136,6 +136,16 @@ export interface DimBala {
    * See garaje/transicionCola.ts. Absent or 0: built exactly as before, bit for bit.
    */
   transCola?: number;
+  /**
+   * 2026-11-17 (Eugenio: «estudia los cortes drásticos de las colas… sin tener que hacer una cola muy alargada»): the Kamm
+   * tail. The whole shape above is still drawn, tail tip included (the «virtual» long tail that sets the taper), and the
+   * skin is then cut square across where its section has fallen to this fraction of the largest one (0.3 … 0.8; Kamm's
+   * rule is 0.5). Everything outside reads the cut as the tail's end (`X_COLA`, `LARGO`, the envelope, the cache), and
+   * the 3D closes it with a flat base and a sharp edge (balaModelo.ts `culote`). Absent: built exactly as before, bit for bit.
+   */
+  corte?: number;
+  /** With `corte`: a cavity in the base this deep (m), its walls the skin carried straight on. Drawn only (the tunnel does not see it). */
+  cavidad?: number;
 }
 
 // --------------------------------------------------- from the Aeromóvil Gota
@@ -796,6 +806,34 @@ export function crearForma(D: DimBala) {
     return { zE: d.zE, yC: d.yC, drop: d.drop, w };
   }
 
+  // ------------------------------------------------------- the Kamm cut (2026-11-17)
+  /**
+   * Where the skin is cut (`corte`): going back from the largest section, the first x where the section's area has fallen
+   * to `corte` of it (bisection; behind the largest section the tail's area only falls). Also what the panel and the
+   * literature estimate need: the base (area, height, width) and the taper just ahead of the cut, as the angle of the top
+   * centre line, of the widest line and of the belly over its last 15 cm (a line falling more than ~15° there has
+   * separated before the cut, and the cut gains nothing: Hucho; the 2-ft and 4-ft trailer tails, Transport Canada).
+   */
+  const kamm = D.corte ? (() => {
+    const f = Math.min(0.9, Math.max(0.1, D.corte)), may = seccionMayor(), objetivo = f * may.area;
+    let a = may.x, b = X_COLA + 0.01;
+    for (let i = 0; i < 32; i++) { const m = (a + b) / 2; if (areaSeccion(m, 120).area > objetivo) a = m; else b = m; }
+    // (never within 15 cm of the canopy's end: the glass, its frame and the hatch end there, on the skin. Then the cut is
+    // as far forward as the canopy lets it be, and `fraccion` says what is left there)
+    const xLibre = Math.max(X_COLA + 0.05, -D.cupFin - 0.15), x = Math.min((a + b) / 2, xLibre), s0 = sec(x), V = 0.15, s1 = sec(Math.min(X_MORRO, x + V));
+    const extremos = (s: Sec) => { let hw = 0, y0 = Infinity, y1 = -Infinity; for (let k = 0; k <= 120; k++) { const [z, y] = punto(s, k / 120); hw = Math.max(hw, z); y0 = Math.min(y0, y); y1 = Math.max(y1, y); } return { hw, y0, y1 }; };
+    const e0 = extremos(s0), e1 = extremos(s1), grados = (d: number) => Math.atan2(d, V) * 180 / Math.PI;
+    return {
+      x, pedida: f, limitado: x < (a + b) / 2, areaMax: may.area, area: areaSeccion(x).area, fraccion: areaSeccion(x).area / may.area, alto: e0.y1 - e0.y0, ancho: 2 * e0.hw, yBajo: e0.y0, yAlto: e0.y1,
+      /** The taper ahead of the cut (°, + closing in): the roof falling, the sides coming in, the belly rising. */
+      angTecho: grados(punto(s1, 1)[1] - punto(s0, 1)[1]), angLado: grados(e1.hw - e0.hw), angBajos: grados(punto(s0, 0)[1] - punto(s1, 0)[1]),
+      /** The long tail's tip, and what the cut saves of it (m). */
+      xPunta: X_COLA, ahorro: x - X_COLA, cavidad: Math.max(0, Math.min(0.5 * (e0.y1 - e0.y0), D.cavidad ?? 0)),
+    };
+  })() : null;
+  /** The tail's real end: the cut, or the tip as always. */
+  const X_FIN = kamm ? kamm.x : X_COLA, LARGO_REAL = X_MORRO - X_FIN;
+
   // ------------------------------------------------------- fast lookups (cache)
   // Projections query thousands of points: the half-section is cached as a
   // polyline every 8 mm in x and blended between neighbours; within 6 cm of the
@@ -804,20 +842,20 @@ export function crearForma(D: DimBala) {
   function polilinea(i: number): Float64Array {
     let p = cache.get(i);
     if (!p) {
-      const s = sec(X_COLA + i * PASO_CACHE);
+      const s = sec(X_FIN + i * PASO_CACHE);
       p = new Float64Array(NT * 2 + 2);
       for (let k = 0; k <= NT; k++) { const [z, y] = punto(s, k / NT); p[2 * k] = z; p[2 * k + 1] = y; }
       cache.set(i, p);
     }
     return p;
   }
-  const N_CACHE = Math.ceil(LARGO / PASO_CACHE);
-  const N_FINO = Math.round(LARGO / PASO_FINO);
+  const N_CACHE = Math.ceil(LARGO_REAL / PASO_CACHE);
+  const N_FINO = Math.round(LARGO_REAL / PASO_FINO);
   const cacheFino = new Map<number, Float64Array>();
   function polilineaFina(i: number): Float64Array {
     let p = cacheFino.get(i);
     if (!p) {
-      const s = sec(Math.min(X_MORRO, X_COLA + i * PASO_FINO));
+      const s = sec(Math.min(X_MORRO, X_FIN + i * PASO_FINO));
       p = new Float64Array(NT * 2 + 2);
       for (let k = 0; k <= NT; k++) { const [z, y] = punto(s, k / NT); p[2 * k] = z; p[2 * k + 1] = y; }
       cacheFino.set(i, p);
@@ -825,11 +863,11 @@ export function crearForma(D: DimBala) {
     return p;
   }
   function vecinos(x: number): [Float64Array, Float64Array, number] {
-    if (X_MORRO - x < LARGO_FINO || x - X_COLA < LARGO_FINO) {
-      const f = Math.min(N_FINO - 1e-9, Math.max(0, (x - X_COLA) / PASO_FINO)), i = Math.floor(f);
+    if (X_MORRO - x < LARGO_FINO || x - X_FIN < LARGO_FINO) {
+      const f = Math.min(N_FINO - 1e-9, Math.max(0, (x - X_FIN) / PASO_FINO)), i = Math.floor(f);
       return [polilineaFina(i), polilineaFina(i + 1), f - i];
     }
-    const f = Math.min(N_CACHE - 1e-9, Math.max(0, (x - X_COLA) / PASO_CACHE));
+    const f = Math.min(N_CACHE - 1e-9, Math.max(0, (x - X_FIN) / PASO_CACHE));
     const i = Math.floor(f);
     return [polilinea(i), polilinea(i + 1), f - i];
   }
@@ -873,7 +911,7 @@ export function crearForma(D: DimBala) {
   }
   /** Is the point (x, y, z) inside the skin? */
   function dentroPiel(x: number, y: number, z: number): boolean {
-    if (x >= X_MORRO || x <= X_COLA) return false;
+    if (x >= X_MORRO || x <= X_FIN) return false;
     const [a, b, w] = vecinos(x);
     return dentro(a, b, w, z, y);
   }
@@ -887,7 +925,7 @@ export function crearForma(D: DimBala) {
   /** x of the skin seen from the front at (z, y), or NaN. */
   const frenteX = (z: number, y: number) => bordeX(z, y, X(0.0), X_MORRO);
   /** x of the skin seen from behind at (z, y), or NaN. */
-  const detrasX = (z: number, y: number) => bordeX(z, y, X(-2.3), X_COLA);
+  const detrasX = (z: number, y: number) => bordeX(z, y, X(-2.3), X_FIN);
 
   // --------------------------------------------------------- envelope and area
   /**
@@ -897,8 +935,8 @@ export function crearForma(D: DimBala) {
    */
   function envolvente(paso = 0.05): [number, number, number, number][] {
     const out: [number, number, number, number][] = [];
-    for (let x = X_MORRO; x >= X_COLA - 1e-9; x -= paso) {
-      const s = sec(Math.max(X_COLA + 1e-4, Math.min(X_MORRO - 1e-4, x)));
+    for (let x = X_MORRO; x >= X_FIN - 1e-9; x -= paso) {
+      const s = sec(Math.max(X_FIN + 1e-4, Math.min(X_MORRO - 1e-4, x)));
       let b = Infinity, t = -Infinity, hw = 0;
       for (let k = 0; k <= 80; k++) { const [z, y] = punto(s, k / 80); b = Math.min(b, y); t = Math.max(t, y); hw = Math.max(hw, z); }
       const r = (v: number) => Math.round(v * 1000) / 1000;
@@ -934,9 +972,13 @@ export function crearForma(D: DimBala) {
   // (2026-11-13, the smooth body: a wide tail carries the light bar onto its trailing edge, 3 cm from the end, and the
   // hatch and the tail panel with it; a wide nose carries its band to 5 cm from the leading edge)
   const X_ARO_MORRO = aMorro ? X_ARO_MORRO0 + (X_MORRO - 0.05 - X_ARO_MORRO0) * aMorro : X_ARO_MORRO0;
-  const X_ARO_COLA = aCola ? X_ARO_COLA0 + (X_COLA + 0.03 - X_ARO_COLA0) * aCola : X_ARO_COLA0;
+  const X_ARO_COLA1 = aCola ? X_ARO_COLA0 + (X_COLA + 0.03 - X_ARO_COLA0) * aCola : X_ARO_COLA0;
+  // (2026-11-17, the Kamm cut: never behind the cut; there the light bar runs 3 cm ahead of the cut edge, as on a Prius)
+  const X_ARO_COLA = kamm ? Math.max(X_ARO_COLA1, X_FIN + 0.03) : X_ARO_COLA1;
   return {
-    D, BATALLA, X_MORRO, X_COLA, LARGO, X_LAT, XN0, XT0, X_ARO_MORRO, X_ARO_COLA,
+    D, BATALLA, X_MORRO, X_COLA: X_FIN, LARGO: LARGO_REAL, X_LAT,
+    /** 2026-11-17: the Kamm cut (`corte`), what it is and where; null without it (then `X_COLA` is the tip as always). */
+    kamm, XN0, XT0, X_ARO_MORRO, X_ARO_COLA,
     /** 2026-11-16: the length (m) over which the cabin–tail transition rounds the stretch; 0 where it had nothing to round. */
     transicion: suave && (!D.lisa || lam > 0) ? suave.largo : 0,
     R_DEL: D.rDel, R_LAT: D.rLat, VIA_LAT: D.via, ANCHO_NEU: D.anchoNeu, ANCHO_NEU_LAT: D.anchoNeuLat,
