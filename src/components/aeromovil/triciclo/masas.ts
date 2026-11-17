@@ -13,6 +13,8 @@ import { centroDe, repartirCargas } from '../masasVehiculo';
 import { ruedasTriciclo } from './centroMasas';
 
 // ------------------------------------------------------------------ cálculo
+import { piezasRefrigeracion } from './refrigeracion';
+
 export interface PiezaMasa {
   nombre: string; kg: number; x: number; y: number;
   /** 2026-11-17 (masas): across the car (m, + to the right); absent, on the centre line. */
@@ -123,6 +125,8 @@ export function piezasTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cris
   if (m.faroBarra) o.push({ nombre: 'Barra de luz del morro', kg: 0.9, x: m.faroBarra.c[0], y: m.faroBarra.c[1] });
   // 2026-11-16: the interior finish (none with the defaults: today's masses)
   o.push(...m.interior.piezas);
+  // 2026-11-17 (capo): the hybrid's radiator, fan, pipes, coolant and intake ducts (none with «Toma de aire: Ninguna»)
+  o.push(...piezasRefrigeracion(m));
   return dimensionar(m, o);
 }
 export function piezasBase(m: ModeloTriciclo, ar: { carroceria: number; cristal: number; solar: number }, centros: { xPiel: number; yPiel: number; xCristal: number; yCristal: number }, pods: { area: number; areaTras?: number }): PiezaMasa[] {
