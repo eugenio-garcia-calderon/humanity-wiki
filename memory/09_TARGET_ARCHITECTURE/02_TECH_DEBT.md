@@ -927,6 +927,13 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **`tVel` lives in Motor's FILAS row and is drawn a second time in «Consumos»**: moving the row's `dep` needs a
   `DepTriciclo` 'consumos' (touches ~6 Records): ~30 min.
 - **Basculante, A1, Gota, Bala: no «Consumos» tab** (legacy since 2026-11-17).
+## 2026-11-17 · Masses, second step (masas)
+- **Resolved**: the six engine/tank sliders and the «Proyecto» lema (pending in «Masses and the hybrid's placement»).
+- **Still pending**: the sliders show the move in metres, not where it puts the part («a 1,14 m del eje trasero»);
+  the `mostrar` cases in `LadoTriciclo.tsx` were ready but that file was held by another bot: ≈ 10 min. Also still
+  pending from step one: `calcularTriciclo`'s own CG sum (≈ 10 min), `LadoTriciclo.tsx`'s unreachable «proyecto»
+  blocks (≈ 15 min), the CLAUDE.md section on masses (≈ 10 min), and `modelo.ts` reading the offsets with its own
+  clamp (`mov`, same ranges) instead of `limitarTriciclo` (file held by another bot, ≈ 5 min).
 ## 2026-11-17 · Aeromóvil section notes (`components/aeromovil/notas/`)
 
 - **A section is its block's title.** Renaming a block leaves its notes behind (still in the table, not shown), and the

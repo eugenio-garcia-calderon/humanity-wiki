@@ -12451,6 +12451,15 @@ elementos. Y podemos ir jugando también con su precio, los proveedores, todo es
   roja dice que hay que subirlo a 18 kg (no lo he subido yo: cambiaría el peso del coche; es decisión de Eugenio).
 - Rombo Bala (a 120 km/h): ver el informe del bot. No visto en un teléfono de verdad: si sale la versión vieja,
   `humanity.wiki/?sw=off`.
+## 2026-11-17 · Motor de gasolina y depósito: deslizadores para colocarlos donde quieras (masas, segundo paso)
+- Lo que faltaba de «que el depósito también se pueda colocar de manera libre, también haz que el motor se pueda
+  colocar de manera libre»: en Motor › Híbrido enchufable, seis deslizadores nuevos, «Motor de gasolina: adelante (+) o
+  atrás (−)», «arriba o abajo», «a la derecha o a la izquierda», y lo mismo para el depósito. Cero es su sitio de serie
+  (el de la pestaña «Masas»); cada uno tiene su explicación. Al moverlos, «Masas» y las comprobaciones (rueda,
+  basculante, amortiguador, asientos, batería, piel) lo siguen.
+- La pestaña «Proyecto» se presenta ahora como «lo que falta por hacer y la revisión de los puntos críticos que no
+  están bien».
+- Ningún diseño guardado cambia: los seis valen cero si no se tocan.
 ## 2026-11-17 · Notas en cada desplegable del Aeromóvil
 
 Eugenio: «Permite también en cada sección, por ejemplo, motor gasolina o motor eléctrico o morro, cola, esas secciones,
