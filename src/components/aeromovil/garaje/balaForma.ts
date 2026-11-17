@@ -401,6 +401,8 @@ interface Tapa {
    * the belly and the widest point; with a tip high on the tail the shoulders creased 24°).
    */
   empalme?: { L: number; d: P2[] };
+  /** 2026-11-17: the joint's slopes unclipped (the new cap's); `g` keeps the old cap's clipped ones. */
+  gN?: [number, number, number];
   /** How much of the guides and of the blend (`transCola`): 0 the old cap, 1 the new. */
   gamma?: number;
   /**
@@ -579,14 +581,22 @@ export function crearForma(D: DimBala) {
     const exceso = Math.abs(gC[0] - T.g[0]) + Math.abs(gC[1] - T.g[1]) + Math.abs(gC[2] - T.g[2]);
     const gamma = continua && dir < 0 ? Math.min(1, Math.max(linea / 0.2, exceso / 0.2, Math.abs(cy - (D.puntaCola + elevar)) / 0.02)) : 0;
     if (gamma > 0) {
-      T.g = gC; T.gamma = gamma;
+      T.gN = gC; T.gamma = gamma;
       T.cunaSuave = true;
       // the top and the belly as guide lines (one monotone rational each, as the smooth body's deck): they leave the joint
       // with the body's height and slope whatever it is, and reach the tip's height without rippling. The ogive, scaled by
       // the slope relative to the height left over the tip, could not follow a body falling steeply onto a high tip
       const fT = (x: number) => controlesBase(x)[8][1], fB = (x: number) => controlesBase(x)[0][1];
-      T.empalme = { L: Math.min(largo, Math.max(0.30, D.transCola ?? 0)), d: b.map((p, i) => [(p[0] - a[i][0]) / e, (p[1] - a[i][1]) / e] as P2) };
-      T.guias = { arriba: guia(x0, yt0, pendiente(fT, x0 + 0.004), xPunta, cy, 3), abajo: guia(x0, yb0, pendiente(fB, x0 + 0.004), xPunta, cy, 3) };
+      // (2026-11-17: each arrives at the tip with `llegada` times its mean slope: 3 for a line that leaves the joint at its
+      // mean slope, more for one that leaves it flatter, less for one that leaves it steeper (1.2 … 6), so the turn is
+      // spread over the cap instead of piled up at one end. A fixed 3 bent a 26 cm tail 8° in 1 cm, at its joint when it
+      // left nearly level, near its tip when it left steep)
+      const llegada = (y0: number, m0: number) => { const r = m0 * (xPunta - x0) / (cy - y0); return Math.min(6, Math.max(1.2, 3 / Math.max(0.5, r > 0 ? r : 0))); };
+      const mT = pendiente(fT, x0 + 0.004), mB = pendiente(fB, x0 + 0.004);
+      T.guias = { arriba: guia(x0, yt0, mT, xPunta, cy, llegada(yt0, mT)), abajo: guia(x0, yb0, mB, xPunta, cy, llegada(yb0, mB)) };
+      // 2026-11-17: the joint's tangent given back point by point by a correction that dies out over `L` (see `empalme`)
+      const h = 0.002, c1 = enTapa(T, x0 + dir * h), L = Math.min(largo, Math.max(0.30, D.transCola ?? 0));
+      T.empalme = { L, d: b.map((p, i) => [(p[0] - a[i][0]) / e - (c1[i][0] - p[0]) / h, (p[1] - a[i][1]) / e - (c1[i][1] - p[1]) / h] as P2) };
     }
     return T;
   }
@@ -606,8 +616,10 @@ export function crearForma(D: DimBala) {
     const s = Math.min(1, Math.abs(x - T.x0) / T.largo);
     const k = (g: number) => { const m = Math.max(T.m, g); return Math.pow(1 - s, m) * (1 + (m - g) * s); };
     let kz = k(T.g[0]), kUp = k(T.g[1]), kDn = k(T.g[2]);
-    if (T.guias) {
-      const G = T.gamma ?? 1;
+    // (the new cap, by `gamma`: the plan from the unclipped slope, the top and the belly along their guide lines)
+    const G = T.gamma ?? 0, gz = T.gN ? T.g[0] + (T.gN[0] - T.g[0]) * G : T.g[0];
+    if (T.guias && T.gN) {
+      kz += (k(T.gN[0]) - kz) * G;
       kUp += ((T.guias.arriba(x) - T.cy) / (T.base[8][1] - T.cy) - kUp) * G; kDn += ((T.cy - T.guias.abajo(x)) / (T.cy - T.base[0][1]) - kDn) * G;
     }
     if (T.linea) {
@@ -615,7 +627,7 @@ export function crearForma(D: DimBala) {
       // nose; 4: nearly square, its truncated tail) that leaves the joint with the body's own slope (g) and keeps half of
       // its width or more until close to the tip; in side view the cone thins into a wedge. Blended by `linea`.
       // (`cunaSuave`: the body's slope may now be above 2, where 1 − g·s + g·s²/2 turns negative; (1 − s)^g is the same at 2)
-      const g = T.g[0], q = T.cunaSuave && g > 2 ? Math.pow(1 - s, g) : 1 - g * s + g * s * s / 2;
+      const g = gz, q = T.cunaSuave && g > 2 ? Math.pow(1 - s, g) : 1 - g * s + g * s * s / 2;
       const ancho = Math.pow(Math.max(0, 1 - Math.pow(s, T.pe!)), 1 / T.pe!) * q, cuna = T.cunaSuave ? cunaContinua(T.linea, s) : 1 - 0.5 * T.linea * s;
       kz += (ancho - kz) * T.linea; kUp *= cuna; kDn *= cuna;
     }
@@ -641,12 +653,12 @@ export function crearForma(D: DimBala) {
       return [z * f * kz, T.cy + dy * f * (dy > 0 ? kUp : kDn)] as P2;
     });
     if (T.empalme) {
+      // the slope each control point lacks at the joint (`d`, body's − cap's), added as d·u·(1 − u/L)³: it gives the body's
+      // tangent back at u = 0 and is gone, with its slope and curvature, at u = L. A blend with the body's section carried
+      // on in a straight line (the first version) pulled a steep roof below the tip on a 25 cm tail: 22° bends
       const u = Math.abs(x - T.x0), E = T.empalme; if (u >= E.L) return out;
-      const v = u / E.L, w = 1 - (T.gamma ?? 1) * (1 - v * v * v * (v * (6 * v - 15) + 10));
-      return out.map(([z, y], i) => {
-        const zl = T.base[i][0] + E.d[i][0] * u, yl = T.base[i][1] + E.d[i][1] * u;
-        return [Math.max(0, zl + (z - zl) * w), yl + (y - yl) * w] as P2;
-      });
+      const v = 1 - u / E.L, f = G * u * v * v * v;
+      return out.map(([z, y], i) => [Math.max(0, z + E.d[i][0] * f), y + E.d[i][1] * f] as P2);
     }
     return out;
   }

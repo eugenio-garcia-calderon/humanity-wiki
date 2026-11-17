@@ -836,7 +836,7 @@ export interface OpcionesBala {
     /** 2026-11-12: teardrop mirrors instead of the camera pods (on the doors if there are doors). */
     retrovisor?: OpcionRetrovisor | null;
     /** 2026-11-12: the solar panel run on over the tail, from x0 back to x1, above t = tLow(x) (it rides on the lid that opens there). */
-    solarCola?: { x0: number; x1: number; tLow: (x: number) => number } | null;
+    solarCola?: { x0: number; x1: number; tLow: (x: number) => number; cuello?: boolean } | null;
     /** Round 3 (2026-11-12): the panel on top of the nose (fixed on the body), and the central headlamp (centre, depth, height, width). */
     solarMorro?: { x0: number; x1: number; tLow: (x: number) => number } | null;
     faro?: { c: [number, number, number]; fondo: number; alto: number; ancho: number } | null;
@@ -922,6 +922,20 @@ function panelCola(o: { x0: number; x1: number; tLow: (x: number) => number }, M
     for (let c = 0; c < R.cols; c++) R.uv[(i * R.cols + c) * 2 + 1] = R.pos[(i * R.cols + c) * 3] / CEL;
   }
   return malla(geometria(R, caras(R)), M.solar, 'panel-solar');
+}
+/**
+ * 2026-11-17 (Eugenio's «Modelo 1», the white spike between the glass's point and the panel's): the canopy frame's navy
+ * carried down, at its rear tip, to the width the tail panel starts with: from where the frame's lower edge reaches that
+ * width back to the panel's front, between that width and the frame (the whole top behind the frame's tip). One patch a
+ * side, on the body (it does not lift with the hatch), lifted as the panel is.
+ */
+function cuelloPanel(o: { x0: number; tLow: (x: number) => number }, M: Mats): THREE.Object3D[] {
+  const t0 = o.tLow(o.x0), tF = (s: Sec) => (s.x < L.XF1 ? 1 : Math.min(1, tArriba(s, L.yMarco(s.x))));
+  let x = L.XF1; while (x < L.XF1 + 0.40 && tF(F.sec(x)) > t0) x += 0.002;
+  if (!(x > o.x0 + 0.004)) return [];
+  const der = malla(parcheXT(x, o.x0, Math.max(8, Math.round((x - o.x0) / 0.004)), s => [t0, Math.max(t0, tF(s) + 0.003)], 10, 0.0015, 'lado'), M.marinoDoble, 'cuello-panel');
+  const izq = der.clone(); izq.scale.z = -1;
+  return [der, izq];
 }
 /** A ribbon on the skin through (x, t) points (right side), with its width at each point, lifted `sep`. */
 function cintaXT(pts: [number, number][], ancho: (i: number) => number, sep: number): THREE.BufferGeometry {
@@ -1154,6 +1168,7 @@ function armar(o: OpcionesBala): THREE.Group {
   const laAleta = o.aleta === null ? null : aleta(F, M, o.aleta);
   // 2026-11-12: the panel over the tail rides on the lid that opens there, as the fin does
   const sc = o.triciclo?.solarCola ? panelCola(o.triciclo.solarCola, M) : null;
+  if (o.triciclo?.solarCola?.cuello) for (const p of cuelloPanel(o.triciclo.solarCola, M)) add(p);
   if (conP?.pivoteFin) {
     // the Aptera hatch carries the fin
     for (const pieza of [laAleta, sc]) if (pieza) { pieza.position.sub(conP.pivoteFin.position); conP.pivoteFin.add(pieza); }
