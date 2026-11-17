@@ -52,7 +52,7 @@ const g = (texto: string): Frase => ({ texto, origen: 'general' });
 /** The sliders the options use: label on screen, where it is, range (as in Aeromovil.tsx). */
 /** `ver`: what the screen shows for a stored value (the Triciclo measures some lengths from its own front axle). */
 type Ficha = { n: string; donde: string; min: number; max: number; ver?: number };
-const A1: Partial<Record<keyof Parametros, Ficha>> = {
+export const A1: Partial<Record<keyof Parametros, Ficha>> = {
   parabrisas: { n: 'Inclinación del parabrisas', donde: 'Carrocería › Carrocería y cúpula', min: 0.12, max: 0.32 },
   techo: { n: 'Caída del techo', donde: 'Carrocería › Carrocería y cúpula', min: 1, max: 3 },
   colaA1: { n: 'Forma de la cola', donde: 'Carrocería › Carrocería y cúpula', min: 0, max: 1 },
@@ -64,7 +64,7 @@ const A1: Partial<Record<keyof Parametros, Ficha>> = {
   nL: { n: 'Fondo', donde: 'Carrocería › Carrocería y cúpula', min: 2.0, max: 5.0 },
   clear: { n: 'Altura de los bajos', donde: 'Chasis › Chasis', min: 0.10, max: 0.30 },
 };
-const GOTA: Partial<Record<keyof Parametros, Ficha>> = {
+export const GOTA: Partial<Record<keyof Parametros, Ficha>> = {
   tailRound: { n: 'Redondez de la punta de cola', donde: 'Carenado aerodinámico', min: 0, max: 0.8 },
   full: { n: 'Plenitud de cola', donde: 'Carenado aerodinámico', min: 0.5, max: 1.4 },
   tipH: { n: 'Altura de la punta de cola', donde: 'Carenado aerodinámico', min: 0.25, max: 0.70 },
