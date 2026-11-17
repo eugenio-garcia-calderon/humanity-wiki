@@ -89,6 +89,12 @@
       "ruta": "src/server/aeromovil.ts",
       "motivo": "legado: el servidor no cambia ni quita diseños legado (2 líneas)",
       "desde": "2026-11-17T17:55:53.559Z"
+    },
+    {
+      "agente": "mgplanetario",
+      "ruta": "src/components/aeromovil/triciclo/defecto.ts",
+      "motivo": "mgplanetario: merge (1 línea)",
+      "desde": "2026-11-17T17:55:55.507Z"
     }
   ]
 }
