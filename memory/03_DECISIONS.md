@@ -2125,3 +2125,13 @@ Eugenio: «permite añadir más tipos de ruedas, por ejemplo de motos de todo ti
   the engine as far as needed to be clean put it 13 cm higher on the default Triciclo, the opposite of the request.
 - **«Masas» is a tab id, not a `Departamento`**: it has no tasks, suppliers or messages, so it is not in
   `DEPARTAMENTOS` (the Aeromóvil 1's eleven tabs do not change).
+
+## 2026-11-17 · Astride passenger: wide range plus collision checks instead of a 62 cm clamp
+
+`tPasX` was clamped to `tPilX + 0.40…0.62` (`rangoTriciclo`, `triciclo/medidas.ts`). Eugenio asked for more. Options:
+(a) raise the clamp to a fixed new number; (b) a clamp computed from what is behind (shock tower, canopy); (c) a wide
+range (`SEPARACION_PASAJERO_MAX` = 1.40 m) with checks that say what is hit. Chosen (c): the project already moved this way
+for the battery width and the canopy height («no lo limites»), and a computed clamp hides *why* the slider stops. The
+checks live in a new file `triciclo/pasajero.ts` (`chequeosPasajeroAtras`), called once from `calcularTriciclo`. The body
+does not grow with the passenger: growing the canopy/wheelbase automatically would change saved designs' bodies and the
+tunnel's Cd silently. The near end (40 cm, pilot's backrest vs passenger's belly) is unchanged.

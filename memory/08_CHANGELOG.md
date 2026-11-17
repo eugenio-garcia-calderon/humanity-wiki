@@ -12374,3 +12374,23 @@ Eugenio: «permite añadir más tipos de ruedas, por ejemplo de motos de todo ti
   «Proyecto». No comprobado en un móvil: con la app instalada, `humanity.wiki/?sw=off` quita la copia vieja.
 - (masas) En rombo, «Rueda delantera, freno y horquilla» (unos 10,7 kg) pasa de la pestaña Carrocería a Rodaje, donde
   debía estar: los kilos de esas dos pestañas cambian a propósito (aviso de pesossecciones).
+
+## 2026-11-17 · El pasajero a horcajadas puede ir mucho más atrás
+
+Eugenio: «Permite la configuración de asientos ahorcajadas uno delante de otro, que el asiento del copiloto, el que va
+detrás, se pueda separar más del asiento frontal. Ahora mismo hay un límite.»
+
+- Triciclo (y Rombo, clásico, Bala de cuatro ruedas), «Interior › Asientos › Pasajero: cadera al eje delantero»: antes
+  el pasajero iba como mucho 62 cm detrás del piloto; ahora hasta 1,40 m (de 40 cm a 1,40 m). Vale a horcajadas y con
+  las dos butacas tipo Aptera. El sillín largo se estira entre los dos; respaldo, estribos y asidero siguen al pasajero.
+- El deslizador ya no es lo que frena: lo dicen las comprobaciones. Tres nuevas: «Asiento del pasajero sobre los
+  largueros (delante de la torreta del amortiguador)» (los largueros acaban en el pivote del basculante), «Asiento del
+  pasajero delante de la rueda trasera» (con una sola rueda detrás) y «Respaldo del pasajero dentro de la carrocería»
+  (a horcajadas). Seguían valiendo «Cabeza del pasajero a la cúpula», «Pivote del basculante detrás de los estribos»,
+  el vuelco y la carga de los neumáticos.
+- La carrocería no crece sola. En el Rombo Bala de Eugenio (batalla 2,75 m) el pasajero cabe hasta ≈1,14 m detrás del
+  piloto antes de tocar la torreta; a partir de ≈0,95 m la cabeza de talla media ya no cabe bajo la cúpula: hay que alargar «Cúpula:
+  final» (p. ej. a 2,95 m) y la batalla (3,30 m) — así la talla media cabe con 1,0–1,2 m de separación (la talla alta va justa, a 1-3 cm).
+- Los kilos del pasajero van a su sitio nuevo en el centro de gravedad y en la carga de cada rueda (las mismas masas
+  de siempre, `m.sillines`). Diseños guardados sin cambios («Todo OK»), salvo uno que guardara un pasajero más atrás de
+  lo que el deslizador dejaba: antes se recortaba en silencio a 62 cm, ahora abre donde se guardó.
