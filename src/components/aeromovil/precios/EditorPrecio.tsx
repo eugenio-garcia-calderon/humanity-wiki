@@ -26,7 +26,7 @@ export function BotonPrecio({ p, abierto, alPulsar }: { p: PrecioParte; abierto:
 /** The editor, under the line. Changes reach the design after a short pause (each one recalculates the vehicle). */
 export function EditorPrecio({ p, alCambiar, alCerrar }: { p: PrecioParte; alCambiar: (v: number | null) => void; alCerrar: () => void }) {
   const [v, setV] = useState(p.eur);
-  const t = useRef<ReturnType<typeof setTimeout>>();
+  const t = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => { setV(p.eur); }, [p.eur]);
   useEffect(() => () => clearTimeout(t.current), []);
   const poner = (x: number) => {

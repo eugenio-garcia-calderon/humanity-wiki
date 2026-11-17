@@ -890,3 +890,15 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   `LEMAS_TRICICLO`, removing `LadoTriciclo.tsx`'s now-unreachable `proyecto` blocks, and the `CLAUDE.md` section on masses.
 - **The new mass checks are appended in `geometria.ts` `calcular`** (`conMasasTriciclo`), not inside `calcularTriciclo`,
   for the same reason: moving them in is ≈ 10 min.
+
+## 2026-11-17 · Prices (precios/), first version
+
+- **Estimates are code, not data** (`estimar` in `precios/precios.ts`, ~45 rules by part name). A table Eugenio could
+  edit, with a source per row, is ≈ 2 h now. Part names are the keys of user prices: renaming a part in the parts list
+  drops its saved price silently (≈ 30 min to add a rename map when it first happens).
+- **Only the Triciclo family shows prices inside its sections.** The Basculante's sections are priced and counted in
+  «Proyecto» and «Mano de obra», but `LadoBasculante.tsx` shows no breakdown yet (≈ 30 min once it shows `DesglosePeso`).
+  The Gota, the Aeromóvil 1 (which has its own component costs in `componentes.ts`) and the Bala: no prices (≈ 1 h).
+- **Catalogue prices only for motors and petrol engines**: controllers and reduction gears publish none, so they are
+  estimated; the tyres from bot «neumaticos» are not wired yet (≈ 20 min once its catalogue has prices).
+- `aeromovil/CLAUDE.md` has no recipe for prices yet (file held by another bot): ≈ 10 min.

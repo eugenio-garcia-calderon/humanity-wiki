@@ -5,7 +5,6 @@
  * of tube, the body's moulds and laminate by its m²). The user's own hours and rates are stored with the design
  * (`P.manoObra[id]`); a design saved without them gets the defaults.
  */
-import './tipos';
 import { largoTubo, type Parametros, type Resultados, type Tubo } from '../geometria';
 
 export interface PartidaManoObra {
@@ -18,7 +17,7 @@ export interface PartidaManoObra {
   propio: boolean;
   eur: number;
 }
-export interface Ajuste { h?: number; eurh?: number }
+export type Ajuste = NonNullable<Parametros['manoObra']>[string];
 
 const r1 = (v: number) => Math.round(v);
 

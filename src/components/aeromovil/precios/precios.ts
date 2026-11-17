@@ -20,7 +20,6 @@
 import type { Parametros, Resultados } from '../geometria';
 import { MATERIALES_CHASIS } from '../geometria';
 import { A_MEDIDA, EUR_POR_USD, motorDe, precioEuros, termicoDe, type Precio } from '../catalogoTren';
-import './tipos';
 import { clave, type DepPeso, type PartePeso, type PesosSecciones, type SeccionPeso } from '../masasSecciones';
 
 export interface PrecioParte {

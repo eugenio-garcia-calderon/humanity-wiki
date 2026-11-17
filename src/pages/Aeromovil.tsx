@@ -31,7 +31,7 @@
 // slider/selector/block controls in controles.tsx. This page keeps the layout, the state and the 3D toolbar.
 import { Fragment, Suspense, lazy, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Armchair, BatteryCharging, Box, Car, Route as RutaIcono, Warehouse, Camera, ChevronDown, CircleDot, ClipboardList, Factory, Weight, Frame, Layers3, Lightbulb, ShieldCheck, Zap, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Maximize2, Minimize2, Ruler, RotateCcw, Package, Ship, Wrench, Wind } from 'lucide-react';
+import { Armchair, BatteryCharging, Box, Car, Route as RutaIcono, Warehouse, Camera, ChevronDown, CircleDot, ClipboardList, Factory, Weight, Hammer, Frame, Layers3, Lightbulb, ShieldCheck, Zap, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Maximize2, Minimize2, Ruler, RotateCcw, Package, Ship, Wrench, Wind } from 'lucide-react';
 import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import { Visor3D, CAPAS, type CapaId, type Vista, type VisorHandle } from '../components/aeromovil/Visor3D';
@@ -43,6 +43,11 @@ import {
 } from '../components/aeromovil/geometriaTriciclo';
 import { kgPorDepartamento, textoKg, type KgDepartamento } from '../components/aeromovil/PesosDepartamento';
 import { LadoResumen, centroParaVisor, useMasas } from '../components/aeromovil/LadoResumen';
+// (2026-11-17) prices: «Proyecto › Coste del prototipo» and the «Mano de obra» tab (precios/)
+import { costeProyecto } from '../components/aeromovil/precios/coste';
+import { eur } from '../components/aeromovil/precios/precios';
+import { BloqueCoste } from '../components/aeromovil/precios/BloqueCoste';
+import { PanelManoObra } from '../components/aeromovil/precios/PanelManoObra';
 // ── Cuadriciclo Basculante (2026-11-15): its sidebar, its Cd and its departments (basculante/, geometriaBasculante.ts)
 import { LadoBasculante, useCdBasculante } from '../components/aeromovil/basculante/LadoBasculante';
 import { CRR_B, LEMAS_BASCULANTE, NOMBRE_BASCULANTE, camposBasculante } from '../components/aeromovil/geometriaBasculante';
@@ -137,7 +142,7 @@ function cargarParametros(): Parametros {
   return PARAMETROS_POR_DEFECTO;
 }
 
-const ICONO_DEP: Record<IdDepartamento, typeof Box> = { proyecto: ClipboardList, masas: Weight, carroceria: Car, chasis: Frame, rodaje: CircleDot, propulsion: Zap, energia: BatteryCharging, interior: Armchair, accesos: DoorOpen, luces: Lightbulb, fabricacion: Factory, homologacion: ShieldCheck };
+const ICONO_DEP: Record<IdDepartamento, typeof Box> = { proyecto: ClipboardList, masas: Weight, manoobra: Hammer, carroceria: Car, chasis: Frame, rodaje: CircleDot, propulsion: Zap, energia: BatteryCharging, interior: Armchair, accesos: DoorOpen, luces: Lightbulb, fabricacion: Factory, homologacion: ShieldCheck };
 /** Qué capas del 3D son de cada departamento (para «Mostrar solo …»). Sin entrada = se ve todo. */
 const CAPAS_DEP: Partial<Record<IdDepartamento, CapaId[]>> = {
   carroceria: ['carenado', 'cristales', 'solar'], chasis: ['chasis'], rodaje: ['suspension', 'direccion', 'ruedas'], propulsion: ['motor', 'transmision'],
@@ -153,7 +158,7 @@ const CAPAS_DEP_TRICICLO: Record<DepTriciclo, CapaId[]> = {
 };
 const VISTAS_NOMBRE: Record<Vista, string> = { iso: '3/4', side: 'Lateral', top: 'Planta', front: 'Frontal', back: 'Trasera' };
 const SOLO_DEP: Partial<Record<IdDepartamento, string>> = { carroceria: 'la carrocería', chasis: 'el chasis', rodaje: 'el rodaje', propulsion: 'el motor', energia: 'la energía', interior: 'el interior', accesos: 'los accesos', luces: 'la carrocería' };
-const NOMBRE_CORTO: Record<IdDepartamento, string> = { proyecto: 'Proyecto', masas: 'Masas', carroceria: 'Carrocería', chasis: 'Chasis', rodaje: 'Rodaje', propulsion: 'Motor', energia: 'Energía', interior: 'Interior', accesos: 'Accesos', luces: 'Luces', fabricacion: 'Fabricación', homologacion: 'Homologación' };
+const NOMBRE_CORTO: Record<IdDepartamento, string> = { proyecto: 'Proyecto', masas: 'Masas', manoobra: 'Mano de obra', carroceria: 'Carrocería', chasis: 'Chasis', rodaje: 'Rodaje', propulsion: 'Motor', energia: 'Energía', interior: 'Interior', accesos: 'Accesos', luces: 'Luces', fabricacion: 'Fabricación', homologacion: 'Homologación' };
 
 /**
  * The departments as a row of tabs IN the top bar (2026-11-12, Eugenio: «Me gustaba cómo estaba antes el menú de
@@ -163,7 +168,7 @@ const NOMBRE_CORTO: Record<IdDepartamento, string> = { proyecto: 'Proyecto', mas
  * (Diseño 3D, Tareas…) fold into `MenuSecciones`. On a phone the row scrolls sideways.
  * Vehicles without departments (the Gota, the Cuadriciclo en rombo) have no tabs: the bar keeps only the logo and the menu.
  */
-function PestanasDepartamento({ lista, dep, alElegir, kg }: { lista: { id: IdDepartamento; lema: string }[]; dep: IdDepartamento | null; alElegir: (d: IdDepartamento) => void; kg?: KgDepartamento | null }) {
+function PestanasDepartamento({ lista, dep, alElegir, kg, extra }: { lista: { id: IdDepartamento; lema: string }[]; dep: IdDepartamento | null; alElegir: (d: IdDepartamento) => void; kg?: KgDepartamento | null; extra?: Partial<Record<IdDepartamento, string>> }) {
   return (
     <nav aria-label="Departamentos" className="order-last flex w-full min-w-0 gap-0.5 overflow-x-auto [scrollbar-width:none] sm:order-none sm:w-auto sm:flex-1 [&::-webkit-scrollbar]:hidden">
       {lista.map(d => { const Icono = ICONO_DEP[d.id], activo = dep === d.id; return (
@@ -172,6 +177,8 @@ function PestanasDepartamento({ lista, dep, alElegir, kg }: { lista: { id: IdDep
           <Icono className="h-4 w-4" />{NOMBRE_CORTO[d.id]}
           {/* (2026-11-16) the department's mass, from the same pieces as «Peso: todos los componentes» (PesosDepartamento.ts) */}
           {kg && textoKg(kg[d.id as keyof KgDepartamento]) && <span className={cn('-mt-0.5 font-mono text-[10px] leading-none tabular-nums', activo ? 'text-teal-100' : 'text-slate-500')}>{textoKg(kg[d.id as keyof KgDepartamento])}</span>}
+          {/* (2026-11-17) a tab's own figure where it has no mass («Mano de obra»: its euros) */}
+          {extra?.[d.id] && <span className={cn('-mt-0.5 font-mono text-[10px] leading-none tabular-nums', activo ? 'text-teal-100' : 'text-slate-500')}>{extra[d.id]}</span>}
         </Button>); })}
     </nav>
   );
@@ -338,13 +345,13 @@ export default function Aeromovil() {
   // (2026-11-17: the aerodynamics now lives inside «Carrocería»: a remembered tab that is not a department, such as an old
   // «aerodinamica»/«tunel» one, opens «Carrocería» instead of an empty panel)
   // (2026-11-17: and «masas», which is a tab and not a department; the Aeromóvil 1, which has no such tab, opens «Proyecto» for it)
-  const [dep, setDep] = useState<IdDepartamento>(() => { try { const g = localStorage.getItem('aeromovil.departamento'); return g && (g === 'masas' || DEPARTAMENTOS.some(d => d.id === g)) ? g as IdDepartamento : 'carroceria'; } catch { return 'carroceria'; } });
+  const [dep, setDep] = useState<IdDepartamento>(() => { try { const g = localStorage.getItem('aeromovil.departamento'); return g && (g === 'masas' || g === 'manoobra' || DEPARTAMENTOS.some(d => d.id === g)) ? g as IdDepartamento : 'carroceria'; } catch { return 'carroceria'; } });
   useEffect(() => { try { localStorage.setItem('aeromovil.departamento', dep); } catch { /* sin memoria */ } }, [dep]);
   // «Ver solo …» (round 3 interior, 2026-11-12): leaves only the department's layers; turning it off (or going to
   // «Proyecto», or to another tab) puts back the layers as they were before it was pressed.
   const antesSolo = useRef<Record<CapaId, boolean> | null>(null);
   const verSolo = (si: boolean) => { if (si && !soloDep) antesSolo.current = visibles; setSoloDep(si); };
-  const capasSolo = (d: IdDepartamento): CapaId[] | undefined => P.disposicion === 'triciclo' || P.disposicion === 'basculante' ? (d === 'proyecto' || d === 'masas' ? undefined : CAPAS_DEP_TRICICLO[d as DepTriciclo]) : CAPAS_DEP[d];
+  const capasSolo = (d: IdDepartamento): CapaId[] | undefined => P.disposicion === 'triciclo' || P.disposicion === 'basculante' ? (d === 'proyecto' || d === 'masas' || d === 'manoobra' ? undefined : CAPAS_DEP_TRICICLO[d as DepTriciclo]) : CAPAS_DEP[d];
   useEffect(() => {
     const suyas = soloDep && dep !== 'proyecto' ? capasSolo(dep) : undefined;
     if (!suyas) { if (antesSolo.current) { setVisibles(antesSolo.current); antesSolo.current = null; } return; }
@@ -426,12 +433,15 @@ export default function Aeromovil() {
   const cdTriComparar = useCdTriciclo(paraCalcular, opcionesTunel.resolucion, kmhComparar);
   // The Triciclo's departments: the A1's choice is kept, but one the Triciclo does not have shows «Carrocería».
   // (2026-11-17: and «Masas», the masses' own tab)
-  const depTri: DepTriciclo | 'proyecto' | 'masas' = dep === 'proyecto' || dep === 'masas' || (DEPS_TRICICLO as string[]).includes(dep) ? dep as DepTriciclo | 'proyecto' | 'masas' : 'carroceria';
+  // (2026-11-17: and «Mano de obra», the labour's tab)
+  const depTri: DepTriciclo | 'proyecto' | 'masas' | 'manoobra' = dep === 'proyecto' || dep === 'masas' || dep === 'manoobra' || (DEPS_TRICICLO as string[]).includes(dep) ? dep as DepTriciclo | 'proyecto' | 'masas' | 'manoobra' : 'carroceria';
   // the masses of the design (LadoResumen.tsx): the «Masas» tab, and the 3D's centre of gravity while it is open
   const masas = useMasas(paraCalcular, res);
   useEffect(() => { if (porDeps && dep !== depTri) setDep(depTri); }, [porDeps, dep, depTri]);
   // (2026-11-17) «Masas» remembered from a Triciclo opens «Proyecto» on a vehicle without that tab (the Aeromóvil 1)
-  useEffect(() => { if (!porDeps && dep === 'masas') setDep('proyecto'); }, [porDeps, dep]);
+  useEffect(() => { if (!porDeps && (dep === 'masas' || dep === 'manoobra')) setDep('proyecto'); }, [porDeps, dep]);
+  // (2026-11-17) the prototype's cost: parts by department + labour (precios/coste.ts), for «Proyecto» and «Mano de obra»
+  const coste = useMemo(() => (porDeps ? costeProyecto(P, paraCalcular, res) : null), [porDeps, P, paraCalcular, res]);
   // the Cuadriciclo Basculante's Cd: the tunnel's, as the Triciclo's
   const cdBas = useCdBasculante(paraCalcular, opcionesTunel.resolucion, esBas ? camposBasculante(P).qVel : 80);
   const cdBasComparar = useCdBasculante(paraCalcular, opcionesTunel.resolucion, kmhComparar);
@@ -579,6 +589,8 @@ export default function Aeromovil() {
     ? DEPARTAMENTOS.filter(d => d.id === 'proyecto' || (DEPS_TRICICLO as string[]).includes(d.id)).flatMap(d => [{ ...d, lema: esBas ? LEMAS_BASCULANTE[d.id as DepTriciclo | 'proyecto'] : lemasTriciclo(camposTriciclo(P))[d.id as DepTriciclo | 'proyecto'] },
       // (2026-11-17) «Masas» right after «Proyecto»
       ...(d.id === 'proyecto' ? [{ id: 'masas' as IdDepartamento, lema: 'el peso total, el centro de gravedad y el peso en cada eje y en cada rueda' }] : [])])
+      // (2026-11-17) «Mano de obra» at the end
+      .concat([{ id: 'manoobra' as IdDepartamento, lema: 'las horas de taller para construir el prototipo y lo que cuestan' }])
     : DEPARTAMENTOS;
 
   return (
@@ -595,7 +607,7 @@ export default function Aeromovil() {
             alNuevo={() => { setP(PARAMETROS_POR_DEFECTO); setActual(null); cargarDisenoPorDefecto().then(d => { if (d) { setP(deDiseno(d.parametros || {})); setActual(null); } }); }}
             alGuardado={alGuardado} />
           {(esA1 || porDeps)
-            ? <PestanasDepartamento lista={pestanas} kg={porDeps ? kgPorDepartamento(res) : null} dep={seccion === 'diseno' ? (porDeps ? depTri : dep) : null} alElegir={d => { setDep(d); setSoloDep(false); if (seccion !== 'diseno') navegar('/aeromovil'); }} />
+            ? <PestanasDepartamento lista={pestanas} kg={porDeps ? kgPorDepartamento(res) : null} extra={coste ? { manoobra: eur(coste.manoObra) } : undefined} dep={seccion === 'diseno' ? (porDeps ? depTri : dep) : null} alElegir={d => { setDep(d); setSoloDep(false); if (seccion !== 'diseno') navegar('/aeromovil'); }} />
             : null}
           <div className="flex-1 sm:hidden" />
           {!(esA1 || porDeps) && <div className="hidden flex-1 sm:block" />}
@@ -844,11 +856,14 @@ export default function Aeromovil() {
           {/* 2026-11-17 (Eugenio: «mete la parte de aerodinámica dentro de carrocería… un botón que diga "hacer estudio aerodinámico"»): the tunnel and the study, in «Carrocería» (always for the vehicles without departments) */}
           {((esA1 || porDeps) ? (porDeps ? depTri : dep) === 'carroceria' : true) && <BloqueAerodinamica P={P} set={set} kmh={kmhComparar} resolucion={opcionesTunel.resolucion} tunel={tunel} alTunel={alternarTunel} />}
           {/* (2026-11-17) «Masas» and «Proyecto» of the vehicles with departments: their own panels (LadoResumen.tsx) */}
-          {porDeps && (depTri === 'masas' || depTri === 'proyecto') && (paraCalcular.tipo === 'triciclo' || paraCalcular.tipo === 'basculante') ? <LadoResumen dep={depTri} modelo={paraCalcular} res={res} masas={masas} alIr={d => { setDep(d as IdDepartamento); setSoloDep(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
+          {/* (2026-11-17) «Proyecto»: the prototype's cost first (precios/BloqueCoste.tsx) */}
+          {porDeps && depTri === 'proyecto' && coste && <BloqueCoste c={coste} alIr={d => { setDep(d as IdDepartamento); setSoloDep(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />}
+          {porDeps && depTri === 'manoobra' ? (coste ? <PanelManoObra c={coste} P={P} set={set} /> : null)
+            : porDeps && (depTri === 'masas' || depTri === 'proyecto') && (paraCalcular.tipo === 'triciclo' || paraCalcular.tipo === 'basculante') ? <LadoResumen dep={depTri} modelo={paraCalcular} res={res} masas={masas} alIr={d => { setDep(d as IdDepartamento); setSoloDep(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />
             : modelo.tipo === 'a1' ? <LadoA1 P={P} Pa={Pa} D={D} set={set} res={res} modelo={modelo} neumaticos={neumaticos} malas={malas} dep={dep} alNavegar={r => { navegar(r); window.scrollTo({ top: 0 }); }} />
-            : modelo.tipo === 'basculante' ? (paraCalcular.tipo === 'basculante' && res.basculante ? <LadoBasculante P={P} set={set} res={res} modelo={paraCalcular} dep={depTri as Exclude<typeof depTri, 'masas'>} cd={cdBas} ui={{ Bloque, Deslizador, Selector: Selector as never, ListaComprobaciones }} /> : null)
+            : modelo.tipo === 'basculante' ? (paraCalcular.tipo === 'basculante' && res.basculante ? <LadoBasculante P={P} set={set} res={res} modelo={paraCalcular} dep={depTri as Exclude<typeof depTri, 'masas' | 'manoobra'>} cd={cdBas} ui={{ Bloque, Deslizador, Selector: Selector as never, ListaComprobaciones }} /> : null)
             : modelo.tipo === 'bala' ? <LadoBala P={P} set={set} res={res} modelo={modelo} cdTunel={tunel ? cdTunelNuestro : undefined} />
-            : modelo.tipo === 'triciclo' && res.triciclo ? <LadoTriciclo P={P} set={set} res={res} modelo={paraCalcular.tipo === 'triciclo' ? paraCalcular : modelo} dep={depTri as Exclude<typeof depTri, 'masas'>} cd={cdTri} abrir={abrirBloque} />
+            : modelo.tipo === 'triciclo' && res.triciclo ? <LadoTriciclo P={P} set={set} res={res} modelo={paraCalcular.tipo === 'triciclo' ? paraCalcular : modelo} dep={depTri as Exclude<typeof depTri, 'masas' | 'manoobra'>} cd={cdTri} abrir={abrirBloque} />
             : modelo.tipo === 'triciclo' ? null : (<>
           <Bloque titulo="Chasis y ruedas">
             <Deslizador id="am-B" etiqueta="Batalla: rueda delantera a trasera" valor={P.B} min={2.6} max={3.8} paso={0.01} mostrar={m2(P.B)} alCambiar={v => set('B', v)} />

@@ -12374,3 +12374,28 @@ Eugenio: «permite añadir más tipos de ruedas, por ejemplo de motos de todo ti
   «Proyecto». No comprobado en un móvil: con la app instalada, `humanity.wiki/?sw=off` quita la copia vieja.
 - (masas) En rombo, «Rueda delantera, freno y horquilla» (unos 10,7 kg) pasa de la pestaña Carrocería a Rodaje, donde
   debía estar: los kilos de esas dos pestañas cambian a propósito (aviso de pesossecciones).
+
+## 2026-11-17 · Precio de cada pieza y sección, coste del proyecto y pestaña «Mano de obra»
+
+Eugenio: «aparte del peso, vamos a añadir en todas las secciones y todos los componentes el precio. Y que sea un slider
+para que podamos indicar el precio … que a nivel de experiencia de usuario no sea un engorro total, tantos sliders …
+y el precio global tiene que aparecer sumado debajo de proyecto. Luego también incluye la mano de obra como un apartado
+añadido donde se le puede poner un precio, y ponlo en el menú».
+
+- **Cada desplegable del Triciclo** (Triciclo, clásico, rombo) dice ahora su peso y su precio en la cabecera:
+  «4,8 kg · 550 €». Dentro, en «De qué está hecho este peso», cada pieza lleva su precio al lado de sus kilos.
+- **No hay un deslizador por pieza a la vista.** El precio es un enlace discreto («≈ 550 €»); al pulsarlo se abre debajo
+  de esa línea un deslizador y una casilla para escribirlo, con de dónde sale el estimado y «Volver al estimado». Un
+  precio puesto por ti se marca «tuyo» en azul y se guarda con el diseño.
+- **De dónde salen los precios**: si en el catálogo has elegido un motor o un motor de gasolina con precio publicado,
+  ese precio (convertido a euros); si no, una estimación por clase de pieza, escrita junto a ella (kg de laminado por su
+  material, m² de cúpula y de panel solar, kWh de batería a 230 €/kWh, kW de motor, una unidad para frenos, asientos,
+  bisagras…). Son piezas y materiales comprados para un prototipo, sin horas.
+- **Proyecto › «Coste del prototipo»** (arriba del todo): materiales por departamento, mano de obra, total y € por kg.
+- **Nueva pestaña «Mano de obra»** al final del menú, con su total debajo: diseño, chasis, moldes, laminado, montaje
+  eléctrico, montaje mecánico, interior, pintura y homologación, cada uno horas × €/hora (pulsa uno para cambiarlos).
+  El chasis sigue a los metros de tubo y los moldes y el laminado a los m² de carrocería.
+- **Rombo Bala**: materiales y piezas 13.870 €, mano de obra 21.545 € (521 h), total 35.415 € (116 €/kg). Todo estimado
+  menos lo que se elija del catálogo: tu Rombo Bala no tiene ninguna pieza del catálogo elegida.
+- Un diseño guardado sin precios abre con los estimados; nada más cambia. Comprobado con
+  `npx tsx scripts/precios-secciones.ts` («Todo OK»). No comprobado en un móvil: `humanity.wiki/?sw=off` quita la copia vieja.

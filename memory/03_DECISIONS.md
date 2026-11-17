@@ -2125,3 +2125,15 @@ Eugenio: «permite añadir más tipos de ruedas, por ejemplo de motos de todo ti
   the engine as far as needed to be clean put it 13 cm higher on the default Triciclo, the opposite of the request.
 - **«Masas» is a tab id, not a `Departamento`**: it has no tasks, suppliers or messages, so it is not in
   `DEPARTAMENTOS` (the Aeromóvil 1's eleven tabs do not change).
+
+## 2026-11-17 · Prices: one model on top of the mass sections, hidden editor (precios/)
+
+- **Prices hang off `masasSecciones.ts`**, not a parallel component list: each part the sections hold gets a price by
+  its name (`precios/precios.ts`). Section = its parts, department = own sections + «sin desplegable», vehicle =
+  departments — the same sums `pesos-secciones` checks for kg, checked by `scripts/precios-secciones.ts`.
+- **User prices keyed by part name** (`P.precios[nombre]`), labour by item id (`P.manoObra[id]`), both optional fields
+  of `Parametros`: designs saved before open with the estimates and nothing else changes. Alternative rejected: a
+  `t…` slider per part in `FILAS` (≈ 40 new fields, defaults to keep in step with every estimate, and 40 visible sliders).
+- **UX**: no slider visible until a price is tapped (Eugenio asked for it not to be «un engorro»). The editor debounces
+  250 ms because every change recalculates the vehicle.
+- **«Mano de obra» is a tab id, not a `Departamento`**, like «Masas».
