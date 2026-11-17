@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "src/pages/Aeromovil.tsx",
+      "motivo": "plegado animado de alas en el garaje",
+      "desde": "2026-11-17T21:43:10.902Z"
+    }
+  ]
 }
