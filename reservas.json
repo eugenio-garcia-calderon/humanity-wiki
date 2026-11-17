@@ -107,6 +107,12 @@
       "ruta": "src/components/aeromovil/PanelProyecto.tsx",
       "motivo": "homologacion: pestaña y unión con puntos críticos",
       "desde": "2026-11-17T13:44:44.066Z"
+    },
+    {
+      "agente": "precios",
+      "ruta": "src/components/aeromovil/geometria.ts",
+      "motivo": "precios: precio por sección y pestaña Mano de obra",
+      "desde": "2026-11-17T13:44:55.790Z"
     }
   ]
 }
