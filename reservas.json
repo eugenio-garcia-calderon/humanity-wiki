@@ -173,6 +173,12 @@
       "ruta": "src/components/aeromovil/hibrido.ts",
       "motivo": "capo: refrigeración, capó y motor delante (pocas líneas)",
       "desde": "2026-11-17T14:26:52.292Z"
+    },
+    {
+      "agente": "masas2",
+      "ruta": "src/components/aeromovil/triciclo/campos.ts",
+      "motivo": "masas: deslizadores del motor y del depósito",
+      "desde": "2026-11-17T14:26:55.038Z"
     }
   ]
 }
