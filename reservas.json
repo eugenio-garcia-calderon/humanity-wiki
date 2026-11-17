@@ -113,6 +113,12 @@
       "ruta": "src/components/aeromovil/hibrido.ts",
       "motivo": "masas: motor y depósito libres, pestaña MASAS, Proyecto limpio",
       "desde": "2026-11-17T10:41:51.775Z"
+    },
+    {
+      "agente": "masas",
+      "ruta": "src/components/aeromovil/hibrido3d.ts",
+      "motivo": "masas: motor y depósito libres, pestaña MASAS, Proyecto limpio",
+      "desde": "2026-11-17T10:41:54.378Z"
     }
   ]
 }
