@@ -2064,5 +2064,7 @@ and a part that no rule takes is shown as «sin desplegable» rather than lost.
   `LadoTriciclo.tsx`); the block key in `FILAS`, `ORDEN_BLOQUES`, `zonaTriciclo` and the remembered open blocks stays
   `Híbrido enchufable`, so saved UI state and other bots' code keep working. Renaming the key everywhere: ≈ 30 min,
   6 files, plus migrating `aeromovil.bloquesAbiertos`.
-- **Block mass** (`pesoMotores.ts`) sums `res.triciclo.piezas` by part name, the same list as «Proyecto › Peso» and
-  the top bar (`PesosDepartamento.ts`), so the MASAS tab and the header cannot disagree.
+- **Block mass** comes from `masasSecciones.ts` (bot «pesossecciones», merged first): `pesoSeccion(seccionesTriciclo(res,
+  modelo), 'propulsion', bloque)` and its `peso` prop on `Bloque`. A first version had its own `pesoMotores.ts` with the
+  same regexes; it was deleted at merge time so there is one rule for which part belongs to which block. The
+  comparison's «En el coche ahora» line lists that same section's parts.

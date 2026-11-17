@@ -832,9 +832,6 @@ the frame's tube masses (same formula as `piezasBase`/`piezasBasculante`). Renam
 `PiezaMasa`/`PiezaMasaB` set where the part is created, and the tube breakdown returned by the parts list itself:
 ≈ 2 h now (≈ 45 parts in 3 files), more as parts are added. The Gota's blocks (inline in `pages/Aeromovil.tsx`) and
 the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper already; see the changelog for which are shown.
-- (2026-11-17, motores) `pesoMotores.ts` picks the engine blocks' parts by regex on the part's Spanish name
-  (`Motor de buje`, `Controlador`, `Motor de gasolina`, `Depósito de gasolina`…). Renaming a part in
-  `triciclo/masas.ts` or `modelo.ts` silently drops it from the header. A `bloque` field on `PiezaMasa`: ≈ 1 h today.
 - (2026-11-17, motores) The engine comparison's L/100 km per option changes the mass by the engine only, not by the
   connection whose mass follows the engine's kW in series/parallel (a few kg; < 1 % of the figure). Running the full
   model per option: ≈ 2 h plus a cache, and ~17 model builds per render.

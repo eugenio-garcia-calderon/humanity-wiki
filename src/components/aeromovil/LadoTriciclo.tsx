@@ -14,7 +14,7 @@ import { filasDetras, fraseFila } from './filasTriciclo';
 import { FichaHibrido } from './FichaHibrido';
 import { CatalogoPieza, type Necesidad } from './CatalogoTren';
 import { ComparadorMotores } from './ComparadorMotores';
-import { kgBloqueMotor } from './pesoMotores';
+import { pesoSeccion, seccionesTriciclo, textoPesoSeccion } from './masasSecciones';
 import { valoresCatalogo, type CATALOGO_CLAVES } from './catalogoTren';
 import { fmt, m2, Deslizador, Bloque, Selector, ListaComprobaciones } from './controles';
 import { ANGULO_MAX, estimacionKamm } from './garaje/kamm';
@@ -103,10 +103,10 @@ export const ordenBloque = (b: string) => { const i = ORDEN_BLOQUES.indexOf(b); 
  * (2026-11-17, Eugenio: «que en los desplegables también de motor eléctrico y motor gasolina que aparezcan con esos
  * nombres, y que según la selección que tengas, pues que aparezca también el peso de ese desplegable»): the hybrid's
  * block shows as «Motor gasolina»; its key stays «Híbrido enchufable» (FILAS, ORDEN_BLOQUES, zonaTriciclo and the
- * remembered open blocks use it). Both engine blocks carry their mass in the title (pesoMotores.ts).
+ * remembered open blocks use it). Both engine blocks carry their mass in the header (`peso`, masasSecciones.ts).
  */
 const TITULO_BLOQUE: Partial<Record<string, string>> = { 'Híbrido enchufable': 'Motor gasolina' };
-const BLOQUE_MOTOR: Partial<Record<string, 'electrico' | 'gasolina'>> = { 'Motor eléctrico': 'electrico', 'Híbrido enchufable': 'gasolina' };
+const BLOQUES_MOTOR = ['Motor eléctrico', 'Híbrido enchufable'];
 /**
  * Which department and block a click on the Triciclo's 3D model opens (2026-11-15): by the layer it hit, and on the
  * body by where: ahead of the canopy's glass the nose, behind it the tail, between them the canopy (or the general sizes
@@ -289,7 +289,10 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
   const ETIQUETA_ROMBO: Partial<Record<string, string>> = { tVia: 'Vía de las ruedas laterales', tRuedaDel: 'Ruedas laterales (en los carenados)', tRuedaTras: 'Ruedas del morro y de la cola', tGiro: 'Giro máximo de la rueda del morro', tMSuspDel: 'Suspensión de las laterales (las dos)', tRecDel: 'Recorrido de la suspensión de las laterales' };
   const etiqueta = (k: string, n: string) => (filas && ETIQUETA_FILAS[k]) || (butacas && ETIQUETA_BUTACAS[k]) || (rombo && ETIQUETA_ROMBO[k]) || (cuatro && ETIQUETA_CUATRO[k]) || n;
   const bloques = [...new Set([...fichas.map(f => f.bloque), ...sels.map(s => s.bloque)])];
-  const tituloBloque = (b: string) => { const t = TITULO_BLOQUE[b] ?? b, m = BLOQUE_MOTOR[b], kg = m ? kgBloqueMotor(rt.piezas, m) : null; return kg != null ? `${t} · ${Math.round(kg)} kg` : t; };
+  const tituloBloque = (b: string) => TITULO_BLOQUE[b] ?? b;
+  // (2026-11-17) the engine blocks' weight: the same sections as every other block's (masasSecciones.ts)
+  const pesosSec = dep === 'propulsion' ? seccionesTriciclo(res, modelo) : null;
+  const seccionMotor = (b: string) => (BLOQUES_MOTOR.includes(b) ? pesoSeccion(pesosSec, 'propulsion', b) : null);
   const cdComparar = cd.cd != null && cd.areaRef != null ? { cd: cd.cd, areaRef: cd.areaRef } : null;
   const checks = res.comprobaciones.filter(c => dep === 'proyecto' || (c.dep ?? '').split(',').includes(dep));
   const malas = checks.filter(c => c.holgura < c.minimo).length;
@@ -369,7 +372,7 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
           : <p className="text-xs text-slate-500">Tres ruedas: dos delante en carenados como el Aptera, que giran con ellas, y una detrás dentro de la cola, con el motor en el buje. La carrocería es la del Cuadriciclo Bala en rombo; con las medidas por defecto, la misma.</p>}
       </Bloque>
       {[...bloques].sort((a, b) => ordenBloque(a) - ordenBloque(b)).map(bloque => (
-        <Bloque key={bloque} id={`bloque-${bloque}`} titulo={tituloBloque(bloque)} plegable={bloque === 'Propulsión' ? undefined : { abierto: abiertos.has(bloque), alAlternar: () => alternar(bloque) }} nota={`${fichas.filter(f => f.bloque === bloque).length + sels.filter(s => s.bloque === bloque).length} ajustes`}>
+        <Bloque key={bloque} id={`bloque-${bloque}`} titulo={tituloBloque(bloque)} peso={textoPesoSeccion(seccionMotor(bloque))} plegable={bloque === 'Propulsión' ? undefined : { abierto: abiertos.has(bloque), alAlternar: () => alternar(bloque) }} nota={`${fichas.filter(f => f.bloque === bloque).length + sels.filter(s => s.bloque === bloque).length} ajustes`}>
           {bloque === 'Forma' && (() => {
             // round two (2026-11-10): one lever for «hazlo un poco más grande»; it moves the nose, wheelbase and tail (see estirarTriciclo)
             const lg = largoTriciclo(T);
@@ -380,10 +383,10 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
           })()}
           {/* (2026-11-16) the hybrid's architecture first in its block: the sliders under it depend on it */}
           {bloque === 'Híbrido enchufable' && sels.filter(s => s.clave === 'tHibArq').map(s => <Selector key={s.clave} id={`t-${s.clave}`} etiqueta={s.n} valor={T[s.clave] as string} clave={s.clave} opciones={s.opciones} alCambiar={v => set(s.clave, v as never)} />)}
-          {bloque === 'Híbrido enchufable' && <ComparadorMotores tipo="gasolina" modelo={modelo} mTot={res.mTot} cd={cdComparar} actual={T.tCatTermico} alElegir={id => elegirCatalogo('tCatTermico', id)} motores={motoresBuje} piezas={rt.piezas} />}
+          {bloque === 'Híbrido enchufable' && <ComparadorMotores tipo="gasolina" modelo={modelo} mTot={res.mTot} cd={cdComparar} actual={T.tCatTermico} alElegir={id => elegirCatalogo('tCatTermico', id)} motores={motoresBuje} partes={seccionMotor(bloque)?.partes ?? []} />}
           {bloque === 'Híbrido enchufable' && <CatalogoPieza tipo="termico" valor={T.tCatTermico} alCambiar={id => elegirCatalogo('tCatTermico', id)} Selector={Selector as never} necesidad={necesidad} />}
           {bloque === 'Motor eléctrico' && <>
-            <ComparadorMotores tipo="electrico" modelo={modelo} mTot={res.mTot} cd={cdComparar} actual={T.tCatMotor} alElegir={id => elegirCatalogo('tCatMotor', id)} motores={motoresBuje} piezas={rt.piezas} />
+            <ComparadorMotores tipo="electrico" modelo={modelo} mTot={res.mTot} cd={cdComparar} actual={T.tCatMotor} alElegir={id => elegirCatalogo('tCatMotor', id)} motores={motoresBuje} partes={seccionMotor(bloque)?.partes ?? []} />
             <CatalogoPieza tipo="motor" valor={T.tCatMotor} alCambiar={id => elegirCatalogo('tCatMotor', id)} Selector={Selector as never} necesidad={necesidad} />
             <CatalogoPieza tipo="controlador" valor={T.tCatCtrl} alCambiar={id => elegirCatalogo('tCatCtrl', id)} Selector={Selector as never} necesidad={necesidad} />
             <CatalogoPieza tipo="reductora" valor={T.tCatReductora} alCambiar={id => elegirCatalogo('tCatReductora', id)} Selector={Selector as never} necesidad={necesidad} />

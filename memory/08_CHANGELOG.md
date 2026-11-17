@@ -12233,9 +12233,10 @@ desplegables también de motor eléctrico y motor gasolina que aparezcan con eso
 tengas, pues que aparezca también el peso de ese desplegable.»
 
 - En la pestaña Motor del Triciclo (y sus variantes), el desplegable que se llamaba «Híbrido enchufable» ahora se llama
-  **«Motor gasolina»**, y junto a «Motor eléctrico» los dos llevan el peso en el título: «Motor gasolina · 74 kg»,
-  «Motor eléctrico · 21 kg». Se actualiza al elegir otro motor. Es la suma de lo que hay en ese desplegable, sacada de la
-  misma lista de piezas que «Proyecto › Peso» y que el número bajo la pestaña (no hay otra fórmula): en el eléctrico,
+  **«Motor gasolina»**, y junto a «Motor eléctrico» los dos llevan el peso en la cabecera (por ejemplo «Motor gasolina
+  80,9 kg» en el diseño Rombo Bala híbrido; con un Honda GX390, 62,6 kg). Se actualiza al elegir otro motor. Es la suma de lo que hay en ese desplegable,
+  con la misma regla que el peso de todos los demás desplegables (masasSecciones.ts) y la misma lista de piezas que
+  «Proyecto › Peso» y que el número bajo la pestaña (no hay otra fórmula): en el eléctrico,
   el motor (o los dos de buje), el controlador y la reductora; en el de gasolina, el motor, su unión a las ruedas
   (planetario, generador o embrague y caja) y el depósito lleno.
 - Dentro de cada uno, una tabla para comparar todos los motores del catálogo a la vez, con el elegido en verde; al pinchar

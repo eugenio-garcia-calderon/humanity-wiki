@@ -13,8 +13,8 @@ import { Fragment, useMemo } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import { A_MEDIDA, EUR_POR_USD, MOTORES, TERMICOS, bsfc, cv, precioEuros, rendimientoTermico, type Precio } from './catalogoTren';
-import { AUXILIARES, RENDIMIENTO, energiaTriciclo, type ModeloTriciclo, type PiezaMasa } from './geometriaTriciclo';
-import { piezasBloqueMotor } from './pesoMotores';
+import { AUXILIARES, RENDIMIENTO, energiaTriciclo, type ModeloTriciclo } from './geometriaTriciclo';
+import type { PartePeso } from './masasSecciones';
 
 /** The speed the table compares at (Eugenio: a car for 80–90 km/h). */
 export const VEL_COMPARAR = 90;
@@ -84,14 +84,15 @@ function Fuentes({ filas }: { filas: Fila[] }) {
   );
 }
 
-export function ComparadorMotores({ tipo, modelo, mTot, cd, actual, alElegir, motores, piezas }: {
+export function ComparadorMotores({ tipo, modelo, mTot, cd, actual, alElegir, motores, partes }: {
   tipo: 'gasolina' | 'electrico'; modelo: ModeloTriciclo; mTot: number;
   /** the tunnel's figures, or null while it computes */
   cd: { cd: number; areaRef: number } | null;
   actual: string | undefined; alElegir: (id: string) => void;
   /** how many hub motors (two with two rear wheels) */
   motores: 1 | 2;
-  piezas: PiezaMasa[];
+  /** the block's parts with their masses (its section in masasSecciones.ts: the same as its header's weight) */
+  partes: PartePeso[];
 }) {
   const T = modelo.campos, id = actual ?? A_MEDIDA, p = modelo.phev;
   // the car at the comparison speed: the same model, only «Velocidad de cálculo» moved
@@ -102,7 +103,7 @@ export function ComparadorMotores({ tipo, modelo, mTot, cd, actual, alElegir, mo
   const rueda = base ? (base.potencia - AUXILIARES) * RENDIMIENTO : null;
   const cuesta = mTot * 9.81 * CUESTA * v;
 
-  const enCoche = piezasBloqueMotor(piezas, tipo);
+  const enCoche = partes;
   const kgCoche = enCoche.reduce((a, x) => a + x.kg, 0);
 
   const datos = useMemo(() => {
