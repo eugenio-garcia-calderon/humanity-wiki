@@ -12624,9 +12624,16 @@ añadido donde se le puede poner un precio, y ponlo en el menú».
   `npx tsx scripts/precios-secciones.ts` («Todo OK»). Visto en el navegador automático a 1300 px y a 390 px (pestañas,
   Proyecto, Mano de obra, cabeceras con precio); el editor de precio solo se probó a 1300 px. No comprobado en un móvil
   de verdad: `humanity.wiki/?sw=off` quita la copia vieja.
+## 2026-11-17 · «Ocultar garaje»: los paneles ocupan la página
 
+Eugenio: «Haz que el garaje se pueda ocultar con un botón arriba en el menú donde pone diseño 3D, eso quítalo y ponlo más pequeñito y pon ver garaje o ocultar garaje, y de esta manera se puede ver con más detalle todos los componentes. Por ejemplo, si pincho en motor, pues veo todos los desplegables de forma mucho más agradable y no tan esquinada hacia un lado.»
+
+- En la barra de arriba del Aeromóvil hay un botón pequeño «Ocultar garaje» / «Ver garaje» (solo en la sección del diseño).
+- Con el garaje oculto desaparece toda la vista 3D y el panel del departamento (Motor, Chasis…) pasa al centro, con hasta 768 px de ancho en vez de 380.
+- El menú de secciones ya no escribe «Diseño 3D»: queda solo el icono, más pequeño (el nombre sigue dentro del menú).
+- «Ver solo …» no aparece con el garaje oculto, porque no hay 3D sobre el que actuar.
+- Cada navegador recuerda la elección (`aeromovil.verGaraje`). El 3D sigue montado pero no se dibuja mientras está oculto.
 ## 2026-11-17 · Electrónica de potencia en Motor, estudio L7e y ensayos en Homologación
-
 Eugenio: «Crea un nuevo apartado dentro de MOTOR que sea Electronica de potencia y añade el control de potencia, todas logicas de arranque del termico y cuando se activa con sliders, mapa de motor, y esas cosas importantes. Añade ese texto que te adjunto en la parte de homologación, resumiendo el tema de homologación de L7, y sobre todo qué cosas están OK y que cosas no, conectando con el tema de Electronica de control y de potencia pico y potencia continua configurada. y también añade los ensayos necesarios segun la normativa, añadiendo una pestaña por cada ensayo».
 
 - **Motor › Electrónica de potencia** (familia Triciclo): límite de potencia continua y pico del conjunto, cuánto dura el pico, reparto entre los dos motores (sin gestión, límite dinámico, térmico rebajado, modos separados), modo sport, mapa del acelerador (normal/eco/a elegir), frenada regenerativa, cuándo arranca el motor de gasolina (batería por debajo de un %, potencia pedida, velocidad, histéresis para pararlo, calentamiento) con una tabla de qué pasa a 30, 50, 90 y 120 km/h, y los dos limitadores independientes del Reglamento 3/2014. Debajo, lo que llega a las ruedas modo a modo y las velocidades.
