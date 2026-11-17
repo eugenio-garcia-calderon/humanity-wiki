@@ -18,8 +18,12 @@ import { ComparadorMotores } from './ComparadorMotores';
 import { BLOQUE_REFRIGERACION, BloqueRefrigeracion } from './RefrigeracionTriciclo';
 import { pesoSeccion, seccionesTriciclo, textoPesoSeccion } from './masasSecciones';
 import { DesglosePeso, SinSeccion } from './PesoSeccion';
+import { conPrecio, precioSeccion, preciosDiseno, textoPesoPrecio, type ContextoPrecio } from './precios/precios';
 import { valoresCatalogo, type CATALOGO_CLAVES } from './catalogoTren';
 import { fmt, m2, Deslizador, Bloque, Selector, ListaComprobaciones } from './controles';
+import { neumaticosTriciclo } from './triciclo/neumaticos';
+import { crrTriciclo } from './triciclo/energia';
+import { lineaNeumatico } from './ruedas/neumaticos';
 import { ANGULO_MAX, estimacionKamm } from './garaje/kamm';
 
 /** El Cd del túnel para el Triciclo: lo que da, a qué área se refiere y si aún calcula. */
@@ -304,6 +308,11 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
   const pesosSec = dep === 'proyecto' ? null : seccionesTriciclo(res, modelo);
   const seccionDe = (b: string) => (dep === 'proyecto' ? null : pesoSeccion(pesosSec, dep, b));
   const seccionMotor = (b: string) => (BLOQUES_MOTOR.includes(b) ? pesoSeccion(pesosSec, 'propulsion', b) : null);
+  // (2026-11-17, «precios»: «en todas las secciones y todos los componentes el precio»): each block's price next to its
+  // weight, and each part's inside its breakdown (precios/precios.ts, from the same sections)
+  const preciosSec = pesosSec ? preciosDiseno(pesosSec, { P, modelo: modelo as unknown as ContextoPrecio['modelo'], res }) : null;
+  const precioDe = (b: string) => (dep === 'proyecto' ? null : precioSeccion(preciosSec, dep, b));
+  const alPrecio = (nombre: string, v: number | null) => set('precios', conPrecio(P, nombre, v));
   const cdComparar = cd.cd != null && cd.areaRef != null ? { cd: cd.cd, areaRef: cd.areaRef } : null;
   const checks = res.comprobaciones.filter(c => dep === 'proyecto' || (c.dep ?? '').split(',').includes(dep));
   const malas = checks.filter(c => c.holgura < c.minimo).length;
@@ -343,7 +352,7 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
         ['  energía solar al día (estimada)', res.areas.solar > 0.005 ? `${fmt(res.solarDia / 1000)} kWh · ${e ? `${Math.round(e.kmSol)} km` : sinCd}` : '—'],
       ])}
       {cd.calculando && <p className="flex items-center gap-1.5 text-xs text-sky-800"><Wind className="h-3.5 w-3.5 animate-pulse" />El túnel de viento está calculando el Cd de esta forma (unos segundos). Hasta que acabe, no hay cifra.</p>}
-      <p className="text-xs text-slate-500">El Cd lo calcula el túnel con la silueta de la carrocería y sus {tresOCuatro} ruedas (no hay fórmula del editor para esta forma); los carenados y los brazos solo entran como ruedas carenadas, así que el real será algo más alto. {nOcc === 1 ? 'Con el piloto solo' : `Con ${['', 'uno', 'dos', 'tres', 'cuatro'][nOcc]} ocupantes`} de {deKg} ({Math.round(res.mTot)} kg en total), rodadura {fmt(CRR, 3)} (neumático de ciclomotor), motor y controlador al {Math.round(RENDIMIENTO * 100)} %, {AUXILIARES} W de equipos y la batería usable al {Math.round(USABLE * 100)} %. Todo supuesto, no medido.</p>
+      <p className="text-xs text-slate-500">El Cd lo calcula el túnel con la silueta de la carrocería y sus {tresOCuatro} ruedas (no hay fórmula del editor para esta forma); los carenados y los brazos solo entran como ruedas carenadas, así que el real será algo más alto. {nOcc === 1 ? 'Con el piloto solo' : `Con ${['', 'uno', 'dos', 'tres', 'cuatro'][nOcc]} ocupantes`} de {deKg} ({Math.round(res.mTot)} kg en total), rodadura {fmt(crrTriciclo(T), crrTriciclo(T) === CRR ? 3 : 4)} ({crrTriciclo(T) === CRR ? 'neumático de ciclomotor' : 'la media de los neumáticos elegidos, con su tipo, en «Ejes y ruedas»'}), motor y controlador al {Math.round(RENDIMIENTO * 100)} %, {AUXILIARES} W de equipos y la batería usable al {Math.round(USABLE * 100)} %. Todo supuesto, no medido.</p>
     </Bloque>
   );
   // round 3 interior (2026-11-12, Eugenio: «dentro del proyecto, que lo primero que aparezca sean todos los componentes que hay y el peso de cada uno»)
@@ -384,7 +393,7 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
         <SinSeccion partes={dep === 'proyecto' ? undefined : pesosSec?.sinSeccion[dep]} />
       </Bloque>
       {[...bloques].sort((a, b) => ordenBloque(a) - ordenBloque(b)).map(bloque => (
-        <Bloque key={bloque} id={`bloque-${bloque}`} titulo={tituloBloque(bloque)} peso={textoPesoSeccion(seccionDe(bloque))} plegable={bloque === 'Propulsión' ? undefined : { abierto: abiertos.has(bloque), alAlternar: () => alternar(bloque) }} nota={`${fichas.filter(f => f.bloque === bloque).length + sels.filter(s => s.bloque === bloque).length} ajustes`}>
+        <Bloque key={bloque} id={`bloque-${bloque}`} titulo={tituloBloque(bloque)} peso={textoPesoPrecio(textoPesoSeccion(seccionDe(bloque)), precioDe(bloque))} plegable={bloque === 'Propulsión' ? undefined : { abierto: abiertos.has(bloque), alAlternar: () => alternar(bloque) }} nota={`${fichas.filter(f => f.bloque === bloque).length + sels.filter(s => s.bloque === bloque).length} ajustes`}>
           {bloque === 'Forma' && (() => {
             // round two (2026-11-10): one lever for «hazlo un poco más grande»; it moves the nose, wheelbase and tail (see estirarTriciclo)
             const lg = largoTriciclo(T);
@@ -442,6 +451,7 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
             {rt.viaSubida && <p className="-mt-1 text-xs text-amber-800">La vía sube a {m2(rt.viaSubida)}: es lo mínimo para que los carenados, girados a tope, queden a 3 cm de la carrocería.</p>}
             {rombo ? <p className="-mt-1 text-xs text-slate-500">En rombo la rueda del morro va donde la lleva el Cuadriciclo Bala en rombo, y las dos laterales a {m2(-modelo.xF)} por detrás: mejor cerca del centro de gravedad, que está a {m2(-res.triciclo!.cg.x)} (abajo, «Vuelco»). De la del morro a la de la cola, {m2(-modelo.xR)}.</p> : <p className="-mt-1 text-xs text-slate-500">El eje delantero va detrás de donde el Cuadriciclo en rombo lleva su rueda delantera: así el peso queda más cerca de las dos ruedas de delante y {cuatro ? 'la vía de delante pesa más en el vuelco' : 'el triciclo vuelca menos'} (abajo, «Vuelco»). Batalla {m2(modelo.batalla)}.</p>}
             {bloque === 'Ejes y ruedas' && <p className="-mt-1 text-xs text-slate-500">Ruedas traseras: una dentro de la cola, sobre un basculante, como un triciclo; o dos fuera, en carenados como los de delante sobre dos brazos carenados cada uno, que no giran: cuatro ruedas. Con dos, el motor se reparte en dos motores de buje, uno en cada rueda, y la cola queda libre para el maletero.{cuatro ? ` La vía trasera va de lo justo para que los carenados queden a 3 cm de la cola (${m2(vistaTriciclo(deslizadoresTriciclo().find(f => f.clave === 'tViaTras')!, T).min)}) a la vía delantera más ancha; de serie, la de delante.` : ''}</p>}
+            {(() => { const n = neumaticosTriciclo(T); return <p className="-mt-1 text-xs text-slate-600"><b>Neumáticos delanteros:</b> {lineaNeumatico(n.del)} <b>{rombo ? 'Morro y cola:' : cuatro ? 'Traseros:' : 'Trasero:'}</b> {lineaNeumatico(n.tras)} Comparado con el neumático de serie de esa medida; agarre en seco y mojado, duración y precio son estimaciones con sus fuentes en el código.</p>; })()}
           </>}
           {bloque === 'Bastidor' && <p className="-mt-1 text-xs text-slate-500">Dos largueros sobre la panza con {modelo.larguerosTraseros ? 'cinco' : 'cuatro'} travesaños, {paquete ? 'la cuna de la suspensión delantera (con la batería a lo largo del bastidor, en el morro ya no hay batería), el paquete de batería sobre el fondo de la panza, con los largueros pasando por dentro' : 'la cuna de la batería (donde se apoya la suspensión delantera)'}, los soportes de los {butacas ? 'asientos' : filas ? 'asientos' : 'sillines'}, la torreta del amortiguador{modelo.larguerosTraseros ? ', los largueros siguiendo hasta el eje trasero (suben con la panza donde la cola se levanta y se cierran donde se estrecha) y una cuna trasera hasta donde llegan los brazos de los carenados de atrás' : ''} y el soporte de la columna de dirección: {fmt(rt.bastidor.metros, 1)} m de tubo. {cuatro ? (modelo.larguerosTraseros ? '' : 'Los largueros acaban en la torreta: «Largueros: hasta» › «El eje trasero» los lleva hasta donde las ruedas de atrás meten su peso. ') : 'Con una rueda detrás, los largueros acaban en la torreta: la rueda va entre ellos, en la cola. '}La separación de los largueros se mide de eje a eje; más separados, el bastidor es más ancho y el paquete de batería, que es un porcentaje de ese ancho, también. Se ve con «Rayos X» o la capa «Chasis».</p>}
           {bloque === 'Cola' && modelo.F.kamm && <ParrafoKamm modelo={modelo} cd={cd} />}
@@ -458,7 +468,7 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
           {bloque === 'Acabado interior' && <FichaAcabado T={T} piezas={rt.piezas} areas={modelo.interior.forro?.areas ?? null} consola={!!modelo.interior.consola} />}
           {bloque === 'Tapicería' && <p className="-mt-1 text-xs text-slate-500">{T.tTapiz === 'serie' ? 'Los asientos de serie: vinilo gris oscuro acolchado en rombos con un pespunte rojo. Al elegir otra tapicería, la funda cambia en los mismos asientos (sillín y respaldos, butacas o asientos de las filas); en las butacas, la carcasa blanca pasa al color de los laterales.' : `${TAPICES.find(t => t.k === T.tTapiz)?.n ?? ''}: la funda nueva cubre los mismos asientos${T.tAsientos === 'butacas' ? ' y la carcasa de las butacas toma el color oscuro de los laterales, como los costados de los asientos del Vision Jet' : ''}. ${T.tCostura === 'no' ? 'Sin costura vista.' : T.tCostura === 'recta' ? 'Costura recta: canales a lo largo, con un pespunte doble a cada lado.' : 'Costura geométrica: líneas que se cruzan desde dos nudos, como la del Vision Jet, con pespunte doble.'} Masa: la diferencia de la funda con la de serie (que ya cuenta «Un asiento»).`}{T.tCinturon !== 'no' ? ' Cinturones de tres puntos: del hombro, por encima del pecho, a la hebilla en la otra cadera, y la cinta de las caderas; en un asiento vacío, recogido por su costado.' : ''}</p>}
           {bloque === 'Batería' && !paquete && <p className="-mt-1 text-xs text-slate-500">Primero en el morro, donde el Cuadriciclo en rombo lleva la rueda delantera ({Math.round(rt.bateria.litrosMorro)} L), luego en un módulo estrecho entre los pies del piloto; si hace falta más, el módulo del morro sube, crece hacia la punta y queda un módulo plano bajo los sillines. Ahora: {Math.round(rt.bateria.litros)} L y {Math.round(rt.bateria.kg)} kg{rt.bateria.litros - rt.bateria.cabe > 0.05 ? `: caben ${Math.round(rt.bateria.cabe)} L, faltan ${Math.round(rt.bateria.litros - rt.bateria.cabe)} (un morro más largo, una carrocería más ancha o celdas más densas)` : ''}.</p>}
-          {!BLOQUES_MOTOR.includes(bloque) && <DesglosePeso s={seccionDe(bloque)} abierto={bloque === 'Bastidor'} />}
+          <DesglosePeso s={seccionDe(bloque)} abierto={bloque === 'Bastidor'} precios={{ s: precioDe(bloque), alCambiar: alPrecio }} />
         </Bloque>
       ))}
       {/* (2026-11-17, capo) the hybrid's cooling and air intakes: RefrigeracionTriciclo.tsx */}

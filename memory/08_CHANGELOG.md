@@ -12541,6 +12541,31 @@ gasolina y que se conecte al engranaje planetario.»
   rueda trasera; el deslizador pone 13 kg, pero con 31,5 kW de pico su rango empieza en 20,2); el motor de gasolina
   queda en el mismo sitio a lo largo y 3 cm más alto; consumo eléctrico a 120 km/h, de 71,8 a 74,0 Wh/km (+3 %, con un
   Cd de prueba de 0,20 × 1,2 m²); gasolina, de 1,98 a 2,00 L/100 km. Ninguna comprobación nueva en rojo.
+## 2026-11-17 · Tipo de neumático en cada eje (Triciclo, Cuadriciclo en rombo y clásico, Basculante)
+
+Eugenio: «Permite también añadir el tipo de neumático.»
+
+- En **Rodaje › Ejes y ruedas**, junto a la medida de cada eje, dos selectores nuevos: **tipo** de neumático
+  (carretera/turismo, deportivo, hiperdeportivo/semi-slick, eco de baja rodadura, lluvia/mixto, todo tiempo/invierno,
+  trail 90/10, trail 50/50, tacos/off-road, scooter) y **construcción** (radial o diagonal, con o sin cámara, run-flat).
+  Delante y detrás por separado. En el Triciclo en rombo, el «trasero» vale también para la rueda del morro (son de la
+  misma medida).
+- Debajo, una línea por eje con lo que hace: rodadura y masa de la rueda en % respecto al neumático de serie de esa
+  medida, agarre en seco y en mojado (g), cuánto dura (km) y lo que cuesta cada neumático (€, estimado).
+- Todo se mide **respecto al neumático que ya tenía esa medida** («De serie»): una medida deportiva ya es deportiva, una
+  de enduro ya es de tacos. Con «De serie» no cambia ningún número: los diseños guardados siguen igual (comprobado:
+  `triciclo-disenos` «Todo OK»). La rodadura 0,011 de las ruedas de ciclomotor no se ha tocado (sigue pendiente tu
+  decisión de subirla a ~0,016).
+- Qué cambia de verdad en el cálculo: la rodadura (consumo y autonomía), la masa de las ruedas (peso, centro de
+  gravedad), y el agarre del eje que empuja en la aceleración 0-50; en el Basculante, también el agarre en la
+  comprobación de vuelco inclinado. Duración y precio solo se enseñan.
+- Ejemplos: una 180/55 ZR17 deportiva de serie rueda 0,0147; con semi-slick +5 %, agarre 1,00 g en seco y 0,41 en
+  mojado, unos 3.000 km. La 120/90-18 de enduro con neumático de carretera rueda un 26 % mejor. Con tacos delante y
+  detrás, el Triciclo de serie pasa de rodadura 0,011 a 0,0149 y pesa 1,2 kg más.
+- Arreglado de paso: el texto del Triciclo que siempre decía «rodadura 0,011 (neumático de ciclomotor)» ahora dice la
+  rodadura de verdad de las ruedas y neumáticos elegidos.
+- Las cifras son estimaciones en el orden que dan las fuentes (Cossalter, etiqueta europea, guías de duración por tipo),
+  no medidas de cada medida; el precio es una regla por anchura y diámetro (±40 %), sin mirar tiendas hoy.
 - No comprobado en un móvil: con la app instalada, `humanity.wiki/?sw=off` quita la copia vieja.
 ## 2026-11-17 · El tamaño de los muñecos: más altos o más gordos
 
@@ -12573,6 +12598,32 @@ Eugenio: «Quita esta parte en todas las secciones, la de mejoras y la de empeza
   (`/aeromovil/tareas`) sigue mostrándolas y conserva su propio formulario, y la API no cambia.
 - Para dejar comentarios sobre una parte concreta, ahora están las notas por sección (bot «notas»).
 - No visto en un teléfono de verdad: si sale la versión vieja, `humanity.wiki/?sw=off`.
+## 2026-11-17 · Precio de cada pieza y sección, coste del proyecto y pestaña «Mano de obra»
+
+Eugenio: «aparte del peso, vamos a añadir en todas las secciones y todos los componentes el precio. Y que sea un slider
+para que podamos indicar el precio … que a nivel de experiencia de usuario no sea un engorro total, tantos sliders …
+y el precio global tiene que aparecer sumado debajo de proyecto. Luego también incluye la mano de obra como un apartado
+añadido donde se le puede poner un precio, y ponlo en el menú».
+
+- **Cada desplegable del Triciclo** (Triciclo, clásico, rombo) dice ahora su peso y su precio en la cabecera:
+  «4,8 kg · 550 €». Dentro, en «De qué está hecho este peso», cada pieza lleva su precio al lado de sus kilos.
+- **No hay un deslizador por pieza a la vista.** El precio es un enlace discreto («≈ 550 €»); al pulsarlo se abre debajo
+  de esa línea un deslizador y una casilla para escribirlo, con de dónde sale el estimado y «Volver al estimado». Un
+  precio puesto por ti se marca «tuyo» en azul y se guarda con el diseño.
+- **De dónde salen los precios**: si en el catálogo has elegido un motor o un motor de gasolina con precio publicado,
+  ese precio (convertido a euros); si no, una estimación por clase de pieza, escrita junto a ella (kg de laminado por su
+  material, m² de cúpula y de panel solar, kWh de batería a 230 €/kWh, kW de motor, una unidad para frenos, asientos,
+  bisagras…). Son piezas y materiales comprados para un prototipo, sin horas.
+- **Proyecto › «Coste del prototipo»** (arriba del todo): materiales por departamento, mano de obra, total y € por kg.
+- **Nueva pestaña «Mano de obra»** al final del menú, con su total debajo: diseño, chasis, moldes, laminado, montaje
+  eléctrico, montaje mecánico, interior, pintura y homologación, cada uno horas × €/hora (pulsa uno para cambiarlos).
+  El chasis sigue a los metros de tubo y los moldes y el laminado a los m² de carrocería.
+- **Rombo Bala**: materiales y piezas 13.870 €, mano de obra 21.545 € (521 h), total 35.415 € (116 €/kg). Todo estimado
+  menos lo que se elija del catálogo: tu Rombo Bala no tiene ninguna pieza del catálogo elegida.
+- Un diseño guardado sin precios abre con los estimados; nada más cambia. Comprobado con
+  `npx tsx scripts/precios-secciones.ts` («Todo OK»). Visto en el navegador automático a 1300 px y a 390 px (pestañas,
+  Proyecto, Mano de obra, cabeceras con precio); el editor de precio solo se probó a 1300 px. No comprobado en un móvil
+  de verdad: `humanity.wiki/?sw=off` quita la copia vieja.
 ## 2026-11-17 · «Ocultar garaje»: los paneles ocupan la página
 
 Eugenio: «Haz que el garaje se pueda ocultar con un botón arriba en el menú donde pone diseño 3D, eso quítalo y ponlo más pequeñito y pon ver garaje o ocultar garaje, y de esta manera se puede ver con más detalle todos los componentes. Por ejemplo, si pincho en motor, pues veo todos los desplegables de forma mucho más agradable y no tan esquinada hacia un lado.»

@@ -7,6 +7,7 @@
 // components (block, slider, selector, list of checks) are passed in, so this
 // looks exactly like the other families and the page keeps one copy of them.
 import { esDelCatalogo, lineaRueda } from '../ruedas/catalogo';
+import { lineaNeumatico } from '../ruedas/neumaticos';
 import { Fragment, useEffect, useMemo, useState, type ComponentType, type ReactNode } from 'react';
 import { claveTunel } from '../tunel/calculo';
 import { pedirTunel, resultadoEnCache } from '../tunel/cliente';
@@ -16,7 +17,7 @@ import type { Modelo } from '../geometria';
 import { Wind } from 'lucide-react';
 import type { Comprobacion, Parametros, Resultados } from '../geometria';
 import {
-  AGARRE_B, AUXILIARES_B, crrBasculante, EQUIPAJE_B, LEMAS_BASCULANTE, NOMBRE_BASCULANTE, RENDIMIENTO_B, RUEDAS_BASCULANTE, SELECTORES_BASCULANTE, USABLE_B,
+  AGARRE_B, AUXILIARES_B, crrBasculante, neumaticosBasculante, EQUIPAJE_B, LEMAS_BASCULANTE, NOMBRE_BASCULANTE, RENDIMIENTO_B, RUEDAS_BASCULANTE, SELECTORES_BASCULANTE, USABLE_B,
   camposBasculante, deslizadoresBasculante, energiaBasculante, largoBasculante, limitarBasculante,
   type DepBasculante, type FichaBasculante, type ModeloBasculante,
 } from '../geometriaBasculante';
@@ -217,6 +218,7 @@ export function LadoBasculante({ P, set, res, modelo, dep, cd, ui }: {
           })}
           {sels.filter(s => s.bloque === bloque).map(s => <Selector key={s.clave} id={`q-${s.clave}`} etiqueta={s.n} valor={Q[s.clave] as string} clave={s.clave} opciones={s.opciones} alCambiar={v => set(s.clave, v as never)} />)}
           {nota(bloque, modelo, res) && <p className="-mt-1 text-xs text-slate-500">{nota(bloque, modelo, res)}</p>}
+          {bloque === 'Ejes y ruedas' && (() => { const n = neumaticosBasculante(Q); return <p className="-mt-1 text-xs text-slate-600"><b>Neumáticos delanteros:</b> {lineaNeumatico(n.del)} <b>Traseros:</b> {lineaNeumatico(n.tras)} Comparado con el neumático de serie de esa medida; agarre en seco y mojado, duración y precio son estimaciones con sus fuentes en el código.</p>; })()}
         </Bloque>
       ))}
       {dep === 'carroceria' && (

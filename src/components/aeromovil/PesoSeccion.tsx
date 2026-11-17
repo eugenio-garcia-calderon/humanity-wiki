@@ -3,32 +3,46 @@
  * part (the frame's tubes by group, its joints split into bolts, brackets and gussets). Folded, except where it says
  * `abierto` (the frame: Eugenio asked to see the tubes and the bolts apart).
  */
+import { useState } from 'react';
 import { fmt } from './controles';
 import type { PartePeso, SeccionPeso } from './masasSecciones';
+// (2026-11-17, «precios»: each part's price on its line, tap to edit — precios/)
+import { eur, type PrecioSeccion } from './precios/precios';
+import { BotonPrecio, EditorPrecio } from './precios/EditorPrecio';
 
-function Parte({ p, nivel }: { p: PartePeso; nivel: number }) {
+/** The prices of a section's parts and how to change one (absent: weights only, as before). */
+export interface PreciosDesglose { s: PrecioSeccion | null; alCambiar: (nombre: string, v: number | null) => void }
+
+function Parte({ p, nivel, precios, editando, alEditar }: { p: PartePeso; nivel: number; precios?: PreciosDesglose; editando?: string | null; alEditar?: (n: string | null) => void }) {
+  const pr = nivel === 0 ? precios?.s?.partes.find(x => x.nombre === p.nombre) : undefined;
   return (
     <li className={nivel ? 'border-l border-slate-200 pl-2' : ''}>
       <div className="flex items-baseline justify-between gap-3">
         <span className={nivel ? 'text-slate-600' : 'font-medium text-slate-700'}>{p.nombre}</span>
-        <span className="shrink-0 font-mono tabular-nums text-slate-700">{fmt(p.kg, p.kg < 1 ? 2 : 1)} kg</span>
+        <span className="flex shrink-0 items-baseline gap-1.5">
+          <span className="font-mono tabular-nums text-slate-700">{fmt(p.kg, p.kg < 1 ? 2 : 1)} kg</span>
+          {pr && alEditar && <BotonPrecio p={pr} abierto={editando === p.nombre} alPulsar={() => alEditar(editando === p.nombre ? null : p.nombre)} />}
+        </span>
       </div>
+      {pr && precios && alEditar && editando === p.nombre && <EditorPrecio p={pr} alCambiar={v => precios.alCambiar(p.nombre, v)} alCerrar={() => alEditar(null)} />}
       {p.nota && <p className="text-[11px] leading-snug text-slate-400">{p.nota}</p>}
       {p.hijos && <ul className="mt-1 flex flex-col gap-1">{p.hijos.map(h => <Parte key={h.nombre} p={h} nivel={nivel + 1} />)}</ul>}
     </li>
   );
 }
 
-export function DesglosePeso({ s, abierto }: { s: SeccionPeso | null; abierto?: boolean }) {
+export function DesglosePeso({ s, abierto, precios }: { s: SeccionPeso | null; abierto?: boolean; precios?: PreciosDesglose }) {
+  const [editando, setEditando] = useState<string | null>(null);
   if (!s) return null;
+  const ps = precios?.s ? ` · ${eur(precios.s.eur)}` : '';
   return (
     <details open={abierto} className="rounded-lg border border-slate-200 bg-slate-50/60 px-2.5 py-1.5 text-xs">
       <summary className="cursor-pointer select-none font-semibold text-slate-600">
-        {s.tipo === 'ajusta' ? `Lo que ajustan estos deslizadores: ${fmt(s.kg, 1)} kg` : `De qué está hecho este peso: ${fmt(s.kg, 1)} kg`}
+        {s.tipo === 'ajusta' ? `Lo que ajustan estos deslizadores: ${fmt(s.kg, 1)} kg${ps}` : `De qué está hecho este peso: ${fmt(s.kg, 1)} kg${ps}`}
       </summary>
-      <ul className="mt-1.5 flex flex-col gap-1.5">{s.partes.map(p => <Parte key={p.nombre} p={p} nivel={0} />)}</ul>
+      <ul className="mt-1.5 flex flex-col gap-1.5">{s.partes.map(p => <Parte key={p.nombre} p={p} nivel={0} precios={precios} editando={editando} alEditar={setEditando} />)}</ul>
       {s.nota && <p className="mt-1 text-[11px] text-slate-400">{s.nota}{s.tipo === 'ajusta' ? '; estas piezas cuentan en sus propios desplegables.' : ''}</p>}
-      <p className="mt-1 text-[11px] text-slate-400">Estimaciones del modelo para piezas de su clase, no pesadas: las mismas cifras que la lista «Peso: todos los componentes».</p>
+      <p className="mt-1 text-[11px] text-slate-400">Estimaciones del modelo para piezas de su clase, no pesadas: las mismas cifras que la lista «Peso: todos los componentes».{precios?.s ? ' Los precios con «≈» son estimados; pulsa uno para poner el tuyo. La suma de todo está en «Proyecto».' : ''}</p>
     </details>
   );
 }
