@@ -867,3 +867,16 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - Garage aircraft are recognised only by having no `envolvente`/`aero`; the consumption card still labels them «Cd sin
   publicar» instead of «aeronave, fuera del túnel». A `aeronave?: true` field in `garaje/tipos.ts` read by that card in
   `pages/Aeromovil.tsx`: ≈ 15 min (the page was claimed by another bot when this was written).
+
+## 2026-11-17 · Aeromóvil section notes (`components/aeromovil/notas/`)
+
+- **A section is its block's title.** Renaming a block leaves its notes behind (still in the table, not shown), and the
+  blocks that share a title across departments («Comprobaciones de este departamento») share their notes. A stable
+  `seccion` id per block (dep + bloque from `LadoTriciclo`/`LadoBasculante`, passed to `Bloque`): ≈ 45 min plus a
+  one-off rename migration of existing rows.
+- **The destination is set from `MenuDisenos`** (a menu publishing page state). A `NotasProvider` in
+  `pages/Aeromovil.tsx` with `actual?.id` and `P.disposicion`: ≈ 10 min once that file is free.
+- **«Guardar como nuevo» does not copy the notes** to the new design; they stay on the original. Copying on create in
+  `POST /api/aeromovil/disenos` (an `origen` id in the body): ≈ 20 min.
+- **Anonymous notes never leave the browser** (by design, rule 3). If Eugenio wants visitors' notes shared, they would
+  go through moderation like the tasks: ≈ 1 h.

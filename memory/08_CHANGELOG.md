@@ -12326,3 +12326,21 @@ Eugenio: «permite añadir más tipos de ruedas, por ejemplo de motos de todo ti
   https://evtol.news/news/aero-friedrichshafen-2024 · https://www.aircraft.com/aircraft/246590431/na-2026-ela-aviation-eclipse-revo ·
   https://dulv.de/Tragschrauber_Kennblaetter/details.php?id=21126 · https://aeroexpo.online/prod/ela-aviacion-sl/product-171316-69471.html ·
   https://elaaviacion.com/eclipse-evo/ · https://en.wikipedia.org/wiki/ELA_10_Eclipse
+
+## 2026-11-17 · Notas en cada desplegable del Aeromóvil
+
+Eugenio: «Permite también en cada sección, por ejemplo, motor gasolina o motor eléctrico o morro, cola, esas secciones,
+permite añadir un comentario en cada una de ellas para poder tomar notas de cosas importantes dentro de cada una de
+ellas. Y haz que ese comentario tenga una fecha y un autor. Si está registrado en la página, claro. Se podrá saber quién
+es el autor, si no será anónimo.»
+
+- Cada desplegable del panel lateral (Morro, Cola, Cúpula, Motor…, en los cinco vehículos) tiene en su cabecera un
+  icono de nota pequeño y gris; cuando la sección tiene notas se pone ámbar con el número. Al pulsarlo se abre la
+  lista de notas (la más reciente arriba) y una caja para añadir otra, aunque el desplegable esté cerrado.
+- Cada nota lleva el texto, la fecha y la hora, y el autor: el nombre de la cuenta si hay sesión iniciada.
+- **Con sesión**: la nota se guarda en la web con el diseño abierto (o con el vehículo si no hay un diseño guardado
+  abierto) y la ve cualquiera que abra la página. Solo quien la escribió puede editarla; puede quitarla quien la
+  escribió o un administrador (se archiva, no se borra).
+- **Sin sesión**: la nota se firma «Anónimo» y se queda solo en ese navegador («solo en este dispositivo»); se puede
+  editar y borrar desde ahí. Para que la vean los demás hay que iniciar sesión.
+- Tabla nueva `aeromovil_notas` (migración 0223). Los diseños guardados no cambian.
