@@ -162,7 +162,7 @@ export function piezasBase(m: ModeloTriciclo, ar: { carroceria: number; cristal:
       { nombre: 'Ruedas', kg: L('tMRueda') * nR, x: (2 * kDel * m.xF + kTras * m.xR) / nR, y: (2 * kDel * yRF + kTras * yRR) / nR },
       { nombre: 'Frenos', kg: 4 * L('tMFreno'), x: (m.xF + m.xR) / 2, y: (yRF + yRR) / 2 },
       { nombre: 'Dirección', kg: L('tMDir'), x: (m.cremallera.x + m.cabezaDireccion[0]) / 2, y: (m.cremallera.y + m.cabezaDireccion[1]) / 2 },
-      { nombre: 'Motores de buje (dos)', kg: L('tMMotor'), x: m.motor.c[0], y: m.motor.c[1] },
+      motorPieza(m, L('tMMotor'), 'Motores de buje (dos)'),
       { nombre: 'Controlador', kg: L('tMInversor'), x: (m.inversor.x0 + m.inversor.x1) / 2, y: (m.inversor.y0 + m.inversor.y1) / 2 },
       ...reductoraPieza(T, m),
       { nombre: 'Batería', kg: bat, x: vb ? xb / vb : 0, y: vb ? yb / vb : 0.3 },
@@ -183,7 +183,7 @@ export function piezasBase(m: ModeloTriciclo, ar: { carroceria: number; cristal:
     { nombre: 'Ruedas', kg: L('tMRueda') * (2 * kDel + kTras), x: (2 * kDel * m.xF + kTras * m.xR) / (2 * kDel + kTras), y: (2 * kDel * yRF + kTras * yRR) / (2 * kDel + kTras) },
     { nombre: 'Frenos', kg: 3 * L('tMFreno'), x: (2 * m.xF + m.xR) / 3, y: (2 * yRF + yRR) / 3 },
     { nombre: 'Dirección', kg: L('tMDir'), x: (m.cremallera.x + m.cabezaDireccion[0]) / 2, y: (m.cremallera.y + m.cabezaDireccion[1]) / 2 },
-    { nombre: 'Motor de buje', kg: L('tMMotor'), x: m.motor.c[0], y: m.motor.c[1] },
+    motorPieza(m, L('tMMotor'), 'Motor de buje'),
     { nombre: 'Controlador', kg: L('tMInversor'), x: (m.inversor.x0 + m.inversor.x1) / 2, y: (m.inversor.y0 + m.inversor.y1) / 2 },
     ...reductoraPieza(T, m),
     { nombre: 'Batería', kg: bat, x: vb ? xb / vb : 0, y: vb ? yb / vb : 0.3 },
@@ -286,7 +286,13 @@ export function dimensionar(m: ModeloTriciclo, piezas: PiezaMasa[]): PiezaMasa[]
 /** (2026-11-16) a reduction gear chosen from the catalogue, at the motor, when its maker publishes its mass. */
 export function reductoraPieza(T: CamposTriciclo, m: ModeloTriciclo) {
   const kg = masaReductora(T);
-  return kg ? [{ nombre: 'Motor: reductora (catálogo)', kg, x: m.motor.c[0], y: m.motor.c[1] }] : [];
+  return kg ? [{ nombre: 'Motor: reductora (catálogo)', kg, x: m.motor.c[0], y: m.motor.c[1], z: m.motor.z }] : [];
+}
+/** (2026-11-17) the traction motor: in the hub, or central (MG2 on the planetary's ring, next to the petrol engine). */
+export function motorPieza(m: ModeloTriciclo, kg: number, buje: string): PiezaMasa {
+  return m.motor.tipo === 'central'
+    ? { nombre: 'Motor eléctrico central (MG2)', kg, x: m.motor.c[0], y: m.motor.c[1], z: m.motor.z, nota: 'junto al motor de gasolina, en la corona del planetario: masa suspendida' }
+    : { nombre: buje, kg, x: m.motor.c[0], y: m.motor.c[1] };
 }
 
 export function grupoPieza(nombre: string): DepTriciclo {

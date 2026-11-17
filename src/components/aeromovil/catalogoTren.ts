@@ -408,10 +408,20 @@ const f1 = (v: number, d = 1) => v.toLocaleString('es-ES', { minimumFractionDigi
  * covers the motor's peak, the reduction gear's torque and speed. `kWPico` is the peak power in use (the slider,
  * filled by the catalogue when it publishes it), for the whole car; `dRueda` the driven wheel's diameter (m).
  */
-export function comprobacionesCatalogo(E: EleccionCatalogo, x: { kWPico: number; motores: 1 | 2; dRueda: number; velCalculo: number }): ComprobacionCat[] {
+export function comprobacionesCatalogo(E: EleccionCatalogo, x: { kWPico: number; motores: 1 | 2; dRueda: number; velCalculo: number; planetario?: number | null }): ComprobacionCat[] {
   const out: ComprobacionCat[] = [];
   const m = motorDe(E.tCatMotor), c = controladorDe(E.tCatCtrl), r = reductoraDe(E.tCatReductora);
-  const porMotor = m?.montaje === 'central' ? x.kWPico : x.kWPico / x.motores;
+  // (2026-11-17: `planetario`, the traction motor is MG2 on the power split's ring, one motor next to the engine; the value
+  // is the ring's rpm at 100 km/h, hibrido.ts `CORONA_A_100`: passed in, so this leaf module imports nothing)
+  const porMotor = m?.montaje === 'central' || x.planetario ? x.kWPico : x.kWPico / x.motores;
+  if (x.planetario && m?.montaje === 'buje') {
+    out.push({ dep: 'propulsion', nombre: `Motor eléctrico unido al planetario: el elegido (${m.marca}) es de buje`, holgura: -1, minimo: 0, mostrar: 'elige uno central en «Motor eléctrico: modelo comercial»' });
+  }
+  // the ring turns CORONA_A_100 rpm at 100 km/h (the chain is chosen for it, hibrido.ts): MG2 on it must reach the speed of calculation
+  if (x.planetario && m?.montaje === 'central' && m.rpmMax != null) {
+    const pide = x.planetario * x.velCalculo / 100 * (m.reduccion ?? 1);
+    out.push({ dep: 'propulsion', nombre: `MG2 en la corona: vueltas a ${Math.round(x.velCalculo)} km/h`, holgura: m.rpmMax - pide, minimo: 0, mostrar: `${Math.round(pide)} de ${m.rpmMax} rpm` });
+  }
   // voltage: the controller's nominal voltage within the motor's range
   if (m && c && c.vNom != null && (m.vMin != null || m.vMax != null)) {
     const v = c.vNom, lo = m.vMin ?? -Infinity, hi = m.vMax ?? Infinity;
@@ -443,7 +453,8 @@ export function comprobacionesCatalogo(E: EleccionCatalogo, x: { kWPico: number;
       out.push({ dep: 'propulsion', nombre: `Velocidad a las rpm máximas del motor, con la reductora (rueda de ${Math.round(x.dRueda * 1000)} mm)`, holgura: kmh - x.velCalculo, minimo: 0, mostrar: `${Math.round(kmh)} km/h · de cálculo ${Math.round(x.velCalculo)} km/h` });
     }
   }
-  if (m?.montaje === 'central' && !r && !m.reduccion) {
+  // (on the planetary's ring, the drop case and the chain to the wheel are its reduction: nothing more to choose)
+  if (m?.montaje === 'central' && !r && !m.reduccion && !x.planetario) {
     out.push({ dep: 'propulsion', nombre: `Motor central (${m.marca}): necesita una reductora hasta la rueda`, holgura: -1, minimo: 0, mostrar: 'elige una en «Reductora»' });
   }
   return out;

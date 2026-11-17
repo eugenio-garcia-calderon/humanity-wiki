@@ -128,6 +128,8 @@ export function dibujarHibrido(g: THREE.Object3D, h: DisposicionHibrido) {
   for (const e of h.ejes) {
     if (e.nombre === 'planetario') planetario(g, e, malT);
     else if (e.nombre === 'MG1' || e.nombre === 'generador' || e.nombre === 'P2') maquina(g, e, malT, e.nombre === 'generador' ? 'hibrido-generador' : e.nombre === 'P2' ? 'hibrido-p2' : 'hibrido-mg1');
+    // (2026-11-17: the central traction motor MG2 on the ring, outboard of the planetary; its own id so it can be shown alone)
+    else if (e.nombre === 'MG2') maquina(g, e, malT, 'hibrido-mg2');
     else if (e.nombre === 'embrague') {
       cilZ(g, e.x, e.y, e.r, e.z0, e.z1, malT ? M.mal : M.culata, 'hibrido-embrague');
       for (let i = 0; i < 10; i++) { const a = i * Math.PI / 5; cilZ(g, e.x + (e.r - 0.006) * Math.cos(a), e.y + (e.r - 0.006) * Math.sin(a), 0.005, e.z0 - 0.004, e.z0, M.acero, 'hibrido-embrague', 8); }
@@ -219,7 +221,7 @@ function maquina(g: THREE.Object3D, e: CilZ, mal: boolean, comp: string) {
 
 /** For the click: what each `hibrido-…` piece is called on the page. */
 export const NOMBRES_HIBRIDO: Record<string, string> = {
-  'hibrido-motor': 'Motor de gasolina', 'hibrido-planetario': 'Engranaje planetario', 'hibrido-mg1': 'Generador MG1', 'hibrido-generador': 'Generador',
+  'hibrido-motor': 'Motor de gasolina', 'hibrido-planetario': 'Engranaje planetario', 'hibrido-mg1': 'Generador MG1', 'hibrido-mg2': 'Motor eléctrico MG2 (en la corona)', 'hibrido-generador': 'Generador',
   'hibrido-embrague': 'Embrague', 'hibrido-p2': 'Motor-generador P2', 'hibrido-caja': 'Caja de cambios', 'hibrido-cadena': 'Cadena a la rueda',
   'hibrido-diferencial': 'Diferencial y palieres', 'hibrido-deposito': 'Depósito de gasolina', 'hibrido-escape': 'Escape',
   'hibrido-admision': 'Admisión', 'hibrido-filtro-aire': 'Filtro de aire', 'hibrido-bomba-agua': 'Bomba de agua', 'hibrido-manguitos': 'Termostato y manguitos',

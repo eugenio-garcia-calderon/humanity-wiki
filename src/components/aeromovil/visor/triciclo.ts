@@ -163,11 +163,12 @@ export function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<
     // side, held by the pod's two faired arms (drawn with the pods): a simple arm, as in front, that does not steer
     const zInT = Ft.VIA_LAT / 2 - Ft.ANCHO_NEU_LAT / 2 - 0.025, [arT, abT] = brazosDe(Ft);
     for (const s of [1, -1] as const) {
-      disk(esquinaB(G.motor, 'tras', s), [m.motor.c[0], m.motor.c[1], s * Ft.VIA_LAT / 2], m.motor.r, m.motor.ancho, M.motor).userData.componente = 'motor-electrico';
+      // (2026-11-17: no hub motor when the traction motor is MG2 on the planetary, drawn by hibrido3d.ts)
+      if (m.motor.tipo === 'buje') disk(esquinaB(G.motor, 'tras', s), [m.motor.c[0], m.motor.c[1], s * Ft.VIA_LAT / 2], m.motor.r, m.motor.ancho, M.motor).userData.componente = 'motor-electrico';
       tube(esquinaB(G.suspension, 'tras', s), [m.xR, abT.y - 0.02, s * zInT], [m.xR, arT.y + 0.03, s * zInT], 0.03, M.alu);
     }
   } else {
-  disk(G.motor, [m.motor.c[0], m.motor.c[1], 0], m.motor.r, m.motor.ancho, M.motor).userData.componente = 'motor-electrico';
+  if (m.motor.tipo === 'buje') disk(G.motor, [m.motor.c[0], m.motor.c[1], 0], m.motor.r, m.motor.ancho, M.motor).userData.componente = 'motor-electrico';
   // rear: the swing arm's two legs round the tyre, its pivot tube and the mono-shock
   const [px, py] = m.basculante.pivote, [ex, ey] = m.basculante.eje, zb = m.basculante.z;
   for (const s of [1, -1]) tube(G.suspension, [px, py, s * zb], [ex, ey, s * zb], 0.032, M.susp);

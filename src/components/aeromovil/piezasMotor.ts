@@ -31,7 +31,7 @@ export const GRUPOS_MOTOR: GrupoMotor[] = [
   { id: 'bloque', n: 'Bloque motor', componentes: ['hibrido-motor'] },
   { id: 'transmision', n: 'Engranaje planetario / transmisión', componentes: ['hibrido-planetario', 'hibrido-embrague', 'hibrido-caja', 'hibrido-arbol', 'hibrido-cadena', 'hibrido-diferencial'] },
   { id: 'generador', n: 'Generador', componentes: ['hibrido-mg1', 'hibrido-generador', 'hibrido-p2'] },
-  { id: 'electrico', n: 'Motor eléctrico', componentes: ['motor-electrico'] },
+  { id: 'electrico', n: 'Motor eléctrico', componentes: ['motor-electrico', 'hibrido-mg2'] },
   { id: 'controlador', n: 'Controlador', componentes: ['controlador'] },
   { id: 'deposito', n: 'Depósito y conducto de combustible', componentes: ['hibrido-deposito'] },
   { id: 'refrigeracion', n: 'Refrigeración', componentes: ['refrigeracion-radiador', 'refrigeracion-tubos', 'hibrido-bomba-agua', 'hibrido-manguitos'] },
@@ -45,7 +45,7 @@ export const NOMBRES_PIEZA: Record<string, string> = {
   'hibrido-motor': 'Bloque, culata y cigüeñal', 'hibrido-planetario': 'Engranaje planetario', 'hibrido-embrague': 'Embrague',
   'hibrido-caja': 'Caja de cambios', 'hibrido-cadena': 'Cadena a la rueda', 'hibrido-diferencial': 'Diferencial y palieres',
   'hibrido-mg1': 'Generador MG1', 'hibrido-generador': 'Generador y su cable', 'hibrido-p2': 'Motor-generador P2',
-  'motor-electrico': 'Motor de buje', controlador: 'Controlador (inversor)', 'hibrido-deposito': 'Depósito, boca y conducto',
+  'motor-electrico': 'Motor de buje', 'hibrido-mg2': 'Motor eléctrico MG2 (en la corona)', controlador: 'Controlador (inversor)', 'hibrido-deposito': 'Depósito, boca y conducto',
   'refrigeracion-radiador': 'Radiador y ventilador', 'refrigeracion-tubos': 'Tubos del refrigerante', 'hibrido-arbol': 'Árbol de transmisión', 'hibrido-bomba-agua': 'Bomba de agua', 'hibrido-manguitos': 'Termostato y manguitos',
   'hibrido-bomba-aceite': 'Bomba de aceite', 'hibrido-carter': 'Cárter de aceite', 'hibrido-filtro-aceite': 'Filtro de aceite',
   'hibrido-escape': 'Colectores, silencioso y tubo de escape', 'hibrido-admision': 'Colector de admisión y mariposa', 'hibrido-filtro-aire': 'Filtro de aire',
@@ -55,16 +55,18 @@ export const NOMBRES_PIEZA: Record<string, string> = {
 export const grupoDePieza = (comp: string): GrupoMotor | null => GRUPOS_MOTOR.find(g => g.componentes.includes(comp)) ?? null;
 
 /** What the model needs to say which parts exist: the Triciclo family's model, read loosely (no import of the model). */
-export interface ModeloConMotor { tipo: string; phev?: { disp: DisposicionHibrido } | null }
+export interface ModeloConMotor { tipo: string; phev?: { disp: DisposicionHibrido } | null; motor?: { tipo?: string } }
 
 /** The parts this design has, in list order. */
 export function piezasPresentes(m: ModeloConMotor): string[] {
   if (m.tipo !== 'triciclo') return [];
-  const s = new Set<string>(['motor-electrico', 'controlador']);
+  const s = new Set<string>(['controlador']);
+  // (2026-11-17: no hub motor when the traction motor is MG2 on the planetary)
+  if (!m.motor?.tipo || m.motor.tipo === 'buje') s.add('motor-electrico');
   const d = m.phev?.disp;
   if (d) {
     for (const k of ['hibrido-motor', 'hibrido-admision', 'hibrido-filtro-aire', 'hibrido-escape', 'hibrido-bomba-agua', 'hibrido-manguitos', 'hibrido-bomba-aceite', 'hibrido-carter', 'hibrido-filtro-aceite', 'hibrido-deposito']) s.add(k);
-    for (const e of d.ejes) s.add(e.nombre === 'planetario' ? 'hibrido-planetario' : e.nombre === 'MG1' ? 'hibrido-mg1' : e.nombre === 'generador' ? 'hibrido-generador' : e.nombre === 'P2' ? 'hibrido-p2' : 'hibrido-embrague');
+    for (const e of d.ejes) s.add(e.nombre === 'planetario' ? 'hibrido-planetario' : e.nombre === 'MG1' ? 'hibrido-mg1' : e.nombre === 'MG2' ? 'hibrido-mg2' : e.nombre === 'generador' ? 'hibrido-generador' : e.nombre === 'P2' ? 'hibrido-p2' : 'hibrido-embrague');
     if (d.caja) s.add(d.caja.nombre === 'caja de cambios' ? 'hibrido-caja' : 'hibrido-planetario');
     if (d.cadena) s.add('hibrido-cadena');
     if (d.diferencial) s.add('hibrido-diferencial');
