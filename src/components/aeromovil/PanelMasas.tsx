@@ -22,7 +22,7 @@ const GRUPOS: [string, string][] = [['carroceria', 'Carrocería'], ['chasis', 'C
 function Esquema({ a, e, alto }: { a: AnalisisMasas; e: EstadoMasas; alto: number }) {
   const xs = a.ruedas.map(r => r.x), x0 = Math.min(...xs) - 0.5, x1 = Math.max(...xs) + 0.5, W = 340, k = W / (x1 - x0);
   const X = (x: number) => (x1 - x) * k;  // the front on the left, as the 3D's side view
-  const zMax = Math.max(0.4, ...a.ruedas.map(r => Math.abs(r.z))) + 0.2, H1 = 2 * zMax * k, Z = (z: number) => (zMax + z) * k;
+  const zMax = Math.max(0.4, ...a.ruedas.map(r => Math.abs(r.z))) + 0.45, H1 = 2 * zMax * k, Z = (z: number) => (zMax + z) * k;
   const H2 = Math.max(alto, e.cg.y + 0.3) * k, Y = (y: number) => H2 - y * k;
   const max = Math.max(...e.ruedas.map(r => r.kg), 1);
   return (
