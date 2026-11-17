@@ -149,6 +149,12 @@
       "ruta": "src/components/aeromovil/PesosDepartamento.ts",
       "motivo": "masas: motor y depósito libres, pestaña MASAS, Proyecto limpio",
       "desde": "2026-11-17T10:42:06.946Z"
+    },
+    {
+      "agente": "masas",
+      "ruta": "src/components/aeromovil/FichaHibrido.tsx",
+      "motivo": "masas: frase de dónde va el motor",
+      "desde": "2026-11-17T10:44:07.275Z"
     }
   ]
 }
