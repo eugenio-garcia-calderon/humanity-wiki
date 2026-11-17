@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "ruedas",
-      "ruta": "src/components/aeromovil/basculante/modelo3d.ts",
-      "motivo": "ruedas: catálogo de ruedas de moto",
-      "desde": "2026-11-17T10:23:14.049Z"
-    },
-    {
-      "agente": "ruedas",
       "ruta": "src/components/aeromovil/geometriaBasculante.ts",
       "motivo": "ruedas: catálogo de ruedas de moto",
       "desde": "2026-11-17T10:23:17.341Z"
