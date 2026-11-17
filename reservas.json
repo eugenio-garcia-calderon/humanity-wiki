@@ -101,6 +101,12 @@
       "ruta": "src/server/seguridad/clasificacion.ts",
       "motivo": "proveedores: clasificar aeromovil_adjuntos (1 línea)",
       "desde": "2026-11-17T18:21:31.092Z"
+    },
+    {
+      "agente": "solopiezas",
+      "ruta": "src/pages/Aeromovil.tsx",
+      "motivo": "solopiezas: lista de piezas del motor (6 líneas)",
+      "desde": "2026-11-17T18:36:09.966Z"
     }
   ]
 }
