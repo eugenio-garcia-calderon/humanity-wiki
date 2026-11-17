@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "legado",
-      "ruta": "src/pages/Aeromovil.tsx",
-      "motivo": "legado: aviso solo lectura y abrir el Aeromóvil S (pocas líneas)",
-      "desde": "2026-11-17T17:01:21.883Z"
-    },
-    {
       "agente": "quitar",
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "quitar: fuera «¿Algo que mejorar?» y «Empezar un diseño nuevo» (pocas líneas)",
