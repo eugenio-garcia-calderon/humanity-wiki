@@ -1,12 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "colacorte",
-      "ruta": "scripts/cola-continuidad.ts",
-      "motivo": "colacorte: cola cortada Kamm en Modelo 1",
-      "desde": "2026-11-17T09:32:56.845Z"
-    },
-    {
       "agente": "estudioaero",
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "estudioaero: bloque Aerodinámica en Carrocería",
