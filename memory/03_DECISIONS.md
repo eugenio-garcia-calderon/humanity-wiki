@@ -2167,6 +2167,7 @@ tunnel's Cd silently. The near end (40 cm, pilot's backrest vs passenger's belly
   in series. At 96 V only the Elmar boost MPPT (solar-car class, no public price) fits; the Victron/Genasun ones stop at 48 V.
 - **Efficiencies**: the battery-side consumption is untouched; new derived figures only (plug consumption = battery /
   charger efficiency; MPPT share of the existing 85 % solar losses; DC-DC output of the 80 W auxiliaries).
+<<<<<<< HEAD
 ## 2026-11-17 · Legacy Aeromóvil designs: by id in code, not a column (bot «legado»)
 
 Eugenio wants to work only on the «Aeromovil S» (design 16); every earlier design and vehicle type becomes read-only
@@ -2179,3 +2180,35 @@ closed by construction (new designs get higher ids). Cost of switching to (a) la
 read it in GET, swap the two helpers). An unsaved vehicle (a type picked from the logo menu) is legacy too.
 The default design is set by a guarded migration (`0226`, the same UPDATE the owner's «por defecto» route runs), not by
 hand in production, and the page opens the S by id regardless (`cargarAeromovilS`), so it works even before the deploy.
+=======
+## 2026-11-17 · Aeromóvil section notes: where they live and how the author is stored
+
+Eugenio asked for a dated, authored note on every side-panel section, «anónimo» when not logged in.
+- **Own table `aeromovil_notas` (migration 0223), not inside `aeromovil_disenos.parametros`.** Saving a design is
+  owner-only (2026-11-07); notes from anyone else could never be stored there, and a note would rewrite the design's
+  parameters (and its autosave race). Keyed by `diseno_id` (nullable: no saved design open → the vehicle family's
+  notes), `vehiculo` (`disposicion`) and `seccion` (the block's title). Not a junction table: a note is an entity.
+- **Writes need a session (level 1)**; root CLAUDE.md rule 3. Anonymous notes stay in that browser
+  (`localStorage` `aeromovil.notas.locales`), signed «Anónimo», editable there. Alternative rejected: an open write
+  route with IP throttling like `/api/aeromovil/tareas` — it breaks rule 3 and lets anyone fill every section of
+  Eugenio's design with text that the page then shows to everybody.
+- **The author is `created_by` (a user id); the name is resolved by a JOIN at read time.** In a backup the table holds
+  text and an opaque id, and an emptied account (`vaciarCuentas.ts` keeps the `users` row as «Usuario eliminado»)
+  shows that name on its notes with nothing to clean here. Alternative rejected: copying the display name into the row —
+  it would survive account deletion in every nightly backup.
+- **One fetch per open design**, in a module store (`components/aeromovil/notas/almacen.ts`), not one per block (~60
+  blocks). `MenuDisenos` sets where notes go, since it already receives the open design and `P.disposicion`
+  (`pages/Aeromovil.tsx` was claimed by another bot; a context provider there is the cleaner home).
+- Reading is public, like the tasks and the designs.
+- **The notes open in a dialog portalled to `document.body`, and the header icon is a `span role="button"`.** For
+  anyone but the owner the side panel is inside `<fieldset disabled>` (pages/Aeromovil.tsx), which disables every
+  button and textarea inside it; inline notes worked only for the owner (caught in the headless test as an anonymous
+  visitor). Alternative: carve the notes out of that fieldset in `pages/Aeromovil.tsx` — more invasive, and that file
+  was claimed by another bot.
+
+## 2026-11-17 · Checks run in GitHub Actions on every pull request
+
+**Context.** Ten bots shared one 2-CPU / 8 GB cloud machine and ran tsc, vite build, the Aeromóvil scripts and headless screenshots one at a time behind `aeromovil-pesado.lock`. The queue reached ~10 jobs of up to 15 min each; ready PRs waited hours.
+**Decision.** New workflow `.github/workflows/comprobar.yml` runs on `pull_request` to main: tsc, build, and a matrix of the Aeromóvil scripts (tunnel, triciclo-disenos, estudio-aerodinamico, pesos-secciones, homologacion, bala-cola-lisa, cola-continuidad seed 7), each job in parallel on GitHub runners. Read-only, no secrets. Bots open the PR, wait for green, then merge under the deploy lock. Local heavy work is limited to what CI cannot do (headless screenshots of the feature).
+**Alternatives.** (a) Allow 2 concurrent heavy jobs locally: at most 2× and risks OOM on 8 GB. (b) Skip checks: rejected. (c) Bigger cloud machine: not in our control.
+>>>>>>> origin/main
