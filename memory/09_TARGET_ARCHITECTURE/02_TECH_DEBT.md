@@ -927,3 +927,10 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **`tVel` lives in Motor's FILAS row and is drawn a second time in «Consumos»**: moving the row's `dep` needs a
   `DepTriciclo` 'consumos' (touches ~6 Records): ~30 min.
 - **Basculante, A1, Gota, Bala: no «Consumos» tab** (legacy since 2026-11-17).
+- **Blocked by claims on 2026-11-17 (both held by bot capo the whole session), ~20 min together once free:**
+  (1) `LadoTriciclo.tsx` still draws its own «Rendimiento» block in Motor and Batería: change
+  `(dep === 'propulsion' || dep === 'energia' || dep === 'proyecto') && rendimiento` to `dep === 'proyecto'` and add a
+  one-line pointer to «Consumos» (the block now lives in `electrico/LadoConsumos.tsx`);
+  (2) `masasSecciones.ts` `seccionesTriciclo`: give «Varios» its `hijos: desgloseVarios(p.kg, sistemaElectrico(m, res))`
+  (`electrico/sistema.ts`, already exact to the part) so the «Varios» section lists the electrical parts and «precios» /
+  «proveedores» pick them up; then `scripts/pesos-secciones.ts` must stay «Todo OK».
