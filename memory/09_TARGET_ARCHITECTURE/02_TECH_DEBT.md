@@ -946,6 +946,20 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   `POST /api/aeromovil/disenos` (an `origen` id in the body): ≈ 20 min.
 - **Anonymous notes never leave the browser** (by design, rule 3). If Eugenio wants visitors' notes shared, they would
   go through moderation like the tasks: ≈ 1 h.
+
+
+## 2026-11-17 · Cooling and engine position (bot «capo»)
+
+- **Cooling fields outside `campos.ts`**: no `Explicacion` per slider (the block has one paragraph) and the study's
+  `ficha()` does not know them (its rule's test is `tunel: false`). Moving them into `FILAS`/`SELECTORES_TRICICLO` +
+  `explicaciones/triciclo.ts`: ≈ 45 min.
+- **Pipes and radiators only check the skin and a few boxes** (engine, tank, battery, nose wheel), not the seats, feet,
+  frame tubes or the battery pack along the frame: ≈ 1 h with `hibrido.ts`'s `choquesDe`.
+- **Radiator is always vertical**; in a low nose it may not fit (check says «asoma»). A tilted core: ≈ 1 h.
+- **The propshaft and the engine in the nose are drawn by `visor/refrigeracion.ts`**, not `hibrido3d.ts` (claimed);
+  the front engine has no specific check for the pilot's pedals or the front suspension cradle. ≈ 40 min.
+- **Hood hinge/latch mass (≈ 1 kg) not counted**, and the nose solar panel (`tSolarMorro`) does not lift with the hood:
+  ≈ 20 min each.
 - **Blocked by claims on 2026-11-17 (both held by bot capo the whole session), ~20 min together once free:**
   (1) `LadoTriciclo.tsx` still draws its own «Rendimiento» block in Motor and Batería: change
   `(dep === 'propulsion' || dep === 'energia' || dep === 'proyecto') && rendimiento` to `dep === 'proyecto'` and add a
