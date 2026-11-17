@@ -11,6 +11,8 @@ import { CAPAS, type CapaId, type V3 } from './capas';
 import type { Mats } from './materiales';
 import { tube, disk, vaciar, tuboCurvo, cajaRedonda, muelle, _x, ponerBieleta } from './primitivas';
 import { ocupante } from './ocupante';
+import { vestirRueda } from './ruedaCatalogo';
+import { fichaRueda } from '../ruedas/catalogo';
 
 /** The Triciclo's front wheels and pods turned `angulo` degrees (+ to the left: the left wheel is then the inner one). */
 export function girarTriciclo(G: Record<CapaId, THREE.Group>, m: ModeloTriciclo, angulo: number) {
@@ -251,5 +253,15 @@ export function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<
     const gi = construirInterior(m.F, m.interior, Mb, G.asientos.getObjectByName('cabina') ?? null, piv, m.plazas.map(q => ({ pts: q.pts, z: q.z, piloto: q.piloto, vacia: sinPasajero && !q.piloto })));
     if (gi.children.length) G.asientos.add(gi);
   }
+  // 2026-11-17: a wheel from the catalogue (motorcycle, eco, velomobile) is drawn with its own section and rim; the pods'
+  // wheels are `tRuedaDel` (the front ones, or the side ones in a diamond), the rest `tRuedaTras`. Old sizes: unchanged
+  vestirRuedasTriciclo(G.ruedas, M, m);
   for (const c of CAPAS) G[c.k].traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+}
+function vestirRuedasTriciclo(capa: THREE.Object3D, M: Mats, m: ModeloTriciclo) {
+  const grupos: THREE.Object3D[] = []; capa.traverse(o => { if (o.name === 'rueda-direccion' || o.name === 'rueda-trasera' || o.name === 'rueda-morro') grupos.push(o); });
+  for (const o of grupos) {
+    const clave = o.name === 'rueda-direccion' ? m.campos.tRuedaDel : m.campos.tRuedaTras, f = fichaRueda(clave);
+    if (f) vestirRueda(o, M, clave, f.d / 2, f.w);
+  }
 }

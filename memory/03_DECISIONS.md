@@ -2069,6 +2069,45 @@ and a part that no rule takes is shown as «sin desplegable» rather than lost.
   same regexes; it was deleted at merge time so there is one rule for which part belongs to which block. The
   comparison's «En el coche ahora» line lists that same section's parts.
 
+
+
+## 2026-11-17 · Wheel catalogue: one shared table, added as extra options of each vehicle's existing wheel selector
+
+Eugenio: «permite añadir más tipos de ruedas, por ejemplo de motos de todo tipo». Alternatives considered:
+- **A new «tyre type» selector next to the size selector** (size from one, type from the other): two controls that can
+  contradict each other (a 21″ enduro tyre on a 13″ car rim). Rejected.
+- **Replacing each vehicle's wheel table with the catalogue**: would change every saved design (masses, Crr). Rejected.
+- **Chosen:** `ruedas/catalogo.ts` holds the real wheels with sources; the Triciclo (`RUEDAS_TRICICLO`) and the
+  Basculante (`RUEDAS_BASCULANTE`) append them, by id, to the tables they already had, and to their selectors and option
+  whitelists. Old keys keep their entries untouched; `crrMezcla` returns the vehicle's old constant (`CRR` 0.011,
+  `CRR_B` 0.010) whenever no axle uses a catalogue wheel, so saved designs keep their numbers exactly.
+- 3D: catalogue wheels are drawn by `visor/ruedaCatalogo.ts` (lathe with the motorcycle's round crown, spokes merged into
+  one mesh, cast split spokes, disc, hub-motor drum). On the Triciclo it re-dresses the wheel groups the body builder
+  already placed (`rueda-direccion`, `rueda-trasera`, `rueda-morro`), keeping their names and `userData`, so steering and
+  leaning work unchanged; old sizes keep the Bala's aero-cover wheel.
+- Not done: the Aeromóvil 1 and the Gota keep their own tyre lists (car tyres and bicycle sizes): a moto tyre on the A1's
+  McPherson car is not a design anyone asked for. Adding them is the same three steps (≈1 h).
+- Mismatch found, not changed: the Triciclo's old moped wheels roll at 0.011, while Cossalter's formula gives ≈ 0.016 for a
+  moped tyre at 2.25 bar. Changing it would change every saved design; it is Eugenio's call.
+## 2026-11-17 · ELA Eclipse REVO autogyro in the garage: which model, which numbers, and how an aircraft fits
+
+- Request (Eugenio, with a photo of a copper enclosed tandem gyro): «haz un modelo 3D del autogiro de ELA Aviación, el
+  ultimo modelo». Reading taken: a garage reference vehicle, like the Vision Jet.
+- **Which model.** Candidates: ELA 10 Eclipse (2014), Eclipse EVO (Rotax 915 iS), Eclipse REVO (Rotax 916 iS, AERO 2024,
+  in production, 2026 units listed). Chose the REVO: newest, same airframe as the photo. Sources: revo.elaaviacion.com,
+  elaaviacion.com (April 2024 article), evtol.news «AERO Friedrichshafen 2024», aircraft.com 2026 REVO listing.
+- **Numbers.** Published: rotor 8.53 m, propeller 1.72 m (DULV EVO type sheet 988-22). ELA's own spec sheet is a JPG
+  (elaaviacion.com/wp-content/uploads/2023/03/Eclipse-EVO-Technical-specifications-scaled.jpg) and the DULV PDF
+  (dulv.de/kennblatt/Tragschrauber/988-221.pdf); neither could be fetched from this session (proxy refused the hosts).
+  So length, width, height, wheelbase, track and cabin width are estimated from the photo with the rotor/propeller
+  as scale, and say so in `fuente`. If someone reads that JPG, replace the constants in `garaje/autogiroForma.ts`
+  (≈ 10 min).
+- **Aircraft vs the road tools.** Same pattern as the Vision Jet: no `envolvente`, no `aero`. The tunnel
+  (`cuerpoGaraje` returns null), consumption cards, the stability circuit and `tunel-pruebas` all key on those fields
+  and skip it; the aerodynamic study only runs on our design. Alternative rejected: a silhouette for the tunnel — its
+  calibration is for road car bodies; a gyro's drag is dominated by the rotor, which the tunnel cannot model.
+- **Rotor parked fore and aft, level.** Its blades overhang the row neighbours at 2.7 m height; row spacing still uses
+  `largo` (fuselage, 5.10 m), so the garage stays compact. Alternative: spacing by rotor (8.5 m) — wastes a row slot.
 ## 2026-11-17 · Masses: one sum, one load split, offsets for the hybrid's parts (masas)
 - **One centre-of-gravity sum** (`masasVehiculo.ts` `centroDe`) used by `cargasRueda`, the new mass checks and the
   «Masas» tab. `calcularTriciclo` keeps its own identical `momento` until its file is free (tech debt); the two give the

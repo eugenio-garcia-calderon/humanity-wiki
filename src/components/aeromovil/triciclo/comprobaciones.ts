@@ -18,7 +18,11 @@ import { puntosFila, type AsientoFila, type Plaza, cgOcupante } from './ocupante
 import { poseBascula, carenadoCuerpoMovido, carenadoAlSuelo, cuerpoAlSuelo, tiltTriciclo } from './bascula';
 import { type ModeloTriciclo, aroVolante, puntasRetrovisor } from './modelo';
 import { type PiezaMasa, type Maleteros, maleterosTriciclo, piezasTriciclo, EQUIPAJE, masaButaca, cargasRueda } from './masas';
-import { CRR, solarDiaTriciclo, energiaTriciclo } from './energia';
+import { crrTriciclo, solarDiaTriciclo, energiaTriciclo } from './energia';
+import { fichaRueda } from '../ruedas/catalogo';
+
+/** The check's name, also in `explicaciones/triciclo.ts`. */
+export const NEUMATICO_MOTO_SIN_INCLINAR = 'Neumáticos de moto en un vehículo que no se inclina: gastan el centro y agarran menos en curva';
 
 export interface ResultadosTriciclo extends Omit<ResultadosBala, 'cabezas'> {
   /** 2026-11-16: the tilt system sized for this car (basculacion.ts), or null when it does not lean. */
@@ -354,6 +358,9 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     const peor = Math.min(capD / cr.del, capT / cr.tras), [carga, cap] = capD / cr.del <= capT / cr.tras ? [cr.del, capD] : [cr.tras, capT];
     c('rodaje', `Neumáticos: carga por rueda con todos a bordo y ${EQUIPAJE} kg de equipaje`, peor - 1, 0, `${Math.round(carga)} de ${cap} kg`);
   }
+  // 2026-11-17: a motorcycle tyre (round crown, `ruedas/catalogo.ts`) on a Triciclo that does not lean stands on a narrow
+  // strip of its crown: it wears the centre and grips less in a bend. A warning, not a failure; leaning (`tBascula`), none
+  if (!m.bascula && [T.tRuedaDel, T.tRuedaTras].some(k => fichaRueda(k)?.perfil === 'moto')) c('rodaje', NEUMATICO_MOTO_SIN_INCLINAR, 0, 1, 'aviso');
   // the swing arm's pivot ahead of the rear wheel and behind the passenger's footpegs
   if (!m.filas && !m.butacas && !m.traseras) c('rodaje', 'Pivote del basculante detrás de los estribos del pasajero', (-1.30 + (m.sillines.xPasajero - ASIENTO.xPasajero) - 0.06) - m.basculante.pivote[0], 0.02);
   let tub = 9, peor = ''; for (const tb of m.tubos) { const h = tuboDentro(F, tb); if (h < tub) { tub = h; peor = tb.nombre; } }
@@ -485,8 +492,11 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     maletero, ocupantes: nOcc,
   };
   const e = bala.energia, nada = NaN;
+  // 2026-11-17: a catalogue tyre's speed symbol against the top speed (the old sizes have none on record: no check)
+  { const v = Math.min(...[T.tRuedaDel, T.tRuedaTras].map(k => fichaRueda(k)?.vmax ?? Infinity));
+    if (Number.isFinite(v) && e && Number.isFinite(e.vmaxNominal)) c('rodaje', 'Neumáticos: velocidad que admiten (su código de velocidad)', (v - e.vmaxNominal) / 100, 0, `${Math.round(e.vmaxNominal)} de ${v} km/h`); }
   return {
-    A: area.total, FR: nada, Cd: e?.cd ?? nada, CdA: e?.CdA ?? nada, Crr: CRR, vol, Paero: nada, Proll: nada, Pw: e?.potencia ?? nada, WhKm: e?.WhKm ?? nada, pedWhKm: 0,
+    A: area.total, FR: nada, Cd: e?.cd ?? nada, CdA: e?.CdA ?? nada, Crr: crrTriciclo(T), vol, Paero: nada, Proll: nada, Pw: e?.potencia ?? nada, WhKm: e?.WhKm ?? nada, pedWhKm: 0,
     autonomia: e?.autonomia ?? nada, vmax: e?.vmaxNominal ?? nada,
     masas, mVeh, mTot: mVeh + nOcc * mOcc, rangoMasa: [nada, nada], Mmax, tension, seguridad, cargaRueda: nada,
     solarPico: ar.solar * RENDIMIENTO_SOLAR * 1000, solarDia: solarDiaTriciclo(ar.solar, m.P.sol), kmSol: e?.kmSol ?? nada, areas: ar, comprobaciones: ch, triciclo: bala,

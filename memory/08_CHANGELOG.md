@@ -12258,6 +12258,74 @@ tengas, pues que aparezca también el peso de ese desplegable.»
   soportes y soldaduras. Los dos de motor usan la misma cuenta (lo hizo el trabajo de los motores).
 - Todavía no: la Gota y el Cuadriciclo Basculante. Las cifras ya existen (`masasSecciones.ts`); falta ponerlas en su
   panel, que otros estaban tocando en ese momento.
+
+
+
+## 2026-11-17 · Catálogo de ruedas: ruedas de moto de todo tipo
+
+Eugenio: «permite añadir más tipos de ruedas, por ejemplo de motos de todo tipo».
+
+- **Dónde:** Rodaje › Ejes y ruedas, en el Cuadriciclo Basculante («Ruedas delanteras» / «Ruedas traseras») y en la
+  familia Triciclo (Triciclo, Bala clásico, rombo, el «Rombo Bala»: «Ruedas delanteras (en los carenados)» / «Rueda
+  trasera»). Las medidas de siempre siguen ahí; debajo, 27 ruedas reales nuevas. Delante y detrás pueden ser distintas,
+  como en una moto.
+- **Las ruedas:** scooter (3.50-10 de Vespa, 120/70-12 y 130/70-12, 160/60 R15 de maxiscooter), 125 (100/80-17 y
+  130/70-17), deportiva (120/70 ZR17, 180/55 ZR17 de naked, 190/55 ZR17 de superdeportiva), turismo (Gold Wing
+  130/70 R18 y 200/55 R16), trail (90/90-21, 120/70 R19, 150/70 R18, 170/60 R17), enduro (80/100-21 y 120/90-18 de
+  tacos), custom (130/90 B16, 150/80 B16 y la 240/40 R18 de la Fat Boy), café racer de radios (100/90-18 y 130/70-18),
+  sidecar (4.00-19 del Ural), moto eléctrica con motor de buje (2.75-17 en un QS 205), y para comparar dos neumáticos eco
+  de coche de 19″ (los del BMW i3, etiqueta C y A) y una rueda de velomóvil de 20″. Cada una con diámetro, anchura,
+  perfil (redondo de moto o plano de coche), peso, rodadura, carga y velocidad máximas, tipo de llanta (radios,
+  aleación, disco o motor de buje) y motos reales que la llevan. Todo en `src/components/aeromovil/ruedas/catalogo.ts`.
+- **Qué cambia al elegir una:** el peso de las ruedas, la rodadura y por tanto el consumo y la autonomía (la media de
+  las ruedas elegidas), el tamaño del carenado o del paso de rueda, y lo que ve el túnel. En 3D se dibuja con su forma:
+  banda redonda de moto, radios o llanta de aleación de cinco brazos dobles, disco de freno, o el tambor del motor de buje.
+- **Comprobaciones nuevas:** carga por rueda frente a la del neumático (ya existía; ahora con la carga de cada rueda),
+  que quepa en su carenado o paso de rueda (ya existían; ahora con su tamaño), **«Neumáticos de moto en un vehículo que
+  no se inclina»** (aviso amarillo: la banda redonda apoya en una tira estrecha, gasta el centro y agarra menos en curva;
+  no sale si el vehículo bascula, ni en el Basculante) y **«velocidad que admiten»** (su código de velocidad frente a la
+  velocidad máxima).
+- **Estudio aerodinámico:** regla nueva «Neumático ancho» (más de 160 mm): el túnel prueba uno más estrecho de su clase
+  y el estudio vuelve a pasar las comprobaciones.
+- **Lo que hay que saber:** un neumático de moto rueda peor que uno de coche: unos 0,015 frente a 0,006-0,009
+  (Cossalter, «Motorcycle Dynamics»). Con ruedas de moto en el Triciclo por defecto el consumo sube; con los neumáticos eco
+  de coche baja. La rueda de velomóvil rueda poquísimo pero solo aguanta unos 100 kg: no pasa la comprobación de carga.
+- Los diseños guardados no cambian: siguen con sus ruedas y sus números (la rodadura de antes solo cambia si eliges una
+  rueda del catálogo).
+- Fuentes: Metzeler Technical Manual 2020 (diámetros y anchos medidos), tablas ETRTO (índices de carga y velocidad),
+  V. Cossalter «Motorcycle Dynamics» (rodadura), Reglamento (UE) 2020/740 y reifen.com (etiquetas eco),
+  bicyclerollingresistance.com (velomóvil), canyonchasers.net y ducatiforum.co.uk (pesos de llantas), em3ev.com (motor QS
+  205), tiremart.com (rueda del Ural).
+- No visto en un teléfono: si sale la versión vieja, `humanity.wiki/?sw=off`.
+## 2026-11-17 · Autogiro ELA Eclipse REVO en el garaje
+
+- Eugenio, con una foto de un autogiro color cobre: «haz un modelo 3D del autogiro de ELA Aviación, el ultimo modelo».
+- **Cuál es el último modelo:** el **Eclipse REVO** de ELA Aviación (Fuente Obejuna, Córdoba), presentado en AERO
+  Friedrichshafen 2024 y en producción (se anuncian unidades de 2026). Es la misma célula biplaza en tándem cerrada del
+  Eclipse/Eclipse EVO de la foto, con un motor Rotax 916 iS de 160 CV que además hace girar el rotor a 500 rpm antes de
+  despegar: sale en unos 10 m.
+- **Modelo nuevo** en el garaje, «Autogiro ELA Eclipse REVO» (`garaje/autogiro.ts`, `autogiroForma.ts`,
+  `autogiroModelo.ts`). Lleva:
+  - la cabina con el morro en punta y la gran cúpula de cristal (se ven los dos asientos en tándem y el panel);
+  - el mástil carenado con la cabeza del rotor y las dos palas, aparcadas a lo largo;
+  - el motor detrás de la cabina y la hélice propulsora de tres palas;
+  - el botalón por debajo de la hélice, el estabilizador horizontal con una deriva en cada punta y la deriva central;
+  - la rueda de morro con su horquilla y las dos ruedas principales carenadas sobre ballestas de acero.
+  - Color cobre satinado, como la foto. Sin letras del fabricante ni matrícula.
+- **Datos publicados:** rotor de 8,53 m y hélice Helix de 3 palas y 1,72 m, 331 kg en vacío y 560 kg máximo del EVO
+  (ficha DULV 988-22); REVO: Rotax 916 iS 160 CV, 530 kg máximo al despegue, crucero hasta 160 km/h, más de 500 km de
+  autonomía (anuncio en aircraft.com), unos 20 kg más que el EVO por el nuevo arrastre del rotor (evtol.news); EVO:
+  81 l de depósito y 200 km/h de máxima (aeroexpo, elaaviacion.com).
+- **Estimado en la foto** (ELA no publica estas medidas en texto; su hoja técnica es una imagen que no se pudo
+  descargar): 5,10 m de largo sin el rotor, 1,94 m de ancho, 2,70 m de alto, batalla 1,95 m, vía 1,70 m, cabina de
+  0,80 m; masa en vacío del REVO 351 kg (331 + 20).
+- **Es una aeronave:** como el Vision Jet, no pasa por el túnel de viento ni por la comparación de consumo ni por el
+  circuito de estabilidad (son para coches); el estudio aerodinámico solo mira nuestro diseño. Las palas aparcadas
+  sobresalen 2,6 m por delante del morro y 1,5 m por detrás, a 2,7 m de altura, por encima de los coches vecinos.
+- Fuentes: https://revo.elaaviacion.com · https://elaaviacion.com/revo-taking-off-into-the-future-of-personal-aviation/ ·
+  https://evtol.news/news/aero-friedrichshafen-2024 · https://www.aircraft.com/aircraft/246590431/na-2026-ela-aviation-eclipse-revo ·
+  https://dulv.de/Tragschrauber_Kennblaetter/details.php?id=21126 · https://aeroexpo.online/prod/ela-aviacion-sl/product-171316-69471.html ·
+  https://elaaviacion.com/eclipse-evo/ · https://en.wikipedia.org/wiki/ELA_10_Eclipse
 ## 2026-11-17 · Pestaña «Masas», motor y depósito libres, «Proyecto» como lista de pendientes (masas)
 - Eugenio: «haz que el motor por defecto esté mucho más cerca de la rueda trasera y más abajo, para bajar el centro de
   gravedad, y que el depósito también se pueda colocar de manera libre, también haz que el motor se pueda colocar de
