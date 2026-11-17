@@ -55,14 +55,15 @@ export const NOMBRES_PIEZA: Record<string, string> = {
 export const grupoDePieza = (comp: string): GrupoMotor | null => GRUPOS_MOTOR.find(g => g.componentes.includes(comp)) ?? null;
 
 /** What the model needs to say which parts exist: the Triciclo family's model, read loosely (no import of the model). */
-export interface ModeloConMotor { tipo: string; phev?: { disp: DisposicionHibrido } | null; motor?: { tipo?: string } }
+export interface ModeloConMotor { tipo: string; phev?: { disp: DisposicionHibrido } | null; motor?: unknown }
 
 /** The parts this design has, in list order. */
 export function piezasPresentes(m: ModeloConMotor): string[] {
   if (m.tipo !== 'triciclo') return [];
   const s = new Set<string>(['controlador']);
   // (2026-11-17: no hub motor when the traction motor is MG2 on the planetary)
-  if (!m.motor?.tipo || m.motor.tipo === 'buje') s.add('motor-electrico');
+  const tipoMotor = (m.motor as { tipo?: string } | undefined)?.tipo;
+  if (!tipoMotor || tipoMotor === 'buje') s.add('motor-electrico');
   const d = m.phev?.disp;
   if (d) {
     for (const k of ['hibrido-motor', 'hibrido-admision', 'hibrido-filtro-aire', 'hibrido-escape', 'hibrido-bomba-agua', 'hibrido-manguitos', 'hibrido-bomba-aceite', 'hibrido-carter', 'hibrido-filtro-aceite', 'hibrido-deposito']) s.add(k);
