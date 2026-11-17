@@ -35,6 +35,32 @@ export const ARQUITECTURAS_HIBRIDO: { k: ArqHibrido; n: string }[] = [
 ];
 /** The planetary path's efficiency (gear mesh and chain to the wheel): fixed, it hardly varies. */
 export const REND_PLANETARIO = 0.97;
+/**
+ * 2026-11-17 (Eugenio: «haz que el motor eléctrico del aeromóvil S no esté en el buje de la rueda, sino que esté junto al
+ * motor de gasolina y que se conecte al engranaje planetario»). Where the traction motor (MG2) goes with the power split:
+ * in the rear wheel's hub (until now: the hub motor plays MG2), or central, on the planetary's ring next to the engine, as
+ * in Toyota's THS: engine → carrier, MG1 → sun, MG2 and the output → ring, and from the ring the same drop case and chain
+ * (and, with two rear wheels, the differential) to the wheels. Only the power split has it; series and P2 keep the hub.
+ */
+export type PosMG2 = 'buje' | 'planetario';
+export const POSICIONES_MG2: { k: PosMG2; n: string }[] = [
+  { k: 'buje', n: 'En el buje de la rueda trasera (hace de MG2)' },
+  { k: 'planetario', n: 'Central, junto al motor de gasolina, unido a la corona del planetario (MG2, como el Prius)' },
+];
+/**
+ * From the ring to the wheel: the drop case and the chain (and the differential with two rear wheels), ≈ 97 %. A central
+ * MG2 drives through it; a hub motor does not. Estimate (a roller chain 97–98 %, a spur gear pair 98–99 %).
+ */
+export const REND_SALIDA = 0.97;
+/**
+ * A central MG2's size from its mass and peak power (m): radius 7 cm plus 1 mm per kW (EMRAX 208: Ø 208 mm for 68 kW
+ * peak; Motenergy ME1616: Ø 206 mm), and as long as its mass needs at ≈ 4,200 kg/m³ of envelope (EMRAX 208: 9.4 kg in
+ * Ø 208 × 85 mm, 3,250 kg/m³; a radial-flux motor of this class is denser). Estimates.
+ */
+export function medidasMG2(kg: number, kWPico: number): { r: number; largo: number } {
+  const r = Math.min(0.12, Math.max(0.08, 0.07 + 0.001 * kWPico));
+  return { r, largo: Math.min(0.25, Math.max(0.06, kg / (4200 * Math.PI * r * r))) };
+}
 /** The Prius's power-split gear: 78 teeth on the ring, 30 on the sun. */
 export const DIENTES_PLANETARIO = { corona: 78, sol: 30 };
 export const RAZON_PLANETARIO = DIENTES_PLANETARIO.corona / DIENTES_PLANETARIO.sol;
@@ -52,10 +78,11 @@ const CC_POR_KW = 24;
  * `mec`: power split, the share that goes straight through the planetary (0–1); `elec`: the electrical path
  * (generator, two inverters, motor; 0–1); `caja`: parallel, gearbox and chain (0–1).
  */
-export function rendimientoHibrido(arq: ArqHibrido, mec: number, elec: number, caja: number): number {
+export function rendimientoHibrido(arq: ArqHibrido, mec: number, elec: number, caja: number, mg2Central = false): number {
   if (arq === 'serie') return elec;
   if (arq === 'paralelo') return caja;
-  return mec * REND_PLANETARIO + (1 - mec) * elec;
+  // (2026-11-17: with MG2 central, on the ring, the electrical share also goes through the drop case and the chain)
+  return mec * REND_PLANETARIO + (1 - mec) * elec * (mg2Central ? REND_SALIDA : 1);
 }
 /**
  * A design saved before 2026-11-16 had one slider, «Conversión mecánica» (`tRendTrans`, 75–97 %): it opens as a power
@@ -83,6 +110,8 @@ export interface DisposicionHibrido {
   };
   /** The connection: the parts on the crank axis (planetary and MG1, generator, clutch and P2), the drop case or gearbox, the chain. */
   ejes: CilZ[];
+  /** 2026-11-17: the central traction motor (MG2) on the planetary's ring, outboard of it on the same axis; null: in the hub. */
+  mg2: CilZ | null;
   caja: { a: [number, number]; ra: number; b: [number, number]; rb: number; z0: number; z1: number; nombre: string } | null;
   /** The chain: from the output sprocket to the wheel's (or the differential's), in the plane z. */
   cadena: { a: [number, number]; ra: number; b: [number, number]; rb: number; z: number } | null;
@@ -142,6 +171,8 @@ export interface EntradaHibrido {
   brazo?: { pivote: [number, number]; eje: [number, number]; rec: number; z: number } | null;
   /** The user's move of each from where it goes by default (m: forward, up, to the right): `tMot…`, `tDep…`. */
   mover?: { motor: V3; deposito: V3 };
+  /** 2026-11-17: the power split's MG2 central, on the ring (its mass and peak power size it); absent or null: in the hub. */
+  mg2?: { kg: number; kWPico: number } | null;
 }
 
 /** The gap between two boxes (m): positive, how far apart along the axis that separates them; negative, how deep they overlap. */
@@ -183,7 +214,9 @@ export function disponerHibrido(e: EntradaHibrido): DisposicionHibrido {
   const H = hC + hB + hH + hA;
   const dB = bore + 0.045, dH = bore + 0.06;
   // what hangs off its left end, by architecture: radius and how far out (the parts on the crank axis)
-  const lado = arq === 'reparto' ? { r: 0.10, fuera: 0.145 } : arq === 'serie' ? { r: 0.095, fuera: 0.12 } : { r: 0.10, fuera: 0.17 };
+  // (2026-11-17: a central MG2 adds its length outboard of the planetary, 1 cm apart, and may be wider than it)
+  const mg2 = arq === 'reparto' && e.mg2 ? medidasMG2(e.mg2.kg, e.mg2.kWPico) : null;
+  const lado = arq === 'reparto' ? (mg2 ? { r: Math.max(0.10, mg2.r), fuera: 0.155 + mg2.largo } : { r: 0.10, fuera: 0.145 }) : arq === 'serie' ? { r: 0.095, fuera: 0.12 } : { r: 0.10, fuera: 0.17 };
   /** The engine's boxes and its connection's cylinders with its crankcase's back at x0, its bottom at y0, moved dz sideways. */
   const piezas = (x0: number, y0: number, dz: number) => {
     const x1 = x0 + D, xc = (x0 + x1) / 2, yc = y0 + hC * 0.45, z0 = -0.085 + dz, z1 = z0 + W;
@@ -219,6 +252,10 @@ export function disponerHibrido(e: EntradaHibrido): DisposicionHibrido {
     }
     return y;
   };
+  // (2026-11-17: with MG2 the engine and what hangs off its left are some 55 cm across: with two rear wheels (the chain goes
+  // to the differential in the middle) the whole row is centred in the car by default, the engine moved right, so its left
+  // end does not stick out of the narrowing tail. With the wheel in the tail the chain must run beside it: as before)
+  const dz0 = mg2 && e.cuatro ? (lado.fuera - W) / 2 + 0.085 : 0;
   // ── where by default: the rearmost and lowest place that is clear of everything
   // (the rear limit: the tail wheel's travel, or the differential with two rear wheels; the front limit, where it went
   // until 2026-11-17: right behind the last backrest)
@@ -228,14 +265,14 @@ export function disponerHibrido(e: EntradaHibrido): DisposicionHibrido {
   // (low before clean: it stands on what is under it and may rise at most 5 cm to clear something; if nothing in that band
   // is clear, it takes the place there that overlaps least, and the checks say by how much: an engine lifted 13 cm to
   // clear a tower tube by 1 cm is not what anyone asked for)
-  let mejor: { x0: number; y0: number; coste: number } | null = null, menosMalo = { x0: xDelante, y0: apoyo(xDelante, xDelante + D, -0.085, W - 0.085, true), peor: -9, coste: 9 };
+  let mejor: { x0: number; y0: number; coste: number } | null = null, menosMalo = { x0: xDelante, y0: apoyo(xDelante, xDelante + D, -0.085 + dz0, W - 0.085 + dz0, true), peor: -9, coste: 9 };
   const yMin = e.yPiso + 0.01;
   for (let x0 = xAtras; x0 <= xDelante + 1e-9; x0 += 0.02) {
-    const y00 = apoyo(x0, x0 + D, -0.085, W - 0.085, true);
+    const y00 = apoyo(x0, x0 + D, -0.085 + dz0, W - 0.085 + dz0, true);
     for (let y0 = y00; y0 <= y00 + 0.05 + 1e-9; y0 += 0.01) {
       const coste = (x0 - xAtras) + 1.5 * (y0 - yMin);
       if (mejor && coste >= mejor.coste) break;
-      const p = piezas(x0, y0, 0);
+      const p = piezas(x0, y0, dz0);
       const hs = choquesDe(p.cajas, 'motor', false), peor = Math.min(9, pielMotor(p) - 0.01, ...hs.map(h => h.holgura - h.minimo));
       if (peor > menosMalo.peor + 1e-6 || (Math.abs(peor - menosMalo.peor) <= 1e-6 && coste < menosMalo.coste)) menosMalo = { x0, y0, peor, coste };
       if (peor >= 0) { mejor = { x0, y0, coste }; break; }
@@ -243,7 +280,7 @@ export function disponerHibrido(e: EntradaHibrido): DisposicionHibrido {
   }
   const sitio = mejor ?? menosMalo;
   // the user's move (forward, up, to the right), on top of it: from here on, nothing is corrected
-  const x0 = sitio.x0 + mover.motor[0], y0 = sitio.y0 + mover.motor[1], dzM = mover.motor[2];
+  const x0 = sitio.x0 + mover.motor[0], y0 = sitio.y0 + mover.motor[1], dzM = dz0 + mover.motor[2];
   const pm = piezas(x0, y0, dzM);
   const { x1, xc, yc, z0, z1, carter, bloque, culata, admision } = pm;
   const yTop = y0 + H;
@@ -262,6 +299,8 @@ export function disponerHibrido(e: EntradaHibrido): DisposicionHibrido {
     // 3D its see-through housing shows the gears face on. The ring drives the drop case back past MG1, on a sleeve)
     ejes.push({ nombre: 'MG1', x: xc, y: yc, r: 0.085, z0: z0 - 0.075, z1: z0 });
     ejes.push({ nombre: 'planetario', x: xc, y: yc, r: 0.10, z0: z0 - 0.145, z1: z0 - 0.075 });
+    // (2026-11-17: MG2 outboard of the planetary on the same axis, its rotor on the ring's shaft, as in the Prius's transaxle)
+    if (mg2) ejes.push({ nombre: 'MG2', x: xc, y: yc, r: mg2.r, z0: z0 - 0.155 - mg2.largo, z1: z0 - 0.155 });
     caja = { a: [xc, yc], ra: 0.06, b: salida, rb: 0.05, z0: z0 - 0.05, z1: z0 - 0.008, nombre: 'salida de la corona' };
   } else if (arq === 'serie') {
     ejes.push({ nombre: 'generador', x: xc, y: yc, r: 0.095, z0: z0 - 0.12, z1: z0 });
@@ -340,7 +379,9 @@ export function disponerHibrido(e: EntradaHibrido): DisposicionHibrido {
     respaldo: asientoMotor ? asientoMotor.holgura : null,
     choques,
   };
-  const transmision: [number, number] = ejes.length ? [ejes.reduce((a, c) => a + c.x, 0) / ejes.length, ejes.reduce((a, c) => a + c.y, 0) / ejes.length] : [xc, yc];
+  // (the connection's own mass centre: MG2 is the electric motor's mass, counted where it is by the model)
+  const ejesT = ejes.filter(c => c.nombre !== 'MG2');
+  const transmision: [number, number] = ejesT.length ? [ejesT.reduce((a, c) => a + c.x, 0) / ejesT.length, ejesT.reduce((a, c) => a + c.y, 0) / ejesT.length] : [xc, yc];
   const ocupa = [
     { x0, x1, y0, y1: yTop, z: Math.max(Math.abs(z0), Math.abs(z1)) },
     ...ejes.map(c => ({ x0: c.x - c.r, x1: c.x + c.r, y0: c.y - c.r, y1: c.y + c.r, z: Math.abs(c.z0) })),
@@ -348,11 +389,11 @@ export function disponerHibrido(e: EntradaHibrido): DisposicionHibrido {
   ];
   return {
     arq, motor: { n, bore, cc, xc, yc, z0, z1, x0, x1, y0, yTop, carter, bloque, culata, admision, cilindrosZ },
-    ejes, caja, cadena, diferencial, cable, deposito,
+    ejes, mg2: ejes.find(c => c.nombre === 'MG2') ?? null, caja, cadena, diferencial, cable, deposito,
     escape: { colectores, silencioso: { x0: xS0, x1: xS1, y: yS, z: zS, r: rS }, salida: salidaX },
     holguras, centros: { motor: [xc, y0 + 0.42 * H], transmision, deposito: [(deposito.x0 + deposito.x1) / 2, (deposito.y0 + deposito.y1) / 2] },
-    centrosZ: { motor: (z0 + z1) / 2, transmision: ejes.length ? ejes.reduce((a, c) => a + (c.z0 + c.z1) / 2, 0) / ejes.length : (z0 + z1) / 2, deposito: (deposito.z0 + deposito.z1) / 2 },
-    porDefecto: { motor: [sitio.x0, sitio.y0, 0], deposito: [deposito.x0 - mover.deposito[0], deposito.y0 - mover.deposito[1], (deposito.z0 + deposito.z1) / 2 - mover.deposito[2]] },
+    centrosZ: { motor: (z0 + z1) / 2, transmision: ejesT.length ? ejesT.reduce((a, c) => a + (c.z0 + c.z1) / 2, 0) / ejesT.length : (z0 + z1) / 2, deposito: (deposito.z0 + deposito.z1) / 2 },
+    porDefecto: { motor: [sitio.x0, sitio.y0, dz0], deposito: [deposito.x0 - mover.deposito[0], deposito.y0 - mover.deposito[1], (deposito.z0 + deposito.z1) / 2 - mover.deposito[2]] },
     ocupa,
   };
 }

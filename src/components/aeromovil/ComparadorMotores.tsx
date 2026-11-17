@@ -95,12 +95,14 @@ export function ComparadorMotores({ tipo, modelo, mTot, cd, actual, alElegir, mo
   partes: PartePeso[];
 }) {
   const T = modelo.campos, id = actual ?? A_MEDIDA, p = modelo.phev;
+  // 2026-11-17: the traction motor central, MG2 on the planetary's ring (hibrido.ts): only central motors fit there, one of them
+  const central = modelo.motor.tipo === 'central';
   // the car at the comparison speed: the same model, only «Velocidad de cálculo» moved
   const a90 = useMemo(() => ({ ...modelo, campos: { ...modelo.campos, tVel: VEL_COMPARAR } }) as ModeloTriciclo, [modelo]);
   const base = useMemo(() => (cd ? energiaTriciclo(a90, mTot, cd) : null), [a90, mTot, cd]);
   const v = VEL_COMPARAR / 3.6;
   // what the wheels ask at 90 km/h (W), flat and on the slope
-  const rueda = base ? (base.potencia - AUXILIARES) * RENDIMIENTO : null;
+  const rueda = base ? (base.potencia - AUXILIARES) * RENDIMIENTO * modelo.motor.rend : null;
   const cuesta = mTot * 9.81 * CUESTA * v;
 
   const enCoche = partes;
@@ -137,8 +139,8 @@ export function ComparadorMotores({ tipo, modelo, mTot, cd, actual, alElegir, mo
     }
     const kgAhora = T.tMMotor;
     const pideLlano = rueda != null ? rueda / 1000 : null, pideCuesta = rueda != null ? (rueda + cuesta) / 1000 : null;
-    const filas: Fila[] = MOTORES.map(m => {
-      const n = m.montaje === 'buje' ? motores : 1;
+    const filas: Fila[] = MOTORES.filter(m => !central || m.montaje === 'central').map(m => {
+      const n = m.montaje === 'buje' && !central ? motores : 1;
       const kg = m.kg != null ? m.kg * n : null;
       const e = cd ? energiaTriciclo(a90, mTot + (kg ?? kgAhora) - kgAhora, cd) : null;
       // with the maker's efficiency: the wheels' power over the motor's and an assumed controller's
@@ -162,7 +164,7 @@ export function ComparadorMotores({ tipo, modelo, mTot, cd, actual, alElegir, mo
       };
     });
     return { filas, pideLlano, pideCuesta };
-  }, [tipo, p, rueda, cuesta, cd, a90, mTot, T.tMMotor, motores]);
+  }, [tipo, p, rueda, cuesta, cd, a90, mTot, T.tMMotor, motores, central]);
 
   if (!datos) return null;
   const { filas, pideLlano, pideCuesta } = datos;
@@ -170,7 +172,7 @@ export function ComparadorMotores({ tipo, modelo, mTot, cd, actual, alElegir, mo
   const medida: Fila = { id: A_MEDIDA, nombre: 'A medida (deslizadores)', precio: null, n: 1, basta: null, celdas: filas[0].celdas.map(() => null) };
   if (id === A_MEDIDA) {
     if (tipo === 'gasolina' && p) medida.celdas = [`≈ ${f(Math.round(p.disp.motor.cc / 10) * 10)}`, `${f(p.kW, 1)} · ${f(cv(p.kW))}`, null, null, f(p.kgMotor, 1), f(745 / (p.rendTerm * 8.9)), base?.hibrido ? f(base.hibrido.litros100, 2) : null, base?.hibrido ? f(base.hibrido.vmaxGasolina) : null, null];
-    if (tipo === 'electrico') medida.celdas = ['buje', null, `${f(T.tKWNom, 1)} · ${f(cv(T.tKWNom))}`, f(T.tKWPico, 0), null, f(T.tMMotor, 1), f(RENDIMIENTO * 100), base ? f(base.WhKm) : null, null];
+    if (tipo === 'electrico') medida.celdas = [central ? 'central' : 'buje', null, `${f(T.tKWNom, 1)} · ${f(cv(T.tKWNom))}`, f(T.tKWPico, 0), null, f(T.tMMotor, 1), f(RENDIMIENTO * 100), base ? f(base.WhKm) : null, null];
   }
   const todas = [medida, ...filas];
   const sirven = filas.filter(r => r.basta);
@@ -186,7 +188,7 @@ export function ComparadorMotores({ tipo, modelo, mTot, cd, actual, alElegir, mo
     : ['Motor eléctrico', 'Tipo', 'V', 'kW · CV cont.', 'kW pico', 'N·m pico', 'kg', 'η %', `Wh/km a ${VEL_COMPARAR}`, 'Precio'];
   const pie = tipo === 'gasolina'
     ? `Potencia, cilindrada, par, masa y consumo: los que publica cada fabricante o vendedor (ficha enlazada al elegirlo). g/kWh: gramos de gasolina por kWh en el eje, de su consumo publicado a su potencia continua; cuanto menos, mejor. L/100 km: este coche a ${VEL_COMPARAR} km/h con la batería gastada, con su Cd del túnel, su unión al híbrido (${f(p!.rendTrans * 100)} %) y la masa de ese motor (el cálculo de «Rendimiento»); * sin consumo publicado: con el rendimiento del deslizador. km/h solo gasolina: lo que sostiene en llano con su potencia máxima. Estimaciones, no medidas.`
-    : `Potencias, par, tensión y masa: los que publica cada fabricante o vendedor (ficha enlazada al elegirlo); «×2»: dos motores de buje, uno por rueda trasera, y las cifras son de los dos. Wh/km: este coche a ${VEL_COMPARAR} km/h con su Cd del túnel y la masa de ese motor; con el rendimiento que publica el fabricante (η) y un controlador al ${f(REND_CONTROLADOR * 100)} %; * sin rendimiento publicado: motor y controlador al ${f(RENDIMIENTO * 100)} %, como en «Rendimiento». Estimaciones, no medidas.`;
+    : `${central ? 'Solo motores centrales: el motor eléctrico va junto al de gasolina, en la corona del planetario (MG2), y llega a las ruedas por la cadena. ' : ''}Potencias, par, tensión y masa: los que publica cada fabricante o vendedor (ficha enlazada al elegirlo); «×2»: dos motores de buje, uno por rueda trasera, y las cifras son de los dos. Wh/km: este coche a ${VEL_COMPARAR} km/h con su Cd del túnel y la masa de ese motor; con el rendimiento que publica el fabricante (η) y un controlador al ${f(REND_CONTROLADOR * 100)} %; * sin rendimiento publicado: motor y controlador al ${f(RENDIMIENTO * 100)} %, como en «Rendimiento». Estimaciones, no medidas.`;
 
   return (
     <div className="flex flex-col gap-1.5">

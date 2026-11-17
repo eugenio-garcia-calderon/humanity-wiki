@@ -2,7 +2,7 @@
 // Moved out of geometriaTriciclo.ts unchanged (2026-11-16, refactor «ordenar»); that file re-exports everything. See ../CLAUDE.md.
 import { filasDetras, medidasAsiento, nombrePlaza, numFila } from '../filasTriciclo';
 import { interiorTriciclo, type SeatInterior } from '../interiorTriciclo';
-import { disponerHibrido, rendimientoHibrido, type ArqHibrido, type EntradaHibrido, type Obstaculo, type ZonaAsiento, tuboCajas } from '../hibrido';
+import { disponerHibrido, rendimientoHibrido, REND_SALIDA, type ArqHibrido, type EntradaHibrido, type Obstaculo, type ZonaAsiento, tuboCajas } from '../hibrido';
 import { termicoDe } from '../catalogoTren';
 import { type Parametros, type Rueda, type Tubo, type P3, MATERIALES_CHASIS } from '../geometria';
 import { TRICICLO_DEFECTO } from './defecto';
@@ -314,6 +314,9 @@ export function crearModeloTriciclo(P: Parametros) {
   // ── 2026-11-16: the plug-in hybrid's parts, where they fit (hibrido.ts): behind the last backrest, or behind the frame's tower
   const ultimo = filas ? asientosFilas.reduce((a, b) => (b.fila > a.fila ? b : a)) : { x: asientos.xPasajero, y: asientos.yPasajero, rec: rec.pasajero };
   const hibArq: ArqHibrido = T.tHibArq ?? 'reparto';
+  // 2026-11-17 (Eugenio, «Aeromóvil S»): the traction motor central, on the planetary's ring next to the engine (hibrido.ts
+  // `POSICIONES_MG2`); only with the power split, otherwise it stays in the hub
+  const mg2Central = T.tPropulsion === 'phev' && hibArq === 'reparto' && T.tMotorElec === 'planetario';
   const hib = T.tPropulsion === 'phev' ? disponerHibrido({
     F, arq: hibArq, kW: L('tPhevKW'), litros: L('tDeposito'), xR, rR, yEje: motor.c[1], recTras, cuatro: !!traseras, viaTras: traseras ? traseras.VIA_LAT : 0,
     pivote: basculante.pivote, torreta: amortiguador.arriba,
@@ -321,7 +324,14 @@ export function crearModeloTriciclo(P: Parametros) {
     cajas: [...baterias, inversor], yPiso, inversor,
     // 2026-11-17 (masas): what the engine and the tank keep clear of, and the user's move of each (hibrido.ts)
     ...entornoHibrido(),
+    mg2: mg2Central ? { kg: L('tMMotor'), kWPico: L('tKWPico') } : null,
   }) : null;
+  // the traction motor the rest of the model sees: in the hub (as always), or MG2 on the ring. `rend`: what lies between it
+  // and the wheel (the drop case and the chain, `REND_SALIDA`); `noSuspendida`: its mass that moves with the wheels (kg)
+  const mg2 = hib?.mg2 ?? null;
+  const motorTraccion: { tipo: 'buje' | 'central'; c: [number, number]; r: number; ancho: number; z: number; rend: number; kg: number; noSuspendida: number } = mg2
+    ? { tipo: 'central', c: [mg2.x, mg2.y], r: mg2.r, ancho: mg2.z1 - mg2.z0, z: (mg2.z0 + mg2.z1) / 2, rend: REND_SALIDA, kg: L('tMMotor'), noSuspendida: 0 }
+    : { ...motor, z: 0, rend: 1, kg: L('tMMotor'), noSuspendida: L('tMMotor') };
   function entornoHibrido(): Pick<EntradaHibrido, 'asientos' | 'obstaculos' | 'brazo' | 'mover'> {
     const mov = (k: string, max: number, min = -max) => { const v = (T as unknown as Record<string, unknown>)[k]; return typeof v === 'number' && Number.isFinite(v) ? Math.min(max, Math.max(min, v)) : 0; };
     // every seat with whoever sits on it: from its backrest (leaning back as it rises) to the toes, 6 cm under its cushion up
@@ -372,7 +382,7 @@ export function crearModeloTriciclo(P: Parametros) {
     phev: hib ? {
       arq: hibArq, kW: L('tPhevKW'), rendTerm: L('tRendTerm') / 100, litros: L('tDeposito'),
       mec: L('tHibMec') / 100, rendElec: L('tRendElec') / 100, rendCaja: L('tRendCaja') / 100,
-      rendTrans: rendimientoHibrido(hibArq, L('tHibMec') / 100, L('tRendElec') / 100, L('tRendCaja') / 100),
+      rendTrans: rendimientoHibrido(hibArq, L('tHibMec') / 100, L('tRendElec') / 100, L('tRendCaja') / 100, !!mg2),
       kgMotor: termicoDe(T.tCatTermico)?.kg ?? 15 + 1.4 * L('tPhevKW'), kgDeposito: 4 + 0.745 * L('tDeposito'),
       // what joins it to the wheels: the planetary and MG1 (12 kg, as since 2026-11-15), a generator alone (≈ 0,32 kg/kW
       // over 4 kg), or a clutch, a 3-speed gearbox and a P2 motor-generator
@@ -381,7 +391,7 @@ export function crearModeloTriciclo(P: Parametros) {
           : [{ nombre: 'Motor: embrague y caja de cambios', kg: 10 + 0.1 * L('tPhevKW') }, { nombre: 'Motor: motor-generador P2', kg: 3 + 0.12 * L('tPhevKW') }],
       disp: hib,
     } : null,
-    tubos, baterias, bateriaCabe: bat.capacidad, inversor, motor, basculante, amortiguador, brazos, cremallera, cabezaDireccion: cabeza, recTras, recDel, yLarguero: yL,
+    tubos, baterias, bateriaCabe: bat.capacidad, inversor, motor: motorTraccion, basculante, amortiguador, brazos, cremallera, cabezaDireccion: cabeza, recTras, recDel, yLarguero: yL,
     // (with two rear wheels there is no wheel under the tail to cover)
     faldon: traseras ? null : faldonDe(F, L('tFaldon'), xR, rR),
     /** The canopy's solar panel and side windows: what the 3D builder draws (`opcVentanas`), the curves, and the panel's area (m², both sides) and centre. */
