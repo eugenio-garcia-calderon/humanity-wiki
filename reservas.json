@@ -161,6 +161,12 @@
       "ruta": "src/components/aeromovil/estudio/reglas.ts",
       "motivo": "ruedas: catálogo de ruedas de moto",
       "desde": "2026-11-17T11:12:52.700Z"
+    },
+    {
+      "agente": "masas",
+      "ruta": "src/components/aeromovil/triciclo/defecto.ts",
+      "motivo": "masas: posiciones del motor y del depósito",
+      "desde": "2026-11-17T11:25:41.048Z"
     }
   ]
 }
