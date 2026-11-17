@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "ajustes",
-      "ruta": "src/components/aeromovil/ruedas/neumaticos.ts",
-      "motivo": "ajustes: Crr ciclomotor, agarre absoluto, Varios 18 kg (pocas líneas)",
-      "desde": "2026-11-17T19:21:59.303Z"
-    },
-    {
-      "agente": "ajustes",
       "ruta": "src/components/aeromovil/triciclo/neumaticos.ts",
       "motivo": "ajustes: Crr ciclomotor, agarre absoluto, Varios 18 kg (pocas líneas)",
       "desde": "2026-11-17T19:22:02.537Z"
