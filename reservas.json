@@ -137,6 +137,12 @@
       "ruta": "src/components/aeromovil/masasSecciones.ts",
       "motivo": "bwb: carenado BWB (pocas líneas)",
       "desde": "2026-11-17T19:33:58.409Z"
+    },
+    {
+      "agente": "bwb",
+      "ruta": "src/components/aeromovil/precios/precios.ts",
+      "motivo": "bwb: carenado BWB (pocas líneas)",
+      "desde": "2026-11-17T19:34:01.113Z"
     }
   ]
 }
