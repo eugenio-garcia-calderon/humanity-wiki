@@ -12224,6 +12224,32 @@ tubos de tornillería y todo esto…»
   del departamento, para que el total de la pestaña cuadre siempre.
 - Comprobación nueva: `npx tsx scripts/pesos-secciones.ts [diseño.json]`: desplegables + «sin desplegable» = cada
   pestaña = el vehículo en vacío, y cada desglose = su pieza. «Todo OK».
+## 2026-11-17 · Elegir el motor de gasolina y el eléctrico sabiendo lo que se elige
+
+Eugenio: «En cuanto a la elección de los motores de gasolina y los motores eléctricos, quiero que la elección pueda
+tomarse de manera mucho más consciente, sabiendo qué potencia y qué peso y qué cilindrada y qué consumo tienen cada uno
+de los motores que se propone y qué coste estimado también, para poder tomar una decisión coherente. Y que en los
+desplegables también de motor eléctrico y motor gasolina que aparezcan con esos nombres, y que según la selección que
+tengas, pues que aparezca también el peso de ese desplegable.»
+
+- En la pestaña Motor del Triciclo (y sus variantes), el desplegable que se llamaba «Híbrido enchufable» ahora se llama
+  **«Motor gasolina»**, y junto a «Motor eléctrico» los dos llevan el peso en la cabecera (por ejemplo «Motor gasolina
+  80,9 kg» en el diseño Rombo Bala híbrido; con un Honda GX390, 62,6 kg). Se actualiza al elegir otro motor. Es la suma de lo que hay en ese desplegable,
+  con la misma regla que el peso de todos los demás desplegables (masasSecciones.ts) y la misma lista de piezas que
+  «Proyecto › Peso» y que el número bajo la pestaña (no hay otra fórmula): en el eléctrico,
+  el motor (o los dos de buje), el controlador y la reductora; en el de gasolina, el motor, su unión a las ruedas
+  (planetario, generador o embrague y caja) y el depósito lleno.
+- Dentro de cada uno, una tabla para comparar todos los motores del catálogo a la vez, con el elegido en verde; al pinchar
+  en una fila se elige (como el selector). Gasolina: cilindrada, potencia en kW y CV, potencia continua, par, masa,
+  consumo específico (g/kWh), **litros a los 100 km de este coche a 90 km/h** (con su Cd del túnel, su unión al híbrido
+  y la masa de ese motor), la velocidad que sostiene solo con gasolina y el precio. Eléctrico: buje o central, tensión,
+  potencia continua (kW y CV) y de pico, par, masa, rendimiento publicado, **Wh/km de este coche a 90 km/h** y precio.
+- Encima, «Cuál te conviene»: cuánta potencia pide el coche a 90 km/h en llano y subiendo una cuesta del 3 %, cuántos
+  motores la dan en continuo, y cuál de ellos es el más ligero, el que menos gasta y el más barato.
+- Precios nuevos en el catálogo: el de una tienda, leído hoy, con su enlace y si lleva IVA («De dónde salen los
+  precios»). Orientativos. EMRAX, Saietta, Rotax, Kubota y algunos QS/Golden no publican precio: sale «—».
+- Dos motores de gasolina más: Honda GX270 (5,1 kW continuos, 25,8 kg) y Kubota WG752 (3 cilindros, agua, 18,5 kW, 62 kg).
+- Los diseños guardados no cambian (siguen con su motor). No se ha tocado el túnel.
 
 ## 2026-11-17 · Pestaña «Masas», motor y depósito libres, «Proyecto» como lista de pendientes (masas)
 - Eugenio: «haz que el motor por defecto esté mucho más cerca de la rueda trasera y más abajo, para bajar el centro de
