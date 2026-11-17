@@ -12402,6 +12402,26 @@ para ponerle más potencia, más peso, etcétera.»
 - Fuentes: Reglamento (UE) 168/2013 (anexo I, arts. 3–5, anexos VI y VIII), Reglamentos Delegados 3/2014 y 44/2014
   (consolidado de EUR-Lex), DGT/MAPFRE/RACE para los permisos. Lo citado sin releer lleva «por confirmar».
 - No visto en un teléfono de verdad: si sale la versión vieja, `humanity.wiki/?sw=off`.
+
+## 2026-11-17 · El pasajero a horcajadas puede ir mucho más atrás
+
+Eugenio: «Permite la configuración de asientos ahorcajadas uno delante de otro, que el asiento del copiloto, el que va
+detrás, se pueda separar más del asiento frontal. Ahora mismo hay un límite.»
+
+- Triciclo (y Rombo, clásico, Bala de cuatro ruedas), «Interior › Asientos › Pasajero: cadera al eje delantero»: antes
+  el pasajero iba como mucho 62 cm detrás del piloto; ahora hasta 1,40 m (de 40 cm a 1,40 m). Vale a horcajadas y con
+  las dos butacas tipo Aptera. El sillín largo se estira entre los dos; respaldo, estribos y asidero siguen al pasajero.
+- El deslizador ya no es lo que frena: lo dicen las comprobaciones. Tres nuevas: «Asiento del pasajero sobre los
+  largueros (delante de la torreta del amortiguador)» (los largueros acaban en el pivote del basculante), «Asiento del
+  pasajero delante de la rueda trasera» (con una sola rueda detrás) y «Respaldo del pasajero dentro de la carrocería»
+  (a horcajadas). Seguían valiendo «Cabeza del pasajero a la cúpula», «Pivote del basculante detrás de los estribos»,
+  el vuelco y la carga de los neumáticos.
+- La carrocería no crece sola. En el Rombo Bala de Eugenio (batalla 2,75 m) el pasajero cabe hasta ≈1,14 m detrás del
+  piloto antes de tocar la torreta; a partir de ≈0,95 m la cabeza de talla media ya no cabe bajo la cúpula: hay que alargar «Cúpula:
+  final» (p. ej. a 2,95 m) y la batalla (3,30 m) — así la talla media cabe con 1,0–1,2 m de separación (la talla alta va justa, a 1-3 cm).
+- Los kilos del pasajero van a su sitio nuevo en el centro de gravedad y en la carga de cada rueda (las mismas masas
+  de siempre, `m.sillines`). Diseños guardados sin cambios («Todo OK»), salvo uno que guardara un pasajero más atrás de
+  lo que el deslizador dejaba: antes se recortaba en silencio a 62 cm, ahora abre donde se guardó.
 ## 2026-11-17 · Tipo de neumático en cada eje (Triciclo, Cuadriciclo en rombo y clásico, Basculante)
 
 Eugenio: «Permite también añadir el tipo de neumático.»
