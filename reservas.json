@@ -107,6 +107,12 @@
       "ruta": "src/server/aeromovil.ts",
       "motivo": "notas: registrar rutas de notas",
       "desde": "2026-11-17T13:37:46.272Z"
+    },
+    {
+      "agente": "notas",
+      "ruta": "src/components/aeromovil/controles.tsx",
+      "motivo": "notas: icono de notas en la cabecera de Bloque",
+      "desde": "2026-11-17T13:37:49.159Z"
     }
   ]
 }
