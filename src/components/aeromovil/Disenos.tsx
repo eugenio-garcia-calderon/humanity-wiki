@@ -31,6 +31,7 @@ import { Button } from '../ui/core';
 import { cn } from '../../utils/cn';
 import { PARAMETROS_A1, PARAMETROS_BALA, PARAMETROS_BASCULANTE, PARAMETROS_GOTA, PARAMETROS_TRICICLO, type Disposicion, type Parametros } from './geometria';
 import { camposTriciclo, fichaTriciclo, paqueteAntes, semiAnchoPaquete } from './geometriaTriciclo';
+import { ponerDestino } from './notas/almacen';
 
 /** The four vehicle families, in the order the menu lists them (the Triciclo Bala since 2026-11-10). */
 export const VEHICULOS: { k: Disposicion; n: string; d: string }[] = [
@@ -194,6 +195,8 @@ export function MenuDisenos({ P, actual, alCargar, alNuevo, alGuardado, alVehicu
   alGuardado: (d: Diseno) => void;
   puedeDecidir: boolean;
 }) {
+  // (2026-11-17) The section notes (notas/almacen.ts) belong to the open design and vehicle: this menu knows both.
+  useEffect(() => { ponerDestino(actual?.id ?? null, P.disposicion); }, [actual?.id, P.disposicion]);
   const [abierto, setAbierto] = useState(false);
   const [lista, setLista] = useState<Diseno[] | null>(null);
   const [error, setError] = useState<string | null>(null);

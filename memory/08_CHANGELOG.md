@@ -12460,6 +12460,24 @@ elementos. Y podemos ir jugando también con su precio, los proveedores, todo es
 - La pestaña «Proyecto» se presenta ahora como «lo que falta por hacer y la revisión de los puntos críticos que no
   están bien».
 - Ningún diseño guardado cambia: los seis valen cero si no se tocan.
+## 2026-11-17 · Notas en cada desplegable del Aeromóvil
+
+Eugenio: «Permite también en cada sección, por ejemplo, motor gasolina o motor eléctrico o morro, cola, esas secciones,
+permite añadir un comentario en cada una de ellas para poder tomar notas de cosas importantes dentro de cada una de
+ellas. Y haz que ese comentario tenga una fecha y un autor. Si está registrado en la página, claro. Se podrá saber quién
+es el autor, si no será anónimo.»
+
+- Cada desplegable del panel lateral (Morro, Cola, Cúpula, Motor…, en los cinco vehículos) tiene en su cabecera un
+  icono de nota pequeño y gris; cuando la sección tiene notas se pone ámbar con el número. Al pulsarlo se abre una
+  ventanita con las notas de esa sección (la más reciente arriba) y una caja para añadir otra, aunque el desplegable
+  esté cerrado. Funciona también para quien no es el dueño (el panel lateral está bloqueado para ellos: las notas no).
+- Cada nota lleva el texto, la fecha y la hora, y el autor: el nombre de la cuenta si hay sesión iniciada.
+- **Con sesión**: la nota se guarda en la web con el diseño abierto (o con el vehículo si no hay un diseño guardado
+  abierto) y la ve cualquiera que abra la página. Solo quien la escribió puede editarla; puede quitarla quien la
+  escribió o un administrador (se archiva, no se borra).
+- **Sin sesión**: la nota se firma «Anónimo» y se queda solo en ese navegador («solo en este dispositivo»); se puede
+  editar y borrar desde ahí. Para que la vean los demás hay que iniciar sesión.
+- Tabla nueva `aeromovil_notas` (migración 0223). Los diseños guardados no cambian.
 
 ## 2026-11-17 · Las comprobaciones pasan a GitHub
 
