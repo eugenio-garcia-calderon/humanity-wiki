@@ -12167,3 +12167,35 @@ encontró 5 colas muy cortas (30 cm) que todavía se doblaban dentro de la punta
   `npx tsx scripts/estudio-aerodinamico.ts [diseño.json]` (todos los vehículos, un diseño malo a propósito y el que le
   pases; «Todo OK» si ninguna pega se contradice, ninguna recomienda algo sin ganancia y ningún cambio se sale de rango).
 - Si alguien tenía guardada una pestaña que no existe (una antigua «aerodinámica»), ahora abre Carrocería.
+
+## 2026-11-17 · Aeromóvil: cola cortada (cola Kamm) en el Triciclo y el «Modelo 1»
+
+Eugenio: «estudia los cortes drásticos de las colas de los vehiculos para mejorar su aerodinámica sin tener que hacer
+una cola muy alargada, y permite seleccionarla en el "Modelo 1"».
+
+- **Dónde está.** Carrocería › Cola › «Formato de la cola»: «Larga, hasta la punta (como siempre)» o «Cortada en recto
+  (cola Kamm)». Con la cortada salen dos deslizadores: «Cola cortada: dónde se corta» (la parte de la sección mayor que
+  queda en el corte, del 20 al 80 %; Kamm cortaba al 50 %) y «Cola cortada: hueco en el culote» (0 a 15 cm). «Cola:
+  largo» pasa a ser la cola imaginaria que se corta: más larga, la cola se cierra más suave hasta el corte.
+- **Cómo se dibuja.** La carrocería se construye entera, con su cola larga, y se corta en recto: un culote azul plano
+  (o hundido, con el hueco) y un borde vivo. La barra de luz roja va a 3 cm del borde, como en un Prius. El corte nunca
+  queda a menos de 15 cm del final de la cúpula. Debajo de la cola, en «Cola», un párrafo dice dónde cae el corte,
+  cuánto acorta el coche, cuánto se cierra la cola justo antes (por arriba, por los lados, por abajo), el Cd del túnel
+  y, aparte y con su etiqueta, lo que cuesta el culote según la literatura. Nueva comprobación: «Cola cortada: el aire
+  llega pegado al corte» (la cola no puede cerrarse más de 15° antes del corte).
+- **Lo que dice el túnel** (Rombo Bala, 80 km/h, sin tocar la calibración): con su cola de 63 cm en punta, 3,83 m y Cd
+  0,207; con una cola de 1,80 m entera, 5,00 m y 0,199; esa cola cortada al 30 / 40 / 50 % de la sección mayor:
+  3,49 m y 0,234 (al 40 %, 14° antes del corte, pasa), 3,22 m y 0,251 (al 50 %, 30°, no pasa). Con el techo cayendo
+  más tarde y la punta alta, cortada al 30 %: 3,82 m y 0,221. **Conclusión honesta:** en esta carrocería el 50 % de la
+  sección cae unos 40 cm detrás de la cúpula, donde el techo aún baja 30°; el corte cambia largo por arrastre, y el
+  túnel da mejor la cola corta en punta que cualquier corte del mismo largo. La literatura dice lo mismo: lo que
+  ahorra una cola larga es casi proporcional a la sección que cierra (SAE 2020-01-0673).
+- **Estudio aerodinámico** (el botón de otro bot): dos reglas nuevas para la cola cortada: «se cierra demasiado antes
+  del corte» / «se corta demasiado pronto» (lo prueba el túnel: cortar más atrás o volver a la cola larga) y «el culote
+  es plano» (estimado, de la literatura: el túnel no ve el hueco). Y con una cola larga de 1 m o más, «podría ser una
+  cola cortada más corta» (el túnel la prueba y dice cuánto cuesta).
+- Los diseños guardados no cambian: la cola cortada está apagada por defecto.
+- Fuentes: Wikipedia «Kammback» (regla del 50 %); Mercedes-Benz Classic (K3 de Kamm, Cd 0,23); SAE 2020-01-0673;
+  Evrard, Cadot y otros (cavidad en la base: −18 % de succión, ΔCd −9 % en un cuerpo de culote recto); Transport
+  Canada / NRC (colas de barco en remolques: −6 a −7 %, igual con 2 que con 4 pies).
+- No visto en un teléfono: si sale la versión vieja, `humanity.wiki/?sw=off`.
