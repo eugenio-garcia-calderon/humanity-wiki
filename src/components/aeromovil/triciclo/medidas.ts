@@ -173,6 +173,9 @@ export function formaR3(T: CamposTriciclo): Partial<DimBala> {
   if (conLisa(T)) { o.lisa = 1; for (const [k, d] of CLAVES_LISA) o[d] = limitarTriciclo(k, T); }
   // 2026-11-16: the round body's flat tail, widened (balaForma reads it times `colaPlana`); only when both are set
   else if (o.colaPlana) { const v = limitarTriciclo('tColaPlanaAncho', T); if (v) o.colaAncho = v; }
+  // 2026-11-16: the round body always joins the cabin and the tail without a crease (garaje/transicionCola.ts)
+  // (with the smooth body it only acts where the canopy ends within 25 cm of the rear axle: balaForma.ts `lam`)
+  o.transCola = limitarTriciclo('tColaTrans', T);
   return o as unknown as Partial<DimBala>;
 }
 export let cacheCuerpo: { clave: string; F: FormaBala } | null = null;
@@ -418,7 +421,10 @@ export function comoAntes(k: ClaveNumTriciclo, v: number, T: CamposTriciclo): nu
     case 'tMorro': return fines(0.45, 0.25, 1.00);
     case 'tPuntaMorro': return fines(0.50, 0.25, 1.00);
     case 'tMorroAlto': return fines(-0.10, 0.12);
-    case 'tPuntaCola': return fines(0.36, 0.58);
+    case 'tPuntaCola': return fines(0.36, 0.58, 0.30, 0.85);
+    // (2026-11-16: the tail's length widened from 0.45–1.20)
+    case 'tCola': return fines(0.45, 1.20);
+    case 'tColaPlanaAncho': return fines(1);
     case 'tAlto': return Math.abs(v - 1.15) < 1e-9 ? 1.15 : fin(1.584);
     case 'tCupFin': { const lo = Math.min(1.80, T.tBatalla - 0.45), hi = Math.min(3.10, T.tBatalla - 0.25); return Math.abs(v - lo) < 1e-9 ? lo : Math.abs(v - hi) < 1e-9 ? hi : v; }
     case 'tMalIni': return fin(1.70);
