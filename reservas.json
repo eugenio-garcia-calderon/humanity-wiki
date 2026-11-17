@@ -103,12 +103,6 @@
       "desde": "2026-11-17T19:59:32.376Z"
     },
     {
-      "agente": "proveedores",
-      "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
-      "motivo": "proveedores: 3 líneas, contexto para proveedor/modelo/archivos",
-      "desde": "2026-11-17T20:08:41.394Z"
-    },
-    {
       "agente": "ajustes",
       "ruta": "src/components/aeromovil/explicaciones/triciclo.ts",
       "motivo": "ajustes: Crr ciclomotor, Varios 18 kg (pocas líneas)",
