@@ -1961,3 +1961,26 @@ Saved designs (tunnel Cd at «media», frontal area A m², wetted = body + glass
   colour (triciclo-disenos with main's folder lists them as CAMBIA).
 Evaluator (scripts/cola-continuidad.ts, 759 designs): main 278 FALLA (worst 49.7° top, 51.5° shoulders) → COLA OK
 (worst 3.9° top, 7.9° shoulders, limit 8°).
+
+## 2026-11-17 · Short tails, the panel's «pico», and the smooth deck off its crest
+
+After PR #1086 the independent evaluator, on an unseen seed (2027), found 5 kinks inside 30 cm tails (up to 18.7°).
+Chosen (balaForma.ts, transicionCola.ts):
+- The tail cap's joint fix is now a tangent correction d·u·(1 − u/L)³ added to the cap, not a blend with the body's
+  section carried on in a straight line (on a short, steep tail that line ran below the tip and pulled the roof down).
+- The cap's old terms keep the old clipped slopes; the unclipped ones enter only through `gamma` (before, a cap with
+  gamma < 1 used the unclipped slope in its "old" part too, which piled the bend at one end).
+- The guides arrive with 3 / r times their mean slope (r: the slope they leave with, relative to the mean; 1.2 … 6).
+- The cap is never shorter than 42 cm (`CAPA_MIN`): only tails under 50 cm, below the range before 2026-11-16,
+  start their cap further forward. Raising the tail's minimum back was rejected: Eugenio asked for «súper pequeña».
+- The stretch's windows are no longer narrowed by the gap between the canopy's end and the rear axle (both corners are
+  rounded together; with one width, the slope is still a convex blend).
+- Smooth body, only where a short canopy forces the rear deck to start behind the real crest (`muCola`): the crown fade
+  starts at the real crest, and the deck blends turn into smootherstep. bala-cola-lisa.ts still all OK.
+- Panel «pico» (Modelo 1): the round body's tail panel starts as wide as the canopy frame is 8 cm ahead of its tip
+  (`CUELLO_PANEL`), and a navy collar patch (`cuelloPanel`) carries the frame down to that width.
+Numbers (tunnel Cd «media», A m², wetted m², solar m²), main 27eb952 → this change:
+- Triciclo por defecto: identical.
+- Rombo Bala: Cd 0.2129 → 0.2066, A 1.1674 → 1.1674, wetted 9.850 → 9.857, solar 1.676 → 1.750 (wider panel start).
+- Modelo 1-like: Cd 0.2210 → 0.2214, A 1.1742 → 1.1740, wetted 10.385 → 10.388, solar 1.826 → 1.908.
+Evaluator: seeds 7 / 2027 / 31337 / 4242 all COLA OK (worst shoulders 6.1 / 6.4 / 6.6 / 7.9°, top 3.4 / 3.3 / 3.4 / 3.5°).
