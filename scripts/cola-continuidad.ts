@@ -32,6 +32,8 @@
  * 1 cm of its own length (two 5 mm chords) beyond 35°, ahead of the second half of the tail cap (where a flat tail's
  * thin trailing edge legitimately sharpens). A round section of 5 cm radius turns 11° there.
  *
+ * Kamm tail (2026-11-17): with `F.kamm` the skin ends at the cut, a sharp edge by design; it is measured to 5 mm from the cut
+ * (FIN_CORTE) instead of 6 cm from a tip, so only that edge is left out, and the cut cases have their own generator.
  * Cases: the plain Triciclo, Eugenio's «Rombo Bala» (scratchpad JSON, or the copy below), a «Modelo 1-like» case (Rombo
  * Bala with a round canopy, flat tail at 100 % and full width, solar tail), a grid of extremes (every tail, roof and
  * canopy slider at both ends, with each deck type × wheel layout), and N random designs (fixed seed) over every
@@ -56,6 +58,9 @@ const PASO = 0.001, W = 0.005;
 /** Left out at the tail's tip (m): the trailing edge's own rounding (a flat tail closes onto a thin, wide edge with
  *  tight rounded corners there, which is its design, not a joint). Sections are still checked to 1 cm from the tip. */
 const FIN_PUNTA = 0.06;
+/** 2026-11-17, the Kamm tail (`F.kamm`): the skin ends at the cut with its full section, and the cut's edge is a sharp edge
+ *  by design (the base plate meets the skin at 90°). Only that edge is left out: the skin is measured to 5 mm from it. */
+const FIN_CORTE = 0.005;
 
 // ───────────────────────────────────────────────────────────────── measures
 type V3 = [number, number, number];
@@ -120,7 +125,7 @@ function medir(m: ModeloTriciclo): Medida {
   const techo = (x: number) => punto(F.sec(x), 1)[1];
   let ymax = -Infinity; for (let x = F.XN0; x > F.XT0; x -= 0.005) ymax = Math.max(ymax, techo(x));
   let cresta = F.XN0; for (let x = F.XN0; x > F.XT0; x -= 0.005) if (techo(x) >= ymax - 0.002) cresta = x;
-  const x0 = Math.min(F.XN0 - 0.02, Math.max(cup.XC1 + 0.40, Math.min(cresta, cup.XC1 + 0.8))), x1 = F.X_COLA + FIN_PUNTA;
+  const x0 = Math.min(F.XN0 - 0.02, Math.max(cup.XC1 + 0.40, Math.min(cresta, cup.XC1 + 0.8))), x1 = F.X_COLA + (F.kamm ? FIN_CORTE : FIN_PUNTA);
   const n = Math.floor((x0 - x1) / PASO);
   const xs = Array.from({ length: n + 1 }, (_, i) => x0 - i * PASO);
   const S = xs.map(x => seccion(F, x)), C = S.map(s => puntos(s)), AP = C.map(areaPerim);
@@ -250,6 +255,20 @@ for (let r = 0; r < N_ALEA; r++) {
   add(`aleatorio #${r + 1}`, P);
 }
 
+// the Kamm tail (2026-11-17): its own cases, with their own generator, so every case above is the same as before. The
+// «Modelo 1» with its tail cut at several places (short and long imaginary tail, with and without a cavity), the same with
+// each extreme slider at both ends, and a cut copy of every third random design
+let semillaK = SEMILLA + 99991;
+const azarK = () => { semillaK = (semillaK * 1103515245 + 12345) % 2147483648; return semillaK / 2147483648; };
+for (const cola of [0, 0.5, 1]) for (const f of [0.2, 0.35, 0.5, 0.65, 0.8]) for (const cav of [0, 0.08]) {
+  const P = { ...modelo1, tColaCorte: 'kamm', tKammSeccion: f, tKammCavidad: cav }; poner(P, 'tCola', cola);
+  add(`Kamm: Modelo 1, cola ${cola * 100} %, corte ${f * 100} %, hueco ${cav * 100} cm`, P);
+}
+for (const k of EXTREMOS) for (const u of [0, 1]) { const P = { ...modelo1, tColaCorte: 'kamm', tKammSeccion: 0.5 }; poner(P, k, u); add(`Kamm: Modelo 1 al 50 %, ${k}=${u ? 'máx' : 'mín'}`, P); }
+for (const c of casos.filter(q => q.nombre.startsWith('aleatorio #')).filter((_, i) => i % 3 === 0)) {
+  add(`Kamm: ${c.nombre}`, { ...(c.P as unknown as Record<string, unknown>), tColaCorte: 'kamm', tKammSeccion: 0.2 + 0.6 * azarK(), tKammCavidad: azarK() < 0.5 ? 0 : 0.15 * azarK() });
+}
+
 // ───────────────────────────────────────────────────────────────── run
 const t0 = Date.now();
 type Fila = { nombre: string; M: Medida; f: string[]; params: Record<string, unknown>; nota: number; P: Parametros };
@@ -271,7 +290,7 @@ const f1 = (v: number) => (Number.isFinite(v) ? v.toFixed(1) : '—'), x3 = (v: 
 const pad = (s: string, n: number) => (s.length >= n ? s.slice(0, n) : s + ' '.repeat(n - s.length));
 const cab = `${pad('caso', 58)} ${pad('salto mm', 9)} ${pad('área %', 7)} ${pad('perím mm', 9)} ${pad('arriba °', 9)} ${pad('hombros °', 10)} ${pad('arista °', 9)} ${pad('vidrio→panel', 12)}  dónde (x, m; fin del vidrio)`;
 const linea = (r: Fila) => `${pad(r.nombre, 58)} ${pad(f1(r.M.salto), 9)} ${pad(f1(r.M.area), 7)} ${pad(f1(r.M.perim), 9)} ${pad(f1(r.M.pliegueArriba), 9)} ${pad(f1(r.M.pliegueHombros), 10)} ${pad(f1(r.M.arista), 9)} ${pad(r.M.panelHueco ? `${r.M.panelHueco.toFixed(0)} mm` : '—', 12)}  salto@${x3(r.M.xSalto)} arriba@${x3(r.M.xArriba)} hombros@${x3(r.M.xHombros)}(t ${r.M.tHombros}) vidrio@${x3(r.M.xFinVidrio)}`;
-const fijos = filas.filter(r => /^(Triciclo por defecto|Rombo Bala \(|Modelo 1)/.test(r.nombre));
+const fijos = filas.filter(r => /^(Triciclo por defecto|Rombo Bala \(|Modelo 1|Kamm: Modelo 1, cola 50 %)/.test(r.nombre));
 console.log(`\nCasos de Eugenio y de referencia:\n${cab}`);
 for (const r of fijos) console.log(linea(r) + (r.f.length ? `\n   FALLA: ${r.f.join('; ')}` : ''));
 const peores = [...filas].sort((a, b) => b.nota - a.nota).slice(0, N_PEORES);

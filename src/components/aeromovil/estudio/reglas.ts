@@ -1,6 +1,7 @@
 import type { Modelo, Parametros, Resultados } from '../geometria';
 import { DESLIZADORES_BALA, camposBala, rangoBala } from '../geometriaBala';
-import { camposTriciclo, deslizadoresTriciclo, esCuatro, esRombo, vistaTriciclo } from '../geometriaTriciclo';
+import { camposTriciclo, cuerpoDe, deslizadoresTriciclo, esCuatro, esRombo, vistaTriciclo, type ModeloTriciclo } from '../geometriaTriciclo';
+import { ANGULO_MAX, CAVIDAD, SUCCION_CULOTE, estimacionKamm } from '../garaje/kamm';
 import { camposBasculante, deslizadoresBasculante } from '../geometriaBasculante';
 import { A1 as FICHAS_A1, GOTA as FICHAS_GOTA } from '../tunel/explicaciones';
 import { CONSTANTES, EXPOSICION } from '../tunel/arrastre';
@@ -270,10 +271,65 @@ export const REGLAS: Regla[] = [
       };
     },
   },
-  // (Kamm / «cola cortada», bot colacorte, 2026-11-17: its rules go here, next to the tail's — cut too early → base drag;
-  // a rounded cut edge loses the effect; a taper too steep before the cut → separation ahead of it; and «a long tail could
-  // be a Kamm cut X cm shorter». `tCola` already belongs to «cola-corta»: put the long-tail ↔ cut comparison inside that
-  // rule, and the cut's own sliders in a new one.)
+  // ── Kamm / «cola cortada» (bot colacorte, 2026-11-17; garaje/balaForma.ts `corte`, garaje/kamm.ts). Two rules, so that
+  // no slider is in two: where and whether to cut (`tColaCorte`, `tKammSeccion`, computed by the tunnel, which sees the cut
+  // through the silhouette), and the base's cavity (`tKammCavidad`, which the tunnel cannot see: «estimado», Evrard et al.).
+  // The long-tail ↔ cut comparison lives here and not in «cola-corta»: it moves `tColaCorte`, which is this rule's.
+  // The cut edge is always drawn sharp (no slider rounds it), so «a rounded edge loses the effect» is said in the advice,
+  // for whoever builds it, not tested.
+  {
+    id: 'cola-kamm', zona: 'cola', vehiculos: ['triciclo'], claves: ['tColaCorte', 'tKammSeccion'],
+    evaluar: cx => {
+      const T = T_DE(cx), F = (cx.modelo as ModeloTriciclo).F, k = F.kamm;
+      const borde = 'Al construirlo, el borde del corte tiene que quedar vivo: un borde redondeado deja que el aire gire hacia dentro y la succión del culote vuelve (Hucho).';
+      if (T.tColaCorte !== 'kamm' || !k) {
+        // a long tail: what cutting it would save in length, and what the tunnel says it costs
+        if (T.tCola < 1.0) return null;
+        let ahorro = 0; try { ahorro = cuerpoDe({ ...T, tColaCorte: 'kamm', tKammSeccion: 0.3 }).kamm?.ahorro ?? 0; } catch { ahorro = 0; }
+        if (ahorro < 0.15) return null;
+        return {
+          titulo: 'La cola larga podría ser una cola cortada (Kamm), más corta', gravedad: 'baja',
+          porQue: `Con ${fmt(T.tCola, 2)} m de cola, cortarla en recto donde le queda el 30 % de la sección mayor la acorta ${fmt(ahorro * 100, 0)} cm. No es gratis: lo que una cola larga ahorra es casi proporcional a la sección que cierra (SAE 2020-01-0673), y el culote frena con una succión de ${fmt(SUCCION_CULOTE[0], 2)}–${fmt(SUCCION_CULOTE[1], 2)} sobre su área. El túnel dice cuánto cuesta en este diseño.`,
+          recomendacion: `Si el largo importa más que el último poco de Cd, elige «Cortada en recto (cola Kamm)» en «Formato de la cola» (Carrocería › Cola). ${borde}`,
+          pruebas: [0.3, 0.4].map(f => ({ cambios: { tColaCorte: 'kamm', tKammSeccion: f } as Partial<Parametros>, texto: `Cola cortada al ${Math.round(f * 100)} % de la sección mayor` })),
+        };
+      }
+      const ang = Math.max(k.angTecho, k.angLado, k.angBajos), pronto = k.fraccion > 0.55;
+      if (ang <= ANGULO_MAX && !pronto) return null;
+      const largo: Prueba = { cambios: { tColaCorte: 'no' } as Partial<Parametros>, texto: `Volver a la cola larga (${fmt(k.ahorro * 100, 0)} cm más de coche)` };
+      const pruebas = [...lista(mover(cx, 'tKammSeccion', -0.1), mover(cx, 'tKammSeccion', -0.2)), largo];
+      return ang > ANGULO_MAX ? {
+        titulo: 'La cola cortada se cierra demasiado antes del corte: el aire se suelta antes', gravedad: 'alta',
+        porQue: `Justo antes del corte la cola se cierra ${Math.round(ang)}° (por arriba ${Math.round(k.angTecho)}°, por los lados ${Math.round(k.angLado)}°, por abajo ${Math.round(k.angBajos)}°): por encima de unos ${ANGULO_MAX}° el aire ya no sigue la piel (Hucho; en el cuerpo de Ahmed la peor es a 30°), se despega antes de llegar al borde y el culote efectivo es más grande que el corte. La regla del 50 % de Kamm supone una cola que se va cerrando suave hasta ahí.`,
+        recomendacion: `Corta más atrás con ${donde(cx, 'tKammSeccion')}, donde la cola ya se cierra menos, o alarga la cola imaginaria («Cola: largo») o retrasa la caída del techo. ${borde}`,
+        pruebas,
+      } : {
+        titulo: 'La cola se corta demasiado pronto: culote grande', gravedad: 'media',
+        porQue: `El corte deja el ${Math.round(k.fraccion * 100)} % de la sección mayor (${fmt(k.area, 2)} m² de culote). Kamm cortaba al 50 %; cada m² de culote frena con una succión de ${fmt(SUCCION_CULOTE[0], 2)}–${fmt(SUCCION_CULOTE[1], 2)} (Evrard y otros; Hucho), y en coches reales lo que se ahorra alargando la cola es casi proporcional a la sección que se cierra (SAE 2020-01-0673).`,
+        recomendacion: `Corta más atrás con ${donde(cx, 'tKammSeccion')}. ${borde}`,
+        pruebas,
+      };
+    },
+  },
+  {
+    id: 'kamm-culote', zona: 'cola', vehiculos: ['triciclo'], claves: ['tKammCavidad'],
+    evaluar: cx => {
+      const T = T_DE(cx), k = (cx.modelo as ModeloTriciclo).F.kamm;
+      if (T.tColaCorte !== 'kamm' || !k) return null;
+      const hondo = Math.round(CAVIDAD.profundidad * k.alto * 200) / 200;
+      if (k.cavidad >= 0.9 * hondo) return null;
+      const ahora = estimacionKamm(k, cx.base.A), con = estimacionKamm({ ...k, cavidad: Math.min(0.15, hondo) }, cx.base.A);
+      const dCd = ((con.min + con.max) - (ahora.min + ahora.max)) / 2, p = poner(cx, 'tKammCavidad', Math.min(0.15, hondo));
+      if (!p || !(dCd < 0)) return null;
+      return {
+        titulo: 'El culote de la cola cortada es plano: un hueco poco hondo frenaría menos', gravedad: 'baja',
+        porQue: `En un cuerpo de ensayo, un hueco en la base del ${Math.round(CAVIDAD.profundidad * 100)} % de su alto bajó la succión de la base un ${Math.round(CAVIDAD.reduccion * 100)} % (Evrard, Cadot y otros); aquí el culote mide ${fmt(k.alto * 100, 0)} cm de alto. El túnel no ve el hueco (solo la silueta): la cifra es de la literatura.`,
+        recomendacion: `Sube ${donde(cx, 'tKammCavidad')} a unos ${fmt(Math.min(0.15, hondo) * 100, 1)} cm, con el borde vivo.`,
+        pruebas: [{ ...p, tunel: false }],
+        estimacion: { dCdA: dCd * cx.base.A, fuente: 'estimado: Evrard, Cadot y otros, cuerpo con cavidad en la base (−18 % de succión de base); succión de culote 0,15–0,20 (Evrard; Hucho)' },
+      };
+    },
+  },
   // ── CÚPULA Y TECHO ──────────────────────────────────────────────────────
   {
     id: 'techo-cae-pronto', zona: 'cupula', vehiculos: ['triciclo', 'basculante', 'a1'], claves: ['tCaida', 'qCaida', 'techo'],
