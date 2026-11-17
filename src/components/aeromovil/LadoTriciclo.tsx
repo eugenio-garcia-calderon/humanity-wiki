@@ -16,6 +16,7 @@ import { CatalogoPieza, type Necesidad } from './CatalogoTren';
 import { ComparadorMotores } from './ComparadorMotores';
 import { pesoSeccion, seccionesTriciclo, textoPesoSeccion } from './masasSecciones';
 import { DesglosePeso, SinSeccion } from './PesoSeccion';
+import { conPrecio, precioSeccion, preciosDiseno, textoPesoPrecio, type ContextoPrecio } from './precios/precios';
 import { valoresCatalogo, type CATALOGO_CLAVES } from './catalogoTren';
 import { fmt, m2, Deslizador, Bloque, Selector, ListaComprobaciones } from './controles';
 import { ANGULO_MAX, estimacionKamm } from './garaje/kamm';
@@ -297,6 +298,11 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
   const pesosSec = dep === 'proyecto' ? null : seccionesTriciclo(res, modelo);
   const seccionDe = (b: string) => (dep === 'proyecto' ? null : pesoSeccion(pesosSec, dep, b));
   const seccionMotor = (b: string) => (BLOQUES_MOTOR.includes(b) ? pesoSeccion(pesosSec, 'propulsion', b) : null);
+  // (2026-11-17, «precios»: «en todas las secciones y todos los componentes el precio»): each block's price next to its
+  // weight, and each part's inside its breakdown (precios/precios.ts, from the same sections)
+  const preciosSec = pesosSec ? preciosDiseno(pesosSec, { P, modelo: modelo as unknown as ContextoPrecio['modelo'], res }) : null;
+  const precioDe = (b: string) => (dep === 'proyecto' ? null : precioSeccion(preciosSec, dep, b));
+  const alPrecio = (nombre: string, v: number | null) => set('precios', conPrecio(P, nombre, v));
   const cdComparar = cd.cd != null && cd.areaRef != null ? { cd: cd.cd, areaRef: cd.areaRef } : null;
   const checks = res.comprobaciones.filter(c => dep === 'proyecto' || (c.dep ?? '').split(',').includes(dep));
   const malas = checks.filter(c => c.holgura < c.minimo).length;
@@ -377,7 +383,7 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
         <SinSeccion partes={dep === 'proyecto' ? undefined : pesosSec?.sinSeccion[dep]} />
       </Bloque>
       {[...bloques].sort((a, b) => ordenBloque(a) - ordenBloque(b)).map(bloque => (
-        <Bloque key={bloque} id={`bloque-${bloque}`} titulo={tituloBloque(bloque)} peso={textoPesoSeccion(seccionDe(bloque))} plegable={bloque === 'Propulsión' ? undefined : { abierto: abiertos.has(bloque), alAlternar: () => alternar(bloque) }} nota={`${fichas.filter(f => f.bloque === bloque).length + sels.filter(s => s.bloque === bloque).length} ajustes`}>
+        <Bloque key={bloque} id={`bloque-${bloque}`} titulo={tituloBloque(bloque)} peso={textoPesoPrecio(textoPesoSeccion(seccionDe(bloque)), precioDe(bloque))} plegable={bloque === 'Propulsión' ? undefined : { abierto: abiertos.has(bloque), alAlternar: () => alternar(bloque) }} nota={`${fichas.filter(f => f.bloque === bloque).length + sels.filter(s => s.bloque === bloque).length} ajustes`}>
           {bloque === 'Forma' && (() => {
             // round two (2026-11-10): one lever for «hazlo un poco más grande»; it moves the nose, wheelbase and tail (see estirarTriciclo)
             const lg = largoTriciclo(T);
@@ -447,7 +453,7 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
           {bloque === 'Acabado interior' && <FichaAcabado T={T} piezas={rt.piezas} areas={modelo.interior.forro?.areas ?? null} consola={!!modelo.interior.consola} />}
           {bloque === 'Tapicería' && <p className="-mt-1 text-xs text-slate-500">{T.tTapiz === 'serie' ? 'Los asientos de serie: vinilo gris oscuro acolchado en rombos con un pespunte rojo. Al elegir otra tapicería, la funda cambia en los mismos asientos (sillín y respaldos, butacas o asientos de las filas); en las butacas, la carcasa blanca pasa al color de los laterales.' : `${TAPICES.find(t => t.k === T.tTapiz)?.n ?? ''}: la funda nueva cubre los mismos asientos${T.tAsientos === 'butacas' ? ' y la carcasa de las butacas toma el color oscuro de los laterales, como los costados de los asientos del Vision Jet' : ''}. ${T.tCostura === 'no' ? 'Sin costura vista.' : T.tCostura === 'recta' ? 'Costura recta: canales a lo largo, con un pespunte doble a cada lado.' : 'Costura geométrica: líneas que se cruzan desde dos nudos, como la del Vision Jet, con pespunte doble.'} Masa: la diferencia de la funda con la de serie (que ya cuenta «Un asiento»).`}{T.tCinturon !== 'no' ? ' Cinturones de tres puntos: del hombro, por encima del pecho, a la hebilla en la otra cadera, y la cinta de las caderas; en un asiento vacío, recogido por su costado.' : ''}</p>}
           {bloque === 'Batería' && !paquete && <p className="-mt-1 text-xs text-slate-500">Primero en el morro, donde el Cuadriciclo en rombo lleva la rueda delantera ({Math.round(rt.bateria.litrosMorro)} L), luego en un módulo estrecho entre los pies del piloto; si hace falta más, el módulo del morro sube, crece hacia la punta y queda un módulo plano bajo los sillines. Ahora: {Math.round(rt.bateria.litros)} L y {Math.round(rt.bateria.kg)} kg{rt.bateria.litros - rt.bateria.cabe > 0.05 ? `: caben ${Math.round(rt.bateria.cabe)} L, faltan ${Math.round(rt.bateria.litros - rt.bateria.cabe)} (un morro más largo, una carrocería más ancha o celdas más densas)` : ''}.</p>}
-          {!BLOQUES_MOTOR.includes(bloque) && <DesglosePeso s={seccionDe(bloque)} abierto={bloque === 'Bastidor'} />}
+          <DesglosePeso s={seccionDe(bloque)} abierto={bloque === 'Bastidor'} precios={{ s: precioDe(bloque), alCambiar: alPrecio }} />
         </Bloque>
       ))}
 
