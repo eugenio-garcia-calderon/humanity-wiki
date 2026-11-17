@@ -97,12 +97,6 @@
       "desde": "2026-11-17T10:51:05.597Z"
     },
     {
-      "agente": "pesossecciones",
-      "ruta": "src/components/aeromovil/CLAUDE.md",
-      "motivo": "pesossecciones: peso de cada desplegable",
-      "desde": "2026-11-17T10:51:58.759Z"
-    },
-    {
       "agente": "autogiro",
       "ruta": "src/components/aeromovil/garaje/index.ts",
       "motivo": "autogiro: añadir el ELA Eclipse REVO al garaje",
