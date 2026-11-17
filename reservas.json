@@ -215,6 +215,12 @@
       "ruta": "src/components/aeromovil/catalogoTren.ts",
       "motivo": "mgplanetario: motor eléctrico central (MG2) unido al planetario",
       "desde": "2026-11-17T14:17:55.133Z"
+    },
+    {
+      "agente": "mgplanetario",
+      "ruta": "src/components/aeromovil/ComparadorMotores.tsx",
+      "motivo": "mgplanetario: motor eléctrico central (MG2) unido al planetario",
+      "desde": "2026-11-17T14:17:57.915Z"
     }
   ]
 }
