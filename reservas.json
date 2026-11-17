@@ -143,6 +143,12 @@
       "ruta": "src/components/aeromovil/triciclo/masas.ts",
       "motivo": "neumaticos: masa de la rueda según el neumático (3 líneas)",
       "desde": "2026-11-17T13:58:35.413Z"
+    },
+    {
+      "agente": "solopiezas",
+      "ruta": "src/components/aeromovil/hibrido3d.ts",
+      "motivo": "solopiezas: piezas del motor aislables (pocas líneas)",
+      "desde": "2026-11-17T14:05:59.542Z"
     }
   ]
 }
