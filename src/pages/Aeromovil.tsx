@@ -297,12 +297,38 @@ export default function Aeromovil() {
   // El ajuste automático decide W y H; lo demás sale tal cual de los deslizadores.
   // (2026-11-13: the body's colours are not shape: a change of colour alone keeps the same parameters for the model, so
   // the 3D is not rebuilt; the viewer recolours its materials from `colores`)
+  // Plegar / desplegar las alas del carenado BWB despacio (2026-11-17, Eugenio: «que la acción se haga lento, no
+  // instantáneo, que tarde unos segundos»): `f` va de 0 (planas) a 1 (plegadas) en unos 3 s, dando pasos de 250 ms,
+  // y sólo al final se guarda el ajuste en el diseño. Mientras tanto el modelo se calcula con el ángulo parcial.
+  const [plieg, setPlieg] = useState<{ f: number; dest: 'si' | 'no' } | null>(null);
+  const PASO_PLIEG = 1 / 12;
+  useEffect(() => {
+    if (!plieg) return;
+    const hacia = plieg.dest === 'si' ? 1 : 0;
+    if (plieg.f === hacia) { set('tBwbPlegadas' as keyof Parametros, plieg.dest as never); setPlieg(null); return; }
+    const t = setTimeout(() => setPlieg(q => {
+      if (!q) return q;
+      const h = q.dest === 'si' ? 1 : 0;
+      return { ...q, f: Math.abs(h - q.f) <= PASO_PLIEG ? h : q.f + Math.sign(h - q.f) * PASO_PLIEG };
+    }), 250);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [plieg]);
+  const Pmostrar = useMemo<Parametros>(() => plieg
+    ? { ...P, tBwbPlegadas: 'si', tBwbPliegueAng: ((P as Parametros & { tBwbPliegueAng?: number }).tBwbPliegueAng ?? 90) * plieg.f } as Parametros
+    : P, [P, plieg]);
   const sinColor = useRef<Parametros | null>(null);
   const Pforma = useMemo(() => {
-    const a = sinColor.current, cambia = (k: string) => (a as unknown as Record<string, unknown>)[k] !== (P as unknown as Record<string, unknown>)[k];
-    if (a && a !== P && !Object.keys({ ...a, ...P }).some(k => !(CLAVES_COLOR as readonly string[]).includes(k) && cambia(k))) return a;
-    return (sinColor.current = P);
-  }, [P]);
+    const a = sinColor.current, cambia = (k: string) => (a as unknown as Record<string, unknown>)[k] !== (Pmostrar as unknown as Record<string, unknown>)[k];
+    if (a && a !== Pmostrar && !Object.keys({ ...a, ...Pmostrar }).some(k => !(CLAVES_COLOR as readonly string[]).includes(k) && cambia(k))) return a;
+    return (sinColor.current = Pmostrar);
+  }, [Pmostrar]);
+  const pliegando = plieg !== null;
+  const alternarAlas = () => {
+    if (plieg) return;
+    const ahora = (P as Parametros & { tBwbPlegadas?: string }).tBwbPlegadas === 'si';
+    setPlieg({ f: ahora ? 1 : 0, dest: ahora ? 'no' : 'si' });
+  };
   const colores = useMemo(() => coloresDe(P), [P]);
   const Pa = useMemo(() => ajustarCarenado(Pforma), [Pforma]);
   const modelo = useMemo(() => crearModelo(Pa), [Pa]);
@@ -689,24 +715,23 @@ export default function Aeromovil() {
             className={cn('absolute right-14 top-3 z-[15] gap-1.5 bg-white px-2.5 py-1.5 text-xs normal-case tracking-normal shadow-sm', panelGaraje && 'border-teal-600 bg-teal-50 text-teal-800')}>
             <Warehouse className="h-4 w-4" />Garaje
           </Button>
+          {/* Plegar / desplegar las alas (carenado BWB), en la pantalla del garaje: tarda unos segundos */}
+          {P.disposicion === 'triciclo' && (P as Parametros & { tBwb?: string }).tBwb === 'si' && (() => {
+            const plegadas = (P as Parametros & { tBwbPlegadas?: string }).tBwbPlegadas === 'si';
+            return (
+              <Button variant="outline" onClick={alternarAlas} disabled={pliegando} aria-pressed={plegadas}
+                title={plegadas ? 'Despliega las alas del carenado BWB (tarda unos segundos)' : 'Pliega las alas del carenado BWB a mitad de cada ala (tarda unos segundos)'}
+                className={cn('absolute right-[8.5rem] top-3 z-[15] gap-1.5 bg-white px-2.5 py-1.5 text-xs normal-case tracking-normal shadow-sm', plegadas && 'border-teal-600 bg-teal-50 text-teal-800')}>
+                {pliegando ? (plieg!.dest === 'si' ? 'Plegando alas…' : 'Desplegando alas…') : plegadas ? 'Desplegar alas' : 'Plegar alas'}
+              </Button>
+            );
+          })()}
           {panelGaraje && (
             <div role="dialog" aria-label="Garaje" className="absolute inset-x-2 top-14 z-[16] flex max-h-[calc(100%-8rem)] flex-col gap-2.5 overflow-y-auto rounded-xl border border-slate-200 bg-white p-3 shadow-lg sm:inset-x-auto sm:right-3 sm:w-[340px]">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold text-slate-800">Garaje</p>
                 <Button variant="ghost" onClick={() => setPanelGaraje(false)} aria-label="Cerrar el garaje" className="px-1.5 py-1"><X className="h-4 w-4" /></Button>
               </div>
-              {/* Plegar / desplegar las alas del carenado BWB (2026-11-17, Eugenio: «haz que las alas se puedan plegar o
-                  desplegar desde el panel del garaje con un botón»). Sólo aparece con el carenado BWB puesto. */}
-              {P.disposicion === 'triciclo' && (P as Parametros & { tBwb?: string }).tBwb === 'si' && (() => {
-                const plegadas = (P as Parametros & { tBwbPlegadas?: string }).tBwbPlegadas === 'si';
-                return (
-                  <Button variant="outline" onClick={() => set('tBwbPlegadas' as keyof Parametros, (plegadas ? 'no' : 'si') as never)}
-                    aria-pressed={plegadas} title="Pliega o despliega las alas del carenado BWB a mitad de cada ala"
-                    className={cn('w-full gap-1.5 text-xs normal-case tracking-normal', plegadas && 'border-teal-600 bg-teal-50 text-teal-800')}>
-                    {plegadas ? 'Desplegar alas' : 'Plegar alas'}
-                  </Button>
-                );
-              })()}
               {garajeLista}
             </div>
           )}
