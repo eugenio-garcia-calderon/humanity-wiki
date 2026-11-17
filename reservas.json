@@ -161,6 +161,12 @@
       "ruta": "src/components/aeromovil/visor/triciclo.ts",
       "motivo": "solopiezas: piezas del motor aislables (pocas líneas)",
       "desde": "2026-11-17T14:06:06.040Z"
+    },
+    {
+      "agente": "capo",
+      "ruta": "src/components/aeromovil/masasSecciones.ts",
+      "motivo": "capo: capó, tomas de aire y radiador (pocas líneas)",
+      "desde": "2026-11-17T14:07:04.095Z"
     }
   ]
 }
