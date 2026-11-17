@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "colasuave",
-      "ruta": "src/components/aeromovil/triciclo/medidas.ts",
-      "motivo": "colasuave: transición cabina–cola y rangos de la cola",
-      "desde": "2026-11-16T23:11:31.870Z"
-    },
-    {
-      "agente": "colasuave",
       "ruta": "src/components/aeromovil/triciclo/defecto.ts",
       "motivo": "colasuave: transición cabina–cola y rangos de la cola",
       "desde": "2026-11-16T23:11:36.192Z"
