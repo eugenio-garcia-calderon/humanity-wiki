@@ -1,54 +1,6 @@
 {
   "reservas": [
     {
-      "agente": "proveedores",
-      "ruta": "drizzle/0224_aeromovil_adjuntos.sql",
-      "motivo": "proveedores: registro de archivos adjuntos por componente",
-      "desde": "2026-11-17T14:13:30.504Z"
-    },
-    {
-      "agente": "legado",
-      "ruta": "src/components/aeromovil/garaje/NavegadorGaraje.tsx",
-      "motivo": "legado: categorías Aeromóvil S / referencia / legado",
-      "desde": "2026-11-17T14:14:35.903Z"
-    },
-    {
-      "agente": "legado",
-      "ruta": "src/components/aeromovil/legado.ts",
-      "motivo": "legado: fichero nuevo",
-      "desde": "2026-11-17T14:14:46.975Z"
-    },
-    {
-      "agente": "legado",
-      "ruta": "drizzle/0226_aeromovil_s_por_defecto.sql",
-      "motivo": "legado: el Aeromóvil S por defecto",
-      "desde": "2026-11-17T14:16:00.009Z"
-    },
-    {
-      "agente": "munecos",
-      "ruta": "src/components/aeromovil/triciclo/ocupantes.ts",
-      "motivo": "munecos: talla y complexión de los ocupantes (pocas líneas)",
-      "desde": "2026-11-17T14:19:17.799Z"
-    },
-    {
-      "agente": "munecos",
-      "ruta": "src/components/aeromovil/triciclo/centroMasas.ts",
-      "motivo": "munecos: talla y complexión de los ocupantes (pocas líneas)",
-      "desde": "2026-11-17T14:19:21.162Z"
-    },
-    {
-      "agente": "munecos",
-      "ruta": "src/components/aeromovil/triciclo/bascula.ts",
-      "motivo": "munecos: talla y complexión de los ocupantes (pocas líneas)",
-      "desde": "2026-11-17T14:19:24.900Z"
-    },
-    {
-      "agente": "munecos",
-      "ruta": "src/components/aeromovil/visor/ocupante.ts",
-      "motivo": "munecos: talla y complexión de los ocupantes (pocas líneas)",
-      "desde": "2026-11-17T14:19:28.282Z"
-    },
-    {
       "agente": "legado",
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "legado: aviso solo lectura y abrir el Aeromóvil S (pocas líneas)",
@@ -149,6 +101,12 @@
       "ruta": "src/components/aeromovil/homologacion/normas.ts",
       "motivo": "electronica: fuentes 901/2014 y R85, texto de potencia (pocas líneas)",
       "desde": "2026-11-17T18:01:52.670Z"
+    },
+    {
+      "agente": "proveedores",
+      "ruta": "src/components/aeromovil/PesoSeccion.tsx",
+      "motivo": "proveedores: una línea, proveedor/modelo/archivos en cada pieza",
+      "desde": "2026-11-17T18:21:28.123Z"
     }
   ]
 }
