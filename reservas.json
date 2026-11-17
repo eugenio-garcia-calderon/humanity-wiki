@@ -119,6 +119,12 @@
       "ruta": "src/components/aeromovil/departamentos/tipos.ts",
       "motivo": "precios: precio por sección y pestaña Mano de obra",
       "desde": "2026-11-17T13:44:59.623Z"
+    },
+    {
+      "agente": "precios",
+      "ruta": "src/components/aeromovil/PesoSeccion.tsx",
+      "motivo": "precios: precio por sección y pestaña Mano de obra",
+      "desde": "2026-11-17T13:45:03.275Z"
     }
   ]
 }
