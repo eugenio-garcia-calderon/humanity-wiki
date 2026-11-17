@@ -28,14 +28,15 @@
 import type { Comprobacion, MaterialCarenado, MaterialChasis, Parametros, PuntosOcupante, Resultados, Rueda, Tubo, P3 } from './geometria';
 import { MATERIALES_CARENADO, MATERIALES_CHASIS, RENDIMIENTO_SOLAR, largoTubo } from './geometria';
 import { BASCULANTE_DEFECTO, type CamposBasculante, type RuedaBasculante } from './basculante/defecto';
-import { CATALOGO_RUEDAS, IDS_CATALOGO, crrMezcla, fichaRueda, nombreRueda, type FichaRueda, type IdRueda } from './ruedas/catalogo';
+import { CATALOGO_RUEDAS, IDS_CATALOGO, fichaRueda, nombreRueda, type FichaRueda, type IdRueda } from './ruedas/catalogo';
+import { OPCIONES_CONSTRUCCION, OPCIONES_TIPO, crrEjes, efectoNeumatico, type PropioNeumatico } from './ruedas/neumaticos';
 import { crearForma, crearPod, largoCapNariz, limiteCarenados, type DimForma, type EsquinaDel, type FormaBasculante, type Pod } from './basculante/forma';
 import { SMERA_REF, dentroPoligono, detallesSmera, mapaSmera, mapearPoligono, perfilSmera } from './basculante/smera';
 import { CADERA_SOBRE_ASIENTO, MEDIA_CABEZA, TALLA_SENTADO, rodilla } from './geometriaBala';
 
 export type { CamposBasculante, RuedaBasculante };
 export type ClaveBasculante = keyof CamposBasculante;
-type ClaveTexto = 'qCarroceria' | 'qRuedasDel' | 'qSolarTecho' | 'qSolarMorro' | 'qSolarCola' | 'qMatCarenado' | 'qChMat' | 'qRuedaDel' | 'qRuedaTras';
+type ClaveTexto = 'qCarroceria' | 'qRuedasDel' | 'qSolarTecho' | 'qSolarMorro' | 'qSolarCola' | 'qMatCarenado' | 'qChMat' | 'qRuedaDel' | 'qRuedaTras' | 'qNeuDel' | 'qNeuTras' | 'qConsDel' | 'qConsTras';
 export type ClaveNumBasculante = Exclude<ClaveBasculante, ClaveTexto>;
 
 export const NOMBRE_BASCULANTE = 'Cuadriciclo Basculante';
@@ -176,11 +177,16 @@ export const SELECTORES_BASCULANTE: SelectorBasculante[] = [
   { clave: 'qMatCarenado', n: 'Material de la carrocería', dep: 'carroceria', bloque: 'Material y espesores', opciones: [{ k: 'carbonoLino', n: 'Carbono-lino' }, { k: 'vidrio', n: 'Fibra de vidrio' }, { k: 'carbono', n: 'Fibra de carbono' }] },
   { clave: 'qChMat', n: 'Material de los tubos', dep: 'chasis', bloque: 'Bastidor', opciones: [{ k: 'al6061', n: 'Aluminio 6061-T6' }, { k: 'cromoly', n: 'Acero cromoly 4130' }, { k: 'carbono', n: 'Tubo de carbono' }] },
   { clave: 'qRuedaDel', n: 'Ruedas delanteras', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['m13', 'm14', 'm15', 'c13', 's14', ...IDS_CATALOGO]) },
+  { clave: 'qNeuDel', n: 'Neumático delantero: tipo', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: OPCIONES_TIPO },
+  { clave: 'qConsDel', n: 'Neumático delantero: construcción', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: OPCIONES_CONSTRUCCION },
   { clave: 'qRuedaTras', n: 'Ruedas traseras', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: ruedas(['m13', 'm14', 'm15', 'c13', 's14', ...IDS_CATALOGO]) },
+  { clave: 'qNeuTras', n: 'Neumático trasero: tipo', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: OPCIONES_TIPO },
+  { clave: 'qConsTras', n: 'Neumático trasero: construcción', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: OPCIONES_CONSTRUCCION },
 ];
 const OPCIONES: Record<ClaveTexto, readonly string[]> = {
   qCarroceria: ['aero', 'smera'], qRuedasDel: ['morro', 'carenados'], qSolarTecho: ['no', 'si'], qSolarMorro: ['no', 'si'], qSolarCola: ['no', 'si'], qMatCarenado: ['carbonoLino', 'vidrio', 'carbono'], qChMat: ['al6061', 'cromoly', 'carbono'],
   qRuedaDel: ['m13', 'm14', 'm15', 'c13', 's14', ...IDS_CATALOGO], qRuedaTras: ['m13', 'm14', 'm15', 'c13', 's14', ...IDS_CATALOGO],
+  qNeuDel: OPCIONES_TIPO.map(o => o.k), qNeuTras: OPCIONES_TIPO.map(o => o.k), qConsDel: OPCIONES_CONSTRUCCION.map(o => o.k), qConsTras: OPCIONES_CONSTRUCCION.map(o => o.k),
 };
 
 /** This vehicle's fields from a design: the defaults for what is missing, a wrong type or an unknown option. */
@@ -744,9 +750,24 @@ export interface ResultadosBasculante {
 /** Scooter tyres at 2.5 bar (rolling 0.010), hub motors and controllers at 88 %, 80 W of equipment, 90 % of the battery usable. Assumed, not measured. */
 export const CRR_B = 0.010, RENDIMIENTO_B = 0.88, AUXILIARES_B = 80, USABLE_B = 0.9;
 /** 2026-11-17: with a catalogue wheel on an axle, the mean of each wheel's own rolling resistance (`ruedas/catalogo.ts`); the old sizes keep `CRR_B`. */
-export const crrBasculante = (Q: Pick<CamposBasculante, 'qRuedaDel' | 'qRuedaTras'>) => crrMezcla([{ k: Q.qRuedaDel, n: 2 }, { k: Q.qRuedaTras, n: 2 }], CRR_B);
 /** Dry grip of a scooter tyre (g): the lean holds a curve without leaning on the tyres' sideways grip up to tan φ. */
 export const AGARRE_B = 0.9;
+/** 2026-11-17: what the older sizes are fitted with (scooter sizes: bias tubeless scooter tyres; the Twizy's and the Smera's: radial road tyres). */
+const legadoB = (k: string): PropioNeumatico => {
+  const r = RUEDAS_BASCULANTE[k as RuedaBasculante] ?? RUEDAS_BASCULANTE.m14, coche = k === 'c13' || k === 's14';
+  return { tipo: coche ? 'carretera' : 'scooter', radial: coche, camara: false, d: r.d, w: r.w, perfil: k === 'c13' ? 'coche' : 'moto' };
+};
+/** The tyre of each axle (`ruedas/neumaticos.ts`): its effect on rolling, mass, grip, life and price. «De serie»: all factors exactly 1. */
+export const neumaticosBasculante = (Q: Pick<CamposBasculante, 'qRuedaDel' | 'qRuedaTras' | 'qNeuDel' | 'qNeuTras' | 'qConsDel' | 'qConsTras'>) => ({
+  del: efectoNeumatico(Q.qRuedaDel, Q.qNeuDel, Q.qConsDel, legadoB, AGARRE_B, true),
+  tras: efectoNeumatico(Q.qRuedaTras, Q.qNeuTras, Q.qConsTras, legadoB, AGARRE_B),
+});
+export const crrBasculante = (Q: Pick<CamposBasculante, 'qRuedaDel' | 'qRuedaTras' | 'qNeuDel' | 'qNeuTras' | 'qConsDel' | 'qConsTras'>) => {
+  const n = neumaticosBasculante(Q);
+  return crrEjes([{ k: Q.qRuedaDel, n: 2, f: n.del.fCrr }, { k: Q.qRuedaTras, n: 2, f: n.tras.fCrr }], CRR_B);
+};
+/** Grip that decides a skid against a roll: the better-gripping axle's dry μ (more grip, the roll comes first). */
+export const agarreBasculante = (Q: CamposBasculante) => { const n = neumaticosBasculante(Q); return Math.max(n.del.muSeco, n.tras.muSeco); };
 /** Luggage counted for the tyres' load (kg). */
 export const EQUIPAJE_B = 20;
 
@@ -755,7 +776,7 @@ export const grupoPiezaB = (p: PiezaMasaB) => p.grupo;
 export function piezasBasculante(m: ModeloBasculante, ar: ReturnType<typeof areasBasculante>): PiezaMasaB[] {
   const Q = m.campos, L = (k: ClaveNumBasculante) => limitarBasculante(k, Q);
   const kgm2mm = MATERIALES_CARENADO[Q.qMatCarenado as MaterialCarenado].kgm2mm;
-  const rd = RUEDAS_BASCULANTE[Q.qRuedaDel], rt = RUEDAS_BASCULANTE[Q.qRuedaTras];
+  const rd = RUEDAS_BASCULANTE[Q.qRuedaDel], rt = RUEDAS_BASCULANTE[Q.qRuedaTras], neu = neumaticosBasculante(Q);
   const densidad = MATERIALES_CHASIS[Q.qChMat as MaterialChasis].densidad;
   let kgTubos = 0, metros = 0;
   for (const t of m.tubos) { const l = largoTubo(t); metros += l; kgTubos += Math.PI * ((t.d / 2) ** 2 - (t.d / 2 - t.pared) ** 2) * l * densidad; }
@@ -779,8 +800,8 @@ export function piezasBasculante(m: ModeloBasculante, ar: ReturnType<typeof area
     { nombre: 'Marco de la cúpula, bisagra y amortiguadores de gas', kg: 4, x: xc, y: yc, grupo: 'carroceria' },
     { nombre: 'Ventilación y desempañado', kg: 3, x: m.xWs - 0.1, y: m.D.yCapo - 0.1, grupo: 'interior' },
     { nombre: 'Bastidor', kg: kgTubos + L('qChUniones'), x: (m.xR + 0) / 2, y: m.sueloIn + 0.1, grupo: 'chasis', nota: `${metros.toFixed(1).replace('.', ',')} m de tubo` },
-    { nombre: 'Ruedas delanteras', kg: 2 * L('qMRueda') * rd.kg, x: 0, y: m.rF, grupo: 'rodaje' },
-    { nombre: 'Ruedas traseras', kg: 2 * L('qMRueda') * rt.kg, x: m.xR, y: m.rR, grupo: 'rodaje' },
+    { nombre: 'Ruedas delanteras', kg: 2 * L('qMRueda') * rd.kg * neu.del.fKg, x: 0, y: m.rF, grupo: 'rodaje' },
+    { nombre: 'Ruedas traseras', kg: 2 * L('qMRueda') * rt.kg * neu.tras.fKg, x: m.xR, y: m.rR, grupo: 'rodaje' },
     { nombre: 'Frenos (cuatro)', kg: 4 * L('qMFreno'), x: m.xR / 2, y: (m.rF + m.rR) / 2, grupo: 'rodaje' },
     { nombre: 'Pilares telescópicos (cuatro)', kg: 4 * L('qMSusp'), x: m.xR / 2, y: (m.yInf + m.ySup) / 2, grupo: 'rodaje' },
     { nombre: 'Paralelogramos (brazos y cojinetes)', kg: L('qMBrazos'), x: m.xR / 2, y: (m.yInf + m.ySup) / 2, grupo: 'rodaje' },
@@ -811,8 +832,8 @@ export function energiaBasculante(m: ModeloBasculante, mTot: number, cd: { cd: n
   const consumo = (kmh: number) => { const v = kmh / 3.6; return potencia(v) / v / 3.6; };
   const vel = L('qVel'), WhKm = consumo(vel), util = m.bateria.kWh * 1000 * USABLE_B;
   const vmaxCon = (kW: number) => { let v = 10; for (let i = 0; i < 80; i++) v *= Math.pow(kW * 1000 / potencia(v), 0.34); return v * 3.6; };
-  // 0 → 50 km/h: peak power, limited by the grip of the two driven rear wheels (their share of the weight, μ 0.9)
-  const Fmax = AGARRE_B * (1 - reparto) * mTot * g;
+  // 0 → 50 km/h: peak power, limited by the grip of the two driven rear wheels (their share of the weight, μ 0.9 with the size's own tyre)
+  const Fmax = neumaticosBasculante(Q).tras.muSeco * (1 - reparto) * mTot * g;
   let v = 0.5, t = 0; const dt = 0.02;
   while (v < 50 / 3.6 && t < 60) { const Fz = Math.min(Fmax, L('qKWPico') * 1000 * RENDIMIENTO_B / v) - 0.5 * 1.2 * CdA * v * v - crr * mTot * g; if (Fz <= 0) { t = 99; break; } v += Fz / (mTot * 1.03) * dt; t += dt; }
   const solarDia = areaSolar * 0.7 * RENDIMIENTO_SOLAR * 4.5 * 1000 * 0.85;
@@ -881,7 +902,7 @@ export function calcularBasculante(m: ModeloBasculante, ar: ReturnType<typeof ar
   const fmt = (v: number, d = 2) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
   const grados = Math.round(phi * 180 / Math.PI), lock = Math.round(m.giro * 180 / Math.PI);
   // the lean: the most it can hold and what tips it
-  c('rodaje', `Vuelco inclinado a ${grados}° (objetivo 1,05 g)`, ssfInclinado - AGARRE_B, 1.05 - AGARRE_B, `${fmt(ssfInclinado)} g`);
+  c('rodaje', `Vuelco inclinado a ${grados}° (objetivo 1,05 g)`, ssfInclinado - agarreBasculante(Q), 1.05 - agarreBasculante(Q), `${fmt(ssfInclinado)} g`);
   c('rodaje', `Curva equilibrada inclinándose ${grados}° (sin cargar los neumáticos de lado)`, 1, 0, `${fmt(aEq)} g`);
   c('rodaje', 'Vuelco sin bascular (parado o a paso de peatón, basculación bloqueada)', 1, 0, `${fmt(ssfRecto)} g`);
   // heads (as the Triciclo: the top and back of the skull, every 10° round it, to the inside of the canopy)
@@ -1083,7 +1104,7 @@ export function dinamicaBasculante(P: Parametros): DinamicaBasculante {
     cgAltura: b.cg.y, cgDetrasEjeDel: -b.cg.x, repartoDel: b.basculacion.repartoDel,
     viaDel: m.via.del, viaTras: m.via.tras, batalla: m.batalla,
     inclinacionMax: L('qBascMax'), aEquilibrada: b.basculacion.aEquilibrada, vuelcoRecto: b.basculacion.ssfRecto, vuelcoInclinado: b.basculacion.ssfInclinado,
-    agarre: AGARRE_B, inclinaNeumatico: Math.min(RUEDAS_BASCULANTE[m.campos.qRuedaDel].inclina, RUEDAS_BASCULANTE[m.campos.qRuedaTras].inclina),
+    agarre: agarreBasculante(m.campos), inclinaNeumatico: Math.min(RUEDAS_BASCULANTE[m.campos.qRuedaDel].inclina, RUEDAS_BASCULANTE[m.campos.qRuedaTras].inclina),
     giroMax: L('qGiro'), radioGiro: b.basculacion.radio, areaFrontal: b.area.total,
   };
 }

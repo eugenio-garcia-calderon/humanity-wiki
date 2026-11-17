@@ -11,6 +11,7 @@
 // keys takes the value here.
 
 import type { IdRueda } from '../ruedas/catalogo';
+import type { OpcionConstruccion, OpcionTipo } from '../ruedas/neumaticos';
 
 /** Wheels: scooter tyres (round profile, they lean like a motorcycle's) and the Twizy's car tyre (flat: it hardly leans). */
 /** 2026-11-17: or any wheel of the catalogue (`ruedas/catalogo.ts`): motorcycle, eco car, velomobile. */
@@ -80,6 +81,8 @@ export interface CamposBasculante {
   qBatalla: number;     // eje delantero a eje trasero (m)
   qViaDel: number; qViaTras: number;               // centro a centro de las ruedas (m)
   qRuedaDel: RuedaBasculante; qRuedaTras: RuedaBasculante;
+  // 2026-11-17: the tyre type and construction per axle ('serie': the size's own tyre, today's numbers)
+  qNeuDel: OpcionTipo; qNeuTras: OpcionTipo; qConsDel: OpcionConstruccion; qConsTras: OpcionConstruccion;
   qBascMax: number;     // inclinación máxima (°)
   qBrazoAlto: number;   // altura del brazo de abajo del paralelogramo (m)
   qBrazoSep: number;    // separación entre los dos brazos (m)
@@ -120,6 +123,7 @@ export const BASCULANTE_DEFECTO: CamposBasculante = {
   qVolX: 0, qVolY: 0, qPedX: -0.10, qPedY: 0, qMOcc: 80, qMAsiento: 3.5,
   qChMat: 'al6061', qChD: 40, qChT: 2.0, qChUniones: 3,
   qBatalla: 1.94, qViaDel: 0.69, qViaTras: 0.62, qRuedaDel: 'm14', qRuedaTras: 'm14',
+  qNeuDel: 'serie', qNeuTras: 'serie', qConsDel: 'serie', qConsTras: 'serie',
   qBascMax: 25, qBrazoAlto: 0.24, qBrazoSep: 0.22, qGiro: 20, qRecDel: 90, qRecTras: 90,
   qMRueda: 6.5, qMFreno: 1.2, qMSusp: 2.5, qMBrazos: 7, qMActuador: 6.5, qMDir: 4,
   qKWNom: 8, qKWPico: 15, qMMotor: 26, qMInversor: 4, qVel: 80,
