@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "src/pages/Aeromovil.tsx",
+      "motivo": "boton plegar alas en el panel Garaje",
+      "desde": "2026-11-17T20:59:59.691Z"
+    }
+  ]
 }
