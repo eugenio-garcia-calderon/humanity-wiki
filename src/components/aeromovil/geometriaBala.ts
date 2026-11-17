@@ -214,7 +214,8 @@ export interface ResultadosBala {
 /** La superficie de la piel (m²) en total y en la zona del cristal, integrando la malla de secciones. */
 export function pielBala(F: FormaBala, cup: ReturnType<typeof contornoCupula>) {
   // the x and y moments (m³) of the body and of the glass go along too, for the Triciclo's centre of gravity
-  const NX = 150, NT = 40, out = { piel: 0, cristal: 0, xPiel: 0, yPiel: 0, xCristal: 0, yCristal: 0 };
+  // (2026-11-17) and the skin ahead of the canopy (the nose) and behind it (the tail), for the weight of each panel section
+  const NX = 150, NT = 40, out = { piel: 0, cristal: 0, xPiel: 0, yPiel: 0, xCristal: 0, yCristal: 0, pielMorro: 0, pielCola: 0 };
   const filas: [number, number][][] = [];
   for (let i = 0; i <= NX; i++) {
     const x = F.X_MORRO - 1e-4 - (F.LARGO - 2e-4) * i / NX, s = F.sec(x), fila: [number, number][] = [];
@@ -233,6 +234,7 @@ export function pielBala(F: FormaBala, cup: ReturnType<typeof contornoCupula>) {
     out.piel += s;
     const xm = (x0 + x1) / 2, ym = (a[1] + b[1] + c[1] + d[1]) / 4;
     out.xPiel += s * xm; out.yPiel += s * ym;
+    if (xm > cup.XC0) out.pielMorro += s; else if (xm < cup.XC1) out.pielCola += s;
     if (xm <= cup.XC0 && xm >= cup.XC1 && ym > cup.Y_VIDRIO(xm)) { out.cristal += s; out.xCristal += s * xm; out.yCristal += s * ym; }
   }
   return out;
