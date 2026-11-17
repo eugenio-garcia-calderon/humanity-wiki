@@ -12375,6 +12375,82 @@ Eugenio: «permite añadir más tipos de ruedas, por ejemplo de motos de todo ti
 - (masas) En rombo, «Rueda delantera, freno y horquilla» (unos 10,7 kg) pasa de la pestaña Carrocería a Rodaje, donde
   debía estar: los kilos de esas dos pestañas cambian a propósito (aviso de pesossecciones).
 
+## 2026-11-17 · Aeromóvil: pestaña «Homologación» (comprobación previa de la categoría europea)
+
+Eugenio: «Falta un apartado en el menú que sea de homologación. Igual puedes ponerlo en uno al lado de interior, arriba
+en el menú, que sea homologación y que indiques ahí, pues por ejemplo, para el triciclo, pues que sea la de
+homologación europea de triciclo pesado. Y pongas ahí las características de homologación y las restricciones que hay
+según normativa con todo lujo de detalles. Y ver si cumple o no cumple con algunas de ellas y qué margen hay todavía
+para ponerle más potencia, más peso, etcétera.»
+
+- **Dónde está.** En el Triciclo, el clásico, el rombo y el Basculante: pestaña «Homologación» arriba, justo después de
+  «Interior». En el Aeromóvil 1, dentro de su pestaña «Homologación» de siempre, debajo de las tareas. En el Gota y el
+  Cuadriciclo Bala (que no tienen pestañas): un botón «Homologación» debajo de la vista 3D.
+- **Qué hace.** Elige sola la categoría en la que cae el diseño (la de «triciclo pesado» es la **L5e-A, triciclo de
+  motor**), con un selector para comparar con las otras (bicicleta asistida, L3e, L2e, L6e-A, L6e-BP, L7e-CP, L7e-A2,
+  L7e-A1 y M1). Dice por qué no entra en las de abajo, y para cada requisito: «Cumple», «No cumple», «No cumple tal cual
+  · se arregla limitando» (potencia o velocidad con limitador) o «No se puede comprobar», con la cifra, el límite, el
+  margen («te quedan 233 kg…») y, al abrirlo, la norma entera y su artículo con enlace.
+- **Las cifras salen del propio diseño**: la masa de «Peso» menos la batería (la ley no la cuenta), la potencia nominal
+  de la pestaña Motor, la velocidad máxima de la misma cuenta que la pestaña Motor (con el Cd del túnel), largo, ancho,
+  alto, plazas, tipo de asiento y mando, radio de giro, carga de cada neumático.
+- **Aviso visible**: es una comprobación previa orientativa, no una homologación.
+- **Unido a «Proyecto › Revisión de puntos críticos»** (del bot «masas», que se fusionó antes): lo que no cumple sale en
+  rojo y lo que se arregla limitando en ámbar, en un grupo «Homologación» con su botón. La unión la hizo este bot, que llegó
+  segundo.
+- **Lo que sale hoy** (script `npx tsx scripts/homologacion.ts`): ver el informe del bot y `memory/03_DECISIONS.md`.
+- Fuentes: Reglamento (UE) 168/2013 (anexo I, arts. 3–5, anexos VI y VIII), Reglamentos Delegados 3/2014 y 44/2014
+  (consolidado de EUR-Lex), DGT/MAPFRE/RACE para los permisos. Lo citado sin releer lleva «por confirmar».
+- No visto en un teléfono de verdad: si sale la versión vieja, `humanity.wiki/?sw=off`.
+
+## 2026-11-17 · El pasajero a horcajadas puede ir mucho más atrás
+
+Eugenio: «Permite la configuración de asientos ahorcajadas uno delante de otro, que el asiento del copiloto, el que va
+detrás, se pueda separar más del asiento frontal. Ahora mismo hay un límite.»
+
+- Triciclo (y Rombo, clásico, Bala de cuatro ruedas), «Interior › Asientos › Pasajero: cadera al eje delantero»: antes
+  el pasajero iba como mucho 62 cm detrás del piloto; ahora hasta 1,40 m (de 40 cm a 1,40 m). Vale a horcajadas y con
+  las dos butacas tipo Aptera. El sillín largo se estira entre los dos; respaldo, estribos y asidero siguen al pasajero.
+- El deslizador ya no es lo que frena: lo dicen las comprobaciones. Tres nuevas: «Asiento del pasajero sobre los
+  largueros (delante de la torreta del amortiguador)» (los largueros acaban en el pivote del basculante), «Asiento del
+  pasajero delante de la rueda trasera» (con una sola rueda detrás) y «Respaldo del pasajero dentro de la carrocería»
+  (a horcajadas). Seguían valiendo «Cabeza del pasajero a la cúpula», «Pivote del basculante detrás de los estribos»,
+  el vuelco y la carga de los neumáticos.
+- La carrocería no crece sola. En el Rombo Bala de Eugenio (batalla 2,75 m) el pasajero cabe hasta ≈1,14 m detrás del
+  piloto antes de tocar la torreta; a partir de ≈0,95 m la cabeza de talla media ya no cabe bajo la cúpula: hay que alargar «Cúpula:
+  final» (p. ej. a 2,95 m) y la batalla (3,30 m) — así la talla media cabe con 1,0–1,2 m de separación (la talla alta va justa, a 1-3 cm).
+- Los kilos del pasajero van a su sitio nuevo en el centro de gravedad y en la carga de cada rueda (las mismas masas
+  de siempre, `m.sillines`). Diseños guardados sin cambios («Todo OK»), salvo uno que guardara un pasajero más atrás de
+  lo que el deslizador dejaba: antes se recortaba en silencio a 62 cm, ahora abre donde se guardó.
+## 2026-11-17 · Aeromóvil: pestaña «Consumos», «Energía» pasa a llamarse «Batería» con todo el sistema solar y de carga
+
+Eugenio: «Añadir en el menú superior un elemento que sea consumos y que debajo aparezca el consumo en litros a los 100
+kilómetros y que ahí en consumos aparezca toda la parte de rendimiento que tiene, todo lo que está ahora en energía, de
+autonomía. Toda esa parte ponlo ahí en consumos. Y luego en energía, llámalo batería. Y ahí añade también la parte de
+toda la configuración solar y todos los controladores que tiene que tener, también los cargadores eléctricos, el
+cargador PPT solar, todos los componentes tienes que detallarlos en profundidad para que tengamos una lista de todos los
+elementos. Y podemos ir jugando también con su precio, los proveedores, todo esto.»
+
+- **Solo en la familia Triciclo** (Triciclo, clásico, rombo; el Aeromóvil S): Eugenio ya solo trabaja en ella.
+- **Pestaña «Consumos»** entre «Motor» y «Batería». Debajo del nombre, el consumo a la velocidad de cálculo: en un
+  eléctrico, «≈0,9 L/100» (la gasolina que tiene la misma energía, 8,9 kWh por litro) y debajo «8,6 kWh» (los kWh a los
+  100 km de verdad); en un híbrido enchufable, los litros de gasolina con la batería gastada. Al pasar el ratón lo dice
+  entero. Dentro: la velocidad de cálculo (la misma de Motor), el bloque «Rendimiento» entero (Cd, consumo, autonomía,
+  velocidades, aceleración, solar; y todo lo del híbrido) y uno nuevo, «Del enchufe a la rueda»: el consumo desde el
+  enchufe (lo que se paga, con lo que pierde el cargador), los equipos de 12 V, qué parte de las pérdidas solares es del
+  regulador y cuánto tarda en cargar (con el cargador y con un enchufe de casa).
+- **«Energía» se llama ahora «Batería»** (por dentro sigue siendo `energia`: quien la tenía abierta la sigue viendo).
+  Además de la batería, «Sistema solar y de carga: todos los componentes»: células solares (Maxeon Gen III), un
+  regulador MPPT por zona de panel (techo, cola, morro), BMS, cargador a bordo, toma Tipo 2, DC-DC a 12 V, contactores,
+  fusible, precarga, desconectador de servicio, cable naranja y batería de 12 V; el controlador del motor se nombra y
+  se cuenta en Motor. Cada pieza es la primera del catálogo que encaja con el diseño (tensión, corriente, potencia), con
+  su masa, rendimiento, precio de una tienda y enlace a la ficha; lo que no se publica dice «estimado». Si no encaja
+  ninguna, sale en rojo.
+- **Ningún diseño cambia**: las masas de estas piezas son el desglose de «Varios: cargador, cables, luces, 12 V»; el
+  consumo y la autonomía siguen igual. En el Rombo Bala las piezas pesan 16,5 kg y «Varios» tiene 12: una comprobación
+  roja dice que hay que subirlo a 18 kg (no lo he subido yo: cambiaría el peso del coche; es decisión de Eugenio).
+- Rombo Bala (a 120 km/h): ver el informe del bot. No visto en un teléfono de verdad: si sale la versión vieja,
+  `humanity.wiki/?sw=off`.
 ## 2026-11-17 · El tamaño de los muñecos: más altos o más gordos
 
 Eugenio: «También en la parte de interior permite cambiar el tamaño de los muñecos para que sean más altos o más gordos

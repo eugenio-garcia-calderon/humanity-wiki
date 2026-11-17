@@ -891,6 +891,42 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **The new mass checks are appended in `geometria.ts` `calcular`** (`conMasasTriciclo`), not inside `calcularTriciclo`,
   for the same reason: moving them in is ≈ 10 min.
 
+## 2026-11-17 · Homologation pre-check: what the first version leaves out (Eugenio: «publish a first version asap»)
+
+- **Not read on EUR-Lex itself**: 168/2013 and 3/2014 were read on legislation.gov.uk (EU text as of 31-1-2020); 134/2014,
+  2018/858, 2019/2144 and RD 750/2010 are cited, not reread (`FUENTES[x].leido: false`). Re-check every limit against
+  the consolidated EUR-Lex texts, especially Euro 5/5+ and OBD dates (2019/129) and the Euro 5 noise column: ~3 h.
+- **Rombo layout**: front-axle share and per-tyre load are «no se puede comprobar» (the model does not share the load
+  among four diamond supports): ~2 h with a 4-support static solve.
+- **Tyre speed symbol, headlamp heights (500–1200 mm), plate space, R-point ≥ 400 mm**: the model knows some of these
+  (lamp positions, seat hip) but they are not wired: ~3 h.
+- **The Cuadriciclo Bala has no masses/motor** (body only): mass, power and speed rows read «no se puede comprobar».
+
+## 2026-11-17 · Astride passenger far back (bot «ahorcajadas»)
+
+- **No straddle seat type for rows 2/3.** Eugenio's straddle layout is `tAsientos: 'horcajadas'` (pilot + one passenger).
+  A «a horcajadas» option in `OPCIONES_TIPO_FILA` (`filasTriciclo.ts`) for three rows would need a straddle figure per
+  row in `ocupantes.ts`/`modelo.ts` and its checks: ≈ 3 h.
+- **The long saddle just stretches** between the two hips (`cabina`, `garaje/balaPiezas.ts`, `w(x)`): at 1.40 m it is one
+  very long bench. Two separate saddles with a gap (and a mass that grows with the length) would be more honest: ≈ 1 h.
+  The seat mass (`tMAsiento`) does not grow with the saddle's length either.
+- **The Aptera buckets' backrest/headrest is not checked against the skin** (`pasajero.ts`): in the default body the
+  headrest corner is already 0.9 cm outside at today's 62 cm, so a check would turn untouched designs red. The headrest's
+  geometry vs the canopy needs a look first: ≈ 45 min.
+- **Seam with «masas» (checked, no debt):** the hybrid's engine and tank collide-check against «los asientos» in
+  `hibrido.ts` `choques`, shown by `centroMasas.ts`, which reads the seats from the same model; the passenger's mass is
+  `m.sillines` → `ocupantesTriciclo`, so the centre of gravity follows the passenger with no second copy.
+## 2026-11-17 · Electrical system v1 (bot consumos): what is left
+
+- **No per-part choice**: each part is the first catalogue item that fits; letting Eugenio pick one (a `tCat…` key per
+  part, like the motor's) needs fields in `triciclo/campos.ts` + defaults: ~1.5 h.
+- **System voltage is inferred**, not a slider: a «Tensión del sistema» selector (48/72/96/144 V) ~45 min.
+- **Several masses are estimates** (DC-DC, contactors, inlet, Daly, generics): read datasheets and replace: ~1 h.
+- **«Varios» vs catalogue parts**: the check fails on every Triciclo design (parts ≈ 14–17 kg, slider 12 kg). Raising
+  the default changes every saved design: Eugenio's call; 5 min once decided.
+- **`tVel` lives in Motor's FILAS row and is drawn a second time in «Consumos»**: moving the row's `dep` needs a
+  `DepTriciclo` 'consumos' (touches ~6 Records): ~30 min.
+- **Basculante, A1, Gota, Bala: no «Consumos» tab** (legacy since 2026-11-17).
 ## 2026-11-17 · Occupant size («muñecos»): fields outside `CamposTriciclo`
 
 - **The six size fields (`tTallaPil/Pas`, `tComplPil/Pas`, `tMPil/Pas`) live in `triciclo/talla.ts` `CamposTalla`, not
@@ -903,3 +939,6 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   `calcularTriciclo` and `ajusteOcupantes.ts` repeats the same formula only to paint the knees red. Making
   `calcularTriciclo` emit them from `ajustePlaza`: ≈ 15 min.
 - `pages/Aeromovil.tsx` (garage card text, «dos ocupantes de N kg») still quotes `tMOcc`, not each rider's mass: 5 min.
+- Also still quoting `tMOcc` rather than each rider's mass: `electrico/LadoConsumos.tsx` (the consumption note, a copy
+  of the one fixed in `LadoTriciclo.tsx`) and `homologacion/ficha.ts` (`masaOcupante`, `masaMaxima` without the wheel
+  loads in a diamond). 10 min together.
