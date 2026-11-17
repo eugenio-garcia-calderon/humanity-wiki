@@ -963,4 +963,29 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   the front engine has no specific check for the pilot's pedals or the front suspension cradle. ≈ 40 min.
 - **Hood hinge/latch mass (≈ 1 kg) not counted**, and the nose solar panel (`tSolarMorro`) does not lift with the hood:
   ≈ 20 min each.
+<<<<<<< HEAD
+>>>>>>> origin/main
+=======
+- **Blocked by claims on 2026-11-17 (both held by bot capo the whole session), ~20 min together once free:**
+  (1) `LadoTriciclo.tsx` still draws its own «Rendimiento» block in Motor and Batería: change
+  `(dep === 'propulsion' || dep === 'energia' || dep === 'proyecto') && rendimiento` to `dep === 'proyecto'` and add a
+  one-line pointer to «Consumos» (the block now lives in `electrico/LadoConsumos.tsx`);
+  (2) `masasSecciones.ts` `seccionesTriciclo`: give «Varios» its `hijos: desgloseVarios(p.kg, sistemaElectrico(m, res))`
+  (`electrico/sistema.ts`, already exact to the part) so the «Varios» section lists the electrical parts and «precios» /
+  «proveedores» pick them up; then `scripts/pesos-secciones.ts` must stay «Todo OK».
+## 2026-11-17 · Occupant size («muñecos»): fields outside `CamposTriciclo`
+
+- **The six size fields (`tTallaPil/Pas`, `tComplPil/Pas`, `tMPil/Pas`) live in `triciclo/talla.ts` `CamposTalla`, not
+  in `CamposTriciclo` / `FILAS` / `TRICICLO_DEFECTO`** (those files were held by other bots). The model reads them from
+  the raw `Parametros` (`cuerpoDe(P, …)`), the panel block is its own component (`TallasOcupantes.tsx`), and absent
+  means today's figure. Consequences: no `Explicacion` popover for them, the aerodynamic study and `camposTriciclo`
+  do not see them, and `scripts/triciclo-disenos.ts` does not round-trip them. Moving them into the recipe's five
+  places: ≈ 30 min.
+- **Two knee checks are computed twice**: «Rodillas del piloto al volante / al salpicadero» stay inline in
+  `calcularTriciclo` and `ajusteOcupantes.ts` repeats the same formula only to paint the knees red. Making
+  `calcularTriciclo` emit them from `ajustePlaza`: ≈ 15 min.
+- `pages/Aeromovil.tsx` (garage card text, «dos ocupantes de N kg») still quotes `tMOcc`, not each rider's mass: 5 min.
+- Also still quoting `tMOcc` rather than each rider's mass: `electrico/LadoConsumos.tsx` (the consumption note, a copy
+  of the one fixed in `LadoTriciclo.tsx`) and `homologacion/ficha.ts` (`masaOcupante`, `masaMaxima` without the wheel
+  loads in a diamond). 10 min together.
 >>>>>>> origin/main
