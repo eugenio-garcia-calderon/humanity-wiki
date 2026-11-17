@@ -26,6 +26,7 @@ import { sql } from 'drizzle-orm';
 import { createHash, randomBytes } from 'node:crypto';
 import { ipDe, ritmo, esperaPendiente, type Regla } from './limites/index.js';
 import { generarImagenDesdeImagen } from './ai/provider.js';
+import { registrarNotasAeromovil } from './aeromovilNotas.js';
 
 const MAX_TEXTO = 4_000;
 const MAX_AUTOR = 80;
@@ -394,4 +395,7 @@ export function registerAeromovilRoutes(app: Express, db: any) {
       res.status(500).json({ error: 'No se ha podido quitar el velomóvil.' });
     }
   });
+
+  // Notas por sección (2026-11-17): their own module, registered from here so server.ts stays frozen.
+  registrarNotasAeromovil(app, db);
 }

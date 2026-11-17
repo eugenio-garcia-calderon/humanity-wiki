@@ -32,6 +32,8 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   // 2026-11-16: the hybrid's architecture (hibrido.ts). The power split at 50 % mechanical (97 %) and 83 % electrical gives
   // 90 %, the old «Conversión mecánica» default: an untouched hybrid gives the same litres as before
   tHibArq: 'reparto', tHibMec: 50, tRendElec: 83, tRendCaja: 93,
+  // 2026-11-17 (masas): the engine and the tank where they go by default (hibrido.ts), not moved
+  tMotX: 0, tMotY: 0, tMotZ: 0, tDepX: 0, tDepY: 0, tDepZ: 0,
   tMRueda: 4.5, tMFreno: 1.2, tMSuspDel: 9, tMSuspTras: 6, tMDir: 4.5,
   tKWNom: 5, tKWPico: 10, tMMotor: 13, tMInversor: 2.5, tVel: 80,
   tKWh: 9, tWhKg: 160, tWhL: 230, tMVarios: 12, tSolarM2: 2.2,
