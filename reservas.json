@@ -116,12 +116,6 @@
     },
     {
       "agente": "solopiezas",
-      "ruta": "src/components/aeromovil/hibrido3d.ts",
-      "motivo": "solopiezas: piezas del motor aislables (pocas líneas)",
-      "desde": "2026-11-17T14:05:59.542Z"
-    },
-    {
-      "agente": "solopiezas",
       "ruta": "src/components/aeromovil/Visor3D.tsx",
       "motivo": "solopiezas: piezas del motor aislables (pocas líneas)",
       "desde": "2026-11-17T14:06:02.681Z"
