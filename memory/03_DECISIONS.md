@@ -2197,6 +2197,26 @@ Eugenio asked for a dated, authored note on every side-panel section, «anónimo
 **Context.** Ten bots shared one 2-CPU / 8 GB cloud machine and ran tsc, vite build, the Aeromóvil scripts and headless screenshots one at a time behind `aeromovil-pesado.lock`. The queue reached ~10 jobs of up to 15 min each; ready PRs waited hours.
 **Decision.** New workflow `.github/workflows/comprobar.yml` runs on `pull_request` to main: tsc, build, and a matrix of the Aeromóvil scripts (tunnel, triciclo-disenos, estudio-aerodinamico, pesos-secciones, homologacion, bala-cola-lisa, cola-continuidad seed 7), each job in parallel on GitHub runners. Read-only, no secrets. Bots open the PR, wait for green, then merge under the deploy lock. Local heavy work is limited to what CI cannot do (headless screenshots of the feature).
 **Alternatives.** (a) Allow 2 concurrent heavy jobs locally: at most 2× and risks OOM on 8 GB. (b) Skip checks: rejected. (c) Bigger cloud machine: not in our control.
+
+
+## 2026-11-17 · Cooling, intakes, hood and engine position of the Triciclo (bot «capo»)
+
+- **Fields outside `CamposTriciclo`.** `tToma…`, `tBranq…`, `tRad…`, `tTuboD`, `tMotorPos` live in
+  `triciclo/refrigeracion.ts` (`CamposRefrigeracion`, `FILAS_REFRIGERACION`, read from `m.P` with
+  `camposRefrigeracion`), because `campos.ts`/`defecto.ts` were claimed by other bots all afternoon. Absent = «Ninguna»
+  / «Detrás», so every saved design builds identically (checked: hash of the hybrid layout + checks + masses equal to
+  main for 3 bodies × 3 architectures × 2 propulsions). Alternative: rows in `FILAS` — moving them is ≈ 30 min.
+- **True holes, not decals.** The intakes remove the body mesh's triangles inside each outline (`visor/refrigeracion.ts`
+  `cortarPiel`); a 12 mm black bezel hides the saw-tooth of the ≈ 1 cm skin cells; a dark duct runs to the radiator.
+  Cheaper than re-gridding the skin around the outline, which would have touched `garaje/balaModelo.ts`.
+- **The hood is the same triangles on a pivot**, registered as a «maletero» so the existing animation opens it; closed it
+  draws exactly the old body. No extra mass (hinges ≈ 1 kg not counted, so saved designs keep their mass).
+- **Cooling drag is a literature estimate added to the consumption's CdA** (`energia.ts`), never to the tunnel or its
+  calibration: ΔCdA = 0,5 × intake area (Hucho, 0,3–0,7). Heat: 25 % of fuel energy (Heywood); radiator ε 0,5, fan 3 m/s,
+  ΔT 70 K.
+- **Engine in the nose** (`hibrido.ts` `delante`): same search (nearest the cabin, lowest), drive by a propshaft along the
+  floor to the unchanged chain sprocket; tank stays behind the seats; exhaust under the floor. Masses of the propshaft
+  (1,9 kg/m + 1 kg) go through `piezasRefrigeracion` (the one hook into `masas.ts`).
 ## 2026-11-17 · Prices: one model on top of the mass sections, hidden editor (precios/)
 
 - **Prices hang off `masasSecciones.ts`**, not a parallel component list: each part the sections hold gets a price by
