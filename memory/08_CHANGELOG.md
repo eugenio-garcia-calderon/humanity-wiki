@@ -12081,3 +12081,11 @@ modelo, masas, comprobaciones, energía). Los valores por defecto del Triciclo s
 `triciclo/defecto.ts`, como ya se hizo con el Basculante: añadir un campo nuevo al Triciclo ya no toca el archivo que
 comparten los cuatro vehículos. El archivo antiguo sigue existiendo y reexporta todo, así que nada más cambia. Se
 borran dos nombres que no usaba nadie (`PARTES_LARGO`, `esTriciclo`).
+
+## 2026-11-16 · Ordenar el código del Aeromóvil (3/4): los paneles laterales en sus propios archivos
+
+Eugenio: «optimiza el codigo de la web aeromovil para que sea más eficiente a futuro generar nuevo código».
+Tercer paso, sin ningún cambio visible: la página `Aeromovil.tsx` (1.930 líneas) deja los paneles de cada vehículo en
+archivos propios junto al visor (`LadoTriciclo.tsx`, `LadoA1.tsx`, `LadoBala.tsx`) y los controles comunes
+(deslizador, selector, bloque, explicación, lista de comprobaciones) en `controles.tsx`. La página se queda en ≈1.030
+líneas con la distribución, el estado y la barra del 3D. Los paneles de todos los departamentos se leen igual que antes.
