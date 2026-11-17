@@ -143,6 +143,12 @@
       "ruta": "src/components/aeromovil/departamentos/tipos.ts",
       "motivo": "masas: motor y depósito libres, pestaña MASAS, Proyecto limpio",
       "desde": "2026-11-17T10:42:04.403Z"
+    },
+    {
+      "agente": "masas",
+      "ruta": "src/components/aeromovil/PesosDepartamento.ts",
+      "motivo": "masas: motor y depósito libres, pestaña MASAS, Proyecto limpio",
+      "desde": "2026-11-17T10:42:06.946Z"
     }
   ]
 }
