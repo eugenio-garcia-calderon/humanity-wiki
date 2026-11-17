@@ -137,6 +137,12 @@
       "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
       "motivo": "motores: títulos Motor gasolina / Motor eléctrico con su peso y tabla para comparar",
       "desde": "2026-11-17T11:12:35.788Z"
+    },
+    {
+      "agente": "ruedas",
+      "ruta": "src/components/aeromovil/triciclo/campos.ts",
+      "motivo": "ruedas: catálogo de ruedas de moto",
+      "desde": "2026-11-17T11:12:44.813Z"
     }
   ]
 }
