@@ -149,6 +149,12 @@
       "ruta": "src/components/aeromovil/visor/ocupante.ts",
       "motivo": "munecos: talla y complexión de los ocupantes (pocas líneas)",
       "desde": "2026-11-17T14:19:28.282Z"
+    },
+    {
+      "agente": "capo",
+      "ruta": "src/components/aeromovil/triciclo/comprobaciones.ts",
+      "motivo": "capo: refrigeración, capó y motor delante (pocas líneas)",
+      "desde": "2026-11-17T14:26:42.993Z"
     }
   ]
 }
