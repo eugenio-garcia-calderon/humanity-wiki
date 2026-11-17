@@ -13,7 +13,7 @@
 import type { Resultados } from './geometria';
 import { grupoPieza, type DepTriciclo } from './geometriaTriciclo';
 
-export type KgDepartamento = Partial<Record<DepTriciclo | 'proyecto', number>>;
+export type KgDepartamento = Partial<Record<DepTriciclo | 'proyecto' | 'masas', number>>;
 
 export function kgPorDepartamento(res: Resultados): KgDepartamento | null {
   const piezas: { kg: number; grupo: DepTriciclo }[] | null =
@@ -21,7 +21,8 @@ export function kgPorDepartamento(res: Resultados): KgDepartamento | null {
       : res.basculante ? res.basculante.piezas.map(p => ({ kg: p.kg, grupo: p.grupo as DepTriciclo }))
         : null;
   if (!piezas || !Number.isFinite(res.mVeh)) return null;
-  const kg: KgDepartamento = { proyecto: res.mVeh };
+  // (2026-11-17) «Masas»: with everyone on board, the mass its centre of gravity is for
+  const kg: KgDepartamento = { proyecto: res.mVeh, ...(Number.isFinite(res.mTot) ? { masas: res.mTot } : {}) };
   for (const p of piezas) kg[p.grupo] = (kg[p.grupo] ?? 0) + p.kg;
   return kg;
 }

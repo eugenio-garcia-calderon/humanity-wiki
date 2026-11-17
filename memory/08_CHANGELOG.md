@@ -12326,6 +12326,82 @@ Eugenio: «permite añadir más tipos de ruedas, por ejemplo de motos de todo ti
   https://evtol.news/news/aero-friedrichshafen-2024 · https://www.aircraft.com/aircraft/246590431/na-2026-ela-aviation-eclipse-revo ·
   https://dulv.de/Tragschrauber_Kennblaetter/details.php?id=21126 · https://aeroexpo.online/prod/ela-aviacion-sl/product-171316-69471.html ·
   https://elaaviacion.com/eclipse-evo/ · https://en.wikipedia.org/wiki/ELA_10_Eclipse
+## 2026-11-17 · Pestaña «Masas», motor y depósito libres, «Proyecto» como lista de pendientes (masas)
+- Eugenio: «haz que el motor por defecto esté mucho más cerca de la rueda trasera y más abajo, para bajar el centro de
+  gravedad, y que el depósito también se pueda colocar de manera libre, también haz que el motor se pueda colocar de
+  manera libre. Y que haya un cálculo de centro de gravedad y de pesos en cada eje, que aparezca en un nuevo apartado del
+  menú que sea MASAS, y te de esta relación calculado, y así en PROYECTO lo dejas despejado como una lista de cosas
+  pendientes, y también una revisión de los puntos críticos a mejorar que no están OK».
+- **Motor de gasolina y depósito, donde quieras**: el cálculo ya los coloca donde se le diga (el motor y el depósito se
+  mueven adelante/atrás, arriba/abajo y de lado desde su sitio de serie, y todas las comprobaciones lo siguen), pero
+  los seis deslizadores que lo hacen en pantalla llegan en un segundo paso: el fichero de los deslizadores lo tenía
+  otro bot ocupado y Eugenio pidió publicar ya.
+- **Su sitio de serie, nuevo**: el motor va lo más cerca de la rueda trasera que cabe (justo delante del amortiguador
+  trasero y su torreta; con dos ruedas detrás, justo delante del diferencial) y lo más bajo que deja lo que tiene debajo
+  (el suelo, la batería o el controlador); puede subir como mucho 5 cm para no chocar. El depósito va en el suelo justo
+  delante del motor si cabe ahí (más bajo y más cerca del centro de gravedad); si no, encima de la rueda trasera, como
+  antes.
+- **Comprobaciones nuevas** del motor y del depósito (en «Masas», «Proyecto» y Motor): la rueda trasera con su recorrido, el basculante con la suspensión
+  comprimida del todo, el amortiguador y su torreta (ahora sus tubos de verdad, inclinados), los asientos con quien va
+  sentado (las tres filas también), la batería y el controlador, y el depósito al motor. Lo que choca se pinta en rojo
+  en el 3D.
+- **Pestaña nueva «Masas»** (Triciclo, clásico, rombo y Basculante), justo después de «Proyecto», con su peso debajo:
+  masa total vacío, con los ocupantes y con equipaje; el centro de gravedad en altura, adelante-atrás y de lado; el peso
+  en cada eje y en cada rueda (en kg y %), con un dibujo desde arriba y de lado; lo que más sube el centro de gravedad;
+  la lista de todas las piezas (antes en «Proyecto»); y una explicación en palabras de por qué importan la altura y el
+  reparto (vuelco, frenada, tracción). Con «Masas» abierta, el 3D marca el centro de gravedad con el símbolo blanco y
+  negro y una línea hasta el suelo, visible a través de la carrocería.
+- **Comprobaciones nuevas de masas**: frenar a 0,8 g sin que se levanten las ruedas de atrás; subir una cuesta del
+  16 % en mojado con la rueda que empuja; «Reparto» (entre qué porcentajes de peso delante se cumplen a la vez el
+  vuelco, la frenada y la cuesta, a la altura que tiene el centro de gravedad); y el centro de gravedad centrado de lado.
+- **«Proyecto» despejado**: arriba, «Pendiente» (lo que falta en este diseño: arreglar lo que está en rojo, elegir motor,
+  controlador y motor de gasolina de catálogo si no se ha hecho, pesar las piezas, el estudio aerodinámico, que un
+  ingeniero revise el bastidor y la basculación), cada cosa con un botón que abre su pestaña. Debajo, «Revisión de
+  puntos críticos»: todas las comprobaciones que no están bien (rojas y justas), agrupadas por el departamento donde se
+  arreglan, con su botón. Al final, plegadas, todas las comprobaciones. El rendimiento, el maletero y el vuelco siguen
+  en sus pestañas (Motor y Energía, Interior, Rodaje); el peso se ha ido a «Masas». No se ha quitado ningún control.
+- **Arreglado de paso**: en rombo, el peso de cada rueda para dimensionar suspensiones y frenos salía mal (todo en las
+  laterales, nada en la cola). Ahora se reparte entre las cuatro con el mismo cálculo que enseña «Masas». En tu Rombo
+  Bala eso quita 13,4 kg de suspensiones y frenos de más.
+- **Rombo Bala (la copia del 15/11, con el híbrido)**: antes 553,1 kg con los dos, centro de gravedad a 48,7 cm, vuelco
+  1,07 g; ahora 539,3 kg, 49,4 cm, 1,04 g. Peso: morro 172 kg (32 %), laterales 252 kg (47 %), cola 115 kg (21 %). En
+  esa copia el motor **no puede acercarse más a la rueda ni bajar**: detrás tiene la torreta del amortiguador y debajo
+  el paquete de batería, que llega hasta el basculante; se mueve 5 cm adelante y sube 3 cm (antes su generador y su
+  planetario se metían 3 cm en la batería sin que nada lo dijera), y sigue tocando la torreta (4 cm) y el respaldo del
+  pasajero (4 cm), en rojo. Bajar el motor 10 cm bajaría el centro de gravedad solo 0,9 cm: lo que más pesa y más alto
+  va son los ocupantes y la batería.
+- Una pestaña recordada sigue abriendo lo mismo; «masas» guardada en un vehículo sin esa pestaña (el Aeromóvil 1) abre
+  «Proyecto». No comprobado en un móvil: con la app instalada, `humanity.wiki/?sw=off` quita la copia vieja.
+- (masas) En rombo, «Rueda delantera, freno y horquilla» (unos 10,7 kg) pasa de la pestaña Carrocería a Rodaje, donde
+  debía estar: los kilos de esas dos pestañas cambian a propósito (aviso de pesossecciones).
+
+## 2026-11-17 · Aeromóvil: pestaña «Homologación» (comprobación previa de la categoría europea)
+
+Eugenio: «Falta un apartado en el menú que sea de homologación. Igual puedes ponerlo en uno al lado de interior, arriba
+en el menú, que sea homologación y que indiques ahí, pues por ejemplo, para el triciclo, pues que sea la de
+homologación europea de triciclo pesado. Y pongas ahí las características de homologación y las restricciones que hay
+según normativa con todo lujo de detalles. Y ver si cumple o no cumple con algunas de ellas y qué margen hay todavía
+para ponerle más potencia, más peso, etcétera.»
+
+- **Dónde está.** En el Triciclo, el clásico, el rombo y el Basculante: pestaña «Homologación» arriba, justo después de
+  «Interior». En el Aeromóvil 1, dentro de su pestaña «Homologación» de siempre, debajo de las tareas. En el Gota y el
+  Cuadriciclo Bala (que no tienen pestañas): un botón «Homologación» debajo de la vista 3D.
+- **Qué hace.** Elige sola la categoría en la que cae el diseño (la de «triciclo pesado» es la **L5e-A, triciclo de
+  motor**), con un selector para comparar con las otras (bicicleta asistida, L3e, L2e, L6e-A, L6e-BP, L7e-CP, L7e-A2,
+  L7e-A1 y M1). Dice por qué no entra en las de abajo, y para cada requisito: «Cumple», «No cumple», «No cumple tal cual
+  · se arregla limitando» (potencia o velocidad con limitador) o «No se puede comprobar», con la cifra, el límite, el
+  margen («te quedan 233 kg…») y, al abrirlo, la norma entera y su artículo con enlace.
+- **Las cifras salen del propio diseño**: la masa de «Peso» menos la batería (la ley no la cuenta), la potencia nominal
+  de la pestaña Motor, la velocidad máxima de la misma cuenta que la pestaña Motor (con el Cd del túnel), largo, ancho,
+  alto, plazas, tipo de asiento y mando, radio de giro, carga de cada neumático.
+- **Aviso visible**: es una comprobación previa orientativa, no una homologación.
+- **Unido a «Proyecto › Revisión de puntos críticos»** (del bot «masas», que se fusionó antes): lo que no cumple sale en
+  rojo y lo que se arregla limitando en ámbar, en un grupo «Homologación» con su botón. La unión la hizo este bot, que llegó
+  segundo.
+- **Lo que sale hoy** (script `npx tsx scripts/homologacion.ts`): ver el informe del bot y `memory/03_DECISIONS.md`.
+- Fuentes: Reglamento (UE) 168/2013 (anexo I, arts. 3–5, anexos VI y VIII), Reglamentos Delegados 3/2014 y 44/2014
+  (consolidado de EUR-Lex), DGT/MAPFRE/RACE para los permisos. Lo citado sin releer lleva «por confirmar».
+- No visto en un teléfono de verdad: si sale la versión vieja, `humanity.wiki/?sw=off`.
 
 ## 2026-11-17 · Notas en cada desplegable del Aeromóvil
 

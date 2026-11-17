@@ -2108,6 +2108,41 @@ Eugenio: «permite añadir más tipos de ruedas, por ejemplo de motos de todo ti
   calibration is for road car bodies; a gyro's drag is dominated by the rotor, which the tunnel cannot model.
 - **Rotor parked fore and aft, level.** Its blades overhang the row neighbours at 2.7 m height; row spacing still uses
   `largo` (fuselage, 5.10 m), so the garage stays compact. Alternative: spacing by rotor (8.5 m) — wastes a row slot.
+## 2026-11-17 · Masses: one sum, one load split, offsets for the hybrid's parts (masas)
+- **One centre-of-gravity sum** (`masasVehiculo.ts` `centroDe`) used by `cargasRueda`, the new mass checks and the
+  «Masas» tab. `calcularTriciclo` keeps its own identical `momento` until its file is free (tech debt); the two give the
+  same number (checked on Rombo Bala: 539.3 kg, x −1.614 m, h 0.494 m both ways).
+- **Wheel loads as a rigid plane on equal springs** (`repartirCargas`): exact for three wheels, the lever rule for two
+  axles, and the only defined answer for the diamond (four supports at three x positions, statically indeterminate).
+  The old lever rule gave the diamond's laterals the whole weight and the tail wheel none, so the rear swing arm and
+  brake were sized for 0 kg and the laterals for 2×. Alternative: per-wheel spring rates from the sliders (would need
+  a stiffness per corner that the model does not have): ≈ 2 h once those exist.
+- **Engine and tank positions as offsets from a searched default** (`tMotX/Y/Z`, `tDepX/Y/Z`, 0 = default), not absolute
+  coordinates: a saved design that never had them opens at 0 = the new default, and the part keeps following the car
+  when the seats or the swing arm move. Absolute positions would have needed a «sin fijar» sentinel in every saved design.
+- **Default search** (`disponerHibrido`): rearmost and lowest (1.5 cm of height costs as much as 1 cm of length), at
+  most 5 cm above what it stands on; if nothing in that band is clear, the least overlapping place, shown red. Lifting
+  the engine as far as needed to be clean put it 13 cm higher on the default Triciclo, the opposite of the request.
+- **«Masas» is a tab id, not a `Departamento`**: it has no tasks, suppliers or messages, so it is not in
+  `DEPARTAMENTOS` (the Aeromóvil 1's eleven tabs do not change).
+
+## 2026-11-17 · Homologation pre-check: rules as data, category chosen by the model
+
+- **Rules as data** in `src/components/aeromovil/homologacion/normas.ts` (categories, sources, requirements with a
+  per-category limit table), evaluated by `evaluar.ts` on `ficha.ts` (the design's numbers). Alternative: hard-coded
+  checks in each vehicle's `comprobaciones.ts` — rejected: five vehicles would each repeat ten categories.
+- **Category choice**: the first category in climbing order (art. 4.4 of 168/2013: L2e→L5e, L6e→L7e; inside L7e our
+  own order CP, A2, A1; then M1) whose deciding criteria pass (wheels after the 460 mm twinned-wheel rule, mass in
+  running order, seats, size, straddle/handlebar, closed cabin) and whose speed cap is not below the design's own
+  «Velocidad de cálculo». Power and top speed over a limit do NOT rule a category out: they show as «se arregla
+  limitando» (3/2014 annex XVIII allows limitation by design). Alternative: rule out on power too — rejected, it would
+  send the Rombo Bala to M1 over 0.5 kW.
+- **Mass in running order** = the «Peso» total minus the traction battery (168/2013 art. 5.2.c) minus 10 % of the fuel
+  (tank at 90 %). **Power** = nominal (continuous) kW of the Motor tab, plus the petrol engine's kW for a PHEV (the
+  prudent reading; to confirm with a technical service). **Top speed** = the Motor tab's own power-limited figure with
+  the tunnel's Cd; gearing/rpm limits are not modelled.
+- **Polycarbonate canopy outside L1e–L5e flagged «No cumple»** (3/2014 annex VII part 1 point 2.1.2 allows rigid
+  plastic windscreens only on L1e–L5e). Read from legislation.gov.uk's copy; to confirm with a technical service.
 
 ## 2026-11-17 · Aeromóvil section notes: where they live and how the author is stored
 

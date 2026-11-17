@@ -131,6 +131,8 @@ interface Props {
   referencia?: Referencia | null;
   modoRef?: 'no' | 'comparar' | 'sola';
   alinear?: 'eje' | 'morro' | 'lado';
+  /** 2026-11-17 (the «Masas» tab): the centre of gravity (x, y, z in the car's axes) to mark, seen through the body; null: none. */
+  centroGravedad?: [number, number, number] | null;
 }
 
 const VISTAS: Record<Vista, [number, number, number]> = {
@@ -162,7 +164,7 @@ function distanciaParaVer(puntos: THREE.Vector3[], centro: THREE.Vector3, haciaC
   return D;
 }
 
-export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cuerposTunel, opcionesTunel, alElegirPuntoTunel, puntoTunel = null, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje, fichasGaraje, alQuitarGaraje, alPincharGaraje, alPincharNuestro, extraTarjeta, seguir, nombres, resaltarNuestro = false, verGaraje = false, margenDerecho = 0, colores, bascular = 0 }, ref) {
+export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cuerposTunel, opcionesTunel, alElegirPuntoTunel, puntoTunel = null, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje, fichasGaraje, alQuitarGaraje, alPincharGaraje, alPincharNuestro, extraTarjeta, seguir, nombres, resaltarNuestro = false, verGaraje = false, margenDerecho = 0, colores, bascular = 0, centroGravedad = null }, ref) {
   const pinchar = useRef(alPinchar); pinchar.current = alPinchar;
   const pincharGaraje = useRef(alPincharGaraje); pincharGaraje.current = alPincharGaraje;
   const pincharNuestro = useRef(alPincharNuestro); pincharNuestro.current = alPincharNuestro;
@@ -606,6 +608,31 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   }, [modelo, sinPasajero]);
 
   useEffect(() => { const st = estado.current; if (!st) return; for (const c of CAPAS) st.G[c.k].visible = visibles[c.k]; }, [visibles]);
+  // 2026-11-17 (masas): the centre of gravity, a ball in black and white quarters drawn over everything, with a line down
+  // to the ground; it rides with the car (it leans with it) and nothing picks it up with a click
+  useEffect(() => {
+    const st = estado.current; if (!st) return;
+    if (!st.marcaCG) {
+      const g = new THREE.Group(); g.name = 'centro-de-gravedad'; g.renderOrder = 20;
+      const sobre = (m: THREE.Material) => { m.depthTest = false; m.transparent = true; return m; };
+      const blanco = sobre(new THREE.MeshBasicMaterial({ color: 0xffffff })), negro = sobre(new THREE.MeshBasicMaterial({ color: 0x111111 }));
+      for (let i = 0; i < 8; i++) {
+        // eight octants of a sphere, alternating colours: the usual centre-of-gravity symbol from any side
+        const q = new THREE.Mesh(new THREE.SphereGeometry(0.055, 12, 6, (i % 4) * Math.PI / 2, Math.PI / 2, i < 4 ? 0 : Math.PI / 2, Math.PI / 2), (i + (i < 4 ? 0 : 1)) % 2 ? negro : blanco);
+        q.renderOrder = 21; q.raycast = () => {}; g.add(q);
+      }
+      const linea = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 1, 8), sobre(new THREE.MeshBasicMaterial({ color: 0xd97706, opacity: 0.9 })));
+      linea.name = 'linea'; linea.renderOrder = 20; linea.raycast = () => {}; g.add(linea);
+      st.coche.add(g); st.marcaCG = g;
+    }
+    const g: THREE.Group = st.marcaCG;
+    g.visible = !!centroGravedad;
+    if (centroGravedad) {
+      const [x, y, z] = centroGravedad; g.position.set(x, y, z);
+      const l = g.getObjectByName('linea')!; l.scale.y = y; l.position.y = -y / 2;
+    }
+    st.sombraSucia = true;
+  }, [centroGravedad?.[0], centroGravedad?.[1], centroGravedad?.[2]]);
   useEffect(() => { const st = estado.current; if (st) st.grupoCotas.visible = verCotas && modoRef !== 'sola'; }, [verCotas, modoRef]);
 
   // El otro velomóvil: se dibuja aparte (no se inclina con el nuestro) y se
