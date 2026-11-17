@@ -50,6 +50,7 @@ import { construirBala, inclinarBala, construirTriciclo } from './visor/triciclo
 import { cotasGaraje, cotas } from './visor/cotas';
 import { construirReferencia, type AperturaGaraje, colocarPivotesGaraje } from './visor/garaje';
 import { construirMovil, construirBasculanteVisor } from './visor/construir';
+import { aplicarPiezasMotor, cajaVisibleMotor, type OpcionesPiezas } from './visor/piezasMotor3d';
 export { construirDisenoGaraje } from './visor/construir';
 
 export type Vista = 'iso' | 'side' | 'top' | 'front' | 'back';
@@ -133,6 +134,8 @@ interface Props {
   alinear?: 'eje' | 'morro' | 'lado';
   /** 2026-11-17 (the «Masas» tab): the centre of gravity (x, y, z in the car's axes) to mark, seen through the body; null: none. */
   centroGravedad?: [number, number, number] | null;
+  /** 2026-11-17 («Mostrar solo el motor», piece by piece): which parts of the «Motor» layer to keep, and their labels. */
+  piezasMotor?: OpcionesPiezas | null;
 }
 
 const VISTAS: Record<Vista, [number, number, number]> = {
@@ -164,7 +167,7 @@ function distanciaParaVer(puntos: THREE.Vector3[], centro: THREE.Vector3, haciaC
   return D;
 }
 
-export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cuerposTunel, opcionesTunel, alElegirPuntoTunel, puntoTunel = null, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje, fichasGaraje, alQuitarGaraje, alPincharGaraje, alPincharNuestro, extraTarjeta, seguir, nombres, resaltarNuestro = false, verGaraje = false, margenDerecho = 0, colores, bascular = 0, centroGravedad = null }, ref) {
+export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cuerposTunel, opcionesTunel, alElegirPuntoTunel, puntoTunel = null, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje, fichasGaraje, alQuitarGaraje, alPincharGaraje, alPincharNuestro, extraTarjeta, seguir, nombres, resaltarNuestro = false, verGaraje = false, margenDerecho = 0, colores, bascular = 0, centroGravedad = null, piezasMotor = null }, ref) {
   const pinchar = useRef(alPinchar); pinchar.current = alPinchar;
   const pincharGaraje = useRef(alPincharGaraje); pincharGaraje.current = alPincharGaraje;
   const pincharNuestro = useRef(alPincharNuestro); pincharNuestro.current = alPincharNuestro;
@@ -336,6 +339,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     const dibujar = () => composer.render();
     const resize = () => {
       const r = cv.getBoundingClientRect();
+      // (2026-11-17) «Ocultar garaje» hides the 3D view (display: none): keep the last size instead of 0 × 0 targets
+      if (r.width < 1 || r.height < 1) return;
       renderer.setSize(r.width, r.height, false); camera.aspect = r.width / Math.max(1, r.height); camera.updateProjectionMatrix();
       const pr = renderer.getPixelRatio(); composer.setSize(r.width, r.height); composer.setPixelRatio(pr); aoPass?.setSize(r.width * pr, r.height * pr);
     };
@@ -544,7 +549,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       // Lo que llega tarde a un coche superpuesto (la carrocería del Twizy se descarga) también pasa a fantasma.
       if (st.superponer && ahora - st.ultimoFantasma > 400) { st.ultimoFantasma = ahora; for (const o of grupoGaraje.children) hacerFantasma(o, colorSuperpuesto(o.name)); }
       if (st.sombraSucia || ahora - ultimaSombra > 1000) { st.sombraSucia = false; ultimaSombra = ahora; ajustarSombra(); }
-      controls.update(); dibujar(); raf = requestAnimationFrame(bucle);
+      controls.update(); if (cv.clientWidth > 0) dibujar(); raf = requestAnimationFrame(bucle);
     };
     raf = requestAnimationFrame(bucle);
     return () => {
@@ -594,6 +599,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       if (m.tipo === 'triciclo') construirTriciclo(st.G, st.puertasG, st.M, st.Mb, m, calidad, sinPasajero);
       else construirBala(st.G, st.puertasG, st.M, st.Mb, m, calidad, sinPasajero);
       construirMovil(st.G, st.M, m, st.coche, st.curva && m.tipo === 'triciclo' ? st.inclinacion : 0);
+      if (m.tipo === 'triciclo' && st.piezas) aplicarPiezasMotor(st.G.motor, st.piezas);
       cotasYPuertas();
       const t1 = performance.now();
       // measured where the visitor's browser can be asked (performance.getEntriesByName)
@@ -608,6 +614,29 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   }, [modelo, sinPasajero]);
 
   useEffect(() => { const st = estado.current; if (!st) return; for (const c of CAPAS) st.G[c.k].visible = visibles[c.k]; }, [visibles]);
+  // 2026-11-17: «Mostrar solo esta pieza» inside the «Motor» layer, and its labels (visor/piezasMotor3d.ts). Choosing a
+  // part or a group frames it; leaving «Ver solo motor» returns the camera to the view it was in.
+  const clavePiezas = piezasMotor ? `${piezasMotor.solo?.join(',') ?? '*'}|${piezasMotor.etiquetas}` : '';
+  useEffect(() => {
+    const st = estado.current; if (!st) return;
+    const antes = st.piezas as OpcionesPiezas | null | undefined;
+    st.piezas = piezasMotor;
+    aplicarPiezasMotor(st.G.motor, piezasMotor);
+    st.sombraSucia = true;
+    // (and pressing «Ver solo motor» frames the whole engine: in the full car view it is a few centimetres on screen)
+    if (piezasMotor && (piezasMotor.solo || !antes || antes.solo)) {
+      const b = cajaVisibleMotor(st.G.motor); if (!b) return;
+      const c = b.getCenter(new THREE.Vector3()), r = Math.max(0.12, b.getSize(new THREE.Vector3()).length() / 2);
+      const dir = st.camera.position.clone().sub(st.controls.target).normalize();
+      const d = Math.min(6, 1.6 * r / Math.tan(THREE.MathUtils.degToRad(st.camera.fov) / 2));
+      st.target.copy(c);
+      st.tween = { from: st.camera.position.clone(), to: c.clone().addScaledVector(dir, d), tf: st.controls.target.clone(), t: 0 };
+    } else if (antes && !piezasMotor) {
+      st.target.set(-1.5, 0.55, 0);
+      st.tween = { from: st.camera.position.clone(), to: new THREE.Vector3(...VISTAS[vista]), tf: st.controls.target.clone(), t: 0 };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clavePiezas]);
   // 2026-11-17 (masas): the centre of gravity, a ball in black and white quarters drawn over everything, with a line down
   // to the ground; it rides with the car (it leans with it) and nothing picks it up with a click
   useEffect(() => {

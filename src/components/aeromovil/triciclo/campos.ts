@@ -91,6 +91,22 @@ export interface CamposTriciclo extends CamposInterior {
   // 2026-11-17 (masas; Eugenio: «que el depósito también se pueda colocar de manera libre, también haz que el motor se pueda
   // colocar de manera libre»): each one's move from where it goes by default (m: forward, up, to the right), hibrido.ts
   tMotX: number; tMotY: number; tMotZ: number; tDepX: number; tDepY: number; tDepZ: number;
+  // 2026-11-17 (Eugenio: «un nuevo apartado dentro de MOTOR que sea Electrónica de potencia»): triciclo/electronica.ts.
+  // Optional when saved: every default leaves the power as it was (no combined limit, one mode, no limiters declared).
+  tEpLimCont: number;  // límite de potencia continua del conjunto (kW); 0 = sin límite
+  tEpLimPico: number;  // límite de potencia pico del conjunto (kW); 0 = sin límite
+  tEpPicoSeg: number;  // cuánto puede durar el pico (s)
+  tEpRegen: number;    // frenada regenerativa: potencia máxima que recupera (kW)
+  tEpArrSoc: number;   // el térmico arranca cuando la batería baja de este % (y hasta aquí se gasta en eléctrico)
+  tEpArrKW: number;    // el térmico arranca cuando se piden más de estos kW; 0 = nunca por potencia
+  tEpArrVel: number;   // el térmico arranca por encima de esta velocidad (km/h); 0 = nunca por velocidad
+  tEpHist: number;     // histéresis: el térmico para cuando la batería ha subido este % por encima del umbral
+  tEpCalent: number;   // calentamiento: segundos al ralentí y a media carga antes de dar plena potencia
+  tEpEstrategia: 'libre' | 'dinamica' | 'termico' | 'modos';
+  tEpSport: 'no' | 'si';           // un modo sport que quita el límite continuo
+  tEpMapa: 'normal' | 'eco' | 'elegible';
+  tEpLim1: 'ninguno' | 'hcu' | 'controlador';
+  tEpLim2: 'ninguno' | 'rpm' | 'velocidad' | 'fisico';
   // 2026-11-16 (Eugenio: «añade marcas de motores eléctricos y de motores térmicos … y de engranajes planetarios, de
   // controladoras»): a real part from catalogoTren.ts, or 'medida' (the sliders decide, as before). Optional when saved.
   tCatMotor?: string; tCatCtrl?: string; tCatReductora?: string; tCatTermico?: string;
@@ -211,7 +227,8 @@ export const RUEDAS_TRICICLO: Record<RuedaTriciclo, { d: number; neuDel: number;
 };
 export type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tNeuDel' | 'tNeuTras' | 'tConsDel' | 'tConsTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tFila2N' | 'tFila3N' | 'tFila2Tipo' | 'tFila3Tipo' | 'tTraseras' | 'tBascula' | 'tRuedas' | 'tPropulsion' | 'tHibArq' | 'tMotorElec' | 'tBascTec' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero'
   | 'tAcabado' | 'tTapiz' | 'tCostura' | 'tCosturaColor' | 'tForroColor' | 'tMoldura' | 'tConsolaTecho' | 'tConsolaCentral' | 'tCinturon' | 'tAmbiente'
-  | 'tCatMotor' | 'tCatCtrl' | 'tCatReductora' | 'tCatTermico' | 'tColaCorte';
+  | 'tCatMotor' | 'tCatCtrl' | 'tCatReductora' | 'tCatTermico' | 'tColaCorte'
+  | 'tEpEstrategia' | 'tEpSport' | 'tEpMapa' | 'tEpLim1' | 'tEpLim2';
 export type ClaveNumTriciclo = Exclude<ClaveTriciclo, ClaveTexto>;
 
 // ------------------------------------------------------------------ deslizadores
@@ -246,7 +263,7 @@ export const lemasTriciclo = (T: Pick<CamposTriciclo, 'tTraseras'> & Partial<Cam
   if (T.tAcceso === 'puertas') o.carroceria = 'la piel del Cuadriciclo en rombo, techo solar y ventanas, puertas y portón como el Aptera, carenados y material';
   return o;
 };
-export type Unidad = 'm' | 'cm' | 'mm' | '°' | 'kg' | 'kW' | 'kWh' | 'Wh/kg' | 'Wh/L' | 'km/h' | 'x' | 'kg/m²' | '%' | 'L' | '°/s';
+export type Unidad = 'm' | 'cm' | 'mm' | '°' | 'kg' | 'kW' | 'kWh' | 'Wh/kg' | 'Wh/L' | 'km/h' | 'x' | 'kg/m²' | '%' | 'L' | '°/s' | 's';
 /**
  * Un deslizador del Triciclo. `bala`: la forma es la del Cuadriciclo en rombo, y su
  * etiqueta, su rango y su paso se leen de su tabla (DESLIZADORES_BALA), no se
@@ -413,6 +430,16 @@ export const FILAS: Fila[] = [
   ['tDepX', 'propulsion', 'Híbrido enchufable', null, 'Depósito: adelante (+) o atrás (−)', -1.5, 1.5, 0.01, 'm'],
   ['tDepY', 'propulsion', 'Híbrido enchufable', null, 'Depósito: arriba (+) o abajo (−)', -0.25, 0.6, 0.005, 'm'],
   ['tDepZ', 'propulsion', 'Híbrido enchufable', null, 'Depósito: a la derecha (+) o a la izquierda (−)', -0.3, 0.3, 0.005, 'm'],
+  // 2026-11-17: power electronics (triciclo/electronica.ts). Drawn by electronica/BloqueElectronica.tsx, not by the generic list
+  ['tEpLimCont', 'propulsion', 'Electrónica de potencia', null, 'Límite de potencia continua del conjunto', 0, 60, 0.5, 'kW'],
+  ['tEpLimPico', 'propulsion', 'Electrónica de potencia', null, 'Límite de potencia pico del conjunto', 0, 100, 0.5, 'kW'],
+  ['tEpPicoSeg', 'propulsion', 'Electrónica de potencia', null, 'Duración máxima del pico', 1, 120, 1, 's'],
+  ['tEpRegen', 'propulsion', 'Electrónica de potencia', null, 'Frenada regenerativa: potencia máxima', 0, 60, 0.5, 'kW'],
+  ['tEpArrSoc', 'propulsion', 'Electrónica de potencia', null, 'Arranca el térmico si la batería baja de', 5, 60, 1, '%'],
+  ['tEpArrKW', 'propulsion', 'Electrónica de potencia', null, 'Arranca el térmico si se piden más de', 0, 60, 0.5, 'kW'],
+  ['tEpArrVel', 'propulsion', 'Electrónica de potencia', null, 'Arranca el térmico por encima de', 0, 140, 5, 'km/h'],
+  ['tEpHist', 'propulsion', 'Electrónica de potencia', null, 'Para el térmico cuando la batería sube', 2, 30, 1, '%'],
+  ['tEpCalent', 'propulsion', 'Electrónica de potencia', null, 'Calentamiento antes de plena carga', 0, 180, 5, 's'],
   ['tKWh', 'energia', 'Batería', null, 'Batería', 5, 30, 0.5, 'kWh'],
   // 2026-11-12: one pack along the frame (only with «A lo largo del bastidor»): its size decides its capacity
   // (round 3 interior, 2026-11-12, «no lo limites»: length and width up to what fits in the body, `rangoTriciclo`; the checks say the rest)
@@ -487,6 +514,12 @@ export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
   { clave: 'tHibArq', n: 'Arquitectura del híbrido', dep: 'propulsion', bloque: 'Híbrido enchufable', opciones: ARQUITECTURAS_HIBRIDO },
   // 2026-11-17: only with the power split (the page hides it otherwise)
   { clave: 'tMotorElec', n: 'Dónde va el motor eléctrico', dep: 'propulsion', bloque: 'Motor eléctrico', opciones: POSICIONES_MG2 },
+  // 2026-11-17: power electronics (triciclo/electronica.ts)
+  { clave: 'tEpEstrategia', n: 'Reparto de potencia entre los dos motores', dep: 'propulsion', bloque: 'Electrónica de potencia', opciones: [{ k: 'libre', n: 'Sin gestión: cada motor da lo suyo' }, { k: 'dinamica', n: 'Límite dinámico del conjunto' }, { k: 'termico', n: 'Térmico rebajado' }, { k: 'modos', n: 'Modos separados' }] },
+  { clave: 'tEpSport', n: 'Modo sport', dep: 'propulsion', bloque: 'Electrónica de potencia', opciones: [{ k: 'no', n: 'No hay' }, { k: 'si', n: 'Sí: quita el límite continuo' }] },
+  { clave: 'tEpMapa', n: 'Mapa del acelerador', dep: 'propulsion', bloque: 'Electrónica de potencia', opciones: [{ k: 'normal', n: 'Normal: todo el par' }, { k: 'eco', n: 'Eco: pico eléctrico al 70 %' }, { k: 'elegible', n: 'Los dos, a elegir por el conductor' }] },
+  { clave: 'tEpLim1', n: 'Primer limitador', dep: 'propulsion', bloque: 'Electrónica de potencia', opciones: [{ k: 'ninguno', n: 'Ninguno' }, { k: 'hcu', n: 'Par combinado en la unidad del híbrido' }, { k: 'controlador', n: 'Mapa del controlador del motor' }] },
+  { clave: 'tEpLim2', n: 'Segundo limitador, independiente', dep: 'propulsion', bloque: 'Electrónica de potencia', opciones: [{ k: 'ninguno', n: 'Ninguno' }, { k: 'rpm', n: 'Por las vueltas del motor eléctrico' }, { k: 'velocidad', n: 'Por la velocidad, medida aparte' }, { k: 'fisico', n: 'Físico: reductora y régimen máximo' }] },
   { clave: 'tRuedas', n: 'Disposición de las ruedas', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: [{ k: 'clasica', n: 'Dos delante en carenados' }, { k: 'rombo', n: 'En rombo: una en el morro, dos laterales en carenados, una en la cola' }] },
   { clave: 'tTraseras', n: 'Ruedas traseras', dep: 'rodaje', bloque: 'Ejes y ruedas', opciones: [{ k: 'una', n: 'Una en la cola (triciclo)' }, { k: 'dos', n: 'Dos en carenados (cuatro ruedas)' }] },
   // 2026-11-15: only with four wheels (the page hides it otherwise)

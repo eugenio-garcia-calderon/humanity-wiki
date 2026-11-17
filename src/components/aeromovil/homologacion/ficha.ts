@@ -7,6 +7,7 @@ import type { Modelo, Parametros, Resultados } from '../geometria';
 import { EQUIPAJE, RUEDAS_TRICICLO, cargasRueda, camposTriciclo, energiaTriciclo, limitarTriciclo, type ModeloTriciclo } from '../geometriaTriciclo';
 import { EQUIPAJE_B, RUEDAS_BASCULANTE, camposBasculante, energiaBasculante, type ModeloBasculante } from '../geometriaBasculante';
 import type { Magnitud, VistaFicha } from './normas';
+import { electronicaTriciclo, type Electronica } from '../triciclo/electronica';
 
 /** Petrol density (kg/L), for the fuel in the tank. */
 const KG_LITRO_GASOLINA = 0.745;
@@ -35,6 +36,10 @@ export interface FichaHomologacion extends VistaFicha {
   kWporKg: number | null;
   /** How each figure was obtained, for the panel. */
   notas: string[];
+  /** (2026-11-17) the Triciclo's power electronics: modes, totals, limiters (triciclo/electronica.ts); null for the others */
+  electronica: Electronica | null;
+  /** top speed with both motors at once in the strongest mode (km/h), when the Cd is known */
+  vmaxConjunta: number | null;
 }
 
 /** The tunnel's Cd, when known (the same one the Motor tab uses). */
@@ -47,7 +52,7 @@ export function fichaHomologacion(P: Parametros, modelo: Modelo, res: Resultados
     ruedasFisicas: 4, ruedasLegales: 4, parejas: [], inclina: false, plazas: null, horcajadas: null, manillar: null, cerrado: null, pedaleo: false, propulsion: 'electrico',
     parabrisasPlastico: null, retrovisores: null, ruedasCarga: null, masaVacio: null, masaBateria: null, masaCombustible: 0, masaOrdenMarcha: null, masaMaxima: null,
     masaOcupante: 75, potenciaContinua: null, potenciaPico: null, potenciaTermica: null, potenciaCategoria: null, vmax: null, vmaxNominal: null, velocidadDiseno: null,
-    largo: modelo.xn - modelo.xt, ancho: null, alto: null, radioGiro: null, repartoDelantero: null, kWporKg: null, notas: [],
+    largo: modelo.xn - modelo.xt, ancho: null, alto: null, radioGiro: null, repartoDelantero: null, kWporKg: null, notas: [], electronica: null, vmaxConjunta: null,
   });
   let f: FichaHomologacion;
   if (modelo.tipo === 'triciclo') f = { vehiculo: nombre ?? 'Triciclo', tipo: 'triciclo', ...fichaTriciclo(P, modelo, res, conCd(cd), base()) };
@@ -95,12 +100,15 @@ function fichaTriciclo(P: Parametros, m: ModeloTriciclo, res: Resultados, cd: { 
   const mOcc = L('tMOcc'), ph = m.phev;
   const e = cd ? energiaTriciclo(m, res.mTot, cd) : null;
   const vGas = e?.hibrido?.vmaxGasolina ?? 0;
+  // (2026-11-17) the category's power is the electronics' continuous total in its strongest mode (134/2014, annex X,
+  // app. 2.4: every hybrid mode, the highest result). Defaults: the e-motor's nominal plus the engine, as before
+  const el = electronicaTriciclo(T);
   // the wheel loads (masas.ts `cargasRueda`: everyone on board and the luggage); not for the diamond, whose four
   // supports it does not share out
   const cargas = !m.rombo ? cargasRueda(m, r.piezas) : null;
   const notas = [
     `Masa: la lista «Peso» (${Math.round(res.mVeh)} kg) menos la batería (${Math.round(r.bateria.kg)} kg)${ph ? ' y el 10 % del combustible (la norma cuenta el depósito al 90 %)' : ''}.`,
-    `Potencia continua: la nominal del motor (pestaña Motor: ${limitarTriciclo('tKWNom', T).toLocaleString('es-ES')} kW${m.cuatro ? ', los dos motores juntos' : ''})${ph ? ` más los ${L('tPhevKW').toLocaleString('es-ES')} kW del motor de gasolina` : ''}.`,
+    `Potencia continua: la nominal del motor (pestaña Motor: ${limitarTriciclo('tKWNom', T).toLocaleString('es-ES')} kW${m.cuatro ? ', los dos motores juntos' : ''})${ph ? ` más los ${el.termicoNeto.toLocaleString('es-ES')} kW del motor de gasolina` : ''}${el.limCont != null || el.modos.length > 1 ? `, con la electrónica de potencia (Motor › Electrónica de potencia): ${el.contTotal.toLocaleString('es-ES', { maximumFractionDigits: 1 })} kW en el modo más potente («${el.modoCont.nombre}»)` : ''}.`,
     e ? 'Velocidad máxima: la que alcanza con la potencia máxima, con el Cd del túnel (la misma cuenta que la pestaña Motor).' : 'Velocidad máxima: hace falta el Cd del túnel, que se está calculando.',
   ];
   if (m.rombo) notas.push('Rombo: el reparto de peso entre sus cuatro ruedas no se calcula, así que el peso en el eje delantero y la carga de cada neumático quedan por comprobar.');
@@ -112,7 +120,7 @@ function fichaTriciclo(P: Parametros, m: ModeloTriciclo, res: Resultados, cd: { 
     propulsion: T.tPropulsion === 'phev' ? 'phev' : 'electrico', parabrisasPlastico: true, retrovisores: T.tRetrovisores === 'camaras' ? 'camaras' : 'espejos',
     masaVacio: res.mVeh, masaBateria: r.bateria.kg, masaCombustible: ph ? ph.litros * KG_LITRO_GASOLINA : 0,
     masaMaxima: cargas ? cargas.masa : res.mVeh + r.ocupantes * mOcc + EQUIPAJE, masaOcupante: mOcc,
-    potenciaContinua: L('tKWNom'), potenciaPico: L('tKWPico'), potenciaTermica: ph ? ph.kW : null,
+    potenciaContinua: L('tKWNom'), potenciaPico: el.picoTotal, potenciaTermica: ph ? el.termicoNeto : null, potenciaCategoria: el.contTotal, electronica: el, vmaxConjunta: e ? e.vmaxConjunta : null,
     vmax: e ? Math.max(e.vmaxPico, vGas) : null, vmaxNominal: e ? e.vmaxNominal : null, velocidadDiseno: L('tVel'),
     largo: m.xn - m.xt, ancho: m.anchoTotal, alto: m.alto,
     radioGiro: r.giro.radio, repartoDelantero: m.rombo ? null : r.vuelco.repartoDel * 100,
