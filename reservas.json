@@ -49,12 +49,6 @@
       "desde": "2026-11-17T10:44:07.275Z"
     },
     {
-      "agente": "autogiro",
-      "ruta": "src/components/aeromovil/garaje/index.ts",
-      "motivo": "autogiro: añadir el ELA Eclipse REVO al garaje",
-      "desde": "2026-11-17T11:02:04.419Z"
-    },
-    {
       "agente": "masas",
       "ruta": "src/components/aeromovil/triciclo/defecto.ts",
       "motivo": "masas: posiciones del motor y del depósito",
