@@ -901,3 +901,11 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **Tyre speed symbol, headlamp heights (500–1200 mm), plate space, R-point ≥ 400 mm**: the model knows some of these
   (lamp positions, seat hip) but they are not wired: ~3 h.
 - **The Cuadriciclo Bala has no masses/motor** (body only): mass, power and speed rows read «no se puede comprobar».
+
+## 2026-11-17 · Masses, second step (masas)
+- **Resolved**: the six engine/tank sliders and the «Proyecto» lema (pending in «Masses and the hybrid's placement»).
+- **Still pending**: the sliders show the move in metres, not where it puts the part («a 1,14 m del eje trasero»);
+  the `mostrar` cases in `LadoTriciclo.tsx` were ready but that file was held by another bot: ≈ 10 min. Also still
+  pending from step one: `calcularTriciclo`'s own CG sum (≈ 10 min), `LadoTriciclo.tsx`'s unreachable «proyecto»
+  blocks (≈ 15 min), the CLAUDE.md section on masses (≈ 10 min), and `modelo.ts` reading the offsets with its own
+  clamp (`mov`, same ranges) instead of `limitarTriciclo` (file held by another bot, ≈ 5 min).

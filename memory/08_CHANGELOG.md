@@ -12402,3 +12402,13 @@ para ponerle más potencia, más peso, etcétera.»
 - Fuentes: Reglamento (UE) 168/2013 (anexo I, arts. 3–5, anexos VI y VIII), Reglamentos Delegados 3/2014 y 44/2014
   (consolidado de EUR-Lex), DGT/MAPFRE/RACE para los permisos. Lo citado sin releer lleva «por confirmar».
 - No visto en un teléfono de verdad: si sale la versión vieja, `humanity.wiki/?sw=off`.
+
+## 2026-11-17 · Motor de gasolina y depósito: deslizadores para colocarlos donde quieras (masas, segundo paso)
+- Lo que faltaba de «que el depósito también se pueda colocar de manera libre, también haz que el motor se pueda
+  colocar de manera libre»: en Motor › Híbrido enchufable, seis deslizadores nuevos, «Motor de gasolina: adelante (+) o
+  atrás (−)», «arriba o abajo», «a la derecha o a la izquierda», y lo mismo para el depósito. Cero es su sitio de serie
+  (el de la pestaña «Masas»); cada uno tiene su explicación. Al moverlos, «Masas» y las comprobaciones (rueda,
+  basculante, amortiguador, asientos, batería, piel) lo siguen.
+- La pestaña «Proyecto» se presenta ahora como «lo que falta por hacer y la revisión de los puntos críticos que no
+  están bien».
+- Ningún diseño guardado cambia: los seis valen cero si no se tocan.
