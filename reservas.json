@@ -1,10 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog1",
-      "ruta": "src/pages/SubpaginaSitio.tsx",
-      "motivo": "Política y Geometría política como webs separadas",
-      "desde": "2026-11-18T19:42:22.990Z"
-    }
-  ]
+  "reservas": []
 }
