@@ -390,7 +390,7 @@ export const FILAS: Fila[] = [
   ['tBatalla', 'rodaje', 'Ejes y ruedas', 'bBatalla', '', 2.20, 3.40, 0.01, 'm'],
   ['tEjeDel', 'rodaje', 'Ejes y ruedas', null, 'Eje delantero: atrasado', 0, 0.45, 0.01, 'cm'],
   // 2026-11-15: only in a diamond (the page hides it otherwise)
-  ['tEjeLat', 'rodaje', 'Ejes y ruedas', null, 'Ruedas laterales: detrás de la del morro', 0.60, 2.40, 0.01, 'm'],
+  ['tEjeLat', 'rodaje', 'Ejes y ruedas', null, 'Ruedas laterales: detrás de la del morro', 0.60, 3.60, 0.01, 'm'],
   ['tVia', 'rodaje', 'Ejes y ruedas', null, 'Vía delantera', 1.40, 2.40, 0.01, 'm'],
   // four wheels (2026-11-11): its real minimum is the narrowest track whose rear pods clear the tail (`viaTraseraMinima`)
   ['tViaTras', 'rodaje', 'Ejes y ruedas', null, 'Vía trasera', 0.80, 2.40, 0.01, 'm'],
