@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0228_politica_geometria_politica.sql",
+      "motivo": "Politica: slug /geometria-politica y titulo Geometría política",
+      "desde": "2026-11-18T19:05:53.247Z"
+    }
+  ]
 }
