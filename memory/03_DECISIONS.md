@@ -2356,3 +2356,10 @@ They change saved designs' numbers on purpose.
 - **«Varios» default 12 → 18 kg** (`triciclo/defecto.ts`), slider max 18 → 24. Only the default: `camposTriciclo`
   takes every stored number, and saving writes the whole `Parametros` (`aDiseno`), so every design saved before today
   (Rombo Bala, the clásico: `tMVarios: 12`) keeps 12 and its «súbelo a 18 kg» check stays red until raised by hand.
+
+## 2026-11-18 — Política: el documento enmarcado escribe en la barra de direcciones del padre
+
+**Context**: Eugenio wants to share a link to the geometry landing, and a link to one topic. The page is a static document inside an `<iframe>` (`ObservatorioPolarizacion.tsx`), so its own address is not the one people copy.
+**Chosen**: the frame forwards the parent's `search` + `hash` to the document once, and the document mirrors its state into `window.parent.history.replaceState` (same origin only, in a `try`). React Router never sees it, which is fine: nothing in the platform reads those parameters.
+**Alternatives**: `postMessage` to a listener in the TSX (cleaner boundary, one more moving part and a message contract nobody else uses); a React port of the chapter (weeks, and the document was reviewed as one file).
+**Cost of switching later**: small — two functions (`guardarURL`, `enlace`) in the document and one `useState` in the TSX.

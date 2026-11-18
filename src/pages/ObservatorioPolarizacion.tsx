@@ -29,9 +29,19 @@ import { useEffect, useRef, useState } from 'react';
 // observatorio de polarización política»), with two new chapters: 6 · Geometrías
 // and 7 · Decidir por temas. Migration 0220 renames the project page; the address
 // `/observatorio-de-polarizacion/espana` and this file's name stay, so no link breaks.
+//
+// GEOMETRÍAS AS THE LANDING (2026-11-18, Eugenio: «coloca la geometría política en
+// una landing page que sea el inicio y dame la URL para poder compartirla»). The
+// page moved to `/politica` (migration 0227; the old address answers with a 301).
+// The frame receives the parent's query and hash (`?tema=vivienda&foco=pp`,
+// `#decidir`) so a shared link opens the same topic, and the document writes its
+// state back into the parent's address bar (same origin), which is what people copy.
 export default function ObservatorioPolarizacion() {
   const marco = useRef<HTMLIFrameElement>(null);
   const [arriba, setArriba] = useState(0);
+  // Read once: the frame's own replaceState keeps the parent's address in step afterwards
+  const [src] = useState(() => '/observatorio-polarizacion/index.html'
+    + (typeof window === 'undefined' ? '' : window.location.search + window.location.hash));
   useEffect(() => {
     const medir = () => { const r = marco.current?.getBoundingClientRect(); if (r) setArriba(Math.max(0, Math.round(r.top + window.scrollY))); };
     medir();
@@ -43,7 +53,7 @@ export default function ObservatorioPolarizacion() {
     <iframe
       ref={marco}
       data-app-observatorio
-      src="/observatorio-polarizacion/index.html"
+      src={src}
       title="Política"
       className="block w-full border-0 bg-slate-950"
       style={{ height: `calc(100dvh - ${arriba}px)`, minHeight: 500 }}
