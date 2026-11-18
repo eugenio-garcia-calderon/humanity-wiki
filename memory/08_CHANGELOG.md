@@ -12808,3 +12808,9 @@ Pendiente: grupo 5 (élite), Europa, Mundo, y la búsqueda de ingresos.
 - Eugenio: «en vez de poner solo la geometría en el centro, pon a su derecha la parte de explicación de los círculos básico, intermedio y avanzado».
 - La leyenda de los tres círculos pasa a una columna a la derecha de la figura, dentro del mismo recuadro. En pantallas estrechas vuelve debajo.
 - Las tarjetas de la leyenda tenían fondo gris y texto centrado por el estilo por defecto del botón; ahora tienen su propio estilo.
+
+## 2026-11-18 — Geometría política: enlace desde la página madre (arreglo del 404)
+
+- Eugenio: «da error 404 el luzhumanidad.com/geometria-politica». Causa: en un dominio, una dirección de una sola parte solo abre páginas colgadas de la página del dominio (`cuelgaDe`, bloques `subpagina`). La copia de la migración 0229 no tenía ese enlace.
+- Migración 0230: añade a la página madre que ya enlaza «Política» un enlace a «Geometría política», con la misma forma. Se ejecuta una vez.
+- Probada dos veces en una base de pruebas.
