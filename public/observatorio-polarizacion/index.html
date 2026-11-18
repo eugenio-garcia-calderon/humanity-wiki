@@ -978,8 +978,21 @@ footer p{margin:0;max-width:70ch}
 .geo-selectores .geo-tc{min-height:0;width:auto;padding:3px 10px 3px 3px;gap:7px;font-size:12.5px}
 .geo-selectores .geo-tc .ill{width:26px;height:26px}
 .geo-chips-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px}
-.geo-chips-row .geo-chip{min-height:34px;padding:5px 11px;font-size:13px}
-.geo-chips-row .geo-chips{justify-content:center}
+/* Partidos en columna a la izquierda de la figura (2026-11-18, Eugenio) */
+.geo{max-width:1280px;display:grid;grid-template-columns:200px minmax(0,1fr);column-gap:20px;align-items:start}
+.geo-partidos{position:sticky;top:12px;display:grid;gap:8px;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--bg-2)}
+.geo-partidos > .sel-k{margin:0 2px 2px}
+.geo-partidos .geo-chips{display:flex;flex-wrap:wrap;gap:6px}
+.geo-partidos .geo-chip{width:100%;justify-content:flex-start;border-radius:12px;min-height:38px;font-size:13.5px}
+.geo-partidos .geo-chip.mini{width:calc(50% - 3px);justify-content:center;min-height:32px;font-size:12px}
+@media (max-width:1000px){
+  .geo{grid-template-columns:minmax(0,1fr);row-gap:12px}
+  .geo-partidos{position:static;display:block;padding:10px}
+  .geo-partidos > .sel-k{display:block;margin-bottom:6px}
+  .geo-partidos .geo-chips{flex-direction:row;flex-wrap:wrap;justify-content:center}
+  .geo-partidos .geo-chip{width:auto;min-height:34px;font-size:13px}
+  .geo-partidos .geo-chip.mini{width:auto}
+}
 .geo-stage svg{max-height:calc(100dvh - 215px)}
 /* ================= 7 · Votar por temas ================= */
 .dd-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:clamp(28px,4vw,44px)}
@@ -1295,12 +1308,16 @@ footer p{margin:0;max-width:70ch}
   <h2 class="sr-only" id="h-geometrias">Geometría política: los partidos como figuras en diez temas</h2>
   <div class="geo-selectores">
     <div class="geo-temas" id="geo-tema" role="tablist" aria-label="Elige un tema"></div>
-    <div class="geo-chips-row"><span class="sel-k">Partidos</span><div class="geo-chips" id="geo-chips"></div>
+    <div class="geo-chips-row">
       <button class="tbtn" id="geo-ideal" aria-pressed="true">Círculo ideal</button>
       <button class="tbtn" id="geo-env" aria-pressed="false">Lo mejor de cada uno</button>
     </div>
   </div>
   <div class="geo">
+    <aside class="geo-partidos" aria-labelledby="geo-partidos-t">
+      <p class="sel-k" id="geo-partidos-t">Partidos</p>
+      <div class="geo-chips" id="geo-chips"></div>
+    </aside>
     <div class="geo-stage">
       <svg id="geo-svg" viewBox="0 0 820 740" role="img" aria-labelledby="geo-svg-t"><title id="geo-svg-t">Figura de cada partido sobre los aspectos del tema elegido</title></svg>
       <div class="geo-tip" id="geo-tip" role="tooltip" hidden></div>
