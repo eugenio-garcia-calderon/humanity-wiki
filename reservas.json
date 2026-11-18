@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "public/observatorio-polarizacion/index.html",
-      "motivo": "Política y Geometría política como webs separadas",
-      "desde": "2026-11-18T19:42:16.103Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/pages/ObservatorioPolarizacion.tsx",
       "motivo": "Política y Geometría política como webs separadas",
       "desde": "2026-11-18T19:42:19.711Z"
