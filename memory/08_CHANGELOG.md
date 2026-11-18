@@ -12757,3 +12757,11 @@ Antes cada paso del plegado recalculaba todo el coche. Ahora, durante los 3 segu
 > «Permite que las ruedas laterales, en modo rombo, se puedan deslizar todavía más atrás, alejadas del morro»
 
 El deslizador «Ruedas laterales: detrás de la del morro» llega ahora hasta 3,60 m (antes 2,40 m). Por defecto no cambia ningún diseño.
+
+## 2026-11-18 · Apartado Competiciones (primer lote: España, grupos estudiantil y aficionados)
+
+> «Créame un apartado que sea competiciones… que se pueda ordenar por volumen de ingresos… desde las de aficionados hasta la Fórmula 1… empieza por las estudiantiles… acótalo a España»
+
+Nueva página «Competiciones» en el menú lateral. Muestra 8 competiciones de España en los grupos 1 (estudiantil) y 2 (aficionados), con categoría, ámbito y organizador, y se ordenan por grupo, ingresos, categoría o nombre. Cada ficha enlaza la fuente. Los ingresos sólo se muestran cuando una fuente pública los da; de momento ninguno.
+
+Pendiente: grupos 3 a 5, el resto de Europa y el Mundo, y la búsqueda de ingresos.

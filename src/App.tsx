@@ -33,6 +33,7 @@ const AdminUsuarios = lazy(() => import('./pages/AdminUsuarios'));
 const Archivos = lazy(() => import('./pages/Archivos'));
 const BaseDeDatos = lazy(() => import('./pages/BaseDeDatos'));
 const Calendario = lazy(() => import('./pages/Calendario'));
+const Competiciones = lazy(() => import('./pages/Competiciones'));
 const CalendarioArte = lazy(() => import('./pages/CalendarioArte'));
 const Aeromovil = lazy(() => import('./pages/Aeromovil'));
 const Conciencia = lazy(() => import('./pages/Conciencia'));
@@ -497,6 +498,7 @@ export default function App() {
                 <Route path="preferencias" element={<Preferencias />} />
                 <Route path="ia" element={<IA />} />
                 <Route path="calendario" element={<Calendario />} />
+                <Route path="competiciones" element={<Competiciones />} />
                 <Route path="mis-videos" element={<MisVideos />} />
                 <Route path="personas" element={<Personas />} />
                 <Route path="paginas" element={<Paginas />} />
