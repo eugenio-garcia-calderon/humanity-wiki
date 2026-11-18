@@ -12802,3 +12802,9 @@ Pendiente: grupo 5 (élite), Europa, Mundo, y la búsqueda de ingresos.
 - **Matriz**: sin el círculo intermedio en cada figura pequeña (quedan el básico y el ideal).
 - Corrección: los iconos de la leyenda de los tres círculos ocupaban todo el ancho y dejaban una caja gris bajo la figura.
 - Verificado en Chrome automatizado sobre el archivo local, ambas webs, 1440×900 y 390 px, con hover de los dos selectores. Migración 0229 probada dos veces en una base de pruebas.
+
+## 2026-11-18 — Geometría política: la explicación de los círculos, a la derecha de la figura
+
+- Eugenio: «en vez de poner solo la geometría en el centro, pon a su derecha la parte de explicación de los círculos básico, intermedio y avanzado».
+- La leyenda de los tres círculos pasa a una columna a la derecha de la figura, dentro del mismo recuadro. En pantallas estrechas vuelve debajo.
+- Las tarjetas de la leyenda tenían fondo gris y texto centrado por el estilo por defecto del botón; ahora tienen su propio estilo.
