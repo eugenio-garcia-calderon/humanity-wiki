@@ -24,7 +24,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  FolderKanban, Folder, Wrench, Store, Users2, PanelLeftClose,
+  FolderKanban, Folder, Wrench, Store,
+  Trophy, Users2, PanelLeftClose,
   Globe2, Map as MapIcon, Gamepad2, ListChecks, FileText, Database, Sparkles, Layers, Target,
   Settings, Eye, EyeOff, GripVertical, X as Cerrar, RotateCcw, Table2,
   Compass, Globe, User, Plus, Package, MessageSquare, CalendarDays, Tag, Phone,
@@ -50,6 +51,8 @@ const HERRAMIENTAS: NodoMenu[] = [
   // te han comprado (Eugenio, 2026-08-22: «pon una herramienta nueva que sea
   // Comercio… la quiero en el menú lateral junto al resto de herramientas»).
   { id: 'h-comercio',  label: 'Comercio',  icono: Store,        destino: '/comercio',  abrir: 'ventana' },
+  // Competiciones (2026-11-18, Eugenio: «crea un apartado que sea competiciones»).
+  { id: 'h-competiciones', label: 'Competiciones', icono: Trophy, destino: '/competiciones', abrir: 'ventana' },
   // El MISMO asistente de la columna derecha, a pantalla completa (2026-08-20).
   { id: 'h-ia',        label: 'IA',        icono: Sparkles,     destino: '/ia',        abrir: 'ventana' },
   { id: 'h-calendario', label: 'Calendario', icono: CalendarDays, destino: '/calendario', abrir: 'ventana' },
