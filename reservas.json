@@ -5,6 +5,12 @@
       "ruta": "src/components/layout/MenuLateral.tsx",
       "motivo": "entrada Competiciones en el menú",
       "desde": "2026-11-18T13:27:26.198Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/App.tsx",
+      "motivo": "ruta Competiciones",
+      "desde": "2026-11-18T13:27:40.623Z"
     }
   ]
 }
