@@ -12828,3 +12828,9 @@ Pendiente: grupo 5 (élite), Europa, Mundo, y la búsqueda de ingresos.
 - Selectores: fila de temas y fila de partidos encima de la figura, con «Círculo ideal» y «Lo mejor de cada uno» en la misma zona.
 - Al pasar por un nivel de la leyenda: su círculo se ilumina, sus ocho puntos se numeran del 1 al 8 y el resto se apaga. Cada tarjeta lista el texto de cada aspecto para ese nivel (los textos que ya existían en los datos, `ejes[].niv`).
 - Corrección: no existían las reglas CSS del resaltado, así que pasar el ratón no cambiaba nada.
+
+## 2026-11-18 — Geometría política: partidos en columna lateral
+
+- Eugenio: poner los partidos a la izquierda de la geometría, en un menú lateral ordenado.
+- La lista de partidos sale de la fila superior y pasa a una columna a la izquierda de la figura, con «Todos» y «Ninguno» abajo. En pantallas de hasta 1000 px se queda como fila encima de la figura.
+- Verificado en local con Chrome automatizado (escritorio 1440×900 y móvil 390 px), sin errores; pulsar un partido lo marca.
