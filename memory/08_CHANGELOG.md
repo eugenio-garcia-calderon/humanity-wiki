@@ -12821,3 +12821,10 @@ Pendiente: grupo 5 (élite), Europa, Mundo, y la búsqueda de ingresos.
 - Migración 0231: da a la copia la misma fila en la misma tabla, con el nombre «Geometría política».
 - Comprobado con el SQL de la regla del servidor en una base de pruebas: antes, la geometría no colgaba de la madre y «Política» sí; después, los dos cuelgan. Se ejecuta una vez.
 - Limitación: desde aquí no se puede abrir luzhumanidad.com (el proxy bloquea la conexión), así que la comprobación en la web real la tiene que hacer Eugenio.
+
+## 2026-11-18 — Geometría política: selectores a la vista, círculos resaltados y textos por punto
+
+- Eugenio: volver a ver desplegados los temas y los partidos, más compactos y encima de la figura; al pasar por básico, intermedio o avanzado, que se vea el círculo en el dibujo; y textos más ricos, uno por cada punto de cada círculo.
+- Selectores: fila de temas y fila de partidos encima de la figura, con «Círculo ideal» y «Lo mejor de cada uno» en la misma zona.
+- Al pasar por un nivel de la leyenda: su círculo se ilumina, sus ocho puntos se numeran del 1 al 8 y el resto se apaga. Cada tarjeta lista el texto de cada aspecto para ese nivel (los textos que ya existían en los datos, `ejes[].niv`).
+- Corrección: no existían las reglas CSS del resaltado, así que pasar el ratón no cambiaba nada.

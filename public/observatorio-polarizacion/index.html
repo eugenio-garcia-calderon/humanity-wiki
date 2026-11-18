@@ -837,10 +837,18 @@ footer p{margin:0;max-width:70ch}
 .geo-tc:hover .ill{transform:scale(1.08) rotate(-3deg)}
 .geo-tc[aria-selected="true"]{border-color:var(--tc);background:color-mix(in srgb,var(--tc) 15%,var(--bg-2));color:var(--ink);box-shadow:inset 0 -3px 0 var(--tc)}
 .geo-tc:focus-visible{outline:2px solid var(--tc);outline-offset:2px}
-.geo-nv{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--bg-2);color:var(--ink-2);font:400 13.5px/1.45 var(--sans);cursor:pointer}
+.geo-nv{display:block;width:100%;text-align:left;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:var(--bg-2);color:var(--ink-2);font:400 13.5px/1.45 var(--sans);cursor:pointer}
+.geo-nv-h{display:flex;gap:12px;align-items:flex-start}
+.geo-nv-h svg{width:40px;height:40px;flex:none}
+.geo-nv-pts{display:none;list-style:none;margin:10px 0 0;padding:10px 0 0 0;border-top:1px solid var(--line);gap:8px}
+.geo-nv:hover .geo-nv-pts,.geo-nv[aria-pressed="true"] .geo-nv-pts,.geo-nv:focus-visible .geo-nv-pts{display:grid}
+.geo-nv-pts li{display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px;font-size:13px;line-height:1.45}
+.geo-nv-pts b{display:inline;margin-right:6px;color:var(--ink);font-weight:600}
+.geo-num-k{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--lc);color:var(--lc);font:600 11px/1 var(--mono)}
+#geo-niveles .geo-nv:focus-visible{outline:2px solid var(--lc);outline-offset:2px}
 .geo-nv svg{width:40px;height:40px;flex:none}
 .geo-nv b{display:block;color:var(--ink);font-weight:600;margin-bottom:3px}
-.geo-nv small{display:block;margin-top:5px;font-size:12px;color:var(--muted)}
+.geo-nv small{display:block;margin-top:8px;font-size:12px;color:var(--muted)}
 .geo-nv:hover,.geo-nv[aria-pressed="true"]{border-color:var(--lc)}
 .geo-nv:focus-visible{outline:2px solid var(--lc);outline-offset:2px}
 .geo-esc{list-style:none;margin:6px 0 14px;padding:0 0 0 6px}
@@ -955,6 +963,24 @@ footer p{margin:0;max-width:70ch}
   [data-vista="geometria"] .geo-bar .sel-box{width:auto}
   [data-vista="geometria"] .geo-bar .geo-estado{right:auto;left:0}
 }
+
+/* Resaltado: al pasar por un nivel de la leyenda, su círculo se ilumina, sus puntos se numeran y el resto se apaga */
+.geo-ring .hl{opacity:.5;transition:opacity .2s}
+.geo-ring.on .hl{opacity:1;stroke-width:6}
+#geo-svg[data-k] .geo-ring:not(.on) .hl{opacity:.1}
+#geo-svg[data-k] .geo-lv .dot{opacity:.2;transition:opacity .2s}
+#geo-svg[data-k="0"] .geo-lv[data-lk="0"] .dot,#geo-svg[data-k="1"] .geo-lv[data-lk="1"] .dot,#geo-svg[data-k="2"] .geo-lv[data-lk="2"] .dot{opacity:1}
+.geo-num{opacity:0;pointer-events:none;transition:opacity .2s}
+#geo-svg[data-k="0"] .geo-num[data-lk="0"],#geo-svg[data-k="1"] .geo-num[data-lk="1"],#geo-svg[data-k="2"] .geo-num[data-lk="2"]{opacity:1}
+/* Los selectores, desplegados y compactos, encima de la figura */
+.geo-selectores{max-width:1120px;margin:0 auto 10px;display:grid;gap:8px}
+.geo-selectores .geo-temas{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:0}
+.geo-selectores .geo-tc{min-height:0;width:auto;padding:3px 10px 3px 3px;gap:7px;font-size:12.5px}
+.geo-selectores .geo-tc .ill{width:26px;height:26px}
+.geo-chips-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px}
+.geo-chips-row .geo-chip{min-height:34px;padding:5px 11px;font-size:13px}
+.geo-chips-row .geo-chips{justify-content:center}
+.geo-stage svg{max-height:calc(100dvh - 215px)}
 /* ================= 7 · Votar por temas ================= */
 .dd-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:clamp(28px,4vw,44px)}
 .dd-step{padding:16px;border-radius:16px;background:var(--bg-2);border:1px solid var(--line);display:flex;flex-direction:column;gap:6px;min-width:0}
@@ -1250,14 +1276,6 @@ footer p{margin:0;max-width:70ch}
       </ol>
     </nav>
     <div class="geo-bar">
-      <div class="sel" id="sel-tema">
-        <button class="sel-btn" type="button" aria-expanded="false" aria-controls="sel-tema-p"><span class="sel-k">Tema</span><b id="sel-tema-txt"></b><i aria-hidden="true">▾</i></button>
-        <div class="sel-panel" id="sel-tema-p"><div class="sel-box temas"><div class="geo-temas" id="geo-tema" role="tablist" aria-label="Elige un tema"></div></div></div>
-      </div>
-      <div class="sel" id="sel-part">
-        <button class="sel-btn" type="button" aria-expanded="false" aria-controls="sel-part-p"><span class="sel-k">Partidos</span><b id="sel-part-txt"></b><i aria-hidden="true">▾</i></button>
-        <div class="sel-panel" id="sel-part-p"><div class="sel-box partidos"><p class="lbl">Pulsa para superponer</p><div class="geo-chips" id="geo-chips"></div></div></div>
-      </div>
       <div class="geo-acc" id="geo-acc">
       <button class="geo-btn yo" id="geo-yo" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></svg><span>Dibuja tu figura</span></button>
       <button class="geo-btn" id="geo-compartir"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.9l7.6-4.4M8.2 13.1l7.6 4.4"/></svg><span>Compartir</span></button>
@@ -1275,9 +1293,12 @@ footer p{margin:0;max-width:70ch}
 <!-- ============ INICIO · GEOMETRÍAS (la portada) ============ -->
 <section id="geometrias" class="chapter geo-landing" aria-labelledby="h-geometrias">
   <h2 class="sr-only" id="h-geometrias">Geometría política: los partidos como figuras en diez temas</h2>
-  <div class="geo-opts-row">
-    <button class="tbtn" id="geo-ideal" aria-pressed="true">Círculo ideal</button>
-    <button class="tbtn" id="geo-env" aria-pressed="false">Lo mejor de cada uno</button>
+  <div class="geo-selectores">
+    <div class="geo-temas" id="geo-tema" role="tablist" aria-label="Elige un tema"></div>
+    <div class="geo-chips-row"><span class="sel-k">Partidos</span><div class="geo-chips" id="geo-chips"></div>
+      <button class="tbtn" id="geo-ideal" aria-pressed="true">Círculo ideal</button>
+      <button class="tbtn" id="geo-env" aria-pressed="false">Lo mejor de cada uno</button>
+    </div>
   </div>
   <div class="geo">
     <div class="geo-stage">
@@ -3357,7 +3378,9 @@ const ILUS = {
       for (let i = 0; i < n; i++) {
         UMBRAL.forEach((v, k) => {
           const [x, y] = P(ang(i, n), rr(v));
-          s += `<g class="geo-lv" data-li="${i}" data-lk="${k}"><circle cx="${r1(x)}" cy="${r1(y)}" r="${r1(15 * K)}" fill="transparent"/><circle class="dot" cx="${r1(x)}" cy="${r1(y)}" r="${r1((k === 2 ? 5.5 : 4.5) * K)}" fill="#0C0F14" stroke="${colorNivel(k)}" stroke-width="2.2"/></g>`;
+          const dx = x - CX, dy = y - CY, L = Math.hypot(dx, dy) || 1, tx = x + (dx / L) * 17 * K, ty = y + (dy / L) * 17 * K;
+          s += `<g class="geo-lv" data-li="${i}" data-lk="${k}"><circle cx="${r1(x)}" cy="${r1(y)}" r="${r1(15 * K)}" fill="transparent"/><circle class="dot" cx="${r1(x)}" cy="${r1(y)}" r="${r1((k === 2 ? 5.5 : 4.5) * K)}" fill="#0C0F14" stroke="${colorNivel(k)}" stroke-width="2.2"/></g>`
+            + `<text class="geo-num" data-lk="${k}" x="${r1(tx)}" y="${r1(ty)}" text-anchor="middle" dominant-baseline="central" font-family="Archivo, sans-serif" font-weight="600" font-size="${r1(12 * K)}" fill="${colorNivel(k)}" stroke="#0C0F14" stroke-width="4" paint-order="stroke">${i + 1}</text>`;
         });
       }
     }
@@ -3482,14 +3505,20 @@ const ILUS = {
   }
 
   /* ---- Leyenda de los tres círculos, también para teclado y pantallas táctiles ---- */
-  function marcar(k) { $$(".geo-ring", svg).forEach((g) => g.classList.toggle("on", +g.dataset.ring === k)); }
+  function marcar(k) {
+    $$(".geo-ring", svg).forEach((g) => g.classList.toggle("on", +g.dataset.ring === k));
+    if (k == null) svg.removeAttribute("data-k"); else svg.setAttribute("data-k", String(k));
+  }
   function niveles() {
     const t = T();
     $("#geo-niveles").innerHTML = t.niv.map((txt, k) => {
       const todos = PARTIDOS.filter((p) => t.v[p.k].every((x) => alcanza(x, k)));
       const mini = [4.3, 8.6, 12.6].map((r, j) => `<circle cx="14" cy="14" r="${r}" fill="none" stroke="${j === k ? colorNivel(k) : "#3A4660"}" stroke-width="${j === k ? 2.6 : 1.2}"/>`).join("");
-      return `<button class="geo-nv" data-nv="${k}" aria-pressed="${st.ring === k}" style="--lc:${colorNivel(k)}"><svg viewBox="0 0 28 28" aria-hidden="true">${mini}</svg>`
-        + `<span><b>${k + 1} · ${NIV[k]}${k === 2 ? " · ideal" : ""}</b>${txt}<small>${todos.length ? "Lo alcanzan en todo el tema: " + todos.map((p) => p.n).join(", ") : "Ningún partido lo alcanza en todo el tema"}</small></span></button>`;
+      const puntos = t.ejes.map((e, i) => `<li><span class="geo-num-k">${i + 1}</span><span><b>${e.n}</b>${e.niv[k]}</span></li>`).join("");
+      return `<div class="geo-nv" role="button" tabindex="0" data-nv="${k}" aria-pressed="${st.ring === k}" style="--lc:${colorNivel(k)}">`
+        + `<div class="geo-nv-h"><svg viewBox="0 0 28 28" aria-hidden="true">${mini}</svg><span><b>${k + 1} · ${NIV[k]}${k === 2 ? " · ideal" : ""}</b>${txt}</span></div>`
+        + `<ol class="geo-nv-pts">${puntos}</ol>`
+        + `<small>${todos.length ? "Lo alcanzan en todo el tema: " + todos.map((p) => p.n).join(", ") : "Ningún partido lo alcanza en todo el tema"}</small></div>`;
     }).join("");
   }
   const ley = $("#geo-niveles");
@@ -3499,6 +3528,7 @@ const ILUS = {
     $$("[data-nv]", ley).forEach((x) => x.setAttribute("aria-pressed", String(+x.dataset.nv === st.ring)));
     marcar(st.ring);
   });
+  ley.addEventListener("keydown", (e) => { const b = e.target.closest("[data-nv]"); if (b && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); b.click(); } });
   ley.addEventListener("pointerover", (e) => { const b = e.target.closest("[data-nv]"); if (b) marcar(+b.dataset.nv); });
   ley.addEventListener("pointerleave", () => marcar(st.ring));
   ley.addEventListener("focusin", (e) => { const b = e.target.closest("[data-nv]"); if (b) marcar(+b.dataset.nv); });
@@ -3639,17 +3669,7 @@ const ILUS = {
   }
   function cabecera() {
     $("#geometrias").style.setProperty("--tc", T().c);
-    $("#sel-tema-txt").textContent = T().n;
-    $("#sel-part-txt").textContent = st.sel.size === PARTIDOS.length ? "todos" : st.sel.size ? `${st.sel.size} de ${PARTIDOS.length}` : "ninguno";
   }
-  /* Los dos selectores de la barra: se abren al pasar el ratón (ver CSS) y, en pantalla táctil, al pulsarlos */
-  const cerrarSelectores = () => $$(".sel.open").forEach((x) => { x.classList.remove("open"); x.querySelector(".sel-btn").setAttribute("aria-expanded", "false"); });
-  $$(".sel").forEach((x) => x.querySelector(".sel-btn").addEventListener("click", () => {
-    const abre = !x.classList.contains("open"); cerrarSelectores();
-    if (abre) { x.classList.add("open"); x.querySelector(".sel-btn").setAttribute("aria-expanded", "true"); }
-  }));
-  document.addEventListener("click", (e) => { if (!e.target.closest(".sel")) cerrarSelectores(); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape") cerrarSelectores(); });
   if (document.documentElement.dataset.vista !== "geometria") {
     document.querySelector(".brand").setAttribute("href", "#hoy");
     document.querySelector(".skip").setAttribute("href", "#hoy");
