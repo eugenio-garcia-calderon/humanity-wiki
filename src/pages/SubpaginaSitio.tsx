@@ -39,7 +39,8 @@ const CadenaSolar = lazy(() => import('./CadenaSolar'));
 const APLICACIONES: Record<string, (p: { inicio: string; conBarra: boolean; pagina: DatosPagina }) => ReactNode> = {
   conciencia: ({ inicio, conBarra }) => <Conciencia enSitio={{ inicio, conBarra }} />,
   'modelo-socioeconomico': ({ inicio }) => <ModeloSocioeconomico enSitio={{ inicio }} />,
-  'observatorio-polarizacion': () => <ObservatorioPolarizacion />,
+  // Una página, dos webs: el mismo documento, con `config.vista` = 'geometria' en «Geometría política».
+  'observatorio-polarizacion': (p) => <ObservatorioPolarizacion vista={p.pagina?.config?.vista === 'geometria' ? 'geometria' : 'politica'} />,
   // 2026-11-12 (Eugenio): «crea el proyecto de Sol Solidario con su página web… con el menú arriba y abajo el Sol Solidario».
   'sol-solidario': ({ pagina }) => <SolSolidario raizId={pagina.sitio?.raizId || null} paginaId={pagina.id} config={(pagina.config || {}) as any} />,
   // 2026-11-12 (Eugenio): «haz un web en luzhumanidad.com que sea de la cadena de valor de instalación de energía solar en España… hazlo visual».
