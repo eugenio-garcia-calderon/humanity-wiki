@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/pages/SubpaginaSitio.tsx",
-      "motivo": "Politica: quitar barra del sitio en Politica",
-      "desde": "2026-11-18T19:06:07.874Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/pages/ObservatorioPolarizacion.tsx",
       "motivo": "Politica: nombre y comentario",
       "desde": "2026-11-18T19:06:12.093Z"
