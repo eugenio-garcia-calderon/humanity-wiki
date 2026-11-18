@@ -1,4 +1,4 @@
-// Catálogo de competiciones (página «Competiciones»). Primer lote: España, grupos 1 (estudiantil) y 2 (aficionados).
+// Catálogo de competiciones (página «Competiciones»). Segundo lote: España, grupos 1 a 4 (estudiantil, aficionados, semiprofesional y profesional).
 // Los ingresos sólo se ponen cuando una fuente pública los da; si no, `ingresos` queda en null y se ordena al final.
 // Cada ficha dice qué se ha verificado y con qué fuente. (2026-11-18)
 
@@ -98,5 +98,61 @@ export const COMPETICIONES: Competicion[] = [
     organiza: 'RFEDA (Real Federación Española de Automovilismo)',
     ingresos: null, ingresosNota: 'No publicado.',
     fuentes: ['https://www.drivelandmotorsport.es/wp-content/uploads/2026/03/7.-RD-SANDERO-2026.-RFEDA.pdf'],
+  },
+  {
+    id: 'sandero-eco-cup-spain', nombre: 'Sandero Eco Cup Spain', ambito: 'España', grupo: 3,
+    categoria: 'Rallyes, copa monomarca (Dacia Sandero GLP)',
+    que: 'Copa monomarca de rallyes con el Dacia Sandero de GLP. En 2026 es su decimotercera temporada: cinco pruebas, tres de asfalto y dos de tierra.',
+    organiza: 'Dacia, con el respaldo de la RFEDA. El coche lo desarrolla Driveland Motorsport.',
+    ingresos: null, ingresosNota: 'No publicado. El bote de premios supera los 33.000 €; son premios, no ingresos de la competición.',
+    fuentes: ['https://www.motor16.com/las-ultimas-noticias/exito-dacia-sandero-eco-spain/'],
+  },
+  {
+    id: 'clio-trophy-spain-asfalto', nombre: 'Clio Trophy Spain Asfalto', ambito: 'España', grupo: 3,
+    categoria: 'Rallyes, copa monomarca (Renault Clio R.S.)',
+    que: 'Serie monomarca de rallyes de asfalto con un único modelo, el Renault Clio. Puntúa dentro del CERA y del S-CER. Cinco rallyes en el calendario previsto. Cuota de 2.200 € + IVA por temporada.',
+    organiza: 'Renault Group España con su promotor Driveland, en colaboración con la RFEDA.',
+    ingresos: null, ingresosNota: 'No publicado. Premios por rallye de hasta 4.000 € al ganador; son premios, no ingresos.',
+    fuentes: ['https://www.drivelandmotorsport.es/wp-content/uploads/2026/03/1.-RD-ASFALTO-2026-CLEAN.pdf'],
+  },
+  {
+    id: 'clio-trophy-spain-tierra', nombre: 'Clio Trophy Spain Tierra', ambito: 'España', grupo: 3,
+    categoria: 'Rallyes de tierra, copa monomarca (Renault Clio R.S.)',
+    que: 'Serie monomarca de rallyes de tierra con un único modelo, el Renault Clio, dentro del CERT y del S-CER. Cuatro rallyes puntuables. Cuota de 1.700 € + IVA por temporada.',
+    organiza: 'Renault Group España con su promotor Driveland, en colaboración con la RFEDA.',
+    ingresos: null, ingresosNota: 'No publicado. Premios por rallye de hasta 3.000 € al ganador; son premios, no ingresos.',
+    fuentes: ['https://www.drivelandmotorsport.es/wp-content/uploads/2026/03/2.-RD-TIERRA-2026-CLEAN.pdf'],
+  },
+  {
+    id: 'motocross-espana', nombre: 'Campeonato de España de Motocross', ambito: 'España', grupo: 3,
+    categoria: 'Motocross (MX1 y MX2 de élite, MX65, MX85, femenino y junior)',
+    que: 'Campeonato nacional de motocross con pruebas organizadas por moto clubes bajo supervisión de la RFME. El calendario oficial no figura en el manual consultado.',
+    organiza: 'RFME (Real Federación Motociclista Española).',
+    ingresos: null, ingresosNota: 'No publicado.',
+    fuentes: ['https://rfme.com/wp-content/uploads/2026/01/2026-manual-organizadores-mx.pdf'],
+  },
+  {
+    id: 'f4-spanish-championship', nombre: 'Campeonato de España de Fórmula 4 (CEF4)', ambito: 'España', grupo: 4,
+    categoria: 'Monoplazas (Fórmula 4, certificado por la FIA)',
+    que: 'Campeonato nacional de monoplazas certificado por la FIA. En 2026 lo disputan 12 equipos con 36 monoplazas. Es uno de los pasos de la escalera hacia la competición profesional de monoplazas.',
+    organiza: 'Comité organizador del CEF4, con la ratificación del comité directivo de la RFEDA.',
+    ingresos: null, ingresosNota: 'No publicado.',
+    fuentes: ['https://f4spain.org/en/equipos/'],
+  },
+  {
+    id: 'cera-asfalto', nombre: 'Campeonato de España de Rallyes de Asfalto (CERA)', ambito: 'España', grupo: 4,
+    categoria: 'Rallyes de asfalto (turismos de competición)',
+    que: 'Campeonato nacional de rallyes sobre asfalto. Incluye series monomarca como la Clio Trophy Spain Asfalto, que puntúa en él.',
+    organiza: 'RFEDA (Real Federación Española de Automovilismo). Reglamento general no consultado.',
+    ingresos: null, ingresosNota: 'No publicado.',
+    fuentes: ['https://www.drivelandmotorsport.es/wp-content/uploads/2026/03/1.-RD-ASFALTO-2026-CLEAN.pdf'],
+  },
+  {
+    id: 'cert-tierra', nombre: 'Campeonato de España de Rallyes de Tierra (CERT)', ambito: 'España', grupo: 4,
+    categoria: 'Rallyes de tierra (turismos de competición)',
+    que: 'Campeonato nacional de rallyes sobre tierra. Incluye la serie Clio Trophy Spain Tierra. Calendario de 2026 sólo parcial en el reglamento consultado: Pozoblanco y Granada.',
+    organiza: 'No verificado: el reglamento de la serie lo menciona en colaboración con la RFEDA.',
+    ingresos: null, ingresosNota: 'No publicado.',
+    fuentes: ['https://www.drivelandmotorsport.es/wp-content/uploads/2026/03/2.-RD-TIERRA-2026-CLEAN.pdf'],
   },
 ];
