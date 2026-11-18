@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0230_geometria_politica_enlace.sql",
+      "motivo": "Geometría política: enlace de subpágina desde la madre (404)",
+      "desde": "2026-11-18T20:29:55.094Z"
+    }
+  ]
 }
