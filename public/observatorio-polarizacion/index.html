@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 </head>
 <body>
-<title>Política</title>
+<title>Geometría política</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Política: cómo se polariza España, qué cuida y qué abandona cada partido en inmigración y servicios públicos, y una propuesta de democracia directa para decidir por temas con datos.">
+<meta name="description" content="Geometría política: cómo se polariza España, qué cuida y qué abandona cada partido en inmigración y servicios públicos, y una propuesta de democracia directa para decidir por temas con datos.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..700&family=IBM+Plex+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&display=swap">
@@ -836,27 +836,6 @@ footer p{margin:0;max-width:70ch}
 .geo-tc:hover .ill{transform:scale(1.08) rotate(-3deg)}
 .geo-tc[aria-selected="true"]{border-color:var(--tc);background:color-mix(in srgb,var(--tc) 15%,var(--bg-2));color:var(--ink);box-shadow:inset 0 -3px 0 var(--tc)}
 .geo-tc:focus-visible{outline:2px solid var(--tc);outline-offset:2px}
-.geo-head{--tc:#888;display:flex;align-items:center;justify-content:space-between;gap:16px 20px;margin:0 0 18px;padding:14px 20px;border-radius:20px;border:1px solid color-mix(in srgb,var(--tc) 40%,var(--line));background:linear-gradient(100deg,color-mix(in srgb,var(--tc) 15%,transparent),transparent 72%)}
-.geo-head .ill{flex:none;width:92px;height:92px;color:var(--tc)}
-.geo-head .lbl{color:var(--tc);margin:0}
-.geo-head h3{font:400 clamp(1.7rem,3.2vw,2.4rem)/1.08 var(--display);margin:4px 0 6px}
-.geo-head .q{font-size:16.5px;line-height:1.45;color:var(--ink-2);margin:0}
-.geo-stage{border-color:color-mix(in srgb,var(--tc) 28%,var(--line))}
-.geo-tip{position:absolute;z-index:6;width:max-content;max-width:min(330px,calc(100% - 12px));padding:12px 14px;border-radius:14px;background:rgba(12,15,20,.96);border:1px solid var(--line-2);box-shadow:0 14px 34px rgba(0,0,0,.55);pointer-events:none;font-size:14px;line-height:1.45;color:var(--ink-2)}
-.geo-tip h5{font:600 15px/1.25 var(--sans);color:var(--ink);margin:4px 0 0}
-.geo-tip p{margin:6px 0 0;font-size:14px;line-height:1.45}
-.geo-tip .who{font-size:12.5px;color:var(--muted)}
-.geo-tip .geo-tag,.geo-esc .geo-tag{margin:3px 3px 0 0;padding:1px 8px;font-size:11.5px}
-.geo-ring .hl{opacity:0;transition:opacity .15s;pointer-events:none}
-.geo-ring .hit{pointer-events:stroke;cursor:help}
-.geo-ring:hover .hl,.geo-ring.on .hl{opacity:.95}
-.geo-lv{cursor:help}
-.geo-lv .dot{transition:transform .15s;transform-box:fill-box;transform-origin:center}
-.geo-lv:hover .dot{transform:scale(1.7)}
-.geo-niveles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:0 8px 10px}
-.geo-nv{display:grid;grid-template-columns:28px minmax(0,1fr);gap:10px;align-items:start;text-align:left;appearance:none;border:1px solid var(--line);background:var(--bg-2);border-radius:12px;padding:10px 12px;color:var(--ink-2);font:400 13px/1.45 var(--sans);cursor:pointer;transition:border-color .15s}
-.geo-nv svg{width:28px;height:28px}
-.geo-nv b{display:block;color:var(--lc);font:600 14px/1.3 var(--sans);margin-bottom:3px}
 .geo-nv small{display:block;margin-top:5px;font-size:12px;color:var(--muted)}
 .geo-nv:hover,.geo-nv[aria-pressed="true"]{border-color:var(--lc)}
 .geo-nv:focus-visible{outline:2px solid var(--lc);outline-offset:2px}
@@ -873,28 +852,22 @@ footer p{margin:0;max-width:70ch}
 .geo-props.n6{grid-template-columns:repeat(3,minmax(0,1fr))}
 .geo-prop{border-top:3px solid var(--tc,var(--line))}
 @media (max-width:1000px){.geo-temas{grid-template-columns:repeat(5,minmax(150px,1fr));overflow-x:auto;scroll-snap-type:x proximity;padding-bottom:6px} .geo-tc{scroll-snap-align:start} .geo-props.n6{grid-template-columns:repeat(2,minmax(0,1fr))} .geo-niveles{grid-template-columns:minmax(0,1fr)}}
-@media (max-width:640px){.geo-temas{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:148px} .geo-head{gap:14px;padding:12px 14px} .geo-head .ill{width:62px;height:62px} .geo-props.n6{grid-template-columns:minmax(0,1fr)} .geo-niveles{margin:0 4px 8px}}
+@media (max-width:640px){.geo-temas{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:148px} .geo-props.n6{grid-template-columns:minmax(0,1fr)} .geo-niveles{margin:0 4px 8px}}
 
 /* Portada: Geometrías como inicio (2026-11-18) */
-.geo-landing{padding-top:clamp(24px,4vw,48px);border-top:0}
-.geo-hero{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:20px 48px;align-items:end;margin-bottom:clamp(22px,3.4vw,36px)}
-.geo-hero h1{margin-top:14px;max-width:15ch}
-.geo-hero .hero-lede{margin-top:16px;max-width:60ch}
-.geo-pasos{list-style:none;margin:0;padding:0;display:grid;gap:10px;counter-reset:paso}
-.geo-pasos li{counter-increment:paso;display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:center;padding:10px 14px;border:1px solid var(--line);border-radius:14px;background:var(--bg-2);font-size:14.5px;line-height:1.4;color:var(--ink-2)}
-.geo-pasos li::before{content:counter(paso);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;border:2px solid var(--warn);color:var(--warn);font:600 15px var(--mono)}
-.geo-pasos b{color:var(--ink);font-weight:600}
+.geo-landing{padding-top:clamp(10px,1.4vw,18px);border-top:0}
+/* La figura entera cabe en la pantalla sin bajar (ordenador): el alto del gráfico se acota a lo que queda debajo de la cabecera y las pestañas. */
+@media (min-width:641px){.geo-stage svg{max-height:calc(100dvh - 190px)}}
 .mas{border-top:1px solid var(--line)}
 .mas .hero-text h2{font:400 clamp(1.8rem,3.6vw,2.8rem)/1.08 var(--display);letter-spacing:-.02em;max-width:24ch;margin:14px 0 0}
-.geo-head-in{display:flex;align-items:center;gap:20px;min-width:0;flex:1}
-.geo-acc{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px;max-width:340px}
+.geo-acc{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:8px 10px;margin:14px 0 26px}
 .geo-btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 16px;border-radius:999px;border:1px solid var(--ctl);background:var(--bg);color:var(--ink);font:600 14px/1 var(--sans);cursor:pointer;transition:background .15s,border-color .15s,color .15s}
 .geo-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .geo-btn:hover{border-color:var(--tc)}
 .geo-btn:focus-visible{outline:2px solid var(--tc);outline-offset:2px}
 .geo-btn.yo{border-color:var(--ink);background:var(--ink);color:var(--bg)}
 .geo-btn.yo[aria-pressed="true"]{background:transparent;color:var(--ink)}
-.geo-estado{flex-basis:100%;margin:0;text-align:right;font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
+.geo-estado{flex-basis:100%;margin:0;text-align:left;font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
 .geo-estado:empty{display:none}
 .geo-estado input{width:100%;margin-top:4px;padding:6px 8px;border-radius:8px;border:1px solid var(--line-2);background:var(--bg);color:var(--ink);font:13px var(--mono)}
 .geo-stage.yo svg{touch-action:none;cursor:crosshair}
@@ -928,8 +901,7 @@ footer p{margin:0;max-width:70ch}
 .gm-c:focus-visible,.gm-t:focus-visible{outline:2px solid var(--tc);outline-offset:-3px}
 .gm-yo{color:#EDEBE6}
 .gm-c .mas-yo{font:500 11px var(--sans);color:var(--muted)}
-@media (max-width:900px){.geo-hero{grid-template-columns:minmax(0,1fr)} .geo-head{flex-wrap:wrap} .geo-acc{max-width:none;justify-content:flex-start;flex-basis:100%} .geo-estado{text-align:left}}
-@media (max-width:640px){.geo-head-in{gap:14px}}
+@media (max-width:900px){.geo-estado{text-align:left}}
 
 /* ================= 7 · Votar por temas ================= */
 .dd-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:clamp(28px,4vw,44px)}
@@ -1211,7 +1183,7 @@ footer p{margin:0;max-width:70ch}
 
 <header class="top" lang="es">
   <div class="top-in">
-    <a class="brand" href="#geometrias"><span class="brand-mark" aria-hidden="true"></span><span class="brand-txt">Política</span></a>
+    <a class="brand" href="#geometrias"><span class="brand-mark" aria-hidden="true"></span><span class="brand-txt">Geometría política</span></a>
     <nav aria-label="Capítulos">
       <ol class="nav">
         <li><a href="#geometrias">Geometrías</a></li>
@@ -1233,27 +1205,7 @@ footer p{margin:0;max-width:70ch}
 
 <!-- ============ INICIO · GEOMETRÍAS (la portada) ============ -->
 <section id="geometrias" class="chapter geo-landing" aria-labelledby="h-geometrias">
-  <div class="geo-hero" id="inicio">
-    <div>
-      <p class="eyebrow">Política · España · elecciones generales del 29 de noviembre</p>
-      <h1 id="h-geometrias">Los partidos no son puntos, <em>son formas</em>.</h1>
-      <p class="hero-lede">Un test electoral te sitúa en un punto del mapa. Pero un programa no es un punto: cuida unos aspectos de cada problema y abandona otros. Aquí cada partido es una figura en diez temas, frente a un círculo ideal que llega a todo sin aristas.</p>
-    </div>
-    <ol class="geo-pasos">
-      <li><span><b>Elige un tema.</b> Diez, de la vivienda a la defensa.</span></li>
-      <li><span><b>Pasa por los círculos.</b> Del más pequeño, lo básico, al ideal, lo avanzado.</span></li>
-      <li><span><b>Dibuja tu figura</b> y mira a qué partido se parece.</span></li>
-    </ol>
-  </div>
   <div class="geo-temas" id="geo-tema" role="tablist" aria-label="Elige un tema"></div>
-  <div class="geo-head" id="geo-head">
-    <div class="geo-head-in" id="geo-head-in" aria-live="polite"></div>
-    <div class="geo-acc">
-      <button class="geo-btn yo" id="geo-yo" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></svg><span>Dibuja tu figura</span></button>
-      <button class="geo-btn" id="geo-compartir"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.9l7.6-4.4M8.2 13.1l7.6 4.4"/></svg><span>Compartir</span></button>
-      <p class="geo-estado" id="geo-compartir-estado" aria-live="polite"></p>
-    </div>
-  </div>
   <div class="geo">
     <div class="geo-stage">
       <svg id="geo-svg" viewBox="0 0 820 740" role="img" aria-labelledby="geo-svg-t"><title id="geo-svg-t">Figura de cada partido sobre los aspectos del tema elegido</title></svg>
@@ -1272,6 +1224,11 @@ footer p{margin:0;max-width:70ch}
       </div>
       <div class="geo-panel" id="geo-panel" aria-live="polite"></div>
     </aside>
+  </div>
+  <div class="geo-acc" id="geo-acc">
+      <button class="geo-btn yo" id="geo-yo" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></svg><span>Dibuja tu figura</span></button>
+      <button class="geo-btn" id="geo-compartir"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.9l7.6-4.4M8.2 13.1l7.6 4.4"/></svg><span>Compartir</span></button>
+      <p class="geo-estado" id="geo-compartir-estado" aria-live="polite"></p>
   </div>
   <div class="sub geo-vistazo">
     <h3>Los diez temas de un vistazo</h3>
@@ -1680,7 +1637,7 @@ footer p{margin:0;max-width:70ch}
 
 </main>
 <footer>
-  <p>Herramienta educativa sin afiliación política. Los perfiles son tipos ideales, no retratos de personas ni de partidos. Las geometrías de la portada sí sitúan a partidos reales: son una valoración de esta página a partir de sus programas y votaciones, discutible y corregible.</p>
+  <p>Esta página es de <a href="https://humanity.wiki">Luz &amp; Humanidad</a>, la comunidad que la publica en humanity.wiki. Herramienta educativa sin afiliación política. Los perfiles son tipos ideales, no retratos de personas ni de partidos. Las geometrías de la portada sí sitúan a partidos reales: son una valoración de esta página a partir de sus programas y votaciones, discutible y corregible.</p>
   <p>Ningún dato sale de tu navegador.</p>
 </footer>
 </div>
@@ -3580,7 +3537,7 @@ const ILUS = {
     else if (st.yo) modoYo(false);
     cambiarTema(b.dataset.mt);
     if (p) { st.sel.add(p); st.foco = p; todo(); guardarURL(); }
-    (stage.getBoundingClientRect().top < 0 ? $("#geo-head") : stage).scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+    (stage.getBoundingClientRect().top < 0 ? $("#geo-tema") : stage).scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
   });
 
   /* ---- La dirección refleja lo que se ve, para poder compartirlo ---- */
@@ -3623,16 +3580,12 @@ const ILUS = {
       + `<button class="geo-chip mini" data-todos>Todos</button><button class="geo-chip mini" data-ninguno>Ninguno</button>`;
   }
   function cabecera() {
-    const t = T(), i = KEYS.indexOf(st.tema), h = $("#geo-head");
-    h.style.setProperty("--tc", t.c);
-    $("#geo-head-in").innerHTML = `<span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64">${ILUS[st.tema] || ""}</svg></span>`
-      + `<div><p class="lbl">Tema ${i + 1} de ${KEYS.length} · ${PALABRA[t.ejes.length] || t.ejes.length} aspectos</p><h3>${t.n}</h3><p class="q">${t.q}</p></div>`;
-    $("#geometrias").style.setProperty("--tc", t.c);
+    $("#geometrias").style.setProperty("--tc", T().c);
   }
   function todo() { ocultar(); chips(); dibujar(); panel(); niveles(); cabecera(); matriz(); }
 
   const tabs = $("#geo-tema");
-  tabs.innerHTML = KEYS.map((k) => { const t = TEMAS[k]; return `<button class="geo-tc" role="tab" data-t="${k}" aria-selected="${k === st.tema}" tabindex="${k === st.tema ? 0 : -1}" aria-controls="geo-head" style="--tc:${t.c}"><span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64">${ILUS[k] || ""}</svg></span><span class="nm">${t.n}</span></button>`; }).join("");
+  tabs.innerHTML = KEYS.map((k) => { const t = TEMAS[k]; return `<button class="geo-tc" role="tab" data-t="${k}" aria-selected="${k === st.tema}" tabindex="${k === st.tema ? 0 : -1}" aria-controls="geo-svg" style="--tc:${t.c}"><span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64">${ILUS[k] || ""}</svg></span><span class="nm">${t.n}</span></button>`; }).join("");
   function marcarTab(enfocarTab) {
     $$("[data-t]", tabs).forEach((b) => {
       const on = b.dataset.t === st.tema;

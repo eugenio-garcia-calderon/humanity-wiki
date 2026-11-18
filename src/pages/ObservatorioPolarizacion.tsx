@@ -32,7 +32,9 @@ import { useEffect, useRef, useState } from 'react';
 //
 // GEOMETRÍAS AS THE LANDING (2026-11-18, Eugenio: «coloca la geometría política en
 // una landing page que sea el inicio y dame la URL para poder compartirla»). The
-// page moved to `/politica` (migration 0227; the old address answers with a 301).
+// page moved to `/politica` (migration 0227), and on 2026-11-18 to
+// `/geometria-politica` (migration 0228), where `/politica` answers with a 301.
+// The site bar is no longer drawn over it (see CON_BARRA in SubpaginaSitio.tsx).
 // The frame receives the parent's query and hash (`?tema=vivienda&foco=pp`,
 // `#decidir`) so a shared link opens the same topic, and the document writes its
 // state back into the parent's address bar (same origin), which is what people copy.
@@ -54,7 +56,7 @@ export default function ObservatorioPolarizacion() {
       ref={marco}
       data-app-observatorio
       src={src}
-      title="Política"
+      title="Geometría política"
       className="block w-full border-0 bg-slate-950"
       style={{ height: `calc(100dvh - ${arriba}px)`, minHeight: 500 }}
     />

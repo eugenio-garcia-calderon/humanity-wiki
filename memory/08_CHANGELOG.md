@@ -12784,3 +12784,11 @@ Pendiente: grupo 5 (élite), Europa, Mundo, y la búsqueda de ingresos.
 - **Los diez temas de un vistazo**: matriz de 9 partidos × 10 temas con una figura pequeña en cada casilla (y una fila con tu figura); pulsar abre ese tema con ese partido.
 - **Pulido**: las figuras crecen desde el centro al cambiar de tema (sin animación si el sistema pide reducir movimiento); en pantallas estrechas el círculo es menor y los rótulos un 38 % más grandes.
 - Verificado en Chrome automatizado sobre el archivo local, 1360 y 390 px, ratón y toque: sin errores de JavaScript ni desbordamiento horizontal; el enlace con `?tema=vivienda&p=pp,psoe,pod&foco=pod` abre ese estado. **No verificado**: la dirección `luzhumanidad.com/politica` en producción, el 301 de la vieja y el botón Compartir dentro del marco de la plataforma (desde aquí no se alcanza el dominio).
+
+## 2026-11-18 — Política pasa a «Geometría política», en luzhumanidad.com/geometria-politica
+
+- Eugenio: «pon geometría política en vez de política, tanto en la URL como en el menú arriba a la derecha; quita el menú de Luz & Humanidad y haz mención a eso en el footer; compacta la portada para ver ya las geometrías sin bajar, quita las instrucciones y el titular, elimina esta sección y pon esos botones más abajo».
+- **Nombre y dirección**: migración 0228 (`politica` → `geometria-politica`, la anterior queda en `direcciones_anteriores` para el 301; título «Geometría política»). Nombre en el documento, en el marco y en la imagen para compartir.
+- **Sin barra de Luz & Humanidad**: `observatorio-polarizacion` sale de `CON_BARRA` (`SubpaginaSitio.tsx`). El pie dice que la página es de Luz & Humanidad y enlaza a humanity.wiki.
+- **Portada compacta**: sin titular ni pasos; las pestañas de temas van arriba y la figura cabe entera en un ordenador de 900 px de alto. Se quita la tarjeta del tema; los botones «Dibuja tu figura» y «Compartir» pasan debajo de la figura.
+- Verificado en Chrome automatizado sobre el archivo local, 1440×900 y 390 px: sin errores de JavaScript (salvo las llamadas a `/api` que el `file://` no puede hacer); la migración probada dos veces sobre una base de pruebas.
