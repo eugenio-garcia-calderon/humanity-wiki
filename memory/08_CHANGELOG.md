@@ -12751,3 +12751,9 @@ El plegado y el desplegado siguen durando 3 segundos, pero ahora el coche se rec
 > «el plegado y desplegado sigue siendo a trompicones, en vez de fluido sin interrupciones visuales»
 
 Antes cada paso del plegado recalculaba todo el coche. Ahora, durante los 3 segundos sólo se mueven las alas en la pantalla 3D, sin recalcular nada; al terminar se guarda el ajuste y se recalcula una vez. Las bisagras se ocultan mientras se mueven.
+
+## 2026-11-18 · Ruedas laterales del rombo más atrás
+
+> «Permite que las ruedas laterales, en modo rombo, se puedan deslizar todavía más atrás, alejadas del morro»
+
+El deslizador «Ruedas laterales: detrás de la del morro» llega ahora hasta 3,60 m (antes 2,40 m). Por defecto no cambia ningún diseño.
