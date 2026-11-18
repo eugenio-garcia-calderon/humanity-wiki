@@ -30,7 +30,7 @@ export default function Competiciones() {
       <header>
         <h1 className="text-2xl font-semibold text-slate-900">Competiciones</h1>
         <p className="text-sm text-slate-600">
-          Competiciones de motor e innovación, de la estudiantil a la élite. Primer lote: España, grupos estudiantil y aficionados.
+          Competiciones de motor e innovación, de la estudiantil a la élite. Segundo lote: España, grupos estudiantil, aficionados, semiprofesional y profesional.
           Los ingresos sólo aparecen cuando una fuente pública los da; el resto no se publica.
         </p>
       </header>

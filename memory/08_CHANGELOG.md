@@ -12765,3 +12765,11 @@ El deslizador «Ruedas laterales: detrás de la del morro» llega ahora hasta 3,
 Nueva página «Competiciones» en el menú lateral. Muestra 8 competiciones de España en los grupos 1 (estudiantil) y 2 (aficionados), con categoría, ámbito y organizador, y se ordenan por grupo, ingresos, categoría o nombre. Cada ficha enlaza la fuente. Los ingresos sólo se muestran cuando una fuente pública los da; de momento ninguno.
 
 Pendiente: grupos 3 a 5, el resto de Europa y el Mundo, y la búsqueda de ingresos.
+
+## 2026-11-18 · Competiciones: segundo lote (España, grupos 3 y 4)
+
+> «vete al grupo en España 1, 2 y 3 de estudiantes, amateurs y luego ya un poco más profesionales»
+
+Se añaden 7 competiciones de España: semiprofesionales (Sandero Eco Cup Spain, Clio Trophy Spain Asfalto y Tierra, Campeonato de España de Motocross) y profesionales (CEF4 de Fórmula 4, CERA y CERT de rallyes). Cada ficha lleva su fuente. Ningún ingreso está publicado todavía: los premios que aparecen en los reglamentos se muestran como premios, no como ingresos. El karting (CEK) queda fuera: la única fuente encontrada es de 2024.
+
+Pendiente: grupo 5 (élite), Europa, Mundo, y la búsqueda de ingresos.
