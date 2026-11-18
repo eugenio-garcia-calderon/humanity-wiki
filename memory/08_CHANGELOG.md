@@ -12792,3 +12792,13 @@ Pendiente: grupo 5 (élite), Europa, Mundo, y la búsqueda de ingresos.
 - **Sin barra de Luz & Humanidad**: `observatorio-polarizacion` sale de `CON_BARRA` (`SubpaginaSitio.tsx`). El pie dice que la página es de Luz & Humanidad y enlaza a humanity.wiki.
 - **Portada compacta**: sin titular ni pasos; las pestañas de temas van arriba y la figura cabe entera en un ordenador de 900 px de alto. Se quita la tarjeta del tema; los botones «Dibuja tu figura» y «Compartir» pasan debajo de la figura.
 - Verificado en Chrome automatizado sobre el archivo local, 1440×900 y 390 px: sin errores de JavaScript (salvo las llamadas a `/api` que el `file://` no puede hacer); la migración probada dos veces sobre una base de pruebas.
+
+## 2026-11-18 — Geometría política tiene su propia web, en luzhumanidad.com/geometria-politica
+
+- Eugenio: «haz una web dedicada para la geometría quitando el resto de cosas del menú y poniéndolas en Política como URL… en el menú superior pon el selector de partido político… centrado la geometría en el medio… hover tanto el selector de partidos como el de temas»; «la matriz justo debajo de la geometría, sin nada en medio, y quita lo de los círculos intermedios».
+- **Dos webs, un documento**: migración 0229. `/politica` vuelve a ser el observatorio completo (su dirección antigua ya lleva a ella). `/geometria-politica` es una página nueva (`KWGEOPOLARIZ01`) con `config.vista = 'geometria'`, que el marco pasa al documento como `?vista=geometria`.
+- **Web de geometría**: barra superior con dos selectores que se abren al pasar el ratón (Tema y Partidos, con toque en móvil), los botones Dibuja tu figura y Compartir, y un enlace a Política. La figura va centrada; la matriz de diez temas va justo debajo; el detalle, después.
+- **Web de Política**: sin la geometría en el menú; enlace a «Geometría política ↗» en su menú.
+- **Matriz**: sin el círculo intermedio en cada figura pequeña (quedan el básico y el ideal).
+- Corrección: los iconos de la leyenda de los tres círculos ocupaban todo el ancho y dejaban una caja gris bajo la figura.
+- Verificado en Chrome automatizado sobre el archivo local, ambas webs, 1440×900 y 390 px, con hover de los dos selectores. Migración 0229 probada dos veces en una base de pruebas.

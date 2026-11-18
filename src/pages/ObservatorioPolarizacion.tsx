@@ -38,12 +38,22 @@ import { useEffect, useRef, useState } from 'react';
 // The frame receives the parent's query and hash (`?tema=vivienda&foco=pp`,
 // `#decidir`) so a shared link opens the same topic, and the document writes its
 // state back into the parent's address bar (same origin), which is what people copy.
-export default function ObservatorioPolarizacion() {
+// DOS WEBS, UN DOCUMENTO (2026-11-18, Eugenio: «haz una web dedicada para la geometría…
+// y poniendo el resto en Política como URL»). `vista` says which one this page is:
+// «geometria» (`/geometria-politica`, only the geometries) or «politica» (`/politica`,
+// the rest). The document reads `?vista=` itself; the page's config carries it.
+export type VistaPolitica = 'politica' | 'geometria';
+export default function ObservatorioPolarizacion({ vista = 'politica' }: { vista?: VistaPolitica }) {
   const marco = useRef<HTMLIFrameElement>(null);
   const [arriba, setArriba] = useState(0);
   // Read once: the frame's own replaceState keeps the parent's address in step afterwards
-  const [src] = useState(() => '/observatorio-polarizacion/index.html'
-    + (typeof window === 'undefined' ? '' : window.location.search + window.location.hash));
+  const [src] = useState(() => {
+    if (typeof window === 'undefined') return '/observatorio-polarizacion/index.html';
+    const q = new URLSearchParams(window.location.search);
+    if (vista === 'geometria') q.set('vista', 'geometria');
+    const busqueda = q.toString();
+    return '/observatorio-polarizacion/index.html' + (busqueda ? `?${busqueda}` : '') + window.location.hash;
+  });
   useEffect(() => {
     const medir = () => { const r = marco.current?.getBoundingClientRect(); if (r) setArriba(Math.max(0, Math.round(r.top + window.scrollY))); };
     medir();
@@ -56,7 +66,7 @@ export default function ObservatorioPolarizacion() {
       ref={marco}
       data-app-observatorio
       src={src}
-      title="Geometría política"
+      title={vista === 'geometria' ? 'Geometría política' : 'Política'}
       className="block w-full border-0 bg-slate-950"
       style={{ height: `calc(100dvh - ${arriba}px)`, minHeight: 500 }}
     />
