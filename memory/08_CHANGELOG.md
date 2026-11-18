@@ -12814,3 +12814,10 @@ Pendiente: grupo 5 (élite), Europa, Mundo, y la búsqueda de ingresos.
 - Eugenio: «da error 404 el luzhumanidad.com/geometria-politica». Causa: en un dominio, una dirección de una sola parte solo abre páginas colgadas de la página del dominio (`cuelgaDe`, bloques `subpagina`). La copia de la migración 0229 no tenía ese enlace.
 - Migración 0230: añade a la página madre que ya enlaza «Política» un enlace a «Geometría política», con la misma forma. Se ejecuta una vez.
 - Probada dos veces en una base de pruebas.
+
+## 2026-11-18 — Geometría política: segunda causa del 404, la fila en Proyectos
+
+- Eugenio: «sigue sin funcionar, compruébalo antes de decir que ya está bien». La página «Política» es una fila de la tabla «Proyectos» (0194). La copia no tenía fila, y una dirección de una sola parte solo abre páginas colgadas de la madre (`madresValidas`, primera rama: filas de una tabla que muestra una página del mismo dueño). El enlace de 0230 solo cubría la segunda rama.
+- Migración 0231: da a la copia la misma fila en la misma tabla, con el nombre «Geometría política».
+- Comprobado con el SQL de la regla del servidor en una base de pruebas: antes, la geometría no colgaba de la madre y «Política» sí; después, los dos cuelgan. Se ejecuta una vez.
+- Limitación: desde aquí no se puede abrir luzhumanidad.com (el proxy bloquea la conexión), así que la comprobación en la web real la tiene que hacer Eugenio.
