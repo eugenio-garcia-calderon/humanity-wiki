@@ -1,10 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog1",
-      "ruta": "drizzle/0227_politica_portada_geometrias.sql",
-      "motivo": "Política: slug politica, geometrías como portada",
-      "desde": "2026-11-18T14:19:52.141Z"
-    }
-  ]
+  "reservas": []
 }
