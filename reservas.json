@@ -11,6 +11,12 @@
       "ruta": "public/observatorio-polarizacion/index.html",
       "motivo": "Politica: landing compacta, sin barra Luz, footer",
       "desde": "2026-11-18T19:06:04.131Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/pages/SubpaginaSitio.tsx",
+      "motivo": "Politica: quitar barra del sitio en Politica",
+      "desde": "2026-11-18T19:06:07.874Z"
     }
   ]
 }
