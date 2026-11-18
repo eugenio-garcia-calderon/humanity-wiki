@@ -836,7 +836,7 @@ footer p{margin:0;max-width:70ch}
 .geo-tc:hover .ill{transform:scale(1.08) rotate(-3deg)}
 .geo-tc[aria-selected="true"]{border-color:var(--tc);background:color-mix(in srgb,var(--tc) 15%,var(--bg-2));color:var(--ink);box-shadow:inset 0 -3px 0 var(--tc)}
 .geo-tc:focus-visible{outline:2px solid var(--tc);outline-offset:2px}
-.geo-head{--tc:#888;display:flex;align-items:center;gap:20px;margin:0 0 18px;padding:14px 20px;border-radius:20px;border:1px solid color-mix(in srgb,var(--tc) 40%,var(--line));background:linear-gradient(100deg,color-mix(in srgb,var(--tc) 15%,transparent),transparent 72%)}
+.geo-head{--tc:#888;display:flex;align-items:center;justify-content:space-between;gap:16px 20px;margin:0 0 18px;padding:14px 20px;border-radius:20px;border:1px solid color-mix(in srgb,var(--tc) 40%,var(--line));background:linear-gradient(100deg,color-mix(in srgb,var(--tc) 15%,transparent),transparent 72%)}
 .geo-head .ill{flex:none;width:92px;height:92px;color:var(--tc)}
 .geo-head .lbl{color:var(--tc);margin:0}
 .geo-head h3{font:400 clamp(1.7rem,3.2vw,2.4rem)/1.08 var(--display);margin:4px 0 6px}
@@ -874,6 +874,62 @@ footer p{margin:0;max-width:70ch}
 .geo-prop{border-top:3px solid var(--tc,var(--line))}
 @media (max-width:1000px){.geo-temas{grid-template-columns:repeat(5,minmax(150px,1fr));overflow-x:auto;scroll-snap-type:x proximity;padding-bottom:6px} .geo-tc{scroll-snap-align:start} .geo-props.n6{grid-template-columns:repeat(2,minmax(0,1fr))} .geo-niveles{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:640px){.geo-temas{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:148px} .geo-head{gap:14px;padding:12px 14px} .geo-head .ill{width:62px;height:62px} .geo-props.n6{grid-template-columns:minmax(0,1fr)} .geo-niveles{margin:0 4px 8px}}
+
+/* Portada: Geometrías como inicio (2026-11-18) */
+.geo-landing{padding-top:clamp(24px,4vw,48px);border-top:0}
+.geo-hero{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:20px 48px;align-items:end;margin-bottom:clamp(22px,3.4vw,36px)}
+.geo-hero h1{margin-top:14px;max-width:15ch}
+.geo-hero .hero-lede{margin-top:16px;max-width:60ch}
+.geo-pasos{list-style:none;margin:0;padding:0;display:grid;gap:10px;counter-reset:paso}
+.geo-pasos li{counter-increment:paso;display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:center;padding:10px 14px;border:1px solid var(--line);border-radius:14px;background:var(--bg-2);font-size:14.5px;line-height:1.4;color:var(--ink-2)}
+.geo-pasos li::before{content:counter(paso);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;border:2px solid var(--warn);color:var(--warn);font:600 15px var(--mono)}
+.geo-pasos b{color:var(--ink);font-weight:600}
+.mas{border-top:1px solid var(--line)}
+.mas .hero-text h2{font:400 clamp(1.8rem,3.6vw,2.8rem)/1.08 var(--display);letter-spacing:-.02em;max-width:24ch;margin:14px 0 0}
+.geo-head-in{display:flex;align-items:center;gap:20px;min-width:0;flex:1}
+.geo-acc{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:8px;max-width:340px}
+.geo-btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 16px;border-radius:999px;border:1px solid var(--ctl);background:var(--bg);color:var(--ink);font:600 14px/1 var(--sans);cursor:pointer;transition:background .15s,border-color .15s,color .15s}
+.geo-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.geo-btn:hover{border-color:var(--tc)}
+.geo-btn:focus-visible{outline:2px solid var(--tc);outline-offset:2px}
+.geo-btn.yo{border-color:var(--ink);background:var(--ink);color:var(--bg)}
+.geo-btn.yo[aria-pressed="true"]{background:transparent;color:var(--ink)}
+.geo-estado{flex-basis:100%;margin:0;text-align:right;font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
+.geo-estado:empty{display:none}
+.geo-estado input{width:100%;margin-top:4px;padding:6px 8px;border-radius:8px;border:1px solid var(--line-2);background:var(--bg);color:var(--ink);font:13px var(--mono)}
+.geo-stage.yo svg{touch-action:none;cursor:crosshair}
+.geo-stage.yo .geo-niveles{display:none}
+.geo-tu{pointer-events:none}
+.geo-yo-sl{display:grid;gap:10px;margin:14px 0 4px}
+.geo-yo-sl label{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:center;font-size:13.5px;color:var(--ink)}
+.geo-yo-sl input{grid-column:1 / -1;width:100%;accent-color:var(--tc);min-height:28px}
+.geo-yo-sl output{font:500 12px var(--mono);color:var(--muted)}
+.geo-yo-total{font-size:13.5px;color:var(--ink-2);margin:12px 0 0}
+.geo-yo-total b{color:var(--ink)}
+.geo-yo-acc{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:10px}
+@keyframes geoEntra{from{transform:scale(.25);opacity:0}to{transform:none;opacity:1}}
+#geo-svg.geo-entra .geo-shape path,#geo-svg.geo-entra .geo-shape circle{animation:geoEntra .65s cubic-bezier(.2,.8,.2,1) both;animation-delay:var(--d,0ms);transform-box:view-box;transform-origin:410px 372px}
+@media (prefers-reduced-motion:reduce){#geo-svg.geo-entra .geo-shape path,#geo-svg.geo-entra .geo-shape circle{animation:none}}
+.gm-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:18px;background:var(--bg-2);-webkit-overflow-scrolling:touch}
+.gm{display:grid;grid-template-columns:minmax(124px,168px) repeat(10,minmax(66px,1fr));min-width:860px}
+.gm > *{border-bottom:1px solid var(--line)}
+.gm > :nth-last-child(-n+11){border-bottom:0}
+.gm-p{position:sticky;left:0;z-index:1;background:var(--bg-2);padding:8px 12px;display:flex;flex-direction:column;justify-content:center;gap:3px;font:600 14px/1.2 var(--sans);color:var(--ink);border-right:1px solid var(--line)}
+.gm-p span{display:flex;align-items:center;gap:8px}
+.gm-p i{flex:none;width:10px;height:10px;border-radius:50%;background:var(--pc)}
+.gm-p small{font:400 11.5px/1.3 var(--sans);color:var(--muted)}
+.gm-t{appearance:none;border:0;border-bottom:1px solid var(--line);background:none;padding:10px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:5px;font:500 11.5px/1.2 var(--sans);color:var(--ink-2);text-align:center;cursor:pointer}
+.gm-t .ill{width:30px;height:30px;color:var(--tc)}
+.gm-c{appearance:none;border:0;border-bottom:1px solid var(--line);background:none;padding:4px;cursor:pointer;display:grid;place-items:center;min-height:66px}
+.gm-c svg{width:100%;max-width:62px;height:auto;display:block;transition:transform .15s}
+.gm-c:hover svg{transform:scale(1.12)}
+.gm .on{background:color-mix(in srgb,var(--tc) 11%,transparent)}
+.gm-t:hover,.gm-c:hover{background:color-mix(in srgb,var(--tc) 16%,transparent)}
+.gm-c:focus-visible,.gm-t:focus-visible{outline:2px solid var(--tc);outline-offset:-3px}
+.gm-yo{color:#EDEBE6}
+.gm-c .mas-yo{font:500 11px var(--sans);color:var(--muted)}
+@media (max-width:900px){.geo-hero{grid-template-columns:minmax(0,1fr)} .geo-head{flex-wrap:wrap} .geo-acc{max-width:none;justify-content:flex-start;flex-basis:100%} .geo-estado{text-align:left}}
+@media (max-width:640px){.geo-head-in{gap:14px}}
 
 /* ================= 7 · Votar por temas ================= */
 .dd-steps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:clamp(28px,4vw,44px)}
@@ -1151,21 +1207,21 @@ footer p{margin:0;max-width:70ch}
     </symbol>
   </defs>
 </svg>
-<a class="skip" href="#hoy">Saltar al contenido</a>
+<a class="skip" href="#geometrias">Saltar al contenido</a>
 
 <header class="top" lang="es">
   <div class="top-in">
-    <a class="brand" href="#inicio"><span class="brand-mark" aria-hidden="true"></span><span class="brand-txt">Política</span></a>
+    <a class="brand" href="#geometrias"><span class="brand-mark" aria-hidden="true"></span><span class="brand-txt">Política</span></a>
     <nav aria-label="Capítulos">
       <ol class="nav">
+        <li><a href="#geometrias">Geometrías</a></li>
         <li><a href="#hoy">1 · Hoy</a></li>
         <li><a href="#historia">2 · Cien años</a></li>
         <li><a href="#miradas">3 · Miradas</a></li>
         <li><a href="#perfiles">4 · Perfiles</a></li>
         <li><a href="#escalada">5 · Del nosotros al enemigo</a></li>
-        <li><a href="#geometrias">6 · Geometrías</a></li>
-        <li><a href="#decidir">7 · Votar por temas</a></li>
-        <li><a href="#fuentes">8 · Palabras y fuentes</a></li>
+        <li><a href="#decidir">6 · Votar por temas</a></li>
+        <li><a href="#fuentes">7 · Palabras y fuentes</a></li>
       </ol>
     </nav>
   </div>
@@ -1175,11 +1231,78 @@ footer p{margin:0;max-width:70ch}
 <div class="page" lang="es">
 <main>
 
-<!-- ============ PORTADA: OCHO CAPÍTULOS ============ -->
-<section id="inicio" class="hero" aria-labelledby="h-inicio">
+<!-- ============ INICIO · GEOMETRÍAS (la portada) ============ -->
+<section id="geometrias" class="chapter geo-landing" aria-labelledby="h-geometrias">
+  <div class="geo-hero" id="inicio">
+    <div>
+      <p class="eyebrow">Política · España · elecciones generales del 29 de noviembre</p>
+      <h1 id="h-geometrias">Los partidos no son puntos, <em>son formas</em>.</h1>
+      <p class="hero-lede">Un test electoral te sitúa en un punto del mapa. Pero un programa no es un punto: cuida unos aspectos de cada problema y abandona otros. Aquí cada partido es una figura en diez temas, frente a un círculo ideal que llega a todo sin aristas.</p>
+    </div>
+    <ol class="geo-pasos">
+      <li><span><b>Elige un tema.</b> Diez, de la vivienda a la defensa.</span></li>
+      <li><span><b>Pasa por los círculos.</b> Del más pequeño, lo básico, al ideal, lo avanzado.</span></li>
+      <li><span><b>Dibuja tu figura</b> y mira a qué partido se parece.</span></li>
+    </ol>
+  </div>
+  <div class="geo-temas" id="geo-tema" role="tablist" aria-label="Elige un tema"></div>
+  <div class="geo-head" id="geo-head">
+    <div class="geo-head-in" id="geo-head-in" aria-live="polite"></div>
+    <div class="geo-acc">
+      <button class="geo-btn yo" id="geo-yo" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></svg><span>Dibuja tu figura</span></button>
+      <button class="geo-btn" id="geo-compartir"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.9l7.6-4.4M8.2 13.1l7.6 4.4"/></svg><span>Compartir</span></button>
+      <p class="geo-estado" id="geo-compartir-estado" aria-live="polite"></p>
+    </div>
+  </div>
+  <div class="geo">
+    <div class="geo-stage">
+      <svg id="geo-svg" viewBox="0 0 820 740" role="img" aria-labelledby="geo-svg-t"><title id="geo-svg-t">Figura de cada partido sobre los aspectos del tema elegido</title></svg>
+      <div class="geo-tip" id="geo-tip" role="tooltip" hidden></div>
+      <p class="geo-cap" id="geo-cap"></p>
+      <div class="geo-niveles" id="geo-niveles" role="group" aria-label="Los tres círculos de cada tema"></div>
+    </div>
+    <aside class="geo-side" aria-label="Partidos y detalle">
+      <div>
+        <p class="lbl" style="margin-bottom:8px">Partidos · pulsa para superponer</p>
+        <div class="geo-chips" id="geo-chips"></div>
+      </div>
+      <div class="toggle-row geo-opts">
+        <button class="tbtn" id="geo-ideal" aria-pressed="true">Círculo ideal</button>
+        <button class="tbtn" id="geo-env" aria-pressed="false">Lo mejor de cada uno</button>
+      </div>
+      <div class="geo-panel" id="geo-panel" aria-live="polite"></div>
+    </aside>
+  </div>
+  <div class="sub geo-vistazo">
+    <h3>Los diez temas de un vistazo</h3>
+    <p class="ch-lede">Cada fila es un partido y cada columna un tema, con sus tres círculos. Una figura grande y redonda llega lejos en todo; una pequeña o con puntas se queda corta en algo. Pulsa cualquiera para abrirla arriba.</p>
+    <div class="gm-wrap"><div class="gm" id="geo-matriz"></div></div>
+  </div>
+  <details class="geo-how">
+    <summary>Cómo se lee y de dónde salen las formas</summary>
+    <p>Cada radio es un aspecto del problema, y cada uno de los tres círculos es un nivel. El primero es <b>lo básico</b>: lo mínimo que cualquier gobierno debería garantizar en ese aspecto. El segundo, <b>lo intermedio</b>. El tercero, el círculo ideal, es <b>lo avanzado</b>. Pasa el ratón (o toca) por un círculo para leer qué significa en todo el tema, y por uno de sus puntos para leer qué es lo básico o lo avanzado en ese aspecto concreto y qué partidos llegan.</p>
+    <p>La distancia de cada partido al centro mide hasta dónde llega su propuesta: 0, lo ignora o lo rechaza; de 4 a 6 cubre lo básico; de 7 a 9, lo intermedio; 10, lo avanzado. Por debajo de 4 no llega a lo básico: es una pata coja.</p>
+    <p>Los radios opuestos son dilemas, y por eso un test los resume en un punto. Los radios vecinos se complementan: si un partido cuida los dos, el borde que los une se curva y sigue el círculo; si cuida uno y abandona el otro, el borde es una recta y aparece una arista. Esas aristas son donde chocan los partidos.</p>
+    <p>Las puntuaciones son una valoración de este observatorio a partir de programas, planes y votaciones publicados hasta noviembre de 2026, con las fuentes al final de la página. No son una encuesta ni una medida oficial, y de algunos partidos hay menos información en algunos aspectos. Son discutibles y corregibles: si un dato está mal, se cambia.</p>
+  </details>
+  <div class="sub">
+    <h3 id="geo-ideal-h">El círculo: lo que diría un partido que cuidara de todo</h3>
+    <p class="ch-lede">Una propuesta por radio, para España, tomada de lo mejor que ya plantea alguno de los partidos y unida para que no queden aristas. Es la propuesta de esta página para el debate, no la de ningún partido.</p>
+    <div class="geo-props" id="geo-props"></div>
+    <div class="geo-obj" id="geo-obj"></div>
+  </div>
+  <details class="geo-tabla">
+    <summary>Ver la tabla de valoraciones</summary>
+    <div class="tw" id="geo-tabla"></div>
+  </details>
+  <p class="note">Elecciones generales del 29 de noviembre de 2026. Esto no es una recomendación de voto: es un mapa de lo que cada propuesta cuida y de lo que deja fuera.</p>
+</section>
+
+<!-- ============ MÁS EN POLÍTICA (lo secundario) ============ -->
+<section id="mas" class="hero mas" aria-labelledby="h-mas">
   <div class="hero-text">
-    <p class="eyebrow">Política · España</p>
-    <h1 id="h-inicio">Entender por qué nos dividimos, y decidir juntos sin bandos.</h1>
+    <p class="eyebrow">Más en Política</p>
+    <h2 id="h-mas">Entender por qué nos dividimos, y decidir juntos sin bandos.</h2>
   </div>
   <div id="cards" class="apartados">
     <div class="apartado">
@@ -1214,28 +1337,24 @@ footer p{margin:0;max-width:70ch}
       </div>
     </div>
     <div class="apartado">
-      <p class="apartado-h"><a href="#propuestas"><span>Apartado 2</span>Geometrías y votar por temas</a></p>
-      <p class="apartado-t">Qué cuida y qué abandona cada partido, y una forma de decidir por temas concretos con datos.</p>
-      <div class="cards cards-3">
-    <a class="card" href="#geometrias" style="--cc:#3B82F6">
-      <span class="card-img" aria-hidden="true"><svg viewBox="0 0 320 150" id="ci-geometrias"></svg></span>
-      <span class="card-n">Capítulo 6</span><b>Geometrías</b>
-      <span class="card-t">Cada partido como una figura: dónde es fuerte, dónde le cojea y el círculo que cuidaría de todo.</span>
-    </a>
+      <p class="apartado-h"><a href="#propuestas"><span>Apartado 2</span>Votar por temas</a></p>
+      <p class="apartado-t">Una forma de decidir por temas concretos con datos, y las fuentes de toda la página.</p>
+      <div class="cards cards-5">
     <a class="card" href="#decidir" style="--cc:#F6BE3B">
       <span class="card-img" aria-hidden="true"><svg viewBox="0 0 320 150" id="ci-decidir"></svg></span>
-      <span class="card-n">Capítulo 7</span><b>Votar por temas</b>
+      <span class="card-n">Capítulo 6</span><b>Votar por temas</b>
       <span class="card-t">Una democracia directa: ver la historia de cada dato y votar cuánto subir, bajar, abrir o cerrar.</span>
     </a>
     <a class="card" href="#fuentes" style="--cc:var(--xr)">
       <span class="card-img" aria-hidden="true"><svg viewBox="0 0 320 150" id="ci-fuentes"></svg></span>
-      <span class="card-n">Capítulo 8</span><b>Palabras y fuentes</b>
+      <span class="card-n">Capítulo 7</span><b>Palabras y fuentes</b>
       <span class="card-t">De dónde vienen «facha», «rojo» o «fascista», y los estudios en que se apoya todo.</span>
     </a>
       </div>
     </div>
   </div>
 </section>
+
 
 <!-- ============ APARTADO 1 · OBSERVATORIO ============ -->
 <div class="apartado-banda" id="observatorio">
@@ -1452,63 +1571,15 @@ footer p{margin:0;max-width:70ch}
 
 <!-- ============ APARTADO 2 · PROPUESTAS ============ -->
 <div class="apartado-banda" id="propuestas">
-  <span class="lbl">Apartado 2 · capítulos 6 y 7</span>
-  <h2>Geometrías y votar por temas</h2>
-  <p>De mirar la división a superarla: qué cuida cada partido frente a un ideal que cuida de todo, y cómo podríamos votar por temas en lugar de votar colores.</p>
+  <span class="lbl">Apartado 2 · capítulo 6</span>
+  <h2>Votar por temas</h2>
+  <p>De mirar la división a superarla: cómo podríamos votar cosas concretas, con sus datos, en lugar de votar colores.</p>
 </div>
 
-<!-- ============ 6 · GEOMETRÍAS ============ -->
-<section id="geometrias" class="chapter" aria-labelledby="h-geometrias">
-  <div class="ch-head">
-    <p class="ch-num">Capítulo 6 · Geometrías</p>
-    <h2 id="h-geometrias">Los partidos no son puntos, <em>son formas</em>.</h2>
-    <p class="ch-lede">Un test electoral te sitúa a ti y a cada partido en un punto del mapa. Pero un programa no es un punto: cuida unos aspectos de un problema y abandona otros. Aquí cada partido es una figura con sus fuerzas y sus patas cojas, en diez temas, y el ideal es un círculo que llega a todo sin aristas.</p>
-  </div>
-  <div class="geo-temas" id="geo-tema" role="tablist" aria-label="Elige un tema"></div>
-  <div class="geo-head" id="geo-head" aria-live="polite"></div>
-  <div class="geo">
-    <div class="geo-stage">
-      <svg id="geo-svg" viewBox="0 0 820 740" role="img" aria-labelledby="geo-svg-t"><title id="geo-svg-t">Figura de cada partido sobre los aspectos del tema elegido</title></svg>
-      <div class="geo-tip" id="geo-tip" role="tooltip" hidden></div>
-      <p class="geo-cap" id="geo-cap"></p>
-      <div class="geo-niveles" id="geo-niveles" role="group" aria-label="Los tres círculos de cada tema"></div>
-    </div>
-    <aside class="geo-side" aria-label="Partidos y detalle">
-      <div>
-        <p class="lbl" style="margin-bottom:8px">Partidos · pulsa para superponer</p>
-        <div class="geo-chips" id="geo-chips"></div>
-      </div>
-      <div class="toggle-row geo-opts">
-        <button class="tbtn" id="geo-ideal" aria-pressed="true">Círculo ideal</button>
-        <button class="tbtn" id="geo-env" aria-pressed="false">Lo mejor de cada uno</button>
-      </div>
-      <div class="geo-panel" id="geo-panel" aria-live="polite"></div>
-    </aside>
-  </div>
-  <details class="geo-how">
-    <summary>Cómo se lee y de dónde salen las formas</summary>
-    <p>Cada radio es un aspecto del problema, y cada uno de los tres círculos es un nivel. El primero es <b>lo básico</b>: lo mínimo que cualquier gobierno debería garantizar en ese aspecto. El segundo, <b>lo intermedio</b>. El tercero, el círculo ideal, es <b>lo avanzado</b>. Pasa el ratón (o toca) por un círculo para leer qué significa en todo el tema, y por uno de sus puntos para leer qué es lo básico o lo avanzado en ese aspecto concreto y qué partidos llegan.</p>
-    <p>La distancia de cada partido al centro mide hasta dónde llega su propuesta: 0, lo ignora o lo rechaza; de 4 a 6 cubre lo básico; de 7 a 9, lo intermedio; 10, lo avanzado. Por debajo de 4 no llega a lo básico: es una pata coja.</p>
-    <p>Los radios opuestos son dilemas, y por eso un test los resume en un punto. Los radios vecinos se complementan: si un partido cuida los dos, el borde que los une se curva y sigue el círculo; si cuida uno y abandona el otro, el borde es una recta y aparece una arista. Esas aristas son donde chocan los partidos.</p>
-    <p>Las puntuaciones son una valoración de este observatorio a partir de programas, planes y votaciones publicados hasta noviembre de 2026, con las fuentes al final de la página. No son una encuesta ni una medida oficial, y de algunos partidos hay menos información en algunos aspectos. Son discutibles y corregibles: si un dato está mal, se cambia.</p>
-  </details>
-  <div class="sub">
-    <h3 id="geo-ideal-h">El círculo: lo que diría un partido que cuidara de todo</h3>
-    <p class="ch-lede">Una propuesta por radio, para España, tomada de lo mejor que ya plantea alguno de los partidos y unida para que no queden aristas. Es la propuesta de esta página para el debate, no la de ningún partido.</p>
-    <div class="geo-props" id="geo-props"></div>
-    <div class="geo-obj" id="geo-obj"></div>
-  </div>
-  <details class="geo-tabla">
-    <summary>Ver la tabla de valoraciones</summary>
-    <div class="tw" id="geo-tabla"></div>
-  </details>
-  <p class="note">Elecciones generales del 29 de noviembre de 2026. Esto no es una recomendación de voto: es un mapa de lo que cada propuesta cuida y de lo que deja fuera.</p>
-</section>
-
-<!-- ============ 7 · VOTAR POR TEMAS ============ -->
+<!-- ============ 6 · VOTAR POR TEMAS ============ -->
 <section id="decidir" class="chapter" aria-labelledby="h-decidir">
   <div class="ch-head">
-    <p class="ch-num">Capítulo 7 · Votar por temas</p>
+    <p class="ch-num">Capítulo 6 · Votar por temas</p>
     <h2 id="h-decidir">Votar cosas concretas, <em>no colores</em>.</h2>
     <p class="ch-lede">Una propuesta de democracia directa. En vez de elegir cada cuatro años un partido que no recoge todo lo que piensas, cada persona ve el estado real de cada materia y cómo ha cambiado en los últimos años, y vota medidas concretas con un deslizador: cuánto subir o bajar, abrir o cerrar. El debate deja de ser de izquierdas contra derechas y pasa a ser sobre qué hacer y con qué datos.</p>
   </div>
@@ -1552,7 +1623,7 @@ footer p{margin:0;max-width:70ch}
 <!-- ============ 8 · PALABRAS Y FUENTES ============ -->
 <section id="fuentes" class="chapter" aria-labelledby="h-fuentes">
   <div class="ch-head">
-    <p class="ch-num">Capítulo 8 · Palabras y fuentes</p>
+    <p class="ch-num">Capítulo 7 · Palabras y fuentes</p>
     <h2 id="h-fuentes">Palabras del siglo XX <em>para conflictos del XXI</em>.</h2>
     <p class="ch-lede">«Fascista» y «comunista» nombran regímenes que ya no existen en Europa. En España arrastran además la memoria de la Guerra Civil. Hoy funcionan como insultos, y cada época añade los suyos, venga de donde venga.</p>
   </div>
@@ -1609,7 +1680,7 @@ footer p{margin:0;max-width:70ch}
 
 </main>
 <footer>
-  <p>Herramienta educativa sin afiliación política. Los perfiles son tipos ideales, no retratos de personas ni de partidos. Las geometrías del capítulo 6 sí sitúan a partidos reales: son una valoración de esta página a partir de sus programas y votaciones, discutible y corregible.</p>
+  <p>Herramienta educativa sin afiliación política. Los perfiles son tipos ideales, no retratos de personas ni de partidos. Las geometrías de la portada sí sitúan a partidos reales: son una valoración de esta página a partir de sus programas y votaciones, discutible y corregible.</p>
   <p>Ningún dato sale de tu navegador.</p>
 </footer>
 </div>
@@ -2502,7 +2573,8 @@ const REFS = [
 (function fuentes() {
   const grid = $("#refs-grid"), pick = $("#ref-pick");
   if (!grid) return;
-  const NOMBRES = ["Todas", "1 · Hoy", "2 · Cien años", "3 · Miradas", "4 · Perfiles", "5 · Escalada", "6 · Geometrías", "7 · Votar", "8 · Palabras"];
+  // Internal chapter numbers stay (REFS `ch`); since 2026-11-18 Geometrías is the landing and has no number.
+  const NOMBRES = ["Todas", "1 · Hoy", "2 · Cien años", "3 · Miradas", "4 · Perfiles", "5 · Escalada", "Geometrías", "6 · Votar", "7 · Palabras"];
   const ini = (a) => a.length <= 4 ? a : a.split(/[\s,()]+/).filter((w) => w.length > 2 && /^[A-ZÁÉÍÓÚ]/.test(w)).slice(0, 2).map((w) => w[0]).join("");
   grid.innerHTML = REFS.map((r) => {
     const [cn, cc] = CAT[r.c];
@@ -2618,7 +2690,7 @@ const REFS = [
 
 /* ================= 6 · Geometrías ================= */
 /* Cada partido es una figura sobre los radios de cada tema (ocho o seis), con tres círculos: lo básico, lo intermedio y lo avanzado. Valoración del observatorio, de 0 a 10, a partir de
-   programas, planes y votaciones hasta noviembre de 2026 (fuentes en el capítulo 8). Entre dos radios
+   programas, planes y votaciones hasta noviembre de 2026 (fuentes al final de la página). Entre dos radios
    vecinos el borde se curva siguiendo el círculo cuanto mejor cuida el partido los dos, y es una recta
    (una arista) cuando cuida uno y abandona el otro. */
 const PARTIDOS = [
@@ -3149,42 +3221,75 @@ const ILUS = {
   if (!svg) return;
   const stage = svg.closest(".geo-stage");
   const tip = $("#geo-tip");
-  const CX = 410, CY = 372, R = 226;
+  const CX = 410, CY = 372, VW = 820, VH = 740;
+  // R and K change on narrow screens: a smaller circle leaves room for bigger labels (K = text scale)
+  let R = 226, K = 1;
   // Tres círculos: lo básico, lo intermedio y lo avanzado (el círculo ideal), a un tercio, dos tercios y el borde
   const NIV = ["Lo básico", "Lo intermedio", "Lo avanzado"];
   const UMBRAL = [10 / 3, 20 / 3, 10];
   const ORO = "#F6BE3B";
   const alcanza = (x, k) => x >= UMBRAL[k] - 0.01;
   const nivelDe = (x) => (alcanza(x, 2) ? 3 : alcanza(x, 1) ? 2 : alcanza(x, 0) ? 1 : 0);
+  const palabraNivel = (v) => (v >= 10 ? "avanzado" : v >= 7 ? "intermedio" : v >= 4 ? "básico" : "no llega a lo básico");
   const PALABRA = { 6: "seis", 8: "ocho" };
+  // Readable names for the address bar (?tema=vivienda); the short keys are accepted too
+  const SLUG = { inm: "inmigracion", ser: "servicios", eco: "economia", tra: "trabajo", viv: "vivienda", amb: "clima", ter: "territorio", der: "derechos", ins: "instituciones", ext: "exterior" };
+  const DE_SLUG = Object.fromEntries(Object.entries(SLUG).map(([k, v]) => [v, k]));
   const ang = (i, n) => -Math.PI / 2 + (i * 2 * Math.PI) / n;
   const P = (a, r) => [CX + r * Math.cos(a), CY + r * Math.sin(a)];
   const rr = (s) => (R * s) / 10;
   const clamp = (x) => Math.min(1, Math.max(0, x));
   // Cuánto se integran dos aspectos vecinos: 1 si los dos están bien cuidados y parejos (borde curvo).
   const integ = (a, b) => clamp((Math.min(a, b) - 4) / 5) * clamp(1 - Math.abs(a - b) / 5);
-  function puntos(s) {
+  function geom(s, cx, cy, rad) {
     const n = s.length, step = (2 * Math.PI) / n, out = [];
+    const Q = (a, r) => [cx + r * Math.cos(a), cy + r * Math.sin(a)];
     for (let i = 0; i < n; i++) {
-      const j = (i + 1) % n, a0 = ang(i, n), r0 = rr(s[i]), r1v = rr(s[j]), k = integ(s[i], s[j]);
-      const A = P(a0, r0), B = P(a0 + step, r1v);
+      const j = (i + 1) % n, a0 = ang(i, n), r0 = (rad * s[i]) / 10, r1v = (rad * s[j]) / 10, k = integ(s[i], s[j]);
+      const A = Q(a0, r0), B = Q(a0 + step, r1v);
       for (let t = 0; t < 16; t++) {
-        const u = t / 16, Q = P(a0 + u * step, r0 + (r1v - r0) * u);
+        const u = t / 16, E = Q(a0 + u * step, r0 + (r1v - r0) * u);
         const C = [A[0] + (B[0] - A[0]) * u, A[1] + (B[1] - A[1]) * u];
-        out.push([C[0] + k * (Q[0] - C[0]), C[1] + k * (Q[1] - C[1])]);
+        out.push([C[0] + k * (E[0] - C[0]), C[1] + k * (E[1] - C[1])]);
       }
     }
     return out;
   }
+  const puntos = (s) => geom(s, CX, CY, R);
   const dPath = (pts) => "M" + pts.map((p) => `${r1(p[0])},${r1(p[1])}`).join("L") + "Z";
 
   const KEYS = Object.keys(TEMAS);
-  const st = { tema: "inm", sel: new Set(["pp", "psoe", "vox", "fa"]), foco: null, eje: null, ideal: true, env: false, ring: null };
+  const DEF = ["pp", "psoe", "vox", "fa"];
+  const st = { tema: "inm", sel: new Set(DEF), foco: null, eje: null, ideal: true, env: false, ring: null, yo: false };
+  // Lo que llega en la dirección: ?tema=vivienda&p=pp,psoe&foco=pp
+  const q = new URLSearchParams(location.search);
+  const qt = q.get("tema");
+  if (qt && (TEMAS[qt] || DE_SLUG[qt])) st.tema = TEMAS[qt] ? qt : DE_SLUG[qt];
+  if (q.get("p") != null) st.sel = new Set(q.get("p").split(",").filter((k) => PMAP[k]));
+  if (PMAP[q.get("foco")]) { st.foco = q.get("foco"); st.sel.add(st.foco); }
   const T = () => TEMAS[st.tema];
   const colorNivel = (k) => (k === 2 ? ORO : T().c);
   const etiquetas = (arr) => arr.map((p) => `<span class="geo-tag" style="--pc:${p.c}">${p.n}</span>`).join("");
 
+  /* ---- Tu figura: solo en este navegador ---- */
+  const LS = "politica.geo.tu.v1";
+  let tu = {};
+  try { const x = JSON.parse(localStorage.getItem(LS) || "{}"); if (x && typeof x === "object") tu = x; } catch (e) { /* sin almacenamiento */ }
+  // A figure saved for a topic whose number of axes later changed is ignored, not misread
+  const valida = (k) => Array.isArray(tu[k]) && TEMAS[k] && tu[k].length === TEMAS[k].ejes.length;
+  const guardarTu = () => { try { localStorage.setItem(LS, JSON.stringify(tu)); } catch (e) { /* sin almacenamiento */ } };
+  const miFigura = () => (valida(st.tema) ? tu[st.tema] : T().ejes.map(() => 5));
+  const parecido = (a, b) => Math.round(100 - (a.reduce((d, x, i) => d + Math.abs(x - b[i]), 0) / a.length) * 10);
+
+  function medir() {
+    const w = svg.getBoundingClientRect().width || VW, estrecho = w < 560;
+    const antes = K;
+    R = estrecho ? 196 : 226; K = estrecho ? 1.38 : 1;
+    return antes !== K;
+  }
+
   function dibujar() {
+    medir();
     const t = T(), ejes = t.ejes, n = ejes.length, step = (2 * Math.PI) / n;
     let s = `<defs><radialGradient id="geo-glow"><stop offset="0" stop-color="${t.c}" stop-opacity="0"/><stop offset=".6" stop-color="${t.c}" stop-opacity=".035"/><stop offset="1" stop-color="${t.c}" stop-opacity=".17"/></radialGradient></defs>`;
     // Fondo: un halo del color del tema que crece hacia el círculo ideal
@@ -3194,8 +3299,7 @@ const ILUS = {
     for (let i = 0; i < n; i++) { const [x, y] = P(ang(i, n), R); s += `<line x1="${CX}" y1="${CY}" x2="${r1(x)}" y2="${r1(y)}" stroke="#3A4660" stroke-width="1"/>`; }
     // Nombre de cada círculo, junto al radio de arriba y justo por encima de su línea
     UMBRAL.forEach((v, k) => {
-      const x = CX + 10, y = CY - rr(v) - 6;
-      s += `<text x="${r1(x)}" y="${r1(y)}" font-family="IBM Plex Mono, monospace" font-size="12.5" letter-spacing="1" fill="${k === 2 ? ORO : t.c}" paint-order="stroke" stroke="#0C0F14" stroke-width="4">${k + 1} · ${NIV[k].replace("Lo ", "").toUpperCase()}</text>`;
+      s += `<text x="${CX + 10}" y="${r1(CY - rr(v) - 6)}" font-family="IBM Plex Mono, monospace" font-size="${r1(12.5 * K)}" letter-spacing="1" fill="${k === 2 ? ORO : t.c}" paint-order="stroke" stroke="#0C0F14" stroke-width="4">${k + 1} · ${NIV[k].replace("Lo ", "").toUpperCase()}</text>`;
     });
     if (st.env) {
       const env = ejes.map((_, i) => Math.max(...PARTIDOS.map((p) => t.v[p.k][i])));
@@ -3203,46 +3307,55 @@ const ILUS = {
     }
     if (st.ideal) {
       const [x, y] = P(ang(1, n) + step * 0.62, R + 12);
-      s += `<text x="${r1(x)}" y="${r1(y)}" font-family="IBM Plex Mono, monospace" font-size="14" fill="${ORO}" letter-spacing="1">CÍRCULO IDEAL</text>`;
+      s += `<text x="${r1(x)}" y="${r1(y)}" font-family="IBM Plex Mono, monospace" font-size="${r1(14 * K)}" fill="${ORO}" letter-spacing="1">CÍRCULO IDEAL</text>`;
     }
     const orden = PARTIDOS.filter((p) => st.sel.has(p.k)).sort((a, b) => (a.k === st.foco) - (b.k === st.foco));
-    orden.forEach((p) => {
-      const v = t.v[p.k], on = !st.foco || st.foco === p.k;
-      s += `<g class="geo-shape" data-p="${p.k}" style="opacity:${on ? 1 : 0.18}"><path d="${dPath(puntos(v))}" fill="${p.c}" fill-opacity="${st.foco === p.k ? 0.26 : 0.1}" stroke="${p.c}" stroke-width="${st.foco === p.k ? 3.2 : 2.2}" stroke-linejoin="round"/>`;
-      v.forEach((x, i) => { const [px, py] = P(ang(i, n), rr(x)); s += `<circle cx="${r1(px)}" cy="${r1(py)}" r="${st.foco === p.k ? 5 : 3.5}" fill="${p.c}"/>`; });
-      if (st.foco === p.k) {
+    orden.forEach((p, idx) => {
+      const v = t.v[p.k], on = !st.foco || st.foco === p.k, fo = st.foco === p.k;
+      s += `<g class="geo-shape" data-p="${p.k}" style="opacity:${st.yo ? 0.5 : on ? 1 : 0.18};--d:${idx * 55}ms"><path d="${dPath(puntos(v))}" fill="${p.c}" fill-opacity="${fo ? 0.26 : 0.1}" stroke="${p.c}" stroke-width="${fo ? 3.2 : 2.2}" stroke-linejoin="round"/>`;
+      v.forEach((x, i) => { const [px, py] = P(ang(i, n), rr(x)); s += `<circle cx="${r1(px)}" cy="${r1(py)}" r="${r1((fo ? 5 : 3.5) * K)}" fill="${p.c}"/>`; });
+      if (fo && !st.yo) {
         // Patas cojas: por debajo de lo básico
-        v.forEach((x, i) => { if (x <= 3) { const [px, py] = P(ang(i, n), rr(x)); s += `<circle cx="${r1(px)}" cy="${r1(py)}" r="11" fill="none" stroke="${ORO}" stroke-width="2" stroke-dasharray="3 3"/>`; } });
+        v.forEach((x, i) => { if (x <= 3) { const [px, py] = P(ang(i, n), rr(x)); s += `<circle cx="${r1(px)}" cy="${r1(py)}" r="${r1(11 * K)}" fill="none" stroke="${ORO}" stroke-width="2" stroke-dasharray="3 3"/>`; } });
         // El punto al que lo reduciría un test
         let vx = 0, vy = 0; v.forEach((x, i) => { vx += x * Math.cos(ang(i, n)); vy += x * Math.sin(ang(i, n)); });
         vx = (vx / n) * (R / 10) * 2.2; vy = (vy / n) * (R / 10) * 2.2;
         const L = Math.hypot(vx, vy), m = L > R * 0.9 ? (R * 0.9) / L : 1;
         const tx = CX + vx * m, ty = CY + vy * m;
-        s += `<line x1="${CX}" y1="${CY}" x2="${r1(tx)}" y2="${r1(ty)}" stroke="#EDEBE6" stroke-width="1.5" stroke-dasharray="2 4"/><circle cx="${r1(tx)}" cy="${r1(ty)}" r="8" fill="${p.c}" stroke="#0C0F14" stroke-width="3"/>`
-          + `<text x="${r1(tx + 13)}" y="${r1(ty + 5)}" font-family="Archivo, sans-serif" font-size="15" fill="#EDEBE6" paint-order="stroke" stroke="#0C0F14" stroke-width="4">el punto de un test</text>`;
+        s += `<line x1="${CX}" y1="${CY}" x2="${r1(tx)}" y2="${r1(ty)}" stroke="#EDEBE6" stroke-width="1.5" stroke-dasharray="2 4"/><circle cx="${r1(tx)}" cy="${r1(ty)}" r="${r1(8 * K)}" fill="${p.c}" stroke="#0C0F14" stroke-width="3"/>`
+          + `<text x="${r1(tx + 13 * K)}" y="${r1(ty + 5 * K)}" font-family="Archivo, sans-serif" font-size="${r1(15 * K)}" fill="#EDEBE6" paint-order="stroke" stroke="#0C0F14" stroke-width="4">el punto de un test</text>`;
       }
       s += `</g>`;
     });
-    // Capa de lectura: cada círculo y cada cruce de radio y círculo explica su nivel al pasar por encima
-    UMBRAL.forEach((v, k) => {
-      const r = r1(rr(v));
-      s += `<g class="geo-ring${st.ring === k ? " on" : ""}" data-ring="${k}"><circle class="hl" cx="${CX}" cy="${CY}" r="${r}" fill="none" stroke="${colorNivel(k)}" stroke-width="3.5"/><circle class="hit" cx="${CX}" cy="${CY}" r="${r}" fill="none" stroke="transparent" stroke-width="20"/></g>`;
-    });
-    for (let i = 0; i < n; i++) {
+    if (st.yo) {
+      // Tu figura, encima de todo, con un asa en cada radio
+      const fig = miFigura(), hecha = valida(st.tema);
+      s += `<g class="geo-tu"><path d="${dPath(puntos(fig))}" fill="#EDEBE6" fill-opacity=".12" stroke="#EDEBE6" stroke-width="3" ${hecha ? "" : 'stroke-dasharray="7 6"'} stroke-linejoin="round"/>`;
+      fig.forEach((x, i) => { const [px, py] = P(ang(i, n), rr(x)); s += `<circle cx="${r1(px)}" cy="${r1(py)}" r="${r1(9 * K)}" fill="#EDEBE6" stroke="#0C0F14" stroke-width="3"/>`; });
+      s += `<text x="${CX}" y="${r1(CY + 5 * K)}" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="600" font-size="${r1(16 * K)}" fill="#EDEBE6" paint-order="stroke" stroke="#0C0F14" stroke-width="5">${hecha ? "TÚ" : "Arrastra los puntos"}</text></g>`;
+    } else {
+      // Capa de lectura: cada círculo y cada cruce de radio y círculo explica su nivel al pasar por encima
       UMBRAL.forEach((v, k) => {
-        const [x, y] = P(ang(i, n), rr(v));
-        s += `<g class="geo-lv" data-li="${i}" data-lk="${k}"><circle cx="${r1(x)}" cy="${r1(y)}" r="15" fill="transparent"/><circle class="dot" cx="${r1(x)}" cy="${r1(y)}" r="${k === 2 ? 5.5 : 4.5}" fill="#0C0F14" stroke="${colorNivel(k)}" stroke-width="2.2"/></g>`;
+        const r = r1(rr(v));
+        s += `<g class="geo-ring${st.ring === k ? " on" : ""}" data-ring="${k}"><circle class="hl" cx="${CX}" cy="${CY}" r="${r}" fill="none" stroke="${colorNivel(k)}" stroke-width="3.5"/><circle class="hit" cx="${CX}" cy="${CY}" r="${r}" fill="none" stroke="transparent" stroke-width="${r1(20 * K)}"/></g>`;
       });
+      for (let i = 0; i < n; i++) {
+        UMBRAL.forEach((v, k) => {
+          const [x, y] = P(ang(i, n), rr(v));
+          s += `<g class="geo-lv" data-li="${i}" data-lk="${k}"><circle cx="${r1(x)}" cy="${r1(y)}" r="${r1(15 * K)}" fill="transparent"/><circle class="dot" cx="${r1(x)}" cy="${r1(y)}" r="${r1((k === 2 ? 5.5 : 4.5) * K)}" fill="#0C0F14" stroke="${colorNivel(k)}" stroke-width="2.2"/></g>`;
+        });
+      }
     }
+    const fs = 20 * K;
     ejes.forEach((e, i) => {
       const a = ang(i, n), [x, y] = P(a, R + 26), c = Math.cos(a), sn = Math.sin(a);
       const anchor = Math.abs(c) < 0.2 ? "middle" : c > 0 ? "start" : "end";
-      const y0 = sn < -0.5 ? y - 22 : sn > 0.5 ? y + 14 : y - 6;
+      const y0 = sn < -0.5 ? y - 22 * K : sn > 0.5 ? y + 14 * K : y - 6 * K;
       const act = st.eje === i;
-      const w = Math.max(...e.l.map((l) => l.length)) * 11.2 + 16;
+      const w = Math.max(...e.l.map((l) => l.length)) * 11.2 * K + 16;
       const bx = anchor === "middle" ? x - w / 2 : anchor === "start" ? x - 8 : x - w + 8;
-      s += `<g class="geo-ax" data-ax="${i}" tabindex="0" role="button" aria-label="${e.n}"><rect x="${r1(bx)}" y="${r1(y0 - 22)}" width="${r1(w)}" height="54" rx="10" fill="${act ? "#1B2230" : "transparent"}" stroke="${act ? t.c : "transparent"}"/>`
-        + e.l.map((l, j) => `<text x="${r1(x)}" y="${r1(y0 + j * 23)}" text-anchor="${anchor}" font-family="Archivo, sans-serif" font-size="20" font-weight="${j ? 400 : 600}" fill="${act ? t.c : j ? "#C9CCD3" : "#EDEBE6"}">${l}</text>`).join("") + `</g>`;
+      s += `<g class="geo-ax" data-ax="${i}" tabindex="0" role="button" aria-label="${e.n}"><rect x="${r1(bx)}" y="${r1(y0 - 22 * K)}" width="${r1(w)}" height="${r1(54 * K)}" rx="10" fill="${act ? "#1B2230" : "transparent"}" stroke="${act ? t.c : "transparent"}"/>`
+        + e.l.map((l, j) => `<text x="${r1(x)}" y="${r1(y0 + j * 23 * K)}" text-anchor="${anchor}" font-family="Archivo, sans-serif" font-size="${r1(fs)}" font-weight="${j ? 400 : 600}" fill="${act ? t.c : j ? "#C9CCD3" : "#EDEBE6"}">${l}</text>`).join("") + `</g>`;
     });
     svg.innerHTML = `<title id="geo-svg-t">Figura de cada partido sobre los ${PALABRA[n] || n} aspectos de ${t.n.toLowerCase()}, con tres círculos: lo básico, lo intermedio y lo avanzado</title>` + s;
     $("#geo-cap").textContent = t.cap;
@@ -3272,6 +3385,7 @@ const ILUS = {
   function ocultar() { tip.hidden = true; tipClave = null; }
   const centro = (el) => { const b = el.getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; };
   function leer(e) {
+    if (st.yo) return false;
     const lv = e.target.closest("[data-lk]");
     if (lv) { const [x, y] = centro(lv.querySelector(".dot")); mostrar(`p${lv.dataset.li}-${lv.dataset.lk}`, htmlPunto(+lv.dataset.li, +lv.dataset.lk), x, y); return true; }
     const rg = e.target.closest("[data-ring]");
@@ -3279,14 +3393,78 @@ const ILUS = {
     return false;
   }
   svg.addEventListener("pointerover", (e) => { if (e.pointerType !== "touch") leer(e); });
-  svg.addEventListener("pointermove", (e) => { if (e.pointerType !== "touch" && e.target.closest("[data-ring]")) leer(e); });
   svg.addEventListener("pointerout", (e) => {
     if (e.pointerType === "touch") return;
     const to = e.relatedTarget;
     if (to && to.closest && (to.closest("[data-lk]") || to.closest("[data-ring]"))) return;
     ocultar();
   });
-  window.addEventListener("resize", ocultar);
+  window.addEventListener("resize", () => { ocultar(); if (medir()) { dibujar(); marcar(st.ring); } });
+
+  /* ---- Dibujar tu figura: arrastrar sobre cada radio ---- */
+  let arrastre = null;
+  function enLienzo(e) {
+    const b = svg.getBoundingClientRect();
+    return [((e.clientX - b.left) * VW) / b.width - CX, ((e.clientY - b.top) * VH) / b.height - CY];
+  }
+  const valorEnEje = (dx, dy, i) => { const a = ang(i, T().ejes.length); return Math.max(0, Math.min(10, Math.round(((dx * Math.cos(a) + dy * Math.sin(a)) / R) * 10))); };
+  function fijar(i, v) {
+    const f = miFigura().slice();
+    if (valida(st.tema) && f[i] === v) return;
+    f[i] = v; tu[st.tema] = f; guardarTu();
+    dibujar(); refrescarYo(); matriz();
+  }
+  svg.addEventListener("pointerdown", (e) => {
+    if (!st.yo || e.button > 0) return;
+    e.preventDefault();
+    const [dx, dy] = enLienzo(e), n = T().ejes.length;
+    let a = Math.atan2(dy, dx) + Math.PI / 2; if (a < 0) a += 2 * Math.PI;
+    const i = Math.round(a / ((2 * Math.PI) / n)) % n;
+    arrastre = { i, id: e.pointerId };
+    try { svg.setPointerCapture(e.pointerId); } catch (err) { /* sin captura */ }
+    fijar(i, valorEnEje(dx, dy, i));
+  });
+  svg.addEventListener("pointermove", (e) => {
+    if (arrastre && e.pointerId === arrastre.id) { const [dx, dy] = enLienzo(e); fijar(arrastre.i, valorEnEje(dx, dy, arrastre.i)); return; }
+    if (e.pointerType !== "touch" && e.target.closest("[data-ring]")) leer(e);
+  });
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach((ev) => svg.addEventListener(ev, () => { arrastre = null; }));
+
+  function ranking(fig, t) { return PARTIDOS.map((p) => [p, parecido(fig, t.v[p.k])]).sort((a, b) => b[1] - a[1]); }
+  function htmlRank() {
+    const t = T();
+    if (!valida(st.tema)) return `<p class="tiny">Mueve al menos un punto y aquí verás a qué partido se parece tu figura en este tema.</p>`;
+    let h = `<span class="lbl" style="display:block;margin:14px 0 8px">Tu figura se parece más a</span><div style="display:grid;gap:7px">`
+      + ranking(tu[st.tema], t).map(([p, x]) => `<div class="geo-row"><span>${p.n}</span><span class="bar"><i style="width:${x}%;background:${p.c}"></i></span><b>${x}%</b></div>`).join("") + `</div>`;
+    const hechos = KEYS.filter(valida);
+    if (hechos.length >= 2) {
+      const media = PARTIDOS.map((p) => [p, Math.round(hechos.reduce((a, k) => a + parecido(tu[k], TEMAS[k].v[p.k]), 0) / hechos.length)]).sort((a, b) => b[1] - a[1]);
+      h += `<p class="geo-yo-total"><b>En los ${hechos.length} temas que has dibujado</b>, los más parecidos: ${media.slice(0, 3).map(([p, x]) => `<span class="geo-tag" style="--pc:${p.c}">${p.n} · ${x}%</span>`).join("")}</p>`;
+    }
+    return h;
+  }
+  function panelYo() {
+    const t = T(), fig = miFigura();
+    $("#geo-panel").innerHTML = `<span class="lbl">Tu figura · ${t.n}</span><h4>¿Hasta dónde llegarías tú?</h4>
+      <p>Arrastra los puntos blancos sobre cada radio, o usa los deslizadores: 0 es no hacer nada en ese aspecto; 10, lo más avanzado. Tu figura se queda solo en este navegador.</p>
+      <div class="geo-yo-sl">${t.ejes.map((e, i) => `<label><span>${e.n}</span><output data-yo="${i}">${fig[i]} · ${palabraNivel(fig[i])}</output><input type="range" min="0" max="10" step="1" value="${fig[i]}" data-yi="${i}"></label>`).join("")}</div>
+      <div id="geo-yo-rank">${htmlRank()}</div>
+      <p class="tiny">Compara tu figura con la valoración de esta página: mide cuánto se separan las dos figuras, radio a radio. No es una recomendación de voto.</p>
+      <div class="geo-yo-acc"><button class="geo-link" data-borrar-yo>Borrar mi figura de este tema</button><button class="geo-link" data-salir-yo>Volver a los partidos</button></div>`;
+  }
+  function refrescarYo() {
+    if (!st.yo) return;
+    const fig = miFigura(), el = $("#geo-panel");
+    $$("[data-yi]", el).forEach((r) => { const i = +r.dataset.yi; if (+r.value !== fig[i]) r.value = fig[i]; });
+    $$("[data-yo]", el).forEach((o) => { const i = +o.dataset.yo; o.textContent = `${fig[i]} · ${palabraNivel(fig[i])}`; });
+    const rk = $("#geo-yo-rank"); if (rk) rk.innerHTML = htmlRank();
+  }
+  function modoYo(on) {
+    st.yo = on; st.foco = null; st.eje = null; st.ring = null;
+    stage.classList.toggle("yo", on);
+    const b = $("#geo-yo"); b.setAttribute("aria-pressed", String(on)); b.querySelector("span").textContent = on ? "Terminar mi figura" : "Dibuja tu figura";
+    ocultar(); dibujar(); panel(); niveles();
+  }
 
   /* ---- Leyenda de los tres círculos, también para teclado y pantallas táctiles ---- */
   function marcar(k) { $$(".geo-ring", svg).forEach((g) => g.classList.toggle("on", +g.dataset.ring === k)); }
@@ -3331,13 +3509,14 @@ const ILUS = {
   }
 
   function panel() {
+    if (st.yo) return panelYo();
     const t = T(), el = $("#geo-panel"), n = t.ejes.length;
     if (st.eje != null) {
       const e = t.ejes[st.eje], vals = PARTIDOS.map((p) => [p, t.v[p.k][st.eje]]);
       const banda = (lv) => vals.filter(([, x]) => nivelDe(x) === lv).map(([p]) => p);
       el.innerHTML = `<span class="lbl">Radio ${st.eje + 1} de ${n}</span><h4>${e.n}</h4><p>${e.d}</p>
         <span class="lbl" style="display:block;margin-top:14px">La escalera de este aspecto</span>
-        <ol class="geo-esc">${[2, 1, 0].map((k) => { const q = banda(k + 1); return `<li style="--lc:${colorNivel(k)}"><span class="lbl">${NIV[k]}</span><p>${e.niv[k]}</p>${q.length ? `<div class="who">${etiquetas(q)}</div>` : `<div class="who vacio">Ningún partido se queda aquí</div>`}</li>`; }).join("")}
+        <ol class="geo-esc">${[2, 1, 0].map((k) => { const qq = banda(k + 1); return `<li style="--lc:${colorNivel(k)}"><span class="lbl">${NIV[k]}</span><p>${e.niv[k]}</p>${qq.length ? `<div class="who">${etiquetas(qq)}</div>` : `<div class="who vacio">Ningún partido se queda aquí</div>`}</li>`; }).join("")}
         ${banda(0).length ? `<li class="bajo"><span class="lbl">No llegan a lo básico</span><div class="who">${etiquetas(banda(0))}</div></li>` : ""}</ol>
         <div style="display:grid;gap:7px;margin:4px 0 14px">${vals.map(([p, x]) => `<div class="geo-row"><span>${p.n}</span><span class="bar"><i style="width:${x * 10}%;background:${p.c}"></i></span><b>${x}</b></div>`).join("")}</div>
         <span class="lbl" style="color:var(--warn)">Lo que haría el círculo</span><p style="margin-top:6px">${e.p}</p>
@@ -3372,6 +3551,73 @@ const ILUS = {
       + PARTIDOS.map((p) => `<tr><td>${p.n}</td>${t.v[p.k].map((x) => `<td>${x}</td>`).join("")}</tr>`).join("") + `</tbody></table>`;
   }
 
+  /* ---- Los diez temas de un vistazo: cada partido (y tu figura) en cada tema ---- */
+  function mini(v, c, rayas) {
+    const r = (x) => r1(x);
+    return `<svg viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="8.7" fill="none" stroke="#3A4660" stroke-dasharray="2 3"/><circle cx="32" cy="32" r="17.3" fill="none" stroke="#3A4660" stroke-dasharray="2 3"/><circle cx="32" cy="32" r="26" fill="none" stroke="${ORO}" stroke-opacity=".6" stroke-width="1.3"/>`
+      + (v ? `<path d="M${geom(v, 32, 32, 26).map((p) => `${r(p[0])},${r(p[1])}`).join("L")}Z" fill="${c}" fill-opacity=".28" stroke="${c}" stroke-width="1.7" stroke-linejoin="round" ${rayas ? 'stroke-dasharray="3 2"' : ""}/>` : "")
+      + `</svg>`;
+  }
+  const TOTAL = KEYS.reduce((a, k) => a + TEMAS[k].ejes.length, 0);
+  function matriz() {
+    let h = `<div class="gm-p" aria-hidden="true"></div>` + KEYS.map((k) => { const t = TEMAS[k]; return `<button class="gm-t${k === st.tema ? " on" : ""}" data-mt="${k}" style="--tc:${t.c}" aria-label="Abrir ${t.n}"><span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64">${ILUS[k] || ""}</svg></span>${t.n}</button>`; }).join("");
+    PARTIDOS.forEach((p) => {
+      const basico = KEYS.reduce((a, k) => a + TEMAS[k].v[p.k].filter((x) => alcanza(x, 0)).length, 0);
+      h += `<div class="gm-p" style="--pc:${p.c}"><span><i></i>${p.n}</span><small>Lo básico en ${basico} de ${TOTAL} aspectos</small></div>`
+        + KEYS.map((k) => { const t = TEMAS[k], v = t.v[p.k]; return `<button class="gm-c${k === st.tema ? " on" : ""}" data-mt="${k}" data-mp="${p.k}" style="--tc:${t.c}" aria-label="${p.n} en ${t.n}: ${hastaDonde(v)}">${mini(v, p.c)}</button>`; }).join("");
+    });
+    const hechos = KEYS.filter(valida);
+    if (hechos.length) {
+      h += `<div class="gm-p gm-yo"><span><i style="background:#EDEBE6"></i>Tu figura</span><small>${hechos.length} de ${KEYS.length} temas dibujados</small></div>`
+        + KEYS.map((k) => { const t = TEMAS[k]; return `<button class="gm-c${k === st.tema ? " on" : ""}" data-mt="${k}" data-myo style="--tc:${t.c}" aria-label="${valida(k) ? "Tu figura en " + t.n : "Dibujar tu figura en " + t.n}">${valida(k) ? mini(tu[k], "#EDEBE6") : `<span class="mas-yo">+ dibujar</span>`}</button>`; }).join("");
+    }
+    $("#geo-matriz").innerHTML = h;
+  }
+  $("#geo-matriz").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-mt]"); if (!b) return;
+    const yo = b.hasAttribute("data-myo"), p = b.dataset.mp;
+    if (yo) { if (!st.yo) modoYo(true); }
+    else if (st.yo) modoYo(false);
+    cambiarTema(b.dataset.mt);
+    if (p) { st.sel.add(p); st.foco = p; todo(); guardarURL(); }
+    (stage.getBoundingClientRect().top < 0 ? $("#geo-head") : stage).scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+  });
+
+  /* ---- La dirección refleja lo que se ve, para poder compartirlo ---- */
+  function guardarURL() {
+    const p = new URLSearchParams(location.search);
+    p.set("tema", SLUG[st.tema] || st.tema);
+    const sel = PARTIDOS.filter((x) => st.sel.has(x.k)).map((x) => x.k);
+    if (sel.join() === DEF.join()) p.delete("p"); else p.set("p", sel.join(",") || "ninguno");
+    if (st.foco) p.set("foco", st.foco); else p.delete("foco");
+    const qs = "?" + p.toString().replace(/%2C/g, ",");
+    try { history.replaceState(history.state, "", location.pathname + qs + location.hash); } catch (e) { /* archivo suelto */ }
+    // Inside the platform the page lives in a frame: the address people copy is the parent's
+    try {
+      if (window.parent !== window && window.parent.location.origin === location.origin) {
+        const L = window.parent.location;
+        window.parent.history.replaceState(window.parent.history.state, "", L.pathname + qs + L.hash);
+      }
+    } catch (e) { /* otro origen */ }
+  }
+  function enlace() {
+    try { if (window.parent !== window && window.parent.location.origin === location.origin) return window.parent.location.href; } catch (e) { /* otro origen */ }
+    return location.href;
+  }
+  $("#geo-compartir").addEventListener("click", async () => {
+    guardarURL();
+    const url = enlace(), t = T(), est = $("#geo-compartir-estado");
+    const datos = { title: "Política · los partidos no son puntos, son formas", text: `${t.n}: qué cuida y qué deja fuera cada partido, frente a un círculo ideal.`, url };
+    if (navigator.share && matchMedia("(pointer: coarse)").matches) {
+      try { await navigator.share(datos); return; } catch (e) { if (e && e.name === "AbortError") return; }
+    }
+    try { await navigator.clipboard.writeText(url); est.textContent = "Enlace copiado. Abre este tema tal como lo ves."; }
+    catch (e) {
+      est.textContent = "Copia este enlace:";
+      const i = document.createElement("input"); i.readOnly = true; i.value = url; est.appendChild(i); i.select();
+    }
+  });
+
   function chips() {
     $("#geo-chips").innerHTML = PARTIDOS.map((p) => `<button class="geo-chip" data-k="${p.k}" style="--pc:${p.c}" aria-pressed="${st.sel.has(p.k)}"><i></i>${p.n}</button>`).join("")
       + `<button class="geo-chip mini" data-todos>Todos</button><button class="geo-chip mini" data-ninguno>Ninguno</button>`;
@@ -3379,23 +3625,28 @@ const ILUS = {
   function cabecera() {
     const t = T(), i = KEYS.indexOf(st.tema), h = $("#geo-head");
     h.style.setProperty("--tc", t.c);
-    h.innerHTML = `<span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64">${ILUS[st.tema] || ""}</svg></span>`
+    $("#geo-head-in").innerHTML = `<span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64">${ILUS[st.tema] || ""}</svg></span>`
       + `<div><p class="lbl">Tema ${i + 1} de ${KEYS.length} · ${PALABRA[t.ejes.length] || t.ejes.length} aspectos</p><h3>${t.n}</h3><p class="q">${t.q}</p></div>`;
     $("#geometrias").style.setProperty("--tc", t.c);
   }
-  function todo() { ocultar(); chips(); dibujar(); panel(); niveles(); cabecera(); }
+  function todo() { ocultar(); chips(); dibujar(); panel(); niveles(); cabecera(); matriz(); }
 
   const tabs = $("#geo-tema");
   tabs.innerHTML = KEYS.map((k) => { const t = TEMAS[k]; return `<button class="geo-tc" role="tab" data-t="${k}" aria-selected="${k === st.tema}" tabindex="${k === st.tema ? 0 : -1}" aria-controls="geo-head" style="--tc:${t.c}"><span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64">${ILUS[k] || ""}</svg></span><span class="nm">${t.n}</span></button>`; }).join("");
-  function cambiarTema(k, enfocarTab) {
-    if (!TEMAS[k]) return;
-    st.tema = k; st.eje = null; st.ring = null;
+  function marcarTab(enfocarTab) {
     $$("[data-t]", tabs).forEach((b) => {
-      const on = b.dataset.t === k;
+      const on = b.dataset.t === st.tema;
       b.setAttribute("aria-selected", String(on)); b.tabIndex = on ? 0 : -1;
       if (on) { if (enfocarTab) b.focus(); if (tabs.scrollWidth > tabs.clientWidth) tabs.scrollTo({ left: b.offsetLeft - tabs.clientWidth / 2 + b.offsetWidth / 2, behavior: "smooth" }); }
     });
-    todo(); propuestas();
+  }
+  function cambiarTema(k, enfocarTab) {
+    if (!TEMAS[k]) return;
+    const nuevo = k !== st.tema;
+    st.tema = k; st.eje = null; st.ring = null; st.foco = null;
+    marcarTab(enfocarTab);
+    if (nuevo) { svg.classList.remove("geo-entra"); void svg.getBoundingClientRect(); svg.classList.add("geo-entra"); clearTimeout(cambiarTema.t); cambiarTema.t = setTimeout(() => svg.classList.remove("geo-entra"), 1200); }
+    todo(); propuestas(); guardarURL();
   }
   tabs.addEventListener("click", (e) => { const b = e.target.closest("[data-t]"); if (b) cambiarTema(b.dataset.t); });
   tabs.addEventListener("keydown", (e) => {
@@ -3409,36 +3660,43 @@ const ILUS = {
     if (b.dataset.todos != null) PARTIDOS.forEach((p) => st.sel.add(p.k));
     else if (b.dataset.ninguno != null) { st.sel.clear(); st.foco = null; }
     else { const k = b.dataset.k; if (st.sel.has(k)) { st.sel.delete(k); if (st.foco === k) st.foco = null; } else st.sel.add(k); }
-    todo();
+    todo(); guardarURL();
   });
-  const enfocar = (k) => { st.foco = st.foco === k ? null : k; st.eje = null; if (k) st.sel.add(k); todo(); };
+  const enfocar = (k) => { if (st.yo) modoYo(false); st.foco = st.foco === k ? null : k; st.eje = null; if (k) st.sel.add(k); todo(); guardarURL(); };
   const eje = (i) => { st.eje = st.eje === i ? null : i; st.foco = null; ocultar(); dibujar(); panel(); };
   svg.addEventListener("click", (e) => {
+    if (st.yo) return; // in drawing mode the pointer draws (pointerdown above)
     // En pantallas táctiles, tocar un círculo o un punto muestra su explicación
     if (leer(e)) return;
     ocultar();
     const a = e.target.closest("[data-ax]"); if (a) return eje(+a.dataset.ax);
     const s = e.target.closest("[data-p]"); if (s) return enfocar(s.dataset.p);
-    if (st.foco || st.eje != null) { st.foco = null; st.eje = null; dibujar(); panel(); }
+    if (st.foco || st.eje != null) { st.foco = null; st.eje = null; dibujar(); panel(); guardarURL(); }
   });
   svg.addEventListener("keydown", (e) => {
     const a = e.target.closest("[data-ax]");
-    if (a && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); eje(+a.dataset.ax); const n = svg.querySelector(`[data-ax="${a.dataset.ax}"]`); if (n) n.focus(); }
+    if (a && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); if (st.yo) modoYo(false); eje(+a.dataset.ax); const n = svg.querySelector(`[data-ax="${a.dataset.ax}"]`); if (n) n.focus(); }
   });
-  $("#geo-panel").addEventListener("click", (e) => {
+  const pn = $("#geo-panel");
+  pn.addEventListener("click", (e) => {
     const v = e.target.closest("[data-ver]"); if (v) return enfocar(v.dataset.ver);
-    if (e.target.closest("[data-cerrar]")) { st.foco = null; st.eje = null; dibujar(); panel(); }
+    if (e.target.closest("[data-cerrar]")) { st.foco = null; st.eje = null; dibujar(); panel(); guardarURL(); return; }
+    if (e.target.closest("[data-borrar-yo]")) { delete tu[st.tema]; guardarTu(); dibujar(); panelYo(); matriz(); return; }
+    if (e.target.closest("[data-salir-yo]")) modoYo(false);
   });
+  pn.addEventListener("input", (e) => { const r = e.target.closest("[data-yi]"); if (r) fijar(+r.dataset.yi, +r.value); });
+  $("#geo-yo").addEventListener("click", () => modoYo(!st.yo));
   $("#geo-ideal").addEventListener("click", (e) => { st.ideal = !st.ideal; e.currentTarget.setAttribute("aria-pressed", String(st.ideal)); dibujar(); marcar(st.ring); });
   $("#geo-env").addEventListener("click", (e) => { st.env = !st.env; e.currentTarget.setAttribute("aria-pressed", String(st.env)); dibujar(); marcar(st.ring); });
-  API.geoForma = puntos; // usado por la tarjeta de la portada
+  API.geoForma = (s) => geom(s, 410, 372, 226); // usado por la tarjeta de la portada
+  marcarTab(false);
   todo(); propuestas();
 })();
 
 /* ================= 7 · Votar por temas ================= */
 /* Prototipo de democracia directa por grados. Cada medida tiene un deslizador en unidades reales
    (euros, años, %, plazas), su serie histórica oficial y, para cada posición del deslizador, el pro y
-   el contra. Datos reales con fuente (capítulo 8). Lo elegido vive solo en el navegador (localStorage). */
+   el contra. Datos reales con fuente (al final de la página). Lo elegido vive solo en el navegador (localStorage). */
 const NIVELES = {
   subir: ["Bajar mucho", "Bajar un poco", "Quedarse igual", "Subir un poco", "Subir mucho"],
   abrir: ["Cerrar mucho", "Cerrar un poco", "Quedarse igual", "Abrir un poco", "Abrir mucho"]
