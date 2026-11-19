@@ -756,6 +756,8 @@ h3{font:400 clamp(1.5rem,2.6vw,2rem)/1.15 var(--display);margin:0}
 
 footer{border-top:1px solid var(--line);padding-block:40px 64px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px;font-size:13.5px;color:var(--muted)}
 footer p{margin:0;max-width:70ch}
+footer .pie-acc,footer .pie-mas{flex-basis:100%}
+footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 
 @media (prefers-reduced-motion: reduce){
   html{scroll-behavior:auto}
@@ -924,6 +926,7 @@ footer p{margin:0;max-width:70ch}
 [data-vista="geometria"] .geo-bar{display:flex;flex:1;min-width:0;align-items:center;justify-content:center;gap:10px;position:relative}
 [data-vista="geometria"] .geo-bar .geo-acc{margin:0;flex-wrap:nowrap;gap:8px;position:relative}
 [data-vista="geometria"] .geo-bar .geo-btn{min-height:38px;padding:6px 12px;font-size:13px}
+[data-vista="geometria"] .geo-bar .geo-btn.geo-test{min-height:52px;padding:12px 24px;font-size:16px}
 [data-vista="geometria"] .geo-bar .geo-estado{position:absolute;top:100%;right:0;margin-top:6px;flex-basis:auto;white-space:nowrap;text-align:right}
 .geo-ir{font:500 13px var(--sans);color:var(--muted);text-decoration:none;white-space:nowrap;margin-left:4px}
 .geo-ir:hover{color:var(--ink)}
@@ -977,9 +980,9 @@ footer p{margin:0;max-width:70ch}
 #geo-svg[data-k="0"] .geo-num[data-lk="0"],#geo-svg[data-k="1"] .geo-num[data-lk="1"],#geo-svg[data-k="2"] .geo-num[data-lk="2"]{opacity:1}
 /* Los selectores, desplegados y compactos, encima de la figura */
 .geo-selectores{max-width:1120px;margin:0 auto 10px;display:grid;gap:8px}
-.geo-selectores .geo-temas{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin:0}
-.geo-selectores .geo-tc{min-height:0;width:auto;padding:3px 10px 3px 3px;gap:7px;font-size:12.5px}
-.geo-selectores .geo-tc .ill{width:26px;height:26px}
+.geo-selectores .geo-temas{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:0}
+.geo-selectores .geo-tc{min-height:60px;width:auto;padding:8px 18px 8px 8px;gap:12px;font-size:16px}
+.geo-selectores .geo-tc .ill{width:46px;height:46px}
 .geo-chips-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px}
 /* Partidos en columna a la izquierda de la figura (2026-11-18, Eugenio) */
 .geo{max-width:1600px;display:grid;grid-template-columns:200px minmax(0,1fr);column-gap:20px;align-items:start}
@@ -1001,6 +1004,7 @@ footer p{margin:0;max-width:70ch}
 .geo-tip{pointer-events:none}
 .geo-tip .tbtn,.geo-tip .geo-link{pointer-events:auto}
 .geo-tip h5{font:600 14px var(--sans);color:var(--ink);margin:2px 0 6px}
+.geo-tip .medida{font:600 1.45rem/1.15 var(--display);margin:8px 0 6px}
 .geo-tip-acc{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
 .geo-mas{display:grid;gap:10px;padding:14px 16px;border-radius:14px;background:var(--bg-2);border:1px solid var(--line-2);color:var(--ink-2);font:400 13.5px/1.5 var(--sans)}
 .geo-mas .lbl{display:block}
@@ -1318,11 +1322,8 @@ footer p{margin:0;max-width:70ch}
     </nav>
     <div class="geo-bar">
       <div class="geo-acc" id="geo-acc">
-      <button class="geo-btn yo" id="geo-yo" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></svg><span>Dibuja tu figura</span></button>
-      <button class="geo-btn" id="geo-compartir"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.9l7.6-4.4M8.2 13.1l7.6 4.4"/></svg><span>Compartir</span></button>
-      <p class="geo-estado" id="geo-compartir-estado" aria-live="polite"></p>
+      <button class="geo-btn yo" id="geo-yo" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/></svg><span>Haz el test y descubre tu geometría política</span></button>
       </div>
-      <a class="geo-ir" href="/politica" target="_top">Política →</a>
     </div>
   </div>
   <div class="prog" aria-hidden="true"><i id="prog"></i></div>
@@ -1336,9 +1337,6 @@ footer p{margin:0;max-width:70ch}
   <h2 class="sr-only" id="h-geometrias">Geometría política: los partidos como figuras en diez temas</h2>
   <div class="geo-selectores">
     <div class="geo-temas" id="geo-tema" role="tablist" aria-label="Elige un tema"></div>
-    <div class="geo-chips-row">
-      <button class="tbtn" id="geo-ideal" aria-pressed="true">Círculo ideal</button>
-    </div>
   </div>
   <div class="geo">
     <aside class="geo-partidos" aria-labelledby="geo-partidos-t">
@@ -1764,6 +1762,11 @@ footer p{margin:0;max-width:70ch}
 <footer>
   <p>Esta página es de <a href="https://humanity.wiki">Luz &amp; Humanidad</a>, la comunidad que la publica en humanity.wiki. Herramienta educativa sin afiliación política. Los perfiles son tipos ideales, no retratos de personas ni de partidos. Las geometrías de la portada sí sitúan a partidos reales: son una valoración de esta página a partir de sus programas y votaciones, discutible y corregible.</p>
   <p>Ningún dato sale de tu navegador.</p>
+  <div class="pie-acc">
+    <button class="geo-btn" id="geo-compartir"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.9l7.6-4.4M8.2 13.1l7.6 4.4"/></svg><span>Compartir</span></button>
+      <p class="geo-estado" id="geo-compartir-estado" aria-live="polite"></p>
+  </div>
+  <p class="pie-mas">Esta web también lleva a otras páginas de política: <a href="/politica" target="_top">Política →</a></p>
 </footer>
 </div>
 
@@ -3349,8 +3352,13 @@ const ILUS = {
   const q = new URLSearchParams(location.search);
   const qt = q.get("tema");
   if (qt && (TEMAS[qt] || DE_SLUG[qt])) st.tema = TEMAS[qt] ? qt : DE_SLUG[qt];
-  if (q.get("p") != null) st.sel = new Set(q.get("p").split(",").filter((k) => PMAP[k]));
-  if (PMAP[q.get("foco")]) { st.foco = q.get("foco"); st.sel.add(st.foco); }
+  const recargada = (performance.getEntriesByType("navigation")[0] || {}).type === "reload";
+  if (recargada && (q.has("p") || q.has("foco"))) {
+    q.delete("p"); q.delete("foco");
+    try { history.replaceState(history.state, "", location.pathname + (q.toString() ? "?" + q.toString() : "") + location.hash); } catch (e) { /* archivo suelto */ }
+  }
+  if (!recargada && q.get("p") != null) st.sel = new Set(q.get("p").split(",").filter((k) => PMAP[k]));
+  if (!recargada && PMAP[q.get("foco")]) { st.foco = q.get("foco"); st.sel.add(st.foco); }
   const T = () => TEMAS[st.tema];
   const colorNivel = (k) => (k === 2 ? ORO : T().c);
   const etiquetas = (arr) => arr.map((p) => `<span class="geo-tag" style="--pc:${p.c}">${p.n}</span>`).join("");
@@ -3472,7 +3480,8 @@ const ILUS = {
     orden.forEach((p, idx) => {
       const v = t.v[p.k], on = !st.foco || st.foco === p.k, fo = st.foco === p.k;
       s += `<g class="geo-shape" data-p="${p.k}" style="opacity:${st.yo ? 0.5 : on ? 1 : 0.18};--d:${idx * 55}ms"><path d="${dPath(puntos(v))}" fill="${p.c}" fill-opacity="${fo ? 0.26 : 0.1}" stroke="${p.c}" stroke-width="${fo ? 3.2 : 2.2}" stroke-linejoin="round"/>`;
-      v.forEach((x, i) => { const [px, py] = P(ang(i, n), rr(x)); s += `<circle cx="${r1(px)}" cy="${r1(py)}" r="${r1((fo ? 5 : 3.5) * K)}" fill="${p.c}"/>`; });
+      // Cada vértice se puede señalar: un área transparente grande encima del punto visible
+      v.forEach((x, i) => { const [px, py] = P(ang(i, n), rr(x)); s += `<g class="geo-pv" data-pv="${p.k}" data-pi="${i}"><circle cx="${r1(px)}" cy="${r1(py)}" r="${r1(14 * K)}" fill="transparent"/><circle cx="${r1(px)}" cy="${r1(py)}" r="${r1((fo ? 5 : 3.5) * K)}" fill="${p.c}"/></g>`; });
       if (fo && !st.yo) {
         // Patas cojas: por debajo de lo básico
         v.forEach((x, i) => { if (x <= 3) { const [px, py] = P(ang(i, n), rr(x)); s += `<circle cx="${r1(px)}" cy="${r1(py)}" r="${r1(11 * K)}" fill="none" stroke="${ORO}" stroke-width="2" stroke-dasharray="3 3"/>`; } });
@@ -3542,13 +3551,28 @@ const ILUS = {
     return `<span class="lbl" style="color:${colorNivel(k)}">${NIV[k]} · radio ${i + 1}</span><h5>${e.n}</h5><p>${e.niv[k]}</p>`
       + `<p class="who">${ya.length ? "Llegan: " + etiquetas(ya) : "Ningún partido llega todavía."}</p>`;
   }
+  // Un vértice de un partido: su nota, qué nivel le corresponde, y su postura en el tema.
+  // Por aspecto no hay todavía un texto por partido que justifique la nota: se dice, en vez de inventarlo.
+  function htmlPartido(pk, i) {
+    const t = T(), e = t.ejes[i], p = PARTIDOS.find((q) => q.k === pk), x = t.v[pk][i], lvl = nivelDe(x);
+    const coma = (n) => n.toFixed(1).replace(".", ",");
+    const nivel = lvl
+      ? `<span class="medida" style="color:${colorNivel(lvl - 1)}">${NIV_TITULO[lvl - 1]}</span>Llega desde ${coma(UMBRAL[lvl - 1])} de 10.`
+      : `<span class="medida" style="color:#8A93A6">Sin medida</span>No llega a lo básico: hacen falta ${coma(UMBRAL[0])} de 10 para el primer círculo.`;
+    return `<span class="lbl" style="color:${p.c}">${p.n} · radio ${i + 1}</span><h5>${e.n}</h5>`
+      + `<p class="who">${p.n}: ${x} de 10 <small>(valoración de este observatorio)</small></p>`
+      + `<p>${nivel}</p>`
+      + `<p><b>Lo básico:</b> ${e.niv[0]}</p>`
+      + `<p><b>Postura de ${p.n} en todo el tema:</b> ${t.t[pk] || "Sin texto todavía."}</p>`
+      + `<p class="who"><small>Por aspecto, este observatorio no tiene aún un texto de ${p.n} que justifique esta nota. Lo de arriba es su postura en el tema entero.</small></p>`;
+  }
   function htmlMejor(i) {
     const t = T(), e = t.ejes[i], m = mejores(t)[i], lvl = nivelDe(m.max); // 0: no llega a lo básico; 1 a 3: círculo
     const cab = `<span class="lbl" style="color:${lvl ? colorNivel(lvl - 1) : "#EDEBE6"}">Nota más alta</span><h5>${e.n}</h5>`;
     if (!lvl) return cab + `<p class="who">Ningún partido llega a lo básico en este aspecto.</p>`;
     // Lo que dice el nivel es una definición general, igual para todos los partidos: se separa de la nota del partido
     return cab + `<p class="who">${etiquetas(m.quien)} · ${m.max} de 10 <small>(valoración de este observatorio)</small></p>`
-      + `<p><b>Qué significa «${NIV[lvl - 1]}» en este aspecto, para cualquier partido:</b> ${e.niv[lvl - 1]}</p>`;
+      + `<p class="medida" style="color:${colorNivel(lvl - 1)}">${NIV_TITULO[lvl - 1]}</p><p>${e.niv[lvl - 1]}</p>`;
   }
   // El detalle de un punto de «lo mejor», para la columna de la derecha
   function htmlMasMejor(i) {
@@ -3613,6 +3637,8 @@ const ILUS = {
     if (st.yo) return false;
     const mj = e.target.closest("[data-mi]");
     if (mj) { if (st.fijado != null) return true; const [x, y] = centro(mj.querySelector(".mdot")); mostrar(`m${st.tema}-${mj.dataset.mi}`, htmlMejor(+mj.dataset.mi), x, y); return true; }
+    const pv = e.target.closest("[data-pv]");
+    if (pv) { const [x, y] = centro(pv.lastElementChild); mostrar(`v${st.tema}-${pv.dataset.pv}-${pv.dataset.pi}`, htmlPartido(pv.dataset.pv, +pv.dataset.pi), x, y); return true; }
     const lv = e.target.closest("[data-lk]");
     if (lv) { const [x, y] = centro(lv.querySelector(".dot")); mostrar(`p${lv.dataset.li}-${lv.dataset.lk}`, htmlPunto(+lv.dataset.li, +lv.dataset.lk), x, y); return true; }
     const rg = e.target.closest("[data-ring]");
@@ -3623,7 +3649,7 @@ const ILUS = {
   svg.addEventListener("pointerout", (e) => {
     if (e.pointerType === "touch") return;
     const to = e.relatedTarget;
-    if (to && to.closest && (to.closest("[data-lk]") || to.closest("[data-ring]") || to.closest("[data-mi]"))) return;
+    if (to && to.closest && (to.closest("[data-lk]") || to.closest("[data-ring]") || to.closest("[data-mi]") || to.closest("[data-pv]"))) return;
     ocultar();
   });
   // Con teclado, al enfocar un punto de «lo mejor» se lee lo mismo que con el ratón
@@ -3940,7 +3966,6 @@ const ILUS = {
   });
   pn.addEventListener("input", (e) => { const r = e.target.closest("[data-yi]"); if (r) fijar(+r.dataset.yi, +r.value); });
   $("#geo-yo").addEventListener("click", () => modoYo(!st.yo));
-  $("#geo-ideal").addEventListener("click", (e) => { st.ideal = !st.ideal; e.currentTarget.setAttribute("aria-pressed", String(st.ideal)); dibujar(); marcar(st.ring); });
   // «Déjalo de lo mejor de cada uno»: el dibujo pasa a mostrar el partido más cercano al ideal en cada aspecto
   function setMejor(on) {
     if (on && st.yo) modoYo(false);
