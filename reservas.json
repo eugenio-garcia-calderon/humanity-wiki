@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "public/observatorio-polarizacion/index.html",
+      "motivo": "Botón de lo mejor de cada partido: texto y estrella; sin tooltip gris",
+      "desde": "2026-11-19T22:26:14.209Z"
+    }
+  ]
 }
