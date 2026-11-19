@@ -10,7 +10,7 @@
 //   'por-confirmar' and the panel shows it as such. Never upgrade a guess.
 // - This page is public. No personal figures of Eugenio (savings, family, names of friends) in this file.
 
-export type TipoNodo = 'meta' | 'hito' | 'decision' | 'opcion' | 'supuesto' | 'regla';
+export type TipoNodo = 'meta' | 'hito' | 'decision' | 'opcion' | 'paso' | 'supuesto' | 'regla';
 /** Where the option stands today, by the research — not Eugenio's own mark, which is stored apart. */
 export type EstadoNodo = 'ahora' | 'elegida' | 'prometedora' | 'por-explorar' | 'dudosa' | 'descartada' | 'despues';
 export type Comprobado = 'leido' | 'por-confirmar';
@@ -39,6 +39,8 @@ export interface NodoEstrategia {
   preguntas?: string[];
   fuentes?: Fuente[];
   borrador?: Borrador;
+  /** the test that closes this door: «se descarta si…» */
+  descarta?: string;
   /** what Eugenio has already answered or decided on this node, with its date */
   decidido?: string[];
 }
@@ -54,6 +56,9 @@ const F = {
   artesanal: { titulo: 'Resolución de 24-9-2025: homologación de L3e y L5e de fabricación artesanal (BOE)', url: 'https://www.boe.es/boe/dias/2025/10/08/pdfs/BOE-A-2025-20062.pdf' },
   manual7: { titulo: 'Resolución de 27-1-2026: corrección segunda de la revisión 7 del Manual de Reformas (BOE)', url: 'https://boe.es/boe/dias/2026/02/05/pdfs/BOE-A-2026-2709.pdf' },
   twizy: { titulo: 'Renault Twizy 80: medidas y datos', url: 'https://www.evspecs.org/tech-specs/renault/twizy/urban-80' },
+  rd750: { titulo: 'Real Decreto 750/2010, homologación de vehículos (BOE, consolidado)', url: 'https://boe.es/buscar/pdf/2010/BOE-A-2010-9994-consolidado.pdf' },
+  orden2026: { titulo: 'Orden PJC/528/2026: requisitos de homologación individual y series cortas (BOE)', url: 'https://www.boe.es/boe/dias/2026/05/29/pdfs/BOE-A-2026-11580.pdf' },
+  neotec: { titulo: 'CDTI: preguntas frecuentes de Neotec 2026', url: 'https://www.cdti.es/sites/default/files/2026-04/faq_neotec_2026_v1.0.pdf' },
   solares: { titulo: 'Electrek (2023): Lightyear, Sono Motors y Aptera', url: 'https://electrek.co/2023/01/26/the-future-of-solar-evs-dims/' },
 };
 
@@ -79,11 +84,12 @@ export const ARBOL: NodoEstrategia[] = [
       'El dinero propio que se arriesga tiene un tope decidido antes de empezar, no durante.',
       'Salud y familia van antes que el calendario.',
       'El control de la empresa se protege: llegar lo más lejos posible con recursos propios antes de dar entrada a nadie.',
+      'Una negativa de la administración cierra una puerta, no el proyecto. Por eso se exploran varias a la vez: la señal de parada es que se cierren todas.',
     ],
-    preguntas: [
-      '¿Cuántas horas a la semana puedes dedicarle de forma sostenida sin que lo pague tu casa? Una cifra, aunque sea aproximada.',
-      '¿Qué cantidad máxima estás dispuesto a perder del todo en el hito 1? No hace falta que la escribas aquí: dímela en el chat y aquí sólo aparecerá como «tope fijado».',
-      '¿Qué señal te haría parar o cambiar de plan? Por ejemplo: un plazo, un gasto o una respuesta negativa de la administración.',
+    decidido: [
+      '19-11-2026: dedicación semanal fijada.',
+      '19-11-2026: tope de pérdida fijado, y se aplica por etapa.',
+      '19-11-2026: señal para parar o cambiar de plan: una respuesta negativa de la administración.',
     ],
   },
 
@@ -98,40 +104,127 @@ export const ARBOL: NodoEstrategia[] = [
   },
   {
     id: 'h1-legal', padre: 'h1', tipo: 'decision', titulo: '¿Por qué puerta legal entra?', estado: 'ahora',
-    resumen: 'Tras la segunda ronda de lectura quedan dos puertas fuertes que no compiten, se suman: la reforma del Twizy para rodar pronto, y el triciclo artesanal con ruedas traseras gemelas para el vehículo definitivo. La homologación individual como cuadriciclo queda de reserva.',
+    resumen: 'Once puertas tras tres rondas de lectura: una cerrada, tres dudosas y siete abiertas. Tres consultas por escrito bastan para confirmar o descartar casi todas. Cada puerta dice qué la descartaría.',
     detalle: [
-      'Primero la reforma del Twizy: es eléctrica, usa lo que ya hay y da matrícula desde el primer día.',
-      'En paralelo, una consulta sobre el triciclo artesanal: es la única vía que la norma española describe para un vehículo hecho unidad a unidad, y admite el híbrido sin tope de potencia.',
-      'Cada una tiene su borrador de consulta escrito dentro de su caja.',
+      'Para rodar pronto: la reforma del Twizy 80.',
+      'Para el vehículo de chasis propio hay tres puertas que se deciden con una sola consulta a un servicio técnico: matricularlo como prototipo, homologación individual como cuadriciclo y homologación individual como turismo.',
+      'De apoyo, no legalizan por sí solas: placas rojas, circuito y ayudas públicas.',
+      'Dudosas: matricular en otro país, el sandbox y el triciclo.',
     ],
-    siguiente: 'Enviar las dos consultas. Son dos correos y ninguno compromete a nada.',
-    decidido: ['19-11-2026: las cuatro ruedas son innegociables.', '19-11-2026: vale un Aeromóvil eléctrico como hito 1; el híbrido viene después.'],
+    siguiente: 'Enviar tres consultas: al ingeniero de reformas (borrador en «Reforma profunda del Twizy 80»), a un servicio técnico (borrador en «Homologación individual como cuadriciclo») y a la DGT sobre placas rojas (borrador en su caja).',
+    decidido: ['19-11-2026: las cuatro ruedas son innegociables.', '19-11-2026: vale un Aeromóvil eléctrico como hito 1; el híbrido viene después.', '19-11-2026: quieres explorar todas las puertas abiertas antes de elegir.'],
   },
   {
-    id: 'p-individual-l7e', padre: 'h1-legal', tipo: 'opcion', titulo: 'Homologación individual como cuadriciclo pesado (L7e)', estado: 'por-explorar', comprobado: 'por-confirmar',
-    resumen: 'La vía general para un vehículo único con chasis propio. Queda de reserva: para cuadriciclos no existe la lista reducida de requisitos que sí existe para triciclos artesanales.',
+    id: 'p-individual-l7e', padre: 'h1-legal', tipo: 'opcion', titulo: 'Homologación individual como cuadriciclo pesado (L7e)', estado: 'prometedora', comprobado: 'por-confirmar',
+    resumen: 'Un servicio técnico ensaya ese vehículo concreto y el Ministerio resuelve. Es más ligera de lo que parecía: una orden de mayo de 2026 deja doce requisitos fuera de la homologación individual en esta categoría, y la puedes pedir tú como titular.',
     detalle: [
-      'Marco: Real Decreto 750/2010, homologación individual. Los prototipos sólo pueden matricularse a nombre del fabricante que los desarrolla.',
-      'Leído: la resolución de fabricación artesanal de 2025 cubre sólo motos (L3e) y triciclos (L5e). No menciona los cuadriciclos, así que aquí se aplicaría la lista completa.',
-      'Límites de la categoría, según la pestaña «Homologación»: 15 kW continuos, 450 kg sin batería, 3,70 m de largo y 1,50 m de ancho, y 90 km/h por construcción en la subcategoría de habitáculo cerrado.',
-      'El formulario del INTA no dice si admite la categoría L ni publica tarifas.',
+      'Leído en el Real Decreto 750/2010, artículo 4.4: la solicita «el interesado». Si la pide el titular del vehículo, puede omitirse la inscripción en el registro de fabricantes.',
+      'Leído, artículo 6.2: la autoridad tiene seis meses para resolver. Si no contesta, se entiende denegada.',
+      'Leído, artículo 4.4: la autoridad puede eximir a un vehículo concreto de actos reglamentarios si cumple requisitos alternativos. En vehículos singulares puede eximir de requisitos que el fabricante justifique como inaplicables y un servicio técnico certifique.',
+      'Leído en la Orden PJC/528/2026: en la categoría L no son obligatorios para la homologación individual la declaración de durabilidad, las estructuras de protección delanteras y traseras, la protección antivuelco, las plazas de asiento, la maniobrabilidad, la placa de limitación de velocidad, la protección de los ocupantes, la potencia y la limitación de velocidad por construcción, la integridad de la estructura, las plataformas de carga, el diagnóstico a bordo y la información de reparación.',
+      'Siguen pidiendo acta de ensayo, entre otros, el frenado, el nivel sonoro, la seguridad eléctrica y los ensayos ambientales.',
+      'Límites de la categoría, según la pestaña «Homologación»: 15 kW continuos, 450 kg sin batería, 3,70 m por 1,50 m y 90 km/h por construcción con habitáculo cerrado.',
+      'Sin leer: tarifas. El formulario del INTA no las publica.',
     ],
-    aFavor: ['Chasis propio con las medidas del diseño.', 'Cada ensayo que se guarde sirve después para la serie corta de cuadriciclos, de hasta 150 al año.'],
-    enContra: ['Potencia y velocidad por debajo de lo que quieres para carretera.', 'Sin lista reducida: más ensayos que el triciclo artesanal.', 'Coste y plazo sin cifra.'],
-    siguiente: 'Preguntarla en la misma consulta del triciclo artesanal, como alternativa. No merece un correo aparte.',
-    fuentes: [F.inta, F.industria, F.artesanal],
+    aFavor: ['Chasis propio con las medidas del diseño.', 'No exige constar como fabricante.', 'Sin ensayo de estructura ni de protección de ocupantes.', 'Cada ensayo sirve después para la serie corta de cuadriciclos.'],
+    enContra: ['15 kW y 90 km/h: por debajo de lo que quieres para carretera.', 'Coste sin cifra.', 'Vale para ese vehículo: cada unidad repite parte del trámite.'],
+    coste: 'Sin cifra. Es la primera pregunta de la consulta.',
+    plazo: 'Hasta seis meses de resolución, más los ensayos.',
+    siguiente: 'Enviar la consulta al servicio técnico. El mismo correo pregunta por las tres puertas de chasis propio.',
+    descarta: 'Se descarta si el presupuesto del servicio técnico supera el tope de la etapa, o si 15 kW y 90 km/h no te bastan ni como primer vehículo.',
+    borrador: {
+      para: 'Un servicio técnico de homologación (IDIADA, INSIA, INTA o TÜV Rheinland)',
+      asunto: 'Consulta previa: vía para matricular un vehículo único de chasis propio (prototipo, individual L7e o individual M1)',
+      cuerpo: `Buenos días:
+
+Estoy desarrollando un vehículo ligero de cuatro ruedas y dos plazas en tándem, carrozado y cerrado, con chasis propio. Quiero construir una sola unidad y matricularla en España. Antes de fabricarla necesito elegir la vía. Adjunto un dibujo con sus medidas.
+
+Datos principales: largo [3,70] m, ancho [1,40] m, masa en orden de marcha de unos [350] kg sin batería, propulsión eléctrica de [15] kW continuos. Más adelante, una versión híbrida enchufable.
+
+Mis preguntas:
+
+1. Prototipo (artículo 5.2 del Real Decreto 750/2010): ¿qué exige en la práctica la autorización expresa de la autoridad de homologación? ¿Basta la memoria de actos que no se cumplen con sus medidas sustitutivas y un informe favorable suyo? ¿Hace falta estar inscrito en el Registro de Fabricantes?
+2. Homologación individual como L7e: con la Orden PJC/528/2026 (anexo I, apartado 3), ¿qué ensayos quedan para un vehículo así y en qué subcategoría entraría?
+3. Homologación individual como M1: en el nuevo apéndice 5 del anexo III, ¿los requisitos de choque frontal y lateral (A20, A21 y A25 a A27) pueden justificarse con declaración del fabricante? ¿Qué se exigiría de control de estabilidad, antibloqueo y ayudas a la conducción (B4 a B7)?
+4. ¿Puedo solicitar la homologación individual como titular del vehículo, sin inscribirme como fabricante (artículo 4.4)?
+5. Coste y plazo orientativos de cada una de las tres vías con ustedes.
+
+Si alguna la ven viable, me gustaría concertar una reunión previa.
+
+Gracias y un saludo,
+[tu nombre y teléfono]`,
+    },
+    fuentes: [F.rd750, F.orden2026, F.inta, F.industria],
   },
   {
-    id: 'p-individual-m1', padre: 'h1-legal', tipo: 'opcion', titulo: 'Homologación individual como turismo (M1)', estado: 'por-explorar', comprobado: 'por-confirmar',
-    resumen: 'La misma vía, pero como coche. Quita los topes de potencia, peso y velocidad de los cuadriciclos, a cambio de la reglamentación de turismos.',
-    aFavor: ['Velocidad legal de coche y autopistas.', 'Sin discusión de categoría: es lo que el vehículo quiere ser.'],
-    enContra: ['Los requisitos de un turismo son muchos más: frenos, control de estabilidad, estructura.', 'No está leído cuáles se pueden sustituir por requisitos alternativos en un vehículo único.', 'Es probablemente la más cara.'],
-    siguiente: 'Preguntar en la misma consulta al laboratorio qué exigiría como M1 un vehículo único de menos de 600 kg.',
-    fuentes: [F.industria],
+    id: 'i-1', padre: 'p-individual-l7e', tipo: 'paso', titulo: '1 · Consulta previa al servicio técnico', estado: 'ahora',
+    resumen: 'Un correo, el del borrador. Sirve a la vez para esta puerta, para la del prototipo y para la del turismo.',
+    coste: 'Nada, o el precio de una reunión.', plazo: 'Una a tres semanas hasta tener respuesta.',
   },
   {
-    id: 'p-individual-l5e', padre: 'h1-legal', tipo: 'opcion', titulo: 'Triciclo artesanal (L5e) con ruedas traseras gemelas', estado: 'prometedora', comprobado: 'por-confirmar',
-    resumen: 'Cuatro ruedas en el suelo, tres para la ley. Dos ruedas del mismo eje a 46 cm o menos cuentan como una, y para triciclos hechos unidad a unidad hay una resolución de 2025 con una lista de requisitos más corta. Es la candidata para el vehículo definitivo.',
+    id: 'i-2', padre: 'p-individual-l7e', tipo: 'paso', titulo: '2 · Lista de ensayos con presupuesto', estado: 'despues',
+    resumen: 'Con la respuesta, pedir por escrito qué ensayos harían, con qué piezas ya homologadas se evitan (luces, cristales, neumáticos, cinturones) y cuánto cuesta cada uno. Es el dato que decide entre las tres puertas.',
+  },
+  {
+    id: 'i-3', padre: 'p-individual-l7e', tipo: 'paso', titulo: '3 · Ficha reducida, ensayos y solicitud', estado: 'despues',
+    resumen: 'Con el vehículo construido: ficha reducida sellada por el servicio técnico, acta de ensayo y solicitud al Ministerio. Después, la ITV emite la tarjeta.',
+    plazo: 'Hasta seis meses de resolución.',
+  },
+  {
+    id: 'p-prototipo', padre: 'h1-legal', tipo: 'opcion', titulo: 'Matricularlo como prototipo', estado: 'prometedora', comprobado: 'por-confirmar',
+    resumen: 'Puerta nueva. El Real Decreto 750/2010 tiene una vía propia para prototipos: el fabricante pide una autorización expresa, el vehículo pasa una inspección única en la ITV y se matricula sólo a nombre del fabricante. Es la que mejor encaja con «sólo necesito uno».',
+    detalle: [
+      'Leído, artículo 5.1: la solicitud lleva una memoria con los actos reglamentarios que el vehículo no puede cumplir, las razones y las medidas sustitutivas, y un informe favorable de un servicio técnico.',
+      'Leído, artículo 5.2: el solicitante es el fabricante. La inspección técnica unitaria favorable da lugar a la tarjeta de ITV.',
+      'Leído, artículo 5.2: sólo puede matricularse, de forma ordinaria o temporal, a nombre del fabricante, y así se anota en la tarjeta.',
+      'Leído: el texto no fija número de unidades ni duración.',
+      'Sin leer: qué mínimos exige la autoridad en la práctica para autorizar, cuánto tarda y si hay que estar inscrito en el Registro de Fabricantes.',
+    ],
+    aFavor: ['Está hecha para un vehículo en desarrollo.', 'Permite decir qué no se cumple todavía y con qué se compensa.', 'Da matrícula ordinaria: se puede circular por España.'],
+    enContra: ['Depende de una autorización que la autoridad concede caso por caso.', 'Exige constar como fabricante.', 'No se puede vender ni poner a nombre de otra persona: no sirve para clientes.'],
+    siguiente: 'Va en la misma consulta al servicio técnico: es su primera pregunta.',
+    descarta: 'Se descarta si el servicio técnico o el Ministerio responden que la autorización de prototipo exige los mismos ensayos que la homologación individual: entonces no aporta nada.',
+    fuentes: [F.rd750, F.industria],
+  },
+  {
+    id: 'pr-1', padre: 'p-prototipo', tipo: 'paso', titulo: '1 · Preguntarlo en la consulta al servicio técnico', estado: 'ahora',
+    resumen: 'Qué exige la autorización en la práctica y si ellos emiten el informe favorable.',
+  },
+  {
+    id: 'pr-2', padre: 'p-prototipo', tipo: 'paso', titulo: '2 · Constar como fabricante', estado: 'despues',
+    resumen: 'Inscripción en el Registro de Fabricantes y Firmas autorizadas del Ministerio de Industria y código de fabricante para el número de bastidor. Depende de la decisión «¿A nombre de quién?».',
+  },
+  {
+    id: 'pr-3', padre: 'p-prototipo', tipo: 'paso', titulo: '3 · Memoria de lo que no se cumple', estado: 'despues',
+    resumen: 'La lista de requisitos que el prototipo no cumple, por qué, y la medida que lo compensa. La pestaña «Homologación» ya calcula qué cumple y qué no: sale de ahí.',
+  },
+  {
+    id: 'p-individual-m1', padre: 'h1-legal', tipo: 'opcion', titulo: 'Homologación individual como turismo (M1)', estado: 'prometedora', comprobado: 'por-confirmar',
+    resumen: 'La misma vía, pero como coche: sin topes de potencia, peso ni velocidad. Parecía inalcanzable por los ensayos de choque; la orden de mayo de 2026 indica que en la homologación individual esos requisitos llevan un código que, en la categoría L, significa «declaración del fabricante».',
+    detalle: [
+      'Leído en la Orden PJC/528/2026: hay una lista nueva de requisitos para la homologación individual de turismos, obligatoria para los procedimientos iniciados desde el 1 de julio de 2026.',
+      'Leído: el choque frontal, el lateral, el de poste y el trasero figuran con el código C. La llamada de emergencia figura como no aplicable.',
+      'Leído: con código B, que es acta de ensayo del servicio técnico, figuran el acondicionamiento interior, los cinturones, los cristales, el desempañado, el limpiaparabrisas, la visión indirecta y la dirección.',
+      'Sin leer: la definición del código C para turismos y las notas que lo acompañan. En la categoría L el código C es «se podrá justificar mediante declaración de conformidad del fabricante»; que valga igual aquí es una suposición mía.',
+      'Sin leer: qué se exige de control de estabilidad, antibloqueo, emisiones y ayudas a la conducción. Estas últimas aparecen con una nota que no pude leer.',
+    ],
+    aFavor: ['Es la única puerta que da un coche de autopista.', 'Sin topes de potencia, peso ni velocidad: cabe el híbrido completo.', 'Si el código C vale, no hay ensayo de choque destructivo.'],
+    enContra: ['La lista de requisitos es la más larga.', 'Las ayudas a la conducción obligatorias pueden no caber en un vehículo así.', 'Probablemente la más cara.'],
+    siguiente: 'Es la tercera pregunta de la consulta al servicio técnico. Mientras, leo el apéndice completo con sus notas.',
+    descarta: 'Se descarta si el servicio técnico confirma que hay que ensayar el choque con un vehículo real, o que se exigen ayudas a la conducción que este vehículo no puede llevar.',
+    fuentes: [F.orden2026, F.rd750],
+  },
+  {
+    id: 'm-1', padre: 'p-individual-m1', tipo: 'paso', titulo: '1 · Leer el apéndice completo con sus notas', estado: 'ahora',
+    resumen: 'El texto de la orden que pude leer estaba cortado. Falta la definición de los códigos para turismos y las notas. Lo hago yo en la próxima ronda.',
+  },
+  {
+    id: 'm-2', padre: 'p-individual-m1', tipo: 'paso', titulo: '2 · Confirmarlo con el servicio técnico', estado: 'ahora',
+    resumen: 'La pregunta 3 del borrador de consulta.',
+  },
+  {
+    id: 'p-individual-l5e', padre: 'h1-legal', tipo: 'opcion', titulo: 'Triciclo artesanal (L5e) con ruedas traseras gemelas', estado: 'dudosa', comprobado: 'por-confirmar',
+    resumen: 'Cuatro ruedas en el suelo, tres para la ley. Dos ruedas del mismo eje a 46 cm o menos cuentan como una, y para triciclos hechos unidad a unidad hay una resolución de 2025 con una lista de requisitos más corta. Sigue abierta sólo en su variante de ruedas gemelas.',
     detalle: [
       'Leído en la resolución de 24 de septiembre de 2025: vale para homologación individual y para tipo nacional de vehículos artesanales, definidos como producidos unidad a unidad por un fabricante que no pasa de 10 al año.',
       'Leído: en triciclos, la velocidad máxima y la potencia las declara el fabricante. No hay tope de potencia en la categoría.',
@@ -143,7 +236,9 @@ export const ARBOL: NodoEstrategia[] = [
     aFavor: ['Mantiene las cuatro ruedas físicas.', 'Sin tope de potencia: cabe el híbrido enchufable.', 'Diez unidades al año con la misma vía: es también el camino a los primeros clientes.', 'Las dos ruedas juntas caben dentro de la cola, sin carenados traseros.'],
     enContra: ['El eje trasero estrecho no ayuda contra el vuelco: toda la estabilidad la da la vía delantera.', 'El largo máximo es de 4 m.', 'Hay que rediseñar la parte trasera.', 'Depende de una interpretación que nadie ha confirmado por escrito.'],
     coste: 'Sin cifra. Pedirla en la consulta.',
-    siguiente: 'Enviar la consulta a un servicio técnico de homologación. El borrador está abajo.',
+    siguiente: 'Ninguno hasta que respondas a la pregunta de abajo.',
+    decidido: ['19-11-2026: marcada «no» como triciclo de tres ruedas: las cuatro ruedas son innegociables.'],
+    descarta: 'Se descarta del todo si tampoco te valen dos ruedas traseras juntas dentro de la cola.',
     preguntas: ['¿Te vale que las dos ruedas traseras vayan juntas, a menos de 46 cm, dentro de la cola? Siguen siendo cuatro ruedas, pero el vehículo se parece más al Triciclo Bala que al de la imagen.'],
     borrador: {
       para: 'Un servicio técnico de homologación (IDIADA, INSIA, INTA o TÜV Rheinland)',
@@ -186,6 +281,7 @@ Gracias y un saludo,
     enContra: ['Con 1,69 m entre ejes, una carrocería de 3,70 m deja mucho voladizo; alargar la batalla es otra reforma.', '80 km/h y la autonomía de su batería.', 'El informe de conformidad lo firma el fabricante o un servicio técnico: pueden pedir ensayos.'],
     coste: 'Proyecto, informe de conformidad e ITV: sin cifra hasta preguntar. La carrocería es el gasto principal.',
     siguiente: 'Enviar la consulta a un ingeniero de reformas. El borrador está abajo.',
+    descarta: 'Se descarta si el ingeniero confirma que, en la revisión vigente del Manual, el cambio completo de carrocería no cabe como reforma, o que el informe de conformidad exige ensayos más caros que una homologación individual.',
     decidido: ['19-11-2026: el donante es un Twizy 80.', '19-11-2026: vale como hito 1 aunque sea sólo eléctrico.'],
     preguntas: [
       '¿El Twizy está matriculado a tu nombre y con la ITV en vigor?',
@@ -214,41 +310,81 @@ Gracias y un saludo,
     fuentes: [F.rd866, F.manual, F.manual7, F.twizy],
   },
   {
-    id: 'r-batalla', padre: 'p-reforma', tipo: 'decision', titulo: '¿Conservar la batalla del Twizy o alargarla?', estado: 'por-explorar',
+    id: 'r-1', padre: 'p-reforma', tipo: 'paso', titulo: '1 · Consulta al ingeniero de reformas', estado: 'ahora',
+    resumen: 'El correo del borrador, a uno o dos ingenieros que firmen proyectos de reforma de categoría L. La respuesta abre o cierra esta puerta.',
+    coste: 'Nada, o una consulta de pago.', plazo: 'Una o dos semanas.',
+  },
+  {
+    id: 'r-prueba', padre: 'p-reforma', tipo: 'opcion', titulo: '2 · Medir el Twizy de serie: el «antes»', estado: 'ahora',
+    resumen: 'Medir la autonomía del Twizy tal como está, a velocidad constante, y repetir la medida con la carrocería nueva. Misma batería, mismo motor, mismo conductor: la diferencia es sólo la forma.',
+    aFavor: ['Convierte el cálculo del consumo en una medida.', 'Se entiende en una frase y en un vídeo.', 'La primera mitad se puede hacer ya, sin fabricar nada.'],
+    siguiente: 'Medir ahora el Twizy de serie: kilómetros recorridos a 50 y a 80 km/h con una carga, en un recorrido llano de ida y vuelta.',
+  },
+  {
+    id: 'r-batalla', padre: 'p-reforma', tipo: 'decision', titulo: '3 · ¿Conservar la batalla del Twizy o alargarla?', estado: 'por-explorar',
     resumen: 'Con sus 1,69 m entre ejes la reforma es sólo de carrocería. Alargarla acerca la forma al diseño, pero toca el bastidor y pide más proyecto.',
     aFavor: ['Conservarla: una sola reforma, bastidor intacto, menos riesgo de que la rechacen.'],
     enContra: ['Conservarla: la forma de cigarro pide más distancia entre ejes de la que hay; habrá voladizo delante y detrás.'],
     siguiente: 'Dibujar en el editor una versión del Aeromóvil con las medidas del Twizy y ver cuánto empeora el coeficiente aerodinámico. Lo preparo cuando me digas.',
   },
   {
-    id: 'r-prueba', padre: 'p-reforma', tipo: 'opcion', titulo: 'La prueba del antes y el después', estado: 'prometedora',
-    resumen: 'Medir la autonomía del Twizy tal como está, a velocidad constante, y repetir la medida con la carrocería nueva. Misma batería, mismo motor, mismo conductor: la diferencia es sólo la forma.',
-    aFavor: ['Convierte el cálculo del consumo en una medida.', 'Se entiende en una frase y en un vídeo.', 'La primera mitad se puede hacer ya, sin fabricar nada.'],
-    siguiente: 'Medir ahora el Twizy de serie: kilómetros recorridos a 50 y a 80 km/h con una carga, en un recorrido llano de ida y vuelta.',
+    id: 'r-4', padre: 'p-reforma', tipo: 'paso', titulo: '4 · Proyecto, carrocería, ITV y el «después»', estado: 'despues',
+    resumen: 'Sólo si los pasos 1 y 3 salen bien: proyecto técnico, fabricación de la carrocería, certificado del taller, inspección en la ITV y la segunda medida de autonomía.',
   },
   {
     id: 'p-placas-rojas', padre: 'h1-legal', tipo: 'opcion', titulo: 'Placas rojas de empresa', estado: 'por-explorar', comprobado: 'leido',
-    resumen: 'Matrícula temporal para vehículos sin matricular. Sirve para pruebas o ensayos de investigación, transporte y exhibición. No es una matrícula definitiva.',
+    resumen: 'Matrícula temporal para vehículos sin matricular. Sirve de apoyo para probar el vehículo en carretera antes de homologarlo. No sirve para la vuelta a España.',
     detalle: [
-      'La DGT las concede a fabricantes, carroceros, importadores y laboratorios oficiales.',
-      'Requisitos: empresa del sector con licencia de apertura y alta en el impuesto de actividades económicas, libro-talonario con un boletín por cada viaje, tasa de 20,61 € y seguro aparte. Valen un año.',
-      'Por confirmar: si una vuelta a España de exhibición cabe en el uso permitido, y si un particular puede optar a ellas.',
+      'Leído en la DGT: las pide una empresa del sector del motor: fabricantes, carroceros, importadores, vendedores, museos de automoción o laboratorios oficiales.',
+      'Leído: la circulación se permite «exclusivamente» para ensayos de investigación, pruebas técnicas, transporte del vehículo, traslados entre instalaciones, exhibición de vehículos de museos y pruebas con posibles compradores.',
+      'Leído: sólo por los trayectos autorizados en el permiso y dentro de España. Cada viaje lleva su boletín con vehículo, conductor, trayecto y ocupantes.',
+      'Leído: vale un año improrrogable y la tasa es de 20,61 €. Exige alta en el impuesto de actividades económicas y licencia de apertura o declaración responsable.',
+      'Sin leer: si las concede a un fabricante recién creado que aún no ha homologado nada.',
     ],
     aFavor: ['Permite rodar por carretera antes de homologar.', 'Trámite barato.'],
-    enContra: ['Hace falta una empresa del sector.', 'Cada viaje se anota; no es para uso diario.'],
-    preguntas: ['¿Tienes ya una sociedad que pueda darse de alta como fabricante de vehículos, o habría que crearla?'],
+    enContra: ['Hace falta una sociedad del sector.', 'Trayectos cerrados de antemano: no es para viajar.'],
+    siguiente: 'Una pregunta a la DGT. El borrador está abajo.',
+    descarta: 'Se descarta si decides no constituir una sociedad, o si la DGT responde que un fabricante nuevo no puede pedirlas.',
+    borrador: {
+      para: 'La DGT (teléfono 060 o la Jefatura Provincial de Tráfico)',
+      asunto: 'Consulta: placas rojas para ensayos de un vehículo en desarrollo',
+      cuerpo: `Buenos días:
+
+Voy a constituir una sociedad para desarrollar y fabricar un vehículo ligero. Necesito probar el primer prototipo en vías abiertas antes de su homologación.
+
+1. ¿Puede una sociedad de nueva creación, dada de alta como fabricante de vehículos pero sin ningún vehículo homologado todavía, solicitar el permiso temporal de empresa (placas rojas) para ensayos de investigación y pruebas técnicas?
+2. ¿Los trayectos autorizados pueden ser rutas largas entre provincias, o deben limitarse al entorno de las instalaciones?
+3. ¿Qué se exige al vehículo no matriculado para circular con ellas (seguro, inspección, documentación técnica)?
+
+Gracias y un saludo,
+[tu nombre y teléfono]`,
+    },
     fuentes: [F.placasRojas],
   },
   {
-    id: 'p-investigacion', padre: 'h1-legal', tipo: 'opcion', titulo: 'Proyecto de investigación con una universidad o un centro tecnológico', estado: 'por-explorar', comprobado: 'por-confirmar',
-    resumen: 'No legaliza el vehículo por sí solo, pero aporta un socio con condición de laboratorio, acceso a ensayos y a ayudas públicas que no quitan propiedad de la empresa.',
+    id: 'p-investigacion', padre: 'h1-legal', tipo: 'opcion', titulo: 'Ayudas públicas y proyecto con una universidad o centro tecnológico', estado: 'por-explorar', comprobado: 'por-confirmar',
+    resumen: 'No legaliza el vehículo, pero paga parte del desarrollo sin ceder propiedad. La ayuda más a medida es Neotec, del CDTI. Lo único urgente es una fecha: la de constitución de la sociedad.',
     detalle: [
-      'El socio puede ser un instituto universitario del automóvil o un centro tecnológico que ya sea servicio técnico de homologación.',
-      'Ayudas: el IDAE ha financiado proyectos singulares de movilidad en convocatorias anteriores. No he comprobado si hay una convocatoria abierta ahora ni si un prototipo de vehículo encaja.',
+      'Leído en las preguntas frecuentes de Neotec 2026: es para pequeñas empresas innovadoras constituidas entre seis meses y tres años antes del cierre del plazo, con 20.000 € de capital desembolsado.',
+      'Leído: el proyecto debe tener un presupuesto de entre 175.000 y 750.000 €. La subvención cubre hasta el 70 %, con un máximo de 250.000 €. Hay anticipo de hasta el 60 % sin garantía.',
+      'Leído: cubre personal, materiales, activos y servicios externos. No menciona de forma expresa prototipos ni homologación.',
+      'La convocatoria de 2026 se abrió en abril. No he comprobado si sigue abierta; doy por hecho que no.',
+      'Si la de 2027 repite las reglas, la sociedad tendría que existir seis meses antes del cierre. Es una suposición: las bases cambian cada año.',
+      'IDAE: no he encontrado ninguna convocatoria abierta para prototipos de vehículos. Las de proyectos singulares de movilidad fueron de 2021 y 2022.',
     ],
-    aFavor: ['Dinero sin ceder participación.', 'Credibilidad y acceso a bancos de ensayo.'],
-    enContra: ['Las convocatorias tienen plazos y papeleo.', 'Suelen pagar después de gastar.', 'Un socio público puede pedir publicar resultados.'],
-    siguiente: 'Buscar las convocatorias abiertas de IDAE y CDTI y leer sus bases. Lo hago yo cuando me digas.',
+    aFavor: ['Dinero sin ceder participación.', 'El anticipo reduce lo que hay que adelantar.'],
+    enContra: ['El proyecto mínimo es de 175.000 € y la empresa pone al menos el 30 %.', 'Papeleo, plazos y justificación de gastos.', 'Es competitiva: no está garantizada.'],
+    siguiente: 'Decidir en «¿A nombre de quién?» si se constituye la sociedad ahora. Yo vigilo la convocatoria de 2027.',
+    descarta: 'Se descarta si el 30 % propio de un proyecto de 175.000 € supera el tope que has fijado para la etapa.',
+    fuentes: [F.neotec],
+  },
+  {
+    id: 'inv-1', padre: 'p-investigacion', tipo: 'paso', titulo: '1 · Comprobar el plazo de Neotec 2026 y las fechas de 2027', estado: 'ahora',
+    resumen: 'Mirar en la web del CDTI si la convocatoria de 2026 sigue abierta y cuándo suele abrirse la siguiente. Lo hago yo.',
+  },
+  {
+    id: 'inv-2', padre: 'p-investigacion', tipo: 'paso', titulo: '2 · Escribir a un instituto universitario del automóvil', estado: 'por-explorar',
+    resumen: 'Proponer el vehículo como proyecto conjunto: ellos ponen bancos de ensayo y estudiantes, y tú el diseño y el prototipo. Varios son además servicio técnico de homologación.',
   },
   {
     id: 'p-circuito', padre: 'h1-legal', tipo: 'opcion', titulo: 'Circuito y exhibición primero, sin matrícula', estado: 'prometedora', comprobado: 'por-confirmar',
@@ -256,11 +392,19 @@ Gracias y un saludo,
     aFavor: ['Se puede hacer en cuanto ruede.', 'Permite medir el consumo real, que es el dato que lo vende todo.', 'Da vídeo y prensa sin esperar a la administración.'],
     enContra: ['No es circular por España.', 'Un remolque y un circuito cuestan cada salida.'],
     siguiente: 'Ninguno hasta que haya vehículo.',
+    descarta: 'No se descarta: es compatible con todas las demás.',
   },
   {
-    id: 'p-otro-pais', padre: 'h1-legal', tipo: 'opcion', titulo: 'Matricularlo en otro país europeo y traerlo', estado: 'por-explorar', comprobado: 'por-confirmar',
-    resumen: 'Algunos países tienen fama de aprobar vehículos únicos con más facilidad. No lo he investigado: no sé si España reconocería esa aprobación.',
-    siguiente: 'Investigarlo sólo si las vías españolas se cierran.',
+    id: 'p-otro-pais', padre: 'h1-legal', tipo: 'opcion', titulo: 'Matricularlo en otro país europeo y traerlo', estado: 'dudosa', comprobado: 'leido',
+    resumen: 'No es un atajo. España no acepta sin más la aprobación individual de otro país: hay que pedir a la autoridad española que evalúe si las exigencias técnicas son equivalentes.',
+    detalle: [
+      'Leído en el Real Decreto 750/2010, artículo 6.4: para vehículos procedentes de otros Estados del espacio económico europeo hay que solicitar a la autoridad española una evaluación de correspondencia de las disposiciones técnicas.',
+      'Sin leer: cuánto cuesta en Alemania o en Países Bajos aprobar un vehículo construido desde cero. Lo que encontré habla de modificaciones, no de vehículos nuevos.',
+    ],
+    enContra: ['Dos administraciones en lugar de una.', 'Hay que llevar el vehículo y, en la práctica, tener domicilio allí.'],
+    siguiente: 'Ninguno. Se retoma sólo si las vías españolas se cierran todas.',
+    descarta: 'Queda aparcada mientras haya una vía española abierta.',
+    fuentes: [F.rd750],
   },
   {
     id: 'p-sandbox', padre: 'h1-legal', tipo: 'opcion', titulo: 'Sandbox de la Ley de Movilidad Sostenible', estado: 'dudosa', comprobado: 'leido',
@@ -269,10 +413,12 @@ Gracias y un saludo,
       'Leído: la solicitud se presenta en la ventanilla única del Ministerio de Transportes; una comisión de expertos informa en tres meses; se firma un protocolo de pruebas con seguro o aval.',
       'Leído: pide innovación sin cobertura en la regulación existente y un prototipo con funcionalidad mínima.',
       'Leído en el preámbulo: la ley no regula el funcionamiento de los vehículos ni sus condiciones de seguridad. Las excepciones son las que se acuerden en el protocolo, sin lista.',
-      'No leído: si la oficina que lo gestiona está ya en marcha ni cuándo se puede solicitar.',
+      'Leído: el reglamento de la oficina que lo gestiona debía aprobarse antes del 30 de junio de 2026. No he encontrado que esté admitiendo solicitudes.',
     ],
     aFavor: ['Encaja mejor con el modelo de financiación colectiva o de uso compartido que con el vehículo.'],
     enContra: ['Exige tener ya un prototipo.', 'Tramitación de meses.', 'La homologación depende de Industria, no de Transportes.'],
+    siguiente: 'Una consulta al Ministerio de Transportes: si la oficina del espacio de pruebas admite ya solicitudes.',
+    descarta: 'Se descarta si la oficina todavía no funciona, o si confirma que no puede exceptuar la homologación, que depende de Industria.',
     fuentes: [F.ley9],
   },
   {
@@ -283,14 +429,14 @@ Gracias y un saludo,
 
   {
     id: 'h1-alcance', padre: 'h1', tipo: 'decision', titulo: '¿Qué se construye primero?', estado: 'ahora',
-    resumen: 'El primer vehículo no tiene que ser el definitivo. Cuanto menos lleve, antes rueda y menos cuesta equivocarse.',
+    resumen: 'Las tres opciones no compiten: son etapas. Primero lo que rueda antes, y el híbrido completo al final, que es el vehículo que quieres.',
   },
   {
-    id: 'a-twizy', padre: 'h1-alcance', tipo: 'opcion', titulo: 'Un Twizy con carrocería de Aeromóvil', estado: 'elegida', comprobado: 'por-confirmar',
+    id: 'a-twizy', padre: 'h1-alcance', tipo: 'opcion', titulo: 'Un Twizy con carrocería de Aeromóvil', estado: 'prometedora', comprobado: 'por-confirmar',
     resumen: 'El donante pone bastidor, suspensión, frenos, dirección, motor y batería. Se fabrica sólo la carrocería. Es el primer vehículo, si la consulta de la reforma sale bien.',
     aFavor: ['Es lo más corto hasta algo que rueda.', 'La carrocería es justo lo que hay que aprender a fabricar.', 'Se mide el consumo real de la forma.'],
     enContra: ['Las medidas las pone el Twizy.', 'Sólo eléctrico, a 80 km/h y con su autonomía.'],
-    decidido: ['19-11-2026: aceptado como hito 1.'],
+    decidido: ['19-11-2026: aceptado como primer paso, con dudas.'],
   },
   {
     id: 'a-electrico', padre: 'h1-alcance', tipo: 'opcion', titulo: 'Prototipo propio, eléctrico primero', estado: 'por-explorar',
@@ -301,16 +447,40 @@ Gracias y un saludo,
   {
     id: 'a-hibrido', padre: 'h1-alcance', tipo: 'opcion', titulo: 'Prototipo completo, híbrido enchufable', estado: 'despues',
     resumen: 'El vehículo definitivo desde el primer día. Es lo que más tarda y lo que más ensayos pide.',
+    decidido: ['19-11-2026: es el vehículo que quieres al final.'],
     enContra: ['Junta todos los riesgos en el primer intento.', 'Los ensayos de emisiones del motor de gasolina se suman a todo lo demás.'],
   },
   {
     id: 'h1-tope', padre: 'h1', tipo: 'decision', titulo: '¿Con qué tope de dinero y de tiempo?', estado: 'ahora',
-    resumen: 'Hay dos deseos que tiran en sentidos opuestos: poner en este hito lo que haga falta y no perder los ahorros. Un tope escrito antes de empezar resuelve la contradicción.',
+    resumen: 'Decidido: un tope por etapa. Cada etapa tiene el suyo y la siguiente sólo se abre si la anterior salió bien.',
     detalle: [
-      'El tope no es el presupuesto: es la cantidad a partir de la cual se para y se replantea, pase lo que pase.',
-      'Lo mismo con el tiempo: una fecha de revisión en la que se decide seguir, cambiar de puerta o parar.',
+      'Etapa 1, consultas y medidas: tres correos y medir el Twizy de serie. Casi sin gasto.',
+      'Etapa 2, el Twizy carrozado: proyecto de reforma y carrocería.',
+      'Etapa 3, chasis propio eléctrico: por la puerta que la consulta deje abierta.',
+      'Etapa 4, el híbrido enchufable.',
+      'El tope no es el presupuesto: es la cantidad a partir de la cual se para y se replantea.',
     ],
-    preguntas: ['¿Prefieres un tope único para todo el hito 1 o un tope por etapa, que se renueva sólo si la etapa anterior salió bien?'],
+    siguiente: 'Cuando lleguen los presupuestos de las consultas, repartir el tope total entre las etapas 2 y 3.',
+    decidido: ['19-11-2026: tope por etapa.'],
+  },
+  {
+    id: 'h1-figura', padre: 'h1', tipo: 'decision', titulo: '¿A nombre de quién: tú o una sociedad fabricante?', estado: 'ahora',
+    resumen: 'Varias puertas dependen de esto. Como persona puedes reformar el Twizy y pedir una homologación individual. Para el prototipo, las placas rojas y las ayudas hace falta una sociedad.',
+    preguntas: ['¿Tienes ya una sociedad que pueda usarse para esto, o habría que constituir una nueva?'],
+  },
+  {
+    id: 'f-persona', padre: 'h1-figura', tipo: 'opcion', titulo: 'Tú, como titular del vehículo', estado: 'por-explorar', comprobado: 'leido',
+    resumen: 'Vale para la reforma del Twizy y para la homologación individual: la norma permite que la pida el titular sin inscribirse como fabricante.',
+    aFavor: ['Sin costes de sociedad.', 'Suficiente para el primer vehículo por dos de las puertas.'],
+    enContra: ['Cierra el prototipo, las placas rojas y las ayudas.', 'La responsabilidad es personal.'],
+    fuentes: [F.rd750],
+  },
+  {
+    id: 'f-sociedad', padre: 'h1-figura', tipo: 'opcion', titulo: 'Una sociedad que conste como fabricante', estado: 'por-explorar', comprobado: 'por-confirmar',
+    resumen: 'Necesaria para matricular como prototipo, pedir placas rojas, optar a Neotec y, más adelante, vender. La fecha de constitución cuenta para las ayudas.',
+    aFavor: ['Abre todas las puertas.', 'Separa tu patrimonio del proyecto.', 'Es la que tendrá que existir de todos modos para vender.'],
+    enContra: ['Cuesta constituirla y mantenerla cada año aunque no facture.', 'Neotec pide 20.000 € de capital desembolsado.'],
+    siguiente: 'Si ya tienes una sociedad, comprobar su fecha de constitución y su objeto social.',
   },
 
   // ── Assumptions ─────────────────────────────────────────────────────────────────────────────────────────────────
