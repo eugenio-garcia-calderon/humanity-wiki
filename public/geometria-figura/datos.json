@@ -51,7 +51,7 @@
   "temas": [
     {
       "k": "inm",
-      "n": "Inmigración y fronteras",
+      "n": "Inmigración",
       "q": "¿Cómo se entra, quién se queda y cómo se convive?",
       "c": "#5FB3E6",
       "niv": [
@@ -260,7 +260,7 @@
     },
     {
       "k": "ser",
-      "n": "Servicios públicos y privados",
+      "n": "Servicios",
       "q": "¿Quién presta los servicios, y cómo se pagan?",
       "c": "#E07BAE",
       "niv": [
@@ -469,7 +469,7 @@
     },
     {
       "k": "eco",
-      "n": "Economía e impuestos",
+      "n": "Economía",
       "q": "¿Quién paga, cuánto, y en qué se gasta?",
       "c": "#F2B33D",
       "niv": [
@@ -634,7 +634,7 @@
     },
     {
       "k": "tra",
-      "n": "Trabajo y pensiones",
+      "n": "Trabajo",
       "q": "¿Cómo se trabaja, y de qué se vive al jubilarse?",
       "c": "#F0835A",
       "niv": [
@@ -964,7 +964,7 @@
     },
     {
       "k": "amb",
-      "n": "Clima y energía",
+      "n": "Clima",
       "q": "¿Cómo frenamos el cambio climático sin dejar a nadie atrás?",
       "c": "#4CC38A",
       "niv": [
@@ -1129,7 +1129,7 @@
     },
     {
       "k": "ter",
-      "n": "Modelo territorial",
+      "n": "Territorio",
       "q": "¿Cómo convivimos las distintas partes de España?",
       "c": "#8F9CF7",
       "niv": [
@@ -1294,7 +1294,7 @@
     },
     {
       "k": "der",
-      "n": "Derechos y libertades",
+      "n": "Derechos",
       "q": "¿Qué libertades protegemos, y cómo?",
       "c": "#B9D45A",
       "niv": [
@@ -1459,7 +1459,7 @@
     },
     {
       "k": "ins",
-      "n": "Instituciones y justicia",
+      "n": "Instituciones",
       "q": "¿Funcionan los contrapesos del poder?",
       "c": "#4FC9C9",
       "niv": [
@@ -1624,7 +1624,7 @@
     },
     {
       "k": "ext",
-      "n": "Exterior y defensa",
+      "n": "Exterior",
       "q": "¿Qué papel queremos tener en el mundo?",
       "c": "#A8B4C8",
       "niv": [

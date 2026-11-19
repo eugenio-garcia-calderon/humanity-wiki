@@ -12937,6 +12937,17 @@ Las marcas, notas y respuestas se guardan sólo en el navegador de quien las esc
 
 Comprobado en un navegador de pruebas (escritorio y móvil) contra el servidor de desarrollo. No comprobado en producción ni con la app instalada.
 
+## 2026-11-19 · Geometry page: «Todos» view, white theme, header that folds on scroll
+
+- New «Todos» tab: one large geometry where each axis is a topic and each selected party's value per topic is drawn. Clicking an axis name opens that topic. Hovering a vertex shows the party's score on that topic and its posture.
+- The whole observatorio page moved from dark to white (palette in `:root`, so the chapters below the figure share it too). The title row is navy, the topic row light grey; topics sit in two rows of six, inside the top bar.
+- The title «Geometría política» is centred in the navy row. On scroll down that row slides out of view and the topic row stays fixed. Scroll up brings it back.
+- Fixed a loop found while testing: the fold changed the header's height, the browser compensated the scroll position, and the fold toggled on and off about 60 times in 94 scroll events. The title row now moves with `transform` and its height never changes, so no compensation happens. The height is measured in JavaScript for the phone layout.
+- Verified: browser interaction suite 237 of 237; reload still opens with PP, PSOE, Vox and Frente Amplio; «Todos» draws 10 axes and one polygon per party, a vertex shows its card, an axis click leaves the view, and a second click on «Todos» turns it off; no page errors; on a 390 px viewport the title row measures 56 px and folds out of view; `tsc --noEmit` clean.
+- Not verified: touch devices, the installed app (the service worker may still serve the old build; `?sw=off` drops it), and the other chapters of the page on white (only the figure was reviewed).
+- Open: the pale topic colours have low contrast on white in the «Todos» axis labels.
+- Files: `public/observatorio-polarizacion/index.html`, `public/geometria-figura/datos.json`, `scripts/probar-figuras.ts`, `memory/08_CHANGELOG.md`.
+
 ## 2026-11-19 · Estrategia: segunda ronda de las puertas legales
 
 > «Tengo el Twizy de 80. Sí, me valdría un aeromóvil eléctrico en vez de híbrido. Las cuatro ruedas son innegociables. Puede seguir siendo pública la estrategia. Explora las vías más prometedoras.»

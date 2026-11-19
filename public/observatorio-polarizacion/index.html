@@ -18,8 +18,8 @@
    Look deliberadamente oscuro y único. Color: convención rojo-azul de la ciencia política, con los
    extremos más oscuros y el centro más claro, para que las posiciones se distingan también sin color. */
 :root{
-  --bg:#0C0F14; --bg-2:#131821; --bg-3:#1B2230; --line:#283142; --line-2:#3A4660; --ctl:#5E6B88;
-  --ink:#EDEBE6; --ink-2:#C9CCD3; --muted:#9AA3B3;
+  --bg:#FFFFFF; --bg-2:#F6F7F9; --bg-3:#EEF1F5; --line:#E1E5EC; --line-2:#C8CED9; --ctl:#8A93A6;
+  --ink:#141A26; --ink-2:#3A4352; --muted:#5F6878;
   --xl:#EC5272; --l:#F2955F; --c:#E8E2CF; --r:#6CC4E4; --xr:#5B7CF0;
   --warn:#F6BE3B;
   --spectrum:linear-gradient(90deg,var(--xl),var(--l) 25%,var(--c) 50%,var(--r) 75%,var(--xr));
@@ -48,7 +48,7 @@ h1,h2,h3,h4{text-wrap:balance}
 
 /* ---------- Cabecera ---------- */
 .top{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;margin-left:calc(-1 * var(--gl));margin-right:calc(-1 * var(--gr));
-  padding-left:var(--gl);padding-right:var(--gr);background:rgba(12,15,20,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+  padding-left:var(--gl);padding-right:var(--gr);background:rgba(255,255,255,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
 .top-in{max-width:1200px;margin:0 auto;height:60px;display:flex;align-items:center;gap:20px}
 .top-in > nav{flex:1;min-width:0}
 .brand{flex:none;display:flex;align-items:center;gap:10px;text-decoration:none;font:600 14px/1 var(--sans);font-stretch:115%;white-space:nowrap}
@@ -775,7 +775,7 @@ footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 
 /* ================= 6 · Geometrías ================= */
 .geo{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:clamp(18px,3vw,36px);align-items:start}
-.geo-stage{position:relative;border-radius:22px;background:radial-gradient(80% 80% at 50% 50%,#131A26,var(--bg) 75%);border:1px solid var(--line);padding:8px}
+.geo-stage{position:relative;border-radius:22px;background:var(--bg-2);border:1px solid var(--line);padding:8px}
 .geo-stage svg{display:block;width:100%;height:auto;touch-action:manipulation}
 .geo-cap{font-size:13.5px;line-height:1.5;color:var(--muted);margin:6px 12px 10px}
 .geo-side{display:grid;gap:14px;position:sticky;top:84px}
@@ -980,9 +980,42 @@ footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 #geo-svg[data-k="0"] .geo-num[data-lk="0"],#geo-svg[data-k="1"] .geo-num[data-lk="1"],#geo-svg[data-k="2"] .geo-num[data-lk="2"]{opacity:1}
 /* Los selectores, desplegados y compactos, encima de la figura */
 .geo-selectores{max-width:1120px;margin:0 auto 10px;display:grid;gap:8px}
-.geo-selectores .geo-temas{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:0}
-.geo-selectores .geo-tc{min-height:60px;width:auto;padding:8px 18px 8px 8px;gap:12px;font-size:16px}
-.geo-selectores .geo-tc .ill{width:46px;height:46px}
+.geo-selectores .geo-temas{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin:0;max-width:1120px;width:100%;justify-self:center}
+@media (max-width:1000px){.geo-selectores .geo-temas{grid-template-columns:repeat(5,minmax(150px,1fr));overflow-x:auto;padding-bottom:6px}}
+@media (max-width:640px){.geo-selectores .geo-temas{grid-template-columns:none;grid-template-rows:repeat(2,auto);grid-auto-flow:column;grid-auto-columns:168px}.geo-selectores .geo-tc{font-size:14.5px;gap:8px;padding:8px 8px 8px 6px}.geo-selectores .geo-tc .ill{width:36px;height:36px}}
+.geo-selectores .geo-tc{min-height:60px;width:100%;min-width:0;padding:8px 12px 8px 8px;gap:10px;font-size:15px;white-space:nowrap}
+.geo-selectores .geo-tc .ill{width:40px;height:40px}
+.geo-stage.todos > #geo-niveles{display:none}
+.geo-ax-todos{cursor:pointer}
+.geo-ax-todos:hover text{fill-opacity:.8}
+/* Cabecera de la geometría: título centrado y botón del test a la derecha (fila azul marino) */
+[data-vista="geometria"] .top{background:none;backdrop-filter:none;-webkit-backdrop-filter:none;border-bottom:0;padding-left:0;padding-right:0}
+[data-vista="geometria"] .top-in{max-width:none;margin:0;height:64px;padding:0 var(--gl);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;background:#1B2433;transition:opacity .2s;overflow:hidden}
+[data-vista="geometria"] .top-in .brand{grid-column:2;justify-self:center;color:#FFFFFF}
+[data-vista="geometria"] .top-in .brand-txt{color:#FFFFFF}
+[data-vista="geometria"] .geo-bar{grid-column:3;justify-self:end;justify-content:flex-end}
+[data-vista="geometria"] .top-in .geo-btn.yo{background:#FFFFFF;border-color:#FFFFFF;color:#1B2433}
+[data-vista="geometria"] .top-in .geo-btn.yo[aria-pressed="true"]{background:transparent;color:#FFFFFF;border-color:#FFFFFF}
+/* Al hacer scroll la barra de título sale por arriba con transform: no cambia la altura, así el navegador no compensa el scroll y no hay bucle de pliegue/despliegue */
+[data-vista="geometria"] .top{transition:transform .25s}
+[data-vista="geometria"] .top.plegado{transform:translateY(calc(-1 * var(--tit-h,64px)))}
+[data-vista="geometria"] .top.plegado .top-in{opacity:0}
+/* Fila de temas, siempre visible al hacer scroll: gris claro, dos filas de seis */
+.top-temas{background:#EEF2F7;border-bottom:1px solid var(--line-2);padding:10px var(--gl)}
+.top-temas .geo-temas{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:0;max-width:1200px;margin-inline:auto}
+.top-temas .geo-tc{min-height:50px;width:100%;min-width:0;padding:6px 10px 6px 6px;gap:8px;font-size:14px;white-space:nowrap;background:#FFFFFF}
+.top-temas .geo-tc .ill{width:36px;height:36px}
+@media (max-width:1000px){.top-temas .geo-temas{grid-template-columns:repeat(6,minmax(140px,1fr));overflow-x:auto;padding-bottom:4px}}
+@media (max-width:640px){.top-temas .geo-temas{grid-template-columns:none;grid-template-rows:repeat(2,auto);grid-auto-flow:column;grid-auto-columns:160px}.top-temas .geo-tc{font-size:13.5px;padding:6px 8px 6px 6px}}
+@media (max-width:760px){[data-vista="geometria"] .top-in{grid-template-columns:1fr auto;height:auto;padding:8px var(--gl);row-gap:6px}[data-vista="geometria"] .top-in .brand{grid-column:1;justify-self:start}[data-vista="geometria"] .geo-bar{grid-column:2}}
+/* Los colores fijos del dibujo (atributos SVG) se adaptan al fondo blanco */
+#geo-svg [fill="#EDEBE6" i]{fill:#141A26} #geo-svg [stroke="#EDEBE6" i]{stroke:#141A26}
+#geo-svg [fill="#C9CCD3" i]{fill:#3A4352} #geo-svg [stroke="#C9CCD3" i]{stroke:#3A4352}
+#geo-svg [fill="#8A93A6" i]{fill:#5F6878} #geo-svg [stroke="#8A93A6" i]{stroke:#5F6878}
+#geo-svg [fill="#0C0F14" i]{fill:#FFFFFF} #geo-svg [stroke="#0C0F14" i]{stroke:#FFFFFF}
+#geo-svg [fill="#3A4660" i]{fill:#C8CED9} #geo-svg [stroke="#3A4660" i]{stroke:#C8CED9}
+#geo-svg [fill="#1B2230" i]{fill:#E6EBF2} #geo-svg [stroke="#1B2230" i]{stroke:#E6EBF2}
+#geo-svg [fill="#F6BE3B" i]{fill:#B26F06} #geo-svg [stroke="#F6BE3B" i]{stroke:#C98A12}
 .geo-chips-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px}
 /* Partidos en columna a la izquierda de la figura (2026-11-18, Eugenio) */
 .geo{max-width:1600px;display:grid;grid-template-columns:200px minmax(0,1fr);column-gap:20px;align-items:start}
@@ -1326,6 +1359,7 @@ footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
       </div>
     </div>
   </div>
+  <div class="top-temas"><div class="geo-temas" id="geo-tema" role="tablist" aria-label="Elige un tema"></div></div>
   <div class="prog" aria-hidden="true"><i id="prog"></i></div>
 </header>
 
@@ -1335,9 +1369,6 @@ footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 <!-- ============ INICIO · GEOMETRÍAS (la portada) ============ -->
 <section id="geometrias" class="chapter geo-landing" aria-labelledby="h-geometrias">
   <h2 class="sr-only" id="h-geometrias">Geometría política: los partidos como figuras en diez temas</h2>
-  <div class="geo-selectores">
-    <div class="geo-temas" id="geo-tema" role="tablist" aria-label="Elige un tema"></div>
-  </div>
   <div class="geo">
     <aside class="geo-partidos" aria-labelledby="geo-partidos-t">
       <button class="tbtn geo-mejor-btn" id="geo-mejor" aria-pressed="false">Déjalo de lo mejor de cada uno</button>
@@ -2792,7 +2823,7 @@ const PARTIDOS = [
 const PMAP = Object.fromEntries(PARTIDOS.map((p) => [p.k, p]));
 const TEMAS = {
   inm: {
-    n: "Inmigración y fronteras", c: "#5FB3E6", q: "¿Cómo se entra, quién se queda y cómo se convive?",
+    n: "Inmigración", c: "#5FB3E6", q: "¿Cómo se entra, quién se queda y cómo se convive?",
     niv: ["Saber quién entra, salvar vidas en el mar, proteger a quien huye y cumplir la ley.", "Vías legales que funcionan, asilo en plazos razonables, retornos efectivos e integración con idioma y empleo.", "Un sistema completo y estable, pactado con Europa y con los países de origen, en el que entrar de forma ordenada sea más fácil que hacerlo con las mafias."],
     cap: "Arriba frente a abajo: cooperación con los países de origen frente a economía, demografía y pensiones. Derecha frente a izquierda: seguridad y retorno frente a asilo y derechos humanos. En diagonal: control de fronteras frente a integración, y convivencia y normas comunes frente a vías legales para venir a trabajar o estudiar. Los radios vecinos se completan entre sí.",
     ejes: [
@@ -2843,7 +2874,7 @@ const TEMAS = {
     ]
   },
   ser: {
-    n: "Servicios públicos y privados", c: "#E07BAE", q: "¿Quién presta los servicios, y cómo se pagan?",
+    n: "Servicios", c: "#E07BAE", q: "¿Quién presta los servicios, y cómo se pagan?",
     niv: ["Que todo el mundo tenga médico, escuela y cuidados, con esperas que no pongan en riesgo la salud.", "Profesionales suficientes, financiación estable y resultados medidos y publicados en cada centro.", "Una red universal que combina lo mejor de la gestión pública y la colaboración privada evaluada, con el mismo servicio en un pueblo que en una capital."],
     cap: "Arriba frente a abajo: colaboración con centros privados frente a profesionales suficientes. Derecha frente a izquierda: libertad de elección frente a gestión pública y universalidad. En diagonal: contención del gasto frente a territorio y cercanía, y evaluación y resultados frente a financiación pública suficiente. Los radios vecinos se completan entre sí.",
     ejes: [
@@ -2894,7 +2925,7 @@ const TEMAS = {
     ]
   },
   eco: {
-    n: "Economía e impuestos", c: "#F2B33D", q: "¿Quién paga, cuánto, y en qué se gasta?",
+    n: "Economía", c: "#F2B33D", q: "¿Quién paga, cuánto, y en qué se gasta?",
     cap: "Arriba frente a abajo: déficit y deuda frente a lucha contra el fraude. En diagonal: pymes y autónomos frente a gasto e inversión pública, y bajar impuestos y competir frente a equidad fiscal.",
     niv: [
       "Cuentas que se sostienen: presupuestos aprobados a tiempo, impuestos que se pagan y una deuda que no crece sin control.",
@@ -2943,7 +2974,7 @@ const TEMAS = {
     ]
   },
   tra: {
-    n: "Trabajo y pensiones", c: "#F0835A", q: "¿Cómo se trabaja, y de qué se vive al jubilarse?",
+    n: "Trabajo", c: "#F0835A", q: "¿Cómo se trabaja, y de qué se vive al jubilarse?",
     cap: "Arriba frente a abajo: pensiones suficientes frente a formación y productividad. En diagonal: sostenibilidad de las pensiones frente a jornada y conciliación, y flexibilidad para contratar frente a empleo estable y salarios.",
     niv: [
       "Que trabajar saque de la pobreza y que la pensión mínima dé para vivir.",
@@ -3041,7 +3072,7 @@ const TEMAS = {
     ]
   },
   amb: {
-    n: "Clima y energía", c: "#4CC38A", q: "¿Cómo frenamos el cambio climático sin dejar a nadie atrás?",
+    n: "Clima", c: "#4CC38A", q: "¿Cómo frenamos el cambio climático sin dejar a nadie atrás?",
     cap: "Arriba frente a abajo: agua y naturaleza frente al precio de la energía. En diagonal: campo y transición justa frente a renovables, redes y almacenamiento, y seguridad de suministro frente a reducir emisiones.",
     niv: [
       "Cumplir los compromisos europeos de clima y que la factura de la luz no corte la vida de nadie.",
@@ -3090,7 +3121,7 @@ const TEMAS = {
     ]
   },
   ter: {
-    n: "Modelo territorial", c: "#8F9CF7", q: "¿Cómo convivimos las distintas partes de España?",
+    n: "Territorio", c: "#8F9CF7", q: "¿Cómo convivimos las distintas partes de España?",
     cap: "Arriba frente a abajo: financiación transparente frente a autogobierno y competencias. En diagonal: lenguas y culturas propias frente a cooperación entre gobiernos, y cohesión frente a igualdad entre territorios.",
     niv: [
       "Que se cumplan la Constitución y los Estatutos y que cada administración pague a tiempo sus servicios.",
@@ -3139,7 +3170,7 @@ const TEMAS = {
     ]
   },
   der: {
-    n: "Derechos y libertades", c: "#B9D45A", q: "¿Qué libertades protegemos, y cómo?",
+    n: "Derechos", c: "#B9D45A", q: "¿Qué libertades protegemos, y cómo?",
     cap: "El dilema más duro está en la diagonal: protección de la vida frente a autonomía personal. Arriba frente a abajo: libertad de conciencia y de educación frente a libertad de expresión y de prensa. En diagonal también: familia y natalidad frente a igualdad y no discriminación.",
     niv: [
       "Que se cumplan los derechos que ya reconocen la Constitución y las leyes, sin discriminación.",
@@ -3188,7 +3219,7 @@ const TEMAS = {
     ]
   },
   ins: {
-    n: "Instituciones y justicia", c: "#4FC9C9", q: "¿Funcionan los contrapesos del poder?",
+    n: "Instituciones", c: "#4FC9C9", q: "¿Funcionan los contrapesos del poder?",
     cap: "Arriba frente a abajo: igualdad ante la ley frente a independencia judicial. En diagonal: justicia rápida y con medios frente a transparencia y lucha contra la corrupción, y convivencia y medidas de gracia frente a participación y calidad democrática.",
     niv: [
       "Que se cumplan las leyes y las sentencias, y que los órganos constitucionales se renueven a tiempo.",
@@ -3237,7 +3268,7 @@ const TEMAS = {
     ]
   },
   ext: {
-    n: "Exterior y defensa", c: "#A8B4C8", q: "¿Qué papel queremos tener en el mundo?",
+    n: "Exterior", c: "#A8B4C8", q: "¿Qué papel queremos tener en el mundo?",
     cap: "Arriba frente a abajo: comercio, industria e influencia frente a Unión Europea. En diagonal: defensa y seguridad frente a paz, diplomacia y desarme, y soberanía e intereses nacionales frente a cooperación y derechos humanos.",
     niv: [
       "Cumplir los compromisos internacionales firmados y proteger a los españoles en el exterior.",
@@ -3347,7 +3378,7 @@ const ILUS = {
 
   const KEYS = Object.keys(TEMAS);
   const DEF = ["pp", "psoe", "vox", "fa"];
-  const st = { tema: "inm", sel: new Set(DEF), foco: null, eje: null, ideal: true, mejor: false, ring: null, yo: false, fijado: null, masVer: null };
+  const st = { tema: "inm", sel: new Set(DEF), foco: null, eje: null, ideal: true, mejor: false, ring: null, yo: false, fijado: null, masVer: null, todos: false };
   // Lo que llega en la dirección: ?tema=vivienda&p=pp,psoe&foco=pp
   const q = new URLSearchParams(location.search);
   const qt = q.get("tema");
@@ -3458,8 +3489,38 @@ const ILUS = {
       + `</g>`;
   }
 
+  /* ---- Todos los temas: una sola figura, con una arista por tema ---- */
+  // Nota media de un partido en un tema: la media de sus seis aspectos (valoración de este observatorio)
+  const mediaTema = (tk, pk) => { const v = TEMAS[tk].v[pk]; return v.reduce((a, b) => a + b, 0) / v.length; };
+  const nivelMedia = (m) => { let lv = 0; [0, 1, 2].forEach((k) => { if (alcanza(m, k)) lv = k + 1; }); return lv; };
+  function dibujarTodos() {
+    const n = KEYS.length, coma = (x) => x.toFixed(1).replace(".", ",");
+    let s = `<defs><radialGradient id="geo-glow2"><stop offset="0" stop-color="#EDEBE6" stop-opacity="0"/><stop offset="1" stop-color="#EDEBE6" stop-opacity=".08"/></radialGradient></defs>`;
+    s += `<circle cx="${CX}" cy="${CY}" r="${R}" fill="url(#geo-glow2)"/>`;
+    [0, 1].forEach((k) => { s += `<circle cx="${CX}" cy="${CY}" r="${r1(rr(UMBRAL[k]))}" fill="none" stroke="#8A93A6" stroke-opacity=".5" stroke-width="1.3" stroke-dasharray="4 5"/>`; });
+    s += `<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${ORO}" stroke-width="3"/>`;
+    KEYS.forEach((k, i) => { const [x, y] = P(ang(i, n), R); s += `<line x1="${CX}" y1="${CY}" x2="${r1(x)}" y2="${r1(y)}" stroke="#3A4660" stroke-width="1"/>`; });
+    UMBRAL.forEach((v, k) => { s += `<text x="${CX + 8}" y="${r1(CY - rr(v) - 6)}" font-family="IBM Plex Mono, monospace" font-size="${r1(12.5 * K)}" letter-spacing="1" fill="${k === 2 ? ORO : "#8A93A6"}" paint-order="stroke" stroke="#0C0F14" stroke-width="4">${k + 1} · ${NIV[k].replace("Lo ", "").toUpperCase()}</text>`; });
+    // Un nombre por arista; pulsarlo abre ese tema
+    KEYS.forEach((k, i) => {
+      const a = ang(i, n), [x, y] = P(a, R + 46 * K), c = Math.cos(a), anc = Math.abs(c) < 0.2 ? "middle" : c > 0 ? "start" : "end";
+      s += `<g class="geo-ax-todos" data-tema-go="${k}" role="button" aria-label="Abrir ${TEMAS[k].n}"><text x="${r1(x)}" y="${r1(y)}" text-anchor="${anc}" dominant-baseline="central" font-family="Archivo, sans-serif" font-size="${r1(19 * K)}" font-weight="600" fill="${TEMAS[k].c}" paint-order="stroke" stroke="#0C0F14" stroke-width="5">${TEMAS[k].n}</text></g>`;
+    });
+    // Un polígono por partido seleccionado: su nota media en cada tema
+    PARTIDOS.filter((p) => st.sel.has(p.k)).forEach((p) => {
+      const pts = KEYS.map((k, i) => P(ang(i, n), rr(mediaTema(k, p.k))));
+      s += `<g class="geo-shape" data-p="${p.k}"><path d="${dPath(pts)}" fill="${p.c}" fill-opacity=".12" stroke="${p.c}" stroke-width="2.6" stroke-linejoin="round"/>`;
+      KEYS.forEach((k, i) => { const [x, y] = pts[i]; s += `<g class="geo-tv" data-tvp="${p.k}" data-tvk="${k}"><circle cx="${r1(x)}" cy="${r1(y)}" r="${r1(14 * K)}" fill="transparent"/><circle cx="${r1(x)}" cy="${r1(y)}" r="${r1(5 * K)}" fill="${p.c}"/></g>`; });
+      s += `</g>`;
+    });
+    svg.innerHTML = `<title id="geo-svg-t">Todos los temas: cada arista es un tema y cada partido, su nota media en ese tema</title>` + s;
+    $("#geo-cap").textContent = "Cada arista es un tema. El punto de cada partido es su nota media en los seis aspectos de ese tema, de 0 a 10 (valoración de este observatorio). Pasa el ratón por un punto para ver de qué sale; pulsa el nombre de un tema para abrirlo.";
+    $("#geo-mejor-nota").hidden = true;
+    $(".geo-partidos").classList.remove("en-mejor");
+  }
   function dibujar() {
     medir();
+    if (st.todos) return dibujarTodos();
     const t = T(), ejes = t.ejes, n = ejes.length, step = (2 * Math.PI) / n;
     let s = `<defs><radialGradient id="geo-glow"><stop offset="0" stop-color="${t.c}" stop-opacity="0"/><stop offset=".6" stop-color="${t.c}" stop-opacity=".035"/><stop offset="1" stop-color="${t.c}" stop-opacity=".17"/></radialGradient></defs>`;
     // Fondo: un halo del color del tema que crece hacia el círculo ideal
@@ -3566,6 +3627,15 @@ const ILUS = {
       + `<p><b>Postura de ${p.n} en todo el tema:</b> ${t.t[pk] || "Sin texto todavía."}</p>`
       + `<p class="who"><small>Por aspecto, este observatorio no tiene aún un texto de ${p.n} que justifique esta nota. Lo de arriba es su postura en el tema entero.</small></p>`;
   }
+  function htmlTodos(pk, tk) {
+    const p = PARTIDOS.find((q) => q.k === pk), t = TEMAS[tk], m = mediaTema(tk, pk), lv = nivelMedia(m);
+    const coma = (x) => x.toFixed(1).replace(".", ",");
+    return `<span class="lbl" style="color:${p.c}">${p.n} · ${t.n}</span><h5>${t.q}</h5>`
+      + `<p class="who">Nota media: ${coma(m)} de 10 <small>(seis aspectos, valoración de este observatorio)</small></p>`
+      + `<p class="medida" style="color:${lv ? colorNivel(lv - 1) : "#8A93A6"}">${lv ? NIV_TITULO[lv - 1] : "Sin medida"}</p>`
+      + `<p>${lv ? "La media llega a esta medida." : "La media no llega a lo básico: hacen falta " + coma(UMBRAL[0]) + " de 10."}</p>`
+      + `<p><b>Postura de ${p.n} en el tema:</b> ${t.t[pk] || "Sin texto todavía."}</p>`;
+  }
   function htmlMejor(i) {
     const t = T(), e = t.ejes[i], m = mejores(t)[i], lvl = nivelDe(m.max); // 0: no llega a lo básico; 1 a 3: círculo
     const cab = `<span class="lbl" style="color:${lvl ? colorNivel(lvl - 1) : "#EDEBE6"}">Nota más alta</span><h5>${e.n}</h5>`;
@@ -3635,6 +3705,8 @@ const ILUS = {
   const centro = (el) => { const b = el.getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; };
   function leer(e) {
     if (st.yo) return false;
+    const tv = e.target.closest("[data-tvk]");
+    if (tv) { const [x, y] = centro(tv.lastElementChild); mostrar(`t${tv.dataset.tvp}-${tv.dataset.tvk}`, htmlTodos(tv.dataset.tvp, tv.dataset.tvk), x, y); return true; }
     const mj = e.target.closest("[data-mi]");
     if (mj) { if (st.fijado != null) return true; const [x, y] = centro(mj.querySelector(".mdot")); mostrar(`m${st.tema}-${mj.dataset.mi}`, htmlMejor(+mj.dataset.mi), x, y); return true; }
     const pv = e.target.closest("[data-pv]");
@@ -3649,7 +3721,7 @@ const ILUS = {
   svg.addEventListener("pointerout", (e) => {
     if (e.pointerType === "touch") return;
     const to = e.relatedTarget;
-    if (to && to.closest && (to.closest("[data-lk]") || to.closest("[data-ring]") || to.closest("[data-mi]") || to.closest("[data-pv]"))) return;
+    if (to && to.closest && (to.closest("[data-lk]") || to.closest("[data-ring]") || to.closest("[data-mi]") || to.closest("[data-pv]") || to.closest("[data-tvk]"))) return;
     ocultar();
   });
   // Con teclado, al enfocar un punto de «lo mejor» se lee lo mismo que con el ratón
@@ -3898,13 +3970,19 @@ const ILUS = {
     document.querySelector(".brand").setAttribute("href", "#hoy");
     document.querySelector(".skip").setAttribute("href", "#hoy");
   }
-  function todo() { soltar(); if (!st.mejor) st.masVer = null; chips(); dibujar(); panel(); niveles(); cabecera(); matriz(); }
+  function todo() { soltar(); if (!st.mejor) st.masVer = null; $(".geo-stage").classList.toggle("todos", st.todos); $("[data-todos]", tabs).setAttribute("aria-selected", String(st.todos)); chips(); dibujar(); panel(); niveles(); cabecera(); matriz(); }
+  function setTodos(on) {
+    if (on && st.yo) modoYo(false);
+    st.todos = on; if (on) { st.mejor = false; $("#geo-mejor").setAttribute("aria-pressed", "false"); }
+    st.foco = null; st.masVer = null; soltar(); todo();
+  }
 
   const tabs = $("#geo-tema");
-  tabs.innerHTML = KEYS.map((k) => { const t = TEMAS[k]; return `<button class="geo-tc" role="tab" data-t="${k}" aria-selected="${k === st.tema}" tabindex="${k === st.tema ? 0 : -1}" aria-controls="geo-svg" style="--tc:${t.c}"><span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64">${ILUS[k] || ""}</svg></span><span class="nm">${t.n}</span></button>`; }).join("");
+  const BOTON_TODOS = `<button class="geo-tc geo-tc-todos" role="tab" data-todos aria-selected="false" aria-controls="geo-svg" style="--tc:#EDEBE6"><span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64"><polygon points="32,5 55,19 55,45 32,59 9,45 9,19" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><polygon points="32,17 46,25 46,39 32,47 18,39 18,25" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/></svg></span><span class="nm">Todos</span></button>`;
+  tabs.innerHTML = KEYS.map((k) => { const t = TEMAS[k]; return `<button class="geo-tc" role="tab" data-t="${k}" aria-selected="${k === st.tema}" tabindex="${k === st.tema ? 0 : -1}" aria-controls="geo-svg" style="--tc:${t.c}"><span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64">${ILUS[k] || ""}</svg></span><span class="nm">${t.n}</span></button>`; }).join("") + BOTON_TODOS;
   function marcarTab(enfocarTab) {
     $$("[data-t]", tabs).forEach((b) => {
-      const on = b.dataset.t === st.tema;
+      const on = !st.todos && b.dataset.t === st.tema;
       b.setAttribute("aria-selected", String(on)); b.tabIndex = on ? 0 : -1;
       if (on) { if (enfocarTab) b.focus(); if (tabs.scrollWidth > tabs.clientWidth) tabs.scrollTo({ left: b.offsetLeft - tabs.clientWidth / 2 + b.offsetWidth / 2, behavior: "smooth" }); }
     });
@@ -3912,12 +3990,12 @@ const ILUS = {
   function cambiarTema(k, enfocarTab) {
     if (!TEMAS[k]) return;
     const nuevo = k !== st.tema;
-    st.tema = k; st.eje = null; st.ring = null; st.foco = null; st.masVer = null;
+    st.tema = k; st.todos = false; st.eje = null; st.ring = null; st.foco = null; st.masVer = null;
     marcarTab(enfocarTab);
     if (nuevo) { svg.classList.remove("geo-entra"); void svg.getBoundingClientRect(); svg.classList.add("geo-entra"); clearTimeout(cambiarTema.t); cambiarTema.t = setTimeout(() => svg.classList.remove("geo-entra"), 1200); }
     todo(); propuestas(); guardarURL();
   }
-  tabs.addEventListener("click", (e) => { const b = e.target.closest("[data-t]"); if (b) cambiarTema(b.dataset.t); });
+  tabs.addEventListener("click", (e) => { if (e.target.closest("[data-todos]")) return setTodos(!st.todos); const b = e.target.closest("[data-t]"); if (b) cambiarTema(b.dataset.t); });
   tabs.addEventListener("keydown", (e) => {
     const d = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
     let j = KEYS.indexOf(st.tema);
@@ -3935,6 +4013,7 @@ const ILUS = {
   const eje = (i) => { st.eje = st.eje === i ? null : i; st.foco = null; ocultar(); dibujar(); panel(); };
   svg.addEventListener("click", (e) => {
     if (st.yo) return; // in drawing mode the pointer draws (pointerdown above)
+    const ir = e.target.closest("[data-tema-go]"); if (ir) return cambiarTema(ir.dataset.temaGo);
     const mj = e.target.closest("[data-mi]");
     if (mj) { const i = +mj.dataset.mi; if (st.fijado === i) soltar(); else fijarMejor(i); return; }
     if (st.fijado != null) soltar();
@@ -3969,7 +4048,7 @@ const ILUS = {
   // «Déjalo de lo mejor de cada uno»: el dibujo pasa a mostrar el partido más cercano al ideal en cada aspecto
   function setMejor(on) {
     if (on && st.yo) modoYo(false);
-    st.mejor = on; st.foco = null; st.masVer = null; soltar();
+    st.mejor = on; st.todos = false; st.foco = null; st.masVer = null; soltar();
     $("#geo-mejor").setAttribute("aria-pressed", String(on));
     todo(); marcar(st.ring);
   }
@@ -4579,5 +4658,6 @@ const AREAS = [
 })();
 
 </script>
+<script>(function(){var top=document.querySelector(".top"),tit=top.querySelector(".top-in"),y0=window.scrollY;function medir(){top.style.setProperty("--tit-h",tit.offsetHeight+"px");}medir();window.addEventListener("resize",medir);window.addEventListener("scroll",function(){var y=window.scrollY;if(Math.abs(y-y0)<6)return;top.classList.toggle("plegado",y>y0&&y>80);y0=y;},{passive:true});})();</script>
 </body>
 </html>
