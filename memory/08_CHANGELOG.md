@@ -12900,3 +12900,11 @@ Pendiente: grupo 5 (élite), Europa, Mundo, y la búsqueda de ingresos.
 - Verified: browser interaction suite (kept outside the repo) 237 of 237, desktop and 390 px mobile; `tsc --noEmit` clean; `npm run build` passes; screenshots of the new layout, the pinned card and the drop-down checked.
 - Not verified: the installed app (service worker, `?sw=off`), real phones, four-way ties.
 - Files: `public/observatorio-polarizacion/index.html`.
+
+## 2026-11-19 · Vía delantera hasta 0,90 m
+
+> «Permite que la vía delantera y la vía trasera puedan tener como mínimo 0,9 metros. Ahora no pueden bajar de 1,4 metros»
+
+El deslizador «Vía delantera» baja de 1,40 m a 0,90 m. Por defecto no cambia ningún diseño (`triciclo-disenos` sigue «Todo OK»).
+
+La vía trasera no baja de 0,95 m: ese es su mínimo geométrico (los carenados traseros tocarían la cola por debajo). Su deslizador ya admitía 0,80 m y se queda como estaba; el límite lo impone la forma, no el deslizador.
