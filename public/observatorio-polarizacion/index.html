@@ -944,15 +944,18 @@ footer p{margin:0;max-width:70ch}
 @media (hover:hover){.sel:hover .sel-panel,.sel:focus-within .sel-panel{display:block}}
 .sel.open .sel-panel{display:block}
 .geo-opts-row{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin:0 0 12px}
-/* La figura y, a su derecha, la explicación de los tres círculos (2026-11-18, Eugenio) */
+/* La figura ocupa casi toda la pantalla; debajo, las tres medidas en fila (2026-11-19, Eugenio) */
 .geo{max-width:1120px;margin:0 auto;display:block}
-.geo-stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,330px);grid-template-areas:"svg niv" "cap niv";column-gap:22px;align-items:center}
-.geo-stage > #geo-svg{grid-area:svg}
-.geo-stage > .geo-cap{grid-area:cap;align-self:start}
-.geo-stage > #geo-niveles{grid-area:niv;display:grid;grid-template-columns:minmax(0,1fr);gap:10px;margin:0 8px 8px 0}
+.geo-stage{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"svg" "cap" "niv";justify-items:center;row-gap:10px}
+.geo-stage > #geo-svg{grid-area:svg;width:100%;height:auto;max-height:calc(100vh - 60px)}
+.geo-stage > .geo-cap{grid-area:cap;align-self:start;justify-self:stretch}
+.geo-stage > #geo-niveles{grid-area:niv;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:start;width:100%;margin:0}
+.geo-stage > #geo-niveles .geo-nv{position:relative}
+/* Al pasar el ratón por una medida, sus puntos caen hacia abajo como una capa: no empujan nada */
+.geo-stage > #geo-niveles .geo-nv-pts{position:absolute;top:100%;left:0;right:0;z-index:5;margin-top:6px;padding:12px 14px;background:var(--bg-2);border:1px solid var(--line-2);border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,.45)}
 .geo-stage.yo{grid-template-columns:minmax(0,1fr)}
 .geo-stage.yo > #geo-niveles{display:none}
-@media (max-width:1000px){.geo-stage{grid-template-columns:minmax(0,1fr);grid-template-areas:"svg" "cap" "niv"} .geo-stage > #geo-niveles{margin:4px 0 8px}}
+@media (max-width:1000px){.geo-stage > #geo-niveles{grid-template-columns:minmax(0,1fr)} .geo-stage > #geo-niveles .geo-nv-pts{position:static;box-shadow:none;margin-top:8px}}
 .geo-detalle{max-width:760px;margin:24px auto 0}
 .geo-detalle .geo-side{position:static;display:grid}
 @media (max-width:760px){
@@ -979,7 +982,7 @@ footer p{margin:0;max-width:70ch}
 .geo-selectores .geo-tc .ill{width:26px;height:26px}
 .geo-chips-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px}
 /* Partidos en columna a la izquierda de la figura (2026-11-18, Eugenio) */
-.geo{max-width:1280px;display:grid;grid-template-columns:200px minmax(0,1fr);column-gap:20px;align-items:start}
+.geo{max-width:1600px;display:grid;grid-template-columns:200px minmax(0,1fr);column-gap:20px;align-items:start}
 .geo-partidos{position:sticky;top:12px;display:grid;gap:8px;padding:12px;border:1px solid var(--line);border-radius:16px;background:var(--bg-2)}
 .geo-partidos > .sel-k{margin:0 2px 2px}
 .geo-partidos .geo-chips{display:flex;flex-wrap:wrap;gap:6px}
@@ -990,6 +993,24 @@ footer p{margin:0;max-width:70ch}
 .geo-partidos .geo-chip:disabled{opacity:.4;cursor:not-allowed}
 .geo-mejor{outline:none}
 .geo-mejor .halo{opacity:0}
+.geo-mejor.on .halo,.geo-mejor:focus .halo{opacity:1}
+.geo-tip{position:absolute;z-index:6;max-width:300px;padding:12px 14px;border-radius:14px;background:var(--bg-2);border:1px solid var(--line-2);color:var(--ink-2);font:400 13.5px/1.5 var(--sans);box-shadow:0 12px 32px rgba(0,0,0,.45)}
+.geo-tip[hidden]{display:none}
+.geo-tip.fijo{border-color:var(--ink-2)}
+/* The box may sit over another point: clicks pass through it, only its buttons catch them */
+.geo-tip{pointer-events:none}
+.geo-tip .tbtn,.geo-tip .geo-link{pointer-events:auto}
+.geo-tip h5{font:600 14px var(--sans);color:var(--ink);margin:2px 0 6px}
+.geo-tip-acc{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.geo-mas{display:grid;gap:10px;padding:14px 16px;border-radius:14px;background:var(--bg-2);border:1px solid var(--line-2);color:var(--ink-2);font:400 13.5px/1.5 var(--sans)}
+.geo-mas .lbl{display:block}
+.geo-mas-h{font:400 1.35rem/1.15 var(--display);color:var(--ink);margin:2px 0 0}
+.geo-mas-nota{font-size:12.5px;color:var(--muted);margin:0}
+.geo-nv-lista{display:grid;gap:8px}
+.geo-nv-fijo{cursor:default}
+.geo-nv-fijo.alcanzado{border-color:var(--lc)}
+.geo-postura summary{cursor:pointer;color:var(--ink);font-weight:600;font-size:13.5px}
+.geo-postura p{font-size:13.5px;margin:6px 0 0}
 .geo-mejor:focus .halo{opacity:1}
 @media (max-width:1000px){.geo-partidos.en-mejor #geo-partidos-t,.geo-partidos.en-mejor #geo-chips{display:none}}
 @media (max-width:1000px){
@@ -1322,7 +1343,7 @@ footer p{margin:0;max-width:70ch}
   <div class="geo">
     <aside class="geo-partidos" aria-labelledby="geo-partidos-t">
       <button class="tbtn geo-mejor-btn" id="geo-mejor" aria-pressed="false">Déjalo de lo mejor de cada uno</button>
-      <p class="geo-nota" id="geo-mejor-nota" hidden>Por cada aspecto, el punto marca la nota más alta entre los nueve partidos. Si empatan, el punto es gris y dice cuántos; pasa el ratón o toca el punto para ver quiénes son. El círculo ideal es la propuesta de esta página, no la de ningún partido. La línea discontinua une esos mejores valores.</p>
+      <p class="geo-nota" id="geo-mejor-nota" hidden>Por cada aspecto, el punto marca la nota más alta entre los nueve partidos. Si empatan, el punto se reparte en los colores de los partidos empatados y sus nombres salen junto a él. Pasa el ratón por el punto para ver por qué llega tan alto; si lo pulsas, se queda fijo, y «Ver más» lo abre en la columna de la derecha. El círculo ideal es la propuesta de esta página, no la de ningún partido. La línea discontinua une esos mejores valores.</p>
       <p class="sel-k" id="geo-partidos-t">Partidos</p>
       <div class="geo-chips" id="geo-chips"></div>
     </aside>
@@ -3287,6 +3308,8 @@ const ILUS = {
   let R = 226, K = 1;
   // Tres círculos: lo básico, lo intermedio y lo avanzado (el círculo ideal), a un tercio, dos tercios y el borde
   const NIV = ["Lo básico", "Lo intermedio", "Lo avanzado"];
+  // Nombres de las tres tarjetas bajo la figura (las medidas, no los círculos)
+  const NIV_TITULO = ["Medidas básicas", "Medidas intermedias", "Medidas avanzadas"];
   const UMBRAL = [10 / 3, 20 / 3, 10];
   const ORO = "#F6BE3B";
   const alcanza = (x, k) => x >= UMBRAL[k] - 0.01;
@@ -3321,7 +3344,7 @@ const ILUS = {
 
   const KEYS = Object.keys(TEMAS);
   const DEF = ["pp", "psoe", "vox", "fa"];
-  const st = { tema: "inm", sel: new Set(DEF), foco: null, eje: null, ideal: true, mejor: false, ring: null, yo: false };
+  const st = { tema: "inm", sel: new Set(DEF), foco: null, eje: null, ideal: true, mejor: false, ring: null, yo: false, fijado: null, masVer: null };
   // Lo que llega en la dirección: ?tema=vivienda&p=pp,psoe&foco=pp
   const q = new URLSearchParams(location.search);
   const qt = q.get("tema");
@@ -3386,23 +3409,44 @@ const ILUS = {
       return { i, max, quien: PARTIDOS.filter((p) => t.v[p.k][i] === max) };
     });
   }
-  // Un solo partido: su color y su nombre. Empate: gris y el número de empatados (los nombres salen al pasar o tocar). Nadie llega a lo básico: gris, sin texto
+  // Un partido: punto de su color y su nombre. Empate de dos o tres: el punto se reparte en los colores de los
+  // partidos empatados y cada nombre sale en su color, todos a la vista sin pasar el ratón. Empate de cuatro o más:
+  // el mismo punto repartido y un recuento. Nadie llega a lo básico: gris, sin texto.
   const unir = (ns) => (ns.length <= 2 ? ns.join(" y ") : ns.slice(0, -1).join(", ") + " y " + ns[ns.length - 1]);
+  // Una circunferencia repartida en porciones iguales, una por partido (con uno, es un círculo liso)
+  function puntoPartido(cx, cy, r, colores) {
+    if (colores.length === 1) return `<circle cx="${r1(cx)}" cy="${r1(cy)}" r="${r1(r)}" fill="${colores[0]}" stroke="#0C0F14" stroke-width="3"/>`;
+    const N = colores.length;
+    const porciones = colores.map((c, k) => {
+      const a0 = -Math.PI / 2 + (k * 2 * Math.PI) / N, a1 = a0 + (2 * Math.PI) / N;
+      const x0 = cx + r * Math.cos(a0), y0 = cy + r * Math.sin(a0), x1 = cx + r * Math.cos(a1), y1 = cy + r * Math.sin(a1);
+      return `<path d="M${r1(cx)} ${r1(cy)} L${r1(x0)} ${r1(y0)} A${r1(r)} ${r1(r)} 0 0 1 ${r1(x1)} ${r1(y1)} Z" fill="${c}"/>`;
+    }).join("");
+    return porciones + `<circle cx="${r1(cx)}" cy="${r1(cy)}" r="${r1(r)}" fill="none" stroke="#0C0F14" stroke-width="3"/>`;
+  }
   function puntoMejor(m, n, t) {
     const [px, py] = P(ang(m.i, n), rr(m.max));
-    const empate = m.quien.length > 1, nada = m.max === 0;
-    const col = empate || nada ? "#EDEBE6" : m.quien[0].c;
-    const texto = nada ? "" : empate ? `${m.quien.length} empatan` : m.quien[0].n;
+    const nada = m.max === 0, varios = m.quien.length > 1, muchos = m.quien.length >= 4;
+    const cols = nada ? ["#EDEBE6"] : m.quien.map((p) => p.c);
     const quienes = nada ? "ningún partido llega a lo básico" : `${unir(m.quien.map((p) => p.n))}, ${m.max} de 10`;
     // La etiqueta va hacia dentro del círculo, para no chocar con los nombres de los aspectos
     const L = Math.hypot(CX - px, CY - py) || 1, ux = (CX - px) / L, uy = (CY - py) / L;
     const lx = px + ux * 16 * K, ly = py + uy * 16 * K + 5 * K;
     const anc = ux > 0.25 ? "start" : ux < -0.25 ? "end" : "middle";
-    // Zona de toque de unos 40 unidades de radio (44 px o más en móvil), y un halo dorado que solo aparece con el teclado
-    return `<g class="geo-mejor" data-mi="${m.i}" tabindex="0" role="button" aria-label="Nota más alta en ${t.ejes[m.i].n}: ${quienes}"><circle cx="${r1(px)}" cy="${r1(py)}" r="${r1(40 * K)}" fill="transparent"/>`
+    const rotulo = (txt, col, y) => `<text x="${r1(lx)}" y="${r1(y)}" text-anchor="${anc}" font-family="Archivo, sans-serif" font-weight="600" font-size="${r1(14 * K)}" fill="${col}" paint-order="stroke" stroke="#0C0F14" stroke-width="4" pointer-events="none">${txt}</text>`;
+    let etiquetas = "";
+    if (!nada && !muchos) {
+      // Una línea por partido, centradas alrededor del punto, cada una en el color de su partido
+      const paso = 15 * K;
+      etiquetas = m.quien.map((p, j) => rotulo(p.n, p.c, ly + (j - (m.quien.length - 1) / 2) * paso)).join("");
+    } else if (muchos) {
+      etiquetas = rotulo(`${m.quien.length} empatan`, "#EDEBE6", ly);
+    }
+    // Zona de toque de unos 40 unidades de radio (44 px o más en móvil), y un halo dorado que aparece con el teclado o al fijarlo
+    return `<g class="geo-mejor${varios ? " empate" : ""}" data-mi="${m.i}" tabindex="0" role="button" aria-label="Nota más alta en ${t.ejes[m.i].n}: ${quienes}"><circle cx="${r1(px)}" cy="${r1(py)}" r="${r1(40 * K)}" fill="transparent"/>`
       + `<circle class="halo" cx="${r1(px)}" cy="${r1(py)}" r="${r1(15 * K)}" fill="none" stroke="${ORO}" stroke-width="2.5" pointer-events="none"/>`
-      + `<circle class="mdot" cx="${r1(px)}" cy="${r1(py)}" r="${r1(8 * K)}" fill="${col}" stroke="#0C0F14" stroke-width="3"/>`
-      + (texto ? `<text x="${r1(lx)}" y="${r1(ly)}" text-anchor="${anc}" font-family="Archivo, sans-serif" font-weight="600" font-size="${r1(14 * K)}" fill="${col}" paint-order="stroke" stroke="#0C0F14" stroke-width="4" pointer-events="none">${texto}</text>` : "")
+      + `<g class="mdot">${puntoPartido(px, py, 8 * K, cols)}</g>`
+      + etiquetas
       + `</g>`;
   }
 
@@ -3422,10 +3466,6 @@ const ILUS = {
     if (st.mejor) {
       // La línea discontinua une los mejores valores con segmentos rectos: no es la figura de ningún partido
       s += `<path d="${dPath(mejores(t).map((m) => P(ang(m.i, n), rr(m.max))))}" fill="none" stroke="#EDEBE6" stroke-opacity=".6" stroke-width="2" stroke-dasharray="7 6"/>`;
-    }
-    if (st.ideal) {
-      const [x, y] = P(ang(1, n) + step * 0.62, R + 12);
-      s += `<text x="${r1(x)}" y="${r1(y)}" font-family="IBM Plex Mono, monospace" font-size="${r1(14 * K)}" fill="${ORO}" letter-spacing="1">CÍRCULO IDEAL</text>`;
     }
     // En «lo mejor de cada uno» no se dibuja ningún partido: se miran los nueve a la vez
     const orden = st.mejor ? [] : PARTIDOS.filter((p) => st.sel.has(p.k)).sort((a, b) => (a.k === st.foco) - (b.k === st.foco));
@@ -3484,6 +3524,7 @@ const ILUS = {
       ? `Lo más cercano al círculo ideal en cada uno de los ${PALABRA[n] || n} aspectos de ${t.n.toLowerCase()}, con tres círculos: lo básico, lo intermedio y lo avanzado`
       : `Figura de cada partido sobre los ${PALABRA[n] || n} aspectos de ${t.n.toLowerCase()}, con tres círculos: lo básico, lo intermedio y lo avanzado`;
     svg.innerHTML = `<title id="geo-svg-t">${titulo}</title>` + s;
+    marcarMejor();
     $("#geo-cap").textContent = t.cap;
     $("#geo-mejor-nota").hidden = !st.mejor;
     $(".geo-partidos").classList.toggle("en-mejor", st.mejor);
@@ -3509,6 +3550,19 @@ const ILUS = {
     return cab + `<p class="who">${etiquetas(m.quien)} · ${m.max} de 10 <small>(valoración de este observatorio)</small></p>`
       + `<p><b>Qué significa «${NIV[lvl - 1]}» en este aspecto, para cualquier partido:</b> ${e.niv[lvl - 1]}</p>`;
   }
+  // El detalle de un punto de «lo mejor», para la columna de la derecha
+  function htmlMasMejor(i) {
+    const t = T(), e = t.ejes[i], m = mejores(t)[i], lvl = nivelDe(m.max);
+    const cab = `<span class="lbl">Nota más alta · radio ${i + 1} de ${t.ejes.length}</span><h4 class="geo-mas-h">${e.n}</h4>`;
+    const quien = m.max === 0
+      ? `<p class="who">Ningún partido llega a lo básico en este aspecto.</p>`
+      : `<p class="who">${etiquetas(m.quien)} · ${m.max} de 10 <small>(valoración de este observatorio)</small></p>`;
+    const escalera = [2, 1, 0].map((k) => `<div class="geo-nv geo-nv-fijo${lvl === k + 1 ? " alcanzado" : ""}" style="--lc:${colorNivel(k)}"><b>${k + 1} · ${NIV[k]}${k === 2 ? " · ideal" : ""}</b>${e.niv[k]}</div>`).join("");
+    const posturas = m.quien.map((p) => `<details class="geo-postura"><summary>Qué propone ${p.n} en todo el tema</summary><p>${t.t[p.k]}</p></details>`).join("");
+    return `<div class="geo-mas">${cab}${quien}<p class="geo-mas-nota">Lo que dice cada nivel es igual para todos los partidos. La nota la pone este observatorio.</p>`
+      + `<div class="geo-nv-lista">${escalera}</div>${posturas}`
+      + `<button class="geo-link" data-volver-mas>Volver a los tres círculos</button></div>`;
+  }
   function mostrar(clave, html, cx, cy) {
     if (clave !== tipClave) { tip.innerHTML = html; tipClave = clave; }
     tip.hidden = false;
@@ -3518,12 +3572,47 @@ const ILUS = {
     if (y < 6) y = cy - sr.top + 20;
     tip.style.left = r1(x) + "px"; tip.style.top = r1(y) + "px";
   }
-  function ocultar() { tip.hidden = true; tipClave = null; }
+  // Lo que se ve al pasar el ratón se oculta; un punto fijado se queda hasta que se cierra o cambia la vista
+  function ocultar() { if (st.fijado != null) return; tip.hidden = true; tipClave = null; }
+  function soltar() { st.fijado = null; tip.hidden = true; tip.classList.remove("fijo"); tipClave = null; marcarMejor(); }
+  // Marca el punto que está fijado, o el que tiene abierto el detalle de la derecha
+  function marcarMejor() {
+    const activo = st.masVer != null ? st.masVer : st.fijado;
+    $$(".geo-mejor", svg).forEach((g) => g.classList.toggle("on", +g.dataset.mi === activo));
+  }
+  function fijarMejor(i) {
+    st.fijado = i;
+    const mj = svg.querySelector(`[data-mi="${i}"]`); if (!mj) return soltar();
+    const [x, y] = centro(mj.querySelector(".mdot"));
+    const html = htmlMejor(i) + `<div class="geo-tip-acc"><button class="tbtn" data-ver-mas="${i}">Ver más</button><button class="geo-link" data-soltar>Cerrar</button></div>`;
+    tipClave = null; mostrar(`f${st.tema}-${i}`, html, x, y);
+    despejar(mj, x, y);
+    tip.classList.add("fijo"); marcarMejor();
+  }
+  // El cuadro fijado busca un hueco que no tape otros puntos ni sus nombres: encima, debajo, o a los lados
+  function despejar(mj, cx, cy) {
+    const sr = stage.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+    const otros = [...svg.querySelectorAll(`.geo-mejor:not([data-mi="${mj.dataset.mi}"]) .mdot, .geo-mejor:not([data-mi="${mj.dataset.mi}"]) text`)]
+      .map((el) => el.getBoundingClientRect());
+    const huecos = [[cx - w / 2, cy - h - 18], [cx - w / 2, cy + 18], [cx + 18, cy - h / 2], [cx - w - 18, cy - h / 2]];
+    const dentro = (x, y) => x >= sr.left + 6 && y >= sr.top + 6 && x + w <= sr.right - 6 && y + h <= sr.bottom - 6;
+    const toca = (x, y) => otros.some((b) => x < b.right + 8 && x + w > b.left - 8 && y < b.bottom + 8 && y + h > b.top - 8);
+    const ok = huecos.find(([x, y]) => dentro(x, y) && !toca(x, y));
+    if (!ok) return;
+    tip.style.left = r1(ok[0] - sr.left) + "px"; tip.style.top = r1(ok[1] - sr.top) + "px";
+  }
+  // «Ver más»: el detalle sustituye a las tres tarjetas de la derecha, y «Volver» las recupera tal como estaban
+  function abrirMas(i) { soltar(); st.masVer = i; niveles(); marcarMejor(); }
+  function cerrarMas() { st.masVer = null; niveles(); marcarMejor(); }
+  tip.addEventListener("click", (e) => {
+    const v = e.target.closest("[data-ver-mas]"); if (v) return abrirMas(+v.dataset.verMas);
+    if (e.target.closest("[data-soltar]")) soltar();
+  });
   const centro = (el) => { const b = el.getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; };
   function leer(e) {
     if (st.yo) return false;
     const mj = e.target.closest("[data-mi]");
-    if (mj) { const [x, y] = centro(mj.querySelector(".mdot")); mostrar(`m${st.tema}-${mj.dataset.mi}`, htmlMejor(+mj.dataset.mi), x, y); return true; }
+    if (mj) { if (st.fijado != null) return true; const [x, y] = centro(mj.querySelector(".mdot")); mostrar(`m${st.tema}-${mj.dataset.mi}`, htmlMejor(+mj.dataset.mi), x, y); return true; }
     const lv = e.target.closest("[data-lk]");
     if (lv) { const [x, y] = centro(lv.querySelector(".dot")); mostrar(`p${lv.dataset.li}-${lv.dataset.lk}`, htmlPunto(+lv.dataset.li, +lv.dataset.lk), x, y); return true; }
     const rg = e.target.closest("[data-ring]");
@@ -3540,7 +3629,7 @@ const ILUS = {
   // Con teclado, al enfocar un punto de «lo mejor» se lee lo mismo que con el ratón
   svg.addEventListener("focusin", (e) => { if (e.target.closest && e.target.closest("[data-mi]")) leer(e); });
   svg.addEventListener("focusout", (e) => { if (e.target.closest && e.target.closest("[data-mi]")) ocultar(); });
-  window.addEventListener("resize", () => { ocultar(); if (medir()) { dibujar(); marcar(st.ring); } });
+  window.addEventListener("resize", () => { soltar(); if (medir()) { dibujar(); marcar(st.ring); } });
 
   /* ---- Dibujar tu figura: arrastrar sobre cada radio ---- */
   let arrastre = null;
@@ -3615,18 +3704,20 @@ const ILUS = {
   }
   function niveles() {
     const t = T();
+    if (st.mejor && st.masVer != null) { $("#geo-niveles").innerHTML = htmlMasMejor(st.masVer); return; }
     $("#geo-niveles").innerHTML = t.niv.map((txt, k) => {
       const todos = PARTIDOS.filter((p) => t.v[p.k].every((x) => alcanza(x, k)));
       const mini = [4.3, 8.6, 12.6].map((r, j) => `<circle cx="14" cy="14" r="${r}" fill="none" stroke="${j === k ? colorNivel(k) : "#3A4660"}" stroke-width="${j === k ? 2.6 : 1.2}"/>`).join("");
       const puntos = t.ejes.map((e, i) => `<li><span class="geo-num-k">${i + 1}</span><span><b>${e.n}</b>${e.niv[k]}</span></li>`).join("");
       return `<div class="geo-nv" role="button" tabindex="0" data-nv="${k}" aria-pressed="${st.ring === k}" style="--lc:${colorNivel(k)}">`
-        + `<div class="geo-nv-h"><svg viewBox="0 0 28 28" aria-hidden="true">${mini}</svg><span><b>${k + 1} · ${NIV[k]}${k === 2 ? " · ideal" : ""}</b>${txt}</span></div>`
+        + `<div class="geo-nv-h"><svg viewBox="0 0 28 28" aria-hidden="true">${mini}</svg><span><b>${k + 1} · ${NIV_TITULO[k]}</b>${txt}</span></div>`
         + `<ol class="geo-nv-pts">${puntos}</ol>`
         + `<small>${todos.length ? "Lo alcanzan en todo el tema: " + todos.map((p) => p.n).join(", ") : "Ningún partido lo alcanza en todo el tema"}</small></div>`;
     }).join("");
   }
   const ley = $("#geo-niveles");
   ley.addEventListener("click", (e) => {
+    if (e.target.closest("[data-volver-mas]")) return cerrarMas();
     const b = e.target.closest("[data-nv]"); if (!b) return;
     const k = +b.dataset.nv; st.ring = st.ring === k ? null : k;
     $$("[data-nv]", ley).forEach((x) => x.setAttribute("aria-pressed", String(+x.dataset.nv === st.ring)));
@@ -3781,7 +3872,7 @@ const ILUS = {
     document.querySelector(".brand").setAttribute("href", "#hoy");
     document.querySelector(".skip").setAttribute("href", "#hoy");
   }
-  function todo() { ocultar(); chips(); dibujar(); panel(); niveles(); cabecera(); matriz(); }
+  function todo() { soltar(); if (!st.mejor) st.masVer = null; chips(); dibujar(); panel(); niveles(); cabecera(); matriz(); }
 
   const tabs = $("#geo-tema");
   tabs.innerHTML = KEYS.map((k) => { const t = TEMAS[k]; return `<button class="geo-tc" role="tab" data-t="${k}" aria-selected="${k === st.tema}" tabindex="${k === st.tema ? 0 : -1}" aria-controls="geo-svg" style="--tc:${t.c}"><span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64">${ILUS[k] || ""}</svg></span><span class="nm">${t.n}</span></button>`; }).join("");
@@ -3795,7 +3886,7 @@ const ILUS = {
   function cambiarTema(k, enfocarTab) {
     if (!TEMAS[k]) return;
     const nuevo = k !== st.tema;
-    st.tema = k; st.eje = null; st.ring = null; st.foco = null;
+    st.tema = k; st.eje = null; st.ring = null; st.foco = null; st.masVer = null;
     marcarTab(enfocarTab);
     if (nuevo) { svg.classList.remove("geo-entra"); void svg.getBoundingClientRect(); svg.classList.add("geo-entra"); clearTimeout(cambiarTema.t); cambiarTema.t = setTimeout(() => svg.classList.remove("geo-entra"), 1200); }
     todo(); propuestas(); guardarURL();
@@ -3818,6 +3909,9 @@ const ILUS = {
   const eje = (i) => { st.eje = st.eje === i ? null : i; st.foco = null; ocultar(); dibujar(); panel(); };
   svg.addEventListener("click", (e) => {
     if (st.yo) return; // in drawing mode the pointer draws (pointerdown above)
+    const mj = e.target.closest("[data-mi]");
+    if (mj) { const i = +mj.dataset.mi; if (st.fijado === i) soltar(); else fijarMejor(i); return; }
+    if (st.fijado != null) soltar();
     // En pantallas táctiles, tocar un círculo o un punto muestra su explicación
     if (leer(e)) return;
     ocultar();
@@ -3828,6 +3922,14 @@ const ILUS = {
   svg.addEventListener("keydown", (e) => {
     const a = e.target.closest("[data-ax]");
     if (a && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); if (st.yo) modoYo(false); eje(+a.dataset.ax); const n = svg.querySelector(`[data-ax="${a.dataset.ax}"]`); if (n) n.focus(); }
+  });
+  svg.addEventListener("keydown", (e) => {
+    const mj = e.target.closest("[data-mi]");
+    if (mj && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); const i = +mj.dataset.mi; if (st.fijado === i) soltar(); else fijarMejor(i); }
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    if (st.masVer != null) cerrarMas(); else if (st.fijado != null) soltar();
   });
   const pn = $("#geo-panel");
   pn.addEventListener("click", (e) => {
@@ -3842,7 +3944,7 @@ const ILUS = {
   // «Déjalo de lo mejor de cada uno»: el dibujo pasa a mostrar el partido más cercano al ideal en cada aspecto
   function setMejor(on) {
     if (on && st.yo) modoYo(false);
-    st.mejor = on; st.foco = null; ocultar();
+    st.mejor = on; st.foco = null; st.masVer = null; soltar();
     $("#geo-mejor").setAttribute("aria-pressed", String(on));
     todo(); marcar(st.ring);
   }
