@@ -12908,3 +12908,21 @@ Pendiente: grupo 5 (élite), Europa, Mundo, y la búsqueda de ingresos.
 El deslizador «Vía delantera» baja de 1,40 m a 0,90 m. Por defecto no cambia ningún diseño (`triciclo-disenos` sigue «Todo OK»).
 
 La vía trasera no baja de 0,95 m: ese es su mínimo geométrico (los carenados traseros tocarían la cola por debajo). Su deslizador ya admitía 0,80 m y se queda como estaba; el límite lo impone la forma, no el deslizador.
+
+## 2026-11-19 · Hover on a party's vertex explains its score
+
+- Hovering a party's vertex (the coloured point on each aspect) shows a card: the party's score (1 de 10 in the example), the level it reaches or the threshold it misses (3,3 for the first circle), what the basic level asks for in that aspect, and the party's posture in the whole topic.
+- The card says plainly that the data has no per-aspect text justifying each party's score. Nothing was invented.
+- Verified: browser interaction suite 237 of 237; hover on Podemos' «Déficit y deuda» vertex shows 1 de 10 and the 3,3 threshold; `tsc --noEmit` clean.
+- Not verified: touch devices (the card is hover-only), the installed app.
+- Files: `public/observatorio-polarizacion/index.html`, `memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md`.
+
+## 2026-11-19 · Geometry page: simpler top bar, footer links, four parties on reload
+
+- Top bar: the drawing mode is now «Haz el test y descubre tu geometría política», larger. «Círculo ideal» button removed (the ideal circle is always drawn). «Compartir» and «Política →» moved to the footer, where the other political sites are linked.
+- Best-mode card: the level name is shown large («Medidas intermedias») and the repeated «Qué significa… para cualquier partido» line is removed. The vertex card follows the same layout.
+- Topic buttons larger (60 px tall, 16 px text).
+- Reload: the selection in the address (`?p=`, `?foco=`) is ignored on a reload, so the page opens with PP, PSOE, Vox and Frente Amplio. Shared links opened in a new visit still carry their selection.
+- Verified: browser interaction suite 237 of 237; reload from `?p=pod,bildu` returns to pp,psoe,vox,fa on the first and second reloads; screenshots of the top bar, the best-mode card and the footer checked.
+- Not verified: touch devices, the installed app (service worker).
+- Files: `public/observatorio-polarizacion/index.html`, `memory/08_CHANGELOG.md`.

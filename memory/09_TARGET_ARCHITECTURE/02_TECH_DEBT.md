@@ -1071,7 +1071,7 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 ## 2026-11-19 — Geometry "best per aspect" view: shortcuts taken
 
 - **Tie names were visible only on hover, tap or focus (resolved 2026-11-19).** Two and three tied parties now show their names in their colours next to the point, and the dot is split into their colours. Four or more still read "N empatan" and need the same treatment or a list.
-- **Per-aspect party postures are not in the data (2026-11-19).** The floating card shows what the level means for the aspect (the same for every party) and the detail column shows each party's topic-level posture. A posture per party and per aspect needs content from Eugenio, not code.
+- **Per-aspect party postures are not in the data (2026-11-19).** Hovering a party's vertex now shows its score, the level it reaches, what the basic level asks for in that aspect (the same for every party), and the party's topic-level posture. The data has no text per party and per aspect that justifies the score, so the card says so. 9 parties × 64 aspects = 576 texts; they need sources and Eugenio's review, not code.
 - **No written posture per party.** The tooltip shows the party's value and the generic text of the level it reaches, labelled as such. Showing what a party says needs one written posture per party and aspect (9 × 64): content work for Eugenio.
 - **Role conflict in the new points.** The points use `role="button"` inside an SVG with `role="img"`, the same pattern the aspect controls already use. Not tested with NVDA or VoiceOver: ~1 h to check.
 - **The view is not in the shared link.** `guardarURL` keeps topic and party selection, not this view: ~15 min.
