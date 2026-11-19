@@ -17,6 +17,12 @@
       "ruta": "public/geometria-figura/index.html",
       "motivo": "Orden izquierda-derecha de los aspectos",
       "desde": "2026-11-19T19:36:59.952Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "public/geometria-figura/datos.json",
+      "motivo": "Orden izquierda-derecha de los aspectos",
+      "desde": "2026-11-19T19:37:02.842Z"
     }
   ]
 }
