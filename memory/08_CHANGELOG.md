@@ -12979,6 +12979,16 @@ Novedades de contenido: puerta nueva «Matricularlo como prototipo» (artículo 
 - Not run: `scripts/probar-figuras.ts`, which needs a PostgreSQL database that is not available in this session. Its only topic check looks for «Inmigración», which is unchanged.
 - Not verified: touch devices, the installed app (the service worker may serve the old build; `?sw=off` drops it).
 - Files: `public/observatorio-polarizacion/index.html`, `public/geometria-figura/datos.json`, `memory/08_CHANGELOG.md`.
+
+## 2026-11-19 · Geometry: hover reaches every party at a point, and cards open to the right of the pointer
+
+- When two or more parties have their point on the same aspect at the same place, the one drawn on top used to cover the others, so their proposal could not be read. Hovering now collects every party's point under the pointer on that aspect and shows them together in one card, each with its score, level and posture; the level description («Lo básico») is shown once, because it is the same for every party. The same applies in the «Todos» view.
+- Hover cards are anchored to the pointer: they open to its right and centred vertically. They move to the left only when there is no room on the right of the window, and they are kept inside the visible window, so a card near the bottom moves up just enough to stay on screen. Cards with two or more parties are a little wider and use a slightly smaller type, so they fit in the window more often. A card taller than the window (three or more long postures) still cannot be fully shown.
+- Pinned cards (click on a best-of-each point) keep their own placement logic and now fall back to the same right-hand position.
+- Verified: a PP point that shares its place with Vox on Inmigración shows PP and Vox together; the card opens to the right of the pointer and is centred vertically when it fits (680 px tall at 900 px of window height); a single-party card opens to the right and is centred; interaction suite 237 of 237; «Todos» suite passes; no page errors; `tsc --noEmit` clean.
+- Not verified: touch devices, screen readers, the installed app (the service worker may serve the old build; `?sw=off` drops it), and windows shorter than 800 px.
+- Files: `public/observatorio-polarizacion/index.html`, `memory/08_CHANGELOG.md`.
+
 ## 2026-11-19 · Estrategia: una consulta redactada por cada vía, con destinatarios
 
 > «desarrolla y redacta las preguntas/email/consultas a hacer en cada estrategia, y añade también los correos a quien va dirigido cada uno. Ya tengo una entidad constituida desde hace 8 años, es una asociación en España»
