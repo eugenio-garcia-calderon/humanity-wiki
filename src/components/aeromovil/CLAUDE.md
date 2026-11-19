@@ -208,6 +208,11 @@ read and says it; otherwise `'por-confirmar'`. A question for him goes in `pregu
 answers (in chat, or pasting «Copiar mis respuestas»), move the answer into the node's text and drop the question.
 Then `fallosArbol()` must return `[]`.
 
+**Reading his marks.** They are in `localStorage` (`aeromovil.estrategia.v1`) of the browser he used. When the Chrome
+extension is connected, open `humanity.wiki/aeromovil/estrategia` in a new tab, read that key, close the tab; otherwise
+ask him to paste «Copiar mis respuestas». A door carries `descarta` (what would close it) and its steps as child nodes
+of `tipo: 'paso'`, numbered in the title.
+
 **The page is public.** No personal figures (savings, limits, family, friends' names) in `arbol.ts`: write «tope
 fijado», not the amount. That is also why his answers stay in his browser.
 
