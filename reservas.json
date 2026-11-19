@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "public/observatorio-polarizacion/index.html",
+      "motivo": "Geometría: vista Todos, cabecera blanca y pliegue al hacer scroll",
+      "desde": "2026-11-19T21:47:06.665Z"
+    }
+  ]
 }
