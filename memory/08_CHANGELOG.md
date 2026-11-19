@@ -12835,6 +12835,31 @@ Pendiente: grupo 5 (élite), Europa, Mundo, y la búsqueda de ingresos.
 - La lista de partidos sale de la fila superior y pasa a una columna a la izquierda de la figura, con «Todos» y «Ninguno» abajo. En pantallas de hasta 1000 px se queda como fila encima de la figura.
 - Verificado en local con Chrome automatizado (escritorio 1440×900 y móvil 390 px), sin errores; pulsar un partido lo marca.
 
+## 2026-11-19 — Geometry figure test: «Construye tu figura» (new page, branch nube/test-figura)
+
+- Eugenio asked for a visual test where people build their own figure with sliders across the ten topics, publish it under a name without registering, and optionally receive the results by email. His choices: publish at once with moderation by hiding; email kept, with a separate newsletter checkbox; public gallery.
+- New page `/geometria-figura/` (`public/geometria-figura/index.html`): builder with the 64 sliders, live radar, comparison with one party, results per topic, publication, gallery and published-figure view.
+- New module `src/server/figuras.ts`, registered in `modulos.ts`. Anonymous publish behind `guardian`, delete with the key, moderation by hiding (`requireLevel(4)`), results email through `correo.ts` when a provider is configured.
+- Migration 0232: table `figuras_geometria`, closed in `transparencia.ts`. See 02_DATABASE.md.
+- Data: `public/geometria-figura/datos.json` is generated from the observatorio page by `scripts/geometria-datos.mjs`. `--verificar` fails when they drift.
+- The summary sentence lives in one place: `frasePrincipal` in `comun.js`, used by the results screen, the published figure and the email. It says «casi empatados» when the first two parties are within 2 points.
+- Review round (two bot reviewers: UX/copy, and UI/accessibility/mobile). Fixed:
+  - Delete box was reachable only from the email link (`#clave=`). Now always there, folded; opens with the key filled when it comes from the email. Blocker.
+  - Copy promised a comparison with another figure that did not exist. Removed.
+  - Copy said the email is always sent. Now «intentaremos». Backup copies are named in the deletion text.
+  - Copy said aspects below «básico» do not count. They do count, with their value. Text now says so.
+  - «Lo ignoro (0)» button per aspect: keyboard and thumb can mark 0 without a change event.
+  - «Ver mi figura completa» with topics left says how many are missing and goes to the first one.
+  - Topic buttons keep keyboard focus when pressed.
+  - Mobile: tab order matches the visual order (radar and comparison come after the sliders, not before).
+  - Contrast: control borders 1.7:1 → 3.3:1 (`--ctl`); disabled consent text no longer dimmed (only its box).
+  - Help text 12–13 px → 13–14 px; disclosure triangles back; the key line is no longer small grey text.
+  - «Ver mi figura publicada» stays hidden until «Ya he copiado la clave» is ticked.
+- Verified: `npx tsc --noEmit` clean; `npm run build` passes; `scripts/probar-figuras.ts` 44/44 on a throwaway Postgres; browser walkthrough 43/43 with a local runner; targeted checks 10/10; desktop and mobile screenshots checked; the production bundle (`node dist/server.cjs`) starts and serves the gallery and the consent text (200) against the same test database.
+- Fixed before merge: `figuras.ts` used `import.meta.url` at module level. The CJS production bundle (`dist/server.cjs`) empties it, so `createRequire(undefined)` would have stopped the server at boot. Now the paths come from `process.cwd()`, as in `sitios.ts` and `documentos.ts`. The three `import.meta` warnings still in the build come from front-end files that already existed.
+- Not verified: production configuration (`APP_URL` defaults to `http://localhost:3000`, so emails and links need the production value), the real email provider, screen readers, a real phone, and the installed app's service worker.
+- Pending decisions for Eugenio: see 09_TARGET_ARCHITECTURE/02_TECH_DEBT.md, the entries dated 2026-11-19.
+
 ## 2026-11-19 — Geometry: "Déjalo de lo mejor de cada uno" (best party per aspect)
 
 - Eugenio asked to remove "Lo mejor de cada uno" and add "Déjalo de lo mejor de cada uno" above the party list. With the view on, the selected topic shows, per aspect, one dot in the colour of the party closest to the ideal circle (value 10), labelled with its name. Hover, tap or keyboard focus shows the party, its value out of 10 and the text of the level it reaches.
@@ -12845,3 +12870,11 @@ Pendiente: grupo 5 (élite), Europa, Mundo, y la búsqueda de ingresos.
 - Checked locally with automated Chrome, desktop 1280×900 and phone 390 px, all ten topics: 152 of 153 checks pass. The remaining one is console noise from the test server: 404 for `/api/textos` and `/api/auth/me` (no API there) and Google Fonts blocked by the test. `npm run build` passes.
 - Not verified: screen readers, a real phone, the installed app (its service worker may serve the previous build; check with `?sw=off`), production.
 - Files: `public/observatorio-polarizacion/index.html` only.
+
+## 2026-11-19 — Figure test: zeros excluded from similarity, PR #1131 ready
+
+- Eugenio answered the four open points (see decisions). Aspects left at 0 no longer count in the similarity; a figure with no comparable aspect shows no percentage and says so, on the page and in the email.
+- Explanatory text on the page updated to say so.
+- `main` merged into `nube/test-figura`; memory conflicts resolved keeping both sides.
+- Verified: `scripts/probar-figuras.ts` 49 of 49 against a throwaway database (5498), `tsc --noEmit` and `npm run build`. The end-to-end browser walkthrough was not rerun after this change.
+- Not verified: real email provider, production configuration, real phones, installed service worker.

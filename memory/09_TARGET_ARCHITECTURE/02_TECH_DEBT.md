@@ -1056,6 +1056,18 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   field never completed under a loaded machine, so the save itself was only seen logged in (same code path: no session
   check on typing). One headless rerun: ~10 min.
 
+- **Geometry test data exists twice** (2026-11-19): `public/geometria-figura/datos.json` is generated from the party and topic arrays in `public/observatorio-polarizacion/index.html` by `scripts/geometria-datos.mjs`. `--verificar` fails when they drift. The source stays in the page because Eugenio edits it there. Unifying into one JSON read by both the page and the server: about 2 hours now. Cost grows with each new party or aspect edit; 9 parties × 64 aspects today.
+- **Newsletter checkbox stores consent, does not subscribe** (2026-11-19): `quiere_novedades` is saved with the exact legal text, but nobody is added to `sitio_suscriptores`. Connecting it through the double opt-in the site already uses (`/boletin/confirmar`) is about 1 hour. Needs Eugenio's decision on which list and which legal holder.
+- **Anonymous write route without a role check** (2026-11-19): `POST /api/figuras` departs from «Forbidden» item 3, the same way the public site forms do. See the decision of that date. Closing it with a guard is about 1 hour, but it breaks the no-account requirement.
+- **Geometry test: ignored aspects count as 0 in the similarity** (2026-11-19): «lo ignoro» is stored as 0 and compared like any figure, so an all-zero figure scores 33–46 % against every party (simulation by UX review). The copy now says so. Decision for Eugenio: exclude ignored aspects from the comparison, or keep them. Changing it touches `comun.js`, which the observatorio rules mirror: about 2 hours including the check.
+- **Geometry test: the level texts come from the observatorio** (2026-11-19): unglossed acronyms (AIReF, IRPF, IPC, PIB) and loaded words in the advanced level («evalu…» 14 times, none at basic). Rewording lives in the observatorio page, so it is a copy decision for Eugenio and Javier: about half a day.
+- **Geometry test: radar not readable on phones** (2026-11-19): the drawing scales from 480 units, so 13 px labels are about 9 px at 390 px. A bigger label or a shorter label set on mobile: about 1 hour, needs a screenshot pass.
+- **Geometry test: published figure has no text alternative** (2026-11-19): no axis names or values on the radar. A per-topic table under each radar: about 1 hour.
+- **Geometry test: live regions missing** (2026-11-19): «Te faltan N aspectos» and «Se ha borrado» appear with `hidden` toggling, which screen readers may skip. A persistent live region: about 1 hour, untested with a real reader.
+- **Geometry test: small accessibility leftovers** (2026-11-19): focus lost when the delete confirmation hides the focused button (~15 min); required fields without «(obligatorio)» (~10 min); slider track colours 1.4–2.3:1 as non-text contrast (~30 min if the team reads it as required); topic chips do not wrap on desktop and have no scroll cue (~30 min).
+- **Geometry test: colour rule** (2026-11-19): the page is static and defines its own colour variables; CLAUDE.md «Forbidden» item 5 names `src/components/ui/`. Needs a decision on whether static test pages are in scope.
+- **Geometry test: consent wording order** (2026-11-19): the legal text starts with the privacy policy and puts the newsletter in the middle. Changing its order changes the stored legal text, so it needs Eugenio's approval and a new `texto_consentimiento` version.
+
 ## 2026-11-19 — Geometry "best per aspect" view: shortcuts taken
 
 - **Tie names are visible only on hover, tap or focus.** The chart says "N empatan", so a printed or screenshot reader cannot see who tied. A list under the chart: ~30 min; costs a few lines per topic on phones.
@@ -1064,3 +1076,11 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **The view is not in the shared link.** `guardarURL` keeps topic and party selection, not this view: ~15 min.
 - **The name is hard to read at first glance.** "Déjalo de lo mejor de cada uno" is Eugenio's wording; a reviewer suggested "Lo mejor de cada partido". His call.
 - **Two phrases for the same idea** ("todos los aspectos" in the level list, "todo el tema" in the topic list). Unify: ~10 min.
+
+## 2026-11-19 — Figure test: shortcuts taken
+
+- **Legal text not reviewed.** The consent text names "Luz & Humanidad" as responsible party and was published as it stands, at Eugenio's request. Review it before any mailing: owner Eugenio.
+- **Newsletter checkbox stores consent and the email, but subscribes nobody.** Connecting it to the list: depends on the newsletter setup (not yet scoped).
+- **"Lo rechazo" and "lo ignoro" are the same zero.** Both are excluded from the similarity. A separate stored state: ~30 min.
+- **The figure dataset mirrors the observatorio page.** Regenerate `public/geometria-figura/datos.json` (`scripts/geometria-datos.mjs`) whenever the observatorio's topic or aspect order changes, or saved figures will read the wrong axes.
+- **Anonymous write route** accepted as an exception to CLAUDE.md, forbidden item 3 (Eugenio, 2026-11-19). Recorded here so the next review does not reopen it silently.

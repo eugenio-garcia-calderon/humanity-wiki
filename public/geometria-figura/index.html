@@ -1,0 +1,977 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Construye tu figura · Geometría política</title>
+<meta name="description" content="Construye tu propia figura de la geometría política, ajustando cada aspecto con un deslizador, y compárala con los partidos. Publícala si quieres.">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="data:,">
+<style>
+:root{
+  --bg:#0C0F14;--bg2:#131A26;--bg3:#1B2433;--ink:#F3F1EA;--ink2:#C9CED8;--muted:#9AA3B3;
+  --line:#263041;--line2:#34405A;--ctl:#5D667B;--acc:#F6BE3B;--ok:#7FD1AE;--err:#FF8A80;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --r:16px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 var(--sans);min-height:100vh}
+a{color:var(--acc)}
+:focus-visible{outline:3px solid var(--acc);outline-offset:3px;border-radius:6px}
+.saltar{position:absolute;left:-9999px;top:8px;background:var(--acc);color:#000;padding:8px 12px;border-radius:8px;z-index:99}
+.saltar:focus{left:12px}
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* Cabecera */
+.cab{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;max-width:1180px;margin:0 auto;padding:16px 20px;border-bottom:1px solid var(--line)}
+.marca{color:var(--ink);text-decoration:none;font-weight:700;letter-spacing:.01em}
+.cab nav{display:flex;gap:6px;flex-wrap:wrap}
+.cab nav button{background:transparent;border:1px solid transparent;color:var(--muted);font:500 15px var(--sans);padding:8px 12px;border-radius:999px;cursor:pointer;min-height:40px}
+.cab nav button:hover{color:var(--ink)}
+.cab nav button[aria-current="page"]{color:var(--ink);border-color:var(--line2);background:var(--bg2)}
+
+main{max-width:1180px;margin:0 auto;padding:24px 20px 64px}
+main:focus{outline:none}
+.vista[hidden]{display:none}
+h1{font-size:clamp(26px,4vw,38px);line-height:1.15;margin:0 0 10px;letter-spacing:-.01em}
+h2{font-size:21px;margin:0 0 8px;line-height:1.25}
+h3{font-size:17px;margin:0 0 6px;line-height:1.3}
+.lede{color:var(--ink2);max-width:70ch;margin:0 0 18px}
+.nota{color:var(--muted);font-size:14px;max-width:70ch}
+.bloque{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.boton{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 18px;border-radius:999px;border:1px solid var(--ctl);background:var(--bg3);color:var(--ink);font:600 15px var(--sans);cursor:pointer;text-decoration:none}
+.boton:hover{border-color:var(--muted)}
+.boton.principal{background:var(--acc);border-color:var(--acc);color:#111}
+.boton.principal:hover{filter:brightness(1.06)}
+.boton:disabled{opacity:.45;cursor:not-allowed}
+.boton.pequeno{min-height:36px;padding:6px 12px;font-size:14px}
+.error{color:var(--err);font-weight:600;margin:10px 0 0}
+.exito{color:var(--ok);font-weight:600}
+
+/* Progreso y pasos */
+.progreso{display:flex;align-items:center;gap:12px;margin:0 0 14px;color:var(--muted);font-size:14px;flex-wrap:wrap}
+.barra{flex:1;min-width:160px;height:8px;background:var(--bg3);border-radius:999px;overflow:hidden}
+.barra i{display:block;height:100%;width:0;background:var(--acc);border-radius:999px;transition:width .25s ease}
+.pasos{display:flex;gap:6px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:thin;margin:0 -2px 12px}
+.paso{flex:0 0 auto;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink2);font:500 14px var(--sans);cursor:pointer;white-space:nowrap}
+.paso .n{font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px}
+.paso[aria-current="step"]{border-color:var(--ink);background:var(--bg3);color:var(--ink)}
+.paso.hecho .n{color:var(--ok)}
+.paso .sw{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+
+/* Construir */
+.construir{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,440px);gap:24px;align-items:start}
+.tema-cab{margin:0 0 14px}
+.tema-cab .etiq{font-size:13px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin:0 0 4px}
+.tema-cab .pregunta{color:var(--ink2);margin:0 0 10px}
+details.circulos{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:0 0 16px;font-size:15px}
+details.circulos summary{cursor:pointer;color:var(--ink2);font-weight:600;min-height:32px;display:flex;align-items:center}
+details.circulos summary::before{content:'▸';margin-right:8px;color:var(--muted)}
+details.circulos[open] summary::before{content:'▾'}
+details.circulos ol{margin:8px 0 2px;padding-left:20px;color:var(--ink2)}
+details.circulos li{margin:0 0 6px}
+details.circulos b{color:var(--ink)}
+
+.aspectos{display:grid;gap:12px}
+.aspecto{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.aspecto.sin{border-style:dashed}
+.asp-acc{margin-top:6px}
+.asp-cab{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.asp-cab label{font-weight:700;font-size:16px;line-height:1.3}
+.asp-cab output{font-variant-numeric:tabular-nums;font-weight:700;min-width:64px;text-align:right;color:var(--ink2)}
+.asp-cab output.sin{color:var(--muted);font-weight:500;font-size:14px}
+.ayuda{margin:4px 0 10px;color:var(--muted);font-size:14px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:32px;background:transparent;margin:0;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:8px;border-radius:999px;background:linear-gradient(90deg,#2A3447 0 40%,#2F5C5A 40% 70%,#2D4B7A 70% 100%)}
+input[type=range]::-moz-range-track{height:8px;border-radius:999px;background:linear-gradient(90deg,#2A3447 0 40%,#2F5C5A 40% 70%,#2D4B7A 70% 100%)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--ink);border:3px solid var(--bg);margin-top:-8px;box-shadow:0 0 0 1px var(--line2)}
+input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--ink);border:3px solid var(--bg)}
+input[type=range].sin::-webkit-slider-thumb{opacity:.55}
+input[type=range].sin::-moz-range-thumb{opacity:.55}
+.escala{position:relative;height:18px;font-size:13px;color:var(--muted);margin:0 0 6px}
+.escala span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.escala span:first-child{transform:none}
+.escala span:last-child{transform:translateX(-100%)}
+.nivel{margin:6px 0 0;color:var(--ink2);font-size:15px;min-height:1.5em}
+.chip{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.02em;padding:2px 9px;border-radius:999px;border:1px solid var(--line2);margin-right:6px;color:var(--ink);vertical-align:1px}
+.chip.b{border-color:#3E7F7B}.chip.i{border-color:#3E6AA6}.chip.a{border-color:var(--acc);color:var(--acc)}.chip.p{border-color:#6B7385;color:var(--muted)}
+
+.lateral{position:sticky;top:16px;display:grid;gap:12px}
+.figura-caja{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:14px}
+.figura-caja svg{display:block;width:100%;height:auto;max-height:440px}
+.comparar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 0;font-size:15px}
+.comparar select{min-height:40px;padding:6px 10px;border-radius:10px;border:1px solid var(--ctl);background:var(--bg3);color:var(--ink);font:500 15px var(--sans)}
+.parecido{font-size:15px;color:var(--ink2);margin:4px 0 0}
+.leyenda{font-size:14px;color:var(--muted);margin:0}
+
+.navtema{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:22px 0 0}
+
+/* Radar */
+svg.radar .anillo{fill:none;stroke:var(--line2);stroke-width:1}
+svg.radar .anillo.ext{stroke:#4A5670}
+svg.radar .eje{stroke:var(--line);stroke-width:1}
+svg.radar .figura{stroke-width:2.2;fill-opacity:.22}
+svg.radar .partido{fill:none;stroke-width:2;stroke-dasharray:6 5;opacity:.95}
+svg.radar .pt{stroke:var(--bg);stroke-width:1.5}
+svg.radar text{fill:var(--ink2);font:600 13px var(--sans)}
+svg.radar text.sub{fill:var(--muted);font-weight:500;font-size:11px}
+svg.radar.mini{width:100%;max-width:96px}
+
+/* Resultado */
+.res-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:0 0 22px}
+.res-tema{display:grid;gap:4px;justify-items:center;text-align:center;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:10px 8px;color:var(--ink);text-decoration:none;cursor:pointer;font:inherit}
+.res-tema:hover{border-color:var(--line2)}
+.res-tema b{font-size:13px;line-height:1.25}
+.res-tema small{color:var(--muted);font-size:13px}
+.tabla{width:100%;border-collapse:collapse;font-size:15px}
+.tabla th,.tabla td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+.tabla th{color:var(--muted);font-weight:600;font-size:14px}
+.tabla td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.resumen-gen{font-size:18px;margin:0 0 12px}
+.resumen-gen b{color:var(--acc)}
+
+form.publicar{display:grid;gap:14px;margin-top:6px}
+.campo{display:grid;gap:6px}
+.campo label{font-weight:700}
+.campo input[type=text],.campo input[type=email]{min-height:46px;padding:10px 12px;border-radius:12px;border:1px solid var(--ctl);background:var(--bg3);color:var(--ink);font:16px var(--sans);width:100%}
+.campo .ayuda{margin:0}
+.casilla{display:flex;gap:10px;align-items:flex-start;font-size:15px;color:var(--ink2)}
+.casilla input{width:22px;height:22px;margin:2px 0 0;accent-color:var(--acc);flex:0 0 auto}
+.casilla.off input{opacity:.5}
+.trampa{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
+.aviso{border-left:3px solid var(--acc);padding:8px 12px;background:var(--bg3);border-radius:8px;color:var(--ink2);font-size:15px;margin:0}
+.publicado{display:grid;gap:14px}
+.campo-copia{display:flex;gap:8px;flex-wrap:wrap}
+.campo-copia input{flex:1 1 260px;min-height:44px;padding:8px 12px;border-radius:10px;border:1px solid var(--ctl);background:var(--bg3);color:var(--ink);font:500 15px ui-monospace,Menlo,Consolas,monospace}
+
+/* Galería */
+.gal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin:18px 0}
+.gal-card{display:grid;gap:8px;background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:12px;color:var(--ink);text-decoration:none}
+.gal-card:hover{border-color:var(--line2)}
+.gal-card .mini-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.gal-card h3{margin:0}
+.gal-card small{color:var(--muted)}
+.vacio{color:var(--muted);padding:24px 0}
+
+/* Figura */
+.fig-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin:18px 0}
+.fig-tema{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:10px;display:grid;gap:6px;justify-items:center;text-align:center}
+.fig-tema svg{width:100%;max-width:220px;height:auto}
+.fig-tema b{font-size:14px}
+.fig-tema small{color:var(--muted);font-size:13px}
+.clave-caja{border:1px solid var(--line2);border-radius:var(--r);padding:16px;background:var(--bg2);margin-top:22px}
+details.clave-caja > summary{cursor:pointer;font-weight:600;font-size:17px;min-height:44px;display:flex;align-items:center;color:var(--ink)}
+details.clave-caja[open] > summary{margin-bottom:12px}
+details.clave-caja > summary::before{content:'▸';margin-right:8px;color:var(--muted)}
+details.clave-caja[open] > summary::before{content:'▾'}
+.clave-cuerpo{display:grid;gap:10px}
+
+footer{max-width:1180px;margin:0 auto;padding:0 20px 40px;color:var(--muted);font-size:14px;border-top:1px solid var(--line);padding-top:18px}
+footer p{margin:0 0 8px;max-width:80ch}
+
+@media (max-width:960px){
+  .construir{grid-template-columns:minmax(0,1fr)}
+  .lateral{position:static}
+  .lateral svg{display:block;max-width:100%;max-height:260px;width:auto;margin:0 auto}
+}
+@media (max-width:520px){
+  main{padding:18px 14px 48px}
+  .bloque{padding:14px}
+  .aspecto{padding:12px}
+  .cab{padding:12px 14px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<a class="saltar" href="#principal">Ir al contenido</a>
+
+<header class="cab">
+  <a class="marca" href="/geometria-politica">Geometría política</a>
+  <nav aria-label="Secciones de la página">
+    <button type="button" data-ir="construir" aria-current="page">Construir mi figura</button>
+    <button type="button" data-ir="galeria">Figuras publicadas</button>
+  </nav>
+</header>
+
+<main id="principal" tabindex="-1">
+  <!-- ============ CARGA ============ -->
+  <p id="cargando" class="lede" role="status">Cargando…</p>
+  <p id="fallo" class="error" role="alert" hidden>No hemos podido cargar los datos de la geometría. Recarga la página; si vuelve a pasar, avísanos.</p>
+
+  <!-- ============ CONSTRUIR ============ -->
+  <section id="v-construir" class="vista" aria-labelledby="t-construir" hidden>
+    <h1 id="t-construir">Construye tu figura</h1>
+    <p class="lede">Para cada tema hay varios aspectos. Mueve cada deslizador hasta donde tú quieras: en 0, lo ignoras y ese aspecto no cuenta en el parecido; cuanto más a la derecha, más llega tu propuesta. Tu figura se dibuja mientras lo haces. <b>No es una encuesta ni una recomendación de voto:</b> sirve para ver dónde te sitúas frente a lo que propone cada partido.</p>
+
+    <div class="progreso">
+      <span id="prog-texto">0 de 64 aspectos marcados</span>
+      <div class="barra" aria-hidden="true"><i id="prog-barra"></i></div>
+    </div>
+
+    <nav class="pasos" id="pasos" aria-label="Temas"></nav>
+
+    <div class="construir">
+      <div>
+        <div class="tema-cab">
+          <p class="etiq" id="tema-etiq"></p>
+          <h2 id="tema-titulo"></h2>
+          <p class="pregunta" id="tema-pregunta"></p>
+        </div>
+        <details class="circulos" id="tema-circulos">
+          <summary>Qué significa cada círculo en este tema</summary>
+          <ol id="tema-niveles"></ol>
+          <p class="nota">Cada aspecto, abajo, puede llegar a esos círculos. Lo que queda por debajo de «básico» también cuenta en la comparación, con su cifra.</p>
+        </details>
+        <div class="aspectos" id="aspectos"></div>
+        <div class="navtema">
+          <button type="button" class="boton" id="ant">← Tema anterior</button>
+          <button type="button" class="boton principal" id="sig">Siguiente tema →</button>
+          <p class="aviso" id="sig-aviso" role="status" hidden></p>
+        </div>
+      </div>
+
+      <aside class="lateral" aria-label="Tu figura">
+        <div class="figura-caja">
+          <div id="figura-mia"></div>
+        </div>
+        <div class="bloque">
+          <div class="comparar">
+            <label for="comparar">Comparar con</label>
+            <select id="comparar"></select>
+          </div>
+          <p class="parecido" id="parecido" aria-live="polite"></p>
+          <p class="leyenda">Línea continua: tu figura. Línea a rayas: el partido elegido.</p>
+          <p class="leyenda">Anillos, de dentro afuera: <b>básico</b>, <b>intermedio</b> y <b>avanzado</b>.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============ RESULTADO Y PUBLICAR ============ -->
+  <section id="v-resultado" class="vista" aria-labelledby="t-resultado" hidden>
+    <h1 id="t-resultado">Tu figura completa</h1>
+    <p class="lede">Así queda en los diez temas. Pulsa uno para volver a ajustarlo.</p>
+    <div class="res-grid" id="res-grid"></div>
+
+    <div class="bloque" id="res-resumen"></div>
+
+    <div class="bloque" style="margin-top:22px" id="publicar-caja">
+      <h2>Publicar tu figura</h2>
+      <p class="lede" style="margin-bottom:6px">Se publica al momento y la puede ver cualquiera en la galería, sin registrarse. No hace falta cuenta. Al publicar te damos una <b>clave para borrarla</b>: guárdala, porque no vuelve a mostrarse. Podemos ocultar una figura si no es adecuada para la galería.</p>
+      <div class="aviso" id="aviso-faltan" hidden></div>
+
+      <form class="publicar" id="form-publicar" novalidate>
+        <div class="campo">
+          <label for="f-nombre">Nombre con el que aparece tu figura</label>
+          <input type="text" id="f-nombre" name="nombre" maxlength="40" autocomplete="nickname" required aria-describedby="f-nombre-ayuda">
+          <p class="ayuda" id="f-nombre-ayuda">Tu nombre o un alias, de 2 a 40 letras. Es público.</p>
+        </div>
+
+        <div class="campo">
+          <label for="f-correo">Correo para recibir tus resultados <span class="nota">(opcional)</span></label>
+          <input type="email" id="f-correo" name="correo" maxlength="254" autocomplete="email" aria-describedby="f-correo-ayuda">
+          <p class="ayuda" id="f-correo-ayuda">Si lo dejas, intentaremos enviarte tus resultados por correo. Tu correo no se muestra a nadie. Al borrar tu figura, quitamos también tu correo de nuestra base de datos.</p>
+        </div>
+
+        <label class="casilla off" id="caja-novedades">
+          <input type="checkbox" id="f-novedades" name="novedades" disabled>
+          <span id="texto-novedades">Cargando el texto…</span>
+        </label>
+
+        <!-- Campo trampa: una persona no lo ve ni lo toca. Si un programa lo rellena, no se guarda nada. -->
+        <div class="trampa" aria-hidden="true">
+          <label>No rellenar <input type="text" name="nota_interna" id="f-trampa" tabindex="-1" autocomplete="off"></label>
+        </div>
+
+        <div>
+          <button type="submit" class="boton principal" id="btn-publicar">Publicar mi figura</button>
+          <p class="error" id="f-error" role="alert" hidden></p>
+        </div>
+      </form>
+    </div>
+
+    <!-- Lo que se ve tras publicar -->
+    <div class="bloque publicado" id="publicado" hidden tabindex="-1">
+      <h2>Tu figura está publicada</h2>
+      <p class="exito" id="pub-correo"></p>
+      <div>
+        <p class="ayuda" style="margin:0 0 6px"><b>Enlace de tu figura</b></p>
+        <div class="campo-copia">
+          <input type="text" id="pub-enlace" readonly aria-label="Enlace de tu figura">
+          <button type="button" class="boton" id="copiar-enlace">Copiar enlace</button>
+        </div>
+      </div>
+      <div>
+        <p style="margin:0 0 6px;font-size:15px;color:var(--ink2)"><b>Clave para borrarla</b> · guárdala ahora, no vuelve a mostrarse</p>
+        <div class="campo-copia">
+          <input type="text" id="pub-clave" readonly aria-label="Clave para borrar tu figura">
+          <button type="button" class="boton" id="copiar-clave">Copiar clave</button>
+        </div>
+      </div>
+      <div class="publicado-pie">
+        <label style="display:flex;gap:8px;align-items:center;min-height:44px"><input type="checkbox" id="pub-guardada"> Ya he copiado la clave</label>
+        <a class="boton principal" id="ver-publicada" href="#" hidden>Ver mi figura publicada</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ GALERÍA ============ -->
+  <section id="v-galeria" class="vista" aria-labelledby="t-galeria" hidden>
+    <h1 id="t-galeria">Figuras publicadas</h1>
+    <p class="lede">Lo que han construido otras personas. Pulsa una para verla completa.</p>
+    <div class="gal-grid" id="gal-grid" aria-live="polite"></div>
+    <p class="vacio" id="gal-vacio" hidden>Todavía no hay figuras publicadas. Sé la primera.</p>
+    <div><button type="button" class="boton" id="gal-mas" hidden>Ver más figuras</button></div>
+  </section>
+
+  <!-- ============ UNA FIGURA ============ -->
+  <section id="v-figura" class="vista" aria-labelledby="t-figura" hidden>
+    <p><a href="?vista=galeria" id="fig-volver">← Volver a las figuras publicadas</a></p>
+    <h1 id="t-figura">Figura</h1>
+    <p class="nota" id="fig-meta"></p>
+    <p class="parecido" id="fig-mejor"></p>
+    <div class="fig-grid" id="fig-grid"></div>
+    <div class="bloque" style="margin-top:10px">
+      <h2>¿Y la tuya?</h2>
+      <p class="lede" style="margin-bottom:12px">Construye la tuya y mira en qué partidos se parece.</p>
+      <button type="button" class="boton principal" data-ir="construir">Construir mi figura</button>
+    </div>
+
+    <details class="clave-caja" id="borrar-caja" hidden>
+      <summary>Borrar esta figura</summary>
+      <div class="clave-cuerpo">
+      <p class="nota">Solo quien la publicó tiene la clave. Al borrarla, desaparece de la galería y quitamos también su correo de nuestra base de datos. Las copias de seguridad antiguas lo conservan hasta que caducan. No se puede deshacer.</p>
+      <div class="campo">
+        <label for="borrar-clave">Clave</label>
+        <input type="text" id="borrar-clave" autocomplete="off" spellcheck="false">
+      </div>
+      <div>
+        <button type="button" class="boton" id="borrar-pedir">Borrar mi figura</button>
+        <span id="borrar-confirmar" hidden>
+          <span class="aviso" style="display:inline-block;margin-right:8px">¿Seguro?</span>
+          <button type="button" class="boton" id="borrar-si" style="border-color:var(--err);color:var(--err)">Sí, borrarla</button>
+          <button type="button" class="boton" id="borrar-no">Cancelar</button>
+        </span>
+      </div>
+      <p class="error" id="borrar-error" role="alert" hidden></p>
+      <p class="exito" id="borrar-ok" role="status" hidden></p>
+      </div>
+    </details>
+  </section>
+</main>
+
+<footer>
+  <p>Esto no es una encuesta ni una recomendación de voto. Las posiciones de los partidos son las de la propia página de la <a href="/geometria-politica">geometría política</a>, con sus fuentes.</p>
+  <p>Tu progreso se guarda en este navegador, para que puedas seguir más tarde. Las figuras publicadas sí se guardan en la plataforma hasta que las borres.</p>
+</footer>
+
+<script src="comun.js"></script>
+<script>
+(function () {
+'use strict';
+
+var CLAVE_LOCAL = 'geometria-figura-v1';
+var NS = 'http://www.w3.org/2000/svg';
+var D = null;   // datos.json: temas y partidos
+var G = window.Geometria;
+var st = null;  // { t, v, m, partido, inicio }
+var galeria = { pagina: 0, total: 0, cargando: false };
+
+var $ = function (s, r) { return (r || document).querySelector(s); };
+var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+/* ---------- utilidades ---------- */
+function el(tag, attrs, kids) {
+  var e = document.createElement(tag);
+  if (attrs) Object.keys(attrs).forEach(function (k) {
+    var v = attrs[k];
+    if (v === false || v == null) return;
+    if (k === 'text') e.textContent = v;
+    else if (k === 'ev') Object.keys(v).forEach(function (n) { e.addEventListener(n, v[n]); });
+    else e.setAttribute(k, v === true ? '' : String(v));
+  });
+  (kids || []).forEach(function (c) {
+    if (c == null || c === false) return;
+    e.appendChild(typeof c === 'string' ? document.createTextNode(c) : c);
+  });
+  return e;
+}
+function se(tag, attrs, parent) {
+  var e = document.createElementNS(NS, tag);
+  Object.keys(attrs || {}).forEach(function (k) { e.setAttribute(k, String(attrs[k])); });
+  if (parent) parent.appendChild(e);
+  return e;
+}
+var etiquetasDe = function (eje) { return Array.isArray(eje.l) ? eje.l : [eje.l]; };
+var fechaLarga = function (iso) {
+  try { return new Date(iso).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return ''; }
+};
+function nombreParte(k) { var p = D.partidos.filter(function (x) { return x.k === k; })[0]; return p ? p.n : k; }
+function colorParte(k) { var p = D.partidos.filter(function (x) { return x.k === k; })[0]; return p ? p.c : '#888'; }
+
+function nuevoEstado() {
+  return {
+    t: 0,
+    v: D.temas.map(function (t) { return t.ejes.map(function () { return 0; }); }),
+    m: D.temas.map(function (t) { return t.ejes.map(function () { return false; }); }),
+    partido: '',
+    inicio: Date.now()
+  };
+}
+function estadoValido(o) {
+  if (!o || typeof o !== 'object' || typeof o.t !== 'number' || !Array.isArray(o.v) || !Array.isArray(o.m)) return false;
+  if (o.v.length !== D.temas.length || o.m.length !== D.temas.length) return false;
+  return D.temas.every(function (t, i) {
+    return Array.isArray(o.v[i]) && Array.isArray(o.m[i]) && o.v[i].length === t.ejes.length && o.m[i].length === t.ejes.length;
+  });
+}
+function guardar() { try { localStorage.setItem(CLAVE_LOCAL, JSON.stringify(st)); } catch (e) { /* sin almacenamiento: se pierde al cerrar */ } }
+function cargar() {
+  try {
+    var o = JSON.parse(localStorage.getItem(CLAVE_LOCAL) || 'null');
+    if (estadoValido(o)) return o;
+  } catch (e) { /* dato roto: empezamos de cero */ }
+  return nuevoEstado();
+}
+function totales() {
+  var total = 0, marcados = 0;
+  D.temas.forEach(function (t, i) {
+    total += t.ejes.length;
+    st.m[i].forEach(function (x) { if (x) marcados++; });
+  });
+  return { total: total, marcados: marcados, faltan: total - marcados };
+}
+function temaCompleto(i) { return st.m[i].every(function (x) { return x; }); }
+function primerTemaIncompleto() {
+  for (var i = 0; i < D.temas.length; i++) if (!temaCompleto(i)) return i;
+  return -1;
+}
+function figuraDe(i) { return st.v[i]; }
+
+/* ---------- el dibujo (el mismo para la figura propia, las minis y las figuras publicadas) ---------- */
+function radar(tema, valores, o) {
+  o = o || {};
+  var n = tema.ejes.length;
+  var W = o.mini ? 100 : (o.etiquetas ? 480 : 440), C = W / 2;
+  var R = o.mini ? 40 : (o.etiquetas ? 118 : 150);
+  var svg = se('svg', {
+    viewBox: '0 0 ' + W + ' ' + W,
+    role: 'img',
+    class: 'radar' + (o.mini ? ' mini' : ''),
+    'aria-label': o.titulo || tema.n
+  });
+  var ang = function (i) { return -Math.PI / 2 + i * 2 * Math.PI / n; };
+  var pt = function (i, r) { return [C + r * Math.cos(ang(i)), C + r * Math.sin(ang(i))]; };
+
+  G.UMBRAL.forEach(function (u, k) {
+    var pts = []; for (var i = 0; i < n; i++) pts.push(pt(i, R * u / 10).join(','));
+    se('polygon', { points: pts.join(' '), class: 'anillo' + (k === 2 ? ' ext' : '') }, svg);
+  });
+  for (var j = 0; j < n; j++) { var e = pt(j, R); se('line', { x1: C, y1: C, x2: e[0], y2: e[1], class: 'eje' }, svg); }
+
+  if (o.partido) {
+    var pv = []; for (var q = 0; q < n; q++) pv.push(pt(q, R * (o.partido.valores[q] || 0) / 10).join(','));
+    se('polygon', { points: pv.join(' '), class: 'partido', stroke: o.partido.color, fill: 'none' }, svg);
+  }
+  var pts2 = valores.map(function (x, i) { return pt(i, R * x / 10); });
+  se('polygon', {
+    points: pts2.map(function (p) { return p.join(','); }).join(' '),
+    class: 'figura', fill: tema.c, stroke: tema.c
+  }, svg);
+  if (!o.mini) pts2.forEach(function (p) { se('circle', { cx: p[0], cy: p[1], r: 3.6, fill: tema.c, class: 'pt' }, svg); });
+
+  if (o.etiquetas) {
+    tema.ejes.forEach(function (eje, i) {
+      var base = pt(i, R + 22), cs = Math.cos(ang(i));
+      var anchor = Math.abs(cs) < 0.2 ? 'middle' : (cs > 0 ? 'start' : 'end');
+      var t = se('text', { x: base[0], y: base[1] + (Math.sin(ang(i)) > 0.5 ? 14 : 0), 'text-anchor': anchor }, svg);
+      etiquetasDe(eje).forEach(function (linea, li) {
+        var s = se('tspan', { x: base[0], dy: li === 0 ? 0 : 15 }, t); s.textContent = linea;
+      });
+    });
+  }
+  return svg;
+}
+
+/* ---------- Construir ---------- */
+function pintarPasos() {
+  var cont = $('#pasos');
+  // Los botones se crean una sola vez y después se actualizan: si se recrean, el foco del teclado se pierde al pulsar un tema.
+  if (cont.children.length !== D.temas.length) {
+    cont.textContent = '';
+    D.temas.forEach(function (t, i) {
+      cont.appendChild(el('button', {
+        type: 'button', class: 'paso',
+        ev: { click: function () { irTema(i); } }
+      }, [
+        el('span', { class: 'sw', style: 'background:' + t.c }),
+        el('span', { class: 'n', text: String(i + 1) }),
+        el('span', { text: t.n.split(' y ')[0] }),
+        el('span', { class: 'n' })
+      ]));
+    });
+  }
+  D.temas.forEach(function (t, i) {
+    var b = cont.children[i];
+    var hecho = temaCompleto(i);
+    var marcados = st.m[i].filter(function (x) { return x; }).length;
+    b.className = 'paso' + (hecho ? ' hecho' : '');
+    if (i === st.t) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current');
+    b.setAttribute('aria-label', t.n + ', ' + (hecho ? 'completo' : marcados + ' de ' + t.ejes.length + ' marcados'));
+    b.lastChild.textContent = hecho ? '✓' : marcados + '/' + t.ejes.length;
+  });
+  var actual = cont.children[st.t];
+  if (actual && actual.scrollIntoView) actual.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+}
+function pintarProgreso() {
+  var t = totales();
+  $('#prog-texto').textContent = t.marcados + ' de ' + t.total + ' aspectos marcados';
+  $('#prog-barra').style.width = (100 * t.marcados / t.total).toFixed(1) + '%';
+}
+function pintarFiguraMia() {
+  var tema = D.temas[st.t];
+  var cont = $('#figura-mia'); cont.textContent = '';
+  var partido = st.partido ? { valores: (tema.v[st.partido] || []), color: colorParte(st.partido) } : null;
+  cont.appendChild(radar(tema, figuraDe(st.t), { etiquetas: true, partido: partido, titulo: 'Tu figura en ' + tema.n }));
+  pintarParecido();
+}
+function pintarParecido() {
+  var p = $('#parecido'); var tema = D.temas[st.t];
+  if (!st.partido) { p.textContent = ''; return; }
+  if (!temaCompleto(st.t)) { p.textContent = 'Marca los ' + tema.ejes.length + ' aspectos de este tema para ver el parecido con ' + nombreParte(st.partido) + '.'; return; }
+  var pa = G.parecido(figuraDe(st.t), tema.v[st.partido]);
+  if (pa === null) { p.textContent = 'Tu figura todavía no tiene aspectos que comparar en este tema: deja alguno distinto de 0.'; return; }
+  p.textContent = 'En este tema, tu figura se parece un ' + pa + ' % a ' + nombreParte(st.partido) + '.';
+}
+function claseNivel(x) {
+  var n = G.nivelDe(x);
+  return n === 2 ? 'a' : n === 1 ? 'i' : n === 0 ? 'b' : 'p';
+}
+/* Cada aspecto se crea UNA vez y luego se actualiza en su sitio. Si se reemplazara la fila
+   mientras se arrastra el deslizador, el navegador perdería el control y el arrastre se cortaría. */
+var filas = {};
+function crearAspecto(i) {
+  var tema = D.temas[st.t], eje = tema.ejes[i];
+  var id = 'sl-' + st.t + '-' + i;
+  var refs = {};
+  refs.salida = el('output', { id: 'out-' + st.t + '-' + i, for: id });
+  refs.rango = el('input', {
+    type: 'range', min: 0, max: 10, step: 1, id: id,
+    ev: { input: function () { fijarAspecto(i, Number(refs.rango.value)); } }
+  });
+  refs.ignorar = el('button', {
+    type: 'button', class: 'boton pequeno', text: 'Lo ignoro (0)',
+    ev: { click: function () { fijarAspecto(i, 0); refs.rango.focus(); } }
+  });
+  refs.nivel = el('p', { class: 'nivel' });
+  refs.fila = el('div', { class: 'aspecto', 'data-i': i }, [
+    el('div', { class: 'asp-cab' }, [el('label', { for: id, text: eje.n }), refs.salida]),
+    el('p', { class: 'ayuda', text: eje.d }),
+    refs.rango,
+    el('div', { class: 'asp-acc' }, [refs.ignorar]),
+    el('div', { class: 'escala', 'aria-hidden': 'true' }, [
+      el('span', { style: 'left:0%', text: '0' }),
+      el('span', { style: 'left:40%', text: '4 básico' }),
+      el('span', { style: 'left:70%', text: '7 intermedio' }),
+      el('span', { style: 'left:100%', text: '10 avanzado' })
+    ]),
+    refs.nivel
+  ]);
+  filas[i] = refs;
+  actualizarAspecto(i);
+  return refs.fila;
+}
+function fijarAspecto(i, v) {
+  st.v[st.t][i] = v; st.m[st.t][i] = true;
+  guardar();
+  actualizarAspecto(i);
+  pintarFiguraMia(); pintarProgreso(); pintarPasos(); actualizarNavegacion();
+}
+function actualizarAspecto(i) {
+  var r = filas[i], tema = D.temas[st.t], eje = tema.ejes[i];
+  var x = st.v[st.t][i], marcado = st.m[st.t][i];
+  r.fila.classList.toggle('sin', !marcado);
+  r.rango.value = x;
+  r.rango.classList.toggle('sin', !marcado);
+  r.rango.setAttribute('aria-valuetext', marcado ? x + ' de 10. ' + G.etiquetaDe(x) : 'Sin marcar');
+  r.salida.textContent = marcado ? x + ' de 10' : 'Sin marcar';
+  r.salida.className = marcado ? '' : 'sin';
+  var nivel = marcado ? G.nivelDe(x) : -1;
+  r.nivel.textContent = '';
+  if (!marcado) r.nivel.appendChild(el('span', { class: 'nota', text: 'Mueve el deslizador para marcar este aspecto.' }));
+  else if (x === 0) r.nivel.appendChild(el('span', { class: 'chip p', text: 'Lo ignora' }));
+  else if (nivel < 0) r.nivel.appendChild(el('span', { class: 'chip p', text: 'No llega a lo básico' }));
+  if (marcado && nivel < 0) r.nivel.appendChild(document.createTextNode(x === 0 ? ' En la comparación cuenta como 0, igual que cualquier otra cifra.' : ' Por debajo de lo básico: también cuenta en la comparación, con su cifra.'));
+  if (marcado && nivel >= 0) {
+    r.nivel.appendChild(el('span', { class: 'chip ' + claseNivel(x), text: G.NOMBRE_NIVEL[nivel] }));
+    r.nivel.appendChild(document.createTextNode(eje.niv[nivel]));
+  }
+}
+function pintarTema() {
+  var tema = D.temas[st.t];
+  $('#tema-etiq').textContent = 'Tema ' + (st.t + 1) + ' de ' + D.temas.length;
+  $('#tema-titulo').textContent = tema.n;
+  $('#tema-pregunta').textContent = tema.q;
+  var lista = $('#tema-niveles'); lista.textContent = '';
+  tema.niv.forEach(function (txt, k) {
+    lista.appendChild(el('li', null, [el('b', { text: G.NOMBRE_NIVEL[k] + ': ' }), txt]));
+  });
+  var cont = $('#aspectos'); cont.textContent = '';
+  filas = {};
+  tema.ejes.forEach(function (eje, i) { cont.appendChild(crearAspecto(i)); });
+  var cmp = $('#comparar');
+  pintarFiguraMia(); pintarProgreso(); pintarPasos(); actualizarNavegacion();
+  if (cmp.value !== (st.partido || '')) cmp.value = st.partido || '';
+}
+function actualizarNavegacion() {
+  var ult = st.t === D.temas.length - 1;
+  $('#ant').disabled = st.t === 0;
+  var sig = $('#sig');
+  sig.textContent = ult ? 'Ver mi figura completa →' : 'Siguiente tema →';
+}
+function irTema(i) {
+  st.t = Math.max(0, Math.min(D.temas.length - 1, i));
+  $('#sig-aviso').hidden = true;
+  guardar();
+  pintarTema();
+  $('#v-construir').querySelector('h2').scrollIntoView({ block: 'start', behavior: 'auto' });
+}
+function pintarComparar() {
+  var sel = $('#comparar'); sel.textContent = '';
+  sel.appendChild(el('option', { value: '', text: 'Ninguno' }));
+  D.partidos.forEach(function (p) { sel.appendChild(el('option', { value: p.k, text: p.n })); });
+  sel.value = st.partido || '';
+  sel.addEventListener('change', function () {
+    st.partido = sel.value; guardar(); pintarFiguraMia();
+  });
+}
+
+/* ---------- Resultado ---------- */
+function pintarResultado() {
+  var grid = $('#res-grid'); grid.textContent = '';
+  D.temas.forEach(function (t, i) {
+    var completo = temaCompleto(i);
+    var card = el('button', {
+      type: 'button', class: 'res-tema', 'aria-label': 'Ajustar ' + t.n,
+      ev: { click: function () { mostrar('construir'); irTema(i); } }
+    }, [
+      radar(t, figuraDe(i), { mini: true, titulo: t.n }),
+      el('b', { text: t.n }),
+      el('small', { text: completo ? 'Completo' : st.m[i].filter(function (x) { return x; }).length + ' de ' + t.ejes.length + ' marcados' })
+    ]);
+    grid.appendChild(card);
+  });
+
+  var t = totales();
+  var aviso = $('#aviso-faltan');
+  var btn = $('#btn-publicar');
+  if (t.faltan > 0) {
+    aviso.hidden = false;
+    aviso.textContent = 'Te faltan ' + t.faltan + ' aspectos por marcar. Hasta que estén todos no se puede publicar la figura.';
+    btn.disabled = true;
+  } else {
+    aviso.hidden = true; aviso.textContent = '';
+    btn.disabled = false;
+  }
+
+  var caja = $('#res-resumen'); caja.textContent = '';
+  if (t.faltan > 0) {
+    caja.appendChild(el('p', { class: 'nota', text: 'El resumen aparecerá cuando tu figura esté completa.' }));
+    return;
+  }
+  var r = G.resumen(st.v, D);
+  caja.appendChild(el('p', { class: 'resumen-gen', text: G.frasePrincipal(r.general, 'tu figura') }));
+  var filas = r.temas.map(function (tr, i) {
+    return el('tr', null, [
+      el('td', { text: D.temas[i].n }),
+      el('td', { class: 'num', text: tr.mejor ? tr.mejor.n + ' · ' + tr.mejor.parecido + ' %' : '—' })
+    ]);
+  });
+  caja.appendChild(el('div', { style: 'overflow-x:auto' }, [
+    el('table', { class: 'tabla' }, [
+      el('thead', null, [el('tr', null, [el('th', { text: 'Tema' }), el('th', { text: 'Partido más parecido en ese tema' })])]),
+      el('tbody', null, filas)
+    ])
+  ]));
+  caja.appendChild(el('p', { class: 'nota', style: 'margin-top:10px', text: 'El parecido compara cifra a cifra, aspecto por aspecto, con las posiciones de la página. Los aspectos que dejas en 0 no cuentan. Es una forma de leer el mapa, no un veredicto.' }));
+}
+
+/* ---------- Publicar ---------- */
+function mensajeError(texto) { var e = $('#f-error'); e.textContent = texto || ''; e.hidden = !texto; }
+function copiar(texto, boton) {
+  var hecho = function () { var old = boton.textContent; boton.textContent = 'Copiado'; setTimeout(function () { boton.textContent = old; }, 1600); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(texto).then(hecho, function () { seleccionar(texto); });
+  else seleccionar(texto);
+}
+function seleccionar(texto) {
+  var campo = $('#pub-enlace'); campo.focus(); campo.select(); campo.setSelectionRange(0, texto.length);
+}
+function textoCorreoPublicado(estado, correo) {
+  if (estado === 'enviado') return 'Te hemos enviado tus resultados a ' + correo + '. Revisa también la carpeta de spam.';
+  if (estado === 'fallido') return 'No hemos podido enviar el correo ahora mismo. Tu figura está publicada igualmente: guarda el enlace y la clave.';
+  if (estado === 'sin_proveedor') return 'El envío de correos todavía no está activo en la plataforma, así que no te hemos podido enviar nada. Guarda el enlace y la clave.';
+  return '';
+}
+function publicarFigura(e) {
+  e.preventDefault();
+  mensajeError('');
+  var t = totales();
+  if (t.faltan > 0) { pintarResultado(); return; }
+  var nombre = $('#f-nombre').value.replace(/\s+/g, ' ').trim();
+  var correo = $('#f-correo').value.trim().toLowerCase();
+  if (nombre.length < 2 || nombre.length > 40) { mensajeError('Pon un nombre de entre 2 y 40 letras.'); $('#f-nombre').focus(); return; }
+  if (correo && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(correo)) { mensajeError('Ese correo no parece válido.'); $('#f-correo').focus(); return; }
+
+  var btn = $('#btn-publicar');
+  btn.disabled = true; btn.textContent = 'Publicando…';
+  var cuerpo = {
+    nombre: nombre,
+    puntuaciones: st.v,
+    correo: correo || undefined,
+    novedades: !!correo && $('#f-novedades').checked,
+    tiempo: Date.now() - st.inicio,
+    nota_interna: $('#f-trampa').value
+  };
+  fetch('/api/figuras', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(cuerpo),
+    credentials: 'same-origin'
+  }).then(function (r) {
+    return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, status: r.status, j: j, retry: r.headers.get('Retry-After') }; });
+  }).then(function (res) {
+    if (!res.ok) {
+      var msg = res.status === 429
+        ? 'Has publicado o intentado publicar muchas veces seguidas. Espera ' + (res.retry ? Math.ceil(Number(res.retry) / 60) + ' minutos' : 'un momento') + '.'
+        : (res.j && res.j.error) || 'No se ha podido publicar. Prueba de nuevo dentro de un rato.';
+      mensajeError(msg);
+      btn.disabled = false; btn.textContent = 'Publicar mi figura';
+      return;
+    }
+    mostrarPublicada(res.j, correo);
+  }).catch(function () {
+    mensajeError('No hay conexión con la plataforma. Tu figura sigue aquí: vuelve a intentarlo.');
+    btn.disabled = false; btn.textContent = 'Publicar mi figura';
+  });
+}
+function mostrarPublicada(j, correo) {
+  $('#publicar-caja').hidden = true;
+  $('#res-grid').hidden = true;
+  $('#res-resumen').hidden = true;
+  var p = $('#publicado'); p.hidden = false;
+  $('#pub-enlace').value = j.enlace || '';
+  $('#pub-clave').value = j.clave || '';
+  $('#pub-correo').textContent = textoCorreoPublicado(j.correo, correo);
+  $('#pub-correo').hidden = !$('#pub-correo').textContent;
+  $('#ver-publicada').href = '?f=' + encodeURIComponent(j.id);
+  var guardada = $('#pub-guardada'); guardada.checked = false; $('#ver-publicada').hidden = true;
+  guardada.onchange = function () { $('#ver-publicada').hidden = !guardada.checked; };
+  localStorage.removeItem(CLAVE_LOCAL);
+  st = nuevoEstado();
+  p.focus();
+}
+
+/* ---------- Galería ---------- */
+function tarjetaGaleria(f) {
+  var d = D.temas;
+  var f2 = f.puntuaciones;
+  var grid = el('div', { class: 'mini-grid', 'aria-hidden': 'true' });
+  d.forEach(function (t, i) { grid.appendChild(radar(t, f2[i], { mini: true })); });
+  return el('a', { class: 'gal-card', href: '?f=' + encodeURIComponent(f.id), ev: { click: function (e) {
+    e.preventDefault(); verFigura(f.id, true);
+  } } }, [
+    grid,
+    el('h3', { text: f.nombre }),
+    el('small', { text: fechaLarga(f.creada) })
+  ]);
+}
+function cargarGaleria(pagina) {
+  if (galeria.cargando) return;
+  galeria.cargando = true;
+  $('#gal-mas').disabled = true;
+  fetch('/api/figuras?pagina=' + pagina, { credentials: 'same-origin' })
+    .then(function (r) { if (!r.ok) throw new Error('galería'); return r.json(); })
+    .then(function (j) {
+      galeria.pagina = j.pagina; galeria.total = j.total;
+      var cont = $('#gal-grid');
+      if (pagina === 1) cont.textContent = '';
+      j.figuras.forEach(function (f) { cont.appendChild(tarjetaGaleria(f)); });
+      $('#gal-vacio').hidden = j.total > 0;
+      $('#gal-mas').hidden = j.pagina * j.tamano >= j.total;
+    })
+    .catch(function () {
+      $('#gal-vacio').hidden = false;
+      $('#gal-vacio').textContent = 'No hemos podido cargar las figuras. Recarga la página en un momento.';
+    })
+    .then(function () { galeria.cargando = false; $('#gal-mas').disabled = false; });
+}
+
+/* ---------- Una figura publicada ---------- */
+function verFigura(id, empujar) {
+  if (empujar) history.pushState({ f: id }, '', '?f=' + encodeURIComponent(id));
+  mostrar('figura');
+  $('#t-figura').textContent = 'Cargando figura…';
+  $('#fig-grid').textContent = '';
+  $('#fig-mejor').textContent = '';
+  $('#fig-meta').textContent = '';
+  $('#borrar-caja').hidden = true;
+  fetch('/api/figuras/' + encodeURIComponent(id), { credentials: 'same-origin' })
+    .then(function (r) {
+      if (r.status === 404) throw { gone: true };
+      if (!r.ok) throw new Error('figura');
+      return r.json();
+    })
+    .then(function (f) { pintarFigura(f); })
+    .catch(function (err) {
+      $('#t-figura').textContent = err && err.gone ? 'Esta figura no existe o ya no está publicada.' : 'No hemos podido cargar la figura.';
+    });
+}
+function pintarFigura(f) {
+  $('#t-figura').textContent = f.nombre;
+  $('#fig-meta').textContent = 'Publicada el ' + fechaLarga(f.creada) + '. Es una figura hecha por una persona, no un voto.';
+  var r = G.resumen(f.puntuaciones, D);
+  $('#fig-mejor').textContent = G.frasePrincipal(r.general, 'esta figura');
+  var grid = $('#fig-grid');
+  D.temas.forEach(function (t, i) {
+    var mejor = r.temas[i].mejor;
+    grid.appendChild(el('div', { class: 'fig-tema' }, [
+      radar(t, f.puntuaciones[i], { titulo: t.n + ': ' + f.nombre }),
+      el('b', { text: t.n }),
+      el('small', { text: mejor ? 'Más parecido: ' + mejor.n + ' (' + mejor.parecido + ' %)' : '' })
+    ]));
+  });
+  configurarBorrado(f);
+}
+function configurarBorrado(f) {
+  // La caja está siempre a mano: quien publicó puede borrar aunque no tenga el enlace del correo.
+  // Si llega con #clave= (desde el correo), se abre con la clave ya escrita.
+  var clave = new URLSearchParams(location.hash.replace(/^#/, '')).get('clave') || '';
+  var caja = $('#borrar-caja');
+  caja.hidden = false;
+  caja.open = !!clave;
+  $('#borrar-clave').value = clave;
+  $('#borrar-ok').hidden = true;
+  $('#borrar-error').hidden = true;
+  var pedir = $('#borrar-pedir'), conf = $('#borrar-confirmar');
+  pedir.hidden = false; conf.hidden = true;
+  pedir.onclick = function () { pedir.hidden = true; conf.hidden = false; $('#borrar-si').focus(); };
+  $('#borrar-no').onclick = function () { conf.hidden = true; pedir.hidden = false; pedir.focus(); };
+  $('#borrar-si').onclick = function () { borrar(f.id); };
+}
+function borrar(id) {
+  var clave = $('#borrar-clave').value.trim();
+  var err = $('#borrar-error'); err.hidden = true;
+  if (!clave) { err.textContent = 'Pon la clave que te dimos al publicar.'; err.hidden = false; return; }
+  fetch('/api/figuras/' + encodeURIComponent(id), {
+    method: 'DELETE', headers: { 'x-clave-figura': clave }, credentials: 'same-origin'
+  }).then(function (r) {
+    return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, j: j }; });
+  }).then(function (res) {
+    if (!res.ok) { err.textContent = (res.j && res.j.error) || 'No se ha podido borrar.'; err.hidden = false; return; }
+    $('#borrar-confirmar').hidden = true;
+    $('#borrar-pedir').hidden = true;
+    $('#borrar-clave').value = '';
+    $('#borrar-ok').textContent = 'Tu figura se ha borrado de la galería. Quitamos también su correo de nuestra base de datos.';
+    $('#borrar-ok').hidden = false;
+    history.replaceState(null, '', '?f=' + encodeURIComponent(id));
+  }).catch(function () {
+    err.textContent = 'No hay conexión. Prueba de nuevo.'; err.hidden = false;
+  });
+}
+
+/* ---------- Navegación entre vistas ---------- */
+var VISTAS = ['construir', 'resultado', 'galeria', 'figura'];
+function mostrar(v) {
+  VISTAS.forEach(function (x) { var s = $('#v-' + x); if (s) s.hidden = x !== v; });
+  $$('.cab nav button').forEach(function (b) {
+    b.setAttribute('aria-current', b.getAttribute('data-ir') === v ? 'page' : 'false');
+  });
+  if (v === 'resultado') pintarResultado();
+  if (v === 'construir') pintarTema();
+  var main = $('#principal');
+  if (main && main.focus) main.focus({ preventScroll: true });
+}
+function ir(v, empujar) {
+  var url = v === 'galeria' ? '?vista=galeria' : v === 'resultado' ? '?vista=resultado' : location.pathname;
+  if (empujar) history.pushState({ v: v }, '', url);
+  if (v === 'galeria' && galeria.pagina === 0) cargarGaleria(1);
+  if (v === 'figura') return;
+  mostrar(v);
+  window.scrollTo(0, 0);
+}
+function ruta() {
+  var q = new URLSearchParams(location.search);
+  var f = q.get('f');
+  if (f) { verFigura(f, false); return; }
+  var v = q.get('vista');
+  if (v === 'galeria') { mostrar('galeria'); if (galeria.pagina === 0) cargarGaleria(1); return; }
+  if (v === 'resultado') { mostrar('resultado'); return; }
+  mostrar('construir');
+}
+
+/* ---------- Arranque ---------- */
+function iniciar(datos) {
+  D = datos;
+  st = cargar();
+  if (!st.inicio) { st.inicio = Date.now(); guardar(); }
+  $('#cargando').hidden = true;
+
+  pintarComparar();
+  $('#ant').addEventListener('click', function () { irTema(st.t - 1); });
+  $('#sig').addEventListener('click', function () {
+    if (st.t === D.temas.length - 1) {
+      var pend = primerTemaIncompleto();
+      if (pend >= 0 && totales().faltan > 0) {
+        // Si queda algo, lo llevamos al primer tema incompleto y no a la publicación, y lo decimos.
+        var faltan = totales().faltan;
+        irTema(pend);
+        var av = $('#sig-aviso');
+        av.textContent = 'Te faltan ' + faltan + (faltan === 1 ? ' aspecto' : ' aspectos') + ': te llevamos al primero que queda.';
+        av.hidden = false;
+        return;
+      }
+      ir('resultado', true);
+    } else irTema(st.t + 1);
+  });
+  $$('.cab nav button, [data-ir]').forEach(function (b) {
+    b.addEventListener('click', function () { ir(b.getAttribute('data-ir'), true); });
+  });
+  $('#form-publicar').addEventListener('submit', publicarFigura);
+  // La casilla solo se activa con correo y cuando su texto legal está cargado: nadie la marca sin haberlo leído.
+  var textoLegalListo = false;
+  var actualizarCasilla = function () {
+    var tiene = $('#f-correo').value.trim().length > 0;
+    var casilla = $('#f-novedades');
+    casilla.disabled = !(tiene && textoLegalListo);
+    if (casilla.disabled) casilla.checked = false;
+    $('#caja-novedades').classList.toggle('off', casilla.disabled);
+  };
+  $('#f-correo').addEventListener('input', actualizarCasilla);
+  fetch('/api/figuras/texto-novedades', { credentials: 'same-origin' })
+    .then(function (r) { if (!r.ok) throw new Error('texto'); return r.json(); })
+    .then(function (j) { $('#texto-novedades').textContent = j.texto; textoLegalListo = true; actualizarCasilla(); })
+    .catch(function () { $('#texto-novedades').textContent = 'No podemos cargar el texto de las novedades ahora mismo. Inténtalo más tarde.'; });
+  $('#copiar-enlace').addEventListener('click', function () { copiar($('#pub-enlace').value, this); });
+  $('#copiar-clave').addEventListener('click', function () { copiar($('#pub-clave').value, this); });
+  $('#gal-mas').addEventListener('click', function () { cargarGaleria(galeria.pagina + 1); });
+  $('#fig-volver').addEventListener('click', function (e) { e.preventDefault(); ir('galeria', true); });
+
+  window.addEventListener('popstate', ruta);
+  ruta();
+}
+
+function arrancar() {
+  if (!G) { $('#cargando').hidden = true; $('#fallo').hidden = false; return; }
+  fetch('datos.json', { cache: 'no-cache' })
+    .then(function (r) { if (!r.ok) throw new Error('datos'); return r.json(); })
+    .then(iniciar)
+    .catch(function () { $('#cargando').hidden = true; $('#fallo').hidden = false; });
+}
+arrancar();
+})();
+</script>
+</body>
+</html>

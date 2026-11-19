@@ -72,6 +72,9 @@ export const NO_SE_ASOMAN = new Map<string, string>([
   // los ve en su panel (`formulariosSitio.ts`); nadie más, ni de golpe.
   ['sitio_mensajes', 'los mensajes de quien escribe a un sitio desde su formulario'],
   ['sitio_suscriptores', 'los correos de quien se apunta al boletín de un sitio'],
+  // Las figuras del test de geometría (2026-11-19): quien la publica puede dejar su correo para recibir
+  // sus resultados. Cerrada igual que los formularios: nadie la lee de golpe por el navegador genérico.
+  ['figuras_geometria', 'el correo de quien publicó una figura y quiere recibir sus resultados'],
 ]);
 
 /** Las rutas de lectura que solo puede usar quien manda, y qué enseñan.

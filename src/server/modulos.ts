@@ -128,6 +128,7 @@ import { registrarOfertas } from './ofertas.js';
 import { registrarSoporte } from './soporte.js';
 import { registrarExpertos } from './expertos.js';
 import { registrarFormulariosSitio } from './formulariosSitio.js';
+import { registrarFiguras } from './figuras.js';
 import { registrarPrestamos } from './prestamos.js';
 
 /**
@@ -474,6 +475,12 @@ export const MODULOS: Modulo[] = [
     nota: 'Los formularios de un escaparate: «quiero colaborar» y el boletín, y el panel de quien administra la raíz '
         + '(2026-11-07, migración 0175). Sólo rutas `/api/sitio/:raiz/{formulario,mensaje,boletin…,formularios…}`, ninguna '
         + 'de un solo tramo, así que el sitio en la lista da igual; va junto al SEO del escaparate porque lee su modelo.',
+  },
+  {
+    nombre: 'figuras-geometria',
+    montar: (app, db) => registrarFiguras(app, db),
+    nota: 'El test de geometría política (2026-11-19): figuras publicadas sin cuenta y su galería '
+        + '(/api/figuras). Migración 0232. Escritura anónima con guardián de envíos y clave de borrado; ver src/server/figuras.ts.',
   },
   {
     nombre: 'prestamos',
