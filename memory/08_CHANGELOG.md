@@ -12926,3 +12926,13 @@ La vía trasera no baja de 0,95 m: ese es su mínimo geométrico (los carenados 
 - Verified: browser interaction suite 237 of 237; reload from `?p=pod,bildu` returns to pp,psoe,vox,fa on the first and second reloads; screenshots of the top bar, the best-mode card and the footer checked.
 - Not verified: touch devices, the installed app (service worker).
 - Files: `public/observatorio-polarizacion/index.html`, `memory/08_CHANGELOG.md`.
+
+## 2026-11-19 · Aeromóvil: sección «Estrategia» (árbol de decisiones)
+
+> «crees una pestaña que sea estrategia y que vayamos juntos desarrollándola… quiero verlo de forma visual e ir pudiendo tomar decisiones de forma ramificada… que me vayas haciendo preguntas»
+
+Nueva sección `/aeromovil/estrategia`, en el menú de secciones. Dibuja el camino de hoy a la fábrica como un árbol de izquierda a derecha: meta, hitos, decisiones y opciones. Primer contenido: el hito 1 (un vehículo rodando legal por España) con diez puertas legales, cada una marcada como «leído en la fuente» o «por confirmar», más los supuestos que hay que probar y los hitos siguientes sólo apuntados. Cada caja abre su detalle (a favor, en contra, siguiente paso pequeño, fuentes) y deja marcar sí / no / dudo, escribir una nota y responder a las preguntas.
+
+Las marcas, notas y respuestas se guardan sólo en el navegador de quien las escribe: la página es pública y son personales. «Copiar mis respuestas» las lleva a la conversación.
+
+Comprobado en un navegador de pruebas (escritorio y móvil) contra el servidor de desarrollo. No comprobado en producción ni con la app instalada.

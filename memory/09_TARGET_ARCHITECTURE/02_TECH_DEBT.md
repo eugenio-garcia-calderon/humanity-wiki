@@ -1089,3 +1089,10 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **Aspect order is copied in four places.** The observatorio page (`ORDEN_ANTERIOR`, saved-figure migration), `public/geometria-figura/comun.js` (`PERMUTACION_V2`, used by the figure page and the server), and `datos.json` (generated). Changing the order again means updating the permutation tables and the classification together. Fix: derive the permutation from one file, ~45 min. Until then, `probar-figuras.ts` checks the converter only, not that the two tables agree.
 - **Offline copy of the old order.** The service worker serves network-first, so an online visitor gets the new order at once. A visitor who opened the figure test offline may still see the previous `datos.json` until they are online. Not measured on a phone.
 - **Figures published before 2026-11-19 keep `orden` 1 forever.** They are converted on read, not rewritten. Once no `orden` 1 row remains, the converter can go, but that needs a count in production first (not checked from here).
+
+## 2026-11-19 — Strategy tree: shortcuts taken
+
+- **Eugenio's marks are per browser.** `localStorage` only: a second device starts empty and Claude cannot read them. A private per-account store: about half a day (migration, owner-only route, a store like `notas/almacen.ts`).
+- **The tree's legal content is a snapshot.** 7 of the 10 legal routes are «por confirmar»: the Manual de Reformas section for category L, INTA's categories and fees, and whether the sandbox office is running were not readable from here. Each has its next step written in the node.
+- **No CI check for the tree.** `fallosArbol()` exists and returns `[]` today, but no script runs it in CI. Adding one: about 15 minutes.
+- **On a phone the tree shows about one column at a time.** It scrolls to the chosen box on its own; a stacked layout for narrow screens was not built.
