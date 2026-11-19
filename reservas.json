@@ -11,6 +11,12 @@
       "ruta": "src/server/seguridad/transparencia.ts",
       "motivo": "Cerrar la tabla de emails de figuras en el navegador de BD",
       "desde": "2026-11-19T16:25:24.621Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0232_figuras_geometria.sql",
+      "motivo": "Migración 0232: tabla de figuras publicadas",
+      "desde": "2026-11-19T16:25:28.038Z"
     }
   ]
 }
