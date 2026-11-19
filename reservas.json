@@ -11,6 +11,12 @@
       "ruta": "public/geometria-figura/datos.json",
       "motivo": "Regenerado por el rename",
       "desde": "2026-11-19T22:40:41.059Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "Entrada del changelog",
+      "desde": "2026-11-19T22:40:43.855Z"
     }
   ]
 }
