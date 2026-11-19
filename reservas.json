@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "public/observatorio-polarizacion/index.html",
+      "motivo": "Cabecera, pie, tarjetas de medidas y selección inicial",
+      "desde": "2026-11-19T21:07:19.243Z"
+    }
+  ]
 }
