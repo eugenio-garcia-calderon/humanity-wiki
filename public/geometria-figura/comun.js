@@ -47,12 +47,26 @@
     return 'Avanzado';
   }
 
-  /** Parecido entre dos listas de cifras de la misma longitud, de 0 a 100. */
+  /**
+   * Parecido entre la figura `a` y un partido `b`, de 0 a 100.
+   * Un aspecto que la persona deja en 0 («lo ignoro») NO cuenta: ni penaliza ni premia.
+   * Devuelve null si no queda ningún aspecto que comparar.
+   */
   function parecido(a, b) {
     if (!a || !b || a.length !== b.length || a.length === 0) return null;
-    var suma = 0;
-    for (var i = 0; i < a.length; i++) suma += Math.abs(a[i] - b[i]);
-    return Math.round(100 - (suma / a.length) * 10);
+    var suma = 0, n = 0;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] === 0) continue;
+      suma += Math.abs(a[i] - b[i]);
+      n++;
+    }
+    if (n === 0) return null;
+    return Math.round(100 - (suma / n) * 10);
+  }
+
+  /** Los partidos con cifra, de más a menos parecidos. Los que no tienen cifra quedan fuera. */
+  function conCifra(lista) {
+    return lista.filter(function (p) { return p.parecido !== null; });
   }
 
   /** ¿Tiene la figura la forma de los datos? `puntuaciones[i]` es un array de cifras de 0 a 10 por tema. */
@@ -83,7 +97,7 @@
       var parecidos = datos.partidos.map(function (p) {
         return { k: p.k, n: p.n, parecido: parecido(fila, t.v[p.k]) };
       });
-      var mejor = parecidos.reduce(function (m, p) { return m === null || p.parecido > m.parecido ? p : m; }, null);
+      var mejor = conCifra(parecidos).reduce(function (m, p) { return m === null || p.parecido > m.parecido ? p : m; }, null);
       return {
         k: t.k,
         n: t.n,
@@ -107,7 +121,7 @@
     var general = datos.partidos.map(function (p) {
       return { k: p.k, n: p.n, parecido: parecido(todas, posiciones[p.k]) };
     });
-    var mejorGeneral = general.reduce(function (m, p) { return m === null || p.parecido > m.parecido ? p : m; }, null);
+    var mejorGeneral = conCifra(general).reduce(function (m, p) { return m === null || p.parecido > m.parecido ? p : m; }, null);
 
     return { temas: temas, general: general, mejorGeneral: mejorGeneral };
   }
@@ -118,8 +132,8 @@
    * Lo usan la pantalla de resultado, la figura publicada y el correo, para que digan lo mismo.
    */
   function frasePrincipal(general, sujeto) {
-    var ord = (general || []).slice().sort(function (a, b) { return b.parecido - a.parecido; });
-    if (!ord.length) return '';
+    var ord = conCifra(general || []).slice().sort(function (a, b) { return b.parecido - a.parecido; });
+    if (!ord.length) return 'Todavía no hay aspectos que comparar: deja alguno distinto de 0.';
     var a = ord[0], b = ord[1];
     if (b && a.parecido - b.parecido <= 2) {
       return 'En conjunto, ' + a.n + ' (' + a.parecido + ' %) y ' + b.n + ' (' + b.parecido + ' %) quedan casi empatados como lo más parecido a ' + sujeto + '.';
@@ -134,6 +148,7 @@
     alcanza: alcanza,
     etiquetaDe: etiquetaDe,
     parecido: parecido,
+    conCifra: conCifra,
     figuraValida: figuraValida,
     resumen: resumen,
     frasePrincipal: frasePrincipal,

@@ -1076,3 +1076,11 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **The view is not in the shared link.** `guardarURL` keeps topic and party selection, not this view: ~15 min.
 - **The name is hard to read at first glance.** "Déjalo de lo mejor de cada uno" is Eugenio's wording; a reviewer suggested "Lo mejor de cada partido". His call.
 - **Two phrases for the same idea** ("todos los aspectos" in the level list, "todo el tema" in the topic list). Unify: ~10 min.
+
+## 2026-11-19 — Figure test: shortcuts taken
+
+- **Legal text not reviewed.** The consent text names "Luz & Humanidad" as responsible party and was published as it stands, at Eugenio's request. Review it before any mailing: owner Eugenio.
+- **Newsletter checkbox stores consent and the email, but subscribes nobody.** Connecting it to the list: depends on the newsletter setup (not yet scoped).
+- **"Lo rechazo" and "lo ignoro" are the same zero.** Both are excluded from the similarity. A separate stored state: ~30 min.
+- **The figure dataset mirrors the observatorio page.** Regenerate `public/geometria-figura/datos.json` (`scripts/geometria-datos.mjs`) whenever the observatorio's topic or aspect order changes, or saved figures will read the wrong axes.
+- **Anonymous write route** accepted as an exception to CLAUDE.md, forbidden item 3 (Eugenio, 2026-11-19). Recorded here so the next review does not reopen it silently.

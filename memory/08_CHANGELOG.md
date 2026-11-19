@@ -12870,3 +12870,11 @@ Pendiente: grupo 5 (élite), Europa, Mundo, y la búsqueda de ingresos.
 - Checked locally with automated Chrome, desktop 1280×900 and phone 390 px, all ten topics: 152 of 153 checks pass. The remaining one is console noise from the test server: 404 for `/api/textos` and `/api/auth/me` (no API there) and Google Fonts blocked by the test. `npm run build` passes.
 - Not verified: screen readers, a real phone, the installed app (its service worker may serve the previous build; check with `?sw=off`), production.
 - Files: `public/observatorio-polarizacion/index.html` only.
+
+## 2026-11-19 — Figure test: zeros excluded from similarity, PR #1131 ready
+
+- Eugenio answered the four open points (see decisions). Aspects left at 0 no longer count in the similarity; a figure with no comparable aspect shows no percentage and says so, on the page and in the email.
+- Explanatory text on the page updated to say so.
+- `main` merged into `nube/test-figura`; memory conflicts resolved keeping both sides.
+- Verified: `scripts/probar-figuras.ts` 49 of 49 against a throwaway database (5498), `tsc --noEmit` and `npm run build`. The end-to-end browser walkthrough was not rerun after this change.
+- Not verified: real email provider, production configuration, real phones, installed service worker.

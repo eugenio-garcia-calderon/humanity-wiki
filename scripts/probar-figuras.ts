@@ -211,6 +211,16 @@ async function main() {
   comprobar('una misma IP que envía sin parar acaba en 429', respuestas.includes(429), respuestas);
   comprobar('los primeros envíos de esa IP pasan (gracia de 5)', respuestas.slice(0, 5).every(s => s === 201), respuestas);
 
+  // Los aspectos que la persona deja en 0 no cuentan en el parecido (decisión de Eugenio, 2026-11-19)
+  comprobar('un aspecto en 0 no penaliza el parecido', comun.parecido([0, 5, 5, 5], [10, 5, 5, 5]) === 100, String(comun.parecido([0, 5, 5, 5], [10, 5, 5, 5])));
+  comprobar('una figura toda en 0 no tiene parecido', comun.parecido([0, 0, 0], [5, 5, 5]) === null);
+  const ceros = datos.temas.map((t: any) => t.ejes.map(() => 0));
+  const rCeros = comun.resumen(ceros, datos);
+  comprobar('figura vacía: ningún partido con cifra', comun.conCifra(rCeros.general).length === 0 && rCeros.mejorGeneral === null);
+  comprobar('figura vacía: la frase lo dice sin inventar un ganador', comun.frasePrincipal(rCeros.general, 'tu figura').startsWith('Todavía no hay aspectos'));
+  const unos = datos.temas.map((t: any) => t.ejes.map(() => 5));
+  const rUnos = comun.resumen(unos, datos);
+  comprobar('figura con cifras: sigue dando un partido más parecido', rUnos.mejorGeneral !== null && typeof rUnos.mejorGeneral.parecido === 'number');
   servidor.close();
   await pool.end();
 

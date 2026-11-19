@@ -204,7 +204,7 @@ footer p{margin:0 0 8px;max-width:80ch}
   <!-- ============ CONSTRUIR ============ -->
   <section id="v-construir" class="vista" aria-labelledby="t-construir" hidden>
     <h1 id="t-construir">Construye tu figura</h1>
-    <p class="lede">Para cada tema hay varios aspectos. Mueve cada deslizador hasta donde tú quieras: en 0, lo ignoras; cuanto más a la derecha, más llega tu propuesta. Tu figura se dibuja mientras lo haces. <b>No es una encuesta ni una recomendación de voto:</b> sirve para ver dónde te sitúas frente a lo que propone cada partido.</p>
+    <p class="lede">Para cada tema hay varios aspectos. Mueve cada deslizador hasta donde tú quieras: en 0, lo ignoras y ese aspecto no cuenta en el parecido; cuanto más a la derecha, más llega tu propuesta. Tu figura se dibuja mientras lo haces. <b>No es una encuesta ni una recomendación de voto:</b> sirve para ver dónde te sitúas frente a lo que propone cada partido.</p>
 
     <div class="progreso">
       <span id="prog-texto">0 de 64 aspectos marcados</span>
@@ -543,6 +543,7 @@ function pintarParecido() {
   if (!st.partido) { p.textContent = ''; return; }
   if (!temaCompleto(st.t)) { p.textContent = 'Marca los ' + tema.ejes.length + ' aspectos de este tema para ver el parecido con ' + nombreParte(st.partido) + '.'; return; }
   var pa = G.parecido(figuraDe(st.t), tema.v[st.partido]);
+  if (pa === null) { p.textContent = 'Tu figura todavía no tiene aspectos que comparar en este tema: deja alguno distinto de 0.'; return; }
   p.textContent = 'En este tema, tu figura se parece un ' + pa + ' % a ' + nombreParte(st.partido) + '.';
 }
 function claseNivel(x) {
@@ -695,7 +696,7 @@ function pintarResultado() {
       el('tbody', null, filas)
     ])
   ]));
-  caja.appendChild(el('p', { class: 'nota', style: 'margin-top:10px', text: 'El parecido compara cifra a cifra, aspecto por aspecto, con las posiciones de la página. Es una forma de leer el mapa, no un veredicto.' }));
+  caja.appendChild(el('p', { class: 'nota', style: 'margin-top:10px', text: 'El parecido compara cifra a cifra, aspecto por aspecto, con las posiciones de la página. Los aspectos que dejas en 0 no cuentan. Es una forma de leer el mapa, no un veredicto.' }));
 }
 
 /* ---------- Publicar ---------- */

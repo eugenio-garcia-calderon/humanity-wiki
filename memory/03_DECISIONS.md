@@ -2393,3 +2393,14 @@ They change saved designs' numbers on purpose.
 **Chosen**: the candidates are all nine parties, whatever the party chips say. Per aspect the highest value wins. Ties draw a grey dot labelled with the number of tied parties; names appear on hover, tap or focus. The chips are disabled and dimmed while the view is on. The tooltip gives the value, the names and the level text, and says the 10 is this observatory's rating. The dashed line joins the best values with straight segments, so it does not read as one party's figure.
 **Alternatives**: respect the selected chips (rejected: the default selection hides five parties, and the question is who is closest to the ideal); one coloured dot per tied party (rejected for now: up to nine colours on one point, about 1 h to lay out); names listed under the chart (deferred: several extra lines per topic on phones); per-party written postures (no such text exists in the data; it is content work for Eugenio, not code).
 **Cost of switching later**: small. Aggregation is `mejores()` and drawing is `puntoMejor()` in the geometry IIFE of `public/observatorio-polarizacion/index.html`. A tie list under the chart is one more element.
+
+## 2026-11-19 — Figure test: Eugenio's answers to the four open points
+
+**Context**: the figure test (PR #1131) had four decisions left open. Eugenio answered them on 2026-11-19 and asked to publish.
+**Chosen**:
+1. Publishing without an account stays. The anonymous write route has the same protections as the public site forms (honeypot, minimum time, attempt limit, same-origin check) and no role check. This is an explicit exception to CLAUDE.md, forbidden item 3, approved by Eugenio.
+2. An aspect the person leaves at 0 ("lo ignoro") does not count in the similarity, in either direction. If no aspect can be compared the figure shows no percentage and says so. Alternative rejected: count it as zero (a blank figure looked 33–46 % similar to every party).
+3. The consent text, with "Luz & Humanidad" as responsible party, is published as it stands. Eugenio asked for it to be reviewed later.
+4. The newsletter checkbox stays. It records consent and stores the email; it does not yet subscribe anyone. Alternative rejected: hide the checkbox until a newsletter is connected.
+**Cost of switching later**: 1 and 4 are one line each in the route and the page; 2 is `parecido()` in `public/geometria-figura/comun.js`, shared by the page and the email.
+**Known consequence of 2**: a 0 meaning "lo rechazo" is also excluded. Separating them needs a stored "ignorado" state (about 30 min).
