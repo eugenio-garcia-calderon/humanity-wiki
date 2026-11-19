@@ -12955,3 +12955,11 @@ Comprobado en un navegador de pruebas (escritorio y móvil) contra el servidor d
 Las respuestas de Eugenio quedan escritas en el árbol («Ya decidido»). La puerta de la reforma pasa a ser «Reforma profunda del Twizy 80», con lo leído en el Manual de Reformas para la categoría L (códigos 8.51, 4.2 y 2.3; leída la revisión 3, no la 7 vigente), las medidas del Twizy y dos cajas nuevas: conservar o alargar la batalla, y la prueba del antes y el después. La puerta del triciclo pasa a «Triciclo artesanal (L5e) con ruedas traseras gemelas»: cuatro ruedas en el suelo que cuentan como tres, con la resolución de 24-9-2025 de fabricación artesanal (hasta 10 al año, sin tope de potencia). La homologación individual como cuadriciclo queda de reserva. Las dos puertas fuertes llevan su borrador de consulta, listo para copiar.
 
 Las respuestas a las preguntas se guardan ahora por el texto de la pregunta, no por su número.
+
+## 2026-11-19 · Geometry: best-of-each button says «Ver lo mejor de cada partido» with a star; no grey tooltip on the figure
+
+- The button above the party list now reads «Ver lo mejor de cada partido» (it was «Déjalo de lo mejor de cada uno») and has a gold star. It has a gold border and tint, which become stronger when the mode is on.
+- The browser's grey box that appeared when hovering the figure is gone. It came from a `<title>` element inside the SVG, which was rewritten on every draw. The text now lives in the SVG's `aria-label`, so screen readers still get it. Only the large white card shows on hover.
+- Verified: browser interaction suite 237 of 237; «Todos» suite passes; the button fits on desktop (193 px) and on a 390 px viewport (160 px) without overflowing; clicking it turns the mode on (`aria-pressed` true); a vertex hover shows the white card and no page errors; `tsc --noEmit` clean.
+- Not verified: touch devices, the installed app (the service worker may serve the old build; `?sw=off` drops it), screen readers.
+- Files: `public/observatorio-polarizacion/index.html`, `memory/08_CHANGELOG.md`, `memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md`.

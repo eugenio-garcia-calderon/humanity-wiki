@@ -1025,6 +1025,10 @@ footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .geo-partidos .geo-chip{width:100%;justify-content:flex-start;border-radius:12px;min-height:38px;font-size:13.5px}
 .geo-partidos .geo-chip.mini{width:calc(50% - 3px);justify-content:center;min-height:32px;font-size:12px}
 .geo-mejor-btn{width:100%;justify-content:center;text-align:center;font-size:13px}
+/* Botón de «lo mejor de cada partido»: dorado y con estrella, para que destaque */
+.geo-mejor-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:700;font-size:14px;border:2px solid #F6BE3B;background:color-mix(in srgb,#F6BE3B 24%,#FFFFFF);color:var(--ink)}
+.geo-mejor-btn:hover,.geo-mejor-btn[aria-pressed="true"]{background:color-mix(in srgb,#F6BE3B 45%,#FFFFFF)}
+.geo-mejor-btn .estrella{flex:none}
 .geo-nota{font-size:12.5px;line-height:1.45;color:var(--muted);margin:0 2px}
 .geo-partidos .geo-chip:disabled{opacity:.4;cursor:not-allowed}
 .geo-mejor{outline:none}
@@ -1371,13 +1375,13 @@ footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
   <h2 class="sr-only" id="h-geometrias">Geometría política: los partidos como figuras en diez temas</h2>
   <div class="geo">
     <aside class="geo-partidos" aria-labelledby="geo-partidos-t">
-      <button class="tbtn geo-mejor-btn" id="geo-mejor" aria-pressed="false">Déjalo de lo mejor de cada uno</button>
+      <button class="tbtn geo-mejor-btn" id="geo-mejor" aria-pressed="false"><svg class="estrella" width="18" height="18" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 4 L39.5 23.2 L60 24.4 L44 37.2 L49.4 57 L32 46 L14.6 57 L20 37.2 L4 24.4 L24.5 23.2 Z" fill="#F6BE3B" stroke="#B7791F" stroke-width="3" stroke-linejoin="round"/></svg>Ver lo mejor de cada partido</button>
       <p class="geo-nota" id="geo-mejor-nota" hidden>Por cada aspecto, el punto marca la nota más alta entre los nueve partidos. Si empatan, el punto se reparte en los colores de los partidos empatados y sus nombres salen junto a él. Pasa el ratón por el punto para ver por qué llega tan alto; si lo pulsas, se queda fijo, y «Ver más» lo abre en la columna de la derecha. El círculo ideal es la propuesta de esta página, no la de ningún partido. La línea discontinua une esos mejores valores.</p>
       <p class="sel-k" id="geo-partidos-t">Partidos</p>
       <div class="geo-chips" id="geo-chips"></div>
     </aside>
     <div class="geo-stage">
-      <svg id="geo-svg" viewBox="0 0 820 740" role="img" aria-labelledby="geo-svg-t"><title id="geo-svg-t">Figura de cada partido sobre los aspectos del tema elegido</title></svg>
+      <svg id="geo-svg" viewBox="0 0 820 740" role="img" aria-label="Figura de cada partido sobre los aspectos del tema elegido"></svg>
       <div class="geo-tip" id="geo-tip" role="tooltip" hidden></div>
       <p class="geo-cap" id="geo-cap"></p>
       <div class="geo-niveles" id="geo-niveles" role="group" aria-label="Los tres círculos de cada tema"></div>
@@ -3513,7 +3517,8 @@ const ILUS = {
       KEYS.forEach((k, i) => { const [x, y] = pts[i]; s += `<g class="geo-tv" data-tvp="${p.k}" data-tvk="${k}"><circle cx="${r1(x)}" cy="${r1(y)}" r="${r1(14 * K)}" fill="transparent"/><circle cx="${r1(x)}" cy="${r1(y)}" r="${r1(5 * K)}" fill="${p.c}"/></g>`; });
       s += `</g>`;
     });
-    svg.innerHTML = `<title id="geo-svg-t">Todos los temas: cada arista es un tema y cada partido, su nota media en ese tema</title>` + s;
+    svg.setAttribute("aria-label", "Todos los temas: cada arista es un tema y cada partido, su nota media en ese tema");
+    svg.innerHTML = s;
     $("#geo-cap").textContent = "Cada arista es un tema. El punto de cada partido es su nota media en los seis aspectos de ese tema, de 0 a 10 (valoración de este observatorio). Pasa el ratón por un punto para ver de qué sale; pulsa el nombre de un tema para abrirlo.";
     $("#geo-mejor-nota").hidden = true;
     $(".geo-partidos").classList.remove("en-mejor");
@@ -3593,7 +3598,9 @@ const ILUS = {
     const titulo = st.mejor
       ? `Lo más cercano al círculo ideal en cada uno de los ${PALABRA[n] || n} aspectos de ${t.n.toLowerCase()}, con tres círculos: lo básico, lo intermedio y lo avanzado`
       : `Figura de cada partido sobre los ${PALABRA[n] || n} aspectos de ${t.n.toLowerCase()}, con tres círculos: lo básico, lo intermedio y lo avanzado`;
-    svg.innerHTML = `<title id="geo-svg-t">${titulo}</title>` + s;
+    // Sin <title> dentro del SVG: el navegador lo mostraba como cuadro gris al pasar el ratón. El texto va en aria-label.
+    svg.setAttribute("aria-label", titulo);
+    svg.innerHTML = s;
     marcarMejor();
     $("#geo-cap").textContent = t.cap;
     $("#geo-mejor-nota").hidden = !st.mejor;
