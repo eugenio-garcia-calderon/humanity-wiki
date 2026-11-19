@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, ChevronRight, CircleHelp, ClipboardCopy, ExternalLink, X } from 'lucide-react';
 import { Badge, Button, Card } from '../../ui/core';
 import { cn } from '../../../utils/cn';
-import { ARBOL, RAIZ, hijosDe, nodo, preguntasAbiertas, type EstadoNodo, type NodoEstrategia, type TipoNodo } from './arbol';
+import { ARBOL, RAIZ, hijosDe, nodo, preguntasAbiertas, type EstadoNodo, type Borrador, type NodoEstrategia, type TipoNodo } from './arbol';
 import { ponerMarca, ponerNota, ponerRespuesta, useEstrategia, type DatosEstrategia, type Marca } from './almacen';
 
 const ANCHO = 236, ALTO = 60, SEP_X = 40, PASO_Y = 70, MARGEN = 12;
@@ -13,6 +13,7 @@ const ANCHO = 236, ALTO = 60, SEP_X = 40, PASO_Y = 70, MARGEN = 12;
 const TIPO: Record<TipoNodo, string> = { meta: 'Meta', hito: 'Hito', decision: 'Decisión', opcion: 'Opción', supuesto: 'Supuesto', regla: 'Reglas' };
 const ESTADO: Record<EstadoNodo, { n: string; caja: string; punto: string }> = {
   ahora: { n: 'Ahora', caja: 'border-teal-500 bg-teal-50', punto: 'bg-teal-500' },
+  elegida: { n: 'Elegida', caja: 'border-emerald-700 bg-emerald-100', punto: 'bg-emerald-700' },
   prometedora: { n: 'Prometedora', caja: 'border-emerald-500 bg-emerald-50', punto: 'bg-emerald-500' },
   'por-explorar': { n: 'Por explorar', caja: 'border-slate-300 bg-white', punto: 'bg-slate-400' },
   dudosa: { n: 'Dudosa', caja: 'border-amber-400 bg-amber-50', punto: 'bg-amber-400' },
@@ -47,7 +48,7 @@ function textoParaCopiar(d: DatosEstrategia): string {
   const l: string[] = ['Mis respuestas en la estrategia del Aeromóvil', ''];
   for (const n of ARBOL) {
     const m = d.marcas[n.id], nota = d.notas[n.id];
-    const rs = (n.preguntas ?? []).map((p, i) => ({ p, r: d.respuestas[`${n.id}#${i}`] })).filter(x => x.r);
+    const rs = (n.preguntas ?? []).map((p, i) => ({ p, r: d.respuestas[`${n.id}#${p}`] })).filter(x => x.r);
     if (!m && !nota && !rs.length) continue;
     l.push(`■ ${n.titulo}`);
     if (m) l.push(`  Decisión: ${MARCA[m].n}`);
@@ -70,6 +71,27 @@ function Lista({ titulo, items, clase }: { titulo: string; items?: string[]; cla
   );
 }
 
+/** The next step already written: a message to copy and send. Folded by default; it is long. */
+function BorradorCorreo({ b }: { b: Borrador }) {
+  const [abierto, setAbierto] = useState(false), [copiado, setCopiado] = useState(false);
+  const copiar = async () => { try { await navigator.clipboard.writeText(`Asunto: ${b.asunto}\n\n${b.cuerpo}`); setCopiado(true); setTimeout(() => setCopiado(false), 2500); } catch { /* sin portapapeles: se puede seleccionar a mano */ } };
+  return (
+    <div className="mt-3 rounded-lg border border-slate-200">
+      <Button variant="ghost" aria-expanded={abierto} onClick={() => setAbierto(a => !a)} className="w-full justify-start gap-2 px-3 py-2 text-left text-sm font-medium normal-case tracking-normal text-slate-900">
+        <ChevronRight className={cn('h-4 w-4 shrink-0 transition-transform', abierto && 'rotate-90')} /><span className="flex-1">Borrador de la consulta</span>
+      </Button>
+      {abierto && (
+        <div className="border-t border-slate-200 p-3">
+          <p className="text-xs text-slate-500">Para: {b.para}. Cambia lo que va entre corchetes antes de enviarlo.</p>
+          <p className="mt-2 text-sm font-medium text-slate-900">{b.asunto}</p>
+          <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700">{b.cuerpo}</p>
+          <Button variant="outline" onClick={copiar} className="mt-3 gap-2 px-3 py-1.5 text-sm font-medium normal-case tracking-normal"><ClipboardCopy className="h-4 w-4" />{copiado ? 'Copiado' : 'Copiar el correo'}</Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Detalle({ n, d, alIr }: { n: NodoEstrategia; d: DatosEstrategia; alIr: (id: string) => void }) {
   const est = n.estado ? ESTADO[n.estado] : null, padre = n.padre ? nodo(n.padre) : null, hs = hijosDe(n.id);
   const marca = d.marcas[n.id];
@@ -83,6 +105,7 @@ function Detalle({ n, d, alIr }: { n: NodoEstrategia; d: DatosEstrategia; alIr: 
       <h3 className="mt-1.5 text-lg font-semibold leading-snug text-slate-900">{n.titulo}</h3>
       {padre && <Button variant="ghost" onClick={() => alIr(padre.id)} className="-ml-1 mt-0.5 px-1 py-0.5 text-xs font-normal normal-case tracking-normal text-slate-500">← {padre.titulo}</Button>}
       <p className="mt-2 text-sm text-slate-700">{n.resumen}</p>
+      <Lista titulo="Ya decidido" items={n.decidido} clase="text-emerald-700" />
       <Lista titulo="En detalle" items={n.detalle} />
       <Lista titulo="A favor" items={n.aFavor} clase="text-emerald-700" />
       <Lista titulo="En contra" items={n.enContra} clase="text-rose-700" />
@@ -98,6 +121,7 @@ function Detalle({ n, d, alIr }: { n: NodoEstrategia; d: DatosEstrategia; alIr: 
           <p className="mt-1 text-sm text-slate-800">{n.siguiente}</p>
         </div>
       )}
+      {n.borrador && <BorradorCorreo key={n.id} b={n.borrador} />}
       {hs.length > 0 && (
         <div className="mt-4">
           <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">{n.tipo === 'decision' ? 'Opciones' : 'Dentro'}</h4>
@@ -108,7 +132,7 @@ function Detalle({ n, d, alIr }: { n: NodoEstrategia; d: DatosEstrategia; alIr: 
           </ul>
         </div>
       )}
-      {n.preguntas?.map((p, i) => { const k = `${n.id}#${i}`; return (
+      {n.preguntas?.map((p, i) => { const k = `${n.id}#${p}`; return (
         <label key={k} className="mt-4 block">
           <span className="text-sm font-medium text-slate-900">{p}</span>
           <textarea rows={2} className={AREA} placeholder="Tu respuesta" value={d.respuestas[k] ?? ''} onChange={e => ponerRespuesta(k, e.target.value)} />
@@ -151,7 +175,7 @@ export default function VistaEstrategia() {
   const visibles = ARBOL.filter(n => pos.has(n.id));
   const x = (id: string) => MARGEN + pos.get(id)!.prof * (ANCHO + SEP_X), y = (id: string) => MARGEN + pos.get(id)!.fila * PASO_Y;
   const ancho = MARGEN * 2 + (hondo + 1) * ANCHO + hondo * SEP_X, alto = MARGEN * 2 + (filas - 1) * PASO_Y + ALTO;
-  const preguntas = preguntasAbiertas(), sinResponder = preguntas.filter(p => !d.respuestas[`${p.nodo.id}#${p.i}`]).length;
+  const preguntas = preguntasAbiertas(), sinResponder = preguntas.filter(p => !d.respuestas[`${p.nodo.id}#${p.texto}`]).length;
   const hayAlgo = Object.keys(d.marcas).length + Object.keys(d.notas).length + Object.keys(d.respuestas).length > 0;
 
   const plegar = (id: string) => setAbiertos(a => { const n = new Set(a); if (n.has(id)) n.delete(id); else n.add(id); return n; });
@@ -233,7 +257,7 @@ export default function VistaEstrategia() {
             <ClipboardCopy className="h-4 w-4" />{copiado === 'si' ? 'Copiado' : copiado === 'fallo' ? 'No se pudo copiar' : 'Copiar mis respuestas'}
           </Button>
         </div>
-        <ol className="mt-3 divide-y divide-slate-100">{preguntas.map(p => { const r = d.respuestas[`${p.nodo.id}#${p.i}`]; return (
+        <ol className="mt-3 divide-y divide-slate-100">{preguntas.map(p => { const r = d.respuestas[`${p.nodo.id}#${p.texto}`]; return (
           <li key={`${p.nodo.id}#${p.i}`}>
             <Button variant="ghost" onClick={() => ir(p.nodo.id)} className="w-full items-start justify-start gap-2.5 px-1.5 py-2 text-left text-sm font-normal normal-case tracking-normal text-slate-800">
               <span className={cn('mt-0.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full', r ? 'bg-emerald-600 text-white' : 'border border-slate-300')}>{r && <Check className="h-3 w-3" />}</span>
