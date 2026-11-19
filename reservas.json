@@ -29,6 +29,12 @@
       "ruta": "src/server/figuras.ts",
       "motivo": "Orden izquierda-derecha de los aspectos",
       "desde": "2026-11-19T19:37:05.938Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "scripts/probar-figuras.ts",
+      "motivo": "Orden izquierda-derecha de los aspectos",
+      "desde": "2026-11-19T19:37:08.977Z"
     }
   ]
 }
