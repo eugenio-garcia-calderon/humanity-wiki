@@ -12936,3 +12936,11 @@ Nueva sección `/aeromovil/estrategia`, en el menú de secciones. Dibuja el cami
 Las marcas, notas y respuestas se guardan sólo en el navegador de quien las escribe: la página es pública y son personales. «Copiar mis respuestas» las lleva a la conversación.
 
 Comprobado en un navegador de pruebas (escritorio y móvil) contra el servidor de desarrollo. No comprobado en producción ni con la app instalada.
+
+## 2026-11-19 · Estrategia: segunda ronda de las puertas legales
+
+> «Tengo el Twizy de 80. Sí, me valdría un aeromóvil eléctrico en vez de híbrido. Las cuatro ruedas son innegociables. Puede seguir siendo pública la estrategia. Explora las vías más prometedoras.»
+
+Las respuestas de Eugenio quedan escritas en el árbol («Ya decidido»). La puerta de la reforma pasa a ser «Reforma profunda del Twizy 80», con lo leído en el Manual de Reformas para la categoría L (códigos 8.51, 4.2 y 2.3; leída la revisión 3, no la 7 vigente), las medidas del Twizy y dos cajas nuevas: conservar o alargar la batalla, y la prueba del antes y el después. La puerta del triciclo pasa a «Triciclo artesanal (L5e) con ruedas traseras gemelas»: cuatro ruedas en el suelo que cuentan como tres, con la resolución de 24-9-2025 de fabricación artesanal (hasta 10 al año, sin tope de potencia). La homologación individual como cuadriciclo queda de reserva. Las dos puertas fuertes llevan su borrador de consulta, listo para copiar.
+
+Las respuestas a las preguntas se guardan ahora por el texto de la pregunta, no por su número.
