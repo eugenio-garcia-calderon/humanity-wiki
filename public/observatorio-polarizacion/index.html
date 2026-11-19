@@ -1042,6 +1042,10 @@ footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .geo-tip .tbtn,.geo-tip .geo-link{pointer-events:auto}
 .geo-tip h5{font:600 14px var(--sans);color:var(--ink);margin:2px 0 6px}
 .geo-tip .medida{font:600 1.45rem/1.15 var(--display);margin:8px 0 6px}
+.geo-tip .geo-tip-sep{border-top:1px solid var(--line-2);margin-top:12px;padding-top:12px}
+.geo-tip.varios{max-width:420px;font-size:12.5px;line-height:1.42}
+.geo-tip.varios .medida{font-size:1.2rem}
+.geo-tip.varios p{margin:3px 0}
 .geo-tip-acc{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
 .geo-mas{display:grid;gap:10px;padding:14px 16px;border-radius:14px;background:var(--bg-2);border:1px solid var(--line-2);color:var(--ink-2);font:400 13.5px/1.5 var(--sans)}
 .geo-mas .lbl{display:block}
@@ -3621,27 +3625,46 @@ const ILUS = {
   }
   // Un vértice de un partido: su nota, qué nivel le corresponde, y su postura en el tema.
   // Por aspecto no hay todavía un texto por partido que justifique la nota: se dice, en vez de inventarlo.
-  function htmlPartido(pk, i) {
+  function cuerpoPartido(pk, i, conBasico = true) {
     const t = T(), e = t.ejes[i], p = PARTIDOS.find((q) => q.k === pk), x = t.v[pk][i], lvl = nivelDe(x);
     const coma = (n) => n.toFixed(1).replace(".", ",");
     const nivel = lvl
       ? `<span class="medida" style="color:${colorNivel(lvl - 1)}">${NIV_TITULO[lvl - 1]}</span>Llega desde ${coma(UMBRAL[lvl - 1])} de 10.`
       : `<span class="medida" style="color:#8A93A6">Sin medida</span>No llega a lo básico: hacen falta ${coma(UMBRAL[0])} de 10 para el primer círculo.`;
-    return `<span class="lbl" style="color:${p.c}">${p.n} · radio ${i + 1}</span><h5>${e.n}</h5>`
-      + `<p class="who">${p.n}: ${x} de 10 <small>(valoración de este observatorio)</small></p>`
+    return `<p class="who">${p.n}: ${x} de 10 <small>(valoración de este observatorio)</small></p>`
       + `<p>${nivel}</p>`
-      + `<p><b>Lo básico:</b> ${e.niv[0]}</p>`
-      + `<p><b>Postura de ${p.n} en todo el tema:</b> ${t.t[pk] || "Sin texto todavía."}</p>`
-      + `<p class="who"><small>Por aspecto, este observatorio no tiene aún un texto de ${p.n} que justifique esta nota. Lo de arriba es su postura en el tema entero.</small></p>`;
+      + (conBasico ? `<p><b>Lo básico:</b> ${e.niv[0]}</p>` : "")
+      + `<p><b>Postura de ${p.n} en todo el tema:</b> ${t.t[pk] || "Sin texto todavía."}</p>`;
   }
-  function htmlTodos(pk, tk) {
+  const NOTA_ASPECTO = `<p class="who"><small>Por aspecto, este observatorio no tiene aún un texto de cada partido que justifique la nota. Lo de arriba es su postura en el tema entero.</small></p>`;
+  function htmlPartido(pk, i) {
+    const e = T().ejes[i], p = PARTIDOS.find((q) => q.k === pk);
+    return `<span class="lbl" style="color:${p.c}">${p.n} · radio ${i + 1}</span><h5>${e.n}</h5>` + cuerpoPartido(pk, i) + NOTA_ASPECTO;
+  }
+  // Varios partidos con su punto en el mismo sitio: se leen todos, uno debajo de otro, para que ninguno quede tapado
+  function htmlPartidos(pks, i) {
+    const e = T().ejes[i];
+    // «Lo básico» es igual para todos los partidos en este aspecto: se dice una vez, arriba
+    return `<span class="lbl">${pks.length} partidos en este punto · radio ${i + 1}</span><h5>${e.n}</h5><p><b>Lo básico:</b> ${e.niv[0]}</p>`
+      + pks.map((pk, j) => { const p = PARTIDOS.find((q) => q.k === pk); return `<div class="${j ? "geo-tip-sep" : ""}"><span class="lbl" style="color:${p.c}">${p.n}</span>${cuerpoPartido(pk, i, false)}</div>`; }).join("")
+      + NOTA_ASPECTO;
+  }
+  function cuerpoTodos(pk, tk) {
     const p = PARTIDOS.find((q) => q.k === pk), t = TEMAS[tk], m = mediaTema(tk, pk), lv = nivelMedia(m);
     const coma = (x) => x.toFixed(1).replace(".", ",");
-    return `<span class="lbl" style="color:${p.c}">${p.n} · ${t.n}</span><h5>${t.q}</h5>`
-      + `<p class="who">Nota media: ${coma(m)} de 10 <small>(seis aspectos, valoración de este observatorio)</small></p>`
+    return `<p class="who">Nota media: ${coma(m)} de 10 <small>(seis aspectos, valoración de este observatorio)</small></p>`
       + `<p class="medida" style="color:${lv ? colorNivel(lv - 1) : "#8A93A6"}">${lv ? NIV_TITULO[lv - 1] : "Sin medida"}</p>`
       + `<p>${lv ? "La media llega a esta medida." : "La media no llega a lo básico: hacen falta " + coma(UMBRAL[0]) + " de 10."}</p>`
       + `<p><b>Postura de ${p.n} en el tema:</b> ${t.t[pk] || "Sin texto todavía."}</p>`;
+  }
+  function htmlTodos(pk, tk) {
+    const p = PARTIDOS.find((q) => q.k === pk), t = TEMAS[tk];
+    return `<span class="lbl" style="color:${p.c}">${p.n} · ${t.n}</span><h5>${t.q}</h5>` + cuerpoTodos(pk, tk);
+  }
+  function htmlTodosVarios(pks, tk) {
+    const t = TEMAS[tk];
+    return `<span class="lbl">${pks.length} partidos · ${t.n}</span><h5>${t.q}</h5>`
+      + pks.map((pk, j) => { const p = PARTIDOS.find((q) => q.k === pk); return `<div class="${j ? "geo-tip-sep" : ""}"><span class="lbl" style="color:${p.c}">${p.n}</span>${cuerpoTodos(pk, tk)}</div>`; }).join("");
   }
   function htmlMejor(i) {
     const t = T(), e = t.ejes[i], m = mejores(t)[i], lvl = nivelDe(m.max); // 0: no llega a lo básico; 1 a 3: círculo
@@ -3667,11 +3690,15 @@ const ILUS = {
   function mostrar(clave, html, cx, cy) {
     if (clave !== tipClave) { tip.innerHTML = html; tipClave = clave; }
     tip.hidden = false;
-    const sr = stage.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
-    let x = cx - sr.left - w / 2, y = cy - sr.top - h - 16;
-    x = Math.max(6, Math.min(sr.width - w - 6, x));
-    if (y < 6) y = cy - sr.top + 20;
-    tip.style.left = r1(x) + "px"; tip.style.top = r1(y) + "px";
+    // Siempre a la derecha del ratón y centrada en vertical, para que se sepa dónde va a salir.
+    // Sólo pasa a la izquierda si no cabe a la derecha (en el borde del escenario), y nunca se sale por arriba ni por abajo.
+    // Los límites son los de la ventana visible, no los del escenario: así la tarjeta nunca se corta en pantalla
+    const sr = stage.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight, G = 18;
+    let xc = cx + G;
+    if (xc + w > window.innerWidth - 6) xc = cx - G - w;
+    xc = Math.max(6, Math.min(window.innerWidth - w - 6, xc));
+    const yc = Math.max(6, Math.min(window.innerHeight - h - 6, cy - h / 2));
+    tip.style.left = r1(xc - sr.left) + "px"; tip.style.top = r1(yc - sr.top) + "px";
   }
   // Lo que se ve al pasar el ratón se oculta; un punto fijado se queda hasta que se cierra o cambia la vista
   function ocultar() { if (st.fijado != null) return; tip.hidden = true; tipClave = null; }
@@ -3710,16 +3737,36 @@ const ILUS = {
     if (e.target.closest("[data-soltar]")) soltar();
   });
   const centro = (el) => { const b = el.getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; };
+  // Los datos de hover se anclan al ratón; con teclado (foco), al elemento
+  const anclaje = (e, el) => (e.type && e.type.startsWith("pointer") ? [e.clientX, e.clientY] : centro(el));
+  // Varios partidos pueden tener su punto en el mismo sitio, y el de encima tapaba a los demás.
+  // Se recogen todos los vértices del mismo aspecto que quedan bajo el ratón y se leen en una sola tarjeta.
+  function vertices(e) {
+    if (st.yo) return false;
+    const tv = !!st.todos;
+    const pos = [...svg.querySelectorAll(tv ? "[data-tvk]" : "[data-pv]")].map((n) => {
+      const hit = n.lastElementChild, [x, y] = centro(hit);
+      return { n, d: Math.hypot(x - e.clientX, y - e.clientY), r: hit.getBoundingClientRect().width / 2 };
+    });
+    if (!pos.length) return false;
+    const cerca = pos.reduce((a, b) => (b.d < a.d ? b : a));
+    if (cerca.d > cerca.r + 2) return false;
+    const eje = tv ? cerca.n.dataset.tvk : cerca.n.dataset.pi;
+    const pks = pos
+      .filter((p) => (tv ? p.n.dataset.tvk : p.n.dataset.pi) === eje && p.d <= Math.max(cerca.r * 2, 10))
+      .map((p) => (tv ? p.n.dataset.tvp : p.n.dataset.pv));
+    tip.classList.toggle("varios", pks.length > 1); // con varios partidos la tarjeta es más ancha, para que quepa en alto
+    if (tv) mostrar(`t${eje}-${pks.join(",")}`, pks.length === 1 ? htmlTodos(pks[0], eje) : htmlTodosVarios(pks, eje), e.clientX, e.clientY);
+    else mostrar(`v${st.tema}-${eje}-${pks.join(",")}`, pks.length === 1 ? htmlPartido(pks[0], +eje) : htmlPartidos(pks, +eje), e.clientX, e.clientY);
+    return true;
+  }
   function leer(e) {
     if (st.yo) return false;
-    const tv = e.target.closest("[data-tvk]");
-    if (tv) { const [x, y] = centro(tv.lastElementChild); mostrar(`t${tv.dataset.tvp}-${tv.dataset.tvk}`, htmlTodos(tv.dataset.tvp, tv.dataset.tvk), x, y); return true; }
+    if (e.target.closest("[data-tvk], [data-pv]")) { vertices(e); return true; }
     const mj = e.target.closest("[data-mi]");
-    if (mj) { if (st.fijado != null) return true; const [x, y] = centro(mj.querySelector(".mdot")); mostrar(`m${st.tema}-${mj.dataset.mi}`, htmlMejor(+mj.dataset.mi), x, y); return true; }
-    const pv = e.target.closest("[data-pv]");
-    if (pv) { const [x, y] = centro(pv.lastElementChild); mostrar(`v${st.tema}-${pv.dataset.pv}-${pv.dataset.pi}`, htmlPartido(pv.dataset.pv, +pv.dataset.pi), x, y); return true; }
+    if (mj) { if (st.fijado != null) return true; const [x, y] = anclaje(e, mj.querySelector(".mdot")); mostrar(`m${st.tema}-${mj.dataset.mi}`, htmlMejor(+mj.dataset.mi), x, y); return true; }
     const lv = e.target.closest("[data-lk]");
-    if (lv) { const [x, y] = centro(lv.querySelector(".dot")); mostrar(`p${lv.dataset.li}-${lv.dataset.lk}`, htmlPunto(+lv.dataset.li, +lv.dataset.lk), x, y); return true; }
+    if (lv) { const [x, y] = anclaje(e, lv.querySelector(".dot")); mostrar(`p${lv.dataset.li}-${lv.dataset.lk}`, htmlPunto(+lv.dataset.li, +lv.dataset.lk), x, y); return true; }
     const rg = e.target.closest("[data-ring]");
     if (rg) { mostrar(`r${rg.dataset.ring}`, htmlRing(+rg.dataset.ring), e.clientX, e.clientY); return true; }
     return false;
@@ -3761,7 +3808,10 @@ const ILUS = {
   });
   svg.addEventListener("pointermove", (e) => {
     if (arrastre && e.pointerId === arrastre.id) { const [dx, dy] = enLienzo(e); fijar(arrastre.i, valorEnEje(dx, dy, arrastre.i)); return; }
-    if (e.pointerType !== "touch" && e.target.closest("[data-ring]")) leer(e);
+    if (e.pointerType === "touch") return;
+    if (e.target.closest("[data-ring]")) { leer(e); return; }
+    // Al moverse, los vértices bajo el ratón se actualizan; al salir de todos, se oculta su tarjeta
+    if (!st.yo && !vertices(e) && /^[vt]/.test(tipClave || "")) ocultar();
   });
   ["pointerup", "pointercancel", "lostpointercapture"].forEach((ev) => svg.addEventListener(ev, () => { arrastre = null; }));
 
