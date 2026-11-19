@@ -2363,3 +2363,10 @@ They change saved designs' numbers on purpose.
 **Chosen**: the frame forwards the parent's `search` + `hash` to the document once, and the document mirrors its state into `window.parent.history.replaceState` (same origin only, in a `try`). React Router never sees it, which is fine: nothing in the platform reads those parameters.
 **Alternatives**: `postMessage` to a listener in the TSX (cleaner boundary, one more moving part and a message contract nobody else uses); a React port of the chapter (weeks, and the document was reviewed as one file).
 **Cost of switching later**: small — two functions (`guardarURL`, `enlace`) in the document and one `useState` in the TSX.
+
+## 2026-11-19 — Geometry "best per aspect" view: all nine parties, ties shown as a count
+
+**Context**: Eugenio asked to replace "Lo mejor de cada uno" with a view that, for the selected topic, shows per aspect only the party closest to the ideal circle (value 10), in that party's colour, with a hover that explains it.
+**Chosen**: the candidates are all nine parties, whatever the party chips say. Per aspect the highest value wins. Ties draw a grey dot labelled with the number of tied parties; names appear on hover, tap or focus. The chips are disabled and dimmed while the view is on. The tooltip gives the value, the names and the level text, and says the 10 is this observatory's rating. The dashed line joins the best values with straight segments, so it does not read as one party's figure.
+**Alternatives**: respect the selected chips (rejected: the default selection hides five parties, and the question is who is closest to the ideal); one coloured dot per tied party (rejected for now: up to nine colours on one point, about 1 h to lay out); names listed under the chart (deferred: several extra lines per topic on phones); per-party written postures (no such text exists in the data; it is content work for Eugenio, not code).
+**Cost of switching later**: small. Aggregation is `mejores()` and drawing is `puntoMejor()` in the geometry IIFE of `public/observatorio-polarizacion/index.html`. A tie list under the chart is one more element.
