@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "public/observatorio-polarizacion/index.html",
-      "motivo": "Geometría: vista Todos, cabecera blanca y pliegue al hacer scroll",
-      "desde": "2026-11-19T21:47:06.665Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "Entrada del changelog: vista Todos y cabecera",
       "desde": "2026-11-19T21:47:10.157Z"
