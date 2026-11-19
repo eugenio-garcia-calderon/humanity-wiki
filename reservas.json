@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "public/observatorio-polarizacion/index.html",
-      "motivo": "Tabla: columna Todos los temas; botón del menú «Todos los temas»",
-      "desde": "2026-11-19T23:12:41.237Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "Entrada del changelog: tabla y botón",
       "desde": "2026-11-19T23:12:44.228Z"
