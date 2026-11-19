@@ -23,6 +23,12 @@
       "ruta": "memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md",
       "motivo": "Estrategia",
       "desde": "2026-11-19T21:06:03.494Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/CLAUDE.md",
+      "motivo": "Estrategia",
+      "desde": "2026-11-19T21:06:06.307Z"
     }
   ]
 }
