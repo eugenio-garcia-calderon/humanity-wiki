@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "public/observatorio-polarizacion/index.html",
+      "motivo": "Orden izquierda-derecha de los aspectos",
+      "desde": "2026-11-19T19:36:53.104Z"
+    }
+  ]
 }
