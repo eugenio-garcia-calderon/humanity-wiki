@@ -10,7 +10,7 @@ import { ponerMarca, ponerNota, ponerRespuesta, useEstrategia, type DatosEstrate
 
 const ANCHO = 236, ALTO = 60, SEP_X = 40, PASO_Y = 70, MARGEN = 12;
 
-const TIPO: Record<TipoNodo, string> = { meta: 'Meta', hito: 'Hito', decision: 'Decisión', opcion: 'Opción', supuesto: 'Supuesto', regla: 'Reglas' };
+const TIPO: Record<TipoNodo, string> = { meta: 'Meta', hito: 'Hito', decision: 'Decisión', opcion: 'Opción', paso: 'Paso', supuesto: 'Supuesto', regla: 'Reglas' };
 const ESTADO: Record<EstadoNodo, { n: string; caja: string; punto: string }> = {
   ahora: { n: 'Ahora', caja: 'border-teal-500 bg-teal-50', punto: 'bg-teal-500' },
   elegida: { n: 'Elegida', caja: 'border-emerald-700 bg-emerald-100', punto: 'bg-emerald-700' },
@@ -122,9 +122,15 @@ function Detalle({ n, d, alIr }: { n: NodoEstrategia; d: DatosEstrategia; alIr: 
         </div>
       )}
       {n.borrador && <BorradorCorreo key={n.id} b={n.borrador} />}
+      {n.descarta && (
+        <div className="mt-3 rounded-lg border border-rose-200 bg-rose-50 p-3">
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-rose-800">Qué la descarta</h4>
+          <p className="mt-1 text-sm text-slate-800">{n.descarta}</p>
+        </div>
+      )}
       {hs.length > 0 && (
         <div className="mt-4">
-          <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">{n.tipo === 'decision' ? 'Opciones' : 'Dentro'}</h4>
+          <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">{n.tipo === 'decision' ? 'Opciones' : hs.every(h => h.tipo === 'paso' || h.titulo[1] === ' ') ? 'Pasos' : 'Dentro'}</h4>
           <ul className="mt-1 space-y-0.5">{hs.map(h => (
             <li key={h.id}><Button variant="ghost" onClick={() => alIr(h.id)} className="w-full justify-start gap-2 px-1.5 py-1 text-left text-sm font-normal normal-case tracking-normal text-slate-800">
               <span className={cn('h-2 w-2 shrink-0 rounded-full', h.estado ? ESTADO[h.estado].punto : 'bg-slate-300')} /><span className={cn('flex-1', h.estado === 'descartada' && 'line-through')}>{h.titulo}</span>

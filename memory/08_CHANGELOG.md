@@ -12955,3 +12955,11 @@ Comprobado en un navegador de pruebas (escritorio y móvil) contra el servidor d
 Las respuestas de Eugenio quedan escritas en el árbol («Ya decidido»). La puerta de la reforma pasa a ser «Reforma profunda del Twizy 80», con lo leído en el Manual de Reformas para la categoría L (códigos 8.51, 4.2 y 2.3; leída la revisión 3, no la 7 vigente), las medidas del Twizy y dos cajas nuevas: conservar o alargar la batalla, y la prueba del antes y el después. La puerta del triciclo pasa a «Triciclo artesanal (L5e) con ruedas traseras gemelas»: cuatro ruedas en el suelo que cuentan como tres, con la resolución de 24-9-2025 de fabricación artesanal (hasta 10 al año, sin tope de potencia). La homologación individual como cuadriciclo queda de reserva. Las dos puertas fuertes llevan su borrador de consulta, listo para copiar.
 
 Las respuestas a las preguntas se guardan ahora por el texto de la pregunta, no por su número.
+
+## 2026-11-19 · Estrategia: tercera ronda, pasos y criterio de descarte por puerta
+
+> «He respondido a las diferentes cuestiones que me has puesto en el hito 1, así que explora y avanza las temáticas de cada uno de ellos… despliégamelo para saber cuáles son los siguientes pasos en cada uno de ellos para ir descartando»
+
+Las marcas y respuestas de Eugenio se leyeron de su navegador y quedan escritas en el árbol como «Ya decidido», sin cifras personales. Cada puerta legal del hito 1 tiene ahora sus pasos numerados y una caja «Qué la descarta».
+
+Novedades de contenido: puerta nueva «Matricularlo como prototipo» (artículo 5.2 del Real Decreto 750/2010); la homologación individual como cuadriciclo la puede pedir el titular y la Orden PJC/528/2026 deja doce requisitos fuera; la homologación individual como turismo lleva los choques con un código cuya definición para turismos no se pudo leer; las placas rojas sólo valen para trayectos autorizados; matricular en otro país no es un atajo (artículo 6.4); Neotec 2026 con sus cifras. Nueva decisión «¿A nombre de quién: tú o una sociedad fabricante?» y el tope pasa a ser por etapas. Tres borradores de consulta: ingeniero de reformas, servicio técnico y DGT.
