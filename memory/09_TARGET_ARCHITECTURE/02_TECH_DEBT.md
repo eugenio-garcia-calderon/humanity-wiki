@@ -1067,3 +1067,12 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **Geometry test: small accessibility leftovers** (2026-11-19): focus lost when the delete confirmation hides the focused button (~15 min); required fields without «(obligatorio)» (~10 min); slider track colours 1.4–2.3:1 as non-text contrast (~30 min if the team reads it as required); topic chips do not wrap on desktop and have no scroll cue (~30 min).
 - **Geometry test: colour rule** (2026-11-19): the page is static and defines its own colour variables; CLAUDE.md «Forbidden» item 5 names `src/components/ui/`. Needs a decision on whether static test pages are in scope.
 - **Geometry test: consent wording order** (2026-11-19): the legal text starts with the privacy policy and puts the newsletter in the middle. Changing its order changes the stored legal text, so it needs Eugenio's approval and a new `texto_consentimiento` version.
+
+## 2026-11-19 — Geometry "best per aspect" view: shortcuts taken
+
+- **Tie names are visible only on hover, tap or focus.** The chart says "N empatan", so a printed or screenshot reader cannot see who tied. A list under the chart: ~30 min; costs a few lines per topic on phones.
+- **No written posture per party.** The tooltip shows the party's value and the generic text of the level it reaches, labelled as such. Showing what a party says needs one written posture per party and aspect (9 × 64): content work for Eugenio.
+- **Role conflict in the new points.** The points use `role="button"` inside an SVG with `role="img"`, the same pattern the aspect controls already use. Not tested with NVDA or VoiceOver: ~1 h to check.
+- **The view is not in the shared link.** `guardarURL` keeps topic and party selection, not this view: ~15 min.
+- **The name is hard to read at first glance.** "Déjalo de lo mejor de cada uno" is Eugenio's wording; a reviewer suggested "Lo mejor de cada partido". His call.
+- **Two phrases for the same idea** ("todos los aspectos" in the level list, "todo el tema" in the topic list). Unify: ~10 min.

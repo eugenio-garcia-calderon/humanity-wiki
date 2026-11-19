@@ -2386,3 +2386,10 @@ They change saved designs' numbers on purpose.
 - Emails sit in plain text in `figuras_geometria` until the figure is deleted. Backups keep them until rotation.
 - The results email is sent only when a provider is configured (`hayCorreo()`). The production provider is not verified from the sandbox.
 - Cost to change later: a review queue, about 1 hour (uses `oculta`). Owned figures (edit or delete from an account), about 2 hours: the table has no owner column yet, so it needs a migration.
+
+## 2026-11-19 — Geometry "best per aspect" view: all nine parties, ties shown as a count
+
+**Context**: Eugenio asked to replace "Lo mejor de cada uno" with a view that, for the selected topic, shows per aspect only the party closest to the ideal circle (value 10), in that party's colour, with a hover that explains it.
+**Chosen**: the candidates are all nine parties, whatever the party chips say. Per aspect the highest value wins. Ties draw a grey dot labelled with the number of tied parties; names appear on hover, tap or focus. The chips are disabled and dimmed while the view is on. The tooltip gives the value, the names and the level text, and says the 10 is this observatory's rating. The dashed line joins the best values with straight segments, so it does not read as one party's figure.
+**Alternatives**: respect the selected chips (rejected: the default selection hides five parties, and the question is who is closest to the ideal); one coloured dot per tied party (rejected for now: up to nine colours on one point, about 1 h to lay out); names listed under the chart (deferred: several extra lines per topic on phones); per-party written postures (no such text exists in the data; it is content work for Eugenio, not code).
+**Cost of switching later**: small. Aggregation is `mejores()` and drawing is `puntoMejor()` in the geometry IIFE of `public/observatorio-polarizacion/index.html`. A tie list under the chart is one more element.

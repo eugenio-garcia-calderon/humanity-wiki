@@ -985,6 +985,13 @@ footer p{margin:0;max-width:70ch}
 .geo-partidos .geo-chips{display:flex;flex-wrap:wrap;gap:6px}
 .geo-partidos .geo-chip{width:100%;justify-content:flex-start;border-radius:12px;min-height:38px;font-size:13.5px}
 .geo-partidos .geo-chip.mini{width:calc(50% - 3px);justify-content:center;min-height:32px;font-size:12px}
+.geo-mejor-btn{width:100%;justify-content:center;text-align:center;font-size:13px}
+.geo-nota{font-size:12.5px;line-height:1.45;color:var(--muted);margin:0 2px}
+.geo-partidos .geo-chip:disabled{opacity:.4;cursor:not-allowed}
+.geo-mejor{outline:none}
+.geo-mejor .halo{opacity:0}
+.geo-mejor:focus .halo{opacity:1}
+@media (max-width:1000px){.geo-partidos.en-mejor #geo-partidos-t,.geo-partidos.en-mejor #geo-chips{display:none}}
 @media (max-width:1000px){
   .geo{grid-template-columns:minmax(0,1fr);row-gap:12px}
   .geo-partidos{position:static;display:block;padding:10px}
@@ -1310,11 +1317,12 @@ footer p{margin:0;max-width:70ch}
     <div class="geo-temas" id="geo-tema" role="tablist" aria-label="Elige un tema"></div>
     <div class="geo-chips-row">
       <button class="tbtn" id="geo-ideal" aria-pressed="true">Círculo ideal</button>
-      <button class="tbtn" id="geo-env" aria-pressed="false">Lo mejor de cada uno</button>
     </div>
   </div>
   <div class="geo">
     <aside class="geo-partidos" aria-labelledby="geo-partidos-t">
+      <button class="tbtn geo-mejor-btn" id="geo-mejor" aria-pressed="false">Déjalo de lo mejor de cada uno</button>
+      <p class="geo-nota" id="geo-mejor-nota" hidden>Por cada aspecto, el punto marca la nota más alta entre los nueve partidos. Si empatan, el punto es gris y dice cuántos; pasa el ratón o toca el punto para ver quiénes son. El círculo ideal es la propuesta de esta página, no la de ningún partido. La línea discontinua une esos mejores valores.</p>
       <p class="sel-k" id="geo-partidos-t">Partidos</p>
       <div class="geo-chips" id="geo-chips"></div>
     </aside>
@@ -1333,7 +1341,7 @@ footer p{margin:0;max-width:70ch}
   <div class="geo-detalle"><aside class="geo-side" aria-label="Detalle del tema"><div class="geo-panel" id="geo-panel" aria-live="polite"></div></aside></div>
   <details class="geo-how">
     <summary>Cómo se lee y de dónde salen las formas</summary>
-    <p>Cada radio es un aspecto del problema, y cada uno de los tres círculos es un nivel. El primero es <b>lo básico</b>: lo mínimo que cualquier gobierno debería garantizar en ese aspecto. El segundo, <b>lo intermedio</b>. El tercero, el círculo ideal, es <b>lo avanzado</b>. Pasa el ratón (o toca) por un círculo para leer qué significa en todo el tema, y por uno de sus puntos para leer qué es lo básico o lo avanzado en ese aspecto concreto y qué partidos llegan.</p>
+    <p>Cada radio es un aspecto del problema, y cada uno de los tres círculos es un nivel. El primero es <b>lo básico</b>: lo mínimo que cualquier gobierno debería garantizar en ese aspecto. El segundo, <b>lo intermedio</b>. El tercero, el círculo ideal, es <b>lo avanzado</b>. Pasa el ratón (o toca) por un círculo para leer qué significa en todo el tema, y por uno de sus puntos para leer qué es lo básico o lo avanzado en ese aspecto concreto y qué partidos llegan. Con «Déjalo de lo mejor de cada uno», cada punto marca la nota más alta de su aspecto y los partidos de la lista se apagan.</p>
     <p>La distancia de cada partido al centro mide hasta dónde llega su propuesta: 0, lo ignora o lo rechaza; de 4 a 6 cubre lo básico; de 7 a 9, lo intermedio; 10, lo avanzado. Por debajo de 4 no llega a lo básico: es una pata coja.</p>
     <p>Los radios opuestos son dilemas, y por eso un test los resume en un punto. Los radios vecinos se complementan: si un partido cuida los dos, el borde que los une se curva y sigue el círculo; si cuida uno y abandona el otro, el borde es una recta y aparece una arista. Esas aristas son donde chocan los partidos.</p>
     <p>Las puntuaciones son una valoración de este observatorio a partir de programas, planes y votaciones publicados hasta noviembre de 2026, con las fuentes al final de la página. No son una encuesta ni una medida oficial, y de algunos partidos hay menos información en algunos aspectos. Son discutibles y corregibles: si un dato está mal, se cambia.</p>
@@ -3313,7 +3321,7 @@ const ILUS = {
 
   const KEYS = Object.keys(TEMAS);
   const DEF = ["pp", "psoe", "vox", "fa"];
-  const st = { tema: "inm", sel: new Set(DEF), foco: null, eje: null, ideal: true, env: false, ring: null, yo: false };
+  const st = { tema: "inm", sel: new Set(DEF), foco: null, eje: null, ideal: true, mejor: false, ring: null, yo: false };
   // Lo que llega en la dirección: ?tema=vivienda&p=pp,psoe&foco=pp
   const q = new URLSearchParams(location.search);
   const qt = q.get("tema");
@@ -3341,6 +3349,33 @@ const ILUS = {
     return antes !== K;
   }
 
+  // Por aspecto, el valor más alto entre los nueve partidos (el más cercano al ideal) y quién lo tiene
+  function mejores(t) {
+    return t.ejes.map((_, i) => {
+      const max = Math.max(...PARTIDOS.map((p) => t.v[p.k][i]));
+      return { i, max, quien: PARTIDOS.filter((p) => t.v[p.k][i] === max) };
+    });
+  }
+  // Un solo partido: su color y su nombre. Empate: gris y el número de empatados (los nombres salen al pasar o tocar). Nadie llega a lo básico: gris, sin texto
+  const unir = (ns) => (ns.length <= 2 ? ns.join(" y ") : ns.slice(0, -1).join(", ") + " y " + ns[ns.length - 1]);
+  function puntoMejor(m, n, t) {
+    const [px, py] = P(ang(m.i, n), rr(m.max));
+    const empate = m.quien.length > 1, nada = m.max === 0;
+    const col = empate || nada ? "#EDEBE6" : m.quien[0].c;
+    const texto = nada ? "" : empate ? `${m.quien.length} empatan` : m.quien[0].n;
+    const quienes = nada ? "ningún partido llega a lo básico" : `${unir(m.quien.map((p) => p.n))}, ${m.max} de 10`;
+    // La etiqueta va hacia dentro del círculo, para no chocar con los nombres de los aspectos
+    const L = Math.hypot(CX - px, CY - py) || 1, ux = (CX - px) / L, uy = (CY - py) / L;
+    const lx = px + ux * 16 * K, ly = py + uy * 16 * K + 5 * K;
+    const anc = ux > 0.25 ? "start" : ux < -0.25 ? "end" : "middle";
+    // Zona de toque de unos 40 unidades de radio (44 px o más en móvil), y un halo dorado que solo aparece con el teclado
+    return `<g class="geo-mejor" data-mi="${m.i}" tabindex="0" role="button" aria-label="Nota más alta en ${t.ejes[m.i].n}: ${quienes}"><circle cx="${r1(px)}" cy="${r1(py)}" r="${r1(40 * K)}" fill="transparent"/>`
+      + `<circle class="halo" cx="${r1(px)}" cy="${r1(py)}" r="${r1(15 * K)}" fill="none" stroke="${ORO}" stroke-width="2.5" pointer-events="none"/>`
+      + `<circle class="mdot" cx="${r1(px)}" cy="${r1(py)}" r="${r1(8 * K)}" fill="${col}" stroke="#0C0F14" stroke-width="3"/>`
+      + (texto ? `<text x="${r1(lx)}" y="${r1(ly)}" text-anchor="${anc}" font-family="Archivo, sans-serif" font-weight="600" font-size="${r1(14 * K)}" fill="${col}" paint-order="stroke" stroke="#0C0F14" stroke-width="4" pointer-events="none">${texto}</text>` : "")
+      + `</g>`;
+  }
+
   function dibujar() {
     medir();
     const t = T(), ejes = t.ejes, n = ejes.length, step = (2 * Math.PI) / n;
@@ -3354,15 +3389,16 @@ const ILUS = {
     UMBRAL.forEach((v, k) => {
       s += `<text x="${CX + 10}" y="${r1(CY - rr(v) - 6)}" font-family="IBM Plex Mono, monospace" font-size="${r1(12.5 * K)}" letter-spacing="1" fill="${k === 2 ? ORO : t.c}" paint-order="stroke" stroke="#0C0F14" stroke-width="4">${k + 1} · ${NIV[k].replace("Lo ", "").toUpperCase()}</text>`;
     });
-    if (st.env) {
-      const env = ejes.map((_, i) => Math.max(...PARTIDOS.map((p) => t.v[p.k][i])));
-      s += `<path d="${dPath(puntos(env))}" fill="none" stroke="#EDEBE6" stroke-opacity=".8" stroke-width="2" stroke-dasharray="7 6"/>`;
+    if (st.mejor) {
+      // La línea discontinua une los mejores valores con segmentos rectos: no es la figura de ningún partido
+      s += `<path d="${dPath(mejores(t).map((m) => P(ang(m.i, n), rr(m.max))))}" fill="none" stroke="#EDEBE6" stroke-opacity=".6" stroke-width="2" stroke-dasharray="7 6"/>`;
     }
     if (st.ideal) {
       const [x, y] = P(ang(1, n) + step * 0.62, R + 12);
       s += `<text x="${r1(x)}" y="${r1(y)}" font-family="IBM Plex Mono, monospace" font-size="${r1(14 * K)}" fill="${ORO}" letter-spacing="1">CÍRCULO IDEAL</text>`;
     }
-    const orden = PARTIDOS.filter((p) => st.sel.has(p.k)).sort((a, b) => (a.k === st.foco) - (b.k === st.foco));
+    // En «lo mejor de cada uno» no se dibuja ningún partido: se miran los nueve a la vez
+    const orden = st.mejor ? [] : PARTIDOS.filter((p) => st.sel.has(p.k)).sort((a, b) => (a.k === st.foco) - (b.k === st.foco));
     orden.forEach((p, idx) => {
       const v = t.v[p.k], on = !st.foco || st.foco === p.k, fo = st.foco === p.k;
       s += `<g class="geo-shape" data-p="${p.k}" style="opacity:${st.yo ? 0.5 : on ? 1 : 0.18};--d:${idx * 55}ms"><path d="${dPath(puntos(v))}" fill="${p.c}" fill-opacity="${fo ? 0.26 : 0.1}" stroke="${p.c}" stroke-width="${fo ? 3.2 : 2.2}" stroke-linejoin="round"/>`;
@@ -3401,6 +3437,8 @@ const ILUS = {
         });
       }
     }
+    // Los puntos de «lo mejor» van por encima de la capa de lectura de los círculos: en el ideal (10) caen sobre el mismo sitio
+    if (st.mejor) mejores(t).forEach((m) => { s += puntoMejor(m, n, t); });
     const fs = 20 * K;
     ejes.forEach((e, i) => {
       const a = ang(i, n), [x, y] = P(a, R + 26), c = Math.cos(a), sn = Math.sin(a);
@@ -3412,8 +3450,13 @@ const ILUS = {
       s += `<g class="geo-ax" data-ax="${i}" tabindex="0" role="button" aria-label="${e.n}"><rect x="${r1(bx)}" y="${r1(y0 - 22 * K)}" width="${r1(w)}" height="${r1(54 * K)}" rx="10" fill="${act ? "#1B2230" : "transparent"}" stroke="${act ? t.c : "transparent"}"/>`
         + e.l.map((l, j) => `<text x="${r1(x)}" y="${r1(y0 + j * 23 * K)}" text-anchor="${anchor}" font-family="Archivo, sans-serif" font-size="${r1(fs)}" font-weight="${j ? 400 : 600}" fill="${act ? t.c : j ? "#C9CCD3" : "#EDEBE6"}">${l}</text>`).join("") + `</g>`;
     });
-    svg.innerHTML = `<title id="geo-svg-t">Figura de cada partido sobre los ${PALABRA[n] || n} aspectos de ${t.n.toLowerCase()}, con tres círculos: lo básico, lo intermedio y lo avanzado</title>` + s;
+    const titulo = st.mejor
+      ? `Lo más cercano al círculo ideal en cada uno de los ${PALABRA[n] || n} aspectos de ${t.n.toLowerCase()}, con tres círculos: lo básico, lo intermedio y lo avanzado`
+      : `Figura de cada partido sobre los ${PALABRA[n] || n} aspectos de ${t.n.toLowerCase()}, con tres círculos: lo básico, lo intermedio y lo avanzado`;
+    svg.innerHTML = `<title id="geo-svg-t">${titulo}</title>` + s;
     $("#geo-cap").textContent = t.cap;
+    $("#geo-mejor-nota").hidden = !st.mejor;
+    $(".geo-partidos").classList.toggle("en-mejor", st.mejor);
   }
 
   /* ---- Lo que se lee al pasar por un círculo o por un punto ---- */
@@ -3428,6 +3471,14 @@ const ILUS = {
     return `<span class="lbl" style="color:${colorNivel(k)}">${NIV[k]} · radio ${i + 1}</span><h5>${e.n}</h5><p>${e.niv[k]}</p>`
       + `<p class="who">${ya.length ? "Llegan: " + etiquetas(ya) : "Ningún partido llega todavía."}</p>`;
   }
+  function htmlMejor(i) {
+    const t = T(), e = t.ejes[i], m = mejores(t)[i], lvl = nivelDe(m.max); // 0: no llega a lo básico; 1 a 3: círculo
+    const cab = `<span class="lbl" style="color:${lvl ? colorNivel(lvl - 1) : "#EDEBE6"}">Nota más alta</span><h5>${e.n}</h5>`;
+    if (!lvl) return cab + `<p class="who">Ningún partido llega a lo básico en este aspecto.</p>`;
+    // Lo que dice el nivel es una definición general, igual para todos los partidos: se separa de la nota del partido
+    return cab + `<p class="who">${etiquetas(m.quien)} · ${m.max} de 10 <small>(valoración de este observatorio)</small></p>`
+      + `<p><b>Qué significa «${NIV[lvl - 1]}» en este aspecto, para cualquier partido:</b> ${e.niv[lvl - 1]}</p>`;
+  }
   function mostrar(clave, html, cx, cy) {
     if (clave !== tipClave) { tip.innerHTML = html; tipClave = clave; }
     tip.hidden = false;
@@ -3441,6 +3492,8 @@ const ILUS = {
   const centro = (el) => { const b = el.getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; };
   function leer(e) {
     if (st.yo) return false;
+    const mj = e.target.closest("[data-mi]");
+    if (mj) { const [x, y] = centro(mj.querySelector(".mdot")); mostrar(`m${st.tema}-${mj.dataset.mi}`, htmlMejor(+mj.dataset.mi), x, y); return true; }
     const lv = e.target.closest("[data-lk]");
     if (lv) { const [x, y] = centro(lv.querySelector(".dot")); mostrar(`p${lv.dataset.li}-${lv.dataset.lk}`, htmlPunto(+lv.dataset.li, +lv.dataset.lk), x, y); return true; }
     const rg = e.target.closest("[data-ring]");
@@ -3451,9 +3504,12 @@ const ILUS = {
   svg.addEventListener("pointerout", (e) => {
     if (e.pointerType === "touch") return;
     const to = e.relatedTarget;
-    if (to && to.closest && (to.closest("[data-lk]") || to.closest("[data-ring]"))) return;
+    if (to && to.closest && (to.closest("[data-lk]") || to.closest("[data-ring]") || to.closest("[data-mi]"))) return;
     ocultar();
   });
+  // Con teclado, al enfocar un punto de «lo mejor» se lee lo mismo que con el ratón
+  svg.addEventListener("focusin", (e) => { if (e.target.closest && e.target.closest("[data-mi]")) leer(e); });
+  svg.addEventListener("focusout", (e) => { if (e.target.closest && e.target.closest("[data-mi]")) ocultar(); });
   window.addEventListener("resize", () => { ocultar(); if (medir()) { dibujar(); marcar(st.ring); } });
 
   /* ---- Dibujar tu figura: arrastrar sobre cada radio ---- */
@@ -3515,6 +3571,7 @@ const ILUS = {
     const rk = $("#geo-yo-rank"); if (rk) rk.innerHTML = htmlRank();
   }
   function modoYo(on) {
+    if (on && st.mejor) { st.mejor = false; $("#geo-mejor").setAttribute("aria-pressed", "false"); }
     st.yo = on; st.foco = null; st.eje = null; st.ring = null;
     stage.classList.toggle("yo", on);
     const b = $("#geo-yo"); b.setAttribute("aria-pressed", String(on)); b.querySelector("span").textContent = on ? "Terminar mi figura" : "Dibuja tu figura";
@@ -3640,6 +3697,8 @@ const ILUS = {
     const yo = b.hasAttribute("data-myo"), p = b.dataset.mp;
     if (yo) { if (!st.yo) modoYo(true); }
     else if (st.yo) modoYo(false);
+    // Elegir un partido sale de «lo mejor»: su ficha y su dibujo son los de siempre
+    if (p && st.mejor) setMejor(false);
     cambiarTema(b.dataset.mt);
     if (p) { st.sel.add(p); st.foco = p; todo(); guardarURL(); }
     stage.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
@@ -3681,8 +3740,9 @@ const ILUS = {
   });
 
   function chips() {
-    $("#geo-chips").innerHTML = PARTIDOS.map((p) => `<button class="geo-chip" data-k="${p.k}" style="--pc:${p.c}" aria-pressed="${st.sel.has(p.k)}"><i></i>${p.n}</button>`).join("")
-      + `<button class="geo-chip mini" data-todos>Todos</button><button class="geo-chip mini" data-ninguno>Ninguno</button>`;
+    const off = st.mejor ? " disabled" : ""; // con la vista activa, los partidos no cambian el dibujo
+    $("#geo-chips").innerHTML = PARTIDOS.map((p) => `<button class="geo-chip" data-k="${p.k}" style="--pc:${p.c}" aria-pressed="${st.sel.has(p.k)}"${off}><i></i>${p.n}</button>`).join("")
+      + `<button class="geo-chip mini" data-todos${off}>Todos</button><button class="geo-chip mini" data-ninguno${off}>Ninguno</button>`;
   }
   function cabecera() {
     $("#geometrias").style.setProperty("--tc", T().c);
@@ -3724,7 +3784,7 @@ const ILUS = {
     else { const k = b.dataset.k; if (st.sel.has(k)) { st.sel.delete(k); if (st.foco === k) st.foco = null; } else st.sel.add(k); }
     todo(); guardarURL();
   });
-  const enfocar = (k) => { if (st.yo) modoYo(false); st.foco = st.foco === k ? null : k; st.eje = null; if (k) st.sel.add(k); todo(); guardarURL(); };
+  const enfocar = (k) => { if (st.yo) modoYo(false); if (st.mejor) setMejor(false); st.foco = st.foco === k ? null : k; st.eje = null; if (k) st.sel.add(k); todo(); guardarURL(); };
   const eje = (i) => { st.eje = st.eje === i ? null : i; st.foco = null; ocultar(); dibujar(); panel(); };
   svg.addEventListener("click", (e) => {
     if (st.yo) return; // in drawing mode the pointer draws (pointerdown above)
@@ -3749,7 +3809,14 @@ const ILUS = {
   pn.addEventListener("input", (e) => { const r = e.target.closest("[data-yi]"); if (r) fijar(+r.dataset.yi, +r.value); });
   $("#geo-yo").addEventListener("click", () => modoYo(!st.yo));
   $("#geo-ideal").addEventListener("click", (e) => { st.ideal = !st.ideal; e.currentTarget.setAttribute("aria-pressed", String(st.ideal)); dibujar(); marcar(st.ring); });
-  $("#geo-env").addEventListener("click", (e) => { st.env = !st.env; e.currentTarget.setAttribute("aria-pressed", String(st.env)); dibujar(); marcar(st.ring); });
+  // «Déjalo de lo mejor de cada uno»: el dibujo pasa a mostrar el partido más cercano al ideal en cada aspecto
+  function setMejor(on) {
+    if (on && st.yo) modoYo(false);
+    st.mejor = on; st.foco = null; ocultar();
+    $("#geo-mejor").setAttribute("aria-pressed", String(on));
+    todo(); marcar(st.ring);
+  }
+  $("#geo-mejor").addEventListener("click", () => setMejor(!st.mejor));
   API.geoForma = (s) => geom(s, 410, 372, 226); // usado por la tarjeta de la portada
   marcarTab(false);
   todo(); propuestas();

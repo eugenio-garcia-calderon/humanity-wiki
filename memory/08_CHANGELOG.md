@@ -12859,3 +12859,14 @@ Pendiente: grupo 5 (élite), Europa, Mundo, y la búsqueda de ingresos.
 - Fixed before merge: `figuras.ts` used `import.meta.url` at module level. The CJS production bundle (`dist/server.cjs`) empties it, so `createRequire(undefined)` would have stopped the server at boot. Now the paths come from `process.cwd()`, as in `sitios.ts` and `documentos.ts`. The three `import.meta` warnings still in the build come from front-end files that already existed.
 - Not verified: production configuration (`APP_URL` defaults to `http://localhost:3000`, so emails and links need the production value), the real email provider, screen readers, a real phone, and the installed app's service worker.
 - Pending decisions for Eugenio: see 09_TARGET_ARCHITECTURE/02_TECH_DEBT.md, the entries dated 2026-11-19.
+
+## 2026-11-19 — Geometry: "Déjalo de lo mejor de cada uno" (best party per aspect)
+
+- Eugenio asked to remove "Lo mejor de cada uno" and add "Déjalo de lo mejor de cada uno" above the party list. With the view on, the selected topic shows, per aspect, one dot in the colour of the party closest to the ideal circle (value 10), labelled with its name. Hover, tap or keyboard focus shows the party, its value out of 10 and the text of the level it reaches.
+- The party chips are disabled and dimmed while the view is on: the picture compares all nine parties. Choosing a party from the matrix or the panel leaves the view.
+- Ties: the dot is grey and labelled with the number of tied parties; the names appear on hover, tap or focus. No maximum (all zero): grey dot, no label.
+- Independent review (read-only, screenshots and code). Applied: leaving the view on party choice, a tooltip that separates the party's rating from the generic level text, short tie labels, a hit area of about 40 units of radius, a gold focus halo, straight segments for the dashed line, updated help text, party list hidden on phones in this view. Left in tech debt.
+- Fixed during testing: the dot on the ideal circle (10) was covered by the ring reader layer and could not be hovered. It is now drawn above that layer.
+- Checked locally with automated Chrome, desktop 1280×900 and phone 390 px, all ten topics: 152 of 153 checks pass. The remaining one is console noise from the test server: 404 for `/api/textos` and `/api/auth/me` (no API there) and Google Fonts blocked by the test. `npm run build` passes.
+- Not verified: screen readers, a real phone, the installed app (its service worker may serve the previous build; check with `?sw=off`), production.
+- Files: `public/observatorio-polarizacion/index.html` only.
