@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "src/server/modulos.ts",
+      "motivo": "Registrar el módulo figuras (test de geometría)",
+      "desde": "2026-11-19T16:25:14.059Z"
+    }
+  ]
 }
