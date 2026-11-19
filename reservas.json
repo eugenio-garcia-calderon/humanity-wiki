@@ -8,12 +8,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "memory/03_DECISIONS.md",
-      "motivo": "Estrategia",
-      "desde": "2026-11-19T21:06:00.490Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md",
       "motivo": "Estrategia",
       "desde": "2026-11-19T21:06:03.494Z"
