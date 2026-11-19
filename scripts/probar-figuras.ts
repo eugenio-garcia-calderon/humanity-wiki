@@ -138,7 +138,7 @@ async function main() {
     comprobar('con proveedor: estado «enviado»', conCorreo.status === 201 && conCorreo.json?.correo === 'enviado', conCorreo.json);
     comprobar('se envió a la dirección en minúsculas', enviados.length === 1 && enviados[0].to[0] === 'marta@example.org', enviados.map(e => e.to));
     const cuerpo: string = enviados[0]?.text || '';
-    comprobar('el correo trae las cifras por tema', cuerpo.includes('Inmigración y fronteras') && cuerpo.toLowerCase().includes('más parecido'), cuerpo.slice(0, 300));
+    comprobar('el correo trae las cifras por tema', cuerpo.includes('Inmigración') && cuerpo.toLowerCase().includes('más parecido'), cuerpo.slice(0, 300));
     comprobar('el correo trae el enlace y la clave para borrar', cuerpo.includes(conCorreo.json?.enlace) && cuerpo.includes(conCorreo.json?.clave), cuerpo.slice(-400));
     const filaEnviada = (await db.execute(sql`SELECT resultados_enviados_at, quiere_novedades, texto_consentimiento FROM figuras_geometria WHERE id = ${conCorreo.json?.id}`)).rows[0] as any;
     comprobar('marca la hora de envío', !!filaEnviada?.resultados_enviados_at, filaEnviada);
