@@ -96,6 +96,13 @@ Todas con clave primaria compuesta (`primaryKey({ columns: [...] })`), sin colum
 - **`memberships`**: vincula `user_id` con identificadores de Stripe (`stripe_customer_id`, `stripe_checkout_session_id`, `stripe_subscription_id`), `status`, `membership_type` (default `socio_regular`), fechas de inicio/fin.
 - **`stripe_events`**: registro idempotente de eventos de webhook procesados (`stripe_event_id` único) para evitar procesar el mismo evento dos veces.
 
+## Geometry test figures table (migration 0232)
+
+- **`figuras_geometria`**: figures people publish without an account at `/geometria-figura/`. Columns: `nombre` (2–40 characters, public), `puntuaciones` (jsonb, 64 integers 0–10), `correo` (optional; closed in the DB browser), `quiere_novedades` + `texto_consentimiento` (the exact consent text the person accepted), `clave_hash` (the delete key, stored only as a SHA-256 hash), `estado` (`publicada` | `oculta`), `resultados_enviados_at`.
+- This table stores no IP. The usage limit on its routes does, as on every route in the platform: `frenos` keeps the IP for two days, and `intentos_fallidos` keeps it for each failed attempt (wrong delete key). Both tables go into the daily off-site copy.
+- Deleting a figure removes its email from this table in the live database. A backup taken before the deletion keeps it until that backup is rotated; the rotation period is not verified.
+- The table is closed in the DB browser (`src/server/seguridad/transparencia.ts`).
+
 ## Recuento de filas actual (auditado el 2026-08-02)
 
 | Tabla | Filas |
