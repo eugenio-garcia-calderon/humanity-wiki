@@ -1,3 +1,22 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "public/geometria-figura/comun.js",
+      "motivo": "Test de figura: los aspectos en 0 no cuentan en el parecido (decisión de Eugenio, 2026-11-19)",
+      "desde": "2026-11-19T18:57:07.135Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "public/geometria-figura/index.html",
+      "motivo": "Test de figura: los aspectos en 0 no cuentan en el parecido (decisión de Eugenio, 2026-11-19)",
+      "desde": "2026-11-19T18:57:07.135Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "scripts/probar-figuras.ts",
+      "motivo": "Test de figura: los aspectos en 0 no cuentan en el parecido (decisión de Eugenio, 2026-11-19)",
+      "desde": "2026-11-19T18:57:07.135Z"
+    }
+  ]
 }
