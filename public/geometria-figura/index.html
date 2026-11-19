@@ -373,7 +373,8 @@ footer p{margin:0 0 8px;max-width:80ch}
 (function () {
 'use strict';
 
-var CLAVE_LOCAL = 'geometria-figura-v1';
+var CLAVE_LOCAL = 'geometria-figura-v2';
+var CLAVE_LOCAL_V1 = 'geometria-figura-v1';  // borrador con el orden antiguo de los aspectos (antes del 2026-11-19)
 var NS = 'http://www.w3.org/2000/svg';
 var D = null;   // datos.json: temas y partidos
 var G = window.Geometria;
@@ -427,6 +428,16 @@ function estadoValido(o) {
   return D.temas.every(function (t, i) {
     return Array.isArray(o.v[i]) && Array.isArray(o.m[i]) && o.v[i].length === t.ejes.length && o.m[i].length === t.ejes.length;
   });
+}
+// Convierte el borrador guardado con el orden antiguo. Si algo no encaja, se empieza de cero (como antes).
+function migrarLocal() {
+  try {
+    if (localStorage.getItem(CLAVE_LOCAL)) return;
+    var viejo = JSON.parse(localStorage.getItem(CLAVE_LOCAL_V1) || 'null');
+    if (!viejo || !Array.isArray(viejo.v) || !Array.isArray(viejo.m)) return;
+    localStorage.setItem(CLAVE_LOCAL, JSON.stringify(Object.assign({}, viejo, { v: G.aOrdenNuevo(viejo.v), m: G.aOrdenNuevo(viejo.m) })));
+    localStorage.removeItem(CLAVE_LOCAL_V1);
+  } catch (e) { /* sin almacenamiento o dato roto: no se migra y se empieza de cero */ }
 }
 function guardar() { try { localStorage.setItem(CLAVE_LOCAL, JSON.stringify(st)); } catch (e) { /* sin almacenamiento: se pierde al cerrar */ } }
 function cargar() {
@@ -915,6 +926,7 @@ function ruta() {
 /* ---------- Arranque ---------- */
 function iniciar(datos) {
   D = datos;
+  migrarLocal();
   st = cargar();
   if (!st.inicio) { st.inicio = Date.now(); guardar(); }
   $('#cargando').hidden = true;

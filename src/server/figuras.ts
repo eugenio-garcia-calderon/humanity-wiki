@@ -70,8 +70,15 @@ const nuevaClave = () => crypto.randomBytes(24).toString('base64url');
 const nuevoId = () => crypto.randomBytes(9).toString('base64url');
 const idValido = (v: unknown) => typeof v === 'string' && /^[A-Za-z0-9_-]{8,20}$/.test(v);
 
-/** Lo que una figura pública enseña: nunca el correo, ni la clave, ni la casilla. */
-const publica = (f: any) => ({ id: f.id, nombre: f.nombre, creada: f.created_at, puntuaciones: f.puntuaciones });
+/** Lo que una figura pública enseña: nunca el correo, ni la clave, ni la casilla.
+ *  Las figuras con `orden` 1 se publicaron cuando los aspectos tenían otra posición (antes del 2026-11-19):
+ *  se convierten al orden actual al leerlas. Las nuevas se guardan ya con `orden` 2 y no se tocan. */
+const publica = (f: any) => ({
+  id: f.id,
+  nombre: f.nombre,
+  creada: f.created_at,
+  puntuaciones: Number(f.orden) === 1 ? comun.aOrdenNuevo(f.puntuaciones) : f.puntuaciones,
+});
 
 /** El texto del correo de resultados, con las mismas cifras que la pantalla. */
 function textoResultados(nombre: string, r: any, enlace: string, clave: string): string {
@@ -144,8 +151,8 @@ export function registrarFiguras(app: Express, db: any) {
       const clave = nuevaClave();
       const textoCasilla = novedades ? textoConsentimiento('boletin', RESPONSABLE) : null;
       await db.execute(sql`
-        INSERT INTO figuras_geometria (id, nombre, puntuaciones, correo, quiere_novedades, texto_consentimiento, clave_hash)
-        VALUES (${id}, ${nombre}, ${JSON.stringify(b.puntuaciones)}::jsonb, ${correo}, ${novedades}, ${textoCasilla}, ${sha256(clave)})
+        INSERT INTO figuras_geometria (id, nombre, puntuaciones, correo, quiere_novedades, texto_consentimiento, clave_hash, orden)
+        VALUES (${id}, ${nombre}, ${JSON.stringify(b.puntuaciones)}::jsonb, ${correo}, ${novedades}, ${textoCasilla}, ${sha256(clave)}, 2)
       `);
       void ritmo(db, REGLAS.formulario, ipDe(req));
 
@@ -179,7 +186,7 @@ export function registrarFiguras(app: Express, db: any) {
       const pagina = Math.max(1, Math.min(10000, parseInt(String(req.query.pagina ?? '1'), 10) || 1));
       const total = (await db.execute(sql`SELECT count(*)::int AS n FROM figuras_geometria WHERE estado = 'publicada'`)).rows[0]?.n ?? 0;
       const filas = (await db.execute(sql`
-        SELECT id, nombre, puntuaciones, created_at FROM figuras_geometria
+        SELECT id, nombre, puntuaciones, orden, created_at FROM figuras_geometria
         WHERE estado = 'publicada'
         ORDER BY created_at DESC, id
         LIMIT ${TAMANO_PAGINA} OFFSET ${(pagina - 1) * TAMANO_PAGINA}
@@ -233,7 +240,7 @@ export function registrarFiguras(app: Express, db: any) {
     try {
       if (!idValido(req.params.id)) return res.status(404).json({ error: 'Esa figura no existe.' });
       const r = await db.execute(sql`
-        SELECT id, nombre, puntuaciones, created_at FROM figuras_geometria
+        SELECT id, nombre, puntuaciones, orden, created_at FROM figuras_geometria
         WHERE id = ${req.params.id} AND estado = 'publicada'
       `);
       if (!r.rows.length) return res.status(404).json({ error: 'Esa figura no existe o ya no está publicada.' });
