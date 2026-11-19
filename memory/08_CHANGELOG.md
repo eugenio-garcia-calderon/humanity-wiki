@@ -12890,6 +12890,17 @@ Pendiente: grupo 5 (élite), Europa, Mundo, y la búsqueda de ingresos.
 - Verified: `scripts/probar-figuras.ts` 54 of 54 against a throwaway database with migrations 0232 and 0233 applied (new section 8: old rows are converted, new rows keep their order, new publications are stored as orden 2); browser check of the observatorio, 152 of 153 (the remaining one is the known test-server console noise); browser check of both local migrations, 10 of 10; `npm run build` passes; `tsc --noEmit` clean; screenshot of the reordered hexagon checked.
 - Not verified: production database (the migration has not run there), the installed service worker (`?sw=off`), real phones, the classification itself (a judgement, see decision entry).
 - Files: `public/observatorio-polarizacion/index.html`, `public/geometria-figura/{comun.js,index.html,datos.json}`, `src/server/figuras.ts`, `drizzle/0233_figuras_orden.sql`, `scripts/probar-figuras.ts`.
+
+## 2026-11-19 — Geometry: best-party points explained, ties shown, levels moved under the chart
+
+- «Déjalo de lo mejor de cada uno»: hovering a best point shows a floating card with the posture that makes the aspect advanced. Clicking pins the card; «Ver más» opens the detail in the right column, «Volver a los tres círculos» restores the three level cards.
+- Ties: two or three tied parties show their names in their colours next to the point, and the dot is split into their colours (halves, thirds). Four or more keep the «N empatan» label.
+- Pinned card avoids covering other points: it tries above, below, then the sides, and stays clear of other dots and names. Its body lets clicks pass through; only «Ver más» and «Cerrar» catch them.
+- Level cards moved from the right column to a row under the chart and are named «Medidas básicas / intermedias / avanzadas». Hover on a card opens its aspect list as a layer that drops down without moving the page. The chart is larger and the right column is gone. The «CÍRCULO IDEAL» label inside the chart is removed.
+- Verified: browser interaction suite (kept outside the repo) 237 of 237, desktop and 390 px mobile; `tsc --noEmit` clean; `npm run build` passes; screenshots of the new layout, the pinned card and the drop-down checked.
+- Not verified: the installed app (service worker, `?sw=off`), real phones, four-way ties.
+- Files: `public/observatorio-polarizacion/index.html`.
+
 ## 2026-11-19 · Vía delantera hasta 0,90 m
 
 > «Permite que la vía delantera y la vía trasera puedan tener como mínimo 0,9 metros. Ahora no pueden bajar de 1,4 metros»

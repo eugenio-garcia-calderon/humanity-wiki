@@ -1070,7 +1070,8 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 
 ## 2026-11-19 — Geometry "best per aspect" view: shortcuts taken
 
-- **Tie names are visible only on hover, tap or focus.** The chart says "N empatan", so a printed or screenshot reader cannot see who tied. A list under the chart: ~30 min; costs a few lines per topic on phones.
+- **Tie names were visible only on hover, tap or focus (resolved 2026-11-19).** Two and three tied parties now show their names in their colours next to the point, and the dot is split into their colours. Four or more still read "N empatan" and need the same treatment or a list.
+- **Per-aspect party postures are not in the data (2026-11-19).** The floating card shows what the level means for the aspect (the same for every party) and the detail column shows each party's topic-level posture. A posture per party and per aspect needs content from Eugenio, not code.
 - **No written posture per party.** The tooltip shows the party's value and the generic text of the level it reaches, labelled as such. Showing what a party says needs one written posture per party and aspect (9 × 64): content work for Eugenio.
 - **Role conflict in the new points.** The points use `role="button"` inside an SVG with `role="img"`, the same pattern the aspect controls already use. Not tested with NVDA or VoiceOver: ~1 h to check.
 - **The view is not in the shared link.** `guardarURL` keeps topic and party selection, not this view: ~15 min.
