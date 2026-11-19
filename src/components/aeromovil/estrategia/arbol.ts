@@ -12,10 +12,12 @@
 
 export type TipoNodo = 'meta' | 'hito' | 'decision' | 'opcion' | 'supuesto' | 'regla';
 /** Where the option stands today, by the research — not Eugenio's own mark, which is stored apart. */
-export type EstadoNodo = 'ahora' | 'prometedora' | 'por-explorar' | 'dudosa' | 'descartada' | 'despues';
+export type EstadoNodo = 'ahora' | 'elegida' | 'prometedora' | 'por-explorar' | 'dudosa' | 'descartada' | 'despues';
 export type Comprobado = 'leido' | 'por-confirmar';
 
 export interface Fuente { titulo: string; url: string }
+/** A message ready to send: the next small step, already written. Placeholders in [brackets]. */
+export interface Borrador { para: string; asunto: string; cuerpo: string }
 
 export interface NodoEstrategia {
   id: string;
@@ -36,6 +38,9 @@ export interface NodoEstrategia {
   /** what Claude needs Eugenio to answer to go further on this node */
   preguntas?: string[];
   fuentes?: Fuente[];
+  borrador?: Borrador;
+  /** what Eugenio has already answered or decided on this node, with its date */
+  decidido?: string[];
 }
 
 const F = {
@@ -46,6 +51,9 @@ const F = {
   manual: { titulo: 'Manual de Reformas de Vehículos (revisión 3)', url: 'https://www.aeca-itv.com/wp-content/uploads/2017/06/ManualReformasVehiculosRev3.pdf' },
   inta: { titulo: 'INTA: solicitud de homologación individual', url: 'https://www.inta.es/export/sites/default/.galleries/Galeria-PDF-Plataformas/Solicitud-de-HIndividual-V26.pdf' },
   industria: { titulo: 'Ministerio de Industria: homologación de vehículos', url: 'https://industria.gob.es/Calidad-Industrial/vehiculos/Paginas/homologacion-vehiculos.aspx' },
+  artesanal: { titulo: 'Resolución de 24-9-2025: homologación de L3e y L5e de fabricación artesanal (BOE)', url: 'https://www.boe.es/boe/dias/2025/10/08/pdfs/BOE-A-2025-20062.pdf' },
+  manual7: { titulo: 'Resolución de 27-1-2026: corrección segunda de la revisión 7 del Manual de Reformas (BOE)', url: 'https://boe.es/boe/dias/2026/02/05/pdfs/BOE-A-2026-2709.pdf' },
+  twizy: { titulo: 'Renault Twizy 80: medidas y datos', url: 'https://www.evspecs.org/tech-specs/renault/twizy/urban-80' },
   solares: { titulo: 'Electrek (2023): Lightyear, Sono Motors y Aptera', url: 'https://electrek.co/2023/01/26/the-future-of-solar-evs-dims/' },
 };
 
@@ -90,24 +98,28 @@ export const ARBOL: NodoEstrategia[] = [
   },
   {
     id: 'h1-legal', padre: 'h1', tipo: 'decision', titulo: '¿Por qué puerta legal entra?', estado: 'ahora',
-    resumen: 'Hay diez puertas posibles. Dos están leídas y cerradas, tres son prometedoras y el resto hay que preguntarlas por escrito. Se exploran de una en una hasta agotarlas.',
-    siguiente: 'Una consulta por escrito, la misma, a dos sitios: un laboratorio de homologación y un ingeniero de reformas. Con el dibujo 3D, el peso y la potencia. Cuesta poco y cierra o abre cuatro puertas a la vez.',
+    resumen: 'Tras la segunda ronda de lectura quedan dos puertas fuertes que no compiten, se suman: la reforma del Twizy para rodar pronto, y el triciclo artesanal con ruedas traseras gemelas para el vehículo definitivo. La homologación individual como cuadriciclo queda de reserva.',
+    detalle: [
+      'Primero la reforma del Twizy: es eléctrica, usa lo que ya hay y da matrícula desde el primer día.',
+      'En paralelo, una consulta sobre el triciclo artesanal: es la única vía que la norma española describe para un vehículo hecho unidad a unidad, y admite el híbrido sin tope de potencia.',
+      'Cada una tiene su borrador de consulta escrito dentro de su caja.',
+    ],
+    siguiente: 'Enviar las dos consultas. Son dos correos y ninguno compromete a nada.',
+    decidido: ['19-11-2026: las cuatro ruedas son innegociables.', '19-11-2026: vale un Aeromóvil eléctrico como hito 1; el híbrido viene después.'],
   },
   {
-    id: 'p-individual-l7e', padre: 'h1-legal', tipo: 'opcion', titulo: 'Homologación individual como cuadriciclo pesado (L7e)', estado: 'prometedora', comprobado: 'por-confirmar',
-    resumen: 'La vía pensada para un vehículo único: un servicio técnico lo inspecciona y ensaya, el Ministerio de Industria resuelve y la ITV emite la tarjeta. Es la que la pestaña «Homologación» de esta web recomienda para el primer prototipo.',
+    id: 'p-individual-l7e', padre: 'h1-legal', tipo: 'opcion', titulo: 'Homologación individual como cuadriciclo pesado (L7e)', estado: 'por-explorar', comprobado: 'por-confirmar',
+    resumen: 'La vía general para un vehículo único con chasis propio. Queda de reserva: para cuadriciclos no existe la lista reducida de requisitos que sí existe para triciclos artesanales.',
     detalle: [
-      'Marco: Real Decreto 750/2010, homologación individual. Los prototipos sólo pueden matricularse a nombre del fabricante que los desarrolla, así que hace falta figurar como fabricante.',
-      'Límites de la categoría L7e, según la ficha de Homologación de esta web: potencia continua de 15 kW como máximo y 450 kg sin batería en la subcategoría de habitáculo cerrado, con 90 km/h por construcción. La subcategoría A2 no tiene ese tope de velocidad en su definición, pero sus requisitos adicionales están por leer.',
-      'El motor de gasolina del híbrido cuenta en la potencia y añade ensayos de emisiones y ruido. Es más barato homologar primero el eléctrico.',
-      'El formulario del INTA no dice si admite la categoría L ni publica tarifas: hay que preguntarlo.',
+      'Marco: Real Decreto 750/2010, homologación individual. Los prototipos sólo pueden matricularse a nombre del fabricante que los desarrolla.',
+      'Leído: la resolución de fabricación artesanal de 2025 cubre sólo motos (L3e) y triciclos (L5e). No menciona los cuadriciclos, así que aquí se aplicaría la lista completa.',
+      'Límites de la categoría, según la pestaña «Homologación»: 15 kW continuos, 450 kg sin batería, 3,70 m de largo y 1,50 m de ancho, y 90 km/h por construcción en la subcategoría de habitáculo cerrado.',
+      'El formulario del INTA no dice si admite la categoría L ni publica tarifas.',
     ],
-    aFavor: ['Es la vía hecha para un solo vehículo.', 'Admite requisitos alternativos para vehículos singulares.', 'Cada ensayo que se guarde sirve después para la serie corta.'],
-    enContra: ['La potencia y la velocidad de la categoría quedan por debajo de lo que quieres para carretera.', 'Coste y plazo sin cifra hasta que conteste un laboratorio.', 'Exige constar como fabricante.'],
-    coste: 'Sin cifra fiable todavía. Pedir presupuesto.',
-    plazo: 'Meses. Sin cifra fiable todavía.',
-    siguiente: 'Enviar la consulta previa a un servicio técnico (IDIADA, INSIA, INTA o TÜV Rheinland): categoría, ensayos, precio y plazo. El borrador del correo ya está en la pestaña «Homologación».',
-    fuentes: [F.inta, F.industria],
+    aFavor: ['Chasis propio con las medidas del diseño.', 'Cada ensayo que se guarde sirve después para la serie corta de cuadriciclos, de hasta 150 al año.'],
+    enContra: ['Potencia y velocidad por debajo de lo que quieres para carretera.', 'Sin lista reducida: más ensayos que el triciclo artesanal.', 'Coste y plazo sin cifra.'],
+    siguiente: 'Preguntarla en la misma consulta del triciclo artesanal, como alternativa. No merece un correo aparte.',
+    fuentes: [F.inta, F.industria, F.artesanal],
   },
   {
     id: 'p-individual-m1', padre: 'h1-legal', tipo: 'opcion', titulo: 'Homologación individual como turismo (M1)', estado: 'por-explorar', comprobado: 'por-confirmar',
@@ -118,30 +130,101 @@ export const ARBOL: NodoEstrategia[] = [
     fuentes: [F.industria],
   },
   {
-    id: 'p-individual-l5e', padre: 'h1-legal', tipo: 'opcion', titulo: 'Homologación individual como triciclo (L5e)', estado: 'dudosa', comprobado: 'por-confirmar',
-    resumen: 'Los triciclos no tienen tope de potencia y pesan hasta 1.000 kg. Sólo vale si el vehículo tiene tres ruedas, y el de producción tiene cuatro.',
-    aFavor: ['Sin tope de potencia.', 'Es la categoría de los triciclos de carretera conocidos.'],
-    enContra: ['Obliga a cambiar el vehículo a tres ruedas.', 'El largo máximo es de 4 m y el Aeromóvil largo mide más.', 'No está confirmado qué velocidad legal tendría en autopista.'],
-    preguntas: ['¿Las cuatro ruedas son innegociables? Si lo son, esta puerta se cierra y no se vuelve a mirar.'],
+    id: 'p-individual-l5e', padre: 'h1-legal', tipo: 'opcion', titulo: 'Triciclo artesanal (L5e) con ruedas traseras gemelas', estado: 'prometedora', comprobado: 'por-confirmar',
+    resumen: 'Cuatro ruedas en el suelo, tres para la ley. Dos ruedas del mismo eje a 46 cm o menos cuentan como una, y para triciclos hechos unidad a unidad hay una resolución de 2025 con una lista de requisitos más corta. Es la candidata para el vehículo definitivo.',
+    detalle: [
+      'Leído en la resolución de 24 de septiembre de 2025: vale para homologación individual y para tipo nacional de vehículos artesanales, definidos como producidos unidad a unidad por un fabricante que no pasa de 10 al año.',
+      'Leído: en triciclos, la velocidad máxima y la potencia las declara el fabricante. No hay tope de potencia en la categoría.',
+      'Leído: hasta el 1 de enero de 2029 las emisiones del motor de gasolina se miden con límites anteriores, más fáciles. Eso favorece al híbrido si llega antes de esa fecha.',
+      'Leído: una lista de puntos no se aplica y otros se resuelven con declaración del fabricante. Sí se ensayan frenos, alumbrado, seguridad eléctrica, compatibilidad electromagnética, salientes exteriores, masas y dimensiones, e integridad de la estructura, entre otros.',
+      'Leído en la pestaña «Homologación»: la regla de las ruedas gemelas está en el artículo 3, punto 72, del Reglamento 168/2013. El triciclo admite hasta 1.000 kg, 4 m de largo y 2 m de ancho.',
+      'Por confirmar: que un servicio técnico acepte como triciclo un vehículo con dos ruedas traseras gemelas; quién puede figurar como fabricante artesanal; qué velocidad legal tiene en autovía; y el coste.',
+    ],
+    aFavor: ['Mantiene las cuatro ruedas físicas.', 'Sin tope de potencia: cabe el híbrido enchufable.', 'Diez unidades al año con la misma vía: es también el camino a los primeros clientes.', 'Las dos ruedas juntas caben dentro de la cola, sin carenados traseros.'],
+    enContra: ['El eje trasero estrecho no ayuda contra el vuelco: toda la estabilidad la da la vía delantera.', 'El largo máximo es de 4 m.', 'Hay que rediseñar la parte trasera.', 'Depende de una interpretación que nadie ha confirmado por escrito.'],
+    coste: 'Sin cifra. Pedirla en la consulta.',
+    siguiente: 'Enviar la consulta a un servicio técnico de homologación. El borrador está abajo.',
+    preguntas: ['¿Te vale que las dos ruedas traseras vayan juntas, a menos de 46 cm, dentro de la cola? Siguen siendo cuatro ruedas, pero el vehículo se parece más al Triciclo Bala que al de la imagen.'],
+    borrador: {
+      para: 'Un servicio técnico de homologación (IDIADA, INSIA, INTA o TÜV Rheinland)',
+      asunto: 'Consulta previa: homologación individual de un L5e de fabricación artesanal con ruedas traseras gemelas',
+      cuerpo: `Buenos días:
+
+Estoy desarrollando un vehículo ligero de dos plazas en tándem, carrozado y cerrado, y quiero confirmar la vía de homologación antes de construirlo. Adjunto un dibujo con sus medidas.
+
+Datos principales: dos ruedas delanteras con vía de [1,20] m y dos ruedas traseras en el mismo eje con sus huellas a menos de 460 mm entre centros. Largo [3,90] m, ancho [1,40] m, masa en orden de marcha de unos [350] kg. Primera unidad eléctrica; más adelante, híbrida enchufable con un motor de gasolina pequeño.
+
+Mis preguntas:
+
+1. Con las dos ruedas traseras a 460 mm o menos (ruedas gemelas, artículo 3.72 del Reglamento (UE) 168/2013), ¿el vehículo se clasifica como L5e-A?
+2. ¿Puede acogerse a la Resolución de 24 de septiembre de 2025 sobre vehículos L3e y L5e de fabricación artesanal, por homologación individual, con los requisitos de su anexo II?
+3. ¿Quién puede figurar como fabricante artesanal: una persona física, o hace falta una empresa inscrita en el Registro de Fabricantes?
+4. Para la versión eléctrica, ¿qué ensayos del anexo II se harían y con cuántas muestras? ¿Y qué se añade para la híbrida?
+5. ¿El habitáculo cerrado añade requisitos (parabrisas, limpiaparabrisas, desempañado, cinturones)?
+6. Como alternativa, ¿qué diferencia de ensayos y de coste habría si se homologara como cuadriciclo L7e por homologación individual?
+7. Coste y plazo orientativos de todo el proceso con ustedes.
+
+Si lo ven viable, me gustaría concertar una reunión previa.
+
+Gracias y un saludo,
+[tu nombre y teléfono]`,
+    },
+    fuentes: [F.artesanal, F.industria],
   },
   {
-    id: 'p-reforma', padre: 'h1-legal', tipo: 'opcion', titulo: 'Reforma profunda de un vehículo ya matriculado', estado: 'prometedora', comprobado: 'por-confirmar',
-    resumen: 'Partir de un vehículo con matrícula, como un Renault Twizy, y cambiarle la carrocería conservando su bastidor y su número de bastidor. No se homologa un vehículo nuevo: se legaliza una reforma.',
+    id: 'p-reforma', padre: 'h1-legal', tipo: 'opcion', titulo: 'Reforma profunda del Twizy 80', estado: 'prometedora', comprobado: 'por-confirmar',
+    resumen: 'Cambiarle la carrocería al Twizy conservando su bastidor, su número de bastidor y su mecánica. No se homologa un vehículo nuevo: se legaliza una reforma. Es la vía para rodar pronto.',
     detalle: [
-      'Marco: Real Decreto 866/2010 y el Manual de Reformas. Una reforma se legaliza con proyecto técnico de un ingeniero, informe de conformidad, certificado del taller e inspección en la ITV.',
-      'Leído en el Manual: sustituir el bastidor sólo es una reforma de identificación cuando la pieza cambiada es la que lleva grabado el número. Existen códigos para modificar y sustituir la carrocería.',
-      'No leído: si esos códigos de carrocería se aplican a la categoría L, ni hasta dónde se puede cambiar la forma, las medidas y el peso antes de que la ITV lo considere un vehículo distinto.',
-      'El vehículo resultante sigue siendo un Twizy para la ley: su categoría, su potencia y su velocidad. Añadirle un motor de gasolina sería otra reforma, mucho más difícil.',
+      'Leído en el Manual de Reformas, sección de categoría L: existe el código 8.51, «modificaciones que afectan a la carrocería», y pide proyecto técnico, certificación final de obra, informe de conformidad y certificado del taller.',
+      'Leído: el código 4.2, cambio de la distancia entre ejes, incluye los cuadriciclos pesados y pide la misma documentación. El 2.3, sustitución del motor, también los incluye.',
+      'Leído: añadir un segundo motor (código 2.4) sólo se contempla para pasar de térmico a híbrido. Un Twizy no puede hacerse híbrido por esta vía.',
+      'Aviso: lo leído es la revisión 3 del Manual. La vigente es la revisión 7, corregida en enero de 2026, y no he podido leer su texto. Hay que confirmarlo sobre la vigente.',
+      'El Twizy 80 mide 2,34 m de largo y 1,23 m de ancho, con 1,69 m entre ejes, 474 kg, 13 kW y 80 km/h. Ya lleva dos plazas en tándem y cuatro ruedas.',
+      'El resultado sigue siendo un Twizy para la ley: su categoría, su potencia y sus 80 km/h. El tope de su categoría es de 3,70 m de largo y 1,50 m de ancho.',
     ],
-    aFavor: ['Puede ser la más rápida y barata: matrícula desde el primer día.', 'Parte de un vehículo que ya existe y ya está matriculado.', 'Da un Aeromóvil eléctrico con el que rodar y enseñar mientras avanza la homologación del definitivo.'],
-    enContra: ['El bastidor del donante manda en la batalla, la vía y la postura.', 'No sería el vehículo final: ni híbrido ni con sus prestaciones.', 'Un ingeniero o la ITV pueden decir que es demasiado cambio.'],
-    coste: 'Proyecto de ingeniero e ITV: sin cifra hasta preguntar. La carrocería es el gasto principal.',
-    siguiente: 'Preguntar a un ingeniero de reformas, con el dibujo del Aeromóvil sobre las medidas del Twizy: ¿se puede legalizar este cambio de carrocería, con qué códigos y qué límites?',
+    aFavor: ['Matrícula desde el primer día.', 'El donante ya es un tándem de cuatro ruedas: es la base más parecida que existe.', 'Permite la prueba que lo vende todo: el mismo Twizy, con la misma batería, antes y después de la carrocería.'],
+    enContra: ['Con 1,69 m entre ejes, una carrocería de 3,70 m deja mucho voladizo; alargar la batalla es otra reforma.', '80 km/h y la autonomía de su batería.', 'El informe de conformidad lo firma el fabricante o un servicio técnico: pueden pedir ensayos.'],
+    coste: 'Proyecto, informe de conformidad e ITV: sin cifra hasta preguntar. La carrocería es el gasto principal.',
+    siguiente: 'Enviar la consulta a un ingeniero de reformas. El borrador está abajo.',
+    decidido: ['19-11-2026: el donante es un Twizy 80.', '19-11-2026: vale como hito 1 aunque sea sólo eléctrico.'],
     preguntas: [
-      '¿Qué versión de Twizy tienes, la de 45 km/h o la de 80, y está matriculado y con ITV en vigor?',
-      '¿Aceptarías como hito 1 un Aeromóvil eléctrico sobre base Twizy, sabiendo que no es el híbrido definitivo?',
+      '¿El Twizy está matriculado a tu nombre y con la ITV en vigor?',
+      '¿La batería es tuya o es de alquiler con Renault? Muchos Twizy se vendieron con la batería alquilada, y eso condiciona modificarlo.',
     ],
-    fuentes: [F.rd866, F.manual],
+    borrador: {
+      para: 'Un ingeniero de reformas o un servicio técnico de reformas',
+      asunto: 'Consulta previa: cambio completo de carrocería en un Renault Twizy 80 (L7e)',
+      cuerpo: `Buenos días:
+
+Tengo un Renault Twizy 80 matriculado y quiero sustituir su carrocería por una nueva, aerodinámica y cerrada, de fibra, conservando el bastidor con su número de identificación, la suspensión, los frenos, la dirección, el motor y la batería de origen. Adjunto un dibujo con las medidas previstas sobre las del Twizy.
+
+Antes de fabricar nada necesito saber si se puede legalizar. Mis preguntas:
+
+1. ¿Puede tramitarse como reforma por el código 8.51 (y el 8.52 si procede) de la sección de categoría L del Manual de Reformas vigente?
+2. ¿Hasta qué largo, ancho y voladizos puede llegar la carrocería nueva? Entiendo que el tope de la categoría es de 3,70 m por 1,50 m.
+3. Si además alargo la distancia entre ejes (código 4.2), ¿qué debe justificar el proyecto?
+4. ¿Qué límites de masa y de reparto por eje debo respetar?
+5. ¿Quién emitiría el informe de conformidad, Renault o un servicio técnico, y qué ensayos o comprobaciones pediría (salientes exteriores, campo de visión, limpiaparabrisas y desempañado al cerrar el habitáculo, alumbrado recolocado)?
+6. ¿Hay algún punto a partir del cual dejaría de considerarse una reforma y pasaría a ser un vehículo nuevo?
+7. Coste y plazo orientativos del proyecto, el informe y la inspección.
+
+Gracias y un saludo,
+[tu nombre y teléfono]`,
+    },
+    fuentes: [F.rd866, F.manual, F.manual7, F.twizy],
+  },
+  {
+    id: 'r-batalla', padre: 'p-reforma', tipo: 'decision', titulo: '¿Conservar la batalla del Twizy o alargarla?', estado: 'por-explorar',
+    resumen: 'Con sus 1,69 m entre ejes la reforma es sólo de carrocería. Alargarla acerca la forma al diseño, pero toca el bastidor y pide más proyecto.',
+    aFavor: ['Conservarla: una sola reforma, bastidor intacto, menos riesgo de que la rechacen.'],
+    enContra: ['Conservarla: la forma de cigarro pide más distancia entre ejes de la que hay; habrá voladizo delante y detrás.'],
+    siguiente: 'Dibujar en el editor una versión del Aeromóvil con las medidas del Twizy y ver cuánto empeora el coeficiente aerodinámico. Lo preparo cuando me digas.',
+  },
+  {
+    id: 'r-prueba', padre: 'p-reforma', tipo: 'opcion', titulo: 'La prueba del antes y el después', estado: 'prometedora',
+    resumen: 'Medir la autonomía del Twizy tal como está, a velocidad constante, y repetir la medida con la carrocería nueva. Misma batería, mismo motor, mismo conductor: la diferencia es sólo la forma.',
+    aFavor: ['Convierte el cálculo del consumo en una medida.', 'Se entiende en una frase y en un vídeo.', 'La primera mitad se puede hacer ya, sin fabricar nada.'],
+    siguiente: 'Medir ahora el Twizy de serie: kilómetros recorridos a 50 y a 80 km/h con una carga, en un recorrido llano de ida y vuelta.',
   },
   {
     id: 'p-placas-rojas', padre: 'h1-legal', tipo: 'opcion', titulo: 'Placas rojas de empresa', estado: 'por-explorar', comprobado: 'leido',
@@ -203,10 +286,11 @@ export const ARBOL: NodoEstrategia[] = [
     resumen: 'El primer vehículo no tiene que ser el definitivo. Cuanto menos lleve, antes rueda y menos cuesta equivocarse.',
   },
   {
-    id: 'a-twizy', padre: 'h1-alcance', tipo: 'opcion', titulo: 'Un Twizy con carrocería de Aeromóvil', estado: 'prometedora', comprobado: 'por-confirmar',
-    resumen: 'El donante pone bastidor, suspensión, frenos, dirección, motor y batería. Se fabrica sólo la carrocería. Depende de que la puerta de la reforma esté abierta.',
+    id: 'a-twizy', padre: 'h1-alcance', tipo: 'opcion', titulo: 'Un Twizy con carrocería de Aeromóvil', estado: 'elegida', comprobado: 'por-confirmar',
+    resumen: 'El donante pone bastidor, suspensión, frenos, dirección, motor y batería. Se fabrica sólo la carrocería. Es el primer vehículo, si la consulta de la reforma sale bien.',
     aFavor: ['Es lo más corto hasta algo que rueda.', 'La carrocería es justo lo que hay que aprender a fabricar.', 'Se mide el consumo real de la forma.'],
-    enContra: ['Las medidas las pone el Twizy.', 'Sólo eléctrico y con su autonomía.'],
+    enContra: ['Las medidas las pone el Twizy.', 'Sólo eléctrico, a 80 km/h y con su autonomía.'],
+    decidido: ['19-11-2026: aceptado como hito 1.'],
   },
   {
     id: 'a-electrico', padre: 'h1-alcance', tipo: 'opcion', titulo: 'Prototipo propio, eléctrico primero', estado: 'por-explorar',
@@ -306,7 +390,7 @@ export const ARBOL: NodoEstrategia[] = [
   {
     id: 'abierto', padre: 'meta', tipo: 'decision', titulo: '¿Código abierto, cerrado o semiabierto?', estado: 'por-explorar',
     resumen: 'Decide quién puede copiar el diseño y quién puede ayudarte. No hace falta resolverlo para el hito 1, pero conviene no cerrarse puertas: lo que se publica no se puede despublicar.',
-    preguntas: ['Esta web es pública y hoy enseña el diseño, el plan y ahora la estrategia. ¿Quieres que la estrategia siga a la vista de cualquiera o que sólo la veas tú con tu cuenta?'],
+    decidido: ['19-11-2026: la estrategia sigue siendo pública.'],
   },
   {
     id: 'ab-abierto', padre: 'abierto', tipo: 'opcion', titulo: 'Abierto', estado: 'por-explorar',

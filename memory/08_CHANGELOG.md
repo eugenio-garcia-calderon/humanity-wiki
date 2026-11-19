@@ -12947,3 +12947,11 @@ Comprobado en un navegador de pruebas (escritorio y móvil) contra el servidor d
 - Not verified: touch devices, the installed app (the service worker may still serve the old build; `?sw=off` drops it), and the other chapters of the page on white (only the figure was reviewed).
 - Open: the pale topic colours have low contrast on white in the «Todos» axis labels.
 - Files: `public/observatorio-polarizacion/index.html`, `public/geometria-figura/datos.json`, `scripts/probar-figuras.ts`, `memory/08_CHANGELOG.md`.
+
+## 2026-11-19 · Estrategia: segunda ronda de las puertas legales
+
+> «Tengo el Twizy de 80. Sí, me valdría un aeromóvil eléctrico en vez de híbrido. Las cuatro ruedas son innegociables. Puede seguir siendo pública la estrategia. Explora las vías más prometedoras.»
+
+Las respuestas de Eugenio quedan escritas en el árbol («Ya decidido»). La puerta de la reforma pasa a ser «Reforma profunda del Twizy 80», con lo leído en el Manual de Reformas para la categoría L (códigos 8.51, 4.2 y 2.3; leída la revisión 3, no la 7 vigente), las medidas del Twizy y dos cajas nuevas: conservar o alargar la batalla, y la prueba del antes y el después. La puerta del triciclo pasa a «Triciclo artesanal (L5e) con ruedas traseras gemelas»: cuatro ruedas en el suelo que cuentan como tres, con la resolución de 24-9-2025 de fabricación artesanal (hasta 10 al año, sin tope de potencia). La homologación individual como cuadriciclo queda de reserva. Las dos puertas fuertes llevan su borrador de consulta, listo para copiar.
+
+Las respuestas a las preguntas se guardan ahora por el texto de la pregunta, no por su número.

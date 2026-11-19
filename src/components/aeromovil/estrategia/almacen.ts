@@ -9,7 +9,7 @@ export type Marca = 'si' | 'no' | 'dudo';
 export interface DatosEstrategia {
   marcas: Record<string, Marca>;
   notas: Record<string, string>;
-  /** key: `${id del nodo}#${índice de la pregunta}` */
+  /** key: `${id del nodo}#${texto de la pregunta}` — the text, not its index: questions come and go as the tree is edited */
   respuestas: Record<string, string>;
 }
 
