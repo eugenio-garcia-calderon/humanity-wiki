@@ -1075,7 +1075,7 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **No written posture per party.** The tooltip shows the party's value and the generic text of the level it reaches, labelled as such. Showing what a party says needs one written posture per party and aspect (9 × 64): content work for Eugenio.
 - **Role conflict in the new points.** The points use `role="button"` inside an SVG with `role="img"`, the same pattern the aspect controls already use. Not tested with NVDA or VoiceOver: ~1 h to check.
 - **The view is not in the shared link.** `guardarURL` keeps topic and party selection, not this view: ~15 min.
-- **The name is hard to read at first glance.** "Déjalo de lo mejor de cada uno" is Eugenio's wording; a reviewer suggested "Lo mejor de cada partido". His call.
+- ~~**The name is hard to read at first glance.**~~ Resolved 2026-11-19: Eugenio chose "Ver lo mejor de cada partido" and it now has a gold star. The old label is gone from the page.
 - **Two phrases for the same idea** ("todos los aspectos" in the level list, "todo el tema" in the topic list). Unify: ~10 min.
 
 ## 2026-11-19 — Figure test: shortcuts taken

@@ -12956,6 +12956,14 @@ Las respuestas de Eugenio quedan escritas en el árbol («Ya decidido»). La pue
 
 Las respuestas a las preguntas se guardan ahora por el texto de la pregunta, no por su número.
 
+## 2026-11-19 · Geometry: best-of-each button says «Ver lo mejor de cada partido» with a star; no grey tooltip on the figure
+
+- The button above the party list now reads «Ver lo mejor de cada partido» (it was «Déjalo de lo mejor de cada uno») and has a gold star. It has a gold border and tint, which become stronger when the mode is on.
+- The browser's grey box that appeared when hovering the figure is gone. It came from a `<title>` element inside the SVG, which was rewritten on every draw. The text now lives in the SVG's `aria-label`, so screen readers still get it. Only the large white card shows on hover.
+- Verified: browser interaction suite 237 of 237; «Todos» suite passes; the button fits on desktop (193 px) and on a 390 px viewport (160 px) without overflowing; clicking it turns the mode on (`aria-pressed` true); a vertex hover shows the white card and no page errors; `tsc --noEmit` clean.
+- Not verified: touch devices, the installed app (the service worker may serve the old build; `?sw=off` drops it), screen readers.
+- Files: `public/observatorio-polarizacion/index.html`, `memory/08_CHANGELOG.md`, `memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md`.
+
 ## 2026-11-19 · Estrategia: tercera ronda, pasos y criterio de descarte por puerta
 
 > «He respondido a las diferentes cuestiones que me has puesto en el hito 1, así que explora y avanza las temáticas de cada uno de ellos… despliégamelo para saber cuáles son los siguientes pasos en cada uno de ellos para ir descartando»
