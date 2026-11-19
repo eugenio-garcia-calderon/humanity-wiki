@@ -1,10 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog1",
-      "ruta": "public/geometria-figura",
-      "motivo": "Página del test de figura (nueva)",
-      "desde": "2026-11-19T16:25:31.729Z"
-    }
-  ]
+  "reservas": []
 }
