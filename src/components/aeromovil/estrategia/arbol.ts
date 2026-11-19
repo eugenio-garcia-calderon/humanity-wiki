@@ -17,7 +17,9 @@ export type Comprobado = 'leido' | 'por-confirmar';
 
 export interface Fuente { titulo: string; url: string }
 /** A message ready to send: the next small step, already written. Placeholders in [brackets]. */
-export interface Borrador { para: string; asunto: string; cuerpo: string }
+/** Where to send a draft. `correo` only when it is published by the recipient and was read there; otherwise `nota` says how to reach them. */
+export interface Contacto { nombre: string; correo?: string; telefono?: string; web?: string; nota?: string }
+export interface Borrador { para: string; asunto: string; cuerpo: string; contactos?: Contacto[] }
 
 export interface NodoEstrategia {
   id: string;
@@ -59,8 +61,26 @@ const F = {
   rd750: { titulo: 'Real Decreto 750/2010, homologación de vehículos (BOE, consolidado)', url: 'https://boe.es/buscar/pdf/2010/BOE-A-2010-9994-consolidado.pdf' },
   orden2026: { titulo: 'Orden PJC/528/2026: requisitos de homologación individual y series cortas (BOE)', url: 'https://www.boe.es/boe/dias/2026/05/29/pdfs/BOE-A-2026-11580.pdf' },
   neotec: { titulo: 'CDTI: preguntas frecuentes de Neotec 2026', url: 'https://www.cdti.es/sites/default/files/2026-04/faq_neotec_2026_v1.0.pdf' },
+  guia: { titulo: 'Ministerio de Industria: guía de reglamentación sobre homologación de vehículos, v1.3', url: 'https://industria.gob.es/Calidad-Industrial/vehiculos/InfoAdicionalHomologacion/Gu%C3%ADa%20de%20Reglamentaci%C3%B3n%20sobre%20Homologaci%C3%B3n%20de%20veh%C3%ADculos%20v1.3.pdf' },
+  gencat: { titulo: 'Generalitat de Catalunya: matriculación de prototipos o preseries', url: 'https://tramits.gencat.cat/es/tramits/tramits-temes/Matriculacio-de-prototipus-o-preseries-de-vehicles' },
+  neotecWeb: { titulo: 'Ministerio de Ciencia: convocatoria Neotec 2026', url: 'https://www.ciencia.gob.es/Convocatorias/2026/NEOTEC2026.html' },
   solares: { titulo: 'Electrek (2023): Lightyear, Sono Motors y Aptera', url: 'https://electrek.co/2023/01/26/the-future-of-solar-evs-dims/' },
 };
+
+// Contacts. An address is here only if the recipient publishes it; the rest carry a phone, a web form or a note.
+const C = {
+  idiada: { nombre: 'Applus IDIADA (Tarragona)', correo: 'idiada@idiada.com', web: 'https://www.applusidiada.com/', nota: 'Servicio técnico de homologación.' },
+  insia: { nombre: 'INSIA, Universidad Politécnica de Madrid', correo: 'insia.insia@upm.es', nota: 'Instituto universitario del automóvil y servicio técnico.' },
+  inta: { nombre: 'INTA, homologación de vehículos (Madrid)', telefono: '+34 91 520 12 52', web: 'https://www.inta.es/', nota: 'No publica correo para este servicio: llamar y pedir la dirección.' },
+  tuvR: { nombre: 'TÜV Rheinland Ibérica', web: 'https://www.tuv.com/spain/es/', nota: 'Sin correo publicado: formulario de contacto de su web.' },
+  tuvS: { nombre: 'TÜV SÜD, reformas en sus ITV', web: 'https://www.tuvsud.com/es-es/industrias/movilidad-automocion/inspeccion-tecnica-de-vehiculos/servicios-itv/reformas', nota: 'Sin correo publicado: cita desde su web.' },
+  ingenieros: { nombre: 'Ingenieros de reformas de tu provincia', web: 'https://www.certicalia.com/homologar-coche-tuning', nota: 'No hay un destinatario único. Un directorio como este, o la ITV habitual, dan nombres. Pedir que firmen reformas de categoría L.' },
+  industria: { nombre: 'Ministerio de Industria, Subdirección General de Calidad y Seguridad Industrial', correo: 'csegind@mintur.es', web: 'https://industria.gob.es/Calidad-Industrial/vehiculos/Paginas/homologacion-vehiculos.aspx', nota: 'Es el buzón que publica su guía de homologación, para comentarios. Si no contestan a una consulta, presentarla por el registro electrónico.' },
+  dgt: { nombre: 'DGT', telefono: '060', web: 'https://sede.dgt.gob.es/es/vehiculos/tramites-para-empresas/matriculas-temporales-placas-rojas/index.html', nota: 'Sin correo de consultas: teléfono 060 o la Jefatura Provincial de Tráfico.' },
+  cdti: { nombre: 'CDTI, programa Neotec', correo: 'neotec@cdti.es', web: 'https://www.ciencia.gob.es/Convocatorias/2026/NEOTEC2026.html' },
+  transportes: { nombre: 'Ministerio de Transportes y Movilidad Sostenible', web: 'https://www.transportes.gob.es/', nota: 'No he encontrado contacto de la oficina del espacio de pruebas: sede electrónica del Ministerio o teléfono 060.' },
+  circuito: { nombre: 'El circuito más cercano', nota: 'Depende de dónde vivas: dime la provincia y busco los contactos.' },
+} satisfies Record<string, Contacto>;
 
 export const RAIZ = 'meta';
 
@@ -111,7 +131,7 @@ export const ARBOL: NodoEstrategia[] = [
       'De apoyo, no legalizan por sí solas: placas rojas, circuito y ayudas públicas.',
       'Dudosas: matricular en otro país, el sandbox y el triciclo.',
     ],
-    siguiente: 'Enviar tres consultas: al ingeniero de reformas (borrador en «Reforma profunda del Twizy 80»), a un servicio técnico (borrador en «Homologación individual como cuadriciclo») y a la DGT sobre placas rojas (borrador en su caja).',
+    siguiente: 'Hay nueve consultas redactadas, cada una en su caja con sus destinatarios. Las cuatro primeras deciden casi todo: ingeniero de reformas, servicio técnico, Ministerio de Industria y DGT.',
     decidido: ['19-11-2026: las cuatro ruedas son innegociables.', '19-11-2026: vale un Aeromóvil eléctrico como hito 1; el híbrido viene después.', '19-11-2026: quieres explorar todas las puertas abiertas antes de elegir.'],
   },
   {
@@ -124,6 +144,7 @@ export const ARBOL: NodoEstrategia[] = [
       'Leído en la Orden PJC/528/2026: en la categoría L no son obligatorios para la homologación individual la declaración de durabilidad, las estructuras de protección delanteras y traseras, la protección antivuelco, las plazas de asiento, la maniobrabilidad, la placa de limitación de velocidad, la protección de los ocupantes, la potencia y la limitación de velocidad por construcción, la integridad de la estructura, las plataformas de carga, el diagnóstico a bordo y la información de reparación.',
       'Siguen pidiendo acta de ensayo, entre otros, el frenado, el nivel sonoro, la seguridad eléctrica y los ensayos ambientales.',
       'Límites de la categoría, según la pestaña «Homologación»: 15 kW continuos, 450 kg sin batería, 3,70 m por 1,50 m y 90 km/h por construcción con habitáculo cerrado.',
+      'Leído en la guía del Ministerio: quien no está inscrito como fabricante la pide como titular del vehículo, y entonces la tarjeta de ITV la emite la comunidad autónoma. El servicio técnico inspecciona el vehículo físicamente, sin excepciones.',
       'Sin leer: tarifas. El formulario del INTA no las publica.',
     ],
     aFavor: ['Chasis propio con las medidas del diseño.', 'No exige constar como fabricante.', 'Sin ensayo de estructura ni de protección de ocupantes.', 'Cada ensayo sirve después para la serie corta de cuadriciclos.'],
@@ -134,6 +155,7 @@ export const ARBOL: NodoEstrategia[] = [
     descarta: 'Se descarta si el presupuesto del servicio técnico supera el tope de la etapa, o si 15 kW y 90 km/h no te bastan ni como primer vehículo.',
     borrador: {
       para: 'Un servicio técnico de homologación (IDIADA, INSIA, INTA o TÜV Rheinland)',
+      contactos: [C.idiada, C.insia, C.inta, C.tuvR],
       asunto: 'Consulta previa: vía para matricular un vehículo único de chasis propio (prototipo, individual L7e o individual M1)',
       cuerpo: `Buenos días:
 
@@ -154,7 +176,7 @@ Si alguna la ven viable, me gustaría concertar una reunión previa.
 Gracias y un saludo,
 [tu nombre y teléfono]`,
     },
-    fuentes: [F.rd750, F.orden2026, F.inta, F.industria],
+    fuentes: [F.rd750, F.orden2026, F.guia, F.inta, F.industria],
   },
   {
     id: 'i-1', padre: 'p-individual-l7e', tipo: 'paso', titulo: '1 · Consulta previa al servicio técnico', estado: 'ahora',
@@ -178,13 +200,35 @@ Gracias y un saludo,
       'Leído, artículo 5.2: el solicitante es el fabricante. La inspección técnica unitaria favorable da lugar a la tarjeta de ITV.',
       'Leído, artículo 5.2: sólo puede matricularse, de forma ordinaria o temporal, a nombre del fabricante, y así se anota en la tarjeta.',
       'Leído: el texto no fija número de unidades ni duración.',
-      'Sin leer: qué mínimos exige la autoridad en la práctica para autorizar, cuánto tarda y si hay que estar inscrito en el Registro de Fabricantes.',
+      'Leído en el trámite de la Generalitat de Catalunya, como ejemplo de comunidad autónoma: sirve para «realizar pruebas en carretera» con proyectos en desarrollo; pide la autorización de exención de homologación del Ministerio, un certificado del fabricante sobre las condiciones de seguridad y una ficha reducida. La tasa que publica es de 128,7.',
+      'Leído en la guía del Ministerio: la condición de fabricante se acredita con el código de fabricante del número de bastidor o con una certificación de calidad cuyo alcance incluya la categoría.',
+      'Sin leer: qué mínimos exige el Ministerio para conceder la exención, cuánto tarda y si una asociación puede constar como fabricante.',
     ],
     aFavor: ['Está hecha para un vehículo en desarrollo.', 'Permite decir qué no se cumple todavía y con qué se compensa.', 'Da matrícula ordinaria: se puede circular por España.'],
     enContra: ['Depende de una autorización que la autoridad concede caso por caso.', 'Exige constar como fabricante.', 'No se puede vender ni poner a nombre de otra persona: no sirve para clientes.'],
-    siguiente: 'Va en la misma consulta al servicio técnico: es su primera pregunta.',
+    siguiente: 'Dos consultas: la del servicio técnico, donde es la primera pregunta, y la del Ministerio, cuyo borrador está abajo.',
     descarta: 'Se descarta si el servicio técnico o el Ministerio responden que la autorización de prototipo exige los mismos ensayos que la homologación individual: entonces no aporta nada.',
-    fuentes: [F.rd750, F.industria],
+    borrador: {
+      para: 'El Ministerio de Industria, que es la autoridad de homologación',
+      contactos: [C.industria],
+      asunto: 'Consulta: autorización de prototipo (artículo 5.2 del Real Decreto 750/2010) para un vehículo ligero en desarrollo',
+      cuerpo: `Buenos días:
+
+Les escribo en nombre de [nombre de la asociación], asociación constituida en España hace ocho años. Estamos desarrollando un vehículo ligero de cuatro ruedas y dos plazas en tándem, eléctrico, de chasis propio. Queremos construir una unidad y circular con ella para ensayarla en vías abiertas.
+
+Agradecería que me aclarasen lo siguiente:
+
+1. ¿Puede una asociación figurar como fabricante a efectos del artículo 5.2 del Real Decreto 750/2010, o debe ser una sociedad mercantil?
+2. ¿Qué documentos acreditan la condición de fabricante en nuestro caso? ¿Basta con el código de fabricante (WMI), y cómo se solicita?
+3. ¿Qué debe contener la memoria justificativa del artículo 5.1 y qué informe del servicio técnico la acompaña? ¿Hay un mínimo de requisitos que no se exceptúa nunca (frenado, alumbrado, seguridad eléctrica)?
+4. ¿La autorización tiene límite de duración, de kilómetros o de itinerarios?
+5. ¿Cuánto tarda la resolución y por dónde se presenta la solicitud?
+6. Si el mismo vehículo se aprobara antes en otro Estado miembro, ¿cómo se tramita la evaluación de correspondencia del artículo 6.4?
+
+Gracias y un saludo,
+[tu nombre, cargo en la asociación y teléfono]`,
+    },
+    fuentes: [F.rd750, F.guia, F.gencat, F.industria],
   },
   {
     id: 'pr-1', padre: 'p-prototipo', tipo: 'paso', titulo: '1 · Preguntarlo en la consulta al servicio técnico', estado: 'ahora',
@@ -242,6 +286,7 @@ Gracias y un saludo,
     preguntas: ['¿Te vale que las dos ruedas traseras vayan juntas, a menos de 46 cm, dentro de la cola? Siguen siendo cuatro ruedas, pero el vehículo se parece más al Triciclo Bala que al de la imagen.'],
     borrador: {
       para: 'Un servicio técnico de homologación (IDIADA, INSIA, INTA o TÜV Rheinland)',
+      contactos: [C.idiada, C.insia, C.inta],
       asunto: 'Consulta previa: homologación individual de un L5e de fabricación artesanal con ruedas traseras gemelas',
       cuerpo: `Buenos días:
 
@@ -289,6 +334,7 @@ Gracias y un saludo,
     ],
     borrador: {
       para: 'Un ingeniero de reformas o un servicio técnico de reformas',
+      contactos: [C.ingenieros, C.tuvS, C.idiada],
       asunto: 'Consulta previa: cambio completo de carrocería en un Renault Twizy 80 (L7e)',
       cuerpo: `Buenos días:
 
@@ -344,20 +390,22 @@ Gracias y un saludo,
     aFavor: ['Permite rodar por carretera antes de homologar.', 'Trámite barato.'],
     enContra: ['Hace falta una sociedad del sector.', 'Trayectos cerrados de antemano: no es para viajar.'],
     siguiente: 'Una pregunta a la DGT. El borrador está abajo.',
-    descarta: 'Se descarta si decides no constituir una sociedad, o si la DGT responde que un fabricante nuevo no puede pedirlas.',
+    descarta: 'Se descarta si la DGT responde que una asociación no puede pedirlas y no quieres constituir una sociedad.',
     borrador: {
-      para: 'La DGT (teléfono 060 o la Jefatura Provincial de Tráfico)',
+      para: 'La DGT',
+      contactos: [C.dgt],
       asunto: 'Consulta: placas rojas para ensayos de un vehículo en desarrollo',
       cuerpo: `Buenos días:
 
-Voy a constituir una sociedad para desarrollar y fabricar un vehículo ligero. Necesito probar el primer prototipo en vías abiertas antes de su homologación.
+Represento a [nombre de la asociación], una asociación constituida en España hace ocho años que está desarrollando un vehículo ligero. Necesitamos probar el primer prototipo en vías abiertas antes de su homologación.
 
-1. ¿Puede una sociedad de nueva creación, dada de alta como fabricante de vehículos pero sin ningún vehículo homologado todavía, solicitar el permiso temporal de empresa (placas rojas) para ensayos de investigación y pruebas técnicas?
-2. ¿Los trayectos autorizados pueden ser rutas largas entre provincias, o deben limitarse al entorno de las instalaciones?
-3. ¿Qué se exige al vehículo no matriculado para circular con ellas (seguro, inspección, documentación técnica)?
+1. ¿Puede una asociación solicitar el permiso temporal de empresa (placas rojas) para ensayos de investigación y pruebas técnicas, si se da de alta en el impuesto de actividades económicas como fabricante de vehículos? ¿O debe ser una sociedad mercantil?
+2. ¿Se concede a un fabricante que todavía no ha homologado ningún vehículo?
+3. ¿Los trayectos autorizados pueden ser rutas largas entre provincias, o deben limitarse al entorno de las instalaciones?
+4. ¿Qué se exige al vehículo no matriculado para circular con ellas (seguro, inspección, documentación técnica)?
 
 Gracias y un saludo,
-[tu nombre y teléfono]`,
+[tu nombre, cargo en la asociación y teléfono]`,
     },
     fuentes: [F.placasRojas],
   },
@@ -368,23 +416,59 @@ Gracias y un saludo,
       'Leído en las preguntas frecuentes de Neotec 2026: es para pequeñas empresas innovadoras constituidas entre seis meses y tres años antes del cierre del plazo, con 20.000 € de capital desembolsado.',
       'Leído: el proyecto debe tener un presupuesto de entre 175.000 y 750.000 €. La subvención cubre hasta el 70 %, con un máximo de 250.000 €. Hay anticipo de hasta el 60 % sin garantía.',
       'Leído: cubre personal, materiales, activos y servicios externos. No menciona de forma expresa prototipos ni homologación.',
-      'La convocatoria de 2026 se abrió en abril. No he comprobado si sigue abierta; doy por hecho que no.',
+      'Leído: el plazo de 2026 fue del 14 de abril al 14 de mayo. Está cerrada.',
+      'Leído: el beneficiario debe ser una sociedad mercantil. Una asociación no puede pedirla; tendría que hacerlo una sociedad nueva.',
       'Si la de 2027 repite las reglas, la sociedad tendría que existir seis meses antes del cierre. Es una suposición: las bases cambian cada año.',
       'IDAE: no he encontrado ninguna convocatoria abierta para prototipos de vehículos. Las de proyectos singulares de movilidad fueron de 2021 y 2022.',
     ],
     aFavor: ['Dinero sin ceder participación.', 'El anticipo reduce lo que hay que adelantar.'],
     enContra: ['El proyecto mínimo es de 175.000 € y la empresa pone al menos el 30 %.', 'Papeleo, plazos y justificación de gastos.', 'Es competitiva: no está garantizada.'],
-    siguiente: 'Decidir en «¿A nombre de quién?» si se constituye la sociedad ahora. Yo vigilo la convocatoria de 2027.',
+    siguiente: 'Preguntar al CDTI por la convocatoria de 2027 y escribir al instituto universitario. Los dos borradores están en los pasos de esta caja.',
     descarta: 'Se descarta si el 30 % propio de un proyecto de 175.000 € supera el tope que has fijado para la etapa.',
-    fuentes: [F.neotec],
+    fuentes: [F.neotec, F.neotecWeb],
   },
   {
-    id: 'inv-1', padre: 'p-investigacion', tipo: 'paso', titulo: '1 · Comprobar el plazo de Neotec 2026 y las fechas de 2027', estado: 'ahora',
-    resumen: 'Mirar en la web del CDTI si la convocatoria de 2026 sigue abierta y cuándo suele abrirse la siguiente. Lo hago yo.',
+    id: 'inv-1', padre: 'p-investigacion', tipo: 'paso', titulo: '1 · Preguntar al CDTI por Neotec 2027', estado: 'ahora',
+    resumen: 'La convocatoria de 2026 está cerrada. La pregunta es qué haría falta para llegar a la de 2027, sabiendo que la asociación no puede pedirla.',
+    borrador: {
+      para: 'El CDTI',
+      contactos: [C.cdti],
+      asunto: 'Consulta Neotec: elegibilidad de una sociedad de nueva creación promovida por una asociación',
+      cuerpo: `Buenos días:
+
+Dirijo una asociación que desarrolla un vehículo ligero de muy bajo consumo. Estamos valorando constituir una sociedad mercantil para llevarlo a producción y presentarla a la próxima convocatoria de Neotec.
+
+1. ¿Cuándo está prevista la convocatoria de 2027 y se mantendrá el requisito de que la empresa tenga entre seis meses y tres años en la fecha de cierre?
+2. ¿Sería elegible una sociedad nueva cuya socia fundadora sea una asociación, que le aporta el diseño y el prototipo desarrollados hasta ahora?
+3. ¿Son financiables la fabricación de prototipos y los ensayos de homologación en un servicio técnico?
+4. ¿El desarrollo de un vehículo completo encaja como tecnología propia, o se valora sólo la parte novedosa?
+
+Gracias y un saludo,
+[tu nombre y teléfono]`,
+    },
   },
   {
-    id: 'inv-2', padre: 'p-investigacion', tipo: 'paso', titulo: '2 · Escribir a un instituto universitario del automóvil', estado: 'por-explorar',
-    resumen: 'Proponer el vehículo como proyecto conjunto: ellos ponen bancos de ensayo y estudiantes, y tú el diseño y el prototipo. Varios son además servicio técnico de homologación.',
+    id: 'inv-2', padre: 'p-investigacion', tipo: 'paso', titulo: '2 · Proponer un proyecto conjunto a un instituto universitario', estado: 'por-explorar',
+    resumen: 'Ellos ponen bancos de ensayo y estudiantes de fin de grado o de máster; la asociación pone el diseño y el prototipo. El INSIA es además servicio técnico de homologación.',
+    borrador: {
+      para: 'Un instituto universitario del automóvil',
+      contactos: [C.insia],
+      asunto: 'Propuesta de colaboración: vehículo ligero de muy bajo consumo, diseño abierto',
+      cuerpo: `Buenos días:
+
+Soy ingeniero mecánico y dirijo [nombre de la asociación]. Hemos diseñado un vehículo ligero de cuatro ruedas y dos plazas en tándem, de carrocería muy aerodinámica, y una herramienta web propia que calcula su geometría, sus masas, su aerodinámica y su encaje en la normativa: [enlace a humanity.wiki/aeromovil].
+
+Vamos a construir el primer prototipo y nos gustaría hacerlo con ustedes. Propongo tres formas de colaborar, de menos a más:
+
+1. Trabajos de fin de grado o de máster sobre partes concretas: estructura, frenos, seguridad eléctrica o medida del consumo real.
+2. Medir en sus instalaciones lo que la herramienta sólo calcula: resistencia aerodinámica, resistencia a la rodadura y consumo.
+3. Un proyecto conjunto para una convocatoria pública de investigación.
+
+¿Con quién podría hablar para valorar si les encaja?
+
+Gracias y un saludo,
+[tu nombre y teléfono]`,
+    },
   },
   {
     id: 'p-circuito', padre: 'h1-legal', tipo: 'opcion', titulo: 'Circuito y exhibición primero, sin matrícula', estado: 'prometedora', comprobado: 'por-confirmar',
@@ -393,6 +477,22 @@ Gracias y un saludo,
     enContra: ['No es circular por España.', 'Un remolque y un circuito cuestan cada salida.'],
     siguiente: 'Ninguno hasta que haya vehículo.',
     descarta: 'No se descarta: es compatible con todas las demás.',
+    borrador: {
+      para: 'Un circuito o pista de pruebas cercano',
+      contactos: [C.circuito],
+      asunto: 'Consulta: alquiler de pista para ensayos de un prototipo de vehículo ligero',
+      cuerpo: `Buenos días:
+
+Estamos desarrollando un prototipo de vehículo ligero eléctrico de dos plazas y necesitamos medir su consumo a velocidad constante y probar frenada y estabilidad.
+
+1. ¿Alquilan la pista por horas o medias jornadas en exclusiva, y a qué precio?
+2. ¿Qué exigen a un vehículo sin matricular (seguro, revisión previa, equipo del conductor)?
+3. ¿Disponen de una recta o un óvalo donde mantener 80 km/h durante varios kilómetros?
+4. ¿Hay toma de corriente para recargar?
+
+Gracias y un saludo,
+[tu nombre y teléfono]`,
+    },
   },
   {
     id: 'p-otro-pais', padre: 'h1-legal', tipo: 'opcion', titulo: 'Matricularlo en otro país europeo y traerlo', estado: 'dudosa', comprobado: 'leido',
@@ -402,7 +502,7 @@ Gracias y un saludo,
       'Sin leer: cuánto cuesta en Alemania o en Países Bajos aprobar un vehículo construido desde cero. Lo que encontré habla de modificaciones, no de vehículos nuevos.',
     ],
     enContra: ['Dos administraciones en lugar de una.', 'Hay que llevar el vehículo y, en la práctica, tener domicilio allí.'],
-    siguiente: 'Ninguno. Se retoma sólo si las vías españolas se cierran todas.',
+    siguiente: 'Sin consulta propia: va como pregunta 6 en el correo al Ministerio de Industria, dentro de «Matricularlo como prototipo».',
     descarta: 'Queda aparcada mientras haya una vía española abierta.',
     fuentes: [F.rd750],
   },
@@ -419,6 +519,22 @@ Gracias y un saludo,
     enContra: ['Exige tener ya un prototipo.', 'Tramitación de meses.', 'La homologación depende de Industria, no de Transportes.'],
     siguiente: 'Una consulta al Ministerio de Transportes: si la oficina del espacio de pruebas admite ya solicitudes.',
     descarta: 'Se descarta si la oficina todavía no funciona, o si confirma que no puede exceptuar la homologación, que depende de Industria.',
+    borrador: {
+      para: 'El Ministerio de Transportes y Movilidad Sostenible',
+      contactos: [C.transportes],
+      asunto: 'Consulta: espacio controlado de pruebas de la Ley 9/2025 para un vehículo ligero innovador',
+      cuerpo: `Buenos días:
+
+La Ley 9/2025, de Movilidad Sostenible, crea en sus artículos 62 a 80 un espacio controlado de pruebas. Estamos desarrollando un vehículo ligero de muy bajo consumo y querría saber si puede acogerse.
+
+1. ¿Está ya en funcionamiento la oficina gestora y admite solicitudes? Si no, ¿cuándo está previsto?
+2. ¿Puede el protocolo de pruebas permitir la circulación de un vehículo todavía no homologado, o la homologación queda fuera por depender de Industria?
+3. ¿Encajaría mejor un proyecto sobre el modelo de uso y de financiación colectiva del vehículo que sobre el vehículo en sí?
+4. ¿Puede presentarlo una asociación?
+
+Gracias y un saludo,
+[tu nombre y teléfono]`,
+    },
     fuentes: [F.ley9],
   },
   {
@@ -464,9 +580,10 @@ Gracias y un saludo,
     decidido: ['19-11-2026: tope por etapa.'],
   },
   {
-    id: 'h1-figura', padre: 'h1', tipo: 'decision', titulo: '¿A nombre de quién: tú o una sociedad fabricante?', estado: 'ahora',
-    resumen: 'Varias puertas dependen de esto. Como persona puedes reformar el Twizy y pedir una homologación individual. Para el prototipo, las placas rojas y las ayudas hace falta una sociedad.',
-    preguntas: ['¿Tienes ya una sociedad que pueda usarse para esto, o habría que constituir una nueva?'],
+    id: 'h1-figura', padre: 'h1', tipo: 'decision', titulo: '¿A nombre de quién: tú, la asociación o una sociedad?', estado: 'ahora',
+    resumen: 'Ya existe una asociación con ocho años de antigüedad. Sirve para ser titular del vehículo y para firmar convenios. Lo que no está claro es si puede constar como fabricante, y para Neotec no vale.',
+    decidido: ['19-11-2026: hay una asociación constituida en España desde hace ocho años.'],
+    preguntas: ['¿En qué comunidad autónoma matricularías el vehículo? La inspección única y la matrícula de prototipo las tramita la comunidad, y de ahí salen los contactos de la ITV y de los circuitos.'],
   },
   {
     id: 'f-persona', padre: 'h1-figura', tipo: 'opcion', titulo: 'Tú, como titular del vehículo', estado: 'por-explorar', comprobado: 'leido',
@@ -476,11 +593,25 @@ Gracias y un saludo,
     fuentes: [F.rd750],
   },
   {
+    id: 'f-asociacion', padre: 'h1-figura', tipo: 'opcion', titulo: 'La asociación que ya existe', estado: 'prometedora', comprobado: 'por-confirmar',
+    resumen: 'Puede ser titular del vehículo, pedir la homologación individual como titular y firmar un convenio con una universidad. Sin coste nuevo.',
+    detalle: [
+      'Leído: la homologación individual la pide «el interesado» y, si es el titular, no necesita estar inscrito como fabricante.',
+      'Leído: Neotec exige sociedad mercantil de menos de tres años. La asociación no puede pedirla.',
+      'Sin leer: si una asociación puede constar como fabricante para matricular un prototipo, y si la DGT le concede placas rojas. Son la pregunta 1 de los correos al Ministerio y a la DGT.',
+    ],
+    aFavor: ['Ya existe: no hay que constituir nada.', 'Encaja con un proyecto abierto y con convenios de investigación.', 'Separa el vehículo de tu patrimonio personal.'],
+    enContra: ['No reparte beneficios ni admite inversores: no sirve para la fábrica.', 'Fuera de Neotec.', 'Puede no valer como fabricante.'],
+    siguiente: 'Enviar los correos al Ministerio y a la DGT: los dos empiezan por esta pregunta.',
+    descarta: 'Deja de bastar el día que haga falta vender vehículos o dar entrada a socios.',
+    fuentes: [F.rd750, F.neotec],
+  },
+  {
     id: 'f-sociedad', padre: 'h1-figura', tipo: 'opcion', titulo: 'Una sociedad que conste como fabricante', estado: 'por-explorar', comprobado: 'por-confirmar',
-    resumen: 'Necesaria para matricular como prototipo, pedir placas rojas, optar a Neotec y, más adelante, vender. La fecha de constitución cuenta para las ayudas.',
+    resumen: 'Necesaria para optar a Neotec y, más adelante, para vender y dar entrada a socios. Puede hacer falta también para el prototipo y las placas rojas, si la asociación no vale. La fecha de constitución cuenta para las ayudas.',
     aFavor: ['Abre todas las puertas.', 'Separa tu patrimonio del proyecto.', 'Es la que tendrá que existir de todos modos para vender.'],
     enContra: ['Cuesta constituirla y mantenerla cada año aunque no facture.', 'Neotec pide 20.000 € de capital desembolsado.'],
-    siguiente: 'Si ya tienes una sociedad, comprobar su fecha de constitución y su objeto social.',
+    siguiente: 'Esperar a las respuestas del Ministerio, la DGT y el CDTI: dirán si hace falta ya o puede esperar al hito 2.',
   },
 
   // ── Assumptions ─────────────────────────────────────────────────────────────────────────────────────────────────
