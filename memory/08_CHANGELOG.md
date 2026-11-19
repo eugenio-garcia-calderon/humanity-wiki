@@ -12988,3 +12988,11 @@ Novedades de contenido: puerta nueva «Matricularlo como prototipo» (artículo 
 - Verified: a PP point that shares its place with Vox on Inmigración shows PP and Vox together; the card opens to the right of the pointer and is centred vertically when it fits (680 px tall at 900 px of window height); a single-party card opens to the right and is centred; interaction suite 237 of 237; «Todos» suite passes; no page errors; `tsc --noEmit` clean.
 - Not verified: touch devices, screen readers, the installed app (the service worker may serve the old build; `?sw=off` drops it), and windows shorter than 800 px.
 - Files: `public/observatorio-polarizacion/index.html`, `memory/08_CHANGELOG.md`.
+
+## 2026-11-19 · Estrategia: una consulta redactada por cada vía, con destinatarios
+
+> «desarrolla y redacta las preguntas/email/consultas a hacer en cada estrategia, y añade también los correos a quien va dirigido cada uno. Ya tengo una entidad constituida desde hace 8 años, es una asociación en España»
+
+Nueve consultas redactadas, cada una dentro de su caja: ingeniero de reformas, servicio técnico de homologación, Ministerio de Industria (prototipo), DGT (placas rojas), CDTI (Neotec 2027), instituto universitario, circuito, Ministerio de Transportes (sandbox) y la del triciclo. Cada borrador lista sus destinatarios; el correo abre el programa de correo con el asunto y el texto ya puestos. Sólo figuran direcciones publicadas por el destinatario: IDIADA, INSIA, Ministerio de Industria y CDTI. De INTA sólo hay teléfono; de TÜV, DGT, Transportes y los ingenieros de reformas no hay correo público y se indica cómo llegar.
+
+La decisión «¿A nombre de quién?» incorpora la asociación: vale como titular y para convenios; Neotec exige sociedad mercantil; si puede constar como fabricante es la primera pregunta de los correos al Ministerio y a la DGT. Neotec 2026 consta como cerrada (plazo del 14 de abril al 14 de mayo).

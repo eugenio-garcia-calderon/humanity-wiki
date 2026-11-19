@@ -83,6 +83,19 @@ function BorradorCorreo({ b }: { b: Borrador }) {
       {abierto && (
         <div className="border-t border-slate-200 p-3">
           <p className="text-xs text-slate-500">Para: {b.para}. Cambia lo que va entre corchetes antes de enviarlo.</p>
+          {b.contactos?.length ? (
+            <ul className="mt-2 space-y-1.5">{b.contactos.map(c => (
+              <li key={c.nombre} className="rounded-md bg-slate-50 px-2.5 py-1.5 text-sm">
+                <span className="font-medium text-slate-900">{c.nombre}</span>
+                <span className="flex flex-wrap gap-x-3 gap-y-0.5">
+                  {c.correo && <a className="break-all text-teal-700 underline-offset-2 hover:underline" href={`mailto:${c.correo}?subject=${encodeURIComponent(b.asunto)}&body=${encodeURIComponent(b.cuerpo)}`}>{c.correo}</a>}
+                  {c.telefono && <a className="text-teal-700 underline-offset-2 hover:underline" href={`tel:${c.telefono.replace(/\s/g, '')}`}>{c.telefono}</a>}
+                  {c.web && <a className="inline-flex items-center gap-1 text-teal-700 underline-offset-2 hover:underline" href={c.web} target="_blank" rel="noreferrer"><ExternalLink className="h-3.5 w-3.5" />web</a>}
+                </span>
+                {c.nota && <span className="block text-xs text-slate-500">{c.nota}</span>}
+              </li>))}
+            </ul>
+          ) : null}
           <p className="mt-2 text-sm font-medium text-slate-900">{b.asunto}</p>
           <p className="mt-2 whitespace-pre-wrap text-sm text-slate-700">{b.cuerpo}</p>
           <Button variant="outline" onClick={copiar} className="mt-3 gap-2 px-3 py-1.5 text-sm font-medium normal-case tracking-normal"><ClipboardCopy className="h-4 w-4" />{copiado ? 'Copiado' : 'Copiar el correo'}</Button>
