@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "public/observatorio-polarizacion/index.html",
+      "motivo": "Empates visibles, punto fijable y detalle en la columna derecha",
+      "desde": "2026-11-19T20:29:05.793Z"
+    }
+  ]
 }
