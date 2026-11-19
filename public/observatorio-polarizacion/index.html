@@ -898,9 +898,13 @@ footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 #geo-svg.geo-entra .geo-shape path,#geo-svg.geo-entra .geo-shape circle{animation:geoEntra .65s cubic-bezier(.2,.8,.2,1) both;animation-delay:var(--d,0ms);transform-box:view-box;transform-origin:410px 372px}
 @media (prefers-reduced-motion:reduce){#geo-svg.geo-entra .geo-shape path,#geo-svg.geo-entra .geo-shape circle{animation:none}}
 .gm-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:18px;background:var(--bg-2);-webkit-overflow-scrolling:touch}
-.gm{display:grid;grid-template-columns:minmax(124px,168px) repeat(10,minmax(66px,1fr));min-width:860px}
+.gm{display:grid;grid-template-columns:minmax(124px,168px) repeat(11,minmax(66px,1fr));min-width:920px}
 .gm > *{border-bottom:1px solid var(--line)}
-.gm > :nth-last-child(-n+11){border-bottom:0}
+.gm > :nth-last-child(-n+12){border-bottom:0}
+/* Columna «Todos los temas»: un poco más marcada para leerla como resumen */
+.gm-tot{background:color-mix(in srgb,var(--tc) 8%,transparent)}
+.gm-todos{color:var(--ink);font-weight:600}
+.gm-vacio{display:block}
 .gm-p{position:sticky;left:0;z-index:1;background:var(--bg-2);padding:8px 12px;display:flex;flex-direction:column;justify-content:center;gap:3px;font:600 14px/1.2 var(--sans);color:var(--ink);border-right:1px solid var(--line)}
 .gm-p span{display:flex;align-items:center;gap:8px}
 .gm-p i{flex:none;width:10px;height:10px;border-radius:50%;background:var(--pc)}
@@ -3955,20 +3959,35 @@ const ILUS = {
   }
   const TOTAL = KEYS.reduce((a, k) => a + TEMAS[k].ejes.length, 0);
   function matriz() {
-    let h = `<div class="gm-p" aria-hidden="true"></div>` + KEYS.map((k) => { const t = TEMAS[k]; return `<button class="gm-t${k === st.tema ? " on" : ""}" data-mt="${k}" style="--tc:${t.c}" aria-label="Abrir ${t.n}"><span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64">${ILUS[k] || ""}</svg></span>${t.n}</button>`; }).join("");
+    // Primera columna: todos los temas a la vez. Cada partido, con la media de cada tema como una arista (diez en total)
+    const TODOS_ICO = `<svg viewBox="0 0 64 64"><polygon points="32,5 55,19 55,45 32,59 9,45 9,19" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><polygon points="32,17 46,25 46,39 32,47 18,39 18,25" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/></svg>`;
+    let h = `<div class="gm-p" aria-hidden="true"></div>`
+      + `<button class="gm-t gm-todos" data-todos-go style="--tc:#EDEBE6" aria-label="Ver todos los temas en una sola figura"><span class="ill" aria-hidden="true">${TODOS_ICO}</span>Todos los temas</button>`
+      + KEYS.map((k) => { const t = TEMAS[k]; return `<button class="gm-t${k === st.tema ? " on" : ""}" data-mt="${k}" style="--tc:${t.c}" aria-label="Abrir ${t.n}"><span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64">${ILUS[k] || ""}</svg></span>${t.n}</button>`; }).join("");
     PARTIDOS.forEach((p) => {
       const basico = KEYS.reduce((a, k) => a + TEMAS[k].v[p.k].filter((x) => alcanza(x, 0)).length, 0);
       h += `<div class="gm-p" style="--pc:${p.c}"><span><i></i>${p.n}</span><small>Lo básico en ${basico} de ${TOTAL} aspectos</small></div>`
+        + `<button class="gm-c gm-tot" data-todos-go data-mp="${p.k}" style="--tc:${p.c}" aria-label="${p.n} en todos los temas">${mini(KEYS.map((k) => mediaTema(k, p.k)), p.c)}</button>`
         + KEYS.map((k) => { const t = TEMAS[k], v = t.v[p.k]; return `<button class="gm-c${k === st.tema ? " on" : ""}" data-mt="${k}" data-mp="${p.k}" style="--tc:${t.c}" aria-label="${p.n} en ${t.n}: ${hastaDonde(v)}">${mini(v, p.c)}</button>`; }).join("");
     });
     const hechos = KEYS.filter(valida);
     if (hechos.length) {
       h += `<div class="gm-p gm-yo"><span><i style="background:#EDEBE6"></i>Tu figura</span><small>${hechos.length} de ${KEYS.length} temas dibujados</small></div>`
+        + `<span class="gm-vacio" aria-hidden="true"></span>`
         + KEYS.map((k) => { const t = TEMAS[k]; return `<button class="gm-c${k === st.tema ? " on" : ""}" data-mt="${k}" data-myo style="--tc:${t.c}" aria-label="${valida(k) ? "Tu figura en " + t.n : "Dibujar tu figura en " + t.n}">${valida(k) ? mini(tu[k], "#EDEBE6") : `<span class="mas-yo">+ dibujar</span>`}</button>`; }).join("");
     }
     $("#geo-matriz").innerHTML = h;
   }
   $("#geo-matriz").addEventListener("click", (e) => {
+    const todos = e.target.closest("[data-todos-go]");
+    if (todos) {
+      const pt = todos.dataset.mp;
+      if (pt && st.mejor) setMejor(false);
+      setTodos(true);
+      if (pt) { st.sel.add(pt); st.foco = pt; todo(); guardarURL(); }
+      stage.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+      return;
+    }
     const b = e.target.closest("[data-mt]"); if (!b) return;
     const yo = b.hasAttribute("data-myo"), p = b.dataset.mp;
     if (yo) { if (!st.yo) modoYo(true); }
@@ -4035,7 +4054,7 @@ const ILUS = {
   }
 
   const tabs = $("#geo-tema");
-  const BOTON_TODOS = `<button class="geo-tc geo-tc-todos" role="tab" data-todos aria-selected="false" aria-controls="geo-svg" style="--tc:#EDEBE6"><span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64"><polygon points="32,5 55,19 55,45 32,59 9,45 9,19" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><polygon points="32,17 46,25 46,39 32,47 18,39 18,25" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/></svg></span><span class="nm">Todos</span></button>`;
+  const BOTON_TODOS = `<button class="geo-tc geo-tc-todos" role="tab" data-todos aria-selected="false" aria-controls="geo-svg" style="--tc:#EDEBE6"><span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64"><polygon points="32,5 55,19 55,45 32,59 9,45 9,19" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><polygon points="32,17 46,25 46,39 32,47 18,39 18,25" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/></svg></span><span class="nm">Todos los temas</span></button>`;
   tabs.innerHTML = KEYS.map((k) => { const t = TEMAS[k]; return `<button class="geo-tc" role="tab" data-t="${k}" aria-selected="${k === st.tema}" tabindex="${k === st.tema ? 0 : -1}" aria-controls="geo-svg" style="--tc:${t.c}"><span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64">${ILUS[k] || ""}</svg></span><span class="nm">${t.n}</span></button>`; }).join("") + BOTON_TODOS;
   function marcarTab(enfocarTab) {
     $$("[data-t]", tabs).forEach((b) => {

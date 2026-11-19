@@ -12996,3 +12996,11 @@ Novedades de contenido: puerta nueva «Matricularlo como prototipo» (artículo 
 Nueve consultas redactadas, cada una dentro de su caja: ingeniero de reformas, servicio técnico de homologación, Ministerio de Industria (prototipo), DGT (placas rojas), CDTI (Neotec 2027), instituto universitario, circuito, Ministerio de Transportes (sandbox) y la del triciclo. Cada borrador lista sus destinatarios; el correo abre el programa de correo con el asunto y el texto ya puestos. Sólo figuran direcciones publicadas por el destinatario: IDIADA, INSIA, Ministerio de Industria y CDTI. De INTA sólo hay teléfono; de TÜV, DGT, Transportes y los ingenieros de reformas no hay correo público y se indica cómo llegar.
 
 La decisión «¿A nombre de quién?» incorpora la asociación: vale como titular y para convenios; Neotec exige sociedad mercantil; si puede constar como fabricante es la primera pregunta de los correos al Ministerio y a la DGT. Neotec 2026 consta como cerrada (plazo del 14 de abril al 14 de mayo).
+
+## 2026-11-20 · Geometry: «Todos los temas» column in the ten-topic table; top button renamed
+
+- The table «Los diez temas de un vistazo» has a new first column, «Todos los temas». Each party's cell draws its average on each topic as one of ten edges, so it shows the whole picture at once. Clicking the column header or a party's cell opens the «Todos» view (a party's cell also selects that party).
+- The top-bar button «Todos» now reads «Todos los temas». The «Todos» and «Ninguno» chips in the party panel keep their names: they select parties, not topics.
+- Verified: the table has 12 cells per row (10 rows); the top button and column header read «Todos los temas»; clicking the header or a party cell opens the «Todos» view with the 10 topics drawn; no page errors; interaction suite and «Todos» suite run before this change still pass in their own branch.
+- Not verified: touch devices, screen readers, the installed app (the service worker may serve the old build; `?sw=off` drops it), and windows narrower than 920 px (the table scrolls sideways there, as before).
+- Files: `public/observatorio-polarizacion/index.html`, `memory/08_CHANGELOG.md`.
