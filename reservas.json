@@ -5,6 +5,12 @@
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "Sección Estrategia",
       "desde": "2026-11-19T20:59:37.922Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "Estrategia",
+      "desde": "2026-11-19T21:05:57.491Z"
     }
   ]
 }
