@@ -41,6 +41,12 @@
       "ruta": "drizzle/0233_figuras_orden.sql",
       "motivo": "Orden de los aspectos: columna orden en figuras",
       "desde": "2026-11-19T19:38:30.093Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/triciclo/campos.ts",
+      "motivo": "Vía delantera mínima 0,90 m",
+      "desde": "2026-11-19T19:44:38.705Z"
     }
   ]
 }
