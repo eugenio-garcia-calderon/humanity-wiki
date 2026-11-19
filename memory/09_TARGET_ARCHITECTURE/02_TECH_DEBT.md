@@ -1055,3 +1055,12 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
   «inicia sesión» notice, no upload button and the catalogue suggestion, but the scripted `fill` into the wheels line's
   field never completed under a loaded machine, so the save itself was only seen logged in (same code path: no session
   check on typing). One headless rerun: ~10 min.
+
+## 2026-11-19 — Geometry "best per aspect" view: shortcuts taken
+
+- **Tie names are visible only on hover, tap or focus.** The chart says "N empatan", so a printed or screenshot reader cannot see who tied. A list under the chart: ~30 min; costs a few lines per topic on phones.
+- **No written posture per party.** The tooltip shows the party's value and the generic text of the level it reaches, labelled as such. Showing what a party says needs one written posture per party and aspect (9 × 64): content work for Eugenio.
+- **Role conflict in the new points.** The points use `role="button"` inside an SVG with `role="img"`, the same pattern the aspect controls already use. Not tested with NVDA or VoiceOver: ~1 h to check.
+- **The view is not in the shared link.** `guardarURL` keeps topic and party selection, not this view: ~15 min.
+- **The name is hard to read at first glance.** "Déjalo de lo mejor de cada uno" is Eugenio's wording; a reviewer suggested "Lo mejor de cada partido". His call.
+- **Two phrases for the same idea** ("todos los aspectos" in the level list, "todo el tema" in the topic list). Unify: ~10 min.
