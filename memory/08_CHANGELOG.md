@@ -12890,3 +12890,10 @@ Pendiente: grupo 5 (élite), Europa, Mundo, y la búsqueda de ingresos.
 - Verified: `scripts/probar-figuras.ts` 54 of 54 against a throwaway database with migrations 0232 and 0233 applied (new section 8: old rows are converted, new rows keep their order, new publications are stored as orden 2); browser check of the observatorio, 152 of 153 (the remaining one is the known test-server console noise); browser check of both local migrations, 10 of 10; `npm run build` passes; `tsc --noEmit` clean; screenshot of the reordered hexagon checked.
 - Not verified: production database (the migration has not run there), the installed service worker (`?sw=off`), real phones, the classification itself (a judgement, see decision entry).
 - Files: `public/observatorio-polarizacion/index.html`, `public/geometria-figura/{comun.js,index.html,datos.json}`, `src/server/figuras.ts`, `drizzle/0233_figuras_orden.sql`, `scripts/probar-figuras.ts`.
+## 2026-11-19 · Vía delantera hasta 0,90 m
+
+> «Permite que la vía delantera y la vía trasera puedan tener como mínimo 0,9 metros. Ahora no pueden bajar de 1,4 metros»
+
+El deslizador «Vía delantera» baja de 1,40 m a 0,90 m. Por defecto no cambia ningún diseño (`triciclo-disenos` sigue «Todo OK»).
+
+La vía trasera no baja de 0,95 m: ese es su mínimo geométrico (los carenados traseros tocarían la cola por debajo). Su deslizador ya admitía 0,80 m y se queda como estaba; el límite lo impone la forma, no el deslizador.
