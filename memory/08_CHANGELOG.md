@@ -12971,3 +12971,11 @@ Las respuestas a las preguntas se guardan ahora por el texto de la pregunta, no 
 Las marcas y respuestas de Eugenio se leyeron de su navegador y quedan escritas en el árbol como «Ya decidido», sin cifras personales. Cada puerta legal del hito 1 tiene ahora sus pasos numerados y una caja «Qué la descarta».
 
 Novedades de contenido: puerta nueva «Matricularlo como prototipo» (artículo 5.2 del Real Decreto 750/2010); la homologación individual como cuadriciclo la puede pedir el titular y la Orden PJC/528/2026 deja doce requisitos fuera; la homologación individual como turismo lleva los choques con un código cuya definición para turismos no se pudo leer; las placas rojas sólo valen para trayectos autorizados; matricular en otro país no es un atajo (artículo 6.4); Neotec 2026 con sus cifras. Nueva decisión «¿A nombre de quién: tú o una sociedad fabricante?» y el tope pasa a ser por etapas. Tres borradores de consulta: ingeniero de reformas, servicio técnico y DGT.
+
+## 2026-11-19 · Geometry: topic «Clima» renamed «Medio ambiente»
+
+- The sixth topic tile and its axis now read «Medio ambiente» (the key `amb` is unchanged, so links and saved selections keep working). `datos.json` regenerated; `--verificar` passes.
+- Verified: the label fits on one line in the top bar on desktop and on a 390 px viewport; clicking the tile opens the topic without page errors; interaction suite 237 of 237; «Todos» suite passes; `tsc --noEmit` clean.
+- Not run: `scripts/probar-figuras.ts`, which needs a PostgreSQL database that is not available in this session. Its only topic check looks for «Inmigración», which is unchanged.
+- Not verified: touch devices, the installed app (the service worker may serve the old build; `?sw=off` drops it).
+- Files: `public/observatorio-polarizacion/index.html`, `public/geometria-figura/datos.json`, `memory/08_CHANGELOG.md`.
