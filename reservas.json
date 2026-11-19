@@ -5,6 +5,12 @@
       "ruta": "public/observatorio-polarizacion/index.html",
       "motivo": "Hover: varios partidos en un punto, tarjeta a la derecha del ratón",
       "desde": "2026-11-19T22:53:02.532Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "Entrada del changelog: hover",
+      "desde": "2026-11-19T22:53:05.448Z"
     }
   ]
 }
