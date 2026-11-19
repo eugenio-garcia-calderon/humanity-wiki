@@ -221,6 +221,28 @@ async function main() {
   const unos = datos.temas.map((t: any) => t.ejes.map(() => 5));
   const rUnos = comun.resumen(unos, datos);
   comprobar('figura con cifras: sigue dando un partido más parecido', rUnos.mejorGeneral !== null && typeof rUnos.mejorGeneral.parecido === 'number');
+  // Orden de los aspectos (2026-11-19): las figuras publicadas antes se leen convertidas al orden nuevo.
+  console.log('\n8. Orden de los aspectos');
+  const valores = datos.temas.map((t: any, i: number) => t.ejes.map((_: any, j: number) => (i * 7 + j * 3) % 11));
+  const esperadaConvertida = datos.temas.map((_: any, i: number) => comun.PERMUTACION_V2[i].map((o: number) => valores[i][o]));
+  // Filas que representan datos que ya existían: se escriben a mano porque la vía normal ya no crea orden 1.
+  const idAntigua = 'AntiguaPrueba1', idNueva = 'NuevaPrueba002';
+  await db.execute(sql`INSERT INTO figuras_geometria (id, nombre, puntuaciones, estado, orden, clave_hash, quiere_novedades)
+    VALUES (${idAntigua}, 'Antigua Prueba', ${JSON.stringify(valores)}::jsonb, 'publicada', 1, ${'0'.repeat(64)}, false)`);
+  await db.execute(sql`INSERT INTO figuras_geometria (id, nombre, puntuaciones, estado, orden, clave_hash, quiere_novedades)
+    VALUES (${idNueva}, 'Nueva Prueba', ${JSON.stringify(valores)}::jsonb, 'publicada', 2, ${'0'.repeat(64)}, false)`);
+  const leidaAntigua = await peticion(`/api/figuras/${idAntigua}`);
+  comprobar('una figura de orden 1 se lee con el orden nuevo', leidaAntigua.status === 200 && JSON.stringify(leidaAntigua.json?.puntuaciones) === JSON.stringify(esperadaConvertida), leidaAntigua.json?.puntuaciones?.[0]);
+  comprobar('convertir no pierde ni cambia ningún valor (suma igual)', leidaAntigua.json?.puntuaciones?.flat().reduce((a: number, b: number) => a + b, 0) === valores.flat().reduce((a: number, b: number) => a + b, 0));
+  const leidaNueva = await peticion(`/api/figuras/${idNueva}`);
+  comprobar('una figura de orden 2 NO se convierte', leidaNueva.status === 200 && JSON.stringify(leidaNueva.json?.puntuaciones) === JSON.stringify(valores), leidaNueva.json?.puntuaciones?.[0]);
+  const galeria = await peticion('/api/figuras');
+  const enGaleria = (galeria.json?.figuras || []).find((f: any) => f.id === idAntigua);
+  comprobar('la galería también devuelve la figura antigua convertida', JSON.stringify(enGaleria?.puntuaciones) === JSON.stringify(esperadaConvertida));
+  const nueva = await peticion('/api/figuras', { method: 'POST', body: { nombre: 'Ana Orden', puntuaciones: puntuacionesTodas(5), tiempo: TIEMPO_OK } });
+  const ordenNueva = (await db.execute(sql`SELECT orden FROM figuras_geometria WHERE id = ${nueva.json?.id}`)).rows[0] as any;
+  comprobar('una figura publicada hoy se guarda con orden 2', nueva.status === 201 && Number(ordenNueva?.orden) === 2, ordenNueva);
+
   servidor.close();
   await pool.end();
 

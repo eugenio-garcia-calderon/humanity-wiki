@@ -12878,3 +12878,15 @@ Pendiente: grupo 5 (élite), Europa, Mundo, y la búsqueda de ingresos.
 - `main` merged into `nube/test-figura`; memory conflicts resolved keeping both sides.
 - Verified: `scripts/probar-figuras.ts` 49 of 49 against a throwaway database (5498), `tsc --noEmit` and `npm run build`. The end-to-end browser walkthrough was not rerun after this change.
 - Not verified: real email provider, production configuration, real phones, installed service worker.
+
+## 2026-11-19 — Geometry: aspects reordered left to right (classic left on the left, right on the right)
+
+- The ten topics' aspects moved to clock positions so that classic left-wing aspects sit on the left of the hexagon and classic right-wing ones on the right. Neutral aspects sit at top and bottom. Values, texts, levels and party tags move with their aspect and were verified by name (64 aspects, 10 topics, no value changed).
+- Layout rule: a left-leaning aspect never goes to a right slot and the reverse; overflow goes to top/bottom. Zero wrong-side placements. Neutral aspects on a side: 1 in Services, Climate, Territory, 3 in Institutions. Leaning aspects in top/bottom because their side was full: 7 across topics. See the decision entry for the rule and the classification caveats.
+- Each topic's `cap` text was rewritten: the opposite pairs changed, so the old description would have been false.
+- Published figures (`figuras_geometria`) store values by position. Migration `0233_figuras_orden.sql` adds `orden` (default 1 = old order). Old rows are converted when read (`publica` in `src/server/figuras.ts`, `comun.aOrdenNuevo`); new rows are saved with `orden` 2. No existing row is rewritten.
+- Local copies converted once on first load: the observatorio's saved figure (`politica.geo.tu.v1` → `v2`) and the figure test's draft (`geometria-figura-v1` → `v2`). The old key is removed only after the new one is written.
+- `public/geometria-figura/datos.json` regenerated (`--verificar` passes).
+- Verified: `scripts/probar-figuras.ts` 54 of 54 against a throwaway database with migrations 0232 and 0233 applied (new section 8: old rows are converted, new rows keep their order, new publications are stored as orden 2); browser check of the observatorio, 152 of 153 (the remaining one is the known test-server console noise); browser check of both local migrations, 10 of 10; `npm run build` passes; `tsc --noEmit` clean; screenshot of the reordered hexagon checked.
+- Not verified: production database (the migration has not run there), the installed service worker (`?sw=off`), real phones, the classification itself (a judgement, see decision entry).
+- Files: `public/observatorio-polarizacion/index.html`, `public/geometria-figura/{comun.js,index.html,datos.json}`, `src/server/figuras.ts`, `drizzle/0233_figuras_orden.sql`, `scripts/probar-figuras.ts`.

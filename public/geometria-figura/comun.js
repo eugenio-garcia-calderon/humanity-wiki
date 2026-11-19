@@ -141,6 +141,29 @@
     return 'En conjunto, lo que más se parece a ' + sujeto + ' es ' + a.n + ' (' + a.parecido + ' %).';
   }
 
+  // ORDEN DE LOS ASPECTOS (2026-11-19). La versión 1 guardaba cada valor según la posición del aspecto
+  // en la lista de antes. PERMUTACION_V2[t][p] = índice ANTIGUO del aspecto que hoy está en la posición p
+  // del tema t (t en el orden de datos.temas). Lo que se guardó con el orden antiguo se convierte con
+  // `aOrdenNuevo`. La misma tabla está en la página de la geometría (ORDEN_ANTERIOR): si cambia una, cambia la otra.
+  var PERMUTACION_V2 = [
+    [1, 0, 7, 6, 3, 5, 4, 2], // inm
+    [4, 6, 5, 3, 1, 7, 0, 2], // ser
+    [5, 4, 3, 1, 2, 0], // eco
+    [2, 5, 3, 4, 1, 0], // tra
+    [3, 2, 4, 5, 1, 0], // viv
+    [2, 5, 4, 3, 1, 0], // amb
+    [2, 1, 4, 3, 5, 0], // ter
+    [5, 4, 3, 2, 1, 0], // der
+    [0, 2, 3, 1, 5, 4], // ins
+    [5, 0, 4, 1, 3, 2], // ext
+  ];
+  // Recibe una matriz por tema (la forma de `puntuaciones`, o de `v` y `m` en el borrador) y la devuelve en el orden nuevo.
+  function aOrdenNuevo(matrices) {
+    return matrices.map(function (fila, t) {
+      return PERMUTACION_V2[t].map(function (o) { return fila[o]; });
+    });
+  }
+
   return {
     UMBRAL: UMBRAL,
     NOMBRE_NIVEL: NOMBRE_NIVEL,
@@ -152,5 +175,7 @@
     figuraValida: figuraValida,
     resumen: resumen,
     frasePrincipal: frasePrincipal,
+    aOrdenNuevo: aOrdenNuevo,
+    PERMUTACION_V2: PERMUTACION_V2,
   };
 });

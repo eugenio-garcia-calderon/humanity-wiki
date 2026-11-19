@@ -2404,3 +2404,19 @@ They change saved designs' numbers on purpose.
 4. The newsletter checkbox stays. It records consent and stores the email; it does not yet subscribe anyone. Alternative rejected: hide the checkbox until a newsletter is connected.
 **Cost of switching later**: 1 and 4 are one line each in the route and the page; 2 is `parecido()` in `public/geometria-figura/comun.js`, shared by the page and the email.
 **Known consequence of 2**: a 0 meaning "lo rechazo" is also excluded. Separating them needs a stored "ignorado" state (about 30 min).
+
+## 2026-11-19 — Aspect order in the geometry: classic left on the left, right on the right
+
+**Context**: Eugenio asked to order the aspects so the party lean is visible on the hexagon, without changing any opinion or data, only positions. Example given: PP and Vox lean right; PSOE, Podemos and Frente Amplio lean left. He then asked to do everything, consequences included.
+**Chosen**:
+1. The classification is by the content of each aspect (is its classic position left or right in the Spanish debate), never by how the parties score. Values are untouched and were verified by name after the move.
+2. Rule for placement: a left-leaning aspect never sits on a right slot and the reverse; when a side is full the aspect goes top/bottom; neutral aspects fill top/bottom first. This gave zero wrong-side placements. The first version put some neutral aspects on a side by tie-break; that was found and replaced.
+3. Lean measured on the hexagon (x-position weighted by value): Vox +0.26, PP +0.12, Junts +0.07, PNV −0.01, PSOE −0.12, ERC −0.15, EH Bildu −0.20, Frente Amplio −0.24, Podemos −0.30. Content-only lean: Vox +0.57 … Podemos −0.58.
+4. Published figures and local drafts are stored by position, so they are converted, not left to break: a column `orden` (migration 0233, default 1) and a converter in `comun.js`. No stored row is rewritten.
+**Judgement calls that remain Eugenio's to change** (edit the classification and rerun `scripts/geometria-datos.mjs`, plus the permutation tables):
+- Abortion and euthanasia on the left, protection of life and support for motherhood on the right. The most contested placements.
+- "Lenguas y culturas propias" on the right: it belongs to the territorial axis, not left-right.
+- "Igualdad entre territorios" on the left and "Cohesión" on the right: same issue.
+- Institutions and justice: almost every aspect is neutral, so the topic reads as lean-free at the top, with three neutral aspects on the sides (that is what the rule produces).
+**Cost of switching later**: one permutation per topic. The page, `comun.js`, the figure page and the server each hold a copy of the table, so changing it means changing all four and the migration story would need a new `orden` value.
+**Known consequence**: a party's lean now depends on this classification. The chart of content-only lean does not depend on positions and is the one to cite when discussing the classification.
