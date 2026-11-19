@@ -12908,3 +12908,13 @@ Pendiente: grupo 5 (élite), Europa, Mundo, y la búsqueda de ingresos.
 El deslizador «Vía delantera» baja de 1,40 m a 0,90 m. Por defecto no cambia ningún diseño (`triciclo-disenos` sigue «Todo OK»).
 
 La vía trasera no baja de 0,95 m: ese es su mínimo geométrico (los carenados traseros tocarían la cola por debajo). Su deslizador ya admitía 0,80 m y se queda como estaba; el límite lo impone la forma, no el deslizador.
+
+## 2026-11-19 · Aeromóvil: sección «Estrategia» (árbol de decisiones)
+
+> «crees una pestaña que sea estrategia y que vayamos juntos desarrollándola… quiero verlo de forma visual e ir pudiendo tomar decisiones de forma ramificada… que me vayas haciendo preguntas»
+
+Nueva sección `/aeromovil/estrategia`, en el menú de secciones. Dibuja el camino de hoy a la fábrica como un árbol de izquierda a derecha: meta, hitos, decisiones y opciones. Primer contenido: el hito 1 (un vehículo rodando legal por España) con diez puertas legales, cada una marcada como «leído en la fuente» o «por confirmar», más los supuestos que hay que probar y los hitos siguientes sólo apuntados. Cada caja abre su detalle (a favor, en contra, siguiente paso pequeño, fuentes) y deja marcar sí / no / dudo, escribir una nota y responder a las preguntas.
+
+Las marcas, notas y respuestas se guardan sólo en el navegador de quien las escribe: la página es pública y son personales. «Copiar mis respuestas» las lleva a la conversación.
+
+Comprobado en un navegador de pruebas (escritorio y móvil) contra el servidor de desarrollo. No comprobado en producción ni con la app instalada.

@@ -191,3 +191,26 @@ Renaming a part drops its saved user price (the name is the key).
 - `homologacion/l7e.ts` + `EstudioL7e.tsx`: the L7e-A2 OK / No OK / A comprobar points (901/2014 fields 1.8.3–1.8.9,
   modes, two limiters, tampering), the scenarios table, and the tests (`ensayosL7e`, one tab each, all «pendiente»).
   `scripts/homologacion.ts` prints them and checks the study's numbers (28 / 45 / 15 kW).
+
+## `estrategia/` — the strategy tree («Estrategia», `/aeromovil/estrategia`, 2026-11-19)
+
+Eugenio and Claude work out, as a branching tree, how to get from today to a factory. Milestone 1 (one road-legal
+vehicle in Spain) is the only one developed in depth; the rest is sketched on purpose.
+
+| File | What |
+|---|---|
+| `arbol.ts` | THE TREE AS DATA: `ARBOL` (goal, milestones, decisions, options, assumptions), `fallosArbol()` |
+| `almacen.ts` | Eugenio's marks (sí / no / dudo), notes and answers — `localStorage` only, never the server |
+| `VistaEstrategia.tsx` | the drawing (boxes left to right, a parent on its first child's row), the detail card, the questions list |
+
+**A new node or an answer from Eugenio**: edit `arbol.ts`. `comprobado: 'leido'` only when the source in `fuentes` was
+read and says it; otherwise `'por-confirmar'`. A question for him goes in `preguntas` of the node that needs it. When he
+answers (in chat, or pasting «Copiar mis respuestas»), move the answer into the node's text and drop the question.
+Then `fallosArbol()` must return `[]`.
+
+**The page is public.** No personal figures (savings, limits, family, friends' names) in `arbol.ts`: write «tope
+fijado», not the amount. That is also why his answers stay in his browser.
+
+**Before you change this, decide**: marks in `localStorage` (today: private, zero server code, but one device only and
+Claude cannot read them) vs a per-account table (≈ half a day: migration, an owner-only route, a store like
+`notas/almacen.ts`). Worth it the day he uses two devices or wants Claude to read his marks without pasting.

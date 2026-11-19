@@ -14,6 +14,7 @@
 //   /aeromovil            Diseño 3D por capas, con medidas ajustables
 //   /aeromovil/tareas     comentarios de mejora = tareas pendientes (en la BD)
 //   /aeromovil/plan       plan de desarrollo por etapas
+//   /aeromovil/estrategia árbol de decisiones de hoy a la fábrica (estrategia/)
 //   /aeromovil/planos     láminas y DXF de fabricación del carenado y el chasis
 //   /aeromovil/exportar   STEP por capas, STL y parámetros para regenerar el STEP
 //   /aeromovil/componentes[/:id]  (solo Aeromóvil 1) ficha de cada pieza: peso,
@@ -31,7 +32,7 @@
 // slider/selector/block controls in controles.tsx. This page keeps the layout, the state and the 3D toolbar.
 import { Fragment, Suspense, lazy, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Armchair, BatteryCharging, Box, Fuel, Car, Route as RutaIcono, Warehouse, Camera, ChevronDown, CircleDot, ClipboardList, Factory, Weight, Hammer, Frame, Layers3, Lightbulb, ShieldCheck, Zap, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Maximize2, Minimize2, Ruler, Package, Ship, Wrench, Wind } from 'lucide-react';
+import { Armchair, BatteryCharging, Box, Fuel, Car, Route as RutaIcono, Warehouse, Camera, ChevronDown, CircleDot, ClipboardList, Factory, Weight, Hammer, Frame, Layers3, Lightbulb, ShieldCheck, Zap, GitCompare, X, DoorOpen, Download, Gauge, Layers, ListChecks, Map as MapIcon, Maximize2, Minimize2, Ruler, Package, Ship, Wrench, Wind, GitBranch } from 'lucide-react';
 import { Button } from '../components/ui/core';
 import { cn } from '../utils/cn';
 import { Visor3D, CAPAS, type CapaId, type Vista, type VisorHandle } from '../components/aeromovil/Visor3D';
@@ -97,10 +98,11 @@ import { comprobacionesHomologacion } from '../components/aeromovil/homologacion
 
 // The cornering circuit (2026-11-15): its own chunk, recharts comes with it and only this section needs it.
 const VistaCircuito = lazy(() => import('../components/aeromovil/circuito/VistaCircuito'));
+const VistaEstrategia = lazy(() => import('../components/aeromovil/estrategia/VistaEstrategia'));
 
 // v5 (2026-11-06): el diseño por defecto pasa a ser el Aeromóvil 1; lo guardado como v4 era del Gota y se queda en su clave.
 const CLAVE = 'aeromovil.parametros.v5';
-type Seccion = 'diseno' | 'componentes' | 'aranceles' | 'circuito' | 'tareas' | 'plan' | 'planos' | 'exportar';
+type Seccion = 'diseno' | 'componentes' | 'aranceles' | 'circuito' | 'tareas' | 'plan' | 'estrategia' | 'planos' | 'exportar';
 const SECCIONES: { k: Seccion; n: string; ruta: string; icono: typeof Box }[] = [
   { k: 'diseno', n: 'Diseño 3D', ruta: '/aeromovil', icono: Box },
   { k: 'componentes', n: 'Componentes', ruta: '/aeromovil/componentes', icono: Wrench },
@@ -109,6 +111,8 @@ const SECCIONES: { k: Seccion; n: string; ruta: string; icono: typeof Box }[] = 
   { k: 'circuito', n: 'Circuito', ruta: '/aeromovil/circuito', icono: RutaIcono },
   { k: 'tareas', n: 'Tareas', ruta: '/aeromovil/tareas', icono: ListChecks },
   { k: 'plan', n: 'Plan', ruta: '/aeromovil/plan', icono: MapIcon },
+  // 2026-11-19, Eugenio: «crees una pestaña que sea estrategia y que vayamos juntos desarrollándola»
+  { k: 'estrategia', n: 'Estrategia', ruta: '/aeromovil/estrategia', icono: GitBranch },
   { k: 'planos', n: 'Planos', ruta: '/aeromovil/planos', icono: Ruler },
   { k: 'exportar', n: 'Exportar a CAD', ruta: '/aeromovil/exportar', icono: Download },
 ];
@@ -1123,6 +1127,11 @@ export default function Aeromovil() {
       )}
       {seccion === 'tareas' && <VistaTareas tareas={tareas} recargar={recargar} error={errorTareas} dueno={dueno} />}
       {seccion === 'plan' && <VistaPlan />}
+      {seccion === 'estrategia' && (
+        <Suspense fallback={<p className="mx-auto max-w-[1200px] px-4 py-8 text-sm text-slate-500">Cargando la estrategia…</p>}>
+          <VistaEstrategia />
+        </Suspense>
+      )}
       {seccion === 'planos' && <VistaPlanos modelo={modelo} />}
       {seccion === 'exportar' && <VistaExportar modelo={modelo} visor={visor} porDefecto={porDefecto} resultados={res} />}
 

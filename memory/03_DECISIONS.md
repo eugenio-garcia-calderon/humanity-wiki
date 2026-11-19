@@ -2420,3 +2420,10 @@ They change saved designs' numbers on purpose.
 - Institutions and justice: almost every aspect is neutral, so the topic reads as lean-free at the top, with three neutral aspects on the sides (that is what the rule produces).
 **Cost of switching later**: one permutation per topic. The page, `comun.js`, the figure page and the server each hold a copy of the table, so changing it means changing all four and the migration story would need a new `orden` value.
 **Known consequence**: a party's lean now depends on this classification. The chart of content-only lean does not depend on positions and is the one to cite when discussing the classification.
+
+## 2026-11-19 — Strategy tree: data in code, Eugenio's marks in his browser
+
+**Context**: Eugenio asked for a «Estrategia» section to work out, with Claude, a branching plan from today to a factory, with questions he answers. The page is public; his answers are personal (savings, limits, family).
+**Decision**: the tree is a typed array in `src/components/aeromovil/estrategia/arbol.ts`, edited by Claude as the conversation advances. His marks, notes and answers live in `localStorage` (`aeromovil.estrategia.v1`) and reach Claude by copy and paste.
+**Alternatives**: (a) reuse `/api/aeromovil/notas` — rejected: its GET is public; (b) a new owner-only table and route — the right pattern, about half a day, postponed until he needs two devices; (c) hide the section behind login — rejected: the tree ships in a public JS chunk anyway, so it would only look private.
+**Consequence**: no personal figures may be written into `arbol.ts`. Whether the strategy stays public is asked to Eugenio inside the tree itself (node `abierto`).
