@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "public/observatorio-polarizacion/index.html",
-      "motivo": "Tema Clima renombrado a Medio ambiente",
-      "desde": "2026-11-19T22:40:37.774Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "public/geometria-figura/datos.json",
       "motivo": "Regenerado por el rename",
       "desde": "2026-11-19T22:40:41.059Z"
