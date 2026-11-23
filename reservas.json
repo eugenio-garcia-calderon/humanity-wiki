@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "public/observatorio-polarizacion/index.html",
-      "motivo": "Lectura al arrastrar en la geometría y revisión antes de publicar",
-      "desde": "2026-11-23T20:12:22.536Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "public/geometria-figura/index.html",
       "motivo": "Lectura al arrastrar en la geometría y revisión antes de publicar",
       "desde": "2026-11-23T20:12:38.362Z"
