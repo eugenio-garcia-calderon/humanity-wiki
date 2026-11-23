@@ -133,6 +133,11 @@ svg.radar.mini{width:100%;max-width:96px}
 .resumen-gen b{color:var(--acc)}
 
 form.publicar{display:grid;gap:14px;margin-top:6px}
+.revisor{display:grid;gap:12px;background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-top:6px}
+.revisor h3{margin:0;font-size:19px;color:var(--ink)}
+.revisor p{margin:0}
+.revisor-item{display:grid;gap:6px;padding-top:10px;border-top:1px solid var(--line)}
+.revisor-item p{color:var(--ink2)}
 .campo{display:grid;gap:6px}
 .campo label{font-weight:700}
 .campo input[type=text],.campo input[type=email]{min-height:46px;padding:10px 12px;border-radius:12px;border:1px solid var(--ctl);background:var(--bg3);color:var(--ink);font:16px var(--sans);width:100%}
@@ -263,6 +268,7 @@ footer p{margin:0 0 8px;max-width:80ch}
       <p class="lede" style="margin-bottom:6px">Se publica al momento y la puede ver cualquiera en la galería, sin registrarse. No hace falta cuenta. Al publicar te damos una <b>clave para borrarla</b>: guárdala, porque no vuelve a mostrarse. Podemos ocultar una figura si no es adecuada para la galería.</p>
       <div class="aviso" id="aviso-faltan" hidden></div>
 
+      <div class="revisor" id="revisor" aria-live="polite" hidden></div>
       <form class="publicar" id="form-publicar" novalidate>
         <div class="campo">
           <label for="f-nombre">Nombre con el que aparece tu figura</label>
@@ -369,6 +375,7 @@ footer p{margin:0 0 8px;max-width:80ch}
 </footer>
 
 <script src="comun.js"></script>
+<script src="revisor.js"></script>
 <script>
 (function () {
 'use strict';
@@ -726,6 +733,29 @@ function textoCorreoPublicado(estado, correo) {
   if (estado === 'sin_proveedor') return 'El envío de correos todavía no está activo en la plataforma, así que no te hemos podido enviar nada. Guarda el enlace y la clave.';
   return '';
 }
+/* Revisión antes de publicar: el aviso sale una vez por cada estado de la figura.
+   Si el usuario publica sin cambiar nada tras verla, se publica. Cambiar la figura vuelve a revisarla. */
+var revisionVista = null;
+function mostrarRevision(items) {
+  var caja = $('#revisor'); caja.textContent = ''; caja.hidden = false;
+  caja.appendChild(el('h3', { text: 'Antes de publicar, una revisión de tu figura' }));
+  if (!items.length) {
+    caja.appendChild(el('p', { text: 'No veo nada que mejorar en la forma de tu figura. Puedes publicarla.' }));
+    return;
+  }
+  caja.appendChild(el('p', { class: 'nota', text: 'Esta revisión mira la forma de la figura, no tus ideas: si un tema está todo igual, si dos temas son idénticos o si casi todo está en los extremos. Puedes publicar tal cual.' }));
+  items.forEach(function (it) {
+    var kids = [
+      el('p', { text: (it.tipo === 'aviso' ? 'Aviso · ' : 'Sugerencia · ') + it.titulo, class: 'lbl' }),
+      el('p', { text: it.texto })
+    ];
+    if (it.tema !== null) {
+      kids.push(el('button', { type: 'button', class: 'boton', text: 'Ir a ' + D.temas[it.tema].n, ev: { click: function () { mostrar('construir'); irTema(it.tema); } } }));
+    }
+    caja.appendChild(el('div', { class: 'revisor-item' }, kids));
+  });
+  caja.appendChild(el('p', { class: 'nota', text: 'Si quieres publicarla tal cual, pulsa otra vez «Publicar mi figura».' }));
+}
 function publicarFigura(e) {
   e.preventDefault();
   mensajeError('');
@@ -735,6 +765,16 @@ function publicarFigura(e) {
   var correo = $('#f-correo').value.trim().toLowerCase();
   if (nombre.length < 2 || nombre.length > 40) { mensajeError('Pon un nombre de entre 2 y 40 letras.'); $('#f-nombre').focus(); return; }
   if (correo && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(correo)) { mensajeError('Ese correo no parece válido.'); $('#f-correo').focus(); return; }
+
+  var firma = JSON.stringify(st.v);
+  var items = window.RevisorFiguras.revisar(st.v, D);
+  if (items.length && revisionVista !== firma) {
+    revisionVista = firma;
+    mostrarRevision(items);
+    mensajeError('Antes de publicar, mira la revisión de arriba. Si quieres publicarla tal cual, pulsa otra vez «Publicar mi figura».');
+    $('#revisor').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return;
+  }
 
   var btn = $('#btn-publicar');
   btn.disabled = true; btn.textContent = 'Publicando…';
