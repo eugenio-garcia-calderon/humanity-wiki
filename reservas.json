@@ -23,6 +23,12 @@
       "ruta": "src/components/aeromovil/triciclo/masas.ts",
       "motivo": "Componentes de bicicleta",
       "desde": "2026-11-23T23:17:34.823Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/triciclo/energia.ts",
+      "motivo": "Componentes de bicicleta",
+      "desde": "2026-11-23T23:17:37.367Z"
     }
   ]
 }
