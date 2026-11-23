@@ -55,17 +55,18 @@ export const AUXILIARES_BICI = 12;
 
 /**
  * What «pasar a componentes de bicicleta» sets on a Triciclo-family design, leaving its shape, seats and doors alone:
- * cargo-bicycle wheels (125 kg each: the ones that carry a two-seater), a frame of thin bicycle tube, electric only,
+ * cargo-bicycle wheels (125 kg each: the ones that carry a two-seater), a frame of bicycle tube (55 × 2 mm chromoly: on
+ * the «Vehículo de producción» the 38 × 1.2 mm first tried gave a safety factor of 0.7 and this one 2.3), electric only,
  * 250 W in all (two hub motors of 125 W, as Schaeffler and Heinzmann's chainless cargo bike: the pedal-assist limit is
  * for the whole vehicle), two 0.18 kg controllers (a Grin Baserunner's mass), 1.4 kWh (two e-bike batteries of 700 Wh at the 189 Wh/kg of ICE
- * Trikes' pack), 25 km/h. Each value is inside `RANGOS_BICI`. The bicycle brakes, suspension and pedals are the
+ * Trikes' pack; where the battery is a pack in the frame, a small one of 0.5 m × 5 cm, and the layout stays the design's own), 25 km/h. Each value is inside `RANGOS_BICI`. The bicycle brakes, suspension and pedals are the
  * bicycle block's own fields (`bici/pedales.ts` `BICI_PROPUESTA`).
  */
 export const VALORES_BICI: Partial<CamposTriciclo> = {
   tClase: 'bici', tRuedaDel: 'cargo20', tRuedaTras: 'cargo20', tNeuDel: 'serie', tNeuTras: 'serie', tConsDel: 'serie', tConsTras: 'serie', tMRueda: 4.5,
-  tChMat: 'cromoly', tChD: 38, tChT: 1.2, tChUniones: 1.5,
+  tChMat: 'cromoly', tChD: 55, tChT: 2, tChUniones: 1.5,
   tMSuspDel: 2.2, tMSuspTras: 2.2, tMFreno: 0.75, tMDir: 1.5, tMAsiento: 1.5,
   tPropulsion: 'electrico', tMotorElec: 'buje', tCatMotor: 'medida', tCatCtrl: 'medida', tCatReductora: 'medida', tCatTermico: 'medida',
   tKWNom: 0.25, tKWPico: 0.6, tMMotor: 6.6, tMInversor: 0.36, tVel: 25,
-  tKWh: 1.4, tWhKg: 190, tBatDisp: 'reparto', tMVarios: 3,
+  tKWh: 1.4, tWhKg: 190, tWhL: 240, tBatLargo: 0.5, tBatAlto: 0.05, tMVarios: 3,
 };

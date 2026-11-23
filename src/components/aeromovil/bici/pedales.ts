@@ -97,6 +97,8 @@ export interface Pedales {
   holgura: number;
   /** the same for the knees, a fist's radius round each: to the skin, and to the steering wheel's rim (null: no steering wheel, or the knees pass outside it) */
   rodillaPiel: number; rodillaVolante: number | null;
+  /** what the leg still has to stretch with the pedal at its farthest (m; negative: the foot does not reach it) */
+  alcance: number;
 }
 
 /** The knee as a ball (m): its radius, for its room to the skin and to the steering wheel. */
@@ -120,13 +122,14 @@ export function pedalesDe(m: { P: object; F: FormaBala; plazas: { piloto: boolea
   // the steering wheel's rim where the knees pass (aroVolante: a circle tilted `inc` from the vertical, its top forward)
   const v = m.volante, aro: [number, number][] = [];
   if (v && zRodilla < v.r) { const s = Math.sqrt(v.r * v.r - zRodilla * zRodilla), up = [Math.sin(v.inc), Math.cos(v.inc)]; aro.push([v.c[0] + up[0] * s, v.c[1] + up[1] * s], [v.c[0] - up[0] * s, v.c[1] - up[1] * s]); }
-  let holgura = Infinity, rodillaPiel = Infinity, rodillaVolante = Infinity;
+  let holgura = Infinity, rodillaPiel = Infinity, rodillaVolante = Infinity, alcance = Infinity;
   for (let i = 0; i < 24; i++) {
     const a = 2 * Math.PI * i / 24, px = eje[0] + biela * Math.cos(a), py = eje[1] + biela * Math.sin(a);
     // the shoe on that pedal: toe up and heel down along the foot of a rider sitting back, and its outer edge
     for (const [dx, dy] of [[0, ZAPATO], [0, -ZAPATO], [ZAPATO * 0.6, 0]] as const) holgura = Math.min(holgura, dentroDe(m.F, px + dx, py + dy, z + MEDIO_ZAPATO));
     // the knee for that foot: hip fixed, the two segments' lengths kept, bending upwards
     const tx = px - TOBILLO_A_PEDAL[0], ty = py - TOBILLO_A_PEDAL[1], d = Math.min(muslo + tibia - 1e-6, Math.hypot(tx - H[0], ty - H[1]));
+    alcance = Math.min(alcance, muslo + tibia - Math.hypot(tx - H[0], ty - H[1]));
     const u = (muslo * muslo - tibia * tibia + d * d) / (2 * d), h = Math.sqrt(Math.max(0, muslo * muslo - u * u)), ex = (tx - H[0]) / Math.hypot(tx - H[0], ty - H[1]), ey = (ty - H[1]) / Math.hypot(tx - H[0], ty - H[1]);
     // (the hip is behind the foot: «up» is the normal with a positive y)
     const nx = -ey, ny = ex, sg = ny >= 0 ? 1 : -1, kx = H[0] + ex * u + sg * nx * h, ky = H[1] + ey * u + sg * ny * h;
@@ -136,7 +139,7 @@ export function pedalesDe(m: { P: object; F: FormaBala; plazas: { piloto: boolea
   const gen = generadorPedal(C.tPedGen);
   const kg = gen ? gen.kg + BIELAS_Y_PEDALES : C.tPedKg;
   const masa = gen ? `${gen.masa}; más bielas y pedales (≈ ${BIELAS_Y_PEDALES.toLocaleString('es-ES')} kg, estimado)` : 'el deslizador «Generador, bielas y pedales»';
-  return { eje, biela, z, generador: GENERADOR, kg, masa, W: C.tPedW, rend: C.tPedRend / 100, electricos: C.tPedW * C.tPedRend / 100, gen, holgura, rodillaPiel, rodillaVolante: aro.length ? rodillaVolante : null };
+  return { eje, biela, z, generador: GENERADOR, kg, masa, W: C.tPedW, rend: C.tPedRend / 100, electricos: C.tPedW * C.tPedRend / 100, gen, holgura, rodillaPiel, rodillaVolante: aro.length ? rodillaVolante : null, alcance };
 }
 
 // ------------------------------------------------------------------ masses
@@ -178,6 +181,7 @@ export function comprobacionesBici(m: ModeloTriciclo, cargas: { del: number; tra
   if (p) {
     o.push({ dep: 'interior', nombre: 'Pedales: la vuelta entera de los pies dentro de la carrocería', holgura: p.holgura, minimo: 0.01 });
     o.push({ dep: 'interior', nombre: 'Pedales: las rodillas del conductor dentro de la carrocería, en toda la vuelta', holgura: p.rodillaPiel, minimo: 0.01 });
+    o.push({ dep: 'interior', nombre: 'Pedales: la pierna del conductor llega al pedal más lejano sin estirarse del todo', holgura: p.alcance, minimo: 0.02 });
     if (p.rodillaVolante != null) o.push({ dep: 'interior', nombre: 'Pedales: las rodillas del conductor al volante, en toda la vuelta', holgura: p.rodillaVolante, minimo: 0.01 });
   }
   // (the rim's limit only with bicycle wheels on: a bicycle-class vehicle may still roll on moped or car wheels)

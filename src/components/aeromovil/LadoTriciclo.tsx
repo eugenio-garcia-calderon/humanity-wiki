@@ -17,6 +17,10 @@ import { CatalogoPieza, type Necesidad } from './CatalogoTren';
 import { ComparadorMotores } from './ComparadorMotores';
 import { BloqueElectronica, BLOQUE_ELECTRONICA } from './electronica/BloqueElectronica';
 import { BLOQUE_REFRIGERACION, BloqueRefrigeracion } from './RefrigeracionTriciclo';
+import { BLOQUE_PEDALES, BloqueClaseBici, BloquePedales } from './BiciTriciclo';
+import { BLOQUE_BICI } from './triciclo/campos';
+import { esBici } from './bici/clase';
+import { pasoTriciclo } from './triciclo/medidas';
 import { pesoSeccion, seccionesTriciclo, textoPesoSeccion } from './masasSecciones';
 import { DesglosePeso, SinSeccion } from './PesoSeccion';
 import { ContextoProveedores } from './proveedores/ProveedorParte';
@@ -129,6 +133,8 @@ export function zonaTriciclo(m: ModeloTriciclo, d: { punto: [number, number, num
   if (/comp:hibrido/.test(n)) return { dep: 'propulsion', bloque: 'Híbrido enchufable' };
   // (2026-11-17, capo) the cooling: intakes, radiator, pipes (visor/refrigeracion.ts)
   if (/comp:refrigeracion/.test(n)) return { dep: 'propulsion', bloque: BLOQUE_REFRIGERACION };
+  // (2026-11-24) the driver's pedals and their generator (visor/bici.ts)
+  if (/comp:pedales/.test(n)) return { dep: 'propulsion', bloque: BLOQUE_PEDALES };
   // (2026-11-16) the interior finish's parts (garaje/balaInterior.ts)
   if (/cinturon/.test(n)) return { dep: 'interior', bloque: 'Tapicería' };
   if (/forro|moldura|consola|reposabrazos|suelo-moqueta|borde-ventana|funda-torreta|luz-ambiente|foco/.test(n)) return { dep: 'interior', bloque: 'Acabado interior' };
@@ -171,6 +177,7 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
   }, [abrir]);
   const T = camposTriciclo(P), rt = res.triciclo!, cm = (v: number, d = 1) => `${fmt(v * 100, d)} cm`;
   const e = cd.cd != null && cd.areaRef != null ? energiaTriciclo(modelo, res.mTot, { cd: cd.cd, areaRef: cd.areaRef }) : null;
+  const bici = esBici(T);
   const mostrar = (f: FichaTriciclo, v: number): string => {
     switch (f.clave) {
       case 'tSuelo': return modelo.elevar > 0 ? `${cm(v)} al suelo · todo sube ${cm(modelo.elevar, 0)}` : `${cm(v)} al suelo`;
@@ -232,11 +239,15 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
       case 'tMSuspDel': case 'tMSuspTras': case 'tMFreno': {
         const n = f.clave === 'tMSuspDel' ? 'Suspensión delantera' : f.clave === 'tMSuspTras' ? (cuatro ? 'Suspensión trasera' : 'Basculante y amortiguador') : 'Frenos';
         const real = (res.masas[n] ?? 0) / (f.clave === 'tMFreno' ? (cuatro ? 4 : 3) : 1);
-        return real > v + 0.05 ? `${fmt(v, 1)} → ${fmt(real, 1)} kg${f.clave === 'tMFreno' ? ' de media' : ''} (por la carga)` : `${fmt(v, 1)} kg`;
+        const d = bici && f.clave === 'tMFreno' ? 2 : 1;
+        return real > v + 0.05 ? `${fmt(v, d)} → ${fmt(real, d)} kg${f.clave === 'tMFreno' ? ' de media' : ''} (por la carga)` : `${fmt(v, d)} kg`;
       }
       case 'tChSep': { const real = 2 * Math.abs(modelo.tubos.find(t => t.nombre.startsWith('Larguero der'))?.b[2] ?? v / 2); return Math.abs(real - v) > 0.005 ? `${cm(v, 0)} → ${cm(real, 0)} (carrocería estrecha)` : `${cm(v, 0)} de eje a eje`; }
       case 'tMAsiento': return butacas ? `${fmt(v, 1)} kg · butaca ${fmt(masaButaca(v), 1)} kg` : `${fmt(v, 1)} kg`;
     }
+    // (2026-11-24) bicycle parts are small: a 250 W motor is not «0,3 kW», nor a 180 g controller «0,2 kg»
+    if (bici && (f.clave === 'tKWNom' || f.clave === 'tKWPico')) return v < 1 ? `${Math.round(v * 1000)} W` : `${fmt(v, 2)} kW`;
+    if (bici && f.clave === 'tMInversor') return `${fmt(v, 2)} kg`;
     switch (f.unidad) {
       case 'm': return m2(v);
       case 'cm': return cm(v);
@@ -287,7 +298,7 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
   // (round 3 interior: the rails reach the rear axle only with two rear wheels; with one, the wheel is in the tail between them)
   // 2026-11-16, the interior finish: the lining's colour, trim, roof console and light only with a lining; the stitching only on a new cover
   const selInterior = (k: string) => (['tForroColor', 'tMoldura', 'tConsolaTecho', 'tAmbiente'].includes(k) ? T.tAcabado !== 'chasis' : k === 'tCostura' ? T.tTapiz !== 'serie' : k === 'tCosturaColor' ? T.tTapiz !== 'serie' && T.tCostura !== 'no' : true);
-  const fichas = deslizadoresTriciclo().filter(f => f.dep === dep && f.bloque !== BLOQUE_ELECTRONICA && !soloFilas(f.bloque) && (cuatro || f.clave !== 'tViaTras') && (f.bloque !== 'Basculación' || T.tBascula === 'si') && (rombo ? f.clave !== 'tEjeDel' : f.clave !== 'tEjeLat') && (f.bloque !== 'Híbrido enchufable' || T.tPropulsion === 'phev') && hibridoVisible(f.clave) && visible(f.clave)), sels = SELECTORES_TRICICLO.filter(s => s.dep === dep && s.bloque !== BLOQUE_ELECTRONICA && !soloFilas(s.bloque) && ((s.clave !== 'tMaletero' && s.clave !== 'tPuertas2') || puertas) && (s.clave !== 'tChLargo' || cuatro) && (s.clave !== 'tBascTec' || T.tBascula === 'si') && (s.clave !== 'tTraseras' || !rombo) && (s.bloque !== 'Híbrido enchufable' || T.tPropulsion === 'phev') && (s.clave !== 'tMotorElec' || (T.tPropulsion === 'phev' && arqH === 'reparto')) && selInterior(s.clave));
+  const fichas = deslizadoresTriciclo().filter(f => f.dep === dep && f.bloque !== BLOQUE_ELECTRONICA && !soloFilas(f.bloque) && (cuatro || f.clave !== 'tViaTras') && (f.bloque !== 'Basculación' || T.tBascula === 'si') && (rombo ? f.clave !== 'tEjeDel' : f.clave !== 'tEjeLat') && (f.bloque !== 'Híbrido enchufable' || T.tPropulsion === 'phev') && hibridoVisible(f.clave) && visible(f.clave)), sels = SELECTORES_TRICICLO.filter(s => s.dep === dep && s.bloque !== BLOQUE_ELECTRONICA && s.bloque !== BLOQUE_BICI && !soloFilas(s.bloque) && ((s.clave !== 'tMaletero' && s.clave !== 'tPuertas2') || puertas) && (s.clave !== 'tChLargo' || cuatro) && (s.clave !== 'tBascTec' || T.tBascula === 'si') && (s.clave !== 'tTraseras' || !rombo) && (s.bloque !== 'Híbrido enchufable' || T.tPropulsion === 'phev') && (s.clave !== 'tMotorElec' || (T.tPropulsion === 'phev' && arqH === 'reparto')) && selInterior(s.clave));
   // (2026-11-17, «muñecos»: each rider weighs what its size says, triciclo/talla.ts)
   const kgsOcc = modelo.plazas.map(q => Math.round(q.kg)), deKg = kgsOcc.every(k => k === kgsOcc[0]) ? `${kgsOcc[0] ?? T.tMOcc} kg` : `${kgsOcc.join(' + ')} kg`;
   const nOcc = rt.ocupantes, conN = nOcc === 1 ? 'con el piloto solo' : `con ${['', 'uno', 'dos', 'tres', 'cuatro'][nOcc] ?? nOcc} ocupantes`;
@@ -426,7 +437,7 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
             // (2026-11-12: with doors the window frame is always there; with the pack along the frame its size decides the kWh)
             const apagado = (T.tVentanas === 'burbuja' && !puertas && f.clave.startsWith('tPilar')) || apagadoFilas(f.clave) || apagadoCuatro(f.clave) || (paquete && f.clave === 'tKWh') || valorFijoCatalogo(f.clave, T) != null;
             const valor = paquete && f.clave === 'tKWh' ? Math.min(v.max, Math.max(v.min, modelo.kWh)) : v.valor;
-            return <Deslizador key={f.clave} id={`t-${f.clave}`} etiqueta={etiqueta(f.clave, f.n)} valor={valor} clave={f.clave} centro={f.centrar ? v.defecto : undefined} min={v.min} max={v.max} paso={f.paso} mostrar={mostrar(f, valor)} desactivado={apagado} alCambiar={x => { const g = guardarTriciclo(f, x, T); if (f.clave === 'tBatalla') for (const [k, v] of Object.entries(conBatalla(T, g))) set(k as keyof Parametros, v as never); else set(f.clave, g); }} />;
+            return <Deslizador key={f.clave} id={`t-${f.clave}`} etiqueta={etiqueta(f.clave, f.n)} valor={valor} clave={f.clave} centro={f.centrar ? v.defecto : undefined} min={v.min} max={v.max} paso={pasoTriciclo(f.clave, T)} mostrar={mostrar(f, valor)} desactivado={apagado} alCambiar={x => { const g = guardarTriciclo(f, x, T); if (f.clave === 'tBatalla') for (const [k, v] of Object.entries(conBatalla(T, g))) set(k as keyof Parametros, v as never); else set(f.clave, g); }} />;
           })}
           {sels.filter(s => s.bloque === bloque && s.clave !== 'tHibArq' && s.clave !== 'tMotorElec').map(s => <Selector key={s.clave} id={`t-${s.clave}`} etiqueta={etiqueta(s.clave, s.n)} valor={T[s.clave] as string} clave={s.clave} opciones={s.opciones} alCambiar={v => {
             set(s.clave, v as never);
@@ -475,6 +486,9 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
           <DesglosePeso s={seccionDe(bloque)} abierto={bloque === 'Bastidor'} precios={{ s: precioDe(bloque), alCambiar: alPrecio }} />
         </Bloque>
       ))}
+      {/* (2026-11-24) bicycle components: the class and the bicycle running gear (Rodaje), the driver's chainless pedals (Motor): BiciTriciclo.tsx */}
+      {dep === 'rodaje' && <BloqueClaseBici P={P} T={T} set={set} bloque={BLOQUE_BICI} plegable={{ abierto: abiertos.has(BLOQUE_BICI), alAlternar: () => alternar(BLOQUE_BICI) }} />}
+      {dep === 'propulsion' && <BloquePedales P={P} set={set} modelo={modelo} pedaleo={e?.pedaleo ?? null} kmh={T.tVel} autonomia={e ? e.autonomia : null} seccion={pesoSeccion(pesosSec, 'propulsion', BLOQUE_PEDALES)} precios={{ s: precioSeccion(preciosSec, 'propulsion', BLOQUE_PEDALES), alCambiar: alPrecio }} plegable={{ abierto: abiertos.has(BLOQUE_PEDALES), alAlternar: () => alternar(BLOQUE_PEDALES) }} />}
       {/* (2026-11-17) Motor › Electrónica de potencia: its own block (electronica/BloqueElectronica.tsx) */}
       {dep === 'propulsion' && <BloqueElectronica T={T} set={set} modelo={modelo} mTot={res.mTot} e={e} plegable={{ abierto: abiertos.has(BLOQUE_ELECTRONICA), alAlternar: () => alternar(BLOQUE_ELECTRONICA) }} />}
       {/* (2026-11-17, capo) the hybrid's cooling and air intakes: RefrigeracionTriciclo.tsx */}

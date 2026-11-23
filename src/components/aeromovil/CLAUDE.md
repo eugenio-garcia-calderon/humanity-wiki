@@ -192,6 +192,40 @@ Renaming a part drops its saved user price (the name is the key).
   modes, two limiters, tampering), the scenarios table, and the tests (`ensayosL7e`, one tab each, all «pendiente»).
   `scripts/homologacion.ts` prints them and checks the study's numbers (28 / 45 / 15 kW).
 
+## `bici/` — bicycle components and the driver's chainless pedals (2026-11-24)
+
+A Triciclo-family design is built from one of two classes of parts: `tClase: 'pesado'` (moped, motorcycle and car parts:
+the default, and every design saved before) or `'bici'` (cargo-bicycle wheels, bicycle brakes and shocks, thin tube, small
+hub motors, an e-bike battery). The class changes three things only (`bici/clase.ts`): the range and step of the sliders
+whose heavy range starts above any bicycle part (`RANGOS_BICI`, read by `triciclo/medidas.ts` `rangoTriciclo` /
+`pasoTriciclo`), how the running gear is sized for its load, and the equipment's standing draw.
+
+| File | What |
+|---|---|
+| `bici/clase.ts` | `esBici`, `RANGOS_BICI`, the sizing rules, `VALORES_BICI` (what «pasar a bicicleta» sets). Leaf module |
+| `bici/catalogo.ts` | bicycle brakes, shocks and pedal generators, each with mass, PRICE and source, published or estimated, said either way; `precioRuedaBici` |
+| `bici/pedales.ts` | the optional fields (`tBiciFreno`, `tBiciSusp`, `tPed…`: not in `FILAS`, as the cooling's), `pedalesDe` (where the crank axle goes and the room of feet and knees all the way round), the pedals' part, `pedaleo` (what the legs change), `comprobacionesBici` |
+| `BiciTriciclo.tsx` | the two blocks: «Rodaje › Componentes de bicicleta» and «Motor › Pedales» |
+| `visor/bici.ts` | generator, cranks and pedals in 3D (layer «Motor», `componente: 'pedales'`) |
+| `triciclo/propuestaBici.ts` | the built-in design «Vehículo de producción (bicicleta)»: saved design 19 as read on 2026-11-24 + the bicycle values |
+
+- **The mark.** Catalogue options carry `clase: 'bici' | 'pesado'`: wheels (`ruedas/catalogo.ts` `claseRueda`: the
+  wheel's `perfil`), motors and controllers (`catalogoTren.ts` `clase`, absent = heavy). `controles.tsx` `Selector`
+  groups them («De bicicleta» / «De vehículo pesado») and shows `MarcaClase` next to the chosen one.
+- **A new bicycle part**: one object in the list of its kind with `kg`, `masa` (what of it is published), `precio`
+  (`tipo: 'publicado'` only with the shop's page in `fuente`), `nota`, `fuente`. A new bicycle wheel also needs its
+  entry in `PRECIO_RUEDA_BICI`. Prices reach the panel through `precios/precios.ts` `estimarBici`, which runs before
+  the heavy-vehicle rules.
+- **Pedalling is chainless, always**: the legs' watts times the generator's efficiency join the battery's bus. No maker
+  publishes that efficiency; 82 % is an estimate and the panel says so.
+- `npx tsx scripts/bici.ts` checks the catalogue and the built-in design and prints its parts with mass and price, its
+  red checks and its pedalling; it must end «Todo OK».
+
+**Before you change this, decide**: the built-in bicycle design is a COPY of design 19's numbers taken on one day, not a
+view of it (the same choice as «Aeromóvil BWB»). A button «versión de bicicleta» that applies `VALORES_BICI` to whatever
+design is open already exists in effect (the class selector); a live link to design 19 would need the proposals to be
+computed from the fetched list (≈ 1 hour) and would change under Eugenio's feet when he edits the original.
+
 ## `estrategia/` — the strategy tree («Estrategia», `/aeromovil/estrategia`, 2026-11-19)
 
 Eugenio and Claude work out, as a branching tree, how to get from today to a factory. Milestone 1 (one road-legal

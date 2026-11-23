@@ -81,6 +81,8 @@ export interface ControladorCatalogo extends Base {
   /** battery (bus) current, when published apart from the phase current */
   aBat?: number | null;
   kg: number | null;
+  /** the published price (2026-11-24: the bicycle controllers) */
+  precio?: Precio | null;
 }
 
 export interface ReductoraCatalogo extends Base {
@@ -204,6 +206,7 @@ export const MOTORES: MotorCatalogo[] = [
     id: 'grin-all-axle', clase: 'bici', marca: 'Grin', modelo: 'All-Axle V3 (27 mm), delantero', montaje: 'buje', tecnologia: 'BLDC de buje directo, 23 pares de polos, sin reductora',
     vNom: 48, vMin: null, vMax: null, kWCont: 0.56, kWPico: null, nmCont: null, nmPico: null, rpmMax: null, kg: 4.05, refrigeracion: 'aire; con ferrofluido (Statorade) aguanta más',
     fuente: 'https://ebikes.ca/product-info/grin-products/all-axle-hub-motor.html', tipoFuente: 'fabricante', leido: LEIDO_BICI,
+    precio: { valor: 565, moneda: 'USD', iva: 'sin IVA', fuente: 'https://ebikes.ca/product-info/grin-products/all-axle-hub-motor.html', leido: LEIDO_BICI, nota: 'el motor solo, en la tienda del fabricante (Canadá): sin envío ni aranceles' },
     notas: 'Grin no da una potencia nominal única: da la que aguanta de continuo con el núcleo a 110 °C según las vueltas (250 W a 100 rpm, 560 W a 200, 900 W a 300 y 1.250 W a 400, sin ferrofluido). Aquí, la de 200 rpm, unos 19 km/h con rueda de 20″. Buje directo: frena regenerando. Tiene versión de eje a un solo lado para triciclos y velomóviles. Trasero: 4,30 kg. No publica el par ni el rendimiento.',
   },
   {
@@ -287,12 +290,14 @@ export const CONTROLADORES: ControladorCatalogo[] = [
     id: 'grin-baserunner-l10', clase: 'bici', marca: 'Grin', modelo: 'Baserunner L10 V6 (encapsulado)', vNom: 48, vMin: null, vMax: 60,
     aPico: 80, aPicoTiempo: 'de pico', aCont: 45, corriente: 'fase', kg: 0.18,
     fuente: 'https://ebikes.ca/baserunner-l10-sa-controller.html', tipoFuente: 'fabricante', leido: LEIDO_BICI,
+    precio: { valor: 290, moneda: 'USD', iva: 'sin IVA', fuente: 'https://ebikes.ca/baserunner-l10-sa-controller.html', leido: LEIDO_BICI, nota: 'en la tienda del fabricante (Canadá): sin envío ni aranceles' },
     notas: 'Control vectorial (FOC), con frenada regenerativa proporcional. 90 × 63 × 15 mm, encapsulado en epoxi. Continua: 45–50 A de fase. No publica la corriente máxima de batería. 290 USD.',
   },
   {
     id: 'grin-phaserunner-l10', clase: 'bici', marca: 'Grin', modelo: 'Phaserunner L10 V6', vNom: 72, vMin: 30, vMax: 90,
     aPico: 90, aPicoTiempo: 'de pico', aCont: 45, corriente: 'fase', aBat: 40, kg: 0.26,
     fuente: 'https://ebikes.ca/phaserunner-l10-motor-controller.html', tipoFuente: 'fabricante', leido: LEIDO_BICI,
+    precio: { valor: 350, moneda: 'USD', iva: 'sin IVA', fuente: 'https://ebikes.ca/phaserunner-l10-motor-controller.html', leido: LEIDO_BICI, nota: 'en la tienda del fabricante (Canadá): sin envío ni aranceles' },
     notas: 'Control vectorial (FOC), con frenada regenerativa. 99 × 40 × 34 mm. Batería de 30 a 90 V; la tensión nominal de 72 V es la del centro de ese rango, no una cifra de Grin. 350 USD.',
   },
 ];

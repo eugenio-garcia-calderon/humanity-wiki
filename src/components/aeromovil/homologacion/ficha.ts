@@ -116,6 +116,8 @@ function fichaTriciclo(P: Parametros, m: ModeloTriciclo, res: Resultados, cd: { 
     ...b,
     ruedasFisicas: m.rombo || m.cuatro ? 4 : 3,
     parejas: [{ nombre: m.rombo ? 'laterales' : 'delanteras', via: m.F.VIA_LAT }, ...(m.traseras ? [{ nombre: 'traseras', via: m.traseras.VIA_LAT }] : [])],
+    // (2026-11-24) the driver's chainless pedals (bici/pedales.ts): the pedal-assist category enters the comparison
+    pedaleo: !!m.pedalesBici,
     inclina: !!m.bascula, plazas: r.ocupantes, horcajadas: T.tAsientos === 'horcajadas', manillar: T.tMando === 'manillar', cerrado: true,
     propulsion: T.tPropulsion === 'phev' ? 'phev' : 'electrico', parabrisasPlastico: true, retrovisores: T.tRetrovisores === 'camaras' ? 'camaras' : 'espejos',
     masaVacio: res.mVeh, masaBateria: r.bateria.kg, masaCombustible: ph ? ph.litros * KG_LITRO_GASOLINA : 0,
