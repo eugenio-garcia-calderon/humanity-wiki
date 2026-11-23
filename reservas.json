@@ -17,6 +17,12 @@
       "ruta": "src/components/aeromovil/triciclo/medidas.ts",
       "motivo": "Componentes de bicicleta",
       "desde": "2026-11-23T23:17:32.320Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/triciclo/masas.ts",
+      "motivo": "Componentes de bicicleta",
+      "desde": "2026-11-23T23:17:34.823Z"
     }
   ]
 }
