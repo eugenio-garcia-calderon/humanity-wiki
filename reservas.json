@@ -53,6 +53,12 @@
       "ruta": "src/components/aeromovil/Disenos.tsx",
       "motivo": "Componentes de bicicleta",
       "desde": "2026-11-23T23:17:47.065Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/catalogoTren.ts",
+      "motivo": "Componentes de bicicleta",
+      "desde": "2026-11-23T23:17:49.464Z"
     }
   ]
 }
