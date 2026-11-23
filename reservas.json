@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "public/geometria-figura/index.html",
-      "motivo": "Lectura al arrastrar en la geometría y revisión antes de publicar",
-      "desde": "2026-11-23T20:12:38.362Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "public/geometria-figura/revisor.js",
       "motivo": "Lectura al arrastrar en la geometría y revisión antes de publicar",
       "desde": "2026-11-23T20:12:41.095Z"
