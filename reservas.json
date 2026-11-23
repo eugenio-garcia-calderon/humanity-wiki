@@ -35,6 +35,12 @@
       "ruta": "src/components/aeromovil/triciclo/comprobaciones.ts",
       "motivo": "Componentes de bicicleta",
       "desde": "2026-11-23T23:17:39.816Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/triciclo/modelo.ts",
+      "motivo": "Componentes de bicicleta",
+      "desde": "2026-11-23T23:17:42.217Z"
     }
   ]
 }
