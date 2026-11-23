@@ -2427,3 +2427,14 @@ They change saved designs' numbers on purpose.
 **Decision**: the tree is a typed array in `src/components/aeromovil/estrategia/arbol.ts`, edited by Claude as the conversation advances. His marks, notes and answers live in `localStorage` (`aeromovil.estrategia.v1`) and reach Claude by copy and paste.
 **Alternatives**: (a) reuse `/api/aeromovil/notas` — rejected: its GET is public; (b) a new owner-only table and route — the right pattern, about half a day, postponed until he needs two devices; (c) hide the section behind login — rejected: the tree ships in a public JS chunk anyway, so it would only look private.
 **Consequence**: no personal figures may be written into `arbol.ts`. Whether the strategy stays public is asked to Eugenio inside the tree itself (node `abierto`).
+
+## 2026-11-23 — Pre-publish review of a figure: fixed rules, not a language model
+
+**Context**: Eugenio asked for a "bot" that evaluates a figure and proposes improvements before it is published. He is not a developer, and the figure page publishes to a public server route.
+**Chosen**:
+1. The review is a plain JavaScript module, `public/geometria-figura/revisor.js`, with fixed rules about the shape of the figure: a topic all at 0 or all at 10, two topics with identical values, a figure flat at one value, or more than 80 % of values at the extremes. It never judges the ideas.
+2. It runs on the client, once per figure state, on the first press of «Publicar mi figura». A second press with the same figure publishes. The review does not block the person.
+3. The rules are pure: the same figure always gets the same review, so it can be tested in Node and cannot invent advice.
+**Alternatives**: (a) an AI model on a server endpoint, which needs an API key stored on the server and a new route (a new write path under CLAUDE.md forbidden item 3, about half a day, with a per-request cost); (b) an AI model in the browser, which would send the figure to a third party from the visitor's device. Both postponed until Eugenio asks for judgement of content, which rules cannot give.
+**Cost of switching later**: the module is a single `revisar(v, datos)` function with a fixed return shape; an AI reviewer would replace it behind the same return shape, about half a day for the server route plus the key.
+**Known consequence**: the rules only check form. A figure that is coherent but badly argued passes without a note.

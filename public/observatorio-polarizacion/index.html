@@ -3701,7 +3701,9 @@ const ILUS = {
     let xc = cx + G;
     if (xc + w > window.innerWidth - 6) xc = cx - G - w;
     xc = Math.max(6, Math.min(window.innerWidth - w - 6, xc));
-    const yc = Math.max(6, Math.min(window.innerHeight - h - 6, cy - h / 2));
+    // Por arriba, la tarjeta empieza debajo de la cabecera fija: si no, queda tapada por ella
+    const cab = document.querySelector(".top"), arriba = Math.max(6, cab ? cab.getBoundingClientRect().bottom + 6 : 6);
+    const yc = Math.max(arriba, Math.min(window.innerHeight - h - 6, cy - h / 2));
     tip.style.left = r1(xc - sr.left) + "px"; tip.style.top = r1(yc - sr.top) + "px";
   }
   // Lo que se ve al pasar el ratón se oculta; un punto fijado se queda hasta que se cierra o cambia la vista
@@ -3808,16 +3810,36 @@ const ILUS = {
     const i = Math.round(a / ((2 * Math.PI) / n)) % n;
     arrastre = { i, id: e.pointerId };
     try { svg.setPointerCapture(e.pointerId); } catch (err) { /* sin captura */ }
-    fijar(i, valorEnEje(dx, dy, i));
+    const v0 = valorEnEje(dx, dy, i);
+    fijar(i, v0); lecturaArrastre(e, i, v0);
   });
   svg.addEventListener("pointermove", (e) => {
-    if (arrastre && e.pointerId === arrastre.id) { const [dx, dy] = enLienzo(e); fijar(arrastre.i, valorEnEje(dx, dy, arrastre.i)); return; }
+    if (arrastre && e.pointerId === arrastre.id) {
+      const [dx, dy] = enLienzo(e), v = valorEnEje(dx, dy, arrastre.i);
+      fijar(arrastre.i, v); lecturaArrastre(e, arrastre.i, v); return;
+    }
     if (e.pointerType === "touch") return;
     if (e.target.closest("[data-ring]")) { leer(e); return; }
     // Al moverse, los vértices bajo el ratón se actualizan; al salir de todos, se oculta su tarjeta
     if (!st.yo && !vertices(e) && /^[vt]/.test(tipClave || "")) ocultar();
   });
-  ["pointerup", "pointercancel", "lostpointercapture"].forEach((ev) => svg.addEventListener(ev, () => { arrastre = null; }));
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach((ev) => svg.addEventListener(ev, () => { arrastre = null; ocultarLectura(); }));
+
+  // Mientras se arrastra un punto: en qué aspecto está y con qué cifra, qué supone ese nivel y qué falta para subir
+  function lecturaArrastre(e, i, v) {
+    const t = T(), a = t.ejes[i], nv = nivelDe(v), coma = (x) => x.toFixed(1).replace(".", ",");
+    const supone = nv === 0
+      ? `Todavía no llega a lo básico. Lo básico es: ${a.niv[0]}`
+      : `Llega a «${NIV_TITULO[nv - 1]}»: ${a.niv[nv - 1]}`;
+    const sube = nv < 3
+      ? `Para llegar a «${NIV_TITULO[nv]}» (desde ${coma(UMBRAL[nv])} de 10) hace falta: ${a.niv[nv]}`
+      : "Ya está en lo más avanzado de este aspecto.";
+    mostrar(`arr${st.tema}-${i}-${v}`,
+      `<span class="lbl">${a.n} · ${t.n}</span><h5>${v} de 10 · ${palabraNivel(v)}</h5>`
+      + `<p><b>Qué mide:</b> ${a.d}</p><p><b>Qué supone:</b> ${supone}</p><p>${sube}</p>`,
+      e.clientX, e.clientY);
+  }
+  function ocultarLectura() { if (/^arr/.test(tipClave || "")) ocultar(); }
 
   function ranking(fig, t) { return PARTIDOS.map((p) => [p, parecido(fig, t.v[p.k])]).sort((a, b) => b[1] - a[1]); }
   function htmlRank() {
