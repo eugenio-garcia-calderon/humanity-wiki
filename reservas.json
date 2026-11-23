@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/triciclo/campos.ts",
+      "motivo": "Componentes de bicicleta",
+      "desde": "2026-11-23T23:17:19.677Z"
+    }
+  ]
 }
