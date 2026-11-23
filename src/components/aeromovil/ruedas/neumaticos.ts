@@ -78,7 +78,7 @@ export interface PropioNeumatico { tipo: TipoNeumatico; radial: boolean; camara:
 const TIPO_DEL_GRUPO: Record<GrupoRueda, TipoNeumatico> = {
   Scooter: 'scooter', 'Ciclomotor y 125': 'carretera', Deportiva: 'deportivo', Turismo: 'carretera', 'Trail y aventura': 'trail90',
   'Enduro y motocross': 'tacos', Custom: 'carretera', 'Café racer': 'carretera', Sidecar: 'carretera', 'Moto eléctrica': 'carretera',
-  'Eco de coche': 'eco', Velomóvil: 'carretera',
+  'Eco de coche': 'eco', Velomóvil: 'carretera', Bicicleta: 'carretera', 'Bici de carga': 'carretera',
 };
 const propioCatalogo = (f: FichaRueda): PropioNeumatico => ({
   tipo: TIPO_DEL_GRUPO[f.grupo], radial: /\bZ?R\d/.test(f.medida), camara: f.llanta === 'radios' || f.llanta === 'buje', d: f.d, w: f.w, perfil: f.perfil,

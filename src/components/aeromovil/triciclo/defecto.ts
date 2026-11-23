@@ -79,4 +79,6 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   // 2026-11-17: the Kamm tail, off: every saved design keeps its long tail. Kamm's own rule when it is chosen: cut at half
   // the largest section, flat base
   tColaCorte: 'no', tKammSeccion: 0.50, tKammCavidad: 0,
+  // 2026-11-24 (bici/clase.ts): a heavy vehicle's components, as every design until now
+  tClase: 'pesado',
 };

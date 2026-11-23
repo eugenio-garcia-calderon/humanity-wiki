@@ -13,6 +13,8 @@ import { cgOcupante } from './ocupantes';
 import type { ModeloTriciclo } from './modelo';
 import { centroDe, repartirCargas } from '../masasVehiculo';
 import { ruedasTriciclo } from './centroMasas';
+import { esBici, masaEsquinaBici, masaFrenoBici } from '../bici/clase';
+import { piezasPedales, piezasRodajeBici } from '../bici/pedales';
 
 // ------------------------------------------------------------------ cálculo
 import { piezasRefrigeracion } from './refrigeracion';
@@ -134,6 +136,8 @@ export function piezasTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cris
   o.push(...piezasRefrigeracion(m));
   // 2026-11-17: the blended-wing-body fairing's wings, their inner structure and the fold (bwb.ts; none when it is off)
   if (m.bwb) o.push(...piezasBWB(m.bwb, MATERIALES_CARENADO[m.campos.tMatCarenado].kgm2mm * limitarTriciclo('tEspCarenado', m.campos)));
+  // 2026-11-24 (bici/pedales.ts): the driver's pedals and their generator (none without pedals)
+  o.push(...piezasPedales(m));
   return dimensionar(m, o);
 }
 export function piezasBase(m: ModeloTriciclo, ar: { carroceria: number; cristal: number; solar: number }, centros: { xPiel: number; yPiel: number; xCristal: number; yCristal: number }, pods: { area: number; areaTras?: number }): PiezaMasa[] {
@@ -261,19 +265,26 @@ export const kg1 = (v: number) => v.toLocaleString('es-ES', { minimumFractionDig
 export function dimensionar(m: ModeloTriciclo, piezas: PiezaMasa[]): PiezaMasa[] {
   const T = m.campos, L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), nT = m.cuatro ? 2 : 1;
   const sD = L('tMSuspDel'), sT = L('tMSuspTras'), fr = L('tMFreno');
+  // 2026-11-24 (bici/): built from bicycle components, a corner and a brake weigh what a bicycle's do for that load; and a
+  // bicycle brake or suspension chosen from the catalogue weighs what its sheet says, whatever the load (the checks say
+  // whether it is up to it). A heavy vehicle with nothing chosen: the rules and the numbers of always.
+  const bici = esBici(T), cat = piezasRodajeBici(m.P);
+  const esquina = (carga: number) => cat.suspension ? cat.suspension.kg : bici ? masaEsquinaBici(carga) : masaEsquina(carga);
+  const freno = (carga: number) => cat.freno ? cat.freno.kg : bici ? masaFrenoBici(carga) : masaFreno(carga);
   const sube = (desliz: number, k: number, carga: number) => k > desliz + 1e-9 ? `sube por la carga: ${kg1(desliz)} kg del deslizador → ${kg1(k)} kg (${Math.round(carga)} kg en cada rueda)` : undefined;
   let o = piezas;
   for (let i = 0; i < 4; i++) {
-    const c = cargasRueda(m, o), fD = Math.max(fr, masaFreno(c.del)), fT = Math.max(fr, masaFreno(c.tras));
+    const c = cargasRueda(m, o), fD = cat.freno ? cat.freno.kg : Math.max(fr, freno(c.del)), fT = cat.freno ? cat.freno.kg : Math.max(fr, freno(c.tras));
     o = o.map(p => {
-      if (p.nombre === 'Suspensión delantera') { const k = Math.max(sD, 2 * masaEsquina(c.del)); return { ...p, kg: k, nota: sube(sD, k, c.del) ?? 'las dos esquinas: brazos, amortiguadores, manguetas y bujes' }; }
+      if (p.nombre === 'Suspensión delantera') { const k = cat.suspension ? 2 * cat.suspension.kg : Math.max(sD, 2 * esquina(c.del)); return { ...p, kg: k, nota: cat.suspension ? `dos esquinas de catálogo: ${cat.suspension.n.toLowerCase()}` : sube(sD, k, c.del) ?? 'las dos esquinas: brazos, amortiguadores, manguetas y bujes' }; }
       if (p.nombre === 'Suspensión trasera' || p.nombre === 'Basculante y amortiguador') {
-        const k = Math.max(sT, nT * masaEsquina(c.tras));
-        return { ...p, kg: k, nota: sube(sT, k, c.tras) ?? (m.cuatro ? 'las dos esquinas: brazos, amortiguadores y bujes' : 'basculante, amortiguador y eje') };
+        const k = cat.suspension ? nT * cat.suspension.kg : Math.max(sT, nT * esquina(c.tras));
+        return { ...p, kg: k, nota: cat.suspension ? `${nT === 2 ? 'dos esquinas' : 'una esquina'} de catálogo: ${cat.suspension.n.toLowerCase()}` : sube(sT, k, c.tras) ?? (m.cuatro ? 'las dos esquinas: brazos, amortiguadores y bujes' : 'basculante, amortiguador y eje') };
       }
       if (p.nombre === 'Frenos') {
         const k = 2 * fD + nT * fT;
-        return { ...p, kg: k, nota: `${2 + nT} discos con pinza: ${kg1(fD)} kg delante${fT !== fD ? `, ${kg1(fT)} kg detrás` : ''}${k > (2 + nT) * fr + 1e-9 ? ` (sube por la carga desde ${kg1(fr)} kg del deslizador)` : ''}` };
+        if (cat.freno) return { ...p, kg: k, nota: `${2 + nT} frenos de catálogo: ${cat.freno.n.toLowerCase()}, ${kg1(cat.freno.kg)} kg cada uno` };
+        return { ...p, kg: k, nota: `${2 + nT} ${bici ? 'frenos de bicicleta' : 'discos con pinza'}: ${kg1(fD)} kg delante${fT !== fD ? `, ${kg1(fT)} kg detrás` : ''}${k > (2 + nT) * fr + 1e-9 ? ` (sube por la carga desde ${kg1(fr)} kg del deslizador)` : ''}` };
       }
       return p;
     });
@@ -303,7 +314,7 @@ export function grupoPieza(nombre: string): DepTriciclo {
   if (nombre === 'Bastidor') return 'chasis';
   // (2026-11-17: and the diamond's nose wheel with its brake and fork, which fell to the body before)
   if (/^(Suspensión|Basculante|Basculación|Ruedas|Frenos|Dirección|Rueda delantera)/.test(nombre)) return 'rodaje';
-  if (/^(Motor|Controlador|Depósito)/.test(nombre)) return 'propulsion';
+  if (/^(Motor|Controlador|Depósito|Pedales)/.test(nombre)) return 'propulsion';
   if (/^(Batería|Varios)/.test(nombre)) return 'energia';
   if (/^(Asientos|Volante|Salpicadero|Interior|Tapicería|Cinturones)/.test(nombre)) return 'interior';
   return 'carroceria';

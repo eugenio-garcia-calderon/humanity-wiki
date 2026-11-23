@@ -125,17 +125,43 @@ function PesoCabecera({ texto }: { texto: string }) {
   return <span className="whitespace-nowrap font-mono text-[11px] font-semibold normal-case tracking-normal text-teal-800" title="Lo que pesa lo que controla este desplegable (estimación del modelo)">{texto}</span>;
 }
 
-export function Selector<T extends string>({ id, etiqueta, valor, opciones, alCambiar, clave }: { id: string; etiqueta: string; valor: T; opciones: { k: T; n: string }[]; alCambiar: (v: T) => void; clave?: keyof Parametros }) {
+/**
+ * 2026-11-24 (Eugenio: «pon una marca que diferencia los componentes que son de bicicleta de los componentes que son para
+ * vehículos pesados»): an option may carry its class. When any does, the list is grouped («De bicicleta», «De vehículo
+ * pesado»; the options with no class, such as «A medida», stay on top) and a small mark beside the selector says which
+ * class the chosen one is.
+ */
+export type ClaseOpcion = 'bici' | 'pesado';
+const NOMBRE_CLASE_OPCION: Record<ClaseOpcion, { grupo: string; marca: string; clase: string; titulo: string }> = {
+  bici: { grupo: 'De bicicleta', marca: 'Bici', clase: 'border-teal-300 bg-teal-50 text-teal-800', titulo: 'Componente de bicicleta' },
+  pesado: { grupo: 'De vehículo pesado', marca: 'Pesado', clase: 'border-slate-300 bg-slate-100 text-slate-700', titulo: 'Componente de vehículo pesado: moto o coche' },
+};
+export function MarcaClase({ clase }: { clase: ClaseOpcion }) {
+  const c = NOMBRE_CLASE_OPCION[clase];
+  return <span title={c.titulo} className={cn('shrink-0 rounded border px-1 py-px text-[10px] font-semibold uppercase leading-4 tracking-wide', c.clase)}>{c.marca}</span>;
+}
+export function Selector<T extends string>({ id, etiqueta, valor, opciones, alCambiar, clave }: { id: string; etiqueta: string; valor: T; opciones: { k: T; n: string; clase?: ClaseOpcion }[]; alCambiar: (v: T) => void; clave?: keyof Parametros }) {
   const [abierto, setAbierto] = useState(false);
+  const conClase = opciones.some(o => o.clase), elegida = opciones.find(o => o.k === valor)?.clase;
   return (
     <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 py-0.5">
       {clave
         ? <button type="button" onClick={() => setAbierto(a => !a)} aria-expanded={abierto} className={cn('truncate text-left text-[13px] text-slate-700 underline decoration-dotted decoration-slate-300 underline-offset-2 hover:text-teal-800', abierto && 'text-teal-800')} title="Pincha para saber más de este parámetro">{etiqueta}</button>
         : <label htmlFor={id} className="text-[13px] text-slate-700">{etiqueta}</label>}
-      {/* (2026-11-13) a select is as wide as its longest option: at 390 px «Ventanas laterales con montante (Aptera)» pushed the page to 490 px */}
-      <select id={id} value={valor} onChange={e => alCambiar(e.target.value as T)} className="max-w-[min(14rem,55vw)] rounded-md border border-slate-300 bg-white px-1.5 py-0.5 font-mono text-xs">
-        {opciones.map(o => <option key={o.k} value={o.k}>{o.n}</option>)}
-      </select>
+      <span className="flex items-center gap-1.5">
+        {elegida && <MarcaClase clase={elegida} />}
+        {/* (2026-11-13) a select is as wide as its longest option: at 390 px «Ventanas laterales con montante (Aptera)» pushed the page to 490 px */}
+        <select id={id} value={valor} onChange={e => alCambiar(e.target.value as T)} className={cn('rounded-md border border-slate-300 bg-white px-1.5 py-0.5 font-mono text-xs', elegida ? 'max-w-[min(11.5rem,46vw)]' : 'max-w-[min(14rem,55vw)]')}>
+          {conClase
+            ? <>
+              {opciones.filter(o => !o.clase).map(o => <option key={o.k} value={o.k}>{o.n}</option>)}
+              {(['bici', 'pesado'] as const).map(c => opciones.some(o => o.clase === c) && (
+                <optgroup key={c} label={NOMBRE_CLASE_OPCION[c].grupo}>{opciones.filter(o => o.clase === c).map(o => <option key={o.k} value={o.k}>{o.n}</option>)}</optgroup>
+              ))}
+            </>
+            : opciones.map(o => <option key={o.k} value={o.k}>{o.n}</option>)}
+        </select>
+      </span>
       {abierto && clave && <Explicacion clave={clave} alCerrar={() => setAbierto(false)} />}
     </div>
   );

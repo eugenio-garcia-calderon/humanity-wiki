@@ -8,7 +8,7 @@
 export type PerfilRueda = 'moto' | 'coche' | 'bici';
 /** What carries the tyre: wire spokes, a cast (or forged) alloy wheel, a closed aero disc, or the drum of a hub motor laced to the rim. */
 export type LlantaRueda = 'radios' | 'fundida' | 'disco' | 'buje';
-export type GrupoRueda = 'Scooter' | 'Ciclomotor y 125' | 'Deportiva' | 'Turismo' | 'Trail y aventura' | 'Enduro y motocross' | 'Custom' | 'Café racer' | 'Sidecar' | 'Moto eléctrica' | 'Eco de coche' | 'Velomóvil';
+export type GrupoRueda = 'Scooter' | 'Ciclomotor y 125' | 'Deportiva' | 'Turismo' | 'Trail y aventura' | 'Enduro y motocross' | 'Custom' | 'Café racer' | 'Sidecar' | 'Moto eléctrica' | 'Eco de coche' | 'Velomóvil' | 'Bicicleta' | 'Bici de carga';
 
 export interface FichaRueda {
   grupo: GrupoRueda;
@@ -54,6 +54,20 @@ export interface FichaRueda {
  *   4.9 kg and a forged Marchesini 4.4 kg (canyonchasers.net), a Panigale rear wheel with tyre and disc 11.1 kg
  *   (ducatiforum.co.uk); QS 205 V3 hub motor 12.8 kg bare, 5.7 kW peak at 72 V (em3ev.com).
  * - Ural sidecar: Duro HF308 4.00-19 72P, 27.4″ (696 mm) outer diameter (tiremart.com).
+ * - Bicycle wheels (2026-11-24, Eugenio: «vehículos ligeros con componentes de piezas de bicicleta… bicicletas de 4
+ *   ruedas. Inspírate en el Quattrevelo»). Read on 2026-11-24. The tyre's mass, its maximum load and its e-bike rating are
+ *   the ones Schwalbe publishes on each tyre's page (schwalbe.com / schwalbetires.com): Marathon Racer 40-406 355 g, 75 kg,
+ *   E-25; G-One Speed 40-406 0.606 lb, 100 kg, E-25; Green Marathon 47-406 660 g, 80 kg, E-50; Marathon Plus 47-406
+ *   1.598 lb, 80 kg, E-50; Big Ben Plus 55-406 680 g, 95 kg and 55-507 835 g, 118 kg, E-50; Pick-Up 60-406 930 g, 125 kg,
+ *   E-50; Marathon Plus Tour 47-622 1,140 g, 121 kg, E-50. `vmax` is that rating: the speed up to which the tyre is
+ *   approved UNDER MOTOR POWER (E-25: 25 km/h pedelecs; E-50: 50 km/h, ECE-R75), not what it stands downhill.
+ *   `kg` is the whole wheel WITHOUT ITS HUB (the hub comes with the brake or the motor, `bici/catalogo.ts`): the tyre as
+ *   published + the rim (Ryde Andra 40, 406: 510 g, axle load 120 kg at most: sjscycles.co.uk; lighter and larger rims
+ *   estimated from it) + 36 spokes and nipples (≈ 0.25 kg) + tube and tape (≈ 0.15 kg): the last two are estimates.
+ *   `d` = bead seat + 2 × width («calculado de la medida»). Rolling resistance: the Marathon Plus measured 0.00764 at
+ *   4.1 bar and 0.00866 at 3.1 bar (37-622, bicyclerollingresistance.com); the others are ESTIMATES placed around it
+ *   by carcass and pressure (a 20″ a little worse, the cargo tyre's double carcass worse still): not measured.
+ *   The Quattrovelo itself: 4 × 20″ (406) wheels, Schwalbe G-One 40-406, 32–35 kg (en.velomobiel.nl, technical details).
  */
 export const CATALOGO_RUEDAS = {
   // ── scooters
@@ -121,12 +135,37 @@ export const CATALOGO_RUEDAS = {
     ejemplos: 'BMW i3 (detrás); Michelin e.Primacy, etiqueta europea A (≤ 6,5 kg/t)', fuente: 'calculado de la medida' },
   velomovil20: { grupo: 'Velomóvil', medida: '40-406 (20 × 1,50″)', llantaPulg: 16, d: 0.486, w: 0.040, perfil: 'bici', llanta: 'radios', kg: 1.5, crr: 0.008, bar: 4.1, carga: 100, vmax: 60, kWBuje: 1, inclina: 45,
     ejemplos: 'Velomóviles Milan, Quest y DF; Schwalbe Marathon Racer, Schwalbe One. Carga máxima estimada (Schwalbe no la publica en esta medida)', fuente: 'calculado de la medida' },
+  // ── bicycle wheels (2026-11-24): what a four-wheeled bicycle rolls on. Mass WITHOUT the hub; load and e-bike rating as Schwalbe publishes them
+  biciRacer20: { grupo: 'Bicicleta', medida: '40-406 (20 × 1,50″), 75 kg, E-25', llantaPulg: 20, d: 0.486, w: 0.040, perfil: 'bici', llanta: 'radios', kg: 1.1, crr: 0.0080, bar: 5.0, carga: 75, vmax: 25, kWBuje: 1, inclina: 45,
+    ejemplos: 'Schwalbe Marathon Racer 40-406 (355 g, 75 kg, 4–6 bar): la rueda ligera de velomóvil. Rodadura estimada', fuente: 'schwalbe.com, Marathon Racer 11100294.01; diámetro calculado de la medida' },
+  biciGOne20: { grupo: 'Bicicleta', medida: '40-406 (20 × 1,50″), 100 kg, E-25', llantaPulg: 20, d: 0.486, w: 0.040, perfil: 'bici', llanta: 'radios', kg: 1.05, crr: 0.0080, bar: 4.5, carga: 100, vmax: 25, kWBuje: 1, inclina: 45,
+    ejemplos: 'Schwalbe G-One Speed 40-406 (275 g, 100 kg, 3,5–5 bar): la familia que monta de serie el Quattrovelo. Rodadura estimada', fuente: 'schwalbetires.com, G-One Speed 11654018; en.velomobiel.nl; diámetro calculado de la medida' },
+  biciMarathon20: { grupo: 'Bicicleta', medida: '47-406 (20 × 1,75″), 80 kg, E-50', llantaPulg: 20, d: 0.500, w: 0.047, perfil: 'bici', llanta: 'radios', kg: 1.5, crr: 0.0090, bar: 4.0, carga: 80, vmax: 50, kWBuje: 2, inclina: 45,
+    ejemplos: 'Schwalbe Green Marathon 47-406 (660 g, 80 kg, 3–5 bar). Rodadura estimada', fuente: 'schwalbe.com, Green Marathon 11159412; diámetro calculado de la medida' },
+  biciPlus20: { grupo: 'Bicicleta', medida: '47-406 (20 × 1,75″) antipinchazos, 80 kg, E-50', llantaPulg: 20, d: 0.500, w: 0.047, perfil: 'bici', llanta: 'radios', kg: 1.6, crr: 0.0085, bar: 4.1, carga: 80, vmax: 50, kWBuje: 2, inclina: 45,
+    ejemplos: 'Schwalbe Marathon Plus 47-406 (725 g, 80 kg, 3,5–5 bar). Rodadura: medida 0,00764 a 4,1 bar en 37-622; en 20″, estimada', fuente: 'schwalbetires.com, Marathon Plus 11100758; bicyclerollingresistance.com; diámetro calculado de la medida' },
+  biciBalon20: { grupo: 'Bicicleta', medida: '55-406 (20 × 2,15″) balón, 95 kg, E-50', llantaPulg: 20, d: 0.516, w: 0.055, perfil: 'bici', llanta: 'radios', kg: 1.6, crr: 0.0090, bar: 3.0, carga: 95, vmax: 50, kWBuje: 2, inclina: 45,
+    ejemplos: 'Schwalbe Big Ben Plus 55-406 (680 g, 95 kg, 2–4 bar): el neumático hace de suspensión. Rodadura estimada', fuente: 'schwalbetires.com, Big Ben Plus 11101122; diámetro calculado de la medida' },
+  biciBalon24: { grupo: 'Bicicleta', medida: '55-507 (24 × 2,15″) balón, 118 kg, E-50', llantaPulg: 24, d: 0.617, w: 0.055, perfil: 'bici', llanta: 'radios', kg: 1.9, crr: 0.0088, bar: 3.0, carga: 118, vmax: 50, kWBuje: 2, inclina: 45,
+    ejemplos: 'Schwalbe Big Ben Plus 55-507 (835 g, 118 kg). Rodadura estimada', fuente: 'schwalbetires.com, Big Ben Plus 11101122; diámetro calculado de la medida' },
+  biciTour28: { grupo: 'Bicicleta', medida: '47-622 (28 × 1,75″), 121 kg, E-50', llantaPulg: 28, d: 0.716, w: 0.047, perfil: 'bici', llanta: 'radios', kg: 2.3, crr: 0.0085, bar: 4.0, carga: 121, vmax: 50, kWBuje: 2, inclina: 45,
+    ejemplos: 'Schwalbe Marathon Plus Tour 47-622 (1.140 g, 121 kg, 3–5 bar): rueda grande de bici de trekking. Rodadura estimada', fuente: 'schwalbe.com, Marathon Plus Tour 11159362.01; bicyclerollingresistance.com; diámetro calculado de la medida' },
+  cargo20: { grupo: 'Bici de carga', medida: '60-406 (20 × 2,35″) de carga, 125 kg, E-50', llantaPulg: 20, d: 0.526, w: 0.060, perfil: 'bici', llanta: 'radios', kg: 1.9, crr: 0.0110, bar: 3.5, carga: 125, vmax: 50, kWBuje: 2, inclina: 45,
+    ejemplos: 'Schwalbe Pick-Up 60-406 (930 g, 125 kg, 2–4,5 bar, doble carcasa) en llanta Ryde Andra 40 (510 g, 120 kg por eje): la rueda de las bicis de carga. Rodadura estimada', fuente: 'schwalbe.com, Pick-Up 11159259.01; sjscycles.co.uk, Ryde Andra 40; diámetro calculado de la medida' },
 } satisfies Record<string, FichaRueda>;
 
 export type IdRueda = keyof typeof CATALOGO_RUEDAS;
 export const IDS_CATALOGO = Object.keys(CATALOGO_RUEDAS) as IdRueda[];
 export const esDelCatalogo = (k: string | undefined | null): k is IdRueda => !!k && Object.prototype.hasOwnProperty.call(CATALOGO_RUEDAS, k);
 export const fichaRueda = (k: string | undefined | null): FichaRueda | null => esDelCatalogo(k) ? CATALOGO_RUEDAS[k] : null;
+/**
+ * 2026-11-24 (Eugenio: «pon una marca que diferencia los componentes que son de bicicleta de los componentes que son
+ * para vehículos pesados»): every component of the editor is of one class or the other. A wheel is a bicycle's when its
+ * tyre is (`perfil: 'bici'`); the older sizes (moped and car) and everything else are a heavy vehicle's.
+ */
+export type ClaseComponente = 'bici' | 'pesado';
+export const NOMBRE_CLASE: Record<ClaseComponente, string> = { bici: 'De bicicleta', pesado: 'De vehículo pesado' };
+export const claseRueda = (k: string | undefined | null): ClaseComponente => fichaRueda(k)?.perfil === 'bici' ? 'bici' : 'pesado';
 
 const PERFIL_N: Record<PerfilRueda, string> = { moto: 'perfil redondo', coche: 'perfil plano', bici: 'de bici' };
 const LLANTA_N: Record<LlantaRueda, string> = { radios: 'radios', fundida: 'llanta de aleación', disco: 'llanta de disco', buje: 'motor de buje' };

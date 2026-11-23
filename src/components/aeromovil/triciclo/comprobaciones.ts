@@ -1,5 +1,6 @@
 // Triciclo checks: calcularTriciclo (every check and the results), seats, rollover.
 // Moved out of geometriaTriciclo.ts unchanged (2026-11-16, refactor «ordenar»); that file re-exports everything. See ../CLAUDE.md.
+import { comprobacionesBici } from '../bici/pedales';
 import { ANGULO_MAX } from '../garaje/kamm';
 import { factorMasaAsiento, numFila } from '../filasTriciclo';
 import type { Tilt } from '../basculacion';
@@ -372,6 +373,8 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     const cr = cargasRueda(m, piezas), capD = RUEDAS_TRICICLO[T.tRuedaDel].carga, capT = RUEDAS_TRICICLO[T.tRuedaTras].carga;
     const peor = Math.min(capD / cr.del, capT / cr.tras), [carga, cap] = capD / cr.del <= capT / cr.tras ? [cr.del, capD] : [cr.tras, capT];
     c('rodaje', `Neumáticos: carga por rueda con todos a bordo y ${EQUIPAJE} kg de equipaje`, peor - 1, 0, `${Math.round(carga)} de ${cap} kg`);
+    // 2026-11-24 (bici/pedales.ts): the pedals' room all the way round, and a bicycle rim's own load
+    for (const k of comprobacionesBici(m, cr)) c(k.dep, k.nombre, k.holgura, k.minimo, k.mostrar);
   }
   // 2026-11-17: a motorcycle tyre (round crown, `ruedas/catalogo.ts`) on a Triciclo that does not lean stands on a narrow
   // strip of its crown: it wears the centre and grips less in a bend. A warning, not a failure; leaning (`tBascula`), none

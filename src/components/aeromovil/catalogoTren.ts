@@ -22,6 +22,8 @@ export const LEIDO = '2026-11-16';
 export const LEIDO_PRECIO = '2026-11-17';
 /** «A medida (deslizadores)»: no catalogue part, the sliders decide. */
 export const A_MEDIDA = 'medida';
+/** (2026-11-24) when the bicycle parts (`clase: 'bici'`) were read. */
+export const LEIDO_BICI = '2026-11-24';
 
 /** Who published the figures: the maker's own datasheet, or a shop / distributor's listing. */
 export type TipoFuente = 'fabricante' | 'distribuidor';
@@ -29,6 +31,11 @@ export type TipoFuente = 'fabricante' | 'distribuidor';
 interface Base {
   id: string; marca: string; modelo: string;
   fuente: string; tipoFuente: TipoFuente; leido: string;
+  /**
+   * 2026-11-24 (Eugenio: «pon una marca que diferencia los componentes que son de bicicleta de los componentes que son
+   * para vehículos pesados»): a bicycle part. Absent: a heavy vehicle's (every part before that day).
+   */
+  clase?: 'bici';
   /** what the source leaves out, disagreements between sources, conditions of a rating (in Spanish: it is shown) */
   notas?: string;
 }
@@ -174,6 +181,43 @@ export const MOTORES: MotorCatalogo[] = [
     precio: null,
     notas: '43 kW durante 2 min (45 kW y 135 N·m durante 10 s). Lleva el inversor dentro; la ficha no dice si sus 22 kg lo incluyen. El conjunto con reductora («eDrive») pesa 42 kg.',
   },
+  // ── bicycle hub motors (2026-11-24): what a four-wheeled bicycle carries, one per driven wheel. Published figures only
+  {
+    id: 'bafang-g020-250', clase: 'bici', marca: 'Bafang', modelo: 'H400B (RM G020.250.D), 250 W trasero', montaje: 'buje', tecnologia: 'BLDC de buje con reductora planetaria interna',
+    vNom: 36, vMin: 36, vMax: 48, kWCont: 0.25, kWPico: null, nmCont: null, nmPico: 45, rpmMax: null, kg: 3.3, refrigeracion: 'aire (IP X5)',
+    fuente: 'https://www.bafang-e.com/en/oem-area/components/component/motor/rm-g020250350500ddc', tipoFuente: 'fabricante', leido: LEIDO_BICI,
+    notas: 'El mismo motor se vende con 250, 350 y 500 W nominales a 36, 43 y 48 V; aquí, la versión de 250 W, la que deja el vehículo como bicicleta de pedaleo asistido. Para ruedas de 20″, 26″ y 28″, con freno de disco, corte a 25 o 32 km/h. No publica la potencia de pico, el rendimiento ni las rpm.',
+  },
+  {
+    id: 'bafang-g0200-250', clase: 'bici', marca: 'Bafang', modelo: 'H550 (FM G0200.250.D), 250 W delantero', montaje: 'buje', tecnologia: 'BLDC de buje con reductora planetaria interna',
+    vNom: 36, vMin: 36, vMax: 48, kWCont: 0.25, kWPico: null, nmCont: null, nmPico: 55, rpmMax: null, kg: 3.8, refrigeracion: 'aire (IP X6)',
+    fuente: 'https://www.bafang-e.com/en/oem-area/components/component/motor/fm-g0200250500750d', tipoFuente: 'fabricante', leido: LEIDO_BICI,
+    notas: 'La ficha da tres versiones (250, 500 y 750 W; 55, 65 y 85 N·m; 3,8, 4,2 y 4,7 kg) en el mismo orden, sin decir expresamente cuál va con cuál: se toma la primera de cada lista. Para ruedas de 20″ y 26″, freno de disco.',
+  },
+  {
+    id: 'bafang-g0630-1000', clase: 'bici', marca: 'Bafang', modelo: 'RM G0630.1000.D, 1 kW trasero', montaje: 'buje', tecnologia: 'BLDC de buje con reductora planetaria interna',
+    vNom: 48, vMin: 48, vMax: 52, kWCont: 1, kWPico: null, nmCont: null, nmPico: 100, rpmMax: null, kg: 4.9, refrigeracion: 'aire (IP X6)',
+    fuente: 'https://www.bafang-e.com/en/oem-area/components/component/motor/rm-g06301000ddc', tipoFuente: 'fabricante', leido: LEIDO_BICI,
+    notas: 'La ficha da cuatro versiones (250, 500, 750 y 1.000 W; 60, 70, 85 y 100 N·m; 4,2, 4,5, 4,9 y 4,9 kg) en el mismo orden, sin decir expresamente cuál va con cuál: se toma la última de cada lista. Con 1 kW el vehículo ya no es una bicicleta de pedaleo asistido: es un ciclomotor (categoría L). Buje ancho, de rueda de 20″ o 26″ gorda (175 mm entre punteras).',
+  },
+  {
+    id: 'grin-all-axle', clase: 'bici', marca: 'Grin', modelo: 'All-Axle V3 (27 mm), delantero', montaje: 'buje', tecnologia: 'BLDC de buje directo, 23 pares de polos, sin reductora',
+    vNom: 48, vMin: null, vMax: null, kWCont: 0.56, kWPico: null, nmCont: null, nmPico: null, rpmMax: null, kg: 4.05, refrigeracion: 'aire; con ferrofluido (Statorade) aguanta más',
+    fuente: 'https://ebikes.ca/product-info/grin-products/all-axle-hub-motor.html', tipoFuente: 'fabricante', leido: LEIDO_BICI,
+    notas: 'Grin no da una potencia nominal única: da la que aguanta de continuo con el núcleo a 110 °C según las vueltas (250 W a 100 rpm, 560 W a 200, 900 W a 300 y 1.250 W a 400, sin ferrofluido). Aquí, la de 200 rpm, unos 19 km/h con rueda de 20″. Buje directo: frena regenerando. Tiene versión de eje a un solo lado para triciclos y velomóviles. Trasero: 4,30 kg. No publica el par ni el rendimiento.',
+  },
+  {
+    id: 'cixi-pers-buje', clase: 'bici', marca: 'Cixi', modelo: 'motor de buje del sistema PERS, 250 W', montaje: 'buje', tecnologia: 'motor de buje del sistema de pedaleo sin cadena PERS',
+    vNom: null, vMin: null, vMax: null, kWCont: 0.25, kWPico: null, nmCont: null, nmPico: 75, rpmMax: null, kg: 4.5, refrigeracion: null,
+    fuente: 'https://www.icetrikes.co/products/pers-chainless-e-assist-system', tipoFuente: 'distribuidor', leido: LEIDO_BICI,
+    notas: 'Las cifras son las que da ICE Trikes para su triciclo con el sistema PERS: motor de buje trasero de 250 W, 75 N·m y 4,5 kg, con batería de 700 Wh. No publica la tensión. Va emparejado con su pedalier generador (en «Componentes de bicicleta»).',
+  },
+  {
+    id: 'heinzmann-rn111', clase: 'bici', marca: 'Heinzmann', modelo: 'CargoPower RN 111, 250 W', montaje: 'buje', tecnologia: 'motor de buje con reductora planetaria de acero, en baño de aceite',
+    vNom: 48, vMin: 36, vMax: 48, kWCont: 0.25, kWPico: null, nmCont: null, nmPico: 113, rpmMax: null, kg: null, refrigeracion: 'aceite',
+    fuente: 'https://ebike.heinzmann.com/en/finder/products/ebike-motors/e-bike-rn-111/tabs-cargopower-e', tipoFuente: 'fabricante', leido: LEIDO_BICI,
+    notas: 'Para bicis de carga. Heinzmann da 125 a 600 W de potencia nominal y 250 W por motor según la norma EN 15194; los 113 N·m en el eje son de la descripción del sistema sin cadena de Schaeffler y Heinzmann (IEEE Spectrum). No publica la masa: se queda la del deslizador.',
+  },
 ];
 
 // ─────────────────────────────── controllers (inverters) ───────────────────────────────
@@ -237,6 +281,19 @@ export const CONTROLADORES: ControladorCatalogo[] = [
     aPico: 600, aPicoTiempo: 'pico (sin decir de qué)', aCont: 200, corriente: 'sin aclarar', kg: 2.44,
     fuente: 'https://manuals.plus/ae/1005009707021960', tipoFuente: 'distribuidor', leido: LEIDO,
     notas: 'La ficha da «600 A de pico» y «200 A nominales» sin decir si son de batería o de fase: se comparan como si fueran de fase.',
+  },
+  // ── bicycle controllers (2026-11-24)
+  {
+    id: 'grin-baserunner-l10', clase: 'bici', marca: 'Grin', modelo: 'Baserunner L10 V6 (encapsulado)', vNom: 48, vMin: null, vMax: 60,
+    aPico: 80, aPicoTiempo: 'de pico', aCont: 45, corriente: 'fase', kg: 0.18,
+    fuente: 'https://ebikes.ca/baserunner-l10-sa-controller.html', tipoFuente: 'fabricante', leido: LEIDO_BICI,
+    notas: 'Control vectorial (FOC), con frenada regenerativa proporcional. 90 × 63 × 15 mm, encapsulado en epoxi. Continua: 45–50 A de fase. No publica la corriente máxima de batería. 290 USD.',
+  },
+  {
+    id: 'grin-phaserunner-l10', clase: 'bici', marca: 'Grin', modelo: 'Phaserunner L10 V6', vNom: 72, vMin: 30, vMax: 90,
+    aPico: 90, aPicoTiempo: 'de pico', aCont: 45, corriente: 'fase', aBat: 40, kg: 0.26,
+    fuente: 'https://ebikes.ca/phaserunner-l10-motor-controller.html', tipoFuente: 'fabricante', leido: LEIDO_BICI,
+    notas: 'Control vectorial (FOC), con frenada regenerativa. 99 × 40 × 34 mm. Batería de 30 a 90 V; la tensión nominal de 72 V es la del centro de ese rango, no una cifra de Grin. 350 USD.',
   },
 ];
 
@@ -365,7 +422,8 @@ export const controladorDe = (id?: string) => CONTROLADORES.find(c => c.id === i
 export const reductoraDe = (id?: string) => REDUCTORAS.find(r => r.id === id) ?? null;
 export const termicoDe = (id?: string) => TERMICOS.find(t => t.id === id) ?? null;
 
-const opcion = (p: Base) => ({ k: p.id, n: `${p.marca} ${p.modelo}` });
+/** (2026-11-24) each option carries its class, so the selector groups and marks it: a bicycle's or a heavy vehicle's. */
+const opcion = (p: Base) => ({ k: p.id, n: `${p.marca} ${p.modelo}`, clase: (p.clase ?? 'pesado') as 'bici' | 'pesado' });
 const MEDIDA = { k: A_MEDIDA, n: 'A medida (deslizadores)' };
 export const OPCIONES_MOTOR = [MEDIDA, ...MOTORES.map(opcion)];
 export const OPCIONES_CONTROLADOR = [MEDIDA, ...CONTROLADORES.map(opcion)];
