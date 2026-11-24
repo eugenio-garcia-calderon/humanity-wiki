@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/server/aeromovil.ts",
-      "motivo": "exportar dueno/puedeDecidir",
-      "desde": "2026-11-24T11:55:34.503Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/aeromovil/homologacion/normas.ts",
       "motivo": "separar epacPedales de l1ea",
       "desde": "2026-11-24T11:55:36.953Z"
