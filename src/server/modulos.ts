@@ -106,6 +106,7 @@ import { registerMensajesRoutes } from './mensajes.js';
 import { registerCalendarioRoutes } from './calendario.js';
 import { registerCalendarioArteRoutes } from './calendarioArte.js';
 import { registerAeromovilRoutes } from './aeromovil.js';
+import { registrarFichasAeromovil } from './aeromovilFichas.js';
 import { registrarAdjuntosAeromovil } from './aeromovilAdjuntos.js';
 import { registrarExpedienteAeromovil } from './aeromovilExpediente.js';
 import { registerConcienciaRoutes } from './conciencia.js';
@@ -375,6 +376,12 @@ export const MODULOS: Modulo[] = [
     montar: (app, db) => registerAeromovilRoutes(app, db),
     nota: 'Aeromóvil Gota: buzón de comentarios de mejora que son las tareas pendientes del diseño. '
         + 'Lee req.user (opcional), así que va después de la autenticación.',
+  },
+  {
+    nombre: 'aeromovil-fichas',
+    montar: (app, db) => registrarFichasAeromovil(app, db),
+    nota: 'Aeromóvil: la ficha de cada componente que se pincha en el 3D (alternativas, stock, imágenes, notas; migración 0236). '
+        + 'Guardar pide ser el dueño del Aeromóvil o admin (lee req.user), así que va después de la autenticación.',
   },
   {
     nombre: 'aeromovil-adjuntos',

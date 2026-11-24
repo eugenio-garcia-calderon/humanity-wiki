@@ -1127,3 +1127,13 @@ By his instruction the bicycle-class labour is assembly only. The project total 
 - **Two lists that must match.** The cards of `/politica` live in `HERRAMIENTAS_POLITICA` (PoliticaHerramientas.tsx); the pages that hang from it are the `subpagina` blocks written by migration 0235. A sixth tool needs both. Reading the cards from the blocks: about 1 hour.
 - **`humanity.wiki/politica` assumes the handle `luz`**, as `/humanidad` does. If the owner's handle differs, the route shows «Esta página no está aquí».
 - **The migration was tested on a hand-built copy of five tables**, not on a dump of production.
+
+## 2026-11-24 — Aeromóvil: records of the components in the 3D (phase 1)
+
+- **One component, one level.** A sub-part (a wheel's tyre, a spoke) is a row in the component's «Piezas» list with the design's weight, price and supplier, not a record of its own. The store takes any `id`, so a sub-part needs an entry and its own clickable mesh tag: ≈ 2 hours for the first, then one entry each.
+- **Only Interior › Asientos so far**, and only in the vehicles with department tabs that have a mass model for it (the Triciclo family and the Basculante). The Aeromóvil 1 isolates by default but has no records; the Gota and the Bala have neither.
+- **No edit history.** The server keeps the latest copy and who/when; a text overwritten is gone (the 409 protects against two sessions, not against a regretted edit). A history table is ≈ 2 hours; it would also be in the nightly backup, with whatever was typed.
+- **Public files.** Reference images and documents are uploaded through `/api/aeromovil/adjuntos` and served from public URLs, like the other Aeromóvil attachments: nothing confidential should be attached there.
+- **Records keyed by vehicle family, not by design**: the same seat is one record for every Triciclo design. Switching to per-design is ≈ 1 hour but orphans what was typed.
+- **«Pedir render» captures what is on screen**, so with a department isolated by default the render shows only that department's layers; a «render with everything» switch would be ≈ 30 minutes.
+- **Duplicate React key in the «Proyecto» tab** (`legislation.gov.uk/eur/2013/168/annexes/adopted?view=plain` used as a key twice): seen in the browser console while testing this; it comes from the homologation sources list, not from the records. Not fixed here.
