@@ -35,6 +35,12 @@
       "ruta": "src/components/aeromovil/homologacion/PaginaHomologacion.tsx",
       "motivo": "vía ciclo de pedales con pedaleo asistido (EN 15194)",
       "desde": "2026-11-24T11:28:26.798Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/notas/almacen.ts",
+      "motivo": "notas: propuestas con id negativo",
+      "desde": "2026-11-24T11:32:03.457Z"
     }
   ]
 }
