@@ -23,6 +23,12 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "Movilidad y Energía en una línea; sin icono ni número de proyectos",
       "desde": "2026-11-24T20:44:32.072Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/pages/Aeromovil.tsx",
+      "motivo": "Aeromóvil: el 3D de cada parte enseña solo lo suyo + ventana 30 % más baja (nube/partes-vehiculo)",
+      "desde": "2026-11-24T20:48:24.935Z"
     }
   ]
 }
