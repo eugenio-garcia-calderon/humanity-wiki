@@ -29,6 +29,12 @@
       "ruta": "src/components/sitio/VistaPagina.tsx",
       "motivo": "aeromovil.org sin la cabecera de Luz & Humanidad y tarjeta que lleva a su web propia (nube/aeromovil-org-web)",
       "desde": "2026-11-24T23:05:38.551Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/pages/SubpaginaSitio.tsx",
+      "motivo": "aeromovil.org sin la cabecera de Luz & Humanidad y tarjeta que lleva a su web propia (nube/aeromovil-org-web)",
+      "desde": "2026-11-24T23:05:41.478Z"
     }
   ]
 }
