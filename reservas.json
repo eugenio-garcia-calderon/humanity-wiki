@@ -20,12 +20,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/data/ambitos/madrid.ts",
-      "motivo": "Economía pública optimizada y tarjetas de Política",
-      "desde": "2026-11-24T13:41:17.275Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "public/vision/data.js",
       "motivo": "Economía pública optimizada y tarjetas de Política",
       "desde": "2026-11-24T13:41:19.810Z"
