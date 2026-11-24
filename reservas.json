@@ -95,6 +95,12 @@
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "homologación L1e-A y página completa",
       "desde": "2026-11-24T11:02:27.872Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/homologacion/PanelHomologacion.tsx",
+      "motivo": "homologación L1e-A y página completa",
+      "desde": "2026-11-24T11:02:30.250Z"
     }
   ]
 }
