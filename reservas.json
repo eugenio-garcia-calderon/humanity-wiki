@@ -53,6 +53,12 @@
       "ruta": "src/avisoInstalar.ts",
       "motivo": "Economía pública optimizada y tarjetas de Política",
       "desde": "2026-11-24T13:41:12.209Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/data/ambitos/talamanca.ts",
+      "motivo": "Economía pública optimizada y tarjetas de Política",
+      "desde": "2026-11-24T13:41:14.737Z"
     }
   ]
 }
