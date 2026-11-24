@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "scripts/homologacion.ts",
-      "motivo": "expediente EPAC (matriz, ensayos, documentos)",
-      "desde": "2026-11-24T12:05:10.878Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/pages/Aeromovil.tsx",
       "motivo": "expediente EPAC (matriz, ensayos, documentos)",
       "desde": "2026-11-24T12:05:13.390Z"
