@@ -47,6 +47,12 @@
       "ruta": "src/components/aeromovil/triciclo/comprobaciones.ts",
       "motivo": "peso editable por pieza",
       "desde": "2026-11-24T10:37:00.781Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/masasSecciones.ts",
+      "motivo": "peso editable por pieza",
+      "desde": "2026-11-24T10:37:03.573Z"
     }
   ]
 }
