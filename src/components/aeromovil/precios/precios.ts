@@ -19,7 +19,8 @@
  */
 import type { Parametros, Resultados } from '../geometria';
 import { MATERIALES_CHASIS } from '../geometria';
-import { A_MEDIDA, EUR_POR_USD, motorDe, precioEuros, termicoDe, type Precio } from '../catalogoTren';
+import { A_MEDIDA, EUR_POR_USD, controladorDe, motorDe, precioEuros, termicoDe, type Precio } from '../catalogoTren';
+import { frenoBici, generadorPedal, precioRuedaBici, suspensionBici, type PrecioBici } from '../bici/catalogo';
 import { clave, type DepPeso, type PartePeso, type PesosSecciones, type SeccionPeso } from '../masasSecciones';
 
 export interface PrecioParte {
@@ -85,9 +86,72 @@ function deCatalogo(nombre: string, p: Precio, n: number): Estimacion {
   return { eur: e * n, origen: 'catalogo', como: `catálogo: ${nombre}, ${moneda} en ${web}, leído el ${p.leido}${n > 1 ? `, × ${n}` : ''}; IVA ${p.iva}` };
 }
 
+/** A bicycle part's price as its sheet gives it (bici/catalogo.ts): published in a shop, or an estimate, said either way. */
+const deBici = (que: string, p: PrecioBici, n: number, mas = 0, masComo = ''): Estimacion => ({
+  eur: redondo(p.eur * n + mas), ...(p.tipo === 'publicado' ? { origen: 'catalogo' as const } : {}),
+  como: `${p.tipo === 'publicado' ? 'catálogo' : 'estimado'}: ${que}, ${n1(p.eur)} €${n > 1 ? ` × ${n}` : ''} (${p.nota})${masComo ? `; ${masComo}` : ''}`,
+});
+
+/**
+ * (2026-11-24, Eugenio: «añade también precio de cada componente») The parts of a vehicle built from BICYCLE components:
+ * a bicycle wheel, brake, shock, hub motor or pedal generator costs what its shop says, or a bicycle-class estimate,
+ * never the motorcycle-class one below. Null: not a bicycle part; the rules below decide.
+ */
+function estimarBici(nombre: string, kg: number, cx: ContextoPrecio): Estimacion | null {
+  const P = cx.P as Parametros & Record<string, unknown>, m = cx.modelo, bici = P.tClase === 'bici';
+  const num = (k: string, d: number) => (typeof P[k] === 'number' ? P[k] as number : d);
+  const nRuedas = Array.isArray(m.ruedas) ? (m.ruedas as unknown[]).length : 4;
+  if (/^Pedales:/.test(nombre)) {
+    const g = generadorPedal(P.tPedGen as string | undefined);
+    if (g) return deBici(`generador ${g.n}`, g.precio, 1, 60, 'bielas y pedales (≈ 60 €, estimado)');
+    return est(500 + 60, 'estimado: un generador de pedales (≈ 500 €: ningún fabricante publica su precio) y bielas y pedales (≈ 60 €)');
+  }
+  if (/^Ruedas/.test(nombre)) {
+    const del = precioRuedaBici(String(P.tRuedaDel ?? '')), tras = precioRuedaBici(String(P.tRuedaTras ?? ''));
+    if (!del && !tras) return null;
+    if (del && tras && P.tRuedaDel === P.tRuedaTras) return { eur: redondo(del.eur * nRuedas), como: `${nRuedas} ruedas de bicicleta a ${n1(del.eur)} €: ${del.como}. Sin el buje: el trasero es el motor y el delantero va contado con su freno`, origen: 'catalogo' };
+    if (del && tras) { const nD = Math.min(2, nRuedas), nT = nRuedas - nD; return { eur: redondo(del.eur * nD + tras.eur * nT), como: `${nD} delanteras a ${n1(del.eur)} € (${del.como}) y ${nT} traseras a ${n1(tras.eur)} € (${tras.como}). Sin el buje: va contado con el freno o es el motor`, origen: 'catalogo' }; }
+    return null;
+  }
+  if (/^Frenos/.test(nombre)) {
+    const f = frenoBici(P.tBiciFreno as string | undefined), n = /cuatro/.test(nombre) ? 4 : nRuedas;
+    if (f) return deBici(`freno ${f.n}`, f.precio, n);
+    if (bici) return est(95 * n, `estimado: ${n} frenos de bicicleta a ≈ 95 € (lo que cuesta un buje con tambor de 70 a 90 mm)`);
+    return null;
+  }
+  if (/^Suspensión (delantera|trasera)/.test(nombre)) {
+    const s = suspensionBici(P.tBiciSusp as string | undefined);
+    if (s) return deBici(s.n, s.precio, 2);
+    if (bici) return est(2 * (150 + 60), 'estimado: dos esquinas de bicicleta a 210 € (amortiguador de aire ≈ 150 € y brazos ≈ 60 €)');
+    return null;
+  }
+  if (/^Controlador/.test(nombre)) {
+    const c = controladorDe(P.tCatCtrl as string | undefined);
+    if (c?.precio && P.tCatCtrl !== A_MEDIDA) return deCatalogo(`${c.marca} ${c.modelo}`, c.precio, 1);
+    if (bici) { const n = Array.isArray(m.traseras) || m.traseras ? 2 : 1; return est(250 * n, `estimado: ${n > 1 ? `${n} controladores` : 'un controlador'} de bicicleta a ≈ 250 € (un Grin Baserunner cuesta 290 $ en su tienda)`); }
+    return null;
+  }
+  if (!bici) return null;
+  if (/^Motor(es)? de buje/.test(nombre)) {
+    const n = /dos/.test(nombre) ? 2 : 1, cat = motorDe(P.tCatMotor as string | undefined);
+    if (cat?.precio && P.tCatMotor !== A_MEDIDA) return null;   // the catalogue rule below
+    const kW = num('tKWNom', 0.25) / n;
+    return est(n * (200 + 250 * kW), `estimado: ${n > 1 ? `${n} motores` : 'un motor'} de buje de bicicleta de ${Math.round(kW * 1000)} W a 200 € + 250 €/kW (un buje Bafang de 250 W ronda los 230 €; un Grin All-Axle, 565 $)`);
+  }
+  if (/^Batería/.test(nombre)) {
+    const kWh = typeof m.kWh === 'number' ? m.kWh : kg * 0.19;
+    return est(kWh * 450, `estimado: ${n1(kWh)} kWh a 450 €/kWh (baterías de bicicleta eléctrica ya montadas, con su BMS y su caja: cuestan por kWh el doble que un paquete de celdas)`);
+  }
+  if (/^Varios/.test(nombre)) return est(220, 'estimado: cargador de bicicleta (80 €), cableado y fusibles (80 €), pantalla y mando (60 €)');
+  if (/^Dirección/.test(nombre)) return est(120, 'estimado: barras, rótulas y columna de triciclo reclinado');
+  return null;
+}
+
 function estimar(nombre: string, kg: number, cx: ContextoPrecio): Estimacion {
   const P = cx.P as Parametros & Record<string, unknown>, m = cx.modelo;
   const num = (k: string, d: number) => (typeof P[k] === 'number' ? P[k] as number : d);
+  const deBicicleta = estimarBici(nombre, kg, cx);
+  if (deBicicleta) return deBicicleta;
   // the body's laminate (and the pods, the floor): per kg of laminate, by material
   const matLam = String(P.tMatCarenado ?? P.qMatCarenado ?? P.matCarenado ?? 'vidrio');
   const [kgLam, nLam] = EUR_KG_LAMINADO[matLam] ?? EUR_KG_LAMINADO.vidrio;

@@ -17,6 +17,7 @@ import { cuerpoDe } from './talla';
 import { choquesPlaza, type PuntosConCuerpo } from './ajusteOcupantes';
 import { camposRefrigeracion } from './refrigeracion';
 import { carenadoBWB, type CamposBWB } from './bwb';
+import { pedalesDe } from '../bici/pedales';
 
 /** El modelo del Triciclo: la forma, los ocupantes, el bastidor, la batería, el motor y lo que lee el visor. */
 export function crearModeloTriciclo(P: Parametros) {
@@ -436,6 +437,8 @@ export function crearModeloTriciclo(P: Parametros) {
     kWh, paquete, alzaPil, alzaPas, volante, salpicadero, retrovisor, opcPuertas, puerta, opcPorton, porton,
     /** Round 3 interior: the Aptera buckets and the pilot's pedals (or null), and the rails' run on to the rear axle (or null). */
     butacas: butacasDe, pedales, larguerosTraseros: trasero,
+    /** 2026-11-24 (bici/pedales.ts): the driver's crankset and its generator, pedalling without a chain (`tPedales`), or null. */
+    pedalesBici: pedalesDe({ P: Pm, F, plazas, volante }),
     /** What the astride saddle stands on (m): the rails' top or the pack's; the 3D thins the saddle down to it. */
     sueloSillin: paquete && -0.835 + dxPil0 > paquete.x0 && -1.745 + dxPas0 < paquete.x1 ? paquete.y1 : yL + dT / 2,
     /** 2026-11-16: the interior finish (interiorTriciclo.ts): the lining, the seats' covers, belts, consoles, and their masses. */

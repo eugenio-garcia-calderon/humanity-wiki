@@ -11,6 +11,8 @@ import type { ModeloTriciclo } from './modelo';
 import { AGARRE } from './comprobaciones';
 import { electronicaTriciclo } from './electronica';
 import { dCdARefrigeracion } from './refrigeracion';
+import { AUXILIARES_BICI, esBici } from '../bici/clase';
+import { pedaleo } from '../bici/pedales';
 
 /**
  * Rodadura de los neumáticos de las medidas antiguas (2026-11-17, decidido por Claude, delegado por Eugenio):
@@ -22,6 +24,8 @@ import { dCdARefrigeracion } from './refrigeracion';
 export const CRR_CICLOMOTOR = 0.0085 + 0.018 / 2.25, CRR_COCHE = 0.011;
 /** Rodadura de neumático de ciclomotor (`CRR_CICLOMOTOR`), motor de buje y controlador al 85 %, 80 W de equipos y la batería usable al 90 %. Supuestos, no medidos. */
 export const CRR = CRR_CICLOMOTOR, RENDIMIENTO = 0.85, AUXILIARES = 80, USABLE = 0.9;
+/** The equipment's standing draw (W): a heavy vehicle's `AUXILIARES`, or a bicycle's lights and electronics (bici/clase.ts). */
+export const auxiliaresTriciclo = (T: { tClase?: string }) => (esBici(T) ? AUXILIARES_BICI : AUXILIARES);
 /** The rolling resistance of an older size's own tyre: the car sizes (c13–c15) `CRR_COCHE`, the moped ones `CRR_CICLOMOTOR`. */
 const crrLegado = (k: string) => k.startsWith('c') ? CRR_COCHE : CRR_CICLOMOTOR;
 /**
@@ -56,7 +60,9 @@ export function energiaTriciclo(m: ModeloTriciclo, mTot: number, cd: { cd: numbe
   const T = m.campos, L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), g = 9.81, CdA = cd.cd * cd.areaRef + dCdARefrigeracion(m), CRR = crrTriciclo(T);
   // (2026-11-17: a central MG2 drives the wheels through the drop case and the chain, `m.motor.rend`; a hub motor, directly)
   const rendM = RENDIMIENTO * (m.motor.rend ?? 1);
-  const potencia = (v: number) => (0.5 * 1.2 * CdA * v ** 3 + CRR * mTot * g * v) / rendM + AUXILIARES;
+  // (2026-11-24, bici/clase.ts: a vehicle of bicycle components draws a bicycle's lights and electronics, not a car's 80 W)
+  const aux = auxiliaresTriciclo(T);
+  const potencia = (v: number) => (0.5 * 1.2 * CdA * v ** 3 + CRR * mTot * g * v) / rendM + aux;
   const consumo = (kmh: number) => { const v = kmh / 3.6; return potencia(v) / v / 3.6; };
   // (2026-11-17) the power electronics (electronica.ts): the electric mode's continuous and peak power after the configured
   // limits and map, the engine after its derating. Defaults: exactly the sliders, as before. A hybrid spends the battery
@@ -76,7 +82,7 @@ export function energiaTriciclo(m: ModeloTriciclo, mTot: number, cd: { cd: numbe
   // and, at part load, runs off its best point: its efficiency times `factorCargaParcial`. In series every kW passes
   // through the electric motor, so the sustained speed on petrol is also capped by its rated power)
   const p = m.phev;
-  const motorW = (kmh: number) => { if (!p) return 0; const v = kmh / 3.6; return (0.5 * 1.2 * CdA * v ** 3 + CRR * mTot * g * v) / p.rendTrans + AUXILIARES; };
+  const motorW = (kmh: number) => { if (!p) return 0; const v = kmh / 3.6; return (0.5 * 1.2 * CdA * v ** 3 + CRR * mTot * g * v) / p.rendTrans + aux; };
   const rendTermA = (kmh: number) => !p ? 1 : p.arq === 'paralelo' ? p.rendTerm * factorCargaParcial(motorW(kmh) / (p.kW * 1000)) : p.rendTerm;
   const litros100 = (kmh: number) => {
     if (!p) return 0;
@@ -94,7 +100,9 @@ export function energiaTriciclo(m: ModeloTriciclo, mTot: number, cd: { cd: numbe
     /** 2026-11-16: the overall efficiency from the engine's shaft to the wheel, the engine's own at this speed, and the rpm (hibrido.ts) */
     rendTrans: p.rendTrans, rendTermVel: rendTermA(vel), cifras: cifrasHibrido(p.arq, vel, 2 * m.rR, motorW(vel), p.kW, p.mec),
   } : null;
-  return { cd: cd.cd, areaRef: cd.areaRef, CdA, WhKm, autonomia: util / WhKm, kmSol: solarDiaTriciclo(areaSolar, m.P.sol) / WhKm, vmaxNominal: vmaxCon(el.ruedasElecCont), vmaxPico: vmaxCon(el.ruedasElecPico), vmaxConjunta, acel50: t, potencia: potencia(vel / 3.6), WhKm50: consumo(50), WhKm100: consumo(100), hibrido };
+  return { cd: cd.cd, areaRef: cd.areaRef, CdA, WhKm, autonomia: util / WhKm, kmSol: solarDiaTriciclo(areaSolar, m.P.sol) / WhKm, vmaxNominal: vmaxCon(el.ruedasElecCont), vmaxPico: vmaxCon(el.ruedasElecPico), vmaxConjunta, acel50: t, potencia: potencia(vel / 3.6), WhKm50: consumo(50), WhKm100: consumo(100), hibrido,
+    /** 2026-11-24 (bici/pedales.ts): what the driver's pedalling changes at the speed of calculation, or null without pedals. */
+    pedaleo: pedaleo(m.pedalesBici, potencia, vel, util), auxiliares: aux };
 }
 
 /**

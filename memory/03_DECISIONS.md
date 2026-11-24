@@ -2438,3 +2438,15 @@ They change saved designs' numbers on purpose.
 **Alternatives**: (a) an AI model on a server endpoint, which needs an API key stored on the server and a new route (a new write path under CLAUDE.md forbidden item 3, about half a day, with a per-request cost); (b) an AI model in the browser, which would send the figure to a third party from the visitor's device. Both postponed until Eugenio asks for judgement of content, which rules cannot give.
 **Cost of switching later**: the module is a single `revisar(v, datos)` function with a fixed return shape; an AI reviewer would replace it behind the same return shape, about half a day for the server route plus the key.
 **Known consequence**: the rules only check form. A figure that is coherent but badly argued passes without a note.
+
+## 2026-11-24 — Aeromóvil: bicycle components as a class of the Triciclo family, not a sixth vehicle
+
+**Context**: Eugenio asked for light four-wheelers built from bicycle parts, a mark telling bicycle parts from heavy-vehicle parts, a copy of «Vehiculo de producción» with bicycle parts, and chainless pedals for the driver.
+**Decision**:
+1. One field, `tClase` ('pesado' default | 'bici'), on the Triciclo family. It changes slider ranges, the sizing rules of the running gear and the standing draw; everything else (body, seats, checks, tunnel, homologation) is the same code. A design saved before has no `tClase` and computes exactly as before.
+2. The bicycle fields other than `tClase` (brake, suspension, pedals) are optional fields outside `FILAS`, as the cooling's: absent means «as before».
+3. The bicycle copy of design 19 is a built-in proposal with a snapshot of its numbers, as «Aeromóvil BWB».
+4. Pedalling is modelled as watts added on the battery bus (legs × generator efficiency), never as a mechanical drive: Eugenio's «always chainless».
+**Alternatives**: (a) a sixth vehicle with its own prefix and files: about 3 days and every later improvement of the Triciclo body done twice; (b) the proposal computed live from saved design 19: about 1 hour, but it changes whenever he edits the original.
+**Cost of switching later**: splitting the class into its own vehicle would mean copying `triciclo/` (≈ 3,500 lines); the catalogue and `bici/` would move unchanged.
+**Known consequence**: the heavy-vehicle checks (rollover target of 1.05 g, frame safety factor) judge a 25 km/h bicycle by a car's standard. They are left as they are and reported, not relaxed.

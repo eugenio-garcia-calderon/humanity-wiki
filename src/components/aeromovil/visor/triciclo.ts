@@ -14,6 +14,7 @@ import { ocupante } from './ocupante';
 import { vestirRueda } from './ruedaCatalogo';
 import { fichaRueda } from '../ruedas/catalogo';
 import { dibujarRefrigeracion } from './refrigeracion';
+import { dibujarPedales } from './bici';
 import { construirBWB } from './bwb';
 
 /** The Triciclo's front wheels and pods turned `angulo` degrees (+ to the left: the left wheel is then the inner one). */
@@ -160,6 +161,8 @@ export function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<
   const iv = m.inversor; cajaRedonda(G.motor, [(iv.x0 + iv.x1) / 2, (iv.y0 + iv.y1) / 2, 0], [iv.x1 - iv.x0, iv.y1 - iv.y0, 2 * iv.hz], M.black, 0.01).userData.componente = 'controlador';
   // 2026-11-16: the plug-in hybrid's engine, its connection to the wheels, tank and exhaust (hibrido3d.ts)
   if (m.phev) dibujarHibrido(G.motor, m.phev.disp);
+  // 2026-11-24: the driver's chainless pedals and their generator (visor/bici.ts)
+  if (m.pedalesBici) dibujarPedales(G.motor, m.pedalesBici, M);
   const Ft = m.traseras;
   if (Ft) {
     // four wheels (2026-11-11): a hub motor in each rear wheel, and in each rear pod an upright on the wheel's inner

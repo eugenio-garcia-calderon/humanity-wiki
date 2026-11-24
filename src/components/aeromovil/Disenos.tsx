@@ -30,6 +30,7 @@ import { Check, ChevronDown, CloudOff, FilePlus2, Link2, Loader2, Save, Star, Tr
 import { Button } from '../ui/core';
 import { cn } from '../../utils/cn';
 import { NOMBRE_PROPUESTA_BWB, PROPUESTA_BWB } from './triciclo/propuestaBWB';
+import { NOMBRE_PROPUESTA_BICI, PROPUESTA_BICI } from './triciclo/propuestaBici';
 import { PARAMETROS_A1, PARAMETROS_BALA, PARAMETROS_BASCULANTE, PARAMETROS_GOTA, PARAMETROS_TRICICLO, type Disposicion, type Parametros } from './geometria';
 import { camposTriciclo, fichaTriciclo, paqueteAntes, semiAnchoPaquete } from './geometriaTriciclo';
 import { ponerDestino } from './notas/almacen';
@@ -54,6 +55,8 @@ export interface Diseno { id: number; nombre: string; parametros: Partial<Parame
  */
 export const PROPUESTAS: Diseno[] = [
   { id: -14, nombre: NOMBRE_PROPUESTA_BWB, parametros: PROPUESTA_BWB, autor: 'propuesta', origen: 'equipo', updated_at: '2026-11-17T18:00:00Z' },
+  // (2026-11-24) «Vehiculo de producción» (id 19) with bicycle components and the driver's pedals: triciclo/propuestaBici.ts
+  { id: -19, nombre: NOMBRE_PROPUESTA_BICI, parametros: PROPUESTA_BICI, autor: 'propuesta', origen: 'equipo', updated_at: '2026-11-24T00:00:00Z' },
 ];
 
 /** El diseño por defecto guardado en la web (el que abre quien llega por primera vez), o null si no hay. */

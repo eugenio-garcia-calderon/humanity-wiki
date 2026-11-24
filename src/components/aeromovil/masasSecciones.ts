@@ -164,6 +164,8 @@ export function seccionesTriciclo(res: Resultados, m: ModeloTriciclo): PesosSecc
     ['propulsion', 'Refrigeración', /^Motor: (radiador|ventilador del radiador|tubos de refrigeración|refrigerante|conductos de la toma)/],
     ['propulsion', 'Híbrido enchufable', /^(Motor de gasolina|Motor: (engranaje|generador|embrague|motor-generador|árbol)|Depósito)/],
     ['propulsion', 'Motor eléctrico', /^(Motor(es)? de buje|Motor eléctrico|Controlador|Motor: reductora)/],
+    // (2026-11-24) the driver's chainless pedals: bici/pedales.ts, its own block (BiciTriciclo.tsx)
+    ['propulsion', 'Pedales', /^Pedales:/],
     ['energia', 'Batería', /^Batería/],
     ['energia', 'Varios', /^Varios/],
     ['interior', 'Asientos', /^Asientos/],

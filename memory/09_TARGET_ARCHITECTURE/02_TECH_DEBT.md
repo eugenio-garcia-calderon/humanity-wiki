@@ -1096,3 +1096,13 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **The tree's legal content is a snapshot.** 7 of the 10 legal routes are «por confirmar»: the Manual de Reformas section for category L, INTA's categories and fees, and whether the sandbox office is running were not readable from here. Each has its next step written in the node.
 - **No CI check for the tree.** `fallosArbol()` exists and returns `[]` today, but no script runs it in CI. Adding one: about 15 minutes.
 - **On a phone the tree shows about one column at a time.** It scrolls to the chosen box on its own; a stacked layout for narrow screens was not built.
+
+## 2026-11-24 — Bicycle components: shortcuts taken
+
+- **Estimated prices and masses.** Of the bicycle parts, the shop price was read for the wheels' tyres and rims, the two drum hubs, the TRP caliper and the three Grin parts; the Shimano brake, the two air shocks and both pedal generators carry estimates (no shop showed a price that day; no maker sells the generator alone). Each says so on screen.
+- **The generator's efficiency (82 %) is an estimate.** No maker publishes one.
+- **Checks are a car's.** Rollover and frame targets are not adapted to a 25 km/h vehicle; a bicycle-class target would need a source (EN 17860-3 for multi-track carrier cycles was not read).
+- **No knee check for the handlebar**, only for the steering wheel.
+- **Four hydraulic calipers need a splitter per lever**: not counted in mass or price (the brake's note says so).
+- **`triciclo-rangos.ts` does not sweep the bicycle ranges** beyond the `tClase` option; `scripts/bici.ts` checks the preset and the built-in design only. A sweep: about 1 hour.
+- **Slider ranges by class live in `bici/clase.ts`, apart from `FILAS`.** If a third class appears, the range should move into each `FILAS` row (the pending rewrite already listed for defaults).

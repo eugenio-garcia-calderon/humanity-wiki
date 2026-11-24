@@ -1,5 +1,6 @@
 // Triciclo packaging and ranges: rows of seats, battery pack, body shape keys, camposTriciclo, rangoTriciclo, limitarTriciclo, track and steering clearance, inside-the-body tests.
 // Moved out of geometriaTriciclo.ts unchanged (2026-11-16, refactor «ordenar»); that file re-exports everything. See ../CLAUDE.md.
+import { rangoBici } from '../bici/clase';
 import { migrarRendTrans } from '../hibrido';
 import { CATALOGO_CLAVES, idValido, valoresCatalogo } from '../catalogoTren';
 import type { Parametros, Tubo } from '../geometria';
@@ -285,6 +286,10 @@ export function rangoTriciclo(k: ClaveNumTriciclo, T: CamposTriciclo): [number, 
   // (2026-11-16) a catalogue part fixes what its maker publishes (catalogoTren.ts): the slider stops there
   const fijo = valorFijoCatalogo(k, T);
   if (fijo != null) return [fijo, fijo];
+  // 2026-11-24 (bici/clase.ts): built from bicycle components, the sliders whose heavy-vehicle range starts above what a
+  // bicycle carries take a bicycle's range (the peak power still not under the rated one)
+  const rb = rangoBici(k, T);
+  if (rb) return k === 'tKWPico' ? [Math.min(rb[1], Math.max(rb[0], T.tKWNom)), rb[1]] : [rb[0], rb[1]];
   // round three (2026-11-11): three rows need room. Only with that layout; astride, every range is as before.
   if (T.tAsientos === 'filas') {
     // the two seats of row 2 side by side need width at shoulder height, under the canopy's curve (see ANCHO_FILAS)
@@ -418,6 +423,8 @@ export const techoBajo = (T: CamposTriciclo) => limitarTriciclo('tAlto', T) < AL
 /** The value a chosen catalogue part fixes for this slider (catalogoTren.ts), or null. */
 export const valorFijoCatalogo = (k: ClaveNumTriciclo, T: CamposTriciclo): number | null =>
   (valoresCatalogo(T, esCuatro(T) ? 2 : 1) as Partial<Record<string, number>>)[k] ?? null;
+/** (2026-11-24) the slider's step: a bicycle's parts move in smaller steps (50 W, 100 g) than a heavy vehicle's. */
+export const pasoTriciclo = (k: ClaveNumTriciclo, T: CamposTriciclo) => rangoBici(k, T)?.[2] ?? fichaTriciclo(k)!.paso;
 export const limitarTriciclo = (k: ClaveNumTriciclo, T: CamposTriciclo) => { const [a, b] = rangoTriciclo(k, T); return Math.min(b, Math.max(a, comoAntes(k, T[k], T))); };
 /**
  * Round 3 (2026-11-12) widened some ranges. A value saved at an old end carries float noise (the editor stores what it

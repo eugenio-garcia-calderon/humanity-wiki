@@ -9,6 +9,8 @@ import { TRICICLO_DEFECTO } from './defecto';
 import { CATALOGO_RUEDAS, IDS_CATALOGO, nombreRueda, type FichaRueda, type IdRueda } from '../ruedas/catalogo';
 import { OPCIONES_CONSTRUCCION, OPCIONES_TIPO, type OpcionConstruccion, type OpcionTipo } from '../ruedas/neumaticos';
 import { DESLIZADORES_BALA, type ClaveBala } from '../geometriaBala';
+import { OPCIONES_CLASE, type ClaseVehiculo } from '../bici/clase';
+import { claseRueda, type ClaseComponente } from '../ruedas/catalogo';
 import { rangoTriciclo, limitarTriciclo } from './medidas';
 
 /** Los parámetros propios del Triciclo (prefijo `t`). Opcionales en `Parametros`: los diseños de los otros tres vehículos no los llevan. */
@@ -192,6 +194,9 @@ export interface CamposTriciclo extends CamposInterior {
   tColaCorte: 'no' | 'kamm';   // la cola: larga hasta la punta (hasta ahora) o cortada en recto (cola Kamm)
   tKammSeccion: number;        // dónde se corta: la fracción de la sección mayor que queda en el corte (Kamm: 0,5)
   tKammCavidad: number;        // hueco en el culote (m): 0 plano
+  // 2026-11-24 (Eugenio: «vehículos ligeros con componentes de piezas de bicicleta … bicicletas de 4 ruedas»): bici/clase.ts.
+  // Optional when saved: absent, a heavy vehicle's parts, and every number as before.
+  tClase: ClaseVehiculo;       // de qué clase son sus componentes: de vehículo pesado (moto y coche: hasta ahora) o de bicicleta
 }
 export type ClaveTriciclo = keyof CamposTriciclo;
 /**
@@ -228,7 +233,7 @@ export const RUEDAS_TRICICLO: Record<RuedaTriciclo, { d: number; neuDel: number;
 export type ClaveTexto = 'tCubierta' | 'tChLargo' | 'tFaro' | 'tConAleta' | 'tSolarMorro' | 'tPuertas2' | 'tSolarCola' | 'tMatCarenado' | 'tChMat' | 'tRuedaDel' | 'tRuedaTras' | 'tNeuDel' | 'tNeuTras' | 'tConsDel' | 'tConsTras' | 'tVentanas' | 'tAsientos' | 'tFila2' | 'tFila3' | 'tFila2N' | 'tFila3N' | 'tFila2Tipo' | 'tFila3Tipo' | 'tTraseras' | 'tBascula' | 'tRuedas' | 'tPropulsion' | 'tHibArq' | 'tMotorElec' | 'tBascTec' | 'tBatDisp' | 'tMando' | 'tSalpicadero' | 'tAcceso' | 'tRetrovisores' | 'tMaletero'
   | 'tAcabado' | 'tTapiz' | 'tCostura' | 'tCosturaColor' | 'tForroColor' | 'tMoldura' | 'tConsolaTecho' | 'tConsolaCentral' | 'tCinturon' | 'tAmbiente'
   | 'tCatMotor' | 'tCatCtrl' | 'tCatReductora' | 'tCatTermico' | 'tColaCorte'
-  | 'tEpEstrategia' | 'tEpSport' | 'tEpMapa' | 'tEpLim1' | 'tEpLim2';
+  | 'tEpEstrategia' | 'tEpSport' | 'tEpMapa' | 'tEpLim1' | 'tEpLim2' | 'tClase';
 export type ClaveNumTriciclo = Exclude<ClaveTriciclo, ClaveTexto>;
 
 // ------------------------------------------------------------------ deslizadores
@@ -272,7 +277,10 @@ export type Unidad = 'm' | 'cm' | 'mm' | '°' | 'kg' | 'kW' | 'kWh' | 'Wh/kg' | 
  * centro de su rango (se ve el rango entero).
  */
 export interface FichaTriciclo { clave: ClaveNumTriciclo; n: string; dep: DepTriciclo; bloque: string; min: number; max: number; paso: number; unidad: Unidad; centrar: boolean; desde?: 1 | -1 }
-export interface SelectorTriciclo { clave: ClaveTexto; n: string; dep: DepTriciclo; bloque: string; opciones: { k: string; n: string }[] }
+/** (2026-11-24) an option may say its class, a bicycle's or a heavy vehicle's part: the selector groups and marks it (controles.tsx). */
+export interface SelectorTriciclo { clave: ClaveTexto; n: string; dep: DepTriciclo; bloque: string; opciones: { k: string; n: string; clase?: ClaseComponente }[] }
+/** The bicycle block's name (BiciTriciclo.tsx draws it; the generic list of a department leaves it out). */
+export const BLOQUE_BICI = 'Componentes de bicicleta';
 
 export type Fila = [ClaveNumTriciclo, DepTriciclo, string, ClaveBala | null, string, number, number, number, Unidad];
 // [clave, departamento, bloque, del Cuadriciclo en rombo, etiqueta, mín, máx, paso, unidad]
@@ -489,7 +497,7 @@ export const fichaTriciclo = (k: ClaveNumTriciclo) => deslizadoresTriciclo().fin
 // because `defecto.ts` was held by another bot. Move them into `defecto.ts` and make the fields required: ≈ 5 min (tech debt).
 export const NEUMATICOS_DEFECTO = { tNeuDel: 'serie', tNeuTras: 'serie', tConsDel: 'serie', tConsTras: 'serie' } as const;
 Object.assign(TRICICLO_DEFECTO, NEUMATICOS_DEFECTO);
-export const ruedas = (l: RuedaTriciclo[]) => l.map(k => ({ k, n: RUEDAS_TRICICLO[k].n }));
+export const ruedas = (l: RuedaTriciclo[]) => l.map(k => ({ k, n: RUEDAS_TRICICLO[k].n, clase: claseRueda(k) }));
 export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
   { clave: 'tSolarCola', n: 'Paneles solares por detrás', dep: 'carroceria', bloque: 'Techo solar y ventanas', opciones: [{ k: 'no', n: 'Solo en la cúpula' }, { k: 'si', n: 'Hasta la punta de la cola (como el Aptera)' }] },
   { clave: 'tVentanas', n: 'Cúpula', dep: 'carroceria', bloque: 'Techo solar y ventanas', opciones: [{ k: 'marco', n: 'Ventanas laterales con montante (Aptera)' }, { k: 'burbuja', n: 'De una pieza (como el Cuadriciclo en rombo)' }] },
@@ -553,6 +561,8 @@ export const SELECTORES_TRICICLO: SelectorTriciclo[] = [
   { clave: 'tCosturaColor', n: 'Color de la costura', dep: 'interior', bloque: 'Tapicería', opciones: COLORES_COSTURA },
   { clave: 'tCinturon', n: 'Cinturones', dep: 'interior', bloque: 'Tapicería', opciones: CINTURONES },
   { clave: 'tBatDisp', n: 'Dónde va la batería', dep: 'energia', bloque: 'Batería', opciones: [{ k: 'reparto', n: 'Morro, pies y bajo los sillines' }, { k: 'chasis', n: 'A lo largo del bastidor' }] },
+  // 2026-11-24: the class of the vehicle's components (bici/clase.ts); drawn by BiciTriciclo.tsx, not by the generic list
+  { clave: 'tClase', n: 'Clase de componentes', dep: 'rodaje', bloque: BLOQUE_BICI, opciones: OPCIONES_CLASE },
 ];
 /** 2026-11-12: which of those options are on (the Aptera hatch only with doors: it takes the canopy's rear part, which a one-piece canopy carries away when it opens). */
 export const conPuertas = (T: Pick<CamposTriciclo, 'tAcceso'>) => T.tAcceso === 'puertas';
