@@ -17,8 +17,11 @@
 // in the address, a cover with one card per window. Every number comes from
 // `src/data/`.
 //
-// TWO HOMES, ONE COMPONENT, like the consciousness map: humanity.wiki/modelo-
-// socioeconomico (App.tsx) and a project page of luzhumanidad.com whose
+// RENAMED «ECONOMÍA PÚBLICA OPTIMIZADA» (2026-11-24, Eugenio): only the name and the
+// address changed (humanity.wiki/economia-publica-optimizada; the old ones redirect).
+//
+// TWO HOMES, ONE COMPONENT, like the consciousness map: humanity.wiki/economia-
+// publica-optimizada (App.tsx) and a project page of luzhumanidad.com whose
 // `config.aplicacion` is 'modelo-socioeconomico' (SubpaginaSitio.tsx, migration
 // 0184). `enSitio` is set in the second case.
 //
@@ -99,11 +102,11 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
 
   useEffect(() => {
     const titulo = document.title;
-    document.title = 'Modelo de optimización socioeconómica · Escalas, recaudación, pensiones, economía, servicios y leyes · Luz & Humanidad';
+    document.title = 'Economía pública optimizada · Escalas, recaudación, pensiones, economía, servicios y leyes · Luz & Humanidad';
     let meta = document.querySelector('meta[name="description"]') as HTMLMetaElement | null;
     const anterior = meta?.content;
     if (!meta) { meta = document.createElement('meta'); meta.name = 'description'; document.head.appendChild(meta); }
-    meta.content = 'Modelo de optimización socioeconómica: ocho escalas de la persona al planeta, un único impuesto en cuatro tramos (10, 20, 40 y 60 %), una pensión única, un país sin deuda, y propuestas para vivienda, seguridad, justicia, sanidad, educación, leyes y firma digital, comparadas con la España de hoy.';
+    meta.content = 'Economía pública optimizada: ocho escalas de la persona al planeta, un único impuesto en cuatro tramos (10, 20, 40 y 60 %), una pensión única, un país sin deuda, y propuestas para vivienda, seguridad, justicia, sanidad, educación, leyes y firma digital, comparadas con la España de hoy.';
     return () => { document.title = titulo; if (meta) meta.content = anterior ?? ''; };
   }, []);
 
@@ -281,7 +284,7 @@ export default function ModeloSocioeconomico({ enSitio }: { enSitio?: { inicio: 
       </main>
 
       <footer className="border-t border-slate-200 px-4 pb-24 pt-8 text-center text-sm text-slate-500">
-        Modelo de optimización socioeconómica. Un proyecto de {marca}.
+        Economía pública optimizada. Un proyecto de {marca}.
       </footer>
 
       {/* Bottom right: add a comment about the page you are on, and the board of pending improvements
@@ -327,7 +330,7 @@ function Portada() {
     <div className="mx-auto max-w-6xl px-4 pb-24 pt-8 sm:px-6 sm:pt-12">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="max-w-3xl text-[2.2rem] font-[800] leading-[1.03] tracking-[-0.035em] sm:text-[3.2rem]">Modelo de optimización socioeconómica</h1>
+          <h1 className="max-w-3xl text-[2.2rem] font-[800] leading-[1.03] tracking-[-0.035em] sm:text-[3.2rem]">Economía pública optimizada</h1>
           <p className="mt-4 max-w-[62ch] text-[1.12rem] leading-relaxed text-slate-700">
             Cómo funcionan hoy la recaudación, las pensiones, la economía, los servicios y las leyes, y cómo podrían funcionar: más simple, más justo y repartiendo el poder entre las escalas, de la persona al planeta. Elige un área.
           </p>
