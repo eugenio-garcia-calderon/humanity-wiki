@@ -14,12 +14,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "Política en tarjetas",
-      "desde": "2026-11-24T13:04:25.035Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "memory/03_DECISIONS.md",
       "motivo": "Política en tarjetas",
       "desde": "2026-11-24T13:04:28.418Z"
