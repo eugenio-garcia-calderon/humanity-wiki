@@ -62,12 +62,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "expediente EPAC (matriz, ensayos, documentos)",
-      "desde": "2026-11-24T12:05:18.575Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md",
       "motivo": "expediente EPAC (matriz, ensayos, documentos)",
       "desde": "2026-11-24T12:05:21.052Z"
@@ -95,6 +89,12 @@
       "ruta": "public/observatorio-polarizacion/index.html",
       "motivo": "Lectura fija del arrastre, marcas por nivel, pase sobre tu punto y botón Todos primero",
       "desde": "2026-11-24T12:46:39.819Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "Entrada del cambio de lectura",
+      "desde": "2026-11-24T12:46:48.146Z"
     }
   ]
 }
