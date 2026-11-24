@@ -87,8 +87,8 @@ export interface Parametros extends Partial<CamposBala>, Partial<CamposTriciclo>
   precios?: Record<string, number>;
   /** (2026-11-24) the user's own weight of a part, kg by the part's name in the mass model (Triciclo family); absent: the model's estimate */
   pesos?: Record<string, number>;
-  /** (2026-11-24) the decisions taken about the running gear's parts, by part, newest last (`rodaje/tipos.ts`); absent: none yet */
-  decisionesRodaje?: Partial<Record<'ruedas' | 'frenos' | 'direccion' | 'suspension', { opcion: string; eje?: 'del' | 'tras' | 'todas'; fecha: string; porque: string }[]>>;
+  /** (2026-11-24) the decisions taken about the vehicle's parts, by part id, newest last (`partes/tipos.ts`; the name is from when only the running gear had them, kept so saved designs keep theirs); absent: none yet */
+  decisionesRodaje?: Record<string, { opcion: string; decision?: string; eje?: 'del' | 'tras' | 'todas'; fecha: string; porque: string }[]>;
   /** (2026-11-17) the user's own hours and €/h of a labour item, by its id (`precios/manoObra.ts`); absent: the estimates */
   manoObra?: Record<string, { h?: number; eurh?: number }>;
   // ── Aeromóvil 1 (disposición 'cuatro') ────────────────────────────────────

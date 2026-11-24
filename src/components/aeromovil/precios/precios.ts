@@ -21,7 +21,7 @@ import type { Parametros, Resultados } from '../geometria';
 import { MATERIALES_CHASIS } from '../geometria';
 import { A_MEDIDA, EUR_POR_USD, controladorDe, motorDe, precioEuros, termicoDe, type Precio } from '../catalogoTren';
 import { frenoBici, generadorPedal, precioRuedaBici, suspensionBici, type PrecioBici } from '../bici/catalogo';
-import { direccionOpcion } from '../rodaje/direccion';
+import { direccionOpcion } from '../partes/direccion';
 import { clave, type DepPeso, type PartePeso, type PesosSecciones, type SeccionPeso } from '../masasSecciones';
 
 export interface PrecioParte {
@@ -221,10 +221,14 @@ function estimar(nombre: string, kg: number, cx: ContextoPrecio): Estimacion {
   }
   if (/^Motor: reductora/.test(nombre)) return est(380, 'estimado: reductora planetaria de su tamaño (las del catálogo no publican precio)');
   if (/^Motor de gasolina/.test(nombre)) {
+    // (2026-11-24) the engine is five lines of the mass list (the block, its exhaust, intake, water pump and oil pump: `desgloseMotorGasolina`), and each
+    // one was priced as the WHOLE engine — a plug-in hybrid counted it five times. Its price is split among them by mass, so the five add up to one engine.
+    const total = (m.phev as { kgMotor?: number } | undefined)?.kgMotor, f = total && total > 0 ? Math.min(1, kg / total) : 1;
+    const cuanto = f >= 0.999 ? '' : `; esta pieza lleva el ${Math.round(f * 100)} % de su precio, por su masa (el motor son cinco líneas de la lista de pesos)`;
     const cat = termicoDe(P.tCatTermico as string | undefined);
-    if (cat?.precio && P.tCatTermico !== A_MEDIDA) return deCatalogo(`${cat.marca} ${cat.modelo}`, cat.precio, 1);
+    if (cat?.precio && P.tCatTermico !== A_MEDIDA) { const d = deCatalogo(`${cat.marca} ${cat.modelo}`, cat.precio, 1); return { ...d, eur: d.eur * f, como: d.como + cuanto }; }
     const kW = num('tPhevKW', 10);
-    return est(400 + 45 * kW, `estimado: motor de gasolina de ${n1(kW)} kW a 400 € + 45 €/kW, con su escape`);
+    return est(f * (400 + 45 * kW), `estimado: motor de gasolina de ${n1(kW)} kW a 400 € + 45 €/kW, con su escape${cuanto}`);
   }
   if (/^Motor: (engranaje|generador|embrague|motor-generador)/.test(nombre)) return est(kg * 35, `estimado: ${n1(kg)} kg a 35 €/kg`);
   if (/^Depósito/.test(nombre)) return est(120, 'estimado: depósito, tapón y bomba (la gasolina no cuenta)');
