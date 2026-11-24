@@ -14,12 +14,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/App.tsx",
-      "motivo": "Política en tarjetas",
-      "desde": "2026-11-24T12:59:50.081Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/pages/ObservatorioPolarizacion.tsx",
       "motivo": "Política en tarjetas",
       "desde": "2026-11-24T12:59:52.700Z"
