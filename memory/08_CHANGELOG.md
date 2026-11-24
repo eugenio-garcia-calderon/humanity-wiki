@@ -13123,3 +13123,14 @@ Eugenio: «En el apartado de homologación vamos a poner diferentes informacione
 - Verified: the migration on a local copy of the five tables involved (run twice: the second run changes nothing; a slug already in use links the existing page instead of creating one; a stale old address for a new slug is removed); all five pages hang from the site root through «Política» by the same recursive query the server uses; the cards (order, links on the domain and from humanity.wiki), the economy page and the three document views in Chromium; the geometry view unchanged; no page errors; `tsc --noEmit` clean; `npm run build` passes.
 - Not verified: the real production database (owner, `publico`, the site root) and the pages served by the real server; the installed app (the service worker may serve the old build; `?sw=off` drops it); phones beyond a 390 px screenshot of the cards.
 - Files: `drizzle/0235_politica_herramientas.sql`, `src/pages/PoliticaHerramientas.tsx`, `src/pages/EconomiaPublica.tsx`, `src/pages/ObservatorioPolarizacion.tsx`, `src/pages/SubpaginaSitio.tsx`, `src/App.tsx`, `public/observatorio-polarizacion/index.html`, `memory/*`.
+
+## 2026-11-24 · Observatorio and Perfiles políticos get back what they had
+
+> «En perfiles políticos falta mucha información que estaba en el observatorio… cómo se hablan unos a otros, qué opinión tienen unos de otros, sus incongruencias… rescátalo. Y el observatorio de polarización, hay cosas que estaban en el anterior que creo que se han modificado, intenta mantenerlas.»
+
+- `/observatorio-de-polarizacion` has its cover of 2026-11-12 back: «Seis formas de mirar una sociedad dividida», with the six illustrated chapter cards. It is dark again, as it was designed; the white theme came with the geometry on 2026-11-19 and stays there and in Democracia directa.
+- `/perfiles-politicos` now carries everything that talks about the profiles, dark too: 1 · Doce perfiles (with their contradictions under «Más»), 2 · Cómo se miran (how each position names the others and how hostile it is, the same fact through five lenses, the mirror), 3 · Del nosotros al enemigo (circles of belonging and the conflict ladder) and 4 · Cómo se nombran (where «facha», «rojo» or «fascista» come from, what the extremes share, and the sources).
+- Geometría política no longer shows the two «Apartado» bands at the bottom that belonged to the old single page.
+- Verified in Chromium: section by section, the observatory shows the same text as the 2026-11-12 version (cover 778 characters, every chapter the same length; Palabras y fuentes is longer because the sources grew since); the profiles page shows its four chapters in order with its own menu; no page errors; geometry suites (237 interactions, Todos, hover, table, drag reading) pass.
+- Not verified: phones, and the installed app (`?sw=off` drops an old copy).
+- Files: `public/observatorio-polarizacion/index.html`, `memory/08_CHANGELOG.md`.
