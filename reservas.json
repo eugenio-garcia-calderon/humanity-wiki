@@ -77,6 +77,12 @@
       "ruta": "src/components/aeromovil/BiciTriciclo.tsx",
       "motivo": "peso editable por pieza",
       "desde": "2026-11-24T10:37:13.843Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/homologacion/normas.ts",
+      "motivo": "homologación L1e-A y página completa",
+      "desde": "2026-11-24T11:02:22.997Z"
     }
   ]
 }
