@@ -5,6 +5,12 @@
       "ruta": "src/components/aeromovil/estrategia/arbol.ts",
       "motivo": "Segunda estrategia",
       "desde": "2026-11-24T01:40:48.806Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/estrategia/VistaEstrategia.tsx",
+      "motivo": "Segunda estrategia",
+      "desde": "2026-11-24T01:40:51.272Z"
     }
   ]
 }
