@@ -84,7 +84,9 @@ function Fuentes({ filas }: { filas: Fila[] }) {
   );
 }
 
-export function ComparadorMotores({ tipo, modelo, mTot, cd, actual, alElegir, motores, partes }: {
+export function ComparadorMotores({ tipo, modelo, mTot, cd, actual, alElegir, motores, partes, velocidad }: {
+  /** (2026-11-24) the speed to compare at, when it is not the car's 90 km/h: a bicycle-class vehicle's own design speed */
+  velocidad?: number;
   tipo: 'gasolina' | 'electrico'; modelo: ModeloTriciclo; mTot: number;
   /** the tunnel's figures, or null while it computes */
   cd: { cd: number; areaRef: number } | null;
@@ -94,13 +96,14 @@ export function ComparadorMotores({ tipo, modelo, mTot, cd, actual, alElegir, mo
   /** the block's parts with their masses (its section in masasSecciones.ts: the same as its header's weight) */
   partes: PartePeso[];
 }) {
+  const VEL = velocidad ?? VEL_COMPARAR;
   const T = modelo.campos, id = actual ?? A_MEDIDA, p = modelo.phev;
   // 2026-11-17: the traction motor central, MG2 on the planetary's ring (hibrido.ts): only central motors fit there, one of them
   const central = modelo.motor.tipo === 'central';
   // the car at the comparison speed: the same model, only «Velocidad de cálculo» moved
-  const a90 = useMemo(() => ({ ...modelo, campos: { ...modelo.campos, tVel: VEL_COMPARAR } }) as ModeloTriciclo, [modelo]);
+  const a90 = useMemo(() => ({ ...modelo, campos: { ...modelo.campos, tVel: VEL } }) as ModeloTriciclo, [modelo, VEL]);
   const base = useMemo(() => (cd ? energiaTriciclo(a90, mTot, cd) : null), [a90, mTot, cd]);
-  const v = VEL_COMPARAR / 3.6;
+  const v = VEL / 3.6;
   // what the wheels ask at 90 km/h (W), flat and on the slope
   const rueda = base ? (base.potencia - AUXILIARES) * RENDIMIENTO * modelo.motor.rend : null;
   const cuesta = mTot * 9.81 * CUESTA * v;
@@ -184,11 +187,11 @@ export function ComparadorMotores({ tipo, modelo, mTot, cd, actual, alElegir, mo
   const masBarato = [...sirven].filter(r => precioEuros(r.precio) != null).sort((a, b) => precioEuros(a.precio)! * a.n - precioEuros(b.precio)! * b.n)[0];
 
   const cab = tipo === 'gasolina'
-    ? ['Motor de gasolina', 'cm³', 'kW · CV máx.', 'kW cont.', 'N·m', 'kg seco', 'g/kWh', `L/100 km a ${VEL_COMPARAR}`, 'km/h solo gasolina', 'Precio']
-    : ['Motor eléctrico', 'Tipo', 'V', 'kW · CV cont.', 'kW pico', 'N·m pico', 'kg', 'η %', `Wh/km a ${VEL_COMPARAR}`, 'Precio'];
+    ? ['Motor de gasolina', 'cm³', 'kW · CV máx.', 'kW cont.', 'N·m', 'kg seco', 'g/kWh', `L/100 km a ${VEL}`, 'km/h solo gasolina', 'Precio']
+    : ['Motor eléctrico', 'Tipo', 'V', 'kW · CV cont.', 'kW pico', 'N·m pico', 'kg', 'η %', `Wh/km a ${VEL}`, 'Precio'];
   const pie = tipo === 'gasolina'
-    ? `Potencia, cilindrada, par, masa y consumo: los que publica cada fabricante o vendedor (ficha enlazada al elegirlo). g/kWh: gramos de gasolina por kWh en el eje, de su consumo publicado a su potencia continua; cuanto menos, mejor. L/100 km: este coche a ${VEL_COMPARAR} km/h con la batería gastada, con su Cd del túnel, su unión al híbrido (${f(p!.rendTrans * 100)} %) y la masa de ese motor (el cálculo de «Rendimiento»); * sin consumo publicado: con el rendimiento del deslizador. km/h solo gasolina: lo que sostiene en llano con su potencia máxima. Estimaciones, no medidas.`
-    : `${central ? 'Solo motores centrales: el motor eléctrico va junto al de gasolina, en la corona del planetario (MG2), y llega a las ruedas por la cadena. ' : ''}Potencias, par, tensión y masa: los que publica cada fabricante o vendedor (ficha enlazada al elegirlo); «×2»: dos motores de buje, uno por rueda trasera, y las cifras son de los dos. Wh/km: este coche a ${VEL_COMPARAR} km/h con su Cd del túnel y la masa de ese motor; con el rendimiento que publica el fabricante (η) y un controlador al ${f(REND_CONTROLADOR * 100)} %; * sin rendimiento publicado: motor y controlador al ${f(RENDIMIENTO * 100)} %, como en «Rendimiento». Estimaciones, no medidas.`;
+    ? `Potencia, cilindrada, par, masa y consumo: los que publica cada fabricante o vendedor (ficha enlazada al elegirlo). g/kWh: gramos de gasolina por kWh en el eje, de su consumo publicado a su potencia continua; cuanto menos, mejor. L/100 km: este coche a ${VEL} km/h con la batería gastada, con su Cd del túnel, su unión al híbrido (${f(p!.rendTrans * 100)} %) y la masa de ese motor (el cálculo de «Rendimiento»); * sin consumo publicado: con el rendimiento del deslizador. km/h solo gasolina: lo que sostiene en llano con su potencia máxima. Estimaciones, no medidas.`
+    : `${central ? 'Solo motores centrales: el motor eléctrico va junto al de gasolina, en la corona del planetario (MG2), y llega a las ruedas por la cadena. ' : ''}Potencias, par, tensión y masa: los que publica cada fabricante o vendedor (ficha enlazada al elegirlo); «×2»: dos motores de buje, uno por rueda trasera, y las cifras son de los dos. Wh/km: este coche a ${VEL} km/h con su Cd del túnel y la masa de ese motor; con el rendimiento que publica el fabricante (η) y un controlador al ${f(REND_CONTROLADOR * 100)} %; * sin rendimiento publicado: motor y controlador al ${f(RENDIMIENTO * 100)} %, como en «Rendimiento». Estimaciones, no medidas.`;
 
   return (
     <div className="flex flex-col gap-1.5">
@@ -197,7 +200,7 @@ export function ComparadorMotores({ tipo, modelo, mTot, cd, actual, alElegir, mo
         {pideLlano == null || pideCuesta == null
           ? <p>El túnel está calculando el Cd de esta forma: en unos segundos sale cuánta potencia pide el coche.</p>
           : <>
-            <p>Con su CdA del túnel ({f(base!.CdA, 3)} m²) y {f(mTot)} kg con los ocupantes, a {VEL_COMPARAR} km/h este coche pide <b>{f(pideLlano, 1)} kW</b> {tipo === 'gasolina' ? 'al motor de gasolina en llano (con la unión al híbrido y los equipos)' : 'en la rueda en llano'}, y <b>{f(pideCuesta, 1)} kW</b> subiendo una cuesta del {f(CUESTA * 100)} %. {tipo === 'gasolina' ? 'Para viajar solo con gasolina, mejor un motor que dé eso en continuo, sin ir al máximo.' : 'Un motor que dé eso en continuo no se calienta en un viaje; para adelantar se tira del pico.'}</p>
+            <p>Con su CdA del túnel ({f(base!.CdA, 3)} m²) y {f(mTot)} kg con los ocupantes, a {VEL} km/h este coche pide <b>{f(pideLlano, 1)} kW</b> {tipo === 'gasolina' ? 'al motor de gasolina en llano (con la unión al híbrido y los equipos)' : 'en la rueda en llano'}, y <b>{f(pideCuesta, 1)} kW</b> subiendo una cuesta del {f(CUESTA * 100)} %. {tipo === 'gasolina' ? 'Para viajar solo con gasolina, mejor un motor que dé eso en continuo, sin ir al máximo.' : 'Un motor que dé eso en continuo no se calienta en un viaje; para adelantar se tira del pico.'}</p>
             {sirven.length
               ? <p>Lo dan {sirven.length} de {filas.length} (en continuo; los que no publican la continua, a su potencia máxima). {masLigero && <>El más ligero: <b>{masLigero.nombre}</b>. </>}{menosGasta && menosGasta !== masLigero && <>El que menos gasta (con consumo publicado): <b>{menosGasta.nombre}</b>. </>}{masBarato && masBarato !== masLigero && masBarato !== menosGasta && <>El más barato con precio publicado: <b>{masBarato.nombre}</b>. </>}Más potencia que eso es más masa y más dinero sin ir más rápido.</p>
               : <p>Ninguno del catálogo lo da en continuo según lo que publica: los de potencia continua sin publicar no se cuentan.</p>}

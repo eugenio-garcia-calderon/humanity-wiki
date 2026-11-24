@@ -121,7 +121,7 @@ function estimarBici(nombre: string, kg: number, cx: ContextoPrecio): Estimacion
   }
   if (/^Suspensión (delantera|trasera)/.test(nombre)) {
     const s = suspensionBici(P.tBiciSusp as string | undefined);
-    if (s) return deBici(s.n, s.precio, 2, 2 * 60, 'brazos y mangueta de tubo de bicicleta (≈ 60 € por esquina, estimado)');
+    if (s) return deBici(s.n, s.precio, 2);
     if (bici) return est(2 * (150 + 60), 'estimado: dos esquinas de bicicleta a 210 € (amortiguador de aire ≈ 150 € y brazos ≈ 60 €)');
     return null;
   }

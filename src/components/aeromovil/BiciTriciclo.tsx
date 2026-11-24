@@ -65,7 +65,7 @@ export function BloqueClaseBici({ P, T, set, bloque, seccion, plegable }: { P: P
       <Selector id="t-tBiciSusp" etiqueta="Suspensión (todas las esquinas)" valor={C.tBiciSusp} opciones={OPCIONES_SUSPENSION} alCambiar={v => poner('tBiciSusp', v)} />
       <FichaBici p={suspensionBici(C.tBiciSusp)} por="por esquina, con sus brazos" />
       <p className="text-xs text-slate-500">
-        «A medida» deja el peso de frenos y suspensión a los deslizadores de «Masas» y a la carga de cada rueda. Las ruedas se eligen arriba, en «Ruedas»; el tubo, en «Bastidor»; los motores y sus controladores de bici,
+        «A medida» deja el peso de frenos y suspensión a los deslizadores de «Masas» y a la carga de cada rueda. Las ruedas se eligen arriba, en «Ejes y ruedas»; el tubo, en la pestaña Chasis, «Bastidor»; los motores y sus controladores de bici,
         en «Motor › Motor eléctrico»; y los pedales, en «Motor › Pedales».
       </p>
     </Bloque>
