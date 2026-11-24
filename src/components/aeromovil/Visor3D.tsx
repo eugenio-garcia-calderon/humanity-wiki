@@ -719,7 +719,9 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       if (!st.camaraAntesFicha) st.camaraAntesFicha = { pos: st.camera.position.clone(), target: st.controls.target.clone() };
       const c = b.getCenter(new THREE.Vector3()), r = Math.max(0.12, b.getSize(new THREE.Vector3()).length() / 2);
       const dir = st.camera.position.clone().sub(st.controls.target).normalize();
-      const d = Math.min(6, 1.25 * r / Math.tan(THREE.MathUtils.degToRad(st.camera.fov) / 2));
+      // (the narrower of the two fields of view: on a phone the window is as wide as it is tall, and a car 3.8 m long overflowed it
+      // when the distance was worked out from the vertical field alone; farther than 6 m for that case)
+      const tanV = Math.tan(THREE.MathUtils.degToRad(st.camera.fov) / 2), d = Math.min(12, 1.25 * r / Math.min(tanV, tanV * st.camera.aspect));
       // the orbit stops the camera at 1.5 m from the target; a part of 30 cm (a battery module, a brake) would stay a speck
       // (the robot measured 9 % of the window): near a small part the camera may come as close as the framing asks
       st.controls.minDistance = Math.min(1.5, Math.max(0.25, d * 0.6));
@@ -746,7 +748,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       const b = cajaVisibleMotor(st.G.motor); if (!b) return;
       const c = b.getCenter(new THREE.Vector3()), r = Math.max(0.12, b.getSize(new THREE.Vector3()).length() / 2);
       const dir = st.camera.position.clone().sub(st.controls.target).normalize();
-      const d = Math.min(6, 1.6 * r / Math.tan(THREE.MathUtils.degToRad(st.camera.fov) / 2));
+      const tanV = Math.tan(THREE.MathUtils.degToRad(st.camera.fov) / 2), d = Math.min(12, 1.6 * r / Math.min(tanV, tanV * st.camera.aspect));
       st.target.copy(c);
       st.tween = { from: st.camera.position.clone(), to: c.clone().addScaledVector(dir, d), tf: st.controls.target.clone(), t: 0 };
     } else if (antes && !piezasMotor) {
