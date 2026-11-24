@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/components/aeromovil/Visor3D.tsx",
-      "motivo": "Aeromóvil: el 3D de cada parte enseña solo lo suyo + ventana 30 % más baja (nube/partes-vehiculo)",
-      "desde": "2026-11-24T20:48:37.494Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/aeromovil/CLAUDE.md",
       "motivo": "Aeromóvil: el 3D de cada parte enseña solo lo suyo + ventana 30 % más baja (nube/partes-vehiculo)",
       "desde": "2026-11-24T20:48:39.945Z"
