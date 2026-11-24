@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
-      "motivo": "eje trasero con slider",
-      "desde": "2026-11-24T10:22:09.902Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "eje trasero",
       "desde": "2026-11-24T10:36:16.027Z"
