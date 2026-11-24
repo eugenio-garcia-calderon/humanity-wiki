@@ -11,6 +11,12 @@
       "ruta": "src/components/aeromovil/Visor3D.tsx",
       "motivo": "hover y selección de componentes en el visor",
       "desde": "2026-11-24T12:08:24.046Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "public/observatorio-polarizacion/index.html",
+      "motivo": "Observatorio y perfiles: recuperar portada, tema oscuro y capítulos de perfiles",
+      "desde": "2026-11-24T13:34:24.377Z"
     }
   ]
 }
