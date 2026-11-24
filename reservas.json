@@ -86,12 +86,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "public/observatorio-polarizacion/index.html",
-      "motivo": "Lectura fija del arrastre, marcas por nivel, pase sobre tu punto y botón Todos primero",
-      "desde": "2026-11-24T12:46:39.819Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "Entrada del cambio de lectura",
       "desde": "2026-11-24T12:46:48.146Z"
