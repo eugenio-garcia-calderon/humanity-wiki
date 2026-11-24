@@ -20,12 +20,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/App.tsx",
-      "motivo": "Economía pública optimizada y tarjetas de Política",
-      "desde": "2026-11-24T13:41:01.461Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/pages/SubpaginaSitio.tsx",
       "motivo": "Economía pública optimizada y tarjetas de Política",
       "desde": "2026-11-24T13:41:04.175Z"
