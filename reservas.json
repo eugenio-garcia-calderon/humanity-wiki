@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/components/sitio/VistaProyectosSitio.tsx",
-      "motivo": "Innovación en Política en la portada de Luz & Humanidad; portada del Aeromóvil",
-      "desde": "2026-11-24T18:22:01.544Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/sitio/FilaSector.tsx",
       "motivo": "Innovación en Política en la portada de Luz & Humanidad; portada del Aeromóvil",
       "desde": "2026-11-24T18:22:04.465Z"
