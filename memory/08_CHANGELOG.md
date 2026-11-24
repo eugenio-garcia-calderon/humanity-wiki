@@ -13206,3 +13206,9 @@ Eugenio: «haz lo mismo que has hecho de los submenus y componentes del RODAJE, 
 - «Innovación en el sector de la movilidad» → «Innovación en Movilidad», «Innovación en el sector energético» → «Innovación en Energía». Both are `destacado` like Política: full width, five cards at once, the slider for the rest (migration 0239).
 - Every sector header shows the title alone: no icon and no «N proyectos». On phones a small «desliza →» remains when there are more cards to the side.
 - Files: `drizzle/0239_sectores_en_linea.sql`, `src/components/sitio/FilaSector.tsx`, `src/components/sitio/VistaProyectosSitio.tsx`.
+
+## 2026-11-24 · luzhumanidad.com home: every sector in one line
+
+> «Hazlo también en la innovación en vivienda y la innovación en cultura. Y así ya tenemos todas las tarjetas en el mismo formato.»
+
+- «Innovación en vivienda y comunidad» → «Innovación en Vivienda», «Innovación en educación, cultura y conciencia» → «Innovación en Cultura», both `destacado` (migration 0240). The last sector, «Informática», goes full width too (`sitio.otrosDestacado`, VistaProyectosSitio.tsx). All six sectors now share one format: full width, five cards at once, the slider beyond five.
