@@ -13183,3 +13183,4 @@ Eugenio: «En rodaje, añade las diferentes partes dentro del rodaje. Por ejempl
 - The Aeromóvil's cover is the side view Eugenio sent (`public/aeromovil/portada-aeromovil.webp`); the previous one is kept in `config.portadaAnterior`.
 - All by migration 0238, tested twice on a local copy of the tables involved.
 - Not verified before deploy: the home page itself with real data (checked after deploy in Chrome).
+- Same day, after seeing it live: the featured sector showed three and a half cards and a slider. It now shows the five at once when the panel is at least 64rem wide (`ANCHO_GRANDE`/`REJILLA_GRANDE` in FilaSector.tsx); narrower, two and then three per row with the slider. Checked in Chrome on luzhumanidad.com at 1280 px by applying the same widths to the live page.
