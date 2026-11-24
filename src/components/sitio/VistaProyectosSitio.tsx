@@ -275,10 +275,12 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
 
   // Los sectores de la portada, si la raíz los define; también en el editor, que enseña lo mismo que la web
   // (2026-11-12). Dentro de cada sector, el orden de la tabla: el que se cambia arrastrando las tarjetas.
-  type Sector = { titulo: string; areas?: string[]; icono?: string };
+  // `destacado` (2026-11-24, Eugenio: «Innovación en Política, bien grande»): el sector ocupa las dos columnas de la
+  // matriz y su título es más grande.
+  type Sector = { titulo: string; areas?: string[]; icono?: string; destacado?: boolean };
   // Un color por sector, por su orden (no en la configuración: lo que va en ella se traduce en lighthumanity.org).
   const COLORES_SECTOR = ['sky', 'violet', 'amber', 'emerald', 'rose'];
-  const COLOR_DEL_ICONO: Record<string, string> = { Movilidad: 'sky', 'Economía': 'violet', 'Energía': 'amber', Vivienda: 'emerald', 'Educación': 'rose' };
+  const COLOR_DEL_ICONO: Record<string, string> = { Movilidad: 'sky', 'Economía': 'violet', 'Política': 'violet', 'Energía': 'amber', Vivienda: 'emerald', 'Educación': 'rose' };
   const defSectores = (raiz.config?.sitio?.sectores || null) as Sector[] | null;
   const sectores = escaparate && !activa && Array.isArray(defSectores) && defSectores.length ? (() => {
     const usados = new Set<string>();
@@ -289,10 +291,11 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
       filas.forEach(f => usados.add(f.id));
       // El color va con el sector (por su icono), no con su sitio: así no cambia al reordenarlos (2026-11-13).
       const color = COLOR_DEL_ICONO[d.icono || ''] || COLORES_SECTOR[defSectores.indexOf(d) % COLORES_SECTOR.length];
-      return { titulo: d.titulo, icono: d.icono, color, otros: false, filas };
+      return { titulo: d.titulo, icono: d.icono, color, otros: false, destacado: d.destacado === true, filas };
     });
     const resto = visibles.filter(f => !usados.has(f.id)).sort((a, b) => a.orden - b.orden);
-    if (resto.length) grupos.push({ titulo: String(raiz.config?.sitio?.sectorOtros || 'Otras innovaciones'), icono: 'Otras', color: 'slate', otros: true, filas: resto });
+    // Su icono, por su nombre cuando lo tiene (2026-11-24: «Otras innovaciones» pasa a llamarse «Informática»).
+    if (resto.length) grupos.push({ titulo: String(raiz.config?.sitio?.sectorOtros || 'Otras innovaciones'), icono: String(raiz.config?.sitio?.iconoOtros || 'Otras'), color: 'slate', otros: true, destacado: false, filas: resto });
     return grupos.filter(g => g.filas.length);
   })() : null;
 
@@ -466,8 +469,9 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
               const titulo = m ? <><span className="hidden sm:inline">{m[1]}</span><span className="max-sm:inline-block max-sm:first-letter:uppercase">{m[2]}</span></> : g.titulo;
               const desde = n; n += g.filas.length;
               return (
-                <FilaSector key={g.titulo} id={`sector-${plano(g.titulo)}`} titulo={titulo} icono={iconoCategoria(g.icono || '', 'h-5 w-5')}
-                  colorBorde={c.borde} colorIcono={c.icono} filas={g.filas} estrecha
+                <FilaSector key={g.titulo} id={`sector-${plano(g.titulo)}`} titulo={titulo} icono={iconoCategoria(g.icono || '', g.destacado ? 'h-7 w-7' : 'h-5 w-5')}
+                  colorBorde={c.borde} colorIcono={c.icono} filas={g.filas} estrecha={!g.destacado} grande={g.destacado}
+                  clase={g.destacado ? '@5xl:col-span-2' : ''}
                   pintar={(f, claseLi) => tarjetaDe(f, desde + g.filas.indexOf(f), true, true, claseLi, g.filas)} />
               );
             });

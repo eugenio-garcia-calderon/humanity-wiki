@@ -24,8 +24,12 @@ const REJILLA = 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 min-[1800px]:gri
 // dos tarjetas y media, cuadradas y estrechas, para que entren los cuatro sectores en la primera pantalla.
 const ANCHO_ESTRECHA = 'w-[85%] shrink-0 snap-start @md:w-[calc((100%-1rem)/1.6)] @xl:w-[calc((100%-2rem)/2.5)]';
 const REJILLA_ESTRECHA = 'grid grid-cols-1 @md:grid-cols-2 @3xl:grid-cols-3';
+// UN SECTOR DESTACADO (2026-11-24, «Innovación en Política… que aparezcan ahí las 5»): a todo el ancho de la
+// matriz, y las cinco a la vez en cuanto el panel mide 64rem; por debajo, dos y luego tres por fila deslizando.
+const ANCHO_GRANDE = 'w-[85%] shrink-0 snap-start @md:w-[calc((100%-1rem)/2)] @3xl:w-[calc((100%-2rem)/3)] @5xl:w-[calc((100%-4rem)/5)]';
+const REJILLA_GRANDE = 'grid grid-cols-1 @md:grid-cols-2 @3xl:grid-cols-3 @5xl:grid-cols-5';
 
-export default function FilaSector<T>({ id, titulo, icono, colorBorde, colorIcono, filas, pintar, estrecha = false }: {
+export default function FilaSector<T>({ id, titulo, icono, colorBorde, colorIcono, filas, pintar, estrecha = false, grande = false, clase = '' }: {
   id: string;
   titulo: ReactNode;
   icono: ReactNode;
@@ -36,6 +40,10 @@ export default function FilaSector<T>({ id, titulo, icono, colorBorde, colorIcon
   pintar: (f: T, claseLi: string) => ReactNode;
   /** En la matriz de 2 × 2: tarjetas y título medidos por el panel. */
   estrecha?: boolean;
+  /** Un sector destacado (2026-11-24, «Innovación en Política, bien grande»): título e icono mayores. */
+  grande?: boolean;
+  /** Clases extra del panel, p. ej. para ocupar las dos columnas de la matriz. */
+  clase?: string;
 }) {
   const pista = useRef<HTMLUListElement>(null);
   const [todos, setTodos] = useState(false);
@@ -60,11 +68,11 @@ export default function FilaSector<T>({ id, titulo, icono, colorBorde, colorIcon
 
   return (
     <section data-sector aria-labelledby={id}
-      className={cn('min-w-0', estrecha && '@container', 'sm:rounded-3xl sm:border sm:border-t-4 sm:border-slate-200 sm:bg-slate-50 sm:p-5', colorBorde)}>
+      className={cn('min-w-0', (estrecha || grande) && '@container', 'sm:rounded-3xl sm:border sm:border-t-4 sm:border-slate-200 sm:bg-slate-50 sm:p-5', colorBorde, clase)}>
       <div className="mb-3 flex items-center gap-3 sm:mb-4">
-        <span aria-hidden className={cn('grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-200', colorIcono)}>{icono}</span>
+        <span aria-hidden className={cn('grid shrink-0 place-items-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-200', grande ? 'h-14 w-14' : 'h-10 w-10', colorIcono)}>{icono}</span>
         <div className="min-w-0 flex-1">
-          <h2 id={id} className={cn('text-lg font-black leading-tight tracking-tight text-slate-900', estrecha ? '2xl:text-xl' : 'sm:text-xl 2xl:text-2xl')}>{titulo}</h2>
+          <h2 id={id} className={cn('font-black leading-tight tracking-tight text-slate-900', grande ? 'text-2xl sm:text-4xl 2xl:text-5xl' : cn('text-lg', estrecha ? '2xl:text-xl' : 'sm:text-xl 2xl:text-2xl'))}>{titulo}</h2>
           <p className="text-[13px] font-semibold text-slate-500">
             {filas.length === 1 ? '1 proyecto' : `${filas.length} proyectos`}
             {hayMas && <span aria-hidden className="sm:hidden"> · desliza →</span>}
@@ -84,9 +92,9 @@ export default function FilaSector<T>({ id, titulo, icono, colorBorde, colorIcon
         )}
       </div>
       <ul ref={pista} className={cn('list-none gap-4 p-0', todos
-        ? (estrecha ? REJILLA_ESTRECHA : REJILLA)
+        ? (grande ? REJILLA_GRANDE : estrecha ? REJILLA_ESTRECHA : REJILLA)
         : '-mx-4 flex snap-x snap-mandatory overflow-x-auto scroll-smooth px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden')}>
-        {filas.map(f => pintar(f, todos ? '' : (estrecha ? ANCHO_ESTRECHA : ANCHO_EN_FILA)))}
+        {filas.map(f => pintar(f, todos ? '' : (grande ? ANCHO_GRANDE : estrecha ? ANCHO_ESTRECHA : ANCHO_EN_FILA)))}
       </ul>
     </section>
   );
