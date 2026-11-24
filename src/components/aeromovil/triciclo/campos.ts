@@ -54,6 +54,7 @@ export interface CamposTriciclo extends CamposInterior {
   tChMat: MaterialChasis; tChD: number; tChT: number; tChUniones: number;   // mm, mm, kg
   // Rodaje
   tBatalla: number;    // la batalla de la carrocería (del Cuadriciclo en rombo): de donde iba su rueda delantera al eje trasero (m)
+  tEjeTras: number;    // eje trasero: cuánto va por delante de donde lo deja la batalla de la carrocería, que no se mueve (m; negativo: más atrás)
   tEjeDel: number;     // eje delantero: cuánto va detrás de donde iba la rueda delantera del Cuadriciclo en rombo (m)
   tVia: number; tRuedaDel: RuedaTriciclo; tRuedaTras: RuedaTriciclo;
   // 2026-11-17: tyre type and construction per axle (`ruedas/neumaticos.ts`; 'serie': the size's own tyre, today's numbers).
@@ -397,6 +398,8 @@ export const FILAS: Fila[] = [
   // (round 2, 2026-11-12: up to 3.40 m, so «Largo total» can still grow the saved clásico, at 3.20)
   ['tBatalla', 'rodaje', 'Ejes y ruedas', 'bBatalla', '', 2.20, 3.40, 0.01, 'm'],
   ['tEjeDel', 'rodaje', 'Ejes y ruedas', null, 'Eje delantero: atrasado', 0, 0.45, 0.01, 'cm'],
+  // 2026-11-24: the rear axle slides under a body that stays where it is, as the front one does (default 0: every design as it was)
+  ['tEjeTras', 'rodaje', 'Ejes y ruedas', null, 'Eje trasero: adelantado', -0.30, 0.30, 0.01, 'cm'],
   // 2026-11-15: only in a diamond (the page hides it otherwise)
   ['tEjeLat', 'rodaje', 'Ejes y ruedas', null, 'Ruedas laterales: detrás de la del morro', 0.60, 3.60, 0.01, 'm'],
   ['tVia', 'rodaje', 'Ejes y ruedas', null, 'Vía delantera', 0.90, 2.40, 0.01, 'm'],
@@ -483,15 +486,17 @@ export function deslizadoresTriciclo(): FichaTriciclo[] {
  * vehicle (+1: ahead of the axle, the nose; −1: behind it).
  */
 export const DESDE_EJE: Partial<Record<ClaveNumTriciclo, 1 | -1>> = { tMorro: 1, tCupIni: -1, tCupFin: -1, tPilX: -1, tPasX: -1, tBatalla: -1, tSolar: -1, tPilar: -1, tBatX: -1, tPuertaDel: -1, tPuertaTras: -1, tMalIni: -1, tPuerta2Parte: -1 };
+/** The «Batalla» slider reads front axle to rear axle, so it also follows the rear axle's own slider (2026-11-24). */
+const dEjeTras = (k: ClaveNumTriciclo, T: CamposTriciclo) => (k === 'tBatalla' ? -limitarTriciclo('tEjeTras', T) : 0);
 /** What a slider shows: its value and range from the Triciclo's front axle. */
 export function vistaTriciclo(f: FichaTriciclo, T: CamposTriciclo): { valor: number; min: number; max: number; defecto: number } {
-  const [a, b] = rangoTriciclo(f.clave, T), d = (f.desde ?? 0) * ejeDesde(T);
+  const [a, b] = rangoTriciclo(f.clave, T), d = (f.desde ?? 0) * ejeDesde(T) + dEjeTras(f.clave, T);
   return { valor: limitarTriciclo(f.clave, T) + d, min: a + d, max: b + d, defecto: TRICICLO_DEFECTO[f.clave] + d };
 }
 /** The stored value for what a slider shows. */
 /** Where the sliders that read «from the front axle» start: the pods' axle, or in a diamond the nose wheel (x = 0). */
 export const ejeDesde = (T: CamposTriciclo) => esRombo(T) ? 0 : limitarTriciclo('tEjeDel', T);
-export const guardarTriciclo = (f: FichaTriciclo, v: number, T: CamposTriciclo) => v - (f.desde ?? 0) * ejeDesde(T);
+export const guardarTriciclo = (f: FichaTriciclo, v: number, T: CamposTriciclo) => v - (f.desde ?? 0) * ejeDesde(T) - dEjeTras(f.clave, T);
 export const fichaTriciclo = (k: ClaveNumTriciclo) => deslizadoresTriciclo().find(f => f.clave === k);
 // 2026-11-17: the tyre fields' defaults, added to TRICICLO_DEFECTO here (so `camposTriciclo` copies and validates them)
 // because `defecto.ts` was held by another bot. Move them into `defecto.ts` and make the fields required: ≈ 5 min (tech debt).
