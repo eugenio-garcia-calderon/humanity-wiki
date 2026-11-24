@@ -189,7 +189,9 @@ const NOMBRE_CORTO: Record<IdPestana, string> = { consumos: 'Consumos', proyecto
  * (Diseño 3D, Tareas…) fold into `MenuSecciones`. On a phone the row scrolls sideways.
  * Vehicles without departments (the Gota, the Cuadriciclo en rombo) have no tabs: the bar keeps only the logo and the menu.
  */
-function PestanasDepartamento({ lista, dep, alElegir, kg, consumo, extra }: { lista: { id: IdPestana; lema: string }[]; dep: IdPestana | null; alElegir: (d: IdPestana) => void; kg?: KgDepartamento | null;
+function PestanasDepartamento({ lista, dep, alElegir, kg, consumo, extra, precio }: {
+  /** (2026-11-24, Eugenio: «pon también el precio debajo de cada componente … y debajo de proyecto, el coste total») each department's parts and materials, and the whole project's cost under «Proyecto» */
+  precio?: Partial<Record<IdPestana, string>>; lista: { id: IdPestana; lema: string }[]; dep: IdPestana | null; alElegir: (d: IdPestana) => void; kg?: KgDepartamento | null;
   /** (2026-11-17, «precios») a tab's own figure where it has no mass («Mano de obra»: its euros) */
   extra?: Partial<Record<IdPestana, string>>;
   /** (2026-11-17) the line(s) under «Consumos»: litres per 100 km (electric: ≈ litres of equal energy, and kWh) */
@@ -203,6 +205,7 @@ function PestanasDepartamento({ lista, dep, alElegir, kg, consumo, extra }: { li
           {/* (2026-11-16) the department's mass, from the same pieces as «Peso: todos los componentes» (PesosDepartamento.ts) */}
           {d.id === 'consumos' && consumo && consumo.lineas.map(l => <span key={l} className={cn('-mt-0.5 whitespace-nowrap font-mono text-[10px] leading-none tabular-nums', activo ? 'text-teal-100' : 'text-slate-500')}>{l}</span>)}
           {kg && textoKg(kg[d.id as keyof KgDepartamento]) && <span className={cn('-mt-0.5 font-mono text-[10px] leading-none tabular-nums', activo ? 'text-teal-100' : 'text-slate-500')}>{textoKg(kg[d.id as keyof KgDepartamento])}</span>}
+          {precio?.[d.id] && <span className={cn('-mt-0.5 whitespace-nowrap font-mono text-[10px] leading-none tabular-nums', activo ? 'text-teal-100' : 'text-slate-500')}>{precio[d.id]}</span>}
           {/* (2026-11-17) a tab's own figure where it has no mass («Mano de obra»: its euros) */}
           {extra?.[d.id] && <span className={cn('-mt-0.5 font-mono text-[10px] leading-none tabular-nums', activo ? 'text-teal-100' : 'text-slate-500')}>{extra[d.id]}</span>}
         </Button>); })}
@@ -675,7 +678,7 @@ export default function Aeromovil() {
             alNuevo={() => { setP(PARAMETROS_POR_DEFECTO); setActual(null); cargarDisenoPorDefecto().then(d => { if (d) { setP(deDiseno(d.parametros || {})); setActual(null); } }); }}
             alGuardado={alGuardado} />
           {(esA1 || porDeps)
-            ? <PestanasDepartamento lista={porDeps ? [...pestanas, PESTANA_HOMOLOGACION] : pestanas} kg={porDeps ? kgPorDepartamento(res) : null} consumo={consumoPestana} extra={coste ? { manoobra: eur(coste.manoObra) } : undefined} dep={seccion === 'diseno' ? (porDeps ? depTri : dep) : null} alElegir={d => { setDep(d); setSoloDep(false); if (seccion !== 'diseno') navegar('/aeromovil'); }} />
+            ? <PestanasDepartamento lista={porDeps ? [...pestanas, PESTANA_HOMOLOGACION] : pestanas} kg={porDeps ? kgPorDepartamento(res) : null} consumo={consumoPestana} extra={coste ? { manoobra: eur(coste.manoObra) } : undefined} precio={coste ? { ...Object.fromEntries(Object.entries(coste.precios.porDep).filter(([, v]) => (v ?? 0) > 0).map(([d, v]) => [d, eur(v ?? 0)])), proyecto: eur(coste.total) } : undefined} dep={seccion === 'diseno' ? (porDeps ? depTri : dep) : null} alElegir={d => { setDep(d); setSoloDep(false); if (seccion !== 'diseno') navegar('/aeromovil'); }} />
             : null}
           <div className="flex-1 sm:hidden" />
           {!(esA1 || porDeps) && <div className="hidden flex-1 sm:block" />}

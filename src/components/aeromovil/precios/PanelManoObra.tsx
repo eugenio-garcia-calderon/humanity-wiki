@@ -16,10 +16,14 @@ export function PanelManoObra({ c, P, set }: { c: CosteProyecto; P: Parametros; 
   const [abierta, setAbierta] = useState<string | null>(null);
   const cambiar = (id: string, v: Ajuste | null) => set('manoObra', conManoObra(P, id, v));
   const horas = c.partidas.reduce((a, p) => a + p.h, 0);
+  // (2026-11-24) a vehicle of bicycle components counts assembly only (manoObra.ts)
+  const bici = (P as { tClase?: string }).tClase === 'bici';
   return (
     <>
       <Bloque titulo="Mano de obra" nota={`${Math.round(horas)} h · ${eur(c.manoObra)}`}>
-        <p className="text-xs text-slate-500">Las horas para construir un prototipo, por trabajos. Pulsa uno para cambiar sus horas o lo que cuesta la hora; lo que pongas se guarda con el diseño.</p>
+        <p className="text-xs text-slate-500">{bici
+          ? 'Solo las horas de montar un cuadriciclo de piezas de bicicleta, por trabajos. No se cuentan el diseño y la ingeniería, ni soldar el bastidor, ni fabricar la carrocería (moldes, laminado y pintura), ni la homologación: el bastidor y la carrocería se suponen ya hechos.'
+          : 'Las horas para construir un prototipo, por trabajos.'} Pulsa uno para cambiar sus horas o lo que cuesta la hora; lo que pongas se guarda con el diseño.</p>
         <ul className="flex flex-col divide-y divide-slate-100">
           {c.partidas.map(p => (
             <li key={p.id} className="py-1">
@@ -44,17 +48,17 @@ export function PanelManoObra({ c, P, set }: { c: CosteProyecto; P: Parametros; 
           ))}
         </ul>
         <div className="flex items-baseline justify-between border-t border-slate-300 pt-1.5 text-[13px]">
-          <span className="font-semibold text-slate-800">Subtotal mano de obra</span>
+          <span className="font-semibold text-slate-800">{bici ? 'Subtotal mano de obra de montaje' : 'Subtotal mano de obra'}</span>
           <span className="font-mono text-sm font-bold tabular-nums text-slate-900">{eur(c.manoObra)}</span>
         </div>
       </Bloque>
       <Bloque titulo="Con los materiales" nota={eur(c.total)}>
         <div className="flex flex-col gap-0.5 text-[13px]">
           <div className="flex justify-between"><span className="text-slate-600">Materiales y piezas</span><span className="font-mono text-xs tabular-nums">{eur(c.materiales)}</span></div>
-          <div className="flex justify-between"><span className="text-slate-600">Mano de obra</span><span className="font-mono text-xs tabular-nums">{eur(c.manoObra)}</span></div>
+          <div className="flex justify-between"><span className="text-slate-600">{bici ? 'Mano de obra de montaje' : 'Mano de obra'}</span><span className="font-mono text-xs tabular-nums">{eur(c.manoObra)}</span></div>
           <div className="flex justify-between border-t border-slate-200 pt-1 font-semibold"><span>Total del prototipo</span><span className="font-mono text-sm tabular-nums text-teal-800">{eur(c.total)}</span></div>
         </div>
-        <p className="text-xs text-slate-500">Son estimaciones para un taller pequeño en España, no presupuestos: para tener cifras de verdad hay que pedirlas (Proyecto › Pendiente). El reparto completo está en «Proyecto».</p>
+        <p className="text-xs text-slate-500">Son estimaciones para {bici ? 'un taller de bicicletas' : 'un taller pequeño'} en España, no presupuestos: para tener cifras de verdad hay que pedirlas (Proyecto › Pendiente). El reparto completo está en «Proyecto».</p>
       </Bloque>
     </>
   );

@@ -1106,3 +1106,7 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 - **Four hydraulic calipers need a splitter per lever**: not counted in mass or price (the brake's note says so).
 - **`triciclo-rangos.ts` does not sweep the bicycle ranges** beyond the `tClase` option; `scripts/bici.ts` checks the preset and the built-in design only. A sweep: about 1 hour.
 - **Slider ranges by class live in `bici/clase.ts`, apart from `FILAS`.** If a third class appears, the range should move into each `FILAS` row (the pending rewrite already listed for defaults).
+
+## 2026-11-24 — Bicycle-class cost leaves fabrication out (Eugenio's decision)
+
+By his instruction the bicycle-class labour is assembly only. The project total of such a design therefore has the materials of the frame and the body but not the hours to weld the one or mould and laminate the other. It is said on the «Mano de obra» panel; it is not said under the «Proyecto» tab's figure. A switch «incluir fabricación» would be about 1 hour.

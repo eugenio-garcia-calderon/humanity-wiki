@@ -14,6 +14,8 @@ import { CATALOGO_RUEDAS } from '../src/components/aeromovil/ruedas/catalogo';
 import { PROPUESTA_BICI } from '../src/components/aeromovil/triciclo/propuestaBici';
 import { pesosSecciones } from '../src/components/aeromovil/masasSecciones';
 import { preciosDiseno, eur } from '../src/components/aeromovil/precios/precios';
+import { costeProyecto } from '../src/components/aeromovil/precios/coste';
+import { kgPorDepartamento } from '../src/components/aeromovil/PesosDepartamento';
 import { energiaTriciclo } from '../src/components/aeromovil/triciclo/energia';
 
 let fallos = 0;
@@ -52,5 +54,13 @@ for (const c of malos) console.log(`    ROJO ${c.nombre.slice(0, 100)} ${c.mostr
 const e: any = energiaTriciclo(m, res.mTot, { cd: 0.16, areaRef: res.areas?.frontal ?? 1.05 });
 console.log(`  Con Cd 0,16 (supuesto; el del túnel lo da la web): ${e.WhKm.toFixed(1)} Wh/km, ${e.autonomia.toFixed(0)} km; velocidad con la potencia nominal ${e.vmaxNominal.toFixed(0)} km/h`);
 if (e.pedaleo) console.log(`  Pedaleando ${e.pedaleo.W} W: ${e.pedaleo.electricos.toFixed(0)} W eléctricos, ${Math.round(e.pedaleo.parte * 100)} % de lo que pide, ${e.pedaleo.WhKm.toFixed(1)} Wh/km, ${e.pedaleo.autonomia.toFixed(0)} km; solo con las piernas ${e.pedaleo.vSolo.toFixed(0)} km/h`);
+// (2026-11-24) labour: a bicycle-class vehicle counts assembly only
+const c = costeProyecto(P, m, res)!, cPesado = costeProyecto(deDiseno({ ...(PROPUESTA_BICI as any), tClase: 'pesado' }), m, res)!;
+for (const p of c.partidas) console.log(`  ${p.nombre.padEnd(30)} ${String(p.h).padStart(4)} h × ${p.eurh} €/h = ${eur(p.eur)}`);
+console.log(`  Mano de obra de montaje ${eur(c.manoObra)} (como vehículo pesado: ${eur(cPesado.manoObra)}) · total del proyecto ${eur(c.total)}`);
+ok(c.partidas.every(p => p.id.startsWith('b-')) && !c.partidas.some(p => /iseño|ngenier|omologa|oldes/.test(p.nombre)), 'la mano de obra de bicicleta es solo montaje');
+ok(c.manoObra < cPesado.manoObra / 4, 'la mano de obra de bicicleta no es la de un vehículo grande');
+ok(Math.abs(Object.values(c.precios.porDep).reduce((a, b) => a + (b ?? 0), 0) + c.manoObra - c.total) < 1e-6, 'pestañas + mano de obra = total del proyecto');
+ok(kgPorDepartamento(res)?.masas === undefined, '«Masas» sin cifra');
 console.log(fallos ? `\n${fallos} FALLOS` : '\nTodo OK');
 process.exit(fallos ? 1 : 0);

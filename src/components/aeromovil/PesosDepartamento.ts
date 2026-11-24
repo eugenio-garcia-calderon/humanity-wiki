@@ -21,8 +21,9 @@ export function kgPorDepartamento(res: Resultados): KgDepartamento | null {
       : res.basculante ? res.basculante.piezas.map(p => ({ kg: p.kg, grupo: p.grupo as DepTriciclo }))
         : null;
   if (!piezas || !Number.isFinite(res.mVeh)) return null;
-  // (2026-11-17) «Masas»: with everyone on board, the mass its centre of gravity is for
-  const kg: KgDepartamento = { proyecto: res.mVeh, ...(Number.isFinite(res.mTot) ? { masas: res.mTot } : {}) };
+  // (2026-11-24, Eugenio: «en masas, quita el número debajo de masas para que no confunda, porque ahí solo se ve la
+  // distribución de masas») «Masas» carries no figure: the 304 kg with everyone on board read as one more part's weight.
+  const kg: KgDepartamento = { proyecto: res.mVeh };
   for (const p of piezas) kg[p.grupo] = (kg[p.grupo] ?? 0) + p.kg;
   return kg;
 }
