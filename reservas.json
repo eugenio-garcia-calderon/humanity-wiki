@@ -35,6 +35,12 @@
       "ruta": "src/components/aeromovil/triciclo/campos.ts",
       "motivo": "eje trasero con slider",
       "desde": "2026-11-24T10:22:01.874Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/triciclo/defecto.ts",
+      "motivo": "eje trasero con slider",
+      "desde": "2026-11-24T10:22:04.639Z"
     }
   ]
 }
