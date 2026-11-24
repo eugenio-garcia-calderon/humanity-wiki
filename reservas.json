@@ -35,6 +35,12 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "eje trasero",
       "desde": "2026-11-24T10:36:16.027Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/geometria.ts",
+      "motivo": "peso editable por pieza",
+      "desde": "2026-11-24T10:36:57.954Z"
     }
   ]
 }
