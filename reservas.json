@@ -71,6 +71,12 @@
       "ruta": "src/components/aeromovil/controles.tsx",
       "motivo": "Componentes de bicicleta",
       "desde": "2026-11-23T23:17:54.326Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/ComparadorMotores.tsx",
+      "motivo": "Componentes de bicicleta: velocidad de comparación",
+      "desde": "2026-11-24T00:27:40.145Z"
     }
   ]
 }
