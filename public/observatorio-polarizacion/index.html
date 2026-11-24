@@ -887,6 +887,7 @@ footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .geo-stage.yo svg{touch-action:none;cursor:crosshair}
 .geo-stage.yo .geo-niveles{display:none}
 .geo-tu{pointer-events:none}
+.geo-tu .geo-tu-pv{pointer-events:auto;cursor:grab}
 .geo-yo-sl{display:grid;gap:10px;margin:14px 0 4px}
 .geo-yo-sl label{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:center;font-size:13.5px;color:var(--ink)}
 .geo-yo-sl input{grid-column:1 / -1;width:100%;accent-color:var(--tc);min-height:28px}
@@ -1050,6 +1051,22 @@ footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .geo-tip.varios{max-width:420px;font-size:12.5px;line-height:1.42}
 .geo-tip.varios .medida{font-size:1.2rem}
 .geo-tip.varios p{margin:3px 0}
+/* Lectura al arrastrar y al pasar por tu punto: la medida grande, y debajo los niveles con su check */
+.geo-tip.lectura{max-width:360px;font-size:13px;line-height:1.45}
+.geo-tip .medida-grande{font:600 1.3rem/1.3 var(--display);color:var(--ink);margin:6px 0 2px}
+.geo-tip .medida-grande.sin{font:400 1rem/1.4 var(--sans);color:var(--muted)}
+.geo-chk-lista{list-style:none;margin:12px 0 0;padding:10px 0 0;border-top:1px solid var(--line);display:grid;gap:6px;font-size:12px;line-height:1.4;color:var(--muted)}
+.geo-chk-lista li{display:grid;grid-template-columns:14px minmax(0,1fr);gap:6px;align-items:start}
+.geo-chk-lista .chk{color:var(--ok);font-weight:700}
+.geo-chk-lista li.ok{color:var(--ink-2)}
+.geo-chk-lista b{font-weight:600}
+/* La medida que se lee en el test: fija bajo el dibujo, con su altura reservada para que no salte */
+.geo-medida{display:none}
+.geo-stage.yo .geo-medida{display:block;box-sizing:border-box;width:100%;min-height:150px;padding:16px 20px;border:1px solid var(--line-2);border-radius:16px;background:var(--bg-2)}
+.geo-stage.yo .geo-medida p{font:400 1.2rem/1.5 var(--sans);color:var(--ink);margin:6px 0 0}
+.geo-stage.yo .geo-medida.vacio p{font-size:1rem;color:var(--muted)}
+.geo-stage.yo{grid-template-areas:"svg" "cap" "med"}
+.geo-stage > #geo-medida{grid-area:med;justify-self:stretch}
 .geo-tip-acc{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
 .geo-mas{display:grid;gap:10px;padding:14px 16px;border-radius:14px;background:var(--bg-2);border:1px solid var(--line-2);color:var(--ink-2);font:400 13.5px/1.5 var(--sans)}
 .geo-mas .lbl{display:block}
@@ -1392,6 +1409,7 @@ footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
       <svg id="geo-svg" viewBox="0 0 820 740" role="img" aria-label="Figura de cada partido sobre los aspectos del tema elegido"></svg>
       <div class="geo-tip" id="geo-tip" role="tooltip" hidden></div>
       <p class="geo-cap" id="geo-cap"></p>
+      <div class="geo-medida vacio" id="geo-medida"></div>
       <div class="geo-niveles" id="geo-niveles" role="group" aria-label="Los tres círculos de cada tema"></div>
     </div>
   </div>
@@ -3573,7 +3591,8 @@ const ILUS = {
       // Tu figura, encima de todo, con un asa en cada radio
       const fig = miFigura(), hecha = valida(st.tema);
       s += `<g class="geo-tu"><path d="${dPath(puntos(fig))}" fill="#EDEBE6" fill-opacity=".12" stroke="#EDEBE6" stroke-width="3" ${hecha ? "" : 'stroke-dasharray="7 6"'} stroke-linejoin="round"/>`;
-      fig.forEach((x, i) => { const [px, py] = P(ang(i, n), rr(x)); s += `<circle cx="${r1(px)}" cy="${r1(py)}" r="${r1(9 * K)}" fill="#EDEBE6" stroke="#0C0F14" stroke-width="3"/>`; });
+      // Cada punto tuyo tiene un área de paso más grande, para que el pase del ratón lo encuentre
+      fig.forEach((x, i) => { const [px, py] = P(ang(i, n), rr(x)); s += `<g class="geo-tu-pv" data-tu="${i}"><circle cx="${r1(px)}" cy="${r1(py)}" r="${r1(16 * K)}" fill="transparent"/><circle cx="${r1(px)}" cy="${r1(py)}" r="${r1(9 * K)}" fill="#EDEBE6" stroke="#0C0F14" stroke-width="3"/></g>`; });
       s += `<text x="${CX}" y="${r1(CY + 5 * K)}" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="600" font-size="${r1(16 * K)}" fill="#EDEBE6" paint-order="stroke" stroke="#0C0F14" stroke-width="5">${hecha ? "TÚ" : "Arrastra los puntos"}</text></g>`;
     } else {
       // Capa de lectura: cada círculo y cada cruce de radio y círculo explica su nivel al pasar por encima
@@ -3598,10 +3617,13 @@ const ILUS = {
       const anchor = Math.abs(c) < 0.2 ? "middle" : c > 0 ? "start" : "end";
       const y0 = sn < -0.5 ? y - 22 * K : sn > 0.5 ? y + 14 * K : y - 6 * K;
       const act = st.eje === i;
-      const w = Math.max(...e.l.map((l) => l.length)) * 11.2 * K + 16;
+      // Mientras se arrastra un punto, su aspecto crece y los demás se apagan (sin título aparte)
+      const arr = st.arrI, dibujado = arr == null ? 1 : arr === i ? 1.3 : 0.8, fsi = fs * dibujado, ya = act || arr === i;
+      const w = Math.max(...e.l.map((l) => l.length)) * 11.2 * K * dibujado + 16;
       const bx = anchor === "middle" ? x - w / 2 : anchor === "start" ? x - 8 : x - w + 8;
-      s += `<g class="geo-ax" data-ax="${i}" tabindex="0" role="button" aria-label="${e.n}"><rect x="${r1(bx)}" y="${r1(y0 - 22 * K)}" width="${r1(w)}" height="${r1(54 * K)}" rx="10" fill="${act ? "#1B2230" : "transparent"}" stroke="${act ? t.c : "transparent"}"/>`
-        + e.l.map((l, j) => `<text x="${r1(x)}" y="${r1(y0 + j * 23 * K)}" text-anchor="${anchor}" font-family="Archivo, sans-serif" font-size="${r1(fs)}" font-weight="${j ? 400 : 600}" fill="${act ? t.c : j ? "#C9CCD3" : "#EDEBE6"}">${l}</text>`).join("") + `</g>`;
+      const color = arr != null && arr !== i ? "#5C6478" : ya ? t.c : "";
+      s += `<g class="geo-ax${arr === i ? " arrastrando" : ""}" data-ax="${i}" tabindex="0" role="button" aria-label="${e.n}"><rect x="${r1(bx)}" y="${r1(y0 - 22 * K)}" width="${r1(w)}" height="${r1(54 * K)}" rx="10" fill="${ya ? "#1B2230" : "transparent"}" stroke="${ya ? t.c : "transparent"}"/>`
+        + e.l.map((l, j) => `<text x="${r1(x)}" y="${r1(y0 + j * 23 * K * dibujado)}" text-anchor="${anchor}" font-family="Archivo, sans-serif" font-size="${r1(fsi)}" font-weight="${j ? 400 : 600}" fill="${color || (j ? "#C9CCD3" : "#EDEBE6")}">${l}</text>`).join("") + `</g>`;
     });
     const titulo = st.mejor
       ? `Lo más cercano al círculo ideal en cada uno de los ${PALABRA[n] || n} aspectos de ${t.n.toLowerCase()}, con tres círculos: lo básico, lo intermedio y lo avanzado`
@@ -3694,6 +3716,7 @@ const ILUS = {
   function mostrar(clave, html, cx, cy) {
     if (clave !== tipClave) { tip.innerHTML = html; tipClave = clave; }
     tip.hidden = false;
+    tip.classList.toggle("lectura", /^(arr|tu)/.test(clave));
     // Siempre a la derecha del ratón y centrada en vertical, para que se sepa dónde va a salir.
     // Sólo pasa a la izquierda si no cabe a la derecha (en el borde del escenario), y nunca se sale por arriba ni por abajo.
     // Los límites son los de la ventana visible, no los del escenario: así la tarjeta nunca se corta en pantalla
@@ -3767,7 +3790,15 @@ const ILUS = {
     return true;
   }
   function leer(e) {
-    if (st.yo) return false;
+    if (st.yo) {
+      // Mientras se arrastra, manda la lectura del arrastre; si no, el pase sobre tu punto muestra su medida más alta
+      if (arrastre) return true;
+      const tu = e.target.closest("[data-tu]");
+      if (!tu) return false;
+      const i = +tu.dataset.tu, v = miFigura()[i];
+      mostrar(`tu${st.tema}-${i}-${v}`, htmlTuMedida(i, v), e.clientX, e.clientY);
+      return true;
+    }
     if (e.target.closest("[data-tvk], [data-pv]")) { vertices(e); return true; }
     const mj = e.target.closest("[data-mi]");
     if (mj) { if (st.fijado != null) return true; const [x, y] = anclaje(e, mj.querySelector(".mdot")); mostrar(`m${st.tema}-${mj.dataset.mi}`, htmlMejor(+mj.dataset.mi), x, y); return true; }
@@ -3781,7 +3812,7 @@ const ILUS = {
   svg.addEventListener("pointerout", (e) => {
     if (e.pointerType === "touch") return;
     const to = e.relatedTarget;
-    if (to && to.closest && (to.closest("[data-lk]") || to.closest("[data-ring]") || to.closest("[data-mi]") || to.closest("[data-pv]") || to.closest("[data-tvk]"))) return;
+    if (to && to.closest && (to.closest("[data-lk]") || to.closest("[data-ring]") || to.closest("[data-mi]") || to.closest("[data-pv]") || to.closest("[data-tvk]") || to.closest("[data-tu]"))) return;
     ocultar();
   });
   // Con teclado, al enfocar un punto de «lo mejor» se lee lo mismo que con el ratón
@@ -3810,6 +3841,7 @@ const ILUS = {
     const i = Math.round(a / ((2 * Math.PI) / n)) % n;
     arrastre = { i, id: e.pointerId };
     try { svg.setPointerCapture(e.pointerId); } catch (err) { /* sin captura */ }
+    st.arrI = i; dibujar(); // el aspecto que se arrastra se agranda ya, aunque el valor no cambie
     const v0 = valorEnEje(dx, dy, i);
     fijar(i, v0); lecturaArrastre(e, i, v0);
   });
@@ -3823,21 +3855,49 @@ const ILUS = {
     // Al moverse, los vértices bajo el ratón se actualizan; al salir de todos, se oculta su tarjeta
     if (!st.yo && !vertices(e) && /^[vt]/.test(tipClave || "")) ocultar();
   });
-  ["pointerup", "pointercancel", "lostpointercapture"].forEach((ev) => svg.addEventListener(ev, () => { arrastre = null; ocultarLectura(); }));
+  ["pointerup", "pointercancel", "lostpointercapture"].forEach((ev) => svg.addEventListener(ev, () => {
+    if (!arrastre) return;
+    arrastre = null; st.arrI = null; ocultarLectura(); pintarMedida(null); dibujar();
+  }));
 
-  // Mientras se arrastra un punto: en qué aspecto está y con qué cifra, qué supone ese nivel y qué falta para subir
+  // Mientras se arrastra un punto: la medida más alta que llega, en grande, y debajo los tres niveles con su check.
+  // «Qué mide» no va aquí: queda fijo debajo del dibujo (pintarMedida).
+  const NIVEL_CORTO = ["Básico", "Intermedio", "Avanzado"];
+  function listaNiveles(a, nv) {
+    return `<ul class="geo-chk-lista">${[0, 1, 2].map((k) => {
+      const ok = nv > k;
+      return `<li class="${ok ? "ok" : ""}"><span class="chk" aria-hidden="true">${ok ? "✓" : ""}</span><span><b style="color:${colorNivel(k)}">${NIVEL_CORTO[k]}</b> · ${a.niv[k]}</span></li>`;
+    }).join("")}</ul>`;
+  }
+  function htmlArrastre(i, v) {
+    const a = T().ejes[i], nv = nivelDe(v);
+    const cab = nv
+      ? `<span class="lbl" style="color:${colorNivel(nv - 1)}">${v} de 10 · ${NIV_TITULO[nv - 1]}</span><p class="medida-grande">${a.niv[nv - 1]}</p>`
+      : `<span class="lbl">${v} de 10 · sin medida todavía</span><p class="medida-grande sin">Todavía no llega a lo básico.</p>`;
+    return cab + listaNiveles(a, nv);
+  }
+  // Pasar el ratón por tu punto: solo la medida más alta que llega, sin la lista de niveles
+  function htmlTuMedida(i, v) {
+    const a = T().ejes[i], nv = nivelDe(v);
+    return nv
+      ? `<span class="lbl" style="color:${colorNivel(nv - 1)}">${v} de 10 · ${NIV_TITULO[nv - 1]}</span><p class="medida-grande">${a.niv[nv - 1]}</p>`
+      : `<span class="lbl">${v} de 10 · sin medida todavía</span><p class="medida-grande sin">Todavía no llega a lo básico.</p>`;
+  }
+  // La caja fija bajo el dibujo: qué mide el aspecto que se arrastra. Con null, muestra la pista.
+  function pintarMedida(i) {
+    const caja = $("#geo-medida"); if (!caja) return;
+    if (i == null) {
+      caja.classList.add("vacio");
+      caja.innerHTML = `<span class="lbl">Qué mide</span><p>Arrastra un punto sobre un aspecto: aquí queda fijo lo que mide.</p>`;
+      return;
+    }
+    caja.classList.remove("vacio");
+    const a = T().ejes[i];
+    caja.innerHTML = `<span class="lbl">Qué mide</span><p>${a.d}</p>`;
+  }
   function lecturaArrastre(e, i, v) {
-    const t = T(), a = t.ejes[i], nv = nivelDe(v), coma = (x) => x.toFixed(1).replace(".", ",");
-    const supone = nv === 0
-      ? `Todavía no llega a lo básico. Lo básico es: ${a.niv[0]}`
-      : `Llega a «${NIV_TITULO[nv - 1]}»: ${a.niv[nv - 1]}`;
-    const sube = nv < 3
-      ? `Para llegar a «${NIV_TITULO[nv]}» (desde ${coma(UMBRAL[nv])} de 10) hace falta: ${a.niv[nv]}`
-      : "Ya está en lo más avanzado de este aspecto.";
-    mostrar(`arr${st.tema}-${i}-${v}`,
-      `<span class="lbl">${a.n} · ${t.n}</span><h5>${v} de 10 · ${palabraNivel(v)}</h5>`
-      + `<p><b>Qué mide:</b> ${a.d}</p><p><b>Qué supone:</b> ${supone}</p><p>${sube}</p>`,
-      e.clientX, e.clientY);
+    pintarMedida(i);
+    mostrar(`arr${st.tema}-${i}-${v}`, htmlArrastre(i, v), e.clientX, e.clientY);
   }
   function ocultarLectura() { if (/^arr/.test(tipClave || "")) ocultar(); }
 
@@ -3875,7 +3935,8 @@ const ILUS = {
     st.yo = on; st.foco = null; st.eje = null; st.ring = null;
     stage.classList.toggle("yo", on);
     const b = $("#geo-yo"); b.setAttribute("aria-pressed", String(on)); b.querySelector("span").textContent = on ? "Terminar mi figura" : "Dibuja tu figura";
-    ocultar(); dibujar(); panel(); niveles();
+    st.arrI = null;
+    ocultar(); dibujar(); panel(); niveles(); pintarMedida(null);
   }
 
   /* ---- Leyenda de los tres círculos, también para teclado y pantallas táctiles ---- */
@@ -4077,7 +4138,7 @@ const ILUS = {
 
   const tabs = $("#geo-tema");
   const BOTON_TODOS = `<button class="geo-tc geo-tc-todos" role="tab" data-todos aria-selected="false" aria-controls="geo-svg" style="--tc:#EDEBE6"><span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64"><polygon points="32,5 55,19 55,45 32,59 9,45 9,19" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><polygon points="32,17 46,25 46,39 32,47 18,39 18,25" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/></svg></span><span class="nm">Todos los temas</span></button>`;
-  tabs.innerHTML = KEYS.map((k) => { const t = TEMAS[k]; return `<button class="geo-tc" role="tab" data-t="${k}" aria-selected="${k === st.tema}" tabindex="${k === st.tema ? 0 : -1}" aria-controls="geo-svg" style="--tc:${t.c}"><span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64">${ILUS[k] || ""}</svg></span><span class="nm">${t.n}</span></button>`; }).join("") + BOTON_TODOS;
+  tabs.innerHTML = BOTON_TODOS + KEYS.map((k) => { const t = TEMAS[k]; return `<button class="geo-tc" role="tab" data-t="${k}" aria-selected="${k === st.tema}" tabindex="${k === st.tema ? 0 : -1}" aria-controls="geo-svg" style="--tc:${t.c}"><span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64">${ILUS[k] || ""}</svg></span><span class="nm">${t.n}</span></button>`; }).join("");
   function marcarTab(enfocarTab) {
     $$("[data-t]", tabs).forEach((b) => {
       const on = !st.todos && b.dataset.t === st.tema;

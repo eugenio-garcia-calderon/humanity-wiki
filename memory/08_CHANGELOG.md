@@ -13090,3 +13090,13 @@ Eugenio: «En el apartado de homologación vamos a poner diferentes informacione
 ## 2026-11-24 — Aeromóvil: notes on the built-in proposals
 
 - Writing a note while a built-in proposal was open (e.g. «Vehículo de producción (bicicleta)», id −19) answered «Sección no válida» and reading answered «No se han podido leer las notas guardadas en la web». Cause: `MenuDisenos` handed the proposal's negative id to `ponerDestino`, and the server only accepts a positive design id or none. Fix in `notas/almacen.ts`: a non-positive id means «no saved design», so those notes are kept with the vehicle (what the panel text already said). Local notes written before with a negative id are matched the same way. The server's 400 now says which of section, design or vehicle is wrong.
+
+## 2026-11-24 · Geometry: fixed reading of the drag, checks by level, and «Todos los temas» first
+
+- Test («Dibuja tu figura»): while a point is dragged, the aspect being dragged grows in the figure and the others turn grey and smaller, so the reading is in the figure itself. The floating card no longer repeats the aspect or «Qué mide». It shows the highest measure reached in large type and, below it, the three levels (Básico, Intermedio, Avanzado) with a green check on each level reached.
+- «Qué mide» is now a fixed box under the figure. It keeps its height and only changes its text while dragging; it returns to a hint when the point is released.
+- Passing the pointer over one of your own points shows only the highest measure reached, without the list of checks.
+- The top bar's «Todos los temas» button is the first topic button, before Inmigración.
+- Verified: a drag reading and hover on own point in Chromium (checks, grey and enlarged labels, fixed box height, release state); the earlier interaction suites (237 checks, «Todos», hover, table) pass; no page errors.
+- Not verified: touch devices, screen readers, the installed app (the service worker may serve the old build; `?sw=off` drops it).
+- Files: `public/observatorio-polarizacion/index.html`, `memory/08_CHANGELOG.md`.
