@@ -17,6 +17,12 @@
       "ruta": "src/components/sitio/VistaProyectosSitio.tsx",
       "motivo": "Movilidad y Energía en una línea; sin icono ni número de proyectos",
       "desde": "2026-11-24T20:44:29.362Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "Movilidad y Energía en una línea; sin icono ni número de proyectos",
+      "desde": "2026-11-24T20:44:32.072Z"
     }
   ]
 }
