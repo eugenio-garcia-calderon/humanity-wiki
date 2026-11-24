@@ -11,13 +11,13 @@ import { fichaHomologacion, type CdConocido } from './ficha';
 import { EstudioL7e } from './EstudioL7e';
 import { candidatas, elegirCategoria, evaluarCategoria, fraseMargen, margenes, type Evaluacion, type Resultado } from './evaluar';
 
-const COLOR: Record<Estado, string> = {
+export const COLOR: Record<Estado, string> = {
   cumple: 'border-emerald-300 bg-emerald-50 text-emerald-800',
   no: 'border-red-300 bg-red-50 text-red-700',
   condicion: 'border-amber-300 bg-amber-50 text-amber-800',
   comprobar: 'border-slate-300 bg-slate-50 text-slate-600',
 };
-const CORTO: Record<Estado, string> = { cumple: 'Cumple', no: 'No cumple', condicion: 'Limitando', comprobar: 'A comprobar' };
+export const CORTO: Record<Estado, string> = { cumple: 'Cumple', no: 'No cumple', condicion: 'Limitando', comprobar: 'A comprobar' };
 
 /** The design's homologation: its numbers, the category it falls in, and the evaluation of the one being looked at. */
 export function useHomologacion(P: Parametros, modelo: Modelo, res: Resultados, cd: CdConocido | null, nombre: string) {
@@ -106,7 +106,7 @@ export function PanelHomologacion({ P, modelo, res, cd, nombre }: { P: Parametro
   );
 }
 
-function Fila({ r }: { r: Resultado }) {
+export function Fila({ r }: { r: Resultado }) {
   const [abierta, setAbierta] = useState(false);
   const f = FUENTES[r.req.fuente];
   return (
@@ -129,7 +129,7 @@ function Fila({ r }: { r: Resultado }) {
 }
 
 /** The headline margins as bars: how much of each limit the design uses. */
-function Margenes({ ev }: { ev: Evaluacion }) {
+export function Margenes({ ev }: { ev: Evaluacion }) {
   const m = margenes(ev);
   const filas = ([['Masa en orden de marcha', m.masa, 0], ['Potencia continua', m.potencia, 1], ['Velocidad máxima', m.vmax, 0], ['Largo', m.largo, 2], ['Ancho', m.ancho, 2]] as const).filter(([, r]) => r);
   const n = (v: number, d: number) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });

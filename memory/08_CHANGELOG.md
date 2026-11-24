@@ -13069,3 +13069,13 @@ Eugenio: «Permite que el eje trasero se pueda adelantar o atrasar al igual que 
 - Implementation: `medidasTriciclo` hands the model a shape whose `BATALLA` is the axle's, while the body's anchors stay from `tBatalla`; the pack's end (`finPaquete`) and the frame's rear mount follow the axle.
 - Not done: the rows/battery ranges still read the body's wheelbase (`tBatalla`), not the axle's; with the axle far forward a row can sit behind it without the sliders stopping it.
 - Files: `triciclo/{campos,defecto,medidas}.ts`, `LadoTriciclo.tsx`, `explicaciones/triciclo.ts`.
+
+## 2026-11-24 — «Homologación» as a whole page, with L1e-A
+
+Eugenio: «En el apartado de homologación vamos a poner diferentes informaciones … empezar con la L1e-A … serie corta nacional … homologación tipo UE … que se oculte automáticamente el garaje … pantalla completa … paso a paso … conecta la información de los requisitos con el diseño 3D.»
+
+- The «Homologación» tab now takes the whole page: no garage, no 3D view, no side panel. Three cards: L1e-A (bicycle-class quadricycle), heavy quadricycle (L6e/L7e), and «Vías» (one unit, national small series, EU type approval). Each homologation: the norm as a table with the design's verdict beside each rule, step by step, the ways to get it (each item opens to say what it means and who gives it), what was checked of the text Eugenio pasted, and the design against every requirement.
+- New category L1e-A in the engine (pedals, 2 to 4 legal wheels): width ≤ 1,00 m, length ≤ 4,00 m, height ≤ 2,50 m, ≤ 1 kW continuous, assistance cut at 25 km/h. A design 1,31 m wide (the bicycle version of design 19) reads red on width and length.
+- Checked against the legal text (24-11-2026): L1e-A criteria 9 to 12 and the 1 000 / 4 000 / 2 500 mm limits (168/2013, annex I); 50 L1e-A per type and year (annex III) and article 42 (valid in the granting State, others accept unless not equivalent, three months); RD 750/2010 (arts. 4.4 and 7.3, HIA-XXXXX). Differences with the pasted text: the DGT instruction on L1e-A is 19/V-134 (24-5-2019), which does not say AM; the Ley 5/2025 insurance claim could not be opened, so it is marked «no comprobado».
+- Not done: lights and the rear reflector are not in the 3D design (the requirement reads «a comprobar»); the heavy-quadricycle page only holds what the catalogue already had.
+- Files: `homologacion/{normas,evaluar,guias,PaginaHomologacion,PanelHomologacion}.ts(x)`, `pages/Aeromovil.tsx`.

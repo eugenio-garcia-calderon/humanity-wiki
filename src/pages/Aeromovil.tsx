@@ -93,6 +93,7 @@ import { usePiezasMotor, ListaPiezasMotor, TarjetaPiezaPinchada } from '../compo
 import { BloqueAerodinamica } from '../components/aeromovil/estudio/EstudioAerodinamico';
 // (2026-11-17) the «Homologación» tab: the design against its EU category (homologacion/)
 import { PanelHomologacion, ResumenHomologacion } from '../components/aeromovil/homologacion/PanelHomologacion';
+import { PaginaHomologacion } from '../components/aeromovil/homologacion/PaginaHomologacion';
 import { fichaHomologacion } from '../components/aeromovil/homologacion/ficha';
 import { comprobacionesHomologacion } from '../components/aeromovil/homologacion/evaluar';
 
@@ -497,6 +498,8 @@ export default function Aeromovil() {
   // (2026-11-17) «Consumos» is the Triciclo family's: on the Basculante it opens «Batería», where its consumption still is
   // (2026-11-17, «precios») and «Mano de obra», the labour's tab
   const depTri: DepTriciclo | 'proyecto' | 'masas' | 'homologacion' | 'consumos' | 'manoobra' = dep === 'consumos' ? (esTri ? 'consumos' : 'energia') : dep === 'proyecto' || dep === 'masas' || dep === 'homologacion' || dep === 'manoobra' || (DEPS_TRICICLO as string[]).includes(dep) ? dep as DepTriciclo | 'proyecto' | 'masas' | 'homologacion' | 'manoobra' : 'carroceria';
+  // (2026-11-24) the «Homologación» tab takes the whole page: no garage, no 3D view, no side panel (homologacion/PaginaHomologacion.tsx)
+  const homologando = (esA1 && dep === 'homologacion') || (porDeps && depTri === 'homologacion');
   // the masses of the design (LadoResumen.tsx): the «Masas» tab, and the 3D's centre of gravity while it is open
   const masas = useMasas(paraCalcular, res);
   useEffect(() => { if (porDeps && dep !== depTri) setDep(depTri); }, [porDeps, dep, depTri]);
@@ -682,7 +685,7 @@ export default function Aeromovil() {
             : null}
           <div className="flex-1 sm:hidden" />
           {!(esA1 || porDeps) && <div className="hidden flex-1 sm:block" />}
-          {seccion === 'diseno' && (
+          {seccion === 'diseno' && !homologando && (
             <Button variant="outline" onClick={() => setVerGaraje(v => !v)} aria-pressed={!verGaraje}
               title={verGaraje ? 'Oculta la vista 3D del garaje: el panel de cada departamento ocupa la página' : 'Vuelve a mostrar la vista 3D del garaje'}
               className="shrink-0 gap-1 px-2 py-1 text-[11px] normal-case tracking-normal text-slate-700">
@@ -694,8 +697,10 @@ export default function Aeromovil() {
       </header>
 
       {/* El diseño se queda montado aunque se mire otra vista: así «Exportar» puede sacar el STL de lo que se ve. */}
-      <main className={cn('mx-auto max-w-[1600px] gap-4 px-4 py-4', seccion !== 'diseno' ? 'hidden' : verGaraje ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_380px]' : 'flex max-w-3xl flex-col')}>
-        <div className="min-w-0">
+      <main className={cn('mx-auto max-w-[1600px] gap-4 px-4 py-4', seccion !== 'diseno' ? 'hidden' : homologando ? 'block' : verGaraje ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_380px]' : 'flex max-w-3xl flex-col')}>
+        {/* (2026-11-24, «Homologación»: pantalla completa, sin garaje) the page replaces the 3D view and the side panel; both stay mounted, hidden */}
+        {homologando && <PaginaHomologacion P={paraCalcular.P} modelo={paraCalcular} res={res} cd={esTri ? cdTri : esBas ? cdBas : null} nombre={nombreVehiculo} />}
+        <div className={cn('min-w-0', homologando && 'hidden')}>
         <section ref={ventana3d} aria-label="Vista 3D" className={cn('overflow-hidden bg-slate-50', !verGaraje && completa === 'no' && 'hidden',
           completa === 'no' ? cn('relative h-[62vh] min-h-[380px] rounded-xl border border-slate-200', esA1 ? 'lg:h-[72vh]' : 'lg:sticky lg:top-[68px] lg:h-[calc(100vh-88px)]')
             : completa === 'css' ? 'fixed inset-0 z-[100] h-[100dvh] w-screen' : 'relative h-full w-full')}>
@@ -921,7 +926,8 @@ export default function Aeromovil() {
         {esA1 && DEPARTAMENTOS.some(x => x.id === dep) && <PanelDepartamento d={DEPARTAMENTOS.find(x => x.id === dep)!} P={P} res={res} modelo={modelo} />}
         {/* (2026-11-17, Eugenio: «Falta un apartado en el menú que sea de homologación») the pre-check under the 3D view;
             the Gota and the Bala, which have no tabs, open it with a button */}
-        {((esA1 && dep === 'homologacion') || (porDeps && depTri === 'homologacion') || (!esA1 && !porDeps && verHomologacion)) &&
+        {/* (2026-11-24) with departments the same check is now the whole-page «Homologación» (PaginaHomologacion): this one stays for the Gota and the Bala */}
+        {(!esA1 && !porDeps && verHomologacion) &&
           <PanelHomologacion P={paraCalcular.P} modelo={paraCalcular} res={res} cd={esTri ? cdTri : esBas ? cdBas : null} nombre={nombreVehiculo} />}
         {!esA1 && !porDeps && (
           <Button variant="outline" onClick={() => setVerHomologacion(v => !v)} aria-expanded={verHomologacion} className="mt-3 w-full justify-center gap-1.5 bg-white px-3 py-2 text-[13px] normal-case tracking-normal">
@@ -930,7 +936,7 @@ export default function Aeromovil() {
         )}
         </div>
 
-        <aside className="mt-4 flex flex-col gap-3 lg:mt-0">
+        <aside className={cn('mt-4 flex flex-col gap-3 lg:mt-0', homologando && 'hidden')}>
           {/* round 3 interior (2026-11-12): «Ver solo …» above the sliders of each department (the Aeromóvil 1's and the Triciclo's) */}
           {/* (no «Ver solo …» with the garage hidden: there is no 3D view for it to act on) */}
           {verGaraje && (esA1 || porDeps) && (porDeps ? depTri : dep) !== 'proyecto' && capasSolo(porDeps ? depTri : dep) && (() => {
