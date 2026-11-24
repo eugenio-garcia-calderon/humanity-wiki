@@ -13051,6 +13051,15 @@ Eugenio: «Pon también el precio debajo de cada componente, por ejemplo, carroc
 - Verified: `scripts/bici.ts` (tabs + labour = total; «Masas» without figure) and `precios-secciones` end «Todo OK»; `tsc`; in Chromium on the dev server, both a bicycle and a heavy design: the tab figures and the labour panel; no overflow at 390 px. Not verified: the installed app.
 - Files: `src/pages/Aeromovil.tsx`, `src/components/aeromovil/precios/{manoObra.ts,PanelManoObra.tsx}`, `src/components/aeromovil/PesosDepartamento.ts`, `scripts/bici.ts`.
 
+## 2026-11-24 — The weight of each part can be set (Triciclo family)
+
+Eugenio: «En la parte de qué está hecho este peso, donde aparece el precio que se puede modificar, también permite modificar el peso en kilogramos con un slider.»
+
+- In «De qué está hecho este peso», the kg of each part is a link (dotted underline) that opens, under the line, a slider and a number box in kg, with «Volver al estimado (x kg)»; a weight set by the user reads «tuyo». Same behaviour as the price editor (250 ms pause before it recalculates).
+- The weight is stored in the design (`P.pesos`, by the part's name) and replaces the estimate everywhere: vehicle mass, centre of gravity, wheel loads and the checks that follow from them, the sections, the department tabs. A part whose price is estimated per kilo changes price with its weight; a price the user set stays.
+- Only the Triciclo family and the parts on the first level of each list (not the frame's tubes or the laminate's zones). Every design saved before has no `pesos`: nothing changes.
+- Verified: `npx tsx scripts/pesos-secciones.ts` (all parts ×0.5 and ×2 give exactly half and double the empty vehicle and every section still adds up), `tsc`. The editor's buttons render in Chromium on the dev server but are disabled without the owner's login, so the slider itself was not driven in a browser. Not verified: the installed app.
+- Files: `geometria.ts`, `triciclo/comprobaciones.ts`, `masasSecciones.ts`, `PesoSeccion.tsx`, `precios/EditorPeso.tsx` (new), `LadoTriciclo.tsx`, `BiciTriciclo.tsx`, `scripts/pesos-secciones.ts`.
 ## 2026-11-24 — Rear axle with a slider (Triciclo family)
 
 Eugenio: «Permite que el eje trasero se pueda adelantar o atrasar al igual que el eje delantero, con un slider.»

@@ -178,6 +178,8 @@ own price is `P.precios[nombre]`; labour is `manoObra.ts` (`P.manoObra[id]`: hou
 (`EditorPrecio.tsx`). **A new part** needs no price code if the fallback (20 €/kg) is fair; otherwise one rule in
 `estimar`, before the fallbacks. Then `npx tsx scripts/precios-secciones.ts [diseño.json]` must end «Todo OK».
 Renaming a part drops its saved user price (the name is the key).
+
+**The user's own weight of a part** (2026-11-24). Beside the price, the weight on each line of «De qué está hecho este peso» is a link that opens a slider and a number box (`precios/EditorPeso.tsx`, `PesoSeccion.tsx` `Parte`). It is stored in the design as `P.pesos[nombre]` (kg, by the part's name, like `P.precios`) and applied once, in `triciclo/comprobaciones.ts` `calcularTriciclo`, right after the parts list is built (the tilt system is still sized on the estimates): the parts of that name are scaled to the figure, so the totals, the centre of gravity, the wheel loads, the sections, the department tabs and the per-kg prices all follow. `res.triciclo.pesosBase` keeps the estimates (for «Volver al estimado»). Only the Triciclo family and only the top-level parts (not a frame's tubes or the laminate's zones; a frame set lighter than its tubes scales them down so the pieces still add up). `scripts/pesos-secciones.ts` runs every part ×0.5 and ×2.
 ## Power electronics («Motor › Electrónica de potencia», 2026-11-17) and the L7e study
 
 - `triciclo/electronica.ts` (pure): from the `tEp…` fields, the driving modes and, per mode, the engine's net power, the
