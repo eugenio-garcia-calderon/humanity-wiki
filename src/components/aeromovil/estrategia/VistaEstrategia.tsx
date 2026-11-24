@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, ChevronRight, CircleHelp, ClipboardCopy, ExternalLink, X } from 'lucide-react';
 import { Badge, Button, Card } from '../../ui/core';
 import { cn } from '../../../utils/cn';
-import { ARBOL, RAIZ, hijosDe, nodo, preguntasAbiertas, type EstadoNodo, type Borrador, type NodoEstrategia, type TipoNodo } from './arbol';
+import { ARBOL, ESTRATEGIAS, RAIZ, hijosDe, nodo, preguntasAbiertas, raizDe, type EstadoNodo, type Borrador, type NodoEstrategia, type TipoNodo } from './arbol';
 import { ponerMarca, ponerNota, ponerRespuesta, useEstrategia, type DatosEstrategia, type Marca } from './almacen';
 
 const ANCHO = 236, ALTO = 60, SEP_X = 40, PASO_Y = 70, MARGEN = 12;
@@ -26,11 +26,11 @@ const MARCA: Record<Marca, { n: string; icono: typeof Check; clase: string }> = 
   dudo: { n: 'Dudo', icono: CircleHelp, clase: 'bg-amber-500 text-white hover:bg-amber-600' },
 };
 /** Open on a first visit: the path to the decision that matters now. */
-const ABIERTOS_INICIO = [RAIZ, 'h1', 'h1-legal'];
+const ABIERTOS_INICIO = ESTRATEGIAS.flatMap(e => e.abiertos);
 
 /** One row per visible leaf; a parent sits on the row of its first child, so the tree starts at the top left and
  *  reads like an outline with branches (a centred parent left half the first screen empty, worst on a phone). */
-function distribuir(abiertos: Set<string>) {
+function distribuir(abiertos: Set<string>, raiz: string) {
   const pos = new Map<string, { prof: number; fila: number }>();
   let fila = 0, hondo = 0;
   const ir = (n: NodoEstrategia, prof: number): number => {
@@ -40,16 +40,19 @@ function distribuir(abiertos: Set<string>) {
     pos.set(n.id, { prof, fila: y });
     return y;
   };
-  ir(nodo(RAIZ)!, 0);
+  ir(nodo(raiz) ?? nodo(RAIZ)!, 0);
   return { pos, filas: fila, hondo };
 }
 
 function textoParaCopiar(d: DatosEstrategia): string {
   const l: string[] = ['Mis respuestas en la estrategia del Aeromóvil', ''];
+  let antes = '';
   for (const n of ARBOL) {
     const m = d.marcas[n.id], nota = d.notas[n.id];
     const rs = (n.preguntas ?? []).map((p, i) => ({ p, r: d.respuestas[`${n.id}#${p}`] })).filter(x => x.r);
     if (!m && !nota && !rs.length) continue;
+    const r = raizDe(n.id);
+    if (r !== antes) { l.push(`== ${ESTRATEGIAS.find(e => e.raiz === r)?.nombre ?? r} ==`, ''); antes = r; }
     l.push(`■ ${n.titulo}`);
     if (m) l.push(`  Decisión: ${MARCA[m].n}`);
     if (nota) l.push(`  Nota: ${nota}`);
@@ -188,13 +191,15 @@ export default function VistaEstrategia() {
   const d = useEstrategia();
   const [abiertos, setAbiertos] = useState<Set<string>>(() => new Set(ABIERTOS_INICIO));
   const [sel, setSel] = useState('h1-legal');
+  // (2026-11-24) which strategy is on screen: the tree the chosen box belongs to
+  const raiz = raizDe(sel), estrategia = ESTRATEGIAS.find(e => e.raiz === raiz) ?? ESTRATEGIAS[0];
   const [copiado, setCopiado] = useState<'no' | 'si' | 'fallo'>('no');
   const refDetalle = useRef<HTMLDivElement>(null), refArbol = useRef<HTMLDivElement>(null);
-  const { pos, filas, hondo } = useMemo(() => distribuir(abiertos), [abiertos]);
+  const { pos, filas, hondo } = useMemo(() => distribuir(abiertos, raiz), [abiertos, raiz]);
   const visibles = ARBOL.filter(n => pos.has(n.id));
   const x = (id: string) => MARGEN + pos.get(id)!.prof * (ANCHO + SEP_X), y = (id: string) => MARGEN + pos.get(id)!.fila * PASO_Y;
   const ancho = MARGEN * 2 + (hondo + 1) * ANCHO + hondo * SEP_X, alto = MARGEN * 2 + (filas - 1) * PASO_Y + ALTO;
-  const preguntas = preguntasAbiertas(), sinResponder = preguntas.filter(p => !d.respuestas[`${p.nodo.id}#${p.texto}`]).length;
+  const preguntas = preguntasAbiertas(raiz), sinResponder = preguntas.filter(p => !d.respuestas[`${p.nodo.id}#${p.texto}`]).length;
   const hayAlgo = Object.keys(d.marcas).length + Object.keys(d.notas).length + Object.keys(d.respuestas).length > 0;
 
   const plegar = (id: string) => setAbiertos(a => { const n = new Set(a); if (n.has(id)) n.delete(id); else n.add(id); return n; });
@@ -206,7 +211,7 @@ export default function VistaEstrategia() {
   };
   useEffect(() => { if (copiado === 'no') return; const t = setTimeout(() => setCopiado('no'), 2500); return () => clearTimeout(t); }, [copiado]);
   const copiar = async () => { try { await navigator.clipboard.writeText(textoParaCopiar(d)); setCopiado('si'); } catch { setCopiado('fallo'); } };
-  const elegido = nodo(sel) ?? nodo(RAIZ)!;
+  const elegido = nodo(sel) ?? nodo(raiz)!;
   // keep the chosen box in sight inside the tree's own scroll (never the page's), with a strip of its parent showing
   useEffect(() => {
     const c = refArbol.current, q = pos.get(sel);
@@ -221,8 +226,16 @@ export default function VistaEstrategia() {
     <div className="mx-auto max-w-[1500px] px-4 py-6">
       <h2 className="text-xl font-semibold text-slate-900">Estrategia</h2>
       <p className="mt-1 max-w-3xl text-sm text-slate-600">
-        El camino de hoy a la fábrica, como un árbol de decisiones. Toca una caja para ver su detalle, marcar tu decisión y responder a las preguntas. La flecha de cada caja pliega su rama.
+        {estrategia.resumen} Toca una caja para ver su detalle, marcar tu decisión y responder a las preguntas. La flecha de cada caja pliega su rama.
       </p>
+      <div className="mt-3 flex flex-wrap gap-2" role="tablist" aria-label="Estrategias">
+        {ESTRATEGIAS.map(e => (
+          <Button key={e.raiz} variant="outline" role="tab" aria-selected={e.raiz === raiz} onClick={() => setSel(e.inicio)}
+            className={cn('px-3 py-1.5 text-sm font-medium normal-case tracking-normal', e.raiz === raiz ? 'border-slate-900 bg-slate-900 text-white hover:bg-slate-800 hover:text-white' : 'text-slate-700')}>
+            {e.nombre}
+          </Button>
+        ))}
+      </div>
       <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-600">
         {(Object.keys(ESTADO) as EstadoNodo[]).map(e => <span key={e} className="inline-flex items-center gap-1.5"><span className={cn('h-2.5 w-2.5 rounded-full', ESTADO[e].punto)} />{ESTADO[e].n}</span>)}
       </div>

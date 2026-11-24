@@ -83,8 +83,18 @@ const C = {
 } satisfies Record<string, Contacto>;
 
 export const RAIZ = 'meta';
+import { ARBOL_BICI, RAIZ_BICI } from './arbolBici';
 
-export const ARBOL: NodoEstrategia[] = [
+/**
+ * (2026-11-24) More than one strategy: each is a tree of its own with its own root (`padre: null`). The first is the
+ * Aeromóvil's (this file); the second, the bicycle-style quadricycle (`arbolBici.ts`, ids `b-…`).
+ */
+export const ESTRATEGIAS: { raiz: string; nombre: string; resumen: string; abiertos: string[]; inicio: string }[] = [
+  { raiz: RAIZ, nombre: 'Aeromóvil: de hoy a la fábrica', resumen: 'El camino de hoy a la fábrica, como un árbol de decisiones.', abiertos: [RAIZ, 'h1', 'h1-legal'], inicio: 'h1-legal' },
+  { raiz: RAIZ_BICI, nombre: 'Cuadriciclo estilo bicicleta', resumen: 'Un cuadriciclo de pedales con ayuda eléctrica y tu carrocería de velomóvil, que legalmente sea una bicicleta.', abiertos: [RAIZ_BICI, 'b-legal', 'b-como', 'b-china'], inicio: 'b-china' },
+];
+
+const ARBOL_AEROMOVIL: NodoEstrategia[] = [
   {
     id: 'meta', padre: null, tipo: 'meta', titulo: 'Una fábrica de Aeromóviles',
     resumen: 'Fabricar y vender un vehículo ligero y aerodinámico que gasta entre la tercera y la cuarta parte que un coche, a un precio de coche pequeño. Se llega por hitos pequeños: cada uno se puede ganar sin jugarse el siguiente.',
@@ -717,13 +727,19 @@ Gracias y un saludo,
   },
 ];
 
+/** Every strategy's nodes, the first tree first. */
+export const ARBOL: NodoEstrategia[] = [...ARBOL_AEROMOVIL, ...ARBOL_BICI];
+
+/** The root of the tree a node belongs to. */
+export function raizDe(id: string): string { let n = nodo(id); while (n?.padre) n = nodo(n.padre); return n?.id ?? RAIZ; }
+
 /** The children of a node, in the order of the file. */
 export const hijosDe = (id: string): NodoEstrategia[] => ARBOL.filter(n => n.padre === id);
 export const nodo = (id: string): NodoEstrategia | undefined => ARBOL.find(n => n.id === id);
 
 /** Every open question, with the node that asks it. */
-export function preguntasAbiertas(): { nodo: NodoEstrategia; i: number; texto: string }[] {
-  return ARBOL.flatMap(n => (n.preguntas ?? []).map((texto, i) => ({ nodo: n, i, texto })));
+export function preguntasAbiertas(raiz?: string): { nodo: NodoEstrategia; i: number; texto: string }[] {
+  return ARBOL.filter(n => !raiz || raizDe(n.id) === raiz).flatMap(n => (n.preguntas ?? []).map((texto, i) => ({ nodo: n, i, texto })));
 }
 
 /** Problems of the data itself (duplicate ids, missing parents, a 'leido' without a source). Empty when sound. */
@@ -734,7 +750,7 @@ export function fallosArbol(): string[] {
     ids.add(n.id);
   }
   for (const n of ARBOL) {
-    if (n.padre === null ? n.id !== RAIZ : !ids.has(n.padre)) f.push(`padre desconocido en ${n.id}`);
+    if (n.padre === null ? !ESTRATEGIAS.some(e => e.raiz === n.id) : !ids.has(n.padre)) f.push(`padre desconocido en ${n.id}`);
     if (n.comprobado === 'leido' && !(n.fuentes && n.fuentes.length)) f.push(`«leído» sin fuente: ${n.id}`);
   }
   return f;

@@ -13029,3 +13029,14 @@ Eugenio: «Añade la capacidad de crear vehículos ligeros con componentes de pi
 - Not verified: the installed app (the service worker may serve the old build; `?sw=off` drops it); saving the bicycle design to the server from a logged-in session; a phone-width screen; the handlebar (no knee check exists for it, only for the steering wheel).
 - Not done: the Quattrovelo as a 3D model in the garage (it inspired the catalogue: its drum brakes and options are cited); pedals for the passenger.
 - Files: `src/components/aeromovil/bici/{catalogo,clase,pedales}.ts`, `BiciTriciclo.tsx`, `visor/bici.ts`, `triciclo/propuestaBici.ts`, `triciclo/{campos,defecto,medidas,masas,energia,comprobaciones,modelo}.ts`, `LadoTriciclo.tsx`, `Disenos.tsx`, `controles.tsx`, `ComparadorMotores.tsx`, `catalogoTren.ts`, `ruedas/{catalogo,neumaticos}.ts`, `precios/precios.ts`, `masasSecciones.ts`, `homologacion/ficha.ts`, `explicaciones/triciclo.ts`, `scripts/bici.ts`, `src/components/aeromovil/CLAUDE.md`.
+
+## 2026-11-24 · Aeromóvil › Estrategia: a second strategy, «Cuadriciclo estilo bicicleta»
+
+Eugenio: «créame también una estrategia nueva, aparte de la anterior, que sea el desarrollo de un cuadriciclo estilo bicicleta y escoge la opción de comprar un cuadriciclo ya casi hecho en China para modificarlo a mi diseño de velomobile».
+
+- The Estrategia page now holds two trees, chosen with two buttons above the drawing: «Aeromóvil: de hoy a la fábrica» (unchanged) and «Cuadriciclo estilo bicicleta» (new, 19 boxes). The questions list and the legend follow the tree on screen; «Copiar mis respuestas» copies both, each under its name.
+- The new tree: what the vehicle is for the law (pedal-assist bicycle, L1e-A, L6e), where the first one comes from (bought almost finished in China and modified — marked as chosen —, a European one, or a frame built from bicycle parts), and three assumptions that could stop it (the 300 kg of the cargo-bike standard, 250 W, rollover). Two drafts ready to send: a written question to the Jefatura Provincial de Tráfico and a quotation request in English for the Chinese maker.
+- Read on 2026-11-24: DGT's Instrucción 2019/S-149 TV-108; the European Commission's notice of 24-1-2025 on the duties on Chinese e-bikes (anti-dumping 10.3–70.1 %, countervailing 3.9–17.2 %); one reseller's page of the TrikExplor F426E (7,198 $, 500 W hub motor with throttle); an article on EN 17860. Not read (pages did not open): the two EUR-Lex regulations with the product definition and each company's rate, the Interior Ministry's note, any Chinese maker's own sheet. Each box says which.
+- Verified: `fallosArbol()` returns `[]`; `tsc` clean; `build`; in Chromium against the dev server.
+- Not verified: the installed app; a phone-width screen.
+- Files: `src/components/aeromovil/estrategia/{arbol.ts,arbolBici.ts,VistaEstrategia.tsx}`, `src/components/aeromovil/CLAUDE.md`.
