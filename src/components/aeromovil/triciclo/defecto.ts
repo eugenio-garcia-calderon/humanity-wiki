@@ -18,7 +18,7 @@ export const TRICICLO_DEFECTO: CamposTriciclo = {
   // 2026-11-16, row by row (filasTriciclo.ts): rows 2 and 3 as they always were, two car seats and one
   tFila2N: '2', tFila3N: '1', tFila2Tipo: 'coche', tFila3Tipo: 'coche',
   tChMat: 'cromoly', tChD: 45, tChT: 2.4, tChUniones: 3.5,
-  tBatalla: 2.45, tEjeDel: 0.30, tVia: 1.80, tRuedaDel: '20', tRuedaTras: '24', tGiro: 28, tRecDel: 80, tRecTras: 80, tBasculante: 0.50,
+  tBatalla: 2.45, tEjeDel: 0.30, tEjeTras: 0, tVia: 1.80, tRuedaDel: '20', tRuedaTras: '24', tGiro: 28, tRecDel: 80, tRecTras: 80, tBasculante: 0.50,
   // the «Cuadriciclo Bala clásico» (2026-11-11): one rear wheel in the tail by default; a design without `tViaTras` takes its own `tVia` (camposTriciclo)
   tTraseras: 'una', tViaTras: 1.80,
   // 2026-11-15 (Eugenio, «Smeraptera»): the four-wheeler tilting in bends, its cabin and the four pods on their arms; off by default

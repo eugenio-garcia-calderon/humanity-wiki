@@ -13050,3 +13050,13 @@ Eugenio: «Pon también el precio debajo de cada componente, por ejemplo, carroc
 - The hours are estimates; the bicycle items have their own ids (`b-…`), so hours set on the heavy items do not carry over.
 - Verified: `scripts/bici.ts` (tabs + labour = total; «Masas» without figure) and `precios-secciones` end «Todo OK»; `tsc`; in Chromium on the dev server, both a bicycle and a heavy design: the tab figures and the labour panel; no overflow at 390 px. Not verified: the installed app.
 - Files: `src/pages/Aeromovil.tsx`, `src/components/aeromovil/precios/{manoObra.ts,PanelManoObra.tsx}`, `src/components/aeromovil/PesosDepartamento.ts`, `scripts/bici.ts`.
+
+## 2026-11-24 — Rear axle with a slider (Triciclo family)
+
+Eugenio: «Permite que el eje trasero se pueda adelantar o atrasar al igual que el eje delantero, con un slider.»
+
+- New slider «Eje trasero: adelantado» (Rodaje › Ejes y ruedas, `tEjeTras`, −30 to +30 cm, default 0): the rear axle slides forward (or back, negative) under a body that stays exactly where it is, as «Eje delantero: atrasado» does for the front one. The wheel, the rear pods (four wheels), the swing arm, the cradle, the motor and the checks that read the rear axle follow; the tail of the body does not.
+- «Batalla: eje delantero a trasero» now reads the real front-axle-to-rear-axle distance, so it follows this slider too. Every design saved before has 0: nothing changes (`triciclo-disenos`, `pesos-secciones`, `precios-secciones`, `homologacion`, `bici` end «Todo OK»).
+- Implementation: `medidasTriciclo` hands the model a shape whose `BATALLA` is the axle's, while the body's anchors stay from `tBatalla`; the pack's end (`finPaquete`) and the frame's rear mount follow the axle.
+- Not done: the rows/battery ranges still read the body's wheelbase (`tBatalla`), not the axle's; with the axle far forward a row can sit behind it without the sliders stopping it.
+- Files: `triciclo/{campos,defecto,medidas}.ts`, `LadoTriciclo.tsx`, `explicaciones/triciclo.ts`.
