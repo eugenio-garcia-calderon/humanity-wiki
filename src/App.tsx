@@ -38,6 +38,11 @@ const CalendarioArte = lazy(() => import('./pages/CalendarioArte'));
 const Aeromovil = lazy(() => import('./pages/Aeromovil'));
 const Conciencia = lazy(() => import('./pages/Conciencia'));
 const ModeloSocioeconomico = lazy(() => import('./pages/ModeloSocioeconomico'));
+/** The model's old address (2026-11-24): same window and parameters, new address. */
+function AEconomiaPublica() {
+  const { search, hash } = useLocation();
+  return <Navigate to={{ pathname: '/economia-publica-optimizada', search, hash }} replace />;
+}
 const Arquitectura = lazy(() => import('./pages/Arquitectura'));
 const MisVideos = lazy(() => import('./pages/MisVideos'));
 const ChallengeProfile = lazy(() => import('./pages/ChallengeProfile'));
@@ -348,10 +353,14 @@ export default function App() {
                   Layout (2026-11-10, Eugenio). El mapa editable de la teoría
                   sintérgica de Jacobo Grinberg y sus estudios científicos. */}
               <Route path="conciencia" element={<Conciencia />} />
-              {/* Modelo socioeconómico optimizado: página PROPIA, fuera del Layout
-                  (2026-11-10, Eugenio). Un solo impuesto del 20 % repartido en
-                  ocho escalas, comparado con el sistema fiscal español. */}
-              <Route path="modelo-socioeconomico" element={<ModeloSocioeconomico />} />
+              {/* Economía pública optimizada (antes «Modelo socioeconómico optimizado»): página
+                  PROPIA, fuera del Layout (2026-11-10, Eugenio). Un solo impuesto repartido en
+                  ocho escalas, comparado con el sistema fiscal español. Su dirección cambió el
+                  2026-11-24 (Eugenio: «la de modelo socioeconómico desaparece y aparece la URL
+                  actualizada»): la vieja lleva a la nueva con la misma ventana (#…) y los mismos
+                  parámetros. */}
+              <Route path="economia-publica-optimizada" element={<ModeloSocioeconomico />} />
+              <Route path="modelo-socioeconomico" element={<AEconomiaPublica />} />
               {/* Arquitectura: el mundo 3D editable de la Comunidad Circular Humana
                   (2026-11-05, Eugenio). Herramienta a pantalla completa, sin
                   cuenta y fuera del Layout, como el calendario. */}

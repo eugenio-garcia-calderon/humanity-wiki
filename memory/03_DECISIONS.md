@@ -2467,3 +2467,10 @@ They change saved designs' numbers on purpose.
 **Alternatives**: (a) render the `subpagina` blocks as cards in the generic page view — rejected: they render as plain link rows today, and a card style for them affects every site; (b) one HTML file per tool — rejected: four copies of shared styles and data.
 **Cost of switching later**: cards in code mean a new tool needs a block (migration or editor) and an entry in `HERRAMIENTAS_POLITICA`. Reading titles and texts from the linked pages instead is about 1 hour.
 **Known consequence**: if Eugenio edits the blocks of «Política» in the editor, the cards do not change.
+
+## 2026-11-24 — Política card pictures copy the observatory's numbers
+
+**Context**: Eugenio asked each card of `/politica` to draw what is inside its tool.
+**Chosen**: React SVG drawings in `src/components/politica/VisualesHerramientas.tsx`. The model's card reads its scales from `src/data/modeloSocioeconomico.ts`. The observatory, profiles, geometry and voting cards copy their numbers (CIS bars, Inmigración scores, measure names) from `public/observatorio-polarizacion/index.html`, which is a static file and cannot be imported.
+**Alternative**: move those data into `src/data/` and have the document load them as JSON — about half a day, and it touches the document's start-up.
+**Known consequence**: if the CIS figures or the Inmigración scores change in the document, the cards keep the old ones until someone edits this file.
