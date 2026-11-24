@@ -189,6 +189,7 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
       case 'tAleta': return `${m2(v)} sobre el suelo`;
       case 'tAlto': return modelo.elevar > 0 ? `${fmt(v, 3)} m · ${fmt(v + modelo.elevar, 3)} m con la carrocería subida` : `${fmt(v, 3)} m`;
       case 'tFaldon': return v < 0.01 ? 'sin faldón' : `asoman ${cm(modelo.faldon?.y0 ?? 0)}`;
+      case 'tEjeTras': return Math.abs(v) < 0.005 ? 'donde lo deja la batalla' : v > 0 ? `${cm(v, 0)} más adelante` : `${cm(-v, 0)} más atrás`;
       case 'tEjeDel': return v < 0.005 ? 'donde el Cuadriciclo en rombo' : `${cm(v, 0)} más atrás`;
       case 'tSolar': return res.areas.solar < 0.005 ? 'sin techo solar' : `${m2(v)} tras el eje · ${fmt(res.areas.solar)} m²`;
       case 'tVentAlto': return `${Math.round(v * 100)} % del costado`;

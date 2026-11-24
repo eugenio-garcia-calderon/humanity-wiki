@@ -13060,3 +13060,12 @@ Eugenio: «En la parte de qué está hecho este peso, donde aparece el precio qu
 - Only the Triciclo family and the parts on the first level of each list (not the frame's tubes or the laminate's zones). Every design saved before has no `pesos`: nothing changes.
 - Verified: `npx tsx scripts/pesos-secciones.ts` (all parts ×0.5 and ×2 give exactly half and double the empty vehicle and every section still adds up), `tsc`. The editor's buttons render in Chromium on the dev server but are disabled without the owner's login, so the slider itself was not driven in a browser. Not verified: the installed app.
 - Files: `geometria.ts`, `triciclo/comprobaciones.ts`, `masasSecciones.ts`, `PesoSeccion.tsx`, `precios/EditorPeso.tsx` (new), `LadoTriciclo.tsx`, `BiciTriciclo.tsx`, `scripts/pesos-secciones.ts`.
+## 2026-11-24 — Rear axle with a slider (Triciclo family)
+
+Eugenio: «Permite que el eje trasero se pueda adelantar o atrasar al igual que el eje delantero, con un slider.»
+
+- New slider «Eje trasero: adelantado» (Rodaje › Ejes y ruedas, `tEjeTras`, −30 to +30 cm, default 0): the rear axle slides forward (or back, negative) under a body that stays exactly where it is, as «Eje delantero: atrasado» does for the front one. The wheel, the rear pods (four wheels), the swing arm, the cradle, the motor and the checks that read the rear axle follow; the tail of the body does not.
+- «Batalla: eje delantero a trasero» now reads the real front-axle-to-rear-axle distance, so it follows this slider too. Every design saved before has 0: nothing changes (`triciclo-disenos`, `pesos-secciones`, `precios-secciones`, `homologacion`, `bici` end «Todo OK»).
+- Implementation: `medidasTriciclo` hands the model a shape whose `BATALLA` is the axle's, while the body's anchors stay from `tBatalla`; the pack's end (`finPaquete`) and the frame's rear mount follow the axle.
+- Not done: the rows/battery ranges still read the body's wheelbase (`tBatalla`), not the axle's; with the axle far forward a row can sit behind it without the sliders stopping it.
+- Files: `triciclo/{campos,defecto,medidas}.ts`, `LadoTriciclo.tsx`, `explicaciones/triciclo.ts`.

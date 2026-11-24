@@ -78,7 +78,7 @@ export const ESPESOR_ASIENTO = 0.06;
  * moves behind the pack, and behind it stands the shock tower (round 2, 2026-11-12: the pack runs between the axles,
  * as long as fits). With the defaults, 1.645 m, where the controller used to start.
  */
-export const finPaquete = (T: CamposTriciclo) => limitarTriciclo('tBatalla', T) - limitarTriciclo('tBasculante', T) - 0.305;
+export const finPaquete = (T: CamposTriciclo) => limitarTriciclo('tBatalla', T) - limitarTriciclo('tEjeTras', T) - limitarTriciclo('tBasculante', T) - 0.305;
 /** The pack along the frame in x (its front face, its rear face; shape coordinates), or null with the battery spread out. */
 export function paqueteX(T: CamposTriciclo): [number, number] | null {
   if (!bateriaChasis(T)) return null;
@@ -109,7 +109,7 @@ export let cacheSep: { clave: string; v: number } | null = null;
  */
 export function sepMaxima(T: CamposTriciclo): number {
   const L = (k: ClaveNumTriciclo) => limitarTriciclo(k, T), F = cuerpoDe(T), r = L('tChD') / 2000;
-  const suelo = Math.min(L('tSuelo'), SUELO_RIGIDO), yL = suelo + 0.035 + r, x0 = -L('tEjeDel'), x1 = -L('tBatalla') + L('tBasculante');
+  const suelo = Math.min(L('tSuelo'), SUELO_RIGIDO), yL = suelo + 0.035 + r, x0 = -L('tEjeDel'), x1 = -L('tBatalla') + L('tEjeTras') + L('tBasculante');
   const clave = JSON.stringify([F.D, r, x0, x1]);
   if (cacheSep?.clave === clave) return cacheSep.v;
   let h = 9;
@@ -478,9 +478,11 @@ export function medidasTriciclo(T: CamposTriciclo) {
   if (hueco < HUECO_GIRO) F = crearForma({ ...D, via: Math.ceil((D.via + 2 * (HUECO_GIRO - hueco)) * 100) / 100 });
   // the seats rise with the lifted body (`+ 0` without a lift: the same numbers)
   const asientos: Asientos = { xPiloto: -L('tPilX'), yPiloto: L('tPilY') + elevar, xPasajero: -L('tPasX'), yPasajero: L('tPasY') + elevar };
+  // (round 3: «Quita la aleta»: none with «Sin aleta»)
+  // 2026-11-24 («eje trasero»): the body keeps its shape (its anchors were set from `tBatalla`); only where the rear axle is moves, and with it the wheel, the cradle, the swing arm and the rear pods
+  const dEje = L('tEjeTras'); if (dEje) F = { ...F, BATALLA: F.BATALLA - dEje };
   // four wheels (2026-11-11): the rear pods, as the front ones but round the rear wheels at the rear axle
   const traseras = esCuatro(T) ? formaTrasera(F, rTras, wTras.neuTras, L('tViaTras')) : null;
-  // (round 3: «Quita la aleta»: none with «Sin aleta»)
   return { D: F.D, F, asientos, aleta: T.tConAleta === 'no' ? null : L('tAleta') + elevar, viaPedida: D.via, giro, elevar, traseras };
 }
 
