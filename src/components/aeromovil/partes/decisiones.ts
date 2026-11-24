@@ -1,4 +1,4 @@
-// The decisions taken about the running gear's parts (2026-11-24, «las decisiones tomadas»), kept in the design
+// The decisions taken about the vehicle's parts (2026-11-24, «las decisiones tomadas»), kept in the design
 // (`Parametros.decisionesRodaje`, by part, newest last). Pure: the star writes one, the engineer adds the reason.
 import type { Parametros } from '../geometria';
 import type { DecisionRodaje, IdSub } from './tipos';
@@ -8,10 +8,10 @@ const MAXIMO = 12;
 
 export const hoy = () => new Date().toISOString().slice(0, 10);
 
-/** The log with one more decision. Choosing the option that is already the latest (same axle) changes nothing. */
+/** The log with one more decision. Choosing the option that is already the latest (same axle, same decision of the part) changes nothing. */
 export function anotarDecision(actual: Parametros['decisionesRodaje'], sub: IdSub, d: Omit<DecisionRodaje, 'porque'>): Decisiones {
   const lista = actual?.[sub] ?? [], ultima = lista[lista.length - 1];
-  if (ultima && ultima.opcion === d.opcion && ultima.eje === d.eje) return { ...actual };
+  if (ultima && ultima.opcion === d.opcion && ultima.eje === d.eje && ultima.decision === d.decision) return { ...actual };
   return { ...actual, [sub]: [...lista, { ...d, porque: '' }].slice(-MAXIMO) };
 }
 

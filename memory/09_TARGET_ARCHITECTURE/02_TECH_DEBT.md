@@ -1147,3 +1147,13 @@ By his instruction the bicycle-class labour is assembly only. The project total 
 - **Unopened sources** (Magickart, igus, AZUB, university references) are flagged `leido:false` on screen; opening them is ≈ 30 minutes and may change prices.
 - **Decisions live inside the design** (12 per part, no author): deleted with it, no history of who. A table: ≈ 3 hours.
 - **The option lists are code** — a new option needs a deploy (≈ 10 minutes with the checks); editing them from the page would need a table.
+
+## 2026-11-24 — Parts of every department: shortcuts taken
+
+- **Parts of one 3D layer cannot be shown alone.** The motor's four parts all use layer `motor`; the body's six (`carenado`) and the doors/mirrors/lights share the skin's layers. Isolating each needs its own layer or mesh tag in `visor/triciclo.ts` and an entry in `fichas/registro.ts`: ≈ 2 hours for the first, then ≈ 30 minutes each.
+- **Model parts' options are the page's own choices, with no product research**: no battery-cell catalogue, no upholstery or seat suppliers; their prices are the price rules' estimates (`precios/precios.ts`). A real catalogue per part is ≈ 1 day each, like the motor's.
+- **Tries cost ≈ 70 ms each**, 16–19 on the busiest parts (≈ 1.2 s in the background). Fine until ≈ 60 options per part (≈ 4 s); then precompute.
+- **«Varios» and the hybrid's planetary gear and generator (12 kg) are in no part.** «Varios» (the bolt-ons) sits in department Batería by the name rule `grupoPieza`; both are printed by `scripts/partes.ts` so they are not forgotten. Giving them a part is ≈ 30 minutes each.
+- **Colour and stitching choices are options too** and get a try each although their kg and € do not change (the lining's four colours and the stitching's three styles: 7 of the 73 model-part options, ≈ 0,5 s of background work). A flag that skips the try for them is ≈ 20 minutes.
+- **Interior › Asientos exists twice**: the part's tab (seats + upholstery + belts) and the record under the 3D (`fichas/`, seats only). They do not add up the same; unifying them is ≈ 1 hour.
+- **Few hand-written pros and cons**: they are written for the catalogue parts and a few choices only; the rest of the model parts' options show the page's own text and the model's numbers.

@@ -1,15 +1,23 @@
-// The options of each part of the running gear, in one shape (2026-11-24): the steering's (`direccion.ts`), and the
-// brakes, the suspension and the wheels the project already had in `bici/catalogo.ts` and `ruedas/catalogo.ts`, dressed
-// with what is in them. Nothing here makes a number up: a part's mass and price are the catalogue's own, said to be
+// The options of each part of the vehicle, in one shape (2026-11-24): the steering's (`direccion.ts`), the
+// brakes, the suspension and the wheels the project already had in `bici/catalogo.ts` and `ruedas/catalogo.ts`, the motor makers'
+// parts (`opcionesCatalogo.ts`), and, for the parts whose options are a choice the page already offers (the battery's place, the
+// tubes' material), those choices themselves. Nothing here makes a number up: a part's mass and price are the catalogue's own, said to be
 // published or estimated as they were there; a part list that sums to the whole says so in `scripts/rodaje.ts`.
 //
 // THE FAVOURITE is a field of the design, not a second list: the star on a brake sets `tBiciFreno`, on a suspension
 // `tBiciSusp`, on a wheel `tRuedaDel` / `tRuedaTras`, on a steering `tDirOpc` (`bici/pedales.ts`). So the mass list, the
 // prices, the checks and every department tab already follow it, as they did when it was chosen in the side panel.
-import { A_MEDIDA, BRAZOS_ESQUINA, BUJE_DISCO, DISCO_160, EUR_POR_GBP, FRENOS_BICI, PRECIO_RADIOS_CAMARA, PRECIO_RUEDA_BICI, SUSPENSIONES_BICI, type PiezaBici } from '../bici/catalogo';
+import { BRAZOS_ESQUINA, BUJE_DISCO, DISCO_160, EUR_POR_GBP, FRENOS_BICI, PRECIO_RADIOS_CAMARA, PRECIO_RUEDA_BICI, SUSPENSIONES_BICI, type PiezaBici } from '../bici/catalogo';
 import { fichaRueda } from '../ruedas/catalogo';
+import { MATERIALES_CHASIS } from '../geometria';
+import type { Parametros } from '../geometria';
+import { explicacion } from '../explicaciones';
+import { SELECTORES_TRICICLO, esCuatro, type SelectorTriciclo } from '../triciclo/campos';
+import { camposTriciclo } from '../geometriaTriciclo';
 import { DIRECCION_OPCIONES } from './direccion';
-import type { FuenteOpcion, IdSub, OpcionRodaje, ParteOpcion } from './tipos';
+import { OPCIONES_CONTROLADOR, OPCIONES_MOTOR, OPCIONES_REDUCTORA, OPCIONES_TERMICO } from './opcionesCatalogo';
+import { subsistema, type Subsistema } from './subsistemas';
+import { A_MEDIDA_RODAJE, type FuenteOpcion, type IdSub, type OpcionRodaje, type ParteOpcion } from './tipos';
 
 const LEIDO = '2026-11-24';
 const eurRedondo = (v: number) => Math.round(v);
@@ -83,34 +91,93 @@ function deRueda(id: string): OpcionRodaje | null {
 }
 export const IDS_RUEDAS_OPCION = Object.keys(PRECIO_RUEDA_BICI);
 
+// ---------------------------------------------------------------- the choices the page already offers (the battery's place, the chassis' tubes)
+/** What the page's own text says about each choice, when it says something that is a fact of the option and not of the slider. */
+const PROS_CONTRAS_SELECTOR: Record<string, { pros: string[]; contras: string[] }> = {
+  'tChMat:cromoly': { pros: ['Se suelda en cualquier taller', 'Es el clásico de los karts y los triciclos: fácil de soldar y reparar'], contras: ['Es el más pesado de los tres'] },
+  'tChMat:carbono': { pros: ['Es el más ligero de los tres'], contras: ['No se suelda: necesita uniones pegadas'] },
+  'tBatDisp:chasis': { pros: ['Peso bajo y centrado: vuelca menos', 'El morro queda vacío', 'Un solo paquete: menos cables y cajas'], contras: ['Los asientos que tiene encima quedan más altos'] },
+};
+/** The choice's own facts, from the tables the model reads (not from a shop): the tubes' density and the stress they stand. */
+function datosSelector(clave: string, k: string): [string, string][] {
+  if (clave === 'tChMat') { const m = (MATERIALES_CHASIS as Record<string, { densidad: number; limite: number }>)[k]; return m ? [['Densidad', `${m.densidad} kg/m³`], ['Tensión que aguanta (usable)', `${m.limite} MPa`]] : []; }
+  return [];
+}
+/** The options of a part whose options are the page's own choices (`SELECTORES_TRICICLO`): one per choice, its figures worked out by the model. */
+function deSelectores(S: Subsistema): OpcionRodaje[] {
+  return (S.selectores ?? []).flatMap(clave => {
+    const sel: SelectorTriciclo | undefined = SELECTORES_TRICICLO.find(x => x.clave === clave);
+    if (!sel) return [];
+    const ex = explicacion(clave as keyof Parametros);
+    return sel.opciones.map((op): OpcionRodaje => ({
+      id: `${clave}:${op.k}`, n: op.n, decision: clave, grupo: sel.n, por: 'en este proyecto', kg: 0, calculando: true,
+      resumen: ex ? `${ex.queEs} ${ex.porQueImporta}` : sel.n,
+      masa: 'lo que pesa esta parte en el proyecto con esta opción: el modelo recalcula el diseño con ella',
+      precio: { eur: 0, tipo: 'estimado', nota: 'el precio que el proyecto da a esta parte con esta opción: el modelo recalcula el diseño con ella' },
+      partes: [], pros: [], contras: [], ...PROS_CONTRAS_SELECTOR[`${clave}:${op.k}`], fuentes: [], datos: datosSelector(clave, op.k),
+    }));
+  });
+}
+/**
+ * Does this design offer the choice? `T` is the design's fields with their defaults (`camposTriciclo`): the rails reach the rear axle
+ * only with two rear wheels; the boot's hatch and the second door only with doors; the lining's trim, roof console and light only with a lining.
+ */
+export const selectorVisible = (clave: string, T: Record<string, unknown>) => {
+  if (clave === 'tChLargo') return esCuatro({ tTraseras: T.tTraseras as 'una' | 'dos', tRuedas: T.tRuedas as 'clasica' | 'rombo' | undefined });
+  if (clave === 'tMaletero' || clave === 'tPuertas2') return T.tAcceso === 'puertas';
+  if (clave === 'tMoldura' || clave === 'tConsolaTecho' || clave === 'tAmbiente' || clave === 'tForroColor') return T.tAcabado !== 'chasis';
+  if (clave === 'tCostura') return T.tTapiz !== 'serie';
+  return true;
+};
+
 // ---------------------------------------------------------------- the lists
 export const OPCIONES_FRENOS: OpcionRodaje[] = FRENOS_BICI.map(deFreno);
 export const OPCIONES_SUSPENSION_RODAJE: OpcionRodaje[] = SUSPENSIONES_BICI.map(deSusp);
 export const OPCIONES_RUEDAS: OpcionRodaje[] = IDS_RUEDAS_OPCION.map(deRueda).filter((o): o is OpcionRodaje => !!o);
 export const OPCIONES_DIRECCION: OpcionRodaje[] = DIRECCION_OPCIONES;
+export { OPCIONES_CONTROLADOR, OPCIONES_MOTOR, OPCIONES_REDUCTORA, OPCIONES_TERMICO };
 
-export function opcionesDe(sub: IdSub): OpcionRodaje[] {
-  return sub === 'frenos' ? OPCIONES_FRENOS : sub === 'suspension' ? OPCIONES_SUSPENSION_RODAJE : sub === 'ruedas' ? OPCIONES_RUEDAS : OPCIONES_DIRECCION;
+const LISTAS: Record<string, OpcionRodaje[]> = {
+  ruedas: OPCIONES_RUEDAS, frenos: OPCIONES_FRENOS, direccion: OPCIONES_DIRECCION, suspension: OPCIONES_SUSPENSION_RODAJE,
+  motor: OPCIONES_MOTOR, controlador: OPCIONES_CONTROLADOR, reductora: OPCIONES_REDUCTORA, termico: OPCIONES_TERMICO,
+};
+const DE_SELECTORES: Record<string, OpcionRodaje[]> = {};
+/** The options of a part, in the order they are shown (the design decides which of a part's choices exist). */
+export function opcionesDe(sub: IdSub, P?: object): OpcionRodaje[] {
+  const S = subsistema(sub);
+  if (S.origen === 'catalogo') return LISTAS[sub] ?? [];
+  const todas = (DE_SELECTORES[sub] ??= deSelectores(S));
+  if (!P) return todas;
+  const T = camposTriciclo(P as Partial<Parametros>) as unknown as Record<string, unknown>;
+  return todas.filter(o => selectorVisible(o.decision!, T));
 }
 
-/** The favourite of a part, read from the design: the option's id or `A_MEDIDA` («as before»). Wheels: one per axle. */
-export function favoritaDe(sub: Exclude<IdSub, 'ruedas'>, P: object): string;
+/** The design's value of each choice of a model part: the options that are on now (`tChMat:cromoly`…). */
+export function elegidasDe(sub: IdSub, P: object): string[] {
+  // read through `camposTriciclo`: a saved design that never touched the choice has no value written, and means its default
+  const Q = camposTriciclo(P as Partial<Parametros>) as unknown as Record<string, unknown>;
+  return opcionesDe(sub, Q).filter(o => Q[o.decision!] === o.id.slice(o.decision!.length + 1)).map(o => o.id);
+}
+
+/** The favourite of a catalogue part, read from the design: the option's id or `medida` («as before»). Wheels: one per axle. */
 export function favoritaDe(sub: 'ruedas', P: object): { del: string; tras: string };
+export function favoritaDe(sub: IdSub, P: object): string;
 export function favoritaDe(sub: IdSub, P: object): string | { del: string; tras: string } {
-  const Q = P as Record<string, unknown>, ids = (l: OpcionRodaje[], v: unknown) => (typeof v === 'string' && l.some(o => o.id === v) ? v : A_MEDIDA);
-  if (sub === 'frenos') return ids(OPCIONES_FRENOS, Q.tBiciFreno);
-  if (sub === 'suspension') return ids(OPCIONES_SUSPENSION_RODAJE, Q.tBiciSusp);
-  if (sub === 'direccion') return ids(OPCIONES_DIRECCION, Q.tDirOpc);
-  return { del: typeof Q.tRuedaDel === 'string' ? Q.tRuedaDel : '', tras: typeof Q.tRuedaTras === 'string' ? Q.tRuedaTras : '' };
+  const Q = P as Record<string, unknown>, S = subsistema(sub);
+  if (sub === 'ruedas') return { del: typeof Q.tRuedaDel === 'string' ? Q.tRuedaDel : '', tras: typeof Q.tRuedaTras === 'string' ? Q.tRuedaTras : '' };
+  const campo = typeof S.campo === 'string' ? S.campo : null, v = campo ? Q[campo] : undefined;
+  return typeof v === 'string' && (LISTAS[sub] ?? []).some(o => o.id === v) ? v : A_MEDIDA_RODAJE;
 }
 
 /** The design's fields a star writes (`ponerFavorita`): a list of [field, value]. */
 export function camposDeFavorita(sub: IdSub, id: string, eje?: 'del' | 'tras' | 'todas'): [string, string][] {
-  if (sub === 'frenos') return [['tBiciFreno', id]];
-  if (sub === 'suspension') return [['tBiciSusp', id]];
-  if (sub === 'direccion') return [['tDirOpc', id]];
-  const o: [string, string][] = [];
-  if (eje !== 'tras') o.push(['tRuedaDel', id]);
-  if (eje !== 'del') o.push(['tRuedaTras', id]);
-  return o;
+  const S = subsistema(sub);
+  if (S.origen === 'modelo') { const i = id.indexOf(':'); return i < 0 ? [] : [[id.slice(0, i), id.slice(i + 1)]]; }
+  if (sub === 'ruedas') {
+    const o: [string, string][] = [];
+    if (eje !== 'tras') o.push(['tRuedaDel', id]);
+    if (eje !== 'del') o.push(['tRuedaTras', id]);
+    return o;
+  }
+  return typeof S.campo === 'string' ? [[S.campo, id]] : [];
 }

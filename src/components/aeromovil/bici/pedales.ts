@@ -19,14 +19,14 @@ import type { FormaBala } from '../garaje/balaForma';
 import { esBici } from './clase';
 import { claseRueda } from '../ruedas/catalogo';
 import { A_MEDIDA, FRENOS_BICI, GENERADORES_PEDAL, SUSPENSIONES_BICI, frenoBici, generadorPedal, suspensionBici } from './catalogo';
-import { DIRECCION_OPCIONES, direccionOpcion } from '../rodaje/direccion';
+import { DIRECCION_OPCIONES, direccionOpcion } from '../partes/direccion';
 
 export interface CamposBici {
   /** the brake at every wheel: a bicycle one from the catalogue, or 'medida' (sized by the load, as before) */
   tBiciFreno: string;
   /** the suspension at every corner: a bicycle one from the catalogue, or 'medida' */
   tBiciSusp: string;
-  /** the steering: the favourite option of `rodaje/direccion.ts`, or 'medida' (the «Masas» slider and the estimate, as before) */
+  /** the steering: the favourite option of `partes/direccion.ts`, or 'medida' (the «Masas» slider and the estimate, as before) */
   tDirOpc: string;
   /** pedals for the driver, turning a generator */
   tPedales: 'no' | 'si';

@@ -328,51 +328,86 @@ switch, and what was typed under the family is orphaned). A record for a sub-par
 store already takes any `id`, so it is an entry whose `id` is `'rodaje/ruedas/neumatico'` plus a way to click it (its own
 mesh tag): ≈ 2 hours for the first one, then one entry each.
 
-## `rodaje/` — the running gear's four parts, each with its options and its star (2026-11-24)
+## `partes/` — every department's parts, each with its options and its star (2026-11-24)
 
-«Rodaje» has a row of tabs above the 3D view (Resumen · Ruedas · Frenos · Dirección · Suspensión; Triciclo family only).
-Picking one: the 3D shows only that part (`CAPAS_DEP_TRICICLO` in `pages/Aeromovil.tsx` is overridden by `subsistema(id).capas`;
-«Mostrar todo» undoes it) and a panel opens UNDER the 3D with what the project carries today (kg and € of that part), its
-options with a star, the geometry, the decisions, and for the steering the plan. Eugenio: «la opción favorita es la que luego
-muestra el peso y el precio y lo manda arriba al proyecto … y de ahí también se sacan los planos de la opción favorita».
+Rodaje first (Eugenio: «en rodaje, añade las diferentes partes … que se comporte como un elemento en sí»), then, the same
+day, the rest («haz lo mismo … para el resto de elemento del vehículo»). Each department of the Triciclo family that has
+parts shows a row of tabs above the 3D view (`Resumen · <part> · <part>…`, Triciclo family only). Picking a part: the 3D shows
+only that part (`CAPAS_DEP_TRICICLO` in `pages/Aeromovil.tsx` is overridden by `subsistema(id).capas`; «Mostrar todo» undoes
+it) and a panel opens UNDER the 3D with what the project carries today (kg and € of that part), its options with a star, the
+design's own numbers for it, why it matters and the decisions taken. Eugenio: «la opción favorita es la que luego muestra el
+peso y el precio y lo manda arriba al proyecto … y de ahí también se sacan los planos de la opción favorita».
+
+| Department | Parts (the registry's order) |
+|---|---|
+| Rodaje | Ruedas · Frenos · Dirección · Suspensión (catalogue parts) |
+| Motor | Motor eléctrico · Controlador · Reductora (catalogue parts) · Motor de gasolina (catalogue part, only in the plug-in hybrid) |
+| Carrocería | Carrocería · Cúpula · Paneles solares · Puertas y maletero · Retrovisores · Luces (model parts) |
+| Interior | Asientos · Mando · Salpicadero · Acabado interior (model parts) |
+| Batería | Batería (one part: no row of tabs) |
+| Chasis | Bastidor (one part: no row of tabs) |
+
+A department with a single part has no row (`SubmenuPartes` returns null under two); its panel opens directly.
 
 | File | What |
 |---|---|
-| `tipos.ts` | `IdSub`, `OpcionRodaje` (id, name, kg, price, parts list, pros/cons, sources with `leido`), `ParteOpcion`, `DecisionRodaje`. Leaf module |
-| `direccion.ts` | THE STEERING AS DATA: 4 options (`reclinado`, `kart`, `propia`, `cremallera`), the 7 angle concepts, the study's table, materials, the Gemini rack's published numbers. Every figure says published or estimated |
-| `opciones.ts` | the brakes, suspension and wheels of `bici/catalogo.ts` and `ruedas/catalogo.ts` dressed as options; `favoritaDe`, `camposDeFavorita` |
-| `subsistemas.ts` | the four parts: name, which mass-list parts are it (`piezas` regex), which 3D layers show it, which design field holds its favourite |
-| `geometriaDireccion.ts` | pure maths: ideal outer angle, turning circle, Ackermann arm angle, rack arm length. Same formula as `triciclo/medidas.ts` `anguloFuera` |
-| `numeros.ts` | what the design says today per part (from the price list), the steering's inputs, `aguantaRueda` (load and speed against the tyre) |
-| `decisiones.ts` | the log of decisions (`Parametros.decisionesRodaje`), `anotarDecision`, `escribirPorque` |
-| `PanelSubsistema.tsx` | `SubmenuRodaje` (the tabs), `ResumenRodaje`, `PanelSubsistema` (the panel) |
-| `Opciones.tsx`, `DibujosGeometria.tsx`, `PlanoDireccion.tsx` | option cards + comparison table; the Ackermann top view of THIS design and six angle drawings; the favourite steering's plan (SVG download) |
+| `tipos.ts` | `IdSub` (a string), `OpcionRodaje` (id, name, kg, price, parts list, pros/cons, sources with `leido`, and for model options `decision`, `grupo`, `calculando`, `proyecto`), `ParteOpcion`, `DecisionRodaje`. Leaf module |
+| `subsistemas.ts` | THE REGISTRY: `SUBSISTEMAS`, one object per part: `dep`, name, which mass-list lines are it (`piezas` regex on the line's name), which 3D layers show it (`capas`), where its options come from (`origen`), which design field holds the favourite (`campo`) or which selectors are its decisions (`selectores`), which of the model's checks speak of it (`comprobaciones` regex), `visible` (only some designs have it). `partesDe(dep, P)`, `tieneSub`, `esSub`, `NOMBRE_DEP`, `DE_DEP` |
+| `opciones.ts` | the option lists: the brakes, suspension and wheels of `bici/catalogo.ts` / `ruedas/catalogo.ts` dressed as options; for the model parts `deSelectores` (one option per choice of `SELECTORES_TRICICLO`), `selectorVisible` (which choices this design offers), `opcionesDe(sub, P)`, `elegidasDe`, `favoritaDe`, `camposDeFavorita` |
+| `opcionesCatalogo.ts` | the motor makers' catalogue (`catalogoTren.ts`) dressed as options: motors, controllers, reduction gears, petrol engines. Published figures say so; what the maker does not publish says «no lo publica» and is estimated by the project |
+| `alternativas.ts` | `evaluar(sub, P, cambios)`: an option is TRIED on a copy of the design (`ajustarCarenado` → `crearModelo` → `calcular` → `costeProyecto`, ≈ 60–80 ms) and the part's lines are read from the result; `useEvaluaciones` does it in the background, a try at a time, 600 ms after the design stops changing; `conEvaluaciones` fills the kg, € and «what changes» of each option |
+| `datosDiseno.ts` | `datosDelDiseno(sub, P, modelo, res)`: [label, value] rows with the numbers of this design for the part (power asked of the motor, the pack's litres, the tubes, a body's m², the boot's litres…), read from what the page already computes |
+| `numeros.ts` | what the design says today per part (from the price list), the steering's inputs, `aguantaRueda` |
+| `direccion.ts`, `geometriaDireccion.ts`, `DibujosGeometria.tsx`, `PlanoDireccion.tsx` | the steering only: 4 options, the 7 angle concepts, the Ackermann maths, the six drawings and the downloadable plan |
+| `decisiones.ts` | the log (`Parametros.decisionesRodaje`, 12 per part, newest last), `anotarDecision` |
+| `Opciones.tsx` | option cards + the comparison table |
+| `PanelSubsistema.tsx` | `SubmenuPartes` (the tabs), `ResumenPartes` (the department's summary), `PanelSubsistema` (the panel). One generic panel for every part; the steering keeps its own extra blocks (`sub === 'direccion'`) |
 
-- **THE FAVOURITE IS A FIELD OF THE DESIGN, not a second list.** The star on a brake sets `tBiciFreno`, on a suspension
-  `tBiciSusp`, on a wheel `tRuedaDel` / `tRuedaTras`, on a steering `tDirOpc` (`bici/pedales.ts`, not in `FILAS`). So the mass
-  list, the prices, the checks and every department tab follow it with no new code, and the star and the old selectors in
-  «Componentes de bicicleta» are the same thing. `'medida'` (nothing starred) reproduces today's car exactly:
-  `npx tsx scripts/triciclo-disenos.ts` and `scripts/bici.ts` must still end «Todo OK».
-- Where the favourite touches the model: steering → `triciclo/masas.ts` `dimensionar` (the part «Dirección» takes the option's kg)
-  and `precios/precios.ts` `estimarBici` (its price). Brakes, suspension and wheels were already read there.
-- **A new option**: one object in the list of its part (`DIRECCION_OPCIONES`; for the others, one object in `bici/catalogo.ts`
-  or `ruedas/catalogo.ts`, which `opciones.ts` dresses). With its parts if the maker publishes them, `pros`, `contras`, and its
-  `fuentes`: `leido` is the day WE opened the page, `false` when it is only cited in the study. A part list whose every figure is
-  given must add up to the option's whole. Then `npx tsx scripts/rodaje.ts` must end «Todo OK».
-- **A new part** (lights, mirrors…): an id in `IdSub`, a row in `SUBSISTEMAS`, its options, and its design field in
-  `camposDeFavorita` / `favoritaDe`; the panel draws the generic sections by itself, the extra ones (geometry, plan) are
-  `sub === 'direccion'` blocks in `PanelSubsistema.tsx`.
-- **What is NOT done, and the screens say so**: the plan exists for the steering only (a layout drawing with its dimensions, not a
-  workshop drawing: tolerances, bushings and the knuckle are missing); brakes share the wheels' 3D layer, so «Frenos» shows the
-  wheels; the steering's prices of the kart, reclined-trike and own-design options are ESTIMATES except the tie rods (ICE, Intrepid)
-  and the whole Gemini rack; the kart spindles (Magickart) and the university references were not opened.
-- The 3D is not clickable per part of the running gear yet: the per-component records (`fichas/`, above) only cover Interior › Asientos so far. Giving a brake or a steering rack its record is one entry in `fichas/registro.ts` plus the 3D name of the piece.
+- **THE FAVOURITE IS A FIELD OF THE DESIGN, not a second list.** *Catalogue parts*: the star writes the field of the part
+  (`tBiciFreno`, `tBiciSusp`, `tRuedaDel`/`tRuedaTras`, `tDirOpc`, `tCatMotor`, `tCatCtrl`, `tCatReductora`, `tCatTermico`; the
+  bicycle ones are in `bici/pedales.ts`, not in `FILAS`). The mass list, prices, checks and every department tab follow it with
+  no new code, and the star and the old selectors are the same thing. `'medida'` (nothing starred) reproduces today's car
+  exactly: `npx tsx scripts/triciclo-disenos.ts` and `scripts/bici.ts` must still end «Todo OK». *Model parts*: the options
+  ARE the page's own choices (`SELECTORES_TRICICLO`: the battery's place, the tubes' material, the body's laminate, doors,
+  seats, trim…); the id of an option is `clave:valor` (`tChMat:carbono`) and the star writes that field. There is nothing to
+  «reproduce today's car»: the star already sits on what the design carries.
+- **A model option's figures are not in a table**: they are what the model says when it is chosen (`alternativas.ts`). Until
+  its try is done an option says «calculando…» and is left out of the comparison's minimum. A part that shares nothing with
+  the rest of the design (one figure) would not need this; a battery that moves the centre of gravity does.
+- **A part is its lines of the mass list.** `piezas` is a regex on the line's name (`Bastidor`, `Cinturones de tres puntos (2)`,
+  `Interior: molduras de madera`…). `scripts/partes.ts` checks, over four designs, that no line belongs to two parts and that a
+  part's lines are of its own department (`grupoPieza` in `triciclo/masas.ts`). Lines no part claims are printed there:
+  today only «Varios» (the bolt-ons, department Batería) and, in the hybrid, the planetary gear and generator (12 kg).
+- Where a favourite touches the model: steering → `triciclo/masas.ts` `dimensionar` and `precios/precios.ts` `estimarBici`;
+  motors, controllers, reduction gears and petrol engines were already read from `tCat…` by `catalogoTren.ts`. The petrol
+  engine's price is split among its five lines by mass (`precios.ts`), because the catalogue price is for the whole engine.
+- **A new option**: for a catalogue part, one object in the list of its kind (`bici/catalogo.ts`, `ruedas/catalogo.ts`,
+  `catalogoTren.ts`, `direccion.ts`), with its parts if the maker publishes them, `pros`, `contras` and `fuentes` (`leido`
+  is the day WE opened the page, `false` when it is only cited). For a model part, a new choice in `SELECTORES_TRICICLO`
+  (and, if it only exists in some designs, a rule in `selectorVisible`). Then `npx tsx scripts/partes.ts` must end «Todo OK».
+- **A new part** (a department or another piece): a row in `SUBSISTEMAS` (`piezas`, `capas`, `origen`, `campo` or `selectores`,
+  `comprobaciones`), its options (catalogue: a list in `opciones.ts`' `LISTAS`, and its field in `camposDeFavorita`/`favoritaDe`;
+  model: nothing else), a `case` in `datosDelDiseno` if it has numbers of its own, and a line in the script's registry check.
+  The panel draws the generic sections by itself; extra ones (geometry, plan) are `sub === '…'` blocks in `PanelSubsistema.tsx`.
+- **What is NOT done, and the screens say so**: the plan exists for the steering only; **parts that share a 3D layer cannot be
+  isolated one from another** (Frenos with the wheels, the motor's four parts all show the whole powertrain, the body's six
+  parts show the whole skin); model options carry the page's own text and the model's figures, no new product research (no
+  cell catalogue for the battery, no seat or upholstery supplier prices beyond the model's rules); a catalogue maker that
+  publishes no mass leaves the model's estimate in place (`kg 0` and «calculando» → the try shows the project's figure); the
+  steering's prices of the kart, reclined-trike and own-design options are ESTIMATES except the tie rods and the Gemini rack;
+  the kart spindles (Magickart) and the university references were not opened.
+- The 3D is not clickable per part yet: the per-component records (`fichas/`, above) only cover Interior › Asientos so far.
+  Interior › Asientos therefore has two ways in (the part's tab and the record under the 3D) and they do not count the same:
+  the record reads the page's section `interior|Asientos` (the seats alone), the part's regex also takes the upholstery and
+  the belts (the page's «Tapicería» section), because its choices are the seats', the upholstery's and the belts'.
 
 **Before you change this, decide**: the favourite as a design field (today: zero server code, the model already reads it, a
 star can be undone by pressing another) versus a table of studies per part with their own history and several favourites per
 scenario (≈ 1.5 days: migration, route, store, and every reader of the mass list reading it instead of the field). Worth it the
 day two people argue over which option is the favourite, or a favourite must differ per vehicle variant. The decisions log is
-in the design (12 per part): it travels with copies, and is lost if a design is deleted.
+in the design (12 per part): it travels with copies, and is lost if a design is deleted. And: an option tried on a copy of the
+design (today: exact, ≈ 70 ms each, 16–19 options on the busiest parts ≈ 1.2 s in the background) versus precomputed tables
+(instant, but a second source that drifts the day someone changes a mass rule): keep tries until a part has ≈ 60 options.
 
 ## `estrategia/` — the strategy tree («Estrategia», `/aeromovil/estrategia`, 2026-11-19)
 

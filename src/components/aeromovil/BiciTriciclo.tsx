@@ -15,7 +15,7 @@ import { eur, textoPesoPrecio, type PrecioSeccion } from './precios/precios';
 import { OPCIONES_FRENO, OPCIONES_GENERADOR, OPCIONES_SUSPENSION, frenoBici, generadorPedal, suspensionBici, type PiezaBici } from './bici/catalogo';
 import { OPCIONES_CLASE, VALORES_BICI, esBici, type ClaseVehiculo } from './bici/clase';
 import { BICI_DEFECTO, FILAS_BICI, OPCIONES_PEDALES, camposBici, type ClaveBici, type Pedaleo } from './bici/pedales';
-import { OPCIONES_DIRECCION_SELECTOR } from './rodaje/direccion';
+import { OPCIONES_DIRECCION_SELECTOR } from './partes/direccion';
 import { TRICICLO_DEFECTO } from './triciclo/defecto';
 import type { CamposTriciclo } from './triciclo/campos';
 
