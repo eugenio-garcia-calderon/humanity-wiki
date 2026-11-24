@@ -138,7 +138,8 @@ export function Margenes({ ev }: { ev: Evaluacion }) {
       <p className="text-[13px] font-semibold text-slate-900">{fraseMargen(ev)}</p>
       {filas.length > 0 && (
         <dl className="grid grid-cols-[minmax(0,9rem)_minmax(0,1fr)] items-center gap-x-3 gap-y-1.5 text-xs sm:grid-cols-[12rem_minmax(0,1fr)]">
-          {filas.map(([t, r, d]) => {
+          {filas.map(([t, r, d0]) => {
+            const d = r!.unidad === 'kW' && r!.limite! < 1 ? 2 : d0; // the pedal cycle's 0,25 kW
             const usa = Math.min(1.15, r!.valor! / r!.limite!), pasa = r!.margen! < 0;
             return (
               <div key={t} className="contents">

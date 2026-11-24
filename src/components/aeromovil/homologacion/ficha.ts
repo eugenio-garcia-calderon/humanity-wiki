@@ -52,7 +52,7 @@ export function fichaHomologacion(P: Parametros, modelo: Modelo, res: Resultados
     ruedasFisicas: 4, ruedasLegales: 4, parejas: [], inclina: false, plazas: null, horcajadas: null, manillar: null, cerrado: null, pedaleo: false, propulsion: 'electrico',
     parabrisasPlastico: null, retrovisores: null, ruedasCarga: null, masaVacio: null, masaBateria: null, masaCombustible: 0, masaOrdenMarcha: null, masaMaxima: null,
     masaOcupante: 75, potenciaContinua: null, potenciaPico: null, potenciaTermica: null, potenciaCategoria: null, vmax: null, vmaxNominal: null, velocidadDiseno: null,
-    largo: modelo.xn - modelo.xt, ancho: null, alto: null, radioGiro: null, repartoDelantero: null, kWporKg: null, notas: [], electronica: null, vmaxConjunta: null,
+    largo: modelo.xn - modelo.xt, ancho: null, alto: null, radioGiro: null, repartoDelantero: null, kWporKg: null, notas: [], electronica: null, vmaxConjunta: null, vuelcoSsf: null, vuelcoObjetivo: null,
   });
   let f: FichaHomologacion;
   if (modelo.tipo === 'triciclo') f = { vehiculo: nombre ?? 'Triciclo', tipo: 'triciclo', ...fichaTriciclo(P, modelo, res, conCd(cd), base()) };
@@ -126,6 +126,8 @@ function fichaTriciclo(P: Parametros, m: ModeloTriciclo, res: Resultados, cd: { 
     vmax: e ? Math.max(e.vmaxPico, vGas) : null, vmaxNominal: e ? e.vmaxNominal : null, velocidadDiseno: L('tVel'),
     largo: m.xn - m.xt, ancho: m.anchoTotal, alto: m.alto,
     radioGiro: r.giro.radio, repartoDelantero: m.rombo ? null : r.vuelco.repartoDel * 100,
+    // (2026-11-24) the rollover threshold of the design (g) and what the editor asks of it: the pedal-cycle check of annex VI, point 10
+    vuelcoSsf: m.rombo ? null : r.vuelco.ssf, vuelcoObjetivo: m.rombo ? null : r.vuelco.objetivo,
     ruedasCarga: cargas ? [
       { nombre: 'cada rueda delantera', carga: cargas.del, capacidad: RUEDAS_TRICICLO[T.tRuedaDel].carga },
       { nombre: m.cuatro ? 'cada rueda trasera' : 'la rueda trasera', carga: cargas.tras, capacidad: RUEDAS_TRICICLO[T.tRuedaTras].carga },

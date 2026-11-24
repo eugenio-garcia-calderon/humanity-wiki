@@ -13080,6 +13080,13 @@ Eugenio: «En el apartado de homologación vamos a poner diferentes informacione
 - Not done: lights and the rear reflector are not in the 3D design (the requirement reads «a comprobar»); the heavy-quadricycle page only holds what the catalogue already had.
 - Files: `homologacion/{normas,evaluar,guias,PaginaHomologacion,PanelHomologacion}.ts(x)`, `pages/Aeromovil.tsx`.
 
+## 2026-11-24 — Aeromóvil: «Homologación» gets the pedal-cycle page (EN 15194)
+
+- A third whole page next to L1e-A and the heavy quadricycle: **ciclo de pedales con pedaleo asistido** (250 W, 25 km/h, pedals). Table of what the norm says with the design's verdict beside each row, 13 steps in four phases, the maker's own way (evaluation, tests, standards, technical file, declaration, manual, plate, production control, CE), which procedures are and are not needed, and the four questions that change the procedure.
+- 17 new requirements for category `EPAC`; those measurable against the design: power (0,25 kW), assisted speed (25 km/h), pedals, passengers' restraint, declared figures, rollover threshold (the design's own target, the law gives no number), wheel loads. The rest read «a comprobar» (lights and reflectors are not in the 3D design).
+- Checked against the legal text (24-11-2026) what Eugenio pasted: Orden PJC/780/2025 and its definition, RD 339/2014 annexes I to VI (lights: 1 white, 1 red, 1 rear reflector, 4 yellow side reflectors), art. 4 (10 years), Regulation 168/2013 art. 2.2.h. Nuances recorded on the page: annex VI only imports EN 15194 clause 4.2; EN 15194 defines a bicycle with two wheels and a saddle height of 635 mm or more; EN 17860-5 is dated 2024 not 2025 and part 6 was not found; the DGT sentence on circulation permits was not read.
+- Decimals: a limit under 1 kW shows two decimals (0,25 kW, not 0,3).
+- Files: `homologacion/{normas,ficha,evaluar,guias,PaginaHomologacion,PanelHomologacion}.ts(x)`, `scripts/homologacion.ts`.
 ## 2026-11-24 — Aeromóvil: notes on the built-in proposals
 
 - Writing a note while a built-in proposal was open (e.g. «Vehículo de producción (bicicleta)», id −19) answered «Sección no válida» and reading answered «No se han podido leer las notas guardadas en la web». Cause: `MenuDisenos` handed the proposal's negative id to `ponerDestino`, and the server only accepts a positive design id or none. Fix in `notas/almacen.ts`: a non-positive id means «no saved design», so those notes are kept with the vehicle (what the panel text already said). Local notes written before with a negative id are matched the same way. The server's 400 now says which of section, design or vehicle is wrong.

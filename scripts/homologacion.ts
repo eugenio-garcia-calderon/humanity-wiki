@@ -19,6 +19,7 @@ import { fichaHomologacion } from '../src/components/aeromovil/homologacion/fich
 import { elegirCategoria, evaluarCategoria, fraseMargen } from '../src/components/aeromovil/homologacion/evaluar';
 import { ETIQUETA_L7E, estudioL7e } from '../src/components/aeromovil/homologacion/l7e';
 import { electronicaTriciclo } from '../src/components/aeromovil/triciclo/electronica';
+import { GUIAS, VIAS } from '../src/components/aeromovil/homologacion/guias';
 
 let fallos = 0;
 const ok = (c: boolean, m: string) => { if (!c) { console.log(`FALLA ${m}`); fallos++; } };
@@ -35,6 +36,26 @@ const ok = (c: boolean, m: string) => { if (!c) { console.log(`FALLA ${m}`); fal
   }
   for (const c of CATEGORIAS) ok(REQUISITOS.some(r => r.categorias.includes(c.id)), `${c.id} no tiene requisitos`);
   console.log(`${REQUISITOS.length} requisitos, ${CATEGORIAS.length} categorías, ${Object.keys(FUENTES).length} fuentes`);
+}
+
+// ── the written guides (guias.ts): every row tied to a requirement of its category, every source known, nothing left out
+{
+  for (const g of GUIAS) {
+    const delGuia = REQUISITOS.filter(r => g.categorias.some(c => r.categorias.includes(c)));
+    for (const f of g.tabla) {
+      ok(f.fuente in FUENTES, `guía ${g.id}: la fila «${f.concepto}» cita una fuente desconocida`);
+      if (f.req) ok(delGuia.some(r => r.id === f.req), `guía ${g.id}: la fila «${f.concepto}» apunta al requisito «${f.req}», que no es de sus categorías`);
+    }
+    for (const r of g.revision) if (r.fuente) ok(r.fuente in FUENTES, `guía ${g.id}: una revisión cita una fuente desconocida`);
+    for (const id of g.vias) ok(VIAS.some(v => v.id === id), `guía ${g.id}: vía «${id}» desconocida`);
+    for (const f of g.propia?.fuentes ?? []) ok(f in FUENTES, `guía ${g.id}: la vía propia cita una fuente desconocida`);
+    ok(g.categorias.includes(g.porDefecto), `guía ${g.id}: la categoría por defecto no es suya`);
+    ok(new Set(g.pasos.map(p => p.titulo)).size === g.pasos.length, `guía ${g.id}: pasos repetidos`);
+    console.log(`guía ${g.id}: ${g.tabla.length} filas, ${g.revision.length} revisiones, ${g.pasos.length} pasos, ${g.vias.length || (g.propia ? 1 : 0)} vías`);
+  }
+  // the pedal-cycle guide shows each of its own requirements in the table (nothing the design is checked against is hidden)
+  const epac = GUIAS.find(g => g.id === 'epac')!;
+  for (const r of REQUISITOS.filter(r => r.categorias.includes('EPAC') && r.id !== 'permiso')) ok(epac.tabla.some(f => f.req === r.id), `guía epac: el requisito «${r.id}» no sale en su tabla`);
 }
 
 const disenos: [string, Parametros][] = [

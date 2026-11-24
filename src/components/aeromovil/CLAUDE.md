@@ -170,7 +170,13 @@ design's verdict from `normas.ts`), `revision` (what was checked of what Eugenio
 comprobado), the steps and the ways, each with expandable «qué significa y quién lo hace». **A new homologation**: a
 category in `CATEGORIAS`, its requirements in `REQUISITOS`, a `Guia` in `guias.ts`, added to `GUIAS`. L1e-A is a category
 of the engine (`candidatas`: pedals and two to four legal wheels): width 1,00 m, length 4,00 m, height 2,50 m, 1 kW, 25 km/h.
-Not modelled yet: lights and the rear reflector (`l1eaLuces` is «a comprobar»).
+Not modelled yet: lights and the rear reflector (`l1eaLuces` / `epacLuces` are «a comprobar»).
+The third card, **«Ciclo de pedales con pedaleo asistido · EN 15194»** (`GUIA_EPAC`, category `EPAC`, 2026-11-24), has no
+approval: it is outside Regulation 168/2013 (art. 2.2.h) and the maker certifies it (RD 339/2014: technical file, declaration,
+manual, plate, production control; annex VI for more than two wheels). So it has `propia` (its own way) instead of `vias`,
+plus `tramites` (what is and is not needed) and `cuestiones`. `scripts/homologacion.ts` checks every guide row points at a
+requirement of its category and that the EPAC table shows every EPAC requirement. The EN 15194 / EN 17860 texts are paid:
+only their catalogue summaries were read (`leido: false`).
 
 **Before you change this, decide**: the figures were read on 2026-11-17 mostly from legislation.gov.uk (the EU text
 as of 31-1-2020) and the consolidated 44/2014 on EUR-Lex; `FUENTES[x].leido: false` marks what was cited without
