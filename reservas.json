@@ -5,6 +5,12 @@
       "ruta": "drizzle/0238_politica_en_portada.sql",
       "motivo": "Innovación en Política en la portada de Luz & Humanidad; portada del Aeromóvil",
       "desde": "2026-11-24T18:21:52.292Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/sitio/VistaProyectosSitio.tsx",
+      "motivo": "Innovación en Política en la portada de Luz & Humanidad; portada del Aeromóvil",
+      "desde": "2026-11-24T18:22:01.544Z"
     }
   ]
 }
