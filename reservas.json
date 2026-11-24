@@ -11,12 +11,6 @@
       "ruta": "src/components/aeromovil/Visor3D.tsx",
       "motivo": "hover y selección de componentes en el visor",
       "desde": "2026-11-24T12:08:24.046Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "memory/03_DECISIONS.md",
-      "motivo": "Economía pública optimizada",
-      "desde": "2026-11-24T13:46:11.255Z"
     }
   ]
 }
