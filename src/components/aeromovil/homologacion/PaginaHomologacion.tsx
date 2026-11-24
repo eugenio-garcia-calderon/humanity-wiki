@@ -140,6 +140,7 @@ function PaginaGuia({ g, ev, aviso }: { g: Guia; ev: Evaluacion; aviso: React.Re
         <ol className="flex flex-col gap-1.5">
           {g.pasos.map((p, i) => (
             <li key={p.titulo}>
+              {p.fase && <h4 className={cn('mb-1 text-[11px] font-semibold uppercase tracking-wider text-slate-500', i > 0 && 'mt-2')}>{p.fase}</h4>}
               <Desplegable titulo={`${i + 1}. ${p.titulo}`} resumen={p.resumen}>
                 <p><span className="font-semibold">Quién:</span> {p.quien}</p>
                 <ul className="mt-1 list-disc pl-5">{p.detalle.map(d => <li key={d}>{d}</li>)}</ul>
@@ -149,9 +150,41 @@ function PaginaGuia({ g, ev, aviso }: { g: Guia; ev: Evaluacion; aviso: React.Re
         </ol>
       </section>
 
-      <section className="flex flex-col gap-2"><Titulo icono={FileText}>Vías para conseguirla: una unidad, serie corta o tipo UE</Titulo>
-        <div className="flex flex-col gap-1.5">{g.vias.map(id => <ViaDetalle key={id} v={VIAS.find(x => x.id === id)!} />)}</div>
-      </section>
+      {g.cuestiones && (
+        <section className="flex flex-col gap-2"><Titulo icono={CircleHelp}>Lo que decide el procedimiento exacto</Titulo>
+          <div className="overflow-hidden rounded-lg border border-slate-200 text-[13px]">
+            <ul className="divide-y divide-slate-100">{g.cuestiones.map(c => (
+              <li key={c.pregunta} className="grid gap-x-3 gap-y-0.5 px-3 py-2 md:grid-cols-[11rem_minmax(0,1fr)_minmax(0,1.5fr)]">
+                <span className="font-semibold text-slate-900">{c.pregunta}</span><span className="text-slate-600">{c.opciones}</span><span className="text-slate-700">{c.porque}</span>
+              </li>))}</ul>
+          </div>
+        </section>
+      )}
+
+      {g.tramites && (
+        <section className="flex flex-col gap-2"><Titulo icono={FileText}>Qué trámites hacen falta y cuáles no</Titulo>
+          <div className="overflow-hidden rounded-lg border border-slate-200 text-[13px]">
+            <ul className="divide-y divide-slate-100">{g.tramites.map(t => (
+              <li key={t.tramite} className="grid grid-cols-[4.5rem_minmax(0,1fr)] items-baseline gap-x-3 px-3 py-1.5 md:grid-cols-[4.5rem_16rem_minmax(0,1fr)]">
+                <span className={cn('w-fit rounded-full border px-1.5 text-[10px] font-bold uppercase', t.hace ? COLOR.comprobar : COLOR.cumple)}>{t.hace ? 'Sí hace falta' : 'No hace falta'}</span>
+                <span className="font-semibold text-slate-900">{t.tramite}</span>
+                <span className="col-span-2 text-slate-600 md:col-span-1">{t.nota ?? ''}</span>
+              </li>))}</ul>
+          </div>
+        </section>
+      )}
+
+      {g.propia && (
+        <section className="flex flex-col gap-2"><Titulo icono={FileText}>La vía: el fabricante lo certifica él mismo</Titulo>
+          <ViaDetalle v={g.propia} />
+        </section>
+      )}
+
+      {g.vias.length > 0 && (
+        <section className="flex flex-col gap-2"><Titulo icono={FileText}>Vías para conseguirla: una unidad, serie corta o tipo UE</Titulo>
+          <div className="flex flex-col gap-1.5">{g.vias.map(id => <ViaDetalle key={id} v={VIAS.find(x => x.id === id)!} />)}</div>
+        </section>
+      )}
 
       <section className="flex flex-col gap-2"><Titulo icono={BadgeCheck}>Lo que contrasté con los textos legales</Titulo><TablaRevision filas={g.revision} /></section>
 
@@ -178,7 +211,7 @@ export function PaginaHomologacion({ P, modelo, res, cd, nombre }: { P: Parametr
   const g = GUIAS.find(x => x.id === sel) ?? null;
   const catGuia: IdCategoria = g ? (g.id === 'pesado' ? (catPesado ?? (g.categorias.includes(auto.cat) ? auto.cat : g.porDefecto)) : g.porDefecto) : 'L1e-A';
   const ev = useMemo(() => evaluarCategoria(ficha, catGuia), [ficha, catGuia]);
-  const evL1 = useMemo(() => evaluarCategoria(ficha, 'L1e-A'), [ficha]);
+  const evGuia = useMemo(() => evaluarCategoria(ficha, g?.id === 'epac' ? 'EPAC' : 'L1e-A'), [ficha, g?.id]);
   return (
     <section aria-label="Homologación" className="mx-auto flex max-w-5xl flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
       <header className="flex flex-col gap-1.5">
@@ -187,7 +220,7 @@ export function PaginaHomologacion({ P, modelo, res, cd, nombre }: { P: Parametr
         <p className="flex items-start gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs text-amber-900"><AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0" />{AVISO_HOMOLOGACION}</p>
       </header>
 
-      <div className="grid gap-2 sm:grid-cols-3" role="tablist" aria-label="Tipos de homologación">
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4" role="tablist" aria-label="Tipos de homologación">
         {[...GUIAS.map(x => ({ id: x.id, titulo: x.titulo, lema: x.lema })), { id: 'vias', titulo: 'Vías: una unidad, serie corta o tipo UE', lema: 'Qué se pide en cada una, qué significa y quién lo hace' }].map(t => (
           <Button key={t.id} variant="outline" role="tab" aria-selected={sel === t.id} onClick={() => setSel(t.id)}
             className={cn('flex h-auto flex-col items-start gap-0.5 whitespace-normal px-3 py-2 text-left normal-case tracking-normal', sel === t.id ? 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800' : 'text-slate-800')}>
@@ -210,11 +243,11 @@ export function PaginaHomologacion({ P, modelo, res, cd, nombre }: { P: Parametr
       )}
 
       {g && (
-        <PaginaGuia key={g.id + catGuia} g={g} ev={ev} aviso={g.id === 'l1ea'
-          ? <p className={cn('rounded-lg border px-3 py-2 text-[13px]', evL1.bloqueantes.length ? COLOR.no : COLOR.cumple)}>
-              {evL1.bloqueantes.length
-                ? <><span className="font-semibold">Tu diseño no entra en L1e-A todavía:</span> {evL1.bloqueantes.map(b => `${b.req.titulo.toLowerCase()} (${b.texto.replace(/\.$/, '')})`).join('; ')}.</>
-                : <><span className="font-semibold">Tu diseño cumple lo que decide L1e-A.</span> Quedan los ensayos y las piezas por comprobar.</>}
+        <PaginaGuia key={g.id + catGuia} g={g} ev={ev} aviso={g.id === 'l1ea' || g.id === 'epac'
+          ? <p className={cn('rounded-lg border px-3 py-2 text-[13px]', evGuia.bloqueantes.length ? COLOR.no : COLOR.cumple)}>
+              {evGuia.bloqueantes.length
+                ? <><span className="font-semibold">Tu diseño no entra en {g.id === 'epac' ? 'esta vía' : 'L1e-A'} todavía:</span> {evGuia.bloqueantes.map(b => `${b.req.titulo.toLowerCase()} (${b.texto.replace(/\.$/, '')})`).join('; ')}.</>
+                : <><span className="font-semibold">Tu diseño cumple lo que decide {g.id === 'epac' ? 'esta vía' : 'L1e-A'}.</span> Quedan los ensayos, los papeles y las piezas por comprobar.{evGuia.cuenta.no > 0 && ` Ojo: ${evGuia.cuenta.no === 1 ? 'hay 1 requisito en rojo' : `hay ${evGuia.cuenta.no} requisitos en rojo`} más abajo.`}</>}
             </p>
           : null} />
       )}

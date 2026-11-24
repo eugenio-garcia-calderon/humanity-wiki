@@ -26,7 +26,9 @@ function evaluarRequisito(req: Requisito, f: FichaHomologacion, cat: IdCategoria
   if (req.aplica && !req.aplica(f)) return null;
   const md = req.medida;
   if (md) {
-    const lim = md.limite[cat], u = UNIDAD[md.magnitud], v = valorDe(f, md.magnitud);
+    const lim = md.limite[cat], u0 = UNIDAD[md.magnitud], v = valorDe(f, md.magnitud);
+    // a limit under 1 kW (the pedal cycle's 0,25) needs two decimals, or it reads «0,3 kW»
+    const u = lim != null && lim < 1 && u0.d < 2 && u0.u === 'kW' ? { ...u0, d: 2 } : u0;
     if (lim == null) return { req, estado: 'cumple', texto: v == null ? `Sin límite en ${cat}.` : `Sin límite en ${cat} (tiene ${num(v, u.d)} ${u.u}).`, ...(v != null ? { valor: v, unidad: u.u } : {}) };
     if (v == null) return { req, estado: 'comprobar', texto: req.queHaceFalta ?? `El modelo no sabe su ${u.nombre}.`, limite: lim, unidad: u.u };
     const margen = md.sentido === 'max' ? lim - v : md.sentido === 'min' ? v - lim : -Math.abs(v - lim);
@@ -81,7 +83,7 @@ export function margenes(e: Evaluacion) {
 /** One sentence: «te quedan 38 kg y 4 kW antes del límite de L5e-A». */
 export function fraseMargen(e: Evaluacion): string {
   const m = margenes(e), partes: string[] = [], pasa: string[] = [];
-  const pon = (r: Resultado | null, d: number) => { if (!r || r.margen == null) return; (r.margen >= 0 ? partes : pasa).push(`${num(Math.abs(r.margen), d)} ${r.unidad}`); };
+  const pon = (r: Resultado | null, d: number) => { if (!r || r.margen == null) return; (r.margen >= 0 ? partes : pasa).push(`${num(Math.abs(r.margen), r.unidad === 'kW' && (r.limite ?? 9) < 1 ? 2 : d)} ${r.unidad}`); };
   pon(m.masa, 0); pon(m.potencia, 1); pon(m.vmax, 0);
   const nombre = categoria(e.cat).id;
   const sinPot = !m.potencia && e.resultados.some(r => r.req.id === 'potencia') ? ' (sin límite de potencia)' : '';

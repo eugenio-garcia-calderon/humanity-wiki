@@ -12,7 +12,7 @@
 // Where a later amendment may have changed a figure, the requirement says so («por confirmar en EUR-Lex»).
 // The UI text is Spanish (it is for Eugenio); the comments are English.
 
-export type IdFuente = 'r168' | 'r168art' | 'r168anx6' | 'r168anx8' | 'r3' | 'r44' | 'r134' | 'r2018' | 'r2019' | 'rd750' | 'permisos' | 'permisoB' | 'b1' | 'r901' | 'r85' | 'r134anx' | 'r168anx3' | 'r168art42' | 'dgtL1eA' | 'rd750anx';
+export type IdFuente = 'r168' | 'r168art' | 'r168anx6' | 'r168anx8' | 'r3' | 'r44' | 'r134' | 'r2018' | 'r2019' | 'rd750' | 'permisos' | 'permisoB' | 'b1' | 'r901' | 'r85' | 'r134anx' | 'r168anx3' | 'r168art42' | 'dgtL1eA' | 'rd750anx' | 'rd339' | 'pjc780' | 'en15194' | 'en17860' | 'maq2006' | 'maq2023' | 'r168excl';
 
 /** The texts behind every figure. `leido`: read on 2026-11-17 (false: cited from memory of the text, to confirm). */
 export const FUENTES: Record<IdFuente, { titulo: string; url: string; leido: boolean }> = {
@@ -37,6 +37,15 @@ export const FUENTES: Record<IdFuente, { titulo: string; url: string; leido: boo
   r168art42: { titulo: 'Reglamento (UE) 168/2013, artículo 42 (homologación nacional de series cortas)', url: 'https://legislation.gov.uk/eur/2013/168/chapter/X/2020-01-31/data.html', leido: true },
   dgtL1eA: { titulo: 'DGT, Instrucción 19/V-134 de 24-5-2019: matriculación de vehículos L1e-A', url: 'https://www.dgt.es/export/sites/web-DGT/.galleries/downloads/muevete-con-seguridad/normas-de-trafico/VEH-vehiculos/19.V-134-Matriculacion-de-vehiculos-L1e-A.pdf', leido: true },
   rd750anx: { titulo: 'Real Decreto 750/2010, consolidado: arts. 4.4 y 7.3 (homologación individual), anexo II apéndices 1, 3, 4 y 5', url: 'https://boe.es/buscar/pdf/2010/BOE-A-2010-9994-consolidado.pdf', leido: true },
+  // 2026-11-24 (ciclo de pedales con pedaleo asistido): the BOE page of the consolidated RD 339/2014 and the order PJC/780/2025 were read that day;
+  // the EN standards are paid texts: only their public catalogue summaries were read
+  rd339: { titulo: 'Real Decreto 339/2014 (comercialización y puesta en servicio de bicicletas y otros ciclos), consolidado: arts. 2 a 4, anexos I a VI y disposición transitoria segunda', url: 'https://www.boe.es/buscar/doc.php?id=BOE-A-2014-5399', leido: true },
+  pjc780: { titulo: 'Orden PJC/780/2025, de 21 de julio (BOE 23-7-2025): modifica el Reglamento General de Vehículos y define el «ciclo de pedales con pedaleo asistido»', url: 'https://www.boe.es/boe/dias/2025/07/23/pdfs/BOE-A-2025-15231.pdf', leido: true },
+  en15194: { titulo: 'UNE-EN 15194:2017+A1:2023 (ciclos con pedaleo asistido, EPAC): ficha pública del catálogo; el texto completo es de pago', url: 'https://genorma.com/en/standards/en-15194-2017-a1-2023/amp', leido: false },
+  en17860: { titulo: 'Serie EN 17860 «Carrier cycles»: parte 3 (ciclos de carga ligeros de varias huellas, mecánica) y parte 5 (eléctrica), según el catálogo de EVS', url: 'https://www.evs.ee/en/evs-en-17860-3-2024', leido: false },
+  maq2006: { titulo: 'Directiva 2006/42/CE de máquinas (la EN 15194 la cita en su anexo ZA)', url: 'https://eur-lex.europa.eu/eli/dir/2006/42/oj', leido: false },
+  maq2023: { titulo: 'Reglamento (UE) 2023/1230 de máquinas (sustituye a la Directiva 2006/42/CE desde el 20-1-2027)', url: 'https://eur-lex.europa.eu/eli/reg/2023/1230/oj', leido: false },
+  r168excl: { titulo: 'Reglamento (UE) 168/2013, artículo 2, apartado 2, letra h (excluye los ciclos de pedaleo asistido de 250 W y 25 km/h)', url: 'https://www.legislation.gov.uk/eur/2013/168/article/2/adopted', leido: true },
   b1: { titulo: 'RACE: el permiso B1 para cuadriciclos pesados (en consulta desde julio de 2024, no en vigor)', url: 'https://www.race.es/?p=254932', leido: true },
 };
 
@@ -67,10 +76,10 @@ export interface Categoria {
 
 export const CATEGORIAS: Categoria[] = [
   {
-    id: 'EPAC', nombre: 'Bicicleta con pedaleo asistido (fuera del Reglamento 168/2013)', ruedas: null, fuente: 'r168art',
-    resumen: 'Ciclos de pedales con un motor de ayuda de hasta 250 W que deja de empujar a 25 km/h o cuando se deja de pedalear. Están fuera del Reglamento 168/2013 (artículo 2.2.h): no se homologan como vehículo de motor, se venden con el marcado CE (norma EN 15194).',
-    ejemplos: 'Velomóviles con ayuda eléctrica, bicicletas de carga eléctricas de tres y cuatro ruedas.',
-    permiso: 'Ninguno.', esfuerzo: 'Bajo: marcado CE del fabricante; sin matrícula, sin ITV.',
+    id: 'EPAC', nombre: 'Ciclo de pedales con pedaleo asistido, EN 15194 (fuera del Reglamento 168/2013)', ruedas: null, fuente: 'rd339',
+    resumen: 'Ciclo de pedales con un motor eléctrico auxiliar de hasta 250 W continuos, cuya ayuda baja poco a poco y se corta antes de los 25 km/h o cuando se deja de pedalear. Está fuera del Reglamento 168/2013 (artículo 2.2.h): no se homologa como vehículo de motor, no se matricula y no pasa ITV. En España lo regula el Real Decreto 339/2014: el fabricante documenta, ensaya y declara él mismo la conformidad. Con más de dos ruedas se aplica su anexo VI.',
+    ejemplos: 'Velomóviles con ayuda eléctrica, bicicletas de carga eléctricas de tres y cuatro ruedas, cuadriciclos de pedales.',
+    permiso: 'Ninguno.', esfuerzo: 'Bajo en trámites (sin homologación de vehículo, sin matrícula, sin ITV), pero con ensayos de seguridad, expediente técnico y declaración de conformidad a cargo del fabricante.',
   },
   {
     id: 'L1e-A', nombre: 'L1e-A — ciclo de motor («bicicleta» de tres o cuatro ruedas con motor de ayuda)', ruedas: null, fuente: 'r168anx3',
@@ -157,6 +166,8 @@ export interface VistaFicha {
   parabrisasPlastico: boolean | null; retrovisores: 'espejos' | 'camaras' | null; ruedasCarga: { nombre: string; carga: number; capacidad: number }[] | null;
   masaOrdenMarcha: number | null; potenciaCategoria: number | null; potenciaPico: number | null; vmax: number | null; velocidadDiseno: number | null;
   parejas: { nombre: string; via: number }[]; inclina: boolean; plazas: number | null;
+  /** (2026-11-24) for the pedal-cycle checks: mass with the battery, laden mass, front-axle share (%), the rollover threshold (g) and the design's own target for it */
+  ruedasFisicas: number; radioGiro: number | null; masaVacio: number | null; masaMaxima: number | null; repartoDelantero: number | null; vuelcoSsf: number | null; vuelcoObjetivo: number | null;
 }
 
 export interface Medida {
@@ -492,22 +503,132 @@ export const REQUISITOS: Requisito[] = [
     ref: 'RD 750/2010; Reglamento 168/2013, anexo III', fuente: 'rd750', categorias: [...L_TODAS, 'M1'],
     queHaceFalta: 'Inscribir al fabricante y hablar con un servicio técnico (ver el departamento «Homologación» del Aeromóvil 1).',
   },
-  // ─────────────────────────────── Bicicleta asistida
+  // ─────────────────────────────── Ciclo de pedales con pedaleo asistido (2026-11-24)
   {
-    id: 'epacPotencia', grupo: 'Propulsión y velocidad', titulo: 'Motor de ayuda de 250 W como mucho',
-    detalle: 'Para quedar fuera del Reglamento 168/2013 como ciclo de pedaleo asistido: potencia continua de hasta 250 W, ayuda solo mientras se pedalea y que se corta a 25 km/h.',
-    ref: 'Reglamento 168/2013, art. 2.2.h; norma EN 15194', fuente: 'r168art', categorias: ['EPAC'],
+    id: 'epacRuedas', grupo: 'Clasificación', titulo: 'Dos ruedas o más (con más de dos se aplica el anexo VI)',
+    detalle: 'El RD 339/2014 define el ciclo como un vehículo de al menos dos ruedas impulsado sobre todo por la fuerza muscular, normalmente con pedales. Un ciclo de tres o cuatro ruedas entra, pero tiene que cumplir además el anexo VI («especificaciones generales aplicables a los ciclos de más de dos ruedas»); la disposición transitoria segunda lo aplica mientras no haya normas armonizadas para ellos. La Orden PJC/780/2025 distingue ahora en el Reglamento General de Vehículos la bicicleta (dos ruedas) del ciclo de pedales con pedaleo asistido (cualquier número de ruedas).',
+    ref: 'RD 339/2014, art. 2 y disposición transitoria segunda; Orden PJC/780/2025', fuente: 'rd339', categorias: ['EPAC'],
+    comprobar: f => ({ estado: 'cumple', texto: f.ruedasFisicas > 2 ? `Lleva ${f.ruedasFisicas} ruedas: más de dos, así que se le aplica el anexo VI del RD 339/2014.` : `Lleva ${f.ruedasFisicas} ruedas: es una bicicleta; el anexo VI no se le aplica.` }),
+  },
+  {
+    id: 'epacCorte', grupo: 'Propulsión y velocidad', titulo: 'El motor se corta al dejar de pedalear y baja poco a poco al acercarse a 25 km/h',
+    detalle: 'La definición española exige que la potencia del motor «disminuya progresivamente» y se interrumpa antes de llegar a 25 km/h o si el ciclista deja de pedalear (Orden PJC/780/2025; Reglamento 168/2013, art. 2.2.h). Un acelerador que mueve el vehículo sin pedalear lo saca de esta categoría (salvo una ayuda de arranque limitada que fija la EN 15194, apartado 4.2). Se demuestra en ensayo con el controlador definitivo.',
+    ref: 'Orden PJC/780/2025; Reglamento 168/2013, art. 2.2.h; EN 15194, apartado 4.2', fuente: 'pjc780', categorias: ['EPAC'],
+    queHaceFalta: 'El controlador con la lógica «sin pedaleo no hay motor» (sensor de pedaleo o de par), sin acelerador de puño, y el ensayo de corte a 25 km/h y al dejar de pedalear.',
+  },
+  {
+    id: 'epacTension', grupo: 'Electricidad, ruido y emisiones', titulo: 'Tensión nominal de la batería de 48 V como mucho (corriente continua)',
+    detalle: 'El campo de aplicación público de la EN 15194 es el de los ciclos con una tensión nominal de hasta 48 V en corriente continua (o con cargador integrado de 230 V en alterna). Por eso la norma no pide protecciones de alta tensión: por encima de 48 V habría que justificar la seguridad eléctrica con otra norma. La EN 17860-5 (eléctrica de ciclos de carga) es la otra referencia.',
+    ref: 'EN 15194, apartado 4.2 (alcance); EN 17860-5', fuente: 'en15194', categorias: ['EPAC'],
+    queHaceFalta: 'La tensión nominal de la batería elegida. El modelo calcula la energía de la batería, no su tensión: se compra la batería ya certificada y se mira su ficha.',
+  },
+  {
+    id: 'epacDeclarar', grupo: 'Masas y medidas', titulo: 'Declarar plazas, masa en vacío, carga máxima y velocidad máxima recomendada',
+    detalle: 'Anexo VI, punto 1: el fabricante declara el número previsto de ocupantes, la masa en vacío, la carga máxima admisible y la velocidad máxima recomendada. No hay un tope legal de masa ni de medidas en el texto leído: el RD 339/2014 no fija ancho, largo ni alto. Lo que se declare es lo que luego se ensaya (frenos, estabilidad) y lo que va en el manual.',
+    ref: 'RD 339/2014, anexo VI, punto 1', fuente: 'rd339', categorias: ['EPAC'],
+    comprobar: f => {
+      const n = (v: number | null, d = 0, u = '') => v == null ? 'sin calcular' : `${fmt(v, d)}${u}`;
+      return { estado: 'comprobar', texto: `El diseño da: ${n(f.plazas)} plaza${f.plazas === 1 ? '' : 's'}; masa en vacío ${n(f.masaVacio, 0, ' kg')} (con batería); a plena carga ${n(f.masaMaxima, 0, ' kg')}; velocidad máxima ${n(f.vmax, 0, ' km/h')}. Hay que firmar esas cifras en el expediente.` };
+    },
+  },
+  {
+    id: 'epacEsquinas', grupo: 'Construcción y papeles', titulo: 'Sin esquinas cortantes y con la transmisión protegida',
+    detalle: 'Anexo VI, puntos 1.1 y 1.2: ningún borde con el que puedan tocar el cuerpo, las manos o los pies al pedalear o manejarlo puede ser cortante, y la transmisión (cadena, correa, piñones) se protege para que no atrape ropa ni dedos, sea cual sea el sistema.',
+    ref: 'RD 339/2014, anexo VI, puntos 1.1 y 1.2', fuente: 'rd339', categorias: ['EPAC'],
+    queHaceFalta: 'Revisar la carrocería, el pedalier y la cadena en el prototipo (y proteger la cadena con un cubrecadenas o una caja).',
+  },
+  {
+    id: 'epacFrenos', grupo: 'Frenos, ruedas y dirección', titulo: 'Frenos que actúan por separado en las ruedas delanteras y traseras',
+    detalle: 'Anexo VI, punto 2: un freno que actúe de forma independiente sobre las ruedas delanteras y sobre las traseras; palanca del freno delantero a la izquierda del manillar y la del trasero a la derecha; regulables hasta que toque cambiar las pastillas; y, en seco, deben parar el ciclo de forma segura y suave, sin vibración excesiva, sin bloquear la rueda delantera, sin vuelco, sin pérdida de control ni deslizamiento lateral excesivo. Las distancias las fija el ensayo de la parte 3 de la EN 17860 o, si el servicio técnico lo prefiere, la EN 15194 (frenos) con el vehículo cargado.',
+    ref: 'RD 339/2014, anexo VI, punto 2; EN 17860-3', fuente: 'rd339', categorias: ['EPAC'],
+    queHaceFalta: 'Un prototipo rodando y el ensayo de frenado con la carga máxima declarada.',
+  },
+  {
+    id: 'epacDireccion', grupo: 'Frenos, ruedas y dirección', titulo: 'Dirección: radio de giro declarado a la velocidad máxima recomendada',
+    detalle: 'Anexo VI, punto 3: puños o protectores en los extremos del manillar, marca de inserción mínima de la potencia, rueda centrada en la horquilla y, para un ciclo de más de dos ruedas, declarar el radio de giro a la velocidad máxima recomendada.',
+    ref: 'RD 339/2014, anexo VI, punto 3', fuente: 'rd339', categorias: ['EPAC'],
+    comprobar: f => f.radioGiro == null ? null : { estado: 'comprobar', texto: `El diseño calcula un radio de giro de ${fmt(f.radioGiro, 1)} m: hay que declararlo y comprobarlo en pista a la velocidad recomendada.` },
+    queHaceFalta: 'El radio de giro (el modelo lo calcula en los Triciclos y el Basculante).',
+  },
+  {
+    id: 'epacNeumaticos', grupo: 'Frenos, ruedas y dirección', titulo: 'Presión de inflado recomendada marcada en el neumático',
+    detalle: 'Anexo VI, punto 4: la presión recomendada para las cargas declaradas va moldeada en el flanco del neumático, visible una vez montado. Comprar neumáticos que la traigan evita el problema; y el manual repite la presión (anexo II).',
+    ref: 'RD 339/2014, anexo VI, punto 4; anexo VI, punto 12 f)', fuente: 'rd339', categorias: ['EPAC'],
+    comprobar: f => f.ruedasCarga?.length ? { estado: 'comprobar', texto: `${f.ruedasCarga.map(r => `${r.nombre}: ${fmt(r.carga)} kg de carga y ${fmt(r.capacidad)} kg de capacidad`).join(' · ')}. La ley no fija esa capacidad, pero la presión que se marque tiene que corresponder a esa carga.` } : null,
+    queHaceFalta: 'Elegir los neumáticos con la presión de uso moldeada y con capacidad de sobra para la carga declarada.',
+  },
+  {
+    id: 'epacEstabilidad', grupo: 'Frenos, ruedas y dirección', titulo: 'Estabilidad: el reparto de masas evita el vuelco lateral y el longitudinal',
+    detalle: 'Anexo VI, punto 10: el reparto de masas tiene que evitar el vuelco longitudinal y el lateral en todos los usos previstos. La ley no da un número: el ensayo de estabilidad (parte 3 de la EN 17860) lo concreta. Aquí se compara el umbral de vuelco lateral del diseño con el que el propio editor se exige (el agarre de un neumático de carretera más un 15 %).',
+    ref: 'RD 339/2014, anexo VI, punto 10; EN 17860-3', fuente: 'rd339', categorias: ['EPAC'],
+    comprobar: f => {
+      if (f.vuelcoSsf == null || f.vuelcoObjetivo == null) return null;
+      const ok = f.vuelcoSsf >= f.vuelcoObjetivo;
+      const rep = f.repartoDelantero != null ? ` Peso en el eje delantero: ${fmt(f.repartoDelantero)} %.` : '';
+      return { estado: ok ? 'cumple' : 'no', texto: `Vuelca de lado a ${fmt(f.vuelcoSsf, 2)} g; el editor se exige ${fmt(f.vuelcoObjetivo, 2)} g${ok ? '' : `: te faltan ${fmt(f.vuelcoObjetivo - f.vuelcoSsf, 2)} g (ensanchar la vía o bajar el centro de gravedad)`}.${rep} El ensayo oficial decide.` };
+    },
+    queHaceFalta: 'El umbral de vuelco del diseño: el modelo lo calcula en los Triciclos (no en el Basculante ni en el Aeromóvil 1).',
+  },
+  {
+    id: 'epacLuces', grupo: 'Visión, luces y mandos', titulo: 'Luces y catadióptricos: faro blanco, piloto rojo, reflector trasero y cuatro laterales amarillos',
+    detalle: 'Anexo VI, punto 6 y anexo V: al menos una luz blanca delante y una luz roja detrás (delante 4 a 60 candelas, detrás 4 a 12); un catadióptrico trasero rojo, no triangular (categoría IA del Reglamento UN 3); y cuatro catadióptricos laterales amarillos, no triangulares (categoría IVA): dos en las ruedas delanteras (uno por lado) y dos en las ruedas traseras (uno por lado). Todos homologados UN 3. El modelo del diseño todavía no dibuja ni cuenta faros, piloto ni catadióptricos: hay que añadirlos al diseño.',
+    ref: 'RD 339/2014, anexo VI, punto 6, y anexo V', fuente: 'rd339', categorias: ['EPAC'],
+    queHaceFalta: 'Poner en el diseño: 1 faro blanco, 1 piloto rojo, 1 catadióptrico rojo trasero y 4 catadióptricos amarillos laterales (uno por rueda), con piezas homologadas UN 3.',
+  },
+  {
+    id: 'epacTimbre', grupo: 'Visión, luces y mandos', titulo: 'Timbre (advertencia acústica)',
+    detalle: 'Anexo VI, punto 11: advertencia acústica conforme al artículo 22 del Reglamento General de Vehículos. Es un timbre de bicicleta, no una bocina de vehículo de motor.',
+    ref: 'RD 339/2014, anexo VI, punto 11', fuente: 'rd339', categorias: ['EPAC'],
+    queHaceFalta: 'Montar un timbre al alcance del conductor.',
+  },
+  {
+    id: 'epacPasajeros', grupo: 'Ocupantes y seguridad pasiva', titulo: 'Sistema de retención para los pasajeros',
+    detalle: 'Anexo VI, punto 9: si el ciclo está pensado para llevar pasajeros, cada uno lleva un sistema de retención que lo proteja (un sillín con arnés o cinturón, por ejemplo). La EN 17860-6 (pasajeros) es la referencia técnica que cita el autor del texto; su existencia la confirmo solo en parte (ver «Lo que contrasté»).',
+    ref: 'RD 339/2014, anexo VI, punto 9', fuente: 'rd339', categorias: ['EPAC'],
+    comprobar: f => f.plazas == null ? null : f.plazas <= 1
+      ? { estado: 'cumple', texto: 'Solo lleva al conductor: este punto no se aplica mientras no se declare ningún pasajero.' }
+      : { estado: 'comprobar', texto: `Lleva ${f.plazas} plazas, así que ${f.plazas - 1} son de pasajero: cada una necesita su sistema de retención (cinturón o arnés) y declararlo.` },
+  },
+  {
+    id: 'epacExpediente', grupo: 'Construcción y papeles', titulo: 'Expediente técnico y declaración de conformidad del fabricante',
+    detalle: 'Antes de comercializar, el fabricante elabora el expediente técnico (anexo III: planos, cálculos, evaluación de riesgos, normas aplicadas, informes de ensayo, manual, declaraciones de los componentes y el control de la producción en serie) y firma la declaración de conformidad (anexo I). Los conserva a disposición de la Administración al menos diez años desde la fabricación o, en serie, desde la última unidad. Sin control previo de la Administración (art. 4): si no lo presenta cuando se lo piden, se presume que el ciclo no cumple.',
+    ref: 'RD 339/2014, art. 4 y anexos I y III', fuente: 'rd339', categorias: ['EPAC'],
+    queHaceFalta: 'Reunir el expediente según el anexo III y firmar la declaración del anexo I cuando haya fabricante identificado.',
+  },
+  {
+    id: 'epacManual', grupo: 'Construcción y papeles', titulo: 'Manual de instrucciones en castellano con cada unidad',
+    detalle: 'Anexo II: en uno o varios idiomas oficiales de la UE; si no hay original en español, traducción al menos al español marcada «Traducción del manual original». Contiene el uso previsto y el mal uso previsible, la carga máxima y el número de plazas, los riesgos residuales, el montaje, el mantenimiento y los ajustes (altura de sillín y manillar con sus marcas, tensión de cadena, frenos y pastillas, cambio, comprobaciones periódicas y presión de los neumáticos). La publicidad no puede contradecirlo.',
+    ref: 'RD 339/2014, anexo II y anexo VI, punto 12', fuente: 'rd339', categorias: ['EPAC'],
+    queHaceFalta: 'Escribir el manual con el contenido mínimo del anexo II.',
+  },
+  {
+    id: 'epacPlaca', grupo: 'Construcción y papeles', titulo: 'Placa del fabricante en cada unidad y modelo marcado',
+    detalle: 'Artículo 3: una placa visible, legible e indeleble con la razón social, la dirección completa del fabricante (o de su representante) y el número de serie; el modelo, identificado de forma legible y permanente. No hace falta bastidor VIN ni matrícula.',
+    ref: 'RD 339/2014, art. 3 y anexo VI, punto 7', fuente: 'rd339', categorias: ['EPAC'],
+    queHaceFalta: 'Encargar la placa y fijar el formato de los números de serie.',
+  },
+  {
+    id: 'epacMaquinas', grupo: 'Construcción y papeles', titulo: 'Marcado CE de máquinas, cuando corresponda',
+    detalle: 'Es un trámite aparte de la homologación de tráfico. La EN 15194 trae un anexo informativo (ZA) que la enlaza con la Directiva de máquinas 2006/42/CE, que el Reglamento (UE) 2023/1230 sustituye desde el 20 de enero de 2027. Si le aplica a este vehículo: evaluación de riesgos, expediente, declaración CE, marcado CE y manual. Que la EN 15194 cubra un cuadriciclo entero no se da por hecho (su definición de bicicleta es de dos ruedas): pide una evaluación escrita de aplicabilidad.',
+    ref: 'EN 15194, anexo ZA; Directiva 2006/42/CE; Reglamento (UE) 2023/1230', fuente: 'maq2023', categorias: ['EPAC'],
+    queHaceFalta: 'Una evaluación escrita, de un ingeniero o un organismo, de si el vehículo es una máquina a efectos de la normativa de máquinas.',
+  },
+  {
+    id: 'epacPotencia', grupo: 'Propulsión y velocidad', titulo: 'Motor de ayuda de 250 W nominales continuos como mucho',
+    detalle: 'La definición española exige un motor eléctrico auxiliar de potencia nominal continua máxima inferior o igual a 250 W: no cuenta la potencia de pico. Con más, el vehículo deja de ser un ciclo de pedales con pedaleo asistido y pasa a ser L1e-A (hasta 1.000 W) o más.',
+    ref: 'Orden PJC/780/2025; Reglamento 168/2013, art. 2.2.h; EN 15194', fuente: 'pjc780', categorias: ['EPAC'],
     medida: { magnitud: 'potenciaCategoria', limite: { EPAC: 0.25 }, sentido: 'max', decide: true },
   },
   {
     id: 'epacVelocidad', grupo: 'Propulsión y velocidad', titulo: 'La ayuda se corta a 25 km/h',
-    detalle: 'Por encima de 25 km/h solo empujan las piernas.', ref: 'Reglamento 168/2013, art. 2.2.h', fuente: 'r168art', categorias: ['EPAC'],
+    detalle: 'Por encima de 25 km/h solo empujan las piernas. No es un tope a la velocidad del vehículo: cuesta abajo o con las piernas puede ir más rápido. Aquí se compara con la velocidad máxima que alcanza con el motor.',
+    ref: 'Orden PJC/780/2025; Reglamento 168/2013, art. 2.2.h', fuente: 'pjc780', categorias: ['EPAC'],
     medida: { magnitud: 'vmax', limite: { EPAC: 25 }, sentido: 'max', limitable: 'cortar la ayuda a 25 km/h en el controlador' },
   },
   {
-    id: 'epacPedales', grupo: 'Clasificación', titulo: 'Se mueve pedaleando',
-    detalle: 'Un ciclo de pedales (también en L1e-A, criterios 9 y 10): el motor ayuda, no sustituye. Un pedalier que solo mueve un generador (pedaleo «por cable») no está claro que sea pedaleo asistido: a confirmar.',
-    ref: 'Reglamento 168/2013, art. 2.2.h', fuente: 'r168art', categorias: ['EPAC', 'L1e-A'],
+    id: 'epacPedales', grupo: 'Clasificación', titulo: 'Se mueve pedaleando: la propulsión es sobre todo muscular',
+    detalle: 'El RD 339/2014 define el ciclo como propulsado «exclusiva o principalmente por la energía muscular», normalmente con pedales, y la Orden PJC/780/2025 exige que el ciclo lleve pedales. Los pedales no pueden ser decorativos: el motor ayuda, no sustituye. Un pedalier que solo mueve un generador (pedaleo «por cable») no está claro que cuente como pedaleo asistido (en L1e-A tampoco): a confirmar por escrito con el servicio técnico.',
+    ref: 'RD 339/2014, art. 2; Orden PJC/780/2025; Reglamento 168/2013, art. 2.2.h', fuente: 'rd339', categorias: ['EPAC', 'L1e-A'],
     comprobar: f => ({ estado: f.pedaleo ? 'comprobar' : 'no', texto: f.pedaleo ? 'Tiene pedales; si mueven un generador y no las ruedas, confirmar que cuenta como pedaleo asistido.' : 'No tiene pedales.' }),
   },
   // ─────────────────────────────── L1e-A (2026-11-24)
@@ -533,7 +654,7 @@ export const REQUISITOS: Requisito[] = [
   {
     id: 'permiso', grupo: 'Permiso de conducir', titulo: 'Permiso para conducirlo en España',
     detalle: 'AM (15 años): ciclomotores de dos y tres ruedas y cuadriciclos ligeros (L2e, L6e). A1 (16 años): motos ligeras y triciclos de motor de hasta 15 kW. A: motos y triciclos de motor (los de más de 15 kW, con 21 años). B (18 años): turismos, cuadriciclos (L7e) y triciclos de motor (los de más de 15 kW, con 21 años). El B1 para cuadriciclos pesados desde los 16 años está en consulta desde 2024, no en vigor.',
-    ref: 'Reglamento General de Conductores (RD 818/2009), art. 4', fuente: 'permisoB', categorias: ['L1e-A', 'L2e', 'L5e-A', 'L6e-A', 'L6e-BP', 'L7e-A1', 'L7e-A2', 'L7e-CP', 'M1', 'L3e'],
+    ref: 'Reglamento General de Conductores (RD 818/2009), art. 4', fuente: 'permisoB', categorias: ['EPAC', 'L1e-A', 'L2e', 'L5e-A', 'L6e-A', 'L6e-BP', 'L7e-A1', 'L7e-A2', 'L7e-CP', 'M1', 'L3e'],
     comprobar: (f, cat) => {
       const p = f.potenciaCategoria;
       if (cat === 'L5e-A') return p == null ? null : { estado: 'cumple', texto: p <= 15 ? `A1 desde los 16 años (${fmt(p, 1)} kW ≤ 15 kW; te quedan ${fmt(15 - p, 1)} kW antes de necesitar el A o el B con 21 años).` : `${fmt(p, 1)} kW > 15 kW: permiso A o B, con 21 años cumplidos (A1 no vale).` };
