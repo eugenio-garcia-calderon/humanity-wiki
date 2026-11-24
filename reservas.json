@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "src/pages/Aeromovil.tsx",
+      "motivo": "Precio bajo cada pestaña y mano de obra de bicicleta",
+      "desde": "2026-11-24T10:05:10.039Z"
+    }
+  ]
 }
