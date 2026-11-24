@@ -101,6 +101,12 @@
       "ruta": "src/components/aeromovil/homologacion/PanelHomologacion.tsx",
       "motivo": "homologación L1e-A y página completa",
       "desde": "2026-11-24T11:02:30.250Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "scripts/homologacion.ts",
+      "motivo": "homologación L1e-A y página completa",
+      "desde": "2026-11-24T11:02:32.536Z"
     }
   ]
 }
