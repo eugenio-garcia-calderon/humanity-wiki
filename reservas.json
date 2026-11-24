@@ -23,12 +23,6 @@
       "ruta": "memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md",
       "motivo": "aeromovil.org: header del proyecto en dominio propio (deuda)",
       "desde": "2026-11-24T21:37:15.176Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "src/server/dominios.ts",
-      "motivo": "aeromovil.org sin la cabecera de Luz & Humanidad y tarjeta que lleva a su web propia (nube/aeromovil-org-web)",
-      "desde": "2026-11-24T23:05:47.436Z"
     }
   ]
 }
