@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/components/aeromovil/LadoTriciclo.tsx",
-      "motivo": "Componentes de bicicleta",
-      "desde": "2026-11-23T23:17:44.594Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/aeromovil/Disenos.tsx",
       "motivo": "Componentes de bicicleta",
       "desde": "2026-11-23T23:17:47.065Z"
