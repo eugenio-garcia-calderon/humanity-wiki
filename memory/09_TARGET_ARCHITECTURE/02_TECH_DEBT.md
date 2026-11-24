@@ -1157,3 +1157,8 @@ By his instruction the bicycle-class labour is assembly only. The project total 
 - **Colour and stitching choices are options too** and get a try each although their kg and € do not change (the lining's four colours and the stitching's three styles: 7 of the 73 model-part options, ≈ 0,5 s of background work). A flag that skips the try for them is ≈ 20 minutes.
 - **Interior › Asientos exists twice**: the part's tab (seats + upholstery + belts) and the record under the 3D (`fichas/`, seats only). They do not add up the same; unifying them is ≈ 1 hour.
 - **Few hand-written pros and cons**: they are written for the catalogue parts and a few choices only; the rest of the model parts' options show the page's own text and the model's numbers.
+
+## Own domain of a project (2026-11-25)
+
+- **The card's own-domain lookup is a second request**: `VistaProyectosSitio` asks `/api/dominios/propias` after the projects list. Until it answers (or if it fails) the card opens the in-site copy, so a very fast click can still go there. Folding the domain into the list response is ≈ 1 hour and touches an endpoint other screens read.
+- **The «no parent bar» rule is decided on the client from `window.location.hostname`**: it works because the platform's own hosts all end in `humanity.wiki`. A project served from a second platform-owned domain (a staging host, say) would lose its bar; the day that exists the constant `PLATAFORMA` in `barraDelSitio.ts` needs a second entry (≈ 5 minutes).

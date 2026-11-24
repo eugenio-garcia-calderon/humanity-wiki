@@ -118,6 +118,18 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
     return () => { vivo = false; };
   }, [proyectos, personas, edicion]);
 
+  // LA WEB PROPIA DE UN PROYECTO (2026-11-25, Eugenio: «si pincho la tarjeta de Aeromóvil, que me lleve a aeromovil.org»): el
+  // proyecto que tiene un dominio comprado y activo se abre en él, no en su copia dentro de esta web. Se pregunta una vez por
+  // la lista; mientras llega (o si falla) la tarjeta lleva a la página de siempre. En el editor, no: allí se abre para editar.
+  const [webs, setWebs] = useState<Record<string, string>>({});
+  const idsProyectos = proyectos ? proyectos.filas.map(f => f.pagina_id).filter(Boolean).join(',') : '';
+  useEffect(() => {
+    if (!idsProyectos || edicion) return;
+    let vivo = true;
+    fetch(`/api/dominios/propias?ids=${encodeURIComponent(idsProyectos)}`).then(r => (r.ok ? r.json() : {})).then((j: Record<string, string> | null) => { if (vivo && j && typeof j === 'object') setWebs(j); }).catch(() => {});
+    return () => { vivo = false; };
+  }, [idsProyectos, edicion]);
+
   // EDITAR EN EL MISMO SITIO (2026-11-10, `TarjetaPortada.tsx`): en el editor esta vista es la de la
   // web, y cada texto se guarda en su celda o en su página nada más salir de él.
   const cambiarFila = (id: string, cambio: (f: Fila) => Fila) => setProyectos(t => (t ? { ...t, filas: t.filas.map(f => (f.id === id ? cambio(f) : f)) } : t));
@@ -361,7 +373,9 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
           );
           return edicion
             ? <div className={cn(CLASE_TARJETA_PORTADA, f.oculta && 'opacity-60')}>{tarjeta}</div>
-            : <Link to={sitio ? sitio.enlacePagina(f.pagina_id!) : `/p/${f.pagina_id}`} draggable={ordenable ? false : undefined} className={CLASE_TARJETA_PORTADA}>{tarjeta}</Link>;
+            : webs[f.pagina_id!] && webs[f.pagina_id!] !== window.location.hostname
+              ? <a href={`https://${webs[f.pagina_id!]}/`} draggable={ordenable ? false : undefined} className={CLASE_TARJETA_PORTADA}>{tarjeta}</a>
+              : <Link to={sitio ? sitio.enlacePagina(f.pagina_id!) : `/p/${f.pagina_id}`} draggable={ordenable ? false : undefined} className={CLASE_TARJETA_PORTADA}>{tarjeta}</Link>;
         })()}
         {ordenable && (
           <span aria-hidden title="Arrastra para cambiar el orden (Alt + flechas con el teclado)"
