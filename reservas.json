@@ -20,12 +20,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/components/sitio/VistaProyectosSitio.tsx",
-      "motivo": "Vivienda, Cultura e Informática en una línea",
-      "desde": "2026-11-24T21:19:46.100Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "Vivienda, Cultura e Informática en una línea",
       "desde": "2026-11-24T21:19:48.678Z"
