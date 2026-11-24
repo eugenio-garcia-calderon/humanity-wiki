@@ -89,6 +89,12 @@
       "ruta": "src/components/aeromovil/homologacion/evaluar.ts",
       "motivo": "homologación L1e-A y página completa",
       "desde": "2026-11-24T11:02:25.463Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/pages/Aeromovil.tsx",
+      "motivo": "homologación L1e-A y página completa",
+      "desde": "2026-11-24T11:02:27.872Z"
     }
   ]
 }
