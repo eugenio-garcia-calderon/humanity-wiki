@@ -12,7 +12,7 @@
 // Where a later amendment may have changed a figure, the requirement says so («por confirmar en EUR-Lex»).
 // The UI text is Spanish (it is for Eugenio); the comments are English.
 
-export type IdFuente = 'r168' | 'r168art' | 'r168anx6' | 'r168anx8' | 'r3' | 'r44' | 'r134' | 'r2018' | 'r2019' | 'rd750' | 'permisos' | 'permisoB' | 'b1' | 'r901' | 'r85' | 'r134anx';
+export type IdFuente = 'r168' | 'r168art' | 'r168anx6' | 'r168anx8' | 'r3' | 'r44' | 'r134' | 'r2018' | 'r2019' | 'rd750' | 'permisos' | 'permisoB' | 'b1' | 'r901' | 'r85' | 'r134anx' | 'r168anx3' | 'r168art42' | 'dgtL1eA' | 'rd750anx';
 
 /** The texts behind every figure. `leido`: read on 2026-11-17 (false: cited from memory of the text, to confirm). */
 export const FUENTES: Record<IdFuente, { titulo: string; url: string; leido: boolean }> = {
@@ -32,6 +32,11 @@ export const FUENTES: Record<IdFuente, { titulo: string; url: string; leido: boo
   r901: { titulo: 'Reglamento de Ejecución (UE) 901/2014 (documentos administrativos de homologación): ficha de características, campos 1.8.3, 1.8.5, 1.8.7 y 1.8.9', url: 'https://eur-lex.europa.eu/eli/reg_impl/2014/901/oj', leido: false },
   r85: { titulo: 'Reglamento UN n.º 85 (medida de la potencia neta y de la potencia máxima de 30 minutos de los grupos de tracción eléctricos)', url: 'https://eur-lex.europa.eu/legal-content/ES/TXT/?uri=CELEX:42014X0919(01)', leido: false },
   r134anx: { titulo: 'Reglamento Delegado (UE) 134/2014, anexo X, apéndice 2.4 (par y potencia máximos de la propulsión híbrida: cada modo, el resultado más alto)', url: 'https://www.legislation.gov.uk/eur/2014/134/annex/X', leido: false },
+  // 2026-11-24 (L1e-A, «Homologación» page): read that day on legislation.gov.uk (the EU text as it stood on 31-1-2020) and on the BOE
+  r168anx3: { titulo: 'Reglamento (UE) 168/2013, anexo III (límites de las series cortas por tipo y año) y anexo I (criterios de L1e-A y medidas máximas)', url: 'https://legislation.gov.uk/eur/2013/168/annexes/adopted?view=plain', leido: true },
+  r168art42: { titulo: 'Reglamento (UE) 168/2013, artículo 42 (homologación nacional de series cortas)', url: 'https://legislation.gov.uk/eur/2013/168/chapter/X/2020-01-31/data.html', leido: true },
+  dgtL1eA: { titulo: 'DGT, Instrucción 19/V-134 de 24-5-2019: matriculación de vehículos L1e-A', url: 'https://www.dgt.es/export/sites/web-DGT/.galleries/downloads/muevete-con-seguridad/normas-de-trafico/VEH-vehiculos/19.V-134-Matriculacion-de-vehiculos-L1e-A.pdf', leido: true },
+  rd750anx: { titulo: 'Real Decreto 750/2010, consolidado: arts. 4.4 y 7.3 (homologación individual), anexo II apéndices 1, 3, 4 y 5', url: 'https://boe.es/buscar/pdf/2010/BOE-A-2010-9994-consolidado.pdf', leido: true },
   b1: { titulo: 'RACE: el permiso B1 para cuadriciclos pesados (en consulta desde julio de 2024, no en vigor)', url: 'https://www.race.es/?p=254932', leido: true },
 };
 
@@ -41,7 +46,7 @@ export const FUENTES: Record<IdFuente, { titulo: string; url: string; leido: boo
  * `ruedas` is the legal count: two wheels on one axle closer than 460 mm count as one (art. 3, punto 72).
  */
 // (Within L7e the order is a choice, not the law's: the closed «cuadrimóvil» first, the Twizy's category, then the quads.)
-export type IdCategoria = 'EPAC' | 'L3e' | 'L2e' | 'L5e-A' | 'L6e-A' | 'L6e-BP' | 'L7e-CP' | 'L7e-A2' | 'L7e-A1' | 'M1';
+export type IdCategoria = 'EPAC' | 'L1e-A' | 'L3e' | 'L2e' | 'L5e-A' | 'L6e-A' | 'L6e-BP' | 'L7e-CP' | 'L7e-A2' | 'L7e-A1' | 'M1';
 
 export interface Categoria {
   id: IdCategoria;
@@ -66,6 +71,13 @@ export const CATEGORIAS: Categoria[] = [
     resumen: 'Ciclos de pedales con un motor de ayuda de hasta 250 W que deja de empujar a 25 km/h o cuando se deja de pedalear. Están fuera del Reglamento 168/2013 (artículo 2.2.h): no se homologan como vehículo de motor, se venden con el marcado CE (norma EN 15194).',
     ejemplos: 'Velomóviles con ayuda eléctrica, bicicletas de carga eléctricas de tres y cuatro ruedas.',
     permiso: 'Ninguno.', esfuerzo: 'Bajo: marcado CE del fabricante; sin matrícula, sin ITV.',
+  },
+  {
+    id: 'L1e-A', nombre: 'L1e-A — ciclo de motor («bicicleta» de tres o cuatro ruedas con motor de ayuda)', ruedas: null, fuente: 'r168anx3',
+    resumen: 'Un ciclo diseñado para pedalear, con un motor cuyo fin principal es ayudar a pedalear, que deja de empujar a 25 km/h o antes y de hasta 1.000 W continuos. Los de tres y cuatro ruedas que cumplen eso cuentan como equivalentes a los de dos (anexo I, criterios 9 a 12). Límites de tamaño de todo L1e: 1,00 m de ancho, 4,00 m de largo y 2,50 m de alto. A diferencia de la bicicleta asistida (EPAC, 250 W), SÍ es un vehículo de motor: se homologa y se matricula.',
+    ejemplos: 'Bicicletas eléctricas con más de 250 W; velomóviles y cuadriciclos de pedales estrechos con motor de ayuda.',
+    permiso: 'La instrucción de la DGT 19/V-134 enumera «permiso de conducir» entre sus obligaciones sin decir cuál (se suele citar el AM): por confirmar con la DGT.',
+    esfuerzo: 'Medio: homologación individual (una unidad) o serie corta nacional (hasta 50 al año por tipo), o de tipo UE; ensayos de frenos, electricidad, compatibilidad electromagnética, luces y manipulación.',
   },
   {
     id: 'L3e', nombre: 'L3e — motocicleta de dos ruedas (y L4e, con sidecar)', ruedas: 2, fuente: 'r168',
@@ -177,7 +189,7 @@ export interface Requisito {
   aplica?: (f: VistaFicha) => boolean;
 }
 
-const L_TODAS: IdCategoria[] = ['L3e', 'L2e', 'L5e-A', 'L6e-A', 'L6e-BP', 'L7e-A1', 'L7e-A2', 'L7e-CP'];
+const L_TODAS: IdCategoria[] = ['L1e-A', 'L3e', 'L2e', 'L5e-A', 'L6e-A', 'L6e-BP', 'L7e-A1', 'L7e-A2', 'L7e-CP'];
 const L_CON_CARROCERIA: IdCategoria[] = ['L2e', 'L5e-A', 'L6e-A', 'L6e-BP', 'L7e-A1', 'L7e-A2', 'L7e-CP'];
 const L7: IdCategoria[] = ['L7e-A1', 'L7e-A2', 'L7e-CP'];
 const fmt = (v: number, d = 0) => v.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -194,6 +206,12 @@ export const REQUISITOS: Requisito[] = [
     detalle: 'Cuentan las ruedas que tocan el suelo; dos ruedas montadas en el mismo eje con sus huellas a 460 mm o menos, centro a centro, son «ruedas gemelas» y cuentan como una (artículo 3, punto 72). Por eso un tres ruedas basculante de vía estrecha es una moto (L3e) y uno de vía ancha es un triciclo (L5e).',
     ref: 'Reglamento 168/2013, art. 3.72 y anexo I', fuente: 'r168art', categorias: ['L3e', 'L2e', 'L5e-A', 'L6e-A', 'L6e-BP', 'L7e-A1', 'L7e-A2', 'L7e-CP'],
     medida: { magnitud: 'ruedasLegales', limite: { 'L3e': 2, 'L2e': 3, 'L5e-A': 3, 'L6e-A': 4, 'L6e-BP': 4, 'L7e-A1': 4, 'L7e-A2': 4, 'L7e-CP': 4 }, sentido: 'igual', decide: true },
+  },
+  {
+    id: 'l1eaRuedas', grupo: 'Clasificación', titulo: 'Dos, tres o cuatro ruedas (los ciclos de tres y cuatro equivalen al de dos)',
+    detalle: 'L1e-A es, por definición, de dos ruedas; los ciclos de tres y cuatro ruedas que cumplen los criterios 9 a 11 (pedales, ayuda que corta a 25 km/h, 1.000 W) cuentan como «técnicamente equivalentes» (criterio 12 del anexo I). Con las ruedas gemelas (a 460 mm o menos) cuenta el número legal de ruedas.',
+    ref: 'Reglamento 168/2013, anexo I, criterio 12', fuente: 'r168anx3', categorias: ['L1e-A'],
+    medida: { magnitud: 'ruedasLegales', limite: { 'L1e-A': 4 }, sentido: 'max', decide: true },
   },
   {
     id: 'ruedasM1', grupo: 'Clasificación', titulo: 'Al menos cuatro ruedas',
@@ -246,19 +264,19 @@ export const REQUISITOS: Requisito[] = [
   {
     id: 'largo', grupo: 'Masas y medidas', titulo: 'Largo total',
     detalle: 'Toda la categoría L: hasta 4,00 m; L6e-B hasta 3,00 m y L7e-C hasta 3,70 m. Se mide en orden de marcha, en suelo llano; lo medido puede diferir un 3 % de lo declarado (44/2014, anexo XI, 3.3).',
-    ref: 'Reglamento 168/2013, anexo I; 44/2014, anexo XI', fuente: 'r168', categorias: ['L2e', 'L5e-A', 'L6e-A', 'L6e-BP', 'L7e-A1', 'L7e-A2', 'L7e-CP'],
-    medida: { magnitud: 'largo', limite: { 'L2e': 4, 'L5e-A': 4, 'L6e-A': 4, 'L6e-BP': 3, 'L7e-A1': 4, 'L7e-A2': 4, 'L7e-CP': 3.7 }, sentido: 'max', decide: true },
+    ref: 'Reglamento 168/2013, anexo I; 44/2014, anexo XI', fuente: 'r168', categorias: ['L1e-A', 'L2e', 'L5e-A', 'L6e-A', 'L6e-BP', 'L7e-A1', 'L7e-A2', 'L7e-CP'],
+    medida: { magnitud: 'largo', limite: { 'L1e-A': 4, 'L2e': 4, 'L5e-A': 4, 'L6e-A': 4, 'L6e-BP': 3, 'L7e-A1': 4, 'L7e-A2': 4, 'L7e-CP': 3.7 }, sentido: 'max', decide: true },
   },
   {
     id: 'ancho', grupo: 'Masas y medidas', titulo: 'Ancho total (sin retrovisores)',
-    detalle: 'Toda la categoría L: hasta 2,00 m; L6e-B y L7e-C hasta 1,50 m.',
-    ref: 'Reglamento 168/2013, anexo I', fuente: 'r168', categorias: ['L2e', 'L5e-A', 'L6e-A', 'L6e-BP', 'L7e-A1', 'L7e-A2', 'L7e-CP'],
-    medida: { magnitud: 'ancho', limite: { 'L2e': 2, 'L5e-A': 2, 'L6e-A': 2, 'L6e-BP': 1.5, 'L7e-A1': 2, 'L7e-A2': 2, 'L7e-CP': 1.5 }, sentido: 'max', decide: true },
+    detalle: 'Toda la categoría L: hasta 2,00 m; todo L1e (incluido L1e-A) hasta 1,00 m; L6e-B y L7e-C hasta 1,50 m.',
+    ref: 'Reglamento 168/2013, anexo I', fuente: 'r168', categorias: ['L1e-A', 'L2e', 'L5e-A', 'L6e-A', 'L6e-BP', 'L7e-A1', 'L7e-A2', 'L7e-CP'],
+    medida: { magnitud: 'ancho', limite: { 'L1e-A': 1, 'L2e': 2, 'L5e-A': 2, 'L6e-A': 2, 'L6e-BP': 1.5, 'L7e-A1': 2, 'L7e-A2': 2, 'L7e-CP': 1.5 }, sentido: 'max', decide: true },
   },
   {
     id: 'alto', grupo: 'Masas y medidas', titulo: 'Alto total',
-    detalle: 'Toda la categoría L: hasta 2,50 m.', ref: 'Reglamento 168/2013, anexo I', fuente: 'r168', categorias: ['L2e', 'L5e-A', 'L6e-A', 'L6e-BP', 'L7e-A1', 'L7e-A2', 'L7e-CP'],
-    medida: { magnitud: 'alto', limite: { 'L2e': 2.5, 'L5e-A': 2.5, 'L6e-A': 2.5, 'L6e-BP': 2.5, 'L7e-A1': 2.5, 'L7e-A2': 2.5, 'L7e-CP': 2.5 }, sentido: 'max', decide: true },
+    detalle: 'Toda la categoría L: hasta 2,50 m.', ref: 'Reglamento 168/2013, anexo I', fuente: 'r168', categorias: ['L1e-A', 'L2e', 'L5e-A', 'L6e-A', 'L6e-BP', 'L7e-A1', 'L7e-A2', 'L7e-CP'],
+    medida: { magnitud: 'alto', limite: { 'L1e-A': 2.5, 'L2e': 2.5, 'L5e-A': 2.5, 'L6e-A': 2.5, 'L6e-BP': 2.5, 'L7e-A1': 2.5, 'L7e-A2': 2.5, 'L7e-CP': 2.5 }, sentido: 'max', decide: true },
   },
   {
     id: 'ejeDelantero', grupo: 'Masas y medidas', titulo: 'Peso en el eje delantero a plena carga: al menos el 30 %',
@@ -488,15 +506,34 @@ export const REQUISITOS: Requisito[] = [
   },
   {
     id: 'epacPedales', grupo: 'Clasificación', titulo: 'Se mueve pedaleando',
-    detalle: 'Un ciclo de pedales: el motor ayuda, no sustituye. Un pedalier que solo mueve un generador (pedaleo «por cable») no está claro que sea pedaleo asistido: a confirmar.',
-    ref: 'Reglamento 168/2013, art. 2.2.h', fuente: 'r168art', categorias: ['EPAC'],
+    detalle: 'Un ciclo de pedales (también en L1e-A, criterios 9 y 10): el motor ayuda, no sustituye. Un pedalier que solo mueve un generador (pedaleo «por cable») no está claro que sea pedaleo asistido: a confirmar.',
+    ref: 'Reglamento 168/2013, art. 2.2.h', fuente: 'r168art', categorias: ['EPAC', 'L1e-A'],
     comprobar: f => ({ estado: f.pedaleo ? 'comprobar' : 'no', texto: f.pedaleo ? 'Tiene pedales; si mueven un generador y no las ruedas, confirmar que cuenta como pedaleo asistido.' : 'No tiene pedales.' }),
+  },
+  // ─────────────────────────────── L1e-A (2026-11-24)
+  {
+    id: 'l1eaPotencia', grupo: 'Propulsión y velocidad', titulo: 'Potencia continua de 1.000 W como mucho',
+    detalle: 'Criterio 11 del anexo I: potencia nominal continua o neta máxima de 1.000 W o menos. Es la potencia que el controlador mantiene, no la punta: un controlador que limite a 1 kW continuos cumple aunque dé más un instante (hay que declararlo y medirlo, Reglamento 134/2014 anexo X). Todo L1e además tiene un tope de 4 kW de potencia y 45 km/h de diseño.',
+    ref: 'Reglamento 168/2013, anexo I, criterio 11', fuente: 'r168anx3', categorias: ['L1e-A'],
+    medida: { magnitud: 'potenciaCategoria', limite: { 'L1e-A': 1 }, sentido: 'max', decide: true },
+  },
+  {
+    id: 'l1eaVelocidad', grupo: 'Propulsión y velocidad', titulo: 'La ayuda se corta a 25 km/h o antes',
+    detalle: 'Criterio 10 del anexo I: la potencia de la ayuda se corta a una velocidad del vehículo de 25 km/h o menos. No es la velocidad que se alcanza pedaleando solo (cuesta abajo o con las piernas puede ser mayor): es la velocidad a la que el motor deja de empujar. Hay que demostrar el corte en ensayo.',
+    ref: 'Reglamento 168/2013, anexo I, criterio 10', fuente: 'r168anx3', categorias: ['L1e-A'],
+    medida: { magnitud: 'vmax', limite: { 'L1e-A': 25 }, sentido: 'max', limitable: 'cortar la ayuda a 25 km/h en el controlador' },
+  },
+  {
+    id: 'l1eaLuces', grupo: 'Visión, luces y mandos', titulo: 'Luces y catadióptricos (incluido el reflector trasero)',
+    detalle: 'Un L1e lleva alumbrado y señalización homologados (Reglamento 3/2014, anexo IX): al menos luz de cruce, luz de posición trasera, luz de freno y catadióptrico trasero. El modelo del diseño todavía no dibuja ni cuenta los faros, los pilotos ni el reflector trasero, así que no puede comprobarlo: hay que añadirlos al diseño y llevar piezas con marca E. La lista exacta para L1e se confirma con el servicio técnico.',
+    ref: 'Reglamento 3/2014, anexo IX (lista para L1e: por confirmar)', fuente: 'r3', categorias: ['L1e-A'],
+    queHaceFalta: 'Poner en el diseño el faro, el piloto trasero con luz de freno y un reflector trasero, con sus alturas y ángulos, y comprar piezas con marca E.',
   },
   // ─────────────────────────────── Permiso de conducir
   {
     id: 'permiso', grupo: 'Permiso de conducir', titulo: 'Permiso para conducirlo en España',
     detalle: 'AM (15 años): ciclomotores de dos y tres ruedas y cuadriciclos ligeros (L2e, L6e). A1 (16 años): motos ligeras y triciclos de motor de hasta 15 kW. A: motos y triciclos de motor (los de más de 15 kW, con 21 años). B (18 años): turismos, cuadriciclos (L7e) y triciclos de motor (los de más de 15 kW, con 21 años). El B1 para cuadriciclos pesados desde los 16 años está en consulta desde 2024, no en vigor.',
-    ref: 'Reglamento General de Conductores (RD 818/2009), art. 4', fuente: 'permisoB', categorias: ['L2e', 'L5e-A', 'L6e-A', 'L6e-BP', 'L7e-A1', 'L7e-A2', 'L7e-CP', 'M1', 'L3e'],
+    ref: 'Reglamento General de Conductores (RD 818/2009), art. 4', fuente: 'permisoB', categorias: ['L1e-A', 'L2e', 'L5e-A', 'L6e-A', 'L6e-BP', 'L7e-A1', 'L7e-A2', 'L7e-CP', 'M1', 'L3e'],
     comprobar: (f, cat) => {
       const p = f.potenciaCategoria;
       if (cat === 'L5e-A') return p == null ? null : { estado: 'cumple', texto: p <= 15 ? `A1 desde los 16 años (${fmt(p, 1)} kW ≤ 15 kW; te quedan ${fmt(15 - p, 1)} kW antes de necesitar el A o el B con 21 años).` : `${fmt(p, 1)} kW > 15 kW: permiso A o B, con 21 años cumplidos (A1 no vale).` };

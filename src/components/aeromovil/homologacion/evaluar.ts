@@ -49,13 +49,13 @@ export function evaluarCategoria(f: FichaHomologacion, cat: IdCategoria): Evalua
   const resultados = REQUISITOS.filter(r => r.categorias.includes(cat)).map(r => evaluarRequisito(r, f, cat)).filter((r): r is Resultado => !!r);
   const cuenta: Record<Estado, number> = { cumple: 0, no: 0, condicion: 0, comprobar: 0 };
   for (const r of resultados) cuenta[r.estado]++;
-  const bloqueantes = resultados.filter(r => r.estado === 'no' && (r.req.medida?.decide || r.req.id === 'horcajadas' || r.req.id === 'cerrado' || r.req.id === 'velocidadDiseno' || r.req.id === 'epacPedales'));
+  const bloqueantes = resultados.filter(r => r.estado === 'no' && (r.req.medida?.decide || r.req.id === 'horcajadas' || r.req.id === 'cerrado' || r.req.id === 'velocidadDiseno' || r.req.id === 'epacPedales' || r.req.id === 'l1eaRuedas'));
   return { cat, resultados, cuenta, bloqueantes };
 }
 
 /** The categories a design with these wheels could be in, cheapest first (art. 4.4 of 168/2013 climbs them in this order). */
 export function candidatas(f: FichaHomologacion): IdCategoria[] {
-  return CATEGORIAS.filter(c => c.id === 'EPAC' ? f.pedaleo : c.id === 'M1' ? f.ruedasLegales >= 4 : c.ruedas === f.ruedasLegales).map(c => c.id);
+  return CATEGORIAS.filter(c => c.id === 'EPAC' ? f.pedaleo : c.id === 'L1e-A' ? f.pedaleo && f.ruedasLegales >= 2 && f.ruedasLegales <= 4 : c.id === 'M1' ? f.ruedasLegales >= 4 : c.ruedas === f.ruedasLegales).map(c => c.id);
 }
 
 /**
@@ -74,8 +74,8 @@ export function elegirCategoria(f: FichaHomologacion): { cat: IdCategoria; desca
 
 /** The headline margins of a category: mass, power and speed left before its limits (null: no limit or unknown). */
 export function margenes(e: Evaluacion) {
-  const de = (id: string) => e.resultados.find(r => r.req.id === id && r.limite != null && r.margen != null) ?? null;
-  return { masa: de('masa'), potencia: de('potencia'), vmax: de('vmax'), largo: de('largo'), ancho: de('ancho') };
+  const de = (...ids: string[]) => e.resultados.find(r => ids.includes(r.req.id) && r.limite != null && r.margen != null) ?? null;
+  return { masa: de('masa'), potencia: de('potencia', 'l1eaPotencia', 'epacPotencia'), vmax: de('vmax', 'l1eaVelocidad', 'epacVelocidad'), largo: de('largo'), ancho: de('ancho') };
 }
 
 /** One sentence: «te quedan 38 kg y 4 kW antes del límite de L5e-A». */
