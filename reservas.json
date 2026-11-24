@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "agent-aa6c9bcf31918af0c",
-      "ruta": "drizzle/0235_aeromovil_fichas.sql",
-      "motivo": "tabla de fichas de componentes del Aeromóvil",
-      "desde": "2026-11-24T12:08:21.408Z"
-    },
-    {
-      "agente": "agent-aa6c9bcf31918af0c",
       "ruta": "src/components/aeromovil/Visor3D.tsx",
       "motivo": "hover y selección de componentes en el visor",
       "desde": "2026-11-24T12:08:24.046Z"
