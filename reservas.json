@@ -71,6 +71,12 @@
       "ruta": "public/vision/data.js",
       "motivo": "Economía pública optimizada y tarjetas de Política",
       "desde": "2026-11-24T13:41:19.810Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/buzonProyectos.ts",
+      "motivo": "Economía pública optimizada y tarjetas de Política",
+      "desde": "2026-11-24T13:41:22.311Z"
     }
   ]
 }
