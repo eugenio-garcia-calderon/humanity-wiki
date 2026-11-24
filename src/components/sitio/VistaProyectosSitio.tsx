@@ -295,7 +295,8 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
     });
     const resto = visibles.filter(f => !usados.has(f.id)).sort((a, b) => a.orden - b.orden);
     // Su icono, por su nombre cuando lo tiene (2026-11-24: «Otras innovaciones» pasa a llamarse «Informática»).
-    if (resto.length) grupos.push({ titulo: String(raiz.config?.sitio?.sectorOtros || 'Otras innovaciones'), icono: String(raiz.config?.sitio?.iconoOtros || 'Otras'), color: 'slate', otros: true, destacado: false, filas: resto });
+    // `sitio.otrosDestacado` (2026-11-24, «todas las tarjetas en el mismo formato»): también a todo el ancho.
+    if (resto.length) grupos.push({ titulo: String(raiz.config?.sitio?.sectorOtros || 'Otras innovaciones'), icono: String(raiz.config?.sitio?.iconoOtros || 'Otras'), color: 'slate', otros: true, destacado: raiz.config?.sitio?.otrosDestacado === true, filas: resto });
     return grupos.filter(g => g.filas.length);
   })() : null;
 
