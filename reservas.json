@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/pages/Aeromovil.tsx",
-      "motivo": "Aeromóvil: partes de todos los departamentos (nube/partes-vehiculo)",
-      "desde": "2026-11-24T19:08:29.117Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/aeromovil/CLAUDE.md",
       "motivo": "Aeromóvil: partes de todos los departamentos (nube/partes-vehiculo)",
       "desde": "2026-11-24T19:08:35.605Z"
@@ -17,12 +11,6 @@
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "Aeromóvil: partes de todos los departamentos (nube/partes-vehiculo)",
       "desde": "2026-11-24T19:08:38.271Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "memory/03_DECISIONS.md",
-      "motivo": "Aeromóvil: partes de todos los departamentos (nube/partes-vehiculo)",
-      "desde": "2026-11-24T19:08:40.929Z"
     },
     {
       "agente": "prog1",
