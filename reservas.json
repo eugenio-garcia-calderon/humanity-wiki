@@ -11,6 +11,12 @@
       "ruta": "src/components/sitio/FilaSector.tsx",
       "motivo": "Movilidad y Energía en una línea; sin icono ni número de proyectos",
       "desde": "2026-11-24T20:44:26.568Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/sitio/VistaProyectosSitio.tsx",
+      "motivo": "Movilidad y Energía en una línea; sin icono ni número de proyectos",
+      "desde": "2026-11-24T20:44:29.362Z"
     }
   ]
 }
