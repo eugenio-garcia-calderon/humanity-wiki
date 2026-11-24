@@ -100,6 +100,7 @@ const PaginaPublica = lazy(() => import('./pages/PaginaPublica'));
 const FormularioPublico = lazy(() => import('./pages/FormularioPublico'));
 const SubpaginaEnCasa = lazy(() => import('./pages/SubpaginaSitio').then(m => ({ default: m.SubpaginaEnCasa })));
 const LaHumanidad = lazy(() => import('./pages/SubpaginaSitio').then(m => ({ default: m.LaHumanidad })));
+const LaPolitica = lazy(() => import('./pages/SubpaginaSitio').then(m => ({ default: m.LaPolitica })));
 const SubpaginaEnEspacio = lazy(() => import('./pages/SubpaginaSitio').then(m => ({ default: m.SubpaginaEnEspacio })));
 const BuscadorEnEspacio = lazy(() => import('./components/sitio/BuscadorSitio').then(m => ({ default: m.BuscadorEnEspacio })));
 const BuscadorEnCasa = lazy(() => import('./components/sitio/BuscadorSitio').then(m => ({ default: m.BuscadorEnCasa })));
@@ -373,6 +374,9 @@ export default function App() {
                   de luzhumanidad.com, ahora en `humanity.wiki/humanidad`.
                   Luz & Humanidad queda como el laboratorio de proyectos. */}
               <Route path="humanidad" element={<LaHumanidad />} />
+              {/* POLÍTICA (2026-11-24, Eugenio): las cinco herramientas de política en tarjetas,
+                  la misma página que luzhumanidad.com/politica. */}
+              <Route path="politica" element={<LaPolitica />} />
               <Route path=":arroba/:slug" element={<PaginaPublica />} />
               {/* Y sus subpáginas: `/@quien/p/:id`, también fuera del Layout. */}
               <Route path=":arroba/p/:id" element={<SubpaginaEnCasa />} />

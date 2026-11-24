@@ -1110,3 +1110,30 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 ## 2026-11-24 — Bicycle-class cost leaves fabrication out (Eugenio's decision)
 
 By his instruction the bicycle-class labour is assembly only. The project total of such a design therefore has the materials of the frame and the body but not the hours to weld the one or mould and laminate the other. It is said on the «Mano de obra» panel; it is not said under the «Proyecto» tab's figure. A switch «incluir fabricación» would be about 1 hour.
+
+## 2026-11-24 — The pedal cycle's file (conformity matrix, tests, documents): shortcuts taken
+
+- **No edit history.** A save replaces the key's value (`aeromovil_expediente.valor`); only `updated_by` and `updated_at` of the last save remain. For a legal file an inspection may ask who changed a test result and when. A history table (key, version, value, who, when) written in the same transaction: ≈ 3 hours. Until then a signed test is protected only by the page («reabrir» removes the signature) and by Eugenio's own copies of the downloaded reports.
+- **Uploaded files are public by an unguessable URL and «quitar» does not delete bytes.** It reuses the Aeromóvil's attachment route (≤ 10 MB). Anyone who has the link can open the file; taking a file out of a list leaves it on the server. Private files behind the owner's session: ≈ 4 hours (route, storage, a signed link).
+- **One JSON key per test holds every attempt.** The server refuses more than 80,000 characters per key; the page warns from 60,000. Six attempts with every text box full could pass it. Attempts as their own keys: ≈ 1 hour.
+- **Reports and documents are HTML made in the browser**, not stored PDFs. The signed copy is the scan Eugenio attaches. A server-side PDF with a hash at signing time: ≈ 1 day.
+- **The documents' texts are drafts.** The generators write from the design and the maker's details; nobody with legal training has reviewed the wording, and the page says so on every document. A review by a lawyer or the technical service before the first sale is a decision for Eugenio, not code.
+- **Claims not verified** (each flagged «por confirmar» on screen): the EN 15194 / EN 17860 full texts (paid), EN 17860-6, the Commission's 11-2-2025 statement, the date and the internal-control claim of Regulation 2023/1230, Regulation 2023/1542 (batteries), the year of manufacture on the plate (Directive 2006/42/CE annex I 1.7.3), whether the GPSR applies, the DGT and insurance statements.
+- **Lights and reflectors are not in the 3D design**, so those obligations read «a comprobar» and their test (EN-13) is the only proof.
+- **No per-unit registry.** The matrix says what every unit must pass (`porUnidad`), but there is no table of serial numbers with their end-of-line checks; with 100 units a year it is needed: ≈ 1 day.
+- **Matrix, tests and documents look at the design of the open vehicle.** If Eugenio opens another design, the numbers in a draft change; a frozen (reviewed) section does not.
+## 2026-11-24 — Política cards: shortcuts taken
+
+- **Two lists that must match.** The cards of `/politica` live in `HERRAMIENTAS_POLITICA` (PoliticaHerramientas.tsx); the pages that hang from it are the `subpagina` blocks written by migration 0235. A sixth tool needs both. Reading the cards from the blocks: about 1 hour.
+- **`humanity.wiki/politica` assumes the handle `luz`**, as `/humanidad` does. If the owner's handle differs, the route shows «Esta página no está aquí».
+- **The migration was tested on a hand-built copy of five tables**, not on a dump of production.
+
+## 2026-11-24 — Aeromóvil: records of the components in the 3D (phase 1)
+
+- **One component, one level.** A sub-part (a wheel's tyre, a spoke) is a row in the component's «Piezas» list with the design's weight, price and supplier, not a record of its own. The store takes any `id`, so a sub-part needs an entry and its own clickable mesh tag: ≈ 2 hours for the first, then one entry each.
+- **Only Interior › Asientos so far**, and only in the vehicles with department tabs that have a mass model for it (the Triciclo family and the Basculante). The Aeromóvil 1 isolates by default but has no records; the Gota and the Bala have neither.
+- **No edit history.** The server keeps the latest copy and who/when; a text overwritten is gone (the 409 protects against two sessions, not against a regretted edit). A history table is ≈ 2 hours; it would also be in the nightly backup, with whatever was typed.
+- **Public files.** Reference images and documents are uploaded through `/api/aeromovil/adjuntos` and served from public URLs, like the other Aeromóvil attachments: nothing confidential should be attached there.
+- **Records keyed by vehicle family, not by design**: the same seat is one record for every Triciclo design. Switching to per-design is ≈ 1 hour but orphans what was typed.
+- **«Pedir render» captures what is on screen**, so with a department isolated by default the render shows only that department's layers; a «render with everything» switch would be ≈ 30 minutes.
+- **Duplicate React key in the «Proyecto» tab** (`legislation.gov.uk/eur/2013/168/annexes/adopted?view=plain` used as a key twice): seen in the browser console while testing this; it comes from the homologation sources list, not from the records. Not fixed here.

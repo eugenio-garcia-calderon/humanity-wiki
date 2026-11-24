@@ -1,5 +1,5 @@
 // ============================================================================
-// AEROMÓVIL · ficha de cada componente (2026-11-24, migración 0235)
+// AEROMÓVIL · ficha de cada componente (2026-11-24, migración 0236)
 // ============================================================================
 // Eugenio: «si hago clic [en una pieza del 3D] se me despliega debajo de la pantalla 3D toda la información de ese
 // componente… el proveedor, las alternativas, las características, el precio, el stock, el peso… una imagen de
@@ -21,6 +21,7 @@
 import type { Express, Request, Response } from 'express';
 import { sql } from 'drizzle-orm';
 import { esperaPendiente, ritmo, type Regla } from './limites/index.js';
+import { dueno, puedeDecidir } from './aeromovil.js';
 
 const VEHICULO = /^[a-z0-9][a-z0-9_-]{0,39}$/;
 const CLAVE = /^[a-z0-9][a-z0-9_/-]{0,119}$/;
@@ -30,18 +31,9 @@ export const MAX_VALOR = 60_000;
 // 600 saves an hour per account: the page saves a second after the last keystroke, so typing for an hour does not reach it.
 const FRENO: Regla = { puerta: 'aeromovil-fichas', gracia: 600, baseSegundos: 30, topeSegundos: 1800, alFallar: 'cerrar' };
 
-/** The page of the menu whose creator is the Aeromóvil's owner (the same rule as `aeromovil.ts`). A copy, not an import:
- *  that module keeps it private; the day it exports it this becomes an import (tech debt, written down). */
-const PAGINA_DUENO = 'KW_AEROMOVIL_GOTA';
-async function puedeEscribir(req: Request, db: any): Promise<boolean> {
-  if (!req.user) return false;
-  if ((req.user.roleLevel ?? 0) >= 4) return true;
-  const r = await db.execute(sql`
-    SELECT creator_user_id AS id FROM knowledge_windows WHERE id = ${PAGINA_DUENO} AND archived_at IS NULL AND deleted_at IS NULL
-  `);
-  const id = (r.rows[0] as any)?.id ?? null;
-  return id !== null && req.user.id === id;
-}
+/** Who may write: the Aeromóvil's owner (the creator of its page) or a level-4 role: the one rule of `aeromovil.ts`
+ *  (`dueno` + `puedeDecidir`, the same that decides saving a design and filling the expediente), not a copy of it. */
+const puedeEscribir = async (req: Request, db: any): Promise<boolean> => !!req.user && puedeDecidir(req, await dueno(db));
 
 export function registrarFichasAeromovil(app: Express, db: any) {
   /** GET /api/aeromovil/fichas?vehiculo=triciclo — every record of that family: { claves: { [clave]: { valor, version, actualizado, por } } }. */

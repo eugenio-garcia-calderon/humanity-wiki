@@ -66,7 +66,7 @@ const COLUMNAS = sql`id, area, texto, autor, origen, estado, respuesta, created_
 /** La página del menú lateral cuyo creador es el dueño del Aeromóvil. */
 const PAGINA_DUENO = 'KW_AEROMOVIL_GOTA';
 
-async function dueno(db: any): Promise<{ id: string | null; nombre: string | null }> {
+export async function dueno(db: any): Promise<{ id: string | null; nombre: string | null }> {
   const r = await db.execute(sql`
     SELECT w.creator_user_id AS id, coalesce(u.display_name, u.name) AS nombre
     FROM knowledge_windows w LEFT JOIN users u ON u.id = w.creator_user_id
@@ -76,7 +76,7 @@ async function dueno(db: any): Promise<{ id: string | null; nombre: string | nul
   return { id: f?.id ?? null, nombre: f?.nombre ?? null };
 }
 
-const puedeDecidir = (req: Request, d: { id: string | null }) =>
+export const puedeDecidir = (req: Request, d: { id: string | null }) =>
   !!req.user && ((d.id !== null && req.user.id === d.id) || (req.user.roleLevel ?? 0) >= 4);
 
 export function registerAeromovilRoutes(app: Express, db: any) {
