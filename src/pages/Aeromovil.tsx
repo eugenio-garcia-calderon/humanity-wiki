@@ -94,6 +94,13 @@ import { BloqueAerodinamica } from '../components/aeromovil/estudio/EstudioAerod
 // (2026-11-17) the «Homologación» tab: the design against its EU category (homologacion/)
 import { PanelHomologacion, ResumenHomologacion } from '../components/aeromovil/homologacion/PanelHomologacion';
 import { PaginaHomologacion } from '../components/aeromovil/homologacion/PaginaHomologacion';
+// (2026-11-24) components in the 3D: hover, click, and the record of the component under the viewer (fichas/)
+import { usarFichas } from '../components/aeromovil/fichas/usarFichas';
+import { PanelFicha } from '../components/aeromovil/fichas/PanelFicha';
+import { EtiquetaFicha } from '../components/aeromovil/fichas/EtiquetaFicha';
+import { fichasDe } from '../components/aeromovil/fichas/registro';
+import { datosDe, hechos, listasDelDiseno } from '../components/aeromovil/fichas/datos';
+import { useFichas } from '../components/aeromovil/fichas/almacen';
 import { fichaHomologacion } from '../components/aeromovil/homologacion/ficha';
 import { comprobacionesHomologacion } from '../components/aeromovil/homologacion/evaluar';
 
@@ -399,7 +406,9 @@ export default function Aeromovil() {
   const [verGaraje, setVerGaraje] = useState<boolean>(() => { try { return localStorage.getItem('aeromovil.verGaraje') !== '0'; } catch { return true; } });
   useEffect(() => { try { localStorage.setItem('aeromovil.verGaraje', verGaraje ? '1' : '0'); } catch { /* sin almacenamiento */ } }, [verGaraje]);
   // Departamento abierto en el lateral y en el panel de abajo (2026-11-06, Eugenio: «el menú dividido por departamentos como una empresa de fabricación»).
-  const [soloDep, setSoloDep] = useState(false);     // «Mostrar solo la carrocería», etc.
+  // (2026-11-24, Eugenio: «cuando pinche en el menú de interior, por defecto me muestre solo los componentes de interior… y el botón
+  // sea ahora mostrar todo») every department opens with only its own layers; the button then reads «Mostrar todo»
+  const [soloDep, setSoloDep] = useState(true);     // «Mostrar solo la carrocería», etc.
   const [capasAbierto, setCapasAbierto] = useState(false);
   const [vistaAbierta, setVistaAbierta] = useState(false);
   // (2026-11-17) the Gota's and the Bala's homologation panel (they have no department tabs)
@@ -414,9 +423,14 @@ export default function Aeromovil() {
   const antesSolo = useRef<Record<CapaId, boolean> | null>(null);
   const verSolo = (si: boolean) => { if (si && !soloDep) antesSolo.current = visibles; setSoloDep(si); };
   const capasSolo = (d: IdPestana): CapaId[] | undefined => d === 'consumos' ? undefined : P.disposicion === 'triciclo' || P.disposicion === 'basculante' ? (d === 'proyecto' || d === 'masas' || d === 'manoobra' ? undefined : CAPAS_DEP_TRICICLO[d as DepTriciclo]) : CAPAS_DEP[d];
+  // entering a department (or changing vehicle) isolates it again, even if the last one was shown whole
+  useEffect(() => { setSoloDep(true); }, [dep, P.disposicion]);
   useEffect(() => {
-    const suyas = soloDep && dep !== 'proyecto' ? capasSolo(dep) : undefined;
+    // only the vehicles with department tabs (they are the ones with the «Mostrar todo» button to undo it)
+    const suyas = soloDep && (esA1 || porDeps) && dep !== 'proyecto' ? capasSolo(dep) : undefined;
     if (!suyas) { if (antesSolo.current) { setVisibles(antesSolo.current); antesSolo.current = null; } return; }
+    // the layers as they were before isolating (also when it is isolated by default and no button was pressed)
+    if (!antesSolo.current) antesSolo.current = visibles;
     setVisibles(Object.fromEntries(CAPAS.map(c => [c.k, suyas.includes(c.k)])) as Record<CapaId, boolean>);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [soloDep, dep, P.disposicion]);
@@ -505,6 +519,12 @@ export default function Aeromovil() {
   useEffect(() => { if (porDeps && dep !== depTri) setDep(depTri); }, [porDeps, dep, depTri]);
   // 2026-11-17: with «Motor» shown alone, its parts one by one (PiezasMotor.tsx)
   const piezas = usePiezasMotor(modelo, porDeps && soloDep && depTri === 'propulsion');
+  // (2026-11-24) components with a record: hover label, click → only that part in the 3D + its record under the viewer
+  const fichas = usarFichas({ dep: porDeps ? depTri : '', tipo: modelo.tipo, familia: P.disposicion, activo: porDeps });
+  const fichasAlmacen = useFichas();
+  const listasFichas = useMemo(() => (porDeps ? listasDelDiseno(P, paraCalcular, res) : null), [porDeps, P, paraCalcular, res]);
+  const capasFicha = useMemo(() => (porDeps ? [...new Set(fichasDe(depTri, modelo.tipo).flatMap(f => f.capas))] : []), [porDeps, depTri, modelo.tipo]);
+  const hoverFicha = fichas.hover && listasFichas ? { numero: fichasAlmacen.leer(fichas.hover.ficha.id).numero, datos: hechos(datosDe(fichas.hover.ficha, modelo.tipo, listasFichas), fichasAlmacen.leer(fichas.hover.ficha.id).stock) } : null;
   // (2026-11-17) «Masas» remembered from a Triciclo opens «Proyecto» on a vehicle without that tab (the Aeromóvil 1)
   useEffect(() => { if (!porDeps && (dep === 'masas' || dep === 'consumos' || dep === 'manoobra')) setDep('proyecto'); }, [porDeps, dep]);
   // (2026-11-17) the prototype's cost: parts by department + labour (precios/coste.ts), for «Proyecto» and «Mano de obra»
@@ -681,7 +701,7 @@ export default function Aeromovil() {
             alNuevo={() => { setP(PARAMETROS_POR_DEFECTO); setActual(null); cargarDisenoPorDefecto().then(d => { if (d) { setP(deDiseno(d.parametros || {})); setActual(null); } }); }}
             alGuardado={alGuardado} />
           {(esA1 || porDeps)
-            ? <PestanasDepartamento lista={porDeps ? [...pestanas, PESTANA_HOMOLOGACION] : pestanas} kg={porDeps ? kgPorDepartamento(res) : null} consumo={consumoPestana} extra={coste ? { manoobra: eur(coste.manoObra) } : undefined} precio={coste ? { ...Object.fromEntries(Object.entries(coste.precios.porDep).filter(([, v]) => (v ?? 0) > 0).map(([d, v]) => [d, eur(v ?? 0)])), proyecto: eur(coste.total) } : undefined} dep={seccion === 'diseno' ? (porDeps ? depTri : dep) : null} alElegir={d => { setDep(d); setSoloDep(false); if (seccion !== 'diseno') navegar('/aeromovil'); }} />
+            ? <PestanasDepartamento lista={porDeps ? [...pestanas, PESTANA_HOMOLOGACION] : pestanas} kg={porDeps ? kgPorDepartamento(res) : null} consumo={consumoPestana} extra={coste ? { manoobra: eur(coste.manoObra) } : undefined} precio={coste ? { ...Object.fromEntries(Object.entries(coste.precios.porDep).filter(([, v]) => (v ?? 0) > 0).map(([d, v]) => [d, eur(v ?? 0)])), proyecto: eur(coste.total) } : undefined} dep={seccion === 'diseno' ? (porDeps ? depTri : dep) : null} alElegir={d => { setDep(d); setSoloDep(true); if (seccion !== 'diseno') navegar('/aeromovil'); }} />
             : null}
           <div className="flex-1 sm:hidden" />
           {!(esA1 || porDeps) && <div className="hidden flex-1 sm:block" />}
@@ -702,15 +722,17 @@ export default function Aeromovil() {
         {homologando && <PaginaHomologacion P={paraCalcular.P} modelo={paraCalcular} res={res} cd={esTri ? cdTri : esBas ? cdBas : null} nombre={nombreVehiculo} />}
         <div className={cn('min-w-0', homologando && 'hidden')}>
         <section ref={ventana3d} aria-label="Vista 3D" className={cn('overflow-hidden bg-slate-50', !verGaraje && completa === 'no' && 'hidden',
-          completa === 'no' ? cn('relative h-[62vh] min-h-[380px] rounded-xl border border-slate-200', esA1 ? 'lg:h-[72vh]' : 'lg:sticky lg:top-[68px] lg:h-[calc(100vh-88px)]')
+          completa === 'no' ? cn('relative rounded-xl border border-slate-200', fichas.activa ? 'h-[40vh] min-h-[300px] lg:h-[56vh]' : 'h-[62vh] min-h-[380px]', esA1 ? 'lg:h-[72vh]' : fichas.activa ? '' : 'lg:sticky lg:top-[68px] lg:h-[calc(100vh-88px)]')
             : completa === 'css' ? 'fixed inset-0 z-[100] h-[100dvh] w-screen' : 'relative h-full w-full')}>
           <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} bascular={bascular} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeConDisenos} soloGaraje={!!soloGaraje} tunel={tunel} carteles={carteles} cuerposTunel={cuerposTunel} opcionesTunel={opcionesTunelVisor} alElegirPuntoTunel={setPuntoTunel} puntoTunel={puntoTunel} fichasGaraje={disenosGaraje.fichas} superponer={!!superponer && !soloGaraje} vista={vista}
             referencia={referencia} modoRef={modoRef} alinear={alinear} alPinchar={esA1 ? c => { navegar(`/aeromovil/componentes/${c}`); window.scrollTo({ top: 0 }); } : undefined}
-            alPincharGaraje={eleccion.alPincharGaraje} alPincharNuestro={donde => { if (piezas.pinchar(donde)) return; eleccion.setTarjeta(true); eleccion.setPendiente(null); if (donde && modelo.tipo === 'triciclo') { const z = zonaTriciclo(modelo, donde); setDep(z.dep); setSoloDep(false); setAbrirBloque(a => ({ bloque: z.bloque, n: (a?.n ?? 0) + 1 })); } }} extraTarjeta={id => <><BotonFilaReferencia g={disenosGaraje} id={id} /><BotonSoloReferencia e={eleccion} id={id} /><BotonEditableReferencia e={eleccion} id={id} />{VEHICULOS_GARAJE.some(v => v.id === id) && !soloUrl && <BotonQuitarReferencia key={id} id={id} nombre={VEHICULOS_GARAJE.find(v => v.id === id)!.nombre} alQuitar={quitarDelGaraje} />}</>}
+            alPincharGaraje={eleccion.alPincharGaraje} alPincharNuestro={donde => { if (fichas.pinchar(donde)) return; if (piezas.pinchar(donde)) return; eleccion.setTarjeta(true); eleccion.setPendiente(null); if (donde && modelo.tipo === 'triciclo') { const z = zonaTriciclo(modelo, donde); setDep(z.dep); setSoloDep(true); setAbrirBloque(a => ({ bloque: z.bloque, n: (a?.n ?? 0) + 1 })); } }} extraTarjeta={id => <><BotonFilaReferencia g={disenosGaraje} id={id} /><BotonSoloReferencia e={eleccion} id={id} /><BotonEditableReferencia e={eleccion} id={id} />{VEHICULOS_GARAJE.some(v => v.id === id) && !soloUrl && <BotonQuitarReferencia key={id} id={id} nombre={VEHICULOS_GARAJE.find(v => v.id === id)!.nombre} alQuitar={quitarDelGaraje} />}</>}
             alMoverGaraje={superponer || soloGaraje ? undefined : disenosGaraje.mover}
             seguir={eleccion.seguir} nombres={soloUrl ? undefined : disenosGaraje.nombres} resaltarNuestro={disenosGaraje.enFila > 0} verGaraje={panelGaraje && !soloGaraje}
             margenDerecho={panelGaraje && typeof window !== 'undefined' && window.matchMedia('(min-width: 640px)').matches ? 352 : 0}
-            colores={colores} centroGravedad={seccion === 'diseno' && porDeps && depTri === 'masas' ? centroParaVisor(masas) : null} piezasMotor={piezas.visor} />
+            colores={colores} centroGravedad={seccion === 'diseno' && porDeps && depTri === 'masas' ? centroParaVisor(masas) : null} piezasMotor={piezas.visor}
+            capasFicha={capasFicha} fichaSolo={fichas.solo} alPasar={fichas.pasar} />
+          <EtiquetaFicha h={fichas.hover} numero={hoverFicha?.numero} datos={hoverFicha?.datos ?? []} ancho={ventana3d.current?.clientWidth ?? 800} />
           <TarjetaPiezaPinchada p={piezas} />
           {/* La esquina de arriba a la derecha es del botón de pantalla completa: las tarjetas se apartan a su izquierda
               (en el móvil, debajo, que de ancho no caben). */}
@@ -914,6 +936,11 @@ export default function Aeromovil() {
             </div>
           )}
         </section>
+        {/* (2026-11-24) the record of the component picked in the 3D: all of it under the viewer (fichas/PanelFicha.tsx) */}
+        {fichas.activa && listasFichas && (
+          <PanelFicha def={fichas.activa} tipo={modelo.tipo} vehiculo={String(P.disposicion ?? '')} nombreVehiculo={nombreVehiculo} P={P} set={set} res={res} listas={listasFichas}
+            editable={!!dueno?.puedeDecidir} alCerrar={fichas.cerrar} />
+        )}
         {/* El túnel abre su tarjeta debajo del visor, no encima (2026-11-07, Eugenio: «que no estorbe»). */}
         {tunel && <TarjetaTunel alCerrar={() => setTunel(false)} base="aeromovil" kmh={kmhComparar} alCambiarKmh={setKmhComparar} filas={filasComparar} className="mt-3"
           cuerpos={cuerposTunel} resultados={resultadosTunel} opciones={opcionesTunel} alCambiarOpciones={setOpcionesTunel}
@@ -944,7 +971,7 @@ export default function Aeromovil() {
             return (
               <Button variant="outline" aria-pressed={soloDep} onClick={() => verSolo(!soloDep)}
                 className={cn('w-full justify-center gap-1.5 bg-white px-3 py-2 text-[13px] font-semibold normal-case tracking-normal', soloDep && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
-                <Layers3 className="h-4 w-4" />{soloDep ? `Viendo solo ${n} · volver a las capas de antes` : `Ver solo ${n}`}
+                <Layers3 className="h-4 w-4" />{soloDep ? 'Mostrar todo' : `Ver solo ${n}`}
               </Button>
             );
           })()}
@@ -963,13 +990,13 @@ export default function Aeromovil() {
           {/* 2026-11-17 (Eugenio: «mete la parte de aerodinámica dentro de carrocería… un botón que diga "hacer estudio aerodinámico"»): the tunnel and the study, in «Carrocería» (always for the vehicles without departments) */}
           {((esA1 || porDeps) ? (porDeps ? depTri : dep) === 'carroceria' : true) && <BloqueAerodinamica P={P} set={set} kmh={kmhComparar} resolucion={opcionesTunel.resolucion} tunel={tunel} alTunel={alternarTunel} />}
           {/* (2026-11-17) «Proyecto»: the prototype's cost first (precios/BloqueCoste.tsx) */}
-          {porDeps && depTri === 'proyecto' && coste && <BloqueCoste c={coste} alIr={d => { setDep(d as IdDepartamento); setSoloDep(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />}
+          {porDeps && depTri === 'proyecto' && coste && <BloqueCoste c={coste} alIr={d => { setDep(d as IdDepartamento); setSoloDep(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }} />}
           {/* (2026-11-17) «Homologación» of the vehicles with departments: a short card here, the detail under the 3D view */}
           {porDeps && depTri === 'homologacion' ? <ResumenHomologacion P={paraCalcular.P} modelo={paraCalcular} res={res} cd={esTri ? cdTri : esBas ? cdBas : null} nombre={nombreVehiculo} />
             /* (2026-11-17) «Mano de obra»: the labour's tab (precios/PanelManoObra.tsx) */
             : porDeps && depTri === 'manoobra' ? (coste ? <PanelManoObra c={coste} P={P} set={set} /> : null)
             /* (2026-11-17) «Masas» and «Proyecto» of the vehicles with departments: their own panels (LadoResumen.tsx) */
-            : porDeps && (depTri === 'masas' || depTri === 'proyecto') && (paraCalcular.tipo === 'triciclo' || paraCalcular.tipo === 'basculante') ? <LadoResumen dep={depTri} modelo={paraCalcular} res={res} masas={masas} alIr={d => { setDep(d as IdDepartamento); setSoloDep(false); window.scrollTo({ top: 0, behavior: 'smooth' }); }}  extra={depTri === 'proyecto' ? fallosHomologacion : undefined} />
+            : porDeps && (depTri === 'masas' || depTri === 'proyecto') && (paraCalcular.tipo === 'triciclo' || paraCalcular.tipo === 'basculante') ? <LadoResumen dep={depTri} modelo={paraCalcular} res={res} masas={masas} alIr={d => { setDep(d as IdDepartamento); setSoloDep(true); window.scrollTo({ top: 0, behavior: 'smooth' }); }}  extra={depTri === 'proyecto' ? fallosHomologacion : undefined} />
             : modelo.tipo === 'a1' ? <LadoA1 P={P} Pa={Pa} D={D} set={set} res={res} modelo={modelo} neumaticos={neumaticos} malas={malas} dep={dep as IdDepartamento} alNavegar={r => { navegar(r); window.scrollTo({ top: 0 }); }} />
             : modelo.tipo === 'basculante' ? (paraCalcular.tipo === 'basculante' && res.basculante ? <LadoBasculante P={P} set={set} res={res} modelo={paraCalcular} dep={depTri as Exclude<typeof depTri, 'masas' | 'homologacion' | 'consumos' | 'manoobra'>} cd={cdBas} ui={{ Bloque, Deslizador, Selector: Selector as never, ListaComprobaciones }} /> : null)
             : modelo.tipo === 'bala' ? <LadoBala P={P} set={set} res={res} modelo={modelo} cdTunel={tunel ? cdTunelNuestro : undefined} />
@@ -1124,7 +1151,7 @@ export default function Aeromovil() {
 
       {seccion === 'componentes' && (esA1
         ? <VistaComponentes P={P} res={res} modelo={modelo} id={ruta.split('/')[3]} alCambiar={setP} alNavegar={r => { navegar(r); window.scrollTo({ top: 0 }); }}
-            alVerEn3D={capa => { setVisibles(Object.fromEntries(CAPAS.map(c => [c.k, true])) as Record<CapaId, boolean>); setRayosX(!['carenado', 'cristales', 'solar'].includes(capa)); setVista('iso'); navegar('/aeromovil'); window.scrollTo({ top: 0 }); }} />
+            alVerEn3D={capa => { antesSolo.current = null; setSoloDep(false); setVisibles(Object.fromEntries(CAPAS.map(c => [c.k, true])) as Record<CapaId, boolean>); setRayosX(!['carenado', 'cristales', 'solar'].includes(capa)); setVista('iso'); navegar('/aeromovil'); window.scrollTo({ top: 0 }); }} />
         : <p className="mx-auto max-w-[1100px] px-4 py-8 text-sm text-slate-600">Las fichas de componentes son del Aeromóvil 1. Elígelo en el menú del nombre del vehículo, arriba a la izquierda, para verlas.</p>)}
       {seccion === 'aranceles' && (esA1
         ? <VistaAranceles P={P} res={res} modelo={modelo} />
