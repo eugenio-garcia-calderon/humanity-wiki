@@ -17,6 +17,12 @@
       "ruta": "scripts/homologacion.ts",
       "motivo": "homologación L1e-A y página completa",
       "desde": "2026-11-24T11:02:32.536Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/homologacion/ficha.ts",
+      "motivo": "vía ciclo de pedales con pedaleo asistido (EN 15194)",
+      "desde": "2026-11-24T11:28:21.801Z"
     }
   ]
 }
