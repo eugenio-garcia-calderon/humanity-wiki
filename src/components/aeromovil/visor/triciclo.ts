@@ -16,6 +16,7 @@ import { fichaRueda } from '../ruedas/catalogo';
 import { dibujarRefrigeracion } from './refrigeracion';
 import { dibujarPedales } from './bici';
 import { construirBWB } from './bwb';
+import { etiquetarPartes } from './partes3d';
 
 /** The Triciclo's front wheels and pods turned `angulo` degrees (+ to the left: the left wheel is then the inner one). */
 export function girarTriciclo(G: Record<CapaId, THREE.Group>, m: ModeloTriciclo, angulo: number) {
@@ -53,6 +54,7 @@ export function construirBala(G: Record<CapaId, THREE.Group>, puertasG: Map<stri
   const b = construirBalaCon(m.F, { M: Mb, calidad, cupulaAparte: true, asientos: m.sillines, aleta: m.aleta });
   repartirBala(G, puertasG, b);
   if (calidad === 'completa') for (const piloto of [true, false]) { if (sinPasajero && !piloto) continue; ocupante(G.ocupantes, M, m, 0, piloto); }
+  etiquetarPartes(G);
   // as the garage does with its cars (glass and lenses keep their no-shadow depth material)
   for (const c of CAPAS) G[c.k].traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
 }
@@ -267,6 +269,8 @@ export function construirTriciclo(G: Record<CapaId, THREE.Group>, puertasG: Map<
   vestirRuedasTriciclo(G.ruedas, M, m);
   // 2026-11-17 (capo): the hood that opens, the intakes cut in the skin, the radiator and the coolant pipes
   dibujarRefrigeracion(G, puertasG, m);
+  // 2026-11-24: which part each mesh of the body, the glass and the cabin is (partes3d.ts): what the menu's parts show
+  etiquetarPartes(G);
   for (const c of CAPAS) G[c.k].traverse((o: any) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
 }
 function vestirRuedasTriciclo(capa: THREE.Object3D, M: Mats, m: ModeloTriciclo) {

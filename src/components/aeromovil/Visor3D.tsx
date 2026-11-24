@@ -51,7 +51,8 @@ import { cotasGaraje, cotas } from './visor/cotas';
 import { construirReferencia, type AperturaGaraje, colocarPivotesGaraje } from './visor/garaje';
 import { construirMovil, construirBasculanteVisor } from './visor/construir';
 import { aplicarPiezasMotor, cajaVisibleMotor, type OpcionesPiezas } from './visor/piezasMotor3d';
-import { aplicarFichaSolo, cajaDeCapas } from './visor/fichaSolo';
+import { aplicarFichaSolo, cajaDeSeleccion } from './visor/fichaSolo';
+import { encuadre, inspeccionar } from './visor/inspeccion';
 export { construirDisenoGaraje } from './visor/construir';
 
 export type Vista = 'iso' | 'side' | 'top' | 'front' | 'back';
@@ -143,6 +144,9 @@ interface Props {
   /** …the component selected: only its layers (and, if given, the meshes tagged `userData.componente` with one of these)
    *  stay drawn, and the camera frames them. null: the department as it was. */
   fichaSolo?: { capas: CapaId[]; componentes?: string[] } | null;
+  /** …`fichaSolo` selects something this design does not draw (a dashboard it has none of, a reduction gear on a hub motor):
+   *  true while the viewer is left empty for that reason, so the page can say so instead of showing a blank window. */
+  alVacia?: (vacia: boolean) => void;
   /** …the pointer moves over a component (`donde`) or off every one (null); x, y in px inside the viewer. Mouse and pen only. */
   alPasar?: (donde: { punto: [number, number, number]; capa: CapaId | null; nombres: string[] } | null, x: number, y: number) => void;
 }
@@ -176,11 +180,18 @@ function distanciaParaVer(puntos: THREE.Vector3[], centro: THREE.Vector3, haciaC
   return D;
 }
 
-export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cuerposTunel, opcionesTunel, alElegirPuntoTunel, puntoTunel = null, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje, fichasGaraje, alQuitarGaraje, alPincharGaraje, alPincharNuestro, extraTarjeta, seguir, nombres, resaltarNuestro = false, verGaraje = false, margenDerecho = 0, colores, bascular = 0, centroGravedad = null, piezasMotor = null, capasFicha, fichaSolo = null, alPasar }, ref) {
+export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cuerposTunel, opcionesTunel, alElegirPuntoTunel, puntoTunel = null, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje, fichasGaraje, alQuitarGaraje, alPincharGaraje, alPincharNuestro, extraTarjeta, seguir, nombres, resaltarNuestro = false, verGaraje = false, margenDerecho = 0, colores, bascular = 0, centroGravedad = null, piezasMotor = null, capasFicha, fichaSolo = null, alVacia, alPasar }, ref) {
   const pinchar = useRef(alPinchar); pinchar.current = alPinchar;
   const pincharGaraje = useRef(alPincharGaraje); pincharGaraje.current = alPincharGaraje;
   const pincharNuestro = useRef(alPincharNuestro); pincharNuestro.current = alPincharNuestro;
   const capasFichaR = useRef(capasFicha); capasFichaR.current = capasFicha;
+  const alVaciaR = useRef(alVacia); alVaciaR.current = alVacia;
+  /** Tells the page whether the selected part has nothing drawn in this design (once per change, from the real meshes). */
+  const avisarVacia = () => {
+    const st = estado.current; if (!st) return;
+    const v = !!st.fichaSolo && cajaDeSeleccion(st.G, st.fichaSolo) === null;
+    if (v !== st.vacia) { st.vacia = v; alVaciaR.current?.(v); }
+  };
   const pasarR = useRef(alPasar); pasarR.current = alPasar;
   const conExtra = useRef(!!extraTarjeta); conExtra.current = !!extraTarjeta;
   const fichas = useRef(fichasGaraje); fichas.current = fichasGaraje;
@@ -367,6 +378,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       balaVisto: false as false | 'bala' | 'triciclo',
       /** The component selected (fichas/): its layers and tags. Re-applied after every rebuild (`cotasYPuertas`). */
       fichaSolo: null as { capas: CapaId[]; componentes?: string[] } | null,
+      /** What `alVacia` last said. */
+      vacia: false,
       /** The layers the page shows now (`visibles`), for re-applying the selection after a rebuild. */
       visibles: null as Record<CapaId, boolean> | null,
       /** Where the camera was when a component was selected, to go back to it. */
@@ -386,6 +399,11 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     };
     const tamano = new THREE.Vector2();
     estado.current = st;
+    // 2026-11-24: what the viewer draws, read-only, for `scripts/robot-3d.ts` (it picks every part of every department in the real
+    // page and compares): `__am3d` the pieces and how many are drawn, `__am3dVista` where they land on the screen
+    const w = window as unknown as { __am3d?: (niveles?: number) => unknown; __am3dVista?: () => unknown };
+    w.__am3d = (niveles?: number) => inspeccionar(st.G, niveles);
+    w.__am3dVista = () => encuadre(st.G, st.camera);
     // (dev server only, 2026-11-13) the browser checks find the garage cars on screen through this; a build leaves it out
     if (import.meta.env.DEV) (window as any).__visorAeromovil = st;
     const colocarPuertas = () => {
@@ -565,6 +583,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
           st.tween = null;
           // back from the all-cars view: the orbit limit returns once the camera is home, not before (it would jump)
           if (st.maxOrbitaAlVolver) { controls.maxDistance = st.maxOrbitaAlVolver; st.maxOrbitaAlVolver = 0; }
+          // …and the close-up limit of a selected part goes back to 1.5 m once the camera is out of it
+          if (!st.fichaSolo && !((st as any).piezas as OpcionesPiezas | null | undefined)?.solo) controls.minDistance = 1.5;
         }
       }
       // Beyond the hand-zoom limit (only the all-cars view goes there) the fog and the ground move
@@ -636,7 +656,8 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   useEffect(() => {
     const st = estado.current; if (!st) return;
     st.modelo = modelo;
-    const cotasYPuertas = () => { vaciar(st.grupoCotas); cotas(st.grupoCotas, st.M, st.modelo, sinPasajero); st.colocarPuertas(); st.sombraSucia = true; if (st.visibles) aplicarFichaSolo(st.G, st.visibles, st.fichaSolo); };
+    // (`avisar`: a quick rebuild leaves out the small details, so it cannot tell the page that a part is missing; the full one can)
+    const cotasYPuertas = (avisar = true) => { vaciar(st.grupoCotas); cotas(st.grupoCotas, st.M, st.modelo, sinPasajero); st.colocarPuertas(); st.sombraSucia = true; if (st.visibles) aplicarFichaSolo(st.G, st.visibles, st.fichaSolo); if (avisar) avisarVacia(); };
     cancelAnimationFrame(st.bala.cuadro); if (st.bala.pausa) { clearTimeout(st.bala.pausa); st.bala.pausa = 0; }
     // ── Cuadriciclo Basculante (2026-11-15): rebuilt whole on every change (~60 ms), at the current lean
     if (modelo.tipo === 'basculante') {
@@ -666,7 +687,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       else construirBala(st.G, st.puertasG, st.M, st.Mb, m, calidad, sinPasajero);
       construirMovil(st.G, st.M, m, st.coche, st.curva && m.tipo === 'triciclo' ? st.inclinacion : 0);
       if (m.tipo === 'triciclo' && st.piezas) aplicarPiezasMotor(st.G.motor, st.piezas);
-      cotasYPuertas();
+      cotasYPuertas(calidad === 'completa');
       const t1 = performance.now();
       // measured where the visitor's browser can be asked (performance.getEntriesByName)
       try { performance.measure(`${m.tipo}:${calidad}`, { start: t0, end: t1 }); } catch { /* old browsers */ }
@@ -685,7 +706,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   useEffect(() => {
     const st = estado.current; if (!st) return;
     st.visibles = visibles; st.fichaSolo = fichaSolo;
-    aplicarFichaSolo(st.G, visibles, fichaSolo); st.sombraSucia = true;
+    aplicarFichaSolo(st.G, visibles, fichaSolo); st.sombraSucia = true; avisarVacia();
     // «only that component» (Eugenio): the garage's reference cars and the name labels leave too, and come back with it
     st.grupoGaraje.visible = !fichaSolo;
     for (const n of ['nombres', 'carteles']) { const o = st.scene.getObjectByName(n); if (o) o.visible = !fichaSolo; }
@@ -694,11 +715,16 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   useEffect(() => {
     const st = estado.current; if (!st) return;
     if (fichaSolo) {
-      const b = cajaDeCapas(st.G, fichaSolo.capas); if (!b) return;
+      const b = cajaDeSeleccion(st.G, fichaSolo); if (!b) return;
       if (!st.camaraAntesFicha) st.camaraAntesFicha = { pos: st.camera.position.clone(), target: st.controls.target.clone() };
       const c = b.getCenter(new THREE.Vector3()), r = Math.max(0.12, b.getSize(new THREE.Vector3()).length() / 2);
       const dir = st.camera.position.clone().sub(st.controls.target).normalize();
-      const d = Math.min(6, 1.25 * r / Math.tan(THREE.MathUtils.degToRad(st.camera.fov) / 2));
+      // (the narrower of the two fields of view: on a phone the window is as wide as it is tall, and a car 3.8 m long overflowed it
+      // when the distance was worked out from the vertical field alone; farther than 6 m for that case)
+      const tanV = Math.tan(THREE.MathUtils.degToRad(st.camera.fov) / 2), d = Math.min(12, 1.25 * r / Math.min(tanV, tanV * st.camera.aspect));
+      // the orbit stops the camera at 1.5 m from the target; a part of 30 cm (a battery module, a brake) would stay a speck
+      // (the robot measured 9 % of the window): near a small part the camera may come as close as the framing asks
+      st.controls.minDistance = Math.min(1.5, Math.max(0.25, d * 0.6));
       st.target.copy(c);
       st.tween = { from: st.camera.position.clone(), to: c.clone().addScaledVector(dir, d), tf: st.controls.target.clone(), t: 0 };
     } else if (st.camaraAntesFicha) {
@@ -722,10 +748,14 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       const b = cajaVisibleMotor(st.G.motor); if (!b) return;
       const c = b.getCenter(new THREE.Vector3()), r = Math.max(0.12, b.getSize(new THREE.Vector3()).length() / 2);
       const dir = st.camera.position.clone().sub(st.controls.target).normalize();
-      const d = Math.min(6, 1.6 * r / Math.tan(THREE.MathUtils.degToRad(st.camera.fov) / 2));
+      const tanV = Math.tan(THREE.MathUtils.degToRad(st.camera.fov) / 2), d = Math.min(12, 1.6 * r / Math.min(tanV, tanV * st.camera.aspect));
       st.target.copy(c);
       st.tween = { from: st.camera.position.clone(), to: c.clone().addScaledVector(dir, d), tf: st.controls.target.clone(), t: 0 };
     } else if (antes && !piezasMotor) {
+      // leaving «Motor» for a department whose selected part has just framed itself (the effect above runs first, in the same
+      // commit): the part's framing stays; going back to the default view here would undo it (the robot measured the battery at
+      // 9 % of the window when it came after the motor)
+      if (st.fichaSolo && cajaDeSeleccion(st.G, st.fichaSolo)) return;
       st.target.set(-1.5, 0.55, 0);
       st.tween = { from: st.camera.position.clone(), to: new THREE.Vector3(...VISTAS[vista]), tf: st.controls.target.clone(), t: 0 };
     }

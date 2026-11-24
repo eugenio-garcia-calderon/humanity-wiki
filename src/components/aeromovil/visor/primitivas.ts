@@ -11,6 +11,7 @@ export function tube(g: THREE.Object3D, a: V3, b: V3, d: number, mat: THREE.Mate
   m.position.copy(A).addScaledVector(v, 0.5);
   m.quaternion.setFromUnitVectors(_up, v.normalize());
   m.castShadow = true; g.add(m);
+  return m;
 }
 export function sphere(g: THREE.Object3D, c: V3, r: number, mat: THREE.Material, escala?: V3) {
   const m = new THREE.Mesh(new THREE.SphereGeometry(r, 24, 16), mat); m.position.set(...c); if (escala) m.scale.set(...escala); m.castShadow = true; g.add(m); return m;

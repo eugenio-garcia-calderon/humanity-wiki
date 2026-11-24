@@ -138,6 +138,6 @@ export function ruedaCoche(g: THREE.Object3D, M: Mats, x: number, y: number, z: 
   const d = new THREE.Mesh(new THREE.CylinderGeometry(disco / 2, disco / 2, 0.022, 64), [M.discoFreno, M.discoFreno, M.discoFreno]); d.rotation.x = Math.PI / 2; d.position.z = -s * (w / 2 - 0.045); d.userData.componente = 'frenos'; grp.add(d);
   { const geo = d.geometry, p = geo.getAttribute('position') as THREE.BufferAttribute, uv = geo.getAttribute('uv') as THREE.BufferAttribute; for (let i = 0; i < p.count; i++) if (Math.abs(p.getY(i)) > 0.01) uv.setXY(i, 0.5 + p.getX(i) / disco, 0.5 + p.getZ(i) / disco); uv.needsUpdate = true; }
   const pinza = cajaRedonda(grp, [-0.02, disco / 2 - 0.03, -s * (w / 2 - 0.045)], [0.075, 0.115, 0.052], M.pinza, 0.012); pinza.userData.componente = 'frenos';
-  tube(grp, [-0.02, disco / 2 + 0.02, -s * (w / 2 - 0.045)], [-0.08, disco / 2 + 0.08, -s * (w / 2 - 0.02)], 0.008, M.black);
+  { const latiguillo = tube(grp, [-0.02, disco / 2 + 0.02, -s * (w / 2 - 0.045)], [-0.08, disco / 2 + 0.08, -s * (w / 2 - 0.02)], 0.008, M.black); if (latiguillo) latiguillo.userData.componente = 'frenos'; }
   return grp;
 }

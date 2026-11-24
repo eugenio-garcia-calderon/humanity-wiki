@@ -173,6 +173,8 @@ export function crearMateriales() {
     goma: fis({ color: 0x18191b, roughness: 0.86, metalness: 0 }),
     tapa: fis({ color: 0xd9dcdf, metalness: 0.6, roughness: 0.25, clearcoat: 0.8, clearcoatRoughness: 0.08 }),
     tapaOscura: fis({ color: 0x23262b, metalness: 0.5, roughness: 0.35 }),
+    discoFreno: fis({ color: 0x9aa0a6, metalness: 0.85, roughness: 0.35 }),
+    pinzaFreno: fis({ color: 0xb3261e, metalness: 0.4, roughness: 0.4 }),
     // interior
     cuero: fis({ color: 0xffffff, map: asiento, roughness: 0.62, metalness: 0, sheen: 0.4, sheenColor: new THREE.Color(0x6a7080), sheenRoughness: 0.6 }),
     carbono: fis({ color: 0x1a1b1e, roughness: 0.35, metalness: 0.2, clearcoat: 0.8 }),
@@ -202,6 +204,13 @@ function rueda(R: number, ancho: number, M: Mats, nombre: string): THREE.Group {
   for (const lado of [1, -1]) {
     const t = new THREE.Group(); t.scale.z = lado; g.add(t);
     t.add(malla(G.tapa, M.tapa, 'tapacubos'), malla(G.ranura, M.tapaOscura, 'tapacubos'), malla(G.centro, M.tapaOscura, 'tapacubos'));
+  }
+  // 2026-11-24 (Eugenio: «pincho en frenos y no cambia lo que se ve»): the brake, a disc and its caliper on the inner side,
+  // behind the aero cover (the whole vehicle does not show it; «Frenos» shows it alone). Tagged `frenos` (visor/partes3d.ts).
+  {
+    const rd = Math.min(R * 0.56, 0.16), zd = -ancho * 0.2, a = 2.2;
+    const disco = malla(new THREE.CylinderGeometry(rd, rd, 0.006, 48), M.discoFreno, 'disco-freno', false); disco.rotation.x = Math.PI / 2; disco.position.z = zd; disco.userData.componente = 'frenos'; g.add(disco);
+    const pinza = malla(new THREE.BoxGeometry(0.045, 0.085, 0.04), M.pinzaFreno, 'pinza-freno', false); pinza.position.set(rd * 0.9 * Math.cos(a), rd * 0.9 * Math.sin(a), zd); pinza.rotation.z = a - Math.PI / 2; pinza.userData.componente = 'frenos'; g.add(pinza);
   }
   return g;
 }
@@ -438,6 +447,11 @@ function poste(g: THREE.Object3D, a: THREE.Vector3, b: THREE.Vector3, r: number,
 }
 export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO, t?: CabinaTriciclo): THREE.Group {
   const g = new THREE.Group(); g.name = 'cabina';
+  // 2026-11-24 (Eugenio: «pincho en mando, salpicadero, asientos y no cambia lo que se ve»): what each block of the cabin is.
+  // `marcar(x)` tags every untagged mesh added since the last call as part `x` (`userData.componente`: visor/partes3d.ts
+  // lists the parts, partes/subsistemas.ts `componentes` says which ones each menu entry shows).
+  let desde = 0;
+  const marcar = (comp: string) => { for (let i = desde; i < g.children.length; i++) g.children[i].traverse((o: any) => { if (o.isMesh && !o.userData.componente) o.userData.componente = comp; }); desde = g.children.length; };
   const R0 = ASIENTO, piso = F.dSuelo + F.elevar, kz = Math.min(1, F.kW);
   const dxPil = A.xPiloto - R0.xPiloto, dyPil = A.yPiloto - R0.yPiloto, dxPas = A.xPasajero - R0.xPasajero, dyPas = A.yPasajero - R0.yPasajero;
   // along the saddle: 0 at the pilot's hips, 1 at the passenger's (clamped), for the stretch in between
@@ -468,6 +482,7 @@ export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO, t?: CabinaT
   if (t?.butacas) for (const a of t.butacas) butaca(g, M, a);
   else if (!t?.filas) g.add(malla(sillin, M.cuero, 'sillin'));
   else for (const a of t.filas) asientoCoche(g, M, a);
+  marcar('asientos');
   // passenger backrest: a pad leaning back 12°, on two short posts
   {
     const pad = loft([
@@ -492,6 +507,7 @@ export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO, t?: CabinaT
       respaldo(A.xPasajero, A.yPasajero, t.recPas, 1, [-1.72 + dxPas, 0.44 + dyPas]);
     }
   }
+  marcar('asientos');
   // the saddle's frame below it and the spine forward to the steering head (dark): on the floor (not on the Triciclo: its frame is the viewer's tubes)
   if (!t) {
     const Ep = (x: number, yb: number, yt: number, wb: number, wm: number, wt: number, n: number) => E(x, yb + piso, yt + piso, wb, wm, wt, n);
@@ -517,6 +533,7 @@ export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO, t?: CabinaT
     Et(-0.86, 0.43, 0.46, 0.01, 0.02, 0.01, 2.2),
   ], { N: 40, sub: 6 });
   // (2026-11-12: with a steering wheel or a dashboard, neither the tank nor its little screen: the dashboard and the column take their place)
+  marcar('cabina-varios');
   const cabinaCoche = !!(t?.volante || t?.salpicadero);
   if (!cabinaCoche) g.add(malla(deposito, M.marino, 'deposito'));
   // dash: a small screen in a carbon hood on top of the tank, facing the pilot (at the steering head)
@@ -524,8 +541,11 @@ export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO, t?: CabinaT
     const capo = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.012, 0.21), M.carbono); capo.position.set(-0.43, 0.868 + piso, 0); capo.rotation.z = 0.75; g.add(capo);
     const pant = new THREE.Mesh(new THREE.PlaneGeometry(0.17, 0.085), M.pantalla); pant.position.set(-0.452, 0.85 + piso, 0); pant.rotation.set(0, -Math.PI / 2, 0); pant.rotateX(-0.82); g.add(pant);
   }
+  marcar('mandos'); // (the tank and its little screen: the handlebar's dash)
   if (t?.salpicadero) { if (t.salpicadero.blanco) salpicaderoBlanco(g, F, M, t.salpicadero, t.volante ?? null); else salpicadero(g, F, M, t.salpicadero); }
+  marcar('salpicadero');
   if (t?.volante) volante(g, M, t.volante, t.cabezaDireccion ?? [-0.44, 0.80 + piso, 0], !t.salpicadero);
+  marcar('mandos');
   // handlebar: clamp on the steering head, bars swept back to the grips, levers ahead of them
   if (!t?.volante) {
     const mx = t ? t.man[0] : 0, my = t ? t.man[1] : 0, kb = t ? escalaManillar(F, t.man) : escalaManillar(F);
@@ -542,9 +562,11 @@ export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO, t?: CabinaT
     // the Triciclo's riser: the clamp stands on the steering head however far the bars move
     if (t && (mx || my)) poste(g, new THREE.Vector3(-0.46, 0.85 + piso, 0), new THREE.Vector3(-0.46 + mx, 0.86 + piso + my, 0), 0.016, M.carbono);
   }
+  marcar('mandos');
   // pilot's footboards forward of the knees (toes up 20°), passenger's footpegs beside the pilot's hips
   const px = t ? t.pies[0] : 0, py = t ? t.pies[1] : 0;
   if (t?.pedales) pedales(g, M, t.pedales);
+  marcar('pedales');
   if (!t?.butacas) for (const s of [1, -1]) {
     const tabla = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.012, 0.09), M.aluminio); tabla.position.set(-0.55 + dxPil + px, 0.205 + piso + py, s * 0.15 * kz); tabla.rotation.z = 0.35; g.add(tabla);
     const goma = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.006, 0.07), M.gomaMate); goma.position.set(-0.55 + dxPil + px, 0.214 + piso + py, s * 0.15 * kz); goma.rotation.z = 0.35; g.add(goma);
@@ -554,12 +576,14 @@ export function cabina(F: FormaBala, M: Mats, A: Asientos = ASIENTO, t?: CabinaT
     const estribo = new THREE.Mesh(new THREE.CylinderGeometry(0.013, 0.013, 0.09, 12), M.gomaMate); estribo.position.set(-1.30 + dxPas, 0.27 + piso + alza, s * 0.20 * kz); estribo.rotation.x = Math.PI / 2; g.add(estribo);
     const soporte = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.05, 0.06), M.aluminio); soporte.position.set(-1.30 + dxPas, 0.255 + piso + alza, s * 0.13 * kz); g.add(soporte);
   }
+  marcar('reposapies');
   // grab rail round the back of the passenger's seat (not with three rows)
   if (!t?.filas && !t?.butacas) {
     const p = (x: number, y: number, z: number) => new THREE.Vector3(x + dxPas, y + dyPas, z * kz);
     const riel = curva([p(-1.42, 0.49, 0.185), p(-1.54, 0.53, 0.20), p(-1.66, 0.555, 0.175), p(-1.73, 0.565, 0.10), p(-1.745, 0.568, 0), p(-1.73, 0.565, -0.10), p(-1.66, 0.555, -0.175), p(-1.54, 0.53, -0.20), p(-1.42, 0.49, -0.185)], 8);
     g.add(malla(barrido(riel, () => [0.012, 0.012], { lados: 10 }), M.aluminio, 'asidero'));
   }
+  marcar('reposapies');
   return g;
 }
 /**
@@ -695,11 +719,13 @@ function salpicaderoBlanco(g: THREE.Group, F: FormaBala, M: Mats, s: { x0: numbe
   }
   // with a wheel: the column's shroud from the dashboard to the hub, and the two stalks
   if (v) {
+    const n0 = g.children.length; // (the shroud and the stalks are the controls' (`mandos`), not the dashboard's)
     const n = new THREE.Vector3(-Math.cos(v.inc), Math.sin(v.inc), 0), c = new THREE.Vector3(v.c[0], v.c[1], 0);
     const a = c.clone().addScaledVector(n, -0.06), b = c.clone().addScaledVector(n, -Math.max(0.10, (s.x1 - v.c[0]) / Math.max(0.3, Math.cos(v.inc)) + 0.03));
     const L = a.distanceTo(b), funda = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.06, L, 24), M.blancoInterior);
     funda.position.copy(a).add(b).multiplyScalar(0.5); funda.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize()); funda.name = 'funda-columna'; g.add(funda);
     for (const z of [1, -1]) poste(g, a.clone().addScaledVector(n, -0.01).add(new THREE.Vector3(0, 0, z * 0.04)), a.clone().addScaledVector(n, -0.03).add(new THREE.Vector3(0, -0.01, z * 0.14)), 0.006, M.negroBrillo);
+    for (let i = n0; i < g.children.length; i++) g.children[i].traverse((o: any) => { if (o.isMesh) o.userData.componente = 'mandos'; });
   }
 }
 /** Box-projected UVs (metres / scale) so the quilting has a constant size. */

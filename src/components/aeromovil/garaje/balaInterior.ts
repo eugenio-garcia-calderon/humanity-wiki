@@ -341,7 +341,7 @@ export function construirInterior(F: FormaBala, I: InteriorTriciclo, Mb: Mats, c
         for (const zf of [0.045, -0.045]) {
           const y = yFoco(x) + 0.002, z = a.z + zf;
           const foco = new THREE.Mesh(new THREE.CylinderGeometry(0.016, 0.016, 0.006, 20), M.foco); foco.position.set(x, y, z); foco.name = 'foco'; g.add(foco);
-          const aro = new THREE.Mesh(new THREE.TorusGeometry(0.019, 0.004, 8, 24), M.aro); aro.rotation.x = Math.PI / 2; aro.position.set(x, y + 0.001, z); g.add(aro);
+          const aro = new THREE.Mesh(new THREE.TorusGeometry(0.019, 0.004, 8, 24), M.aro); aro.rotation.x = Math.PI / 2; aro.position.set(x, y + 0.001, z); aro.name = 'foco-aro'; g.add(aro);
         }
         if (c.tConsolaTecho === 'encendida') {
           const luz = new THREE.SpotLight(0xffe9c8, 3, 1.6, 0.75, 0.6, 1.5); luz.position.set(x, yFoco(x) - 0.01, a.z); luz.target.position.set(x - 0.15, yFoco(x) - 1, a.z); luz.castShadow = false;
@@ -365,9 +365,9 @@ export function construirInterior(F: FormaBala, I: InteriorTriciclo, Mb: Mats, c
       const k = fo?.puerta ? fo.puerta.enHoja((xa + xb) / 2, ym) + 1 : 0;
       poner(malla(geo, cover, 'reposabrazos'), k, s);
       // the cupholder at its front, sunk in the trim-coloured cap
-      const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.036, 0.006, 28), M.moldura); cap.position.set(xa - 0.045, yT + 0.002, s * zc); poner(cap, k, s);
-      const pozo = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.026, 0.008, 24), M.negro); pozo.position.set(xa - 0.045, yT + 0.003, s * zc); poner(pozo, k, s);
-      const aro = new THREE.Mesh(new THREE.TorusGeometry(0.031, 0.003, 8, 28), M.aro); aro.rotation.x = Math.PI / 2; aro.position.set(xa - 0.045, yT + 0.006, s * zc); poner(aro, k, s);
+      const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.036, 0.036, 0.006, 28), M.moldura); cap.position.set(xa - 0.045, yT + 0.002, s * zc); cap.name = 'portavasos-tapa'; poner(cap, k, s);
+      const pozo = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.026, 0.008, 24), M.negro); pozo.position.set(xa - 0.045, yT + 0.003, s * zc); pozo.name = 'portavasos-pozo'; poner(pozo, k, s);
+      const aro = new THREE.Mesh(new THREE.TorusGeometry(0.031, 0.003, 8, 28), M.aro); aro.rotation.x = Math.PI / 2; aro.position.set(xa - 0.045, yT + 0.006, s * zc); aro.name = 'portavasos-aro'; poner(aro, k, s);
     };
     for (const a of I.asientos) {
       if (a.fila === 2 && a.z !== 0) { brazo(a, a.z > 0 ? 1 : -1); continue; }
@@ -378,7 +378,7 @@ export function construirInterior(F: FormaBala, I: InteriorTriciclo, Mb: Mats, c
       const a = fila2[0], x0 = a.x - 0.10, x1 = a.x + 0.30, y0 = fo ? fo.suelo.y : a.y - 0.3, y1 = a.y + 0.17, hw = Math.max(0.04, Math.min(0.085, Math.abs(a.z) - 0.235));
       g.add(malla(loft([E(x1, y0, y1 - 0.01, hw * 0.9, hw * 0.95, hw * 0.8, 3), E(x1 - 0.04, y0, y1, hw, hw, hw * 0.92, 3.6), E(x0 + 0.04, y0, y1, hw, hw, hw * 0.92, 3.6), E(x0, y0, y1 - 0.01, hw * 0.9, hw * 0.95, hw * 0.8, 3)], { N: 32, sub: 3 }), cover, 'consola-central'));
       g.add(malla(cinta([new THREE.Vector3(x1 - 0.02, y1 + 0.002, 0), new THREE.Vector3(x0 + 0.02, y1 + 0.002, 0)], () => new THREE.Vector3(0, 1, 0), 2 * hw - 0.02, 0.004), M.moldura, 'consola-central-tapa'));
-      for (const dx of [0.05, 0.14]) { const p = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.026, 0.01, 24), M.negro); p.position.set(x1 - dx, y1 + 0.004, 0); g.add(p); }
+      for (const dx of [0.05, 0.14]) { const p = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.026, 0.01, 24), M.negro); p.position.set(x1 - dx, y1 + 0.004, 0); p.name = 'portavasos-pozo'; g.add(p); }
     }
   }
   // ── the belts: a three-point belt across each rider (from the seat's outboard shoulder down to the buckle at the other
@@ -397,8 +397,8 @@ export function construirInterior(F: FormaBala, I: InteriorTriciclo, Mb: Mats, c
       const regazo = curva([P(H, 0.02, 0.0, 0.2), P(H, 0.05, 0.10, 0.12), P(H, 0.07, 0.125, 0), hebilla], 8);
       g.add(malla(cinta(regazo, cara, 0.046, 0.003), M.cinta, 'cinturon'));
     }
-    const caja = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.035, 0.018), M.hebilla); caja.position.copy(hebilla); caja.rotation.z = Math.atan2(d.y, d.x) - Math.PI / 2; g.add(caja);
-    const tope = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.05, 0.022), M.negro); tope.position.copy(P(H, -0.01, 0.06, -0.17)); g.add(tope);
+    const caja = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.035, 0.018), M.hebilla); caja.position.copy(hebilla); caja.rotation.z = Math.atan2(d.y, d.x) - Math.PI / 2; caja.name = 'cinturon-hebilla'; g.add(caja);
+    const tope = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.05, 0.022), M.negro); tope.position.copy(P(H, -0.01, 0.06, -0.17)); tope.name = 'cinturon-tope'; g.add(tope);
   }
   return g;
 }
