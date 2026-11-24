@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0238_politica_en_portada.sql",
+      "motivo": "Innovación en Política en la portada de Luz & Humanidad; portada del Aeromóvil",
+      "desde": "2026-11-24T18:21:52.292Z"
+    }
+  ]
 }
