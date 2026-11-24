@@ -17,6 +17,12 @@
       "ruta": "src/components/aeromovil/CLAUDE.md",
       "motivo": "Aeromóvil: el 3D de cada parte enseña solo lo suyo + ventana 30 % más baja (nube/partes-vehiculo)",
       "desde": "2026-11-24T20:48:39.945Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md",
+      "motivo": "aeromovil.org: header del proyecto en dominio propio (deuda)",
+      "desde": "2026-11-24T21:37:15.176Z"
     }
   ]
 }
