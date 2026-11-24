@@ -28,7 +28,7 @@ const F = {
   turismo: { url: 'https://www.visitmadrid.es/donde-ir/area-metropolitana/talamanca-jarama', titulo: 'Turismo de la Comunidad de Madrid · Talamanca de Jarama: puente, Ábside de los Milagros, murallas y Cartuja' },
   cartuja: { url: 'https://www.comunidad.madrid/node/64932', titulo: 'Comunidad de Madrid (10-12-2022) · La Cartuja de Talamanca de Jarama, declarada Bien de Interés Cultural' },
   bus: { url: 'https://www.crtm.es/datos_lineas/horarios/8197EH2.pdf', titulo: 'Consorcio Regional de Transportes de Madrid · Horario de la línea 197E (Torrelaguna – Talamanca de Jarama)' },
-  modelo: { url: 'https://humanity.wiki/modelo-socioeconomico', titulo: 'humanity.wiki · Modelo de optimización socioeconómica: lo que recibe cada escala (cálculo propio)' },
+  modelo: { url: 'https://humanity.wiki/economia-publica-optimizada', titulo: 'humanity.wiki · Economía pública optimizada: lo que recibe cada escala (cálculo propio)' },
 } satisfies Record<string, FuenteAmbito>;
 
 export const AMBITO: Ambito | null = {

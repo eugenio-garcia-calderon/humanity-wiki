@@ -2802,11 +2802,11 @@ const SECTORES = [
     ]
    },
    {
-    "nombre": "Modelo de optimización socioeconómica (Luz & Humanidad)",
+    "nombre": "Economía pública optimizada (Luz & Humanidad)",
     "lugar": "España",
     "tipo": "Proyecto propio",
     "texto": "Un único impuesto sobre cada transacción, cobrado automáticamente y repartido a partes iguales entre ocho escalas (persona, comunidad vecinal, municipio, provincia, región, nación, continente y planeta), con asambleas que eligen prioridades y comités técnicos que ejecutan.",
-    "web": "https://humanity.wiki/modelo-socioeconomico",
+    "web": "https://humanity.wiki/economia-publica-optimizada",
     "fuente": null,
     "escalas": [
      "individuo",

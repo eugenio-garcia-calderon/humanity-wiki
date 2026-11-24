@@ -35,7 +35,6 @@ const Conciencia = lazy(() => import('./Conciencia'));
 const ModeloSocioeconomico = lazy(() => import('./ModeloSocioeconomico'));
 const ObservatorioPolarizacion = lazy(() => import('./ObservatorioPolarizacion'));
 const PoliticaHerramientas = lazy(() => import('./PoliticaHerramientas'));
-const EconomiaPublica = lazy(() => import('./EconomiaPublica'));
 // The views of the observatory document a page may ask for in `config.vista` (see ObservatorioPolarizacion.tsx)
 const VISTAS_DOC = new Set(['geometria', 'observatorio', 'perfiles', 'decidir']);
 const SolSolidario = lazy(() => import('./SolSolidario'));
@@ -51,8 +50,6 @@ const APLICACIONES: Record<string, (p: { inicio: string; conBarra: boolean; pagi
   },
   // 2026-11-24 (Eugenio): «en la URL de política… solo tarjetas que si pinchas te lleva a esa URL».
   'politica-herramientas': ({ inicio }) => <PoliticaHerramientas inicio={inicio} />,
-  // 2026-11-24 (Eugenio): «economía pública… todo el tema de los presupuestos», copia del modelo socioeconómico.
-  'economia-publica': ({ inicio }) => <EconomiaPublica inicio={inicio} />,
   // 2026-11-12 (Eugenio): «crea el proyecto de Sol Solidario con su página web… con el menú arriba y abajo el Sol Solidario».
   'sol-solidario': ({ pagina }) => <SolSolidario raizId={pagina.sitio?.raizId || null} paginaId={pagina.id} config={(pagina.config || {}) as any} />,
   // 2026-11-12 (Eugenio): «haz un web en luzhumanidad.com que sea de la cadena de valor de instalación de energía solar en España… hazlo visual».
