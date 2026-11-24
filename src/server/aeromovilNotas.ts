@@ -84,7 +84,7 @@ export function registrarNotasAeromovil(app: Express, db: any) {
       const vehiculo = String(req.body?.vehiculo ?? ''), diseno = disenoDe(req.body?.diseno);
       const seccion = String(req.body?.seccion ?? '').trim().slice(0, MAX_SECCION);
       const texto = String(req.body?.texto ?? '').trim();
-      if (!VEHICULOS.has(vehiculo) || diseno === undefined || !seccion) return res.status(400).json({ error: 'Sección no válida.' });
+      if (!VEHICULOS.has(vehiculo) || diseno === undefined || !seccion) return res.status(400).json({ error: !seccion ? 'Falta la sección de la nota.' : diseno === undefined ? 'Diseño no válido.' : 'Vehículo no válido.' });
       if (!texto) return res.status(400).json({ error: 'Escribe la nota antes de guardarla.' });
       if (texto.length > MAX_TEXTO) return res.status(400).json({ error: `La nota es demasiado larga (máximo ${MAX_TEXTO} caracteres).` });
       if (diseno !== null) {
