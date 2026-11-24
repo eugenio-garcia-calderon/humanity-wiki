@@ -2450,3 +2450,14 @@ They change saved designs' numbers on purpose.
 **Alternatives**: (a) a sixth vehicle with its own prefix and files: about 3 days and every later improvement of the Triciclo body done twice; (b) the proposal computed live from saved design 19: about 1 hour, but it changes whenever he edits the original.
 **Cost of switching later**: splitting the class into its own vehicle would mean copying `triciclo/` (≈ 3,500 lines); the catalogue and `bici/` would move unchanged.
 **Known consequence**: the heavy-vehicle checks (rollover target of 1.05 g, frame safety factor) judge a 25 km/h bicycle by a car's standard. They are left as they are and reported, not relaxed.
+
+## 2026-11-24 — Política as cards: an app with fixed cards, pages linked as subpages
+
+**Context**: Eugenio asked for `/politica` to show only one card per political tool, each with its own address, five in all.
+**Chosen**:
+1. «Política» keeps its id and address and becomes the app `politica-herramientas`, whose cards are written in code (`HERRAMIENTAS_POLITICA`). Its blocks are an intro and one `subpagina` per tool: they are what makes each tool hang from the site (`madresValidas`) and what the server HTML and sitemap read.
+2. Three tools are views of the one observatory document (`?vista=observatorio|perfiles|decidir`), as the geometry already was. No new HTML files.
+3. Economía pública imports the model's budgets components instead of copying them, so the «copy in each place» is one source shown twice.
+**Alternatives**: (a) render the `subpagina` blocks as cards in the generic page view — rejected: they render as plain link rows today, and a card style for them affects every site; (b) one HTML file per tool — rejected: four copies of shared styles and data.
+**Cost of switching later**: cards in code mean a new tool needs a block (migration or editor) and an entry in `HERRAMIENTAS_POLITICA`. Reading titles and texts from the linked pages instead is about 1 hour.
+**Known consequence**: if Eugenio edits the blocks of «Política» in the editor, the cards do not change.

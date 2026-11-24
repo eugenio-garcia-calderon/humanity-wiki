@@ -13100,3 +13100,16 @@ Eugenio: «En el apartado de homologación vamos a poner diferentes informacione
 - Verified: a drag reading and hover on own point in Chromium (checks, grey and enlarged labels, fixed box height, release state); the earlier interaction suites (237 checks, «Todos», hover, table) pass; no page errors.
 - Not verified: touch devices, screen readers, the installed app (the service worker may serve the old build; `?sw=off` drops it).
 - Files: `public/observatorio-polarizacion/index.html`, `memory/08_CHANGELOG.md`.
+
+## 2026-11-24 · Política: one card per tool, one address per tool
+
+> «En la URL de política tienen que aparecer todas las herramientas… solo como tarjetas que si pinchas te lleva a esa URL… Haz una tarjeta por cada una de ellas, una URL por cada una de ellas y ordénalo todo bien.» Asked whether to review first: «No quiero revisar antes de que publiques, y sí pon una copia en cada sitio».
+
+- `luzhumanidad.com/politica` no longer frames the observatory document. It shows five cards, in this order: Observatorio de polarización, Perfiles políticos, Geometría política, Democracia directa and Economía pública (`src/pages/PoliticaHerramientas.tsx`, app `politica-herramientas`). No top menu, no topic bar, no «Entender por qué nos dividimos».
+- Four new pages, created by `drizzle/0235_politica_herramientas.sql` and linked from «Política» as subpages: `/observatorio-de-polarizacion` (document view `observatorio`: chapters 1–5 and Palabras y fuentes, renumbered 6), `/perfiles-politicos` (view `perfiles`: chapter 4 alone), `/democracia-directa` (view `decidir`: «Votar por temas» alone) and `/economia-publica` (`src/pages/EconomiaPublica.tsx`: the budgets window of the socioeconomic model, imported, so it stays in the model too). `/geometria-politica` is unchanged.
+- The observatory's old address `observatorio-de-polarizacion/espana` now redirects to the new observatory page instead of the cards.
+- `humanity.wiki/politica` is a fixed route to the same page (like `/humanidad`); there its cards link to luzhumanidad.com.
+- The document's footer now reads «Las demás herramientas de política, cada una en su página: Política →».
+- Verified: the migration on a local copy of the five tables involved (run twice: the second run changes nothing; a slug already in use links the existing page instead of creating one; a stale old address for a new slug is removed); all five pages hang from the site root through «Política» by the same recursive query the server uses; the cards (order, links on the domain and from humanity.wiki), the economy page and the three document views in Chromium; the geometry view unchanged; no page errors; `tsc --noEmit` clean; `npm run build` passes.
+- Not verified: the real production database (owner, `publico`, the site root) and the pages served by the real server; the installed app (the service worker may serve the old build; `?sw=off` drops it); phones beyond a 390 px screenshot of the cards.
+- Files: `drizzle/0235_politica_herramientas.sql`, `src/pages/PoliticaHerramientas.tsx`, `src/pages/EconomiaPublica.tsx`, `src/pages/ObservatorioPolarizacion.tsx`, `src/pages/SubpaginaSitio.tsx`, `src/App.tsx`, `public/observatorio-polarizacion/index.html`, `memory/*`.

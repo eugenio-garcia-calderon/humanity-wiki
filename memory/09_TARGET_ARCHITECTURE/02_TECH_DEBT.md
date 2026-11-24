@@ -1110,3 +1110,9 @@ the Basculante's (`LadoBasculante.tsx`) get their numbers from the helper alread
 ## 2026-11-24 — Bicycle-class cost leaves fabrication out (Eugenio's decision)
 
 By his instruction the bicycle-class labour is assembly only. The project total of such a design therefore has the materials of the frame and the body but not the hours to weld the one or mould and laminate the other. It is said on the «Mano de obra» panel; it is not said under the «Proyecto» tab's figure. A switch «incluir fabricación» would be about 1 hour.
+
+## 2026-11-24 — Política cards: shortcuts taken
+
+- **Two lists that must match.** The cards of `/politica` live in `HERRAMIENTAS_POLITICA` (PoliticaHerramientas.tsx); the pages that hang from it are the `subpagina` blocks written by migration 0235. A sixth tool needs both. Reading the cards from the blocks: about 1 hour.
+- **`humanity.wiki/politica` assumes the handle `luz`**, as `/humanidad` does. If the owner's handle differs, the route shows «Esta página no está aquí».
+- **The migration was tested on a hand-built copy of five tables**, not on a dump of production.
