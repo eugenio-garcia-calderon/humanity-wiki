@@ -1,3 +1,10 @@
 {
-  "reservas": []
+  "reservas": [
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0234_aeromovil_expediente.sql",
+      "motivo": "tabla del expediente del ciclo de pedales",
+      "desde": "2026-11-24T11:55:29.364Z"
+    }
+  ]
 }
