@@ -5,6 +5,12 @@
       "ruta": "drizzle/0239_sectores_en_linea.sql",
       "motivo": "Movilidad y Energía en una línea; sin icono ni número de proyectos",
       "desde": "2026-11-24T20:44:15.369Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/sitio/FilaSector.tsx",
+      "motivo": "Movilidad y Energía en una línea; sin icono ni número de proyectos",
+      "desde": "2026-11-24T20:44:26.568Z"
     }
   ]
 }
