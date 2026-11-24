@@ -1,10 +1,3 @@
 {
-  "reservas": [
-    {
-      "agente": "prog1",
-      "ruta": "src/components/aeromovil/ComparadorMotores.tsx",
-      "motivo": "Componentes de bicicleta: velocidad de comparación",
-      "desde": "2026-11-24T00:27:40.145Z"
-    }
-  ]
+  "reservas": []
 }
