@@ -23,6 +23,12 @@
       "ruta": "src/components/aeromovil/homologacion/ficha.ts",
       "motivo": "vía ciclo de pedales con pedaleo asistido (EN 15194)",
       "desde": "2026-11-24T11:28:21.801Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/homologacion/guias.ts",
+      "motivo": "vía ciclo de pedales con pedaleo asistido (EN 15194)",
+      "desde": "2026-11-24T11:28:24.283Z"
     }
   ]
 }
