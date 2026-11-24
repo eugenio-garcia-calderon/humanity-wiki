@@ -71,6 +71,12 @@
       "ruta": "src/components/aeromovil/precios/precios.ts",
       "motivo": "peso editable por pieza",
       "desde": "2026-11-24T10:37:11.346Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/BiciTriciclo.tsx",
+      "motivo": "peso editable por pieza",
+      "desde": "2026-11-24T10:37:13.843Z"
     }
   ]
 }
