@@ -1127,3 +1127,12 @@ By his instruction the bicycle-class labour is assembly only. The project total 
 - **Two lists that must match.** The cards of `/politica` live in `HERRAMIENTAS_POLITICA` (PoliticaHerramientas.tsx); the pages that hang from it are the `subpagina` blocks written by migration 0235. A sixth tool needs both. Reading the cards from the blocks: about 1 hour.
 - **`humanity.wiki/politica` assumes the handle `luz`**, as `/humanidad` does. If the owner's handle differs, the route shows «Esta página no está aquí».
 - **The migration was tested on a hand-built copy of five tables**, not on a dump of production.
+## 2026-11-24 — Rodaje submenu: shortcuts taken
+
+- **Plans only for the steering.** Brakes, wheels and suspension have no drawing; the steering's is a layout view (dimensions, arm angle, rack or rocker), not a workshop drawing (no tolerances, bushings, knuckle). Another part's plan: ≈ 3 hours each; a real workshop drawing needs a CAD pass.
+- **«Frenos» shares the wheels' 3D layer**, so isolating a brake needs a layer of its own in the 3D. The per-component cards (the other piece of work, `nube/componentes-3d`) are the natural way: ≈ 2 hours once they are merged.
+- **Brakes/suspension are multiplied by the number of wheels** in «En el vehículo» — right for 4 wheels, approximate for 3.
+- **Steering prices are estimates** for three of four options (published only for the Gemini rack and the tie rods); the cited geometry values come from builders' forums (IHPVA, bkhome), not standards. Heavy-class wheels are not among the bicycle wheel options.
+- **Unopened sources** (Magickart, igus, AZUB, university references) are flagged `leido:false` on screen; opening them is ≈ 30 minutes and may change prices.
+- **Decisions live inside the design** (12 per part, no author): deleted with it, no history of who. A table: ≈ 3 hours.
+- **The option lists are code** — a new option needs a deploy (≈ 10 minutes with the checks); editing them from the page would need a table.

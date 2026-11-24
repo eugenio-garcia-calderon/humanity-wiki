@@ -15,6 +15,7 @@ import { eur, textoPesoPrecio, type PrecioSeccion } from './precios/precios';
 import { OPCIONES_FRENO, OPCIONES_GENERADOR, OPCIONES_SUSPENSION, frenoBici, generadorPedal, suspensionBici, type PiezaBici } from './bici/catalogo';
 import { OPCIONES_CLASE, VALORES_BICI, esBici, type ClaseVehiculo } from './bici/clase';
 import { BICI_DEFECTO, FILAS_BICI, OPCIONES_PEDALES, camposBici, type ClaveBici, type Pedaleo } from './bici/pedales';
+import { OPCIONES_DIRECCION_SELECTOR } from './rodaje/direccion';
 import { TRICICLO_DEFECTO } from './triciclo/defecto';
 import type { CamposTriciclo } from './triciclo/campos';
 
@@ -45,7 +46,7 @@ export function BloqueClaseBici({ P, T, set, bloque, seccion, plegable }: { P: P
   const cambiarClase = (v: ClaseVehiculo) => {
     if (v === 'bici') { for (const [k, x] of Object.entries(VALORES_BICI)) set(k as keyof Parametros, x as never); return; }
     for (const k of Object.keys(VALORES_BICI)) set(k as keyof Parametros, TRICICLO_DEFECTO[k as keyof CamposTriciclo] as never);
-    poner('tBiciFreno', BICI_DEFECTO.tBiciFreno); poner('tBiciSusp', BICI_DEFECTO.tBiciSusp);
+    poner('tBiciFreno', BICI_DEFECTO.tBiciFreno); poner('tBiciSusp', BICI_DEFECTO.tBiciSusp); poner('tDirOpc', BICI_DEFECTO.tDirOpc);
   };
   return (
     <Bloque id={`bloque-${bloque}`} titulo="Componentes de bicicleta" peso={textoPesoSeccion(seccion ?? null)} plegable={plegable} nota={bici ? 'de bicicleta' : 'de vehículo pesado'}>
@@ -64,6 +65,8 @@ export function BloqueClaseBici({ P, T, set, bloque, seccion, plegable }: { P: P
       <FichaBici p={frenoBici(C.tBiciFreno)} por="por rueda" />
       <Selector id="t-tBiciSusp" etiqueta="Suspensión (todas las esquinas)" valor={C.tBiciSusp} opciones={OPCIONES_SUSPENSION} alCambiar={v => poner('tBiciSusp', v)} />
       <FichaBici p={suspensionBici(C.tBiciSusp)} por="por esquina, con sus brazos" />
+      <Selector id="t-tDirOpc" etiqueta="Dirección (la favorita)" valor={C.tDirOpc} opciones={OPCIONES_DIRECCION_SELECTOR} alCambiar={v => poner('tDirOpc', v)} />
+      <p className="-mt-1 text-xs text-slate-500">La dirección se estudia y se elige con una estrella en «Rodaje › Dirección», con sus ángulos, su plano y las otras opciones para comparar.</p>
       <p className="text-xs text-slate-500">
         «A medida» deja el peso de frenos y suspensión a los deslizadores de «Masas» y a la carga de cada rueda. Las ruedas se eligen arriba, en «Ejes y ruedas»; el tubo, en la pestaña Chasis, «Bastidor»; los motores y sus controladores de bici,
         en «Motor › Motor eléctrico»; y los pedales, en «Motor › Pedales».

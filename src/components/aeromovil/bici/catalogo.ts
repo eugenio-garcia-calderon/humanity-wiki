@@ -64,7 +64,7 @@ export interface PiezaBici {
 
 export interface FrenoBici extends PiezaBici { tipo: 'tambor' | 'disco mecánico' | 'disco hidráulico' }
 /** A plain disc hub (kg) and a 160 mm rotor (kg): estimates of parts of their class, counted with each disc brake. */
-const BUJE_DISCO = 0.25, DISCO_160 = 0.12;
+export const BUJE_DISCO = 0.25, DISCO_160 = 0.12;
 
 export const FRENOS_BICI: FrenoBici[] = [
   {
@@ -99,7 +99,7 @@ export const FRENOS_BICI: FrenoBici[] = [
 
 export interface SuspensionBici extends PiezaBici { recorrido: number /* mm at the wheel, about */ }
 /** A corner's arms, upright and stub axle in bicycle tube (kg): an estimate, no published figure. */
-const BRAZOS_ESQUINA = 0.9;
+export const BRAZOS_ESQUINA = 0.9;
 
 export const SUSPENSIONES_BICI: SuspensionBici[] = [
   {
