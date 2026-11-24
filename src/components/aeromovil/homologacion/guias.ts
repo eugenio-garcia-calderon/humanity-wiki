@@ -89,7 +89,7 @@ export const GUIA_L1EA: Guia = {
   categorias: ['L1e-A'], porDefecto: 'L1e-A',
   tabla: [
     { concepto: 'Número de ruedas', norma: 'Dos, o tres o cuatro si cumplen lo demás: cuentan como «técnicamente equivalentes» a un L1e-A de dos ruedas.', ref: 'Anexo I, criterio 12', fuente: 'r168anx3', req: 'l1eaRuedas' },
-    { concepto: 'Propulsión', norma: 'Ciclo diseñado para pedalear: se mueve pedaleando y el motor ayuda, no lo sustituye. Un pedalier que solo mueve un generador (sin cadena) no queda dicho en el texto: se confirma con el servicio técnico.', ref: 'Anexo I, criterios 9 y 10', fuente: 'r168anx3', req: 'epacPedales' },
+    { concepto: 'Propulsión', norma: 'Ciclo diseñado para pedalear: se mueve pedaleando y el motor ayuda, no lo sustituye. Un pedalier que solo mueve un generador (sin cadena) no queda dicho en el texto: se confirma con el servicio técnico.', ref: 'Anexo I, criterios 9 y 10', fuente: 'r168anx3', req: 'l1eaPedales' },
     { concepto: 'Función del motor', norma: 'Su fin principal es ayudar a pedalear.', ref: 'Anexo I, criterio 9', fuente: 'r168anx3' },
     { concepto: 'Velocidad a la que corta la ayuda', norma: '25 km/h o menos. No limita lo que el vehículo alcance con las piernas o cuesta abajo, sino a qué velocidad deja de empujar el motor.', ref: 'Anexo I, criterio 10', fuente: 'r168anx3', req: 'l1eaVelocidad' },
     { concepto: 'Potencia continua máxima', norma: '1.000 W (potencia nominal continua o neta). Todo L1e, además, 4.000 W y 45 km/h como techo de diseño.', ref: 'Anexo I, criterio 11 y criterios comunes de L1e', fuente: 'r168anx3', req: 'l1eaPotencia' },

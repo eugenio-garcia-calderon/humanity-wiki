@@ -163,24 +163,69 @@ known sources, no limit for an unlisted category, every category with requiremen
 what fails and the margins, and must end «Todo OK».
 
 **The whole-page «Homologación»** (2026-11-24). Picking the tab hides the garage, the 3D view and the side panel
-(`homologando` in `pages/Aeromovil.tsx`; they stay mounted) and shows `PaginaHomologacion.tsx`: one card per homologation
-(`L1e-A` bicycle-class quadricycle, heavy L6e/L7e) and one for the three ways to approve. The written content is data in
-`guias.ts` (`GUIA_L1EA`, `GUIA_PESADO`, `VIAS`, `LIMITES_SERIE_CORTA`): the norm as a table (a row with `req` shows the
-design's verdict from `normas.ts`), `revision` (what was checked of what Eugenio pasted: confirmado / con matiz / no
-comprobado), the steps and the ways, each with expandable «qué significa y quién lo hace». **A new homologation**: a
-category in `CATEGORIAS`, its requirements in `REQUISITOS`, a `Guia` in `guias.ts`, added to `GUIAS`. L1e-A is a category
-of the engine (`candidatas`: pedals and two to four legal wheels): width 1,00 m, length 4,00 m, height 2,50 m, 1 kW, 25 km/h.
-Not modelled yet: lights and the rear reflector (`l1eaLuces` / `epacLuces` are «a comprobar»).
-The third card, **«Ciclo de pedales con pedaleo asistido · EN 15194»** (`GUIA_EPAC`, category `EPAC`, 2026-11-24), has no
-approval: it is outside Regulation 168/2013 (art. 2.2.h) and the maker certifies it (RD 339/2014: technical file, declaration,
-manual, plate, production control; annex VI for more than two wheels). So it has `propia` (its own way) instead of `vias`,
-plus `tramites` (what is and is not needed) and `cuestiones`. `scripts/homologacion.ts` checks every guide row points at a
-requirement of its category and that the EPAC table shows every EPAC requirement. The EN 15194 / EN 17860 texts are paid:
-only their catalogue summaries were read (`leido: false`).
+(`homologando` in `pages/Aeromovil.tsx`; they stay mounted) and shows `PaginaHomologacion.tsx`, which since the afternoon of
+2026-11-24 holds ONE thing: the pedal cycle's file (`epac/PaginaEpac.tsx`, below). The other homologations (`L1e-A`
+bicycle-class quadricycle, heavy L6e/L7e, the three ways to approve) are a different category each and live in a drawer on
+the right, `OtrasHomologaciones.tsx`; the shared drawing of a guide is `GuiaPagina.tsx` (`PaginaGuia`, `ViaDetalle`). The
+written content is data in `guias.ts` (`GUIA_L1EA`, `GUIA_PESADO`, `GUIA_EPAC`, `VIAS`, `LIMITES_SERIE_CORTA`): the norm as a
+table (a row with `req` shows the design's verdict from `normas.ts`), `revision` (what was checked of what Eugenio pasted:
+confirmado / con matiz / no comprobado), the steps and the ways, each with expandable «qué significa y quién lo hace».
+**A new homologation**: a category in `CATEGORIAS`, its requirements in `REQUISITOS`, a `Guia` in `guias.ts`, added to `GUIAS`
+(it appears in the drawer by itself, except `epac`, which has its own page). L1e-A is a category of the engine (`candidatas`:
+pedals and two to four legal wheels): width 1,00 m, length 4,00 m, height 2,50 m, 1 kW, 25 km/h. Not modelled yet: lights and
+the rear reflector (`l1eaLuces` / `epacLuces` are «a comprobar»). The EPAC category (`EPAC`) is outside Regulation 168/2013
+(art. 2.2.h) and the maker certifies it (RD 339/2014: technical file, declaration, manual, plate, production control; annex VI
+for more than two wheels); its guide has `propia` instead of `vias`, plus `tramites` and `cuestiones`. `scripts/homologacion.ts`
+checks every guide row points at a requirement of its category. The EN 15194 / EN 17860 texts are paid: only their catalogue
+summaries were read (`leido: false`). L1e-A and EPAC have separate requirement lists (`l1eaPedales` vs `epacPedales` in
+`normas.ts`): never share a requirement between them.
+
+**The pedal cycle's file** (`homologacion/epac/`, 2026-11-24, Eugenio: «matriz de conformidad normativa… cada obligación
+legal vinculada a un plano, cálculo, ensayo, inspección o documento que demuestre su cumplimiento… creo que es la clave»).
+It is not an approval: the maker certifies it himself, so the page is his file and says how far along it is (0-100 %) before
+the first unit can be sold. Six sections on a side menu: Resumen, Matriz de conformidad, Ensayos, Documentos legales, Archivos,
+Normativa y referencia.
+
+| File | What |
+|---|---|
+| `catalogo.ts` | THE MATRIX AS DATA: `OBLIGACIONES` (52, each with `peso` 3/2/1, what the law asks, where, `verificada`, `diseno` = the id of a 3D-design requirement whose verdict shows beside it, and its `huecos`: slots of type plano / cálculo / ensayo / inspección / documento; a slot with `ensayo`, `doc` or `fab` takes its state from there) and `GRUPOS_MATRIZ` |
+| `ensayos.ts` | the 14 tests: instruments, preparation, proposed procedure, criterion (`criterioLegal` only where a law gives the figure), the fields to write down (`diseno` = what the 3D design says, to compare) |
+| `documentos.ts` | the 11 legal documents as sections with a GENERATOR each (draft from the design, the maker's details and the state of tests and matrix); `CARPETA_LEGAL` = the eight documents of the pasted text |
+| `textoAportado.ts`, `referencia.ts` | what Eugenio pasted, kept whole and split by heading; `referencia.ts` adds what was checked against the law (`contraste`) and the inspector's checklist (`INSPECCION`) |
+| `tipos.ts`, `progreso.ts` | what is stored; the pure maths (states, 0-100 %, «lo que falta», `contextoDoc`). `scripts/expediente.ts` imports both in Node |
+| `almacen.ts` | the client store: local value at once, saved a second after the last keystroke, one request per key with the `version` read (409 = somebody else saved: the newer value replaces it and the page says so). Nothing in `localStorage` |
+| `PaginaEpac.tsx` + `Panel*.tsx`, `MatrizConformidad.tsx`, `Editor*.tsx`, `Referencia.tsx`, `Adjuntos.tsx`, `ui.tsx`, `exportar.ts` | the screens; `exportar.ts` builds the self-contained HTML of a report or document (escaped: what the engineer types is data) |
+
+- **The server.** `src/server/aeromovilExpediente.ts`: table `aeromovil_expediente(clave, valor jsonb, version, updated_by,
+  updated_at)`, `GET /api/aeromovil/expediente` and `PUT /api/aeromovil/expediente/:clave`, only the owner of the Aeromóvil
+  or a level-4 role (the file holds a company's legal papers). One key per obligation (`matriz-o03`), per test
+  (`ensayo-e01`), per document (`doc-d10`), plus `fabricante` and `biblioteca`; 80,000 characters per key (the biggest
+  obligation, filled to the limit of its fields, is 10,426). jsonb does not keep the order of object keys, lists keep theirs:
+  never rely on key order. Files go through the existing `POST /api/aeromovil/adjuntos` (public by an unguessable URL).
+- **A new obligation**: one object in `OBLIGACIONES` (next free id of its group), `verificada: true` only if the law's text
+  was read; slots with `ensayo`/`doc` must name a real test/document. **A new test**: one object in `ENSAYOS` and a slot with
+  `ensayo` in the obligation it proves. **A new document**: one object in `DOCUMENTOS`; a generator writes `pc('qué falta')`
+  where only a person can know. Then `npx tsx scripts/expediente.ts` must end «Todo OK» (ids, references, every generator
+  runs, the biggest value fits the server's limit).
+- **A section marked «revisada» freezes its text** (so an approved document never changes when the design's numbers do);
+  «Volver al borrador automático» undoes it. A report or document with a `[por completar: …]` cannot be approved.
+- **The percentages**: a slot is 1 done, 0,5 in progress; an obligation is the mean of its slots; the group and the total weigh
+  each obligation by `peso`; «lo imprescindible» is the same over weight 3 only; «no aplica» leaves the count only with its
+  reason written. A slot marked done by hand with no file is flagged (an inspector will ask to see it).
+- **Not verified, and the page says so**: EN 15194 / EN 17860 full texts (paid), EN 17860-6, the Commission's statement of
+  11-2-2025, the date and the internal-control claim of Regulation 2023/1230, the details of Regulation 2023/1542 (batteries),
+  the year of manufacture on the plate (Directive 2006/42/CE annex I 1.7.3), whether the GPSR applies, the DGT and insurance
+  statements. Lights and reflectors are not in the 3D design.
 
 **Before you change this, decide**: the figures were read on 2026-11-17 mostly from legislation.gov.uk (the EU text
 as of 31-1-2020) and the consolidated 44/2014 on EUR-Lex; `FUENTES[x].leido: false` marks what was cited without
 rereading. Re-check against EUR-Lex consolidated texts before trusting a margin of a few kg or kW.
+
+**And for the pedal cycle's file**: today one JSON document per key on the server (a table, two routes, versioned writes:
+the file follows Eugenio to any device and Claude can read and fill it) versus a row per obligation, attempt and document
+(≈ 1 day: migrations, a route per thing). The second pays the day more than one person edits at once, or an inspection asks
+for who changed what and when: today a save replaces the key's value and keeps no history (tech debt, 2026-11-24). Reports
+and documents are HTML built in the browser (`exportar.ts`), not PDF files on the server: printing to PDF is the browser's.
 
 ## `precios/` — prices and labour (2026-11-17)
 

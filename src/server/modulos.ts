@@ -107,6 +107,7 @@ import { registerCalendarioRoutes } from './calendario.js';
 import { registerCalendarioArteRoutes } from './calendarioArte.js';
 import { registerAeromovilRoutes } from './aeromovil.js';
 import { registrarAdjuntosAeromovil } from './aeromovilAdjuntos.js';
+import { registrarExpedienteAeromovil } from './aeromovilExpediente.js';
 import { registerConcienciaRoutes } from './conciencia.js';
 import { registerBuzonProyectosRoutes } from './buzonProyectos.js';
 import { registerPersonasRoutes } from './personas.js';
@@ -380,6 +381,12 @@ export const MODULOS: Modulo[] = [
     montar: (app, db) => registrarAdjuntosAeromovil(app, db),
     nota: 'Aeromóvil: archivos de cada componente (presupuestos, fichas técnicas; migración 0224). '
         + 'Subir pide nivel 1 (lee req.user), así que va después de la autenticación.',
+  },
+  {
+    nombre: 'aeromovil-expediente',
+    montar: (app, db) => registrarExpedienteAeromovil(app, db),
+    nota: 'Aeromóvil: expediente del fabricante del ciclo de pedales con pedaleo asistido (matriz de conformidad, ensayos, documentos; migración 0234). '
+        + 'Solo el dueño o un admin (lee req.user), así que va después de la autenticación.',
   },
   {
     nombre: 'conciencia',

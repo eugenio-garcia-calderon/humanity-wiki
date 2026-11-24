@@ -51,7 +51,7 @@ export function evaluarCategoria(f: FichaHomologacion, cat: IdCategoria): Evalua
   const resultados = REQUISITOS.filter(r => r.categorias.includes(cat)).map(r => evaluarRequisito(r, f, cat)).filter((r): r is Resultado => !!r);
   const cuenta: Record<Estado, number> = { cumple: 0, no: 0, condicion: 0, comprobar: 0 };
   for (const r of resultados) cuenta[r.estado]++;
-  const bloqueantes = resultados.filter(r => r.estado === 'no' && (r.req.medida?.decide || r.req.id === 'horcajadas' || r.req.id === 'cerrado' || r.req.id === 'velocidadDiseno' || r.req.id === 'epacPedales' || r.req.id === 'l1eaRuedas'));
+  const bloqueantes = resultados.filter(r => r.estado === 'no' && (r.req.medida?.decide || r.req.id === 'horcajadas' || r.req.id === 'cerrado' || r.req.id === 'velocidadDiseno' || r.req.id === 'epacPedales' || r.req.id === 'l1eaPedales' || r.req.id === 'l1eaRuedas'));
   return { cat, resultados, cuenta, bloqueantes };
 }
 
