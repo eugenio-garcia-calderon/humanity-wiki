@@ -11,6 +11,12 @@
       "ruta": "src/components/aeromovil/precios/manoObra.ts",
       "motivo": "Precio bajo cada pestaña y mano de obra de bicicleta",
       "desde": "2026-11-24T10:05:25.737Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/components/aeromovil/precios/PanelManoObra.tsx",
+      "motivo": "Precio bajo cada pestaña y mano de obra de bicicleta",
+      "desde": "2026-11-24T10:05:28.322Z"
     }
   ]
 }
