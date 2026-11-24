@@ -30,10 +30,22 @@ const casos: [string, Parametros][] = [
 ];
 for (const f of process.argv.slice(2)) casos.push([f, deDiseno(JSON.parse(readFileSync(f, 'utf8')))]);
 
+// (2026-11-24, «peso editable») the user's own weights (`P.pesos`): every part ×0.5 and ×2 must give exactly half and double
+// the empty vehicle, and the sections must still add up (the frame lighter than its own tubes included)
+const factores: Record<string, number> = {};
+for (const [n, P] of [...casos]) {
+  const m0 = crearModelo(P), r0 = calcular(m0, areas(m0)); if (!r0.triciclo) continue;
+  for (const k of [0.5, 2]) {
+    const pesos: Record<string, number> = {}; for (const [nombre, kg] of Object.entries(r0.triciclo.pesosBase)) pesos[nombre] = kg * k;
+    casos.push([`${n} · todas las piezas ×${k}`, { ...P, pesos } as Parametros]); factores[`${n} · todas las piezas ×${k}`] = k * r0.mVeh;
+  }
+}
+
 for (const [n, P] of casos) {
   const m = crearModelo(P), res = calcular(m, areas(m)), ps = pesosSecciones(res, m);
   console.log(`\n== ${n}: ${res.mVeh.toFixed(2)} kg en vacío`);
   if (!ps) { ok(false, `${n}: sin secciones`); continue; }
+  if (factores[n] != null) ok(cerca(res.mVeh, factores[n]), `${n}: el vehículo pesa ${res.mVeh} y debía pesar ${factores[n]}`);
   const deps = kgPorDepartamento(res);
   const porDep: Record<string, number> = {};
   for (const [k, s] of Object.entries(ps.secciones)) {

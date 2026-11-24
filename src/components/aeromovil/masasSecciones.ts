@@ -95,6 +95,8 @@ function desgloseBastidor(tubos: Tubo[], kgPieza: number, densidad: number, fij:
     a.kg += kg; a.m += l; a.n++; grupos.set(g, a);
   }
   const tubosP: PartePeso[] = [...grupos].map(([g, a]) => ({ nombre: g, kg: a.kg, nota: `${a.n} tubo${a.n > 1 ? 's' : ''}, ${f2(a.m)} m de Ø${Math.round(a.d * 1000)} × ${f1(a.pared * 1000)} mm` }));
+  // (2026-11-24, «peso editable») a frame the user set lighter than its own tubes: the tubes scale down, so the pieces still add up to the part
+  const kgT0 = suma(tubosP); if (kgPieza < kgT0 - 1e-9 && kgT0 > 0) for (const t of tubosP) t.kg *= kgPieza / kgT0;
   const kgTubos = suma(tubosP), metros = [...grupos.values()].reduce((s, a) => s + a.m, 0);
   // the joints are the rest of the part (the model: «Uniones, chapas y tornillería», at least 15 % of the tubes on the Triciclo)
   const U = Math.max(0, kgPieza - kgTubos);

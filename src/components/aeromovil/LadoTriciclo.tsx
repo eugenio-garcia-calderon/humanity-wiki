@@ -24,6 +24,7 @@ import { pasoTriciclo } from './triciclo/medidas';
 import { pesoSeccion, seccionesTriciclo, textoPesoSeccion } from './masasSecciones';
 import { DesglosePeso, SinSeccion } from './PesoSeccion';
 import { ContextoProveedores } from './proveedores/ProveedorParte';
+import { conPeso } from './precios/EditorPeso';
 import { conPrecio, precioSeccion, preciosDiseno, textoPesoPrecio, type ContextoPrecio } from './precios/precios';
 import { valoresCatalogo, type CATALOGO_CLAVES } from './catalogoTren';
 import { fmt, m2, Deslizador, Bloque, Selector, ListaComprobaciones } from './controles';
@@ -327,6 +328,8 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
   const preciosSec = pesosSec ? preciosDiseno(pesosSec, { P, modelo: modelo as unknown as ContextoPrecio['modelo'], res }) : null;
   const precioDe = (b: string) => (dep === 'proyecto' ? null : precioSeccion(preciosSec, dep, b));
   const alPrecio = (nombre: string, v: number | null) => set('precios', conPrecio(P, nombre, v));
+  // (2026-11-24, «peso editable») each part's weight can be set too: the model's estimate (`pesosBase`) and the user's own (`P.pesos`)
+  const pesosEd = res.triciclo ? { base: res.triciclo.pesosBase, propios: P.pesos, alCambiar: (nombre: string, v: number | null) => set('pesos', conPeso(P.pesos, nombre, v)) } : undefined;
   const cdComparar = cd.cd != null && cd.areaRef != null ? { cd: cd.cd, areaRef: cd.areaRef } : null;
   const checks = res.comprobaciones.filter(c => dep === 'proyecto' || (c.dep ?? '').split(',').includes(dep));
   const malas = checks.filter(c => c.holgura < c.minimo).length;
@@ -483,12 +486,12 @@ export function LadoTriciclo({ P, set, res, modelo, dep, cd, abrir }: {
           {bloque === 'Acabado interior' && <FichaAcabado T={T} piezas={rt.piezas} areas={modelo.interior.forro?.areas ?? null} consola={!!modelo.interior.consola} />}
           {bloque === 'Tapicería' && <p className="-mt-1 text-xs text-slate-500">{T.tTapiz === 'serie' ? 'Los asientos de serie: vinilo gris oscuro acolchado en rombos con un pespunte rojo. Al elegir otra tapicería, la funda cambia en los mismos asientos (sillín y respaldos, butacas o asientos de las filas); en las butacas, la carcasa blanca pasa al color de los laterales.' : `${TAPICES.find(t => t.k === T.tTapiz)?.n ?? ''}: la funda nueva cubre los mismos asientos${T.tAsientos === 'butacas' ? ' y la carcasa de las butacas toma el color oscuro de los laterales, como los costados de los asientos del Vision Jet' : ''}. ${T.tCostura === 'no' ? 'Sin costura vista.' : T.tCostura === 'recta' ? 'Costura recta: canales a lo largo, con un pespunte doble a cada lado.' : 'Costura geométrica: líneas que se cruzan desde dos nudos, como la del Vision Jet, con pespunte doble.'} Masa: la diferencia de la funda con la de serie (que ya cuenta «Un asiento»).`}{T.tCinturon !== 'no' ? ' Cinturones de tres puntos: del hombro, por encima del pecho, a la hebilla en la otra cadera, y la cinta de las caderas; en un asiento vacío, recogido por su costado.' : ''}</p>}
           {bloque === 'Batería' && !paquete && <p className="-mt-1 text-xs text-slate-500">Primero en el morro, donde el Cuadriciclo en rombo lleva la rueda delantera ({Math.round(rt.bateria.litrosMorro)} L), luego en un módulo estrecho entre los pies del piloto; si hace falta más, el módulo del morro sube, crece hacia la punta y queda un módulo plano bajo los sillines. Ahora: {Math.round(rt.bateria.litros)} L y {Math.round(rt.bateria.kg)} kg{rt.bateria.litros - rt.bateria.cabe > 0.05 ? `: caben ${Math.round(rt.bateria.cabe)} L, faltan ${Math.round(rt.bateria.litros - rt.bateria.cabe)} (un morro más largo, una carrocería más ancha o celdas más densas)` : ''}.</p>}
-          <DesglosePeso s={seccionDe(bloque)} abierto={bloque === 'Bastidor'} precios={{ s: precioDe(bloque), alCambiar: alPrecio }} />
+          <DesglosePeso s={seccionDe(bloque)} abierto={bloque === 'Bastidor'} precios={{ s: precioDe(bloque), alCambiar: alPrecio }} pesos={pesosEd} />
         </Bloque>
       ))}
       {/* (2026-11-24) bicycle components: the class and the bicycle running gear (Rodaje), the driver's chainless pedals (Motor): BiciTriciclo.tsx */}
       {dep === 'rodaje' && <BloqueClaseBici P={P} T={T} set={set} bloque={BLOQUE_BICI} plegable={{ abierto: abiertos.has(BLOQUE_BICI), alAlternar: () => alternar(BLOQUE_BICI) }} />}
-      {dep === 'propulsion' && <BloquePedales P={P} set={set} modelo={modelo} pedaleo={e?.pedaleo ?? null} kmh={T.tVel} autonomia={e ? e.autonomia : null} seccion={pesoSeccion(pesosSec, 'propulsion', BLOQUE_PEDALES)} precios={{ s: precioSeccion(preciosSec, 'propulsion', BLOQUE_PEDALES), alCambiar: alPrecio }} plegable={{ abierto: abiertos.has(BLOQUE_PEDALES), alAlternar: () => alternar(BLOQUE_PEDALES) }} />}
+      {dep === 'propulsion' && <BloquePedales P={P} set={set} modelo={modelo} pedaleo={e?.pedaleo ?? null} kmh={T.tVel} autonomia={e ? e.autonomia : null} seccion={pesoSeccion(pesosSec, 'propulsion', BLOQUE_PEDALES)} precios={{ s: precioSeccion(preciosSec, 'propulsion', BLOQUE_PEDALES), alCambiar: alPrecio }} pesos={pesosEd} plegable={{ abierto: abiertos.has(BLOQUE_PEDALES), alAlternar: () => alternar(BLOQUE_PEDALES) }} />}
       {/* (2026-11-17) Motor › Electrónica de potencia: its own block (electronica/BloqueElectronica.tsx) */}
       {dep === 'propulsion' && <BloqueElectronica T={T} set={set} modelo={modelo} mTot={res.mTot} e={e} plegable={{ abierto: abiertos.has(BLOQUE_ELECTRONICA), alAlternar: () => alternar(BLOQUE_ELECTRONICA) }} />}
       {/* (2026-11-17, capo) the hybrid's cooling and air intakes: RefrigeracionTriciclo.tsx */}

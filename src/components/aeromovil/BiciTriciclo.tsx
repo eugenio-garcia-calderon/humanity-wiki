@@ -9,7 +9,7 @@
 // (campos.ts): they are optional on a design, as the cooling's.
 import type { ModeloTriciclo, Parametros } from './geometria';
 import { Bloque, Deslizador, MarcaClase, Selector, fmt } from './controles';
-import { DesglosePeso } from './PesoSeccion';
+import { DesglosePeso, type PesosEditables } from './PesoSeccion';
 import { textoPesoSeccion, type SeccionPeso } from './masasSecciones';
 import { eur, textoPesoPrecio, type PrecioSeccion } from './precios/precios';
 import { OPCIONES_FRENO, OPCIONES_GENERADOR, OPCIONES_SUSPENSION, frenoBici, generadorPedal, suspensionBici, type PiezaBici } from './bici/catalogo';
@@ -73,9 +73,9 @@ export function BloqueClaseBici({ P, T, set, bloque, seccion, plegable }: { P: P
 }
 
 /** «Motor › Pedales»: the driver's chainless pedals. */
-export function BloquePedales({ P, set, modelo, pedaleo, kmh, autonomia, seccion, precios, plegable }: {
+export function BloquePedales({ P, set, modelo, pedaleo, kmh, autonomia, seccion, precios, pesos, plegable }: {
   P: Parametros; set: Poner; modelo: ModeloTriciclo; pedaleo: Pedaleo | null; kmh: number; autonomia: number | null;
-  seccion: SeccionPeso | null; precios: Precios; plegable?: Plegable;
+  seccion: SeccionPeso | null; precios: Precios; pesos?: PesosEditables; plegable?: Plegable;
 }) {
   const C = camposBici(P), con = C.tPedales === 'si', p = modelo.pedalesBici, gen = generadorPedal(C.tPedGen);
   const poner = (k: ClaveBici, v: number | string) => set(k as keyof Parametros, v as never);
@@ -114,7 +114,7 @@ export function BloquePedales({ P, set, modelo, pedaleo, kmh, autonomia, seccion
           Una persona en forma sostiene de 50 a 150 W durante una hora. Legalmente no está claro que un pedalier que solo mueve un generador cuente como «pedaleo asistido»: está anotado en Homologación.
         </p>
       )}
-      <DesglosePeso s={seccion} precios={precios} />
+      <DesglosePeso s={seccion} precios={precios} pesos={pesos} />
     </Bloque>
   );
 }

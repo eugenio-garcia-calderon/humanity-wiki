@@ -39,6 +39,8 @@ export interface ResultadosTriciclo extends Omit<ResultadosBala, 'cabezas'> {
   ocupantes: number;
   /** Masa por partes con su centro (para el centro de gravedad); los ocupantes van aparte. */
   piezas: PiezaMasa[];
+  /** (2026-11-24) what each part weighed by the model's own estimate, by name, before the user's own weights (`P.pesos`) replaced some */
+  pesosBase: Record<string, number>;
   cg: { x: number; y: number; masa: number; vacio: { x: number; y: number } };
   /** Umbral de vuelco estático (g) con dos ocupantes y con el piloto solo, y lo que pesa el eje delantero. */
   /** (2026-11-17: `agarre`, the tyres' dry grip, `agarreTriciclo`, and `objetivo`, what the check asks: `objetivoVuelco`) */
@@ -164,6 +166,14 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
   // the tilt system (2026-11-16): sized with the car as it is without it, its riders on board, then added to the masses
   const tilt = m.bascula ? tiltTriciclo(m, piezas) : null;
   if (tilt) for (const c of tilt.componentes) piezas.push({ nombre: `Basculación: ${c.nombre.toLowerCase()}`, kg: c.kg, x: c.x, y: c.y, nota: c.ficha.join('; ') });
+  // 2026-11-24 («peso editable»): the user's own weight of a part replaces the estimate; everything below (totals, centre of
+  // gravity, wheel loads, sections, prices per kg) reads this list. Absent `P.pesos`: nothing changes.
+  const pesosBase: Record<string, number> = {}; for (const p of piezas) pesosBase[p.nombre] = (pesosBase[p.nombre] ?? 0) + p.kg;
+  const propios = (m.P as { pesos?: Record<string, number> }).pesos;
+  if (propios) for (const [n, kg] of Object.entries(propios)) {
+    const base = pesosBase[n]; if (!(base > 0) || !Number.isFinite(kg) || kg <= 0) continue;
+    for (const p of piezas) if (p.nombre === n) p.kg *= kg / base;
+  }
   const masas: Record<string, number> = {}; for (const p of piezas) masas[p.nombre] = (masas[p.nombre] ?? 0) + p.kg;
   // (2026-11-17, «muñecos»: each rider's mass follows its size, triciclo/talla.ts; `tMOcc` is the average man's)
   const mVeh = piezas.reduce((a, p) => a + p.kg, 0), kgPil = m.cuerpos.piloto.kg, kgPas = m.cuerpos.pasajero.kg;
@@ -506,7 +516,7 @@ export function calcularTriciclo(m: ModeloTriciclo, ar: { carroceria: number; cr
     tilt,
     area, vol, piel: ar.carroceria + ar.cristal, cristal: ar.cristal, cupula: [-m.cup.XC0, -m.cup.XC1],
     viaSubida: F.VIA_LAT > m.viaPedida + 1e-9 ? F.VIA_LAT : null, cabezas,
-    piezas, cg: { x: cg.x, y: cg.y, masa: cg.masa, vacio: { x: vacio.x, y: vacio.y } }, vuelco: { ssf, ssfSolo, repartoDel, agarre, objetivo },
+    piezas, pesosBase, cg: { x: cg.x, y: cg.y, masa: cg.masa, vacio: { x: vacio.x, y: vacio.y } }, vuelco: { ssf, ssfSolo, repartoDel, agarre, objetivo },
     giro: { radio, dentro: di * 180 / Math.PI, fuera: dout * 180 / Math.PI },
     bastidor: { M: Mmax, tension, seguridad, metros },
     bateria: { litros: m.kWh * 1000 / L('tWhL'), kg: m.kWh * 1000 / L('tWhKg'), litrosMorro: 0.42 * 0.30 * Math.max(1, F.kW) * 0.20 * 1000, cabe: m.bateriaCabe },
