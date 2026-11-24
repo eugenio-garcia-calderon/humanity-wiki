@@ -20,12 +20,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "drizzle/0240_sectores_todos_en_linea.sql",
-      "motivo": "Vivienda, Cultura e Informática en una línea",
-      "desde": "2026-11-24T21:19:42.615Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/sitio/VistaProyectosSitio.tsx",
       "motivo": "Vivienda, Cultura e Informática en una línea",
       "desde": "2026-11-24T21:19:46.100Z"
