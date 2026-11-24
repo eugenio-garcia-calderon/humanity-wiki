@@ -41,6 +41,12 @@
       "ruta": "src/components/aeromovil/homologacion/PaginaHomologacion.tsx",
       "motivo": "expediente EPAC (matriz, ensayos, documentos)",
       "desde": "2026-11-24T12:05:08.344Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "scripts/homologacion.ts",
+      "motivo": "expediente EPAC (matriz, ensayos, documentos)",
+      "desde": "2026-11-24T12:05:10.878Z"
     }
   ]
 }
