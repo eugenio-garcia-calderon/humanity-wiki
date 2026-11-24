@@ -17,12 +17,6 @@
       "ruta": "src/components/aeromovil/CLAUDE.md",
       "motivo": "Aeromóvil: el 3D de cada parte enseña solo lo suyo + ventana 30 % más baja (nube/partes-vehiculo)",
       "desde": "2026-11-24T20:48:39.945Z"
-    },
-    {
-      "agente": "prog1",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "Aeromóvil: el 3D de cada parte enseña solo lo suyo + ventana 30 % más baja (nube/partes-vehiculo)",
-      "desde": "2026-11-24T20:48:42.410Z"
     }
   ]
 }
