@@ -376,8 +376,10 @@ A department with a single part has no row (`SubmenuPartes` returns null under t
   the rest of the design (one figure) would not need this; a battery that moves the centre of gravity does.
 - **A part is its lines of the mass list.** `piezas` is a regex on the line's name (`Bastidor`, `Cinturones de tres puntos (2)`,
   `Interior: molduras de madera`…). `scripts/partes.ts` checks, over four designs, that no line belongs to two parts and that a
-  part's lines are of its own department (`grupoPieza` in `triciclo/masas.ts`). Lines no part claims are printed there:
-  today only «Varios» (the bolt-ons, department Batería) and, in the hybrid, the planetary gear and generator (12 kg).
+  part's lines are of its own department (`grupoPieza` in `triciclo/masas.ts`) and that a department's parts plus the lines no
+  part claims add up to its mass. Those lines (`numeros.ts` `sinParteDe`: the pedals of a bicycle design, the hybrid's planetary
+  gear and generator, the tilt system) are listed under the summary of a department, so its figure matches its tab; «Varios»
+  (the bolt-ons, department Batería) has no summary because Batería has one part.
 - Where a favourite touches the model: steering → `triciclo/masas.ts` `dimensionar` and `precios/precios.ts` `estimarBici`;
   motors, controllers, reduction gears and petrol engines were already read from `tCat…` by `catalogoTren.ts`. The petrol
   engine's price is split among its five lines by mass (`precios.ts`), because the catalogue price is for the whole engine.

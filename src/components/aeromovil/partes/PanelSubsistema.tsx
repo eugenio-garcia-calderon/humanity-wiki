@@ -21,7 +21,7 @@ import { DibujoConcepto, VistaAckermann } from './DibujosGeometria';
 import { Opciones, PartesDelProyecto, type Favoritas } from './Opciones';
 import { PlanoDireccion } from './PlanoDireccion';
 import { anotarDecision, escribirPorque, hoy, ultimaDecision } from './decisiones';
-import { aguantaRueda, datosGiro, numerosActuales } from './numeros';
+import { aguantaRueda, datosGiro, numerosActuales, sinParteDe } from './numeros';
 import { camposDeFavorita, elegidasDe, favoritaDe, opcionesDe } from './opciones';
 import { conEvaluaciones, useEvaluaciones } from './alternativas';
 import { datosDelDiseno } from './datosDiseno';
@@ -258,6 +258,7 @@ export function ResumenPartes({ dep, P, precios, alElegir }: { dep: string; P: P
     return { s, n, fav };
   });
   const kg = filas.reduce((a, f) => a + f.n.kg, 0), e = filas.reduce((a, f) => a + f.n.eur, 0);
+  const otras = sinParteDe(dep, precios), okg = otras.reduce((a, p) => a + p.kg, 0), oeur = otras.reduce((a, p) => a + p.eur, 0);
   return (
     <section aria-label={`${NOMBRE_DEP[dep as keyof typeof NOMBRE_DEP] ?? dep}: resumen`} className="mt-3 rounded-xl border border-slate-200 bg-white p-3">
       <h3 className="text-base font-semibold text-slate-900">{filas.length === 4 ? 'Las cuatro' : filas.length === 3 ? 'Las tres' : 'Las'} partes {DE_DEP[dep as keyof typeof DE_DEP] ?? ''}</h3>
@@ -272,6 +273,7 @@ export function ResumenPartes({ dep, P, precios, alElegir }: { dep: string; P: P
             </Button>
           </li>))}
       </ul>
+      {otras.length > 0 && <p className="mt-2 text-xs text-slate-600">Además, en este departamento hay piezas que no son de ninguna de estas partes: {otras.map(p => `${p.nombre} (${fmt(p.kg, 1)} kg · ${eur(p.eur)})`).join('; ')}. Con ellas el departamento suma {fmt(kg + okg, 1)} kg y {eur(e + oeur)}, como su pestaña.</p>}
     </section>
   );
 }

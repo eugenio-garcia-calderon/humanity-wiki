@@ -22,6 +22,7 @@ import { CONCEPTOS_DIRECCION, CREMALLERA_GEMINI, PREGUNTAS_ESTUDIO } from '../sr
 import { SUBSISTEMAS, esSub, partesDe, subsistema, tieneSub } from '../src/components/aeromovil/partes/subsistemas';
 import { OPCIONES_CONTROLADOR, OPCIONES_MOTOR, OPCIONES_REDUCTORA, OPCIONES_TERMICO, elegidasDe, selectorVisible } from '../src/components/aeromovil/partes/opciones';
 import { grupoPieza } from '../src/components/aeromovil/triciclo/masas';
+import { numerosActuales, sinParteDe } from '../src/components/aeromovil/partes/numeros';
 import { evaluar } from '../src/components/aeromovil/partes/alternativas';
 import { datosDelDiseno } from '../src/components/aeromovil/partes/datosDiseno';
 import { anotarDecision, ultimaDecision } from '../src/components/aeromovil/partes/decisiones';
@@ -238,6 +239,15 @@ for (const [nombre, Q] of [['por defecto', P0], ['completo', { ...PD, tMaletero:
     if (!dueñas.length) sueltas.push(`${p.nombre} ${p.kg.toFixed(1)} kg`);
   }
   console.log(`  ${nombre}: piezas sin parte propia: ${sueltas.join('; ') || 'ninguna'}`);
+}
+// the summary of a department: its parts plus the lines no part claims add up to the department's mass (the pedals of a bicycle design, the hybrid's planetary gear)
+for (const [nombre, Q] of [['por defecto', P0], ['híbrido', PH], ['bicicleta', { ...PARAMETROS_TRICICLO, ...BICI_PROPUESTA } as Parametros]] as const) {
+  const { m, res } = calc(Q), pr = preciosDiseno(pesosSecciones(res, m)!, { P: Q, modelo: m, res });
+  for (const dep of ['rodaje', 'propulsion', 'carroceria', 'interior'] as const) {
+    const delDep = res.triciclo!.piezas.filter((p: { nombre: string }) => grupoPieza(p.nombre) === dep).reduce((a: number, p: { kg: number }) => a + p.kg, 0);
+    const kg = partesDe(dep, Q).reduce((a, x) => a + numerosActuales(x.id, pr).kg, 0), otras = sinParteDe(dep, pr);
+    ok(casi(kg + otras.reduce((a, p) => a + p.kg, 0), delDep, 0.01), `diseño ${nombre}, ${dep}: las partes (${kg.toFixed(2)} kg) y las piezas sin parte (${otras.map(p => `${p.nombre} ${p.kg.toFixed(2)}`).join('; ') || 'ninguna'}) suman lo que el departamento (${delDep.toFixed(2)} kg)`);
+  }
 }
 const evsDe: Record<string, Record<string, NonNullable<ReturnType<typeof evaluar>>>> = {};
 for (const { sub, P } of [{ sub: 'carenado', P: P0 }, { sub: 'cristales', P: P0 }, { sub: 'solar', P: P0 }, { sub: 'accesos', P: PD }, { sub: 'retrovisores', P: P0 }, { sub: 'luces', P: P0 }, { sub: 'asientos', P: PD }, { sub: 'mandos', P: P0 }, { sub: 'salpicadero', P: P0 }, { sub: 'acabado', P: { ...PD, tAcabado: 'paneles' } as Parametros }] as const) {
