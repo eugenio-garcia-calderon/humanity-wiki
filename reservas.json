@@ -23,6 +23,12 @@
       "ruta": "drizzle/0237_economia_publica_optimizada.sql",
       "motivo": "Renombrar el modelo a Economía pública optimizada",
       "desde": "2026-11-24T13:36:57.161Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/App.tsx",
+      "motivo": "Economía pública optimizada y tarjetas de Política",
+      "desde": "2026-11-24T13:41:01.461Z"
     }
   ]
 }
