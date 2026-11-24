@@ -237,6 +237,11 @@ vehicle in Spain) is the only one developed in depth; the rest is sketched on pu
 | `almacen.ts` | Eugenio's marks (sí / no / dudo), notes and answers — `localStorage` only, never the server |
 | `VistaEstrategia.tsx` | the drawing (boxes left to right, a parent on its first child's row), the detail card, the questions list |
 
+**More than one strategy (2026-11-24).** `ESTRATEGIAS` in `arbol.ts` lists the trees: each has its own root
+(`padre: null`), the boxes open on a first visit and the box chosen when its button is pressed. The second,
+«Cuadriciclo estilo bicicleta», is `arbolBici.ts` (ids `b-…`). The tree on screen is the one the chosen box belongs to
+(`raizDe`). A third strategy: a new file with its nodes, spread into `ARBOL`, and one entry in `ESTRATEGIAS`.
+
 **A new node or an answer from Eugenio**: edit `arbol.ts`. `comprobado: 'leido'` only when the source in `fuentes` was
 read and says it; otherwise `'por-confirmar'`. A question for him goes in `preguntas` of the node that needs it. When he
 answers (in chat, or pasting «Copiar mis respuestas»), move the answer into the node's text and drop the question.
