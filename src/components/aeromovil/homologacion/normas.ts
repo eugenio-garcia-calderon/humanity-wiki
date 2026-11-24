@@ -12,7 +12,7 @@
 // Where a later amendment may have changed a figure, the requirement says so («por confirmar en EUR-Lex»).
 // The UI text is Spanish (it is for Eugenio); the comments are English.
 
-export type IdFuente = 'r168' | 'r168art' | 'r168anx6' | 'r168anx8' | 'r3' | 'r44' | 'r134' | 'r2018' | 'r2019' | 'rd750' | 'permisos' | 'permisoB' | 'b1' | 'r901' | 'r85' | 'r134anx' | 'r168anx3' | 'r168art42' | 'dgtL1eA' | 'rd750anx' | 'rd339' | 'pjc780' | 'en15194' | 'en17860' | 'maq2006' | 'maq2023' | 'r168excl';
+export type IdFuente = 'r168' | 'r168art' | 'r168anx6' | 'r168anx8' | 'r3' | 'r44' | 'r134' | 'r2018' | 'r2019' | 'rd750' | 'permisos' | 'permisoB' | 'b1' | 'r901' | 'r85' | 'r134anx' | 'r168anx3' | 'r168art42' | 'dgtL1eA' | 'rd750anx' | 'rd339' | 'pjc780' | 'en15194' | 'en17860' | 'maq2006' | 'maq2023' | 'r168excl' | 'bat2023' | 'gpsr2023' | 'rgv';
 
 /** The texts behind every figure. `leido`: read on 2026-11-17 (false: cited from memory of the text, to confirm). */
 export const FUENTES: Record<IdFuente, { titulo: string; url: string; leido: boolean }> = {
@@ -45,6 +45,9 @@ export const FUENTES: Record<IdFuente, { titulo: string; url: string; leido: boo
   en17860: { titulo: 'Serie EN 17860 «Carrier cycles»: parte 3 (ciclos de carga ligeros de varias huellas, mecánica) y parte 5 (eléctrica), según el catálogo de EVS', url: 'https://www.evs.ee/en/evs-en-17860-3-2024', leido: false },
   maq2006: { titulo: 'Directiva 2006/42/CE de máquinas (la EN 15194 la cita en su anexo ZA)', url: 'https://eur-lex.europa.eu/eli/dir/2006/42/oj', leido: false },
   maq2023: { titulo: 'Reglamento (UE) 2023/1230 de máquinas (sustituye a la Directiva 2006/42/CE desde el 20-1-2027)', url: 'https://eur-lex.europa.eu/eli/reg/2023/1230/oj', leido: false },
+  bat2023: { titulo: 'Reglamento (UE) 2023/1542 (baterías; las selladas de hasta 25 kg para vehículos eléctricos o de propulsión humano-eléctrica son «LMT»)', url: 'https://eur-lex.europa.eu/eli/reg/2023/1542/oj', leido: false },
+  gpsr2023: { titulo: 'Reglamento (UE) 2023/988 (seguridad general de los productos)', url: 'https://eur-lex.europa.eu/eli/reg/2023/988/oj', leido: false },
+  rgv: { titulo: 'Real Decreto 2822/1998, Reglamento General de Vehículos (texto consolidado; su artículo 22 trata la advertencia acústica)', url: 'https://www.boe.es/buscar/act.php?id=BOE-A-1999-1826', leido: false },
   r168excl: { titulo: 'Reglamento (UE) 168/2013, artículo 2, apartado 2, letra h (excluye los ciclos de pedaleo asistido de 250 W y 25 km/h)', url: 'https://www.legislation.gov.uk/eur/2013/168/article/2/adopted', leido: true },
   b1: { titulo: 'RACE: el permiso B1 para cuadriciclos pesados (en consulta desde julio de 2024, no en vigor)', url: 'https://www.race.es/?p=254932', leido: true },
 };
@@ -627,11 +630,17 @@ export const REQUISITOS: Requisito[] = [
   },
   {
     id: 'epacPedales', grupo: 'Clasificación', titulo: 'Se mueve pedaleando: la propulsión es sobre todo muscular',
-    detalle: 'El RD 339/2014 define el ciclo como propulsado «exclusiva o principalmente por la energía muscular», normalmente con pedales, y la Orden PJC/780/2025 exige que el ciclo lleve pedales. Los pedales no pueden ser decorativos: el motor ayuda, no sustituye. Un pedalier que solo mueve un generador (pedaleo «por cable») no está claro que cuente como pedaleo asistido (en L1e-A tampoco): a confirmar por escrito con el servicio técnico.',
-    ref: 'RD 339/2014, art. 2; Orden PJC/780/2025; Reglamento 168/2013, art. 2.2.h', fuente: 'rd339', categorias: ['EPAC', 'L1e-A'],
-    comprobar: f => ({ estado: f.pedaleo ? 'comprobar' : 'no', texto: f.pedaleo ? 'Tiene pedales; si mueven un generador y no las ruedas, confirmar que cuenta como pedaleo asistido.' : 'No tiene pedales.' }),
+    detalle: 'El RD 339/2014 define el ciclo como propulsado «exclusiva o principalmente por la energía muscular», normalmente con pedales, y la Orden PJC/780/2025 exige que el ciclo lleve pedales. Los pedales no pueden ser decorativos: el motor ayuda, no sustituye. Un pedalier que solo mueve un generador (pedaleo «por cable») no está claro que cuente como pedaleo asistido: a confirmar por escrito. Tampoco puede haber un acelerador independiente de los pedales: eso lo convertiría en vehículo a motor.',
+    ref: 'RD 339/2014, art. 2; Orden PJC/780/2025; Reglamento 168/2013, art. 2.2.h', fuente: 'rd339', categorias: ['EPAC'],
+    comprobar: f => ({ estado: f.pedaleo ? 'comprobar' : 'no', texto: f.pedaleo ? 'Tiene pedales; si mueven un generador y no las ruedas, confirmar que cuenta como pedaleo asistido. Y comprobar que no hay acelerador independiente.' : 'No tiene pedales.' }),
   },
-  // ─────────────────────────────── L1e-A (2026-11-24)
+  // ─────────────────────────────── L1e-A (2026-11-24): its own rule, not the pedal cycle's (two categories, two laws)
+  {
+    id: 'l1eaPedales', grupo: 'Clasificación', titulo: 'Ciclo de pedales: el motor ayuda a pedalear, no lo sustituye',
+    detalle: 'Criterios 9 y 12 del anexo I del Reglamento 168/2013: el vehículo está diseñado para pedalear y el fin principal del motor es ayudar a hacerlo. Unos pedales decorativos no valen. Un pedalier que solo mueve un generador (pedaleo «por cable») no está claro que cuente: a confirmar por escrito con el servicio técnico.',
+    ref: 'Reglamento 168/2013, anexo I, criterios 9 y 12', fuente: 'r168anx3', categorias: ['L1e-A'],
+    comprobar: f => ({ estado: f.pedaleo ? 'comprobar' : 'no', texto: f.pedaleo ? 'Tiene pedales; si mueven un generador y no las ruedas, confirmar que cuenta como ciclo de pedales.' : 'No tiene pedales.' }),
+  },
   {
     id: 'l1eaPotencia', grupo: 'Propulsión y velocidad', titulo: 'Potencia continua de 1.000 W como mucho',
     detalle: 'Criterio 11 del anexo I: potencia nominal continua o neta máxima de 1.000 W o menos. Es la potencia que el controlador mantiene, no la punta: un controlador que limite a 1 kW continuos cumple aunque dé más un instante (hay que declararlo y medirlo, Reglamento 134/2014 anexo X). Todo L1e además tiene un tope de 4 kW de potencia y 45 km/h de diseño.',

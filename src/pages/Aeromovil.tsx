@@ -699,7 +699,7 @@ export default function Aeromovil() {
       {/* El diseño se queda montado aunque se mire otra vista: así «Exportar» puede sacar el STL de lo que se ve. */}
       <main className={cn('mx-auto max-w-[1600px] gap-4 px-4 py-4', seccion !== 'diseno' ? 'hidden' : homologando ? 'block' : verGaraje ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_380px]' : 'flex max-w-3xl flex-col')}>
         {/* (2026-11-24, «Homologación»: pantalla completa, sin garaje) the page replaces the 3D view and the side panel; both stay mounted, hidden */}
-        {homologando && <PaginaHomologacion P={paraCalcular.P} modelo={paraCalcular} res={res} cd={esTri ? cdTri : esBas ? cdBas : null} nombre={nombreVehiculo} />}
+        {homologando && <PaginaHomologacion P={paraCalcular.P} modelo={paraCalcular} res={res} cd={esTri ? cdTri : esBas ? cdBas : null} nombre={nombreVehiculo} puedeDecidir={!!dueno?.puedeDecidir} />}
         <div className={cn('min-w-0', homologando && 'hidden')}>
         <section ref={ventana3d} aria-label="Vista 3D" className={cn('overflow-hidden bg-slate-50', !verGaraje && completa === 'no' && 'hidden',
           completa === 'no' ? cn('relative h-[62vh] min-h-[380px] rounded-xl border border-slate-200', esA1 ? 'lg:h-[72vh]' : 'lg:sticky lg:top-[68px] lg:h-[calc(100vh-88px)]')

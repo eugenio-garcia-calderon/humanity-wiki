@@ -2450,3 +2450,10 @@ They change saved designs' numbers on purpose.
 **Alternatives**: (a) a sixth vehicle with its own prefix and files: about 3 days and every later improvement of the Triciclo body done twice; (b) the proposal computed live from saved design 19: about 1 hour, but it changes whenever he edits the original.
 **Cost of switching later**: splitting the class into its own vehicle would mean copying `triciclo/` (≈ 3,500 lines); the catalogue and `bici/` would move unchanged.
 **Known consequence**: the heavy-vehicle checks (rollover target of 1.05 g, frame safety factor) judge a 25 km/h bicycle by a car's standard. They are left as they are and reported, not relaxed.
+
+## 2026-11-24 — The pedal cycle's file: one JSON document per key, drafts frozen when reviewed
+
+**Context.** Eugenio asked for the whole pre-sale file of the pedal cycle with pedal assistance: a requirement-by-requirement conformity matrix tied to its evidence, tests he runs and signs, legal documents generated and edited, and file management, with a percentage per item.
+**Decision.** (1) Store it on the server as one JSON document per key (`aeromovil_expediente`: one key per obligation, test and document, plus the maker's details and a shelf of loose files), written with the version that was read; the catalogue (obligations, tests, document generators) stays in code. (2) Marking a document section «revisada» saves the text that was reviewed. (3) The two pedal categories (L1e-A and EPAC) have separate requirement lists and separate pages.
+**Alternatives.** (1) A row per obligation/attempt/document (≈ 1 day more; pays when several people edit or an audit needs history); `localStorage` only (rejected: legal evidence must not live in one browser, and Claude could not read it). (2) Keep drafts live (rejected: an approved document would change by itself when a design number changes). (3) One page with a switch (rejected by Eugenio: «son dos categorías totalmente distintas»).
+**Cost to change.** Moving to rows: ≈ 1 day, the page code does not change (`almacen.ts` is the only reader). History: ≈ 3 hours (tech debt).
