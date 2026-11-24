@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/components/aeromovil/homologacion/PaginaHomologacion.tsx",
-      "motivo": "vía ciclo de pedales con pedaleo asistido (EN 15194)",
-      "desde": "2026-11-24T11:28:26.798Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/aeromovil/homologacion/PanelHomologacion.tsx",
       "motivo": "decimales de 0,25 kW",
       "desde": "2026-11-24T11:41:30.599Z"
