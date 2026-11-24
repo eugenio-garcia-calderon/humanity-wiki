@@ -10,6 +10,7 @@ import RedRelaciones, { AccionesPagina } from './RedRelaciones';
 import type { ContextoRuta } from '../../utils/precargado';
 import SugerirCorreccion from '../bloquesDatos/ficha/SugerirCorreccion';
 import { useSitio } from './ContextoSitio';
+import { esWebPropiaDeProyecto, anfitrionActual } from './barraDelSitio';
 import { useEsMovil } from '../../hooks/useEsMovil';
 import { MarcoLectura, CabeceraLectura } from './CabeceraLectura';
 import { cn } from '../../utils/cn';
@@ -168,7 +169,9 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
   const menuPropio = !!(pagina.sitio?.config && completarSitio(pagina.sitio.config).menu.activo);
   // Solo en los sitios que la piden (`sitio.barra`, hoy luzhumanidad.com): los demás conservan su cabecera.
   // También en la portada (2026-10-26, Eugenio: «la página principal con la misma estructura»), en lugar de su cabecera.
-  const conBarra = !!pagina.sitio?.raizId && !menuPropio && pagina.sitio?.config?.barra === true;
+  // (2026-11-25) …salvo en la web propia de un proyecto (aeromovil.org): allí no va la barra de la web madre ni su ruta (`barraDelSitio.ts`).
+  const webPropia = esWebPropiaDeProyecto(pagina.sitio?.raizId, sitio, anfitrionActual());
+  const conBarra = !!pagina.sitio?.raizId && !menuPropio && pagina.sitio?.config?.barra === true && !webPropia;
   // LA VISTA DE MAPA (2026-10-26, `VistaMapaSitio.tsx`): el mapa a toda la pantalla bajo la barra. La página
   // sigue montada y escondida: su termómetro o su filtro son los que ponen el territorio en la barra.
   // La portada abre en la vista que pida el sitio (`sitio.vistaInicial`); las demás páginas, en la suya.
@@ -242,7 +245,7 @@ export default function VistaPagina({ pagina, propio, pie, contexto }: {
           el indicador, con icono y desplegable»), si la entrada cuelga de la portada; si no, las migas. */}
       {/* En el escaparate (`sitio.escaparate`, 2026-11-06, Eugenio: «en la ruta pone Inicio, Donar,
           José Luis Pasamontes: eso está fatal, quítalo») no hay ruta. */}
-      {escaparate ? null : conBarra && !esRaiz && !pagina.virtual && !perfil
+      {escaparate || webPropia ? null : conBarra && !esRaiz && !pagina.virtual && !perfil
         ? <RutaRelaciones paginaId={pagina.id} sinRuta={migasEl} />
         : migasEl}
       </div>}

@@ -244,6 +244,34 @@ export function registerDominiosRoutes(app: Express, db: any) {
     } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
   });
 
+  /**
+   * LA WEB PROPIA DE UNOS PROYECTOS — `GET /api/dominios/propias?ids=a,b,c` (2026-11-25, Eugenio: «si pincho la tarjeta de
+   * Aeromóvil, que me lleve a aeromovil.org»).
+   *
+   * Para cada página de la lista que tenga un dominio comprado y activo, ese dominio. La tarjeta de un proyecto en
+   * luzhumanidad.com lo usa para llevar a su web en vez de a su copia dentro de la de Luz & Humanidad. Sin sesión: un dominio
+   * activo ya es público (cualquiera lo abre). Quedan fuera los subdominios de la plataforma (`*.humanity.wiki`, que no son
+   * «una web propia comprada») y los dominios que solo redirigen a otro sitio.
+   */
+  app.get('/api/dominios/propias', async (req: Request, res: Response) => {
+    try {
+      const ids = [...new Set(String(req.query.ids ?? '').split(',').map(x => x.trim()).filter(x => /^[A-Za-z0-9_-]{1,40}$/.test(x)))].slice(0, 200);
+      if (!ids.length) return res.json({});
+      const plataforma = process.env.DOMINIO_PUBLICO || 'humanity.wiki';
+      const r = await db.execute(sql`
+        SELECT DISTINCT ON (pagina_id) pagina_id, dominio FROM dominios_paginas
+        WHERE estado = 'activo' AND redirigir_a IS NULL
+          AND pagina_id = ANY(string_to_array(${ids.join(',')}, ','))
+          AND dominio NOT LIKE ${'%.' + plataforma}
+        ORDER BY pagina_id, activo_desde DESC NULLS LAST, created_at
+      `);
+      const fuera: Record<string, string> = {};
+      for (const f of r.rows as any[]) fuera[f.pagina_id] = f.dominio;
+      res.set('Cache-Control', 'public, max-age=60');
+      res.json(fuera);
+    } catch (e: any) { console.error(e); res.status(500).json({ error: e.message }); }
+  });
+
   /** Los dominios que tengo, con su estado y lo que hay que hacer con cada uno. */
   app.get('/api/dominios', async (req: Request, res: Response) => {
     try {

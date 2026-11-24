@@ -13212,3 +13212,12 @@ Eugenio: «haz lo mismo que has hecho de los submenus y componentes del RODAJE, 
 > «Hazlo también en la innovación en vivienda y la innovación en cultura. Y así ya tenemos todas las tarjetas en el mismo formato.»
 
 - «Innovación en vivienda y comunidad» → «Innovación en Vivienda», «Innovación en educación, cultura y conciencia» → «Innovación en Cultura», both `destacado` (migration 0240). The last sector, «Informática», goes full width too (`sitio.otrosDestacado`, VistaProyectosSitio.tsx). All six sectors now share one format: full width, five cards at once, the slider beyond five.
+
+## 2026-11-25 · aeromovil.org: no Luz & Humanidad header, and the Aeromóvil card leads there
+
+> «Si prefieres que al pincharlo te lleve a aeromovil.org, dímelo y lo hago. SI; HAZLO.» / «quita la cabecera de luz&humanidad en aeromovil.org.»
+
+- On `luzhumanidad.com` the Aeromóvil card (and any project card whose page has a bought, active domain) is now a plain link to that domain (`https://aeromovil.org/`) instead of the copy of the page inside the Luz & Humanidad site. Until the answer arrives, or if it fails, or in the editor, the card still opens the page inside the site.
+- On `aeromovil.org` the Luz & Humanidad bar is gone. The rule is general: a project page served on a domain that is not the project's own parent site and not `*.humanity.wiki` draws no parent bar, no breadcrumb line. `luzhumanidad.com`, `solarcrowd.com`, `wikiproducts` and every `*.humanity.wiki` address keep theirs (checked against the production `dominios_paginas` rows).
+- New public endpoint `GET /api/dominios/propias?ids=a,b,c` → `{ pageId: domain }` (active, not redirecting, not a platform subdomain; cached 60 s).
+- Files: `src/server/dominios.ts`, `src/components/sitio/barraDelSitio.ts` (new), `src/components/sitio/VistaPagina.tsx`, `src/pages/SubpaginaSitio.tsx`, `src/components/sitio/VistaProyectosSitio.tsx`, `scripts/web-propia.ts` (11 checks).

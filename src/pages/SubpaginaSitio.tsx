@@ -3,6 +3,7 @@ import { apuntarRutaConfirmada } from '../utils/rutasLegibles';
 import { useParams } from 'react-router-dom';
 import VistaPagina, { Cargando, SinPagina, type DatosPagina } from '../components/sitio/VistaPagina';
 import { useSitio, ProveedorSitio, sitioConAnfitrion, sitioEnCasa } from '../components/sitio/ContextoSitio';
+import { esWebPropiaDeProyecto, anfitrionActual } from '../components/sitio/barraDelSitio';
 import { paginaPrecargada } from '../utils/precargado';
 import MuroMiembros, { useLecturaSitio } from '../components/sitio/MuroMiembros';
 import BarraMiembro from '../components/sitio/BarraMiembro';
@@ -119,7 +120,8 @@ export default function SubpaginaSitio({ propio, idFijo, contexto }: { propio: b
   if (App) {
     // The same rule as VistaPagina: only sites that ask for the bar (`sitio.barra`).
     const incrustada = INCRUSTADAS.has(nombreApp);
-    const conBarra = (CON_BARRA.has(nombreApp) || incrustada) && !!pagina.sitio?.raizId && pagina.sitio?.config?.barra === true;
+    // (2026-11-25: not on a project's own domain, `barraDelSitio.ts`)
+    const conBarra = (CON_BARRA.has(nombreApp) || incrustada) && !!pagina.sitio?.raizId && pagina.sitio?.config?.barra === true && !esWebPropiaDeProyecto(pagina.sitio?.raizId, sitio, anfitrionActual());
     if (incrustada) return <Suspense fallback={<Cargando />}>
       {/* The spacer is what the bar's negative top margin pulls into (see the CON_BARRA branch). */}
       {conBarra && <><div aria-hidden data-espacio-barra className="h-[18px] sm:h-5" /><CabeceraSitio raizId={pagina.sitio!.raizId}
