@@ -286,6 +286,7 @@ export function dimensionar(m: ModeloTriciclo, piezas: PiezaMasa[]): PiezaMasa[]
         if (cat.freno) return { ...p, kg: k, nota: `${2 + nT} frenos de catálogo: ${cat.freno.n.toLowerCase()}, ${kg1(cat.freno.kg)} kg cada uno` };
         return { ...p, kg: k, nota: `${2 + nT} ${bici ? 'frenos de bicicleta' : 'discos con pinza'}: ${kg1(fD)} kg delante${fT !== fD ? `, ${kg1(fT)} kg detrás` : ''}${k > (2 + nT) * fr + 1e-9 ? ` (sube por la carga desde ${kg1(fr)} kg del deslizador)` : ''}` };
       }
+      if (p.nombre === 'Dirección' && cat.direccion) return { ...p, kg: cat.direccion.kg, nota: `la favorita de «Rodaje › Dirección»: ${cat.direccion.n.toLowerCase()}` };
       return p;
     });
   }

@@ -1137,3 +1137,13 @@ By his instruction the bicycle-class labour is assembly only. The project total 
 - **Records keyed by vehicle family, not by design**: the same seat is one record for every Triciclo design. Switching to per-design is ≈ 1 hour but orphans what was typed.
 - **«Pedir render» captures what is on screen**, so with a department isolated by default the render shows only that department's layers; a «render with everything» switch would be ≈ 30 minutes.
 - **Duplicate React key in the «Proyecto» tab** (`legislation.gov.uk/eur/2013/168/annexes/adopted?view=plain` used as a key twice): seen in the browser console while testing this; it comes from the homologation sources list, not from the records. Not fixed here.
+
+## 2026-11-24 — Rodaje submenu: shortcuts taken
+
+- **Plans only for the steering.** Brakes, wheels and suspension have no drawing; the steering's is a layout view (dimensions, arm angle, rack or rocker), not a workshop drawing (no tolerances, bushings, knuckle). Another part's plan: ≈ 3 hours each; a real workshop drawing needs a CAD pass.
+- **«Frenos» shares the wheels' 3D layer**, so isolating a brake needs a layer of its own in the 3D. The per-component records (`fichas/`, merged the same day, today only for Interior › Asientos) are the natural way: one entry in `fichas/registro.ts` and a named piece in the 3D, ≈ 2 hours.
+- **Brakes/suspension are multiplied by the number of wheels** in «En el vehículo» — right for 4 wheels, approximate for 3.
+- **Steering prices are estimates** for three of four options (published only for the Gemini rack and the tie rods); the cited geometry values come from builders' forums (IHPVA, bkhome), not standards. Heavy-class wheels are not among the bicycle wheel options.
+- **Unopened sources** (Magickart, igus, AZUB, university references) are flagged `leido:false` on screen; opening them is ≈ 30 minutes and may change prices.
+- **Decisions live inside the design** (12 per part, no author): deleted with it, no history of who. A table: ≈ 3 hours.
+- **The option lists are code** — a new option needs a deploy (≈ 10 minutes with the checks); editing them from the page would need a table.

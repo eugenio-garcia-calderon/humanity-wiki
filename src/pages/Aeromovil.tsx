@@ -94,6 +94,9 @@ import { BloqueAerodinamica } from '../components/aeromovil/estudio/EstudioAerod
 // (2026-11-17) the «Homologación» tab: the design against its EU category (homologacion/)
 import { PanelHomologacion, ResumenHomologacion } from '../components/aeromovil/homologacion/PanelHomologacion';
 import { PaginaHomologacion } from '../components/aeromovil/homologacion/PaginaHomologacion';
+import { PanelSubsistema, ResumenRodaje, SubmenuRodaje } from '../components/aeromovil/rodaje/PanelSubsistema';
+import { esSub, subsistema } from '../components/aeromovil/rodaje/subsistemas';
+import type { IdSub } from '../components/aeromovil/rodaje/tipos';
 // (2026-11-24) components in the 3D: hover, click, and the record of the component under the viewer (fichas/)
 import { usarFichas } from '../components/aeromovil/fichas/usarFichas';
 import { PanelFicha } from '../components/aeromovil/fichas/PanelFicha';
@@ -422,7 +425,12 @@ export default function Aeromovil() {
   // «Proyecto», or to another tab) puts back the layers as they were before it was pressed.
   const antesSolo = useRef<Record<CapaId, boolean> | null>(null);
   const verSolo = (si: boolean) => { if (si && !soloDep) antesSolo.current = visibles; setSoloDep(si); };
-  const capasSolo = (d: IdPestana): CapaId[] | undefined => d === 'consumos' ? undefined : P.disposicion === 'triciclo' || P.disposicion === 'basculante' ? (d === 'proyecto' || d === 'masas' || d === 'manoobra' ? undefined : CAPAS_DEP_TRICICLO[d as DepTriciclo]) : CAPAS_DEP[d];
+  // (2026-11-24, Eugenio: «en rodaje, añade las diferentes partes … frenos, dirección, ruedas») «Rodaje» has a row of parts under it
+  // (rodaje/): the one open decides which of the 3D's layers «Mostrar solo el rodaje» keeps, and which panel opens under the 3D
+  const [subRodaje, setSubRodaje] = useState<IdSub | 'resumen'>(() => { try { const g = localStorage.getItem('aeromovil.rodajeSub'); return esSub(g) ? g : 'resumen'; } catch { return 'resumen'; } });
+  useEffect(() => { try { localStorage.setItem('aeromovil.rodajeSub', subRodaje); } catch { /* sin memoria */ } }, [subRodaje]);
+  const elegirSub = (s: IdSub | 'resumen') => { setSubRodaje(s); verSolo(true); };
+  const capasSolo = (d: IdPestana): CapaId[] | undefined => d === 'consumos' ? undefined : P.disposicion === 'triciclo' || P.disposicion === 'basculante' ? (d === 'proyecto' || d === 'masas' || d === 'manoobra' ? undefined : d === 'rodaje' && P.disposicion === 'triciclo' && esSub(subRodaje) ? subsistema(subRodaje).capas : CAPAS_DEP_TRICICLO[d as DepTriciclo]) : CAPAS_DEP[d];
   // entering a department (or changing vehicle) isolates it again, even if the last one was shown whole
   useEffect(() => { setSoloDep(true); }, [dep, P.disposicion]);
   useEffect(() => {
@@ -433,7 +441,7 @@ export default function Aeromovil() {
     if (!antesSolo.current) antesSolo.current = visibles;
     setVisibles(Object.fromEntries(CAPAS.map(c => [c.k, suyas.includes(c.k)])) as Record<CapaId, boolean>);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [soloDep, dep, P.disposicion]);
+  }, [soloDep, dep, P.disposicion, subRodaje]);
   // El garaje: qué vehículos se ven y dónde están (eje delantero en el suelo, m). Se recuerda en este navegador.
   // `quitado` (2026-11-16): taken out of the garage («Eliminar del garaje») until «Recuperar» (`garaje/quitados.ts`)
   type PlazaGaraje = { id: string; visible: boolean; x: number; z: number; giro: number; quitado?: boolean };
@@ -721,8 +729,10 @@ export default function Aeromovil() {
         {/* (2026-11-24, «Homologación»: pantalla completa, sin garaje) the page replaces the 3D view and the side panel; both stay mounted, hidden */}
         {homologando && <PaginaHomologacion P={paraCalcular.P} modelo={paraCalcular} res={res} cd={esTri ? cdTri : esBas ? cdBas : null} nombre={nombreVehiculo} puedeDecidir={!!dueno?.puedeDecidir} />}
         <div className={cn('min-w-0', homologando && 'hidden')}>
+        {/* (2026-11-24) «Rodaje»: its parts as a row of tabs above the 3D view (rodaje/PanelSubsistema.tsx) */}
+        {esTri && depTri === 'rodaje' && <SubmenuRodaje sub={subRodaje} alElegir={elegirSub} P={P} precios={coste?.precios ?? null} />}
         <section ref={ventana3d} aria-label="Vista 3D" className={cn('overflow-hidden bg-slate-50', !verGaraje && completa === 'no' && 'hidden',
-          completa === 'no' ? cn('relative rounded-xl border border-slate-200', fichas.activa ? 'h-[40vh] min-h-[300px] lg:h-[56vh]' : 'h-[62vh] min-h-[380px]', esA1 ? 'lg:h-[72vh]' : fichas.activa ? '' : 'lg:sticky lg:top-[68px] lg:h-[calc(100vh-88px)]')
+          completa === 'no' ? cn('relative rounded-xl border border-slate-200', fichas.activa ? 'h-[40vh] min-h-[300px] lg:h-[56vh]' : 'h-[62vh] min-h-[380px]', (esA1 || (esTri && depTri === 'rodaje' && !fichas.activa)) ? 'lg:h-[72vh]' : fichas.activa ? '' : 'lg:sticky lg:top-[68px] lg:h-[calc(100vh-88px)]')
             : completa === 'css' ? 'fixed inset-0 z-[100] h-[100dvh] w-screen' : 'relative h-full w-full')}>
           <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} bascular={bascular} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeConDisenos} soloGaraje={!!soloGaraje} tunel={tunel} carteles={carteles} cuerposTunel={cuerposTunel} opcionesTunel={opcionesTunelVisor} alElegirPuntoTunel={setPuntoTunel} puntoTunel={puntoTunel} fichasGaraje={disenosGaraje.fichas} superponer={!!superponer && !soloGaraje} vista={vista}
             referencia={referencia} modoRef={modoRef} alinear={alinear} alPinchar={esA1 ? c => { navegar(`/aeromovil/componentes/${c}`); window.scrollTo({ top: 0 }); } : undefined}
@@ -865,7 +875,7 @@ export default function Aeromovil() {
             {(esA1 || porDeps) && (porDeps ? depTri : dep) !== 'proyecto' && capasSolo(porDeps ? depTri : dep) && (
               <Button variant="outline" aria-pressed={soloDep} onClick={() => verSolo(!soloDep)}
                 className={cn('bg-white px-2 py-1 text-[11px] normal-case tracking-normal', soloDep && 'border-teal-700 bg-teal-700 text-white hover:bg-teal-800')}>
-                {soloDep ? 'Mostrar todo' : `Mostrar solo ${SOLO_DEP[porDeps ? depTri : dep] ?? NOMBRE_CORTO[porDeps ? depTri : dep].toLowerCase()}`}
+                {soloDep ? 'Mostrar todo' : `Mostrar solo ${esTri && depTri === 'rodaje' && esSub(subRodaje) ? subsistema(subRodaje).solo : SOLO_DEP[porDeps ? depTri : dep] ?? NOMBRE_CORTO[porDeps ? depTri : dep].toLowerCase()}`}
               </Button>
             )}
             {/* El Bala no se inclina ni tiene la dirección dibujada: sin «Simular curva». */}
@@ -951,6 +961,10 @@ export default function Aeromovil() {
             if (v) window.scrollTo({ top: window.scrollY + v.getBoundingClientRect().top - cab - 8, behavior: 'smooth' });
           }} />}
         {esA1 && DEPARTAMENTOS.some(x => x.id === dep) && <PanelDepartamento d={DEPARTAMENTOS.find(x => x.id === dep)!} P={P} res={res} modelo={modelo} />}
+        {/* (2026-11-24) under the 3D view: the part of the running gear that is open (its options with a star, geometry, decisions, plan) */}
+        {paraCalcular.tipo === 'triciclo' && depTri === 'rodaje' && (subRodaje === 'resumen'
+          ? <ResumenRodaje P={P} precios={coste?.precios ?? null} alElegir={elegirSub} />
+          : <PanelSubsistema sub={subRodaje} P={P} set={set} modelo={paraCalcular} res={res} precios={coste?.precios ?? null} alElegirSub={elegirSub} />)}
         {/* (2026-11-17, Eugenio: «Falta un apartado en el menú que sea de homologación») the pre-check under the 3D view;
             the Gota and the Bala, which have no tabs, open it with a button */}
         {/* (2026-11-24) with departments the same check is now the whole-page «Homologación» (PaginaHomologacion): this one stays for the Gota and the Bala */}

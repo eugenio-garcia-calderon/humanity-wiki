@@ -19,12 +19,15 @@ import type { FormaBala } from '../garaje/balaForma';
 import { esBici } from './clase';
 import { claseRueda } from '../ruedas/catalogo';
 import { A_MEDIDA, FRENOS_BICI, GENERADORES_PEDAL, SUSPENSIONES_BICI, frenoBici, generadorPedal, suspensionBici } from './catalogo';
+import { DIRECCION_OPCIONES, direccionOpcion } from '../rodaje/direccion';
 
 export interface CamposBici {
   /** the brake at every wheel: a bicycle one from the catalogue, or 'medida' (sized by the load, as before) */
   tBiciFreno: string;
   /** the suspension at every corner: a bicycle one from the catalogue, or 'medida' */
   tBiciSusp: string;
+  /** the steering: the favourite option of `rodaje/direccion.ts`, or 'medida' (the «Masas» slider and the estimate, as before) */
+  tDirOpc: string;
   /** pedals for the driver, turning a generator */
   tPedales: 'no' | 'si';
   /** the pedal generator: one from the catalogue, or 'medida' (the sliders) */
@@ -43,7 +46,7 @@ export interface CamposBici {
 export type ClaveBici = keyof CamposBici;
 export type ClaveNumBici = 'tPedW' | 'tPedRend' | 'tPedKg' | 'tPedBiela' | 'tPedX' | 'tPedY';
 
-export const BICI_DEFECTO: CamposBici = { tBiciFreno: A_MEDIDA, tBiciSusp: A_MEDIDA, tPedales: 'no', tPedGen: A_MEDIDA, tPedW: 100, tPedRend: 82, tPedKg: 4.5, tPedBiela: 165, tPedX: 0, tPedY: 0 };
+export const BICI_DEFECTO: CamposBici = { tBiciFreno: A_MEDIDA, tBiciSusp: A_MEDIDA, tDirOpc: A_MEDIDA, tPedales: 'no', tPedGen: A_MEDIDA, tPedW: 100, tPedRend: 82, tPedKg: 4.5, tPedBiela: 165, tPedX: 0, tPedY: 0 };
 /** What the bicycle proposal sets (with `clase.ts` `VALORES_BICI`): hydraulic discs, an air shock a corner, the driver pedalling a Cixi generator. */
 export const BICI_PROPUESTA: Partial<CamposBici> = { tBiciFreno: 'discoHidraulico', tBiciSusp: 'aireMonarch', tPedales: 'si', tPedGen: 'cixi', tPedW: 100, tPedRend: 82, tPedBiela: 165 };
 
@@ -66,12 +69,13 @@ export function camposBici(P: object): CamposBici {
   if (Q.tPedales === 'si') o.tPedales = 'si';
   if (FRENOS_BICI.some(x => x.id === Q.tBiciFreno)) o.tBiciFreno = Q.tBiciFreno;
   if (SUSPENSIONES_BICI.some(x => x.id === Q.tBiciSusp)) o.tBiciSusp = Q.tBiciSusp;
+  if (DIRECCION_OPCIONES.some(x => x.id === Q.tDirOpc)) o.tDirOpc = Q.tDirOpc;
   if (GENERADORES_PEDAL.some(x => x.id === Q.tPedGen)) o.tPedGen = Q.tPedGen;
   return o as unknown as CamposBici;
 }
 
-/** The bicycle brake and suspension chosen for this design, or null («a medida»). */
-export const piezasRodajeBici = (P: object) => { const C = camposBici(P); return { freno: frenoBici(C.tBiciFreno), suspension: suspensionBici(C.tBiciSusp) }; };
+/** The brake, suspension and steering chosen for this design (the favourites of «Rodaje»), or null («a medida»). */
+export const piezasRodajeBici = (P: object) => { const C = camposBici(P); return { freno: frenoBici(C.tBiciFreno), suspension: suspensionBici(C.tBiciSusp), direccion: direccionOpcion(C.tDirOpc) }; };
 
 // ------------------------------------------------------------------ the pedals: where they go
 /** From the ankle to the pedal's axle with the foot on it (m): the ball of the foot, ahead of and a little above the ankle of a rider sitting back. */

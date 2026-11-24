@@ -2488,3 +2488,15 @@ They change saved designs' numbers on purpose.
 **Chosen**: React SVG drawings in `src/components/politica/VisualesHerramientas.tsx`. The model's card reads its scales from `src/data/modeloSocioeconomico.ts`. The observatory, profiles, geometry and voting cards copy their numbers (CIS bars, Inmigración scores, measure names) from `public/observatorio-polarizacion/index.html`, which is a static file and cannot be imported.
 **Alternative**: move those data into `src/data/` and have the document load them as JSON — about half a day, and it touches the document's start-up.
 **Known consequence**: if the CIS figures or the Inmigración scores change in the document, the cards keep the old ones until someone edits this file.
+
+## 2026-11-24 — Rodaje: the favourite option is a field of the design
+
+**Context**: Eugenio wants, for each part of the running gear (wheels, brakes, steering, suspension), several options he can study and compare, one starred as the favourite; the favourite sets the project's weight and price, shows its components, and gives the plan.
+**Chosen**:
+1. The star writes into the design's own fields (`tBiciFreno`, `tBiciSusp`, `tRuedaDel`/`tRuedaTras`, `tDirOpc`). The model already reads the first four; steering gained `tDirOpc` in `masas.ts` and `precios.ts`. Default `'medida'` = today's car.
+2. The options are code (`rodaje/direccion.ts`, the bicycle and wheel catalogues): each with its published or estimated figures and its sources. No new table.
+3. Decisions («qué se eligió, cuándo, por qué») are a list inside the design, last 12 per part.
+4. The plan is drawn from the favourite's numbers and the design's vía and wheelbase, not stored.
+**Alternatives**: (a) a table of studies per part with its own history and several favourites per scenario — rejected for now: migration, route, store, and every reader of the mass list would read it instead of the field (≈ 1.5 days); (b) a second «favourites» object next to the design — rejected: two lists that must agree, the exact class of bug this project keeps paying for.
+**Cost of switching later**: ≈ 1.5 days today; it grows with every reader that starts to rely on the design fields. Worth it when two people argue over the favourite or the favourite must differ per vehicle variant.
+**Known consequence**: deleting a design deletes its decisions; copies carry them.

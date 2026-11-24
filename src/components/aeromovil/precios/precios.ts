@@ -21,6 +21,7 @@ import type { Parametros, Resultados } from '../geometria';
 import { MATERIALES_CHASIS } from '../geometria';
 import { A_MEDIDA, EUR_POR_USD, controladorDe, motorDe, precioEuros, termicoDe, type Precio } from '../catalogoTren';
 import { frenoBici, generadorPedal, precioRuedaBici, suspensionBici, type PrecioBici } from '../bici/catalogo';
+import { direccionOpcion } from '../rodaje/direccion';
 import { clave, type DepPeso, type PartePeso, type PesosSecciones, type SeccionPeso } from '../masasSecciones';
 
 export interface PrecioParte {
@@ -130,6 +131,11 @@ function estimarBici(nombre: string, kg: number, cx: ContextoPrecio): Estimacion
     if (c?.precio && P.tCatCtrl !== A_MEDIDA) return deCatalogo(`${c.marca} ${c.modelo}`, c.precio, 1);
     if (bici) { const n = Array.isArray(m.traseras) || m.traseras ? 2 : 1; return est(250 * n, `estimado: ${n > 1 ? `${n} controladores` : 'un controlador'} de bicicleta a ≈ 250 € (un Grin Baserunner cuesta 290 $ en su tienda)`); }
     return null;
+  }
+  if (/^Dirección/.test(nombre)) {
+    // the steering the design picked in «Rodaje › Dirección» (its star): its own price, published or estimated, said so
+    const d = direccionOpcion(P.tDirOpc as string | undefined);
+    if (d) return { eur: d.precio.eur, como: `${d.n}: ${d.precio.nota}`, ...(d.precio.tipo === 'publicado' ? { origen: 'catalogo' as const } : {}) };
   }
   if (!bici) return null;
   if (/^Motor(es)? de buje/.test(nombre)) {
