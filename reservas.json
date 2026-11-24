@@ -23,6 +23,12 @@
       "ruta": "memory/03_DECISIONS.md",
       "motivo": "Aeromóvil: partes de todos los departamentos (nube/partes-vehiculo)",
       "desde": "2026-11-24T19:08:40.929Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md",
+      "motivo": "Aeromóvil: partes de todos los departamentos (nube/partes-vehiculo)",
+      "desde": "2026-11-24T19:08:43.501Z"
     }
   ]
 }
