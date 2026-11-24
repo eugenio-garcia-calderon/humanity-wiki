@@ -13171,3 +13171,15 @@ Eugenio: «En rodaje, añade las diferentes partes dentro del rodaje. Por ejempl
 - Not verified: the installed app / service worker copy (`?sw=off` drops a stale one); phones beyond the 390 px run; production.
 - Limits stated on screen: plan only for the steering (a layout drawing, not a workshop drawing); «Frenos» shares the wheels' 3D layer; steering prices of three options are estimates; Magickart, igus, AZUB and the university sources were not opened; the ×(wheels) factor for brakes/suspension is approximate for 3-wheel vehicles.
 - Files: `src/components/aeromovil/rodaje/*` (new), `bici/pedales.ts`, `bici/catalogo.ts`, `triciclo/masas.ts`, `precios/precios.ts`, `geometria.ts`, `BiciTriciclo.tsx`, `src/pages/Aeromovil.tsx`, `scripts/rodaje.ts`, `src/components/aeromovil/CLAUDE.md`, `memory/*`.
+
+## 2026-11-24 · luzhumanidad.com home: «Innovación en Política» with the five tools; «Informática»; Aeromóvil cover
+
+> «Esas 5 herramientas políticas intégralas en la web de Luz & Humanidad, reciclando esas ilustraciones… llámalo Innovación en Política, bien grande… Humanity.wiki sácala de ahí y ponla en Otras innovaciones, y llama a esa categoría "Informática". Y Política ya no tiene sentido.» And: «La portada del proyecto Aeromóvil haz que sea esta imagen».
+
+- The sector «Innovación en el sector socioeconómico y político» is now «Innovación en Política»: it takes both columns of the 2 × 2 grid with a larger title and icon (`sitio.sectores[].destacado`, VistaProyectosSitio.tsx, FilaSector.tsx). It holds the five tools in order: Observatorio de polarización, Perfiles políticos, Geometría política, Democracia directa, Economía pública optimizada (three new rows in «Proyectos»).
+- Each of the five pages has its illustration as cover (`public/politica/tarjetas/*.webp`, rendered from VisualesHerramientas.tsx in the shape of a home card); the previous cover stays in `config.portadaAnterior`.
+- The «Política» card is hidden (`oculta`), not deleted; `/politica` still opens.
+- Humanity.wiki moves to the category «Informática»; the last sector, «Otras innovaciones», is now called «Informática» with its icon.
+- The Aeromóvil's cover is the side view Eugenio sent (`public/aeromovil/portada-aeromovil.webp`); the previous one is kept in `config.portadaAnterior`.
+- All by migration 0238, tested twice on a local copy of the tables involved.
+- Not verified before deploy: the home page itself with real data (checked after deploy in Chrome).
