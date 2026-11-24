@@ -41,6 +41,12 @@
       "ruta": "src/components/sitio/VistaProyectosSitio.tsx",
       "motivo": "aeromovil.org sin la cabecera de Luz & Humanidad y tarjeta que lleva a su web propia (nube/aeromovil-org-web)",
       "desde": "2026-11-24T23:05:44.617Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/dominios.ts",
+      "motivo": "aeromovil.org sin la cabecera de Luz & Humanidad y tarjeta que lleva a su web propia (nube/aeromovil-org-web)",
+      "desde": "2026-11-24T23:05:47.436Z"
     }
   ]
 }
