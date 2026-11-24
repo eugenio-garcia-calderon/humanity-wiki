@@ -13198,3 +13198,11 @@ Eugenio: «haz lo mismo que has hecho de los submenus y componentes del RODAJE, 
 - Not verified: the installed app / service worker copy (`?sw=off` drops a stale one); a real phone. **Limits stated on the screens:** parts that share a 3D layer cannot be isolated one from another (the motor's four, the body's six); no new product research outside the motor catalogue (no cell catalogue for the battery, no upholstery supplier prices); the planetary gear and generator of the hybrid (12 kg) and «Varios» belong to no part.
 - **Summary adds up with the tab.** A department's summary also lists the mass-list lines no part claims (the pedals of a bicycle design 4,4 kg · 560 €, the hybrid's planetary gear and generator 12 kg · 420 €), so «Juntas pesan …» equals the department's tab. Found in production the same day: Motor's tab said 11 kg while its parts added up to 7.
 - Files: `src/components/aeromovil/partes/*` (the former `rodaje/`, renamed; new: `alternativas.ts`, `datosDiseno.ts`, `opcionesCatalogo.ts`), `precios/precios.ts`, `src/pages/Aeromovil.tsx`, `scripts/partes.ts` (the former `scripts/rodaje.ts`), `src/components/aeromovil/CLAUDE.md`.
+
+## 2026-11-24 · luzhumanidad.com home: Movilidad and Energía in one line like Política; sector headers without icon or count
+
+> «Me gusta mucho cómo has hecho la innovación en política, poniéndolo todo en una única línea y estrechito… haz lo mismo para la innovación en energía y innovación en movilidad. Acorta los títulos… Si hay más de 5 tarjetas, pues pones ya el slider… quita lo del número de proyectos… y también quita el icono.»
+
+- «Innovación en el sector de la movilidad» → «Innovación en Movilidad», «Innovación en el sector energético» → «Innovación en Energía». Both are `destacado` like Política: full width, five cards at once, the slider for the rest (migration 0239).
+- Every sector header shows the title alone: no icon and no «N proyectos». On phones a small «desliza →» remains when there are more cards to the side.
+- Files: `drizzle/0239_sectores_en_linea.sql`, `src/components/sitio/FilaSector.tsx`, `src/components/sitio/VistaProyectosSitio.tsx`.

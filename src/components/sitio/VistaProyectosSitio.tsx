@@ -469,8 +469,8 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
               const titulo = m ? <><span className="hidden sm:inline">{m[1]}</span><span className="max-sm:inline-block max-sm:first-letter:uppercase">{m[2]}</span></> : g.titulo;
               const desde = n; n += g.filas.length;
               return (
-                <FilaSector key={g.titulo} id={`sector-${plano(g.titulo)}`} titulo={titulo} icono={iconoCategoria(g.icono || '', g.destacado ? 'h-7 w-7' : 'h-5 w-5')}
-                  colorBorde={c.borde} colorIcono={c.icono} filas={g.filas} estrecha={!g.destacado} grande={g.destacado}
+                <FilaSector key={g.titulo} id={`sector-${plano(g.titulo)}`} titulo={titulo}
+                  colorBorde={c.borde} filas={g.filas} estrecha={!g.destacado} grande={g.destacado}
                   clase={g.destacado ? '@5xl:col-span-2' : ''}
                   pintar={(f, claseLi) => tarjetaDe(f, desde + g.filas.indexOf(f), true, true, claseLi, g.filas)} />
               );
