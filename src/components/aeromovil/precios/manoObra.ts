@@ -28,6 +28,21 @@ export function partidasManoObra(P: Parametros, modelo: Record<string, unknown>,
   const metros = tubos.reduce((s, t) => s + largoTubo(t), 0) || 8;
   const m2 = Math.max(4, res.areas?.carroceria ?? 8);
   const bascula = !!modelo.bascula || modelo.tipo === 'basculante';
+  // (2026-11-24, Eugenio: «el precio de la mano de obra está el de un vehículo grande. Y quítalo de diseño de
+  // ingeniería, solo pon la mano de obra de montaje de un cuadriciclo bicicleta») A vehicle of bicycle components counts
+  // ASSEMBLY only: no design and engineering, no frame welding, no moulds or laminating, no paint, no homologation.
+  // Hours of a bicycle workshop, every one an estimate; their ids are their own (`b-…`), so hours the user set on the
+  // heavy vehicle's items never leak into these.
+  if ((P as { tClase?: string }).tClase === 'bici') {
+    const pedales = !!modelo.pedalesBici;
+    return conAjustes(P, [
+      { id: 'b-rodaje', nombre: 'Montaje del rodaje', que: 'ruedas, frenos, suspensión y dirección sobre el bastidor; alinear y purgar los frenos: tres jornadas de un mecánico de bicicletas (estimado)', hEst: 24, eurhEst: 30 },
+      { id: 'b-electrico', nombre: 'Montaje eléctrico', que: `motores de buje, controladores, batería, cableado, luces y pantalla${pedales ? ', y el generador de pedales con sus bielas' : ''} (estimado)`, hEst: pedales ? 16 : 12, eurhEst: 30 },
+      { id: 'b-carroceria', nombre: 'Montaje de la carrocería', que: 'fijar la carrocería ya hecha al bastidor, cúpula, puertas y carenados de las ruedas; ajustar holguras (estimado)', hEst: 16, eurhEst: 30 },
+      { id: 'b-interior', nombre: 'Montaje del interior', que: 'asientos, cinturones, salpicadero y mandos (estimado)', hEst: 8, eurhEst: 30 },
+      { id: 'b-prueba', nombre: 'Ajuste y prueba', que: 'reglaje final, prueba en parado y primera rodada (estimado)', hEst: 6, eurhEst: 30 },
+    ]);
+  }
   const base: Omit<PartidaManoObra, 'h' | 'eurh' | 'propio' | 'eur'>[] = [
     { id: 'diseno', nombre: 'Diseño e ingeniería', que: 'planos de fabricación, cálculo de la estructura y de la suspensión, lista de piezas: unas tres semanas de una persona (estimado)', hEst: 120, eurhEst: 45 },
     { id: 'chasis', nombre: 'Chasis: corte, plantilla y soldadura', que: `20 h de plantilla y 3 h por metro de tubo (cortar, ajustar las bocas y soldar) × ${metros.toFixed(1).replace('.', ',')} m (estimado)`, hEst: r1(20 + 3 * metros), eurhEst: 40 },
@@ -39,6 +54,11 @@ export function partidasManoObra(P: Parametros, modelo: Record<string, unknown>,
     { id: 'pintura', nombre: 'Pintura y acabado', que: 'lijar, imprimar y pintar la carrocería, o vinilarla (estimado)', hEst: 35, eurhEst: 35 },
     { id: 'homologacion', nombre: 'Homologación y ensayos', que: 'proyecto técnico, ensayos y tasas de una homologación individual, en horas de ingeniero (estimado; el laboratorio puede cobrar aparte)', hEst: 50, eurhEst: 60 },
   ];
+  return conAjustes(P, base);
+}
+
+/** The items with the user's own hours and rates over the estimates. */
+function conAjustes(P: Parametros, base: Omit<PartidaManoObra, 'h' | 'eurh' | 'propio' | 'eur'>[]): PartidaManoObra[] {
   return base.map(b => {
     const a = P.manoObra?.[b.id];
     const h = typeof a?.h === 'number' && Number.isFinite(a.h) && a.h >= 0 ? a.h : b.hEst;

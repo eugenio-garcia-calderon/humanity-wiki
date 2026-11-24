@@ -13040,3 +13040,13 @@ Eugenio: «créame también una estrategia nueva, aparte de la anterior, que sea
 - Verified: `fallosArbol()` returns `[]`; `tsc` clean; `build`; in Chromium against the dev server.
 - Not verified: the installed app; a phone-width screen.
 - Files: `src/components/aeromovil/estrategia/{arbol.ts,arbolBici.ts,VistaEstrategia.tsx}`, `src/components/aeromovil/CLAUDE.md`.
+
+## 2026-11-24 · Aeromóvil: price under every tab, the project's total under «Proyecto», assembly-only labour for bicycle class
+
+Eugenio: «Pon también el precio debajo de cada componente, por ejemplo, carrocería, chasis, rodaje, motor, en la parte también de bicicleta. Y en la mano de obra también. Ahora mismo el precio de la mano de obra está el de un vehículo grande. Y quítalo de diseño de ingeniería, solo pon la mano de obra de montaje de un cuadriciclo bicicleta. Y luego, debajo de proyecto, pues pones también el coste total … Y luego en masas, quita el número debajo de masas para que no confunda.»
+
+- Top bar: each department tab shows its parts and materials in euros under its kilograms (every class of vehicle with departments); «Proyecto» shows the empty weight and the project's total (parts + labour); «Masas» shows no figure.
+- Labour of a bicycle-class vehicle is assembly only, five items at a bicycle workshop's rate (running gear, electrics, fitting the body, interior, adjustment and test): 70 h, 2,100 € on «Vehículo de producción (bicicleta)», where the heavy-vehicle list gave 21,245 €. No design and engineering, frame welding, moulds, laminating, paint or homologation: the panel says so and says the frame and the body are taken as already made. A heavy vehicle's labour is unchanged.
+- The hours are estimates; the bicycle items have their own ids (`b-…`), so hours set on the heavy items do not carry over.
+- Verified: `scripts/bici.ts` (tabs + labour = total; «Masas» without figure) and `precios-secciones` end «Todo OK»; `tsc`; in Chromium on the dev server, both a bicycle and a heavy design: the tab figures and the labour panel; no overflow at 390 px. Not verified: the installed app.
+- Files: `src/pages/Aeromovil.tsx`, `src/components/aeromovil/precios/{manoObra.ts,PanelManoObra.tsx}`, `src/components/aeromovil/PesosDepartamento.ts`, `scripts/bici.ts`.
