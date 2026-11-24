@@ -750,6 +750,10 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       st.target.copy(c);
       st.tween = { from: st.camera.position.clone(), to: c.clone().addScaledVector(dir, d), tf: st.controls.target.clone(), t: 0 };
     } else if (antes && !piezasMotor) {
+      // leaving «Motor» for a department whose selected part has just framed itself (the effect above runs first, in the same
+      // commit): the part's framing stays; going back to the default view here would undo it (the robot measured the battery at
+      // 9 % of the window when it came after the motor)
+      if (st.fichaSolo && cajaDeSeleccion(st.G, st.fichaSolo)) return;
       st.target.set(-1.5, 0.55, 0);
       st.tween = { from: st.camera.position.clone(), to: new THREE.Vector3(...VISTAS[vista]), tf: st.controls.target.clone(), t: 0 };
     }
