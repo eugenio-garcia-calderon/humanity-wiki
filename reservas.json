@@ -14,12 +14,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "memory/08_CHANGELOG.md",
-      "motivo": "Observatorio y perfiles",
-      "desde": "2026-11-24T13:36:07.237Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "drizzle/0237_economia_publica_optimizada.sql",
       "motivo": "Renombrar el modelo a Economía pública optimizada",
       "desde": "2026-11-24T13:36:57.161Z"
@@ -77,6 +71,12 @@
       "ruta": "src/server/buzonProyectos.ts",
       "motivo": "Economía pública optimizada y tarjetas de Política",
       "desde": "2026-11-24T13:41:22.311Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "Economía pública optimizada",
+      "desde": "2026-11-24T13:46:08.039Z"
     }
   ]
 }
