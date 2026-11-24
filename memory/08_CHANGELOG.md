@@ -13079,3 +13079,7 @@ Eugenio: «En el apartado de homologación vamos a poner diferentes informacione
 - Checked against the legal text (24-11-2026): L1e-A criteria 9 to 12 and the 1 000 / 4 000 / 2 500 mm limits (168/2013, annex I); 50 L1e-A per type and year (annex III) and article 42 (valid in the granting State, others accept unless not equivalent, three months); RD 750/2010 (arts. 4.4 and 7.3, HIA-XXXXX). Differences with the pasted text: the DGT instruction on L1e-A is 19/V-134 (24-5-2019), which does not say AM; the Ley 5/2025 insurance claim could not be opened, so it is marked «no comprobado».
 - Not done: lights and the rear reflector are not in the 3D design (the requirement reads «a comprobar»); the heavy-quadricycle page only holds what the catalogue already had.
 - Files: `homologacion/{normas,evaluar,guias,PaginaHomologacion,PanelHomologacion}.ts(x)`, `pages/Aeromovil.tsx`.
+
+## 2026-11-24 — Aeromóvil: notes on the built-in proposals
+
+- Writing a note while a built-in proposal was open (e.g. «Vehículo de producción (bicicleta)», id −19) answered «Sección no válida» and reading answered «No se han podido leer las notas guardadas en la web». Cause: `MenuDisenos` handed the proposal's negative id to `ponerDestino`, and the server only accepts a positive design id or none. Fix in `notas/almacen.ts`: a non-positive id means «no saved design», so those notes are kept with the vehicle (what the panel text already said). Local notes written before with a negative id are matched the same way. The server's 400 now says which of section, design or vehicle is wrong.
