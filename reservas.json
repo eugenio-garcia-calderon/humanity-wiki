@@ -17,6 +17,12 @@
       "ruta": "public/observatorio-polarizacion/index.html",
       "motivo": "Observatorio y perfiles: recuperar portada, tema oscuro y capítulos de perfiles",
       "desde": "2026-11-24T13:34:24.377Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "memory/08_CHANGELOG.md",
+      "motivo": "Observatorio y perfiles",
+      "desde": "2026-11-24T13:36:07.237Z"
     }
   ]
 }
