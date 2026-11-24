@@ -931,11 +931,24 @@ html:not([data-vista="politica"]) .brand-txt[data-solo="politica"],html:not([dat
    observatorio: capítulos 1 a 5 y Palabras y fuentes · perfiles: solo el capítulo 4 · decidir: solo Votar por temas.
    Ninguna lleva lo de la geometría (temas, test, compartir) ni la portada «Más en Política». */
 :is([data-vista="observatorio"],[data-vista="perfiles"],[data-vista="decidir"]) :is(.top-temas,.geo-bar,.geo-nav,.pol-nav,.pie-acc,#geometrias,#mas){display:none}
-[data-vista="observatorio"] main > :is(#propuestas,#decidir){display:none}
+[data-vista="observatorio"] main > :is(#propuestas,#decidir,#observatorio){display:none}
 [data-vista="observatorio"] .nav li:has(> a[href="#decidir"]){display:none}
-[data-vista="observatorio"] #observatorio .lbl{display:none}
-[data-vista="perfiles"] main > :not(#perfiles),[data-vista="decidir"] main > :not(#decidir){display:none}
-:is([data-vista="perfiles"],[data-vista="decidir"]) .top-in > nav{display:none}
+/* El observatorio recupera su portada de 2026-11-12 (2026-11-24, Eugenio: «hay cosas que estaban en el anterior
+   que se han modificado, intenta mantenerlas»): «#mas» se rehace en JS como aquella portada de seis capítulos */
+[data-vista="observatorio"] #mas{display:grid}
+/* Perfiles políticos: los perfiles y todo lo que habla de ellos (2026-11-24, Eugenio: «cómo se hablan unos a otros,
+   qué opinión tienen unos de otros, sus incongruencias… rescátalo»): Miradas, Del nosotros al enemigo y Palabras */
+[data-vista="perfiles"] main > :not(#perfiles,#miradas,#escalada,#fuentes){display:none}
+[data-vista="perfiles"] .nav li:has(> a:is([href="#hoy"],[href="#historia"],[href="#decidir"])){display:none}
+[data-vista="decidir"] main > :not(#decidir){display:none}
+[data-vista="geometria"] main > .apartado-banda{display:none}
+[data-vista="decidir"] .top-in > nav{display:none}
+/* Observatorio y perfiles vuelven a su tema oscuro original: se diseñaron así (dibujos, insignias, contrastes),
+   y el blanco llegó con la geometría el 2026-11-19. La geometría y la democracia directa siguen en blanco. */
+:is([data-vista="observatorio"],[data-vista="perfiles"]){
+  --bg:#0C0F14; --bg-2:#131821; --bg-3:#1B2230; --line:#283142; --line-2:#3A4660; --ctl:#5E6B88;
+  --ink:#EDEBE6; --ink-2:#C9CCD3; --muted:#9AA3B3; color-scheme:dark}
+:is([data-vista="observatorio"],[data-vista="perfiles"]) .top{background:rgba(12,15,20,.88)}
 [data-vista="geometria"] .top-in > nav{display:none}
 [data-vista="geometria"] .geo-bar{display:flex;flex:1;min-width:0;align-items:center;justify-content:center;gap:10px;position:relative}
 [data-vista="geometria"] .geo-bar .geo-acc{margin:0;flex-wrap:nowrap;gap:8px;position:relative}
@@ -4142,11 +4155,35 @@ const ILUS = {
   // Sueltos, los capítulos no llevan número: «Capítulo 4» no tiene sentido en una página que solo es ese capítulo.
   // En el observatorio, Palabras y fuentes pasa a ser el 6, porque Votar por temas está en su propia página.
   const numero = (sel, txt) => { const el = document.querySelector(sel); if (el) el.textContent = txt; };
-  if (VISTA === "perfiles") numero("#perfiles .ch-num", "Perfiles políticos · doce perfiles");
+  const enlaceNav = (href, txt) => { const a = document.querySelector(`.nav a[href="${href}"]`); if (a) a.textContent = txt; };
   if (VISTA === "decidir") numero("#decidir .ch-num", "Democracia directa · votar por temas");
+  if (VISTA === "perfiles") {
+    // Primero los perfiles; después cómo se miran, hasta dónde llegan y cómo se nombran
+    const main = document.querySelector("main"), pf = document.querySelector("#perfiles"), mi = document.querySelector("#miradas");
+    if (main && pf && mi) main.insertBefore(pf, mi);
+    [["#perfiles", "1 · Doce perfiles", "Capítulo 1 · Doce perfiles"], ["#miradas", "2 · Cómo se miran", "Capítulo 2 · Cómo se miran unos a otros"],
+     ["#escalada", "3 · Del nosotros al enemigo", "Capítulo 3 · Del nosotros al enemigo"], ["#fuentes", "4 · Cómo se nombran", "Capítulo 4 · Cómo se nombran: palabras y fuentes"]]
+      .forEach(([id, nav, num]) => { enlaceNav(id, nav); numero(`${id} .ch-num`, num); });
+    const ol = document.querySelector(".nav"), li = ol && ol.querySelector('a[href="#perfiles"]')?.parentElement;
+    if (ol && li) ol.insertBefore(li, ol.querySelector('a[href="#miradas"]')?.parentElement || null);
+  }
   if (VISTA === "observatorio") {
     numero("#fuentes .ch-num", "Capítulo 6 · Palabras y fuentes");
-    const a = document.querySelector('.nav a[href="#fuentes"]'); if (a) a.textContent = "6 · Palabras y fuentes";
+    enlaceNav("#fuentes", "6 · Palabras y fuentes");
+    // La portada de antes: «Seis formas de mirar una sociedad dividida», con las seis tarjetas de capítulo
+    const mas = document.querySelector("#mas");
+    if (mas) {
+      const ceja = mas.querySelector(".eyebrow"), h = mas.querySelector("#h-mas");
+      if (ceja) ceja.textContent = "Observatorio de Polarización Política · España";
+      if (h) h.textContent = "Seis formas de mirar una sociedad dividida.";
+      const rejilla = document.createElement("div");
+      rejilla.className = "cards cards-3"; rejilla.id = "cards-observatorio";
+      ["#hoy", "#historia", "#miradas", "#perfiles", "#escalada", "#fuentes"].forEach((ref) => {
+        const c = mas.querySelector(`a.card[href="${ref}"]`); if (c) rejilla.appendChild(c);
+      });
+      const n6 = rejilla.querySelector('a[href="#fuentes"] .card-n'); if (n6) n6.textContent = "Capítulo 6";
+      const ap = mas.querySelector(".apartados"); if (ap) ap.replaceWith(rejilla);
+    }
   }
   function todo() { soltar(); if (!st.mejor) st.masVer = null; $(".geo-stage").classList.toggle("todos", st.todos); $("[data-todos]", tabs).setAttribute("aria-selected", String(st.todos)); chips(); dibujar(); panel(); niveles(); cabecera(); matriz(); }
   function setTodos(on) {
