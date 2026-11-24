@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/components/aeromovil/PesosDepartamento.ts",
-      "motivo": "Precio bajo cada pestaña y mano de obra de bicicleta",
-      "desde": "2026-11-24T10:05:30.987Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/aeromovil/triciclo/medidas.ts",
       "motivo": "eje trasero con slider",
       "desde": "2026-11-24T10:21:58.839Z"
