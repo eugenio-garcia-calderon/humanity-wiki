@@ -173,6 +173,8 @@ export function crearMateriales() {
     goma: fis({ color: 0x18191b, roughness: 0.86, metalness: 0 }),
     tapa: fis({ color: 0xd9dcdf, metalness: 0.6, roughness: 0.25, clearcoat: 0.8, clearcoatRoughness: 0.08 }),
     tapaOscura: fis({ color: 0x23262b, metalness: 0.5, roughness: 0.35 }),
+    discoFreno: fis({ color: 0x9aa0a6, metalness: 0.85, roughness: 0.35 }),
+    pinzaFreno: fis({ color: 0xb3261e, metalness: 0.4, roughness: 0.4 }),
     // interior
     cuero: fis({ color: 0xffffff, map: asiento, roughness: 0.62, metalness: 0, sheen: 0.4, sheenColor: new THREE.Color(0x6a7080), sheenRoughness: 0.6 }),
     carbono: fis({ color: 0x1a1b1e, roughness: 0.35, metalness: 0.2, clearcoat: 0.8 }),
@@ -202,6 +204,13 @@ function rueda(R: number, ancho: number, M: Mats, nombre: string): THREE.Group {
   for (const lado of [1, -1]) {
     const t = new THREE.Group(); t.scale.z = lado; g.add(t);
     t.add(malla(G.tapa, M.tapa, 'tapacubos'), malla(G.ranura, M.tapaOscura, 'tapacubos'), malla(G.centro, M.tapaOscura, 'tapacubos'));
+  }
+  // 2026-11-24 (Eugenio: «pincho en frenos y no cambia lo que se ve»): the brake, a disc and its caliper on the inner side,
+  // behind the aero cover (the whole vehicle does not show it; «Frenos» shows it alone). Tagged `frenos` (visor/partes3d.ts).
+  {
+    const rd = Math.min(R * 0.56, 0.16), zd = -ancho * 0.2, a = 2.2;
+    const disco = malla(new THREE.CylinderGeometry(rd, rd, 0.006, 48), M.discoFreno, 'disco-freno', false); disco.rotation.x = Math.PI / 2; disco.position.z = zd; disco.userData.componente = 'frenos'; g.add(disco);
+    const pinza = malla(new THREE.BoxGeometry(0.045, 0.085, 0.04), M.pinzaFreno, 'pinza-freno', false); pinza.position.set(rd * 0.9 * Math.cos(a), rd * 0.9 * Math.sin(a), zd); pinza.rotation.z = a - Math.PI / 2; pinza.userData.componente = 'frenos'; g.add(pinza);
   }
   return g;
 }

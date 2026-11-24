@@ -55,6 +55,7 @@ const delGrupo = (...ids: string[]) => GRUPOS_MOTOR.filter(g => ids.includes(g.i
  * part's name and, where the plain sentence would mislead, its own words. Keyed by the entry's id.
  */
 export const SIN_PIEZA: Partial<Record<IdSub, string>> = {
+  frenos: 'Los frenos de este diseño no están dibujados en el 3D (las ruedas con motor de buje no los llevan dibujados aún); sus opciones, su peso y su precio sí cuentan en la lista.',
   reductora: 'Este diseño no lleva reductora dibujada: el motor de buje mueve la rueda directamente, y solo el híbrido enchufable (con motor central) lleva engranajes.',
   termico: 'Este diseño no lleva motor de gasolina: solo el híbrido enchufable lo tiene.',
   salpicadero: 'Este diseño no lleva salpicadero dibujado con el mando elegido.',

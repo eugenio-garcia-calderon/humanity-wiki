@@ -89,9 +89,11 @@ export function ruedaDeCatalogo(M: Mats, f: FichaRueda, r = f.d / 2, w = f.w, op
     }
   }
   // the brake disc on the outer side, inside the rim (a motorcycle's: 300 mm on a big rim, 220 mm on a scooter's)
-  if (opc.freno && f.perfil === 'moto' && f.llanta !== 'buje') {
-    const rd = Math.min(rLlanta - 0.03, f.llantaPulg >= 16 ? 0.15 : 0.11);
-    const disco = ejeZ(new THREE.Mesh(new THREE.CylinderGeometry(rd, rd, 0.005, 48), M.discoFreno)); disco.position.z = s * (anchoCubo / 2 + 0.008); disco.userData.componente = 'frenos'; disco.name = 'disco-freno'; g.add(disco);
+  // (2026-11-24: not only a motorcycle's: a bicycle's 160 mm, a car's or an eco car's 260 mm; and its caliper)
+  if (opc.freno && f.llanta !== 'buje') {
+    const rd = f.perfil === 'bici' ? Math.min(rLlanta - 0.02, 0.08) : f.perfil === 'moto' ? Math.min(rLlanta - 0.03, f.llantaPulg >= 16 ? 0.15 : 0.11) : Math.min(rLlanta - 0.03, 0.13), zd = s * (anchoCubo / 2 + 0.008), a = 2.2;
+    const disco = ejeZ(new THREE.Mesh(new THREE.CylinderGeometry(rd, rd, 0.005, 48), M.discoFreno)); disco.position.z = zd; disco.userData.componente = 'frenos'; disco.name = 'disco-freno'; g.add(disco);
+    const pinza = new THREE.Mesh(new THREE.BoxGeometry(0.045, 0.07, 0.035), M.pinza); pinza.position.set(rd * 0.9 * Math.cos(a), rd * 0.9 * Math.sin(a), zd); pinza.rotation.z = a - Math.PI / 2; pinza.userData.componente = 'frenos'; pinza.name = 'pinza-freno'; pinza.castShadow = true; g.add(pinza);
   }
   return g;
 }
