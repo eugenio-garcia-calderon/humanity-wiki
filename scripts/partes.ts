@@ -19,7 +19,9 @@ import { BICI_PROPUESTA } from '../src/components/aeromovil/bici/pedales';
 import { anguloFuera } from '../src/components/aeromovil/triciclo/medidas';
 import { OPCIONES_FRENOS, OPCIONES_RUEDAS, OPCIONES_SUSPENSION_RODAJE, OPCIONES_DIRECCION, camposDeFavorita, favoritaDe, opcionesDe } from '../src/components/aeromovil/partes/opciones';
 import { CONCEPTOS_DIRECCION, CREMALLERA_GEMINI, PREGUNTAS_ESTUDIO } from '../src/components/aeromovil/partes/direccion';
-import { SUBSISTEMAS, esSub, partesDe, subsistema, tieneSub } from '../src/components/aeromovil/partes/subsistemas';
+import { SIN_PIEZA, SUBSISTEMAS, esSub, partesDe, subsistema, tieneSub } from '../src/components/aeromovil/partes/subsistemas';
+import { PARTES_3D } from '../src/components/aeromovil/visor/partes3d';
+import { NOMBRES_PIEZA } from '../src/components/aeromovil/piezasMotor';
 import { OPCIONES_CONTROLADOR, OPCIONES_MOTOR, OPCIONES_REDUCTORA, OPCIONES_TERMICO, elegidasDe, selectorVisible } from '../src/components/aeromovil/partes/opciones';
 import { grupoPieza } from '../src/components/aeromovil/triciclo/masas';
 import { numerosActuales, sinParteDe } from '../src/components/aeromovil/partes/numeros';
@@ -67,6 +69,13 @@ ok(['rodaje', 'propulsion', 'energia', 'chasis', 'carroceria', 'interior'].every
 ok(partesDe('carroceria', PARAMETROS_TRICICLO).map(s => s.id).join() === 'carenado,cristales,solar,accesos,retrovisores,luces' && partesDe('interior', PARAMETROS_TRICICLO).map(s => s.id).join() === 'asientos,mandos,salpicadero,acabado', 'las partes de la carrocería y del interior, en su orden');
 ok(partesDe('propulsion', PARAMETROS_TRICICLO).map(s => s.id).join() === 'motor,controlador,reductora' && partesDe('propulsion', { tPropulsion: 'phev' }).map(s => s.id).join() === 'motor,controlador,reductora,termico', 'el motor de gasolina solo está en el híbrido enchufable');
 for (const s of SUBSISTEMAS) ok(s.capas.length > 0 && s.lema.length > 10 && s.solo.length > 3, `${s.id}: capas, lema y texto de «mostrar solo»`);
+// 2026-11-24: the tags of the 3D a part shows (`componentes`) must be tags the viewer puts (`visor/partes3d.ts`), and no two parts
+// of a department may show the same ones (that is «pincho en mando, salpicadero, asientos y no cambia lo que se ve»)
+for (const s of SUBSISTEMAS.filter(x => x.componentes)) ok(s.componentes!.every(c => (PARTES_3D as readonly string[]).includes(c) || c in NOMBRES_PIEZA), `${s.id}: etiqueta de 3D desconocida en «componentes» (${s.componentes})`);
+for (const s of SUBSISTEMAS.filter(x => x.componentes)) for (const o of SUBSISTEMAS.filter(x => x.dep === s.dep && x.id < s.id && x.componentes)) ok(s.componentes!.join() !== o.componentes!.join() || s.capas.join() !== o.capas.join(), `${s.id} y ${o.id} enseñan lo mismo en 3D`);
+// «Este diseño no lleva …» (the page's notice for a part the design does not draw): its special texts name real parts
+ok(Object.keys(SIN_PIEZA).every(k => SUBSISTEMAS.some(s => s.id === k)), 'SIN_PIEZA: cada texto es de una parte que existe');
+ok(SUBSISTEMAS.filter(s => s.dep === 'propulsion').every(s => (s.componentes?.length ?? 0) > 0), 'cada parte del motor dice qué piezas del 3D son suyas');
 
 // the Gemini rack: the figures that come from its page
 const gem = OPCIONES_DIRECCION.find(o => o.id === 'cremallera')!;

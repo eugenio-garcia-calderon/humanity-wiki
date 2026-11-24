@@ -27,16 +27,21 @@ export function aplicarFichaSolo(G: Record<CapaId, THREE.Object3D>, visibles: Re
   }
 }
 
-/** The box (world axes) of what the selected layers draw now, for the camera to frame; null if nothing. */
-export function cajaDeCapas(G: Record<CapaId, THREE.Object3D>, capas: CapaId[]): THREE.Box3 | null {
+/**
+ * The box (world axes) of what the selection shows, for the camera to frame; null if nothing. It reads the selection itself
+ * (the layers it names and its tags), not what is visible at this moment: the camera is framed in the same render that changes
+ * the page's layers, before `visibles` has caught up, and a mesh this file hid counts as the selection's if it passes the filter.
+ */
+export function cajaDeSeleccion(G: Record<CapaId, THREE.Object3D>, sel: SeleccionFicha): THREE.Box3 | null {
   const b = new THREE.Box3(), t = new THREE.Box3();
   let alguna = false;
-  for (const k of capas) {
-    const g = G[k]; if (!g) continue;
-    g.updateMatrixWorld(true);
-    g.traverse((m: any) => {
-      if (!m.isMesh || !m.visible) return;
-      for (let p = m.parent; p; p = p.parent) if (!p.visible) return;
+  for (const k of sel.capas) {
+    const raiz = G[k]; if (!raiz) continue;
+    raiz.updateMatrixWorld(true);
+    raiz.traverse((m: any) => {
+      if (!m.isMesh || (!m.visible && !m.userData.ocultaFicha)) return;
+      for (let p = m.parent; p && p !== raiz; p = p.parent) if (!p.visible) return;
+      if (sel.componentes && !sel.componentes.includes(m.userData.componente)) return;
       m.geometry.computeBoundingBox?.(); t.copy(m.geometry.boundingBox).applyMatrix4(m.matrixWorld); b.union(t); alguna = true;
     });
   }

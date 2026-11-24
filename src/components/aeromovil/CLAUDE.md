@@ -50,6 +50,9 @@ barrel would load half-built modules. Calls between siblings are fine only insid
 | `ocupante.ts` | seats, the rider figure, wheels |
 | `triciclo.ts` | Triciclo/Bala family: build, split into layers, steer, lean. The body itself comes from `garaje/balaModelo.ts` and `garaje/balaPiezas.ts` |
 | `gota.ts`, `a1.ts` | the other two vehicles |
+| `partes3d.ts` | which part each mesh of the body, the glass and the cabin is (`userData.componente`: `carroceria`, `cupula`, `solar`, `retrovisores`, `luces`, `asientos`, `mandos`, `salpicadero`, `acabado`…); `etiquetarPartes(G)` runs at the end of the Bala and Triciclo builds. See «Part tags» below |
+| `fichaSolo.ts` | «only this part» in the viewer: layers + tagged meshes, and the box the camera frames |
+| `inspeccion.ts` | what the viewer draws, as rows (`window.__am3d`) and where it lands on the screen (`window.__am3dVista`): read-only, for `scripts/robot-3d.ts` |
 | `cotas.ts` | dimension lines |
 | `garaje.ts` | reference velomobiles, door pivots of garage cars |
 | `construir.ts` | dispatch by `modelo.tipo`, and `construirDisenoGaraje` (a saved design drawn in the garage) |
@@ -69,8 +72,9 @@ Then use it where it acts (`triciclo/modelo.ts`, `masas.ts`, `comprobaciones.ts`
 `limitarTriciclo('tX', T)`, which clamps it to its range.
 
 **A new 3D part of the Triciclo**: draw it in `visor/triciclo.ts` (`construirTriciclo`) or, if it is part of the body
-or cabin shared with the garage's Bala, in `garaje/balaPiezas.ts`. Put it in a layer (`CapaId`) and give the
-object a `name`: `zonaTriciclo` in `LadoTriciclo.tsx` maps a click (layer, part names, point) to the block that opens. Its mass goes
+or cabin shared with the garage's Bala, in `garaje/balaPiezas.ts`. Put it in a layer (`CapaId`), give the object a `name`, and
+**say which part of the vehicle it is** (below, «Part tags»): a mesh nobody names shows under «Carrocería» (body layer) or
+«cabina-varios» (cabin) and under no other menu entry, and `npx tsx scripts/robot-3d.ts` will say so. Click mapping: `zonaTriciclo` in `LadoTriciclo.tsx` maps a click (layer, part names, point) to the block that opens. Its mass goes
 in `triciclo/masas.ts` `piezasTriciclo`, or the «Peso» list and the centre of gravity will not know it exists.
 
 **A new check**: in `triciclo/comprobaciones.ts` `calcularTriciclo`, one call to
@@ -402,6 +406,44 @@ A department with a single part has no row (`SubmenuPartes` returns null under t
   Interior › Asientos therefore has two ways in (the part's tab and the record under the 3D) and they do not count the same:
   the record reads the page's section `interior|Asientos` (the seats alone), the part's regex also takes the upholstery and
   the belts (the page's «Tapicería» section), because its choices are the seats', the upholstery's and the belts'.
+
+### Part tags and the 3D robot (2026-11-24)
+
+Eugenio: «selecciono cúpula o paneles solares o retrovisores, no termina de funcionar bien lo que se muestra … paneles solares
+pincho y no se muestran los paneles solares, o retrovisores pincho y se muestra todo el vehículo salvo la cúpula … en interior
+pincho en mando, salpicadero, asientos y no cambia lo que se ve en 3D». **Root cause**: a part could only switch whole LAYERS
+(`capas`); the mirrors, the solar panels, the doors, the dashboard, the wheel and the seats are a few meshes INSIDE the layers of
+the body (`carenado`, `cristales`) and of the cabin (`asientos`), and the `solar` layer is empty (the panels hang in the body and
+glass layers). So «Retrovisores» drew the whole skin, «Paneles solares» nothing, and the four interior parts drew one cabin.
+
+- **Every mesh of `carenado`, `cristales` and `asientos` carries `userData.componente` = the part it is** (`PARTES_3D` in
+  `visor/partes3d.ts`). Two sources: `parteDeMalla` reads the mesh's own name and its parents' (the builders already name most:
+  `panel-solar`, `retrovisor-casco`, `faro-led`, `forro-puerta`, `salpicadero`…; the order of its rules is the order of
+  precedence: a solar panel on the boot lid is a solar panel), and the cabin's anonymous meshes (seat posts, spokes, vents) are
+  tagged while they are built: `cabina()` in `garaje/balaPiezas.ts` calls `marcar('asientos' | 'mandos' | 'salpicadero' | …)`
+  after each block (it tags what was added since the last call), and `garaje/balaInterior.ts` names its cupholders and belt
+  hardware. A mesh that already has a `componente` (the cooling grille, the brake discs) keeps it. `etiquetarPartes(G)` runs at
+  the end of `construirTriciclo` and `construirBala`.
+- **Each `Subsistema` lists the tags it shows in `componentes`**, and its `capas` must include every layer where they live
+  («Acabado interior» is in `asientos` AND `carenado`: the door lining hangs on the doors). `pages/Aeromovil.tsx` `parteSolo`
+  passes `{capas, componentes}` to the viewer's `fichaSolo` (a record's selection, `fichas.solo`, wins), which hides every other
+  layer and every other tagged mesh, hides the garage's cars and the labels, and frames the camera on what is left
+  (`cajaDeSeleccion` reads the selection itself, not the page's layers, which have not caught up in that render).
+- **The riders (`ocupantes`) are in no part**: they would hide the seat, the belts and the wheel.
+- **The 3D window is 30 % lower** (Eugenio: «un 30 % más estrechita, para que se vea mejor también lo que está debajo»):
+  `h-[50vh]` on a desktop with the parts' row (was 72), 43vh on a phone (was 62), 39vh with a record open (was 56).
+- **The robot**: `npx tsx scripts/robot-3d.ts [--url http://localhost:3000] [--diseno completo,puertas] [--dep carroceria] [--movil]`
+  (the dev server up; if Playwright's browser is missing, `ROBOT_CHROMIUM=/path/to/chromium`). It opens the real page with each of
+  five designs (`DISENOS`), goes to every department, clicks every part of its row and reads `window.__am3d()` (what is drawn:
+  `visor/inspeccion.ts`) and `window.__am3dVista()` (where it lands on the screen). Per part: it draws something, or the page
+  says why not; every piece of the part is drawn and nothing else (`ESPERA`: what each part is, written apart from the tags, by the
+  builders' own names); it is on the screen and big enough; no two parts of a department draw the same; the 3D window is at most
+  52 % of the screen's height and the part's panel starts on the first screen. Before the fix it reported 17 failures in
+  Carrocería and Interior of the full design (Retrovisores drew the same 122 meshes as Carrocería; Mando, Salpicadero and
+  Asientos the same 138). It must end «Todo OK»: run it after touching a builder, `SUBSISTEMAS`, `partes3d.ts` or `parteSolo`.
+- **A new mesh in the body or the cabin**: name it (`malla(geo, mat, 'nombre')`) and, if its name is not already a rule of
+  `parteDeMalla`, add the rule; in `cabina()`, put it inside a block that ends with `marcar(...)`. Without that it shows only
+  under «Carrocería» (body layers) or under no part (cabin) and the robot says «se ve lo que no es suyo».
 
 **Before you change this, decide**: the favourite as a design field (today: zero server code, the model already reads it, a
 star can be undone by pressing another) versus a table of studies per part with their own history and several favourites per

@@ -95,7 +95,7 @@ import { BloqueAerodinamica } from '../components/aeromovil/estudio/EstudioAerod
 import { PanelHomologacion, ResumenHomologacion } from '../components/aeromovil/homologacion/PanelHomologacion';
 import { PaginaHomologacion } from '../components/aeromovil/homologacion/PaginaHomologacion';
 import { PanelSubsistema, ResumenPartes, SubmenuPartes } from '../components/aeromovil/partes/PanelSubsistema';
-import { esSub, partesDe, subsistema, tieneSub } from '../components/aeromovil/partes/subsistemas';
+import { esSub, partesDe, SIN_PIEZA, subsistema, tieneSub } from '../components/aeromovil/partes/subsistemas';
 import type { IdSub } from '../components/aeromovil/partes/tipos';
 // (2026-11-24) components in the 3D: hover, click, and the record of the component under the viewer (fichas/)
 import { usarFichas } from '../components/aeromovil/fichas/usarFichas';
@@ -543,6 +543,15 @@ export default function Aeromovil() {
   const piezas = usePiezasMotor(modelo, porDeps && soloDep && depTri === 'propulsion');
   // (2026-11-24) components with a record: hover label, click → only that part in the 3D + its record under the viewer
   const fichas = usarFichas({ dep: porDeps ? depTri : '', tipo: modelo.tipo, familia: P.disposicion, activo: porDeps });
+  // (2026-11-24, Eugenio: «paneles solares pincho y no se muestran los paneles solares, o retrovisores pincho y se muestra todo
+  // el vehículo salvo la cúpula») the selected part of the department narrows the 3D to its own pieces: its layers and, inside
+  // them, the meshes tagged for it (partes/subsistemas.ts `componentes`, visor/partes3d.ts). A record's selection wins.
+  const subParte = porDeps && soloDep && P.disposicion === 'triciclo' && tieneSub(depTri) && esSub(subDe(depTri)) ? subsistema(subDe(depTri) as IdSub) : null;
+  const parteSolo = subParte ? { capas: subParte.capas, componentes: subParte.componentes } : null;
+  // …and when this design draws none of it (a dashboard it has none of, a reduction gear behind a hub motor) the window would
+  // be empty with no reason given: the viewer says so (`alVacia`) and the page writes it over the window
+  const [parteVacia, setParteVacia] = useState(false);
+  const textoVacia = !fichas.solo && subParte ? (SIN_PIEZA[subParte.id] ?? `Este diseño no lleva ${subParte.nombre.toLowerCase()}.`) : 'Este diseño no lleva esa pieza.';
   const fichasAlmacen = useFichas();
   const listasFichas = useMemo(() => (porDeps ? listasDelDiseno(P, paraCalcular, res) : null), [porDeps, P, paraCalcular, res]);
   const capasFicha = useMemo(() => (porDeps ? [...new Set(fichasDe(depTri, modelo.tipo).flatMap(f => f.capas))] : []), [porDeps, depTri, modelo.tipo]);
@@ -746,7 +755,7 @@ export default function Aeromovil() {
         {/* (2026-11-24) each department's parts as a row of tabs above the 3D view (partes/PanelSubsistema.tsx) */}
         {esTri && tieneSub(depTri) && <SubmenuPartes dep={depTri} sub={subDe(depTri)} alElegir={elegirSub} P={P} precios={coste?.precios ?? null} />}
         <section ref={ventana3d} aria-label="Vista 3D" className={cn('overflow-hidden bg-slate-50', !verGaraje && completa === 'no' && 'hidden',
-          completa === 'no' ? cn('relative rounded-xl border border-slate-200', fichas.activa ? 'h-[40vh] min-h-[300px] lg:h-[56vh]' : 'h-[62vh] min-h-[380px]', (esA1 || (esTri && tieneSub(depTri) && !fichas.activa)) ? 'lg:h-[72vh]' : fichas.activa ? '' : 'lg:sticky lg:top-[68px] lg:h-[calc(100vh-88px)]')
+          completa === 'no' ? cn('relative rounded-xl border border-slate-200', fichas.activa ? 'h-[28vh] min-h-[210px] lg:h-[39vh]' : 'h-[43vh] min-h-[266px]', (esA1 || (esTri && tieneSub(depTri) && !fichas.activa)) ? 'lg:h-[50vh]' : fichas.activa ? '' : 'lg:sticky lg:top-[68px] lg:h-[calc((100vh_-_88px)*0.7)]')
             : completa === 'css' ? 'fixed inset-0 z-[100] h-[100dvh] w-screen' : 'relative h-full w-full')}>
           <Visor3D ref={visor} modelo={modelo} visibles={visibles} rayosX={rayosX} corte={corte} curva={curva} bascular={bascular} cotas={verCotas} abierta={abierta} maleteros={maleteros} sinPasajero={sinPasajero} garaje={garajeConDisenos} soloGaraje={!!soloGaraje} tunel={tunel} carteles={carteles} cuerposTunel={cuerposTunel} opcionesTunel={opcionesTunelVisor} alElegirPuntoTunel={setPuntoTunel} puntoTunel={puntoTunel} fichasGaraje={disenosGaraje.fichas} superponer={!!superponer && !soloGaraje} vista={vista}
             referencia={referencia} modoRef={modoRef} alinear={alinear} alPinchar={esA1 ? c => { navegar(`/aeromovil/componentes/${c}`); window.scrollTo({ top: 0 }); } : undefined}
@@ -755,7 +764,8 @@ export default function Aeromovil() {
             seguir={eleccion.seguir} nombres={soloUrl ? undefined : disenosGaraje.nombres} resaltarNuestro={disenosGaraje.enFila > 0} verGaraje={panelGaraje && !soloGaraje}
             margenDerecho={panelGaraje && typeof window !== 'undefined' && window.matchMedia('(min-width: 640px)').matches ? 352 : 0}
             colores={colores} centroGravedad={seccion === 'diseno' && porDeps && depTri === 'masas' ? centroParaVisor(masas) : null} piezasMotor={piezas.visor}
-            capasFicha={capasFicha} fichaSolo={fichas.solo} alPasar={fichas.pasar} />
+            capasFicha={capasFicha} fichaSolo={fichas.solo ?? parteSolo} alVacia={setParteVacia} alPasar={fichas.pasar} />
+          {parteVacia && <p data-vacio-3d role="status" className="pointer-events-none absolute left-1/2 top-1/2 z-[12] w-[min(24rem,calc(100%-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-lg border border-slate-300 bg-white/95 px-4 py-3 text-center text-sm text-slate-700 shadow-md">{textoVacia}</p>}
           <EtiquetaFicha h={fichas.hover} numero={hoverFicha?.numero} datos={hoverFicha?.datos ?? []} ancho={ventana3d.current?.clientWidth ?? 800} />
           <TarjetaPiezaPinchada p={piezas} />
           {/* La esquina de arriba a la derecha es del botón de pantalla completa: las tarjetas se apartan a su izquierda
