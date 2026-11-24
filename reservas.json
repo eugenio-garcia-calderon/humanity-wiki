@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "src/components/aeromovil/masasSecciones.ts",
-      "motivo": "peso editable por pieza",
-      "desde": "2026-11-24T10:37:03.573Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "src/components/aeromovil/PesoSeccion.tsx",
       "motivo": "peso editable por pieza",
       "desde": "2026-11-24T10:37:05.951Z"
