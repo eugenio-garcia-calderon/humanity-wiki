@@ -13222,3 +13222,25 @@ Eugenio: «haz lo mismo que has hecho de los submenus y componentes del RODAJE, 
 - Checks: `tsc` 0 errors; `scripts/partes.ts` (new: the registry's tags exist and no two parts of a department show the same ones; the empty-part texts name real parts).
 - Files: `src/components/aeromovil/visor/{partes3d,inspeccion,fichaSolo,triciclo,ruedaCatalogo,ocupante,primitivas}.ts`, `garaje/{balaPiezas,balaInterior}.ts`, `partes/subsistemas.ts`, `Visor3D.tsx`, `src/pages/Aeromovil.tsx`, `scripts/{robot-3d,partes}.ts`, `src/components/aeromovil/CLAUDE.md`.
 - **Not verified:** the installed app (the service worker may serve the old build: `humanity.wiki/?sw=off` drops it), a real phone (the robot emulates 390 px with software WebGL), the look of the new brake discs next to the real wheels in daylight, and the Cuadriciclo Basculante and the Aeromóvil 1, which this does not touch.
+## 2026-11-24 · luzhumanidad.com home: Movilidad and Energía in one line like Política; sector headers without icon or count
+
+> «Me gusta mucho cómo has hecho la innovación en política, poniéndolo todo en una única línea y estrechito… haz lo mismo para la innovación en energía y innovación en movilidad. Acorta los títulos… Si hay más de 5 tarjetas, pues pones ya el slider… quita lo del número de proyectos… y también quita el icono.»
+
+- «Innovación en el sector de la movilidad» → «Innovación en Movilidad», «Innovación en el sector energético» → «Innovación en Energía». Both are `destacado` like Política: full width, five cards at once, the slider for the rest (migration 0239).
+- Every sector header shows the title alone: no icon and no «N proyectos». On phones a small «desliza →» remains when there are more cards to the side.
+- Files: `drizzle/0239_sectores_en_linea.sql`, `src/components/sitio/FilaSector.tsx`, `src/components/sitio/VistaProyectosSitio.tsx`.
+
+## 2026-11-24 · luzhumanidad.com home: every sector in one line
+
+> «Hazlo también en la innovación en vivienda y la innovación en cultura. Y así ya tenemos todas las tarjetas en el mismo formato.»
+
+- «Innovación en vivienda y comunidad» → «Innovación en Vivienda», «Innovación en educación, cultura y conciencia» → «Innovación en Cultura», both `destacado` (migration 0240). The last sector, «Informática», goes full width too (`sitio.otrosDestacado`, VistaProyectosSitio.tsx). All six sectors now share one format: full width, five cards at once, the slider beyond five.
+
+## 2026-11-25 · aeromovil.org: no Luz & Humanidad header, and the Aeromóvil card leads there
+
+> «Si prefieres que al pincharlo te lleve a aeromovil.org, dímelo y lo hago. SI; HAZLO.» / «quita la cabecera de luz&humanidad en aeromovil.org.»
+
+- On `luzhumanidad.com` the Aeromóvil card (and any project card whose page has a bought, active domain) is now a plain link to that domain (`https://aeromovil.org/`) instead of the copy of the page inside the Luz & Humanidad site. Until the answer arrives, or if it fails, or in the editor, the card still opens the page inside the site.
+- On `aeromovil.org` the Luz & Humanidad bar is gone. The rule is general: a project page served on a domain that is not the project's own parent site and not `*.humanity.wiki` draws no parent bar, no breadcrumb line. `luzhumanidad.com`, `solarcrowd.com`, `wikiproducts` and every `*.humanity.wiki` address keep theirs (checked against the production `dominios_paginas` rows).
+- New public endpoint `GET /api/dominios/propias?ids=a,b,c` → `{ pageId: domain }` (active, not redirecting, not a platform subdomain; cached 60 s).
+- Files: `src/server/dominios.ts`, `src/components/sitio/barraDelSitio.ts` (new), `src/components/sitio/VistaPagina.tsx`, `src/pages/SubpaginaSitio.tsx`, `src/components/sitio/VistaProyectosSitio.tsx`, `scripts/web-propia.ts` (11 checks).

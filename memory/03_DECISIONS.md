@@ -2526,3 +2526,13 @@ They change saved designs' numbers on purpose.
 **Cost of switching later**: tags → layers ≈ 1 day today; every new mesh in a shared layer without a name or a tag lands in «cabina-varios»/«carroceria», the catch-all, and shows up under no menu entry: the robot's «se ve lo que no es suyo» finds it.
 **Known consequences**: the reduction gear and the dashboard are drawn in few designs, so their entry is often empty; a hybrid's electric motor (MG2) answers to «Motor eléctrico».
 
+
+## 2026-11-25 — A project's own web carries no parent bar, and its card leads to its own domain
+
+**Context**: aeromovil.org was connected to the Aeromóvil project page (a descendant of the Luz & Humanidad site root). Because the page's nearest `config.sitio` ancestor is Luz & Humanidad, the page drew Luz & Humanidad's bar on a domain that is not Luz & Humanidad's. Eugenio asked for the bar to go, and for the project's card on luzhumanidad.com to lead to the bought domain.
+**Chosen**:
+1. **Bar rule** (`esWebPropiaDeProyecto`): the bar is dropped when the host's own root (`useSitio().raizId`) differs from the root of the site the page belongs to, and the host is not `*.humanity.wiki`. It reads data that already exists on both sides; nothing new is stored.
+2. **Card rule**: the home asks `GET /api/dominios/propias?ids=…` once for all its project cards; a card with an active, non-redirecting, non-platform domain becomes an `<a href="https://domain/">`. The request is one per home visit, cached 60 s.
+**Alternatives**: (a) a flag `sitio.sinBarra` written on the Aeromóvil page — rejected: it fixes one project and the next bought domain (four vehicles are planned, each one likely to get its own domain) would need someone to remember it; (b) hard-coding `aeromovil.org` in the card — rejected for the same reason; (c) a server-side redirect from the copy to the domain — rejected: it would also redirect people who are editing or previewing the page inside the site; (d) putting the domain in the projects list response — cleaner (no second request) but touches the shared projects-list endpoint that other screens also read, ≈ 1 hour and a regression risk.
+**Cost of switching later**: (a)→(rule) was ≈ 20 minutes today; (d) ≈ 1 hour. The second request is ≈ 1 small query per home visit; at ≈ 10 000 visits/day it is still < 1 query per 8 s on average.
+**Known consequences**: the card link is a full page load (a different origin), not an in-app navigation; a project whose domain is active but still showing the platform's «not ready» page would be linked anyway — `estado = 'activo'` is what guards that.
