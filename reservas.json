@@ -89,6 +89,12 @@
       "ruta": "public/observatorio-polarizacion/index.html",
       "motivo": "Vistas observatorio, perfiles y democracia directa para las URLs de Política",
       "desde": "2026-11-24T12:56:56.876Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "drizzle/0235_politica_herramientas.sql",
+      "motivo": "Política en tarjetas y cuatro páginas nuevas",
+      "desde": "2026-11-24T12:59:44.635Z"
     }
   ]
 }
