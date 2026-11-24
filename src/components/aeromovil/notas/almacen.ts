@@ -38,7 +38,7 @@ const avisar = () => { version++; subs.forEach(f => f()); };
 
 const leerLocales = (): NotaLocal[] => { try { const v = JSON.parse(localStorage.getItem(CLAVE_LOCAL) || '[]'); return Array.isArray(v) ? v : []; } catch { return []; } };
 const guardarLocales = (l: NotaLocal[]) => { try { localStorage.setItem(CLAVE_LOCAL, JSON.stringify(l)); } catch { /* sin almacenamiento */ } };
-const mismoDestino = (n: { diseno: number | null; vehiculo: string }) => !!destino && n.vehiculo === destino.vehiculo && (n.diseno ?? null) === destino.diseno;
+const mismoDestino = (n: { diseno: number | null; vehiculo: string }) => !!destino && n.vehiculo === destino.vehiculo && ((n.diseno ?? 0) > 0 ? n.diseno : null) === destino.diseno;
 
 function deServidor(f: any): Nota {
   return { id: `s${f.id}`, seccion: String(f.seccion), texto: String(f.texto), fecha: String(f.created_at), editada: f.updated_at ? String(f.updated_at) : null, autor: String(f.autor || 'Usuario'), mia: !!f.mia, local: false };
@@ -63,7 +63,10 @@ async function recargar() {
 }
 
 /** Where notes go now: the open saved design (or none) and the vehicle family. */
-export function ponerDestino(diseno: number | null, vehiculo: string | undefined) {
+export function ponerDestino(diseno0: number | null, vehiculo: string | undefined) {
+  // The built-in proposals (Disenos.tsx) have a negative id and no row on the server: their notes belong to the vehicle
+  // with no saved design open. Sending the negative id made the server answer «Sección no válida» (2026-11-24).
+  const diseno = diseno0 != null && diseno0 > 0 ? diseno0 : null;
   const d = vehiculo ? { diseno, vehiculo } : null;
   if (d?.diseno === destino?.diseno && d?.vehiculo === destino?.vehiculo) return;
   destino = d; void recargar();
