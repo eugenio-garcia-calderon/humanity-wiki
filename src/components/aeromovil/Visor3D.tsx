@@ -51,6 +51,7 @@ import { cotasGaraje, cotas } from './visor/cotas';
 import { construirReferencia, type AperturaGaraje, colocarPivotesGaraje } from './visor/garaje';
 import { construirMovil, construirBasculanteVisor } from './visor/construir';
 import { aplicarPiezasMotor, cajaVisibleMotor, type OpcionesPiezas } from './visor/piezasMotor3d';
+import { aplicarFichaSolo, cajaDeCapas } from './visor/fichaSolo';
 export { construirDisenoGaraje } from './visor/construir';
 
 export type Vista = 'iso' | 'side' | 'top' | 'front' | 'back';
@@ -136,6 +137,14 @@ interface Props {
   centroGravedad?: [number, number, number] | null;
   /** 2026-11-17 («Mostrar solo el motor», piece by piece): which parts of the «Motor» layer to keep, and their labels. */
   piezasMotor?: OpcionesPiezas | null;
+  /** 2026-11-24 (components with a record, fichas/registro.ts): the layers whose parts are components. A click or a hover
+   *  picks among THEM first, so an occupant in front of a seat does not hide the seat. */
+  capasFicha?: CapaId[];
+  /** …the component selected: only its layers (and, if given, the meshes tagged `userData.componente` with one of these)
+   *  stay drawn, and the camera frames them. null: the department as it was. */
+  fichaSolo?: { capas: CapaId[]; componentes?: string[] } | null;
+  /** …the pointer moves over a component (`donde`) or off every one (null); x, y in px inside the viewer. Mouse and pen only. */
+  alPasar?: (donde: { punto: [number, number, number]; capa: CapaId | null; nombres: string[] } | null, x: number, y: number) => void;
 }
 
 const VISTAS: Record<Vista, [number, number, number]> = {
@@ -167,10 +176,12 @@ function distanciaParaVer(puntos: THREE.Vector3[], centro: THREE.Vector3, haciaC
   return D;
 }
 
-export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cuerposTunel, opcionesTunel, alElegirPuntoTunel, puntoTunel = null, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje, fichasGaraje, alQuitarGaraje, alPincharGaraje, alPincharNuestro, extraTarjeta, seguir, nombres, resaltarNuestro = false, verGaraje = false, margenDerecho = 0, colores, bascular = 0, centroGravedad = null, piezasMotor = null }, ref) {
+export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo, visibles, rayosX, corte, curva, cotas: verCotas, abierta, maleteros = false, sinPasajero = false, garaje = [], soloGaraje = false, tunel = false, carteles, cuerposTunel, opcionesTunel, alElegirPuntoTunel, puntoTunel = null, superponer = false, vista, referencia = null, modoRef = 'no', alinear = 'eje', alPinchar, alMoverGaraje, fichasGaraje, alQuitarGaraje, alPincharGaraje, alPincharNuestro, extraTarjeta, seguir, nombres, resaltarNuestro = false, verGaraje = false, margenDerecho = 0, colores, bascular = 0, centroGravedad = null, piezasMotor = null, capasFicha, fichaSolo = null, alPasar }, ref) {
   const pinchar = useRef(alPinchar); pinchar.current = alPinchar;
   const pincharGaraje = useRef(alPincharGaraje); pincharGaraje.current = alPincharGaraje;
   const pincharNuestro = useRef(alPincharNuestro); pincharNuestro.current = alPincharNuestro;
+  const capasFichaR = useRef(capasFicha); capasFichaR.current = capasFicha;
+  const pasarR = useRef(alPasar); pasarR.current = alPasar;
   const conExtra = useRef(!!extraTarjeta); conExtra.current = !!extraTarjeta;
   const fichas = useRef(fichasGaraje); fichas.current = fichasGaraje;
   const elegirPunto = useRef(alElegirPuntoTunel); elegirPunto.current = alElegirPuntoTunel;
@@ -354,6 +365,12 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       bala: { ultima: 0, cuadro: 0, pausa: 0 as ReturnType<typeof setTimeout> | 0 },
       /** The Bala is already on screen (so a change is an edit, rebuilt quick first), not being opened. */
       balaVisto: false as false | 'bala' | 'triciclo',
+      /** The component selected (fichas/): its layers and tags. Re-applied after every rebuild (`cotasYPuertas`). */
+      fichaSolo: null as { capas: CapaId[]; componentes?: string[] } | null,
+      /** The layers the page shows now (`visibles`), for re-applying the selection after a rebuild. */
+      visibles: null as Record<CapaId, boolean> | null,
+      /** Where the camera was when a component was selected, to go back to it. */
+      camaraAntesFicha: null as { pos: THREE.Vector3; target: THREE.Vector3 } | null,
       curva: false, inclinacion: 0, modelo: null as Modelo | null, plano: new THREE.Plane(new THREE.Vector3(0, 0, 1), 0),
       /** Cuadriciclo Basculante: «Bascular» running (seconds since it was pressed), or null. */
       bascula: null as { t: number } | null,
@@ -380,6 +397,21 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     // Clic en una pieza: si apenas se ha movido el ratón, es un clic y no un giro de cámara.
     const ray = new THREE.Raycaster(), ptr = new THREE.Vector2();
     let bajada: [number, number] | null = null;
+    // (2026-11-24) the visible, solid-enough meshes of some layers, and the answer a click or a hover gives the page
+    const meshesDe = (capas: CapaId[]) => {
+      const out: THREE.Object3D[] = [];
+      for (const k of capas) st.G[k]?.traverse((o: any) => {
+        if (!o.isMesh || !o.visible || (o.material?.transparent && (o.material.opacity ?? 1) <= 0.3)) return;
+        for (let p = o.parent; p && p !== coche; p = p.parent) if (!p.visible) return;
+        out.push(o);
+      });
+      return out;
+    };
+    const dondeDe = (h: THREE.Intersection) => {
+      const p = coche.worldToLocal(h.point.clone()), nombres: string[] = (h.object as any).userData?.componente ? [`comp:${(h.object as any).userData.componente}`] : []; let capa: CapaId | null = null;
+      for (let o: THREE.Object3D | null = h.object; o && o !== coche; o = o.parent) { if (o.name) nombres.push(o.name); const c = CAPAS.find(k => k.n === o!.name && o!.parent === coche); if (c) capa = c.k; }
+      return { punto: [p.x, p.y, p.z] as [number, number, number], capa, nombres };
+    };
     const alBajar = (e: PointerEvent) => { bajada = [e.clientX, e.clientY]; };
     const alSoltar = (e: PointerEvent) => {
       if (!bajada || Math.hypot(e.clientX - bajada[0], e.clientY - bajada[1]) > 6) { bajada = null; return; }
@@ -392,6 +424,12 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       if (punto) { elegirPunto.current!(punto); return; }
       // A garage car that cannot be dragged (alone with ?garaje=…, or overlaid) is picked here; a click on
       // anything else closes its card. (A car that can be dragged is picked when the drag ends without moving.)
+      // a component with a record (fichas/registro.ts): picked among its own layers first, and before the garage cars (their
+      // boxes can sit behind our seats: the nearest thing under the pointer wins)
+      if (pincharNuestro.current && capasFichaR.current?.length && coche.visible) {
+        const hf = ray.intersectObjects(meshesDe(capasFichaR.current), false)[0];
+        if (hf && hf.distance <= distanciaGaraje()) { elegirCoche(null); pincharNuestro.current(dondeDe(hf)); return; }
+      }
       const enGaraje = grupoGaraje.children.length ? cocheGarajeEn(true) : null;
       elegirCoche(enGaraje);
       if (enGaraje || (!pinchar.current && !pincharNuestro.current) || !coche.visible) return;
@@ -401,11 +439,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       if (hit && pinchar.current) { pinchar.current((hit.object as any).userData.componente); return; }
       // (2026-11-13) our own car, where no part with a sheet was hit: the page opens the design's card
       if (!pincharNuestro.current) return;
-      const donde = (h: THREE.Intersection) => {
-        const p = coche.worldToLocal(h.point.clone()), nombres: string[] = (h.object as any).userData?.componente ? [`comp:${(h.object as any).userData.componente}`] : []; let capa: CapaId | null = null;
-        for (let o: THREE.Object3D | null = h.object; o && o !== coche; o = o.parent) { if (o.name) nombres.push(o.name); const c = CAPAS.find(k => k.n === o!.name && o!.parent === coche); if (c) capa = c.k; }
-        return { punto: [p.x, p.y, p.z] as [number, number, number], capa, nombres };
-      };
+      const donde = dondeDe;
       if (hit) { pincharNuestro.current(donde(hit)); return; }
       const todas: THREE.Object3D[] = [];
       coche.traverse((o: any) => { if (o.isMesh && o.visible) { let p = o.parent, ok = true; while (p && p !== coche) { if (!p.visible) { ok = false; break; } p = p.parent; } if (ok) todas.push(o); } });
@@ -413,6 +447,23 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       if (h2) pincharNuestro.current(donde(h2));
     };
     cv.addEventListener('pointerdown', alBajar); cv.addEventListener('pointerup', alSoltar);
+    // Hover over a component (2026-11-24): mouse and pen only (a finger has no hover: a tap opens the record at once), at most
+    // every 60 ms, and only while the page asked for it (`alPasar`: a department with components, nothing selected)
+    let esperaHover = 0, sobreFicha = false;
+    const alMoverFicha = (e: PointerEvent) => {
+      const cb = pasarR.current;
+      if (!cb || e.pointerType === 'touch' || e.buttons !== 0 || !coche.visible) return;
+      const ahora = performance.now(); if (ahora - esperaHover < 60) return; esperaHover = ahora;
+      const r = cv.getBoundingClientRect();
+      ptr.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+      ray.setFromCamera(ptr, camera);
+      const caps = capasFichaR.current, h0 = caps?.length ? ray.intersectObjects(meshesDe(caps), false)[0] : undefined;
+      const h = h0 && h0.distance <= distanciaGaraje() ? h0 : undefined; // a garage car in front hides it
+      sobreFicha = !!h; cv.style.cursor = h ? 'pointer' : '';
+      cb(h ? dondeDe(h) : null, e.clientX - r.left, e.clientY - r.top);
+    };
+    const alSalirFicha = () => { if (sobreFicha) { sobreFicha = false; cv.style.cursor = ''; } pasarR.current?.(null, 0, 0); };
+    cv.addEventListener('pointermove', alMoverFicha); cv.addEventListener('pointerleave', alSalirFicha);
     // Arrastrar un coche del garaje (2026-11-07, Eugenio: «mover los vehículos pulsando sobre ellos y
     // arrastrándolos»). Se escucha en captura para quitarle el gesto a la cámara antes de que empiece a girar.
     const suelo0 = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), pSuelo = new THREE.Vector3(), cajaTmp = new THREE.Box3();
@@ -425,6 +476,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
      */
     const cajaCoche = new THREE.Box3();
     const cocheGarajeEn = (caja = false): THREE.Object3D | null => {
+      if (!grupoGaraje.visible) return null; // hidden while one component of ours is shown alone (a ray ignores `visible`)
       const candidatos = grupoGaraje.children.filter(c => c.visible && ray.ray.intersectsBox(cajaTmp.setFromObject(c)));
       const hit = candidatos.length ? ray.intersectObjects(candidatos, true).find(h => (h.object as any).isMesh && h.object.visible) : undefined;
       if (hit) {
@@ -442,6 +494,13 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       }
       return mejor;
     };
+    /** How far the nearest triangle of a garage car under the ray is (Infinity: none). */
+    const distanciaGaraje = (): number => {
+      if (!grupoGaraje.visible) return Infinity;
+      const cand = grupoGaraje.children.filter(c => c.visible && ray.ray.intersectsBox(cajaTmp.setFromObject(c)));
+      const h = cand.length ? ray.intersectObjects(cand, true).find(x => (x.object as any).isMesh && x.object.visible) : undefined;
+      return h ? h.distance : Infinity;
+    };
     // a car with parts that open or that leans, or one of our designs (it has a card of its own)
     const abreAlgo = (obj: THREE.Object3D | null) => !!obj && (conExtra.current || !!vehiculoGaraje(obj.name)?.pivotes?.length || !!vehiculoGaraje(obj.name)?.bascula || !!fichas.current?.[obj.name]);
     /** Picks a garage car (its card opens) or, with null or a car with nothing to open, closes the card. One the page
@@ -456,6 +515,12 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
       if (st.tunel?.elegir(ray)) return; // a tunnel label in front of the car: it is a click on the label, not a drag
       const obj = cocheGarajeEn();
       if (!obj || !ray.ray.intersectPlane(suelo0, pSuelo)) return;
+      // a component of ours with a record, nearer than that car (the car's shell can sit behind our seats): it is a click
+      // on the component, not a grab of the car
+      if (pincharNuestro.current && capasFichaR.current?.length) {
+        const hf = ray.intersectObjects(meshesDe(capasFichaR.current), false)[0];
+        if (hf && hf.distance <= distanciaGaraje()) return;
+      }
       e.stopImmediatePropagation(); e.preventDefault();
       arrastre = { obj, dx: obj.position.x - pSuelo.x, dz: obj.position.z - pSuelo.z, id: e.pointerId, x0: e.clientX, y0: e.clientY, movido: false };
       controls.enabled = false; cv.setPointerCapture(e.pointerId); cv.style.cursor = 'grabbing';
@@ -555,6 +620,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     return () => {
       cancelAnimationFrame(raf); ro.disconnect(); controls.dispose(); st.tunel?.liberar();
       cv.removeEventListener('pointerdown', alBajar); cv.removeEventListener('pointerup', alSoltar);
+      cv.removeEventListener('pointermove', alMoverFicha); cv.removeEventListener('pointerleave', alSalirFicha);
       cv.removeEventListener('pointerdown', empezarArrastre, { capture: true });
       cv.removeEventListener('pointermove', moverArrastre); cv.removeEventListener('pointerup', soltarArrastre); cv.removeEventListener('pointercancel', soltarArrastre);
       cv.removeEventListener('pointermove', sobreCartel);
@@ -570,7 +636,7 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
   useEffect(() => {
     const st = estado.current; if (!st) return;
     st.modelo = modelo;
-    const cotasYPuertas = () => { vaciar(st.grupoCotas); cotas(st.grupoCotas, st.M, st.modelo, sinPasajero); st.colocarPuertas(); st.sombraSucia = true; };
+    const cotasYPuertas = () => { vaciar(st.grupoCotas); cotas(st.grupoCotas, st.M, st.modelo, sinPasajero); st.colocarPuertas(); st.sombraSucia = true; if (st.visibles) aplicarFichaSolo(st.G, st.visibles, st.fichaSolo); };
     cancelAnimationFrame(st.bala.cuadro); if (st.bala.pausa) { clearTimeout(st.bala.pausa); st.bala.pausa = 0; }
     // ── Cuadriciclo Basculante (2026-11-15): rebuilt whole on every change (~60 ms), at the current lean
     if (modelo.tipo === 'basculante') {
@@ -613,7 +679,35 @@ export const Visor3D = forwardRef<VisorHandle, Props>(function Visor3D({ modelo,
     st.bala.pausa = setTimeout(() => { st.bala.pausa = 0; cancelAnimationFrame(st.bala.cuadro); construir('completa'); }, 300);
   }, [modelo, sinPasajero]);
 
-  useEffect(() => { const st = estado.current; if (!st) return; for (const c of CAPAS) st.G[c.k].visible = visibles[c.k]; }, [visibles]);
+  // 2026-11-24: the layers the page shows, narrowed to the selected component (visor/fichaSolo.ts); selecting one frames it,
+  // and leaving it puts the camera back where it was
+  const claveFicha = fichaSolo ? `${fichaSolo.capas.join(',')}|${fichaSolo.componentes?.join(',') ?? ''}` : '';
+  useEffect(() => {
+    const st = estado.current; if (!st) return;
+    st.visibles = visibles; st.fichaSolo = fichaSolo;
+    aplicarFichaSolo(st.G, visibles, fichaSolo); st.sombraSucia = true;
+    // «only that component» (Eugenio): the garage's reference cars and the name labels leave too, and come back with it
+    st.grupoGaraje.visible = !fichaSolo;
+    for (const n of ['nombres', 'carteles']) { const o = st.scene.getObjectByName(n); if (o) o.visible = !fichaSolo; }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visibles, claveFicha]);
+  useEffect(() => {
+    const st = estado.current; if (!st) return;
+    if (fichaSolo) {
+      const b = cajaDeCapas(st.G, fichaSolo.capas); if (!b) return;
+      if (!st.camaraAntesFicha) st.camaraAntesFicha = { pos: st.camera.position.clone(), target: st.controls.target.clone() };
+      const c = b.getCenter(new THREE.Vector3()), r = Math.max(0.12, b.getSize(new THREE.Vector3()).length() / 2);
+      const dir = st.camera.position.clone().sub(st.controls.target).normalize();
+      const d = Math.min(6, 1.25 * r / Math.tan(THREE.MathUtils.degToRad(st.camera.fov) / 2));
+      st.target.copy(c);
+      st.tween = { from: st.camera.position.clone(), to: c.clone().addScaledVector(dir, d), tf: st.controls.target.clone(), t: 0 };
+    } else if (st.camaraAntesFicha) {
+      const a = st.camaraAntesFicha; st.camaraAntesFicha = null;
+      st.target.copy(a.target);
+      st.tween = { from: st.camera.position.clone(), to: a.pos, tf: st.controls.target.clone(), t: 0 };
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [claveFicha]);
   // 2026-11-17: «Mostrar solo esta pieza» inside the «Motor» layer, and its labels (visor/piezasMotor3d.ts). Choosing a
   // part or a group frames it; leaving «Ver solo motor» returns the camera to the view it was in.
   const clavePiezas = piezasMotor ? `${piezasMotor.solo?.join(',') ?? '*'}|${piezasMotor.etiquetas}` : '';

@@ -16,7 +16,7 @@ const F: Record<string, FuenteAmbito> = {
   gastoSanitario: { url: 'https://www.sanidad.gob.es/gabinete/notasPrensa.do?id=6908', titulo: 'Ministerio de Sanidad · Gasto sanitario público 2024, por comunidad (mayo de 2026)' },
   esicam: { url: 'https://www.comunidad.madrid/node/60074', titulo: 'Comunidad de Madrid · ESICAM179, el modelo regional de seguridad y policía local que sustituye a las BESCAM (2021)' },
   planVive: { url: 'https://www.comunidad.madrid/notas-prensa/2025/11/17/comunidad-madrid-alcanza-5175-viviendas-entregadas-plan-vive-incorporar-dos-nuevas-promociones-mostoles', titulo: 'Comunidad de Madrid · El Plan Vive alcanza 5.175 viviendas entregadas (17-11-2025)' },
-  modelo: { url: 'https://humanity.wiki/modelo-socioeconomico', titulo: 'humanity.wiki · Modelo de optimización socioeconómica (cálculo propio, lectura literal)' },
+  modelo: { url: 'https://humanity.wiki/economia-publica-optimizada', titulo: 'humanity.wiki · Economía pública optimizada (cálculo propio, lectura literal)' },
 };
 
 // ── FIGURES ─────────────────────────────────────────────────────────────────

@@ -2451,6 +2451,20 @@ They change saved designs' numbers on purpose.
 **Cost of switching later**: splitting the class into its own vehicle would mean copying `triciclo/` (≈ 3,500 lines); the catalogue and `bici/` would move unchanged.
 **Known consequence**: the heavy-vehicle checks (rollover target of 1.05 g, frame safety factor) judge a 25 km/h bicycle by a car's standard. They are left as they are and reported, not relaxed.
 
+## 2026-11-24 — Aeromóvil: a record for every component of the 3D view (phase 1: Interior › Asientos)
+
+**Context**: Eugenio (13:02, with a photo of red seats): inside a department the 3D should show only that department's components, and the button that used to show only the interior should become «Mostrar todo»; hovering a part shows what it is; clicking it leaves only that part in the 3D (it can be turned and moved) and opens under the 3D everything about it: supplier and alternatives, characteristics, price, stock, weight, its sub-parts (a wheel: spokes, tyre, hub), a number («interior 1, chasis 2…»), a reference image, documents — at every level, for every component of every menu.
+**Decision**:
+1. **One registry file, `components/aeromovil/fichas/registro.ts`.** A component is one entry: department, 3D layer(s), optional mesh tags, and the mass-model section of each vehicle kind that has it. Hover, click, number, weight, price and sub-parts all derive from it. Adding a component to another department = one entry + `npx tsx scripts/fichas.ts`. The internal number is the position among the entries of the same prefix, so entries are only ever appended.
+2. **No second list of parts.** Weight, price, supplier/model/links/files and the user's own weights stay in the design (`masasSecciones.ts`, `precios/`, `proveedores/`, `P.pesos`/`P.precios`/`P.proveedores`); the record embeds the same `DesglosePeso` the side panel uses. Only what had no home goes to the new store: internal number, characteristics, stock, alternatives, reference images, documents, notes.
+3. **A new table, `aeromovil_fichas` (migration 0236)**, one JSON document per (vehicle family, component path), optimistic `version` (409 returns the current one), its own rate limit, written only by the owner of the page or an admin, read by everyone — the pattern of the expediente copied, not imported (that module is not merged yet). Keyed by family (`P.disposicion`: triciclo, basculante…), not by saved design: the seats of «the Triciclo» are one record whichever design is open.
+4. **Selecting a component hides the rest inside the viewer** (`visor/fichaSolo.ts`, intersected with the page's `visibles`), not by rewriting `visibles`: the page's «Mostrar todo» restore stack and the one of a component never fight.
+5. **Every department opens isolated** (all vehicles with department tabs, all tabs but «Proyecto»): `soloDep` starts true and is set again whenever a department is entered; the layers before isolating are remembered in `antesSolo`.
+6. **Touch**: there is no hover on a phone, so a tap on a part opens its record directly (decided, not asked). Mouse and pen get the label.
+**Alternatives**: (a) store the records inside the design's parameters (`P.fichas`): rejected, designs cap parameters at 20,000 characters and are saved by hand, so a record would depend on «Guardar» and be copied into every design; (b) one table row per attribute (price row, stock row…): more queries and a migration per new attribute for what is one document that the page always reads whole; (c) key by saved design: one record per design means retyping the same seat for every variant.
+**Cost of switching later**: moving the key from family to design is a column and a query (≈ 1 hour) but orphans what was typed; the registry shape (`DefFicha`) is the part to get right now and it is small.
+**Known consequences**: sub-levels (the wheel's tyre as a clickable part of its own with its own record) are not built: the sub-parts are listed in the record and keep the design's weight and price, but have no record. «Pedir render» captures what is on screen, so in an isolated department the render shows only that department's layers (as it did with «Ver solo»). Uploaded files are served from public URLs (as the other Aeromóvil attachments).
+
 ## 2026-11-24 — The pedal cycle's file: one JSON document per key, drafts frozen when reviewed
 
 **Context.** Eugenio asked for the whole pre-sale file of the pedal cycle with pedal assistance: a requirement-by-requirement conformity matrix tied to its evidence, tests he runs and signs, legal documents generated and edited, and file management, with a percentage per item.
@@ -2467,6 +2481,14 @@ They change saved designs' numbers on purpose.
 **Alternatives**: (a) render the `subpagina` blocks as cards in the generic page view — rejected: they render as plain link rows today, and a card style for them affects every site; (b) one HTML file per tool — rejected: four copies of shared styles and data.
 **Cost of switching later**: cards in code mean a new tool needs a block (migration or editor) and an entry in `HERRAMIENTAS_POLITICA`. Reading titles and texts from the linked pages instead is about 1 hour.
 **Known consequence**: if Eugenio edits the blocks of «Política» in the editor, the cards do not change.
+
+## 2026-11-24 — Política card pictures copy the observatory's numbers
+
+**Context**: Eugenio asked each card of `/politica` to draw what is inside its tool.
+**Chosen**: React SVG drawings in `src/components/politica/VisualesHerramientas.tsx`. The model's card reads its scales from `src/data/modeloSocioeconomico.ts`. The observatory, profiles, geometry and voting cards copy their numbers (CIS bars, Inmigración scores, measure names) from `public/observatorio-polarizacion/index.html`, which is a static file and cannot be imported.
+**Alternative**: move those data into `src/data/` and have the document load them as JSON — about half a day, and it touches the document's start-up.
+**Known consequence**: if the CIS figures or the Inmigración scores change in the document, the cards keep the old ones until someone edits this file.
+
 ## 2026-11-24 — Rodaje: the favourite option is a field of the design
 
 **Context**: Eugenio wants, for each part of the running gear (wheels, brakes, steering, suspension), several options he can study and compare, one starred as the favourite; the favourite sets the project's weight and price, shows its components, and gives the plan.

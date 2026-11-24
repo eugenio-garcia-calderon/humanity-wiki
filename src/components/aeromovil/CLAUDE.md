@@ -289,6 +289,45 @@ view of it (the same choice as «Aeromóvil BWB»). A button «versión de bicic
 design is open already exists in effect (the class selector); a live link to design 19 would need the proposals to be
 computed from the fetched list (≈ 1 hour) and would change under Eugenio's feet when he edits the original.
 
+## `fichas/` — a record for each component of the 3D view (2026-11-24)
+
+Eugenio: inside a department the 3D shows only that department's components (every tab but «Proyecto» opens isolated and its
+button reads «Mostrar todo»); hovering a component shows a label (its number, name, weight, price, stock); clicking it (a tap
+on a phone) leaves only that component in the 3D, which can be turned, and opens its whole record under the viewer.
+Proven on Interior › Asientos; the rest of the departments plug in with one entry each.
+
+| File | What |
+|---|---|
+| `registro.ts` | THE ONE FILE TO EXTEND: `FICHAS` (a component = department + 3D layers + its section of the mass model per vehicle kind), `fichaEn`, `fichasDe`, `numeroPorDefecto` |
+| `almacen.ts` | the records on the server (internal number, characteristics, stock, alternatives, reference images, documents, notes): a client store, saved 900 ms after the last keystroke, a 409 adopts the server's copy |
+| `datos.ts` | a component's weight and price, read from the design's own lists (`masasSecciones.ts`, `precios/`) |
+| `usarFichas.ts` | the page's hook: which one is selected or hovered, Esc, what the viewer must show |
+| `PanelFicha.tsx`, `EtiquetaFicha.tsx` | the record under the 3D (it embeds `DesglosePeso`, so parts, weight, price and supplier are the design's own) and the hover label |
+| `../visor/fichaSolo.ts` | «only this component» inside the viewer (layers + meshes tagged `userData.componente`); the garage's cars and the name labels leave with it |
+
+Server: `src/server/aeromovilFichas.ts` and the table `aeromovil_fichas` (migration 0236). One JSON document per vehicle
+family (`P.disposicion`) and component `id`; everybody reads, only the owner of the page or an admin writes (`dueno` +
+`puedeDecidir` of `aeromovil.ts`, imported).
+
+**A new component** (say «Rodaje › Ruedas»), in this order:
+1. append an object to `FICHAS` in `registro.ts`, inside its department's block, **never reordering or renaming**: the number
+   «Rodaje 1, 2…» is the position among the entries of the same `prefijo`, and `id` is the server key. Fields: `id`
+   (`'dep/name'`), `dep`, `nombre`, `prefijo`, `capas` (layers of `visor/capas.ts`), optional `componentes` (meshes tagged
+   `userData.componente`: to tell the wheel from the caliper when they share a layer), `secciones` (`{ triciclo: 'rodaje|Ruedas' }`:
+   the key of its section in `masasSecciones.ts`, for each vehicle kind that has it) and `queEs` (one sentence);
+2. `npx tsx scripts/fichas.ts` must end «Todo OK» (it checks the layer, the section, the weight and the price in every
+   vehicle it names, and that a click on its layer finds it);
+3. nothing else: hover, click, number, weight, price, parts and the server record come from the entry. No change in
+   `pages/Aeromovil.tsx` or in the viewer.
+A sub-part of a component (a wheel's spokes, tyre, hub) is today a row of the record's «Piezas» list (the section's own
+parts, with the design's weight, price and supplier); it has no record of its own yet.
+
+**Before you change this, decide**: records keyed by vehicle family (today: the seats of «the Triciclo» are one record
+whichever design is open) vs by saved design (one record per design: the same seat retyped for every variant; ≈ 1 hour to
+switch, and what was typed under the family is orphaned). A record for a sub-part (its own number, supplier, images): the
+store already takes any `id`, so it is an entry whose `id` is `'rodaje/ruedas/neumatico'` plus a way to click it (its own
+mesh tag): ≈ 2 hours for the first one, then one entry each.
+
 ## `rodaje/` — the running gear's four parts, each with its options and its star (2026-11-24)
 
 «Rodaje» has a row of tabs above the 3D view (Resumen · Ruedas · Frenos · Dirección · Suspensión; Triciclo family only).
@@ -327,7 +366,7 @@ muestra el peso y el precio y lo manda arriba al proyecto … y de ahí también
   workshop drawing: tolerances, bushings and the knuckle are missing); brakes share the wheels' 3D layer, so «Frenos» shows the
   wheels; the steering's prices of the kart, reclined-trike and own-design options are ESTIMATES except the tie rods (ICE, Intrepid)
   and the whole Gemini rack; the kart spindles (Magickart) and the university references were not opened.
-- The 3D is not clickable per part yet (that is the department-wide component cards, a separate piece of work).
+- The 3D is not clickable per part of the running gear yet: the per-component records (`fichas/`, above) only cover Interior › Asientos so far. Giving a brake or a steering rack its record is one entry in `fichas/registro.ts` plus the 3D name of the piece.
 
 **Before you change this, decide**: the favourite as a design field (today: zero server code, the model already reads it, a
 star can be undone by pressing another) versus a table of studies per part with their own history and several favourites per
