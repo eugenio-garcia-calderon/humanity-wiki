@@ -2,9 +2,9 @@
 // the rest of the page already computes: never a second source. Pure functions, no React: `scripts/rodaje.ts` could call them.
 import type { PrecioParte, PreciosDiseno } from '../precios/precios';
 import type { ModeloTriciclo, ResultadosTriciclo } from '../geometriaTriciclo';
-import { cargasRueda } from '../triciclo/masas';
+import { cargasRueda, grupoPieza } from '../triciclo/masas';
 import { fichaRueda } from '../ruedas/catalogo';
-import { subsistema } from './subsistemas';
+import { SUBSISTEMAS, subsistema } from './subsistemas';
 import type { IdSub } from './tipos';
 
 export interface NumerosSub {
@@ -23,6 +23,19 @@ export function numerosActuales(sub: IdSub, precios: PreciosDiseno | null): Nume
   }
   const partes = [...vistas.values()];
   return { partes, kg: partes.reduce((a, p) => a + p.kg, 0), eur: partes.reduce((a, p) => a + p.eur, 0) };
+}
+
+/**
+ * The lines of a department's mass list that none of its parts claims (the pedals, the hybrid's planetary gear, the tilt
+ * system): the department's summary says them, so its parts and its tab add up to the same figure.
+ */
+export function sinParteDe(dep: string, precios: PreciosDiseno | null): PrecioParte[] {
+  if (!precios) return [];
+  const propias = SUBSISTEMAS.filter(s => s.dep === dep).map(s => s.piezas), vistas = new Map<string, PrecioParte>();
+  const mira = (p: PrecioParte) => { if (grupoPieza(p.nombre) === dep && !propias.some(re => re.test(p.nombre))) vistas.set(p.nombre, p); };
+  for (const s of Object.values(precios.secciones)) if (s.tipo === 'propia') s.partes.forEach(mira);
+  for (const l of Object.values(precios.sinSeccion)) (l ?? []).forEach(mira);
+  return [...vistas.values()];
 }
 
 /** The numbers the steering's geometry needs, from the design: the wheelbase, the front track and what the model turns the wheels to. */
