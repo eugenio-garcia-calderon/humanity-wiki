@@ -395,9 +395,10 @@ A department with a single part has no row (`SubmenuPartes` returns null under t
   `comprobaciones`), its options (catalogue: a list in `opciones.ts`' `LISTAS`, and its field in `camposDeFavorita`/`favoritaDe`;
   model: nothing else), a `case` in `datosDelDiseno` if it has numbers of its own, and a line in the script's registry check.
   The panel draws the generic sections by itself; extra ones (geometry, plan) are `sub === '…'` blocks in `PanelSubsistema.tsx`.
-- **What is NOT done, and the screens say so**: the plan exists for the steering only; **parts that share a 3D layer cannot be
-  isolated one from another** (Frenos with the wheels, the motor's four parts all show the whole powertrain, the body's six
-  parts show the whole skin); model options carry the page's own text and the model's figures, no new product research (no
+- **What is NOT done, and the screens say so**: the plan exists for the steering only; **a part with no mesh of its own in this design
+  shows nothing and says so** (`SIN_PIEZA`: no brakes on a hub-motor wheel, no reduction gear on a hub motor, no petrol engine on
+  an electric design); parts that share a 3D layer are told apart by mesh tags (`visor/partes3d.ts`), so a new mesh without a
+  name lands in a catch-all tag; model options carry the page's own text and the model's figures, no new product research (no
   cell catalogue for the battery, no seat or upholstery supplier prices beyond the model's rules); a catalogue maker that
   publishes no mass leaves the model's estimate in place (`kg 0` and «calculando» → the try shows the project's figure); the
   steering's prices of the kart, reclined-trike and own-design options are ESTIMATES except the tie rods and the Gemini rack;
