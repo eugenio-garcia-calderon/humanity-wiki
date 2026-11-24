@@ -95,6 +95,12 @@
       "ruta": "drizzle/0235_politica_herramientas.sql",
       "motivo": "Política en tarjetas y cuatro páginas nuevas",
       "desde": "2026-11-24T12:59:44.635Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/pages/SubpaginaSitio.tsx",
+      "motivo": "Política en tarjetas",
+      "desde": "2026-11-24T12:59:47.579Z"
     }
   ]
 }
