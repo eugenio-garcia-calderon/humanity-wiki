@@ -20,12 +20,6 @@
     },
     {
       "agente": "prog1",
-      "ruta": "src/server/buzonProyectos.ts",
-      "motivo": "Economía pública optimizada y tarjetas de Política",
-      "desde": "2026-11-24T13:41:22.311Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "memory/08_CHANGELOG.md",
       "motivo": "Economía pública optimizada",
       "desde": "2026-11-24T13:46:08.039Z"
