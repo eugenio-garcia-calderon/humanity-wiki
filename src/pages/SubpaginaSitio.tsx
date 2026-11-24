@@ -34,13 +34,25 @@ import type { ContextoRuta } from '../utils/precargado';
 const Conciencia = lazy(() => import('./Conciencia'));
 const ModeloSocioeconomico = lazy(() => import('./ModeloSocioeconomico'));
 const ObservatorioPolarizacion = lazy(() => import('./ObservatorioPolarizacion'));
+const PoliticaHerramientas = lazy(() => import('./PoliticaHerramientas'));
+const EconomiaPublica = lazy(() => import('./EconomiaPublica'));
+// The views of the observatory document a page may ask for in `config.vista` (see ObservatorioPolarizacion.tsx)
+const VISTAS_DOC = new Set(['geometria', 'observatorio', 'perfiles', 'decidir']);
 const SolSolidario = lazy(() => import('./SolSolidario'));
 const CadenaSolar = lazy(() => import('./CadenaSolar'));
 const APLICACIONES: Record<string, (p: { inicio: string; conBarra: boolean; pagina: DatosPagina }) => ReactNode> = {
   conciencia: ({ inicio, conBarra }) => <Conciencia enSitio={{ inicio, conBarra }} />,
   'modelo-socioeconomico': ({ inicio }) => <ModeloSocioeconomico enSitio={{ inicio }} />,
-  // Una página, dos webs: el mismo documento, con `config.vista` = 'geometria' en «Geometría política».
-  'observatorio-polarizacion': (p) => <ObservatorioPolarizacion vista={p.pagina?.config?.vista === 'geometria' ? 'geometria' : 'politica'} />,
+  // Una página, varias webs: el mismo documento, con `config.vista` = 'geometria' en «Geometría política»,
+  // y 'observatorio', 'perfiles' o 'decidir' en las tres herramientas de Política (2026-11-24).
+  'observatorio-polarizacion': (p) => {
+    const v = String(p.pagina?.config?.vista || '');
+    return <ObservatorioPolarizacion vista={VISTAS_DOC.has(v) ? (v as 'geometria' | 'observatorio' | 'perfiles' | 'decidir') : 'politica'} />;
+  },
+  // 2026-11-24 (Eugenio): «en la URL de política… solo tarjetas que si pinchas te lleva a esa URL».
+  'politica-herramientas': ({ inicio }) => <PoliticaHerramientas inicio={inicio} />,
+  // 2026-11-24 (Eugenio): «economía pública… todo el tema de los presupuestos», copia del modelo socioeconómico.
+  'economia-publica': ({ inicio }) => <EconomiaPublica inicio={inicio} />,
   // 2026-11-12 (Eugenio): «crea el proyecto de Sol Solidario con su página web… con el menú arriba y abajo el Sol Solidario».
   'sol-solidario': ({ pagina }) => <SolSolidario raizId={pagina.sitio?.raizId || null} paginaId={pagina.id} config={(pagina.config || {}) as any} />,
   // 2026-11-12 (Eugenio): «haz un web en luzhumanidad.com que sea de la cadena de valor de instalación de energía solar en España… hazlo visual».
@@ -164,6 +176,21 @@ export function LaHumanidad() {
   return (
     <ProveedorSitio sitio={sitioEnCasa('luz')}>
       <SubpaginaSitio propio={false} idFijo={HUMANIDAD_PORTADA_ID} />
+    </ProveedorSitio>
+  );
+}
+
+/**
+ * POLÍTICA EN HUMANITY.WIKI — `humanity.wiki/politica` (2026-11-24, Eugenio: «en la URL de
+ * humanity.wiki/política tienen que aparecer todas las herramientas…»). The same page as
+ * luzhumanidad.com/politica, like `/humanidad` above. Its cards link to luzhumanidad.com,
+ * where the five tools are pages of the site (`inicio` is not '/' here).
+ */
+export const POLITICA_ID = 'KWMOBSPOLARIZ01';
+export function LaPolitica() {
+  return (
+    <ProveedorSitio sitio={sitioEnCasa('luz')}>
+      <SubpaginaSitio propio={false} idFijo={POLITICA_ID} />
     </ProveedorSitio>
   );
 }

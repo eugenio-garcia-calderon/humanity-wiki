@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<script>(function(){var g=/[?&]vista=geometria(&|$)/.test(location.search);document.documentElement.setAttribute("data-vista",g?"geometria":"politica");document.title=g?"Geometría política":"Política";})();</script>
+<script>(function(){var T={geometria:"Geometría política",observatorio:"Observatorio de polarización",perfiles:"Perfiles políticos",decidir:"Democracia directa"};var m=/[?&]vista=([a-z]+)/.exec(location.search),v=m&&T[m[1]]?m[1]:"politica";document.documentElement.setAttribute("data-vista",v);document.title=T[v]||"Política";})();</script>
 </head>
 <body>
 <title>Geometría política</title>
@@ -926,7 +926,16 @@ footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 [data-vista="politica"] #geometrias,[data-vista="politica"] .geo-nav,[data-vista="politica"] .geo-bar{display:none}
 [data-vista="geometria"] .pol-nav,[data-vista="geometria"] main > section:not(#geometrias){display:none}
-[data-vista="geometria"] .brand-txt[data-solo="politica"],[data-vista="politica"] .brand-txt[data-solo="geometria"]{display:none}
+html:not([data-vista="politica"]) .brand-txt[data-solo="politica"],html:not([data-vista="geometria"]) .brand-txt[data-solo="geometria"],html:not([data-vista="observatorio"]) .brand-txt[data-solo="observatorio"],html:not([data-vista="perfiles"]) .brand-txt[data-solo="perfiles"],html:not([data-vista="decidir"]) .brand-txt[data-solo="decidir"]{display:none}
+/* Una herramienta por página (2026-11-24, Eugenio: «una URL por cada una de ellas»).
+   observatorio: capítulos 1 a 5 y Palabras y fuentes · perfiles: solo el capítulo 4 · decidir: solo Votar por temas.
+   Ninguna lleva lo de la geometría (temas, test, compartir) ni la portada «Más en Política». */
+:is([data-vista="observatorio"],[data-vista="perfiles"],[data-vista="decidir"]) :is(.top-temas,.geo-bar,.geo-nav,.pol-nav,.pie-acc,#geometrias,#mas){display:none}
+[data-vista="observatorio"] main > :is(#propuestas,#decidir){display:none}
+[data-vista="observatorio"] .nav li:has(> a[href="#decidir"]){display:none}
+[data-vista="observatorio"] #observatorio .lbl{display:none}
+[data-vista="perfiles"] main > :not(#perfiles),[data-vista="decidir"] main > :not(#decidir){display:none}
+:is([data-vista="perfiles"],[data-vista="decidir"]) .top-in > nav{display:none}
 [data-vista="geometria"] .top-in > nav{display:none}
 [data-vista="geometria"] .geo-bar{display:flex;flex:1;min-width:0;align-items:center;justify-content:center;gap:10px;position:relative}
 [data-vista="geometria"] .geo-bar .geo-acc{margin:0;flex-wrap:nowrap;gap:8px;position:relative}
@@ -1368,7 +1377,7 @@ footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 
 <header class="top" lang="es">
   <div class="top-in">
-    <a class="brand" href="#geometrias"><span class="brand-mark" aria-hidden="true"></span><span class="brand-txt" data-solo="politica">Política</span><span class="brand-txt" data-solo="geometria">Geometría política</span></a>
+    <a class="brand" href="#geometrias"><span class="brand-mark" aria-hidden="true"></span><span class="brand-txt" data-solo="politica">Política</span><span class="brand-txt" data-solo="geometria">Geometría política</span><span class="brand-txt" data-solo="observatorio">Observatorio de polarización</span><span class="brand-txt" data-solo="perfiles">Perfiles políticos</span><span class="brand-txt" data-solo="decidir">Democracia directa</span></a>
     <nav aria-label="Capítulos">
       <ol class="nav">
         <li class="geo-nav"><a href="#geometrias">Geometrías</a></li>
@@ -1827,7 +1836,7 @@ footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
     <button class="geo-btn" id="geo-compartir"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="M8.2 10.9l7.6-4.4M8.2 13.1l7.6 4.4"/></svg><span>Compartir</span></button>
       <p class="geo-estado" id="geo-compartir-estado" aria-live="polite"></p>
   </div>
-  <p class="pie-mas">Esta web también lleva a otras páginas de política: <a href="/politica" target="_top">Política →</a></p>
+  <p class="pie-mas">Las demás herramientas de política, cada una en su página: <a href="/politica" target="_top">Política →</a></p>
 </footer>
 </div>
 
@@ -4125,9 +4134,19 @@ const ILUS = {
   function cabecera() {
     $("#geometrias").style.setProperty("--tc", T().c);
   }
-  if (document.documentElement.dataset.vista !== "geometria") {
-    document.querySelector(".brand").setAttribute("href", "#hoy");
-    document.querySelector(".skip").setAttribute("href", "#hoy");
+  // Cada web empieza en su primer apartado: la marca y «Saltar al contenido» llevan allí
+  const VISTA = document.documentElement.dataset.vista;
+  const INICIO = { geometria: "#geometrias", perfiles: "#perfiles", decidir: "#decidir" }[VISTA] || "#hoy";
+  document.querySelector(".brand").setAttribute("href", INICIO);
+  document.querySelector(".skip").setAttribute("href", INICIO);
+  // Sueltos, los capítulos no llevan número: «Capítulo 4» no tiene sentido en una página que solo es ese capítulo.
+  // En el observatorio, Palabras y fuentes pasa a ser el 6, porque Votar por temas está en su propia página.
+  const numero = (sel, txt) => { const el = document.querySelector(sel); if (el) el.textContent = txt; };
+  if (VISTA === "perfiles") numero("#perfiles .ch-num", "Perfiles políticos · doce perfiles");
+  if (VISTA === "decidir") numero("#decidir .ch-num", "Democracia directa · votar por temas");
+  if (VISTA === "observatorio") {
+    numero("#fuentes .ch-num", "Capítulo 6 · Palabras y fuentes");
+    const a = document.querySelector('.nav a[href="#fuentes"]'); if (a) a.textContent = "6 · Palabras y fuentes";
   }
   function todo() { soltar(); if (!st.mejor) st.masVer = null; $(".geo-stage").classList.toggle("todos", st.todos); $("[data-todos]", tabs).setAttribute("aria-selected", String(st.todos)); chips(); dibujar(); panel(); niveles(); cabecera(); matriz(); }
   function setTodos(on) {

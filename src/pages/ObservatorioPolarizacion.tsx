@@ -42,7 +42,17 @@ import { useEffect, useRef, useState } from 'react';
 // y poniendo el resto en Política como URL»). `vista` says which one this page is:
 // «geometria» (`/geometria-politica`, only the geometries) or «politica» (`/politica`,
 // the rest). The document reads `?vista=` itself; the page's config carries it.
-export type VistaPolitica = 'politica' | 'geometria';
+// ONE TOOL PER ADDRESS (2026-11-24, Eugenio: «una tarjeta por cada una de ellas, una URL por cada una de ellas»).
+// `/politica` is now only the cards (PoliticaHerramientas.tsx). Three more pages frame the same document:
+// «observatorio» (`/observatorio-de-polarizacion`, chapters 1–5 and the sources), «perfiles»
+// (`/perfiles-politicos`, chapter 4 alone) and «decidir» (`/democracia-directa`, «Votar por temas» alone).
+// «politica» stays as the whole document for anyone who still frames it without a view.
+export type VistaPolitica = 'politica' | 'geometria' | 'observatorio' | 'perfiles' | 'decidir';
+export const VISTAS_POLITICA: readonly VistaPolitica[] = ['politica', 'geometria', 'observatorio', 'perfiles', 'decidir'];
+const TITULO_VISTA: Record<VistaPolitica, string> = {
+  politica: 'Política', geometria: 'Geometría política', observatorio: 'Observatorio de polarización',
+  perfiles: 'Perfiles políticos', decidir: 'Democracia directa',
+};
 export default function ObservatorioPolarizacion({ vista = 'politica' }: { vista?: VistaPolitica }) {
   const marco = useRef<HTMLIFrameElement>(null);
   const [arriba, setArriba] = useState(0);
@@ -50,7 +60,8 @@ export default function ObservatorioPolarizacion({ vista = 'politica' }: { vista
   const [src] = useState(() => {
     if (typeof window === 'undefined') return '/observatorio-polarizacion/index.html';
     const q = new URLSearchParams(window.location.search);
-    if (vista === 'geometria') q.set('vista', 'geometria');
+    // The page decides the view, whatever an old shared link carries (`?vista=` is written back into the address)
+    if (vista === 'politica') q.delete('vista'); else q.set('vista', vista);
     const busqueda = q.toString();
     return '/observatorio-polarizacion/index.html' + (busqueda ? `?${busqueda}` : '') + window.location.hash;
   });
@@ -66,7 +77,7 @@ export default function ObservatorioPolarizacion({ vista = 'politica' }: { vista
       ref={marco}
       data-app-observatorio
       src={src}
-      title={vista === 'geometria' ? 'Geometría política' : 'Política'}
+      title={TITULO_VISTA[vista]}
       className="block w-full border-0 bg-slate-950"
       style={{ height: `calc(100dvh - ${arriba}px)`, minHeight: 500 }}
     />

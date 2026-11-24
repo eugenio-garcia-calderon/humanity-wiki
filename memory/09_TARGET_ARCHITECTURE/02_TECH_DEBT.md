@@ -1122,3 +1122,8 @@ By his instruction the bicycle-class labour is assembly only. The project total 
 - **Lights and reflectors are not in the 3D design**, so those obligations read «a comprobar» and their test (EN-13) is the only proof.
 - **No per-unit registry.** The matrix says what every unit must pass (`porUnidad`), but there is no table of serial numbers with their end-of-line checks; with 100 units a year it is needed: ≈ 1 day.
 - **Matrix, tests and documents look at the design of the open vehicle.** If Eugenio opens another design, the numbers in a draft change; a frozen (reviewed) section does not.
+## 2026-11-24 — Política cards: shortcuts taken
+
+- **Two lists that must match.** The cards of `/politica` live in `HERRAMIENTAS_POLITICA` (PoliticaHerramientas.tsx); the pages that hang from it are the `subpagina` blocks written by migration 0235. A sixth tool needs both. Reading the cards from the blocks: about 1 hour.
+- **`humanity.wiki/politica` assumes the handle `luz`**, as `/humanidad` does. If the owner's handle differs, the route shows «Esta página no está aquí».
+- **The migration was tested on a hand-built copy of five tables**, not on a dump of production.
