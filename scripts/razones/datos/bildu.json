@@ -1,0 +1,219 @@
+{
+ "grupo": "bildu",
+ "celdas": [
+  {
+   "partido": "bildu",
+   "tema": "inm",
+   "i": 1,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre registro e identificación de quien llega en su programa. Sí consta una concentración contra el aumento de controles franceses en la frontera de Irun-Hendaia (2024).",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "bildu",
+   "tema": "inm",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre expulsión de quien comete delitos graves ni sobre retornos en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "bildu",
+   "tema": "ser",
+   "i": 0,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): en el Pacto Vasco de Salud pide cerrar la puerta a las privatizaciones en Osakidetza y planteó auditar la colaboración público-privada; no admite el concierto como vía para reducir esperas.",
+   "fuente": {
+    "t": "EH Bildu pide que se cierren las puertas a las privatizaciones de Osakidetza (Orain, 7-6-2025)",
+    "url": "https://orain.eus/es/politica/2025/06/07/video-eh-bildu-pide-que-se-cierren-puertas-a-privatizaciones-de-osakidetza/",
+    "programa": "otra"
+   },
+   "confianza": "baja"
+  },
+  {
+   "partido": "bildu",
+   "tema": "ser",
+   "i": 1,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre contención del gasto en servicios públicos en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "bildu",
+   "tema": "ser",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre libre elección de médico de cabecera, hospital o colegio en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "bildu",
+   "tema": "eco",
+   "i": 0,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre el cumplimiento de las reglas fiscales europeas ni sobre reducción de deuda en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "bildu",
+   "tema": "eco",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre ajustar el IRPF a la inflación en su programa. En Álava reclamó un impuesto a grandes fortunas y más tributación a grandes empresas; en Navarra pactó medidas fiscales con el Gobierno foral.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "bildu",
+   "tema": "tra",
+   "i": 1,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre la sostenibilidad a largo plazo de las pensiones en su programa. Se abstuvo en la reforma de pensiones de 2023 y pide subir las mínimas.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "bildu",
+   "tema": "tra",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre simplificar contratos o trámites de contratación en su programa. Su posición conocida se centra en derogar la reforma laboral de 2012 y en un marco laboral vasco.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "bildu",
+   "tema": "viv",
+   "i": 0,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): cuestiona la deducción fiscal por compra de vivienda habitual en las haciendas forales y pide alquiler forzoso de viviendas vacías; choca con rebajar los impuestos de la primera vivienda.",
+   "fuente": {
+    "t": "EH Bildu cuestiona la deducción fiscal por vivienda y pide aplicar el alquiler forzoso a las vacías (Deia, 18-5-2026)",
+    "url": "https://www.deia.eus/politica/2026/05/18/bildu-cuestiona-deduccion-fiscal-vivienda-alquiler-forzoso-vivienda-vacia-11084566.amp.html",
+    "programa": "otra"
+   },
+   "confianza": "baja"
+  },
+  {
+   "partido": "bildu",
+   "tema": "viv",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): en 2024 votó a favor de la enmienda del PNV que agiliza los desalojos por ocupación y después lo atribuyó a un error de voto: su posición es contraria a acelerar esos desalojos.",
+   "fuente": {
+    "t": "Un error de Bildu en la votación pasará a ejecutar desahucios en semanas (Periódico de Ibiza, 21-11-2024)",
+    "url": "https://www.periodicodeibiza.es/noticias/nacional/2024/11/21/2279531/error-bildu-votacion-pasara-ejecutar-desahucios-semanas.html",
+    "programa": "otra"
+   },
+   "confianza": "baja"
+  },
+  {
+   "partido": "bildu",
+   "tema": "amb",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre potencia de respaldo o seguridad de suministro eléctrico en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "bildu",
+   "tema": "ter",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre el cumplimiento de la Constitución y de las sentencias en su programa. Defiende el derecho a decidir y una república vasca, lo que por sí solo no equivale a incumplir.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "bildu",
+   "tema": "ter",
+   "i": 5,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre mínimos comunes de sanidad, educación y servicios sociales entre territorios en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "bildu",
+   "tema": "der",
+   "i": 0,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre libertad religiosa y de culto en su programa. En Navarra anunció apoyo a derogar la norma sobre profesorado de Religión (2026).",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "bildu",
+   "tema": "der",
+   "i": 1,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): propuso en el Parlamento Vasco una prestación universal de 150 euros al mes por la crianza de cada hijo o hija, una ayuda económica a quien tiene hijos.",
+   "fuente": {
+    "t": "EH Bildu propone crear una prestación universal de 150 euros mensuales para la crianza de hijos e hijas (Orain, 13-5-2022)",
+    "url": "https://orain.eus/es/politica/2022/05/13/eh-bildu-propone-crear-prestacion-universal-de-150-euros-mensuales-para-crianza-de-hijos-e-hijas/",
+    "programa": "otra"
+   },
+   "confianza": "baja"
+  },
+  {
+   "partido": "bildu",
+   "tema": "ins",
+   "i": 0,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): defendió la ley de amnistía de 2024 como «necesaria y justa» y la apoyó en el Congreso; la amnistía extingue condenas ya impuestas, lo que choca con que las condenas se cumplan.",
+   "fuente": {
+    "t": "EH Bildu defiende la amnistía por \"necesaria y justa\" y el PNV como una \"oportunidad\" (Orain, 12-12-2023)",
+    "url": "https://orain.eus/es/politica/2023/12/12/eh-bildu-defiende-amnistia-por-necesaria-y-justa-y-pnv-como-oportunidad/",
+    "programa": "otra"
+   },
+   "confianza": "baja"
+  },
+  {
+   "partido": "bildu",
+   "tema": "ext",
+   "i": 0,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre apoyo a las empresas exportadoras en su programa. Sí propone un consejo de política industrial y medidas contra la deslocalización en Euskadi.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "bildu",
+   "tema": "ext",
+   "i": 1,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): pide plantear en la UE el debate de salir de la OTAN y rechaza el aumento del gasto militar; choca con que las fuerzas armadas cumplan sus misiones, que incluyen las de la Alianza.",
+   "fuente": {
+    "t": "EH Bildu pide a Sánchez plantear en la UE el debate de salir de la OTAN (Onda Vasca, 25-3-2026)",
+    "url": "https://www.ondavasca.com/eh-bildu-pide-a-sanchez-plantear-en-la-ue-el-debate-de-salir-de-la-otan/",
+    "programa": "otra"
+   },
+   "confianza": "baja"
+  }
+ ]
+}

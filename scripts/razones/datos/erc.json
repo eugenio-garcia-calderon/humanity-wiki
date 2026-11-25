@@ -1,0 +1,145 @@
+{
+ "grupo": "erc",
+ "celdas": [
+  {
+   "partido": "erc",
+   "tema": "inm",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre expulsión de quien comete delitos graves ni sobre retornos en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "erc",
+   "tema": "ser",
+   "i": 1,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre contención del gasto público en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "erc",
+   "tema": "ser",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre libre elección de médico, hospital o colegio en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "erc",
+   "tema": "eco",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): pactó con el Govern una rebaja del IRPF para rentas de menos de 33.000 euros anuales. No hemos localizado propuesta de ajustar el IRPF a la inflación.",
+   "fuente": {
+    "t": "El govern i ERC pacten rebaixar l'IRPF per a les rendes de menys de 33.000 euros anuals",
+    "url": "https://www.3cat.cat/3catinfo/el-govern-i-erc-pacten-rebaixar-lirpf-per-a-les-rendes-de-menys-de-33000-euros-anuals/noticia/3342500/",
+    "programa": "otra"
+   },
+   "confianza": "baja"
+  },
+  {
+   "partido": "erc",
+   "tema": "tra",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre simplificar contratos o reducir trámites para contratar en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "erc",
+   "tema": "viv",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre desalojo rápido de viviendas ocupadas ilegalmente en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "erc",
+   "tema": "amb",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): se abstuvo en 2025 ante la propuesta de prorrogar la vida de las nucleares, en lugar de rechazarla, y se abrió a revisar el calendario de cierre.",
+   "fuente": {
+    "t": "El territorio fuerza a ERC y Junts a revisar el calendario de cierre de las nucleares",
+    "url": "https://es.ara.cat/politica/territorio-fuerza-erc-junts-revisar-calendario-cierre-nucleares_1_5294248.html",
+    "programa": "otra"
+   },
+   "confianza": "baja"
+  },
+  {
+   "partido": "erc",
+   "tema": "ter",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): lleva al 29-N un referéndum de autodeterminación de Cataluña pactado con el Estado, figura que la Constitución vigente no recoge; choca con cumplir la Constitución tal como está.",
+   "fuente": {
+    "t": "ERC lleva el referéndum de autodeterminación al 29N y exige la financiación singular y el traspaso de Rodalies",
+    "url": "https://www.democrata.es/elecciones-generales-espana/programa-electoral-erc-29n-referendum/",
+    "programa": "29-N 2026"
+   },
+   "confianza": "baja"
+  },
+  {
+   "partido": "erc",
+   "tema": "ter",
+   "i": 5,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre mínimos comunes en sanidad, educación y servicios sociales en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "erc",
+   "tema": "der",
+   "i": 1,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre información y ayudas a la embarazada que quiera seguir adelante en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "erc",
+   "tema": "ins",
+   "i": 0,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): exige la aplicación inmediata de la ley de amnistía a los condenados y encausados del procés; la medida extingue penas ya impuestas, lo que choca con que las condenas se cumplan.",
+   "fuente": {
+    "t": "ERC exigeix l'aplicació «immediata» de la llei d'amnistia i demana als jutges que «no hi posin més impediments»",
+    "url": "https://www.diaridetarragona.com/internacional/214700/erc-exigeix-l-aplicacio-immediata-de-la-llei-d-amnistia-i-demana-als-jutges-que-no-hi-posin-mes-impediments-lo19717862.html",
+    "programa": "otra"
+   },
+   "confianza": "baja"
+  },
+  {
+   "partido": "erc",
+   "tema": "ext",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): lleva al 29-N un referéndum de autodeterminación de Cataluña, lo que choca con defender la integridad del territorio. En el campo pide frenar tratados comerciales de la UE como Mercosur.",
+   "fuente": {
+    "t": "ERC lleva el referéndum de autodeterminación al 29N y exige la financiación singular y el traspaso de Rodalies",
+    "url": "https://www.democrata.es/elecciones-generales-espana/programa-electoral-erc-29n-referendum/",
+    "programa": "29-N 2026"
+   },
+   "confianza": "baja"
+  }
+ ]
+}

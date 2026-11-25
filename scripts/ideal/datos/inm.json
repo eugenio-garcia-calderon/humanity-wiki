@@ -1,48 +1,638 @@
 {
  "clave": "inm",
- "pendiente": true,
- "anti_tema": "Quedarse por debajo de lo básico: no proponer nada sobre el tema, o proponer algo que rompe la base (la ley, las sentencias o los derechos fundamentales) en vez de mejorarla.",
- "ideal_tema": "El ideal de este tema está en preparación: se publicará en una próxima fase, aspecto por aspecto.",
+ "anti_tema": "No proponer nada, o romper la base: negar el auxilio en el mar o el asilo, pedir expulsiones sin juez, o negar que el Estado pueda decidir quién entra.",
+ "ideal_tema": "Un sistema en el que venir con papeles es más fácil que venir con las mafias: puertas legales amplias, fronteras que identifican a todos, asilo rápido, retornos que se cumplen e integración medida por resultados.",
  "aspectos": [
   {
    "i": 0,
-   "anti": "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
-   "ideal": "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
+   "anti": "No proponer nada, pagar a otros países por frenar salidas sin mirar cómo lo hacen, o rechazar todo acuerdo de readmisión.",
+   "ideal": "Un tratado con cada país de origen y tránsito que cambia visados de trabajo y formación por readmisión y lucha contra las mafias, con cupos que suben o bajan según resultados y una auditoría pública de derechos.",
+   "titulo": "Tratados de movilidad con visados ligados a resultados",
+   "slug": "tratados-de-movilidad-con-visados-ligados-a-resultados",
+   "resumen": "Cada país socio firma con España, dentro del marco europeo, un tratado a varios años: plazas de trabajo y formación a cambio de readmitir a sus nacionales sin derecho a quedarse y de perseguir a las redes. El nivel avanzado evalúa las alianzas; aquí la evaluación tiene consecuencias automáticas: el cupo de visados sube o baja según lo medido, y el dinero se corta si se vulneran derechos.",
+   "medidas": [
+    "Firmar tratados de cinco años con cada país de origen y tránsito, con un cupo anual de visados de trabajo, estudio y formación profesional reservado a sus nacionales.",
+    "Ligar el cupo a tres datos públicos: readmisiones aceptadas, salidas irregulares desde su costa y condenas a redes de tráfico. Si mejoran, el cupo crece al año siguiente.",
+    "Formar en origen para oficios con vacantes en España y en el propio país, de modo que parte de los formados se quede allí y el país no pierda a sus profesionales.",
+    "Contratación circular con permisos de varios años, derecho a volver cada campaña y cotizaciones que se puedan cobrar en el país de origen.",
+    "Auditoría anual independiente de derechos humanos: ni dinero ni material para cuerpos que abandonen a personas en el desierto o en el mar.",
+    "Publicar cada tratado, su coste y sus resultados, y someterlo a votación en el Congreso."
+   ],
+   "supone": {
+    "personas": "Quien quiere emigrar tiene una ventanilla en su país: sabe cuántas plazas hay, qué oficio se pide y cómo formarse. Venir en cayuco deja de ser la única opción y, además, no da derecho a quedarse. Las empresas españolas encuentran trabajadores ya formados y con papeles.",
+    "cuentas": "Se paga con la ayuda al desarrollo y los fondos europeos de migración que ya existen, reordenados hacia formación y empleo. No hay una cifra verificada del coste total. Parte vuelve: quien llega con contrato cotiza desde el primer día.",
+    "puesta_en_marcha": "Tratados bilaterales negociados dentro de las Asociaciones de Talento de la UE, que ya existen con Marruecos, Túnez, Egipto, Pakistán y Bangladés. La orden anual de contratación en origen pasa a ser plurianual. Hace falta un pacto de Estado para que cada tratado sobreviva a los cambios de gobierno."
+   },
+   "integra": "Recoge la exigencia de orden: readmisión efectiva y menos salidas irregulares. Y recoge la de derechos y desarrollo: vías legales, formación en origen y ninguna ayuda a quien maltrata a los migrantes. Cada parte gana solo si la otra también cumple.",
+   "referencias": [
+    {
+     "lugar": "Alemania",
+     "que": "Desde 2015 da permisos de trabajo a nacionales de seis países de los Balcanes occidentales que tengan una oferta de empleo. Entre 2015 y 2017 las solicitudes de asilo de esa región bajaron un 90 %, de 120.882 a 10.915.",
+     "url": "https://gsp.cgdev.org/legalpathway/western-balkan-regulation/"
+    },
+    {
+     "lugar": "Unión Europea",
+     "que": "Las Asociaciones de Talento con Marruecos, Túnez, Egipto, Pakistán y Bangladés unen movilidad laboral y formación con un segundo objetivo declarado: cooperar mejor en la gestión migratoria, incluidos el retorno y la readmisión.",
+     "url": "https://home-affairs.ec.europa.eu/policies/migration-and-asylum/legal-migration-and-resettlement/talent-partnerships_en"
+    },
+    {
+     "lugar": "Australia",
+     "que": "El programa PALM permite a las empresas contratar trabajadores de nueve países insulares del Pacífico y de Timor Oriental: hasta nueve meses en las estancias cortas y de uno a cuatro años en las largas.",
+     "url": "https://www.palmscheme.gov.au/about"
+    },
+    {
+     "lugar": "España",
+     "que": "La contratación colectiva en origen (orden GECCO) trajo a 25.767 personas en 2025, de 17 países, con permisos de cuatro años para trabajar hasta nueve meses al año y la obligación de volver al terminar cada campaña.",
+     "url": "https://www.inclusion.gob.es/w/el-gobierno-aprueba-la-orden-gecco-2026"
+    }
+   ],
+   "objeciones": [
+    {
+     "o": "Condicionar visados a la readmisión da poder de presión a gobiernos que pueden abrir o cerrar la salida de personas según les convenga.",
+     "r": "El riesgo existe. Se reduce con tratados escritos, públicos y europeos, donde el premio es automático y medible y no se negocia de urgencia en cada crisis. No lo elimina."
+    },
+    {
+     "o": "El caso alemán no prueba que los visados bajen la migración irregular: la regla se aprobó dentro de una reforma más amplia del asilo.",
+     "r": "Es cierto: no se puede separar un efecto del otro. Por eso el ideal no confía solo en los visados y exige a la vez readmisión y control, con datos publicados para comprobar si funciona."
+    },
+    {
+     "o": "Contratar en origen puede llevarse a los profesionales que más falta hacen en países pobres.",
+     "r": "Por eso se forma a más personas de las que emigran y en oficios que también necesita el país de origen. Si un país se queda sin sanitarios o docentes, ese oficio sale del cupo."
+    }
+   ],
+   "fuentes": [
+    {
+     "t": "Center for Global Development: Western Balkan Regulation (Alemania)",
+     "url": "https://gsp.cgdev.org/legalpathway/western-balkan-regulation/"
+    },
+    {
+     "t": "Comisión Europea: Talent Partnerships",
+     "url": "https://home-affairs.ec.europa.eu/policies/migration-and-asylum/legal-migration-and-resettlement/talent-partnerships_en"
+    },
+    {
+     "t": "Gobierno de Australia: About the PALM scheme",
+     "url": "https://www.palmscheme.gov.au/about"
+    },
+    {
+     "t": "Ministerio de Inclusión, Seguridad Social y Migraciones: el Gobierno aprueba la Orden GECCO 2026",
+     "url": "https://www.inclusion.gob.es/w/el-gobierno-aprueba-la-orden-gecco-2026"
+    }
+   ]
   },
   {
    "i": 1,
-   "anti": "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
-   "ideal": "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
+   "anti": "No proponer nada, pedir devoluciones sin identificar ni escuchar a nadie, o rechazar todo control de quién entra.",
+   "ideal": "Identificar al 100 % de quien llega en 72 horas con un control independiente de derechos, llegar a cero muertes evitables en el mar y quitar a las redes su dinero, con los datos publicados cada mes.",
+   "titulo": "Frontera verificada: todos identificados, cero muertes",
+   "slug": "frontera-verificada-todos-identificados-cero-muertes",
+   "resumen": "Una frontera en la que nadie entra sin ser identificado y nadie muere por falta de auxilio. Va más lejos que lo avanzado porque fija metas que se pueden comprobar —100 % de identificados, plazo de 72 horas, cero muertes evitables— y pone a un organismo independiente a vigilar que se cumplen tanto la seguridad como los derechos.",
+   "medidas": [
+    "Registrar huella, foto y documento de toda persona que llega de forma irregular en un máximo de 72 horas, por debajo del tope europeo de siete días.",
+    "Dar al salvamento marítimo la orden y los medios de salir ante cualquier aviso, sin esperar a aclarar de quién es la zona, y coordinarlo con los países vecinos.",
+    "Perseguir el dinero: congelar los bienes de los cabecillas, de quien suministra barcas y motores y de quien mueve los pagos, también fuera de España.",
+    "Crear un mecanismo independiente que visite sin avisar puestos fronterizos y centros, investigue las denuncias y publique sus informes.",
+    "Publicar cada mes llegadas, rescates, muertes y desaparecidos por ruta, identificaciones hechas en plazo y redes desarticuladas.",
+    "Identificar a los fallecidos e informar a sus familias, con un registro oficial de muertos y desaparecidos en las rutas hacia España."
+   ],
+   "supone": {
+    "personas": "Quien llega es atendido, identificado y dirigido en tres días a la vía que le toca: asilo, protección de menores o retorno. El vecino sabe que nadie entra sin que se sepa quién es. Las familias de los desaparecidos tienen a quién preguntar.",
+    "cuentas": "Cuesta personal, intérpretes, medios de salvamento e informática. No hay una cifra verificada del total. Los bienes decomisados a las redes pueden destinarse a pagar parte del sistema.",
+    "puesta_en_marcha": "El Pacto europeo, que se aplica desde junio de 2026, ya obliga a identificar y a hacer un primer control. Faltan una ley que cree la agencia única y el mecanismo independiente, una norma de sanciones económicas a las redes y la obligación de publicar los datos. Las 72 horas exigen plantilla estable en Canarias, Baleares, Ceuta y Melilla."
+   },
+   "integra": "Control total de quién entra, que es la exigencia de seguridad, y cero muertes con vigilancia independiente, que es la exigencia de derechos. Las dos metas se miden con los mismos datos públicos y ninguna se cumple a costa de la otra.",
+   "referencias": [
+    {
+     "lugar": "Unión Europea (reglamento de triaje)",
+     "que": "Obliga a identificar, tomar datos biométricos y hacer un control de salud, vulnerabilidad y seguridad a quien cruza sin autorización, en un máximo de siete días en la frontera exterior y de tres dentro del territorio.",
+     "url": "https://frontex.europa.eu/what-we-do/eu-pact-on-migration-and-asylum/how-frontex-supports-the-screening-regulation/"
+    },
+    {
+     "lugar": "Unión Europea (Sistema de Entradas y Salidas)",
+     "que": "Registra huellas, imagen facial y fecha de entrada y salida de los viajeros de fuera de la UE en 29 países. Funciona por completo desde el 10 de abril de 2026 y detecta de forma automática a quien se queda más tiempo del permitido.",
+     "url": "https://home-affairs.ec.europa.eu/policies/schengen-borders-and-visa/smart-borders/entry-exit-system_en"
+    },
+    {
+     "lugar": "Reino Unido",
+     "que": "El 23 de julio de 2025 aplicó las primeras sanciones de su régimen contra el tráfico de personas: 25 personas y entidades con bienes congelados y entrada prohibida, entre ellas jefes de redes, proveedores de barcas y quienes mueven el dinero.",
+     "url": "https://www.gov.uk/government/news/uk-sanctions-notorious-people-smuggling-gangs-and-their-enablers-in-global-crackdown"
+    },
+    {
+     "lugar": "Organización Internacional para las Migraciones",
+     "que": "Su proyecto Migrantes Desaparecidos ha registrado desde 2014 más de 63.000 muertes y desapariciones en rutas migratorias. Advierte de que son cifras mínimas y de que los organismos oficiales rara vez publican estos datos.",
+     "url": "https://migrationdataportal.org/themes/migrant-deaths-and-disappearances"
+    }
+   ],
+   "objeciones": [
+    {
+     "o": "Identificar a todos en 72 horas es inviable cuando llegan miles de personas en pocos días a una isla pequeña.",
+     "r": "En los picos de llegadas el plazo se incumplirá. Por eso el tope legal sigue siendo el europeo de siete días y las 72 horas son una meta con datos públicos de cumplimiento, que obliga a dimensionar la plantilla."
+    },
+    {
+     "o": "Más salvamento puede animar a más salidas y dar más negocio a las mafias.",
+     "r": "Auxiliar a quien se ahoga es una obligación, no una opción de política migratoria. El ideal busca reducir las salidas por otro lado: vías legales, tratados con los países de origen y retornos que se cumplen."
+    },
+    {
+     "o": "Congelar bienes sirve de poco si los cabecillas viven y guardan el dinero fuera de Europa.",
+     "r": "Es un límite real. Las sanciones funcionan mejor coordinadas con la UE y los países de tránsito, y dirigidas también a proveedores y a quienes mueven los pagos, más fáciles de alcanzar."
+    }
+   ],
+   "fuentes": [
+    {
+     "t": "Frontex: cómo apoya Frontex el Reglamento de triaje (Screening Regulation)",
+     "url": "https://frontex.europa.eu/what-we-do/eu-pact-on-migration-and-asylum/how-frontex-supports-the-screening-regulation/"
+    },
+    {
+     "t": "Comisión Europea: Entry/Exit System (EES)",
+     "url": "https://home-affairs.ec.europa.eu/policies/schengen-borders-and-visa/smart-borders/entry-exit-system_en"
+    },
+    {
+     "t": "Gobierno del Reino Unido: UK sanctions notorious people-smuggling gangs and their enablers",
+     "url": "https://www.gov.uk/government/news/uk-sanctions-notorious-people-smuggling-gangs-and-their-enablers-in-global-crackdown"
+    },
+    {
+     "t": "Migration Data Portal (OIM): Migrant deaths and disappearances",
+     "url": "https://migrationdataportal.org/themes/migrant-deaths-and-disappearances"
+    },
+    {
+     "t": "Comisión Europea: Pact on Migration and Asylum",
+     "url": "https://home-affairs.ec.europa.eu/policies/migration-and-asylum/pact-migration-and-asylum_en"
+    },
+    {
+     "t": "Agencia de Derechos Fundamentales de la UE: mecanismo de vigilancia de fronteras de Croacia",
+     "url": "https://fra.europa.eu/en/news/2023/croatias-border-monitoring-mechanism-meets"
+    }
+   ]
   },
   {
    "i": 2,
-   "anti": "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
-   "ideal": "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
+   "anti": "No proponer nada, pedir expulsiones colectivas o sin recurso ante un juez, o defender que ninguna orden de salida se cumpla nunca.",
+   "ideal": "Toda orden firme de salida se cumple en un plazo fijado: primero con retorno voluntario asistido y, si no, forzoso con observador independiente. Los datos de retornos y de delincuencia se publican con su contexto.",
+   "titulo": "Retorno cumplido, vigilado y con datos abiertos",
+   "slug": "retorno-cumplido-vigilado-y-con-datos-abiertos",
+   "resumen": "Un sistema en el que la decisión firme se cumple siempre, y siempre con garantías. Va más lejos que lo avanzado porque pone plazo y cifra pública al cumplimiento, hace del retorno voluntario la vía normal, coloca un observador independiente en cada expulsión forzosa y encarga la estadística de delincuencia a un organismo independiente que la ajusta por edad y situación social.",
+   "medidas": [
+    "Dictar la orden de salida junto a la denegación firme y ofrecer en ese momento retorno voluntario asistido: billete, ayuda de viaje y apoyo para reinstalarse.",
+    "Si no hay salida voluntaria en el plazo dado, retorno forzoso con un observador independiente en cada operación y un informe público.",
+    "Tramitar por juicio rápido los delitos menos graves y expulsar, tras cumplir condena, a quien acumula condenas firmes por delitos graves, con control judicial caso a caso.",
+    "No devolver nunca a nadie a un país donde corra riesgo de tortura o persecución: el recurso ante un juez suspende la salida hasta que se resuelve.",
+    "Publicar cada trimestre las órdenes dictadas, los retornos cumplidos, cuántos fueron voluntarios y el tiempo medio, por nacionalidad.",
+    "Encargar al instituto de estadística una serie anual de delincuencia por origen, ajustada por edad, sexo y situación socioeconómica, con los datos brutos al lado."
+   ],
+   "supone": {
+    "personas": "Quien recibe una orden de salida sabe qué plazo tiene, qué ayuda hay si se va por su cuenta y ante qué juez puede recurrir. El vecino ve que la ley se cumple y puede consultar los datos reales de delincuencia, sin exageraciones ni silencios. Quien ha rehecho su vida y cumple los requisitos tiene la vía del arraigo, no un limbo.",
+    "cuentas": "El retorno voluntario cuesta un billete y una ayuda por persona: Alemania da 200 euros para el viaje y, a ciertas nacionalidades, 1.000 de ayuda inicial. No hay una cifra verificada del coste total en España. El retorno forzoso suma escolta, detención y vuelo.",
+    "puesta_en_marcha": "El Reglamento europeo de Retorno, adoptado por el Consejo el 1 de octubre de 2026, da el marco común. En España hacen falta una ley que fije plazos y la observación independiente, un programa estable de retorno voluntario, tratados de readmisión que funcionen y un mandato estadístico."
+   },
+   "integra": "La ley se cumple y el delito tiene consecuencias, que es lo que pide la derecha. Nadie es expulsado sin juez, sin observador ni hacia un país donde peligre, que es lo que pide la izquierda. Y los datos con contexto sirven contra los bulos de ambos lados.",
+   "referencias": [
+    {
+     "lugar": "Alemania",
+     "que": "El programa REAG/GARP da a quien vuelve por su voluntad el billete, 200 euros para el viaje, asistencia médica durante los tres primeros meses y, a ciertas nacionalidades, 1.000 euros de ayuda inicial. Se solicita en centros de asesoramiento.",
+     "url": "https://www.returningfromgermany.de/en/programmes/reag-garp/"
+    },
+    {
+     "lugar": "España (Defensor del Pueblo)",
+     "que": "En su papel de Mecanismo Nacional de Prevención de la Tortura, envía técnicos a vuelos de repatriación para observar la llegada al aeropuerto, el embarque y el procedimiento seguido durante todo el vuelo.",
+     "url": "https://www.defensordelpueblo.es/noticias/el-defensor-del-pueblo-supervisa-un-vuelo-frontex-de-repatriacion-de-extranjeros-organizado-por-espana-2/"
+    },
+    {
+     "lugar": "Dinamarca",
+     "que": "Su oficina de estadística publica índices de delincuencia por origen estandarizados por edad y por situación socioeconómica, para poder comparar grupos de población con edades y condiciones distintas.",
+     "url": "https://www.dst.dk/nyt/20403"
+    },
+    {
+     "lugar": "Unión Europea (Eurostat)",
+     "que": "Publica cada trimestre las órdenes de salida y los retornos. En el cuarto trimestre de 2025: 117.545 órdenes de salida y 33.860 personas retornadas a países de fuera de la UE.",
+     "url": "https://ec.europa.eu/eurostat/web/products-eurostat-news/w/ddn-20260331-1"
+    }
+   ],
+   "objeciones": [
+    {
+     "o": "Pagar por irse premia a quien entró de forma irregular y puede atraer a más gente.",
+     "r": "El riesgo existe. Se limita con ayudas pequeñas, que se cobran una sola vez y que se reducen para quien viene de países exentos de visado, como hace Alemania."
+    },
+    {
+     "o": "Muchas órdenes no se cumplen porque el país de origen no documenta ni acepta a sus nacionales. Ninguna ley española lo arregla sola.",
+     "r": "Es el límite principal. En el último trimestre de 2025 la UE dictó 117.545 órdenes y retornó a 33.860 personas. Por eso este ideal depende de los tratados con los países de origen."
+    },
+    {
+     "o": "Publicar la delincuencia por origen puede estigmatizar a colectivos enteros.",
+     "r": "Los datos ya circulan, pero sin contexto. Publicarlos ajustados por edad y situación social, y por un organismo independiente, permite separar el efecto del origen del de ser joven, varón o pobre."
+    }
+   ],
+   "fuentes": [
+    {
+     "t": "Eurostat: Returns to third countries up by 13% in Q4 2025",
+     "url": "https://ec.europa.eu/eurostat/web/products-eurostat-news/w/ddn-20260331-1"
+    },
+    {
+     "t": "Returning from Germany: programa REAG/GARP",
+     "url": "https://www.returningfromgermany.de/en/programmes/reag-garp/"
+    },
+    {
+     "t": "Oficina Federal de Migración y Refugiados de Alemania (BAMF): REAG/GARP",
+     "url": "https://www.bamf.de/EN/Themen/Rueckkehr/FoerderprogrammREAGGARP/reaggarp-node.html"
+    },
+    {
+     "t": "Defensor del Pueblo: supervisión de un vuelo FRONTEX de repatriación organizado por España",
+     "url": "https://www.defensordelpueblo.es/noticias/el-defensor-del-pueblo-supervisa-un-vuelo-frontex-de-repatriacion-de-extranjeros-organizado-por-espana-2/"
+    },
+    {
+     "t": "Danmarks Statistik: Indvandrere i Danmark 2015 (índices de delincuencia estandarizados)",
+     "url": "https://www.dst.dk/nyt/20403"
+    },
+    {
+     "t": "Parlamento Europeo, Legislative Train: nuevo enfoque común sobre retornos (Reglamento de Retorno)",
+     "url": "https://www.europarl.europa.eu/legislative-train/theme-promoting-our-european-way-of-life/file-new-common-approach-on-returns"
+    }
+   ]
   },
   {
    "i": 3,
-   "anti": "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
-   "ideal": "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
+   "anti": "No proponer nada, pedir leyes distintas según el origen o la religión, o justificar el racismo o el incumplimiento de la ley por motivos culturales.",
+   "ideal": "Ningún barrio ni escuela segregado: vivienda asequible repartida por ley entre todos los municipios, inversión por contrato en los barrios con más presión y una sola vara de medir para el delito y para el racismo.",
+   "titulo": "Barrios mezclados por ley y una sola vara de medir",
+   "slug": "barrios-mezclados-por-ley-y-una-sola-vara-de-medir",
+   "resumen": "La convivencia se decide en el barrio y en la escuela. El nivel avanzado pide barrios mixtos; aquí se dice cómo: cuota de vivienda asequible en todos los municipios, reparto equilibrado del alumnado, contrato de inversión con metas para los barrios con más presión y normas iguales aplicadas con la misma firmeza a quien delinque y a quien discrimina.",
+   "medidas": [
+    "Obligar a cada municipio urbano a tener una cuota de vivienda asequible, con sanción económica al que no avance, para que la población con menos renta no se concentre en pocos barrios.",
+    "Repartir al alumnado recién llegado entre todos los centros de la zona sostenidos con fondos públicos, sean públicos o concertados.",
+    "Firmar con cada barrio de alta concentración un contrato a diez años con metas de empleo, escuela, seguridad y limpieza, evaluado cada año.",
+    "Aplicar las mismas normas a todos: igualdad entre mujeres y hombres, libertad religiosa dentro de la ley y escuela obligatoria, sin excepciones culturales.",
+    "Crear en cada ciudad una red de mediación vecinal y de respuesta a los rumores, con vecinos formados y datos locales.",
+    "Dar a una autoridad independiente de igualdad de trato poder para investigar y sancionar la discriminación en el alquiler y en el empleo."
+   ],
+   "supone": {
+    "personas": "Quien vive en un barrio con mucha presión ve inversión, más servicios y normas que se cumplen. Quien llega no queda encerrado en un barrio ni en una escuela aparte. Quien sufre racismo al buscar piso o trabajo tiene dónde denunciar, y quien incumple la ley recibe la misma respuesta venga de donde venga.",
+    "cuentas": "El grueso es vivienda asequible e inversión en barrios, que comparte presupuesto con la política de vivienda. No hay una cifra verificada para España. En Francia, la detracción a los municipios que no llegan a su cuota sumó 240 millones de euros en 2024 antes de deducciones, y se destina a vivienda social.",
+    "puesta_en_marcha": "Reforma de la ley de vivienda para fijar la cuota municipal y su sanción; acuerdo con las comunidades autónomas, que tienen las competencias de vivienda y educación, para el reparto escolar; y una ley estatal de barrios con financiación a diez años. La mezcla tarda décadas en verse."
+   },
+   "integra": "Recoge la demanda de normas iguales, seguridad y que nadie viva al margen de la ley. Y recoge la de inversión pública, vivienda asequible y lucha contra la discriminación. Las dos piden en el fondo lo mismo: que no haya barrios aparte.",
+   "referencias": [
+    {
+     "lugar": "Francia",
+     "que": "La ley SRU obliga a los municipios urbanos de más de 3.500 habitantes a llegar al 25 % de vivienda social (20 % en zonas menos tensionadas). El que no llega paga cada año una detracción; 341 fueron sancionados por no avanzar en 2020-2022.",
+     "url": "https://www.ecologie.gouv.fr/larticle-55-loi-solidarite-et-renouvellement-urbain-sru-mode-demploi"
+    },
+    {
+     "lugar": "Barcelona y Consejo de Europa",
+     "que": "La estrategia antirrumores nació en Barcelona en 2010, dentro del plan de interculturalidad de la ciudad. El Consejo de Europa ha promovido su extensión a más de cincuenta ciudades europeas.",
+     "url": "https://rm.coe.int/anti-rumors-handbook-a-standardized-method-for-cities-2018-/168077351c"
+    },
+    {
+     "lugar": "Singapur",
+     "que": "Desde 1989 limita la proporción de cada grupo étnico en cada bloque y barrio de vivienda pública, donde vive cerca del 80 % de la población. Desde 2022 ofrece recomprar el piso a dueños que no logran venderlo a un precio razonable por ese límite.",
+     "url": "https://www.gov.sg/article/hdbs-ethnic-integration-policy-why-it-still-matters"
+    }
+   ],
+   "objeciones": [
+    {
+     "o": "Repartir vivienda social o alumnado es ingeniería social: limita la libertad de elegir dónde vivir y a qué colegio ir.",
+     "r": "El ideal no pone cuotas por origen, como hace Singapur: reparte la vivienda asequible y las plazas escolares, y cada familia elige dentro de eso. Aun así restringe algo la elección de centro, y hay que decirlo."
+    },
+    {
+     "o": "Las cuotas de vivienda social se incumplen: hay municipios que prefieren pagar la sanción.",
+     "r": "Pasa en Francia, donde 341 municipios fueron sancionados en un solo trienio. La cuota sola no basta: hace falta que el Estado pueda promover vivienda en el municipio que se niega."
+    },
+    {
+     "o": "Invertir más en los barrios con más inmigración puede sentirse como un agravio en otros barrios pobres.",
+     "r": "Los contratos de barrio se asignan por renta, paro y estado de las viviendas, no por el origen de los vecinos. Un barrio pobre sin inmigración entra igual."
+    }
+   ],
+   "fuentes": [
+    {
+     "t": "Ministerio francés de Transición Ecológica: el artículo 55 de la ley SRU, modo de empleo",
+     "url": "https://www.ecologie.gouv.fr/larticle-55-loi-solidarite-et-renouvellement-urbain-sru-mode-demploi"
+    },
+    {
+     "t": "Consejo de Europa: Antirumours Handbook (2018)",
+     "url": "https://rm.coe.int/anti-rumors-handbook-a-standardized-method-for-cities-2018-/168077351c"
+    },
+    {
+     "t": "Gobierno de Singapur: HDB's Ethnic Integration Policy: Why It Still Matters",
+     "url": "https://www.gov.sg/article/hdbs-ethnic-integration-policy-why-it-still-matters"
+    }
+   ]
   },
   {
    "i": 4,
-   "anti": "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
-   "ideal": "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
+   "anti": "No proponer nada, tratar la inmigración solo como mano de obra barata o solo como un coste, o negar los datos sobre su efecto económico.",
+   "ideal": "Un plan a diez años, votado cada año en el Congreso, con objetivos de entrada por cada vía, calculados por un comité independiente y ligados al empleo, a la vivienda disponible y a una política propia de natalidad.",
+   "titulo": "Plan demográfico a diez años votado cada año",
+   "slug": "plan-demografico-a-diez-anos-votado-cada-ano",
+   "resumen": "Cuánta gente viene deja de decidirse por inercia. Un comité independiente calcula cada año las necesidades por sector y territorio; el Gobierno lleva al Congreso objetivos de entrada para tres años dentro de un horizonte de diez, junto a metas de natalidad, empleo y vivienda. Va más lejos que lo avanzado porque el plan tiene cifras, votación y revisión anual.",
+   "medidas": [
+    "Llevar cada año al Congreso un plan con objetivos de entrada por vía —trabajo, estudio, familia y protección— para los tres años siguientes, con horquillas.",
+    "Encargar a un comité independiente de expertos el cálculo de vacantes por sector y provincia, con informe público antes de la votación.",
+    "Ligar los objetivos a datos: paro y salarios del sector, vivienda disponible y plazas en escuelas y centros de salud del territorio que acoge.",
+    "Encargar a la autoridad fiscal independiente una cuenta periódica de lo que aportan y lo que reciben los inmigrantes a largo plazo, según el tipo de entrada.",
+    "Fijar en el mismo plan metas de natalidad y de empleo de jóvenes, mujeres y mayores de 55 años, con vivienda y conciliación, para no fiarlo todo a la inmigración.",
+    "Mismo salario y mismas condiciones por el mismo trabajo, con inspección reforzada, para que contratar fuera no sirva para pagar menos."
+   ],
+   "supone": {
+    "personas": "Empresas, ayuntamientos y familias saben con años de antelación cuánta gente llegará y dónde, y pueden preparar vivienda, escuelas y centros de salud. Los trabajadores de aquí tienen la garantía de que no se contrata fuera para bajar sueldos. Las parejas jóvenes ven medidas de vivienda y conciliación en el mismo plan.",
+    "cuentas": "El comité y el plan cuestan poco. Lo caro es lo que el plan ordena: vivienda, servicios y natalidad, sin cifra verificada para España. La oficina fiscal británica calcula que una inmigración con sueldos más altos dejaría la deuda unos 40 puntos del PIB más baja en 50 años, sin cambiar por sí sola su tendencia.",
+    "puesta_en_marcha": "Una ley que obligue a presentar el plan cada año y cree el comité independiente; un mandato a la autoridad fiscal para la cuenta a largo plazo; y un acuerdo con comunidades autónomas, empresas y sindicatos, que aportan los datos de vacantes. El primer plan puede aprobarse en un año; sus efectos demográficos se miden en décadas."
+   },
+   "integra": "Recoge que la economía necesita trabajadores y que hay que decirlo con datos. Y recoge que la inmigración no sustituye a una política de natalidad ni debe servir para bajar salarios. Planificarlo todo junto evita tener que elegir entre una cosa y otra.",
+   "referencias": [
+    {
+     "lugar": "Canadá",
+     "que": "El Gobierno publica un plan de niveles de inmigración a tres años, con objetivos y horquillas por categoría, que confirma o ajusta cada año. El de 2025-2027 fija 395.000, 380.000 y 365.000 residentes permanentes e incluye por primera vez a los temporales.",
+     "url": "https://www.canada.ca/en/immigration-refugees-citizenship/news/notices/supplementary-immigration-levels-2025-2027.html"
+    },
+    {
+     "lugar": "Reino Unido (Comité Asesor de Migración)",
+     "que": "Es un organismo público independiente, con una presidencia y miembros expertos, que asesora al Gobierno sobre migración. Trabaja sobre todo por encargo del Ministerio del Interior y publica además un informe anual y análisis por iniciativa propia.",
+     "url": "https://www.gov.uk/government/organisations/migration-advisory-committee/about"
+    },
+    {
+     "lugar": "Reino Unido (Oficina de Responsabilidad Presupuestaria)",
+     "que": "Publica escenarios a 50 años: con inmigrantes de sueldos más altos, la deuda en 2073-74 sería unos 40 puntos del PIB menor que en el escenario base, pero seguiría en una senda insostenible.",
+     "url": "https://obr.uk/frs/fiscal-risks-and-sustainability-september-2024/"
+    },
+    {
+     "lugar": "Italia",
+     "que": "Fija por decreto las entradas por trabajo para tres años: 497.550 en 2026-2028, repartidas en 164.850, 165.850 y 166.850 por año.",
+     "url": "https://lavoro.gov.it/priorita/pagine/flussi-2026-2028-pubblicato-il-decreto-da-oltre-497mila-ingressi"
+    }
+   ],
+   "objeciones": [
+    {
+     "o": "Planificar la inmigración con cifras es dirigismo: el mercado laboral cambia más rápido que cualquier plan.",
+     "r": "Por eso el plan se revisa y se vota cada año y usa horquillas, no cifras cerradas, como hace Canadá. Un plan imperfecto y público es mejor que una cifra que nadie decide."
+    },
+    {
+     "o": "Fijar objetivos de entrada choca con el asilo y la reagrupación familiar, que son derechos y no admiten cupo.",
+     "r": "Cierto: para esas vías el plan da previsiones, no topes. Los objetivos que se pueden subir o bajar son los de trabajo, estudio y reasentamiento."
+    },
+    {
+     "o": "Las políticas de natalidad son caras y sus resultados, dudosos.",
+     "r": "Es un límite que se reconoce: ninguna medida garantiza más nacimientos. El plan no promete una cifra; fija qué se hace en vivienda y conciliación y mide cada año el resultado."
+    }
+   ],
+   "fuentes": [
+    {
+     "t": "Gobierno de Canadá: Supplementary Information for the 2025-2027 Immigration Levels Plan",
+     "url": "https://www.canada.ca/en/immigration-refugees-citizenship/news/notices/supplementary-immigration-levels-2025-2027.html"
+    },
+    {
+     "t": "Gobierno de Canadá: 2025 Annual Report to Parliament on Immigration",
+     "url": "https://www.canada.ca/en/immigration-refugees-citizenship/corporate/publications-manuals/annual-report-parliament-immigration-2025.html"
+    },
+    {
+     "t": "Gobierno del Reino Unido: Migration Advisory Committee, About us",
+     "url": "https://www.gov.uk/government/organisations/migration-advisory-committee/about"
+    },
+    {
+     "t": "Office for Budget Responsibility: Fiscal risks and sustainability, septiembre de 2024",
+     "url": "https://obr.uk/frs/fiscal-risks-and-sustainability-september-2024/"
+    },
+    {
+     "t": "Ministerio de Trabajo de Italia: Flussi 2026-2028, publicado el decreto",
+     "url": "https://lavoro.gov.it/priorita/pagine/flussi-2026-2028-pubblicato-il-decreto-da-oltre-497mila-ingressi"
+    }
+   ]
   },
   {
    "i": 5,
-   "anti": "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
-   "ideal": "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
+   "anti": "No proponer nada, negar la escuela a los menores sin papeles, o rechazar que se pida aprender el idioma y las normas comunes.",
+   "ideal": "Un derecho y un deber de integración: itinerario gratuito de idioma, normas y empleo que empieza antes de tres meses, con plan individual, prueba final y resultados por municipio.",
+   "titulo": "Itinerario de integración con derecho, deber y examen",
+   "slug": "itinerario-de-integracion-con-derecho-deber-y-examen",
+   "resumen": "Cada persona que llega para quedarse tiene derecho a un itinerario gratuito y el deber de seguirlo: idioma, normas comunes y camino al empleo. Va más lejos que lo avanzado porque fija plazos y horas, termina con una prueba, financia a los municipios según sus resultados y publica los indicadores para comparar territorios.",
+   "medidas": [
+    "Empezar el itinerario antes de tres meses desde la llegada, con un plan individual firmado por la persona y por su municipio.",
+    "Garantizar un mínimo de horas de castellano y de la lengua cooficial, y un curso sobre la Constitución y las normas comunes, con prueba final.",
+    "Unir el idioma al trabajo: prácticas, reconocimiento de la experiencia y formación profesional desde los primeros meses, con cuidado de niños para que las madres participen.",
+    "Repartir la acogida entre comunidades y municipios con una fórmula fija según población y recursos, con el dinero siguiendo a la persona.",
+    "Reforzar con profesores y aulas de acogida las escuelas que reciben alumnado a mitad de curso, y evitar que se concentre en pocos centros.",
+    "Publicar cada año, por municipio, el empleo, el nivel de idioma, el abandono escolar y el acceso a vivienda de quienes llegaron, y financiar más a quien mejor integra."
+   ],
+   "supone": {
+    "personas": "Quien llega sabe desde el primer mes qué se espera de él y qué recibe a cambio: clases, orientación y un camino hacia el empleo. Renovar ciertos permisos y ayudas va ligado a asistir. El vecino ve que quien llega aprende el idioma y las normas, y que su municipio recibe dinero por acoger.",
+    "cuentas": "Cuesta profesores, plazas y personal que acompañe cada caso. No hay una cifra verificada para España. Como orden de magnitud del esfuerzo, el curso alemán son 700 clases por persona. Lo que se recupera es empleo antes y menos gasto social después.",
+    "puesta_en_marcha": "Una ley estatal de integración pactada con las comunidades autónomas, que tienen las competencias de educación, empleo y servicios sociales; una fórmula de reparto y de financiación; y un sistema común de indicadores. Formar al profesorado y abrir las plazas lleva varios años."
+   },
+   "integra": "Recoge la exigencia de que quien llega aprenda la lengua, respete las normas y trabaje. Y recoge la de que el Estado ponga los medios, gratis y desde el principio, y no deje solos a los barrios que acogen. Derecho y deber van en el mismo contrato.",
+   "referencias": [
+    {
+     "lugar": "Alemania (curso de integración)",
+     "que": "El curso general suma 700 clases: 600 de alemán, que terminan con un examen de idioma, y 100 de orientación sobre el sistema legal, la historia y valores como la libertad religiosa y la igualdad entre mujeres y hombres, con otra prueba final.",
+     "url": "https://www.bamf.de/EN/Themen/Integration/ZugewanderteTeilnehmende/Integrationskurse/InhaltAblauf/inhaltablauf-node.html"
+    },
+    {
+     "lugar": "Noruega",
+     "que": "Los municipios deben ofrecer un programa de introducción a los refugiados y sus familias de 18 a 55 años. Empieza como tarde a los tres meses, dura hasta dos años, sigue un plan individual y da una ayuda económica por participar.",
+     "url": "https://www.imdi.no/en/the-introduction-programme/"
+    },
+    {
+     "lugar": "OCDE y Comisión Europea",
+     "que": "Publican juntas el informe «Settling In» (2023), con 83 indicadores comparables de integración de los inmigrantes y de sus hijos: empleo y competencias, condiciones de vida, y participación cívica e integración social.",
+     "url": "https://www.oecd.org/en/publications/indicators-of-immigrant-integration-2023_1d5020a6-en.html"
+    },
+    {
+     "lugar": "Alemania (reparto territorial)",
+     "que": "Reparte a los solicitantes de asilo entre los estados federados con una fórmula fija, la clave de Königstein: dos tercios según la recaudación fiscal y un tercio según la población. Se recalcula cada año.",
+     "url": "https://www.bamf.de/EN/Themen/AsylFluechtlingsschutz/AblaufAsylverfahrens/Erstverteilung/erstverteilung-node.html"
+    }
+   ],
+   "objeciones": [
+    {
+     "o": "Hacer obligatorio el itinerario y ligarlo a permisos castiga a quien no puede asistir por trabajo, cuidados o salud.",
+     "r": "El plan individual debe adaptar horarios y prever exenciones justificadas. La obligación solo es legítima si la plaza existe: sin oferta suficiente no puede haber sanción."
+    },
+    {
+     "o": "Repartir personas por el territorio falla si se las envía a sitios sin empleo: acaban marchándose a las grandes ciudades.",
+     "r": "Es un riesgo real. La fórmula debe contar las vacantes y la vivienda del lugar, no solo la población, y nadie queda atado a un municipio cuando encuentra trabajo en otro."
+    },
+    {
+     "o": "Educación, empleo y servicios sociales son competencia autonómica: un itinerario común puede invadirla.",
+     "r": "El Estado puede fijar los mínimos y los indicadores, y las comunidades gestionar. Sin acuerdo con ellas no funciona: es el principal obstáculo político."
+    }
+   ],
+   "fuentes": [
+    {
+     "t": "Oficina Federal de Migración y Refugiados de Alemania (BAMF): contenido y fases del curso de integración",
+     "url": "https://www.bamf.de/EN/Themen/Integration/ZugewanderteTeilnehmende/Integrationskurse/InhaltAblauf/inhaltablauf-node.html"
+    },
+    {
+     "t": "Dirección de Integración y Diversidad de Noruega (IMDi): The introduction programme",
+     "url": "https://www.imdi.no/en/the-introduction-programme/"
+    },
+    {
+     "t": "OCDE y Comisión Europea: Indicators of Immigrant Integration 2023: Settling In",
+     "url": "https://www.oecd.org/en/publications/indicators-of-immigrant-integration-2023_1d5020a6-en.html"
+    },
+    {
+     "t": "BAMF: reparto inicial de los solicitantes de asilo (sistema EASY y clave de Königstein)",
+     "url": "https://www.bamf.de/EN/Themen/AsylFluechtlingsschutz/AblaufAsylverfahrens/Erstverteilung/erstverteilung-node.html"
+    }
+   ]
   },
   {
    "i": 6,
-   "anti": "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
-   "ideal": "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
+   "anti": "No proponer nada, pedir la salida del sistema de asilo o devolver sin examinar cada caso, o negar que una denegación firme deba cumplirse.",
+   "ideal": "Asilo resuelto en un máximo de 140 días con abogado gratuito desde el primer día, vías seguras para pedirlo sin cruzar el mar y menores repartidos en 14 días, con tutor, por una fórmula fija que paga el Estado.",
+   "titulo": "Asilo en 140 días, vías seguras y tutela inmediata",
+   "slug": "asilo-en-140-dias-vias-seguras-y-tutela-inmediata",
+   "resumen": "Proteger rápido a quien lo necesita y decir pronto que no a quien no. Va más lejos que lo avanzado, que pide seis meses: tope de 140 días, abogado gratuito desde el inicio, puertas legales para refugiados —reasentamiento y patrocinio ciudadano— y reparto automático de los menores, con tutor, en dos semanas. La decisión, sea cual sea, se cumple.",
+   "medidas": [
+    "Resolver cada solicitud en un máximo de 140 días, con plantilla e intérpretes suficientes, y publicar cada trimestre el tiempo medio real.",
+    "Dar asistencia jurídica gratuita e independiente desde el primer día, y un recurso ante un juez que suspenda la salida mientras se decide.",
+    "Abrir vías seguras: cupo anual de reasentamiento, visados humanitarios y patrocinio por asociaciones y grupos de ciudadanos que cubren el primer año.",
+    "Repartir a los menores no acompañados entre comunidades en 14 días, con una fórmula fija según población y recursos pagada por el Estado y con tutor nombrado.",
+    "Buscar a la familia del menor desde el primer día y reunificarlo cuando sea seguro, en España o en su país.",
+    "Cumplir la decisión en los dos sentidos: papeles, idioma y empleo inmediatos para quien obtiene protección; retorno con garantías para quien recibe un no firme."
+   ],
+   "supone": {
+    "personas": "Quien huye sabe en menos de cinco meses si se queda, en vez de esperar años sin poder rehacer su vida, y puede pedir protección sin pagar a una red. El menor que llega solo tiene tutor y plaza en dos semanas. Y el vecino sabe que el asilo no es una puerta trasera: quien no tiene derecho, vuelve.",
+    "cuentas": "Exige más instructores, intérpretes, abogados y plazas de acogida; no hay una cifra verificada para España. Resolver antes ahorra meses de acogida. En el patrocinio ciudadano, los patrocinadores pagan vivienda y manutención el primer año. El reparto de menores lo paga el Estado.",
+    "puesta_en_marcha": "El Pacto europeo, aplicable desde junio de 2026, marca el procedimiento y la solidaridad entre países. En España: reforma de la ley de asilo, refuerzo de la oficina que instruye, una ley de patrocinio ciudadano y una fórmula de reparto de menores fijada por ley y no negociada en cada crisis."
+   },
+   "integra": "Recoge la defensa del derecho de asilo, de los menores y de las vías seguras. Y recoge la exigencia de rapidez, de que el asilo no sirva para quedarse sin derecho y de que el no se cumpla. Un sistema rápido y creíble protege mejor el propio asilo.",
+   "referencias": [
+    {
+     "lugar": "Suiza",
+     "que": "En el procedimiento acelerado, el solicitante permanece en un centro federal de asilo y todo el proceso dura como máximo 140 días, hasta la concesión del asilo o la salida del país. La negativa se puede recurrir ante el Tribunal Administrativo Federal.",
+     "url": "https://www.sem.admin.ch/sem/en/home/asyl/asylverfahren.html"
+    },
+    {
+     "lugar": "Canadá",
+     "que": "En el patrocinio privado, organizaciones con acuerdo con el Gobierno traen refugiados y les cubren durante un año vivienda, comida y apoyo para trabajar y estudiar. La vía para grupos de cinco ciudadanos figura en pausa.",
+     "url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/refugees/help-outside-canada/private-sponsorship-program.html"
+    },
+    {
+     "lugar": "Italia",
+     "que": "Los corredores humanitarios, regulados por un protocolo entre el Gobierno y tres entidades religiosas, han traído desde febrero de 2016 a más de 8.592 personas vulnerables con visado humanitario. Los pagan las entidades, no el Estado.",
+     "url": "https://www.santegidio.org/pageID/30112/langID/en/Humanitarian-Corridors.html"
+    },
+    {
+     "lugar": "Alemania",
+     "que": "Los menores que llegan solos quedan primero a cargo de la oficina de juventud local y se reparten por todo el país en un procedimiento que se ejecuta en 14 días. Viajan acompañados y el juzgado de familia les nombra un tutor.",
+     "url": "https://www.bamf.de/EN/Themen/AsylFluechtlingsschutz/UnbegleiteteMinderjaehrige/unbegleiteteminderjaehrige-node.html"
+    }
+   ],
+   "objeciones": [
+    {
+     "o": "Resolver en 140 días puede llevar a decisiones precipitadas y a errores que cuestan vidas.",
+     "r": "La rapidez solo es aceptable con abogado desde el principio y recurso judicial, y los casos complejos deben poder pasar a un procedimiento más largo. Si la plantilla no crece, el plazo no se cumple o se cumple mal."
+    },
+    {
+     "o": "Abrir vías seguras y patrocinio puede sumar llegadas en lugar de sustituir a las irregulares.",
+     "r": "Las vías seguras tienen un cupo anual fijado en el plan demográfico: el número lo decide el Congreso. No eliminan las llegadas irregulares; dan una alternativa a quien hoy no tiene otra puerta."
+    },
+    {
+     "o": "Repartir menores por fórmula obliga a comunidades que no quieren o no tienen plazas, y choca con sus competencias.",
+     "r": "Por eso el reparto va con financiación estatal completa y fijado por ley. El conflicto de competencias existe y puede acabar ante el Tribunal Constitucional si no hay acuerdo previo."
+    }
+   ],
+   "fuentes": [
+    {
+     "t": "Secretaría de Estado de Migración de Suiza (SEM): Asylum procedure",
+     "url": "https://www.sem.admin.ch/sem/en/home/asyl/asylverfahren.html"
+    },
+    {
+     "t": "Gobierno de Canadá: Private Sponsorship of Refugees program",
+     "url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/refugees/help-outside-canada/private-sponsorship-program.html"
+    },
+    {
+     "t": "Comunidad de Sant'Egidio: Humanitarian Corridors",
+     "url": "https://www.santegidio.org/pageID/30112/langID/en/Humanitarian-Corridors.html"
+    },
+    {
+     "t": "Oficina Federal de Migración y Refugiados de Alemania (BAMF): menores no acompañados",
+     "url": "https://www.bamf.de/EN/Themen/AsylFluechtlingsschutz/UnbegleiteteMinderjaehrige/unbegleiteteminderjaehrige-node.html"
+    },
+    {
+     "t": "Comisión Europea: Pact on Migration and Asylum",
+     "url": "https://home-affairs.ec.europa.eu/policies/migration-and-asylum/pact-migration-and-asylum_en"
+    }
+   ]
   },
   {
    "i": 7,
-   "anti": "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
-   "ideal": "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
+   "anti": "No proponer nada, pedir el cierre de toda vía legal de entrada, o confiar solo en regularizaciones periódicas de quien ya entró sin papeles.",
+   "ideal": "Una ventanilla digital única con plazos garantizados: visado de búsqueda de empleo por puntos, cupos anuales por sector, títulos reconocidos en tres meses y arraigo individual permanente con requisitos fijos.",
+   "titulo": "Ventanilla única de entrada legal con plazos fijos",
+   "slug": "ventanilla-unica-de-entrada-legal-con-plazos-fijos",
+   "resumen": "Entrar legalmente pasa a ser más rápido y más seguro que hacerlo con una red. Va más lejos que lo avanzado porque pone plazo máximo a cada trámite, hace públicos los criterios con un sistema de puntos, liga los cupos al plan demográfico y deja una vía individual y permanente de regularización por trabajo o formación, que hace innecesarias las extraordinarias.",
+   "medidas": [
+    "Visado de búsqueda de empleo de un año por puntos —idioma, formación, experiencia, edad—, con medios propios acreditados y permiso para trabajar a tiempo parcial mientras se busca.",
+    "Cupos anuales por sector fijados en el plan demográfico, con contratación en origen y permisos de varios años para el trabajo de temporada.",
+    "Resolver visados y permisos de trabajo en 30 días y la homologación de títulos en tres meses; pasado el plazo, permiso provisional automático.",
+    "Tramitar todo en línea, en una sola ventanilla para la empresa y el trabajador, con consulados reforzados y sin intermediarios de pago.",
+    "Mantener el arraigo por trabajo o formación como vía ordinaria e individual, con requisitos fijos de tiempo de estancia, contrato y ausencia de antecedentes.",
+    "Visado de estudios que permita trabajar a tiempo parcial y quedarse un año a buscar empleo después de titularse."
+   ],
+   "supone": {
+    "personas": "Quien quiere venir puede calcular en casa si cumple los requisitos y cuánto tardará. La empresa que no encuentra trabajadores contrata en semanas. El médico o la ingeniera ejercen de lo suyo a los pocos meses. Y quien ya vive y trabaja aquí sin papeles tiene un camino individual y conocido, sin esperar una regularización general.",
+    "cuentas": "Requiere personal en consulados y oficinas de extranjería y una plataforma digital; no hay una cifra verificada. Quien entra con contrato cotiza desde el primer día, y cada título homologado antes es un profesional que deja de estar en un empleo por debajo de su formación.",
+    "puesta_en_marcha": "Reforma del reglamento de extranjería para fijar los plazos y el sistema de puntos; refuerzo de consulados y oficinas; y acuerdo con colegios profesionales y universidades para homologar. Los cupos se coordinan con los tratados con los países de origen y con el plan demográfico."
+   },
+   "integra": "Recoge la petición de orden: entra quien cumple requisitos conocidos, con contrato o medios propios, y baja el incentivo a entrar sin papeles. Y recoge la de derechos: puertas reales, trámites rápidos y una salida legal para quien ya trabaja aquí.",
+   "referencias": [
+    {
+     "lugar": "Alemania (tarjeta de oportunidad)",
+     "que": "Permite entrar hasta un año a buscar empleo cualificado a quien reúne seis puntos por idioma, experiencia, edad y otros criterios y acredita medios propios. Mientras busca, puede trabajar hasta 20 horas semanales y hacer pruebas de dos semanas.",
+     "url": "https://www.make-it-in-germany.com/en/visa-residence/types/job-search-opportunity-card"
+    },
+    {
+     "lugar": "Alemania (regla de los Balcanes occidentales)",
+     "que": "Da permisos de trabajo a nacionales de seis países con una oferta de empleo, sin exigir titulación. En junio de 2024 el cupo anual pasó de 25.000 a 50.000 autorizaciones; el Gobierno prevé devolverlo a 25.000 desde 2027.",
+     "url": "https://www.handwerksblatt.de/betriebsfuehrung/themen-specials/so-finden-sie-gute-leute-fuer-ihren-betrieb/chancenkarte-und-westbalkanregelung-was-sich-ab-juni-aendert"
+    },
+    {
+     "lugar": "España",
+     "que": "La orden GECCO de 2026 regula la contratación colectiva en origen con permisos de cuatro años para trabajar hasta nueve meses al año. Admite ofertas genéricas y nominativas y obliga al empleador a garantizar el alojamiento.",
+     "url": "https://www.inclusion.gob.es/w/el-gobierno-aprueba-la-orden-gecco-2026"
+    },
+    {
+     "lugar": "Canadá",
+     "que": "Express Entry gestiona en línea tres programas de inmigración cualificada: el candidato comprueba si cumple y crea un perfil, y la nominación por una provincia le da puntos adicionales para ser invitado antes a solicitar la residencia.",
+     "url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry/works.html"
+    }
+   ],
+   "objeciones": [
+    {
+     "o": "Un visado para buscar empleo sin contrato previo puede acabar en estancias irregulares si la persona no encuentra trabajo.",
+     "r": "El riesgo existe. Se limita exigiendo medios propios, como hace Alemania, y registrando entradas y salidas: el sistema europeo ya detecta a quien supera el tiempo permitido. Quien no encuentra empleo debe salir."
+    },
+    {
+     "o": "Un arraigo permanente funciona como una regularización continua y anima a entrar sin papeles y esperar el plazo.",
+     "r": "Es la objeción más seria. Por eso el arraigo exige trabajo o formación reales y va unido a entradas legales más fáciles que la irregular y a retornos que se cumplen. Si esas dos piezas fallan, el incentivo existe."
+    },
+    {
+     "o": "Un permiso provisional automático para títulos sanitarios o técnicos pone en riesgo la calidad y la seguridad.",
+     "r": "En las profesiones reguladas el permiso provisional debe ser para trabajar bajo supervisión, no para ejercer solo. El plazo obliga a la Administración a resolver; no rebaja el nivel exigido."
+    }
+   ],
+   "fuentes": [
+    {
+     "t": "Make it in Germany (Gobierno federal): Opportunity Card for jobseekers",
+     "url": "https://www.make-it-in-germany.com/en/visa-residence/types/job-search-opportunity-card"
+    },
+    {
+     "t": "Deutsches Handwerksblatt: Chancenkarte und Westbalkanregelung, was sich ab Juni ändert",
+     "url": "https://www.handwerksblatt.de/betriebsfuehrung/themen-specials/so-finden-sie-gute-leute-fuer-ihren-betrieb/chancenkarte-und-westbalkanregelung-was-sich-ab-juni-aendert"
+    },
+    {
+     "t": "Ministerio de Inclusión, Seguridad Social y Migraciones: el Gobierno aprueba la Orden GECCO 2026",
+     "url": "https://www.inclusion.gob.es/w/el-gobierno-aprueba-la-orden-gecco-2026"
+    },
+    {
+     "t": "Gobierno de Canadá: How Express Entry works",
+     "url": "https://www.canada.ca/en/immigration-refugees-citizenship/services/immigrate-canada/express-entry/works.html"
+    },
+    {
+     "t": "Comisión Europea: Entry/Exit System (EES)",
+     "url": "https://home-affairs.ec.europa.eu/policies/schengen-borders-and-visa/smart-borders/entry-exit-system_en"
+    },
+    {
+     "t": "Center for Global Development: Western Balkan Regulation (Alemania)",
+     "url": "https://gsp.cgdev.org/legalpathway/western-balkan-regulation/"
+    }
+   ]
   }
  ]
 }

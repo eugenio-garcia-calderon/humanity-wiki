@@ -1,38 +1,485 @@
 {
  "clave": "ter",
- "pendiente": true,
- "anti_tema": "Quedarse por debajo de lo básico: no proponer nada sobre el tema, o proponer algo que rompe la base (la ley, las sentencias o los derechos fundamentales) en vez de mejorarla.",
- "ideal_tema": "El ideal de este tema está en preparación: se publicará en una próxima fase, aspecto por aspecto.",
+ "anti_tema": "No proponer nada, o romper la base por cualquier lado: saltarse la Constitución y las sentencias, o negar el autogobierno y las lenguas que la Constitución reconoce.",
+ "ideal_tema": "Reglas pactadas que no dependen de cada legislatura: financiación con fórmula pública, competencias claras con ingresos propios, lenguas con derechos en los dos sentidos, gobiernos que deciden juntos y servicios equivalentes.",
  "aspectos": [
   {
    "i": 0,
-   "anti": "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
-   "ideal": "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
+   "anti": "No proponer nada sobre financiación, o negar la solidaridad entre territorios o la autonomía financiera que reconoce la Constitución.",
+   "ideal": "Una fórmula fijada por ley que un órgano técnico aplica y publica cada año: suelo garantizado de recursos por habitante, sin alterar el orden entre comunidades, y revisión obligatoria en plazo para que no vuelva a caducar.",
+   "titulo": "Fórmula pública con suelo garantizado y orden respetado",
+   "slug": "formula-publica-de-financiacion-con-suelo-y-orden",
+   "resumen": "Lo avanzado pide un modelo calculable, balanzas publicadas y un límite a las diferencias. El ideal añade quién lo calcula (un órgano técnico, no la negociación de cada legislatura), un suelo garantizado, la regla de que la nivelación no cambia el orden entre comunidades y una revisión con fecha, para que el modelo no dependa de quién necesita qué votos.",
+   "medidas": [
+    "Fijar la fórmula en la ley, con todas sus variables, y publicar cada año los datos y la hoja de cálculo para que cualquiera pueda rehacer la cuenta de su comunidad.",
+    "Encargar el cálculo anual a un órgano técnico que consulta a todas las comunidades y publica sus métodos, como hace la comisión australiana que reparte el IVA entre estados.",
+    "Medir la capacidad fiscal de cada comunidad con tipos medios, no con lo que recauda de verdad: quien baja o sube sus impuestos responde ante sus votantes y no recibe por ello ni más ni menos.",
+    "Garantizar un suelo de recursos por habitante ajustado, fijado como porcentaje de la media, y nivelar solo una parte de la diferencia restante, de modo que el orden entre comunidades no se invierta.",
+    "Publicar cada año las cuentas territorializadas con un método oficial único y, con el mismo detalle, el cálculo del cupo vasco y de la aportación navarra, sin tocar el régimen foral.",
+    "Evaluar el sistema cada cuatro o cinco años con un informe público; si no hay acuerdo para reformarlo, se sigue aplicando la fórmula con datos actualizados."
+   ],
+   "supone": {
+    "personas": "Cualquier persona puede comprobar cuánto aporta y cuánto recibe su comunidad y por qué, con la misma hoja de cálculo que usa el Gobierno. Ninguna comunidad queda por debajo del suelo pactado para pagar sanidad, educación y servicios sociales, y la discusión deja de ser sobre agravios para ser sobre números que todos ven.",
+    "cuentas": "Cambiar las reglas de reparto no cuesta dinero por sí mismo. Sí lo cuesta subir a las comunidades peor financiadas sin bajar a ninguna: esa diferencia la pone el Estado. Como orden de magnitud, la propuesta que presentó Hacienda en enero de 2026 hablaba de 20.975 millones más para las comunidades en 2027.",
+    "puesta_en_marcha": "Hay que reformar la ley orgánica que regula la financiación autonómica, con negociación previa en el Consejo de Política Fiscal y Financiera. Para que dure, conviene aprobarla con una mayoría mucho más amplia que la mínima y con un periodo transitorio en el que ninguna comunidad pierda recursos de un año para otro."
+   },
+   "integra": "Recoge la solidaridad (un suelo para todas, con las de más capacidad aportando) y la responsabilidad (quien aporta más no acaba por debajo, y cada gobierno responde de sus impuestos). Los datos públicos sirven igual a quien cree que su comunidad paga de más que a quien teme por la caja común.",
+   "referencias": [
+    {
+     "lugar": "Australia",
+     "que": "Cada año el Tesoro encarga a la Commonwealth Grants Commission actualizar los coeficientes con que se reparte el IVA (GST) entre estados. La comisión consulta a los estados y revisa sus métodos más o menos cada cinco años.",
+     "url": "https://cgc.gov.au/reports-for-government"
+    },
+    {
+     "lugar": "Canadá",
+     "que": "La nivelación mide lo que cada provincia podría recaudar con tipos medios nacionales, no lo que recauda de verdad. El pago es incondicionado y no puede dejar a una provincia receptora por encima de una que no recibe, contados los recursos naturales.",
+     "url": "https://www.canada.ca/en/department-finance/programs/federal-transfers/equalization.html"
+    },
+    {
+     "lugar": "Suiza",
+     "que": "La compensación de recursos la pagan la Confederación (60 %) y los cantones con más capacidad (40 %). Los cantones con menos recursos reciben un mínimo garantizado del 86,5 % de la media suiza.",
+     "url": "https://res.cloudinary.com/adminch/image/private/s--yc6Gq7WS--/v1719952965/Bundespublikationen/601_010_eng.pdf"
+    },
+    {
+     "lugar": "Alemania",
+     "que": "Se compensa con recargos y descuentos el 63 % de la distancia entre la capacidad fiscal de cada Land y su referencia. En 2021 Baviera pasó del 121,9 % al 108,1 %: aportó, pero siguió por encima del 100 %.",
+     "url": "https://www.bpb.de/kurz-knapp/zahlen-und-fakten/soziale-situation-in-deutschland/61877/finanzkraftausgleich-und-bundesergaenzungszuweisungen/"
+    }
+   ],
+   "objeciones": [
+    {
+     "o": "Si el orden no puede cambiar, se limita la solidaridad: las comunidades con menos renta nunca alcanzan a las demás en recursos por habitante.",
+     "r": "El límite existe. Por eso el ideal combina el orden con un suelo garantizado y, en el aspecto de igualdad, con la cobertura del coste de los servicios básicos. Lo que queda sin nivelar es el margen por encima de ese suelo."
+    },
+    {
+     "o": "Un órgano técnico no tiene legitimidad para decidir un reparto de tanto dinero: eso es política y debe decidirlo quien ha sido votado.",
+     "r": "El órgano no decide: aplica una fórmula que aprueban las Cortes y calcula con datos públicos. En Australia es el Gobierno quien fija el mandato de la comisión y quien responde del resultado."
+    },
+    {
+     "o": "Publicar balanzas fiscales alimenta el agravio: cada comunidad leerá el dato como le convenga.",
+     "r": "Hoy ya circulan cálculos de parte. Un método oficial único, con los datos abiertos, no acaba la discusión, pero la obliga a partir de las mismas cifras."
+    }
+   ],
+   "fuentes": [
+    {
+     "t": "Commonwealth Grants Commission (Australia): Fiscal equalisation",
+     "url": "https://www.cgc.gov.au/about-us/fiscal-equalisation"
+    },
+    {
+     "t": "Department of Finance Canada: Equalization Program",
+     "url": "https://www.canada.ca/en/department-finance/programs/federal-transfers/equalization.html"
+    },
+    {
+     "t": "Administración Federal de Finanzas (Suiza): National fiscal equalization (folleto, datos de 2020)",
+     "url": "https://res.cloudinary.com/adminch/image/private/s--yc6Gq7WS--/v1719952965/Bundespublikationen/601_010_eng.pdf"
+    },
+    {
+     "t": "Bundeszentrale für politische Bildung (Alemania): Finanzkraftausgleich und Bundesergänzungszuweisungen",
+     "url": "https://www.bpb.de/kurz-knapp/zahlen-und-fakten/soziale-situation-in-deutschland/61877/finanzkraftausgleich-und-bundesergaenzungszuweisungen/"
+    },
+    {
+     "t": "Ministerio de Hacienda: nota de prensa sobre los datos para calcular las cuentas territorializadas de 2021 (12-3-2024)",
+     "url": "https://www.hacienda.gob.es/Documentacion/Publico/GabineteMinistro/Notas%20Prensa/2024/S.E.HACIENDA/12-03-24-NP-Datos-cuentas-territorializadas.pdf"
+    },
+    {
+     "t": "La Moncloa: Hacienda propone un nuevo modelo de financiación que otorgará 20.975 millones más en 2027 a las comunidades",
+     "url": "https://www.lamoncloa.gob.es/serviciosdeprensa/notasprensa/hacienda/Paginas/2026/090126-modelo-financiacion-comunidades.aspx"
+    }
+   ]
   },
   {
    "i": 1,
-   "anti": "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
-   "ideal": "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
+   "anti": "Negar la oficialidad o el uso del castellano o de una lengua cooficial, usar una contra otra o desobedecer las sentencias sobre lenguas.",
+   "ideal": "Una ley de lenguas oficiales con los mismos derechos en los dos sentidos: usar el castellano y la lengua propia ante cualquier administración, también la del Estado, con un comisionado independiente que atiende las quejas.",
+   "titulo": "Ley de lenguas con derechos en los dos sentidos",
+   "slug": "ley-de-lenguas-oficiales-con-comisionado-linguistico",
+   "resumen": "Lo avanzado trata las lenguas como patrimonio común. El ideal lo convierte en derechos que se pueden reclamar: ser atendido en la lengua oficial que uno elija, acabar la escuela dominando las dos y poder quejarse ante un comisionado tanto si falla el castellano como si falla la lengua propia. Se mide con datos y se rinde cuentas cada tres años.",
+   "medidas": [
+    "Reconocer por ley el derecho a dirigirse a la Administración del Estado y a la Justicia en cualquier lengua oficial del territorio y a recibir respuesta en ella.",
+    "Crear un comisionado de lenguas independiente que investiga las quejas de cualquier hablante, de castellano o de lengua cooficial, y publica un informe anual con recomendaciones.",
+    "Garantizar que todo el alumnado acaba la enseñanza obligatoria dominando el castellano y la lengua cooficial, con las dos presentes en las aulas y una evaluación externa y pública.",
+    "Dejar a cada comunidad decidir su modelo escolar dentro de esa garantía y de las sentencias, y reforzar la lengua que quede por debajo del nivel exigido, sea la que sea.",
+    "Ofrecer catalán, gallego y euskera como optativas en toda España y financiar intercambios de alumnos y profesores entre comunidades.",
+    "Fijar objetivos de personal que domine la lengua cooficial en los servicios del Estado, la Justicia y la sanidad de cada territorio, con plazo y formación para quien llega de fuera."
+   ],
+   "supone": {
+    "personas": "Quien habla catalán, gallego o euskera puede usarlo también ante un juzgado o una oficina del Estado en su comunidad. Quien habla castellano tiene asegurado usarlo y aprenderlo en cualquier comunidad. Los hijos de ambos acaban la escuela con las dos lenguas, y si un derecho falla hay una ventanilla a la que quejarse.",
+    "cuentas": "El gasto está en traducción e interpretación, en formar al personal del Estado y de la Justicia y en las optativas y los intercambios. No se ha encontrado una estimación oficial del coste total, así que no se da cifra.",
+    "puesta_en_marcha": "Una ley estatal de lenguas oficiales pactada con las comunidades que las tienen. No toca la Constitución: desarrolla su artículo 3. El Congreso ya reformó su Reglamento en 2023 para poder usarlas. El resto se despliega por fases: primero los derechos ante el Estado, después los objetivos de personal y la evaluación escolar."
+   },
+   "integra": "Protege a la vez a las dos minorías posibles: al hablante de lengua cooficial ante un Estado que no le atiende en ella, y al castellanohablante ante una administración que no le atienda en castellano. El mismo comisionado y la misma vara de medir para ambos.",
+   "referencias": [
+    {
+     "lugar": "Canadá",
+     "que": "La Ley de Lenguas Oficiales da derecho a comunicarse con las instituciones federales en inglés o en francés en su sede y allí donde haya demanda significativa. Un comisionado investiga las quejas, que puede presentar cualquier persona.",
+     "url": "https://laws-lois.justice.gc.ca/eng/acts/O-3.01/FullText.html"
+    },
+    {
+     "lugar": "Suiza",
+     "que": "Cualquiera puede dirigirse a las autoridades federales en una lengua oficial y recibir respuesta en ella. La Administración federal tiene horquillas objetivo de personal para cada comunidad lingüística.",
+     "url": "https://www.plurilingua.admin.ch/dam/en/sd-web/wgN8O5waA2LA/20260518_Swiss%20plurilingualism%20%E2%80%93%20a%20brief%20guide.pdf"
+    },
+    {
+     "lugar": "Finlandia",
+     "que": "Cada persona tiene derecho a que las autoridades la atiendan en su lengua, finés o sueco. En 2017 eran bilingües 33 de los 313 municipios del país.",
+     "url": "https://oikeusministerio.fi/en/linguistic-rights"
+    },
+    {
+     "lugar": "Consejo de Europa",
+     "que": "Su comité de expertos concluyó en 2024 que España protege bien sus lenguas regionales, pero con carencias en la Justicia, la sanidad y la Administración del Estado, donde falta personal que las domine.",
+     "url": "https://www.coe.int/en/web/portal/-/spain-s-system-to-protect-regional-and-minority-languages-is-well-developed-but-gaps-persist-in-justice-healthcare-and-public-administration"
+    }
+   ],
+   "objeciones": [
+    {
+     "o": "Exigir la lengua cooficial para trabajar en la Administración deja fuera a candidatos de otras comunidades y limita la movilidad.",
+     "r": "Es un coste real. Se reduce pidiendo la lengua por puesto y no de forma general, dando plazo y formación para aprenderla, y valorándola solo como mérito cuando el puesto no atiende al público."
+    },
+    {
+     "o": "Exigir que las dos lenguas estén en las aulas invade la competencia educativa y debilita la inmersión, que protege a la lengua más frágil.",
+     "r": "El ideal no fija horas: fija un resultado, dominar las dos, y deja el modelo a cada comunidad. Si la evaluación muestra que una lengua queda atrás, se refuerza esa, también cuando es la cooficial."
+    },
+    {
+     "o": "Traducir e interpretar en las instituciones comunes es un gasto innecesario si todos entienden el castellano.",
+     "r": "El castellano sigue siendo la lengua común y nadie pierde el derecho a usarlo. El gasto compra otra cosa: que quien tiene otra lengua sienta el Estado como propio. Cuánto compensa es una decisión política legítima."
+    }
+   ],
+   "fuentes": [
+    {
+     "t": "Constitución Española (texto consolidado, BOE), artículo 3",
+     "url": "https://www.boe.es/buscar/act.php?id=BOE-A-1978-31229"
+    },
+    {
+     "t": "Reforma del Reglamento del Congreso de los Diputados de 21 de septiembre de 2023 (BOE-A-2023-19919)",
+     "url": "https://www.boe.es/boe/dias/2023/09/25/pdfs/BOE-A-2023-19919.pdf"
+    },
+    {
+     "t": "Consejo de Europa: informes periódicos de la Carta Europea de las Lenguas Regionales o Minoritarias",
+     "url": "https://www.coe.int/en/web/european-charter-regional-or-minority-languages/reports-and-recommendations"
+    },
+    {
+     "t": "Constitución Federal de Suiza, artículo 70 (lenguas), versión bilingüe francés-inglés",
+     "url": "https://www.droit-bilingue.ch/fr-en/1/10/101-70-82.html"
+    },
+    {
+     "t": "Official Languages Act (Canadá), texto consolidado",
+     "url": "https://laws-lois.justice.gc.ca/eng/acts/O-3.01/FullText.html"
+    },
+    {
+     "t": "Ministerio de Justicia de Finlandia: Linguistic rights",
+     "url": "https://oikeusministerio.fi/en/linguistic-rights"
+    }
+   ]
   },
   {
    "i": 2,
-   "anti": "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
-   "ideal": "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
+   "anti": "Desobedecer la Constitución o las sentencias, cambiar las reglas comunes por la vía de los hechos o levantar barreras entre territorios.",
+   "ideal": "Un pacto firmado por el Estado y todas las comunidades: lo que es legal en una vale en las demás, las sentencias se cumplen en plazo y a la vista de todos, y cualquier cambio de las reglas comunes va por la reforma prevista.",
+   "titulo": "Pacto de reconocimiento mutuo y lealtad verificable",
+   "slug": "pacto-de-reconocimiento-mutuo-y-lealtad-verificable",
+   "resumen": "Lo avanzado aspira a reglas comunes que se viven como propias. El ideal dice cómo: las reglas del mercado común se pactan entre todos los gobiernos, como en el acuerdo canadiense de comercio interior, en vez de imponerse por una sola parte. A cambio, el reconocimiento es automático, las sentencias tienen plazo y registro público, y toda aspiración política cabe si sigue los cauces de reforma.",
+   "medidas": [
+    "Firmar un acuerdo de reconocimiento mutuo entre el Estado y todas las comunidades: un producto, una licencia o un título profesional válidos en una valen en las demás sin nuevo trámite.",
+    "Limitar las excepciones a una lista cerrada y pública (salud, seguridad, medio ambiente, lengua en la atención al público), que cada gobierno debe justificar y que se revisa de forma periódica.",
+    "Dar a ciudadanos y empresas una ventanilla única para reclamar contra una barrera, con un plazo tasado de respuesta y la publicación de cada caso y de su resultado.",
+    "Llevar un registro público de sentencias y resoluciones pendientes de cumplir por el Estado y por cada comunidad, con plazo de ejecución y explicación obligatoria cuando se supera.",
+    "Aprobar las normas básicas comunes con participación de las comunidades en la cámara territorial, para que la regla común nazca pactada y no se discuta después en los tribunales.",
+    "Comprometer a todos los gobiernos a defender cualquier cambio del modelo, hacia más o hacia menos autogobierno, solo por los procedimientos de reforma de la Constitución y de los Estatutos."
+   ],
+   "supone": {
+    "personas": "Un electricista, una guía turística o una empresa trabajan en toda España con su licencia de origen. Quien se topa con una traba tiene dónde reclamar y un plazo de respuesta. Y nadie tiene que temer que una ley o una sentencia valga en un territorio y en otro no, gobierne quien gobierne.",
+    "cuentas": "Apenas tiene coste presupuestario: es sobre todo trabajo de coordinación, y la ventanilla puede apoyarse en la Secretaría para la Unidad de Mercado, que ya existe. El beneficio esperado es menos trámites duplicados para empresas y profesionales; no se ha encontrado una cifra oficial fiable para España y por eso no se da.",
+    "puesta_en_marcha": "La ley de unidad de mercado de 2013 quiso dar validez en toda España por ley estatal, y el Tribunal Constitucional anuló esa parte en 2017. El camino que queda es el pacto: un acuerdo firmado por todos y trasladado después a las leyes estatal y autonómicas. El registro de sentencias puede crearse por ley."
+   },
+   "integra": "Da a quien pide cohesión lo que pide: mercado único real, sentencias cumplidas y reglas iguales. Y a quien pide autogobierno, que esas reglas se pacten en vez de imponerse y que su proyecto político sea legítimo mientras siga los cauces de reforma.",
+   "referencias": [
+    {
+     "lugar": "Canadá",
+     "que": "El Acuerdo de Libre Comercio Canadiense, firmado por el Gobierno federal, las provincias y los territorios y en vigor desde el 1 de julio de 2017, busca facilitar dentro del país la circulación de bienes, servicios e inversión y la movilidad laboral.",
+     "url": "https://www.cfta-alec.ca/"
+    },
+    {
+     "lugar": "Australia",
+     "que": "La Ley de Reconocimiento Mutuo de 1992 regula el derecho a vender bienes entre estados, a ejercer profesiones equivalentes y, en su parte 3A, el registro automático para trabajar en un segundo estado.",
+     "url": "https://www.legislation.gov.au/C2004A04489/latest/text"
+    },
+    {
+     "lugar": "Alemania",
+     "que": "La Ley Fundamental dice que el derecho federal prevalece sobre el de los Länder (art. 31), prevé el caso de que un Land incumpla sus obligaciones (art. 37) y da a los Länder voz en las leyes federales a través del Bundesrat (art. 50).",
+     "url": "https://www.gesetze-im-internet.de/englisch_gg/englisch_gg.html"
+    },
+    {
+     "lugar": "España (Ley 20/2013)",
+     "que": "La ley de garantía de la unidad de mercado mantiene una Secretaría ante la que cualquier persona o empresa puede reclamar contra una barrera. Sus artículos sobre eficacia en todo el territorio (6, 19 y 20) los anuló el Tribunal Constitucional en 2017.",
+     "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2013-12888"
+    }
+   ],
+   "objeciones": [
+    {
+     "o": "El reconocimiento mutuo provoca una carrera a la baja: las empresas se registran donde la norma es más laxa y la llevan al resto.",
+     "r": "Por eso el pacto incluye mínimos comunes en salud, seguridad y medio ambiente y una lista de excepciones. El riesgo no desaparece: obliga a revisar esos mínimos entre todos en vez de que cada uno levante su barrera."
+    },
+    {
+     "o": "Un pacto voluntario no obliga a nadie: basta con que una comunidad no firme o se descuelgue para que el mercado siga fragmentado.",
+     "r": "Es el punto débil. La vía de imponerlo por ley estatal ya se intentó y fue anulada en parte en 2017. El pacto es más lento, y el Estado conserva sus competencias básicas para lo esencial mientras no haya firma de todos."
+    },
+    {
+     "o": "Un registro público de sentencias incumplidas convierte la justicia en un arma política entre gobiernos.",
+     "r": "El registro solo recoge hechos: qué resolución, a quién obliga y desde cuándo. Incluye por igual al Estado y a las comunidades. Hoy cada parte denuncia solo los incumplimientos de la otra."
+    }
+   ],
+   "fuentes": [
+    {
+     "t": "Ley 20/2013, de garantía de la unidad de mercado (texto consolidado, BOE)",
+     "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2013-12888"
+    },
+    {
+     "t": "Constitución Española (texto consolidado, BOE), artículos 139, 155, 167 y 168",
+     "url": "https://www.boe.es/buscar/act.php?id=BOE-A-1978-31229"
+    },
+    {
+     "t": "Canadian Free Trade Agreement (sitio oficial del acuerdo)",
+     "url": "https://www.cfta-alec.ca/"
+    },
+    {
+     "t": "Mutual Recognition Act 1992 (Australia), Federal Register of Legislation",
+     "url": "https://www.legislation.gov.au/C2004A04489/latest/text"
+    },
+    {
+     "t": "Ley Fundamental de la República Federal de Alemania (traducción oficial al inglés)",
+     "url": "https://www.gesetze-im-internet.de/englisch_gg/englisch_gg.html"
+    }
+   ]
   },
   {
    "i": 3,
-   "anti": "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
-   "ideal": "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
+   "anti": "Negar el autogobierno que la Constitución reconoce o ejercer poderes al margen de ella y de los Estatutos; o no proponer nada.",
+   "ideal": "Un reparto cerrado de competencias con dos reglas: cada tarea la hace el nivel más cercano que pueda hacerla bien, y quien decide un gasto lo paga con sus impuestos. Las tareas pueden bajar o subir de nivel con una prueba pública.",
+   "titulo": "Mapa cerrado de competencias: quien decide, paga",
+   "slug": "mapa-cerrado-de-competencias-quien-decide-paga",
+   "resumen": "Lo avanzado pide competencias claras e ingresos propios. El ideal añade el criterio para repartirlas y revisarlas: subsidiariedad (lo hace el nivel más cercano capaz) y equivalencia fiscal (quien decide, paga y responde). Así el mapa no depende de cada negociación: una competencia baja a la comunidad o sube al Estado si se demuestra que allí se presta mejor, como hizo Suiza.",
+   "medidas": [
+    "Repasar todas las competencias compartidas y asignar cada una, entera, al Estado o a las comunidades; dejar como compartidas solo las imprescindibles, con el papel de cada nivel por escrito.",
+    "Aplicar una prueba pública a cada cambio, en los dos sentidos: una tarea sube de nivel solo si se demuestra que así cuesta menos o se presta mejor, y baja en caso contrario.",
+    "Completar los traspasos ya previstos en los Estatutos con un calendario público y con la financiación que les corresponde.",
+    "Ligar cada competencia a ingresos propios y visibles: quien decide un servicio fija también el impuesto que lo paga, y ningún nivel impone gastos a otro sin financiarlos.",
+    "Limitar la legislación básica del Estado a mínimos comunes y aprobarla con participación de las comunidades, para que no vacíe competencias autonómicas ni deje huecos de igualdad.",
+    "Respetar las singularidades que la Constitución ya reconoce, como los regímenes forales y las lenguas, y dejar abiertas a todas las comunidades las competencias que cualquiera pueda asumir."
+   ],
+   "supone": {
+    "personas": "Cada persona sabe a qué gobierno pedir cuentas por su hospital, su escuela o su tren, y ve qué impuesto paga a cada uno. Se acaban las ventanillas dobles y el «eso no es mío». Si su comunidad gestiona mejor o peor, se nota en los resultados y en los impuestos, y puede votarlo.",
+    "cuentas": "No añade gasto: reordena quién lo hace. El ahorro sale de eliminar servicios duplicados entre administraciones, pero no hay una cifra oficial fiable de cuánto suponen y por eso no se da. Sí cambia quién recauda: más impuestos propios de las comunidades y menos transferencias del Estado.",
+    "puesta_en_marcha": "Lo primero cabe sin tocar la Constitución: una ley pactada, los traspasos pendientes y el artículo 150.2, que permite transferir facultades del Estado por ley orgánica. Cerrar el reparto del todo exige reformar la Constitución, con tres quintos de cada cámara. Suiza reordenó a la vez sus tareas y su financiación."
+   },
+   "integra": "A quien quiere más autogobierno le da competencias enteras, ingresos propios y un freno a la invasión por leyes básicas. A quien quiere más cohesión le da un criterio para que una tarea vuelva al Estado si así funciona mejor, y el fin de los gastos duplicados.",
+   "referencias": [
+    {
+     "lugar": "Suiza (reparto de tareas)",
+     "que": "La reforma de la compensación financiera repartió tareas antes compartidas: siete pasaron por entero a la Confederación y diez a los cantones. Quedaron diecisiete conjuntas, con nuevos instrumentos de cooperación.",
+     "url": "https://www.efv.admin.ch/dam/efv/en/dokumente/finanzausgleich/Finanzausgleich_A5_web_e.pdf"
+    },
+    {
+     "lugar": "Suiza (subsidiariedad)",
+     "que": "Nada que pueda hacerse en un nivel político inferior debe hacerse en uno superior. La Confederación solo tiene los poderes que le atribuye la Constitución federal, y los cantones fijan sus presupuestos y recaudan impuestos.",
+     "url": "https://www.ch.ch/en/political-system/operation-and-organisation-of-switzerland/federalism/"
+    },
+    {
+     "lugar": "Alemania",
+     "que": "La Ley Fundamental deja a los Länder todo lo que no atribuye a la Federación (arts. 30 y 70) y establece que cada nivel paga los gastos que derivan de sus propias tareas (art. 104a).",
+     "url": "https://www.gesetze-im-internet.de/englisch_gg/englisch_gg.html"
+    }
+   ],
+   "objeciones": [
+    {
+     "o": "Cerrar el mapa es imposible: aparecen materias nuevas, como la inteligencia artificial o una pandemia, que nadie previó.",
+     "r": "Cierto: ninguna lista es eterna. Por eso el ideal no fija solo una lista, sino el criterio y el procedimiento para asignar lo nuevo, y una cláusula que dice a quién corresponde lo no previsto."
+    },
+    {
+     "o": "Más impuestos propios significa competencia fiscal a la baja entre comunidades y más distancia entre las ricas y las pobres.",
+     "r": "El riesgo es real. Lo acota el ideal de financiación: la nivelación se calcula con tipos medios, así que bajar impuestos no da derecho a más transferencias, y hay un suelo de recursos para todas."
+    },
+    {
+     "o": "Permitir que una competencia vuelva al Estado abre la puerta a recentralizar con la excusa de la eficiencia.",
+     "r": "La prueba es pública, vale en los dos sentidos y el cambio exige el mismo pacto que un traspaso. Sin acuerdo, la competencia se queda donde está."
+    }
+   ],
+   "fuentes": [
+    {
+     "t": "Administración Federal de Finanzas (Suiza): folleto sobre la compensación financiera nacional y el reparto de tareas",
+     "url": "https://www.efv.admin.ch/dam/efv/en/dokumente/finanzausgleich/Finanzausgleich_A5_web_e.pdf"
+    },
+    {
+     "t": "ch.ch (portal oficial de Suiza): Federalism",
+     "url": "https://www.ch.ch/en/political-system/operation-and-organisation-of-switzerland/federalism/"
+    },
+    {
+     "t": "Ley Fundamental de la República Federal de Alemania (traducción oficial al inglés)",
+     "url": "https://www.gesetze-im-internet.de/englisch_gg/englisch_gg.html"
+    },
+    {
+     "t": "Constitución Española (texto consolidado, BOE), artículos 2, 150.2, 156 y 167",
+     "url": "https://www.boe.es/buscar/act.php?id=BOE-A-1978-31229"
+    }
+   ]
   },
   {
    "i": 4,
-   "anti": "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
-   "ideal": "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
+   "anti": "No proponer nada, o negarse por sistema a cooperar: no convocar los órganos comunes, no acudir a ellos o incumplir lo que se firma.",
+   "ideal": "Un Senado formado por los gobiernos autonómicos, que vota las leyes que les afectan, y un sistema de conferencias con calendario fijo, secretaría propia y acuerdos que obligan a todos y cuyo cumplimiento se publica.",
+   "titulo": "Senado de gobiernos autonómicos y acuerdos que obligan",
+   "slug": "senado-de-gobiernos-autonomicos-y-acuerdos-vinculantes",
+   "resumen": "Lo avanzado pide un Senado de las comunidades y lealtad en los dos sentidos. El ideal concreta el diseño: senadores que son miembros de los gobiernos autonómicos, como en el Bundesrat alemán; una Conferencia de Presidentes que no depende de que alguien quiera convocarla; una conferencia solo de comunidades; y acuerdos que obligan también a quien votó en contra.",
+   "medidas": [
+    "Convertir el Senado en una cámara de gobiernos autonómicos: cada comunidad envía a miembros de su gobierno y vota en bloque, con un número de votos graduado según su población.",
+    "Exigir el visto bueno de ese Senado para las leyes que afectan a competencias o ingresos de las comunidades, con una comisión de conciliación con el Congreso cuando haya desacuerdo.",
+    "Fijar por ley dos reuniones al año de la Conferencia de Presidentes, con fecha conocida, orden del día pactado y una secretaría permanente que no dependa de ningún gobierno.",
+    "Crear una conferencia solo de gobiernos autonómicos, sin el Estado, para pactar posiciones comunes y cooperar entre ellas en servicios que cruzan sus límites.",
+    "Hacer que los acuerdos de las conferencias sectoriales tomados por mayoría reforzada obliguen a todos, y publicar en un registro qué gobierno ha cumplido cada acuerdo y cuál no."
+   ],
+   "supone": {
+    "personas": "Menos decisiones a golpe de titular y menos pleitos entre gobiernos. Los problemas que cruzan límites autonómicos, como una lista de espera, un incendio o un tren, tienen una mesa fija donde resolverse, y cualquiera puede consultar qué se acordó y quién lo ha cumplido.",
+    "cuentas": "Es la medida más barata del tema: no crea gasto nuevo relevante, porque el Senado y las conferencias ya existen. El coste real es político: cada gobierno, también el central, cede algo de margen para decidir por su cuenta.",
+    "puesta_en_marcha": "El calendario fijo, la secretaría, el registro y los acuerdos vinculantes caben en una reforma de la ley de régimen jurídico del sector público, donde hoy los acuerdos no obligan a quien vota en contra. El Senado de gobiernos exige reformar la Constitución (artículo 69), con mayoría de tres quintos en cada cámara."
+   },
+   "integra": "Para quien defiende el autogobierno, las comunidades entran a decidir las leyes comunes en vez de recurrirlas después. Para quien defiende la cohesión, lo acordado obliga a todas y nadie puede plantar la mesa. La lealtad se exige igual al Estado y a las comunidades.",
+   "referencias": [
+    {
+     "lugar": "Alemania",
+     "que": "Solo pueden ser miembros del Bundesrat quienes tienen asiento y voto en el gobierno de un Land. Cada Land tiene entre tres y seis votos según su población, 69 en total.",
+     "url": "https://www.bundesrat.de/EN/organisation-en/stimmenverteilung-en/stimmenverteilung-en-node.html"
+    },
+    {
+     "lugar": "Australia",
+     "que": "El National Cabinet, creado el 13 de marzo de 2020, reúne al primer ministro con los jefes de gobierno de los estados y territorios. Cada gobierno decide cómo aplica en su territorio lo que se acuerda.",
+     "url": "https://federation.gov.au/national-cabinet"
+    },
+    {
+     "lugar": "Suiza",
+     "que": "Los cantones se coordinan entre sí y con el Gobierno federal mediante conferencias intercantonales y la Conferencia de Gobiernos Cantonales.",
+     "url": "https://www.ch.ch/en/political-system/operation-and-organisation-of-switzerland/federalism/"
+    },
+    {
+     "lugar": "España (Ley 40/2015)",
+     "que": "La ley regula la Conferencia de Presidentes y las conferencias sectoriales. Sus acuerdos no obligan a los gobiernos que votan en contra, salvo cuando el Estado ejerce funciones de coordinación.",
+     "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2015-10566"
+    }
+   ],
+   "objeciones": [
+    {
+     "o": "Un Senado de gobiernos puede bloquear las leyes cuando la mayoría autonómica es de signo contrario a la del Congreso.",
+     "r": "Puede ocurrir. Se limita acotando qué leyes necesitan su visto bueno y con una comisión de conciliación. A cambio, las leyes que salen llegan pactadas con quienes tienen que aplicarlas."
+    },
+    {
+     "o": "Los senadores dejarían de ser elegidos por los ciudadanos: se pierde representación directa.",
+     "r": "Es verdad: se cambia la elección directa por la representación de gobiernos que sí han sido elegidos. Es el precio de una cámara distinta del Congreso; quien no lo acepte puede quedarse en las conferencias reforzadas, que no lo exigen."
+    },
+    {
+     "o": "Los acuerdos vinculantes por mayoría permiten que las demás comunidades impongan a una decisiones sobre sus propias competencias.",
+     "r": "Solo valdrían para materias que exigen actuar juntos y con mayoría reforzada. En lo que es competencia exclusiva de cada comunidad, el acuerdo sigue siendo voluntario."
+    }
+   ],
+   "fuentes": [
+    {
+     "t": "Bundesrat (Alemania): Distribution of votes",
+     "url": "https://www.bundesrat.de/EN/organisation-en/stimmenverteilung-en/stimmenverteilung-en-node.html"
+    },
+    {
+     "t": "Ley Fundamental de la República Federal de Alemania, artículos 50 y 51 (traducción oficial al inglés)",
+     "url": "https://www.gesetze-im-internet.de/englisch_gg/englisch_gg.html"
+    },
+    {
+     "t": "Gobierno de Australia: National Cabinet",
+     "url": "https://federation.gov.au/national-cabinet"
+    },
+    {
+     "t": "Ley 40/2015, de Régimen Jurídico del Sector Público (texto consolidado, BOE), artículos 146 a 153",
+     "url": "https://www.boe.es/buscar/act.php?id=BOE-A-2015-10566"
+    },
+    {
+     "t": "Constitución Española (texto consolidado, BOE), artículos 69 y 167",
+     "url": "https://www.boe.es/buscar/act.php?id=BOE-A-1978-31229"
+    }
+   ]
   },
   {
    "i": 5,
-   "anti": "No proponer nada en este aspecto, o proponer algo que rompe lo básico en vez de mejorarlo.",
-   "ideal": "El ideal de este aspecto está en preparación y se publicará en una próxima fase."
+   "anti": "No proponer nada, o aceptar que los derechos básicos dependan del territorio: privilegios para unas comunidades o abandono de otras.",
+   "ideal": "Un derecho exigible a servicios básicos equivalentes en toda España: estándares comunes medidos cada año por un órgano independiente, financiación que cubre su coste y corrección automática si una comunidad se queda atrás.",
+   "titulo": "Garantía de servicios equivalentes en toda España",
+   "slug": "garantia-de-servicios-equivalentes-entre-comunidades",
+   "resumen": "Lo avanzado mide y corrige. El ideal lo convierte en garantía: estándares concretos de sanidad, educación y dependencia pactados entre todos; una financiación que cubre lo que cuesta prestarlos en cada territorio, sea disperso, envejecido o insular; un informe anual comparable; y un plan automático de mejora, con dinero y apoyo, que no quita la competencia a nadie.",
+   "medidas": [
+    "Pactar entre el Estado y las comunidades estándares medibles de los servicios básicos: tiempos máximos de espera, plazas, ratios y plazos para resolver la dependencia.",
+    "Publicar cada año un informe independiente que compare a todas las comunidades en equidad, eficacia y eficiencia de esos servicios, con los mismos indicadores y datos abiertos.",
+    "Financiar a cada comunidad el coste de esos estándares según su población y lo que encarece prestarlos: envejecimiento, dispersión, insularidad y pobreza.",
+    "Activar un plan de mejora cuando una comunidad queda por debajo de un estándar: fondos adicionales, apoyo técnico y objetivos con fecha, sin retirarle la competencia.",
+    "Garantizar que la tarjeta sanitaria, la historia clínica, el expediente escolar y el grado de dependencia reconocido valen igual al cambiar de comunidad, sin repetir trámites.",
+    "Dejar libertad a cada comunidad por encima del estándar: puede ofrecer más o gestionarlo de otra forma, pagándolo con sus propios impuestos."
+   ],
+   "supone": {
+    "personas": "El tiempo de espera de una operación, una plaza de escuela infantil o una ayuda a la dependencia dejan de depender de la comunidad en la que se vive. Cada persona puede ver cómo está la suya frente al resto con los mismos datos, y al mudarse no pierde derechos ni empieza los papeles de cero.",
+    "cuentas": "Es la parte cara del tema: llevar a las comunidades peor situadas hasta el estándar cuesta dinero del Estado, y cuánto depende de dónde se ponga el listón. No hay una cifra oficial para España y no se da. La Constitución ya prevé una asignación en los Presupuestos para garantizar un nivel mínimo de servicios fundamentales (artículo 158.1).",
+    "puesta_en_marcha": "Los estándares se pactan en las conferencias sectoriales y se fijan por ley básica. El informe anual puede empezar con los datos que ya existen. El fondo de nivelación se integra en el nuevo modelo de financiación. Los planes de mejora necesitan una regla previa y automática, para que no dependan del color de cada gobierno."
+   },
+   "integra": "Recoge la igualdad de derechos básicos se viva donde se viva y, a la vez, la libertad de cada comunidad para gestionar a su manera y la exigencia de resultados: el dinero adicional va ligado a mejoras medibles y publicadas, no a pedir más sin rendir cuentas.",
+   "referencias": [
+    {
+     "lugar": "Canadá",
+     "que": "La Constitución compromete al Parlamento y al Gobierno a hacer pagos de nivelación para que las provincias puedan prestar servicios públicos razonablemente comparables con niveles de impuestos razonablemente comparables (art. 36.2).",
+     "url": "https://www.canada.ca/en/department-finance/programs/federal-transfers/equalization.html"
+    },
+    {
+     "lugar": "Australia",
+     "que": "La Productivity Commission publica cada año, en nombre de todos los gobiernos del país, un informe con datos de equidad, eficiencia y eficacia de escuelas, sanidad, justicia, servicios sociales y vivienda.",
+     "url": "https://www.pc.gov.au/ongoing/report-on-government-services"
+    },
+    {
+     "lugar": "Alemania",
+     "que": "La Ley Fundamental usa como criterio establecer condiciones de vida equivalentes en todo el territorio federal (art. 72.2) y ordena repartir el IVA de modo que se asegure la uniformidad de las condiciones de vida (art. 106.3).",
+     "url": "https://www.gesetze-im-internet.de/englisch_gg/englisch_gg.html"
+    },
+    {
+     "lugar": "Suiza",
+     "que": "La compensación de cargas, que paga la Confederación, cubre costes excesivos que los cantones no eligen: altitud, relieve y baja densidad, por un lado; pobreza, edad e integración de inmigrantes, por otro.",
+     "url": "https://www.efv.admin.ch/dam/efv/en/dokumente/finanzausgleich/Finanzausgleich_A5_web_e.pdf"
+    }
+   ],
+   "objeciones": [
+    {
+     "o": "Si el Estado cubre siempre a quien se queda atrás, se premia la mala gestión y se quita el incentivo a hacerlo bien.",
+     "r": "Por eso se financia el coste estándar, no el gasto real: quien gestiona peor no recibe más por ello. Y el dinero del plan de mejora va con objetivos y fechas publicados. El incentivo perverso se reduce, no desaparece."
+    },
+    {
+     "o": "Fijar estándares estatales detallados es recentralizar por la puerta de atrás la sanidad y la educación.",
+     "r": "Los estándares se pactan con las comunidades, miden resultados y no dicen cómo organizarse. Por encima de ellos cada comunidad decide. Aun así, un listón común limita algo el margen propio: es el precio de la garantía."
+    },
+    {
+     "o": "Los indicadores se pueden maquillar, y las comunidades acabarán trabajando para el indicador y no para el paciente o el alumno.",
+     "r": "Pasa en todos los sistemas que miden. Lo mitigan un órgano independiente que audita los datos y un conjunto amplio de indicadores, también de resultados. No medir deja las diferencias igual, pero ocultas."
+    }
+   ],
+   "fuentes": [
+    {
+     "t": "Department of Finance Canada: Equalization Program (cita el artículo 36.2 de la Constitution Act, 1982)",
+     "url": "https://www.canada.ca/en/department-finance/programs/federal-transfers/equalization.html"
+    },
+    {
+     "t": "Productivity Commission (Australia): Report on Government Services",
+     "url": "https://www.pc.gov.au/ongoing/report-on-government-services"
+    },
+    {
+     "t": "Ley Fundamental de la República Federal de Alemania (traducción oficial al inglés)",
+     "url": "https://www.gesetze-im-internet.de/englisch_gg/englisch_gg.html"
+    },
+    {
+     "t": "Administración Federal de Finanzas (Suiza): folleto sobre la compensación financiera nacional",
+     "url": "https://www.efv.admin.ch/dam/efv/en/dokumente/finanzausgleich/Finanzausgleich_A5_web_e.pdf"
+    },
+    {
+     "t": "Constitución Española (texto consolidado, BOE), artículos 138, 139, 149.1.1.ª y 158",
+     "url": "https://www.boe.es/buscar/act.php?id=BOE-A-1978-31229"
+    }
+   ]
   }
  ]
 }

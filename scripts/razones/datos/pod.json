@@ -1,0 +1,193 @@
+{
+ "grupo": "pod",
+ "celdas": [
+  {
+   "partido": "pod",
+   "tema": "inm",
+   "i": 1,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre registro e identificación de quien llega en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "pod",
+   "tema": "inm",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre expulsión de quien comete delitos graves en su programa. Sí consta que pide cerrar los CIE, lo que no equivale a oponerse a esa expulsión.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "pod",
+   "tema": "ser",
+   "i": 0,
+   "tipo": "contra",
+   "nivel": 0,
+   "razon": "Propone la «desprivatización inmediata» de la sanidad y en 2024 registró una ley para extinguir Muface y los conciertos sanitarios; choca con mantener conciertos puntuales para reducir esperas.",
+   "fuente": {
+    "t": "Podemos lleva al 29N la \"desprivatización inmediata\" de la sanidad, una farmacia pública y una planificación MIR a 15 años (Redacción Médica)",
+    "url": "https://www.redaccionmedica.com/politica/20261117/podemos-lleva-al-la-desprivatizacion-inmediata-de-sanidad-una-farmacia-publica-planificacion-mir-anos/365609_0.html",
+    "programa": "29-N 2026"
+   },
+   "confianza": "media"
+  },
+  {
+   "partido": "pod",
+   "tema": "ser",
+   "i": 1,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre contención o auditoría del gasto en servicios públicos en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "pod",
+   "tema": "ser",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre libre elección de médico de cabecera en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "pod",
+   "tema": "eco",
+   "i": 0,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre cumplimiento de las reglas fiscales europeas en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "pod",
+   "tema": "eco",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre no subir impuestos o ajustar el IRPF a la inflación en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "pod",
+   "tema": "tra",
+   "i": 1,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre la sostenibilidad a largo plazo del gasto en pensiones en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "pod",
+   "tema": "tra",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre simplificación de contratos o trámites para contratar en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "pod",
+   "tema": "viv",
+   "i": 0,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre rebaja de impuestos a la primera vivienda en su programa. Sí consta que propone prohibir la compra de viviendas que no sean para vivir.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "pod",
+   "tema": "viv",
+   "i": 1,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre liberar suelo público para vivienda en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "pod",
+   "tema": "viv",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre desalojo rápido de viviendas ocupadas ilegalmente en su programa. Su candidata declaró que la okupación es «un problema inventado».",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "pod",
+   "tema": "amb",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre respaldo del sistema eléctrico para evitar apagones en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "pod",
+   "tema": "ter",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre cumplimiento de la Constitución y las sentencias en su programa. Sí consta que propone una república plurinacional y un referéndum sobre la Jefatura del Estado.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "pod",
+   "tema": "der",
+   "i": 0,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre libertad religiosa y de culto en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "pod",
+   "tema": "der",
+   "i": 1,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre información y ayudas a la embarazada que quiera seguir adelante en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "pod",
+   "tema": "ext",
+   "i": 0,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre apoyo a las empresas exportadoras en su programa. Podemos Andalucía rechazó el acuerdo UE-Mercosur.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "pod",
+   "tema": "ext",
+   "i": 1,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): propone revertir el aumento del gasto en defensa para destinarlo a servicios públicos y sacar a España de la OTAN; choca con unas fuerzas armadas que cumplan sus misiones y compromisos con los aliados.",
+   "fuente": {
+    "t": "Podemos plantear revertir el aumento del gasto en defensa para dedicarlo a los servicios públicos y sacar a España de la OTAN (Diario Red)",
+    "url": "https://www.diario-red.com/espana/podemos-plantear-revertir-aumento-gasto-defensa-dedicarlo-servicios-publicos-sacar-espana-otan/20261117210241080542.html",
+    "programa": "29-N 2026"
+   },
+   "confianza": "baja"
+  }
+ ]
+}

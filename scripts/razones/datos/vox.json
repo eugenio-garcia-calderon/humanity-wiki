@@ -1,0 +1,283 @@
+{
+ "grupo": "vox",
+ "celdas": [
+  {
+   "partido": "vox",
+   "tema": "inm",
+   "i": 4,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): atribuye a la inmigración el estancamiento de los salarios y pide cesar la llegada masiva de extranjeros; choca con reconocer su papel en el empleo.",
+   "fuente": {
+    "t": "Vox culpa a la inmigración del estancamiento de los salarios y pide cesar la llegada masiva de extranjeros (Forbes España)",
+    "url": "https://forbes.es/economia/841921/vox-culpa-a-la-inmigracion-del-estancamiento-de-los-salarios-y-pide-cesar-la-llegada-masiva-de-extranjeros/",
+    "programa": "otra"
+   },
+   "confianza": "baja"
+  },
+  {
+   "partido": "vox",
+   "tema": "inm",
+   "i": 5,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre clases de idioma o escolarización de menores recién llegados en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "vox",
+   "tema": "inm",
+   "i": 6,
+   "tipo": "contra",
+   "nivel": 0,
+   "razon": "Llevó al Congreso (2025) una iniciativa para repatriar a los menores extranjeros no acompañados y expulsar a quien entra de forma irregular; choca con proteger a los menores.",
+   "fuente": {
+    "t": "Vox lleva a votación en el Congreso que se expulse migrantes ilegales, se repatríe a menores y se confisque Open Arms (Deia)",
+    "url": "https://www.deia.eus/politica/2025/09/12/vox-lleva-votacion-congreso-expulse-10076376.html",
+    "programa": "otra"
+   },
+   "confianza": "media"
+  },
+  {
+   "partido": "vox",
+   "tema": "inm",
+   "i": 7,
+   "tipo": "contra",
+   "nivel": 0,
+   "razon": "Promovió en 2025 una iniciativa contra los mecanismos que permiten regularizar a personas en situación irregular, entre ellos el arraigo; choca con mantener las vías de arraigo.",
+   "fuente": {
+    "t": "La maniobra de Vox para tumbar los mecanismos que permiten la regularización (El Debate)",
+    "url": "https://www.eldebate.com/espana/andalucia/20250925/maniobra-vox-tumbar-mecanismos-permiten-regularizacion-masiva-ilegales-andalucia_337759.html",
+    "programa": "otra"
+   },
+   "confianza": "media"
+  },
+  {
+   "partido": "vox",
+   "tema": "ser",
+   "i": 6,
+   "tipo": "contra",
+   "nivel": 0,
+   "razon": "Pidió en el Congreso (abril de 2026) derogar la sanidad universal para inmigrantes en situación irregular; choca con garantizar la atención a toda persona residente.",
+   "fuente": {
+    "t": "Vox busca que el Congreso exija derogar la regularización de inmigrantes y la sanidad universal (Diario de León)",
+    "url": "https://www.diariodeleon.es/nacional/260416/2082098/vox-busca-congreso-exija-derogar-regularizacion-inmigrantes-sanidad-universal.html",
+    "programa": "otra"
+   },
+   "confianza": "media"
+  },
+  {
+   "partido": "vox",
+   "tema": "eco",
+   "i": 4,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre mantener la inversión pública en servicios e infraestructuras en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "vox",
+   "tema": "eco",
+   "i": 5,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): registró en el Congreso una ley de IRPF con dos tipos: 15 % hasta 70.000 euros y 25 % por encima. Mantiene un impuesto progresivo, con menos tramos.",
+   "fuente": {
+    "t": "Vox lleva al Congreso su ley de IRPF: 15% para menos de 70.000 euros y 25% para superiores (Alicante Plaza)",
+    "url": "https://alicanteplaza.es/alicanteplaza/voxllevaalcongresosuleydeirpf15paramenosde70000eurosy25parasuperiores",
+    "programa": "otra"
+   },
+   "confianza": "baja"
+  },
+  {
+   "partido": "vox",
+   "tema": "tra",
+   "i": 4,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre registro de jornada y pago de horas extra en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "vox",
+   "tema": "viv",
+   "i": 3,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre un censo de viviendas vacías y turísticas en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "vox",
+   "tema": "viv",
+   "i": 4,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre ayudas al alquiler para jóvenes y rentas bajas en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "vox",
+   "tema": "viv",
+   "i": 5,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre conservar la vivienda pública sin venderla en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "vox",
+   "tema": "amb",
+   "i": 4,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): apoyó en las Cortes de Castilla y León iniciar una ley que limite la instalación de renovables; choca con seguir instalándolas.",
+   "fuente": {
+    "t": "PSOE y Vox aprueban iniciar el desarrollo de una ley que limite la instalación de renovables en Castilla y León (elDiario.es)",
+    "url": "https://www.eldiario.es/castilla-y-leon/politica/el-psoe-vox-aprueban-iniciar-desarrollo-ley-limite-instalacion-renovables-castilla-leon_1_12667129.amp.html",
+    "programa": "otra"
+   },
+   "confianza": "baja"
+  },
+  {
+   "partido": "vox",
+   "tema": "amb",
+   "i": 5,
+   "tipo": "contra",
+   "nivel": 0,
+   "razon": "Pide derogar el Pacto Verde Europeo, que fija los objetivos de reducción de emisiones; choca con cumplir esos objetivos.",
+   "fuente": {
+    "t": "El PP apoya tramitar una iniciativa de Vox que pide la derogación del Pacto Verde Europeo (Valencia Plaza)",
+    "url": "https://valenciaplaza.com/pp-apoya-denunciar-disposiciones-pacto-verde-europeo-perjudiquen-agricultura",
+    "programa": "otra"
+   },
+   "confianza": "media"
+  },
+  {
+   "partido": "vox",
+   "tema": "ter",
+   "i": 0,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre renovar el modelo de financiación autonómica en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "vox",
+   "tema": "ter",
+   "i": 1,
+   "tipo": "contra",
+   "nivel": 0,
+   "razon": "Pide suprimir la lengua propia como requisito en la sanidad de Baleares (2023); choca con proteger las lenguas cooficiales en su territorio.",
+   "fuente": {
+    "t": "Catalán en la sanidad: Vox quiere suprimir la lengua propia como requisito (Menorca.info)",
+    "url": "https://www.menorca.info/balears/noticias/2023/08/30/2003847/catalan-sanidad-vox-quiere-suprimir-lengua-propia-como-requisito-1.html",
+    "programa": "otra"
+   },
+   "confianza": "media"
+  },
+  {
+   "partido": "vox",
+   "tema": "ter",
+   "i": 3,
+   "tipo": "contra",
+   "nivel": 0,
+   "razon": "Pide devolver al Estado las competencias de sanidad que hoy ejercen las comunidades; choca con respetar las competencias de los Estatutos.",
+   "fuente": {
+    "t": "Vox pide devolver las competencias de Sanidad al Estado (Redacción Médica, 19-7-2024)",
+    "url": "https://www.redaccionmedica.com/politica/sanidad-hoy/20240719/vox-pide-devolver-las-competencias-de-sanidad-al-estado/229000_0.amp.html",
+    "programa": "otra"
+   },
+   "confianza": "media"
+  },
+  {
+   "partido": "vox",
+   "tema": "ter",
+   "i": 4,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre la Conferencia de Presidentes o la cooperación entre gobiernos en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "vox",
+   "tema": "der",
+   "i": 4,
+   "tipo": "contra",
+   "nivel": 0,
+   "razon": "Presentó en el Congreso (octubre de 2025) una iniciativa para derogar las leyes de aborto y eutanasia, que fue rechazada; choca con mantener esas leyes.",
+   "fuente": {
+    "t": "Todos los grupos rechazan en el Congreso una iniciativa de Vox para derogar las leyes de aborto y eutanasia (Redacción Médica)",
+    "url": "https://www.redaccionmedica.com/ultimas-noticias/20251007/todos-los-grupos-rechazan-en-el-congreso-una-iniciativa-de-vox-para-derogar-leyes-aborto-eutanasia/130229_0.html",
+    "programa": "otra"
+   },
+   "confianza": "media"
+  },
+  {
+   "partido": "vox",
+   "tema": "der",
+   "i": 5,
+   "tipo": "contra",
+   "nivel": 0,
+   "razon": "Su programa para el 29-N incluye derogar las leyes de género; choca con cumplir las leyes de igualdad vigentes.",
+   "fuente": {
+    "t": "Vox lleva al 29-N un programa electoral con repatriaciones y deportaciones de migrantes, prioridad nacional y derogación de leyes de género (Infobae)",
+    "url": "https://www.infobae.com/espana/2026/11/12/vox-lleva-al-29-n-un-programa-electoral-con-repatriaciones-y-deportaciones-de-migrantes-prioridad-nacional-y-derogacion-de-leyes-de-genero/",
+    "programa": "29-N 2026"
+   },
+   "confianza": "media"
+  },
+  {
+   "partido": "vox",
+   "tema": "ins",
+   "i": 2,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre indultos individuales u otras medidas de gracia en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "vox",
+   "tema": "ext",
+   "i": 3,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre cumplir las normas europeas y el uso de los fondos en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  },
+  {
+   "partido": "vox",
+   "tema": "ext",
+   "i": 4,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "Dato localizado, que no basta para decir que choque con lo básico (o que lo cumpla): pide eliminar la Agenda 2030, aprobada por resolución de la Asamblea General de la ONU; choca con apoyar las resoluciones de Naciones Unidas.",
+   "fuente": {
+    "t": "VOX exige eliminar la Agenda 2030 y recuperar la soberanía española (Derecha Diario)",
+    "url": "https://derechadiario.com.ar/internacionales/vox-exige-eliminar-agenda-2030-y-recuperar-soberania-espanola",
+    "programa": "otra"
+   },
+   "confianza": "baja"
+  },
+  {
+   "partido": "vox",
+   "tema": "ext",
+   "i": 5,
+   "tipo": "vacio",
+   "nivel": 0,
+   "razon": "No hemos localizado propuesta sobre ayuda humanitaria en emergencias en su programa.",
+   "fuente": null,
+   "confianza": "baja"
+  }
+ ]
+}
