@@ -23,11 +23,12 @@
 //   exportar.ts   SVG/DXF plans, planting CSV · FichaEspecie, Grafica, Proyecto
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, BookOpen, Box, CheckCircle2, Database, Download, Grid3x3, Lightbulb, Map as MapaIcono, Menu, Pause, Play, RotateCcw, Share2, SlidersHorizontal, Sprout, Upload, X, Image as ImagenIcono, Ruler, LandPlot, Shapes } from 'lucide-react';
+import { AlertTriangle, BookOpen, Box, CheckCircle2, Database, Download, Grid3x3, Lightbulb, Map as MapaIcono, Menu, Pause, Play, RotateCcw, Share2, SlidersHorizontal, Sprout, Upload, X, Image as ImagenIcono, Ruler, LandPlot, Shapes, Flower2, Sun, Leaf, Snowflake, Wind, Clock } from 'lucide-react';
 import { Button } from '../components/ui/core';
 import { Deslizador } from '../components/ui/Deslizador';
 import { cn } from '../utils/cn';
-import Escena3D, { type ObjetivoCamara, type Vista3D } from '../components/agriculturaSintropica/Escena3D';
+import Escena3D, { type Ambiente, type ObjetivoCamara, type Vista3D } from '../components/agriculturaSintropica/Escena3D';
+import { nombreMes, estacionDe } from '../components/agriculturaSintropica/fenologia';
 import EditorModulo from '../components/agriculturaSintropica/EditorModulo';
 import FichaEspecie, { Gotas, MapaZonas } from '../components/agriculturaSintropica/FichaEspecie';
 import Grafica from '../components/agriculturaSintropica/Grafica';
@@ -81,6 +82,10 @@ export default function AgriculturaSintropica() {
   const [selHueco, setSelHueco] = useState<number | null>(null);
   const [copas, setCopas] = useState(true);
   const [rejilla, setRejilla] = useState(0);
+  // The seasons (2026-11-25, Eugenio: «una animación de las 4 estaciones, con flores, hojas caducas, luces del sol, vientos»).
+  const [ambiente, setAmbiente] = useState<Ambiente>(() => ({ mes: 4.4, animarAno: false, hora: 16, animarDia: false, viento: 0.3, sombras: typeof window === 'undefined' || window.innerWidth >= 700 }));
+  const [reloj, setReloj] = useState({ mes: 4.4, hora: 16 });
+  const amb = (x: Partial<Ambiente>) => setAmbiente(a => ({ ...a, ...x }));
   const [camara, setCamara] = useState<ObjetivoCamara>({ vista: 'perspectiva', nonce: 1 });
   const [aviso, setAviso] = useState<string | null>(null);
   const [zoomPlano, setZoomPlano] = useState(1);
@@ -365,7 +370,30 @@ export default function AgriculturaSintropica() {
         {/* ------------------------------------------------ view */}
         <main className="relative min-w-0 flex-1">
           {vista === '3d' && <>
-            <Escena3D parcela={parcela} convencional={comparar ? conv : null} p={pd} t={t} resaltar={ficha} camara={camara} onElegir={elegirPlanta} />
+            <Escena3D parcela={parcela} convencional={comparar ? conv : null} p={pd} t={t} resaltar={ficha} camara={camara} onElegir={elegirPlanta}
+              ambiente={ambiente} onReloj={(mes, hora) => setReloj({ mes, hora })} />
+            <div className="absolute bottom-3 left-3 flex max-w-[calc(100%-1.5rem)] flex-wrap items-center gap-1 rounded-xl bg-slate-900/85 p-1.5 text-[11px] text-slate-200 backdrop-blur sm:max-w-[calc(100%-18rem)]">
+              {([['primavera', 'Primavera', 3.9, Flower2], ['verano', 'Verano', 6.9, Sun], ['otono', 'Otoño', 10.1, Leaf], ['invierno', 'Invierno', 0.6, Snowflake]] as const).map(([id, txt, m, I]) => (
+                <Button key={id} variant="ghost" onClick={() => { amb({ mes: m, animarAno: false }); setReloj(r => ({ ...r, mes: m })); }}
+                  className={cn('gap-1 px-2 py-1 text-[10px] normal-case tracking-normal', estacionDe(reloj.mes) === id ? 'bg-emerald-600 text-white hover:bg-emerald-600' : 'text-slate-300 hover:bg-slate-800')}><I size={13} />{txt}</Button>
+              ))}
+              <Button variant="ghost" className={cn('gap-1 px-2 py-1 text-[10px] normal-case tracking-normal', ambiente.animarAno ? 'bg-amber-400 text-slate-900 hover:bg-amber-300' : 'text-slate-200 hover:bg-slate-800')}
+                onClick={() => amb(ambiente.animarAno ? { animarAno: false, mes: reloj.mes } : { animarAno: true })}>{ambiente.animarAno ? <Pause size={12} /> : <Play size={12} />}Año</Button>
+              <span className="w-16 text-center font-semibold capitalize text-emerald-300">{nombreMes(reloj.mes)}</span>
+              <span className="mx-1 h-5 w-px bg-slate-700" />
+              <Clock size={13} className="text-slate-400" />
+              <input type="range" min={6} max={21.5} step={0.25} value={ambiente.animarDia ? reloj.hora : ambiente.hora} aria-label="Hora del día"
+                onChange={e => { amb({ hora: Number(e.target.value), animarDia: false }); setReloj(r => ({ ...r, hora: Number(e.target.value) })); }} className="w-20 accent-amber-400" />
+              <span className="w-10 font-mono text-[10px]">{String(Math.floor(reloj.hora)).padStart(2, '0')}:{String(Math.floor((reloj.hora % 1) * 60)).padStart(2, '0')}</span>
+              <Button variant="ghost" className={cn('gap-1 px-2 py-1 text-[10px] normal-case tracking-normal', ambiente.animarDia ? 'bg-amber-400 text-slate-900 hover:bg-amber-300' : 'text-slate-200 hover:bg-slate-800')}
+                onClick={() => amb(ambiente.animarDia ? { animarDia: false, hora: reloj.hora } : { animarDia: true })}>{ambiente.animarDia ? <Pause size={12} /> : <Play size={12} />}Día</Button>
+              <span className="mx-1 h-5 w-px bg-slate-700" />
+              <Wind size={13} className="text-slate-400" />
+              <select aria-label="Viento" className="rounded-md border border-slate-700 bg-slate-800 px-1 py-0.5 text-[10px]" value={ambiente.viento} onChange={e => amb({ viento: Number(e.target.value) })}>
+                <option value={0}>Calma</option><option value={0.3}>Brisa</option><option value={0.65}>Viento</option><option value={1}>Vendaval</option>
+              </select>
+              <label className="ml-1 flex items-center gap-1 text-[10px] text-slate-300"><input type="checkbox" className="accent-emerald-500" checked={ambiente.sombras} onChange={e => amb({ sombras: e.target.checked })} />Sombras</label>
+            </div>
             <div className="absolute bottom-3 right-3 flex gap-1">
               {([['perspectiva', 'Perspectiva'], ['cenital', 'Cenital'], ['lateral', 'A ras de suelo']] as [Vista3D, string][]).map(([v, txt]) => (
                 <Button key={v} variant="ghost" className="bg-slate-900/80 px-2 py-1 text-[10px] text-slate-200 hover:bg-slate-800" onClick={() => setCamara({ vista: v, nonce: Date.now() })}>{txt}</Button>

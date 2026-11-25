@@ -8,7 +8,8 @@ Also shown on luzhumanidad.com through `APLICACIONES` in `SubpaginaSitio.tsx` (m
 | `especies.ts` | The reference database of species. One row per species, orientative values |
 | `disenos.ts` | The four geometries (a module with numbered positions) and the default consortium of each key species |
 | `modelo.ts` | Pure functions: plot layout, size of a plant at year t, the 30-year indicators, the advisor, the steps |
-| `Escena3D.tsx` | R3F scene: two InstancedMeshes (crowns, trunks); only matrices change with the year |
+| `Escena3D.tsx` | R3F scene: three InstancedMeshes (crown lobes, trunks, branches) rewritten from `useFrame` when the year or month changes; sun, sky, shadows; wind in the vertex shader; petals and leaves |
+| `fenologia.ts` | The year of each species: leaf-out, leaf-fall, autumn colour, flowering. Used by the 3D and the species card |
 | `EditorModulo.tsx` | The module from above, draggable, with its neighbours faded |
 | `PanelPatron.tsx` | The «Patrón» tab: every tool that edits the base pattern (templates, size, spacing, ring, symmetry, snapping, typed positions) |
 | `exportar.ts` | SVG plan, module sheet with distances, DXF R12, planting CSV, nursery list |

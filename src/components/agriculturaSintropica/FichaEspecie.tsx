@@ -11,6 +11,8 @@ import { Droplet, X } from 'lucide-react';
 import { Button } from '../ui/core';
 import { cn } from '../../utils/cn';
 import { ESTRATOS, FUNCIONES, GENERACIONES, SUCESIONES, ZONAS, type Especie, type Zona } from './especies';
+import { FENOLOGIA, MESES, aspecto } from './fenologia';
+import { COLOR } from './paleta';
 
 const num = (n: number) => n.toLocaleString('es-ES', { maximumFractionDigits: 1 });
 
@@ -51,6 +53,28 @@ export function MapaZonas({ zonas, actual, pequeno }: { zonas: Zona[]; actual?: 
         );
       }))}
     </div>
+  );
+}
+
+/** The plant's year, month by month: leaves, autumn colour, bare branches, flowers. */
+function SuAno({ e }: { e: Especie }) {
+  const f = FENOLOGIA[e.id];
+  const meses = MESES.map((nombre, i) => {
+    const a = aspecto(e.id, i + 0.5);
+    const fondo = a.flor > 0.3 && f?.flor ? f.flor[2] : a.hoja < 0.15 ? COLOR.tronco : a.otono > 0.4 && f?.otono ? f.otono : e.color;
+    return { nombre, fondo, flor: a.flor > 0.3, desnudo: a.hoja < 0.15 };
+  });
+  return (
+    <section className="rounded-xl border border-slate-800 p-3">
+      <h3 className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-300">Su año</h3>
+      <div className="grid grid-cols-12 gap-0.5">
+        {meses.map(m => <div key={m.nombre} title={m.nombre} className="flex h-7 items-end justify-center rounded text-[8px] font-bold uppercase text-slate-900/70" style={{ background: m.fondo }}>{m.nombre[0]}</div>)}
+      </div>
+      <p className="mt-1.5 text-[10px] text-slate-400">
+        {f?.caduca ? `Hoja caduca: brota en ${MESES[Math.floor(f.caduca[0])]} y la pierde en ${MESES[Math.floor(f.caduca[1])]}.` : e.ciclo === 'anual' ? 'Planta anual.' : 'Hoja perenne.'}
+        {f?.flor ? ` Florece de ${MESES[Math.floor(f.flor[0])]} a ${MESES[Math.floor(f.flor[1])]}.` : ''}
+      </p>
+    </section>
   );
 }
 
@@ -100,6 +124,8 @@ export default function FichaEspecie({ e, lluvia, zona, onCerrar }: { e: Especie
         <h3 className="mb-1 text-[11px] font-bold uppercase tracking-wider text-slate-300">Valor <span className="ml-1 text-amber-300">{'€'.repeat(e.valor)}<span className="text-slate-600">{'€'.repeat(3 - e.valor)}</span></span></h3>
         <p>{e.valorTxt}.{e.kgPlanta ? ` Cosecha orientativa de una planta adulta en secano: ${num(e.kgPlanta)} kg${e.kgRegadio ? ` (con riego, ${num(e.kgRegadio)} kg)` : ''}.` : ''}</p>
       </section>
+
+      <SuAno e={e} />
 
       <section className="rounded-xl border border-slate-800 p-3">
         <h3 className="mb-2 text-[11px] font-bold uppercase tracking-wider text-slate-300">Funciones en el bosque</h3>

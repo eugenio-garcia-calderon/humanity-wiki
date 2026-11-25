@@ -13374,3 +13374,16 @@ Eugenio, tras donar 1 € de prueba: «no ha habido thank you page; créala, que
 - **Saved designs** (browser, links, JSON) that predate these parameters are completed with the defaults of their own design (`completar`), so a saved smile keeps its 0.5 m grid.
 - Checked: `tsc`, build, Playwright on the built page (open the menu, add a ring, select a row, spacing at 130 %) with no JavaScript errors.
 - Not verified: dragging by touch on a phone; the installed app.
+
+## 2026-11-25 — Agricultura sintrópica: more realistic trees and the four seasons
+
+> «Mejora el diseño de los árboles para que sean más realistas… incluso permite una animación de las 4 estaciones, con flores, hojas caducas, luces del sol, vientos, etc.»
+
+- **Trees**: each crown is a cluster of 2–7 irregular lobes shaped by the species' form (round, columnar, spreading, shrub, vine with two cordons, palm with fronds), with a tapered trunk and, for trees, 4 branches plus 2 twigs each that show when a deciduous tree is bare. Real shadows (soft, 2048 map) and an atmospheric sky (drei `Sky`). Still three InstancedMeshes for the whole plot.
+- **Seasons** (`fenologia.ts`, 60 species): bud break and leaf fall of the deciduous ones, autumn colour, flowering window and colour. Bar in the 3D view: Primavera / Verano / Otoño / Invierno, «Año» plays the months (≈ 30 s per year), the month name; the field turns green in winter–spring and straw-coloured in summer.
+- **Sun**: position from month and hour at 40° N (height, day length, sunrise azimuth), warm light when low; hour slider and «Día» plays the day.
+- **Wind**: Calma / Brisa / Viento / Vendaval sways crowns, trunks and branches in the vertex shader; petals fly in flowering time and leaves in autumn (900 points).
+- **Species card**: «Su año», a 12-month strip (leaves, flowers, autumn, bare) with the dates in words.
+- Shadows start off on screens narrower than 700 px (checkbox to turn them on).
+- Checked: `tsc`, build, Playwright screenshots of winter, February (almonds in flower), spring at ground level, summer and autumn, with no JavaScript errors.
+- **Not verified**: frame rate on a real phone (the test browser renders in software); wind and particles were only seen in stills.
