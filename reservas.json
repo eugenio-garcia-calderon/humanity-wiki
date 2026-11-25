@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "public/geometria-figura/comun.js",
-      "motivo": "Geometría: cinco niveles (Antisistema…Ideal)",
-      "desde": "2026-11-25T12:00:50.742Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "public/geometria-figura/revisor.js",
       "motivo": "Geometría: cinco niveles (Antisistema…Ideal)",
       "desde": "2026-11-25T12:00:53.241Z"
