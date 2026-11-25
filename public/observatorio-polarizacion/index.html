@@ -797,7 +797,38 @@ footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .geo-row .bar{height:8px;border-radius:4px;background:var(--bg-3);overflow:hidden}
 .geo-row .bar i{display:block;height:100%;border-radius:4px}
 .geo-row b{font:500 13px var(--mono);color:var(--ink);text-align:right}
-.geo-razon{font-size:13px;line-height:1.45}.geo-razon small a{color:inherit}.geo-ideal-mas{display:inline-block;margin:6px 0 2px;color:#8A5A00;font:600 13.5px/1.35 var(--sans);text-decoration:underline;text-underline-offset:3px;pointer-events:auto}
+.geo-razon{font-size:13px;line-height:1.45}.geo-razon small a{color:inherit}.geo.con-nivel{grid-template-columns:200px minmax(0,1fr) minmax(320px,380px)}
+.geo-nivel{position:sticky;top:96px;align-self:start;max-height:calc(100vh - 112px);overflow:auto;display:grid;gap:12px;padding:16px;border:1px solid var(--line);border-radius:18px;background:var(--bg-2);color:var(--ink-2);font:400 14px/1.5 var(--sans)}
+.geo-nivel[hidden]{display:none}
+.geo-nivel:focus{outline:none}
+.geo-nivel h4{margin:0;font:600 18px/1.25 var(--sans);color:var(--ink)}
+.geo-nivel h5{margin:0 0 6px;font:600 12px/1.3 var(--sans);letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.geo-nivel p{margin:0}
+.gn-cab{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.gn-x{flex:none;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:transparent;color:var(--ink-2);font:400 22px/1 var(--sans);cursor:pointer}
+.gn-x:hover{color:var(--ink);border-color:var(--ink-2)}
+.gn-niveles{display:flex;flex-wrap:wrap;gap:6px}
+.gn-niv{padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--ink-2);font:500 13px/1 var(--sans);cursor:pointer}
+.gn-niv.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 18%,transparent);color:var(--ink)}
+.gn-texto{padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--c) 10%,transparent);border-left:3px solid var(--c)}
+.gn-texto .medida{display:block;font-weight:600;color:var(--c);margin-bottom:2px}
+.gn-grupo ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.gn-grupo li{display:grid;grid-template-columns:12px 1fr;gap:8px;align-items:start}
+.gn-grupo li i{width:10px;height:10px;border-radius:50%;margin-top:6px}
+.gn-grupo li b{color:var(--ink);font-weight:600}
+.gn-grupo li small{display:block;color:var(--muted);font-size:12.5px;line-height:1.45}
+.gn-grupo li a{color:inherit}
+.geo-nivel details summary{cursor:pointer;font:600 13.5px/1.4 var(--sans);color:var(--ink);min-height:32px;display:flex;align-items:center}
+.gn-form{display:grid;gap:8px}
+.gn-form textarea{width:100%;min-height:84px;resize:vertical;padding:8px 10px;border-radius:10px;border:1px solid var(--line-2);background:var(--bg);color:var(--ink);font:400 14px/1.45 var(--sans);box-sizing:border-box}
+.gn-form button[type=submit]{justify-self:start;padding:8px 14px;border-radius:10px;border:1px solid var(--ink-2);background:transparent;color:var(--ink);font:600 13.5px/1 var(--sans);cursor:pointer}
+.gn-form button[disabled]{opacity:.5;cursor:default}
+.gn-form .gn-msg{font-size:13px;color:var(--muted)}
+.gn-form .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+#geo-svg .geo-lv.sel .dot{opacity:1;stroke-width:4;filter:drop-shadow(0 0 6px currentColor)}
+#geo-svg .geo-lv{cursor:pointer}
+@media (max-width:1000px){.geo.con-nivel{grid-template-columns:minmax(0,1fr)}.geo-nivel{position:static;max-height:none;margin-top:12px}}
+.geo-ideal-mas{display:inline-block;margin:6px 0 2px;color:#8A5A00;font:600 13.5px/1.35 var(--sans);text-decoration:underline;text-underline-offset:3px;pointer-events:auto}
 .geo-ideal-mas:hover{color:var(--ink)}
 .geo-link{appearance:none;border:0;background:none;padding:0;color:var(--ink);font:600 14px var(--sans);text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:32px}
 .geo-plist{display:grid;gap:8px;margin-top:10px}
@@ -987,6 +1018,8 @@ html:not([data-vista="politica"]) .brand-txt[data-solo="politica"],html:not([dat
 .geo-stage > #geo-niveles .geo-nv-pts{position:absolute;top:100%;left:0;right:0;z-index:5;margin-top:6px;padding:12px 14px;background:var(--bg-2);border:1px solid var(--line-2);border-radius:14px;box-shadow:0 12px 32px rgba(0,0,0,.45)}
 .geo-stage.yo{grid-template-columns:minmax(0,1fr)}
 .geo-stage.yo > #geo-niveles{display:none}
+/* Con el panel del nivel abierto la figura es más estrecha: las cinco tarjetas de nivel pasan a una columna */
+.geo.con-nivel .geo-stage > #geo-niveles{grid-template-columns:minmax(0,1fr)}
 @media (max-width:1000px){.geo-stage > #geo-niveles{grid-template-columns:minmax(0,1fr)} .geo-stage > #geo-niveles .geo-nv-pts{position:static;box-shadow:none;margin-top:8px}}
 .geo-detalle{max-width:760px;margin:24px auto 0}
 .geo-detalle .geo-side{position:static;display:grid}
@@ -1029,13 +1062,17 @@ html:not([data-vista="politica"]) .brand-txt[data-solo="politica"],html:not([dat
 [data-vista="geometria"] .top{transition:transform .25s}
 [data-vista="geometria"] .top.plegado{transform:translateY(calc(-1 * var(--tit-h,64px)))}
 [data-vista="geometria"] .top.plegado .top-in{opacity:0}
-/* Fila de temas, siempre visible al hacer scroll: gris claro, dos filas de seis */
-.top-temas{background:#EEF2F7;border-bottom:1px solid var(--line-2);padding:10px var(--gl)}
-.top-temas .geo-temas{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin:0;max-width:1200px;margin-inline:auto}
-.top-temas .geo-tc{min-height:50px;width:100%;min-width:0;padding:6px 10px 6px 6px;gap:8px;font-size:14px;white-space:nowrap;background:#FFFFFF}
-.top-temas .geo-tc .ill{width:36px;height:36px}
-@media (max-width:1000px){.top-temas .geo-temas{grid-template-columns:repeat(6,minmax(140px,1fr));overflow-x:auto;padding-bottom:4px}}
-@media (max-width:640px){.top-temas .geo-temas{grid-template-columns:none;grid-template-rows:repeat(2,auto);grid-auto-flow:column;grid-auto-columns:160px}.top-temas .geo-tc{font-size:13.5px;padding:6px 8px 6px 6px}}
+/* Fila de temas, siempre visible al hacer scroll: una sola línea, compacta, con flechas para ver el resto */
+.top-temas{background:#EEF2F7;border-bottom:1px solid var(--line-2);padding:6px var(--gl)}
+.top-temas-fila{display:flex;align-items:center;gap:6px;max-width:1200px;margin-inline:auto}
+.top-temas .geo-temas{position:relative;display:flex;flex-wrap:nowrap;gap:6px;flex:1;min-width:0;margin:0;padding:2px 0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;scroll-behavior:smooth}
+.top-temas .geo-temas::-webkit-scrollbar{display:none}
+.top-temas .geo-tc{flex:none;width:auto;min-height:36px;padding:3px 12px 3px 5px;gap:6px;font-size:13px;white-space:nowrap;background:#FFFFFF;border-radius:12px}
+.top-temas .geo-tc .ill{width:28px;height:28px}
+.top-flecha{flex:none;width:32px;height:36px;border-radius:10px;border:1px solid var(--line);background:#FFFFFF;color:var(--ink-2);font:600 20px/1 var(--sans);cursor:pointer;display:grid;place-items:center;padding:0}
+.top-flecha:hover:not(:disabled){border-color:var(--ink-2);color:var(--ink)}
+.top-flecha:disabled{opacity:.3;cursor:default}
+.top-flecha:focus-visible{outline:2px solid var(--ink-2);outline-offset:2px}
 @media (max-width:760px){[data-vista="geometria"] .top-in{grid-template-columns:1fr auto;height:auto;padding:8px var(--gl);row-gap:6px}[data-vista="geometria"] .top-in .brand{grid-column:1;justify-self:start}[data-vista="geometria"] .geo-bar{grid-column:2}}
 /* Los colores fijos del dibujo (atributos SVG) se adaptan al fondo blanco */
 #geo-svg [fill="#EDEBE6" i]{fill:#141A26} #geo-svg [stroke="#EDEBE6" i]{stroke:#141A26}
@@ -1412,7 +1449,7 @@ html:not([data-vista="politica"]) .brand-txt[data-solo="politica"],html:not([dat
       </div>
     </div>
   </div>
-  <div class="top-temas"><div class="geo-temas" id="geo-tema" role="tablist" aria-label="Elige un tema"></div></div>
+  <div class="top-temas"><div class="top-temas-fila"><button class="top-flecha" id="temas-izq" type="button" aria-label="Temas anteriores" disabled>‹</button><div class="geo-temas" id="geo-tema" role="tablist" aria-label="Elige un tema"></div><button class="top-flecha" id="temas-der" type="button" aria-label="Más temas">›</button></div></div>
   <div class="prog" aria-hidden="true"><i id="prog"></i></div>
 </header>
 
@@ -1436,6 +1473,7 @@ html:not([data-vista="politica"]) .brand-txt[data-solo="politica"],html:not([dat
       <div class="geo-medida vacio" id="geo-medida"></div>
       <div class="geo-niveles" id="geo-niveles" role="group" aria-label="Los cinco niveles de cada tema"></div>
     </div>
+    <aside class="geo-nivel" id="geo-nivel" tabindex="-1" aria-label="Detalle del nivel elegido" aria-live="polite" hidden></aside>
   </div>
   <div class="sub geo-vistazo">
     <h3>Los diez temas de un vistazo</h3>
@@ -3414,7 +3452,7 @@ const ILUS = {
 
   const KEYS = Object.keys(TEMAS);
   const DEF = ["pp", "psoe", "vox", "fa"];
-  const st = { tema: "inm", sel: new Set(DEF), foco: null, eje: null, ideal: true, mejor: false, ring: null, yo: false, fijado: null, masVer: null, todos: false };
+  const st = { tema: "inm", sel: new Set(DEF), foco: null, eje: null, ideal: true, mejor: false, ring: null, yo: false, fijado: null, masVer: null, todos: false, nivel: null };
   // Lo que llega en la dirección: ?tema=vivienda&p=pp,psoe&foco=pp
   const q = new URLSearchParams(location.search);
   const qt = q.get("tema");
@@ -3625,7 +3663,7 @@ const ILUS = {
         UMBRAL.forEach((v, k) => {
           const [x, y] = P(ang(i, n), rr(v));
           const dx = x - CX, dy = y - CY, L = Math.hypot(dx, dy) || 1, tx = x + (dx / L) * 17 * K, ty = y + (dy / L) * 17 * K;
-          s += `<g class="geo-lv" data-li="${i}" data-lk="${k}"><circle cx="${r1(x)}" cy="${r1(y)}" r="${r1(15 * K)}" fill="transparent"/><circle class="dot" cx="${r1(x)}" cy="${r1(y)}" r="${r1((k === NMAX ? 5.5 : 4.5) * K)}" fill="#0C0F14" stroke="${colorNivel(k)}" stroke-width="2.2"/></g>`
+          s += `<g class="geo-lv" data-li="${i}" data-lk="${k}" tabindex="0" role="button" aria-label="${ejes[i].n}: ${NIVEL_CORTO[k]}"><circle cx="${r1(x)}" cy="${r1(y)}" r="${r1(15 * K)}" fill="transparent"/><circle class="dot" cx="${r1(x)}" cy="${r1(y)}" r="${r1((k === NMAX ? 5.5 : 4.5) * K)}" fill="#0C0F14" stroke="${colorNivel(k)}" stroke-width="2.2"/></g>`
             + `<text class="geo-num" data-lk="${k}" x="${r1(tx)}" y="${r1(ty)}" text-anchor="middle" dominant-baseline="central" font-family="Archivo, sans-serif" font-weight="600" font-size="${r1(12 * K)}" fill="${colorNivel(k)}" stroke="#0C0F14" stroke-width="4" paint-order="stroke">${i + 1}</text>`;
         });
       }
@@ -3652,7 +3690,7 @@ const ILUS = {
     // Sin <title> dentro del SVG: el navegador lo mostraba como cuadro gris al pasar el ratón. El texto va en aria-label.
     svg.setAttribute("aria-label", titulo);
     svg.innerHTML = s;
-    marcarMejor();
+    marcarMejor(); marcarNivel();
     $("#geo-cap").textContent = t.cap;
     $("#geo-mejor-nota").hidden = !st.mejor;
     $(".geo-partidos").classList.toggle("en-mejor", st.mejor);
@@ -3668,16 +3706,14 @@ const ILUS = {
       : (todos.length ? "Lo alcanzan en todos los aspectos: " + etiquetas(todos) : "Ningún partido lo alcanza en todos los aspectos.");
     return `<span class="lbl" style="color:${colorNivel(k)}">${NIV[k]}${k === NMAX ? " · el círculo de fuera" : k === 0 ? " · por debajo de lo básico" : ""}</span><p>${t.niv[k]}</p><p class="who">${quien}</p>`;
   }
-  function htmlPunto(i, k, fijo) {
+  function htmlPunto(i, k) {
     const t = T(), e = t.ejes[i];
     const ya = PARTIDOS.filter((p) => (k === 0 ? nivelDe(t.v[p.k][i]) === 0 : alcanza(t.v[p.k][i], k)));
     const quien = k === 0
       ? (ya.length ? "Se quedan aquí, según la valoración de este observatorio: " + etiquetas(ya) : "Ningún partido se queda aquí.")
       : (ya.length ? "Llegan: " + etiquetas(ya) : "Ningún partido llega todavía.");
     return `<span class="lbl" style="color:${colorNivel(k)}">${NIV[k]} · radio ${i + 1}</span><h5>${e.n}</h5><p>${e.niv[k]}</p>`
-      + `<p class="who">${quien}</p>` + (k === NMAX && e.is ? (fijo
-        ? `<div class="geo-tip-acc">${enlaceIdeal(e)}<button class="geo-link" data-soltar>Cerrar</button></div>`
-        : `<p class="who"><small>Pulsa el punto y después «Más» para abrir la propuesta: «${e.it}».</small></p>`) : "");
+      + `<p class="who">${quien}</p>` + `<p class="who"><small>Pulsa el punto para abrir su detalle a la derecha.</small></p>`;
   }
   // Un vértice de un partido: su nota, qué nivel le corresponde, y su postura en el tema.
   // Por aspecto no hay todavía un texto por partido que justifique la nota: se dice, en vez de inventarlo.
@@ -3774,14 +3810,63 @@ const ILUS = {
     const activo = st.masVer != null ? st.masVer : st.fijado;
     $$(".geo-mejor", svg).forEach((g) => g.classList.toggle("on", +g.dataset.mi === activo));
   }
-  // La tarjeta de un ideal, fija: así se puede pulsar su «Más». `st.fijado` lleva un texto para no confundirse con «lo mejor»
-  function fijarIdeal(i, nodo) {
-    st.fijado = "ideal-" + i;
-    const [x, y] = centro(nodo.querySelector(".dot"));
-    tipClave = null; tip.classList.remove("varios");
-    mostrar(`fi${st.tema}-${i}`, htmlPunto(i, NMAX, true), x + 14, y);
-    tip.classList.add("fijo");
+  /* ---- Panel lateral de un nivel: se abre solo al pinchar uno de los puntos de la figura ---- */
+  const pnl = $("#geo-nivel"), geoEl = $(".geo");
+  function htmlNivel(i, k) {
+    const t = T(), e = t.ejes[i], col = colorNivel(k);
+    const grupos = { aqui: [], mas: [], menos: [] };
+    PARTIDOS.forEach((p) => { const l = nivelDe(t.v[p.k][i]); grupos[l === k ? "aqui" : l > k ? "mas" : "menos"].push([p, l]); });
+    const fila = ([p, l]) => { const rz = razonDe(p.k, i);
+      const est = l === k ? "" : l > k ? ` · llega a ${NIVEL_CORTO[l]}` : ` · se queda en ${NIVEL_CORTO[l]}`;
+      const por = rz ? `<small>${rz.tp === "vacio" ? "Qué hemos buscado" : "Qué propone"}: ${rz.r}${rz.u ? ` <a href="${rz.u}" target="_blank" rel="noopener">Fuente: ${rz.f}</a>` : ""}</small>` : "";
+      return `<li><i style="background:${p.c}"></i><span><b>${p.n}</b>${est}${por}</span></li>`; };
+    const grupo = (tit, lista) => lista.length ? `<div class="gn-grupo"><h5>${tit} (${lista.length})</h5><ul>${lista.map(fila).join("")}</ul></div>` : "";
+    const sinTexto = PARTIDOS.some((p) => !razonDe(p.k, i));
+    return `<div class="gn-cab"><span class="lbl" style="color:${t.c}">${t.n} · radio ${i + 1}</span><button class="gn-x" type="button" data-gn-cerrar aria-label="Cerrar el detalle">×</button></div>`
+      + `<h4>${e.n}</h4><p><small>${e.d}</small></p>`
+      + `<div class="gn-niveles" role="group" aria-label="Nivel">${NIVEL_CORTO.map((n, j) => `<button type="button" class="gn-niv${j === k ? " on" : ""}" data-gn-k="${j}" style="--c:${colorNivel(j)}" aria-pressed="${j === k}">${n}</button>`).join("")}</div>`
+      + `<div class="gn-texto" style="--c:${col}"><span class="medida">${NIV_TITULO[k]}</span>${e.niv[k]}${k === NMAX && e.is ? `<br>${enlaceIdeal(e)}` : ""}</div>`
+      + grupo(k === 0 ? "Se quedan por debajo de lo básico" : `Están justo en ${NIVEL_CORTO[k].toLowerCase()}`, grupos.aqui)
+      + grupo(k === 0 ? "Pasan de ahí" : "Van más allá", grupos.mas) + grupo("No llegan", grupos.menos)
+      + (sinTexto ? `<p><small>Por aspecto, este observatorio aún no tiene un texto de cada partido que justifique su nivel: donde lo hay, sale debajo del nombre.</small></p>` : "")
+      + `<details><summary>Lo que haría el círculo en este aspecto</summary><p>${e.p}</p></details>`
+      + `<form class="gn-form" data-gn-form><h5>¿Falta algo, o no estás de acuerdo?</h5><textarea name="texto" maxlength="1500" placeholder="Escribe lo que añadirías o corregirías en este nivel…" aria-label="Tu comentario"></textarea>`
+      + `<input class="hp" name="web" tabindex="-1" autocomplete="off" aria-hidden="true"><button type="submit">Enviar</button><p class="gn-msg" role="status"></p>`
+      + `<p><small>Llega al equipo de la web como propuesta; no se publica aquí.</small></p></form>`;
   }
+  function marcarNivel() { $$(".geo-lv", svg).forEach((g) => g.classList.toggle("sel", !!st.nivel && +g.dataset.li === st.nivel.i && +g.dataset.lk === st.nivel.k)); }
+  function abrirNivel(i, k, conTeclado) {
+    if (st.yo) return;
+    st.nivel = { i, k }; soltar();
+    pnl.innerHTML = htmlNivel(i, k); pnl.hidden = false; geoEl.classList.add("con-nivel"); marcarNivel();
+    if (conTeclado) pnl.focus();
+    if (matchMedia("(max-width:1000px)").matches) pnl.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }
+  function cerrarNivel() {
+    if (!st.nivel) return;
+    const i = st.nivel.i, k = st.nivel.k; st.nivel = null;
+    pnl.hidden = true; pnl.innerHTML = ""; geoEl.classList.remove("con-nivel"); marcarNivel();
+    const d = svg.querySelector(`.geo-lv[data-li="${i}"][data-lk="${k}"]`); if (d && document.activeElement === document.body) d.focus();
+  }
+  pnl.addEventListener("click", (e) => {
+    if (e.target.closest("[data-gn-cerrar]")) return cerrarNivel();
+    const b = e.target.closest("[data-gn-k]"); if (b && st.nivel) { st.nivel.k = +b.dataset.gnK; pnl.innerHTML = htmlNivel(st.nivel.i, st.nivel.k); marcarNivel(); pnl.querySelector(`[data-gn-k="${st.nivel.k}"]`).focus(); }
+  });
+  pnl.addEventListener("submit", async (e) => {
+    e.preventDefault(); if (!st.nivel) return;
+    const f = e.target, txt = f.texto.value.trim(), msg = f.querySelector(".gn-msg"), bt = f.querySelector("button[type=submit]");
+    if (txt.length < 3) { msg.textContent = "Escribe un poco más."; return; }
+    const t = T(), ej = t.ejes[st.nivel.i];
+    bt.disabled = true; msg.textContent = "Enviando…";
+    try {
+      const r = await fetch("/api/sitio/opinion", { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ texto: `[Geometría política · ${t.n} · ${ej.n} · nivel ${NIVEL_CORTO[st.nivel.k]}]\n${txt}`, pagina: location.pathname + location.search, web: f.web.value }) });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || "No se ha podido enviar.");
+      f.texto.value = ""; msg.textContent = "Enviado. Gracias.";
+    } catch (err) { msg.textContent = err.message; }
+    bt.disabled = false;
+  });
   function fijarMejor(i) {
     st.fijado = i;
     const mj = svg.querySelector(`[data-mi="${i}"]`); if (!mj) return soltar();
@@ -3835,7 +3920,6 @@ const ILUS = {
     return true;
   }
   function leer(e) {
-    if (typeof st.fijado === "string") return true; // hay un ideal fijado: el paso del ratón no lo cambia
     if (st.yo) {
       // Mientras se arrastra, manda la lectura del arrastre; si no, el pase sobre tu punto muestra su medida más alta
       if (arrastre) return true;
@@ -3973,6 +4057,7 @@ const ILUS = {
   }
   function modoYo(on) {
     if (on && st.mejor) { st.mejor = false; $("#geo-mejor").setAttribute("aria-pressed", "false"); }
+    if (on) cerrarNivel();
     st.yo = on; st.foco = null; st.eje = null; st.ring = null;
     stage.classList.toggle("yo", on);
     const b = $("#geo-yo"); b.setAttribute("aria-pressed", String(on)); b.querySelector("span").textContent = on ? "Terminar mi figura" : "Dibuja tu figura";
@@ -4062,7 +4147,7 @@ const ILUS = {
     }
     const sel = PARTIDOS.filter((p) => st.sel.has(p.k));
     el.innerHTML = `<span class="lbl">${t.n}</span><h4>Pulsa una figura o un aspecto</h4>
-      <p>Pasa el ratón por los cinco círculos y por sus puntos: el de dentro, en rojo, es indefinido (por debajo de lo básico) y el de fuera, dorado, el ideal. Pulsa un punto del ideal para abrir su propuesta. Pulsa un partido para ver hasta dónde llega, o el nombre de un aspecto para ver su escalera completa.</p>
+      <p>Pasa el ratón por los cinco círculos y por sus puntos: el de dentro, en rojo, es indefinido (por debajo de lo básico) y el de fuera, dorado, el ideal. Pulsa uno de esos puntos para abrir a la derecha su detalle: el texto del nivel, qué partidos llegan, un cuadro para sugerir lo que falte y, en el ideal, el enlace a su propuesta completa. Pulsa un partido para ver hasta dónde llega, o el nombre de un aspecto para ver su escalera completa.</p>
       <div class="geo-plist">${sel.map((p) => { const c = cojas(t.v[p.k], t.ejes); return `<button class="geo-pitem" data-ver="${p.k}" style="--pc:${p.c}"><i></i><span><b>${p.n}</b> · ${c.length ? "no llega a lo básico en " + lista(c) : "llega a lo básico en todo"}</span></button>`; }).join("") || `<p class="tiny">Elige al menos un partido arriba.</p>`}</div>`;
   }
 
@@ -4213,12 +4298,18 @@ const ILUS = {
   function setTodos(on) {
     if (on && st.yo) modoYo(false);
     st.todos = on; if (on) { st.mejor = false; $("#geo-mejor").setAttribute("aria-pressed", "false"); }
-    st.foco = null; st.masVer = null; soltar(); todo();
+    st.foco = null; st.masVer = null; soltar(); cerrarNivel(); todo();
   }
 
   const tabs = $("#geo-tema");
   const BOTON_TODOS = `<button class="geo-tc geo-tc-todos" role="tab" data-todos aria-selected="false" aria-controls="geo-svg" style="--tc:#EDEBE6"><span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64"><polygon points="32,5 55,19 55,45 32,59 9,45 9,19" fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round"/><polygon points="32,17 46,25 46,39 32,47 18,39 18,25" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/></svg></span><span class="nm">Todos los temas</span></button>`;
   tabs.innerHTML = BOTON_TODOS + KEYS.map((k) => { const t = TEMAS[k]; return `<button class="geo-tc" role="tab" data-t="${k}" aria-selected="${k === st.tema}" tabindex="${k === st.tema ? 0 : -1}" aria-controls="geo-svg" style="--tc:${t.c}"><span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64">${ILUS[k] || ""}</svg></span><span class="nm">${t.n}</span></button>`; }).join("");
+  const flIzq = $("#temas-izq"), flDer = $("#temas-der");
+  function flechas() { const max = tabs.scrollWidth - tabs.clientWidth; flIzq.disabled = tabs.scrollLeft <= 2; flDer.disabled = tabs.scrollLeft >= max - 2; }
+  tabs.addEventListener("scroll", flechas, { passive: true }); window.addEventListener("resize", flechas);
+  flIzq.addEventListener("click", () => tabs.scrollBy({ left: -tabs.clientWidth * 0.7 }));
+  flDer.addEventListener("click", () => tabs.scrollBy({ left: tabs.clientWidth * 0.7 }));
+  setTimeout(flechas, 60); if (document.fonts && document.fonts.ready) document.fonts.ready.then(flechas);
   function marcarTab(enfocarTab) {
     $$("[data-t]", tabs).forEach((b) => {
       const on = !st.todos && b.dataset.t === st.tema;
@@ -4229,6 +4320,7 @@ const ILUS = {
   function cambiarTema(k, enfocarTab) {
     if (!TEMAS[k]) return;
     const nuevo = k !== st.tema;
+    if (nuevo) cerrarNivel();
     st.tema = k; st.todos = false; st.eje = null; st.ring = null; st.foco = null; st.masVer = null;
     marcarTab(enfocarTab);
     if (nuevo) { svg.classList.remove("geo-entra"); void svg.getBoundingClientRect(); svg.classList.add("geo-entra"); clearTimeout(cambiarTema.t); cambiarTema.t = setTimeout(() => svg.classList.remove("geo-entra"), 1200); }
@@ -4256,9 +4348,9 @@ const ILUS = {
     const mj = e.target.closest("[data-mi]");
     if (mj) { const i = +mj.dataset.mi; if (st.fijado === i) soltar(); else fijarMejor(i); return; }
     if (st.fijado != null) soltar();
-    // Un punto del ideal deja fija su tarjeta, con «Más»: el enlace a la página de esa propuesta
-    const idl = e.target.closest(`[data-lk="${NMAX}"]`);
-    if (idl) return fijarIdeal(+idl.dataset.li, idl);
+    // Cualquier punto de nivel abre su detalle a la derecha (y solo así se abre ese cuadro)
+    const lvl = e.target.closest(".geo-lv");
+    if (lvl) return abrirNivel(+lvl.dataset.li, +lvl.dataset.lk);
     // En pantallas táctiles, tocar un círculo o un punto muestra su explicación
     if (leer(e)) return;
     ocultar();
@@ -4271,12 +4363,16 @@ const ILUS = {
     if (a && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); if (st.yo) modoYo(false); eje(+a.dataset.ax); const n = svg.querySelector(`[data-ax="${a.dataset.ax}"]`); if (n) n.focus(); }
   });
   svg.addEventListener("keydown", (e) => {
+    const lv = e.target.closest(".geo-lv");
+    if (lv && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); abrirNivel(+lv.dataset.li, +lv.dataset.lk, true); }
+  });
+  svg.addEventListener("keydown", (e) => {
     const mj = e.target.closest("[data-mi]");
     if (mj && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); const i = +mj.dataset.mi; if (st.fijado === i) soltar(); else fijarMejor(i); }
   });
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape") return;
-    if (st.masVer != null) cerrarMas(); else if (st.fijado != null) soltar();
+    if (st.masVer != null) cerrarMas(); else if (st.fijado != null) soltar(); else if (st.nivel) cerrarNivel();
   });
   const pn = $("#geo-panel");
   pn.addEventListener("click", (e) => {
