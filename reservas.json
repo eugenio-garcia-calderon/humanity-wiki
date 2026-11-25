@@ -35,6 +35,12 @@
       "ruta": "scripts/geometria-datos.mjs",
       "motivo": "Geometría: cinco niveles (Antisistema…Ideal)",
       "desde": "2026-11-25T12:00:58.323Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/figuras.ts",
+      "motivo": "Geometría: cinco niveles (Antisistema…Ideal)",
+      "desde": "2026-11-25T12:01:00.925Z"
     }
   ]
 }
