@@ -125,12 +125,55 @@ const CSS = `/* generado por scripts/geometria-medidas.mjs: no editar a mano */
 .niveles-asp h3 a{text-decoration:none}
 .niveles-asp p{margin:4px 0 6px;color:var(--ink2);font-size:15.5px}
 .niveles-asp small{color:var(--muted)}
+.partidos .pt-grupo{margin:0 0 14px}
+.partidos h3{margin:0 0 8px;font-size:1rem;color:var(--ink2)}
+.partidos ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.partidos li{display:grid;grid-template-columns:14px minmax(0,1fr);gap:10px;align-items:start;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.partidos li i{width:14px;height:14px;border-radius:50%;margin-top:5px}
+.partidos li small{display:block;margin-top:4px;font-size:14px;line-height:1.45;color:var(--ink2)}
+.partidos li small a{color:#1D4ED8}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px;font-size:13px}
+.chips em{font-style:normal;color:var(--muted)}
+.chip{padding:2px 9px;border-radius:999px;border:1px solid var(--pc);background:color-mix(in srgb,var(--pc) 12%,#fff);color:var(--ink)}
 .tabla-ind{width:100%;border-collapse:collapse;font-size:15px}
 .tabla-ind td,.tabla-ind th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
 .tabla-ind td a{display:inline-block;margin:2px 6px 2px 0;font-size:13.5px;color:#1D4ED8}
 `;
 
+// Party positions: the levels live in datos.json (TEMAS[k].v), the reasons in the RAZONES constant of the
+// geometry page (one per party and aspect, with its source). Same data the level side panel shows.
+function leerRazones() {
+  const html = fs.readFileSync(path.join(RAIZ, "public/observatorio-polarizacion/index.html"), "utf8");
+  const m = html.match(/^const RAZONES = (\{.*\});\s*$/m);
+  if (!m) throw new Error("No encuentro la constante RAZONES en la página de la geometría");
+  return JSON.parse(m[1]);
+}
+function htmlPartidos(t, i, n, RAZONES) {
+  const grupos = { aqui: [], mas: [], menos: [] };
+  for (const p of DATOS.partidos) {
+    const l = Math.max(0, Math.min(4, Math.floor((t.v[p.k] || [])[i] + 0.01)));
+    if (!Number.isInteger(l)) continue;
+    grupos[l === n ? "aqui" : l > n ? "mas" : "menos"].push([p, l]);
+  }
+  const fila = ([p, l]) => {
+    const rz = RAZONES[p.k] && RAZONES[p.k][t.k] && RAZONES[p.k][t.k][String(i)];
+    const est = l === n ? "" : l > n ? ` · llega a ${NIV[l].toLowerCase()}` : ` · se queda en ${NIV[l].toLowerCase()}`;
+    const por = rz ? `<small><b>${rz.tp === "vacio" ? "Qué hemos buscado" : "Qué propone"}:</b> ${esc(rz.r)}${/^https?:\/\//.test(rz.u || "") ? ` <a href="${esc(rz.u)}" rel="noopener nofollow" target="_blank">Fuente: ${esc(rz.f || host(rz.u))} ↗</a>` : ""}</small>` : "";
+    return `<li><i style="background:${esc(p.c)}"></i><span><b>${esc(p.n)}</b>${est}${por}</span></li>`;
+  };
+  const grupo = (tit, lista) => (lista.length ? `<div class="pt-grupo"><h3>${tit} (${lista.length})</h3><ul>${lista.map(fila).join("")}</ul></div>` : "");
+  return `<section class="partidos" id="partidos">
+<h2>Qué partidos están en este nivel</h2>
+${grupo(n === 0 ? "Se quedan por debajo de lo básico" : `Están justo en ${NIV[n].toLowerCase()}`, grupos.aqui)}
+${grupo(n === 0 ? "Pasan de ahí" : n === 4 ? "Van más allá" : "Están más avanzados", grupos.mas)}
+${grupo(n === 0 ? "" : "Se quedan fuera: no llegan a este nivel", grupos.menos)}
+<p class="nota">Posición de cada partido valorada por esta web a partir de sus programas y declaraciones públicas, en una escala de cinco niveles. Se asignó con la descripción corta de cada nivel: todavía no se ha revisado medida por medida con esta lista. Donde hay un texto que justifica el nivel, sale debajo del nombre con su fuente. No es una recomendación de voto. ¿Ves un error? <a href="${SITIO}/geometria-politica?tema=${TEMA_SLUG[t.k]}">Díselo al equipo desde la geometría</a>.</p>
+</section>`;
+}
+const chipsPartidos = (t, i, n) => DATOS.partidos.filter((p) => Math.floor((t.v[p.k] || [])[i] + 0.01) === n).map((p) => `<span class="chip" style="--pc:${esc(p.c)}">${esc(p.n)}</span>`).join("");
+
 function paginas(temas) {
+  const RAZONES = leerRazones();
   const RAIZ_M = path.join(RAIZ, "public/medidas");
   fs.rmSync(RAIZ_M, { recursive: true, force: true });
   const escribir = (rel, html) => { const f = path.join(RAIZ_M, rel); fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, html); };
@@ -173,6 +216,7 @@ ${pildoras(n)}
 ${lista(nv)}
 </section>
 ${ideal}
+${htmlPartidos(t, x.i, n, RAZONES)}
 ${antes}
 ${sig}
 <section>
@@ -199,7 +243,7 @@ ${hermanos.map((y) => `<li><a href="/medidas/${y.slug}/${NIV_SLUG[n]}/"><b>${esc
 <h1>${esc(e.n)}</h1>
 <p class="lede nv" style="--c:${t.c}">${esc(e.d)}</p>
 <ol class="niveles-asp">
-${a.niveles.map((nv, n) => `<li style="--c:${colorNivel(t, n)}"><h3><a href="/medidas/${slug}/${NIV_SLUG[n]}/">${NIV_TITULO[n]} →</a></h3><p>${esc(nv.resumen)}</p><small>${nv.medidas.map((m) => esc(m.nombre)).join(" · ")}</small></li>`).join("\n")}
+${a.niveles.map((nv, n) => `<li style="--c:${colorNivel(t, n)}"><h3><a href="/medidas/${slug}/${NIV_SLUG[n]}/">${NIV_TITULO[n]} →</a></h3><p>${esc(nv.resumen)}</p><small>${nv.medidas.map((m) => esc(m.nombre)).join(" · ")}</small>${chipsPartidos(t, x.i, n) ? `<div class="chips"><em>En este nivel:</em> ${chipsPartidos(t, x.i, n)}</div>` : ""}</li>`).join("\n")}
 </ol>
 <div class="acciones"><a class="boton" href="${enTema}">Haz el test y mira tu geometría en ${esc(t.n)} →</a>${e.is ? `<a class="boton claro" href="/ideal/${e.is}/">La propuesta ideal completa →</a>` : ""}</div>
 <nav class="otras" aria-label="Otros aspectos de ${esc(t.n)}">

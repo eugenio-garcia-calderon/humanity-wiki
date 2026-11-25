@@ -22,6 +22,16 @@
 .niveles-asp h3 a{text-decoration:none}
 .niveles-asp p{margin:4px 0 6px;color:var(--ink2);font-size:15.5px}
 .niveles-asp small{color:var(--muted)}
+.partidos .pt-grupo{margin:0 0 14px}
+.partidos h3{margin:0 0 8px;font-size:1rem;color:var(--ink2)}
+.partidos ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.partidos li{display:grid;grid-template-columns:14px minmax(0,1fr);gap:10px;align-items:start;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.partidos li i{width:14px;height:14px;border-radius:50%;margin-top:5px}
+.partidos li small{display:block;margin-top:4px;font-size:14px;line-height:1.45;color:var(--ink2)}
+.partidos li small a{color:#1D4ED8}
+.chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px;font-size:13px}
+.chips em{font-style:normal;color:var(--muted)}
+.chip{padding:2px 9px;border-radius:999px;border:1px solid var(--pc);background:color-mix(in srgb,var(--pc) 12%,#fff);color:var(--ink)}
 .tabla-ind{width:100%;border-collapse:collapse;font-size:15px}
 .tabla-ind td,.tabla-ind th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
 .tabla-ind td a{display:inline-block;margin:2px 6px 2px 0;font-size:13.5px;color:#1D4ED8}
