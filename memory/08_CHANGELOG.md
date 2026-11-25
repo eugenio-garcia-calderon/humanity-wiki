@@ -13427,3 +13427,7 @@ Eugenio, tras donar 1 € de prueba: «no ha habido thank you page; créala, que
 - Migración `0243_inventos_y_comunidades_luz.sql`: columna «Tipo» en Proyectos (`BDCTIPOPROYECT1`: «Invento o modelo» / «Comunidad beneficiada»); 16 comunidades marcadas (comunidades solares, proyectos de Sol Solidario que llevan energía a personas, ecoaldeas); `sitio.beneficiarias` en la raíz.
 - `VistaProyectosSitio`: «Inventos y modelos» arriba (los sectores de siempre) y «Comunidades beneficiadas» abajo, por sector, aunque estén dentro de otro proyecto.
 - `CabeceraSitio`: un puntito casi invisible arriba a la derecha cambia «Luz & Humanidad» por «Eugini Fettuccini — Los inventos locos» (se recuerda en el navegador).
+
+### 2026-11-26 — luzhumanidad.com: ajuste de inventos y beneficiarias
+- Migración `0244_ajuste_inventos_luz.sql`: Crowd, Tienda Solar Solidaria y Bicicleta Solar como inventos; Activismo energético, Divulgación en Colegios y Cursos Instaladores Solares como comunidades beneficiadas.
+- `VistaProyectosSitio`: un proyecto dentro de otro sale también arriba si su «Tipo» dice invento; fuera el título «Inventos y modelos».
