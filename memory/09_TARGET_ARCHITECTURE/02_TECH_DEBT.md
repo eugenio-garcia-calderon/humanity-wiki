@@ -1181,3 +1181,8 @@ By his instruction the bicycle-class labour is assembly only. The project total 
 - **The advisor only checks the central module and its 8 neighbours**, not the edges of the plot or the paths. Good enough while every module is identical; it misses edge effects.
 - **Crown colours and plan colours are hex values** in `paleta.ts` and `especies.ts` (3D/CAD data, same precedent as `components/arquitectura/paleta.ts`).
 - **Values not reviewed**: water needs, frost limits, zones and yields per plant are literature-level references written on 2026-11-25. Each card says so.
+
+## 2026-11-25 — Geometría: new measures vs party levels (seam)
+
+- Party levels (`TEMAS[k].v`) and the reasons were assigned against the old one-line level texts. The new bullets (`scripts/medidas/datos/`) raise several Básico/Intermedio bars (e.g. Básico «cumplir lo que ya obliga» → verifiable instruments). Nobody has re-checked whether each party still sits on the same level under the new measures. Re-running the review agents against `medidas.json` is roughly one batch of 10 agents.
+- The evaluator also proposed structural changes that were **not** applied (they change what parties are scored on): renaming «Bajar impuestos y competir» and «Contención del gasto», splitting overlapping aspects (ins: igualdad/convivencia; der: vida/autonomía; inm: cupos counted three times; viv: impago counted twice), and new aspects (tra: paro/autónomos/seguridad; der: libertades civiles y privacidad; amb: residuos, aire, biodiversidad, adaptación). Decision pending with Eugenio. Details in each file's `evaluacion.problemas`.

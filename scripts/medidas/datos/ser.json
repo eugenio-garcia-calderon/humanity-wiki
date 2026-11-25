@@ -1,0 +1,493 @@
+{
+  "tema": "ser",
+  "evaluacion": {
+    "nota": 6,
+    "resumen": "Los niveles Avanzado e Ideal son concretos y comprobables (plazos que se cumplen solos, contrato único, suelo de gasto por ley), y el tema tiene buena progresión en evaluación y financiación. Pero el tema se llama «Servicios» y está escrito casi solo para la sanidad: la educación sale poco y los cuidados a personas dependientes casi nada. Varios niveles Básico son lemas sin instrumento, y dos aspectos mezclan dos preguntas o parten de una postura.",
+    "problemas": [
+      {
+        "aspecto": null,
+        "nivel": null,
+        "problema": "El tema cubre sanidad, educación y dependencia, pero casi todos los textos hablan solo de sanidad: médico de cabecera, historia clínica, mutualismo. Los cuidados a personas dependientes solo aparecen en la financiación.",
+        "mejora": "Cada nivel incluye al menos una medida de educación y una de cuidados: admisión escolar, residencias y ayuda a domicilio, lista de espera de la dependencia, profesionalización de los cuidadores."
+      },
+      {
+        "aspecto": 1,
+        "nivel": 1,
+        "problema": "«No gastar de más» es un lema con el que cualquiera está de acuerdo, no una medida. Además, el nombre y la descripción del aspecto («ni subir impuestos sin necesidad») dan por buena una dirección antes de preguntar.",
+        "mejora": "Renombrar el aspecto como «Eficiencia y control del gasto» y llenar el Básico con instrumentos: presupuesto ejecutado y publicado, pago a proveedores en plazo, memoria de coste de cada programa nuevo y cruce de datos contra el fraude."
+      },
+      {
+        "aspecto": 6,
+        "nivel": null,
+        "problema": "El aspecto mezcla dos preguntas: quién tiene derecho al servicio (universalidad) y quién lo gestiona (gestión pública). Quien quiere universalidad plena pero no tiene preferencia sobre la gestión no sabe qué responder.",
+        "mejora": "Separar las dos ideas o dejar claro en cada nivel qué mide cada una: el derecho por residencia por un lado, y una red pública capaz de cubrir por sí misma la cartera común y evaluada como las demás por otro."
+      },
+      {
+        "aspecto": 3,
+        "nivel": 1,
+        "problema": "«Publicar las listas de espera» y, en el aspecto 4, «Cubrir las plazas vacantes» no dicen con qué método, cada cuánto ni quién lo hace, así que un nivel Básico de papel parece cumplido.",
+        "mejora": "Exigir método común entre comunidades, datos abiertos con calendario fijo e incluir la espera de la dependencia; y para las vacantes, oposiciones anuales, bolsas únicas y un registro público de plazas sin cubrir."
+      },
+      {
+        "aspecto": 0,
+        "nivel": 1,
+        "problema": "«Conciertos puntuales para reducir esperas» describe la sanidad. En educación y en residencias el concierto es estable, no puntual, y el nivel no dice nada de cobros a las familias ni de admisión.",
+        "mejora": "Básico con contrato escrito y publicado, gratuidad garantizada e inspección de requisitos; la admisión por la misma oficina que la red pública pasa a Intermedio."
+      },
+      {
+        "aspecto": null,
+        "nivel": null,
+        "problema": "Faltan piezas grandes del tema: salud mental, salud dental, prevención y educación de cero a tres años no aparecen en ningún aspecto. Y la integración del mutualismo se repite en dos aspectos (elección y universalidad).",
+        "mejora": "Añadir los huecos de la cartera común como medida en «Gestión pública y universalidad» y dejar el mutualismo solo en «Libertad de elección»."
+      }
+    ]
+  },
+  "aspectos": [
+    {
+      "i": 0,
+      "n": "Colaboración con centros privados",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin postura sobre los conciertos, o dinero público a centros privados sin contrato claro, sin control de resultados ni de cobros.",
+          "medidas": [
+            { "nombre": "Sin plan propio", "texto": "No dice si usará centros privados ni para qué, de modo que cada concierto se decide caso a caso, sin un criterio conocido ni comparación con la red pública." },
+            { "nombre": "Dinero sin control", "texto": "Se paga a centros privados sin indicadores de resultado, sin inspección y sin publicar cuánto cobran ni qué hacen con ese dinero público." },
+            { "nombre": "Contratos rotos o eternos", "texto": "Se rompen conciertos vigentes sin indemnizar ni preparar la alternativa, o se prorrogan siempre de forma automática, sin mirar cómo funcionan." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Conciertos con contrato escrito, precio público y control mínimo, para cubrir lo que la red pública no llega a atender.",
+          "medidas": [
+            { "nombre": "Contrato escrito y publicado", "texto": "Cada concierto sanitario, educativo o de cuidados se firma con precio, servicios incluidos y duración, y se publica en el portal de contratación de la comunidad." },
+            { "nombre": "Derivar lo que pasa del plazo", "texto": "En sanidad, la comunidad deriva a centros privados las pruebas y operaciones que superan el plazo, respetando la misma lista de espera y el mismo orden de prioridad." },
+            { "nombre": "Gratuidad garantizada", "texto": "Lo pagado con dinero público no se cobra otra vez a la familia, al paciente o a la persona dependiente; la inspección atiende las quejas y ordena devolver lo cobrado." },
+            { "nombre": "Inspección de requisitos", "texto": "Antes de concertar, la comunidad comprueba personal, instalaciones y seguridad del centro, y repite la inspección mientras dura el contrato." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Conciertos evaluados por coste y resultado, comparados con la red pública y renovados solo si la evaluación lo justifica.",
+          "medidas": [
+            { "nombre": "Indicadores en cada contrato", "texto": "Cada concierto fija indicadores de resultado (complicaciones, reingresos, progreso del alumnado, calidad de los cuidados) y de coste, medidos cada año." },
+            { "nombre": "Comparación con la red pública", "texto": "La comunidad publica cada año el coste y los resultados de los centros concertados junto a los de los públicos de su zona, con el mismo método." },
+            { "nombre": "Renovar solo tras evaluar", "texto": "Ningún concierto se renueva sin un informe que compare su coste y su resultado con la alternativa pública; el informe se publica antes de firmar." },
+            { "nombre": "Admisión por la misma oficina", "texto": "Las plazas concertadas en colegios y residencias se adjudican con los mismos criterios y por la misma oficina que las públicas, nunca por el propio centro." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Colaboración solo donde mejora lo medido, con precio ajustado por dificultad, reversión pactada y sin elegir a los usuarios rentables.",
+          "medidas": [
+            { "nombre": "Concertar solo con ventaja medida", "texto": "Un concierto nuevo solo se firma si un estudio público muestra que mejora el plazo, el resultado o el coste frente a ampliar la red pública." },
+            { "nombre": "Precio ajustado por dificultad", "texto": "El precio por paciente, alumno o persona dependiente sube con la gravedad o la necesidad de apoyo, para que no compense quedarse con los casos fáciles." },
+            { "nombre": "Reserva de plazas para más necesidad", "texto": "Todo centro concertado reserva plazas para alumnado con necesidad de apoyo y para pacientes o residentes complejos, y la inspección comprueba que se ocupan." },
+            { "nombre": "Cláusula de reversión pactada", "texto": "El contrato prevé desde el inicio cómo vuelve el servicio a la red pública si sale peor: plazos, personal, bienes y cálculo de lo que se debe cada parte." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Un contrato tipo por ley para todo centro pagado con impuestos: mismo precio, mismos indicadores, cuentas abiertas y sin prórroga si sale peor.",
+          "medidas": [
+            { "nombre": "Ley de contrato tipo", "texto": "Una ley básica estatal fija el contrato tipo de conciertos sanitarios, educativos y de cuidados; las comunidades lo aplican al renovar cada uno y respetan los vigentes hasta su fin." },
+            { "nombre": "Cuentas abiertas", "texto": "El centro concertado publica en qué gasta el dinero público que recibe y qué beneficio obtiene de él, con una auditoría externa cada año." },
+            { "nombre": "Sin cuotas encubiertas", "texto": "Prohibidas las cuotas, las aportaciones «voluntarias» y los servicios de pago obligatorios en lo que financia el dinero público, con inspección y devolución a las familias." },
+            { "nombre": "Sin prórroga tras dos malas evaluaciones", "texto": "Si el centro sale peor que la red pública comparable en dos evaluaciones seguidas, no se prorroga; si sale mejor, puede ampliarse. Lo compara un evaluador independiente." },
+            { "nombre": "Plaza pública si falta oferta", "texto": "Si con el precio común no hay centros dispuestos a concertar, la plaza la crea la red pública; nunca se paga más por atender casos más fáciles." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 1,
+      "n": "Contención del gasto y de los impuestos",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin propuesta sobre el gasto, o gastar sin control ni cuentas, tolerar el fraude o bajar impuestos sin decir qué se deja de pagar.",
+          "medidas": [
+            { "nombre": "Gasto sin cuentas", "texto": "Programas que se crean y se mantienen sin un objetivo medible, sin un coste conocido y sin que nadie revise si funcionan." },
+            { "nombre": "Rebajas sin financiar", "texto": "Bajadas de impuestos que no dicen qué servicio o qué partida se recorta para pagarlas, ni cómo se notará en hospitales, colegios o residencias." },
+            { "nombre": "Tolerar el fraude", "texto": "Amnistías fiscales o falta de inspección que dejan sin cobrar lo que el resto de contribuyentes sí paga." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Presupuestos que se cumplen y se publican: cada servicio sabe cuánto gasta, en qué y si se ha desviado de lo previsto.",
+          "medidas": [
+            { "nombre": "Ejecución publicada cada trimestre", "texto": "Estado y comunidades publican cada trimestre lo gastado en sanidad, educación y cuidados frente a lo presupuestado, con cada desviación explicada." },
+            { "nombre": "Pagar a proveedores en plazo", "texto": "Pagar facturas dentro del plazo legal, porque pagar tarde encarece las compras y genera intereses; el periodo medio de pago se publica cada mes." },
+            { "nombre": "Memoria de coste de lo nuevo", "texto": "Toda ley o programa nuevo de servicios dice, antes de aprobarse, cuánto cuesta, cómo se paga y qué objetivo debe alcanzar." },
+            { "nombre": "Cruce de datos contra el fraude", "texto": "Hacienda, Seguridad Social y comunidades cruzan sus datos para detectar fraude fiscal y en prestaciones, y publican cada año lo detectado y lo recuperado." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Comprar mejor y revisar lo que se gasta: central de compras, administración digital y auditoría de los grandes programas.",
+          "medidas": [
+            { "nombre": "Central de compras común", "texto": "Estado y comunidades compran juntos medicamentos, material sanitario y suministros de uso común, y publican los precios adjudicados." },
+            { "nombre": "Administración digital sin papeles repetidos", "texto": "Citas, recetas, matrícula y solicitud de la dependencia por internet, con datos compartidos entre administraciones y sin pedir lo que ya tienen; con atención presencial para quien la necesite." },
+            { "nombre": "Auditoría de los grandes programas", "texto": "El Tribunal de Cuentas y los órganos de control de las comunidades auditan cada año los mayores programas de gasto en servicios y publican sus conclusiones." },
+            { "nombre": "Revisiones de gasto independientes", "texto": "La Autoridad Independiente de Responsabilidad Fiscal (AIReF) revisa programas concretos y el Gobierno responde a cada propuesta: la aplica o explica por qué no." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Cada euro evaluado antes de subir la presión fiscal media: lo nuevo se evalúa antes de pagarlo y lo que no aporta se retira.",
+          "medidas": [
+            { "nombre": "Evaluar lo nuevo antes de pagarlo", "texto": "Medicamentos, tecnologías y programas nuevos se financian tras una evaluación pública de lo que aportan frente a lo que cuestan." },
+            { "nombre": "Retirar lo que no aporta", "texto": "Una lista pública de prácticas de poco valor (pruebas repetidas, tratamientos sin beneficio probado) que se dejan de pagar, revisada cada año con los profesionales." },
+            { "nombre": "Presupuesto por resultados", "texto": "Cada programa de servicios lleva en el presupuesto objetivos medibles, y al cerrar el año se publica si se alcanzaron." },
+            { "nombre": "Informe antes de subir impuestos", "texto": "Antes de subir la presión fiscal media, el Gobierno publica qué ahorros evaluados ha aplicado, cuáles no y por qué." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Todo el gasto revisado por turnos con una opción de ahorro obligada, solo se paga lo que demuestra su valor y lo ahorrado vuelve al servicio.",
+          "medidas": [
+            { "nombre": "Revisión de todo el gasto por turnos", "texto": "Cada gran partida se revisa al menos una vez cada cinco años, con presidente independiente y al menos una opción que ahorre del 10 al 20 %, como hacen los Países Bajos.", "meta": true, "fuente": "https://www.rijksfinancien.nl/sites/default/files/extrainfo/ibos/Spending%20Reviews%20in%20the%20Netherlands.pdf" },
+            { "nombre": "Cumplir o explicar por ley", "texto": "Con rango de ley y también para comunidades y ayuntamientos: cada propuesta se aplica o se rechaza por escrito, en público y con plazo; sin responder a todas, no se sube la presión fiscal media." },
+            { "nombre": "Umbral público de coste y beneficio", "texto": "Un umbral conocido de coste por año de vida ganado con buena salud decide qué tratamientos nuevos se pagan, apoyado en la evaluación clínica conjunta de la UE y con excepciones tasadas.", "fuente": "https://health.ec.europa.eu/health-technology-assessment/implementation-regulation-health-technology-assessment_en" },
+            { "nombre": "Lo ahorrado vuelve al servicio", "texto": "Lo ahorrado en una revisión se destina primero al servicio evaluado (menos espera, más profesionales) y solo después a otros fines." },
+            { "nombre": "Excepción de emergencia con control", "texto": "En una crisis grave se puede subir ingresos sin completar las revisiones, con la obligación de responder después ante el Parlamento." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 2,
+      "n": "Libertad de elección",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin propuesta sobre la elección, o ninguna elección para la persona, o una en la que es el centro quien escoge a quién admite.",
+          "medidas": [
+            { "nombre": "Asignación sin salida", "texto": "Centro de salud, hospital y colegio asignados solo por el domicilio, sin posibilidad de cambiar ni de reclamar." },
+            { "nombre": "Elige el centro, no la persona", "texto": "Colegios o residencias pagados con dinero público que deciden a quién admiten mediante entrevistas, cuotas o requisitos que filtran." },
+            { "nombre": "Elegir a ciegas", "texto": "Se permite elegir pero sin ningún dato de esperas ni de resultados, de modo que solo elige bien quien tiene información por su cuenta." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Elegir y cambiar de médico de familia, pediatra y colegio en la propia zona, con un trámite sencillo y criterios públicos.",
+          "medidas": [
+            { "nombre": "Médico de familia y pediatra", "texto": "Toda persona puede elegir y cambiar de médico de familia y de pediatra en su zona, por internet o en el centro, sin justificar el motivo." },
+            { "nombre": "Solicitud de colegio por preferencias", "texto": "La familia pide varios colegios por orden de preferencia y las plazas se asignan con criterios publicados de antemano, como la cercanía, los hermanos o la renta." },
+            { "nombre": "Segunda opinión médica", "texto": "Derecho a una segunda opinión ante diagnósticos graves, regulado igual en todas las comunidades." },
+            { "nombre": "Respuesta motivada", "texto": "Si no se atiende la elección pedida, la administración responde por escrito y con motivos dentro de plazo, y la persona puede recurrir." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Elegir médico, especialista, hospital, colegio y tipo de cuidado en toda la red de la comunidad, sin que el centro filtre.",
+          "medidas": [
+            { "nombre": "Hospital y especialista en la comunidad", "texto": "Elegir cualquier hospital y centro de especialidades de la comunidad para consultas y operaciones programadas, no solo el que toca por zona." },
+            { "nombre": "Zonas escolares amplias", "texto": "La comunidad amplía las zonas de admisión para que la familia pueda pedir cualquier centro sostenido con fondos públicos de su municipio o comarca." },
+            { "nombre": "Elegir el tipo de cuidado", "texto": "La persona dependiente elige entre residencia, centro de día o ayuda a domicilio, y entre los centros acreditados, dentro de lo que se le ha reconocido." },
+            { "nombre": "Sorteo si hay más demanda que plazas", "texto": "Cuando un colegio o una residencia tiene más solicitudes que plazas, se aplican los criterios legales y se desempata por sorteo público; el centro nunca selecciona." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Elección informada: antes de elegir se ven las esperas y los resultados de cada centro, y elegir no depende de la renta.",
+          "medidas": [
+            { "nombre": "Datos en el momento de elegir", "texto": "La espera, la calificación y los resultados de cada centro se muestran al pedir la cita o la plaza, no en un informe aparte." },
+            { "nombre": "Orientación para quien no usa internet", "texto": "Oficinas y teléfono de orientación para quien no usa internet o no domina el idioma, para que la información no favorezca solo a quien ya sabe moverse." },
+            { "nombre": "Otro centro si la espera se pasa", "texto": "Si la espera supera el plazo garantizado, la persona puede pedir otro centro de la red, también en otra comunidad." },
+            { "nombre": "Plan de mejora para el centro que pierde", "texto": "El centro que pierde usuarios de forma sostenida recibe inspección y un plan de mejora con apoyo, no solo menos dinero." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Elegir cualquier centro pagado con dinero público en toda España, con el dinero siguiendo a la persona y un solo régimen sanitario.",
+          "medidas": [
+            { "nombre": "Elección en toda España", "texto": "Elegir médico de familia, hospital y centro de especialidades entre todos los que tienen financiación pública, en cualquier comunidad y sin autorización previa." },
+            { "nombre": "Comparador oficial único", "texto": "Un solo comparador, acordado entre el Estado y las comunidades, con la espera, los resultados y la calificación de cada centro sanitario, escolar y de cuidados." },
+            { "nombre": "El dinero sigue a la persona", "texto": "El centro que atiende a más personas recibe más financiación, y la comunidad de origen compensa a la de destino de forma automática." },
+            { "nombre": "Transporte para quien lo necesita", "texto": "Ayuda de transporte para quien cambia de centro por espera excesiva o falta de servicio cerca, para que elegir no dependa de tener coche o dinero." },
+            { "nombre": "Un solo régimen sanitario", "texto": "El mutualismo de los funcionarios se integra por fases en el sistema común, condicionado a reforzar antes la sanidad pública y bajar las esperas, como aconseja la AIReF.", "fuente": "https://www.airef.es/wp-content/uploads/2025/03/Spending_Review_2022-2026_Fase_1_Mutualismo_administrativo/Resumen-ejecutivo.pdf" }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 3,
+      "n": "Evaluación y resultados",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin propuesta de evaluación, o listas de espera ocultas o maquilladas y resultados de los centros que no se publican.",
+          "medidas": [
+            { "nombre": "Listas de espera maquilladas", "texto": "Sacar pacientes de la lista, contar desde fechas tardías o no contar a quien espera una prueba, para que la espera parezca menor." },
+            { "nombre": "Resultados en secreto", "texto": "Negarse a publicar los resultados de hospitales, colegios o residencias, o publicarlos sin un método común para que no se puedan comparar." },
+            { "nombre": "Evaluarse a uno mismo", "texto": "Que la misma administración que gestiona los centros sea la única que los evalúa, sin ningún control externo." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Listas de espera publicadas con un método común y un calendario fijo, por especialidad, centro y comunidad, también en dependencia.",
+          "medidas": [
+            { "nombre": "Esperas con método común", "texto": "Todas las comunidades publican la espera de consultas, pruebas y operaciones con el mismo método y las mismas fechas, por especialidad y por hospital." },
+            { "nombre": "Espera de la dependencia", "texto": "Publicar cuántas personas esperan la valoración y la ayuda de la dependencia, y cuánto tiempo, por comunidad." },
+            { "nombre": "Datos abiertos y descargables", "texto": "Los datos se publican en un formato abierto que cualquiera puede descargar y reutilizar, no solo en informes en imagen o en papel." },
+            { "nombre": "Calendario fijo de publicación", "texto": "Publicar con una periodicidad conocida de antemano, para que nadie elija el momento según le convenga." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Indicadores públicos de calidad y coste por centro, con el mismo método en hospitales, centros de salud, colegios y residencias.",
+          "medidas": [
+            { "nombre": "Indicadores de calidad por centro", "texto": "Cada hospital, centro de salud, colegio y residencia publica indicadores de calidad (complicaciones, reingresos, abandono escolar, caídas) con definiciones comunes." },
+            { "nombre": "Coste por servicio", "texto": "Coste por paciente atendido, por alumno y por plaza de cuidados en cada centro, calculado con el mismo método contable." },
+            { "nombre": "Encuestas comunes de satisfacción", "texto": "Encuestas a pacientes, familias y personas cuidadas con el mismo cuestionario en toda España, con resultados por centro." },
+            { "nombre": "Inspecciones de residencias publicadas", "texto": "Los informes de inspección de residencias y centros de día se publican, con las sanciones impuestas y su seguimiento." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Plazos máximos garantizados por ley para todo el recorrido y evaluación independiente de todos los centros, sea cual sea su gestión.",
+          "medidas": [
+            { "nombre": "Plazos por ley para todo el recorrido", "texto": "Plazos máximos para primaria, diagnóstico, especialista y operación, y para la valoración y la ayuda de la dependencia; hoy el decreto de 2011 solo cubre cinco operaciones.", "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2011-14190" },
+            { "nombre": "Registro único de esperas auditado", "texto": "Un registro que cuenta desde que el médico indica la prueba o la operación, sin pacientes fuera de la lista y auditado desde fuera." },
+            { "nombre": "Evaluador independiente", "texto": "Una agencia independiente del Gobierno y de las comunidades evalúa todos los centros, públicos y concertados, con la misma vara." },
+            { "nombre": "Progreso del alumnado", "texto": "En educación se publica el progreso que logra cada centro teniendo en cuenta el punto de partida del alumnado, no solo la nota media." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Plazos que se cumplen solos: vencido el plazo, se atiende en otro centro sin coste ni reclamación; y calificación pública de cada centro.",
+          "medidas": [
+            { "nombre": "Garantía de plazo automática", "texto": "Vencido el plazo, el sistema ofrece otro centro público o concertado y paga el desplazamiento, sin que la persona tenga que reclamar, como en Dinamarca y Suecia.", "fuente": "https://www.1177.se/en/Vastra-Gotaland/other-languages/other-languages/regler-och-rattigheter---andra-sprak/vardgaranti-andra-sprak-vgr/" },
+            { "nombre": "Calificación visible en cada centro", "texto": "La agencia da a cada centro una calificación pública en pocos niveles, que se muestra en su entrada y en su web, como hace el inspector público inglés.", "fuente": "https://www.cqc.org.uk/about-us/how-we-do-our-job/ratings" },
+            { "nombre": "Lo que cuentan los pacientes", "texto": "Medir cómo está la persona tras el tratamiento y si lo entiende, con encuestas comparables entre países como las de la Organización para la Cooperación y el Desarrollo Económicos (OCDE).", "fuente": "https://www.oecd.org/en/about/programmes/patient-reported-indicator-surveys-paris.html" },
+            { "nombre": "Indicadores ajustados y revisados", "texto": "Resultados ajustados por la gravedad del paciente o el punto de partida del alumno, combinados con inspección presencial y revisados cada pocos años para evitar trampas." },
+            { "nombre": "Garantía por fases unida a capacidad", "texto": "La garantía empieza por lo más grave y se amplía a medida que crecen profesionales y financiación, para que no quede en papel mojado." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 4,
+      "n": "Profesionales suficientes",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin plan de plantillas, o plazas vacías durante años y contratos temporales encadenados al margen de la ley.",
+          "medidas": [
+            { "nombre": "Plazas vacías sin plan", "texto": "Consultorios, aulas y residencias sin profesional durante meses, sin un plan para cubrirlos ni datos públicos de cuántas plazas faltan." },
+            { "nombre": "Temporalidad encadenada", "texto": "Encadenar interinidades y contratos temporales para puestos que son estables, en contra de lo que exigen la ley española y la europea." },
+            { "nombre": "Recortar plantilla a ciegas", "texto": "Congelar la reposición de profesionales sin calcular la necesidad, aunque crezca o envejezca la población a la que se atiende." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Cubrir las vacantes con oposiciones regulares, sustituciones rápidas y un registro público de las plazas sin cubrir.",
+          "medidas": [
+            { "nombre": "Oposiciones cada año", "texto": "Convocar cada año las plazas estables vacantes de sanidad, educación y servicios sociales, con fechas conocidas de antemano." },
+            { "nombre": "Bolsas de sustitución ágiles", "texto": "Una bolsa de empleo única y abierta en cada comunidad para cubrir bajas y vacaciones en días, no en semanas." },
+            { "nombre": "Registro público de vacantes", "texto": "Cada comunidad publica cuántas plazas están sin cubrir, por centro y por categoría, y cuánto tiempo llevan así." },
+            { "nombre": "Títulos extranjeros reconocidos en plazo", "texto": "Homologar los títulos de profesionales formados fuera de España con plazos máximos y criterios claros, sin rebajar la exigencia." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Plazas de formación según las necesidades previstas y una carrera profesional que premia experiencia, formación y resultados.",
+          "medidas": [
+            { "nombre": "Formación según la necesidad", "texto": "Las plazas de especialización sanitaria (como el médico interno residente, MIR), de magisterio y de cuidados se fijan con un estudio de necesidades, no por inercia." },
+            { "nombre": "Carrera profesional común", "texto": "Niveles de carrera con subida de sueldo por experiencia, formación y evaluación, iguales en lo básico en todas las comunidades." },
+            { "nombre": "Tiempo protegido para formarse", "texto": "Horas reservadas dentro de la jornada para la formación continua y la docencia, que no se pierden por la presión asistencial." },
+            { "nombre": "Profesionalizar los cuidados", "texto": "Formación y acreditación oficial para auxiliares de residencia y ayuda a domicilio, con un salario y un convenio acordes a ese trabajo." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Plantillas calculadas por población y necesidad, con ratios máximas e incentivos para quedarse en las plazas difíciles.",
+          "medidas": [
+            { "nombre": "Plantilla según población y necesidad", "texto": "Cada centro tiene una plantilla calculada según la población que atiende, su edad y su estado de salud o sus necesidades educativas." },
+            { "nombre": "Ratios máximas por norma", "texto": "Máximos de pacientes por médico y por enfermera, de alumnos por docente y de personas por cuidador, fijados por norma y publicados por centro." },
+            { "nombre": "Incentivos para plazas difíciles", "texto": "Plus salarial, ayuda de vivienda y puntos para el traslado en plazas rurales o de difícil cobertura." },
+            { "nombre": "Primaria que compite con el hospital", "texto": "Medicina de familia y pediatría con un cupo máximo de pacientes, tiempo suficiente por consulta y una carrera propia." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Previsión independiente a 15 años, revisada cada tres; formación financiada según ella y un plus común que crece con lejanía y permanencia.",
+          "medidas": [
+            { "nombre": "Previsión independiente a 15 años", "texto": "Un órgano independiente publica cada tres años cuántos profesionales harán falta por especialidad y territorio a 15 años vista, como hacen los Países Bajos.", "meta": true, "fuente": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3465184" },
+            { "nombre": "Formación financiada según la previsión", "texto": "Las plazas de formación sanitaria, de enfermería y de magisterio siguen esa previsión; si el Gobierno ofrece menos, lo justifica por escrito ante el Parlamento." },
+            { "nombre": "Plus común por lejanía y permanencia", "texto": "Un mapa oficial de plazas difíciles por niveles de lejanía y un plus común en toda España que crece con el nivel y con los años de permanencia, como en Australia.", "fuente": "https://www.health.gov.au/our-work/workforce-incentive-program/doctor-stream/payment-amounts" },
+            { "nombre": "Contrato al acabar la residencia", "texto": "Contrato de varios años, al terminar la formación, para quien se queda en una zona con déficit de profesionales." },
+            { "nombre": "Ratios revisadas con cada previsión", "texto": "Las ratios máximas se revisan con cada previsión y su coste entra en el suelo de gasto, para que no queden en una promesa sin dinero." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 5,
+      "n": "Territorio y cercanía",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin propuesta para el medio rural, o cerrar consultorios y escuelas sin alternativa, o negar la atención a quien viene de otra comunidad.",
+          "medidas": [
+            { "nombre": "Cierres sin alternativa", "texto": "Cerrar consultorios, escuelas o centros de día rurales sin transporte, unidad móvil ni teleconsulta que los sustituya." },
+            { "nombre": "Fronteras entre comunidades", "texto": "Negar o retrasar la atención a quien vive en otra comunidad, o no reconocer sus recetas ni sus informes." },
+            { "nombre": "Reparto que ignora la distancia", "texto": "Repartir los recursos solo por número de habitantes, sin reconocer que atender a una población dispersa o envejecida cuesta más." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Centro de salud, escuela y atención social a una distancia razonable, con transporte o atención a domicilio donde no los hay.",
+          "medidas": [
+            { "nombre": "Consultorio y escuela cercanos", "texto": "Mantener el consultorio local y la escuela rural, aunque sea con aulas de varias edades, mientras haya población que los use." },
+            { "nombre": "Transporte escolar y sanitario", "texto": "Transporte gratuito al colegio, al centro de salud y al hospital para quien vive lejos y no tiene ese servicio en su pueblo." },
+            { "nombre": "Atención en otra comunidad", "texto": "La receta electrónica y la atención urgente funcionan igual fuera de la comunidad de residencia, sin trámites añadidos." },
+            { "nombre": "Cuidados en casa", "texto": "Enfermería, ayuda a domicilio y teleasistencia llegan a las personas mayores o dependientes que viven solas en los pueblos." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Historia clínica común entre comunidades, telemedicina, unidades móviles y escuelas rurales agrupadas.",
+          "medidas": [
+            { "nombre": "Historia clínica compartida", "texto": "Cualquier profesional autorizado de cualquier comunidad consulta la historia clínica del paciente, y queda registrado quién ha entrado." },
+            { "nombre": "Teleconsulta desde el pueblo", "texto": "Consulta por vídeo con el especialista desde el consultorio del pueblo, con el médico o la enfermera local presentes cuando haga falta." },
+            { "nombre": "Unidades móviles con calendario", "texto": "Unidades móviles de pruebas (mamografías, análisis, revisión de la vista) y de servicios sociales que recorren los pueblos con un calendario fijo y público." },
+            { "nombre": "Escuelas rurales agrupadas", "texto": "Colegios rurales agrupados que comparten entre varios pueblos docentes especialistas, transporte y materiales." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "El mismo servicio en un pueblo que en una capital, con gestión cercana y un fondo de nivelación que paga el coste de la dispersión.",
+          "medidas": [
+            { "nombre": "Fondo de nivelación", "texto": "Un fondo estatal compensa a comunidades y diputaciones el coste extra de servir a población dispersa, envejecida o insular." },
+            { "nombre": "Gestión cercana", "texto": "Comunidades y municipios organizan el servicio en su territorio; el Estado fija el mínimo común y los datos que todos deben publicar." },
+            { "nombre": "Mapa de acceso publicado", "texto": "Un mapa oficial con el tiempo de viaje de cada pueblo a su centro de salud, urgencias, colegio y servicios sociales, actualizado cada año." },
+            { "nombre": "Puntos de servicio compartidos", "texto": "Sanidad, servicios sociales y trámites en un mismo local en los pueblos, con personal presencial y apoyo digital." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Tiempos máximos de acceso fijados por ley, una historia clínica que controla el paciente y que le sigue por la UE, y reparto según la necesidad.",
+          "medidas": [
+            { "nombre": "Tiempos máximos de acceso por ley", "texto": "Una ley básica fija el tiempo máximo hasta urgencias, primaria, escuela y servicios; por ejemplo, un punto de atención a menos de 30 minutos, como busca Francia.", "meta": true, "fuente": "https://www.banquedesterritoires.fr/programme-france-services" },
+            { "nombre": "Alternativa obligada donde no se llega", "texto": "Donde no se cumple el tiempo máximo, la administración responsable pone unidad móvil, transporte o teleconsulta, sin que la persona tenga que pedirlo." },
+            { "nombre": "Historia clínica que controla el paciente", "texto": "El paciente ve quién ha consultado sus datos y puede bloquear accesos, como ya ocurre en Estonia.", "fuente": "https://www.coe.int/en/web/bioethics/-/estonia-digital-health-system" },
+            { "nombre": "Datos que viajan por la UE", "texto": "Resumen de paciente y receta en el formato del Espacio Europeo de Datos de Salud, válidos en toda la UE antes de las fechas que fija esa norma.", "fuente": "https://health.ec.europa.eu/ehealth-digital-health-and-care/european-health-data-space-regulation-ehds_en" },
+            { "nombre": "Fórmula pública según la necesidad", "texto": "El dinero se reparte entre comunidades según población, necesidad sanitaria y social, dispersión, insularidad y envejecimiento, recalculado cada año, como en Finlandia.", "fuente": "https://vm.fi/en/funding-of-wellbeing-services-counties" }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 6,
+      "n": "Gestión pública y universalidad",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin propuesta, o negar la sanidad o la escuela a personas que viven en España, o desmantelar la red pública.",
+          "medidas": [
+            { "nombre": "Excluir a quien vive aquí", "texto": "Dejar sin atención sanitaria o sin escuela a personas que viven en España por su situación administrativa." },
+            { "nombre": "Desmantelar la red pública", "texto": "Vender o cerrar centros públicos sin evaluación ni alternativa, o dejarlos sin inversión hasta que dejan de funcionar." },
+            { "nombre": "Derechos según el código postal", "texto": "Que lo que cubre el sistema dependa por completo de la comunidad en la que se vive, sin un mínimo común garantizado." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Atención sanitaria, escuela y valoración de la dependencia garantizadas a toda persona que vive en España, como ya fija la ley.",
+          "medidas": [
+            { "nombre": "Atención a toda persona residente", "texto": "Aplicar en todas las comunidades el derecho a la atención sanitaria del decreto-ley de 2018, también a las personas extranjeras que cumplen sus requisitos.", "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2018-10752" },
+            { "nombre": "Escuela para todo menor", "texto": "Todo menor que vive en España se escolariza, sea cual sea la situación administrativa de su familia." },
+            { "nombre": "Urgencias, embarazo y menores siempre", "texto": "La atención urgente, la de las embarazadas y la de los menores se presta en cualquier caso, sin trámites previos." },
+            { "nombre": "Sin pagos por adelantado", "texto": "Ningún centro público pide pago ni depósito antes de atender lo que cubre la cartera común de servicios." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Una cartera común de servicios en toda España, con una red pública capaz de cubrirla por sí misma en cada territorio.",
+          "medidas": [
+            { "nombre": "Cartera común con suelo estatal", "texto": "Una lista de prestaciones sanitarias, educativas y de dependencia que el Estado garantiza en todas las comunidades; cada comunidad puede añadir, nunca quitar." },
+            { "nombre": "Red pública como base", "texto": "La red pública puede atender por sí misma la cartera común en cada territorio; los conciertos cubren picos y carencias, no la base." },
+            { "nombre": "Plan de mantenimiento de centros", "texto": "Un plan de varios años para renovar edificios y equipos de los centros públicos, para que no se degraden por falta de inversión." },
+            { "nombre": "Cerrar los huecos de la cartera", "texto": "Incluir con un calendario público lo que hoy queda fuera o cubre poco y es básico, como la salud dental, la salud mental y la educación de cero a tres años." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Universalidad sin huecos y una gestión pública evaluada con las mismas reglas que cualquier otra, con consecuencias.",
+          "medidas": [
+            { "nombre": "Mismas reglas de evaluación", "texto": "Los centros públicos se evalúan con los mismos indicadores, la misma inspección y la misma publicación que los concertados." },
+            { "nombre": "Consecuencias también en lo público", "texto": "Si un centro público sale mal en dos evaluaciones seguidas, cambia la dirección y aplica un plan de mejora con seguimiento público." },
+            { "nombre": "Sin exclusiones por trámite", "texto": "Revisar cada año quién se queda fuera por papeles (recién llegados, personas sin domicilio fijo) y corregir el procedimiento que lo causa." },
+            { "nombre": "Ampliar la cartera solo tras evaluar", "texto": "Lo que entra en la cartera común entra tras una evaluación pública de coste y beneficio, y a la vez para todas las comunidades." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Derecho por residencia con un solo documento en toda España, cartera común por ley y centros públicos autónomos dirigidos por mérito.",
+          "medidas": [
+            { "nombre": "Documento único en toda España", "texto": "Un único documento sanitario, válido en toda España, para toda persona que vive aquí y cumple la ley, con el mismo procedimiento en todas las comunidades." },
+            { "nombre": "Cartera común con rango de ley", "texto": "La cartera común pasa a fijarse por ley estatal, no por decreto, para que no pueda recortarse sin debate en el Parlamento." },
+            { "nombre": "Dirección elegida por mérito", "texto": "Directores de hospitales, centros de salud y colegios públicos elegidos por concurso de mérito, con contrato de objetivos y evaluación pública al final del mandato." },
+            { "nombre": "Autonomía de gestión del centro público", "texto": "Presupuesto propio y capacidad de organizar plantilla y horarios, a cambio de rendir cuentas con los mismos indicadores que un concertado." }
+          ]
+        }
+      ]
+    },
+    {
+      "i": 7,
+      "n": "Financiación pública suficiente",
+      "niveles": [
+        {
+          "nivel": 0,
+          "resumen": "Sin propuesta de financiación, o recortar por debajo de lo que la ley garantiza, o prometer servicios sin decir cómo se pagan.",
+          "medidas": [
+            { "nombre": "Recortes por debajo de la ley", "texto": "Presupuestos que no cubren lo que la ley ya garantiza, como las ayudas de dependencia reconocidas o la gratuidad de la enseñanza obligatoria." },
+            { "nombre": "Promesas sin financiar", "texto": "Anunciar servicios nuevos sin decir cuánto cuestan ni de dónde sale el dinero para pagarlos." },
+            { "nombre": "Recortar en plena crisis", "texto": "Recortar los servicios justo en las recesiones, cuando más personas los necesitan y menos alternativas tienen." }
+          ]
+        },
+        {
+          "nivel": 1,
+          "resumen": "Mantener el gasto por habitante cuando crece la demanda: más población, más edad o más dependencia, más presupuesto.",
+          "medidas": [
+            { "nombre": "Gasto que sigue a la demanda", "texto": "El presupuesto de sanidad, educación y dependencia crece al menos al ritmo de la población atendida y de su envejecimiento." },
+            { "nombre": "Pagar primero lo ya reconocido", "texto": "Financiar las ayudas de dependencia ya reconocidas, y que la persona aún no recibe, antes de aprobar prestaciones nuevas." },
+            { "nombre": "Sin recortes por presupuesto prorrogado", "texto": "Si no se aprueba presupuesto, los servicios mantienen al menos el gasto real del año anterior, ajustado por la demanda." },
+            { "nombre": "Gasto por habitante publicado", "texto": "Publicar cada año el gasto por habitante en cada servicio y en cada comunidad, con el mismo método, para poder comparar." }
+          ]
+        },
+        {
+          "nivel": 2,
+          "resumen": "Un suelo de gasto por habitante en sanidad, educación y dependencia que ninguna administración puede rebajar.",
+          "medidas": [
+            { "nombre": "Suelo de gasto por habitante", "texto": "Una ley fija un gasto mínimo por habitante en sanidad, educación y dependencia, que ni el Estado ni las comunidades pueden rebajar." },
+            { "nombre": "Plan de gasto educativo cumplido", "texto": "Cumplir el plan que manda la ley de educación de 2020 para subir el gasto público educativo hasta un mínimo del 5 % del producto interior bruto.", "meta": true, "fuente": "https://www.boe.es/buscar/act.php?id=BOE-A-2020-17264" },
+            { "nombre": "Parte estatal de la dependencia suficiente", "texto": "El Estado paga su parte del nivel mínimo de la dependencia con una cuantía que se actualiza cada año con el coste real de los servicios." }
+          ]
+        },
+        {
+          "nivel": 3,
+          "resumen": "Financiación estable y a varios años, finalista donde haga falta y revisada cada año contra resultados.",
+          "medidas": [
+            { "nombre": "Compromisos a varios años", "texto": "Compromisos de gasto a varios años para los servicios, para que plantillas e inversiones se planifiquen sin depender del presupuesto de cada año." },
+            { "nombre": "Dinero finalista donde haga falta", "texto": "Partidas que solo pueden usarse para su fin (atención primaria, dependencia, educación de cero a tres años) donde hay riesgo de que se desvíen a otra cosa." },
+            { "nombre": "Aumentos ligados a objetivos", "texto": "Cada aumento sobre el suelo se liga a objetivos medidos (esperas, abandono escolar, plazas de cuidados) y se revisa al cabo de un año." },
+            { "nombre": "Reasignar si no hay resultado", "texto": "Si el aumento no logra su objetivo, el dinero pasa a otro programa del mismo servicio que sí funcione, no sale del servicio." }
+          ]
+        },
+        {
+          "nivel": 4,
+          "resumen": "Suelo de gasto por habitante ajustado por necesidad, fijado por ley para cuatro años, actualizado cada año y con parte reservada.",
+          "medidas": [
+            { "nombre": "Ley de suelo a cuatro años", "texto": "Una ley fija para cuatro años el mínimo de sanidad, educación y dependencia, y el Gobierno no puede presupuestar por debajo, como hizo Inglaterra con su sanidad en 2020.", "meta": true, "fuente": "https://www.legislation.gov.uk/ukpga/2020/5/section/1" },
+            { "nombre": "Suelo ajustado por necesidad", "texto": "El suelo por habitante se ajusta por edad, estado de salud, pobreza y dispersión, y se recalcula cada año con datos oficiales y costes." },
+            { "nombre": "Parte reservada a primaria y dependencia", "texto": "Un porcentaje mínimo del gasto sanitario va a la atención primaria, y el nivel mínimo estatal de dependencia cubre el coste real del servicio." },
+            { "nombre": "Fondo de reserva para las crisis", "texto": "Un fondo que se llena en los años buenos y solo puede usarse para mantener el suelo en las recesiones." },
+            { "nombre": "Encaje con la revisión de gasto", "texto": "El suelo protege el mínimo; lo que va por encima pasa por la revisión de gasto, y todo encaja con las reglas fiscales europeas y la ley de estabilidad." }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -13351,3 +13351,12 @@ Eugenio, tras donar 1 € de prueba: «no ha habido thank you page; créala, que
 - The figure takes half the screen (top of the dialog on mobile). Click or drag on it to set levels (nearest spoke, nearest ring); hovering a point shows that level's measure; the matching card is highlighted (and scrolled to on desktop).
 - «Mostrar/Ocultar partidos» (hidden by default, saved in `politica.geo.test.v1.ver`): dashed party polygons + legend, and the live «de momento te pareces más a». Hidden, the test is answered without party references; the final screen always shows the top 3.
 - Not verified: real touch devices, installed app / service worker.
+
+## 2026-11-25 — Geometría: evaluator agent and measures in bullets per level
+
+> «Genera un bot que te evalúe el test de política y proponga mejores medidas, más completas y en bullet points en cada nivel.»
+
+- New agent `.claude/agents/evaluador-geometria.md`: reads one topic (ignoring party positions), grades it 1–10, lists problems, and writes 2–3 bullets for Indefinido and 3–5 for each other level (bold name + description), cumulative, neutral, numbers only as `"meta": true` targets or with `"fuente"`.
+- Run once per topic (10 in parallel): `scripts/medidas/datos/<tema>.json`, 1,265 measures. Grades: 6/10 in eight topics, 7/10 in Inmigración and Vivienda. Each file keeps its `evaluacion` (6–9 problems each).
+- `scripts/geometria-medidas.mjs --verificar|--aplicar` validates (lengths, counts, banned labels and party names, figures need meta/fuente, no repeated names) and builds `public/geometria-figura/medidas.json` (278 KB, loaded after the page).
+- The page shows summary + bullets in the test cards, the level side panel, and (names only) when hovering the test figure. Without the file it falls back to the short level text.
