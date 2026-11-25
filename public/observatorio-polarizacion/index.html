@@ -873,6 +873,8 @@ footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .mds li b{color:var(--ink);font-weight:700;display:inline}
 .mds-res{display:block;color:var(--ink-2)}
 .mds-c{gap:2px;font-size:13px}
+.mds-mas{display:inline-block;margin-top:8px;font-weight:600;font-size:14px;color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.mds-mas:hover{color:var(--c,var(--ink))}
 .gt-txt b{display:block;margin-bottom:2px;color:var(--ink);font-weight:700}
 .gt-txt.vacio{border-left-color:var(--line);background:transparent;color:var(--muted);font-size:14px}
 .gt-lat{overflow:auto;padding:22px clamp(14px,2vw,28px);border-left:1px solid var(--line);background:var(--bg-2);display:grid;gap:14px;align-content:start}
@@ -3914,9 +3916,15 @@ const ILUS = {
   // Loaded after the page; until it arrives (or if it fails) the short text of each level is shown.
   let MEDIDAS = null;
   const medidasDe = (k, i, n) => (MEDIDAS && MEDIDAS.temas[k] && MEDIDAS.temas[k][i] && MEDIDAS.temas[k][i][n]) || null;
-  function htmlMedidas(k, i, n, corto) {
+  const NIV_SLUG = ["indefinido", "basico", "intermedio", "avanzado", "ideal"];
+  // «Ver más»: every level of every aspect has its own page (/medidas/<aspecto>/<nivel>/, scripts/geometria-medidas.mjs).
+  // From the test it opens in a new tab so the test is not lost; from the panel it replaces the page (_top: we live in a frame).
+  const rutaMedidas = (k, i, n) => { const r = MEDIDAS && MEDIDAS.rutas && MEDIDAS.rutas[k] && MEDIDAS.rutas[k][i]; return r ? `/medidas/${r}/${NIV_SLUG[n]}/` : null; };
+  function htmlMedidas(k, i, n, corto, destino = "_top") {
     const m = medidasDe(k, i, n); if (!m) return corto;
-    return `<span class="mds-res">${m[0]}</span><ul class="mds">${m[1].map(([a, b]) => `<li><b>${a}</b> ${b}</li>`).join("")}</ul>`;
+    const r = rutaMedidas(k, i, n);
+    return `<span class="mds-res">${m[0]}</span><ul class="mds">${m[1].map(([a, b]) => `<li><b>${a}</b> ${b}</li>`).join("")}</ul>`
+      + (r ? `<a class="mds-mas" href="${r}" target="${destino}"${destino === "_blank" ? ' rel="noopener"' : ""}>Ver más sobre ${n === 0 ? "este nivel" : "estas medidas"} →</a>` : "");
   }
   function refrescarMedidas() {
     if (st.nivel && !pnl.hidden) pnl.innerHTML = htmlNivel(st.nivel.i, st.nivel.k);
@@ -4576,7 +4584,7 @@ const ILUS = {
   }
   const gtTexto = (t, e, v) => (v === null
     ? `<p class="gt-txt vacio">Sin contestar: si pasas de tema, cuenta como «Indefinido». Desliza o pulsa un nivel para ver la medida.</p>`
-    : `<div class="gt-txt"><b>${NIV_TITULO[v]}</b>${htmlMedidas(KEYS[gt.paso], t.ejes.indexOf(e), v, e.niv[v])}</div>`);
+    : `<div class="gt-txt"><b>${NIV_TITULO[v]}</b>${htmlMedidas(KEYS[gt.paso], t.ejes.indexOf(e), v, e.niv[v], "_blank")}</div>`);
   // When the measures arrive after the test is open, redraw the texts of the answered cards
   function gtRefrescarTextos() {
     if (gtEl.hidden || gt.paso >= KEYS.length) return;

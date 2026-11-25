@@ -13360,3 +13360,12 @@ Eugenio, tras donar 1 € de prueba: «no ha habido thank you page; créala, que
 - Run once per topic (10 in parallel): `scripts/medidas/datos/<tema>.json`, 1,265 measures. Grades: 6/10 in eight topics, 7/10 in Inmigración and Vivienda. Each file keeps its `evaluacion` (6–9 problems each).
 - `scripts/geometria-medidas.mjs --verificar|--aplicar` validates (lengths, counts, banned labels and party names, figures need meta/fuente, no repeated names) and builds `public/geometria-figura/medidas.json` (278 KB, loaded after the page).
 - The page shows summary + bullets in the test cards, the level side panel, and (names only) when hovering the test figure. Without the file it falls back to the short level text.
+
+## 2026-11-25 — Geometría: one page per level («Ver más»), reachable from the test
+
+> «Sigue generando las URL para ampliar la información, que también se pueda ampliar y llegar a esa URL desde el test.»
+
+- `scripts/geometria-medidas.mjs --aplicar` now also writes `public/medidas/`: 320 level pages (`/medidas/<aspecto>/<nivel>/`: summary, bullets with bold names, «objetivo propuesto» tags and sources, level pills, what the lower levels already include, the next step, other aspects at the same level), 64 aspect pages (`/medidas/<aspecto>/`, the five levels) and an index (`/medidas/`). Canonical on luzhumanidad.com. 6,660 internal links checked, 0 broken.
+- «Ver más sobre estas medidas →» under the bullets: in the test it opens a new tab (the test stays open); in the level side panel it replaces the page (`_top`).
+- `src/server/sitios.ts`: `/medidas` goes to the static files like `/ideal` (own-domain 404 otherwise), and the sitemap of luzhumanidad.com (or of whichever site lists `/geometria-politica`) now announces the 385 `/medidas/` pages and the 65 `/ideal/` ones, which were not in any sitemap before. List in `public/geometria-figura/paginas.json`.
+- Not verified: production sitemap (I could not read the live one), installed app.

@@ -1186,3 +1186,7 @@ By his instruction the bicycle-class labour is assembly only. The project total 
 
 - Party levels (`TEMAS[k].v`) and the reasons were assigned against the old one-line level texts. The new bullets (`scripts/medidas/datos/`) raise several Básico/Intermedio bars (e.g. Básico «cumplir lo que ya obliga» → verifiable instruments). Nobody has re-checked whether each party still sits on the same level under the new measures. Re-running the review agents against `medidas.json` is roughly one batch of 10 agents.
 - The evaluator also proposed structural changes that were **not** applied (they change what parties are scored on): renaming «Bajar impuestos y competir» and «Contención del gasto», splitting overlapping aspects (ins: igualdad/convivencia; der: vida/autonomía; inm: cupos counted three times; viv: impago counted twice), and new aspects (tra: paro/autónomos/seguridad; der: libertades civiles y privacidad; amb: residuos, aire, biodiversidad, adaptación). Decision pending with Eugenio. Details in each file's `evaluacion.problemas`.
+
+## 2026-11-25 — Service worker stores any navigation as the app shell
+
+- `public/sw.js` (navigate branch) does `c.put("/", copy)` for **every** navigation response. Visiting a static page (`/medidas/…`, `/ideal/…`) with the app installed replaces the cached shell with that page; offline, the app would open on it. Pre-existing (affects `/ideal/` since phase 1). Fix: only store when the response is the SPA (`pathname === "/"` or a header the server sets on `index.html`), ~15 min plus a cache-name bump.
