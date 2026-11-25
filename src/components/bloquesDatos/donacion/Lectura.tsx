@@ -4,6 +4,8 @@ import type { PropsLectura } from '../tipos';
 import { cn } from '../../../utils/cn';
 import { miniatura } from '../../../utils/miniatura';
 import TextoEnriquecido from '../../knowledge/TextoEnriquecido';
+import { useCobro } from '../../../hooks/useCobro';
+import { useAuthOpcional } from '../../../contexts/AuthContext';
 
 // ============================================================================
 // DONAR (2026-10-26, Eugenio)
@@ -38,6 +40,12 @@ export default function Lectura({ datos, paginaId }: PropsLectura) {
   const [otro, setOtro] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [fallo, setFallo] = useState<string | null>(null);
+  // SIN ENTORNO DE PRUEBA (2026-11-25, Eugenio): mientras Stripe tenga una clave de pruebas, el público no ve el pago
+  // con tarjeta (no cobraría nada de verdad) sino un aviso; quien ha iniciado sesión lo prueba con la tarjeta 4242.
+  const cobro = useCobro();
+  const user = useAuthOpcional()?.user;
+  const enPruebas = !!cobro?.pruebas;
+  const ocultarPago = enPruebas && !user;
   const vuelta = (() => { try { return new URLSearchParams(window.location.search).get('donacion'); } catch { return null; } })();
   const euros = otro ? Number(otro.replace(',', '.')) : importe;
   const valido = Number.isFinite(euros) && euros >= 1 && euros <= 10000;
@@ -94,6 +102,14 @@ export default function Lectura({ datos, paginaId }: PropsLectura) {
     <div data-donacion className="mx-auto my-6 max-w-lg">
       {cabeza}
       <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+        {ocultarPago ? (
+          <div data-donacion-pronto className="text-center">
+            <Heart className="mx-auto h-8 w-8 text-rose-600" fill="currentColor" />
+            <p className="mt-2 text-lg font-black text-slate-900">Las donaciones con tarjeta se abren muy pronto</p>
+            <p className="mt-1 text-sm text-slate-600">{email ? <>Mientras tanto, escríbenos a <a href={`mailto:${email}`} className="font-bold underline">{email}</a> y te contamos cómo ayudar.</> : 'Mientras tanto, puedes ayudar por transferencia o escribiéndonos.'}</p>
+          </div>
+        ) : <>
+        {enPruebas && <p className="mb-3 rounded-xl bg-amber-50 px-3 py-2 text-[13px] text-amber-900"><b>Solo lo ves tú:</b> Stripe está con una clave de pruebas y el público ve un aviso en lugar del pago. Puedes probarlo con la tarjeta 4242 4242 4242 4242.</p>}
         {vuelta === 'cancelada' && <p className="mb-3 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-800">El pago no se ha completado. Puedes intentarlo de nuevo.</p>}
         {/* Una vez o cada mes. */}
         <div role="radiogroup" aria-label="Frecuencia" className="grid grid-cols-2 gap-1 rounded-2xl bg-slate-100 p-1">
@@ -131,6 +147,7 @@ export default function Lectura({ datos, paginaId }: PropsLectura) {
         </p>
         {/* El certificado para desgravar y el teléfono para dudas (2026-10-26). */}
         {nota && <div data-nota-donacion className="mt-3 border-t border-slate-100 pt-3 text-[12px] leading-relaxed text-slate-500 [white-space:pre-line]"><TextoEnriquecido texto={nota} /></div>}
+        </>}
       </div>
       {email && (
         <a href={`mailto:${email}`} className="mt-3 flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-left hover:border-slate-300">

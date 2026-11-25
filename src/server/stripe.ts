@@ -275,6 +275,12 @@ export function registerStripeRoutes(app: Express, db: any) {
     try {
       const cents = Math.round(Number(req.body?.importe_cents));
       if (!Number.isFinite(cents) || cents < 100 || cents > 1000000) return res.status(400).json({ error: 'El importe tiene que estar entre 1 € y 10.000 €.' });
+      // SIN ENTORNO DE PRUEBA PARA EL PÚBLICO (2026-11-25, Eugenio: «elimina el entorno de prueba de las donaciones de
+      // Stripe Checkout»): con una clave de pruebas nadie paga de verdad, así que a quien no ha iniciado sesión no se le
+      // abre ese pago; la sesión del equipo sí, para probar con la tarjeta 4242. Con la clave real, todo el mundo.
+      if ((process.env.STRIPE_SECRET_KEY || '').startsWith('sk_test') && !req.user) {
+        return res.status(503).json({ error: 'Las donaciones con tarjeta se abren muy pronto.', pruebas: true });
+      }
       const paginaId = String(req.body?.pagina_id || '').slice(0, 64);
       const ruta = typeof req.body?.ruta === 'string' && /^\/(?!\/)[^?#\s]{0,300}$/.test(req.body.ruta) ? req.body.ruta : '/';
       // El sitio desde el que se dona (su dominio propio, si lo tiene); si no se sabe, la plataforma.

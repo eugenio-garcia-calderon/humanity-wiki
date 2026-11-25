@@ -200,6 +200,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
  *  —la pizarra— necesita saberlo para ponérsela sin reventar la página. */
 export const useHayProveedorDeSesion = () => useContext(AuthContext) !== null;
 
+/** Como `useAuth`, pero sin proveedor (una página suelta) da `null` en vez de romper. */
+export const useAuthOpcional = () => useContext(AuthContext);
+
 export const useAuth = () => {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
