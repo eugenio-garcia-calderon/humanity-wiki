@@ -2,12 +2,6 @@
   "reservas": [
     {
       "agente": "prog1",
-      "ruta": "memory/09_TARGET_ARCHITECTURE/02_TECH_DEBT.md",
-      "motivo": "Geometría: cinco niveles",
-      "desde": "2026-11-25T12:12:43.299Z"
-    },
-    {
-      "agente": "prog1",
       "ruta": "scripts/geometria-ideal.mjs",
       "motivo": "Geometría: cinco niveles",
       "desde": "2026-11-25T12:12:46.238Z"
