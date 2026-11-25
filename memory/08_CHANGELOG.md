@@ -13361,10 +13361,35 @@ Eugenio, tras donar 1 € de prueba: «no ha habido thank you page; créala, que
 - `scripts/geometria-medidas.mjs --verificar|--aplicar` validates (lengths, counts, banned labels and party names, figures need meta/fuente, no repeated names) and builds `public/geometria-figura/medidas.json` (278 KB, loaded after the page).
 - The page shows summary + bullets in the test cards, the level side panel, and (names only) when hovering the test figure. Without the file it falls back to the short level text.
 
+## 2026-11-25 — Geometría: one page per level («Ver más»), reachable from the test
+
+> «Sigue generando las URL para ampliar la información, que también se pueda ampliar y llegar a esa URL desde el test.»
+
+- `scripts/geometria-medidas.mjs --aplicar` now also writes `public/medidas/`: 320 level pages (`/medidas/<aspecto>/<nivel>/`: summary, bullets with bold names, «objetivo propuesto» tags and sources, level pills, what the lower levels already include, the next step, other aspects at the same level), 64 aspect pages (`/medidas/<aspecto>/`, the five levels) and an index (`/medidas/`). Canonical on luzhumanidad.com. 6,660 internal links checked, 0 broken.
+- «Ver más sobre estas medidas →» under the bullets: in the test it opens a new tab (the test stays open); in the level side panel it replaces the page (`_top`).
+- `src/server/sitios.ts`: `/medidas` goes to the static files like `/ideal` (own-domain 404 otherwise), and the sitemap of luzhumanidad.com (or of whichever site lists `/geometria-politica`) now announces the 385 `/medidas/` pages and the 65 `/ideal/` ones, which were not in any sitemap before. List in `public/geometria-figura/paginas.json`.
+- Not verified: production sitemap (I could not read the live one), installed app.
 ### 2026-11-25 — luzhumanidad.com: sector «Innovación en Agricultura»
 - Eugenio: «añade innovación en Agricultura… y añade ahí el proyecto de agricultura sintrópica, que ahora está en informática».
 - Migración `0242_sector_agricultura_luz.sql`: nuevo sector en `sitio.sectores` de `KWMUO4S4V663` (áreas Alimentación, Agricultura, Agroecología; a todo el ancho), entre Vivienda y Cultura. El proyecto tenía el área «Alimentación», que ningún sector recogía.
 - `VistaProyectosSitio`: color lima para el icono «Agricultura».
+
+## 2026-11-25 — /medidas/ level pages: which parties are at, above or below each level
+
+> «Añade en la URL de cada medida qué partido las adscribe y cuáles se quedan fuera o cuáles están más avanzados.»
+
+- Each level page has a «Qué partidos están en este nivel» section: at this level / more advanced (with the level they reach) / left out (with the level they stay at), each with its reason and source from `RAZONES` when there is one, plus a note that positions were assigned against the short level texts, not yet measure by measure. Aspect pages show party chips per level.
+- Same data as the level side panel: compared programmatically for all 320 aspect × level pairs, 0 differences.
+- Copy to keep in step: the pages are static. After changing party levels or reasons in the geometry page, run `node scripts/geometria-datos.mjs && node scripts/geometria-medidas.mjs --aplicar`, or the pages keep the old positions.
+
+## 2026-11-25 — One page per party: /partidos/<partido>/
+
+> «Haz una página para cada partido con sus propuestas que se pueda llegar desde varios lugares de la APP, para ver toda su geometría y también verlo en bullet points por temáticas.»
+
+- `scripts/geometria-medidas.mjs --aplicar` writes `public/partidos/` (9 parties + index): level distribution over the 64 aspects, ten mini figures linking to each topic section, and per topic the party figure, its stance in the topic (`TEMAS[k].t`), and one card per aspect with its level, «Qué propone / Qué hemos buscado» + source (`RAZONES`, where they exist), the measures of that level as visible bullets (labelled «medidas de esta web», not the party's words) with descriptions folded, and links to the level page and to the next level.
+- Reachable from: the party selector («Página de cada partido →»), the level side panel (party names), the party card, the all-topics mosaic, the test side legend (parties shown), the test results (chips), the /medidas/ level and aspect pages, and the header of every static page.
+- `sitios.ts`: `/partidos` served statically and in the sitemap. 11,783 internal links checked, 0 broken.
+- Not verified: production, installed app. A site page named «partidos» on an own domain would now be shadowed by these files.
 ## 2026-11-25 — Agricultura sintrópica: spacing between plants, and a menu of its own for the base pattern
 
 > «Permite ajustar el espacio entre plantas, no solo los pasillos y bloques.» Then: «permite modificar el patrón base de manera sencilla con un menú entero solo para ese patrón base.»

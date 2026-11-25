@@ -920,6 +920,21 @@ export function registrarSitios(app: Express, db: any) {
       inicio.mod = fecha(ultimo || Date.now());
       inicio.t = ultimo || undefined;
     }
+    // THE GEOMETRY'S STATIC PAGES (2026-11-25, SEO): /medidas/… (one page per level of each aspect) and
+    // /ideal/… are files in public/, not pages of the site, so nothing above lists them. They go in the
+    // sitemap of whichever site publishes /geometria-politica. The list is written by
+    // scripts/geometria-medidas.mjs; read from dist/ in production, from public/ in development.
+    // luzhumanidad.com is where the geometry lives; the second test covers it if it ever moves.
+    if (/(^|\.)luzhumanidad\.com$/.test(s.host) || urls.some(u => /\/geometria-politica$/.test(u.loc))) {
+      for (const base of ['dist', 'public']) {
+        try {
+          const j = JSON.parse(fs.readFileSync(path.join(process.cwd(), base, 'geometria-figura', 'paginas.json'), 'utf8'));
+          const mod = /^\d{4}-\d{2}-\d{2}$/.test(j.fecha) ? j.fecha : fecha(Date.now());
+          for (const r of j.rutas || []) if (typeof r === 'string' && /^\/(medidas|ideal|partidos)\/[a-z0-9\-\/]*$/.test(r)) urls.push({ loc: `https://${s.host}${r}`, mod });
+          break;
+        } catch { /* not in this folder */ }
+      }
+    }
     // Una página del espacio que además cuelga de otra sale dos veces con la
     // misma dirección: una basta.
     const vistas = new Set<string>();
@@ -977,7 +992,7 @@ export function registrarSitios(app: Express, db: any) {
       // contestaba el 404 de la aplicación aunque el fichero existiera. Se dejan pasar a `express.static`, que sirve
       // la carpeta (y manda `/ideal/x` a `/ideal/x/`). Si algún día una página del sitio se llama «ideal», habrá que
       // moverla: estas dos carpetas mandan.
-      if (/^\/(ideal|geometria-figura)(\/|$)/.test(req.path)) return next();
+      if (/^\/(ideal|medidas|partidos|geometria-figura)(\/|$)/.test(req.path)) return next();
       // LOS ENLACES VIEJOS A LAS VISTAS DE LA HUMANIDAD (2026-11-05, la
       // reestructuración): el círculo, la pirámide, la sociedad, el flujo, el
       // mapa y los sectores de luzhumanidad.com viven ahora en
