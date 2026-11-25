@@ -970,6 +970,14 @@ export function registrarSitios(app: Express, db: any) {
   app.get(/^\/(?!api\/|assets\/|uploads\/)[^.]*$/, async (req: Request, res: Response, next: NextFunction) => {
     (req as any)._t0 = Date.now();
     try {
+      // CARPETAS ESTÁTICAS QUE NO SON PÁGINAS DEL SITIO (2026-11-25, Eugenio: «cuando le doy a más… me lleva a una
+      // URL que da error 404»). `/ideal/<propuesta>/` y `/geometria-figura/` son ficheros de `public/` (una página
+      // por propuesta, escrita a mano y con su SEO). En humanity.wiki funcionaban, pero en un dominio propio como
+      // luzhumanidad.com esta ruta trata TODA dirección sin punto como una página del sitio y, al no encontrarla,
+      // contestaba el 404 de la aplicación aunque el fichero existiera. Se dejan pasar a `express.static`, que sirve
+      // la carpeta (y manda `/ideal/x` a `/ideal/x/`). Si algún día una página del sitio se llama «ideal», habrá que
+      // moverla: estas dos carpetas mandan.
+      if (/^\/(ideal|geometria-figura)(\/|$)/.test(req.path)) return next();
       // LOS ENLACES VIEJOS A LAS VISTAS DE LA HUMANIDAD (2026-11-05, la
       // reestructuración): el círculo, la pirámide, la sociedad, el flujo, el
       // mapa y los sectores de luzhumanidad.com viven ahora en
