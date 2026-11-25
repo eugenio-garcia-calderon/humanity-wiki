@@ -13381,3 +13381,12 @@ Eugenio, tras donar 1 € de prueba: «no ha habido thank you page; créala, que
 - Each level page has a «Qué partidos están en este nivel» section: at this level / more advanced (with the level they reach) / left out (with the level they stay at), each with its reason and source from `RAZONES` when there is one, plus a note that positions were assigned against the short level texts, not yet measure by measure. Aspect pages show party chips per level.
 - Same data as the level side panel: compared programmatically for all 320 aspect × level pairs, 0 differences.
 - Copy to keep in step: the pages are static. After changing party levels or reasons in the geometry page, run `node scripts/geometria-datos.mjs && node scripts/geometria-medidas.mjs --aplicar`, or the pages keep the old positions.
+
+## 2026-11-25 — One page per party: /partidos/<partido>/
+
+> «Haz una página para cada partido con sus propuestas que se pueda llegar desde varios lugares de la APP, para ver toda su geometría y también verlo en bullet points por temáticas.»
+
+- `scripts/geometria-medidas.mjs --aplicar` writes `public/partidos/` (9 parties + index): level distribution over the 64 aspects, ten mini figures linking to each topic section, and per topic the party figure, its stance in the topic (`TEMAS[k].t`), and one card per aspect with its level, «Qué propone / Qué hemos buscado» + source (`RAZONES`, where they exist), the measures of that level as visible bullets (labelled «medidas de esta web», not the party's words) with descriptions folded, and links to the level page and to the next level.
+- Reachable from: the party selector («Página de cada partido →»), the level side panel (party names), the party card, the all-topics mosaic, the test side legend (parties shown), the test results (chips), the /medidas/ level and aspect pages, and the header of every static page.
+- `sitios.ts`: `/partidos` served statically and in the sitemap. 11,783 internal links checked, 0 broken.
+- Not verified: production, installed app. A site page named «partidos» on an own domain would now be shadowed by these files.

@@ -779,7 +779,14 @@ footer .pie-acc{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
 .geo-stage svg{display:block;width:100%;height:auto;touch-action:manipulation}
 .geo-cap{font-size:13.5px;line-height:1.5;color:var(--muted);margin:6px 12px 10px}
 .geo-side{display:grid;gap:14px;position:sticky;top:84px}
-.geo-chips{display:flex;flex-wrap:wrap;gap:6px}
+.geo-chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.geo-fichas{margin-left:6px;font:600 13.5px/1.1 var(--sans);color:var(--ink);text-underline-offset:3px}
+.gn-pt,.gm-pn{color:inherit;text-decoration:none}
+.gn-pt:hover b,.gm-pn:hover{text-decoration:underline}
+.gt-leyenda a{display:inline-flex;align-items:center;gap:5px;color:inherit;text-decoration:none}
+.gt-leyenda a:hover{text-decoration:underline}
+.gt-res-fila .chips a{padding:4px 10px;border-radius:999px;border:1px solid var(--pc);background:color-mix(in srgb,var(--pc) 14%,transparent);color:var(--ink);font:500 13px/1.2 var(--sans);text-decoration:none}
+.gt-res-fila .chips a:hover{text-decoration:underline}
 .geo-chip{display:inline-flex;align-items:center;gap:8px;min-height:40px;padding:7px 12px;border-radius:999px;border:1px solid var(--ctl);background:transparent;color:var(--ink-2);font:500 13.5px/1.1 var(--sans);cursor:pointer}
 .geo-chip i{width:12px;height:12px;border-radius:50%;background:var(--pc);box-shadow:0 0 0 2px var(--bg),0 0 0 3px var(--pc);opacity:.45}
 .geo-chip[aria-pressed="true"]{border-color:var(--pc);color:var(--ink);background:color-mix(in srgb,var(--pc) 16%,transparent)}
@@ -3527,6 +3534,8 @@ const ILUS = {
   // Readable names for the address bar (?tema=vivienda); the short keys are accepted too
   const SLUG = { inm: "inmigracion", ser: "servicios", eco: "economia", tra: "trabajo", viv: "vivienda", amb: "clima", ter: "territorio", der: "derechos", ins: "instituciones", ext: "exterior" };
   const DE_SLUG = Object.fromEntries(Object.entries(SLUG).map(([k, v]) => [v, k]));
+  // Each party has its own page (/partidos/<partido>/, scripts/geometria-medidas.mjs), with one section per topic
+  const urlPartido = (p, k) => `/partidos/${p.n.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}/${k ? "#" + SLUG[k] : ""}`;
   const ang = (i, n) => -Math.PI / 2 + (i * 2 * Math.PI) / n;
   const P = (a, r) => [CX + r * Math.cos(a), CY + r * Math.sin(a)];
   const rr = (s) => (R * dec(s)) / 10;
@@ -3938,7 +3947,7 @@ const ILUS = {
     const fila = ([p, l]) => { const rz = razonDe(p.k, i);
       const est = l === k ? "" : l > k ? ` · llega a ${NIVEL_CORTO[l]}` : ` · se queda en ${NIVEL_CORTO[l]}`;
       const por = rz ? `<small>${rz.tp === "vacio" ? "Qué hemos buscado" : "Qué propone"}: ${rz.r}${rz.u ? ` <a href="${rz.u}" target="_blank" rel="noopener">Fuente: ${rz.f}</a>` : ""}</small>` : "";
-      return `<li><i style="background:${p.c}"></i><span><b>${p.n}</b>${est}${por}</span></li>`; };
+      return `<li><i style="background:${p.c}"></i><span><a class="gn-pt" href="${urlPartido(p, st.tema)}" target="_top"><b>${p.n}</b></a>${est}${por}</span></li>`; };
     const grupo = (tit, lista) => lista.length ? `<div class="gn-grupo"><h5>${tit} (${lista.length})</h5><ul>${lista.map(fila).join("")}</ul></div>` : "";
     const sinTexto = PARTIDOS.some((p) => !razonDe(p.k, i));
     return `<div class="gn-cab"><span class="lbl" style="color:${t.c}">${t.n} · radio ${i + 1}</span><button class="gn-x" type="button" data-gn-cerrar aria-label="Cerrar el detalle">×</button></div>`
@@ -4256,7 +4265,7 @@ const ILUS = {
     }
     if (st.foco) {
       const p = PMAP[st.foco], v = t.v[p.k], f = fuertes(v, t.ejes), c = cojas(v, t.ejes), a = aristas(v, t.ejes);
-      el.innerHTML = `<div class="pbar" style="--pc:${p.c}"></div><span class="lbl">${t.n}</span><h4>${p.n}</h4><p>${t.t[p.k]}</p>
+      el.innerHTML = `<div class="pbar" style="--pc:${p.c}"></div><span class="lbl">${t.n}</span><h4>${p.n}</h4><p>${t.t[p.k]}</p><p><a class="geo-ideal-mas" href="${urlPartido(p, st.tema)}" target="_top">Todas las propuestas de ${p.n}, tema por tema →</a></p>
         <ul><li><b>Hasta dónde llega:</b> ${hastaDonde(v)}</li>${f.length ? `<li><b>Dónde es fuerte:</b> ${lista(f)}.</li>` : ""}${c.length ? `<li><b>Dónde no llega a lo básico:</b> ${lista(c)}.</li>` : `<li><b>Sin patas cojas:</b> llega a lo básico en todos los aspectos.</li>`}
         ${a.length ? `<li><b>Aristas:</b> ${a.slice(0, 3).map(([x, y]) => `de ${x.toLowerCase()} a ${y.toLowerCase()}`).join("; ")}.</li>` : `<li><b>Sin aristas fuertes:</b> sus radios vecinos están parejos.</li>`}</ul>
         <p style="font-size:13.5px;color:var(--muted)">El punto con borde negro es donde lo dejaría un test que lo resume todo en una posición. La figura enseña lo que ese punto esconde.</p>
@@ -4298,7 +4307,7 @@ const ILUS = {
       + KEYS.map((k) => { const t = TEMAS[k]; return `<button class="gm-t${k === st.tema ? " on" : ""}" data-mt="${k}" style="--tc:${t.c}" aria-label="Abrir ${t.n}"><span class="ill" aria-hidden="true"><svg viewBox="0 0 64 64">${ILUS[k] || ""}</svg></span>${t.n}</button>`; }).join("");
     PARTIDOS.forEach((p) => {
       const basico = KEYS.reduce((a, k) => a + TEMAS[k].v[p.k].filter((x) => alcanza(x, 1)).length, 0);
-      h += `<div class="gm-p" style="--pc:${p.c}"><span><i></i>${p.n}</span><small>Lo básico en ${basico} de ${TOTAL} aspectos</small></div>`
+      h += `<div class="gm-p" style="--pc:${p.c}"><span><i></i><a class="gm-pn" href="${urlPartido(p)}" target="_top">${p.n}</a></span><small>Lo básico en ${basico} de ${TOTAL} aspectos</small></div>`
         + `<button class="gm-c gm-tot" data-todos-go data-mp="${p.k}" style="--tc:${p.c}" aria-label="${p.n} en todos los temas">${mini(KEYS.map((k) => mediaTema(k, p.k)), p.c)}</button>`
         + KEYS.map((k) => { const t = TEMAS[k], v = t.v[p.k]; return `<button class="gm-c${k === st.tema ? " on" : ""}" data-mt="${k}" data-mp="${p.k}" style="--tc:${t.c}" aria-label="${p.n} en ${t.n}: ${hastaDonde(v)}">${mini(v, p.c)}</button>`; }).join("");
     });
@@ -4369,7 +4378,7 @@ const ILUS = {
   function chips() {
     const off = st.mejor ? " disabled" : ""; // con la vista activa, los partidos no cambian el dibujo
     $("#geo-chips").innerHTML = PARTIDOS.map((p) => `<button class="geo-chip" data-k="${p.k}" style="--pc:${p.c}" aria-pressed="${st.sel.has(p.k)}"${off}><i></i>${p.n}</button>`).join("")
-      + `<button class="geo-chip mini" data-todos${off}>Todos</button><button class="geo-chip mini" data-ninguno${off}>Ninguno</button>`;
+      + `<button class="geo-chip mini" data-todos${off}>Todos</button><button class="geo-chip mini" data-ninguno${off}>Ninguno</button><a class="geo-fichas" href="/partidos/" target="_top">Página de cada partido →</a>`;
   }
   function cabecera() {
     $("#geometrias").style.setProperty("--tc", T().c);
@@ -4568,7 +4577,7 @@ const ILUS = {
     const k = KEYS[gt.paso], t = TEMAS[k];
     gtLat.innerHTML = `<div class="gt-lat-cab"><h5>Tu geometría en ${t.n}</h5><button type="button" class="gt-ojo" data-gt-partidos aria-pressed="${gt.ver}">${gt.ver ? "Ocultar partidos" : "Mostrar partidos"}</button></div>`
       + `<div class="gt-fig">${radarTest(k)}</div>`
-      + (gt.ver ? `<div class="gt-leyenda">${PARTIDOS.map((p) => `<span style="--pc:${p.c}"><i></i>${p.n}</span>`).join("")}</div>` : "")
+      + (gt.ver ? `<div class="gt-leyenda">${PARTIDOS.map((p) => `<a href="${urlPartido(p, KEYS[gt.paso])}" target="_blank" rel="noopener" style="--pc:${p.c}"><i></i>${p.n}</a>`).join("")}</div>` : "")
       + `<p class="gt-info vacio" id="gt-info">${GT_PISTA}</p><div id="gt-lat-resto" style="display:grid;gap:14px"></div>`;
     gtRadarAct(k); gtLatResto();
   }
@@ -4603,8 +4612,8 @@ const ILUS = {
     const media = PARTIDOS.map((p) => [p, Math.round(KEYS.reduce((a, k) => a + parecido(figuraTest(k), TEMAS[k].v[p.k]), 0) / KEYS.length)]).sort((a, b) => b[1] - a[1]).slice(0, 3);
     const faltan = TOTAL_ASP - gtTodas();
     return `<h3>Tu geometría política</h3><p class="gt-intro">Has contestado ${gtTodas()} de ${TOTAL_ASP} aspectos${faltan ? `; los ${faltan} sin contestar cuentan como «Indefinido»` : ""}. Debajo, en cada tema, los tres partidos cuya figura se parece más a la tuya según la valoración de esta página. No es una recomendación de voto: mide cuánto se separan las dos figuras, radio a radio.</p>`
-      + `<div class="gt-res"><div class="gt-res-fila" style="background:transparent"><b>En conjunto</b><div class="chips">${media.map(([p, x]) => `<span style="--pc:${p.c}">${p.n} · ${x}%</span>`).join("")}</div></div>`
-      + KEYS.map((k) => `<div class="gt-res-fila"><div><b>${TEMAS[k].n}</b><br><button type="button" data-gt-ver="${k}">Ver mi figura sobre los partidos</button></div><div class="chips">${topPartidos(k).map(([p, x]) => `<span style="--pc:${p.c}">${p.n} · ${x}%</span>`).join("")}</div></div>`).join("")
+      + `<div class="gt-res"><div class="gt-res-fila" style="background:transparent"><b>En conjunto</b><div class="chips">${media.map(([p, x]) => `<a href="${urlPartido(p)}" target="_blank" rel="noopener" style="--pc:${p.c}">${p.n} · ${x}%</a>`).join("")}</div></div>`
+      + KEYS.map((k) => `<div class="gt-res-fila"><div><b>${TEMAS[k].n}</b><br><button type="button" data-gt-ver="${k}">Ver mi figura sobre los partidos</button></div><div class="chips">${topPartidos(k).map(([p, x]) => `<a href="${urlPartido(p, k)}" target="_blank" rel="noopener" style="--pc:${p.c}">${p.n} · ${x}%</a>`).join("")}</div></div>`).join("")
       + `</div><div class="gt-acc"><button class="gt-btn" type="button" data-gt-repetir>Repetir el test</button><button class="gt-btn" type="button" data-gt-cerrar>Cerrar</button></div>`;
   }
   function gtPintar(conFoco) {
