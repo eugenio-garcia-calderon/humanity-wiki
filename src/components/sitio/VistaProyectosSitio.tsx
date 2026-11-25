@@ -229,8 +229,20 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
     const lugar = new Map(areas.map((a, i) => [a.id, i]));
     const categoriaDe = (f: Fila) => lista(f.celdas[colArea]?.valor).find(id => lugar.has(id)) || null;
     const posicion = (f: Fila) => { const c = categoriaDe(f); return c ? lugar.get(c)! : areas.length; };
+    // LAS COMUNIDADES BENEFICIADAS, APARTE (2026-11-25, Eugenio: «separa lo que son invenciones de lo que son comunidades
+    // beneficiadas; las comunidades beneficiadas ponlas abajo»). `sitio.beneficiarias` = { columna, opcion }: la columna
+    // «Tipo» de la tabla de proyectos y su opción «Comunidad beneficiada». Esas filas salen abajo, en su propio bloque,
+    // aunque estén dentro de otro proyecto (los proyectos de Sol Solidario, las comunidades de los pueblos…).
+    const benef = raiz?.config?.sitio?.beneficiarias as { columna?: string; opcion?: string } | undefined;
+    const esBeneficiaria = (f: Fila) => {
+      if (!benef?.columna || !benef.opcion) return false;
+      const v = f.celdas[benef.columna]?.valor;
+      return Array.isArray(v) ? v.map(String).includes(benef.opcion) : v === benef.opcion;
+    };
+    const conNombre = (f: Fila) => (edicion ? true : !f.oculta && f.pagina_id) && String(f.celdas[colNombre]?.valor || f.pagina?.titulo || '').trim();
+    const beneficiarias = proyectos.filas.filter(f => conNombre(f) && esBeneficiaria(f)).sort((a, b) => posicion(a) - posicion(b) || a.orden - b.orden);
     const filas = [...proyectos.filas]
-      .filter(f => (edicion ? true : !f.oculta && f.pagina_id) && String(f.celdas[colNombre]?.valor || f.pagina?.titulo || '').trim())
+      .filter(f => conNombre(f) && !esBeneficiaria(f))
       // Los que están dentro de otro proyecto (su «Elemento madre») salen en la página de ese
       // proyecto, no aquí (2026-11-12, `SubproyectosSitio.tsx`). En el editor siguen, para editarlos.
       // En el editor, igual (2026-11-12, Eugenio: «tiene que ser igual lo que se ve en el dominio público de lo que
@@ -238,7 +250,7 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
       .filter(f => !madre || lista(f.celdas[madre]?.valor).length === 0)
       .sort((a, b) => posicion(a) - posicion(b) || a.orden - b.orden);
     const opcionesArea: EstadoTarjeta[] = [...sistemaDe.entries()].map(([id, x]) => ({ id, label: x.nombre })).sort((a, b) => a.label.localeCompare(b.label, 'es'));
-    return { colNombre, colArea, areas, filas, categoriaDe, opcionesArea, nombreArea: (id: string) => sistemaDe.get(id)?.nombre || '' };
+    return { colNombre, colArea, areas, filas, beneficiarias, categoriaDe, opcionesArea, nombreArea: (id: string) => sistemaDe.get(id)?.nombre || '' };
   }, [proyectos, sistemas, raiz]);
 
   // Las personas: su foto (la portada de su página) y su nombre.
@@ -294,23 +306,56 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
   const COLORES_SECTOR = ['sky', 'violet', 'amber', 'emerald', 'rose'];
   const COLOR_DEL_ICONO: Record<string, string> = { Movilidad: 'sky', 'Economía': 'violet', 'Política': 'violet', 'Energía': 'amber', Vivienda: 'emerald', 'Educación': 'rose', Agricultura: 'lime' };
   const defSectores = (raiz.config?.sitio?.sectores || null) as Sector[] | null;
-  const sectores = escaparate && !activa && Array.isArray(defSectores) && defSectores.length ? (() => {
+  const agrupar = (todas: Fila[], beneficiarias = false) => {
     const usados = new Set<string>();
     const areasDe = (f: Fila) => lista(f.celdas[modelo.colArea]?.valor).map(id => plano(modelo.nombreArea(id))).filter(Boolean);
-    const grupos = defSectores.map(d => {
+    const grupos = defSectores!.map(d => {
       const quiere = new Set((d.areas || []).map(plano));
-      const filas = visibles.filter(f => !usados.has(f.id) && areasDe(f).some(a => quiere.has(a))).sort((a, b) => a.orden - b.orden);
+      const filas = todas.filter(f => !usados.has(f.id) && areasDe(f).some(a => quiere.has(a))).sort((a, b) => a.orden - b.orden);
       filas.forEach(f => usados.add(f.id));
       // El color va con el sector (por su icono), no con su sitio: así no cambia al reordenarlos (2026-11-13).
-      const color = COLOR_DEL_ICONO[d.icono || ''] || COLORES_SECTOR[defSectores.indexOf(d) % COLORES_SECTOR.length];
+      const color = COLOR_DEL_ICONO[d.icono || ''] || COLORES_SECTOR[defSectores!.indexOf(d) % COLORES_SECTOR.length];
       return { titulo: d.titulo, icono: d.icono, color, otros: false, destacado: d.destacado === true, filas };
     });
-    const resto = visibles.filter(f => !usados.has(f.id)).sort((a, b) => a.orden - b.orden);
+    const resto = todas.filter(f => !usados.has(f.id)).sort((a, b) => a.orden - b.orden);
     // Su icono, por su nombre cuando lo tiene (2026-11-24: «Otras innovaciones» pasa a llamarse «Informática»).
     // `sitio.otrosDestacado` (2026-11-24, «todas las tarjetas en el mismo formato»): también a todo el ancho.
     if (resto.length) grupos.push({ titulo: String(raiz.config?.sitio?.sectorOtros || 'Otras innovaciones'), icono: String(raiz.config?.sitio?.iconoOtros || 'Otras'), color: 'slate', otros: true, destacado: raiz.config?.sitio?.otrosDestacado === true, filas: resto });
+    // Abajo, el nombre del sector sin «Innovación en»: «Energía», «Vivienda».
+    if (beneficiarias) grupos.forEach(g => { g.titulo = g.titulo.replace(/^Innovaci[oó]n en (?:el sector (?:de la |de los |del |de )?)?/i, '').replace(/^./, l => l.toUpperCase()); g.destacado = true; });
     return grupos.filter(g => g.filas.length);
-  })() : null;
+  };
+  const conSectores = escaparate && !activa && Array.isArray(defSectores) && defSectores.length > 0;
+  const sectores = conSectores ? agrupar(visibles) : null;
+  const sectoresBeneficiarias = conSectores && modelo.beneficiarias.length ? agrupar(modelo.beneficiarias, true) : null;
+
+  // Un panel por sector (`FilaSector`): los de las invenciones y, abajo, los de las comunidades beneficiadas.
+  const pintarSectores = (grupos: NonNullable<typeof sectores>, prefijo: string, desdeN: number) => {
+            // TERCERA FORMA (2026-11-12, Eugenio: «que cada sector de innovación ocupe una línea… con un slider o un botón
+            // de mostrar más… que todos los proyectos tengan el mismo tamaño… quita la categoría de la tarjeta, ya
+            // están englobados en un sector»): un panel por sector a todo el ancho (`FilaSector`), tarjetas iguales y
+            // sin etiqueta. Un color por sector, por su orden.
+            const COLOR: Record<string, { borde: string; icono: string }> = {
+              sky: { borde: 'sm:border-t-sky-500', icono: 'text-sky-600' }, violet: { borde: 'sm:border-t-violet-500', icono: 'text-violet-600' },
+              amber: { borde: 'sm:border-t-amber-500', icono: 'text-amber-600' }, emerald: { borde: 'sm:border-t-emerald-500', icono: 'text-emerald-600' },
+              rose: { borde: 'sm:border-t-rose-500', icono: 'text-rose-600' }, lime: { borde: 'sm:border-t-lime-500', icono: 'text-lime-600' },
+              slate: { borde: 'sm:border-t-slate-500', icono: 'text-slate-600' },
+            };
+            let n = desdeN;
+            return grupos.map(g => {
+              const c = COLOR[g.color || 'slate'] || COLOR.slate;
+              // En el móvil, solo lo que cambia («Movilidad»); el título entero, desde `sm`.
+              const m = g.titulo.match(/^(Innovaci[oó]n en (?:el sector (?:de la |de los |del |de )?)?)(.+)$/i);
+              const titulo = m ? <><span className="hidden sm:inline">{m[1]}</span><span className="max-sm:inline-block max-sm:first-letter:uppercase">{m[2]}</span></> : g.titulo;
+              const desde = n; n += g.filas.length;
+              return (
+                <FilaSector key={g.titulo} id={`${prefijo}${plano(g.titulo)}`} titulo={titulo}
+                  colorBorde={c.borde} filas={g.filas} estrecha={!g.destacado} grande={g.destacado}
+                  clase={g.destacado ? '@5xl:col-span-2' : ''}
+                  pintar={(f, claseLi) => tarjetaDe(f, desde + g.filas.indexOf(f), true, true, claseLi, g.filas)} />
+              );
+            });
+  };
 
   // Quien gestiona la web ordena arrastrando: en el editor de humanity.wiki y en la propia web con la sesión abierta.
   const ordenable = !!edicion || equipo;
@@ -455,7 +500,9 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
           la portada, como en la página del proyecto; debajo la descripción en letra pequeña sobre
           blanco; el estado y el año arriba de la imagen y algo más grandes; todas del mismo tamaño,
           dos por fila»). Las primeras cargan ya y con prioridad; el resto, al acercarse. */}
-      {escaparate && <h2 className="sr-only">Proyectos</h2>}
+      {escaparate && (sectoresBeneficiarias
+        ? <Apartado titulo="Inventos y modelos" texto="Lo que inventamos: tecnologías y formas nuevas de organizarse que cualquiera puede copiar." />
+        : <h2 className="sr-only">Proyectos</h2>)}
       {/* LOS SECTORES DE INNOVACIÓN (2026-11-12, Eugenio: «agrupa los proyectos de la página de inicio en
           sectores: una tarjeta grande donde están esas tarjetas un poco más pequeñas… que se vean varios
           sectores a lo ancho y largo de la página»). `sitio.sectores` de la raíz: cada sector reúne las
@@ -466,32 +513,7 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
         // sectores por fila cuando cabe (por el ancho de la caja, así el editor, más estrecho, sigue en una columna).
         <div className="@container">
         <div data-ancla="proyectos" data-sectores className="mt-6 grid scroll-mt-36 grid-cols-1 gap-8 outline-none sm:mt-8 sm:scroll-mt-24 sm:gap-5 @5xl:grid-cols-2 @5xl:items-start 2xl:gap-6">
-          {(() => {
-            // TERCERA FORMA (2026-11-12, Eugenio: «que cada sector de innovación ocupe una línea… con un slider o un botón
-            // de mostrar más… que todos los proyectos tengan el mismo tamaño… quita la categoría de la tarjeta, ya
-            // están englobados en un sector»): un panel por sector a todo el ancho (`FilaSector`), tarjetas iguales y
-            // sin etiqueta. Un color por sector, por su orden.
-            const COLOR: Record<string, { borde: string; icono: string }> = {
-              sky: { borde: 'sm:border-t-sky-500', icono: 'text-sky-600' }, violet: { borde: 'sm:border-t-violet-500', icono: 'text-violet-600' },
-              amber: { borde: 'sm:border-t-amber-500', icono: 'text-amber-600' }, emerald: { borde: 'sm:border-t-emerald-500', icono: 'text-emerald-600' },
-              rose: { borde: 'sm:border-t-rose-500', icono: 'text-rose-600' }, lime: { borde: 'sm:border-t-lime-500', icono: 'text-lime-600' },
-              slate: { borde: 'sm:border-t-slate-500', icono: 'text-slate-600' },
-            };
-            let n = 0;
-            return sectores.map(g => {
-              const c = COLOR[g.color || 'slate'] || COLOR.slate;
-              // En el móvil, solo lo que cambia («Movilidad»); el título entero, desde `sm`.
-              const m = g.titulo.match(/^(Innovaci[oó]n en (?:el sector (?:de la |de los |del |de )?)?)(.+)$/i);
-              const titulo = m ? <><span className="hidden sm:inline">{m[1]}</span><span className="max-sm:inline-block max-sm:first-letter:uppercase">{m[2]}</span></> : g.titulo;
-              const desde = n; n += g.filas.length;
-              return (
-                <FilaSector key={g.titulo} id={`sector-${plano(g.titulo)}`} titulo={titulo}
-                  colorBorde={c.borde} filas={g.filas} estrecha={!g.destacado} grande={g.destacado}
-                  clase={g.destacado ? '@5xl:col-span-2' : ''}
-                  pintar={(f, claseLi) => tarjetaDe(f, desde + g.filas.indexOf(f), true, true, claseLi, g.filas)} />
-              );
-            });
-          })()}
+          {pintarSectores(sectores, 'sector-', 0)}
         </div>
         </div>
       ) : (
@@ -512,6 +534,17 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
           className="mt-5 inline-flex h-10 items-center gap-2 rounded-full border-2 border-dashed border-slate-300 px-4 text-sm font-bold text-slate-500 transition-colors hover:border-slate-500 hover:text-slate-800">
           <Plus className="h-4 w-4" /> Añadir proyecto
         </button>
+      )}
+      {/* LAS COMUNIDADES BENEFICIADAS, ABAJO (2026-11-25): las que viven de esos inventos, por sector. */}
+      {sectoresBeneficiarias && (
+        <section data-ancla="comunidades" aria-label="Comunidades beneficiadas" className="mt-14 scroll-mt-36 outline-none sm:mt-20 sm:scroll-mt-24">
+          <Apartado titulo="Comunidades beneficiadas" texto="Las personas, pueblos y comunidades que ya disfrutan de esos inventos." />
+          <div className="@container">
+            <div data-sectores-beneficiarias className="mt-6 grid grid-cols-1 gap-8 sm:mt-8 sm:gap-5 @5xl:grid-cols-2 @5xl:items-start 2xl:gap-6">
+              {pintarSectores(sectoresBeneficiarias, 'comunidades-', visibles.length)}
+            </div>
+          </div>
+        </section>
       )}
       {aviso && (edicion || equipo) && <p role="alert" className="mt-3 text-sm font-bold text-rose-600">{aviso}</p>}
       {ordenable && <p aria-live="polite" className="sr-only">{anuncio}</p>}
@@ -557,6 +590,16 @@ export default function VistaProyectosSitio({ raizId, edicion }: { raizId: strin
           <InspiranSitio tabla={inspiran} />
         </div>
       )}
+    </div>
+  );
+}
+
+/** El encabezado de un apartado de la portada: «Inventos y modelos», «Comunidades beneficiadas». */
+function Apartado({ titulo, texto }: { titulo: string; texto: string }) {
+  return (
+    <div className="mt-8 border-b border-slate-200 pb-4 sm:mt-10">
+      <h2 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">{titulo}</h2>
+      <p className="mt-1.5 max-w-2xl text-[15px] leading-relaxed text-slate-500">{texto}</p>
     </div>
   );
 }

@@ -13421,3 +13421,9 @@ Eugenio, tras donar 1 € de prueba: «no ha habido thank you page; créala, que
 - Shadows start off on screens narrower than 700 px (checkbox to turn them on).
 - Checked: `tsc`, build, Playwright screenshots of winter, February (almonds in flower), spring at ground level, summer and autumn, with no JavaScript errors.
 - **Not verified**: frame rate on a real phone (the test browser renders in software); wind and particles were only seen in stills.
+
+### 2026-11-25 — luzhumanidad.com: inventos y comunidades beneficiadas; Eugini Fettuccini
+- Eugenio: «separa lo que son invenciones de lo que son comunidades beneficiadas; las comunidades beneficiadas ponlas abajo».
+- Migración `0243_inventos_y_comunidades_luz.sql`: columna «Tipo» en Proyectos (`BDCTIPOPROYECT1`: «Invento o modelo» / «Comunidad beneficiada»); 16 comunidades marcadas (comunidades solares, proyectos de Sol Solidario que llevan energía a personas, ecoaldeas); `sitio.beneficiarias` en la raíz.
+- `VistaProyectosSitio`: «Inventos y modelos» arriba (los sectores de siempre) y «Comunidades beneficiadas» abajo, por sector, aunque estén dentro de otro proyecto.
+- `CabeceraSitio`: un puntito casi invisible arriba a la derecha cambia «Luz & Humanidad» por «Eugini Fettuccini — Los inventos locos» (se recuerda en el navegador).
