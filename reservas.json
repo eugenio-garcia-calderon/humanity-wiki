@@ -5,6 +5,12 @@
       "ruta": "public/observatorio-polarizacion/index.html",
       "motivo": "Geometría: enlaces del ideal y niveles con medidas",
       "desde": "2026-11-25T17:42:10.271Z"
+    },
+    {
+      "agente": "prog1",
+      "ruta": "src/server/sitios.ts",
+      "motivo": "Dejar pasar /ideal y /geometria-figura (carpetas estáticas) en dominios propios",
+      "desde": "2026-11-25T17:44:53.191Z"
     }
   ]
 }
