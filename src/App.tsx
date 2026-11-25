@@ -38,6 +38,7 @@ const Competiciones = lazy(() => import('./pages/Competiciones'));
 const CalendarioArte = lazy(() => import('./pages/CalendarioArte'));
 const Aeromovil = lazy(() => import('./pages/Aeromovil'));
 const Conciencia = lazy(() => import('./pages/Conciencia'));
+const AgriculturaSintropica = lazy(() => import('./pages/AgriculturaSintropica'));
 const ModeloSocioeconomico = lazy(() => import('./pages/ModeloSocioeconomico'));
 /** The model's old address (2026-11-24): same window and parameters, new address. */
 function AEconomiaPublica() {
@@ -356,6 +357,10 @@ export default function App() {
                   Layout (2026-11-10, Eugenio). El mapa editable de la teoría
                   sintérgica de Jacobo Grinberg y sus estudios científicos. */}
               <Route path="conciencia" element={<Conciencia />} />
+              {/* Agricultura sintrópica: diseñador y simulador de bosques para el almendro,
+                  el olivo, la viña y el pistacho. Página PROPIA, fuera del Layout
+                  (2026-11-25, Eugenio), como /arquitectura. */}
+              <Route path="agricultura-sintropica" element={<AgriculturaSintropica />} />
               {/* Economía pública optimizada (antes «Modelo socioeconómico optimizado»): página
                   PROPIA, fuera del Layout (2026-11-10, Eugenio). Un solo impuesto repartido en
                   ocho escalas, comparado con el sistema fiscal español. Su dirección cambió el
