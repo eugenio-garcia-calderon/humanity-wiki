@@ -13319,6 +13319,15 @@ Eugenio, tras donar 1 € de prueba: «no ha habido thank you page; créala, que
 - **Cause**: the SEO handler in `src/server/sitios.ts` treats every dot-less address on a own-domain site (luzhumanidad.com) as a page of the site and, finding none, answers the app's 404 even when a static folder exists. `/ideal/<slug>/` worked on humanity.wiki and on luzhumanidad.com only with `/index.html` appended. It hit all 64 ideal pages, `/ideal/` and `/geometria-figura/` (the test).
 - **Fix**: `/ideal` and `/geometria-figura` are passed to `express.static` before the site lookup. If a page of a site is ever called «ideal», it has to be renamed: these two folders win.
 - **Audit**: the 64 links in the geometry page, the 64 folders and the index agree (no link without a page, no page without a link). Production check of every `/ideal/…/` address from a real browser navigation is in the PR.
+
+## 2026-11-25 — Geometría: guided test (button top right)
+
+> «Haz que hacer el test de los sliders de abajo te aparezca cuando haces click en el botón de arriba a la derecha… porcentaje de completado… que cuando termines un tema te permita avanzar… resultado de en cada temática a qué 3 partidos se parece más.»
+
+- `#geo-yo` now opens a full-screen dialog (`#gt`) instead of toggling the drawing mode. Questions on the left (all 10 topics, 64 aspects, slider + five level buttons + the level text), side panel on the right with the live five-ring figure, the answers so far and the 3 closest parties so far. Header shows completion % (answered aspects / 64).
+- A topic must be fully answered before «Siguiente tema»; topics already reached can be revisited from the side list. Final screen: top 3 parties per topic and overall, plus «Ver mi figura sobre los partidos» (closes the test and opens the drawing mode with the same figure).
+- Answers stored in `politica.geo.test.v1`; they also write the existing `politica.geo.tu.v3`, so the drawing mode and the matrix keep showing the same figure. Button label reflects progress.
+- Limit: the questions reuse each aspect's description and level texts; they are not new, longer scenario questions. Not verified: installed app / service worker, touch devices.
 ## 2026-11-25 — Agricultura sintrópica: designer and simulator of syntropic forests (`/agricultura-sintropica`)
 
 > «Vamos a crear dentro de Luz de Humanidad una nueva página… innovación en agricultura… centrarlo en España… el olivo, la viña, el almendro, y el emergente es el pistacho… una herramienta que nos permita generar un bosque en una superficie determinada… un selector de especies auxiliares, otro de especies clave… encontrar esa geometría que se repite… una parte del modelo actual… retención de agua… lo más divulgativo posible… exportarlo para que se pueda implementar con un plano.» Later the same afternoon: «una sucesión que permita simular el crecimiento… si pinchas en ellas te diga cuánta agua necesita, qué valor tiene, qué alimento produce, en qué zonas de la península… la base de datos de referencia de cualquier diseñador de bosques sintrópicos… que te dé consejos.»
