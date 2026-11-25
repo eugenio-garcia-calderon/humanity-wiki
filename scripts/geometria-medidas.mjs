@@ -4,6 +4,7 @@
 //   node scripts/geometria-medidas.mjs --aplicar            validate all and build public/geometria-figura/medidas.json
 import fs from "node:fs";
 import path from "node:path";
+import vm from "node:vm";
 
 const RAIZ = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..");
 const DATOS = JSON.parse(fs.readFileSync(path.join(RAIZ, "public/geometria-figura/datos.json"), "utf8"));
@@ -93,7 +94,7 @@ ${MARCA}
 <link rel="stylesheet" href="/medidas/medidas.css">
 </head>
 <body style="--tc:${esc(tc || "#5FB3E6")}">
-<header class="top"><a class="marca" href="${SITIO}/geometria-politica">Geometría política</a><a class="todos" href="/medidas/">Todas las medidas</a></header>`;
+<header class="top"><a class="marca" href="${SITIO}/geometria-politica">Geometría política</a><span class="navs"><a class="todos" href="/partidos/">Partidos</a><a class="todos" href="/medidas/">Todas las medidas</a></span></header>`;
 const pie = `<footer class="pie">
 <p>Estas medidas son propuestas de trabajo de esta web, ordenadas de menos a más exigentes; no son un hecho ni una recomendación de voto. Las cifras marcadas como objetivo son metas propuestas; los datos llevan su fuente.</p>
 <p>Herramienta educativa sin afiliación política. Un proyecto de <a href="${SITIO}/">Luz &amp; Humanidad</a>.</p>
@@ -102,6 +103,7 @@ const pie = `<footer class="pie">
 </html>
 `;
 const CSS = `/* generado por scripts/geometria-medidas.mjs: no editar a mano */
+.navs{display:flex;gap:16px}
 .pildoras{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 18px;padding:0;list-style:none}
 .pildoras a,.pildoras span{display:inline-block;padding:6px 12px;border-radius:999px;border:1.5px solid var(--line);font-size:14px;text-decoration:none;color:var(--ink2)}
 .pildoras span{border-color:var(--c);background:color-mix(in srgb,var(--c) 16%,#fff);color:var(--ink);font-weight:700}
@@ -134,11 +136,149 @@ const CSS = `/* generado por scripts/geometria-medidas.mjs: no editar a mano */
 .partidos li small a{color:#1D4ED8}
 .chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:8px;font-size:13px}
 .chips em{font-style:normal;color:var(--muted)}
-.chip{padding:2px 9px;border-radius:999px;border:1px solid var(--pc);background:color-mix(in srgb,var(--pc) 12%,#fff);color:var(--ink)}
+.pt-n{text-decoration:none}
+.pt-n:hover b{text-decoration:underline}
+.chip{text-decoration:none;padding:2px 9px;border-radius:999px;border:1px solid var(--pc);background:color-mix(in srgb,var(--pc) 12%,#fff);color:var(--ink)}
 .tabla-ind{width:100%;border-collapse:collapse;font-size:15px}
 .tabla-ind td,.tabla-ind th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
 .tabla-ind td a{display:inline-block;margin:2px 6px 2px 0;font-size:13.5px;color:#1D4ED8}
 `;
+
+// ---------------------------------------------------------------------------
+// One page per party: /partidos/<partido>/ (+ /partidos/). Its figure in each topic, and per topic one
+// bullet per aspect: the level it reaches, what it proposes (RAZONES, with source) and what that level
+// contains (this site's measures, labelled as such: they are not the party's words).
+// ---------------------------------------------------------------------------
+function leerTemasCompletos() {
+  const html = fs.readFileSync(path.join(RAIZ, "public/observatorio-polarizacion/index.html"), "utf8");
+  const bloque = (nombre) => {
+    const inicio = html.indexOf(`const ${nombre} = `); if (inicio < 0) throw new Error(`No encuentro ${nombre}`);
+    let i = html.indexOf("=", inicio) + 1, prof = 0, enCadena = null, esc2 = false;
+    for (; i < html.length; i++) {
+      const c = html[i];
+      if (enCadena) { if (esc2) esc2 = false; else if (c === "\\") esc2 = true; else if (c === enCadena) enCadena = null; continue; }
+      if (c === '"' || c === "'" || c === "`") enCadena = c;
+      else if ("{[(".includes(c)) prof++;
+      else if ("}])".includes(c)) { prof--; if (prof === 0) return html.slice(inicio, html.indexOf(";", i) + 1); }
+    }
+    throw new Error(`${nombre} no cierra`);
+  };
+  return vm.runInNewContext(bloque("TEMAS") + "\n;TEMAS", {}, { timeout: 2000 });
+}
+function radar(vals, color, tam, etiquetas) {
+  const n = vals.length, C = tam / 2, R = tam / 2 - (etiquetas ? 22 : 6);
+  const xy = (i, nv) => { const a = -Math.PI / 2 + (i * 2 * Math.PI) / n, d = (R * (nv + 1)) / 5; return [C + d * Math.cos(a), C + d * Math.sin(a)]; };
+  let o = `<svg viewBox="0 0 ${tam} ${tam}" role="img" aria-hidden="true">`;
+  for (let nv = 0; nv < 5; nv++) o += `<circle cx="${C}" cy="${C}" r="${((R * (nv + 1)) / 5).toFixed(1)}" fill="none" stroke="${nv === 4 ? "#F6BE3B" : nv === 0 ? "#E5484D" : "#CBD5E1"}" stroke-width="${nv === 4 ? 1.6 : 1}"/>`;
+  for (let i = 0; i < n; i++) { const [x, y] = xy(i, 4); o += `<line x1="${C}" y1="${C}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="#CBD5E1"/>`; }
+  o += `<polygon points="${vals.map((v, i) => xy(i, v).map((q) => q.toFixed(1)).join(",")).join(" ")}" fill="${color}" fill-opacity=".25" stroke="${color}" stroke-width="2.2" stroke-linejoin="round"/>`;
+  vals.forEach((v, i) => { const [x, y] = xy(i, v); o += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${etiquetas ? 4 : 2.6}" fill="${color}"/>`; if (etiquetas) { const [lx, ly] = xy(i, 4.85); o += `<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="12" font-weight="700" fill="#64748B">${i + 1}</text>`; } });
+  return o + "</svg>";
+}
+const CSS_PARTIDOS = `
+.pt-cab{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.pt-cab i{width:22px;height:22px;border-radius:50%;background:var(--pc)}
+.reparto{display:flex;height:14px;border-radius:99px;overflow:hidden;margin:6px 0 4px;border:1px solid var(--line)}
+.reparto span{display:block;height:100%}
+.leyenda-niv{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13.5px;color:var(--ink2)}
+.leyenda-niv b{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.mapa-temas{list-style:none;margin:18px 0 0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.mapa-temas a{display:block;padding:8px 8px 10px;border:1px solid var(--line);border-top:4px solid var(--tc);border-radius:12px;text-decoration:none;text-align:center;font-size:13.5px;font-weight:600;background:var(--bg)}
+.mapa-temas a:hover{border-color:var(--pc)}
+.mapa-temas svg{width:100%;height:auto;display:block}
+.mapa-temas small{display:block;font-weight:400;color:var(--muted)}
+.tema-p{margin-top:44px;padding-top:12px;border-top:4px solid var(--tc)}
+.tema-p .fig{display:grid;grid-template-columns:minmax(180px,240px) minmax(0,1fr);gap:20px;align-items:start}
+.tema-p .fig svg{width:100%;height:auto}
+.tema-p .postura{margin:0;color:var(--ink2)}
+.tema-p .postura b{color:var(--ink)}
+.asp{list-style:none;margin:18px 0 0;padding:0;display:grid;gap:12px}
+.asp>li{padding:12px 14px;border:1px solid var(--line);border-left:5px solid var(--c);border-radius:12px}
+.asp .t{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px}
+.asp .t b{font-size:1.02rem}
+.asp .niv{display:inline-block;padding:2px 10px;border-radius:999px;background:color-mix(in srgb,var(--c) 16%,#fff);border:1px solid var(--c);font-size:13px;font-weight:700}
+.asp .rz{margin:8px 0 0;font-size:15px;color:var(--ink2)}
+.asp .rz a{color:#1D4ED8}
+.asp .inc{margin:8px 0 2px;font-size:14px;color:var(--muted)}
+.asp .nombres{margin:0;padding-left:1.2em;display:grid;gap:2px;font-size:15px}
+.asp .nombres li::marker{color:var(--c)}
+.asp details{margin-top:8px;font-size:14.5px}
+.asp summary{cursor:pointer;color:var(--ink2);font-weight:600}
+.asp details ul{margin:6px 0 0;padding-left:1.2em;color:var(--ink2)}
+.asp .mas{font-size:14px;color:#1D4ED8}
+.otros-p{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0;padding:0}
+.otros-p a{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;text-decoration:none;font-weight:600}
+.otros-p i{width:10px;height:10px;border-radius:50%;background:var(--pc)}
+.lista-p{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.lista-p a{display:block;padding:14px;border:1px solid var(--line);border-top:5px solid var(--pc);border-radius:14px;text-decoration:none;background:var(--bg)}
+.lista-p a:hover{border-color:var(--pc)}
+.lista-p b{font-size:1.15rem}
+.lista-p p{margin:6px 0 0;font-size:14px;color:var(--ink2)}
+@media (max-width:700px){.mapa-temas{grid-template-columns:repeat(2,minmax(0,1fr))}.tema-p .fig{grid-template-columns:minmax(0,1fr)}.tema-p .fig svg{max-width:240px}.lista-p{grid-template-columns:minmax(0,1fr)}}
+`;
+const COL_NIV = ["#E5484D", "#94A3B8", "#64748B", "#334155", "#F6BE3B"];
+function paginasPartidos(temas, RAZONES, todos, escribir) {
+  const TEMAS = leerTemasCompletos();
+  const rutas = [];
+  fs.appendFileSync(path.join(RAIZ, "public/medidas/medidas.css"), CSS_PARTIDOS);
+  const ESCR = (rel, html) => { const f = path.join(RAIZ, "public/partidos", rel); fs.mkdirSync(path.dirname(f), { recursive: true }); fs.writeFileSync(f, html); };
+  fs.rmSync(path.join(RAIZ, "public/partidos"), { recursive: true, force: true });
+  const reparto = (p) => { const c = [0, 0, 0, 0, 0]; for (const k of temas) for (const v of DATOS.temas.find((t) => t.k === k).v[p.k]) c[Math.floor(v + 0.01)]++; return c; };
+  const barra = (c) => { const tot = c.reduce((a, b) => a + b, 0); return `<div class="reparto" role="img" aria-label="${NIV.map((n, j) => `${n}: ${c[j]}`).join(", ")}">${c.map((x, j) => (x ? `<span style="width:${((x / tot) * 100).toFixed(2)}%;background:${COL_NIV[j]}" title="${NIV[j]}: ${x}"></span>` : "")).join("")}</div><div class="leyenda-niv">${c.map((x, j) => `<span><b style="background:${COL_NIV[j]}"></b>${NIV[j]}: ${x}</span>`).join("")}</div>`; };
+  for (const p of DATOS.partidos) {
+    const ps = slugify(p.n), ruta = `/partidos/${ps}/`, c = reparto(p), tot = c.reduce((a, b) => a + b, 0);
+    const desc = `Dónde se sitúa ${p.n} en los diez temas de la geometría política, aspecto por aspecto: el nivel al que llega, lo que propone con sus fuentes y lo que incluye cada nivel.`;
+    let h = cabecera(`${p.n}: su geometría política y sus propuestas por temas · Geometría política`, desc, ruta, p.c) + `
+<main style="--pc:${esc(p.c)}">
+<p class="ceja"><a href="/partidos/">Partidos</a> · <a href="${SITIO}/geometria-politica">Geometría política</a></p>
+<div class="pt-cab"><i aria-hidden="true"></i><h1 style="margin:0">${esc(p.n)}</h1></div>
+<p class="lede nv" style="--c:${esc(p.c)}">Su geometría en los diez temas: en cada aspecto, hasta qué nivel llega (de indefinido a ideal), qué propone y qué incluye ese nivel.</p>
+<section><h2>En los ${tot} aspectos</h2>${barra(c)}
+<ul class="mapa-temas">${temas.map((k) => { const t = DATOS.temas.find((x) => x.k === k), v = t.v[p.k]; return `<li><a href="#${TEMA_SLUG[k]}" style="--tc:${esc(t.c)}">${radar(v, p.c, 120, false)}${esc(t.n)}<small>Básico o más en ${v.filter((x) => x >= 1).length} de ${v.length}</small></a></li>`; }).join("")}</ul>
+</section>`;
+    for (const k of temas) {
+      const t = DATOS.temas.find((x) => x.k === k), T = TEMAS[k], v = t.v[p.k];
+      h += `
+<section class="tema-p" id="${TEMA_SLUG[k]}" style="--tc:${esc(t.c)}">
+<h2>${esc(t.n)}</h2>
+<div class="fig">${radar(v, p.c, 260, true)}<div><p class="postura"><b>Su postura en el tema:</b> ${esc(T && T.t && T.t[p.k] ? T.t[p.k] : "Sin texto todavía.")}</p><p class="nota" style="margin-top:8px">${esc(t.q)}</p><p><a class="mas" href="${SITIO}/geometria-politica?tema=${TEMA_SLUG[k]}">Ver ${esc(t.n.toLowerCase())} con los demás partidos →</a></p></div></div>
+<ol class="asp">
+${t.ejes.map((e, i) => {
+  const l = Math.floor(v[i] + 0.01), col = colorNivel(t, l), x = todos.find((y) => y.k === k && y.i === i);
+  const rz = RAZONES[p.k] && RAZONES[p.k][k] && RAZONES[p.k][k][String(i)];
+  const nv = x.a.niveles[l];
+  return `<li style="--c:${col}"><div class="t"><b>${i + 1}. ${esc(e.n)}</b><span class="niv">${NIV[l]}</span></div>`
+    + (rz ? `<p class="rz"><b>${rz.tp === "vacio" ? "Qué hemos buscado" : "Qué propone"}:</b> ${esc(rz.r)}${/^https?:\/\//.test(rz.u || "") ? ` <a href="${esc(rz.u)}" rel="noopener nofollow" target="_blank">Fuente: ${esc(rz.f || host(rz.u))} ↗</a>` : ""}</p>` : "")
+    + `<p class="inc">${l === 0 ? "Quedarse en indefinido aquí es:" : `El nivel ${NIV[l].toLowerCase()} incluye (medidas de esta web):`}</p><ul class="nombres">${nv.medidas.map((m) => `<li>${esc(m.nombre)}</li>`).join("")}</ul>`
+    + `<details><summary>Ver cada medida explicada</summary><p style="margin:6px 0 0">${esc(nv.resumen)}</p><ul>${nv.medidas.map((m) => `<li><b>${esc(m.nombre)}.</b> ${esc(m.texto)}</li>`).join("")}</ul></details>`
+    + `<p style="margin:8px 0 0"><a class="mas" href="/medidas/${x.slug}/${NIV_SLUG[l]}/">Ver el nivel y qué partidos están en él →</a>${l < 4 ? ` · <a class="mas" href="/medidas/${x.slug}/${NIV_SLUG[l + 1]}/">Qué le falta para el siguiente nivel →</a>` : ""}</p></li>`;
+}).join("\n")}
+</ol>
+</section>`;
+    }
+    h += `
+<section><h2>Otros partidos</h2><ul class="otros-p">${DATOS.partidos.filter((q) => q !== p).map((q) => `<li><a href="/partidos/${slugify(q.n)}/" style="--pc:${esc(q.c)}"><i></i>${esc(q.n)}</a></li>`).join("")}</ul>
+<p class="nota" style="margin-top:16px">Los niveles los asigna esta web a partir de programas y declaraciones públicas; «Qué propone» y «Qué hemos buscado» resumen lo localizado, con su fuente cuando la hay. Las medidas de cada nivel son propuestas de esta web, no del partido. No es una recomendación de voto.</p>
+<div class="acciones"><a class="boton" href="${SITIO}/geometria-politica">Haz el test y compara tu geometría con la de ${esc(p.n)} →</a></div>
+</section>
+</main>
+` + pie;
+    ESCR(`${ps}/index.html`, h);
+    rutas.push(ruta);
+  }
+  const ind = cabecera("Los partidos y su geometría política · Geometría política", "La geometría política de cada partido en diez temas: hasta dónde llega en cada aspecto, qué propone y con qué fuentes.", "/partidos/") + `
+<main class="indice">
+<p class="ceja"><a href="${SITIO}/geometria-politica">Geometría política</a></p>
+<h1>Los partidos y su geometría</h1>
+<p class="lede nv" style="--c:#5FB3E6">Elige un partido para ver su figura en los diez temas y, tema por tema, el nivel al que llega en cada aspecto, lo que propone y sus fuentes.</p>
+<ul class="lista-p">${DATOS.partidos.map((p) => { const c = reparto(p); return `<li><a href="/partidos/${slugify(p.n)}/" style="--pc:${esc(p.c)}"><b>${esc(p.n)}</b>${barra(c)}<p>Básico o más en ${c.slice(1).reduce((a, b) => a + b, 0)} de ${c.reduce((a, b) => a + b, 0)} aspectos.</p></a></li>`; }).join("")}</ul>
+</main>
+` + pie;
+  ESCR("index.html", ind);
+  rutas.push("/partidos/");
+  console.log(`Páginas de partidos: ${rutas.length}`);
+  return rutas;
+}
 
 // Party positions: the levels live in datos.json (TEMAS[k].v), the reasons in the RAZONES constant of the
 // geometry page (one per party and aspect, with its source). Same data the level side panel shows.
@@ -159,7 +299,7 @@ function htmlPartidos(t, i, n, RAZONES) {
     const rz = RAZONES[p.k] && RAZONES[p.k][t.k] && RAZONES[p.k][t.k][String(i)];
     const est = l === n ? "" : l > n ? ` · llega a ${NIV[l].toLowerCase()}` : ` · se queda en ${NIV[l].toLowerCase()}`;
     const por = rz ? `<small><b>${rz.tp === "vacio" ? "Qué hemos buscado" : "Qué propone"}:</b> ${esc(rz.r)}${/^https?:\/\//.test(rz.u || "") ? ` <a href="${esc(rz.u)}" rel="noopener nofollow" target="_blank">Fuente: ${esc(rz.f || host(rz.u))} ↗</a>` : ""}</small>` : "";
-    return `<li><i style="background:${esc(p.c)}"></i><span><b>${esc(p.n)}</b>${est}${por}</span></li>`;
+    return `<li><i style="background:${esc(p.c)}"></i><span><a class="pt-n" href="/partidos/${slugify(p.n)}/#${TEMA_SLUG[t.k]}"><b>${esc(p.n)}</b></a>${est}${por}</span></li>`;
   };
   const grupo = (tit, lista) => (lista.length ? `<div class="pt-grupo"><h3>${tit} (${lista.length})</h3><ul>${lista.map(fila).join("")}</ul></div>` : "");
   return `<section class="partidos" id="partidos">
@@ -170,7 +310,7 @@ ${grupo(n === 0 ? "" : "Se quedan fuera: no llegan a este nivel", grupos.menos)}
 <p class="nota">Posición de cada partido valorada por esta web a partir de sus programas y declaraciones públicas, en una escala de cinco niveles. Se asignó con la descripción corta de cada nivel: todavía no se ha revisado medida por medida con esta lista. Donde hay un texto que justifica el nivel, sale debajo del nombre con su fuente. No es una recomendación de voto. ¿Ves un error? <a href="${SITIO}/geometria-politica?tema=${TEMA_SLUG[t.k]}">Díselo al equipo desde la geometría</a>.</p>
 </section>`;
 }
-const chipsPartidos = (t, i, n) => DATOS.partidos.filter((p) => Math.floor((t.v[p.k] || [])[i] + 0.01) === n).map((p) => `<span class="chip" style="--pc:${esc(p.c)}">${esc(p.n)}</span>`).join("");
+const chipsPartidos = (t, i, n) => DATOS.partidos.filter((p) => Math.floor((t.v[p.k] || [])[i] + 0.01) === n).map((p) => `<a class="chip" href="/partidos/${slugify(p.n)}/#${TEMA_SLUG[t.k]}" style="--pc:${esc(p.c)}">${esc(p.n)}</a>`).join("");
 
 function paginas(temas) {
   const RAZONES = leerRazones();
@@ -269,6 +409,7 @@ ${temas.map((k) => { const t = DATOS.temas.find((x) => x.k === k); return `<sect
 ` + pie;
   escribir("index.html", ind);
   rutas.push("/medidas/");
+  rutas.push(...paginasPartidos(temas, RAZONES, todos, escribir));
   // what the sitemap announces: these pages and the ideal ones
   const ideal = fs.existsSync(path.join(RAIZ, "public/ideal")) ? fs.readdirSync(path.join(RAIZ, "public/ideal"), { withFileTypes: true }).filter((x) => x.isDirectory()).map((x) => `/ideal/${x.name}/`) : [];
   const hoy = new Date().toISOString().slice(0, 10);

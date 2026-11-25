@@ -930,7 +930,7 @@ export function registrarSitios(app: Express, db: any) {
         try {
           const j = JSON.parse(fs.readFileSync(path.join(process.cwd(), base, 'geometria-figura', 'paginas.json'), 'utf8'));
           const mod = /^\d{4}-\d{2}-\d{2}$/.test(j.fecha) ? j.fecha : fecha(Date.now());
-          for (const r of j.rutas || []) if (typeof r === 'string' && /^\/(medidas|ideal)\/[a-z0-9\-\/]*$/.test(r)) urls.push({ loc: `https://${s.host}${r}`, mod });
+          for (const r of j.rutas || []) if (typeof r === 'string' && /^\/(medidas|ideal|partidos)\/[a-z0-9\-\/]*$/.test(r)) urls.push({ loc: `https://${s.host}${r}`, mod });
           break;
         } catch { /* not in this folder */ }
       }
@@ -992,7 +992,7 @@ export function registrarSitios(app: Express, db: any) {
       // contestaba el 404 de la aplicación aunque el fichero existiera. Se dejan pasar a `express.static`, que sirve
       // la carpeta (y manda `/ideal/x` a `/ideal/x/`). Si algún día una página del sitio se llama «ideal», habrá que
       // moverla: estas dos carpetas mandan.
-      if (/^\/(ideal|medidas|geometria-figura)(\/|$)/.test(req.path)) return next();
+      if (/^\/(ideal|medidas|partidos|geometria-figura)(\/|$)/.test(req.path)) return next();
       // LOS ENLACES VIEJOS A LAS VISTAS DE LA HUMANIDAD (2026-11-05, la
       // reestructuración): el círculo, la pirámide, la sociedad, el flujo, el
       // mapa y los sectores de luzhumanidad.com viven ahora en
