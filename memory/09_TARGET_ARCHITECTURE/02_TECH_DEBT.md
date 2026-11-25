@@ -1190,3 +1190,7 @@ By his instruction the bicycle-class labour is assembly only. The project total 
 ## 2026-11-25 — Service worker stores any navigation as the app shell
 
 - `public/sw.js` (navigate branch) does `c.put("/", copy)` for **every** navigation response. Visiting a static page (`/medidas/…`, `/ideal/…`) with the app installed replaces the cached shell with that page; offline, the app would open on it. Pre-existing (affects `/ideal/` since phase 1). Fix: only store when the response is the SPA (`pathname === "/"` or a header the server sets on `index.html`), ~15 min plus a cache-name bump.
+
+## 2026-11-25 — /medidas/ pages are a static copy of party positions
+
+- Party levels and reasons are copied into 320 static pages at generation time. Nothing fails if someone edits `TEMAS`/`RAZONES` in the geometry page and forgets `geometria-datos.mjs` + `geometria-medidas.mjs --aplicar`. A CI step that regenerates and fails on diff: ~20 min.

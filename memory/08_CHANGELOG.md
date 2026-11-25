@@ -13373,3 +13373,11 @@ Eugenio, tras donar 1 € de prueba: «no ha habido thank you page; créala, que
 - Eugenio: «añade innovación en Agricultura… y añade ahí el proyecto de agricultura sintrópica, que ahora está en informática».
 - Migración `0242_sector_agricultura_luz.sql`: nuevo sector en `sitio.sectores` de `KWMUO4S4V663` (áreas Alimentación, Agricultura, Agroecología; a todo el ancho), entre Vivienda y Cultura. El proyecto tenía el área «Alimentación», que ningún sector recogía.
 - `VistaProyectosSitio`: color lima para el icono «Agricultura».
+
+## 2026-11-25 — /medidas/ level pages: which parties are at, above or below each level
+
+> «Añade en la URL de cada medida qué partido las adscribe y cuáles se quedan fuera o cuáles están más avanzados.»
+
+- Each level page has a «Qué partidos están en este nivel» section: at this level / more advanced (with the level they reach) / left out (with the level they stay at), each with its reason and source from `RAZONES` when there is one, plus a note that positions were assigned against the short level texts, not yet measure by measure. Aspect pages show party chips per level.
+- Same data as the level side panel: compared programmatically for all 320 aspect × level pairs, 0 differences.
+- Copy to keep in step: the pages are static. After changing party levels or reasons in the geometry page, run `node scripts/geometria-datos.mjs && node scripts/geometria-medidas.mjs --aplicar`, or the pages keep the old positions.
